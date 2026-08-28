@@ -1,34 +1,108 @@
 # État courant audité de MorseHGP3D v5 — 28 août 2026
 
-- **Dernier pin produit inspecté :** `55c1f105`, qui épingle le correctif de
-  complexité trouvé par le miroir, sa sonde et les mesures documentaires. Il
-  prolonge le fold à créneaux et les raccords hôte G0/G1 de `c19dc60d`, le
-  pool/sonde de `194a0bc2` et le réducteur vivant durci de `bc66ade7`. Les
+- **Pin fonctionnel committé inspecté :** `72090f79`, durcissement du
+  raffinement post-séparation sur la base `7ac6ca86`. Il inclut le pin
+  mathématique `fbcf2059`, qui borne le contre-théorème ternaire et grave les
+  fixtures q3 skinny et plateau shell. Le pin `7ac6ca86` reste une mesure
+  documentaire d'un run `scanline` 100 k qui confirme un bilan mural négatif
+  du raffinement, mais elle demeure diagnostique : un seul run par bras, sans
+  sortie brute ni hash de binaire versionnés. Le pin `3469d93c` avait propagé
+  le raffinement post-séparation aux lanes CPU par lots et `5a0a90d6` en avait
+  introduit le raccord CPU opt-in. Le pin historique `55c1f105` épingle le correctif de
+  complexité du miroir; il prolonge le fold à créneaux et les raccords hôte
+  G0/G1 de `c19dc60d`, le pool/sonde de `194a0bc2` et le réducteur vivant durci
+  de `bc66ade7`. Les
   constats historiques G0 portent sur `fe54ccca`, la campagne device/SCALE sur
   `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur `556c421e`.
+- **Dernier pin documentaire inspecté :** `2d0614e0`. Il corrige le claim de
+  redondance structurelle arrivé concurremment dans `469d6e41` : les mesures
+  disponibles donnent un signal local négatif, mais ne déterminent pas tout le
+  travail intermédiaire.
 - **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
-- **Worktree observé avant ce delta :** `HEAD=origin/main=819cac3c`; aucun code
-  produit n'est postérieur à `55c1f105`. `2192ec9e`–`3636d5b0` corrigent la
-  proposition de raffinement dans la question active ; `fd2844fb`, `57deaaa6`
-  et `4ecb57d4` ajoutent puis requalifient une question d'exposants et des
-  instruments exploratoires dans `rect_probe.cpp`, sans modifier le produit.
-  `905c5361` ajoute une mesure transitoire désormais consolidée dans la question
-  active et retirée du tip ; `b550ec0d` tranche V42, `ad42438e` borne le taux
-  de récupération et `819cac3c` corrige dans l'instrument la population q4 du
-  compteur `k=1`. La rétractation `a54bd528` retire justement le claim des
-  31 jours, mais ses nouveaux temps 10 M restent fondés sur un débit non mesuré
-  appliqué à une autre unité ; elle est consolidée dans la question active puis
-  retirée du tip.
-  Le probe non suivi
-  `.codex_fold_contract_probe.cpp`, appartenant à un autre travail, reste hors
-  preuve. La réponse transitoire de Claude au miroir est consolidée ici puis
-  retirée du tip, conformément à la convention du dossier.
+- **Base du contre-audit :** `7ac6ca86`, alors `HEAD=origin/main`; le pin
+  documentaire concurrent `469d6e41` a été relu, puis `main` a avancé jusqu'à
+  `2d0614e0` sans branche ni réécriture. Le commit qui
+  publie ce document peut être postérieur conformément à la convention de
+  fraîcheur du dossier.
+  `fd318929` avait ajouté un théorème ternaire trop large, `50dc6ef5` un reçu
+  200 k surinterprété, `bdad55d1` la fraction d'ancres,
+  `3e785622`/`e5ca5023` une sonde de raffinement et `beb8bc0b`/`6a2742f6` sa
+  consolidation documentaire. Le présent delta répare et borne le théorème,
+  requalifie le reçu historique, ferme les identités q4 par quatre CTests,
+  intègre le raffinement CPU derrière une option fail-closed et mesure son bilan
+  négatif à 4/8/16 k. Les notes transitoires consolidées et les probes locaux
+  non suivis sont supprimés; aucune promotion de registre n'est demandée.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
   `public_status=not_claimed`.
 
 ## Verdict utile à Claude
+
+**Le verrou d'échelle est mieux localisé, mais pas levé.** Sur le chemin
+historique `scanline`, la WSPD garde un nombre de rectangles proche du linéaire
+alors que leur masse $\lvert A\rvert\lvert B\rvert$ devient localement presque
+quadratique; q3 propose ensuite chaque tiers `x` depuis le cover de l'ancre et
+q4 forme les paires `x,y` avant ses derniers rejets. Le Théorème 4 ferme
+seulement une décomposition ternaire symétrique, fortement séparée et
+exact-once en $O(n)$; il ne ferme ni l'ancrage asymétrique, ni un arrangement de
+centres shallow, ni un traitement implicite certifié.
+
+Le raffinement post-séparation est maintenant un raccord correct et mesurable :
+rollback transactionnel si un enfant perd `separated`, certificat
+`max(parent, frais)`, q2 fermée, API/CLI bornées, overrides refusés tant que la
+politique n'y est pas déclarée, ledger contrôlé avant publication, oracle
+littéral exact-once et cinq mutants. La contre-fixture q2 radix à six points
+tue spécifiquement l'ouverture q2 : elle fait passer les candidats de 13 à 14
+et ajoute une boule RLE alors que le ledger de masse reste vert. Le vrai
+pipeline refuse en plus toute activité structurelle q2 ; le helper test-only
+conserve la preuve constructive du réveil. Le multiensemble brut pré-RLE est
+signé seulement sous l'option diagnostique de la porte, afin de ne pas ajouter
+ce hachage aux anciens contrats `--digest`. Boules canonisées, cardinalités par lane,
+événements, niveaux et forêts sont identiques à $L=0$ et entre un/quatre fils
+sur la porte bornée. Les lanes CPU par lots sont appariées à $L=1$ avec tous
+les compteurs; ni le CLI CUDA ni une porte device n'exercent encore cette option.
+Le contre-audit a aussi restauré et gravé le sens historique de `rect_alive` —
+nombre de sous-rectangles effectivement remis à la lane — par l'identité
+`rect_alive == produits émis`, le nombre de parents WSPD ayant désormais son
+compteur propre. Les quatre portes de masses q4 forcent le
+prétest par requête au lieu de le laisser vacant sous son seuil par défaut.
+La couture du cœur est maintenant falsifiable elle aussi : une fixture q3
+minimale à quatre points grave `parent=1`, `fresh_child=1/2` avec les coins et
+`fresh_child=0/0` sans eux. Le mutant dédié garde un ledger exact mais produit
+deux régressions, refusées avant digest.
+
+La question historique V7–V14 sur les tests d'ancre est consolidée. La
+correction canonique dit maintenant que le **maximum** d'une forme affine sur
+un segment est atteint à une extrémité; F5 construit bien ses 28 sites et la
+positivité stricte de $J$ est explicitée pour toute seed aiguë valide. Il reste
+une dette de mesure, pas de correction sémantique connue :
+`AnchorPretests::kCounterfactual` coupe plusieurs certificats ensemble. Toute
+attribution causale devra isoler W, secteurs, corde et grille avant de comparer
+leurs murs.
+
+**Ce raccord n'est toutefois pas rentable en l'état.** Sur des runs locaux
+appariés à huit fils, `scanline`, la génération passe de 1,266 à 1,655 s à
+4 k, de 3,356 à 4,294 s à 8 k et de 9,088 à 10,862 s à 16 k entre
+$L=0$ et $L=3$, malgré 39,1 %, 43,7 % et 44,0 % de masse q4 tuée. À 16 k,
+les corps q3+q4 n'économisent que 0,137 s tandis que la phase
+WSPD+raffinement correspondante ajoute 1,913 s. La prochaine étape utile n'est
+donc pas une profondeur plus grande. Le prochain micro-certificat exact doit
+chercher les seuls témoins nouveaux dans le frère d'un enfant : ils sont
+disjoints des témoins hérités, ce qui autorise
+`min(h, parent.core + sibling_credit)` sans double comptage. Tester d'abord le
+frère entier, puis son seul sous-arbre sous budget, à $L=1$ et fail-open. Cette
+sonde doit être stratifiée par `h-core`, masse et géométrie et gagner sur le mur
+réel; elle ne remplace ni le center-cover ni l'arrangement shallow.
+
+Le contre-audit du pin concurrent `469d6e41` retire toutefois sa conclusion de
+« redondance structurelle ». En q3, `depth_killed + candidates` omet les seeds
+tués par cellules. En q4, il omet les seeds tués par cellules, cœur ou corde et
+les sept rejets qui précèdent le filtre final des complétions. L'égalité de ces
+deux compteurs et du digest publié n'implique donc ni mêmes seeds, ni mêmes
+covers, tests de cœur ou complétions. Le pin `2d0614e0` conserve le signal utile
+— objet final inchangé sur ce run, mur à +34 % — et demande une comparaison
+intégrée directe de chaque étage avant toute causalité plus forte.
 
 **Orange constructif : `c19dc60d` garde la bonne architecture.**
 Notification du ticket, démarrage transactionnel, domaine `1..8`, latch
@@ -170,22 +244,27 @@ est correct, sans devenir une part générale des autres familles ou du nouveau
 fold.
 
 **Réponse sur le coût de recherche q2/q3/q4 : la crainte est confirmée, mais
-elle dépend fortement de la géométrie.** Au meilleur grand reçu disponible
-(`82f613d3`, CPU 48 fils, 200 k), les corps q2/q3/q4 prennent 1,103 / 7,869 /
+elle dépend fortement de la géométrie.** La campagne historique au pin source
+`82f613d3`, CPU 48 fils, mesure à 200 k les corps q2/q3/q4 à 1,103 / 7,869 /
 12,323 s sur `uniform`, 0,940 / 47,667 / 83,786 s sur `eight_clusters`, et
-0,483 / 24,551 / 214,544 s sur `scanline`. Entre 50 k et 200 k, q3/q4 sont
-presque linéaires sur `uniform`, d'exposants observés 1,61/1,56 sur les
-clusters, mais 2,07/2,76 sur `scanline`. q2 ne cherche pas de `x`; q3 peut
+0,483 / 24,551 / 214,544 s sur `scanline`. Sur la série homogène du binaire
+produit 50/100/200 k, le mur `scanline` suit des pentes 1,69 puis 2,716 et la
+somme des corps 2,14 puis 3,135. À 200 k, q4 seul vaut 80,14 % du mur; les
+trois corps 89,50 % et le fold 5,33 %. q2 ne cherche pas de `x`; q3 peut
 rescanner le cover pour chaque `x`, et q4 ajoute les `y` puis parfois un
 nouveau scan. Sur `scanline`, les rectangles restent presque linéaires, mais
-les ancres puis les `x` aigus approchent déjà une pente quadratique : le verrou
-est dans `|A| × |B|`, puis `x × cover` et q4 `x × y × cover`, pas dans la WSPD
-seule. Le
+la fraction d'ancres q4 ne baisse que de 0,971 % à 0,959 % entre 100 et 200 k,
+soit une masse explicite locale proche de $n^{1{,}98}$. Le verrou est dans
+`|A| × |B|`, puis `x × cover` et q4 `x × y × cover`, pas dans la WSPD seule. Le
 [tableau, ses limites et la correction proposée](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md#complément--la-crainte-quadratique-est-confirmée-sur-scanline)
-est intégré à la question active. Ces 200 k prouvent un verrou au pin mesuré,
-pas la performance de `55c1f105` : instrumenter les itérations puis rejouer
-50/100/200 k au pin courant avant toute extrapolation. Il n'existe encore
-aucune mesure 1 M ou 10 M.
+est intégré à la question active. Les ancres q4 ont crû de ×238,21 entre 8 et
+200 k, mais les candidats q4 de ×14,95 : la dégradation ancres/candidat vaut
+×15,94, pas ×238, et les sorties globales restent presque linéaires. Ces
+200 k prouvent un verrou au pin historique, pas la performance courante :
+instrumenter les itérations puis rejouer 50/100/200 k au pin courant. Il
+n'existe encore aucune mesure 1 M ou 10 M; les valeurs 4,97 h, 17,18 h et
+127,7 jours à 10 M sont seulement des prolongements conditionnels de la pente
+100→200 k pour `uniform`, `eight_clusters` et `scanline`.
 
 **Architecture constructive reçue pour étude : WSPD de paires, puis arrangement
 local de centres par ancre.** Une WSSD standard couvre les simplexes pour une
@@ -201,6 +280,36 @@ fallbacks et scratch, puis construire un oracle exhaustif borné. Le producteur
 shallow échoue sa porte s'il forme d'abord toutes les intersections. Les
 [formules, dégénérescences et étapes R0–R3](QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md#réponse-à-louis--généraliser-la-wspd-mais-par-les-centres)
 sont transmises à Claude ; aucun q5 n'est requis en dimension trois.
+
+Le contre-théorème ternaire est désormais correctement borné. Une famille
+cercle--axe force $\Omega(n^{2})$ blocs si l'on exige une décomposition q3
+symétrique, fortement séparée et exact-once de **tous** les supports aigus.
+Cela ferme ce remplacement explicite linéaire, pas les WSSD approximatives,
+l'ancrage asymétrique, la restriction aux centres de profondeur au plus huit
+ou l'arrangement shallow. Le faux corollaire sur le triangle proche de
+89°--89°--2° est retiré : pour toute ancre maximale aiguë $D$, le circumcentre
+reste dans le disque $D^{2}/12$. `mhgp5_q3_skinny_center` grave ce fait et une
+instance u16 cercle--axe de 792 supports tous aigus.
+
+Le profil R0a ajoute six masses q4 sans modifier le chemin hors
+`MHGP5_PROFILE_Q4` : covers construits, visites de points, sites retenus, tests
+de cœur, entrées de profondeur et appels de puissance. À `n=400`, les quatre
+familles ferment les partitions internes. Seulement 2,0 % des complétions
+`terrain` et 3,7 % des complétions `scanline` atteignent la profondeur : une
+descente radix exacte peut retirer ce dernier poste, pas les tests de cœur ni
+la formation amont des complétions. L'ordre constructif reste donc réemploi
+des certificats par `x`, rejet exact de `|x-y|^2>D^2`, descente de profondeur,
+puis arrangement shallow pour supprimer la formation `x × y` elle-même.
+
+La correction des « 31 jours » ne reçoit pas les nouveaux temps. Sur les runs
+50 k, le débit mural du corps q4 n'est que 66,5 à 121,5 M complétions/s, donc
+395 à 722 fois sous les 48 G/s supposés. Sur `terrain`, la pente de
+`completions_q4` baisse, mais celles du corps q4
+(`2,221 → 2,302 → 2,450`), de la génération et du mur augmentent : ce compteur
+ne peut ni prédire le temps ni établir que le régime s'améliore. Le pic
+0,354 MiB/point est celui de `uniform` complet résident ; les runs `terrain` et
+`scanline` valent 0,075 et 0,072 MiB/point. Garder mémoire et génération comme
+deux verrous mesurés séparément.
 
 Les mesures Claude `954ec1af` à `ff5931fd` renforcent le bon diagnostic sans
 encore recevoir une architecture : le nombre de rectangles vivants est proche
@@ -228,25 +337,37 @@ outre déjà 100/200 k `scanline` : le dernier doublement donne 3,220 sur
 `jung_cert_skip` et 3,305 sur le mur q4, ce qui réfute directement la projection
 1,5 h fondée sur la seule pente 32→50 k.
 
-La descente prolongée de `57deaaa6` trouve un signal q3 non vacant, mais sa
-profondeur 40, son ratio estimé et son commentaire ne sont pas recevables comme
-algorithme. `separated` n'est pas héréditaire, tandis que le compte sémantique
-de témoins universels est monotone sur un sous-produit ; tester les deux enfants
-avant effet, conserver par garde `core=max(parent,fresh)`, exclure q2, borner
-`L` à 0/1/2/3, puis graver ledger u128, multiensemble trié, digests, événements
-et niveaux. Les 92,1 M sites de cover évités sont un prorata contrefactuel et ne
-se comparent pas aux 27,3 M nœuds visités comme un speedup 3 pour 1. Les
-257 810 « sous-rectangles » incluent 173 190 racines, et le binaire rejoué
-annonce encore `pin_configure=0b3f3fd6` : aucun reçu `57deaaa6` n'existe. La
-[réponse détaillée](QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md#réponse-auditée--v36-à-v41)
+La descente prolongée de `57deaaa6` puis `3e785622` trouve un signal non vacant,
+mais sa profondeur 40 et ses ratios ne sont pas recevables comme algorithme.
+Sur `scanline` q4, les fractions survivantes 8/16/32 k donnent bien des masses
+locales d'exposants 1,14 puis 1,25. Le ratio `3,3:1` de `e5ca5023` est en
+revanche invalide : à 32 k, 4,546 M paires sont tuées mais seulement 1,674 M
+covers existent; l'intersection n'est pas mesurée. Même l'économie maximale
+impossible de toutes les 708,6 M visites de points ne vaudrait que 1,22 fois
+les 580,4 M visites de nœuds, avec des unités différentes. Une sortie 100 k
+non reçue indique en outre une pente 1,34 des survivantes contre 2,18 des
+visites du raffinement. Le mécanisme réduit donc la masse explicite observée,
+pas encore le travail total.
+
+`separated` n'est pas héréditaire, tandis que le compte sémantique de témoins
+universels est monotone sur un sous-produit. L'intégration conserve donc le
+rectangle WSPD parent et une antichaîne de sous-produits survivants, teste les
+deux enfants avant effet, réutilise `max(parent.core, fresh_core)` et exclut q2.
+Elle ferme avant publication le ledger `u64` — suffisant sous les indices `i32`
+—, l'exact-once littéral, `digest_raw_candidates` pré-RLE opt-in, `digest_balls`, les
+cardinalités par lane, événements, niveaux et forêts. Les cinq mutants — perte,
+duplication, seuil $h-1$, ouverture q2 et recomptage sans coins — meurent. La mesure appariée doit encore ventiler les
+morts par dernier étage réellement évité et sommer les vraies `point_visits`;
+un masque dans la boucle originale ne retire aucun travail. La
+[réponse détaillée](QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md#contre-audit-de-3e785622--e5ca5023--garder-le-mécanisme-retirer-le-ratio)
 et les fixtures sont consolidées dans les deux questions actives.
 
 La réception `4ecb57d4` retire correctement le faux plafond et accepte les deux
 rails. Elle ne transforme toutefois pas les ratios de la sonde en verdict de
-temps : ils ne classent pas la priorité q4. La prochaine
-série épingle la règle `coord(n)`, pas une valeur `coord` constante. V42 est
-tranché comme porte bornée : multiensemble littéral sur petits arbres, ledger
-u128 seul à l'échelle, mutants perte/doublon/effet avant rollback.
+temps : les runs intégrés 4/8/16 k sont au contraire tous plus lents. La
+politique inconditionnelle est donc rejetée et le défaut reste $L=0$. Seule une
+politique sélective, mesurée par dernier étage évité, reste ouverte. La prochaine
+série épingle la règle `coord(n)`, pas une valeur `coord` constante.
 
 La mesure `905c5361` ne ferme pas davantage le choix. Avec ses seuls totaux,
 la récupération `k=1` de `scanline` q3 est dans `[70,581 %, 100 %]`, pas égale
@@ -727,6 +848,25 @@ valeurs, calculs et corrections détaillés restent dans
 
 ## Validation indépendante
 
+- Pin fonctionnel `72090f79`, puis correctif documentaire `2d0614e0`, sur la
+  base `7ac6ca86` : configuration Release et construction CPU complètes
+  réussies, **242 CTests enregistrés**. La porte post-séparation
+  nominale et ses cinq mutants rendent **6/6** en 426,42 s ; les portes API,
+  lanes CPU par lots à `L=1`, q3 skinny, plateau shell et parseur CLI ciblées
+  ainsi que les quatre probes q4 rendent ensemble **16/16** sur le snapshot
+  final. Les deux cas CLI positifs `L=0` et `L=3` rendent **2/2** dans cet
+  ensemble. Les probes q4 forcées avec
+  `--pretest-query-min=0` rendent **4/4** et ferment les trois identités de
+  masse ainsi que la non-vacuité de la voie requête ; leurs couples
+  `(rectangles_requete, candidats_requete)` valent respectivement
+  `(21628, 488448)`, `(15374, 623335)`, `(8824, 113241)` et
+  `(7804, 111340)`. `tools/check_docs.py` valide 217 Markdown actifs,
+  `tools/check_implementation_status.py` valide 20 phases, les neuf Markdown
+  du dossier d'audit passent aussi explicitement `check_docs.validate`, et
+  `git diff --check` est propre. La suite complète finale n'a pas été rejouée :
+  une exécution antérieure, encore à 234 tests, a été arrêtée proprement après
+  32 succès pour ne pas mêler son snapshot au delta mouvant. Il n'y a donc ni
+  claim de suite complète, ni exécution CUDA/device dans ce verdict.
 - Pin `194a0bc2` : construction ciblée Release et trois CTests pool verts ;
   nominal 0,35 s, mutants série 15,35 s et exception 0,35 s. Le même source
   nominal a rendu 30/30 sous CPU 0, et 3/3 sous ASan/UBSan. Avec Clang 18, le

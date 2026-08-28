@@ -14,7 +14,6 @@ recopiés au tip.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : question V15 et six raccords encore utiles après réception bornée du noyau ; le fold renvoie désormais à l'état courant.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : arbitrages V17–V30 pour passer des G0/G1 déjà implémentés à une réception device, puis à G2/L7 selon l'ablation.
 - [`QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md`](QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md) : réponse active sur le coût q3/q4 ; sépare diagnostic de pente et budget, borne le raffinement, puis spécifie la généralisation WSPD par arrangement local de centres.
-- [`QUESTION_CLAUDE_TESTS_D_ANCRE_20260827.md`](QUESTION_CLAUDE_TESTS_D_ANCRE_20260827.md) : pont historique condensé, conservé tant que le document mathématique canonique le référence.
 - [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.
 - [`REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`](REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md) : reçu des arbitrages V1–V4 désormais intégrés aux documents canoniques.
 
@@ -23,8 +22,9 @@ requalifiées. Les réponses générales de fermeture de Claude ont été
 requalifiées jusqu'au pin `556c421e` et retirées du tip ; leur contenu reste
 dans l'historique Git. La réponse V17–V30 a été consolidée dans la question L7
 conservée après réception bornée de la session 13 dans
-`../receipts/campagne_g4_v5_20260828_instrument_scale/`. La question V7–V14 a
-été condensée de la même manière.
+`../receipts/campagne_g4_v5_20260828_instrument_scale/`. La question V7–V14 est
+absorbée par le document mathématique canonique et l'état courant; son échange
+détaillé reste dans l'historique Git.
 
 ## Convention de fraîcheur
 

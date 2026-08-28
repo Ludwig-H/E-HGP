@@ -10,6 +10,10 @@ G2 reste conditionné par l'ablation des retours q4. La conception L7a–L7c
 après réception CUDA de G1 ; les verrous ci-dessous la conditionnent, sans
 redessiner le pool ni le wire déjà acquis.
 
+Ce même échange porte plus bas le contre-audit CPU des exposants, du
+raffinement post-séparation et de la contre-fixture q2 radix ; ces sections
+restent actives même si le titre historique du fichier est centré sur L7.
+
 - **V17 — ordre du cover.** Un counting sort stable par rounds (chunks de 8, curseurs de classe) sur device donne-t-il *le même* ordre que `anchor_cover_from_handles` (handles en ordre de pile, `u` croissant, stable par classe radiale), jugé par une porte de compteurs de sortie anticipée et par `raw_order_gate` à un fil ?
 - **V18 — `di_to_double_d`.** Preuve `proof_internal` (décalage à droite avec bit collant, valeur ≤ 64 bits, un seul arrondi, `ldexp` exact) à inscrire dans `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md` avant la porte de grille device ; la fixture $10^7$ tirages + milieux est complémentaire, non substitutive.
 - **V19 — bornes séparables sans division (census device, L7c).** Minimiseur entier de $a t^2 + b t$ sur $[0, 65535]$ estimé en binaire64 puis évalué en DI128 sur $\lbrace \lfloor \hat t \rfloor, \lceil \hat t \rceil \rbrace$ : accord sur l'argument de convexité et $\left\vert \hat t - t^{\ast} \right\vert < 1$, avec fixture des cas où $\lfloor \hat t \rfloor \ne t^{\ast}$.
@@ -590,7 +594,12 @@ réutilise explicitement le minorant déjà prouvé et protège la couture
 d'implémentation. Avec `with_corners=true`, le compte frais complet est attendu
 monotone lui aussi ; graver `fresh_child >= parent.core` sur boîtes plates,
 frontières strictes, multiplicité et parent à `h-1`, puis tuer un mutant qui
-force `with_corners=false`. Une somme doublerait les témoins communs.
+force `with_corners=false`. Le worktree ferme le premier falsificateur minimal :
+en q3, quatre points donnent `parent=1`, enfants frais `1/2` avec les coins et
+`0/0` sans eux ; le mutant produit deux régressions et est refusé alors que le
+ledger reste exact. Les variantes boîte plate, frontière stricte, multiplicité
+et parent à `h-1` restent des extensions de couverture, pas un verrou à la
+correction observée. Une somme doublerait les témoins communs.
 
 La sûreté est courte. Les deux enfants radix forment une partition disjointe du
 facteur scindé ; leurs produits cartésiens forment donc une partition disjointe
@@ -603,14 +612,18 @@ la porte ne doit cependant pas remplacer cette preuve par une hypothèse sur la
 valeur fraîche de l'implémentation. Elle doit exiger
 l'égalité des digests de candidats, des sorties et de la forêt, car c'est le
 contrat observable actuel. Graver aussi `L=0` comme identité stricte, puis un
-ledger u128 d'ancres uniques
+ledger de masse d'ancres uniques
 `emitted_pair_mass + postsep_killed_pair_mass = base_alive_pair_mass` et, si la
 masse WSPD pondérée est revendiquée, son ledger distinct ; puis le
 multiensemble littéral des couples d'indices avant/après sur de petits arbres :
 les digests seuls localisent mal une perte ou un doublon de paire. L'ordre brut
 change notamment quand B est scindé ; comparer le multiensemble trié avant RLE,
 puis `digest_balls`, chaque forêt, les événements et `batch_levels`, pas l'ordre
-d'énumération.
+d'énumération. Dans le profil courant les plages de positions sont indexées
+en `i32`, donc la masse est strictement inférieure à $\binom{2^{31}}{2}$ et un
+`u64` est suffisant; exiger `u128` n'ajouterait ici aucune sécurité. L'intégration
+du worktree ferme désormais le ledger avant publication, compare l'objet complet,
+tue les mutants de perte et de duplication et exerce l'oracle littéral borné.
 
 Le critère `separated` n'est pas héréditaire sous déplacement du centre de la
 boîte. La fixture 1D `x={0,99,100,512,612}`, `y=z=0`, `s=8` le grave : le parent
@@ -620,39 +633,64 @@ fixture positive q3 doit en parallèle prouver le gain par le frère :
 `{0}` acquiert neuf témoins et le ledger partage 100 paires en 10 mortes et 90
 émises.
 
-La restriction q3/q4 est substantielle. Un témoin du frère compté dans
-`h_a(a)` au parent peut ne plus être compté ni par `h_a` ni par le cœur de
-l'enfant : une ancre morte à l'histogramme parent peut donc « revivre » dans
-l'histogramme enfant. En q3/q4, ce témoin reste un vrai point de `W_q(a,b)` et
-le prétest ponctuel obligatoire le recompte avant toute seed. En q2, aucun
-prétest ponctuel ne ferme cette couture et le multiensemble de candidats peut
-changer. Toute implémentation doit graver une fixture minimale
-`refine-hist-wakeup` qui produit ce réveil en q2, interdit la route q2 et prouve
-l'égalité q3/q4 au mutant qui réutilise le certificat parent.
+La première construction q2 à quatre positions était invalide comme rectangle
+radix, mais le réveil est **réalisable**. Au pin `3469d93c`, une recherche bornée
+sur les seuls nœuds construits par `build_cloud_index` trouve, pour `s=1`,
+`smax=3`, `h2=2`, les six points `0=(59,3,7)`, `1=(62,50,9)`,
+`2=(24,55,14)`, `3=(56,44,46)`, `4=(426,17,62)` et `5=(424,36,5)`. Leur ordre
+Morton des `PointId` est `0,2,1,3,5,4`. Le parent réel `(3,4)` porte
+`A={0,2,1,3}`, `B={5,4}` ; pour l'ancre `(2,5)`, son certificat vaut
+`core=0, h_a=3, h_b=0`, donc elle meurt. À profondeur au plus trois, le
+sous-rectangle réel `(1,leaf_ref(4))`, `A'={2,1}`, `B'={5}`, reste séparé mais
+porte `core=0, h_a=1, h_b=0` : la même ancre revit.
 
-La contre-fixture q2 tient en quatre positions : `(64,183,31)`, `(90,7,26)`,
-`(52,146,28)`, `(91,156,28)`. Leur ordre Morton est respectivement
-`u3,u0,u1,u2`. Avec `s=1`, `smax=3`, `h2=2`, le parent
-`A={u0}, B={u1,u2,u3}` et ses deux enfants sont séparés. Pour l'ancre
-`(u0,u3)`, le cœur reste nul, mais l'histogramme passe de 2 au parent (`u1,u2`)
-à 1 dans l'enfant `B'={u2,u3}` : q2 émet alors une boule supplémentaire. La
-fixture doit aussi tuer les mutants qui additionnent `core_parent+core_child`
-ou réutilisent `h_parent`, deux doubles comptes possibles lors de la migration
-d'un témoin du frère.
+La comparaison donne `13 -> 14` candidats q2, une boule RLE supplémentaire et
+deux digests différents — multiensemble trié pré-RLE et `digest_balls`. Surtout,
+la masse q2 tuée reste nulle et la masse émise égale la masse de base : les
+invariants proposés `tués[q2] == 0` et `émis[q2] == base[q2]` restent verts et
+ne gardent donc pas l'ouverture. La monotonie `core_child >= core_parent` est
+vraie, mais ne prouve pas la compensation quantitative, ancre par ancre ; ici
+le gain de cœur est nul et la perte d'histogramme vaut deux.
+
+Le candidat réveillé était profond et disparaissait avant la forêt dans le run
+diagnostique antérieur : `digest_all` y restait identique. La porte ne fait pas
+de ce masquage aval son critère de mise à mort : une future divergence de forêt
+serait une faute plus forte. Le helper test-only établit la divergence du
+contrat de génération et de `digest_balls`, puis le vrai pipeline refuse toute
+activité q2 — zéro état/comptage/rollback et
+`parents == produits == rect_alive`. Le ledger ne remplace donc ni le mutant,
+ni cette garde structurelle. Le digest brut est lui aussi opt-in dans la porte,
+pour ne pas ajouter un second hachage aux contrats de temps historiques.
+
+Il reste une couture ciblée à transformer en fixture, sans bloquer le nominal
+déjà apparié : forcer un réveil d'histogramme en q3 puis q4 et exercer
+séparément les deux routes du prétest ponctuel, cover et requête. La preuve
+attendue est que tout témoin perdu du frère, auparavant compté
+universellement, appartient encore à $W_q(a,b)$ pour l'ancre enfant et est donc
+recompté avant toute seed. La porte agrégée constate déjà l'égalité des
+multiensembles sur six familles, mais ne prouve pas que ce cas précis ni les
+deux routages y sont non vacants. La future fixture doit exiger rejet avant
+seed et multiensemble brut inchangé ; ce verrou est local, pas une raison de
+revenir sur la partition post-WSPD.
 
 Ne pas appeler ce post-traitement une nouvelle WSPD : le front canonique reste
-terminal à la première séparation. Exposer dans la sonde `L=0,1,2,3`
-et un seuil de masse de paires, puis rejouer d'abord q3 `scanline` 8/16/32 k. Pour
-chaque bras, imprimer rectangles supplémentaires, branches tuées après
-séparation, paires effectivement énumérées, opérations des histogrammes, sites
-de prétest réellement visités, covers construits, `sc.visits`, seeds réels et
-temps. Le succès n'est pas une baisse de `seeds_cf` : il faut une baisse du temps
-et des visites **payées** supérieure au surcoût des nouveaux comptages. Si
-`L=1..3` ne réduit pas ces deux masses au pin courant, abandonner ce raccord ;
-si q3 répond, le tester ensuite séparément en q4 et sur `terrain`/clusters. `L`
-reste borné indépendamment de n : au plus 2/6/14 nouveaux comptages par parent
-pour `L=1/2/3`. Propager la même option aux chemins intégrés, batched et device ;
-leurs sorties doivent rester appariées sous une politique identique.
+terminal à la première séparation. Cette prescription est maintenant exécutée
+sur le chemin CPU de référence : $L=0..3$, rollback, ledger fail-closed,
+multiensemble pré-RLE, sorties complètes et mutants. Les chemins override sont
+refusés pour $L>0$ tant qu'ils ne déclarent pas cette capacité. Les lanes CPU
+par lots propagent désormais la politique et leurs deux portes dédiées passent
+à $L=1$ avec le ledger complet; le CLI CUDA ne parse pas encore `--postsep` et
+aucune réception device n'en découle.
+
+Le verdict de coût est négatif pour la politique inconditionnelle. Sur
+`scanline` à 4/8/16 k, $L=3$ tue 39,1/43,7/44,0 % de masse q4 mais ralentit la
+génération de 1,266 à 1,655 s, 3,356 à 4,294 s et 9,088 à 10,862 s. Le
+défaut reste donc $L=0$; une profondeur plus grande est fermée.
+
+Le prochain raccord exact à sonder est moins ambitieux et moins cher. Si
+$A=A_0\mathbin{\dot\cup}A_1$, les témoins du `parent.core` sont hors de
+$A\cup B$, tandis que tout nouveau témoin cherché dans le frère $A_1$ en est
+disjoint. Pour l'enfant $A_0\times B$, la somme $\min(h,\,parent.core+sibling\_credit)$ est donc sûre — contrairement à `parent + fresh_global`, qui peut doubler des témoins. Tester d'abord le frère entier par `box_vs_ball`, puis au besoin son seul sous-arbre avec un budget de 16/64 nœuds et arrêt au slack. Commencer à $L=1$ et ne poursuivre qu'après progrès strict. Ce micro-raccord peut épargner les histogrammes; il ne remplace pas le center-cover ni l'arrangement shallow qui attaquent les seeds q3/q4.
 
 Avant même ce prototype, ventiler par classe les verdicts
 `anchor_kill_cumulated` en `k=1` (`W_q`) et `k=2` (secteurs). Seule la masse

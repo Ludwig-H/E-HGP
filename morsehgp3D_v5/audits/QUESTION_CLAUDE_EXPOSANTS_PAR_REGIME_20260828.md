@@ -1,54 +1,47 @@
-# ⚠ RÉTRACTATION EN TÊTE — lire ceci avant le reste
+# ⚠ RÉTRACTATION CONSOLIDÉE EN TÊTE — lire ceci avant le reste
 
-**Le § 1 de ce document est FAUX et je le retire.** J'y écrivais que `terrain`
-demanderait 31 jours de calcul agrégé à 10 M points et qu'il lui manquait
-« exactement 0,86 d'exposant ». La cause est celle que l'audit avait
-identifiée avant que je ne la mesure : ma colonne « évaluations Jung » était
-`jung_cert_skip`, un proxy étroit — ni le coût de la lane q4, ni son temps.
+Deux projections successives sont retirées. La première annonçait 31 jours sur
+`terrain` et un déficit « exact » de 0,86 à partir de `jung_cert_skip`, qui
+n'est ni le coût de q4 ni son temps. Son remplacement par `completions_q4`
+améliorait l'unité de boucle, mais ne transformait toujours pas ce compteur en
+horloge : les temps `2 s / 42 s / 1,3 min` à 10 M sont donc retirés eux aussi.
 
-Avec `completions_q4`, **vrai compteur de travail de production**, les mêmes
-reçus donnent des exposants locaux (8 000 → 16 000 → 32 000 → 50 000) :
+À 50 k, les débits réellement observés du corps q4 sont seulement 121,5 M
+complétions/s sur `uniform`, 66,5 M/s sur `terrain` et 67,5 M/s sur `scanline`,
+soit 395 à 722 fois sous les 48 G/s supposés. Sur `terrain`, la pente de
+`completions_q4` décroît alors que celles du corps q4, de la génération et du
+mur augmentent. Ce compteur ne permet donc de conclure ni que le régime
+s'améliore, ni que seul `scanline` se dégrade, ni que la génération n'est pas
+un mur.
 
-| famille | complétions q4 à 50 000 | exposants | extrapolation à 10 M |
-|---|---|---|---|
-| `uniform` | 366 947 557 | 1,08 → 1,06 → **1,05** | ≈ 2 s |
-| `terrain` | 514 838 729 | 2,07 → 1,80 → **1,56** (décroît) | ≈ 42 s |
-| `scanline_single_pass` | 335 781 778 | 1,44 → 1,72 → **1,76** (croît) | ≈ 1,3 min |
+La campagne **historique** au pin source `82f613d3`, 48 fils CPU, donne le
+diagnostic le plus utile sur la série homogène du binaire produit 50/100/200 k.
+Sur `scanline_single_pass`, le mur suit les pentes locales 1,69 puis 2,716 et
+la somme des trois corps `rects` 2,14 puis 3,135. À 200 k, q4 seul prend
+214,544 s, soit 80,14 % d'un mur de 267,701 s ; les trois corps prennent
+239,579 s, soit 89,50 %, et le fold 14,269 s, soit 5,33 %. Les parts des corps
+valent 19,04 % à 8 k, 66,93 % à 100 k et 89,50 % à 200 k. Cette mesure doit
+être rejouée au pin courant avant toute conclusion de performance actuelle.
 
-Le coût par ancre de `terrain` **sature** (seeds par ancre 9,4 → 13,7 → 17,4 →
-17,9 ; complétions par seed 3,78 → 4,55 → 5,13 → 5,33). **La génération n'est
-pas le mur du passage à 10–30 M**, et `terrain` n'est pas le régime perdu : le
-seul exposant qui se dégrade est celui de `scanline`.
+Entre 8 k et 200 k, les ancres q4 croissent de ×238,21, mais les candidats q4
+émis de ×14,95 : les ancres par candidat passent de 16,94 à 269,94, soit une
+dégradation de rendement ×15,94, pas ×238. Seuls ces candidats q4 provisoires
+sont sous-linéaires ; candidats totaux, boules, événements et facettes restent
+approximativement linéaires. Le reçu localise donc le coût dans q4 sans encore
+le partager entre visites de points durant la construction des covers, sites
+retenus, tests de cœur, entrées de profondeur et appels de puissance.
 
-Le mur réel est la **mémoire**, et il est mesuré ailleurs : la loi est
-linéaire (exposants 0,85–1,10 sur quatre familles et trois phases), le pic du
-fold vaut 73,9 ko par point sur `scanline`, 78,6 sur `terrain` et 363 sur
-`uniform`, ce qui fixe la taille maximale résidente sur les 180 Gio de la VM à
-**2,3–2,4 M points** pour un nuage LiDAR et **0,5 M** pour `uniform`. Il manque
-un facteur 4 à 13 sur les familles réalistes — c'est le chantier L2–L4, pas la
-sous-quadraticité.
+Les projections 10 M restent conditionnelles à la conservation de la seule
+pente 100→200 k : 4,97 h pour `uniform`, 17,18 h pour `eight_clusters` et
+127,7 jours pour `scanline`. Ce ne sont pas des tests. Même l'extrapolation
+temporelle favorable de `uniform` échoue largement en résidence. Pour
+`scanline`, prolonger la pente locale du pic GNU donne environ 308 Gio et le
+palier interne environ 318 Gio ; le seul pic mesuré est 10,60 Gio à 200 k.
+Garder deux rails : mur/RSS mesurés d'une part, masses de boucles et
+architecture d'autre part.
 
-Les réserves sur ces chiffres tiennent aussi : les quatre tailles viennent de
-deux binaires (`mhgp5_conformity_v4` et `mhgp5_probe`), le débit de
-$4{,}8 \times 10^{10}$/s n'est pas mesuré, et une pente locale sur moins d'une
-décade ne dit rien d'une asymptote.
-
-**⚠ Cette rétractation était elle-même trop optimiste.** Des reçus portent le
-**mur mesuré jusqu'à 200 000 points**
-(`receipts/campagne_g4_v5_20260828_grille/`) et je ne les avais pas exploités.
-Ils disent que la génération **est** le mur sur la famille LiDAR :
-`scanline_single_pass` croît en $n^{2{,}72}$ (100 k → 200 k), ses lanes en
-$n^{3{,}14}$, et elles passent de 19 % à **89,5 % du mur** ; sa sortie, elle,
-est **sous-linéaire** ($n^{0{,}89}$ : 710 211 candidats pour 191,7 M ancres à
-200 000). Le fold y est linéaire et ne pèse plus que 5,3 %. `uniform` reste
-linéaire ($n^{1{,}09}$, coût par ancre plat à 26 µs-fil, lanes 8,4 % du mur) ;
-`eight_clusters` est à $n^{1{,}32}$. Le détail et le contrat qui en découle
-sont dans `MESURE_CLAUDE_MUR_JUSQU_A_200K_20260828.md`.
-
-**Leçon de méthode, la vraie** : un compteur nommé comme s'il était le coût a
-produit trois documents et une extrapolation fausse de deux ordres de
-grandeur. Je vérifie désormais qu'un compteur mesure ce que son nom prétend
-avant de bâtir dessus.
+**Leçon de méthode :** un compteur de boucle n'est pas une horloge, une pente
+locale n'est pas une loi asymptotique et une projection n'est pas une mesure.
 
 ---
 
@@ -92,17 +85,58 @@ fibrée par l'ancre**, pas WSSD standard :
 2. `AnchorCenterArrangement(a,b)` traite ensemble tous les tiers d'une ancre,
    en scratch borné puis en flux vers le RLE existant.
 
+### Ce que le code courant propose réellement pour q3 et q4
+
+La WSPD courante possède chaque paire non ordonnée une fois, mais le chemin
+produit développe ensuite chaque rectangle vivant `A x B` par la double boucle
+sur toutes ses positions. En notant $A_q=\sum_r\lvert A_r\rvert\lvert B_r\rvert$,
+on a $A_q\leq\binom{n}{2}$, sans garantie que cette masse vivante soit linéaire.
+Sur `scanline` 100 k → 200 k, elle suit localement $n^{1{,}981}$ en q4 tandis
+que le nombre de rectangles reste presque linéaire : la compacité WSPD est
+perdue au moment de proposer les ancres.
+
+Pour une ancre `(a,b)` de longueur carrée `D2`, le cover coefficient 3 retient
+chaque site vérifiant $\lVert 2x-a-b\rVert^{2}\leq 3D^{2}$. Les handles sont
+partagés au niveau du rectangle, mais leurs points sont balayés de nouveau pour
+chaque ancre survivante; ce n'est ni un voisinage de taille bornée ni un k-NN.
+
+- **q3 :** chaque point du cover est essayé comme `x`. Il survit seulement si
+  $\lVert x-a\rVert^{2}\leq D^{2}$,
+  $\lVert x-b\rVert^{2}\leq D^{2}$ et
+  $\lVert 2x-a-b\rVert^{2}>D^{2}$, puis si `(a,b)` est l'arête maximale
+  canonique du triangle. Chaque seed survivant rescane ensuite le cover pour sa
+  profondeur stricte, jusqu'à `h3`.
+- **q4 :** le code forme d'abord `lens`, sous-ensemble du cover satisfaisant les
+  deux premières inégalités. Chaque point de `lens` est essayé comme `x` aigu;
+  le cœur et la corde de ce seed rescannent le cover. Si le seed vit, une seconde
+  boucle essaie **chaque** `y` de `lens`. Le compteur `q4_completions` est
+  incrémenté avant les rejets `x-y`, owner, exact-once, bien-centrage et forme
+  q4. Toute complétion parvenue à la profondeur rescane encore le cover.
+
+La réponse à « l'algorithme est-il quadratique ? » est donc : **le catalogue
+d'ancres peut l'être presque, et le chemin aval n'est pas borné au carré par sa
+structure de boucles**. Les majorants syntaxiques, volontairement lâches, sont
+$O(n^{4})$ pour q3 — jusqu'à $O(n^{2})$ ancres, $O(n)$ tiers et un rescan
+$O(n)$ — et $O(n^{5})$ pour q4 quand une complétion `x,y` paie encore un rescan.
+Ils ne sont ni des bornes géométriques serrées ni des exposants mesurés. Les
+supports distincts eux-mêmes sont bornés par $\binom{n}{3}$ et
+$\binom{n}{4}$; le gaspillage vient des propositions et rescans avant la petite
+sortie canonique. C'est pourquoi optimiser seulement un filtre placé après
+`q4_completions` ne change pas l'exposant de proposition.
+
 ### L'objet commun q3/q4
 
 Fixons l'ancre possédée `e=(a,b)`, son milieu $M$, sa longueur $D$ et son plan
-médiateur. Chaque site $x$ induit dans ce plan la droite orientée
-$h_x(v)=0$, avec une identité exacte déjà démontrée :
+médiateur. Chaque site $x$ non collinéaire à l'ancre induit dans ce plan la
+droite orientée $h_x(v)=0$, avec une identité exacte déjà démontrée :
 
 $$h_x(v)=2v\mathbin{\cdot}(x-M)-\left(\left\Vert x-M\right\Vert^{2}-\frac{D^{2}}{4}\right)=r^{2}-\left\Vert x-(M+v)\right\Vert^{2}.$$
 
 Ainsi `h_x(v)>0`, `=0`, `<0` signifie respectivement intérieur strict, shell,
-extérieur pour la sphère de centre `M+v`. Ce même arrangement donne les deux
-lanes :
+extérieur pour la sphère de centre `M+v`. Un site collinéaire induit une
+fonction constante : intérieur universel, extérieur universel ou shell
+universel selon sa position sur l'axe ; il faut le router vers le compte fixe
+ou le census, pas inventer une droite. Ce même arrangement donne les deux lanes :
 
 - **q3 :** `x` ne demande pas une nouvelle recherche géométrique. Le centre du
   triangle `(a,b,x)` est le point marqué $v_x$ de norme minimale sur sa propre
@@ -129,6 +163,31 @@ complet de Jung peut tuer davantage de candidats profonds et constitue un
 changement de contrat séparé, déjà averti par
 [`PISTES_FERMEES.md`](../docs/PISTES_FERMEES.md).
 
+Deux profondeurs doivent donc rester nommées séparément. La profondeur
+$\delta_e^{\mathrm{full}}$ porte sur tous les intérieurs de la sphère et donne
+le rang mathématique. La profondeur $\delta_e^{(3)}$ ne parcourt que le cover
+coefficient 3 et reproduit le filtre historique de génération. Pour q3, ce
+cover contient tous les intérieurs ; pour q4, il contient les carriers utiles
+mais peut omettre des intérieurs, comme le grave `mhgp5_q4_cover_fixture`.
+Préserver d'abord `digest_balls` impose $\delta_e^{(3)}$ ; revendiquer la borne
+de rang exige $\delta_e^{\mathrm{full}}$ ou une recertification terminale
+équivalente. Ne jamais échanger silencieusement ces deux objets.
+
+Le futur `center-cover` possède toutefois un garde de compatibilité exact,
+simple et conservateur. Pour des boîtes d'extrémités $A,B$ et un nœud témoin
+$W$, poser $I_i=[2w_i^- -a_i^+-b_i^+,\,2w_i^+ -a_i^- -b_i^-]$,
+$U=\sum_i\max((\inf I_i)^2,(\sup I_i)^2)$ et
+$L=\sum_i\mathrm{dist}([a_i^-,a_i^+],[b_i^-,b_i^+])^2$. Alors toute ancre
+$p\in A,q\in B$ et tout $x\in W$ vérifient
+$\lVert2x-p-q\rVert^2\leq U$ et $\lVert p-q\rVert^2\geq L$. Le test
+$U\leq3L$, ajouté au certificat d'intériorité stricte, prouve donc que chaque
+témoin crédité appartient aussi au cover coefficient 3 de **toute** ancre du
+bloc. Avec au moins $h_4$ tels témoins par patch, le bloc peut être tué sans
+changer le multiensemble historique ni `digest_balls`; si le garde échoue, la
+route compatible v4 reste fail-open. L'égalité $U=3L$ est admissible pour
+l'appartenance au cover, tandis que l'intériorité demeure stricte. Sous le
+profil u16, ces carrés tiennent en `i64`.
+
 L'abstraction se généralise en dimension $d$, sans généraliser naïvement les
 produits : une paire diamètre laisse un espace de centres de dimension $d-1$ ;
 chacun des $q-2$ porteurs supplémentaires y ajoute un hyperplan orienté ; le
@@ -138,13 +197,15 @@ budget de profondeur stricte vaut $s_{\max}-q$. En 3D, cela donne `q2 = v=0`,
 formulation unifie les preuves et les données, mais ne promet pas la même borne
 combinatoire en dimension supérieure.
 
-### Gain obtenu, et limite honnête
+### Borne locale visée, et limite honnête
 
 Pour une ancre `e`, notons `m_e` le nombre de droites actives. En position
 générale, le nombre de sommets q4 admissibles par profondeur vérifie
 $Z_e\leq m_e(\kappa_e+1)$ ; à `smax=11`, cela donne au plus `8*m_e`, contre
-`m_e*(m_e-1)/2` complétions. Les constructions de niveaux peu profonds donnent
-comme cible théorique locale
+`m_e*(m_e-1)/2` intersections dans le développement naïf. Ce dernier nombre
+n'est pas le compteur actuel `q4_completions`, placé après plusieurs filtres et
+gouverné aussi par le nombre de seeds. Les constructions de niveaux peu
+profonds donnent comme cible théorique locale
 $O(m_e\log m_e+m_e(\kappa_e+1))`. Le document
 [`RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md`](../../docs/math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md)
 porte la preuve géométrique, les bornes et leurs limites.
@@ -184,13 +245,78 @@ quatre points : il faut généraliser l'abstraction, pas ouvrir q5.
    par blocs d'extrémités avant l'émission des ancres. Ne pas revenir au produit
    symétrique de quatre nœuds.
 
+### R0a livré — les masses internes ferment enfin la comptabilité q4
+
+Le worktree ajoute, sous `MHGP5_PROFILE_Q4` seulement, six masses : covers
+construits, visites de points durant leur construction, sites retenus, tests de
+cœur, entrées du filtre de profondeur et appels à `q4_power`. La sonde refuse
+son résultat si l'une des trois partitions cœur, profondeur ou complétions ne
+ferme pas. Les quatre runs locaux `n=400`, un fil, avec prétest par requête
+forcé, ferment les trois identités :
+
+| famille | tests cœur | complétions | entrées profondeur | appels `q4_power` |
+|---|---:|---:|---:|---:|
+| `uniform` | 5 783 195 | 1 551 035 | 159 932 | 2 762 711 |
+| `eight_clusters` | 8 150 461 | 1 594 384 | 126 942 | 2 529 198 |
+| `terrain` | 756 870 | 170 629 | 3 410 | 51 505 |
+| `scanline_single_pass` | 1 233 035 | 273 392 | 10 112 | 145 096 |
+
+À cette petite taille, seulement 2,0 % des complétions `terrain` et 3,7 % des
+complétions `scanline` atteignent la profondeur. Une descente radix exacte sur
+le cover coefficient 3 reste utile pour supprimer les appels `q4_power`, mais
+elle intervient trop tard pour enlever les scans de cœur ou la formation des
+complétions. L'ordre d'aide à Claude est donc : réutiliser les certificats
+partiels cœur/corde par `x`, faire rejeter exactement `|x-y|^2>D^2` avant la
+forme q4, puis intégrer la descente radix ; l'arrangement shallow est la voie
+qui peut retirer la formation `x × y` elle-même. Rejouer ces masses à
+50/100/200 k sur le même pin est indispensable avant de classer leurs gains.
+Ces runs R0a sont des ratios exploratoires, pas un reçu de scalabilité; leurs
+chronométrages à un passage sont volontairement exclus du tableau.
+
+La nouvelle fraction $f_4(n)=\mathrm{anchors}[2]/\binom{n}{2}$ fournit un
+second diagnostic propre. Sur `scanline`, elle passe seulement de 0,971 % à
+0,959 % entre 100 k et 200 k, soit une pente locale $n^{-0{,}02}$ et donc une
+masse d'ancres explicites proche de $n^{1{,}98}$ sur ce doublement. Pour rendre
+**ce catalogue explicite** linéaire, demander $f_4=O(n^{-1})$ est exactement
+équivalent. Ce n'est toutefois pas l'unique contrat algorithmique possible :
+le center-cover peut fermer un bloc sans émettre ses ancres, et l'arrangement
+peut partager le traitement de nombreuses ancres. Le vrai objectif est donc
+« masse d'ancres explicites linéaire **ou** traitement implicite certifié à
+travail sous-quadratique », pas obligatoirement « tout résoudre par l'élagage
+de rectangle ». Cette fraction ne décrit en outre que q4 et une pente sur deux
+points ; publier séparément q2/q3/q4, le ledger des paires et le coût du
+raffinement.
+
+Le mode concurrent `--descente-seule` de `rect_probe` est un plafond
+exploratoire, pas encore un algorithme reçu : il reprend une profondeur 40 déjà
+refusée comme route produit, ne rejoue ni covers, ni candidats, ni digests, et
+aucune commande ou sortie brute n'est encore au tip. Sa comptabilité doit
+fermer `paires_avant = paires_tuées + paires_après`, prouver que chaque split
+partitionne le produit et rapporter le travail par paire retirée. Une campagne
+de **compteurs** déterministes peut bien tourner localement ; seuls les temps
+comparables demandent la machine gardée.
+
 Les cas dégénérés sont contractuels : droites parallèles, identiques ou
-concourantes, centre sur la frontière du disque, profondeurs 8/9 en q3 et 7/8
-en q4, shell cosphérique jusqu'au cap, ties d'owner et `det=0`. Les concurrences
-sont groupées par centre/`BallKey` et passées au census complet ; aucun jitter.
-Au-delà du cap de shell, le statut reste `resource_exhausted`, jamais une
-omission. Les mutants minimaux retirent ou dupliquent une droite, changent
-`<` en `<=`, décalent `kappa` de un et éclatent une concurrence.
+concourantes, fonctions constantes, centre sur la frontière du disque,
+profondeurs 8/9 en q3 et 7/8 en q4, shell cosphérique jusqu'au cap, ties d'owner
+et `det=0`. Attention : le shell complet ne participe pas à la profondeur
+stricte et ne borne pas la pertinence d'un sous-support. Douze points
+cosphériques peuvent avoir un rang fermé complet 12 tout en contenant un
+tétraèdre bien centré de cardinalité quatre pertinent à `smax=11` ; la fixture
+`mhgp5_plateau_shell_relevance` grave ce contre-exemple. Les concurrences sont
+groupées par centre, sans jitter, puis passées au census complet.
+
+Un groupement par seul `BallKey` ne suffit toutefois pas encore à préserver le
+contrat observable : à clé égale, le RLE choisit l'arité puis la représentation
+brute minimale de `ExactLevel`, et `q4_level_raw` dépend du carrier. Sous succès
+du cap de shell 12, une ancre n'a au plus que dix autres sites sur ce shell ;
+examiner au plus 45 couples **après** avoir trouvé le centre permet donc de
+retrouver le représentant historique sans réintroduire le carré en `m_e`. La
+porte R1 doit comparer le `BallCandidate` post-RLE complet, les digests, statuts
+et forêt, pas seulement l'ensemble des `BallKey`. Au-delà du cap, le statut
+reste `resource_exhausted`, jamais une omission. Les mutants minimaux retirent
+ou dupliquent une droite, changent `<` en `<=`, décalent `kappa` de un et
+éclatent une concurrence.
 
 ### Correction du dernier contre-proxy
 
@@ -396,9 +522,10 @@ Un tuilage de scheduling est sûr s'il partage seulement l'itération de
 `A x B`, tout en conservant le rectangle parent, son `core`, ses histogrammes,
 la sémantique de chaque ancre et un merge déterministe. Il répartit le travail
 mais n'en retire aucun. Un **sous-rectangle géométrique** qui recalcule boîtes,
-certificats ou histogrammes est une autre optimisation : elle est interdite en
-q2 par la contre-fixture `refine-hist-wakeup` et conditionnée en q3/q4 par les
-portes de conservation de la question active.
+certificats ou histogrammes est une autre optimisation : la route q2 reste
+fermée, désormais sur une contre-fixture radix valide où un candidat et une
+boule RLE se réveillent sans masse q2 tuée. Les routes q3/q4 sont conditionnées
+par les portes de conservation de la question active.
 
 ### V41 — signal utile, descente non recevable telle quelle
 
@@ -425,7 +552,7 @@ commentaire sont fausses :
   `L=0..3` proposée. Chaque `count_universal_witnesses` peut lui-même parcourir
   l'arbre du nuage : le coût n'est donc pas borné par deux fois le nombre de
   feuilles ou de paires ;
-- « objet inchangé » exige l'exclusion de q2, le ledger u128 des masses, le
+- « objet inchangé » exige l'exclusion de q2, le ledger borné des masses, le
   multiensemble trié des candidats et les signatures complètes. Scinder B change
   l'ordre brut ; ce n'est pas un défaut si la canonisation et toutes les sorties
   restent identiques.
@@ -445,12 +572,12 @@ nombres mais le binaire imprime `pin_configure=0b3f3fd6`, faute de
 reconfiguration, et aucune commande/sortie brute n'est versionnée : la mesure
 n'est pas un reçu attribuable à `57deaaa6`.
 
-Action minimale : garder ce code comme sonde, mais remplacer sa descente 40 par
-les bras transactionnels `L=0/1/2/3`, graver les deux fixtures
-`refine-separated-not-hereditary` et `refine-sibling-witness`, puis mesurer dans
-le flux réel les paires retirées, visites de comptage ajoutées, visites de cover
-retirées et le mur. Le détail des portes et de la propagation aux chemins
-intégrés/batched/device est consolidé dans la question lane active.
+Cette action minimale est désormais exécutée sur le chemin CPU de référence :
+bras transactionnels `L=0/1/2/3`, rollback `refine-separated-not-hereditary`,
+ledger, multiensemble littéral borné et mesure du mur intégré. Le résultat est
+négatif pour le rescannage global inconditionnel : la masse retirée ne paie pas
+les visites LBVH ajoutées. La piste encore ouverte est un certificat local par
+frère ou un center-cover sélectif, pas une profondeur globale supérieure à 3.
 
 Le nouveau compteur `k=1` est seulement une borne sur les ancres de la
 population post-histogramme/post-W4 qui atteignent effectivement le test W. Il
@@ -467,18 +594,33 @@ niveaux complémentaires évitent de transformer l'oracle en coût produit :
    uniques. La porte compare après tri canonique la réunion disjointe
    `couples_emis union couples_branches_certifiees_mortes` au multiensemble du
    front vivant de base. Elle exige au moins une scission de A, une de B, une
-   branche morte, une survivante et un rollback pour enfant non séparé. Des
-   mutants retirent un enfant, le dupliquent et appliquent un effet avant le
-   rollback ; `refine-hist-wakeup` tue séparément toute activation q2.
+   branche morte, une survivante et un rollback pour enfant non séparé. Les
+   mutants retirent un enfant, le dupliquent ou abaissent à $h-1$ le seuil de
+   mort; le rollback est une fixture nominale distincte. La route q2 est fermée
+   par construction et gardée par un mutant dédié : la contre-fixture radix
+   à six points réveille exactement un candidat et une boule RLE quand cette
+   route est ouverte, bien que son ledger de masse reste vert.
 2. Sur le chemin de taille, ne matérialiser aucun couple : conserver seulement
-   le ledger u128 d'ancres uniques
+   le ledger d'ancres uniques
    `emitted_pair_mass + postsep_killed_pair_mass = base_alive_pair_mass`. Si la
    masse pondérée par multiplicité de PointId est revendiquée, lui donner un
    second ledger explicitement nommé. Les digests de candidats, sorties,
    forêts, événements et niveaux restent des portes aval distinctes.
 
-Cette porte doit être un CTest dédié du prototype, avec planchers de non-vacuité
-et codes de sortie exacts. Le benchmark garde seulement les compteurs ; il ne
+La porte intégrée du worktree réalise maintenant ces deux niveaux, refuse le
+ledger avant publication, tue les mutants de perte/duplication/sur-mort,
+d'ouverture q2 et de recomptage sans coins, puis compare le digest diagnostique
+`digest_raw_candidates` pré-RLE, `digest_balls`, les cardinalités brutes par
+lane, événements, `batch_levels` et forêts entre `L=0..3` et entre un et quatre
+fils. Le digest brut est opt-in dans cette porte : le `--digest` historique ne
+paie pas un second hachage du catalogue. La fermeture q2 exige aussi zéro
+activité structurelle de raffinement et `parents == produits == rect_alive` ;
+le mutant conserve sa preuve de réveil via le helper test-only puis est refusé
+par le vrai pipeline. `u64` suffit ici : les positions sont indexées en `i32`,
+donc la masse reste strictement sous $\binom{2^{31}}{2}$.
+
+Cette porte est un CTest dédié du prototype, avec planchers de non-vacuité et
+codes de sortie exacts. Le benchmark garde seulement les compteurs ; il ne
 devient jamais l'oracle quadratique.
 
 Deux formulations de la réception `4ecb57d4` restent à corriger avant la série
@@ -491,16 +633,105 @@ suivante :
   utilisée ;
 - la masse `k=1` ne borne que les ancres post-histogramme/post-W4 effectivement
   soumises au test W. Elle ne borne ni toute la masse de paires supprimable avant
-  ces filtres, ni le temps. Enfin, q4 n'est pas encore une « perte nette » : les
-  69,8 M visites sont mesurées, mais les 4,0 M covers évités sont estimés au
-  prorata et les unités n'ont pas le même prix. Ce signal ne classe donc pas la
-  priorité q4 ; il refuse seulement ce raffinement tant qu'une mesure intégrée
-  du mur et des visites payées ne le rend pas favorable.
+  ces filtres, ni le temps. Les 69,8 M visites mesurées et 4,0 M covers estimés
+  au prorata ne suffisaient donc pas à conclure. La mesure intégrée tranche
+  maintenant contre le rescannage global : tous les bras `L>0` mesurés sont
+  plus lents, malgré une masse q4 nettement réduite.
 
 En q3, `33,7 % -> 43,8 %` décrit donc une **opportunité de pruning sur deux
 tailles**, pas encore un gain croissant ni une baisse d'exposant. Cet ordre
 historique est remplacé par R0--R3 ci-dessus : partager le diagnostic puis
 traiter le carré local q4 avec le constructeur shallow.
+
+## Contre-audit de `3e785622` / `e5ca5023` — garder le mécanisme, retirer le ratio
+
+Les masses 8/16/32 k et leurs exposants sont arithmétiquement justes. Sur
+`scanline` q4, la fraction survivante passe localement de 1,4389 % à 0,7913 %
+puis 0,4698 %, et l'exposant de la masse survivante vaut 1,14 puis 1,25. C'est
+un signal suffisamment bon pour continuer la sonde. Il prouve seulement que le
+raffinement réduit la masse d'ancres explicites sur ces deux intervalles, pas
+qu'il réduit le travail total ni qu'il « restaure » une complexité.
+
+Le rapport annoncé `3,3:1` est faux par mélange de populations. À 32 k, la
+base contient 6 951 708 paires et le raffinement en tue 4 546 210, alors que le
+stage aval ne construit que 1 673 861 covers. L'intersection entre « paire
+tuée » et « paire qui aurait construit un cover » n'est pas mesurée; elle peut
+contenir entre zéro et 1 673 861 paires. Au plus 36,8 % des paires tuées
+auraient donc atteint ce stage. Les 708 593 623 visites de points cumulées sur
+tous les covers ne sont pas l'économie du raffinement. Même en lui attribuant
+irréalistement toute cette masse, le quotient avec les 580 417 374 visites de
+nœuds du raffinement ne dépasserait que 1,22, et ces deux unités n'ont pas le
+même prix.
+
+Le coût de la sonde croît lui-même vite : les visites de nœuds valent environ
+43,98 M, 148,91 M et 580,42 M à 8/16/32 k, soit des pentes 1,76 puis 1,96. Une
+sortie temporaire 100 k, non versionnée et donc seulement diagnostique, donne
+48 557 755 paires avant, 11 044 864 après et 6 965 456 210 visites : la masse
+survivante suit localement une pente 1,34 depuis 32 k, mais les visites 2,18 et
+le coût par paire tuée monte d'environ 128 à 186 visites. Chaque comptage de
+cœur peut traverser le LBVH; le pire cas ajouté reste donc jusqu'à cubique en
+la taille du nuage. Une meilleure fraction survivante ne suffit pas si elle est
+achetée par davantage de travail.
+
+La sonde intégrée réutilise désormais `parent.core`, ferme le ledger
+`avant = tuées + survivantes` et chronomètre le surcoût dans le flux réel. Elle
+montre que les morts déplacées en amont ne compensent pas le rescannage global.
+Une politique sélective devra encore apparier les branches avec leur dernier
+étage réellement évité — `killed_pre_hist`,
+`killed_prequery_W4_sector_cell`, `killed_cover_built` et somme exacte des
+`point_visits` — puis conserver comme portes terminales le multiensemble pré-RLE,
+les digests post-RLE, événements, niveaux et forêt.
+
+L'intégration sûre conserve chaque rectangle WSPD parent et lui associe une
+antichaîne de sous-produits survivants. Les enfants ne sont pas réinjectés
+comme rectangles WSPD, car la séparation n'est pas héréditaire; ils servent
+seulement à itérer les produits `A' x B'` encore vivants. Un masque consulté
+depuis la double boucle originale conserverait l'énumération de toutes les
+paires et rendrait le gain d'exposant fictif. La porte bornée doit vérifier que
+chaque paire vivante apparaît exactement une fois, que les masses des enfants
+partitionnent le parent, que q2 refuse cette route et que les caps échouent
+ouverts. Ces portes sont maintenant présentes. Verdict constructif mis à jour :
+**conserver le mécanisme comme instrument exact, garder `L=0` par défaut et ne
+plus approfondir globalement**. La suite utile est le crédit local par frère,
+puis le center-cover et l'arrangement shallow qui attaquent les propositions
+d'ancres et le produit q4 `x` par `y`.
+
+## Réponse auditée — V43 à V45
+
+**V43 est recevable après réécriture, pas dans sa version `fd318929`.** La
+preuve mélangeait la convention de séparation écrite avec celle de la WSPD de
+Callahan--Kosaraju, omettait de déclarer les facteurs non vides et disjoints,
+et la contre-famille initiale ne garantissait pas l'acuité q3. Le théorème
+autonome corrigé est maintenant dans
+[`RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md`](../../docs/math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md),
+Théorème 4 : deux populations de taille $m$, l'une sur un cercle et l'autre
+espacée sur son axe, forcent au moins $m(m-1)=\Omega(n^{2})$ blocs ternaires
+symétriques, fortement séparés et exact-once, bien que tous les supports
+croisés soient strictement aigus. Le seuil utile est $s>1$, sans argument de
+spanner externe.
+
+**V44 ferme seulement cette réalisation symétrique explicite de tous les
+supports aigus comme remplacement linéaire de q3.** Elle ne ferme ni une WSSD
+approximative, ni une source asymétrique ancre--tiers, ni une source restreinte
+aux centres de profondeur au plus huit, ni l'arrangement shallow. C'est cette
+portée étroite qui entre dans `PISTES_FERMEES.md`; le titre général « la WSPD ne
+se généralise pas » est retiré.
+
+**Le corollaire sur le circumrayon était faux pour la lane q3.** Pour un
+triangle aigu ancré par sa plus longue arête $D$, le centre vérifie
+$R_c^{2}\leq D^{2}/3$ et $\lVert c-m_D\rVert^{2}\leq D^{2}/12$. Le cas proche
+de 89°--89°--2° tend vers un centre au milieu de l'arête maximale; il montre
+une disparité de côtés, pas une délocalisation. Le troisième sommet `x` est le
+carrier proposé dans le cover; ce sont les autres sites qui servent de témoins
+de profondeur.
+
+**V45 devient une fixture locale, jamais une preuve asymptotique.** La porte
+`mhgp5_q3_skinny_center` vérifie la localisation précédente et une instance
+u16 cercle--axe de 12 points par population : ses 792 supports croisés sont
+tous aigus et satisfont les inégalités locales à $s=8$. Si un producteur
+ternaire symétrique apparaît, une porte séparée devra vérifier l'exact-once sur
+ces 792 supports et le plancher de 132 blocs. Le domaine u16 fini, à lui seul,
+ne peut pas prouver une borne asymptotique.
 
 ## Requalification de la mesure prédicteur `905c5361`
 
