@@ -8,6 +8,7 @@
 // Usage : mhgp5_rect_probe --family=F --n=N [--lane=3|4] [--coord=C]
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstdio>
 #include <string>
 #include <vector>
@@ -159,7 +160,14 @@ int main(int argc, char** argv) {
   SectorKill sk;
   u64 t_prod_ns = 0, t_sect_ns = 0, t_prodtest_ns = 0;
   const bool float_on = float_filter_runtime_enabled();
+  // PALMARES des rectangles les plus lourds (seeds) : D_max, |A|.|B|, ancres
+  // vivantes, tuees par la production, seeds, survivants — repond a « le
+  // travail lourd est-il inherent (survivants) ou gaspille (zero survivant) ? ».
+  struct Heavy { u64 dmax2, nab, alive, killed, seeds, surv, cover; };
+  std::vector<Heavy> heavy;
+  u64 seeds_in_zero_surv = 0, seeds_in_killed_free = 0;
   for (const AliveRect& ar : alive) {
+    u64 r_killed = 0;
     generate_detail::corner_histograms(ix, L, ar.r, &sc.ha, &sc.hb);
     const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
     rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), coef, &sc.handles, &sc.cover_nodes);
@@ -212,7 +220,7 @@ int main(int argc, char** argv) {
         {
           const int k = anchor_kill_cumulated(sc.cover, ix.upos, ua, ub, pa, pb, D2, lane == 3 ? Lane::kQ3 : Lane::kQ4,
                                               lane == 3 ? 12 : 8, h_of[li]);
-          if (k != 0) { ++sk.killed_prod; sk.seeds_avoided_prod += sd; if (!lo.empty()) ++sk.wrong; }
+          if (k != 0) { ++sk.killed_prod; sk.seeds_avoided_prod += sd; ++r_killed; if (!lo.empty()) ++sk.wrong; }
           if (k == 1) ++sk.killed_w;
         }
         const auto ts2 = std::chrono::steady_clock::now();
@@ -224,7 +232,31 @@ int main(int argc, char** argv) {
       }
     rect_anchors_alive.add(r_alive); rect_cover_sum.add(r_cover); rect_seeds.add(r_seeds); rect_surv.add(r_surv);
     anchors_alive_total += r_alive; seeds_total += r_seeds; surv_total += r_surv;
+    {
+      const AxisBox ba = ix.box_of(ar.r.a), bb = ix.box_of(ar.r.b);
+      u64 dmax2 = 0;
+      for (int i = 0; i < 3; ++i) {
+        const i64 w = std::max(std::llabs(ba.hi[i] - bb.lo[i]), std::llabs(bb.hi[i] - ba.lo[i]));
+        dmax2 += (u64)(w * w);
+      }
+      heavy.push_back(Heavy{dmax2, (u64)nab, r_alive, r_killed, r_seeds, r_surv, r_cover});
+      if (r_surv == 0) seeds_in_zero_surv += r_seeds;
+    }
   }
+  std::sort(heavy.begin(), heavy.end(), [](const Heavy& x, const Heavy& y) { return x.seeds > y.seeds; });
+  {
+    u64 top_seeds = 0, top_surv = 0;
+    const size_t ntop = std::min<size_t>(heavy.size(), heavy.size() / 100 + 1);
+    for (size_t i = 0; i < ntop; ++i) { top_seeds += heavy[i].seeds; top_surv += heavy[i].surv; }
+    std::printf("palmares : 1 %% des rectangles les plus lourds (%zu) = %.1f %% des seeds, %.1f %% des survivants ; seeds dans les rectangles SANS survivant = %.1f %%\n",
+                ntop, seeds_total ? 100.0 * (double)top_seeds / (double)seeds_total : 0.0, surv_total ? 100.0 * (double)top_surv / (double)surv_total : 0.0,
+                seeds_total ? 100.0 * (double)seeds_in_zero_surv / (double)seeds_total : 0.0);
+    for (size_t i = 0; i < std::min<size_t>(heavy.size(), 12); ++i)
+      std::printf("  rect#%zu Dmax=%.0f |A||B|=%llu vivantes=%llu tuees_prod=%llu seeds=%llu survivants=%llu covers=%llu\n", i, std::sqrt((double)heavy[i].dmax2),
+                  (unsigned long long)heavy[i].nab, (unsigned long long)heavy[i].alive, (unsigned long long)heavy[i].killed, (unsigned long long)heavy[i].seeds,
+                  (unsigned long long)heavy[i].surv, (unsigned long long)heavy[i].cover);
+  }
+  (void)seeds_in_killed_free;
   const auto line = [](const char* name, Q& q) {
     std::printf("%-22s somme=%llu p50=%llu p90=%llu p99=%llu max=%llu\n", name, (unsigned long long)q.sum(), (unsigned long long)q.q(0.5),
                 (unsigned long long)q.q(0.9), (unsigned long long)q.q(0.99), (unsigned long long)q.mx());
