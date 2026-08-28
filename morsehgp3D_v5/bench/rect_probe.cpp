@@ -274,6 +274,33 @@ int main(int argc, char** argv) {
       cls[c].rects += 1; cls[c].nab += hh.nab; cls[c].alive += hh.alive; cls[c].killed += hh.killed;
       cls[c].seeds += hh.seeds; cls[c].surv += hh.surv; cls[c].cover += hh.cover;
     }
+    // PLAFOND D'UN TEST DE RECTANGLE (la mesure qui decide) : un test au
+    // niveau du rectangle ne peut etre EXACT que s'il ne tue qu'un rectangle
+    // dont TOUTES les ancres sont deja tuees par le test d'ancre exact. Le
+    // travail porte par ces rectangles-la est donc le gain MAXIMAL atteignable
+    // par n'importe quel test de rectangle exact, aussi parfait soit-il.
+    {
+      u64 rects_tout_tue = 0, seeds_tout_tue = 0, covers_tout_tue = 0, paires_tout_tue = 0;
+      u64 rects_avec_vivantes = 0, seeds_avec_vivantes = 0;
+      for (const Heavy& hh : heavy) {
+        if (hh.alive == 0) continue;
+        ++rects_avec_vivantes;
+        seeds_avec_vivantes += hh.seeds;
+        if (hh.killed == hh.alive) {
+          ++rects_tout_tue;
+          seeds_tout_tue += hh.seeds;
+          covers_tout_tue += hh.cover;
+          paires_tout_tue += hh.nab;
+        }
+      }
+      std::printf("plafond_test_rectangle : rectangles dont TOUTES les ancres sont tuees = %llu / %llu (%.1f %%) ; "
+                  "ils portent %llu / %llu seeds (%.1f %%), %llu paires et %llu sites de cover — c'est le gain MAXIMAL d'un test de rectangle exact\n",
+                  (unsigned long long)rects_tout_tue, (unsigned long long)rects_avec_vivantes,
+                  rects_avec_vivantes ? 100.0 * (double)rects_tout_tue / (double)rects_avec_vivantes : 0.0,
+                  (unsigned long long)seeds_tout_tue, (unsigned long long)seeds_avec_vivantes,
+                  seeds_avec_vivantes ? 100.0 * (double)seeds_tout_tue / (double)seeds_avec_vivantes : 0.0,
+                  (unsigned long long)paires_tout_tue, (unsigned long long)covers_tout_tue);
+    }
     std::printf("classes_dmax (Dmax dans [2^c, 2^(c+1)))\n");
     for (int c = 0; c < kCls; ++c) {
       if (!cls[c].rects) continue;
