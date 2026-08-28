@@ -67,6 +67,8 @@ inline constexpr const char* kMutants[] = {
     "sector-kill-nonstrict",
     "anchor-kill-h-minus-one",
     "chord-nonstrict",
+    "cell-kill-nonstrict",
+    "cell-kill-h-minus-one",
 };
 
 inline std::vector<std::string>& mutant_registry() {

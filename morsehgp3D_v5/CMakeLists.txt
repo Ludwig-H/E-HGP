@@ -328,11 +328,13 @@ mhgp5_gate(mhgp5_sector_kill_fixture 0 mhgp5_sector_kill_fixture "")
 mhgp5_gate(mhgp5_sector_kill_mutant_nonstrict 4 mhgp5_sector_kill_fixture "--inject=sector-kill-nonstrict")
 mhgp5_executable(mhgp5_anchor_tests_oracle tests/anchor_tests_oracle.cpp)
 mhgp5_gate(mhgp5_anchor_tests_oracle 0 mhgp5_anchor_tests_oracle "" LABELS oracle)
+mhgp5_gate(mhgp5_anchor_tests_oracle_mutant_cell_h1 4 mhgp5_anchor_tests_oracle "--inject=cell-kill-h-minus-one" LABELS oracle)
 mhgp5_executable(mhgp5_anchor_kill_fixture tests/anchor_kill_fixture.cpp)
 mhgp5_gate(mhgp5_anchor_kill_fixture 0 mhgp5_anchor_kill_fixture "")
 mhgp5_gate(mhgp5_anchor_kill_mutant_h1 4 mhgp5_anchor_kill_fixture "--inject=anchor-kill-h-minus-one")
 mhgp5_gate(mhgp5_anchor_kill_mutant_nonstrict 4 mhgp5_anchor_kill_fixture "--inject=sector-kill-nonstrict")
 mhgp5_gate(mhgp5_anchor_kill_mutant_chord 4 mhgp5_anchor_kill_fixture "--inject=chord-nonstrict")
+mhgp5_gate(mhgp5_anchor_kill_mutant_cell_nonstrict 4 mhgp5_anchor_kill_fixture "--inject=cell-kill-nonstrict")
 
 # Contrat structurel du fold (P0 audit 9762daaf) : rejets permanents et limites positives.
 mhgp5_executable(mhgp5_fold_contract_gate tests/fold_contract_gate.cpp)

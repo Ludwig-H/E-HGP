@@ -163,10 +163,12 @@ int main(int argc, char** argv) {
   // PALMARES des rectangles les plus lourds (seeds) : D_max, |A|.|B|, ancres
   // vivantes, tuees par la production, seeds, survivants — repond a « le
   // travail lourd est-il inherent (survivants) ou gaspille (zero survivant) ? ».
-  struct Heavy { u64 dmax2, nab, alive, killed, seeds, surv, cover; };
+  struct Heavy { u64 dmax2, nab, alive, killed, seeds, surv, cover; size_t idx; };
   std::vector<Heavy> heavy;
   u64 seeds_in_zero_surv = 0, seeds_in_killed_free = 0;
+  size_t rect_idx = 0;
   for (const AliveRect& ar : alive) {
+    const size_t my_idx = rect_idx++;
     u64 r_killed = 0;
     generate_detail::corner_histograms(ix, L, ar.r, &sc.ha, &sc.hb);
     const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
@@ -239,7 +241,7 @@ int main(int argc, char** argv) {
         const i64 w = std::max(std::llabs(ba.hi[i] - bb.lo[i]), std::llabs(bb.hi[i] - ba.lo[i]));
         dmax2 += (u64)(w * w);
       }
-      heavy.push_back(Heavy{dmax2, (u64)nab, r_alive, r_killed, r_seeds, r_surv, r_cover});
+      heavy.push_back(Heavy{dmax2, (u64)nab, r_alive, r_killed, r_seeds, r_surv, r_cover, my_idx});
       if (r_surv == 0) seeds_in_zero_surv += r_seeds;
     }
   }
@@ -257,6 +259,88 @@ int main(int argc, char** argv) {
                   (unsigned long long)heavy[i].surv, (unsigned long long)heavy[i].cover);
   }
   (void)seeds_in_killed_free;
+  // VIDAGE de l'ancre la plus lourde (diagnostic : ou sont les centres des
+  // seeds d'une ancre sans survivant ? apex ou couronne ?).
+  if (!heavy.empty() && heavy[0].seeds > 0) {
+    const AliveRect& ar = alive[heavy[0].idx];
+    const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
+    rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), coef, &sc.handles, &sc.cover_nodes);
+    i32 best_a = -1, best_b = -1;
+    u64 best_seeds = 0;
+    for (i32 ua = ra.first; ua <= ra.last; ++ua)
+      for (i32 ub = rb.first; ub <= rb.last; ++ub) {
+        const P3& pa = ix.upos[(size_t)ua];
+        const P3& pb = ix.upos[(size_t)ub];
+        const i64 D2 = p3_norm2(p3_sub(pb, pa));
+        if (D2 == 0) continue;
+        anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, coef, &sc.cover, &sc.visits, &sc.cover_tmp);
+        u64 ns = 0;
+        for (const CoverPoint& cx : sc.cover) {
+          if (cx.u == ua || cx.u == ub) continue;
+          if (is_acute_seed(pa, pb, ix.upos[(size_t)cx.u], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cx.u))) ++ns;
+        }
+        if (ns > best_seeds) { best_seeds = ns; best_a = ua; best_b = ub; }
+      }
+    if (best_a >= 0) {
+      const P3 pa = ix.upos[(size_t)best_a], pb = ix.upos[(size_t)best_b];
+      const i64 D2 = p3_norm2(p3_sub(pb, pa));
+      anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, coef, &sc.cover, &sc.visits, &sc.cover_tmp);
+      const double D = std::sqrt((double)D2);
+      u64 diam = 0;
+      double min_ratio = 1e300;
+      for (const CoverPoint& cz : sc.cover) {
+        if (cz.u == best_a || cz.u == best_b) continue;
+        const double r = (double)cz.dist2q / (double)D2;
+        min_ratio = std::min(min_ratio, r);
+        if (cz.dist2q < D2) ++diam;
+      }
+      std::printf("VIDAGE ancre la plus lourde du rectangle #0 : a=(%lld,%lld,%lld) b=(%lld,%lld,%lld) D=%.1f cover=%zu sites_boule_diametrale=%llu min(|2w|²/D²)=%.3f seeds=%llu\n",
+                  (long long)pa.x, (long long)pa.y, (long long)pa.z, (long long)pb.x, (long long)pb.y, (long long)pb.z, D, sc.cover.size(),
+                  (unsigned long long)diam, min_ratio, (unsigned long long)best_seeds);
+      struct SeedDiag { double v3_over_D, mu_over_D; u64 depth0, core; P3 x; };
+      std::vector<SeedDiag> diag;
+      const double dd[3] = {(double)(pb.x - pa.x), (double)(pb.y - pa.y), (double)(pb.z - pa.z)};
+      for (const CoverPoint& cx : sc.cover) {
+        if (cx.u == best_a || cx.u == best_b) continue;
+        const P3 px = ix.upos[(size_t)cx.u];
+        if (!is_acute_seed(pa, pb, px, D2, ix.point_id(best_a), ix.point_id(best_b), ix.point_id(cx.u))) continue;
+        const Q3Form f3 = q3_form(pa, pb, px);
+        const double G = (double)f3.g;
+        const double v3[3] = {((double)f3.w[0] - G * dd[0]) / (2 * G), ((double)f3.w[1] - G * dd[1]) / (2 * G), ((double)f3.w[2] - G * dd[2]) / (2 * G)};
+        const double v3n2 = v3[0] * v3[0] + v3[1] * v3[1] + v3[2] * v3[2];
+        // corde : |mu| <= sqrt(J/2), J = G(D² − 8|v3|²) ; demi-longueur = mu* |n| / (2G)
+        const P3 nrm = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
+        const double nn = std::sqrt((double)p3_norm2(nrm));
+        const double J = G * ((double)D2 - 8.0 * v3n2);
+        const double half = J > 0 ? std::sqrt(J / 2) * nn / (2 * G) : 0.0;
+        // extremites de la corde (centres) et rayons
+        const double c0[3] = {(double)pa.x + (double)f3.w[0] / (2 * G), (double)pa.y + (double)f3.w[1] / (2 * G), (double)pa.z + (double)f3.w[2] / (2 * G)};
+        const double un[3] = {(double)nrm.x / nn, (double)nrm.y / nn, (double)nrm.z / nn};
+        u64 depth0 = 0, core = 0;
+        for (const CoverPoint& cz : sc.cover) {
+          if (cz.u == best_a || cz.u == best_b || cz.u == cx.u) continue;
+          const P3& z = ix.upos[(size_t)cz.u];
+          if (q3_power(f3, z) < 0) ++depth0;
+          bool in_all = true;
+          for (int sgn = -1; sgn <= 1 && in_all; sgn += 2) {
+            double c[3], r2 = (double)D2 / 4;
+            for (int i = 0; i < 3; ++i) c[i] = c0[i] + sgn * half * un[i];
+            for (int i = 0; i < 3; ++i) { const double t = v3[i] + sgn * half * un[i]; r2 += t * t; }
+            const double dz = ((double)z.x - c[0]) * ((double)z.x - c[0]) + ((double)z.y - c[1]) * ((double)z.y - c[1]) + ((double)z.z - c[2]) * ((double)z.z - c[2]);
+            if (!(dz < r2)) in_all = false;
+          }
+          if (in_all) ++core;
+        }
+        diag.push_back(SeedDiag{std::sqrt(v3n2) / D, half / D, depth0, core, px});
+      }
+      std::sort(diag.begin(), diag.end(), [](const SeedDiag& p1, const SeedDiag& p2) { return p1.v3_over_D < p2.v3_over_D; });
+      for (size_t i = 0; i < diag.size(); ++i) {
+        if (i >= 10 && i + 4 < diag.size() && i != diag.size() / 2) continue;
+        std::printf("  seed x=(%lld,%lld,%lld) |v3|/D=%.3f demi-corde/D=%.3f interieurs(mu=0)=%llu temoins_coeur(extremites)=%llu\n", (long long)diag[i].x.x,
+                    (long long)diag[i].x.y, (long long)diag[i].x.z, diag[i].v3_over_D, diag[i].mu_over_D, (unsigned long long)diag[i].depth0, (unsigned long long)diag[i].core);
+      }
+    }
+  }
   const auto line = [](const char* name, Q& q) {
     std::printf("%-22s somme=%llu p50=%llu p90=%llu p99=%llu max=%llu\n", name, (unsigned long long)q.sum(), (unsigned long long)q.q(0.5),
                 (unsigned long long)q.q(0.9), (unsigned long long)q.q(0.99), (unsigned long long)q.mx());

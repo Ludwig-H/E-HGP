@@ -26,11 +26,13 @@
 //     disque et le test par secteurs rend wmin = 0 : les deux tests sont
 //     incomparables et doivent etre CUMULES.
 // Codes : 0, 1 desaccord, 2 refus, 4 mutant tue.
+#include <algorithm>
 #include <cstdio>
 #include <string>
 #include <vector>
 
 #include "../src/lanes/q3.hpp"
+#include "../src/lanes/cell_grid.hpp"
 #include "../src/lanes/chord_kill.hpp"
 #include "../src/lanes/sector_kill.hpp"
 #include "../src/pipeline/generate.hpp"
@@ -109,6 +111,7 @@ int main(int argc, char** argv) {
   if (!inject.empty() && !mutants_enable(inject)) return 2;
   const bool m_h1 = MHGP5_MUTANT("anchor-kill-h-minus-one");
   const bool m_ns = MHGP5_MUTANT("sector-kill-nonstrict");
+  const bool m_cell_ns = MHGP5_MUTANT("cell-kill-nonstrict");
   const bool m_chord = MHGP5_MUTANT("chord-nonstrict");
   bool f5_killed_by_mutant = false, f6_boundary_counted = false;
   // F1
@@ -234,6 +237,116 @@ int main(int argc, char** argv) {
     ch2.init(2, false);
     ch2.update(-16.0, 1.0, 0, []() { return (i128)-16; });
     expect(ch2.cnt[0] == 1 && ch2.cnt[1] == 1 && ch2.cnt[2] == 1 && ch2.cnt[3] == 1, "F8 : un site interieur a toute la corde est temoin de tous les morceaux");
+  }
+  // F9 « ancre au-dessus d'une vallee » (theoreme 10.5, grille de cellules) : vallee a fond plat (h = −600,
+  // |w| >= 0,30 D), parois raides pres de a et b (aucun temoin universel W_4), surface remontant au-dela (pas 40) ;
+  // la boule diametrale est pleine mais aucun secteur (apex + bord) n'a de temoin commun : les secteurs
+  // q4 ne tuent pas ; toutes les cellules necessaires de la grille q4 sont mortes : l'ancre est tuee sans
+  // enumerer un seed ; la production contrefactuelle (sans pretests) n'emet aucune boule q4 de cette ancre.
+  {
+    Fixture f;  // ancre a=(800,0,0), b=(2800,0,0) (avant translation +1000 en y, z) ; la cuvette s'etend au-dela
+    f.add(800, 0, 0);
+    f.add(2800, 0, 0);
+    // Vallee a fond plat h = −600 pour |x − 1800| <= 900, parois de pente 6 (h = 0 en a et b), remontee au-dela.
+    for (i64 x = 0; x <= 3600; x += 40)
+      for (i64 y = -600; y <= 600; y += 40) {
+        const i64 ax = x >= 1800 ? x - 1800 : 1800 - x;
+        const i64 h = ax <= 900 ? -600 : -600 + 6 * (ax - 900);
+        if ((x == 800 || x == 2800) && y == 0) continue;  // positions de a et b
+        f.add(x, y, h);
+      }
+    const CloudIndex ix = build_cloud_index(f.in);
+    expect(ix.valid && !ix.has_duplicate_positions(), "F9 : index valide");
+    const P3 pa{800, 1000, 1000}, pb{2800, 1000, 1000};
+    i32 ua = -1, ub = -1;
+    for (i32 u = 0; u < (i32)ix.upos.size(); ++u) {
+      const P3& p = ix.upos[(size_t)u];
+      if (p.x == pa.x && p.y == pa.y && p.z == pa.z) ua = u;
+      if (p.x == pb.x && p.y == pb.y && p.z == pb.z) ub = u;
+    }
+    const i64 D2 = p3_norm2(p3_sub(pb, pa));
+    generate_detail::AnchorScratch sc;
+    cover_query(ix, pa, pb, D2, 3, &sc.cover);
+    u64 diam = 0, near_m = 0;
+    for (const CoverPoint& cz : sc.cover) {
+      if (cz.u == ua || cz.u == ub) continue;
+      if (cz.dist2q < D2) ++diam;
+      if (100 * cz.dist2q < 36 * D2) ++near_m;  // |2w|² < 0,36 D² <=> |w| < 0,30 D
+    }
+    u64 wmin4 = 0;
+    const bool sect4 = anchor_sector_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, 8, &wmin4);
+    const bool w4 = anchor_universal_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, Lane::kQ4, 8);
+    CellGrid g;
+    const bool built = g.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, 8);
+    std::vector<BallCandidate> on, off;
+    GenerateStats son, soff;
+    const u64 h4 = lane_h(Lane::kQ4, 11);
+    const bool float_on = float_filter_runtime_enabled();
+    sc.affine_filled = false;
+    generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h4, float_on, false, false, false, &on, &son, generate_detail::AnchorPretests::kApply);
+    sc.affine_filled = false;
+    generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h4, float_on, false, false, false, &off, &soff, generate_detail::AnchorPretests::kCounterfactual);
+    std::printf("F9 : cover=%zu boule_diametrale=%llu pres_de_m=%llu W4=%d secteurs_q4=%d (wmin=%llu) grille : construite=%d necessaires=%u mortes=%u ; "
+                "production ON : ancres_cellules=%llu seeds=%llu candidats=%zu ; OFF : seeds=%llu coeur=%llu corde=%llu candidats=%zu\n",
+                sc.cover.size(), (unsigned long long)diam, (unsigned long long)near_m, w4 ? 1 : 0, sect4 ? 1 : 0, (unsigned long long)wmin4,
+                built ? 1 : 0, g.needed_cells, g.dead_cells, (unsigned long long)son.anchors_killed_cells[2], (unsigned long long)son.seeds[1], on.size(),
+                (unsigned long long)soff.seeds[1], (unsigned long long)soff.seeds_killed_core, (unsigned long long)soff.seeds_killed_chord, off.size());
+    expect(sc.cover.size() >= kCellGridMinSites, "F9 : cover dense (politique de grille)");
+    expect(diam >= 100 && near_m == 0, "F9 : boule diametrale pleine, vide a moins de 0,30 D de m");
+    expect(!w4 && !sect4, "F9 : ni W_4 ni les secteurs q4 ne tuent l'ancre (apex + bord sans temoin commun)");
+    for (int j = -CellGrid::G; j < CellGrid::G; ++j)
+      for (int i = -CellGrid::G; i < CellGrid::G; ++i)
+        if (CellGrid::cell_needed(i, j) && !g.cell_dead(i, j) && g.needed_cells - g.dead_cells <= 12)
+          std::printf("  cellule vivante (%d,%d) temoins=%u\n", i, j, (unsigned)g.cnt[j + CellGrid::G][i + CellGrid::G]);
+    expect(built && g.all_dead, "F9 : toutes les cellules necessaires de la grille q4 sont mortes");
+    expect(son.anchors_killed_cells[2] == 1 && on.empty(), "F9 : la production tue l'ancre par la grille sans enumerer un seed");
+    expect(soff.seeds[1] >= 100 && off.empty(), "F9 : contrefactuel : >= 100 seeds aigus, tous morts, aucune boule (objet inchange)");
+  }
+  // F10 « frontiere des sommets de la grille » (primitive cell_grid.hpp) : ancre a=(0,0,0), b=(2000,0,0) ;
+  // base u=(0,0,2000), v=(0,−2000,0), sommets p=(0,−250j',250i') ; 13 sites entiers de la sphere diametrale
+  // dans le plan y=0, z>0 (s²+t²=10⁶) : 4w'·p = G(|w'|²−D²) = 0 EXACTEMENT aux sommets i'=0 ; strict : aucun
+  // n'est temoin de la colonne i=0 (ni des colonnes i<0) ; mutant `cell-kill-nonstrict` : tous les 13 le sont.
+  {
+    Fixture f;
+    f.add(0, 0, 0);
+    f.add(2000, 0, 0);
+    const i64 st[][2] = {{600, 800}, {-600, 800}, {800, 600}, {-800, 600}, {280, 960}, {-280, 960}, {960, 280},
+                         {-960, 280}, {352, 936}, {-352, 936}, {936, 352}, {-936, 352}, {0, 1000}};
+    for (const auto& q : st) f.add(1000 + q[0], 0, q[1]);
+    const CloudIndex ix = build_cloud_index(f.in);
+    expect(ix.valid && !ix.has_duplicate_positions(), "F10 : index valide");
+    const P3 pa{0, 1000, 1000}, pb{2000, 1000, 1000};
+    i32 ua = -1, ub = -1;
+    for (i32 u = 0; u < (i32)ix.upos.size(); ++u) {
+      const P3& p = ix.upos[(size_t)u];
+      if (p.x == pa.x && p.y == pa.y && p.z == pa.z) ua = u;
+      if (p.x == pb.x && p.y == pb.y && p.z == pb.z) ub = u;
+    }
+    const i64 D2 = p3_norm2(p3_sub(pb, pa));
+    std::vector<CoverPoint> cover;
+    cover_query(ix, pa, pb, D2, 3, &cover);
+    u64 on_sphere = 0;
+    for (const CoverPoint& cz : cover) if (cz.u != ua && cz.u != ub && cz.dist2q == D2) ++on_sphere;
+    CellGrid g;
+    const bool built = g.build(cover, ix.upos, ua, ub, pa, pb, D2, 8, 8);
+    u32 col0_min = 255, col0_max = 0, col1_min = 255, colm1_max = 0;
+    for (int j = -CellGrid::G; j < CellGrid::G; ++j) {
+      col0_min = std::min<u32>(col0_min, g.cnt[j + CellGrid::G][CellGrid::G]);
+      col0_max = std::max<u32>(col0_max, g.cnt[j + CellGrid::G][CellGrid::G]);
+      col1_min = std::min<u32>(col1_min, g.cnt[j + CellGrid::G][CellGrid::G + 1]);
+      colm1_max = std::max<u32>(colm1_max, g.cnt[j + CellGrid::G][CellGrid::G - 1]);
+    }
+    std::printf("F10 : sites_sur_sphere=%llu base u=(%lld,%lld,%lld) v=(%lld,%lld,%lld) colonne i=0 : temoins [%u,%u] ; i=1 : min %u ; i=−1 : max %u (mutant cell-ns=%d)\n",
+                (unsigned long long)on_sphere, (long long)g.u[0], (long long)g.u[1], (long long)g.u[2], (long long)g.v[0], (long long)g.v[1], (long long)g.v[2],
+                col0_min, col0_max, col1_min, colm1_max, m_cell_ns ? 1 : 0);
+    expect(built && on_sphere == 13, "F10 : grille construite, 13 sites sur la sphere diametrale");
+    expect(col1_min == 13 && colm1_max == 0, "F10 : colonne i=1 (sommets stricts) : 13 temoins ; colonne i=−1 : aucun");
+    if (m_cell_ns) {
+      if (col0_min == 13 && !failures) return 4;
+      std::printf("MUTANT NON TUE (cell-kill-nonstrict : colonne i=0 min %u)\n", col0_min);
+      return 1;
+    }
+    expect(col0_max == 0, "F10 : la frontiere exacte des sommets i'=0 n'est temoin d'aucune cellule (strict)");
   }
   if (m_ns) {
     // Mutant non strict : F5 (frontiere diametrale, 28 sites a q = 0) tuee a tort ET F6 (frontiere des demi-plans)

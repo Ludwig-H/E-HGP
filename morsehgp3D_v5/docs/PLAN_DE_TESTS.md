@@ -53,7 +53,7 @@ fixe son application v5.
 | forêt | K = 1 ≡ single-linkage ; juge par miniboule indépendante + cliques + Kruskal à lots (n ≤ 14) ; fixtures plateau / attachement / croissance | `mhgp5_forest_judge` |
 | parallélisme | bit-identique 1 fil / N fils, ouvriers mesurés ; tri stable parallèle ≡ `std::stable_sort` ; SHA-256 accéléré ≡ portable ; étage B concurrent par ordre : `digest_all` identique pour `fold_inflight` ∈ {1, 2, 3, 8}, callbacks dans l'ordre des K et jamais simultanés, exception d'un callback avec trois ordres en vol propagée et publication arrêtée à l'ordre fautif | `mhgp5_par_gate`, `mhgp5_parallel_sort_gate`, `mhgp5_sha256_gate`, `mhgp5_api_guard_gate` |
 | coût (instrument) | banc apparié contrebalancé du fold, signature identique exigée, médiane des rapports par paire | `mhgp5_fold_bench` |
-| tests d'ancre | $W_q$ exact et témoins sectoriels suffisants : mêmes candidats avec les prétests ON et OFF sur **toutes** les paires $(a,b)$ de petits nuages ; $J > 0$ pour tout seed q4 aigu ; identité de signe $P/B$ ; non-vacuité de chaque test | `mhgp5_anchor_tests_oracle` (label `oracle`) ; fixtures gravées F1–F7 (`mhgp5_anchor_kill_fixture`), sphère diamétrale (`mhgp5_sector_kill_fixture`) ; mutants `sector-kill-nonstrict`, `anchor-kill-h-minus-one` (code 4) |
+| tests d'ancre et de seed | $W_q$ exact, témoins sectoriels, morceaux de corde et **grille de cellules** (théorème 10.5) suffisants : mêmes candidats avec les prétests ON et OFF sur **toutes** les paires $(a,b)$ de petits nuages (grille sur toute ancre : seuil 0) ; $J > 0$ pour tout seed q4 aigu ; identité de signe $P/B$ ; non-vacuité de chaque test (dont seeds tués par cellules en q3 et q4) | `mhgp5_anchor_tests_oracle` (label `oracle`) ; fixtures gravées F1–F10 (`mhgp5_anchor_kill_fixture` ; F9 : ancre au-dessus d'une vallée, W₄ et secteurs impuissants, 172/172 cellules mortes ; F10 : 13 sites entiers de la sphère diamétrale exactement sur la frontière des sommets $i' = 0$ de la grille — tue `cell-kill-nonstrict`), sphère diamétrale (`mhgp5_sector_kill_fixture`) ; mutants `sector-kill-nonstrict`, `anchor-kill-h-minus-one`, `chord-nonstrict`, `cell-kill-nonstrict`, `cell-kill-h-minus-one` (code 4) |
 | lanes par lots / device (point 2) | vecteur post-RLE et compteurs (7 q3, 22 q4, dont $W_3$/$W_4$/secteurs) identiques à la production ; ordre brut à un fil en routage nul ; bornes dures de lot ; non-vacuité des routes ; contrat structurel des lots ; exceptions jointes puis relancées | `mhgp5_q3/q4_lane_batched_*` (nominal, petit lot, ancre trop grande, routes, mutants `q3-batched-emit-dead`, `q4-batched-emit-deep`, `route-ignore-threshold`), `mhgp5_batch_contract`, `mhgp5_parallel_exception` ; device (label `gpu`, G4 seulement) : `mhgp5_device_witness`, `mhgp5_q3/q4_lane_device_*` |
 | **conformité v4** | `digest_balls` et `digest_all` (format v4) identiques sur les mêmes entrées — c'est aussi la preuve d'invariance de l'objet des tests d'ancre | `mhgp5_conformity_*` (n=400…2000 : `gate` ; 8000/16000/32000 : `scaleNNNN`) |
 
@@ -78,7 +78,12 @@ $h-1$ via les secteurs) ; F3 `(1000+e, 550, 0)`, $e = 0..8$, plus `x` ($W_3$
 tue, secteurs non) ; F4 idem $e = 0..7$ plus `x` (frontière $W_3$ à $h-1$) ;
 F5 28 sites sur la sphère diamétrale plus `x` (aucun test ne tue, tout seed
 mort : nécessité réfutée) ; F6 `(1000,400,−200)` exactement sur la frontière
-du demi-plan du sommet `u` ; F7 secteurs q4 sur F1 ; sphère diamétrale
+du demi-plan du sommet `u` ; F7 secteurs q4 sur F1 ; F8 frontière des morceaux
+de corde ($v_j = 0$) ; F9 ancre `a=(800,0,0)`, `b=(2800,0,0)` au-dessus d'une
+vallée à fond plat ($h = -600$ pour $\left\vert x - 1800 \right\vert \le 900$, parois
+de pente 6, remontée au-delà, pas 40, $y \in [-600, 600]$) ; F10 ancre
+`a=(0,0,0)`, `b=(2000,0,0)`, sites `(1000+s, 0, t)` avec $s^2 + t^2 = 10^6$,
+$t > 0$ (13 solutions entières) ; sphère diamétrale
 `a=(0,0,0)`, `b=(50,0,0)`, 37 sites (frontière diamétrale du mutant non strict).
 
 ## 5. Mesures d'échelle et reçus

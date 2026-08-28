@@ -87,6 +87,8 @@ int main(int argc, char** argv) {
   cmp("anchors_killed_hist", sp.anchors_killed_hist[1], sb.anchors_killed_hist[1]);
   cmp("anchors_killed_w3", sp.anchors_killed_w3, sb.anchors_killed_w3);
   cmp("anchors_killed_sectors", sp.anchors_killed_sectors[1], sb.anchors_killed_sectors[1]);
+  cmp("anchors_killed_cells", sp.anchors_killed_cells[1], sb.anchors_killed_cells[1]);
+  cmp("seeds_killed_cells", sp.seeds_killed_cells[1], sb.seeds_killed_cells[1]);
   cmp("seeds", sp.seeds[0], sb.seeds[0]);
   cmp("depth_killed", sp.depth_killed[1], sb.depth_killed[1]);
   cmp("candidates", sp.candidates[1], sb.candidates[1]);

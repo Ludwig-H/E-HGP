@@ -241,6 +241,34 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
           continue;
         }
       }
+      // Grille de cellules (theoreme 10.5), comme en production : ancre entiere
+      // ou corde de chaque seed (les seeds tues ne sont jamais materialises).
+      sc.grid.built = false;
+      if (sc.cover.size() >= sc.cell_min_sites) {
+        size_t nacute = 0, near_m = 0;  // seeds aigus de la lentille et sites pres de m, comme la production (meme politique)
+        for (const CoverPoint& cx : sc.cover) {
+          if (cx.u == ua || cx.u == ub) continue;
+          if (cell_grid_near_m(cx.dist2q, D2)) ++near_m;
+          const P3& px = ix.upos[(size_t)cx.u];
+          if (p3_norm2(p3_sub(px, pa)) <= D2 && p3_norm2(p3_sub(px, pb)) <= D2 &&
+              is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cx.u)))
+            ++nacute;
+        }
+        if (cell_grid_wanted(sc.cover.size(), nacute, near_m, h_of[2], sc.cell_min_sites, kCellGridSeedsRatioQ4)) {
+          ++ls->grids_built[2];
+          if (sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h_of[2]) && sc.grid.all_dead) {
+            ++ls->anchors_killed_cells[2];
+            continue;
+          }
+        }
+      }
+      const i64 d4[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
+      const auto cell_dead_seed = [&](const P3& px) {
+        if (!sc.grid.built) return false;
+        const Q3Form f3s = q3_form(pa, pb, px);
+        const P3 nrm = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
+        return seed_chord_cell_dead(sc.grid, f3s, d4, nrm, D2, p3_norm2(p3_sub(px, pa)), p3_norm2(p3_sub(px, pb)));
+      };
       // Seeds aigus de la lentille D'ABORD (sans materialiser) : une ancre
       // sans seed n'entre jamais dans le lot (rien a scanner ni a completer).
       const size_t nc = sc.cover.size();
@@ -250,11 +278,13 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         const P3& p = ix.upos[(size_t)sc.cover[i].u];
         if (p3_norm2(p3_sub(p, pa)) <= D2 && p3_norm2(p3_sub(p, pb)) <= D2) lens_idx.push_back((u32)i);
       }
-      size_t nseeds = 0;
+      size_t nseeds = 0, nseeds_acute = 0;  // nseeds : seeds vivants apres la grille (materialises) ; acute : comptes comme en production
       for (const u32 li : lens_idx) {
         const i32 ux = sc.cover[li].u;
         if (ux == ua || ux == ub) continue;
-        if (is_acute_seed(pa, pb, ix.upos[(size_t)ux], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(ux))) ++nseeds;
+        if (!is_acute_seed(pa, pb, ix.upos[(size_t)ux], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(ux))) continue;
+        ++nseeds_acute;
+        if (!cell_dead_seed(ix.upos[(size_t)ux])) ++nseeds;
       }
       // PREFLIGHT (avant toute ecriture) : sites, seeds, paires (arithmetique
       // verifiee) ; ancre trop grande pour un lot -> corps de production ;
@@ -272,7 +302,8 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         bs->seeds_host += ls->seeds[1] - seeds_before_h;
         continue;
       }
-      ls->seeds[1] += nseeds;
+      ls->seeds[1] += nseeds_acute;
+      ls->seeds_killed_cells[2] += nseeds_acute - nseeds;
       if (nseeds == 0) {
         ++bs->anchors_host;  // rien a scanner ni a completer : comptee cote hote, jamais materialisee
         continue;
@@ -307,6 +338,7 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         if (cx.u == ua || cx.u == ub) continue;
         const P3& px = ix.upos[(size_t)cx.u];
         if (!is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cx.u))) continue;
+        if (cell_dead_seed(px)) continue;  // deja compte dans seeds_killed_cells (precomptage)
         Q4BatchSeed sd;
         sd.anchor = aidx;
         sd.x_site = xs;
@@ -455,6 +487,7 @@ inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions
   std::vector<std::vector<BallCandidate>> louts(T);
   std::vector<GenerateStats> lst(T);
   std::vector<AnchorScratch> lsc(T);
+  for (AnchorScratch& x : lsc) x.cell_min_sites = lim.cell_grid_min_sites;
   std::vector<Q4Batch> lb(T);
   std::vector<BatchStats> lbs(T);
   const auto flush = [&](size_t t) {

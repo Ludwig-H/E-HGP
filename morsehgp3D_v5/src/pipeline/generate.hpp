@@ -37,6 +37,7 @@
 #include <vector>
 
 #include "../lanes/edge_cover.hpp"
+#include "../lanes/cell_grid.hpp"
 #include "../lanes/chord_kill.hpp"
 #include "../lanes/sector_kill.hpp"
 #include "../lanes/q2.hpp"
@@ -58,6 +59,9 @@ struct GenerateStats {
   u64 anchors_killed_hist[3] = {0, 0, 0};
   u64 anchors_killed_w4 = 0;
   u64 anchors_killed_sectors[3] = {0, 0, 0};  // test d'ancre par secteurs (sector_kill.hpp) : ancres mortes sans enumerer les seeds
+  u64 anchors_killed_cells[3] = {0, 0, 0};    // grille de cellules (cell_grid.hpp, theoreme 10.5) : toutes les cellules mortes
+  u64 seeds_killed_cells[3] = {0, 0, 0};      // seeds dont le centre (q3) / la corde (q4) ne rencontre que des cellules mortes
+  u64 grids_built[3] = {0, 0, 0};             // grilles construites (politique cell_grid_wanted)
   u64 anchors_killed_w3 = 0;                   // test W_3 EXACT (temoins universels du disque des centres), lane q3
   u64 invariant_jneg = 0;                      // seeds q4 aigus avec J < 0 : INATTEIGNABLE par theoreme — toute occurrence est une violation d'invariant
   u64 candidates[3] = {0, 0, 0};
@@ -87,6 +91,9 @@ struct GenerateStats {
     }
     anchors_killed_w4 += o.anchors_killed_w4;
     for (int i = 0; i < 3; ++i) anchors_killed_sectors[i] += o.anchors_killed_sectors[i];
+    for (int i = 0; i < 3; ++i) anchors_killed_cells[i] += o.anchors_killed_cells[i];
+    for (int i = 0; i < 3; ++i) seeds_killed_cells[i] += o.seeds_killed_cells[i];
+    for (int i = 0; i < 3; ++i) grids_built[i] += o.grids_built[i];
     prof_q4_anchor_ns += o.prof_q4_anchor_ns; prof_q4_core_ns += o.prof_q4_core_ns;
     prof_q4_compl_ns += o.prof_q4_compl_ns; prof_q4_cover_ns += o.prof_q4_cover_ns;
     anchors_killed_w3 += o.anchors_killed_w3;
@@ -211,6 +218,8 @@ struct AnchorScratch {
   std::vector<i64> su0, su1, su2, sq;
   double qmax_d = 1.0, umax_d = 1.0;
   bool affine_filled = false;
+  CellGrid grid;  // grille de cellules de l'ancre courante (cell_grid.hpp) ; grid.built = false si non construite
+  size_t cell_min_sites = kCellGridMinSites;  // politique : grille seulement si cover >= ce seuil (0 : toujours ; oracle)
   void fill_affine_sites(const CloudIndex& ix, const P3& pa, const P3& pb, i64 D2) {
     const size_t nc = cover.size();
     su0.resize(nc); su1.resize(nc); su2.resize(nc); sq.resize(nc);
@@ -229,6 +238,34 @@ struct AnchorScratch {
     affine_filled = true;
   }
 };
+
+// GRILLE DE CELLULES (cell_grid.hpp) — helpers partages par la production et
+// les lanes par lots : centre v3 = N/(2G), N = W − G·d (q3) ; corde
+// (N ± μ̂·n)/(2G), μ̂ = isqrt(J/2) + 1 (q4, theoreme 10.4).
+inline bool seed_center_cell_dead(const CellGrid& g, const Q3Form& f3, const i64 d[3]) {
+  i128 pu = 0, pv = 0;
+  for (int k = 0; k < 3; ++k) {
+    const i128 Nk = f3.w[k] - f3.g * (i128)d[k];
+    pu += Nk * g.u[k];
+    pv += Nk * g.v[k];
+  }
+  return g.point_dead(pu, pv, 2 * f3.g);
+}
+inline bool seed_chord_cell_dead(const CellGrid& g, const Q3Form& f3, const i64 d[3], const P3& nrm, i64 D2, i64 l_ax, i64 l_bx) {
+  const i128 J = (i128)D2 * (3 * f3.g - 2 * (i128)l_ax * l_bx);
+  if (J < 0) return false;  // inatteignable par theoreme ; fail-open
+  const i128 mu_hat = isqrt128_floor(J / 2) + 1;
+  const i64 nn[3] = {nrm.x, nrm.y, nrm.z};
+  i128 pu = 0, pv = 0, qu = 0, qv = 0;
+  for (int k = 0; k < 3; ++k) {
+    const i128 Nk = f3.w[k] - f3.g * (i128)d[k];
+    pu += Nk * g.u[k];
+    pv += Nk * g.v[k];
+    qu += (i128)nn[k] * g.u[k];
+    qv += (i128)nn[k] * g.v[k];
+  }
+  return g.segment_dead(pu + mu_hat * qu, pv + mu_hat * qv, pu - mu_hat * qu, pv - mu_hat * qv, 2 * f3.g);
+}
 
 // Kernel affine d'un seed sur les sites de l'ancre : N = W − G·d, borne E.
 struct AffineSeed {
@@ -273,14 +310,34 @@ inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 
     if (k == 1) { ++ls->anchors_killed_w3; return; }
     if (k == 2) { ++ls->anchors_killed_sectors[1]; return; }
   }
+  // Grille de cellules (theoreme 10.5) sur les covers denses : l'ancre entiere
+  // si toutes les cellules sont mortes, sinon chaque seed par son centre.
+  sc.grid.built = false;
+  if (pretests != AnchorPretests::kCounterfactual && sc.cover.size() >= sc.cell_min_sites) {
+    size_t nacute = 0, near_m = 0;
+    for (const CoverPoint& cp : sc.cover) {
+      if (cp.u == ua || cp.u == ub) continue;
+      if (cell_grid_near_m(cp.dist2q, D2)) ++near_m;
+      if (is_acute_seed(pa, pb, ix.upos[(size_t)cp.u], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cp.u))) ++nacute;
+    }
+    if (cell_grid_wanted(sc.cover.size(), nacute, near_m, h3, sc.cell_min_sites, kCellGridSeedsRatioQ3)) {
+      ++ls->grids_built[1];
+      if (sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 12, h3) && sc.grid.all_dead) {
+        ++ls->anchors_killed_cells[1];
+        return;
+      }
+    }
+  }
+  const i64 d3[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
   sc.affine_filled = false;
   for (const CoverPoint& cp : sc.cover) {
     if (cp.u == ua || cp.u == ub) continue;
     const P3& px = ix.upos[(size_t)cp.u];
     if (!is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cp.u))) continue;
     ++ls->seeds[0];
-    if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);
     const Q3Form f3 = q3_form(pa, pb, px);
+    if (sc.grid.built && seed_center_cell_dead(sc.grid, f3, d3)) { ++ls->seeds_killed_cells[1]; continue; }
+    if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);
     const AffineSeed seed(f3, pa, pb, sc, float_on);
     // Filtre de profondeur a la generation : minorant certifie.
     u64 depth = 0;
@@ -356,6 +413,23 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     const P3& pz = ix.upos[(size_t)cz.u];
     if (p3_norm2(p3_sub(pz, pa)) <= D2 && p3_norm2(p3_sub(pz, pb)) <= D2) sc.lens.push_back(cz);
   }
+  // Grille de cellules (theoreme 10.5) : ancre entiere ou corde de chaque seed.
+  sc.grid.built = false;
+  if (pretests != AnchorPretests::kCounterfactual && sc.cover.size() >= sc.cell_min_sites) {
+    size_t nacute = 0, near_m = 0;
+    for (const CoverPoint& cz : sc.cover)
+      if (cz.u != ua && cz.u != ub && cell_grid_near_m(cz.dist2q, D2)) ++near_m;
+    for (const CoverPoint& cx : sc.lens)
+      if (cx.u != ua && cx.u != ub && is_acute_seed(pa, pb, ix.upos[(size_t)cx.u], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cx.u))) ++nacute;
+    if (cell_grid_wanted(sc.cover.size(), nacute, near_m, h4, sc.cell_min_sites, kCellGridSeedsRatioQ4)) {
+      ++ls->grids_built[2];
+      if (sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h4) && sc.grid.all_dead) {
+        ++ls->anchors_killed_cells[2];
+        return;
+      }
+    }
+  }
+  const i64 d4[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
   for (const CoverPoint& cx : sc.lens) {
     if (cx.u == ua || cx.u == ub) continue;
     const P3& px = ix.upos[(size_t)cx.u];
@@ -365,6 +439,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     const i64 l_bx = p3_norm2(p3_sub(px, pb));
     const Q3Form f3s = q3_form(pa, pb, px);
     const P3 nrm = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
+    if (sc.grid.built && seed_chord_cell_dead(sc.grid, f3s, d4, nrm, D2, l_ax, l_bx)) { ++ls->seeds_killed_cells[2]; continue; }
     // Cœur universel du seed (Jung) : J = D²(3G − 2 l_ax l_bx) = G(D² − 8|v3|²)
     // >= G·D²/3 > 0 pour tout seed aigu (|v3|² <= D²/12) : la branche Jb < 0 est
     // INATTEIGNABLE par theoreme et reste une garde fail-closed.
@@ -496,6 +571,7 @@ struct GenerateOptions {
   u64 smax = 11;
   int threads = 1;
   size_t pretest_query_min_points = kPretestQueryMinPoints;
+  size_t cell_grid_min_sites = kCellGridMinSites;  // grille de cellules (theoreme 10.5) des que le cover atteint ce seuil
   LaneOverride q3_override;  // vide : lane q3 integree
   LaneOverride q4_override;  // vide : lane q4 integree
 };
@@ -504,13 +580,14 @@ struct GenerateOptions {
 // son vecteur d'emissions et ses compteurs ; fusion en ordre d'ouvrier.
 // Mutant `par-drop-shard` : la fusion oublie le premier ouvrier.
 template <typename Body>
-inline void run_lane(const std::vector<AliveRect>& alive, int threads, int lane_idx, std::vector<BallCandidate>* out,
-                     GenerateStats* st, Body&& body) {
+inline void run_lane(const std::vector<AliveRect>& alive, int threads, int lane_idx, size_t cell_min_sites,
+                     std::vector<BallCandidate>* out, GenerateStats* st, Body&& body) {
   const size_t nrect = alive.size();
   const size_t T = planned_workers(nrect, threads);
   std::vector<std::vector<BallCandidate>> louts(T);
   std::vector<GenerateStats> lst(T);
   std::vector<generate_detail::AnchorScratch> lsc(T);
+  for (generate_detail::AnchorScratch& x : lsc) x.cell_min_sites = cell_min_sites;
   const size_t created = parallel_items(nrect, (int)T, [&](size_t i, size_t t) { body(alive[i], lsc[t], &louts[t], &lst[t]); });
   st->workers_rects[lane_idx] = std::max(st->workers_rects[lane_idx], (u64)created);
   const bool drop = MHGP5_MUTANT("par-drop-shard");
@@ -544,7 +621,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
     st->t_wspd_ms[0] += ms_since(t0);
     st->rect_alive[0] = alive.size();
     const auto t1 = std::chrono::steady_clock::now();
-    run_lane(alive, opt.threads, 0, out, st, [&](const AliveRect& ar, AnchorScratch& sc, std::vector<BallCandidate>* lo, GenerateStats* ls) {
+    run_lane(alive, opt.threads, 0, opt.cell_grid_min_sites, out, st, [&](const AliveRect& ar, AnchorScratch& sc, std::vector<BallCandidate>* lo, GenerateStats* ls) {
       corner_histograms(ix, Lane::kQ2, ar.r, &sc.ha, &sc.hb);
       const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
       const u64 need = h_of[0] - ar.core;
@@ -575,7 +652,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
     st->t_wspd_ms[1] += ms_since(t0);
     st->rect_alive[1] = alive.size();
     const auto t1 = std::chrono::steady_clock::now();
-    run_lane(alive, opt.threads, 1, out, st, [&](const AliveRect& ar, AnchorScratch& sc, std::vector<BallCandidate>* lo, GenerateStats* ls) {
+    run_lane(alive, opt.threads, 1, opt.cell_grid_min_sites, out, st, [&](const AliveRect& ar, AnchorScratch& sc, std::vector<BallCandidate>* lo, GenerateStats* ls) {
       corner_histograms(ix, Lane::kQ3, ar.r, &sc.ha, &sc.hb);
       const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
       rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), 3, &sc.handles, &sc.cover_nodes);
@@ -620,7 +697,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
     st->t_wspd_ms[2] += ms_since(t0);
     st->rect_alive[2] = alive.size();
     const auto t1 = std::chrono::steady_clock::now();
-    run_lane(alive, opt.threads, 2, out, st, [&](const AliveRect& ar, AnchorScratch& sc, std::vector<BallCandidate>* lo, GenerateStats* ls) {
+    run_lane(alive, opt.threads, 2, opt.cell_grid_min_sites, out, st, [&](const AliveRect& ar, AnchorScratch& sc, std::vector<BallCandidate>* lo, GenerateStats* ls) {
       corner_histograms(ix, Lane::kQ4, ar.r, &sc.ha, &sc.hb);
       const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
       rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), q4_cover_coef, &sc.handles, &sc.cover_nodes);

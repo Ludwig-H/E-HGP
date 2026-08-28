@@ -139,6 +139,7 @@ struct BatchLimits {
   size_t pairs = kPairsPerLaunch;  // q4 seulement (estimation : seeds de l'ancre x sites de sa lentille)
   size_t device_min_sites = 1;
   size_t pretest_query_min_points = kPretestQueryMinPoints;  // politique des pretests (generate.hpp)
+  size_t cell_grid_min_sites = kCellGridMinSites;            // grille de cellules (generate.hpp)
 };
 
 // Mesures de lotissement d'une lane (par ouvrier, fusionnees par max/somme).
@@ -206,6 +207,25 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         if (k == 1) { ++ls->anchors_killed_w3; continue; }
         if (k == 2) { ++ls->anchors_killed_sectors[1]; continue; }
       }
+      // Grille de cellules (theoreme 10.5), comme en production : ancre entiere
+      // ou centre de chaque seed (les seeds tues ne sont jamais materialises).
+      sc.grid.built = false;
+      if (sc.cover.size() >= sc.cell_min_sites) {
+        size_t nacute = 0, near_m = 0;
+        for (const CoverPoint& cp : sc.cover) {
+          if (cp.u == ua || cp.u == ub) continue;
+          if (cell_grid_near_m(cp.dist2q, D2)) ++near_m;
+          if (is_acute_seed(pa, pb, ix.upos[(size_t)cp.u], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cp.u))) ++nacute;
+        }
+        if (cell_grid_wanted(sc.cover.size(), nacute, near_m, h_of[1], sc.cell_min_sites, kCellGridSeedsRatioQ3)) {
+          ++ls->grids_built[1];
+          if (sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 12, h_of[1]) && sc.grid.all_dead) {
+            ++ls->anchors_killed_cells[1];
+            continue;
+          }
+        }
+      }
+      const i64 d3[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
       // PREFLIGHT (avant toute ecriture) : taille du cover, nombre de seeds
       // aigus ; une ancre sous le seuil de routage, ou TROP GRANDE pour un lot
       // (cover > seuil de sites ou seeds > seuil de seeds), va au corps de
@@ -241,6 +261,7 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         const P3& px = ix.upos[(size_t)cp.u];
         if (!is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cp.u))) continue;
         ++ls->seeds[0];
+        if (sc.grid.built && seed_center_cell_dead(sc.grid, q3_form(pa, pb, px), d3)) { ++ls->seeds_killed_cells[1]; continue; }
         if (!sc.affine_filled) {
           // Sites de l'ancre : remplis au premier seed, comme en production, puis
           // copies dans le lot (i64 seulement ; les doubles sont derives a la volee).
@@ -343,6 +364,7 @@ inline void generate_q3_batched_with(const CloudIndex& ix, const GenerateOptions
   std::vector<std::vector<BallCandidate>> louts(T);
   std::vector<GenerateStats> lst(T);
   std::vector<AnchorScratch> lsc(T);
+  for (AnchorScratch& x : lsc) x.cell_min_sites = lim.cell_grid_min_sites;
   std::vector<Q3Batch> lb(T);
   std::vector<BatchStats> lbs(T);
   const auto flush = [&](size_t t) {

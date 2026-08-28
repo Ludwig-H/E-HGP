@@ -42,6 +42,7 @@ struct RunOptions {
   // vol simultanement ; la publication reste dans l'ordre des K et la sortie
   // bit-identique ; residence bornee a fold_inflight + 1 ordres.
   int fold_inflight = 2;
+  size_t cell_grid_min_sites = kCellGridMinSites;  // grille de cellules (generate.hpp) ; SIZE_MAX : jamais (mesure contrefactuelle)
   // Appele pour chaque K croissant, AVANT liberation du resultat, depuis le
   // fil d'arriere-plan de cet ordre (un seul a la fois, dans l'ordre des K,
   // sous le verrou de publication) — PROVISOIRE jusqu'au statut terminal.
@@ -162,6 +163,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   const auto t_g = std::chrono::steady_clock::now();
   std::vector<BallCandidate> cands;
   GenerateOptions go;
+  go.cell_grid_min_sites = opt.cell_grid_min_sites;
   go.q3_override = opt.q3_override;
   go.q4_override = opt.q4_override;
   rr.backend_override = (bool)opt.q3_override || (bool)opt.q4_override;
@@ -414,13 +416,16 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                (unsigned long long)rr.total_nodes);
   std::fprintf(out,
                "generation rect_alive=%llu/%llu/%llu ancres=%llu/%llu/%llu candidats=%llu/%llu/%llu "
-               "tues_profondeur=%llu/%llu/%llu ancres_w4=%llu ancres_w3=%llu ancres_secteurs=%llu/%llu seeds_core_tues=%llu seeds_corde_tues=%llu float_cert=%llu/%llu repli=%llu "
+               "tues_profondeur=%llu/%llu/%llu ancres_w4=%llu ancres_w3=%llu ancres_secteurs=%llu/%llu ancres_cellules=%llu/%llu seeds_cellules=%llu/%llu grilles=%llu/%llu seeds_core_tues=%llu seeds_corde_tues=%llu float_cert=%llu/%llu repli=%llu "
                "jung=%llu/%llu/%llu\n",
                (unsigned long long)gs.rect_alive[0], (unsigned long long)gs.rect_alive[1], (unsigned long long)gs.rect_alive[2],
                (unsigned long long)gs.anchors[0], (unsigned long long)gs.anchors[1], (unsigned long long)gs.anchors[2],
                (unsigned long long)gs.candidates[0], (unsigned long long)gs.candidates[1], (unsigned long long)gs.candidates[2],
                (unsigned long long)gs.depth_killed[0], (unsigned long long)gs.depth_killed[1], (unsigned long long)gs.depth_killed[2],
-               (unsigned long long)gs.anchors_killed_w4, (unsigned long long)gs.anchors_killed_w3, (unsigned long long)gs.anchors_killed_sectors[1], (unsigned long long)gs.anchors_killed_sectors[2], (unsigned long long)gs.seeds_killed_core, (unsigned long long)gs.seeds_killed_chord,
+               (unsigned long long)gs.anchors_killed_w4, (unsigned long long)gs.anchors_killed_w3, (unsigned long long)gs.anchors_killed_sectors[1], (unsigned long long)gs.anchors_killed_sectors[2],
+               (unsigned long long)gs.anchors_killed_cells[1], (unsigned long long)gs.anchors_killed_cells[2],
+               (unsigned long long)gs.seeds_killed_cells[1], (unsigned long long)gs.seeds_killed_cells[2],
+               (unsigned long long)gs.grids_built[1], (unsigned long long)gs.grids_built[2], (unsigned long long)gs.seeds_killed_core, (unsigned long long)gs.seeds_killed_chord,
                (unsigned long long)gs.float_cert_neg, (unsigned long long)gs.float_cert_pos, (unsigned long long)gs.float_fallback,
                (unsigned long long)gs.jung_cert_kill, (unsigned long long)gs.jung_cert_skip, (unsigned long long)gs.jung_fallback);
   std::fprintf(out, "ouvriers wspd=%llu/%llu/%llu rects=%llu/%llu/%llu rle=%llu prefiltre=%llu census=%llu expansion=%llu fold=%llu\n",
