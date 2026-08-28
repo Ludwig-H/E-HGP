@@ -388,6 +388,123 @@ par un supercover de segment, ou construire un sweep rationnel q4, exige
 d'abord un lemme indépendant, des fixtures de frontière et les compteurs
 ci-dessus ; aucune de ces deux idées n'est reçue par cet audit.
 
+#### Requalification des mesures Claude `954ec1af` et `c7ee791f`
+
+Le nouveau document
+[`MESURE_CLAUDE_OU_EST_LA_QUADRATICITE_20260828.md`](MESURE_CLAUDE_OU_EST_LA_QUADRATICITE_20260828.md)
+apporte un bon raccord : à binaire et tailles appariés jusqu'à 50 k, il sépare
+rectangles, ancres, seeds, complétions et un compteur Jung. Conserver surtout
+les deux constats falsifiables : `ancres/rect_alive` reste presque constant sur
+`uniform` et croît sur `scanline`, puis le travail Jung croît encore plus vite
+que les ancres sur cette dernière famille.
+
+Huit formulations doivent toutefois être corrigées avant d'en faire une
+autorité de conception :
+
+1. Les « tests d'ancre en `O(1)` » ne le sont pas. Seule la consultation finale
+   de `h_a(a)+h_b(b)` est constante. `corner_histograms` coûte
+   `|A|^2+|B|^2` par rectangle ; `W_q`, secteurs et grille lisent un candidat
+   de rectangle ou le cover, avec sorties anticipées mais sans borne constante
+   pour une ancre vivante.
+2. Un nombre de rectangles vivants presque linéaire établit que la WSPD n'est
+   **pas le poste dominant observé** de ces runs. Il ne prouve ni que le front
+   visité est linéaire, ni la borne `O(s^3 n)` encore ouverte pour l'arbre radix,
+   ni que toute amélioration de la mort par rectangle serait inutile. Ne pas
+   remplacer la WSPD maintenant est une bonne décision empirique ; la déclarer
+   « saine » au sens de complexité est trop fort.
+3. La ligne nommée « évaluations Jung q4 » reprend seulement le second champ
+   imprimé par `jung`, soit `jung_cert_skip`. Le total exercé comprend au moins
+   `jung_cert_kill + jung_cert_skip + jung_fallback`, sans encore compter tous
+   les sites sautés ou les scans de profondeur q4. Renommer la ligne ; le signal
+   de pente reste valide comme proxy non vacant.
+4. Le tableau `ancres q4 par rectangle vivant` emploie le mauvais dénominateur :
+   ses valeurs sont `anchors[q4] / rect_alive[q3]`. Avec les rectangles de la
+   même lane q4, les extrémités 8 k → 50 k sont environ `1,74 → 1,78`
+   (`uniform`), `2,29 → 3,83` (`terrain`), `4,53 → 13,26` (`scanline`) et
+   `6,15 → 13,62` (`eight_clusters`). La tendance reste, mais le tableau et
+   ses facteurs doivent être recalculés.
+5. Les exposants 3,14 (`terrain`) et 2,21 (`scanline`) sont des exposants locaux
+   du compteur `jung_cert_skip` **total**, pas du travail par ancre. La moyenne
+   réellement formée par `jung_cert_skip / anchors[q4]` passe, entre 8 k et
+   50 k, d'environ `33,7 → 33,3` (`uniform`), `76 → 1 420` (`terrain`),
+   `41,7 → 148` (`scanline`) et `15,9 → 7,8` (`eight_clusters`). Le facteur B
+   est donc bien grave sur `terrain`, croissant mais non « quadratique » sur
+   `scanline`, et décroissant sur les clusters. Ne jamais soustraire des
+   exposants provenant de compteurs ou intervalles différents sans afficher le
+   quotient mesuré.
+6. La croissance du cover et du « nombre de seeds par ancre » ne découle pas
+   de ce proxy. Sur q4 `scanline`, `seeds/anchors` baisse même d'environ
+   `5,03` à `4,39` entre 8 k et 50 k, tandis que
+   `jung_cert_skip/seeds` augmente fortement. Les suspects encore compatibles
+   sont cover plus long, seeds survivant plus longtemps, ordre de scan ou
+   mélange de ces effets ; seuls `cover_sites`, `core_site_tests` et leurs
+   distributions les départageront.
+7. « Aucune mesure au-delà de 50 k » n'est vrai que pour la session 14 choisie.
+   La session 11 épingle 100 k et 200 k, et confirme le verrou avec une pente
+   q4 encore pire. Elle n'est pas au même pin : la citer comme corroboration
+   historique et refaire la mesure au pin courant, pas l'effacer.
+8. `scanline_single_pass` rend plausible un effet de géométrie mince, mais ne
+   prouve ni la quasi-coplanarité comme cause, ni le transfert quantitatif à
+   SemanticKITTI. Garder cette phrase comme hypothèse et la tester sur des scans
+   réels, stratifiés par épaisseur locale et population des rectangles.
+
+La sonde de rectangles ajoutée à `c03daa42` conserve un signal important : les
+quantiles et maxima de seeds montrent une forte asymétrie, et la somme des
+covers acceptés croît vite sur `scanline`. Quatre limites empêchent encore sa
+promotion :
+
+- `sum(covers) / sum(rect_points(handles))` n'est pas le nombre de fois où un
+  point est balayé. Pour chaque ancre post-histogramme,
+  `anchor_cover_from_handles` visite **tous** les `H_r` points des handles puis
+  n'en conserve que `C_e`. Le bon numérateur de l'amplification de scan est
+  `sum_e H_r`, c'est-à-dire `sc.visits`, encore non imprimé ; le rapport publié
+  mesure seulement des incidences de cover acceptées sur un candidat de
+  rectangle.
+- `Dmax` élargit le candidat de handles, pas directement le cover exact, dont
+  le filtre emploie le `D2` de l'ancre. Attribuer la hausse à de « grandes
+  boîtes quasi-planes » reste une hypothèse tant que distributions de `Dmax`,
+  `H_r`, `D2`, `C_e/H_r` et populations des deux côtés ne sont pas jointes.
+- un rectangle portant 0,53 % des seeds démontre une traîne pour un mapping
+  naïf d'un rectangle vers un bloc ; ce n'est pas « rédhibitoire pour un GPU ».
+  La subdivision déjà prévue par plages d'ancres ou une file de seeds peut
+  répartir ce rectangle. Il faut mesurer le maximum **après** subdivision et
+  l'overhead du scheduling.
+- les sorties brutes, le pin de configuration imprimé par la sonde et leurs
+  statuts ne sont pas versionnés avec `c03daa42`. `FAUX POSITIFS = 0` sur ces
+  exécutions est un contrôle de non-contradiction, pas la preuve de sûreté ;
+  celle-ci appartient aux lemmes et aux fixtures reçues.
+
+De même, « 91,4 % des seeds évités, donc élagage q3 saturé » confond fraction
+et coût. Les 8,6 % restants sont encore massifs, et les prétests ont eux-mêmes
+payé requête ou cover. Conserver la fraction comme priorité relative ; décider
+la saturation sur temps et incidences évités, pas sur le seul nombre de seeds
+contre-factuels.
+
+La phrase `uniform` « rien à rendre sous-quadratique » doit devenir : « aucune
+urgence de pente sur cette famille aux tailles reçues ». Sa constante, les
+autres familles et la borne déterministe restent des sujets distincts.
+
+La prochaine modification utile est donc uniquement instrumentale : agréger et
+imprimer `rect_visited`, `anchors_killed_hist`, `handle_point_visits`,
+`cover_sites`, `lens_sites`, `acute_x_tests`, sites de profondeur q3, sites
+cœur/corde q4, complétions atteignant la profondeur et sites `q4_power`. Pour
+chaque masse, conserver somme, maximum et histogramme logarithmique. La porte
+doit graver les conservations suivantes :
+
+```text
+anchors = sum_alive_rect |A| |B|
+anchors = anchors_killed_hist + anchors_post_hist
+q4_depth_entries = depth_killed_q4 + candidates_q4
+```
+
+Ensuite seulement : (A) conserver la liste des `x` aigus déjà calculée par la
+politique de grille ; (B) reporter directement les `b` post-histogramme avec
+seuil strict et ordre conservé, petite ablation probablement secondaire ;
+(C) raffiner les seules cellules vivantes occupées sur les ancres lourdes. Le
+supercover rationnel de corde et le sweep signé `P/B` restent des recherches
+conditionnelles : lemme, frontières exactes, oracle ON/OFF et modèle de coût
+doivent précéder toute activation.
+
 ### V30 — occupation : trois objets, pas un compteur `%smid`
 
 Séparer dans le reçu : ressources de build (`regs/thread`, smem, local/stack,
