@@ -1,11 +1,18 @@
 # MorseHGP3D v5 — Passage à l'échelle : dizaines de millions de points sur une G4
 
 Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
-`profile=quantized_u16_input_only`, `public_status=not_claimed`. Ce document
-est une **conception chiffrée**, pas un claim : chaque chiffre cite un reçu ou
-une mesure locale (ratios), et les théorèmes à prouver sont listés avant le
-code (§ 6). Rédigé le 28 août 2026 à partir des reçus G4 n° 9–11, des mesures
-locales du 28 août et des audits v3/v4 cités au § 2.
+`profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+Ce document est une **hypothèse d'architecture falsifiable**, pas un plan de
+capacité : chaque chiffre cite un reçu ou une mesure locale (ratios), les
+théorèmes à prouver sont listés avant le code (§ 6), et aucun run à 1 M, 10 M
+ou 30 M n'existe. Rédigé le 28 août 2026 à partir des reçus G4 n° 9–12, des
+mesures locales du 28 août, des audits v3/v4 cités au § 2, de trois
+conceptions contradictoires (`docs/analyses/echelle_20260828/`) et de l'audit
+ciblé `audits/AUDIT_PASSAGE_ECHELLE_20260828.md`, dont les objections sont
+intégrées au § 4 (marquées **[audit]**). Le scénario chiffré est **CPU sur une
+VM munie d'un GPU** : aucune résidence VRAM ni transfert n'est budgété tant
+que la lane résidente sur device (`GPU.md`) n'est pas mesurée.
 
 ## 1. Les deux objectifs
 
@@ -45,8 +52,9 @@ l'arrêt).
   arbre résidents seulement si le préflight le démontre ; ancres, frontières,
   candidats et sorties streamés par plages Morton.
 
-La v5 reprend ces conclusions telles quelles ; ce document ne les contredit
-sur aucun point et y ajoute des mesures qui fixent les constantes.
+Doctrine v5 : ces conclusions sont des **hypothèses différentielles à
+requalifier**, pas des acquis ; leurs contre-fixtures et ordres de grandeur
+sont conservés, chaque preuve ou mesure v5 est épinglée séparément (§ 3, § 6).
 
 ## 3. Lois d'échelle mesurées
 
@@ -94,16 +102,27 @@ Dans le fold d'un ordre trié par niveau, une facette n'est vivante (première
 incidence passée, dernière à venir) que brièvement. Pic de facettes vivantes
 par point, K = 10 : `uniform` 8000 16,8, 16 000 18,1 (+8 % par doublement) ;
 `eight_clusters` 8000 13,3 ; `scanline` 8000 2,5. Fraction du total : K = 10
-2,2 %, K = 4 10 %, K = 1 93 % (les singletons). **C'est la mesure qui rend un
-fold à état borné possible** : à 10 M, ≈ 40 facettes vivantes par point
-(marge ×2,2) contre 912 au total pour K = 10.
+2,2 %, K = 4 10 %, K = 1 93 % (les singletons). **[audit]** Cette sonde n'est pas un majorant de l'état du fold : elle
+échantillonne après chaque lot (une facette née et terminée dans le même lot
+n'y entre jamais ; un plateau mono-lot annoncerait zéro), elle ignore les
+racines et ancêtres union-find encore référencés, la clé canonique, le payload
+final et les tampons du lot. Les 18 facettes/point sont une **borne basse
+descriptive** ; aucune marge n'en fait un majorant. La mesure de réception (L0)
+doit suivre, pendant chaque lot : facettes distinctes touchées, fermeture des
+parents/racines/canoniques, état réutilisable après le lot, octets alloués et
+pic externe (`ru_maxrss` reste l'autorité : 72,3 Gio à 200 k `uniform` contre
+66,3 Gio au palier `rss_mb[4]`, échantillonné après réduction et publication —
+à renommer `rss_after_publish_sample`). Deux fixtures précèdent tout
+compactage : un plateau massif mono-lot et une chaîne où une facette sans
+incidence future reste ancêtre d'un membre futur.
 
 ### 3.5 Rayons des boules survivantes (32 000, `smax = 11`)
 
 Rayon maximal : `uniform` 22 unités (2,2 pas moyens), `scanline` 84 (2,4 pas),
 `eight_clusters` **149 (7,4 pas, 23 % du domaine — les vides inter-amas)**. Un
 halo par copie est donc impraticable sur les familles à vides ; la conception
-laisse l'index **résident** et ne tuile que le travail (§ 4).
+laisse l'index **résident** et ne réplique aucun rectangle (§ 4.3, **[audit]**
+: un halo exigerait sa propre preuve de complétude et d'exact-once).
 
 ## 4. Architecture retenue (décision du 28 août, après trois conceptions et trois critiques adverses — `docs/analyses/echelle_20260828/`)
 
@@ -131,8 +150,19 @@ plateaux par quotient. Seule la **résidence** change.
   digest `mhgp5-digest-stream-v1` ; le digest v4 reste l'autorité de
   conformité tant que le résident existe (≤ 1 M) et un **convertisseur** flux
   → tableaux v4 (hors produit) prouve l'égalité aux tailles où les deux
-  existent. Output-sensitive : ≈ 1,6–1,8 To de clés développées à 10 M pour
-  K = 10 (parents ≈ 600 clés/pt), ≈ 0,15 To pour K = 5.
+  existent. **[audit]** Le flux doit d'abord être **spécifié** : le payload
+  courant porte, par K, `batch_levels`, deltas, `facet_keys` et
+  `final_canon_fid` ; `facet_hierarchy_stream-v1` doit dire comment ces quatre
+  objets sont reconstruits (lots sans delta, partition finale), et la porte aux
+  tailles bornées est : décoder le flux en `ForestResult` complet, comparer les
+  quatre objets élément par élément au résident, recalculer le digest v4 sur
+  l'objet reconstruit et le comparer au pin v4, calculer à part le digest
+  d'intégrité du flux (qui ne peut pas être « égal » au digest v4 : autre
+  sérialisation). Borne basse de sortie au reçu 200 k : 467,9 M naissances ×
+  41 o + ≥ 2 parents × 50,4 M nœuds + 62,8 M deltas × ≥ 105 o = **29,9 Go, soit
+  ≥ 1,5 To à 10 M** pour K = 10 avant parents des croissances, cadrage,
+  sommes de contrôle et reprise ; K = 5 : ≈ 0,15 To. Un wire plus compact doit
+  être spécifié, versionné et mesuré.
 - Statuts : `complete_regular | unsupported_degeneracy | resource_exhausted/{requires_tiling, live_state, disk, index, seau} | invalid_input | invariant_violated | incomplete_continuation` (reprise à une frontière de phase, jamais sur une prédiction de temps) ; `public_status=not_claimed`.
 
 ### 4.2 Résident, streamé, externe (`uniform`, 48 fils ; base reçu 200 k, cardinalités +10–15 % à 10 M)
@@ -153,8 +183,11 @@ plateaux par quotient. Seule la **résidence** change.
 | temps, complet | ~25 min | 6–7,5 h | 17–20 h (3 sessions) |
 | temps, `prefixe_k5` | ~5 min | 1,5–2 h | 5–6 h |
 
-`eight_clusters` complet à 10 M : 8–9 h (hors session, exposant ~1,55 sur la
-génération) ; `scanline` : **non extrapolable** (lane q4 en exposant ~3 entre
+**[audit]** Rectangles : la seule lane q4 compte 21,8 M `AliveRect` à
+200 k, soit ≥ 17,4 Go à 10 M par extrapolation linéaire — la vague qui les
+borne doit être mesurée avant d'entrer dans ce tableau. Sortie : ≥ 1,5 To à
+10 M (§ 4.1). `eight_clusters` complet à 10 M : 8–9 h (hors session, exposant
+~1,55 sur la génération) ; `scanline` : **non extrapolable** (lane q4 en exposant ~3 entre
 32 k et 200 k — c'est le verrou de la famille LiDAR, et c'est la lane GPU
 résidente qui doit le lever). Toute ligne 10 M / 30 M est une extrapolation ;
 les seules mesures opposables seront les reçus 1 M puis 10 M.
@@ -167,29 +200,62 @@ les seules mesures opposables seront les reçus 1 M puis 10 M.
    k-aire des seaux triés restitue l'ordre global (`digest_balls` v4) ; les
    seaux sont des plages de l'arbre radix à effectif de positions égal (T8),
    jamais fonction de la charge ; le census lit l'index résident (pas de
-   halo) ; magasin de boules SSD partitionné par $(q, d)$ ; expansion en une
-   passe vers dix runs par ordre ; tri externe par ordre.
+   halo) ; **[audit]** le théorème de centre co-localise les émissions d'une
+   même clé mais ne borne pas un seau (une famille cosphérique ou un centre
+   chaud peut en concentrer un nombre arbitraire) : la variante retenue est un
+   passage **append-only** de tous les rectangles (chacun traité exactement une
+   fois, aucune réplication), routage déterministe, **barrière globale**, puis
+   tri externe et RLE par clé exacte ; chaque seau déborde sur disque et se
+   sous-partitionne récursivement par la clé, sa mémoire vient d'un budget,
+   jamais d'une hypothèse d'occupation ; le Morton du centre est une clé de
+   localité, pas l'autorité d'une borne ; magasin de boules SSD partitionné
+   par $(q, d)$ ; expansion en une passe vers dix runs par ordre ; tri externe
+   par ordre.
 2. **Fold streamé à état borné** : clé d'ex aequo explicite (niveau exact,
-   `BallKey`, rang d'émission intra-boule ; T2) ; passe PREMIÈRE/DERNIÈRE par
-   empreinte 64 bits (minorant du pic exact, marge déclarée ; T4) ; table des
+   `BallKey`, rang d'émission intra-boule ; T2) ; **[audit]** passe
+   PREMIÈRE/DERNIÈRE **exacte** : tri externe des enregistrements
+   (`FacetKey`, rang d'événement), identifiants stables attribués après
+   comparaison complète de la clé, dernière position en u64 — aucune empreinte
+   probabiliste, aucun compte u8 ; l'éviction n'est tentée qu'après une
+   opération explicite de compression/re-racinement des membres conservés et
+   une preuve de préservation du canonique (mutant
+   `drop_at_last_direct_incidence` tué par la chaîne adversariale) ; si cette
+   fermeture n'est pas bornée, le résultat négatif invalide le fold compact et
+   n'est pas masqué ; table des
    facettes vivantes libérée **au lot** de la dernière incidence (T3, avec
    `root_key` figée à la création et `canon_key` = min mise à jour aux unions,
    contre-fixtures « absorbée ⇒ oubliable » réfutée) ; arène des
    enregistrements de composantes bornée par compteur instrumenté (T6) ;
    indices et positions d'incidence en u64 ; deltas émis en flux.
-3. **Reprise** : manifeste atomique (pin, tailles, sha256 des runs, ordre et
-   lot courants), reprise à une frontière de phase ; comptabilité à chaque
-   frontière (aucune écriture sans espace pour ancien état + temporaire +
-   fusion + manifeste + marge).
+3. **Reprise `resume=replay_current_K`** **[audit]** : chaque ordre K terminé
+   est écrit dans un fichier temporaire, `fsync`, validé, renommé atomiquement
+   et inscrit au manifeste ; un K interrompu n'est jamais publié et est rejoué
+   depuis le début à partir des runs immuables ; le préflight vérifie qu'un K
+   isolé tient dans la durée de session ; falsification par `SIGKILL` à chaque
+   frontière. Une reprise intra-K (curseurs de fusion, tas, état du fold,
+   digest, offsets) ne viendra qu'avec un checkpoint complet, versionné et
+   mesuré. Comptabilité à chaque frontière (aucune écriture sans espace pour
+   ancien état + temporaire + fusion + manifeste + marge).
 
 ## 5. Modèle de temps
 
 Constantes du reçu 200 k (48 fils) avec dérive de latence du reduce
 (1,4 → 2,2 µs par événement à 10 M, +8 % par doublement) ; voir la table du
-§ 4.2. Hypothèses à mesurer avant tout engagement : débit du disque (le
-disque persistant de 100 Go actuel est mesuré à ~290 Mo/s par
-`gcp-migration/deploy.sh`, insuffisant), constante du reduce à état borné,
-surgénération aux frontières de seaux.
+§ 4.2. **[audit]** Le disque de la VM est un boot **Hyperdisk Balanced** de
+100 Go provisionné à 3 600 IOPS et **290 Mio/s** (`gcp-migration/deploy.sh`) ;
+une G4 n'accepte pas les Persistent Disk zonaux, son plafond partagé est de
+1 600 Mio/s et le débit Hyperdisk est half-duplex. Le modèle prend donc en
+paramètres type, capacité, IOPS, débit provisionné et débit `fio` mesuré :
+avec la borne basse de sortie (1,5 To) plus 230 Go de runs écrits et relus,
+le minimum séquentiel est ≈ 1,96 To, soit **107 min idéales à 290 Mio/s**
+(≈ 20 min à 1 600 Mio/s), sans lecture d'entrée, comptes, hachages ni marge.
+Le fold `uniform` mesuré (115 s) extrapole linéairement à 1,6 h et le reduce
+cumulé (128 s) à 1,8 h ; la génération vaut 68 s (`uniform`), 178 s
+(`eight_clusters`), 244 s (`scanline`) à 200 k : « 6–7 h » est un scénario
+`uniform`, pas une loi de famille — publier formule, facteur de streaming,
+fourchette et sensibilité au débit, et ne promettre aucune session de 8 h
+avant un pilote à 1 M. Toute modification de disque GCP est une mutation
+gardée à ajouter aux scripts du dépôt.
 
 ## 6. Théorèmes à prouver avant le code (énoncés, `docs/analyses/echelle_20260828/synthese.txt` § 3)
 
@@ -246,7 +312,7 @@ mutants à code 4 : `prefix-hq-off`, `tiebreak-cell-local`, `tie-by-sorted-T`,
 | # | livraison | objet | digest v4 |
 |---|---|---|---|
 | L0 | instrument `vivantes` promu en compteur de réception (pic par lot, enregistrements, singletons) + reçu 32 000 puis 200 k | inchangé | inchangé |
-| L1 | **livré en partie (28 août)** : profil nommé `prefixe_k5` / `prefixe_k4` dans la sortie et porte de préfixe par digests (K = 4, 5 ; trois familles ; mutant tué) — restent : clé d'ex aequo explicite, indices u64, mutants T2 | inchangé | bit-identique |
+| L1 | **livré en partie (28 août)** : portée nommée de la tour dans la sortie et porte de préfixe par digests (K = 4, 5 ; trois familles ; mutant tué) — **[audit]** à corriger : le champ `profil=` collisionne avec le profil normatif `quantized_u16_input_only` → `tower_scope=profile_complete_k10` / `tower_scope=prefix_k5` (« complet » = complet dans le profil K ≤ 10), distinguer `smax_requested` / `smax_effective`, étendre la porte aux événements canoniques et aux `batch_levels` de tous les lots (omis par le digest v4) avec un plateau non trivial — restent : clé d'ex aequo explicite, indices u64, mutants T2 | inchangé | bit-identique |
 | L2 | fold résident à état borné (PREMIÈRE/DERNIÈRE en RAM, table des vivantes, arène, convertisseur flux → tableaux v4) | inchangé | bit-identique par convertisseur |
 | L3 | payload et digest de flux, manifeste atomique, statuts SSD | inchangé | second digest déclaré |
 | L4 | amont streamé : seaux Morton du centre, RLE par seau, magasin de boules, expansion en runs, tri externe | inchangé | `balls` v4 par fusion k-aire |
@@ -257,6 +323,20 @@ mutants à code 4 : `prefix-hq-off`, `tiebreak-cell-local`, `tie-by-sorted-T`,
 Le GPU (lane résidente sur device, `GPU.md`) est un chantier **parallèle**
 visant la lane q4 de `scanline`/`eight_clusters` et la génération à 10 M ; il
 ne change ni l'objet ni ce plan.
+
+## 8 bis. Ordre de travail retenu (audit du passage à l'échelle, 28 août)
+
+1. Spécifier `facet_hierarchy_stream-v1` (wire, décodeur vers `ForestResult`,
+   autorité terminale, `resume=replay_current_K`) et recalculer les bornes de
+   sortie.
+2. Comptage PREMIÈRE/DERNIÈRE par tri externe de clés exactes ; fixtures
+   mono-lot et chaîne adversariale tuées avant toute éviction.
+3. Routage append-only exact-once avec débordement et barrière globale ; aucun
+   halo.
+4. Comparer le flux décodé au `ForestResult` complet de 8 k à 200 k, puis
+   campagne 1 M avec pics externes, occupation des seaux et E/S mesurées.
+5. Refaire alors le tableau RAM/disque/temps et décider si 10 M K = 5 ou
+   K = 10 est la porte suivante.
 
 ## 9. Questions à trancher par l'utilisateur
 
