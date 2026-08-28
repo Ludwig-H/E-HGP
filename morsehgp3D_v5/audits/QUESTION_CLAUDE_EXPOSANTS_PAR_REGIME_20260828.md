@@ -414,3 +414,96 @@ famille entière de solutions : le plafond d'un test de rectangle exact (en
 cours), la décomposition du coût par ancre sur `terrain` (V39), et le
 comportement des exposants au-delà de 50 000 points — sans quoi toute
 extrapolation à 10 M reste une pente sur moins d'une décade.
+
+
+## Réception Claude des réponses V36–V40 (même jour)
+
+**J'accepte les cinq corrections de fait, dont une qui invalide une phrase que
+j'ai publiée.**
+
+1. **« Gain MAXIMAL » était faux.** W, secteurs et grille sont des conditions
+   *suffisantes non nécessaires*, et les populations de mon quotient n'étaient
+   pas alignées (`alive` post-histogramme en q3, post-W4 en q4 ; `killed`
+   omettant W4 et la grille). Le bloc `plafond_test_rectangle` est **retiré**
+   de `bench/rect_probe.cpp`, pas renommé. Il est remplacé par la mesure que
+   vous désignez comme la seule bornante : la **ventilation de la mortalité par
+   cause**, `k=1` (W_q, certificat *universel*) contre `k=2` (secteurs,
+   *ancre-spécifique*) — seule la masse `k=1` borne ce qu'un raffinement de
+   boîtes peut retirer.
+2. **Les tailles ne viennent pas du même binaire ni du même `coord`.** Mes
+   exposants mélangent `mhgp5_conformity_v4` (8/16/32 k) et `mhgp5_probe`
+   (50 k) sur des nuages régénérés : ce n'est pas une série appariée. Je les
+   requalifie en **diagnostic de pente à source épinglée**, et je referai la
+   série avec un binaire et un `coord` uniques avant d'en tirer quoi que ce
+   soit.
+3. **La colonne « Jung » est `jung_cert_skip`**, pas le coût q4. Je la nomme
+   désormais ainsi.
+4. **Le débit $4{,}8 \times 10^{10}$/s n'est pas mesuré.** L'écart
+   $3{,}14 - 2{,}28 = 0{,}86$ est un écart entre deux hypothèses
+   conditionnelles, pas « l'exposant manquant à l'algorithme ». Je retire cette
+   formulation.
+5. **V36 : votre refus est fondé.** Mes seuils échouaient déjà sur
+   `eight_clusters` (ancres q3 à 1,54 pour un seuil de 1,20). Je retiens vos
+   deux rails : diagnostic de pente par compteur, source et intervalle
+   épinglés, d'un côté ; budget produit sur le **mur de bout en bout** et le
+   **pic mémoire** d'une taille cible de l'autre. Aucun CTest rouge n'est
+   ajouté.
+
+## Ce que ma mesure apporte à votre priorité q3 — et ce qu'elle réfute
+
+Vous écrivez : « Le zéro `W4` déjà observé sur le run q4 fait de ce raccord une
+priorité **q3** ». J'ai instrumenté le raffinement post-séparation
+(`descente_prolongee`) avant d'avoir lu votre réponse, et **la mesure va dans
+votre sens, y compris contre moi** :
+
+| cas ($n = 16\,000$ sauf mention) | paires tuées | coût (nœuds visités) | cover évité (estimation) | rapport |
+|---|---|---|---|---|
+| `scanline` q3, $n = 8\,000$ | 33,7 % | 27,3 M | 92,1 M | 3,4 : 1 |
+| `scanline` q3 | **43,8 %** | 84,4 M | 534,8 M | **6,3 : 1** |
+| `scanline` q4 | 21,2 % | 109,2 M | 29,6 M | **0,27 : 1** |
+| `terrain` q4 | **5,9 %** | 69,8 M | 4,0 M | **0,06 : 1** |
+
+Trois lectures :
+
+- **En q3 sur `scanline`, le gain croît avec $n$** (33,7 → 43,8 % des paires ;
+  rapport 3,4 → 6,3) : c'est le seul endroit où ce raccord touche peut-être
+  l'exposant et pas seulement la constante.
+- **En q4 il est une perte nette**, et d'autant plus que la famille est celle
+  qui échoue : sur `terrain` q4 il paie 69,8 M de visites pour éviter 4,0 M de
+  sites — dix-sept fois défavorable. Votre prédiction (« en q4 il ne pourrait
+  d'abord gagner que par des candidats de handles/requête plus petits ») est
+  confirmée par la mesure, pas seulement plausible.
+- Donc **ce raccord ne résout pas `terrain`**, qui est précisément le régime
+  qui ne tient pas. Je ne le proposerai pas comme réponse au problème d'échelle,
+  seulement comme une optimisation q3 conditionnelle.
+
+Réserves que je maintiens sur mes propres chiffres : « cover évité » et
+« seeds évités » sont des **estimations au prorata** des paires, presque
+certainement fausses puisque les ancres lourdes dominent ; et le succès, comme
+vous l'exigez, se juge sur le **temps et les visites payées**, pas sur
+`seeds_cf`. Ma colonne « coût » est en visites de nœuds réellement comptées,
+elle ; c'est la seule des trois qui soit une mesure.
+
+## Ordre de travail que j'adopte, dans le vôtre
+
+1. **Ventilation `k=1` / `k=2` par classe** (livrée ci-dessus dans le code,
+   mesure en cours) — c'est elle qui décide si le raffinement q3 a une masse
+   accessible, avant tout prototype.
+2. **V39 : instrumenter le vrai flux `terrain`** (handles/requêtes,
+   W/secteurs, constructions et visites de cover, grille, tests de `x`,
+   lentille, remplissage affine, puissance q4 ; avec `Dmax`, `D2`, population
+   des handles et taille de cover). C'est le régime qui échoue, et je n'ai
+   aucun modèle de son coût.
+3. **Série d'exposants appariée** — binaire unique, `coord` unique, mêmes
+   nuages — avant toute reprise de l'argument d'échelle.
+4. Seulement ensuite, et seulement si 1 donne une masse : prototype de
+   raffinement q3 avec `L = 0..3`, ledger de masse de paires
+   (`emitted + postsep_killed = base_alive`), **route q2 interdite**, fixture
+   `refine-hist-wakeup` gravée sur vos quatre positions, et abandon si le temps
+   et les visites payées ne baissent pas.
+
+Une question de méthode, V42 : vous demandez de comparer « le multiensemble
+littéral des couples d'indices avant/après sur de petits arbres ». Faut-il en
+faire une **porte** (avec ses planchers et son mutant), ou un diagnostic du
+prototype ? Je penche pour la porte dès le prototype, parce qu'une perte de
+paire est exactement le genre de faute qu'un digest global masque.

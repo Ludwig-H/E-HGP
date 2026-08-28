@@ -163,13 +163,13 @@ int main(int argc, char** argv) {
   // PALMARES des rectangles les plus lourds (seeds) : D_max, |A|.|B|, ancres
   // vivantes, tuees par la production, seeds, survivants — repond a « le
   // travail lourd est-il inherent (survivants) ou gaspille (zero survivant) ? ».
-  struct Heavy { u64 dmax2, nab, alive, killed, seeds, surv, cover; size_t idx; };
+  struct Heavy { u64 dmax2, nab, alive, killed, seeds, surv, cover, kw, ks; size_t idx; };
   std::vector<Heavy> heavy;
   u64 seeds_in_zero_surv = 0, seeds_in_killed_free = 0;
   size_t rect_idx = 0;
   for (const AliveRect& ar : alive) {
     const size_t my_idx = rect_idx++;
-    u64 r_killed = 0;
+    u64 r_killed = 0, r_kw = 0, r_ks = 0;
     generate_detail::corner_histograms(ix, L, ar.r, &sc.ha, &sc.hb);
     const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
     rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), coef, &sc.handles, &sc.cover_nodes);
@@ -223,7 +223,8 @@ int main(int argc, char** argv) {
           const int k = anchor_kill_cumulated(sc.cover, ix.upos, ua, ub, pa, pb, D2, lane == 3 ? Lane::kQ3 : Lane::kQ4,
                                               lane == 3 ? 12 : 8, h_of[li]);
           if (k != 0) { ++sk.killed_prod; sk.seeds_avoided_prod += sd; ++r_killed; if (!lo.empty()) ++sk.wrong; }
-          if (k == 1) ++sk.killed_w;
+          if (k == 1) { ++sk.killed_w; ++r_kw; }
+          if (k == 2) ++r_ks;
         }
         const auto ts2 = std::chrono::steady_clock::now();
         t_sect_ns += (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(ts1 - ts0).count();
@@ -241,7 +242,7 @@ int main(int argc, char** argv) {
         const i64 w = std::max(std::llabs(ba.hi[i] - bb.lo[i]), std::llabs(bb.hi[i] - ba.lo[i]));
         dmax2 += (u64)(w * w);
       }
-      heavy.push_back(Heavy{dmax2, (u64)nab, r_alive, r_killed, r_seeds, r_surv, r_cover, my_idx});
+      heavy.push_back(Heavy{dmax2, (u64)nab, r_alive, r_killed, r_seeds, r_surv, r_cover, r_kw, r_ks, my_idx});
       if (r_surv == 0) seeds_in_zero_surv += r_seeds;
     }
   }
@@ -267,40 +268,23 @@ int main(int argc, char** argv) {
   // gratuit.
   {
     constexpr int kCls = 24;
-    struct Cls { u64 rects, nab, alive, killed, seeds, surv, cover; } cls[kCls] = {};
+    struct Cls { u64 rects, nab, alive, killed, seeds, surv, cover, kw, ks; } cls[kCls] = {};
     for (const Heavy& hh : heavy) {
       int c = 0;
       while (c + 1 < kCls && (hh.dmax2 >> (2 * (c + 1))) > 0) ++c;  // classe = floor(log2(Dmax))
       cls[c].rects += 1; cls[c].nab += hh.nab; cls[c].alive += hh.alive; cls[c].killed += hh.killed;
       cls[c].seeds += hh.seeds; cls[c].surv += hh.surv; cls[c].cover += hh.cover;
+      cls[c].kw += hh.kw; cls[c].ks += hh.ks;
     }
-    // PLAFOND D'UN TEST DE RECTANGLE (la mesure qui decide) : un test au
-    // niveau du rectangle ne peut etre EXACT que s'il ne tue qu'un rectangle
-    // dont TOUTES les ancres sont deja tuees par le test d'ancre exact. Le
-    // travail porte par ces rectangles-la est donc le gain MAXIMAL atteignable
-    // par n'importe quel test de rectangle exact, aussi parfait soit-il.
-    {
-      u64 rects_tout_tue = 0, seeds_tout_tue = 0, covers_tout_tue = 0, paires_tout_tue = 0;
-      u64 rects_avec_vivantes = 0, seeds_avec_vivantes = 0;
-      for (const Heavy& hh : heavy) {
-        if (hh.alive == 0) continue;
-        ++rects_avec_vivantes;
-        seeds_avec_vivantes += hh.seeds;
-        if (hh.killed == hh.alive) {
-          ++rects_tout_tue;
-          seeds_tout_tue += hh.seeds;
-          covers_tout_tue += hh.cover;
-          paires_tout_tue += hh.nab;
-        }
-      }
-      std::printf("plafond_test_rectangle : rectangles dont TOUTES les ancres sont tuees = %llu / %llu (%.1f %%) ; "
-                  "ils portent %llu / %llu seeds (%.1f %%), %llu paires et %llu sites de cover — c'est le gain MAXIMAL d'un test de rectangle exact\n",
-                  (unsigned long long)rects_tout_tue, (unsigned long long)rects_avec_vivantes,
-                  rects_avec_vivantes ? 100.0 * (double)rects_tout_tue / (double)rects_avec_vivantes : 0.0,
-                  (unsigned long long)seeds_tout_tue, (unsigned long long)seeds_avec_vivantes,
-                  seeds_avec_vivantes ? 100.0 * (double)seeds_tout_tue / (double)seeds_avec_vivantes : 0.0,
-                  (unsigned long long)paires_tout_tue, (unsigned long long)covers_tout_tue);
-    }
+    // Le bloc `plafond_test_rectangle` a ete RETIRE (audit du 28 aout) : W,
+    // secteurs et grille sont des conditions SUFFISANTES et non necessaires,
+    // un futur certificat peut tuer ce qu'elles laissent vivre, et ses
+    // populations n'etaient pas alignees (`alive` post-histogramme en q3 mais
+    // post-W4 en q4, `killed` omettant W4 et la grille). Ce n'etait donc pas
+    // un plafond. Ce qui borne reellement le gain accessible au CERTIFICAT
+    // UNIVERSEL est la masse de paires tuees par `k=1` (W_q) — ventilee
+    // ci-dessous — car un rectangle dont les ancres ne meurent que par
+    // secteurs ne sera jamais supprime par un raffinement de boites.
     // DESCENTE PROLONGEE (l'experience decisive) : `alive_rectangles` arrete
     // la descente ternaire des que le rectangle est SEPARE. Rien n'oblige a
     // s'y arreter pour le TRAVAIL : scinder un rectangle vivant ne change ni
@@ -370,14 +354,22 @@ int main(int argc, char** argv) {
                   seeds_total ? 100.0 * (double)seeds_killed_est / (double)seeds_total : 0.0,
                   (unsigned long long)cover_evite_est, (unsigned long long)core_nodes);
     }
+    {
+      u64 tk1 = 0, tk2 = 0, talive = 0;
+      for (const Heavy& hh : heavy) { tk1 += hh.kw; tk2 += hh.ks; talive += hh.alive; }
+      std::printf("mortalite_par_cause : ancres vivantes=%llu, tuees par k=1 (W_q, certificat UNIVERSEL) = %llu (%.1f %%), "
+                  "par k=2 (secteurs, ancre-specifique) = %llu (%.1f %%) — seule la masse k=1 borne le gain d'un raffinement de boites\n",
+                  (unsigned long long)talive, (unsigned long long)tk1, talive ? 100.0 * (double)tk1 / (double)talive : 0.0,
+                  (unsigned long long)tk2, talive ? 100.0 * (double)tk2 / (double)talive : 0.0);
+    }
     std::printf("classes_dmax (Dmax dans [2^c, 2^(c+1)))\n");
     for (int c = 0; c < kCls; ++c) {
       if (!cls[c].rects) continue;
       const double part_ancres = cls[c].alive ? 100.0 * (double)cls[c].killed / (double)cls[c].alive : 0.0;
-      std::printf("  c=%2d Dmax<2^%d rects=%llu paires=%llu vivantes=%llu tuees_prod=%llu (%.1f %%) seeds_cf=%llu survivants=%llu covers=%llu\n", c, c + 1,
-                  (unsigned long long)cls[c].rects, (unsigned long long)cls[c].nab, (unsigned long long)cls[c].alive,
-                  (unsigned long long)cls[c].killed, part_ancres, (unsigned long long)cls[c].seeds, (unsigned long long)cls[c].surv,
-                  (unsigned long long)cls[c].cover);
+      std::printf("  c=%2d Dmax<2^%d rects=%llu paires=%llu vivantes=%llu tuees_prod=%llu (%.1f %%) dont k1_W=%llu k2_secteurs=%llu seeds_cf=%llu survivants=%llu covers=%llu\n",
+                  c, c + 1, (unsigned long long)cls[c].rects, (unsigned long long)cls[c].nab, (unsigned long long)cls[c].alive,
+                  (unsigned long long)cls[c].killed, part_ancres, (unsigned long long)cls[c].kw, (unsigned long long)cls[c].ks,
+                  (unsigned long long)cls[c].seeds, (unsigned long long)cls[c].surv, (unsigned long long)cls[c].cover);
     }
   }
   (void)seeds_in_killed_free;
