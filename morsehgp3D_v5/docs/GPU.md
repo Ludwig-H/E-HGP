@@ -159,6 +159,23 @@ gain net). Trois lectures :
    étapes séparément ; aucune conclusion de débit device n'est tirée de ce
    reçu.
 
+**Session 10 (pin `90baa0bb` : étage B du fold concurrent par ordre,
+`fold_inflight` = 2, `reduce` à état packé + prefetch ; reçu
+`campagne_g4_v5_20260828_fold_inflight`, campagne complète, 31 runs,
+validateur du pin rejoué)** — comparaison appariée avec la session 9, CPU 48
+fils : `uniform` 50 k **78 → 57 s**, 100 k 164 → 121 s, 200 k **346 → 258 s**
+(mur du fold 118 s pour 198 s cumulés de reduce + digest ; RSS 65 → 80 Go) ;
+`eight_clusters` 50 k **82 → 64 s**, 100 k 185 → 144 s, 200 k **443 → 363 s**
+(59 → 74 Go) ; `terrain` 22 → 20 s ; `scanline` inchangé (16 / 54 / 502 s :
+lane q4). Contrats `--gpu` à parité (61 / 22 / 68 / 16 s), deux digests
+identiques. Lecture : le fold n'est plus séquentiel sur le chemin critique ;
+son mur reste borné par l'étage A (tri + internement + fusion ≈ 46 s à 200 k
+`uniform`) plus la traîne du dernier ordre ; `fold_inflight` = 3 ou 4 (un ou
+deux ordres résidents de plus) et l'internement (1,3 µs de temps-fil par
+enregistrement de facette) sont les leviers suivants du fold. Sur `scanline`
+et sur les familles denses, la lane q4 est le poste : c'est la **grille de
+cellules** (théorème 10.5), livrée au pin suivant.
+
 ## 1. Ce que la mesure G4 a désigné (27 août 2026)
 
 Sur `g4-standard-48` à 48 fils, K = 1..10 exact (reçu

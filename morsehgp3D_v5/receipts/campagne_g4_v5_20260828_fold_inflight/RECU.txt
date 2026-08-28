@@ -1,0 +1,60 @@
+# Session G4 v5 — campagne d echelle (temoin, lanes device, conformite v4, contrats 50 000 CPU et --gpu)
+date_utc=2026-08-28T00:24:47+00:00
+source_commit=90baa0bbbc954cb17d64ad0d4c6723909eab0de1
+head_local=0b0533855b1f956025be010ebe42ca2efec7d80b
+source_payload_sha256=904a34a9a49abbdc6ef82f0af2dfc4f193be5d267964f129af903c8a8e9b1fb1
+protocol_manifest_sha256=605ddc2d14bed68a1e5d4ab97aa84a0e42b52110d7c4e151f9e984dfd531f890
+machine=g4-standard-48 SPOT europe-west4-ai1a, 48 fils, RTX PRO 6000 Blackwell
+protocole=gcp-migration/session_campagne_v5_scale_g4.sh (pin, gardes, arret certifie)
+
+# note
+Session 10 : pin 90baa0bb = etage B du fold concurrent par ordre (fold_inflight=2 par defaut : trois ordres residents), reduce a etat packe + prefetch, mur du fold imprime. Comparaison appariee avec la session 9 (pin 5c777be3, campagne_g4_v5_20260827_corde_pretests), CPU 48 fils : uniform 50k 78 -> 57 s, 100k 164 -> 121 s, 200k 346 -> 258 s (RSS 65 -> 80 Go) ; eight_clusters 50k 82 -> 64 s, 100k 185 -> 144 s, 200k 443 -> 363 s (59 -> 74 Go) ; terrain 50k 22 -> 20 s ; scanline 50k 16 -> 15 s, 100k 57 -> 54 s, 200k 499 -> 502 s (lane q4 dominante, inchangee). Contrats --gpu a parite (61/22/68/16 s), deux digests identiques au CPU. Le gain memoire des listes de census inline (d86b4ec7) n est PAS dans ce pin.
+
+# run code duree_s peak_rss_kb
+conf_eight_clusters_n16000 0 16 6176728
+conf_eight_clusters_n32000 0 37 12719232
+conf_eight_clusters_n8000 0 7 2849312
+conf_scanline_single_pass_n16000 0 3 1215232
+conf_scanline_single_pass_n32000 0 8 2277312
+conf_scanline_single_pass_n8000 0 1 639884
+conf_terrain_n16000 0 3 1345704
+conf_terrain_n32000 0 10 2451400
+conf_terrain_n8000 0 1 645484
+conf_uniform_n16000 0 17 7142552
+conf_uniform_n32000 0 35 14430136
+conf_uniform_n8000 0 8 3492292
+contrat_eight_clusters_n100000 0 144 44063656
+contrat_eight_clusters_n200000 0 363 73744092
+contrat_eight_clusters_n50000 0 64 21147592
+contrat_gpu_eight_clusters_n50000 0 68 21030064
+contrat_gpu_scanline_single_pass_n50000 0 16 5263848
+contrat_gpu_terrain_n50000 0 22 4623488
+contrat_gpu_uniform_n50000 0 61 22716376
+contrat_gpuad_eight_clusters_n50000 0 67 21059592
+contrat_gpuad_scanline_single_pass_n50000 0 16 5097124
+contrat_scanline_single_pass_n100000 0 54 7094408
+contrat_scanline_single_pass_n200000 0 502 13576224
+contrat_scanline_single_pass_n50000 0 15 3663756
+contrat_terrain_n50000 0 20 3960316
+contrat_uniform_n100000 0 121 45399636
+contrat_uniform_n200000 0 258 80428604
+contrat_uniform_n50000 0 57 22670140
+gpu_lane 0 75 1861868
+gpu_mutant 4 3 873640
+gpu_witness 0 12 873256
+contrat_eight_clusters_n100000 digest_all=8f4190af21b4a2ba1bd2b3b9f15e198c19aa4ffa7bfe76d72aa04fd8682aadb7
+contrat_eight_clusters_n200000 digest_all=80d0a97c5384f640d181728ef653b94c0e1c30a8211893d2030ac6cce83c916e
+contrat_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_gpu_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_gpu_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_gpu_terrain_n50000 digest_all=700dbbc067bbebce48173d9cc1d1b79cf10274a0773ef4075abf014976e8bbb5
+contrat_gpu_uniform_n50000 digest_all=5fc1fdef4f439028b2f956dfcba22a5f9736a94e83d05e13e0eb362918cda2c0
+contrat_gpuad_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_gpuad_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_scanline_single_pass_n100000 digest_all=c5c402035ef4bb0c55f45af07a0d8ba6036d5f1ab7f6d953d3a8ab191727ba45
+contrat_scanline_single_pass_n200000 digest_all=84e4d8219becc7bef33ae1202ebce9d805419d58b634fc92745d499cb377a505
+contrat_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_terrain_n50000 digest_all=700dbbc067bbebce48173d9cc1d1b79cf10274a0773ef4075abf014976e8bbb5
+contrat_uniform_n100000 digest_all=48658dacd847d55d7ed535d1592576f6fa468670460b9dbd9c615c7c727bb8a2
+contrat_uniform_n200000 digest_all=e1938f542e9be1f433619040a13a913a04bd10357cde57e91bfc96cf6420bcbb
+contrat_uniform_n50000 digest_all=5fc1fdef4f439028b2f956dfcba22a5f9736a94e83d05e13e0eb362918cda2c0
