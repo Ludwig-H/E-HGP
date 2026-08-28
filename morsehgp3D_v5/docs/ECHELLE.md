@@ -191,9 +191,14 @@ plateaux par quotient. Seule la **résidence** change.
 200 k, soit ≥ 17,4 Go à 10 M par extrapolation linéaire — la vague qui les
 borne doit être mesurée avant d'entrer dans ce tableau. Sortie : ≥ 1,5 To à
 10 M (§ 4.1). `eight_clusters` complet à 10 M : 8–9 h (hors session, exposant
-~1,55 sur la génération) ; `scanline` : **non extrapolable** (lane q4 en exposant ~3 entre
-32 k et 200 k — c'est le verrou de la famille LiDAR, et c'est la lane GPU
-résidente qui doit le lever). Toute ligne 10 M / 30 M est une extrapolation ;
+~1,55 sur la génération) ; `scanline` : la lane q4 croît en exposant ~3
+entre 32 k et 200 k — **[audit, V29]** ce n'est pas une contradiction du
+modèle par seed : au reçu 11, 277,9 M seeds tués par cellules + 491,9 M par
+le cœur + 171,5 M par la corde = 941,3 M seeds, à ~10 µs de temps-fil chacun
+sur 48 fils ≈ 196 s, proches des 214,5 s mesurées ; la projection à 10 M
+passe par le nombre de seeds (imprimé depuis le pin `c95cfa95` :
+`seeds=q3/q4`, `completions_q4=`) et c'est la lane GPU résidente qui doit
+lever ce verrou de la famille LiDAR. Toute ligne 10 M / 30 M est une extrapolation ;
 les seules mesures opposables seront les reçus 1 M puis 10 M.
 
 ### 4.3 Les trois étages
@@ -356,7 +361,7 @@ mutants à code 4 : `prefix-hq-off`, `tiebreak-cell-local`, `tie-by-sorted-T`,
 | L1 | **livré en partie (28 août)** : portée nommée de la tour dans la sortie et porte de préfixe par digests (K = 4, 5 ; trois familles ; mutant tué) — **[audit]** à corriger : le champ `profil=` collisionne avec le profil normatif `quantized_u16_input_only` → `tower_scope=profile_complete_k10` / `tower_scope=prefix_k5` (« complet » = complet dans le profil K ≤ 10), distinguer `smax_requested` / `smax_effective`, étendre la porte aux événements canoniques et aux `batch_levels` de tous les lots (omis par le digest v4) avec un plateau non trivial — restent : clé d'ex aequo explicite, indices u64, mutants T2 | inchangé | bit-identique |
 | L2 | fold résident à état borné (PREMIÈRE/DERNIÈRE en RAM, table des vivantes, arène, convertisseur flux → tableaux v4) | inchangé | bit-identique par convertisseur |
 | L3 | payload et digest de flux, manifeste atomique, statuts SSD | inchangé | second digest déclaré |
-| L4 | amont streamé : seaux Morton du centre, RLE par seau, magasin de boules, expansion en runs, tri externe | inchangé | `balls` v4 par fusion k-aire |
+| L4 | amont streamé (solution 4, § 4.3) : runs de candidats triés par vague, fusion externe globale et RLE exact sur la clé complète, préfiltre/census/expansion une seule fois par boule unique, runs par ordre triés par clé totale ; le seau Morton du centre reste une localité optionnelle (V28 : la réconciliation globale des occurrences d'une clé est la seule nécessité) | inchangé | `balls` v4 par fusion k-aire |
 | L5 | préflight par rôle (`MemAvailable`, cgroup, `statvfs`, débit mesuré) ; jalon **1 M** G4 : résident ≡ streamé | — | — |
 | L6 | 10 M : `prefixe_k5` d'abord, puis objet complet | — | flux + invariants + juges |
 | L7 | 30 M : `prefixe_k5` (une session) puis complet en sessions gardées avec reprise | — | idem |

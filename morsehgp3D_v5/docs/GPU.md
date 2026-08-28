@@ -522,9 +522,12 @@ par lot.
 Aucun « GPU 10× » : à 50 k `uniform` le plafond d'Amdahl est 1,10× tant que
 fold, digest, préfiltre et census restent hôte ; la valeur de G0–G1 est la
 viabilité du device (fin des 48 exécuteurs synchrones et des 37 Go de bus).
-`k_q4_core` mesuré à 7,5 s de « kernel_ms » pour 3,0 s de lane CPU n'est pas
-expliqué : une sonde isolée à pleine occupation doit le ramener sous la lane
-CPU avant tout budget L7b. À 10 M, le test de profondeur à la génération est
+`k_q4_core` mesuré à 7,5 s de « kernel_ms » (ancienne sémantique : tout le
+lot après H2D) pour 3,0 s de lane CPU n'est pas encore décomposé sous nvcc :
+la session de réception de l'instrument (kernels seuls, événements, octets,
+pic de flux, cycle de vie) précède tout budget L7b ; la requalification V29
+des auditeurs (941 M seeds tués à ~10 µs ≈ 196 s contre 214,5 s mesurées à
+`scanline` 200 k) montre que le modèle par seed et le reçu 11 concordent. À 10 M, le test de profondeur à la génération est
 le poste dominant identifié et non résolu (V24) ; le pic mémoire hôte des
 `BallCandidate` relève d'`ECHELLE.md`, pas de L7. Occupation, spills, ratio
 visites/cover, fraction routée hôte : mesurés dans chaque reçu, jamais
