@@ -45,6 +45,40 @@ Le filtre `near_m` reste sûr pour l'objet, mais ce n'est pas un lemme garantiss
 
 Le reçu G4 n° 11 établit une amélioration appariée bornée et des digests inchangés au pin mesuré. Il combine cependant la grille et les listes inline : il ne permet pas d'attribuer causalement toute la baisse de temps ou de mémoire à la grille seule. Les deux oracles cellule, étiquetés uniquement `oracle`, n'ont pas été rejoués par la commande G4 `-L gate`; ils ont été rejoués localement pendant cette réponse.
 
+### Raccord du worktree actif — réception presque fermée
+
+Le raccord CMake/mutants/oracle est maintenant recevable : la fixture nominale,
+le registre des mutants, F11, l'oracle brut et ses trois mutants sont exécutés
+par les portes. La campagne ciblée donne 7/7 tests réussis en 12,6 s. L'oracle
+nominal exerce 18 748 grilles, 757 014 sites, 324 171 localisations réelles,
+447 frontières exactes et 4 000 cas i128 synthétiques sans désaccord; les trois
+mutants produisent respectivement 42 660, 8 921 et 444 écarts. Le facteur `G`
+de l'inégalité témoin est corrigé et la dérivation binaire64 suit désormais le
+graphe du code.
+
+Il reste seulement quatre corrections documentaires locales avant d'appeler le
+théorème 10.5 reçu :
+
+1. Remplacer « le losange contient le disque car `|P_k| >= rho_q` », qui ne
+   suffit pas, par les deux inégalités de distance aux arêtes déjà garanties
+   par `bisector_basis`.
+2. Renommer les 4 799 488 « paires (site, cellule) » : le compteur est incrémenté
+   une fois par cellule et par grille, donc il mesure des comparaisons
+   `(grille, cellule)`. Les évaluations site-cellule sont bien nombreuses, mais
+   ce n'est pas ce compteur.
+3. Écrire `|rhs| < 2^62`, et non `|G*rhs| < 2^62`, puisque `rhs` contient déjà
+   le facteur `G` dans le code.
+4. Dans la dernière borne d'arrondi, rattacher `u*(4G+eps) < 2^-47` au chemin
+   accepté par `range_in_domain` (`lo` et `hi` dans `[-4G,4G]`), plutôt qu'au
+   seul énoncé `|Ahat| <= 4G`.
+
+La fixture strictement côté vivant, réalisable depuis une seed q3/q4 u16, peut
+attendre. Le mutant `cell-locate-eps-zero` est déjà une bonne preuve négative
+du contrat conservatif du localisateur, mais pas encore un faux-kill de l'objet;
+le texte courant respecte cette distinction. Davantage de non-vacuité sur les
+routes batch forcées est également un durcissement d'intégration, pas un verrou
+du certificat nominal.
+
 ### Fold et mémoire
 
 Le fold concurrent contient des défauts de sûreté indépendants des digests nominaux. Après le démarrage d'un fil B, plusieurs `return rr` s'appuient seulement sur le destructeur de `BJoiner`. La valeur de retour est initialisée avant la destruction des variables locales ; si la NRVO n'est pas appliquée, `rr` peut donc être déplacé tandis qu'un fil le modifie encore. Il faut annuler, notifier et joindre explicitement avant tout retour post-lancement. Il faut aussi placer le `BSlot` dans un propriétaire avant de lancer son `std::thread` : une exception de `slots.push_back` détruirait sinon un thread encore joignable et appellerait `std::terminate`.
