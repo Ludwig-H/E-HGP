@@ -1,16 +1,16 @@
 # État courant audité de MorseHGP3D v5 — 28 août 2026
 
-- **Dernier pin produit inspecté :** `c19dc60d`, qui épingle le fold à créneaux,
-  les raccords hôte G0/G1 et les deux régimes de sonde décrits ci-dessous. Il
-  prolonge le pool/sonde de `194a0bc2` et le réducteur vivant durci de
-  `bc66ade7`. Les constats historiques G0 portent sur `fe54ccca`, la campagne
-  device/SCALE sur `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur
-  `556c421e`.
+- **Dernier pin produit inspecté :** `55c1f105`, qui épingle le correctif de
+  complexité trouvé par le miroir, sa sonde et les mesures documentaires. Il
+  prolonge le fold à créneaux et les raccords hôte G0/G1 de `c19dc60d`, le
+  pool/sonde de `194a0bc2` et le réducteur vivant durci de `bc66ade7`. Les
+  constats historiques G0 portent sur `fe54ccca`, la campagne device/SCALE sur
+  `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur `556c421e`.
 - **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
-- **Worktree observé :** le produit est propre au pin `c19dc60d`. Seul le probe
-  non suivi `.codex_fold_contract_probe.cpp`, appartenant à un autre audit,
-  reste hors du pin et n'est pas une preuve intégrée. Les corrections d'audit
-  postérieures requalifient les claims du pin sans modifier son code.
+- **Worktree observé :** `HEAD=origin/main=55c1f105`; le produit est propre à ce
+  pin. Le probe non suivi `.codex_fold_contract_probe.cpp`, appartenant à un
+  autre audit, reste hors preuve. La réponse transitoire de Claude au miroir est
+  consolidée ici puis retirée du tip, conformément à la convention du dossier.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -29,16 +29,38 @@ allocation dans `close_fatal`, rendre les scénarios de fermeture causaux sans
 worker puisse prendre un autre lot. Ces points ne bloquent ni G1 ni le fold,
 mais précèdent tout claim de confinement device.
 
-La sonde fold historique reste correctement libellée micro-banc. Son nouveau
-régime `--dump/--from` exécute, lui, un seul réducteur par processus et constitue
-la bonne couture de miroir. Il ne reçoit pas encore un objet complet : la copie
-du catalogue vivant est hors chronométrage, le rejeu faible reste optionnel et
-aucun digest commun n'est comparé. Son artefact n'est pas encore recevable non
-plus : un compteur natif suivi de la représentation mémoire de `ForestEvent`,
-sans magic, schéma, K, taille de record, digest ni contrôle de fin de fichier,
-ne peut devenir un reçu stable. Un wire champ par champ à boutisme fixé doit
-être borné contre la taille réelle du fichier avant allocation ; tout refus du
-fold doit faire échouer la sonde.
+La sonde fold historique reste correctement libellée micro-banc. Son régime
+`--dump/--from` exécute, lui, un seul réducteur par processus et constitue la
+bonne couture de miroir. Il a déjà été utile : sur le témoin massif de Claude,
+le parcours des capacités de tous les deltas à chaque lot a fait passer une
+réduction à 981 s. `55c1f105` déplace ce parcours vers les balayages
+bornés et supprime ainsi le coût quadratique par préfixes ; garder cette
+correction. Les nombres exacts appartiennent à une sortie brute ou un reçu,
+tandis que le commentaire source peut simplement documenter la complexité
+évitée.
+
+Le bras vivant sans rejeu est une **ablation de l'état L2**, pas encore le
+miroir d'un objet résident complet. Le bras avec rejeu n'a en revanche besoin
+d'aucune copie de `keys` : `reduce_fold_live(FoldPrepared&&)` ne déplace que
+`fp.r` et laisse `fp.keys` valide jusqu'au retour de `measure`. Rejouer
+directement depuis `fp.keys` après la réduction évite la copie annoncée de
+274 Mo et ferme ce biais sans changer l'API produit. Il reste à partager le
+replayer T5 strict, comparer une signature commune et faire échouer la sonde sur
+tout refus ou désaccord.
+
+L'artefact n'est pas encore un reçu stable : un compteur natif suivi de la
+représentation mémoire de `ForestEvent`, sans magic, schéma, K, taille de
+record, boutisme, digest ni contrôle de fin de fichier, peut provoquer une
+allocation massive avant validation. Un wire champ par champ doit être borné
+contre la taille réelle du fichier avant allocation. Le RSS est celui du
+processus dédié — lecture, préparation, sortie et rejeu compris — et non celui
+du réducteur seul ; si le fold n'établit pas un nouveau pic, le différentiel
+reste inconclusif.
+
+Dans `docs/ECHELLE.md`, remplacer donc « RSS attribuable » par « pic de
+processus apparié ». Le −8,6 % compare le résident au vivant **sans partition**,
+alors que le bras vivant avec rejeu dépasse le résident ; il isole une ablation
+utile, pas encore un gain mémoire de l'objet complet.
 
 La session 13 fournit par ailleurs une baseline CUDA cohérente. La session au
 pin `839cf1ec` compile et exécute nominalement G0 et G1 q3 : huit exécuteurs au
@@ -78,56 +100,80 @@ naissances avant les morts du lot puis réutiliser la liste libre au lot suivant
 atteint exactement le chevauchement maximal. Il n'y a pas de verrou
 algorithmique caché à résoudre ici.
 
-Le pin ferme le marquage exact libre/vivant, les valeurs littérales des
-deltas de frontière, le préfixe `resource_exhausted`, la vacuité des deux sorties
-et le compte de débordement. Trois coutures courtes restent avant le pin fold.
-Premièrement, le balayage doit aussi parcourir **tous** les `slot_of_fid` : une
-entrée stale non nulle échappe aujourd'hui à la bijection annoncée. Il doit
-tester `x < nslots` avant toute lecture de `av[x]`, puis valider les backlinks.
-Un mutant qui duplique un créneau libre tout en en perdant un autre, donc à
-cardinalité conservée, doit tuer précisément ce marquage.
-Deuxièmement, le mutant de capacité rend encore 4 si les cas synthétiques
-ultérieurs produisent un désaccord générique ; isoler un verdict causal où le
-seul chemin vers 4 est le refus exact observé et non vacant. Les fixtures doivent
-également graver `batches` et `batch_levels`, pas seulement les afficher.
+Le pin `c19dc60d` ferme le marquage exact libre/vivant, les valeurs littérales
+des deltas de frontière, le préfixe `resource_exhausted`, la vacuité des deux
+sorties et le compte de débordement. `55c1f105` ferme en plus le défaut
+quadratique de la mesure. Quatre coutures locales, dans cet ordre, suffisent
+maintenant :
 
-Troisièmement, les cinq postes d'octets sont les bonnes catégories mais pas
-encore des pics : ils sont échantillonnés avant les croissances du lot courant,
-donc un unique ou dernier lot sous-compte `pre_list`, `post_list`, `scratch`,
-`r.deltas`, `cfree` et `slot_mark`; `born_at`, `died_at` et `batch_levels` sont
-omis. Échantillonner après chaque phase qui peut croître, puis publier ces
-nombres comme capacités de conteneurs, jamais comme somme allocator-précise. Le
-L2 complet reste O(F + I), et seul L3 peut retirer les tableaux d'occurrences.
+1. **Sécuriser l'oracle avant de l'étendre.** Dans la liste de composante,
+   tester `x < nslots` avant toute lecture de `av[x]`, puis borner
+   `av[x].fid` avant l'accès à `slot_of_fid`; capturer `next` seulement après
+   ces gardes. Parcourir ensuite **tous** les `slot_of_fid` pour détecter une
+   entrée stale. Un mutant de partition à cardinalité conservée doit tuer ce
+   témoin précis.
+2. **Rendre les deux petites portes causales.** La fixture de capacité vérifie
+   déjà le bon refus local, mais le binaire peut encore rendre 4 grâce à un
+   désaccord synthétique ultérieur : terminer immédiatement sur ce verdict
+   dédié. Pour les frontières, comparer `liv.batches` à la valeur littérale
+   `c.batches`, graver les vecteurs `batch_levels` attendus et inclure `level`
+   dans le rendu des deltas.
+3. **Mesurer les capacités une seule fois, exactement.** Toutes les capacités
+   comptées sont monotones : un relevé final après la boucle donne leur maximum
+   exact et évite même jusqu'à 127 balayages induits par le stride plancher.
+   Comptabiliser `born_at`/`died_at` avant leur destruction, puis inclure au
+   relevé final `cfree`, `slot_mark`, les scratchs imbriqués, les deltas
+   imbriqués et `batch_levels`. Appeler le même helper de finalisation avant un
+   refus anticipé si ces métriques y sont promises. Publier ces cinq postes
+   comme capacités de conteneurs séparées, jamais comme somme allocator-précise.
+4. **Comparer le même objet sans copie.** Conserver le bras sans rejeu comme
+   ablation, puis faire du bras avec rejeu le miroir complet en utilisant
+   `fp.keys` directement, le replayer strict et un digest commun. Versionner le
+   wire avant d'en faire un reçu.
 
-Le nouveau `--dump/--from` enlève bien le pipeline des deux bras et exécute un
-seul réducteur. Pour devenir un miroir complet, démarrer le chronomètre vivant
-avant la copie de `keys`, imposer le replayer T5 strict, produire la même
-signature de partition/deltas/niveaux dans les deux bras et refuser tout
-désaccord. Versionner le wire d'entrée, contrôler son digest et sa taille exacte,
-puis choisir le témoin par facettes ou empreinte préparée plutôt que par le seul
-nombre d'événements. Le RSS reste le pic du processus dédié — lecture,
-préparation, sorties et rejeu compris — et devient inconclusif si le fold
-n'établit pas un nouveau pic ; il n'est jamais « la mémoire du réducteur seul ».
-Contrebalancer les répétitions sous cpuset et conserver les sorties brutes. Les
-tableaux 8 k/16 k historiques restent des micro-mesures ; ils ne deviennent pas
-rétroactivement des mesures miroir, et deux tailles ne prouvent pas un facteur
-asymptotiquement constant.
+Le L2 complet reste O(F + I), et seul L3 peut retirer les tableaux
+d'occurrences. Contrebalancer ensuite les répétitions sous cpuset et conserver
+les sorties brutes. Les tableaux 8 k/16 k historiques restent des
+micro-mesures ; ils ne deviennent pas rétroactivement des mesures miroir, et
+deux tailles ne prouvent pas un facteur asymptotiquement constant.
 
 **Réponse V35 :** retenir le vivant comme **baseline L2 candidate** d'une future
 voie d'échelle, à sélectionner lorsque le futur préflight prouvera que le
 résident ne tient pas ; aujourd'hui L2 reste O(F + I), hors chemin produit et
-sans ce routeur. Le surcoût local d'environ 1,6 reste un budget à réduire, pas
-une destination. Ne pas remplacer encore l'arène de composantes : `cv` est déjà
-un vecteur contigu à indices recyclés. Après le banc corrigé, profiler séparément
-lifetime, naissances/morts, unions, tris, rejeu et `slot_alias`; n'essayer une
-seconde disposition par créneau que si les accès `cv` ressortent effectivement.
-La suppression L3 de `firstb`/`lastb`/`slot_of_fid` peut apporter davantage.
+sans ce routeur. Le surcoût historique d'environ 1,6 vient du micro-banc ; le
+miroir courant rapporte 2,52 pour le bras **sans rejeu**, donc pour un objet
+incomplet. Ce sont des budgets à réduire, pas une destination ; remesurer le
+miroir complet après suppression de la copie et raccord du replayer strict. Ne
+pas remplacer encore l'arène de composantes : `cv` est déjà un vecteur contigu
+à indices recyclés. Profiler séparément lifetime, naissances/morts, unions,
+tris, rejeu et `slot_alias`; n'essayer une seconde disposition par créneau que
+si les accès `cv` ressortent effectivement. La suppression L3 de
+`firstb`/`lastb`/`slot_of_fid` peut apporter davantage.
+
 Sur le seul
 [run reçu `uniform n=50000`](../receipts/campagne_g4_v5_20260828_instrument_scale/out/contrat_uniform_n50000.txt),
 la part mur du fold vaut
 `25245,8 / 56290,8 = 44,85 %` ; le calcul conditionnel d'Amdahl à environ +27 %
 est correct, sans devenir une part générale des autres familles ou du nouveau
 fold.
+
+**Réponse sur le coût de recherche q2/q3/q4 : la crainte est confirmée, mais
+elle dépend fortement de la géométrie.** Au meilleur grand reçu disponible
+(`82f613d3`, CPU 48 fils, 200 k), les corps q2/q3/q4 prennent 1,103 / 7,869 /
+12,323 s sur `uniform`, 0,940 / 47,667 / 83,786 s sur `eight_clusters`, et
+0,483 / 24,551 / 214,544 s sur `scanline`. Entre 50 k et 200 k, q3/q4 sont
+presque linéaires sur `uniform`, d'exposants observés 1,61/1,56 sur les
+clusters, mais 2,07/2,76 sur `scanline`. q2 ne cherche pas de `x`; q3 peut
+rescanner le cover pour chaque `x`, et q4 ajoute les `y` puis parfois un
+nouveau scan. Sur `scanline`, les rectangles restent presque linéaires, mais
+les ancres puis les `x` aigus approchent déjà une pente quadratique : le verrou
+est dans `|A| × |B|`, puis `x × cover` et q4 `x × y × cover`, pas dans la WSPD
+seule. Le
+[tableau, ses limites et la correction proposée](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md#complément--la-crainte-quadratique-est-confirmée-sur-scanline)
+est intégré à la question active. Ces 200 k prouvent un verrou au pin mesuré,
+pas la performance de `55c1f105` : instrumenter les itérations puis rejouer
+50/100/200 k au pin courant avant toute extrapolation. Il n'existe encore
+aucune mesure 1 M ou 10 M.
 
 **Ablation immédiate multi-CPU :** ne pas commencer par un nouveau pool général.
 Sur le témoin qui porte `490143/1231555/1353144` rectangles à 48 workers,
@@ -325,10 +371,12 @@ Quelques claims doivent encore rester étroits :
   créneaux a supprimé `LiveIndex` : aucune fixture de décalage arrière n'est à
   ajouter tant que ce hash ne revient pas comme repli compilé. Le hash constant
   des lifetimes externes reste dû à L3 ;
-- les cinq postes remplacent utilement `g_alloc_bytes`, mais sont échantillonnés
-  avant les croissances du lot courant. Les déplacer après chaque phase
-  allocatrice, inclure `born_at`/`died_at` et `batch_levels`, et retirer
-  d'`ECHELLE.md` l'ancien paragraphe « deux postes / 3,19 Mo » s'il subsiste.
+- les cinq postes remplacent utilement `g_alloc_bytes`. `55c1f105`
+  relève maintenant scratch et sortie après les croissances du lot et supprime
+  leur parcours quadratique. Comme toutes les capacités comptées sont
+  monotones, un relevé final unique est plus exact et moins cher ; enregistrer
+  séparément `born_at`/`died_at` avant leur destruction et inclure
+  `batch_levels`, `cfree` et `slot_mark` ;
 
 Les balayages structurels sont un oracle, pas un coût produit : le stride
 actuel peut en exécuter jusqu'à 127 malgré le plafond commenté à 64, et un
@@ -356,14 +404,26 @@ gardent un indice placé dans `cfree`.
 Enfin, `reduce_fold_live` reste hors du chemin produit et aucun gain CPU/RSS
 n'est reçu. Le nouveau régime `--dump/--from` fait maintenant lire le même flux
 d'événements à deux processus et chacun exécute un seul réducteur : la couture
-de mesure est donc correcte. Le bras vivant copie toutefois le catalogue après
-le temps de préparation mais avant son chronomètre de réduction, puis emploie un
-replayer faible et facultatif ; aucun digest commun ne refuse une divergence.
-Chronométrer cette copie, ou mieux rattacher sans copie le catalogue déplacé
-après réduction, imposer le replayer strict et publier la même signature
-d'objet dans les deux bras ferme le miroir sans modifier le pipeline produit.
-Le pic `ru_maxrss` reste un pic de bout en bout — entrée et préparation
-comprises — ce qui est précisément la mesure utile.
+de mesure est donc correcte. Le diff ne copie plus le catalogue dans l'ablation
+sans rejeu, mais le copie encore précisément dans le bras qui doit rendre
+l'objet complet. Cette copie est inutile : `fp.keys` reste valide après
+`reduce_fold_live(std::move(fp))`. L'utiliser directement, imposer le replayer
+strict et publier la même signature d'objet dans les deux bras ferme le miroir
+sans modifier le pipeline produit. Le pic `ru_maxrss` reste un pic de bout en
+bout — entrée et préparation comprises — ce qui est précisément la mesure
+utile.
+
+Sur `uniform n=8000`, Claude documente à `55c1f105`, sans sortie brute ni reçu :
+résident 4 097 ms et 1 166 Mo RSS, vivant sans rejeu 6 557 ms et 1 065 Mo, puis
+vivant avec rejeu 2 700 ms de préparation, 3 718 ms de réduction, 3 872 ms de
+rejeu et 1 330 Mo. Pour ce dernier bras, les composantes totalisent 10 290 ms,
+pas les 10 569 ms transcrites dans sa réponse ; vérifier la sortie brute avant
+de retenir un total. Le signal de décision reste utile : l'ablation L2 économise
+8,6 % du pic de processus au prix d'une réduction 2,52 fois plus lente, tandis
+que le seul bras qui restitue aujourd'hui la partition dépasse le résident. Ces
+valeurs restent des mesures Claude non reçues ; elles motivent le miroir strict
+et la suppression de la copie, pas un claim de gain mémoire du réducteur
+complet.
 
 Le protocole doit lancer deux invocations fraîches du binaire avec
 `digest=true` et exiger `fold_inflight=1`, `reduce_calls == orders`, les mêmes
@@ -606,6 +666,13 @@ valeurs, calculs et corrections détaillés restent dans
   mutants fold **9/9** sous ASan/UBSan (16,46 s). Cela couvre les chemins
   exercés, pas les corruptions de partition encore sans mutant ni le nominal
   fold massif sous sanitizer.
+- Sources ensuite épinglées par `55c1f105` : le nominal fold passe directement en
+  20,62 s sur 58 ordres, 5 194 737 facettes et 733 029 deltas, avec zéro
+  désaccord et zéro violation de vie, structure, partition ou vacuité. Un second
+  CTest sous charge concurrente passe en 87,55 s ; les six mutants passent
+  **6/6** en 0,17 s après reconstruction ciblée. Ces verts confirment la
+  correction fonctionnelle exercée du déplacement de mesure ; la dispersion du
+  nominal interdit d'en déduire un speedup.
 - Build Release CPU complet au pin `556c421e` : succès ; construction ciblée
   des portes fold au pin `bc66ade7` : succès.
 - CTests API, pool, T5, préfixe et lanes q3/q4 batched : 41/41 verts en

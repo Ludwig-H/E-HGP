@@ -301,10 +301,11 @@ Le reçu de session 11, versionné au pin `685e8e22` dans
 `82f613d3` : q4 `t_rects_ms = 214544,4` ms à 200 k. Ses branches disjointes
 comptent au moins 277 911 630 seeds tués
 par cellules, 491 912 062 par le cœur et 171 517 481 par la corde, soit
-941 341 173 seeds. À 10 µs de temps-fil par seed et 48 fils, ce **minorant**
-donne un contrôle de cohérence inférieur de 196,1 s, proche des 214,5 s
-mesurées. Le reçu réfute donc le modèle contenant l'hypothèse `seeds ×4`; il ne
-prouve pas encore un modèle prédictif exact à 10 µs par seed.
+941 341 173 seeds. À 10 µs de temps-fil par seed et 48 fils, ce calcul
+donnerait 196,1 s, proche des 214,5 s mesurées. Ce n'est toutefois pas un
+minorant mathématique : 10 µs est un ratio empirique. C'est seulement un
+contrôle d'ordre de grandeur qui réfute le modèle contenant l'hypothèse
+`seeds ×4`; le reçu ne prouve pas un modèle prédictif exact par seed.
 
 `c95cfa95` imprime désormais `GenerateStats::seeds` par lane et les
 complétions q4 : ce premier raccord est reçu. Avant toute projection, ajouter
@@ -313,6 +314,65 @@ les tests de sites cœur/corde, paires de complétion, candidats de profondeur e
 puis seulement normaliser la sonde K2 device, chauffée et répétée, par ces
 compteurs. Il n'est pas utile d'ouvrir une session G4 uniquement pour
 « trancher » une contradiction déjà réfutée arithmétiquement.
+
+#### Complément — la crainte quadratique est confirmée sur `scanline`
+
+Le plus grand reçu apparié reste la
+[session 11](../receipts/campagne_g4_v5_20260828_grille/RECU.txt), source
+`82f613d3`, CPU reference, 48 fils, `s=8`, `smax=11`, seed 3. Les valeurs
+ci-dessous sont `t_rects_ms` : tout le corps de chaque lane après découverte
+WSPD, donc construction des covers, prétests, recherche des `x`, profondeur et
+complétions. Elles ne chronomètrent pas la seule boucle qui découvre `x`.
+
+| famille | 50 k, q2/q3/q4 | 100 k, q2/q3/q4 | 200 k, q2/q3/q4 | exposant effectif observé 50→200 k, q2/q3/q4 |
+|---|---:|---:|---:|---:|
+| `uniform` | 0,207 / 2,026 / 3,034 s | 0,418 / 4,041 / 6,082 s | 1,103 / 7,869 / 12,323 s | 1,21 / 0,98 / 1,01 |
+| `eight_clusters` | 0,240 / 5,089 / 9,663 s | 0,482 / 13,726 / 25,659 s | 0,940 / 47,667 / 83,786 s | 0,99 / 1,61 / 1,56 |
+| `scanline_single_pass` | 0,128 / 1,394 / 4,673 s | 0,322 / 5,230 / 21,711 s | 0,483 / 24,551 / 214,544 s | 0,96 / 2,07 / 2,76 |
+
+À 200 k, en ajoutant la découverte WSPD propre à chaque lane, q2/q3/q4 valent
+respectivement 5,446 / 27,240 / 35,517 s sur `uniform`, 4,862 / 65,675 /
+107,388 s sur `eight_clusters`, et 1,158 / 26,274 / 216,623 s sur `scanline`.
+Ce dernier q4 représente environ 80 % des 267,701 s du pipeline. Le dernier
+doublement `scanline` multiplie son corps q4 par 9,88 : la grille a réduit le
+niveau 438 → 215 s, pas supprimé la mauvaise pente.
+
+Les compteurs confirment que cette pente n'est pas un bruit de chronométrage.
+Sur `scanline` 50/100/200 k, les `x` aigus q3 passent de 89,5 M à 322,7 M puis
+1,241 G (exposant effectif 1,90). Les seuls `x` q4 tués déjà comptabilisés
+passent de 60,1 M à 228,6 M puis 941,3 M (minorant d'exposant 1,99), et les
+évaluations Jung comptées de 2,44 G à 14,0 G puis 125,1 G (minorant d'exposant
+2,84). Les rectangles vivants restent proches du linéaire ; l'explosion
+commence dans `|A| × |B|`, puis dans les produits par cover.
+
+La lecture algorithmique explique cette dépendance à la géométrie :
+
+- q2 ne cherche aucun `x`; il parcourt seulement les paires d'ancrage
+  `A × B`. La somme de ces paires peut toutefois rester quadratique au pire ;
+- q3 parcourt le cover pour trouver chaque `x` aigu, puis rescane le cover pour
+  chaque seed survivant ([boucles concernées](../src/pipeline/generate.hpp#L384)) :
+  coût local potentiel quadratique en taille de cover ;
+- q4 parcourt les `x`, rescane le cover pour le cœur/corde, parcourt les
+  complétions `y`, puis peut rescanner le cover par tétraèdre
+  ([boucles concernées](../src/pipeline/generate.hpp#L474)) : coût local
+  potentiel cubique, fortement réduit mais non borné par les sorties anticipées
+  et la grille.
+
+Il n'existe donc aucune preuve globale subquadratique au code courant. Le bon
+prochain raccord n'est pas un port GPU supplémentaire. `seeds` et
+`q4_completions` existent déjà ; ajouter les itérations séparées de profondeur
+q3, cœur/corde q4 et profondeur q4, puis rejouer au **pin courant** 50/100/200 k
+avec trois répétitions. Le reçu 200 k ci-dessus prouve le verrou à `82f613d3`,
+pas la performance du HEAD ; aucune mesure 1 M ou 10 M n'existe. Ces trois
+tailles, une seed et un passage décrivent une pente locale, jamais une loi
+asymptotique. Tester d'abord un certificat ou traitement groupé de plusieurs
+seeds par ancre — raffinement de grille ou arrangement — qui retire réellement
+un produit. Une requête d'arbre ou un index dual **par seed** reste une ablation :
+elle peut alourdir q3, où les seeds morts s'arrêtent déjà vite, et ne retire ni
+le nombre de `x` ni le produit `x × y` de q4. Dans `docs/ECHELLE.md`, l'exposant
+« ~3 » doit enfin être daté comme chemin pré-grille ; le chemin grille reçu
+montre 2,76 sur 50→200 k et 3,30 sur le dernier doublement, sans en faire une
+borne asymptotique.
 
 ### V30 — occupation : trois objets, pas un compteur `%smid`
 
