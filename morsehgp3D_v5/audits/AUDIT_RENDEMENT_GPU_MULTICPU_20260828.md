@@ -1,6 +1,6 @@
 # Audit de résolution — rendement GPU et multi-CPU
 
-- **Dernier pin produit inspecté :** `615b9bcc` ; la baseline device/SCALE versionnée
+- **Dernier pin produit inspecté :** `bc66ade7` ; la baseline device/SCALE versionnée
   provient de `c95cfa95`, G0 de `fe54ccca` et G1 q3/q4 des trois commits
   `dd928111`–`556c421e`. Le nouveau reçu device exécute G0 et G1 q3 au pin
   `839cf1ec` ; il est versionné avec cet audit à `0656bf4c` et ne reçoit pas
@@ -387,8 +387,10 @@ d'environ 3,30 à 4,89/4,96 Gio. Le verrou n'est donc plus le nombre de
 producteurs : c'est la phase de reduce séquentielle et le digest fixe. L'état
 vivant et le trafic mémoire sont une hypothèse explicative à profiler, pas
 encore une cause reçue ; une table de hash et des listes intrusives peuvent
-aussi ralentir le chemin court. Le fold vivant de `615b9bcc` reste hors du
-chemin produit et n'a pas encore été comparé au résident sur le même périmètre.
+aussi ralentir le chemin court. Le fold vivant durci de `bc66ade7` reste hors
+du chemin produit et n'a pas encore été comparé au résident sur un périmètre
+attribuable ; la sonde postérieure au pin relance actuellement un second fold
+depuis le callback du pipeline et ne fournit donc pas ce miroir CPU/RSS.
 
 Scinder le protocole :
 

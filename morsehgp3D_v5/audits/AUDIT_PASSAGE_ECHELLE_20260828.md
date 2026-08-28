@@ -1,7 +1,7 @@
 # Conception auditée de résolution — passage à 10–30 millions de points
 
-- **Derniers commits techniques relus pour ce sujet :** `615b9bcc` pour le
-  réducteur vivant, `fb7e9d40` pour la
+- **Derniers commits techniques relus pour ce sujet :** `bc66ade7` pour le
+  réducteur vivant durci, `fb7e9d40` pour la
   porte de préfixe durcie et `f4b554fe` pour le smoke T5
   `(catalogue, deltas) -> partition`. Les changements G1 antérieurs restent
   indépendants du passage à l'échelle du fold.
@@ -44,74 +44,73 @@ explicitement décrite sans fausse cocircularité et mutants propres aux champs
 d'événement et niveaux de lots. Ces remarques sont closes et ne doivent plus
 être remises dans l'ordre de travail.
 
-### Pin L2 `615b9bcc` — cœur prometteur, claims à requalifier
+### Pin L2 `bc66ade7` — raccords reçus, autorité T5 encore trop faible
 
-Le réducteur `fold_live.hpp`, désormais versionné et poussé, reproduit
-nominalement le résident :
-58 ordres, 5 194 737 facettes, mêmes deltas/compteurs et zéro invariant violé.
-Après contre-audit, sa porte nominale passe aussi : 5 660 568 relocalisations,
-zéro invariant, 15 grands ordres mesurés et un ratio maximal d'alias de 7,29 %
-sur ceux-ci ; une exécution nominale indépendante termine au code 0 en 49,2 s.
-La fausse borne quatre fois trop stricte a été remplacée par une borne agrégée
-small-to-large valide mais lâche. Le commentaire initial sur `--reloc-ratio`
-reste à retirer ;
-une fixture où un nouveau singleton logique absorbe répétitivement une grande
-composante encore vivante doit encore tuer causalement
-`physical-root-is-logical-root`, de préférence via un compteur maximum par
-alias plutôt qu'un ratio empirique agrégé.
+Le pin garde le différentiel nominal du réducteur et applique correctement la
+majeure partie des raccords demandés : compte exact des alias avant et après les
+morts à chaque lot, cohérence `idx.used`, balayages structurels ajoutés, vacuité
+finale, deux témoins de fraction séparés, maximum de déplacements par alias,
+cas small-to-large adverse et timeouts. Les cinq injections rendent rapidement
+le code 4 annoncé. D et E opposent enfin l'ordre logique à l'ordre des clés. Ce
+cœur doit être conservé.
 
-Le mutant `free-on-absorb` recycle encore `cv[small]` alors que ses alias et
-l'index conservent cet indice. Le champ `dead` empêche ensuite leur nettoyage :
-la réécriture n'est pas structurellement sûre, sous-décompte les composantes
-jusqu'à `UINT64_MAX` et peut terminer par signal au lieu du code 4. Elle cible
-en outre le perdant **physique** `small`, pas nécessairement l'absorbé
-sémantique `cb`. Simuler la faute sans mémoire invalide : mémoriser les alias de
-`cb`, faire l'union normale, puis les évincer proprement après émission. Auditer
-la structure avant recyclage et borner tous les CTests du réducteur par
-`TIMEOUT` ; ni hang ni crash ne doit tenir lieu de mutant tué.
+La porte des fixtures doit toutefois comparer tout ce qu'elle annonce : son
+rendu omet encore `level`, `batch_levels`, refus et compteurs ; A-300 et E-50
+n'ont pas d'attente littérale, et le plancher global de 6 sur 7 appels ne
+protège pas chaque motif. Ajouter un comparateur complet et des planchers
+nommés, ou annoncer précisément cinq sorties littérales plus deux stresses
+différentiels.
 
-`root-key-mutable` ne teste pas non plus ce que son nom promet : il remplace le
-canonique par la tête physique et duplique essentiellement
-`canon-not-min-on-union`, sans muter `logical_root_fid`. Garder le canonique
-minimum, corrompre uniquement la racine logique et utiliser une fixture où
-gagnant physique et absorbant logique diffèrent, puis où au moins deux sorties
-rendent l'ordre post-lot observable.
+Le mutant de coût peut légitimement être tué par un plafond théorique, mais sa
+neutralité sémantique doit précéder son code 4. Le chemin synthétique retourne
+actuellement dès le dépassement après une comparaison plus courte que la porte
+nominale. Comparer d'abord deltas complets, niveaux, compteurs, détecteurs et
+partition ; toute divergence rend 1 ou 3, puis seulement le dépassement
+non-vacant rend 4. Le maximum par alias est le témoin causal ; la borne agrégée
+peut rester redondante.
 
-Trois contrats sont encore plus faibles que les commentaires : T6 compare les
-alias de chaque frontière au **pic global** des durées de vie, alors que les
-tableaux déjà construits permettent l'égalité
-`live_aliases == live_exact[b]` avant morts et l'égalité exacte après morts.
-Elle ne valide ni `idx.used == live_alias`, ni la bijection index/alias, ni les
-listes `prev/next` et `count`, ni la vacuité finale. Enfin, la porte compare les
-vecteurs de deltas sans
-les rejouer : T5 reste donc `(catalogue externe, deltas) -> partition`, jamais
-`deltas -> facet_keys`, notamment à cause des singletons implicites. Raccorder
-le rejeu existant avec le catalogue du résident ferme cette couture sans
-modifier le chemin produit.
+Le « rejeu T5 » local est une connectivité finale conditionnelle, pas encore le
+replayer indépendant annoncé. Il ignore `output`, lots, niveaux et clés hors
+catalogue, puis compare au `final_canon_fid` du même résident sans contrôle
+négatif. Extraire le replayer strict de `delta_replay_gate.cpp` dans l'oracle et
+le partager avec la porte vivante ; une clé absente ou un delta incohérent doit
+être rejeté. Cela ferme T5 sans mettre l'oracle sur le chemin produit.
 
-Ce prototype ne démontre pas encore le gain CPU visé. Son chrono `reduce`
-commence après la passe FIRST/LAST et ses allocations ; `live_bytes_peak` omet
-ces tableaux, les capacités d'arènes/free-lists, scratchs, `keys` et `ev_fid` ;
-la porte ne compare aucun temps résident/vivant. Mesurer les deux chemins sur
-le même périmètre complet, avec RSS, et ajouter plateau mono-lot, chaîne à
-racine morte, absorption adverse et hash constant. L'exactitude nominale est un
-progrès réel ; le gain de mur et de mémoire reste à établir. En attendant,
-renommer `live_bytes_peak` en `logical_live_bytes` évite de lui attribuer une
-mesure d'allocation qu'il ne porte pas.
+Les fixtures demandent encore deux dents distinctes. Le hash constant ne touche
+que `FacetIntern`, jamais les collisions et le décalage arrière de `LiveIndex` :
+ajouter une petite table traversant 15 vers 0, supprimer tête, milieu et queue,
+puis vérifier `get`, `used_` et réinsertion. Les trois triangles de D reçoivent
+l'ordre des sorties mais portent neuf alias ; conserver D et ajouter un unique
+simplex K = 2 qui vérifie explicitement le pic transitoire 3 et la vacuité.
 
-La ligne imprimée doit aussi séparer deux témoins. `fraction_max=7,29 %` vient
-du pire ratio sur les grands ordres, alors que `pic_alias=16929`,
-`facettes_de_l_ordre=733687` et les octets viennent du plus grand pic absolu ;
-ce dernier couple vaut 2,31 %. Conserver ensemble numérateur, dénominateur et
-octets du témoin qui maximise chaque mesure, ou publier deux lignes nommées.
+Les scans structurels doivent rester un oracle de test. Le stride entier actuel
+peut produire jusqu'à 127 scans malgré le commentaire « au plus 64 » et le
+parcours déréférence `av[x]` avant d'avoir borné `x`. Utiliser un stride plafond,
+contrôler bornes, backlinks, nombre de composantes, table et free-lists, puis
+désactiver ces parcours dans le chemin mesuré. Les compteurs de vie exacts
+restent, eux, une garde O(1) par frontière.
 
-En conséquence, les lignes du HEAD qui marquent L2 « livré » dans
-`docs/ECHELLE.md` et annoncent cinq mutants tués dans `docs/PLAN_DE_TESTS.md`
-sont prématurées : `run_expect.cmake` refuse explicitement un arrêt par signal,
-donc le core dump de `free-on-absorb` n'est pas un code 4. Remplacer
-provisoirement « livré » par « prototype nominal », `T6 vérifié` par le
-contrat faible effectivement testé et « facteur 15 » par « estimation logique
-au témoin ». Cette requalification n'enlève rien au progrès d'exactitude.
+La formule de porte doit aussi être distinguée du théorème. Le code autorise
+`ceil(log2(F + 2)) + 1`, alors que le doublement small-to-large donne la borne
+plus nette `floor(log2(F))` par alias. La première peut rester une marge sûre,
+mais les documents ne doivent pas les écrire comme une seule formule.
+
+La mesure mémoire reste un ratio de structures choisies. `g_alloc_bytes` prend
+un maximum global et l'imprime avec l'ordre du maximum d'alias ; les témoins
+peuvent diverger. Échantillonner aussi après les morts, où les free-lists
+grandissent, et conserver chaque valeur avec son ordre. Scratchs, sortie,
+FIRST/LAST, catalogue et `ev_fid` restent hors de ce compte : ne jamais le
+nommer RSS ni mémoire bout en bout.
+
+`free-on-absorb` ne recycle plus ses alias mais recycle encore leur composante,
+dont ils gardent l'indice. Son code 4 Release est reçu ; le vert ASan/UBSan est
+rapporté par Claude mais n'a pas été rejoué par cet audit. Le mutant reste
+diagnostiquement sale. Enfin, aucune
+accélération CPU/RSS n'est reçue. La sonde postérieure au pin relance un fold
+depuis `on_forest`, donc mesure le résident déjà vivant plus le second
+réducteur. Un miroir attribuable exécute dans deux processus le même flux
+d'événements avec exactement un réducteur par processus, replayer strict et
+digest commun inclus côté vivant.
 
 ## Solution 1 — fold vivant sans ancienne forêt union-find
 

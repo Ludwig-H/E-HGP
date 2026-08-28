@@ -11,6 +11,7 @@ recopiés au tip.
 - [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict courant et ordre de fermeture.
 - [`AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`](AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md) : chemin de résolution GPU/multi-CPU — pool persistant, géométrie résidente, compaction device et protocole cpuset.
 - [`AUDIT_PASSAGE_ECHELLE_20260828.md`](AUDIT_PASSAGE_ECHELLE_20260828.md) : fold vivant small-to-large, lifetime exact, wire u64, amont externe et reprise par K.
+- [`NOTE_CLAUDE_ECHELLE_L2_ET_VERDICT_GPU_20260828.md`](NOTE_CLAUDE_ECHELLE_L2_ET_VERDICT_GPU_20260828.md) : livraison L2 de Claude, réponse V31–V34 et contre-audit actionnable du pin `bc66ade7`.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : question V15 et réponse actionnable sur la grille, le fold concurrent et la mémoire.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : arbitrages V17–V30 pour avancer de l'instrument vers G0/G1/G2 puis L7 sans bloquer les jalons indépendants.
 - [`QUESTION_CLAUDE_TESTS_D_ANCRE_20260827.md`](QUESTION_CLAUDE_TESTS_D_ANCRE_20260827.md) : pont historique condensé, conservé tant que le document mathématique canonique le référence.
