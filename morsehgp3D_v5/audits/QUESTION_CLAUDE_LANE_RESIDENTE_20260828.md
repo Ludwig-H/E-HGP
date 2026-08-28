@@ -522,6 +522,17 @@ seule », mais ne localise pas encore le travail résiduel :
   formation hôte des lots, mais sa seule valeur maximale ne prouve aucun mur
   GPU. Mesurer le maximum après routage/subdivision.
 
+Une reproduction locale Release du pin `107051ce` ferme aussi trois détails
+factuels, sans constituer un reçu : `smax=11` donne `h3=9`, pas 10 ; les 2 176
+sites cités ne prouvent de toute façon ni neuf témoins `W3` ni neuf témoins dans
+chaque secteur ; enfin la seconde passe choisit l'ancre la plus riche sans
+réappliquer l'histogramme, donc elle n'établit même pas que cette ancre appartient
+aux 960 ancres post-histogramme. Les trois rectangles de tête ne sont pas
+« petits » non plus : `|A||B|=1600,1520,2200`, contre une médiane globale de 2,
+un p99 de 77 et un maximum de 2 600 dans cette exécution. Le premier combine
+donc population exceptionnelle **et** grand `Dmax`; opposer « rayon » à
+« population » masque précisément le produit à réduire.
+
 La phrase `uniform` « rien à rendre sous-quadratique » doit devenir : « aucune
 urgence de pente sur cette famille aux tailles reçues ». Sa constante, les
 autres familles et la borne déterministe restent des sujets distincts.
@@ -543,7 +554,58 @@ anchors = anchors_killed_hist + anchors_post_hist
 q4_depth_entries = depth_killed_q4 + candidates_q4
 ```
 
-Ensuite seulement : (A) conserver la liste des `x` aigus déjà calculée par la
+#### Premier levier certifiable : raffiner après séparation, avant `A x B`
+
+Le signal `Dmax` suggère une ablation immédiatement testable qui ne demande
+aucun nouveau certificat géométrique. Dans `alive_rectangles`, lorsqu'un
+rectangle est déjà séparé mais reste vivant après
+`count_universal_witnesses(..., with_corners=true)`, autoriser une profondeur
+bornée `L` de subdivision supplémentaire du facteur interne de plus grand
+diamètre. Les deux enfants repassent ensuite par **le même** comptage universel ;
+si le prédicat entier `separated` n'est pas conservé pour les deux enfants, le
+raffinement facultatif est annulé. Un enfant certifié mort disparaît, les autres
+sont à nouveau subdivisés ou émis.
+
+La sûreté est courte. Les deux enfants radix forment une partition disjointe du
+facteur scindé ; leurs produits cartésiens forment donc une partition disjointe
+du rectangle parent. Aucun couple n'est perdu ni dupliqué. Une branche n'est
+supprimée que par le certificat suffisant déjà consommé par la production. En
+outre, les points du frère qui ne sont plus des extrémités du sous-rectangle
+deviennent des témoins extérieurs légitimes : des boîtes plus petites peuvent
+ainsi renforcer le minorant sans changer l'objet. La porte doit néanmoins exiger
+l'égalité des digests de candidats, des sorties et de la forêt, car c'est le
+contrat observable actuel.
+
+Ne pas en faire encore une politique par défaut. Exposer dans la sonde `L=0,1,2,3`
+et un seuil de masse de paires, puis rejouer d'abord q3 `scanline` 8/16/32 k. Pour
+chaque bras, imprimer rectangles supplémentaires, branches tuées après
+séparation, paires effectivement énumérées, opérations des histogrammes, sites
+de prétest réellement visités, covers construits, `sc.visits`, seeds réels et
+temps. Le succès n'est pas une baisse de `seeds_cf` : il faut une baisse du temps
+et des visites **payées** supérieure au surcoût des nouveaux comptages. Si
+`L=1..3` ne réduit pas ces deux masses au pin courant, abandonner ce raccord ;
+si q3 répond, le tester ensuite séparément en q4 et sur `terrain`/clusters.
+
+Avant même ce prototype, ventiler par classe les verdicts
+`anchor_kill_cumulated` en `k=1` (`W_q`) et `k=2` (secteurs). Seule la masse
+`k=1` borne le gain de mortalité accessible au certificat universel actuel ; un
+rectangle dont les ancres meurent seulement par secteurs ne sera pas supprimé
+par cette subdivision. Le zéro `W4` déjà observé sur le run q4 fait donc de ce
+raccord une priorité **q3**. En q4, il ne pourrait d'abord gagner que par des
+candidats de handles/requête plus petits, ce qui doit être établi par la trace
+de production avant de payer de nouveaux comptages.
+
+Le compteur exploratoire en cours `killed==alive` doit, pour la même raison,
+être nommé `rectangles_entierement_certifies_par_les_pretests_courants`, pas
+« gain maximal de n'importe quel test de rectangle ». `W_q` et secteurs sont
+des conditions suffisantes, non nécessaires ; la grille, le corps complet ou
+un futur certificat peuvent tuer ce qu'ils laissent vivre, et la subdivision
+peut supprimer des enfants d'un parent mixte. Ses `seeds` et `covers` restent
+en outre contrefactuels. La seule masse directement évitable qu'il mesure est
+la masse de paires de ces rectangles, sous réserve d'inclure aussi les
+rectangles dont toutes les paires sont déjà mortes à l'histogramme.
+
+Ensuite : (A) conserver la liste des `x` aigus déjà calculée par la
 politique de grille ; (B) reporter directement les `b` post-histogramme avec
 seuil strict et ordre conservé, petite ablation probablement secondaire ;
 (C) raffiner les seules cellules vivantes occupées sur les ancres lourdes. Le
