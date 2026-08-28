@@ -45,6 +45,11 @@ int main(int argc, char** argv) {
       lim.sites = (size_t)v;
     } else if (arg.rfind("--min-flushes=", 0) == 0) min_flushes = (u64)std::atoll(arg.c_str() + 14);
     else if (arg.rfind("--expect-route=", 0) == 0) expect_route = arg.substr(15);
+    else if (arg.rfind("--wire=", 0) == 0) {  // G1 : wire par indices (geometrie residente) ou SoA
+      if (arg.substr(7) == "index") lim.wire_index = true;
+      else if (arg.substr(7) == "soa") lim.wire_index = false;
+      else return 2;
+    }
     else return 2;
   }
   int ndev = 0;

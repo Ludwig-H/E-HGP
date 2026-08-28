@@ -50,14 +50,20 @@ struct Q3BatchVerdict {
 
 // Un lot = une suite d'ANCRES (de un ou plusieurs rectangles d'un meme
 // ouvrier) ; les vecteurs sont reutilises entre lots.
+// Geometrie d'ancre du wire par indices (G1) : a+b et D² — layout identique a gpu::AnchorGeom.
+struct Q3BatchAnchorGeom {
+  i64 sx = 0, sy = 0, sz = 0, D2 = 0;
+};
 struct Q3Batch {
   std::vector<i64> u0, u1, u2, q;
+  std::vector<u32> site_index;             // wire G1 : indice de position unique par site (4 o), parallele a u0..q
+  std::vector<Q3BatchAnchorGeom> ageom;    // wire G1 : une geometrie par ancre
   std::vector<Q3BatchAnchor> anchors;
   std::vector<Q3BatchSeed> seeds;
   std::vector<BallCandidate> emit_if_alive;  // un par seed
   std::vector<Q3BatchVerdict> verdicts;      // rempli par l'executeur
   void clear() {
-    u0.clear(); u1.clear(); u2.clear(); q.clear();
+    u0.clear(); u1.clear(); u2.clear(); q.clear(); site_index.clear(); ageom.clear();
     anchors.clear(); seeds.clear(); emit_if_alive.clear(); verdicts.clear();
   }
 };
@@ -68,12 +74,14 @@ struct Q3Batch {
 struct Q3BatchView {
   size_t n_sites = 0, n_seeds = 0, n_anchors = 0, n_emit = 0, n_verdicts = 0;
   size_t n_u1 = 0, n_u2 = 0, n_q = 0;  // tailles des autres SoA
+  size_t n_index = 0, n_ageom = 0;      // wire G1 (0 = absent ; sinon = n_sites et n_anchors)
   const Q3BatchAnchor* anchors = nullptr;
   const Q3BatchSeed* seeds = nullptr;
 };
 inline Q3BatchView q3_batch_view(const Q3Batch& b) {
   Q3BatchView v;
   v.n_sites = b.u0.size(); v.n_u1 = b.u1.size(); v.n_u2 = b.u2.size(); v.n_q = b.q.size();
+  v.n_index = b.site_index.size(); v.n_ageom = b.ageom.size();
   v.n_seeds = b.seeds.size(); v.n_anchors = b.anchors.size(); v.n_emit = b.emit_if_alive.size();
   v.n_verdicts = b.verdicts.size();
   v.anchors = b.anchors.data(); v.seeds = b.seeds.data();
@@ -87,6 +95,8 @@ inline bool validate_q3_batch_view(const Q3BatchView& v, std::string* why) {
   if (v.n_sites > (size_t)UINT32_MAX) { *why = "lot q3 : plus de 2^32 - 1 sites"; return false; }
   if ((v.n_anchors && !v.anchors) || (v.n_seeds && !v.seeds)) { *why = "lot q3 : pointeur nul avec un compte non nul"; return false; }
   if (v.n_u1 != v.n_sites || v.n_u2 != v.n_sites || v.n_q != v.n_sites) { *why = "lot q3 : tailles SoA differentes"; return false; }
+  if (v.n_index != 0 && v.n_index != v.n_sites) { *why = "lot q3 : wire par indices de taille differente des sites"; return false; }
+  if (v.n_ageom != 0 && v.n_ageom != v.n_anchors) { *why = "lot q3 : une geometrie par ancre attendue"; return false; }
   if (v.n_emit != v.n_seeds) { *why = "lot q3 : un candidat par seed attendu"; return false; }
   if (v.n_anchors > (size_t)UINT32_MAX || v.n_seeds > (size_t)UINT32_MAX) { *why = "lot q3 : plus de 2^32 - 1 ancres ou seeds"; return false; }
   for (size_t a = 0; a < v.n_anchors; ++a) {
@@ -144,6 +154,7 @@ struct BatchLimits {
   // (l'option CLI --cell-min-sites gouverne la production ET les lanes par
   // lots/device ; 0 = mode force des tests) — aucun doublon ici.
   int gpu_executors = 4;  // pool d'executeurs device persistant (G0), 1..8
+  bool wire_index = false;  // G1 : covers par INDICES u32 + geometrie residente (defaut : SoA, jusqu'a reception CUDA)
 };
 
 // HISTOGRAMME PAR CLASSE log2 (instrument recevable, audit du 28 aout 2026 :
@@ -298,8 +309,10 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
           const u32 begin = (u32)b->u0.size();
           const size_t nc = sc.cover.size();
           b->anchors.push_back(Q3BatchAnchor{begin, (u32)nc});
+          b->ageom.push_back(Q3BatchAnchorGeom{pa.x + pb.x, pa.y + pb.y, pa.z + pb.z, D2});
           for (size_t i = 0; i < nc; ++i) {
             b->u0.push_back(sc.su0[i]); b->u1.push_back(sc.su1[i]); b->u2.push_back(sc.su2[i]); b->q.push_back(sc.sq[i]);
+            b->site_index.push_back((u32)sc.cover[i].u);  // wire G1 (4 o/site) : les memes sites, dans le meme ordre
           }
         }
         const Q3Form f3 = q3_form(pa, pb, px);

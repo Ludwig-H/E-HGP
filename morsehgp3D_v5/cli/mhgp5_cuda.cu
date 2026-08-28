@@ -27,6 +27,7 @@ int main(int argc, char** argv) {
   bool gpu = false;
   size_t gpu_min_sites = 1;  // 1 = toute ancre au device ; N = seulement les covers d'au moins N sites
   int gpu_executors = 4;  // pool persistant (G0), 1..8
+  bool gpu_wire_index = false;  // G1 : covers par indices u32 + geometrie residente (q3)
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
     const auto val = [&](const char* prefix) -> const char* {
@@ -43,7 +44,11 @@ int main(int argc, char** argv) {
     else if (const char* v = val("--shell-cap=")) opt.shell_cap = (size_t)std::atoll(v);
     else if (arg == "--digest") opt.digest = true;
     else if (arg == "--gpu") gpu = true;
-    else if (const char* v = val("--gpu-executors=")) {
+    else if (const char* v = val("--gpu-wire=")) {
+      if (std::string(v) == "index") gpu_wire_index = true;
+      else if (std::string(v) == "soa") gpu_wire_index = false;
+      else ok = false;
+    } else if (const char* v = val("--gpu-executors=")) {
       gpu_executors = std::atoi(v);
       if (gpu_executors < 1 || gpu_executors > gpu::kGpuExecutorsMax) ok = false;
     } else if (const char* v = val("--gpu-min-sites=")) {
@@ -74,6 +79,7 @@ int main(int argc, char** argv) {
     BatchLimits lim;
     lim.device_min_sites = gpu_min_sites;
     lim.gpu_executors = gpu_executors;
+    lim.wire_index = gpu_wire_index;
     opt.q3_override = [&, lim](const CloudIndex& ix, const GenerateOptions& g, std::vector<BallCandidate>* out, GenerateStats* st) {
       gpu::generate_q3_device(ix, g, out, st, &kernel_ms, &launches, lim, &bs3, &sg3);
     };
@@ -137,8 +143,8 @@ int main(int argc, char** argv) {
     // Cycle de vie des executeurs (creation, flux, evenements, allocations, destruction) : HORS executor_ms_sum,
     // cumule sur le processus (les executeurs thread_local des deux lanes), somme sur les fils — jamais un mur.
     const gpu::ExecutorLifecycle& lc = gpu::ExecutorLifecycle::global();
-    std::printf("gpu_cycle_de_vie executeurs_crees=%llu cycle_de_vie_ms_sum=%.1f pool_executeurs=%d\n", (unsigned long long)lc.created.load(),
-                (double)lc.lifecycle_ns.load() / 1e6, gpu_executors);
+    std::printf("gpu_cycle_de_vie executeurs_crees=%llu cycle_de_vie_ms_sum=%.1f pool_executeurs=%d wire=%s\n", (unsigned long long)lc.created.load(),
+                (double)lc.lifecycle_ns.load() / 1e6, gpu_executors, gpu_wire_index ? "index" : "soa");
   }
   // Pic de residence MESURE (RSS max du processus), jamais un pic annonce.
   struct rusage ru;

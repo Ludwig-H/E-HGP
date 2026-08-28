@@ -18,6 +18,7 @@
 #pragma once
 #include <chrono>
 
+#include <memory>
 #include <mutex>
 #include <stdexcept>
 #include <string>
@@ -56,6 +57,44 @@ inline double ms_host_since(std::chrono::steady_clock::time_point t0) {
   return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
 }
 
+// GEOMETRIE RESIDENTE (G1) : positions uniques du CloudIndex televersees UNE
+// fois par lane (3 x i32 par position : 50 k -> 600 Ko, 10 M -> 120 Mo), lues
+// par les kernels a wire par indices ; partagee en lecture seule par les
+// executeurs du pool. RAII, jamais de fuite sur exception.
+struct GpuGeometry {
+  int *d_px = nullptr, *d_py = nullptr, *d_pz = nullptr;
+  size_t count = 0;
+  u64 bytes = 0;
+  explicit GpuGeometry(const CloudIndex& ix) {
+    count = ix.upos.size();
+    std::vector<int> hx(count), hy(count), hz(count);
+    for (size_t i = 0; i < count; ++i) { hx[i] = (int)ix.upos[i].x; hy[i] = (int)ix.upos[i].y; hz[i] = (int)ix.upos[i].z; }
+    try {
+      cuda_check(cudaMalloc(&d_px, count * sizeof(int)), "cudaMalloc geometrie x");
+      cuda_check(cudaMalloc(&d_py, count * sizeof(int)), "cudaMalloc geometrie y");
+      cuda_check(cudaMalloc(&d_pz, count * sizeof(int)), "cudaMalloc geometrie z");
+      cuda_check(cudaMemcpy(d_px, hx.data(), count * sizeof(int), cudaMemcpyHostToDevice), "geometrie x");
+      cuda_check(cudaMemcpy(d_py, hy.data(), count * sizeof(int), cudaMemcpyHostToDevice), "geometrie y");
+      cuda_check(cudaMemcpy(d_pz, hz.data(), count * sizeof(int), cudaMemcpyHostToDevice), "geometrie z");
+    } catch (...) {
+      release();
+      throw;
+    }
+    bytes = 3 * count * sizeof(int);
+  }
+  ~GpuGeometry() { release(); }
+  GpuGeometry(const GpuGeometry&) = delete;
+  GpuGeometry& operator=(const GpuGeometry&) = delete;
+  GeomDev dev() const { return GeomDev{d_px, d_py, d_pz}; }
+ private:
+  void release() {
+    if (d_px) cudaFree(d_px);
+    if (d_py) cudaFree(d_py);
+    if (d_pz) cudaFree(d_pz);
+    d_px = d_py = d_pz = nullptr;
+  }
+};
+
 class Q3DeviceExecutor {
  public:
   Q3DeviceExecutor() { cuda_check(cudaStreamCreate(&stream_), "stream"); }
@@ -71,7 +110,9 @@ class Q3DeviceExecutor {
   inline static ConcurrencyGauge gauge;  // partage par tous les executeurs q3 du processus
 
   // `d` (facultatif) recoit les mesures DE CE LOT (ajoutees) ; `total` les cumule toujours.
-  void scan(Q3Batch* b, u32 h3, bool nonstrict, DeviceExecutorStats* d = nullptr) {
+  // `geom` (facultatif) + `wire_index` : chemin G1 (indices u32 + geometrie residente) ; sinon wire SoA.
+  void scan(Q3Batch* b, u32 h3, bool nonstrict, DeviceExecutorStats* d = nullptr, const GpuGeometry* geom = nullptr,
+            bool wire_index = false) {
     if (broken_) throw std::runtime_error("cuda : executeur q3 inutilisable apres une erreur d'allocation");
     std::string why;
     if (!validate_q3_batch(*b, &why)) throw std::invalid_argument(why);
@@ -94,16 +135,26 @@ class Q3DeviceExecutor {
     static_assert(sizeof(Q3BatchSeed) == sizeof(SeedJob), "Q3BatchSeed et SeedJob doivent avoir le meme layout");
     static_assert(sizeof(Q3BatchAnchor) == sizeof(AnchorRange), "layout des ancres");
     static_assert(sizeof(Q3BatchVerdict) == sizeof(SeedOut), "layout des verdicts");
+    static_assert(sizeof(Q3BatchAnchorGeom) == sizeof(AnchorGeom), "layout de la geometrie d'ancre");
+    const bool use_idx = wire_index && geom && b->site_index.size() == ns && b->ageom.size() == na;
+    if (wire_index && !use_idx) throw std::invalid_argument("lot q3 : wire par indices demande sans indices/geometrie complets");
     const auto t_issue = std::chrono::steady_clock::now();
     ev_h0_.record(stream_);
-    m.h2d_bytes += up(d_u0_, b->u0.data(), ns) + up(d_u1_, b->u1.data(), ns) + up(d_u2_, b->u2.data(), ns) + up(d_q_, b->q.data(), ns);
+    if (use_idx) {
+      m.h2d_bytes += up(d_idx_, b->site_index.data(), ns);
+      m.h2d_bytes += up(d_ageom_, reinterpret_cast<const AnchorGeom*>(b->ageom.data()), na);
+    } else {
+      m.h2d_bytes += up(d_u0_, b->u0.data(), ns) + up(d_u1_, b->u1.data(), ns) + up(d_u2_, b->u2.data(), ns) + up(d_q_, b->q.data(), ns);
+    }
     m.h2d_bytes += up(d_jobs_, reinterpret_cast<const SeedJob*>(b->seeds.data()), nj);
     m.h2d_bytes += up(d_anchors_, reinterpret_cast<const AnchorRange*>(b->anchors.data()), na);
     ev_h1_.record(stream_);
     const unsigned threads = 256, wpb = threads / 32;
     const unsigned blocks = (unsigned)((nj + wpb - 1) / wpb);
-    k_scan<<<blocks, threads, 0, stream_>>>(d_jobs_, (unsigned)nj, d_anchors_, d_u0_, d_u1_, d_u2_, d_q_, h3, false, nonstrict,
-                                            d_out_);
+    if (use_idx)
+      k_scan_idx<<<blocks, threads, 0, stream_>>>(d_jobs_, (unsigned)nj, d_anchors_, d_idx_, geom->dev(), d_ageom_, h3, false, nonstrict, d_out_);
+    else
+      k_scan<<<blocks, threads, 0, stream_>>>(d_jobs_, (unsigned)nj, d_anchors_, d_u0_, d_u1_, d_u2_, d_q_, h3, false, nonstrict, d_out_);
     cuda_check(cudaGetLastError(), "lancement k_scan");
     m.launches += 1;
     ev_k1_.record(stream_);
@@ -129,6 +180,8 @@ class Q3DeviceExecutor {
   cudaStream_t stream_{};
   CudaEvent ev_h0_, ev_h1_, ev_k1_, ev_d1_;  // crees une fois par executeur (pas par lot)
   i64 *d_u0_ = nullptr, *d_u1_ = nullptr, *d_u2_ = nullptr, *d_q_ = nullptr;
+  unsigned* d_idx_ = nullptr;      // wire G1 (capacite cap_sites_)
+  AnchorGeom* d_ageom_ = nullptr;  // wire G1 (capacite cap_anchors_)
   SeedJob* d_jobs_ = nullptr;
   AnchorRange* d_anchors_ = nullptr;
   SeedOut* d_out_ = nullptr;
@@ -170,16 +223,18 @@ class Q3DeviceExecutor {
       const bool gs = ns > cap_sites_, gj = nj > cap_jobs_, ga = na > cap_anchors_;
       const size_t cs = gs ? ns + ns / 2 : 0, cj = gj ? nj + nj / 2 : 0, ca = ga ? na + na / 2 : 0;
       i64 *u0 = nullptr, *u1 = nullptr, *u2 = nullptr, *q = nullptr;
+      unsigned* idx = nullptr;
+      AnchorGeom* ageom = nullptr;
       SeedJob* jobs = nullptr;
       SeedOut* out = nullptr;
       AnchorRange* anchors = nullptr;
-      if (gs) { u0 = t.alloc<i64>(cs); u1 = t.alloc<i64>(cs); u2 = t.alloc<i64>(cs); q = t.alloc<i64>(cs); }
+      if (gs) { u0 = t.alloc<i64>(cs); u1 = t.alloc<i64>(cs); u2 = t.alloc<i64>(cs); q = t.alloc<i64>(cs); idx = t.alloc<unsigned>(cs); }
       if (gj) { jobs = t.alloc<SeedJob>(cj); out = t.alloc<SeedOut>(cj); }
-      if (ga) { anchors = t.alloc<AnchorRange>(ca); }
+      if (ga) { anchors = t.alloc<AnchorRange>(ca); ageom = t.alloc<AnchorGeom>(ca); }
       // Tout est alloue : echange.
-      if (gs) { swap_in(&d_u0_, u0); swap_in(&d_u1_, u1); swap_in(&d_u2_, u2); swap_in(&d_q_, q); cap_sites_ = cs; }
+      if (gs) { swap_in(&d_u0_, u0); swap_in(&d_u1_, u1); swap_in(&d_u2_, u2); swap_in(&d_q_, q); swap_in(&d_idx_, idx); cap_sites_ = cs; }
       if (gj) { swap_in(&d_jobs_, jobs); swap_in(&d_out_, out); cap_jobs_ = cj; }
-      if (ga) { swap_in(&d_anchors_, anchors); cap_anchors_ = ca; }
+      if (ga) { swap_in(&d_anchors_, anchors); swap_in(&d_ageom_, ageom); cap_anchors_ = ca; }
       t.commit();
     } catch (...) {
       broken_ = true;
@@ -187,7 +242,7 @@ class Q3DeviceExecutor {
     }
   }
   void release() {
-    for (void* p : {(void*)d_u0_, (void*)d_u1_, (void*)d_u2_, (void*)d_q_, (void*)d_jobs_, (void*)d_anchors_, (void*)d_out_})
+    for (void* p : {(void*)d_u0_, (void*)d_u1_, (void*)d_u2_, (void*)d_q_, (void*)d_idx_, (void*)d_ageom_, (void*)d_jobs_, (void*)d_anchors_, (void*)d_out_})
       if (p) cudaFree(p);
   }
 };
@@ -204,9 +259,15 @@ inline void generate_q3_device(const CloudIndex& ix, const GenerateOptions& opt,
   // G0 : pool BORNE et PERSISTANT (lim.gpu_executors executeurs crees une fois pour la lane, file avec
   // contre-pression ; les producteurs CPU attendent leur lot, donc l'ordre d'emission par ouvrier est inchange).
   ExecutorPool<Q3DeviceExecutor> pool(lim.gpu_executors);
+  // G1 : geometrie residente televersee UNE fois par lane quand le wire par indices est demande.
+  std::unique_ptr<GpuGeometry> geom;
+  if (lim.wire_index) {
+    geom = std::make_unique<GpuGeometry>(ix);
+    if (stages) stages->h2d_bytes += geom->bytes;
+  }
   generate_q3_batched_with(ix, opt, out, st, [&](Q3Batch* b, u32 h3, bool nonstrict) {
     DeviceExecutorStats d;
-    pool.submit_and_wait([&](Q3DeviceExecutor& ex) { ex.scan(b, h3, nonstrict, &d); });
+    pool.submit_and_wait([&](Q3DeviceExecutor& ex) { ex.scan(b, h3, nonstrict, &d, geom.get(), lim.wire_index); });
     std::lock_guard<std::mutex> lk(mu);
     *kernel_ms += d.kernel_ms();
     *launches += d.launches;

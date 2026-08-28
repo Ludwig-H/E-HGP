@@ -570,6 +570,31 @@ jusqu'à 8 fils puis sature vers 14× à 48 vCPU ; le digest coûte 2–4 s fixe
 les auditeurs (pool persistant, subdivision des rectangles lourds, fusions par
 offsets, fold vivant), pas `threads = 48` seul.
 
+### G0 et G1 livrés côté hôte (28 août, réception CUDA en attente)
+
+- **G0 — pool persistant** (`src/gpu/executor_pool.hpp`, `--gpu-executors=N`,
+  N ∈ [1, 8], défaut 4) : exécuteurs créés une fois par lane et possédés par
+  des fils de pool, file bornée à contre-pression, producteurs CPU bloquants
+  (ordre d'émission par ouvrier inchangé), résidus dans la même file,
+  exceptions relancées dans le producteur soumettant ; porte hôte
+  `mhgp5_executor_pool` (12 producteurs × 100 travaux, ordre, N exécuteurs
+  construits, pic d'activité ≤ N et ≥ 2, exception propagée) et mutants
+  `pool-serial`, `pool-drop-exception` (code 4).
+- **G1 — géométrie résidente et covers par indices (q3)** : `GpuGeometry`
+  (positions uniques i32 téléversées une fois par lane, RAII) ; lot q3 porteur
+  de `site_index` (u32 par site) et d'une géométrie par ancre
+  ($a + b$, $D^2$) ; kernel `k_scan_idx` (corps commun `k_scan_body` avec
+  fournisseur de sites SoA ou indices) reconstruisant $u = 2z - (a + b)$ et
+  $q = u \cdot u - D^2$ en i64 exacts — les mêmes entiers que
+  `fill_affine_sites`, donc le même filtre flottant certifié ; **32 → 4 o par
+  site** ; deux wires conservés (`--gpu-wire=soa|index`, défaut SoA jusqu'à
+  réception), portes device `mhgp5_q3_lane_device_*_wire_index` (label
+  `gpu`) exigeant le même vecteur de verdicts et les mêmes compteurs que la
+  production ; octets H2D gravés wire par wire. Réception : prochaine session
+  G4 (compilation nvcc, portes `gpu`, contrats `--gpu --gpu-wire=index`,
+  digests identiques). Restent : le wire par indices de la lane q4
+  (positions et `PointId` résidents, 60 → 4 o par site) puis G2.
+
 ### Ordre de commits (auditeurs)
 
 1. Finir l'instrument (parseur au format réel, mutants et CMake, cycle de vie

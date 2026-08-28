@@ -459,6 +459,10 @@ if(MHGP5_ENABLE_CUDA)
   mhgp5_gate(mhgp5_q3_lane_device_uniform 0 mhgp5_q3_lane_device_gate "--family=uniform --n=1200" LABELS gpu)
   mhgp5_gate(mhgp5_q3_lane_device_clusters 0 mhgp5_q3_lane_device_gate "--family=eight_clusters --n=1200 --threads=4" LABELS gpu)
   mhgp5_gate(mhgp5_q3_lane_device_cocirc 0 mhgp5_q3_lane_device_gate "--family=uniform --n=300 --coord=40 --min-candidates=200" LABELS gpu)
+  # G1 : wire par INDICES u32 + geometrie residente — memes verdicts, vecteur et compteurs que la production (et que le wire SoA).
+  mhgp5_gate(mhgp5_q3_lane_device_uniform_wire_index 0 mhgp5_q3_lane_device_gate "--family=uniform --n=1200 --wire=index" LABELS gpu)
+  mhgp5_gate(mhgp5_q3_lane_device_clusters_wire_index 0 mhgp5_q3_lane_device_gate "--family=eight_clusters --n=1200 --threads=4 --wire=index" LABELS gpu)
+  mhgp5_gate(mhgp5_q3_lane_device_cocirc_wire_index 0 mhgp5_q3_lane_device_gate "--family=uniform --n=300 --coord=40 --min-candidates=200 --wire=index" LABELS gpu)
   add_executable(mhgp5_q4_lane_device_gate tests/q4_lane_device_gate.cu)
   target_compile_options(mhgp5_q4_lane_device_gate PRIVATE
     "$<$<COMPILE_LANGUAGE:CUDA>:-fmad=false;--expt-relaxed-constexpr;-Xcompiler=-Wall,-Wextra,-Werror>")
