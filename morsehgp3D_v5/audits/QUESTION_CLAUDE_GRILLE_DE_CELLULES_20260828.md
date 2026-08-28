@@ -45,19 +45,21 @@ Le filtre `near_m` reste sûr pour l'objet, mais ce n'est pas un lemme garantiss
 
 Le reçu G4 n° 11 établit une amélioration appariée bornée et des digests inchangés au pin mesuré. Il combine cependant la grille et les listes inline : il ne permet pas d'attribuer causalement toute la baisse de temps ou de mémoire à la grille seule. Les deux oracles cellule, étiquetés uniquement `oracle`, n'ont pas été rejoués par la commande G4 `-L gate`; ils ont été rejoués localement pendant cette réponse.
 
-### Raccord du worktree actif — réception presque fermée
+### Raccord du worktree actif — noyau local presque fermé, réception sur pin différée
 
-Le raccord CMake/mutants/oracle est maintenant recevable : la fixture nominale,
+Le raccord CMake/mutants/oracle est maintenant cohérent localement : la fixture nominale,
 le registre des mutants, F11, l'oracle brut et ses trois mutants sont exécutés
 par les portes. La campagne ciblée donne 7/7 tests réussis en 12,6 s. L'oracle
 nominal exerce 18 748 grilles, 757 014 sites, 324 171 localisations réelles,
 447 frontières exactes et 4 000 cas i128 synthétiques sans désaccord; les trois
-mutants produisent respectivement 42 660, 8 921 et 444 écarts. Le facteur `G`
-de l'inégalité témoin est corrigé et la dérivation binaire64 suit désormais le
-graphe du code.
+mutants produisent respectivement `cnt_mism=42 660` et `meta_mism=1 006`,
+`meta_mism=8 921`, puis `contract_viol=444`. Le facteur `G` de l'inégalité
+témoin est corrigé et la dérivation binaire64 suit désormais le graphe du code.
+Ces résultats portent sur le worktree non committé ; ils ne sont pas encore une
+réception reproductible.
 
-Il reste seulement quatre corrections documentaires locales avant d'appeler le
-théorème 10.5 reçu :
+Le noyau mathématique paraît fermable, mais sept raccords courts restent avant
+d'appeler le théorème 10.5 reçu sur un pin propre :
 
 1. Remplacer « le losange contient le disque car `|P_k| >= rho_q` », qui ne
    suffit pas, par les deux inégalités de distance aux arêtes déjà garanties
@@ -67,17 +69,31 @@ théorème 10.5 reçu :
    `(grille, cellule)`. Les évaluations site-cellule sont bien nombreuses, mais
    ce n'est pas ce compteur.
 3. Écrire `|rhs| < 2^62`, et non `|G*rhs| < 2^62`, puisque `rhs` contient déjà
-   le facteur `G` dans le code.
-4. Dans la dernière borne d'arrondi, rattacher `u*(4G+eps) < 2^-47` au chemin
-   accepté par `range_in_domain` (`lo` et `hi` dans `[-4G,4G]`), plutôt qu'au
-   seul énoncé `|Ahat| <= 4G`.
+   le facteur `G` dans le code. Corriger aussi le commentaire de
+   `cell_grid.hpp`, pas seulement le manuscrit mathématique.
+4. Dans la dernière borne d'arrondi, utiliser exactement la garde : pour
+   l'opérande exact `x`, l'acceptation `|fl(x)| <= 4G` implique
+   `|x| <= 4G/(1-u)`, donc une erreur au plus `4G*u/(1-u) < 2^-47`. Le seul
+   énoncé `|Ahat| <= 4G` ne borne pas le terme `eps`.
+5. Remplacer « une contraction FMA ne peut qu'abaisser l'erreur », faux sur une
+   réalisation où des erreurs se compensaient, par l'énoncé utile : la borne
+   pire cas du graphe non contracté couvre aussi une contraction qui supprime
+   un terme d'arrondi. L'autre option est de figer `fp-contract=off`.
+6. Faire correspondre le fail-open promis à ses hypothèses. La constante
+   `kCellLocateEvalOk` ne vérifie aujourd'hui que `FLT_EVAL_METHOD == 0` ; ajouter
+   au minimum `std::numeric_limits<double>::is_iec559`, `radix == 2` et
+   `digits == 53`, en plus de la garde d'arrondi déjà reçue de l'appelant.
+7. Mettre `docs/PLAN_DE_TESTS.md` à jour : sa table s'arrête à F1–F10 et omet
+   F11, `mhgp5_cell_grid_oracle` et `cell-locate-eps-zero`.
 
 La fixture strictement côté vivant, réalisable depuis une seed q3/q4 u16, peut
 attendre. Le mutant `cell-locate-eps-zero` est déjà une bonne preuve négative
 du contrat conservatif du localisateur, mais pas encore un faux-kill de l'objet;
 le texte courant respecte cette distinction. Davantage de non-vacuité sur les
 routes batch forcées est également un durcissement d'intégration, pas un verrou
-du certificat nominal.
+du certificat nominal. Une fois les sept raccords appliqués, rejouer les sept
+portes sur le pin propre suffit pour soumettre cette réception ; il n'est pas
+utile de rouvrir l'algorithme de grille.
 
 ### Fold et mémoire
 

@@ -31,19 +31,22 @@ Trois expériences architecturales bornées répondent directement aux suspects 
    par cover ;
 3. **la compaction q4 stable sur device**, sans les deux retours intermédiaires.
 
-G0–G2 sont des coutures de mesure et de réduction du gaspillage, pas encore
-une architecture qui supprime un terme dominant reçu. L'hôte téléverse bien un
-`Q3BatchSeed` de 112 octets ou un `Q4BatchSeed` de 288 octets par seed ; seule
-la baseline instrumentée dira si ce terme domine pour une famille donnée. Si
-elle le confirme, la conception qui retire ce terme est la lane **par
-rectangles avec index résident** déjà décrite dans
+G0 et G1 ne partent pas d'un soupçon arbitraire : le reçu n° 12 a déjà désigné
+la contention des exécuteurs et le wire répété des covers. Son ancien instrument
+ne séparait toutefois pas proprement leurs parts causales dans le mur ; G0 et G1
+sont donc les ablations qui les départagent. G1 retire le payload site répété en
+le remplaçant par des indices, mais l'hôte téléverse encore un `Q3BatchSeed` de
+112 octets ou un `Q4BatchSeed` de 288 octets par seed. La dominance de ce second
+terme n'est pas reçue. Si elle est ensuite établie, la conception qui le retire
+est la lane **par rectangles avec index résident** déjà décrite dans
 [`docs/analyses/seeds_20260827/design.txt`](../docs/analyses/seeds_20260827/design.txt) :
 le device reçoit handles et ancres, puis reconstruit covers et seeds. G1 est la
 couture réversible qui prouve d'abord l'index et l'arithmétique de cette cible.
 
-Le reçu n° 12 établit seulement que le kernel q3 est petit ; la causalité q4
-reste ouverte. Recevoir d'abord l'instrument sur une petite session G4 permettra
-donc de choisir et d'ordonner G0, G1 et G2 au lieu de supposer leur gain. Pour le
+Le reçu n° 12 établit que le kernel q3 est petit et implique fortement le wire
+des covers et la contention ; la causalité q4 et la part propre du wire par seed
+restent ouvertes. Recevoir d'abord l'instrument corrigé sur une petite session
+G4 permettra donc d'ordonner G0, G1 et G2 au lieu de supposer leur gain. Pour le
 multi-CPU, il faut séparer la sensibilité au budget d'ouvriers d'un véritable
 speedup 1→N sous cpuset.
 
@@ -129,6 +132,15 @@ doit appartenir à une invocation, pas être un singleton statique remis à zér
 par deux pipelines potentiellement concurrents. Enfin, toute erreur après une
 copie asynchrone doit drainer au mieux, empoisonner l'exécuteur et interdire sa
 réutilisation.
+
+Le seul compteur `h2d_bytes` agrège actuellement sites, seeds, ancres, lentilles
+et tableaux intermédiaires. Il permet de mesurer le trafic total, mais pas
+d'affirmer que les 112/288 octets par seed dominent. Ajouter au minimum les
+classes `sites`, `seeds`, `anchors_lens` et `intermediate`, en octets. Leur part
+quantifie le payload ; elle n'attribue pas encore un temps, puisque les copies
+sont enfilées ensemble. La causalité temporelle vient d'une ablation appariée
+G1 puis `rect_shaped`, avec mêmes lots, compteurs et digests, pas de la seule
+décomposition d'octets.
 
 La porte CUDA doit exercer les vraies copies/kernels, pas seulement
 l'arithmétique du struct :

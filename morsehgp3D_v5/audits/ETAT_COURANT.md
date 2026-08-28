@@ -1,6 +1,6 @@
 # État courant audité de MorseHGP3D v5 — 28 août 2026
 
-- **Derniers commits techniques relus :** `46f9f8c7`, intégration de la conception du fold vivant, `5aceeed5` et `cce4b2b3`, consolidation critique des deux audits ; `ba31c169` reste la dernière porte fonctionnelle reçue.
+- **Derniers commits techniques relus :** `46f9f8c7`, intégration de la conception du fold vivant, `5aceeed5` et `cce4b2b3`, consolidation critique des deux audits ; les raccords d'audit `0167c914`, `5ac6a95f` et `6576e44c` ont été croisés à leur tour. `ba31c169` reste la dernière porte fonctionnelle reçue.
 - **Code en cours de relecture :** worktree postérieur à `cce4b2b3`, encore non committé. Il prépare la sûreté du fold, l'instrumentation device, l'oracle de grille et une campagne `SCALE_THREADS`. Les observations sur ce code sont des indications de travail, pas une réception sur pin.
 - **Pins de performance conservés :** `82f613d3` pour les campagnes CPU 50–200 k et `63deda74` pour les étapes device à 50 k.
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
@@ -23,9 +23,10 @@ les commits suivants :
   vivantes ; l'invariant obtenu est `components <= live_aliases`, sous lot
   relisible et pré-composants référencés par alias stables ;
 - le GPU peut d'abord recevoir un pool synchrone minimal et une géométrie
-  résidente par indices. Si la baseline montre que les 112/288 octets par seed
-  dominent encore, la couture suivante reconstruira covers et seeds sur device
-  depuis handles/ancres ; ce n'est pas encore une priorité reçue.
+  résidente par indices. Le reçu n° 12 désigne déjà la contention et le wire
+  répété des covers, sans en séparer proprement les parts causales. La dominance
+  distincte des 112/288 octets par seed reste à mesurer par classes de payload,
+  puis par ablation, avant de reconstruire covers et seeds sur device.
 
 Les algorithmes, preuves locales, wires et fixtures sont détaillés dans
 [AUDIT_PASSAGE_ECHELLE_20260828.md](AUDIT_PASSAGE_ECHELLE_20260828.md) et
@@ -68,29 +69,32 @@ Le renversement actuel des seuls niveaux de fils est utile pour mesurer le scali
 
 ### 3. L'observateur `kPublished` intervient après la publication irréversible
 
-Dans le worktree courant, un ordre K avance `next_publish`, notifie et libère son état avant d'appeler `on_fold_phase(kPublished)`. Si cet observateur lève, un K supérieur peut déjà appeler `on_forest` et se déclarer publié. Le contrat annoncé — la faute de l'ordre observé gagne avant les publications supérieures — n'est alors pas respecté. Les nouveaux tests injectent une faute dans `on_forest`, mais pas dans l'observateur `kPublished`.
+Dans le worktree courant, un ordre K avance `next_publish`, notifie et libère son
+état avant d'appeler `on_fold_phase(kPublished)`. Si cet observateur lève, son
+exception est stockée mais ne pose jamais `pub_failed`; K + 1 publie donc pendant
+le drainage. La porte injecte une faute dans `on_forest`, pas dans cet
+observateur, et son `published_complete` ne juge plus que la multiplicité.
 
-Correction minimale : ne faire avancer `next_publish` qu'après le retour réussi de l'observateur, ou rendre explicitement cet observateur non autoritatif. La première option correspond au contrat et aux tests existants. Ajouter un scénario déterministe où K = 2 lève sur `kPublished` pendant que K = 3 a fini sa réduction; K = 3 ne doit appeler ni `on_forest`, ni `kPublished`. Préserver aussi la première exception d'un ordre si `kReduceBegin` et `reduce_fold` lèvent tous deux.
+Raccord minimal sans changer l'API : après `on_forest` et l'échantillon RSS,
+libérer `st`, déverrouiller, puis appeler `observe(kPublished)` **sans** avancer
+`next_publish`. Reprendre le verrou : si le hook a levé, poser `pub_failed`,
+notifier et rendre la main ; sinon seulement ouvrir le tour K + 1. Ne pas émettre
+`kNotPublished` pour K, car son `on_forest` a déjà réussi ; les ordres supérieurs
+abandonnés reçoivent cette phase.
 
-La porte active a depuis remplacé l'ordre strict des `kPublished` par un simple
-comptage. Ce relâchement ne ferme pas le défaut : `RunOptions` promet toujours
-qu'une exception du hook devient l'exception de l'ordre observé. Le plus petit
-raccord, sans changer cette API, est le suivant : après `on_forest` réussi,
-libérer `st` puis appeler `observe(kPublished)` hors verrou **sans** avancer
-`next_publish`; reprendre ensuite le verrou, poser `pub_failed` si le hook a
-levé, sinon seulement ouvrir le tour K + 1. L'ordre K a bien exécuté son
-callback provisoire, donc ne pas lui émettre `kNotPublished`; les ordres
-supérieurs, eux, sont abandonnés et reçoivent cette phase.
+Fixture déterministe : `fold_inflight=3`; `on_forest` de K = 2 attend
+`kReduceEnd` de K = 3, puis `on_fold_phase` enregistre et lève une exception
+exacte sur `(K=2,kPublished)`. Après toutes les jointures, exiger seulement deux
+`on_forest` (K = 1 puis K = 2), K = 3 `kNotPublished` sans `kPublished`, et
+restaurer dans `published_complete` la séquence stricte 1, 2, ..., Kmax.
 
-Fixture déterministe minimale : `fold_inflight=3`; le callback de K = 2 attend
-`kReduceEnd` de K = 3, puis le hook lève sur `(K=2,kPublished)`. Attendre
-l'exception exacte après toutes les jointures, exactement deux `on_forest`
-(K = 1 puis K = 2), et K = 3 `kNotPublished` sans `kPublished`. Le code courant
-publie K = 3 pendant le drainage; le correctif ci-dessus le laisse bloqué
-jusqu'au verdict de K = 2, sans annuler K = 1. Restaurer alors le contrôle
-d'ordre strict dans `published_complete`.
-
-Le fil B a par ailleurs perdu l'enveloppe `catch (...)` globale de la version précédente. Les calculs principaux sont protégés, mais la construction de `sp->message` après une violation alloue encore hors `try`; un `bad_alloc` quittant la fonction de thread appelle `std::terminate`. Stocker seulement le statut et K puis construire le message après la jointure, ou rétablir une enveloppe externe qui transforme toute exception en verdict ordonné du slot.
+Deux raccords d'exception accompagnent ce changement. Le `catch` de
+réduction/digest ne doit affecter `sp->exc` que s'il est encore vide, sinon il
+écrase une faute antérieure de `kReduceBegin`. La construction de `sp->message`
+après une violation alloue encore hors `try`; stocker `status + K` dans le slot
+et construire le texte après la jointure. Une éventuelle enveloppe externe doit
+elle aussi conserver le verdict dans le slot jusqu'au tour de K, jamais poser
+`pub_failed` immédiatement depuis un ordre supérieur.
 
 ## P1 — durcir sans agrandir le chantier
 
@@ -116,11 +120,13 @@ Le compteur de concurrence ne doit pas être un singleton statique remis à zér
 
 ## Questions actives qui ne bloquent pas ce jalon
 
-- Le worktree corrige le facteur du théorème 10.5, ajoute l'oracle i128 et unifie
-  l'étage/autorité de grille. La fixture F11 reste exactement sur une frontière :
-  elle tue un localisateur sans marge, mais pas encore un faux-kill où un centre
-  strictement côté vivant serait arrondi côté mort. Recevoir le gros oracle sur
-  pin, puis ajouter ce cas ciblé sans rouvrir le chantier.
+- Le noyau de grille est localement presque fermable : les sept portes ont été
+  rejouées, mais le pin propre et plusieurs raccords documentaires restent
+  nécessaires. En particulier, la garde doit vérifier le format binaire64 et le
+  plan de tests doit enregistrer F11 et l'oracle. La fixture F11 tue un
+  localisateur sans marge sur une frontière, pas encore un faux-kill où un
+  centre strictement côté vivant serait arrondi côté mort ; ce dernier cas est
+  un durcissement après réception de la preuve analytique, pas un nouveau verrou.
 - Les théorèmes T3–T6 de `docs/ECHELLE.md` restent des obligations de preuve,
   pas des résultats. Le fold vivant est maintenant spécifié assez précisément
   pour être codé. En revanche T5 doit être conditionné au flux accepté : un
@@ -156,6 +162,12 @@ fold/instrument/grille ont été construites en Release et leur CTest ciblé don
 précisément l'acceptation legacy et l'absence de contrôle de `P`. Ces résultats
 locaux guident la fermeture, sans constituer un pin reçu. Aucun test CUDA, aucun
 résultat nvcc et aucun résultat GCP nouveau ne sont reçus.
+
+Une relecture croisée du même worktree a rejoué 13/13 CTests fold, instrument
+CPU et oracle grille en 23,53 s. Le sous-ensemble grille seul donne 7/7 en
+12,09 s et reproduit ses compteurs annoncés. Ces succès n'exercent toujours ni
+nvcc ni un device CUDA et ne ferment pas la porte `kPublished`, absente du test
+courant.
 
 Les validations antérieures restent bornées à leurs pins : suites CPU reçues à `369f3ac0`, campagne CPU 50–200 k à `82f613d3`, instrumentation device de la session G4 n° 12 à `63deda74`. Elles ne valident pas automatiquement le worktree courant.
 
