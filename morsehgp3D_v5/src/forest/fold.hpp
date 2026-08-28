@@ -568,6 +568,18 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
     reduce_prefetch(&events[(size_t)order[e]]);
     prefetch_event(e);
   }
+#ifdef MHGP5_PROFILE_REDUCE
+  // INSTRUMENT (jamais en production) : fraction de facettes VIVANTES au fil
+  // des lots — touchees mais pas encore a leur dernier contact — pour le
+  // dimensionnement d'un fold streame a etat borne (compaction).
+  std::vector<u32> remaining(nfid, 0);
+  for (size_t e = 0; e < ne; ++e) {
+    const ForestEvent& ev = evt(e);
+    for (int t = 0; t < (int)ev.q + (int)ev.d; ++t) ++remaining[ev_fid[e * 11 + (size_t)t]];
+  }
+  std::vector<u8> alive_flag(nfid, 0);
+  u64 live = 0, live_max = 0, live_sum = 0;
+#endif
   for (size_t b = 0; b < batches.size(); ++b) {
     const size_t e0 = batches[b].first, e1 = batches[b].second;
     touched.clear();
@@ -665,7 +677,24 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
     for (const u32 fid : touched) st[(size_t)fid].seen = 1;
     ++r.batches;
     ptick(4);
+#ifdef MHGP5_PROFILE_REDUCE
+    for (size_t e = e0; e < e1; ++e) {
+      const ForestEvent& ev = evt(e);
+      for (int t = 0; t < (int)ev.q + (int)ev.d; ++t) {
+        const u32 fid = ev_fid[e * 11 + (size_t)t];
+        if (!alive_flag[fid]) { alive_flag[fid] = 1; ++live; }
+        if (--remaining[fid] == 0) { alive_flag[fid] = 2; --live; }
+      }
+    }
+    live_max = std::max(live_max, live);
+    live_sum += live;
+#endif
   }
+#ifdef MHGP5_PROFILE_REDUCE
+  std::fprintf(stderr, "profil_vivantes facettes=%zu lots=%zu vivantes_max=%llu (%.1f %%) vivantes_moyenne=%.1f %%\n", nfid, batches.size(),
+               (unsigned long long)live_max, nfid ? 100.0 * (double)live_max / (double)nfid : 0.0,
+               nfid && !batches.empty() ? 100.0 * (double)live_sum / ((double)nfid * (double)batches.size()) : 0.0);
+#endif
 #ifdef MHGP5_PROFILE_REDUCE
   std::fprintf(stderr, "profil_reduce facettes=%zu evenements=%zu lots=%llu touch=%.0f pre=%.0f unite=%.0f post=%.0f deltas=%.0f ms\n", nfid, ne,
                (unsigned long long)r.batches, pt[0], pt[1], pt[2], pt[3], pt[4]);
