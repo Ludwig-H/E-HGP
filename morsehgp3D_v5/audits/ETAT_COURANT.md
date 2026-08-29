@@ -1,8 +1,9 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **HEAD relu :** `2d052921`, publié sur `main` et `origin/main` pendant
-  l'audit. Les commits `70a62be3` et `2d052921` ajoutent un harnais local et
-  deux notes de Claude ; ils ne pinent pas le raccord d'enveloppe.
+- **HEAD documentaire relu :** `ac43ab1a`, publié sur `main` et
+  `origin/main`. Le dernier delta fonctionnel du HEAD reste `2d052921` ; les
+  commits `70a62be3` et `2d052921` ajoutent un harnais local et deux notes de
+  Claude, sans pinner le raccord d'enveloppe.
 - **Dernier pin fonctionnel reçu :** `72090f79`. Le chemin produit de
   l'enveloppe q3/q4, ses portes et les corrections du harnais restent dans un
   worktree concurrent non commité. Ils sont jugés ci-dessous comme snapshot,
@@ -26,6 +27,13 @@ La base continue d'éviter la mosaïque de Delaunay d'ordre supérieur. Le filtr
 réduit les sites de cœur/profondeur ; il ne retire ni visites de handles, ni
 ancres, ni pire exposant q4. Le verrou d'échelle global reste donc ouvert.
 
+La correction de cap de l'utilisateur est reçue : **q2 n'est pas le problème
+architectural à traiter**. La WSPD binaire partitionne correctement les paires ;
+l'explosion naît lorsque q3/q4 développent chaque produit vivant `A x B` en
+ancres, puis les tiers ou les couples de carriers. L'arrangement shallow par
+ancre ne ferme que le second facteur. Il doit devenir le terminal d'une source
+WSPD q3/q4 fibrée, pas se substituer à cette généralisation.
+
 Le contre-audit des notes de Claude a eu un effet concret : la formule q4 est
 requalifiée comme sur-ensemble de Jung, le seuil de coût ancien est retiré et
 la fusion prématurée dans la collecte des handles est abandonnée. Ces décisions
@@ -48,6 +56,44 @@ du tip.
 
 La dérivation, les fixtures et la réponse V49–V52 consolidée vivent dans
 `QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md`.
+
+## Réorientation WSPD q3/q4
+
+Le contrat actif transmis à Claude est désormais :
+
+- garder `PairWspdBlock(A,B)` comme tape q2 et ownership des ancres ;
+- ajouter `Q3FiberTask(A,B,C)` et `Q4FiberTask(A,B,C,D)`, avec carriers
+  paresseux, owner total, reçus de rang et continuation fail-open ;
+- tuer un bloc seulement par un certificat universel exact ; une ambiguïté ou
+  une capacité atteinte conserve le parent ;
+- traiter q4 par lignes et niveaux peu profonds dans le plan médiateur, jamais
+  par matérialisation préalable de `C x D` ni par dépendance aux verdicts q3 ;
+- conserver séparément le ledger de paires, la provenance des supports q3/q4
+  et les occurrences de proposition.
+
+Le no-go des blocs ternaires symétriques fortement séparés reste valide, mais
+sa portée est étroite. Une WSSD standard n'apporte pas l'exact-once ni le rang ;
+une variante possédée peut en revanche devenir une source exacte après preuve
+de bijection, transitions disjointes et oracle exhaustif. En attendant, la
+frontière canonique `(N_i,r_i)` reste l'autorité q3/q4 et la route fibrée un
+accélérateur à recertifier.
+
+Le premier incrément demandé n'est pas un reroutage produit : une primitive
+`q34_fiber` pour une ancre exacte, oracle exhaustif contre shallow, compteurs
+de lignes/intersections/visites/scratch, puis producteur counter-only q3 et q4
+avec center-cover de bloc. Les seuils de fenêtre à `smax=11` sont neuf
+intérieurs pour tuer q3 et huit pour tuer q4. La note active détaille ABI,
+ledgers, fixtures et mutants.
+
+Claude a répondu au pin `ac43ab1a` avec deux filtres q3 par groupes. Le lemme
+du tiers aigu est reçu après ajout de l'owner `EdgeKey`; l'optimalité du cœur
+est limitée à la boule concentrique d'une ancre ponctuelle. L'escalier
+d'histogramme et les rejets de handles passent d'abord en counter-only : ils
+ne sont ni gratuits, ni une preuve que seules deux boucles restent. Le rejet
+non aigu sûr emploie la forme couplée `hmin_boxes(A,B,C) >= 0`, dans une vue de
+seeds séparée qui ne retire jamais ces points du cover témoin. La réponse
+V53--V56 est fusionnée dans la note active ; la question séparée est retirée
+du tip après migration, son commit restant dans l'historique.
 
 ## Réception du snapshot d'enveloppe
 
@@ -148,11 +194,13 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
 ## Ordre recommandé
 
 1. Fermer la non-vacuité oversized, le timeout et le harnais, puis pinner le
-   raccord d'enveloppe avec ses tests.
-2. Refaire build et campagne `gate` sur ce pin ; seulement ensuite produire le
-   reçu CPU par lane.
-3. Fermer les quatre dents G0, puis la réception G1 minimale.
-4. Fermer les coutures locales du fold vivant et de la grille.
-5. Reprendre l'arrangement shallow et l'amont streamé avec oracles bornés.
+   raccord d'enveloppe avec ses tests ; ne plus l'étendre avant réception.
+2. Refaire build et campagne `gate` sur ce pin.
+3. Ouvrir le primitive borné `q34_fiber`, puis le producteur counter-only de
+   tâches q3/q4 ; comparer exhaustive et shallow avant tout reroutage produit.
+4. Raccorder le center-cover au niveau des blocs et prouver provenance,
+   exact-once et continuations avant de remplacer les boucles `A x B`.
+5. Fermer ensuite G0/G1, fold vivant et grille selon leur ordre local ; aucun
+   de ces chantiers ne doit masquer les compteurs de la nouvelle source.
 
 GCP non utilisé.

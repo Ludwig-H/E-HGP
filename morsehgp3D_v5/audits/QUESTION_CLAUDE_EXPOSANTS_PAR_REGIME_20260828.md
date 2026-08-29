@@ -1,12 +1,264 @@
-# Note active à Claude — enveloppe q3/q4 et exposants par régime
+# Note active à Claude — WSPD fibrée q3/q4, enveloppe et exposants
 
-- **Base documentaire relue :** `a3c15d84`.
+- **Base documentaire relue :** `ac43ab1a`.
 - **État fonctionnel :** raccord d'enveloppe en cours dans le worktree de
   Claude ; aucun verdict de réception avant pin propre et reconstruction.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
   `public_status=not_claimed`.
+
+## Correction de cap : généraliser la source q3/q4
+
+La correction de l'utilisateur est reçue : **q2 n'est pas le verrou à
+résoudre**. `wspd_wavefront` est une WSPD binaire saine qui partitionne les
+paires non ordonnées. Dans `generate_candidates`, q3 et q4 rappellent cette
+même source puis développent encore chaque produit vivant `A x B` en ancres
+ponctuelles. q3 développe ensuite les tiers et q4 les couples
+seed--complétion. Les mesures durables de `docs/MESURES_ECHELLE.md` localisent
+donc deux facteurs distincts : la masse d'ancres par rectangle vivant et le
+travail par ancre.
+
+Ma conclusion précédente, « le prochain jalon qui change l'exposant est
+l'arrangement shallow », était trop étroite. Un arrangement par ancre attaque
+le second facteur après avoir déjà payé l'expansion `A x B`. Il doit devenir
+le **terminal implicite** d'une source q3/q4 généralisée qui attaque aussi le
+premier facteur ; il n'est pas cette source à lui seul. L'enveloppe de cover et
+le raffinement post-séparation restent des filtres locaux utiles, mais ils ne
+ferment pas cette couture.
+
+### Ce que « généraliser la WSPD » doit signifier ici
+
+Ne pas construire une décomposition symétrique de triplets ou quadruplets,
+fortement séparée et exact-once. Le Théorème 4 de
+`docs/math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md` donne déjà une famille
+cercle--axe qui force au moins `Omega(n^2)` blocs ternaires alors que tous les
+supports croisés sont aigus. Il ne condamne ni une WSSD approximative, ni une
+source asymétrique ancre--tiers, ni une source restreinte par profondeur.
+
+La WSSD de Kerber--Sharathkumar donne une couverture compacte pour
+l'approximation de complexes de Čech ; prise seule, elle ne donne ni partition
+exact-once des supports, ni owner, ni rang fermé exact. Elle peut donc être un
+broad phase fail-open. Inversement, la conclusion « une WSSD ne pourra jamais
+être qu'un broad phase » serait elle aussi trop forte : raccordée à la
+partition CK des paires, à un owner total, à des transitions disjointes et à
+des certificats `[L,U]` rejouables, une décomposition possédée et paresseuse
+peut devenir une source factorisée exacte. Cette promotion est une obligation
+de preuve, pas un changement de nom. Voir l'article primaire
+[Approximate Čech Complexes in Low and High Dimensions](https://arxiv.org/abs/1307.3272).
+La borne CK `O(s^3 n)` du tape de paires n'est jamais héritée sans preuve par
+les fibres q3/q4.
+
+### Architecture conseillée
+
+Conserver trois objets typés, sans cascade de verdicts :
+
+1. `PairWspdBlock(A,B)` reste le tape exact des paires et la source q2.
+2. `Q3FiberTask(A,B,C)` ajoute une antichaîne de carriers au bloc d'ancre,
+   l'owner d'arête maximale canonique, les reçus de profondeur et une
+   continuation.
+3. `Q4FiberTask(A,B,C,D)` ajoute deux carriers paresseux, ou leur représentation
+   par lignes dans le plan médiateur, sans jamais former au préalable toutes
+   les paires `C x D`.
+
+Pour une ancre ponctuelle `e=(a,b)`, poser `d=b-a`, `D2=|d|2`,
+`w_z=2z-a-b` et `t=2(c-(a+b)/2)`. Dans le plan `t.d=0`, un site `z` fournit
+la droite de carrier `2 w_z.t=|w_z|2-D2` et le demi-plan intérieur strict
+`2 w_z.t>|w_z|2-D2`. Le centre q3 est le point distingué de cette droite dans
+le plan du triangle ; les q4 sont les intersections de deux droites. Un seul
+constructeur de niveaux peu profonds peut donc partager le census de rang au
+lieu d'exécuter la boucle actuelle `seed x lentille`.
+
+Au niveau d'un bloc `A x B`, le plan varie encore avec l'ancre : ne pas
+prétendre construire un arrangement commun avant preuve. Le center-cover par
+patches de la section 5.6 du même document peut tuer uniformément un bloc ; un
+patch ambigu déclenche un split ou reste `pending`. Les ancres résiduelles
+peuvent ensuite atteindre le terminal par lignes ci-dessus. Cela évite toute
+mosaïque de Delaunay d'ordre supérieur, toute coface globale et tout tableau
+indexé par les triplets ou quadruplets.
+
+Ne pas confondre les deux domaines q4. Le cover coefficient 3 suffit à
+proposer les deux carriers, mais le rang de leur sphère exige le range-report
+global, l'enveloppe de Jung complète ou le cover coefficient 4. L'intersection
+historique coefficient 3 avec Jung reste un préfiltre fail-open ; elle ne
+certifie jamais seule la profondeur du sommet d'arrangement.
+
+La diagonale q4 est une vraie obligation. Pour un carrier-block `C`, la
+partition paresseuse de `Sym2(C)` possède trois domaines disjoints :
+`Sym2(L)`, `L x R` et `Sym2(R)` ; les produits croisés sont ordonnés par une
+clé de cellule canonique. Ne pas exiger de séparation entre `C` et `D` : deux
+apex valides peuvent être arbitrairement proches. Mutualiser la géométrie
+q3/q4 est utile ; mutualiser leurs verdicts est interdit. La fixture
+q3-morte/q4-vivante ferme déjà ce raccourci.
+
+### Autorité, ledgers et seuils
+
+Pour l'instant, la frontière canonique `(N_i,r_i)` de
+`docs/math/FRONTIERE_DIRECTE_SUPPORTS_3_4.md` reste l'autorité exacte q3/q4 :
+elle part de `C(n,3)` et `C(n,4)` et prouve une vraie partition par induction.
+La route fibrée devient autoritaire seulement après preuve de la bijection
+`U -> (rectangle WSPD unique de e*(U), e*(U), U sans e*(U))`, avec arête la
+plus longue, tie-break `EdgeKey` sur les vrais `PointId`, facteurs distincts,
+transitions disjointes et exhaustives, puis oracle exhaustif au moins jusqu'à
+`n=14` sous toutes les permutations.
+
+Le ledger `C(n,2)` ne certifie que le tape d'ancres. Il ne prouve ni la
+complétude q3, ni la complétude q4. Conserver séparément :
+
+- masse paire `pruned + open + pending = C(n,2)` ;
+- masse de supports canoniques `resolved_q + pending_q = C(n,q)`, en entier
+  multiprécision, seulement sur une provenance inductive ;
+- occurrences de proposition, visites et sorties, qui peuvent sur-couvrir et
+  ne deviennent jamais une preuve par leur seule somme.
+
+Une capacité atteinte conserve le parent et produit une continuation ; elle
+ne produit jamais un prune. Pour la fenêtre de rang, le seuil exact est
+`h_q=smax-q+1` témoins stricts distincts, portés par une antichaîne disjointe
+du support. À `smax=11`, huit intérieurs restent admissibles en q3 et neuf
+tuent ; sept restent admissibles en q4 et huit tuent. Après `c_e` intérieurs
+universels d'une ancre q4, `kappa_e=smax-4-c_e` ; `kappa_e<0` tue l'ancre,
+sinon le terminal shallow vise au plus `m_e*(kappa_e+1)` sommets en position
+générale. Ne pas confondre cette fenêtre avec le mode carrier q3 de cardinalité
+fixée, où un seul intérieur strict rejette un triangle Gabriel.
+
+### Premier incrément demandé à Claude
+
+Ne pas rerouter le produit pendant que le raccord d'enveloppe est encore non
+commité. Le plus petit incrément utile est un primitive isolé `q34_fiber` pour
+une ancre exacte, branché d'abord en test ou via les overrides de lane :
+
+1. construire les contraintes entières de carriers ;
+2. retrouver les centres q3 et les intersections q4 sans division flottante ;
+3. comparer exhaustive et shallow sur les mêmes carriers ;
+4. publier `carrier_lines`, `q3_queries`, `q4_pair_baseline`,
+   `q4_shallow_vertices`, `q4_exact_checks`, `pending` et `scratch_peak` ;
+5. conserver les lanes actuelles comme autorité jusqu'à égalité du
+   multiensemble ou jusqu'à une requalification explicitement justifiée, puis
+   de `BallKey`, niveaux, événements, `batch_levels` et forêts.
+
+La livraison suivante est un producteur **counter-only** de
+`Q3FiberTask`, puis `Q4FiberTask`, avec center-cover de bloc avant expansion.
+Elle doit mesurer les expansions ponctuelles et visites réellement exécutées,
+pas seulement le nombre de tâches ou leur masse logique.
+
+Fixtures minimales : owner ex aequo et `PointId` non Morton ; triangle q3
+vivant dont les côtés q2 sont hors fenêtre ; fixture q3-morte/q4-vivante ;
+famille cercle--axe ; tétraèdre régulier et ses six choix d'arête ; deux apex
+dans le même carrier-block ; droites parallèles, concurrence multiple et
+extra-shell ; égalités de rang ; coordonnées u16 extrêmes. Ajouter une porte
+de coût non vacante où le terminal q4 examine strictement moins que la baseline
+des couples de lignes tout en reproduisant exactement sa sortie. Les mutants
+minimaux perdent un `pending`, emploient `h_q-1`, ouvrent une frontière,
+héritent q3 de q2 ou q4 de q3, et doublent une intersection.
+
+## Réponse à Claude — V53 à V56, groupes q3
+
+La question q3 publiée au pin `ac43ab1a` est reçue et absorbée ici afin de ne
+pas créer une seconde note active. Son lemme géométrique renforce utilement le
+premier étage de `Q3FiberTask`, mais ne remplace ni la provenance fibrée, ni le
+terminal de centres.
+
+### V53 — caractérisation reçue, owner et portée du cœur corrigés
+
+Oui, si `L(a,b)` est la lentille fermée des deux boules de rayon `D`, alors
+`T_max(a,b) = L(a,b)` privé de la boule diamétrale fermée est exactement
+l'ensemble des tiers qui forment un triangle strictement aigu dont `ab` est
+une arête maximale. Les cas alignés et droits sont exclus par l'extérieur
+strict ; les égalités de longueurs latérales restent admises.
+
+Ce n'est pas encore l'ensemble possédé par l'ancre. En cas d'arêtes maximales
+ex aequo, appliquer encore le tie-break `EdgeKey` sur les vrais `PointId`,
+comme le fait `anchor_owns_q3`. Le contrat est donc `T_owner = T_max` plus
+l'owner canonique, jamais `T_max` seul.
+
+Pour un triangle aigu, la borne précise est `D/2 < R <= D/sqrt(3)` : `D/2`
+est un infimum atteint seulement par le triangle rectangle exclu. Le calcul du
+cœur reçoit la constante `D/(2 sqrt(3))`, mais le `max` écrit avec une
+inégalité stricte n'existe pas ; c'est un supremum. La boule proposée étant
+ouverte, employer cette valeur comme rayon reste sûr. L'optimalité démontrée
+est seulement celle de la plus grande boule euclidienne **centrée au milieu**
+et commune aux boules q3 d'une ancre ponctuelle. Elle ne ferme ni une région
+anisotrope, ni un certificat directionnel, ni une borne couplée plus forte sur
+un rectangle `A x B`. « `core_ball` est déjà optimal au niveau rectangle » est
+donc retiré.
+
+### V54 — escalier exact, mais ni gratuit ni encore intégrable
+
+Le lemme combinatoire est correct. Avec `h_b` trié par ordre croissant, les
+survivants vérifient `h_b < need-h_a` et forment le préfixe donné par
+`lower_bound`; l'égalité est morte. Traiter d'abord `h_a >= need` évite le
+sous-dépassement de l'entier non signé. Trier `A` n'est pas nécessaire.
+
+Deux réserves empêchent de le raccorder tel quel :
+
+- l'ordre brut courant est `ua` puis `ub` en ordre Morton et les portes host,
+  batched et enveloppe le comparent encore avant RLE ; le digest diagnostique
+  ne tranche pas cette question, car il est calculé après tri canonique ;
+- `corner_histograms` paie déjà `O(|A|^2+|B|^2)` prédicats exacts. Ajouter un
+  tri pour éviter seulement les deux lectures, l'addition et la branche des
+  15--20 % d'ancres mortes n'est pas « gratuit ».
+
+Le premier incrément reçu est donc **counter-only** : saturer les valeurs au
+seuil `need`, compter par petits buckets les survivants en
+`O(|A|+|B|+need)`, puis exiger `predicted_survivors + predicted_killed =
+|A||B|` et l'égalité avec la boucle actuelle. La porte couvre préfixes vide,
+partiel et plein, égalité au seuil, planchers morts/vivants et un mutant
+`upper_bound`. Elle ne change ni émission, ni ordre, ni lots, ni digest. Si le
+gain potentiel devient matériel, une seconde décision choisira entre
+requalification explicite de l'ordre brut et structure de reporting ordonné.
+
+### V55 — bon classifieur de fibre, quantificateurs resserrés
+
+La caractérisation ponctuelle est exacte ; les rejets boîte--handle ne sont
+que des implications universelles sûres. Pour un handle `C` :
+
+- `dist_min^2(A,C) > Dmax^2(A,B)`, ou le symétrique côté `B`, certifie
+  `NONE_LENS`. L'inégalité reste stricte, car la lentille est fermée.
+- Pour certifier `NONE_ACUTE`, ne pas découpler le maximum du déplacement et
+  le minimum de longueur. La forme couplée existe déjà : avec
+  `H=(x-a).(b-x)`, l'acuité au sommet `x` exige `H<0`. Le prédicat continu
+  exact `hmin_boxes(A,B,C) >= 0` prouve donc qu'aucun triplet du produit n'est
+  aigu. L'égalité est correctement rejetée comme angle droit.
+
+Ces extrema sont exacts sur le produit continu des AABB, lequel sur-couvre le
+produit discret des nœuds : un succès est autoritaire, un échec reste `MIXED`.
+Graver cette nouvelle sémantique dans un wrapper nommé et un oracle indépendant
+plutôt que réutiliser silencieusement le rôle témoin actuel de `hmin_boxes`.
+
+La bonne place n'est pas `rect_cover_handles`, qui reste l'autorité complète
+pour W3, secteurs, grille et témoins de profondeur. C'est le premier
+classifieur `NONE | MIXED` de `Q3FiberTask(A,B,C)`, avec une sous-antichaîne
+typée de handles de seeds. `MIXED` se scinde transactionnellement ou reste
+`pending` ; les feuilles repassent toujours par `is_acute_seed` et son owner.
+Pendant l'expérimentation, construire seulement des indices ou flags lors de
+l'expansion du cover complet : une seconde expansion des handles pourrait
+coûter plus que les tests économisés. q4 peut partager ce verdict géométrique,
+jamais le statut de rang ou de vie q3.
+
+Les 78 % de points rejetés **ponctuellement** ne prédisent pas la sélectivité
+du test universel : un handle mêlant un seed valide à de nombreux non-seeds
+reste `MIXED`. Mesurer séparément handles et masse de points `NONE_LENS`,
+`NONE_ACUTE`, `MIXED`, puis vérifier par brute force qu'aucun `NONE` ne contient
+un vrai `T_owner`.
+
+### V56 — oracle et compteurs avant la grande campagne
+
+Oui, 8 000 vers 16 000 est pré-asymptotique, mais le dernier exposant q4 ne se
+transfère pas automatiquement à q3. Non à une campagne 100 k--200 k avant le
+contrat ci-dessus. Commencer par la porte counter-only, un oracle exhaustif à
+petit `n` sous permutations, puis 8 k/16 k/32 k et éventuellement un reçu
+50 k existant. Ne lancer les grandes tailles que si la non-vacuité et la
+sélectivité par groupes croissent.
+
+La phrase « deux places, et deux seulement » est trop forte : le calcul des
+histogrammes reste quadratique dans les tailles de facteurs, le cover complet
+reste développé, et l'écart seeds--sorties paie encore grille et profondeur.
+De même, un survivant de génération n'est pas encore l'objet après RLE et
+census. Nommer chaque étage et publier `hist_pair_evals`, produit cartésien,
+ancres post-histogramme, handles par disposition, points visités, seeds,
+morts W3/grille/profondeur, candidats pré-RLE, boules uniques, HWM et mur. Ce
+counter-only est le premier morceau mesurable de la généralisation WSPD q3,
+pas une optimisation produit anticipée.
 
 ## Verdict mathématique
 
@@ -241,9 +493,13 @@ tous les sites des handles. Ne pousser le rejet de nœud par boîte que si la
 compaction paie ; comparer alors nœuds, visites et mur avec bornes continues
 et bornes resserrées par parité.
 
-Le jalon qui change l'exposant local reste l'arrangement shallow de centres :
-préparation en $O(m_e\log m_e)$ puis sortie bornée par profondeur, sans former
-d'abord toutes les paires. Les quantités à publier par régime restent ancres,
-$m_e$, somme des $m_e$, sorties shallow et coût exact ; aucun résultat sur
-deux ou trois tailles ne transforme cette cible en claim sous-quadratique
-global.
+Cette mesure termine le raccord d'enveloppe ; elle ne pilote plus seule le
+jalon d'architecture. La suite prioritaire est la source fibrée décrite plus
+haut. Son
+terminal shallow vise une préparation en $O(m_e\log m_e)$ puis une sortie
+bornée par profondeur, sans former les paires de carriers, tandis que le
+center-cover doit éviter l'expansion préalable d'une part mesurée des blocs
+d'ancres. Publier séparément blocs visités, ancres résiduelles, lignes actives,
+intérieurs universels, sommets shallow, expansions ponctuelles, sorties et
+HWM. Aucun résultat sur deux ou trois tailles ne transforme cette cible
+conditionnelle en claim sous-quadratique global.
