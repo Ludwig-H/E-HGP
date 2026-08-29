@@ -164,6 +164,11 @@ int main(int argc, char** argv) {
   // acuite stricte -> owner canonique ; classer par l'etage le plus profond
   // atteint partitionne la vacuite reelle sans recouvrement.
   u64 reel_zero_role = 0, reel_lentille = 0, reel_acuite = 0, reel_owner = 0;
+  // V71 : ce qu'un bloc VIDE coute reellement. Un bloc sans support valide
+  // ne declenche AUCUN rescan de profondeur — il ne paie que l'enumeration
+  // de ses roles. Reconnaitre sa vacuite n'evite donc que cela, et la
+  // comparaison honnete est en appels executes de chaque espece.
+  u64 roles_blocs_vides = 0, roles_blocs_pleins = 0;
   // Croisement : parmi les vides que les BOITES ne classent pas, quelle est
   // la cause reelle ? C'est la question V68.
   u64 nc_lentille = 0, nc_acuite = 0, nc_owner = 0, nc_zero = 0;
@@ -276,6 +281,7 @@ int main(int argc, char** argv) {
       }
 
       const bool vide_reel = formes.empty();
+      if (vide_reel) roles_blocs_vides += roles_inspectes; else roles_blocs_pleins += roles_inspectes;
       if (vide_reel) {
         ++vides_reels;
         if (etage == 0) ++reel_zero_role;
@@ -382,6 +388,9 @@ int main(int argc, char** argv) {
   std::printf("    baseline : ancres examinees=%llu, appels in_spindle=%llu, sorties anticipees=%llu\n",
               (unsigned long long)ancres_examinees, (unsigned long long)appels_spindle,
               (unsigned long long)sorties_anticipees_ancre);
+  std::printf("    roles enumeres (is_acute_seed) : blocs VIDES=%llu, blocs PLEINS=%llu — "
+              "reconnaitre un bloc vide n'evite QUE la premiere colonne\n",
+              (unsigned long long)roles_blocs_vides, (unsigned long long)roles_blocs_pleins);
   std::printf("    certificateur de boites (compteur SEPARE) : %llu evaluations de bornes\n",
               (unsigned long long)cout_certificateur);
   std::printf("  mur=%.1f s rss_hwm_kb=%llu\n", mur, (unsigned long long)rss_hwm_kb());
