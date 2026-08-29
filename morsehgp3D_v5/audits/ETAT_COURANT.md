@@ -1,9 +1,11 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **HEAD documentaire relu :** `d809216d`, publié sur `main` et
+- **HEAD documentaire relu :** `51ca037b`, publié sur `main` et
   `origin/main`. Le dernier delta du chemin produit reste `2d052921` ; le HEAD
-  épingle le harnais local et le contrat entier du futur center-cover, sans
-  pinner le raccord d'enveloppe.
+  épingle maintenant le harnais, le contrat du futur center-cover et le probe
+  diagnostique `A x B x C`, sans pinner le raccord d'enveloppe. Les tableaux
+  du probe ternaire ne possèdent pas encore leurs sorties brutes sous
+  `receipts/`.
 - **Dernier pin du chemin produit reçu :** `72090f79`. Le chemin produit de
   l'enveloppe q3/q4 et ses portes restent dans un worktree concurrent non
   commité. Ils sont jugés ci-dessous comme snapshot, jamais attribués au HEAD ;
@@ -64,6 +66,17 @@ la fusion prématurée dans la collecte des handles est abandonnée. Ces décisi
 sont intégrées à la question active ; les deux notes redondantes sont retirées
 du tip.
 
+La restriction supplémentaire par un handle $C$ est désormais un **GO
+counter-only** : le compte commun franchit neuf sur 70--78 % des blocs q3 non
+vides jugés dans les deux familles sondées, mais ce n'est ni l'idéal général,
+ni un certificat implémentable, ni un reçu de gain. La baseline paire du probe
+n'emploie que la première ancre ; ses ratios ne sont pas causaux. Le test de la
+vraie puissance aux seuls `8^3` coins est faux : une fixture u16 donne deux
+coins strictement intérieurs et un porteur médian strictement extérieur. La
+première île sûre réutilise `h_a(a),h_b(b)` et conditionne les patches du
+center-cover par les médiatrices `AB/AC/BC`. $h_c(c)$ reste une ablation du
+résiduel. Un cap ou une borne ambiguë produit `pending`, jamais un prune.
+
 ## Enveloppe q3/q4 reçue mathématiquement
 
 - Avec `d=b-a`, `D2=|d|2`, `w=2z-a-b`, `S=|w|2-D2` et
@@ -106,6 +119,21 @@ sous grille commune ou octree 2:1 et paramètres fixes ; cette borne ne prouve
 aucun prune. Elle ne borne ni les splits `MIXED` de `A x B`, ni les visites du
 center-cover, ni la somme des lignes de census. En attendant leur réception,
 la frontière directe reste l'oracle q3/q4 borné.
+
+Il ne ferme pas la fibre asymétrique `WSPDRect x Handle`, où $C$ n'est pas
+séparé. Le couple `(rectangle,handle)` partitionne les rôles paire--tiers du
+cover ; acuité, identités et owner restent à décider. La masse retire les
+diagonales lorsque $C$ recouvre $A$ ou $B$, et le complément du cover reçoit
+le fate `DEAD_OUTSIDE_WINDOW`. Le join des histogrammes est borné par le seuil
+neuf seulement sur un domaine cartésien ; acuité et owner couplent sinon les
+rôles. Leur calcul courant reste `O(|A|^2+|B|^2)`.
+
+Une ablation distincte `Lca3Forest` possède un ledger exact
+`sum |A||B||C| = C(n,3)` et au plus `48(n-1)` blocs littéraux sous le radix
+Morton48 actuel. Elle n'est pas une WSPD ternaire : sa paire LCA n'est pas
+l'arête maximale, donc ni le spindle ni le cover owner courant ne peuvent y
+être réutilisés. Elle reste un comparateur combinatoire après la fibre mesurée,
+pas une nouvelle route produit.
 
 La borne honnête cible
 `O(n log n + R + K log n + C + I + A + V + sum_e(m_e log m_e) + h*M + Z)`.

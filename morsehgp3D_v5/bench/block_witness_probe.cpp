@@ -4,16 +4,15 @@
 // Question posee par Louis le 29 aout : enumerer des blocs A x B x C — la paire
 // (a,b) par un rectangle WSPD, le troisieme point x par un handle — et tuer des
 // blocs entiers par temoins centraux. Les handles forment une ANTICHAINE, donc
-// des plages disjointes : (rectangle, handle) est bien une PARTITION des
-// triplets, pas un recouvrement, et l'exact-once est gratuit.
+// des plages disjointes : (rectangle, handle) partitionne les ROLES
+// (arete, tiers) presents dans le cover. Distinct-ID, acuite et owner restent
+// necessaires avant de parler d'une partition des triangles q3.
 //
 // Cette sonde ne mesure PAS un certificat implementable : elle mesure le
-// CERTIFICAT IDEAL, c'est-a-dire l'ensemble EXACT des temoins universels du
-// bloc, obtenu par force brute sur les triplets reellement valides du bloc.
-// C'est un MAJORANT de ce que tout certificat sain pourra jamais atteindre.
-// Si l'ideal ne tue pas, l'idee est morte et aucune ingenierie ne la sauvera ;
-// s'il tue, il reste a construire une approximation saine et bon marche, et
-// c'est un autre travail.
+// COMPTE COMMUN EXACT, c'est-a-dire l'intersection des temoins des triplets
+// reellement valides du bloc. Ce n'est PAS l'ideal general : deux sous-domaines
+// peuvent etre tues par des ensembles de temoins incompatibles sans fournir h3
+// temoins communs. Un succes est un signal positif ; un echec ne refute rien.
 //
 // Definitions, toutes exactes en entiers :
 //   - triplet VALIDE du bloc : (a,b,x) avec a dans A, b dans B, x dans C,
@@ -25,9 +24,9 @@
 //     circumboules) ;
 //   - bloc TUABLE : au moins h_3 temoins universels — alors aucun de ses
 //     triplets ne peut survivre au filtre de profondeur.
-// Le comparatif est le certificat de PAIRE deja en production (`in_spindle`,
-// temoins universels du disque entier des centres), evalue sur les memes
-// blocs : c'est lui que le bloc doit battre pour valoir un chantier.
+// Le comparatif PAIRE est seulement `in_spindle` sur la premiere paire du
+// rectangle. Il ne represente ni toutes les ancres actives du bloc, ni la
+// production ; les rapports entre colonnes restent diagnostiques.
 //
 // Usage : mhgp5_block_witness_probe --family=F --n=N [--blocs=K] [--max-triplets=T]
 #include <algorithm>
@@ -66,8 +65,10 @@ int main(int argc, char** argv) {
   u64 visited = 0, workers = 0;
   generate_detail::alive_rectangles(ix, 8, h_of, 1, 1, &alive, &visited, &workers);
 
-  // Denombrement des blocs pour un echantillonnage a PAS CONSTANT (deterministe,
-  // reproductible, et non biaise vers les rectangles lourds ou legers).
+  // Denombrement des blocs pour un echantillonnage SYSTEMATIQUE a pas constant
+  // (deterministe et reproductible). Ce n'est pas un echantillon aleatoire :
+  // une inference devra varier la phase ou utiliser un hash stable des IDs,
+  // car l'ordre des rectangles/handles peut etre correle avec la geometrie.
   generate_detail::AnchorScratch sc;
   u64 blocs_total = 0;
   for (const AliveRect& ar : alive) {
@@ -133,8 +134,8 @@ int main(int argc, char** argv) {
           if (universel) ++tb;
         }
       }
-      // Comparatif : temoins universels de PAIRE (production), pour la premiere
-      // paire du bloc — `in_spindle` ne depend pas de C, c'est le point.
+      // Comparatif ponctuel, NON apparie : temoins W3 de la premiere paire du
+      // rectangle. Une baseline de bloc devra traiter toutes les ancres actives.
       {
         const P3& pa = ix.upos[(size_t)ra.first];
         const P3& pb = ix.upos[(size_t)rb.first];
@@ -165,10 +166,10 @@ int main(int argc, char** argv) {
   if (juges == 0) { std::printf("  aucun bloc juge\n"); return 3; }
   std::printf("  blocs juges = %llu ; triplets valides par bloc = %.1f en moyenne\n",
               (unsigned long long)juges, (double)triplets_cumules / (double)juges);
-  std::printf("  temoins universels par bloc : BLOC %.2f en moyenne, PAIRE %.2f en moyenne\n",
+  std::printf("  temoins universels : COMMUN_BLOC %.2f en moyenne, PAIRE_PONCTUELLE %.2f en moyenne\n",
               (double)temoins_bloc_cumules / (double)juges, (double)temoins_paire_cumules / (double)juges);
-  std::printf("  TUABLES (>= h3) : par le bloc %llu (%.1f %%), par la paire %llu (%.1f %%), "
-              "par le bloc SEULEMENT %llu (%.1f %%)\n",
+  std::printf("  SEUIL (>= h3) : commun_bloc %llu (%.1f %%), paire_ponctuelle %llu (%.1f %%), "
+              "commun_sans_paire_ponctuelle %llu (%.1f %%)\n",
               (unsigned long long)tuables_bloc, 100.0 * (double)tuables_bloc / (double)juges,
               (unsigned long long)tuables_paire, 100.0 * (double)tuables_paire / (double)juges,
               (unsigned long long)tuables_bloc_seulement, 100.0 * (double)tuables_bloc_seulement / (double)juges);

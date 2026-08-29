@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "../src/lanes/q3.hpp"
+#include "../src/spindle/spindle.hpp"
 
 using namespace mhgp5;
 
@@ -84,7 +85,47 @@ int main() {
     return 3;
   }
 
-  std::printf("q3_skinny_center OK D2=%lld base2=%lld acute=%lld/%lld/%lld ternary=%llu\n",
+  // Contre-fixture permanente au faux lemme « la puissance q3 est negative
+  // aux coins de A x B x C, donc partout dans le produit ». A et B sont des
+  // singletons et C est le segment horizontal entre xm et xp. Les deux coins
+  // de C placent z strictement dans la circumboule, tandis que le point entier
+  // interieur x0 le place strictement dehors. Les trois triangles sont aigus
+  // et ab est leur arete maximale stricte : aucun filtre d'admissibilite ne
+  // peut expliquer le changement de signe.
+  const P3 ca{10, 0, 0}, cb{50, 0, 0}, xm{20, 24, 0}, x0{30, 24, 0}, xp{40, 24, 0};
+  const P3 wz{30, 25, 0};
+  const i64 cd2 = p3_norm2(p3_sub(cb, ca));
+  if (!is_acute_seed(ca, cb, xm, cd2, 0, 1, 2) || !is_acute_seed(ca, cb, x0, cd2, 0, 1, 2) ||
+      !is_acute_seed(ca, cb, xp, cd2, 0, 1, 2)) {
+    std::fprintf(stderr, "ECHEC: la contre-fixture des coins n'est plus admissible\n");
+    return 3;
+  }
+  const i128 pm = q3_power(q3_form(ca, cb, xm), wz);
+  const i128 p0 = q3_power(q3_form(ca, cb, x0), wz);
+  const i128 pp = q3_power(q3_form(ca, cb, xp), wz);
+  if (pm != -57600000 || p0 != 38400000 || pp != -57600000 || !(pm < 0 && p0 > 0 && pp < 0)) {
+    std::fprintf(stderr, "ECHEC: la contre-fixture des coins ne change plus strictement de signe\n");
+    return 3;
+  }
+
+  // h_a est indexe par l'endpoint choisi, pas un scalaire de bloc. Avec le
+  // meme partenaire b et le meme carrier c, a1 est dans W3(a0,b) et interieur
+  // au support de a0, tandis que a0 est hors W3(a1,b) et exterieur au support
+  // de a1.
+  const P3 ha0{4, 2, 0}, ha1{3, 2, 0}, hb0{0, 0, 0}, hc0{0, 3, 0};
+  const i64 hd0 = p3_norm2(p3_sub(hb0, ha0));
+  const i64 hd1 = p3_norm2(p3_sub(hb0, ha1));
+  const i128 hp0 = q3_power(q3_form(ha0, hb0, hc0), ha1);
+  const i128 hp1 = q3_power(q3_form(ha1, hb0, hc0), ha0);
+  if (!is_acute_seed(ha0, hb0, hc0, hd0, 0, 1, 2) ||
+      !is_acute_seed(ha1, hb0, hc0, hd1, 0, 1, 2) ||
+      !in_spindle(Lane::kQ3, ha0, hb0, ha1) || in_spindle(Lane::kQ3, ha1, hb0, ha0) ||
+      hp0 != -504 || hp1 != 378) {
+    std::fprintf(stderr, "ECHEC: la contre-fixture d'indexation de h_a a change\n");
+    return 3;
+  }
+
+  std::printf("q3_skinny_center OK D2=%lld base2=%lld acute=%lld/%lld/%lld ternary=%llu corner512=refuted hindex=1/0\n",
               (long long)d2, (long long)base2, (long long)acute_p, (long long)acute_q,
               (long long)acute_r, (unsigned long long)acute_triples);
   return 0;
