@@ -78,7 +78,12 @@ struct RunOptions {
   // servent pour forcer un entrelacement) ; une exception qu'il leve est
   // traitee comme une exception de l'ordre observe (propagee apres jonction).
   std::function<void(u64 K, FoldPhase phase)> on_fold_phase;
+  size_t pretest_query_min_points = kPretestQueryMinPoints;  // 0 = requete toujours ; SIZE_MAX = cover toujours
   size_t cell_grid_min_sites = kCellGridMinSites;  // grille de cellules (generate.hpp) ; SIZE_MAX : jamais (mesure contrefactuelle)
+  // Filtre d'enveloppe q3/q4 experimental, opt-in. Il compacte le cover
+  // historique apres les handles ; aucun claim tant que l'appariement ON/OFF
+  // du catalogue brut jusqu'aux forets n'est pas recu.
+  bool cover_envelope_filter = false;
   u32 postsep_refine_levels = 0;  // raffinement post-separation, L in [0, 3] ; 0 = desactive. q2 jamais raffinee.
   // Appele pour chaque K croissant, AVANT liberation du resultat, depuis le
   // fil d'arriere-plan de cet ordre (un seul a la fois, dans l'ordre des K,
@@ -216,7 +221,9 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   const auto t_g = std::chrono::steady_clock::now();
   std::vector<BallCandidate> cands;
   GenerateOptions go;
+  go.pretest_query_min_points = opt.pretest_query_min_points;
   go.cell_grid_min_sites = opt.cell_grid_min_sites;
+  go.cover_envelope_filter = opt.cover_envelope_filter;
   go.postsep_refine_levels = opt.postsep_refine_levels;
   go.q3_override = opt.q3_override;
   go.q4_override = opt.q4_override;
@@ -652,6 +659,39 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                (unsigned long long)gs.seeds[0], (unsigned long long)gs.seeds[1], (unsigned long long)gs.q4_completions, (unsigned long long)gs.seeds_killed_core, (unsigned long long)gs.seeds_killed_chord,
                (unsigned long long)gs.float_cert_neg, (unsigned long long)gs.float_cert_pos, (unsigned long long)gs.float_fallback,
                (unsigned long long)gs.jung_cert_kill, (unsigned long long)gs.jung_cert_skip, (unsigned long long)gs.jung_fallback);
+  std::fprintf(out,
+               "enveloppe_cover active=%d "
+               "q3_cover=%llu/%llu/%llu/%llu q3_query=%llu/%llu/%llu/%llu "
+               "q4_cover=%llu/%llu/%llu/%llu q4_query=%llu/%llu/%llu/%llu "
+               "(ancres/sites_avant/sites_apres/tests_transverses)\n",
+               opt.cover_envelope_filter ? 1 : 0,
+               (unsigned long long)gs.edge_envelope_anchors[1][0],
+               (unsigned long long)gs.edge_envelope_sites_before[1][0],
+               (unsigned long long)gs.edge_envelope_sites_after[1][0],
+               (unsigned long long)gs.edge_envelope_cross_tests[1][0],
+               (unsigned long long)gs.edge_envelope_anchors[1][1],
+               (unsigned long long)gs.edge_envelope_sites_before[1][1],
+               (unsigned long long)gs.edge_envelope_sites_after[1][1],
+               (unsigned long long)gs.edge_envelope_cross_tests[1][1],
+               (unsigned long long)gs.edge_envelope_anchors[2][0],
+               (unsigned long long)gs.edge_envelope_sites_before[2][0],
+               (unsigned long long)gs.edge_envelope_sites_after[2][0],
+               (unsigned long long)gs.edge_envelope_cross_tests[2][0],
+               (unsigned long long)gs.edge_envelope_anchors[2][1],
+               (unsigned long long)gs.edge_envelope_sites_before[2][1],
+               (unsigned long long)gs.edge_envelope_sites_after[2][1],
+               (unsigned long long)gs.edge_envelope_cross_tests[2][1]);
+#if defined(MHGP5_PROFILE_Q4)
+  std::fprintf(out,
+               "profil_enveloppe q3_tests_profondeur=%llu q4_covers=%llu q4_visites_handles=%llu "
+               "q4_sites_cover_historiques=%llu q4_tests_coeur=%llu q4_completions=%llu "
+               "q4_entrees_profondeur=%llu q4_tests_puissance=%llu\n",
+               (unsigned long long)(gs.q3_cert[0] + gs.q3_cert[1] + gs.q3_cert[2]),
+               (unsigned long long)gs.q4_covers_built, (unsigned long long)gs.q4_cover_visits,
+               (unsigned long long)gs.q4_cover_sites, (unsigned long long)gs.q4_core_site_tests,
+               (unsigned long long)gs.q4_completions, (unsigned long long)gs.q4_depth_entries,
+               (unsigned long long)gs.q4_power_tests);
+#endif
   // GRAND-LIVRE DU RAFFINEMENT POST-SEPARATION : identite exacte par lane.
   std::fprintf(out, "postsep L=%u parents=%llu/%llu/%llu produits=%llu/%llu/%llu base=%llu/%llu/%llu emis=%llu/%llu/%llu tues=%llu/%llu/%llu etats=%llu/%llu/%llu comptages=%llu/%llu/%llu nœuds=%llu/%llu/%llu coins=%llu/%llu/%llu rollbacks=%llu/%llu/%llu regressions=%llu/%llu/%llu\n",
                opt.postsep_refine_levels, (unsigned long long)gs.postsep_parent_rects[0],

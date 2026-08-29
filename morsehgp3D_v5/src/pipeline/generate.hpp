@@ -85,6 +85,14 @@ struct GenerateStats {
   u64 seeds[2] = {0, 0};             // q3, q4
   u64 seeds_killed_core = 0;         // q4 : cœur de seed (Jung, K = 1)
   u64 seeds_killed_chord = 0;        // q4 : morceaux de corde (chord_kill.hpp) — seed vivant au cœur, mort par morceaux
+  // Filtre d'enveloppe d'ancre EXPERIMENTAL, opt-in. Deux routes : 0 =
+  // pretests sur le cover, 1 = pretests par requete de rectangle. `before`
+  // conserve le sens du cover historique coefficient 3 ; `after` est la vue
+  // transmise aux scans. Ces masses mesurent le travail, jamais l'objet.
+  u64 edge_envelope_anchors[3][2] = {};
+  u64 edge_envelope_sites_before[3][2] = {};
+  u64 edge_envelope_sites_after[3][2] = {};
+  u64 edge_envelope_cross_tests[3][2] = {};
   // Profil q4 par etage (MESURE, compile seulement avec -DMHGP5_PROFILE_Q4 : cible mhgp5_q4_stage_probe) :
   // nanosecondes cumulees dans les tests d'ancre, l'enumeration des seeds, les scans de cœur/corde, les completions.
   u64 prof_q4_anchor_ns = 0, prof_q4_core_ns = 0, prof_q4_compl_ns = 0, prof_q4_cover_ns = 0;
@@ -159,11 +167,28 @@ struct GenerateStats {
     float_fallback += o.float_fallback;
     for (int i = 0; i < 3; ++i) q3_cert[i] += o.q3_cert[i];
     for (int i = 0; i < 6; ++i) q4_cert[i] += o.q4_cert[i];
+    for (int i = 0; i < 3; ++i)
+      for (int r = 0; r < 2; ++r) {
+        edge_envelope_anchors[i][r] += o.edge_envelope_anchors[i][r];
+        edge_envelope_sites_before[i][r] += o.edge_envelope_sites_before[i][r];
+        edge_envelope_sites_after[i][r] += o.edge_envelope_sites_after[i][r];
+        edge_envelope_cross_tests[i][r] += o.edge_envelope_cross_tests[i][r];
+      }
     jung_cert_kill += o.jung_cert_kill;
     jung_cert_skip += o.jung_cert_skip;
     jung_fallback += o.jung_fallback;
   }
 };
+
+inline void record_edge_envelope(GenerateStats* st, Lane lane, bool pretest_by_query,
+                                 const EdgeEnvelopeCounts& c) {
+  const int li = lane_index(lane);
+  const int route = pretest_by_query ? 1 : 0;
+  ++st->edge_envelope_anchors[li][route];
+  st->edge_envelope_sites_before[li][route] += c.sites_before;
+  st->edge_envelope_sites_after[li][route] += c.sites_after;
+  st->edge_envelope_cross_tests[li][route] += c.cross_tests;
+}
 
 struct AliveRect {
   WspdRect r;
@@ -385,7 +410,13 @@ inline void corner_histograms(const CloudIndex& ix, Lane lane, const WspdRect& r
 struct AnchorScratch {
   std::vector<u64> ha, hb;
   std::vector<NodeRef> handles;
-  std::vector<CoverPoint> cover, cover_tmp, lens, query;  // query : boule diametrale par requete (pretests avant cover)
+  // `cover_tmp` alterne avec `cover` comme tampon du counting sort, puis sert
+  // de vue enveloppe jusqu'a l'ancre suivante. Deux capacites suffisent donc
+  // pour conserver simultanement l'autorite historique et la vue de scan.
+  std::vector<CoverPoint> cover, cover_tmp, lens, query;
+  bool scan_cover_active = false;
+  bool scan_cover_requested = false;
+  bool scan_cover_query_route = false;
   u64 handle_points = 0;                                    // points des handles du rectangle courant (politique de pretest)
   u64 cover_nodes = 0, visits = 0;
   // Sites affines de l'ancre : u = 2z−a−b, q = |u|²−D² (entiers < 2^36, exacts
@@ -395,13 +426,15 @@ struct AnchorScratch {
   bool affine_filled = false;
   CellGrid grid;  // grille de cellules de l'ancre courante (cell_grid.hpp) ; grid.built = false si non construite
   size_t cell_min_sites = kCellGridMinSites;  // politique : grille seulement si cover >= ce seuil ; 0 = mode FORCE (toute ancre, ratio et near_m ignores ; tests)
+  const std::vector<CoverPoint>& scan_sites() const { return scan_cover_active ? cover_tmp : cover; }
   void fill_affine_sites(const CloudIndex& ix, const P3& pa, const P3& pb, i64 D2) {
-    const size_t nc = cover.size();
+    const std::vector<CoverPoint>& sites = scan_sites();
+    const size_t nc = sites.size();
     su0.resize(nc); su1.resize(nc); su2.resize(nc); sq.resize(nc);
     i64 qmax = 1, umax = 1;
     const i64 sx = pa.x + pb.x, sy = pa.y + pb.y, sz = pa.z + pb.z;
     for (size_t i = 0; i < nc; ++i) {
-      const P3& pz = ix.upos[(size_t)cover[i].u];
+      const P3& pz = ix.upos[(size_t)sites[i].u];
       const i64 u0 = 2 * pz.x - sx, u1 = 2 * pz.y - sy, u2 = 2 * pz.z - sz;
       const i64 qz = u0 * u0 + u1 * u1 + u2 * u2 - D2;
       su0[i] = u0; su1[i] = u1; su2[i] = u2; sq[i] = qz;
@@ -413,6 +446,57 @@ struct AnchorScratch {
     affine_filled = true;
   }
 };
+
+inline void configure_anchor_scan_cover(AnchorScratch& sc, bool enabled, bool pretest_by_query) {
+  sc.scan_cover_active = false;
+  sc.scan_cover_requested = enabled;
+  sc.scan_cover_query_route = pretest_by_query;
+  sc.affine_filled = false;
+}
+
+// Prepare au PREMIER seed effectivement scanne. Le compactage et la formation
+// affine sont fusionnes en une seule passe : le filtre n'ajoute donc pas une
+// seconde lecture complete du cover a la passe affine historique.
+inline void ensure_anchor_scan_affine(const CloudIndex& ix, AnchorScratch& sc, const P3& pa, const P3& pb,
+                                      i64 D2, Lane lane, GenerateStats* st) {
+  if (sc.affine_filled) return;
+  if (!sc.scan_cover_requested) {
+    sc.fill_affine_sites(ix, pa, pb, D2);
+    return;
+  }
+  const EdgeEnvelope envelope = lane == Lane::kQ3 ? EdgeEnvelope::kQ3 : EdgeEnvelope::kQ4Jung;
+  EdgeEnvelopeCounts counts;
+  counts.sites_before = sc.cover.size();
+  sc.cover_tmp.clear();
+  sc.cover_tmp.reserve(sc.cover.size());
+  sc.su0.clear(); sc.su1.clear(); sc.su2.clear(); sc.sq.clear();
+  sc.su0.reserve(sc.cover.size()); sc.su1.reserve(sc.cover.size());
+  sc.su2.reserve(sc.cover.size()); sc.sq.reserve(sc.cover.size());
+  i64 qmax = 1, umax = 1;
+  const i64 sx = pa.x + pb.x, sy = pa.y + pb.y, sz = pa.z + pb.z;
+  const i64 d0 = pb.x - pa.x, d1 = pb.y - pa.y, d2 = pb.z - pa.z;
+  for (const CoverPoint& cp : sc.cover) {
+    const P3& pz = ix.upos[(size_t)cp.u];
+    const i64 u0 = 2 * pz.x - sx, u1 = 2 * pz.y - sy, u2 = 2 * pz.z - sz;
+    const i64 qz = cp.dist2q - D2;
+    if (qz > 0) {
+      ++counts.cross_tests;
+      const i64 dw = d0 * u0 + d1 * u1 + d2 * u2;
+      const i128 xi = (i128)D2 * cp.dist2q - (i128)dw * dw;
+      if (!edge_envelope_outer_contains(envelope, qz, xi)) continue;
+    }
+    sc.cover_tmp.push_back(cp);
+    sc.su0.push_back(u0); sc.su1.push_back(u1); sc.su2.push_back(u2); sc.sq.push_back(qz);
+    qmax = std::max(qmax, qz < 0 ? -qz : qz);
+    umax = std::max({umax, u0 < 0 ? -u0 : u0, u1 < 0 ? -u1 : u1, u2 < 0 ? -u2 : u2});
+  }
+  counts.sites_after = sc.cover_tmp.size();
+  sc.qmax_d = (double)qmax;
+  sc.umax_d = (double)umax;
+  sc.scan_cover_active = true;
+  sc.affine_filled = true;
+  record_edge_envelope(st, lane, sc.scan_cover_query_route, counts);
+}
 
 // GRILLE DE CELLULES (cell_grid.hpp) — helpers partages par la production et
 // les lanes par lots : centre v3 = N/(2G), N = W − G·d (q3) ; corde
@@ -551,7 +635,7 @@ inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 
     sc.grid.built = false;
   }  // kAlreadyAppliedWithGrid : sc.grid tel que laisse par l'appelant
   const i64 d3[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
-  sc.affine_filled = false;
+  if (!sc.scan_cover_active) sc.affine_filled = false;
   for (const CoverPoint& cp : sc.cover) {
     if (cp.u == ua || cp.u == ub) continue;
     const P3& px = ix.upos[(size_t)cp.u];
@@ -559,12 +643,13 @@ inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 
     ++ls->seeds[0];
     const Q3Form f3 = q3_form(pa, pb, px);
     if (sc.grid.built && seed_center_cell_dead(sc.grid, f3, d3)) { ++ls->seeds_killed_cells[1]; continue; }
-    if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);
+    if (!sc.affine_filled) ensure_anchor_scan_affine(ix, sc, pa, pb, D2, Lane::kQ3, ls);
+    const std::vector<CoverPoint>& scan_sites = sc.scan_sites();
     const AffineSeed seed(f3, pa, pb, sc, float_on);
     // Filtre de profondeur a la generation : minorant certifie.
     u64 depth = 0;
     bool deep = false;
-    for (size_t iz = 0; iz < sc.cover.size() && !deep; ++iz) {
+    for (size_t iz = 0; iz < scan_sites.size() && !deep; ++iz) {
       const double lh = seed.l_hat(sc, iz);
       bool interior;
       if (lh < -seed.bound) {
@@ -631,7 +716,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     }
   }
   MHGP5_Q4_ACC(prof_q4_anchor_ns, q4_t_anchor);
-  sc.affine_filled = false;
+  if (!sc.scan_cover_active) sc.affine_filled = false;
   sc.lens.clear();
   for (const CoverPoint& cz : sc.cover) {
     const P3& pz = ix.upos[(size_t)cz.u];
@@ -663,7 +748,8 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     bool dead_by_chord = false;
     const auto q4_t_core = MHGP5_Q4_TICK();
     if (!dead) {
-      if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);
+      if (!sc.affine_filled) ensure_anchor_scan_affine(ix, sc, pa, pb, D2, Lane::kQ4, ls);
+      const std::vector<CoverPoint>& scan_sites = sc.scan_sites();
       const AffineSeed seed(f3s, pa, pb, sc, float_on);
       const double Jd = (double)Jb;
       const double Jlo = Jd * (1.0 - kJungGuard), Jhi = Jd * (1.0 + kJungGuard);
@@ -673,8 +759,8 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       ChordPieces chord;
       if (chord_on) chord.init(Jb, MHGP5_MUTANT("chord-nonstrict"));
       u64 fcount = 0;
-      for (size_t iz = 0; iz < sc.cover.size(); ++iz) {
-        const CoverPoint& cz = sc.cover[iz];
+      for (size_t iz = 0; iz < scan_sites.size(); ++iz) {
+        const CoverPoint& cz = scan_sites[iz];
         if (cz.u == ua || cz.u == ub || cz.u == cx.u) continue;
         MHGP5_Q4_ADD(q4_core_site_tests, 1);
         const double lh = seed.l_hat(sc, iz);
@@ -724,6 +810,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       if (dead_by_chord) ++ls->seeds_killed_chord; else ++ls->seeds_killed_core;
       continue;
     }
+    const std::vector<CoverPoint>& scan_sites = sc.scan_sites();
     // Completions y sur la lentille.
     const auto q4_t_compl = MHGP5_Q4_TICK();
     for (const CoverPoint& cy : sc.lens) {
@@ -754,7 +841,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       MHGP5_Q4_ADD(q4_depth_entries, 1);
       u64 depth = 0;
       bool deep = false;
-      for (const CoverPoint& cz : sc.cover) {
+      for (const CoverPoint& cz : scan_sites) {
         MHGP5_Q4_ADD(q4_power_tests, 1);
         const i128 pw = q4_power(f4, ix.upos[(size_t)cz.u]);
         if ((pw < 0 || (genfilter_nonstrict && pw <= 0)) && ++depth >= h4) { deep = true; break; }
@@ -789,6 +876,10 @@ struct GenerateOptions {
   int threads = 1;
   size_t pretest_query_min_points = kPretestQueryMinPoints;
   size_t cell_grid_min_sites = kCellGridMinSites;  // grille de cellules (theoreme 10.5) des que le cover atteint ce seuil
+  // Filtre ponctuel entier du cover par l'enveloppe continue des boules de
+  // l'ancre. EXPERIMENTAL et desactive par defaut jusqu'a reception ON/OFF ;
+  // q4 reste l'intersection du cover historique coefficient 3 avec Jung.
+  bool cover_envelope_filter = false;
   // RAFFINEMENT POST-SEPARATION, niveaux L in [0, 3] (0 = desactive, defaut).
   // Prolonge la descente ternaire A L INTERIEUR d'un rectangle vivant : la
   // partition des paires est INCHANGEE (donc l'objet aussi), mais les boites
@@ -923,6 +1014,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
             if (k == 2) { ++ls->anchors_killed_sectors[1]; continue; }
           }
           anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, 3, &sc.cover, &sc.visits, &sc.cover_tmp);
+          configure_anchor_scan_cover(sc, opt.cover_envelope_filter, pretest_by_query);
           scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, genfilter_nonstrict, lo, ls,
                          pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply);
         }
@@ -988,6 +1080,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
           MHGP5_Q4_ADD(q4_covers_built, 1);
           MHGP5_Q4_ADD(q4_cover_visits, sc.visits - cover_visits_before);
           MHGP5_Q4_ADD(q4_cover_sites, sc.cover.size());
+          configure_anchor_scan_cover(sc, opt.cover_envelope_filter, pretest_by_query);
           process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, genfilter_nonstrict, seed_core_nonstrict,
                             no_canonical, lo, ls, pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply);
         }

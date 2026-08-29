@@ -207,6 +207,7 @@ inline bool validate_q4_results(const Q4Batch& b, std::string* why, bool emit_eq
 // anchors_killed_hist, anchors_killed_w4, seeds comme la lane de production.
 template <class Flush>
 inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 h_of[3], bool float_on, i64 cover_coef,
+                           size_t pretest_query_min_points, bool cover_envelope_filter,
                            bool depth_nonstrict, bool core_nonstrict, bool no_canonical,
                            generate_detail::AnchorScratch& sc, Q4Batch* bdev, std::vector<BallCandidate>* lo,
                            GenerateStats* ls, const BatchLimits& lim, BatchStats* bs, Flush&& flush) {
@@ -216,7 +217,7 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
   rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), cover_coef, &sc.handles, &sc.cover_nodes);
   sc.handle_points = 0;
   for (const NodeRef h : sc.handles) { const NodeRange r = ix.range_of(h); sc.handle_points += (u64)(r.last - r.first + 1); }
-  const bool pretest_by_query = sc.handle_points >= lim.pretest_query_min_points;
+  const bool pretest_by_query = sc.handle_points >= pretest_query_min_points;
   if (pretest_by_query) rect_diametral_candidates(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), &sc.query, &sc.cover_nodes);
   const u64 need = h_of[2] - ar.core;
   for (i32 ua = ra.first; ua <= ra.last; ++ua)
@@ -236,8 +237,22 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         if (k == 2) { ++ls->anchors_killed_sectors[2]; continue; }
       }
       anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, cover_coef, &sc.cover, &sc.visits, &sc.cover_tmp);
+      configure_anchor_scan_cover(sc, cover_envelope_filter, pretest_by_query);
+      const size_t nc_route = sc.cover.size();
+      // Fail-closed avant tout cast d'un indice de cover en u32. Le corps hote
+      // conserve les memes pretests et la meme grille, sans materialiser de wire.
+      if (nc_route > (size_t)UINT32_MAX) {
+        const u64 seeds_before_h = ls->seeds[1];
+        process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, depth_nonstrict, core_nonstrict,
+                          no_canonical, lo, ls,
+                          pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply);
+        ++bs->anchors_host;
+        ++bs->anchors_oversized;
+        bs->seeds_host += ls->seeds[1] - seeds_before_h;
+        continue;
+      }
       const bool ignore_threshold = MHGP5_MUTANT("route-ignore-threshold");
-      if (sc.cover.size() < lim.device_min_sites && !ignore_threshold) {
+      if (nc_route < lim.device_min_sites && !ignore_threshold) {
         // Routage hote : lane de production par ancre, emission immediate (pretests deja faits si requete).
         const u64 seeds_before_h = ls->seeds[1];
         process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, depth_nonstrict, core_nonstrict, no_canonical, lo, ls,
@@ -275,13 +290,13 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       };
       // Seeds aigus de la lentille D'ABORD (sans materialiser) : une ancre
       // sans seed n'entre jamais dans le lot (rien a scanner ni a completer).
-      const size_t nc = sc.cover.size();
-      thread_local std::vector<u32> lens_idx;  // indices (dans le cover) des sites de la lentille
+      thread_local std::vector<u32> lens_idx;  // indices historiques, puis remappes dans la sous-sequence de scan
       lens_idx.clear();
-      for (size_t i = 0; i < nc; ++i) {
+      for (size_t i = 0; i < nc_route; ++i) {
         const P3& p = ix.upos[(size_t)sc.cover[i].u];
         if (p3_norm2(p3_sub(p, pa)) <= D2 && p3_norm2(p3_sub(p, pb)) <= D2) lens_idx.push_back((u32)i);
       }
+      const size_t historical_lens = lens_idx.size();
       size_t nseeds = 0, nseeds_acute = 0;  // nseeds : seeds vivants apres la grille (materialises) ; acute : comptes comme en production
       for (const u32 li : lens_idx) {
         const i32 ux = sc.cover[li].u;
@@ -295,8 +310,11 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       // sinon vidage AVANT l'ajout qui depasserait un seuil.
       const u64 anchor_pairs_pre = (u64)nseeds * (u64)lens_idx.size();
       const bool pairs_overflow = nseeds != 0 && anchor_pairs_pre / nseeds != lens_idx.size();
-      const bool oversized = nc > lim.sites || nseeds > lim.seeds || pairs_overflow || anchor_pairs_pre > lim.pairs ||
-                             nc > (size_t)UINT32_MAX || lens_idx.size() > (size_t)UINT32_MAX;
+      // Comme en q3, la classification hote/device emploie le cover
+      // historique. Les frontieres de lots peuvent toutefois se decaler car
+      // la masse deja accumulee est la masse filtree effectivement transmise.
+      const bool oversized = nc_route > lim.sites || nseeds > lim.seeds || pairs_overflow || anchor_pairs_pre > lim.pairs ||
+                             lens_idx.size() > (size_t)UINT32_MAX;
       if (oversized) {
         const u64 seeds_before_h = ls->seeds[1];
         process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, depth_nonstrict, core_nonstrict, no_canonical, lo, ls,
@@ -312,11 +330,29 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         ++bs->anchors_host;  // rien a scanner ni a completer : comptee cote hote, jamais materialisee
         continue;
       }
+      ensure_anchor_scan_affine(ix, sc, pa, pb, D2, Lane::kQ4, ls);
+      const std::vector<CoverPoint>& batch_sites = sc.scan_sites();
+      const size_t nc = batch_sites.size();
+      if (sc.scan_cover_active) {
+        thread_local std::vector<u32> remapped_lens;
+        remapped_lens.clear();
+        remapped_lens.reserve(lens_idx.size());
+        size_t si = 0;
+        for (const u32 hi : lens_idx) {
+          const i32 target = sc.cover[hi].u;
+          while (si < batch_sites.size() && batch_sites[si].u != target) ++si;
+          if (si == batch_sites.size())
+            throw std::logic_error("enveloppe q4 : un site de la lentille historique a ete perdu");
+          remapped_lens.push_back((u32)si++);
+        }
+        lens_idx.swap(remapped_lens);
+      }
+      if (lens_idx.size() != historical_lens)
+        throw std::logic_error("enveloppe q4 : cardinal de lentille historique incoherent");
       Q4Batch* b = bdev;
-      if (b->seeds.size() + nseeds > lim.seeds || b->u0.size() + nc > lim.sites ||
+      if (b->seeds.size() + nseeds > lim.seeds || b->u0.size() + nc_route > lim.sites ||
           b->pairs_estimate > lim.pairs - anchor_pairs_pre)
         flush();
-      sc.fill_affine_sites(ix, pa, pb, D2);
       const size_t seeds_before = b->seeds.size();
       Q4BatchAnchor an;
       an.begin = (u32)b->u0.size();
@@ -325,7 +361,7 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       an.D2 = D2; an.a = pa; an.b = pb; an.ida = ix.point_id(ua); an.idb = ix.point_id(ub);
       an.lens_begin = (u32)b->lens_sites.size();
       for (size_t i = 0; i < nc; ++i) {
-        const CoverPoint& cz = sc.cover[i];
+        const CoverPoint& cz = batch_sites[i];
         const P3& p = ix.upos[(size_t)cz.u];
         b->u0.push_back(sc.su0[i]); b->u1.push_back(sc.su1[i]); b->u2.push_back(sc.su2[i]); b->q.push_back(sc.sq[i]);
         b->px.push_back(p.x); b->py.push_back(p.y); b->pz.push_back(p.z);
@@ -339,7 +375,7 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       const u32 aidx = (u32)b->anchors.size();
       b->anchors.push_back(an);
       for (const u32 xs : lens_idx) {
-        const CoverPoint& cx = sc.cover[xs];
+        const CoverPoint& cx = batch_sites[xs];
         if (cx.u == ua || cx.u == ub) continue;
         const P3& px = ix.upos[(size_t)cx.u];
         if (!is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cx.u))) continue;
@@ -527,7 +563,8 @@ inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions
     b.clear();
   };
   const size_t created = parallel_items(nrect, (int)T, [&](size_t i, size_t t) {
-    build_q4_batch(ix, alive[i], h_of, float_on, cover_coef, depth_nonstrict, core_nonstrict, no_canonical, lsc[t], &lb[t],
+    build_q4_batch(ix, alive[i], h_of, float_on, cover_coef, opt.pretest_query_min_points,
+                   opt.cover_envelope_filter, depth_nonstrict, core_nonstrict, no_canonical, lsc[t], &lb[t],
                    &louts[t], &lst[t], lim, &lbs[t], [&] { flush(t); });
   });
   for (size_t t = 0; t < T; ++t) flush(t);

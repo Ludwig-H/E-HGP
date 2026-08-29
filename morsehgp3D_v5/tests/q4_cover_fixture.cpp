@@ -24,9 +24,12 @@ using namespace mhgp5;
 
 int main(int argc, char** argv) {
   std::string inject;
+  bool cover_envelope = false;
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
     if (arg.rfind("--inject=", 0) == 0) inject = arg.substr(9);
+    else if (arg == "--cover-envelope=0") cover_envelope = false;
+    else if (arg == "--cover-envelope=1") cover_envelope = true;
     else return 2;
   }
   if (!inject.empty() && !mutants_enable(inject)) return 2;
@@ -36,6 +39,7 @@ int main(int argc, char** argv) {
   const BallKey target{2712, {-198919, -939434, -201167}, 88336155};
   GenerateOptions go;
   go.threads = 8;
+  go.cover_envelope_filter = cover_envelope;
   std::vector<BallCandidate> cands;
   GenerateStats gs;
   generate_candidates(ix, go, &cands, &gs);

@@ -3,14 +3,30 @@
 // Binaire PRODUIT : compile sans MHGP5_TESTING — aucun mutant n'y existe.
 #include <sys/resource.h>
 
+#include <charconv>
 #include <cstdio>
 #include <cstring>
+#include <limits>
 #include <string>
 
 #include "../src/cloud/families.hpp"
 #include "../src/pipeline/run.hpp"
 
 using namespace mhgp5;
+
+namespace {
+
+bool parse_size_exact(const char* text, size_t* out) {
+  if (text == nullptr || text[0] == '\0') return false;
+  unsigned long long value = 0;
+  const char* end = text + std::strlen(text);
+  const auto parsed = std::from_chars(text, end, value);
+  if (parsed.ec != std::errc() || parsed.ptr != end || value > std::numeric_limits<size_t>::max()) return false;
+  *out = (size_t)value;
+  return true;
+}
+
+}  // namespace
 
 int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
@@ -32,7 +48,16 @@ int main(int argc, char** argv) {
     else if (const char* v = val("--smax=")) opt.smax = (u64)std::atoll(v);
     else if (const char* v = val("--threads=")) opt.threads = std::atoi(v);
     else if (const char* v = val("--fold-inflight=")) opt.fold_inflight = std::atoi(v);
+    else if (const char* v = val("--pretest-query-min=")) {
+      size_t parsed = 0;
+      if (!parse_size_exact(v, &parsed)) ok = false;
+      else opt.pretest_query_min_points = parsed;
+    }
     else if (const char* v = val("--cell-min-sites=")) opt.cell_grid_min_sites = (size_t)std::atoll(v);
+    else if (const char* v = val("--cover-envelope=")) {
+      if ((v[0] != '0' && v[0] != '1') || v[1] != '\0') ok = false;
+      else opt.cover_envelope_filter = v[0] == '1';
+    }
     else if (const char* v = val("--postsep=")) {  // raffinement post-separation : L in [0, 3], refus hors domaine
       if (v[0] < '0' || v[0] > '3' || v[1] != '\0') ok = false;
       else opt.postsep_refine_levels = (u32)(v[0] - '0');

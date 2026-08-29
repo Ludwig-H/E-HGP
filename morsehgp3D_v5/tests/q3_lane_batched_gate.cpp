@@ -23,9 +23,9 @@ int main(int argc, char** argv) {
   int n = 400, coord = 0, threads = 1;
   u32 postsep = 0;
   BatchLimits lim;
-  u64 min_flushes = 1;
+  u64 min_flushes = 1, min_oversized = 0;
   std::string expect_route = "device";  // device | mixed | host : contrat de NON-VACUITE des routes
-  bool scan_noop = false;
+  bool scan_noop = false, cover_envelope = false;
   BatchStats bs;
   u64 min_candidates = 1000, min_killed = 10, min_fallback = 10;
   std::string inject;
@@ -57,7 +57,10 @@ int main(int argc, char** argv) {
       if (v < 1) return 2;
       lim.sites = (size_t)v;
     } else if (arg.rfind("--min-flushes=", 0) == 0) min_flushes = (u64)std::atoll(arg.c_str() + 14);
+    else if (arg.rfind("--min-oversized=", 0) == 0) min_oversized = (u64)std::atoll(arg.c_str() + 16);
     else if (arg.rfind("--expect-route=", 0) == 0) expect_route = arg.substr(15);
+    else if (arg == "--cover-envelope=0") cover_envelope = false;
+    else if (arg == "--cover-envelope=1") cover_envelope = true;
     else if (arg == "--scan-noop") scan_noop = true;  // MESURE seulement : executeur vide (tout vivant) — desaccords attendus, code 1
     else return 2;
   }
@@ -69,6 +72,7 @@ int main(int argc, char** argv) {
   GenerateOptions opt;
   opt.threads = threads;
   opt.postsep_refine_levels = postsep;
+  opt.cover_envelope_filter = cover_envelope;
   // Production : toutes les lanes, on garde l'arite 3 (ordre conserve).
   std::vector<BallCandidate> prod_all, prod, batched;
   GenerateStats sp, sb;
@@ -126,6 +130,14 @@ int main(int argc, char** argv) {
   cmp("q3_cert_neg", sp.q3_cert[0], sb.q3_cert[0]);
   cmp("q3_cert_pos", sp.q3_cert[1], sb.q3_cert[1]);
   cmp("q3_fallback", sp.q3_cert[2], sb.q3_cert[2]);
+  cmp("envelope_anchors_cover", sp.edge_envelope_anchors[1][0], sb.edge_envelope_anchors[1][0]);
+  cmp("envelope_anchors_query", sp.edge_envelope_anchors[1][1], sb.edge_envelope_anchors[1][1]);
+  cmp("envelope_before_cover", sp.edge_envelope_sites_before[1][0], sb.edge_envelope_sites_before[1][0]);
+  cmp("envelope_before_query", sp.edge_envelope_sites_before[1][1], sb.edge_envelope_sites_before[1][1]);
+  cmp("envelope_after_cover", sp.edge_envelope_sites_after[1][0], sb.edge_envelope_sites_after[1][0]);
+  cmp("envelope_after_query", sp.edge_envelope_sites_after[1][1], sb.edge_envelope_sites_after[1][1]);
+  cmp("envelope_cross_cover", sp.edge_envelope_cross_tests[1][0], sb.edge_envelope_cross_tests[1][0]);
+  cmp("envelope_cross_query", sp.edge_envelope_cross_tests[1][1], sb.edge_envelope_cross_tests[1][1]);
   // Ordre brut : identique a un fil (ordonnancement dynamique des rectangles
   // entre ouvriers sinon) ; post-RLE : identique a tout nombre de fils.
   auto count_mism = [](const std::vector<BallCandidate>& a, const std::vector<BallCandidate>& b) {
@@ -162,6 +174,16 @@ int main(int argc, char** argv) {
                 (unsigned long long)sp.q3_cert[2], (unsigned long long)min_fallback);
     return 3;
   }
+  if (cover_envelope) {
+    const u64 anchors = sp.edge_envelope_anchors[1][0] + sp.edge_envelope_anchors[1][1];
+    const u64 before = sp.edge_envelope_sites_before[1][0] + sp.edge_envelope_sites_before[1][1];
+    const u64 after = sp.edge_envelope_sites_after[1][0] + sp.edge_envelope_sites_after[1][1];
+    if (anchors == 0 || before <= after) {
+      std::printf("VACUITE : enveloppe q3 ancres=%llu sites=%llu->%llu\n", (unsigned long long)anchors,
+                  (unsigned long long)before, (unsigned long long)after);
+      return 3;
+    }
+  }
   // Contrat de lotissement : borne dure seuil + plus grosse ancre ; nombre de
   // vidages au moins min_flushes (un code ignorant le seuil resterait vert sinon).
   // Contrat de lotissement : BORNE DURE = les seuils eux-memes (preflight :
@@ -185,6 +207,11 @@ int main(int argc, char** argv) {
                 expect_route.c_str(), (unsigned long long)bs.seeds_device, (unsigned long long)bs.seeds_host,
                 (unsigned long long)bs.anchors_device, (unsigned long long)bs.anchors_host, (unsigned long long)bs.anchors_oversized);
     return route_mut ? 4 : 1;
+  }
+  if (bs.anchors_oversized < min_oversized) {
+    std::printf("ROUTAGE : ancres trop grandes %llu < plancher %llu\n",
+                (unsigned long long)bs.anchors_oversized, (unsigned long long)min_oversized);
+    return 3;
   }
   if (route_mut) {
     std::printf("MUTANT NON TUE (route-ignore-threshold)\n");

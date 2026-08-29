@@ -31,7 +31,12 @@ for d in ("src", "tests", "oracle", "cli", "bench"):
         for m in re.finditer(r'MHGP5_MUTANT\("([a-z0-9-]+)"\)', code):
             sites.setdefault(m.group(1), []).append(str(f.relative_to(ROOT)))
 cmake = (ROOT / "CMakeLists.txt").read_text(encoding="utf-8")
-gated: set[str] = set(re.findall(r'mhgp5_gate\([A-Za-z0-9_${}-]+ 4 [A-Za-z0-9_]+ "[^"]*--inject=([a-z0-9-]+)', cmake))
+gated: set[str] = set(
+    re.findall(
+        r'mhgp5_gate\(\s*[A-Za-z0-9_${}-]+\s+4\s+[A-Za-z0-9_]+\s+"[^"]*--inject=([a-z0-9-]+)',
+        cmake,
+    )
+)
 for m in re.finditer(r'foreach\(m ([^)]*)\)(.*?)endforeach\(\)', cmake, re.S):
     body = m.group(2)
     if re.search(r'mhgp5_gate\([A-Za-z0-9_${}-]+\s+4\s', body) and '--inject=${m}' in body:

@@ -38,7 +38,8 @@ inline constexpr const char* kMutants[] = {
     // wspd
     "wspd-drop-rect", "wspd-cap-terminal", "wspd-split-heaviest",
     // fuseaux / temoins / cover
-    "core-ball-ceil-distance", "witness-no-lane-mask", "cover-rect-dmin",
+    "core-ball-ceil-distance", "witness-no-lane-mask", "cover-rect-dmin", "cover-envelope-open",
+    "cover-envelope-factor",
     // lanes
     "q3-prune-ge", "q3-level-4g",
     "q4-seeds-from-q3-live", "q4-cover-coef4", "q4-no-canonical", "q4-center-parity",

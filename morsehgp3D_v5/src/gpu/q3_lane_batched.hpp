@@ -181,7 +181,6 @@ struct BatchLimits {
   size_t sites = kSitesPerLaunch;
   size_t pairs = kPairsPerLaunch;  // q4 seulement (estimation : seeds de l'ancre x sites de sa lentille)
   size_t device_min_sites = 1;
-  size_t pretest_query_min_points = kPretestQueryMinPoints;  // politique des pretests (generate.hpp)
   // Grille de cellules : UNE seule autorite, GenerateOptions::cell_grid_min_sites
   // (l'option CLI --cell-min-sites gouverne la production ET les lanes par
   // lots/device ; 0 = mode force des tests) — aucun doublon ici.
@@ -261,6 +260,7 @@ struct BatchStats {
 // materialisees dans le lot.
 template <class Flush>
 inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 h_of[3], bool float_on, bool nonstrict,
+                           size_t pretest_query_min_points, bool cover_envelope_filter,
                            generate_detail::AnchorScratch& sc, Q3Batch* bdev, std::vector<BallCandidate>* lo,
                            GenerateStats* ls, const BatchLimits& lim, BatchStats* bs, Flush&& flush) {
   using namespace generate_detail;
@@ -269,7 +269,7 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
   rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), 3, &sc.handles, &sc.cover_nodes);
   sc.handle_points = 0;
   for (const NodeRef h : sc.handles) { const NodeRange r = ix.range_of(h); sc.handle_points += (u64)(r.last - r.first + 1); }
-  const bool pretest_by_query = sc.handle_points >= lim.pretest_query_min_points;
+  const bool pretest_by_query = sc.handle_points >= pretest_query_min_points;
   if (pretest_by_query) rect_diametral_candidates(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), &sc.query, &sc.cover_nodes);
   const u64 need = h_of[1] - ar.core;
   for (i32 ua = ra.first; ua <= ra.last; ++ua)
@@ -289,6 +289,7 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         if (k == 2) { ++ls->anchors_killed_sectors[1]; continue; }
       }
       anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, 3, &sc.cover, &sc.visits, &sc.cover_tmp);
+      configure_anchor_scan_cover(sc, cover_envelope_filter, pretest_by_query);
       if (!pretest_by_query) {
         const int k = anchor_kill_cumulated(sc.cover, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h_of[1]);
         if (k == 1) { ++ls->anchors_killed_w3; continue; }
@@ -306,10 +307,15 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       // (cover > seuil de sites ou seeds > seuil de seeds), va au corps de
       // production ; sinon le lot est vide AVANT l'ajout qui le ferait
       // depasser (borne dure : un lot <= seuils, jamais seuil + ancre).
-      const size_t nc = sc.cover.size();
+      const size_t nc_route = sc.cover.size();
       const bool ignore_threshold = MHGP5_MUTANT("route-ignore-threshold");
-      const bool oversized = nc > lim.sites || nseeds > lim.seeds || nc > (size_t)UINT32_MAX;
-      if ((nc < lim.device_min_sites && !ignore_threshold) || oversized) {
+      // Le routage et la classification des ancres trop grandes restent
+      // fondes sur le cover historique : le toggle ne deplace donc pas une
+      // ancre entre hote et device. La vue filtree n'est formee qu'au premier
+      // seed effectivement scanne. Les frontieres entre lots peuvent, elles,
+      // se decaler car les lots precedents stockent leur masse filtree.
+      const bool oversized = nc_route > lim.sites || nseeds > lim.seeds || nc_route > (size_t)UINT32_MAX;
+      if ((nc_route < lim.device_min_sites && !ignore_threshold) || oversized) {
         const u64 seeds_before_h = ls->seeds[0];
         // Pretests ET grille deja appliques sur ce cover : le corps hote ne reconstruit rien.
         scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, nonstrict, lo, ls, AnchorPretests::kAlreadyAppliedWithGrid);
@@ -323,8 +329,7 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         continue;
       }
       Q3Batch* b = bdev;
-      if (b->seeds.size() + nseeds > lim.seeds || b->u0.size() + nc > lim.sites) flush();
-      sc.affine_filled = false;
+      if (b->seeds.size() + nseeds > lim.seeds || b->u0.size() + nc_route > lim.sites) flush();
       u32 aidx = std::numeric_limits<u32>::max();
       const size_t seeds_before = b->seeds.size();
       for (const CoverPoint& cp : sc.cover) {
@@ -333,18 +338,18 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         if (!is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cp.u))) continue;
         ++ls->seeds[0];
         if (sc.grid.built && seed_center_cell_dead(sc.grid, q3_form(pa, pb, px), d3)) { ++ls->seeds_killed_cells[1]; continue; }
-        if (!sc.affine_filled) {
+        if (aidx == std::numeric_limits<u32>::max()) {
           // Sites de l'ancre : remplis au premier seed, comme en production, puis
           // copies dans le lot (i64 seulement ; les doubles sont derives a la volee).
-          sc.fill_affine_sites(ix, pa, pb, D2);
+          ensure_anchor_scan_affine(ix, sc, pa, pb, D2, Lane::kQ3, ls);
           aidx = (u32)b->anchors.size();
           const u32 begin = (u32)b->u0.size();
-          const size_t nc = sc.cover.size();
-          b->anchors.push_back(Q3BatchAnchor{begin, (u32)nc});
+          const std::vector<CoverPoint>& scan_sites = sc.scan_sites();
+          b->anchors.push_back(Q3BatchAnchor{begin, (u32)scan_sites.size()});
           b->ageom.push_back(Q3BatchAnchorGeom{pa.x + pb.x, pa.y + pb.y, pa.z + pb.z, D2});
-          for (size_t i = 0; i < nc; ++i) {
+          for (size_t i = 0; i < scan_sites.size(); ++i) {
             b->u0.push_back(sc.su0[i]); b->u1.push_back(sc.su1[i]); b->u2.push_back(sc.su2[i]); b->q.push_back(sc.sq[i]);
-            b->site_index.push_back((u32)sc.cover[i].u);  // wire G1 (4 o/site) : les memes sites, dans le meme ordre
+            b->site_index.push_back((u32)scan_sites[i].u);  // wire G1 (4 o/site) : vue stable des sites scannes
           }
         }
         const Q3Form f3 = q3_form(pa, pb, px);
@@ -362,7 +367,7 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       if (aidx != std::numeric_limits<u32>::max()) {
         const u64 anchor_seeds = (u64)b->seeds.size() - seeds_before;
         bs->max_anchor_seeds = std::max(bs->max_anchor_seeds, anchor_seeds);
-        bs->max_anchor_sites = std::max(bs->max_anchor_sites, (u64)nc);
+        bs->max_anchor_sites = std::max(bs->max_anchor_sites, (u64)sc.scan_sites().size());
         ++bs->anchors_device;
         bs->seeds_device += anchor_seeds;
         if (b->seeds.size() >= lim.seeds || b->u0.size() >= lim.sites) flush();
@@ -470,7 +475,9 @@ inline void generate_q3_batched_with(const CloudIndex& ix, const GenerateOptions
     b.clear();
   };
   const size_t created = parallel_items(nrect, (int)T, [&](size_t i, size_t t) {
-    build_q3_batch(ix, alive[i], h_of, float_on, nonstrict, lsc[t], &lb[t], &louts[t], &lst[t], lim, &lbs[t], [&] { flush(t); });
+    build_q3_batch(ix, alive[i], h_of, float_on, nonstrict, opt.pretest_query_min_points,
+                   opt.cover_envelope_filter, lsc[t], &lb[t], &louts[t], &lst[t], lim, &lbs[t],
+                   [&] { flush(t); });
   });
   for (size_t t = 0; t < T; ++t) flush(t);
   st->workers_rects[1] = std::max(st->workers_rects[1], (u64)created);

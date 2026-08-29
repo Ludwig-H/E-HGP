@@ -80,7 +80,8 @@ les requêtes de cover. Il n'existe ni octree séparé ni second arbre.
        descente) | TERMINALE (séparée, instruite) | SCINDÉE
    1b  par rectangle vivant : h_a/h_b (8 coins, exact), ancres        generate.hpp
        survivantes (h_coeur + h_a + h_b < h_q)
-   1c  par ancre : cover (coef 3, ou 4 pour les intérieurs q4) ;      lanes/, float_filter.hpp
+   1c  par ancre : cover historique ; enveloppe fermée optionnelle   lanes/, float_filter.hpp
+       des boules possibles, formée paresseusement pour les scans ;
        q2 : boule diamétrale ; q3 : seeds aigus + filtre de
        profondeur certifié ; q4 : W_4, seed, cœur de Jung,
        complétions (owner, exact-once, préfiltres, Cramer, centre)
@@ -112,6 +113,15 @@ les requêtes de cover. Il n'existe ni octree séparé ni second arbre.
    inférieur) ; observateur de phases `on_fold_phase` (hors verrou) et pic
    mesuré `peak_fold_inflight` imprimé (`pic_mesure_en_vol`).
 ```
+
+L'enveloppe optionnelle de 1c ne change jamais la vue de proposition : seeds,
+lentille et complétions lisent le cover historique. Elle compacte uniquement
+les tableaux affines et les scans de cœur/profondeur. Son prédicat est une
+union existentielle fermée sous l'hypothèse que l'ancre est l'arête maximale ;
+il ne fournit aucun crédit universel de témoin. Il est donc placé après
+histogrammes et expansion des ancres, reste désactivé par défaut et ne réduit
+à lui seul ni le produit `A x B`, ni le produit q4 seed--complétion, ni leur
+pire exposant.
 
 Chaque étape parallèle découpe par tranches d'index et fusionne **en ordre de
 tranche** : la sortie est bit-identique au séquentiel quel que soit le nombre

@@ -17,8 +17,9 @@ int main(int argc, char** argv) {
   int n = 400, coord = 0, threads = 1;
   u32 postsep = 0;
   BatchLimits lim;
-  u64 min_flushes = 1;
+  u64 min_flushes = 1, min_oversized = 0;
   std::string expect_route = "device";  // device | mixed | host : contrat de NON-VACUITE des routes
+  bool cover_envelope = false;
   BatchStats bs;
   u64 min_candidates = 1000, min_deep = 100;
   std::string inject;
@@ -53,7 +54,10 @@ int main(int argc, char** argv) {
       if (v < 1) return 2;
       lim.pairs = (size_t)v;
     } else if (arg.rfind("--min-flushes=", 0) == 0) min_flushes = (u64)std::atoll(arg.c_str() + 14);
+    else if (arg.rfind("--min-oversized=", 0) == 0) min_oversized = (u64)std::atoll(arg.c_str() + 16);
     else if (arg.rfind("--expect-route=", 0) == 0) expect_route = arg.substr(15);
+    else if (arg == "--cover-envelope=0") cover_envelope = false;
+    else if (arg == "--cover-envelope=1") cover_envelope = true;
     else return 2;
   }
   if (!inject.empty() && !mutants_enable(inject)) return 2;
@@ -64,6 +68,7 @@ int main(int argc, char** argv) {
   GenerateOptions opt;
   opt.threads = threads;
   opt.postsep_refine_levels = postsep;
+  opt.cover_envelope_filter = cover_envelope;
   std::vector<BallCandidate> prod_all, prod, batched;
   GenerateStats sp, sb;
   generate_candidates(ix, opt, &prod_all, &sp);
@@ -123,6 +128,14 @@ int main(int argc, char** argv) {
   cmp("candidates", sp.candidates[2], sb.candidates[2]);
   const char* cn[6] = {"q4_cert_pos", "q4_cert_neg", "q4_jung_kill", "q4_jung_skip", "q4_jung_fallback", "q4_float_fallback"};
   for (int i = 0; i < 6; ++i) cmp(cn[i], sp.q4_cert[i], sb.q4_cert[i]);
+  cmp("envelope_anchors_cover", sp.edge_envelope_anchors[2][0], sb.edge_envelope_anchors[2][0]);
+  cmp("envelope_anchors_query", sp.edge_envelope_anchors[2][1], sb.edge_envelope_anchors[2][1]);
+  cmp("envelope_before_cover", sp.edge_envelope_sites_before[2][0], sb.edge_envelope_sites_before[2][0]);
+  cmp("envelope_before_query", sp.edge_envelope_sites_before[2][1], sb.edge_envelope_sites_before[2][1]);
+  cmp("envelope_after_cover", sp.edge_envelope_sites_after[2][0], sb.edge_envelope_sites_after[2][0]);
+  cmp("envelope_after_query", sp.edge_envelope_sites_after[2][1], sb.edge_envelope_sites_after[2][1]);
+  cmp("envelope_cross_cover", sp.edge_envelope_cross_tests[2][0], sb.edge_envelope_cross_tests[2][0]);
+  cmp("envelope_cross_query", sp.edge_envelope_cross_tests[2][1], sb.edge_envelope_cross_tests[2][1]);
   // VACUITE : les vingt-deux compteurs compares sont imprimes ; seize d'entre
   // eux doivent etre NON NULS sur toute famille exercee (une egalite 0 = 0 ne
   // prouve rien) — det et jung_fallback peuvent etre nuls en position generale
@@ -176,6 +189,16 @@ int main(int argc, char** argv) {
     std::printf("PLANCHER\n");
     return 3;
   }
+  if (cover_envelope) {
+    const u64 anchors = sp.edge_envelope_anchors[2][0] + sp.edge_envelope_anchors[2][1];
+    const u64 before = sp.edge_envelope_sites_before[2][0] + sp.edge_envelope_sites_before[2][1];
+    const u64 after = sp.edge_envelope_sites_after[2][0] + sp.edge_envelope_sites_after[2][1];
+    if (anchors == 0 || before <= after) {
+      std::printf("VACUITE : enveloppe q4 ancres=%llu sites=%llu->%llu\n", (unsigned long long)anchors,
+                  (unsigned long long)before, (unsigned long long)after);
+      return 3;
+    }
+  }
   // Contrat de lotissement : borne dure seuil + plus grosse ancre ; nombre de
   // vidages au moins min_flushes (un code ignorant le seuil resterait vert sinon).
   // Contrat de lotissement : BORNE DURE = les seuils eux-memes (preflight :
@@ -199,6 +222,11 @@ int main(int argc, char** argv) {
                 expect_route.c_str(), (unsigned long long)bs.seeds_device, (unsigned long long)bs.seeds_host,
                 (unsigned long long)bs.anchors_device, (unsigned long long)bs.anchors_host, (unsigned long long)bs.anchors_oversized);
     return route_mut ? 4 : 1;
+  }
+  if (bs.anchors_oversized < min_oversized) {
+    std::printf("ROUTAGE : ancres trop grandes %llu < plancher %llu\n",
+                (unsigned long long)bs.anchors_oversized, (unsigned long long)min_oversized);
+    return 3;
   }
   if (route_mut) {
     std::printf("MUTANT NON TUE (route-ignore-threshold)\n");

@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <vector>
 
+#include "../core/device.hpp"
 #include "../core/mutants.hpp"
 #include "../tree/cloud_index.hpp"
 
@@ -23,6 +24,53 @@ struct CoverPoint {
   i32 u;
   i64 dist2q;  // |2z-(a+b)|²
 };
+
+// UNION FERMEE DES BOULES POSSIBLES D'UNE ANCRE MAXIMALE, filtre experimental
+// opt-in. Le cover historique au coefficient 3 reste l'autorite de
+// compatibilite ; cette enveloppe ne peut que le compacter. Le quantificateur
+// est EXISTENTIEL (z appartient a au moins une boule possible) : un site garde
+// n'est jamais, de ce seul fait, un temoin universel et ne credite aucun
+// h0/ha/hb/hc. Les bornes supposent ab arete maximale ; ne pas les appliquer a
+// une paire LCA ou a un role de bloc avant decision de l'owner. Avec
+// d=b-a, w=2z-a-b,
+// S=|w|²-D² et Xi=|d×w|² :
+//   q3 : fermeture de l'union continue exacte, S<=0 ou 3S²<=4Xi ;
+//   q4 : sur-ensemble de Jung, S<=0 ou S²<=2Xi.
+// Les frontieres sont FERMEES : un point de coquille ne doit jamais etre
+// perdu. Sous u16, S² et Xi exigent i128 (jusqu'a moins de 2^74 apres les
+// petits facteurs). L'identite de Lagrange evite de former le produit
+// vectoriel : Xi=D²|w|²-(d·w)².
+enum class EdgeEnvelope : u8 { kNone, kQ3, kQ4Jung };
+
+struct EdgeEnvelopeCounts {
+  u64 sites_before = 0;  // sites du cover historique (coefficient deja applique)
+  u64 sites_after = 0;   // sites conserves par l'enveloppe
+  u64 cross_tests = 0;   // sites S>0 qui paient le test transverse
+};
+
+// Branche exterieure S>0, partagee avec la formation affine fusionnee. `xi`
+// est Xi=|d x w|², forme en i128 avant tout carre.
+MHGP5_HD inline bool edge_envelope_outer_contains(EdgeEnvelope envelope, i64 S, i128 xi) {
+  if (envelope == EdgeEnvelope::kNone) return true;
+  const i128 s2 = (i128)S * S;
+  const bool factor_mutant = MHGP5_MUTANT("cover-envelope-factor");
+  const i128 lhs = envelope == EdgeEnvelope::kQ3 ? 3 * s2 : s2;
+  const i128 rhs = envelope == EdgeEnvelope::kQ3 ? (factor_mutant ? 3 : 4) * xi
+                                                  : (factor_mutant ? 1 : 2) * xi;
+  return MHGP5_MUTANT("cover-envelope-open") ? lhs < rhs : lhs <= rhs;
+}
+
+MHGP5_HD inline bool edge_envelope_contains(EdgeEnvelope envelope, const P3& pa, const P3& pb, const P3& pz,
+                                            i64 D2, i64 dist2q) {
+  if (envelope == EdgeEnvelope::kNone) return true;
+  const i64 S = dist2q - D2;
+  if (S <= 0) return true;
+  const P3 d = p3_sub(pb, pa);
+  const P3 w{2 * pz.x - pa.x - pb.x, 2 * pz.y - pa.y - pb.y, 2 * pz.z - pa.z - pb.z};
+  const i64 dw = p3_dot(d, w);
+  const i128 xi = (i128)D2 * dist2q - (i128)dw * dw;
+  return edge_envelope_outer_contains(envelope, S, xi);
+}
 
 // `sorted = false` : resultat NON trie (pretests d'ancre, ordre indifferent —
 // le tri par dist2q d'un resultat dense dominait le cout de la requete).

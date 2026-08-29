@@ -115,6 +115,12 @@ mhgp5_gate(mhgp5_cli_refus_postsep_suffix 2 mhgp5 "--postsep=1junk --n=2")
 mhgp5_gate(mhgp5_cli_refus_postsep_empty 2 mhgp5 "--postsep= --n=2")
 mhgp5_gate(mhgp5_cli_refus_postsep_negative 2 mhgp5 "--postsep=-1 --n=2")
 mhgp5_gate(mhgp5_cli_refus_postsep_high 2 mhgp5 "--postsep=4 --n=2")
+foreach(v "" abc 1junk -1 2)
+  mhgp5_gate(mhgp5_cli_refus_cover_envelope_${v} 2 mhgp5 "--cover-envelope=${v} --n=2")
+endforeach()
+foreach(v "" abc 2junk -1)
+  mhgp5_gate(mhgp5_cli_refus_pretest_query_min_${v} 2 mhgp5 "--pretest-query-min=${v} --n=2")
+endforeach()
 
 # ---- Conformite v4 ≡ v5 --------------------------------------------------------
 
@@ -143,15 +149,11 @@ mhgp5_gate(mhgp5_conformity_two_lines_n2000 0 mhgp5_conformity_v4 "--receipt=${_
 mhgp5_gate(mhgp5_conformity_refus_absent 2 mhgp5_conformity_v4 "--receipt=${_recu} --family=collinear_seven --n=9")
 
 # ---- Registre des mutants (Python 3 requis, comme les portes F0 de la v3) -------
-find_package(Python3 COMPONENTS Interpreter)
-if(Python3_Interpreter_FOUND)
-  add_test(NAME mhgp5_mutants_gate
-           COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 "-DCMD=${Python3_EXECUTABLE}"
-                   "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/mutants_gate.py" -P ${_mhgp5_expect})
-  set_tests_properties(mhgp5_mutants_gate PROPERTIES LABELS gate)
-else()
-  message(WARNING "mhgp5 : Python 3 introuvable — porte du registre des mutants non enregistree")
-endif()
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+add_test(NAME mhgp5_mutants_gate
+         COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 "-DCMD=${Python3_EXECUTABLE}"
+                 "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/mutants_gate.py" -P ${_mhgp5_expect})
+set_tests_properties(mhgp5_mutants_gate PROPERTIES LABELS gate)
 
 # ---- Mutants du pipeline (tues par divergence de digest, code 4) ---------------
 # Les mutants FAIL-OPEN (ils ne changent pas l'objet sur une famille reguliere :
@@ -294,6 +296,7 @@ mhgp5_gate(mhgp5_prefix_mutant_event_order 4 mhgp5_prefix_gate "--family=uniform
 mhgp5_gate(mhgp5_prefix_mutant_batch_levels 4 mhgp5_prefix_gate "--family=uniform --n=1200 --smax=6 --min-events=1000 --inject=prefix-tamper-batch-levels")
 mhgp5_executable(mhgp5_q4_cover_fixture tests/q4_cover_fixture.cpp)
 mhgp5_gate(mhgp5_q4_cover_fixture 0 mhgp5_q4_cover_fixture "")
+mhgp5_gate(mhgp5_q4_cover_envelope 0 mhgp5_q4_cover_fixture "--cover-envelope=1")
 mhgp5_gate(mhgp5_q4_cover_mutant_coef4 4 mhgp5_q4_cover_fixture "--inject=q4-cover-coef4")
 mhgp5_gate(mhgp5_wspd_mutant_cap_terminal 4 mhgp5_wspd_gate "--family=two_lines --n=2000 --s=8 --inject=wspd-cap-terminal")
 mhgp5_gate(mhgp5_wspd_mutant_split_heaviest 4 mhgp5_wspd_gate "--family=eight_clusters --n=2000 --s=8 --seed=3 --inject=wspd-split-heaviest")
@@ -321,6 +324,23 @@ mhgp5_gate(mhgp5_detector_mutant_disabled 4 mhgp5_detector_gate "--inject=attach
 mhgp5_executable(mhgp5_cover_gate tests/cover_gate.cpp)
 mhgp5_gate(mhgp5_cover_gate 0 mhgp5_cover_gate "--n=400 --min-anchors=1000")
 mhgp5_gate(mhgp5_cover_mutant_dmin 4 mhgp5_cover_gate "--n=400 --inject=cover-rect-dmin")
+# Enveloppes q3 exacte / q4 Jung : frontieres i128 et identite du catalogue
+# brut jusqu'aux forets, filtre opt-in. Les deux routes de pretest sont forcees.
+mhgp5_executable(mhgp5_cover_envelope_gate tests/cover_envelope_gate.cpp)
+mhgp5_gate(mhgp5_cover_envelope_cover 0 mhgp5_cover_envelope_gate
+    "--family=uniform --n=300 --threads=2 --route=cover")
+mhgp5_gate(mhgp5_cover_envelope_query 0 mhgp5_cover_envelope_gate
+    "--family=eight_clusters --n=300 --threads=2 --route=query")
+foreach(fam terrain scanline_single_pass scanline_overlap_multiecho)
+  mhgp5_gate(mhgp5_cover_envelope_${fam} 0 mhgp5_cover_envelope_gate
+      "--family=${fam} --n=500 --threads=1")
+endforeach()
+mhgp5_gate(mhgp5_cover_envelope_two_lines 0 mhgp5_cover_envelope_gate
+    "--family=two_lines --n=500 --threads=1 --min-removed=0")
+mhgp5_gate(mhgp5_cover_envelope_mutant_open 4 mhgp5_cover_envelope_gate
+    "--n=2 --threads=1 --min-removed=0 --inject=cover-envelope-open")
+mhgp5_gate(mhgp5_cover_envelope_mutant_factor 4 mhgp5_cover_envelope_gate
+    "--n=2 --threads=1 --min-removed=0 --inject=cover-envelope-factor")
 mhgp5_executable(mhgp5_q4_once_gate tests/q4_once_gate.cpp)
 mhgp5_gate(mhgp5_q4_once_gate 0 mhgp5_q4_once_gate "")
 mhgp5_gate(mhgp5_q4_once_mutant_no_canonical 4 mhgp5_q4_once_gate "--inject=q4-no-canonical")
@@ -393,6 +413,10 @@ mhgp5_gate(mhgp5_gpu_instrument_refus 2 mhgp5_gpu_instrument_gate "--gauge-threa
 mhgp5_executable(mhgp5_q4_chord_probe bench/q4_chord_probe.cpp)
 mhgp5_executable(mhgp5_q4_stage_probe bench/q4_stage_probe.cpp)
 target_compile_definitions(mhgp5_q4_stage_probe PRIVATE MHGP5_PROFILE_Q4=1)
+# Meme pipeline/CLI que le produit, mais avec les masses de boucles q4
+# compilees : sonde ON/OFF de l'enveloppe, jamais un claim ni un backend.
+mhgp5_product_executable(mhgp5_cover_envelope_probe cli/mhgp5.cpp)
+target_compile_definitions(mhgp5_cover_envelope_probe PRIVATE MHGP5_PROFILE_Q4=1)
 foreach(fam uniform eight_clusters terrain scanline_single_pass)
   mhgp5_gate(mhgp5_q4_stage_${fam} 0 mhgp5_q4_stage_probe "--family=${fam} --n=400 --pretest-query-min=0" TIMEOUT 180)
 endforeach()
@@ -447,6 +471,14 @@ mhgp5_gate(mhgp5_q3_lane_batched_terrain 0 mhgp5_q3_lane_batched_gate "--family=
 mhgp5_gate(mhgp5_q3_lane_batched_cocirc 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=300 --coord=40 --min-candidates=200 --min-fallback=100")
 mhgp5_gate(mhgp5_q3_lane_batched_mutant_dead 4 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --min-candidates=200 --inject=q3-batched-emit-dead")
 mhgp5_gate(mhgp5_q3_lane_batched_postsep_l1 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --threads=1 --postsep=1 --min-candidates=200" TIMEOUT 300)
+mhgp5_gate(mhgp5_q3_lane_batched_envelope 0 mhgp5_q3_lane_batched_gate
+    "--family=uniform --n=400 --threads=1 --min-candidates=200 --cover-envelope=1")
+mhgp5_gate(mhgp5_q3_lane_batched_envelope_host 0 mhgp5_q3_lane_batched_gate
+    "--family=uniform --n=400 --threads=1 --device-min-sites=1000000000 --min-candidates=200 --min-flushes=0 --expect-route=host --cover-envelope=1")
+mhgp5_gate(mhgp5_q3_lane_batched_envelope_mixed 0 mhgp5_q3_lane_batched_gate
+    "--family=eight_clusters --n=1200 --threads=3 --device-min-sites=256 --expect-route=mixed --cover-envelope=1")
+mhgp5_gate(mhgp5_q3_lane_batched_envelope_oversized 0 mhgp5_q3_lane_batched_gate
+    "--family=eight_clusters --n=400 --threads=2 --seeds-per-launch=50 --min-candidates=200 --expect-route=device --min-oversized=1 --cover-envelope=1")
 # Lane q4 par lots (etage hote de la lane q4 device) : egalite post-RLE,
 # compteurs historiques et grand-livre post-separation complet.
 mhgp5_executable(mhgp5_q4_lane_batched_gate tests/q4_lane_batched_gate.cpp)
@@ -457,6 +489,14 @@ mhgp5_gate(mhgp5_q4_lane_batched_cocirc 0 mhgp5_q4_lane_batched_gate "--family=u
 mhgp5_gate(mhgp5_q4_lane_batched_ordre 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=1 --min-candidates=200")
 mhgp5_gate(mhgp5_q4_lane_batched_mutant_deep 4 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --min-candidates=200 --inject=q4-batched-emit-deep")
 mhgp5_gate(mhgp5_q4_lane_batched_postsep_l1 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=1 --postsep=1 --min-candidates=200" TIMEOUT 300)
+mhgp5_gate(mhgp5_q4_lane_batched_envelope 0 mhgp5_q4_lane_batched_gate
+    "--family=uniform --n=400 --threads=1 --min-candidates=200 --cover-envelope=1")
+mhgp5_gate(mhgp5_q4_lane_batched_envelope_host 0 mhgp5_q4_lane_batched_gate
+    "--family=uniform --n=400 --threads=1 --device-min-sites=1000000000 --min-candidates=200 --min-flushes=0 --expect-route=host --cover-envelope=1")
+mhgp5_gate(mhgp5_q4_lane_batched_envelope_mixed 0 mhgp5_q4_lane_batched_gate
+    "--family=eight_clusters --n=1200 --threads=3 --device-min-sites=256 --expect-route=mixed --cover-envelope=1")
+mhgp5_gate(mhgp5_q4_lane_batched_envelope_oversized 0 mhgp5_q4_lane_batched_gate
+    "--family=eight_clusters --n=400 --threads=2 --seeds-per-launch=50 --min-candidates=200 --expect-route=device --min-oversized=1 --cover-envelope=1")
 mhgp5_gate(mhgp5_q4_lane_batched_uniform_8000 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS scale8000 TIMEOUT 1800)
 
 mhgp5_gate(mhgp5_q3_lane_batched_petit_lot 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --threads=1 --seeds-per-launch=1000 --min-candidates=200 --min-flushes=100")

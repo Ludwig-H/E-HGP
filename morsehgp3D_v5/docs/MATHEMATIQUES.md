@@ -663,6 +663,40 @@ Pour chaque ancre survivante $(a,b)$, par arité (`src/pipeline/generate.hpp`).
   pipeline peu profond. Statut : `recu_auditeur_v4` (même audit A047460,
   § 0 point 4).
 
+#### Enveloppe fermée des boules possibles d'une arête maximale
+
+Le filtre expérimental `cover_envelope_filter` compacte seulement les sites
+scannés après la construction du cover historique. Posons $d=b-a$,
+$D^{2}=\left\Vert d\right\Vert^{2}$, $w=2z-a-b$,
+$S=\left\Vert w\right\Vert^{2}-D^{2}$ et
+$\Xi=\left\Vert d\times w\right\Vert^{2}$. Le centre d'une boule ancrée en
+$a,b$ s'écrit $m+v$, avec $v\perp d$. Un site appartient à cette boule fermée
+ssi $S\leq4w\cdot v$.
+
+Pour q3, l'arête $ab$ doit être maximale et le triangle aigu. Alors
+$\leftVert v\rightVert\leq D/(2\sqrt{3})$ et la fermeture de l'union continue
+des boules possibles est donnée exactement par
+$S\leq0$ ou $3S^{2}\leq4\Xi$. Pour q4, le tétraèdre doit être bien centré et
+$ab$ maximale ; Jung donne $\leftVert v\rightVert\leq D/(2\sqrt{2})$, donc le
+sur-ensemble sûr $S\leq0$ ou $S^{2}\leq2\Xi$. La région q4 n'est pas déclarée
+réalisable centre par centre. Les deux frontières sont fermées afin de ne
+jamais perdre une coquille.
+
+Le quantificateur est existentiel : un site conservé peut appartenir à au
+moins une boule possible. Ce prédicat n'est donc ni un témoin central, ni un
+crédit `h0`, `h_a`, `h_b` ou `h_c`, qui exigent une intériorité stricte
+universelle. Il est interdit d'ajouter ses compteurs aux crédits de rang. La
+lentille fermée des porteurs est incluse dans la région q3, elle-même incluse
+dans la région q4 ; seeds et complétions continuent d'être proposés depuis le
+cover historique. Le filtre ne s'applique qu'aux scans de cœur et de
+profondeur, paresseusement au premier seed effectivement scanné.
+
+Tous les produits $S^{2}$ et $\Xi$ sont formés en `i128`. Sous le profil u16,
+les petits facteurs restent strictement sous la capacité. Statut :
+`derive_v5`, option désactivée par défaut, identité de l'objet reçue seulement
+par les portes ON/OFF ; aucune borne d'exposant ni aucun gain CPU/GPU n'en
+découle.
+
 ### 6.2 q2
 
 L'événement existe ssi $\mathrm{depth}(B(m, D/2)) < h_2$ ; la boule
