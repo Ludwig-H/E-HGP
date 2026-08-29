@@ -43,9 +43,13 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   même pour `P[t]>0`, en temps linéaire en handles après les facteurs. En q4,
   neuf classes `s_H` retirent le produit `C x D`, puis les faces ternaires
   résiduelles passent au terminal axial ; `t_CD` reste un oracle borné. Cover
-  brut, vue témoin certifiée, complétions et seeds restent séparés. Témoins de
-  position, masque de patches calculés et prédicat seed q4 symétrique sont
-  explicites. La réponse V73--V81 reçoit le retrait de `EMPTY` comme priorité
+  brut, partition de complétions, capacité de seed, source de certificats et
+  census exact restent séparés : une sous-source sonore suffit à un minorant,
+  tandis que le ranking/census q4 exige l'arbre entier ou une source complète
+  prouvée. Les `h_a/h_b` historiques sont des minorants facteurs après split,
+  pas les cardinalités exactes de la fibre enfant. Témoins de position, masque
+  de patches calculés et prédicat seed q4 symétrique sont explicites. La
+  réponse V73--V81 reçoit le retrait de `EMPTY` comme priorité
   produit, réfute le faux plafond 95--99 % censuré au premier shallow et la
   conclusion « patches nécessaires ». Un fast path global commun reste un
   premier shadow légitime, dont l'échec vaut `UNKNOWN`. La note fixe aussi le

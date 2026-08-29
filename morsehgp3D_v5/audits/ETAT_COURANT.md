@@ -5,10 +5,11 @@
   V79--V81. Les lignes `uniform` sont reproductibles, mais leur interprétation
   comme plafond produit et nécessité des patches est réfutée. Son contre-audit
   de la v2 reste `b74d8050`.
-- **Base mathématique concurrente relue :** `b201ac23`. Elle fixe les seuils
-  `t_C/t_CD`, les poids de rôles et les types de témoins. Le présent audit
-  ferme en plus le ledger pondéré q3 par histogrammes et remplace le carré q4
-  par un préfiltre à neuf classes suivi du terminal axial.
+- **Base mathématique concurrente relue :** `84cc3d73`, qui consolide
+  `b201ac23`. Elle ferme le ledger pondéré q3 par histogrammes et spécifie un
+  préfiltre q4 à neuf classes avant le terminal axial. Les factorisations sont
+  reçues mathématiquement ; le chemin q4 reste une proposition counter-only,
+  pas une route produit déjà reçue.
 - **Complément V79 reçu comme diagnostic :** la sonde sépare le marginal
   tous-profonds selon l'existence de neuf témoins communs. Ce shadow ne corrige
   pas le biais V74 et ne prouve ni que les patches sont nécessaires, ni qu'un
@@ -97,8 +98,9 @@ les facteurs de résidu 70/48 sont rétractés, comme la priorité `EMPTY` qui e
 était déduite. Les blocs capés lourds sont exclus, les blocs mixtes sont mal
 crédités et la chaîne réelle filtre puis s'arrête au seuil.
 
-Le premier incrément sûr est moins cher que le rescan envisagé : calculer une
-fois par `(A,B)` les crédits `g_AB[j]` des 64 patches hors `A union B`, puis
+Le premier incrément **center-cover** sûr est moins cher que le rescan
+envisagé : calculer une fois par `(A,B)` les crédits `g_AB[j]` des 64 patches
+hors `A union B`, puis
 laisser chaque `C` masquer seulement les patches dont `AB/AC/BC` peuvent
 encore contenir zéro. `g_AB[j]` s'additionne à `h_a(a),h_b(b)` mais n'est pas
 le vrai $h_0$ extérieur à `C`; il ne se compose donc pas avec un futur
@@ -344,11 +346,18 @@ néanmoins factorisable exactement par les histogrammes de `A intersect C` et
 `O(|A|+|B|+number_of_handles+h3^2)`, sans paire d'ancre. En q4, poser le seuil
 mono-handle `s_H=max_{j in M_H}(t_j)`. Comme
 `t_CD<=min(s_C,s_D)`, neuf classes à `h4=8` retirent le produit de handles en
-`O(k)` avant de passer les carriers ternaires résiduels au terminal axial.
+temps linéaire en handles après construction des facteurs `A/B`, avant de
+passer les carriers ternaires résiduels au terminal axial. Le masque `M_H` est
+celui des **complétions** possibles, jamais celui des seuls seeds aigus.
 
-Les vues sont typées : q3 sépare `census_handles` et `seed_handles`; q4 sépare
-`census_handles`, `completion_handles` et `seed_handles`. `NONE_ACUTE` ne
-retire jamais une complétion q4. La fixture
+Les vues sont typées : la partition des carriers/complétions est complète et
+disjointe ; `seed_capability` lui est attaché ; une `certificate_source`
+sonore peut être incomplète pour fournir des minorants ; seule
+`exact_census_source` doit être complète pour l'absence, le ranking axial et
+le census. En q4, le cover coefficient 3 couvre les sommets opposés, mais pas
+tous les intérieurs : le ranking exact emploie l'arbre entier ou une source
+coefficient 4 séparément prouvée. `NONE_ACUTE` ne retire jamais une complétion
+ni un témoin. La fixture
 `a=(0,0,0), b=(6,0,0), c=(1,-3,-1), d=(1,1,-2)` est bien centrée avec `AB`
 strictement maximal, `ABc` aigu et `ABd` droit ; elle impose de choisir le seed
 sur la paire non ordonnée au lieu de supposer que le premier handle l'est.
@@ -397,8 +406,12 @@ Le raccord autoritaire ajoute encore trois gardes : les témoins sont des rangs
 de positions typés, pas des `PointId`; un `computed_patch_mask` distingue
 `g[j]==0` de « non calculé » ; et une paire q4 est seed-éligible si
 `seed_possible(C)||seed_possible(D)`, indépendamment de l'ordre `i<=j`. Le
-cover brut, la vue témoin certifiée, les complétions et les seeds portent des
-types distincts ; nommer un cover « census » ne lui donne aucune complétude.
+cover brut, la source de certificats, le census exact, les complétions et la
+capacité de seed portent des types distincts ; nommer un cover « census » ne
+lui donne aucune complétude. Les tableaux `h_a/h_b` de `corner_histograms`
+sont les comptes exacts de leurs sous-ensembles $W_q$ certifiés et seulement
+des minorants des intersections exactes d'une fibre. Après split de `C`, ils
+restent sûrs mais ne deviennent pas les cardinalités exactes de l'enfant.
 
 ## Réception du pin d'enveloppe `7e0ffe79`
 
@@ -543,11 +556,18 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
   convertir ces opérations hétérogènes en gain. Le défaut de fraîcheur CMake
   reproduit au pin précédent reste à corriger et aucune porte CTest n'est
   enregistrée pour cette sonde ;
+- pin `9a51a729` reconfiguré puis reconstruit : `uniform,n=8000,seed=3`
+  reproduit `867/31` blocs exact-common suffisants/insuffisants et
+  `1219444/47508` appels de son oracle en `18,4 s`, sur `3001` blocs. Cette
+  reproduction reçoit les nombres, pas leur attribution au chemin produit ni
+  le pin `1ff39ab9` encore écrit dans la note transitoire désormais retirée ;
 - réduction de seuil `t_C` confrontée à l'énumération directe sur `200 000`
   configurations déterministes de patches/crédits, sans divergence ; contrats
   géométriques q3/q4 ciblés `5/5` verts (`skinny_center`, oracle q4, cover,
   exact-once et completion shaped). La nouvelle fixture de vues q4 reste à
   enregistrer avec le delta fonctionnel ;
+- portes existantes de séparation cover/census q4 : `4/4` vertes
+  (`q4_cover_fixture`, mutant coefficient 4, `q4_source` 22 et 13+8) ;
 - `python tools/check_docs.py` vert sur `217` Markdown actifs,
   `python tools/check_implementation_status.py` vert sur `20` phases, et diff
   sans erreur d'espacement après consolidation.
@@ -570,11 +590,12 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
    OFF/ON ; activer seulement les décisions exactes rentables. Garder les fates
    `EMPTY` au ledger d'oracle sans route autonome.
 4. En q4, ajouter les neuf classes `s_H`, puis envoyer directement les faces
-   ternaires résiduelles à `Q4SeedAxisTopR4`; garder **tous** les sites témoins
-   admissibles pour son ranking. Comparer `threshold+axial` à l'oracle `CD`
-   borné. `Sym2`, la WSPD locale q4 et le stream exact de paires restent des
-   ablations, jamais des prérequis. Fermer parallèlement les capacités
-   d'override et les portes CUDA avant tout reçu GPU.
+   ternaires résiduelles à `Q4SeedAxisTopR4`; alimenter son ranking par
+   l'`exact_census_source`, sans filtre de capacité seed. Comparer
+   `threshold+axial` à l'oracle `CD` borné. `Sym2`, la WSPD locale q4 et le
+   stream exact de paires restent des ablations, jamais des prérequis. Fermer
+   parallèlement les capacités d'override et les portes CUDA avant tout reçu
+   GPU.
 5. Fermer ensuite G0/G1, fold vivant et grille selon leur ordre local ; aucun
    de ces chantiers ne doit masquer les compteurs de la nouvelle source.
 
