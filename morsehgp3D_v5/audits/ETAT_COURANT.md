@@ -1,11 +1,13 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **Dernier tip de Claude relu :** `b9646d1a`, publié sur `main` et
-  `origin/main`. Il compte les évaluations de rôles dans les blocs vides et
-  non vides, retire V69 comme priorité produit et pose V73--V75. Le retrait est
-  reçu ; les ratios sont un signal de priorité conditionnel, pas un « plafond
-  absolu » de travail. La réponse est consolidée dans la note active et les
-  notes transitoires sont retirées du tip ; l'historique les conserve. Son
+- **Base d'audit concurrente relue :** `4efef972`, publiée sur `main` et
+  `origin/main`. Il consolide les seuils factorisés q3/q4 dans la réponse
+  active et retire les notes V68/V71 devenues transitoires ; l'historique les
+  conserve.
+- **Dernier pin de sonde de Claude relu :** `b9646d1a`. Il compte les
+  évaluations de rôles dans les blocs vides et non vides, retire V69 comme
+  priorité produit et pose V73--V75. Le retrait est reçu ; les ratios sont un
+  signal de priorité conditionnel, pas un « plafond absolu » de travail. Son
   contre-audit de la v2 reste `b74d8050`.
 - **Dernier pin du chemin produit reçu :** `7e0ffe79`. Il raccorde l'enveloppe
   fermée de boules possibles aux scans q3/q4, avec son oracle géométrique
@@ -346,6 +348,33 @@ l'ablation. Si la lane `EMPTY` est retouchée, requalifier d'abord
 `OwnerD2Exact` avec oracle et fixtures v5 avant un split ; ne pas recopier son
 code v4.
 
+Ce chantier ne prétend pas inventer le center-cover : la v4 avait déjà `P1`,
+64 patches et des pentes `2,104/1,896`, rejetées parce que la route partait
+encore de la paire. Le delta v5 à tester est la factorisation
+`WSPD rectangle -> un scan g_AB -> masques C -> t_C -> P[t_C]`, puis le stream
+`t_CD` sans catalogue q4. Le reçu doit montrer les pentes des rectangles, pops
+témoin, masques, `sum_P_t_c`, paires de handles et propositions terminales sur
+les tailles appariées v4 ; une seule baisse de constante ne réfute pas cet
+antécédent.
+
+Deux verrous empêchent encore de transformer cette factorisation en claim
+sous-quadratique. D'abord `P[t]` compte des couples d'ancres, pas leur masse de
+rôles lorsque `C/D` recouvrent `A/B`; seul `P[t]==0` classe tout un bloc sans
+ambiguïté. Pour `P[t]>0`, sommer en `u128` les poids d'appartenance des couples
+survivants ou laisser le bloc `PENDING`. Ensuite le streaming borne la mémoire,
+pas le temps : avec `k` handles, q3 peut encore transmettre
+`Theta(k*|A|*|B|)` couples et q4 payer `Theta(k^2)` masques puis jusqu'à
+`Theta(k^2*|A|*|B|)` continuations. Les pentes de `sum_P_t_c`, des paires de
+handles et des scans terminaux sont donc des portes de réfutation, pas de
+simples compteurs descriptifs.
+
+Le raccord autoritaire ajoute encore trois gardes : les témoins sont des rangs
+de positions typés, pas des `PointId`; un `computed_patch_mask` distingue
+`g[j]==0` de « non calculé » ; et une paire q4 est seed-éligible si
+`seed_possible(C)||seed_possible(D)`, indépendamment de l'ordre `i<=j`. Le
+cover brut, la vue témoin certifiée, les complétions et les seeds portent des
+types distincts ; nommer un cover « census » ne lui donne aucune complétude.
+
 ## Réception du pin d'enveloppe `7e0ffe79`
 
 ### Fermé sur le pin
@@ -507,8 +536,10 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
 2. **Fil fibre, développable en parallèle mais non autoritaire :** corriger
    ledger, caps, compteurs et échantillonnage du probe, installer les trois axes
    d'état, puis ouvrir `g_AB[j]`, `t_C/t_CD` et les vues typées de handles en
-   counter-only. Prouver non-vacuité, provenance, IDs et continuations sans
-   matérialiser `A x B x C` ou `C x D`; aucun masquage avant oracle.
+   counter-only. Prouver non-vacuité, provenance, rangs de positions,
+   `PointId` d'owner et continuations sans matérialiser `A x B x C` ou
+   `C x D`; seul `P[t]==0` reçoit un crédit de masse en vrac avant le ledger
+   pondéré, et aucun masquage n'est autorisé avant oracle.
 3. Comparer ensuite les deux ordres chauds sur le vecteur causal et sur mur/HWM
    OFF/ON ; activer seulement les décisions exactes rentables. Garder les fates
    `EMPTY` au ledger d'oracle sans route autonome.

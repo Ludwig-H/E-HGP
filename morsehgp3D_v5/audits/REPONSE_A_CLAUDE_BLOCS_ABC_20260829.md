@@ -388,7 +388,9 @@ pas « cause réelle ».
   preuves dans un bitmask ou une liste `proof_kinds`, éventuellement avec une
   preuve primaire, afin de ne pas réintroduire le first-match :
   `NONE_MAX_EDGE`, `HMIN`, `OWNER_D2_EXACT`, `CENTER_COVER`, `PAIR_W3` et
-  `EXACT_ENUMERATION` peuvent se recouvrir. Un center-cover peut certifier
+  `EXACT_ENUMERATION` peuvent se recouvrir. Leur masse ne se somme jamais :
+  `classified_r` partitionne les actions terminales, pas les preuves. Un
+  center-cover peut certifier
   « tout support éventuel est profond » sans prouver qu'un support existe : il
   autorise alors `action=PRUNE_NO_EMISSION`, mais laisse `existence` et `depth`
   à `UNKNOWN` jusqu'à un témoin de non-vacuité. Cela conserve le prune sûr sans
@@ -466,6 +468,32 @@ séparément convexe dans le carrier. La fixture est préparée dans
 `mhgp5_q3_skinny_center` et passe localement ; elle doit être épinglée avec le
 prochain delta fonctionnel.
 
+## Différentiel v4 : ne pas rebaptiser P1
+
+Les 64 patches et le center-cover ne sont pas nouveaux. La v4 documente déjà
+`P1`, avec ce pavage, et rapporte pour `P1a center-cover` des pentes rouges
+`2,104/1,896`. Elle conclut que le certificat partait encore de la paire et
+travaillait contre un univers beaucoup plus gros que la sortie. Reprendre les
+patches seuls rouvrirait donc une piste réfutée sans répondre à son motif
+d'abandon.
+
+Le delta à falsifier est plus précis : une WSPD partitionne les arêtes en
+rectangles ; `g_AB` ne parcourt les témoins qu'une fois par rectangle ; les
+handles `C` ne font ensuite que masquer ces patches et produire `t_C`; les
+bitsets des facteurs donnent `P[t_C]` sans matérialiser `A x B x C`. En q4,
+`t_CD` reste streamé et aucun catalogue `C x D` ne survit. Cela constitue une
+architecture différente à requalifier, pas une preuve de meilleur exposant.
+Le pire cas demeure ouvert dans les visites `MIXED`, les couples survivants et
+les paires de handles q4.
+
+Le reçu différentiel publie donc, sur les mêmes familles et tailles que P1,
+`wspd_rectangles`, `g_ab_witness_node_pops`, `handle_masks`, `sum_P_t_c`,
+`q4_handle_pairs_streamed` et les propositions réellement transmises au
+terminal. Une baisse de constante ne rouvre pas la route : la pente de chacun
+de ces générateurs, puis mur/HWM à 50 k, doit réfuter le motif v4. Aucun code ni
+reçu v4 n'est importé ; seules ses contre-fixtures et ses mesures sont épinglées
+comme différentiel.
+
 ## Certificat sûr : center-cover conditionné par $C$
 
 Un fallback simple évalue la forme polynomiale exacte par intervalles entiers
@@ -526,6 +554,11 @@ doit jamais croître par rescan multiplicatif en `C`; sa valeur peut néanmoins
 dépendre de l'union des patches demandés par les handles. La réutilisation
 cesse si `(A,B)`, la grille, la lane ou le pavage changent.
 
+Le cache porte aussi `computed_patch_mask`. Un `g_AB[j]==0` avec ce bit absent
+signifie « non calculé », jamais « calculé et nul ». La valeur zéro reste
+fail-open pour la décision, mais confondre ces états rendrait faux les reçus,
+les réemplois et tout calcul de coût incrémental.
+
 Les crédits de patches différents ne sont ni sommés ni unis. Ils peuvent en
 revanche utiliser des témoins différents, ce qui est précisément le gain que
 le compte commun du probe ne mesure pas.
@@ -542,6 +575,11 @@ $$D_A=A,\qquad D_B=B,\qquad D_C=C\setminus(A\cup B),\qquad D_0=P\setminus(A\cup 
 Les crédits complets s'écrivent :
 
 $$H_0=D_0\cap\bigcap_{t\in F}I_t,\qquad H_A(a)=D_A\cap\bigcap_{t\in F:\,t_A=a}I_t,\qquad H_B(b)=D_B\cap\bigcap_{t\in F:\,t_B=b}I_t,\qquad H_C(c)=D_C\cap\bigcap_{t\in F:\,t_C=c}I_t.$$
+
+L'univers est celui des rangs de positions uniques, avec `A` et `B` disjoints.
+Les scalaires sont leurs cardinalités : $h_0=\lvert H_0\rvert$,
+$h_a(a)=\lvert H_A(a)\rvert$, $h_b(b)=\lvert H_B(b)\rvert$ et
+$h_c(c)=\lvert H_C(c)\rvert$.
 
 Une fibre ou une tranche fixant `a`, `b` ou `c` sans complétion valide reçoit
 zéro, jamais une cardinalité vacante. Pour tout
@@ -567,14 +605,15 @@ de `a0,b,c`, alors que `a0` est extérieur à celle de `a1,b,c` :
 Le `tb` actuel n'est pas ce central additionnable : il exclut seulement les
 sites apparaissant dans un triplet valide, pas toutes les plages `A` et `B`.
 Un point inactif de `A` peut donc aussi vivre dans `h_a`. Le prochain probe
-publie `central_outside_AB` ou conserve les IDs.
+publie `central_outside_AB` ou conserve les rangs de positions.
 
 `AliveRect::core` et `g_AB[j]` peuvent reconnaître le même site. Sans
 identités, leur seule composition sûre est `max(core_AB,g_AB[j])`. Avec au
 plus huit crédits dans un rectangle q3 vivant,
-`collect_universal_ids` permet de former explicitement l'union puis de chercher
-seulement de nouveaux IDs. Aucun crédit n'est hérité après un split dont les
-patches changent.
+`collect_universal_ids`, malgré son nom, retourne actuellement des rangs de
+positions `i32`; il permet de former explicitement l'union puis de chercher
+seulement de nouvelles positions. Aucun crédit n'est hérité après un split
+dont les patches changent.
 
 Une condition simple de mort du patch `j` est :
 
@@ -589,8 +628,9 @@ Elle donne sinon un surcompte de travail, pas une partition des survivants.
 Un futur `h_c(c)` prend ses témoins dans `C` privé de `A union B`, et le vrai
 central devient alors extérieur à `A union B union C`. `g_AB[j]` et $h_c(c)$
 peuvent partager un autre site de `C` : avant de les composer, conserver les
-IDs et prendre leur union, ou reconstruire `h0_j(C)` hors `C`. La fixture
-future minimale prend `a=(0,0,0)`, `b=(4,0,0)`, `c=(2,3,0)` et `z=(2,1,0)`,
+rangs de positions et prendre leur union, ou reconstruire `h0_j(C)` hors `C`.
+La fixture future minimale prend `a=(0,0,0)`, `b=(4,0,0)`, `c=(2,3,0)` et
+`z=(2,1,0)`,
 avec `c,z` dans le même `C` : `z` appartient à $W_3(a,b)$ et est strictement
 intérieur à la circumboule de `(a,b,c)`, donc peut vivre à la fois dans
 `g_AB[j]` et $h_c(c)$. L'auto-jointure de $h_c$ est capée par les 32 positions
@@ -599,11 +639,15 @@ après les prunes `EMPTY/NONE_OWNER`, médiatrices et central, sur le résiduel
 mesuré.
 
 La version autoritaire transporte pour chaque source un
-`CappedWitnessSet<h3>` trié d'IDs. Deux méthodes appliquées au même domaine se
-composent par union ; sans IDs, seulement par `max`. Après un split qui change
-les patches, un enfant ne transporte que les IDs explicitement revalidés sous
-son propre certificat ; sa recherche ignore ensuite ces IDs. L'addition
-`parent_count + fresh_count` est interdite.
+`CappedWitnessPosSet<h3>` trié de rangs `i32` de positions uniques, l'unité
+conceptuelle `GeometryIndex`. Deux méthodes
+appliquées au même domaine se composent par union ; sans positions, seulement
+par `max`. Le profil courant refuse les positions dupliquées, donc position et
+`PointId` sont en bijection, mais le tie-break d'owner ne change pas l'unité du
+ledger témoin. Une future levée de ce refus exige un mapping explicite. Après
+un split qui change les patches, un enfant ne transporte que les positions
+explicitement revalidées sous son propre certificat ; sa recherche les ignore
+ensuite. L'addition `parent_count + fresh_count` est interdite.
 
 Si l'on veut récupérer dans $h_c$ les positions de $C$ qui recouvrent $A$ ou
 $B$, il faut d'abord normaliser l'auto-jointure ordonnée. Pour un nœud
@@ -624,8 +668,8 @@ La convolution coûte `O(|A|+|B|+|C|+need^2)` avec `need<=9`. Elle rend donc la
 **combinaison** des crédits constante, pas leur calcul. Le verrou courant reste
 `corner_histograms`, en `O(|A|^2+|B|^2)`. Sa relève parcourt les témoins par
 nœuds, crédite un sous-arbre certifié, scinde `MIXED` et s'arrête après neuf
-IDs. Son coût n'est quasi linéaire que si le nombre de nœuds `MIXED` le reste ;
-c'est une porte de mesure, pas une borne reçue.
+positions. Son coût n'est quasi linéaire que si le nombre de nœuds `MIXED` le
+reste ; c'est une porte de mesure, pas une borne reçue.
 
 ## Relève directement intégrable de `corner_histograms`
 
@@ -687,7 +731,7 @@ seulement « au moins `cap` », pas que le compte complet est connu. Employer
 `cap=need` suffit à toutes les décisions actuelles. L'addition
 `h_core+h_a+h_b` reste sûre parce que le contrat courant place `h_core` hors
 `A union B`, tandis que `A` et `B` sont disjoints ; changer un de ces domaines
-exigerait des IDs et une union explicite.
+exigerait des rangs de positions et une union explicite.
 
 Après la porte de parité, les deux facteurs ne doivent pas être interrogés
 aveuglément au même plafond. Poser `N` au plus grand seuil résiduel encore
@@ -755,6 +799,20 @@ une masse de supports valides, car identités, acuité et owner restent dans leu
 ledger séparé. Cette réduction est exacte pour le **certificateur** et ne
 matérialise jamais `A x B x C`.
 
+Même la masse brute de rôles ne se déduit pas du seul `P[t]` dès que `C`
+recouvre `A` ou `B`. Pour un couple survivant, son poids q3 vaut
+`n_C-I_C(a)-I_C(b)`. En q4 croisé, il vaut
+`(n_C-I_C(a)-I_C(b))*(n_D-I_D(a)-I_D(b))`; sur le diagonal `H,H`, il vaut
+`choose2(n_H-I_H(a)-I_H(b))`. Ainsi, avec
+`A={a0,a1}`, `B={b}`, `C={a0,c}`, `D={d}`, la même valeur `P[t]=1` porte une
+masse q4 égale à un si `(a0,b)` survit, mais deux si `(a1,b)` survit. La v1
+autorise donc seulement `P[t]==0` à classer toute la masse en vrac. Si
+`P[t]>0`, elle énumère les couples survivants et somme ces poids en `u128`, ou
+laisse toute la masse du bloc `PENDING`; elle ne fabrique jamais
+`classified_r/pending_r` depuis un compte non pondéré. Des histogrammes
+pondérés par signatures d'appartenance pourront être une optimisation
+ultérieure, avec oracle séparé.
+
 Elle rend aussi les deux ordres de coût explicites. Dans l'ordre center-first,
 former les handles et leurs masques, calculer `g_AB` seulement sur leur union,
 puis poser `N=max_C t_C` avant les requêtes de facteurs. Dans l'ordre
@@ -770,6 +828,15 @@ honnête est `O(|A|*ceil(|B|/64)+survivor_pairs)`. Le pire cas reste
 proportionnel au nombre de survivants, ce qui est nécessaire puisque le
 terminal les consomme ; le cas « toutes les paires tuées » ne parcourt plus
 `A x B`.
+
+« Streamé sans catalogue » borne la mémoire, pas le temps. Avec `k` handles,
+q3 peut encore transmettre `Theta(sum_C P[t_C])`, jusqu'à
+`Theta(k*|A|*|B|)`, avant même le coût ponctuel des carriers. q4 paie
+`Theta(k^2)` masques de paires, deux fois si l'union exacte exige deux passages,
+puis `Theta(sum_{i<=j} P[t_ij])`, jusqu'à
+`Theta(k^2*|A|*|B|)`. Le reçu doit publier ces trois sommes et leur pente ; un
+ledger agrégé en `O(k)` ne réduit aucun de ces coûts. Les masses conditionnées
+restent en `u128` : à dix millions, `4 M*(3 M)^2=3,6e19` dépasse déjà `u64`.
 
 À chaque réemploi du scratch, remettre tous les mots à zéro, reconstruire les
 listes `nonzero_words` et masquer les bits hors plage du dernier mot. Un bit
@@ -800,9 +867,10 @@ le sous-domaine n'est pas prouvé cartésien après acuité, owner et diagonales
 ## Ordre d'implémentation transmis à Claude
 
 ```text
-RectId(A,B), patches et core IDs
+RectId(A,B), patches et positions du core
   -> h_a/h_b saturés + parité avec corner_histograms + bitsets B_lt[t]
-  -> census/seed handles C + masse de rôles + fates + masques AB/AC/BC
+  -> raw_cover/witness/seed handles C + masse de rôles + fates + masques
+     AB/AC/BC
   -> union des patches encore actifs, puis un seul scan g_AB sur cette union
   -> seuil t_C + émission sparse : bloc certifié, split borné, ou pending
   -> ancres et terminal shallow seulement sur le résiduel
@@ -811,17 +879,26 @@ RectId(A,B), patches et core IDs
 Le probe reste counter-only. Il se streame par rectangle ; il ne matérialise
 pas une liste globale de millions de blocs et ne relance pas un census complet
 pour chaque `C` au premier essai. En q3, un handle mort comme **seed** reste
-dans `census_handles` comme source possible de témoins ; seule sa vue
-`seed_handles` est filtrée. Le pseudo-flux fixe l'ordre de développement après
-la parité des facteurs. Le hot path conserve l'ablation center-first décrite
-plus haut : il ne doit pas payer simultanément les deux ordres.
+dans la vue témoin ; seule sa vue `seed_handles` est filtrée. Les noms reflètent
+les preuves : `raw_cover_handles` est la sortie géométrique brute,
+`witness_handles` la source dont la complétude de census est certifiée, et
+`seed_handles` la vue de proposition. Ne pas rebaptiser automatiquement le
+cover coefficient 3 en « census » ; si le même stockage sert aux deux, son
+théorème de complétude q3/q4 et sa porte doivent être cités. Le pseudo-flux
+fixe l'ordre de développement après la parité des facteurs. Le hot path
+conserve l'ablation center-first décrite plus haut : il ne doit pas payer
+simultanément les deux ordres.
 
 Un split de `C` raffine seulement ses vues de supports ; son parent reste dans
-le census tant que la partition témoin n'est pas remplacée explicitement. Un
+la vue témoin tant que cette partition n'est pas remplacée explicitement. Pour
+un enfant, `Q/core/g_AB/h_a/h_b` restent valides, `M_child` est inclus dans
+`M_parent` et `t_child<=t_parent`; les facteurs capés au seuil parent restent
+donc réutilisables. En revanche, un futur `h_c` scalaire ne s'hérite pas : son
+domaine change avec le sibling ; filtrer les positions ou le recalculer. Un
 split de `A` ou `B` change `RectId`, les patches et les domaines de
-`h_a/h_b/g_AB` : tous ces crédits sont invalidés, sauf sets d'IDs explicitement
-revalidés sous le nouveau rectangle. Aucune cardinalité scalaire du parent ne
-se transmet par héritage.
+`h_a/h_b/g_AB` : tous ces crédits sont invalidés, sauf sets de positions typés
+et explicitement revalidés sous le nouveau rectangle. Aucune cardinalité
+scalaire du parent ne se transmet par héritage.
 
 La porte exhaustive à `n<=14` vérifie chaque bloc pruné, le ledger des rôles et
 les diagonales. Elle conserve les tangences `L32==0` et `U32==0`, vérifie que
@@ -853,13 +930,18 @@ et `d` dont la face avec `AB` est aiguë, conformément à la règle exact-once
 actuelle, ou employer un prédicat symétrique prouvé équivalent.
 
 Une vue unique `support_handles` est donc incorrecte en q4. Le contrat porte
-au moins trois vues : `census_handles` pour les sites témoins et le ledger,
-`opposite_handles` ou `completion_handles` pour les deux sommets opposés
-possibles, et `seed_handles` pour le sous-ensemble qui peut porter la face
-aiguë canonique. `NONE_ACUTE` retire un handle de `seed_handles`, jamais de
-`completion_handles` ni du census. La préparation `CellGrid` sépare de la même
-façon `witness_sites` et `seed_sites`; réutiliser un seul vecteur rendrait un
-fate de seed destructif pour le census.
+au moins quatre vues : `raw_cover_handles`, `witness_handles` pour les sites
+témoins sous preuve de complétude, `opposite_handles` ou `completion_handles`
+pour les deux sommets opposés possibles, et `seed_handles` pour le sous-ensemble
+qui peut porter la face aiguë canonique. `NONE_ACUTE` retire un handle de
+`seed_handles`, jamais de `completion_handles` ni de la vue témoin. Une paire
+de vues passe le gate seed si et seulement si
+`seed_possible(C)||seed_possible(D)`, les inconnus restant possibles ; ce gate
+n'est pas une preuve d'existence. Ne jamais joindre un stream orienté
+`seed x completion` à `i<=j`, qui perdrait le cas où la complétion précède le
+seed. La préparation `CellGrid` sépare de la même façon `witness_sites` et
+`seed_sites`; réutiliser un seul vecteur rendrait un fate de seed destructif
+pour le census exact.
 
 La fixture q4 minimale suivante rend cette distinction exécutable :
 
@@ -880,8 +962,8 @@ de q4, jamais ceux de q3. Le crédit `g4_AB[j]` est sûr pour toute sphère du
 patch parce qu'il se compare déjà au rayon porté par `a` ou `b`; il ne dépend
 ni de `C`, ni de `D`. Les tableaux `h_a,h_b` employés ici sont ceux de $W_4$,
 pas les crédits q3. Une mort q3 ne tue toujours pas une complétion q4.
-`g4_AB[j]` porte explicitement des IDs hors `A union B` avant toute addition à
-`h_a+h_b`. Un même couple `{c,d}` peut survivre plusieurs patches, mais sa
+`g4_AB[j]` porte explicitement des positions hors `A union B` avant toute
+addition à `h_a+h_b`. Un même couple `{c,d}` peut survivre plusieurs patches, mais sa
 masse n'est inscrite qu'une fois dans le ledger : les patches certifient une
 décision, ils ne créent aucune provenance supplémentaire.
 
@@ -908,9 +990,10 @@ $$D_A=A,\qquad D_B=B,\qquad D_C=C\setminus(A\cup B),\qquad D_D=D\setminus(A\cup 
 Les crédits $h_0,h_a,h_b,h_c,h_d$ sont définis par intersections universelles
 sur leurs fibres non vides, exactement comme en q3. Le premier incrément q4
 doit pourtant s'arrêter à `g4_AB + h_a + h_b`. Ajouter $h_c$, puis $h_d$, exige
-des IDs ou une repartition explicite à chaque nouveau handle. Le flux doit donc
-imbriquer les handles `C`, puis `D` seulement sur les masques survivants, avec
-continuations et fates, sans matérialiser un catalogue global `C x D`.
+des positions ou une repartition explicite à chaque nouveau handle. Le flux
+doit donc imbriquer les handles `C`, puis `D` seulement sur les masques
+survivants, avec continuations et fates, sans matérialiser un catalogue global
+`C x D`.
 
 Pour un bloc croisé `C!=D`, cette orientation fournit bien deux domaines
 disjoints pour $h_c$ et $h_d$. Pour le bloc diagonal `C=D=H`, elle donne au
@@ -918,7 +1001,7 @@ contraire `D_D=emptyset` : la paire de points est orientée, par exemple par
 `PointId(c)<PointId(d)`, uniquement pour nommer les fibres, et le second crédit
 scalaire vaut zéro. Poser à nouveau `D_D=H\(A union B)` puis sommer
 `h_c+h_d` compterait deux fois le même domaine. Récupérer davantage exige des
-sets d'IDs et leur union, jamais deux cardinalités nues ; l'orientation ne
+sets de positions et leur union, jamais deux cardinalités nues ; l'orientation ne
 préjuge toujours pas lequel de `c,d` devient le seed canonique.
 
 ### Ledger local des paires de handles

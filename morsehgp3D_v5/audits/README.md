@@ -34,10 +34,17 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   la lentille requalifie d'abord les extrema corrélés `OwnerD2Exact` de la v4,
   sans en importer le code ; le terme `|w.d|`, dominé après le cover, reste une
   identité d'oracle/mutant. Aucun fate ne retire les mêmes handles du census.
+  Le pavage P1 à 64 patches existait déjà en v4 avec des pentes rouges ; le
+  delta à requalifier est sa factorisation par rectangle WSPD, `t_C/P[t_C]` et
+  le stream `t_CD`, jamais le center-cover pris isolément.
   Le seuil `t_C` condense les patches et réutilise les bitsets `B_lt[t]` sans
-  `A x B x C`; q4 streame `t_CD` sans catalogue `C x D` et sépare census,
-  complétions et seeds. La réponse V73--V75 reçoit le retrait de `EMPTY` comme
-  priorité produit sans recevoir son « plafond absolu », fixe le
+  `A x B x C`; q4 streame `t_CD` sans catalogue `C x D` et sépare cover brut,
+  vue témoin certifiée, complétions et seeds. Seul `P[t]==0` classe une masse
+  en vrac ; au-delà, le
+  ledger exige les poids d'appartenance, et le streaming ne prouve aucun
+  exposant. Témoins de position, masque de patches calculés et prédicat seed q4
+  symétrique sont explicites. La réponse V73--V75 reçoit le retrait de `EMPTY`
+  comme priorité produit sans recevoir son « plafond absolu », fixe le
   contrefactuel multicomptes du center-cover et sépare
   existence, profondeur et action en trois axes avec non-vacuité explicite.
   L'universel autorise un prune sans promouvoir `ALL_DEEP` tant que l'existence
