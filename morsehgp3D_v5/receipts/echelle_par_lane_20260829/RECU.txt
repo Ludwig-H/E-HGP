@@ -1,0 +1,28 @@
+# MorseHGP3D v5 — campagne locale : echelle_par_lane_20260829
+date_utc=2026-08-29T08:01:38+00:00
+source_commit=a3c15d846b84e43906b7689b82f85433f8939615
+arbre_construit=propre (refus sinon)
+cible=mhgp5 (cible PRODUIT, pas une cible MHGP5_TESTING)
+binaire_sha256=cd0d16d54101bcd42c56fc0d3b4ff9d72f775305e8553ea55823af5ba8d31e1a
+machine=Linux 6.8.0-1052-azure, 8 fils logiques — MACHINE PARTAGEE, LOCALE
+avertissement=un ecart de mur sous ~20 % n'est pas concluant ici ; les compteurs sont exacts
+protocole=morsehgp3D_v5/bench/recu_local.sh, bras alternes AB/BA
+
+# bras
+produit = --threads=2
+
+# signature de l'objet (sha256 de famille= + cardinalites par K)
+scanline_single_pass_n16000_produit_r1 1db64d3e34ff07a2cf45ad331d78e2332968b1c0017ecb7dd410fddc191b7ccf
+scanline_single_pass_n32000_produit_r1 30c88110946f9c2b844beb870a7e3778188cada660c31bfacd23c28be4d7d05f
+scanline_single_pass_n8000_produit_r1 08d837cf51edb1ad5cfcab14d591d94a351d3ab44f59160f6b1cbc9f11495f32
+terrain_n16000_produit_r1 acfa20dd56c49e2e48848011e14358c24d8d2fe50e751e5842637048192a3a05
+terrain_n32000_produit_r1 4d4c67702e55855db856869120380ce9efd3541ec10e573cae46a85176fcb09c
+terrain_n8000_produit_r1 7b96763b4dd28b0e7c208398e11877f297933d0aa630e217cd937e3f6d5b8802
+
+# run code duree_s peak_rss_kb
+scanline_single_pass_n16000_produit_r1 0 40 806428
+scanline_single_pass_n32000_produit_r1 0 88 1511816
+scanline_single_pass_n8000_produit_r1 0 23 413276
+terrain_n16000_produit_r1 0 52 811856
+terrain_n32000_produit_r1 0 108 1596556
+terrain_n8000_produit_r1 0 22 435388
