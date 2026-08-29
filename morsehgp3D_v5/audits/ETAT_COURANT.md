@@ -156,9 +156,13 @@ hors `A union B`, puis
 laisser chaque `C` masquer seulement les patches dont `AB/AC/BC` peuvent
 encore contenir zéro. `g_AB[j]` s'additionne à `h_a(a),h_b(b)` mais n'est pas
 le vrai $h_0$ extérieur à `C`; il ne se compose donc pas avec un futur
-$h_c(c)$ sans union d'IDs ou repartition. Le test de puissance aux seuls
-`8^3` coins reste réfuté par la fixture u16. Un cap, une tangence ou une borne
-ambiguë produit `pending`, jamais un prune.
+$h_c(c)$ par une addition nue. La repartition scalaire est désormais
+explicite : ventiler `g_AB[j]` sur les strates disjointes
+`H_i\(A union B)` plus un bucket extérieur, sommer les autres strates et
+composer par `max` seulement dans la strate du carrier. Cela prépare $h_c$
+sans liste globale d'IDs ni rescan témoin par `C`. Le test de puissance aux
+seuls `8^3` coins reste réfuté par la fixture u16. Un cap, une tangence ou une
+borne ambiguë produit `pending`, jamais un prune.
 
 Pour q4, les deux porteurs opposés à `AB` restent une paire non ordonnée. Le
 parcours peut imbriquer deux handles, mais son ledger emploie les blocs croisés
@@ -167,17 +171,23 @@ avant le terminal lequel des deux porteurs est la face aiguë canonique. Les
 formules locales retirant les recouvrements avec `A/B` ont été vérifiées sur
 `442644` configurations exhaustives. La fermeture globale doit toutefois
 inclure les rectangles morts avant `AliveRect`; sur une diagonale `C=D`, le
-domaine de $h_d$ est vide sans union d'IDs. La masse couverte se calcule sur
-l'union des handles en temps linéaire en leur nombre : aucune de ces preuves ne
-justifie une matérialisation globale des couples.
+domaine de $h_d$ est vide si le handle reste indivis. La décomposition
+canonique de `choose2(H)` en produits des enfants de chaque LCA fournit au
+contraire `|H|-1` blocs à facteurs disjoints et autorise $h_c+h_d$ sans IDs ;
+ce n'est ni une WSPD locale ni une solution au carré des handles distincts. La
+masse couverte se calcule sur l'union des handles en temps linéaire en leur
+nombre : aucune de ces preuves ne justifie une matérialisation globale des
+couples.
 
 Le hot path q4 s'arrête donc à
 `h_a+h_b+max(core,g4_AB[j])`. Si `h_c/h_d` sont ajoutés sans positions, la
 seule composition scalaire générale est
 `h_a+h_b+max(core,g4_AB[j],h_c+h_d)` sur un bloc croisé, avec `h_d=0` sur la
-diagonale ; sommer le central et les deux fibres double-compte leurs positions.
-Avec des rangs, prendre l'union capée. Ces domaines témoins ne retranchent
-jamais `A/B` de la partition des carriers.
+diagonale indivise. La ventilation par strates renforce ce repli en
+`h_a+h_b+max(core,g_rest+max(g_C,h_c)+max(g_D,h_d))` pour deux facteurs
+disjoints. Sommer le central brut et les deux fibres double-compte leurs
+positions. Avec des rangs, prendre l'union capée. Ces domaines témoins ne
+retranchent jamais `A/B` de la partition des carriers.
 
 ## Enveloppe q3/q4 reçue mathématiquement
 
@@ -427,12 +437,23 @@ reste distinct de la masse de supports valides. Le ledger q3 pondéré est
 néanmoins factorisable exactement par les histogrammes de `A intersect C` et
 `B intersect C`, agrégés par seuil : coût
 `O(|A|+|B|+number_of_handles+h3^2)`, sans paire d'ancre. En q4, poser le seuil
-mono-handle `s_H=max_{j in M_H}(t_j)`. Comme
-`t_CD<=min(s_C,s_D)`, neuf classes à `h4=8` retirent le produit de handles en
+mono-handle `s_H=max_{j in M_H}(t_j)`. Comme `t_CD<=min(s_C,s_D)`, neuf classes
+à `h4=8` retirent le produit de handles en
 `O(k+H)` après construction des facteurs `A/B`, avec `H=sum_H |H|=O(k)`
 seulement sous le cap courant des handles, avant de
 passer les carriers ternaires résiduels au terminal axial. Le masque `M_H` est
 celui des **complétions** possibles, jamais celui des seuls seeds aigus.
+
+La relève avec $h_c$ garde la même factorisation. Pour chaque patch `j`, la
+strate locale compose `g_{i,j}` et `h_{c,j}(c)` par `max`, les autres strates
+s'additionnent, puis `core` reste en `max` extérieur tant qu'il n'est pas
+ventilé. Condenser ensuite
+`tau_i(c)=max_{j in M_i(c)}(h3-credit_{i,j}(c))_+`. Les neuf classes de
+`tau` remplacent le seuil unique du handle ; un tableau bidimensionnel
+`(tau,h_a)` ou `(tau,h_b)` ferme les diagonales `c=a/c=b`. La combinaison
+reste linéaire en masse de handles plus `O(h3^2)` et ne matérialise toujours
+pas `A x B x C`. Le minimum numérique entre patches ne revendique aucune
+intersection commune de témoins.
 
 Le parcours témoin de `g_AB[64]` part une seule fois de la racine : nœuds
 `ALL` en antichaîne locale, bits de compte saturés masqués et `MIXED` scindés
@@ -731,6 +752,9 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
    ledger, caps, compteurs et échantillonnage du probe, installer les trois axes
    d'état, graver le helper centre/patch typé contre l'oracle exact, puis
    calculer seulement `g_AB[64]` par un DFS masqué sur tous les rectangles.
+   Dès ce premier DFS, conserver les 64 comptes capés **par strate de handle**
+   et une somme non capée des cellules : ce petit supplément prépare $h_c$
+   sans rescanner la racine et interdit le futur double compte local.
    Comparer aux 64 parcours indépendants, fermer antichaînes, coquilles et
    provenance, puis former `t_C` en post-traitement sans `A x B x C`. Ouvrir
    seulement ensuite `global_common` avec un masque requis distinct des
@@ -743,6 +767,9 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
    puissance réellement évités après les portes existantes. Les positions des
    handles morts restent témoins et census ; ne jamais convertir ce verdict
    handle-local en kill d'ancre ni le transférer à q4.
+   Seulement sur le résiduel mesuré, calculer `h_{c,j}(c)` par la forme
+   `Phi32` avec split diagonal, condenser `tau(c)` sur le pire patch et fermer
+   sa masse par les classes de seuil avant toute émission sparse.
 3. Comparer ensuite les deux ordres chauds sur le vecteur causal et sur mur/HWM
    OFF/ON ; activer seulement les décisions exactes rentables. Garder les fates
    `EMPTY` au ledger d'oracle sans route autonome.

@@ -28,7 +28,10 @@ ne doit pas opposer fibre ternaire et center-cover : la fibre donne la
 provenance ; le center-cover, resserré par `C`, donne le certificat sûr. Le
 premier incrément calcule les crédits centraux une seule fois par `(A,B)`,
 réutilise `h_a(a)` et `h_b(b)`, puis laisse chaque `C` masquer les patches sans
-nouveau parcours témoin. `h_c(c)` reste différé jusqu'au résiduel.
+nouveau parcours témoin. `h_c(c)` reste différé jusqu'au résiduel, mais sa
+composition scalaire sûre est maintenant identifiée : ventiler le central par
+strates de handles, au lieu de sommer deux comptes qui peuvent viser les mêmes
+positions.
 
 Le pin `7e0ffe79` ne remplace aucune de ces quantités. `EdgeEnvelope(a,b)` est
 l'union fermée des positions pouvant appartenir à **au moins une** boule
@@ -1456,18 +1459,116 @@ Sur le domaine complet, le critère exact reste le minimum couplé de
 sur un produit cartésien ; acuité et owner couplent généralement les rôles.
 Elle donne sinon un surcompte de travail, pas une partition des survivants.
 
-Un futur `h_c(c)` prend ses témoins dans `C` privé de `A union B`, et le vrai
-central devient alors extérieur à `A union B union C`. `g_AB[j]` et $h_c(c)$
-peuvent partager un autre site de `C` : avant de les composer, conserver les
-rangs de positions et prendre leur union, ou reconstruire `h0_j(C)` hors `C`.
-La fixture future minimale prend `a=(0,0,0)`, `b=(4,0,0)`, `c=(2,3,0)` et
-`z=(2,1,0)`,
-avec `c,z` dans le même `C` : `z` appartient à $W_3(a,b)$ et est strictement
-intérieur à la circumboule de `(a,b,c)`, donc peut vivre à la fois dans
-`g_AB[j]` et $h_c(c)$. L'auto-jointure de $h_c$ est capée par les 32 positions
-d'un handle mais peut encore payer 1024 couples par bloc. Elle vient seulement
-après les prunes `EMPTY/NONE_OWNER`, médiatrices et central, sur le résiduel
-mesuré.
+Un futur `h_c(c)` prend ses témoins dans `C` privé de `A union B`. `g_AB[j]`
+et $h_c(c)$ peuvent partager un autre site de `C` : les additionner nus reste
+donc faux. La fixture minimale prend `a=(0,0,0)`, `b=(4,0,0)`, `c=(2,3,0)`
+et `z=(2,1,0)`, avec `c,z` dans le même `C` : `z` appartient à $W_3(a,b)$ et
+est strictement intérieur à la circumboule de `(a,b,c)`, donc peut vivre à la
+fois dans `g_AB[j]` et $h_c(c)`. La sous-section suivante donne toutefois une
+repartition scalaire par handles qui évite de conserver tous les rangs.
+
+### Algèbre stratifiée des témoins : `+` entre domaines, `max` dans un domaine, pire patch entre alternatives
+
+Les handles `H_i` sont des nœuds d'une antichaîne et leurs plages de positions
+sont disjointes. Définir les **strates témoins**, qui ne changent pas la
+partition des rôles carriers :
+
+$$S_i=\mathrm{range}(H_i)\setminus(A\cup B),\qquad S_\bot=P\setminus\left(A\cup B\cup\bigcup_i S_i\right).$$
+
+Un carrier `c` peut encore appartenir physiquement à `A` ou `B` lorsqu'il est
+distinct de l'endpoint effectivement choisi ; seule sa source de témoins
+locale retranche toutes ces positions. Cette différence de rôles se calcule
+sur les plages de positions, jamais par soustraction d'AABB.
+
+Pour un patch `j`, soit `G_j` un sous-ensemble certifié par `g_AB[j]`, hors
+`A union B`, et poser `g_{r,j}=|G_j intersect S_r|`, avec `r=bot` pour la strate
+extérieure. Chaque cellule peut être capée à `h3`, mais la somme des cellules
+capées reste stockée dans un entier **non capé globalement**. Pour le handle
+carrier `H_i`, poser `g_{not i,j}=sum_{r!=i} g_{r,j}`. Si
+`C_{i,j}(c) subseteq S_i` est un facteur local de cardinalité `h_{c,j}(c)`,
+alors les strates donnent immédiatement :
+
+$$\left\lvert G_j\cup C_{i,j}(c)\right\rvert\geq g_{\neg i,j}+\max\left(g_{i,j},h_{c,j}(c)\right).$$
+
+Avec le `core` historique seulement scalaire, le crédit patch-spécifique sûr
+est donc :
+
+$$b_{i,j}(c)=\max\left(h_{\mathrm{core}},g_{\neg i,j}+\max\left(g_{i,j},h_{c,j}(c)\right)\right).$$
+
+Si le prochain DFS ventile aussi un sous-ensemble certifié du cœur en comptes
+`k_r`, on récupère davantage sans identités individuelles :
+
+$$b_{i,j}(c)=\sum_{r\neq i}\max\left(k_r,g_{r,j}\right)+\max\left(k_i,g_{i,j},h_{c,j}(c)\right).$$
+
+Ces formules résument l'algèbre correcte : addition seulement entre strates
+physiquement disjointes ; `max` entre certificateurs d'une même strate, car
+leurs ensembles peuvent être emboîtés ; minimum numérique du crédit, ou
+maximum du besoin résiduel, entre patches alternatifs. Le minimum sur les
+patches n'est jamais la cardinalité de leur intersection : deux patches
+peuvent chacun fournir un témoin différent.
+
+Ne jamais calculer `global_capped - local`. Il faut former
+`sum_r min(h3,g_{r,j})` sans cap sur la somme, puis retrancher la cellule
+stockée. Deux strates saturées à neuf constituent la fixture combinatoire
+minimale qui tue la soustraction d'un total global déjà ramené à neuf.
+
+Le DFS masqué ne doit pas devenir `number_of_handles` parcours globaux. Quand
+un nœud certifié traverse plusieurs strates, il se scinde jusqu'aux racines de
+handles ; dès qu'il est contenu dans une strate, son crédit en vrac va à cette
+cellule. Les racines de handles étant une antichaîne du même radix tree, cette
+couture ajoute les séparations de frontières au parcours partagé, pas un
+facteur `k*V`. Publier `stratum_boundary_splits`,
+`patch_node_tests`, `bulk_positions` et `cells_saturated`.
+
+Le facteur local utilise directement la variable centre. Pour `q=32o`, poser :
+
+$$\Phi_{32}(q,c,z)=2q\mathbin{\cdot}(z-c)+32\left(\left\lVert c\right\rVert^2-\left\lVert z\right\rVert^2\right).$$
+
+`Phi32>0` équivaut à `z` strictement intérieur à la sphère de centre `o`
+passant par `c`. Ainsi
+`center_witness_phi32_lattice_min(Q_j,{c},W)>0` crédite tout nœud témoin
+`W subseteq S_i` pour le patch `j`. La requête auto-jointe scinde tout nœud
+contenant `c` et ignore la feuille diagonale ; tester seulement
+`Box(C) x Box(C)` resterait bloqué par `Phi32(q,c,c)=0`. Le compte naturel est
+patch-spécifique `h_{c,j}(c)` et s'arrête au besoin résiduel. Les 32 positions
+par handle bornent l'oracle plat, pas le coût produit à accepter sans mesure.
+
+Pour un surmasque conservatif non vide `M_i(c)` de patches possibles, condenser
+les crédits en un seul seuil de carrier :
+
+$$\tau_i(c)=\max_{j\in M_i(c)}\max\left(0,h_3-b_{i,j}(c)\right).$$
+
+Une ancre `(a,b)` tue alors ce carrier dès que
+`h_a(a)+h_b(b)>=tau_i(c)`. Un masque vide reçoit un fate d'absence séparé ; il
+ne passe jamais par le maximum vide avec une valeur neutre inventée. Cette
+condensation n'énumère pas `A x B x C`. Avec
+`P[t]=#{(a,b):h_a(a)+h_b(b)<t}`, agréger les carriers par leur seuil. Si
+`C_t=#{c:tau(c)=t}` et si `X^A_{t,r}` compte les carriers `c in A` de seuil
+`t` et de score `h_a(c)=r` (`X^B` symétriquement), la masse brute distinct-ID
+laissée par ce certificateur vaut :
+
+$$M_3=\sum_t C_tP[t]-\sum_{t,r}X^A_{t,r}B_{<t-r}-\sum_{t,r}X^B_{t,r}A_{<t-r}.$$
+
+Les deux corrections sont disjointes puisque `A` et `B` le sont. La
+combinaison coûte `O(H+h3^2)` après le calcul des scores, avec `H` la masse des
+handles, et généralise la formule à seuil unique déjà vérifiée. Le terminal
+n'énumère que le résiduel ; acuité, owner et existence gardent leurs fates
+séparés.
+
+Un oracle combinatoire indépendant au worktree courant a tiré `100000` cas de
+strates q3/q4 et `200000` ledgers `tau`, sans surcompte ni divergence avec
+l'union ou l'énumération explicite. Ce rejeu reçoit les formules papier ; il ne
+remplace pas les futures fixtures CTest déterministes de recouvrement,
+saturation et diagonale.
+
+La fixture géométrique stratifiée minimale fixe
+`a=(0,0,0), b=(12,0,0), c=(6,9,0)`, `H0={c,(6,3,0)}` et
+`H1={(3,3,0)}` sur le patch ponctuel `q=32o=(192,80,0)`. Les deux autres positions
+sont intérieures, celle de `H0` appartient simultanément à `g_0` et à `h_c`,
+et la profondeur vaut deux : `g_rest+max(g_0,h_c)=2`, tandis que
+`g_total+h_c=3` est le mutant à tuer. La fixture structurelle q4 prend un
+handle de cinq feuilles : les quatre produits de frères au LCA doivent avoir
+une masse totale `choose2(5)=10`, chaque paire exactement une fois.
 
 La version autoritaire transporte pour chaque source un
 `CappedWitnessPosSet<h3>` trié de rangs `i32` de positions uniques, l'unité
@@ -2064,7 +2165,9 @@ $$D_A=A,\qquad D_B=B,\qquad D_C=C\setminus(A\cup B),\qquad D_D=D\setminus(A\cup 
 Les crédits $h_0,h_a,h_b,h_c,h_d$ sont définis par intersections universelles
 sur leurs fibres non vides, exactement comme en q3. Le premier incrément q4
 doit s'arrêter à `g4_AB + h_a + h_b`. Ajouter $h_c$, puis $h_d$, exige des
-positions ou une repartition explicite à chaque nouveau handle. Si l'oracle de
+positions ou une repartition explicite à chaque nouveau handle ; la
+ventilation scalaire par strates ci-dessous constitue précisément une telle
+repartition sans liste d'IDs. Si l'oracle de
 paires est exécuté, il imbrique `C`, puis `D` seulement sur les masques
 survivants et reste sous cap. Le chemin produit recommandé passe au contraire
 du carrier ternaire fixe au terminal axial et ne construit pas ce produit.
@@ -2087,6 +2190,21 @@ aussi sûr, mais rend le calcul dépendant de la paire de handles et le réserve
 définissent seulement les domaines **témoins** : elles ne retirent aucun site
 de la partition des carriers, où distinct-ID reste un fate séparé.
 
+La ventilation q3 se transporte proprement à un bloc croisé de handles
+disjoints `H_i,H_k`. Avec `g_rest,j=sum_{r not in {i,k}}g_{r,j}` et des
+facteurs patch-spécifiques calculés par la même primitive `Phi32`, on obtient :
+
+$$b_{i,k,j}(c,d)=\max\left(h_{\mathrm{core}},g_{\mathrm{rest},j}+\max\left(g_{i,j},h_{c,j}(c)\right)+\max\left(g_{k,j},h_{d,j}(d)\right)\right).$$
+
+La somme des deux maxima est légitime parce que les deux strates sont
+disjointes ; le `max` extérieur reste obligatoire tant que le cœur historique
+n'est pas ventilé. Avec des comptes `k_r` du cœur par strate, remplacer ce
+`max` extérieur par la somme des `max(k_r,g_{r,j})`, exactement comme en q3.
+Le bucket extérieur est indispensable en q4 : les complétions vivent dans le
+cover 3, mais un témoin intérieur peut être dans la fenêtre 4 ou dans la source
+arbre entière. La stratification se fait donc par intersection physique avec
+les handles de complétion, jamais en renommant le cover 3 comme source témoin.
+
 Pour un bloc croisé `C!=D`, cette orientation fournit bien deux domaines
 disjoints pour $h_c$ et $h_d$. Pour le bloc diagonal `C=D=H`, elle donne au
 contraire `D_D=emptyset` : la paire de points est orientée, par exemple par
@@ -2095,6 +2213,23 @@ scalaire vaut zéro. Poser à nouveau `D_D=H\(A union B)` puis sommer
 `h_c+h_d` compterait deux fois le même domaine. Récupérer davantage exige des
 sets de positions et leur union, jamais deux cardinalités nues ; l'orientation ne
 préjuge toujours pas lequel de `c,d` devient le seed canonique.
+
+Une amélioration scalaire existe toutefois sans IDs : remplacer chaque
+diagonale `choose2(H)` par sa partition canonique suivant le radix tree :
+
+$$\mathrm{Sym2}(H)=\biguplus_{N\in\mathrm{Int}(H)}\left(\mathrm{range}(L(N))\times\mathrm{range}(R(N))\right).$$
+
+Chaque paire non ordonnée de positions distinctes apparaît exactement au nœud
+LCA de ses deux feuilles, les deux facteurs sont disjoints, et un handle de
+`m<=32` positions produit exactement `m-1` blocs croisés. On peut alors
+additionner $h_c$ et $h_d$ avec la formule stratifiée précédente. Si `g4` reste
+ventilé seulement au niveau du handle parent, le repli sûr est
+`g_rest+max(g_H,h_c+h_d)` ; ventiler aussi les deux sous-facteurs récupère les
+deux maxima séparés. Cette décomposition est une partition combinatoire, pas
+une WSPD locale ni une preuve de séparation géométrique ; elle ferme seulement
+le double compte diagonal et ne résout pas le carré des handles distincts. Le
+hot path seuil--axial reste donc prioritaire, tandis que cette forme devient
+l'oracle propre de $h_c/h_d$.
 
 ### Ledger local des paires de handles — oracle exact
 

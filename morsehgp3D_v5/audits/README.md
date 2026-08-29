@@ -25,7 +25,11 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   mais la v3 reste diagnostique tant que ledger, caps et compteurs causaux ne
   sont pas indépendants ; le chemin sûr calcule `g_AB[j]` une fois par
   rectangle, laisse `C` masquer les patches par les médiatrices, réutilise
-  `h_a(a),h_b(b)` et diffère `h_c(c)`. Pour q4, les deux
+  `h_a(a),h_b(b)` et diffère le coût de `h_c(c)` jusqu'au résiduel. Sa
+  composition est néanmoins fermée sans liste d'IDs : les comptes centraux
+  sont ventilés sur les strates disjointes des handles, s'additionnent entre
+  strates et se composent par `max` avec `h_{c,j}(c)` dans la strate locale ;
+  le pire patch devient une classe de seuil de carrier. Pour q4, les deux
   porteurs restants restent une paire non ordonnée dont le ledger ferme
   `6*C(n_u,4)`. La note donne aussi la relève concrète de
   `corner_histograms` par requêtes d'arbre saturées, puis bitsets des seuls
@@ -43,7 +47,8 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   `A x B x C`; les histogrammes d'intersection ferment exactement la masse q3
   même pour `P[t]>0`, en `O(|A|+|B|+k+h3^2)` après les visites d'arbre, ou en
   `O(k+h3^2)` seulement si l'index position--handle a déjà été construit et
-  comptabilisé. En q4,
+  comptabilisé. L'extension `tau(c)` garde cette factorisation avec un tableau
+  `(tau,h_a/h_b)` et une requête locale `Phi32` qui scinde la diagonale. En q4,
   neuf classes `s_H` retirent le produit `C x D`, puis les faces ternaires
   résiduelles passent au terminal axial ; `t_CD` reste un oracle borné. Cover
   brut, partition de complétions, capacité de seed, source de certificats et
