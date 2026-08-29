@@ -1,9 +1,9 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **HEAD documentaire relu :** `ac43ab1a`, publié sur `main` et
+- **HEAD documentaire relu :** `54228991`, publié sur `main` et
   `origin/main`. Le dernier delta fonctionnel du HEAD reste `2d052921` ; les
-  commits `70a62be3` et `2d052921` ajoutent un harnais local et deux notes de
-  Claude, sans pinner le raccord d'enveloppe.
+  commits suivants réorganisent les notes de Claude et des auditeurs, sans
+  pinner le raccord d'enveloppe.
 - **Dernier pin fonctionnel reçu :** `72090f79`. Le chemin produit de
   l'enveloppe q3/q4, ses portes et les corrections du harnais restent dans un
   worktree concurrent non commité. Ils sont jugés ci-dessous comme snapshot,
@@ -30,9 +30,13 @@ ancres, ni pire exposant q4. Le verrou d'échelle global reste donc ouvert.
 La correction de cap de l'utilisateur est reçue : **q2 n'est pas le problème
 architectural à traiter**. La WSPD binaire partitionne correctement les paires ;
 l'explosion naît lorsque q3/q4 développent chaque produit vivant `A x B` en
-ancres, puis les tiers ou les couples de carriers. L'arrangement shallow par
-ancre ne ferme que le second facteur. Il doit devenir le terminal d'une source
-WSPD q3/q4 fibrée, pas se substituer à cette généralisation.
+ancres, puis les tiers ou les couples de carriers. Une auto-jointure de deux
+WSPD globales a été testée puis rejetée : elle recrée des millions
+d'interactions dès `n=256`. Le chemin retenu compresse localement l'arête
+opposée par `RectId`, puis transfère les cellules lourdes au terminal shallow.
+Sa base combinatoire est linéaire sous packing ; son coût global ne le devient
+que si expansion extérieure, visites de census et lignes actives restent
+sparse.
 
 Le contre-audit des notes de Claude a eu un effet concret : la formule q4 est
 requalifiée comme sur-ensemble de Jung, le seuil de coût ancien est retiré et
@@ -61,29 +65,42 @@ La dérivation, les fixtures et la réponse V49–V52 consolidée vivent dans
 
 Le contrat actif transmis à Claude est désormais :
 
-- garder `PairWspdBlock(A,B)` comme tape q2 et ownership des ancres ;
-- ajouter `Q3FiberTask(A,B,C)` et `Q4FiberTask(A,B,C,D)`, avec carriers
-  paresseux, owner total, reçus de rang et continuation fail-open ;
-- tuer un bloc seulement par un certificat universel exact ; une ambiguïté ou
-  une capacité atteinte conserve le parent ;
-- traiter q4 par lignes et niveaux peu profonds dans le plan médiateur, jamais
-  par matérialisation préalable de `C x D` ni par dépendance aux verdicts q3 ;
-- conserver séparément le ledger de paires, la provenance des supports q3/q4
-  et les occurrences de proposition.
+- garder `PairWspdBlock(A,B)` comme tape extérieur et `RectId` immuable ;
+- reconnaître que `Q3FiberTask(A,B,C)`, WST3, WST4, `CellPair` et
+  `Sym2(G) disjoint_union Cross(G,N)` sont des antériorités v3/v4, pas une
+  nouvelle généralisation ;
+- rejeter l'auto-jointure de deux WSPD globales comme hot path ;
+- construire `LocalOppositeEdgeWspd` sur les cellules du seul `RectId`, avec
+  WSPD symétrique sur `G x G`, WSPD bichromatique color-pure sur `G x N`,
+  voisins explicites et diagonales symboliques ;
+- transférer toute cellule lourde ou paire ambiguë vers les niveaux peu
+  profonds d'une arête exacte, sans aucune boucle point--point ;
+- séparer `support_lines` de `census_lines` et conserver le range-report global
+  nécessaire au rang ;
+- tuer seulement par certificat universel exact ; ambiguïté ou capacité
+  atteinte conserve le parent et sa continuation.
 
-Le no-go des blocs ternaires symétriques fortement séparés reste valide, mais
-sa portée est étroite. Une WSSD standard n'apporte pas l'exact-once ni le rang ;
-une variante possédée peut en revanche devenir une source exacte après preuve
-de bijection, transitions disjointes et oracle exhaustif. En attendant, la
-frontière canonique `(N_i,r_i)` reste l'autorité q3/q4 et la route fibrée un
-accélérateur à recertifier.
+Le no-go des blocs ternaires symétriques fortement séparés reste valide. La
+WSPD locale partitionne les couples de cellules en `O(k_r)` blocs seulement
+sous grille commune ou octree 2:1 et paramètres fixes. Elle ne borne ni les
+splits `MIXED` de `A x B`, ni les visites du center-cover, ni la somme des
+lignes de census. En attendant leur réception, la frontière directe reste
+l'oracle q3/q4 borné et la route locale un accélérateur counter-only.
 
-Le premier incrément demandé n'est pas un reroutage produit : une primitive
-`q34_fiber` pour une ancre exacte, oracle exhaustif contre shallow, compteurs
-de lignes/intersections/visites/scratch, puis producteur counter-only q3 et q4
-avec center-cover de bloc. Les seuils de fenêtre à `smax=11` sont neuf
-intérieurs pour tuer q3 et huit pour tuer q4. La note active détaille ABI,
-ledgers, fixtures et mutants.
+La borne honnête cible
+`O(n log n + R + K log n + C + I + A + V + sum_e(m_e log m_e) + h*M + Z)`.
+`R,K,C,I,A,V,E,M,Z` sont des compteurs obligatoires et `Z` compte les vrais
+supports avant RLE. Le sous-quadratique n'est reçu que si la borne supérieure
+à 95 % de la pente de travail non-sortie reste sous `1,8` sur les quatre
+familles ; la cible est quasi linéaire. Le linéaire demeure un objectif
+conditionnel, pas un claim.
+
+Le premier incrément demandé n'est pas un reroutage produit : un probe
+`local_opposite_edge_wspd` counter-only, partition locale jugée, comparaison
+aux `CellPair` directs, zéro paire de points testée dans les cellules lourdes,
+puis handoff vers un terminal shallow d'oracle. Les seuils à `smax=11` restent
+neuf intérieurs pour tuer q3 et huit pour tuer q4. La note active détaille la
+provenance `3*C(n,3)` et `6*C(n,4)`, les portes de coût, fixtures et mutants.
 
 Claude a répondu au pin `ac43ab1a` avec deux filtres q3 par groupes. Le lemme
 du tiers aigu est reçu après ajout de l'owner `EdgeKey`; l'optimalité du cœur

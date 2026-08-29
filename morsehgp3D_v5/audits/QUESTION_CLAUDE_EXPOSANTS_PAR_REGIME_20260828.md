@@ -1,6 +1,6 @@
 # Note active à Claude — WSPD fibrée q3/q4, enveloppe et exposants
 
-- **Base documentaire relue :** `ac43ab1a`.
+- **Base documentaire relue :** `54228991`.
 - **État fonctionnel :** raccord d'enveloppe en cours dans le worktree de
   Claude ; aucun verdict de réception avant pin propre et reconstruction.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
@@ -8,155 +8,220 @@
   `mode=audit_independant_math_and_architecture`,
   `public_status=not_claimed`.
 
-## Correction de cap : généraliser la source q3/q4
+## Verdict après inventaire v3/v4 et test d'exposant
 
-La correction de l'utilisateur est reçue : **q2 n'est pas le verrou à
-résoudre**. `wspd_wavefront` est une WSPD binaire saine qui partitionne les
-paires non ordonnées. Dans `generate_candidates`, q3 et q4 rappellent cette
-même source puis développent encore chaque produit vivant `A x B` en ancres
-ponctuelles. q3 développe ensuite les tiers et q4 les couples
-seed--complétion. Les mesures durables de `docs/MESURES_ECHELLE.md` localisent
-donc deux facteurs distincts : la masse d'ancres par rectangle vivant et le
-travail par ancre.
+La cible n'est pas un produit `A x B x C`, encore moins
+`A x B x C x D`. Le contrat utile est une source dont le **travail exécuté**
+est sous-quadratique dans chaque régime déclaré, quasi linéaire lorsque la
+fenêtre de rang est fixée et la sortie sparse. Une garantie universelle est
+impossible : des nuages valides portent déjà `Omega(n^2)` supports q3 utiles,
+donc toute API qui exige un `SupportRecord` par support paie au moins cette
+sortie. Ce cas doit être préflighté, streamé ou rendu comme statut de ressource
+typé ; il ne doit jamais être caché dans un RLE de `BallKey`.
 
-Ma conclusion précédente, « le prochain jalon qui change l'exposant est
-l'arrangement shallow », était trop étroite. Un arrangement par ancre attaque
-le second facteur après avoir déjà payé l'expansion `A x B`. Il doit devenir
-le **terminal implicite** d'une source q3/q4 généralisée qui attaque aussi le
-premier facteur ; il n'est pas cette source à lui seul. L'enveloppe de cover et
-le raffinement post-séparation restent des filtres locaux utiles, mais ils ne
-ferment pas cette couture.
+L'inventaire retire une fausse nouveauté de la version précédente de cette
+note. Les objets suivants existaient déjà en v3/v4 :
 
-### Ce que « généraliser la WSPD » doit signifier ici
+- `OwnedCK-WST3`, c'est-à-dire rectangle WSPD d'arête multiplié par une cellule
+  de tiers ;
+- `OwnedCK-WST4`, `CellPair` et la partition
+  `Sym2(G) disjoint_union Cross(G,N)` des deux sommets restants ;
+- les jointures WSPD--LBVH, le scheduler par états et le gateway d'acuité ;
+- le terminal par droites et niveaux peu profonds pour une arête exacte.
 
-Ne pas construire une décomposition symétrique de triplets ou quadruplets,
-fortement séparée et exact-once. Le Théorème 4 de
-`docs/math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md` donne déjà une famille
-cercle--axe qui force au moins `Omega(n^2)` blocs ternaires alors que tous les
-supports croisés sont aigus. Il ne condamne ni une WSSD approximative, ni une
-source asymétrique ancre--tiers, ni une source restreinte par profondeur.
-
-La WSSD de Kerber--Sharathkumar donne une couverture compacte pour
-l'approximation de complexes de Čech ; prise seule, elle ne donne ni partition
-exact-once des supports, ni owner, ni rang fermé exact. Elle peut donc être un
-broad phase fail-open. Inversement, la conclusion « une WSSD ne pourra jamais
-être qu'un broad phase » serait elle aussi trop forte : raccordée à la
-partition CK des paires, à un owner total, à des transitions disjointes et à
-des certificats `[L,U]` rejouables, une décomposition possédée et paresseuse
-peut devenir une source factorisée exacte. Cette promotion est une obligation
-de preuve, pas un changement de nom. Voir l'article primaire
+Les simples noms `Q3FiberTask(A,B,C)` et `Q4FiberTask(A,B,C,D)` ne changent
+donc ni l'architecture ni l'exposant. Je retire cette présentation comme
+solution. La WSSD de Kerber--Sharathkumar reste une couverture linéaire utile
+pour l'approximation de Čech, mais ne fournit ni owner exact, ni partition des
+supports, ni rang Morse :
 [Approximate Čech Complexes in Low and High Dimensions](https://arxiv.org/abs/1307.3272).
-La borne CK `O(s^3 n)` du tape de paires n'est jamais héritée sans preuve par
-les fibres q3/q4.
 
-### Architecture conseillée
+### Piste globale testée puis rejetée
 
-Conserver trois objets typés, sans cascade de verdicts :
+Une construction séduisante consistait à joindre deux WSPD globales : l'une
+porte l'arête owner, l'autre l'arête opposée du tétraèdre. Elle donne une belle
+preuve combinatoire : chaque triangle a trois occurrences enracinées par une
+arête, chaque tétraèdre six, puis l'owner maximal canonique en conserve une.
+Elle ne donne aucune borne de jointure. Une sonde jetable, donc diagnostique et
+non qualifiante, l'a réfutée avant implémentation produit sur la vraie WSPD v5.
+À `n=256`, même après diamètre, lentille et rejet `NONE_ACUTE`, elle observe :
 
-1. `PairWspdBlock(A,B)` reste le tape exact des paires et la source q2.
-2. `Q3FiberTask(A,B,C)` ajoute une antichaîne de carriers au bloc d'ancre,
-   l'owner d'arête maximale canonique, les reçus de profondeur et une
-   continuation.
-3. `Q4FiberTask(A,B,C,D)` ajoute deux carriers paresseux, ou leur représentation
-   par lignes dans le plan médiateur, sans jamais former au préalable toutes
-   les paires `C x D`.
+| famille | rectangles `R` | interactions résiduelles `J` | `J/R` |
+|---|---:|---:|---:|
+| uniform | 18 575 | 47,7 M | 2 567 |
+| eight_clusters | 8 829 | 11,2 M | 1 262 |
+| terrain | 9 058 | 8,26 M | 912 |
+| scanline | 7 831 | 4,94 M | 631 |
 
-Pour une ancre ponctuelle `e=(a,b)`, poser `d=b-a`, `D2=|d|2`,
-`w_z=2z-a-b` et `t=2(c-(a+b)/2)`. Dans le plan `t.d=0`, un site `z` fournit
-la droite de carrier `2 w_z.t=|w_z|2-D2` et le demi-plan intérieur strict
-`2 w_z.t>|w_z|2-D2`. Le centre q3 est le point distingué de cette droite dans
-le plan du triangle ; les q4 sont les intersections de deux droites. Un seul
-constructeur de niveaux peu profonds peut donc partager le census de rang au
-lieu d'exécuter la boucle actuelle `seed x lentille`.
+Le gateway conserve encore environ 60 à 85 % des interactions. Une
+`GlobalDoubleWspd` peut rester un oracle de ledger ; elle est **interdite comme
+hot path**. Une WSPD linéaire n'autorise jamais à traiter son auto-jointure
+comme linéaire.
 
-Au niveau d'un bloc `A x B`, le plan varie encore avec l'ancre : ne pas
-prétendre construire un arrangement commun avant preuve. Le center-cover par
-patches de la section 5.6 du même document peut tuer uniformément un bloc ; un
-patch ambigu déclenche un split ou reste `pending`. Les ancres résiduelles
-peuvent ensuite atteindre le terminal par lignes ci-dessus. Cela évite toute
-mosaïque de Delaunay d'ordre supérieur, toute coface globale et tout tableau
-indexé par les triplets ou quadruplets.
+## Construction retenue : WSPD locale de l'arête opposée
 
-Ne pas confondre les deux domaines q4. Le cover coefficient 3 suffit à
-proposer les deux carriers, mais le rang de leur sphère exige le range-report
-global, l'enveloppe de Jung complète ou le cover coefficient 4. L'intersection
-historique coefficient 3 avec Jung reste un préfiltre fail-open ; elle ne
-certifie jamais seule la profondeur du sommet d'arrangement.
+La généralisation étroite qui n'apparaît pas dans l'inventaire v4 est
+`LocalOppositeEdgeWspd`. Elle ne construit pas une seconde WSPD globale et ne
+prétend pas résoudre q3 à nouveau.
 
-La diagonale q4 est une vraie obligation. Pour un carrier-block `C`, la
-partition paresseuse de `Sym2(C)` possède trois domaines disjoints :
-`Sym2(L)`, `L x R` et `Sym2(R)` ; les produits croisés sont ordonnés par une
-clé de cellule canonique. Ne pas exiger de séparation entre `C` et `D` : deux
-apex valides peuvent être arbitrairement proches. Mutualiser la géométrie
-q3/q4 est utile ; mutualiser leurs verdicts est interdit. La fixture
-q3-morte/q4-vivante ferme déjà ce raccourci.
+1. Le tape extérieur conserve le `RectId r=(A,B)` unique de chaque paire
+   d'extrémités.
+2. À l'échelle géométrique de `r`, une grille de préfixes half-open, à niveau
+   commun ou équilibrée 2:1, produit une antichaîne immuable `C_r` de cellules
+   de support. Des `CellRange` sont obtenus par dictionnaire de préfixes ou
+   deux `lower_bound` Morton ; une DFS du LBVH depuis la racine par cellule
+   serait potentiellement linéaire et est exclue.
+3. Le classifieur sûr partage `C_r` en `G_r`, où une face aiguë reste possible,
+   et `N_r`, utilisable seulement comme second sommet. La fibre q3
+   `r x G_r` est l'ancienne WST3 à requalifier, pas la nouveauté.
+4. La fibre logique q4 reste l'identité v4
+   `Sym2(G_r) disjoint_union Cross(G_r,N_r)`. La nouveauté est de construire
+   sur les **boîtes de cellules de ce seul `RectId`** une WSPD exacte des
+   couples de cellules, au lieu de matérialiser les `CellPair`.
 
-### Autorité, ledgers et seuils
+L'objet local contient trois sortes de feuilles disjointes :
 
-Pour l'instant, la frontière canonique `(N_i,r_i)` de
-`docs/math/FRONTIERE_DIRECTE_SUPPORTS_3_4.md` reste l'autorité exacte q3/q4 :
-elle part de `C(n,3)` et `C(n,4)` et prouve une vraie partition par induction.
-La route fibrée devient autoritaire seulement après preuve de la bijection
-`U -> (rectangle WSPD unique de e*(U), e*(U), U sans e*(U))`, avec arête la
-plus longue, tie-break `EdgeKey` sur les vrais `PointId`, facteurs distincts,
-transitions disjointes et exhaustives, puis oracle exhaustif au moins jusqu'à
-`n=14` sous toutes les permutations.
+- des blocs séparés `(U,V)` de cellules, avec les diamètres réels des cubes
+  inclus dans le test de séparation ;
+- les couples voisins/touchants explicites, en nombre linéaire seulement sous
+  niveau commun ou équilibre 2:1 ;
+- chaque diagonale `choose2(C)` conservée symboliquement.
 
-Le ledger `C(n,2)` ne certifie que le tape d'ancres. Il ne prouve ni la
-complétude q3, ni la complétude q4. Conserver séparément :
+La route `G x G` emploie une WSPD symétrique canonique ; `G x N` emploie une
+décomposition bichromatique color-pure. Un filtre de couleur appliqué après
+une WSPD générique n'est pas une preuve exact-once. À paramètres de séparation
+fixes et sous le packing annoncé, le front initial possède `O(k_r)` blocs pour
+`k_r=|C_r|`, et non `O(k_r^2)`. Un raffinement adaptatif non équilibré, des
+AABB serrées ou un gros cube touchant arbitrairement beaucoup de petits cubes
+annulent cette borne.
 
-- masse paire `pruned + open + pending = C(n,2)` ;
-- masse de supports canoniques `resolved_q + pending_q = C(n,q)`, en entier
-  multiprécision, seulement sur une provenance inductive ;
-- occurrences de proposition, visites et sorties, qui peuvent sur-couvrir et
-  ne deviennent jamais une preuve par leur seule somme.
+### Le handoff qui interdit le retour au quadratique
 
-Une capacité atteinte conserve le parent et produit une continuation ; elle
-ne produit jamais un prune. Pour la fenêtre de rang, le seuil exact est
-`h_q=smax-q+1` témoins stricts distincts, portés par une antichaîne disjointe
-du support. À `smax=11`, huit intérieurs restent admissibles en q3 et neuf
-tuent ; sept restent admissibles en q4 et huit tuent. Après `c_e` intérieurs
-universels d'une ancre q4, `kappa_e=smax-4-c_e` ; `kappa_e<0` tue l'ancre,
-sinon le terminal shallow vise au plus `m_e*(kappa_e+1)` sommets en position
-générale. Ne pas confondre cette fenêtre avec le mode carrier q3 de cardinalité
-fixée, où un seul intérieur strict rejette un triangle Gabriel.
+La séparation de cellules ne décide généralement ni `owner6`, ni positivité,
+ni profondeur. Un bloc `MIXED` peut être subdivisé, mais il est interdit de le
+développer jusqu'à toutes les paires de points. Dès que l'arête extérieure est
+ponctuelle, les cellules lourdes, diagonales et couples voisins passent au
+terminal commun par lignes dans le plan médiateur :
 
-### Premier incrément demandé à Claude
+- q3 fait les point-locations des pieds marqués dans les premiers niveaux ;
+- q4 énumère seulement les intersections de profondeur au plus
+  `kappa_e=smax-4-c_e` ;
+- lignes parallèles et concurrences sont groupées exactement, puis owner,
+  positivité, `BallKey`, shell et niveau sont rejoués séparément.
 
-Ne pas rerouter le produit pendant que le raccord d'enveloppe est encore non
-commité. Le plus petit incrément utile est un primitive isolé `q34_fiber` pour
-une ancre exacte, branché d'abord en test ou via les overrides de lane :
+En position générale, le coût terminal visé est
+`O(m_e log m_e + m_e*(kappa_e+1) + z_e)`, pas `O(m_e^2)`. À `smax=11`,
+`kappa_e<=7` pour q4. q3 et q4 partagent les coefficients de lignes et la
+structure de niveaux, jamais leurs verdicts.
 
-1. construire les contraintes entières de carriers ;
-2. retrouver les centres q3 et les intersections q4 sans division flottante ;
-3. comparer exhaustive et shallow sur les mêmes carriers ;
-4. publier `carrier_lines`, `q3_queries`, `q4_pair_baseline`,
-   `q4_shallow_vertices`, `q4_exact_checks`, `pending` et `scratch_peak` ;
-5. conserver les lanes actuelles comme autorité jusqu'à égalité du
-   multiensemble ou jusqu'à une requalification explicitement justifiée, puis
-   de `BallKey`, niveaux, événements, `batch_levels` et forêts.
+Deux populations doivent rester distinctes. `support_lines` contient les sites
+qui peuvent compléter le support ; `census_lines` contient **tous** les sites
+qui peuvent être intérieurs ou sur le shell. Le cover historique coefficient
+3 peut proposer q4, mais ne certifie pas son rang. Restreindre le niveau aux
+seuls carriers donne un rang faux ; prendre naïvement `n` lignes pour chaque
+arête recrée un coût dense. La quantité à réduire est donc la somme des lignes
+de census actives après classification exacte des lignes constantes et
+range-report, pas seulement `|G_r|`.
 
-La livraison suivante est un producteur **counter-only** de
-`Q3FiberTask`, puis `Q4FiberTask`, avec center-cover de bloc avant expansion.
-Elle doit mesurer les expansions ponctuelles et visites réellement exécutées,
-pas seulement le nombre de tâches ou leur masse logique.
+Cette route ne matérialise ni mosaïque de Delaunay d'ordre supérieur, ni
+cofaces ou incidences globales. Elle n'est cependant linéaire que si le
+center-cover résout effectivement des rectangles avant `PairId` et si le
+census agrégé reste sparse. La WSPD locale enlève le carré des cellules ; elle
+ne prouve pas ces deux faits à sa place.
 
-Fixtures minimales : owner ex aequo et `PointId` non Morton ; triangle q3
-vivant dont les côtés q2 sont hors fenêtre ; fixture q3-morte/q4-vivante ;
-famille cercle--axe ; tétraèdre régulier et ses six choix d'arête ; deux apex
-dans le même carrier-block ; droites parallèles, concurrence multiple et
-extra-shell ; égalités de rang ; coordonnées u16 extrêmes. Ajouter une porte
-de coût non vacante où le terminal q4 examine strictement moins que la baseline
-des couples de lignes tout en reproduisant exactement sa sortie. Les mutants
-minimaux perdent un `pending`, emploient `h_q-1`, ouvrent une frontière,
-héritent q3 de q2 ou q4 de q3, et doublent une intersection.
+## Exactitude et provenance à conserver
+
+Le ledger naturel porte d'abord les occurrences enracinées par arête :
+
+- q3 : `3*C(n,3)` occurrences ;
+- q4 : `6*C(n,4)` occurrences.
+
+Le tape extérieur, l'antichaîne de cellules, la WSPD locale, ses voisins et
+ses diagonales doivent partitionner ces occurrences. `EdgeKey` choisit ensuite
+l'unique arête maximale canonique et convertit exactement une occurrence en
+support possédé. Les cellules hors de la fenêtre reçoivent un reçu
+`OUT_OWNER_ENVELOPE`; elles ne disparaissent pas du ledger.
+
+Un split de `A` ou `B` conserve l'`origin_rect_id`, la grille et la partition
+locale immuables ; seule la partie `MIXED` est rejouée. Reconstruire librement
+une nouvelle grille dans chaque enfant perdrait la preuve de partition. Une
+capacité atteinte conserve le parent et une continuation, jamais un prune.
+
+Pour l'instant, la frontière directe de
+`docs/math/FRONTIERE_DIRECTE_SUPPORTS_3_4.md` reste l'oracle borné. La route
+locale ne devient autoritaire qu'après égalité des `SupportKey`, `BallKey`,
+niveaux, événements et forêts, au moins jusqu'à `n=14`, sous permutations et
+`PointId` non Morton. La diagonale, les égalités d'owner, les concurrences et
+les plateaux sont incluses.
+
+## Complexité honnête et contrat de régime
+
+Claude doit publier séparément :
+
+- `R`, nombre de rectangles WSPD extérieurs ;
+- `K=sum_r k_r`, cellules initiales, et `C`, visites nécessaires pour les
+  retrouver ;
+- `I`, blocs locaux séparés, voisins et diagonales ;
+- `A`, raffinements sémantiques `MIXED` ;
+- `V`, visites du center-cover et du range-report ;
+- `E`, arêtes ponctuelles réellement terminalisées ;
+- `M=sum_e m_e`, lignes de census actives ;
+- `Z`, vrais `SupportRecord` émis, avant quotient par `BallKey`.
+
+La borne à viser est
+`O(n log n + R + K log n + C + I + A + V + sum_e(m_e log m_e) + h*M + Z)`
+avec scratch tuilé `O(n + K_tile + M_tile + Z_tile)`. Elle devient quasi
+linéaire à `h` fixé seulement après réception des quatre propriétés suivantes :
+
+1. `R=O(n)` pour une vraie décomposition fair/prefix extérieure ;
+2. `K+I+C=O(R log n)` à paramètres de maille et séparation fixes ;
+3. `A+V+M=O(R+K+Z)` dans chaque régime déclaré ;
+4. aucune boucle point--point dans une diagonale ou paire voisine lourde.
+
+L'objectif immédiat honnête est donc `O(n log n+Z)` dans les régimes sparse.
+Le linéaire `O(n+Z)` est un objectif secondaire crédible sur entrée Morton déjà
+triée, voisinages bornés et terminal sans tri comparatif supplémentaire ; il
+n'est pas encore prouvé. Le pire cas reste output-sensitive et peut être
+quadratique. Cette formulation satisfait la demande de sous-quadratique sans
+inventer une garantie impossible.
+
+Sur `uniform`, `terrain`, `eight_clusters` et `scanline`, les rampes
+`8k/16k/32k/50k`, puis `100k/200k`, publient tous les compteurs ci-dessus et
+leur HWM. La porte de développement exige une borne supérieure à 95 % de la
+pente de travail non-sortie strictement inférieure à `1,8`; la cible
+d'ingénierie est `1,2`. Une pente de `I` seule ne qualifie rien. Aucun test à
+10 M ne commence avant fermeture exacte et mémoire bornée à 50 k.
+
+## Premier incrément utile à Claude
+
+Ne pas rerouter le produit pendant que le raccord d'enveloppe est non commité.
+Ajouter un probe **counter-only** `local_opposite_edge_wspd` :
+
+1. construire les `CellRange` d'une grille commune et comparer le nombre de
+   `CellPair` direct à `I` sans développer les points ;
+2. vérifier par oracle la partition symétrique `G x G`, la partition
+   bichromatique `G x N`, les voisins et les diagonales ;
+3. publier `R,K,C,I,A,V,E,M,Z`, la masse logique et les continuations ;
+4. aiguiller une cellule lourde vers un terminal shallow d'oracle et exiger
+   `opposite_point_pairs_tested=0` hors du petit juge exhaustif ;
+5. choisir le chemin direct lorsque `k_r` est petit et la WSPD locale sinon,
+   uniquement par preflight du nombre de blocs physiques, jamais par troncature
+   des candidats.
+
+Fixtures prioritaires : deux lignes sans support ; même cellule et cellules
+voisines très chargées ; bloc tué par huit témoins q4 avant tout `CellPair` ;
+famille cercle--axe ; owner ex aequo avec `PointId` non Morton ; q3-morte et
+q4-vivante ; tétraèdre régulier avec ses six occurrences ; lignes parallèles,
+concurrence cosphérique, extra-shell et coordonnées u16 extrêmes. Un mutant
+qui remplace le terminal shallow par `choose2(m_e)` doit échouer sur une porte
+de travail, même s'il reproduit la bonne sortie.
 
 ## Réponse à Claude — V53 à V56, groupes q3
 
 La question q3 publiée au pin `ac43ab1a` est reçue et absorbée ici afin de ne
-pas créer une seconde note active. Son lemme géométrique renforce utilement le
-premier étage de `Q3FiberTask`, mais ne remplace ni la provenance fibrée, ni le
-terminal de centres.
+pas créer une seconde note active. Son lemme géométrique renforce utilement la
+fibre q3 existante, mais ne remplace ni sa provenance, ni le terminal de
+centres.
 
 ### V53 — caractérisation reçue, owner et portée du cœur corrigés
 
@@ -257,8 +322,8 @@ De même, un survivant de génération n'est pas encore l'objet après RLE et
 census. Nommer chaque étage et publier `hist_pair_evals`, produit cartésien,
 ancres post-histogramme, handles par disposition, points visités, seeds,
 morts W3/grille/profondeur, candidats pré-RLE, boules uniques, HWM et mur. Ce
-counter-only est le premier morceau mesurable de la généralisation WSPD q3,
-pas une optimisation produit anticipée.
+counter-only est le premier morceau mesurable de la fibre q3 existante, pas
+une optimisation produit anticipée.
 
 ## Verdict mathématique
 
@@ -494,9 +559,9 @@ compaction paie ; comparer alors nœuds, visites et mur avec bornes continues
 et bornes resserrées par parité.
 
 Cette mesure termine le raccord d'enveloppe ; elle ne pilote plus seule le
-jalon d'architecture. La suite prioritaire est la source fibrée décrite plus
-haut. Son
-terminal shallow vise une préparation en $O(m_e\log m_e)$ puis une sortie
+jalon d'architecture. La suite prioritaire est la WSPD locale par `RectId`
+décrite plus haut. Son terminal shallow vise une préparation en
+$O(m_e\log m_e)$ puis une sortie
 bornée par profondeur, sans former les paires de carriers, tandis que le
 center-cover doit éviter l'expansion préalable d'une part mesurée des blocs
 d'ancres. Publier séparément blocs visités, ancres résiduelles, lignes actives,

@@ -14,7 +14,10 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
 
 - [`ETAT_COURANT.md`](ETAT_COURANT.md) : seul verdict mutable, pin jugé,
   réserves et ordre de fermeture.
-- [`QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md`](QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md) : contrat actif de WSPD fibrée q3/q4 ; l'enveloppe et l'arrangement shallow y sont requalifiés comme étages locaux de cette source.
+- [`QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md`](QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md) :
+  contre-audit de l'exposant q3/q4 ; il rejette la double WSPD globale et
+  spécifie la WSPD locale d'arête opposée, son terminal shallow et ses portes
+  de coût.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : décisions et dents restantes de la lane device.
 - [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.
