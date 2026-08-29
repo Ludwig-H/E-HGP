@@ -444,6 +444,24 @@ target_compile_definitions(mhgp5_sector_reach_probe PRIVATE MHGP5_PROBE_PIN="${_
 mhgp5_gate(mhgp5_sector_reach_probe_smoke 0 mhgp5_sector_reach_probe
            "--family=terrain --n=64 --blocs=64 --union-rects=8 --seed=3")
 
+# Sonde q3 counter-only : route « WSPD -> K^3 patches de centres -> masque de
+# mediatrices -> credit temoin g_AB[j] ». ORACLE BORNE : elle materialise
+# A x B x C pour sa verite terrain et rescane les handles a plat, ce qui n'est
+# PAS l'architecture proposee (le futur DFS masque est partage) ; elle mesure le
+# PLAFOND du pouvoir de coupe et verifie trois invariants exacts (centre dans le
+# cover, centre dans le masque, seed profond des qu'un patch le contenant meurt).
+mhgp5_executable(mhgp5_q3_patch_block_probe bench/q3_patch_block_probe.cpp)
+target_compile_definitions(mhgp5_q3_patch_block_probe PRIVATE MHGP5_PROBE_PIN="${_mhgp5_probe_pin}" MHGP5_PROBE_DIRTY="${_mhgp5_probe_dirty}")
+mhgp5_gate(mhgp5_q3_patch_block_probe_smoke 0 mhgp5_q3_patch_block_probe
+           "--family=terrain --n=400 --rects=120 --seed=3 --min-seeds=200 --min-blocs=100 --min-credit-evals=1000 --min-profondeurs=20")
+# PORTE DE MUTANT (code 3) : composer `core` et `g_AB[j]` par une SOMME au lieu
+# du `max` sur surcompte les temoins — les deux credits peuvent reconnaitre le
+# MEME site — et tue des seeds qui ne sont pas profonds. Sans cette porte, le
+# faux gain (48,8 % de blocs morts au lieu de 13,9 % sur terrain n=2000) passe
+# pour un resultat.
+mhgp5_gate(mhgp5_q3_patch_block_credit_sum_mutant 3 mhgp5_q3_patch_block_probe
+           "--family=terrain --n=2000 --rects=300 --seed=3 --min-profondeurs=100 --inject=credit-sum-core-gab")
+
 # Test d'ancre par secteurs : un mutant non strict cree des faux positifs -> divergence des digests v4 (code 4).
 # Le mutant non strict est INVISIBLE en position generale (aucune egalite) : la fixture gravee
 # (sites exactement sur la sphere diametrale, seed survivant) le tue ; les conformites v4 prouvent l'objet.

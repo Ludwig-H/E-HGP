@@ -42,6 +42,7 @@ struct SectorFrame {
 };
 
 struct HandleObservation {
+  AxisBox box{};   // AJOUT CLAUDE : la boite du handle, pour la pre-porte O(1)
   u8 exact_mask = 0;
   u8 box_mask = 0;
   u64 seeds = 0;
@@ -149,12 +150,37 @@ inline bool mask_deep(u8 mask, const u32 counts[8], u64 h) {
   return true;
 }
 
+// AJOUT CLAUDE — PRE-PORTE O(1) (mesure seulement, jamais une decision d objet).
+// Question V108 : peut-on majorer l ouverture du cone transverse de Box(C) SANS
+// payer les seize extrema ? Dans l echelle doublee w = 2x - (a+b), le centre de
+// la boite donne wc = lo + hi - (a+b) et le rayon transverse de la boite est
+// majore par G = sum (hi_i - lo_i)^2. La distance transverse au coeur vaut
+// r^2 = |wc x d|^2 / D^2. Le cone est contenu dans un secteur (45 deg) des que
+// rho <= r sin(22,5 deg) ; on prend le rationnel sur k = 1/8 < sin^2(22,5 deg).
+// Cout : trois produits scalaires, contre seize formes affines.
+inline bool narrow_cone_pregate(const P3& pa, const P3& pb, const AxisBox& box, i64 d2) {
+  const i64 d[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
+  const i64 s[3] = {pa.x + pb.x, pa.y + pb.y, pa.z + pb.z};
+  i64 w[3], g[3];
+  for (int i = 0; i < 3; ++i) {
+    w[i] = box.lo[i] + box.hi[i] - s[i];
+    g[i] = box.hi[i] - box.lo[i];
+  }
+  const i128 cx = (i128)w[1] * d[2] - (i128)w[2] * d[1];
+  const i128 cy = (i128)w[2] * d[0] - (i128)w[0] * d[2];
+  const i128 cz = (i128)w[0] * d[1] - (i128)w[1] * d[0];
+  const i128 t = cx * cx + cy * cy + cz * cz;           // |wc x d|^2 = r^2 D^2
+  const i128 gg = (i128)g[0] * g[0] + (i128)g[1] * g[1] + (i128)g[2] * g[2];
+  return 8 * gg * (i128)d2 <= t;
+}
+
 inline HandleObservation observe_handle(const CloudIndex& ix, NodeRef handle, i32 ua, i32 ub,
                                         const P3& pa, const P3& pb, i64 d2,
                                         const SectorFrame& frame, bool sampled) {
   HandleObservation out;
   out.sampled = sampled;
-  out.box_mask = box_sector_mask(frame, pa, pb, ix.box_of(handle));
+  out.box = ix.box_of(handle);
+  out.box_mask = box_sector_mask(frame, pa, pb, out.box);
   const NodeRange rc = ix.range_of(handle);
   for (i32 ux = rc.first; ux <= rc.last; ++ux) {
     if (ux == ua || ux == ub) continue;
@@ -285,6 +311,17 @@ int main(int argc, char** argv) {
   u64 handle_exact_killed = 0;
   u64 handle_box_killed = 0;
   u64 handle_box_gain = 0;
+  // AJOUT CLAUDE (additif, aucune semantique changee) : le LEDGER DE
+  // RENTABILITE demande par V103. Le cout du prune est paye une fois par
+  // groupe non vide (seize extrema, evaluation paresseuse au premier seed
+  // aigu) ; le gain est le scan de profondeur des seeds des groupes que le
+  // surmasque tue et que le test d ancre a huit secteurs ne tuait pas.
+  u64 handle_seeds_gain = 0;      // seeds des groupes tues par Box(C) et non par full8
+  u64 handle_seeds_box = 0;       // seeds des groupes tues par Box(C)
+  u64 handle_seeds_full8 = 0;     // seeds des groupes deja tues par le test d ancre
+  u64 handle_seeds_vivants = 0;   // seeds des groupes que rien ne tue
+  u64 pregate_pass = 0, pregate_pass_killed = 0, pregate_pass_seeds_gain = 0;
+  u64 pregate_fail = 0, pregate_fail_killed = 0, pregate_fail_seeds_gain = 0;
   u64 exact_hist[9] = {};
   u64 box_hist[9] = {};
 
@@ -397,6 +434,14 @@ int main(int argc, char** argv) {
           handle_exact_killed += exact_killed ? 1 : 0;
           handle_box_killed += box_killed ? 1 : 0;
           handle_box_gain += box_killed && !full8_killed ? 1 : 0;
+          handle_seeds_box += box_killed ? obs.seeds : 0;
+          handle_seeds_full8 += full8_killed ? obs.seeds : 0;
+          handle_seeds_gain += box_killed && !full8_killed ? obs.seeds : 0;
+          handle_seeds_vivants += box_killed ? 0 : obs.seeds;
+          const bool etroit = narrow_cone_pregate(pa, pb, obs.box, d2);
+          const u64 gain_seeds = box_killed && !full8_killed ? obs.seeds : 0;
+          if (etroit) { ++pregate_pass; pregate_pass_killed += box_killed ? 1 : 0; pregate_pass_seeds_gain += gain_seeds; }
+          else { ++pregate_fail; pregate_fail_killed += box_killed ? 1 : 0; pregate_fail_seeds_gain += gain_seeds; }
           if ((!subset && box_killed) || (box_killed && !exact_killed) ||
               (full8_killed && !box_killed)) ++decision_invariants;
         }
@@ -445,6 +490,32 @@ int main(int argc, char** argv) {
   std::printf("    killed full8=%llu exact_oracle=%llu box_candidate=%llu gain_box_vs_full8=%llu\n",
               (unsigned long long)handle_full8_killed, (unsigned long long)handle_exact_killed,
               (unsigned long long)handle_box_killed, (unsigned long long)handle_box_gain);
+  // AJOUT CLAUDE : ledger de rentabilite V103, en UNITES COMPARABLES.
+  // cout = 16 extrema par groupe non vide (fate paresseux, memoise par handle) ;
+  // gain = scans de profondeur evites, a `tests_par_seed` tests de sites chacun.
+  {
+    const double tests_par_seed = 12.0;  // mesure de la vraie lane (11,40-12,50 entre 2k et 8k)
+    const double cout = 16.0 * (double)handle_nonempty;
+    const double gain = tests_par_seed * (double)handle_seeds_gain;
+    std::printf("    LEDGER seeds_tues_box=%llu (dont deja_full8=%llu) seeds_gain=%llu seeds_vivants=%llu\n",
+                (unsigned long long)handle_seeds_box, (unsigned long long)handle_seeds_full8,
+                (unsigned long long)handle_seeds_gain, (unsigned long long)handle_seeds_vivants);
+    std::printf("    LEDGER seeds/groupe_nonvide=%.2f seeds/groupe_gagne=%.2f cout_extrema=%.0f gain_tests=%.0f rapport=%.2f\n",
+                handle_nonempty ? (double)handle_seeds / (double)handle_nonempty : 0.0,
+                handle_box_gain ? (double)handle_seeds_gain / (double)handle_box_gain : 0.0,
+                cout, gain, cout > 0.0 ? gain / cout : 0.0);
+    // AJOUT CLAUDE : le meme ledger DERRIERE la pre-porte O(1) (V108).
+    // cout = 3 unites de pre-porte sur tout groupe non vide, + 16 sur les seuls
+    // groupes juges etroits ; gain = seeds gagnes des groupes etroits.
+    const double cout_pg = 3.0 * (double)handle_nonempty + 16.0 * (double)pregate_pass;
+    const double gain_pg = tests_par_seed * (double)pregate_pass_seeds_gain;
+    std::printf("    PREPORTE etroits=%llu/%llu tues_parmi_etroits=%llu tues_parmi_larges=%llu gain_perdu=%llu/%llu rapport_preporte=%.2f\n",
+                (unsigned long long)pregate_pass, (unsigned long long)(pregate_pass + pregate_fail),
+                (unsigned long long)pregate_pass_killed, (unsigned long long)pregate_fail_killed,
+                (unsigned long long)pregate_fail_seeds_gain,
+                (unsigned long long)(pregate_pass_seeds_gain + pregate_fail_seeds_gain),
+                cout_pg > 0.0 ? gain_pg / cout_pg : 0.0);
+  }
 
   std::printf("  UNION ANCRE [tous handles des rectangles bottom-k] : groupes=%llu nonvides=%llu vides=%llu seeds=%llu\n",
               (unsigned long long)anchor_groups, (unsigned long long)anchor_nonempty,
