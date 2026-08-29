@@ -66,7 +66,7 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   non vides serait circulaire. `g_AB[64]` vient avant `global_common` : le
   masque d'intersection reste distinct des bits de compte saturés, et une
   fixture de témoins disjoints interdit leur confusion.
-  La réponse V82--V100 retire le repli brut par intervalles sur `Pi`, reproduit
+  La réponse V82--V103 retire le repli brut par intervalles sur `Pi`, reproduit
   son inertie au pin propre `650b3cff`, puis ramène la proposition de Claude au
   noyau centre/patch de `g_AB` : minimum concave aux sommets des patches,
   masque conservatif et front d'arbre réutilisé. Elle interdit le plan d'une
@@ -92,7 +92,12 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   le rescan q3 comme seul coût évitable, mais son `36,1 %` n'est pas reçu : son
   masque oublie l'orientation du frame et sa baseline ignore les prunes
   `core/histogrammes`, `W3` et grille. Le prochain shadow réutilise le helper
-  reçu et rejoue ces étages avant de compter les tests de profondeur.
+  reçu et rejoue ces étages avant de compter les tests de profondeur. La note
+  reçoit enfin le retrait du shallow comme priorité après mesure du vrai
+  pipeline à 11--13 tests de sites par seed, sans convertir cette moyenne en
+  borne `O(h3)`. Elle donne le raccord sans surcoût mémoire : `handle_id` dans
+  le padding de `CoverPoint`, état sectoriel réutilisé par la route de prétest,
+  fate paresseux et skip identique dans les boucles CPU et batched.
   `Lca3Forest` reste une
   ablation de ledger, pas une route produit.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.

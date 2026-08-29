@@ -4,7 +4,8 @@
   `b74d8050`, raccord d'enveloppe `7e0ffe79`, probe v3 `1ff39ab9`, questions
   V67--V69 de `a0621897`, V68/V70--V72 de `91af69ff`, puis V71/V73--V75 de
   `b9646d1a`, mesure V74/V76--V78 de `50b85e16`, V79--V81 de `9a51a729`,
-  puis V80/V82--V84 de `650b3cff`, consolidées ci-dessous.
+  V80/V82--V84 de `650b3cff`, V88--V100 jusqu'à `8cbee414`, puis la
+  réfutation shallow V101--V103 de `2168a295`, consolidées ci-dessous.
 - **Statut :** prédicat idéal reçu au seuil ; enveloppe de scan reçue mais sans
   effet sur l'exposant ; ledger q3 pondéré maintenant factorisé sans
   `A x B` ; AABB brut de $\Pi$ reçu comme résultat négatif, mais plafond de
@@ -1083,6 +1084,102 @@ $$\epsilon\,d\mathbin{\cdot}(P_k\mathbin{\times}y)\geq0\quad\text{et}\quad\epsil
   le digest candidat/forêt identique, les mutants et les planchers de
   non-vacuité précèdent toute activation. Il n'est pas utile de payer un grand
   reçu de la sonde actuelle que l'on sait non causale.
+
+### Réponses V101--V103 : refermer le shallow chaud, sans inventer une borne par seed
+
+- **V101 — OUI au changement de priorité, NON au théorème `O(h3)`.** Le pin
+  `2168a295` découvre un fait utile : sur son échantillon brut, les boules
+  profondes trouvent souvent leur neuvième intérieur presque immédiatement.
+  Sa sonde ne mesure toutefois pas les appels « réellement exécutés » du
+  produit. Elle omet `core+h_a+h_b`, `W3`, les secteurs, la grille d'ancre et
+  la cellule du seed ; elle facture en outre le modèle shallow à toute ancre
+  dont le cover est non vide, même si cette ancre n'a aucun seed aigu. Les
+  nombres de seeds du tableau ne sont ni comptés ni imprimés par le source
+  committé. Échantillonnage périodique, includes absolus, absence de cible
+  CMake et de pin complètent la réserve.
+
+  Le compteur déjà présent dans la vraie lane donne la bonne unité. Au pin
+  `2168a295`, après recompilation de `mhgp5_cover_envelope_probe`, profil
+  standard, enveloppe OFF et seed 3, on obtient :
+
+  | famille | $n$ | seeds atteignant la profondeur | tests de sites q3 | tests/seed |
+  |---|---:|---:|---:|---:|
+  | `terrain` | 2 000 | 420 699 | 5 257 413 | 12,50 |
+  | `terrain` | 4 000 | 1 131 747 | 13 608 661 | 12,02 |
+  | `terrain` | 8 000 | 3 675 204 | 41 896 298 | 11,40 |
+  | `scanline_single_pass` | 2 000 | 732 493 | 8 970 750 | 12,25 |
+  | `scanline_single_pass` | 4 000 | 1 711 498 | 21 031 312 | 12,29 |
+  | `scanline_single_pass` | 8 000 | 4 826 424 | 58 074 430 | 12,03 |
+
+  Ici `seeds atteignant la profondeur = depth_killed[1]+candidates[1]`, donc
+  les seeds déjà tués par cellule ne diluent pas le ratio. Cela reçoit un coût
+  moyen court et remarquablement stable entre 2 k et 8 k sur ces deux régimes,
+  pas les valeurs `9,24/9,57` ni l'énoncé « quelle que soit la taille du
+  cover ». Un seed peu profond parcourt encore tout `scan_sites`, et le tri en
+  32 classes de distance au milieu de l'ancre n'ordonne pas la puissance d'une
+  boule q3 quelconque. Le pire cas reste donc linéaire en cover ; aucune borne
+  déterministe par `h3` n'est démontrée.
+
+- **V102 — refermer R2 comme chantier actif.** Malgré les défauts de la sonde,
+  le signal suffit pour ne pas acheter maintenant un constructeur shallow :
+  son meilleur gain possible attaque une boucle dont le coût moyen observé est
+  seulement de 11 à 13 tests. Conserver l'idée comme ablation différée sur le
+  résiduel peu profond, sans implémentation produit. Le facteur `6--9` n'est pas
+  reçu, car le modèle est facturé avant les portes et aux ancres sans seed ; il
+  n'est pas nécessaire de le prouver pour prendre cette décision de priorité.
+
+- **V103 — viser la proposition, mais distinguer constante et exposant.** La
+  bonne cible immédiate est bien le nombre de seeds qui atteignent la
+  profondeur. Le `36--38 %` de `fibre_gain_probe` reste non reçu pour les
+  raisons de V98 ; il doit être remplacé par le shadow causal utilisant le
+  helper sectoriel exact. Même confirmé, un taux constant ne transforme pas à
+  lui seul une pente proche de deux. Pour attaquer l'exposant, la décision doit
+  remonter avant la matérialisation de `(a,b,x)` : requêtes saturées remplaçant
+  `corner_histograms`, puis `g_AB[64] -> t_C` au niveau
+  `WSPDRect x Handle`. Le prune sectoriel handle-local est un terminal
+  complémentaire après matérialisation de `(a,b)`.
+
+  Le « plafond absolu » obtenu en divisant deux régressions de seeds et de
+  candidats n'est pas un plafond contractuel : leurs constantes, cohortes et
+  unités diffèrent, la pente n'est pas un théorème asymptotique, et le nombre
+  de candidats émis n'est pas démontré comme minorant du nombre minimal de
+  propositions. Publier plutôt, à chaque taille, les masses exactes
+  `seeds_before_gate`, `seeds_after_gate`, `depth_killed` et `candidates`, puis
+  la pente de chacune avec intervalle entre trois seeds.
+
+  Le raccord de provenance peut être fait sans table dense et sans octet de
+  cover supplémentaire. `CoverPoint` occupe déjà 16 octets (`i32` suivi du
+  padding d'alignement puis `i64`) : placer un `u32 handle_id` dans ce padding,
+  garder `dist2q` en dernier et graver `static_assert(sizeof(CoverPoint)==16)`.
+  `cover_query` et `rect_diametral_candidates` écrivent un sentinel ;
+  `anchor_cover_from_handles` écrit l'indice du handle. Le counting-sort stable
+  copie alors la provenance avec le point, comme le compactage d'enveloppe.
+  Cela évite une table `position -> handle` de taille `n` par worker, rédhibitoire
+  à plusieurs dizaines de millions de points, et évite une recherche binaire
+  par seed. Le handle ne sert qu'au droit d'émission ; `scan_sites`, grille,
+  témoins et census continuent à lire tous les points.
+
+  Extraire parallèlement un `AnchorSectorState` typé depuis
+  `anchor_sector_kill` : frame, comptes saturés au seuil et seize normales
+  signées des demi-plans. La route par candidats diamétraux doit rendre ce même
+  état au survivant au lieu de le recalculer sur le cover. Calculer le fate
+  paresseusement au premier seed aigu de chaque handle et le mémoïser pour
+  l'ancre ; les seize extrema utilisent directement un choix d'extrémité par
+  axe, jamais huit coins. En shadow, conserver le scan OFF pour compter les
+  tests effectivement évitables après cellule. À l'activation, tester le fate
+  avant `q3_form` économise aussi la forme et le localisateur. Le même skip doit
+  exister dans `scan_anchor_q3` et dans la boucle de construction de
+  `build_q3_batch`; sinon les routes hôte et batched divergent.
+
+  Deux fixtures ferment cette couture : handles disjoints dont les points
+  s'entrelacent après le tri radial, un seul étant profond ; et parité de
+  `AnchorSectorState` entre la route candidats diamétraux et le cover exact.
+  La première exige un digest candidat identique tout en vérifiant que les
+  points du handle tué restent dans `scan_sites`; un mutant qui les retire de
+  la source témoin doit mourir. Publier enfin le nombre de handles évalués,
+  seeds par handle tué, seize extrema payés, formes q3 et tests de sites évités,
+  puis le mur. Avec seulement 11--13 tests par seed, cette amortisation par
+  handle est désormais la vraie porte de rentabilité.
 
 Fixtures permanentes minimales : direction exactement sur une frontière
 (deux bits), boîte dont une arête projetée traverse un cône sans coin intérieur,

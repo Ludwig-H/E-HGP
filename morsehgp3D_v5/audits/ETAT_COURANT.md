@@ -1,15 +1,25 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **Dernier pin de Claude relu :** `8cbee414`, sur `main` et `origin/main`.
-  Son nouveau `fibre_gain_probe` ne reçoit pas encore les gains annoncés de
-  `36,1 %`. Il réimplémente le masque de `73b00f3f` avec les deux formes de
-  signe opposé et sans normalisation par l'orientation de `(d,u,v)` : sur la
-  propre fixture oblique positive du probe sectoriel, le vrai bit `0x01`
-  devient le bit opposé `0x10`. Il compte en outre les rescans de seeds déjà
-  retirés par `core+h_a+h_b`, `W3`, la mort de grille ou la cellule de seed, et
-  reconstruit cover/comptes par handle. Le périmètre « rescan q3 seulement »
-  est bien identifié, mais son chiffre reste à rejouer dans l'ordre causal du
-  produit.
+- **Dernier pin de Claude relu :** `2168a295`, sur `main` et `origin/main`.
+  Son changement de priorité est reçu : ne pas construire maintenant
+  l'arrangement shallow et attaquer d'abord le nombre de seeds q3. Sa sonde ne
+  prouve toutefois ni le facteur `6--9`, ni `O(h3)` par seed, ni les moyennes
+  `9,24/9,57` dans le produit : elle saute toutes les portes amont, facture le
+  shallow aux ancres sans seed et son source committé n'imprime aucun compte de
+  seeds. Le replay instrumenté de la vraie lane donne 11,40 tests de sites par seed sur
+  `terrain n=8000` et 12,03 sur `scanline`, avec une plage 11,40--12,50 entre
+  2 k et 8 k. Le scan moyen est donc court dans ces régimes ; le pire cas d'un
+  seed peu profond reste le cover entier. R2 est refermé comme priorité, pas
+  réfuté comme possibilité mathématique.
+- **Pin de gain fibre relu :** `8cbee414`. Son `fibre_gain_probe` ne reçoit pas
+  encore les gains annoncés de `36,1 %`. Il réimplémente le masque de
+  `73b00f3f` avec les deux formes de signe opposé et sans normalisation par
+  l'orientation de `(d,u,v)` : sur la propre fixture oblique positive du probe
+  sectoriel, le vrai bit `0x01` devient le bit opposé `0x10`. Il compte en outre
+  les rescans de seeds déjà retirés par `core+h_a+h_b`, `W3`, la mort de grille
+  ou la cellule de seed, et reconstruit cover/comptes par handle. Le prochain
+  shadow doit maintenant fermer l'amortissement réel : seulement 11--13 tests
+  de sites par seed contre seize extrema ajoutés par handle.
 - **Dernier pin sectoriel reçu :** `73b00f3f`. Il consolide le
   helper de `ed9c282f` et répare réellement V90/V92 : vrais cônes de
   `anchor_sector_kill`, produits mixtes entiers fermés, tous les seeds et
