@@ -461,6 +461,13 @@ mhgp5_gate(mhgp5_q3_patch_block_probe_smoke 0 mhgp5_q3_patch_block_probe
 # pour un resultat.
 mhgp5_gate(mhgp5_q3_patch_block_credit_sum_mutant 3 mhgp5_q3_patch_block_probe
            "--family=terrain --n=2000 --rects=300 --seed=3 --min-profondeurs=100 --inject=credit-sum-core-gab")
+# PORTE DE MUTANT (code 3) : la boite serree dilate chaque axe du rayon HORS AXE
+# seulement (t_i^2 <= (D^2 - d_i^2)/12, par Cauchy-Schwarz sur t.d = 0). Un cran
+# de moins sur ce rayon fait sortir de vrais centres de la boite pavee, et
+# l oracle `centres_hors_cover` doit le voir. Sans cette porte, un arrondi trop
+# serre passerait pour un gain de resolution.
+mhgp5_gate(mhgp5_q3_patch_block_rho_mutant 3 mhgp5_q3_patch_block_probe
+           "--family=terrain --n=2000 --rects=300 --seed=3 --min-profondeurs=100 --inject=rho-moins-un")
 
 # Test d'ancre par secteurs : un mutant non strict cree des faux positifs -> divergence des digests v4 (code 4).
 # Le mutant non strict est INVISIBLE en position generale (aucune egalite) : la fixture gravee

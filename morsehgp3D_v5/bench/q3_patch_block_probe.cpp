@@ -143,23 +143,39 @@ struct RectPatches {
 };
 
 // Boite des centres du rectangle, ECHELLE 4, puis pavage 4 x 4 x 4.
-inline RectPatches build_patches(const AxisBox& ba, const AxisBox& bb, int k) {
+inline RectPatches build_patches(const AxisBox& ba, const AxisBox& bb, int k, bool mutant_rho = false) {
   RectPatches out;
   out.k = k;
   const Box128 A = from_axis(ba), B = from_axis(bb);
   const Iv d2 = dist2_point_point(A, B);
   if (d2.hi <= 0) return out;
-  const i64 rmax = isqrt_ceil((d2.hi + 2) / 3 + 1);  // ceil(sqrt(maxdist2/3)), majore
+  // BOITE SERREE (lemme du rayon HORS AXE). Le centre vaut c = m + t avec
+  // m = (a+b)/2, t PERPENDICULAIRE a d = b-a, et |t|^2 = R^2 - D^2/4 <= D^2/12
+  // puisque R <= D/sqrt(3). De t.d = 0 on tire, par Cauchy-Schwarz,
+  //     t_i^2 d_i^2 <= (|t|^2 - t_i^2)(D^2 - d_i^2)  d ou  t_i^2 <= (D^2 - d_i^2)/12,
+  // c est-a-dire que la dilatation de l axe i n utilise QUE l etendue HORS AXE.
+  // C est tout le gain : la dilatation isotrope par Rmax = sqrt(maxdist2/3)
+  // ignorait cette annulation. La boite serree est PROUVEE incluse dans
+  // l ancienne (la difference vaut (sqrt(M)/(2 sqrt3))(2 sin(theta+30) - 2) <= 0),
+  // c est donc un raffinement, jamais un concurrent.
+  // Tout est a l ECHELLE 2 : lo2 = A.lo + B.lo represente 2 * borne du milieu.
+  i128 w[3];
+  for (int i = 0; i < 3; ++i) {
+    const i128 g1 = A.hi[i] - B.lo[i], g2 = B.hi[i] - A.lo[i];
+    w[i] = std::max(g1 < 0 ? -g1 : g1, g2 < 0 ? -g2 : g2);
+  }
+  const i128 wsum = w[0] * w[0] + w[1] * w[1] + w[2] * w[2];
   i128 lo[3], hi[3];
   for (int i = 0; i < 3; ++i) {
-    const i128 la = A.lo[i] - rmax, ha = A.hi[i] + rmax;
-    const i128 lb = B.lo[i] - rmax, hb = B.hi[i] + rmax;
-    lo[i] = std::max(la, lb);
-    hi[i] = std::min(ha, hb);
+    const i128 moff = wsum - w[i] * w[i];               // etendue HORS AXE au carre
+    i64 rho2 = isqrt_ceil((moff + 2) / 3 + 1);         // 2|t_i| <= sqrt(moff/3), majore
+    if (mutant_rho && rho2 > 0) --rho2;                // mutant `rho-moins-un`
+    lo[i] = A.lo[i] + B.lo[i] - rho2;
+    hi[i] = A.hi[i] + B.hi[i] + rho2;
     if (lo[i] > hi[i]) return out;
   }
   // Bornes de pavage, ECHELLE 4 : b_j = 4 lo + j (hi - lo), j = 0..4 — entieres.
-  // Bornes ENTIERES a l ECHELLE k : b_j = k*lo + j*(hi-lo), j = 0..k.
+  // Bornes ENTIERES a l ECHELLE 2k : lo/hi sont deja a l echelle 2.
   std::vector<std::vector<i128>> bnd(3, std::vector<i128>((size_t)k + 1, 0));
   for (int i = 0; i < 3; ++i)
     for (int j = 0; j <= k; ++j) bnd[(size_t)i][(size_t)j] = (i128)k * lo[i] + (i128)j * (hi[i] - lo[i]);
@@ -177,7 +193,7 @@ inline RectPatches build_patches(const AxisBox& ba, const AxisBox& bb, int k) {
   // Contraintes ne dependant que de (A,B) : mediatrice AB, et le rayon
   // encadre par |ab|/2 <= R <= |ab|/sqrt(3), en ECHELLE 16.
   const Iv ab2 = dist2_point_point(A, B);
-  const i128 sc = k, sc2 = (i128)k * k;   // carres a l ECHELLE k^2
+  const i128 sc = 2 * (i128)k, sc2 = sc * sc;   // ECHELLE 2k (la boite est a l echelle 2)
   for (size_t id = 0; id < out.patch.size(); ++id) {
     const Box128& q = out.patch[id];
     if (!contains_zero(bisector(q, A, B, sc))) continue;
@@ -197,7 +213,7 @@ inline RectPatches build_patches(const AxisBox& ba, const AxisBox& bb, int k) {
 // sont faisables. Renvoie aussi le nombre de tests patch-noeud payes.
 inline u64 block_mask(const RectPatches& rp, const Box128& A, const Box128& B, const Box128& C,
                       std::vector<u8>* m, u64* tests) {
-  const i128 sc = rp.k;
+  const i128 sc = 2 * (i128)rp.k;
   m->assign(rp.patch.size(), 0);
   u64 pc = 0;
   for (size_t id = 0; id < rp.patch.size(); ++id) {
@@ -282,7 +298,7 @@ inline bool patch_credits(const PatchVerts& pv, const P3& z, i64 sc) {
 inline void locate_center_patches(const Q3Form& f, const RectPatches& rp, std::vector<int>* out) {
   out->clear();
   if (f.g <= 0) return;
-  const i128 k = rp.k;
+  const i128 k = 2 * (i128)rp.k;
   const i64 ai[3] = {f.a.x, f.a.y, f.a.z};
   const i128 den2 = 2 * f.g;
   i128 num[3];
@@ -309,6 +325,10 @@ int main(int argc, char** argv) {
   int n = 8000, coord = 0, seed = 3;
   u64 blocs_cible = 200000, rects_cible = ~(u64)0;
   int tuile = 4;
+  i64 core_min = -1;  // ne paver QUE les rectangles de core >= seuil : `core` dit
+                      // gratuitement de combien de temoins W_3 a manque son coup,
+                      // et le pavage ne vaut que la ou il en manque peu. Pur choix
+                      // de COUT : un rectangle non pave n est pas elague.
   u64 min_seeds = 0, min_blocs = 0, min_credit_evals = 0, min_oracle_profondeurs = 0;
   // MUTANT LOCAL A L ORACLE : compose `core` et `g_AB[j]` par une SOMME au
   // lieu du `max` sur. Les deux credits peuvent reconnaitre le MEME site :
@@ -316,6 +336,11 @@ int main(int argc, char** argv) {
   // violations_credit > 0 (code 3). Il sera promu au registre `kMutants`
   // avec sa cible CTest a code 4 quand la sonde aura sa cible CMake.
   bool mutant_credit_somme = false;
+  // MUTANT DE LA BOITE SERREE : un cran de moins sur le rayon HORS AXE. La
+  // boite cesse alors de contenir tous les vrais centres, et l oracle
+  // `centres_hors_cover` doit le voir (code 3). Sans cette porte, une erreur
+  // d arrondi sur rho2 passerait pour un gain de resolution.
+  bool mutant_rho_moins_un = false;
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
     if (arg.rfind("--family=", 0) == 0) { if (!parse_cloud_family(arg.c_str() + 9, &family)) return 2; }
@@ -325,11 +350,13 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--blocs=", 0) == 0) blocs_cible = (u64)std::atoll(arg.c_str() + 8);
     else if (arg.rfind("--rects=", 0) == 0) rects_cible = (u64)std::atoll(arg.c_str() + 8);
     else if (arg.rfind("--tuile=", 0) == 0) tuile = std::atoi(arg.c_str() + 8);
+    else if (arg.rfind("--core-min=", 0) == 0) core_min = std::atoll(arg.c_str() + 11);
     else if (arg.rfind("--min-seeds=", 0) == 0) min_seeds = (u64)std::atoll(arg.c_str() + 12);
     else if (arg.rfind("--min-blocs=", 0) == 0) min_blocs = (u64)std::atoll(arg.c_str() + 12);
     else if (arg.rfind("--min-credit-evals=", 0) == 0) min_credit_evals = (u64)std::atoll(arg.c_str() + 19);
     else if (arg.rfind("--min-profondeurs=", 0) == 0) min_oracle_profondeurs = (u64)std::atoll(arg.c_str() + 18);
     else if (arg == "--inject=credit-sum-core-gab") mutant_credit_somme = true;
+    else if (arg == "--inject=rho-moins-un") mutant_rho_moins_un = true;
     else return 2;
   }
   if (n < 4) return 2;
@@ -351,7 +378,7 @@ int main(int argc, char** argv) {
   u64 seeds_total = 0, seeds_dans_blocs_vides = 0, triples = 0;
   u64 violations = 0;
   u64 popcount_hist[9] = {};  // 0, 1-8, puis >8 dans la case 8
-  u64 patchs_vivants = 0, patchs_morts_credit = 0, credit_evals = 0, f_min_sum = 0;
+  u64 patchs_vivants = 0, patchs_morts_credit = 0, credit_evals = 0, f_min_sum = 0, rects_paves = 0;
   u64 blocs_morts_credit = 0, seeds_dans_blocs_morts_credit = 0, violations_credit = 0;
   u64 oracle_seeds = 0, oracle_profondeurs = 0, centres_hors_cover = 0, centres_hors_masque = 0;
   u64 plafond_atteint = 0;
@@ -367,7 +394,7 @@ int main(int argc, char** argv) {
     if (blocs >= blocs_cible) { plafond_atteint = 1; break; }
     ++rects;
     const AxisBox ba = ix.box_of(ar.r.a), bb = ix.box_of(ar.r.b);
-    const RectPatches rp = build_patches(ba, bb, tuile);
+    const RectPatches rp = build_patches(ba, bb, tuile, mutant_rho_moins_un);
     if (!rp.valid || rp.ab_count == 0) { ++rects_sans_patch; }
     const Box128 A = from_axis(ba), B = from_axis(bb);
     rect_cover_handles(ix, ba, bb, 3, &sc.handles, &sc.cover_nodes);
@@ -392,14 +419,16 @@ int main(int argc, char** argv) {
       f_min_sum += f_endpoints;
     }
     std::vector<u8> patch_mort;
-    if (rp.valid && rp.ab_count) {
+    const bool paver = core_min < 0 || (i64)ar.core >= core_min;
+    if (paver) ++rects_paves;
+    if (paver && rp.valid && rp.ab_count) {
       patch_mort.assign(rp.patch.size(), 0);
       for (size_t id = 0; id < rp.patch.size(); ++id) {
         if (!rp.ab_alive[id]) continue;
         ++patchs_vivants;
         if (ar.core + f_endpoints >= h3) { patch_mort[id] = 1; ++patchs_morts_credit; continue; }
         PatchVerts pv;
-        patch_verts(rp.patch[id], A, B, tuile, &pv);
+        patch_verts(rp.patch[id], A, B, 2 * (i64)tuile, &pv);
         // COMPOSITION SURE : `core` et `g_AB[j]` peuvent reconnaitre le MEME
         // site. Sans rangs de positions, leur seule composition sure est
         // max(core, g_AB[j]) — jamais la somme (la somme donne 228 violations
@@ -411,7 +440,7 @@ int main(int argc, char** argv) {
           for (i32 uz = rw.first; uz <= rw.last && g + appoint + f_endpoints < h3; ++uz) {
             if ((uz >= ra.first && uz <= ra.last) || (uz >= rb.first && uz <= rb.last)) continue;
             ++credit_evals;
-            if (patch_credits(pv, ix.upos[(size_t)uz], tuile)) ++g;
+            if (patch_credits(pv, ix.upos[(size_t)uz], 2 * (i64)tuile)) ++g;
           }
           if (g + (mutant_credit_somme ? ar.core : 0) + f_endpoints >= h3) break;
         }
@@ -449,7 +478,7 @@ int main(int argc, char** argv) {
         if (vrais != 0) ++violations;  // CONTRADICTION : mort d un bloc habite
       }
       // MORT PAR CREDIT : tous les bits du masque du bloc sont des patchs morts.
-      bool tout_mort = m != 0;
+      bool tout_mort = m != 0 && !patch_mort.empty();
       if (tout_mort)
         for (size_t id = 0; id < bloc_mask.size() && tout_mort; ++id)
           if (bloc_mask[id] && !patch_mort[id]) tout_mort = false;
@@ -522,6 +551,9 @@ int main(int argc, char** argv) {
               (unsigned long long)patchs_vivants, (unsigned long long)patchs_morts_credit,
               patchs_vivants ? 100.0 * (double)patchs_morts_credit / (double)patchs_vivants : 0.0,
               (unsigned long long)credit_evals);
+  std::printf("  PORTE core_min=%lld rects_paves=%llu/%llu (%.1f %%)\n", (long long)core_min,
+              (unsigned long long)rects_paves, (unsigned long long)rects,
+              rects ? 100.0 * (double)rects_paves / (double)rects : 0.0);
   std::printf("  f = min h_a + min h_b : moyenne par rectangle = %.2f (h3 = %llu)\n",
               rects ? (double)f_min_sum / (double)rects : 0.0, (unsigned long long)h3);
   std::printf("  BLOCS MORTS PAR CREDIT : %llu / %llu = %.1f %% ; seeds retires=%llu / %llu = %.1f %%\n",
