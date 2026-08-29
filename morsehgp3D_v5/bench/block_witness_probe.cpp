@@ -86,6 +86,60 @@ inline void v2_bounds(const AxisBox& A, const AxisBox& B, const AxisBox& C, i64*
   }
 }
 
+// --- CERTIFICAT PAR BOITES : arithmetique d'INTERVALLES ENTIERS DIRIGES sur la
+// forme exacte de q3.hpp, telle que specifiee par l'audit. Avec d=b-a, u=c-a,
+// y=z-a, D=d.d, E=u.u, F=d.u, G=D*E-F*F et W=E(D-F)d+D(E-F)u :
+//     Pi(a,b,c;z) = G (y.y) - y.W.
+// `Pi_upper < 0` prouve que z est STRICTEMENT interieur a la circumboule de
+// TOUT (a,b,c) du produit continu des boites : c'est un credit de temoin
+// universel SUR. `Pi_lower >= 0` prouve seulement que ce nœud n'apporte aucun
+// credit. Tout le reste est MIXED. L'identite de Gram autorise a intersecter la
+// borne de G avec [0, +inf) sans perdre de valeur reelle.
+// C'est volontairement LACHE : les dependances d'intervalles (a apparait dans
+// d, u ET y) sont perdues. La sonde mesure precisement ce que cette perte coute
+// par rapport au certificat ideal.
+struct Ii { i128 lo, hi; };
+inline Ii ii_add(const Ii& a, const Ii& b) { return {a.lo + b.lo, a.hi + b.hi}; }
+inline Ii ii_sub(const Ii& a, const Ii& b) { return {a.lo - b.hi, a.hi - b.lo}; }
+inline Ii ii_mul(const Ii& a, const Ii& b) {
+  const i128 p1 = a.lo * b.lo, p2 = a.lo * b.hi, p3 = a.hi * b.lo, p4 = a.hi * b.hi;
+  return {std::min(std::min(p1, p2), std::min(p3, p4)), std::max(std::max(p1, p2), std::max(p3, p4))};
+}
+// Le carre prend ZERO comme minimum s'il traverse zero (audit).
+inline Ii ii_sq(const Ii& a) {
+  const i128 l = a.lo * a.lo, h = a.hi * a.hi;
+  if (a.lo <= 0 && a.hi >= 0) return {0, std::max(l, h)};
+  return {std::min(l, h), std::max(l, h)};
+}
+inline Ii ii_axis(const AxisBox& B, int i) { return {(i128)B.lo[i], (i128)B.hi[i]}; }
+
+// Rend true si z est CERTIFIE temoin universel du bloc (A,B,C) : Pi_upper < 0.
+inline bool box_credit_witness(const AxisBox& A, const AxisBox& B, const AxisBox& C, const P3& z) {
+  const i128 zc[3] = {(i128)z.x, (i128)z.y, (i128)z.z};
+  Ii d[3], u[3], y[3];
+  for (int i = 0; i < 3; ++i) {
+    d[i] = ii_sub(ii_axis(B, i), ii_axis(A, i));
+    u[i] = ii_sub(ii_axis(C, i), ii_axis(A, i));
+    y[i] = ii_sub(Ii{zc[i], zc[i]}, ii_axis(A, i));
+  }
+  Ii D{0, 0}, E{0, 0}, F{0, 0}, Y2{0, 0};
+  for (int i = 0; i < 3; ++i) {
+    D = ii_add(D, ii_sq(d[i]));
+    E = ii_add(E, ii_sq(u[i]));
+    F = ii_add(F, ii_mul(d[i], u[i]));
+    Y2 = ii_add(Y2, ii_sq(y[i]));
+  }
+  Ii G = ii_sub(ii_mul(D, E), ii_sq(F));
+  if (G.lo < 0) G.lo = 0;  // identite de Gram : G >= 0 toujours
+  const Ii cd = ii_mul(E, ii_sub(D, F));   // E (D - F)
+  const Ii cu = ii_mul(D, ii_sub(E, F));   // D (E - F)
+  Ii yW{0, 0};
+  for (int i = 0; i < 3; ++i)
+    yW = ii_add(yW, ii_mul(y[i], ii_add(ii_mul(cd, d[i]), ii_mul(cu, u[i]))));
+  const Ii Pi = ii_sub(ii_mul(G, Y2), yW);
+  return Pi.hi < 0;
+}
+
 // Recouvrement de plages (les handles peuvent recouvrir A ou B).
 inline u64 overlap(const NodeRange& u, const NodeRange& v) {
   const i32 lo = std::max(u.first, v.first), hi = std::min(u.last, v.last);
@@ -184,6 +238,8 @@ int main(int argc, char** argv) {
   // PATCHES tues par des ensembles de temoins differents — la machinerie
   // lourde de la note d'audit. Cette mesure dit combien elle est necessaire.
   u64 marg_simple = 0, marg_patches = 0, pw_marg_simple = 0, pw_marg_patches = 0;
+  // Ce qu'un certificat de BOITES capte reellement du certificat ideal.
+  u64 boites_capte = 0, pw_boites_capte = 0, boites_appels = 0;
   // Croisement : parmi les vides que les BOITES ne classent pas, quelle est
   // la cause reelle ? C'est la question V68.
   u64 nc_lentille = 0, nc_acuite = 0, nc_owner = 0, nc_zero = 0;
@@ -372,6 +428,13 @@ int main(int argc, char** argv) {
         }
         if (communs >= h3) { ++marg_simple; pw_marg_simple += pw_bloc; }
         else { ++marg_patches; pw_marg_patches += pw_bloc; }
+        // Le meme bloc, juge par un certificat de BOITES seul.
+        u64 credites = 0;
+        for (const i32 uz : candidats) {
+          ++boites_appels;
+          if (box_credit_witness(bA, bB, bC, ix.upos[(size_t)uz]) && ++credites >= h3) break;
+        }
+        if (credites >= h3) { ++boites_capte; pw_boites_capte += pw_bloc; }
       }
       else pw_inherent += pw_bloc;
       if (tous_profonds) ++ideal_mort;
@@ -439,6 +502,10 @@ int main(int argc, char** argv) {
     std::printf("      dont PATCHES necessaires (temoins incompatibles)      : %llu blocs, %llu appels (%.1f %% du marginal)\n",
                 (unsigned long long)marg_patches, (unsigned long long)pw_marg_patches,
                 marg ? 100.0 * (double)pw_marg_patches / marg : 0.0);
+    std::printf("      CERTIFICAT PAR BOITES (intervalles diriges, Pi_upper < 0) : %llu blocs, %llu appels "
+                "(%.1f %% du marginal) — cout %llu evaluations\n",
+                (unsigned long long)boites_capte, (unsigned long long)pw_boites_capte,
+                marg ? 100.0 * (double)pw_boites_capte / marg : 0.0, (unsigned long long)boites_appels);
     std::printf("    inherent (un support survit, rien a eviter)    = %llu (%.1f %%)\n",
                 (unsigned long long)pw_inherent, tot ? 100.0 * (double)pw_inherent / tot : 0.0);
   }
