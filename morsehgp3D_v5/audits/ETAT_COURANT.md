@@ -1,11 +1,11 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **HEAD documentaire relu :** `51ca037b`, publié sur `main` et
-  `origin/main`. Le dernier delta du chemin produit reste `2d052921` ; le HEAD
-  épingle maintenant le harnais, le contrat du futur center-cover et le probe
-  diagnostique `A x B x C`, sans pinner le raccord d'enveloppe. Les tableaux
-  du probe ternaire ne possèdent pas encore leurs sorties brutes sous
-  `receipts/`.
+- **HEAD fonctionnel relu :** `7bf28488`, publié sur `main` et `origin/main`.
+  Le dernier delta du chemin produit reste `2d052921` ; le HEAD épingle
+  maintenant le harnais, le contrat du futur center-cover et le probe
+  diagnostique `A x B x C` v2, sans pinner le raccord d'enveloppe. Le prédicat
+  idéal au seuil est reçu ; ses proxys de travail et ses sorties ne sont ni
+  causaux, ni receiptés.
 - **Dernier pin du chemin produit reçu :** `72090f79`. Le chemin produit de
   l'enveloppe q3/q4 et ses portes restent dans un worktree concurrent non
   commité. Ils sont jugés ci-dessous comme snapshot, jamais attribués au HEAD ;
@@ -67,15 +67,22 @@ sont intégrées à la question active ; les deux notes redondantes sont retiré
 du tip.
 
 La restriction supplémentaire par un handle $C$ est désormais un **GO
-counter-only** : le compte commun franchit neuf sur 70--78 % des blocs q3 non
-vides jugés dans les deux familles sondées, mais ce n'est ni l'idéal général,
-ni un certificat implémentable, ni un reçu de gain. La baseline paire du probe
-n'emploie que la première ancre ; ses ratios ne sont pas causaux. Le test de la
-vraie puissance aux seuls `8^3` coins est faux : une fixture u16 donne deux
-coins strictement intérieurs et un porteur médian strictement extérieur. La
-première île sûre réutilise `h_a(a),h_b(b)` et conditionne les patches du
-center-cover par les médiatrices `AB/AC/BC`. $h_c(c)$ reste une ablation du
-résiduel. Un cap ou une borne ambiguë produit `pending`, jamais un prune.
+counter-only**. La v2 teste exactement au seuil si tous les supports valides
+d'un bloc non capé sont profonds, et sa baseline couvre désormais toutes les
+ancres. En revanche `valid_forms * rectangle_candidates` n'est ni le nombre de
+rescans exécutés, ni le travail évité : les ratios 99,7/99,5 %, 78,9/76,2 % et
+les facteurs de résidu 70/48 sont rétractés, comme la priorité `EMPTY` qui en
+était déduite. Les blocs capés lourds sont exclus, les blocs mixtes sont mal
+crédités et la chaîne réelle filtre puis s'arrête au seuil.
+
+Le premier incrément sûr est moins cher que le rescan envisagé : calculer une
+fois par `(A,B)` les crédits `g_AB[j]` des 64 patches hors `A union B`, puis
+laisser chaque `C` masquer seulement les patches dont `AB/AC/BC` peuvent
+encore contenir zéro. `g_AB[j]` s'additionne à `h_a(a),h_b(b)` mais n'est pas
+le vrai $h_0$ extérieur à `C`; il ne se compose donc pas avec un futur
+$h_c(c)$ sans union d'IDs ou repartition. Le test de puissance aux seuls
+`8^3` coins reste réfuté par la fixture u16. Un cap, une tangence ou une borne
+ambiguë produit `pending`, jamais un prune.
 
 ## Enveloppe q3/q4 reçue mathématiquement
 
@@ -144,12 +151,13 @@ borne supérieure à 95 % de pente reste un falsificateur empirique, jamais une
 preuve d'exposant. Le linéaire demeure un objectif conditionnel, pas un claim.
 
 Le premier incrément demandé n'est pas un reroutage produit : un probe
-`q34_fiber` counter-only exécute le center-cover sur les blocs, ferme les masses
-de positions et de rôles, exige `anchors_materialized=0` et rejoue chaque prune
-à petit `n`. Ensuite seulement vient `AnchorLineSet`, puis l'ablation de WSPD
-locale q4. Les seuils à `smax=11` restent neuf intérieurs pour tuer q3 et huit
-pour tuer q4. La note active détaille coefficients homogènes, tangences,
-concurrences, digest, portes de coût, fixtures et mutants.
+`q34_fiber` counter-only exécute un parcours témoin par rectangle, réutilise
+ses crédits sur les handles, ferme les masses de positions et de rôles, exige
+`anchors_materialized=0` et rejoue chaque prune à petit `n`. Ensuite seulement
+vient `AnchorLineSet`, puis l'ablation de WSPD locale q4. Les seuils à
+`smax=11` restent neuf intérieurs pour tuer q3 et huit pour tuer q4. La note
+active détaille coefficients homogènes, tangences, concurrences, digest,
+portes de coût, fixtures et mutants.
 
 Ce probe a maintenant un contrat d'implémentation borné : deux grilles
 entières distinctes de 64 patches à l'échelle 32, sans flottant ; parcours
@@ -224,6 +232,12 @@ du tip après migration, son commit restant dans l'historique.
    porte nominale jumelle finit en `302,74 s`. Le rejeu isolé est vert en
    `153,94 s` avec le code 4 attendu : le mutant est bien tué, mais le timeout
    de 300 s ne supporte pas la concurrence de la campagne canonique.
+7. **Réparer les normes du brouillon mathématique.** Le worktree observé écrit
+   trois fois `leftVert` sans antislash dans la nouvelle dérivation
+   d'enveloppe (`D`, `S`, puis `Xi`) ; `rightVert` reste seul. Le rendu KaTeX
+   est invalide alors que `python tools/check_docs.py` reste vert, car ce motif
+   amputé n'est pas encore contrôlé. Corriger le Markdown avant pin et ajouter
+   ce cas au validateur.
 
 Le filtre reste OFF par défaut. Aucun tableau de mur antérieur au refactor ne
 sert de reçu. Mesurer ensuite `none/q3/q4/both` exige d'abord des commutateurs

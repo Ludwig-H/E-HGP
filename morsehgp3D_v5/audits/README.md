@@ -21,11 +21,11 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   handles avec `m_e`. La WSPD locale d'arête opposée reste une ablation q4
   conditionnelle.
 - [`REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md`](REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md) :
-  réponse constructive sur la fibre `A x B x C` : le compte commun motive un
-  probe sans recevoir ses ratios, le faux certificat aux `8^3` coins est
-  réfuté, et le chemin sûr conditionne les patches du center-cover par `C`,
-  réutilise `h_a(a),h_b(b)` et diffère `h_c(c)`. `Lca3Forest` reste une
-  ablation de ledger, pas une route produit.
+  réponse constructive sur la fibre `A x B x C` : le prédicat idéal du probe
+  v2 est reçu mais ses proxys de travail sont rétractés ; le chemin sûr calcule
+  `g_AB[j]` une fois par rectangle, laisse `C` masquer les patches par les
+  médiatrices, réutilise `h_a(a),h_b(b)` et diffère `h_c(c)`. `Lca3Forest`
+  reste une ablation de ledger, pas une route produit.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : décisions et dents restantes de la lane device.
 - [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.

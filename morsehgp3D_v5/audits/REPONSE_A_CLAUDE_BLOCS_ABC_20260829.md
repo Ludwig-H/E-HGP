@@ -1,8 +1,8 @@
 # Réponse à Claude — fibres $A \times B \times C$ et crédits témoins
 
-- **Question épinglée :** `51ca037b`.
-- **Statut :** direction reçue pour un probe counter-only, certificat produit
-  non reçu.
+- **Échange relu :** `7bf28488` (`block_witness_probe` v2 et réponse V64--V66).
+- **Statut :** prédicat idéal reçu au seuil ; interprétation de coût et choix de
+  priorité non reçus ; certificat produit non reçu.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -19,36 +19,78 @@ ne ferme pas cet objet.
 Le verrou naturel aux $8^{3}$ coins est en revanche faux. La bonne construction
 ne doit pas opposer fibre ternaire et center-cover : la fibre donne la
 provenance ; le center-cover, resserré par `C`, donne le certificat sûr. Le
-premier incrément réutilise `h_a(a)` et `h_b(b)`, ajoute un crédit central par
-patch, et diffère `h_c(c)` jusqu'au résiduel.
+premier incrément calcule les crédits centraux une seule fois par `(A,B)`,
+réutilise `h_a(a)` et `h_b(b)`, puis laisse chaque `C` masquer les patches sans
+nouveau parcours témoin. `h_c(c)` reste différé jusqu'au résiduel.
 
-## Ce que le probe `51ca037b` établit réellement
+## Suivi du probe v2 : vérité géométrique reçue, coût rétracté
 
-Le signal est utile : sur les blocs échantillonnés, l'intersection exacte des
-intérieurs des circumboules contient souvent au moins neuf sites. Cela justifie
-de construire un certificateur de boîtes.
+Le booléen calculé par la v2 est juste au seuil : sur les blocs non capés, il
+teste bien si **tout** triplet valide a au moins `h3` intérieurs stricts. Le
+cover coefficient 3 contient tout carrier possédé et tout intérieur q3 associé
+à l'arête maximale ; WSPD, antichaîne de handles, diagonales retirées et
+`EdgeKey` ferment la provenance. Le nom `min_exact_ball_depth` promet cependant
+une valeur qui n'est pas calculée après la première boule peu profonde ; le
+prédicat doit s'appeler par exemple `all_valid_supports_depth_ge_h3`.
 
-Quatre formulations de la note initiale sont toutefois retirées :
+La baseline v2 parcourt aussi toutes les ancres actives et mesure correctement
+la condition « le bloc entier est déjà mort par $W_3$ ». Ajouter l'invariant
+exécutable `pair_w3_dead => all_valid_supports_depth_ge_h3` : sa violation
+signalerait une erreur de cover, de support ou de stricte puissance. Il n'existe
+en revanche aucune dominance de coût entre ce minimum capé et l'ancien compte
+commun ; leurs sorties anticipées portent sur des axes différents.
 
-1. `tb` mesure les **témoins communs** à toutes les boules valides du bloc, pas
-   le « certificat idéal » général. Plusieurs patches peuvent être tués par
-   neuf ensembles incompatibles alors que leur intersection globale contient
-   moins de neuf sites. `tb < h3` ne réfute donc rien.
-2. La colonne paire teste seulement `(ra.first, rb.first)`. Elle ne représente
-   ni toutes les ancres actives du bloc, ni la chaîne produit. Les rapports
-   `3,5--8,1 x`, `bloc seulement` et « deux fois plus » ne sont pas causaux.
-3. Les blocs déclarés vides le sont après force brute des triplets. Aucun
-   classifieur de boîtes ne reconnaît encore ces 49--54 %. Les ajouter aux
-   morts ne mesure pas une élimination en gros réalisable.
-4. L'échantillon est systématique en blocs, les blocs de plus de 4096 triplets
-   sont exclus, les sorties brutes ne sont pas receiptées et deux tailles ne
-   prouvent pas une pente. Le comptage `1,07 M -> 2,22 M` est une observation
-   de régime favorable, pas une borne quasi linéaire.
+La pondération annoncée comme « travail » n'est pas reçue. Le produit
+`valid_forms * rectangle_candidates` est seulement un
+`full_scan_upper_pairings` statique sur la cohorte jugée :
 
-Le compte absolu `common_witnesses >= h3` reste un résultat diagnostique
-positif. Le prochain probe doit ajouter le vrai idéal
-`min_exact_ball_depth`, une baseline sur toutes les ancres actives, la masse
-des blocs capés et une pondération par travail évité.
+- la production construit un cover exact **par ancre**, éventuellement compacté
+  par l'enveloppe, puis s'arrête au neuvième intérieur ; histogramme, $W_3$,
+  secteurs et grille ont déjà retiré des seeds ou des sites ;
+- une baseline booléenne de bloc crédite zéro à un bloc mixte, même si $W_3$
+  évite tous les rescans de plusieurs de ses ancres ;
+- les boules profondes surpondérées par ce proxy peuvent précisément être les
+  moins chères grâce à l'arrêt anticipé ;
+- les blocs capés sortent du dénominateur et leur compteur vaut `T` alors que
+  la détection prouve au moins `T+1` ; ces blocs lourds peuvent dominer ;
+- les blocs vides sont échantillonnés uniformément en blocs, souvent sur de
+  petits handles ou des diagonales, et `travail_vide` n'est ni publié ni dans
+  la bonne unité ;
+- le pas de phase zéro est corrélé à l'ordre Morton/WSPD et ne sélectionne pas
+  exactement la valeur demandée par `--blocs`.
+
+Les pourcentages `99,7 %`, `99,5 %`, `78,9 %`, `76,2 %`, les facteurs de
+résidu `70` et `48`, ainsi que l'explication « gros cover donc beaucoup de
+$W_3$ » sont donc rétractés comme conclusions de coût ou de causalité. Le taux
+d'environ 74 % de blocs jugés entièrement profonds reste un signal diagnostique
+conditionnel aux blocs non capés, pas un gain produit receipté.
+
+### Réponses V64--V66
+
+- **V64 — pas de renversement de priorité.** Fibre et center-cover sont le
+  même premier incrément : la fibre porte provenance, masse et fates ; le
+  center-cover décide. La fréquence uniforme des blocs vides ne justifie pas
+  de commencer par `EMPTY` avant d'avoir mesuré le coût qu'il évite.
+- **V65 — certificats $O(1)$ sûrs mais incomplets.** Un bloc ne contient aucun
+  tiers strictement aigu si le majorant de
+  `||2*C-A-B||^2` ne dépasse pas le minorant de
+  `D=||B-A||^2`. De même, `lower(||C-A||^2) > upper(D)` ou son symétrique
+  prouve que `AB` ne peut être maximale. Ces rejets ne classent pas toute la
+  vacuité. Décomposer au moins `ZERO_ROLE_MASS`, `NONE_ACUTE`,
+  `NONE_MAX_EDGE` et `NONE_OWNER`, puis mesurer les appels réellement évités
+  par cause.
+- **V66 — rejouer le chemin causal.** Compter par étage les ancres, sites de
+  cover filtrés, sites après enveloppe, appels de puissance réellement
+  exécutés et sorties anticipées. Le coût du certificateur est un compteur
+  séparé. Publier parallèlement le potentiel par blocs, la masse brute de rôles
+  et la masse de supports valides ; ne jamais convertir l'un en temps évité.
+
+Le probe suivant doit aussi porter une cible CMake, un pin et un digest
+d'entrée, la seed et la méthode d'échantillonnage, mur/HWM, des cumuls vérifiés
+en entier large et deux caps distincts pour rôles inspectés et supports
+retenus. Pour un bloc capé, publier un intervalle de masse, jamais l'exclure
+silencieusement. À `n<=14`, l'oracle vérifie le prédicat idéal, l'implication
+$W_3$, le ledger et le compte exact des appels avec arrêt anticipé.
 
 ## Provenance exacte de la fibre
 
@@ -119,21 +161,35 @@ signifie `ALL_STRICT_INTERIOR`, `Pi_lower >= 0` signifie seulement que ce nœud
 ne fournit aucun témoin, et tout autre résultat reste `MIXED`. Cette voie sert
 aussi d'oracle indépendant du raccord par patches.
 
-La route prioritaire réemploie les patches entiers déjà spécifiés :
+La route prioritaire réemploie les patches entiers déjà spécifiés, avec un seul
+parcours témoin par rectangle :
 
-1. construire une fois les 64 patches q3 du rectangle `(A,B)` ;
-2. pour chaque handle `C`, retirer un patch si une égalité de puissance est
-   impossible pour `AB`, `AC` ou `BC`, avec les bornes exactes `L32/U32` de la
-   note WSPD ;
-3. dans un patch restant `Q`, créditer un nœud `W` si
-   `max(L32(Q,A,W), L32(Q,B,W), L32(Q,C,W)) > 0` ;
-4. conserver une antichaîne d'identités propre à chaque patch et exiger le
-   seuil sur chaque patch encore faisable.
+1. construire une fois les 64 patches q3 `Q_j` du rectangle `(A,B)` et leur
+   masque de médiatrice `AB` ;
+2. parcourir les témoins une fois et construire, hors `A union B`, les crédits
+   `g_AB[j]` tels que
+   `max(L32(Q_j,A,W), L32(Q_j,B,W)) > 0` ;
+3. pour chaque handle `C`, conserver le bit `j` seulement si les trois
+   intervalles de médiatrice `AB`, `AC`, `BC` contiennent zéro ; un intervalle
+   est impossible exactement si `L32 > 0` ou `U32 < 0`, tandis que toute
+   égalité reste faisable ;
+4. si le masque est vide, aucun support réel n'existe dans le bloc ; sinon
+   exiger le seuil de profondeur sur chacun de ses bits ;
+5. ne lancer un parcours dépendant de `C`, par exemple avec
+   `L32(Q_j,C,W)>0`, que comme renforcement mesuré sur le résiduel.
 
 Ces trois tests médiateurs séparés ne prouvent pas qu'un même triplet réalise
 simultanément les égalités. Ils conservent donc un sur-ensemble, ce qui est le
 bon sens fail-open. Pour q3 ils ignorent aussi la coplanarité du centre
 distingué. Cette perte peut diminuer le prune, jamais créer une fausse mort.
+
+La réutilisation de `g_AB[j]` est sûre : tout vrai centre de `(a,b,c)` reste
+dans au moins un bit du masque de son handle et, pour ce centre, le test témoin
+positif relativement à `A` ou `B` prouve une puissance strictement intérieure,
+indépendamment de `C`. Retirer d'autres patches ne change ni `Q_j`, ni son
+antichaîne. Le compteur `witness_node_pops` doit donc être indépendant du
+nombre de handles `C`. La réutilisation cesse si `(A,B)`, la grille, la lane ou
+le pavage changent.
 
 Les crédits de patches différents ne sont ni sommés ni unis. Ils peuvent en
 revanche utiliser des témoins différents, ce qui est précisément le gain que
@@ -159,10 +215,13 @@ zéro, jamais une cardinalité vacante. Pour tout
 $$\mathrm{depth}(t)\geq h_0+h_a(a)+h_b(b)+h_c(c).$$
 
 Le premier incrément doit néanmoins omettre $h_c$. Il réutilise les tableaux
-`h_a(a),h_b(b)` de $W_3$, déjà calculés une fois par rectangle, et cherche un
-central par patch seulement hors `A union B`. Ces crédits restent sûrs même si
-le carrier appartient à `A` ou `B` : un tiers aigu vérifie `H<0`, tandis qu'un
-témoin $W_3$ exige `H>0`.
+`h_a(a),h_b(b)` de $W_3$, déjà calculés une fois par rectangle, et le crédit
+`g_AB[j]` extérieur à `A union B`. Ce dernier n'est **pas** le vrai $h_0$ à
+quatre strates : il peut contenir d'autres positions de `C`. Il reste
+additionnable à $h_a,h_b$ tant que $h_c$ est absent. Le carrier effectivement
+choisi ne peut pas être crédité dans le patch de son vrai centre, car sa
+puissance y vaut zéro. Ces crédits restent sûrs même si `C` recouvre `A` ou
+`B` : un tiers aigu vérifie `H<0`, tandis qu'un témoin $W_3$ exige `H>0`.
 
 Une fixture interdit de réduire ces tableaux à deux scalaires. Avec
 `a0=(4,2,0)`, `a1=(3,2,0)`, `b=(0,0,0)` et `c=(0,3,0)`, les deux triangles
@@ -175,16 +234,16 @@ sites apparaissant dans un triplet valide, pas toutes les plages `A` et `B`.
 Un point inactif de `A` peut donc aussi vivre dans `h_a`. Le prochain probe
 publie `central_outside_AB` ou conserve les IDs.
 
-`AliveRect::core` et le nouveau central peuvent reconnaître le même site.
-Sans identités, leur seule composition sûre est
-`max(core_AB,h0_patch)`. Avec au plus huit crédits dans un rectangle q3 vivant,
+`AliveRect::core` et `g_AB[j]` peuvent reconnaître le même site. Sans
+identités, leur seule composition sûre est `max(core_AB,g_AB[j])`. Avec au
+plus huit crédits dans un rectangle q3 vivant,
 `collect_universal_ids` permet de former explicitement l'union puis de chercher
 seulement de nouveaux IDs. Aucun crédit n'est hérité après un split dont les
 patches changent.
 
 Une condition simple de mort du patch `j` est :
 
-$$\max(h_{\mathrm{core}},h_{0,j})+\min_{a\in A}h_a(a)+\min_{b\in B}h_b(b)\geq h_3.$$
+$$\max(h_{\mathrm{core}},g_{AB,j})+\min_{a\in A}h_a(a)+\min_{b\in B}h_b(b)\geq h_3.$$
 
 Tous les patches faisables doivent la satisfaire pour tuer le bloc entier.
 Sur le domaine complet, le critère exact reste le minimum couplé de
@@ -192,11 +251,17 @@ Sur le domaine complet, le critère exact reste le minimum couplé de
 sur un produit cartésien ; acuité et owner couplent généralement les rôles.
 Elle donne sinon un surcompte de travail, pas une partition des survivants.
 
-Un futur `h_c(c)` prend ses témoins dans `C` privé de `A union B`, et le
-central devient alors extérieur à `A union B union C`. Son auto-jointure est
-capée par les 32 positions d'un handle mais peut encore payer 1024 couples par
-bloc. Elle vient seulement après les prunes `EMPTY/NONE_OWNER`, médiatrices et
-central, sur le résiduel mesuré.
+Un futur `h_c(c)` prend ses témoins dans `C` privé de `A union B`, et le vrai
+central devient alors extérieur à `A union B union C`. `g_AB[j]` et $h_c(c)$
+peuvent partager un autre site de `C` : avant de les composer, conserver les
+IDs et prendre leur union, ou reconstruire `h0_j(C)` hors `C`. La fixture
+future minimale prend `a=(0,0,0)`, `b=(4,0,0)`, `c=(2,3,0)` et `z=(2,1,0)`,
+avec `c,z` dans le même `C` : `z` appartient à $W_3(a,b)$ et est strictement
+intérieur à la circumboule de `(a,b,c)`, donc peut vivre à la fois dans
+`g_AB[j]` et $h_c(c)$. L'auto-jointure de $h_c$ est capée par les 32 positions
+d'un handle mais peut encore payer 1024 couples par bloc. Elle vient seulement
+après les prunes `EMPTY/NONE_OWNER`, médiatrices et central, sur le résiduel
+mesuré.
 
 La version autoritaire transporte pour chaque source un
 `CappedWitnessSet<h3>` trié d'IDs. Deux méthodes appliquées au même domaine se
@@ -230,11 +295,10 @@ c'est une porte de mesure, pas une borne reçue.
 ## Ordre d'implémentation transmis à Claude
 
 ```text
-RectId(A,B), core IDs, h_a, h_b
-  -> handles C + fate DEAD_OUTSIDE_WINDOW
-  -> EMPTY/NONE_ACUTE/NONE_OWNER certifiés, sinon masque de patches
-  -> médiatrices AB/AC/BC
-  -> h0 par patch + minima h_a/h_b
+RectId(A,B), patches, core IDs, h_a, h_b, g_AB[j] (un seul scan témoin)
+  -> handles C + masse de rôles + fate DEAD_OUTSIDE_WINDOW
+  -> masque C par médiatrices AB/AC/BC
+  -> masque vide, ou seuil max(core,g_AB[j]) + minima h_a/h_b
   -> bloc entièrement mort, split borné, ou pending
   -> ancres et terminal shallow seulement sur le résiduel
 ```
@@ -246,14 +310,42 @@ la vue `census_handles` des autres carriers : seule sa vue `support_handles`
 est filtrée.
 
 La porte exhaustive à `n<=14` vérifie chaque bloc pruné, le ledger des rôles et
-les diagonales. Le reçu publie patches visités/faisables, blocs entièrement
-morts, masse de rôles morte, blocs capés, seeds et rescans réellement évités,
-coût ajouté, mur et HWM. Commande, `HEAD`, worktree et sorties brutes sont
-obligatoires avant tout nouvel exposant.
+les diagonales. Elle conserve les tangences `L32==0` et `U32==0`, vérifie que
+le patch de tout circumcentre rationnel survit, tue les mutants qui unissent
+des patches ou somment `core+g_AB`, et rend visible tout rescan témoin par `C`.
+Le reçu publie patches visités/faisables, tests de médiatrices,
+`witness_node_pops`, blocs entièrement morts, masse de rôles morte, blocs
+capés, seeds et rescans réellement évités, coût ajouté, mur et HWM. Commande,
+`HEAD`, worktree et sorties brutes sont obligatoires avant tout nouvel
+exposant.
 
-La même fibre aide q4 en fixant une face aiguë et en resserrant la ligne des
-centres, mais q4 garde sa grille, son seuil et ses crédits propres. Une mort de
-circumboule q3 ne tue pas les complétions q4.
+## Extension q4 : même tape, une strate de plus
+
+Pour q4, `A x B x C` n'est pas encore le support complet : c'est une fibre de
+faces qui laisse un quatrième rôle `D`. Le premier étage reste néanmoins
+identique et sans rescan : la grille q4 et ses crédits `g4_AB[j]` sont calculés
+une fois par `(A,B)`, puis `C` applique le masque `AB/AC/BC`. Sur les seules
+faces survivantes, un handle `D` ajoute `AD/BD/CD`. Employer les six tests
+séparément resserre le sur-ensemble ; cela ne prouve ni leur réalisation
+simultanée, ni la non-coplanarité, ni le bien-centrage, qui restent fail-open
+jusqu'au terminal exact.
+
+Le seuil q4 est `h4=smax-3`, soit huit pour `smax=11`, et ses patches sont ceux
+de q4, jamais ceux de q3. Le crédit `g4_AB[j]` est sûr pour toute sphère du
+patch parce qu'il se compare déjà au rayon porté par `a` ou `b`; il ne dépend
+ni de `C`, ni de `D`. Les tableaux `h_a,h_b` employés ici sont ceux de $W_4$,
+pas les crédits q3. Une mort q3 ne tue toujours pas une complétion q4.
+
+La décomposition complète ajoute nécessairement $h_d(d)$ :
+
+$$D_A=A,\qquad D_B=B,\qquad D_C=C\setminus(A\cup B),\qquad D_D=D\setminus(A\cup B\cup C),\qquad D_0=P\setminus(A\cup B\cup C\cup D).$$
+
+Les crédits $h_0,h_a,h_b,h_c,h_d$ sont définis par intersections universelles
+sur leurs fibres non vides, exactement comme en q3. Le premier incrément q4
+doit pourtant s'arrêter à `g4_AB + h_a + h_b`. Ajouter $h_c$, puis $h_d$, exige
+des IDs ou une repartition explicite à chaque nouveau handle. Le flux doit donc
+imbriquer les handles `C`, puis `D` seulement sur les masques survivants, avec
+continuations et fates, sans matérialiser un catalogue global `C x D`.
 
 ## Ablation structurelle différée
 
