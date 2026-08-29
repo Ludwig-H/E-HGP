@@ -38,9 +38,36 @@ for arg in "$@"; do
 done
 [ -n "$nom" ] || { echo "nom de campagne manquant" >&2; exit 2; }
 [ "${#bras_noms[@]}" -ge 1 ] || { echo "au moins un --bras=nom:flags" >&2; exit 2; }
+[[ "$nom" =~ ^[a-z0-9][a-z0-9_.-]{0,63}$ ]] || { echo "nom de campagne invalide" >&2; exit 2; }
+[[ "$repetitions" =~ ^[1-9][0-9]*$ ]] && [ "$repetitions" -le 100 ] || {
+  echo "repetitions hors domaine [1,100]" >&2; exit 2;
+}
+case "$cible" in
+  mhgp5|mhgp5_cover_envelope_probe) ;;
+  *) echo "cible non autorisee (produit attendu) : $cible" >&2; exit 2 ;;
+esac
+IFS=',' read -r -a n_values <<< "$ns"
+IFS=',' read -r -a family_values <<< "$familles"
+for n in "${n_values[@]}"; do
+  [[ "$n" =~ ^[0-9]+$ ]] && [ "$n" -ge 2 ] || { echo "taille invalide : $n" >&2; exit 2; }
+done
+for fam in "${family_values[@]}"; do
+  case "$fam" in
+    uniform|terrain|scanline_single_pass|scanline_overlap_multiecho|eight_clusters|two_lines) ;;
+    *) echo "famille invalide : $fam" >&2; exit 2 ;;
+  esac
+done
+declare -A bras_vus=()
+for i in "${!bras_noms[@]}"; do
+  bn="${bras_noms[$i]}"; bf="${bras_flags[$i]}"
+  [[ "$bn" =~ ^[a-z0-9][a-z0-9_.-]{0,31}$ ]] || { echo "nom de bras invalide : $bn" >&2; exit 2; }
+  [ -z "${bras_vus[$bn]:-}" ] || { echo "nom de bras duplique : $bn" >&2; exit 2; }
+  bras_vus[$bn]=1
+  [[ "$bf" != *$'\n'* && ( -z "$bf" || "$bf" == --* ) ]] || { echo "flags de bras invalides : $bn" >&2; exit 2; }
+done
 
 # --- PIN : refus sur arbre sale pour les chemins qui entrent dans le binaire.
-chemins="morsehgp3D_v5/src morsehgp3D_v5/cli morsehgp3D_v5/CMakeLists.txt morsehgp3D_v5/cmake"
+chemins="morsehgp3D_v5/src morsehgp3D_v5/cli morsehgp3D_v5/CMakeLists.txt morsehgp3D_v5/cmake morsehgp3D_v5/bench/recu_local.sh"
 sale="$(git status --porcelain -- $chemins || true)"
 if [ -n "$sale" ]; then
   echo "REFUS : l'arbre est sale sur les chemins construits — un recu ancre a un" >&2
@@ -57,16 +84,31 @@ cmake --build "$build" --parallel --target "$cible" > /dev/null
 bin="$build/$cible"
 [ -x "$bin" ] || { echo "cible $cible introuvable dans $build" >&2; exit 2; }
 bin_sha="$(sha256sum "$bin" | cut -d' ' -f1)"
+compilo="$(sed -n 's/^CMAKE_CXX_COMPILER:[^=]*=//p' "$build/CMakeCache.txt" | head -1)"
+compilo="$compilo ($("$compilo" --version 2>/dev/null | head -1))"
 
 sortie="$RACINE/morsehgp3D_v5/receipts/$nom"
-rm -rf "$sortie/out"          # jamais de sortie rance dans un recu
-mkdir -p "$sortie/out"
+[ ! -e "$sortie" ] || { echo "REFUS : destination de recu deja existante : $sortie" >&2; exit 2; }
+mkdir "$sortie"
+mkdir "$sortie/out"
 : > "$sortie/session.log"
 
 # --- MATRICE, en ordre alterne.
-declare -a lignes=()
-for n in ${ns//,/ }; do
-  for fam in ${familles//,/ }; do
+declare -a lignes=() ordre_joue=()
+runs_non_nuls=0
+# DENT 1 : une interruption doit laisser un statut TERMINAL explicite, jamais un
+# repertoire de recu muet qu'un lecteur prendrait pour une campagne complete.
+statut_terminal() {
+  local code=$?
+  if [ ! -s "$sortie/RECU.txt" ]; then
+    { echo "# MorseHGP3D v5 — campagne locale : $nom"; echo "statut=interrompu"; echo "code_sortie=$code";
+      echo "date_utc=$(date -u +%Y-%m-%dT%H:%M:%S+00:00)"; echo "source_commit=$commit";
+      echo "note=campagne interrompue avant ecriture du recu — AUCUNE conclusion n'en sort"; } > "$sortie/RECU.txt"
+  fi
+}
+trap statut_terminal EXIT INT TERM
+for n in "${n_values[@]}"; do
+  for fam in "${family_values[@]}"; do
     for r in $(seq 1 "$repetitions"); do
       # ordre A B au tour impair, B A au tour pair (AB/BA)
       idx=($(seq 0 $((${#bras_noms[@]} - 1))))
@@ -75,36 +117,65 @@ for n in ${ns//,/ }; do
       fi
       for i in "${idx[@]}"; do
         bn="${bras_noms[$i]}"; bf="${bras_flags[$i]}"
+        read -r -a run_flags <<< "$bf"
         run="${fam}_n${n}_${bn}_r${r}"
-        cmd="$bin --family=$fam --n=$n $bf"
+        cmd="$bin --family=$fam --n=$n ${run_flags[*]} --digest"
         echo "\$ $cmd" >> "$sortie/session.log"
-        t0=$(date +%s)
+        t0="${EPOCHREALTIME/,/.}"
         set +e
-        "$bin" --family="$fam" --n="$n" $bf > "$sortie/out/$run.txt" 2> "$sortie/out/$run.err"
+        "$bin" --family="$fam" --n="$n" "${run_flags[@]}" --digest > "$sortie/out/$run.txt" 2> "$sortie/out/$run.err"
         code=$?
         set -e
-        t1=$(date +%s)
+        t1="${EPOCHREALTIME/,/.}"
+        duree="$(awk -v a="$t0" -v b="$t1" 'BEGIN{printf "%.3f", b-a}')"
         # RSS : le CLI publie lui-meme `rss_max_kb=` ; pas de dependance a
         # /usr/bin/time, absent de ce conteneur (il rendait un code 127 muet).
         rss="$(sed -n 's/^rss_max_kb=\([0-9]*\).*/\1/p' "$sortie/out/$run.txt" | tail -1)"
         [ -n "$rss" ] || rss=0
-        lignes+=("$run $code $((t1 - t0)) $rss")
-        echo "  code=$code duree=$((t1 - t0))s rss=${rss}kb" >> "$sortie/session.log"
+        lignes+=("$run $code $duree $rss")
+        [ "$code" -eq 0 ] || runs_non_nuls=$((runs_non_nuls + 1))
+        ordre_joue+=("$run")
+        echo "  code=$code duree=${duree}s rss=${rss}kb" >> "$sortie/session.log"
       done
     done
   done
 done
 
-# --- SIGNATURE DE L'OBJET : lignes agregees + cardinalites par K, par run.
+# --- SIGNATURE DE L'OBJET : catalogue, forets et cardinalites, par run.
 vides=0
 for f in "$sortie/out"/*.txt; do
-  lignes_objet="$(grep -E "^famille=|^cardinalites " "$f" || true)"
+  lignes_objet="$(grep -E "^famille=|^cardinalites |^digest_balls=|^digest_forest_K|^digest_all=" "$f" || true)"
   if [ -z "$lignes_objet" ]; then
     echo "VIDE" > "${f%.txt}.objet"; vides=$((vides + 1))
   else
     printf '%s\n' "$lignes_objet" | sha256sum | cut -d' ' -f1 > "${f%.txt}.objet"
   fi
 done
+
+# Comparaison AUTORITAIRE des bras pour chaque (famille, n, repetition).
+desaccords=0
+for n in "${n_values[@]}"; do
+  for fam in "${family_values[@]}"; do
+    for r in $(seq 1 "$repetitions"); do
+      reference="$sortie/out/${fam}_n${n}_${bras_noms[0]}_r${r}.objet"
+      ref_sig="$(cat "$reference")"
+      for bn in "${bras_noms[@]:1}"; do
+        candidate="$sortie/out/${fam}_n${n}_${bn}_r${r}.objet"
+        if [ "$(cat "$candidate")" != "$ref_sig" ]; then
+          echo "DESACCORD objet : ${fam} n=${n} repetition=${r}, ${bras_noms[0]} != ${bn}" >> "$sortie/session.log"
+          desaccords=$((desaccords + 1))
+        fi
+      done
+    done
+  done
+done
+
+# --- STATUT TERMINAL (dent 1) : un run non nul invalide la campagne, meme s'il
+# a imprime des lignes d'objet.
+statut=complete
+[ "$vides" -eq 0 ] || statut=invalid
+[ "$desaccords" -eq 0 ] || statut=failed
+[ "$runs_non_nuls" -eq 0 ] || statut=failed
 
 # --- RECU.
 {
@@ -116,12 +187,24 @@ done
   echo "binaire_sha256=$bin_sha"
   echo "machine=$(uname -sr), $(nproc) fils logiques — MACHINE PARTAGEE, LOCALE"
   echo "avertissement=un ecart de mur sous ~20 % n'est pas concluant ici ; les compteurs sont exacts"
-  echo "protocole=morsehgp3D_v5/bench/recu_local.sh, bras alternes AB/BA"
+  if [ "${#bras_noms[@]}" -ge 2 ] && [ "$repetitions" -ge 2 ]; then
+    echo "protocole=morsehgp3D_v5/bench/recu_local.sh, bras alternes AB/BA"
+  else
+    echo "protocole=morsehgp3D_v5/bench/recu_local.sh, ordre joue SANS alternance (un seul bras ou une seule repetition)"
+  fi
+  # DENT 3 : compilateur et configuration graves, sinon le pin ne suffit pas.
+  echo "compilateur=$compilo"
+  echo "cmake_build_type=Release"
+  echo "cmake_version=$(cmake --version | head -1)"
+  echo "statut=$statut"
+  echo "runs_non_nuls=$runs_non_nuls"
   echo
   echo "# bras"
   for i in "${!bras_noms[@]}"; do echo "${bras_noms[$i]} = ${bras_flags[$i]}"; done
   echo
-  echo "# signature de l'objet (sha256 de famille= + cardinalites par K)"
+  echo "comparaison_objet=$([ "$desaccords" -eq 0 ] && echo identique || echo DESACCORD)"
+  echo
+  echo "# signature de l'objet (sha256 catalogue + forets + cardinalites par K)"
   for f in "$sortie/out"/*.objet; do echo "$(basename "${f%.objet}") $(cat "$f")"; done
   echo
   echo "# run code duree_s peak_rss_kb"
@@ -132,5 +215,13 @@ echo "recu ecrit : morsehgp3D_v5/receipts/$nom/RECU.txt"
 echo "runs : ${#lignes[@]}"
 if [ "$vides" -gt 0 ]; then
   echo "REFUS : $vides run(s) sans ligne d'objet — recu non concluant" >&2
+  exit 3
+fi
+if [ "$desaccords" -gt 0 ]; then
+  echo "REFUS : $desaccords comparaison(s) d'objet divergente(s)" >&2
+  exit 3
+fi
+if [ "$runs_non_nuls" -gt 0 ]; then
+  echo "REFUS : $runs_non_nuls run(s) de code non nul — statut=failed" >&2
   exit 3
 fi
