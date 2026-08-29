@@ -3,10 +3,11 @@
 - **Échange relu :** `7bf28488` (`block_witness_probe` v2), contre-audit
   `b74d8050`, raccord d'enveloppe `7e0ffe79`, probe v3 `1ff39ab9`, questions
   V67--V69 de `a0621897`, V68/V70--V72 de `91af69ff`, puis V71/V73--V75 de
-  `b9646d1a`, consolidées ci-dessous.
+  `b9646d1a`, mesure V74/V76--V78 de `50b85e16` et V79--V81 de `9a51a729`,
+  consolidées ci-dessous.
 - **Statut :** prédicat idéal reçu au seuil ; enveloppe de scan reçue mais sans
-  effet sur l'exposant ; interprétation de coût et certificat de bloc produit
-  non reçus.
+  effet sur l'exposant ; ledger q3 pondéré maintenant factorisé sans
+  `A x B` ; plafond de coût V74 et certificat de bloc produit non reçus.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -400,6 +401,102 @@ pas « cause réelle ».
   un support et porte le coût de profondeur. `blocs_morts` peut rester un
   agrégat de commodité, jamais le seul reçu.
 
+### Réponses V76--V78 au pin `50b85e16`
+
+- **V76 — GO au chantier, NON au plafond 95--99 %.** Le compteur ajouté ne
+  mesure pas le résiduel payé par la production. Sa boucle est
+  `t < formes.size() && tous_profonds` : un bloc tous-profonds crédite les
+  appels de **tous** ses supports, tandis qu'un bloc mixte crédite seulement le
+  préfixe qui précède et inclut son premier support shallow. Tous les supports
+  suivants disparaissent donc du seau `pw_inherent`. Cette censure dépend en
+  outre de l'ordre d'énumération Morton. Elle rend mécaniquement le seau
+  « inhérent » petit et interdit d'appeler le quotient un plafond. Les trois
+  seaux sont disjoints sur les appels que la sonde a choisi d'exécuter, mais ne
+  partitionnent pas les appels qu'aurait exécutés le produit. Le rejeu local
+  propre de `uniform,n=8000,seed=3` reproduit exactement
+  `1471068/1266952/60264` en `17,8 s`; il reproduit donc le chiffre, pas son
+  interprétation.
+- **Correction causale.** Renommer le compteur courant
+  `ideal_prefix_power_calls_until_first_shallow`. Ajouter une seconde passe
+  diagnostique qui parcourt **toutes** les `formes`, garde seulement l'arrêt à
+  `h3` dans chaque support et publie
+  `all_support_power_calls_w3_dead/all_deep/mixed`. Cela corrige le biais de
+  préfixe, mais reste une force brute de sonde. Le plafond produit exige ensuite
+  les compteurs shadow au vrai point d'appel du pipeline, après histogramme,
+  prétests, secteurs, grille et enveloppe, attribués au même `RectId/handle`.
+  Le center-cover est jugé sur le vecteur avant/après ; le mur et HWM appariés
+  décident le gain. Le tableau comparant ce ratio aux autres mécanismes est
+  retiré jusque-là : ses lignes n'ont ni la même cohorte, ni la même unité.
+- **V77 — `MIXED` reste obligatoire.** La rareté annoncée des blocs mixtes est
+  précisément la grandeur censurée par la sortie au premier shallow. Même une
+  faible fréquence exacte ne simplifierait pas le certificateur : plusieurs
+  patches peuvent être tous profonds grâce à des ensembles de témoins
+  différents, et la relaxation par médiatrices peut laisser `P[t_C]>0` dans un
+  bloc dont tous les supports réels sont profonds. `MIXED` doit donc rester
+  fail-open, avec split borné ou terminal.
+- **V78 — aucun effet `uniform` attribuable à ce stade.** Une phase zéro, une
+  seule seed, des tailles d'échantillon légèrement différentes et la censure
+  dépendante de l'ordre suffisent à produire ce contraste. Rejouer bottom-k ou
+  plusieurs phases, au moins trois seeds, publier caps et appels complets, puis
+  stratifier par taille de handle et de rectangle. Le signal peut ensuite
+  servir au routeur ; il ne prouve aujourd'hui ni que `uniform` est le meilleur
+  régime, ni que $W_3$ y est causalement plus faible.
+
+Cette correction ne renverse pas la priorité constructive. Elle évite seulement
+de demander au premier prototype de « capturer 95 % » d'une quantité qui n'est
+pas définie. Le ledger factorisé ci-dessous permet au contraire d'implémenter
+le shadow q3 sans matérialiser les couples, puis de mesurer sa vraie capture.
+
+Le pin `9a51a729` ajoute une stratification du marginal tous-profonds.
+L'implication
+`common_strict_interior_positions>=h3 => un témoin global suffit` est exacte.
+Sa réciproque ne dit toutefois pas « patches nécessaires » : elle réfute
+seulement ce certificat global d'intersection. `h_a+h_b`, les classes de seuil
+ou une autre factorisation peuvent encore conclure sans patches. Nommer les
+seaux `common_witness_set_sufficient/insufficient`, compter séparément les
+appels `q3_power` supplémentaires de cette intersection et garder le second
+comme cohorte à expliquer. Ce delta ne modifie ni la censure de `pw_inherent`,
+ni le statut du plafond V74.
+
+### Réponses V79--V81 au pin `9a51a729`
+
+- **V79 — GO à un fast path global, NON à la rétrogradation des patches.** La
+  table mesure l'intersection des intérieurs des **supports exacts déjà
+  énumérés**. Elle ne mesure pas ce qu'un certificat de boîtes sait prouver.
+  Une relaxation globale peut perdre préférentiellement les cas qu'un pavage
+  conserve : deux régions de centres séparées peuvent avoir les mêmes témoins
+  réels, tandis que leur boîte englobante introduit des boules fictives qui les
+  rejettent. Il est donc faux d'affirmer que les deux catégories se dégraderont
+  pareil. Le premier shadow léger peut néanmoins chercher au plus neuf rangs
+  de positions certifiés intérieurs pour **tous** les patches de l'union
+  faisable. Succès : `PRUNE_NO_EMISSION`. Échec : `UNKNOWN`, jamais
+  `PATCHES_NECESSARY`. Architecturer son front avec un masque de patches afin
+  que le même parcours puisse ensuite remplir `g_AB[j]` sur le résiduel, sans
+  second départ à la racine.
+- **V80 — ne pas payer 16 k/32 k au mauvais oracle.** Corriger d'abord le biais
+  de préfixe, les noms, le pin/dirty compilé et le compteur du scan commun.
+  Puis publier la matrice
+  `exact_common x certified_global x certified_patch`, trois seeds et un
+  bottom-k ou plusieurs phases à la première taille soutenable. Les tailles
+  `4k/8k/16k` servent ensuite à mesurer les pentes du **certificateur
+  implémentable** ; `32k` ne devient utile que si caps et budget laissent la
+  cohorte jugée non vacante. La stabilité actuelle à une seed et une phase ne
+  fige rien.
+- **V81 — oui, conserver fates et ledger.** Ils portent exact-once,
+  `pending`, les caps, la distinction rôle/support et la fermeture globale ;
+  leur valeur est correctness/provenance, pas un gain à défendre. Le ledger q3
+  pondéré est désormais factorisé en temps linéaire en handles, donc il n'y a
+  aucune raison de sacrifier cette preuve pour alléger le certificateur.
+
+Les pourcentages `96,3--99,6 %` restent un diagnostic exact-common conditionnel
+aux blocs marginaux non capés de cette sonde. Ils ne démontrent ni « global
+92--98 % du travail produit », car ce dénominateur réemploie V74 censuré, ni
+« patches 0,4--3,7 % », car l'absence de témoins communs n'est pas leur
+nécessité et leur présence n'est pas leur certifiabilité. La note porte encore
+le pin historique `1ff39ab9`; un rebuild local au vrai pin `9a51a729` reproduit
+la ligne `uniform` (`867/31`, `1219444/47508`) en `18,8 s`, mais aucune commande
+ni sortie brute n'est publiée comme reçu.
+
 Le split de `C` n'est pas « identique » dans tous ses usages. Employé seulement
 pour mieux reconnaître `EMPTY`, il répète effectivement le mécanisme peu
 prometteur du raffinement post-séparation. Employé sous budget pour résoudre le
@@ -481,15 +578,17 @@ Le delta à falsifier est plus précis : une WSPD partitionne les arêtes en
 rectangles ; `g_AB` ne parcourt les témoins qu'une fois par rectangle ; les
 handles `C` ne font ensuite que masquer ces patches et produire `t_C`; les
 bitsets des facteurs donnent `P[t_C]` sans matérialiser `A x B x C`. En q4,
-`t_CD` reste streamé et aucun catalogue `C x D` ne survit. Cela constitue une
-architecture différente à requalifier, pas une preuve de meilleur exposant.
-Le pire cas demeure ouvert dans les visites `MIXED`, les couples survivants et
-les paires de handles q4.
+les seuils mono-handle `s_H` groupent le résiduel avant le terminal axial ; le
+stream exact `t_CD` reste un oracle sous cap. Cela constitue une architecture
+différente à requalifier, pas une preuve de meilleur exposant. Le pire cas
+demeure ouvert dans les visites `MIXED`, les couples q3 survivants, les faces
+q4 et leur census.
 
 Le reçu différentiel publie donc, sur les mêmes familles et tailles que P1,
 `wspd_rectangles`, `g_ab_witness_node_pops`, `handle_masks`, `sum_P_t_c`,
-`q4_handle_pairs_streamed` et les propositions réellement transmises au
-terminal. Une baisse de constante ne rouvre pas la route : la pente de chacun
+`q3_weighted_roles_proposed`, classes `s_H`, faces q4, groupes axiaux et les
+propositions réellement transmises au terminal. L'oracle publie séparément
+`q4_handle_pairs_streamed`. Une baisse de constante ne rouvre pas la route : la pente de chacun
 de ces générateurs, puis mur/HWM à 50 k, doit réfuter le motif v4. Aucun code ni
 reçu v4 n'est importé ; seules ses contre-fixtures et ses mesures sont épinglées
 comme différentiel.
@@ -799,19 +898,75 @@ une masse de supports valides, car identités, acuité et owner restent dans leu
 ledger séparé. Cette réduction est exacte pour le **certificateur** et ne
 matérialise jamais `A x B x C`.
 
-Même la masse brute de rôles ne se déduit pas du seul `P[t]` dès que `C`
-recouvre `A` ou `B`. Pour un couple survivant, son poids q3 vaut
-`n_C-I_C(a)-I_C(b)`. En q4 croisé, il vaut
-`(n_C-I_C(a)-I_C(b))*(n_D-I_D(a)-I_D(b))`; sur le diagonal `H,H`, il vaut
-`choose2(n_H-I_H(a)-I_H(b))`. Ainsi, avec
-`A={a0,a1}`, `B={b}`, `C={a0,c}`, `D={d}`, la même valeur `P[t]=1` porte une
-masse q4 égale à un si `(a0,b)` survit, mais deux si `(a1,b)` survit. La v1
-autorise donc seulement `P[t]==0` à classer toute la masse en vrac. Si
-`P[t]>0`, elle énumère les couples survivants et somme ces poids en `u128`, ou
-laisse toute la masse du bloc `PENDING`; elle ne fabrique jamais
-`classified_r/pending_r` depuis un compte non pondéré. Des histogrammes
-pondérés par signatures d'appartenance pourront être une optimisation
-ultérieure, avec oracle séparé.
+### Fermeture exacte du ledger pondéré q3
+
+La masse brute de rôles ne se déduit pas du seul `P[t]` lorsque `C` recouvre
+`A` ou `B`, mais elle se **factorise** sans énumérer les couples survivants.
+Poser `N=max_C(t_C)<=h3`, saturer `h_a,h_b` dans le bin `N`, puis définir
+`A_i=#{a:h_a(a)=i}`, `B_j=#{b:h_b(b)=j}` et les préfixes `A_<r,B_<r`.
+Pour tout `t<=N`, la saturation conserve exactement le prédicat `<t` et :
+
+$$P[t]=\sum_i A_i B_{<t-i}.$$
+
+Pour un handle `C`, poser `A_i^C=#{a in A intersect C:h_a(a)=i}` et
+`B_j^C` symétriquement. La masse exacte laissée par le certificateur est :
+
+$$M_C(t)=\lvert C\rvert P[t]-\sum_i A_i^C B_{<t-i}-\sum_j B_j^C A_{<t-j}.$$
+
+La preuve est une simple double incidence. Le premier terme attribue
+`|C|` tiers à chaque couple survivant ; les deux sommes retirent respectivement
+les seules diagonales `c=a` et `c=b`. Elles sont disjointes parce que
+`A intersect B` est vide, donc aucun terme de réaddition n'existe.
+
+Il n'est même pas nécessaire de conserver un histogramme par handle. Pendant
+le stream, accumuler par seuil `t_C` les trois petits tableaux
+`W_t=sum|C|`, `X^A_ti=sum A_i^C` et `X^B_tj=sum B_j^C`, puis calculer :
+
+$$M_{\mathrm{proposed}}=\sum_t W_tP[t]-\sum_{t,i}X^A_{t,i}B_{<t-i}-\sum_{t,j}X^B_{t,j}A_{<t-j}.$$
+
+Les handles sont une antichaîne : leurs intersections avec les plages de `A`
+et `B` sont disjointes. Former tous les bins coûte donc
+`O(|A|+|B|+k+N^2)` par rectangle, avec `N<=9`, et une mémoire `O(N^2)` hors
+tableaux d'endpoints. Aucun `A x B` ni `A x B x C` n'est parcouru. Un test
+brut local sur `218700` configurations exhaustives petites, puis `100000`
+configurations aléatoires, n'a trouvé aucune divergence avec la somme explicite
+des poids. Ce rejeu d'audit ne remplace pas la future fixture CTest.
+
+Le ledger local peut maintenant fermer exactement
+`full=outside+empty+pending+depth_killed+proposed`, puis la tape complète ferme
+`3*choose3(n_unique)` en ajoutant les rectangles morts avant `AliveRect`.
+Toutes les multiplications sont promues en `u128` **avant** le produit et toute
+soustraction vérifie son ordre. Un parent et ses enfants ne figurent jamais
+simultanément dans ce ledger ; un split remplace le parent atomiquement. Si le
+seuil varie à l'intérieur d'un handle, il faut le scinder, le stratifier ou le
+laisser `PENDING`.
+
+Cette fermeture règle la comptabilité pondérée q3, pas nécessairement son
+terminal : l'émission effective peut encore être proportionnelle à
+`M_proposed`. Elle permet toutefois de mesurer et de tuer en vrac sans cacher
+un produit derrière le mot « ledger ».
+
+ABI minimale proposée, avec tableaux de taille dix fixés au profil courant :
+
+```cpp
+struct Q3FactorBins {
+  u8 cap;
+  std::array<u64, 10> a, b, a_lt, b_lt;
+  std::array<u128, 10> pair_lt;
+};
+
+struct Q3RoleLedger {
+  u128 full, outside, empty, pending, depth_killed, proposed;
+  bool closed;
+};
+```
+
+Le scratch ajoute `weight_by_t[10]`, `a_intersection_by_t[10][10]` et
+`b_intersection_by_t[10][10]`. `close_q3_roles` vérifie `RectId`, lane, cap,
+antichaîne, epoch de grille et plages avant le premier cumul. Les préfixes
+valent zéro pour un indice inférieur ou égal à zéro et leur total pour un
+indice supérieur au cap ; cette convention retire toute branche fragile sur
+`t-i`.
 
 Elle rend aussi les deux ordres de coût explicites. Dans l'ordre center-first,
 former les handles et leurs masques, calculer `g_AB` seulement sur leur union,
@@ -829,14 +984,16 @@ proportionnel au nombre de survivants, ce qui est nécessaire puisque le
 terminal les consomme ; le cas « toutes les paires tuées » ne parcourt plus
 `A x B`.
 
-« Streamé sans catalogue » borne la mémoire, pas le temps. Avec `k` handles,
-q3 peut encore transmettre `Theta(sum_C P[t_C])`, jusqu'à
-`Theta(k*|A|*|B|)`, avant même le coût ponctuel des carriers. q4 paie
-`Theta(k^2)` masques de paires, deux fois si l'union exacte exige deux passages,
-puis `Theta(sum_{i<=j} P[t_ij])`, jusqu'à
-`Theta(k^2*|A|*|B|)`. Le reçu doit publier ces trois sommes et leur pente ; un
-ledger agrégé en `O(k)` ne réduit aucun de ces coûts. Les masses conditionnées
-restent en `u128` : à dix millions, `4 M*(3 M)^2=3,6e19` dépasse déjà `u64`.
+« Streamé sans catalogue » ne suffisait pas : l'ancien stream `CD` bornait la
+mémoire mais gardait `Theta(k^2)` décisions et jusqu'à
+`Theta(k^2*|A|*|B|)` continuations. Il devient un oracle/ablation borné. Le
+ledger q3 pondéré est maintenant `O(k)` après les facteurs, mais son terminal
+peut encore transmettre `Theta(sum_C P[t_C])`. Le préfiltre q4 par classes de
+`s_H` retire le carré des handles ; son terminal axial paie encore les faces
+ternaires résiduelles, les groupes de racines, le scan de témoins et le census.
+Le reçu publie séparément ces générateurs et leurs pentes. Les masses
+conditionnées restent en `u128` : à dix millions,
+`4 M*(3 M)^2=3,6e19` dépasse déjà `u64`.
 
 À chaque réemploi du scratch, remettre tous les mots à zéro, reconstruire les
 listes `nonzero_words` et masquer les bits hors plage du dernier mot. Un bit
@@ -871,9 +1028,11 @@ RectId(A,B), patches et positions du core
   -> h_a/h_b saturés + parité avec corner_histograms + bitsets B_lt[t]
   -> raw_cover/witness/seed handles C + masse de rôles + fates + masques
      AB/AC/BC
-  -> union des patches encore actifs, puis un seul scan g_AB sur cette union
-  -> seuil t_C + émission sparse : bloc certifié, split borné, ou pending
-  -> ancres et terminal shallow seulement sur le résiduel
+  -> union des patches actifs + global_common (succès=prune, échec=UNKNOWN)
+  -> reprendre le même front pour remplir g_AB, sans rescan de racine
+  -> seuil t_C + ledger q3 pondéré agrégé par seuil, sans A x B
+  -> q3 : émission sparse seulement sur le résiduel
+  -> q4 : classes s_H, carriers ternaires résiduels, puis terminal axial Top-r4
 ```
 
 Le probe reste counter-only. Il se streame par rectangle ; il ne matérialise
@@ -983,17 +1142,88 @@ former l'union exacte, scanner `g4_AB`, puis refaire un second stream pour les
 continuations. Ce double passage doit apparaître dans les compteurs ; il ne
 peut pas être caché sous un prétendu scan unique.
 
-La décomposition complète ajoute nécessairement $h_d(d)$ :
+### Retirer le carré q4 avant la médiatrice `CD`
+
+Le ledger pondéré possède lui aussi une forme exacte factorisée. Reprendre la
+même construction de bins avec les `h_a,h_b` **q4** et le cap `h4`, puis poser
+`L_H(t)=sum_i A_i^H*B_<[t-i]+sum_j B_j^H*A_<[t-j]` et
+`X_HK(t)=sum_{i+j<t} A_i^H*B_j^K`. Pour deux handles distincts et disjoints
+`H,K`, puis pour la diagonale, les masses laissées sont exactement :
+
+$$M_{HK}(t)=\lvert H\rvert\lvert K\rvert P[t]-\lvert K\rvert L_H(t)-\lvert H\rvert L_K(t)+X_{HK}(t)+X_{KH}(t).$$
+
+$$M_{HH}(t)=\binom{\lvert H\rvert}{2}P[t]-(\lvert H\rvert-1)L_H(t)+X_{HH}(t).$$
+
+Elles ont été confrontées dans le même rejeu exhaustif et aléatoire sans
+divergence. La borne de seuil ci-dessous a en plus passé `1048576` combinaisons
+exhaustives de quatre patches. Ces replays ferment le calcul papier, pas une
+porte produit. Évaluer les formules pour chaque `H,K` conserverait le carré que
+l'on cherche à retirer.
+
+La réduction sûre est plus grossière et beaucoup plus utile. Pour le masque
+mono-handle `mu_H`, avant la médiatrice `CD`, poser `s_H=0` si le masque est
+vide, sinon `s_H=max_{j in mu_H}(t_j)`. Le masque exact d'une paire est inclus
+dans `mu_C intersect mu_D`; par conséquent :
+
+$$t_{CD}\leq\min(s_C,s_D).$$
+
+Pour une ancre de score `u=h_a(a)+h_b(b)`, toute paire incidente à un handle
+tel que `s_H<=u` est donc tuée par le certificateur, sans calculer `CD`. Les
+seuls handles de complétion encore actifs satisfont `s_H>u`. Comme `h4=8`, il
+n'existe que neuf classes de seuil ; les séparer aussi par le bit
+`seed_possible` donne au plus dix-huit classes. Le stream des handles remplit
+leurs unions, tailles et histogrammes en `O(k)`, puis les formules ci-dessus
+traitent le nombre constant de paires de classes. C'est un préfiltre q4
+**linéaire en handles**, exact pour sa relaxation et fail-open pour la
+médiatrice omise.
+
+L'implémentation n'a besoin que d'un tableau
+`Q4HandleClass classes[9][2]`. Chaque case agrège `handle_count`, masse de
+positions, union logique des handles, bins `A intersection U` et
+`B intersection U`, plus le bit de non-vacuité du groupe. Ces unions ne
+deviennent jamais des boîtes géométriques autoritaires : elles portent
+seulement le ledger et la liste de carriers. Les décisions géométriques restent
+celles des handles ou du terminal exact.
+
+Avant le gate seed, le nombre exact de continuations de blocs de cette
+relaxation est
+`sum_s P[s]*(q_s*(q_s+1)/2+q_s*Q_greater_s)`. Ce n'est pas une masse de rôles
+q4 ; les formules pondérées sur les unions de classes donnent cette dernière.
+Une classe dont les deux côtés ont `seed_possible=false` est vide ; toute
+classe non certifiée reste `PENDING`, jamais « existante » par construction.
+
+Il ne faut pas raffiner ensuite jusqu'aux feuilles pour récupérer `CD`. La v4
+a déjà mesuré cette auto-jointure `Sym2/CellPair` : `459477476` nœuds à
+`n=4000`, contre `141468` couples plats. À l'inverse, son terminal axial a
+remplacé `48791131` paires par `830044` groupes/racines sur sa cohorte, à sortie
+q4 inchangée ; ces nombres sont un différentiel à requalifier, pas un reçu v5.
+Le chemin constructif est donc : seuils mono-handle, carriers ternaires
+résiduels issus de `seed_handles` avec `s_H>u`, puis `Q4SeedAxisTopR4` pour
+chaque face fixe. Le replay exact v5 conserve seulement une complétion `y` dont
+le handle vérifie aussi `s_H(y)>u`, puis réapplique distinct-ID, owner6,
+positivité et seed canonique ; il borne les groupes de racines par
+`2*(h4-p)<=16` sous ses préconditions requalifiées.
+
+Tous les handles, y compris ceux dont le rôle d'apex a été tué par `s_H`,
+restent dans la source **témoin** du ranking axial. Un site interdit comme apex
+peut encore être intérieur et changer le top-r4. Seule une exclusion
+géométrique déjà prouvée permet de l'omettre du census. Une auto-jointure locale
+`C x D` peut survivre en ablation counter-only sous budget, jamais comme
+fallback non borné. Le coût encore ouvert devient le nombre de faces ternaires
+résiduelles et le scan/top-k par face, plus le census, et non plus `k^2`.
+
+Une éventuelle décomposition **par paire de handles**, désormais limitée à
+l'oracle, ajoute nécessairement $h_d(d)$ :
 
 $$D_A=A,\qquad D_B=B,\qquad D_C=C\setminus(A\cup B),\qquad D_D=D\setminus(A\cup B\cup C),\qquad D_0=P\setminus(A\cup B\cup C\cup D).$$
 
 Les crédits $h_0,h_a,h_b,h_c,h_d$ sont définis par intersections universelles
 sur leurs fibres non vides, exactement comme en q3. Le premier incrément q4
-doit pourtant s'arrêter à `g4_AB + h_a + h_b`. Ajouter $h_c$, puis $h_d$, exige
-des positions ou une repartition explicite à chaque nouveau handle. Le flux
-doit donc imbriquer les handles `C`, puis `D` seulement sur les masques
-survivants, avec continuations et fates, sans matérialiser un catalogue global
-`C x D`.
+doit s'arrêter à `g4_AB + h_a + h_b`. Ajouter $h_c$, puis $h_d$, exige des
+positions ou une repartition explicite à chaque nouveau handle. Si l'oracle de
+paires est exécuté, il imbrique `C`, puis `D` seulement sur les masques
+survivants et reste sous cap. Le chemin produit recommandé passe au contraire
+du carrier ternaire fixe au terminal axial et ne construit pas ce produit.
 
 Pour un bloc croisé `C!=D`, cette orientation fournit bien deux domaines
 disjoints pour $h_c$ et $h_d$. Pour le bloc diagonal `C=D=H`, elle donne au
@@ -1004,7 +1234,7 @@ scalaire vaut zéro. Poser à nouveau `D_D=H\(A union B)` puis sommer
 sets de positions et leur union, jamais deux cardinalités nues ; l'orientation ne
 préjuge toujours pas lequel de `c,d` devient le seed canonique.
 
-### Ledger local des paires de handles
+### Ledger local des paires de handles — oracle exact
 
 Les handles `H_i` d'un rectangle forment une antichaîne, donc leurs plages de
 positions sont disjointes. Parcourir seulement `i<j` pour les blocs croisés et

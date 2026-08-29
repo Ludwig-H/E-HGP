@@ -35,16 +35,20 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   sans en importer le code ; le terme `|w.d|`, dominé après le cover, reste une
   identité d'oracle/mutant. Aucun fate ne retire les mêmes handles du census.
   Le pavage P1 à 64 patches existait déjà en v4 avec des pentes rouges ; le
-  delta à requalifier est sa factorisation par rectangle WSPD, `t_C/P[t_C]` et
-  le stream `t_CD`, jamais le center-cover pris isolément.
+  delta à requalifier est sa factorisation par rectangle WSPD, `t_C/P[t_C]`,
+  le ledger q3 pondéré par seuil et le passage q4 seuil--axial, jamais le
+  center-cover pris isolément.
   Le seuil `t_C` condense les patches et réutilise les bitsets `B_lt[t]` sans
-  `A x B x C`; q4 streame `t_CD` sans catalogue `C x D` et sépare cover brut,
-  vue témoin certifiée, complétions et seeds. Seul `P[t]==0` classe une masse
-  en vrac ; au-delà, le
-  ledger exige les poids d'appartenance, et le streaming ne prouve aucun
-  exposant. Témoins de position, masque de patches calculés et prédicat seed q4
-  symétrique sont explicites. La réponse V73--V75 reçoit le retrait de `EMPTY`
-  comme priorité produit sans recevoir son « plafond absolu », fixe le
+  `A x B x C`; les histogrammes d'intersection ferment exactement la masse q3
+  même pour `P[t]>0`, en temps linéaire en handles après les facteurs. En q4,
+  neuf classes `s_H` retirent le produit `C x D`, puis les faces ternaires
+  résiduelles passent au terminal axial ; `t_CD` reste un oracle borné. Cover
+  brut, vue témoin certifiée, complétions et seeds restent séparés. Témoins de
+  position, masque de patches calculés et prédicat seed q4 symétrique sont
+  explicites. La réponse V73--V81 reçoit le retrait de `EMPTY` comme priorité
+  produit, réfute le faux plafond 95--99 % censuré au premier shallow et la
+  conclusion « patches nécessaires ». Un fast path global commun reste un
+  premier shadow légitime, dont l'échec vaut `UNKNOWN`. La note fixe aussi le
   contrefactuel multicomptes du center-cover et sépare
   existence, profondeur et action en trois axes avec non-vacuité explicite.
   L'universel autorise un prune sans promouvoir `ALL_DEEP` tant que l'existence

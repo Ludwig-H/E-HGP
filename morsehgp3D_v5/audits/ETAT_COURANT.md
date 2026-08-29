@@ -1,14 +1,18 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **Base d'audit concurrente relue :** `4efef972`, publiée sur `main` et
-  `origin/main`. Il consolide les seuils factorisés q3/q4 dans la réponse
-  active et retire les notes V68/V71 devenues transitoires ; l'historique les
-  conserve.
-- **Dernier pin de sonde de Claude relu :** `b9646d1a`. Il compte les
-  évaluations de rôles dans les blocs vides et non vides, retire V69 comme
-  priorité produit et pose V73--V75. Le retrait est reçu ; les ratios sont un
-  signal de priorité conditionnel, pas un « plafond absolu » de travail. Son
-  contre-audit de la v2 reste `b74d8050`.
+- **Dernier pin de sonde de Claude relu :** `9a51a729`, publié sur `main` et
+  `origin/main`. Il ajoute au V74 de `50b85e16` le partage exact-common et pose
+  V79--V81. Les lignes `uniform` sont reproductibles, mais leur interprétation
+  comme plafond produit et nécessité des patches est réfutée. Son contre-audit
+  de la v2 reste `b74d8050`.
+- **Base mathématique concurrente relue :** `b201ac23`. Elle fixe les seuils
+  `t_C/t_CD`, les poids de rôles et les types de témoins. Le présent audit
+  ferme en plus le ledger pondéré q3 par histogrammes et remplace le carré q4
+  par un préfiltre à neuf classes suivi du terminal axial.
+- **Complément V79 reçu comme diagnostic :** la sonde sépare le marginal
+  tous-profonds selon l'existence de neuf témoins communs. Ce shadow ne corrige
+  pas le biais V74 et ne prouve ni que les patches sont nécessaires, ni qu'un
+  certificat global de boîtes captera les témoins communs exacts.
 - **Dernier pin du chemin produit reçu :** `7e0ffe79`. Il raccorde l'enveloppe
   fermée de boules possibles aux scans q3/q4, avec son oracle géométrique
   indépendant, ses chemins batched et ses portes de non-vacuité. Le harnais de
@@ -296,6 +300,25 @@ provenance, sans chantier ni route autonomes tant que ces unités ne changent
 pas la décision ; un `EMPTY` obtenu gratuitement par le center-cover reste un
 sous-produit utilisable.
 
+Le pin `50b85e16` ne transforme pas ce signal en plafond 95--99 %. Sa boucle
+idéale s'arrête au premier support shallow d'un bloc mixte, mais parcourt tous
+les supports d'un bloc tous-profonds ; le seau `pw_inherent` omet donc un
+suffixe dépendant de l'ordre. Le rejeu propre `uniform,n=8000,seed=3` reproduit
+les trois valeurs en `17,8 s`, et confirme le biais dans le code. Renommer ce
+compteur en préfixe idéal, ajouter une passe sur tous les supports avec arrêt
+seulement à l'intérieur de chacun, puis instrumenter le vrai pipeline. La
+direction center-cover reste prioritaire ; sa cible numérique n'est simplement
+pas encore mesurée.
+
+Le second tableau de `9a51a729` mesure une intersection sur les supports exacts
+déjà énumérés. Il autorise un premier fast path global counter-only, pas la
+suppression des patches : chercher neuf positions certifiées intérieures pour
+tous les patches faisables, puis rendre `UNKNOWN` en cas d'échec. Le front doit
+être réutilisable par `g_AB[j]` pour éviter un second parcours. La matrice
+`exact_common x certified_global x certified_patch`, trois seeds et plusieurs
+phases décide seulement ensuite si le raffinement paie. Fates et ledger sont
+conservés dans tous les cas.
+
 Le center-cover `g_AB[j]`, conditionné par les masques de `C`, reste donc le
 premier certificateur sémantique de bloc à ouvrir en counter-only. Le shadow
 visite tous les blocs, puis l'oracle stratifie les non capés après coup ; le
@@ -315,10 +338,13 @@ La composition ne requiert aucun bloc matérialisé. Pour un patch, poser
 vide d'un handle `C`, `t_C=max_j t_j`. Le même histogramme minuscule
 `P[t]=#{(a,b):h_a(a)+h_b(b)<t}` ou les bitsets `B_lt[t]` donnent les couples
 que le certificateur laisse à chaque handle, sans `A x B x C`. Ce compteur
-reste distinct de la masse de supports valides. En q4, `t_CD` se calcule
-pendant le stream non ordonné `i<=j`, sans catalogue `C x D`; si l'union exacte
-des patches exige la médiatrice `CD`, receipt-er le premier passage de masques
-et le second de continuations.
+reste distinct de la masse de supports valides. Le ledger q3 pondéré est
+néanmoins factorisable exactement par les histogrammes de `A intersect C` et
+`B intersect C`, agrégés par seuil : coût
+`O(|A|+|B|+number_of_handles+h3^2)`, sans paire d'ancre. En q4, poser le seuil
+mono-handle `s_H=max_{j in M_H}(t_j)`. Comme
+`t_CD<=min(s_C,s_D)`, neuf classes à `h4=8` retirent le produit de handles en
+`O(k)` avant de passer les carriers ternaires résiduels au terminal axial.
 
 Les vues sont typées : q3 sépare `census_handles` et `seed_handles`; q4 sépare
 `census_handles`, `completion_handles` et `seed_handles`. `NONE_ACUTE` ne
@@ -351,22 +377,21 @@ code v4.
 Ce chantier ne prétend pas inventer le center-cover : la v4 avait déjà `P1`,
 64 patches et des pentes `2,104/1,896`, rejetées parce que la route partait
 encore de la paire. Le delta v5 à tester est la factorisation
-`WSPD rectangle -> un scan g_AB -> masques C -> t_C -> P[t_C]`, puis le stream
-`t_CD` sans catalogue q4. Le reçu doit montrer les pentes des rectangles, pops
-témoin, masques, `sum_P_t_c`, paires de handles et propositions terminales sur
-les tailles appariées v4 ; une seule baisse de constante ne réfute pas cet
-antécédent.
+`WSPD rectangle -> un scan g_AB -> masques C -> t_C -> ledger pondéré q3`, puis
+`classes s_H -> faces ternaires -> Top-r4` en q4. La voie exacte `t_CD` reste
+un oracle sous cap. La v4 avait déjà réfuté `Sym2/CellPair` comme hot path
+(`459477476` nœuds à `n=4000`) et proposé le terminal axial ; ni son code, ni
+ses reçus ne sont hérités. Le reçu v5 doit montrer les pentes des rectangles,
+pops témoin, masques, rôles q3 proposés, faces q4, groupes de racines, scans et
+census sur les tailles appariées.
 
-Deux verrous empêchent encore de transformer cette factorisation en claim
-sous-quadratique. D'abord `P[t]` compte des couples d'ancres, pas leur masse de
-rôles lorsque `C/D` recouvrent `A/B`; seul `P[t]==0` classe tout un bloc sans
-ambiguïté. Pour `P[t]>0`, sommer en `u128` les poids d'appartenance des couples
-survivants ou laisser le bloc `PENDING`. Ensuite le streaming borne la mémoire,
-pas le temps : avec `k` handles, q3 peut encore transmettre
-`Theta(k*|A|*|B|)` couples et q4 payer `Theta(k^2)` masques puis jusqu'à
-`Theta(k^2*|A|*|B|)` continuations. Les pentes de `sum_P_t_c`, des paires de
-handles et des scans terminaux sont donc des portes de réfutation, pas de
-simples compteurs descriptifs.
+Le verrou de pondération q3 est fermé mathématiquement : les corrections de
+diagonales se calculent par petits histogrammes en temps linéaire en handles.
+Cela ne prouve pas un temps global linéaire : l'émission q3 peut encore suivre
+`sum_C P[t_C]`, et q4 paie le nombre de faces ternaires résiduelles puis le
+scan/top-k et le census par face. Les handles tués comme apex restent dans la
+source témoin. Ce sont désormais ces générateurs, et non un stream `k^2`, dont
+les pentes constituent la porte de réfutation.
 
 Le raccord autoritaire ajoute encore trois gardes : les témoins sont des rangs
 de positions typés, pas des `PointId`; un `computed_patch_mask` distingue
@@ -535,19 +560,21 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
    sur q2/q3/q4 avant activation.
 2. **Fil fibre, développable en parallèle mais non autoritaire :** corriger
    ledger, caps, compteurs et échantillonnage du probe, installer les trois axes
-   d'état, puis ouvrir `g_AB[j]`, `t_C/t_CD` et les vues typées de handles en
-   counter-only. Prouver non-vacuité, provenance, rangs de positions,
-   `PointId` d'owner et continuations sans matérialiser `A x B x C` ou
-   `C x D`; seul `P[t]==0` reçoit un crédit de masse en vrac avant le ledger
-   pondéré, et aucun masquage n'est autorisé avant oracle.
+   d'état, puis ouvrir le fast path `global_common` sur un front de patches
+   réutilisable par `g_AB[j]`, `t_C`, le ledger q3 pondéré agrégé et les vues
+   typées de handles. Prouver non-vacuité, provenance, rangs de positions et
+   `PointId` d'owner sans matérialiser `A x B x C`. Un échec global rend
+   `UNKNOWN`; le shadow q3 ferme toute sa masse par histogrammes, même si
+   `P[t]>0`. Aucun masquage produit n'est autorisé avant oracle.
 3. Comparer ensuite les deux ordres chauds sur le vecteur causal et sur mur/HWM
    OFF/ON ; activer seulement les décisions exactes rentables. Garder les fates
    `EMPTY` au ledger d'oracle sans route autonome.
-4. Si le résiduel le justifie, ouvrir `AnchorLineSet`, l'oracle exhaustif borné
-   puis le shallow ; comparer en shadow `all-direct`, `all-shallow` et le
-   dispatch adaptatif. Tester la WSPD locale q4 comme ablation, jamais comme
-   prérequis. Fermer parallèlement les capacités d'override et les portes CUDA
-   avant tout reçu GPU.
+4. En q4, ajouter les neuf classes `s_H`, puis envoyer directement les faces
+   ternaires résiduelles à `Q4SeedAxisTopR4`; garder **tous** les sites témoins
+   admissibles pour son ranking. Comparer `threshold+axial` à l'oracle `CD`
+   borné. `Sym2`, la WSPD locale q4 et le stream exact de paires restent des
+   ablations, jamais des prérequis. Fermer parallèlement les capacités
+   d'override et les portes CUDA avant tout reçu GPU.
 5. Fermer ensuite G0/G1, fold vivant et grille selon leur ordre local ; aucun
    de ces chantiers ne doit masquer les compteurs de la nouvelle source.
 
