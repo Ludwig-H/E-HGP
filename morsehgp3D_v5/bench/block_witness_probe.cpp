@@ -1,5 +1,5 @@
 // MorseHGP3D v5 — SONDE (jamais un claim) : fibre A x B x C, vacuite par
-// boites, et chemin causal. Version 3.
+// boites, et chemin causal. Version 4.
 //
 // Historique des retractations, toutes des auditeurs, toutes acceptees :
 //   v1 -> v2 : `tb` comptait les temoins COMMUNS a toutes les boules du bloc,
@@ -16,8 +16,13 @@
 //     retires. La v3 ne publie plus qu'un CHEMIN CAUSAL : des appels reellement
 //     executes et des sorties anticipees, comptes par etage, et le cout du
 //     certificateur dans un compteur SEPARE. Aucune conversion en temps evite.
+//   v3 -> v4 : (a) l'echec du temoin commun devient UNKNOWN, jamais « patches
+//     necessaires » ; (b) le rayon autour du barycentre d'un bloc, normalise
+//     par sa premiere ancre, est retire. La mesure restante fixe (a,b) et
+//     compare le diametre exact des centres dans C au diametre 2*rho_ab du
+//     disque aigu de cette meme ancre.
 //
-// Ce que la v3 mesure :
+// Ce que la v4 mesure :
 //   1. le predicat ideal `all_valid_supports_depth_ge_h3` par bloc, avec le
 //      nombre d'appels de puissance REELLEMENT executes et les sorties
 //      anticipees, et non un majorant statique ;
@@ -41,6 +46,7 @@
 // Usage : mhgp5_block_witness_probe --family=F --n=N [--blocs=K] [--seed=S]
 //         [--cap-roles=R] [--cap-supports=T] [--coord=C]
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cstdio>
 #include <string>
@@ -234,20 +240,21 @@ int main(int argc, char** argv) {
   // Le gain marginal se decoupe encore en deux, et la distinction gouverne
   // la CONSTRUCTION du certificat. Un center-cover global credite les sites
   // interieurs a TOUTES les boules du bloc : s'il y en a h_3, un certificat
-  // UNIQUE suffit. Sinon le bloc peut encore mourir, mais seulement par
-  // PATCHES tues par des ensembles de temoins differents — la machinerie
-  // lourde de la note d'audit. Cette mesure dit combien elle est necessaire.
-  u64 marg_simple = 0, marg_patches = 0, pw_marg_simple = 0, pw_marg_patches = 0;
+  // UNIQUE suffit. Son echec ne prouve ni que des patches sont necessaires,
+  // ni qu'une factorisation h_a+h_b ne conclura pas : l'issue reste inconnue.
+  u64 marg_common_ok = 0, marg_common_unknown = 0;
+  u64 pw_marg_common_ok = 0, pw_marg_common_unknown = 0;
   // Ce qu'un certificat de BOITES capte reellement du certificat ideal.
   u64 boites_capte = 0, pw_boites_capte = 0, boites_appels = 0;
-  // V84 : de combien l'ensemble des centres retrecit-il quand on connait C ?
-  // Le certificat de PAIRE doit resister au DISQUE entier de rayon
-  // rho = D/(2 rac3) ; le certificat de BLOC ne doit resister qu'a
-  // l'ensemble reel des centres du bloc. Le rapport des deux rayons borne
-  // ce que la construction disque inter bande peut esperer : s'il vaut 1,
-  // connaitre C n'apporte rien ; s'il est petit, il y a de la place.
-  // MESURE seulement : centres en flottant, jamais une decision.
-  double ratio_somme = 0.0; u64 ratio_n = 0; double ratio_max = 0.0;
+  // V84 corrigee : pour une ANCRE FIXE (a,b), diametre des centres exacts
+  // produits par les carriers du handle C, normalise par le diametre
+  // 2*rho_ab = D/sqrt(3) du disque aigu de CETTE MEME ancre. Ce rapport est
+  // dans [0,1]. Il ne mesure ni une aire, ni le cover du rectangle WSPD ;
+  // il isole seulement le retrecissement exact apporte par C a ancre fixe.
+  // MESURE flottante sur tous les blocs non capes, jamais une decision.
+  double ratio_somme = 0.0, ratio_multi_somme = 0.0, ratio_max = 0.0;
+  u64 ratio_n = 0, ratio_multi_n = 0, ratio_over_one = 0;
+  u64 ratio_center_evals = 0, ratio_pair_tests = 0;
   // Croisement : parmi les vides que les BOITES ne classent pas, quelle est
   // la cause reelle ? C'est la question V68.
   u64 nc_lentille = 0, nc_acuite = 0, nc_owner = 0, nc_zero = 0;
@@ -258,6 +265,7 @@ int main(int argc, char** argv) {
   std::vector<Q3Form> formes;
   std::vector<std::pair<i32, i32>> ancres;
   std::vector<i32> carriers;
+  std::vector<std::array<double, 3>> centres_ancre;
 
   for (const AliveRect& ar : alive) {
     const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
@@ -383,6 +391,42 @@ int main(int argc, char** argv) {
       if (cause != 0) ++cert_faux_positif;
       ++juges;
 
+      // Geometrie V84 a ancre FIXE. `formes` est groupe par (ua,ub), car la
+      // force brute enumere d'abord les deux endpoints puis le carrier.
+      for (size_t first = 0; first < formes.size();) {
+        size_t last = first + 1;
+        while (last < formes.size() && ancres[last] == ancres[first]) ++last;
+        centres_ancre.clear();
+        centres_ancre.reserve(last - first);
+        for (size_t t = first; t < last; ++t) {
+          ++ratio_center_evals;
+          const double g2 = 2.0 * (double)formes[t].g;
+          centres_ancre.push_back({
+              (double)formes[t].a.x + (double)formes[t].w[0] / g2,
+              (double)formes[t].a.y + (double)formes[t].w[1] / g2,
+              (double)formes[t].a.z + (double)formes[t].w[2] / g2});
+        }
+        double diam2 = 0.0;
+        for (size_t i = 0; i < centres_ancre.size(); ++i)
+          for (size_t j = i + 1; j < centres_ancre.size(); ++j) {
+            ++ratio_pair_tests;
+            const double dx = centres_ancre[i][0] - centres_ancre[j][0];
+            const double dy = centres_ancre[i][1] - centres_ancre[j][1];
+            const double dz = centres_ancre[i][2] - centres_ancre[j][2];
+            diam2 = std::max(diam2, dx * dx + dy * dy + dz * dz);
+          }
+        const P3& pa0 = ix.upos[(size_t)ancres[first].first];
+        const P3& pb0 = ix.upos[(size_t)ancres[first].second];
+        const i64 D2 = p3_norm2(p3_sub(pb0, pa0));
+        const double ratio = std::sqrt(3.0 * diam2 / (double)D2);
+        ratio_somme += ratio;
+        ++ratio_n;
+        if (centres_ancre.size() >= 2) { ratio_multi_somme += ratio; ++ratio_multi_n; }
+        ratio_max = std::max(ratio_max, ratio);
+        if (ratio > 1.0 + 1e-12) ++ratio_over_one;
+        first = last;
+      }
+
       // --- PREDICAT IDEAL : tout support valide a-t-il >= h3 interieurs
       // stricts ? Sortie anticipee a h3 : la profondeur exacte n'est PAS
       // calculee au-dela, d'ou le nom.
@@ -434,35 +478,8 @@ int main(int argc, char** argv) {
             if (!(q3_power(formes[t], ix.upos[(size_t)uz]) < 0)) universel = false;
           if (universel && ++communs >= h3) break;
         }
-        if (communs >= h3) { ++marg_simple; pw_marg_simple += pw_bloc; }
-        else { ++marg_patches; pw_marg_patches += pw_bloc; }
-        // Rayon reel de l'ensemble des centres du bloc, contre rho de la paire.
-        {
-          double cx = 0, cy = 0, cz2 = 0;
-          std::vector<double> px(formes.size()), py(formes.size()), pz(formes.size());
-          for (size_t t = 0; t < formes.size(); ++t) {
-            const double g2 = 2.0 * (double)formes[t].g;
-            px[t] = (double)formes[t].a.x + (double)formes[t].w[0] / g2;
-            py[t] = (double)formes[t].a.y + (double)formes[t].w[1] / g2;
-            pz[t] = (double)formes[t].a.z + (double)formes[t].w[2] / g2;
-            cx += px[t]; cy += py[t]; cz2 += pz[t];
-          }
-          const double m = (double)formes.size();
-          cx /= m; cy /= m; cz2 /= m;
-          double r2max = 0.0;
-          for (size_t t = 0; t < formes.size(); ++t) {
-            const double dx = px[t] - cx, dy = py[t] - cy, dz = pz[t] - cz2;
-            r2max = std::max(r2max, dx * dx + dy * dy + dz * dz);
-          }
-          // rho de la paire, pris sur l'ancre du premier support du bloc.
-          const P3& pa0 = ix.upos[(size_t)ancres[0].first];
-          const P3& pb0 = ix.upos[(size_t)ancres[0].second];
-          const double rho = std::sqrt((double)p3_norm2(p3_sub(pb0, pa0)) / 12.0);
-          if (rho > 0) {
-            const double r = std::sqrt(r2max) / rho;
-            ratio_somme += r; ++ratio_n; ratio_max = std::max(ratio_max, r);
-          }
-        }
+        if (communs >= h3) { ++marg_common_ok; pw_marg_common_ok += pw_bloc; }
+        else { ++marg_common_unknown; pw_marg_common_unknown += pw_bloc; }
         // Le meme bloc, juge par un certificat de BOITES seul.
         u64 credites = 0;
         for (const i32 uz : candidats) {
@@ -481,7 +498,7 @@ int main(int argc, char** argv) {
   }
 
   const double mur = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
-  std::printf("block_witness_v3 pin=%s worktree_modifie=%s\n", MHGP5_PROBE_PIN, MHGP5_PROBE_DIRTY);
+  std::printf("block_witness_v4 pin=%s worktree_modifie=%s\n", MHGP5_PROBE_PIN, MHGP5_PROBE_DIRTY);
   std::printf("  famille=%s n=%d coord=%d seed=%d digest_entree=%016llx h3=%llu n_unique=%llu\n",
               cloud_family_name(family), n, coord, seed, (unsigned long long)digest,
               (unsigned long long)h3, (unsigned long long)nu);
@@ -530,19 +547,23 @@ int main(int argc, char** argv) {
                 (unsigned long long)pw_deja_w3, tot ? 100.0 * (double)pw_deja_w3 / tot : 0.0);
     std::printf("    GAIN MARGINAL visable par un certificat de bloc = %llu (%.1f %%)\n",
                 (unsigned long long)pw_gain_marginal, tot ? 100.0 * (double)pw_gain_marginal / tot : 0.0);
-    const double marg = (double)(pw_marg_simple + pw_marg_patches);
-    std::printf("      dont CERTIFICAT UNIQUE suffit (>= h3 temoins communs) : %llu blocs, %llu appels (%.1f %% du marginal)\n",
-                (unsigned long long)marg_simple, (unsigned long long)pw_marg_simple,
-                marg ? 100.0 * (double)pw_marg_simple / marg : 0.0);
-    std::printf("      dont PATCHES necessaires (temoins incompatibles)      : %llu blocs, %llu appels (%.1f %% du marginal)\n",
-                (unsigned long long)marg_patches, (unsigned long long)pw_marg_patches,
-                marg ? 100.0 * (double)pw_marg_patches / marg : 0.0);
+    const double marg = (double)(pw_marg_common_ok + pw_marg_common_unknown);
+    std::printf("      dont TEMOINS COMMUNS suffisants (>= h3)               : %llu blocs, %llu appels (%.1f %% du marginal)\n",
+                (unsigned long long)marg_common_ok, (unsigned long long)pw_marg_common_ok,
+                marg ? 100.0 * (double)pw_marg_common_ok / marg : 0.0);
+    std::printf("      dont TEMOINS COMMUNS insuffisants (issue UNKNOWN)     : %llu blocs, %llu appels (%.1f %% du marginal)\n",
+                (unsigned long long)marg_common_unknown, (unsigned long long)pw_marg_common_unknown,
+                marg ? 100.0 * (double)pw_marg_common_unknown / marg : 0.0);
     std::printf("      CERTIFICAT PAR BOITES (intervalles diriges, Pi_upper < 0) : %llu blocs, %llu appels "
                 "(%.1f %% du marginal) — cout %llu evaluations\n",
                 (unsigned long long)boites_capte, (unsigned long long)pw_boites_capte,
                 marg ? 100.0 * (double)pw_boites_capte / marg : 0.0, (unsigned long long)boites_appels);
-    std::printf("      RETRECISSEMENT des centres par C : rayon reel / rho_paire = %.3f en moyenne, %.3f au pire (%llu blocs)\n",
-                ratio_n ? ratio_somme / (double)ratio_n : 0.0, ratio_max, (unsigned long long)ratio_n);
+    std::printf("      CENTRES A ANCRE FIXE dans C [tous blocs non capes non vides] : diametre / (2*rho_ab) = %.3f en moyenne ; %.3f si >=2 centres ; %.3f au pire (%llu groupes, %llu multi, %llu >1 ; %llu centres, %llu paires)\n",
+                ratio_n ? ratio_somme / (double)ratio_n : 0.0,
+                ratio_multi_n ? ratio_multi_somme / (double)ratio_multi_n : 0.0, ratio_max,
+                (unsigned long long)ratio_n, (unsigned long long)ratio_multi_n,
+                (unsigned long long)ratio_over_one, (unsigned long long)ratio_center_evals,
+                (unsigned long long)ratio_pair_tests);
     std::printf("    inherent (un support survit, rien a eviter)    = %llu (%.1f %%)\n",
                 (unsigned long long)pw_inherent, tot ? 100.0 * (double)pw_inherent / tot : 0.0);
   }
@@ -552,6 +573,6 @@ int main(int argc, char** argv) {
   std::printf("    certificateur de boites (compteur SEPARE) : %llu evaluations de bornes\n",
               (unsigned long long)cout_certificateur);
   std::printf("  mur=%.1f s rss_hwm_kb=%llu\n", mur, (unsigned long long)rss_hwm_kb());
-  if (ledger_ko != 0 || cert_faux_positif != 0 || invariant_viole != 0) return 3;
+  if (ledger_ko != 0 || cert_faux_positif != 0 || invariant_viole != 0 || ratio_over_one != 0) return 3;
   return 0;
 }
