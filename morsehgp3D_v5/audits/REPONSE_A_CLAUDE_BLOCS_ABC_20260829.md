@@ -3,11 +3,12 @@
 - **Échange relu :** `7bf28488` (`block_witness_probe` v2), contre-audit
   `b74d8050`, raccord d'enveloppe `7e0ffe79`, probe v3 `1ff39ab9`, questions
   V67--V69 de `a0621897`, V68/V70--V72 de `91af69ff`, puis V71/V73--V75 de
-  `b9646d1a`, mesure V74/V76--V78 de `50b85e16` et V79--V81 de `9a51a729`,
-  consolidées ci-dessous.
+  `b9646d1a`, mesure V74/V76--V78 de `50b85e16`, V79--V81 de `9a51a729`,
+  puis V80/V82--V84 de `650b3cff`, consolidées ci-dessous.
 - **Statut :** prédicat idéal reçu au seuil ; enveloppe de scan reçue mais sans
   effet sur l'exposant ; ledger q3 pondéré maintenant factorisé sans
-  `A x B` ; plafond de coût V74 et certificat de bloc produit non reçus.
+  `A x B` ; AABB brut de $\Pi$ reçu comme résultat négatif, mais plafond de
+  coût V74 et certificat de centres par patches non reçus.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -497,6 +498,98 @@ le pin historique `1ff39ab9`; un rebuild local au vrai pin `9a51a729` reproduit
 la ligne `uniform` (`867/31`, `1219444/47508`) en `18,8 s`, mais aucune commande
 ni sortie brute n'est publiée comme reçu.
 
+### Réponses V82--V84 au pin `650b3cff`
+
+- **V82 — retirer l'intervalle brut sur `Pi` du chemin candidat.** Au pin
+  propre `650b3cff`, après reconfiguration CMake, trois replays
+  `n=3000,seed=3,800` blocs captent respectivement `0`, `1` et `0` blocs sur
+  `uniform`, `terrain` et `scanline_single_pass`, soit `0 %`, `0,1 %` et
+  `0 %` des appels marginaux, pour `101196`, `41943` et `53666` évaluations
+  d'intervalles. C'est sûr dans ces replays mais inerte. Le pin
+  `1ff39ab9,worktree_modifie=non` imprimé par les runs 8k--32k de la réponse de
+  Claude venait de définitions CMake en cache et ne peut pas certifier le code
+  ajouté à `650b3cff`; ces grands nombres restent diagnostiques. Ils ne
+  « confirment » pas davantage des **patches nécessaires** : ils séparent
+  seulement `exact_common_sufficient/insufficient` dans la cohorte marginale
+  censurée, à deux familles et une seed. `h_a+h_b` ou une autre factorisation
+  peut encore fermer la seconde classe. Conserver la
+  primitive comme contre-sonde négative et lui donner une fixture permanente
+  boîtes ponctuelles/boîtes étendues. L'égalité sur boîtes ponctuelles valide
+  l'implémentation d'intervalles, mais ne constitue pas un oracle géométrique
+  indépendant de q3 puisqu'elle recopie la même forme de Gram. Avant tout
+  nouveau reçu, reconfigurer au pin propre et comparer le `HEAD`/dirty externe
+  au stamp imprimé ; à terme, remplacer l'`execute_process` de configuration
+  par un stamp de build ou un runner gardé. Un binaire ne peut pas certifier
+  une modification postérieure à sa configuration.
+- **V83 — oui à la variable centre, avec deux corrections.** Noter `o` le
+  circumcentre pour ne pas le confondre avec le carrier `c`. L'identité est
+  correcte :
+
+$$\psi(o,a;z)=2o\mathbin{\cdot}(z-a)+\lVert a\rVert^{2}-\lVert z\rVert^{2}=\lVert a-o\rVert^{2}-\lVert z-o\rVert^{2}.$$
+
+  Pour `o` fixé, le minimum sur la relaxation cartésienne
+  `Box(A) intersect Z^3` est séparable et choisit par axe l'entier admissible
+  le plus proche de `o_i`. Il est exact pour cette boîte, donc seulement un
+  minorant sûr pour l'ensemble clairsemé des endpoints réellement contenus
+  dans le nœud `A`. Après ce minimum, toutefois, la fonction n'est plus
+  affine :
+
+$$f_A(o;z)=\min_{a\in \mathrm{Box}(A)\cap\mathbb{Z}^{3}}\psi(o,a;z).$$
+
+  Elle est **concave**, car minimum ponctuel de fonctions affines de `o`.
+  C'est précisément suffisant : sur un patch polyédral convexe `Q`, son
+  minimum est atteint à un sommet. Pour une boîte de centres, huit évaluations
+  exactes donnent donc
+  `L_A(Q,z)=min_{o vertex of Q} f_A(o;z)`, et symétriquement `L_B`. Le test
+  `max(L_A,L_B)>0` certifie `z` intérieur à toute boule dont le centre vit dans
+  `Q`. Il s'agit exactement du noyau mathématique de `g_AB`, pas d'une nouvelle
+  route concurrente.
+
+  La version **nœud** est tout aussi finie et donne l'implémentation exacte à
+  mesurer. Pour une échelle entière positive `S`, écrire `q=S*o` et multiplier
+  le prédicat strict par `S` :
+
+$$\Phi_S(q,a,z)=S\psi(o,a;z)=2q\mathbin{\cdot}(z-a)+S\left(\lVert a\rVert^{2}-\lVert z\rVert^{2}\right).$$
+
+  Si `Q` est une boîte de centres en coordonnées `q` et `W` une boîte de
+  témoins entiers, la borne cartésienne exacte est :
+
+$$L_S(Q,A,W)=\min_{q\in\mathrm{Vert}(Q)}\sum_{i=1}^{3}\left(\min_{r\in\left\lbrace W_i^{\min},W_i^{\max}\right\rbrace}(2q_i r-Sr^2)+\min_{r\in[A_i^{\min},A_i^{\max}]\cap\mathbb{Z}}(Sr^2-2q_i r)\right).$$
+
+  Le premier minimum teste les deux extrémités ; le second teste la division
+  entière signée `floor(q_i/S)` et son successeur, tous deux clampés dans la
+  plage. Le minimum sur `q` est aux huit sommets parce que la minimisation sur
+  `a,z` donne encore un minimum de fonctions affines, donc une fonction
+  concave de `q`. Ainsi `max(L_S(Q,A,W),L_S(Q,B,W))>0` crédite le nœud `W` en
+  bloc pour le patch `Q`; l'égalité reste fail-open. Avec `S=32`, c'est le
+  contrat court attendu de `L32`. Employer des opérations signées exactes et
+  vérifier la borne de largeur du patch u16 avant le premier produit.
+
+  L'obstacle restant est le **cover des centres**. Pour une paire ponctuelle,
+  les centres aigus dont `AB` est maximale vivent bien dans le disque du plan
+  bissecteur de rayon transversal `|AB|/(2*sqrt(3))`. Pour les boîtes variables
+  `A x B` et le carrier `C`, l'union des plans/disques n'est pas ce disque fixe,
+  et `disque intersect bande` possède en outre une infinité de points extrêmes.
+  Il faut donc prouver une union finie de sur-patches rationnels. Les 64 patches
+  P1 et leurs masques de médiatrices fournissent déjà ce candidat : conserver
+  tout vrai centre, tolérer les faux, et ne jamais prendre un masque non vide
+  pour une preuve d'existence. Un nouveau disque/bande ne doit être codé que
+  s'il resserre ce cover avec une inclusion exacte vérifiée.
+- **V84 — GO au plafond du bon objet, avant le produit.** Ajouter les helpers
+  purs `center_patch_point_credit(Q,A,B,z)` puis
+  `center_patch_node_credit(Q,A,B,W)` avec la formule ci-dessus, confrontés à
+  l'énumération exacte sous cap, puis les brancher en shadow sur le front de
+  patches déjà prévu. Pour un témoin global, le même rang de position doit être crédité sur
+  **tous** les patches faisables de l'union des handles ; pour `g_AB[j]`, les
+  crédits restent séparés par patch. Publier la matrice
+  `exact_common x certified_global x certified_patch`, les patches testés et
+  les nœuds/sites lus, sur tous les blocs et au moins trois seeds. Le test
+  ponctuel mesure le plafond ; le candidat produit emploie ensuite la borne de
+  nœud `L32` et une antichaîne de l'arbre, sinon il remplace seulement les
+  appels `q3_power` par un autre scan linéaire par bloc. Succès global donne
+  `PRUNE_NO_EMISSION`; échec reste `UNKNOWN` et le même front poursuit `g_AB`
+  sans repartir de la racine.
+
 Le split de `C` n'est pas « identique » dans tous ses usages. Employé seulement
 pour mieux reconnaître `EMPTY`, il répète effectivement le mécanisme peu
 prometteur du raffinement post-séparation. Employé sous budget pour résoudre le
@@ -688,14 +781,19 @@ $$\mathrm{depth}(t)\geq h_0^F+h_a^F(a)+h_b^F(b)+h_c^F(c).$$
 
 `corner_histograms` ne calcule pas ces intersections exactes dépendantes de
 `F`. Il calcule des ensembles facteurs certifiés par $W_q$, une fois pour
-`(A,B)`. Leurs cardinalités, notées conceptuellement
-`h_a_factor(a),h_b_factor(b)`, sont des **minorants** de $h_a^F,h_b^F$ pour
-toute fibre compatible. Par convention historique, le reste de cette note et
-le code les appellent encore `h_a,h_b`; « exact » signifie seulement « compte
-exact du sous-ensemble certifié par le facteur », jamais « cardinalité exacte
-de la fibre `F` ». Après un split de `C`, les ensembles exacts de la fibre
-enfant peuvent grandir, tandis que les facteurs cachés restent inchangés et
-sûrs : ils s'héritent comme minorants, pas comme comptes exacts de l'enfant.
+`(A,B)`. Pour tout triplet valide `t`, chaque témoin facteur appartient à
+`I_t` et minore donc sûrement `depth(t)`. Si la fibre fixée est **non vide**,
+le sous-ensemble facteur est inclus dans son intersection exacte et sa
+cardinalité, notée conceptuellement `h_a_factor(a)` ou `h_b_factor(b)`, minore
+bien $h_a^F(a)$ ou $h_b^F(b)$. Si la fibre est vide, la convention impose au
+contraire $h_a^F=0$ ou $h_b^F=0$ : aucune comparaison numérique avec le compte
+facteur, éventuellement positif, n'est revendiquée ; la sûreté est vacante
+faute de support. Par convention historique, le reste de cette note et le
+code appellent encore ces comptes `h_a,h_b`; « exact » signifie seulement
+« compte exact du sous-ensemble certifié par le facteur », jamais
+« cardinalité exacte de la fibre `F` ». Après un split de `C`, ils restent des
+crédits sûrs pour chaque support enfant valide, mais ne deviennent ni une
+preuve de non-vacuité, ni les comptes exacts des fibres enfants.
 
 Le premier incrément doit néanmoins omettre $h_c$. Il réutilise les tableaux
 `h_a(a),h_b(b)` de $W_3$, déjà calculés une fois par rectangle, et le crédit
@@ -951,14 +1049,18 @@ peut maintenant fermer exactement
 `full=outside+empty+pending+depth_killed+proposed`, puis la tape complète ferme
 `3*choose3(n_unique)` en ajoutant les rectangles morts avant `AliveRect`.
 Les cinq termes sont des **actions primaires disjointes** sur la même masse
-brute ; les `proof_kinds` peuvent se recouvrir mais ne créent pas une seconde
-inscription. Toutes les multiplications des totaux positifs sont promues en
-`u128` avant le produit. Les formules avec corrections sont accumulées en
-`i128`, vérifiées non négatives, puis converties en `u128`; une soustraction
-non vérifiée en arithmétique non signée est interdite. Un parent et ses enfants ne figurent jamais
-simultanément dans ce ledger ; un split remplace le parent atomiquement. Si le
-seuil varie à l'intérieur d'un handle, il faut le scinder, le stratifier ou le
-laisser `PENDING`.
+brute ; une table de précédence ou une affectation terminale exacte-once est
+obligatoire, car `proof_kinds` peut se recouvrir et `M_proposed` contient
+encore des rôles que l'acuité ou l'owner rejetteront. Ces preuves concurrentes
+ne créent jamais une seconde inscription. Toutes les multiplications des
+totaux positifs sont promues en `u128` avant le produit. Les formules avec
+corrections sont accumulées en `i128`, vérifiées non négatives, puis converties
+en `u128`; une soustraction non vérifiée en arithmétique non signée est
+interdite. La borne `NodeRange` en `i32` garde ici les produits q3 sous
+`i128`, mais l'ABI vérifie cette borne avant toute conversion `u128 -> i128`.
+Un parent et ses enfants ne figurent jamais simultanément dans ce ledger ; un
+split remplace le parent atomiquement. Si le seuil varie à l'intérieur d'un
+handle, il faut le scinder, le stratifier ou le laisser `PENDING`.
 
 Cette fermeture règle la comptabilité pondérée q3, pas nécessairement son
 terminal : l'émission effective peut encore être proportionnelle à
@@ -969,9 +1071,21 @@ ABI minimale proposée, avec tableaux de taille dix fixés au profil courant :
 
 ```cpp
 struct Q3FactorBins {
-  u8 cap;
+  RectId rect;
+  Lane lane;
+  u64 grid_epoch;
+  NodeRef a_node, b_node;
+  u8 decision_cap;
+  // Un bin par endpoint est requis pour former A_i^C et B_i^C.
+  std::vector<u8> ha_bin, hb_bin;
   std::array<u64, 10> a, b, a_lt, b_lt;
   std::array<u128, 10> pair_lt;
+};
+
+struct Q3CarrierHandle {
+  NodeRef carrier;
+  u8 threshold;
+  PrimaryFate primary_fate;
 };
 
 struct Q3RoleLedger {
@@ -981,11 +1095,18 @@ struct Q3RoleLedger {
 ```
 
 Le scratch ajoute `weight_by_t[10]`, `a_intersection_by_t[10][10]` et
-`b_intersection_by_t[10][10]`. `close_q3_roles` vérifie `RectId`, lane, cap,
-antichaîne, epoch de grille et plages avant le premier cumul. Les préfixes
-valent zéro pour un indice inférieur ou égal à zéro et leur total pour un
-indice supérieur au cap ; cette convention retire toute branche fragile sur
-`t-i`.
+`b_intersection_by_t[10][10]`. `close_q3_roles` reçoit en plus une frontier
+opaque de `Q3CarrierHandle`, complète, disjointe et triée ; il vérifie
+`RectId`, lane, cap, antichaîne, epoch de grille et plages avant le premier
+cumul. Les `proof_kinds` ne choisissent jamais `primary_fate`. Les préfixes
+valent zéro pour un indice inférieur ou égal à zéro et ne sont définis que
+pour un indice au plus égal au cap ; un indice supérieur est un rejet de
+contrat, car un bin saturé `cap` signifie « au moins cap », pas « exactement
+cap ». Ici `t-i<=cap` par construction. Si le second facteur est interrogé au
+petit cap `N-m`, son sentinel doit être canonisé au bin global `N` avec la
+preuve que tout endpoint du premier facteur vaut au moins `m`, ou bien l'ABI
+porte deux caps et restreint les préfixes à leur domaine. Mélanger le petit cap
+de requête avec `Q3FactorBins{decision_cap=N}` est interdit.
 
 Elle rend aussi les deux ordres de coût explicites. Dans l'ordre center-first,
 former les handles et leurs masques, calculer `g_AB` seulement sur leur union,
@@ -1045,8 +1166,10 @@ le sous-domaine n'est pas prouvé cartésien après acuité, owner et diagonales
 ```text
 RectId(A,B), patches et positions du core
   -> h_a/h_b saturés + parité avec corner_histograms + bitsets B_lt[t]
-  -> raw_cover/witness/seed handles C + masse de rôles + fates + masques
-     AB/AC/BC
+  -> carrier_partition C complète/disjointe + masse de rôles + fates +
+     masques AB/AC/BC ; seed_capability attachée séparément
+  -> certificate_source et exact_census_source typées, sans autorité sur la
+     taille des carriers ni sur leurs intersections avec A/B
   -> union des patches actifs + global_common (succès=prune, échec=UNKNOWN)
   -> reprendre le même front pour remplir g_AB, sans rescan de racine
   -> seuil t_C + ledger q3 pondéré agrégé par seuil, sans A x B
@@ -1083,13 +1206,19 @@ fixe l'ordre de développement après la parité des facteurs. Le hot path
 conserve l'ablation center-first décrite plus haut : il ne doit pas payer
 simultanément les deux ordres.
 
-Un split de `C` raffine seulement ses vues de supports ; son parent reste dans
-la source de certificats ou de census tant que cette vue n'est pas remplacée
-explicitement. Pour un enfant, `Q/core/g_AB` et les **minorants facteurs**
-`h_a/h_b` restent valides, `M_child` est inclus dans `M_parent` et
-`t_child<=t_parent`; les facteurs capés au seuil parent restent donc
-réutilisables. Ils ne deviennent pas les cardinalités exactes de la fibre
-enfant. En revanche, un futur `h_c` scalaire ne s'hérite pas : son domaine
+Un split de `C` raffine seulement ses vues de supports. La partition de rôles
+remplace atomiquement le parent par les enfants ; une source de témoins ou de
+census peut garder le parent **ou** ses enfants, jamais les deux sans une
+déduplication explicite des positions et une nouvelle antichaîne. Pour un
+enfant, `Q/core/g_AB` et les comptes facteurs `h_a/h_b` restent des crédits
+sûrs pour chacun de ses supports valides, `M_child` est inclus dans `M_parent`
+et `t_child<=t_parent`; les facteurs capés au seuil parent restent donc
+réutilisables. Ils ne deviennent ni les cardinalités exactes de la fibre
+enfant, ni une preuve que celle-ci est non vide. `existence=NONEMPTY` du parent
+ne s'hérite qu'à l'enfant contenant un support témoin identifié ; les autres
+enfants restent `UNKNOWN`. De même, un prune universel peut porter
+`action=PRUNE_NO_EMISSION`, mais `depth=ALL_DEEP` exige la non-vacuité propre
+de l'enfant. En revanche, un futur `h_c` scalaire ne s'hérite pas : son domaine
 change avec le sibling ; filtrer les positions ou le recalculer. Un
 split de `A` ou `B` change `RectId`, les patches et les domaines de
 `h_a/h_b/g_AB` : tous ces crédits sont invalidés, sauf sets de positions typés
@@ -1179,8 +1308,9 @@ masse n'est inscrite qu'une fois dans le ledger : les patches certifient une
 décision, ils ne créent aucune provenance supplémentaire.
 
 La réduction de seuil q3 se transporte sans catalogue de produits. Pour une
-paire de handles visitée paresseusement, former son masque `M_CD` avec les six
-médiatrices. Un masque vide ferme le bloc sans autre calcul ; sinon poser :
+paire de handles visitée paresseusement, former son masque **raffiné mais
+conservatif** `M_CD` avec les six médiatrices. Un masque vide ferme le bloc
+sans autre calcul ; sinon poser :
 
 $$t_{CD}=\max_{j\in M_{CD}}\max\left(0,h_4-\max\left(h_{\mathrm{core}},g4_{AB,j}\right)\right).$$
 
@@ -1216,11 +1346,15 @@ l'on cherche à retirer.
 
 La réduction sûre est plus grossière et beaucoup plus utile. Pour le masque
 mono-handle de **complétion** `mu_H`, avant la médiatrice `CD`, poser `s_H=0`
-si le masque est vide, sinon `s_H=max_{j in mu_H}(t_j)`. Ce masque conserve les
+si le masque est vide, sinon `s_H=max_{j in mu_H}(t_j)`. Tout bit faisable dont
+`g4_AB[j]` n'a pas été calculé contribue avec `g=0`, donc avec le seuil
+fail-open `h4-max(core,0)` ; l'omettre sous-estimerait `s_H` et rendrait faux
+le prune `s_H<=u`. Ce masque conserve les
 équations possibles du sommet opposé ; ce n'est jamais le masque d'acuité du
 seed. Sinon la fixture `ABc` aiguë / `ABd` droite perdrait la complétion `d`.
-Le masque exact d'une paire est inclus dans `mu_C intersect mu_D`; par
-conséquent :
+Le masque raffiné d'une paire, qui reste un sur-ensemble et dont la non-vacuité
+ne prouve jamais l'existence d'un tétraèdre, est inclus dans
+`mu_C intersect mu_D`; par conséquent :
 
 $$t_{CD}\leq\min(s_C,s_D).$$
 
@@ -1229,16 +1363,26 @@ tel que `s_H<=u` est donc tuée par le certificateur, sans calculer `CD`. Les
 seuls handles de complétion encore actifs satisfont `s_H>u`. Comme `h4=8`, il
 n'existe que neuf classes de seuil ; les séparer aussi par le bit
 `seed_possible` donne au plus dix-huit classes. Le stream des handles remplit
-leurs unions et tailles en `O(k)`. Les bins d'intersection avec `A/B` coûtent
-en plus `O(|A|+|B|)` avec une provenance `position -> handle/classe`, ou
-réemploient des résumés par handle déjà construits ; ils ne sont pas gratuits.
+leurs unions et tailles en `O(k+H)`, où `H=sum_H |H|` compte les positions
+parcourues. Sous le cover actuel seulement, `|H|<=32` donne `H=O(k)` ; cette
+constante est une précondition, pas une identité générale. Les bins
+d'intersection avec `A/B` coûtent en plus `O(|A|+|B|)` avec une provenance
+`position -> handle/classe`, ou réemploient des résumés par handle déjà
+construits ; ils ne sont pas gratuits. Ne jamais allouer ou remettre à zéro un
+tableau de taille `n` par rectangle : utiliser les seules plages du cover ou
+des stamps.
 Les formules traitent ensuite un nombre constant de paires de classes, avec un
 facteur borné par `h4`. C'est un préfiltre q4 linéaire en handles **après ces
 facteurs**, exact pour sa relaxation et fail-open pour la médiatrice omise.
 
 L'implémentation n'a besoin que d'un tableau
-`Q4HandleClass classes[9][2]`. Chaque case agrège `handle_count`, masse de
-positions, union logique des handles, bins `A intersection U` et
+`Q4HandleClass classes[9][2]`. Le second axe est
+`certified_no_seed/seed_possible`, où `seed_possible` regroupe `YES` et
+`UNKNOWN`; `NO` signifie que tout le handle est certifié non aigu, jamais
+« aucun seed observé ». Une propriété oracle doit vérifier le lemme utilisé
+par le gate exact-once : tout support q4 admissible possède au moins une des
+deux faces incidentes à l'owner qui soit aiguë. Chaque case agrège
+`handle_count`, masse de positions, union logique des handles, bins `A intersection U` et
 `B intersection U`, plus le bit de non-vacuité du groupe. Ces unions ne
 deviennent jamais des boîtes géométriques autoritaires : elles portent
 seulement le ledger et la liste de carriers. Les décisions géométriques restent
@@ -1250,7 +1394,7 @@ Avant le gate seed et les fates distinct-ID/non-vacuité, le nombre exact de
 q4 ni le nombre de continuations non vides ; les formules pondérées sur les
 unions de classes donnent la masse distinct-ID, puis les fates donnent les
 continuations réelles.
-Une paire de classes dont les deux capacités valent `seed_possible=false` est
+Une paire de classes dont les deux capacités valent `certified_no_seed` est
 écartée par le gate ; toute autre classe non certifiée reste `PENDING`, jamais
 « existante » par construction.
 
@@ -1263,8 +1407,12 @@ Le chemin constructif est donc : seuils mono-handle, carriers ternaires
 résiduels issus de `seed_handles` avec `s_H>u`, puis `Q4SeedAxisTopR4` pour
 chaque face fixe. Le replay exact v5 conserve seulement une complétion `y` dont
 le handle vérifie aussi `s_H(y)>u`, puis réapplique distinct-ID, owner6,
-positivité et seed canonique ; il borne les groupes de racines par
-`2*(h4-p)<=16` sous ses préconditions requalifiées.
+positivité et seed canonique ; il borne le **nombre de groupes de racines** par
+`2*(h4-p)<=16` sous ses préconditions requalifiées. Cette borne ne limite ni
+les IDs d'un groupe, ni une coquille d'égalité : les ties restent complets,
+avec compteurs `root_group_sites/max_tie/shell` et fate explicite en cas de
+cap. Les comparaisons de racines et d'extrémités restent exactes dans la
+largeur requalifiée ; ni `double`, ni `i128` non prouvé ne décide.
 
 Tous les handles, y compris ceux dont le rôle d'apex a été tué par `s_H`,
 restent disponibles à la `certificate_source`; aucune capacité de seed ne

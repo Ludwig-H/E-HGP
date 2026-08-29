@@ -40,14 +40,19 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   center-cover pris isolément.
   Le seuil `t_C` condense les patches et réutilise les bitsets `B_lt[t]` sans
   `A x B x C`; les histogrammes d'intersection ferment exactement la masse q3
-  même pour `P[t]>0`, en temps linéaire en handles après les facteurs. En q4,
+  même pour `P[t]>0`, en `O(|A|+|B|+k+h3^2)` après les visites d'arbre, ou en
+  `O(k+h3^2)` seulement si l'index position--handle a déjà été construit et
+  comptabilisé. En q4,
   neuf classes `s_H` retirent le produit `C x D`, puis les faces ternaires
   résiduelles passent au terminal axial ; `t_CD` reste un oracle borné. Cover
   brut, partition de complétions, capacité de seed, source de certificats et
-  census exact restent séparés : une sous-source sonore suffit à un minorant,
+  census exact restent séparés : une sous-source sonore suffit à un crédit
+  sûr pour chaque support valide,
   tandis que le ranking/census q4 exige l'arbre entier ou une source complète
-  prouvée. Les `h_a/h_b` historiques sont des minorants facteurs après split,
-  pas les cardinalités exactes de la fibre enfant. Témoins de position, masque
+  prouvée. Les `h_a/h_b` historiques ne minorent numériquement l'intersection
+  exacte que pour une fibre non vide ; sur une fibre vide ils restent seulement
+  des crédits vacuement sûrs par support et ne prouvent aucune non-vacuité.
+  Témoins de position, masque
   de patches calculés et prédicat seed q4 symétrique sont explicites. La
   réponse V73--V81 reçoit le retrait de `EMPTY` comme priorité
   produit, réfute le faux plafond 95--99 % censuré au premier shallow et la
@@ -58,7 +63,11 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   L'universel autorise un prune sans promouvoir `ALL_DEEP` tant que l'existence
   reste inconnue. Le shadow visite tous les blocs ; une sélection préalable des
   non vides serait circulaire.
-  `Lca3Forest` reste une ablation de ledger, pas une route produit.
+  La réponse V82--V84 retire le repli brut par intervalles sur `Pi`, reproduit
+  son inertie au pin propre `650b3cff`, puis ramène la proposition de Claude au
+  noyau centre/patch de `g_AB` : minimum concave aux sommets des patches,
+  masque conservatif et front d'arbre réutilisé. `Lca3Forest` reste une
+  ablation de ledger, pas une route produit.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : décisions et dents restantes de la lane device.
 - [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.

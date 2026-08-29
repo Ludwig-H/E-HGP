@@ -1,19 +1,25 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **Dernier pin de sonde de Claude relu :** `9a51a729`, publié sur `main` et
-  `origin/main`. Il ajoute au V74 de `50b85e16` le partage exact-common et pose
-  V79--V81. Les lignes `uniform` sont reproductibles, mais leur interprétation
-  comme plafond produit et nécessité des patches est réfutée. Son contre-audit
-  de la v2 reste `b74d8050`.
-- **Base mathématique concurrente relue :** `84cc3d73`, qui consolide
-  `b201ac23`. Elle ferme le ledger pondéré q3 par histogrammes et spécifie un
-  préfiltre q4 à neuf classes avant le terminal axial. Les factorisations sont
+- **Dernier pin de sonde de Claude relu :** `650b3cff`, publié sur `main` et
+  `origin/main`. Il implémente le repli d'intervalles sur `Pi`; reconfiguré puis
+  reconstruit au vrai pin propre, ce repli capte `0/1/0` blocs sur trois
+  familles à `n=3000` et est retiré du chemin candidat. Les grands runs qui
+  impriment `1ff39ab9,worktree_modifie=non` ont réemployé des définitions CMake
+  en cache et restent diagnostiques, pas des reçus. Son contre-audit de la v2
+  reste `b74d8050`.
+- **Base mathématique concurrente relue :** `b53605db`, qui consolide
+  `84cc3d73` et `b201ac23`. Elle ferme le ledger pondéré q3 par histogrammes et
+  spécifie un préfiltre q4 à neuf classes avant le terminal axial. Les factorisations sont
   reçues mathématiquement ; le chemin q4 reste une proposition counter-only,
   pas une route produit déjà reçue.
-- **Complément V79 reçu comme diagnostic :** la sonde sépare le marginal
+- **Compléments V79--V84 reçus comme diagnostics :** la sonde sépare le marginal
   tous-profonds selon l'existence de neuf témoins communs. Ce shadow ne corrige
   pas le biais V74 et ne prouve ni que les patches sont nécessaires, ni qu'un
-  certificat global de boîtes captera les témoins communs exacts.
+  certificat global de boîtes captera les témoins communs exacts. La bonne
+  reformulation par le centre est le noyau déjà prévu de `g_AB` : minimum
+  concave aux sommets d'un sur-patch rationnel, puis front d'arbre partagé par
+  les crédits globaux et par patch. Le disque d'une paire ponctuelle ne couvre
+  pas automatiquement l'union des centres de `A x B x C`.
 - **Dernier pin du chemin produit reçu :** `7e0ffe79`. Il raccorde l'enveloppe
   fermée de boules possibles aux scans q3/q4, avec son oracle géométrique
   indépendant, ses chemins batched et ses portes de non-vacuité. Le harnais de
@@ -346,13 +352,14 @@ néanmoins factorisable exactement par les histogrammes de `A intersect C` et
 `O(|A|+|B|+number_of_handles+h3^2)`, sans paire d'ancre. En q4, poser le seuil
 mono-handle `s_H=max_{j in M_H}(t_j)`. Comme
 `t_CD<=min(s_C,s_D)`, neuf classes à `h4=8` retirent le produit de handles en
-temps linéaire en handles après construction des facteurs `A/B`, avant de
+`O(k+H)` après construction des facteurs `A/B`, avec `H=sum_H |H|=O(k)`
+seulement sous le cap courant des handles, avant de
 passer les carriers ternaires résiduels au terminal axial. Le masque `M_H` est
 celui des **complétions** possibles, jamais celui des seuls seeds aigus.
 
 Les vues sont typées : la partition des carriers/complétions est complète et
 disjointe ; `seed_capability` lui est attaché ; une `certificate_source`
-sonore peut être incomplète pour fournir des minorants ; seule
+sonore peut être incomplète pour fournir des crédits sûrs par support ; seule
 `exact_census_source` doit être complète pour l'absence, le ranking axial et
 le census. En q4, le cover coefficient 3 couvre les sommets opposés, mais pas
 tous les intérieurs : le ranking exact emploie l'arbre entier ou une source
@@ -409,9 +416,20 @@ de positions typés, pas des `PointId`; un `computed_patch_mask` distingue
 cover brut, la source de certificats, le census exact, les complétions et la
 capacité de seed portent des types distincts ; nommer un cover « census » ne
 lui donne aucune complétude. Les tableaux `h_a/h_b` de `corner_histograms`
-sont les comptes exacts de leurs sous-ensembles $W_q$ certifiés et seulement
-des minorants des intersections exactes d'une fibre. Après split de `C`, ils
-restent sûrs mais ne deviennent pas les cardinalités exactes de l'enfant.
+sont les comptes exacts de leurs sous-ensembles $W_q$ certifiés. Ils minorent
+l'intersection exacte seulement pour une fibre non vide ; si la fibre vaut
+zéro par convention, aucune comparaison numérique n'est faite. Après split de
+`C`, ils restent sûrs pour chaque support valide mais ne prouvent ni la
+non-vacuité, ni les cardinalités exactes de l'enfant.
+
+Avant code, le masque q4 de six médiatrices reste nommé **raffiné
+conservatif**, jamais exact ni preuve d'existence. Un bit faisable de patch non
+calculé contribue avec `g=0` au maximum `s_H`; `UNKNOWN` appartient à
+`seed_possible`, et seul `certified_no_seed` autorise le rejet. La borne 16 du
+terminal axial porte sur les groupes de racines, jamais sur leurs sites ni sur
+la coquille. Un parent et ses enfants ne coexistent dans aucune source sans
+déduplication explicite ; `s_H` et la capacité seed ne filtrent que l'émission,
+jamais le ranking ou le census exact.
 
 ## Réception du pin d'enveloppe `7e0ffe79`
 
@@ -568,6 +586,11 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
   enregistrer avec le delta fonctionnel ;
 - portes existantes de séparation cover/census q4 : `4/4` vertes
   (`q4_cover_fixture`, mutant coefficient 4, `q4_source` 22 et 13+8) ;
+- pin `650b3cff` reconfiguré puis cible `mhgp5_block_witness_probe`
+  reconstruite : `uniform`, `terrain` et `scanline_single_pass` à
+  `n=3000,seed=3,blocs=800` impriment le bon pin propre, aucun cap, faux
+  positif ou invariant violé ; le certificat `Pi` capte `0/1/0` blocs et
+  `0/86/0` appels marginaux pour `101196/41943/53666` évaluations propres ;
 - `python tools/check_docs.py` vert sur `217` Markdown actifs,
   `python tools/check_implementation_status.py` vert sur `20` phases, et diff
   sans erreur d'espacement après consolidation.
@@ -580,8 +603,9 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
    sur q2/q3/q4 avant activation.
 2. **Fil fibre, développable en parallèle mais non autoritaire :** corriger
    ledger, caps, compteurs et échantillonnage du probe, installer les trois axes
-   d'état, puis ouvrir le fast path `global_common` sur un front de patches
-   réutilisable par `g_AB[j]`, `t_C`, le ledger q3 pondéré agrégé et les vues
+   d'état, graver le helper centre/patch contre l'oracle exact, puis ouvrir le
+   fast path `global_common` sur un front de patches réutilisable par
+   `g_AB[j]`, `t_C`, le ledger q3 pondéré agrégé et les vues
    typées de handles. Prouver non-vacuité, provenance, rangs de positions et
    `PointId` d'owner sans matérialiser `A x B x C`. Un échec global rend
    `UNKNOWN`; le shadow q3 ferme toute sa masse par histogrammes, même si
@@ -589,13 +613,15 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
 3. Comparer ensuite les deux ordres chauds sur le vecteur causal et sur mur/HWM
    OFF/ON ; activer seulement les décisions exactes rentables. Garder les fates
    `EMPTY` au ledger d'oracle sans route autonome.
-4. En q4, ajouter les neuf classes `s_H`, puis envoyer directement les faces
-   ternaires résiduelles à `Q4SeedAxisTopR4`; alimenter son ranking par
-   l'`exact_census_source`, sans filtre de capacité seed. Comparer
-   `threshold+axial` à l'oracle `CD` borné. `Sym2`, la WSPD locale q4 et le
-   stream exact de paires restent des ablations, jamais des prérequis. Fermer
-   parallèlement les capacités d'override et les portes CUDA avant tout reçu
-   GPU.
+4. En q4, ouvrir d'abord `q4_threshold_axial_probe` counter-only : helper pur
+   des neuf classes `s_H` contre l'oracle `CD` borné, avec mutants bit de patch
+   absent, `UNKNOWN->NO` et `max->min`; puis noyau CPU-reference Top-r4 pour une
+   face fixe, source arbre entier et ties non tronqués. Alimenter son ranking
+   par l'`exact_census_source`, sans filtre de capacité seed, et comparer
+   `threshold+axial` sur les faces, sites lus, groupes, census, mur et HWM.
+   `Sym2`, la WSPD locale q4 et le stream exact de paires restent des ablations,
+   jamais des prérequis. Fermer parallèlement les capacités d'override et les
+   portes CUDA avant tout reçu GPU.
 5. Fermer ensuite G0/G1, fold vivant et grille selon leur ordre local ; aucun
    de ces chantiers ne doit masquer les compteurs de la nouvelle source.
 
