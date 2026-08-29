@@ -20,10 +20,14 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   sont pas indépendants ; le chemin sûr calcule `g_AB[j]` une fois par
   rectangle, laisse `C` masquer les patches par les médiatrices, réutilise
   `h_a(a),h_b(b)` et diffère le coût de `h_c(c)` jusqu'au résiduel. Sa
-  composition est néanmoins fermée sans liste d'IDs : les comptes centraux
-  sont ventilés sur les strates disjointes des handles, s'additionnent entre
-  strates et se composent par `max` avec `h_{c,j}(c)` dans la strate locale ;
-  le pire patch devient une classe de seuil de carrier. Pour q4, les deux
+  composition est néanmoins fermée avec un stockage borné : un patch qui
+  atteint `h_q` meurt globalement ; sinon ses `h_q-1` positions au plus sont
+  affectées après coup aux strates disjointes des handles. Elles s'additionnent
+  entre strates et se composent par union, ou par `max` sans identités, avec
+  `h_{c,j}(c)` dans la strate locale ; le pire patch devient une classe de
+  seuil de carrier. Pour q4, `A x B x C` est la porte de face commune : un
+  seuil `tau4(c)` peut tuer la seed avant cœur, corde et complétions, sans
+  calculer `h_d`. Les deux
   porteurs restants restent une paire non ordonnée dont le ledger ferme
   `6*C(n_u,4)`. La note donne aussi la relève concrète de
   `corner_histograms` par requêtes d'arbre saturées, puis bitsets des seuls
@@ -43,8 +47,10 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   `O(k+h3^2)` seulement si l'index position--handle a déjà été construit et
   comptabilisé. L'extension `tau(c)` garde cette factorisation avec un tableau
   `(tau,h_a/h_b)` et une requête locale `Phi32` qui scinde la diagonale. En q4,
-  neuf classes `s_H` retirent le produit `C x D`, puis les faces ternaires
-  résiduelles passent au terminal axial ; `t_CD` reste un oracle borné. Cover
+  le même `Phi32` construit d'abord `tau4(c)` sur la face, sans la contrainte de
+  coplanarité q3 ; neuf classes `s_H` retirent ensuite le produit `C x D`, puis
+  les faces ternaires résiduelles passent au terminal axial ; `t_CD` reste un
+  oracle borné. Cover
   brut, partition de complétions, capacité de seed, source de certificats et
   census exact restent séparés : une sous-source sonore suffit à un crédit
   sûr pour chaque support valide,
@@ -96,7 +102,12 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   pipeline à 11--13 tests de sites par seed, sans convertir cette moyenne en
   borne `O(h3)`. Elle donne le raccord sans surcoût mémoire : `handle_id` dans
   le padding de `CoverPoint`, état sectoriel réutilisé par la route de prétest,
-  fate paresseux et skip identique dans les boucles CPU et batched.
+  fate paresseux et skip identique dans les boucles CPU et batched. V104 retire
+  ensuite le chiffre sectoriel fautif. Les réponses V105--V109 ferment son
+  activation inconditionnelle, demandent le marginal après `tau` et remplacent
+  la fausse pré-porte de rayon par deux marges linéaires exactes autour du
+  secteur central. Le probe de masque q3 encore concurrent reste un diagnostic
+  d'absence, distinct de `g_AB/tau`, à échantillonner par bottom-k avant reçu.
   `Lca3Forest` reste une
   ablation de ledger, pas une route produit.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.

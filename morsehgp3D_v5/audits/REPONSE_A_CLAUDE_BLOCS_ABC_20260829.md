@@ -5,7 +5,8 @@
   V67--V69 de `a0621897`, V68/V70--V72 de `91af69ff`, puis V71/V73--V75 de
   `b9646d1a`, mesure V74/V76--V78 de `50b85e16`, V79--V81 de `9a51a729`,
   V80/V82--V84 de `650b3cff`, V88--V100 jusqu'à `8cbee414`, puis la
-  réfutation shallow V101--V103 de `2168a295`, consolidées ci-dessous.
+  réfutation shallow V101--V103 de `2168a295` et la réponse concurrente
+  non committée V104--V109, consolidées ci-dessous.
 - **Statut :** prédicat idéal reçu au seuil ; enveloppe de scan reçue mais sans
   effet sur l'exposant ; ledger q3 pondéré maintenant factorisé sans
   `A x B` ; AABB brut de $\Pi$ reçu comme résultat négatif, mais plafond de
@@ -28,10 +29,14 @@ ne doit pas opposer fibre ternaire et center-cover : la fibre donne la
 provenance ; le center-cover, resserré par `C`, donne le certificat sûr. Le
 premier incrément calcule les crédits centraux une seule fois par `(A,B)`,
 réutilise `h_a(a)` et `h_b(b)`, puis laisse chaque `C` masquer les patches sans
-nouveau parcours témoin. `h_c(c)` reste différé jusqu'au résiduel, mais sa
-composition scalaire sûre est maintenant identifiée : ventiler le central par
-strates de handles, au lieu de sommer deux comptes qui peuvent viser les mêmes
-positions.
+nouveau parcours témoin. Un patch qui atteint seul le seuil est immédiatement
+mort ; un patch qui ne l'atteint pas possède au plus huit témoins en q3. Il
+suffit donc de conserver ces quelques positions puis de les affecter aux
+handles, sans matrice `64 x number_of_handles`. `h_c(c)` reste différé jusqu'au
+résiduel, mais sa composition sûre est identifiée : union dans la strate du
+carrier, addition seulement entre strates disjointes. La même face
+`A x B x C` constitue le bon premier étage q4 ; `D` ne doit apparaître
+qu'après cette porte.
 
 Le pin `7e0ffe79` ne remplace aucune de ces quantités. `EdgeEnvelope(a,b)` est
 l'union fermée des positions pouvant appartenir à **au moins une** boule
@@ -1183,6 +1188,82 @@ $$\epsilon\,d\mathbin{\cdot}(P_k\mathbin{\times}y)\geq0\quad\text{et}\quad\epsil
   puis le mur. Avec seulement 11--13 tests par seed, cette amortisation par
   handle est désormais la vraie porte de rentabilité.
 
+### Réponses V104--V109 : fermer la piste sectorielle chaude, garder son marginal après `tau`
+
+- **V104 — correction reçue, chiffre retiré.** Le contrôle d'orientation
+  confirme que le masque de `fibre_gain_probe` était faux sur la moitié des
+  frames et n'était même pas un surmasque. Le `36,1 %` est définitivement
+  rétracté. La prochaine mesure doit appeler un helper partagé extrait de
+  `anchor_sector_kill`; aucune quatrième transcription du prédicat n'est
+  recevable.
+- **V105/V107 — la fonction objectif est marginale, mais le tableau ne la
+  mesure pas encore.** Le bon numérateur est le travail effectivement évité
+  sur les seeds qui auraient atteint la profondeur dans la lane OFF, après
+  histogrammes, `W3`, secteur d'ancre, grille et cellule du seed. Le probe
+  courant part d'`AliveRect`, appelle directement `anchor_sector_kill` au lieu
+  de `anchor_kill_cumulated`, puis crédite les douze tests à **tous** les seeds
+  aigus du handle. Il ne rejoue donc ni `corner_histograms`, ni `W3`, ni la
+  grille, et son gain reste un plafond généreux, pas une économie causale.
+  Le coût doit compter les opérations réellement ajoutées et le mur, pas
+  postuler qu'un extremum vaut un test de puissance.
+
+  Le ratio `0,04` sur `eight_clusters`, déjà obtenu avec ce numérateur
+  favorable, disqualifie bien une activation sectorielle inconditionnelle ;
+  aucune nouvelle présentation comptable ne la rend rentable. Les ratios
+  supérieurs à un sur `terrain/scanline` restent seulement une invitation à
+  mesurer le marginal réel. Employer quatre bras appariés
+  `baseline/tau/sector/tau+sector` : le seul gain attribuable au secteur est
+  `tau+sector - tau`, avec les mêmes seeds et le même ordre. Une règle pilotée
+  par le nom de famille est interdite ; seule une propriété géométrique locale,
+  calculée moins cher que ce qu'elle évite, pourrait router le résiduel.
+- **V108 — le test de rayon proposé ne certifie pas un secteur.** L'inégalité
+  de `narrow_cone_pregate` borne le diamètre angulaire autour de la direction
+  centrale, mais ignore l'alignement avec les huit frontières. Une boîte
+  ponctuelle dont la direction centrale est exactement sur une frontière
+  vérifie la condition avec `G=0` et atteint pourtant les deux secteurs
+  adjacents. Une boîte mince autour de cette frontière fournit la version non
+  dégénérée. Le cas `t=G=0` passe aussi l'inégalité alors que la direction est
+  indéfinie. Le commentaire « contenu dans un secteur » est donc faux ; le
+  helper peut rester un classificateur diagnostique, jamais une porte de
+  décision sous cette forme.
+
+  Une pré-porte sonore et plus directe existe néanmoins. Déterminer le secteur
+  de la projection du centre de boîte, puis évaluer seulement ses deux
+  demi-plans frontières. Pour chaque forme linéaire de coefficients `c_i`, la
+  variation exacte sur la boîte en coordonnées `w` vaut
+  `sum_i abs(c_i)*(hi_i-lo_i)`. Si les deux valeurs au centre sont strictement
+  supérieures à leur variation, toute la boîte vit dans ce secteur ; égalité,
+  centre sur frontière ou projection nulle restent fail-open. Ce fast path
+  demande deux formes et deux rayons de support, pas les seize extrema. Il doit
+  être confronté à `box_sector_mask`, puis chronométré en instructions ou mur :
+  `O(1)` ne signifie pas coût nul.
+- **V109 — priorité à `g_AB/tau`, composition seulement sur le résiduel.** Les
+  deux preuves sont sémantiquement compatibles, mais les payer toutes deux
+  partout serait une erreur de routeur. `g_AB[64]`, puis `tau(c)`, vient en
+  premier parce qu'il décide au niveau `WSPDRect x Handle`, se transpose à la
+  face q4 et attaque le nombre de propositions. Le secteur reste une ablation
+  q3-only après `tau`, activable seulement si son marginal causal est positif.
+  Les fates sont primaires et disjoints : une face tuée par `tau` n'est jamais
+  recréditée au secteur. Si le quatrième bras ne gagne rien au-delà de `tau`,
+  supprimer la piste sectorielle au lieu de conserver deux terminaux.
+
+La campagne de masses V106 peut continuer comme diagnostic de la vraie lane,
+avec trois graines, commandes et sorties brutes. Elle ne remplace ni le shadow
+`tau`, ni son oracle de prune, et un quotient de pentes reste interdit comme
+plafond théorique.
+
+Pré-lecture du `q3_patch_block_probe.cpp` encore concurrent : l'invariant
+`mask_empty -> true_acute_seeds==0` est la bonne première porte et l'omission
+de coplanarité reste fail-open. Le probe ne mesure toutefois que l'absence de
+centre, ni `g_AB`, ni `h_c`, ni `tau`; ne pas le décrire comme le seul
+mécanisme qui attaque la proposition. Sa grille de centres à l'échelle 4 est
+une relaxation distincte du type `CenterQ32Box` spécifié pour `Phi32` et doit
+porter un type et un oracle séparés. Enfin, `break` après les premiers
+`blocs_cible` réintroduit l'échantillon de phase Morton déjà rejeté : choisir
+les blocs par bottom-k haché avant toute fréquence ou comparaison entre
+familles. Attendre cible CMake, pin propre, plancher de seeds non nul et sorties
+brutes avant de recevoir ses taux.
+
 Fixtures permanentes minimales : direction exactement sur une frontière
 (deux bits), boîte dont une arête projetée traverse un cône sans coin intérieur,
 boîte projetée contenant l'origine (huit bits), `p_x=0`, secteur inaccessible
@@ -1481,11 +1562,9 @@ sur les plages de positions, jamais par soustraction d'AABB.
 
 Pour un patch `j`, soit `G_j` un sous-ensemble certifié par `g_AB[j]`, hors
 `A union B`, et poser `g_{r,j}=|G_j intersect S_r|`, avec `r=bot` pour la strate
-extérieure. Chaque cellule peut être capée à `h3`, mais la somme des cellules
-capées reste stockée dans un entier **non capé globalement**. Pour le handle
-carrier `H_i`, poser `g_{not i,j}=sum_{r!=i} g_{r,j}`. Si
-`C_{i,j}(c) subseteq S_i` est un facteur local de cardinalité `h_{c,j}(c)`,
-alors les strates donnent immédiatement :
+extérieure. Pour le handle carrier `H_i`, poser
+`g_{not i,j}=sum_{r!=i} g_{r,j}`. Si `C_{i,j}(c) subseteq S_i` est un facteur
+local de cardinalité `h_{c,j}(c)`, alors les strates donnent immédiatement :
 
 $$\left\lvert G_j\cup C_{i,j}(c)\right\rvert\geq g_{\neg i,j}+\max\left(g_{i,j},h_{c,j}(c)\right).$$
 
@@ -1506,18 +1585,56 @@ maximum du besoin résiduel, entre patches alternatifs. Le minimum sur les
 patches n'est jamais la cardinalité de leur intersection : deux patches
 peuvent chacun fournir un témoin différent.
 
-Ne jamais calculer `global_capped - local`. Il faut former
-`sum_r min(h3,g_{r,j})` sans cap sur la somme, puis retrancher la cellule
-stockée. Deux strates saturées à neuf constituent la fixture combinatoire
-minimale qui tue la soustraction d'un total global déjà ramené à neuf.
+La ventilation ne doit toutefois pas prendre la forme d'une matrice
+`64 x number_of_handles`. Poser `H=h_q`. Dès que le DFS a certifié
+`|G_j|>=H`, ce patch est `SATURATED_GLOBAL` : `G_j` seul tue tout support dont
+le centre appartient au patch, indépendamment du handle carrier. Le patch
+reçoit un fate de profondeur, pas un fate géométrique `EMPTY`, et sa
+provenance devient volontairement opaque. Aucun accès à une cellule locale ni
+aucune soustraction depuis ce total capé n'est ensuite autorisé.
 
-Le DFS masqué ne doit pas devenir `number_of_handles` parcours globaux. Quand
-un nœud certifié traverse plusieurs strates, il se scinde jusqu'aux racines de
-handles ; dès qu'il est contenu dans une strate, son crédit en vrac va à cette
-cellule. Les racines de handles étant une antichaîne du même radix tree, cette
-couture ajoute les séparations de frontières au parcours partagé, pas un
-facteur `k*V`. Publier `stratum_boundary_splits`,
-`patch_node_tests`, `bulk_positions` et `cells_saturated`.
+Si la source est épuisée avant saturation, alors `|G_j|<=H-1` : huit positions
+au plus en q3 et sept en q4 au profil courant. Il est donc moins coûteux et
+plus exact de conserver directement ces `GeometryIndex` triés, puis de les
+affecter après coup à un unique `S_i` ou à `S_bot`. Un arrêt sur budget donne
+de même `PARTIAL_UNDER_CAP` avec un sous-ensemble utilisable comme minorant ;
+seul `EXHAUSTED_UNDER_CAP` affirme que le certificateur a épuisé sa source.
+La machine d'états par patch est ainsi
+`UNSEEN/PARTIAL_UNDER_CAP/EXHAUSTED_UNDER_CAP/SATURATED_GLOBAL`, avec le cap
+dans la clé.
+
+Le DFS masqué reste unique. Pour chaque bit d'un nœud, `NONE` retire le bit,
+`MIXED` descend et `ALL` crédite la plage hors `A union B`. Si le nouveau total
+atteint `H`, le bit devient immédiatement `SATURATED_GLOBAL`. Sinon, cette
+plage contient nécessairement au plus `H-1-count` positions utiles : les
+matérialiser ne peut donc jamais dépasser le petit stockage promis, et le bit
+ne descend pas sous le nœud `ALL`. Sous le profil courant sans positions
+dupliquées, le compte est la taille de plage et non un poids de multiplicité ;
+le helper doit refuser explicitement une autre unité.
+
+Le post-mapping emploie les plages de handles triées et disjointes. Il ne
+filtre jamais un témoin selon `seed_capability` ou selon le masque du handle
+qui le contient : un site peut témoigner pour un patch auquel il ne fournit
+aucun carrier. Raffiner artificiellement les handles sans changer leur union
+doit laisser identiques visites, tests de patches, fates et positions
+certifiées ; seuls leurs labels de strate changent. La borne candidate devient
+`O(V_phys+T_patch+64*H*log(k))`, ou sans logarithme avec un curseur, et non
+`O(64*k+k*V_phys)` **pour le DFS et sa provenance**. La construction séparée
+des surmasques géométriques des `k` handles peut encore coûter `O(64*k)` ; ce
+terme n'est ni supprimé ni caché par le stockage sparse. Publier
+`patch_node_tests`, `witness_node_pops`,
+`bulk_positions_certified`, `sparse_ids_materialized`, `saturated_global`,
+`exhausted_under_cap`, `partial_under_cap`, `postmap_handle_hits` et
+`postmap_outside_hits`.
+
+Le mutant historique `min(H,total)-min(H,local)` reste faux, mais sa fixture
+doit maintenant vérifier plus fortement qu'un patch saturé refuse tout accès
+local. Pour un rectangle vivant, `core<H` fournit la même économie : tenter
+`collect_universal_ids(...,cap=core)`, revalider ces positions sous le
+`RectId` courant, puis former les `k_r` seulement si au moins `core` positions
+sont réellement récupérées. Le `max(parent_core,fresh_core)` de `postsep` ne
+transporte aucune provenance ; si la récupération échoue, conserver la formule
+scalaire avec le `max` extérieur et ne jamais inventer des `k_r`.
 
 Le facteur local utilise directement la variable centre. Pour `q=32o`, poser :
 
@@ -1532,6 +1649,28 @@ contenant `c` et ignore la feuille diagonale ; tester seulement
 patch-spécifique `h_{c,j}(c)` et s'arrête au besoin résiduel. Les 32 positions
 par handle bornent l'oracle plat, pas le coût produit à accepter sans mesure.
 
+Pour un support ponctuel `c`, le minimum cartésien exact teste les huit coins
+de `Q_j` et, sur chaque axe de `W`, ses deux extrémités : la quadratique en
+`z` est concave. Pour traiter un nœud entier de supports `C`, ses huit coins ne
+suffisent **pas**. À chaque coin `q` du patch et sur chaque axe, le terme en
+`c` est convexe ; son minimum lattice teste `floor(q_i/32)` et son successeur,
+tous deux clampés dans l'intervalle de `C`. La contre-fixture unidimensionnelle
+`q=96`, `C=[0,6]`, `z=2` donne `Phi32=256` aux deux coins supports, mais
+`Phi32=-32` au support intérieur `c=3`. Elle doit tuer
+`box-support-corners-only`.
+
+Cette formule autorise une auto-jointure dirigée de l'arbre déjà construit,
+sans imposer la double boucle plate du handle. Un état
+`(support_node,witness_node,patch_mask)` emploie
+`L(Q,C,W)>0 -> ALL`, `-L(Q,W,C)<=0 -> NONE` et descend sinon ; l'identité
+`Phi32(q,c,z)=-Phi32(q,z,c)` justifie la borne supérieure. Une diagonale se
+scinde avant tout crédit. Un `ALL` crédite le nœud témoin à tous les supports
+du nœud gauche, avec saturation individuelle au besoin ; une implémentation
+peut différer cette mise à jour ou profiter du cap `|H_i|<=32`. Cette route
+reste susceptible de visiter un produit quadratique si les boîtes se
+recouvrent : `support_witness_node_pairs`, `ALL/NONE/MIXED` et les mises à jour
+effectives constituent donc sa porte de coût, pas une promesse d'exposant.
+
 Pour un surmasque conservatif non vide `M_i(c)` de patches possibles, condenser
 les crédits en un seul seuil de carrier :
 
@@ -1539,8 +1678,10 @@ $$\tau_i(c)=\max_{j\in M_i(c)}\max\left(0,h_3-b_{i,j}(c)\right).$$
 
 Une ancre `(a,b)` tue alors ce carrier dès que
 `h_a(a)+h_b(b)>=tau_i(c)`. Un masque vide reçoit un fate d'absence séparé ; il
-ne passe jamais par le maximum vide avec une valeur neutre inventée. Cette
-condensation n'énumère pas `A x B x C`. Avec
+ne passe jamais par le maximum vide avec une valeur neutre inventée. Au profil
+q3, `tau` possède dix valeurs `0..9` : `tau=0` signifie que tous les patches
+encore géométriquement possibles sont déjà morts par profondeur, et non que le
+masque est vide. Cette condensation n'énumère pas `A x B x C`. Avec
 `P[t]=#{(a,b):h_a(a)+h_b(b)<t}`, agréger les carriers par leur seuil. Si
 `C_t=#{c:tau(c)=t}` et si `X^A_{t,r}` compte les carriers `c in A` de seuil
 `t` et de score `h_a(c)=r` (`X^B` symétriquement), la masse brute distinct-ID
@@ -1570,9 +1711,10 @@ et la profondeur vaut deux : `g_rest+max(g_0,h_c)=2`, tandis que
 handle de cinq feuilles : les quatre produits de frères au LCA doivent avoir
 une masse totale `choose2(5)=10`, chaque paire exactement une fois.
 
-La version autoritaire transporte pour chaque source un
-`CappedWitnessPosSet<h3>` trié de rangs `i32` de positions uniques, l'unité
-conceptuelle `GeometryIndex`. Deux méthodes
+La version autoritaire transporte un `PatchSparseCredit` : fate, cap, nombre
+et tableau de `h_q-1` `GeometryIndex` au plus. Le tableau n'est lisible que
+pour `PARTIAL_UNDER_CAP` ou `EXHAUSTED_UNDER_CAP` ;
+`SATURATED_GLOBAL` est opaque. Deux méthodes
 appliquées au même domaine se composent par union ; sans positions, seulement
 par `max`. Le profil courant refuse les positions dupliquées, donc position et
 `PointId` sont en bijection, mais le tie-break d'owner ne change pas l'unité du
@@ -1895,11 +2037,13 @@ RectId(A,B), patches et positions du core
      masques AB/AC/BC ; seed_capability attachée séparément
   -> certificate_source et exact_census_source typées, sans autorité sur la
      taille des carriers ni sur leurs intersections avec A/B
-  -> g_AB[64] counter-only par un unique DFS masqué, sans global_common
-  -> seuil t_C + ledger q3 pondéré agrégé par seuil, sans A x B
+  -> g_AB[64] counter-only par un unique DFS masqué : patch saturé opaque,
+     sinon au plus h_q-1 GeometryIndex puis post-mapping vers les handles
+  -> q3 : h_c par Phi32 sur le résiduel, tau(c) + ledger pondéré, sans A x B
   -> seulement après parité : global_common avec état commun séparé
   -> q3 : émission sparse seulement sur le résiduel
-  -> q4 : classes s_H, carriers ternaires résiduels, puis terminal axial Top-r4
+  -> q4 : tau4(c) tue les faces A x B x C avant D, puis classes s_H sur les
+     faces résiduelles et terminal axial Top-r4 ; h_d reste dans l'oracle CD
 ```
 
 Le probe reste counter-only. Il se streame par rectangle ; il ne matérialise
@@ -1971,6 +2115,72 @@ quatrième sommet. Les deux sommets opposés à `AB` forment toutefois un rôle
 pas une seconde provenance sémantique. Le ledger reste
 `Omega4={(e,{c,d})}`, de masse $6\binom{n_u}{4}$, et non douze occurrences par
 support.
+
+### La vraie généralisation commune : tuer la face `A x B x C` avant `D`
+
+La lane actuelle confirme le bon découpage algorithmique :
+`process_anchor_q4` choisit d'abord une face aiguë `(a,b,c)`, calcule son cœur
+et sa corde, puis seulement parcourt les complétions `d`. Le premier objet q4
+à factoriser n'est donc pas `A x B x C x D`, mais la même tape de faces
+`A x B x C` qu'en q3, avec des constantes et des patches q4 distincts.
+
+Employer `h4=smax-3`, les grilles q4 et les tableaux q4 `h_a^4,h_b^4`. Pour un
+carrier `c` du handle `H_i`, construire un surmasque non vide `M_i^4(c)` avec
+les médiatrices `AB/AC/BC`. En q3, la coplanarité du circumcentre ferme en plus
+la direction normale ; en q4 elle est **interdite**, car les centres des
+sphères passant par la face vivent sur la droite normale au plan `abc`. Un
+masque non vide ne prouve toujours aucune complétion, et son vide n'est un fate
+d'absence que si le cover des centres a sa propre preuve d'inclusion.
+
+Le même `Phi32` calcule alors `h_{c,j}^4(c)` : des positions strictement
+intérieures à toutes les sphères du patch passant par `c`. Une sous-source
+sonore, même le cover coefficient 3, donne encore un minorant sûr mais
+volontairement incomplet. Pour capter tous les intérieurs potentiels, employer
+l'arbre entier ou un cover coefficient 4 prouvé complet ; le cover coefficient
+3 reste la partition des complétions et ne reçoit jamais une autorité de
+complétude témoin. Toute position certifiée hors de ce cover 3 appartient au
+bucket extérieur `S_bot`, jamais à un handle inventé.
+
+Pour un patch q4 sous le cap, poser :
+
+$$b_{i,j}^{(4)}(c)=\max\left(h_{\mathrm{core}}^{(4)},g_{\neg i,j}^{(4)}+\max\left(g_{i,j}^{(4)},h_{c,j}^{(4)}(c)\right)\right).$$
+
+Puis condenser les alternatives :
+
+$$\tau_i^{(4)}(c)=\max_{j\in M_i^{(4)}(c)}\max\left(0,h_4-b_{i,j}^{(4)}(c)\right).$$
+
+Dès que `h_a^4(a)+h_b^4(b)>=tau_i^4(c)`, toute complétion q4 de la face
+`(a,b,c)` est profonde : la lane peut supprimer cette seed **avant** son scan
+de cœur, sa corde et la boucle sur `D`. Aucun `h_d` n'est requis à ce premier
+étage. Une éventuelle complétion `d` ne peut pas avoir été faussement comptée
+comme témoin universel de sa propre sphère : au centre réel,
+`Phi32(q,c,d)=0`, tandis que le crédit exige une stricte positivité pour tous
+les centres du patch.
+
+Cette mort ne retire `c` ni des témoins, ni de la partition des complétions, ni
+du census. Elle masque seulement son droit d'émission comme seed. Elle est
+compatible avec l'exact-once : si un tétraèdre peu profond existe, son centre
+appartient à un bit de `M_i^4(c)` et sa face canonique ne peut satisfaire la
+preuve de mort. Le choix du plus petit `PointId` entre les faces aiguës reste
+au terminal ; ni l'ordre Morton ni l'ordre des handles ne choisissent le seed.
+
+Les mêmes histogrammes que q3 ferment la masse brute des **slots de faces**
+distinct-ID par classes `tau^4`, sans construire `A x B x C`. Ce nombre n'est
+pas une masse de supports q4 : acuité, owner, existence de `D` et choix du seed
+canonique dépendent encore du quatrième point. Le ledger autoritaire reste
+`6*choose4(n_unique)`. Publier séparément
+`q4_seed_faces_raw`, `q4_seed_faces_depth_dead_before_d`,
+`q4_seed_faces_residual`, `q4_completion_pairs_avoided` et
+`q4_hc_node_product_visits`.
+
+Le premier raccord est counter-only. Sur `n<=14`, chaque face annoncée morte
+doit vérifier par énumération que toute complétion valide possède au moins
+`h4` intérieurs stricts ; ON/OFF conserve `digest_balls` et la forêt. Les
+mutants prioritaires sont `q4-use-q3-patches`, `q4-require-coplanar-center`,
+`q4-cover3-claimed-complete`, `q4-add-g-plus-hc`, `q4-tau-empty-mask-zero` et
+`q4-drop-dead-seed-from-census`. Mesurer ensuite le coût du calcul de `h_c`
+contre les scans de cœur, morceaux de corde et paires `(seed,d)` réellement
+évités ; une masse de faces tuée n'est pas encore un gain produit.
 
 Le premier étage reste identique et sans rescan : la grille q4 et ses crédits
 `g4_AB[j]` sont calculés une fois par `(A,B)`. Un premier handle applique
@@ -2163,14 +2373,15 @@ l'oracle, ajoute nécessairement $h_d(d)$ :
 $$D_A=A,\qquad D_B=B,\qquad D_C=C\setminus(A\cup B),\qquad D_D=D\setminus(A\cup B\cup C),\qquad D_0=P\setminus(A\cup B\cup C\cup D).$$
 
 Les crédits $h_0,h_a,h_b,h_c,h_d$ sont définis par intersections universelles
-sur leurs fibres non vides, exactement comme en q3. Le premier incrément q4
-doit s'arrêter à `g4_AB + h_a + h_b`. Ajouter $h_c$, puis $h_d$, exige des
-positions ou une repartition explicite à chaque nouveau handle ; la
-ventilation scalaire par strates ci-dessous constitue précisément une telle
-repartition sans liste d'IDs. Si l'oracle de
-paires est exécuté, il imbrique `C`, puis `D` seulement sur les masques
-survivants et reste sous cap. Le chemin produit recommandé passe au contraire
-du carrier ternaire fixe au terminal axial et ne construit pas ce produit.
+sur leurs fibres non vides, exactement comme en q3. La porte de **face** peut
+désormais ajouter $h_c$ à `g4_AB+h_a+h_b`, grâce aux positions sparse sous le
+cap, sans connaître `D`. C'est seulement l'ajout de $h_d$ et la composition
+simultanée des deux carriers qui exigent une répartition par paire de handles.
+La ventilation scalaire ci-dessous ferme cet oracle, mais ne doit pas
+précéder la porte ternaire. Si l'oracle de paires est exécuté, il imbrique `C`,
+puis `D` seulement sur les masques survivants et reste sous cap. Le chemin
+produit recommandé passe au contraire de la face ternaire résiduelle au
+terminal axial et ne construit pas ce produit.
 
 Plus précisément, si `K,G_j,A_a,B_b,C_c,D_d` désignent les **ensembles de
 positions** certifiés par `core`, `g4_AB[j]` et les quatre fibres, le vrai
@@ -2224,8 +2435,10 @@ LCA de ses deux feuilles, les deux facteurs sont disjoints, et un handle de
 `m<=32` positions produit exactement `m-1` blocs croisés. On peut alors
 additionner $h_c$ et $h_d$ avec la formule stratifiée précédente. Si `g4` reste
 ventilé seulement au niveau du handle parent, le repli sûr est
-`g_rest+max(g_H,h_c+h_d)` ; ventiler aussi les deux sous-facteurs récupère les
-deux maxima séparés. Cette décomposition est une partition combinatoire, pas
+`g_outside_H+max(g_H,h_c+h_d)`. Pour un nœud interne strict `N`, le reste fin
+inclut aussi `H minus range(N)`, et pas seulement les autres handles. Ventiler
+`L(N)`, `R(N)` et le complément de leur union récupère les deux maxima séparés
+sans soustraire un total capé. Cette décomposition est une partition combinatoire, pas
 une WSPD locale ni une preuve de séparation géométrique ; elle ferme seulement
 le double compte diagonal et ne résout pas le carré des handles distincts. Le
 hot path seuil--axial reste donc prioritaire, tandis que cette forme devient
