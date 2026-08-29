@@ -19,7 +19,10 @@
   reformulation par le centre est le noyau déjà prévu de `g_AB` : minimum
   concave aux sommets d'un sur-patch rationnel, puis front d'arbre partagé par
   les crédits globaux et par patch. Le disque d'une paire ponctuelle ne couvre
-  pas automatiquement l'union des centres de `A x B x C`.
+  pas automatiquement l'union des centres de `A x B x C`. Les tendances
+  16 k/32 k ne sont pas reçues comme stabilité d'échelle : phase zéro corrélée
+  à l'ordre WSPD, caps avant classification, une seed, ratio pondéré distinct
+  de la fréquence de blocs et coût `exact_common` absent.
 - **Dernier pin du chemin produit reçu :** `7e0ffe79`. Il raccorde l'enveloppe
   fermée de boules possibles aux scans q3/q4, avec son oracle géométrique
   indépendant, ses chemins batched et ses portes de non-vacuité. Le harnais de
@@ -341,9 +344,12 @@ ordres `g_AB -> need résiduel -> histogrammes` et
 `histogrammes -> g_AB`; l'ordre de développement ne préjuge pas du routeur
 final.
 
-La composition ne requiert aucun bloc matérialisé. Pour un patch, poser
-`credit_j=max(core,g_AB[j])` et `t_j=max(0,h_q-credit_j)` ; pour le masque non
-vide d'un handle `C`, `t_C=max_j t_j`. Le même histogramme minuscule
+La composition ne requiert aucun bloc matérialisé. Poser
+`f=min_a h_a(a)+min_b h_b(b)`. Pour un patch, poser
+`credit_j=max(core,g_AB[j])` sans identités, ou la cardinalité de leur union
+avec identités, puis `t_j=max(0,h_q-credit_j)` ; le patch est mort exactement
+pour ce minorant si `credit_j+f>=h_q`. Pour le masque non vide d'un handle
+`C`, `t_C=max_j t_j`. Le même histogramme minuscule
 `P[t]=#{(a,b):h_a(a)+h_b(b)<t}` ou les bitsets `B_lt[t]` donnent les couples
 que le certificateur laisse à chaque handle, sans `A x B x C`. Ce compteur
 reste distinct de la masse de supports valides. Le ledger q3 pondéré est
@@ -356,6 +362,13 @@ mono-handle `s_H=max_{j in M_H}(t_j)`. Comme
 seulement sous le cap courant des handles, avant de
 passer les carriers ternaires résiduels au terminal axial. Le masque `M_H` est
 celui des **complétions** possibles, jamais celui des seuls seeds aigus.
+
+Le parcours témoin doit être physiquement partagé par le fast path global et
+les 64 crédits de patch : une union de masques, un seul départ de la racine,
+des nœuds `ALL` en antichaîne, les bits saturés masqués et les `MIXED` scindés
+sur place. La borne candidate inclut `V_phys+T_patch`, avec
+`T_patch<=64*V_phys`, jamais `k*V_phys`; l'échec global reprend ce même front
+et reste `UNKNOWN`.
 
 Les vues sont typées : la partition des carriers/complétions est complète et
 disjointe ; `seed_capability` lui est attaché ; une `certificate_source`

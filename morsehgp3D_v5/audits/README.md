@@ -66,8 +66,10 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   La réponse V82--V84 retire le repli brut par intervalles sur `Pi`, reproduit
   son inertie au pin propre `650b3cff`, puis ramène la proposition de Claude au
   noyau centre/patch de `g_AB` : minimum concave aux sommets des patches,
-  masque conservatif et front d'arbre réutilisé. `Lca3Forest` reste une
-  ablation de ledger, pas une route produit.
+  masque conservatif et front d'arbre réutilisé. Elle interdit le plan d'une
+  ancre représentative, compose `max(core,g_AB[j])+min(h_a)+min(h_b)` et refuse
+  de lire les runs 16 k/32 k biaisés comme une loi d'échelle. `Lca3Forest`
+  reste une ablation de ledger, pas une route produit.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : décisions et dents restantes de la lane device.
 - [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.

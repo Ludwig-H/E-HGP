@@ -514,13 +514,29 @@ ni sortie brute n'est publiée comme reçu.
   censurée, à deux familles et une seed. `h_a+h_b` ou une autre factorisation
   peut encore fermer la seconde classe. Conserver la
   primitive comme contre-sonde négative et lui donner une fixture permanente
-  boîtes ponctuelles/boîtes étendues. L'égalité sur boîtes ponctuelles valide
+  boîtes ponctuelles/boîtes étendues. Sous petit cap, cette fixture énumère
+  tous les quadruplets et impose
+  `box_credit(A,B,C,z) => Pi(a,b,c;z)<0` pour chaque
+  `(a,b,c) in A x B x C`. L'égalité sur boîtes ponctuelles valide
   l'implémentation d'intervalles, mais ne constitue pas un oracle géométrique
   indépendant de q3 puisqu'elle recopie la même forme de Gram. Avant tout
   nouveau reçu, reconfigurer au pin propre et comparer le `HEAD`/dirty externe
   au stamp imprimé ; à terme, remplacer l'`execute_process` de configuration
   par un stamp de build ou un runner gardé. Un binaire ne peut pas certifier
   une modification postérieure à sa configuration.
+
+  Les lignes 16 k/32 k ne montrent pas non plus que le ratio « s'améliore »
+  avec l'échelle. L'échantillon systématique de phase zéro est corrélé à
+  l'ordre Morton/WSPD, sa taille réelle varie, les caps quittent la boucle
+  avant classification et le ratio pondéré par `pw_bloc` n'est pas une
+  fréquence de blocs. À 8 k, `scanline` donne `684/740=92,4 %` par blocs mais
+  `98,2 %` pondéré ; `eight_clusters` donne `728/771=94,4 %` mais `99,6 %`
+  pondéré. En laissant les capés non identifiés, l'intervalle honnête
+  `S/(S+F+C)` à `(S+C)/(S+F+C)` vaut respectivement
+  `[91,94 %,92,47 %]` et `[91,80 %,94,58 %]`. Le prochain relevé emploie un
+  bottom-k haché, au moins trois seeds, publie `S/F/C` bruts et compte à part
+  le coût du scan `exact_common`; 32 k n'est utile que si ces intervalles se
+  resserrent.
 - **V83 — oui à la variable centre, avec deux corrections.** Noter `o` le
   circumcentre pour ne pas le confondre avec le carrier `c`. L'identité est
   correcte :
@@ -575,6 +591,14 @@ $$L_S(Q,A,W)=\min_{q\in\mathrm{Vert}(Q)}\sum_{i=1}^{3}\left(\min_{r\in\left\lbra
   tout vrai centre, tolérer les faux, et ne jamais prendre un masque non vide
   pour une preuve d'existence. Un nouveau disque/bande ne doit être codé que
   s'il resserre ce cover avec une inclusion exacte vérifiée.
+
+  Une fixture rationnelle doit tuer toute réutilisation du plan d'une ancre
+  représentative. Prendre `a0=(0,0,0)`, `a1=(0,0,2)`, `b=(6,0,0)` et
+  `c=(3,4,0)`. Les deux triangles sont strictement aigus et `ab` est
+  strictement maximal, mais leurs centres valent
+  `o0=(3,7/8,0)` et `o1=(993/338,140/169,275/338)` ; les plans médiateurs
+  sont respectivement `X=3` et `3X-Z=8`, et chaque centre viole le plan de
+  l'autre ancre. Le mutant `representative_anchor_plane` doit donc échouer.
 - **V84 — GO au plafond du bon objet, avant le produit.** Ajouter les helpers
   purs `center_patch_point_credit(Q,A,B,z)` puis
   `center_patch_node_credit(Q,A,B,W)` avec la formule ci-dessus, confrontés à
@@ -589,6 +613,38 @@ $$L_S(Q,A,W)=\min_{q\in\mathrm{Vert}(Q)}\sum_{i=1}^{3}\left(\min_{r\in\left\lbra
   appels `q3_power` par un autre scan linéaire par bloc. Succès global donne
   `PRUNE_NO_EMISSION`; échec reste `UNKNOWN` et le même front poursuit `g_AB`
   sans repartir de la racine.
+
+  Pour un nœud témoin `W`, le contrat ternaire est explicite. Avec la borne
+  supérieure exacte compagne `U_S`, poser
+  `L_W=max(L_S(Q,A,W),L_S(Q,B,W))` et
+  `U_W=min(U_S(Q,A,W),U_S(Q,B,W))`. `L_W>0` donne `ALL`, `U_W<=0` donne
+  `NONE`, toute égalité donne `MIXED`; si les deux décisions semblent vraies,
+  refuser le crédit et signaler le conflit arithmétique. Un nœud qui rencontre
+  `A` ou `B` doit être scindé avant tout bulk, et une feuille diagonale est
+  ignorée.
+
+  La décision doit composer explicitement les crédits plutôt que comparer
+  `g_AB` seul. Poser `a_min=min_a h_a(a)`, `b_min=min_b h_b(b)` et
+  `f=a_min+b_min`. Sans rangs de positions, le crédit central d'un patch est
+  `base_j=max(core,g_AB[j])`; avec les rangs, c'est la cardinalité de leur
+  union. Le patch est mort si `base_j+f>=h3`. Un handle non vide est mort si
+  cette condition vaut pour tous les bits de son masque ; un masque vide ne
+  prouve `EMPTY` qu'après preuve que le cover conserve tout vrai centre, et un
+  masque non vide ne prouve jamais l'existence. Le fast path global remplace
+  `g_AB[j]` par les mêmes positions certifiées sur **tous** les patches
+  faisables. Son succès autorise `PRUNE_NO_EMISSION`, même si l'existence reste
+  inconnue, mais ne permet de publier `ALL_DEEP` qu'avec une preuve séparée de
+  non-vacuité. La source de `g_AB` reste hors `A union B`, donc `f` est
+  additionnable ; tout changement de domaine impose une union d'identités.
+
+  Enfin, le front partagé est un contrat de coût, pas une simple optimisation :
+  former l'union des masques, partir une seule fois de la racine, créditer les
+  nœuds `ALL` globalement ou par bits, scinder les `MIXED` sur place et masquer
+  les bits saturés. Avec `V_phys` visites physiques et `T_patch` tests de bits,
+  la borne visée est
+  `O(|A|+|B|+V_A+V_B+64k+V_phys+T_patch)`, avec
+  `T_patch<=64*V_phys`. Aucun terme `k*V_phys`, aucun second parcours de racine
+  et aucun cumul de deux nœuds ancêtre/descendant ne sont admissibles.
 
 Le split de `C` n'est pas « identique » dans tous ses usages. Employé seulement
 pour mieux reconnaître `EMPTY`, il répète effectivement le mécanisme peu
@@ -688,10 +744,12 @@ comme différentiel.
 
 ## Certificat sûr : center-cover conditionné par $C$
 
-Un fallback simple évalue la forme polynomiale exacte par intervalles entiers
-dirigés sur `A,B,C,W`. `power_upper < 0` crédite un nœud témoin,
-`power_lower >= 0` le rejette, et `MIXED` subdivise ou rend `pending`. Cette
-route est sûre mais risque d'être lâche à cause des dépendances d'intervalles.
+Le repli brut par intervalles sur `A,B,C,W` n'est plus une route candidate au
+pin `650b3cff` : il est sûr lorsque sa borne supérieure est strictement
+négative, mais les dépendances l'ont rendu pratiquement inerte. Le conserver
+seulement comme contre-sonde bornée `pointwise_raw_aabb_pi_certificate`, avec
+fixtures ponctuelles et petites boîtes étendues ; il n'est pas un oracle
+géométrique indépendant puisqu'il réévalue la même forme de Gram que q3.
 
 La forme à encadrer est exactement celle de `q3.hpp`. Avec `d=b-a`, `u=c-a`,
 `y=z-a`, `D=d.d`, `E=u.u`, `F=d.u`, `G=D*E-F*F` et
@@ -704,7 +762,8 @@ comme minimum s'il traverse zéro. L'identité de Gram autorise à intersecter l
 borne de $G$ avec `[0,+inf)` sans perdre de valeur réelle. `Pi_upper < 0`
 signifie `ALL_STRICT_INTERIOR`, `Pi_lower >= 0` signifie seulement que ce nœud
 ne fournit aucun témoin, et tout autre résultat reste `MIXED`. Cette voie sert
-aussi d'oracle indépendant du raccord par patches.
+uniquement à falsifier le raccord par patches sur un domaine borné ; elle ne
+justifie ni un rescan par handle, ni un fallback produit.
 
 La route prioritaire réemploie les patches entiers déjà spécifiés, avec un seul
 parcours témoin par rectangle :
