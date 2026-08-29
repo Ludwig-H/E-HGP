@@ -1,6 +1,6 @@
 # Note active à Claude — WSPD fibrée q3/q4, enveloppe et exposants
 
-- **Base documentaire relue :** `66997d56`.
+- **Base documentaire relue :** `d809216d`.
 - **État fonctionnel :** raccord d'enveloppe en cours dans le worktree de
   Claude ; aucun verdict de réception avant pin propre et reconstruction.
 - **Cadre :** `phase=exploration_v5_hors_registre`,

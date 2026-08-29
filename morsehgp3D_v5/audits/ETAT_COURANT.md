@@ -1,10 +1,10 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **HEAD documentaire relu :** `66997d56`, publié sur `main` et
+- **HEAD documentaire relu :** `d809216d`, publié sur `main` et
   `origin/main`. Le dernier delta du chemin produit reste `2d052921` ; le HEAD
-  épingle désormais le harnais local et son selftest, sans pinner le raccord
-  d'enveloppe.
-- **Dernier pin fonctionnel reçu :** `72090f79`. Le chemin produit de
+  épingle le harnais local et le contrat entier du futur center-cover, sans
+  pinner le raccord d'enveloppe.
+- **Dernier pin du chemin produit reçu :** `72090f79`. Le chemin produit de
   l'enveloppe q3/q4 et ses portes restent dans un worktree concurrent non
   commité. Ils sont jugés ci-dessous comme snapshot, jamais attribués au HEAD ;
   le harnais est désormais épinglé séparément à `66997d56`.
@@ -172,13 +172,26 @@ du tip après migration, son commit restant dans l'historique.
    la combinaison.
 4. **Finir le harnais de reçu.** `66997d56` pinne le protocole, refuse
    l'écrasement, force les vrais digests, compare les bras, grave le statut et
-   l'environnement, et son auto-fixture tue les quatre refus annoncés. Deux
-   coutures restent : exposer des bras séparés q3/q4 avant d'annoncer
-   `none/q3/q4/both`, et rendre l'interruption causale. Le handler `INT/TERM`
-   écrit un statut s'il manque, mais ne quitte pas explicitement le script ;
-   ce scénario n'est pas exercé par l'auto-fixture et peut reprendre puis
-   réécrire le reçu.
-5. **Réparer le budget de la porte post-séparation.** Dans la campagne à deux
+   l'environnement, et son auto-fixture nominale passe `5/5`. Le handler
+   `INT/TERM` écrit un statut s'il manque, mais ne quitte pas explicitement le
+   script. Sous `setsid`, un `TERM` pendant le premier run a laissé exécuter les
+   quatre runs : codes `143,0,0,0`, sortie finale 3 et `statut=failed`, jamais
+   `interrompu`. Séparer `on_signal`, sortir en 130/143, attendre ou tuer le
+   descendant ciblé et vérifier qu'aucun ne survit.
+5. **Comparer l'objet, pas les métadonnées.** La signature conserve toute la
+   ligne `famille=`, donc `--threads=1` contre `--threads=2` produit un faux
+   `DESACCORD` code 3 alors que les digests et comptes sémantiques sont
+   identiques. Hasher seulement les digests et cardinalités, puis ajouter ce
+   bras multithread au contrôle positif. Le selftest doit aussi vérifier les
+   champs du reçu et la cause : son cas `--smax=99` produit déjà un objet vide,
+   donc le code 3 ne tue pas isolément la garde `runs_non_nuls`. Enfin écrire
+   `ordre_joue` ; avec trois bras le reçu annonce actuellement AB/BA pour un
+   ordre ABC/CBA. Reconfigurer aussi avec un cache frais et hasher les options
+   ou le `CMakeCache.txt` : le répertoire `build/recu_$nom` peut actuellement
+   préexister alors que le reçu ne grave que compilateur et `Release`. Exposer
+   séparément q3/q4 avant `none/q3/q4/both` reste bloqué par le booléen global
+   du raccord.
+6. **Réparer le budget de la porte post-séparation.** Dans la campagne à deux
    workers, `mhgp5_postsep_refine_mutant_h1` expire à `300,10 s` alors que la
    porte nominale jumelle finit en `302,74 s`. Le rejeu isolé est vert en
    `153,94 s` avec le code 4 attendu : le mutant est bien tué, mais le timeout
@@ -242,8 +255,9 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
 - reçu baseline `echelle_par_lane_20260829` : six runs produit au pin propre
   `a3c15d84`, codes nuls et compteurs exacts ; les ventilations par route et
   le proxy de concentration de l'addendum ne sont pas dans ses sorties ;
-- harnais `66997d56` : syntaxe Bash valide ; auto-fixture locale `5/5`, quatre
-  refus tués et contrôle positif, code final 0 ; signal `INT/TERM` non testé ;
+- harnais `66997d56` : syntaxe Bash valide ; les cinq scénarios de
+  l'auto-fixture rendent les codes attendus et son code final vaut 0 ; le test
+  causal `TERM` échoue et la comparaison inter-threads diverge à tort ;
 - contrôles documentaires et diff final à rejouer après consolidation.
 
 ## Ordre recommandé
