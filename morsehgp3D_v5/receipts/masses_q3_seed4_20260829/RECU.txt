@@ -1,0 +1,63 @@
+# MorseHGP3D v5 — campagne locale : masses_q3_seed4_20260829
+date_utc=2026-08-29T20:41:50+00:00
+source_commit=e4aaf123b12c904dee6d043b587e01dfbfa2d629
+arbre_construit=propre (refus sinon)
+cible=mhgp5 (cible PRODUIT, pas une cible MHGP5_TESTING)
+binaire_sha256=a83f9a8dbbe98a428ad89fdf0d119a9e722dfd7a868d25dad3a8db6152136f0f
+machine=Linux 6.8.0-1052-azure, 8 fils logiques — MACHINE PARTAGEE, LOCALE
+avertissement=un ecart de mur sous ~20 % n'est pas concluant ici ; les compteurs sont exacts
+protocole=morsehgp3D_v5/bench/recu_local.sh, ordre joue SANS alternance (un seul bras ou une seule repetition)
+compilateur=/usr/bin/c++ (c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0)
+cmake_build_type=Release
+cmake_version=cmake version 3.28.3
+statut=complete
+runs_non_nuls=0
+
+# bras
+prod = --s=8 --seed=4
+
+comparaison_objet=identique
+
+# signature de l'objet (sha256 catalogue + forets + cardinalites par K)
+eight_clusters_n16000_prod_r1 84688720465637068c999766da632499feda80ef15d5269e07ca24dcef024e48
+eight_clusters_n2000_prod_r1 d6b8219947205b6981ff3b57c53fc4bc7bde28b18632e0c7c8ab0ba69daab832
+eight_clusters_n32000_prod_r1 a5f9acc9ac4395ecd8e234c79cc7a799c8b90c8d19097ffe02d01456fb65d659
+eight_clusters_n4000_prod_r1 003346055adaa0d8d739e4b2994f9fdfeebd24ed1e6b6eef26298d753a50ac16
+eight_clusters_n8000_prod_r1 da5723d369b91fda49a20ac2ecf3a85fe6daa307826a5cbced23b02fb6ae67db
+scanline_single_pass_n16000_prod_r1 7d5f976224b98b53634c61877e674b2721edc68cede4f7b8e94090ae2ca86f69
+scanline_single_pass_n2000_prod_r1 41722b388113e6184d373f2994801c1a4f74d96e8e12944600b5a962ae80c388
+scanline_single_pass_n32000_prod_r1 eeff6cf28e1282d8b3797da277ae7279edbc4cfce60c47044e8b4cb2c24b0859
+scanline_single_pass_n4000_prod_r1 4e026284a888ef2f731ecd7218c6d1ffb17db0de60a2ab62c17f12432770ebb4
+scanline_single_pass_n8000_prod_r1 2f27213352c581833edf087f2a138d6b4d85accd08c92243f56613d2ce0bd48c
+terrain_n16000_prod_r1 dba867806abb9bb61f2be75c00041191011b45c3121b38c25be829bfe6f97a78
+terrain_n2000_prod_r1 937769ec3238bf9f5d9d79f7792003da704bfb53ab57f5d4d4d33502bfd6a0c2
+terrain_n32000_prod_r1 c9b89ed82be0eec1c376d4cde2a8de8943098cbb8c0b6e75f75d3d2c53fee570
+terrain_n4000_prod_r1 aa80ffbfacd5fd007df6d8625704d512ba8bca5fb735854caea3bdc7a5c5b7ab
+terrain_n8000_prod_r1 7b8d9f51b9ee52f91d5a951edd85cf2b8ccd3c3309d18bafded20ccaf28a4615
+uniform_n16000_prod_r1 c28ccd69a68f41df19b24e43e58071826e1e15ecf710a3f615ed972345d8f3b3
+uniform_n2000_prod_r1 c680f872cb7cfc7f1212c0fa7db2f14a11fed407904397044c6d7d67b416e06d
+uniform_n32000_prod_r1 afa150892e4552af8062a8d3699af9c795ede9f198f88d83a1c996da63fc19e4
+uniform_n4000_prod_r1 ae4ae468091e823937fb514f7d6a4d40ff2ab336bd2b888dce639b75d5973376
+uniform_n8000_prod_r1 5d561afd66839ed0f1102fbe2604bc50025a937933a1338758e6d2843e7840dd
+
+# run code duree_s peak_rss_kb
+eight_clusters_n16000_prod_r1 0 350.354 3463728
+eight_clusters_n2000_prod_r1 0 31.830 392268
+eight_clusters_n32000_prod_r1 0 843.760 7321992
+eight_clusters_n4000_prod_r1 0 56.231 763856
+eight_clusters_n8000_prod_r1 0 153.367 1629164
+scanline_single_pass_n16000_prod_r1 0 72.664 703660
+scanline_single_pass_n2000_prod_r1 0 6.376 116864
+scanline_single_pass_n32000_prod_r1 0 215.604 1361956
+scanline_single_pass_n4000_prod_r1 0 9.970 198876
+scanline_single_pass_n8000_prod_r1 0 27.383 366008
+terrain_n16000_prod_r1 0 75.256 746932
+terrain_n2000_prod_r1 0 5.970 116764
+terrain_n32000_prod_r1 0 176.905 1505088
+terrain_n4000_prod_r1 0 8.931 202880
+terrain_n8000_prod_r1 0 23.778 386548
+uniform_n16000_prod_r1 0 307.879 3903208
+uniform_n2000_prod_r1 0 38.126 434112
+uniform_n32000_prod_r1 0 652.605 8038012
+uniform_n4000_prod_r1 0 85.659 942632
+uniform_n8000_prod_r1 0 136.559 1889736

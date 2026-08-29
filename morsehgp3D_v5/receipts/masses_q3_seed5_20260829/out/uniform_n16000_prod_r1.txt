@@ -1,0 +1,35 @@
+payload=mhgp5-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+backend=cpu_reference
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=uniform n=16000 coord=251 s=8 smax=11 seed=5 threads=1 emis=6562395 boules_uniques=6560960 mortes_profondeur=65050 survivantes=6495910 census_int=33673804 census_shell=21898834 evenements=6542980 facettes=40812883 fusions=40809346 deltas=5723605 noeuds=4093692
+generation rect_alive=531964/1398853/1551224 ancres=667240/2328205/2738261 candidats=645036/2975042/2942317 tues_profondeur=0/23060857/8840832 ancres_w4=774653 ancres_w3=573688 ancres_secteurs=270070/529798 ancres_cellules=0/47 seeds_cellules=0/1447 grilles=0/65 seeds=26035899/23381758 completions_q4=110016197 seeds_core_tues=5981345 seeds_corde_tues=11949005 float_cert=454128173/307669149 repli=13267253 jung=139044084/91783527/223
+enveloppe_cover active=0 q3_cover=0/0/0/0 q3_query=0/0/0/0 q4_cover=0/0/0/0 q4_query=0/0/0/0 (ancres/sites_avant/sites_apres/tests_transverses)
+postsep L=0 parents=531964/1398853/1551224 produits=531964/1398853/1551224 base=667240/2328205/2738261 emis=667240/2328205/2738261 tues=0/0/0 etats=0/0/0 comptages=0/0/0 nœuds=0/0/0 coins=0/0/0 rollbacks=0/0/0 regressions=0/0/0
+ouvriers wspd=1/1/1 rects=1/1/1 rle=1 prefiltre=1 census=1 expansion=1 fold=1
+temps_ms index=4.6 gen=147165.7 (wspd 10508.5/41824.1/49519.7 rects 78.4/15022.5/30212.3) rle=1701.6 prefiltre=43077.0 census=39420.7 comptage=100.9 expansion=1857.5 fold=58326.2 (tri 12389.0 intern 26734.0 fusion 9308.4 reduce 9836.9) digest=6016.3
+temps_mur_ms=287656.1 (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, pas le mur)
+temps_fold_mur_ms=55108.4 (etages A et B, fold_inflight=2, pic_mesure_en_vol=1)
+rss_mb apres_generation=947 apres_rle=947 apres_prefiltre=1046 apres_census=2334 max_fold=3176 fin=94
+cardinalites K=1 evenements=61759 facettes=16000 deltas=12980 attachements=0 fusions=15999 noeuds=12980
+cardinalites K=2 evenements=131887 facettes=128509 deltas=51100 attachements=62853 fusions=128497 noeuds=45881
+cardinalites K=3 evenements=225269 facettes=414711 deltas=157236 attachements=261439 fusions=414677 noeuds=99538
+cardinalites K=4 evenements=342896 facettes=949648 deltas=269389 attachements=672125 fusions=949573 noeuds=174418
+cardinalites K=5 evenements=483959 facettes=1803386 deltas=404089 attachements=1363123 fusions=1803216 noeuds=270585
+cardinalites K=6 evenements=647301 facettes=3041751 deltas=561937 attachements=2401147 fusions=3041482 noeuds=386961
+cardinalites K=7 evenements=831824 facettes=4726197 deltas=741539 attachements=3848857 fusions=4725787 noeuds=522912
+cardinalites K=8 evenements=1037873 facettes=6922952 deltas=943828 attachements=5773094 fusions=6922339 noeuds=678936
+cardinalites K=9 evenements=1265483 facettes=9696990 deltas=1167396 attachements=8239026 fusions=9696149 noeuds=854636
+cardinalites K=10 evenements=1514729 facettes=13112739 deltas=1414111 attachements=11310906 fusions=13111627 noeuds=1046845
+digest_balls=11b3a5ac1001c543ac6556eb282fe8ceaa23004047cdba7df4de31bc90541fea
+digest_forest_K1=86ed7af4fecb6f5ae6ce21429d71d1498cc6d39174dda092b40cdb1040a345df
+digest_forest_K2=b0b3d656a20e797cd3ae381464fa026cf6e32ccd306cdc0a80949392675be720
+digest_forest_K3=728040afea11224cf8b3f55c04cec15dda52f286005022f6c73edd449187f003
+digest_forest_K4=4387edb7f8bf836851507babaa3cb2b87c1991fd8a911c14dba3bb6c8efea04a
+digest_forest_K5=7a907f01f85cb3f38d128a1d9847da9d486881d862a84796d00b6d7b64cc9df3
+digest_forest_K6=4f989dadd48980a4b0a5781edacb002c736c3c380f052884b29f745d700ca266
+digest_forest_K7=68e6c1706fcb7fad3745be8920cfa4d387989e1cd52dde3e8d4a2f3347010970
+digest_forest_K8=2ca2d5220fdbb1e015495d9e822904a88bad46dcf055b908b82723ad7c420ad1
+digest_forest_K9=43f07b1bf5b4d8918a4a3cb3bd7a23f4557dfb44bb4d5429e4f23428b71e4f0b
+digest_forest_K10=023a2e1f7b393a07942f6751cf4884590c3ba266d447fe5feb78837e144fc36f
+digest_all=c56b7b3a3816e6542e3adde324aff295b4d013009e2e9107748a1f38c233cd41
+rss_max_kb=3913968

@@ -1,0 +1,35 @@
+payload=mhgp5-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+backend=cpu_reference
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=terrain n=16000 coord=632 s=8 smax=11 seed=4 threads=1 emis=1233866 boules_uniques=1232695 mortes_profondeur=46998 survivantes=1185697 census_int=5956009 census_shell=3379930 evenements=1236896 facettes=7506565 fusions=7494476 deltas=955097 noeuds=761372
+generation rect_alive=259310/418739/432619 ancres=400088/917096/1087280 candidats=372999/762940/97927 tues_profondeur=0/12317140/6560302 ancres_w4=285969 ancres_w3=210107 ancres_secteurs=7869/21564 ancres_cellules=10/14254 seeds_cellules=12341/6184014 grilles=86/65245 seeds=13092421/14355670 completions_q4=67940087 seeds_core_tues=5646636 seeds_corde_tues=1336114 float_cert=263612908/172927187 repli=3795677 jung=58181801/90540631/195
+enveloppe_cover active=0 q3_cover=0/0/0/0 q3_query=0/0/0/0 q4_cover=0/0/0/0 q4_query=0/0/0/0 (ancres/sites_avant/sites_apres/tests_transverses)
+postsep L=0 parents=259310/418739/432619 produits=259310/418739/432619 base=400088/917096/1087280 emis=400088/917096/1087280 tues=0/0/0 etats=0/0/0 comptages=0/0/0 nœuds=0/0/0 coins=0/0/0 rollbacks=0/0/0 regressions=0/0/0
+ouvriers wspd=1/1/1 rects=1/1/1 rle=1 prefiltre=1 census=1 expansion=1 fold=1
+temps_ms index=12.0 gen=53281.4 (wspd 4179.9/7120.8/7375.6 rects 66.3/5640.4/28896.8) rle=360.9 prefiltre=7874.8 census=5455.8 comptage=48.9 expansion=651.2 fold=8122.7 (tri 1061.9 intern 4166.0 fusion 1521.6 reduce 1372.3) digest=1107.0
+temps_mur_ms=75234.3 (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, pas le mur)
+temps_fold_mur_ms=7991.1 (etages A et B, fold_inflight=2, pic_mesure_en_vol=1)
+rss_mb apres_generation=177 apres_rle=177 apres_prefiltre=209 apres_census=476 max_fold=642 fin=72
+cardinalites K=1 evenements=36904 facettes=16000 deltas=13055 attachements=0 fusions=15999 noeuds=13055
+cardinalites K=2 evenements=55655 facettes=72940 deltas=30166 attachements=36952 fusions=72922 noeuds=24158
+cardinalites K=3 evenements=74520 facettes=169557 deltas=49526 attachements=110054 fusions=169406 noeuds=37276
+cardinalites K=4 evenements=93760 facettes=305666 deltas=66964 attachements=221031 fusions=305253 noeuds=51456
+cardinalites K=5 evenements=112952 facettes=480841 deltas=85329 attachements=369451 fusions=480081 noeuds=66580
+cardinalites K=6 evenements=132356 facettes=695652 deltas=103468 attachements=556771 fusions=694454 noeuds=81959
+cardinalites K=7 evenements=152229 facettes=952095 deltas=122753 attachements=785246 fusions=950416 noeuds=97642
+cardinalites K=8 evenements=172344 facettes=1249953 deltas=141409 attachements=1054426 fusions=1247765 noeuds=113241
+cardinalites K=9 evenements=192819 facettes=1590791 deltas=161494 attachements=1365669 fusions=1588171 noeuds=130034
+cardinalites K=10 evenements=213357 facettes=1973070 deltas=180933 attachements=1718307 fusions=1970009 noeuds=145971
+digest_balls=715564af16f9b86d9be60892869e71f7a08d19c91baa1f4b733239994380d459
+digest_forest_K1=76f511b0359f3d523375e4a97515679ed65062cfe125270b5917de397434d19b
+digest_forest_K2=d52a65c31f825cc5c58541e39f702cc5a089dbbfab435ea4b65218602b3758cc
+digest_forest_K3=5b2faa25426804e8da632a96c8bb1aead716e54aae0aabf0bd5bc0aa927c8123
+digest_forest_K4=53da83a3c0e63ec1116276285be77f56933b4ed9bf7aca7b5a0d1899f430ce88
+digest_forest_K5=fedd0fb6bac79691dd74ef6f9d2edf2ae1c80ad90c1f0d8be8e5e7810c582b2a
+digest_forest_K6=ce5618ec929ab66fb9dcee1aba3d4f82d936e341185a95e70377b03cf47e16fb
+digest_forest_K7=174bc481027f297626395a7ed2aaa679357e233f98744b9bb945b15a1a5e1752
+digest_forest_K8=c5264a883a3125dfa3f34a166c464f286a2871575d5147b3e0cd3e3e5a81cae3
+digest_forest_K9=0459936107f57db3e3c2195f4f30a947f1ce370cf67414a1486542202f02a266
+digest_forest_K10=216e7f366ddc7142b9bfbc97945bb0f73c5f06b3760dffd4fc415a27958a25d5
+digest_all=3bd9edd60a6625b7648e104961903a5afb0569caee5a2af16a6b5749e18930aa
+rss_max_kb=746932

@@ -1,0 +1,35 @@
+payload=mhgp5-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+backend=cpu_reference
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=uniform n=16000 coord=251 s=8 smax=11 seed=4 threads=1 emis=6547382 boules_uniques=6545919 mortes_profondeur=63645 survivantes=6482274 census_int=33617061 census_shell=21846664 evenements=6528393 facettes=40723172 fusions=40719624 deltas=5704661 noeuds=4077200
+generation rect_alive=534286/1403108/1555825 ancres=664539/2296188/2690827 candidats=643344/2972342/2931696 tues_profondeur=0/22708360/8801558 ancres_w4=743558 ancres_w3=552525 ancres_secteurs=271445/529371 ancres_cellules=0/87 seeds_cellules=0/5054 grilles=0/148 seeds=25680702/23053533 completions_q4=109508533 seeds_core_tues=5861776 seeds_corde_tues=11744458 float_cert=447337290/305209151 repli=13242830 jung=136737343/90479180/191
+enveloppe_cover active=0 q3_cover=0/0/0/0 q3_query=0/0/0/0 q4_cover=0/0/0/0 q4_query=0/0/0/0 (ancres/sites_avant/sites_apres/tests_transverses)
+postsep L=0 parents=534286/1403108/1555825 produits=534286/1403108/1555825 base=664539/2296188/2690827 emis=664539/2296188/2690827 tues=0/0/0 etats=0/0/0 comptages=0/0/0 nœuds=0/0/0 coins=0/0/0 rollbacks=0/0/0 regressions=0/0/0
+ouvriers wspd=1/1/1 rects=1/1/1 rle=1 prefiltre=1 census=1 expansion=1 fold=1
+temps_ms index=4.4 gen=156479.5 (wspd 11109.0/44020.9/53703.1 rects 86.7/15534.1/32025.4) rle=1672.1 prefiltre=45125.3 census=40762.3 comptage=122.0 expansion=2126.0 fold=65996.8 (tri 13226.5 intern 29591.9 fusion 10521.1 reduce 12589.6) digest=6578.2
+temps_mur_ms=307866.1 (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, pas le mur)
+temps_fold_mur_ms=62524.8 (etages A et B, fold_inflight=2, pic_mesure_en_vol=1)
+rss_mb apres_generation=943 apres_rle=943 apres_prefiltre=1042 apres_census=2328 max_fold=3171 fin=32
+cardinalites K=1 evenements=62133 facettes=16000 deltas=13047 attachements=0 fusions=15999 noeuds=13047
+cardinalites K=2 evenements=131831 facettes=127962 deltas=51013 attachements=61997 fusions=127954 noeuds=45971
+cardinalites K=3 evenements=225268 facettes=414135 deltas=157195 attachements=261426 fusions=414097 noeuds=99313
+cardinalites K=4 evenements=341731 facettes=945817 deltas=268453 attachements=668902 fusions=945746 noeuds=173525
+cardinalites K=5 evenements=480876 facettes=1792310 deltas=400873 attachements=1354204 fusions=1792130 noeuds=268758
+cardinalites K=6 evenements=644185 facettes=3027320 deltas=558485 attachements=2391136 fusions=3027067 noeuds=384070
+cardinalites K=7 evenements=828780 facettes=4708770 deltas=738085 attachements=3836354 fusions=4708356 noeuds=520577
+cardinalites K=8 evenements=1035679 facettes=6907718 deltas=940625 attachements=5763004 fusions=6907111 noeuds=675758
+cardinalites K=9 evenements=1264810 facettes=9688170 deltas=1165866 attachements=8236179 fusions=9687335 noeuds=850671
+cardinalites K=10 evenements=1513100 facettes=13094970 deltas=1411019 attachements=11298227 fusions=13093829 noeuds=1045510
+digest_balls=adef9f88d9dd5f803ddfba974f2f8c1bd6e5d075d53e6dad0f0ebe3c31d3ade0
+digest_forest_K1=3a5ba7f53c02b46b454fe9e4aa628c621daa3468b760d87d302175ffe18bda5f
+digest_forest_K2=84f9e4226ab741c43b57a74dd80c9660badfad71d4a0484b19d9ffdb9a410bb7
+digest_forest_K3=4bca44a8065c5dd9179486b142c4cfdc6eeddacca9696b953a4d117eff8eca2a
+digest_forest_K4=7c851bf105a32ff0f5f3e190931ac7f97444fbba0b1fb1bc685a04b72a58774a
+digest_forest_K5=15e0a2ea0818b4f0f4987f60fbe744124cc5f7899d33a50393062712580d8f02
+digest_forest_K6=8759564ae12f84a3bd28c58b414624e07b92c0dd7da7cc9e2cac388ac980b909
+digest_forest_K7=d48d1d1cddb55c1d47c111c98f7db3c0dd3d0984510e57f23888f9eb84da0c71
+digest_forest_K8=2a9ad760da033b04163cd1b153697e0ca63961fc5303dad2f695aec31dbad22e
+digest_forest_K9=ed754c5b8acf3cd0ef97fe7d3c43a3d9b5bbf5478990fa794038831aaaf8007e
+digest_forest_K10=60df8e08f649f62d23ec13703e40ce8f1f492051da482b563db7155502e27f86
+digest_all=3c8a765a09bd655b8d3632a1d37c5110d35d9580eb12c2e34135809f7e3630c1
+rss_max_kb=3903208
