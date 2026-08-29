@@ -159,6 +159,14 @@ int main(int argc, char** argv) {
   // Vacuite decomposee : ce que les certificats de BOITES reconnaissent.
   u64 cert_zero_role = 0, cert_none_max_edge = 0, cert_none_acute = 0, cert_aucun = 0;
   u64 vide_reel_non_classe = 0, cert_faux_positif = 0;
+  // CAUSE REELLE de vacuite (V68) : etage le PLUS PROFOND atteint par un
+  // role du bloc. `is_acute_seed` se decompose exactement en lentille ->
+  // acuite stricte -> owner canonique ; classer par l'etage le plus profond
+  // atteint partitionne la vacuite reelle sans recouvrement.
+  u64 reel_zero_role = 0, reel_lentille = 0, reel_acuite = 0, reel_owner = 0;
+  // Croisement : parmi les vides que les BOITES ne classent pas, quelle est
+  // la cause reelle ? C'est la question V68.
+  u64 nc_lentille = 0, nc_acuite = 0, nc_owner = 0, nc_zero = 0;
   // Ledger de provenance, verifie sur les rectangles visites.
   i128 ledger_ok = 0, ledger_ko = 0;
 
@@ -203,22 +211,35 @@ int main(int argc, char** argv) {
       const i128 masse = (i128)nA * nB * nC - (i128)overlap(ra, rc) * nB - (i128)overlap(rb, rc) * nA;
       int cause = 0;  // 0 = non classe, 1 = ZERO_ROLE_MASS, 2 = NONE_MAX_EDGE, 3 = NONE_ACUTE
       if (masse <= 0) cause = 1;
+      i64 v2lo = 0, v2hi = 0;
+      v2_bounds(bA, bB, bC, &v2lo, &v2hi);
       if (!cause) {
+        // NONE_MAX_EDGE. Une borne COUPLEE existe et elle est strictement
+        // meilleure en theorie : l'identite du parallelogramme
+        //   |x-a|^2 + |x-b|^2 = 2|x-m|^2 + D^2/2
+        // donne max(|x-a|^2,|x-b|^2) >= |x-m|^2 + D^2/4, et la lentille exige ce
+        // max <= D^2, d'ou la condition NECESSAIRE |2x-a-b|^2 <= 3 D^2 — une
+        // seule quantite separable au lieu de deux minima atteints en des points
+        // differents. ELLE EST POURTANT INERTE ICI, et c'est demontrable :
+        // `rect_cover_handles` elague sur `gap2 > coef * dmax2` avec coef = 3,
+        // ou `gap2` est exactement notre `v2lo` et `dmax2` exactement `D2hi`.
+        // Le test `v2lo > 3*D2hi` EST le critere de selection des handles :
+        // aucun handle retourne ne peut le satisfaire. Mesure a l'appui — il ne
+        // change aucun des quatre comptes. Seule la version decouplee apporte
+        // de l'information au-dela de la selection des handles.
         i64 lax_lo = 0, lax_hi = 0, lbx_lo = 0, lbx_hi = 0;
         l2_bounds(bA, bC, &lax_lo, &lax_hi);
         l2_bounds(bB, bC, &lbx_lo, &lbx_hi);
-        if (lax_lo > D2hi || lbx_lo > D2hi) cause = 2;  // ab ne peut pas etre maximale
+        if (lax_lo > D2hi || lbx_lo > D2hi) cause = 2;
       }
-      if (!cause) {
-        i64 v2lo = 0, v2hi = 0;
-        v2_bounds(bA, bB, bC, &v2lo, &v2hi);
-        if (v2hi <= D2lo) cause = 3;  // aucun tiers strictement aigu
-      }
+      if (!cause && v2hi <= D2lo) cause = 3;  // aucun tiers strictement aigu
 
       // --- VERITE : force brute des roles, sous DEUX caps distincts.
       formes.clear(); ancres.clear(); carriers.clear();
       u64 roles_inspectes = 0;
       bool cape_role = false, cape_support = false;
+      // etage : 0 aucun role, 1 lentille, 2 acuite, 3 owner, 4 support valide
+      int etage = 0;
       for (i32 ua = ra.first; ua <= ra.last && !cape_role && !cape_support; ++ua)
         for (i32 ub = rb.first; ub <= rb.last && !cape_role && !cape_support; ++ub) {
           const P3& pa = ix.upos[(size_t)ua];
@@ -229,7 +250,17 @@ int main(int argc, char** argv) {
             if (ux == ua || ux == ub) continue;
             if (++roles_inspectes > cap_roles) { cape_role = true; break; }
             const P3& px = ix.upos[(size_t)ux];
-            if (!is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(ux))) continue;
+            // Decomposition exacte de `is_acute_seed`, pour attribuer la cause
+            // reelle de vacuite (V68) sans changer la decision.
+            const i64 l_ax = p3_norm2(p3_sub(px, pa)), l_bx = p3_norm2(p3_sub(px, pb));
+            if (l_ax > D2 || l_bx > D2) { etage = std::max(etage, 1); continue; }
+            const P3 vx{2 * px.x - pa.x - pb.x, 2 * px.y - pa.y - pb.y, 2 * px.z - pa.z - pb.z};
+            if (p3_norm2(vx) <= D2) { etage = std::max(etage, 2); continue; }
+            if (!anchor_owns_q3(D2, l_ax, l_bx, ix.point_id(ua), ix.point_id(ub), ix.point_id(ux))) {
+              etage = std::max(etage, 3);
+              continue;
+            }
+            etage = 4;
             if (formes.size() >= cap_supports) { cape_support = true; break; }
             formes.push_back(q3_form(pa, pb, px));
             ancres.push_back({ua, ub});
@@ -247,10 +278,20 @@ int main(int argc, char** argv) {
       const bool vide_reel = formes.empty();
       if (vide_reel) {
         ++vides_reels;
+        if (etage == 0) ++reel_zero_role;
+        else if (etage == 1) ++reel_lentille;
+        else if (etage == 2) ++reel_acuite;
+        else ++reel_owner;
         if (cause == 1) ++cert_zero_role;
         else if (cause == 2) ++cert_none_max_edge;
         else if (cause == 3) ++cert_none_acute;
-        else { ++cert_aucun; ++vide_reel_non_classe; }
+        else {
+          ++cert_aucun; ++vide_reel_non_classe;
+          if (etage == 0) ++nc_zero;
+          else if (etage == 1) ++nc_lentille;
+          else if (etage == 2) ++nc_acuite;
+          else ++nc_owner;
+        }
         continue;
       }
       // Un certificat qui declare vide un bloc NON vide serait une fausse mort.
@@ -316,6 +357,14 @@ int main(int argc, char** argv) {
               (unsigned long long)cert_none_max_edge, (unsigned long long)cert_none_acute,
               (unsigned long long)vide_reel_non_classe,
               vides_reels ? 100.0 * (double)vide_reel_non_classe / (double)vides_reels : 0.0);
+  std::printf("  CAUSE REELLE des vides (etage le plus profond atteint par un role) : "
+              "aucun role=%llu lentille=%llu acuite=%llu owner=%llu\n",
+              (unsigned long long)reel_zero_role, (unsigned long long)reel_lentille,
+              (unsigned long long)reel_acuite, (unsigned long long)reel_owner);
+  std::printf("  PARMI LES NON CLASSES par les boites, cause reelle : "
+              "aucun role=%llu lentille=%llu acuite=%llu owner=%llu\n",
+              (unsigned long long)nc_zero, (unsigned long long)nc_lentille,
+              (unsigned long long)nc_acuite, (unsigned long long)nc_owner);
   std::printf("  certificats FAUX POSITIFS (bloc declare vide mais non vide) = %llu  [doit valoir 0]\n",
               (unsigned long long)cert_faux_positif);
   if (juges == 0) { std::printf("  aucun bloc juge\n"); return 3; }
