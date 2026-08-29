@@ -169,6 +169,14 @@ int main(int argc, char** argv) {
   // de ses roles. Reconnaitre sa vacuite n'evite donc que cela, et la
   // comparaison honnete est en appels executes de chaque espece.
   u64 roles_blocs_vides = 0, roles_blocs_pleins = 0;
+  // V74 : PLAFOND de la direction center-cover, mesure avant tout chantier.
+  // Les appels de puissance des blocs a supports valides se repartissent en
+  // trois seaux disjoints : (1) blocs que la baseline W_3 tue deja — la
+  // production les capte, un certificat de bloc n'y gagne rien ; (2) blocs
+  // tous profonds que W_3 ne tue PAS — c'est exactement le gain marginal
+  // qu'un center-cover conditionne par C pourrait viser ; (3) blocs dont un
+  // support survit — travail inherent, aucun certificat ne peut l'eviter.
+  u64 pw_deja_w3 = 0, pw_gain_marginal = 0, pw_inherent = 0;
   // Croisement : parmi les vides que les BOITES ne classent pas, quelle est
   // la cause reelle ? C'est la question V68.
   u64 nc_lentille = 0, nc_acuite = 0, nc_owner = 0, nc_zero = 0;
@@ -308,13 +316,14 @@ int main(int argc, char** argv) {
       // stricts ? Sortie anticipee a h3 : la profondeur exacte n'est PAS
       // calculee au-dela, d'ou le nom.
       bool tous_profonds = true;
+      u64 pw_bloc = 0;
       for (size_t t = 0; t < formes.size() && tous_profonds; ++t) {
         ++supports_examines;
         u64 prof = 0;
         bool sorti = false;
         for (const i32 uz : candidats) {
           if (uz == ancres[t].first || uz == ancres[t].second || uz == carriers[t]) continue;
-          ++appels_puissance;
+          ++appels_puissance; ++pw_bloc;
           if (q3_power(formes[t], ix.upos[(size_t)uz]) < 0 && ++prof >= h3) { sorti = true; break; }
         }
         if (sorti) ++sorties_anticipees_support; else tous_profonds = false;
@@ -337,6 +346,10 @@ int main(int argc, char** argv) {
         if (sorti) ++sorties_anticipees_ancre; else paire_morte_ici = false;
       }
 
+      // Attribution du plafond (V74) : trois seaux disjoints.
+      if (paire_morte_ici) pw_deja_w3 += pw_bloc;
+      else if (tous_profonds) pw_gain_marginal += pw_bloc;
+      else pw_inherent += pw_bloc;
       if (tous_profonds) ++ideal_mort;
       if (paire_morte_ici) ++paire_morte;
       if (tous_profonds && !paire_morte_ici) ++ideal_seul;
@@ -388,6 +401,16 @@ int main(int argc, char** argv) {
   std::printf("    baseline : ancres examinees=%llu, appels in_spindle=%llu, sorties anticipees=%llu\n",
               (unsigned long long)ancres_examinees, (unsigned long long)appels_spindle,
               (unsigned long long)sorties_anticipees_ancre);
+  {
+    const double tot = (double)(pw_deja_w3 + pw_gain_marginal + pw_inherent);
+    std::printf("  PLAFOND DU CENTER-COVER (appels de puissance des blocs a supports valides, trois seaux disjoints) :\n");
+    std::printf("    deja tues par W_3 (production les capte)      = %llu (%.1f %%)\n",
+                (unsigned long long)pw_deja_w3, tot ? 100.0 * (double)pw_deja_w3 / tot : 0.0);
+    std::printf("    GAIN MARGINAL visable par un certificat de bloc = %llu (%.1f %%)\n",
+                (unsigned long long)pw_gain_marginal, tot ? 100.0 * (double)pw_gain_marginal / tot : 0.0);
+    std::printf("    inherent (un support survit, rien a eviter)    = %llu (%.1f %%)\n",
+                (unsigned long long)pw_inherent, tot ? 100.0 * (double)pw_inherent / tot : 0.0);
+  }
   std::printf("    roles enumeres (is_acute_seed) : blocs VIDES=%llu, blocs PLEINS=%llu — "
               "reconnaitre un bloc vide n'evite QUE la premiere colonne\n",
               (unsigned long long)roles_blocs_vides, (unsigned long long)roles_blocs_pleins);
