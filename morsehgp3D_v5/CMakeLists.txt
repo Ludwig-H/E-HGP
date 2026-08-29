@@ -437,6 +437,12 @@ target_compile_definitions(mhgp5_rect_probe PRIVATE MHGP5_PROBE_PIN="${_mhgp5_pr
 # faux positif de certificat ou l'invariant sont pris en defaut.
 mhgp5_executable(mhgp5_block_witness_probe bench/block_witness_probe.cpp)
 target_compile_definitions(mhgp5_block_witness_probe PRIVATE MHGP5_PROBE_PIN="${_mhgp5_probe_pin}" MHGP5_PROBE_DIRTY="${_mhgp5_probe_dirty}")
+# Sonde q3 counter-only : vrais cones du test sectoriel, surmasque Box(C) et
+# union causale de tous les handles pour une ancre. Aucun prune produit.
+mhgp5_executable(mhgp5_sector_reach_probe bench/sector_reach_probe.cpp)
+target_compile_definitions(mhgp5_sector_reach_probe PRIVATE MHGP5_PROBE_PIN="${_mhgp5_probe_pin}" MHGP5_PROBE_DIRTY="${_mhgp5_probe_dirty}")
+mhgp5_gate(mhgp5_sector_reach_probe_smoke 0 mhgp5_sector_reach_probe
+           "--family=terrain --n=64 --blocs=64 --union-rects=8 --seed=3")
 
 # Test d'ancre par secteurs : un mutant non strict cree des faux positifs -> divergence des digests v4 (code 4).
 # Le mutant non strict est INVISIBLE en position generale (aucune egalite) : la fixture gravee
