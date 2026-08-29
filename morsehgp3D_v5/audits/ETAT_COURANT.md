@@ -1,13 +1,15 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **HEAD fonctionnel relu :** `7e0ffe79`, commité sur `main`. Il raccorde
-  l'enveloppe fermée de boules possibles aux scans q3/q4, avec son oracle
-  géométrique indépendant, ses chemins batched et ses portes de non-vacuité.
-  Le probe diagnostique `A x B x C` v2 reste épinglé à `7bf28488` et son
-  contre-audit de coût à `b74d8050`.
-- **Dernier pin du chemin produit reçu :** `7e0ffe79`. Le harnais de reçu reste
-  épinglé séparément à `66997d56`. Aucune mesure antérieure à ce pin n'est
-  attribuée au raccord d'enveloppe.
+- **Dernier tip de Claude relu :** `a0621897`, présent dans l'historique de
+  `main`. Il ajoute la réponse V67--V69, désormais consolidée dans la réponse active.
+  Son dernier pin fonctionnel est `1ff39ab9`, qui épingle la sonde diagnostique
+  `A x B x C` v3 ; celle-ci n'est ni un certificat produit, ni un reçu de coût.
+  Son contre-audit de la v2 reste `b74d8050`.
+- **Dernier pin du chemin produit reçu :** `7e0ffe79`. Il raccorde l'enveloppe
+  fermée de boules possibles aux scans q3/q4, avec son oracle géométrique
+  indépendant, ses chemins batched et ses portes de non-vacuité. Le harnais de
+  reçu reste épinglé séparément à `66997d56`. Aucune mesure antérieure à ce pin
+  n'est attribuée au raccord d'enveloppe.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -32,6 +34,14 @@ admissible de l'ancre. Elle ne fournit aucun crédit universel
 `h0/ha/hb/hc`, ne s'additionne à aucun compte témoin et ne se réemploie pas sur
 une paire LCA qui n'est pas l'arête maximale possédée. Le verrou d'échelle
 global reste donc ouvert.
+
+La relève directement actionnable est maintenant spécifiée dans la réponse
+`A x B x C` : requêtes d'arbre saturées par endpoint pour remplacer
+`corner_histograms`, puis bitsets cumulatifs munis d'un index de mots non nuls
+pour ne parcourir que les couples survivants. Elle conserve l'autorité exacte
+aux feuilles, sépare diagonale/prune/bulk et publie les visites `MIXED`. Son
+pire cas reste quadratique ; seule une pente de compteurs sur les régimes
+cibles peut qualifier le gain, jamais le seul mur.
 
 La correction de cap de l'utilisateur est reçue : **q2 n'est pas le problème
 architectural à traiter**. La WSPD binaire partitionne correctement les paires ;
@@ -92,8 +102,12 @@ Pour q4, les deux porteurs opposés à `AB` restent une paire non ordonnée. Le
 parcours peut imbriquer deux handles, mais son ledger emploie les blocs croisés
 `i<j` et les diagonales `choose2(H_i)`, ferme `6*C(n_u,4)` et ne décide pas
 avant le terminal lequel des deux porteurs est la face aiguë canonique. Les
-formules locales retirant les recouvrements avec `A/B` sont épinglées dans la
-réponse active ; elles ne justifient aucune matérialisation globale des couples.
+formules locales retirant les recouvrements avec `A/B` ont été vérifiées sur
+`442644` configurations exhaustives. La fermeture globale doit toutefois
+inclure les rectangles morts avant `AliveRect`; sur une diagonale `C=D`, le
+domaine de $h_d$ est vide sans union d'IDs. La masse couverte se calcule sur
+l'union des handles en temps linéaire en leur nombre : aucune de ces preuves ne
+justifie une matérialisation globale des couples.
 
 ## Enveloppe q3/q4 reçue mathématiquement
 
@@ -188,36 +202,87 @@ seeds séparée qui ne retire jamais ces points du cover témoin. La réponse
 V53--V56 est fusionnée dans la note active ; la question séparée est retirée
 du tip après migration, son commit restant dans l'historique.
 
-## Réception du snapshot d'enveloppe
+## Réception de la sonde de fibre v3 `1ff39ab9`
 
-### Fermé dans le worktree observé
+Le pin est un **GO diagnostique**, pas un reçu de ledger ni de coût. Les trois
+certificats de vacuité sont sûrs dans le sens implémenté ; en particulier
+`v2hi<=D2lo` prouve bien `NONE_ACUTE` et ne doit pas être inversé. L'implication
+`pair_w3_dead => all_valid_supports_depth_ge_h3` est mathématiquement réelle.
+Les smokes locaux `uniform` et `eight_clusters`, `n=400`, jugent chacun 301
+blocs sans cap et trouvent zéro faux positif ou violation ; ils ne constituent
+ni une campagne, ni un oracle indépendant.
+
+Quatre garanties annoncées restent à corriger dans la v4 du probe :
+
+1. `outside=full-covered` rend le ledger actuel tautologique ; vérifier
+   antichaîne/disjonction puis attribuer chaque rôle à petit `n`, en incluant
+   les rectangles morts par cœur dans la fermeture globale
+   `3*C(n_unique,3)`.
+2. La sortie capée mélange masse brute de rôles et nombre de supports valides,
+   exclut encore les blocs lourds des pourcentages et ne confronte pas leurs
+   certificats. Publier les objets séparément avec un intervalle valide, puis
+   garder ces blocs `pending`.
+3. `cout_certificateur += 3` est fixé par construction, et les appels
+   `q3_power/in_spindle` appartiennent à la force brute du probe, pas au chemin
+   produit. Compter aux vrais points d'appel ou instrumenter le pipeline en
+   shadow avant toute causalité de gain.
+4. Imprimer les cumuls `i128` sans cast u64, corriger et compléter l'empreinte
+   par les `PointId`, parser strictement, échantillonner par bottom-k ou phases,
+   puis ajouter le CTest exhaustif absent. Le bit dirty compilé par CMake ne
+   reste pas frais après une modification du worktree.
+
+Le prochain travail produit ne dépend pas de ces pourcentages : implémenter
+d'abord les histogrammes saturés et l'énumération sparse des couples, puis
+mesurer les blocs conditionnés par `C` sur le résiduel causal.
+
+## Réception du pin d'enveloppe `7e0ffe79`
+
+### Fermé sur le pin
 
 - build Release complet avec `-Wall -Wextra -Wpedantic -Werror` ;
-- registre `80/80/80`, Python requis et détection des portes CMake
-  multiligne ;
+- `27/27` portes ciblées locales vertes : CLI, mutants, oracle géométrique,
+  familles OFF/ON et routes batched q3/q4 normales, hôte, mixtes et
+  surdimensionnées ;
 - appariement OFF/ON sur six familles : ordre brut à un fil, catalogue RLE,
   digests, événements avec niveaux, `batch_levels` et cardinalités par K ;
+- implication indépendante `q3_power <= 0` vers l'enveloppe q3, implication
+  q4 sur tous les tétraèdres bien centrés de coins de cube et inclusion exacte
+  de la lentille ; aucune copie de la formule produit ne tient lieu d'oracle ;
 - routes de prétest cover/requête, compteurs séparés et compaction q3/q4 non
-  vacante ;
-- fixtures strictes non axiales, frontière `i128`, point Jung q4 extérieur à
-  q3 et oracle indépendant par produit vectoriel ;
-- chemins batched normaux, tout hôte, mixtes et surdimensionnés q3/q4 ;
-- réemploi de `cover_tmp`, remapping stable de la lentille q4, garde u32 avant
-  matérialisation, autorité unique de `pretest_query_min_points`, parsing CLI
-  exact et sonde compilée comme cible produit.
+  vacante ; les portes surdimensionnées exigent désormais
+  `anchors_oversized >= 1`, et le contrefactuel à plancher impossible rend le
+  code 3 ;
+- fixtures strictes non axiales, frontières `i128`, point Jung q4 extérieur à
+  q3, réemploi de `cover_tmp`, remapping stable de la lentille q4, garde u32
+  avant matérialisation, parsing CLI exact et sonde compilée comme cible
+  produit ;
+- `python tools/check_docs.py` et
+  `python tools/check_implementation_status.py` verts sur le pin.
 
-### Dents avant pin et mesure
+### Dents restant avant mesure
 
-1. **Pinner le delta complet.** Source, fixtures, CMake et statut doivent
-   entrer dans le même commit cohérent, puis être reconstruits et rejoués sur
-   ce pin.
-2. **Rendre « oversized » causal.** Les exécutions auditées empruntent la route
-   (`3657` ancres q3, `2961` q4), mais `expect-route=device` n'exige pas
-   `anchors_oversized > 0`. Ajouter un plancher explicite.
-3. **Déclarer les capacités d'override.** Une option imprimée active ne peut
+1. **Ne pas attribuer le pin à CUDA.** `cli/mhgp5_cuda.cu` et les portes device
+   ne parsèrent ni `--cover-envelope`, ni `--pretest-query-min`; les huit portes
+   batched de ce pin sont CPU/host-shaped. Les reçus G4 historiques restent
+   vrais pour leur ancien pin mais ne couvrent pas ce delta. Avant tout résultat
+   GPU : parsing exact, portes device ON q3/q4 pour les wires SoA et index, puis
+   reçu frais. Aucune session GPU n'est nécessaire pour recevoir le CPU actuel.
+2. **Déclarer les capacités d'override.** Une option imprimée active ne peut
    être ignorée silencieusement par un exécuteur externe ; propager ou refuser
-   la combinaison.
-4. **Finir le harnais de reçu.** `66997d56` pinne le protocole, refuse
+   la combinaison. Les overrides CUDA intégrés transmettent les options, mais
+   l'API générique d'un exécuteur tiers ne déclare pas encore cette capacité.
+   Imprimer `requested` et `applied_q3/applied_q4`, pas seulement un booléen
+   global dérivé de la requête.
+3. **Fermer les croisements CLI et routes batched.** Les refus CLI sont gardés,
+   mais aucune porte positive ne tuerait une option acceptée puis ignorée. Le
+   gate direct force cover/query ; les exécutables batched ne parsèrent pas
+   `--pretest-query-min`, donc leurs compteurs par route peuvent comparer
+   `0==0`. Ajouter une porte produit positive et une porte q3/q4 par route.
+4. **Durcir les compteurs de travail.** Les nouveaux cumuls
+   `sites_before/sites_after/cross_tests` sont en `u64` alors que leur somme
+   peut théoriquement atteindre un régime cubique. Employer `u128` ou une
+   saturation avec bit d'overflow avant de les dire exacts à grande taille.
+5. **Finir le harnais de reçu.** `66997d56` pinne le protocole, refuse
    l'écrasement, force les vrais digests, compare les bras, grave le statut et
    l'environnement, et son auto-fixture nominale passe `5/5`. Le handler
    `INT/TERM` écrit un statut s'il manque, mais ne quitte pas explicitement le
@@ -225,7 +290,7 @@ du tip après migration, son commit restant dans l'historique.
    quatre runs : codes `143,0,0,0`, sortie finale 3 et `statut=failed`, jamais
    `interrompu`. Séparer `on_signal`, sortir en 130/143, attendre ou tuer le
    descendant ciblé et vérifier qu'aucun ne survit.
-5. **Comparer l'objet, pas les métadonnées.** La signature conserve toute la
+6. **Comparer l'objet, pas les métadonnées.** La signature conserve toute la
    ligne `famille=`, donc `--threads=1` contre `--threads=2` produit un faux
    `DESACCORD` code 3 alors que les digests et comptes sémantiques sont
    identiques. Hasher seulement les digests et cardinalités, puis ajouter ce
@@ -238,17 +303,11 @@ du tip après migration, son commit restant dans l'historique.
    préexister alors que le reçu ne grave que compilateur et `Release`. Exposer
    séparément q3/q4 avant `none/q3/q4/both` reste bloqué par le booléen global
    du raccord.
-6. **Réparer le budget de la porte post-séparation.** Dans la campagne à deux
+7. **Réparer le budget de la porte post-séparation.** Dans la campagne à deux
    workers, `mhgp5_postsep_refine_mutant_h1` expire à `300,10 s` alors que la
    porte nominale jumelle finit en `302,74 s`. Le rejeu isolé est vert en
    `153,94 s` avec le code 4 attendu : le mutant est bien tué, mais le timeout
    de 300 s ne supporte pas la concurrence de la campagne canonique.
-7. **Réparer les normes du brouillon mathématique.** Le worktree observé écrit
-   trois fois `leftVert` sans antislash dans la nouvelle dérivation
-   d'enveloppe (`D`, `S`, puis `Xi`) ; `rightVert` reste seul. Le rendu KaTeX
-   est invalide alors que `python tools/check_docs.py` reste vert, car ce motif
-   amputé n'est pas encore contrôlé. Corriger le Markdown avant pin et ajouter
-   ce cas au validateur.
 
 Le filtre reste OFF par défaut. Aucun tableau de mur antérieur au refactor ne
 sert de reçu. Mesurer ensuite `none/q3/q4/both` exige d'abord des commutateurs
@@ -295,7 +354,7 @@ contexte géométrique partagé et une réservation exclusive du wire actif. Le
 protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
 `../docs/GPU.md`. Aucune nouvelle matrice G4 avant fermeture locale de G0/G1.
 
-## Validation indépendante du snapshot
+## Validation indépendante des pins
 
 - configuration canonique et build Release : succès ;
 - campagnes ciblées enveloppe/CLI/mutants et routes batched : `27/27` ;
@@ -311,20 +370,28 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
 - harnais `66997d56` : syntaxe Bash valide ; les cinq scénarios de
   l'auto-fixture rendent les codes attendus et son code final vaut 0 ; le test
   causal `TERM` échoue et la comparaison inter-threads diverge à tort ;
+- probe v3 `1ff39ab9` : cible Release construite ; smokes `uniform` et
+  `eight_clusters` à `n=400` verts, 301 blocs jugés par famille, sans cap,
+  faux positif ou violation ; aucune porte CTest n'est enregistrée pour cette
+  sonde ;
 - contrôles documentaires et diff final à rejouer après consolidation.
 
 ## Ordre recommandé
 
-1. Fermer la non-vacuité oversized, le timeout et le harnais, puis pinner le
-   raccord d'enveloppe avec ses tests ; ne plus l'étendre avant réception.
-2. Refaire build et campagne `gate` sur ce pin.
-3. Ouvrir `q34_fiber` comme falsificateur counter-only du center-cover de
-   blocs ; prouver provenance, ledgers et continuations sans matérialiser une
-   ancre.
-4. Seulement si ce prune est non vacant, ouvrir `AnchorLineSet`, ses compteurs
-   par ancre, l'oracle exhaustif borné puis le shallow ; comparer en shadow
-   `all-direct`, `all-shallow` et le dispatch adaptatif. Tester la WSPD locale
-   q4 comme ablation, jamais comme prérequis.
+1. Corriger le ledger, les caps, les compteurs et l'échantillonnage du probe
+   v3, puis lui donner une porte exhaustive ; ne pas attendre ses pourcentages
+   pour traiter la boucle quadratique connue.
+2. Remplacer `corner_histograms` par les requêtes saturées partagées, puis
+   émettre via les bitsets à mots non nuls ; fermer égalité des comptes, masse
+   et ordre sur q2/q3/q4 avant activation.
+3. Ouvrir ensuite `g_AB[j]` et les masques de handles en counter-only dans le
+   chemin causal ; prouver provenance, IDs et continuations sans matérialiser
+   un catalogue global `A x B x C` ou `C x D`.
+4. Si le résiduel le justifie, ouvrir `AnchorLineSet`, l'oracle exhaustif borné
+   puis le shallow ; comparer en shadow `all-direct`, `all-shallow` et le
+   dispatch adaptatif. Tester la WSPD locale q4 comme ablation, jamais comme
+   prérequis. Fermer parallèlement les capacités d'override et les portes CUDA
+   avant tout reçu GPU.
 5. Fermer ensuite G0/G1, fold vivant et grille selon leur ordre local ; aucun
    de ces chantiers ne doit masquer les compteurs de la nouvelle source.
 

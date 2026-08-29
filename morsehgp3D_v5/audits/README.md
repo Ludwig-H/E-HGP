@@ -21,12 +21,15 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   handles avec `m_e`. La WSPD locale d'arête opposée reste une ablation q4
   conditionnelle.
 - [`REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md`](REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md) :
-  réponse constructive sur la fibre `A x B x C` : le prédicat idéal du probe
-  v2 est reçu mais ses proxys de travail sont rétractés ; le chemin sûr calcule
-  `g_AB[j]` une fois par rectangle, laisse `C` masquer les patches par les
-  médiatrices, réutilise `h_a(a),h_b(b)` et diffère `h_c(c)`. Pour q4, les deux
+  réponse constructive sur la fibre `A x B x C` : le prédicat idéal est reçu,
+  mais la v3 reste diagnostique tant que ledger, caps et compteurs causaux ne
+  sont pas indépendants ; le chemin sûr calcule `g_AB[j]` une fois par
+  rectangle, laisse `C` masquer les patches par les médiatrices, réutilise
+  `h_a(a),h_b(b)` et diffère `h_c(c)`. Pour q4, les deux
   porteurs restants restent une paire non ordonnée dont le ledger ferme
-  `6*C(n_u,4)`. `Lca3Forest` reste une ablation de ledger, pas une route
+  `6*C(n_u,4)`. La note donne aussi la relève concrète de
+  `corner_histograms` par requêtes d'arbre saturées, puis bitsets des seuls
+  couples survivants. `Lca3Forest` reste une ablation de ledger, pas une route
   produit.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : décisions et dents restantes de la lane device.
