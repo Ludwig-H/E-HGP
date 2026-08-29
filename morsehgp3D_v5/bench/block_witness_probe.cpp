@@ -177,6 +177,13 @@ int main(int argc, char** argv) {
   // qu'un center-cover conditionne par C pourrait viser ; (3) blocs dont un
   // support survit — travail inherent, aucun certificat ne peut l'eviter.
   u64 pw_deja_w3 = 0, pw_gain_marginal = 0, pw_inherent = 0;
+  // Le gain marginal se decoupe encore en deux, et la distinction gouverne
+  // la CONSTRUCTION du certificat. Un center-cover global credite les sites
+  // interieurs a TOUTES les boules du bloc : s'il y en a h_3, un certificat
+  // UNIQUE suffit. Sinon le bloc peut encore mourir, mais seulement par
+  // PATCHES tues par des ensembles de temoins differents — la machinerie
+  // lourde de la note d'audit. Cette mesure dit combien elle est necessaire.
+  u64 marg_simple = 0, marg_patches = 0, pw_marg_simple = 0, pw_marg_patches = 0;
   // Croisement : parmi les vides que les BOITES ne classent pas, quelle est
   // la cause reelle ? C'est la question V68.
   u64 nc_lentille = 0, nc_acuite = 0, nc_owner = 0, nc_zero = 0;
@@ -348,7 +355,24 @@ int main(int argc, char** argv) {
 
       // Attribution du plafond (V74) : trois seaux disjoints.
       if (paire_morte_ici) pw_deja_w3 += pw_bloc;
-      else if (tous_profonds) pw_gain_marginal += pw_bloc;
+      else if (tous_profonds) {
+        pw_gain_marginal += pw_bloc;
+        // Temoins COMMUNS a toutes les boules du bloc : arret des h_3 atteints,
+        // et pour chaque candidat arret des qu'une boule l'exclut.
+        u64 communs = 0;
+        for (const i32 uz : candidats) {
+          bool sommet = false;
+          for (size_t t = 0; t < formes.size() && !sommet; ++t)
+            if (uz == ancres[t].first || uz == ancres[t].second || uz == carriers[t]) sommet = true;
+          if (sommet) continue;
+          bool universel = true;
+          for (size_t t = 0; t < formes.size() && universel; ++t)
+            if (!(q3_power(formes[t], ix.upos[(size_t)uz]) < 0)) universel = false;
+          if (universel && ++communs >= h3) break;
+        }
+        if (communs >= h3) { ++marg_simple; pw_marg_simple += pw_bloc; }
+        else { ++marg_patches; pw_marg_patches += pw_bloc; }
+      }
       else pw_inherent += pw_bloc;
       if (tous_profonds) ++ideal_mort;
       if (paire_morte_ici) ++paire_morte;
@@ -408,6 +432,13 @@ int main(int argc, char** argv) {
                 (unsigned long long)pw_deja_w3, tot ? 100.0 * (double)pw_deja_w3 / tot : 0.0);
     std::printf("    GAIN MARGINAL visable par un certificat de bloc = %llu (%.1f %%)\n",
                 (unsigned long long)pw_gain_marginal, tot ? 100.0 * (double)pw_gain_marginal / tot : 0.0);
+    const double marg = (double)(pw_marg_simple + pw_marg_patches);
+    std::printf("      dont CERTIFICAT UNIQUE suffit (>= h3 temoins communs) : %llu blocs, %llu appels (%.1f %% du marginal)\n",
+                (unsigned long long)marg_simple, (unsigned long long)pw_marg_simple,
+                marg ? 100.0 * (double)pw_marg_simple / marg : 0.0);
+    std::printf("      dont PATCHES necessaires (temoins incompatibles)      : %llu blocs, %llu appels (%.1f %% du marginal)\n",
+                (unsigned long long)marg_patches, (unsigned long long)pw_marg_patches,
+                marg ? 100.0 * (double)pw_marg_patches / marg : 0.0);
     std::printf("    inherent (un support survit, rien a eviter)    = %llu (%.1f %%)\n",
                 (unsigned long long)pw_inherent, tot ? 100.0 * (double)pw_inherent / tot : 0.0);
   }
