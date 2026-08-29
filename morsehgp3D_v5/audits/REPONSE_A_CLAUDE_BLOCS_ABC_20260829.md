@@ -578,8 +578,19 @@ $$L_S(Q,A,W)=\min_{q\in\mathrm{Vert}(Q)}\sum_{i=1}^{3}\left(\min_{r\in\left\lbra
   `a,z` donne encore un minimum de fonctions affines, donc une fonction
   concave de `q`. Ainsi `max(L_S(Q,A,W),L_S(Q,B,W))>0` crédite le nœud `W` en
   bloc pour le patch `Q`; l'égalité reste fail-open. Avec `S=32`, c'est le
-  contrat court attendu de `L32`. Employer des opérations signées exactes et
-  vérifier la borne de largeur du patch u16 avant le premier produit.
+  contrat court attendu du helper de témoin. Employer des opérations signées
+  exactes et vérifier la borne de largeur du patch u16 avant le premier
+  produit.
+
+  Ne pas nommer ce helper simplement `L32`. Deux ABI sûres mais différentes
+  coexistent dans les notes : l'ancienne met `Q,A,W` à l'échelle 32 et relaxe
+  des AABB continues ; celle-ci met seulement le centre `q=32o` à l'échelle et
+  minimise `a,z` sur le réseau u16. Elles diffèrent d'un facteur 32 sur les
+  boîtes ponctuelles et donnent des relaxations réellement différentes sur une
+  boîte étendue. Le raccord doit donc recevoir des types tels que
+  `CenterQ32Box` et `U16LatticeBox`, et un nom non ambigu comme
+  `center_witness_phi32_lattice_min`; passer une boîte `A/W` déjà multipliée
+  par 32 à cette formule brise le prédicat.
 
   L'obstacle restant est le **cover des centres**. Pour une paire ponctuelle,
   les centres aigus dont `AB` est maximale vivent bien dans le disque du plan
@@ -599,29 +610,31 @@ $$L_S(Q,A,W)=\min_{q\in\mathrm{Vert}(Q)}\sum_{i=1}^{3}\left(\min_{r\in\left\lbra
   `o0=(3,7/8,0)` et `o1=(993/338,140/169,275/338)` ; les plans médiateurs
   sont respectivement `X=3` et `3X-Z=8`, et chaque centre viole le plan de
   l'autre ancre. Le mutant `representative_anchor_plane` doit donc échouer.
-- **V84 — GO au plafond du bon objet, avant le produit.** Ajouter les helpers
+- **V84 — GO borné pour `g_AB[64]`, avant le produit.** Ajouter les helpers
   purs `center_patch_point_credit(Q,A,B,z)` puis
   `center_patch_node_credit(Q,A,B,W)` avec la formule ci-dessus, confrontés à
-  l'énumération exacte sous cap, puis les brancher en shadow sur le front de
-  patches déjà prévu. Pour un témoin global, le même rang de position doit être crédité sur
-  **tous** les patches faisables de l'union des handles ; pour `g_AB[j]`, les
-  crédits restent séparés par patch. Publier la matrice
-  `exact_common x certified_global x certified_patch`, les patches testés et
-  les nœuds/sites lus, sur tous les blocs et au moins trois seeds. Le test
-  ponctuel mesure le plafond ; le candidat produit emploie ensuite la borne de
-  nœud `L32` et une antichaîne de l'arbre, sinon il remplace seulement les
-  appels `q3_power` par un autre scan linéaire par bloc. Succès global donne
-  `PRUNE_NO_EMISSION`; échec reste `UNKNOWN` et le même front poursuit `g_AB`
-  sans repartir de la racine.
+  l'énumération exacte sous cap. Le premier micro-incrément calcule seulement
+  les 64 compteurs saturés, sur tous les rectangles vivants, sans décision
+  produit, sans `global_common` et sans liste d'identités. Il compare un unique
+  DFS `{NodeRef,patch_mask}` aux 64 parcours indépendants et à l'énumération
+  ponctuelle. Les masques de `C`, puis `t_C`, sont un pur post-traitement de ce
+  tableau. Le test ponctuel mesure le plafond ; le candidat emploie ensuite la
+  borne de nœud et une antichaîne locale à chaque patch, sinon il remplace
+  seulement les appels `q3_power` par un autre scan linéaire par bloc.
 
   Pour un nœud témoin `W`, le contrat ternaire est explicite. Avec la borne
   supérieure exacte compagne `U_S`, poser
   `L_W=max(L_S(Q,A,W),L_S(Q,B,W))` et
-  `U_W=min(U_S(Q,A,W),U_S(Q,B,W))`. `L_W>0` donne `ALL`, `U_W<=0` donne
-  `NONE`, toute égalité donne `MIXED`; si les deux décisions semblent vraies,
-  refuser le crédit et signaler le conflit arithmétique. Un nœud qui rencontre
-  `A` ou `B` doit être scindé avant tout bulk, et une feuille diagonale est
-  ignorée.
+  `U_W=min(U_S(Q,A,W),U_S(Q,B,W))`, avec
+  `U_S(Q,A,W)=-L_S(Q,W,A)`. Pour le témoin **strict**, `L_W>0` donne `ALL` et
+  `U_W<=0` donne `NONE`, y compris `U_W==0`; tout autre cas donne `MIXED`.
+  Ainsi `L_W==0` n'est jamais `ALL`, mais peut coïncider avec `NONE` si toute
+  l'image vaut zéro. La phrase « toute égalité donne MIXED » était donc fausse.
+  Si les deux décisions semblent vraies, refuser le crédit et signaler le
+  conflit arithmétique. Un nœud qui rencontre `A` ou `B` doit être scindé avant
+  tout bulk, et une feuille diagonale est ignorée. Ces états sont un
+  `PatchCreditState`; `NONE` ne signifie ni `EMPTY`, ni retrait d'un carrier,
+  ni retrait du census.
 
   La décision doit composer explicitement les crédits plutôt que comparer
   `g_AB` seul. Poser `a_min=min_a h_a(a)`, `b_min=min_b h_b(b)` et
@@ -630,29 +643,409 @@ $$L_S(Q,A,W)=\min_{q\in\mathrm{Vert}(Q)}\sum_{i=1}^{3}\left(\min_{r\in\left\lbra
   union. Le patch est mort si `base_j+f>=h3`. Un handle non vide est mort si
   cette condition vaut pour tous les bits de son masque ; un masque vide ne
   prouve `EMPTY` qu'après preuve que le cover conserve tout vrai centre, et un
-  masque non vide ne prouve jamais l'existence. Le fast path global remplace
-  `g_AB[j]` par les mêmes positions certifiées sur **tous** les patches
-  faisables. Son succès autorise `PRUNE_NO_EMISSION`, même si l'existence reste
-  inconnue, mais ne permet de publier `ALL_DEEP` qu'avec une preuve séparée de
-  non-vacuité. La source de `g_AB` reste hors `A union B`, donc `f` est
-  additionnable ; tout changement de domaine impose une union d'identités.
+  masque non vide ne prouve jamais l'existence. Un futur fast path global
+  remplace `g_AB[j]` par les mêmes positions certifiées sur **tous** les
+  patches faisables. Son succès autorise `PRUNE_NO_EMISSION`, même si
+  l'existence reste inconnue, mais ne permet de publier `ALL_DEEP` qu'avec une
+  preuve séparée de non-vacuité. La source de `g_AB` reste hors `A union B`,
+  donc `f` est additionnable ; tout changement de domaine impose une union
+  d'identités.
 
   Enfin, le front partagé est un contrat de coût, pas une simple optimisation :
   former l'union des masques, partir une seule fois de la racine, créditer les
-  nœuds `ALL` globalement ou par bits, scinder les `MIXED` sur place et masquer
-  les bits saturés. Avec `V_phys` visites physiques et `T_patch` tests de bits,
-  la borne visée est
+  nœuds `ALL` par bits, scinder les `MIXED` sur place et masquer dans
+  `count_needed_mask` les seuls compteurs `g[j]` saturés. Avec `V_phys` visites
+  physiques et `T_patch` tests de bits, la borne visée est
   `O(|A|+|B|+V_A+V_B+64k+V_phys+T_patch)`, avec
   `T_patch<=64*V_phys`. Aucun terme `k*V_phys`, aucun second parcours de racine
   et aucun cumul de deux nœuds ancêtre/descendant ne sont admissibles.
+
+  `global_common` exige un état séparé. Son `global_required_mask` ne perd
+  jamais un bit parce que la somme de `g[j]` a saturé. Dans une entrée de pile,
+  les bits `ALL` d'un ancêtre sont hérités et retirés du
+  `common_missing_mask`; un bit `NONE` encore requis tue la contribution du
+  sous-arbre ; les bits `MIXED` descendent ; lorsque `common_missing_mask` est
+  vide, le nœud entier crédite le compte commun. Une saturation obtenue en
+  sommant plusieurs nœuds disjoints n'est pas un `ALL` héritable.
+
+  La fixture seuil un fixe deux patches `P,Q` et deux positions `x,y`, avec
+  `P={x}` et `Q={y}`. Les deux compteurs par patch saturent, mais
+  `P intersection Q` est vide : toute implémentation qui masque `P` après
+  avoir vu `x`, puis crédite `y` pour le masque restant, doit échouer. Ce
+  verrou justifie de différer `global_common` après la parité de `g_AB[64]`.
+
+#### Le constructeur de patches v5 reste à livrer
+
+Au pin d'audit `8f43207c`, aucun symbole `center_patch`, `g_AB` ou
+`computed_patch_mask` n'existe encore dans `src/`, `tests/`, `oracle/` ou
+`bench/`. P1 est donc un différentiel documentaire v4, pas une primitive v5
+disponible. Le constructeur minimal peut être redérivé sans importer son code.
+
+Pour chaque axe, poser :
+
+$$h_i=\max\left(\lvert A_i^{\min}-B_i^{\max}\rvert,\lvert A_i^{\max}-B_i^{\min}\rvert\right),\qquad d=b-a,\qquad v=o-\frac{a+b}{2}.$$
+
+Tout centre vrai vérifie `v dot d=0`. Pour q3 aigu possédé,
+$\lVert v\rVert^2\leq D^2/12$ ; pour q4 bien centré possédé, Jung et la
+médiatrice donnent $\lVert v\rVert^2\leq D^2/8$. La projection orthogonale
+resserre chaque coordonnée :
+
+$$v_i^2\leq\lVert v\rVert^2\frac{D^2-d_i^2}{D^2}.$$
+
+À l'échelle entière `q=32*o`, choisir les plus petits entiers non négatifs
+`E3_i,E4_i` tels que :
+
+$$3(E_i^{(3)})^2\geq256(h_j^2+h_k^2),\qquad (E_i^{(4)})^2\geq128(h_j^2+h_k^2),\qquad \left\lbrace i,j,k\right\rbrace=\left\lbrace1,2,3\right\rbrace.$$
+
+Les boîtes racines sûres sont alors :
+
+$$Q_r^{\mathrm{root}}=\prod_{i=1}^{3}\left[16(A_i^{\min}+B_i^{\min})-E_i^{(r)},16(A_i^{\max}+B_i^{\max})+E_i^{(r)}\right],\qquad r=3,4.$$
+
+Avec le seul scalaire `H=max_i h_i`, les majorants simples sont `E3_i<=14H`
+et `E4_i<=16H`. Le `20H` q4 de la boîte v4 provenait d'une borne de norme
+sans exploiter `v dot d=0`; il reste sûr mais inutilement lâche. Garder malgré
+tout deux types de grille : les bornes, masques, seuils et reçus q3/q4 ne sont
+pas interchangeables.
+
+Pour partager chaque intervalle entier `[L,U]` en quatre slabs fermés, le slab
+`r=0..3` prend
+`floor(((4-r)*L+r*U)/4)` comme borne basse et
+`ceil(((3-r)*L+(r+1)*U)/4)` comme borne haute. Les produits cartésiens donnent
+64 sur-patches, avec un chevauchement d'arrondi autorisé et aucun trou. Les
+divisions signées emploient `floor_div/ceil_div`, jamais la troncature C++ vers
+zéro.
+
+Sous u16, `h_i<=65535`, `E4_i<=1048560` et toute coordonnée de patch `q` reste
+entre `-1048560` et `3145680`. Les termes de `Phi_32`, ainsi que leurs sommes
+sur trois axes, restent sous `2^42` en valeur absolue : `i64` signé suffit pour
+ce helper si ces bornes sont vérifiées avant calcul ; `i32` ne suffit pas aux
+produits.
+
+La fixture q4 minimale qui interdit d'aliaser la grille q3 prend
+`a=(0,0,0)`, `b=(1,1,0)`, `c=(1,0,1)`, `d=(0,1,1)` et les `PointId` faisant de
+`ab` la plus petite arête en cas d'égalité. Le tétraèdre régulier a
+`o=(1/2,1/2,1/2)` : sur l'axe `z`, `E3_z=14` mais `32*o_z=16=E4_z`. Les portes
+exhaustives vérifient l'inclusion rationnelle de chaque centre vrai, la
+tangence fermée et tuent `q4-use-q3-cover`, `center-cut-trunc-zero`,
+`center-cover-open` et `representative-anchor-plane`.
+
+### Réponses V85--V87 à la mesure de rétrécissement non committée
+
+Les ratios `0,220--0,274` ne sont pas reçus sous leur interprétation actuelle.
+Le delta initial prenait le rayon autour du **barycentre** des centres exacts
+du bloc, puis le divisait par `rho` de la première ancre, alors que `(a,b)`,
+son milieu, son plan et `rho` changent dans `A x B`. Ce rayon n'est ni la
+boule minimale, ni l'aire de l'ensemble, ni le volume d'un sur-cover
+certifiable. Assimiler ensuite le nuage fini de centres à un disque d'aire
+`pi*r^2`, puis relier ce rapport aux `92--98 %` exact-common, n'a donc pas de
+sens causal. La note transitoire emploie en outre le stamp CMake périmé
+`1ff39ab9,worktree_modifie=non`.
+
+Le probe v4 corrigé conserve seulement une quantité bien typée : pour chaque
+groupe `(rectangle,C,a,b)` non capé, diamètre des centres exacts des porteurs
+de `C`, divisé par `2*rho_ab` de **cette même ancre**. Il la calcule avant
+toute sélection `W3/ALL_DEEP`, publie groupes à un ou plusieurs centres,
+évaluations et paires, et vérifie que le ratio ne dépasse pas un. C'est un
+plafond géométrique à ancre fixe, pas une aire, un rétrécissement WSPD ou un
+gain produit. Le double parcours des centres coûte toutefois
+`sum_{a,b,C} m_{abC}^2` : `ratio_pair_tests` doit rester une monnaie
+diagnostique séparée et son mur ne doit jamais être attribué au center-cover
+candidat.
+
+- **V85 — oui, la seconde contrainte existe : c'est la coplanarité.** Pour une
+  ancre et un porteur fixés, les deux médiatrices laissent une droite en 3D ;
+  le centre du triangle appartient aussi au plan affine du triangle. Poser :
+
+$$\chi(o,a,b,x)=\det(b-a,x-a,o-a),\qquad \chi_{32}(q,a,b,x)=\det(b-a,x-a,q-32a).$$
+
+  Tout vrai centre q3 vérifie `chi_32=0`. Dans le plan médiateur de `AB`, cette
+  égalité fournit précisément la direction que la prétendue bande ne ferme
+  pas. La forme est multi-affine séparément en `q,a,b,x` — c'est le volume
+  orienté homogène de quatre points — donc ses extrema sur
+  `Q x Box(A) x Box(B) x Box(C)` sont atteints aux coins. Un intervalle de
+  coins strictement positif ou strictement négatif retire sûrement le patch ;
+  zéro ou une égalité le conserve. Les médiatrices et la coplanarité restent
+  des relaxations séparées : leurs zéros individuels ne prouvent ni leur
+  réalisation simultanée, ni l'existence d'un support. Les `8^4=4096` tuples
+  de coins constituent l'oracle, pas le hot path. Le candidat produit encadre
+  le déterminant par différences, produits vectoriels et produit scalaire
+  dirigés, en coût constant par couple patch--handle ; une borne qui contient
+  zéro reste `MIXED`. Sous les bornes q32/u16 ci-dessus, les déterminants
+  restent sous environ `2^57` ; promouvoir avant chaque produit rend `i64`
+  suffisant, `i128` restant le choix défensif.
+- **V86 — mesurer ce masque avant de modifier `s` ou de splitter `C`.** Il
+  utilise la grille existante, attaque exactement la direction manquante et
+  ne change ni WSPD, ni handles, ni digest en shadow. Le plafond borné énumère
+  les coins ; le candidat commence par une borne dirigée et compte
+  `coplanarity_patch_tests/rejected/mixed`. Ensuite seulement, si le résiduel
+  le justifie, mesurer d'abord un split adaptatif d'un niveau des seuls handles
+  `C` ambigus et à fort `popcount`. Le scan `g_AB` reste réutilisable : ce
+  split paie davantage de handles et de tests de masques, pas un second
+  parcours témoin de racine. Augmenter `s` vient en dernier : il resserre
+  `A/B`, mais ne divise pas automatiquement le diamètre d'un handle `C`,
+  invalide les rectangles et peut gonfler la constante WSPD comme `s^3`.
+- **V87 — aucune borne structurelle `0,22--0,27` n'en découle.** La stabilité
+  apparente peut venir du même `s`, du même cap de handles, du même ordre de
+  phase et de la même sélection oracle. Le pire observé `0,891` réfute déjà
+  l'idée d'un facteur quatre uniforme. Une mesure géométrique encore utile
+  fixe d'abord la paire d'ancres, projette ses centres rationnels dans son plan
+  perpendiculaire et calcule leur cercle englobant minimal, normalisé par
+  `rho_ab`. La stratifier par `diam(C)/D`, aspect des boîtes et conditionnement
+  de Gram peut expliquer la dispersion ; près des configurations aiguës
+  presque dégénérées, aucune contraction Lipschitz uniforme n'est acquise. Au
+  niveau WSPD, la mesure directement causale reste le `popcount` du masque
+  après coplanarité et la capture de témoins certifiés. Le cercle discret reste
+  un plafond oracle, jamais une aire de cover ni un gain produit.
+
+### Réponses V88--V97 : le secteur est exact à ancre fixe, pas encore une WSPD de boîtes
+
+- **V88 — théorème reçu en q3, sous ses vraies préconditions.** Poser
+  `m=(a+b)/2`, `d=b-a`, et laisser `p_x` être la projection de `x-m` sur
+  `d` orthogonal. Le plan du triangle coupe le plan médiateur de `AB` suivant
+  `m+span(p_x)`, donc `v=o-m=t*p_x`. L'égalité des distances à `a` et `x`
+  donne :
+
+$$2t\lVert p_x\rVert^{2}=q_x,\qquad q_x=\lVert x-m\rVert^{2}-\frac{\lVert d\rVert^{2}}{4}=(a-x)\mathbin{\cdot}(b-x).$$
+
+  Pour un seed strictement aigu, `q_x>0` et `p_x!=0`, donc le centre est sur
+  le **rayon positif** de `p_x`. C'est la spécialisation à ancre fixe de
+  `chi(o,a,b,x)=0`, pas un théorème concurrent. Si `p_x=0`, la face est
+  dégénérée (`G=0`) ; toute relaxation de boîte qui ne peut pas l'exclure doit
+  néanmoins garder les huit secteurs, jamais choisir une direction.
+- **V89/V91 — le sens conservatif est correct, le vocabulaire de V90 est
+  inversé.** Si le masque fermé contient chaque secteur de chaque centre
+  valide du handle, exiger le seuil sur tous ses bits est plus exigeant que
+  l'oracle discret et ne peut donc pas créer un faux prune. Un secteur ajouté
+  à tort ne fait que perdre une occasion de tuer. En revanche un seul secteur
+  atteignable omis rend le test faux. Le `popcount` des centres exacts est
+  ainsi un **minorant du nombre de secteurs que le masque de boîtes exigera**,
+  donc un plafond optimiste du bénéfice possible ; ce n'est pas un « plancher
+  du bénéfice ». Un masque vide rend `UNKNOWN`, sauf preuve indépendante que
+  la fibre est vide.
+- **V92 — ne pas employer `atan2(p dot u,p dot v)`.** Les sommets entiers
+  `u,v` de `bisector_basis` ne sont en général ni orthogonaux ni de même
+  norme. Leurs produits scalaires sont des coordonnées covariantes couplées, et
+  huit bins euclidiens de 45 degrés ne coïncident donc pas avec les huit
+  triangles de `anchor_sector_kill`. Même dans une base orthonormale, le bin
+  actuel est décalé de quatre indices par rapport à `P[0]=u`; ce décalage ne
+  change pas un `popcount`, mais brancherait les mauvais `sector_counts`.
+
+  Si une sonde veut malgré tout des coordonnées 2D, elles doivent être
+  contravariantes. Avec `y=2x-a-b`,
+  `Delta=d dot (u cross v)`, prendre
+  `A=sign(Delta)*d dot (y cross v)` et
+  `B=sign(Delta)*d dot (u cross y)`. Les huit rayons deviennent alors
+  exactement `(1,0),(1,1),(0,1),(-1,1),...`; aucune division n'est requise
+  pour les classer. Le test direct par produits mixtes ci-dessous évite même
+  cette conversion.
+
+  Le masque sûr se calcule directement dans la géométrie du certificateur.
+  Construire ses sommets `P_k` exactement comme `sector_kill.hpp`, poser
+  `y=2x-a-b` et `epsilon=sign(d dot (u cross v))`. Le rayon de `x` appartient
+  au cône fermé `k` lorsque :
+
+$$\epsilon\,d\mathbin{\cdot}(P_k\mathbin{\times}y)\geq0\quad\text{et}\quad\epsilon\,d\mathbin{\cdot}(y\mathbin{\times}P_{k+1})\geq0.$$
+
+  Chacune de ces deux formes est affine en `x`. Sur `Box(C)`, calculer son
+  maximum signé exact par choix d'extrémité sur les trois axes ; retirer le
+  secteur seulement si l'un des deux maxima est strictement négatif. Tester
+  les deux demi-plans séparément peut garder des secteurs supplémentaires,
+  mais jamais en perdre. Une égalité conserve le bit et sélectionne donc les
+  deux secteurs adjacents ; si la projection de la boîte peut contenir
+  l'origine, les huit bits survivent automatiquement. Cette porte tient en
+  `i128` sous u16 et évite flottants, arcs échantillonnés et raisonnement de
+  tangence. La projection de `Box(C)` est un zonotope ; son encadrement par un
+  rectangle est permis comme sur-ensemble. Classer seulement ses quatre coins
+  par `atan2`, ou 64 échantillons de frontière, ne constitue toutefois pas un
+  certificat fermé ; l'enveloppe exacte de ses coins avec intersection des
+  arêtes, ou les extrema affines ci-dessus, le peut.
+- **V90 — mesure à refaire avant conclusion.** Le commit `96e881b7` confirme
+  seulement qu'une statistique angulaire discrète semble petite. Sa sonde
+  emploie précisément les bins duaux erronés ci-dessus, un échantillon
+  systématique de phase zéro et une seule seed ; elle n'est pas une cible
+  CMake, utilise des includes absolus et ne publie ni pin/dirty ni sorties
+  brutes. Les nombres `1,17--1,71`, l'absence au-delà de six et les ouvertures
+  annoncées ne sont donc pas encore attribuables aux secteurs réels. De plus,
+  `q_x` proche de zéro rapproche le centre de `m`, mais ne rend pas sa
+  direction mathématique instable : celle-ci reste celle de `p_x`. Le cas
+  incertain est `p_x` susceptible de s'annuler ou de traverser plusieurs
+  cônes dans la boîte. La corrélation de quatre moyennes de familles avec le
+  gain marginal ne démontre aucun lien causal.
+
+  Deux contre-fixtures u16 rendent l'erreur de coordonnées exécutable. Avec
+  `a=(100,100,100)`, `b=(112,124,136)`, la base rendue est
+  `u=(0,36,-24)`, `v=(-36,0,12)`. Les carriers
+  `x1=(103,142,99)` et `x2=(88,142,104)` sont strictement aigus avec `AB`
+  strictement maximale ; leurs directions ont les rapports respectifs
+  `10u+v` et `10u+6v`, donc vivent dans le même vrai secteur `[u,u+v]`, mais
+  la sonde les place dans les bins 3 et 4. Inversement, pour
+  `a=(100,100,100)`, `b=(116,132,148)`, les carriers
+  `x1=(81,146,113)` et `x2=(75,146,115)` tombent de part et d'autre du rayon
+  `u+v`, donc dans deux vrais secteurs adjacents, alors que la sonde les place
+  tous deux dans le bin 4. Comparer un masque de boîtes et un masque exact
+  construits avec cette même partition erronée peut afficher zéro violation
+  sans certifier `anchor_sector_kill`.
+- **V93 — GO à un incrément intermédiaire counter-only.** Ajouter d'abord une
+  cible gardée et portable qui compare, pour chaque `(a,b,C)`, trois masques :
+  centres rationnels exacts, oracle fermé par énumération des points de
+  `Box(C)` sous petit cap, et sur-masque par intervalles d'orientation. Exiger
+  `exact subset box`, publier les deux histogrammes de `popcount`, les bits de
+  frontière, `UNKNOWN`, tests d'orientation, groupes avant sélection, seeds et
+  phases bottom-k. Ensuite seulement, étendre le test d'ancre avec un
+  `required_sector_mask` non vide, comparer son digest à la route actuelle et
+  compter les appels de puissance réellement évités. `sector_counts` évite de
+  recalculer les témoins, mais le calcul du masque et son oracle sont bien de
+  l'arithmétique et des contrats nouveaux.
+
+  Mesurer aussi le bon niveau de décision. La production actuelle aplatit tous
+  les handles dans `sc.cover`, puis le test sectoriel tue **l'ancre entière**.
+  Son masque requis est donc l'union
+  `M_anchor=OR_C M(a,b,Box(C))`, dont le `popcount` peut valoir huit même si la
+  moyenne par handle vaut deux. Un masque par handle ne peut tuer que ce
+  handle ; cela exige de conserver sa provenance dans la boucle des carriers
+  et de fermer son ledger, ce que l'API actuelle ne fait pas. Publier les deux
+  histogrammes `popcount_per_handle` et `popcount_union_per_anchor`, puis
+  mesurer séparément prune d'ancre et prune de handle. Sans cette union, V90
+  ne prédit pas le gain de `anchor_sector_kill`.
+
+  Cette voie est **q3 et par ancre**. La base, les secteurs et leurs comptes
+  dépendent du vrai `(a,b)` ; elle ne calcule pas `g_AB[64]`, ne supprime pas
+  `|A||B|` et ne généralise donc pas encore la WSPD `A x B x C`. C'est un bon
+  terminal complémentaire qui peut éviter des scans après matérialisation des
+  ancres. Ne pas la porter telle quelle en q4 : le centre d'un tétraèdre n'est
+  généralement pas dans le plan de la face `ABx`, et un handle seul ne fixe
+  pas sa direction ; il faut le second porteur ou le terminal axial. La
+  fixture régulière `a=(0,0,0)`, `b=(2,2,0)`, `c=(2,0,2)`, `d=(0,2,2)` a
+  `o-(a+b)/2=(0,0,1)`, tandis que la projection de `c-(a+b)/2` orthogonale à
+  `b-a` vaut `(1,-1,2)` : les directions ne sont pas parallèles.
+
+  Enfin, la version simple exige encore `h3` témoins complets dans chaque
+  secteur sélectionné. Composer ces comptes avec `core`, `g_AB[j]`, `h_a` ou
+  `h_b` demande une union de rangs ou des domaines disjoints ; additionner des
+  scalaires issus des mêmes positions serait un double compte. Le critère
+  complet par secteur est sûr et plus faible en optimisation, ce qui convient
+  au premier shadow.
+
+- **V94 — NON aux moyennes V92, OUI aux frontières fermées.** Au pin
+  `7313df2d`, `touche` et `touche_b` emploient la même partition erronée :
+  produits scalaires avec la base oblique, puis huit arcs `atan2` de 45 degrés.
+  Le « zéro violation » prouve seulement que le rectangle covariant contient
+  les points covariants sous ce même découpage ; il ne prouve pas
+  `semantic_sector_mask subset_of anchor_sector_mask`. Le masque dit exact
+  convertit en outre `Q3Form::w` en double. Sa borne locale à 64 entrées est
+  inerte avec le contrat actuel `NodeRange<=32`, mais deviendrait une censure
+  silencieuse si l'objet était rebaptisé bloc `C` général. Les moyennes
+  `1,98--4,28`, le taux `all8` et le gain « seuil sur deux
+  à quatre secteurs » restent donc non reçus. En revanche, une direction sur
+  un rayon appartient bien aux deux cônes fermés adjacents ; cette règle doit
+  être obtenue par une égalité entière, pas par un epsilon flottant.
+- **V95 — livrer d'abord le shadow sans split.** Le split ne vient qu'après un
+  masque réparé et la mesure causale des handles réellement tués. Le worktree
+  postérieur à `7313df2d` réemploie le même helper `atan2` et moyenne le
+  `popcount` des deux enfants : ce n'est ni un plafond de gain, ni le coût du
+  split. Un enfant plus étroit peut exiger moins de secteurs tout en doublant
+  le nombre de masques, les états et les fates. Si le résiduel `all8` reste
+  dominant après la porte exacte, mesurer un seul niveau counter-only avec
+  remplacement atomique du parent, masse de rôles conservée, coût des deux
+  enfants et appels de puissance réellement évités ; sinon ne pas ouvrir ce
+  chantier.
+- **V96 — OUI aux produits mixtes entiers, sans `atan2`.** Calculer une fois
+  `P[8]` et `sector_counts[8]` pour la vraie ancre. Pour chaque seed discret,
+  classer directement `y=2x-a-b` avec les deux inégalités fermées de V92 ;
+  aucune construction du circumcentre n'est nécessaire puisque son facteur
+  radial est positif. Pour `Box(C)`, maximiser exactement chacune des deux
+  formes affines et ne retirer le bit que si l'une est strictement négative.
+  L'égalité garde naturellement les deux bits. Dégénérescence, garde ou
+  overflow donnent `0xff/UNKNOWN`. Une version plus serrée peut projeter les
+  huit coins en coordonnées contravariantes, construire leur enveloppe et
+  intersecter les cônes fermés, mais les seuls bins de coins ne suffisent pas :
+  une arête peut traverser un cône intermédiaire.
+
+  La porte suivante est donc précise : cible CMake portable, arithmétique
+  entière, aucune limite à 64 seeds dans l'oracle borné, propriété exhaustive
+  `semantic_mask subset_of box_mask`, puis histogrammes exact/boîte et nombre
+  de handles satisfaisant réellement
+  `min_{k in box_mask} sector_counts[k]>=h3`. Trois seeds, phases bottom-k,
+  pin/dirty, coût des tests et appels q3 évités précèdent tout digest ON/OFF.
+  Le `popcount` seul ne prédit pas le gain : les bits conservés peuvent être
+  précisément ceux dont les comptes sont sous le seuil.
+
+- **V97 — GO au helper et au shadow handle-local de `ed9c282f`, pas encore au
+  prune produit.** Le nouveau source corrige les objections V90/V92 : il
+  reconstruit les mêmes `P[8]` que `sector_kill.hpp`, classe `y=2x-a-b` par
+  produits mixtes entiers, énumère tous les seeds et forme le surmasque de
+  boîte par maxima séparés. Cette relaxation peut ajouter des bits, jamais en
+  oublier. Le principe mathématique est reçu ; l'arithmétique et l'état sont
+  bien nouveaux, même si la base existait déjà.
+
+  Reconfiguré avec la cible CMake encore non committée, le replay
+  `n=8000,seed=3,blocs=1500,union_rects=64` donne :
+
+  | famille | handles non vides | mort `full8` | mort `Box(C)` | gain local |
+  |---|---:|---:|---:|---:|
+  | `scanline_single_pass` | 10 357 | 59,7 % | 88,1 % | +28,4 points |
+  | `terrain` | 2 103 | 13,4 % | 56,5 % | +43,1 points |
+  | `uniform` | 1 334 | 57,3 % | 62,1 % | +4,7 points |
+  | `eight_clusters` | 18 658 | 97,0 % | 97,9 % | +0,9 point |
+
+  Les quatre runs ont `exact_hors_box=0`, `frame_failures=0` et
+  `decision_invariants=0`. Ils impriment toutefois
+  `pin=ed9c282f...,worktree_modifie=OUI`, et ne reproduisent pas exactement le
+  tableau publié dans la réponse Claude. Ce sont des diagnostics prometteurs,
+  pas encore un reçu.
+
+  Surtout, la cohorte d'union ferme le choix architectural. Les
+  `262/136/97/177` ancres non vides de
+  `scanline/terrain/uniform/eight_clusters` ont toutes un `union_box_mask` de
+  huit bits ; `box_candidate` égale donc `full8` et le gain d'ancre vaut zéro.
+  Même l'oracle qui retire avant l'union les handles réellement sans seed ne
+  gagne que `1/1/0/0` ancre supplémentaire : l'absence des handles vides ne
+  suffit pas à resserrer ce niveau.
+  Modifier seulement `anchor_sector_kill(required_mask)` ne rapportera rien.
+  Le bénéfice mesuré exige un fate **par handle** : calculer
+  `AnchorSectorState{P[8],counts[8]}` une fois par ancre, calculer
+  `box_mask[handle]`, puis ignorer comme supports les positions des handles
+  profonds. Ces mêmes positions restent dans `certificate_source` et
+  `exact_census_source` comme témoins ; le fate est `PRUNE_NO_EMISSION`, jamais
+  `EMPTY`.
+
+  L'intégration la moins intrusive garde le cover radial courant et lui joint
+  une vue typée `seed_handle_id` ou un index d'intervalles de `NodeRange` ; la
+  boucle q3 saute un seed lorsque son handle est profond, sans retirer ce point
+  de `scan_sites`. Le mapping se construit une fois par rectangle et le tableau
+  des fates une fois par ancre. Exposer le frame et les comptes évite de refaire
+  `bisector_basis` après le prétest par requête.
+
+  Avant activation, ajouter la cible portable au CMake et des CTests purs pour
+  frontière fermée, base oblique, ancre représentative, arête de boîte qui
+  traverse un cône et mutant covariant. Puis publier, sur trois seeds, la masse
+  de seeds dans les handles tués, les appels `q3_form` et scans de profondeur
+  évités, le coût du mapping et des 16 extrema par handle, mur/HWM et digest
+  ON/OFF. Ne pas ouvrir le split : le masque local vient d'abord. Cette voie
+  peut retirer beaucoup de travail terminal, mais elle conserve `A x B` et ne
+  remplace ni `g_AB[64]`, ni la porte d'exposant, ni le chemin q4.
+
+Fixtures permanentes minimales : direction exactement sur une frontière
+(deux bits), boîte dont une arête projetée traverse un cône sans coin intérieur,
+boîte projetée contenant l'origine (huit bits), `p_x=0`, secteur inaccessible
+peu profond contre secteur atteignable profond, mutant d'ancre représentative,
+et rejet explicite de l'emploi du masque q3 en q4.
+
+La porte V85 minimale compare l'intervalle dirigé de `chi_32` aux 4096 tuples
+de coins, vérifie que le patch de chaque centre rationnel vrai survit, garde
+`chi_32==0` et tue les mutants `drop-coplanarity`, `coplanarity-open` et
+`coplanarity-representative-anchor`. Le reçu pertinent reste la matrice
+`exact_common x certified_global x certified_patch` et le coût du front
+partagé, pas le rayon empirique des centres déjà connus par l'oracle.
 
 Le split de `C` n'est pas « identique » dans tous ses usages. Employé seulement
 pour mieux reconnaître `EMPTY`, il répète effectivement le mécanisme peu
 prometteur du raffinement post-séparation. Employé sous budget pour résoudre le
 résiduel avec `existence=NONEMPTY` et `depth=ALL_DEEP`, il peut supprimer des
-rescans et doit être évalué avec le contrefactuel V74. Le prochain geste de la fibre reste
-le schéma d'état et le center-cover counter-only sur **tous** les blocs, sans
-masquage : l'oracle exhaustif stratifie ensuite les cohortes non capées. En
+rescans et doit être évalué avec le contrefactuel V74. Le prochain geste de la
+fibre reste le schéma d'état et le center-cover counter-only sur **tous** les
+blocs, avec un front masqué mais sans `global_common` ni décision produit :
+l'oracle exhaustif stratifie ensuite les cohortes non capées. En
 parallèle, la relève exacte des histogrammes saturés reste le premier candidat
 à une activation produit, car elle attaque la boucle quadratique connue. Le
 routeur final entre `g_AB` et les histogrammes attend l'ablation des deux
@@ -714,33 +1107,44 @@ séparément convexe dans le carrier. La fixture est préparée dans
 `mhgp5_q3_skinny_center` et passe localement ; elle doit être épinglée avec le
 prochain delta fonctionnel.
 
-## Différentiel v4 : ne pas rebaptiser P1
+## Différentiel v3/v4 : ne pas rebaptiser P1
 
-Les 64 patches et le center-cover ne sont pas nouveaux. La v4 documente déjà
-`P1`, avec ce pavage, et rapporte pour `P1a center-cover` des pentes rouges
-`2,104/1,896`. Elle conclut que le certificat partait encore de la paire et
-travaillait contre un univers beaucoup plus gros que la sortie. Reprendre les
-patches seuls rouvrirait donc une piste réfutée sans répondre à son motif
-d'abandon.
+Les 64 patches et le DFS masqué ne sont pas nouveaux. Le commit v3
+`b312638c` contient déjà, dans
+`prototype/center_cover_mass_probe.cpp`, une pile
+`(nœud,masque de patches)`, un crop et une antichaîne par patch ; cette route
+`P1a center-cover` porte les pentes rouges `2,104/1,896`. Le landing CUDA
+enregistré `95dd8036` utilisait au contraire 64 parcours logiques indépendants
+et n'avait pas de run natif à sa réception. Enfin, le commit v4 `40b309c3`
+mutualisait déjà une traversée haute du cover par rectangle WSPD, puis
+filtrait localement le résultat pour chaque ancre, avec un gain cumulé annoncé
+de 37 fois. Ni `L32`, ni le pavage, ni le front masqué pris isolément ne
+constituent donc le delta v5.
 
-Le delta à falsifier est plus précis : une WSPD partitionne les arêtes en
-rectangles ; `g_AB` ne parcourt les témoins qu'une fois par rectangle ; les
-handles `C` ne font ensuite que masquer ces patches et produire `t_C`; les
-bitsets des facteurs donnent `P[t_C]` sans matérialiser `A x B x C`. En q4,
-les seuils mono-handle `s_H` groupent le résiduel avant le terminal axial ; le
-stream exact `t_CD` reste un oracle sous cap. Cela constitue une architecture
-différente à requalifier, pas une preuve de meilleur exposant. Le pire cas
-demeure ouvert dans les visites `MIXED`, les couples q3 survivants, les faces
-q4 et leur census.
+Le delta à falsifier est exactement :
 
-Le reçu différentiel publie donc, sur les mêmes familles et tailles que P1,
-`wspd_rectangles`, `g_ab_witness_node_pops`, `handle_masks`, `sum_P_t_c`,
+`WSPD rectangle -> g_AB[64] une fois -> masques C -> t_C -> ledger pondéré`.
+
+Il doit supprimer les filtres/scans locaux par ancre de la v4. Pour `R`
+rectangles, `k_r` handles, `V_r` nœuds physiques et `T_r` tests
+patch--nœud, sa facture est
+`O(64R+64*sum_r k_r+sum_r(V_r+T_r)+facteurs A/B)`, avec
+`T_r<=64V_r`. Cette écriture retire `k_r*V_r`, mais ne prouve aucun pire cas
+sous-quadratique : `sum_r k_r` peut être quadratique, `sum_r V_r` peut valoir
+`Theta(Rn)`, les facteurs courants gardent `|A|^2+|B|^2` et l'émission
+résiduelle garde `sum_C P[t_C]`.
+
+Le reçu différentiel publie donc, sur les mêmes familles et tailles que P1a,
+`wspd_rectangles`, `sum_handle_masks`, `g_ab_witness_node_pops`,
+`patch_node_tests`, `ALL/NONE/MIXED`, feuilles, high-water, `sum_P_t_c`,
 `q3_weighted_roles_proposed`, classes `s_H`, faces q4, groupes axiaux et les
-propositions réellement transmises au terminal. L'oracle publie séparément
-`q4_handle_pairs_streamed`. Une baisse de constante ne rouvre pas la route : la pente de chacun
-de ces générateurs, puis mur/HWM à 50 k, doit réfuter le motif v4. Aucun code ni
-reçu v4 n'est importé ; seules ses contre-fixtures et ses mesures sont épinglées
-comme différentiel.
+propositions réellement transmises au terminal. Le ratio
+`patch_node_tests/witness_node_pops` ne suffit pas : la pente de chacun des
+deux termes doit rester visible. L'oracle publie séparément
+`q4_handle_pairs_streamed`. Une baisse de constante ne rouvre pas la route :
+la pente de chaque générateur, puis mur/HWM à 50 k, doit réfuter le motif
+historique. Aucun code ni reçu v3/v4 n'est importé ; seules leurs
+contre-fixtures et mesures sont épinglées comme différentiel.
 
 ## Certificat sûr : center-cover conditionné par $C$
 
@@ -805,10 +1209,14 @@ doit jamais croître par rescan multiplicatif en `C`; sa valeur peut néanmoins
 dépendre de l'union des patches demandés par les handles. La réutilisation
 cesse si `(A,B)`, la grille, la lane ou le pavage changent.
 
-Le cache porte aussi `computed_patch_mask`. Un `g_AB[j]==0` avec ce bit absent
-signifie « non calculé », jamais « calculé et nul ». La valeur zéro reste
-fail-open pour la décision, mais confondre ces états rendrait faux les reçus,
-les réemplois et tout calcul de coût incrémental.
+Un seul `computed_patch_mask` ne suffit pas dès qu'un budget peut interrompre
+le front. Chaque patch porte `UNSEEN`, `PARTIAL`, `EXHAUSTED` ou `SATURATED`,
+ainsi que le seuil de saturation utilisé. `PARTIAL` fournit un minorant
+utilisable mais reste `UNKNOWN` s'il n'atteint pas le seuil ; `EXHAUSTED`
+signifie que la source a été entièrement visitée ; `SATURATED` certifie
+seulement `g[j]>=cap` et ne devient pas un compte exact réutilisable avec un
+cap supérieur. Des masques `requested/exhausted/saturated` peuvent encoder ce
+contrat. Un zéro partiel ou non vu n'est jamais un zéro calculé.
 
 Les crédits de patches différents ne sont ni sommés ni unis. Ils peuvent en
 revanche utiliser des témoins différents, ce qui est précisément le gain que
@@ -1229,9 +1637,9 @@ RectId(A,B), patches et positions du core
      masques AB/AC/BC ; seed_capability attachée séparément
   -> certificate_source et exact_census_source typées, sans autorité sur la
      taille des carriers ni sur leurs intersections avec A/B
-  -> union des patches actifs + global_common (succès=prune, échec=UNKNOWN)
-  -> reprendre le même front pour remplir g_AB, sans rescan de racine
+  -> g_AB[64] counter-only par un unique DFS masqué, sans global_common
   -> seuil t_C + ledger q3 pondéré agrégé par seuil, sans A x B
+  -> seulement après parité : global_common avec état commun séparé
   -> q3 : émission sparse seulement sur le résiduel
   -> q4 : classes s_H, carriers ternaires résiduels, puis terminal axial Top-r4
 ```
@@ -1285,9 +1693,12 @@ et explicitement revalidés sous le nouveau rectangle. Aucune cardinalité
 scalaire du parent ne se transmet par héritage.
 
 La porte exhaustive à `n<=14` vérifie chaque bloc pruné, le ledger des rôles et
-les diagonales. Elle conserve les tangences `L32==0` et `U32==0`, vérifie que
-le patch de tout circumcentre rationnel survit, tue les mutants qui unissent
-des patches ou somment `core+g_AB`, et rend visible tout rescan témoin par `C`.
+les diagonales. Les intervalles de **médiatrice** conservent zéro comme patch
+faisable ; le crédit de témoin strict interdit `L_W==0 -> ALL` et impose
+`U_W==0 -> NONE`. Elle vérifie que le patch de tout circumcentre rationnel
+survit, tue les mutants qui unissent des patches ou somment `core+g_AB`, et
+rend visible tout rescan témoin par `C`. La fixture `P={x},Q={y}` tue aussi
+tout partage du masque de saturation avec `global_common`.
 Le reçu publie patches visités/faisables, tests de médiatrices,
 `witness_node_pops`, blocs entièrement morts, masse de rôles morte, blocs
 capés, seeds et rescans réellement évités, coût ajouté, mur et HWM. Commande,
@@ -1399,9 +1810,10 @@ $$M_{HH}(t)=\binom{\lvert H\rvert}{2}P[t]-(\lvert H\rvert-1)L_H(t)+X_{HH}(t).$$
 
 Elles ont été confrontées dans le même rejeu exhaustif et aléatoire sans
 divergence. La borne de seuil ci-dessous a en plus passé `1048576` combinaisons
-exhaustives de quatre patches. Ces replays ferment le calcul papier, pas une
-porte produit. Évaluer les formules pour chaque `H,K` conserverait le carré que
-l'on cherche à retirer.
+exhaustives de quatre patches. Ces replays ferment le calcul papier, mais ne
+sont ni un CTest permanent, ni un reçu épinglé, ni une porte produit. Évaluer
+les formules pour chaque `H,K` conserverait le carré que l'on cherche à
+retirer.
 
 La réduction sûre est plus grossière et beaucoup plus utile. Pour le masque
 mono-handle de **complétion** `mu_H`, avant la médiatrice `CD`, poser `s_H=0`
@@ -1450,9 +1862,12 @@ celles des handles ou du terminal exact.
 Avant le gate seed et les fates distinct-ID/non-vacuité, le nombre exact de
 **slots de blocs grossiers** de cette relaxation est
 `sum_s P[s]*(q_s*(q_s+1)/2+q_s*Q_greater_s)`. Ce n'est pas une masse de rôles
-q4 ni le nombre de continuations non vides ; les formules pondérées sur les
+q4 ni le nombre de continuations non vides : ici
+`q_s=#{H:s_H=s}` et `Q_greater_s=sum_{r>s}q_r`. Les formules pondérées sur les
 unions de classes donnent la masse distinct-ID, puis les fates donnent les
-continuations réelles.
+continuations réelles. Toute paire retirée avant `CD` reçoit seulement
+`PRUNE_NO_EMISSION` ; cette relaxation ne distingue pas `EMPTY` de la
+profondeur universelle.
 Une paire de classes dont les deux capacités valent `certified_no_seed` est
 écartée par le gate ; toute autre classe non certifiée reste `PENDING`, jamais
 « existante » par construction.
@@ -1497,6 +1912,24 @@ positions ou une repartition explicite à chaque nouveau handle. Si l'oracle de
 paires est exécuté, il imbrique `C`, puis `D` seulement sur les masques
 survivants et reste sous cap. Le chemin produit recommandé passe au contraire
 du carrier ternaire fixe au terminal axial et ne construit pas ce produit.
+
+Plus précisément, si `K,G_j,A_a,B_b,C_c,D_d` désignent les **ensembles de
+positions** certifiés par `core`, `g4_AB[j]` et les quatre fibres, le vrai
+minorant composable est :
+
+$$\mathrm{depth}(a,b,c,d)\geq\lvert A_a\rvert+\lvert B_b\rvert+\lvert K\cup G_j\cup C_c\cup D_d\rvert.$$
+
+`A_a` et `B_b` sont disjoints, et `C_c,D_d` le sont dans un bloc croisé sous
+les domaines ci-dessus ; en revanche `K` et `G_j` peuvent recouvrir chacun de
+ces deux derniers ensembles. Sans rangs de positions, le meilleur ajout
+scalaire général est donc
+`h_a+h_b+max(core,g4_AB[j],h_c+h_d)`, jamais
+`max(core,g4_AB[j])+h_c+h_d`. Sur la diagonale, `h_d=0`. Avec des rangs,
+prendre l'union capée ; retirer d'abord `C union D` de la source centrale est
+aussi sûr, mais rend le calcul dépendant de la paire de handles et le réserve
+à l'oracle. Les différences `C\(A union B)` et `D\(A union B union C)`
+définissent seulement les domaines **témoins** : elles ne retirent aucun site
+de la partition des carriers, où distinct-ID reste un fate séparé.
 
 Pour un bloc croisé `C!=D`, cette orientation fournit bien deux domaines
 disjoints pour $h_c$ et $h_d$. Pour le bloc diagonal `C=D=H`, elle donne au

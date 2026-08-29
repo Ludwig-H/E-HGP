@@ -34,10 +34,11 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   la lentille requalifie d'abord les extrema corrélés `OwnerD2Exact` de la v4,
   sans en importer le code ; le terme `|w.d|`, dominé après le cover, reste une
   identité d'oracle/mutant. Aucun fate ne retire les mêmes handles du census.
-  Le pavage P1 à 64 patches existait déjà en v4 avec des pentes rouges ; le
-  delta à requalifier est sa factorisation par rectangle WSPD, `t_C/P[t_C]`,
-  le ledger q3 pondéré par seuil et le passage q4 seuil--axial, jamais le
-  center-cover pris isolément.
+  Le pavage P1a à 64 patches et le DFS masqué existaient déjà en v3 avec des
+  pentes rouges ; la v4 partageait déjà la traversée haute par rectangle. Le
+  delta à requalifier est
+  `rectangle WSPD -> g_AB[64] -> masques C -> t_C/P[t_C]`, puis le passage q4
+  seuil--axial, jamais le center-cover pris isolément.
   Le seuil `t_C` condense les patches et réutilise les bitsets `B_lt[t]` sans
   `A x B x C`; les histogrammes d'intersection ferment exactement la masse q3
   même pour `P[t]>0`, en `O(|A|+|B|+k+h3^2)` après les visites d'arbre, ou en
@@ -62,14 +63,31 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   existence, profondeur et action en trois axes avec non-vacuité explicite.
   L'universel autorise un prune sans promouvoir `ALL_DEEP` tant que l'existence
   reste inconnue. Le shadow visite tous les blocs ; une sélection préalable des
-  non vides serait circulaire.
-  La réponse V82--V84 retire le repli brut par intervalles sur `Pi`, reproduit
+  non vides serait circulaire. `g_AB[64]` vient avant `global_common` : le
+  masque d'intersection reste distinct des bits de compte saturés, et une
+  fixture de témoins disjoints interdit leur confusion.
+  La réponse V82--V97 retire le repli brut par intervalles sur `Pi`, reproduit
   son inertie au pin propre `650b3cff`, puis ramène la proposition de Claude au
   noyau centre/patch de `g_AB` : minimum concave aux sommets des patches,
   masque conservatif et front d'arbre réutilisé. Elle interdit le plan d'une
   ancre représentative, compose `max(core,g_AB[j])+min(h_a)+min(h_b)` et refuse
-  de lire les runs 16 k/32 k biaisés comme une loi d'échelle. `Lca3Forest`
-  reste une ablation de ledger, pas une route produit.
+  de lire les runs 16 k/32 k biaisés comme une loi d'échelle. Le constructeur
+  v5 absent y est redérivé à l'échelle 32 : expansions par axe distinctes q3/q4,
+  64 sur-patches fermés et arrondis signés sans trou. Elle rejette le faux
+  ratio d'aire V84 et donne la seconde direction exacte demandée par Claude :
+  un masque de coplanarité multi-affine, à mesurer avant split ou changement
+  de séparation. Elle reçoit aussi le lemme directionnel q3 à ancre fixe, mais
+  réfute les bins `atan2` uniformes de V90 : le candidat sectoriel doit tester
+  les vrais cônes entiers, rester handle-local et publier le surmasque de boîte
+  contre le masque exact. Les chiffres V92 ne réparent pas ce défaut, car les
+  deux côtés de leur inclusion emploient la même partition erronée ; la
+  frontière fermée est reçue, pas leurs moyennes. Le source V97 répare ensuite
+  les cônes en entier et confirme un fort potentiel handle-local sur terrain et
+  scanline ; l'union vaut toutefois huit bits pour chaque ancre rejouée. La
+  seule intégration utile conserve donc la provenance, filtre l'émission du
+  handle et garde ses points comme témoins. Cette ablation conserve `A x B` et
+  ne s'étend pas à q4. `Lca3Forest` reste une
+  ablation de ledger, pas une route produit.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : décisions et dents restantes de la lane device.
 - [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.

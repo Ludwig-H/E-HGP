@@ -1,28 +1,49 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **Dernier pin de sonde de Claude relu :** `650b3cff`, publié sur `main` et
-  `origin/main`. Il implémente le repli d'intervalles sur `Pi`; reconfiguré puis
-  reconstruit au vrai pin propre, ce repli capte `0/1/0` blocs sur trois
-  familles à `n=3000` et est retiré du chemin candidat. Les grands runs qui
-  impriment `1ff39ab9,worktree_modifie=non` ont réemployé des définitions CMake
-  en cache et restent diagnostiques, pas des reçus. Son contre-audit de la v2
-  reste `b74d8050`.
+- **Dernier pin de sonde de Claude relu :** `ed9c282f`, publié sur `main` et
+  `origin/main`. Il répare réellement V90/V92 : vrais cônes de
+  `anchor_sector_kill`, produits mixtes entiers fermés, tous les seeds et
+  surmasque AABB conservatif. Le replay local à `n=8000,seed=3` ne trouve
+  aucune inclusion ou décision violée et reçoit un fort potentiel
+  **handle-local** sur `terrain/scanline`. Il révèle aussi le verrou décisif :
+  l'union des masques de tous les handles vaut `0xff` pour chaque ancre non
+  vide des quatre cohortes, donc le gain au niveau du test d'ancre courant est
+  nul. L'incrément doit préserver la provenance et tuer seulement l'émission
+  du handle. Les anciens chiffres `7313df2d` restent invalides ; le tableau
+  publié avec `ed9c282f` n'est pas exactement reproduit par le source à ce pin,
+  n'a ni sortie brute ni trois seeds, et sa cible CMake n'existe encore que
+  dans le worktree. Signal reçu, reçu de performance absent.
+- **Dernier pin propre du repli `Pi` :** `650b3cff`. Reconfiguré puis
+  reconstruit, il capte `0/1/0` blocs sur trois familles à `n=3000` et est
+  retiré du chemin candidat. Les grands runs qui impriment
+  `1ff39ab9,worktree_modifie=non` ont réemployé des définitions CMake en cache
+  et restent diagnostiques, pas des reçus. Son contre-audit de la v2 reste
+  `b74d8050`.
 - **Base mathématique concurrente relue :** `b53605db`, qui consolide
   `84cc3d73` et `b201ac23`. Elle ferme le ledger pondéré q3 par histogrammes et
   spécifie un préfiltre q4 à neuf classes avant le terminal axial. Les factorisations sont
   reçues mathématiquement ; le chemin q4 reste une proposition counter-only,
   pas une route produit déjà reçue.
-- **Compléments V79--V84 reçus comme diagnostics :** la sonde sépare le marginal
+- **Compléments V79--V97 reçus comme diagnostics :** la sonde sépare le marginal
   tous-profonds selon l'existence de neuf témoins communs. Ce shadow ne corrige
   pas le biais V74 et ne prouve ni que les patches sont nécessaires, ni qu'un
   certificat global de boîtes captera les témoins communs exacts. La bonne
   reformulation par le centre est le noyau déjà prévu de `g_AB` : minimum
-  concave aux sommets d'un sur-patch rationnel, puis front d'arbre partagé par
-  les crédits globaux et par patch. Le disque d'une paire ponctuelle ne couvre
-  pas automatiquement l'union des centres de `A x B x C`. Les tendances
+  concave aux sommets d'un sur-patch rationnel, puis front d'arbre masqué. Le
+  premier incrément calcule `g_AB[64]` seul ; le crédit commun attend un état
+  d'intersection distinct des saturations par patch. Le disque d'une paire
+  ponctuelle ne couvre pas automatiquement l'union des centres de
+  `A x B x C`. Les tendances
   16 k/32 k ne sont pas reçues comme stabilité d'échelle : phase zéro corrélée
   à l'ordre WSPD, caps avant classification, une seed, ratio pondéré distinct
-  de la fréquence de blocs et coût `exact_common` absent.
+  de la fréquence de blocs et coût `exact_common` absent. La mesure V84
+  non committée du rayon autour du barycentre, normalisée par la première
+  ancre, ne mesure ni une aire ni un rétrécissement WSPD et n'est pas reçue.
+  La seconde contrainte exacte à tester est la coplanarité du centre q3, sous
+  forme d'un masque multi-affine aux coins des boîtes. Le pin d'audit `8f43207c`
+  documente ces bornes mais ne contient encore aucun helper centre/patch v5.
+  Le lemme directionnel ultérieur ouvre aussi une ablation sectorielle locale,
+  sans remplacer cette route factorisée.
 - **Dernier pin du chemin produit reçu :** `7e0ffe79`. Il raccorde l'enveloppe
   fermée de boules possibles aux scans q3/q4, avec son oracle géométrique
   indépendant, ses chemins batched et ses portes de non-vacuité. Le harnais de
@@ -128,6 +149,14 @@ domaine de $h_d$ est vide sans union d'IDs. La masse couverte se calcule sur
 l'union des handles en temps linéaire en leur nombre : aucune de ces preuves ne
 justifie une matérialisation globale des couples.
 
+Le hot path q4 s'arrête donc à
+`h_a+h_b+max(core,g4_AB[j])`. Si `h_c/h_d` sont ajoutés sans positions, la
+seule composition scalaire générale est
+`h_a+h_b+max(core,g4_AB[j],h_c+h_d)` sur un bloc croisé, avec `h_d=0` sur la
+diagonale ; sommer le central et les deux fibres double-compte leurs positions.
+Avec des rangs, prendre l'union capée. Ces domaines témoins ne retranchent
+jamais `A/B` de la partition des carriers.
+
 ## Enveloppe q3/q4 reçue mathématiquement
 
 - Avec `d=b-a`, `D2=|d|2`, `w=2z-a-b`, `S=|w|2-D2` et
@@ -203,13 +232,18 @@ vient `AnchorLineSet`, puis l'ablation de WSPD locale q4. Les seuils à
 active détaille coefficients homogènes, tangences, concurrences, digest,
 portes de coût, fixtures et mutants.
 
-Ce probe a maintenant un contrat d'implémentation borné : deux grilles
-entières distinctes de 64 patches à l'échelle 32, sans flottant ; parcours
-partagé par deux masques mais antichaînes locales ; scission obligatoire d'un
-nœud témoin contenant `A` ou `B` ; aucun cumul avec `AliveRect::core`, aucun
-héritage de crédits après split. Le profil refuse les positions dupliquées :
-le ledger sémantique compte les positions, jamais `node_weight`. Le lemme q3
-analogue au Théorème 5 doit être gravé avant tout prune q3 autoritaire.
+Ce probe a maintenant un contrat d'implémentation borné, mais pas encore son
+code v5 : deux grilles entières typées de 64 patches à l'échelle 32, sans
+flottant ; parcours partagé par deux masques mais antichaînes locales ;
+scission obligatoire d'un nœud témoin contenant `A` ou `B` ; aucun cumul avec
+`AliveRect::core`, aucun héritage de crédits après split. Pour l'axe `i`, les
+expansions minimales `E3_i,E4_i` satisfont
+`3*E3_i^2>=256*(h_j^2+h_k^2)` et
+`E4_i^2>=128*(h_j^2+h_k^2)`. La médiatrice resserre ainsi le `20H` q4 v4 à
+`16H` au pire ; employer la grille q3 en q4 est toutefois faux. Le profil
+refuse les positions dupliquées : le ledger sémantique compte les positions,
+jamais `node_weight`. Le lemme q3 analogue au Théorème 5 doit être gravé avant
+tout prune q3 autoritaire.
 
 Claude a répondu au pin `ac43ab1a` avec deux filtres q3 par groupes. Le lemme
 du tiers aigu est reçu après ajout de l'owner `EdgeKey`; l'optimalité du cœur
@@ -322,10 +356,13 @@ direction center-cover reste prioritaire ; sa cible numérique n'est simplement
 pas encore mesurée.
 
 Le second tableau de `9a51a729` mesure une intersection sur les supports exacts
-déjà énumérés. Il autorise un premier fast path global counter-only, pas la
-suppression des patches : chercher neuf positions certifiées intérieures pour
-tous les patches faisables, puis rendre `UNKNOWN` en cas d'échec. Le front doit
-être réutilisable par `g_AB[j]` pour éviter un second parcours. La matrice
+déjà énumérés. Il rend un futur fast path global plausible, mais pas prioritaire
+sur `g_AB[64]`. Une saturation de `g[j]` ne retire jamais `j` du masque requis
+par l'intersection commune : deux patches peuvent chacun atteindre le seuil
+avec des ensembles de témoins disjoints. Après la parité des compteurs, le
+front pourra chercher neuf positions certifiées intérieures pour tous les
+patches faisables avec un `global_required_mask` distinct, puis rendre
+`UNKNOWN` en cas d'échec. La matrice
 `exact_common x certified_global x certified_patch`, trois seeds et plusieurs
 phases décide seulement ensuite si le raffinement paie. Fates et ledger sont
 conservés dans tous les cas.
@@ -343,6 +380,18 @@ produit. q4 possède ses propres compteurs. Pour le hot path, mesurer les deux
 ordres `g_AB -> need résiduel -> histogrammes` et
 `histogrammes -> g_AB`; l'ordre de développement ne préjuge pas du routeur
 final.
+
+Le secteur de Claude devient une ablation locale réellement utile une fois
+réparé. Pour une ancre q3 fixe, la direction du centre est bien celle de la
+projection de `x-m`. Il faut exposer une fois
+`AnchorSectorState{P[8],counts[8]}`, puis calculer pour chaque handle un
+surmasque par deux formes orientées affines sur son AABB. Le minimum restreint
+ne tue que ce handle, jamais l'ancre entière ; frontière, projection nulle ou
+overflow gardent les bits. Le masque coûte `O(8k)` par ancre et conserve donc
+`A x B` : il peut éviter des seeds et scans de puissance dans le terminal,
+mais ne prouve ni meilleur exposant ni gain GPU. Le théorème ne passe pas en
+q4, où le quatrième sommet déplace le centre le long de la corde normale à la
+face.
 
 La composition ne requiert aucun bloc matérialisé. Poser
 `f=min_a h_a(a)+min_b h_b(b)`. Pour un patch, poser
@@ -363,12 +412,13 @@ seulement sous le cap courant des handles, avant de
 passer les carriers ternaires résiduels au terminal axial. Le masque `M_H` est
 celui des **complétions** possibles, jamais celui des seuls seeds aigus.
 
-Le parcours témoin doit être physiquement partagé par le fast path global et
-les 64 crédits de patch : une union de masques, un seul départ de la racine,
-des nœuds `ALL` en antichaîne, les bits saturés masqués et les `MIXED` scindés
+Le parcours témoin de `g_AB[64]` part une seule fois de la racine : nœuds
+`ALL` en antichaîne locale, bits de compte saturés masqués et `MIXED` scindés
 sur place. La borne candidate inclut `V_phys+T_patch`, avec
-`T_patch<=64*V_phys`, jamais `k*V_phys`; l'échec global reprend ce même front
-et reste `UNKNOWN`.
+`T_patch<=64*V_phys`, jamais `k*V_phys`. Quand `global_common` sera ajouté, son
+masque requis restera distinct : une saturation de `g[j]` ne retire pas le bit
+commun, tandis qu'un `ALL` d'ancêtre s'hérite sur sa branche. L'échec global
+reste `UNKNOWN` sans second départ de racine.
 
 Les vues sont typées : la partition des carriers/complétions est complète et
 disjointe ; `seed_capability` lui est attaché ; une `certificate_source`
@@ -396,17 +446,22 @@ qu'un agrégat facultatif.
 
 Deux fils ne doivent plus être confondus. Pour l'expérience de fibre, le
 prochain incrément installe ce schéma d'état et `g_AB` counter-only sur tous les
-blocs, sans masquage. Pour la boucle d'exposant déjà connue, les histogrammes
-saturés et l'émission sparse restent le premier candidat à une activation
-produit et peuvent avancer en parallèle. L'ordre chaud entre les deux attend
-l'ablation. Si la lane `EMPTY` est retouchée, requalifier d'abord
+blocs, avec un unique masque de patches mais sans `global_common` ni décision
+produit. Pour la boucle d'exposant déjà connue, les histogrammes saturés et
+l'émission sparse restent le premier candidat à une activation produit et
+peuvent avancer en parallèle. L'ordre chaud entre les deux attend l'ablation.
+Si la lane `EMPTY` est retouchée, requalifier d'abord
 `OwnerD2Exact` avec oracle et fixtures v5 avant un split ; ne pas recopier son
 code v4.
 
-Ce chantier ne prétend pas inventer le center-cover : la v4 avait déjà `P1`,
-64 patches et des pentes `2,104/1,896`, rejetées parce que la route partait
-encore de la paire. Le delta v5 à tester est la factorisation
-`WSPD rectangle -> un scan g_AB -> masques C -> t_C -> ledger pondéré q3`, puis
+Ce chantier ne prétend pas inventer le center-cover : la v3 `b312638c` avait
+déjà 64 patches, un unique DFS masqué et les pentes `2,104/1,896`. Le landing
+CUDA `95dd8036` faisait 64 parcours logiques et n'avait pas de run natif à sa
+réception. La v4 `40b309c3` mutualisait déjà la traversée haute du cover par
+rectangle avant les filtres locaux par ancre. Le delta v5 à tester est donc la
+composition
+`WSPD rectangle -> g_AB[64] -> masques C -> t_C -> ledger pondéré q3`, avec
+suppression de ces scans locaux, puis
 `classes s_H -> faces ternaires -> Top-r4` en q4. La voie exacte `t_CD` reste
 un oracle sous cap. La v4 avait déjà réfuté `Sym2/CellPair` comme hot path
 (`459477476` nœuds à `n=4000`) et proposé le terminal axial ; ni son code, ni
@@ -423,8 +478,10 @@ source témoin. Ce sont désormais ces générateurs, et non un stream `k^2`, do
 les pentes constituent la porte de réfutation.
 
 Le raccord autoritaire ajoute encore trois gardes : les témoins sont des rangs
-de positions typés, pas des `PointId`; un `computed_patch_mask` distingue
-`g[j]==0` de « non calculé » ; et une paire q4 est seed-éligible si
+de positions typés, pas des `PointId`; chaque patch porte
+`UNSEEN/PARTIAL/EXHAUSTED/SATURATED` et son cap, car un seul
+`computed_patch_mask` ne distingue ni une interruption, ni un compte exact
+d'une saturation ; et une paire q4 est seed-éligible si
 `seed_possible(C)||seed_possible(D)`, indépendamment de l'ordre `i<=j`. Le
 cover brut, la source de certificats, le census exact, les complétions et la
 capacité de seed portent des types distincts ; nommer un cover « census » ne
@@ -604,6 +661,32 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
   `n=3000,seed=3,blocs=800` impriment le bon pin propre, aucun cap, faux
   positif ou invariant violé ; le certificat `Pi` capte `0/1/0` blocs et
   `0/86/0` appels marginaux pour `101196/41943/53666` évaluations propres ;
+- worktree v4 corrigé du probe, reconfiguré puis construit en Release :
+  `uniform/terrain/scanline_single_pass/eight_clusters` à
+  `n=400,seed=3,blocs=300` rendent zéro, sans cap, faux positif, invariant ou
+  ratio supérieur à un. Le binaire imprime
+  `0d60092f,worktree_modifie=OUI`. Pour les seuls groupes à au moins deux
+  centres, les diamètres normalisés moyens valent
+  `0,234/0,230/0,208/0,190`, les maxima
+  `0,487/0,833/0,642/0,660` et les tests de paires
+  `1733/1712/2871/29254`. Cette mesure à ancre fixe corrige V84 mais reste un
+  diagnostic discret à coût quadratique, ni une aire, ni un reçu de gain ;
+  un scratch rationnel indépendant sur `12678` triangles aigus et `2263`
+  tétraèdres bien centrés ne trouve aucune violation des nouvelles boîtes
+  racines par axe ; ce diagnostic attend ses fixtures permanentes ;
+- portes sectorielles existantes reconfigurées : `10/10` vertes
+  (fixture stricte, mutant non strict, oracle d'ancre, seuil `h-1`, corde et
+  grille). Elles reçoivent le certificat sur huit secteurs actuel, pas le
+  futur masque `Box(C) -> cônes` ni les sondes V90/V92 ;
+- probe sectoriel `ed9c282f` construit depuis le worktree avec sa cible CMake
+  non committée, stamp `worktree_modifie=OUI`, puis rejoué à
+  `n=8000,seed=3,blocs=1500,union_rects=64` sur quatre familles. Les inclusions,
+  frames et invariants de décision valent zéro. Parmi les handles non vides,
+  le taux `full8 -> box` vaut `59,7 -> 88,1 %` sur `scanline_single_pass`,
+  `13,4 -> 56,5 %` sur `terrain`, `57,3 -> 62,1 %` sur `uniform` et
+  `97,0 -> 97,9 %` sur `eight_clusters`. Pour les unions d'ancre, tous les
+  `262/136/97/177` surmasques non vides valent huit bits et le gain est zéro.
+  Ce replay reçoit le potentiel local, pas le tableau publié ni un gain mur ;
 - `python tools/check_docs.py` vert sur `217` Markdown actifs,
   `python tools/check_implementation_status.py` vert sur `20` phases, et diff
   sans erreur d'espacement après consolidation.
@@ -616,13 +699,18 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
    sur q2/q3/q4 avant activation.
 2. **Fil fibre, développable en parallèle mais non autoritaire :** corriger
    ledger, caps, compteurs et échantillonnage du probe, installer les trois axes
-   d'état, graver le helper centre/patch contre l'oracle exact, puis ouvrir le
-   fast path `global_common` sur un front de patches réutilisable par
-   `g_AB[j]`, `t_C`, le ledger q3 pondéré agrégé et les vues
-   typées de handles. Prouver non-vacuité, provenance, rangs de positions et
-   `PointId` d'owner sans matérialiser `A x B x C`. Un échec global rend
-   `UNKNOWN`; le shadow q3 ferme toute sa masse par histogrammes, même si
-   `P[t]>0`. Aucun masquage produit n'est autorisé avant oracle.
+   d'état, graver le helper centre/patch typé contre l'oracle exact, puis
+   calculer seulement `g_AB[64]` par un DFS masqué sur tous les rectangles.
+   Comparer aux 64 parcours indépendants, fermer antichaînes, coquilles et
+   provenance, puis former `t_C` en post-traitement sans `A x B x C`. Ouvrir
+   seulement ensuite `global_common` avec un masque requis distinct des
+   saturations `g` et la fixture des intersections disjointes. Un échec global
+   rend `UNKNOWN`; le shadow q3 ferme toute sa masse par histogrammes, même si
+   `P[t]>0`. Aucun masquage produit n'est autorisé avant oracle. En ablation
+   parallèle, réparer `sector_reach_probe` avec les vrais cônes entiers,
+   prouver `exact_seed_mask subset_of box_mask`, puis mesurer les handles
+   réellement tués ; ne jamais convertir ce verdict handle-local en kill
+   d'ancre ni le transférer à q4.
 3. Comparer ensuite les deux ordres chauds sur le vecteur causal et sur mur/HWM
    OFF/ON ; activer seulement les décisions exactes rentables. Garder les fates
    `EMPTY` au ledger d'oracle sans route autonome.
