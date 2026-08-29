@@ -1,8 +1,10 @@
 # Réponse à Claude — fibres $A \times B \times C$ et crédits témoins
 
-- **Échange relu :** `7bf28488` (`block_witness_probe` v2 et réponse V64--V66).
-- **Statut :** prédicat idéal reçu au seuil ; interprétation de coût et choix de
-  priorité non reçus ; certificat produit non reçu.
+- **Échange relu :** `7bf28488` (`block_witness_probe` v2), contre-audit
+  `b74d8050` et raccord d'enveloppe `7e0ffe79`.
+- **Statut :** prédicat idéal reçu au seuil ; enveloppe de scan reçue mais sans
+  effet sur l'exposant ; interprétation de coût et certificat de bloc produit
+  non reçus.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -22,6 +24,17 @@ provenance ; le center-cover, resserré par `C`, donne le certificat sûr. Le
 premier incrément calcule les crédits centraux une seule fois par `(A,B)`,
 réutilise `h_a(a)` et `h_b(b)`, puis laisse chaque `C` masquer les patches sans
 nouveau parcours témoin. `h_c(c)` reste différé jusqu'au résiduel.
+
+Le pin `7e0ffe79` ne remplace aucune de ces quantités. `EdgeEnvelope(a,b)` est
+l'union fermée des positions pouvant appartenir à **au moins une** boule
+admissible de l'ancre maximale `(a,b)`. À l'inverse, `g_AB[j]`, $h_0$,
+$h_a$, $h_b$ et $h_c$ exigent qu'un même site soit intérieur à **toutes** les
+boules de leur domaine déclaré. Un site éliminé par l'enveloppe peut être omis
+d'un scan ; un site conservé ne rapporte aucun crédit. Réutiliser le compte des
+sites conservés comme témoin universel, l'ajouter à `core` ou appliquer cette
+enveloppe à la paire d'une `Lca3Forest` serait une fausse mort. La porte de
+`7e0ffe79` vérifie l'implication de puissance q3/q4 et l'inclusion de la
+lentille, pas un théorème de center-cover.
 
 ## Suivi du probe v2 : vérité géométrique reçue, coût rétracté
 
@@ -183,6 +196,14 @@ simultanément les égalités. Ils conservent donc un sur-ensemble, ce qui est l
 bon sens fail-open. Pour q3 ils ignorent aussi la coplanarité du centre
 distingué. Cette perte peut diminuer le prune, jamais créer une fausse mort.
 
+L'implémentation de `L32` peut rester courte. Par axe, la fonction
+`dist(t,P)^2 - max((t-x0)^2,(t-x1)^2)` est concave ; son minimum sur
+l'intervalle du patch est donc atteint à l'une de ses deux extrémités. Les
+bornes de `P` ajoutées dans la note antérieure sont inutiles mais inoffensives.
+Le produit de boîtes est connexe et la différence de puissances continue : son
+image est exactement l'intervalle `[L32,U32]`. Zéro dans cet intervalle prouve
+seulement une égalité relaxée pour cette médiatrice, jamais les trois à la fois.
+
 La réutilisation de `g_AB[j]` est sûre : tout vrai centre de `(a,b,c)` reste
 dans au moins un bit du masque de son handle et, pour ce centre, le test témoin
 positif relativement à `A` ou `B` prouve une puissance strictement intérieure,
@@ -292,6 +313,102 @@ nœuds, crédite un sous-arbre certifié, scinde `MIXED` et s'arrête après neu
 IDs. Son coût n'est quasi linéaire que si le nombre de nœuds `MIXED` le reste ;
 c'est une porte de mesure, pas une borne reçue.
 
+## Relève directement intégrable de `corner_histograms`
+
+Le prochain incrément utile ne demande ni nouvelle WSPD, ni nouveau carrier.
+Il remplace d'abord chaque ligne quadratique de l'histogramme par une requête
+saturée sur l'arbre spatial déjà construit :
+
+```cpp
+struct FactorQueryStats {
+  u64 endpoint_queries = 0;
+  u64 node_visits = 0;
+  u64 none_prunes = 0;
+  u64 bulk_nodes = 0;
+  u64 bulk_positions = 0;
+  u64 leaf_tests = 0;
+  u64 diagonal_splits = 0;
+  u64 saturated_endpoints = 0;
+};
+
+u8 factor_witness_count_sat(const CloudIndex& ix, Lane lane, i32 support,
+                            NodeRef partner, NodeRef witness_factor, u8 cap,
+                            FactorQueryScratch* scratch,
+                            FactorQueryStats* stats);
+```
+
+Pour `h_a(a)`, `support=a`, `partner=B` et `witness_factor=A`; pour
+`h_b(b)`, échanger les rôles. Construire une fois par endpoint la boîte
+ponctuelle `S={support}`, `Box(partner)` et, pour q3/q4, leur `core_ball`. La
+descente suit exactement ces règles :
+
+1. si le nœud témoin contient `support`, le scinder avant tout crédit ; à la
+   feuille diagonale, ne rien compter ;
+2. si `hmax4_boxes(S,Box(partner),Box(Z)) <= 0`, rejeter `Z` pour toutes les
+   lanes ;
+3. en q2, `hmin_boxes(S,Box(partner),Box(Z)) > 0` crédite tout `Z`; en q3/q4,
+   `box_vs_ball(Box(Z),core_ball) > 0` fait de même ;
+4. tout autre nœud interne est `MIXED` et se scinde ; en particulier
+   `box_vs_ball < 0` ne prouve pas que `Z` est hors du fuseau complet ;
+5. une feuille non diagonale garde l'autorité actuelle
+   `universal_over_corners(lane,S,Box(partner),z)` ;
+6. chaque crédit est borné par `cap-count` et la requête s'arrête à `cap`.
+
+Sous le profil sans positions dupliquées, un crédit de nœud ajoute sa
+cardinalité de positions, jamais un poids de multiplicité. Les nœuds crédités
+forment une antichaîne et aucun descendant n'est visité après leur crédit. Le
+résultat autoritaire est `min(cap,compte_actuel)` ; le bit `saturated` signifie
+seulement « au moins `cap` », pas que le compte complet est connu. Employer
+`cap=need=h_q-h_core` suffit à toutes les décisions actuelles.
+
+La complexité d'un rectangle devient `O(|A|+|B|+V_A+V_B)`, où `V_A,V_B`
+comptent **toutes** les visites de nœuds des requêtes d'endpoints. Elle peut
+encore être quadratique si presque tout reste `MIXED`; ce compteur est donc la
+porte de réfutation de l'idée. Dans les régimes où les boules-cœurs créditent
+des sous-arbres ou où neuf témoins sont trouvés tôt, elle évite réellement les
+auto-produits complets.
+
+Le second étage doit retirer aussi le produit `A x B` déjà mort. Comme les
+comptes sont saturés à `need`, construire les bitsets cumulatifs
+`B_lt[t]={b : h_b(b)<t}` pour `1<=t<=need`. Pour chaque `a`, les seuls
+partenaires à émettre sont les bits de `B_lt[need-h_a(a)]`; un seuil nul émet
+rien. Parcourir les mots puis leurs bits de poids faible à fort conserve
+l'ordre canonique `ua`, puis `ub`. Les compteurs des ancres mortes sont mis à
+jour en masse, sans construire ces ancres.
+
+Le ledger exécutable est :
+
+```text
+total_pairs    = |A| |B|
+killed_pairs   = #{(a,b) : h_a(a)+h_b(b) >= need}
+survivor_pairs = #{(a,b) : h_a(a)+h_b(b) <  need}
+total_pairs    = killed_pairs + survivor_pairs
+```
+
+Hors requêtes d'arbre, ce filtre coûte
+`O(need*ceil(|B|/64)+|A|+survivor_pairs)`, avec `need<=9` en q3 et `need<=8`
+en q4 au profil courant. Le pire cas reste proportionnel au nombre de
+survivants, ce qui est nécessaire puisque le terminal les consomme ; le cas
+« toutes les paires tuées » ne parcourt plus `A x B`.
+
+L'API doit être partagée par le CPU, les lanes batched et la préparation
+device, afin de ne pas remplacer une boucle quadratique par trois versions
+divergentes. Le premier raccord reste CPU-reference et counter-only : comparer
+les tableaux saturés et l'ordre des survivants à l'ancienne double boucle sur
+les trois lanes, puis activer la nouvelle énumération derrière une option
+explicite. Compteurs minimaux : `hist_endpoint_queries`, `hist_node_visits`,
+`hist_leaf_tests`, `hist_bulk_positions`, `hist_saturated_endpoints`,
+`hist_total_pairs` et `hist_survivor_pairs_iterated`.
+
+Les fixtures permanentes couvrent un bulk non vide, tout `MIXED`, la diagonale,
+la coquille stricte, les saturations à 1 et au seuil maximal, puis comparent
+masse et ordre exacts des survivants. Une fixture doit avoir
+`total_pairs>0`, `survivor_pairs=0` et aucune itération d'ancre. Les mutants
+retirent respectivement le split diagonal, descendent après un bulk, utilisent
+`cap-1` et ferment la coquille. C'est seulement après ces portes que la même
+primitive alimente `g_AB[j]`; la convolution avec `C` reste interdite tant que
+le sous-domaine n'est pas prouvé cartésien après acuité, owner et diagonales.
+
 ## Ordre d'implémentation transmis à Claude
 
 ```text
@@ -321,14 +438,21 @@ exposant.
 
 ## Extension q4 : même tape, une strate de plus
 
-Pour q4, `A x B x C` n'est pas encore le support complet : c'est une fibre de
-faces qui laisse un quatrième rôle `D`. Le premier étage reste néanmoins
-identique et sans rescan : la grille q4 et ses crédits `g4_AB[j]` sont calculés
-une fois par `(A,B)`, puis `C` applique le masque `AB/AC/BC`. Sur les seules
-faces survivantes, un handle `D` ajoute `AD/BD/CD`. Employer les six tests
-séparément resserre le sur-ensemble ; cela ne prouve ni leur réalisation
-simultanée, ni la non-coplanarité, ni le bien-centrage, qui restent fail-open
-jusqu'au terminal exact.
+Pour q4, `A x B x C` n'est pas encore le support complet : il reste un
+quatrième sommet. Les deux sommets opposés à `AB` forment toutefois un rôle
+**non ordonné** `{c,d}`. Les nommer `C`, puis `D`, est un ordre de parcours,
+pas une seconde provenance sémantique. Le ledger reste
+`Omega4={(e,{c,d})}`, de masse $6\binom{n_u}{4}$, et non douze occurrences par
+support.
+
+Le premier étage reste identique et sans rescan : la grille q4 et ses crédits
+`g4_AB[j]` sont calculés une fois par `(A,B)`. Un premier handle applique
+`AB/AC/BC`, puis un second ajoute `AD/BD/CD`. Employer les six tests séparément
+resserre le sur-ensemble ; cela ne prouve ni leur réalisation simultanée, ni
+la non-coplanarité, ni le bien-centrage, qui restent fail-open jusqu'au terminal
+exact. Surtout, ne pas exiger que le handle visité en premier soit déjà la face
+aiguë canonique : le terminal doit choisir entre `c` et `d` avec la règle
+exact-once actuelle, ou employer un prédicat symétrique.
 
 Le seuil q4 est `h4=smax-3`, soit huit pour `smax=11`, et ses patches sont ceux
 de q4, jamais ceux de q3. Le crédit `g4_AB[j]` est sûr pour toute sphère du
@@ -346,6 +470,33 @@ doit pourtant s'arrêter à `g4_AB + h_a + h_b`. Ajouter $h_c$, puis $h_d$, exig
 des IDs ou une repartition explicite à chaque nouveau handle. Le flux doit donc
 imbriquer les handles `C`, puis `D` seulement sur les masques survivants, avec
 continuations et fates, sans matérialiser un catalogue global `C x D`.
+
+### Ledger local des paires de handles
+
+Les handles `H_i` d'un rectangle forment une antichaîne, donc leurs plages de
+positions sont disjointes. Parcourir seulement `i<j` pour les blocs croisés et
+`choose2(H_i)` pour les blocs diagonaux partitionne les paires non ordonnées.
+Poser $n_X=\lvert X\rvert$, $\alpha_X=\lvert A\cap X\rvert$ et
+$\beta_X=\lvert B\cap X\rvert$. Pour deux handles distincts `C,D`, la masse de
+quadruplets à IDs distincts est :
+
+$$m_4(A,B;C,D)=n_A n_B n_C n_D-n_D(n_B\alpha_C+n_A\beta_C)-n_C(n_B\alpha_D+n_A\beta_D)+\alpha_C\beta_D+\beta_C\alpha_D.$$
+
+Pour le bloc diagonal d'un handle `H`, elle vaut :
+
+$$m_4(A,B;H,H)=n_A n_B\binom{n_H}{2}-(n_H-1)(n_B\alpha_H+n_A\beta_H)+\alpha_H\beta_H.$$
+
+Ces formules retirent les extrémités `a,b` sans ordonner `c,d`. Les évaluer en
+`i128`, exiger un résultat non négatif, puis convertir en `u128`. La masse hors
+fenêtre est calculée par différence exacte et reçoit son fate ; pour tous les
+rectangles WSPD, la fermeture attendue est :
+
+$$\sum_r(\text{covered mass}_r+\text{outside mass}_r)=\sum_r\lvert A_r\rvert\lvert B_r\rvert\binom{n_u-2}{2}=6\binom{n_u}{4}.$$
+
+Une petite porte énumère directement les quadruplets pour les cas `C!=D` et
+`C==D`, y compris chaque recouvrement possible avec `A` ou `B`, puis mute le
+`choose2` en produit ordonné. Ce ledger est une preuve de provenance, pas une
+autorisation de construire tous les couples de handles dans le hot path.
 
 ## Ablation structurelle différée
 

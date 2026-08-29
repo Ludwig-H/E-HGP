@@ -1,15 +1,13 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **HEAD fonctionnel relu :** `7bf28488`, publié sur `main` et `origin/main`.
-  Le dernier delta du chemin produit reste `2d052921` ; le HEAD épingle
-  maintenant le harnais, le contrat du futur center-cover et le probe
-  diagnostique `A x B x C` v2, sans pinner le raccord d'enveloppe. Le prédicat
-  idéal au seuil est reçu ; ses proxys de travail et ses sorties ne sont ni
-  causaux, ni receiptés.
-- **Dernier pin du chemin produit reçu :** `72090f79`. Le chemin produit de
-  l'enveloppe q3/q4 et ses portes restent dans un worktree concurrent non
-  commité. Ils sont jugés ci-dessous comme snapshot, jamais attribués au HEAD ;
-  le harnais est désormais épinglé séparément à `66997d56`.
+- **HEAD fonctionnel relu :** `7e0ffe79`, commité sur `main`. Il raccorde
+  l'enveloppe fermée de boules possibles aux scans q3/q4, avec son oracle
+  géométrique indépendant, ses chemins batched et ses portes de non-vacuité.
+  Le probe diagnostique `A x B x C` v2 reste épinglé à `7bf28488` et son
+  contre-audit de coût à `b74d8050`.
+- **Dernier pin du chemin produit reçu :** `7e0ffe79`. Le harnais de reçu reste
+  épinglé séparément à `66997d56`. Aucune mesure antérieure à ce pin n'est
+  attribuée au raccord d'enveloppe.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -20,14 +18,20 @@
 
 ## Verdict utile à Claude
 
-Le raccord d'enveloppe est bon dans son principe et dans son placement CPU :
+Le raccord d'enveloppe est reçu dans son principe et dans son placement CPU :
 il conserve le cover historique, compacte paresseusement au premier scan et
-réemploie le tampon du counting sort. L'appariement exercé est solide. Il doit
-maintenant être épinglé avec ses portes, pas encore optimisé ni mesuré.
+réemploie le tampon du counting sort. Le pin `7e0ffe79` ferme l'implication
+géométrique indépendante, la lentille, les chemins batched et la non-vacuité
+des routes surdimensionnées. Il reste à le mesurer causalement.
 
 La base continue d'éviter la mosaïque de Delaunay d'ordre supérieur. Le filtre
 réduit les sites de cœur/profondeur ; il ne retire ni visites de handles, ni
-ancres, ni pire exposant q4. Le verrou d'échelle global reste donc ouvert.
+ancres, ni `corner_histograms`, ni pire exposant q4. C'est une enveloppe
+**existentielle** : elle décide si un site peut appartenir à au moins une boule
+admissible de l'ancre. Elle ne fournit aucun crédit universel
+`h0/ha/hb/hc`, ne s'additionne à aucun compte témoin et ne se réemploie pas sur
+une paire LCA qui n'est pas l'arête maximale possédée. Le verrou d'échelle
+global reste donc ouvert.
 
 La correction de cap de l'utilisateur est reçue : **q2 n'est pas le problème
 architectural à traiter**. La WSPD binaire partitionne correctement les paires ;
@@ -83,6 +87,13 @@ le vrai $h_0$ extérieur à `C`; il ne se compose donc pas avec un futur
 $h_c(c)$ sans union d'IDs ou repartition. Le test de puissance aux seuls
 `8^3` coins reste réfuté par la fixture u16. Un cap, une tangence ou une borne
 ambiguë produit `pending`, jamais un prune.
+
+Pour q4, les deux porteurs opposés à `AB` restent une paire non ordonnée. Le
+parcours peut imbriquer deux handles, mais son ledger emploie les blocs croisés
+`i<j` et les diagonales `choose2(H_i)`, ferme `6*C(n_u,4)` et ne décide pas
+avant le terminal lequel des deux porteurs est la face aiguë canonique. Les
+formules locales retirant les recouvrements avec `A/B` sont épinglées dans la
+réponse active ; elles ne justifient aucune matérialisation globale des couples.
 
 ## Enveloppe q3/q4 reçue mathématiquement
 

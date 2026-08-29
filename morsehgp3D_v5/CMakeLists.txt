@@ -432,6 +432,11 @@ else()
   set(_mhgp5_probe_dirty "OUI")
 endif()
 target_compile_definitions(mhgp5_rect_probe PRIVATE MHGP5_PROBE_PIN="${_mhgp5_probe_pin}" MHGP5_PROBE_DIRTY="${_mhgp5_probe_dirty}")
+# Sonde de fibre A x B x C : vacuite par boites, predicat ideal au seuil,
+# invariant W_3, ledger de provenance, chemin causal. Code 3 si le ledger, un
+# faux positif de certificat ou l'invariant sont pris en defaut.
+mhgp5_executable(mhgp5_block_witness_probe bench/block_witness_probe.cpp)
+target_compile_definitions(mhgp5_block_witness_probe PRIVATE MHGP5_PROBE_PIN="${_mhgp5_probe_pin}" MHGP5_PROBE_DIRTY="${_mhgp5_probe_dirty}")
 
 # Test d'ancre par secteurs : un mutant non strict cree des faux positifs -> divergence des digests v4 (code 4).
 # Le mutant non strict est INVISIBLE en position generale (aucune egalite) : la fixture gravee
