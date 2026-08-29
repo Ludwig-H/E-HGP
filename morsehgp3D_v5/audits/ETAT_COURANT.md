@@ -1,6 +1,8 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **Dernier pin de Claude relu :** `2168a295`, sur `main` et `origin/main`.
+- **Dernier pin fonctionnel de Claude relu :** `2168a295`. Les deux commits
+  postérieurs relus jusqu'à `dc01fdf0` sont documentaires ; ils ne déplacent
+  pas le pin fonctionnel jugé.
   Son changement de priorité est reçu : ne pas construire maintenant
   l'arrangement shallow et attaquer d'abord le nombre de seeds q3. Sa sonde ne
   prouve toutefois ni le facteur `6--9`, ni `O(h3)` par seed, ni les moyennes
@@ -203,8 +205,9 @@ retranchent jamais `A/B` de la partition des carriers.
   `Q_min` par distance aux intervalles est seulement un minimum continu sûr,
   pas le minimum exact du réseau u16 à parité fixée.
 
-La dérivation, les fixtures et la réponse V49–V52 consolidée vivent dans
-`QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md`.
+La dérivation reçue vit dans `../docs/MATHEMATIQUES.md` § 6.1 ; les fixtures,
+les réserves d'architecture et la réponse consolidée vivent dans
+`REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md`.
 
 ## Réorientation WSPD q3/q4
 
@@ -448,12 +451,14 @@ La relève avec $h_c$ garde la même factorisation. Pour chaque patch `j`, la
 strate locale compose `g_{i,j}` et `h_{c,j}(c)` par `max`, les autres strates
 s'additionnent, puis `core` reste en `max` extérieur tant qu'il n'est pas
 ventilé. Condenser ensuite
-`tau_i(c)=max_{j in M_i(c)}(h3-credit_{i,j}(c))_+`. Les neuf classes de
-`tau` remplacent le seuil unique du handle ; un tableau bidimensionnel
+`tau_i(c)=max_{j in M_i(c)}(h3-credit_{i,j}(c))_+`. Avec `h3=9`, `tau` prend
+les dix valeurs `0..9`, pas neuf classes. Ces classes remplacent le seuil
+unique du handle ; un tableau bidimensionnel
 `(tau,h_a)` ou `(tau,h_b)` ferme les diagonales `c=a/c=b`. La combinaison
 reste linéaire en masse de handles plus `O(h3^2)` et ne matérialise toujours
-pas `A x B x C`. Le minimum numérique entre patches ne revendique aucune
-intersection commune de témoins.
+pas `A x B x C`. Les fixtures permanentes doivent exercer explicitement les
+deux bords `tau=0` et `tau=h3`. Le minimum numérique entre patches ne
+revendique aucune intersection commune de témoins.
 
 Le parcours témoin de `g_AB[64]` part une seule fois de la racine : nœuds
 `ALL` en antichaîne locale, bits de compte saturés masqués et `MIXED` scindés
@@ -617,6 +622,11 @@ jamais le ranking ou le census exact.
    porte nominale jumelle finit en `302,74 s`. Le rejeu isolé est vert en
    `153,94 s` avec le code 4 attendu : le mutant est bien tué, mais le timeout
    de 300 s ne supporte pas la concurrence de la campagne canonique.
+8. **Tester la composition des deux filtres.** Les portes batched q3/q4
+   couvrent séparément `--postsep=1` et `--cover-envelope=1`, jamais leur
+   activation simultanée. Ajouter un CTest croisé par lane qui exige des
+   compteurs non vacants et l'égalité de l'objet canonique ; les deux familles
+   de tests isolées ne tuent pas une interaction d'ordre ou de compaction.
 
 Le filtre reste OFF par défaut. Aucun tableau de mur antérieur au refactor ne
 sert de reçu. Mesurer ensuite `none/q3/q4/both` exige d'abord des commutateurs
@@ -666,9 +676,15 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
 ## Validation indépendante des pins
 
 - configuration canonique et build Release : succès ;
+- contre-audit frais sur la base `dc01fdf0` : `269` CTests découverts et les
+  quatre portes ciblées `sector_reach_probe_smoke`, `sector_kill_fixture`,
+  `anchor_tests_oracle` et `postsep_refine_mutant_h1` vertes. La campagne
+  complète a été arrêtée après ses `38` premiers succès pour ne pas contaminer
+  le mur d'un reçu concurrent de Claude ; elle ne constitue donc pas un
+  verdict de suite complète ;
 - campagnes ciblées enveloppe/CLI/mutants et routes batched : `27/27` ;
 - registre direct : `80` mutants déclarés, `80` injectés, `80` gardés ;
-- campagne complète antérieure label `gate` : `250/251` en `790,97 s`, seul
+- campagne complète **historique** label `gate` : `250/251` en `790,97 s`, seul
   le timeout post-séparation décrit ci-dessus ; rejeu isolé vert en
   `153,94 s` ; un rejeu frais a retrouvé ce timeout à `300,12 s` sous
   concurrence puis a été interrompu, il ne constitue pas une campagne

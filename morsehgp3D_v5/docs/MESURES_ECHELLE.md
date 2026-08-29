@@ -354,9 +354,11 @@ continue q3 vérifie exactement $S\leq0$ ou $3S^{2}\leq4\Xi$. La borne de Jung
 q4 fournit le sur-ensemble sûr $S\leq0$ ou $S^{2}\leq2\Xi$ ; l'intersecter avec
 le cover q4 coefficient 3 ne l'élargit pas et peut retirer des sites incapables
 d'appartenir à une boule admissible. Le plan de test, la borne de boîte
-fail-open et la séparation q3/q4 sont détaillés dans
-[`QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md`](../audits/QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md#enveloppe-entière-immédiate--ne-pas-attendre-larrangement).
-Ce filtre n'a encore aucune mesure de mur ni preuve différentielle v5.
+fail-open et la séparation q3/q4 sont consolidés dans
+[`MATHEMATIQUES.md`](MATHEMATIQUES.md) § 6.1 et dans la réponse d'architecture
+[`REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md`](../audits/REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md).
+Le raccord possède ses portes différentielles v5 au pin `7e0ffe79`, mais
+aucune mesure causale de mur ne lui est encore attribuée.
 
 ## 5. Ce qui n'est pas établi
 

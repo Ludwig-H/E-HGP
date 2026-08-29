@@ -281,12 +281,11 @@ reste donc une identité d'oracle et un mutant utile, pas une ablation produit
 à payer après `cover+OwnerD2Exact`. Une porte peut encore vérifier
 `dot_only==0` sur cette cohorte.
 
-Un rejeu indépendant a cherché une contradiction : boîtes exhaustives 1D sur
-la grille `0..6`, boîtes exhaustives 2D sur `0..2`, puis `200 000` boîtes 3D
-pseudo-aléatoires. Les cohortes `dot` après cover comptaient respectivement
-`220`, `224` et `15` cas ; les `459` étaient tous reconnus par l'un des deux
-extrema corrélés, donc `dot_only=0`. Ce test soutient la preuve sans s'y
-substituer.
+Un scratch local non conservé avait été annoncé à l'appui de cette dominance.
+Sans source, seed, commande, sortie brute ni reçu épinglé, ses comptes exacts
+sont retirés de la chaîne de preuve. La justification recevable est l'identité
+algébrique ci-dessus ; une fixture CTest permanente doit encore tuer
+`dot_only!=0` sur la cohorte post-cover.
 
 La fixture u16 `A=[6,6]`, `B=[7,8]`, `C=[4,5]` montre seulement le défaut de
 la v5 courante : le cover passe et les extrema découplés restent ambigus. Le
@@ -1555,11 +1554,12 @@ handles, et généralise la formule à seuil unique déjà vérifiée. Le termin
 n'énumère que le résiduel ; acuité, owner et existence gardent leurs fates
 séparés.
 
-Un oracle combinatoire indépendant au worktree courant a tiré `100000` cas de
-strates q3/q4 et `200000` ledgers `tau`, sans surcompte ni divergence avec
-l'union ou l'énumération explicite. Ce rejeu reçoit les formules papier ; il ne
-remplace pas les futures fixtures CTest déterministes de recouvrement,
-saturation et diagonale.
+Des tirages locaux non conservés avaient été annoncés sans divergence. Sans
+source, seed, commande, sortie brute ni reçu épinglé, ils ne reçoivent pas les
+formules papier. La dérivation reste une proposition algébrique à graver dans
+des fixtures CTest déterministes de recouvrement, saturation et diagonale ;
+elles doivent couvrir les dix seuils q3 `tau=0..9`, en particulier les deux
+bords.
 
 La fixture géométrique stratifiée minimale fixe
 `a=(0,0,0), b=(12,0,0), c=(6,9,0)`, `H0={c,(6,3,0)}` et
@@ -1763,9 +1763,10 @@ Les handles sont une antichaîne : leurs intersections avec les plages de `A`
 et `B` sont disjointes. Former tous les bins coûte donc
 `O(|A|+|B|+k+N^2)` par rectangle, avec `N<=9`, et une mémoire `O(N^2)` hors
 tableaux d'endpoints. Aucun `A x B` ni `A x B x C` n'est parcouru. Un test
-brut local sur `218700` configurations exhaustives petites, puis `100000`
-configurations aléatoires, n'a trouvé aucune divergence avec la somme explicite
-des poids. Ce rejeu d'audit ne remplace pas la future fixture CTest.
+brut local non conservé avait été annoncé sans divergence avec la somme
+explicite des poids. Faute de source, commande et reçu épinglé, ce compte n'est
+pas reproductible et ne qualifie pas la formule ; la future fixture CTest doit
+comparer les poids à l'énumération explicite.
 
 Ce nombre inclut encore les triplets qu'acuité ou owner rejetteront : ce n'est
 ni une masse de supports valides, ni un nombre de candidats. Le ledger local
@@ -2065,12 +2066,11 @@ $$M_{HK}(t)=\lvert H\rvert\lvert K\rvert P[t]-\lvert K\rvert L_H(t)-\lvert H\rve
 
 $$M_{HH}(t)=\binom{\lvert H\rvert}{2}P[t]-(\lvert H\rvert-1)L_H(t)+X_{HH}(t).$$
 
-Elles ont été confrontées dans le même rejeu exhaustif et aléatoire sans
-divergence. La borne de seuil ci-dessous a en plus passé `1048576` combinaisons
-exhaustives de quatre patches. Ces replays ferment le calcul papier, mais ne
-sont ni un CTest permanent, ni un reçu épinglé, ni une porte produit. Évaluer
-les formules pour chaque `H,K` conserverait le carré que l'on cherche à
-retirer.
+Elles avaient été confrontées dans le même scratch non conservé. Les comptes
+annoncés ne sont pas reproductibles et ne ferment donc pas le calcul papier.
+Une fixture permanente doit comparer les formules et la borne de seuil à
+l'énumération exhaustive de petits handles et de quatre patches. Évaluer les
+formules pour chaque `H,K` conserverait le carré que l'on cherche à retirer.
 
 La réduction sûre est plus grossière et beaucoup plus utile. Pour le masque
 mono-handle de **complétion** `mu_H`, avant la médiatrice `CD`, poser `s_H=0`

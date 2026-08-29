@@ -1,9 +1,9 @@
 # Audits de MorseHGP3D v5
 
 Ce dossier est le canal de travail entre Claude et les auditeurs. Il reste
-court par construction : un verdict courant mutable, les seules questions
-encore actionnables et deux reçus de décision auxquels les documents
-canoniques renvoient.
+concentré par construction : un verdict courant mutable, deux questions encore
+actionnables, une réponse constructive consolidée et deux reçus de décision
+auxquels les documents canoniques renvoient.
 
 Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,
@@ -14,12 +14,6 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
 
 - [`ETAT_COURANT.md`](ETAT_COURANT.md) : seul verdict mutable, pin jugé,
   réserves et ordre de fermeture.
-- [`QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md`](QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md) :
-  contre-audit de l'exposant q3/q4 ; il rejette la double WSPD globale et
-  place le center-cover entier de blocs avant les ancres, avec terminal par
-  lignes ; il répond aussi au reçu de rescans sans confondre le routeur de
-  handles avec `m_e`. La WSPD locale d'arête opposée reste une ablation q4
-  conditionnelle.
 - [`REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md`](REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md) :
   réponse constructive sur la fibre `A x B x C` : le prédicat idéal est reçu,
   mais la v3 reste diagnostique tant que ledger, caps et compteurs causaux ne
