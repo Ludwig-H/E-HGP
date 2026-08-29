@@ -240,6 +240,14 @@ int main(int argc, char** argv) {
   u64 marg_simple = 0, marg_patches = 0, pw_marg_simple = 0, pw_marg_patches = 0;
   // Ce qu'un certificat de BOITES capte reellement du certificat ideal.
   u64 boites_capte = 0, pw_boites_capte = 0, boites_appels = 0;
+  // V84 : de combien l'ensemble des centres retrecit-il quand on connait C ?
+  // Le certificat de PAIRE doit resister au DISQUE entier de rayon
+  // rho = D/(2 rac3) ; le certificat de BLOC ne doit resister qu'a
+  // l'ensemble reel des centres du bloc. Le rapport des deux rayons borne
+  // ce que la construction disque inter bande peut esperer : s'il vaut 1,
+  // connaitre C n'apporte rien ; s'il est petit, il y a de la place.
+  // MESURE seulement : centres en flottant, jamais une decision.
+  double ratio_somme = 0.0; u64 ratio_n = 0; double ratio_max = 0.0;
   // Croisement : parmi les vides que les BOITES ne classent pas, quelle est
   // la cause reelle ? C'est la question V68.
   u64 nc_lentille = 0, nc_acuite = 0, nc_owner = 0, nc_zero = 0;
@@ -428,6 +436,33 @@ int main(int argc, char** argv) {
         }
         if (communs >= h3) { ++marg_simple; pw_marg_simple += pw_bloc; }
         else { ++marg_patches; pw_marg_patches += pw_bloc; }
+        // Rayon reel de l'ensemble des centres du bloc, contre rho de la paire.
+        {
+          double cx = 0, cy = 0, cz2 = 0;
+          std::vector<double> px(formes.size()), py(formes.size()), pz(formes.size());
+          for (size_t t = 0; t < formes.size(); ++t) {
+            const double g2 = 2.0 * (double)formes[t].g;
+            px[t] = (double)formes[t].a.x + (double)formes[t].w[0] / g2;
+            py[t] = (double)formes[t].a.y + (double)formes[t].w[1] / g2;
+            pz[t] = (double)formes[t].a.z + (double)formes[t].w[2] / g2;
+            cx += px[t]; cy += py[t]; cz2 += pz[t];
+          }
+          const double m = (double)formes.size();
+          cx /= m; cy /= m; cz2 /= m;
+          double r2max = 0.0;
+          for (size_t t = 0; t < formes.size(); ++t) {
+            const double dx = px[t] - cx, dy = py[t] - cy, dz = pz[t] - cz2;
+            r2max = std::max(r2max, dx * dx + dy * dy + dz * dz);
+          }
+          // rho de la paire, pris sur l'ancre du premier support du bloc.
+          const P3& pa0 = ix.upos[(size_t)ancres[0].first];
+          const P3& pb0 = ix.upos[(size_t)ancres[0].second];
+          const double rho = std::sqrt((double)p3_norm2(p3_sub(pb0, pa0)) / 12.0);
+          if (rho > 0) {
+            const double r = std::sqrt(r2max) / rho;
+            ratio_somme += r; ++ratio_n; ratio_max = std::max(ratio_max, r);
+          }
+        }
         // Le meme bloc, juge par un certificat de BOITES seul.
         u64 credites = 0;
         for (const i32 uz : candidats) {
@@ -506,6 +541,8 @@ int main(int argc, char** argv) {
                 "(%.1f %% du marginal) — cout %llu evaluations\n",
                 (unsigned long long)boites_capte, (unsigned long long)pw_boites_capte,
                 marg ? 100.0 * (double)pw_boites_capte / marg : 0.0, (unsigned long long)boites_appels);
+    std::printf("      RETRECISSEMENT des centres par C : rayon reel / rho_paire = %.3f en moyenne, %.3f au pire (%llu blocs)\n",
+                ratio_n ? ratio_somme / (double)ratio_n : 0.0, ratio_max, (unsigned long long)ratio_n);
     std::printf("    inherent (un support survit, rien a eviter)    = %llu (%.1f %%)\n",
                 (unsigned long long)pw_inherent, tot ? 100.0 * (double)pw_inherent / tot : 0.0);
   }
