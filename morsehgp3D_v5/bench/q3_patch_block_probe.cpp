@@ -328,7 +328,11 @@ int main(int argc, char** argv) {
   int n = 8000, coord = 0, seed = 3;
   u64 blocs_cible = 200000, rects_cible = ~(u64)0;
   int tuile = 4;
-  i64 core_min = -1;  // ne paver QUE les rectangles de core >= seuil : `core` dit
+  i64 core_min = -1;
+  u64 cap_temoins = 0;  // 0 = pas de plafond. Sinon : au plus `cap_temoins` temoins
+                        // testes par patch ; si h3 credits ne sont pas atteints, le
+                        // patch VIT. Repli fail-open, donc sur : il ne peut que laisser
+                        // vivre des patches, jamais tuer un seed peu profond.  // ne paver QUE les rectangles de core >= seuil : `core` dit
                       // gratuitement de combien de temoins W_3 a manque son coup,
                       // et le pavage ne vaut que la ou il en manque peu. Pur choix
                       // de COUT : un rectangle non pave n est pas elague.
@@ -354,6 +358,7 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--rects=", 0) == 0) rects_cible = (u64)std::atoll(arg.c_str() + 8);
     else if (arg.rfind("--tuile=", 0) == 0) tuile = std::atoi(arg.c_str() + 8);
     else if (arg.rfind("--core-min=", 0) == 0) core_min = std::atoll(arg.c_str() + 11);
+    else if (arg.rfind("--cap=", 0) == 0) cap_temoins = (u64)std::atoll(arg.c_str() + 6);
     else if (arg.rfind("--min-seeds=", 0) == 0) min_seeds = (u64)std::atoll(arg.c_str() + 12);
     else if (arg.rfind("--min-blocs=", 0) == 0) min_blocs = (u64)std::atoll(arg.c_str() + 12);
     else if (arg.rfind("--min-credit-evals=", 0) == 0) min_credit_evals = (u64)std::atoll(arg.c_str() + 19);
@@ -376,6 +381,13 @@ int main(int argc, char** argv) {
   generate_detail::AnchorScratch sc;
   std::vector<u8> bloc_mask;
   std::vector<int> centre_patches;
+  // TEMOINS TRIES RADIALEMENT, une fois par rectangle. Le filtre de profondeur
+  // doit sa brievete (13 tests) au tri radial de son cover : les sites proches
+  // sont interieurs. Le credit de patch scannait, lui, en ordre de HANDLE. Trier
+  // par distance au centre de la boite des centres met en tete les sites les plus
+  // susceptibles d etre interieurs a TOUTE boule du patch. Le tri est amorti sur
+  // les K^3 patches du rectangle.
+  std::vector<std::pair<i64, i32>> temoins_tries;
 
   u64 rects = 0, rects_sans_patch = 0, blocs = 0, blocs_vides = 0, tests = 0;
   u64 seeds_total = 0, seeds_dans_blocs_vides = 0, triples = 0;
@@ -390,6 +402,12 @@ int main(int argc, char** argv) {
   // 13 * seeds_retires > sommets_payes. Le compte des rectangles rentables est
   // le majorant de TOUTE regle rectangle -> K : aucune porte ne peut faire mieux.
   u64 rects_rentables = 0; i64 bilan_net = 0; u64 sommets_total = 0;
+  // VERDICT PAR SEED (le bon verdict). Si UN patch contenant le centre du seed
+  // est mort, toute boule centree dans ce patch porte h3 temoins interieurs,
+  // donc CE seed est profond : on saute son scan de profondeur sans le faire.
+  // C est SUR (l oracle `violations_credit` le verifie deja) et c est beaucoup
+  // plus fort que d exiger la mort du bloc entier, que le sur-masque empeche.
+  u64 seeds_tues_par_patch = 0; i64 bilan_net_seed = 0; u64 rects_rentables_seed = 0;
   u64 plafond_atteint = 0;
   // ECHANTILLONNAGE PAR HACHAGE sur TOUTE la liste des rectangles vivants.
   // Prendre le prefixe biaise la population : l ordre de la vague WSPD trie les
@@ -428,9 +446,35 @@ int main(int argc, char** argv) {
       f_min_sum += f_endpoints;
     }
     const u64 sommets_avant = g_sommets;
-    u64 seeds_retires_rect = 0;
-    std::vector<u8> patch_mort;
+    u64 seeds_retires_rect = 0, seeds_patch_rect = 0;
+    // Tri radial des temoins du rectangle (hors A et B), autour du centre de la
+    // boite des centres. Cout O(m log m) une fois, contre K^3 scans qui le reutilisent.
+    temoins_tries.clear();
     const bool paver = core_min < 0 || (i64)ar.core >= core_min;
+    if (paver && rp.valid) {
+      i64 cb[3];
+      for (int i = 0; i < 3; ++i)
+        cb[i] = (i64)((rp.patch[0].lo[i] + rp.patch[rp.patch.size() - 1].hi[i]) / 2);  // echelle 2K
+      const i64 sk = 2 * (i64)tuile;
+      for (const NodeRef hw : sc.handles) {
+        const NodeRange rw = ix.range_of(hw);
+        for (i32 uz = rw.first; uz <= rw.last; ++uz) {
+          if ((uz >= ra.first && uz <= ra.last) || (uz >= rb.first && uz <= rb.last)) continue;
+          const P3& pz = ix.upos[(size_t)uz];
+          const i64 t0 = sk * pz.x - cb[0], t1 = sk * pz.y - cb[1], t2 = sk * pz.z - cb[2];
+          temoins_tries.push_back({t0 * t0 + t1 * t1 + t2 * t2, uz});
+        }
+      }
+      std::sort(temoins_tries.begin(), temoins_tries.end());
+      // COUT DU TRI, facture dans la MEME unite. La vraie lane ne trie PAS en
+      // m log m : `anchor_cover_from_handles` range le cover en 32 classes
+      // radiales par un tri par COMPTAGE, en O(m). On facture donc 2m (une passe
+      // de comptage, une passe de placement), ce qu un portage ferait reellement.
+      // Le std::sort ci-dessus n est qu une commodite de sonde ; il donne le meme
+      // ORDRE a la granularite qui compte.
+      g_sommets += 2 * (u64)temoins_tries.size();
+    }
+    std::vector<u8> patch_mort;
     if (paver) ++rects_paves;
     if (paver && rp.valid && rp.ab_count) {
       patch_mort.assign(rp.patch.size(), 0);
@@ -444,16 +488,14 @@ int main(int argc, char** argv) {
         // site. Sans rangs de positions, leur seule composition sure est
         // max(core, g_AB[j]) — jamais la somme (la somme donne 228 violations
         // de l invariant de profondeur sur terrain n=2000, graine 3 : fixture).
-        u64 g = 0;
-        for (const NodeRef hw : sc.handles) {
-          const NodeRange rw = ix.range_of(hw);
-          const u64 appoint = mutant_credit_somme ? ar.core : 0;  // borne d arret PROPRE a la composition
-          for (i32 uz = rw.first; uz <= rw.last && g + appoint + f_endpoints < h3; ++uz) {
-            if ((uz >= ra.first && uz <= ra.last) || (uz >= rb.first && uz <= rb.last)) continue;
-            ++credit_evals;
-            if (patch_credits(pv, ix.upos[(size_t)uz], 2 * (i64)tuile)) ++g;
-          }
-          if (g + (mutant_credit_somme ? ar.core : 0) + f_endpoints >= h3) break;
+        u64 g = 0, testes = 0;
+        const u64 appoint = mutant_credit_somme ? ar.core : 0;
+        for (const std::pair<i64, i32>& tz : temoins_tries) {
+          if (g + appoint + f_endpoints >= h3) break;
+          if (cap_temoins != 0 && testes >= cap_temoins) break;
+          ++credit_evals;
+          ++testes;
+          if (patch_credits(pv, ix.upos[(size_t)tz.second], 2 * (i64)tuile)) ++g;
         }
         const u64 base = mutant_credit_somme ? g + ar.core : std::max(g, ar.core);
         if (base + f_endpoints >= h3) { patch_mort[id] = 1; ++patchs_morts_credit; }
@@ -519,6 +561,10 @@ int main(int argc, char** argv) {
                 continue;
               const Q3Form f3 = q3_form(pa, pb, ix.upos[(size_t)ux]);
               locate_center_patches(f3, rp, &centre_patches);
+              // COUT DE LOCALISATION, facture : 2 comparaisons par indice et par
+              // axe. C est le prix a payer PAR SEED pour appliquer le verdict de
+              // patch ; l omettre offrirait le mecanisme gratuitement.
+              g_sommets += (u64)(6 * rp.k);
               ++oracle_seeds;
               if (centre_patches.empty()) { ++centres_hors_cover; continue; }
               bool dans_masque = false, un_mort = false;
@@ -528,6 +574,8 @@ int main(int argc, char** argv) {
               }
               if (!dans_masque) { ++centres_hors_masque; continue; }
               if (!un_mort) continue;
+              ++seeds_tues_par_patch;
+              ++seeds_patch_rect;
               u64 prof = 0;
               for (const NodeRef hw : sc.handles) {
                 const NodeRange rw = ix.range_of(hw);
@@ -548,6 +596,9 @@ int main(int argc, char** argv) {
     const i64 net = (i64)(13 * seeds_retires_rect) - (i64)sommets_rect;
     bilan_net += net;
     if (net > 0) ++rects_rentables;
+    const i64 net_seed = (i64)(13 * seeds_patch_rect) - (i64)sommets_rect;
+    bilan_net_seed += net_seed;
+    if (net_seed > 0) ++rects_rentables_seed;
   }
 
   std::printf("q3_patch_block pin=%s worktree_modifie=%s\n", MHGP5_PROBE_PIN,
@@ -568,9 +619,13 @@ int main(int argc, char** argv) {
               (unsigned long long)patchs_vivants, (unsigned long long)patchs_morts_credit,
               patchs_vivants ? 100.0 * (double)patchs_morts_credit / (double)patchs_vivants : 0.0,
               (unsigned long long)credit_evals);
-  std::printf("  BILAN NET (unite = test de site) sommets_credit=%llu bilan=%lld rects_rentables=%llu/%llu\n",
+  std::printf("  BILAN BLOC  sommets=%llu bilan=%lld rentables=%llu/%llu\n",
               (unsigned long long)sommets_total, (long long)bilan_net,
               (unsigned long long)rects_rentables, (unsigned long long)rects);
+  std::printf("  BILAN SEED  seeds_tues_par_patch=%llu/%llu (%.1f %%) bilan=%lld rentables=%llu/%llu\n",
+              (unsigned long long)seeds_tues_par_patch, (unsigned long long)oracle_seeds,
+              oracle_seeds ? 100.0 * (double)seeds_tues_par_patch / (double)oracle_seeds : 0.0,
+              (long long)bilan_net_seed, (unsigned long long)rects_rentables_seed, (unsigned long long)rects);
   std::printf("  PORTE core_min=%lld rects_paves=%llu/%llu (%.1f %%)\n", (long long)core_min,
               (unsigned long long)rects_paves, (unsigned long long)rects,
               rects ? 100.0 * (double)rects_paves / (double)rects : 0.0);
