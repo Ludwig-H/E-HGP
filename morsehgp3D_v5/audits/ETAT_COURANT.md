@@ -1,10 +1,12 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **Dernier tip de Claude relu :** `a0621897`, présent dans l'historique de
-  `main`. Il ajoute la réponse V67--V69, désormais consolidée dans la réponse active.
-  Son dernier pin fonctionnel est `1ff39ab9`, qui épingle la sonde diagnostique
-  `A x B x C` v3 ; celle-ci n'est ni un certificat produit, ni un reçu de coût.
-  Son contre-audit de la v2 reste `b74d8050`.
+- **Dernier tip de Claude relu :** `b9646d1a`, publié sur `main` et
+  `origin/main`. Il compte les évaluations de rôles dans les blocs vides et
+  non vides, retire V69 comme priorité produit et pose V73--V75. Le retrait est
+  reçu ; les ratios sont un signal de priorité conditionnel, pas un « plafond
+  absolu » de travail. La réponse est consolidée dans la note active et les
+  notes transitoires sont retirées du tip ; l'historique les conserve. Son
+  contre-audit de la v2 reste `b74d8050`.
 - **Dernier pin du chemin produit reçu :** `7e0ffe79`. Il raccorde l'enveloppe
   fermée de boules possibles aux scans q3/q4, avec son oracle géométrique
   indépendant, ses chemins batched et ses portes de non-vacuité. Le harnais de
@@ -231,9 +233,118 @@ Quatre garanties annoncées restent à corriger dans la v4 du probe :
    puis ajouter le CTest exhaustif absent. Le bit dirty compilé par CMake ne
    reste pas frais après une modification du worktree.
 
-Le prochain travail produit ne dépend pas de ces pourcentages : implémenter
-d'abord les histogrammes saturés et l'énumération sparse des couples, puis
-mesurer les blocs conditionnés par `C` sur le résiduel causal.
+La réponse `a0621897` ne change pas cette réception. `NONE_MAX_EDGE` reconnaît
+environ la moitié des blocs vides jugés sur quatre familles, mais un taux de
+blocs n'est pas un taux de travail. La faiblesse apparente de `NONE_ACUTE` ne
+concerne que son gain marginal, après priorité, avec la borne découplée
+`v2hi<=D2lo`. Le candidat correct est le wrapper typé
+`hmin_boxes(A,B,C)>=0`, car `V2-D2=-4H` et l'acuité exige `H<0`. Le comparer en
+bitmask avant tout split ou raffinement de parité.
+
+Pour expliquer le résiduel, l'oracle petit `n` compte indépendamment les rôles
+distincts, aigus, possédés et l'intersection aiguë--possédée. Un « étage le
+plus profond » n'est pas une cause : deux rôles différents peuvent rendre les
+deux marges non vides sans qu'aucun n'appartienne à leur intersection.
+`BOX_RELAXATION` désigne l'échec du certificat de boîte face à cet oracle, pas
+une cause ponctuelle concurrente. Enfin `v2lo>3*D2hi` ne crée pas un nouveau
+fate : il répète le prune coefficient 3 de `rect_cover_handles` et doit être
+nul sur les handles déjà rendus.
+
+Le brouillon V68 concurrent ne ferme donc pas V70--V72. Ses tableaux viennent
+d'un code modifié après `1ff39ab9` avec un bit dirty CMake périmé ; ils ne sont
+pas une mesure de ce pin propre. Son étage maximal décrit le premier filtre qui
+vide le résiduel dans l'ordre courant, pas une cause logique indépendante. Ne
+retirer ni `NONE_ACUTE` avant d'avoir testé `hmin_boxes>=0`, ni `NONE_OWNER` du
+vocabulaire d'oracle.
+
+Avant tout split, requalifier `OwnerD2Exact` documenté par la v4 : ses extrema
+corrélés de `Delta_E=|b-a|^2-|x-a|^2` et de son symétrique sont exacts
+**séparément pour chaque marge** sur le produit continu des AABB, en `O(1)` et
+en `i64` sous u16. Ils ne sont pas un oracle d'existence d'un même triplet qui
+satisfait les deux marges. La fixture `A=[6,6], B=[7,8], C=[4,5]`, ambiguë pour
+le cover et les extrema découplés, est déjà rejetée par `Delta_X_hi=-3`. Ce
+contrat doit recevoir une primitive, un oracle et des fixtures v5 propres ;
+aucun code v4 n'est importé.
+
+L'identité alternative `|w|^2+2*|w.d|<=3*|d|^2` reste correcte. Son intervalle
+donne le rejet `w2_lo+2*dist(0,P)>3*d2_hi`, mais après le cover coefficient 3
+ce rejet est dominé par les extrema corrélés : si l'intervalle de `w.d` garde
+un signe, une des deux marges est négative partout ; s'il traverse zéro, le
+rejet répète le cover. Garder ce test comme identité d'oracle/mutant et exiger
+`dot_only==0`, pas comme ablation produit. Ensuite seulement, une descente
+transactionnelle scinde le facteur `A/B/C` qui porte l'incertitude, sous devis
+en appels aval évités ; jamais `C` systématiquement.
+
+Le rejeu indépendant de cette domination couvre les boîtes exhaustives 1D sur
+`0..6`, 2D sur `0..2` et `200 000` boîtes 3D pseudo-aléatoires : `459` rejets
+`dot` après cover, tous repris par un extremum corrélé, zéro `dot_only`.
+
+Le pin `b9646d1a` donne un signal fort supplémentaire : les blocs vides jugés
+ne portent aucun rescan de profondeur, tandis que les blocs non vides portent
+les millions d'appels `q3_power`. Le retrait de V69 comme priorité produit est
+donc reçu. Ses valeurs `0,4--2,8 %` ne sont pourtant pas un plafond absolu : le
+ratio compare deux espèces d'opérations, omet les blocs capés et applique une
+fréquence de blocs à une masse de rôles non mesurée. Les compteurs ajoutés sont
+des évaluations du prédicat décomposé, pas des appels `is_acute_seed`; il faut
+compter directement les évaluations des blocs effectivement certifiés vides,
+leurs distances et owners, et les rectangles dont tous les handles de support
+disparaissent. Un cap ne donne jamais `EMPTY`; un support déjà observé donne
+néanmoins `NONEMPTY`, avec profondeur `UNKNOWN/CAP`. Garder `EMPTY` pour oracle et
+provenance, sans chantier ni route autonomes tant que ces unités ne changent
+pas la décision ; un `EMPTY` obtenu gratuitement par le center-cover reste un
+sous-produit utilisable.
+
+Le center-cover `g_AB[j]`, conditionné par les masques de `C`, reste donc le
+premier certificateur sémantique de bloc à ouvrir en counter-only. Le shadow
+visite tous les blocs, puis l'oracle stratifie les non capés après coup ; le
+sélectionner d'avance sur les seuls blocs non vides serait circulaire. Sa porte
+de gain ne se réduit pas à un nombre de blocs : elle publie sur le même ordre
+supports matérialisés et scannés, appels `q3_power`, visites de nœuds, crédits
+en vrac, sites lus, formes ou octets émis, ainsi que nœuds, patches et coins
+payés par `g_AB`. Ces monnaies ne sont pas soustraites ; elles attribuent le
+gain, tandis que cycles, mur et HWM appariés OFF/ON décident les contrats
+produit. q4 possède ses propres compteurs. Pour le hot path, mesurer les deux
+ordres `g_AB -> need résiduel -> histogrammes` et
+`histogrammes -> g_AB`; l'ordre de développement ne préjuge pas du routeur
+final.
+
+La composition ne requiert aucun bloc matérialisé. Pour un patch, poser
+`credit_j=max(core,g_AB[j])` et `t_j=max(0,h_q-credit_j)` ; pour le masque non
+vide d'un handle `C`, `t_C=max_j t_j`. Le même histogramme minuscule
+`P[t]=#{(a,b):h_a(a)+h_b(b)<t}` ou les bitsets `B_lt[t]` donnent les couples
+que le certificateur laisse à chaque handle, sans `A x B x C`. Ce compteur
+reste distinct de la masse de supports valides. En q4, `t_CD` se calcule
+pendant le stream non ordonné `i<=j`, sans catalogue `C x D`; si l'union exacte
+des patches exige la médiatrice `CD`, receipt-er le premier passage de masques
+et le second de continuations.
+
+Les vues sont typées : q3 sépare `census_handles` et `seed_handles`; q4 sépare
+`census_handles`, `completion_handles` et `seed_handles`. `NONE_ACUTE` ne
+retire jamais une complétion q4. La fixture
+`a=(0,0,0), b=(6,0,0), c=(1,-3,-1), d=(1,1,-2)` est bien centrée avec `AB`
+strictement maximal, `ABc` aigu et `ABd` droit ; elle impose de choisir le seed
+sur la paire non ordonnée au lieu de supposer que le premier handle l'est.
+
+Le reçu causal utilise trois axes : `existence={EMPTY,NONEMPTY,UNKNOWN}`,
+`depth={NOT_APPLICABLE,ALL_DEEP,HAS_SHALLOW,UNKNOWN}` et
+`action={PRUNE_NO_EMISSION,CONTINUE,PENDING}`, complétés par
+`pending_reason={NONE,CAP,MIXED,UNCHECKED}`. `ALL_DEEP` exige explicitement un
+compte positif de supports certifiés, afin que l'universel vide ne fusionne
+jamais les deux catégories. Un bitmask ou une liste `proof_kinds` conserve les
+preuves concurrentes sans first-match. Un universel de profondeur suffit à
+`PRUNE_NO_EMISSION`, même si l'existence reste inconnue ; il ne promeut
+`depth=ALL_DEEP` qu'après preuve de non-vacuité. Masse brute de rôles, masse de
+supports et travail aval restent trois ledgers distincts ; `blocs_morts` n'est
+qu'un agrégat facultatif.
+
+Deux fils ne doivent plus être confondus. Pour l'expérience de fibre, le
+prochain incrément installe ce schéma d'état et `g_AB` counter-only sur tous les
+blocs, sans masquage. Pour la boucle d'exposant déjà connue, les histogrammes
+saturés et l'émission sparse restent le premier candidat à une activation
+produit et peuvent avancer en parallèle. L'ordre chaud entre les deux attend
+l'ablation. Si la lane `EMPTY` est retouchée, requalifier d'abord
+`OwnerD2Exact` avec oracle et fixtures v5 avant un split ; ne pas recopier son
+code v4.
 
 ## Réception du pin d'enveloppe `7e0ffe79`
 
@@ -370,23 +481,37 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
 - harnais `66997d56` : syntaxe Bash valide ; les cinq scénarios de
   l'auto-fixture rendent les codes attendus et son code final vaut 0 ; le test
   causal `TERM` échoue et la comparaison inter-threads diverge à tort ;
-- probe v3 `1ff39ab9` : cible Release construite ; smokes `uniform` et
-  `eight_clusters` à `n=400` verts, 301 blocs jugés par famille, sans cap,
-  faux positif ou violation ; aucune porte CTest n'est enregistrée pour cette
-  sonde ;
-- contrôles documentaires et diff final à rejouer après consolidation.
+- probe v3 puis compteurs `b9646d1a` : cible Release reconstruite ; smokes
+  `uniform` et `eight_clusters` à `n=400` verts, 301 blocs jugés par famille,
+  sans cap, faux positif ou violation. Le binaire reconstruit imprime le pin
+  propre `b9646d1a`; les évaluations de rôles vides valent respectivement
+  `5 278` et `7 402`, contre `99 389` et `461 759` appels `q3_power`, sans
+  convertir ces opérations hétérogènes en gain. Le défaut de fraîcheur CMake
+  reproduit au pin précédent reste à corriger et aucune porte CTest n'est
+  enregistrée pour cette sonde ;
+- réduction de seuil `t_C` confrontée à l'énumération directe sur `200 000`
+  configurations déterministes de patches/crédits, sans divergence ; contrats
+  géométriques q3/q4 ciblés `5/5` verts (`skinny_center`, oracle q4, cover,
+  exact-once et completion shaped). La nouvelle fixture de vues q4 reste à
+  enregistrer avec le delta fonctionnel ;
+- `python tools/check_docs.py` vert sur `217` Markdown actifs,
+  `python tools/check_implementation_status.py` vert sur `20` phases, et diff
+  sans erreur d'espacement après consolidation.
 
 ## Ordre recommandé
 
-1. Corriger le ledger, les caps, les compteurs et l'échantillonnage du probe
-   v3, puis lui donner une porte exhaustive ; ne pas attendre ses pourcentages
-   pour traiter la boucle quadratique connue.
-2. Remplacer `corner_histograms` par les requêtes saturées partagées, puis
-   émettre via les bitsets à mots non nuls ; fermer égalité des comptes, masse
-   et ordre sur q2/q3/q4 avant activation.
-3. Ouvrir ensuite `g_AB[j]` et les masques de handles en counter-only dans le
-   chemin causal ; prouver provenance, IDs et continuations sans matérialiser
-   un catalogue global `A x B x C` ou `C x D`.
+1. **Fil exposant :** remplacer `corner_histograms` par les requêtes saturées
+   partagées, interroger d'abord le facteur au plus faible devis, puis émettre
+   via les bitsets à mots non nuls ; fermer égalité des comptes, masse et ordre
+   sur q2/q3/q4 avant activation.
+2. **Fil fibre, développable en parallèle mais non autoritaire :** corriger
+   ledger, caps, compteurs et échantillonnage du probe, installer les trois axes
+   d'état, puis ouvrir `g_AB[j]`, `t_C/t_CD` et les vues typées de handles en
+   counter-only. Prouver non-vacuité, provenance, IDs et continuations sans
+   matérialiser `A x B x C` ou `C x D`; aucun masquage avant oracle.
+3. Comparer ensuite les deux ordres chauds sur le vecteur causal et sur mur/HWM
+   OFF/ON ; activer seulement les décisions exactes rentables. Garder les fates
+   `EMPTY` au ledger d'oracle sans route autonome.
 4. Si le résiduel le justifie, ouvrir `AnchorLineSet`, l'oracle exhaustif borné
    puis le shallow ; comparer en shadow `all-direct`, `all-shallow` et le
    dispatch adaptatif. Tester la WSPD locale q4 comme ablation, jamais comme

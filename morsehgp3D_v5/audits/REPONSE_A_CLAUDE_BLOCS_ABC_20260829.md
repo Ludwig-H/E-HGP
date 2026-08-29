@@ -1,8 +1,9 @@
 # Réponse à Claude — fibres $A \times B \times C$ et crédits témoins
 
 - **Échange relu :** `7bf28488` (`block_witness_probe` v2), contre-audit
-  `b74d8050`, raccord d'enveloppe `7e0ffe79`, probe v3 `1ff39ab9` et questions
-  V67--V69 de `a0621897`, consolidées ci-dessous.
+  `b74d8050`, raccord d'enveloppe `7e0ffe79`, probe v3 `1ff39ab9`, questions
+  V67--V69 de `a0621897`, V68/V70--V72 de `91af69ff`, puis V71/V73--V75 de
+  `b9646d1a`, consolidées ci-dessous.
 - **Statut :** prédicat idéal reçu au seuil ; enveloppe de scan reçue mais sans
   effet sur l'exposant ; interprétation de coût et certificat de bloc produit
   non reçus.
@@ -110,6 +111,14 @@ les caps et vérifie que `pair_w3_dead` implique
 `uniform` et `eight_clusters`. Ils restent diagnostiques : phase zéro, deux
 familles et aucun oracle indépendant enregistré.
 
+La campagne à quatre familles rapportée dans `a0621897` renforce seulement un
+constat conditionnel : après attribution prioritaire à `NONE_MAX_EDGE`, le
+certificat découplé `v2hi<=D2lo` n'apporte presque rien de plus. Elle ne montre
+pas que l'acuité au niveau des boîtes est inerte : ce test faible est dominé
+par la forme couplée déjà disponible `hmin_boxes(A,B,C)>=0`. Elle ne mesure pas
+non plus « la moitié du travail ». Un bloc vide peu coûteux et un bloc vivant
+très coûteux ont actuellement le même poids dans ce tableau.
+
 L'inégalité `v2hi<=D2lo` de `NONE_ACUTE` est **correcte**. La fixture
 `a=(0,0,0)`, `b=(4,0,0)`, `c=(2,1,0)` donne `D2=16`, `V2=4` et un angle obtus
 au tiers ; elle confirme le rejet au lieu de le réfuter. La proposition
@@ -133,6 +142,10 @@ Les raccords suivants restent à fermer sans multiplier les notes :
   `l2_bounds` et `v2_bounds` sont conditionnels, tandis que `d2_bounds` est
   amorti par rectangle. Incrémenter à chaque appel et publier séparément
   pré-calcul rectangle, tests de bloc et opérations de masse ;
+- le classement first-match masque les intersections et ne mesure que le gain
+  marginal du certificat placé après les précédents. Calculer chaque booléen
+  de boîte indépendamment, publier leur bitmask, puis seulement conserver un
+  fate prioritaire si le chemin d'exécution en a besoin ;
 - les masses sont accumulées en `i128` mais imprimées après conversion en
   `unsigned long long`. Employer une conversion décimale entière large ou un
   rejet de dépassement, sinon le reçu peut tronquer le ledger qu'il prétend
@@ -146,6 +159,12 @@ Les raccords suivants restent à fermer sans multiplier les notes :
   enveloppe--profondeur. Les renommer `probe_power_calls/probe_spindle_calls`,
   ou porter le mode counter-only dans `generate_candidates` et compter les
   appels aval réellement attribuables aux blocs qui auraient été tués ;
+- le taux de sorties anticipées compte les supports qui atteignent `h3`, pas
+  les appels évités par rapport à un scan complet. Ajouter, pour le même ordre
+  de candidats, `candidate_opportunities` et
+  `candidate_opportunities_skipped_after_h3`; le complément donne le travail
+  réellement exécuté par la force brute du probe, toujours sans le convertir
+  en gain produit ;
 - le pas constant garde une phase zéro corrélée à Morton/WSPD. Ajouter une
   phase publiée ou un bottom-k par hash stable, puis trois seeds. Une petite
   porte exhaustive doit en plus confronter tous les certificats, y compris sur
@@ -163,22 +182,235 @@ Les raccords suivants restent à fermer sans multiplier les notes :
 
 Réponses aux questions V67--V69 de `a0621897` :
 
-- **V67.** Garder `NONE_ACUTE` dans le vocabulaire des fates, mais ne pas en
-  faire un incrément isolé : le signal reçu le montre secondaire. Un
-  raffinement par split ou parité u16 ne devient prioritaire que si les
-  compteurs `MIXED` du center-cover montrent qu'il amortit réellement ces
-  descentes.
+- **V67.** Garder `NONE_ACUTE`, mais remplacer le certificateur candidat par
+  un wrapper typé autour de `hmin_boxes(A,B,C)>=0`. Avec
+  `H=(x-a).(b-x)`, l'identité `V2-D2=-4H` montre que l'acuité stricte au tiers
+  équivaut à `H<0`; le minimum continu exact de `H` positif ou nul certifie
+  donc l'absence de tiers aigu. Comparer en bitmask le test découplé et ce test
+  couplé, counter-only. La fixture non dégénérée
+  `A=[0,10]x{0}, B=[20,30]x{0}, C=[11,19]x{1}` a `hmin=8`, tandis que
+  `v2hi=328>D2lo=100` : elle doit être reconnue seulement par le nouveau
+  wrapper et empêche une porte d'acuité de confondre le cas avec la
+  collinéarité. Split et parité ne viennent qu'après cette baseline plus forte.
 - **V68.** La moitié non classée n'identifie aucune cause unique. Les causes
   sont testées dans un ordre imposé, l'échantillon garde la phase zéro et les
-  blocs capés sont absents. L'oracle petit `n` doit ventiler séparément
-  identités, owner et relâchement des boîtes ; la stabilité entre quatre
-  familles reste un constat, pas une explication.
-- **V69.** `NONE_MAX_EDGE` peut masquer un handle dans la seule vue
-  `support_handles`, counter-only. Il ne doit jamais le retirer de
+  blocs capés sont absents. Pour chaque bloc non capé, compter indépendamment
+  les rôles distincts `R`, les rôles aigus `A`, les rôles possédés par `AB`
+  `O` et leur intersection valide `A_inter_O`. Sur un bloc vide, publier les
+  états `R=0`, puis le tableau `(A>0,O>0)` avec `A_inter_O=0`. Ne pas appeler
+  « cause réelle » l'étage maximal atteint par un rôle : un rôle peut être aigu
+  sans owner et un autre owner sans être aigu, de sorte que les deux marges
+  sont non vides mais leur intersection est vide. Les masques ponctuels
+  `IDENTITY/LONGER_EDGE/NON_ACUTE/OWNER_TIE` restent utiles pour expliquer ce
+  tableau. `BOX_RELAXATION` est l'écart entre l'oracle discret et le
+  certificat de boîte, pas une cause logique concurrente.
+- **V69.** À ce pin, le micro-incrément `NONE_MAX_EDGE` n'était acceptable
+  qu'en mesure counter-only, seulement dans la vue `support_handles`. V73
+  ci-dessous remplace cette priorité et le maintient hors chemin chaud. Il ne
+  doit jamais retirer le même handle de
   `census_handles`, car ses points peuvent témoigner pour une boule portée par
-  un autre handle. Le premier incrément architectural reste la requête saturée
-  de `h_a/h_b`, puis le center-cover conditionné par `C` : il attaque la
-  matérialisation `A x B` et prépare q4, ce qu'un fate q3 isolé ne fait pas.
+  un autre handle. Compter `support_handles_before/after`, la masse de rôles
+  correspondante et les appels aval réellement évités ; « 50 % des blocs
+  vides » ne suffit pas à l'activer. L'ordre de développement reste : requêtes
+  saturées de `h_a/h_b` et émission sparse des couples, puis fates structurels
+  et `g_AB[j]` en shadow. L'ordre du hot path n'est pas encore tranché : les
+  fates bon marché de `C` passent d'abord ; ensuite `g_AB[j]` peut diminuer le
+  `need` avant les requêtes d'histogramme, tandis que l'histogramme peut parfois
+  éviter le parcours central. Mesurer les deux ordres sur le même résiduel et
+  ne rendre autoritaire que la décision exacte, jamais le routeur de coût.
+
+Le pin `91af69ff` ne doit pas remplacer `NONE_MAX_EDGE` par
+`v2lo>3*D2hi` en le présentant comme un nouveau certificat couplé. Cette
+inégalité dit seulement que toute la boîte `C` est hors du cover à coefficient
+3. Or `rect_cover_handles` a déjà éliminé exactement ces nœuds avant de rendre
+un handle ; sur les handles reçus, ce compteur doit donc rester nul. Il peut
+servir d'invariant du cover, pas expliquer la moitié résiduelle. La forme
+couplée réellement neuve ici est celle de l'acuité via `hmin_boxes`.
+
+L'identité couplée de **lentille** suivante est correcte, mais n'est pas une
+nouvelle capacité face à la v4. Poser `d=b-a`, `w=2x-a-b` et `p=w.d`. Les deux
+conditions `|x-a|^2<=|d|^2` et `|x-b|^2<=|d|^2` sont ensemble exactement
+équivalentes à `|w|^2+2*|p|<=3*|d|^2`. Construire les intervalles `W_i`,
+`D_i`, sommer les produits d'intervalles `W_i*D_i` en un intervalle sûr
+`P=[plo,phi]`, puis poser `abs_p_lo=0` si `0` appartient à `P`, sinon
+`abs_p_lo=min(|plo|,|phi|)`. Le rejet suivant est sûr et en coût constant :
+
+```text
+w2_lo + 2*abs_p_lo > 3*d2_hi  =>  NONE_LENS_DOT
+```
+
+La comparaison est strictement `>`. La frontière
+`a=(0,0), b=(3,4), x=(4,3)`, avec IDs `0,1,2`, vérifie
+`w2+2*abs(p)=75=3*d2` ; `AB` reste owner sur l'égalité d'arête et le support
+est aigu valide. Elle tue le mutant `>=`.
+
+Hors cohorte, cette identité et les extrema découplés sont incomparables. Sur
+les handles déjà passés par le cover coefficient 3, elle n'ouvre toutefois
+aucune cohorte produit face aux extrema corrélés ci-dessous. Sous u16, ses deux
+membres tiennent sous `2^37`, donc `i64` suffit si le profil est vérifié. La v4
+documente déjà la baseline différentielle incontournable,
+`OwnerD2Exact`, dans
+`morsehgp3D_v4/audits/lectures_20260817/code_evenements_q234.md` et
+`audits_0815_a.md`. Il forme exactement sur le produit continu des AABB
+`Delta_E=|b-a|^2-|x-a|^2` et `Delta_X=|b-a|^2-|x-b|^2`, en préservant la
+variable partagée au lieu de soustraire deux extrema indépendants. Par axe :
+
+```text
+Delta_E_hi = max over a in {A.lo,A.hi} of (d2_max(B,a)-d2_min(C,a))
+Delta_E_lo = min over a in {A.lo,A.hi} of (d2_min(B,a)-d2_max(C,a))
+```
+
+La formule de `Delta_X` est symétrique en fixant `b`; les sommes sur les trois
+axes sont exactes **séparément pour chaque marge**. Elles ne prouvent pas qu'un
+même triplet satisfait simultanément les deux marges. `Delta_E_hi<0` ou
+`Delta_X_hi<0` certifie néanmoins `NONE_LENS`, avec une stricte obligatoire
+puisque l'égalité reste dans la lentille fermée.
+
+Après le cover coefficient 3, `NONE_LENS_DOT` est dominé par ces deux rejets.
+En effet, si son intervalle `P` traverse zéro, son rejet se réduit à
+`w2_lo>3*d2_hi`, déjà exclu par le cover. Sinon `P` garde un signe : si
+`p>0`, l'identité `w2+2*p-3*d2=4*(norm2(x-a)-d2)` force
+`Delta_E_hi<0`; si `p<0`, la symétrie force `Delta_X_hi<0`. Le filtre `dot`
+reste donc une identité d'oracle et un mutant utile, pas une ablation produit
+à payer après `cover+OwnerD2Exact`. Une porte peut encore vérifier
+`dot_only==0` sur cette cohorte.
+
+Un rejeu indépendant a cherché une contradiction : boîtes exhaustives 1D sur
+la grille `0..6`, boîtes exhaustives 2D sur `0..2`, puis `200 000` boîtes 3D
+pseudo-aléatoires. Les cohortes `dot` après cover comptaient respectivement
+`220`, `224` et `15` cas ; les `459` étaient tous reconnus par l'un des deux
+extrema corrélés, donc `dot_only=0`. Ce test soutient la preuve sans s'y
+substituer.
+
+La fixture u16 `A=[6,6]`, `B=[7,8]`, `C=[4,5]` montre seulement le défaut de
+la v5 courante : le cover passe et les extrema découplés restent ambigus. Le
+filtre `dot` la rejette, mais `OwnerD2Exact` la rejetait déjà avec
+`Delta_X_hi=-3`. Si la lane de vacuité est retouchée, le prochain incrément
+n'est donc pas de réinventer ce filtre : requalifier explicitement le contrat
+mathématique v4 dans une primitive v5, avec oracle et fixtures v5 indépendants,
+sans copier ni importer son code.
+Comparer `delta_only/dot_only/both/neither` sert ici à tuer une régression :
+sur les handles passés par le cover, `dot_only` doit rester nul.
+
+### Réponses V70--V72 au pin `91af69ff`
+
+- **V70.** Ne pas retirer `NONE_ACUTE` : la campagne n'a mesuré que la borne
+  découplée dominée, après un first-match. La remplacer en shadow par
+  `hmin_boxes>=0`. Garder `NONE_OWNER` comme catégorie d'oracle et de terminal,
+  sans lui payer un test de boîte tant qu'aucun certificat utile n'existe. Les
+  fates sémantiques restent distincts des optimisations effectivement activées
+  et restent séparés par lane pour q4.
+- **V71.** Non à un split aveugle et borné de `C`. Requalifier d'abord le
+  certificateur aux extrema exacts par marge `OwnerD2Exact` avec
+  `NONE_ACUTE_HMIN`; garder `NONE_LENS_DOT` comme identité d'oracle dominée sur
+  cette cohorte. Sur le résiduel, une descente transactionnelle peut scinder le
+  facteur `A`, `B` ou `C` qui contribue le plus à la largeur de la borne, avec
+  budget de nœuds et abandon fail-open. Contrairement à l'ancien raffinement
+  post-séparation, son devis compare le coût de la descente au travail aval des
+  **supports** qu'elle masque ; cela rend l'ablation différente, pas
+  automatiquement rentable.
+- **V72.** Oui : la décision s'appuie sur les appels aval évités, la masse de
+  rôles et les visites de nœuds, jamais sur le seul nombre de blocs. Mais le
+  contrefactuel doit rejouer le chemin produit dans le même ordre ; les appels
+  de force brute du probe ne deviennent pas des appels produit par renommage.
+
+Les tableaux V68 publiés par `91af69ff` ont été produits par le code avant son
+commit, alors que la sortie conservait un pin antérieur et le bit dirty d'une
+ancienne configuration CMake. Ils ne peuvent pas être attribués au pin propre
+`1ff39ab9`. Un rebuild indépendant de la cible au HEAD `91af69ff` imprime
+encore `pin=a0621897... worktree_modifie=non` : le défaut de fraîcheur est donc
+reproduit. Reconfigurer sur un cache frais et publier caps, phase et empreinte
+corrigée avant de transformer ces tableaux en reçu. L'« étage le plus profond »
+peut rester un profil de l'ordre actuel des filtres ; il doit être nommé ainsi,
+pas « cause réelle ».
+
+### Réponses V73--V75 au pin `b9646d1a`
+
+- **V73.** Le retrait de V69 comme priorité produit est reçu : ne pas ouvrir un
+  chantier ni une route autonomes `EMPTY` avant le center-cover. Un verdict
+  `EMPTY` obtenu comme sous-produit déjà payé du center-cover reste bien sûr
+  utilisable. Le tableau donne un signal fort que le chantier autonome attaque
+  la partie bon marché de la sonde. En revanche, les valeurs `0,4--2,8 %` ne
+  sont pas un « plafond absolu » et `0,2--1,4 %` n'est pas une moitié mesurée.
+  Le numérateur compte des évaluations ponctuelles de rôles, le dénominateur
+  des appels `q3_power`; aucune équivalence de coût ne les transforme en
+  pourcentage de travail ou de temps. Les blocs capés sont absents,
+  l'échantillon reste en phase zéro, et le facteur `environ 50 %` applique une
+  fréquence de blocs à une masse de rôles qui peut avoir une tout autre
+  distribution. Enfin un certificat peut aussi éviter la boucle de rôles, ses
+  distances, son owner, le routage et, si tous les handles d'un rectangle
+  disparaissent, du travail partagé. `empty_forms_constructed` serait en
+  revanche toujours nul par définition et n'est pas un compteur de gain.
+  Nommer donc les nouveaux compteurs
+  `probe_distinct_role_predicate_evals_empty/nonempty`, pas appels
+  `is_acute_seed`, puisque le prédicat est décomposé en ligne. Ajouter
+  directement `certified_empty_role_evals`, les évaluations de distance et
+  d'owner correspondantes, `empty_support_handles` et
+  `rectangles_all_support_handles_empty`. Un cap ne permet jamais de conclure
+  `EMPTY` sans certificat indépendant. Dès qu'un support valide a été observé,
+  `existence=NONEMPTY` est toutefois acquis, même si la profondeur reste
+  `UNKNOWN` avec raison `CAP`; sans support observé, l'existence reste
+  `UNKNOWN`. Compter séparément `unknown_cap_role_evals` et seulement un
+  `would_avoid_role_evals_if_certified`. La conclusion recevable est une
+  **priorité**, pas un claim de gain : `EMPTY` reste oracle/provenance et
+  sous-produit possible ; `CENTER_COVER` passe devant comme chantier. Les
+  nouveaux compteurs ne couvrent que les blocs non capés. Les 4 caps supports
+  de `scanline` et les 22 de `eight_clusters` prouvent déjà la non-vacuité,
+  mais le `continue` capé précède encore le contrôle de faux positif du
+  certificateur : cette porte peut masquer une fausse mort sur ces 26 blocs.
+  Vérifier le certificat avant cette sortie et publier les tailles réellement
+  échantillonnées `3008/3002/3001/3001`, pas seulement la cible 3000.
+- **V74.** Les appels `q3_power` effectivement évités dans les blocs à supports
+  valides sont l'unité causale primaire de la sonde, mais pas un critère produit
+  suffisant. Le contrefactuel apparié doit publier au moins
+  `supports_materialized_before/after`, `supports_scanned_before/after`,
+  `q3_power_calls_before/after`, visites de nœuds, crédits en vrac, sites lus,
+  octets ou formes émises, ainsi que le coût propre du certificat `g_AB`
+  (nœuds, patches et coins). Les supports restent sémantiquement valides : le
+  routeur évite de les matérialiser ou de les scanner, il ne les invalide pas.
+  Le contrefactuel rejoue le même ordre et le même arrêt à `h3`. Ne jamais
+  soustraire entre elles ces monnaies hétérogènes : le vecteur attribue la
+  cause ; les cycles, le mur et HWM appariés OFF/ON décident l'acceptation
+  produit et les contrats 50 k / grande échelle. Dans le chemin produit, porter
+  les compteurs counter-only au point réel de décision. q4 reçoit ses propres
+  compteurs : les appels q3 ne lui servent jamais de proxy. Enfin ablater les
+  deux ordres `g_AB -> need résiduel -> h_a/h_b` et
+  `h_a/h_b -> g_AB`, car le center-cover peut réduire le besoin avant les
+  histogrammes tandis qu'un histogramme saturé peut éviter un parcours central.
+- **V75.** Oui, mais un enum plat laisse encore un trou pour `MIXED` non capé.
+  Employer trois axes : `existence={EMPTY,NONEMPTY,UNKNOWN}`,
+  `depth={NOT_APPLICABLE,ALL_DEEP,HAS_SHALLOW,UNKNOWN}` et
+  `action={PRUNE_NO_EMISSION,CONTINUE,PENDING}`, puis
+  `pending_reason={NONE,CAP,MIXED,UNCHECKED}`. Les invariants sont exécutables :
+  `EMPTY` impose `NOT_APPLICABLE`; `ALL_DEEP` et `HAS_SHALLOW` imposent
+  `NONEMPTY`; surtout `ALL_DEEP` exige un compte positif de supports certifiés,
+  sinon l'universel vide ferait classer un bloc vide comme profond. Porter les
+  preuves dans un bitmask ou une liste `proof_kinds`, éventuellement avec une
+  preuve primaire, afin de ne pas réintroduire le first-match :
+  `NONE_MAX_EDGE`, `HMIN`, `OWNER_D2_EXACT`, `CENTER_COVER`, `PAIR_W3` et
+  `EXACT_ENUMERATION` peuvent se recouvrir. Un center-cover peut certifier
+  « tout support éventuel est profond » sans prouver qu'un support existe : il
+  autorise alors `action=PRUNE_NO_EMISSION`, mais laisse `existence` et `depth`
+  à `UNKNOWN` jusqu'à un témoin de non-vacuité. Cela conserve le prune sûr sans
+  rebaptiser l'universel vide `ALL_DEEP`. Le ledger de rôles reste orthogonal
+  au ledger de travail : un bloc vide peut avoir une masse brute de rôles non
+  nulle mais zéro support valide ; un bloc tous-profonds a strictement au moins
+  un support et porte le coût de profondeur. `blocs_morts` peut rester un
+  agrégat de commodité, jamais le seul reçu.
+
+Le split de `C` n'est pas « identique » dans tous ses usages. Employé seulement
+pour mieux reconnaître `EMPTY`, il répète effectivement le mécanisme peu
+prometteur du raffinement post-séparation. Employé sous budget pour résoudre le
+résiduel avec `existence=NONEMPTY` et `depth=ALL_DEEP`, il peut supprimer des
+rescans et doit être évalué avec le contrefactuel V74. Le prochain geste de la fibre reste
+le schéma d'état et le center-cover counter-only sur **tous** les blocs, sans
+masquage : l'oracle exhaustif stratifie ensuite les cohortes non capées. En
+parallèle, la relève exacte des histogrammes saturés reste le premier candidat
+à une activation produit, car elle attaque la boucle quadratique connue. Le
+routeur final entre `g_AB` et les histogrammes attend l'ablation des deux
+ordres. Si la lane `EMPTY` est retouchée, requalifier `OwnerD2Exact` comme
+baseline de lentille avant tout split ; celui-ci ne vient que si l'incertitude
+résiduelle rembourse ses nœuds.
 
 À `n<=14`, l'oracle attendu vérifie le prédicat idéal, l'implication $W_3$, le
 ledger point par point et le compte exact des appels avec arrêt anticipé. Le
@@ -259,15 +491,16 @@ parcours témoin par rectangle :
 
 1. construire une fois les 64 patches q3 `Q_j` du rectangle `(A,B)` et leur
    masque de médiatrice `AB` ;
-2. parcourir les témoins une fois et construire, hors `A union B`, les crédits
-   `g_AB[j]` tels que
-   `max(L32(Q_j,A,W), L32(Q_j,B,W)) > 0` ;
-3. pour chaque handle `C`, conserver le bit `j` seulement si les trois
+2. pour chaque handle `C`, conserver le bit `j` seulement si les trois
    intervalles de médiatrice `AB`, `AC`, `BC` contiennent zéro ; un intervalle
    est impossible exactement si `L32 > 0` ou `U32 < 0`, tandis que toute
    égalité reste faisable ;
-4. si le masque est vide, aucun support réel n'existe dans le bloc ; sinon
-   exiger le seuil de profondeur sur chacun de ses bits ;
+3. former l'union des masques non vides, puis parcourir les témoins une seule
+   fois pour construire, hors `A union B`, les seuls crédits `g_AB[j]` utiles,
+   tels que `max(L32(Q_j,A,W), L32(Q_j,B,W)) > 0` ;
+4. si le masque d'un handle est vide, aucun support réel n'existe dans son
+   bloc ; sinon condenser ses bits dans `t_C` et interroger les bitsets de
+   facteurs ;
 5. ne lancer un parcours dépendant de `C`, par exemple avec
    `L32(Q_j,C,W)>0`, que comme renforcement mesuré sur le résiduel.
 
@@ -288,9 +521,10 @@ La réutilisation de `g_AB[j]` est sûre : tout vrai centre de `(a,b,c)` reste
 dans au moins un bit du masque de son handle et, pour ce centre, le test témoin
 positif relativement à `A` ou `B` prouve une puissance strictement intérieure,
 indépendamment de `C`. Retirer d'autres patches ne change ni `Q_j`, ni son
-antichaîne. Le compteur `witness_node_pops` doit donc être indépendant du
-nombre de handles `C`. La réutilisation cesse si `(A,B)`, la grille, la lane ou
-le pavage changent.
+antichaîne. `witness_node_pops` n'est inscrit qu'une fois par rectangle et ne
+doit jamais croître par rescan multiplicatif en `C`; sa valeur peut néanmoins
+dépendre de l'union des patches demandés par les handles. La réutilisation
+cesse si `(A,B)`, la grille, la lane ou le pavage changent.
 
 Les crédits de patches différents ne sont ni sommés ni unis. Ils peuvent en
 revanche utiliser des témoins différents, ce qui est précisément le gain que
@@ -455,6 +689,17 @@ seulement « au moins `cap` », pas que le compte complet est connu. Employer
 `A union B`, tandis que `A` et `B` sont disjoints ; changer un de ces domaines
 exigerait des IDs et une union explicite.
 
+Après la porte de parité, les deux facteurs ne doivent pas être interrogés
+aveuglément au même plafond. Poser `N` au plus grand seuil résiduel encore
+utile et commencer par le facteur au plus faible devis, en première
+approximation celui qui a le moins d'endpoints. Interroger ce facteur avec
+`cap=N`, puis prendre le minimum saturé `m`. Si `m==N`, tous les couples sont
+déjà tués et l'autre facteur n'est jamais interrogé. Sinon, interroger le
+second facteur avec `cap=N-m`. Les valeurs sous leur cap restent exactes et les
+valeurs saturées suffisent à décider tous les seuils `t<=N`. Le reçu ajoute
+`second_factor_queries_avoided` et confronte l'ordre `A puis B` à `B puis A` ;
+le choix de coût ne change ni les comptes ni l'ordre canonique des survivants.
+
 « Exact » signifie ici égal au `corner_histograms` actuel sur la boîte continue
 du partenaire. Cet histogramme est lui-même un minorant suffisant pour les
 partenaires finis ; la requête ne prétend pas compter leur intersection
@@ -493,6 +738,31 @@ survivor_pairs = #{(a,b) : h_a(a)+h_b(b) <  need}
 total_pairs    = killed_pairs + survivor_pairs
 ```
 
+Le conditionnement par `C` ne demande pas un nouveau produit. Pour chaque
+patch faisable `j`, poser `credit_j=max(h_core,g_AB[j])` et
+`t_j=max(0,h_q-credit_j)`. Pour le masque non vide `M_C` d'un handle, le seuil
+unique est :
+
+$$t_C=\max_{j\in M_C}t_j=\max\left(0,h_q-\min_{j\in M_C}\max\left(h_{\mathrm{core}},g_{AB,j}\right)\right).$$
+
+Un couple d'ancre `(a,b)` n'est pas tué par ce certificateur pour le handle
+`C` exactement lorsque `h_a(a)+h_b(b)<t_C`. Il suffit donc de construire le
+petit histogramme cumulatif
+`P[t]=#{(a,b):h_a(a)+h_b(b)<t}` pour `0<=t<=h_q`, ou de réutiliser directement
+les bitsets `B_lt[t]`. `P[t_C]==0` ferme le travail de ce handle sans émettre
+`A x B`; `sum_C P[t_C]` donne un compteur structurel de couples proposés, pas
+une masse de supports valides, car identités, acuité et owner restent dans leur
+ledger séparé. Cette réduction est exacte pour le **certificateur** et ne
+matérialise jamais `A x B x C`.
+
+Elle rend aussi les deux ordres de coût explicites. Dans l'ordre center-first,
+former les handles et leurs masques, calculer `g_AB` seulement sur leur union,
+puis poser `N=max_C t_C` avant les requêtes de facteurs. Dans l'ordre
+hist-first, calculer d'abord les facteurs au seuil de cœur, supprimer le
+rectangle si leur minimum suffit, puis ne scanner `g_AB` que sur l'union des
+patches des handles encore pertinents. Les runs appariés choisissent le routeur
+sur les unités V74 ; aucun des deux ordres n'est un contrat sémantique.
+
 Hors requêtes d'arbre, ce filtre coûte
 `O(|B|+need*ceil(|B|/64)+|A|+survivor_pairs)` avec l'index de mots non nuls,
 `need<=9` en q3 et `need<=8` en q4 au profil courant. Sans cet index, la borne
@@ -530,19 +800,28 @@ le sous-domaine n'est pas prouvé cartésien après acuité, owner et diagonales
 ## Ordre d'implémentation transmis à Claude
 
 ```text
-RectId(A,B), patches, core IDs, h_a, h_b, g_AB[j] (un seul scan témoin)
-  -> handles C + masse de rôles + fate DEAD_OUTSIDE_WINDOW
-  -> masque C par médiatrices AB/AC/BC
-  -> masque vide, ou seuil max(core,g_AB[j]) + minima h_a/h_b
-  -> bloc entièrement mort, split borné, ou pending
+RectId(A,B), patches et core IDs
+  -> h_a/h_b saturés + parité avec corner_histograms + bitsets B_lt[t]
+  -> census/seed handles C + masse de rôles + fates + masques AB/AC/BC
+  -> union des patches encore actifs, puis un seul scan g_AB sur cette union
+  -> seuil t_C + émission sparse : bloc certifié, split borné, ou pending
   -> ancres et terminal shallow seulement sur le résiduel
 ```
 
 Le probe reste counter-only. Il se streame par rectangle ; il ne matérialise
 pas une liste globale de millions de blocs et ne relance pas un census complet
-pour chaque `C` au premier essai. Un handle mort comme **carrier** reste dans
-la vue `census_handles` des autres carriers : seule sa vue `support_handles`
-est filtrée.
+pour chaque `C` au premier essai. En q3, un handle mort comme **seed** reste
+dans `census_handles` comme source possible de témoins ; seule sa vue
+`seed_handles` est filtrée. Le pseudo-flux fixe l'ordre de développement après
+la parité des facteurs. Le hot path conserve l'ablation center-first décrite
+plus haut : il ne doit pas payer simultanément les deux ordres.
+
+Un split de `C` raffine seulement ses vues de supports ; son parent reste dans
+le census tant que la partition témoin n'est pas remplacée explicitement. Un
+split de `A` ou `B` change `RectId`, les patches et les domaines de
+`h_a/h_b/g_AB` : tous ces crédits sont invalidés, sauf sets d'IDs explicitement
+revalidés sous le nouveau rectangle. Aucune cardinalité scalaire du parent ne
+se transmet par héritage.
 
 La porte exhaustive à `n<=14` vérifie chaque bloc pruné, le ledger des rôles et
 les diagonales. Elle conserve les tangences `L32==0` et `U32==0`, vérifie que
@@ -573,6 +852,29 @@ aiguë canonique : le terminal doit choisir le plus petit `PointId` parmi `c`
 et `d` dont la face avec `AB` est aiguë, conformément à la règle exact-once
 actuelle, ou employer un prédicat symétrique prouvé équivalent.
 
+Une vue unique `support_handles` est donc incorrecte en q4. Le contrat porte
+au moins trois vues : `census_handles` pour les sites témoins et le ledger,
+`opposite_handles` ou `completion_handles` pour les deux sommets opposés
+possibles, et `seed_handles` pour le sous-ensemble qui peut porter la face
+aiguë canonique. `NONE_ACUTE` retire un handle de `seed_handles`, jamais de
+`completion_handles` ni du census. La préparation `CellGrid` sépare de la même
+façon `witness_sites` et `seed_sites`; réutiliser un seul vecteur rendrait un
+fate de seed destructif pour le census.
+
+La fixture q4 minimale suivante rend cette distinction exécutable :
+
+```text
+a=(0,0,0)  b=(6,0,0)  c=(1,-3,-1)  d=(1,1,-2)
+```
+
+`AB2=36` est strictement plus grand que les cinq autres carrés de longueur.
+La face `ABc` est aiguë (`36<11+35`), tandis que `ABd` est droite
+(`36=6+30`), et `q3_power(a,b,c;d)=180>0`. Le circumcentre a les coordonnées
+barycentriques strictement positives `(12/49,22/49,25/98,5/98)` : le
+tétraèdre est bien centré et `d` est une complétion q4 valide, bien qu'il ne
+soit pas un seed valide. La porte permute l'ordre des deux handles et tue un
+stream `i<j` qui suppose que le premier handle est le seed.
+
 Le seuil q4 est `h4=smax-3`, soit huit pour `smax=11`, et ses patches sont ceux
 de q4, jamais ceux de q3. Le crédit `g4_AB[j]` est sûr pour toute sphère du
 patch parce qu'il se compare déjà au rayon porté par `a` ou `b`; il ne dépend
@@ -582,6 +884,22 @@ pas les crédits q3. Une mort q3 ne tue toujours pas une complétion q4.
 `h_a+h_b`. Un même couple `{c,d}` peut survivre plusieurs patches, mais sa
 masse n'est inscrite qu'une fois dans le ledger : les patches certifient une
 décision, ils ne créent aucune provenance supplémentaire.
+
+La réduction de seuil q3 se transporte sans catalogue de produits. Pour une
+paire de handles visitée paresseusement, former son masque `M_CD` avec les six
+médiatrices. Un masque vide ferme le bloc sans autre calcul ; sinon poser :
+
+$$t_{CD}=\max_{j\in M_{CD}}\max\left(0,h_4-\max\left(h_{\mathrm{core}},g4_{AB,j}\right)\right).$$
+
+Le même `P[t]` compte alors les couples d'ancres que ce certificateur laisse à
+ce bloc de handles. Ce compteur ne vaut ni nombre de quadruplets ni nombre de
+complétions. Les paires de handles restent streamées en `i<=j`; aucun tableau
+`C x D` n'est conservé. Comme la médiatrice `CD` conditionne le masque final,
+deux routes seulement sont honnêtes : scanner `g4_AB` une fois sur l'union
+grossière des masques mono-handle, ou faire un premier stream des paires pour
+former l'union exacte, scanner `g4_AB`, puis refaire un second stream pour les
+continuations. Ce double passage doit apparaître dans les compteurs ; il ne
+peut pas être caché sous un prétendu scan unique.
 
 La décomposition complète ajoute nécessairement $h_d(d)$ :
 

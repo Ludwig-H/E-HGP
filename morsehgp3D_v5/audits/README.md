@@ -29,8 +29,21 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   porteurs restants restent une paire non ordonnée dont le ledger ferme
   `6*C(n_u,4)`. La note donne aussi la relève concrète de
   `corner_histograms` par requêtes d'arbre saturées, puis bitsets des seuls
-  couples survivants. `Lca3Forest` reste une ablation de ledger, pas une route
-  produit.
+  couples survivants. Les fates de boîtes restent en shadow sur les seuls
+  porteurs de supports ; l'acuité emploie la forme couplée `hmin_boxes>=0`, et
+  la lentille requalifie d'abord les extrema corrélés `OwnerD2Exact` de la v4,
+  sans en importer le code ; le terme `|w.d|`, dominé après le cover, reste une
+  identité d'oracle/mutant. Aucun fate ne retire les mêmes handles du census.
+  Le seuil `t_C` condense les patches et réutilise les bitsets `B_lt[t]` sans
+  `A x B x C`; q4 streame `t_CD` sans catalogue `C x D` et sépare census,
+  complétions et seeds. La réponse V73--V75 reçoit le retrait de `EMPTY` comme
+  priorité produit sans recevoir son « plafond absolu », fixe le
+  contrefactuel multicomptes du center-cover et sépare
+  existence, profondeur et action en trois axes avec non-vacuité explicite.
+  L'universel autorise un prune sans promouvoir `ALL_DEEP` tant que l'existence
+  reste inconnue. Le shadow visite tous les blocs ; une sélection préalable des
+  non vides serait circulaire.
+  `Lca3Forest` reste une ablation de ledger, pas une route produit.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : décisions et dents restantes de la lane device.
 - [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.
