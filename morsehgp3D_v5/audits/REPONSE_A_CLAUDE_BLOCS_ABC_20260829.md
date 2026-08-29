@@ -970,7 +970,7 @@ $$\epsilon\,d\mathbin{\cdot}(P_k\mathbin{\times}y)\geq0\quad\text{et}\quad\epsil
   Le `popcount` seul ne prédit pas le gain : les bits conservés peuvent être
   précisément ceux dont les comptes sont sous le seuil.
 
-- **V97 — GO au helper et au shadow handle-local de `ed9c282f`, pas encore au
+- **V97 — GO au helper et au shadow handle-local de `73b00f3f`, pas encore au
   prune produit.** Le nouveau source corrige les objections V90/V92 : il
   reconstruit les mêmes `P[8]` que `sector_kill.hpp`, classe `y=2x-a-b` par
   produits mixtes entiers, énumère tous les seeds et forme le surmasque de
@@ -978,7 +978,7 @@ $$\epsilon\,d\mathbin{\cdot}(P_k\mathbin{\times}y)\geq0\quad\text{et}\quad\epsil
   oublier. Le principe mathématique est reçu ; l'arithmétique et l'état sont
   bien nouveaux, même si la base existait déjà.
 
-  Reconfiguré avec la cible CMake encore non committée, le replay
+  Reconfiguré avec la cible CMake enregistrée au pin propre `73b00f3f`, le replay
   `n=8000,seed=3,blocs=1500,union_rects=64` donne :
 
   | famille | handles non vides | mort `full8` | mort `Box(C)` | gain local |
@@ -988,11 +988,12 @@ $$\epsilon\,d\mathbin{\cdot}(P_k\mathbin{\times}y)\geq0\quad\text{et}\quad\epsil
   | `uniform` | 1 334 | 57,3 % | 62,1 % | +4,7 points |
   | `eight_clusters` | 18 658 | 97,0 % | 97,9 % | +0,9 point |
 
-  Les quatre runs ont `exact_hors_box=0`, `frame_failures=0` et
-  `decision_invariants=0`. Ils impriment toutefois
-  `pin=ed9c282f...,worktree_modifie=OUI`, et ne reproduisent pas exactement le
-  tableau publié dans la réponse Claude. Ce sont des diagnostics prometteurs,
-  pas encore un reçu.
+  Les quatre runs impriment `pin=73b00f3f...,worktree_modifie=non` et ont
+  `exact_hors_box=0`, `frame_failures=0` et `decision_invariants=0`. La cible
+  smoke et les dix portes sectorielles/d'ancre rendent `11/11`. Le source grave
+  les deux bases obliques, une frontière à deux bits et la projection nulle à
+  `0xff`. Cela reproduit proprement le signal local, pas le tableau historique
+  de Claude ni encore un reçu de performance à trois seeds.
 
   Surtout, la cohorte d'union ferme le choix architectural. Les
   `262/136/97/177` ancres non vides de
@@ -1016,12 +1017,12 @@ $$\epsilon\,d\mathbin{\cdot}(P_k\mathbin{\times}y)\geq0\quad\text{et}\quad\epsil
   des fates une fois par ancre. Exposer le frame et les comptes évite de refaire
   `bisector_basis` après le prétest par requête.
 
-  Avant activation, ajouter la cible portable au CMake et des CTests purs pour
-  frontière fermée, base oblique, ancre représentative, arête de boîte qui
-  traverse un cône et mutant covariant. Puis publier, sur trois seeds, la masse
-  de seeds dans les handles tués, les appels `q3_form` et scans de profondeur
-  évités, le coût du mapping et des 16 extrema par handle, mur/HWM et digest
-  ON/OFF. Ne pas ouvrir le split : le masque local vient d'abord. Cette voie
+  Avant activation, extraire le helper bench vers une primitive pure seulement
+  avec ses CTests de boîte traversant un cône, ancre représentative et mutant
+  covariant. Puis publier, sur trois seeds, la masse de seeds dans les handles
+  tués, les appels `q3_form` et scans de profondeur évités, le coût du mapping
+  et des 16 extrema par handle, mur/HWM et digest ON/OFF. Ne pas ouvrir le
+  split : le masque local vient d'abord. Cette voie
   peut retirer beaucoup de travail terminal, mais elle conserve `A x B` et ne
   remplace ni `g_AB[64]`, ni la porte d'exposant, ni le chemin q4.
 

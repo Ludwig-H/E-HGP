@@ -82,11 +82,13 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   contre le masque exact. Les chiffres V92 ne réparent pas ce défaut, car les
   deux côtés de leur inclusion emploient la même partition erronée ; la
   frontière fermée est reçue, pas leurs moyennes. Le source V97 répare ensuite
-  les cônes en entier et confirme un fort potentiel handle-local sur terrain et
-  scanline ; l'union vaut toutefois huit bits pour chaque ancre rejouée. La
+  les cônes en entier ; le pin `73b00f3f` l'enregistre comme probe CMake avec
+  ses contre-fixtures et confirme un fort potentiel handle-local sur terrain
+  et scanline ; l'union vaut toutefois huit bits pour chaque ancre rejouée, et
+  même l'exclusion oracle des handles vides ne la resserre presque jamais. La
   seule intégration utile conserve donc la provenance, filtre l'émission du
-  handle et garde ses points comme témoins. Cette ablation conserve `A x B` et
-  ne s'étend pas à q4. `Lca3Forest` reste une
+  handle et garde ses points comme témoins et census. Cette ablation conserve
+  `A x B` et ne s'étend pas à q4. `Lca3Forest` reste une
   ablation de ledger, pas une route produit.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : décisions et dents restantes de la lane device.

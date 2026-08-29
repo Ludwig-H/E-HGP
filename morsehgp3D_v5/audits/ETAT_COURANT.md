@@ -1,18 +1,20 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **Dernier pin de sonde de Claude relu :** `ed9c282f`, publié sur `main` et
-  `origin/main`. Il répare réellement V90/V92 : vrais cônes de
+- **Dernier pin de sonde relu :** `73b00f3f`, sur `main`. Il consolide le
+  helper de `ed9c282f` et répare réellement V90/V92 : vrais cônes de
   `anchor_sector_kill`, produits mixtes entiers fermés, tous les seeds et
-  surmasque AABB conservatif. Le replay local à `n=8000,seed=3` ne trouve
+  surmasque AABB conservatif, contre-fixtures obliques/frontière et cible CMake
+  smoke. Le replay propre à `n=8000,seed=3` ne trouve
   aucune inclusion ou décision violée et reçoit un fort potentiel
   **handle-local** sur `terrain/scanline`. Il révèle aussi le verrou décisif :
   l'union des masques de tous les handles vaut `0xff` pour chaque ancre non
   vide des quatre cohortes, donc le gain au niveau du test d'ancre courant est
-  nul. L'incrément doit préserver la provenance et tuer seulement l'émission
-  du handle. Les anciens chiffres `7313df2d` restent invalides ; le tableau
-  publié avec `ed9c282f` n'est pas exactement reproduit par le source à ce pin,
-  n'a ni sortie brute ni trois seeds, et sa cible CMake n'existe encore que
-  dans le worktree. Signal reçu, reçu de performance absent.
+  nul. Même retirer oraclement les handles sans seed ne gagne que `1/1/0/0`
+  ancre sur `scanline/terrain/uniform/eight_clusters`. L'incrément doit
+  préserver la provenance et tuer seulement l'émission du handle. Les anciens
+  chiffres `7313df2d` restent invalides ; le tableau publié avec `ed9c282f`
+  n'est pas exactement celui du source réparé et n'a ni sortie brute ni trois
+  seeds. Signal causal reçu, reçu de performance absent.
 - **Dernier pin propre du repli `Pi` :** `650b3cff`. Reconfiguré puis
   reconstruit, il capte `0/1/0` blocs sur trois familles à `n=3000` et est
   retiré du chemin candidat. Les grands runs qui impriment
@@ -661,11 +663,12 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
   `n=3000,seed=3,blocs=800` impriment le bon pin propre, aucun cap, faux
   positif ou invariant violé ; le certificat `Pi` capte `0/1/0` blocs et
   `0/86/0` appels marginaux pour `101196/41943/53666` évaluations propres ;
-- worktree v4 corrigé du probe, reconfiguré puis construit en Release :
+- probe v4 de centres à ancre fixe, committé au pin `2897a03b`, puis
+  reconfiguré au pin propre `73b00f3f` et construit en Release :
   `uniform/terrain/scanline_single_pass/eight_clusters` à
   `n=400,seed=3,blocs=300` rendent zéro, sans cap, faux positif, invariant ou
   ratio supérieur à un. Le binaire imprime
-  `0d60092f,worktree_modifie=OUI`. Pour les seuls groupes à au moins deux
+  `73b00f3f,worktree_modifie=non`. Pour les seuls groupes à au moins deux
   centres, les diamètres normalisés moyens valent
   `0,234/0,230/0,208/0,190`, les maxima
   `0,487/0,833/0,642/0,660` et les tests de paires
@@ -678,15 +681,19 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
   (fixture stricte, mutant non strict, oracle d'ancre, seuil `h-1`, corde et
   grille). Elles reçoivent le certificat sur huit secteurs actuel, pas le
   futur masque `Box(C) -> cônes` ni les sondes V90/V92 ;
-- probe sectoriel `ed9c282f` construit depuis le worktree avec sa cible CMake
-  non committée, stamp `worktree_modifie=OUI`, puis rejoué à
+- probe sectoriel enregistré au pin `73b00f3f`, stamp
+  `worktree_modifie=non`, puis rejoué à
   `n=8000,seed=3,blocs=1500,union_rects=64` sur quatre familles. Les inclusions,
   frames et invariants de décision valent zéro. Parmi les handles non vides,
   le taux `full8 -> box` vaut `59,7 -> 88,1 %` sur `scanline_single_pass`,
   `13,4 -> 56,5 %` sur `terrain`, `57,3 -> 62,1 %` sur `uniform` et
   `97,0 -> 97,9 %` sur `eight_clusters`. Pour les unions d'ancre, tous les
   `262/136/97/177` surmasques non vides valent huit bits et le gain est zéro.
-  Ce replay reçoit le potentiel local, pas le tableau publié ni un gain mur ;
+  Le filtre oracle des handles réellement non vides ne gagne que `1/1/0/0`
+  ancre. Le probe grave aussi les deux contre-fixtures obliques, la frontière
+  à deux bits et le repli `0xff` à projection nulle ; le smoke ajouté et les
+  portes sectorielles/d'ancre rendent `11/11`. Ce replay reçoit le potentiel
+  local, pas le tableau publié ni un gain mur ;
 - `python tools/check_docs.py` vert sur `217` Markdown actifs,
   `python tools/check_implementation_status.py` vert sur `20` phases, et diff
   sans erreur d'espacement après consolidation.
@@ -707,10 +714,12 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
    saturations `g` et la fixture des intersections disjointes. Un échec global
    rend `UNKNOWN`; le shadow q3 ferme toute sa masse par histogrammes, même si
    `P[t]>0`. Aucun masquage produit n'est autorisé avant oracle. En ablation
-   parallèle, réparer `sector_reach_probe` avec les vrais cônes entiers,
-   prouver `exact_seed_mask subset_of box_mask`, puis mesurer les handles
-   réellement tués ; ne jamais convertir ce verdict handle-local en kill
-   d'ancre ni le transférer à q4.
+   parallèle, conserver le `sector_reach_probe` réparé avec ses vrais cônes
+   entiers et sa porte `exact_seed_mask subset_of box_mask`, puis shadow-er un
+   mapping `position -> seed_handle_id` qui mesure les carriers et appels de
+   puissance réellement évités après les portes existantes. Les positions des
+   handles morts restent témoins et census ; ne jamais convertir ce verdict
+   handle-local en kill d'ancre ni le transférer à q4.
 3. Comparer ensuite les deux ordres chauds sur le vecteur causal et sur mur/HWM
    OFF/ON ; activer seulement les décisions exactes rentables. Garder les fates
    `EMPTY` au ledger d'oracle sans route autonome.
