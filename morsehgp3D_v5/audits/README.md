@@ -16,8 +16,10 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   réserves et ordre de fermeture.
 - [`QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md`](QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md) :
   contre-audit de l'exposant q3/q4 ; il rejette la double WSPD globale et
-  place le center-cover de blocs avant les ancres, avec terminal par lignes ;
-  la WSPD locale d'arête opposée reste une ablation q4 conditionnelle.
+  place le center-cover entier de blocs avant les ancres, avec terminal par
+  lignes ; il répond aussi au reçu de rescans sans confondre le routeur de
+  handles avec `m_e`. La WSPD locale d'arête opposée reste une ablation q4
+  conditionnelle.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : décisions et dents restantes de la lane device.
 - [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.

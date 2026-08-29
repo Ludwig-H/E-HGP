@@ -1,13 +1,13 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **HEAD documentaire relu :** `5afcfce0`, publié sur `main` et
-  `origin/main`. Le dernier delta fonctionnel du HEAD reste `2d052921` ; les
-  commits suivants réorganisent les notes de Claude et des auditeurs, sans
-  pinner le raccord d'enveloppe.
+- **HEAD documentaire relu :** `66997d56`, publié sur `main` et
+  `origin/main`. Le dernier delta du chemin produit reste `2d052921` ; le HEAD
+  épingle désormais le harnais local et son selftest, sans pinner le raccord
+  d'enveloppe.
 - **Dernier pin fonctionnel reçu :** `72090f79`. Le chemin produit de
-  l'enveloppe q3/q4, ses portes et les corrections du harnais restent dans un
-  worktree concurrent non commité. Ils sont jugés ci-dessous comme snapshot,
-  jamais attribués au HEAD.
+  l'enveloppe q3/q4 et ses portes restent dans un worktree concurrent non
+  commité. Ils sont jugés ci-dessous comme snapshot, jamais attribués au HEAD ;
+  le harnais est désormais épinglé séparément à `66997d56`.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -38,6 +38,25 @@ q3, ni le facteur `|A||B|`, et une partition compacte de couples sans décision
 sémantique peut être redondante avec le terminal shallow. Le center-cover de
 blocs vient donc en premier ; la route locale ne survit que si elle évite un
 travail effectivement exécuté avant ce terminal.
+
+Le reçu `echelle_par_lane_20260829` confirme que les rescans sont un poste
+majeur sur `terrain`, mais son addendum sur-interprète le routage. Le seuil
+`pretest_query_min_points` porte sur les points de handles d'un rectangle, pas
+sur le nombre exact de lignes d'une ancre ; le seuil 60--100 est un croisement
+de modèle, pas une mesure du shallow. Les chiffres 3,9 % / 87 % et leur
+ventilation ne sont pas présents dans les sorties jointes. L'enveloppe réduit
+directement `scan_sites`, et un prune de bloc supprime tous les rescans aval :
+center-cover et shallow restent complémentaires.
+
+La v3/v4 proposait déjà un switch statique entre scan et arrangement. Pour le
+routage du terminal, l'incrément neuf défendable est un
+`adaptive_online_dispatch` : après création de l'`AnchorLineSet`, scanner un
+préfixe canonique, compter le travail vraiment exécuté puis acheter le shallow
+pour le reliquat lorsque son devis receipté est atteint. q3 porte la première
+ablation ; q4 exige de garder les carriers du préfixe comme témoins, de masquer
+seulement leur droit d'émission primaire et de fermer le ledger exact-once. Le
+mode initial reste shadow/counter-only, sans reroutage produit ; le RLE ne
+remplace pas la preuve de partition.
 
 Le contre-audit des notes de Claude a eu un effet concret : la formule q4 est
 requalifiée comme sur-ensemble de Jung, le seuil de coût ancien est retiré et
@@ -104,6 +123,14 @@ locale q4. Les seuils à `smax=11` restent neuf intérieurs pour tuer q3 et huit
 pour tuer q4. La note active détaille coefficients homogènes, tangences,
 concurrences, digest, portes de coût, fixtures et mutants.
 
+Ce probe a maintenant un contrat d'implémentation borné : deux grilles
+entières distinctes de 64 patches à l'échelle 32, sans flottant ; parcours
+partagé par deux masques mais antichaînes locales ; scission obligatoire d'un
+nœud témoin contenant `A` ou `B` ; aucun cumul avec `AliveRect::core`, aucun
+héritage de crédits après split. Le profil refuse les positions dupliquées :
+le ledger sémantique compte les positions, jamais `node_weight`. Le lemme q3
+analogue au Théorème 5 doit être gravé avant tout prune q3 autoritaire.
+
 Claude a répondu au pin `ac43ab1a` avec deux filtres q3 par groupes. Le lemme
 du tiers aigu est reçu après ajout de l'owner `EdgeKey`; l'optimalité du cœur
 est limitée à la boule concentrique d'une ancre ponctuelle. L'escalier
@@ -143,12 +170,14 @@ du tip après migration, son commit restant dans l'historique.
 3. **Déclarer les capacités d'override.** Une option imprimée active ne peut
    être ignorée silencieusement par un exécuteur externe ; propager ou refuser
    la combinaison.
-4. **Finir le harnais de reçu.** Le correctif après `70a62be3` pinne désormais
-   le protocole, refuse l'écrasement, force les vrais digests et compare les
-   bras. Il doit encore échouer sur tout code de run non nul, conserver un
-   statut terminal après interruption, décrire honnêtement une seule
-   répétition et exposer des bras séparés q3/q4 avant d'annoncer
-   `none/q3/q4/both`.
+4. **Finir le harnais de reçu.** `66997d56` pinne le protocole, refuse
+   l'écrasement, force les vrais digests, compare les bras, grave le statut et
+   l'environnement, et son auto-fixture tue les quatre refus annoncés. Deux
+   coutures restent : exposer des bras séparés q3/q4 avant d'annoncer
+   `none/q3/q4/both`, et rendre l'interruption causale. Le handler `INT/TERM`
+   écrit un statut s'il manque, mais ne quitte pas explicitement le script ;
+   ce scénario n'est pas exercé par l'auto-fixture et peut reprendre puis
+   réécrire le reçu.
 5. **Réparer le budget de la porte post-séparation.** Dans la campagne à deux
    workers, `mhgp5_postsep_refine_mutant_h1` expire à `300,10 s` alors que la
    porte nominale jumelle finit en `302,74 s`. Le rejeu isolé est vert en
@@ -203,11 +232,18 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
 ## Validation indépendante du snapshot
 
 - configuration canonique et build Release : succès ;
-- campagne ciblée enveloppe/CLI/mutants : `26/26` en `47,10 s` de mur ;
+- campagnes ciblées enveloppe/CLI/mutants et routes batched : `27/27` ;
 - registre direct : `80` mutants déclarés, `80` injectés, `80` gardés ;
-- campagne complète label `gate` : `250/251` en `790,97 s`, seul le timeout
-  post-séparation décrit ci-dessus ; rejeu isolé vert en `153,94 s` ;
-- script de reçu : syntaxe Bash valide, contrats fonctionnels encore ouverts ;
+- campagne complète antérieure label `gate` : `250/251` en `790,97 s`, seul
+  le timeout post-séparation décrit ci-dessus ; rejeu isolé vert en
+  `153,94 s` ; un rejeu frais a retrouvé ce timeout à `300,12 s` sous
+  concurrence puis a été interrompu, il ne constitue pas une campagne
+  complète supplémentaire ;
+- reçu baseline `echelle_par_lane_20260829` : six runs produit au pin propre
+  `a3c15d84`, codes nuls et compteurs exacts ; les ventilations par route et
+  le proxy de concentration de l'addendum ne sont pas dans ses sorties ;
+- harnais `66997d56` : syntaxe Bash valide ; auto-fixture locale `5/5`, quatre
+  refus tués et contrôle positif, code final 0 ; signal `INT/TERM` non testé ;
 - contrôles documentaires et diff final à rejouer après consolidation.
 
 ## Ordre recommandé
@@ -218,9 +254,10 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
 3. Ouvrir `q34_fiber` comme falsificateur counter-only du center-cover de
    blocs ; prouver provenance, ledgers et continuations sans matérialiser une
    ancre.
-4. Seulement si ce prune est non vacant, ouvrir `AnchorLineSet`, l'oracle
-   exhaustif borné puis le shallow ; tester la WSPD locale q4 comme ablation,
-   jamais comme prérequis.
+4. Seulement si ce prune est non vacant, ouvrir `AnchorLineSet`, ses compteurs
+   par ancre, l'oracle exhaustif borné puis le shallow ; comparer en shadow
+   `all-direct`, `all-shallow` et le dispatch adaptatif. Tester la WSPD locale
+   q4 comme ablation, jamais comme prérequis.
 5. Fermer ensuite G0/G1, fold vivant et grille selon leur ordre local ; aucun
    de ces chantiers ne doit masquer les compteurs de la nouvelle source.
 

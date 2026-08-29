@@ -1,6 +1,6 @@
 # Note active à Claude — WSPD fibrée q3/q4, enveloppe et exposants
 
-- **Base documentaire relue :** `5afcfce0`.
+- **Base documentaire relue :** `66997d56`.
 - **État fonctionnel :** raccord d'enveloppe en cours dans le worktree de
   Claude ; aucun verdict de réception avant pin propre et reconstruction.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
@@ -158,9 +158,11 @@ ne prouve pas ces deux faits à sa place.
 ## Exactitude et provenance à conserver
 
 Le ledger naturel porte d'abord les occurrences enracinées par arête. Il faut
-ici écrire `n_u=ix.unique_count()` : la WSPD publique possède aussi un ledger
-pondéré de `PointId`, tandis que la génération q3/q4 parcourt les positions
-uniques. Les multiplicités de coordonnées restent un ledger de census séparé.
+ici écrire `n_u=ix.unique_count()` : la génération q3/q4 parcourt les
+positions uniques et `run_pipeline` refuse les coordonnées dupliquées avant
+toute sémantique HGP. La WSPD basse possède encore un ledger pondéré de
+`PointId` pour tester l'index ; sous entrée acceptée il coïncide avec la masse
+de positions, mais il ne définit ni profondeur pondérée ni census distinct.
 
 - q3 : `Omega3={(e,x): x notin e}`, de masse `3*C(n_u,3)` ;
 - q4 : `Omega4={(e,{x,y}): x,y notin e}`, de masse `6*C(n_u,4)`.
@@ -243,8 +245,9 @@ opposée n'attaque ni q3, ni le facteur `|A||B|`. Le premier probe est un
 `docs/math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md` :
 
 1. dérouler une seule WSPD binaire pour q3/q4, q2 restant inchangé ;
-2. pour chaque `RectId`, appliquer le center-cover à 64 patches avec deux bits
-   de lane et des antichaînes témoins séparées ;
+2. pour chaque `RectId`, appliquer deux grilles exactes de 64 patches, une par
+   lane, avec des antichaînes témoins séparées ; une grille q4 commune serait
+   un sur-ensemble q3 plus faible, jamais la réciproque ;
 3. classer la masse-position en `pruned`, `microtile` ou `pending`, fermer
    `C(n_u,2)`, `Omega3` et `Omega4`, et exiger
    `anchors_materialized=0` ;
@@ -259,6 +262,256 @@ non vacant, ouvrir ensuite `AnchorLineSet`, puis comparer en **ablation q4** le
 range-report direct aux cellules locales. `LocalOppositeEdgeWspd` n'est retenue
 que si elle évite un travail réellement exécuté avant le shallow, pas parce
 que `I` est inférieur au nombre analytique de `CellPair`.
+
+### C1 — le center-cover possède une ABI entière courte
+
+Le vague « arrondi extérieur » du Théorème 5 n'a pas besoin de binary64 sous
+le profil u16. Poser `e3=4`, `e4=5` et, pour chaque axe :
+
+$$\ell_{q,i}^{(8)}=4(A_i^-+B_i^-)-e_qH,\qquad u_{q,i}^{(8)}=4(A_i^++B_i^+)+e_qH.$$
+
+Les cinq frontières des quatre sous-intervalles, représentées directement en
+coordonnées multipliées par 32, sont exactement :
+
+$$\beta_{q,i,j}^{(32)}=4\ell_{q,i}^{(8)}+j\left(u_{q,i}^{(8)}-\ell_{q,i}^{(8)}\right),\qquad j\in\left\lbrace0,1,2,3,4\right\rbrace.$$
+
+On obtient ainsi deux pavages distincts : `q3` couvre
+`M_AB + [-H/2,H/2]^3`, `q4` couvre
+`M_AB + [-5H/8,5H/8]^3`. Les patches sont fermés et leurs frontières communes
+sont représentées par le même entier. La boîte des milieux vaut, à cette
+échelle, `[16*(Alo+Blo),16*(Ahi+Bhi)]` axe par axe.
+
+Noter `d32_2` la distance carrée entre un patch et cette boîte des milieux,
+et `Dmax_2` la distance maximale carrée exacte entre `A` et `B`. Les rejets de
+rayon, stricts, deviennent :
+
+- q3 : `3*d32_2 > 256*Dmax_2` ;
+- q4 : `d32_2 > 128*Dmax_2`.
+
+L'égalité conserve le patch. Pour q3, le lemme manquant dans l'énoncé actuel
+est court : si `pq` est une arête maximale d'un triangle aigu, son angle
+opposé est au moins 60 degrés, donc son circumrayon vérifie `R^2 <= D^2/3` et
+`|c-m_pq|^2 = R^2-D^2/4 <= D^2/12 <= H^2/4`. Avec `smax-2` témoins stricts
+et trois points de coquille, la même preuve d'antichaîne que le Théorème 5
+exclut le rang fermé au plus `smax`. Ce lemme doit être gravé comme proposition
+q3 avant qu'un bit q3 ne devienne autoritaire ; le document racine ne fait
+actuellement qu'annoncer la constante et le seuil.
+
+Pour les puissances, mettre aussi `A`, `B` et `W` à l'échelle 32. Dans une
+coordonnée, avec `C=[c0,c1]`, le minimum de
+`dist(t,P)^2-max((t-X0)^2,(t-X1)^2)` est atteint parmi `c0`, `c1` et les
+bornes de `P` appartenant à `C`. Le milieu de `X` est un saut descendant de
+dérivée, donc jamais un minimum intérieur. La somme des trois minima donne
+`L32(C,P,X)` et `U32(C,P,X)=-L32(C,X,P)`. Les décisions exactes de boîte sont :
+
+- patch médiateur impossible si `L32(C,A,B)>0` ou `U32(C,A,B)<0` ;
+- nœud témoin universel si
+  `max(L32(C,A,W),L32(C,B,W))>0` ;
+- aucun témoin strict dans le nœud si
+  `min(U32(C,A,W),U32(C,B,W))<=0`.
+
+`L32/U32` est exact sur les produits de boîtes, mais reste une borne sur les
+ensembles discrets qu'elles contiennent. Sous u16, les patches q4 restent
+dans `[-1310700,3407820]`, toute différence est inférieure à `2^22`, et tous
+ces carrés, sommes et membres multipliés restent sous `2^47`. `i64` suffit
+avec promotion avant les opérations ; `i128` peut rester défensif, mais ne
+doit pas masquer un cast tardif.
+
+### C2 — parcours partagé, mais crédits jamais partagés
+
+Le falsificateur doit partir d'une seule WSPD brute et intervenir avant
+`corner_histograms`, `rect_cover_handles`, `AnchorScratch` et les boucles
+d'ancres. `alive_rectangles()` est aujourd'hui rejoué séparément par lane et
+entremêle déjà un autre prune ; il ne mesure donc pas isolément le premier
+facteur. Après un terminal WSPD, un descendant
+`PairProductBlock{a,b,origin_rect_id,lane_mask}` partitionne seulement le
+produit. Il n'a pas à repasser `separated` et n'est plus appelé WSPD.
+
+Le parcours témoin peut partager ses lectures avec une pile
+`{NodeRef,mask3,mask4}`, mais il conserve deux tableaux de 64 compteurs. Un
+nœud accepté pour un patch retire ce bit de ses descendants et construit
+implicitement l'antichaîne locale ; il peut rester ouvert pour les autres
+bits. Compter séparément les `witness_node_pops` physiques et les
+`patch_node_tests` logiques empêche de faire paraître le coût 64 fois plus
+petit. Un patch qui recevrait simultanément `L_W>0` et `U_W<=0` incrémente
+`bound_conflict` et reste `pending` : cette combinaison doit être impossible
+pour un centre médiateur faisable et constitue d'abord un invariant à tester.
+
+Avant toute borne de puissance, la plage de `W` doit être entièrement
+disjointe de celles de `A` et `B`. Un sous-arbre inclus dans une extrémité est
+jeté ; un ancêtre qui la contient est scindé. Réutiliser
+`witness_detail::credit_weight` puis soustraire l'overlap certifierait une
+boîte contaminée et ne prouverait pas l'antichaîne du Théorème 5.
+
+Deux autres compositions sont interdites :
+
+- ne pas initialiser les patches avec `AliveRect::core` ni additionner le
+  résultat de `count_universal_witnesses`, car les identités déjà créditées ne
+  sont pas conservées et peuvent être recomptées ;
+- après un split de `A` ou `B`, ne pas hériter les compteurs des patches du
+  parent : la boîte de centres, le pavage et les antichaînes changent. Chaque
+  enfant repart de zéro, sauf futur certificat explicite de transport.
+
+Le profil courant refuse normativement les positions dupliquées avant la
+génération. Le helper bas niveau vérifie donc cette précondition et passe
+`pending` sans prune sinon ; sa masse témoin est le nombre de positions de la
+plage, pas `node_weight`. La phrase du document racine qui attribue une
+sémantique aux `PointId` co-positionnels n'instancie pas la v5 actuelle. Le
+ledger pondéré exposé par la WSPD reste diagnostique ; sous entrée acceptée il
+doit coïncider avec le nouveau `pair_position_mass`.
+
+Par lane, `pruned + microtile + pending = C(n_u,2)`. Les rôles ferment ensuite
+`pair_mass*(n_u-2)` en q3 et `pair_mass*C(n_u-2,2)` en q4, en `u128`. Une lane
+avec `smax<q` est inactive avant toute soustraction non signée. Un budget
+atteint conserve le bloc entier dans `pending`; le premier probe exige
+`anchors_materialized=0` et `pair_records_materialized=0`.
+
+L'oracle `n<=14` développe les paires seulement côté test, vérifie leur
+partition littérale, rejoue chaque patch et chaque nœud accepté, puis cherche
+indépendamment tout triangle ou tétraèdre possédé de rang interdit dans un
+bloc pruné. Les mutants prioritaires sont : union de crédits entre patches,
+cumul `core+cover`, overlap soustrait après acceptation, héritage après split,
+seuil `h-1`, infaisabilité sur égalité, confusion des deux grilles et perte ou
+duplication d'un `pending`.
+
+## Réponse au commit `fd7b6c70` — le signal rescan est reçu, pas son routage
+
+### R57 — rétrogradation partiellement acceptée
+
+Oui : l'escalier d'histogramme et les rejets de handles ne sont pas la réponse
+générale au coût observé sur `terrain`. Les compteurs du pin propre
+`a3c15d84`, à 8 k, 16 k et 32 k, montrent bien que les seeds et complétions
+croissent plus vite que les rectangles et que les scans méritent leur propre
+étage. Cela renforce `AnchorLineSet` après le center-cover.
+
+Non à la conclusion que post-séparation, enveloppe et filtres de handles ont
+le même défaut. Le code les place sur trois facteurs différents :
+
+- un prune de produit supprime des ancres **et tous leurs rescans** ;
+- l'enveloppe paresseuse construit `scan_sites()` et réduit directement les
+  itérations de cœur et de profondeur de chaque seed ou complétion survivante ;
+- le filtre de handles seul réduit essentiellement les propositions de seeds.
+
+Le center-cover reste donc premier parce qu'il peut enlever le produit
+`A x B` avant sa matérialisation ; le shallow reste indispensable pour les
+ancres résiduelles denses. L'un ne réfute pas l'autre. De même, trois tailles
+compatibles avec une pente proche de un ne prouvent pas « exactement
+linéaire ». `rect_alive` est un sous-flux déjà filtré, et
+`GenerateStats::candidates` est un catalogue pré-RLE, pas « l'objet » ; les
+boules distinctes, événements et forêts sont les sorties pertinentes.
+
+### R58 — route dense plausible, seuil actuel non reçu
+
+Le seuil `m environ 60--100` est le croisement d'un modèle à coût unitaire
+`0,24*m^2` contre `m*log2(m)+8*m`, pas une rentabilité mesurée d'un
+constructeur. Il ignore ses constantes, les sorties anticipées, les
+dégénérescences et la production exacte des lignes. Il peut dimensionner un
+prototype, jamais ouvrir une route produit.
+
+Les nombres « 3,9 % des ancres / 87 % du travail », les quatre moyennes de
+`m` et leur ventilation cover/requête ne figurent pas dans le reçu joint. Ils
+ne sont donc pas reproductibles depuis `RECU.txt` et ses six sorties. Même
+avec ces moyennes, remplacer `sum(m_e^2)` par `nombre_ancres*moyenne(m_e)^2`
+perd la variance et ne prouve pas la concentration du travail réel ; les
+sorties anticipées peuvent aussi différer entre routes.
+
+Surtout, `pretest_query_min_points` teste une fois par rectangle si
+`handle_points >= 512`. Il ne teste ni le `m_e` exact d'une ancre, ni le seuil
+60--100, et toutes les ancres du rectangle héritent du même choix. La
+coïncidence des moyennes en fait un hint de scheduling, pas « exactement » le
+routeur shallow. Pour q4, le cover historique de coefficient 3 ne contient
+pas nécessairement toutes les lignes qui influencent le rang ; le `m_e`
+autoritaire vient du `census_lines` global classifié, pas de cette taille de
+cover.
+
+La porte utile publie donc par ancre ou par buckets de `m_e` : lignes de
+support, lignes de census, seeds, complétions, tests de puissance réellement
+exécutés, early exits, fallbacks et temps. Elle compare ensuite scan exact et
+shallow sur le **même** `AnchorLineSet`. Une route dense seulement est une
+bonne ablation ; elle se décide sur `m_e` après construction de la source et
+reste fail-open ailleurs, sans réutiliser silencieusement le seuil des
+prétests.
+
+### R59 — profondeur bornée ne signifie pas population bornée
+
+Le calcul `8,4 -> 23,8` lorsque `n` est multiplié par quatre donne bien une
+pente terminale proche de `0,75`, mais pour la **moyenne des seeds par ancre**,
+pas pour `m_e`. Il mélange la taille du cover, le taux d'acuité, les deux routes
+de prétest et leur distribution. Le reçu ne publie ni `sum_e m_e`, ni ses
+quantiles, ni son maximum ; il ne permet donc pas encore d'affirmer
+`m_e ~ n^0,75`. Cette pente prouve que le rescan est à mesurer, pas quelle
+variable géométrique l'explique.
+
+La croissance de `m_e` n'invalide pas la borne locale
+`O(m_e log m_e + m_e*(kappa_e+1) + Z_e)` ; c'est précisément le régime où elle
+peut remplacer un rescan quadratique. Elle invalide seulement toute phrase qui
+déduirait `m_e=O(1)` de `kappa_e=O(1)`. Au rang fermé onze, q3 cherche au plus
+huit intérieurs et q4 au plus sept avant crédits globaux exacts ; les crédits
+locaux des patches ne réduisent jamais ces seuils terminaux.
+
+La question globale reste `M=sum_e m_e`, pas le maximum d'une ancre. Un petit
+nombre d'ancres denses peut être favorable au shallow ; une masse croissante
+d'ancres portant chacune un grand `m_e` peut encore rendre la construction des
+lignes superquadratique. Publier la pente de `M`, le travail de range-report
+et `Z` est donc obligatoire. Enfin, la borne shallow citée reste une borne de
+position générale : parallèles, coïncidences, concurrences et profondeur
+stricte gardent l'oracle quadratique borné puis `pending` au-delà du cap.
+
+Ordre inchangé mais mieux motivé : pinner l'enveloppe, exécuter le center-cover
+counter-only, construire la source signée et mesurer directement `m_e`, puis
+ouvrir le shallow sur la route dense. La WSPD locale q4 reste une ablation du
+range-report, pas un préalable.
+
+### R58 bis — remplacer le faux seuil statique par une bascule sur travail exécuté
+
+L'idée d'un backend hybride n'est pas nouvelle. La v3 proposait déjà le switch
+statique `carrier_count*cover_mass > switch_budget` entre scan axial et
+`EdgeCenterShallowCut` dans
+[`NOTE_AUDITEUR_LBVH_SPARSE_Q3_Q4_APRES_53815F_20260816.md`](../../morsehgp3D_v3/audits/NOTE_AUDITEUR_LBVH_SPARSE_Q3_Q4_APRES_53815F_20260816.md),
+et la v4 demandait encore une branche adaptative dans
+[`REPONSE_CLAUDE_E573888_FILTRES_CERTIFIES_ET_Q3_DEMI_PLANS_20260818.md`](../../morsehgp3D_v4/audits/REPONSE_CLAUDE_E573888_FILTRES_CERTIFIES_ET_Q3_DEMI_PLANS_20260818.md).
+Réintroduire seulement un seuil sur `m_e` ne généraliserait donc rien.
+
+L'incrément qui ne figure pas dans cet inventaire est une bascule **en ligne**
+sur le préfixe de travail réellement consommé :
+
+1. construire une fois `AnchorLineSet`, en temps linéaire dans les sites
+   reportés, avec les trits exacts `INTERIOR | EXTERIOR | ACTIVE_LINE` ;
+2. traiter les carriers dans leur ordre canonique par scan direct et compter
+   les prédicats réellement exécutés, sorties anticipées et replis exacts
+   compris ;
+3. lorsque ce cumul atteint le devis receipté du constructeur shallow pour le
+   bucket `(m_e,kappa_e,profil_degenerescence)`, construire l'index une fois et
+   lui soumettre seulement les carriers restants ;
+4. prouver le ledger exact-once
+   `primary_carriers=prefixe_direct disjoint_union suffixe_shallow`, conserver
+   le préfixe déjà produit et exiger le même objet que les routes `all-direct`
+   et `all-shallow`. Le RLE canonicalise les doublons résiduels ; il ne prouve
+   ni cette partition ni l'absence d'un support manquant.
+
+Nommer d'abord cette politique `adaptive_online_dispatch`, pas `ski_rental` :
+elle n'est deux-compétitive que si coût de location et prix d'achat sont connus
+dans la même unité et si le prix de construction est indépendant du jeu de
+données. Une construction exacte randomisée, ses listes de conflits et ses
+dégénérescences ne satisfont pas encore ces hypothèses. Le devis doit donc être
+calibré par compteurs pondérés, puis confronté au mur et à la HWM ; le reçu
+publie aussi le regret contre `min(all-direct,all-shallow)`.
+
+q3 est le premier terrain sûr de cette ablation. Pour q4, l'unité du préfixe
+est un seed carrier canonique avec toutes ses complétions. Les lignes des seeds
+déjà traités restent dans l'index comme témoins de profondeur et comme apex
+possibles ; seul leur droit d'émission comme carrier primaire est masqué.
+Retirer physiquement le préfixe créerait des manques, le réémettre créerait des
+doubles. Les paires croisant préfixe et suffixe suivent le carrier primaire
+canonique, jamais la date de bascule. Une capacité ou une dégénérescence non
+supportée conserve la continuation ou retourne son fate explicite ; elle ne
+déclenche jamais un fallback direct non borné.
+
+Le premier mode est `shadow_counter_only` : sur de petites et moyennes ancres,
+les trois politiques s'exécutent, l'oracle compare profondeur stricte, shell,
+`BallKey`, owner et digest, puis le routeur ne publie encore aucune décision.
+Cette étape donne enfin un seuil causal sans attendre que le constructeur soit
+assez mûr pour rerouter le produit.
 
 ### V57 — la vue signée commune q3/q4 est déjà disponible
 
@@ -426,6 +679,17 @@ Ces extrema sont exacts sur le produit continu des AABB, lequel sur-couvre le
 produit discret des nœuds : un succès est autoritaire, un échec reste `MIXED`.
 Graver cette nouvelle sémantique dans un wrapper nommé et un oracle indépendant
 plutôt que réutiliser silencieusement le rôle témoin actuel de `hmin_boxes`.
+
+Ne pas fabriquer le trit complémentaire avec `hmax4_boxes` : cette fonction
+calcule un `min_(a,b) max_x`, pas le maximum de `H` sur le produit. En une
+dimension, `A=[0,10]`, `B=[20,30]`, `C={9}` donne `hmax4_boxes=-84` alors que
+`H(0,20,9)=99`. Un futur certificat signé peut employer un vrai maximum de
+`H` et un majorant de `G=|(b-a) x (x-a)|^2`; le maximum continu exact de `G`
+est atteint sur au plus `8^3=512` triplets de coins. Ces trits restent une
+ablation counter-only **après** le center-cover : ils peuvent accélérer ses
+64 patches, mais le pavage local est plus fort et doit d'abord servir de
+baseline. La contre-fixture ci-dessus devient permanente avant toute branche
+`UNIVERSAL_EXTERIOR` de bloc.
 
 La bonne place n'est pas `rect_cover_handles`, qui reste l'autorité complète
 pour W3, secteurs, grille et témoins de profondeur. C'est le premier
