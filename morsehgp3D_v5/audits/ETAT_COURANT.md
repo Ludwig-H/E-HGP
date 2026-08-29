@@ -1,6 +1,92 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **Dernier pin fonctionnel de Claude relu :** `2168a295`. Les deux commits
+- **Dernier pin de Claude relu :** `4741f5b0`, documentaire ; le dernier source
+  du probe reste `bd35b88e`. V140 corrige à juste
+  titre V139 : si un patch fermé contenant le centre exact d'un seed porte un
+  fate `ALL_DEEP`, ce seed est profond, même si les autres patches incidents
+  restent vivants. Il n'existe pas d'objection d'exactitude ou de lot GPU à un
+  filtre placé après `q3_form` et la cellule, mais avant
+  `ensure_anchor_scan_affine` et toute matérialisation de lot. Le raccord
+  recommandé prépare un cache par `AliveRect`, mais ne calcule `g_AB[j]` qu'au
+  premier seed résiduel qui demande le bit `j`; il compose ensuite avec le vrai
+  `ha[ia]+hb[ib]` de l'ancre. Il passe cette table explicitement aux chemins
+  CPU/batched et applique le filtre sur l'hôte. Le masque `ABC` reste
+  oracle-only. Aucun de ces éléments n'est encore dans la lane produit.
+
+  Le ratio `0,295` n'est pas reçu comme rentabilité. Surtout, le probe compte
+  tous les seeds aigus de `A x B x C` sans les portes produit antérieures. Si
+  `core+f_min>=h3`, tous ses patches meurent, mais toute ancre vérifie déjà
+  `ha[ia]+hb[ib]>=h3-core` et meurt à la porte histogramme : ces seeds
+  n'atteignent jamais le fate V140. Ce biais peut dominer la cohorte
+  `core>=8`. Le probe exécute en plus un
+  `std::sort` exact autour du centre du rectangle mais lui facture le counting
+  sort en 32 classes autour de chaque ancre du produit ; il crédite treize
+  tests fixes par seed, agrège des opérations non équivalentes dans
+  `g_sommets` et exclut plusieurs coûts de construction. Sous `core_min`, son
+  dénominateur `oracle_seeds` ne contient que les rectangles pavés : `89,2 %`
+  est conditionnel à cette cohorte, pas une coupe globale. Le facteur `54`
+  compare donc des proxies successifs, jamais un temps produit. Après l'ablation
+  `CellGrid OFF/AUTO/FORCE`, le prochain jalon utile compare baseline, union
+  sparse du cœur avec le `W3` résiduel, puis cache `K=2` paresseux, sans
+  `block_mask`, avec vrai ordre, tests exacts évités, dénominateurs
+  global/sélectionné et digest identique sur CPU et batch hôte. Une route device
+  future devra obtenir la même sortie ; aucun résultat GPU n'est revendiqué.
+
+  V141 ne déplace pas cette priorité. `anchor_universal_kill` appelle déjà le
+  prédicat exact `in_spindle(Lane::kQ3)` du disque de centres d'une ancre ; la
+  boîte hors axe redécrit ce même lieu par une sur-boîte et ne peut donc pas
+  augmenter le taux de mort de `W3`. Elle reste utile au rectangle où `A` et
+  `B` varient. L'oracle rationnel, le run `K=32`, la base oblique et les
+  nouvelles mesures de nœuds annoncés en V141 ne sont pas suivis ; la
+  projection `0,43` demeure non reçue. La preuve d'arrondi établit la sûreté,
+  pas la minimalité : le `+1` superflu reste dans le source. Enfin
+  `min(U_A,U_B)` peut être un sous-comptage fail-open, jamais l'état exact
+  `NONE`; le classificateur ternaire conserve `max(U_A,U_B)`.
+
+  Le lemme hors axe de `eaea063b` couvre bien tous les vrais centres et les
+  échelles `2K` du code sont cohérentes. Son rayon entier conserve toutefois un
+  `+1` superflu, ses commentaires d'échelle sont périmés et son mutant doit
+  épingler `centres_hors_cover>0`, pas seulement le code 3. La correction
+  d'unité V139 reste reçue dans sa portée exacte : les scans plats indépendants
+  par patch ne paient pas sur les cohortes mesurées ; elle ne réfute ni le
+  verdict par seed ni un comptage partagé. Pour V138, le premier majorant
+  `NONE` à tester est le minimax lattice fondé sur les AABB existantes ; il
+  n'ajoute aucun octet par nœud, contrairement à une boule ou un k-DOP.
+
+  Le levier immédiat sur les témoins est l'identité, pas un nouveau rayon. Dans
+  un rectangle q3 vivant, tenter de récupérer et revalider les `core<=8` IDs.
+  Le `W3` exact peut alors chercher seulement de nouveaux témoins hors
+  `A union B`, jusqu'au besoin `h3-core-ha(a)-hb(b)`. Le cache de patch forme
+  ensuite l'union capée `core IDs union g_AB[j]`; à `core=8`, un seul témoin
+  distinct peut suffire au lieu d'exiger neuf succès de `g_AB`. `h_c` reste
+  différé et se compose par union ou par strates, jamais par addition nue.
+
+  Le noyau du probe q3 introduit à `bf2192f1` reste reçu comme oracle
+  counter-only. Le probe q3 à
+  patches est reçu comme oracle counter-only : cover q3, pavage rationnel,
+  médiatrices, crédit strict et composition `max(core,g_AB)` sont sûrs dans le
+  périmètre relu. Le run local
+  `terrain,n=2000,seed=3,K=4,rects=3000` reproduit `14,5 %` de blocs et
+  `14,4 %` du compteur `seeds_total` retiré, avec `51359` seeds jugés, `34277`
+  profondeurs vérifiées et zéro violation. Les trois CTests ciblés passent.
+  Ce signal n'est pas encore un reçu de gain : les sorties annoncées jusqu'à
+  V140 ne sont pas archivées, une seule graine est disponible et le probe
+  précède les portes de la lane produit. Les inversions successives
+  `K=8>K=4`, puis `K=2>K=4` après changement de verdict et d'ordre de scan,
+  confirment qu'aucun choix de résolution n'est encore reçu. La recommandation
+  antérieure d'un raffinement dyadique rescannant le
+  cover est retirée : le diagnostic V125 montre que ses niveaux internes
+  ajoutent surtout des scans complets. Le prochain comparateur éventuel est la
+  grille 2D par ancre déjà implémentée dans `CellGrid`, en bras q3
+  `OFF/AUTO/FORCE`, après attribution du mur q3 et ajout de la masse aiguë
+  perdue quand une grille tue l'ancre entière.
+  `MIXED` reste le verdict d'une relation nœud-témoin--patch ; un budget épuisé
+  donne `action=PENDING,pending_reason=CAP`. La version ponctuelle reste un
+  oracle borné, pas une route produit.
+  Le même commit embarque `narrow_cone_pregate`, qui ne certifie aucun secteur
+  et ne doit guider ni décision ni rentabilité ; la porte exacte emploie les
+  deux marges strictes des frontières du secteur central.
+- **Ancien pin shallow relu :** `2168a295`. Les deux commits
   postérieurs relus jusqu'à `dc01fdf0` sont documentaires ; ils ne déplacent
   pas le pin fonctionnel jugé.
   Son changement de priorité est reçu : ne pas construire maintenant
@@ -50,23 +136,84 @@
   doit rester fail-open à égalité ou projection nulle et recevoir oracle,
   mutant et coût avant emploi. V109 garde `g_AB/tau` prioritaire ; le secteur
   est seulement un terminal possible sur son résiduel mesuré.
-- **Pré-lecture du probe q3 de patches non committé :** son invariant
-  `mask_empty -> zero_true_seed` est pertinent et l'absence de coplanarité est
-  seulement lâche. Il calcule désormais un crédit `g_AB` counterfactual, mais
-  ni `h_c`, ni `tau`, et sa grille à l'échelle 4 ne doit pas être confondue
-  avec `CenterQ32Box`. Sa version courante rescane à plat les handles jusqu'à
-  64 fois, matérialise
-  explicitement `A x B x C` pour la vérité terrain et ne borne pas ce nombre
-  de triples : c'est un oracle borné à séparer du futur DFS partagé, jamais une
-  mesure d'architecture. Son préfixe de blocs est corrélé à l'ordre Morton et
-  son code 0 accepte encore zéro seed, zéro bloc mort ou zéro évaluation de
-  crédit. Le stamp compare en outre `MHGP5_PROBE_DIRTY` à `"1"`, alors que
-  CMake fournit `"OUI"/"non"`, et peut donc annoncer faussement un worktree
-  propre. Bottom-k, caps fail-closed, planchers distincts, cible CMake/CTest,
-  pin propre et sorties brutes précèdent tout taux reçu. L'oracle de crédit
-  doit enfin vérifier chaque bit contenant le centre d'un vrai seed, pas
-  seulement le cas où tous les bits du bloc meurent ; la contradiction
-  `core+g` déjà observée devient une fixture permanente avec mutant.
+- **Contre-lecture V110--V116 au pin `bf2192f1` :** le prédicat
+  `patch_credits==true` est un certificat `ALL` sonore ; `false` signifie
+  `UNKNOWN`. La boucle normale poursuit maintenant `g` sans ajouter `core`,
+  et le stamp compare correctement la valeur CMake à `"non"` : les réserves
+  antérieures sur ces deux points sont fermées. L'oracle par centre est une
+  amélioration réelle, mais partage toujours les primitives q3 et le cover du
+  probe ; l'énumération ponctuelle indépendante reste requise sur petites
+  fixtures. Le smoke impose les quatre planchers positifs ; le mutant impose
+  seulement `--min-profondeurs`, et la CLI les laisse tous nuls par défaut.
+  Seul un mode de reçu à planchers obligatoires peut produire une preuve non
+  vacue. Des caps fail-closed manquent encore sur les triples et vérifications
+  de profondeur.
+
+  La « fixture minimale » du mutant est une campagne générée. Le texte annonce
+  228 violations, la cible CTest courante en produit 115, et son code attendu 3
+  peut aussi provenir d'un plancher ou d'une autre contradiction. Réduire un
+  petit nuage explicite et donner au mutant un motif/code dédié. Le faible taux
+  de masques vides ne rend pas le masque inutile : mesurer `AB_alive` contre
+  le masque conditionné `ABC`, car retirer quelques patches vivants peut être
+  exactement ce qui rend tous les patches restants profonds. Former l'union
+  des masques avant `g_AB` sépare aussi `dead_by_core_f` du vrai marginal
+  `dead_by_g`. Pour un masque `M_C` non vide, avec `t0=max(0,h3-core)`,
+  `t_j=max(0,h3-max(core,g_AB[j]))` et
+  `t_C=max_{j in M_C}(t_j)`, l'économie structurelle est
+  `P[t0]-P[t_C]`, puis le ledger distinct-ID retire `c=a/c=b`.
+
+  Un bloc lourd n'est enfin jamais un fate mathématique : c'est une étiquette
+  de scheduling `RESIDUAL_HEAVY`. Ne pas mélanger les couches : le calcul du
+  patch porte `UNSEEN/PARTIAL_UNDER_CAP/EXHAUSTED_UNDER_CAP/SATURATED_GLOBAL`,
+  l'existence porte `EMPTY/NONEMPTY/UNKNOWN`, la profondeur porte
+  `NOT_APPLICABLE/ALL_DEEP/HAS_SHALLOW/UNKNOWN` et l'action porte
+  `PRUNE_NO_EMISSION/CONTINUE/PENDING`. Router le résiduel lourd vers le
+  raffinement local puis `h_c`, et publier les déciles croisés de masse,
+  diamètre normalisé, coût et masse retirée.
+- **Contre-réception V117--V131 :** le reçu
+  `masses_q3_seed3_20260829`, suivi à `19e6b99c`, est terminal : pin source
+  `dc01fdf0`, vingt runs sur vingt au code 0, même binaire et objets signés. Il
+  ne donne encore qu'une graine. Sur les ancres qui atteignent la boucle,
+  l'identité exacte est
+  `seeds[0]=seeds_killed_cells[1]+depth_killed[1]+candidates[1]` ; `seeds[0]`
+  est déjà postérieur aux morts d'ancre par `W3`, secteurs et grille. Le
+  compteur `q3_grid_acute_killed_by_all_dead` manque donc pour parler de masse
+  avant grille. Les extrapolations « terrain seule pathologique », « scanline
+  stabilisée » et « saturation à 42 % » ne sont pas reçues ; la dernière
+  dépend notamment d'un `K=16` que le source committé refuse.
+
+  La moyenne reçue `436323/207772=2,10` ancres par rectangle ne réfute pas tout
+  amortissement : le tableau de Claude place lui-même `73,7 %` des ancres dans
+  des rectangles d'au moins deux ancres, et ne mesure ni la masse de seeds ni
+  `|A|^2+|B|^2`. Les ratios V124/V131, la porte `core_min`, l'adaptatif et leurs
+  coûts n'ont pas de source ou de brut suivi. `AliveRect::core` est un minorant
+  de rectangle, pas le déficit exact de `W3`; il peut servir de feature de
+  scheduling, jamais de crédit additionnel.
+
+  Surtout, V122 est déjà réalisé par `src/lanes/cell_grid.hpp` : pavage entier
+  2D du disque par ancre, prédicat affine aux quatre sommets, comptage de toutes
+  les cellules par intervalles dans une seule passe du cover, oracle et mutants.
+  Ce code réfute l'impossibilité générale « un scan par patch », sans démontrer
+  pour autant une amélioration q3. Réponse constructive : ne pas écrire le
+  center-cover rectangle ; mesurer d'abord, même binaire et même entrée,
+  `--cell-min-sites=9223372036854775807/256/0`, avec digest identique, masses
+  aiguës complètes, évaluations, tests de profondeur évités, temps q3 et HWM.
+  Le secteur reste sain mais sans priorité de recherche jusqu'à une ablation
+  causale OFF/ON.
+- **Contre-audit de la porte de face q4 :** l'implication est saine sous
+  l'hypothèse que le vrai centre appartient au pavage q4 et survit au masque
+  fermé `AB/AC/BC`; la complétion elle-même ne peut être créditée par `h_c`
+  puisque `Phi32(q,c,d)=0` et le test exige `>0`. Aucun helper q4, cover de
+  centres complet ni oracle `n<=14` ne reçoit encore cette hypothèse : la porte
+  reste une proposition counter-only. Sans preuve d'existence, l'état sûr est
+  `existence=UNKNOWN,depth=UNKNOWN,action=PRUNE_NO_EMISSION`. `c` reste éligible
+  pour d'autres rôles dans la `completion_partition` et comme témoin, et reste
+  présent dans `exact_census_source`. Nommer le cœur de rectangle `rect_core4`,
+  sans le confondre avec le cœur de Jung du seed ni le compter deux fois.
+  Calculer `tau4` sans `h_c` d'abord, puis réserver `Phi32` au résiduel. Une
+  auto-jointure s'appuie sur la récurrence `Ord2` qui partitionne les couples
+  ordonnés exactement une fois ; scinder localement les `NodeRange` qui se
+  recouvrent ne suffit pas à établir seul ce ledger.
 - **Dernier pin sectoriel reçu :** `73b00f3f`. Il consolide le
   helper de `ed9c282f` et répare réellement V90/V92 : vrais cônes de
   `anchor_sector_kill`, produits mixtes entiers fermés, tous les seeds et

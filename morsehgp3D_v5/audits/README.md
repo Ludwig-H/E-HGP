@@ -106,10 +106,49 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   ensuite le chiffre sectoriel fautif. Les réponses V105--V109 ferment son
   activation inconditionnelle, demandent le marginal après `tau` et remplacent
   la fausse pré-porte de rayon par deux marges linéaires exactes autour du
-  secteur central. Le probe de masque q3 encore concurrent reste un diagnostic
-  d'absence, distinct de `g_AB/tau`, à échantillonner par bottom-k avant reçu.
-  `Lca3Forest` reste une
-  ablation de ledger, pas une route produit.
+  secteur central. La réception V110--V116 relit le probe q3 committé à
+  `bf2192f1` : son oracle ponctuel et ses deux CTests reçoivent le principe de
+  `g_AB`, mais ses tableaux à une graine restent sans sorties brutes et ne
+  mesurent pas le marginal après les portes produit. Le tableau non reçu
+  `K=8>K=4` ne motive plus un raffinement dyadique rescannant le cover : V125
+  diagnostique justement le surcoût des niveaux internes. `MIXED` reste le
+  verdict d'une relation nœud-témoin--patch dans le DFS. La version ponctuelle
+  demeure un oracle borné. Un bloc
+  dense est une classe `RESIDUAL_HEAVY`, jamais un fate de prune. Le
+  contre-audit q4 confirme la porte de face avant `D`, avec
+  `PRUNE_NO_EMISSION`, `rect_core4` compté une seule fois et `Phi32/h_c`
+  réservé au résiduel. La contre-réception V117--V131 reçoit seulement la
+  campagne produit seed 3 au pin source `dc01fdf0`; elle corrige la nomenclature
+  des masses et refuse les lois à une graine, le `K=16` sans source, le plafond
+  `42 %` et la généralisation de la faible moyenne d'ancres par rectangle.
+  Elle répond surtout à V122/V131 par le chemin déjà présent : `CellGrid`
+  construit un cover entier 2D du disque de chaque ancre et compte toutes ses
+  cellules en une seule passe structurée du cover. V132 ajoute un lemme hors
+  axe sûr et utile au probe rectangle, mais son rayon entier et ses commentaires
+  d'échelle demandent encore une finition. V139 corrige honnêtement son unité
+  de coût : le verdict reçu retire les scans plats indépendants par patch de la
+  priorité produit, sans prétendre réfuter toute résolution ni un comptage
+  partagé. V140 reçoit ensuite le prédicat de mort **par seed** et son placement
+  hôte avant le scan/lot, mais pas son ratio `0,295` : le probe crédite des
+  seeds qui meurent déjà à la porte histogramme, emploie l'ordre d'un tri exact
+  avec le coût d'un autre counting sort et publie des taux conditionnels aux
+  rectangles pavés. Le shadow constructif demande `g_AB[j]` paresseusement au
+  premier seed résiduel du bit, compose avec le vrai `ha[ia]+hb[ib]` de l'ancre
+  et compare CPU/batch hôte sans `block_mask`. Il tente d'abord de récupérer les
+  huit IDs au plus du cœur : leur union avec le `W3` résiduel, puis avec les IDs
+  `g_AB[j]`, exploite enfin sans double compte les témoins centraux, `h_a` et
+  `h_b`; `h_c` reste stratifié et différé. La correction
+  `U_W=max(U_A,U_B)` est intégrée et V138 reçoit un majorant minimax lattice
+  fondé sur les AABB, sans octet d'index supplémentaire. `W3` teste déjà le
+  fuseau exact et ne peut pas être renforcé par le même rayon ; l'union sparse
+  renforce sa **composition**, pas sa géométrie. V141 ne change pas ce verdict :
+  ses nouveaux oracles, `K=32`, chiffres obliques et mesures de nœuds ne sont
+  pas suivis, et sa projection `0,43` réemploie le proxy V140 déjà biaisé. Les
+  deux ablations admissibles
+  après attribution du mur q3 sont donc `CellGrid OFF/AUTO/FORCE` et ce shadow
+  patch par seed, avec compteurs complets et coûts réellement évités. Aucun
+  résultat GPU n'est revendiqué.
+  `Lca3Forest` reste une ablation de ledger, pas une route produit.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : décisions et dents restantes de la lane device.
 - [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.

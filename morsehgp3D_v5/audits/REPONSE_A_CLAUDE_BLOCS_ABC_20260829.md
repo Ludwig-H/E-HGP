@@ -5,12 +5,15 @@
   V67--V69 de `a0621897`, V68/V70--V72 de `91af69ff`, puis V71/V73--V75 de
   `b9646d1a`, mesure V74/V76--V78 de `50b85e16`, V79--V81 de `9a51a729`,
   V80/V82--V84 de `650b3cff`, V88--V100 jusqu'à `8cbee414`, puis la
-  réfutation shallow V101--V103 de `2168a295` et la réponse concurrente
-  non committée V104--V109, consolidées ci-dessous.
+  réfutation shallow V101--V103 de `2168a295`, V104--V109, le probe à
+  patches V110--V116 de `bf2192f1`, puis V117--V140 jusqu'au verdict par seed
+  de `bd35b88e`, consolidés ci-dessous.
 - **Statut :** prédicat idéal reçu au seuil ; enveloppe de scan reçue mais sans
   effet sur l'exposant ; ledger q3 pondéré maintenant factorisé sans
-  `A x B` ; AABB brut de $\Pi$ reçu comme résultat négatif, mais plafond de
-  coût V74 et certificat de centres par patches non reçus.
+  `A x B` ; AABB brut de $\Pi$ reçu comme résultat négatif. Le certificat q3
+  ponctuel par patches et son verdict par seed sont reçus sémantiquement comme
+  oracle counter-only ; leur gain causal après les portes produit, leur coût
+  réel, leur DFS de nœuds et leurs fractions multi-graines restent non reçus.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -633,7 +636,7 @@ $$L_S(Q,A,W)=\min_{q\in\mathrm{Vert}(Q)}\sum_{i=1}^{3}\left(\min_{r\in\left\lbra
   Pour un nœud témoin `W`, le contrat ternaire est explicite. Avec la borne
   supérieure exacte compagne `U_S`, poser
   `L_W=max(L_S(Q,A,W),L_S(Q,B,W))` et
-  `U_W=min(U_S(Q,A,W),U_S(Q,B,W))`, avec
+  `U_W=max(U_S(Q,A,W),U_S(Q,B,W))`, avec
   `U_S(Q,A,W)=-L_S(Q,W,A)`. Pour le témoin **strict**, `L_W>0` donne `ALL` et
   `U_W<=0` donne `NONE`, y compris `U_W==0`; tout autre cas donne `MIXED`.
   Ainsi `L_W==0` n'est jamais `ALL`, mais peut coïncider avec `NONE` si toute
@@ -643,6 +646,13 @@ $$L_S(Q,A,W)=\min_{q\in\mathrm{Vert}(Q)}\sum_{i=1}^{3}\left(\min_{r\in\left\lbra
   tout bulk, et une feuille diagonale est ignorée. Ces états sont un
   `PatchCreditState`; `NONE` ne signifie ni `EMPTY`, ni retrait d'un carrier,
   ni retrait du census.
+
+  Cette ligne corrige explicitement mon ancienne formule en `min`, signalée à
+  juste titre par V134/V136. Le crédit ponctuel est une disjonction
+  `L_A>0 || L_B>0`; exclure tout crédit sur `W` exige donc simultanément
+  `U_A<=0` et `U_B<=0`, soit `max(U_A,U_B)<=0`. Employer `min` restait
+  fail-open pour la décision finale parce qu'il sous-comptait `g_AB`, mais
+  classait à tort certains nœuds `NONE` et affaiblissait le DFS.
 
   La décision doit composer explicitement les crédits plutôt que comparer
   `g_AB` seul. Poser `a_min=min_a h_a(a)`, `b_min=min_b h_b(b)` et
@@ -1225,18 +1235,29 @@ $$\epsilon\,d\mathbin{\cdot}(P_k\mathbin{\times}y)\geq0\quad\text{et}\quad\epsil
   dégénérée. Le cas `t=G=0` passe aussi l'inégalité alors que la direction est
   indéfinie. Le commentaire « contenu dans un secteur » est donc faux ; le
   helper peut rester un classificateur diagnostique, jamais une porte de
-  décision sous cette forme.
+  décision sous cette forme. Il suppose en plus des secteurs euclidiens de
+  45 degrés, alors que les vecteurs entiers `u,v` du frame ne sont en général
+  ni orthogonaux ni de même norme. Le probe committé paie déjà
+  `box_sector_mask` avant cette pré-porte : son ledger est contrefactuel et ne
+  mesure aucune économie exécutée. Son modèle paie enfin les extrema sur les
+  passages, alors qu'une vraie pré-porte les éviterait précisément dans ce cas.
 
-  Une pré-porte sonore et plus directe existe néanmoins. Déterminer le secteur
-  de la projection du centre de boîte, puis évaluer seulement ses deux
-  demi-plans frontières. Pour chaque forme linéaire de coefficients `c_i`, la
-  variation exacte sur la boîte en coordonnées `w` vaut
-  `sum_i abs(c_i)*(hi_i-lo_i)`. Si les deux valeurs au centre sont strictement
-  supérieures à leur variation, toute la boîte vit dans ce secteur ; égalité,
-  centre sur frontière ou projection nulle restent fail-open. Ce fast path
-  demande deux formes et deux rayons de support, pas les seize extrema. Il doit
-  être confronté à `box_sector_mask`, puis chronométré en instructions ou mur :
-  `O(1)` ne signifie pas coût nul.
+  Une pré-porte sonore et plus directe existe néanmoins. Précalculer par ancre
+  `eps=sign(det(d,u,v))`, `n0=eps*(d cross u)` et
+  `n2=eps*(d cross v)`. Les huit normales de frontières sont alors
+  `n0,n0+n2,n2,-n0+n2,-n0,-n0-n2,-n2,n0-n2`. Pour
+  `w=lo+hi-(a+b)` et `g=hi-lo`, les signes et l'ordre des valeurs absolues de
+  `n0.w,n2.w` déterminent le secteur central ; une valeur nulle ou une égalité
+  de valeurs absolues échoue volontairement. Si ce secteur est borné par
+  `n_k,n_{k+1}`, demander strictement
+  `n_k.w > sum_i abs(n_k[i])*g[i]` et
+  `-n_{k+1}.w > sum_i abs(n_{k+1}[i])*g[i]`. Ce sont les deux minima exacts
+  sur `Box(C)`. Un succès rend directement le bit unique `1<<k`, sans aucun
+  des seize extrema ; un échec passe au fallback. Égalité, centre sur frontière
+  ou projection nulle restent fail-open. Un replay local non conservé n'a pas
+  trouvé de direction hors du bit rendu ; sans commande ni sortie brute, ce
+  diagnostic n'est pas reçu. Les fixtures frontière, origine, tangence et boîte
+  axialement longue doivent être gravées avant raccord.
 - **V109 — priorité à `g_AB/tau`, composition seulement sur le résiduel.** Les
   deux preuves sont sémantiquement compatibles, mais les payer toutes deux
   partout serait une erreur de routeur. `g_AB[64]`, puis `tau(c)`, vient en
@@ -1252,17 +1273,586 @@ avec trois graines, commandes et sorties brutes. Elle ne remplace ni le shadow
 `tau`, ni son oracle de prune, et un quotient de pentes reste interdit comme
 plafond théorique.
 
-Pré-lecture du `q3_patch_block_probe.cpp` encore concurrent : l'invariant
-`mask_empty -> true_acute_seeds==0` est la bonne première porte et l'omission
-de coplanarité reste fail-open. Le probe ne mesure toutefois que l'absence de
-centre, ni `g_AB`, ni `h_c`, ni `tau`; ne pas le décrire comme le seul
-mécanisme qui attaque la proposition. Sa grille de centres à l'échelle 4 est
-une relaxation distincte du type `CenterQ32Box` spécifié pour `Phi32` et doit
-porter un type et un oracle séparés. Enfin, `break` après les premiers
-`blocs_cible` réintroduit l'échantillon de phase Morton déjà rejeté : choisir
-les blocs par bottom-k haché avant toute fréquence ou comparaison entre
-familles. Attendre cible CMake, pin propre, plancher de seeds non nul et sorties
-brutes avant de recevoir ses taux.
+### Réception de `bf2192f1` et réponses V110--V116
+
+Le noyau géométrique du probe q3 est reçu comme oracle counter-only. Le cover
+coefficient 3 contient les tiers et intérieurs q3 associés à l'arête maximale ;
+le pavage rationnel à l'échelle `K`, les intervalles de médiatrices et le crédit
+strict par minimum concave restent fail-open. L'oracle localise désormais le
+centre rationnel de chaque vrai seed dans tous ses patches fermés et vérifie sa
+profondeur dès qu'un de ces patches est déclaré mort. Aucun faux prune n'a été
+trouvé. Après reconfiguration propre, les deux CTests ciblés
+`mhgp5_q3_patch_block_probe_smoke` et
+`mhgp5_q3_patch_block_credit_sum_mutant` passent.
+
+Le localisateur peut conserver au plus deux cellules fermées par axe dans ce
+constructeur : si `delta_i` est l'écart axial des deux boîtes, alors
+`delta_i^2<=d2.hi<4*rmax^2`, donc l'intersection des boîtes dilatées possède une
+largeur strictement positive. Un point n'appartient ainsi qu'à une cellule ou
+aux deux voisines sur une frontière. Graver cette largeur stricte et le cas
+frontière dans le selfcheck empêchera qu'un futur constructeur dégénéré rende
+silencieusement le cap `2` faux.
+
+Le mutant confirme qualitativement que `core+g_AB` est faux et que
+`max(core,g_AB)` est le repli scalaire sûr. La campagne générée à `n=2000`
+n'est toutefois pas une « fixture minimale permanente » : le texte annonce
+228 violations, tandis que le CTest committé sur 300 rectangles en produit
+115 et n'épingle que le code 3. Ce même code couvre toutes les autres erreurs
+de contrat ; une porte dédiée, ou un plancher explicite sur
+`violations_credit`, doit prouver que le mutant meurt pour la bonne raison.
+Réduire ensuite un cas en points, IDs, rectangle et patch explicites. Le
+commentaire annonçant une future cible CMake est déjà périmé.
+
+- **V110 — le masque n'est pas seulement un coût.** Le fate `EMPTY` isolé est
+  rare, mais le masque `ABC` peut encore avoir un fort marginal de décision :
+  un handle meurt lorsque **tous ses patches faisables** sont morts par crédit.
+  Comparer le même `g_AB` avec le masque global `AB`, puis avec le masque
+  conditionné `ABC`; seule cette ablation mesure ce que `C` apporte.
+- **V112 — signal reçu, robustesse non reçue.** Le run local
+  `terrain,n=2000,seed=3,K=4,rects=3000` reproduit exactement 14,5 % de blocs
+  morts et 14,4 % du compteur `seeds_total` retiré, avec 51 359 seeds jugés, 34 277
+  profondeurs vérifiées et zéro violation. Les onze autres sorties, leurs
+  commandes et leurs clés d'échantillon ne vivent dans aucun reçu ; une seule
+  graine ne permet pas d'appeler les fractions robustes. Ces « seeds retirés »
+  sont des rôles aigus counterfactual avant la lane, pas le marginal causal
+  après histogrammes, `W3`, secteurs, grille et cellule.
+- **V113 — `K=4` n'est pas reçu comme saturé, rien de plus.** Le gain annoncé
+  de `K=8` est compatible avec une perte due en partie à la relaxation du
+  pavage sur cette cohorte. Sans sorties brutes, il n'établit ni ce marginal,
+  ni que la résolution est l'unique verrou, ni qu'aucun plafond géométrique ne
+  subsiste. Le tableau `K=2/4/8` doit publier commandes, mêmes clés bottom-k,
+  caps non atteints, trois graines et coûts en patches, visites d'arbre, mur et
+  HWM.
+- **V114 — `K` est un paramètre d'oracle ; le produit doit raffiner localement.**
+  Rien ne privilégie `K=4` mathématiquement. Ne pas choisir `K` par le diamètre
+  absolu de la boîte des centres : une simple dilatation des coordonnées
+  changerait le routeur sans changer le problème normalisé. Partir plutôt d'un
+  arbre dyadique de patches et ne scinder que les patches admissibles résiduels,
+  demandés par au moins un masque de carrier et prioritaires en masse. `MIXED`
+  qualifie une relation nœud-témoin--patch dans le DFS ; il ne doit pas être
+  recyclé comme état du patch géométrique à subdiviser. Prioriser de façon
+  déterministe la masse résiduelle distinct-ID économisable par unité de coût,
+  avec profondeur et budget bornés ; budget épuisé donne
+  `action=PENDING,pending_reason=CAP`, jamais un prune. `K=2/4/8` reste
+  l'ablation uniforme qui borne le pouvoir de ce raffinement.
+
+  **Correction après V125 :** je retire la recommandation d'une descente
+  dyadique qui rescane le cover à chaque nœud. Le diagnostic de Claude montre
+  correctement pourquoi ses niveaux hauts ajoutent surtout des scans complets.
+  Un raffinement ne redevient candidat que s'il partage une passe entre toutes
+  les cellules, comme la grille 2D existante, ou si un oracle de nœuds démontre
+  un coût total inférieur au scan ponctuel. Il ne faut donc pas implémenter le
+  DFS proposé ici comme prochain jalon produit.
+- **V115 — conserver les deux chemins.** Le parcours de nœuds entièrement
+  descendu doit retrouver exactement les mêmes IDs, comptes capés et fates par
+  patch que l'énumération ponctuelle ; `ALL` ne fait que créditer en bloc et
+  `MIXED` descend jusqu'aux feuilles. Si un budget arrête `MIXED`, le résultat
+  devient un minorant fail-open dont la perte se mesure contre cet oracle.
+  Construire donc dans les tests un scan ponctuel borné, distinct des bornes de
+  nœuds, comme oracle permanent ; le scan actuel du probe est un premier
+  comparateur mais partage encore ses primitives q3. Aucun scan ponctuel
+  n'entre dans le produit. Comparer patch par patch et identité par identité,
+  pas seulement un taux agrégé. `Phi32` avec un support `C` construit ensuite
+  `h_c` : c'est un étage distinct, pas le remplacement de `g_AB`.
+
+  Le classificateur de nœud minimal est explicite. Pour chaque sommet `q` du
+  patch et la boîte témoin `W`, pré-calculer `d_A2(q)` vers `K*Box(A)`, puis
+  `lower_A=min_q(d_A2(q)-far_dist2(q,K*W))` et
+  `upper_A=min_q(d_A2(q)-near_dist2(q,K*W))`, symétriquement pour `B`.
+  Rendre `ALL` si `lower_A>0 || lower_B>0`, `NONE` si
+  `upper_A<=0 && upper_B<=0`, `MIXED` sinon. À une feuille, les deux bornes
+  rejoignent le prédicat ponctuel ; toute égalité reste fail-open.
+- **V116 — « dense » est une classe de routage, pas un fate.** La seule masse
+  `|A||B||C|` ne prouve aucune absence ni profondeur. Les couches restent
+  séparées : état de calcul du patch, existence, profondeur et action. Un
+  `RESIDUAL_HEAVY` est seulement une étiquette de scheduling vers le
+  raffinement local puis `h_c`; il ne change ni fate ni objet. Le poids utile
+  vient du ledger distinct-ID ou de `P[t_0]-P[t_C]`, après retranchement des
+  diagonales, pas du produit brut. Publier les déciles croisés masse, diamètre
+  normalisé, profondeur de raffinement, coût et masse réellement retirée.
+
+Le smoke impose les quatre planchers positifs ; le mutant n'impose que
+`--min-profondeurs`. Les quatre options `--min-*` valent encore zéro par défaut,
+donc la CLI accepte un run sans seed ni profondeur vérifiée. C'est acceptable
+pour une sonde exploratoire seulement si la sortie est marquée diagnostic ; un
+mode `--receipt` doit rendre les planchers obligatoires. Il manque aussi des
+caps fail-closed sur les triples et les vérifications de profondeur avant toute
+campagne d'échelle.
+
+### Contre-réception V117--V131 : conserver le diagnostic, changer de route
+
+Le reçu seed 3 est désormais terminal et suivi dans
+`receipts/masses_q3_seed3_20260829/` au commit `19e6b99c`. Il porte le pin source
+`dc01fdf04b999695ad97f0e9a6e2b31c36471a7f`, le SHA-256 binaire
+`a83f9a8dbbe98a428ad89fdf0d119a9e722dfd7a868d25dad3a8db6152136f0f`, vingt
+runs sur vingt au code 0 et les sorties brutes. Les vingt signatures d'objet
+ont été recalculées, ainsi que le ledger q3. Ce reçu permet un diagnostic à une
+graine ; il ne reçoit ni une loi multi-graines, ni les sondes dérivées de V121,
+V124 ou V131, dont le source, la commande et les sorties ne sont pas archivés.
+Le document V117 avait en outre été committé avant la fin de ce reçu ; c'est le
+commit `19e6b99c`, pas `b0827725`, qui rend la campagne seed 3 consultable.
+
+#### Nommer exactement les masses de la lane
+
+`seeds[0]` n'est pas la masse aiguë avant toutes les portes. `W3`, les secteurs
+et une éventuelle mort de l'ancre par grille ont déjà rendu la main avant son
+incrément. Sur les ancres qui atteignent la boucle de seeds, l'identité vérifiée
+est :
+
+`seeds[0] = seeds_killed_cells[1] + depth_killed[1] + candidates[1]`.
+
+Les noms non ambigus sont donc :
+
+- `q3_acute_after_anchor_gates = seeds[0]` ;
+- `q3_depth_inputs = seeds[0] - seeds_killed_cells[1]` ;
+- `q3_anchor_grid_acute_killed` : compteur encore absent, égal à la somme des
+  `nacute` des ancres pour lesquelles `anchor_grid_stage` rend `all_dead`.
+
+Pour `terrain`, seed 3, les lignes effectivement reçues sont :
+
+| $n$ | aigus après portes d'ancre | tués par cellule | entrées profondeur | tués profondeur | candidats |
+|---:|---:|---:|---:|---:|---:|
+| 2 000 | 420 699 | 0 | 420 699 | 332 156 | 88 543 |
+| 4 000 | 1 131 747 | 0 | 1 131 747 | 948 704 | 183 043 |
+| 8 000 | 3 679 817 | 4 613 | 3 675 204 | 3 300 704 | 374 500 |
+| 16 000 | 13 586 877 | 34 879 | 13 551 998 | 12 787 750 | 764 248 |
+| 32 000 | 56 061 324 | 140 439 | 55 920 885 | 54 372 988 | 1 547 897 |
+
+V117 mélangeait la colonne avant cellule dans son tableau et la colonne après
+cellule dans son texte. Le quotient `seeds/ancres` divise en outre une masse
+après plusieurs portes par `anchors[1]`, qui compte les ancres avant ces portes :
+c'est un ratio de travail agrégé, pas le nombre moyen de seeds d'une ancre
+survivante. Ajouter `q3_anchor_grid_acute_killed` est indispensable avant de
+revendiquer une masse « avant grille » ou le marginal complet de la grille.
+
+Une graine ne ferme pas les extrapolations V118. Les sorties reçues donnent des
+pentes locales d'ancres `terrain` comprises entre `1,105` et `1,230`, et les
+pentes candidates des quatre cohortes vont de `0,991` à `1,171`, pas les plages
+plus étroites annoncées. À `16000 -> 32000`, `scanline_single_pass` monte encore
+à une pente de seeds de `1,682`, avec `9,65` seeds par ancre ; il ne s'est pas
+« stabilisé à 1,50 ». `terrain` est la cohorte la plus raide observée, pas la
+seule dont ce ratio puisse croître. Attendre les seeds 4 et 5, puis publier
+médiane et dispersion des pentes locales ; ne pas ajuster un exposant sur cinq
+points corrélés et l'appeler une loi.
+
+#### V119 : fermer l'investissement, pas supprimer une porte saine
+
+La fraction `anchors_killed_sectors[1] / anchors[1]` ne pondère pas les ancres
+par leur nombre de seeds et ne mesure ni les tests de profondeur réellement
+évités, ni le coût marginal du secteur après les portes précédentes. Elle ne
+reçoit donc pas la conclusion « route produit définitivement close ». Le signal
+est néanmoins assez faible sur `terrain` pour arrêter d'investir dans un
+raffinement sectoriel. Conserver la porte actuellement saine tant qu'une
+ablation appariée `sector OFF/ON`, au même stade produit, n'établit pas que son
+coût dépasse son gain ; compter alors formes aiguës, seeds et tests de sites
+évités, coût du secteur, mur et objet identique. L'angle porte bien de
+l'information dans le prédicat ; la mesure dit seulement que les huit secteurs
+actuels en extraient peu sur cette cohorte.
+
+#### V120--V123 : une taxonomie, pas une interpolation exacte
+
+On peut conserver l'abstraction « cover fini d'un lieu de centres, puis crédit
+universel par région ». Elle doit toutefois être indexée par la portée
+(`anchor`, `WSPDRect x Handle`), le carrier, la forme du cover, sa résolution et
+l'algèbre des crédits. `W3` sur une ancre ponctuelle n'est pas `K=1` du probe :
+il décide le disque exact d'une ancre, tandis que le probe sur-approche les
+centres de toutes les paires d'un rectangle. Les secteurs sont encore un cover
+différent et incomparables à `W3`. La limite ponctuelle n'est atteinte que pour
+des endpoints fixes, des cellules emboîtées de diamètre tendant vers zéro, des
+inégalités strictes à marge positive et le domaine complet de témoins ; le
+probe ne raffine pas les boîtes `A`, `B` et `C`. Il n'existe donc pas ici de
+famille exacte gouvernée par le seul scalaire `K`.
+
+La « saturation à 42 % » reste non reçue. Le source committé accepte seulement
+`K=2,4,8` ; `--tuile=16` rend le code 2. Aucun brut, pin, hash ou code de sortie
+ne porte `K=16`, le rapport côté/rayon ou la descente adaptative. La sélection
+par hash contient 150 rectangles en espérance, pas exactement 150. Enfin, le
+probe matérialise la vérité terrain `A x B x C` et recompte des seeds aigus en
+amont des portes produit : `41,9 %` n'est ni un plafond asymptotique, ni une
+économie causale déjà obtenue avant matérialisation.
+
+La réponse positive à V122 existe déjà dans le dépôt : `src/lanes/cell_grid.hpp`
+et le théorème 10.5 de `docs/MATHEMATIQUES.md` pavent par ancre le plan
+bissecteur dans la base entière `bisector_basis`. Le prédicat témoin est affine
+en centre ; ses quatre sommets suffisent, le comptage reste entier exact, le
+localisateur rationnel est fail-open et possède oracle et mutants. Surtout, le
+code ne rescane pas le cover cellule par cellule : pour chaque site, les
+cellules témoins de chaque ligne forment un intervalle, accumulé par tableaux de
+différences. C'est déjà la version 2D partagée que V122/V131 projettent comme
+future. Pour un rectangle WSPD aux endpoints variables, en revanche, le lieu
+est généralement tridimensionnel et aucune base commune mince n'est encore
+certifiée.
+
+Je retire donc aussi la réponse antérieure « raffiner adaptativement les patches
+UNKNOWN » comme prochaine action. La monotonie de V124 est juste, mais V125
+montre qu'un arbre qui rescane ses niveaux internes peut coûter davantage que
+ses feuilles. Un `K(m)` fondé sur le seul nombre de témoins ne contrôle aucune
+marge géométrique et peut transférer la pente des seeds dans un coût en `K^2` ou
+`K^3`. Si les seeds bruts ont une pente locale `p=2,04`, obtenir un résiduel de
+pente `q=1,02` exige une fraction résiduelle qui décroît comme
+`O(n^(q-p)) = O(n^-1,02)` ; une coupe constante, même forte, ne suffit pas.
+
+#### V124--V131 : réponse constructive aux quatre questions
+
+- **V128 — mesure plausible, conclusion trop large.** La seule quantité
+  directement reproductible est `436323 / 207772 = 2,10` ancres par rectangle
+  q3 vivant pour `terrain,n=8000,seed=3`. Les histogrammes, coûts de patches et
+  variantes `K=16/core_min` viennent de sondes non archivées. Même le tableau
+  fourni contredit « l'essentiel de la masse vaut une ancre » : les rectangles
+  d'au moins deux ancres portent `73,7 %` des ancres, et ceux d'au moins quatre
+  en portent `41,2 %`. Il faut pondérer par seeds résiduels et coûts évités.
+  Enfin, un petit produit `|A||B|` ne borne pas
+  `|A|^2+|B|^2` : le cas `1 x m` suffit à réfuter le corollaire sur
+  `corner_histograms`. Mesurer séparément les deux tailles, leurs carrés et la
+  masse de seeds avant de fermer cette couture. Le résultat négatif recevable
+  est plus étroit : **les scans indépendants des patches terminaux du probe
+  n'ont pas de rentabilité démontrée**.
+- **V129 — ne pas monter aveuglément dans la WSPD.** Un rectangle ancêtre
+  agrège plus d'ancres mais élargit aussi les boîtes d'endpoints et affaiblit le
+  certificat. La seule expérience légitime est une coupe disjointe de l'arbre
+  de décomposition : tester une fois le nœud, descendre fail-open s'il reste
+  `UNKNOWN`, et imputer exactement à chaque nœud sa masse d'ancres et de seeds.
+  Mais ce n'est pas la prochaine priorité : la grille par ancre existe déjà et
+  fournit un comparateur plus fort et moins spéculatif.
+- **V130 — aucun prolongement de la hausse de `W3` n'est garanti.** Quand la
+  densité croît, les arêtes sélectionnées peuvent raccourcir en même temps que
+  le nombre de points croît ; la masse attendue du disque témoin peut donc
+  rester bornée. Un taux de mort croissant peut aussi masquer une base d'ancres
+  croissante. Publier les masses absolues avant/après `W3` et la pente du
+  résiduel sur trois graines ; ne pas extrapoler `19,7 -> 32,0 %`.
+- **V131 — non à l'optimum universel, oui au pivot.** Le conflit mesuré vaut
+  pour la réalisation « un scan du cover par patch ». Il ne vaut pas pour tous
+  les certificats régionaux : `CellGrid::build` décide ses 172 cellules
+  nécessaires dans une passe structurée, sans 172 scans. `W3` n'est donc pas
+  prouvé optimal sur une courbe commune. En revanche, ne pas implémenter le
+  center-cover rectangle tant que son propre oracle reste deux ordres de
+  grandeur sous l'équilibre est la bonne décision.
+
+La porte `core_min` de V131 est une idée de scheduling sûre — ne pas tenter un
+certificat ne retire rien — mais son interprétation est à corriger. `AliveRect::core`
+est un minorant universel du rectangle, pas « exactement le nombre de témoins
+manquant à W3 » d'une ancre. Les valeurs `0,0199--0,0320`, le bug réparé et le
+gain `97 %` n'ont toujours ni source committé, ni sortie brute, ni reçu. Même
+comme projection, le facteur `15--30` d'un pavage par ancre doit payer une
+grille par chaque ancre du rectangle ; avec la moyenne annoncée `2,10`, le
+rapport brut `512/(16*2,10)` vaut au plus `15,2`, pas `30`. Le facteur de nœuds
+`5--10` est lui aussi non mesuré. Ne pas multiplier ces deux optimismes pour
+annoncer un facteur favorable.
+
+Le prochain pas utile à Claude est donc court : aucune nouvelle géométrie
+produit. Vérifier d'abord que la lane q3 est encore un poste significatif dans
+le mur de bout en bout ; ses seeds sont traités en flux et seuls les candidats
+survivants sont stockés. Si ce poste justifie encore une ablation, comparer sur
+la lane existante, même binaire et mêmes entrées,
+`--cell-min-sites=9223372036854775807` (OFF), `256` (AUTO) et `0` (FORCE),
+d'abord à `n=2000/4000`. Ajouter les compteurs
+`q3_grid_acute_seen` et `q3_grid_acute_killed_by_all_dead`, car les compteurs
+actuels perdent précisément la masse des ancres tuées avant `seeds[0]`.
+Attention : `anchor_grid_stage` énumère déjà les carriers aigus pour choisir sa
+politique ; cette grille peut économiser le filtre exact et l'émission, pas
+faire disparaître à elle seule la pente du test d'acuité. Publier objet/digest
+identique, cellules construites et mortes, seeds tués par ancre et par cellule,
+évaluations de grille, tests exacts de profondeur évités, temps q3 et HWM.
+
+#### V132--V139 : recevoir le lemme, borner la réfutation, répondre à `W3`
+
+Le lemme hors axe de V132 est sain. Pour une paire ponctuelle, `t.d=0` et
+`|t|^2<=D^2/12` impliquent bien
+`2|t_i|<=sqrt((D^2-d_i^2)/3)`. Pour les boîtes `A,B`, la somme des carrés des
+étendues maximales sur les axes autres que `i` majore uniformément le membre de
+droite. Le stockage des patches à l'échelle `2K` et ses usages dans la
+médiatrice, le rayon, les sommets, le crédit et le localisateur sont cohérents.
+C'est un vrai resserrement counter-only à conserver.
+
+Deux finitions sont nécessaires avant de l'appeler reçu minimal :
+
+- le plus petit rayon entier sûr est
+  `rho2=isqrt_ceil((moff+2)/3)`, soit le plus petit entier `r` tel que
+  `3*r*r>=moff`. Le `+1` ajouté après la division dans `eaea063b` sur-gonfle
+  encore certains axes, notamment `moff=0`. Ce surcroît est sûr mais le nom
+  « boîte serrée » et le mutant `rho-moins-un` deviennent ambigus ; partir du
+  rayon entier minimal, puis graver un cas d'égalité où un cran de moins perd
+  le centre ;
+- les commentaires du probe parlent encore d'échelles `4`, `16` ou `K` alors
+  que l'ABI courante est `2K`. Les corriger avec le code. La preuve de
+  couverture suffit à la sûreté ; si l'inclusion dans l'ancienne boîte reste
+  revendiquée, définir `M/theta` et traiter explicitement les arrondis.
+
+Les trois CTests ciblés passent localement sur le worktree postérieur à
+`1c5ba207`. Le replay direct du mutant rend dix centres hors cover contre zéro
+au nominal. Ce n'est pas encore une réception propre : le binaire annonce un
+pin antérieur et `worktree_modifie=OUI`. La cible CTest n'épingle de plus que le
+code 3, partagé par plusieurs refus. Ajouter au mutant un plancher ou un motif
+dédié `centres_hors_cover>0`. Les « cinq cohortes x trois graines » et les
+747854 centres de V132 n'ont ni brut ni reçu. Enfin, `--rects=300` a sélectionné
+315 rectangles : la sélection par seuil de hash vise 300 en espérance.
+
+V133 est une bonne feature de scheduling, pas la quantité qu'annonce son
+texte. `core` est un minorant universel de rectangle ; il ne mesure pas le
+déficit exact de `W3` d'une ancre. Dans le probe, `core_min` ne saute que les
+scans `g_AB` : `build_patches`, `corner_histograms` et `block_mask` restent
+payés pour tous les rectangles. Les ratios qui ne comptent que
+`credit_evals` ne sont donc pas des murs ni des coûts complets.
+
+La correction V139 est bienvenue : comparer un crédit à huit sommets à un test
+ponctuel comme s'ils valaient une même unité invalidait V135. Elle justifie de
+retirer la route actuelle de la priorité produit. Sa portée doit cependant
+rester précise :
+
+- le commit `1c5ba207` compte les seeds de blocs entièrement morts, alors qu'un
+  verdict par seed peut exploiter un seul patch mort contenant son centre ; le
+  worktree concurrent mesure déjà cette différence, mais reste non reçu ;
+- `13*seeds` n'est pas la facture exacte : les seeds profonds sortent tôt, les
+  candidats peu profonds peuvent lire davantage, et une mort de bloc évite
+  aussi acuité, forme et clé tandis qu'une mort par seed ne les évite pas.
+  Rejouer l'ordre produit et compter les tests réellement évités par étage ;
+- construction du cover de patches, masques et histogrammes restent absents du
+  débit, donc le bilan courant demeure un majorant optimiste du gain ;
+- « majorant de toute règle `rectangle -> K` » ne vaut que pour le `K` et le
+  scan plat mesurés. Un autre `K`, un partage de calcul ou une sélection par
+  seed n'est pas borné par ce tableau. `CellGrid::build` est le
+  contre-exemple constructif à la borne « neuf coûts par patch » : une même
+  opération de site alimente un intervalle de nombreuses cellules.
+
+Le verdict recevable est donc fort mais borné : **les scans plats indépendants
+par patch du probe ne paient pas sur les cohortes mesurées ; ne pas les porter
+en produit**. Le lemme hors axe, la monotonie et les oracles restent des
+résultats négatifs utiles. Les pourcentages `K=16`, plafonds multi-cohortes,
+diagnostics de nœuds et caps du worktree restent counter-only tant qu'ils ne
+sont pas épinglés.
+
+- **V136 — oui.** La correction est intégrée plus haut :
+  `U_W=max(U_A,U_B)`, car le crédit est `L_A>0 || L_B>0`. `NONE` exige les deux
+  majorants non positifs. L'ancien `min` sous-comptait seulement le crédit et
+  restait fail-open pour la prune finale, mais son état de nœud était faux.
+- **V137 — ne pas réimplémenter le pavage par ancre.** `CellGrid` possède déjà
+  la base entière, le cover 2D, le comptage partagé, le localisateur et les
+  portes. Il énumère toutefois déjà les carriers aigus et n'a donc pas le même
+  objectif qu'une mort de bloc avant `A x B x C`. Le prendre comme autorité de
+  géométrie et comparateur de coût ; ne créer une seconde grille que si un
+  contrat non couvert est nommé.
+- **V138 — premier candidat exact pour `NONE`, sans octet d'index en plus.**
+  Avant d'ajouter une boule englobante ou un k-DOP à chaque nœud, exploiter la
+  structure minimax de `Phi32` avec l'AABB lattice déjà présente. Pour chaque
+  sommet $q$ du patch, poser :
+
+  $$S_A(q)=\min_{a\in A\cap\mathbb{Z}^3}\left(32\left\lVert a\right\rVert^2-2q\mathbin{\cdot}a\right),\qquad T_W(q)=\max_{z\in W\cap\mathbb{Z}^3}\left(2q\mathbin{\cdot}z-32\left\lVert z\right\rVert^2\right).$$
+
+  Puis utiliser :
+
+  $$\widetilde{U}_A(Q,W)=\min_{q\in\mathrm{Vert}(Q)}\left(S_A(q)+T_W(q)\right).$$
+
+  Pour chaque $q$ choisi, cette quantité majore
+  $\max_z\min_{q',a}\Phi_{32}(q',a,z)$ par l'inégalité max--min ; le minimum
+  des huit majorants reste donc un majorant. Les extrema sont séparables et
+  exacts : sur chaque axe, tester `floor(q_i/32)` et son successeur, clampés
+  dans la boîte lattice. Calculer symétriquement $\widetilde{U}_B$ et rendre
+  `NONE` seulement si les deux valeurs sont non positives. Cette borne ne
+  demande aucun stockage persistant ; sa sûreté découle du minimax, mais sa
+  comparaison de finesse avec le `U_S` global doit être mesurée, pas affirmée.
+  Une petite énumération exhaustive doit confronter chaque branche à tous les
+  sites et tuer les inversions `min/max`. La boule ou le k-DOP ne viennent
+  qu'ensuite si leur gain marginal rembourse leurs octets par nœud.
+- **V139 — `W3` ne peut pas être renforcé par ce lemme.** Pour le lieu exact
+  `C` des centres d'une ancre, un site `z` est créditable indépendamment des
+  autres exactement lorsque toutes les boules de centres dans `C` le
+  contiennent. `in_spindle(Lane::kQ3)` teste déjà cette condition exacte. Le
+  lemme hors axe décrit le même disque dans des coordonnées plus serrées ; il
+  resserre une sur-boîte de rectangle, mais n'enlève aucun centre valide de
+  `C`. Un compteur additif de sites universels ne peut donc être plus fort que
+  `W3`. Pour faire mieux il faut exploiter une couverture collective où des
+  témoins différents couvrent des régions différentes : ce sont précisément
+  secteurs, grille ou arrangement, avec leur coût supplémentaire. Le bon pivot
+  est de vérifier d'abord le mur q3 absolu et la pente de son résiduel sur trois
+  graines ; si la lane n'est plus un poste dominant, fermer ce chantier plutôt
+  que chercher un `W3` impossible à renforcer dans le même modèle.
+
+#### V140 — oui au fate par seed, mais seulement après les portes existantes
+
+La correction de `bd35b88e` est mathématiquement juste. Pour un vrai seed de
+centre exact `c`, il suffit qu'un patch fermé `Q` contenant `c` porte le fate
+`ALL_DEEP` pour conclure que sa boule est profonde. Sur une face, une arête ou
+un coin du pavage, **un seul** des patches fermés incidents certifié mort
+suffit ; les rendre tous reste nécessaire à l'oracle pour éviter un faux
+négatif et comparer exactement les compteurs. Un cap épuisé ou un prédicat
+`patch_credits` faux donne toujours `UNKNOWN`, jamais un patch mort.
+`violations_credit=0` est un bon contrôle empirique, mais la justification du
+prune reste l'implication précédente, à graver sur une fixture indépendante.
+
+Il n'existe donc pas d'objection d'exactitude ou de lot GPU au placement proposé.
+Le raccord propre n'est toutefois pas un simple appel local, et le probe révèle
+une correction plus importante que son modèle de coût :
+
+- préparer une table `Q3PatchCredits` par `AliveRect`, mais laisser chaque bit
+  `UNSEEN` jusqu'au premier seed résiduel qui le demande. Le premier hit construit
+  son minorant capé `g_AB[j]`, puis les hits suivants réutilisent son état
+  `PARTIAL/EXHAUSTED/SATURATED`. La passer explicitement au corps q3 ; ne pas la
+  cacher dans un scratch d'ancre ni dans `AnchorPretests`. Cette paresse évite
+  de payer les huit patches `K=2` quand seuls deux environ portent des centres
+  observés ;
+- après la porte histogramme, former une fois par ancre survivante
+  `f_anchor=ha[ia]+hb[ib]`, puis le bitset
+  `dead[j] <=> max(core,g_AB[j])+f_anchor>=h3`. La table de rectangle ne doit
+  pas figer ce fate avec `f_min` : le crédit exact déjà disponible dépend de
+  l'ancre ;
+- dans `scan_anchor_q3`, calculer `f3=q3_form(...)` une seule fois, appliquer la
+  cellule existante, puis `patch_dead_for_center(f3, dead)`, puis seulement
+  `ensure_anchor_scan_affine`. Ajouter un compteur distinct
+  `seeds_killed_patches[1]` ;
+- dans `build_q3_batch`, faire exactement le même test après la cellule et
+  avant `aidx`, `Q3BatchSeed`, `emit_if_alive` et toute copie de sites. Le
+  préflight actuel peut rester une borne supérieure sûre pour le premier
+  shadow, mais il peut encore router inutilement une ancre vers l'hôte comme
+  « oversized » avant de connaître ses survivants ; publier ce compteur ;
+- appliquer le fate **sur l'hôte** lors de la formation du lot. Aucun calcul
+  nouveau n'est requis dans le kernel et les seeds tués n'entrent ni dans le
+  lot ni dans le transfert. CPU intégré, repli hôte du batch et route device
+  doivent recevoir la même table et les mêmes compteurs.
+
+Le masque `ABC` du probe n'est pas nécessaire dans ce chemin candidat. Le seed
+réel fournit déjà son sommet `x` et son centre ; `g_AB`, `f` et le cœur rendent
+le patch universellement profond indépendamment du handle de `x`. Conserver
+`block_mask` et l'énumération `A x B x C` dans l'oracle seulement évite une
+jointure coûteuse et simplifie fortement le raccord. Une table invalide, un
+centre non localisé ou un patch sans fate mort échoue ouvert.
+
+V140 pointe en outre vers un candidat plus amont et probablement moins cher à
+tester avant son pavage : il
+sélectionne `core>=8`, mais compose encore le cœur et `g_AB[j]` par le repli
+scalaire `max`. Avec le seuil q3 courant égal à neuf, ce repli exige que
+`g_AB[j]` retrouve seul neuf témoins, même quand le cœur en possède déjà huit.
+Le stockage sparse borné spécifié plus haut retire exactement cette perte :
+
+- tenter `collect_universal_ids(...,cap=core)` une fois par rectangle vivant et
+  revalider chaque position sous le `RectId` courant. `postsep` peut avoir
+  transporté seulement `max(parent_core,fresh_core)` sans provenance ; si les
+  `core` positions ne sont pas toutes récupérées, conserver le `max` scalaire ;
+- pour une ancre survivante, initialiser le crédit par
+  `core+h_a(a)+h_b(b)`, puis scanner `W3` seulement hors `A union B` et en
+  ignorant les IDs du cœur. Ces trois domaines sont disjoints. Le test
+  `in_spindle(Lane::kQ3)` reste inchangé et exact ; seul le double compte est
+  retiré. Le même scan s'arrête alors au besoin résiduel, souvent un ;
+- pour chaque patch effectivement demandé, former l'union capée des IDs du
+  cœur et des nouveaux IDs `g_AB[j]`. Ajouter ensuite les comptes propres à
+  l'ancre `h_a(a)+h_b(b)`, pas leurs minima de rectangle. À `core=8`, un seul
+  nouveau témoin **distinct** peut ainsi saturer le patch ;
+- tant que le seuil n'est pas atteint, toute liste centrale contient au plus
+  `h3-1=8` positions. Les témoins `h_a` vivent dans `A`, ceux de `h_b` dans
+  `B`, et le central hors `A union B` : leurs cardinalités s'additionnent sans
+  matérialiser les IDs des histogrammes. `h_c` reste différé, car sa strate peut
+  recouvrir celle de `g_AB[j]`; il emploie l'union ou la formule stratifiée,
+  jamais une addition nue.
+
+Ce shadow sparse est le test direct de la généralisation demandée des témoins
+centraux, `h_a`, `h_b` et `h_c`. Il doit précéder tout pavage oblique : il
+attaque le facteur neuf observé avec des listes déjà bornées par le seuil, sans
+changer le lieu des centres ni construire `A x B x C`. Ce placement ne prouve
+pas qu'il domine le pavage : un témoin patch-local peut rester utile sans être
+universel dans `W3`. Le bras apparié ci-dessous doit décider sur coût et gain
+réellement marginaux.
+
+En revanche, le tableau V140 n'est pas encore un bilan « tous coûts » :
+
+- surtout, la sonde énumère les seeds aigus de `A x B x C` sans rejouer les
+  portes `histogrammes/W3/secteurs/grille` de la lane. Si
+  `core+f_min>=h3`, elle marque immédiatement les patches morts. Or
+  `ha[ia]+hb[ib]>=f_min` pour toute ancre : la porte histogramme produit a donc
+  **déjà tué toutes ces ancres** avec
+  `ha[ia]+hb[ib]>=h3-core`. Les seeds ainsi crédités à V140 n'atteignent jamais
+  le point d'insertion proposé. Ici `h3=9`; sous `core=8`, seules les ancres
+  dont `ha[ia]+hb[ib]=0` atteignent encore la lane. Ce biais est donc
+  précisément le plus suspect sous `core>=8`; `0,295` ne mesure pas le gain
+  incrémental de la route ;
+- la sonde obtient son ordre par `std::sort` de la distance exacte au centre de
+  la boîte **du rectangle**, mais lui facture `2m` comme un counting sort. Le
+  produit trie en 32 classes selon la distance au milieu de **chaque ancre**.
+  Les clés, les ex æquo et l'ordre ne sont pas les mêmes. Il faut soit exécuter
+  le vrai counting sort rectangle et mesurer cet ordre, soit facturer le tri
+  exact réellement exécuté ; son pouvoir de sortie anticipée ne peut pas être
+  conservé avec le prix d'un autre algorithme ;
+- `13` tests évités par seed est encore une moyenne extérieure. Rejouer, dans
+  l'ordre produit, le nombre exact d'itérations `q3_cert` qu'aurait consommé
+  chaque seed tué. Séparer le gain du verdict bloc, qui précède davantage de
+  travail, de celui du verdict seed, qui paie déjà acuité, `q3_form`, cellule et
+  localisation ;
+- `g_sommets` additionne comme si une comparaison de localisation, un sommet
+  en arithmétique entière et un test affine de site avaient le même coût. Il
+  omet construction du pavage, fates, mémoire et cache. `corner_histograms` et
+  `rect_cover_handles` sont déjà payés dans le produit et doivent au contraire
+  être marqués comme réemploi ; `block_mask`, les triples et les profondeurs
+  exhaustives sont oracle-only et doivent sortir du ledger candidat ;
+- avec `core_min`, `oracle_seeds` n'est incrémenté que dans les rectangles
+  pavés. Les `75,6--89,2 %` sont donc des taux **conditionnels à la sélection**,
+  pas la fraction de tous les seeds q3 supprimés. Publier
+  `acute_global/acute_selected/killed_selected/killed_global`, ainsi que le
+  nombre absolu de rectangles et ancres ;
+- le facteur `54` compare des proxies successifs, pas un temps produit. Le
+  pavage oblique annoncé par l'autre exploration n'a ni source, ni sortie brute,
+  ni reçu dans ce pin et ne doit pas alimenter l'extrapolation.
+
+Après l'ablation `CellGrid OFF/AUTO/FORCE`, le prochain incrément utile est
+donc un shadow désactivé par défaut, dans l'ordre de la lane, sans `block_mask`.
+Comparer trois bras appariés : baseline, union sparse du cœur avec le `W3`
+résiduel, puis cette union plus cache `K=2` paresseux. Ne compter que les
+ancres et seeds qui atteignent chaque étage, composer `g_AB[j]` avec leurs vrais
+`h_a(a)+h_b(b)`, employer le vrai ordre de témoins, puis publier coûts ajoutés,
+tests exacts évités, bits distincts demandés, taux global et conditionnel,
+temps q3 et bout en bout.
+Les portes minimales sont : fixture exhaustive indépendante incluant les
+frontières fermées ; égalité stricte et cap fail-open ; objets et compteurs
+identiques entre CPU intégré, batch hôte et device ; mutants
+`patch-dead-h-minus-one`, `patch-locate-one-boundary-cell`,
+`patch-sum-core-gab` et `route-ignore-patch-fate`. Ce dernier doit mourir sur
+le compteur positif et les tests évités tout en conservant volontairement le
+même digest. Une campagne reçue viendra ensuite avec bottom-k exact, trois
+graines, pin source, commandes et sorties brutes. Cela ouvre le raccord sans
+transformer `0,295` en promesse de performance.
+
+#### V141 — ne pas reporter la boîte serrée dans `W3`
+
+Réponse directe à V141 : **non**. À ancre fixée, le rayon hors axe redonne le
+disque de centres déjà employé pour définir le fuseau q3. Le helper
+`anchor_universal_kill` parcourt les sites et appelle le prédicat ponctuel exact
+`in_spindle(Lane::kQ3)`, soit `H>0` et `3*H*H>Xi`. Remplacer ce fuseau par la
+boîte englobante du même disque serait plus faible ; l'ajouter devant lui ne
+peut augmenter le taux de mort et paie un test supplémentaire. Le lemme est
+utile quand `A` et `B` varient dans un rectangle, car il resserre alors leur
+sur-boîte commune. Pour battre `W3` à ancre fixe, il faut exploiter une
+couverture collective des centres effectivement réalisables — secteurs ou
+`CellGrid` — et non redécrire le même lieu par axes. Si le mur de
+`anchor_universal_kill` devient visible, profiler et optimiser son ordre ou son
+prédicat exact ; ne pas ouvrir une nouvelle géométrie pour changer son pouvoir.
+
+La relecture adversariale de V141 corrige honnêtement deux mesures, mais son
+commit `4741f5b0` n'ajoute que le document. L'oracle rationnel de 146 030
+triangles, le run `K=32`, la base oblique, les largeurs 160--173 bits et le
+nouveau parcours de nœuds n'ont ni source, ni commande, ni brut suivi ; leurs
+chiffres restent counter-only. En particulier, la projection `0,43` multiplie
+le ratio V140 déjà biaisé par les portes amont par un facteur oblique non reçu.
+La formule « seul le lemme survit » est donc trop large : le verdict par seed et
+`U_W=max(U_A,U_B)` sont eux aussi des implications mathématiques reçues ; ce
+qui tombe ici, ce sont des mesures ou des routes, pas ces deux contrats.
+
+Deux précisions évitent de transformer les corrections en nouveaux contrats :
+
+- l'inégalité `floor((moff+2)/3)>=moff/3` prouve que l'arrondi est sûr. Elle ne
+  justifie pas le `+1` encore présent dans le source
+  `isqrt_ceil((moff+2)/3+1)`. Le rayon entier minimal sûr reste
+  `isqrt_ceil((moff+2)/3)` ; « pas de trou » est reçu mathématiquement, « pas
+  d'off-by-one » ne l'est pas au sens de minimalité ;
+- `min(U_A,U_B)` peut sous-compter sans produire de faux prune final, mais il
+  ne signifie jamais `NONE` pour la disjonction de crédits. Si ce raccourci est
+  conservé comme heuristique fail-open, lui donner un autre état ; le
+  classificateur ternaire exact garde `max(U_A,U_B)`. Un taux de visites plus
+  faible n'autorise pas à mentir dans l'API.
+
+Le geste utile n'est donc pas de porter le lemme dans `W3`. Conserver sa preuve
+comme fixture compacte, corriger rayon/commentaires/motif du mutant, puis
+mesurer d'abord l'union sparse `core IDs + h_a(a) + h_b(b) + nouveaux W3` :
+elle renforce la composition du scan exact sans changer son disque. Réparer
+ensuite le shadow V140 pour que son cache de patches commence **après**
+histogrammes, ce `W3` résiduel, secteurs et grille. C'est là seulement que le
+verdict par seed peut révéler son marginal réel.
 
 Fixtures permanentes minimales : direction exactement sur une frontière
 (deux bits), boîte dont une arête projetée traverse un cône sans coin intérieur,
@@ -1281,12 +1871,13 @@ Le split de `C` n'est pas « identique » dans tous ses usages. Employé seuleme
 pour mieux reconnaître `EMPTY`, il répète effectivement le mécanisme peu
 prometteur du raffinement post-séparation. Employé sous budget pour résoudre le
 résiduel avec `existence=NONEMPTY` et `depth=ALL_DEEP`, il peut supprimer des
-rescans et doit être évalué avec le contrefactuel V74. Le prochain geste de la
-fibre reste le schéma d'état et le center-cover counter-only sur **tous** les
-blocs, avec un front masqué mais sans `global_common` ni décision produit :
-l'oracle exhaustif stratifie ensuite les cohortes non capées. En
-parallèle, la relève exacte des histogrammes saturés reste le premier candidat
-à une activation produit, car elle attaque la boucle quadratique connue. Le
+  rescans et doit être évalué avec le contrefactuel V74. V140 retire en revanche
+  le besoin de calculer le center-cover sur **tous** les blocs : le chemin
+  candidat demande paresseusement le seul bit du centre de chaque seed résiduel,
+  tandis que l'oracle `A x B x C` complet conserve le schéma d'état et stratifie
+  les cohortes non capées. En parallèle, la relève exacte des histogrammes
+  saturés reste le premier candidat à une activation produit, car elle attaque
+  la boucle quadratique connue. Le
 routeur final entre `g_AB` et les histogrammes attend l'ablation des deux
 ordres. Si la lane `EMPTY` est retouchée, requalifier `OwnerD2Exact` comme
 baseline de lentille avant tout split ; celui-ci ne vient que si l'incertitude
@@ -1588,9 +2179,9 @@ peuvent chacun fournir un témoin différent.
 La ventilation ne doit toutefois pas prendre la forme d'une matrice
 `64 x number_of_handles`. Poser `H=h_q`. Dès que le DFS a certifié
 `|G_j|>=H`, ce patch est `SATURATED_GLOBAL` : `G_j` seul tue tout support dont
-le centre appartient au patch, indépendamment du handle carrier. Le patch
-reçoit un fate de profondeur, pas un fate géométrique `EMPTY`, et sa
-provenance devient volontairement opaque. Aucun accès à une cellule locale ni
+  le centre appartient au patch, indépendamment du handle carrier. Le patch
+  reçoit un état de calcul/provenance, pas un fate géométrique `EMPTY` ni une
+  action de bloc, et sa provenance devient volontairement opaque. Aucun accès à une cellule locale ni
 aucune soustraction depuis ce total capé n'est ensuite autorisé.
 
 Si la source est épuisée avant saturation, alors `|G_j|<=H-1` : huit positions
@@ -2141,24 +2732,32 @@ l'arbre entier ou un cover coefficient 4 prouvé complet ; le cover coefficient
 complétude témoin. Toute position certifiée hors de ce cover 3 appartient au
 bucket extérieur `S_bot`, jamais à un handle inventé.
 
-Pour un patch q4 sous le cap, poser :
+Pour un patch q4 sous le cap, `rect_core4` désigne exclusivement le cœur
+universel porté par l'`AliveRect` q4, hors `A union B`. Il ne désigne jamais le
+cœur de Jung dépendant de `(a,b,c)`, indisponible au stade `AliveRect` et que la
+lane actuelle calcule après matérialisation de cette face, avant sa boucle `D`.
+Poser :
 
-$$b_{i,j}^{(4)}(c)=\max\left(h_{\mathrm{core}}^{(4)},g_{\neg i,j}^{(4)}+\max\left(g_{i,j}^{(4)},h_{c,j}^{(4)}(c)\right)\right).$$
+$$b_{i,j}^{(4)}(c)=\max\left(\mathrm{rect\_core4},g_{\neg i,j}^{(4)}+\max\left(g_{i,j}^{(4)},h_{c,j}^{(4)}(c)\right)\right).$$
 
 Puis condenser les alternatives :
 
 $$\tau_i^{(4)}(c)=\max_{j\in M_i^{(4)}(c)}\max\left(0,h_4-b_{i,j}^{(4)}(c)\right).$$
 
-Dès que `h_a^4(a)+h_b^4(b)>=tau_i^4(c)`, toute complétion q4 de la face
-`(a,b,c)` est profonde : la lane peut supprimer cette seed **avant** son scan
-de cœur, sa corde et la boucle sur `D`. Aucun `h_d` n'est requis à ce premier
-étage. Une éventuelle complétion `d` ne peut pas avoir été faussement comptée
-comme témoin universel de sa propre sphère : au centre réel,
+Dès que `h_a^4(a)+h_b^4(b)>=tau_i^4(c)`, toute complétion admissible, possédée
+par `AB` et bien centrée de la face `(a,b,c)` est profonde : la lane peut
+supprimer le droit d'émission de cette seed **avant** son scan de cœur, sa
+corde et la boucle sur `D`. Aucun `h_d` n'est requis à ce premier étage. Sans
+preuve qu'une complétion existe, poser `existence=UNKNOWN`, `depth=UNKNOWN` et
+`action=PRUNE_NO_EMISSION`; seule une preuve de non-vacuité autorise ensuite
+`depth=ALL_DEEP`. Une éventuelle complétion `d` ne peut pas avoir été
+faussement comptée comme témoin universel de sa propre sphère : au centre réel,
 `Phi32(q,c,d)=0`, tandis que le crédit exige une stricte positivité pour tous
 les centres du patch.
 
-Cette mort ne retire `c` ni des témoins, ni de la partition des complétions, ni
-du census. Elle masque seulement son droit d'émission comme seed. Elle est
+Cette mort ne retire `c` ni de son éligibilité comme témoin ou complétion pour
+d'autres rôles, ni de la `completion_partition`, ni de `exact_census_source`.
+Elle masque seulement son droit d'émission comme seed dans cette face. Elle est
 compatible avec l'exact-once : si un tétraèdre peu profond existe, son centre
 appartient à un bit de `M_i^4(c)` et sa face canonique ne peut satisfaire la
 preuve de mort. Le choix du plus petit `PointId` entre les faces aiguës reste
@@ -2173,8 +2772,15 @@ canonique dépendent encore du quatrième point. Le ledger autoritaire reste
 `q4_seed_faces_residual`, `q4_completion_pairs_avoided` et
 `q4_hc_node_product_visits`.
 
-Le premier raccord est counter-only. Sur `n<=14`, chaque face annoncée morte
-doit vérifier par énumération que toute complétion valide possède au moins
+Le premier raccord est counter-only. Calculer d'abord le `tau4` obtenu avec
+`h_c=0`, puis réserver le produit `Phi32/h_c` aux carriers encore résiduels.
+Garder une seule convention sûre sans identités : `b` contient
+`max(rect_core4,...)` et le seuil reste `h4`. Soustraire `rect_core4` du seuil
+est faux si le cœur et `g/h_c` reconnaissent les mêmes sites. La fixture fixe
+`h4=8`, `rect_core4=4`, `g=4` sur exactement les mêmes quatre positions et les
+autres crédits à zéro : le maximum vaut quatre et ne tue rien, tandis que la
+convention soustractive sur-tue. Sur `n<=14`, chaque face
+annoncée morte doit vérifier par énumération que toute complétion valide possède au moins
 `h4` intérieurs stricts ; ON/OFF conserve `digest_balls` et la forêt. Les
 mutants prioritaires sont `q4-use-q3-patches`, `q4-require-coplanar-center`,
 `q4-cover3-claimed-complete`, `q4-add-g-plus-hc`, `q4-tau-empty-mask-zero` et
@@ -2191,6 +2797,14 @@ exact. Surtout, ne pas exiger que le handle visité en premier soit déjà la fa
 aiguë canonique : le terminal doit choisir le plus petit `PointId` parmi `c`
 et `d` dont la face avec `AB` est aiguë, conformément à la règle exact-once
 actuelle, ou employer un prédicat symétrique prouvé équivalent.
+
+Si l'auto-jointure de témoins `Phi32` visite deux nœuds qui se recouvrent, elle
+doit d'abord scinder leurs `NodeRange` jusqu'à obtenir des facteurs disjoints ;
+sinon un même `GeometryIndex` peut être crédité deux fois. Cette opération est
+sonore seulement à l'intérieur de la récurrence `Ord2` déjà spécifiée, qui
+partitionne les paires ordonnées exactement une fois. Une simple diagonale
+ignorée, ou des splits locaux sans ce ledger global, ne suffit pas lorsque les
+deux nœuds internes se chevauchent.
 
 Une vue unique `support_handles` est donc incorrecte en q4. Le cover fermé de
 coefficient 3 fournit, après sa porte, la `completion_partition` complète et
