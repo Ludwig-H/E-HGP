@@ -52,10 +52,21 @@
   est seulement un terminal possible sur son résiduel mesuré.
 - **Pré-lecture du probe q3 de patches non committé :** son invariant
   `mask_empty -> zero_true_seed` est pertinent et l'absence de coplanarité est
-  seulement lâche. Il ne calcule cependant ni `g_AB`, ni `h_c`, ni `tau`, et sa
-  grille à l'échelle 4 ne doit pas être confondue avec `CenterQ32Box`. Son arrêt
-  après les premiers blocs est corrélé à l'ordre Morton : bottom-k, cible
-  CMake, pin propre, non-vacuité et sorties brutes précèdent tout taux reçu.
+  seulement lâche. Il calcule désormais un crédit `g_AB` counterfactual, mais
+  ni `h_c`, ni `tau`, et sa grille à l'échelle 4 ne doit pas être confondue
+  avec `CenterQ32Box`. Sa version courante rescane à plat les handles jusqu'à
+  64 fois, matérialise
+  explicitement `A x B x C` pour la vérité terrain et ne borne pas ce nombre
+  de triples : c'est un oracle borné à séparer du futur DFS partagé, jamais une
+  mesure d'architecture. Son préfixe de blocs est corrélé à l'ordre Morton et
+  son code 0 accepte encore zéro seed, zéro bloc mort ou zéro évaluation de
+  crédit. Le stamp compare en outre `MHGP5_PROBE_DIRTY` à `"1"`, alors que
+  CMake fournit `"OUI"/"non"`, et peut donc annoncer faussement un worktree
+  propre. Bottom-k, caps fail-closed, planchers distincts, cible CMake/CTest,
+  pin propre et sorties brutes précèdent tout taux reçu. L'oracle de crédit
+  doit enfin vérifier chaque bit contenant le centre d'un vrai seed, pas
+  seulement le cas où tous les bits du bloc meurent ; la contradiction
+  `core+g` déjà observée devient une fixture permanente avec mutant.
 - **Dernier pin sectoriel reçu :** `73b00f3f`. Il consolide le
   helper de `ed9c282f` et répare réellement V90/V92 : vrais cônes de
   `anchor_sector_kill`, produits mixtes entiers fermés, tous les seeds et
