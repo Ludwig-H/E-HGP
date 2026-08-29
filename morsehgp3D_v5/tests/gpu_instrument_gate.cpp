@@ -1,5 +1,5 @@
-// MorseHGP3D v5 — porte de l'INSTRUMENT device recevable (audit
-// AUDIT_RENDEMENT_GPU_MULTICPU_20260828, § reception de 63deda74), partie
+// MorseHGP3D v5 — porte de l'INSTRUMENT device recevable (docs/GPU.md,
+// reception de 63deda74), partie
 // verifiable SANS nvcc : src/gpu/device_stats.hpp (statistiques d'executeur,
 // pic de flux) et le BatchStats de q3_lane_batched.hpp.
 //   1. Log2Hist : classes log2 gravees (0 -> 0 ; 1 -> 1 ; 2, 3 -> 2 ; 4 -> 3 ;

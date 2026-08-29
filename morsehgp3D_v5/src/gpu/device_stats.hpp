@@ -1,6 +1,6 @@
 // MorseHGP3D v5 — STATISTIQUES DE L'INSTRUMENT DEVICE (hote pur, sans CUDA :
-// verifiable par une porte CPU, tests/gpu_instrument_gate.cpp). Reponse a
-// audits/AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md (§ reception de 63deda74) :
+// verifiable par une porte CPU, tests/gpu_instrument_gate.cpp). Contrat
+// canonique : docs/GPU.md, reception de 63deda74 :
 //   - toutes les durees sont des SOMMES de temps-executeur sur les appels
 //     scan() de fils CONCURRENTS (`executor_ms_sum`) : aucune n'est un mur,
 //     aucune ne se soustrait au mur de lane (t_rects_ms, imprime lane_wall_ms) ;

@@ -7,10 +7,11 @@ Ce document est une **hypothèse d'architecture falsifiable**, pas un plan de
 capacité : chaque chiffre cite un reçu ou une mesure locale (ratios), les
 théorèmes à prouver sont listés avant le code (§ 6), et aucun run à 1 M, 10 M
 ou 30 M n'existe. Rédigé le 28 août 2026 à partir des reçus G4 n° 9–12, des
-mesures locales du 28 août, des audits v3/v4 cités au § 2, de trois
-conceptions contradictoires (`docs/analyses/echelle_20260828/`) et de l'audit
-ciblé `audits/AUDIT_PASSAGE_ECHELLE_20260828.md`, dont les objections sont
-intégrées au § 4 (marquées **[audit]**). Le scénario chiffré est **CPU sur une
+mesures locales du 28 août, des audits v3/v4 cités au § 2 et de trois
+conceptions contradictoires (`docs/analyses/echelle_20260828/`). Les décisions
+de passage à l'échelle sont intégrées ici ; seul
+`audits/ETAT_COURANT.md` porte leur verdict mutable et leur pin. Le scénario
+chiffré est **CPU sur une
 VM munie d'un GPU** : aucune résidence VRAM ni transfert n'est budgété tant
 que la lane résidente sur device (`GPU.md`) n'est pas mesurée.
 
@@ -177,7 +178,7 @@ plateaux par quotient. Seule la **résidence** change.
 | rectangles WSPD vivants (3 lanes, 242/pt × 16 o) | 3,9 Go | **39–50 Go** → par vague | 116–150 Go → jamais résidents |
 | boules censusées (aujourd'hui résidentes) | 100 Go | 1,0 To → SSD par seau | 3,0 To |
 | événements tous K (runs SSD, ×2 pour le tri externe) | 72 Go | 720 Go | 2,2 To |
-| comptage PREMIÈRE/DERNIÈRE (SSD, transitoire, par ordre) | 62 Go | 620 Go | 1,9 To |
+| comptage PREMIÈRE/DERNIÈRE exact (wire brut cumulé tous K) | ≈ 0,16 To | ≈ 1,60 To | ≈ 4,8 To |
 | fold K = 10 : facettes vivantes (22/pt attendu, ×2,5 majoré) | 2,5 Go | 17–32 Go | 55–106 Go |
 | fold K = 10 : enregistrements de composantes | **à instrumenter (L0)** | ? | ? |
 | RAM de pointe, objet complet (`inflight` = 1) | ~15 Go | ~110–140 Go | ~165–200 Go (non garanti) |
@@ -186,6 +187,10 @@ plateaux par quotient. Seule la **résidence** change.
 | SSD requis, `prefixe_k5` | 0,05 To | ~0,5 To | ~1,5 To |
 | temps, complet | ~25 min | 6–7,5 h | 17–20 h (3 sessions) |
 | temps, `prefixe_k5` | ~5 min | 1,5–2 h | 5–6 h |
+
+Les trois volumes de wire de la ligne PREMIÈRE/DERNIÈRE sont des
+**extrapolations linéaires conditionnelles** du compte exact à 200 k, pas des
+bornes prouvées à 1/10/30 M ; aucune de ces trois tailles n'a été exécutée.
 
 **[audit]** Rectangles : la seule lane q4 compte 21,8 M `AliveRect` à
 200 k, soit ≥ 17,4 Go à 10 M par extrapolation linéaire — la vague qui les
@@ -303,12 +308,26 @@ gardée à ajouter aux scripts du dépôt.
   porte à hachage constant injecté (résultat identique) et mutant
   `lifetime-by-hash-only` divergent. Coût de wire (`FacetOccurrenceWire`,
   octets écrits/lus, facteur temporaire du tri K par K) à graver en L2 avant
-  de recalculer le poste SSD — la ligne « 620 Go » du § 4.2 est un chiffre
-  d'empreinte, pas de clés complètes.
-- **T5 ordre intra-lot sans catalogue** : `fid(x) < fid(y)` ⟺
+  de recalculer le poste SSD. Le reçu `uniform` 200 k compte exactement
+  769 871 673 incidences ; son extrapolation linéaire ×50 et le wire logique
+  compact `4K + rank_u64 + slot_u8` donnent déjà environ 1,60 To bruts tous K
+  à 10 M, dont environ 569 Go pour K = 10, avant cadrage, tri et join. Une
+  compression préfixe après tri peut réduire le volume, mais ne remplace pas
+  la comparaison des clés complètes.
+- **T5 ordre intra-lot et rejeu autoritaire** : le catalogue fournit les
+  `facet_keys`, donc `fid(x) < fid(y)` ⟺
   `key(x) < key(y)` ; `post_list` triée par racine ≡ triée par `root_key` ;
-  `(facet_keys, final_canon_fid)` est une fonction du flux de deltas ;
-  invariant sans état `output = min(parents ∪ born)`.
+  `(catalogue, deltas)` détermine `final_canon_fid` ;
+  invariant sans état `output = min(parents ∪ born)`. Cette reconstruction
+  est conditionnée à un flux déjà accepté par le détecteur de rôles. Contre-
+  fixture minimale K = 1 : lot 0, événement `{A,B}` avec les deux facettes
+  actives ; lot 1, événement `{A,C}` avec `A` attachement déjà vu et `C`
+  active. Le résident relie `{A,B,C}` ; le delta suivant est invalide parce
+  qu'il fait renaître `A` alors que son bloc contenant déjà `B` est vivant. Un
+  rejeu union-find permissif peut conserver `B`, mais n'a aucune autorité pour
+  accepter cette violation de rôle. La porte doit refuser le flux avant union et
+  valider entièrement rôles, lots, niveaux, unicité, vivacité et sortie avant
+  toute union ; les deltas seuls ne reconstruisent jamais le catalogue.
 - **T6 → invariant `components <= live_aliases`** (fold vivant
   *small-to-large*, audit de résolution) : un `Alias` par facette encore
   réutilisable (`fid_u64`, clé, `seen`, rôles du lot, composante, liens

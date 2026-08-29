@@ -1,53 +1,41 @@
 # Audits de MorseHGP3D v5
 
-Ce dossier est le canal de travail entre l'implémenteur et l'auditeur. Il reste
-volontairement court : un état courant mutable, les questions encore utiles et
-leurs réponses. Les incidents fermés et les mesures munies d'un reçu restent
-consultables dans l'historique Git ou dans `../receipts/` ; ils ne sont pas
-recopiés au tip.
+Ce dossier est le canal de travail entre Claude et les auditeurs. Il reste
+court par construction : un verdict courant mutable, les seules questions
+encore actionnables et deux reçus de décision auxquels les documents
+canoniques renvoient.
+
+Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
+`backend=cpu_reference`, `profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`,
+`public_status=not_claimed`.
 
 ## Entrées actives
 
-- [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict courant et ordre de fermeture.
-- [`AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`](AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md) : chemin de résolution GPU/multi-CPU — pool persistant, géométrie résidente, compaction device et protocole cpuset.
-- [`AUDIT_PASSAGE_ECHELLE_20260828.md`](AUDIT_PASSAGE_ECHELLE_20260828.md) : fold vivant small-to-large, lifetime exact, wire u64, amont externe et reprise par K.
-- [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : question V15 et six raccords encore utiles après réception bornée du noyau ; le fold renvoie désormais à l'état courant.
-- [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : arbitrages V17–V30, diagnostic quadratique q3/q4 et raffinement post-séparation, puis passage des G0/G1 déjà implémentés à une réception device et à G2/L7 selon l'ablation.
-- [`QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md`](QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md) : réponse active sur le coût q3/q4 ; sépare diagnostic de pente et budget, donne l'enveloppe entière q3/q4, borne le raffinement, puis spécifie la généralisation WSPD par arrangement local de centres.
+- [`ETAT_COURANT.md`](ETAT_COURANT.md) : seul verdict mutable, pin jugé,
+  réserves et ordre de fermeture.
+- [`QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md`](QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md) : note active sur l'enveloppe q3/q4 et le prochain jalon d'arrangement shallow.
+- [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.
+- [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : décisions et dents restantes de la lane device.
 - [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.
-- [`REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`](REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md) : reçu des arbitrages V1–V4 désormais intégrés aux documents canoniques.
+- [`REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`](REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md) : reçu des arbitrages V1–V4.
 
-La question V15 reste au tip tant que ses corrections documentaires ne sont pas
-requalifiées. Les réponses générales de fermeture de Claude ont été
-requalifiées jusqu'au pin `556c421e` et retirées du tip ; leur contenu reste
-dans l'historique Git. La réponse V17–V30 a été consolidée dans la question L7
-conservée après réception bornée de la session 13 dans
-`../receipts/campagne_g4_v5_20260828_instrument_scale/`. La question V7–V14 est
-absorbée par le document mathématique canonique et l'état courant; son échange
-détaillé reste dans l'historique Git.
+Une question reste au tip seulement tant que sa décision ou sa preuve n'a pas
+été migrée vers `docs/`, `tests/` ou `receipts/`. Elle est ensuite supprimée ;
+l'historique Git conserve l'échange. Les sorties brutes et les mesures reçues
+ne sont jamais recopiées ici.
 
-## Convention de fraîcheur
+## Fraîcheur et validation
 
 `ETAT_COURANT.md` nomme le commit fonctionnel effectivement jugé et distingue
-les constats sur ce pin des observations sur un worktree sale. Le commit qui
-publie l'état peut naturellement être postérieur au pin jugé ; tout commit
-fonctionnel ultérieur rend le verdict périmé jusqu'à relecture. Un audit ne
-change jamais `public_status=not_claimed` et ne remplace ni un oracle ni un
-reçu reproductible.
+ce pin d'un éventuel worktree concurrent. Tout commit fonctionnel ultérieur
+rend le verdict périmé jusqu'à relecture. Le commit qui publie l'audit est
+naturellement postérieur au pin qu'il juge.
 
-Claude peut écrire ici une question ou une réponse. L'auditeur répond de façon
-actionnable, requalifie les corrections sur un pin propre et retire les échanges
-devenus inutiles après migration de leurs décisions vers `docs/` et de leurs
-preuves vers `receipts/`.
+`python tools/check_docs.py` exclut volontairement une partie des écrits
+d'audit. Avant publication, passer chaque Markdown de ce dossier à
+`tools.check_docs.validate`, puis exécuter `git diff --check`. Un vert
+documentaire ne prouve ni la fraîcheur sémantique, ni l'exactitude du code.
 
-Les réponses auxquelles les documents canoniques renvoient restent de courts
-reçus de décision. Les longues notes d'incident, réponses de fermeture et
-mesures déjà reçues sont retirées du tip dès que `ETAT_COURANT.md` les a
-requalifiées ; leur historique Git demeure disponible.
-
-Les Markdown suivent les règles KaTeX du dépôt. `python tools/check_docs.py`
-contrôle les documents produit, reçus et écrits de Claude de la v5, mais exclut
-délibérément les mots de l'auditeur — dont `README.md`, `ETAT_COURANT.md` et
-`REPONSE_A_CLAUDE_*`. Ceux-ci doivent être passés explicitement à la fonction
-`validate()` du vérificateur ; aucun vert documentaire ne prouve la fraîcheur
-sémantique ni la conformité du code.
+Un audit aide à fermer une couture ; il ne promeut jamais le registre et ne
+remplace ni un oracle indépendant, ni un reçu reproductible.

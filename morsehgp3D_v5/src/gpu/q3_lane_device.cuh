@@ -6,8 +6,8 @@
 // sont reutilises. Compile par nvcc seulement. Toute erreur CUDA est un refus
 // (exception std::runtime_error) — jamais un verdict invente.
 //
-// INSTRUMENT RECEVABLE (audit AUDIT_RENDEMENT_GPU_MULTICPU_20260828, § reception
-// de 63deda74) : toutes les durees de DeviceExecutorStats sont des SOMMES sur
+// INSTRUMENT RECEVABLE (docs/GPU.md, reception de 63deda74) : toutes les
+// durees de DeviceExecutorStats sont des SOMMES sur
 // les appels scan() de fils CONCURRENTS (`executor_ms_sum`) — aucune n'est un
 // mur et aucune ne se soustrait au mur de lane (t_rects_ms, imprime
 // `lane_wall_ms` par la CLI). Les etapes device (H2D, kernels, D2H) sont

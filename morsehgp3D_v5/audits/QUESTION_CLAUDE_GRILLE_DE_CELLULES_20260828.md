@@ -105,4 +105,4 @@ de publication, drain explicite et domaine `fold_inflight` refusé. Leur détail
 historique n'est plus une liste d'actions. Le fold vivant L2, ses créneaux et la
 qualification mémoire courante sont désormais suivis dans
 [`ETAT_COURANT.md`](ETAT_COURANT.md) et
-[`AUDIT_PASSAGE_ECHELLE_20260828.md`](AUDIT_PASSAGE_ECHELLE_20260828.md).
+[`../docs/ECHELLE.md`](../docs/ECHELLE.md).

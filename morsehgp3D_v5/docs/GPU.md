@@ -230,8 +230,10 @@ sans usage en campagne. Lecture recevable au sens de l'audit : **q3-kernel
 petit, transferts/orchestration et concurrence fortement suspects, causalité
 q4 encore ouverte.**
 
-**Instrument recevable (après `ab2c2563`, réponse à la réception de `63deda74`
-dans `audits/AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`)** — les demandes de
+**Instrument recevable (après `ab2c2563`, réponse à la réception de
+`63deda74`)** — le contrat canonique est tenu ici, ses portes dans
+`PLAN_DE_TESTS.md` et ses sorties brutes dans
+`../receipts/campagne_g4_v5_20260828_instrument_scale/`. Les demandes de
 l'auditeur, et ce que le code fait désormais :
 
 - « `sg3.wall` et `sg4.wall` additionnent des `scan()` concurrents ; ce ne
@@ -446,11 +448,13 @@ en blocs.
 
 ## Lane résidente sur device — conception (L7, 28 août 2026)
 
-Sources : audits de résolution des auditeurs
-(`audits/AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`, G0–G2), flux de
-conception contradictoire (`docs/analyses/gpu_20260828/`), reçu 12. Cadre
-inchangé, `public_status=not_claimed` ; aucun débit n'est cité sans le
-compteur d'occupation qui l'accompagne.
+Sources : flux de conception contradictoire
+(`docs/analyses/gpu_20260828/`), reçu 12 et décisions G0–G2 intégrées dans
+ce document. L'autorité courante et son pin sont tenus dans
+`audits/ETAT_COURANT.md` ; les résultats et hashes restent dans `receipts/`.
+Cadre inchangé, `public_status=not_claimed` ; aucun débit n'est cité sans le
+compteur d'occupation qui l'accompagne. Les sommes de temps-exécuteur ne sont
+jamais interprétées comme un mur.
 
 ### Décision
 
@@ -603,8 +607,9 @@ offsets, fold vivant), pas `threads = 48` seul.
   à `queue_cap = 1` (pic de file ≤ 1) ; plancher 1 000 travaux, `TIMEOUT`
   explicite, propre sous ASan/UBSan **et** TSan. Mutants `pool-serial`,
   `pool-drop-exception` (code 4).
-  **Erreur device fatale** (P1 de l'audit) : `close_fatal(exception_ptr)` rend
-  le pool à usage unique — l'admission ferme, la première erreur est mémorisée,
+  **Primitive hôte de fermeture fatale, raccord device encore ouvert** :
+  `close_fatal(exception_ptr)` rend le pool à usage unique — l'admission ferme,
+  la première erreur est mémorisée,
   les tickets **en file sont annulés** avec elle (jamais laissés en attente),
   toutes les attentes sont réveillées et les exécuteurs des travaux actifs ne
   sont plus réutilisés ; une exception de travail *ordinaire* reste, elle,
@@ -612,7 +617,12 @@ offsets, fold vivant), pas `threads = 48` seul.
   `soumis = réussis + échoués + annulés` et `actifs = en file = 0` — la porte
   bloque les deux exécuteurs pour que l'annulation ne soit pas vide (mesuré :
   soumis 6 = réussis 2 + annulés 4, six producteurs reçoivent l'erreur, aucun
-  n'est laissé en attente).
+  n'est laissé en attente). Ce scénario reçoit le mécanisme hôte explicite,
+  pas encore le confinement d'une panne CUDA : les wrappers q3/q4 propagent
+  actuellement une exception ordinaire via `submit_and_wait(ex.scan)` sans la
+  convertir en erreur typée ni appeler `close_fatal` avant la prise d'un autre
+  lot. Les quatre dents restantes sont tenues dans
+  `audits/ETAT_COURANT.md` et `audits/QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`.
 - **G1 — géométrie résidente et covers par indices (q3)** : `GpuGeometry`
   (positions uniques i32 téléversées une fois par lane, RAII) ; lot q3 porteur
   de `site_index` (u32 par site) et d'une géométrie par ancre
@@ -643,4 +653,3 @@ offsets, fold vivant), pas `threads = 48` seul.
 
 Verrous à poser aux auditeurs : `audits/QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`
 (V17–V30).
-

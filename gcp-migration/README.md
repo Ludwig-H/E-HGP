@@ -662,9 +662,13 @@ référence v5 à 50 k), jamais un claim : `public_status=not_claimed`.
 
 ### Phase optionnelle `SCALE_THREADS` (campagne contrebalancée fils × inflight × digest)
 
-Demandée en P0 par l'audit « rendement GPU et multi-CPU » du 28 août 2026
-(`morsehgp3D_v5/audits/AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`) : aucun reçu ne
-balaie 1 à 48 fils au même pin sur les mêmes entrées. La phase est activée par
+Le protocole canonique est décrit dans `morsehgp3D_v5/docs/GPU.md` et ses
+sorties dans
+`morsehgp3D_v5/receipts/campagne_g4_v5_20260828_instrument_scale/` : un premier
+balayage reçu couvre déjà 1, 2, 4, 8, 16, 32 et 48 fils sur
+`eight_clusters`, `n=16000`, `fold_inflight=1`, digest OFF/ON, une répétition.
+Il ne couvre pas encore la matrice multi-familles à 50 k, plusieurs valeurs
+d'`inflight` et des répétitions contrebalancées. La phase est activée par
 `SCALE_THREADS` (liste de fils) et transmise telle quelle par la session au
 script distant, qui applique ses défauts :
 
