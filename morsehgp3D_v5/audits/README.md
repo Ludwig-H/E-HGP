@@ -66,7 +66,7 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   non vides serait circulaire. `g_AB[64]` vient avant `global_common` : le
   masque d'intersection reste distinct des bits de compte saturés, et une
   fixture de témoins disjoints interdit leur confusion.
-  La réponse V82--V97 retire le repli brut par intervalles sur `Pi`, reproduit
+  La réponse V82--V100 retire le repli brut par intervalles sur `Pi`, reproduit
   son inertie au pin propre `650b3cff`, puis ramène la proposition de Claude au
   noyau centre/patch de `g_AB` : minimum concave aux sommets des patches,
   masque conservatif et front d'arbre réutilisé. Elle interdit le plan d'une
@@ -88,7 +88,12 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   même l'exclusion oracle des handles vides ne la resserre presque jamais. La
   seule intégration utile conserve donc la provenance, filtre l'émission du
   handle et garde ses points comme témoins et census. Cette ablation conserve
-  `A x B` et ne s'étend pas à q4. `Lca3Forest` reste une
+  `A x B` et ne s'étend pas à q4. La sonde de gain V98 identifie correctement
+  le rescan q3 comme seul coût évitable, mais son `36,1 %` n'est pas reçu : son
+  masque oublie l'orientation du frame et sa baseline ignore les prunes
+  `core/histogrammes`, `W3` et grille. Le prochain shadow réutilise le helper
+  reçu et rejoue ces étages avant de compter les tests de profondeur.
+  `Lca3Forest` reste une
   ablation de ledger, pas une route produit.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : décisions et dents restantes de la lane device.

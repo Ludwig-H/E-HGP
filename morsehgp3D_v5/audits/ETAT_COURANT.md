@@ -1,6 +1,16 @@
 # État courant audité de MorseHGP3D v5 — 29 août 2026
 
-- **Dernier pin de sonde relu :** `73b00f3f`, sur `main`. Il consolide le
+- **Dernier pin de Claude relu :** `8cbee414`, sur `main` et `origin/main`.
+  Son nouveau `fibre_gain_probe` ne reçoit pas encore les gains annoncés de
+  `36,1 %`. Il réimplémente le masque de `73b00f3f` avec les deux formes de
+  signe opposé et sans normalisation par l'orientation de `(d,u,v)` : sur la
+  propre fixture oblique positive du probe sectoriel, le vrai bit `0x01`
+  devient le bit opposé `0x10`. Il compte en outre les rescans de seeds déjà
+  retirés par `core+h_a+h_b`, `W3`, la mort de grille ou la cellule de seed, et
+  reconstruit cover/comptes par handle. Le périmètre « rescan q3 seulement »
+  est bien identifié, mais son chiffre reste à rejouer dans l'ordre causal du
+  produit.
+- **Dernier pin sectoriel reçu :** `73b00f3f`. Il consolide le
   helper de `ed9c282f` et répare réellement V90/V92 : vrais cônes de
   `anchor_sector_kill`, produits mixtes entiers fermés, tous les seeds et
   surmasque AABB conservatif, contre-fixtures obliques/frontière et cible CMake
@@ -26,7 +36,7 @@
   spécifie un préfiltre q4 à neuf classes avant le terminal axial. Les factorisations sont
   reçues mathématiquement ; le chemin q4 reste une proposition counter-only,
   pas une route produit déjà reçue.
-- **Compléments V79--V97 reçus comme diagnostics :** la sonde sépare le marginal
+- **Compléments V79--V100 reçus comme diagnostics :** la sonde sépare le marginal
   tous-profonds selon l'existence de neuf témoins communs. Ce shadow ne corrige
   pas le biais V74 et ne prouve ni que les patches sont nécessaires, ni qu'un
   certificat global de boîtes captera les témoins communs exacts. La bonne
@@ -692,8 +702,11 @@ protocole est condensé dans `QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md` et
   Le filtre oracle des handles réellement non vides ne gagne que `1/1/0/0`
   ancre. Le probe grave aussi les deux contre-fixtures obliques, la frontière
   à deux bits et le repli `0xff` à projection nulle ; le smoke ajouté et les
-  portes sectorielles/d'ancre rendent `11/11`. Ce replay reçoit le potentiel
-  local, pas le tableau publié ni un gain mur ;
+  portes sectorielles/d'ancre rendent `11/11`. Le smoke observe `43` handles
+  non vides et `120` seeds, mais son code de sortie ne verrouille encore que
+  `handles_sampled>0` : ajouter ce plancher de non-vacuité avant d'en faire une
+  porte sémantique. Ce replay reçoit le potentiel local, pas le tableau publié
+  ni un gain mur ;
 - `python tools/check_docs.py` vert sur `217` Markdown actifs,
   `python tools/check_implementation_status.py` vert sur `20` phases, et diff
   sans erreur d'espacement après consolidation.

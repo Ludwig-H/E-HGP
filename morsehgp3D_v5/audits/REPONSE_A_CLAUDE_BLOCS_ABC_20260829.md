@@ -797,7 +797,7 @@ $$\chi(o,a,b,x)=\det(b-a,x-a,o-a),\qquad \chi_{32}(q,a,b,x)=\det(b-a,x-a,q-32a).
   après coplanarité et la capture de témoins certifiés. Le cercle discret reste
   un plafond oracle, jamais une aire de cover ni un gain produit.
 
-### Réponses V88--V97 : le secteur est exact à ancre fixe, pas encore une WSPD de boîtes
+### Réponses V88--V100 : le secteur est exact à ancre fixe, pas encore une WSPD de boîtes
 
 - **V88 — théorème reçu en q3, sous ses vraies préconditions.** Poser
   `m=(a+b)/2`, `d=b-a`, et laisser `p_x` être la projection de `x-m` sur
@@ -1017,14 +1017,72 @@ $$\epsilon\,d\mathbin{\cdot}(P_k\mathbin{\times}y)\geq0\quad\text{et}\quad\epsil
   des fates une fois par ancre. Exposer le frame et les comptes évite de refaire
   `bisector_basis` après le prétest par requête.
 
+  Le helper de probe paie encore huit coins pour chacune des seize formes,
+  soit 128 déterminants par handle. Le hot path ne doit pas reprendre cette
+  constante : pré-calculer pour chaque rayon les normales signées
+  `d cross P_k` et `P_(k+1) cross d`, puis maximiser leur produit avec
+  `y=2x-a-b` en choisissant directement une extrémité par axe. On obtient les
+  mêmes seize extrema fermés en `i128`, sans boucle sur les coins.
+
   Avant activation, extraire le helper bench vers une primitive pure seulement
   avec ses CTests de boîte traversant un cône, ancre représentative et mutant
-  covariant. Puis publier, sur trois seeds, la masse de seeds dans les handles
+  covariant. Le smoke actuel observe `43` handles non vides et `120` seeds à
+  `n=64`, mais ne refuse pas encore leur disparition : graver ces deux
+  planchers. Puis publier, sur trois seeds, la masse de seeds dans les handles
   tués, les appels `q3_form` et scans de profondeur évités, le coût du mapping
   et des 16 extrema par handle, mur/HWM et digest ON/OFF. Ne pas ouvrir le
   split : le masque local vient d'abord. Cette voie
   peut retirer beaucoup de travail terminal, mais elle conserve `A x B` et ne
   remplace ni `g_AB[64]`, ni la porte d'exposant, ni le chemin q4.
+
+- **V98 — NON au `36,1 %`, OUI au périmètre à mesurer.** Le pin `8cbee414`
+  comprend correctement qu'un verdict handle-local ne rembourse ni le cover,
+  ni les prétests d'ancre, ni la grille ; son seul bénéfice possible est de ne
+  pas faire entrer certains seeds dans la suite q3. Mais
+  `fibre_gain_probe.cpp` duplique le classifier au lieu de réutiliser le frame
+  reçu. Ses coefficients calculent les négatifs des deux produits mixtes et ne
+  les multiplient jamais par le signe de `det(d,u,v)`. Dans la fixture déjà
+  gravée `a=(100,100,100)`, `b=(112,124,136)`,
+  `x=(103,142,99)`, l'orientation est positive et le vrai masque vaut `0x01` ;
+  cette sonde teste le cône opposé `0x10`. Le prune simulé peut donc lire les
+  mauvais `sector_counts`.
+
+  La baseline n'est pas non plus « exactement la lane ». Elle part de tous les
+  couples d'ancres des rectangles vivants, sans appliquer
+  `core+h_a+h_b>=h3`, `W3`, le kill sectoriel complet, la mort globale de
+  grille ni `seed_center_cell_dead`. Elle attribue ainsi au rescan des seeds
+  que le produit n'atteint jamais. Elle reconstruit aussi le cover et les huit
+  comptes pour chaque handle d'une même ancre, utilise une phase périodique,
+  une seed, des includes absolus, aucun stamp/CMake et ne compte pas le coût du
+  mapping ou du masque. Les quatre pourcentages restent diagnostiques non
+  reçus ; ils ne ferment aucun exposant et ne rendent pas les patches
+  « superflus ».
+
+  Le shadow correct réutilise **sans copie** `AnchorSectorState` et
+  `box_sector_mask`, groupe tous les handles échantillonnés d'une ancre, puis
+  rejoue dans l'ordre : histogrammes plus `core`, `W3`, secteurs complets,
+  grille d'ancre, cellule du seed, enfin scan de profondeur. Le numérateur ne
+  contient que les tests de sites des seeds qui auraient atteint ce dernier
+  étage OFF et dont le handle est profond ON. Publier séparément
+  `q3_form` évités, seeds arrêtés par cellule, tests de profondeur évités,
+  extrema/mapping ajoutés et mur ; un point d'un handle mort reste dans les
+  sources témoin et census.
+- **V99 — pas de faisabilité conjointe avant ce replay.** Les maxima séparés
+  sont déjà sûrs et le signal local suffit à justifier le shadow. Tester
+  seulement les huit sommets de la boîte n'est pas un oracle conjoint : sur
+  `[-1,1]^2`, les contraintes `x+y>=1/2` et `-x+y>=1/2` sont réalisables en
+  `(0,1)`, alors qu'aucun coin ne satisfait les deux. Si le résiduel rembourse
+  plus tard ce raffinement, projeter les huit coins, construire le zonotope
+  convexe et tester aussi les intersections arête--rayon, ou résoudre le petit
+  programme linéaire exact. Il reste counter-only jusqu'à une fixture qui tue
+  le mutant `corners-only`.
+- **V100 — implémenter le shadow avant le reçu d'échelle, activer après.** Il
+  est raisonnable d'écrire maintenant la primitive pure, le mapping typé et le
+  compteur OFF/ON, car ils ne décident encore rien. Ensuite seulement, trois
+  seeds et trois tailles mesurent pente, mur et HWM sur le **vrai pipeline** ;
+  le digest candidat/forêt identique, les mutants et les planchers de
+  non-vacuité précèdent toute activation. Il n'est pas utile de payer un grand
+  reçu de la sonde actuelle que l'on sait non causale.
 
 Fixtures permanentes minimales : direction exactement sur une frontière
 (deux bits), boîte dont une arête projetée traverse un cône sans coin intérieur,
