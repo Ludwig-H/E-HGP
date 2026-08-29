@@ -1,32 +1,33 @@
-// MorseHGP3D v5 — SONDE (jamais un claim) : le certificat de BLOC A x B x C
-// tue-t-il la ou le certificat de RECTANGLE A x B echoue ?
+// MorseHGP3D v5 — SONDE (jamais un claim) : la fibre A x B x C tue-t-elle
+// des blocs entiers, et combien de TRAVAIL cela eviterait-il ?
 //
-// Question posee par Louis le 29 aout : enumerer des blocs A x B x C — la paire
-// (a,b) par un rectangle WSPD, le troisieme point x par un handle — et tuer des
-// blocs entiers par temoins centraux. Les handles forment une ANTICHAINE, donc
-// des plages disjointes : (rectangle, handle) partitionne les ROLES
-// (arete, tiers) presents dans le cover. Distinct-ID, acuite et owner restent
-// necessaires avant de parler d'une partition des triangles q3.
+// Version 2, apres la reponse d'audit `REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md`,
+// qui a retire quatre formulations de la version 1. Les corrections :
 //
-// Cette sonde ne mesure PAS un certificat implementable : elle mesure le
-// COMPTE COMMUN EXACT, c'est-a-dire l'intersection des temoins des triplets
-// reellement valides du bloc. Ce n'est PAS l'ideal general : deux sous-domaines
-// peuvent etre tues par des ensembles de temoins incompatibles sans fournir h3
-// temoins communs. Un succes est un signal positif ; un echec ne refute rien.
+//   1. LE VRAI IDEAL est `min_exact_ball_depth` = min sur les triplets valides
+//      du bloc de la profondeur EXACTE de leur circumboule, pas le compte des
+//      temoins COMMUNS. Un bloc est reellement tuable ssi CHACUN de ses
+//      triplets est tue, donc ssi ce minimum atteint h_3. Le compte commun
+//      `tb` n'en est qu'un MINORANT : deux triplets peuvent mourir par neuf
+//      temoins incompatibles alors que leur intersection en contient moins de
+//      neuf. `tb < h3` ne refutait donc rien, et la v1 le laissait croire.
+//   2. LA BASELINE porte sur TOUTES les ancres actives du bloc, pas sur la
+//      seule paire (ra.first, rb.first). Le bloc meurt au niveau PAIRE ssi
+//      toutes ses ancres actives ont h_3 temoins universels de fuseau.
+//   3. LES BLOCS SANS TRIPLET VALIDE ne sont plus comptes comme « tuables » :
+//      aucun classifieur de BOITES ne les reconnait encore. Ils sont publies
+//      a part, comme une cible, jamais comme un acquis.
+//   4. LA MASSE CAPEE est publiee : les blocs trop gros pour la force brute
+//      sont comptes en blocs ET en triplets, pour qu'un cap ne se fasse pas
+//      passer pour une absence.
 //
-// Definitions, toutes exactes en entiers :
-//   - triplet VALIDE du bloc : (a,b,x) avec a dans A, b dans B, x dans C,
-//     |ab| > 0 et `is_acute_seed` vrai (lentille, acuite stricte en x, owner
-//     canonique) — exactement ce que la lane q3 emettrait ;
-//   - temoin UNIVERSEL du bloc : un site z du candidat de cover du rectangle,
-//     distinct des trois sommets, tel que `q3_power < 0` pour TOUS les
-//     triplets valides du bloc (donc strictement interieur a toutes leurs
-//     circumboules) ;
-//   - bloc TUABLE : au moins h_3 temoins universels — alors aucun de ses
-//     triplets ne peut survivre au filtre de profondeur.
-// Le comparatif PAIRE est seulement `in_spindle` sur la premiere paire du
-// rectangle. Il ne represente ni toutes les ancres actives du bloc, ni la
-// production ; les rapports entre colonnes restent diagnostiques.
+// Et la mesure est ponderee par le TRAVAIL evite : un bloc pese le nombre de
+// rescans de profondeur qu'il declencherait, soit (triplets valides) x (taille
+// du candidat de cover). Tuer un gros bloc ne vaut pas tuer un petit.
+//
+// Ce que la sonde ne fait toujours pas : proposer un certificat de BOITES.
+// Elle borne ce qu'un tel certificat pourrait au mieux atteindre, en payant la
+// force brute que le certificat devra eviter.
 //
 // Usage : mhgp5_block_witness_probe --family=F --n=N [--blocs=K] [--max-triplets=T]
 #include <algorithm>
@@ -79,24 +80,31 @@ int main(int argc, char** argv) {
   const u64 pas = std::max<u64>(1, blocs_total / std::max<u64>(1, (u64)blocs_cible));
 
   u64 vus = 0, echantillon = 0;
-  u64 vides = 0, tuables_bloc = 0, tuables_paire = 0, tuables_bloc_seulement = 0;
-  u64 trop_gros = 0, triplets_cumules = 0, temoins_bloc_cumules = 0, temoins_paire_cumules = 0;
-  std::vector<u64> hist_bloc(64, 0), hist_paire(64, 0);
-  std::vector<std::pair<i32, i32>> paires;
+  u64 vides = 0, capes = 0, capes_triplets = 0;
+  u64 tuables_bloc = 0, tuables_paire = 0, tuables_bloc_seulement = 0, juges = 0;
+  u64 triplets_cumules = 0;
+  // Ponderation par TRAVAIL : un bloc coute (triplets valides) x (candidats),
+  // c'est-a-dire les rescans de profondeur qu'il declenche.
+  u64 travail_total = 0, travail_tue_bloc = 0, travail_tue_paire = 0, travail_vide = 0;
+  std::vector<std::pair<i32, i32>> ancres;
   std::vector<Q3Form> formes;
-  std::vector<i32> sommets;  // sommets des triplets, pour exclure a, b, x des temoins
+  std::vector<i32> carriers;
+  std::vector<i32> candidats;  // sites du candidat de cover du rectangle
 
   for (const AliveRect& ar : alive) {
     const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
     rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), 3, &sc.handles, &sc.cover_nodes);
+    candidats.clear();
+    for (const NodeRef hz : sc.handles) {
+      const NodeRange rz = ix.range_of(hz);
+      for (i32 uz = rz.first; uz <= rz.last; ++uz) candidats.push_back(uz);
+    }
     for (const NodeRef h : sc.handles) {
       const u64 mon_bloc = vus++;
       if (mon_bloc % pas != 0) continue;
       ++echantillon;
       const NodeRange rc = ix.range_of(h);
-      // Triplets VALIDES du bloc.
-      formes.clear();
-      sommets.clear();
+      formes.clear(); ancres.clear(); carriers.clear();
       bool depasse = false;
       for (i32 ua = ra.first; ua <= ra.last && !depasse; ++ua)
         for (i32 ub = rb.first; ub <= rb.last && !depasse; ++ub) {
@@ -110,71 +118,73 @@ int main(int argc, char** argv) {
             if (!is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(ux))) continue;
             if (formes.size() >= max_triplets) { depasse = true; break; }
             formes.push_back(q3_form(pa, pb, px));
-            sommets.push_back(ua); sommets.push_back(ub); sommets.push_back(ux);
+            ancres.push_back({ua, ub});
+            carriers.push_back(ux);
           }
         }
-      if (depasse) { ++trop_gros; continue; }
-      if (formes.empty()) { ++vides; continue; }  // bloc sans triplet valide : mort sans certificat
+      // RETRACTATION 4 : un cap se publie, il ne se tait pas.
+      if (depasse) { ++capes; capes_triplets += (u64)formes.size(); continue; }
+      // RETRACTATION 3 : un bloc sans triplet valide n'est PAS un acquis —
+      // aucun classifieur de boites ne le reconnait encore.
+      if (formes.empty()) { ++vides; travail_vide += (u64)candidats.size(); continue; }
+      ++juges;
       triplets_cumules += (u64)formes.size();
+      const u64 travail = (u64)formes.size() * (u64)candidats.size();
+      travail_total += travail;
 
-      // Candidats temoins : les points des handles du rectangle (sur-ensemble
-      // fail-open du cover de chaque ancre du bloc).
-      u64 tb = 0, tp = 0;
-      for (const NodeRef hz : sc.handles) {
-        const NodeRange rz = ix.range_of(hz);
-        for (i32 uz = rz.first; uz <= rz.last; ++uz) {
-          bool sommet = false;
-          for (size_t k = 0; k < sommets.size(); ++k)
-            if (sommets[k] == uz) { sommet = true; break; }
-          if (sommet) continue;
-          const P3& pz = ix.upos[(size_t)uz];
-          bool universel = true;
-          for (const Q3Form& f : formes)
-            if (!(q3_power(f, pz) < 0)) { universel = false; break; }
-          if (universel) ++tb;
+      // RETRACTATION 1 : LE VRAI IDEAL — minimum sur les triplets du bloc de la
+      // profondeur EXACTE de leur circumboule. Sortie anticipee a h_3 : le
+      // minimum n'a pas besoin d'etre connu au-dela du seuil.
+      u64 min_depth = ~0ull;
+      for (size_t t = 0; t < formes.size() && min_depth >= h3; ++t) {
+        u64 prof = 0;
+        for (const i32 uz : candidats) {
+          if (uz == ancres[t].first || uz == ancres[t].second || uz == carriers[t]) continue;
+          if (q3_power(formes[t], ix.upos[(size_t)uz]) < 0 && ++prof >= h3) break;
         }
+        min_depth = std::min(min_depth, prof);
       }
-      // Comparatif ponctuel, NON apparie : temoins W3 de la premiere paire du
-      // rectangle. Une baseline de bloc devra traiter toutes les ancres actives.
-      {
-        const P3& pa = ix.upos[(size_t)ra.first];
-        const P3& pb = ix.upos[(size_t)rb.first];
-        for (const NodeRef hz : sc.handles) {
-          const NodeRange rz = ix.range_of(hz);
-          for (i32 uz = rz.first; uz <= rz.last; ++uz)
-            if (uz != ra.first && uz != rb.first && in_spindle(Lane::kQ3, pa, pb, ix.upos[(size_t)uz])) ++tp;
+      const bool kb = min_depth >= h3;
+
+      // RETRACTATION 2 : baseline sur TOUTES les ancres actives du bloc. Le
+      // bloc meurt au niveau PAIRE ssi chacune de ses ancres actives a h_3
+      // temoins universels de fuseau.
+      bool kp = true;
+      for (size_t t = 0; t < formes.size() && kp; ++t) {
+        if (t > 0 && ancres[t] == ancres[t - 1]) continue;  // ancres consecutives par construction
+        const P3& pa = ix.upos[(size_t)ancres[t].first];
+        const P3& pb = ix.upos[(size_t)ancres[t].second];
+        u64 n3 = 0;
+        for (const i32 uz : candidats) {
+          if (uz == ancres[t].first || uz == ancres[t].second) continue;
+          if (in_spindle(Lane::kQ3, pa, pb, ix.upos[(size_t)uz]) && ++n3 >= h3) break;
         }
+        if (n3 < h3) kp = false;
       }
-      temoins_bloc_cumules += tb;
-      temoins_paire_cumules += tp;
-      ++hist_bloc[std::min<size_t>(63, (size_t)tb)];
-      ++hist_paire[std::min<size_t>(63, (size_t)tp)];
-      const bool kb = tb >= h3, kp = tp >= h3;
-      if (kb) ++tuables_bloc;
-      if (kp) ++tuables_paire;
+
+      if (kb) { ++tuables_bloc; travail_tue_bloc += travail; }
+      if (kp) { ++tuables_paire; travail_tue_paire += travail; }
       if (kb && !kp) ++tuables_bloc_seulement;
     }
   }
 
-  const u64 juges = echantillon - vides - trop_gros;
-  std::printf("block_witness famille=%s n=%d h3=%llu rectangles=%zu blocs_total=%llu pas=%llu echantillon=%llu\n",
+  std::printf("block_witness_v2 famille=%s n=%d h3=%llu rectangles=%zu blocs_total=%llu pas=%llu echantillon=%llu\n",
               cloud_family_name(family), n, (unsigned long long)h3, alive.size(),
               (unsigned long long)blocs_total, (unsigned long long)pas, (unsigned long long)echantillon);
-  std::printf("  blocs SANS triplet valide = %llu (%.1f %%) ; blocs trop gros (> %zu triplets, non juges) = %llu\n",
-              (unsigned long long)vides, echantillon ? 100.0 * (double)vides / (double)echantillon : 0.0,
-              max_triplets, (unsigned long long)trop_gros);
+  std::printf("  blocs SANS triplet valide = %llu (%.1f %%) — CIBLE, pas un acquis : aucun classifieur de boites ne les reconnait\n",
+              (unsigned long long)vides, echantillon ? 100.0 * (double)vides / (double)echantillon : 0.0);
+  std::printf("  blocs CAPES (> %zu triplets, non juges) = %llu, portant au moins %llu triplets\n",
+              max_triplets, (unsigned long long)capes, (unsigned long long)capes_triplets);
   if (juges == 0) { std::printf("  aucun bloc juge\n"); return 3; }
-  std::printf("  blocs juges = %llu ; triplets valides par bloc = %.1f en moyenne\n",
+  std::printf("  blocs juges = %llu ; triplets valides par bloc = %.1f\n",
               (unsigned long long)juges, (double)triplets_cumules / (double)juges);
-  std::printf("  temoins universels : COMMUN_BLOC %.2f en moyenne, PAIRE_PONCTUELLE %.2f en moyenne\n",
-              (double)temoins_bloc_cumules / (double)juges, (double)temoins_paire_cumules / (double)juges);
-  std::printf("  SEUIL (>= h3) : commun_bloc %llu (%.1f %%), paire_ponctuelle %llu (%.1f %%), "
-              "commun_sans_paire_ponctuelle %llu (%.1f %%)\n",
-              (unsigned long long)tuables_bloc, 100.0 * (double)tuables_bloc / (double)juges,
+  std::printf("  IDEAL VRAI (min_exact_ball_depth >= h3) : %llu blocs (%.1f %%)\n",
+              (unsigned long long)tuables_bloc, 100.0 * (double)tuables_bloc / (double)juges);
+  std::printf("  BASELINE PAIRE (toutes ancres actives, W_3 >= h3) : %llu blocs (%.1f %%) ; ideal SEUL %llu (%.1f %%)\n",
               (unsigned long long)tuables_paire, 100.0 * (double)tuables_paire / (double)juges,
               (unsigned long long)tuables_bloc_seulement, 100.0 * (double)tuables_bloc_seulement / (double)juges);
-  std::printf("  histogramme des temoins de bloc (0..12) :");
-  for (size_t k = 0; k <= 12; ++k) std::printf(" %llu", (unsigned long long)hist_bloc[k]);
-  std::printf("\n");
+  std::printf("  PONDERE PAR LE TRAVAIL (triplets x candidats) : ideal %.1f %%, baseline paire %.1f %% du travail des blocs juges\n",
+              travail_total ? 100.0 * (double)travail_tue_bloc / (double)travail_total : 0.0,
+              travail_total ? 100.0 * (double)travail_tue_paire / (double)travail_total : 0.0);
   return 0;
 }
