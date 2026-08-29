@@ -44,8 +44,8 @@ int main(int argc, char** argv) {
   if (blocs == 0) return 3;
   const u64 pas = std::max<u64>(1, blocs / std::max<u64>(1, (u64)cible));
 
-  u64 vus = 0, groupes = 0, hist[9] = {};
-  double somme_secteurs = 0.0, somme_angle = 0.0, angle_max = 0.0;
+  u64 vus = 0, groupes = 0, hist[9] = {}, histb[9] = {}, non_sur = 0;
+  double somme_secteurs = 0.0, somme_angle = 0.0, angle_max = 0.0, somme_boites = 0.0;
   for (const AliveRect& ar : alive) {
     const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
     rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), 3, &sc.handles, &sc.cover_nodes);
@@ -63,6 +63,61 @@ int main(int argc, char** argv) {
           if (!bisector_basis(pa, pb, D2, 12, bu, bv)) continue;
           // Coordonnees du centre dans la base (bu, bv) du plan bissecteur, et
           // secteur d'appartenance parmi 8 (octogone ±u, ±v, ±(u+v), ±(u−v)).
+          // --- NIVEAU BOITES (ce qu'une implementation atteindrait vraiment).
+          // La base (u,v) est EXACTE puisque le test est par ancre ; seul x
+          // varie. Et u, v sont orthogonaux a d, donc p_x . u = (x - m) . u :
+          // LINEAIRE en x, donc un intervalle exact par axe sur Box(C).
+          // On double tout pour rester entier : 2(x-m) = 2x - (a+b).
+          const AxisBox bC = ix.box_of(h);
+          i64 Pu_lo = 0, Pu_hi = 0, Pv_lo = 0, Pv_hi = 0;
+          for (int i = 0; i < 3; ++i) {
+            const i64 s2 = (i == 0 ? pa.x + pb.x : i == 1 ? pa.y + pb.y : pa.z + pb.z);
+            const i64 lo = 2 * bC.lo[i] - s2, hi = 2 * bC.hi[i] - s2;
+            const i64 cu = bu[i], cv = bv[i];
+            Pu_lo += std::min(cu * lo, cu * hi); Pu_hi += std::max(cu * lo, cu * hi);
+            Pv_lo += std::min(cv * lo, cv * hi); Pv_hi += std::max(cv * lo, cv * hi);
+          }
+          bool touche_b[8] = {};
+          if (Pu_lo <= 0 && Pu_hi >= 0 && Pv_lo <= 0 && Pv_hi >= 0) {
+            for (int t2 = 0; t2 < 8; ++t2) touche_b[t2] = true;  // rectangle contenant l'origine
+          } else {
+            // Un convexe ne contenant pas l'origine tient dans un demi-plan par
+            // l'origine : son image angulaire est donc un ARC de largeur < 180
+            // degres, entierement determine par les QUATRE coins. Pas
+            // d'echantillonnage — un balayage de frontiere pouvait sauter un
+            // secteur entre deux points, et c'est ce qui produisait des
+            // violations de surete.
+            const double cs[4][2] = {{(double)Pu_lo, (double)Pv_lo}, {(double)Pu_hi, (double)Pv_lo},
+                                     {(double)Pu_hi, (double)Pv_hi}, {(double)Pu_lo, (double)Pv_hi}};
+            double an[4];
+            for (int t2 = 0; t2 < 4; ++t2) an[t2] = std::atan2(cs[t2][1], cs[t2][0]);
+            // Arc minimal contenant les quatre angles : on essaie chaque coin
+            // comme origine de l'arc et on retient le plus court.
+            double best_lo = an[0], best_w = 1e18;
+            for (int t2 = 0; t2 < 4; ++t2) {
+              double w = 0;
+              for (int u2 = 0; u2 < 4; ++u2) {
+                double dd = an[u2] - an[t2];
+                while (dd < 0) dd += 2 * 3.14159265358979;
+                w = std::max(w, dd);
+              }
+              if (w < best_w) { best_w = w; best_lo = an[t2]; }
+            }
+            const double pas2 = 2 * 3.14159265358979 / 8.0;
+            for (int t2 = 0; t2 < 8; ++t2) {
+              // secteur t2 = [-pi + t2*pas, -pi + (t2+1)*pas] ; intersecte-t-il l'arc ?
+              const double s_lo = -3.14159265358979 + t2 * pas2, s_hi = s_lo + pas2;
+              // Elargissement par epsilon : une direction exactement SUR une
+              // frontiere de secteur doit marquer les DEUX secteurs adjacents.
+              // C'est le sens conservateur — on en marque plus, jamais moins —
+              // et c'est la seule instabilite reelle, celle de q_x proche de 0.
+              const double eps = 1e-9;
+              for (int shift = -1; shift <= 1; ++shift) {
+                const double a_lo = best_lo + shift * 2 * 3.14159265358979 - eps, a_hi = a_lo + best_w + 2 * eps;
+                if (a_lo <= s_hi && s_lo <= a_hi) { touche_b[t2] = true; break; }
+              }
+            }
+          }
           bool touche[8] = {};
           double ax[64], ay[64]; size_t k = 0;
           for (i32 ux = rc.first; ux <= rc.last && k < 64; ++ux) {
@@ -87,7 +142,12 @@ int main(int argc, char** argv) {
           }
           if (k < 1) continue;
           int ns = 0; for (int s = 0; s < 8; ++s) ns += touche[s] ? 1 : 0;
+          int nb = 0; for (int s = 0; s < 8; ++s) nb += touche_b[s] ? 1 : 0;
+          bool sur = true;  // le niveau boites doit CONTENIR le niveau exact
+          for (int s = 0; s < 8; ++s) if (touche[s] && !touche_b[s]) sur = false;
+          if (!sur) ++non_sur;
           ++groupes; ++hist[ns]; somme_secteurs += ns;
+          ++histb[nb]; somme_boites += nb;
           double cosmin = 1.0;
           for (size_t t = 0; t < k; ++t)
             for (size_t u2 = t + 1; u2 < k; ++u2) {
@@ -105,7 +165,11 @@ int main(int argc, char** argv) {
               cloud_family_name(family), n, (unsigned long long)groupes);
   std::printf("  secteurs atteints sur 8 : moyenne %.2f ; histogramme 1..8 :", groupes ? somme_secteurs/(double)groupes : 0.0);
   for (int s = 1; s <= 8; ++s) std::printf(" %llu", (unsigned long long)hist[s]);
-  std::printf("\n  ouverture angulaire des centres : %.1f deg en moyenne, %.1f au pire (secteur = 45 deg)\n",
+  std::printf("\n  NIVEAU BOITES (ce qu'une implementation atteindrait) : moyenne %.2f ; histogramme 1..8 :",
+              groupes ? somme_boites/(double)groupes : 0.0);
+  for (int s = 1; s <= 8; ++s) std::printf(" %llu", (unsigned long long)histb[s]);
+  std::printf("\n  surete (boites contient exact) : %llu violations [doit valoir 0]\n", (unsigned long long)non_sur);
+  std::printf("  ouverture angulaire des centres : %.1f deg en moyenne, %.1f au pire (secteur = 45 deg)\n",
               groupes ? somme_angle/(double)groupes : 0.0, angle_max);
   return 0;
 }
