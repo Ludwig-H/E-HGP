@@ -266,11 +266,14 @@ inline void patch_verts(const Box128& q, const Box128& A, const Box128& B, i64 s
 }
 
 // Le temoin z est-il credite au patch ? max(L_A, L_B) > 0.
+inline u64 g_sommets = 0;  // atome de cout du credit : une evaluation de sommet
+                           // vaut au moins un test de site du filtre de profondeur.
 inline bool patch_credits(const PatchVerts& pv, const P3& z, i64 sc) {
   const i64 z4[3] = {sc * (i64)z.x, sc * (i64)z.y, sc * (i64)z.z};
   i64 la = 0, lb = 0;
   bool first = true;
   for (int k = 0; k < 8; ++k) {
+    ++g_sommets;
     i64 d2 = 0;
     for (int i = 0; i < 3; ++i) { const i64 t = pv.v[k][i] - z4[i]; d2 += t * t; }
     const i64 fa = pv.da[k] - d2, fb = pv.db[k] - d2;
@@ -381,6 +384,12 @@ int main(int argc, char** argv) {
   u64 patchs_vivants = 0, patchs_morts_credit = 0, credit_evals = 0, f_min_sum = 0, rects_paves = 0;
   u64 blocs_morts_credit = 0, seeds_dans_blocs_morts_credit = 0, violations_credit = 0;
   u64 oracle_seeds = 0, oracle_profondeurs = 0, centres_hors_cover = 0, centres_hors_masque = 0;
+  // BILAN NET PAR RECTANGLE, dans l unite du filtre de profondeur : un seed non
+  // retire coute 13 tests de sites en aval, une evaluation de sommet du credit
+  // en vaut au moins un. Un rectangle n est RENTABLE que si
+  // 13 * seeds_retires > sommets_payes. Le compte des rectangles rentables est
+  // le majorant de TOUTE regle rectangle -> K : aucune porte ne peut faire mieux.
+  u64 rects_rentables = 0; i64 bilan_net = 0; u64 sommets_total = 0;
   u64 plafond_atteint = 0;
   // ECHANTILLONNAGE PAR HACHAGE sur TOUTE la liste des rectangles vivants.
   // Prendre le prefixe biaise la population : l ordre de la vague WSPD trie les
@@ -418,6 +427,8 @@ int main(int argc, char** argv) {
       f_endpoints = amin + bmin;
       f_min_sum += f_endpoints;
     }
+    const u64 sommets_avant = g_sommets;
+    u64 seeds_retires_rect = 0;
     std::vector<u8> patch_mort;
     const bool paver = core_min < 0 || (i64)ar.core >= core_min;
     if (paver) ++rects_paves;
@@ -485,6 +496,7 @@ int main(int argc, char** argv) {
       if (tout_mort) {
         ++blocs_morts_credit;
         seeds_dans_blocs_morts_credit += vrais;
+        seeds_retires_rect += vrais;
       }
       // ORACLE DE CREDIT, VERSION FORTE (demande de l audit 262d2819). Pour
       // CHAQUE vrai seed du bloc, et non plus seulement quand tout le bloc
@@ -531,6 +543,11 @@ int main(int argc, char** argv) {
           }
       }
     }
+    const u64 sommets_rect = g_sommets - sommets_avant;
+    sommets_total += sommets_rect;
+    const i64 net = (i64)(13 * seeds_retires_rect) - (i64)sommets_rect;
+    bilan_net += net;
+    if (net > 0) ++rects_rentables;
   }
 
   std::printf("q3_patch_block pin=%s worktree_modifie=%s\n", MHGP5_PROBE_PIN,
@@ -551,6 +568,9 @@ int main(int argc, char** argv) {
               (unsigned long long)patchs_vivants, (unsigned long long)patchs_morts_credit,
               patchs_vivants ? 100.0 * (double)patchs_morts_credit / (double)patchs_vivants : 0.0,
               (unsigned long long)credit_evals);
+  std::printf("  BILAN NET (unite = test de site) sommets_credit=%llu bilan=%lld rects_rentables=%llu/%llu\n",
+              (unsigned long long)sommets_total, (long long)bilan_net,
+              (unsigned long long)rects_rentables, (unsigned long long)rects);
   std::printf("  PORTE core_min=%lld rects_paves=%llu/%llu (%.1f %%)\n", (long long)core_min,
               (unsigned long long)rects_paves, (unsigned long long)rects,
               rects ? 100.0 * (double)rects_paves / (double)rects : 0.0);
