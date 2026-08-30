@@ -383,11 +383,12 @@ un mutant `chord-skip-positive` qui restaure l'ancien saut, en plus du mutant de
 frontière `chord-nonstrict`, puis exercer la même fixture dans le scalaire et
 le shaped. Les portes de lane gardent ensuite la parité device.
 
-### Retour constructif sur le premier patch `chord-skip-positive`
+### Retour constructif au pin `e2ac9da2`
 
-La direction prise dans le worktree après `b82f1de1` est la bonne : le calcul
-de `Bz` et `ChordPieces::update` précèdent désormais le rejet du cœur dans les
-routes scalaire et shaped. Il reste toutefois une couture de contrôle : dans
+La direction prise après `b82f1de1`, puis commitée dans `e2ac9da2`, est la
+bonne : le calcul de `Bz` et `ChordPieces::update` précèdent désormais le rejet
+du cœur dans les routes scalaire et shaped. Il reste toutefois une couture de
+contrôle : dans
 les deux routes, le site certifié positif exécute encore `continue` avant
 `chord.dead(h4)`. Si ce site apporte le dernier morceau manquant, le compteur
 est exact mais la mort n'est jamais publiée. Le résultat dépend alors de
@@ -415,16 +416,15 @@ les deux ordres vivants. La vraie route scalaire donne actuellement
 `seeds_killed_chord=1/0` et `q4_completions=4/6`; après correction les deux
 ordres doivent donner `1` et `4`, avec le même candidat final.
 
-Rejeu local du worktree : les huit portes ciblées shaped, corde historique et
-batch passent, mais elles ne discriminent pas ce défaut. La porte shaped
-appelle explicitement `chord_on=false`, la fixture historique ne tue que
+Rejeu local avant la porte de masse : les huit portes ciblées shaped, corde
+historique et batch passent, mais elles ne discriminent pas ce défaut. La porte
+shaped appelle explicitement `chord_on=false`, la fixture historique ne tue que
 `chord-nonstrict`, et la parité batch compare deux routes portant le même
-`continue`. `mhgp5_mutants_gate` échoue donc avec le code 3 : 82 mutants sont
-déclarés et injectés, mais seulement 81 ont une porte attendue au code 4.
+`continue`. Elles ne pouvaient donc pas recevoir le correctif.
 
-Le candidat `chord_positive_gate.cpp` apparu ensuite améliore ce point sans le
-fermer. Son plancher `terrain n=2000` sépare bien la masse nominale annoncée du
-mutant et rend `mutants_gate.py` vert à `82/82/82` ; il est utile comme
+Le `chord_positive_gate.cpp` committé améliore ce point sans le fermer. Son
+plancher `terrain n=2000` sépare bien la masse nominale du mutant et rend
+`mutants_gate.py` vert à `82/82/82` ; il est utile comme
 régression d'intégration. En revanche, le patch encore dépendant de l'ordre
 dépasse lui aussi le plancher `23000`, donc cette porte peut être verte avec la
 couture de contrôle toujours fausse. Elle ne compare pas les deux permutations,
@@ -438,9 +438,8 @@ La fermeture utile est petite et atomique :
 1. graver les deux permutations dans une porte courte qui exerce
    `ChordPieces` comme oracle local, la route shaped et la vraie route scalaire
    `process_anchor_q4` avec `h4=1` ;
-2. faire attendre le code 4 au CTest `chord-skip-positive` ; les portes
-   existantes le laissent actuellement survivre avec le code 0 et
-   `mutants_gate.py` le refuse comme mutant sans porte ;
+2. faire attendre le code 4 de cette fixture exacte sous
+   `chord-skip-positive`, indépendamment du plancher empirique ;
 3. former `my_piece` pour tout site valide dans `q4_kernels.cuh`, y compris
    `lh>bound`, sans lui donner `my_wit`, puis rejouer cette fixture contre le
    vrai kernel lors de la prochaine session CUDA autorisée ;

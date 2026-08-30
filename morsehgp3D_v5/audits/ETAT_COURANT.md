@@ -7,23 +7,19 @@ Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
 
 ## Fraîcheur
 
-Dernier pin source relu : `eba24b9a`. Il ferme le header de parsing omis, la
-garde CLI de `s>=8` et committe le profiler q4. Les commits ultérieurs
-`62959613` et `4c286017` sont des contre-lectures ou stratégies documentaires ;
-les autres diagnostics reçus incluent `119b80b0` pour les corrections q4 et
-`9940668e` pour la sonde de fusion WSPD.
+Dernier pin source relu : `e2ac9da2`. Il reprend le build autonome et la garde
+`--s` de `eba24b9a`, puis committe la lecture des sites `P>0` par la corde dans
+les deux routes CPU, le mutant `chord-skip-positive`, une régression de masse
+`terrain n=2000` et les corrections de portée de `PROFIL_SEPARATION.md`. Le
+kernel CUDA n'est pas modifié par ce pin.
 
-Au moment du verdict initial, les sources suivies étaient identiques au pin.
-Depuis, Claude prépare dans le worktree une correction de la corde q4 dans
-`generate.hpp`, `q4_core_shaped.hpp` et le registre des mutants. Cette
-proposition non commitée est contre-relue dans l'addendum actif de
-`QUESTION_CLAUDE_Q4_APRES_Q3_20260830.md` ; elle ne change pas encore le pin
-source reçu. Les autres changements du worktree, notamment documentaires,
-restent conservés pour Claude. Les deux faux reçus `cf_*.txt`, qui contenaient
-uniquement l'échec d'invocation d'un binaire absent, ont été supprimés pendant
-le nettoyage. Toute autre modification source périme la fraîcheur du verdict ;
-elle ne périme pas les contre-exemples mathématiques ni les constats sur les
-commits nommés.
+Les sources suivies du worktree sont identiques à `e2ac9da2`; les changements
+restants sont des propositions documentaires conservées pour Claude. Les
+commits `62959613`, `4c286017`, `d421bd69`, `30c1dc30` et `3b729c01` portent les
+contre-lectures et réponses actives. Les deux faux reçus `cf_*.txt`, qui ne
+contenaient que l'échec d'invocation d'un binaire absent, ont été supprimés.
+Toute modification source ultérieure périme la fraîcheur du verdict, pas les
+contre-exemples mathématiques ni les constats attachés aux pins nommés.
 
 ## Verdict
 
@@ -105,36 +101,31 @@ depuis le pin ; la CLI CUDA n'a pas été recompilée localement sans `nvcc`.
 
 ## P1 — q4 : fermer la vérité avant de mesurer la vitesse
 
-### La corde au pin audité perd des témoins `P>0`
+### `e2ac9da2` récupère les témoins `P>0`, mais dépend encore de leur ordre
 
-Dans les routes scalaire, shaped et device, un site certifié `P>0` quitte le
-scan avant `ChordPieces::update`. C'est correct pour le cœur au centre
-`mu=0`, mais pas pour la corde : `P-mu B` peut devenir strictement négatif sur
-un morceau extérieur. Le défaut est fail-open ; il ne crée pas de fausse mort,
-mais rend `seeds_killed_chord` et les taux historiques ininterprétables comme
-mesure du certificat annoncé.
+Au pin précédent, un site certifié `P>0` quittait les routes scalaire, shaped et
+device avant `ChordPieces::update`. `e2ac9da2` corrige utilement ce placement
+dans les deux routes CPU. Sa régression trouve sur `terrain n=2000` exactement
+`24727` morts de corde contre `21691` sous le mutant, avec `9401` candidats q4
+dans les deux bras. Le défaut historique était donc bien fail-open et du
+travail est réellement évité sans modifier cette sortie finale bornée.
 
-La fixture entière déjà décrite dans
-`QUESTION_CLAUDE_Q4_APRES_Q3_20260830.md` ferme ce point avec `P(z_2)>0` et
-`B(z_2)<0`. Il faut appeler la mise à jour avant le saut du cœur, porter la
-fixture dans le scalaire et le shaped, puis tuer un mutant
-`chord-skip-positive`; la parité device vient ensuite.
+La couture de contrôle reste toutefois ouverte : le pin teste encore
+`chord.dead(h4)` après le `continue` des sites positifs. Si un tel site complète
+le dernier morceau, la décision dépend de l'ordre. La fixture indépendante à
+cinq points rend, sur la route shaped nominale,
+`dead=1,dead_by_chord=1` lorsque le positif vient en premier, mais
+`dead=0,dead_by_chord=0` lorsqu'il vient en dernier ; le mutant rend les deux
+ordres vivants. En parallèle, les trois CTests `mutants_gate`,
+`chord_positive` et `chord_positive_mutant` passent. La porte de masse est donc
+une bonne régression d'intégration, mais une autorité insuffisante pour cette
+couture.
 
-Le patch actif va dans cette direction, mais son premier état teste encore
-`chord.dead(h4)` après le `continue` des sites positifs : la décision dépend
-donc de l'ordre si un tel site complète le dernier morceau. Le kernel CUDA
-conserve en outre l'ancien saut. Rejoué localement, `mhgp5_mutants_gate` rend le
-code 3 : le mutant déclaré n'a aucune porte code 4 ; les portes shaped
-désactivent la corde et la parité batch partage le même oubli. La fixture
-minimale à cinq points et ses deux permutations sont données dans l'addendum de
-la réponse Q4, avec le motif de correction qui préserve la priorité du cœur en
-cas d'égalité.
-
-Claude a ensuite ajouté dans le worktree une porte `terrain n=2000` fondée sur
-un plancher de `seeds_killed_chord`. Elle rend le registre mécanique des mutants
-vert et constitue une bonne régression de masse, mais elle passe encore sur le
-`continue` dépendant de l'ordre et n'exerce ni shaped ni device. Elle doit donc
-rester complémentaire à la fixture exacte, pas la remplacer.
+Le kernel CUDA conserve l'ancien saut complet. La fermeture CPU tient à un
+test supplémentaire après l'update du seul cas positif, avant son `continue` ;
+les sites non positifs gardent le cœur prioritaire puis le test de corde
+historique. Il faut graver les deux permutations dans la porte exacte, puis
+former `my_piece` avant la branche du cœur dans le kernel.
 
 ### La sonde de corde actuelle n'est plus une autorité indépendante
 
@@ -272,10 +263,10 @@ elles ne remplacent aucune de ces preuves.
 
 ## Ordre de travail conseillé à Claude
 
-1. Recevoir `eba24b9a` sur CPU et limiter exactement le claim au parsing de
-   `--s`; garder CUDA non reçu tant que `nvcc` n'a pas rejoué les portes.
+1. Fermer `e2ac9da2` avec les deux ordres de la fixture q4 et la route device ;
+   garder CUDA non reçu tant que `nvcc` n'a pas rejoué la porte.
 2. Livrer le patch de vérité Gabriel/Gamma et le refus `require_exact`.
-3. Réparer la corde q4 tous sites avec fixture et mutant dans les trois routes.
+3. Limiter exactement le claim de parsing à `--s` dans la documentation.
 4. Fermer le ledger q4 et rendre les nouveaux compteurs non vacants.
 5. Refaire la porte WSPD contre le symbole produit, puis mesurer la mémoire.
 6. Après ces portes seulement, choisir entre optimisation q4 et fusion WSPD à
@@ -287,6 +278,12 @@ elles ne remplacent aucune de ces preuves.
   `-Werror` ; build Release canonique du workspace : succès à 100 % ;
 - portes CPU/API `s`, fold, séparation, q4-stage et fusion WSPD : 29/29. Les
   dix sondes s'exécutent, sans réparer les autorités contestées ci-dessus ;
+- au pin `e2ac9da2`, les CTests `mutants_gate`, `chord_positive` et
+  `chord_positive_mutant` passent 3/3 en 4,37 s ; la régression imprime
+  `24727/21691` morts de corde et `9401/9401` candidats sous nominal/mutant ;
+- harness shaped indépendant à cinq points, compilé sous `-Werror` : positif
+  premier `dead/chord=1/1`, positif dernier `0/0`, mutant `0/0` dans les deux
+  ordres ;
 - `python3 -m unittest tests.oracle.test_gabriel_counterexample -v` : 4/4 ;
 - `mhgp5_q4_chord_probe --family=uniform --n=2` : code 0 avec tous les
   planchers utiles à zéro ;
