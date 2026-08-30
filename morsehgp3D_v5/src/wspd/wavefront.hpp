@@ -21,12 +21,24 @@
 #pragma once
 
 #include <algorithm>
+#include <limits>
+#include <stdexcept>
 #include <vector>
 
 #include "../core/mutants.hpp"
+#include "../core/wide.hpp"
 #include "../tree/cloud_index.hpp"
 
 namespace mhgp5 {
+
+// SEPARATION MINIMALE DU PROFIL PRODUIT, imposee a 8. Justification de marge,
+// pas d exactitude : si M=max(rA,rB), la borne recue donne
+// R_dec,q >= (kappa_q*s-1)M. Le rayon uniforme est donc > M pour les trois
+// lanes a s=8 (seuil q4 : 2/sin(15 deg) ~= 7,727). Cela ne signifie PAS que
+// tout cœur particulier est vide sous 8. Toute execution sous ce seuil reste
+// hors profil : `run_pipeline` et les CLI la refusent, et `alive_rectangles`
+// exige un opt-in test-only explicite.
+inline constexpr i64 kSeparationProfileMin = 8;
 
 struct WspdRect {
   NodeRef a, b;
@@ -52,20 +64,35 @@ inline i64 box_w2(const AxisBox& b) {
 }
 
 inline bool separated(const AxisBox& a, const AxisBox& b, i64 p, i64 q) {
+  if (p <= 0 || q <= 0) throw std::invalid_argument("separation rationnelle non positive");
   i64 d2 = 0;
   for (int i = 0; i < 3; ++i) {
     const i64 u = (a.lo[i] + a.hi[i]) - (b.lo[i] + b.hi[i]);
     d2 += u * u;
   }
   const i64 r2 = std::max(box_w2(a), box_w2(b));
-  const i64 k = p + 2 * q;
-  return ((i128)q * q) * d2 >= ((i128)k * k) * r2;
+  const u128 qu = (u128)q;
+  const u128 k = (u128)p + 2 * qu;
+  // Voie chaude du profil (8/1, 10/1) : sous u16, q,k <= 2^32-1 bornent
+  // les produits finaux sous 2^100, donc u128 suffit exactement.
+  constexpr u128 fast_max = (u128)std::numeric_limits<u32>::max();
+  if (qu <= fast_max && k <= fast_max)
+    return qu * qu * (u128)d2 >= k * k * (u128)r2;
+  // p et q tiennent sur 63 bits positifs, donc k < 2^65, k^2 < 2^130 et,
+  // sous le profil u16, le produit par d2/r2 reste sous 2^166. U320 evite
+  // tout overflow pour l'ensemble du domaine i64 accepte par RunOptions.
+  const U320 lhs = mul_192x128_320(mul_128x128_192(qu, qu), (u128)d2);
+  U192 k2 = mul_128x128_192(k, k);
+  if (MHGP5_MUTANT("wspd-wide-drop-k2-mid")) k2.w[1] = 0;
+  const U320 rhs = mul_192x128_320(k2, (u128)r2);
+  return cmp_u320(lhs, rhs) >= 0;
 }
 
 }  // namespace wspd_detail
 
 // Deroule la WSPD complete ; `emit(rect)` recoit chaque rectangle terminal.
-// `s = s_num / s_den` (les campagnes testent s = 6, 8, 10 entiers).
+// `s = s_num / s_den`. La primitive peut exercer des contre-tests sous 8 ; le
+// profil `run_pipeline` n'accepte que les separations entieres s >= 8.
 template <typename Emit>
 inline WspdStats wspd_wavefront(const CloudIndex& ix, i64 s_num, i64 s_den, Emit&& emit) {
   WspdStats st;

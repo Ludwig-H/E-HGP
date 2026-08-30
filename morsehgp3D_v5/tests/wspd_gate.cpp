@@ -13,11 +13,13 @@
 //       depassent le cap par construction ;
 //   L5  (--discriminate-split) idem contre la scission du plus peuple
 //       (mutant `wspd-split-heaviest`) : front different ou plus gros.
+//   L6  frontieres exactes du predicat, y compris k^2 = 2^64 et s=i64::max.
 // Mutants : `wspd-drop-rect` (un rectangle perdu) est tue par L1 ; les deux
-// autres par les portes appariees.
+// criteres par les portes appariees ; `wspd-wide-drop-k2-mid` par L6.
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
+#include <limits>
 #include <numeric>
 #include <random>
 #include <string>
@@ -87,6 +89,30 @@ Front run_front(const CloudIndex& ix, i64 s) {
   return f;
 }
 
+bool separation_boundary_gate() {
+  const AxisBox a{{0, 0, 0}, {1, 0, 0}};
+  const AxisBox at_equality{{5, 0, 0}, {6, 0, 0}};
+  const AxisBox below_equality{{4, 0, 0}, {5, 0, 0}};
+  const AxisBox far{{65534, 0, 0}, {65535, 0, 0}};
+  const AxisBox point_a{{0, 0, 0}, {0, 0, 0}};
+  const AxisBox point_b{{65535, 0, 0}, {65535, 0, 0}};
+  const i64 max_i64 = std::numeric_limits<i64>::max();
+  const auto rejects = [&](i64 p, i64 q) {
+    try {
+      (void)wspd_detail::separated(a, at_equality, p, q);
+    } catch (const std::invalid_argument&) {
+      return true;
+    }
+    return false;
+  };
+  return wspd_detail::separated(a, at_equality, 8, 1) &&
+         !wspd_detail::separated(a, below_equality, 8, 1) &&
+         !wspd_detail::separated(a, far, ((i64)1 << 32) - 2, 1) &&
+         !wspd_detail::separated(a, far, max_i64, 1) &&
+         wspd_detail::separated(point_a, point_b, max_i64, 1) &&
+         rejects(-1, 1) && rejects(0, 1) && rejects(8, 0);
+}
+
 // Un run "temoin" execute avec un mutant active TEMPORAIREMENT : le
 // registre est vide en production, la porte appariee est la seule a le
 // remplir en cours d'execution, et la lecture par site est memorisee
@@ -125,6 +151,10 @@ int main(int argc, char** argv) {
   if (!a.inject.empty() && !mutants_enable(a.inject)) {
     std::fprintf(stderr, "REFUS : mutant inconnu %s\n", a.inject.c_str());
     return 2;
+  }
+  if (!separation_boundary_gate()) {
+    std::fprintf(stderr, "PREDICAT : frontiere large incorrecte\n");
+    return a.inject.empty() ? 3 : 4;
   }
   const int coord = a.coord > 0 ? a.coord : cloud_family_default_coord(a.family, a.n);
   const std::vector<P3> pts = make_family_cloud(a.family, a.n, coord, a.seed);

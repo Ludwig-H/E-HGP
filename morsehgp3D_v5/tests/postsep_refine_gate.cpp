@@ -19,8 +19,8 @@
 //       paires strictement positive en q3 ET en q4, sinon la porte est verte
 //       par vacuite ;
 //   (6) MONOTONIE DU CŒUR : une fixture q3 minimale exige l'autorite de coin
-//       pour que `fresh_child >= parent.core`; son retrait doit etre refuse par
-//       l'invariant alors que le ledger de paires reste exact.
+//       pour que `fresh_child >= parent.core`; son retrait doit lever le
+//       compteur `core_regressions` alors que le ledger de paires reste exact.
 // Codes : 0 ; 1 desaccord ; 2 refus ; 3 plancher ; 4 mutant tue.
 #include <algorithm>
 #include <cstdio>
@@ -128,6 +128,7 @@ GenerationOut run_generation_only(const std::vector<InputPoint>& in, u32 levels,
   opt.smax = smax;
   opt.threads = 1;
   opt.postsep_refine_levels = levels;
+  opt.allow_subprofile_separation_for_tests = true;
   std::vector<BallCandidate> candidates;
   GenerateStats stats;
   generate_candidates(ix, opt, &candidates, &stats);
@@ -187,7 +188,20 @@ bool literal_pair_partition(const std::vector<InputPoint>& in, i64 s, int lane_i
   std::vector<AliveRect> parents;
   u64 visited = 0, workers = 0;
   generate_detail::PostsepLedger base_ledger;
-  generate_detail::alive_rectangles(ix, s, h_of, lane_idx, 1, &parents, &visited, &workers, 0, &base_ledger);
+  // FIXTURE HORS PROFIL, DECLAREE. Cette porte litterale travaille a s = 4 pour
+  // forcer des rectangles gros et verifier la partition exacte des couples ;
+  // elle ne teste ni un taux de coupe ni un point de fonctionnement produit.
+  // L opt-in est explicite : la garde de profil d alive_rectangles est
+  // fail-closed. Sans lui, l'appel doit lever une erreur avant tout rectangle.
+  bool rejected_without_opt_in = false;
+  try {
+    generate_detail::alive_rectangles(ix, s, h_of, lane_idx, 1, &parents, &visited, &workers, 0, &base_ledger);
+  } catch (const std::invalid_argument&) {
+    rejected_without_opt_in = true;
+  }
+  if (!rejected_without_opt_in) return false;
+  generate_detail::alive_rectangles(ix, s, h_of, lane_idx, 1, &parents, &visited, &workers, 0, &base_ledger,
+                                    /*allow_subprofile_separation=*/true);
   std::sort(parents.begin(), parents.end(), [](const AliveRect& x, const AliveRect& y) {
     return std::tie(x.r.a, x.r.b) < std::tie(y.r.a, y.r.b);
   });
@@ -339,10 +353,8 @@ int main(int argc, char** argv) {
     generate_detail::postsep_refine(ix, parent, p_true.c[1], h_of, 1, 0b010, 1, 1, &emitted, &led);
     const bool ledger_ok = led.base == 2 && led.emitted == 2 && led.killed == 0;
     expect(ledger_ok, "core monotone : ledger local exact 2=2+0");
-    const Out l0 = run_one(in, 0, 1, 5, 1), l1 = run_one(in, 1, 1, 5, 1);
     if (core_mutant) {
-      if (separated && counts_ok && ledger_ok && led.core_regressions == 2 && l0.ok &&
-          l1.status == PipelineStatus::kInvariantViolated) {
+      if (separated && counts_ok && ledger_ok && led.core_regressions == 2) {
         std::printf("MUTANT TUE PAR REGRESSION DU CŒUR AVEC LEDGER VERT\n");
         return 4;
       }
@@ -351,7 +363,6 @@ int main(int argc, char** argv) {
     }
     if (!mutant) {
       expect(led.core_regressions == 0, "core monotone : aucune regression nominale");
-      expect(l0.ok && l1.ok && same_output(l0, l1), "core monotone : L=0 et L=1 identiques");
     }
   }
 
@@ -366,43 +377,41 @@ int main(int argc, char** argv) {
     if (q2_mutant) {
       const GenerationOut a = run_generation_only(in, 0, 1, 3);
       const GenerationOut b = run_generation_only(in, 3, 1, 3);
-      const Out guarded = run_one(in, 3, 1, 3, 1);
       const bool wakeup = a.ok && b.ok && a.candidates_q2 == 13 && b.candidates_q2 == 14 &&
                           a.digest_raw_candidates != b.digest_raw_candidates &&
                           a.digest_balls != b.digest_balls && b.killed_q2 == 0 &&
                           b.emitted_q2 == b.base_q2;
-      if (wakeup && guarded.status == PipelineStatus::kInvariantViolated) {
-        std::printf("MUTANT TUE PAR REVEIL Q2 AVEC LEDGER VERT ET GARDE STRUCTURELLE\n");
+      if (wakeup) {
+        std::printf("MUTANT TUE PAR REVEIL Q2 TEST-ONLY AVEC LEDGER VERT\n");
         return 4;
       }
       std::printf("MUTANT Q2 NON TUE\n");
       return 1;
     }
-    const Out a = run_one(in, 0, 1, 3, 1), b = run_one(in, 3, 1, 3, 1);
+    const GenerationOut a = run_generation_only(in, 0, 1, 3);
+    const GenerationOut b = run_generation_only(in, 3, 1, 3);
     if (!a.ok || !b.ok) {
-      if (mutant && (a.status == PipelineStatus::kInvariantViolated || b.status == PipelineStatus::kInvariantViolated))
-        return 4;
       std::printf("REFUS : contre-fixture refine-hist-wakeup-q2\n");
       return 2;
     }
-    std::printf("refine-hist-wakeup-q2 L=0 raw=%.16s balls=%.16s all=%.16s candidats=%llu | L=3 raw=%.16s balls=%.16s all=%.16s candidats=%llu masse=%llu+%llu/%llu\n",
-                a.digest_raw_candidates.c_str(), a.digest_balls.c_str(), a.digest_all.c_str(),
-                (unsigned long long)a.candidates[0], b.digest_raw_candidates.c_str(), b.digest_balls.c_str(),
-                b.digest_all.c_str(), (unsigned long long)b.candidates[0],
-                (unsigned long long)b.emitted[0], (unsigned long long)b.killed[0], (unsigned long long)b.base[0]);
+    std::printf("refine-hist-wakeup-q2 test-only L=0 raw=%.16s balls=%.16s candidats=%llu | L=3 raw=%.16s balls=%.16s candidats=%llu masse=%llu+%llu/%llu\n",
+                a.digest_raw_candidates.c_str(), a.digest_balls.c_str(), (unsigned long long)a.candidates_q2,
+                b.digest_raw_candidates.c_str(), b.digest_balls.c_str(), (unsigned long long)b.candidates_q2,
+                (unsigned long long)b.emitted_q2, (unsigned long long)b.killed_q2, (unsigned long long)b.base_q2);
     // La mise a mort porte sur la premiere divergence semantique observable :
     // candidat + boule RLE avec ledger vert. `digest_all` est encore identique
     // sur cette fixture parce que la boule reveillee est profonde, mais cette
     // caracterisation aval ne doit pas rendre le mutant plus difficile a tuer :
     // une future divergence de foret serait une faute plus forte, pas un vert.
-    const bool wakeup = a.candidates[0] == 13 && b.candidates[0] == 14 &&
+    const bool wakeup = a.candidates_q2 == 13 && b.candidates_q2 == 14 &&
                         a.digest_raw_candidates != b.digest_raw_candidates && a.digest_balls != b.digest_balls &&
-                        b.killed[0] == 0 && b.emitted[0] == b.base[0];
+                        b.killed_q2 == 0 && b.emitted_q2 == b.base_q2;
     expect(!wakeup, "refine-hist-wakeup-q2 : aucun reveil sur la route nominalement fermee");
-    expect(same_output(a, b), "refine-hist-wakeup-q2 : route q2 nominale fermee");
-    expect(a.candidates[0] == 13 && b.candidates[0] == 13,
+    expect(a.digest_raw_candidates == b.digest_raw_candidates && a.digest_balls == b.digest_balls,
+           "refine-hist-wakeup-q2 : route q2 nominale fermee");
+    expect(a.candidates_q2 == 13 && b.candidates_q2 == 13,
            "refine-hist-wakeup-q2 : 13 candidats de part et d'autre quand la route est fermee");
-    expect(b.killed[0] == 0 && b.emitted[0] == b.base[0],
+    expect(b.killed_q2 == 0 && b.emitted_q2 == b.base_q2,
            "refine-hist-wakeup-q2 : ledger q2 nominal exact");
   }
 

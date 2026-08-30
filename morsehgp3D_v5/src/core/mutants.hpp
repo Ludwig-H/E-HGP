@@ -36,7 +36,7 @@ inline constexpr const char* kMutants[] = {
     // familles
     "family-scanline-overshoot",
     // wspd
-    "wspd-drop-rect", "wspd-cap-terminal", "wspd-split-heaviest",
+    "wspd-drop-rect", "wspd-cap-terminal", "wspd-split-heaviest", "wspd-wide-drop-k2-mid",
     // fuseaux / temoins / cover
     "core-ball-ceil-distance", "witness-no-lane-mask", "cover-rect-dmin", "cover-envelope-open",
     "cover-envelope-factor",

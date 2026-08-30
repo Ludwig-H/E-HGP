@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
     else if (const char* v = val("--inject=")) a.inject = v;
     else a.ok = false;
   }
-  if (!a.ok || a.n < 3 || a.smax < 4 || a.smax > 11) return 2;
+  if (!a.ok || a.n < 3 || a.s < 1 || a.smax < 4 || a.smax > 11) return 2;
   if (!a.inject.empty() && !mutants_enable(a.inject)) return 2;
   fixtures();
   if (g_fail) return 3;

@@ -55,6 +55,13 @@ enum class FoldPhase : u8 { kStageABegin, kStageAFailed, kReduceBegin, kReduceEn
 // silence a une valeur valide (une option hors profil n'est pas une mesure).
 inline constexpr int kFoldInflightMax = 16;
 
+// Profil produit v5 : la generation q3/q4 n'est autorisee qu'a partir de la
+// separation entiere 8 — `kSeparationProfileMin`, defini avec sa borne de marge
+// dans src/wspd/wavefront.hpp. Les primitives WSPD et les fixtures test-only
+// peuvent explorer plus bas, mais SEULEMENT par l'opt-in explicite
+// `allow_subprofile_separation` d'`alive_rectangles`, et une telle mesure n'est
+// jamais un point de fonctionnement recevable.
+
 struct RunOptions {
   i64 s = 8;
   u64 smax = 11;
@@ -172,7 +179,7 @@ inline constexpr size_t kShellCapProfile = kBallShellMax;  // = tableau inline d
 
 inline bool validate_run_options(const std::vector<InputPoint>& in, const RunOptions& opt, std::string* why) {
   if (in.size() < 2) { *why = "invalid_input : moins de deux points"; return false; }
-  if (opt.s < 1) { *why = "invalid_input : separation s < 1"; return false; }
+  if (opt.s < kSeparationProfileMin) { *why = "invalid_input : separation s < 8"; return false; }
   if (opt.smax < 2 || opt.smax > kSmaxProfile) { *why = "invalid_input : smax hors du profil [2, 11]"; return false; }
   if (opt.threads < 1) { *why = "invalid_input : threads < 1"; return false; }
   if (opt.postsep_refine_levels > 3) {

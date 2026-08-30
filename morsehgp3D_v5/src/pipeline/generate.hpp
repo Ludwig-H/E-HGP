@@ -326,10 +326,18 @@ inline void postsep_refine(const CloudIndex& ix, const WspdRect& r, u64 core, co
   }
 }
 
+// GARDE DE PROFIL. La descente refuse s < 8, sauf opt-in EXPLICITE et greppable
+// `allow_subprofile_separation=true`, reserve aux fixtures qui documentent leur
+// sortie du profil. Le seuil assure une marge uniforme forte du cœur q3/q4 ; il
+// ne prouve pas que tout cœur particulier est vide sous 8. L'oubli de l'opt-in
+// leve une erreur, au lieu de produire silencieusement une mesure vide.
 inline void alive_rectangles(const CloudIndex& ix, i64 s, const u64 h_of[3], int lane_idx, int threads,
                              std::vector<AliveRect>* out, u64* visited, u64* workers, u32 levels = 0,
-                             PostsepLedger* ledger_out = nullptr) {
+                             PostsepLedger* ledger_out = nullptr,
+                             bool allow_subprofile_separation = false) {
   out->clear();
+  if (s < kSeparationProfileMin && !allow_subprofile_separation)
+    throw std::invalid_argument("alive_rectangles : separation s < 8 sans opt-in test-only");
   if (ix.nodes.empty()) return;
   const u8 mask = (u8)(1u << lane_idx);
   const u64 h = h_of[lane_idx];
@@ -425,8 +433,9 @@ struct AnchorScratch {
   // des `b` DANS une ligne vivante, a ete retire : il change l ordre croissant
   // historique de `ub` et casse les portes de parite CPU/batch vecteur a
   // vecteur (audit 732529b3 : 920 desaccords sur q3_lane_batched_cocirc). A
-  // s >= 8 — le seul domaine admis, car en dessous le citron commun est vide
-  // pour q3 (s > 6,93) et q4 (s > 7,73) — on a |A||B| ~ 2, donc ce raffinement
+  // s >= 8 — domaine produit fixe. Ce seuil assure la marge uniforme forte du
+  // coeur q3/q4 ; il ne signifie pas que tout citron particulier est vide en
+  // dessous. Sur les campagnes de reference, |A||B| ~ 2, donc ce raffinement
   // ne valait rien. L ORDRE DE PARCOURS EST DONC EXACTEMENT L HISTORIQUE.
   std::vector<NodeRef> handles;
   // `cover_tmp` alterne avec `cover` comme tampon du counting sort, puis sert
@@ -893,6 +902,11 @@ struct GenerateOptions {
   i64 s = 8;
   u64 smax = 11;
   int threads = 1;
+#if defined(MHGP5_TESTING)
+  // Uniquement compile dans les cibles de test : aucune API ou CLI produit ne
+  // peut contourner le profil s>=8 par ce champ.
+  bool allow_subprofile_separation_for_tests = false;
+#endif
   size_t pretest_query_min_points = kPretestQueryMinPoints;
   size_t cell_grid_min_sites = kCellGridMinSites;  // grille de cellules (theoreme 10.5) des que le cover atteint ce seuil
   // Filtre ponctuel entier du cover par l'enveloppe continue des boules de
@@ -952,13 +966,18 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
   const i64 q4_cover_coef = MHGP5_MUTANT("q4-cover-coef4") ? 4 : 3;
   const u64 h_of[3] = {lane_h(Lane::kQ2, opt.smax), lane_h(Lane::kQ3, opt.smax), lane_h(Lane::kQ4, opt.smax)};
   std::vector<AliveRect> alive;
+#if defined(MHGP5_TESTING)
+  const bool allow_subprofile = opt.allow_subprofile_separation_for_tests;
+#else
+  constexpr bool allow_subprofile = false;
+#endif
 
   // ---- q2.
   {
     const auto t0 = std::chrono::steady_clock::now();
     PostsepLedger led2;
     alive_rectangles(ix, opt.s, h_of, 0, opt.threads, &alive, &st->rect_visited[0], &st->workers_wspd[0],
-                     opt.postsep_refine_levels, &led2);
+                     opt.postsep_refine_levels, &led2, allow_subprofile);
     st->postsep_base_mass[0] = led2.base; st->postsep_emitted_mass[0] = led2.emitted;
     st->postsep_killed_mass[0] = led2.killed; st->postsep_subrects[0] = led2.subrects;
     st->postsep_core_evals[0] = led2.core_evals;
@@ -1007,7 +1026,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
     const auto t0 = std::chrono::steady_clock::now();
     PostsepLedger led3;
     alive_rectangles(ix, opt.s, h_of, 1, opt.threads, &alive, &st->rect_visited[1], &st->workers_wspd[1],
-                     opt.postsep_refine_levels, &led3);
+                     opt.postsep_refine_levels, &led3, allow_subprofile);
     st->postsep_base_mass[1] = led3.base; st->postsep_emitted_mass[1] = led3.emitted;
     st->postsep_killed_mass[1] = led3.killed; st->postsep_subrects[1] = led3.subrects;
     st->postsep_core_evals[1] = led3.core_evals;
@@ -1072,7 +1091,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
     // (perd les ancres q3-mortes / q4-vivantes — fixture bloquante).
     PostsepLedger led4;
     alive_rectangles(ix, opt.s, h_of, q4_from_q3_live ? 1 : 2, opt.threads, &alive, &st->rect_visited[2],
-                     &st->workers_wspd[2], opt.postsep_refine_levels, &led4);
+                     &st->workers_wspd[2], opt.postsep_refine_levels, &led4, allow_subprofile);
     st->postsep_base_mass[2] = led4.base; st->postsep_emitted_mass[2] = led4.emitted;
     st->postsep_killed_mass[2] = led4.killed; st->postsep_subrects[2] = led4.subrects;
     st->postsep_core_evals[2] = led4.core_evals;

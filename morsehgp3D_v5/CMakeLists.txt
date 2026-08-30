@@ -102,12 +102,25 @@ mhgp5_gate(mhgp5_spindle_judge_uniform 0 mhgp5_spindle_gate "--family=uniform --
 mhgp5_gate(mhgp5_spindle_judge_clusters 0 mhgp5_spindle_gate "--family=eight_clusters --n=1500 --s=8 --seed=3 --min-dead-pct=30")
 mhgp5_gate(mhgp5_spindle_judge_terrain 0 mhgp5_spindle_gate "--family=terrain --n=1500 --s=8 --seed=3 --min-dead-pct=50")
 mhgp5_gate(mhgp5_spindle_judge_two_lines 0 mhgp5_spindle_gate "--family=two_lines --n=1200 --s=8")
+mhgp5_gate(mhgp5_spindle_refus_s_non_positif 2 mhgp5_spindle_gate "--n=3 --s=0")
 mhgp5_gate(mhgp5_spindle_mutant_ceil 4 mhgp5_spindle_gate "--family=uniform --n=1500 --s=8 --seed=3 --inject=core-ball-ceil-distance")
 mhgp5_gate(mhgp5_spindle_mutant_mask 4 mhgp5_spindle_gate "--family=uniform --n=1500 --s=8 --seed=3 --inject=witness-no-lane-mask")
 
 # ---- Pilote ------------------------------------------------------------------
 
 mhgp5_product_executable(mhgp5 cli/mhgp5.cpp)
+mhgp5_gate(mhgp5_cli_s_min 0 mhgp5 "--s=8 --n=2")
+mhgp5_gate(mhgp5_cli_s_10 0 mhgp5 "--s=10 --n=2")
+mhgp5_gate(mhgp5_cli_s_max 0 mhgp5 "--s=9223372036854775807 --n=12")
+foreach(v 0 1 7)
+  mhgp5_gate(mhgp5_cli_refus_s_${v} 2 mhgp5 "--s=${v} --n=2")
+endforeach()
+mhgp5_gate(mhgp5_cli_refus_s_empty 2 mhgp5 "--s= --n=2")
+mhgp5_gate(mhgp5_cli_refus_s_text 2 mhgp5 "--s=abc --n=2")
+mhgp5_gate(mhgp5_cli_refus_s_suffix 2 mhgp5 "--s=8junk --n=2")
+mhgp5_gate(mhgp5_cli_refus_s_overflow 2 mhgp5 "--s=9223372036854775808 --n=2")
+mhgp5_gate(mhgp5_cli_refus_s_negative 2 mhgp5 "--s=-1 --n=2")
+mhgp5_gate(mhgp5_cli_refus_s_min_i64 2 mhgp5 "--s=-9223372036854775808 --n=2")
 mhgp5_gate(mhgp5_cli_postsep_l0 0 mhgp5 "--postsep=0 --n=2")
 mhgp5_gate(mhgp5_cli_postsep_l3 0 mhgp5 "--postsep=3 --n=2")
 mhgp5_gate(mhgp5_cli_refus_postsep_text 2 mhgp5 "--postsep=abc --n=2")
@@ -300,6 +313,7 @@ mhgp5_gate(mhgp5_q4_cover_envelope 0 mhgp5_q4_cover_fixture "--cover-envelope=1"
 mhgp5_gate(mhgp5_q4_cover_mutant_coef4 4 mhgp5_q4_cover_fixture "--inject=q4-cover-coef4")
 mhgp5_gate(mhgp5_wspd_mutant_cap_terminal 4 mhgp5_wspd_gate "--family=two_lines --n=2000 --s=8 --inject=wspd-cap-terminal")
 mhgp5_gate(mhgp5_wspd_mutant_split_heaviest 4 mhgp5_wspd_gate "--family=eight_clusters --n=2000 --s=8 --seed=3 --inject=wspd-split-heaviest")
+mhgp5_gate(mhgp5_wspd_mutant_wide 4 mhgp5_wspd_gate "--n=2 --inject=wspd-wide-drop-k2-mid")
 mhgp5_executable(mhgp5_q4_oracle tests/q4_oracle.cpp)
 mhgp5_gate(mhgp5_q4_oracle 0 mhgp5_q4_oracle "" LABELS oracle gate)
 foreach(m q4-center-parity q4-eq-nonstrict q4-eq-sign q4-i64-drop-factor q4-i64-pair-min)
@@ -356,6 +370,9 @@ mhgp5_gate(mhgp5_parallel_sort_refus_mutant_inconnu 2 mhgp5_parallel_sort_gate "
 # Banc apparie contrebalance (instrument, pas une porte de vitesse) : signature identique exigee.
 mhgp5_executable(mhgp5_fold_bench tests/fold_bench.cpp)
 mhgp5_gate(mhgp5_fold_bench_signature 0 mhgp5_fold_bench "--family=uniform --n=1200 --K=10 --pairs=2 --threads=4")
+mhgp5_gate(mhgp5_fold_bench_refus_s_7 2 mhgp5_fold_bench "--family=uniform --n=40 --K=2 --pairs=1 --threads=2 --s=7")
+mhgp5_gate(mhgp5_fold_bench_refus_s_suffix 2 mhgp5_fold_bench "--family=uniform --n=40 --K=2 --pairs=1 --threads=2 --s=8junk")
+mhgp5_gate(mhgp5_fold_bench_refus_s_overflow 2 mhgp5_fold_bench "--family=uniform --n=40 --K=2 --pairs=1 --threads=2 --s=9223372036854775808")
 
 # ---- SHA-256 : vecteurs FIPS et egalite portable / SHA-NI ---------------------------
 mhgp5_executable(mhgp5_sha256_gate tests/sha256_gate.cpp)
@@ -466,6 +483,13 @@ mhgp5_gate(mhgp5_q3_patch_block_credit_sum_mutant 3 mhgp5_q3_patch_block_probe
 # de moins sur ce rayon fait sortir de vrais centres de la boite pavee, et
 # l oracle `centres_hors_cover` doit le voir. Sans cette porte, un arrondi trop
 # serre passerait pour un gain de resolution.
+# PROFIL DE SEPARATION NORMATIF : s=8 est le plus petit entier qui assure la
+# marge uniforme forte R_dec,q > max(rA,rB) pour les trois lanes. Cela ne dit
+# pas que tout cœur particulier est vide sous 8. Le CLI produit refuse s < 8
+# avant calcul ; la porte positive exerce un nuage non trivial a la frontiere.
+mhgp5_gate(mhgp5_separation_sous_profil_refusee 2 mhgp5 "--family=terrain --n=400 --s=7 --seed=3")
+mhgp5_gate(mhgp5_separation_profil_minimal_acceptee 0 mhgp5 "--family=terrain --n=400 --s=8 --seed=3")
+
 mhgp5_gate(mhgp5_q3_patch_block_rho_mutant 3 mhgp5_q3_patch_block_probe
            "--family=terrain --n=2000 --rects=300 --seed=3 --min-profondeurs=100 --inject=rho-moins-un")
 
@@ -610,6 +634,12 @@ if(MHGP5_ENABLE_CUDA)
   target_compile_options(mhgp5_cuda PRIVATE
     "$<$<COMPILE_LANGUAGE:CUDA>:-fmad=false;--expt-relaxed-constexpr;-Xcompiler=-Wall,-Wextra,-Werror>")
   target_link_libraries(mhgp5_cuda PRIVATE Threads::Threads)
+  mhgp5_gate(mhgp5_cuda_cli_s_min 0 mhgp5_cuda "--s=8 --n=2" LABELS gpu)
+  mhgp5_gate(mhgp5_cuda_cli_s_max 0 mhgp5_cuda "--s=9223372036854775807 --n=12" LABELS gpu)
+  mhgp5_gate(mhgp5_cuda_cli_refus_s_7 2 mhgp5_cuda "--s=7 --n=2" LABELS gpu)
+  mhgp5_gate(mhgp5_cuda_cli_refus_s_empty 2 mhgp5_cuda "--s= --n=2" LABELS gpu)
+  mhgp5_gate(mhgp5_cuda_cli_refus_s_suffix 2 mhgp5_cuda "--s=8junk --n=2" LABELS gpu)
+  mhgp5_gate(mhgp5_cuda_cli_refus_s_overflow 2 mhgp5_cuda "--s=9223372036854775808 --n=2" LABELS gpu)
   mhgp5_gate(mhgp5_q4_lane_device_route_256 0 mhgp5_q4_lane_device_gate "--family=eight_clusters --n=1200 --threads=4 --device-min-sites=256 --expect-route=mixed" LABELS gpu)
   mhgp5_gate(mhgp5_q3_lane_device_route_256 0 mhgp5_q3_lane_device_gate "--family=eight_clusters --n=1200 --threads=4 --device-min-sites=256 --expect-route=mixed" LABELS gpu)
   mhgp5_gate(mhgp5_q3_lane_device_route_mutant 4 mhgp5_q3_lane_device_gate "--family=eight_clusters --n=1200 --threads=4 --device-min-sites=256 --expect-route=mixed --inject=route-ignore-threshold" LABELS gpu)

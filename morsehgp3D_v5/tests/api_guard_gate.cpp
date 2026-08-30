@@ -1,9 +1,10 @@
 // MorseHGP3D v5 — porte des GARDES D'API et des cas limites (audit bloquant
 // 87e915bd, P0/P1). Chaque cas exige le statut contractuel, AUCUN callback et
-// AUCUN payload sur un refus ; sous ASan/UBSan (option MHGP5_ENABLE_SANITIZERS)
-// tout debordement serait un crash par signal, refuse par run_expect.
+// AUCUN payload sur un refus ; sous ASan/UBSan (option MHGP5_ENABLE_SANITIZERS
+// et UBSAN_OPTIONS=halt_on_error=1), tout debordement fait echouer la porte.
 //   entree vide, singleton, deux points, positions dupliquees, coordonnee hors
-//   profil, PointId duplique, smax ∈ {0, 1, 11, 12}, s < 1, threads <= 0,
+//   profil, PointId duplique, smax ∈ {0, 1, 11, 12}, s ∈ {0, 1, 7, 8},
+//   threads <= 0,
 //   fold_inflight hors de [1, 16], postsep hors de [0,3] ou combine a un
 //   override non propage, plafond de coquille < 4 ; census sur un singleton
 //   (P1 : nodes.empty() n'est pas le vide) ; expansion a kmax = 1 (smax = 2).
@@ -12,6 +13,7 @@
 #include <chrono>
 #include <condition_variable>
 #include <cstdio>
+#include <limits>
 #include <mutex>
 #include <stdexcept>
 #include <string>
@@ -32,7 +34,8 @@ void expect(bool ok, const char* what) {
   }
 }
 // Execute et verifie : statut attendu, callbacks = 0 sur refus, aucun digest.
-void run_case(const char* label, const std::vector<InputPoint>& in, RunOptions opt, PipelineStatus want) {
+void run_case(const char* label, const std::vector<InputPoint>& in, RunOptions opt, PipelineStatus want,
+              const char* want_message = nullptr) {
   int callbacks = 0;
   opt.digest = true;
   opt.on_forest = [&](u64, const std::vector<ForestEvent>&, const ForestResult&) { ++callbacks; };
@@ -40,6 +43,10 @@ void run_case(const char* label, const std::vector<InputPoint>& in, RunOptions o
   char what[200];
   std::snprintf(what, sizeof(what), "%s : statut %d attendu %d (%s)", label, (int)rr.status, (int)want, rr.message.c_str());
   expect(rr.status == want, what);
+  if (want_message != nullptr) {
+    std::snprintf(what, sizeof(what), "%s : message '%s' attendu '%s'", label, rr.message.c_str(), want_message);
+    expect(rr.message == want_message, what);
+  }
   if (want != PipelineStatus::kCompleteRegular) {
     std::snprintf(what, sizeof(what), "%s : %d callbacks sur un refus", label, callbacks);
     expect(callbacks == 0, what);
@@ -77,9 +84,20 @@ int main() {
     run_case("smax=11 sur douze points", twelve, o, PipelineStatus::kCompleteRegular);
     o.smax = 2;
     run_case("smax=2 (kmax=1)", small, o, PipelineStatus::kCompleteRegular);
+    for (const i64 separation : {std::numeric_limits<i64>::min(), (i64)-1, (i64)0, (i64)1, (i64)7}) {
+      o = base;
+      o.s = separation;
+      char label[64];
+      std::snprintf(label, sizeof(label), "s=%lld", (long long)separation);
+      run_case(label, small, o, PipelineStatus::kInvalidInput, "invalid_input : separation s < 8");
+    }
     o = base;
-    o.s = 0;
-    run_case("s=0", small, o, PipelineStatus::kInvalidInput);
+    o.s = kSeparationProfileMin;
+    run_case("s=8 (limite basse du profil)", small, o, PipelineStatus::kCompleteRegular);
+    o.s = 10;
+    run_case("s=10", small, o, PipelineStatus::kCompleteRegular);
+    o.s = std::numeric_limits<i64>::max();
+    run_case("s=INT64_MAX", twelve, o, PipelineStatus::kCompleteRegular);
     o = base;
     o.threads = 0;
     run_case("threads=0", small, o, PipelineStatus::kInvalidInput);

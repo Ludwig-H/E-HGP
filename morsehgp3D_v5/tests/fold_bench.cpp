@@ -44,6 +44,7 @@
 #include <vector>
 
 #include "../src/cloud/families.hpp"
+#include "../src/core/parse.hpp"
 #include "../src/pipeline/digest.hpp"
 #include "../src/pipeline/run.hpp"
 
@@ -113,16 +114,18 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--threads=", 0) == 0) threads = std::atoi(arg.c_str() + 10);
     else if (arg.rfind("--pairs=", 0) == 0) pairs = std::atoi(arg.c_str() + 8);
     else if (arg.rfind("--K=", 0) == 0) K = std::atoi(arg.c_str() + 4);
-    else if (arg.rfind("--s=", 0) == 0) s = std::atoll(arg.c_str() + 4);
+    else if (arg.rfind("--s=", 0) == 0) {
+      if (!parse_i64_exact(arg.c_str() + 4, &s)) return 2;
+    }
     else if (arg.rfind("--seed=", 0) == 0) seed = std::atoll(arg.c_str() + 7);
     else if (arg.rfind("--min-ratio=", 0) == 0) min_ratio = std::atof(arg.c_str() + 12);
     else if (arg == "--gate") gate = true;
     else if (arg.rfind("--inject=", 0) == 0) inject = arg.substr(9);
     else { std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str()); return 2; }
   }
-  if (n < 2 || threads < 2 || pairs < 1 || K < 1 || K > (int)kSmaxProfile - 1 || s < 1 || pairs > 60 ||
+  if (n < 2 || threads < 2 || pairs < 1 || K < 1 || K > (int)kSmaxProfile - 1 || s < kSeparationProfileMin || pairs > 60 ||
       !(min_ratio > 0.0)) {
-    std::fprintf(stderr, "REFUS : n >= 2, threads >= 2, 1 <= pairs <= 60, 1 <= K <= %d, s >= 1, min-ratio > 0\n",
+    std::fprintf(stderr, "REFUS : n >= 2, threads >= 2, 1 <= pairs <= 60, 1 <= K <= %d, s >= 8, min-ratio > 0\n",
                  (int)kSmaxProfile - 1);
     return 2;
   }
