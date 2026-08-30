@@ -209,10 +209,11 @@ $\binom{n_u}{2}$ rectangles. Accepter ce cas comme profil produit bénit un mode
 quadratique déterministe.
 
 Deux décisions seulement sont cohérentes : borner le profil opérationnel aux
-valeurs qualifiées, actuellement 8/10, tout en gardant la primitive large pour
-ses tests arithmétiques ; ou conserver tout i64 mais annoncer explicitement que
-ces valeurs n'ont aucun claim de temps, mémoire ou sous-quadraticité. Dans les
-deux cas, la borne $O(s^3n)$ de la WSPD fair-split classique ne doit pas être
+valeurs effectivement qualifiées, actuellement la seule frontière 8, tout en
+gardant la primitive large pour ses tests arithmétiques ; ou conserver tout i64
+mais annoncer explicitement que ces valeurs n'ont aucun claim de temps, mémoire
+ou sous-quadraticité. Dans les deux cas, la borne $O(s^3n)$ de la WSPD
+fair-split classique ne doit pas être
 attribuée à la variante Morton-radix actuelle : `MATHEMATIQUES.md` la déclare
 correctement ouverte, tandis que l'en-tête de `wavefront.hpp`,
 `cloud_index.hpp` et `ARCHITECTURE.md` l'affirment encore. Les vagues et le
@@ -226,6 +227,32 @@ les builds. Seul le champ correspondant de `GenerateOptions` disparaît sans
 les cibles de test, soit déclarer honnêtement qu'une primitive interne possède
 un bypass explicite non exposé par `run_pipeline`; l'architecture ne peut pas
 promettre les deux.
+
+#### `s=10` est un point expérimental, pas un profil reçu
+
+La recherche bornée dans les reçus v5 retrouve des commandes et sorties à
+`s=8`, mais aucune commande ni sortie à `s=10`. Les campagnes q3 récentes à
+trois graines restent toutes à 8. La seule porte 10 enregistrée est un smoke
+API/CLI à deux points ; les mentions `8/10` d'`ECHELLE.md` et `GPU.md` décrivent
+des campagnes prévues, non leurs résultats. Il n'existe donc aucune paire
+reçue à famille, taille, seed et pin identiques qui autorise un choix de coût
+entre 8 et 10.
+
+Sur un même arbre radix et avant tout élagage, augmenter `s` a une seule
+monotonie simple : `Sep_10(A,B)` implique `Sep_8(A,B)`, donc le front WSPD à 10
+raffine celui à 8 et ne contient pas moins de rectangles terminaux. Un témoin
+du cœur exact reste universel dans un descendant ; l'héritage
+`max(parent,fresh)` doit préserver ce fait dans le calcul dirigé. En revanche,
+une scission peut réduire le domaine de `h_a` tout en facilitant `h_b`, ou
+l'inverse. La somme des crédits d'extrémité, les rectangles vivants, ancres,
+seeds, candidats, mur et HWM n'ont donc aucun ordre garanti entre 8 et 10.
+
+Le prochain sweep minimal doit employer `s` dans l'ensemble `{8,9,10}`, avec
+entrée, seed, arbre, seuils, post-séparation et threads figés. Il exige des
+digests finaux identiques, puis publie séparément front WSPD brut, masse après
+cœur, distributions non censurées de `h_coeur/h_a/h_b`, résiduel q3/q4, temps
+par étage et HWM. Tant qu'il manque, écrire `{8,10}` pour deux essais, jamais
+un intervalle qualifié ni « 10 améliore le cœur donc améliore le produit ».
 
 ### V151--V153 — aucune répétition exacte, utiliser d'abord l'index existant
 
@@ -347,6 +374,36 @@ certifiés. Les routes query, cover, batch et device transportent les IDs
 canoniques, jamais des offsets ; tout mapping absent ou dupliqué désactive la
 précharge en fail-open. Séparer les shadows `oneside_gate` et `w4_tape`, sinon
 le placement et la propagation aval restent confondus.
+
+### Fibre `A x B x C` — statut exact de `h_c`
+
+Cette généralisation est saine si `C` reste un handle asymétrique attaché au
+rectangle WSPD `A x B`, et non le troisième facteur d'une WSPD symétrique. Pour
+une fibre vivante et sans transporter les IDs, la composition générale sûre
+est `h_a(a)+h_b(b)+max(h_coeur,h_c(c))` : le cœur et le crédit du carrier
+peuvent reconnaître le même site hors `A union B`. Le seuil `s>=8` fixe le
+domaine produit et sa marge continue commune ; il ne rend pas ces deux
+ensembles disjoints.
+
+La somme `h_coeur+h_a+h_b+h_c` n'est autorisée que par un contrat plus fort :
+`h_coeur_not_C` compte exclusivement dans `P minus (A union B union C)` et
+`h_c(c)` exclusivement dans `C minus (A union B union {c})`. Les quatre
+strates sont alors disjointes. Une union sparse d'IDs donne la même sécurité
+sans sacrifier les témoins du cœur situés dans `C`.
+
+Enfin, `h_c` peut être un unique scalaire du handle seulement s'il minore tous
+les carriers valides de ce handle : `h_C(C) <= min_c h_c(c)`, le minimum étant
+pris sur les fibres non vides. Un ensemble commun certifié pour tout `c` suffit ;
+sinon le tableau doit rester indexé par `c`, en particulier quand le patch ou
+la boule dépend de sa position. Une fibre vide reçoit un fate séparé et crédit
+zéro, jamais le minimum d'une famille vide.
+
+La contre-fixture minimale prend `a=(0,0,0)`, `b=(4,0,0)`, `c=(2,3,0)` et
+`z=(2,1,0)`, avec `c,z` dans le même handle. Le même `z` peut être reconnu par
+le cœur et par `h_c(c)` : la profondeur apportée est 1, non 2. Elle doit tuer
+un mutant qui additionne les deux scalaires. En q4, appliquer cette règle sur
+la face `A x B x C`; le quatrième support `D` ne vient qu'après cette porte et
+garde sa propre strate ou ses propres IDs.
 
 ### V156 — fermeture rectangle : ne pas réinventer le raffinement exhaustif
 
