@@ -26,6 +26,9 @@ ne sont pas des échelles candidates et ne peuvent publier aucun payload.
   raccords encore ouverts pour la grille de cellules.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) :
   décisions encore ouvertes pour la lane device.
+- [`NOTE_CLAUDE_RECOMMANDATIONS_20260830.md`](NOTE_CLAUDE_RECOMMANDATIONS_20260830.md) :
+  ordre de travail recommandé, constats de premier main sur le build et les
+  portes, corrections documentaires à faire indépendamment, et état du dépôt.
 - [`NOTE_CLAUDE_DESCENTE_WSPD_FUSIONNEE_20260830.md`](NOTE_CLAUDE_DESCENTE_WSPD_FUSIONNEE_20260830.md) :
   la descente WSPD est jouée trois fois alors que ses décisions ne dépendent pas
   de la lane. Sonde counter-only `mhgp5_wspd_fusion_probe` avec porte
