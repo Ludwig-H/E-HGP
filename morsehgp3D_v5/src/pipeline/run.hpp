@@ -647,7 +647,7 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
   std::fprintf(out,
                "generation rect_alive=%llu/%llu/%llu ancres=%llu/%llu/%llu candidats=%llu/%llu/%llu "
                "tues_profondeur=%llu/%llu/%llu ancres_w4=%llu ancres_w3=%llu ancres_secteurs=%llu/%llu ancres_cellules=%llu/%llu seeds_cellules=%llu/%llu grilles=%llu/%llu seeds=%llu/%llu completions_q4=%llu seeds_core_tues=%llu seeds_corde_tues=%llu float_cert=%llu/%llu repli=%llu "
-               "jung=%llu/%llu/%llu\n",
+               "ancres_hist=%llu/%llu/%llu hist_lignes=%llu/%llu/%llu hist_seuil=%llu/%llu/%llu hist_survivants=%llu/%llu/%llu jung=%llu/%llu/%llu\n",
                (unsigned long long)gs.rect_alive[0], (unsigned long long)gs.rect_alive[1], (unsigned long long)gs.rect_alive[2],
                (unsigned long long)gs.anchors[0], (unsigned long long)gs.anchors[1], (unsigned long long)gs.anchors[2],
                (unsigned long long)gs.candidates[0], (unsigned long long)gs.candidates[1], (unsigned long long)gs.candidates[2],
@@ -658,6 +658,14 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                (unsigned long long)gs.grids_built[1], (unsigned long long)gs.grids_built[2],
                (unsigned long long)gs.seeds[0], (unsigned long long)gs.seeds[1], (unsigned long long)gs.q4_completions, (unsigned long long)gs.seeds_killed_core, (unsigned long long)gs.seeds_killed_chord,
                (unsigned long long)gs.float_cert_neg, (unsigned long long)gs.float_cert_pos, (unsigned long long)gs.float_fallback,
+               (unsigned long long)gs.anchors_killed_hist[0], (unsigned long long)gs.anchors_killed_hist[1],
+               (unsigned long long)gs.anchors_killed_hist[2],
+               (unsigned long long)gs.hist_killed_rows[0], (unsigned long long)gs.hist_killed_rows[1],
+               (unsigned long long)gs.hist_killed_rows[2],
+               (unsigned long long)gs.hist_killed_thresh[0], (unsigned long long)gs.hist_killed_thresh[1],
+               (unsigned long long)gs.hist_killed_thresh[2],
+               (unsigned long long)gs.hist_survivors[0], (unsigned long long)gs.hist_survivors[1],
+               (unsigned long long)gs.hist_survivors[2],
                (unsigned long long)gs.jung_cert_kill, (unsigned long long)gs.jung_cert_skip, (unsigned long long)gs.jung_fallback);
   std::fprintf(out,
                "enveloppe_cover active=%d "

@@ -88,16 +88,43 @@ inline bool bisector_basis(const P3& pa, const P3& pb, i64 D2, i128 rho2_den, i6
   return false;  // garde fail-open (jamais atteinte : |e| >= D·sqrt(2/3))
 }
 
+// CREDIT D EXTREMITE deja acquis pour cette ancre (cascade du 30 aout, audit
+// 7d173a37) : `base = h_a(a) + h_b(b)`, les temoins de A et de B certifies
+// universels sur la boite opposee. Leur domaine est DISJOINT des temoins pris
+// hors de A union B, donc les deux comptes s additionnent :
+//     depth(a,b,x) >= |W_q inter (cover \ (A u B))| + h_a(a) + h_b(b).
+// Le test devient l UNION des deux formes,
+//     max( |W_q inter (cover \ {a,b})| , |W_q inter (cover \ (A u B))| + base ) >= h,
+// qui DOMINE les deux prises separement. Mesure du 30 aout : la forme
+// residuelle seule est strictement plus faible (elle ne tue jamais une ancre
+// que la forme complete rate, et en rate 2 a 239 selon la configuration),
+// parce que h_a(a) <= |W_q inter (A \ a)| ; l union recupere donc la sortie
+// anticipee sans rien perdre.
+struct EndpointCredit {
+  u64 base = 0;
+  i32 a_first = 0, a_last = -1;
+  i32 b_first = 0, b_last = -1;
+  bool active() const { return base > 0 && a_last >= a_first; }
+  bool in_boxes(i32 u) const { return (u >= a_first && u <= a_last) || (u >= b_first && u <= b_last); }
+};
+
 // Test W_q EXACT sur le cover trie : rend true si >= h sites sont universels
 // (in_spindle) ; sortie anticipee a h et a la classe radiale 11.
 inline bool anchor_universal_kill(const std::vector<CoverPoint>& cover, const std::vector<P3>& upos, i32 ua, i32 ub,
-                                  const P3& pa, const P3& pb, i64 D2, Lane lane, u64 h, bool radially_sorted = true) {
+                                  const P3& pa, const P3& pb, i64 D2, Lane lane, u64 h, bool radially_sorted = true,
+                                  const EndpointCredit* ec = nullptr) {
   const u64 hh = MHGP5_MUTANT("anchor-kill-h-minus-one") && h > 1 ? h - 1 : h;
-  u64 n = 0;
+  const bool use_ec = ec != nullptr && ec->active() && ec->base < hh;
+  u64 n = 0, n_out = 0;
   for (const CoverPoint& cz : cover) {
     if (sector_detail::beyond_diametral_bins(cz.dist2q, D2)) { if (radially_sorted) break; else continue; }
     if (cz.u == ua || cz.u == ub) continue;
-    if (in_spindle(lane, pa, pb, upos[(size_t)cz.u]) && ++n >= hh) return true;
+    if (!in_spindle(lane, pa, pb, upos[(size_t)cz.u])) continue;
+    if (++n >= hh) return true;
+    // UNION avec la forme residuelle : les temoins pris HORS de A union B ont
+    // un domaine disjoint de celui de h_a et h_b, donc leur compte s y ajoute.
+    // Cette branche ne peut que tuer PLUS TOT ; elle ne retire jamais une mort.
+    if (use_ec && !ec->in_boxes(cz.u) && ++n_out + ec->base >= hh) return true;
   }
   return false;
 }
@@ -149,8 +176,8 @@ inline bool anchor_sector_kill(const std::vector<CoverPoint>& cover, const std::
 // (secteurs) ou 0 (vivante).
 inline int anchor_kill_cumulated(const std::vector<CoverPoint>& cover, const std::vector<P3>& upos, i32 ua, i32 ub,
                                  const P3& pa, const P3& pb, i64 D2, Lane lane, i128 rho2_den, u64 h,
-                                 bool radially_sorted = true) {
-  if (anchor_universal_kill(cover, upos, ua, ub, pa, pb, D2, lane, h, radially_sorted)) return 1;
+                                 bool radially_sorted = true, const EndpointCredit* ec = nullptr) {
+  if (anchor_universal_kill(cover, upos, ua, ub, pa, pb, D2, lane, h, radially_sorted, ec)) return 1;
   u64 wmin = 0;
   if (anchor_sector_kill(cover, upos, ua, ub, pa, pb, D2, rho2_den, h, &wmin, nullptr, radially_sorted)) return 2;
   return 0;
@@ -173,8 +200,9 @@ inline int anchor_kill_from_query(const CloudIndex& ix, i32 ua, i32 ub, const P3
 // distance a la boite des sommes, pas |2z − (a+b)|² : on la recalcule ici
 // (les tests ne lisent dist2q que pour la sortie anticipee, desactivee).
 inline int anchor_kill_from_candidates(const std::vector<CoverPoint>& cand, const std::vector<P3>& upos, i32 ua, i32 ub,
-                                       const P3& pa, const P3& pb, i64 D2, Lane lane, i128 rho2_den, u64 h) {
-  return anchor_kill_cumulated(cand, upos, ua, ub, pa, pb, D2, lane, rho2_den, h, /*radially_sorted=*/false);
+                                       const P3& pa, const P3& pb, i64 D2, Lane lane, i128 rho2_den, u64 h,
+                                       const EndpointCredit* ec = nullptr) {
+  return anchor_kill_cumulated(cand, upos, ua, ub, pa, pb, D2, lane, rho2_den, h, /*radially_sorted=*/false, ec);
 }
 
 }  // namespace mhgp5

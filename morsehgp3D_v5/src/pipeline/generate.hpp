@@ -71,6 +71,11 @@ struct GenerateStats {
   u64 rect_visited[3] = {0, 0, 0};
   u64 anchors[3] = {0, 0, 0};
   u64 anchors_killed_hist[3] = {0, 0, 0};
+  // Les trois classes DISJOINTES de la porte histogramme (audit 732529b3) :
+  // hist_total_pairs = hist_killed_rows + hist_killed_thresh + hist_survivors.
+  u64 hist_killed_rows[3] = {0, 0, 0};   // lignes A fermees : h_a(a) >= need
+  u64 hist_killed_thresh[3] = {0, 0, 0}; // seuil B sur les lignes A restantes
+  u64 hist_survivors[3] = {0, 0, 0};     // couples effectivement transmis
   u64 anchors_killed_w4 = 0;
   u64 anchors_killed_sectors[3] = {0, 0, 0};  // test d'ancre par secteurs (sector_kill.hpp) : ancres mortes sans enumerer les seeds
   u64 anchors_killed_cells[3] = {0, 0, 0};    // grille de cellules (cell_grid.hpp, theoreme 10.5) : toutes les cellules mortes
@@ -116,6 +121,9 @@ struct GenerateStats {
     for (int i = 0; i < 3; ++i) {
       anchors[i] += o.anchors[i];
       anchors_killed_hist[i] += o.anchors_killed_hist[i];
+      hist_killed_rows[i] += o.hist_killed_rows[i];
+      hist_killed_thresh[i] += o.hist_killed_thresh[i];
+      hist_survivors[i] += o.hist_survivors[i];
       candidates[i] += o.candidates[i];
       depth_killed[i] += o.depth_killed[i];
     }
@@ -409,6 +417,17 @@ inline void corner_histograms(const CloudIndex& ix, Lane lane, const WspdRect& r
 // Brouillon par ouvrier : cover de l'ancre, lentille, sites affines.
 struct AnchorScratch {
   std::vector<u64> ha, hb;
+  // COUCHE PAR POINT de la cascade (audit 7d173a37, « le cœur et les facteurs
+  // forment une seule cascade »). Les seuls couples a transmettre sont
+  //     S_AB = { (a,b) : h_a(a) + h_b(b) < need },  need = h_q - h_coeur.
+  // La ligne entiere d un `a` tel que h_a(a) >= need meurt d UN SEUL test, sans
+  // developper ses |B| ancres. Le tri par classes de h_b, qui eviterait aussi
+  // des `b` DANS une ligne vivante, a ete retire : il change l ordre croissant
+  // historique de `ub` et casse les portes de parite CPU/batch vecteur a
+  // vecteur (audit 732529b3 : 920 desaccords sur q3_lane_batched_cocirc). A
+  // s >= 8 — le seul domaine admis, car en dessous le citron commun est vide
+  // pour q3 (s > 6,93) et q4 (s > 7,73) — on a |A||B| ~ 2, donc ce raffinement
+  // ne valait rien. L ORDRE DE PARCOURS EST DONC EXACTEMENT L HISTORIQUE.
   std::vector<NodeRef> handles;
   // `cover_tmp` alterne avec `cover` comme tampon du counting sort, puis sert
   // de vue enveloppe jusqu'a l'ancre suivante. Deux capacites suffisent donc
@@ -620,10 +639,10 @@ enum class AnchorPretests : u8 { kApply, kAlreadyApplied, kAlreadyAppliedWithGri
 
 inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb, i64 D2,
                            u64 h3, bool float_on, bool genfilter_nonstrict, std::vector<BallCandidate>* lo, GenerateStats* ls,
-                           AnchorPretests pretests = AnchorPretests::kApply) {
+                           AnchorPretests pretests = AnchorPretests::kApply, const EndpointCredit* ec = nullptr) {
   // Tests d'ancre cumules (sector_kill.hpp) : W_3 exact puis secteurs — suffisants, l'objet est inchange.
   if (pretests == AnchorPretests::kApply) {
-    const int k = anchor_kill_cumulated(sc.cover, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h3);
+    const int k = anchor_kill_cumulated(sc.cover, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h3, true, ec);
     if (k == 1) { ++ls->anchors_killed_w3; return; }
     if (k == 2) { ++ls->anchors_killed_sectors[1]; return; }
   }
@@ -952,14 +971,17 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
     run_lane(alive, opt.threads, 0, opt.cell_grid_min_sites, out, st, [&](const AliveRect& ar, AnchorScratch& sc, std::vector<BallCandidate>* lo, GenerateStats* ls) {
       corner_histograms(ix, Lane::kQ2, ar.r, &sc.ha, &sc.hb);
       const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
-      const u64 need = h_of[0] - ar.core;
-      for (i32 ua = ra.first; ua <= ra.last; ++ua)
+      const u64 need = h_of[0] > ar.core ? h_of[0] - ar.core : 0;
+      const u64 nA = (u64)(ra.last - ra.first + 1), nB = (u64)(rb.last - rb.first + 1);
+      ls->anchors[0] += nA * nB;  // le grand-livre reste ferme : toutes les paires sont comptees
+      if (need == 0) { ls->anchors_killed_hist[0] += nA * nB; return; }
+      u64 visitees = 0, tues_ligne = 0, tues_seuil = 0;
+      for (i32 ua = ra.first; ua <= ra.last; ++ua) {
+        const u64 ha_a = sc.ha[(size_t)(ua - ra.first)];
+        if (ha_a >= need) { tues_ligne += nB; continue; }  // la ligne entiere meurt d un seul test
         for (i32 ub = rb.first; ub <= rb.last; ++ub) {
-          ++ls->anchors[0];
-          if (sc.ha[(size_t)(ua - ra.first)] + sc.hb[(size_t)(ub - rb.first)] >= need) {
-            ++ls->anchors_killed_hist[0];
-            continue;
-          }
+          if (ha_a + sc.hb[(size_t)(ub - rb.first)] >= need) { ++tues_seuil; continue; }
+          ++visitees;
           const P3& pa = ix.upos[(size_t)ua];
           const P3& pb = ix.upos[(size_t)ub];
           const i64 D2 = p3_norm2(p3_sub(pb, pa));
@@ -967,6 +989,13 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
           lo->push_back(BallCandidate{q2_ball_key(pa, pb), promote_level(q2_exact_level(D2)), 2});
           ++ls->candidates[0];
         }
+      }
+      // TROIS CLASSES DISJOINTES, dans l ordre demande par l audit 732529b3 :
+      // lignes A fermees d abord, puis le seuil B sur les seules lignes restantes.
+      ls->hist_killed_rows[0] += tues_ligne;
+      ls->hist_killed_thresh[0] += tues_seuil;
+      ls->hist_survivors[0] += visitees;
+      ls->anchors_killed_hist[0] += tues_ligne + tues_seuil;
     });
     st->t_rects_ms[0] += ms_since(t1);
   }
@@ -996,28 +1025,40 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
       for (const NodeRef h : sc.handles) { const NodeRange r = ix.range_of(h); sc.handle_points += (u64)(r.last - r.first + 1); }
       const bool pretest_by_query = sc.handle_points >= opt.pretest_query_min_points;
       if (pretest_by_query) rect_diametral_candidates(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), &sc.query, &sc.cover_nodes);
-      const u64 need = h_of[1] - ar.core;
-      for (i32 ua = ra.first; ua <= ra.last; ++ua)
+      const u64 need = h_of[1] > ar.core ? h_of[1] - ar.core : 0;
+      const u64 nA = (u64)(ra.last - ra.first + 1), nB = (u64)(rb.last - rb.first + 1);
+      ls->anchors[1] += nA * nB;  // le grand-livre reste ferme : toutes les paires sont comptees
+      if (need == 0) { ls->anchors_killed_hist[1] += nA * nB; return; }
+      u64 visitees = 0, tues_ligne = 0, tues_seuil = 0;
+      for (i32 ua = ra.first; ua <= ra.last; ++ua) {
+        const u64 ha_a = sc.ha[(size_t)(ua - ra.first)];
+        if (ha_a >= need) { tues_ligne += nB; continue; }  // la ligne entiere meurt d un seul test
         for (i32 ub = rb.first; ub <= rb.last; ++ub) {
-          ++ls->anchors[1];
-          if (sc.ha[(size_t)(ua - ra.first)] + sc.hb[(size_t)(ub - rb.first)] >= need) {
-            ++ls->anchors_killed_hist[1];
-            continue;
-          }
+          if (ha_a + sc.hb[(size_t)(ub - rb.first)] >= need) { ++tues_seuil; continue; }
+          ++visitees;
           const P3& pa = ix.upos[(size_t)ua];
           const P3& pb = ix.upos[(size_t)ub];
           const i64 D2 = p3_norm2(p3_sub(pb, pa));
           if (D2 == 0) continue;
+          // Credit d extremite deja acquis, transmis a la cascade aval.
+          const EndpointCredit ec{ha_a + sc.hb[(size_t)(ub - rb.first)], ra.first, ra.last, rb.first, rb.last};
           if (pretest_by_query) {
-            const int k = anchor_kill_from_candidates(sc.query, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h_of[1]);
+            const int k = anchor_kill_from_candidates(sc.query, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h_of[1], &ec);
             if (k == 1) { ++ls->anchors_killed_w3; continue; }
             if (k == 2) { ++ls->anchors_killed_sectors[1]; continue; }
           }
           anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, 3, &sc.cover, &sc.visits, &sc.cover_tmp);
           configure_anchor_scan_cover(sc, opt.cover_envelope_filter, pretest_by_query);
           scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, genfilter_nonstrict, lo, ls,
-                         pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply);
+                         pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply, &ec);
         }
+      }
+      // TROIS CLASSES DISJOINTES, dans l ordre demande par l audit 732529b3 :
+      // lignes A fermees d abord, puis le seuil B sur les seules lignes restantes.
+      ls->hist_killed_rows[1] += tues_ligne;
+      ls->hist_killed_thresh[1] += tues_seuil;
+      ls->hist_survivors[1] += visitees;
+      ls->anchors_killed_hist[1] += tues_ligne + tues_seuil;
     });
     st->t_rects_ms[1] += ms_since(t1);
   }
@@ -1049,14 +1090,17 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
       for (const NodeRef h : sc.handles) { const NodeRange r = ix.range_of(h); sc.handle_points += (u64)(r.last - r.first + 1); }
       const bool pretest_by_query = sc.handle_points >= opt.pretest_query_min_points;
       if (pretest_by_query) rect_diametral_candidates(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), &sc.query, &sc.cover_nodes);
-      const u64 need = h_of[2] - ar.core;
-      for (i32 ua = ra.first; ua <= ra.last; ++ua)
+      const u64 need = h_of[2] > ar.core ? h_of[2] - ar.core : 0;
+      const u64 nA = (u64)(ra.last - ra.first + 1), nB = (u64)(rb.last - rb.first + 1);
+      ls->anchors[2] += nA * nB;  // le grand-livre reste ferme : toutes les paires sont comptees
+      if (need == 0) { ls->anchors_killed_hist[2] += nA * nB; return; }
+      u64 visitees = 0, tues_ligne = 0, tues_seuil = 0;
+      for (i32 ua = ra.first; ua <= ra.last; ++ua) {
+        const u64 ha_a = sc.ha[(size_t)(ua - ra.first)];
+        if (ha_a >= need) { tues_ligne += nB; continue; }  // la ligne entiere meurt d un seul test
         for (i32 ub = rb.first; ub <= rb.last; ++ub) {
-          ++ls->anchors[2];
-          if (sc.ha[(size_t)(ua - ra.first)] + sc.hb[(size_t)(ub - rb.first)] >= need) {
-            ++ls->anchors_killed_hist[2];
-            continue;
-          }
+          if (ha_a + sc.hb[(size_t)(ub - rb.first)] >= need) { ++tues_seuil; continue; }
+          ++visitees;
           const P3& pa = ix.upos[(size_t)ua];
           const P3& pb = ix.upos[(size_t)ub];
           const i64 D2 = p3_norm2(p3_sub(pb, pa));
@@ -1084,6 +1128,13 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
           process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, genfilter_nonstrict, seed_core_nonstrict,
                             no_canonical, lo, ls, pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply);
         }
+      }
+      // TROIS CLASSES DISJOINTES, dans l ordre demande par l audit 732529b3 :
+      // lignes A fermees d abord, puis le seuil B sur les seules lignes restantes.
+      ls->hist_killed_rows[2] += tues_ligne;
+      ls->hist_killed_thresh[2] += tues_seuil;
+      ls->hist_survivors[2] += visitees;
+      ls->anchors_killed_hist[2] += tues_ligne + tues_seuil;
     });
     st->t_rects_ms[2] += ms_since(t1);
   }
