@@ -13,13 +13,17 @@ garde CLI de `s>=8` et committe le profiler q4. Les commits ultérieurs
 les autres diagnostics reçus incluent `119b80b0` pour les corrections q4 et
 `9940668e` pour la sonde de fusion WSPD.
 
-Au moment de ce verdict, les sources suivies sont identiques au pin ; le
-worktree porte seulement des propositions documentaires conservées pour
-Claude. Les deux faux reçus `cf_*.txt`, qui contenaient uniquement l'échec
-d'invocation d'un binaire absent, ont été supprimés pendant le nettoyage.
-Toute modification source ultérieure périme la fraîcheur du verdict ; elle ne
-périme pas les contre-exemples mathématiques ni les constats sur les commits
-nommés.
+Au moment du verdict initial, les sources suivies étaient identiques au pin.
+Depuis, Claude prépare dans le worktree une correction de la corde q4 dans
+`generate.hpp`, `q4_core_shaped.hpp` et le registre des mutants. Cette
+proposition non commitée est contre-relue dans l'addendum actif de
+`QUESTION_CLAUDE_Q4_APRES_Q3_20260830.md` ; elle ne change pas encore le pin
+source reçu. Les autres changements du worktree, notamment documentaires,
+restent conservés pour Claude. Les deux faux reçus `cf_*.txt`, qui contenaient
+uniquement l'échec d'invocation d'un binaire absent, ont été supprimés pendant
+le nettoyage. Toute autre modification source périme la fraîcheur du verdict ;
+elle ne périme pas les contre-exemples mathématiques ni les constats sur les
+commits nommés.
 
 ## Verdict
 
@@ -101,7 +105,7 @@ depuis le pin ; la CLI CUDA n'a pas été recompilée localement sans `nvcc`.
 
 ## P1 — q4 : fermer la vérité avant de mesurer la vitesse
 
-### La corde perd actuellement des témoins `P>0`
+### La corde au pin audité perd des témoins `P>0`
 
 Dans les routes scalaire, shaped et device, un site certifié `P>0` quitte le
 scan avant `ChordPieces::update`. C'est correct pour le cœur au centre
@@ -115,6 +119,16 @@ La fixture entière déjà décrite dans
 `B(z_2)<0`. Il faut appeler la mise à jour avant le saut du cœur, porter la
 fixture dans le scalaire et le shaped, puis tuer un mutant
 `chord-skip-positive`; la parité device vient ensuite.
+
+Le patch actif va dans cette direction, mais son premier état teste encore
+`chord.dead(h4)` après le `continue` des sites positifs : la décision dépend
+donc de l'ordre si un tel site complète le dernier morceau. Le kernel CUDA
+conserve en outre l'ancien saut. Rejoué localement, `mhgp5_mutants_gate` rend le
+code 3 : le mutant déclaré n'a aucune porte code 4 ; les portes shaped
+désactivent la corde et la parité batch partage le même oubli. La fixture à
+sept points et ses deux permutations sont données dans l'addendum de la réponse
+Q4, avec le motif de correction qui préserve la priorité du cœur en cas
+d'égalité.
 
 ### La sonde de corde actuelle n'est plus une autorité indépendante
 

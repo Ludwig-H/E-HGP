@@ -383,6 +383,66 @@ un mutant `chord-skip-positive` qui restaure l'ancien saut, en plus du mutant de
 frontière `chord-nonstrict`, puis exercer la même fixture dans le scalaire et
 le shaped. Les portes de lane gardent ensuite la parité device.
 
+### Retour constructif sur le premier patch `chord-skip-positive`
+
+La direction prise dans le worktree après `b82f1de1` est la bonne : le calcul
+de `Bz` et `ChordPieces::update` précèdent désormais le rejet du cœur dans les
+routes scalaire et shaped. Il reste toutefois une couture de contrôle : dans
+les deux routes, le site certifié positif exécute encore `continue` avant
+`chord.dead(h4)`. Si ce site apporte le dernier morceau manquant, le compteur
+est exact mais la mort n'est jamais publiée. Le résultat dépend alors de
+l'ordre du scan. Le test de mort doit être fait après la mise à jour positive
+et avant ce `continue`; pour un site non positif, garder le test après le cœur
+préserve la priorité historique du cœur lorsque les deux certificats ferment
+au même site.
+
+Une fixture entière à `h4=2` rend ce défaut et le mutant non vacants :
+
+```text
+A=(0,0,10), B=(4,0,10), X=(2,3,10)
+PL=(2,3,9), NL=(3,2,9), NR=(3,2,11), PR=(2,3,11)
+G=144, J=1504, mu_hat=28
+PL : L= 576, P= 144, B=-12, pièces [1,0,0,0]
+NL : L=-768, P=-192, B=-12, pièces [1,1,1,0]
+NR : L=-768, P=-192, B= 12, pièces [0,1,1,1]
+PR : L= 576, P= 144, B= 12, pièces [0,0,0,1]
+somme exacte : [2,2,2,2]
+```
+
+Le cœur ne tue pas : pour `NL` et `NR`, `2P^2=73728 < J B^2=216576`, et les
+deux autres sites ont `P>0`. Les deux ordres
+`(PL,PR,NL,NR)` et `(PL,NL,NR,PR)` doivent donc rendre exactement
+`dead=true`, `dead_by_chord=1`, `cert_pos=2`, `cert_neg=2`, `jung_skip=2`.
+Le premier état du patch rend vrai puis faux ; le mutant rend faux dans les
+deux ordres avec les comptes de morceaux `[1,2,2,1]`.
+
+Rejeu local du worktree : les huit portes ciblées shaped, corde historique et
+batch passent, mais elles ne discriminent pas ce défaut. La porte shaped
+appelle explicitement `chord_on=false`, la fixture historique ne tue que
+`chord-nonstrict`, et la parité batch compare deux routes portant le même
+`continue`. `mhgp5_mutants_gate` échoue donc avec le code 3 : 82 mutants sont
+déclarés et injectés, mais seulement 81 ont une porte attendue au code 4.
+
+La fermeture utile est petite et atomique :
+
+1. graver les deux permutations dans une porte courte qui exerce
+   `ChordPieces` comme oracle local, la route shaped et la vraie route scalaire
+   `process_anchor_q4` avec `h4=2` ;
+2. faire attendre le code 4 au CTest `chord-skip-positive` ; les portes
+   existantes le laissent actuellement survivre avec le code 0 et
+   `mutants_gate.py` le refuse comme mutant sans porte ;
+3. former `my_piece` pour tout site valide dans `q4_kernels.cuh`, y compris
+   `lh>bound`, sans lui donner `my_wit`, puis rejouer cette fixture contre le
+   vrai kernel lors de la prochaine session CUDA autorisée ;
+4. seulement après ces trois égalités, interpréter le nouveau taux de morts de
+   corde. Cette correction est fail-open : les digests finaux doivent rester
+   identiques, tandis que le nombre de seeds et d'essais évités peut changer.
+
+Sur device, `MHGP5_MUTANT` vaut `false` sous `__CUDA_ARCH__`. Si la même porte
+doit exercer le kernel mutanté, le booléen doit donc être résolu sur l'hôte et
+passé au kernel, comme `chord_nonstrict_`; appeler le registre depuis le device
+ne recevrait rien.
+
 Sur les seuls seeds ayant déjà survécu à la production actuelle, le K=4 tous
 sites de la sonde tue `7426/113718` seeds et évite `17,10 %` des essais D sur
 `terrain 4000`, puis `12370/129770` et `24,12 %` sur `terrain 8000`; sur
