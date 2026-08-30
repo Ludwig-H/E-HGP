@@ -130,6 +130,12 @@ minimale à cinq points et ses deux permutations sont données dans l'addendum d
 la réponse Q4, avec le motif de correction qui préserve la priorité du cœur en
 cas d'égalité.
 
+Claude a ensuite ajouté dans le worktree une porte `terrain n=2000` fondée sur
+un plancher de `seeds_killed_chord`. Elle rend le registre mécanique des mutants
+vert et constitue une bonne régression de masse, mais elle passe encore sur le
+`continue` dépendant de l'ordre et n'exerce ni shaped ni device. Elle doit donc
+rester complémentaire à la fixture exacte, pas la remplacer.
+
 ### La sonde de corde actuelle n'est plus une autorité indépendante
 
 `q4_chord_probe` construit son flux `emitted` en appelant aujourd'hui le

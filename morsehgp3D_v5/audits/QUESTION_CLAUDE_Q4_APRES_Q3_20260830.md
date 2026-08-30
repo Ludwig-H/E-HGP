@@ -422,6 +422,17 @@ appelle explicitement `chord_on=false`, la fixture historique ne tue que
 `continue`. `mhgp5_mutants_gate` échoue donc avec le code 3 : 82 mutants sont
 déclarés et injectés, mais seulement 81 ont une porte attendue au code 4.
 
+Le candidat `chord_positive_gate.cpp` apparu ensuite améliore ce point sans le
+fermer. Son plancher `terrain n=2000` sépare bien la masse nominale annoncée du
+mutant et rend `mutants_gate.py` vert à `82/82/82` ; il est utile comme
+régression d'intégration. En revanche, le patch encore dépendant de l'ordre
+dépasse lui aussi le plancher `23000`, donc cette porte peut être verte avec la
+couture de contrôle toujours fausse. Elle ne compare pas les deux permutations,
+n'appelle pas la route shaped ou le kernel et ne vérifie pas le digest qu'elle
+annonce identique. La garder en complément est constructif ; la fixture cinq
+points reste l'autorité permanente et indépendante d'une famille, d'une seed
+et d'un seuil empirique.
+
 La fermeture utile est petite et atomique :
 
 1. graver les deux permutations dans une porte courte qui exerce
