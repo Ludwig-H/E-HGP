@@ -35,9 +35,39 @@ proportionnel aux **seeds**, pas aux complétions.
 Il **croît dans les deux cas**, et il croît *plus vite* en famille bornée : les
 seeds y sont quatre fois moins nombreux, mais les survivants sont les plus durs.
 
-**Conséquence : dans l'unité qui paie, borner la canopée ne change pas
-l'exposant.** Exposant local du travail élémentaire total, $8\,000 \to 16\,000$,
-graine 3 : **$2{,}215$ au dépôt et $2{,}227$ en famille bornée**.
+**Conséquence sur l'unité qui paie — et voici la limite de ce qui est établi.**
+L'exposant local du travail élémentaire total, $8\,000 \to 16\,000$, vaut
+$2{,}215$ au dépôt et $2{,}227$ en famille bornée **en graine 3**. Mais ce couple
+est **mono-graine**, et la même mesure en graine 4 donne $1{,}010$ pour la
+famille bornée, avec un `core_site_tests` à $n=16\,000$ qui varie d'un facteur
+$6{,}79$ entre les deux graines. **L'effet d'une canopée bornée sur l'exposant
+n'est donc établi ni dans un sens ni dans l'autre** : il faudrait trois graines
+et un intervalle, comme la campagne `masses_q3_seed{3,4,5}` en fournit pour la
+famille du dépôt.
+
+### Ce qui EST établi, sur trois graines (famille du dépôt)
+
+Exposants locaux $8\,000 \to 16\,000$ de la lane q4, reçus
+`masses_q3_seed{3,4,5}_20260829` :
+
+| famille | seeds q4 | complétions | tués par profondeur | étendue max |
+|---|---|---|---|---:|
+| `terrain` | 1,798 / 1,803 / 1,773 | **2,066 / 2,101 / 2,071** | **2,246 / 2,333 / 2,373** | 0,127 |
+| `uniform` | 1,061 / 1,078 / 1,076 | 1,079 / 1,085 / 1,077 | 1,087 / 1,093 / 1,080 | 0,017 |
+| `eight_clusters` | 1,184 / 1,171 / 1,176 | 1,226 / 1,202 / 1,236 | 1,125 / 1,095 / 1,122 | 0,034 |
+| `scanline` | 1,251 / **1,586** / 1,240 | 1,439 / 1,756 / **1,142** | 1,763 / 1,943 / **1,084** | **0,859** |
+
+Trois lectures :
+
+1. **`terrain` est super-quadratique sur les trois graines** — complétions
+   $\geq 2{,}066$ et profondeur $\geq 2{,}246$ partout, étendue $\leq 0{,}13$.
+   Ce n'est pas un accident de graine.
+2. **`uniform` et `eight_clusters` sont sous-quadratiques et stables** (étendue
+   $\leq 0{,}034$).
+3. **`scanline` n'est établi ni dans un sens ni dans l'autre** : l'étendue
+   atteint $0{,}859$ sur les tués par profondeur ($1{,}084$ contre $1{,}943$).
+   **Toute conclusion mono-graine sur `scanline` est sans valeur**, la mienne
+   comprise.
 
 **Et la pente résiduelle était lue sur un ajustement global.** La série à canopée
 bornée a cinq tailles ; ses exposants **locaux** de complétions sont $1{,}065$,
