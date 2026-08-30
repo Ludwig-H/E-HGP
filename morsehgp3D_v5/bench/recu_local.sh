@@ -24,6 +24,12 @@ RACINE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$RACINE"
 
 nom=""; ns="8000"; familles="uniform"; repetitions=1; cible="mhgp5"
+# --entrees-differentes : les bras changent le NUAGE D'ENTREE (graine, plafond
+# de canopee...) et non l'algorithme. La comparaison d'objet entre bras n'a
+# alors aucun sens — une divergence est ATTENDUE, pas une faute. Toutes les
+# autres gardes (pin propre, sha256 du binaire, commande gravee, sorties
+# brutes, refus sur run vide) restent en vigueur.
+entrees_differentes=0
 declare -a bras_noms=() bras_flags=()
 for arg in "$@"; do
   case "$arg" in
@@ -31,6 +37,7 @@ for arg in "$@"; do
     --familles=*)    familles="${arg#--familles=}" ;;
     --repetitions=*) repetitions="${arg#--repetitions=}" ;;
     --cible=*)       cible="${arg#--cible=}" ;;
+    --entrees-differentes) entrees_differentes=1 ;;
     --bras=*)        v="${arg#--bras=}"; bras_noms+=("${v%%:*}"); bras_flags+=("${v#*:}") ;;
     --*)             echo "option inconnue : $arg" >&2; exit 2 ;;
     *)               nom="$arg" ;;
@@ -163,6 +170,7 @@ desaccords=0
 for n in "${n_values[@]}"; do
   for fam in "${family_values[@]}"; do
     for r in $(seq 1 "$repetitions"); do
+      [ "$entrees_differentes" -eq 1 ] && continue
       reference="$sortie/out/${fam}_n${n}_${bras_noms[0]}_r${r}.objet"
       ref_sig="$(cat "$reference")"
       for bn in "${bras_noms[@]:1}"; do
@@ -208,7 +216,11 @@ statut=complete
   echo "# bras"
   for i in "${!bras_noms[@]}"; do echo "${bras_noms[$i]} = ${bras_flags[$i]}"; done
   echo
-  echo "comparaison_objet=$([ "$desaccords" -eq 0 ] && echo identique || echo DESACCORD)"
+  if [ "$entrees_differentes" -eq 1 ]; then
+    echo "comparaison_objet=sans_objet (les bras changent l'entree, pas l'algorithme)"
+  else
+    echo "comparaison_objet=$([ "$desaccords" -eq 0 ] && echo identique || echo DESACCORD)"
+  fi
   echo
   echo "# signature de l'objet (sha256 catalogue + forets + cardinalites par K)"
   for f in "$sortie/out"/*.objet; do echo "$(basename "${f%.objet}") $(cat "$f")"; done
