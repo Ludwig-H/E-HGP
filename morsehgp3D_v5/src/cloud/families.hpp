@@ -148,13 +148,22 @@ inline std::vector<P3> eight_clusters_cloud(int n, int coord, long long seed) {
 // espacement de points constant (docs/TERRAIN_CANOPEE.md). Ce parametre sert
 // UNIQUEMENT aux contrefactuels de mesure : il fabrique une famille differente,
 // jamais un regime de production, et aucun reçu de conformite ne l'emploie.
-inline std::vector<P3> terrain_cloud(int n, int coord, long long seed, int canopy_lift_cap = 0) {
+// `bump_amp_cap` (0 = inerte) : SECONDE anisotropie, jumelle de la canopee.
+// L'amplitude des six calottes est tiree dans [coord/16, coord/8] : elle croit
+// donc en sqrt(n) alors que l'espacement au sol reste constant (5 unites), et
+// le nuage devient de plus en plus VOLUMIQUE quand il grandit — le nombre
+// d'altitudes distinctes passe de 137 a 284 entre n = 8000 et n = 32000
+// (graine 3). Le plafond fige cette hauteur ; comme `canopy_lift_cap`, il
+// fabrique une famille differente et ne sert qu'aux contrefactuels de mesure.
+inline std::vector<P3> terrain_cloud(int n, int coord, long long seed, int canopy_lift_cap = 0, int bump_amp_cap = 0) {
   std::mt19937 rng((unsigned)seed);
   struct Bump { long long cx = 0, cy = 0, r = 1, amp = 0; };
   std::vector<Bump> bumps(6);
   std::uniform_int_distribution<int> place(0, coord - 1);
   std::uniform_int_distribution<int> radius(std::max(2, coord / 6), std::max(3, coord / 3));
-  std::uniform_int_distribution<int> height(std::max(1, coord / 16), std::max(2, coord / 8));
+  const int amp_lo = bump_amp_cap > 0 ? std::max(1, bump_amp_cap / 2) : std::max(1, coord / 16);
+  const int amp_hi = bump_amp_cap > 0 ? std::max(2, bump_amp_cap) : std::max(2, coord / 8);
+  std::uniform_int_distribution<int> height(amp_lo, amp_hi);
   for (Bump& b : bumps) {
     b.cx = place(rng);
     b.cy = place(rng);
@@ -316,13 +325,13 @@ inline std::vector<P3> collinear_seven_cloud() {
 }
 
 inline std::vector<P3> make_family_cloud(CloudFamily family, int n, int coord, long long seed,
-                                         int canopy_lift_cap = 0) {
+                                         int canopy_lift_cap = 0, int bump_amp_cap = 0) {
   switch (family) {
     case CloudFamily::kTwoLines: return two_lines_cloud(n, coord);
     case CloudFamily::kCollinearSeven: return collinear_seven_cloud();
     case CloudFamily::kUniform: return uniform_cloud(n, coord, seed);
     case CloudFamily::kEightClusters: return eight_clusters_cloud(n, coord, seed);
-    case CloudFamily::kTerrain: return terrain_cloud(n, coord, seed, canopy_lift_cap);
+    case CloudFamily::kTerrain: return terrain_cloud(n, coord, seed, canopy_lift_cap, bump_amp_cap);
     case CloudFamily::kScanlineSinglePass: return scanline_cloud(n, coord, seed, false);
     case CloudFamily::kScanlineOverlapMultiecho: return scanline_cloud(n, coord, seed, true);
   }
@@ -333,9 +342,9 @@ inline std::vector<P3> make_family_cloud(CloudFamily family, int n, int coord, l
 // id = index d'entree (commodite de campagne ; la bibliotheque recoit des
 // InputPoint explicites).
 inline std::vector<InputPoint> make_family_input(CloudFamily family, int n, int coord, long long seed,
-                                                int canopy_lift_cap = 0) {
+                                                int canopy_lift_cap = 0, int bump_amp_cap = 0) {
   if (coord <= 0) coord = cloud_family_default_coord(family, n);
-  const std::vector<P3> pts = make_family_cloud(family, n, coord, seed, canopy_lift_cap);
+  const std::vector<P3> pts = make_family_cloud(family, n, coord, seed, canopy_lift_cap, bump_amp_cap);
   std::vector<InputPoint> in(pts.size());
   for (size_t i = 0; i < pts.size(); ++i) in[i] = InputPoint{(PointId)i, pts[i]};
   return in;

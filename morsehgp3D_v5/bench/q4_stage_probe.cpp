@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
   int n = 4000, coord = 0;
   size_t pretest_min = kPretestQueryMinPoints;
   long long seed = 3;
-  int lift_cap = 0;
+  int lift_cap = 0, amp_cap = 0;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     if (a.rfind("--family=", 0) == 0) { if (!parse_cloud_family(a.c_str() + 9, &family)) return 2; }
@@ -32,10 +32,11 @@ int main(int argc, char** argv) {
     // sinon coord/8 et grandit avec le nuage (docs/TERRAIN_CANOPEE.md). Ce
     // n'est PAS un regime de production.
     else if (a.rfind("--canopy-lift-cap=", 0) == 0) lift_cap = std::atoi(a.c_str() + 18);
+    else if (a.rfind("--bump-amp-cap=", 0) == 0) amp_cap = std::atoi(a.c_str() + 15);
     else return 2;
   }
   if (coord <= 0) coord = cloud_family_default_coord(family, n);
-  const CloudIndex ix = build_cloud_index(make_family_input(family, n, coord, seed, lift_cap));
+  const CloudIndex ix = build_cloud_index(make_family_input(family, n, coord, seed, lift_cap, amp_cap));
   if (!ix.valid || ix.has_duplicate_positions()) return 2;
   const u64 smax = 11;
   const u64 h_of[3] = {lane_h(Lane::kQ2, smax), lane_h(Lane::kQ3, smax), lane_h(Lane::kQ4, smax)};
@@ -80,11 +81,16 @@ int main(int argc, char** argv) {
         const i64 D2 = p3_norm2(p3_sub(pb, pa));
         if (D2 == 0) continue;
         ++anchors;
+        // MEME credit d'extremite que la lane de production : sans lui la sonde
+        // mesure des etages qui ne sont pas ceux du produit (elle sous-compte
+        // les morts d'ancre par secteurs).
+        const EndpointCredit ec{sc.ha[(size_t)(ua - ra.first)] + sc.hb[(size_t)(ub - rb.first)],
+                                ra.first, ra.last, rb.first, rb.last};
         if (by_query) {
           ++pretest_anchors;
           pretest_sites += sc.query.size();
           t0 = now();
-          const int k = anchor_kill_from_candidates(sc.query, ix.upos, ua, ub, pa, pb, D2, Lane::kQ4, 8, h_of[2]);
+          const int k = anchor_kill_from_candidates(sc.query, ix.upos, ua, ub, pa, pb, D2, Lane::kQ4, 8, h_of[2], &ec);
           t_query += ns(t0);
           if (k == 1) { ++ls.anchors_killed_w4; continue; }
           if (k == 2) { ++ls.anchors_killed_sectors[2]; continue; }
@@ -98,7 +104,8 @@ int main(int argc, char** argv) {
         ls.q4_cover_sites += sc.cover.size();
         t0 = now();
         generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, false, false, false, &lo, &ls,
-                                           by_query ? generate_detail::AnchorPretests::kAlreadyApplied : generate_detail::AnchorPretests::kApply);
+                                           by_query ? generate_detail::AnchorPretests::kAlreadyApplied : generate_detail::AnchorPretests::kApply,
+                                           &ec);
         t_body += ns(t0);
       }
   }
@@ -117,7 +124,7 @@ int main(int argc, char** argv) {
   const bool nonempty = query_nonempty && ls.q4_covers_built > 0 && ls.q4_cover_visits > 0 && ls.q4_cover_sites > 0 &&
                         ls.q4_core_site_tests > 0 && ls.q4_depth_entries > 0 && ls.q4_power_tests > 0 &&
                         ls.q4_completions > 0;
-  std::printf("parametres graine=%lld canopy_lift_cap=%d\n", seed, lift_cap);
+  std::printf("parametres graine=%lld canopy_lift_cap=%d bump_amp_cap=%d\n", seed, lift_cap, amp_cap);
   std::printf("q4_stage_probe famille=%s n=%d rectangles=%zu ancres_post_hist=%llu candidats=%llu seeds=%llu core_tues=%llu corde_tues=%llu completions=%llu profonds=%llu\n",
               cloud_family_name(family), n, alive.size(), (unsigned long long)anchors, (unsigned long long)lo.size(),
               (unsigned long long)ls.seeds[1], (unsigned long long)ls.seeds_killed_core, (unsigned long long)ls.seeds_killed_chord,

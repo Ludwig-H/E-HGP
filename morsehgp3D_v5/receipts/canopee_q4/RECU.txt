@@ -1,0 +1,64 @@
+# MorseHGP3D v5 — campagne locale : canopee_q4
+date_utc=2026-08-30T22:55:01+00:00
+source_commit=38fa88af0f7c20176cf8278b06219cc5cbb49594
+arbre_construit=propre (refus sinon)
+cible=mhgp5_q4_stage_probe (cible PRODUIT, pas une cible MHGP5_TESTING)
+binaire_sha256=21794af51fdb5761961c602c2f7fb412ed361374a8f34a2e974b5b27db5faabc
+machine=Linux 6.8.0-1052-azure, 8 fils logiques — MACHINE PARTAGEE, LOCALE
+avertissement=un ecart de mur sous ~20 % n'est pas concluant ici ; les compteurs sont exacts
+protocole=morsehgp3D_v5/bench/recu_local.sh, ordre joue SANS alternance (un seul bras ou une seule repetition)
+compilateur=/usr/bin/c++ (c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0)
+cmake_build_type=Release
+cmake_version=cmake version 3.28.3
+statut=complete
+runs_non_nuls=0
+
+# bras
+g3cap0 = --seed=3 --canopy-lift-cap=0
+g3cap3 = --seed=3 --canopy-lift-cap=3
+g4cap0 = --seed=4 --canopy-lift-cap=0
+g4cap3 = --seed=4 --canopy-lift-cap=3
+g5cap0 = --seed=5 --canopy-lift-cap=0
+g5cap3 = --seed=5 --canopy-lift-cap=3
+
+comparaison_objet=sans_objet (les bras changent l'entree, pas l'algorithme)
+
+# signature de l'objet (sha256 catalogue + forets + cardinalites par K)
+terrain_n16000_g3cap0_r1 52df4d15ef04e6eb5102eea4d482b29b45963a0b55be209ed340bd3f5d521181
+terrain_n16000_g3cap3_r1 e168e71376ae4b3705e4cc6a8e989978eb2540b64ee7387ce0c53db97e5db628
+terrain_n16000_g4cap0_r1 4ce9e20b605fcc4c721cfa2e1243b0f72ba25d3c3af8707f2a388efbec8e1b79
+terrain_n16000_g4cap3_r1 ccb63d9b821b41e337f9afcf5d3b28d0455a6bc2cbd782a0a1ec6c70b0bde3a3
+terrain_n16000_g5cap0_r1 7ea9d01755c32df4b4fe9c0ab3f5b59f95fe97f87feafe9b3f82a54a570a4fa9
+terrain_n16000_g5cap3_r1 a48da8aea96186b3fb02482a0cea714fab386b92664f7b8108976ffb63672473
+terrain_n32000_g3cap0_r1 3f41c177b1f934f7a523eb1bb5c5b697215d9baf68740195a14f7c715105e48c
+terrain_n32000_g3cap3_r1 5b7ef34c2de6fc1460fd06998ad1522cf91fe501c76ca0b2cff7437ced90a338
+terrain_n32000_g4cap0_r1 3b725ea6bb36d48f6a5fc82b23ac69838c764e546164494f685e1452a636f383
+terrain_n32000_g4cap3_r1 e3749254ecb08403c3f0fd8afa57bbab4900a79649b7ca94d64fe1d27660554b
+terrain_n32000_g5cap0_r1 afea3d51080f133ab40d69ba27fea4f20f18c6c1fc2633c7525e2506bb1b41ad
+terrain_n32000_g5cap3_r1 76a1f85da5973309131a46abdc8b6dc6c8a5a3c07cfa20dd6720d6795019c17c
+terrain_n8000_g3cap0_r1 d9b6234e330d7ea8fa1b5b9da12f0ab9ab9fb097706e9eb63a21f696bbf4445e
+terrain_n8000_g3cap3_r1 28558a91388ab01cda2623ea3a920c6cc0a807fcebe9d3fbf4585776a086b9e1
+terrain_n8000_g4cap0_r1 25c75a37ffdfa265aae5fa441318c7ece11478aa5423fe16888c44bb2d872f20
+terrain_n8000_g4cap3_r1 65b0c55180c8fc303b02ddf6e318a4d9586b96b55884c3bb0d01875dc523f46b
+terrain_n8000_g5cap0_r1 c9e09a9613a75663d5f4ba588e7bc6406d957da5413b375c2e1a37cc0c5fbe48
+terrain_n8000_g5cap3_r1 c6a69c23b585f77405a647b13c7b8dc5aeb230a247dbb2b13778c7431200658b
+
+# run code duree_s peak_rss_kb
+terrain_n16000_g3cap0_r1 0 34.923 0
+terrain_n16000_g3cap3_r1 0 15.639 0
+terrain_n16000_g4cap0_r1 0 28.237 0
+terrain_n16000_g4cap3_r1 0 9.079 0
+terrain_n16000_g5cap0_r1 0 25.749 0
+terrain_n16000_g5cap3_r1 0 10.292 0
+terrain_n32000_g3cap0_r1 0 225.003 0
+terrain_n32000_g3cap3_r1 0 65.679 0
+terrain_n32000_g4cap0_r1 0 95.271 0
+terrain_n32000_g4cap3_r1 0 18.929 0
+terrain_n32000_g5cap0_r1 0 88.501 0
+terrain_n32000_g5cap3_r1 0 20.763 0
+terrain_n8000_g3cap0_r1 0 9.565 0
+terrain_n8000_g3cap3_r1 0 5.323 0
+terrain_n8000_g4cap0_r1 0 8.529 0
+terrain_n8000_g4cap3_r1 0 4.383 0
+terrain_n8000_g5cap0_r1 0 8.060 0
+terrain_n8000_g5cap3_r1 0 4.814 0
