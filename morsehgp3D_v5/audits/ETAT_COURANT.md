@@ -13,18 +13,18 @@ les deux routes CPU, le mutant `chord-skip-positive`, une régression de masse
 `terrain n=2000` et les corrections de portée de `PROFIL_SEPARATION.md`. Le
 kernel CUDA n'est pas modifié par ce pin.
 
-Le dernier commit concurrent relu, `1e4e0845`, ne change pas ces sources q4 :
-avec `b1045ae5`, il ajoute le ledger causal puis les fixtures exactes proposées
-pour `EndpointCredit`. Le worktree contient en revanche un brouillon
-concurrent non commité qui raccorde `EndpointCredit` aux routes scalar et batch,
-corrige la corde scalar/shaped, ajoute sa fixture locale et commence une sonde
-de canopée bornée. Ce brouillon est relu séparément ci-dessous, sans être
-substitué au pin source. Le vrai kernel CUDA reste inchangé. Les autres
-changements non commités sont des propositions documentaires conservées pour
-Claude. Les commits `d421bd69`, `30c1dc30`, `3b729c01` et `be8dfd26` portent les
-contre-lectures q4 actives. Toute modification source ultérieure périme la
-fraîcheur du verdict, pas les contre-exemples mathématiques ni les constats
-attachés aux pins nommés.
+La tête relue `d42f69ff` ne change pas ces sources q4 : avec `b1045ae5`,
+`1e4e0845` et `7aaf0ce5`, elle consolide le ledger causal, les fixtures
+attendues et la réception des routes. Le worktree contient en revanche un
+brouillon concurrent non commité qui raccorde `EndpointCredit` aux routes
+scalaire et batch, prend désormais le maximum secteur par secteur, corrige la
+corde scalaire/shaped/kernel et ajoute ses fixtures locales. Ce brouillon est
+relu séparément ci-dessous, sans être substitué au pin source. Le kernel CUDA
+est corrigé en lecture seulement : `MHGP5_ENABLE_CUDA=OFF` et aucun `nvcc`
+n'est disponible. Les autres changements non commités sont des propositions
+documentaires conservées pour Claude. Toute modification source ultérieure
+périme la fraîcheur du verdict, pas les contre-exemples mathématiques ni les
+constats attachés aux pins nommés.
 
 ## Verdict
 
@@ -126,44 +126,62 @@ ordres vivants. En parallèle, les trois CTests `mutants_gate`,
 une bonne régression d'intégration, mais une autorité insuffisante pour cette
 couture.
 
-Le kernel CUDA conserve l'ancien saut complet. La fermeture CPU tient à un
-test supplémentaire après l'update du seul cas positif, avant son `continue` ;
-les sites non positifs gardent le cœur prioritaire puis le test de corde
-historique. Il faut graver les deux permutations dans la porte exacte, puis
-former `my_piece` avant la branche du cœur dans le kernel.
+Le worktree applique maintenant la bonne couture : scalaire et shaped testent
+la mort après l'update positif et avant son `continue`; le kernel forme
+`my_piece` pour tout site avant de brancher sur `P>0`, puis conserve la priorité
+du cœur à égalité de lane. La correction nominale est cohérente en lecture.
+Elle n'est pas encore reçue : aucune fixture produit/shaped à cinq points et
+deux permutations n'est enregistrée, `q4_core_shaped_gate` désactive la corde,
+et le kernel n'a été ni compilé ni exécuté sans `nvcc`. CUDA reste donc
+`not_received`, non « fermé ».
 
-### Le brouillon `EndpointCredit` q4 est sûr mais ne réalise pas encore son contrat
+### `EndpointCredit` : helper algébrique reçu, crédit du cœur encore absent
 
-Le worktree propage utilement `h_a+h_b` vers le pré-scan W4 et les secteurs.
-La disjonction employée est correcte : le crédit vit dans `A union B`, tandis
-que `cnt_out` ne lit que son complément. Mais le commentaire annonce
-`min_k max(cnt[k],cnt_out[k]+base)>=h`, alors que le code calcule seulement
-`min_k cnt[k]>=h` **ou** `min_k(cnt_out[k]+base)>=h`. Ce dernier reste fail-open
-et sûr, mais il perd les cas où certains secteurs sont fermés par le compte pur
-et les autres par le crédit. Pour réaliser le contrat annoncé, prendre le
-maximum secteur par secteur avant le minimum et graver une fixture croisée où
-aucune des deux branches globales ne suffit seule. Le commit documentaire
-`1e4e0845` donne désormais la fixture géométrique q3 à cinq positions qui
-réalise ce croisement, puis une fixture distincte de fausse mort pour le mutant
-de double comptage. Elles sont préférables à un test limité aux tableaux du
-helper et doivent devenir les autorités CTest.
+Le worktree propage `h_a+h_b` vers le pré-scan W4 et les secteurs. La
+disjonction est correcte : le crédit vit dans `A union B`, tandis que
+`cnt_out` ne lit que son complément. Claude a remplacé l'union globale trop
+faible par `min_k max(cnt[k],cnt_out[k]+base)` et ajouté le mutant
+`sector-credit-global`. La fixture géométrique q3 à cinq positions ferme le cas
+croisé ; nominal, mutant et registre passent `3/3`. Ce contrat local n'est donc
+plus un verrou.
 
-Le raccord n'est pas encore homogène : `q3_lane_batched.hpp` et
-`q4_lane_batched.hpp` construisent les mêmes histogrammes mais ne transmettent
-pas `EndpointCredit` à leurs prétests, routes hôte ou prétest manuel avant le
-lot device. Aucun nouveau wire n'est requis : construire le crédit par ancre
-côté hôte, le passer aux fallbacks et employer la même fonction de prétest
-avant matérialisation. Le premier état du brouillon divergeait donc dès que le
-nouveau kill devenait non vacant. Claude a depuis transmis le même crédit dans
-les builders q3/q4 et ajouté une porte locale à `sector-credit-inbox`.
+Le premier état n'était pas homogène : les builders q3/q4 ne transmettaient
+pas le crédit aux prétests hôte. Claude construit désormais le même token par
+ancre avant toute matérialisation et le passe aux deux routes ; aucun changement
+de wire n'était requis.
 
 Le rejeu reçoit cette progression : build ciblé réussi, registre et fixture
 locale verts, puis q3/q4 `uniform`, `clusters` et les deux routes tout-hôte
 verts, soit `9/9` portes ciblées en `155,65 s`. Ces mêmes parités échouaient
 avant le raccord. La propagation scalar/batch de ce sous-ensemble est donc
 fermée dans le worktree courant ; les autres routes batch et la suite complète
-restent à rejouer après commit. La fixture locale ne reçoit pas encore le
-contrat géométrique croisé, comme détaillé ci-dessous.
+restent à rejouer après commit. Le second rejeu shaped/corde/secteur/q4-batch
+porte ce sous-ensemble à `14/14` en `47,02 s`.
+
+La fixture croisée fait toutefois encore confiance à
+`EndpointCredit.base=1`. Elle ne calcule pas ce crédit via
+`corner_histograms`/l'autorité de coins, ne vérifie pas les huit comptes purs
+annoncés et ne passe pas par un seed vivant. Il reste donc à graver une porte
+d'intégration `histogrammes -> crédit -> secteurs`, en plus de la bonne porte
+locale désormais reçue. La précondition `base<hh` doit aussi être encodée ou
+documentée : les helpers ignorent un appel direct `base>=hh`; la route produit
+l'évite seulement parce que la porte d'histogramme a déjà tué l'ancre.
+
+Les parités batch ne comparent pas encore tout `GenerateStats`. Les builders
+ne remplissent pas `hist_killed_rows`, `hist_killed_thresh` et
+`hist_survivors`, et leurs gates ne comparent pas ces champs. Partager
+l'énumérateur ou ajouter ces trois comptes, puis exiger
+`rows+thresh+survivors=anchors` ferme le ledger plutôt que le seul aval.
+
+Surtout, le token vaut toujours seulement `h_a+h_b`. `ar.core` sert au seuil
+de la porte histogramme, puis n'est pas transmis aux secteurs. Le chemin reste
+fail-open, mais ne réalise pas encore `h_core+h_a+h_b`. La fermeture propre est
+bornée : appeler une fois `collect_universal_ids` par `AliveRect`, recertifier
+les au plus `h_q-1` IDs cœur hors `A union B`, puis former
+`base=h_core+h_a+h_b` et `cnt_res` hors facteurs **et** hors IDs cœur. Le
+verdict reste `min_k max(cnt[k],cnt_res[k]+base)>=h_q`. Si la recertification
+échoue, notamment après héritage postsep, omettre le cœur du crédit et compter
+le repli. Cette même provenance prépare le tape résiduel de `h_c`.
 
 ### `CREDIT_SECTEUR.md` ferme le lemme, pas encore le coût
 
@@ -177,26 +195,27 @@ séparation mathématique doit être conservée.
 La réponse de Claude reçoit aussi honnêtement le second défaut de corde. Dans
 le worktree, les routes scalaire et shaped constatent maintenant la mort après
 la mise à jour positive et avant le `continue`, avec la priorité historique
-préservée. En revanche, `q4_core_shaped.hpp` n'est pas le kernel CUDA :
-`q4_kernels.cuh` branche toujours sur `P>0` avant de former `Bz/my_piece`.
-Le titre « verrou de corde fermé » doit donc rester « CPU/scalar+shaped
-corrigés » jusqu'à la fixture à deux ordres et au rejeu du vrai kernel.
+préservée. Le vrai `q4_kernels.cuh` forme désormais lui aussi `Bz/my_piece`
+avant de brancher sur `P>0`. Le titre « verrou de corde fermé » reste néanmoins
+prématuré jusqu'à la fixture à deux ordres et au rejeu CUDA : le kernel n'a été
+ni compilé ni exécuté dans cet environnement.
 
 La nouvelle `sector_credit_fixture.cpp` garde bien le mutant au code 4, mais
-elle ne remplace pas la fixture géométrique demandée. Elle construit
+elle construit encore
 `EndpointCredit{1,0,m-1,0,-1}` : la plage B est vide, A contient ancres et
 sites, et `base=1` ne provient pas de `corner_histograms` sur deux nœuds WSPD
 disjoints. Son second crédit emploie deux boîtes singletons, qui donneraient
-réellement `h_a=h_b=0`. Les trois portes vertes testent donc un token de helper
-de confiance, pas la route produit ; elles passent en outre alors que le cas
-croisé `min_k max(...)` reste faux. Conserver cette porte locale est utile,
-mais ajouter l'intégration `corner_histograms -> EndpointCredit -> secteurs`
-avec ranges valides, seed vivant et le cas croisé cinq positions.
+réellement `h_a=h_b=0`. Cette porte teste donc un token de helper de confiance,
+pas une fausse mort atteignable du produit. La nouvelle fixture croisée, elle,
+emploie des ranges disjoints et tue `sector-credit-global`; ses trois portes
+passent. Elle doit encore vérifier explicitement que `e` satisfait bien
+`universal_over_corners` et, idéalement, exercer
+`corner_histograms -> EndpointCredit -> secteurs` sur de vrais `NodeRef`.
 
 Les conclusions de performance de la note dépassent toutefois ses données.
-La table mono-graine n'a encore ni source, commande, stdout, hash ni reçu ; le
-seul code visible emploie le combinateur global plus faible et des routes batch
-non raccordées, donc cette table n'est pas encore attribuable au contrat exact.
+La table mono-graine n'a encore ni source, commande, stdout, hash ni reçu et
+précède les fermetures du combinateur et des routes batch ; elle doit être
+rejouée avant d'être attribuée au contrat exact courant.
 Surtout, « gratuit », « dominant », « ne change pas l'exposant » et
 « le mur reste le cœur » ne découlent pas de `0,28--0,53 %` d'ancres mortes en
 plus. Le code ajoute une classification et jusqu'à huit compteurs par site, et
