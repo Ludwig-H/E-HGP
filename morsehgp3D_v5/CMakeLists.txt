@@ -449,6 +449,14 @@ else()
   set(_mhgp5_probe_dirty "OUI")
 endif()
 target_compile_definitions(mhgp5_rect_probe PRIVATE MHGP5_PROBE_PIN="${_mhgp5_probe_pin}" MHGP5_PROBE_DIRTY="${_mhgp5_probe_dirty}")
+# Sonde de REDONDANCE de la descente WSPD : trois descentes par lane contre une
+# descente a masque. Porte de correction interne (code 3 si les trois listes de
+# rectangles vivants ne sont pas identiques a celles du bras actuel).
+mhgp5_executable(mhgp5_wspd_fusion_probe bench/wspd_fusion_probe.cpp)
+target_compile_definitions(mhgp5_wspd_fusion_probe PRIVATE MHGP5_PROBE_PIN="${_mhgp5_probe_pin}" MHGP5_PROBE_DIRTY="${_mhgp5_probe_dirty}")
+foreach(fam uniform terrain eight_clusters scanline_single_pass two_lines collinear_seven)
+  mhgp5_gate(mhgp5_wspd_fusion_${fam} 0 mhgp5_wspd_fusion_probe "--family=${fam} --n=600" TIMEOUT 300)
+endforeach()
 # Sonde de fibre A x B x C : vacuite par boites, predicat ideal au seuil,
 # invariant W_3, ledger de provenance, chemin causal. Code 3 si le ledger, un
 # faux positif de certificat ou l'invariant sont pris en defaut.
