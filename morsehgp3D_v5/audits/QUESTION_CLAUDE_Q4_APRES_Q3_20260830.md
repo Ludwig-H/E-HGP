@@ -187,6 +187,33 @@ qui peut supprimer les `12,58 -> 95,27` essais D par face vivante ; le prototype
 doit rester CPU, counter-only et ciblé d'abord sur les ancres longues du
 diagnostic.
 
+La couture implémentable ne demande pas encore d'auto-jointure globale. Pour
+chaque handle `H_i` de taille `m_i<=32`, chaque carrier `c` et chaque patch q4
+faisable `j`, énumérer localement les `z!=c` de ce handle, hors `A union B`, et
+compter jusqu'au besoin résiduel ceux qui satisfont strictement sur tout le
+patch :
+
+```text
+Phi32(q,c,z) = 2*q.(z-c) + 32*(||c||^2-||z||^2) > 0
+```
+
+Pour `c,z` fixés, le minimum en `q` est atteint à un coin du patch, donc le
+test reste entier et borné. Si `g_i,j` est le crédit patch-global dans la strate
+du handle et `g_not_i,j` celui des autres strates, composer exactement :
+
+```text
+b_i,j(c) = max(rect_core4, g_not_i,j + max(g_i,j, h_c,j(c)))
+tau_i(c) = max over feasible j of max(0, h4 - b_i,j(c))
+face (a,b,c) closed iff h_a(a) + h_b(b) >= tau_i(c)
+```
+
+`rect_core4` est le cœur porté par `AliveRect`, jamais le cœur de Jung propre à
+la face. Le maximum sur les patches exprime le pire cas alternatif ; il ne
+somme pas leurs témoins. Un masque faisable vide reçoit un fate d'absence
+séparé, jamais `tau=0`. Avec au plus 64 patches, le coût plat vérifie
+`64*sum_i(m_i^2) <= 2048*sum_i(m_i)`. Cette borne locale rend le premier shadow
+viable ; elle ne borne toujours ni le nombre total de handles ni le front WSPD.
+
 Pour mémoire, la borne `/8` se déduit sans heuristique : si `d=b-a`, `D^2` est
 sa norme carrée et `t` le déplacement du centre depuis le milieu, alors
 `t` est orthogonal à `d` et Jung donne `t` de norme carrée au plus `D^2/8`.
@@ -240,3 +267,35 @@ Enfin, V159 corrige la sémantique de `q4_completions`, donne le dénominateur
 recevoir en parallèle le certificat ciblé des ancres longues et la
 décomposition `cellule -> cœur -> corde -> faces_D -> essais D` pour départager
 réellement les deux leviers.
+
+### Garde immédiate sur la sonde q4 en cours
+
+Le scratch `q4lanep.cpp` relu pendant son exécution ne peut pas encore recevoir
+un effet causal de canopée : changer la borne de `uniform_int_distribution`
+peut changer la consommation du MT, puis les collisions de `z` changent la
+déduplication et l'arrêt à `n`. Il faut figer les propositions latentes et
+accepter un même ensemble d'indices dans tous les bras, ou déclarer des
+contre-familles indépendantes avec incertitude, jamais des paires.
+
+L'échantillonneur courant hache le rang `ir` dans `alive`. Ce rang et la liste
+WSPD changent avec le nuage ; les rectangles des bras ne sont donc pas appariés.
+En outre, le test modulo sélectionne un effectif aléatoire autour de la cible,
+alors que la sortie imprime la cible comme si elle était réalisée. Employer un
+bottom-k exact sur des `AnchorKey` stables après appariement des PointId, ou
+publier `sel.size()`, les probabilités d'inclusion et l'incertitude groupée.
+
+Trois corrections de grand-livre sont nécessaires avant usage des sorties :
+
+- imprimer `faces_D` et `q4_completions/faces_D`, pas seulement
+  `q4_completions/seeds[1]` ;
+- imprimer `depth_killed/q4_depth_entries` et
+  `q4_power_tests/q4_depth_entries`, pas `depth_killed/q4_completions` ;
+- refuser si la partition des ancres ou des seeds ne ferme pas, au lieu de
+  masquer un éventuel sous-dépassement par une soustraction saturée.
+
+Enfin, la copie du wrapper produit omet actuellement l'alimentation de
+`q4_covers_built`, `q4_cover_visits` et `q4_cover_sites`; ces trois valeurs du
+bloc `PROFIL` sortiront donc à zéro et ne mesurent rien. Le bras historique
+bit-identique est une bonne garde, mais le cap constant de référence exact à
+2 000 points est 27, non 28. Versionner source, commande, stdout, hash du
+binaire, `HEAD` et état du worktree avant tout nouveau verdict.
