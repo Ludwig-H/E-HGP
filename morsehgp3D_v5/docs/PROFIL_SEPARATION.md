@@ -16,9 +16,22 @@ $$\left(\kappa_q-\frac{2}{s}\right)d_{\min},\qquad \kappa_2=\frac{1}{2},\quad \k
 Elle s'annule à $s=4$ pour q2, $s=6{,}93$ pour q3 et $s=7{,}73$ pour q4.
 
 **Huit est le plus petit entier qui rend le certificat de cœur non dégénéré pour
-les trois lanes.** En dessous, `core` est vide **par construction** : toute
-statistique mesurée là décrit un pipeline amputé de son crédit principal, et
-n'est pas un point de fonctionnement.
+les trois lanes** au pire cas de la séparation, c'est-à-dire lorsque les boîtes
+atteignent la borne $r = d_{\min}/s$.
+
+**Correction (audit du 30 août).** Deux formulations antérieures de cette page
+étaient trop fortes et sont retirées :
+
+- « en dessous, `core` est vide **par construction** » est faux en général. La
+  borne $\left(\kappa_q - 2/s\right)d_{\min}$ suppose $r_A$ et $r_B$ **au
+  maximum** autorisé par la séparation. Les **singletons** ($r_A = r_B = 0$)
+  donnent une contre-fixture immédiate : le citron commun y est le citron entier,
+  quel que soit $s$. Ce qui est vrai est plus étroit — *le pire cas* du citron
+  commun s'annule sous ces seuils, donc une mesure prise là ne décrit plus le
+  régime que le profil produit garantit.
+- « aucun rectangle n'est généré » sous le seuil décrit ma **garde**, pas une
+  propriété géométrique : la bibliothèque **refuse explicitement le profil
+  produit**, elle ne constate pas une vacuité.
 
 ## Ce que cela invalide, nommément
 
@@ -53,7 +66,18 @@ domaine, pas un réglage.
 | `run_pipeline` | refus `invalid_input : separation s < 8` |
 | CLI `mhgp5` | code 2, `REFUS : arguments (profil s >= 8, …)` |
 | `alive_rectangles` | **fail-closed** : zéro rectangle si $s<8$, sauf opt-in explicite |
-| `GenerateOptions` | l'opt-in n'existe **que** sous `MHGP5_TESTING` |
+| `GenerateOptions` | le **champ** d'opt-in n'existe que sous `MHGP5_TESTING` |
+
+Nuance de portée, relevée par l'audit : le **paramètre** de contournement
+d'`alive_rectangles` est présent dans toute compilation ; seul le **champ
+d'options** qui le pilote est conditionné. Le claim exact est donc : aucun point
+d'entrée produit n'expose ce contournement — pas : la branche n'est pas compilée.
+
+Portée exacte du raccord de parsing, relevée par l'audit : `parse_i64_exact`
+route **`--s` seulement**. `--n`, `--coord`, `--seed`, `--smax`, `--threads`,
+`--cell-min-sites` et les options CUDA restent sur `atoi`/`atoll`. Le signe
+explicite `--s=+8` est refusé par `from_chars` ; `INT64_MAX` est accepté, comme
+frontière arithmétique et non comme profil de coût.
 
 Le trou par lequel mes chiffres hors profil sont sortis était le troisième :
 mes sondes appellent `alive_rectangles` directement et contournaient ainsi le

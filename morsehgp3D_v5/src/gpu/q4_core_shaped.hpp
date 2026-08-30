@@ -79,16 +79,19 @@ MHGP5_HD inline bool q4_seed_core_shaped(const SeedQ4D& s, const AnchorSitesSoA&
   for (u32 i = 0; i < sites.n; ++i) {
     if (i == skip_a || i == skip_b || i == s.skip_x) continue;
     const double lh = q3_l_hat_shaped(s.aff, (double)sites.u0[i], (double)sites.u1[i], (double)sites.u2[i], (double)sites.q[i]);
-    if (lh > s.aff.bound) {
-      ++c->cert_pos;
-      continue;
-    }
     const i64 nu = s.n0 * sites.u0[i] + s.n1 * sites.u1[i] + s.n2 * sites.u2[i];  // = 2B, pair
     const i64 Bz = nu / 2;
-    if (chord_on)
+    // Meme correction que la route scalaire : un site certifie P > 0 reste
+    // temoin possible d'un morceau EXTERIEUR de corde (v_j < 0 avec L > 0).
+    const bool skip_pos = lh > s.aff.bound;
+    if (chord_on && !(skip_pos && MHGP5_MUTANT("chord-skip-positive")))
       chord.update(lh, s.aff.bound, Bz, [&]() {
         return di_to_i128_hd(q3_l_exact_shaped(s.aff, sites.u0[i], sites.u1[i], sites.u2[i], sites.q[i]));
       });
+    if (skip_pos) {
+      ++c->cert_pos;
+      continue;
+    }
     if (lh < -s.aff.bound) {
       ++c->cert_neg;
       const int js = jung_interval_sign_shaped(lh, s.aff.bound, s.Jlo, s.Jhi, Bz);

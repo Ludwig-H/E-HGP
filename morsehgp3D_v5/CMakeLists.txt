@@ -427,6 +427,17 @@ mhgp5_gate(mhgp5_gpu_instrument_refus 2 mhgp5_gpu_instrument_gate "--gauge-threa
 
 # Lane q3 par lots (etage hote de la lane device) : egalite vecteur a vecteur avec la production.
 # Sonde de mesure (jamais un claim) pour la lane par rectangle : tailles aplaties par rectangle, quantiles.
+# PORTE DE LA CORDE : un site certifie P > 0 reste temoin possible d un morceau
+# EXTERIEUR (v_j = L - (2j-4) mu_hat B peut etre negatif avec L > 0). Le defaut
+# est FAIL-OPEN — digest identique — donc il se tue sur le COMPTEUR, par un
+# plancher place strictement entre les deux valeurs mesurees a terrain n=2000 :
+# 24 727 corrige contre 21 691 avec le mutant.
+mhgp5_executable(mhgp5_chord_positive_gate tests/chord_positive_gate.cpp)
+mhgp5_gate(mhgp5_chord_positive 0 mhgp5_chord_positive_gate
+           "--family=terrain --n=2000 --seed=3 --min-seeds=400000 --min-corde=23000" TIMEOUT 300)
+mhgp5_gate(mhgp5_chord_positive_mutant 4 mhgp5_chord_positive_gate
+           "--family=terrain --n=2000 --seed=3 --min-seeds=400000 --min-corde=23000 --inject=chord-skip-positive" TIMEOUT 300)
+
 mhgp5_executable(mhgp5_q4_chord_probe bench/q4_chord_probe.cpp)
 mhgp5_executable(mhgp5_q4_stage_probe bench/q4_stage_probe.cpp)
 target_compile_definitions(mhgp5_q4_stage_probe PRIVATE MHGP5_PROFILE_Q4=1)

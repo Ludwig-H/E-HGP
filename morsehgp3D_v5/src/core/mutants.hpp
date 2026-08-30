@@ -71,7 +71,7 @@ inline constexpr const char* kMutants[] = {
     "route-ignore-threshold",
     "sector-kill-nonstrict",
     "anchor-kill-h-minus-one",
-    "chord-nonstrict",
+    "chord-nonstrict", "chord-skip-positive",
     "cell-kill-nonstrict",
     "cell-kill-h-minus-one",
     "prefix-tamper-event-order",

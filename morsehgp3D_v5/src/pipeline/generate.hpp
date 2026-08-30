@@ -837,14 +837,25 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
         if (cz.u == ua || cz.u == ub || cz.u == cx.u) continue;
         MHGP5_Q4_ADD(q4_core_site_tests, 1);
         const double lh = seed.l_hat(sc, iz);
-        if (lh > seed.bound) {
-          ++ls->float_cert_pos;
-          ++ls->q4_cert[0];
-          continue;  // P > 0 certifie : jamais temoin (d'aucune boule, d'aucun morceau)
-        }
         const P3& pz = ix.upos[(size_t)cz.u];
         const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
-        if (chord_on) chord.update(lh, seed.bound, Bz, [&]() { return seed.l_exact(sc, iz); });
+        // LA CORDE VOIT AUSSI LES SITES CERTIFIES P > 0. Le morceau i teste
+        // v_j = L - (2j-4) mu_hat B aux deux extremites : pour un morceau
+        // EXTERIEUR (c != 0), v_j peut etre strictement negatif alors meme que
+        // L > 0, des que c mu_hat B > L. Sauter le site avant `chord.update`
+        // — ce que faisait le commentaire « jamais temoin d'aucun morceau » —
+        // perd donc de vrais temoins de corde. Le defaut etait fail-open (il ne
+        // creait aucune fausse mort) mais rendait `seeds_killed_chord`
+        // ininterpretable comme mesure du certificat annonce.
+        // Mutant `chord-skip-positive` : retablit le saut fautif.
+        const bool skip_pos = lh > seed.bound;
+        if (chord_on && !(skip_pos && MHGP5_MUTANT("chord-skip-positive")))
+          chord.update(lh, seed.bound, Bz, [&]() { return seed.l_exact(sc, iz); });
+        if (skip_pos) {
+          ++ls->float_cert_pos;
+          ++ls->q4_cert[0];
+          continue;  // P > 0 certifie : jamais temoin du CŒUR (mu = 0)
+        }
         if (lh < -seed.bound) {
           ++ls->float_cert_neg;
           ++ls->q4_cert[1];
