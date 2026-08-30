@@ -10,6 +10,14 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
+Réception fraîche au pin Claude `5def28aa` : le point layer sparse est une
+bonne primitive, mais son premier counting-sort casse cinq portes d'ordre
+CPU/batch. La propagation sûre a commencé pour W3 q3 pendant la revue, mais
+reste absente des secteurs, cellules, scans, q4 et batch. La réponse consolidée
+prescrit `B_lt[t]` en ordre d'indices, un budget typé et un seul helper CPU/batch, puis
+une récolte q3 à deux échelles : facteurs sur blocs grossiers, cœur et `C` sur
+la seule masse résiduelle raffinée vers `s>=8`, avec provenance explicite.
+
 ## Entrées actives
 
 - [`ETAT_COURANT.md`](ETAT_COURANT.md) : seul verdict mutable, pin jugé,

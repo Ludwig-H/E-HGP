@@ -1,6 +1,37 @@
 # État courant audité de MorseHGP3D v5 — 30 août 2026
 
-- **Dernier pin de Claude relu :** `0ad70c23`, documentaire. V142 apporte trois
+- **Dernier pin de Claude relu :** `5def28aa`, documentaire. V144 observe la
+  tension réelle entre facteurs d'extrémité sur gros blocs et cœur serré sur
+  petits blocs, mais aucun probe, commande, reçu ou hash ne rend ses chiffres
+  reproductibles. Les conclusions `s=8 annule h_a/h_b` et `s=2` préférable ne
+  sont pas reçues ; ses propres masses laissent encore environ 5,7 fois plus
+  d'ancres après histogramme à `s=2` qu'à `s=8`, avant le coût quadratique de
+  `corner_histograms`.
+
+  Le brouillon source suivant rend la porte histogramme sparse, mais son
+  counting-sort de B réordonne les ancres. Build Release vert ; sur 24 portes
+  ciblées, 19 passent et cinq lanes CPU/batch échouent avec 152 à 920
+  désaccords vecteur, compteurs identiques. Conserver l'ABI et émettre les
+  survivants en ordre `ub` via `B_lt[t]` bitsets. Le ledger historique reste
+  `anchors=|A||B|` et `anchors_killed_hist=total-survivants`; un éventuel
+  diagnostic sépare lignes A tuées, seuils B tués sur les lignes restantes et
+  résiduel. Ne pas toucher q2 dans ce jalon.
+
+  Pendant la revue, Claude a commencé correctement la propagation q3 W3 : le
+  verdict devient l'union du compte historique complet et du compte hors
+  `A union B` additionné à `h_a+h_b`. Le raccord reste non commité et partiel :
+  secteurs, grille, profondeur, q4 et batch reçoivent encore `h_q`. Un budget
+  typé commun doit leur imposer `outside_need=h_q-h_a-h_b`; ce compte central
+  contient déjà le cœur. Pour les patches qui peuvent le recouvrir, union d'IDs
+  ou `max`, jamais somme nue.
+  Une descente multi-lanes est possible avec un masque et un ledger par lane,
+  mais la meilleure réponse au conflit de V144 est q3 à deux échelles : récolte
+  grossière des facteurs, puis raffinement de la seule masse survivante vers
+  `s_core>=8`, avec provenance fixe ou IDs et ledger masqué. La fixture P0 à
+  onze positions de la réponse consolidée grave base 8, cœur 9, puis témoin
+  central résiduel 9.
+
+- **Pin V142/V143 précédent :** `0ad70c23`, documentaire. V142 apporte trois
   campagnes CPU produit complètes, 60 runs au même SHA-256 de binaire. Elles
   répliquent un signal borné : sur `terrain`, entre 16 k et 32 k, la pente des
   seeds q3 comptés dépasse 2 dans les trois graines, minimum `2,045`. Elles ne

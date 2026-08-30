@@ -3407,3 +3407,179 @@ d'acuité et de profondeur évités, mur/HWM, puis égalité des BallKeys, évé
 et forêts. Les fixtures minimales fixent `h_coeur<h3` mais
 `h_coeur+h_a+h_b=h3`, puis `h_coeur+h_a+h_b=h3-1` avec un seul témoin central
 nouveau, ainsi qu'un mutant qui recompte le même site dans le cœur et un patch.
+
+## Réception V144 : point layer oui, choix global de $s$ non reçu
+
+### Statut des mesures
+
+Le diagnostic qualitatif de Claude est utile : la taille des facteurs borne
+trivialement `h_a` et `h_b`, donc raffiner les boîtes finit par affaiblir ces
+deux crédits pendant que le cœur se resserre. V144 ne constitue toutefois pas
+un reçu. Le commit `5def28aa` ne contient que son Markdown : ni source de sonde,
+ni commande, sortie brute, hash de binaire ou manifeste. Le pin déclaré est
+`0ad70c23`, l'échantillon de rectangles n'a pas de cardinal publié, et les
+moyennes viennent d'une seule graine à `n=2000`, conditionnée par les morts.
+
+Les formulations fortes sont donc retirées. `s=8` n'« annule » pas les facteurs
+quand le tableau lui-même leur attribue 11 à 30 % de masse tuée. On ne peut pas
+non plus déduire `|A| environ 1,4` de la seule moyenne `|A||B|=1,92` sans les
+deux marges et leur déséquilibre. Enfin, `10 685 ancres tuables par point`
+contre `8 504 tuées par paire` ne peut pas comparer une union au total des morts
+sur le même univers : les morts par un facteur seul sont incluses dans les morts
+par la somme. Le premier chiffre double compte vraisemblablement les côtés A et
+B. Le prochain reçu publie les trois classes **disjointes** : `h_a>=need`, puis
+`h_a<need && h_b>=need`, puis `h_a<need && h_b<need && h_a+h_b>=need`, avec le
+même dénominateur.
+
+La propre masse de V144 interdit déjà de promouvoir `s=2`. Sur `terrain,8000`,
+le calcul grossier annoncé laisse environ `10,3 M * 21,5 % = 2,21 M` ancres
+après histogramme à `s=2`, contre `436 k * 88,8 % = 0,387 M` à `s=8`, soit
+encore environ 5,7 fois plus d'ancres transmises à l'aval. De plus,
+`corner_histograms` reste en `O(|A|^2+|B|^2)`. Le `31,0 s` contre `23,2 s`
+observé par Claude est donc une réfutation actuelle, pas une dépense déjà
+expliquée par la seule boucle interne.
+
+### Revue du brouillon non commité
+
+Dans le premier état relu, au SHA-256 `generate.hpp`
+`3c5c9996...cff23`, le seuil du counting-sort est mathématiquement correct et
+les compteurs historiques peuvent rester fermés :
+`anchors` reçoit `|A||B|` et `anchors_killed_hist` reçoit
+`|A||B|-survivants`. Il n'est pas nécessaire de changer la signification
+d'`anchors` ni d'ajouter `anchors_skipped_by_point` pour ce ledger. Pour le
+diagnostic, employer plutôt :
+
+```text
+hist_total_pairs = hist_killed_rows_a + hist_killed_threshold_b + hist_survivor_pairs
+```
+
+Les deux masses mortes doivent être ordonnées et disjointes : les lignes A
+fermées d'abord, puis le seuil B seulement sur les lignes A restantes. Le champ
+`ancres_hist` ajouté en cours dans `print_run` rend enfin le total historique
+visible ; lui joindre `hist_survivor_pairs` et vérifier l'égalité ci-dessus.
+
+Le build Release passe, mais la porte d'ordre rejette cet état du brouillon. Sur
+24 tests ciblés, 19 passent et cinq échouent : `q3_lane_batched_cocirc` avec 920
+désaccords vecteur, `q3_lane_batched_postsep_l1` avec 258,
+`q4_lane_batched_cocirc` avec 589, `q4_lane_batched_ordre` avec 702 et
+`q4_lane_batched_postsep_l1` avec 152. Les compteurs et tailles de candidats
+restent égaux : `build_point_layer` est stable **dans** chaque classe `h_b`,
+mais trie les classes et change l'ordre croissant historique de `ub`. La porte
+CPU/batch vecteur-à-vecteur ne doit pas être affaiblie.
+
+Remplacer ce counting-sort par les bitsets cumulatifs `B_lt[t]`, avec liste
+triée des mots non nuls, puis parcourir les mots et leurs bits de poids faible
+à fort. Cela émet les `ub` survivants en ordre croissant et coûte
+`O(h_q*|B|/64 + P)` plus la construction, où `P` est le résiduel effectivement
+visité. Une fixture directe suffit : pour `h_b={2,0,2,1}`, le brouillon produit
+les indices `{1,3,0,2}` au lieu de `{0,1,2,3}`. Le même énumérateur sparse
+canonique doit être appelé par les lanes intégrées **et** les builders batch
+q3/q4 ; quatre copies divergentes ne sont pas acceptables. L'activer d'abord
+en q3. Modifier q2 dans le même incrément est hors du besoin et augmente
+inutilement le rayon de validation.
+
+Pendant la revue, Claude a commencé la couture q3 W3 dans un second état non
+commité (`generate.hpp` `f43105e4...e796`, `sector_kill.hpp`
+`2b21ba12...6421`). Son union des deux verdicts est sûre : conserver le compte
+historique complet à seuil `h_q`, et ajouter un compte hors `A union B` auquel
+s'ajoute `h_a+h_b`. C'est exactement la manière de dominer l'ancien filtre sans
+perdre une mort historique. Cette correction va dans la bonne direction.
+
+Il ne faut cependant pas attendre une nouvelle population de morts W3 : pour
+une ancre fixée, tous les témoins certifiés par `h_a/h_b` appartiennent déjà au
+W3 complet que l'ancien scan finit par compter. À parcours exhaustif,
+`outside+endpoint_lb<=total`. Le gain attendu est une sortie anticipée après
+moins de sites visités, non un digest ou un résidu différent ; le reçu doit donc
+publier `w3_sites_visited` et `w3_early_by_endpoint`.
+
+Elle reste partielle : `EndpointCredit` n'alimente que le test W3 q3 intégré.
+Le test sectoriel appelé juste après ignore encore ce crédit, tout comme
+`CellGrid`, le scan de profondeur par seed, q4 et les builders batch. Les cinq
+échecs d'ordre du premier état doivent être rejoués après chaque évolution ; la
+nouvelle sémantique impose en plus la parité des fates et compteurs, pas seulement
+du multiensemble final.
+
+Pour éviter qu'un appel futur associe un seuil à la mauvaise provenance,
+préférer à un couple libre `(h,EndpointCredit*)` un petit type
+`OutsideAbBudget` construit une fois par ancre : il porte `target`, les deux
+plages d'exclusion, `endpoint_lb`, `outside_need=target-endpoint_lb` et le
+prédicat `accepts(u)` hors des deux plages. Tous les consommateurs utilisent
+alors la même règle. Pour un scan central complet, employer :
+
+$$need_{\mathrm{central}}=h_q-h_a(a)-h_b(b).$$
+
+Ne pas soustraire encore `h_coeur` : le scan `Wq` hors A et B contient déjà les
+témoins du cœur. Pour une sous-source qui ne garantit pas cette inclusion,
+revenir à l'union d'IDs ou à `max(h_coeur,g)`. Cette couture doit précéder toute
+discussion de performance du point layer, car c'est elle qui répond à la
+demande utilisateur.
+
+Le scan final peut conserver les deux compteurs en une passe : `total` sur le
+cover historique et `outside` seulement quand `accepts(u)`. Il tue si
+`total>=target` ou `outside>=outside_need`. Pour la lane batch, le wire doit
+porter ce budget, ou séparer stablement les sites hors domaine des autres ;
+laisser seulement le `h3` global au device recréerait une divergence de
+sémantique.
+
+### Réponse V145 : plusieurs récoltes sont sûres, mais la bonne cible est à deux échelles dans une lane
+
+Une descente partagée peut porter un masque de lanes et récolter q2, q3 et q4 à
+des séparations différentes sans casser la mathématique, sous cinq conditions :
+
+1. chaque lane possède son propre prédicat entier `separated(s_q)` et son propre
+   ledger `base_q=emitted_q+killed_q` ;
+2. il s'agit du premier rectangle qui satisfait le prédicat de la lane, pas
+   d'une hauteur fixe du radix ;
+3. quand une lane émet ou tue son rectangle, son bit est retiré ; les enfants
+   ne servent qu'aux lanes encore ouvertes ;
+4. q2 reste figée à son terminal et n'est jamais réévaluée sur les enfants q3/q4,
+   ce qui reproduirait le `postsep` q2 interdit ;
+5. cœurs, facteurs, caps et fates restent typés par lane ; aucun scalaire n'est
+   partagé implicitement.
+
+Ce scheduler est donc acceptable, mais trois valeurs globales `s_q` ne
+résolvent pas la tension découverte **à l'intérieur de q3**. La voie à tester
+est une récolte à deux échelles :
+
+- à un seuil grossier `s_factor`, calculer les facteurs saturés et éliminer la
+  masse de paires par les classes `h_a+h_b` ;
+- continuer seulement la masse survivante jusqu'à un seuil fin `s_core>=8`, où
+  le citron, les patches de centres et les handles `C` deviennent serrés ;
+- porter les valeurs par endpoint jusqu'aux enfants, mais conserver leur
+  provenance. La variante scalaire simple fixe les domaines au rectangle
+  grossier et oblige toute requête centrale fine à exclure **tout** le
+  `A0 union B0` grossier. La variante plus forte conserve les IDs et forme les
+  unions. Sans l'une de ces deux règles, un site de `A0` sorti du fils `A'`
+  pourrait être recompté comme cœur frais ;
+- fermer le ledger sur la masse résiduelle masquée, jamais sur le produit brut
+  des enfants qui contient aussi des couples déjà tués.
+
+Cette architecture conserve exactement le grand `s` voulu pour le citron tout
+en récoltant `h_a/h_b` sur des blocs plus gros. Elle est plus prometteuse qu'un
+passage global à `s=2`, mais elle ne devient implémentable qu'après la porte
+sparse canonique, les requêtes facteurs non quadratiques et un ledger masqué en
+shadow.
+
+### Fixture P0 de la cascade
+
+Une seule famille de onze positions peut graver les trois fautes prioritaires.
+Prendre `A={(100,1000,1000),(102,1000,1000),(104,1000,1000)}` et
+`B={(10100,1000,1000),(10102,1000,1000),(10104,1000,1000)}`, quatre témoins
+centraux `(5000+2k,1000,1000)` pour `0<=k<4`, puis le carrier
+`c=(5100,7000,1000)`. Pour l'ancre extrême, le compte attendu est
+`h_coeur=4`, `h_a=2`, `h_b=2`, profondeur exacte 8 : la BallKey doit survivre.
+
+- Ajouter `(5008,1000,1000)` donne `h_coeur=5` et tue exactement cette ancre à
+  la couche point, avant tout cover.
+- Repartir de la base et ajouter `(4900,3883,1000)` conserve `h_coeur=4`, mais
+  ajoute un témoin `W3` propre à l'ancre : elle passe la couche point puis meurt
+  au cinquième témoin central, avec `need_central=5`.
+- Sur la base, les quatre mêmes IDs centraux peuvent alimenter le cœur et une
+  cellule ou un patch. Toute somme nue `core+g` tue à tort la boule de
+  profondeur 8 ; l'union ou `max` la conserve.
+
+Cette fixture complète `q3_skinny_center_gate`, qui ne prouve que l'indexation
+de `h_a`, et les portes de cellules existantes, qui ne prouvent pas la
+provenance croisée. Les premiers mutants sont `point-layer-ignore-core`,
+`residual-w3-ignore-ha-hb` et `credit-sum-core-gab` ; les mutants de frontière
+des cellules existent déjà et ne doivent pas être dupliqués.
