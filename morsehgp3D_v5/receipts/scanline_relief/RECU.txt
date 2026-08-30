@@ -1,0 +1,64 @@
+# MorseHGP3D v5 — campagne locale : scanline_relief
+date_utc=2026-08-30T23:33:39+00:00
+source_commit=fc53472f29960fad325b9c0dbeb4aa202eca2fd9
+arbre_construit=propre (refus sinon)
+cible=mhgp5_q4_stage_probe (cible PRODUIT, pas une cible MHGP5_TESTING)
+binaire_sha256=2d202f0e7465ed0b0dc8bb0024f4ca30be997c111ed9fdc8ea2266f4830fb895
+machine=Linux 6.8.0-1052-azure, 8 fils logiques — MACHINE PARTAGEE, LOCALE
+avertissement=un ecart de mur sous ~20 % n'est pas concluant ici ; les compteurs sont exacts
+protocole=morsehgp3D_v5/bench/recu_local.sh, ordre joue SANS alternance (un seul bras ou une seule repetition)
+compilateur=/usr/bin/c++ (c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0)
+cmake_build_type=Release
+cmake_version=cmake version 3.28.3
+statut=complete
+runs_non_nuls=0
+
+# bras
+g3depot = --seed=3
+g3gele = --seed=3 --bump-amp-cap=30
+g4depot = --seed=4
+g4gele = --seed=4 --bump-amp-cap=30
+g5depot = --seed=5
+g5gele = --seed=5 --bump-amp-cap=30
+
+comparaison_objet=sans_objet (les bras changent l'entree, pas l'algorithme)
+
+# signature de l'objet (sha256 catalogue + forets + cardinalites par K)
+scanline_single_pass_n16000_g3depot_r1 09af03b56081cc905228dc6b13d9d72e7cf2e0e9309b8ff2171c5a447ff8be11
+scanline_single_pass_n16000_g3gele_r1 da288abcc38ba7d39006d9b206c81ceae5a43e58e8bd809f9a4b5902ae253b2b
+scanline_single_pass_n16000_g4depot_r1 26fba43107e1ac1bf41b9c504c726f31a2c59aa204ee2ef4e21c0950a4f2f5e1
+scanline_single_pass_n16000_g4gele_r1 9002ba6d029bd5d71d312bba3653f6666eb4119189bd2db0d662ee0dd87f544c
+scanline_single_pass_n16000_g5depot_r1 3fd532b7b6efe8833741c7e3a0528984c39c6d254bc3172bcbfa99a075ba310b
+scanline_single_pass_n16000_g5gele_r1 47b96b47210fd8e8523d0e47b3ee93e3126b734a1132356adee3271817c74c24
+scanline_single_pass_n32000_g3depot_r1 f428e1a151f0470ee119001373df981b55358bd26343409637b12e1303015c04
+scanline_single_pass_n32000_g3gele_r1 2db3cccf51f697293270655bde179d47d042657da0a17924bbaf305689b1d63b
+scanline_single_pass_n32000_g4depot_r1 2cb57c9d6c6483d79dd9e3d659afdb1f4c4ffe678ab980c17ec63f97aed61aa5
+scanline_single_pass_n32000_g4gele_r1 02e427bafc2ae4e952eb8a3a498e3d95c410de17de5a9ae26d0b814686d9b121
+scanline_single_pass_n32000_g5depot_r1 eb2ec249c32373cfc3fcb22e9adc93c66b827506c8aa863dd44bcef262c5c25d
+scanline_single_pass_n32000_g5gele_r1 8334fa8d01f6c02390591a261c0b4d9cd4fe18b2e1172221a0a465d9571a7dff
+scanline_single_pass_n8000_g3depot_r1 7eb4dc644893f0260cf97752242ba0e7d1ad66bc8a384139559e72857758d0b0
+scanline_single_pass_n8000_g3gele_r1 5641084f8ae3f0f539bd894e70430590422671ca372a0e7cdff3ee6f883069a6
+scanline_single_pass_n8000_g4depot_r1 f5d621d65315de77dcd4968a1c80d342dc0fddd2663cf96e47e317d93f73d466
+scanline_single_pass_n8000_g4gele_r1 3f45a052bac0102e29d816ffc42e123837bd1b623a93de062cbbac12514988bf
+scanline_single_pass_n8000_g5depot_r1 bb4e903d54101a7cab072f95686c9b77a4f70055d73833b7f3ab874f00592660
+scanline_single_pass_n8000_g5gele_r1 dcfcca35c17924e1835aba5993799375efb9a16ad77e3b4748ebb7bba9bf1631
+
+# run code duree_s peak_rss_kb
+scanline_single_pass_n16000_g3depot_r1 0 28.423 0
+scanline_single_pass_n16000_g3gele_r1 0 7.906 0
+scanline_single_pass_n16000_g4depot_r1 0 39.324 0
+scanline_single_pass_n16000_g4gele_r1 0 8.138 0
+scanline_single_pass_n16000_g5depot_r1 0 21.394 0
+scanline_single_pass_n16000_g5gele_r1 0 7.224 0
+scanline_single_pass_n32000_g3depot_r1 0 107.042 0
+scanline_single_pass_n32000_g3gele_r1 0 15.846 0
+scanline_single_pass_n32000_g4depot_r1 0 139.991 0
+scanline_single_pass_n32000_g4gele_r1 0 14.875 0
+scanline_single_pass_n32000_g5depot_r1 0 66.058 0
+scanline_single_pass_n32000_g5gele_r1 0 14.462 0
+scanline_single_pass_n8000_g3depot_r1 0 9.821 0
+scanline_single_pass_n8000_g3gele_r1 0 4.437 0
+scanline_single_pass_n8000_g4depot_r1 0 11.275 0
+scanline_single_pass_n8000_g4gele_r1 0 4.209 0
+scanline_single_pass_n8000_g5depot_r1 0 8.072 0
+scanline_single_pass_n8000_g5gele_r1 0 3.970 0

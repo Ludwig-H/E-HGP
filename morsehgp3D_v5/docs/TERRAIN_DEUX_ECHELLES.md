@@ -103,6 +103,43 @@ s'évanouit** : il ne venait pas des nuages, il venait de la hauteur qui grandit
   physique, pas par $\sqrt{n}$ ; c'est le régime gelé qui lui ressemble.
 - Elle **ne dit rien de `scanline`**, dont les exposants restent non établis
   (étendue $0{,}36$ sur les seeds q3, $0{,}86$ sur q4 à trois graines).
-- Une seconde échelle du même type existe dans les familles `scanline_*`
-  (`terrain_field`, même tirage $[\mathrm{coord}/16, \mathrm{coord}/8]$) et n'a
-  pas été testée ici.
+## 6. Les `scanline_*` ont la même anisotropie, mais pas la même conclusion
+
+`ScanlineField::make` tire la hauteur de ses **cinq calottes et de ses quatre
+plateaux à bord franc** dans le même $[\mathrm{coord}/16, \mathrm{coord}/8]$,
+avec $\mathrm{coord} = \sqrt{40 n}$ donc $\delta = 6{,}32$. Sur les nuages :
+$z_{\max}$ double quand $n$ quadruple ($168 \to 344$, $94 \to 192$,
+$191 \to 385$) et les altitudes distinctes passent de $166$ à $343$ ; gelé à
+$30$, $z_{\max}$ se fige ($73 \to 75$, $41 \to 42$, $82 \to 82$).
+
+Reçu `receipts/scanline_relief` (18 runs, `statut=complete`, un binaire,
+épinglé à `fc53472f`). `tests_coeur`, exposants locaux, les deux pas :
+
+| régime | graine 3 | graine 4 | graine 5 | étendue des six |
+|---|---|---|---|---|
+| dépôt | 1,606 · 2,354 | 2,068 · 2,086 | 1,629 · 1,795 | 0,748 |
+| relief gelé | 0,533 · 0,886 | 0,825 · 0,685 | 0,732 · 0,929 | **0,396** |
+
+**Ce qui est confirmé** : geler le relief supprime toute super-linéarité — les
+six exposants tombent sous $1$. La même anisotropie est donc à l'œuvre.
+
+**Ce qui est réfuté** : j'avais prédit que l'étendue entre graines s'effondrerait
+sous $0{,}05$, comme les $0{,}011$ obtenus sur `terrain` gelé. Elle ne fait que
+se réduire de moitié. Les trois nuages `scanline` restent hétérogènes même
+gelés, ce que leurs parts plates annonçaient : $27$ %, $76$ % et $10$ % de
+points à $z \leq 2$.
+
+**Ce que ce bras ne mesure pas.** Des exposants *sous-linéaires* ($0{,}53$ à
+$0{,}93$) ne sont pas un bon résultat : ils signalent que la famille gelée
+s'aplatit **relativement** quand le domaine grandit — le côté des plateaux croît
+en $\sqrt{n}$ pendant que leur hauteur reste à $30$. Ce bras borne donc la
+croissance, il ne mesure pas l'exposant de la lane. `terrain` gelé n'a pas ce
+défaut ($1{,}003$–$1{,}014$, ni sur- ni sous-linéaire) parce que sa structure y
+est déjà une dalle mince dont le coût est planaire.
+
+**Conclusion pour `scanline` : toujours non établie.** Ce qui est acquis est
+plus étroit — sa super-linéarité au dépôt est imputable à la même anisotropie de
+hauteur qu'à `terrain`. Un témoin isotrope propre demanderait de faire croître
+la hauteur **comme** $\delta$, c'est-à-dire de la garder constante en unités
+d'espacement tout en gardant la géométrie des plateaux self-similaire — ce que
+ni le dépôt ni le gel ne font.
