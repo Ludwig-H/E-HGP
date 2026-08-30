@@ -16,11 +16,12 @@ kernel CUDA n'est pas modifié par ce pin.
 Le dernier commit concurrent relu, `1e4e0845`, ne change pas ces sources q4 :
 avec `b1045ae5`, il ajoute le ledger causal puis les fixtures exactes proposées
 pour `EndpointCredit`. Le worktree contient en revanche un brouillon
-concurrent non commité dans `mutants.hpp`, `sector_kill.hpp` et `generate.hpp`,
-qui raccorde `EndpointCredit` aux prétests q4. Ce brouillon est relu séparément
-ci-dessous, sans être substitué au pin source. Les autres changements non
-commités sont des propositions documentaires conservées pour Claude. Les
-commits `d421bd69`, `30c1dc30`, `3b729c01` et `be8dfd26` portent les
+concurrent non commité qui raccorde `EndpointCredit` aux routes scalar et batch,
+corrige la corde scalar/shaped, ajoute sa fixture locale et commence une sonde
+de canopée bornée. Ce brouillon est relu séparément ci-dessous, sans être
+substitué au pin source. Le vrai kernel CUDA reste inchangé. Les autres
+changements non commités sont des propositions documentaires conservées pour
+Claude. Les commits `d421bd69`, `30c1dc30`, `3b729c01` et `be8dfd26` portent les
 contre-lectures q4 actives. Toute modification source ultérieure périme la
 fraîcheur du verdict, pas les contre-exemples mathématiques ni les constats
 attachés aux pins nommés.
@@ -152,23 +153,17 @@ Le raccord n'est pas encore homogène : `q3_lane_batched.hpp` et
 pas `EndpointCredit` à leurs prétests, routes hôte ou prétest manuel avant le
 lot device. Aucun nouveau wire n'est requis : construire le crédit par ancre
 côté hôte, le passer aux fallbacks et employer la même fonction de prétest
-avant matérialisation. Sans cela, la production et les lanes par lots divergent
-dès que le nouveau kill devient non vacant. Le mutant `sector-credit-inbox`
-n'a encore aucune porte visible ; il faut une mort fausse par double comptage,
-des planchers sur les nouvelles morts et la parité production/batch. Ce
-brouillon ne corrige par ailleurs aucune des trois coutures de corde ci-dessus.
+avant matérialisation. Le premier état du brouillon divergeait donc dès que le
+nouveau kill devenait non vacant. Claude a depuis transmis le même crédit dans
+les builders q3/q4 et ajouté une porte locale à `sector-credit-inbox`.
 
-Le rejeu local rend ces deux manques non vacants. `mhgp5_mutants_gate` échoue :
-83 mutants sont déclarés et injectés, mais 82 seulement possèdent une porte
-CTest en code 4 ; `sector-credit-inbox` est l'orphelin. La fixture secteur
-historique passe et ne discrimine donc pas le nouveau contrat. Surtout, les 15
-portes batch ciblées q3/q4 choisies — familles, ordre, route mixte, tout-hôte et
-ancre surdimensionnée — échouent toutes. Les vecteurs finaux restent égaux,
-mais la production tue davantage par secteurs et les compteurs aval divergent :
-sur `uniform n=1200`, q3 donne `12066/11821` morts secteur et
-`1384153/1392373` seeds production/lots ; q4 donne `24196/23945` et
-`1290674/1298238`. Le chemin tout-hôte échoue lui aussi, ce qui localise le
-défaut dans la propagation du contrat, pas dans le kernel device.
+Le rejeu reçoit cette progression : build ciblé réussi, registre et fixture
+locale verts, puis q3/q4 `uniform`, `clusters` et les deux routes tout-hôte
+verts, soit `9/9` portes ciblées en `155,65 s`. Ces mêmes parités échouaient
+avant le raccord. La propagation scalar/batch de ce sous-ensemble est donc
+fermée dans le worktree courant ; les autres routes batch et la suite complète
+restent à rejouer après commit. La fixture locale ne reçoit pas encore le
+contrat géométrique croisé, comme détaillé ci-dessous.
 
 ### `CREDIT_SECTEUR.md` ferme le lemme, pas encore le coût
 
@@ -276,6 +271,27 @@ soit séparer `jneg` et écrire `N_scan=seeds-cells-jneg`. Le titre et les phras
 restent incompatibles avec la requalification mono-graine de ce même document.
 Les exposants locaux de compteurs à deux tailles ne doivent pas devenir des
 claims asymptotiques sur une lane ou une famille.
+
+### La nouvelle sonde canopée n'est pas encore appariée
+
+Le paramètre `--canopy-lift-cap` rend enfin le bras borné versionnable, mais son
+implémentation change directement la borne de `uniform_int_distribution`.
+Elle ne réalise donc pas le contrat « même tirage latent, puis écrêtage » : le
+nombre de tirages moteur peut diverger, et une collision créée par le cap décale
+ensuite la déduplication et les `PointId`. Générer d'abord le nuage nominal avec
+métadonnée de canopée, cloner les mêmes points/IDs, écrêter leur lift et refuser
+le couple si une collision apparaît ferme ce point sans inventer une nouvelle
+famille de propositions.
+
+Le probe doit aussi refuser un cap négatif, supérieur au plafond nominal ou
+appliqué hors `terrain`, imprimer la graine effective `uint32`, et transmettre
+le même `EndpointCredit` que le produit. Le mode q4 de `recu_local.sh` ne doit
+pas exiger l'égalité de `masses_q4/seeds_q4` entre deux nuages différents ni
+l'appeler « identité d'objet » ; il doit recevoir séparément digest d'entrée,
+lineage, points modifiés, collisions, commande et source complète du binaire.
+Enfin, le dirty gate couvre aujourd'hui le script mais pas
+`bench/q4_stage_probe.cpp`, ce qui permettrait d'écrire « propre » pour une
+sonde recompilée depuis une source sale.
 
 ### Deux corrections mathématiques aux audits
 
