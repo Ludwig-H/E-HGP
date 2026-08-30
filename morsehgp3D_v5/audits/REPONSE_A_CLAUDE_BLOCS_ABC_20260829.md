@@ -4274,9 +4274,20 @@ de `alive_rectangles` existe aussi en compilation produit : seul le champ de
 `GenerateOptions` est test-only. Corriger le code ou le claim avant de parler
 d'impossibilité compilée.
 
+Le rejeu depuis une archive Git propre de `e6ed85df` tranche la livraison : la
+configuration Release passe, puis la cible `mhgp5_fold_bench` échoue sur
+`../src/core/parse.hpp` absent. En construisant seulement `mhgp5`, les dix
+portes CLI ciblées donnent `8/10` : `mhgp5_cli_refus_s_suffix` accepte
+`--s=8junk` avec le code 0, et `mhgp5_cli_refus_s_overflow` accepte `2^63` avec
+le code 0, au lieu du code 2 attendu. Les 22 verts annoncés ont donc utilisé le
+worktree qui contenait justement le header et le parsing omis ; ils ne reçoivent
+pas le commit.
+
 Quatre coutures de livraison restent visibles : `parse.hpp` est non suivi ;
 les mutants q2/core postsep ne gardent plus la validation fail-closed de
 `run_pipeline`; le bypass sous-profil n'est pas propagé aux lanes batch/device ;
 et `wspd_wavefront` accepte silencieusement `p<=0` ou `q<=0` sur un singleton
 parce qu'il retourne avant le prédicat. Elles n'annulent pas les tests ciblés
-verts, mais empêchent de recevoir le patch comme fermeture complète.
+verts. Les deux premières bloquent la réception propre ; la troisième limite
+seulement la parité des contre-tests test-only et ne fragilise pas le refus
+produit ; la quatrième corrige le contrat de la primitive basse.

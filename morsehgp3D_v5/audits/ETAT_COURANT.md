@@ -136,9 +136,11 @@ séparation par un opt-in test-only explicite, sans produire un résultat
 
 Le worktree complète les deux CLI et contient le header manquant, mais ce n'est
 pas le pin. Le booléen de bypass de la primitive basse reste en outre compilé
-dans le produit, et l'opt-in n'est pas propagé aux lanes batch/device. Claude
-doit porter un second commit cohérent, puis fournir un clean build depuis Git,
-avant que ces points puissent être déclarés fermés.
+dans le produit. L'opt-in n'est pas propagé aux entry points batch/device :
+cela ne fragilise pas leur refus produit sous 8, mais empêche un contre-test
+sous profil d'exercer ces routes avec la même option que la lane intégrée.
+Claude doit porter un second commit cohérent, puis fournir un clean build depuis
+Git, avant que ces points puissent être déclarés fermés.
 
 La réception devra repartir d'un checkout de `e6ed85df` complété, graver
 `s=0,1,7` en rejet, `s=8` en limite positive, le code 2 et le texte exact aux
@@ -166,9 +168,10 @@ que le code venait justement de corriger :
   a conduit à ce rectangle. La justification correcte est donc : `s=8` est le
   plus petit entier donnant **uniformément** la marge voulue aux trois lanes,
   non une nécessité rectangle par rectangle.
-- Le tableau `alive_rectangles` ne décrit aucune révision cohérente : au pin
-  commité il n'existe pas encore de garde sous 8 ; dans le candidat du worktree,
-  l'absence d'opt-in lève `invalid_argument` au lieu de rendre zéro rectangle.
+- Le tableau `alive_rectangles` ne décrit aucune révision cohérente : depuis
+  `e6ed85df`, l'absence d'opt-in lève `invalid_argument` au lieu de rendre zéro
+  rectangle. Le message du commit et le document restent donc factuellement
+  faux sur ce comportement, même si lever est le contrat préférable.
 
 Le statut de preuve est lui aussi mélangé. Être mesuré à `s=8` rend un chiffre
 admissible au domaine ; cela ne lui donne ni reçu ni dénominateur. En
@@ -448,6 +451,22 @@ clean build de toutes les cibles modifiées              IMPOSSIBLE (header abse
 Le commit reçoit donc le cœur de la garde de bibliothèque, mais pas une
 livraison reproductible du profil. Le worktree non commité n'est pas substitué
 à ce constat.
+
+Rejeu depuis une archive Git propre de `e6ed85df` :
+
+```text
+cmake -S morsehgp3D_v5 -B build -DCMAKE_BUILD_TYPE=Release     PASS
+cmake --build build --target mhgp5_fold_bench --parallel 2    FAIL
+  fatal error: ../src/core/parse.hpp: No such file or directory
+cmake --build build --target mhgp5 --parallel 2               PASS
+CTest CLI s ciblés                                            8/10 PASS
+  FAIL mhgp5_cli_refus_s_suffix   (--s=8junk : code 0, attendu 2)
+  FAIL mhgp5_cli_refus_s_overflow (2^63 : code 0, attendu 2)
+```
+
+Les huit autres portes ciblées comprennent la limite `s=8` et les rejets
+`s=0,1,7`, vide, texte, négatif et `INT64_MIN`. Ce résultat juge le pin, pas le
+worktree qui contient déjà les corrections manquantes.
 
 Diagnostic seulement sur ce candidat, dans un build CPU propre hors arbre :
 
