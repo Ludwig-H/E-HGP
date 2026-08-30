@@ -44,6 +44,10 @@ done
 }
 case "$cible" in
   mhgp5|mhgp5_cover_envelope_probe) ;;
+  # Probe d'etages q4 : pas de digest (il ne construit pas la foret), donc la
+  # comparaison d'objet du recu porte sur les COMPTEURS bruts. Le pin, le
+  # sha256 du binaire et les sorties brutes restent exiges a l'identique.
+  mhgp5_q4_stage_probe) ;;
   *) echo "cible non autorisee (produit attendu) : $cible" >&2; exit 2 ;;
 esac
 IFS=',' read -r -a n_values <<< "$ns"
@@ -119,11 +123,13 @@ for n in "${n_values[@]}"; do
         bn="${bras_noms[$i]}"; bf="${bras_flags[$i]}"
         read -r -a run_flags <<< "$bf"
         run="${fam}_n${n}_${bn}_r${r}"
-        cmd="$bin --family=$fam --n=$n ${run_flags[*]} --digest"
+        declare -a digest_flag=()
+        [ "$cible" = "mhgp5_q4_stage_probe" ] || digest_flag=(--digest)
+        cmd="$bin --family=$fam --n=$n ${run_flags[*]} ${digest_flag[*]}"
         echo "\$ $cmd" >> "$sortie/session.log"
         t0="${EPOCHREALTIME/,/.}"
         set +e
-        "$bin" --family="$fam" --n="$n" "${run_flags[@]}" --digest > "$sortie/out/$run.txt" 2> "$sortie/out/$run.err"
+        "$bin" --family="$fam" --n="$n" "${run_flags[@]}" "${digest_flag[@]}" > "$sortie/out/$run.txt" 2> "$sortie/out/$run.err"
         code=$?
         set -e
         t1="${EPOCHREALTIME/,/.}"
@@ -144,7 +150,7 @@ done
 # --- SIGNATURE DE L'OBJET : catalogue, forets et cardinalites, par run.
 vides=0
 for f in "$sortie/out"/*.txt; do
-  lignes_objet="$(grep -E "^famille=|^cardinalites |^digest_balls=|^digest_forest_K|^digest_all=" "$f" || true)"
+  lignes_objet="$(grep -E "^famille=|^cardinalites |^digest_balls=|^digest_forest_K|^digest_all=|^masses_q4 |^seeds_q4 " "$f" || true)"
   if [ -z "$lignes_objet" ]; then
     echo "VIDE" > "${f%.txt}.objet"; vides=$((vides + 1))
   else

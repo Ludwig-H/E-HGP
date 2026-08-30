@@ -70,6 +70,8 @@ inline constexpr const char* kMutants[] = {
     "q4-batched-emit-deep",
     "route-ignore-threshold",
     "sector-kill-nonstrict",
+    "sector-credit-inbox",
+    "sector-credit-global",
     "anchor-kill-h-minus-one",
     "chord-nonstrict", "chord-skip-positive",
     "cell-kill-nonstrict",

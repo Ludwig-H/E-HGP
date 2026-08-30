@@ -283,15 +283,18 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       const P3& pb = ix.upos[(size_t)ub];
       const i64 D2 = p3_norm2(p3_sub(pb, pa));
       if (D2 == 0) continue;
+      // MEME credit d'extremite que la lane de production (voir q4_lane_batched).
+      const EndpointCredit ec{sc.ha[(size_t)(ua - ra.first)] + sc.hb[(size_t)(ub - rb.first)],
+                              ra.first, ra.last, rb.first, rb.last};
       if (pretest_by_query) {
-        const int k = anchor_kill_from_candidates(sc.query, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h_of[1]);
+        const int k = anchor_kill_from_candidates(sc.query, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h_of[1], &ec);
         if (k == 1) { ++ls->anchors_killed_w3; continue; }
         if (k == 2) { ++ls->anchors_killed_sectors[1]; continue; }
       }
       anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, 3, &sc.cover, &sc.visits, &sc.cover_tmp);
       configure_anchor_scan_cover(sc, cover_envelope_filter, pretest_by_query);
       if (!pretest_by_query) {
-        const int k = anchor_kill_cumulated(sc.cover, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h_of[1]);
+        const int k = anchor_kill_cumulated(sc.cover, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h_of[1], true, &ec);
         if (k == 1) { ++ls->anchors_killed_w3; continue; }
         if (k == 2) { ++ls->anchors_killed_sectors[1]; continue; }
       }
@@ -318,7 +321,7 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       if ((nc_route < lim.device_min_sites && !ignore_threshold) || oversized) {
         const u64 seeds_before_h = ls->seeds[0];
         // Pretests ET grille deja appliques sur ce cover : le corps hote ne reconstruit rien.
-        scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, nonstrict, lo, ls, AnchorPretests::kAlreadyAppliedWithGrid);
+        scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, nonstrict, lo, ls, AnchorPretests::kAlreadyAppliedWithGrid, &ec);
         ++bs->anchors_host;
         if (oversized) ++bs->anchors_oversized;
         bs->seeds_host += ls->seeds[0] - seeds_before_h;

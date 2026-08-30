@@ -745,15 +745,21 @@ inline u64 mhgp5_thread_cpu_ns() {
 inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb, i64 D2,
                               u64 h4, bool float_on, bool genfilter_nonstrict, bool seed_core_nonstrict, bool no_canonical,
                               std::vector<BallCandidate>* lo, GenerateStats* ls,
-                              AnchorPretests pretests = AnchorPretests::kApply) {
+                              AnchorPretests pretests = AnchorPretests::kApply, const EndpointCredit* ec = nullptr) {
   const auto q4_t_anchor = MHGP5_Q4_TICK();
   // Compte W_4 exact par ancre : n4 >= h_4 tue l'ancre entiere ; puis secteurs.
+  // Le CREDIT D'EXTREMITE (h_a + h_b, deja acquis par le grand-livre de ligne)
+  // entre ici par la meme union que la lane q3 : les temoins pris hors de
+  // A union B ont un domaine disjoint de celui du credit, donc s y ajoutent.
   if (pretests == AnchorPretests::kApply) {
-    u64 n4 = 0;
+    u64 n4 = 0, n4_out = 0;
+    const bool use_ec = ec != nullptr && ec->active() && ec->base < h4;
     for (const CoverPoint& cz : sc.cover) {
       if (cz.u == ua || cz.u == ub) continue;
       MHGP5_Q4_ADD(q4_w4_prescan_tests, 1);
-      if (in_spindle(Lane::kQ4, pa, pb, ix.upos[(size_t)cz.u]) && ++n4 >= h4) break;
+      if (!in_spindle(Lane::kQ4, pa, pb, ix.upos[(size_t)cz.u])) continue;
+      if (++n4 >= h4) break;
+      if (use_ec && !ec->in_boxes(cz.u) && ++n4_out + ec->base >= h4) { n4 = h4; break; }
     }
     if (n4 >= h4) {
       ++ls->anchors_killed_w4;
@@ -762,7 +768,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     }
     u64 wmin = 0;
     MHGP5_Q4_ADD(q4_sector_sites, sc.cover.size());
-    if (anchor_sector_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h4, &wmin)) {
+    if (anchor_sector_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h4, &wmin, nullptr, true, ec)) {
       ++ls->anchors_killed_sectors[2];
       MHGP5_Q4_ACC(prof_q4_anchor_ns, q4_t_anchor);
       return;
@@ -854,6 +860,12 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
         if (skip_pos) {
           ++ls->float_cert_pos;
           ++ls->q4_cert[0];
+          // Le morceau de corde vient d'etre enregistre : constater la mort ICI.
+          // Sans cela le `continue` saute le test de fin de boucle, et un seed
+          // dont les derniers sites sont tous certifies P > 0 survit a tort
+          // (fail-open). Le test est place APRES l'enregistrement et AVANT le
+          // saut, donc il n'avance jamais une mort d'un site.
+          if (chord_on && chord.dead(h4)) { dead_by_chord = true; break; }
           continue;  // P > 0 certifie : jamais temoin du CŒUR (mu = 0)
         }
         if (lh < -seed.bound) {
@@ -1183,8 +1195,10 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
           const P3& pb = ix.upos[(size_t)ub];
           const i64 D2 = p3_norm2(p3_sub(pb, pa));
           if (D2 == 0) continue;
+          // Credit d extremite deja acquis, transmis a la cascade aval (comme q3).
+          const EndpointCredit ec{ha_a + sc.hb[(size_t)(ub - rb.first)], ra.first, ra.last, rb.first, rb.last};
           if (pretest_by_query) {
-            const int k = anchor_kill_from_candidates(sc.query, ix.upos, ua, ub, pa, pb, D2, Lane::kQ4, 8, h_of[2]);
+            const int k = anchor_kill_from_candidates(sc.query, ix.upos, ua, ub, pa, pb, D2, Lane::kQ4, 8, h_of[2], &ec);
             if (k == 1) { ++ls->anchors_killed_w4; continue; }
             if (k == 2) { ++ls->anchors_killed_sectors[2]; continue; }
           }
@@ -1204,7 +1218,8 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
           MHGP5_Q4_ADD(q4_cover_sites, sc.cover.size());
           configure_anchor_scan_cover(sc, opt.cover_envelope_filter, pretest_by_query);
           process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, genfilter_nonstrict, seed_core_nonstrict,
-                            no_canonical, lo, ls, pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply);
+                            no_canonical, lo, ls, pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply,
+                            &ec);
         }
       }
       // TROIS CLASSES DISJOINTES, dans l ordre demande par l audit 732529b3 :

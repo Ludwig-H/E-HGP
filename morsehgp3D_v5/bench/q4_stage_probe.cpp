@@ -19,16 +19,23 @@ int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kEightClusters;
   int n = 4000, coord = 0;
   size_t pretest_min = kPretestQueryMinPoints;
+  long long seed = 3;
+  int lift_cap = 0;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     if (a.rfind("--family=", 0) == 0) { if (!parse_cloud_family(a.c_str() + 9, &family)) return 2; }
     else if (a.rfind("--n=", 0) == 0) n = std::atoi(a.c_str() + 4);
     else if (a.rfind("--coord=", 0) == 0) coord = std::atoi(a.c_str() + 8);
     else if (a.rfind("--pretest-query-min=", 0) == 0) pretest_min = (size_t)std::atoll(a.c_str() + 20);
+    else if (a.rfind("--seed=", 0) == 0) seed = std::atoll(a.c_str() + 7);
+    // Contrefactuel de mesure : borne le saut de canopee de `terrain`, qui vaut
+    // sinon coord/8 et grandit avec le nuage (docs/TERRAIN_CANOPEE.md). Ce
+    // n'est PAS un regime de production.
+    else if (a.rfind("--canopy-lift-cap=", 0) == 0) lift_cap = std::atoi(a.c_str() + 18);
     else return 2;
   }
   if (coord <= 0) coord = cloud_family_default_coord(family, n);
-  const CloudIndex ix = build_cloud_index(make_family_input(family, n, coord, 3));
+  const CloudIndex ix = build_cloud_index(make_family_input(family, n, coord, seed, lift_cap));
   if (!ix.valid || ix.has_duplicate_positions()) return 2;
   const u64 smax = 11;
   const u64 h_of[3] = {lane_h(Lane::kQ2, smax), lane_h(Lane::kQ3, smax), lane_h(Lane::kQ4, smax)};
@@ -110,6 +117,7 @@ int main(int argc, char** argv) {
   const bool nonempty = query_nonempty && ls.q4_covers_built > 0 && ls.q4_cover_visits > 0 && ls.q4_cover_sites > 0 &&
                         ls.q4_core_site_tests > 0 && ls.q4_depth_entries > 0 && ls.q4_power_tests > 0 &&
                         ls.q4_completions > 0;
+  std::printf("parametres graine=%lld canopy_lift_cap=%d\n", seed, lift_cap);
   std::printf("q4_stage_probe famille=%s n=%d rectangles=%zu ancres_post_hist=%llu candidats=%llu seeds=%llu core_tues=%llu corde_tues=%llu completions=%llu profonds=%llu\n",
               cloud_family_name(family), n, alive.size(), (unsigned long long)anchors, (unsigned long long)lo.size(),
               (unsigned long long)ls.seeds[1], (unsigned long long)ls.seeds_killed_core, (unsigned long long)ls.seeds_killed_chord,

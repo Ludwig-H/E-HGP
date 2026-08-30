@@ -169,8 +169,9 @@ doit stratifier rendement et coût par `h-core`, masse $\lvert A\rvert\lvert B\r
 masse seule ne vaut pas un gain de complexité ni de mur.
 
 La première construction q2 à quatre positions n'était pas un rectangle radix
-valide, mais une fixture valide à six points réalise ensuite le réveil : à
-`s=1`, `smax=3`, un parent tue l'ancre `(2,5)` avec
+valide, mais une fixture valide à six points réalise ensuite le réveil. Cette
+contre-fixture appelle directement `generate_candidates`, hors garde produit :
+à `s=1`, `smax=3`, un parent tue l'ancre `(2,5)` avec
 `core + h_a + h_b = 0 + 3 + 0`, puis un sous-rectangle séparé la réveille avec
 `0 + 1 + 0 < h2=2`. Le chemin test-only ouvert passe de 13 à 14 candidats et
 ajoute une boule RLE, alors même que `tués[q2] == 0` et

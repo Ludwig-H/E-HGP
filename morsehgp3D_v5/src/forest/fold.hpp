@@ -71,7 +71,13 @@ struct ForestResult {
   u64 nodes = 0;                       // deltas a >= 2 parents (vue derivee)
   std::vector<FacetKey> facet_keys;    // fid -> FacetKey, strictement croissante
   std::vector<u32> final_canon_fid;    // fid -> plus petit fid de sa composante
-  std::vector<ComponentDelta> deltas;  // le payload hierarchique complet
+  // Le payload des EVENEMENTS VERIFIES (forest_semantics=verified_events_only,
+  // proof_basis=gabriel_positive_connectivity), de portee horizontale : il ne
+  // porte PAS les incidences silencieuses du contrat Gamma (cofaces non-Gabriel
+  // attachant une arete a un niveau que le flot brut ne voit pas ; fixture
+  // gabriel-point-set-counterexample-5-points-v1). Ce n'est donc pas un payload
+  // hierarchique complet, et il ne peut pas porter require_exact=true.
+  std::vector<ComponentDelta> deltas;
   std::vector<ExactLevel> batch_levels;
   u64 workers = 0;  // ouvriers reellement crees (max sur les phases paralleles)
   double t_sort_ms = 0, t_intern_ms = 0, t_merge_ms = 0, t_reduce_ms = 0, t_partition_ms = 0;

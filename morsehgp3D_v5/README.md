@@ -8,7 +8,12 @@ La v5 remplace `morsehgp3D_v4/` comme chantier actif. Elle calcule **le même
 objet que la v4** — les **dix forêts horizontales** HGP K = 1..10 du manuscrit
 (Défs 20–31, Théorèmes 2–7), niveaux et événements exacts sur le profil u16 ;
 les applications verticales entre ordres (la « tour ») ne sont **pas**
-livrées — avec **le même contrat de test** (fixtures gravées, mutants tués, codes de sortie exacts, planchers
+livrées, et la sémantique publiée est
+`forest_semantics=verified_events_only` /
+`proof_basis=gabriel_positive_connectivity`, de portée horizontale : les
+**incidences silencieuses** du contrat Gamma ne sont pas encore produites, donc
+aucune sortie ne porte `require_exact=true` (docs/MATHEMATIQUES.md § 1.2) —
+avec **le même contrat de test** (fixtures gravées, mutants tués, codes de sortie exacts, planchers
 de couverture, équivariance) et **une base de code neuve** : la v4 est un
 sujet différentiel et une source de contre-fixtures et de digests épinglés,
 jamais une base de code ni une autorité implicite. Tout port contractuel
@@ -46,6 +51,9 @@ Les errances de fond relevées par l'audit du 22 août 2026
 ## Contrats
 
 Dix forêts horizontales K = 1..10, événements et niveaux exacts, rendu § 9.1 ;
+**séparation produit entière `s >= 8`** (8 par défaut ; toute valeur inférieure
+est refusée par l'API produit `run_pipeline` et les CLI avant calcul ; les
+fixtures internes ne peuvent descendre plus bas que par un opt-in test-only) ;
 **portes d'invariants et de mesure à n = 8000, 16000, 32000** sur cette
 machine (8 cœurs, 31 Go), puis contrats à 50 000 points sur G4 via
 `gcp-migration/`, puis des dizaines de millions de points. Aucun claim tant

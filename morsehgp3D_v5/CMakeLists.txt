@@ -292,9 +292,9 @@ mhgp5_gate(mhgp5_fold_fixtures 0 mhgp5_fold_fixtures_gate "" TIMEOUT 120)
 # ledger vert.
 mhgp5_executable(mhgp5_postsep_refine_gate tests/postsep_refine_gate.cpp)
 mhgp5_gate(mhgp5_postsep_refine 0 mhgp5_postsep_refine_gate "" TIMEOUT 600)
-mhgp5_gate(mhgp5_postsep_refine_mutant_h1 4 mhgp5_postsep_refine_gate "--inject=postsep-kill-h-minus-one" TIMEOUT 300)
-mhgp5_gate(mhgp5_postsep_refine_mutant_drop 4 mhgp5_postsep_refine_gate "--inject=postsep-drop-child" TIMEOUT 300)
-mhgp5_gate(mhgp5_postsep_refine_mutant_duplicate 4 mhgp5_postsep_refine_gate "--inject=postsep-duplicate-child" TIMEOUT 300)
+mhgp5_gate(mhgp5_postsep_refine_mutant_h1 4 mhgp5_postsep_refine_gate "--inject=postsep-kill-h-minus-one" TIMEOUT 600)
+mhgp5_gate(mhgp5_postsep_refine_mutant_drop 4 mhgp5_postsep_refine_gate "--inject=postsep-drop-child" TIMEOUT 600)
+mhgp5_gate(mhgp5_postsep_refine_mutant_duplicate 4 mhgp5_postsep_refine_gate "--inject=postsep-duplicate-child" TIMEOUT 600)
 mhgp5_gate(mhgp5_postsep_refine_mutant_q2 4 mhgp5_postsep_refine_gate "--inject=postsep-refine-q2" TIMEOUT 60)
 mhgp5_gate(mhgp5_postsep_refine_mutant_core_corners 4 mhgp5_postsep_refine_gate "--inject=postsep-core-without-corners" TIMEOUT 60)
 # Prefixe exact de la tour (docs/ECHELLE.md § 3.3) : ordres K <= smax − 1 identiques a l'objet complet.
@@ -403,6 +403,7 @@ mhgp5_gate(mhgp5_q4_core_shaped_uniform 0 mhgp5_q4_core_shaped_gate "--family=un
 mhgp5_gate(mhgp5_q4_core_shaped_clusters 0 mhgp5_q4_core_shaped_gate "--family=eight_clusters --n=400 --min-jung-fallback=0 --min-float-fallback=5")
 mhgp5_gate(mhgp5_q4_core_shaped_cocirc 0 mhgp5_q4_core_shaped_gate "--family=uniform --n=300 --coord=40 --min-seeds=500 --min-jung-fallback=20 --min-float-fallback=100")
 mhgp5_gate(mhgp5_q4_core_shaped_mutant_skip 4 mhgp5_q4_core_shaped_gate "--family=uniform --n=300 --coord=40 --min-seeds=500 --inject=q4-shaped-jung-skip-kills")
+
 
 # Completions q4 en forme de kernel (livraison 4c) : etage atteint et forme de Cramer identiques.
 mhgp5_executable(mhgp5_q4_completion_shaped_gate tests/q4_completion_shaped_gate.cpp)
@@ -518,6 +519,12 @@ mhgp5_gate(mhgp5_q3_patch_block_rho_mutant 3 mhgp5_q3_patch_block_probe
 mhgp5_executable(mhgp5_sector_kill_fixture tests/sector_kill_fixture.cpp)
 mhgp5_gate(mhgp5_sector_kill_fixture 0 mhgp5_sector_kill_fixture "")
 mhgp5_gate(mhgp5_sector_kill_mutant_nonstrict 4 mhgp5_sector_kill_fixture "--inject=sector-kill-nonstrict")
+mhgp5_executable(mhgp5_sector_credit_fixture tests/sector_credit_fixture.cpp)
+mhgp5_gate(mhgp5_sector_credit_fixture 0 mhgp5_sector_credit_fixture "")
+mhgp5_gate(mhgp5_sector_credit_mutant_inbox 4 mhgp5_sector_credit_fixture "--inject=sector-credit-inbox")
+mhgp5_executable(mhgp5_sector_credit_crossed_fixture tests/sector_credit_crossed_fixture.cpp)
+mhgp5_gate(mhgp5_sector_credit_crossed 0 mhgp5_sector_credit_crossed_fixture "")
+mhgp5_gate(mhgp5_sector_credit_mutant_global 4 mhgp5_sector_credit_crossed_fixture "--inject=sector-credit-global")
 mhgp5_executable(mhgp5_anchor_tests_oracle tests/anchor_tests_oracle.cpp)
 mhgp5_gate(mhgp5_anchor_tests_oracle 0 mhgp5_anchor_tests_oracle "" LABELS oracle)
 mhgp5_gate(mhgp5_anchor_tests_oracle_mutant_cell_h1 4 mhgp5_anchor_tests_oracle "--inject=cell-kill-h-minus-one" LABELS oracle)

@@ -132,9 +132,19 @@ inline bool anchor_universal_kill(const std::vector<CoverPoint>& cover, const st
 // Rend true si l'ancre est morte par secteurs (K = 8). `rho2_den` : 12 (q3) ou
 // 8 (q4) — rho² = D²/den. Compte dans `*witness_min` le minimum sur les
 // secteurs du nombre de temoins (mesure).
+//
+// CREDIT D'EXTREMITE PAR SECTEUR (30 aout). Les temoins comptes par h_a(a) et
+// h_b(b) sont universels sur la boite opposée : ils appartiennent a W_q(a,b)
+// pour l'ancre courante, donc ils sont temoins QUEL QUE SOIT le porteur, donc
+// dans CHAQUE secteur. Ils vivent dans A union B ; les temoins de secteur pris
+// HORS boites leur sont donc disjoints, et le verdict devient
+//     min_k max( cnt[k] , cnt_hors[k] + base ) >= h,
+// qui domine les deux formes prises separement. `*witness_min` et
+// `sector_counts` gardent leur semantique de MESURE (comptes purs, sans
+// credit) : seule la decision change.
 inline bool anchor_sector_kill(const std::vector<CoverPoint>& cover, const std::vector<P3>& upos, i32 ua, i32 ub, const P3& pa,
                                const P3& pb, i64 D2, i128 rho2_den, u64 h, u64* witness_min, u32* sector_counts = nullptr,
-                               bool radially_sorted = true) {
+                               bool radially_sorted = true, const EndpointCredit* ec = nullptr) {
   using sector_detail::sq;
   const bool nonstrict = MHGP5_MUTANT("sector-kill-nonstrict");
   const u64 hh = MHGP5_MUTANT("anchor-kill-h-minus-one") && h > 1 ? h - 1 : h;
@@ -147,6 +157,8 @@ inline bool anchor_sector_kill(const std::vector<CoverPoint>& cover, const std::
     P[4][i] = -u[i]; P[5][i] = -u[i] - v[i]; P[6][i] = -v[i]; P[7][i] = u[i] - v[i];
   }
   u32 cnt[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  u32 cnt_out[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  const bool use_ec = ec != nullptr && ec->active() && ec->base < hh;
   const i64 sx = pa.x + pb.x, sy = pa.y + pb.y, sz = pa.z + pb.z;
   for (const CoverPoint& cz : cover) {
     if (sector_detail::beyond_diametral_bins(cz.dist2q, D2)) { if (radially_sorted) break; else continue; }  // cover trie par classes radiales
@@ -161,14 +173,29 @@ inline bool anchor_sector_kill(const std::vector<CoverPoint>& cover, const std::
       const i128 dot = (i128)w0 * P[k][0] + (i128)w1 * P[k][1] + (i128)w2 * P[k][2];
       ok[k] = nonstrict ? (4 * dot >= rhs) : (4 * dot > rhs);
     }
+    // Un temoin DANS A union B est deja compte par base : ne pas le recrediter.
+    const bool hors = use_ec && !(MHGP5_MUTANT("sector-credit-inbox") ? false : ec->in_boxes(cz.u));
     for (int k = 0; k < 8; ++k)
-      if (ok[k] && ok[(k + 1) & 7]) ++cnt[k];
+      if (ok[k] && ok[(k + 1) & 7]) { ++cnt[k]; if (hors) ++cnt_out[k]; }
   }
   u32 mn = cnt[0];
   for (int k = 1; k < 8; ++k) mn = std::min(mn, cnt[k]);
   if (sector_counts) for (int k = 0; k < 8; ++k) sector_counts[k] = cnt[k];
-  *witness_min = mn;
-  return (u64)mn >= hh;
+  *witness_min = mn;  // MESURE : compte pur, sans credit
+  if ((u64)mn >= hh) return true;
+  if (!use_ec) return false;
+  // Le maximum est pris SECTEUR PAR SECTEUR, AVANT le minimum. La forme
+  // globale max( min_k cnt[k], min_k (cnt_hors[k] + base) ) est strictement
+  // plus faible : elle rate les ancres dont certains secteurs sont fermes par
+  // le compte pur et les autres par le credit. Mutant `sector-credit-global`.
+  const bool global_form = MHGP5_MUTANT("sector-credit-global");
+  u64 mn_u = std::max((u64)cnt[0], (u64)cnt_out[0] + ec->base);
+  u64 mn_g = (u64)cnt_out[0] + ec->base;
+  for (int k = 1; k < 8; ++k) {
+    mn_u = std::min(mn_u, std::max((u64)cnt[k], (u64)cnt_out[k] + ec->base));
+    mn_g = std::min(mn_g, (u64)cnt_out[k] + ec->base);
+  }
+  return (global_form ? mn_g : mn_u) >= hh;
 }
 
 // Les deux tests cumules : W_q exact d'abord (bon marche, sortie a h), secteurs
@@ -179,7 +206,7 @@ inline int anchor_kill_cumulated(const std::vector<CoverPoint>& cover, const std
                                  bool radially_sorted = true, const EndpointCredit* ec = nullptr) {
   if (anchor_universal_kill(cover, upos, ua, ub, pa, pb, D2, lane, h, radially_sorted, ec)) return 1;
   u64 wmin = 0;
-  if (anchor_sector_kill(cover, upos, ua, ub, pa, pb, D2, rho2_den, h, &wmin, nullptr, radially_sorted)) return 2;
+  if (anchor_sector_kill(cover, upos, ua, ub, pa, pb, D2, rho2_den, h, &wmin, nullptr, radially_sorted, ec)) return 2;
   return 0;
 }
 

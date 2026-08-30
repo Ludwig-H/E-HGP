@@ -125,8 +125,21 @@ rayon** ($r = d/2$ pour une arête), jamais un diamètre.
   p. PDF 126) ; elle redevient nécessaire pour le rendu (§ 7.7).
 - **K-MST** (Déf. 30) et **Théorème 5** (p. PDF 117) : un arbre couvrant
   minimum du K-graphe de Gabriel, élagué à $r$, redonne exactement les
-  K-polyèdres non triviaux, pour tout $r$. C'est l'objet que la v5 rend :
+  K-polyèdres non triviaux, pour tout $r$. C'est l'objet **visé** :
   **la forêt HGP = ce K-MST par K**, avec les niveaux $\rho^2$.
+
+  **Ce que la v5 rend n'est pas encore cet objet, et il faut le dire ici.**
+  Elle rend le flot de Gabriel construit à partir des **seuls événements
+  vérifiés** (`forest_semantics=verified_events_only`,
+  `proof_basis=gabriel_positive_connectivity`), de portée **horizontale**. Le
+  contrat Gamma exige en plus les **incidences silencieuses** : des cofaces
+  non-Gabriel peuvent attacher une arête à un niveau que le flot brut ne voit
+  pas. La fixture `gabriel-point-set-counterexample-5-points-v1` le montre — les
+  cofaces $ACD$ et $ACE$ attachent silencieusement $AC$ au niveau $33/2$, puis
+  $ABC$ la réutilise au niveau $83886/3563$ : Gamma et le flot brut n'ont alors
+  ni la même généalogie ni le même temps de fusion. Tant que la source
+  d'incidences silencieuses manque, aucune sortie de cette ligne ne peut porter
+  `require_exact=true`.
 - **Théorèmes 6–7** (p. PDF 118, 125) : tout K-simplexe de Gabriel est porté
   par la mosaïque de Delaunay d'ordre K (resp. se lit dans $\mathrm{Del}_{K-1}$).
   La v5 les utilise comme **caractérisations et oracles**, jamais comme chemin
@@ -461,7 +474,8 @@ stricte ; tout arrondi vers le haut du rayon crée de faux crédits (mutant v5
 
 Statut : `recu_auditeur_v4` (`AUDIT_MATHEMATIQUE_0FB32C3_A_5072E23_20260817.md`
 § 1 « Réception du rayon couplé » ; `ETAT_COURANT.md` v4 du 17 août § 6).
-Le gain « +71 % de rayon à $s = 6$ en q4 » reste une `mesure` v3.
+Le gain « +71 % de rayon à $s = 6$ en q4 » reste une `mesure` v3 historique,
+hors du profil produit v5 qui impose l'entier $s \geq 8$.
 
 ### 4.5 Bornes de bloc : $H_{min}$ exact, $H_{max}$, autorité aux coins
 
@@ -591,11 +605,19 @@ Code : `src/wspd/wavefront.hpp`.
   jamais du plus peuplé (invariant de l'argument d'empilement ; −14,7 % de
   rectangles mesuré). Statut : `recu_auditeur_v4` (idem § 9, affirmations
   confirmées) ; mutants v5 `wspd-cap-terminal`, `wspd-split-heaviest`.
+- **Domaines distincts.** La formule mathématique ci-dessous accepte le
+  rationnel positif $p/q$. L'API et les CLI du profil produit v5 n'exposent
+  toutefois qu'un entier signé exactement parsé et imposent $s=p \geq 8$,
+  $q=1$. Les petites valeurs rationnelles ou entières restent réservées aux
+  preuves et fixtures ciblées des primitives ; elles ne constituent ni une
+  configuration produit ni une promesse de conformité.
 - **Prédicat de séparation entier** : avec $D2$ le carré de la distance des
   centres **doublés** et $W2$ le carré du diamètre de boîte,
   $q^2 \cdot D2 \geq (p+2q)^2 \cdot \max(W2_A, W2_B)$ implique
   $d - r_A - r_B \geq s \cdot \max(r_A, r_B)$ pour $s = p/q$. Il peut manquer
-  une séparation (le front grossit), jamais en inventer. i64 sous u16.
+  une séparation (le front grossit), jamais en inventer. Pour des coordonnées
+  u16 et tout $p,q$ positifs représentables en i64, la v5 évalue les produits
+  dans ses entiers larges exacts, sans débordement signé.
   Statut : `recu_auditeur_v4` comme condition **suffisante**
   (`AUDIT_MATHEMATIQUE_0FB32C3_A_5072E23_20260817.md` § 10).
 - **Mort dans la descente.** Une paire de nœuds dont le cœur compte déjà

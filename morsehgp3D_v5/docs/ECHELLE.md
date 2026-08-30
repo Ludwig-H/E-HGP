@@ -356,7 +356,8 @@ gardée à ajouter aux scripts du dépôt.
 ## 7. Portes
 
 Égalité résident / streamé aux deux digests (v4 par convertisseur, flux) à
-8 k / 16 k / 32 k (quatre familles + `terrain`, $s$ = 6/8/10,
+8 k / 16 k / 32 k (quatre familles + `terrain`, profil produit $s$ = 8/10 ;
+$s=6$ reste une contre-mesure interne explicitement hors profil,
 contre-familles), seaux ∈ {1, 2, 3, 7, 31}, fils ∈ {1, 8, 48}, tailles de
 run, `inflight` ∈ {1, 2, 3}, frontière de run au milieu d'un niveau égal,
 coupure + reprise après chaque phase ; 200 k puis 400 k et **1 M** sur G4 ;

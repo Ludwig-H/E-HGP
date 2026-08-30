@@ -98,19 +98,25 @@ __global__ void k_q4_core(const Q4BatchSeed* seeds, unsigned nseeds, const Q4Bat
     if (i < an.count && i != an.skip_a && i != an.skip_b && i != sd.core.skip_x) {
       const unsigned g = an.begin + i;
       const double lh = q3_l_hat_shaped(sd.core.aff, (double)S.U0(g, an), (double)S.U1(g, an), (double)S.U2(g, an), (double)S.Q(g, an));
-      if (lh > sd.core.aff.bound) {
-        my_pos = 1;
-      } else {
-        const i64 nu = sd.core.n0 * S.U0(g, an) + sd.core.n1 * S.U1(g, an) + sd.core.n2 * S.U2(g, an);
-        const i64 Bz = nu / 2;
-        {
-          ChordPieces local;
-          local.init(J, chord_nonstrict);
+      // Un site certifie P > 0 n'est jamais temoin du CŒUR, mais il peut
+      // temoigner d'un morceau EXTERIEUR de corde (v_j < 0 avec L > 0) : le
+      // morceau doit donc etre enregistre AVANT le branchement, exactement
+      // comme les routes scalaire et shaped. Mutant `chord-skip-positive`.
+      const i64 nu = sd.core.n0 * S.U0(g, an) + sd.core.n1 * S.U1(g, an) + sd.core.n2 * S.U2(g, an);
+      const i64 Bz = nu / 2;
+      const bool skip_pos = lh > sd.core.aff.bound;
+      {
+        ChordPieces local;
+        local.init(J, chord_nonstrict);
+        if (!(skip_pos && MHGP5_MUTANT("chord-skip-positive")))
           local.update(lh, sd.core.aff.bound, Bz, [&]() {
             return di_to_i128_hd(q3_l_exact_shaped(sd.core.aff, S.U0(g, an), S.U1(g, an), S.U2(g, an), S.Q(g, an)));
           });
-          for (int k = 0; k < kChordPieces; ++k) if (local.cnt[k]) my_piece |= 1u << k;
-        }
+        for (int k = 0; k < kChordPieces; ++k) if (local.cnt[k]) my_piece |= 1u << k;
+      }
+      if (skip_pos) {
+        my_pos = 1;
+      } else {
         if (lh < -sd.core.aff.bound) {
           my_neg = 1;
           const int js = jung_interval_sign_shaped(lh, sd.core.aff.bound, sd.core.Jlo, sd.core.Jhi, Bz);

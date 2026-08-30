@@ -426,7 +426,15 @@ en blocs.
      chemin q4.
    - 5b **écrit, en attente de G4** (session `2e75cb42`) :
      `src/gpu/q4_kernels.cuh` — `k_q4_core` (warp par seed, six compteurs par
-     ballot, correction intra-warp au h4-ième témoin), `k_q4_complete` (bloc
+     ballot, correction intra-warp au h4-ième témoin ; **corrigé le 30 août
+     2026, non rejoué** : il branchait sur $P > 0$ *avant* de former $B_z$ et le
+     morceau de corde, donc `my_piece` restait nul sur tout site certifié
+     positif et le morceau n'était **jamais enregistré** — même défaut que les
+     routes scalaire et « shaped », corrigé au même endroit et sous le même
+     mutant `chord-skip-positive`, mais **aucun `nvcc` sur la machine de
+     travail** : ce correctif est écrit pour être identique aux deux routes
+     prouvées, il n'est pas certifié. La seconde couture, la mort constatée
+     trop tard, n'existe pas côté kernel : le ballot du warp est uniforme), `k_q4_complete` (bloc
      par seed vivant, étage `Q4Stage` par paire de la lentille), `k_q4_depth`
      (warp par paire candidate, `q4_power_d` par ballot) ;
      `src/gpu/q4_lane_device.cuh` — `Q4DeviceExecutor` (l'hôte calcule les
@@ -514,7 +522,8 @@ dans `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`), `seed_affine_d`
 (séquence FMA figée, `-fmad=false`), `isqrt128_floor_d` (boucle bornée
 prouvée, jamais un « ±1 » sur `sqrt(double)`). Filtre flottant seulement là
 où un repli exact existe. Objet : multiensemble de candidats → RLE →
-`digest_balls` identique CPU/GPU (cinq familles, $s$ = 6/8/10, 8000–50 000) ;
+`digest_balls` identique CPU/GPU (cinq familles, profil produit $s$ = 8/10,
+8000–50 000 ; $s=6$ seulement comme contre-mesure interne hors profil) ;
 ordre brut jugé à un fil seulement (`raw_order_gate` avec rangs de seed et de
 lentille) ; compteurs en trois classes (exacts, de politique, de mesure) ;
 verdict fonction pure du rectangle (porte à deux découpages de lots) ; mutants

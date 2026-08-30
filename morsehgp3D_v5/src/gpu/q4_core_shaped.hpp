@@ -90,6 +90,10 @@ MHGP5_HD inline bool q4_seed_core_shaped(const SeedQ4D& s, const AnchorSitesSoA&
       });
     if (skip_pos) {
       ++c->cert_pos;
+      // Meme correction que la route scalaire : le `continue` sautait le test
+      // de mort de fin de boucle, et un seed dont les derniers sites sont tous
+      // certifies P > 0 survivait a tort.
+      if (chord_on && chord.dead(h4)) { c->dead_by_chord = 1; return true; }
       continue;
     }
     if (lh < -s.aff.bound) {

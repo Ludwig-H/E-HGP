@@ -10,9 +10,17 @@ module : [`PROVENANCE.md`](PROVENANCE.md).
 - **Objet** : les dix forêts horizontales HGP (K = 1..K_max, K_max = 10 au
   profil), niveaux $\rho^2$ exacts, événements exacts (MATHEMATIQUES § 1–2).
   Les applications verticales entre ordres (la tour) ne sont pas livrées.
+- **Sémantique de forêt** : `forest_semantics=verified_events_only`,
+  `proof_basis=gabriel_positive_connectivity`, portée horizontale. Les
+  incidences silencieuses du contrat Gamma (cofaces non-Gabriel attachant une
+  arête à un niveau invisible au flot brut) ne sont **pas** produites ; la
+  fixture `gabriel-point-set-counterexample-5-points-v1` sépare les deux.
+  `require_exact=true` est refusé sur cette source (MATHEMATIQUES § 1.2).
   Une optimisation ne modifie ni l'objet, ni les niveaux, ni les inclusions ;
   la porte de conformité v4 ≡ v5 (digests canoniques au format v4) le grave.
 - **Profil d'entrée** : u16 quantifié seulement (grille $[0, 65536)^3$),
+  séparation WSPD entière `s >= 8` (8 par défaut ; refus par `run_pipeline` et
+  les CLI avant calcul sous la borne ; opt-in interne compilé test-only),
   `PointId` u32 arbitraires (≠ index dense ≠ rang Morton), dégénérescences →
   refus explicite, jamais de jitter. Les positions dupliquées sont refusées
   (`unsupported_degeneracy`) — **arbitrage V1**

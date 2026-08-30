@@ -231,8 +231,13 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       const P3& pb = ix.upos[(size_t)ub];
       const i64 D2 = p3_norm2(p3_sub(pb, pa));
       if (D2 == 0) continue;
+      // MEME credit d'extremite que la lane de production : sans lui les deux
+      // routes tuent des ancres differentes et la parite de compteurs casse
+      // (l'objet, lui, reste identique — ce sont des sorties anticipees).
+      const EndpointCredit ec{sc.ha[(size_t)(ua - ra.first)] + sc.hb[(size_t)(ub - rb.first)],
+                              ra.first, ra.last, rb.first, rb.last};
       if (pretest_by_query) {
-        const int k = anchor_kill_from_candidates(sc.query, ix.upos, ua, ub, pa, pb, D2, Lane::kQ4, 8, h_of[2]);
+        const int k = anchor_kill_from_candidates(sc.query, ix.upos, ua, ub, pa, pb, D2, Lane::kQ4, 8, h_of[2], &ec);
         if (k == 1) { ++ls->anchors_killed_w4; continue; }
         if (k == 2) { ++ls->anchors_killed_sectors[2]; continue; }
       }
@@ -245,7 +250,7 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         const u64 seeds_before_h = ls->seeds[1];
         process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, depth_nonstrict, core_nonstrict,
                           no_canonical, lo, ls,
-                          pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply);
+                          pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply, &ec);
         ++bs->anchors_host;
         ++bs->anchors_oversized;
         bs->seeds_host += ls->seeds[1] - seeds_before_h;
@@ -256,23 +261,26 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         // Routage hote : lane de production par ancre, emission immediate (pretests deja faits si requete).
         const u64 seeds_before_h = ls->seeds[1];
         process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, depth_nonstrict, core_nonstrict, no_canonical, lo, ls,
-                          pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply);
+                          pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply, &ec);
         ++bs->anchors_host;
         bs->seeds_host += ls->seeds[1] - seeds_before_h;
         continue;
       }
       if (!pretest_by_query) {
-        u64 n4 = 0;
+        u64 n4 = 0, n4_out = 0;
+        const bool use_ec = ec.active() && ec.base < h_of[2];
         for (const CoverPoint& cz : sc.cover) {
           if (cz.u == ua || cz.u == ub) continue;
-          if (in_spindle(Lane::kQ4, pa, pb, ix.upos[(size_t)cz.u]) && ++n4 >= h_of[2]) break;
+          if (!in_spindle(Lane::kQ4, pa, pb, ix.upos[(size_t)cz.u])) continue;
+          if (++n4 >= h_of[2]) break;
+          if (use_ec && !ec.in_boxes(cz.u) && ++n4_out + ec.base >= h_of[2]) { n4 = h_of[2]; break; }
         }
         if (n4 >= h_of[2]) {
           ++ls->anchors_killed_w4;
           continue;
         }
         u64 wmin = 0;
-        if (anchor_sector_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h_of[2], &wmin)) {
+        if (anchor_sector_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h_of[2], &wmin, nullptr, true, &ec)) {
           ++ls->anchors_killed_sectors[2];
           continue;
         }
