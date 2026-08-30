@@ -409,26 +409,32 @@ somme exacte : [1,1,1,1]
 Le cœur ne tue pas : pour `NL`, `2P^2=73728 < J B^2=216576`, tandis que `PR`
 a `P>0`. Les deux ordres `(PR,NL)` et `(NL,PR)` doivent donc rendre exactement
 `dead=true`, `dead_by_chord=1`, `cert_pos=1`, `cert_neg=1`, `jung_skip=1`.
-Le premier état du patch rendait respectivement mort puis vivant ; le mutant
-rend les deux ordres vivants. Après correction, les deux ordres doivent donner
-`seeds_killed_chord=1`, `q4_completions=4` et le même candidat final.
+Le premier état du patch, comme le mutant `chord-dead-skip-positive`, rend
+respectivement mort puis vivant : seul l'ordre où le positif arrive en dernier
+saute la constatation. Le mutant `chord-skip-positive`, qui n'enregistre pas ce
+site, rend les deux ordres vivants. Après correction, les deux ordres doivent
+donner `seeds_killed_chord=1`, `q4_completions=4` et le même candidat final.
 
-Une candidate `--ordre-corde` non commise a fourni une régression utile avant
-`6ba46c81` : sur `terrain n=400`, nominal donnait
-`morts_corde=25675`, `desaccords_ordre=0`, et la réintroduction du second défaut
-donnait `morts_corde=25091`, `desaccords_ordre=426`, code 4. Claude a eu raison
-de ne pas enregistrer cette candidate : son CMake portait encore
-`--min-corde=@CORDE@`, jeton non substitué que `std::atoll` transformait en
-zéro. Si cette régression est reprise, son plancher doit être une valeur
-explicite — au minimum `1` — et son mutant doit entrer au registre avec sa
-porte dans le même commit.
+La candidate `--ordre-corde` est maintenant livrée par `b8082040` avec un vrai
+plancher `20000`. La sélection shaped, registre,
+mutants corde et fixtures secteur passe `13/13` en 9,37 s. Sur
+`terrain n=400`, nominal donne `morts_corde=25675`,
+`desaccords_ordre=0`; `chord-dead-skip-positive` donne `25091/426`, code 4.
+C'est une bonne régression d'intégration shaped et elle mérite d'être gardée.
 
-Au pin livré, `chord_positive_gate.cpp` reste utile pour le premier défaut sur
-la route scalaire, mais aucun mutant ni CTest ne grave la seconde couture. La
-candidate inversait en outre une grande réalisation aléatoire et n'exerçait
-que le helper shaped. La fixture cinq points reste donc la fermeture permanente
-souhaitable sur scalaire, shaped et kernel, indépendante d'une famille, d'une
-seed et d'un seuil.
+Elle n'exerce toutefois ni `process_anchor_q4` ni le kernel. L'injection du
+second mutant existe dans la route scalaire, mais la porte de masse actuelle
+la laisse passer (`corde_tues=24700`, code 0). Le plancher shaped ne discrimine
+pas non plus le défaut puisque les deux bras le dépassent ; le code 4 vient des
+seuls désaccords d'ordre. Comme le plancher est évalué avant la branche mutant,
+une évolution qui ferait tomber le mutant sous `20000` rendrait le code 3 au
+lieu du code 4 attendu. Il faut retourner 4 sous le mutant si **le plancher ou
+l'invariance d'ordre** tombe, et conserver 3 seulement pour le nominal vacant.
+
+Enfin, `morts_corde` additionne les attributions des deux replays : ce n'est
+pas un nombre de seeds uniques. La fixture cinq points reste la fermeture
+permanente souhaitable sur scalaire, shaped et kernel, avec verdicts et
+compteurs littéraux indépendants d'une famille, d'une seed et d'un seuil.
 
 La fermeture utile est petite et atomique :
 
@@ -767,3 +773,81 @@ des contre-fixtures v5 établies, il faut fournir les coordonnées entières, le
 pin, les rectangles émis, les sommes exactes et un mutant/contrôle qui rend le
 ledger non vacant. Cette exigence renforce la stratégie ; elle ne remet pas en
 cause son choix de publier ces masses.
+
+Deux raffinements rendent le plan plus directement implémentable. La collecte
+de provenance cœur n'a pas besoin d'être tout-ou-rien : si `c` indices
+universels distincts sont recertifiés puis retirés du tape, le minorant sûr est
+`h_a+h_b+c+max(h_core-c,h_c_residual)`. Un échec à retrouver tout `ar.core`
+peut donc conserver le crédit partiel et incrémenter un repli, sans surcompter.
+Le profil produit courant refuse les positions dupliquées dans `run_pipeline` ;
+il ne faut pas élargir silencieusement ce contrat sous prétexte que l'index sait
+les bucketiser. Les helpers bas niveau doivent simplement déclarer cette
+précondition, et une future sémantique pondérée resterait une phase distincte.
+
+Enfin, `ball_depth_at_least` offre un terminal reçu et dédupliqué par
+`BallKey`, mais ne « neutralise » pas à lui seul la contre-famille
+ancre--témoins : une requête peut encore visiter `Theta(n)` nœuds par clé, et
+le nombre de supports ou de clés ne diminue pas. Le bon shadow mesure donc les
+visites après déduplication et compare les fates, sans lui attribuer une borne
+nouvelle. De même, l'algorithme à au plus 16 racines donne exactement le
+**verdict écrêté au seuil `h4`** ; il n'a pas à reconstruire une profondeur
+entière supérieure à ce seuil.
+
+### Réception de `b8082040` et de la campagne canopée locale
+
+Le commit `b8082040` garde utilement la grande régression d'ordre sur le helper
+shaped hôte. Les portes ciblées `mutants_gate`, `q4_chord_ordre`,
+`q4_chord_ordre_mutant` et `chord_positive` passent `5/5`. Les valeurs publiées
+sont reproduites : nominal `25675/0`, mutant `25091/426`, sortie mutante 4.
+Le titre « 426 seeds sur 65881 changeaient de verdict » désigne bien les 426
+verdicts shaped discordants de cette réalisation.
+
+Trois bornes doivent rester visibles. `morts_corde` additionne les attributions
+des deux replays et n'est pas un nombre de seeds uniques. Le plancher `20000`
+est dépassé par les deux bras et ne tue donc pas le mutant ; si une évolution le
+faisait tomber avant la branche `ordre_mism`, la porte rendrait 3 au lieu du 4
+contractuel. Enfin, cette porte n'appelle ni `process_anchor_q4` ni le kernel.
+L'injection scalaire est présente, mais la porte de masse existante laisse
+passer `chord-dead-skip-positive` (`corde_tues=24700`, code 0). Le plus petit
+complément robuste reste la fixture exacte cinq points et ses compteurs
+littéraux sur scalaire et shaped, sans nouveau seuil empirique ; le kernel
+reste `not_received` jusqu'au même rejeu CUDA.
+
+La suite concurrente annoncée dans le message de commit n'est pas un reçu
+propre puisque les sources étaient modifiées et compilées pendant son
+exécution. Les deux timeouts lourds ne révèlent toutefois pas de régression :
+`mhgp5_postsep_refine` passe isolément en 103,77 s et
+`mhgp5_postsep_refine_mutant_h1` en 96,00 s. Si `ctest -j8` doit devenir un
+contrat supporté, attribuer à ces portes un coût `PROCESSORS` réaliste ou les
+rendre sérielles sera plus stable qu'augmenter encore leur `TIMEOUT`. La
+commande canonique séquentielle reste inchangée.
+
+La première campagne `receipts/canopee_q4/`, épinglée à `b8082040`, est un bon
+résultat négatif de protocole, mais pas une preuve causale. Ses 12 sorties
+brutes rendaient toutes le code 0 avec identités internes fermées, tandis que
+son statut terminal `failed` était honnête. Le harnais comparait chacun des
+cinq autres bras à `g3cap0` comme s'ils devaient produire le même objet : il
+obtenait dix désaccords attendus, puisque les bras changeaient la graine et le
+cap. Pour cette sonde, les hashes portent des compteurs, pas un catalogue ni
+une forêt ; `comparaison_objet` n'avait donc pas d'autorité.
+
+Le défaut causal précède même le wrapper : `terrain_cloud` change la borne de
+`uniform_int_distribution` avant le tirage. La consommation du MT peut diverger,
+puis les collisions de positions modifient la déduplication, l'arrêt à `n` et
+les `PointId`. Une paire recevable doit tirer une fois le lift nominal, dériver
+le bras borné par clamp **après** ce tirage, conserver le même lineage et
+refuser toute collision introduite par le clamp. Publier pour chaque bras les
+digests du nuage ordonné et du lineage, ainsi que le nombre de collisions,
+rendrait l'appariement vérifiable.
+
+Le commit `38fa88af` reçoit la première moitié de ce raccord :
+`--entrees-differentes` saute explicitement l'égalité inapplicable et inscrit
+`comparaison_objet=sans_objet`. Cela empêche le faux statut `failed` sans
+prétendre que les sorties sont identiques. Il ne restaure aucun appariement
+causal. Restent à inclure tout `morsehgp3D_v5/bench/` dans la garde de
+worktree, déclarer `mhgp5_q4_stage_probe` comme `probe` plutôt que cible
+produit, et ranger ses hashes sous `signatures_compteurs`. Les paires doivent
+encore être groupées par graine avec leurs digests d'entrée et de lineage.
+Une campagne terminale `complete` après ce raccord signifie donc seulement
+« tous les runs indépendants ont fini » ; ses écarts de temps et de masses ne
+doivent pas être cités comme effet apparié de la canopée.
