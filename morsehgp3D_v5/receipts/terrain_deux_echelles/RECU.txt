@@ -1,0 +1,85 @@
+# MorseHGP3D v5 — campagne locale : terrain_deux_echelles
+date_utc=2026-08-30T23:08:17+00:00
+source_commit=9f504e52a7778a26c7c70137db4f87f5137376ef
+arbre_construit=propre (refus sinon)
+cible=mhgp5_q4_stage_probe (cible PRODUIT, pas une cible MHGP5_TESTING)
+binaire_sha256=b319abda4c26f1a133b3410f2b0ab1a8cfd68a28f965bf7e3949fd7b6aa6e565
+machine=Linux 6.8.0-1052-azure, 8 fils logiques — MACHINE PARTAGEE, LOCALE
+avertissement=un ecart de mur sous ~20 % n'est pas concluant ici ; les compteurs sont exacts
+protocole=morsehgp3D_v5/bench/recu_local.sh, ordre joue SANS alternance (un seul bras ou une seule repetition)
+compilateur=/usr/bin/c++ (c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0)
+cmake_build_type=Release
+cmake_version=cmake version 3.28.3
+statut=complete
+runs_non_nuls=0
+
+# bras
+g3depot = --seed=3
+g3canopee = --seed=3 --canopy-lift-cap=3
+g3gele = --seed=3 --canopy-lift-cap=3 --bump-amp-cap=30
+g4depot = --seed=4
+g4canopee = --seed=4 --canopy-lift-cap=3
+g4gele = --seed=4 --canopy-lift-cap=3 --bump-amp-cap=30
+g5depot = --seed=5
+g5canopee = --seed=5 --canopy-lift-cap=3
+g5gele = --seed=5 --canopy-lift-cap=3 --bump-amp-cap=30
+
+comparaison_objet=sans_objet (les bras changent l'entree, pas l'algorithme)
+
+# signature de l'objet (sha256 catalogue + forets + cardinalites par K)
+terrain_n16000_g3canopee_r1 1936e28814dde65f9db91148779495227f989bc9e0ecc71891419c6f21b64341
+terrain_n16000_g3depot_r1 742ca21999ce08caddd04b544f5b9b390e3af603761b70afa6d0f1fe8d64370a
+terrain_n16000_g3gele_r1 345a5e1e6f701c9f0816acfdf1a1bc00c8cd11acdf7a24dcfd3db7caf5260ff2
+terrain_n16000_g4canopee_r1 c97ea53bff7f51b2e43262ca23a95c64db4d0220c457fae4db002001900e5d9e
+terrain_n16000_g4depot_r1 a33db0ab9beea1574d323172aea3206b6832585145cf951a13feaa8b275e3fbc
+terrain_n16000_g4gele_r1 97e8b4c9ff24c70aaed7204aeb0ab00e6cfc86562ae7a0cae6d919202d638ed0
+terrain_n16000_g5canopee_r1 50e74ff0bcc038c03a13c853b18b0394dc4dd0039ac4b631d45148d90f977eaa
+terrain_n16000_g5depot_r1 2740baa102e15855ae13bac8dee4838d161ef5804143654219109d063a57bb00
+terrain_n16000_g5gele_r1 105a3c5a19448f9293bd6fc78cd2b8868a017e5a535f05e54bc1211db3baf9d8
+terrain_n32000_g3canopee_r1 c5360298b4c99fd1e923b9400e4966dbb012b6d483d2f6e1cd8aa82cdc5fc5fb
+terrain_n32000_g3depot_r1 fbfe7ff6aafd64ee00dfcc5cb616bfbd14bba5db34d95387ff3d9a27d46e9604
+terrain_n32000_g3gele_r1 c1419f007269f2abb3c6c8d96fea5573c6f7e84f39a082a64a75ed03c791b4f3
+terrain_n32000_g4canopee_r1 22438369d2d60a6b0e9ae40effe268997c03693e1d0b51a73cc07ceb94bf508e
+terrain_n32000_g4depot_r1 54cce583790d48a24879d87488c4095597e9de6605069819d5a8df13c5c14cda
+terrain_n32000_g4gele_r1 f79a68d304171c8f8ef685add055d53d1acf986111244f7175781dea247aa912
+terrain_n32000_g5canopee_r1 66a7c566dbd64d37a2b0ec4560513f0ca4b00dfb6595f7aa0e0d707ceba08741
+terrain_n32000_g5depot_r1 8fdf409908533f10248dce776a7342b7e5633426cc92565202cb6070c195ea4b
+terrain_n32000_g5gele_r1 e63e5abe25599d254b9f7e6d4c2715fa7468f30396f40161e868f7545b065e0b
+terrain_n8000_g3canopee_r1 2ca7e3a18d0a8d653b355ed05407d5667c2f194236e6336c0c90706ecce768d3
+terrain_n8000_g3depot_r1 1ddf20343d489127aa5678a3f816b31e73660420a24b2eee736b39c56413ffb6
+terrain_n8000_g3gele_r1 37a6eaa33e93cdf656e1cdd657f920f6e9ba5199605732d356b3e0da1ca66ecf
+terrain_n8000_g4canopee_r1 7a25b946f05ba8084be905f8c01de3d2a1a4159ddb1efcb65f12d699675adf79
+terrain_n8000_g4depot_r1 99487f3ff5bdb00a00c8ca2473e9747e5c8823dd18606156d87a31d9d93f6fbe
+terrain_n8000_g4gele_r1 1aa16792335038aa88c31a2847286105f81934fff1fb156029e177b39bca2d00
+terrain_n8000_g5canopee_r1 a48cc64ee1016c26ea4d876746b46d118e3e4e0988823f480550ec2709ca4552
+terrain_n8000_g5depot_r1 d95bd57ce3461d7fbfac6b7609979dea09fc64abf50832a875c4d3586f7b8f4b
+terrain_n8000_g5gele_r1 b28f19e933059ea53a6e091df94fce9c40be0add46ef010a8f9266aa81b84675
+
+# run code duree_s peak_rss_kb
+terrain_n16000_g3canopee_r1 0 15.750 0
+terrain_n16000_g3depot_r1 0 34.926 0
+terrain_n16000_g3gele_r1 0 8.360 0
+terrain_n16000_g4canopee_r1 0 9.074 0
+terrain_n16000_g4depot_r1 0 28.407 0
+terrain_n16000_g4gele_r1 0 8.414 0
+terrain_n16000_g5canopee_r1 0 10.130 0
+terrain_n16000_g5depot_r1 0 25.782 0
+terrain_n16000_g5gele_r1 0 8.809 0
+terrain_n32000_g3canopee_r1 0 66.389 0
+terrain_n32000_g3depot_r1 0 139.565 0
+terrain_n32000_g3gele_r1 0 17.597 0
+terrain_n32000_g4canopee_r1 0 18.645 0
+terrain_n32000_g4depot_r1 0 95.054 0
+terrain_n32000_g4gele_r1 0 17.117 0
+terrain_n32000_g5canopee_r1 0 20.645 0
+terrain_n32000_g5depot_r1 0 89.015 0
+terrain_n32000_g5gele_r1 0 17.904 0
+terrain_n8000_g3canopee_r1 0 5.538 0
+terrain_n8000_g3depot_r1 0 9.733 0
+terrain_n8000_g3gele_r1 0 4.147 0
+terrain_n8000_g4canopee_r1 0 4.315 0
+terrain_n8000_g4depot_r1 0 8.490 0
+terrain_n8000_g4gele_r1 0 4.103 0
+terrain_n8000_g5canopee_r1 0 4.732 0
+terrain_n8000_g5depot_r1 0 8.076 0
+terrain_n8000_g5gele_r1 0 4.279 0

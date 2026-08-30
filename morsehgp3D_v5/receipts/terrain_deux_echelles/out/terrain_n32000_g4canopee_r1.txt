@@ -1,0 +1,11 @@
+parametres graine=4 canopy_lift_cap=3 bump_amp_cap=0
+q4_stage_probe famille=terrain n=32000 rectangles=801174 ancres_post_hist=1573251 candidats=82467 seeds=5793325 core_tues=4137278 corde_tues=195976 completions=13362319 profonds=29961
+profil (ms, 1 fil, ratios seulement ; pretest_query_min=512) : total=7179 histogrammes=137 handles=392 requetes_pretest=277 rectangles_requete=705 candidats_requete=1106653 covers=1431 corps=4768 dont tests_ancre=890 cœur+corde=2302 completions=544 ; tuees W4=442877 secteurs=47262
+masses_q4 covers=1461618 visites_points_cover=199594535 sites_retenus=61683392 tests_cœur=67495452 entrees_profondeur=112428 tests_q4_power=2103719
+etages_q4 pretest_ancres=111648 pretest_sites=348310558 lentille_balayee=31907055 lentille_gardee=17277868 grille_sites=37375 grille_ancres=13 grille_sites_baties=25096 tests_aigus=15111644 corde_cellules=5497 affine_remplis=971568 affine_sites=31202029 w4_prescan=35747217 secteur_sites=35030598
+temps_q4 lentille_grille=350 dont_grille=37 boucle_seeds=3357 cœur=2302 completions=544 dont_profondeur=28 ; grilles_tentees=8 grilles_baties=8
+rejets_q4 lentille=3234092 owner=72177 once=1514978 i64=2122909 face_power=5002330 det=30327 centre=1273078 profonds=29961 emis=82467
+seeds_q4 seeds=5793325 cellules_tues=4244 cœur_tues=4137278 corde_tues=195976 survivants=1455827 ancres_covers=1461618 ancres_w4=442877 ancres_secteurs=47262 ancres_cellules=0
+certs_q4 cert_pos=22797078 cert_neg=44694285 jung_kill=40726473 jung_skip=3967429 jung_repli=383 repli_flottant=4089
+horloge_q4 mur_ms=7179 cpu_processus_ms=7179 (machine partagee : mur/cpu mesure la contention)
+identites_q4 cœur=OK profondeur=OK completions=OK non_vacuite=OK
