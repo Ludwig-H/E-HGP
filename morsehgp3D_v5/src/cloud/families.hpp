@@ -205,12 +205,18 @@ struct ScanlineField {
   struct Slab { long long x0 = 0, x1 = 0, y0 = 0, y1 = 0, h = 0; };
   std::vector<Bump> bumps;
   std::vector<Slab> slabs;
-  static ScanlineField make(std::mt19937* rng, int coord) {
+  // `bump_amp_cap` (0 = inerte) : MEME anisotropie que `terrain` — les cinq
+  // calottes ET les quatre plateaux a bord franc tirent leur hauteur dans
+  // [coord/16, coord/8], donc en sqrt(n), alors que l'espacement reste
+  // constant (docs/TERRAIN_DEUX_ECHELLES.md).
+  static ScanlineField make(std::mt19937* rng, int coord, int bump_amp_cap = 0) {
     ScanlineField field;
     field.bumps.resize(5);
     std::uniform_int_distribution<int> place(0, coord - 1);
     std::uniform_int_distribution<int> radius(std::max(2, coord / 6), std::max(3, coord / 3));
-    std::uniform_int_distribution<int> height(std::max(1, coord / 16), std::max(2, coord / 8));
+    const int amp_lo = bump_amp_cap > 0 ? std::max(1, bump_amp_cap / 2) : std::max(1, coord / 16);
+    const int amp_hi = bump_amp_cap > 0 ? std::max(2, bump_amp_cap) : std::max(2, coord / 8);
+    std::uniform_int_distribution<int> height(amp_lo, amp_hi);
     for (Bump& b : field.bumps) {
       b.cx = place(*rng);
       b.cy = place(*rng);
@@ -283,9 +289,9 @@ inline void scanline_pass(std::mt19937* rng, const ScanlineField& field, int n, 
   }
 }
 
-inline std::vector<P3> scanline_cloud(int n, int coord, long long seed, bool overlap_multiecho) {
+inline std::vector<P3> scanline_cloud(int n, int coord, long long seed, bool overlap_multiecho, int bump_amp_cap = 0) {
   std::mt19937 rng((unsigned)seed);
-  const ScanlineField field = ScanlineField::make(&rng, coord);
+  const ScanlineField field = ScanlineField::make(&rng, coord, bump_amp_cap);
   const int step_along = 2;
   const int pitch = 8;  // anisotropie 4:1 entre l'inter-ligne et le pas
   std::vector<P3> pts;
@@ -332,8 +338,8 @@ inline std::vector<P3> make_family_cloud(CloudFamily family, int n, int coord, l
     case CloudFamily::kUniform: return uniform_cloud(n, coord, seed);
     case CloudFamily::kEightClusters: return eight_clusters_cloud(n, coord, seed);
     case CloudFamily::kTerrain: return terrain_cloud(n, coord, seed, canopy_lift_cap, bump_amp_cap);
-    case CloudFamily::kScanlineSinglePass: return scanline_cloud(n, coord, seed, false);
-    case CloudFamily::kScanlineOverlapMultiecho: return scanline_cloud(n, coord, seed, true);
+    case CloudFamily::kScanlineSinglePass: return scanline_cloud(n, coord, seed, false, bump_amp_cap);
+    case CloudFamily::kScanlineOverlapMultiecho: return scanline_cloud(n, coord, seed, true, bump_amp_cap);
   }
   return {};
 }
