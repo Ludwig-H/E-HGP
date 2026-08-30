@@ -6,8 +6,8 @@
   `b9646d1a`, mesure V74/V76--V78 de `50b85e16`, V79--V81 de `9a51a729`,
   V80/V82--V84 de `650b3cff`, V88--V100 jusqu'à `8cbee414`, puis la
   réfutation shallow V101--V103 de `2168a295`, V104--V109, le probe à
-  patches V110--V116 de `bf2192f1`, puis V117--V140 jusqu'au verdict par seed
-  de `bd35b88e`, consolidés ci-dessous.
+  patches V110--V116 de `bf2192f1`, puis V117--V143 jusqu'à la proposition de
+  grille q3 précoce de `0ad70c23`, consolidés ci-dessous.
 - **Statut :** prédicat idéal reçu au seuil ; enveloppe de scan reçue mais sans
   effet sur l'exposant ; ledger q3 pondéré maintenant factorisé sans
   `A x B` ; AABB brut de $\Pi$ reçu comme résultat négatif. Le certificat q3
@@ -3144,3 +3144,178 @@ elle ne remplace pas le premier incrément : la paire LCA n'est généralement
 pas l'arête maximale et n'est pas WSPD-séparée. Ni le spindle ni le cover owner
 actuels ne s'y appliquent. La tester comme oracle structurel est légitime ; la
 présenter comme nouvelle route produit avant le probe fibré ne l'est pas.
+
+## Réception V142--V143 : meilleure voie q3 et borne honnête
+
+### Ce que les trois reçus établissent réellement
+
+Les trois campagnes `masses_q3_seed{3,4,5}_20260829` sont substantielles : les
+60 runs attendus existent, terminent à zéro, leurs sorties d'erreur sont vides,
+leurs 60 signatures `.objet` se recalculent, et les trois binaires locaux ont
+le même SHA-256 `a83f9a8d...136f0f`. Les arbres `src/`, `cli/` et
+`bench/recu_local.sh` sont identiques aux trois pins ; seul `CMakeLists.txt` a
+gagné des tests. L'explication « harnais durci entre les graines » est donc
+inexacte, mais l'équivalence du binaire est bien vérifiée. Les commandes exactes
+restent dans des `session.log` ignorés par Git ; le reçu reconstruit la matrice,
+mais n'archive pas le journal. `comparaison_objet=identique` est vacu avec un
+seul bras et ne valide pas les masses de la ligne `generation`.
+
+Chaque run ferme exactement `q3_depth_inputs = q3_acute_after_anchor_gates - seeds_killed_cells[1] = depth_killed[1] + candidates[1]`. En revanche, V142 ne publie que 7 des 20
+couples famille--taille et omet la pente distincte après cellule. Ses tableaux
+sont des médianes composante par composante, pas des reçus exacts : sur
+`terrain,32000`, la médiane par run de `q3_depth_inputs` vaut `55 723 101`, pas
+`55 710 836`. Cette dernière valeur soustrait deux médianes provenant de
+graines différentes. De même, `25,57` est le quotient de deux médianes
+marginales ; la médiane des trois quotients par run vaut `23,80`.
+
+Les pentes publiées sont des exposants sécants et leur « intervalle » est
+l'étendue min--max de trois graines, pas un intervalle de confiance. Le résultat
+fort et borné est le suivant : sur `terrain`, entre 16 k et 32 k, la pente des
+seeds comptés dépasse 2 dans les trois runs, avec un minimum de `2,045`. Les
+exposants des candidats provisoires entre 2 k et 32 k vont de `1,007` à `1,122` ;
+ils décrivent une croissance proche du linéaire sur cette plage, jamais un
+théorème sur l'objet. `candidates[1]` compte des propositions avant RLE, pas les
+boules uniques, les événements ni les forêts.
+
+Les conclusions causales de V142 sont retirées. Avec la médiane des ratios par
+run, `terrain` passe de `4,51` à `23,80`, mais `scanline` croît aussi de `6,46`
+à `9,56`, `uniform` bouge de `11,05` à `11,16`, et `eight_clusters` décroît de
+`7,76` à `3,52`. `uniform`, non `terrain`, porte en outre la plus petite pente
+d'ancres du tableau. Quatre cohortes couplées ne prouvent donc ni une
+anti-corrélation, ni une causalité WSPD. Surtout, le numérateur `seeds[0]` vient
+après histogrammes, `W3`, secteurs et mort globale de grille, tandis que
+`anchors[1]` est incrémenté avant ces portes. Leur quotient est une charge
+agrégée entre deux étages, pas le nombre moyen de seeds d'une ancre survivante.
+
+### Réponse à V142 : séparation obligatoire, retouche seulement après
+
+Le retrait de la question par Claude est bienvenu, mais le bon énoncé est plus
+étroit. Une scission radix conserve la partition exacte des paires ; elle ne
+préserve pas à elle seule la sémantique des lanes. La contre-fixture q2 déjà
+gravée garde un ledger vert tout en passant de 13 à 14 candidats. Pour q3/q4,
+les portes bornées revalident les décisions aval ; elles ne constituent pas un
+théorème pour un critère arbitraire.
+
+Le prédicat `separated` reste donc la porte géométrique canonique. Un prédicteur
+de charge peut seulement choisir `SPLIT` ou `EMIT` **après** la première
+séparation, dans `postsep_refine` : q2 fermé, deux enfants séparés sinon rollback
+atomique, facteur de plus grand diamètre, `max(core_parent,core_fresh)`, budget
+déterministe fail-open et identité `emitted + killed = base`. La meilleure
+variante éventuelle serait `death-only` : ne publier le raffinement que si le
+lookahead borné découvre au moins un enfant certifié mort ; sinon réémettre le
+parent. Elle reste un préconditionneur secondaire, pas le générateur q3.
+
+Le diagnostic reçu va déjà contre son activation générale. Sur `scanline`
+100 k, `L=3` avait retiré environ 47 % des ancres mais ajouté 34 % de mur. Un
+rejeu local du binaire `a83f...`, non archivé comme reçu et dont les quatre bras
+ont été lancés simultanément, donne sur `terrain,2000,seed=3` : `L=0 -> L=3`
+fait passer la masse q3 émise de `93 195` à `69 834` et en certifie `23 361`
+morte, tout en conservant exactement `420 699` seeds, `332 156` morts de
+profondeur, `88 543` candidats, `digest_balls` et `digest_all`. Le ratio
+`seeds/anchors` monte alors artificiellement de `4,51` à `6,02`. Ce ratio ne
+peut pas router la retouche.
+
+### Réponse à V143 : oui au principe, mais c'est déjà `CellGrid`
+
+Le total mathématique des triplets aigus possédés par leur arête maximale est
+intrinsèque au nuage. Le compteur `seeds[0]` ne mesure toutefois pas ce total :
+une ancre tuée par histogramme, `W3`, secteur ou grille peut contenir des
+triplets aigus qui ne sont jamais comptés. V143 démontre une invariance sur ses
+runs `terrain,8000`, pas l'identité annoncée pour tout nuage ou toute politique.
+« Les ancres retirées n'avaient aucun seed » doit devenir « elles n'ont changé
+aucun seed **compté après les portes sur ces runs** ». De même, le coût n'est
+pas `anchors * seeds/anchor * 13` : le treize est une moyenne observée de tests
+de sites par entrée de profondeur, ni un optimum ni une borne, et le
+dénominateur du ratio précède plusieurs portes.
+
+Il n'existe en revanche aucune objection de principe au certificat proposé sur
+le disque des centres d'une ancre. C'est précisément le théorème et le point
+d'insertion de `CellGrid` : même `bisector_basis`, condition affine testée aux
+quatre sommets de cellules fermées, construction entre `W3`/secteurs et la
+boucle des seeds, mort de l'ancre si toutes les cellules requises sont mortes,
+puis fate par seed dans les cellules résiduelles. Il ne faut pas créer une
+seconde grille. Un niveau grossier `G=2` peut devenir le premier étage d'une
+cascade `G=2 -> G=8`, à condition que ses cellules fermées couvrent réellement
+tout le disque et que les frontières consultent toutes les cellules incidentes.
+Huit patches simplement dessinés ne suffisent pas sans cette preuve.
+
+La couture décisive est algorithmique : `anchor_grid_stage` énumère aujourd'hui
+tous les porteurs aigus pour calculer `nacute` **avant** de décider de construire
+la grille. Il peut donc supprimer les scans de profondeur, mais pas rendre cette
+énumération sous-quadratique. Le prochain shadow doit décider le niveau grossier
+sans `nacute`, à partir de quantités déjà disponibles comme la taille du cover
+et `near_m`, construire la grille, tuer `all_dead` avant tout test d'acuité, puis
+n'énumérer les seeds que si une cellule reste vivante. Comparer exactement
+`OFF`, `AUTO` actuel, `EARLY_G2` et `EARLY_G8`; compter séparément sites de
+grille, ancres `all_dead`, tests d'acuité évités, seeds résiduels, tests de
+profondeur, mur et HWM. La sortie post-RLE, les événements et les forêts doivent
+rester identiques. Ce shadow est le meilleur **premier incrément** parce qu'il
+réemploie une primitive déjà prouvée et teste directement l'hypothèse de V143.
+Il ne change toutefois l'exposant que sur les ancres `all_dead`. Pour les
+grilles mixtes, l'étape suivante traverse les handles `C` comme des nœuds : une
+borne conservatrice de l'image de tous leurs porteurs dans le disque permet de
+sauter le nœud si toutes les cellules possibles sont mortes, et oblige à
+descendre sinon. Refaire une boucle sur chaque feuille après avoir construit la
+grille ne change que la constante. Ce parcours hiérarchique est le raccord
+direct entre le shadow par ancre et les fibres `A x B x C` de l'architecture
+finale.
+
+### Meilleure architecture d'énumération q3
+
+Le premier incrément par ancre ne suffit pas comme architecture finale. La voie
+la plus prometteuse reste asymétrique : garder la WSPD binaire canonique comme
+tape exacte-once des arêtes `A x B`, attacher les handles `C` du cover, puis
+classer des fibres de porteurs dans l'espace des centres avant de développer
+les ancres et les seeds. Ce n'est ni une WSPD ternaire symétrique, déjà fermée
+par l'obstruction quadratique, ni un réglage de `s`.
+
+Pour chaque `A x B`, le classifieur doit faire, dans cet ordre :
+
+1. retirer en bloc les rôles géométriquement impossibles (`NONE_ACUTE` ou owner
+   impossible) ;
+2. récupérer si possible les au plus huit identités du cœur, faire chercher à
+   `W3` seulement les témoins nouveaux hors `A union B`, puis composer sans
+   doublon avec les vrais `h_a(a)` et `h_b(b)` ;
+3. calculer paresseusement `g_AB[j]` seulement au premier carrier résiduel qui
+   demande le patch `j`, et composer par union d'identités ou par strates
+   disjointes ; `h_c(c)` reste différé au résiduel ;
+4. émettre les triplets exacts seulement dans les fibres `PENDING`, avec les
+   mêmes tests owner, acuité, puissance stricte et profondeur que la lane
+   actuelle.
+
+Le grand-livre global porte sur les `3*choose3(n_unique)` rôles
+arête--porteur, y compris les rectangles morts avant `AliveRect`. Chaque rôle
+reçoit exactement un fate : géométrie impossible, mort certifiée, résiduel
+exact ou candidat. Cette fermeture empêche qu'un bon taux conditionnel aux
+seuls blocs pavés masque le travail non classé.
+
+Enfin, une route réellement sensible à la sortie doit traiter les plateaux. Une
+RLE tardive économise la mémoire des boules, pas l'énumération des supports. Le
+différentiel v4 `cocyclique 384` annonçait `2 322 560` supports aigus pour une
+seule `BallKey` ; il doit être requalifié comme fixture v5. À terme, un bloc
+vivant reconnu comme plateau doit publier le quotient par boule et son shell
+complet, ou refuser transactionnellement selon le contrat, jamais développer
+des millions de copies silencieusement.
+
+### Est-ce sous-quadratique ?
+
+**Pas comme garantie universelle.** La source et la sortie q3 en dimension 3
+peuvent être quadratiques ; aucun algorithme qui publie explicitement cette
+sortie ne peut promettre `o(n^2)` sur tous les nuages. Le schéma fibré peut lui
+aussi laisser un résiduel dense. La revendication correcte est
+**output-sensitive** : si `V` est le nombre de visites de certification, `P`
+la masse des rôles `PENDING` réellement développés et `Z` la sortie canonique,
+viser un coût proche de `n log n + V + P + Z`. Il est sous-quadratique sur une
+famille seulement si `V + P + Z = o(n^2)` sur cette famille ; rien ne le prouve
+encore.
+
+V142 rend cette voie empiriquement plausible : sur les quatre cohortes reçues,
+les candidats provisoires croissent bien plus lentement que les seeds, et
+`terrain` rejette tardivement environ 97 % de ses entrées de profondeur à 32 k.
+Ce contraste est le headroom, pas la preuve. La porte de décision publie aux
+cinq tailles et trois graines les pentes séparées de `V`, `P`, BallKeys uniques,
+tests d'acuité, tests de profondeur, mur et HWM, avec une famille adversariale
+et la fixture de plateau. Tant que la borne supérieure observée du résiduel
+n'est pas strictement sous 2 et qu'aucun théorème de packing ne la ferme, le
+verdict reste : **voie viable à tester sur les cohortes, sous-quadraticité non
+établie**.

@@ -1,6 +1,61 @@
-# État courant audité de MorseHGP3D v5 — 29 août 2026
+# État courant audité de MorseHGP3D v5 — 30 août 2026
 
-- **Dernier pin de Claude relu :** `4741f5b0`, documentaire ; le dernier source
+- **Dernier pin de Claude relu :** `0ad70c23`, documentaire. V142 apporte trois
+  campagnes CPU produit complètes, 60 runs au même SHA-256 de binaire. Elles
+  répliquent un signal borné : sur `terrain`, entre 16 k et 32 k, la pente des
+  seeds q3 comptés dépasse 2 dans les trois graines, minimum `2,045`. Elles ne
+  prouvent pas que l'objet soit linéaire : `candidates[1]` est une proposition
+  avant RLE et ses exposants `1,007--1,122` ne portent que sur 2 k--32 k. La
+  table V142 ne contient que 7 des 20 couples famille--taille, omet la pente
+  après cellule et forme des médianes synthétiques. Sur `terrain,32000`, la
+  médiane par run après cellule vaut `55 723 101`, pas `55 710 836`; le ratio
+  médian par run vaut `23,80`, pas le quotient marginal `25,57`.
+
+  `seeds[0]/anchors[1]` n'est pas une charge par ancre survivante : les seeds
+  sont comptés après histogrammes, `W3`, secteurs et mort globale de grille,
+  les ancres avant ces portes. `scanline` croît aussi de `6,46` à `9,56` et
+  `uniform` bouge de `11,05` à `11,16`; l'anti-corrélation WSPD revendiquée
+  n'est ni générale ni causale. La séparation reste la porte géométrique de la
+  WSPD. Une charge peut au plus router `postsep_refine` après séparation, sous
+  rollback, ledger et budget fail-open. Le replay local diagnostique
+  `terrain,2000,seed=3` montre déjà que `L=3` retire `23 361/93 195` de masse
+  q3 mais conserve exactement `420 699` seeds, `332 156` morts de profondeur
+  et `88 543` candidats : aucune activation générale n'est motivée.
+
+  V143 retire correctement V142, mais remplace ensuite une observation locale
+  par une identité trop forte. Le total des triplets aigus possédés est
+  intrinsèque ; `seeds[0]` ne le compte pas, puisque les ancres mortes aux
+  portes amont ne sont jamais énumérées. Le facteur treize est une moyenne de
+  tests de sites, pas une borne optimale, et la mesure unique de temps entre
+  séparations reste sous le seuil de prudence du reçu. Le certificat `K=2`
+  proposé par ancre est déjà `CellGrid` : même base du plan bissecteur, même
+  affine aux quatre sommets, même insertion avant la boucle et mêmes fates
+  global/par seed. Ne pas créer de troisième implémentation.
+
+  Le meilleur premier incrément est une cascade `CellGrid` grossière puis
+  fine, en shadow `OFF/AUTO/EARLY_G2/EARLY_G8`. Les bras `EARLY` choisissent et
+  construisent la grille sans préénumérer `nacute`, afin qu'une grille
+  `all_dead` tue réellement l'ancre avant tout test d'acuité. Sur une grille
+  mixte, changer l'exposant exige ensuite de traverser les handles `C` et de
+  sauter un nœud dont tous les centres possibles tombent dans des cellules
+  mortes ; une nouvelle boucle feuille par feuille ne suffit pas. Compter
+  sites de grille, nœuds `C`, acuités évitées, seeds résiduels, tests de
+  profondeur, mur/HWM et sortie complète identique.
+
+  L'architecture q3 recommandée reste la WSPD binaire canonique `A x B`, puis
+  des fibres de handles `C` classées avant expansion : géométrie impossible,
+  union sparse des au plus huit IDs du cœur avec `W3` résiduel et
+  `h_a/h_b`, `g_AB[j]` paresseux, `h_c` différé, puis énumération exacte du seul
+  résiduel `PENDING`. Le ledger ferme `3*choose3(n_unique)` sur la tape entière.
+  Un quotient BallKey/shell ou un refus transactionnel est aussi requis sur
+  les plateaux ; la RLE tardive ne retire pas le coût des supports dupliqués.
+  Cette route est output-sensitive et empiriquement plausible, mais **aucune
+  borne universelle sous-quadratique n'est reçue** : la sortie q3 3D peut être
+  quadratique. Elle n'est sous-quadratique sur une famille que si visites de
+  certificats, résiduel et sortie canonique le sont ensemble. Le chemin actuel
+  est au contraire réfuté sur le dernier palier `terrain` par sa pente de seeds.
+
+- **Pin V140/V141 précédent :** `4741f5b0`, documentaire ; le dernier source
   du probe reste `bd35b88e`. V140 corrige à juste
   titre V139 : si un patch fermé contenant le centre exact d'un seed porte un
   fate `ALL_DEEP`, ce seed est profond, même si les autres patches incidents

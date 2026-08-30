@@ -143,11 +143,22 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   fuseau exact et ne peut pas être renforcé par le même rayon ; l'union sparse
   renforce sa **composition**, pas sa géométrie. V141 ne change pas ce verdict :
   ses nouveaux oracles, `K=32`, chiffres obliques et mesures de nœuds ne sont
-  pas suivis, et sa projection `0,43` réemploie le proxy V140 déjà biaisé. Les
-  deux ablations admissibles
-  après attribution du mur q3 sont donc `CellGrid OFF/AUTO/FORCE` et ce shadow
-  patch par seed, avec compteurs complets et coûts réellement évités. Aucun
-  résultat GPU n'est revendiqué.
+  pas suivis, et sa projection `0,43` réemploie le proxy V140 déjà biaisé. V142
+  apporte 60 runs au même binaire et réplique seulement la pente locale rouge
+  des seeds `terrain`; ses médianes synthétiques, son ratio entre étages et sa
+  causalité WSPD sont corrigés. V143 retire alors le réglage de séparation,
+  mais `seeds[0]` n'est pas le total intrinsèque des triplets : il vient après
+  les portes d'ancre. Son patch `K=2` est déjà le principe de `CellGrid`. Le
+  premier shadow utile compare `OFF/AUTO/EARLY_G2/EARLY_G8` en construisant les
+  bras précoces sans préénumérer `nacute`; sur une grille mixte, les handles `C`
+  doivent ensuite être classés par nœud pour éviter la boucle feuille par
+  feuille. L'architecture finale recommandée garde la WSPD `A x B`, traite les
+  fibres `C` avec crédits d'identités factorisés et n'énumère que `PENDING`,
+  avec quotient explicite des plateaux. Elle est output-sensitive et viable à
+  éprouver, pas prouvée sous-quadratique dans le pire cas. Les deux ablations
+  immédiates après attribution du mur q3 sont donc la cascade `CellGrid` et le
+  shadow patch/union sparse, avec compteurs complets et coûts réellement
+  évités. Aucun résultat GPU n'est revendiqué.
   `Lca3Forest` reste une ablation de ledger, pas une route produit.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : décisions et dents restantes de la lane device.
