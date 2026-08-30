@@ -5,11 +5,10 @@ Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-Dernier pin Claude relu : `495b234f`, documentaire seulement. Dernier pin
-source fonctionnel relu : `351faccc`. Le worktree partagé contenait pendant la
-revue un candidat fonctionnel `s>=8` non commité et d'attribution mélangée ; il
-est traité comme proposition à contre-relire, jamais comme livraison ni comme
-autorité.
+Dernier pin Claude relu : `e6ed85df`, source `s>=8` non autonome. Dernier pin
+source fonctionnel relu : `351faccc`. Le worktree partagé contient les CLI, le
+header de parsing et les compléments documentaires absents de `e6ed85df` ; ils
+restent des propositions non commitées, jamais substituées au pin audité.
 
 ## Verdict
 
@@ -104,15 +103,22 @@ diagnostic n'est donc pas seulement documentaire.
 
 ## P1 — corrections au contre-audit d'optimisation
 
-### `s>=8` est le plancher normatif du profil produit, pas encore livré
+### `s>=8` est le plancher normatif, mais `e6ed85df` ne se construit pas proprement
 
 Décision utilisateur du 30 août : `s=1` n'a pas de sens pour le produit v5 et
 la séparation entière minimale est 8 pour toute la voie produit, q2 comprise.
-Au pin `495b234f`, cette décision est seulement documentée : la version commitée
-de `validate_run_options` et des deux CLI refuse encore uniquement `s<1`, et
-`alive_rectangles` n'a aucune garde interne. `s=1` et `s=7` restent donc
-acceptés contrairement au contrat demandé ; `s=8` n'est pas encore une
-frontière exécutable reçue.
+Le pin `495b234f` ne faisait que documenter cette décision. `e6ed85df` ajoute
+désormais la garde de `run_pipeline`, celle d'`alive_rectangles`, le calcul
+large et les tests. Il n'est toutefois pas une livraison autonome :
+
+- `tests/fold_bench.cpp` inclut `src/core/parse.hpp`, absent de l'arbre Git ; un
+  clean build échoue dès la compilation de cette cible ;
+- les deux CLI commitées utilisent encore `atoll`, testent seulement `s<1` et
+  acceptent donc lexicalement `--s=8junk`, alors que les CTests du même commit
+  exigent son refus ;
+- `run_pipeline` refuse bien les valeurs numériques `s=1` et `s=7` avant index
+  ou génération, mais ce repli de bibliothèque ne répare ni le parsing CLI ni
+  le message de frontière annoncé.
 
 La justification continue correcte se place sur un rectangle terminal : poser
 $M=\max(r_A,r_B)$ et $g=d-r_A-r_B\geq sM$. Pour $M>0$, le rayon de décision
@@ -128,22 +134,18 @@ et des contre-fixtures de génération peuvent encore exercer une petite
 séparation par un opt-in test-only explicite, sans produire un résultat
 `run_pipeline` recevable.
 
-Le candidat du worktree va dans la bonne direction : garde globale, refus
-interne explicite, champ haut niveau borné par `MHGP5_TESTING`, propagation à la
-fixture q2 et comparaison large sans overflow. Le booléen de bypass de la
-primitive basse reste toutefois compilé dans le produit, et l'opt-in n'est pas
-propagé aux lanes batch/device. Comme ce candidat n'est ni commité ni
-attribuable à un seul auteur dans le worktree partagé, l'audit ne le reçoit
-pas. Claude doit porter et épingler son patch cohérent avant que ces points
-puissent être déclarés fermés.
+Le worktree complète les deux CLI et contient le header manquant, mais ce n'est
+pas le pin. Le booléen de bypass de la primitive basse reste en outre compilé
+dans le produit, et l'opt-in n'est pas propagé aux lanes batch/device. Claude
+doit porter un second commit cohérent, puis fournir un clean build depuis Git,
+avant que ces points puissent être déclarés fermés.
 
-La réception devra graver `s=0,1,7` en rejet, `s=8` en limite positive, le code
-2 et le texte exact aux deux CLI, ainsi que le refus API avant génération. Elle
-doit aussi rejouer le mutant q2 test-only, les mutants post-séparation et la
-frontière arithmétique large. Accepter `s=INT64_MAX` peut être sûr
-arithmétiquement tout en forçant une WSPD quadratique : toute revendication
-sous-quadratique suppose s fixé indépendamment de n, ou une borne supérieure de
-profil.
+La réception devra repartir d'un checkout de `e6ed85df` complété, graver
+`s=0,1,7` en rejet, `s=8` en limite positive, le code 2 et le texte exact aux
+deux CLI, puis rejouer l'API, le mutant q2 test-only, les mutants
+post-séparation et la frontière large. Les verts obtenus avant `e6ed85df`
+utilisaient le worktree contenant justement les fichiers omis : ils ne valident
+pas ce commit.
 
 #### Contre-relecture du nouveau `PROFIL_SEPARATION.md`
 
@@ -432,18 +434,20 @@ complexité sous-quadratique.
 
 ## Vérification indépendante
 
-Lecture statique du pin `495b234f` :
+Lecture statique du pin `e6ed85df` :
 
 ```text
-docs/PROFIL_SEPARATION.md ajouté                         OUI
-validate_run_options refuse s<8                         NON (refuse s<1)
-CLI CPU/CUDA refusent s<8                               NON (refusent s<1)
-alive_rectangles possède une garde interne sous 8       NON
+docs/PROFIL_SEPARATION.md présent                       OUI (depuis 495b234f)
+validate_run_options refuse s<8                         OUI
+alive_rectangles possède une garde interne sous 8       OUI
+CLI CPU/CUDA parsées exactement et gardées sous 8       NON
+src/core/parse.hpp suivi                                NON
+clean build de toutes les cibles modifiées              IMPOSSIBLE (header absent)
 ```
 
-Le commit reçoit donc la décision de domaine et le retrait des mesures sous 8,
-mais pas encore son application exécutable. Le candidat non commité n'est pas
-substitué à ce constat.
+Le commit reçoit donc le cœur de la garde de bibliothèque, mais pas une
+livraison reproductible du profil. Le worktree non commité n'est pas substitué
+à ce constat.
 
 Diagnostic seulement sur ce candidat, dans un build CPU propre hors arbre :
 
