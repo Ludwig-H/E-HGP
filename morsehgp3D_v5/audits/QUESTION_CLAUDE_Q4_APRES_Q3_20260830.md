@@ -559,3 +559,75 @@ pas le lift `A x B x C`, qui cherche à amortir ou éviter les scans de plusieur
 carriers, et ne borne toujours ni leur nombre ni le front WSPD. Pour le sommer
 à `h_a+h_b`, il faut en outre refaire le scan hors `A union B`; avec le scan
 actuel, la composition sûre reste un maximum ou une union d'IDs.
+
+### Réponse au diagnostic d'unité `521cb02f`, corrigé par `d723b68a`
+
+La requalification de `d723b68a` est juste et utile : la graine 4 réfute la
+conclusion mono-graine sur la canopée bornée, et Claude la retire sans chercher
+à sauver le récit initial. La série dépôt à trois graines confirme également
+que `terrain` porte une croissance reproductible des **essais D** et des morts
+de profondeur, contrairement à `uniform` et `eight_clusters`. Ce signal mérite
+donc le prochain diagnostic.
+
+Il ne ferme toutefois pas encore le « mur du cœur ». Quatre corrections rendent
+la prochaine mesure directement exploitable :
+
+1. `q4_core_site_tests` compte les visites de la boucle **fusionnée
+   cœur+corde**. Chaque site met à jour `ChordPieces` et peut provoquer un arrêt
+   cœur ou corde. Le document et les décisions doivent donc dire « scan partagé
+   cœur+corde », jusqu'à une décomposition causale des issues.
+2. La table `13,81 -> 52,79` est
+   `q4_core_site_tests / seeds[1]`, pas le coût aval total par seed. Son
+   dénominateur inclut en outre les seeds tués par cellule, qui ne commencent
+   jamais ce scan. Sur le bras dépôt, le quotient par seed réellement scanné
+   vaut `28,50 -> 53,98` entre 8k et 16k, contre `20,69 -> 30,63` avec toutes
+   les seeds. À 16k, `53,98` est presque le `52,79` du bras borné : l'hypothèse
+   « les survivants bornés sont plus durs » peut donc être une confusion de
+   dénominateur, pas encore un effet géométrique.
+3. Le « travail élémentaire total » qui donne `2,215/2,227` emploie un autre
+   numérateur, non défini. Si la table avait ce même numérateur, l'identité
+   donnerait `1,296 + log2(52,79/21,00) = 2,626`, pas `2,227`. Les chiffres
+   peuvent être cohérents, mais seulement après publication de la formule de
+   `W`, compteur par compteur et sans double comptage.
+4. `q4_completions` reste le nombre d'**essais D**, pas de complétions
+   admissibles. Les pentes dépôt à trois graines établissent donc une masse
+   algorithmique reproductible, pas à elles seules un exposant de temps ni le
+   poste causal dominant.
+
+La fermeture la plus courte est un ledger counter-only, après la fixture de
+corde positive, sur `terrain` dépôt/borné appariés, tailles 8k et 16k, graines
+3/4/5. Pour chaque seed qui entre réellement dans le scan, accumuler sans
+conserver les seeds :
+
+```text
+M_s = nombre de sites éligibles hors support
+L_s = nombre de sites effectivement visités
+fate = core | chord | faces_D
+T_scan = somme_s L_s = q4_core_site_tests
+N_scan = seeds[1] - seeds_killed_cells[2]
+seeds[1] = cells + core + chord + faces_D
+```
+
+Rapporter `sum(M)/N_scan`, `sum(L)/sum(M)`, les mêmes quotients par fate et par
+octave d'ancre, puis `essais_D/faces_D`. Cette factorisation départage vraiment
+les deux mécanismes : si `M` croît, agir sur cover/index et amortissement entre
+seeds ; si `M` reste plat mais `L/M` croît, agir sur certificats et ordre
+d'arrêt ; si les arrêts viennent surtout de la corde, ne pas architecturer un
+« cœur » isolé. Un premier shadow `h_c` devient informatif s'il compte aussi
+`sum(L)` évitée avant le scan, pas seulement les essais D évités après ce coût.
+
+Deux gardes restent nécessaires avant de qualifier la note de durable :
+
+- rejouer après fermeture de l'ordre `P>0 -> chord.dead` et de la parité device,
+  car le pin `e2ac9da2` peut encore changer les issues et longueurs de scan ;
+- versionner source de sonde, commande, stdout, formule de `W`, hashes et
+  digests des deux nuages. L'écrêtage après tirage est un bon appariement des
+  propositions, mais ses collisions peuvent encore modifier le masque accepté
+  et les `PointId` ; publier ce masque ferme l'ambiguïté.
+
+En attendant, une formulation fidèle au progrès réel serait : « sur `terrain`,
+graine 3 et dernier doublement 8k vers 16k, l'écrêtage testé n'améliore pas le
+compteur `W` défini ; la graine 4 invalide toute conclusion sur son exposant.
+La prochaine hypothèse est la longueur du scan partagé cœur+corde par seed
+effectivement scanné ». Le titre, le tableau q3/q4 et les phrases « ne change
+pas » / « pas un artefact de famille » doivent suivre cette requalification.
