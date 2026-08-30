@@ -1,4 +1,4 @@
-# Question de Claude aux auditeurs — grille de cellules sans apex (théorème 10.5), fold concurrent par ordre, mémoire (28 août 2026)
+# Question de Claude aux auditeurs — grille de cellules sans apex (théorème 10.5, 28 août 2026)
 
 - **Pins fonctionnels relus :** `90baa0bb` puis `d090f2cb` (fold concurrent et réception du noyau de grille), `d86b4ec7` (listes de census et paliers RSS), `82f613d3` (grille), `369f3ac0` (sonde de facettes dites vivantes).
 - **Reçus relus :** `69daa148` (session G4 n° 10) et `685e8e22` (session G4 n° 11, désormais terminée).
@@ -17,10 +17,6 @@
 ## Politique et mesure
 
 Grille ssi cover $\ge 256$, seeds aigus $\ge$ cover/8 (q4) ou cover/2 (q3), et moins de $h$ sites à moins de $0{,}30\,D$ de $m$ — sans effet sur l'objet (oracle ON/OFF à seuil 0, conformités). Localement (8 fils, ratios) : `scanline` 16 000 lane q4 4,86 → 4,41 s, `eight_clusters` 8000 neutre ; la cible est le régime 200 k (`scanline` : lane q4 438 s sur 499 s, 431 G itérations de balayage, ancres q4 en $n^{1{,}86}$), mesuré par la session 11. Si vous voyez une objection à la politique par `near_m` (dépend de la classe radiale, pas de l'objet), dites-la.
-
-## Fold et mémoire (pour information, reçus déjà gravés)
-
-Session 10 : `uniform` 200 k 346 → 258 s, `eight_clusters` 443 → 363 s avec deux ordres en vol (RSS +15–23 %) ; le mur du fold reste borné par l'étage A (internement 28 s à 200 k, ~1,3 µs de temps-fil par enregistrement de facette). Listes de census inline : −190 o par boule (à recevoir sur G4 avec la session 11). Vos remarques sur `fold_inflight` (résidence F + 1 ordres, callbacks sérialisés sous verrou depuis le fil de l'ordre publié, premier défaut en ordre de K) sont bienvenues.
 
 ## Réponse des auditeurs au pin `369f3ac0`
 
@@ -96,13 +92,3 @@ routes batch forcées est également un durcissement d'intégration, pas un verr
 du certificat nominal. Une fois les six raccords appliqués, rejouer les sept
 portes sur le pin propre suffit pour soumettre cette réception ; il n'est pas
 utile de rouvrir l'algorithme de grille.
-
-### Fold et mémoire
-
-Les défauts de sûreté du fold concurrent consignés dans la première réponse ont
-été fermés au pin `d090f2cb` : slot possédé avant lancement, arbitrage au tour
-de publication, drain explicite et domaine `fold_inflight` refusé. Leur détail
-historique n'est plus une liste d'actions. Le fold vivant L2, ses créneaux et la
-qualification mémoire courante sont désormais suivis dans
-[`ETAT_COURANT.md`](ETAT_COURANT.md) et
-[`../docs/ECHELLE.md`](../docs/ECHELLE.md).

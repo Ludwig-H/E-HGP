@@ -1,198 +1,48 @@
 # Audits de MorseHGP3D v5
 
-Ce dossier est le canal de travail entre Claude et les auditeurs. Il reste
-concentré par construction : un verdict courant mutable, deux questions encore
-actionnables, une réponse constructive consolidée et deux reçus de décision
-auxquels les documents canoniques renvoient.
+Ce dossier est le canal de travail compact entre Claude et les auditeurs.
 
-Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
-`backend=cpu_reference`, `profile=quantized_u16_input_only`,
+Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-Réception fraîche au pin Claude `5def28aa` : le point layer sparse est une
-bonne primitive, mais son premier counting-sort casse cinq portes d'ordre
-CPU/batch. La propagation sûre a commencé pour W3 q3 pendant la revue, mais
-reste absente des secteurs, cellules, scans, q4 et batch. La réponse consolidée
-prescrit `B_lt[t]` en ordre d'indices, un budget typé et un seul helper CPU/batch, puis
-une récolte q3 à deux échelles : facteurs sur blocs grossiers, cœur et `C` sur
-la seule masse résiduelle raffinée vers `s>=8`, avec provenance explicite.
+Décision active : le profil produit doit imposer `s>=8` sur toute la voie, q2
+comprise. Les séparations plus petites restent au plus des diagnostics de
+primitives ou des contre-fixtures de génération explicitement test-only ; elles
+ne sont pas des échelles candidates et ne peuvent publier aucun payload.
 
-## Entrées actives
+## À lire maintenant
 
-- [`ETAT_COURANT.md`](ETAT_COURANT.md) : seul verdict mutable, pin jugé,
-  réserves et ordre de fermeture.
+- [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict mutable, pin source jugé,
+  blocages et ordre de fermeture. Il prime sur les réponses historiques.
 - [`REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md`](REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md) :
-  réponse constructive sur la fibre `A x B x C` : le prédicat idéal est reçu,
-  mais la v3 reste diagnostique tant que ledger, caps et compteurs causaux ne
-  sont pas indépendants ; le chemin sûr calcule `g_AB[j]` une fois par
-  rectangle, laisse `C` masquer les patches par les médiatrices, réutilise
-  obligatoirement `h_coeur+h_a(a)+h_b(b)` avant toute expansion, puis diffère
-  le coût de `h_c(c)` jusqu'au résiduel. Si le cœur seul ne ferme pas le
-  rectangle, les tableaux par extrémité éliminent encore les couples par
-  classes de seuil sans former `A x B`; ils ne sont jamais réduits à deux
-  moyennes. Sa
-  composition est néanmoins fermée avec un stockage borné : un patch qui
-  atteint `h_q` meurt globalement ; sinon ses `h_q-1` positions au plus sont
-  affectées après coup aux strates disjointes des handles. Elles s'additionnent
-  entre strates et se composent par union, ou par `max` sans identités, avec
-  `h_{c,j}(c)` dans la strate locale ; le pire patch devient une classe de
-  seuil de carrier. Pour q4, `A x B x C` est la porte de face commune : un
-  seuil `tau4(c)` peut tuer la seed avant cœur, corde et complétions, sans
-  calculer `h_d`. Les deux
-  porteurs restants restent une paire non ordonnée dont le ledger ferme
-  `6*C(n_u,4)`. La note donne aussi la relève concrète de
-  `corner_histograms` par requêtes d'arbre saturées, puis bitsets des seuls
-  couples survivants. Les fates de boîtes restent en shadow sur les seuls
-  porteurs de supports ; l'acuité emploie la forme couplée `hmin_boxes>=0`, et
-  la lentille requalifie d'abord les extrema corrélés `OwnerD2Exact` de la v4,
-  sans en importer le code ; le terme `|w.d|`, dominé après le cover, reste une
-  identité d'oracle/mutant. Aucun fate ne retire les mêmes handles du census.
-  Le pavage P1a à 64 patches et le DFS masqué existaient déjà en v3 avec des
-  pentes rouges ; la v4 partageait déjà la traversée haute par rectangle. Le
-  delta à requalifier est
-  `rectangle WSPD -> g_AB[64] -> masques C -> t_C/P[t_C]`, puis le passage q4
-  seuil--axial, jamais le center-cover pris isolément.
-  Le seuil `t_C` condense les patches et réutilise les bitsets `B_lt[t]` sans
-  `A x B x C`; les histogrammes d'intersection ferment exactement la masse q3
-  même pour `P[t]>0`, en `O(|A|+|B|+k+h3^2)` après les visites d'arbre, ou en
-  `O(k+h3^2)` seulement si l'index position--handle a déjà été construit et
-  comptabilisé. L'extension `tau(c)` garde cette factorisation avec un tableau
-  `(tau,h_a/h_b)` et une requête locale `Phi32` qui scinde la diagonale. En q4,
-  le même `Phi32` construit d'abord `tau4(c)` sur la face, sans la contrainte de
-  coplanarité q3 ; neuf classes `s_H` retirent ensuite le produit `C x D`, puis
-  les faces ternaires résiduelles passent au terminal axial ; `t_CD` reste un
-  oracle borné. Cover
-  brut, partition de complétions, capacité de seed, source de certificats et
-  census exact restent séparés : une sous-source sonore suffit à un crédit
-  sûr pour chaque support valide,
-  tandis que le ranking/census q4 exige l'arbre entier ou une source complète
-  prouvée. Les `h_a/h_b` historiques ne minorent numériquement l'intersection
-  exacte que pour une fibre non vide ; sur une fibre vide ils restent seulement
-  des crédits vacuement sûrs par support et ne prouvent aucune non-vacuité.
-  Témoins de position, masque
-  de patches calculés et prédicat seed q4 symétrique sont explicites. La
-  réponse V73--V81 reçoit le retrait de `EMPTY` comme priorité
-  produit, réfute le faux plafond 95--99 % censuré au premier shallow et la
-  conclusion « patches nécessaires ». Un fast path global commun reste un
-  premier shadow légitime, dont l'échec vaut `UNKNOWN`. La note fixe aussi le
-  contrefactuel multicomptes du center-cover et sépare
-  existence, profondeur et action en trois axes avec non-vacuité explicite.
-  L'universel autorise un prune sans promouvoir `ALL_DEEP` tant que l'existence
-  reste inconnue. Le shadow visite tous les blocs ; une sélection préalable des
-  non vides serait circulaire. `g_AB[64]` vient avant `global_common` : le
-  masque d'intersection reste distinct des bits de compte saturés, et une
-  fixture de témoins disjoints interdit leur confusion.
-  La réponse V82--V103 retire le repli brut par intervalles sur `Pi`, reproduit
-  son inertie au pin propre `650b3cff`, puis ramène la proposition de Claude au
-  noyau centre/patch de `g_AB` : minimum concave aux sommets des patches,
-  masque conservatif et front d'arbre réutilisé. Elle interdit le plan d'une
-  ancre représentative, compose `max(core,g_AB[j])+min(h_a)+min(h_b)` et refuse
-  de lire les runs 16 k/32 k biaisés comme une loi d'échelle. Le constructeur
-  v5 absent y est redérivé à l'échelle 32 : expansions par axe distinctes q3/q4,
-  64 sur-patches fermés et arrondis signés sans trou. Elle rejette le faux
-  ratio d'aire V84 et donne la seconde direction exacte demandée par Claude :
-  un masque de coplanarité multi-affine, à mesurer avant split ou changement
-  de séparation. Elle reçoit aussi le lemme directionnel q3 à ancre fixe, mais
-  réfute les bins `atan2` uniformes de V90 : le candidat sectoriel doit tester
-  les vrais cônes entiers, rester handle-local et publier le surmasque de boîte
-  contre le masque exact. Les chiffres V92 ne réparent pas ce défaut, car les
-  deux côtés de leur inclusion emploient la même partition erronée ; la
-  frontière fermée est reçue, pas leurs moyennes. Le source V97 répare ensuite
-  les cônes en entier ; le pin `73b00f3f` l'enregistre comme probe CMake avec
-  ses contre-fixtures et confirme un fort potentiel handle-local sur terrain
-  et scanline ; l'union vaut toutefois huit bits pour chaque ancre rejouée, et
-  même l'exclusion oracle des handles vides ne la resserre presque jamais. La
-  seule intégration utile conserve donc la provenance, filtre l'émission du
-  handle et garde ses points comme témoins et census. Cette ablation conserve
-  `A x B` et ne s'étend pas à q4. La sonde de gain V98 identifie correctement
-  le rescan q3 comme seul coût évitable, mais son `36,1 %` n'est pas reçu : son
-  masque oublie l'orientation du frame et sa baseline ignore les prunes
-  `core/histogrammes`, `W3` et grille. Le prochain shadow réutilise le helper
-  reçu et rejoue ces étages avant de compter les tests de profondeur. La note
-  reçoit enfin le retrait du shallow comme priorité après mesure du vrai
-  pipeline à 11--13 tests de sites par seed, sans convertir cette moyenne en
-  borne `O(h3)`. Elle donne le raccord sans surcoût mémoire : `handle_id` dans
-  le padding de `CoverPoint`, état sectoriel réutilisé par la route de prétest,
-  fate paresseux et skip identique dans les boucles CPU et batched. V104 retire
-  ensuite le chiffre sectoriel fautif. Les réponses V105--V109 ferment son
-  activation inconditionnelle, demandent le marginal après `tau` et remplacent
-  la fausse pré-porte de rayon par deux marges linéaires exactes autour du
-  secteur central. La réception V110--V116 relit le probe q3 committé à
-  `bf2192f1` : son oracle ponctuel et ses deux CTests reçoivent le principe de
-  `g_AB`, mais ses tableaux à une graine restent sans sorties brutes et ne
-  mesurent pas le marginal après les portes produit. Le tableau non reçu
-  `K=8>K=4` ne motive plus un raffinement dyadique rescannant le cover : V125
-  diagnostique justement le surcoût des niveaux internes. `MIXED` reste le
-  verdict d'une relation nœud-témoin--patch dans le DFS. La version ponctuelle
-  demeure un oracle borné. Un bloc
-  dense est une classe `RESIDUAL_HEAVY`, jamais un fate de prune. Le
-  contre-audit q4 confirme la porte de face avant `D`, avec
-  `PRUNE_NO_EMISSION`, `rect_core4` compté une seule fois et `Phi32/h_c`
-  réservé au résiduel. La contre-réception V117--V131 reçoit seulement la
-  campagne produit seed 3 au pin source `dc01fdf0`; elle corrige la nomenclature
-  des masses et refuse les lois à une graine, le `K=16` sans source, le plafond
-  `42 %` et la généralisation de la faible moyenne d'ancres par rectangle.
-  Elle répond surtout à V122/V131 par le chemin déjà présent : `CellGrid`
-  construit un cover entier 2D du disque de chaque ancre et compte toutes ses
-  cellules en une seule passe structurée du cover. V132 ajoute un lemme hors
-  axe sûr et utile au probe rectangle, mais son rayon entier et ses commentaires
-  d'échelle demandent encore une finition. V139 corrige honnêtement son unité
-  de coût : le verdict reçu retire les scans plats indépendants par patch de la
-  priorité produit, sans prétendre réfuter toute résolution ni un comptage
-  partagé. V140 reçoit ensuite le prédicat de mort **par seed** et son placement
-  hôte avant le scan/lot, mais pas son ratio `0,295` : le probe crédite des
-  seeds qui meurent déjà à la porte histogramme, emploie l'ordre d'un tri exact
-  avec le coût d'un autre counting sort et publie des taux conditionnels aux
-  rectangles pavés. Le shadow constructif demande `g_AB[j]` paresseusement au
-  premier seed résiduel du bit, compose avec le vrai `ha[ia]+hb[ib]` de l'ancre
-  et compare CPU/batch hôte sans `block_mask`. Il tente d'abord de récupérer les
-  huit IDs au plus du cœur : leur union avec le `W3` résiduel, puis avec les IDs
-  `g_AB[j]`, exploite enfin sans double compte les témoins centraux, `h_a` et
-  `h_b`; `h_c` reste stratifié et différé. La correction
-  `U_W=max(U_A,U_B)` est intégrée et V138 reçoit un majorant minimax lattice
-  fondé sur les AABB, sans octet d'index supplémentaire. `W3` teste déjà le
-  fuseau exact et ne peut pas être renforcé par le même rayon ; l'union sparse
-  renforce sa **composition**, pas sa géométrie. V141 ne change pas ce verdict :
-  ses nouveaux oracles, `K=32`, chiffres obliques et mesures de nœuds ne sont
-  pas suivis, et sa projection `0,43` réemploie le proxy V140 déjà biaisé. V142
-  apporte 60 runs au même binaire et réplique seulement la pente locale rouge
-  des seeds `terrain`; ses médianes synthétiques, son ratio entre étages et sa
-  causalité WSPD sont corrigés. V143 retire alors le réglage de séparation,
-  mais `seeds[0]` n'est pas le total intrinsèque des triplets : il vient après
-  les portes d'ancre. Son patch `K=2` est déjà le principe de `CellGrid`. Le
-  premier shadow utile compare `OFF/AUTO/EARLY_G2/EARLY_G8` en construisant les
-  bras précoces sans préénumérer `nacute`; sur une grille mixte, les handles `C`
-  doivent ensuite être classés par nœud pour éviter la boucle feuille par
-  feuille. L'architecture finale recommandée garde la WSPD `A x B`, traite les
-  fibres `C` avec crédits d'identités factorisés et n'énumère que `PENDING`,
-  avec quotient explicite des plateaux. Elle est output-sensitive et viable à
-  éprouver, pas prouvée sous-quadratique dans le pire cas. Les deux ablations
-  immédiates après attribution du mur q3 sont donc la cascade `CellGrid` et le
-  shadow patch/union sparse, avec compteurs complets et coûts réellement
-  évités. Aucun résultat GPU n'est revendiqué.
-  `Lca3Forest` reste une ablation de ledger, pas une route produit.
-- [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : six raccords encore ouverts pour la grille de cellules.
-- [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : décisions et dents restantes de la lane device.
-- [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.
-- [`REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`](REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md) : reçu des arbitrages V1–V4.
+  échange consolidé. Sa fin contient la contre-relecture V151–V157 et le
+  verdict sur la sémantique Gamma/Gabriel.
+- [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) :
+  raccords encore ouverts pour la grille de cellules.
+- [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) :
+  décisions encore ouvertes pour la lane device.
 
-Une question reste au tip seulement tant que sa décision ou sa preuve n'a pas
-été migrée vers `docs/`, `tests/` ou `receipts/`. Elle est ensuite supprimée ;
-l'historique Git conserve l'échange. Les sorties brutes et les mesures reçues
-ne sont jamais recopiées ici.
+## Reçus de décision conservés
+
+- [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md)
+- [`REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`](REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md)
+
+Les questions V146–V157 déjà traitées sont consolidées puis supprimées ; Git
+en conserve l'historique. Les sorties brutes restent dans `receipts/`, jamais
+recopiées ici.
 
 ## Fraîcheur et validation
 
-`ETAT_COURANT.md` nomme le commit fonctionnel effectivement jugé et distingue
-ce pin d'un éventuel worktree concurrent. Tout commit fonctionnel ultérieur
-rend le verdict périmé jusqu'à relecture. Le commit qui publie l'audit est
-naturellement postérieur au pin qu'il juge.
+`ETAT_COURANT.md` nomme séparément le dernier commit Claude et le dernier pin
+fonctionnel effectivement jugé. Un commit fonctionnel ultérieur périme le
+verdict, mais un commit documentaire de question ne transforme pas le code.
 
-`python tools/check_docs.py` exclut volontairement une partie des écrits
-d'audit. Avant publication, passer chaque Markdown de ce dossier à
-`tools.check_docs.validate`, puis exécuter `git diff --check`. Un vert
-documentaire ne prouve ni la fraîcheur sémantique, ni l'exactitude du code.
+Avant publication, passer chaque Markdown du dossier à
+`tools.check_docs.validate`, puis exécuter `python tools/check_docs.py` et
+`git diff --check`. Un vert documentaire ne prouve ni exactitude, ni
+performance, ni fraîcheur sémantique.
 
-Un audit aide à fermer une couture ; il ne promeut jamais le registre et ne
-remplace ni un oracle indépendant, ni un reçu reproductible.
+Un audit doit fermer une couture ou répondre à une question. Il ne promeut
+jamais le registre et ne remplace ni oracle indépendant, ni reçu reproductible.

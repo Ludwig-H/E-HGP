@@ -108,9 +108,10 @@ Ils ne bloquent pas les mesures CPU ni les portes hôte des wires.
 - Pour toute compaction, comparer les tableaux intermédiaires sur petits lots :
   ordre des seeds, indices de lentille, offsets, `skip_a/skip_b`, candidats et
   compteurs. Les portes CPU tout hôte, mixtes et nommées surdimensionnées sont
-  présentes dans le worktree. Ajouter au dernier cas un plancher explicite
-  `anchors_oversized > 0` : aujourd'hui la fixture emprunte bien la route, mais
-  `expect-route=device` pourrait rester verte si elle devenait vacante.
+  présentes. Au pin `495b234f`, le dernier cas impose désormais
+  `--min-oversized=1` : la dent de non-vacuité est fermée statiquement, à
+  conserver dans le prochain rejeu device plutôt qu'à redemander comme
+  correctif.
 
 ## CPU multi-worker
 

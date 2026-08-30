@@ -3439,6 +3439,14 @@ encore environ 5,7 fois plus d'ancres transmises à l'aval. De plus,
 observé par Claude est donc une réfutation actuelle, pas une dépense déjà
 expliquée par la seule boucle interne.
 
+Correction impérative : dans la voie produit, `s=2` est exclu indépendamment
+de ces mesures. Le contrat architectural de la généralisation entière commence
+à `s>=8`; V144 n'apporte aucune preuve permettant de l'abaisser, et ses propres
+diagnostics de coût et de résiduel vont dans le sens contraire. `s=2` peut
+rester un contre-test de correction, mais aucun résultat V144 ne peut le
+promouvoir comme échelle de récolte, de raffinement ou de décision
+architecturale.
+
 ### Revue du brouillon non commité
 
 Dans le premier état relu, au SHA-256 `generate.hpp`
@@ -3521,13 +3529,14 @@ porter ce budget, ou séparer stablement les sites hors domaine des autres ;
 laisser seulement le `h3` global au device recréerait une divergence de
 sémantique.
 
-### Réponse V145 : plusieurs récoltes sont sûres, mais la bonne cible est à deux échelles dans une lane
+### Réponse V145 corrigée : toute récolte produit commence à `s=8`
 
 Une descente partagée peut porter un masque de lanes et récolter q2, q3 et q4 à
 des séparations différentes sans casser la mathématique, sous cinq conditions :
 
-1. chaque lane possède son propre prédicat entier `separated(s_q)` et son propre
-   ledger `base_q=emitted_q+killed_q` ;
+1. chaque lane possède son propre prédicat entier `separated(s_q)`, avec
+   `s_q>=8` sur la voie produit, et son propre ledger
+   `base_q=emitted_q+killed_q` ;
 2. il s'agit du premier rectangle qui satisfait le prédicat de la lane, pas
    d'une hauteur fixe du radix ;
 3. quand une lane émet ou tue son rectangle, son bit est retiré ; les enfants
@@ -3538,13 +3547,18 @@ des séparations différentes sans casser la mathématique, sous cinq conditions
    partagé implicitement.
 
 Ce scheduler est donc acceptable, mais trois valeurs globales `s_q` ne
-résolvent pas la tension découverte **à l'intérieur de q3**. La voie à tester
-est une récolte à deux échelles :
+résolvent pas la tension découverte **à l'intérieur de q3**. La référence
+produit à tester d'abord est une récolte canonique unique à `s=8`, avec cœur et
+facteurs saturés dans le même rectangle. Une extension à deux échelles n'est
+admissible qu'entièrement dans le domaine sûr : `s_factor=8`, puis, seulement
+sur la masse survivante, `s_core>s_factor` — d'abord `(8,10)`, éventuellement
+`(8,12)` en shadow si le resserrement du cœur et des patches rembourse la
+descente supplémentaire. Dans ce cas :
 
-- à un seuil grossier `s_factor`, calculer les facteurs saturés et éliminer la
-  masse de paires par les classes `h_a+h_b` ;
-- continuer seulement la masse survivante jusqu'à un seuil fin `s_core>=8`, où
-  le citron, les patches de centres et les handles `C` deviennent serrés ;
+- au terminal `s_factor=8`, calculer les facteurs saturés et éliminer la masse
+  de paires par les classes `h_a+h_b` ;
+- continuer seulement la masse survivante jusqu'au terminal `s_core>8`, où le
+  citron, les patches de centres et les handles `C` deviennent plus serrés ;
 - porter les valeurs par endpoint jusqu'aux enfants, mais conserver leur
   provenance. La variante scalaire simple fixe les domaines au rectangle
   grossier et oblige toute requête centrale fine à exclure **tout** le
@@ -3554,11 +3568,46 @@ est une récolte à deux échelles :
 - fermer le ledger sur la masse résiduelle masquée, jamais sur le produit brut
   des enfants qui contient aussi des couples déjà tués.
 
-Cette architecture conserve exactement le grand `s` voulu pour le citron tout
-en récoltant `h_a/h_b` sur des blocs plus gros. Elle est plus prometteuse qu'un
-passage global à `s=2`, mais elle ne devient implémentable qu'après la porte
-sparse canonique, les requêtes facteurs non quadratiques et un ledger masqué en
-shadow.
+Le ledger exact peut être porté sans matérialiser `A x B`. Pour chaque
+rectangle parent `R0=(A0,B0)` terminal à `s=8`, fixer une fois pour toutes
+`h0=h_coeur`, `alpha(a)=h_a(a)`, `beta(b)=h_b(b)` et les domaines complets
+`A0,B0`. Pour tout descendant `Q=(A,B)`, définir :
+
+```text
+M_Q(t) = nombre de (a,b) dans A x B tels que alpha(a)+beta(b) < t
+```
+
+Avec `t0=max(0,h3-h0)`, la mort initiale composée par cœur et facteurs vaut
+`|A0||B0|-M_R0(t0)`. Un cœur fin compte exclusivement hors de **tout**
+`A0 union B0`, pose `k=max(h0,k_frais)` — ou l'union exacte des IDs — puis
+`t=max(0,h3-k)`. Sa nouvelle masse morte dans un état entrant de seuil `t_in`
+vaut `M_Q(t_in)-M_Q(t)`. Chaque split doit vérifier
+`M_Q(t)=M_Q1(t)+M_Q2(t)`; un enfant de masse masquée nulle n'est pas une
+nouvelle mort. Des histogrammes de plage calculent les masses et les bitsets
+cumulatifs `A_lt[t],B_lt[t]` énumèrent le seul résiduel en ordre canonique.
+
+L'exclusion parent fixe s'applique à **tout** certificat central ajouté à ces
+scores : cœur fin, `g_AB`, W3 résiduel, secteurs et cellules. Si un consommateur
+ne peut pas l'imposer, le scalaire est insuffisant et il doit transporter les
+IDs pour former l'union. De même, un handle `C` qui recouvre A ou B ne permet
+pas de multiplier naïvement `M_Q(t)` par `|C|` : les diagonales `c=a` et `c=b`
+doivent être retirées, et le ledger des rôles q3 reste en `u128`.
+
+Cette architecture conserve le plancher produit `s>=8`, qui garantit la marge
+forte uniforme commune sans être nécessaire rectangle par rectangle.
+`s=2` n'entre dans aucune ablation de promotion. Le raffinement `(8,s_core)` ne
+devient implémentable qu'après la porte sparse canonique, les requêtes facteurs
+non quadratiques et un ledger masqué en shadow ; le `postsep_refine` actuel ne
+suffit pas s'il annule la descente dès qu'un enfant n'est pas déjà séparé au
+nouveau `s_core`.
+
+Les quatre portes minimales sont : `FactorTape` contre double boucle pour tous
+les seuils et sous-ranges, reprise `(8,10)/(8,12)` contre la WSPD directe au
+même `s_core`, exclusion fixe détectant un point de `A0` sorti du fils, puis
+oracle `n<=14` fermant masse de paires, rôles et sorties triées. Cette route
+évite `A x B` dense, mais ne constitue pas encore une preuve sous-quadratique :
+`corner_histograms`, les visites de certificats, le résiduel ou la sortie
+peuvent encore être quadratiques.
 
 ### Fixture P0 de la cascade
 
@@ -3566,20 +3615,668 @@ Une seule famille de onze positions peut graver les trois fautes prioritaires.
 Prendre `A={(100,1000,1000),(102,1000,1000),(104,1000,1000)}` et
 `B={(10100,1000,1000),(10102,1000,1000),(10104,1000,1000)}`, quatre témoins
 centraux `(5000+2k,1000,1000)` pour `0<=k<4`, puis le carrier
-`c=(5100,7000,1000)`. Pour l'ancre extrême, le compte attendu est
-`h_coeur=4`, `h_a=2`, `h_b=2`, profondeur exacte 8 : la BallKey doit survivre.
+`c=(5100,7000,1000)`. Les boîtes A et B sont séparées à `s=8`. Pour
+l'ancre extrême, le compte attendu est `h_coeur=4`, `h_a=2`, `h_b=2`,
+profondeur exacte 8 : la BallKey doit survivre.
 
 - Ajouter `(5008,1000,1000)` donne `h_coeur=5` et tue exactement cette ancre à
-  la couche point, avant tout cover.
+  la couche point, avant son cover par ancre.
 - Repartir de la base et ajouter `(4900,3883,1000)` conserve `h_coeur=4`, mais
   ajoute un témoin `W3` propre à l'ancre : elle passe la couche point puis meurt
-  au cinquième témoin central, avec `need_central=5`.
+  au cinquième témoin `W3` hors `A union B`, avec `need_central=5`.
 - Sur la base, les quatre mêmes IDs centraux peuvent alimenter le cœur et une
-  cellule ou un patch. Toute somme nue `core+g` tue à tort la boule de
-  profondeur 8 ; l'union ou `max` la conserve.
+  cellule ou un patch. Le compte CellGrid complet vaut déjà 8, car il contient
+  les quatre crédits d'extrémité et les quatre témoins du cœur ; le sommer à
+  `h_a+h_b` sur-tue. Si `g_outAB` exclut explicitement tout `A union B`, il vaut
+  4 et la borne sûre est `h_a+h_b+max(h_coeur,g_outAB)=8`. Sans cette
+  provenance, seule l'union d'IDs est probante.
 
 Cette fixture complète `q3_skinny_center_gate`, qui ne prouve que l'indexation
 de `h_a`, et les portes de cellules existantes, qui ne prouvent pas la
 provenance croisée. Les premiers mutants sont `point-layer-ignore-core`,
-`residual-w3-ignore-ha-hb` et `credit-sum-core-gab` ; les mutants de frontière
-des cellules existent déjà et ne doivent pas être dupliqués.
+`residual-w3-ignore-ha-hb` et `credit-sum-core-gab` ; leurs oracles doivent
+juger le fate, l'étape et les visites, pas seulement le digest final, puisque le
+scan W3 complet peut tuer la même boule plus tard. Les mutants de frontière des
+cellules existent déjà et ne doivent pas être dupliqués.
+
+### Réponse V146 : oui à l'union, comme borne de sortie anticipée
+
+Oui, la combinaison intégrée au pin `351faccc` est sûre pour le scan W3 q3 :
+conserver le compte historique complet et, en parallèle, compter seulement
+hors de A et B avant d'ajouter `h_a+h_b`. La forme hors A/B seule ne doit pas
+remplacer le compte complet. Elle reste toutefois utile comme seconde borne de
+sortie anticipée ; c'est précisément sa fonction correcte.
+
+La nuance de vocabulaire est importante. À parcours exhaustif,
+`outside+h_a+h_b<=total`, puisque les témoins certifiés par les facteurs sont
+déjà des témoins W3 du compte complet. L'union a donc **exactement le même
+verdict final** que l'ancien scan ; elle domine son instant d'arrêt, pas son
+ensemble de morts. Le reçu causal doit mesurer `w3_sites_visited` et
+`w3_early_by_endpoint`, non annoncer de nouveaux kills ou s'appuyer seulement
+sur un digest identique. L'exclusion des deux plages entières demeure une
+condition de sûreté de cette branche, et devient l'exclusion du parent fixe
+`A0 union B0` si les scores sont hérités dans un raffinement `(8,s_core)`.
+
+Le plancher utilisateur `s>=8` est confirmé, mais sa justification dans V146 et
+le commentaire source doit être corrigée. Pour un rectangle terminal, poser
+`M=max(r_A,r_B)` et `g=d-r_A-r_B>=sM`. Dans le modèle continu et pour `M>0`,
+le minorant reçu est `R_dec,q >= (kappa_q*s-1)M`. Les seuils annoncés `4*sqrt(3)` en q3 et
+`2/sin(15 deg)` en q4 garantissent la marge forte `R_dec,q>M`; le pire seuil
+est q4, environ `7,727`, d'où le plus petit entier produit `s=8`. Ils ne sont
+pas les seuils de non-vacuité : la positivité uniforme commence déjà à
+`s>1/kappa_q`, et des rectangles particuliers gardent un citron non vide en
+dessous. À `s=2`, en revanche, aucun cœur positif uniforme n'est certifié. Il
+faut donc écrire « marge uniforme forte perdue sous 8 », jamais « tous les
+citrons sont vides sous 8 ». Le cas `M=0` se traite séparément. Le passage de
+ce rayon continu au `radius4` entier dirigé n'est pas automatique et requiert
+une porte propre ; il ne change pas la décision normative de profil.
+
+Décision utilisateur du 30 août : cette borne est normative pour le profil v5.
+Au pin commité `495b234f`, elle n'est toutefois pas encore exécutable :
+`validate_run_options` et les deux CLI acceptent toujours `s>=1`. Le candidat
+non commité du worktree ajoute le refus exact de `s<8` et les portes
+`s=0,1,7/8`, mais il doit être repris et épinglé par Claude avant réception. La
+primitive WSPD et ses contre-tests peuvent conserver un domaine plus large ;
+une fois la garde livrée, aucune exécution `run_pipeline` sous 8 ne devra publier
+de payload.
+
+La couche par ligne restaure bien l'ordre historique `ua,ub` et retire la faute
+du counting-sort. Elle ne ferme toutefois que les lignes `h_a>=need`; le seuil
+B des autres lignes est encore parcouru paire par paire. `|A||B| environ 2` est
+une mesure locale, pas un invariant de complexité : la relève non quadratique
+reste le `FactorTape` masqué décrit ci-dessus. Le changement q2 est hors du
+jalon demandé et doit être retiré ou isolé dans une réception séparée.
+
+Enfin, les nouveaux champs `hist_lignes`, `hist_seuil` et `hist_survivants` ne
+sont alimentés que par la lane intégrée. Les builders q3/q4 batch et device
+laissent ces trois champs à zéro, et leurs portes ne les comparent pas : le
+ledger imprimé diverge selon le backend sans être détecté. Ajouter l'identité
+`anchors=hist_lignes+hist_seuil+hist_survivants` aux deux portes batch, fermer
+également la branche défensive `need==0`, puis graver P0 avant toute mesure de
+mur. Les six comparaisons et digests annoncés par V146 restent documentaires
+tant que commandes, sorties brutes et hashes des deux binaires ne sont pas
+épinglés.
+
+### Réponse V147--V150 : conserver les trois crédits, factoriser les deux bornes unilatérales
+
+La correction de dénominateur V149 est juste mais sa conclusion est trop
+forte. Un `AliveRect` vérifie déjà `h_coeur<h3`; il est donc tautologique que
+toute mort **à la porte histogramme conditionnée par cette survie** emploie un
+crédit d'extrémité positif. Cela ne signifie ni que `h_a` et `h_b` sont chacun
+non nuls, ni que toutes les morts d'ancre produit exigent les facteurs, ni que
+le cœur ne tue rien : les rectangles `h_coeur>=h3` ont été retirés en amont et
+W3, secteurs et cellules tuent encore après la porte. Le ledger causal correct
+porte les classes disjointes `core_rect_dead`, `endpoint_only`,
+`core_plus_endpoint` et `hist_survivor`, toutes rapportées à la masse de paires
+avant censure. Les tableaux V147 restent des hypothèses de mesure : aucun probe,
+commande, stdout ou hash ne les reproduit depuis le dépôt.
+
+Pour V147, « strictement hors des boîtes » ne sépare pas un facteur étendu du
+cœur : le cœur actuel cherche précisément parmi les IDs hors A et B. Une somme
+de trois domaines élargis exige donc soit les IDs pondérés du cœur — il en porte
+au plus `h3-1` sur un rectangle vivant —, soit une partition fixe en territoires
+A, B et central, consommée aussi par le calcul du cœur. Si l'on choisit deux
+boules de territoire, le rayon commun maximal factorisable est `rho=delta/2`,
+où `delta` minore toutes les distances A--B du rectangle, avec le test entier
+**strict** `4*dist2<delta2`. Le milieu d'une paire minimisante reste alors sur
+les deux frontières et n'est jamais double compté. `rho=|a-b|/2` par ancre est
+sûr, mais détruit la factorisation ; un test non strict exige un rayon plus
+petit ou une ownership canonique. Cette voie reste une ablation, pas la priorité
+après V150.
+
+La borne V150 est sûre sans modifier le cœur, mais son `max` est conservateur,
+pas « exact ». La forme cacheable la plus propre évite même de matérialiser
+`h_a_ext`. Définir, avec saturation au seuil de la lane :
+
+```text
+H_A(a,B) = nombre de sites z universels pour {a} x Box(B), dans tout P
+H_B(b,A) = nombre de sites z universels pour Box(A) x {b}, dans tout P
+L(a,b) = max(core + h_a(a) + h_b(b), H_A(a,B) + h_b(b), H_B(b,A) + h_a(a))
+```
+
+`H_A` ne compte aucun site de B : pour `z` dans `Box(B)`, le choix `b'=z`
+interdit que z soit témoin strict de l'ancre `(a,z)`. Il contient en revanche
+les témoins historiques de `h_a` et les témoins extérieurs unilatéraux ; le
+second terme est donc disjoint de `h_b`. Le raisonnement symétrique reçoit le
+troisième terme. Ainsi `L` minore la vraie profondeur q3 — et q4 avec le
+prédicat de sa lane — sans aucune somme entre ensembles extérieurs recouvrants.
+
+Cette écriture donne directement l'énumérateur groupé manquant. Pour un `a`,
+poser `T1=h-max(core+h_a(a),H_A(a,B))` et `T2=h-h_a(a)`, saturés à zéro. Un `b`
+survit si et seulement si :
+
+```text
+h_b(b) < T1  ET  H_B(b,A) < T2
+```
+
+Préconstruire les bitsets cumulatifs `B_hb_lt[T1]` et `B_HB_lt[T2]`, prendre
+leur `AND`, puis parcourir les mots et bits en ordre croissant. Cela conserve
+l'ABI `ub`, compte la masse par `popcount` et ne visite que les couples
+survivants. La fixture algébrique minimale est `h=9`, `core=4`, `h_a=2`,
+`H_A=5`, puis trois B `(h_b,H_B)=(2,4),(3,4),(0,7)` : seul le premier survit.
+Les mutants `OR`, seuil `<=` et parcours par classe doivent échouer.
+
+Il n'existe pas de niveau ancêtre optimal par théorème. La clé exacte cacheable
+est `(ua,B_ref,lane)` — et symétriquement `(ub,A_ref,lane)` —, non la définition
+V150 `hors A union B`, qui dépend encore de A. Un certificat sur `Box(B_parent)`
+s'hérite vers ses descendants, mais découvrir le complément demande soit une
+nouvelle requête, soit la petite liste d'IDs saturée ; universaliser aussi sur A
+retombe exactement sur le cœur. Commencer au terminal `s=8`, compter
+`one_side_corner_evals`, IDs visités, réutilisations, paires masquées, covers et
+sites W3 évités, puis seulement tester un cache d'ancêtre en shadow. Le calcul
+peut être perdant quand B est minuscule : aucune promotion sans mur et HWM
+appariés.
+
+Cette mécanique est output-sensitive, pas une preuve sous-quadratique. Si tous
+les couples survivent, le résiduel ou la sortie peuvent rester quadratiques ;
+`corner_histograms` l'est encore. Elle fournit néanmoins la bonne architecture
+pour éviter de matérialiser les couples **déjà certifiés morts** à `s>=8`, en q3
+puis en q4, sans renoncer à `h_coeur`, `h_a` ou `h_b`.
+
+Sur le pin source `351faccc`, le build Release et la campagne suivante passent
+`53/53` en `354,51 s`, avec empreinte source/tests stable :
+
+```text
+ctest --test-dir build/v5 --output-on-failure -R '^mhgp5_(q3_lane_batched.*|q4_lane_batched.*|anchor.*|sector.*|cell_grid.*)$'
+```
+
+Cela reçoit la réparation d'ordre, mais pas V150 : aucune de ces portes ne
+compare encore les trois nouveaux compteurs batch ni n'exerce directement
+`EndpointCredit`.
+
+### Réponse V151--V153 : requête unilatérale exacte avant tout catalogue directionnel
+
+La piste directionnelle est admissible comme **minorant**, mais les prémisses
+de V151 ne justifient pas un pré-calcul produit. La colonne intitulée `|B|` est
+de nouveau la moyenne `|A||B|` : les valeurs `1,921626`, `4,226513` et
+`1,602351` se reproduisent exactement comme `sum(|A||B|)/rectangles`, pas comme
+une marge de B. De plus, les 65--189 incidences d'un point portent des A et des
+`Box(B)` différentes ; `corner_histograms` recalcule donc des requêtes
+distinctes, pas « le même crédit ». Le rapport pertinent est `requests` contre
+`unique(endpoint,opposite_node,lane)`, puis contre les clés direction--rayon
+réellement réutilisées. Les pourcentages angulaires ne sont accompagnés d'aucun
+algorithme, probe ou stdout reproductible.
+
+La reconstruction indépendante des trois cohortes rend l'erreur plus nette.
+Les clés exactes `(endpoint,opposite_node)` observées sont toutes uniques :
+`130969/130969` sur `terrain`, `377199/377199` sur `eight_clusters` et
+`361120/361120` sur `uniform`, soit zéro réemploi entre rectangles. Le seul
+amortissement exact immédiat est **dans** un rectangle, quand un même `H_A`
+sert plusieurs `b` : la moyenne pondérée du nombre de partenaires vaut seulement
+`1,426`, `2,533` et `1,286` ; le côté symétrique donne `1,420`, `2,556` et
+`1,284`. Les `65--189` incidences ne sont donc pas un budget de cache exact.
+Une agrégation direction--rayon pourrait fusionner des requêtes différentes,
+mais elle doit d'abord publier ses collisions sûres et le crédit conservé.
+
+La géométrie q3 exacte couple angle **et** rayon. Pour `d=b-a`, `z=a+r*u`,
+`D=|d|` et l'angle `theta` entre u et d, le fuseau impose :
+
+```text
+theta < 60 deg  ET  r/D < cos(theta) - sin(theta)/sqrt(3)
+```
+
+La portée tend vers D sur l'axe et vers zéro à 60 degrés ; elle n'est pas un
+rayon constant. En q4, `sqrt(3)` devient `sqrt(2)` et l'angle maximal vaut
+environ `54,736 deg`. Pour une `Box(B)` non ponctuelle, la borne est le minimum
+sur toutes ses directions et portées — le prédicat exact aux huit coins le fait
+déjà. Deux boîtes de même direction centrale et même portée peuvent donner des
+crédits différents si leur ouverture diffère. Toute autorité produit reste donc
+la forme entière `H>0` et `3*H^2>Xi` ou `2*H^2>Xi`; les angles ne servent qu'au
+routage.
+
+Avant d'inventer un index, V150 possède déjà une implémentation de référence :
+
+```text
+H_A^cert(a,B) = count_universal_witnesses(ix, leaf(a), B, cap=h, lane, with_corners=true)
+H_B^cert(b,A) = count_universal_witnesses(ix, leaf(b), A, cap=h, lane, with_corners=true)
+```
+
+Avec un seul facteur réduit à une feuille, cette primitive compte
+déterministement, à saturation, un **sous-ensemble certifié** des témoins
+unilatéraux : crédits sûrs de nœuds par boule-cœur, feuilles restantes par
+évaluation entière exacte des coins, exclusion de l'endpoint et du facteur
+opposé. Le test aux coins est suffisant, pas exact relativement aux seuls
+points réels de B ou A. Elle gère déjà q3/q4 et l'index spatial, sans nouvelle
+structure globale. Elle doit alimenter en P0 la borne
+`max(core+h_a+h_b,H_A^cert+h_b,H_B^cert+h_a)` et les deux bitsets de V150.
+Graver en plus `H_A^cert>=min(h,core+h_a)` et son symétrique : cela confirme
+explicitement que le cœur est conservé, même si le terme unilatéral le subsume
+au seuil.
+
+L'ordre paresseux évite de payer les deux côtés sans nécessité. Après la porte
+historique, calculer `H_A^cert` seulement pour chaque ligne A encore non vide, puis
+former :
+
+```text
+M_a = B_hb_lt[h - max(core + h_a(a), H_A^cert(a,B))]
+```
+
+Accumuler l'union des colonnes présentes dans au moins un `M_a`, calculer
+`H_B^cert` uniquement pour ces colonnes, puis émettre :
+
+```text
+M_a AND B_HBcert_lt[h - h_a(a)]
+```
+
+Le ledger se ferme en classes disjointes `hist_dead`, `HA_dead`, `HB_dead` et
+`survivors`. Un `H_B^cert` d'une colonne déjà fermée n'est jamais demandé. Les
+invariants attendus font subsumer `core+h_a` et `core+h_b` par les certificats
+unilatéraux respectifs ; conserver le `max` dans l'API reste néanmoins le choix
+fail-open tant que cette domination n'est pas reçue par fixture.
+
+Un tableau de 32 demi-octets par point ne stocke que 480 Mo de **comptes sans
+rayon** et ne peut répondre à V152. Seize coquilles portent déjà ce plancher à
+`7,68 Go`, trente-deux à `15,36 Go`, avant répertoire et métadonnées ; conserver
+les neuf premières portées sur 17 bits approche `18,36 Go`. Plus grave, remplir
+les histogrammes de toutes les origines est naïvement quadratique : une mémoire
+`O(n*k)` ne prouve pas un temps de construction identique. Enfin, même un
+covering sphérique idéal à 32 cellules a un rayon angulaire d'au moins
+`20,36 deg` — avant l'ouverture de B —, et non 10--15 degrés. Le « 45--50 degrés
+utiles » n'est pas reçu.
+
+Si la requête exacte P0 montre un bénéfice, l'étape suivante est un cache
+**borné par lot canonique de rectangles `s=8`** : produire les clés
+`(endpoint,opposite_node,lane)`, trier/uniquer, calculer en parallèle, consommer
+puis libérer. Un cache opportuniste par ouvrier rend hits, évictions et HWM
+dépendants du scheduling ; un dictionnaire global pourrait atteindre des
+milliards de clés à 30 M. L'héritage d'un certificat d'ancêtre reste un minorant
+sûr pour un descendant, mais il n'existe aucun niveau optimal sans mesure.
+
+Une table direction--rayon ne vient qu'ensuite, comme index de routage. Ses
+cellules doivent former une partition sans double compte ; seules les cellules
+angulaires **et radiales entièrement incluses** dans le fuseau de tous les coins
+de B peuvent créditer. Une coquille partielle est ignorée ou ses quelques IDs
+sont revérifiés par `universal_over_corners`. Fixer la plus petite portée de
+tous les rectangles d'un point est sûr mais probablement vide ; stocker des
+préfixes radiaux arrondis vers l'intérieur est la seule option exploitable. q3
+et q4 gardent des seuils distincts.
+
+V153 ne reçoit donc pas encore un incrément produit. Le « 100 % » de V149 est
+conditionnel et tautologique, et V150 déplace une mort déjà trouvée par W3. Le
+prochain reçu compare, au même pin et à `s=8` : historique ; `H_A^cert/H_B^cert` en
+shadow ; bitsets sans émission des morts ; puis seulement cache. Il publie
+`one_side_requests/unique`, nœuds et coins testés, paires masquées, covers
+évités, `w3_sites_visited`, mur et HWM, avec sorties et fates identiques. Les
+fixtures minimales changent séparément A, l'ouverture de B, l'orientation, la
+lane et la portée ; les mutants omettent chacun de ces champs, emploient un
+arrondi radial extérieur ou fusionnent q3/q4.
+
+### Réponse V154 : la porte est calculée tôt, mais appliquée trop tard
+
+V154 confond le moment où le tableau est construit et celui où il peut éviter
+du travail. Dans les lanes q3/q4 intégrées comme dans les builders batch,
+l'ordre actuel est :
+
+```text
+corner_histograms
+rect_cover_handles
+calcul de handle_points
+rect_diametral_candidates si le rectangle est dense
+application de core + h_a + h_b aux paires
+prétests Wq/secteurs, covers d'ancre, puis aval
+```
+
+La porte historique est donc déjà avant chaque cover **d'ancre**, mais pas
+avant les handles du rectangle ni avant sa requête diamétrale partagée. Placer
+la partition des survivants immédiatement après `corner_histograms` est un vrai
+réordonnancement. Il évite handles et requête seulement si le rectangle entier
+est fermé ; sinon ces deux structures partagées restent nécessaires. Placer
+ensuite `H_A^cert/H_B^cert` au même endroit peut fermer des rectangles supplémentaires
+et retirer des ancres avant leur cover, sans modifier l'objet.
+
+Trois bras sont indispensables pour attribuer le gain :
+
+1. ordre actuel ;
+2. même `h_a/h_b`, mais porte historique déplacée avant les handles ;
+3. bras 2 puis `H_A^cert/H_B^cert`.
+
+Sans le bras 2, tout gain du simple déplacement serait faussement attribué au
+crédit étendu. Les deux partitions du ledger restent distinctes :
+
+```text
+anchors = hist_rows + hist_thresh + hist_survivors
+hist_survivors = oneside_dead_A + oneside_dead_B_after_A + oneside_survivors
+point_layer_dead = hist_rows + hist_thresh + oneside_dead_A + oneside_dead_B_after_A
+rect_alive = rect_hist_all_dead + rect_oneside_all_dead + rect_reaching_handles
+```
+
+En q3, le reçu causal doit aussi vérifier
+`w3_killed_OFF = oneside_dead_ON + w3_killed_ON`, puisque toute mort
+unilatérale aurait été retrouvée par W3 avant secteurs et seeds. Il faut comparer
+le vecteur brut de candidats, pas seulement la RLE.
+
+Deux conclusions de V154 doivent être bornées. `corner_histograms` ne calcule
+pas le crédit étendu : il ne visite que `A x A` et `B x B`; `H_A/H_B` requiert
+la descente globale. Et le scan produit n'est pas toujours radialement
+croissant : le cover par ancre est classé en 32 bins, tandis que
+`rect_diametral_candidates` fournit une traversée non triée. Les chiffres
+croissant/décroissant n'ont ni probe, commande, stdout ni hash versionnés ; ils
+restent un diagnostic de Claude. Même reçus, `9,6--19,3` tests par ancre ne
+comptent ni la construction partagée, ni secteurs, ni la distribution des deux
+routes.
+
+### Réponse V155 : même cascade d'ancre en q4, mais le mur aval demande les identités
+
+L'extraction de V155 est arithmétiquement correcte dans sa portée. Au reçu
+`dc01fdf`, un fil, seed 3, `s=8`, la lane q4 représente `53,64 %` du mur sur
+`terrain` et `50,57 %` sur `scanline` à 32000 points ; les exposants entre les
+deux extrémités 2000 et 32000 valent `1,977` et `1,808`. Ce sont des exposants
+empiriques sur une répétition, une machine partagée et des nuages dont l'échelle
+de coordonnées change avec n, pas une preuve `Theta(n^2)`. Le reçu précède le
+HEAD actuel. La colonne `fold` de V155 emploie en outre le temps cumulé que le
+reçu interdit de comparer au mur : les parts `temps_fold_mur_ms` sont
+`8,23 %`, `9,25 %`, `15,67 %` et `18,52 %`. Sur `uniform`, la lane q4 n'est
+pas le premier poste.
+
+La réponse mathématique à la question est **oui à l'étage de l'ancre**. Pour
+q4 comme pour q3, `core`, le facteur A et le facteur B occupent les domaines
+disjoints `P hors (A union B)`, `A sans a` et `B sans b`. Leur somme minore le
+nombre de témoins W4 indépendamment du carrier `x` et de la complétion `y`, qui
+sont des supports de coquille, pas des témoins intérieurs. Les bornes
+unilatérales restent donc :
+
+```text
+L4(a,b) = max(core4 + h_a4(a) + h_b4(b), H_A4(a,B) + h_b4(b), H_B4(b,A) + h_a4(a))
+```
+
+Il ne faut jamais sommer `H_A4+H_B4`. La factorisation par bitsets et l'ordre
+paresseux décrits pour q3 s'appliquent avec le seuil `h4`. q4 conserve sa propre
+source WSPD et ses propres comptes : une ancre q3 morte peut être q4 vivante.
+
+La géométrie doit être corrigée avant de coder. Pour q4, la formule polaire
+ponctuelle est :
+
+```text
+0 < r/D < cos(theta) - sin(theta)/sqrt(2), avec theta < 54,7356 deg
+```
+
+L'ouverture complète de la pointe vaut donc `109,471 deg`, contre `120 deg`
+en q3. `125,26 deg` est un angle supplémentaire mal nommé, pas l'ouverture du
+citron q4. Sur l'axe, la portée tend encore vers D. Pour une boîte B, prendre le
+minimum de cette portée sur les huit coins reste obligatoire. Le plancher
+produit commun reste `s>=8`.
+
+Au HEAD, `core+h_a+h_b` est déjà appliqué en q4. Ce qui manque est
+`EndpointCredit` dans la requête/scan W4 et dans `process_anchor_q4`; la
+sélection axiale v3/v4 est explicitement fermée en v5 et ne change rien à ce
+raccord. Une première propagation sûre reproduit q3 : conserver le compte W4
+historique et, en parallèle, compter hors A/B jusqu'au besoin diminué par les
+facteurs. Elle accélère l'arrêt de W4, mais ne réduit pas le cœur, la corde ou
+les complétions des ancres déjà tuées par W4, puisque cette mort se produit
+déjà avant les seeds.
+
+La sonde d'étages existante confirme où regarder, sans constituer un reçu. Au
+contenu source actuel, un fil, politique produit, `n=8000`, elle donne sur
+`terrain` `6227 ms` au total, dont `35` histogrammes, `137` handles, `325`
+requête, `580` covers, `2258` cœur+corde et `1057` complétions ; sur `scanline`,
+`7595 ms`, dont `40`, `105`, `854`, `707`, `2410` et `939 ms`. Les identités
+internes de la sonde passent. Le cœur/corde est donc le plus gros sous-poste
+nommé dans ce diagnostic ; une porte seulement dominée par W4 ne suffit pas à
+l'attaquer.
+
+La piste constructive q4 est un petit **WitnessTape d'ancre**. Il ne doit pas
+redécouvrir seulement les témoins pendant le scan W4 : construire l'union triée
+et dédupliquée des IDs certifiés par `h_coeur`, `h_a`, `h_b`, puis par W4 ; plus
+tard `H_A/H_B` peuvent ajouter leurs IDs, jamais leurs sommes scalaires. À huit
+IDs l'ancre meurt, donc une survivante en porte au plus sept. Le profil public
+refusant les positions dupliquées, chaque entrée est un index de position
+unique de poids implicite 1 ; un poids compressé n'a ici aucune sémantique.
+
+Chaque entrée est strictement intérieure à toute boule q4 admissible passant
+par `a,b`. Elle peut initialiser directement le cœur de Jung après exclusion de
+`{a,b,x}`, et la profondeur de complétion après exclusion de `{a,b,x,y}`, à
+condition que les mêmes IDs soient ensuite sautés. Pour la corde, le raccourci
+« ajouter la tape aux quatre morceaux » est faux sans lemme supplémentaire :
+`ChordPieces` emploie `muhat`, dont deux extrémités sortent du disque de Jung.
+Chaque ID doit passer par le même `ChordPieces::update` strict et ne créditer
+que les morceaux réellement certifiés. Une somme scalaire nue reste interdite.
+
+Le shadow minimal garde deux bras séparés : `oneside_gate` mesure seulement les
+rectangles/requêtes/covers W4 évités ; `w4_tape` mesure ensuite seeds, tests de
+cœur, morceaux de corde, complétions et tests de puissance évités. Les fixtures
+doivent couvrir un même ID présent dans W4 et le cœur de Jung, une ancre à
+exactement `h4-1` IDs, les supports `{a,b,x,y}`, les frontières strictes, le
+rejet des positions dupliquées, un mutant qui préremplit aveuglément les quatre
+morceaux, une source q3 morte/q4 vivante et la parité CPU/batch brute. Les
+routes query/cover transportent les IDs canoniques, jamais des offsets ; un
+mapping absent ou dupliqué désactive la précharge en fail-open. Ainsi le
+terminal q4 ne change pas les domaines disjoints ; il impose seulement de
+transporter leur identité avant de réutiliser le crédit plus bas.
+
+### Contre-audit P0 : préserver le chantier, requalifier sa forêt Gabriel
+
+La contre-lecture transversale découvre une couture plus fondamentale que les
+optimisations q3/q4. Le contrat actif racine ne reçoit plus le K-MST du graphe
+de Gabriel brut comme HGP exact. `docs/SPECIFICATION_MORSEHGP3D.md` § 1 et
+§ 17 réserve ce flot à la proposition, à la connectivité positive ou à une
+compression partielle ; la source exacte doit restituer les cofaces Gamma et
+leurs incidences silencieuses. `docs/TEST_PLAN_MORSEHGP3D.md` impose alors
+`forest_semantics=partial_refinement` et le refus de `require_exact=true`.
+
+La v5 affirme encore l'inverse dans son README, son architecture,
+`docs/MATHEMATIQUES.md` § 7 et `src/forest/fold.hpp`. Le juge
+`mhgp5_forest_judge` est indépendant en arithmétique, niveaux et rôles, mais son
+étape 3 filtre les seules cofaces Gabriel et son étape 5 reconstruit le graphe
+depuis ce même univers. Il requalifie donc correctement la conformité du
+sous-flot v4/Gabriel ; il n'est pas un oracle Gamma indépendant.
+
+La fixture discriminante minimale porte l'identifiant canonique
+`gabriel-point-set-counterexample-5-points-v1` ; le nom court « E5 » est
+ambigu avec l'exemple planaire E5 de
+`docs/contracts/EXEMPLES_CONTRACTUELS.md` :
+
+```text
+A=(0,0,7)  B=(0,9,6)  C=(1,4,0)  D=(0,0,1)  E=(4,1,2)
+```
+
+À l'ordre 2, `ACD` et `ACE`, non-Gabriel, attachent silencieusement la facette
+`AC` au niveau carré `33/2`. La coface Gabriel future `ABC` réutilise `AC` au
+niveau `83886/3563`. Gamma possède alors une seule composante couvrant les cinq
+points. Privé de `AC`, le flot Gabriel brut crée deux racines et ne les réunit
+qu'au niveau `24` par `BCE`. `BCE` est une vraie coface Gamma ; c'est sa
+promotion tardive en nœud de fusion qui est artificielle relativement à la
+généalogie Gamma. La divergence touche donc le temps de fusion et la généalogie
+des unions de points, pas seulement un payload de facettes plus riche.
+
+Le recalcul rationnel indépendant retrouve en outre `CDE=162/25` et
+`ADE=189/17`. La porte racine
+`tests/oracle/test_gabriel_counterexample.py` passe `4/4`, et un probe borné
+contre le worktree v5 n'émet en ordre 2 que les événements Gabriel attendus,
+jamais `ACD/ACE`.
+
+Il ne faut pas jeter le travail de Claude : tous les événements actuels restent
+des certificats positifs et les prunes q3/q4 restent utiles à leur production.
+La fermeture constructive est :
+
+1. nommer immédiatement la sortie actuelle
+   `proof_basis=gabriel_positive_connectivity` et provisoirement
+   `forest_semantics=verified_events_only` ; les deltas actuels ne deviennent
+   `partial_refinement` qu'après une projection réduite et un `PartialScope`
+   démontré ;
+2. ajouter `reconstruction_contract_id` et `require_exact`, puis refuser
+   atomiquement le mode exact avec cette source ;
+3. remplacer `tower_scope=profile_complete_k10` par une portée horizontale
+   explicite tant que `vertical_maps=none` ;
+4. graver `gabriel-point-set-counterexample-5-points-v1` contre un oracle
+   Gamma exhaustif borné, où la divergence Gabriel est attendue et ne peut plus
+   être prise pour un accord ;
+5. raccorder ensuite une source sparse d'incidences silencieuses et comparer
+   les coupes ouvertes et fermées, sans faire de l'oracle l'architecture
+   produit.
+
+Le rendu actuel doit de même être nommé rendu Gabriel borné. Il agrège les
+événements disponibles, mais ne livre pas encore l'objet Gamma reconstructible
+de la section 9.1. Cette requalification bloque un claim, pas les expériences :
+elle sécurise au contraire la signification des prochains gains q4.
+
+### Réponse V156 : le certificat rectangle existe déjà ; borner sa version utile
+
+Le rapprochement « `99,766 %`, soit `93 195` ancres et `8,7e5` seeds à
+`n=2000` » mélange des configurations ou des dénominateurs. Sur le reçu seed 3
+versionné, `93 195 / C(2000,2) = 4,662 %` de paires survivantes, donc `95,338 %`
+retirées, et le compteur q3 vaut `420 699` seeds. Les taux retirés dépendent
+fortement de n : sur `terrain`, le même ratio passe de `95,338 %` à n=2000 à
+`99,540 %` à n=32000. V156 ne fournit ni probe, commande, stdout, taille, seed
+ni hash pour son tableau. Les `1,19--1,36` sont des exposants sécants de temps
+sur une plage finie, pas une preuve de complexité ni une conséquence du taux de
+masse. Les nombres sous `s<8` restent hors du point de fonctionnement.
+
+Le certificat demandé n'est pourtant pas inconnu. `postsep_refine` calcule déjà
+des comptes universels sur des sous-rectangles. Il retire `39--44 %` de masse
+q4 dans les campagnes documentées, mais sa version exhaustive ralentit tous les
+bras ; à `scanline 100k`, L=3 retire environ `47 %` des ancres et ajoute `34 %`
+de mur. Il ne faut pas le réimplémenter sous un autre nom.
+
+La fermeture immédiatement exploitable comporte deux étages :
+
+1. Au terminal WSPD, avant handles, poser `alpha=min_a h_a(a)` et
+   `beta=min_b h_b(b)`. Le minorant `core+alpha+beta` vaut pour toute paire du
+   rectangle. C'est le bras de simple placement déjà demandé en V154 ; il ne
+   rajoute aucune géométrie et mesure d'abord `rect_hist_all_dead`.
+2. En preuve seulement, partager A et B en une petite partition radix bornée et
+   calculer pour chaque cellule `A_i x B_j` le compte certifié `D_ij` hors
+   `A_i union B_j`. Alors `depth_lb=min_ij D_ij` minore chaque paire du
+   rectangle. `D_ij` absorbe automatiquement le cœur, les siblings de A et B,
+   et les témoins extérieurs sans addition ambiguë. Prendre
+   `max(depth_lb_parent,D_ij_frais)` avant le minimum ; ne jamais appeler ce
+   scalaire `h_coeur`, car les IDs témoins peuvent différer entre cellules.
+
+Si toutes les cellules atteignent `h_q`, tuer transactionnellement la masse du
+parent, même si les cellules ne sont pas séparées : elles ne sont jamais
+publiées. Dès qu'une cellule reste vivante ou que le budget expire, jeter la
+preuve et rendre exactement le parent. Si des cellules survivantes doivent être
+émises, le contrat historique de séparation et le ledger exact redeviennent
+obligatoires.
+
+Le premier shadow est encore plus petit : dans les rollbacks actuels de
+`postsep_refine`, compter `rollback_children_all_dead` et les nœuds visités
+avant de décider. Si le compteur est nul, fermer la piste. Sinon comparer
+`OFF`, `terminal_hist_floor`, `proof_split_budgeted`, avec profondeur et visites
+fixes indépendamment de n. Pour s fixé à 8 et budgets fixes, le certificateur
+ajoute un travail borné par état WSPD ; cela ne prouve la sous-quadraticité ni
+du WSPD maison, ni des seeds restantes. Publier masse totale, morts cœur,
+morts preuve, terminaux vivants, appels/nœuds/coins, ancres, seeds, candidats,
+mur, HWM et digests identiques, sur trois graines.
+
+La limite feuille de cette partition rejoint `H_A^cert/H_B^cert`. Le raccord
+rectangle sûr reste
+`max(core+min(h_a)+min(h_b),min(H_A^cert)+min(h_b),min(H_B^cert)+min(h_a))`.
+Ne jamais sommer les deux termes unilatéraux : leurs témoins extérieurs peuvent
+se recouvrir.
+
+### Réponse V157 : opt-in explicite oui, zéro silencieux non
+
+Le bon contrat est bien : produit `s>=8`, exploration sous profil seulement par
+un opt-in explicite et greppable. Trois corrections sont toutefois bloquantes
+dans le patch courant :
+
+- La phrase « sous 8 le citron commun est vide par construction » est fausse et
+  contredit le commentaire correct plus bas dans `generate.hpp`. La formule
+  donnée rend **non positive la marge uniforme garantie** du cœur q4 sous
+  `7,73` ; elle ne prouve pas que chaque intersection particulière est vide.
+  La politique `s>=8` reste inchangée.
+- Un retour `void` avec zéro rectangle n'est pas fail-closed : zéro est une
+  sortie plausible et une sonde peut encore la publier. Rendre un statut
+  explicite ou lever `invalid_argument`; graver ce refus interne, pas seulement
+  deux nouveaux doublons des portes CLI.
+- L'opt-in n'est actuellement exposé que sur `alive_rectangles`. La fixture q2
+  `run_generation_only(s=1)` passe par `generate_candidates` et ne peut pas le
+  transmettre ; elle obtient donc zéro candidat et ne tue plus son mutant.
+  Ajouter un champ test-only explicite à `GenerateOptions`, le propager aux
+  trois lanes, et l'activer dans cette seule fixture, ou garder un helper direct
+  équivalent. `literal_pair_partition(s=4)` a déjà son opt-in.
+
+La première phrase de V157 doit enfin lire « toute mesure publiée sous
+`s<8` ». Les chiffres historiques peuvent rester comme contre-diagnostics
+nommés hors profil ; ils ne participent à aucune décision produit. À l'autre
+extrême, accepter `s=INT64_MAX` reçoit l'arithmétique mais pas un coût produit :
+la WSPD peut alors dégénérer vers les paires de feuilles. Toute revendication
+sous-quadratique doit fixer s indépendamment de n, ou le profil doit déclarer
+une borne supérieure. La nouvelle voie rapide u128 pour 8/10 répond au risque
+de surcoût U320 ; sa frontière et le mutant large doivent encore passer après
+le dernier rebuild.
+
+Relecture de la proposition V157 : ces trois coutures immédiates paraissent
+fermées dans le worktree partagé. Le commentaire parle de marge uniforme,
+l'absence d'opt-in lève explicitement `invalid_argument`, et
+`GenerateOptions::allow_subprofile_separation_for_tests` n'est compilé que sous
+`MHGP5_TESTING` puis activé par `run_generation_only`. Il reste à recevoir le
+patch attribuable et commité, puis son rebuild, le mutant q2, les cinq mutants
+post-séparation et le mutant arithmétique large ; aucun résultat CUDA n'est
+inféré de cette lecture CPU.
+
+### Contre-réponse au document de retrait V157 : garder 8, corriger sa preuve
+
+La décision produit `s>=8` est correcte et les inférences produit tirées de
+`s<8` doivent bien être retirées. En revanche, le nouveau
+`docs/PROFIL_SEPARATION.md` ne peut pas encore servir de justification durable.
+
+La quantité $(\kappa_q-2/s)d_{\min}$ n'est pas la demi-largeur exacte du citron
+commun. Elle n'a ce sens que si $d_{\min}$ désigne le gap de boules
+$g=d-r_A-r_B$. Dans la dérivation continue reçue,
+$(\kappa_q-2/s)g$ borne le **surplus de marge** $R_{\mathrm{dec},q}-M$, alors que le rayon vérifie
+$R_{\mathrm{dec},q}\geq(\kappa_qs-1)M$. Les seuils `4`, `6,93` et `7,73`
+marquent donc la perte de la garantie uniforme $R_{\mathrm{dec},q}>M$, pas
+l'annulation de toute région réelle. Deux facteurs singletons distincts
+suffisent à falsifier la phrase
+« `core` est vide par construction sous 8 » : leurs rayons de boîte sont nuls
+et `core_ball` produit un rayon strictement positif en q3/q4. Écrire plutôt :
+
+```text
+s=8 est le plus petit entier qui garantit uniformément, dans le modèle
+continu, R_dec,q > M pour q2, q3 et q4 sur un rectangle terminal.
+Sous 8, le profil perd cette marge forte commune ; certains rectangles
+peuvent néanmoins conserver un cœur certifié non vide.
+```
+
+Ne pas transférer silencieusement cette inégalité au rayon entier dirigé.
+La garde de domaine reste correcte ; c'est seulement une éventuelle
+revendication de marge forte sur `radius4` qui demande une preuve d'arrondi ou
+une fixture dédiée.
+
+Deux corrections factuelles suivent. Dans le worktree candidat,
+`alive_rectangles` lève `invalid_argument` sans opt-in ; il ne rend pas zéro
+rectangle. Et ni `f83fd184` ni le pin documentaire `495b234f` ne contiennent
+les gardes annoncées : à ces pins, l'API et les CLI acceptent encore `s>=1`.
+Le document doit être épinglé au commit qui portera réellement le correctif.
+
+Enfin, « survit » doit signifier seulement « n'est pas invalidé par le domaine
+de s ». Cela ne reçoit pas les chiffres. Les `80,9--99,8 %` et
+`18,69/15,98` n'ont toujours pas de probe, commande, stdout, dénominateur et
+hash versionnés dans V156. Ils restent des diagnostics jusqu'à production de
+ce reçu. Le seuil 8, lui, n'est pas remis en cause par ces corrections.
+
+### Contre-fixture discrète : à `s=8`, le rayon codé peut seulement égaler $M$
+
+La preuve continue ne doit pas être recopiée comme propriété stricte des
+entiers dirigés. Pour `A=[0,1]x{0}x{0}` et `B=[5,6]x{0}x{0}`, le prédicat
+`separated(A,B,8,1)` est à égalité car `D2=100=(8+2)^2 W2`. En q3 et q4,
+`core_ball` rend pourtant `radius4=2`; comme $M=1/2$, on a exactement
+`radius4=4M`, jamais `>4M`. Le calcul reste fail-open et sûr. Écrire que le
+seuil 8 dépasse le seuil **continu**, puis déclarer l'effet des arrondis ; ne
+pas utiliser une marge discrète stricte sans nouveau lemme.
+
+L'autre extrême ferme la question de coût. À `s=INT64_MAX`, aucune paire de
+boîtes dont l'une a un diamètre positif ne peut satisfaire la séparation sur
+la grille u16. La descente atteint donc deux feuilles et émet exactement
+$\binom{n_u}{2}$ rectangles. Cette valeur peut tester l'arithmétique U320 ; la
+présenter comme configuration produit qualifiée détruit toute lecture
+sous-quadratique. Je recommande un profil opérationnel borné aux valeurs déjà
+qualifiées 8/10, la primitive rationnelle large restant disponible pour les
+fixtures. À défaut, le CLI doit annoncer que les grandes valeurs n'ont aucun
+contrat de coût.
+
+Enfin, la borne $O(s^3n)$ appartient au fair split tree classique. La variante
+Morton-radix à boîtes serrées n'a toujours pas sa preuve, comme le reconnaît
+`MATHEMATIQUES.md` ; les affirmations contraires de `wavefront.hpp`,
+`cloud_index.hpp` et `ARCHITECTURE.md` doivent être retirées. Le bypass booléen
+de `alive_rectangles` existe aussi en compilation produit : seul le champ de
+`GenerateOptions` est test-only. Corriger le code ou le claim avant de parler
+d'impossibilité compilée.
+
+Quatre coutures de livraison restent visibles : `parse.hpp` est non suivi ;
+les mutants q2/core postsep ne gardent plus la validation fail-closed de
+`run_pipeline`; le bypass sous-profil n'est pas propagé aux lanes batch/device ;
+et `wspd_wavefront` accepte silencieusement `p<=0` ou `q<=0` sur un singleton
+parce qu'il retourne avant le prédicat. Elles n'annulent pas les tests ciblés
+verts, mais empêchent de recevoir le patch comme fermeture complète.
