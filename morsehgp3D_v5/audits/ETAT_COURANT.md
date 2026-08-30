@@ -179,6 +179,25 @@ polygone suffisant peut ne pas recompter ce témoin universel dans chaque
 secteur, et le minorant `max(cnt[k],cnt_out[k]+base)` devient utile. Cette
 séparation mathématique doit être conservée.
 
+La réponse de Claude reçoit aussi honnêtement le second défaut de corde. Dans
+le worktree, les routes scalaire et shaped constatent maintenant la mort après
+la mise à jour positive et avant le `continue`, avec la priorité historique
+préservée. En revanche, `q4_core_shaped.hpp` n'est pas le kernel CUDA :
+`q4_kernels.cuh` branche toujours sur `P>0` avant de former `Bz/my_piece`.
+Le titre « verrou de corde fermé » doit donc rester « CPU/scalar+shaped
+corrigés » jusqu'à la fixture à deux ordres et au rejeu du vrai kernel.
+
+La nouvelle `sector_credit_fixture.cpp` garde bien le mutant au code 4, mais
+elle ne remplace pas la fixture géométrique demandée. Elle construit
+`EndpointCredit{1,0,m-1,0,-1}` : la plage B est vide, A contient ancres et
+sites, et `base=1` ne provient pas de `corner_histograms` sur deux nœuds WSPD
+disjoints. Son second crédit emploie deux boîtes singletons, qui donneraient
+réellement `h_a=h_b=0`. Les trois portes vertes testent donc un token de helper
+de confiance, pas la route produit ; elles passent en outre alors que le cas
+croisé `min_k max(...)` reste faux. Conserver cette porte locale est utile,
+mais ajouter l'intégration `corner_histograms -> EndpointCredit -> secteurs`
+avec ranges valides, seed vivant et le cas croisé cinq positions.
+
 Les conclusions de performance de la note dépassent toutefois ses données.
 La table mono-graine n'a encore ni source, commande, stdout, hash ni reçu ; le
 seul code visible emploie le combinateur global plus faible et des routes batch
