@@ -851,3 +851,111 @@ encore être groupées par graine avec leurs digests d'entrée et de lineage.
 Une campagne terminale `complete` après ce raccord signifie donc seulement
 « tous les runs indépendants ont fini » ; ses écarts de temps et de masses ne
 doivent pas être cités comme effet apparié de la canopée.
+
+### Garde sur les deux brouillons suivants
+
+Le brouillon `bump_amp_cap` ouvre une seconde hypothèse intéressante — les six
+calottes grandissent elles aussi avec `coord` — mais ne corrige pas le
+couplage. Il remplace la distribution nominale par `[cap/2,cap]` avant tirage,
+au lieu de dériver le bras borné d'une amplitude nominale déjà tirée. Pour
+`cap=1`, `max(2,cap)` permet même une amplitude 2 : le nom « cap » est alors
+faux. La canopée conserve parallèlement sa distribution à borne changée. Il
+n'existe toujours ni latent commun, ni masque d'acceptation partagé, ni digest
+de lineage.
+
+La correction minimale est de construire les deux nuages ensemble. Pour
+chaque proposition, tirer toujours les bosses et lifts nominaux, former le bras
+borné par transformation **après** tirage, conserver exactement le masque
+d'acceptation nominal et les mêmes `PointId`, puis refuser la paire si la
+transformation crée une collision. La sonde publie alors
+`digest_input_nominal`, `digest_input_bounded`, un `digest_lineage` des tuples
+ordonnés `(PointId,nominal,bounded)`, `changed_points` et
+`bounded_collisions=0`. Le chemin `cap=0` doit garder le digest de famille déjà
+gravé. Si l'objectif des bosses est de reproduire une loi de taille de
+référence plutôt qu'un simple clamp, la transformation de quantile doit être
+nommée comme telle ; changer silencieusement les bornes ne l'établit pas.
+
+La fixture scalaire cinq points peut, elle, être livrée sans nouvelle API.
+Construire son `CloudIndex`, retrouver `ua/ub`, puis remplir explicitement
+`AnchorScratch::cover` dans les ordres `[A,B,X,PR,NL]` et
+`[A,B,X,NL,PR]`, avec `dist2q` respectifs `16,16,36,40,24`. Appeler la vraie
+`process_anchor_q4` avec `D2=16`, `h4=1` et
+`AnchorPretests::kAlreadyAppliedWithGrid` : ce jeton saute W4, secteurs et la
+construction de grille, laisse `sc.grid.built=false`, mais conserve la corde.
+
+Les contrats scalaires littéraux sont : nominal `seeds_killed_chord=1` et
+`q4_completions=4` dans les deux ordres, avec même sortie canonique ;
+`chord-dead-skip-positive` donne respectivement `1/4` puis `0/6` ;
+`chord-skip-positive` donne `0/6` dans les deux ordres. La porte shaped associée
+vérifie `dead_by_chord=1`, `cert_pos=1`, `cert_neg=1`, `jung_skip=1`. Trois
+CTests dédiés — nominal 0, chacun des mutants 4 — suffisent, sans plancher ni
+famille aléatoire. La route CUDA réutilisera ensuite les mêmes données, sans
+être revendiquée par cette fermeture CPU.
+
+### Réception du reçu terminal et sauvegarde de l'hypothèse « deux échelles »
+
+Le reçu `receipts/canopee_q4/RECU.txt` est désormais terminal : 18 exécutions
+sur 18 rendent 0 et `statut=complete`. Il est utile et doit être conservé. Sa
+conclusion positive exacte est cependant bornée : sur les neuf couples
+`(graine,taille)`, la cohorte construite avec `canopy_lift_cap=3` a moins de
+seeds, de tests de cœur, de complétions et d'entrées de profondeur que la
+cohorte nominale. C'est un signal descriptif fort qu'une échelle verticale du
+générateur pilote une grande partie de la charge q4.
+
+Le reçu se protège correctement par `comparaison_objet=sans_objet`, mais trois
+limites restent inscrites dans ses propres métadonnées : un seul run par bras,
+aucune alternance, et entrées différentes. Son binaire
+`21794af51fdb5761961c602c2f7fb412ed361374a8f34a2e974b5b27db5faabc` a été
+construit au pin `38fa88af`, avant le raccord d'`EndpointCredit` et avant
+`bump_amp_cap`. Il reçoit donc l'ancien probe, pas le worktree courant. Les
+fichiers `.objet` sont des signatures de compteurs, pas des signatures de
+catalogue ou de forêt. `rss=0` signifie mesure absente. Enfin le run graine 3,
+32 000 points, affiche `mur_ms=207459` contre `cpu_processus_ms=128887` : les
+temps muraux de cette campagne concurrencée ne doivent pas alimenter un ratio
+de performance. Les compteurs entiers, eux, restent exploitables comme
+diagnostic de cohortes indépendantes.
+
+La nouvelle note `docs/TERRAIN_DEUX_ECHELLES.md` peut ainsi être sauvée sans
+jeter les mesures : remplacer « le mur n'est pas algorithmique » et « q4
+redevient linéaire » par « sur trois tailles et trois cohortes, borner les deux
+échelles verticales est associé à des compteurs de tests de cœur presque
+proportionnels à n ». Les valeurs du second factoriel (`bump_amp_cap=30`) n'ont
+encore ni commande, ni sorties brutes, ni hash de binaire dans un reçu ; elles
+sont une hypothèse très encourageante, pas encore un résultat reçu. Trois
+tailles finies ne prouvent par ailleurs aucun exposant asymptotique, même si
+leurs pentes locales sont proches de 1.
+
+L'explication géométrique de la note doit être corrigée avant commit. Le cover
+historique q4 n'est pas la boule diamétrale : il vérifie
+$\lVert 2z-a-b\rVert^2\leq 3D^2$. Dans le plan horizontal d'altitude $z_0$, son
+rayon vérifie exactement $r_3^2=\frac{3D^2-(2z_0-z_a-z_b)^2}{4}$. Pour une
+ancre avec $z_a=z_0=0$, $z_b=H$ et séparation horizontale $d_{xy}$, cela donne
+$r_3^2=\frac{3d_{xy}^2}{4}+\frac{H^2}{2}$, pas $H^2/4$. À densité $1/25$, le
+terme vertical prédit donc environ $\pi H^2/50$, deux fois la valeur écrite.
+À l'inverse, le prétest diamétral de coefficient 1 donne
+$r_1^2=d_{xy}^2/4$ dans ce même cas : la hauteur s'y annule. Et les seeds sont
+ensuite retenus dans la lentille, qui est encore un troisième objet. La formule
+du cover peut donc expliquer une masse offerte au scan du cœur ; elle ne
+prédit pas à elle seule les seeds ni les complétions observés.
+
+L'expérience discriminante courte est d'agréger par ancre, dans des classes de
+`(|dz|,d_xy)`, les cinq quantités `cover.size`, `lens.size`, seeds aigus,
+`q4_core_site_tests` et complétions. Sur le même tape latent et les quatre bras
+du factoriel, elle dira où naît l'écart : enveloppe de coefficient 3, lentille,
+survie des seeds ou boucle de complétion. Cette coupe est plus actionnable pour
+l'architecture qu'un seul nombre d'altitudes distinctes.
+
+Deux voies propres permettent à Claude de continuer immédiatement :
+
+1. conserver le générateur actuel comme **contre-familles indépendantes**, en
+   renommant `bump_amp_cap` comme une borne de distribution (et non un clamp),
+   avec trois graines, pentes locales et reçus bruts, sans vocabulaire causal ;
+2. pour attribuer causalement l'effet, dériver les quatre bras d'un tape latent
+   commun comme décrit plus haut, avec lineage et collisions contrôlés.
+
+Le raccord d'`EndpointCredit` dans la sonde est en revanche une correction
+nécessaire et bienvenue. Pour éviter une nouvelle dérive, ajouter une petite
+porte qui compare tous les compteurs/fates q4 de la sonde à un appel produit
+`generate_candidates` sur la même fixture, ou faire du chemin produit
+l'autorité du reçu. La cible actuelle est compilée avec `MHGP5_TESTING` : le
+wrapper doit l'appeler « probe instrumenté », pas « cible PRODUIT ».
