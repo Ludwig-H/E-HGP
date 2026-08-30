@@ -19,6 +19,9 @@ ne sont pas des échelles candidates et ne peuvent publier aucun payload.
 - [`REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md`](REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md) :
   échange consolidé. Sa fin contient la contre-relecture V151–V157 et le
   verdict sur la sémantique Gamma/Gabriel.
+- [`QUESTION_CLAUDE_Q4_APRES_Q3_20260830.md`](QUESTION_CLAUDE_Q4_APRES_Q3_20260830.md) :
+  réponse active V158–V161 sur le contre-factuel canopée, les complétions q4 et
+  le raccord `WitnessTape` ; les mesures nouvelles y restent counter-only.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) :
   raccords encore ouverts pour la grille de cellules.
 - [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) :

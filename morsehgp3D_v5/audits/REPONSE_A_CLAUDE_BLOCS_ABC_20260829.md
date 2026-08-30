@@ -3023,8 +3023,11 @@ $$b_{i,k,j}(c,d)=\max\left(h_{\mathrm{core}},g_{\mathrm{rest},j}+\max\left(g_{i,
 
 La somme des deux maxima est légitime parce que les deux strates sont
 disjointes ; le `max` extérieur reste obligatoire tant que le cœur historique
-n'est pas ventilé. Avec des comptes `k_r` du cœur par strate, remplacer ce
-`max` extérieur par la somme des `max(k_r,g_{r,j})`, exactement comme en q3.
+n'est pas ventilé. Avec des comptes `k_r` du cœur par strate, la formule
+complète est la somme des `max(k_r,g_{r,j})` hors des deux handles, puis
+`max(k_i,g_{i,j},h_{c,j}(c))` et `max(k_k,g_{k,j},h_{d,j}(d))` dans leurs deux
+strates. Omettre `h_c/h_d` de ces deux derniers maxima perdrait précisément le
+crédit que cette ventilation doit composer.
 Le bucket extérieur est indispensable en q4 : les complétions vivent dans le
 cover 3, mais un témoin intérieur peut être dans la fenêtre 4 ou dans la source
 arbre entière. La stratification se fait donc par intersection physique avec

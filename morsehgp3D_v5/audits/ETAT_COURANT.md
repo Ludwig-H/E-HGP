@@ -5,10 +5,12 @@ Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-Dernier pin Claude relu : `e6ed85df`, source `s>=8` non autonome. Dernier pin
-source fonctionnel relu : `351faccc`. Le worktree partagé contient les CLI, le
-header de parsing et les compléments documentaires absents de `e6ed85df` ; ils
-restent des propositions non commitées, jamais substituées au pin audité.
+Dernier pin Claude relu : `d280fb2c`, diagnostic q4/canopée documentaire et
+échantillonné, sans sonde ni reçu versionné. Dernier pin source relu :
+`e6ed85df`, raccord `s>=8` non autonome. Dernier pin source fonctionnel relu :
+`351faccc`. Le worktree partagé contient les CLI, le header de parsing et les
+compléments documentaires absents de `e6ed85df` ; ils restent des propositions
+non commitées, jamais substituées au pin audité.
 
 ## Verdict
 
@@ -238,14 +240,23 @@ des campagnes prévues, non leurs résultats. Il n'existe donc aucune paire
 reçue à famille, taille, seed et pin identiques qui autorise un choix de coût
 entre 8 et 10.
 
-Sur un même arbre radix et avant tout élagage, augmenter `s` a une seule
-monotonie simple : `Sep_10(A,B)` implique `Sep_8(A,B)`, donc le front WSPD à 10
-raffine celui à 8 et ne contient pas moins de rectangles terminaux. Un témoin
-du cœur exact reste universel dans un descendant ; l'héritage
-`max(parent,fresh)` doit préserver ce fait dans le calcul dirigé. En revanche,
-une scission peut réduire le domaine de `h_a` tout en facilitant `h_b`, ou
-l'inverse. La somme des crédits d'extrémité, les rectangles vivants, ancres,
-seeds, candidats, mur et HWM n'ont donc aucun ordre garanti entre 8 et 10.
+Sur un même arbre radix, avec splitter et tie-break indépendants de `s`,
+arithmétique exacte et avant tout élagage, `Sep_10(A,B)` implique
+`Sep_8(A,B)`. Le front brut à 10 raffine donc celui à 8 : il conserve exactement
+la même masse de paires et possède au moins autant de rectangles terminaux et
+de visites sans prune. Un témoin universel exact d'un parent le reste dans ses
+descendants. L'héritage `max(parent,fresh)` est en revanche une exigence du
+**post-séparateur**, pas un mécanisme de la descente WSPD brute.
+
+Une scission peut réduire le domaine de `h_a` tout en facilitant `h_b`, ou
+l'inverse : leur somme, les seeds résiduels, le mur complet et le HWM n'ont pas
+d'ordre général. Il ne faut pas étendre cette absence d'ordre à tout compteur.
+Avec `postsep=0`, le compteur produit `anchors` après le cœur doit être non
+croissant de 8 vers 10 si l'héritage exact est respecté. Avec rollback
+post-séparation, cet ordre n'est plus acquis. Les candidats superficiels q3/q4
+exact-once doivent garder le même multiensemble final ; une divergence est une
+alarme à expliquer, pas un effet attendu de `s`. Le brut q2 et les compteurs
+pris à d'autres stades demandent leur propre qualification.
 
 Le prochain sweep minimal doit employer `s` dans l'ensemble `{8,9,10}`, avec
 entrée, seed, arbre, seuils, post-séparation et threads figés. Il exige des
@@ -253,6 +264,128 @@ digests finaux identiques, puis publie séparément front WSPD brut, masse aprè
 cœur, distributions non censurées de `h_coeur/h_a/h_b`, résiduel q3/q4, temps
 par étage et HWM. Tant qu'il manque, écrire `{8,10}` pour deux essais, jamais
 un intervalle qualifié ni « 10 améliore le cœur donc améliore le produit ».
+
+### `3c343954` — canopée : confondeur plausible, pas preuve de complexité
+
+Le nouveau `TERRAIN_CANOPEE.md` contient une observation utile : dans une
+sonde à la graine 3, remplacer le plafond `coord/8` par un plafond absolu 3 est
+associé à un quotient `seeds/ancre` presque stable entre 2 000 et 32 000
+points. Le pin ne contient toutefois que le Markdown. `octave2.cpp`,
+`canopee.cpp`, commandes, sorties brutes, clé d'échantillonnage, hash de
+binaire et reçu sont absents ; les tableaux ne sont donc pas reproductibles et
+le qualificatif « fait durable » n'est pas reçu.
+
+Deux inférences doivent être retirées sans perdre ce diagnostic. D'abord, un
+compte W3 commun faible prouve seulement que cette porte d'ancre ne suffit pas.
+`W_q` est un certificat universel suffisant dont la réciproque est fausse ; un
+témoin dépendant du carrier, du patch ou de la boule exacte peut se trouver
+hors de ce citron. Affirmer qu'« aucun certificat fondé sur des témoins » ne
+peut tuer l'ancre ferme donc à tort la piste `h_c` que ce cas doit précisément
+tester. Ensuite, un quotient `seeds/ancre` stable ne borne ni rectangles WSPD,
+ni nombre total d'ancres atteignant les seeds, ni visites de cover, ni tests de
+profondeur, ni sortie, mur ou HWM. Il ne permet pas de conclure « lane q3 sans
+mur », « quasi linéaire » ou « pas l'algorithme ».
+
+Le dénominateur doit être nommé sur le chemin produit :
+
+```text
+A_seed = hist_survivors[q3] - anchors_killed_w3
+       - anchors_killed_sectors[q3] - anchors_killed_cells[q3]
+```
+
+Publier `sum(seeds)/sum(A_seed)` sur l'échantillon, jamais la moyenne des
+quotients par rectangle. Un hash uniforme de rectangles n'est pas uniforme en
+ancres lorsque leurs masses `|A||B|` diffèrent ; il faut un bottom-k d'ancres,
+ou les probabilités d'inclusion et une incertitude par cluster rectangle. Le
+bras borné ne porte actuellement qu'une graine. Modifier la borne d'une
+`uniform_int_distribution` peut en outre désynchroniser les tirages MT et la
+déduplication : les bras ne sont appariés que si les variables latentes
+`x,y`, bosses, jitter, drapeau de canopée et quantile de lift sont gelées avant
+le remapping du lift.
+
+Deux détails documentaires confirment le besoin d'un manifeste. Avec
+`coord=floor(sqrt(25n))`, les plafonds réels aux trois tailles sont 27, 55 et
+111, non 28 et 112. La canopée n'est pas le seul paramètre lié à `coord` : les
+rayons et amplitudes des six bosses le sont aussi, tandis que leur nombre
+reste fixe. Il faut définir l'invariance physique visée et ne pas appeler 3
+« physique » sans unité ni calibration ; le bras constant 27, qui reproduit le
+cap historique à 2 000 points, est au moins nécessaire à côté de 3. Rejouer 28
+peut seulement servir à reproduire la sonde non suivie.
+
+La fermeture constructive garde `terrain` et ses digests comme adversaire,
+puis ajoute une contre-famille séparée. Le probe versionné joue
+`n={2000,4000,8000,16000,32000}`, graines `{3,4,5}`, avec les plafonds
+constants 3 et 27 face au plafond historique `coord/8`, sous tirages latents
+appariés. Il publie par run points rendus/suspendus, rectangles et masse de
+paires, toutes les morts d'ancre, `A_seed`, W3, `h_coeur/h_a/h_b` puis `h_c`
+en shadow, seeds, candidats, visites/sites/tests, mur et HWM. Le claim recevable
+avant ce reçu est seulement : **l'échelle de canopée est un facteur explicatif
+plausible de la croissance échantillonnée**. Même après une pente observée
+sous 2, la sortie q3 et les familles adversariales interdisent un théorème
+universel sous-quadratique.
+
+### `d280fb2c` — le résidu q4 est un échantillon utile, pas « 47 ancres » globales
+
+`Q4_APRES_Q3.md` resserre utilement le diagnostic sur les ancres longues, mais
+répète les défauts de preuve de `3c343954` : `octq4.cpp`, commande, stdout,
+hashes et reçu sont absents ; une seule graine et 2 500 rectangles hachés sont
+rapportés. Le pin `76a0ad4a` cité est le parent documentaire, pas le source de
+la sonde. Changer la borne de `uniform_int_distribution` ne produit pas des
+bras latents appariés : la consommation du RNG et la déduplication peuvent
+modifier tous les points suivants.
+
+Deux corrections factuelles sont bloquantes. L'ouverture W4 complète vaut
+`109,47 deg`, pas `125,26 deg`. La table contient 6 663 ancres, dont 1 726 dans
+les deux grandes octaves. Les 47 survivantes arrondies représentent donc
+`0,71 %` des ancres échantillonnées, `1,34 %` des 3 509 survivantes ou `2,72 %`
+des ancres longues, mais jamais les `5,5 %` annoncés. Elles portent 50 % de la
+masse **dans cet échantillon groupé par rectangles** ; le titre et la conclusion
+doivent dire « 47 survivantes échantillonnées, seed 3 », non localiser ainsi le
+mur de toute la lane. Il manque probabilités d'inclusion, incertitude par
+cluster rectangle et validation sur les mêmes IDs.
+
+La comparaison q3/q4 n'est pas appariée par le seul fait que les deux lanes
+appellent `is_acute_seed` : leurs fronts vivants, seuils et portes diffèrent.
+Pour affirmer que q3 tue les homologues des 47, il faut rejouer W3/h3 sur les
+mêmes ancres identifiées. Publier aussi l'histogramme W4 de 0 à 7 : une moyenne
+de 6,4 à 7,0 ne prouve pas que chaque ancre « rate de peu ». La survie doit être
+définie après `core+h_a+h_b`, W4, secteurs et grille, sinon les 415--479 seeds
+ne représentent pas le chemin produit.
+
+Le contrat exact est `W4` inclus dans `W3`, donc `N4<=N3` et seulement
+`N3=0 => N4=0`. À `smax=11`, les seuils `h3=9` et `h4=8` n'ordonnent pas les
+décisions. La fixture permanente `q4_source_fixture` réalise déjà
+`(N3,N4)=(9,0)` et tue `q4-seeds-from-q3-live` : c'est l'autorité du résidu q4,
+pas l'angle ni l'égalité du prédicat d'acuité.
+
+Le contre-calcul le plus important concerne `q4_completions`, qui compte les
+**essais D** avant les rejets. Le nombre de faces atteignant cette boucle se
+déduit exactement des compteurs actuels :
+
+```text
+faces_D = seeds[1] - seeds_killed_cells[2]
+        - seeds_killed_core - seeds_killed_chord
+```
+
+Dans les reçus seed 3, `terrain` passe de 102 835 faces et 1 293 473 essais à
+2 000 points à 2 692 030 faces et 256 463 974 essais à 32 000. Le vrai quotient
+conditionnel passe donc de `12,58` à `95,27`, soit un facteur `7,57` et un
+exposant sécant local `0,73`, non `0,21`. Le même calcul donne `20,37 -> 64,24`
+sur `scanline`, contre `19,49 -> 20,31` sur `uniform` et `29,92 -> 34,94` sur
+`eight_clusters`. Diviser par tous les seeds, dont ceux morts avant D, masque
+donc précisément le facteur q4 recherché et invalide « ne pas chercher côté
+complétion en premier ».
+
+Ajouter l'identité reçue
+`seeds = cells + core + chord + faces_reaching_completions`, puis publier essais
+par face, rejets cumulatifs, entrées et tests de profondeur et mur. La conclusion
+constructive est double : les ancres longues échantillonnées sont le banc ciblé
+du prototype `A x B x C`, tandis que la boucle D reste un mur potentiel à
+mesurer, pas un poste fermé. Garder le WSPD binaire `A x B`, utiliser les handles
+bornés pour le carrier `c`, calculer un `h_c(c)` q4 strict par patch et
+n'énumérer D qu'après cette porte de face. Ce shadow CPU counter-only doit
+mesurer faces, essais D et tests de puissance évités avant toute promotion ou
+auto-jointure globale.
 
 ### V151--V153 — aucune répétition exacte, utiliser d'abord l'index existant
 
@@ -379,31 +512,75 @@ le placement et la propagation aval restent confondus.
 
 Cette généralisation est saine si `C` reste un handle asymétrique attaché au
 rectangle WSPD `A x B`, et non le troisième facteur d'une WSPD symétrique. Pour
-une fibre vivante et sans transporter les IDs, la composition générale sûre
-est `h_a(a)+h_b(b)+max(h_coeur,h_c(c))` : le cœur et le crédit du carrier
-peuvent reconnaître le même site hors `A union B`. Le seuil `s>=8` fixe le
-domaine produit et sa marge continue commune ; il ne rend pas ces deux
-ensembles disjoints.
+une fibre vivante et sans transporter les IDs, la composition
+`h_a(a)+h_b(b)+max(h_coeur,h_c(c))` est sûre seulement sous les préconditions
+suivantes : `A` et `B` sont disjoints, les comptes portent sur des positions
+uniques, `h_coeur` et `h_c(c)` excluent `A union B` et les supports, et
+`h_c(c)` certifie strictement la même fibre valide non vide. Le cœur et le
+crédit du carrier peuvent alors reconnaître le même site hors `A union B`,
+d'où le maximum plutôt que la somme. Le seuil `s>=8` fixe le domaine produit et
+sa marge continue commune ; il ne prouve aucune disjonction.
 
-La somme `h_coeur+h_a+h_b+h_c` n'est autorisée que par un contrat plus fort :
-`h_coeur_not_C` compte exclusivement dans `P minus (A union B union C)` et
-`h_c(c)` exclusivement dans `C minus (A union B union {c})`. Les quatre
-strates sont alors disjointes. Une union sparse d'IDs donne la même sécurité
+Sans IDs de provenance, sommer `h_coeur+h_a+h_b+h_c` exige une preuve de
+disjonction pour le même support. Un contrat suffisant est que
+`h_coeur_not_C` compte exclusivement dans `P minus (A union B union C)` et que
+`h_c(c)` compte exclusivement dans `C minus (A union B union {c})`, les
+crédits d'extrémité restant dans leurs facteurs disjoints. Ce découpage n'est
+pas la seule preuve possible : une union sparse d'IDs donne la même sécurité
 sans sacrifier les témoins du cœur situés dans `C`.
 
 Enfin, `h_c` peut être un unique scalaire du handle seulement s'il minore tous
 les carriers valides de ce handle : `h_C(C) <= min_c h_c(c)`, le minimum étant
-pris sur les fibres non vides. Un ensemble commun certifié pour tout `c` suffit ;
-sinon le tableau doit rester indexé par `c`, en particulier quand le patch ou
-la boule dépend de sa position. Une fibre vide reçoit un fate séparé et crédit
-zéro, jamais le minimum d'une famille vide.
+pris sur les fibres non vides. Dans un calcul fail-open, tout carrier `UNKNOWN`
+reste dans ce minimum ; seuls les `certified_no_seed` peuvent en sortir. Un
+ensemble commun certifié pour tout `c` suffit ; sinon le tableau doit rester
+indexé par `c`, en particulier quand le patch ou la boule dépend de sa
+position. Une fibre vide reçoit un fate séparé et crédit zéro, jamais le
+minimum d'une famille vide.
 
-La contre-fixture minimale prend `a=(0,0,0)`, `b=(4,0,0)`, `c=(2,3,0)` et
-`z=(2,1,0)`, avec `c,z` dans le même handle. Le même `z` peut être reconnu par
-le cœur et par `h_c(c)` : la profondeur apportée est 1, non 2. Elle doit tuer
-un mutant qui additionne les deux scalaires. En q4, appliquer cette règle sur
-la face `A x B x C`; le quatrième support `D` ne vient qu'après cette porte et
-garde sa propre strate ou ses propres IDs.
+Le cap structurel existant rend ce tableau préférable au scalaire comme premier
+prototype : `rect_cover_handles` produit une antichaîne dont chaque handle porte
+32 positions au plus. Pour `H=sum_C |C|`, la borne élémentaire donne
+`sum_C |C|^2 <= 32 H`. Avec au plus 64 patches, une
+table saturée `h_{c,j}(c)` reste donc linéaire en masse de handles à constantes
+fixées ; elle doit être calculée paresseusement sur les seuls carriers et
+patches résiduels. Cela ne borne ni `H` cumulé sur tous les rectangles, ni les
+histogrammes A/B, ni le résiduel émis, et ne prouve donc aucune
+sous-quadraticité globale.
+
+Le raccord minimal conserve l'ordre actuel `a,b,c` : condenser la table en un
+seuil `tau(c)`, tuer une ancre entière si son crédit A/B dépasse le maximum des
+seuils encore possibles, puis ignorer seulement le **droit d'émission** des
+carriers fermés. Un carrier mort reste disponible comme témoin, complétion ou
+site de census. Ne pas compacter le cover unique selon `tau` ; garder une vue
+`seed_capability` distincte de `certificate_source` et d'`exact_census_source`.
+Le prototype reste CPU, plat et counter-only avant toute auto-jointure de
+l'arbre, avec parité exhaustive à `n<=14` et mesure des patches, couples locaux
+et triplets réellement évités.
+
+Au source actuel, `AliveRect` ne porte que le scalaire `core`. Le raffinement
+post-séparation hérite `max(parent,fresh)` sans provenance et
+`collect_universal_ids` n'a ni appel ni porte directe ; une recollecte enfant
+ne doit donc jamais être supposée restituer les IDs du certificat parent. Le
+premier prototype reste sur les `max` stratifiés. Une union d'IDs exige ensuite
+un type `CoreWitnessSet` avec lane, rectangle, cap, origine et validation du
+mapping ; tout échec de récupération revient au scalaire, fail-open.
+
+La contre-fixture q3 minimale fixe explicitement
+`P={a,b,c,z}`, `A={a}`, `B={b}`, un handle `C` contenant `c,z`, avec
+`a=(0,0,0)`, `b=(4,0,0)`, `c=(2,3,0)` et `z=(2,1,0)`. Le même `z` est strictement
+reconnu par le cœur et par `h_c(c)` ; la profondeur de ce nuage vaut 1, non 2.
+Elle doit tuer un mutant qui additionne les deux scalaires.
+
+La portée q4 n'est pas automatique : elle demande un crédit `h_c4(c)` strict,
+valable pour toutes les complétions `d` admissibles ou tout le patch de centres
+de la face. Le crédit q3 ne se réemploie pas par son nom. Une extension exacte
+de la fixture prend `d=(2,1,3)` : elle grave le recouvrement cœur/carrier en q4.
+Les rôles `c,d` ne sont pas ordonnés géométriquement et peuvent appartenir au
+même handle. Pour deux handles réellement disjoints, une strate séparée est
+possible ; sur la diagonale `C=D=H`, elle ne l'est pas. Sans IDs ou partition
+canonique de `choose2(H)`, poser `h_d=0`, jamais `h_c+h_d` sur deux copies du
+même domaine.
 
 ### V156 — fermeture rectangle : ne pas réinventer le raffinement exhaustif
 
@@ -529,10 +706,18 @@ Diagnostic seulement sur ce candidat, dans un build CPU propre hors arbre :
 
 ```text
 configure Release sans CUDA/sanitizers                         PASS
-6 cibles ciblées compilées et liées avec -Werror              6/6 PASS
-CLI/API/WSPD large/fold/separation ciblés                     20/20 PASS
-mhgp5_postsep_refine nominal                                  SANS VERDICT (interrompu)
+7 cibles ciblées compilées et liées avec -Werror              7/7 PASS
+CLI/API/WSPD/postsep/fold/separation/batch ciblés             28/28 PASS, 194,09 s
+  mhgp5_postsep_refine nominal                                PASS, 89,44 s
+  mhgp5_postsep_refine_h1_mutant                              PASS, 86,55 s
+  cinq mutants postsep supplémentaires                       PASS
 ```
+
+Les sept cibles sont `mhgp5`, la garde API, la porte WSPD, la porte postsep,
+les portes batch q3/q4 et le fold bench. Les 28 CTests incluent les douze cas
+CLI `s`, les bornes API/WSPD, nominal et mutants post-séparation, fold,
+séparation `s=7/8` et parité batch q3/q4. Ils reçoivent le **worktree candidat**
+CPU, pas un pin Git ni une suite complète.
 
 Les portes CUDA ne sont ni générées ni exécutées. Les CTests CUDA candidats
 lancent d'ailleurs le binaire sans `--gpu` : ils vérifieraient le parser du
