@@ -13,13 +13,16 @@ les deux routes CPU, le mutant `chord-skip-positive`, une régression de masse
 `terrain n=2000` et les corrections de portée de `PROFIL_SEPARATION.md`. Le
 kernel CUDA n'est pas modifié par ce pin.
 
-Les sources suivies du worktree sont identiques à `e2ac9da2`; les changements
-restants sont des propositions documentaires conservées pour Claude. Les
-commits `62959613`, `4c286017`, `d421bd69`, `30c1dc30` et `3b729c01` portent les
-contre-lectures et réponses actives. Les deux faux reçus `cf_*.txt`, qui ne
-contenaient que l'échec d'invocation d'un binaire absent, ont été supprimés.
-Toute modification source ultérieure périme la fraîcheur du verdict, pas les
-contre-exemples mathématiques ni les constats attachés aux pins nommés.
+Le `HEAD=b1045ae5` ne change pas ces sources q4 : il ajoute au ledger causal de
+la question V158--V161. Le worktree contient en revanche un brouillon
+concurrent non commité dans `mutants.hpp`, `sector_kill.hpp` et `generate.hpp`,
+qui raccorde `EndpointCredit` aux prétests q4. Ce brouillon est relu séparément
+ci-dessous, sans être substitué au pin source. Les autres changements non
+commités sont des propositions documentaires conservées pour Claude. Les
+commits `d421bd69`, `30c1dc30`, `3b729c01` et `be8dfd26` portent les
+contre-lectures q4 actives. Toute modification source ultérieure périme la
+fraîcheur du verdict, pas les contre-exemples mathématiques ni les constats
+attachés aux pins nommés.
 
 ## Verdict
 
@@ -127,6 +130,29 @@ les sites non positifs gardent le cœur prioritaire puis le test de corde
 historique. Il faut graver les deux permutations dans la porte exacte, puis
 former `my_piece` avant la branche du cœur dans le kernel.
 
+### Le brouillon `EndpointCredit` q4 est sûr mais ne réalise pas encore son contrat
+
+Le worktree propage utilement `h_a+h_b` vers le pré-scan W4 et les secteurs.
+La disjonction employée est correcte : le crédit vit dans `A union B`, tandis
+que `cnt_out` ne lit que son complément. Mais le commentaire annonce
+`min_k max(cnt[k],cnt_out[k]+base)>=h`, alors que le code calcule seulement
+`min_k cnt[k]>=h` **ou** `min_k(cnt_out[k]+base)>=h`. Ce dernier reste fail-open
+et sûr, mais il perd les cas où certains secteurs sont fermés par le compte pur
+et les autres par le crédit. Pour réaliser le contrat annoncé, prendre le
+maximum secteur par secteur avant le minimum et graver une fixture croisée où
+aucune des deux branches globales ne suffit seule.
+
+Le raccord n'est pas encore homogène : `q3_lane_batched.hpp` et
+`q4_lane_batched.hpp` construisent les mêmes histogrammes mais ne transmettent
+pas `EndpointCredit` à leurs prétests, routes hôte ou prétest manuel avant le
+lot device. Aucun nouveau wire n'est requis : construire le crédit par ancre
+côté hôte, le passer aux fallbacks et employer la même fonction de prétest
+avant matérialisation. Sans cela, la production et les lanes par lots divergent
+dès que le nouveau kill devient non vacant. Le mutant `sector-credit-inbox`
+n'a encore aucune porte visible ; il faut une mort fausse par double comptage,
+des planchers sur les nouvelles morts et la parité production/batch. Ce
+brouillon ne corrige par ailleurs aucune des trois coutures de corde ci-dessus.
+
 ### La sonde de corde actuelle n'est plus une autorité indépendante
 
 `q4_chord_probe` construit son flux `emitted` en appelant aujourd'hui le
@@ -178,6 +204,16 @@ mur/CPU n'isole pas exclusivement la contention. Enfin, les champs de profil
 et leur agrégation existent dans `GenerateStats` hors `MHGP5_PROFILE_Q4` : seule
 leur alimentation est neutralisée. Le commit ne peut donc pas les qualifier de
 « sans effet sur le binaire produit » sans mesure ou conditionnement complet.
+
+Le ledger causal ajouté dans `b1045ae5` est la bonne prochaine sonde, avec une
+garde : son identité `N_scan=seeds[1]-seeds_killed_cells[2]` suppose
+`invariant_jneg==0`. Sinon un `Jb<0` saute le scan mais finit actuellement dans
+`seeds_killed_core`; il faut soit refuser le reçu si l'invariant est non nul,
+soit séparer `jneg` et écrire `N_scan=seeds-cells-jneg`. Le titre et les phrases
+« ne change pas » / « pas un artefact de famille » de `docs/Q4_MUR_UNITE.md`
+restent incompatibles avec la requalification mono-graine de ce même document.
+Les exposants locaux de compteurs à deux tailles ne doivent pas devenir des
+claims asymptotiques sur une lane ou une famille.
 
 ### Deux corrections mathématiques aux audits
 
@@ -256,6 +292,27 @@ et incidences de droites ont leur propre terme ; et `h_c` ne ferme un nœud de
 carriers qu'avec un seuil uniforme prouvé sans visiter ses feuilles. Le
 coarsening du front est borné à `postsep_refine_levels=0`.
 
+Le choix Morton recommandé pour le premier incrément est de réutiliser le cube
+`Q` et de contracter ses au plus sept préfixes internes dans un quotient octree
+indépendant. Les invariants suggèrent le lemme de simulation
+`R_shadow<=49*R_oct<=49*C_3(8)*m`, mais le facteur 49 n'est reçu qu'après avoir
+prouvé l'injection terminale et n'est pas la constante WSPD totale. Le charging
+`C_3(8)` et le nouveau ledger global de coupe
+`R_cut=rectangles_emis+rectangles_tues_core` doivent encore entrer dans une
+porte avant `R_cut=O(m)`.
+
+Une spécification de prototype exact est dérivée pour les facteurs : `ALL` est
+équivalent aux 64 couples de coins sur le produit continu partenaire--témoin,
+donc seulement suffisant pour les positions discrètes d'un nœud ; `NONE`
+dispose d'un certificat entier conservateur, et `MIXED` descend jusqu'aux
+feuilles pour rendre le compte exact. Son coût est
+`O(V_R+C_R+|A|+|B|+P_R)`, où `V_R` compte tous les nœuds classifiés,
+`C_R<=64*V_R` les couples de coins et `P_R` les ancres survivantes de ce seul
+filtre. Chacun de ces termes peut encore être quadratique. Le premier moteur
+plan suit la même discipline :
+`PlanConflictGrid` shadow q3 mesure `K_conf`, puis le shadow q4 mesure
+`P_grid`; aucun des deux compteurs n'est une preuve d'exposant.
+
 Le claim global reste NO-GO tant que `R=O(n)`, le constructeur exact des
 niveaux peu profonds et chaque terme du grand-livre ne sont pas prouvés. Les
 cinq tailles et trois graines peuvent réfuter ou borner une classe annoncée ;
@@ -265,12 +322,18 @@ elles ne remplacent aucune de ces preuves.
 
 1. Fermer `e2ac9da2` avec les deux ordres de la fixture q4 et la route device ;
    garder CUDA non reçu tant que `nvcc` n'a pas rejoué la porte.
-2. Livrer le patch de vérité Gabriel/Gamma et le refus `require_exact`.
-3. Limiter exactement le claim de parsing à `--s` dans la documentation.
-4. Fermer le ledger q4 et rendre les nouveaux compteurs non vacants.
-5. Refaire la porte WSPD contre le symbole produit, puis mesurer la mémoire.
-6. Après ces portes seulement, choisir entre optimisation q4 et fusion WSPD à
-   partir de murs appariés et de reçus bruts.
+2. Finir le raccord `EndpointCredit` secteur par secteur, puis le recevoir sur
+   les routes production, batch et device avec mutant non vacant.
+3. Livrer le patch de vérité Gabriel/Gamma et le refus `require_exact`.
+4. Limiter exactement le claim de parsing à `--s` dans la documentation.
+5. Fermer le ledger q4 et rendre les nouveaux compteurs non vacants.
+6. Recevoir le front `Q` par quotient octree, shadow et ledger global, puis
+   seulement raccorder la fusion des lanes et mesurer la mémoire.
+7. Ajouter les requêtes `h_a/h_b` `ALL/NONE/MIXED` en shadow contre
+   `corner_histograms`, avec garde cardinal et compteurs `V_R+C_R+P_R`.
+8. Livrer `PlanConflictGrid` q3 counter-only, puis q4 avec budget/fallback ;
+   n'ouvrir le constructeur orienté de faibles profondeurs qu'après ces
+   profils exacts.
 
 ## Vérifications indépendantes de cette passe
 

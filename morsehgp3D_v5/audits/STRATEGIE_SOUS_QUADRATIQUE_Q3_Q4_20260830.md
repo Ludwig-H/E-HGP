@@ -12,6 +12,17 @@ le build/parsing et ajoute l'instrumentation q4. Le worktree d'audit reste
 concurrent. Ses modifications non commitées ne sont jamais substituées au pin ;
 aucun claim de résultat, de complexité ou de fraîcheur ne leur est attribué.
 
+Mise à jour au `HEAD=b1045ae5` : le source q4 est toujours celui du commit
+`e2ac9da2`, et la contre-relecture WSPD/facteurs/moteur plan ci-dessous porte
+sur ce nouvel état. La porte de masse `chord_positive` est reçue comme
+régression de compteur, mais pas comme fixture de correction : le `continue`
+positif précède encore `chord.dead(h4)` et le device garde l'ancien branchement.
+Ce verrou reste donc ouvert malgré les trois CTests verts rejoués localement.
+Claude a par ailleurs retiré dans `d723b68a` son interprétation des exposants
+mono-graine de la canopée bornée ; les mesures à trois graines confirment un
+mur de compteurs sur `terrain`, mais ne bornent aucun terme de l'algorithme
+proposé ici.
+
 Cette stratégie optimise uniquement la source horizontale actuelle sous
 `forest_semantics=verified_events_only`. Elle ne fournit ni les incidences
 silencieuses Gamma, ni la reconstruction correspondante, ni une raison
@@ -105,13 +116,30 @@ cellule exacte fixe `l` bits de chaque axe, puis le bit suivant de `z` si
 
 `cell_of_prefix` calcule aujourd'hui seulement `level=used/3`. Les champs
 `clo/chi` décrivent donc le cube octree englobant `Q`, pas la cellule exacte de
-préfixe `P`. Deux réparations sont possibles :
+préfixe `P`. La décision recommandée est de **conserver `Q`** pour le premier
+incrément. Il existe déjà, ne change ni le layout ni les derniers bits. Le
+lemme candidat est le suivant : pour un cube non singleton, les préfixes
+internes réalisés de résidus 0, 1 et 2 portant le même `Q` forment une
+composante connexe de taille au plus `1+2+4=7`. Leur contraction doit produire
+un octree occupé compressé, éventuellement à racine comprimée, de fanout au
+plus huit. Définir explicitement `Q(leaf)={point}` dans `packing_box_of` ; une
+feuille est alors son cube singleton de niveau 16 et ne s'ajoute pas aux sept
+représentants internes de son parent.
 
-- préférence : stocker `P` exactement, y compris les un ou deux bits
-  résiduels ;
-- repli : conserver `Q`, mais prouver `tight(v) subset P(v) subset Q(v)`, la
-  monotonie parent--enfant et le fait qu'au plus sept préfixes binaires
-  internes partagent un même cube avant le triplet Morton suivant.
+La seule multiplicité sept ne prouve pas encore le facteur 49. Il faut recevoir
+un lemme de simulation : les arêtes sortantes de chaque composante vont vers
+au plus huit octants distincts ; les états à cellules égales ou imbriquées ne
+terminent pas par `SepQ` ; la contraction simule exactement l'expansion
+multiway ; et l'exact-once des graines LCA empêche de produire deux fois un
+même couple. On peut alors injecter chaque terminal binaire dans
+`(terminal_octree,rank_left,rank_right)` et borner une fibre canonisée par
+`7*7=49`. Sous ce lemme écrit et reçu, le squelette de preuve vise
+`R_shadow<=49*R_oct<=49*C_3(8)*m` pour `m` positions uniques. Le facteur 49 est
+un majorant du déroulage Patricia, **pas** la constante WSPD totale : le
+charging `C_3(8)` doit encore traiter les boîtes entières de largeur `2^k-1`,
+les cellules virtuelles des arêtes comprimées, leur disjonction et leur
+distance bornée. Il est interdit d'inventer une valeur numérique pour cette
+constante.
 
 Le front ombre emploie seulement la séparation des cellules et scinde le
 facteur de plus grand diamètre de cellule, avec tie-break canonique. Le front
@@ -124,8 +152,20 @@ SepCell(A,B) || SepTight(A,B)
 Chaque terminal réel doit alors être l'ancêtre d'un ensemble non vide de
 terminaux ombre. Le ledger exact-once est conservé à chaque remplacement
 `A x B = A0 x B disjoint_union A1 x B`, et le front réel est un coarsening du
-front de packing. Il reste à écrire le charging par nœud et échelle ; une pente
-empirique ne le remplace pas.
+front de packing. Cette projection exige **le même split par diamètre de `Q` et
+le même tie-break** dans le shadow et le réel. Elle donne alors
+`R_cut<=R_shadow`; aucune monotonie de `SepTight` n'est nécessaire, avec
+`R_cut=rectangles_emis+rectangles_tues_core` et `R_emis<=R_cut`. Les produits
+correspondants forment une partition de masse, lane par lane. Le
+`PostsepLedger` actuel ne voit pas les morts du cœur de la descente principale :
+il faut donc un nouveau ledger global depuis les graines jusqu'à cette coupe,
+et non renommer le ledger local existant.
+
+L'incrément minimal à Claude est donc : exposer `packing_box_of`, renommer la
+fausse « cellule exacte », partager une politique pure `SepQ || SepTight`, puis
+ajouter un shadow test-only `SepQ`. Ne pas commencer par `P`, et ne pas annoncer
+`O(n)` avant que le quotient octree indépendant, l'injection des terminaux et
+le charging soient écrits et reçus.
 
 Ce coarsening ne vise ici que `postsep_refine_levels=0`. Tout raffinement
 post-séparation modifie l'arbre de rectangles et demande une projection, un
@@ -139,12 +179,15 @@ l'instant, figer **`s=8`**. À `s=INT64_MAX`, tout facteur de diamètre positif
 positions, donc un front quadratique. La primitive arithmétique large peut
 rester testée hors profil de coût.
 
-Fixtures minimales : `used mod 3 = 0,1,2`, inclusion `tight/P/Q`, multiplicité
-du cube au plus sept, diamètre non croissant puis strictement décroissant au
-triplet Morton suivant, mapping terminal ombre vers terminal réel,
-`R_real<=R_shadow`, ledger exact sous permutations et mutant de scission par
-boîte serrée. Exiger une décroissance stricte à chaque enfant réfuterait à tort
-le repli `Q`, dont le diamètre peut stagner pendant les bits résiduels.
+Fixtures minimales : `used mod 3 = 0,1,2`, inclusion `tight subset Q`,
+multiplicité interne du cube au plus sept, les huit feuilles singleton d'un
+cube `2x2x2`, diamètre non croissant puis strictement décroissant au triplet
+Morton suivant, quotient octree de fanout huit, fibre terminale au plus 49,
+mapping terminal ombre vers coupe réelle, `R_emis<=R_cut<=R_shadow`, ledger
+global exact sous permutations et mutants de scission par boîte serrée, `AND`
+au lieu de `OR`, feuille rattachée au parent et tie-break divergent. Exiger une
+décroissance stricte à chaque enfant réfuterait à tort `Q`, dont le diamètre
+peut stagner pendant les bits résiduels.
 
 ## Étage 1 — fermer `A x B` sans le développer
 
@@ -152,6 +195,29 @@ Le cœur du citron et les crédits d'extrémités doivent être utilisés ensemb
 Ils répondent à des domaines de témoins distincts et ferment une ancre lorsque
 leur somme certifiée atteint le seuil de la lane. Un cœur faible ne doit donc
 jamais court-circuiter `h_a` et `h_b`.
+
+Le premier raccourci est gratuit : si
+`(|A|-1)+(|B|-1)<need`, aucun couple ne peut mourir par `h_a+h_b`, donc les
+deux histogrammes sont entièrement sautés ; un facteur singleton reçoit zéro.
+Sinon, une descente one-sided exacte est possible sans enrichir `RadixNode`.
+Pour l'endpoint `s`, la boîte partenaire `T` et un nœud témoin `Z`, les
+64 couples de coins de `T x Z` donnent un classifieur `ALL` **exact sur le
+continu**. La raison est double : à `t` fixé, le fuseau ouvert est convexe en
+`z`; à `z` fixé, les partenaires admissibles forment un cône convexe en `t`.
+L'évaluation peut donc appeler `universal_over_corners(q,s,T,zc)` pour chaque
+coin distinct `zc` de `Z`.
+
+`NONE` doit rester conservateur. Pour un coin partenaire `t`, calculer
+`M=hmax4_boxes(point_box(s),point_box(t),Z)=4*max_Z(H)`. Pour chaque composante
+`j` de `d cross (z-s)`, former son intervalle exact `I_j` sur `Z`, puis
+`Xlb=sum_j dist(0,I_j)^2` ; sommer des extrema incompatibles ou prendre un
+maximum serait faux. Si `M<=0`, ou si `beta_q*M*M<=16*Xlb` avec `beta_3=3` et
+`beta_4=2`, aucun point de `Z` ne témoigne pour ce `t`, donc aucun n'est
+universel sur `T`. Dans tous les autres cas le nœud est `MIXED` et il faut
+descendre ; à la feuille, `universal_over_corners` reste l'autorité exacte.
+Voir tous les couples de coins hors du fuseau ne prouve jamais `NONE` : deux
+ensembles discrets peuvent avoir la même AABB, l'un sans témoin et l'autre avec
+un témoin au centre.
 
 La couture qui change le coût est la suivante :
 
@@ -172,6 +238,27 @@ devient linéaire en `|A|+|B|`, visites de nœuds mixtes et couples réellement
 `PENDING`, au lieu de `|A|^2+|B|^2+|A||B|` par défaut. Il peut encore être
 quadratique si tout reste mixte : le nombre de visites et la masse `PENDING`
 doivent être publiés comme critères de réfutation.
+
+La borne honnête par rectangle est
+`O(V_R+C_R+|A|+|B|+P_R)`, où `V_R` somme tous les nœuds classifiés,
+`C_R<=64*V_R` les couples de coins évalués et `P_R` les ancres survivantes de
+ce seul filtre. Une AABB seule autorise encore
+`V_R=Theta(|A|^2+|B|^2)` : cette primitive est un prototype exact et mesurable,
+pas encore une preuve d'exposant. Employer la boucle directe sur les facteurs
+minuscules, l'arbre seulement au-dessus d'un seuil fixé, et publier
+`all_nodes`, `none_nodes`, `mixed_nodes`, `corner_pair_evals`, `leaf_tests`,
+`range_add_mass`, `V_R` et `direct_pairs`.
+
+La fusion q3/q4 est sûre avec des masques : `ALL4` crédite les deux lanes,
+`ALL3` seulement q3, `NONE3` ferme les deux et `NONE4` seulement q4. Une lane
+créditée est retirée avant la descente. La feuille `z=s` reste exclue et ne peut
+jamais devenir `ALL` (`H=0`) ; une garde, une assertion et un mutant doivent
+graver cet invariant. Les comptes sont saturés séparément à
+`need3=h3-hcore3` et `need4=h4-hcore4`, et le shadow compare
+`min(corner_histograms,need_q)` par lane. Aux maxima du profil `smax=11`, les
+`b` sont rangés dans au plus neuf classes de crédit, puis émis par bitsets
+cumulatifs ou merge **dans l'ordre Morton historique** ; concaténer les classes
+casserait la parité brute.
 
 Chaque crédit conserve ses IDs ou une partition de provenance. Les témoins du
 cœur, de `h_a`, de `h_b`, de la grille et de `h_c` ne s'additionnent pas si
@@ -268,11 +355,13 @@ fixture de séparation des deux sources.
 
 Après les portes bon marché de rang, non-colinéarité, owner et acuité, chaque
 carrier admissible `c` donne un point précis de `ell_c`, le centre de la
-circonférence passant par `a,b,c`. Ce point est sur une face 1D du
-sous-complexe : une point-location dans une cellule 2D adjacente compterait à
-tort un site incident. La requête doit rendre la profondeur stricte de la face
-elle-même. Si elle atteint 9, le seed est mort ; sinon les portes exactes
-restantes continuent. `k_e` compte tous les carriers effectivement interrogés.
+circonférence passant par `a,b,c`. Ce point est sur la droite du carrier, mais
+sa strate minimale peut être 1D ou 0D si plusieurs classes sont concurrentes
+ou cosphériques. Une point-location dans une cellule 2D adjacente compterait à
+tort un site incident. La requête doit rendre la profondeur stricte de cette
+strate minimale, classe confondue comprise. Si elle atteint 9, le seed est
+mort ; sinon les portes exactes restantes continuent. `k_e` compte tous les
+carriers effectivement interrogés.
 
 Le raccord algorithmique reste ouvert. Il faut prouver un constructeur du
 sous-complexe stratifié de profondeur inférieure à `h3`, dégénérescences du
@@ -282,10 +371,44 @@ coûtent `O(A_e+k_e*log(m_e))`. Si `k_e=O(m_e)`, le produit `seed x cover` serai
 alors remplacé par `O(m_e*log(m_e))` à seuil constant. La complexité
 combinatoire des niveaux ne fournit pas, à elle seule, ce constructeur exact.
 
-Une structure de cuttings donnant des requêtes sous-linéaires peut servir de
-prototype q3 intermédiaire. Elle ne doit pas devenir l'architecture finale si
-elle ne sert pas aussi q4 ou si son prétraitement caché construit l'arrangement
-complet.
+Le premier incrément codable est un `PlanConflictGrid` **shadow exact par
+rapport aux `witness_tape` et `q3_query_tape` reçus**. Pour
+`r_z=2z-a-b`, `q_z=|r_z|^2-|b-a|^2` et un centre décalé `v`, chaque témoin
+définit l'affine `F_z(v)=4*r_z dot v-q_z`; la profondeur stricte est le nombre
+de `F_z(v)>0`. Sur une cellule fermée, `min(F)>0` crédite `base_depth`,
+`max(F)<=0` ne crédite rien, et le reste va dans la liste de conflits. Le centre
+q3 rationnel est localisé dans une cellule canonique par comparaisons entières
+256 bits, puis seuls les conflits sont réévalués exactement. La parité à graver
+est `4*r_z dot N-2*g3*q_z=-8*q3_power`, avec `g3=f3.g`. Les formes axiales
+`A=B=0` sont retirées avant rasterisation : `q_z<0` crédite toutes les cellules,
+`q_z=0` est coquille universelle sans profondeur, et `q_z>0` ne crédite rien.
+
+Le localisateur flottant actuel ne convient pas : il certifie un sur-ensemble
+de cellules fermées, pas un propriétaire canonique. L'oracle
+`tests/cell_grid_oracle.cpp` contient déjà les primitives W256 et leurs bornes ;
+elles doivent devenir une primitive produit testée indépendamment, jamais un
+import de l'oracle. Avec `G_grid` la résolution et
+`K_conf=sum_query |conf[cell(query)]|`, le coût publié est
+`O(G_grid*m_e+k_e+K_conf)` après rasterisation, ou
+`O(G_grid^2*m_e+k_e+K_conf)` au premier brouillon. À `G_grid` fixé, `K_conf`
+peut encore valoir `Theta(m_e*k_e)` : ce shadow mesure le verrou, il ne le
+ferme pas.
+
+La littérature distingue précisément ce qui est acquis. Har-Peled et Sharir,
+[Depth contours in arrangements of halfplanes](https://www.math.tau.ac.il/~michas/k_depth.pdf),
+lemme 2.5, bornent par `m*(k+1)` les sommets de profondeur au plus `k` pour des
+orientations mixtes **en position générale**. Les coïncidences, concurrences,
+verticales et frontières strictes v5 restent donc à étendre. Everett, Robert et
+van Kreveld,
+[An optimal algorithm for computing (≤k)-levels, with applications](https://doi.org/10.1142/S0218195996000186),
+donnent le constructeur `O(m log m+m*k)` pour les niveaux classiques, mais pas
+pour le niveau pondéré `+1/-1` induit par nos orientations mixtes. Aronov et
+Har-Peled,
+[On Approximating the Depth and Related Problems](https://sarielhp.org/p/04/depth/depth.pdf)
+§ 4.2, rappellent en le citant l'incrémental randomisé pour des régions
+pseudodisques x-monotones bornées par des courbes fermées. L'adaptation exacte
+aux demi-plans non bornés, aux lignes confondues et aux strates strictes v5
+reste à prouver. Une shallow cutting seule ne produit pas ce sous-complexe.
 
 ### q4 : énumérer les sommets peu profonds
 
@@ -313,6 +436,17 @@ peuvent en revanche être concurrentes en un centre ; tous leurs événements
 sont appliqués en bloc, sans perturbation symbolique qui transformerait une
 coquille en intérieur.
 
+Le même `PlanConflictGrid` fournit un shadow q4 limité : rasteriser les lignes
+incidentes aux cellules, former seulement les paires de classes non parallèles,
+garder l'intersection dans sa cellule canonique puis appliquer Cramer et les
+portes existantes. Son coût critique est
+`P_grid=sum_C binom(line_incidence_C,2)`. Un faisceau peut rendre ce terme
+quadratique. Le premier shadow q4 est donc strictement counter-only et n'émet
+rien. Un futur candidat produit devra faire un preflight complet, puis choisir
+atomiquement la route grille ou le fallback avant toute émission. Il mesure si
+la grille suffit sur un régime, sans être confondu avec le constructeur optimal
+visé.
+
 Un centre concurrent ne peut émettre une `BallKey` qu'après avoir prouvé qu'il
 existe une paire incidente distincte qui satisfait rang, rôles de support,
 lentille, owner, exact-once et bien-centrage. Tester toutes les paires d'un
@@ -331,6 +465,11 @@ scan diffèrent. Chaque entrée du tape porte donc ses masques de lane et chaque
 zone garde son seuil. Pour la première requalification q4, conserver
 `scan_source=cover3` afin de reproduire le flux historique ; un cover 4 plus
 complet est un autre contrat et peut changer `digest_balls`.
+
+Concrètement, ne jamais fusionner trois populations : `witness_tape` est le
+`scan_sites()` qui compte la profondeur, `q3_query_tape` contient les carriers
+à interroger, et `q4_support_tape` porte les rôles carrier/complétion. `h_c`
+ferme un rôle de fibre ; il ne retire pas le même point du tape de témoins.
 
 ## Route adaptative qui conserve la borne
 
@@ -450,11 +589,14 @@ pas un choix unique de micro-kernel.
 
 ### P1 — recevoir le front et retirer les auto-produits
 
-1. Choisir `P` exact ou `Q` avec facteur sept, puis implémenter le shadow
-   `SepCell` et le terminal `SepCell || SepTight`.
-2. Figer le profil de coût à `s=8`.
-3. Remplacer `corner_histograms` par requêtes saturées, bitsets de résidu et
-   porte `all_dead` avant handles.
+1. Exposer le cube `Q` existant, partager split/tie-break par diamètre de `Q`,
+   puis implémenter le shadow `SepQ` et le terminal `SepQ || SepTight`.
+2. Recevoir le quotient octree, les fibres de taille au plus 49, le ledger
+   global de `R_cut` et le coarsening, à `s=8`, `postsep=0`.
+3. Ajouter le garde cardinal puis remplacer `corner_histograms` par les
+   requêtes `ALL/NONE/MIXED` saturées et la porte `all_dead` avant handles.
+4. Émettre le résidu dans l'ordre historique et publier `V_R+C_R+P_R`; aucun
+   claim si les visites mixtes gardent l'auto-produit.
 
 ### P2 — mesurer le vrai résidu `h_c`
 
@@ -471,14 +613,19 @@ pas un choix unique de micro-kernel.
    seuils stricts. Graver sites axiaux constants, faces 1D/0D, droites
    parallèles, classes confondues, concurrence multiple, témoin sur frontière,
    groupes `witness_only` et source `cover3` suivie du census.
-2. Ajouter q3 comme requêtes de points désignés et q4 comme sommets peu
-   profonds, avec groupes de concurrence. Un mutant qui accepte un centre sans
-   paire incidente admissible doit tomber sans énumération quadratique.
-3. Comparer la correction de corde et la petite route au flux brut historique.
+2. Livrer d'abord `PlanConflictGrid` en shadow q3 : affine, classification de
+   cellule et propriétaire rationnel W256 contre le scan exhaustif.
+3. Ajouter le shadow q4 counter-only et publier `K_conf` puis `P_grid`, y
+   compris le nombre de budgets qui auraient été dépassés. Un raccord produit
+   ultérieur devra faire son preflight et son fallback avant toute émission.
+4. Construire ensuite le sous-complexe orienté de faibles profondeurs ; un
+   mutant qui accepte un centre sans paire incidente admissible doit tomber
+   sans énumération quadratique.
+5. Comparer la correction de corde et la petite route au flux brut historique.
    Pour la route quotientée, comparer le set et les niveaux post-RLE des
    `BallKey`, le census, les fates, événements, forêt et digests ; conserver un
    ledger distinct de la multiplicité brute supprimée.
-4. Garder la route historique sous un `m0` constant et router les ancres lourdes
+6. Garder la route historique sous un `m0` constant et router les ancres lourdes
    vers l'arrangement.
 
 ## Compteurs et portes go/no-go
@@ -493,9 +640,11 @@ Chaque run doit publier au minimum :
   et résidu matérialisé ;
 - ancres : distribution de `m_e`, `k_e`, somme `m_e`, somme `m_e*log(m_e)` et
   queue par octaves ;
-- q3 : points localisés, profondeurs exactes et supports/`BallKey` ;
+- q3 : points localisés, profondeurs exactes, `K_conf`, conflits maximum et
+  quantiles, fallback et supports/`BallKey` ;
 - q4 : `faces_D`, essais `D`, groupes de droites, sommets par profondeur,
-  incidences de groupes, multiplicité maximale, centres émis et census ;
+  `P_grid`, incidences de groupes, multiplicité maximale, centres émis et
+  census ;
 - candidats remis au tri, comparaisons/RLE, visites du census et de la forêt ;
 - temps exclusifs, HWM, sortie canonique et expansion demandée.
 
@@ -520,8 +669,8 @@ avec la petite route ; c'est leur répétition non bornée qui est interdite.
 
 ## Questions à Claude avant de raccorder
 
-1. Veut-il stocker la cellule de préfixe exacte `P`, ou conserver le cube `Q`
-   et payer/prover le facteur sept ?
+1. Le front `Q` partage-t-il maintenant strictement split et tie-break entre
+   shadow, WSPD produit et `alive_rectangles` ?
 2. Où `h_c` ferme-t-il un nœud de carriers avant toute matérialisation de
    `A x B x C` ?
 3. Quel est, après `h_core+h_a+h_b+h_c`, le nombre d'ancres résiduelles et la
@@ -530,8 +679,8 @@ avec la petite route ; c'est leur répétition non bornée qui est interdite.
    ouvre-t-il explicitement une requalification `cover4` ?
 5. La sortie demandée est-elle le quotient par `BallKey`, le shell complet ou
    l'expansion des supports ?
-6. La correction de corde et les compteurs non emboîtés sont-ils reçus avant
-   d'interpréter le nouveau profiler ?
+6. La fixture de corde à deux permutations, shaped puis device, est-elle reçue
+   en plus du plancher de masse avant d'interpréter le nouveau profiler ?
 
 Ces réponses déterminent la structure à coder. Elles ne bloquent pas le shadow
 `h_c`, mais elles bloquent tout claim de sous-quadraticité et toute conclusion
