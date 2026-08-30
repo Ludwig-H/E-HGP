@@ -12,6 +12,12 @@ Là où elle recoupe l'ordre de travail de l'auditeur, elle le suit.
 
 ## 0. Ce que j'ai vérifié moi-même sur ce pin
 
+> [!NOTE]
+> **Les trois premiers constats sont clos par `eba24b9a`**, poussé après la
+> rédaction de cette note. Je les conserve parce qu'ils expliquent pourquoi
+> l'item 1 était en tête, et je les fais suivre de ma propre vérification de la
+> fermeture. Le quatrième constat, lui, reste ouvert.
+
 Quatre constats de premier main, reproductibles, qui cadrent les priorités.
 
 - **Le build propre est cassé.** `tests/fold_bench.cpp` inclut
@@ -19,12 +25,15 @@ Quatre constats de premier main, reproductibles, qui cadrent les priorités.
   cible `mhgp5_fold_bench`, et la recette du `README.md` ne passe pas. Nuance
   factuelle par rapport à `ETAT_COURANT.md` § P1 : sur ce pin, **un seul**
   fichier l'inclut, pas trois.
-- **Six portes échouent sur 274.** `mhgp5_cli_refus_s_suffix` et
+- **Six portes échouent.** `mhgp5_cli_refus_s_suffix` et
   `mhgp5_cli_refus_s_overflow` (code 0, attendu 2), plus les quatre portes
-  `mhgp5_fold_bench_*` qui ne peuvent pas se construire. Les 268 autres passent,
-  y compris WSPD, secteurs, cellules, cordes, oracles bornés, mutants, parité
-  batch et post-séparation. **Le cœur mathématique tient ; c'est l'emballage qui
-  est cassé.**
+  `mhgp5_fold_bench_*` qui ne peuvent pas se construire. Toutes les autres
+  passent, y compris WSPD, secteurs, cellules, cordes, oracles bornés, mutants,
+  parité batch et post-séparation, et `scale8000` est vert 6/6.
+  **Le cœur mathématique tient ; c'est l'emballage qui est cassé.**
+  Dénominateurs, à ancrer : 291 CTests enregistrés et 274 sous le label `gate`
+  au pin `119b80b0` ; 297 et 280 depuis l'ajout des six portes de la sonde de
+  fusion. Les six rouges sont les mêmes dans les deux comptages.
 - **La cause est localisée.** La garde du CLI est `opt.s < 1`
   (`cli/mhgp5.cpp`) : elle ne connaît pas le plancher 8. C'est `run_pipeline` qui
   refuse 7, d'où `--s=7` correct. Mais `atoll("8junk")` rend 8 et
@@ -36,12 +45,21 @@ Quatre constats de premier main, reproductibles, qui cadrent les priorités.
   `ancres_w3`, `ancres_w4` et `ancres_hist` tombent **tous à zéro**. Tout
   l'élagage au niveau du bloc est désactivé. Une faute de frappe suffit.
 
-Un cinquième constat, hors code : voir la section 4, qui décrit l'état des
+**Fermeture vérifiée à `eba24b9a`.** `src/core/parse.hpp` est suivi
+(`git ls-files` le rend) ; `mhgp5_fold_bench` et `mhgp5` construisent tous deux
+sous `-Werror` ; `mhgp5_cli_refus_s_suffix` et `mhgp5_cli_refus_s_overflow`
+passent, et à la main `--s=8junk`, `--s=9223372036854775808` et `--s=7` rendent
+tous le code 2 tandis que `--s=8` rend 0. Le quatrième constat — le régime
+dégénéré atteint en silence par un `s` débordé — n'est donc plus atteignable
+depuis les CLI ; il reste vrai de la primitive `alive_rectangles`, dont l'opt-in
+test-only accepte encore un `s` arbitraire.
+
+Un cinquième constat, hors code : voir la section 5, qui décrit l'état des
 lignées Git et une divergence résolue le 30 août.
 
 ## 1. Ordre recommandé
 
-### 1. Fermer le build et le parsing — deux fichiers
+### 1. Fermer le build et le parsing — deux fichiers — **LIVRÉ (`eba24b9a`)**
 
 Ajouter `src/core/parse.hpp` au dépôt et router `--s`, `--n`, `--smax`,
 `--seed`, `--threads`, `--cell-min-sites`, `--shell-cap` par un parsing entier
@@ -61,9 +79,30 @@ C'est le P0 de l'auditeur et je le maintiens en tête après le build, parce qu'
 
 La v5 émet le sous-flot Gabriel horizontal puis les deltas d'un K-MST sur ses
 facettes. Ce n'est ni le `hgp_reduced` exact du contrat Gamma, ni une hiérarchie
-partielle munie d'une projection prouvée. Or `README.md`, `ARCHITECTURE.md`,
-`MATHEMATIQUES.md` § 7 et `src/forest/fold.hpp` l'appellent encore la forêt HGP
-exacte.
+partielle munie d'une projection prouvée.
+
+**Précision sur la liste des fichiers fautifs.** `ETAT_COURANT.md` § P0 écrit que
+`README.md`, `docs/ARCHITECTURE.md`, `docs/MATHEMATIQUES.md` § 7 et
+`src/forest/fold.hpp` « appellent encore le K-MST du graphe de Gabriel la forêt
+HGP exacte ». J'avais repris cette liste sans la vérifier ; contrôlée, elle est
+imprécise sur deux de ses quatre entrées :
+
+- la formule « la forêt HGP exacte » n'apparaît **nulle part** dans le chantier :
+  zéro occurrence hors `ETAT_COURANT.md` lui-même. C'est une paraphrase de
+  l'auditeur, pas une citation ;
+- `README.md` et `docs/ARCHITECTURE.md` ne contiennent **aucune** occurrence de
+  « Gabriel » ni de « K-MST ». Ils identifient la sortie aux « dix forêts
+  horizontales HGP du manuscrit », ce qui reste une **sur-qualification
+  sémantique** — le reproche tient — mais pas par le mécanisme allégué ;
+- le texte réellement fautif est `docs/MATHEMATIQUES.md:129` (« **la forêt HGP =
+  ce K-MST par K** », estampillé `theoreme_manuscrit`) et `:1009`, plus
+  `src/forest/fold.hpp:74` où `ForestResult::deltas` porte le commentaire
+  « le payload hierarchique complet ».
+
+Cette correction ne change ni le verdict, ni la fermeture attendue : elle change
+seulement **où poser le patch**. Viser `MATHEMATIQUES.md` § 1.2 et § 7.1 et
+`fold.hpp:74` en premier ; requalifier `README.md` et `ARCHITECTURE.md` sur le
+registre de la portée annoncée, pas sur celui du K-MST.
 
 Fermeture minimale, dans l'ordre de l'auditeur : renommer avec
 `proof_basis=gabriel_positive_connectivity` et `forest_semantics=verified_events_only` ;
@@ -117,7 +156,40 @@ mérite pas de passer devant un verrou sémantique.
 Il lui manque un banc apparié contrebalancé sur machine au repos, et
 l'extension de `vague_pic` à 16000 et 32000.
 
-## 2. Corrections documentaires à faire indépendamment
+## 2. Une porte manquante, trouvée en contre-lecture
+
+Le ledger de masse de paires — l'identité qui atteste que la descente
+**partitionne** les paires au lieu de les couvrir — n'est **jamais évalué sur le
+chemin produit**.
+
+`pair_mass` et `expected_pair_mass` n'existent que dans deux fichiers :
+`src/wspd/wavefront.hpp` et `tests/wspd_gate.cpp`. Or `wspd_wavefront` n'a que
+**trois appelants, tous dans `tests/`** (`wspd_gate.cpp:84`, `cover_gate.cpp:35`,
+`spindle_gate.cpp:118`). La WSPD de production est `alive_rectangles`
+(`src/pipeline/generate.hpp`), qui réimplémente la même descente et **ne porte
+aucun ledger de masse** : elle n'expose qu'un ledger de raffinement
+post-séparation, lequel vérifie `émis + tués == base` mais prend `base` comme
+donnée, pas comme quantité à retrouver.
+
+Autrement dit, la propriété la plus fondamentale de l'amont — chaque paire
+apparaît exactement une fois — est gravée sur une primitive que le produit
+n'appelle pas. Une divergence entre les deux descentes ne serait vue par aucune
+porte.
+
+Deux réserves pour ne pas surestimer ce constat. D'abord, l'identité de masse est
+une condition **nécessaire de comptage**, pas une preuve de partition : deux
+fautes compensatoires la laissent verte. Ensuite, une porte littérale existe
+bien sur la primitive produit — `tests/postsep_refine_gate.cpp` développe le
+multiensemble de couples — mais parent par parent et sur de petits arbres, ce
+qui ne couvre pas l'identité globale.
+
+Le raccord est bon marché : accumuler `sum |A| |B|` sur les rectangles émis
+**et** sur les rectangles tués dans `alive_rectangles`, et comparer à
+`expected_pair_mass(ix)` en fin de descente, sous porte à code exact. C'est
+l'invariant que le raccord de fusion de descente (§ 1.5) devra de toute façon
+préserver, et il vaut mieux qu'il existe avant.
+
+## 3. Corrections documentaires à faire indépendamment
 
 - **La borne `O(s^3 n)` est affirmée dans trois en-têtes** (`wavefront.hpp`
   ligne 3, `cloud_index.hpp`, `ARCHITECTURE.md`) alors que
@@ -138,7 +210,7 @@ l'extension de `vague_pic` à 16000 et 32000.
   comme prouvée par les deux ; une campagne de conformité doit donc épingler `s`
   exactement, sinon elle compare deux choses différentes.
 
-## 3. Ce qui n'est pas une piste
+## 4. Ce qui n'est pas une piste
 
 Rappels utiles avant la prochaine itération sur la WSPD, tous déjà fermés
 (`docs/PISTES_FERMEES.md`) : un plafond de population dans le critère terminal
@@ -155,7 +227,7 @@ l'unité près, digest identique. Tout gain WSPD porte sur l'amont, et est donc
 borné par la part de l'amont — laquelle vaut 68 à 70 % de la génération sur
 `uniform`, mais 16 % sur `scanline` à 32000.
 
-## 4. Sur l'état du dépôt lui-même
+## 5. Sur l'état du dépôt lui-même
 
 **Divergence constatée puis résolue le 30 août.** Pendant la rédaction de cette
 note, `main` était daté du 22 août, ne contenait pas `morsehgp3D_v5/`, et n'avait
