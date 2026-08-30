@@ -12,7 +12,7 @@ le build/parsing et ajoute l'instrumentation q4. Le worktree d'audit reste
 concurrent. Ses modifications non commitées ne sont jamais substituées au pin ;
 aucun claim de résultat, de complexité ou de fraîcheur ne leur est attribué.
 
-Mise à jour au `HEAD=b1045ae5` : le source q4 est toujours celui du commit
+Mise à jour sur la base relue `1e4e0845` : le source q4 est toujours celui du commit
 `e2ac9da2`, et la contre-relecture WSPD/facteurs/moteur plan ci-dessous porte
 sur ce nouvel état. La porte de masse `chord_positive` est reçue comme
 régression de compteur, mais pas comme fixture de correction : le `continue`
@@ -207,6 +207,15 @@ continu**. La raison est double : à `t` fixé, le fuseau ouvert est convexe en
 L'évaluation peut donc appeler `universal_over_corners(q,s,T,zc)` pour chaque
 coin distinct `zc` de `Z`.
 
+Le crédit `ALL` du premier shadow doit conserver l'unité historique :
+`corner_histograms` incrémente une fois par **position unique** `upos`, pas par
+`PointId` du bucket. Créditer un sous-arbre par `node_weight()` ou
+`range_weight()` changerait donc le compte ; employer
+`range.last-range.first+1`, moins la feuille `s` si nécessaire. Une éventuelle
+requalification par multiplicité est un autre contrat, avec oracle et digests
+propres. Ajouter un mutant `endpoint-credit-use-weight` et une fixture à bucket
+dupliqué empêche ce glissement silencieux.
+
 `NONE` doit rester conservateur. Pour un coin partenaire `t`, calculer
 `M=hmax4_boxes(point_box(s),point_box(t),Z)=4*max_Z(H)`. Pour chaque composante
 `j` de `d cross (z-s)`, former son intervalle exact `I_j` sur `Z`, puis
@@ -247,7 +256,7 @@ ce seul filtre. Une AABB seule autorise encore
 pas encore une preuve d'exposant. Employer la boucle directe sur les facteurs
 minuscules, l'arbre seulement au-dessus d'un seuil fixé, et publier
 `all_nodes`, `none_nodes`, `mixed_nodes`, `corner_pair_evals`, `leaf_tests`,
-`range_add_mass`, `V_R` et `direct_pairs`.
+`range_add_unique`, `V_R` et `direct_pairs`.
 
 La fusion q3/q4 est sûre avec des masques : `ALL4` crédite les deux lanes,
 `ALL3` seulement q3, `NONE3` ferme les deux et `NONE4` seulement q4. Une lane
@@ -393,6 +402,34 @@ import de l'oracle. Avec `G_grid` la résolution et
 `O(G_grid^2*m_e+k_e+K_conf)` au premier brouillon. À `G_grid` fixé, `K_conf`
 peut encore valoir `Theta(m_e*k_e)` : ce shadow mesure le verrou, il ne le
 ferme pas.
+
+La voie d'implémentation la plus courte ne duplique pas la grille actuelle.
+En mode strict nominal et pour **le même tape avec les mêmes exclusions**,
+`CellGrid::count_site_t` calcule déjà, par seuils monotones de lignes, les
+cellules où les quatre sommets satisfont l'affine : son `cnt` est exactement le
+futur `base_depth`. Le `cover` actuel et un futur `scan_sites()` ne sont pas le
+même tape ; réutiliser la primitive ne permet pas de recopier aveuglément son
+tableau. Pour préserver exactement la profondeur historique, le premier
+shadow reconstruit donc base et listes **après** la compaction, sur
+`scan_sites()`. L'autre option — rester sur `cover` — exige un lemme séparé
+prouvant que les sites filtrés ne contribuent à aucune requête admissible ; elle
+n'autorise toujours pas l'égalité des tableaux sur tout le losange.
+
+Refactorer cette primitive en générateur de bornes et callbacks. Deux sweeps
+sont nécessaires par rangée, l'un pour `F>0`, l'autre pour `F>=0`, afin
+d'émettre séparément `depth_conflict` lorsque `min(F)<=0<max(F)` et
+`line_incidence` lorsque `min(F)<=0<=max(F)`. Une droite **non axiale** touche
+`O(G_grid)` cellules ; la variation monotone des bornes donne donc un coût
+`O(G_grid^2+m_e*G_grid+sorties)` avec l'initialisation de la grille. Le cas
+`du=0,dv!=0` émet une rangée entière ou vide. Le cas `du=dv=0` est axial :
+intérieur global, coquille globale ou extérieur global en `O(1)` ; matérialiser
+la coquille dans `G_grid^2` listes serait une faute de coût et de multiplicité
+q4. Ajouter `conflict_cells_emitted` et `incidence_cells_emitted`, puis comparer
+cellule par cellule au balayage exhaustif du tape choisi. Séparément, appeler le
+helper refactoré sur `cover` et exiger que l'ancien `CellGrid::cnt` reste
+bit-identique. Les fixtures comprennent diagonale par sommets, ligne sur arête,
+coin tangent et les deux strictesses. Le cas `max(F)=0` appartient seulement
+aux incidences, jamais aux conflits de profondeur.
 
 La littérature distingue précisément ce qui est acquis. Har-Peled et Sharir,
 [Depth contours in arrangements of halfplanes](https://www.math.tau.ac.il/~michas/k_depth.pdf),

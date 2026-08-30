@@ -13,8 +13,9 @@ les deux routes CPU, le mutant `chord-skip-positive`, une régression de masse
 `terrain n=2000` et les corrections de portée de `PROFIL_SEPARATION.md`. Le
 kernel CUDA n'est pas modifié par ce pin.
 
-Le `HEAD=b1045ae5` ne change pas ces sources q4 : il ajoute au ledger causal de
-la question V158--V161. Le worktree contient en revanche un brouillon
+Le dernier commit concurrent relu, `1e4e0845`, ne change pas ces sources q4 :
+avec `b1045ae5`, il ajoute le ledger causal puis les fixtures exactes proposées
+pour `EndpointCredit`. Le worktree contient en revanche un brouillon
 concurrent non commité dans `mutants.hpp`, `sector_kill.hpp` et `generate.hpp`,
 qui raccorde `EndpointCredit` aux prétests q4. Ce brouillon est relu séparément
 ci-dessous, sans être substitué au pin source. Les autres changements non
@@ -140,7 +141,11 @@ que `cnt_out` ne lit que son complément. Mais le commentaire annonce
 et sûr, mais il perd les cas où certains secteurs sont fermés par le compte pur
 et les autres par le crédit. Pour réaliser le contrat annoncé, prendre le
 maximum secteur par secteur avant le minimum et graver une fixture croisée où
-aucune des deux branches globales ne suffit seule.
+aucune des deux branches globales ne suffit seule. Le commit documentaire
+`1e4e0845` donne désormais la fixture géométrique q3 à cinq positions qui
+réalise ce croisement, puis une fixture distincte de fausse mort pour le mutant
+de double comptage. Elles sont préférables à un test limité aux tableaux du
+helper et doivent devenir les autorités CTest.
 
 Le raccord n'est pas encore homogène : `q3_lane_batched.hpp` et
 `q4_lane_batched.hpp` construisent les mêmes histogrammes mais ne transmettent
@@ -152,6 +157,18 @@ dès que le nouveau kill devient non vacant. Le mutant `sector-credit-inbox`
 n'a encore aucune porte visible ; il faut une mort fausse par double comptage,
 des planchers sur les nouvelles morts et la parité production/batch. Ce
 brouillon ne corrige par ailleurs aucune des trois coutures de corde ci-dessus.
+
+Le rejeu local rend ces deux manques non vacants. `mhgp5_mutants_gate` échoue :
+83 mutants sont déclarés et injectés, mais 82 seulement possèdent une porte
+CTest en code 4 ; `sector-credit-inbox` est l'orphelin. La fixture secteur
+historique passe et ne discrimine donc pas le nouveau contrat. Surtout, les 15
+portes batch ciblées q3/q4 choisies — familles, ordre, route mixte, tout-hôte et
+ancre surdimensionnée — échouent toutes. Les vecteurs finaux restent égaux,
+mais la production tue davantage par secteurs et les compteurs aval divergent :
+sur `uniform n=1200`, q3 donne `12066/11821` morts secteur et
+`1384153/1392373` seeds production/lots ; q4 donne `24196/23945` et
+`1290674/1298238`. Le chemin tout-hôte échoue lui aussi, ce qui localise le
+défaut dans la propagation du contrat, pas dans le kernel device.
 
 ### La sonde de corde actuelle n'est plus une autorité indépendante
 
@@ -308,8 +325,10 @@ dispose d'un certificat entier conservateur, et `MIXED` descend jusqu'aux
 feuilles pour rendre le compte exact. Son coût est
 `O(V_R+C_R+|A|+|B|+P_R)`, où `V_R` compte tous les nœuds classifiés,
 `C_R<=64*V_R` les couples de coins et `P_R` les ancres survivantes de ce seul
-filtre. Chacun de ces termes peut encore être quadratique. Le premier moteur
-plan suit la même discipline :
+filtre. Le crédit `ALL` conserve d'abord l'unité de `corner_histograms`, une
+position unique par feuille : employer `node_weight()` compterait les buckets
+dupliqués et changerait le contrat. Chacun de ces termes peut encore être
+quadratique. Le premier moteur plan suit la même discipline :
 `PlanConflictGrid` shadow q3 mesure `K_conf`, puis le shadow q4 mesure
 `P_grid`; aucun des deux compteurs n'est une preuve d'exposant.
 
