@@ -404,6 +404,19 @@ mhgp5_gate(mhgp5_q4_core_shaped_clusters 0 mhgp5_q4_core_shaped_gate "--family=e
 mhgp5_gate(mhgp5_q4_core_shaped_cocirc 0 mhgp5_q4_core_shaped_gate "--family=uniform --n=300 --coord=40 --min-seeds=500 --min-jung-fallback=20 --min-float-fallback=100")
 mhgp5_gate(mhgp5_q4_core_shaped_mutant_skip 4 mhgp5_q4_core_shaped_gate "--family=uniform --n=300 --coord=40 --min-seeds=500 --inject=q4-shaped-jung-skip-kills")
 
+# LES DEUX ORDRES (audit du 30 aout 2026, item 1) : corde active, le verdict de
+# chaque seed est rejoue dans l ordre naturel PUIS dans l ordre INVERSE des
+# sites. Un desaccord signe la couture d ordre — le `continue` d un site
+# certifie P > 0 qui sautait la constatation de mort par corde, defaut
+# FAIL-OPEN invisible au digest (l objet ne change pas, seuls des seeds
+# survivent a tort). Plancher a 20000 morts de corde contre le vert par
+# vacuite ; mesure du 30 aout a terrain n=400 : nominal 25675 morts et
+# 0 desaccord, mutant 25091 morts et 426 desaccords sur 65881 seeds.
+mhgp5_gate(mhgp5_q4_chord_ordre 0 mhgp5_q4_core_shaped_gate
+           "--family=terrain --n=400 --ordre-corde --min-corde=20000 --min-jung-fallback=0")
+mhgp5_gate(mhgp5_q4_chord_ordre_mutant 4 mhgp5_q4_core_shaped_gate
+           "--family=terrain --n=400 --ordre-corde --min-corde=20000 --min-jung-fallback=0 --inject=chord-dead-skip-positive")
+
 
 # Completions q4 en forme de kernel (livraison 4c) : etage atteint et forme de Cramer identiques.
 mhgp5_executable(mhgp5_q4_completion_shaped_gate tests/q4_completion_shaped_gate.cpp)

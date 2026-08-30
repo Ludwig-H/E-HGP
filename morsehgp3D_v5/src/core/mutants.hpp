@@ -73,7 +73,7 @@ inline constexpr const char* kMutants[] = {
     "sector-credit-inbox",
     "sector-credit-global",
     "anchor-kill-h-minus-one",
-    "chord-nonstrict", "chord-skip-positive",
+    "chord-nonstrict", "chord-skip-positive", "chord-dead-skip-positive",
     "cell-kill-nonstrict",
     "cell-kill-h-minus-one",
     "prefix-tamper-event-order",

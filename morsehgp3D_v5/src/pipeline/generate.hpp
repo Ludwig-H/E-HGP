@@ -865,7 +865,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
           // dont les derniers sites sont tous certifies P > 0 survit a tort
           // (fail-open). Le test est place APRES l'enregistrement et AVANT le
           // saut, donc il n'avance jamais une mort d'un site.
-          if (chord_on && chord.dead(h4)) { dead_by_chord = true; break; }
+          if (chord_on && !MHGP5_MUTANT("chord-dead-skip-positive") && chord.dead(h4)) { dead_by_chord = true; break; }
           continue;  // P > 0 certifie : jamais temoin du CŒUR (mu = 0)
         }
         if (lh < -seed.bound) {

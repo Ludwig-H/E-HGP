@@ -27,7 +27,13 @@ using namespace mhgp5;
 int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
   int n = 400, coord = 0;
-  u64 min_seeds = 1000, min_jf = 10, min_ff = 10, min_js = 10;
+  u64 min_seeds = 1000, min_jf = 10, min_ff = 10, min_js = 10, min_chord = 0;
+  // --ordre-corde : le VERDICT d'un seed ne doit pas dependre de l'ordre des
+  // sites. Le scan est rejoue corde active dans l'ordre naturel puis dans
+  // l'ordre INVERSE ; un desaccord signe une couture d'ordre (le `continue`
+  // d'un site certifie P > 0 qui saute la constatation de mort par corde).
+  bool ordre_corde = false;
+  u64 chord_dead = 0, ordre_mism = 0;
   std::string inject;
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
@@ -38,6 +44,8 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--min-jung-fallback=", 0) == 0) min_jf = (u64)std::atoll(arg.c_str() + 20);
     else if (arg.rfind("--min-float-fallback=", 0) == 0) min_ff = (u64)std::atoll(arg.c_str() + 21);
     else if (arg.rfind("--min-jung-skip=", 0) == 0) min_js = (u64)std::atoll(arg.c_str() + 16);
+    else if (arg.rfind("--min-corde=", 0) == 0) min_chord = (u64)std::atoll(arg.c_str() + 12);
+    else if (arg == "--ordre-corde") ordre_corde = true;
     else if (arg.rfind("--inject=", 0) == 0) inject = arg.substr(9);
     else return 2;
   }
@@ -145,6 +153,24 @@ int main(int argc, char** argv) {
           for (size_t i = 0; i < sc.cover.size(); ++i)
             if (sc.cover[i].u == cx.u) sd.skip_x = (u32)i;
           const AnchorSitesSoA sites{sc.su0.data(), sc.su1.data(), sc.su2.data(), sc.sq.data(), (u32)sc.cover.size()};
+          if (ordre_corde) {
+            const u32 nn = (u32)sc.cover.size();
+            Q4CoreCounters c1, c2;
+            const bool d1 = q4_seed_core_shaped(sd, sites, skip_a, skip_b, (u32)h_of[2], false, &c1, false, true);
+            std::vector<i64> r0(nn), r1(nn), r2(nn);
+            std::vector<i64> rq(nn);
+            for (u32 i = 0; i < nn; ++i) {
+              r0[i] = sc.su0[nn - 1 - i]; r1[i] = sc.su1[nn - 1 - i];
+              r2[i] = sc.su2[nn - 1 - i]; rq[i] = sc.sq[nn - 1 - i];
+            }
+            const auto rev = [&](u32 j) { return j == std::numeric_limits<u32>::max() ? j : nn - 1 - j; };
+            SeedQ4D sdr = sd;
+            sdr.skip_x = rev(sd.skip_x);
+            const AnchorSitesSoA sr{r0.data(), r1.data(), r2.data(), rq.data(), nn};
+            const bool d2 = q4_seed_core_shaped(sdr, sr, rev(skip_a), rev(skip_b), (u32)h_of[2], false, &c2, false, true);
+            chord_dead += (c1.dead_by_chord != 0) + (c2.dead_by_chord != 0);
+            if (d1 != d2) ++ordre_mism;
+          }
           Q4CoreCounters hc;
           bool hdead = q4_seed_core_shaped(sd, sites, skip_a, skip_b, (u32)h_of[2], false, &hc, false, /*chord_on=*/false);
           if (m_skip_kills && hc.jung_skip > 0) {  // MUTANT de porte : les non-temoins certifies tuent
@@ -165,9 +191,19 @@ int main(int argc, char** argv) {
               "jung_skip=%u jung_fallback=%u float_fallback=%u desaccords=%llu\n",
               cloud_family_name(family), n, alive.size(), (unsigned long long)seeds, (unsigned long long)dead_n, tot.cert_pos,
               tot.cert_neg, tot.jung_kill, tot.jung_skip, tot.jung_fallback, tot.float_fallback, (unsigned long long)mism);
-  if (seeds < min_seeds || tot.jung_fallback < min_jf || tot.float_fallback < min_ff || tot.jung_skip < min_js) {
+  if (ordre_corde)
+    std::printf("ordre_corde morts_corde=%llu desaccords_ordre=%llu\n", (unsigned long long)chord_dead,
+                (unsigned long long)ordre_mism);
+  if (seeds < min_seeds || tot.jung_fallback < min_jf || tot.float_fallback < min_ff || tot.jung_skip < min_js ||
+      (ordre_corde && chord_dead < min_chord)) {
     std::printf("PLANCHER\n");
     return 3;
+  }
+  if (ordre_corde) {
+    // Le mutant `chord-dead-skip-positive` rend le verdict DEPENDANT de l'ordre.
+    const bool m_dead = MHGP5_MUTANT("chord-dead-skip-positive");
+    if (ordre_mism) return m_dead ? 4 : 1;
+    if (m_dead) { std::printf("MUTANT NON TUE\n"); return 1; }
   }
   if (mism) return m_skip_kills ? 4 : 1;
   if (m_skip_kills) { std::printf("MUTANT NON TUE\n"); return 1; }
