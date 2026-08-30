@@ -36,11 +36,8 @@ Quatre constats de premier main, reproductibles, qui cadrent les priorités.
   `ancres_w3`, `ancres_w4` et `ancres_hist` tombent **tous à zéro**. Tout
   l'élagage au niveau du bloc est désactivé. Une faute de frappe suffit.
 
-Un cinquième constat, hors code : `main` ne contient pas `morsehgp3D_v5/` et son
-historique n'a **aucun ancêtre commun** avec la branche de travail. Le commit
-`e4aaf12` intitulé « Merge remote-tracking branch 'origin/main' » a en réalité
-fusionné `7e74e77 "Add files via upload"`. La doctrine du dépôt (`AGENTS.md`,
-`CLAUDE.md`) veut que tout vive sur `main` ; ce n'est pas le cas aujourd'hui.
+Un cinquième constat, hors code : voir la section 4, qui décrit l'état des
+lignées Git et une divergence résolue le 30 août.
 
 ## 1. Ordre recommandé
 
@@ -160,15 +157,22 @@ borné par la part de l'amont — laquelle vaut 68 à 70 % de la génération su
 
 ## 4. Sur l'état du dépôt lui-même
 
-`main` est daté du 22 août, ne contient pas `morsehgp3D_v5/`, et n'a aucun
-ancêtre commun avec la branche portant le chantier. Cinquante et un commits de
-v5 y sont invisibles. La branche est un **sur-ensemble de contenu** de `main`
-(zéro fichier de `main` absent d'elle, 1206 fichiers en plus), donc la
-réconciliation ne perd aucun contenu — mais elle exige une décision explicite
-sur l'historique, et c'est une décision utilisateur, pas une décision d'agent.
+**Divergence constatée puis résolue le 30 août.** Pendant la rédaction de cette
+note, `main` était daté du 22 août, ne contenait pas `morsehgp3D_v5/`, et n'avait
+**aucun ancêtre commun** avec la branche portant le chantier : cinquante et un
+commits y étaient invisibles. Le commit `e4aaf12` intitulé « Merge
+remote-tracking branch 'origin/main' » avait en réalité fusionné
+`7e74e77 "Add files via upload"`, pas `main`.
 
-Tant qu'elle n'est pas prise, la doctrine « commits sur `main` » d'`AGENTS.md`
-n'est pas satisfaite, et un auditeur qui lit `main` ne voit pas le chantier
-qu'il audite.
+`main` a depuis été réinitialisé sur la lignée v5 et pointe sur `119b80b0` ; il
+contient donc `morsehgp3D_v5/` et la doctrine « commits sur `main` »
+d'`AGENTS.md` est de nouveau satisfaite. La lignée v4 antérieure, dont
+`bab37b9` était la tête, n'est plus atteignable depuis `main` mais **survit sur
+`origin/claude/morsehgp3d-v4-reprise-nck0nk`** : aucun commit n'est perdu.
+
+Ce constat est conservé ici parce qu'il explique pourquoi les reçus et audits
+antérieurs au 30 août peuvent citer des pins introuvables depuis `main` selon la
+date à laquelle ils ont été écrits. Une lecture d'historique croisant les deux
+lignées doit nommer la branche, pas seulement le hash.
 
 GCP non utilisé.
