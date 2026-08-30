@@ -40,9 +40,10 @@ int main(int argc, char** argv) {
   GenerateStats ls;
   std::vector<BallCandidate> lo;
   u64 t_hist = 0, t_handles = 0, t_cover = 0, t_body = 0, t_query = 0, anchors = 0;
-  u64 query_rectangles = 0, query_candidates = 0;
+  u64 query_rectangles = 0, query_candidates = 0, pretest_anchors = 0, pretest_sites = 0;
   const auto now = [] { return std::chrono::steady_clock::now(); };
   const auto ns = [](auto t0) { return (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - t0).count(); };
+  const u64 cpu0 = mhgp5::generate_detail::mhgp5_thread_cpu_ns();
   const auto t_all = now();
   for (const AliveRect& ar : alive) {
     auto t0 = now();
@@ -73,6 +74,8 @@ int main(int argc, char** argv) {
         if (D2 == 0) continue;
         ++anchors;
         if (by_query) {
+          ++pretest_anchors;
+          pretest_sites += sc.query.size();
           t0 = now();
           const int k = anchor_kill_from_candidates(sc.query, ix.upos, ua, ub, pa, pb, D2, Lane::kQ4, 8, h_of[2]);
           t_query += ns(t0);
@@ -93,6 +96,7 @@ int main(int argc, char** argv) {
       }
   }
   const double total = (double)ns(t_all) / 1e6;
+  const double cpu_ms = (double)(mhgp5::generate_detail::mhgp5_thread_cpu_ns() - cpu0) / 1e6;
   const auto ms = [](u64 x) { return (double)x / 1e6; };
   const u128 core_partition = (u128)ls.q4_cert[0] + ls.q4_cert[1] + ls.q4_cert[5];
   const u128 depth_partition = (u128)ls.depth_killed[2] + ls.candidates[2];
@@ -118,6 +122,32 @@ int main(int argc, char** argv) {
               (unsigned long long)ls.q4_covers_built, (unsigned long long)ls.q4_cover_visits,
               (unsigned long long)ls.q4_cover_sites, (unsigned long long)ls.q4_core_site_tests,
               (unsigned long long)ls.q4_depth_entries, (unsigned long long)ls.q4_power_tests);
+  std::printf("etages_q4 pretest_ancres=%llu pretest_sites=%llu lentille_balayee=%llu lentille_gardee=%llu grille_sites=%llu grille_ancres=%llu grille_sites_baties=%llu tests_aigus=%llu corde_cellules=%llu affine_remplis=%llu affine_sites=%llu w4_prescan=%llu secteur_sites=%llu\n",
+              (unsigned long long)pretest_anchors, (unsigned long long)pretest_sites,
+              (unsigned long long)ls.q4_lens_scanned, (unsigned long long)ls.q4_lens_kept,
+              (unsigned long long)ls.q4_grid_scan_sites, (unsigned long long)ls.q4_grid_anchors,
+              (unsigned long long)ls.q4_grid_built_sites, (unsigned long long)ls.q4_acute_tests,
+              (unsigned long long)ls.q4_chord_cell_tests, (unsigned long long)ls.q4_affine_fills,
+              (unsigned long long)ls.q4_affine_sites, (unsigned long long)ls.q4_w4_prescan_tests,
+              (unsigned long long)ls.q4_sector_sites);
+  std::printf("temps_q4 lentille_grille=%.0f dont_grille=%.0f boucle_seeds=%.0f cœur=%.0f completions=%.0f dont_profondeur=%.0f ; grilles_tentees=%llu grilles_baties=%llu\n",
+              ms(ls.prof_q4_lens_ns), ms(ls.prof_q4_grid_ns), ms(ls.prof_q4_seedloop_ns), ms(ls.prof_q4_core_ns),
+              ms(ls.prof_q4_compl_ns), ms(ls.prof_q4_depth_ns), (unsigned long long)ls.grids_attempted[2],
+              (unsigned long long)ls.grids_built[2]);
+  std::printf("rejets_q4 lentille=%llu owner=%llu once=%llu i64=%llu face_power=%llu det=%llu centre=%llu profonds=%llu emis=%llu\n",
+              (unsigned long long)ls.q4_rej_lens, (unsigned long long)ls.q4_rej_owner, (unsigned long long)ls.q4_rej_once,
+              (unsigned long long)ls.q4_rej_i64, (unsigned long long)ls.q4_rej_face_power, (unsigned long long)ls.q4_rej_det,
+              (unsigned long long)ls.q4_rej_center, (unsigned long long)ls.depth_killed[2], (unsigned long long)ls.candidates[2]);
+  std::printf("seeds_q4 seeds=%llu cellules_tues=%llu cœur_tues=%llu corde_tues=%llu survivants=%llu ancres_covers=%llu ancres_w4=%llu ancres_secteurs=%llu ancres_cellules=%llu\n",
+              (unsigned long long)ls.seeds[1], (unsigned long long)ls.seeds_killed_cells[2],
+              (unsigned long long)ls.seeds_killed_core, (unsigned long long)ls.seeds_killed_chord,
+              (unsigned long long)(ls.seeds[1] - ls.seeds_killed_cells[2] - ls.seeds_killed_core - ls.seeds_killed_chord),
+              (unsigned long long)ls.q4_covers_built, (unsigned long long)ls.anchors_killed_w4,
+              (unsigned long long)ls.anchors_killed_sectors[2], (unsigned long long)ls.anchors_killed_cells[2]);
+  std::printf("certs_q4 cert_pos=%llu cert_neg=%llu jung_kill=%llu jung_skip=%llu jung_repli=%llu repli_flottant=%llu\n",
+              (unsigned long long)ls.q4_cert[0], (unsigned long long)ls.q4_cert[1], (unsigned long long)ls.q4_cert[2],
+              (unsigned long long)ls.q4_cert[3], (unsigned long long)ls.q4_cert[4], (unsigned long long)ls.q4_cert[5]);
+  std::printf("horloge_q4 mur_ms=%.0f cpu_processus_ms=%.0f (machine partagee : mur/cpu mesure la contention)\n", total, cpu_ms);
   std::printf("identites_q4 cœur=%s profondeur=%s completions=%s non_vacuite=%s\n", core_ok ? "OK" : "ECHEC",
               depth_ok ? "OK" : "ECHEC", completions_ok ? "OK" : "ECHEC", nonempty ? "OK" : "ECHEC");
   if (!nonempty) return 3;

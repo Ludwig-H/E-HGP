@@ -32,6 +32,7 @@
 #pragma once
 
 #include <chrono>
+#include <ctime>
 #include <functional>
 #include <limits>
 #include <vector>
@@ -107,6 +108,12 @@ struct GenerateStats {
   // sous-categories imbriquees de q4_cert.
   u64 q4_covers_built = 0, q4_cover_visits = 0, q4_cover_sites = 0;
   u64 q4_core_site_tests = 0, q4_depth_entries = 0, q4_power_tests = 0;
+  // Etages supplementaires du meme profil (compiles seulement sous MHGP5_PROFILE_Q4).
+  u64 prof_q4_lens_ns = 0, prof_q4_seedloop_ns = 0, prof_q4_depth_ns = 0, prof_q4_grid_ns = 0;
+  u64 q4_w4_prescan_tests = 0, q4_sector_sites = 0, q4_lens_scanned = 0, q4_lens_kept = 0;
+  u64 q4_grid_scan_sites = 0, q4_acute_tests = 0, q4_chord_cell_tests = 0;
+  u64 q4_grid_anchors = 0, q4_grid_built_sites = 0;
+  u64 q4_affine_fills = 0, q4_affine_sites = 0;
   u64 q4_completions = 0, q4_rej_lens = 0, q4_rej_owner = 0, q4_rej_once = 0, q4_rej_i64 = 0,
       q4_rej_face_power = 0, q4_rej_det = 0, q4_rej_center = 0;
   u64 float_cert_neg = 0, float_cert_pos = 0, float_fallback = 0;
@@ -156,6 +163,14 @@ struct GenerateStats {
     q4_core_site_tests += o.q4_core_site_tests;
     q4_depth_entries += o.q4_depth_entries;
     q4_power_tests += o.q4_power_tests;
+    prof_q4_lens_ns += o.prof_q4_lens_ns; prof_q4_seedloop_ns += o.prof_q4_seedloop_ns;
+    prof_q4_depth_ns += o.prof_q4_depth_ns; prof_q4_grid_ns += o.prof_q4_grid_ns;
+    q4_w4_prescan_tests += o.q4_w4_prescan_tests; q4_sector_sites += o.q4_sector_sites;
+    q4_lens_scanned += o.q4_lens_scanned; q4_lens_kept += o.q4_lens_kept;
+    q4_grid_scan_sites += o.q4_grid_scan_sites; q4_acute_tests += o.q4_acute_tests;
+    q4_grid_anchors += o.q4_grid_anchors; q4_grid_built_sites += o.q4_grid_built_sites;
+    q4_chord_cell_tests += o.q4_chord_cell_tests;
+    q4_affine_fills += o.q4_affine_fills; q4_affine_sites += o.q4_affine_sites;
     anchors_killed_w3 += o.anchors_killed_w3;
     invariant_jneg += o.invariant_jneg;
     seeds[0] += o.seeds[0];
@@ -706,6 +721,14 @@ inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 
 }
 
 #if defined(MHGP5_PROFILE_Q4)
+// CLOCK_THREAD_CPUTIME_ID a ete essaye : c'est un APPEL SYSTEME (~1 us) et il
+// multipliait par 5 le mur de la sonde. On reste sur steady_clock (vDSO, ~20 ns)
+// et on publie le rapport mur/cpu du processus pour juger la contention.
+inline u64 mhgp5_thread_cpu_ns() {
+  struct timespec ts;
+  clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
+  return (u64)ts.tv_sec * 1000000000ull + (u64)ts.tv_nsec;
+}
 #define MHGP5_Q4_TICK() std::chrono::steady_clock::now()
 #define MHGP5_Q4_ACC(field, t0) (ls->field += (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - (t0)).count())
 #define MHGP5_Q4_ADD(field, value) (ls->field += (u64)(value))
@@ -729,6 +752,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     u64 n4 = 0;
     for (const CoverPoint& cz : sc.cover) {
       if (cz.u == ua || cz.u == ub) continue;
+      MHGP5_Q4_ADD(q4_w4_prescan_tests, 1);
       if (in_spindle(Lane::kQ4, pa, pb, ix.upos[(size_t)cz.u]) && ++n4 >= h4) break;
     }
     if (n4 >= h4) {
@@ -737,6 +761,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       return;
     }
     u64 wmin = 0;
+    MHGP5_Q4_ADD(q4_sector_sites, sc.cover.size());
     if (anchor_sector_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h4, &wmin)) {
       ++ls->anchors_killed_sectors[2];
       MHGP5_Q4_ACC(prof_q4_anchor_ns, q4_t_anchor);
@@ -744,21 +769,36 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     }
   }
   MHGP5_Q4_ACC(prof_q4_anchor_ns, q4_t_anchor);
+  const auto q4_t_lens = MHGP5_Q4_TICK();
   if (!sc.scan_cover_active) sc.affine_filled = false;
   sc.lens.clear();
+  MHGP5_Q4_ADD(q4_lens_scanned, sc.cover.size());
   for (const CoverPoint& cz : sc.cover) {
     const P3& pz = ix.upos[(size_t)cz.u];
     if (p3_norm2(p3_sub(pz, pa)) <= D2 && p3_norm2(p3_sub(pz, pb)) <= D2) sc.lens.push_back(cz);
   }
+  MHGP5_Q4_ADD(q4_lens_kept, sc.lens.size());
   // Grille de cellules (theoreme 10.5) : ancre entiere ou corde de chaque seed.
   if (pretests == AnchorPretests::kApply || pretests == AnchorPretests::kAlreadyApplied) {
-    if (anchor_grid_stage(ix, sc, ua, ub, pa, pb, D2, Lane::kQ4, h4, float_on, ls)) return;
+    MHGP5_Q4_ADD(q4_grid_scan_sites, (sc.cell_min_sites == 0 || sc.cover.size() >= sc.cell_min_sites) ? sc.cover.size() : 0);
+    MHGP5_Q4_ADD(q4_grid_anchors, (sc.cell_min_sites == 0 || sc.cover.size() >= sc.cell_min_sites) ? 1 : 0);
+    const auto q4_t_grid = MHGP5_Q4_TICK();
+    const bool q4_grid_kill = anchor_grid_stage(ix, sc, ua, ub, pa, pb, D2, Lane::kQ4, h4, float_on, ls);
+    MHGP5_Q4_ADD(q4_grid_built_sites, sc.grid.built ? sc.cover.size() : 0);
+    MHGP5_Q4_ACC(prof_q4_grid_ns, q4_t_grid);
+    if (q4_grid_kill) {
+      MHGP5_Q4_ACC(prof_q4_lens_ns, q4_t_lens);
+      return;
+    }
   } else if (pretests == AnchorPretests::kCounterfactual) {
     sc.grid.built = false;
   }  // kAlreadyAppliedWithGrid : sc.grid tel que laisse par l'appelant
+  MHGP5_Q4_ACC(prof_q4_lens_ns, q4_t_lens);
+  const auto q4_t_seedloop = MHGP5_Q4_TICK();
   const i64 d4[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
   for (const CoverPoint& cx : sc.lens) {
     if (cx.u == ua || cx.u == ub) continue;
+    MHGP5_Q4_ADD(q4_acute_tests, 1);
     const P3& px = ix.upos[(size_t)cx.u];
     if (!is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cx.u))) continue;
     ++ls->seeds[1];
@@ -766,6 +806,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     const i64 l_bx = p3_norm2(p3_sub(px, pb));
     const Q3Form f3s = q3_form(pa, pb, px);
     const P3 nrm = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
+    MHGP5_Q4_ADD(q4_chord_cell_tests, sc.grid.built ? 1 : 0);
     if (sc.grid.built && seed_chord_cell_dead(sc.grid, f3s, d4, nrm, D2, l_ax, l_bx)) { ++ls->seeds_killed_cells[2]; continue; }
     // Cœur universel du seed (Jung) : J = D²(3G − 2 l_ax l_bx) = G(D² − 8|v3|²)
     // >= G·D²/3 > 0 pour tout seed aigu (|v3|² <= D²/12) : la branche Jb < 0 est
@@ -776,7 +817,11 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     bool dead_by_chord = false;
     const auto q4_t_core = MHGP5_Q4_TICK();
     if (!dead) {
-      if (!sc.affine_filled) ensure_anchor_scan_affine(ix, sc, pa, pb, D2, Lane::kQ4, ls);
+      if (!sc.affine_filled) {
+        ensure_anchor_scan_affine(ix, sc, pa, pb, D2, Lane::kQ4, ls);
+        MHGP5_Q4_ADD(q4_affine_fills, 1);
+        MHGP5_Q4_ADD(q4_affine_sites, sc.scan_sites().size());
+      }
       const std::vector<CoverPoint>& scan_sites = sc.scan_sites();
       const AffineSeed seed(f3s, pa, pb, sc, float_on);
       const double Jd = (double)Jb;
@@ -867,6 +912,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       if (!q4_center_strictly_inside(f4, pa, pb, px, py)) { ++ls->q4_rej_center; continue; }
       // Filtre de profondeur a la generation.
       MHGP5_Q4_ADD(q4_depth_entries, 1);
+      const auto q4_t_depth = MHGP5_Q4_TICK();
       u64 depth = 0;
       bool deep = false;
       for (const CoverPoint& cz : scan_sites) {
@@ -874,12 +920,14 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
         const i128 pw = q4_power(f4, ix.upos[(size_t)cz.u]);
         if ((pw < 0 || (genfilter_nonstrict && pw <= 0)) && ++depth >= h4) { deep = true; break; }
       }
+      MHGP5_Q4_ACC(prof_q4_depth_ns, q4_t_depth);
       if (deep) { ++ls->depth_killed[2]; continue; }
       lo->push_back(BallCandidate{ball_key_reduce(q4_ball_form(f4)), q4_level_raw(f4), 4});
       ++ls->candidates[2];
     }
     MHGP5_Q4_ACC(prof_q4_compl_ns, q4_t_compl);
   }
+  MHGP5_Q4_ACC(prof_q4_seedloop_ns, q4_t_seedloop);
 }
 
 }  // namespace generate_detail

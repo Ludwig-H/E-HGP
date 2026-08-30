@@ -12,6 +12,7 @@
 #include <string>
 
 #include "../src/cloud/families.hpp"
+#include "../src/core/parse.hpp"
 #include "../src/gpu/q3_lane_device.cuh"
 #include "../src/gpu/q4_lane_device.cuh"
 #include "../src/pipeline/run.hpp"
@@ -38,7 +39,11 @@ int main(int argc, char** argv) {
     else if (const char* v = val("--n=")) n = std::atoi(v);
     else if (const char* v = val("--coord=")) coord = std::atoi(v);
     else if (const char* v = val("--seed=")) seed = std::atoll(v);
-    else if (const char* v = val("--s=")) opt.s = std::atoll(v);
+    else if (const char* v = val("--s=")) {
+      i64 parsed = 0;
+      if (!parse_i64_exact(v, &parsed)) ok = false;
+      else opt.s = parsed;
+    }
     else if (const char* v = val("--smax=")) opt.smax = (u64)std::atoll(v);
     else if (const char* v = val("--threads=")) opt.threads = std::atoi(v);
     else if (const char* v = val("--shell-cap=")) opt.shell_cap = (size_t)std::atoll(v);
@@ -62,8 +67,8 @@ int main(int argc, char** argv) {
     }
   }
   if (gpu_min_sites < 1) ok = false;
-  if (!ok || n < 2 || opt.s < 1 || opt.smax < 2 || opt.smax > 11) {
-    std::fprintf(stderr, "REFUS : arguments (profil K_max <= 10 ⟺ smax <= 11)\n");
+  if (!ok || n < 2 || opt.s < kSeparationProfileMin || opt.smax < 2 || opt.smax > 11) {
+    std::fprintf(stderr, "REFUS : arguments (profil s >= 8, K_max <= 10 ⟺ smax <= 11)\n");
     return 2;
   }
   double kernel_ms = 0;
