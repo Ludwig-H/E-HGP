@@ -631,3 +631,77 @@ compteur `W` défini ; la graine 4 invalide toute conclusion sur son exposant.
 La prochaine hypothèse est la longueur du scan partagé cœur+corde par seed
 effectivement scanné ». Le titre, le tableau q3/q4 et les phrases « ne change
 pas » / « pas un artefact de famille » doivent suivre cette requalification.
+
+### Renforcement de la couture `EndpointCredit -> secteurs`
+
+Le brouillon relu au `HEAD=e008139f` est mathématiquement bien orienté. Pour
+chaque secteur `k`, le crédit `E` vit dans `A union B`, le résidu `S_out[k]`
+hors de cette union, et les deux ensembles sont disjoints. Le minorant sûr est
+donc bien `max(cnt[k], cnt_out[k]+base)`, puis le minimum sur les huit secteurs.
+
+Le code courant calcule à la place l'union de deux verdicts globaux :
+
+```text
+min(cnt) >= h  OR  min(cnt_out + base) >= h
+```
+
+Il reste fail-open, mais n'implémente pas le contrat commenté. La correction
+sans addition potentiellement débordante, sous la précondition `base<h`, est :
+
+```cpp
+for (int k = 0; k < 8; ++k)
+  if ((u64)cnt[k] < h && (u64)cnt_out[k] < h - base) return false;
+return true;
+```
+
+La fixture de comptes proposée dans `ETAT_COURANT.md` est une bonne porte du
+combinateur, mais elle ne suffit pas comme autorité : elle n'exerce ni les
+demi-plans sectoriels, ni `in_spindle`, ni l'exclusion réelle des ranges. Une
+fixture géométrique q3 à cinq positions ferme le cas croisé :
+
+```text
+a=(0,1000,1000), b=(2000,1000,1000), D2=4000000, h=2
+e=(10,990,990), i=(10,910,910), o=(10,1020,1020)
+A={a,e,i}, B={b}, EndpointCredit(base=1), cover={e,i,o}
+cnt     = [1,2,2,2,2,1,1,1]
+cnt_out = [1,0,0,0,0,1,1,1]
+```
+
+Ici `e` est le seul crédit W3 universel. Chaque secteur atteint exactement 2
+par l'une des deux branches, alors que les deux minima globaux valent 1 : sans
+crédit `false`, avec crédit `true`, et `witness_min/sector_counts` restent les
+comptes purs.
+
+Le mutant `sector-credit-inbox` doit être tué séparément par une **fausse
+mort**, pas seulement par une différence de compteur. Une fixture déjà rejouée
+avec `h3=6`, cinq siblings W3 dans `A` et un seed aigu donne :
+
+```text
+nominal : kill=0, min=5, profondeur(seed)=5
+mutant  : kill=1, min=5, profondeur(seed)=5
+```
+
+Le mutant recompte les cinq mêmes positions comme résiduelles, ajoute encore
+`base=5` et perd un seed vivant. C'est la porte code 4 attendue ; le registre
+refuse correctement le brouillon tant qu'elle manque (`83/83/82`).
+
+Enfin, l'écart de routes est déjà non vacant. Le build passe, mais les sept
+portes ciblées donnent `0/7` : registre, q3/q4 batch `uniform`, q3/q4 batch
+`clusters` et les deux routes tout-hôte. Par exemple les morts secteurs valent
+`12066/11821` en q3 uniform et `24196/23945` en q4 uniform entre production et
+lots. Construire le même `EndpointCredit` par ancre dans
+`q3_lane_batched.hpp` et `q4_lane_batched.hpp`, puis le passer aux prétests
+hôte, suffit ; aucun nouveau champ wire ni kernel n'est requis puisque l'ancre
+est tuée avant matérialisation. Les probes `rect_probe`, `q4_stage_probe` et
+`q4_chord_probe` doivent suivre ou déclarer explicitement leur contrefactuel,
+sinon leurs masses ne décrivent plus la production.
+
+Après raccord, la commande de réception courte est :
+
+```bash
+cmake --build build/v5 --parallel
+ctest --test-dir build/v5 --output-on-failure -R '^(mhgp5_mutants_gate|mhgp5_anchor_kill.*|mhgp5_q3_lane_batched.*|mhgp5_q4_lane_batched.*)$'
+```
+
+La fixture de corde `P>0` reste une porte indépendante à fermer : ce nouveau
+crédit ne répare ni l'ordre de `chord.dead` ni le kernel q4.
