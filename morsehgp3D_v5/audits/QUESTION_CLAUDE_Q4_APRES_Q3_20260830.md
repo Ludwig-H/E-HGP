@@ -396,25 +396,24 @@ et avant ce `continue`; pour un site non positif, garder le test après le cœur
 préserve la priorité historique du cœur lorsque les deux certificats ferment
 au même site.
 
-Une fixture entière à `h4=2` rend ce défaut et le mutant non vacants :
+Une fixture entière minimale à `h4=1` rend ce défaut et le mutant non vacants :
 
 ```text
 A=(0,0,10), B=(4,0,10), X=(2,3,10)
-PL=(2,3,9), NL=(3,2,9), NR=(3,2,11), PR=(2,3,11)
+NL=(3,2,9), PR=(2,3,11)
 G=144, J=1504, mu_hat=28
-PL : L= 576, P= 144, B=-12, pièces [1,0,0,0]
 NL : L=-768, P=-192, B=-12, pièces [1,1,1,0]
-NR : L=-768, P=-192, B= 12, pièces [0,1,1,1]
 PR : L= 576, P= 144, B= 12, pièces [0,0,0,1]
-somme exacte : [2,2,2,2]
+somme exacte : [1,1,1,1]
 ```
 
-Le cœur ne tue pas : pour `NL` et `NR`, `2P^2=73728 < J B^2=216576`, et les
-deux autres sites ont `P>0`. Les deux ordres
-`(PL,PR,NL,NR)` et `(PL,NL,NR,PR)` doivent donc rendre exactement
-`dead=true`, `dead_by_chord=1`, `cert_pos=2`, `cert_neg=2`, `jung_skip=2`.
-Le premier état du patch rend vrai puis faux ; le mutant rend faux dans les
-deux ordres avec les comptes de morceaux `[1,2,2,1]`.
+Le cœur ne tue pas : pour `NL`, `2P^2=73728 < J B^2=216576`, tandis que `PR`
+a `P>0`. Les deux ordres `(PR,NL)` et `(NL,PR)` doivent donc rendre exactement
+`dead=true`, `dead_by_chord=1`, `cert_pos=1`, `cert_neg=1`, `jung_skip=1`.
+Le premier état du patch rend respectivement mort puis vivant ; le mutant rend
+les deux ordres vivants. La vraie route scalaire donne actuellement
+`seeds_killed_chord=1/0` et `q4_completions=4/6`; après correction les deux
+ordres doivent donner `1` et `4`, avec le même candidat final.
 
 Rejeu local du worktree : les huit portes ciblées shaped, corde historique et
 batch passent, mais elles ne discriminent pas ce défaut. La porte shaped
@@ -427,7 +426,7 @@ La fermeture utile est petite et atomique :
 
 1. graver les deux permutations dans une porte courte qui exerce
    `ChordPieces` comme oracle local, la route shaped et la vraie route scalaire
-   `process_anchor_q4` avec `h4=2` ;
+   `process_anchor_q4` avec `h4=1` ;
 2. faire attendre le code 4 au CTest `chord-skip-positive` ; les portes
    existantes le laissent actuellement survivre avec le code 0 et
    `mutants_gate.py` le refuse comme mutant sans porte ;

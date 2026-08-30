@@ -125,10 +125,10 @@ Le patch actif va dans cette direction, mais son premier état teste encore
 donc de l'ordre si un tel site complète le dernier morceau. Le kernel CUDA
 conserve en outre l'ancien saut. Rejoué localement, `mhgp5_mutants_gate` rend le
 code 3 : le mutant déclaré n'a aucune porte code 4 ; les portes shaped
-désactivent la corde et la parité batch partage le même oubli. La fixture à
-sept points et ses deux permutations sont données dans l'addendum de la réponse
-Q4, avec le motif de correction qui préserve la priorité du cœur en cas
-d'égalité.
+désactivent la corde et la parité batch partage le même oubli. La fixture
+minimale à cinq points et ses deux permutations sont données dans l'addendum de
+la réponse Q4, avec le motif de correction qui préserve la priorité du cœur en
+cas d'égalité.
 
 ### La sonde de corde actuelle n'est plus une autorité indépendante
 
