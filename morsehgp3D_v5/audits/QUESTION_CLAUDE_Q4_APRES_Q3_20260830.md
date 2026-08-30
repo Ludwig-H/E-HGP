@@ -383,19 +383,17 @@ un mutant `chord-skip-positive` qui restaure l'ancien saut, en plus du mutant de
 frontière `chord-nonstrict`, puis exercer la même fixture dans le scalaire et
 le shaped. Les portes de lane gardent ensuite la parité device.
 
-### Retour constructif au pin `e2ac9da2`
+### Retour constructif au pin `e2ac9da2`, puis au commit `6ba46c81`
 
-La direction prise après `b82f1de1`, puis commitée dans `e2ac9da2`, est la
-bonne : le calcul de `Bz` et `ChordPieces::update` précèdent désormais le rejet
-du cœur dans les routes scalaire et shaped. Il reste toutefois une couture de
-contrôle : dans
-les deux routes, le site certifié positif exécute encore `continue` avant
-`chord.dead(h4)`. Si ce site apporte le dernier morceau manquant, le compteur
-est exact mais la mort n'est jamais publiée. Le résultat dépend alors de
-l'ordre du scan. Le test de mort doit être fait après la mise à jour positive
-et avant ce `continue`; pour un site non positif, garder le test après le cœur
-préserve la priorité historique du cœur lorsque les deux certificats ferment
-au même site.
+Le pin `e2ac9da2` avait bien déplacé le calcul de `Bz` et
+`ChordPieces::update` avant le rejet du cœur dans les routes scalaire et
+shaped, mais laissait `chord.dead(h4)` après le `continue` positif. Le commit
+`6ba46c81` corrige maintenant cette seconde couture sur les deux routes CPU : le
+test de mort suit la mise à jour positive et précède le `continue`, tandis que
+le site non positif garde la priorité historique du cœur. Le kernel forme lui
+aussi `my_piece` avant le branchement `P>0`. Ces trois modifications sont les
+bonnes corrections en lecture ; le device reste non reçu sans compilation ni
+exécution CUDA.
 
 Une fixture entière minimale à `h4=1` rend ce défaut et le mutant non vacants :
 
@@ -411,35 +409,34 @@ somme exacte : [1,1,1,1]
 Le cœur ne tue pas : pour `NL`, `2P^2=73728 < J B^2=216576`, tandis que `PR`
 a `P>0`. Les deux ordres `(PR,NL)` et `(NL,PR)` doivent donc rendre exactement
 `dead=true`, `dead_by_chord=1`, `cert_pos=1`, `cert_neg=1`, `jung_skip=1`.
-Le premier état du patch rend respectivement mort puis vivant ; le mutant rend
-les deux ordres vivants. La vraie route scalaire donne actuellement
-`seeds_killed_chord=1/0` et `q4_completions=4/6`; après correction les deux
-ordres doivent donner `1` et `4`, avec le même candidat final.
+Le premier état du patch rendait respectivement mort puis vivant ; le mutant
+rend les deux ordres vivants. Après correction, les deux ordres doivent donner
+`seeds_killed_chord=1`, `q4_completions=4` et le même candidat final.
 
-Rejeu local avant la porte de masse : les huit portes ciblées shaped, corde
-historique et batch passent, mais elles ne discriminent pas ce défaut. La porte
-shaped appelle explicitement `chord_on=false`, la fixture historique ne tue que
-`chord-nonstrict`, et la parité batch compare deux routes portant le même
-`continue`. Elles ne pouvaient donc pas recevoir le correctif.
+Une candidate `--ordre-corde` non commise a fourni une régression utile avant
+`6ba46c81` : sur `terrain n=400`, nominal donnait
+`morts_corde=25675`, `desaccords_ordre=0`, et la réintroduction du second défaut
+donnait `morts_corde=25091`, `desaccords_ordre=426`, code 4. Claude a eu raison
+de ne pas enregistrer cette candidate : son CMake portait encore
+`--min-corde=@CORDE@`, jeton non substitué que `std::atoll` transformait en
+zéro. Si cette régression est reprise, son plancher doit être une valeur
+explicite — au minimum `1` — et son mutant doit entrer au registre avec sa
+porte dans le même commit.
 
-Le `chord_positive_gate.cpp` committé améliore ce point sans le fermer. Son
-plancher `terrain n=2000` sépare bien la masse nominale du mutant et rend
-`mutants_gate.py` vert à `82/82/82` ; il est utile comme
-régression d'intégration. En revanche, le patch encore dépendant de l'ordre
-dépasse lui aussi le plancher `23000`, donc cette porte peut être verte avec la
-couture de contrôle toujours fausse. Elle ne compare pas les deux permutations,
-n'appelle pas la route shaped ou le kernel et ne vérifie pas le digest qu'elle
-annonce identique. La garder en complément est constructif ; la fixture cinq
-points reste l'autorité permanente et indépendante d'une famille, d'une seed
-et d'un seuil empirique.
+Au pin livré, `chord_positive_gate.cpp` reste utile pour le premier défaut sur
+la route scalaire, mais aucun mutant ni CTest ne grave la seconde couture. La
+candidate inversait en outre une grande réalisation aléatoire et n'exerçait
+que le helper shaped. La fixture cinq points reste donc la fermeture permanente
+souhaitable sur scalaire, shaped et kernel, indépendante d'une famille, d'une
+seed et d'un seuil.
 
 La fermeture utile est petite et atomique :
 
-1. graver les deux permutations dans une porte courte qui exerce
+1. graver les deux permutations de la fixture cinq points dans une porte courte qui exerce
    `ChordPieces` comme oracle local, la route shaped et la vraie route scalaire
    `process_anchor_q4` avec `h4=1` ;
-2. faire attendre le code 4 de cette fixture exacte sous
-   `chord-skip-positive`, indépendamment du plancher empirique ;
+2. ajouter le mutant `chord-dead-skip-positive` avec sa porte au code 4, et
+   exercer aussi `chord-skip-positive`, indépendamment des planchers empiriques ;
 3. former `my_piece` pour tout site valide dans `q4_kernels.cuh`, y compris
    `lh>bound`, sans lui donner `my_wit`, puis rejouer cette fixture contre le
    vrai kernel lors de la prochaine session CUDA autorisée ;
@@ -560,7 +557,7 @@ carriers, et ne borne toujours ni leur nombre ni le front WSPD. Pour le sommer
 à `h_a+h_b`, il faut en outre refaire le scan hors `A union B`; avec le scan
 actuel, la composition sûre reste un maximum ou une union d'IDs.
 
-### Réponse au diagnostic d'unité `521cb02f`, corrigé par `d723b68a`
+### Réponse au diagnostic d'unité `521cb02f`, corrigé par `d723b68a`, puis à la sonde `6ba46c81`
 
 La requalification de `d723b68a` est juste et utile : la graine 4 réfute la
 conclusion mono-graine sur la canopée bornée, et Claude la retire sans chercher
@@ -568,6 +565,23 @@ conclusion mono-graine sur la canopée bornée, et Claude la retire sans cherche
 que `terrain` porte une croissance reproductible des **essais D** et des morts
 de profondeur, contrairement à `uniform` et `eight_clusters`. Ce signal mérite
 donc le prochain diagnostic.
+
+Le commit `6ba46c81` rend le paramètre reproductible, mais pas encore le
+contrefactuel causal décrit ci-dessous. `terrain_cloud` change la borne de
+`uniform_int_distribution` avant le tirage ; il ne tire pas le saut nominal
+puis ne l'écrête pas. Les mêmes bits du moteur sont donc remappés différemment,
+et l'algorithme de rejet de la distribution peut même consommer un nombre de
+tirages différent. Une collision de hauteur propre à un bras modifie ensuite
+la déduplication, les propositions acceptées et les `PointId`. Il faut générer
+une seule réalisation nominale avec son lineage, cloner ses points, écrêter les
+mêmes sauts et refuser le couple si une collision apparaît.
+
+Le pilote doit aussi refuser strictement une graine ou un cap mal formé, un cap
+négatif, un cap supérieur au plafond nominal et un cap sur une famille autre
+que `terrain`; il doit imprimer la graine `uint32` effectivement transmise au
+PRNG, pas seulement le `long long` reçu. Publier les digests ordonnés des deux
+nuages, le digest de lineage, le nombre de points modifiés et les collisions
+rend alors l'appariement falsifiable.
 
 Il ne ferme toutefois pas encore le « mur du cœur ». Quatre corrections rendent
 la prochaine mesure directement exploitable :
@@ -616,14 +630,22 @@ d'arrêt ; si les arrêts viennent surtout de la corde, ne pas architecturer un
 « cœur » isolé. Un premier shadow `h_c` devient informatif s'il compte aussi
 `sum(L)` évitée avant le scan, pas seulement les essais D évités après ce coût.
 
-Deux gardes restent nécessaires avant de qualifier la note de durable :
+Trois gardes restent nécessaires avant de qualifier la note de durable :
 
 - rejouer après fermeture de l'ordre `P>0 -> chord.dead` et de la parité device,
   car le pin `e2ac9da2` peut encore changer les issues et longueurs de scan ;
 - versionner source de sonde, commande, stdout, formule de `W`, hashes et
-  digests des deux nuages. L'écrêtage après tirage est un bon appariement des
-  propositions, mais ses collisions peuvent encore modifier le masque accepté
-  et les `PointId` ; publier ce masque ferme l'ambiguïté.
+  digests des deux nuages. Implémenter réellement l'écrêtage après le tirage
+  nominal donne le bon appariement des propositions ; ses collisions peuvent
+  encore modifier le masque accepté et les `PointId`, donc les publier ferme
+  l'ambiguïté ;
+- corriger `recu_local.sh` : son garde de propreté inclut le script mais pas
+  `bench/q4_stage_probe.cpp`, puis son mode q4 hash les lignes `masses_q4` et
+  `seeds_q4` et exige leur égalité entre deux nuages différents sous le nom de
+  `comparaison_objet`. Cette égalité n'est ni attendue ni une identité d'objet.
+  Inclure tout `bench/` dans le pin et enregistrer ces lignes comme signatures
+  de compteurs sans comparaison inter-bras ; réserver l'égalité aux vrais
+  digests produit.
 
 En attendant, une formulation fidèle au progrès réel serait : « sur `terrain`,
 graine 3 et dernier doublement 8k vers 16k, l'écrêtage testé n'améliore pas le
@@ -634,19 +656,13 @@ pas » / « pas un artefact de famille » doivent suivre cette requalification.
 
 ### Renforcement de la couture `EndpointCredit -> secteurs`
 
-Le brouillon relu au `HEAD=e008139f` est mathématiquement bien orienté. Pour
-chaque secteur `k`, le crédit `E` vit dans `A union B`, le résidu `S_out[k]`
-hors de cette union, et les deux ensembles sont disjoints. Le minorant sûr est
-donc bien `max(cnt[k], cnt_out[k]+base)`, puis le minimum sur les huit secteurs.
-
-Le code courant calcule à la place l'union de deux verdicts globaux :
-
-```text
-min(cnt) >= h  OR  min(cnt_out + base) >= h
-```
-
-Il reste fail-open, mais n'implémente pas le contrat commenté. La correction
-sans addition potentiellement débordante, sous la précondition `base<h`, est :
+Le commit `6ba46c81` implémente maintenant le bon combinateur. Pour chaque
+secteur `k`, le crédit `E` vit dans `A union B`, le résidu `S_out[k]` hors de
+cette union, et les deux ensembles sont disjoints. Le minorant sûr est
+`max(cnt[k], cnt_out[k]+base)`, puis le minimum sur les huit secteurs. Le
+mutant `sector-credit-global` restaure l'ancienne union de deux minima globaux
+et la nouvelle porte croisée le tue. Une écriture équivalente sans addition
+potentiellement débordante, sous la précondition `base<h`, est :
 
 ```cpp
 for (int k = 0; k < 8; ++k)
@@ -657,24 +673,41 @@ return true;
 La fixture de comptes proposée dans `ETAT_COURANT.md` est une bonne porte du
 combinateur, mais elle ne suffit pas comme autorité : elle n'exerce ni les
 demi-plans sectoriels, ni `in_spindle`, ni l'exclusion réelle des ranges. Une
-fixture géométrique q3 à cinq positions ferme le cas croisé :
+fixture géométrique q3 à cinq positions ferme le cas croisé, mais la coordonnée
+de `o` doit être légèrement déplacée pour que `A` soit un vrai `NodeRef` et non
+une plage artificielle :
 
 ```text
 a=(0,1000,1000), b=(2000,1000,1000), D2=4000000, h=2
-e=(10,990,990), i=(10,910,910), o=(10,1020,1020)
+e=(10,990,990), i=(10,910,910), o=(10,1020,1024)
 A={a,e,i}, B={b}, EndpointCredit(base=1), cover={e,i,o}
 cnt     = [1,2,2,2,2,1,1,1]
 cnt_out = [1,0,0,0,0,1,1,1]
 ```
 
-Ici `e` est le seul crédit W3 universel. Chaque secteur atteint exactement 2
-par l'une des deux branches, alors que les deux minima globaux valent 1 : sans
-crédit `false`, avec crédit `true`, et `witness_min/sector_counts` restent les
-comptes purs.
+Avec cette seule modification, les indices Morton de `a/e/i/o/b` valent
+`2/1/0/4/3`. Le nœud interne `A=NodeRef 2` porte exactement le range `0..2`,
+`B=leaf_ref(3)`, `wspd_wavefront(s=8)` émet `A x B`, puis
+`alive_rectangles(q3,h=2)` le conserve avec `core=0`.
+`corner_histograms(q3,{A,B})` donne `ha=[0,0,1]`, `hb=[0]`; pour l'ancre
+`(a,b)`, `EndpointCredit.base=1` est donc réellement dérivé du chemin produit.
+Chaque secteur atteint exactement 2 par l'une des deux branches, alors que les
+deux minima globaux valent 1 : nominal tue, `sector-credit-global` laisse
+vivre au code 4, et `witness_min/sector_counts` restent les comptes purs.
 
-Le mutant `sector-credit-inbox` doit être tué séparément par une **fausse
-mort**, pas seulement par une différence de compteur. Une fixture déjà rejouée
-avec `h3=6`, cinq siblings W3 dans `A` et un seed aigu donne :
+La fixture versionnée emploie encore `o=(10,1020,1020)` et fabrique `A` avec
+`min/max` des indices. Sa plage `0..2` n'est alors le range d'aucun `NodeRef`
+(les ranges réels sont `0..4`, `1..3`, `2..3` et `0..3`). Elle reçoit bien le
+combinateur local, mais pas la provenance
+`WSPD -> AliveRect -> corner_histograms -> EndpointCredit`. Le changement de
+quatre unités ci-dessus permet de fermer toute cette chaîne dans la même porte.
+
+Le mutant `sector-credit-inbox` est maintenant tué par une **fausse mort** dans
+sa porte unitaire. Cette porte fabrique toutefois
+`EndpointCredit{1,0,m-1,0,-1}` : sa plage B est vide et son état n'est pas
+produit par `corner_histograms`. Elle reste utile pour le garde local, sans
+servir de preuve d'intégration. Une future fixture d'intégration peut employer
+le cas déjà rejoué avec `h3=6`, cinq siblings W3 dans `A` et un seed aigu :
 
 ```text
 nominal : kill=0, min=5, profondeur(seed)=5
@@ -682,19 +715,25 @@ mutant  : kill=1, min=5, profondeur(seed)=5
 ```
 
 Le mutant recompte les cinq mêmes positions comme résiduelles, ajoute encore
-`base=5` et perd un seed vivant. C'est la porte code 4 attendue ; le registre
-refuse correctement le brouillon tant qu'elle manque (`83/83/82`).
+`base=5` et perd un seed vivant. C'est la porte code 4 attendue.
 
-Enfin, l'écart de routes est déjà non vacant. Le build passe, mais les sept
-portes ciblées donnent `0/7` : registre, q3/q4 batch `uniform`, q3/q4 batch
-`clusters` et les deux routes tout-hôte. Par exemple les morts secteurs valent
-`12066/11821` en q3 uniform et `24196/23945` en q4 uniform entre production et
-lots. Construire le même `EndpointCredit` par ancre dans
-`q3_lane_batched.hpp` et `q4_lane_batched.hpp`, puis le passer aux prétests
-hôte, suffit ; aucun nouveau champ wire ni kernel n'est requis puisque l'ancre
-est tuée avant matérialisation. Les probes `rect_probe`, `q4_stage_probe` et
-`q4_chord_probe` doivent suivre ou déclarer explicitement leur contrefactuel,
-sinon leurs masses ne décrivent plus la production.
+L'écart de routes signalé au premier brouillon est désormais fermé : Claude
+construit le même `EndpointCredit` dans `q3_lane_batched.hpp` et
+`q4_lane_batched.hpp`, avant toute matérialisation wire. Après rebuild, les
+portes mutants, les deux fixtures secteur et les routes q3/q4 uniformes et
+tout-hôte passent `9/9` en 155,65 s ; une sélection élargie passe `14/14`.
+Aucun nouveau champ kernel n'est requis puisque le verdict d'ancre intervient
+sur l'hôte. Les probes `rect_probe`, `q4_stage_probe` et `q4_chord_probe`
+doivent encore suivre ou déclarer explicitement leur contrefactuel, sinon leurs
+masses ne décrivent plus la production.
+
+La preuve de `docs/CREDIT_SECTEUR.md` et le caractère sûr/monotone du patch sont
+reçus. Son § 5 doit toutefois rester au même niveau de preuve que son § 4 : les
+chiffres annoncés y sont explicitement antérieurs au combinateur exact et à la
+parité batch. Ils ne permettent donc ni « ne change pas l'exposant », ni « le
+mur reste le cœur ». La formulation reçue est : **aucun déplacement d'exposant
+n'est établi** ; `q4_core_site_tests` reste le scan partagé cœur+corde, dont la
+causalité doit être ventilée par fate avant de nommer un mur.
 
 Après raccord, la commande de réception courte est :
 
@@ -703,5 +742,28 @@ cmake --build build/v5 --parallel
 ctest --test-dir build/v5 --output-on-failure -R '^(mhgp5_mutants_gate|mhgp5_anchor_kill.*|mhgp5_q3_lane_batched.*|mhgp5_q4_lane_batched.*)$'
 ```
 
-La fixture de corde `P>0` reste une porte indépendante à fermer : ce nouveau
-crédit ne répare ni l'ordre de `chord.dead` ni le kernel q4.
+Ajouter `mhgp5_sector_credit.*` à cette expression reçoit les deux helpers
+locaux. La fixture de provenance proposée ci-dessus doit ensuite devenir la
+porte d'intégration. La corde reste un verrou indépendant : `6ba46c81` corrige
+nominalement l'ordre scalaire/shaped et le kernel en lecture, mais la fixture
+exacte à deux ordres et le rejeu CUDA manquent encore.
+
+### Contre-relecture constructive de la stratégie sous-quadratique concurrente
+
+Les nouveaux termes `H_rect`, `M_anchor`, `I_conf`, `K_conf` et `P_shallow`
+sont les bons antidotes à un claim tiré du seul nombre de rectangles. Les deux
+« contre-familles » ajoutées à la stratégie n'ont toutefois pas encore le même
+statut que la fixture secteur ci-dessus. L'identité conditionnelle
+`sum_R(|A_R|+|B_R|)=binom(n,2)+R` suppose que chaque rectangle WSPD de la
+réalisation possède un facteur singleton ; aucune suite d'entiers u16 n'est
+encore passée dans le `wspd_wavefront` v5 pour l'établir. De même, la calotte
+`B` et les sites proches de `z0` ont de bonnes marges analytiques, mais leur
+factorisation, leurs handles et les ancres réellement scannées par la WSPD
+Morton restent à graver.
+
+La conclusion reçue est donc conditionnelle et déjà utile : **`R=O(n)` ne
+borne pas à lui seul `H_rect` ni `M_anchor`**. Avant d'appeler ces constructions
+des contre-fixtures v5 établies, il faut fournir les coordonnées entières, le
+pin, les rectangles émis, les sommes exactes et un mutant/contrôle qui rend le
+ledger non vacant. Cette exigence renforce la stratégie ; elle ne remet pas en
+cause son choix de publier ces masses.
