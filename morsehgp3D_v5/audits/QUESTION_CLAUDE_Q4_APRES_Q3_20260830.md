@@ -299,3 +299,165 @@ bloc `PROFIL` sortiront donc à zéro et ne mesurent rien. Le bras historique
 bit-identique est une bonne garde, mais le cap constant de référence exact à
 2 000 points est 27, non 28. Versionner source, commande, stdout, hash du
 binaire, `HEAD` et état du worktree avant tout nouveau verdict.
+
+### Addendum : deux coutures q4 exactes révélées par la sonde de complétion
+
+Les sorties `cf_*` ferment les identités agrégées qu'elles contrôlent, mais la
+mention `identite_production=OK` ne compare ni les clés ni l'ordre des
+candidats, ni tous les compteurs de rejet. Les temps de `reps.txt` varient
+jusqu'à un facteur deux sur une même entrée et ne sont pas citables. Les taux
+ci-dessous restent donc des diagnostics seed 3 non reçus ; les décisions
+mathématiques, elles, peuvent être prises indépendamment de ces taux.
+
+#### 1. La corde doit lire aussi les sites `P>0`
+
+Le `continue` de `process_anchor_q4` après `lh>seed.bound` est trop tôt. Il est
+correct pour le **cœur de Jung**, qui exige `P<0`, mais faux pour les morceaux
+de corde. Pour un site `z`, la condition exacte le long du faisceau est
+`P(z)-mu*B(z)<0`. La valeur `P(z)>0` dit seulement que `z` n'est pas intérieur
+au centre `mu=0`; si `B(z)` est non nul, `z` peut être strictement intérieur
+sur un morceau extérieur.
+
+Le théorème 10.4 et `ChordPieces::update` n'ont aucune précondition `P<0`.
+`bench/q4_chord_probe.cpp`, qui a produit le reçu historique K=4, parcourt déjà
+**tous** les `P`. La sonde qui a motivé l'intégration et la production ne
+mesurent donc pas le même certificat : le code intégré est strictement plus
+faible que son théorème et que son propre banc.
+
+La réparation minimale est de calculer `Bz` et d'appeler
+`chord.update(lh,bound,Bz,exact_l)` avant de sortir de la branche `P>0`. Le
+compteur de cœur continue à ignorer ce site, puis `chord.dead(h4)` doit encore
+être testé. La même couture est obligatoire dans les trois autorités :
+
+- `src/pipeline/generate.hpp` ;
+- `src/gpu/q4_core_shaped.hpp` ;
+- `src/gpu/q4_kernels.cuh`, où le masque `my_piece` doit être formé hors de la
+  branche négative.
+
+La stricte frontière `v_j<0` ne change pas. Un futur support `y` ne peut pas
+être compté comme intérieur de sa propre boule : à son paramètre `mu_y`, sa
+forme vaut zéro ; une forme affine négative aux deux extrémités du morceau qui
+contient `mu_y` ne pourrait pas s'y annuler. L'emploi des mêmes `scan_sites`
+que la profondeur implique aussi que les candidats bruts et leur ordre doivent
+rester identiques ; seuls les seeds, essais et tests évités changent. Une
+divergence de digest candidat est ici une alarme, contrairement à une future
+`WitnessTape` qui ajouterait des IDs hors du scan historique.
+
+La fixture non vacante peut rester petite et entière :
+
+```text
+a=(0,0,0), b=(4,0,0), x=(2,3,0), G=144, J=1504, mu_hat=28
+z1=(1,0,1)  : P=-288, B=12, morceaux 1,2,3
+z2=(0,0,-1) : P=+144, B=-12, morceau 0 seulement
+```
+
+À `h=1`, tous les morceaux sont couverts seulement si `z2` passe dans
+`ChordPieces`. La complétion `y=(1,0,-2)` est strictement bien centrée et est
+tuée en profondeur par `z1`; elle grave l'égalité du flux de candidats. Ajouter
+un mutant `chord-skip-positive` qui restaure l'ancien saut, en plus du mutant de
+frontière `chord-nonstrict`, puis exercer la même fixture dans le scalaire et
+le shaped. Les portes de lane gardent ensuite la parité device.
+
+Sur les seuls seeds ayant déjà survécu à la production actuelle, le K=4 tous
+sites de la sonde tue `7426/113718` seeds et évite `17,10 %` des essais D sur
+`terrain 4000`, puis `12370/129770` et `24,12 %` sur `terrain 8000`; sur
+`uniform 8000`, il donne `73219/325588` et `32,88 %`. C'est un gain incrémental
+utile, pas une estimation de population : l'échantillon est un modulo des
+indices internes, sans bottom-k stable ni intervalle d'incertitude. La ligne
+« K=4 production = 0 » est en outre tautologique puisqu'elle n'est calculée
+qu'après survie au K=4 produit, et son bras ignore tout `L>0` exact alors que la
+production n'ignore que les positifs certifiés flottants.
+
+#### 2. Une complétion `y` doit atteindre la corde du seed
+
+Pour une face `(a,b,x)`, poser `P(y)=q3_power(face,y)`,
+`B(y)=dot(cross(b-a,x-a),y-a)` et
+`J=D2*(3G-2*l_ax*l_bx)`. Une complétion q4 bien centrée est sur la sphère d'un
+centre de paramètre `mu_y`, donc `P(y)-mu_y*B(y)=0`; Jung donne
+`2*mu_y^2<=J`. Il en résulte la condition nécessaire exacte :
+
+$$2P(y)^2\leq J B(y)^2.$$
+
+Si l'implémentation emploie le kernel affine `L=4P`, la même condition devient
+`L*L<=8*J*B*B`; écrire `2*L*L<=J*B*B` serait un défaut de facteur 16. Après la
+porte existante `P>0`, `B=0` est un rejet immédiat. L'égalité doit survivre : le
+rejet exact est seulement `2*P*P>J*B*B`.
+
+Le bon emplacement est après les filtres lentille, owner, exact-once et i64,
+au moment où la puissance de face est déjà calculée, mais avant Cramer et le
+test du centre. Calculer `Py` une fois, conserver la sémantique et les mutants
+du filtre `Py>0`, puis appeler `cmp_2p2_jb2(-Py,J,By)` : ce helper exige un
+premier argument non positif. Les carrés dépassent i128 et U192 ; le U320 déjà
+employé par ce helper est requis. Créer un étage distinct
+`q4_rej_mu_range`, puis le porter dans `q4_completion_stage_shaped`, les
+switches batch et le kernel device ; ne pas le cacher dans
+`q4_rej_face_power`.
+
+Trois fixtures séparent les contrats :
+
+```text
+survit strictement : a=(2,2,2), b=(2,0,0), x=(1,0,2), y=(1,2,0)
+  P=32, B=8, J=176, 2P^2 < JB^2
+frontière gardée : a=(2,2,2), b=(2,0,0), x=(0,2,0), y=(0,0,2)
+  P=128, B=-16, J=128, 2P^2 = JB^2
+rejet non vacant : a=(0,0,0), b=(8,0,0), x=(4,5,0), y=(4,6,3)
+  P=29120, B=120, J=92032, 2P^2 > JB^2 mais P^2 < JB^2
+```
+
+La dernière tue spécifiquement un mutant qui omet le facteur 2 et atteint les
+portes actuelles avant d'être rejetée plus tard par le centre. Un oracle borné
+doit en plus vérifier que tout tétraèdre bien centré possédé satisfait la
+condition, puis comparer candidats et digests avant/après.
+
+Ce filtre reste ponctuel : sur `terrain 8000`, il retirerait 978 085 entrées
+qui paient actuellement Cramer ou le centre, mais aucune n'atteint la
+profondeur. Il réduit donc une constante **après avoir énuméré D** et ne change
+pas le coût `O(|lens|)` par face. La porte `h_c(c)` sur `A x B x C`, avant la
+boucle D, reste le seul des deux mécanismes qui puisse éviter cette
+énumération. Ordre conseillé : réparer d'abord le K=4 tous sites, recevoir sa
+fixture et sa parité ; ajouter ensuite le rejet ponctuel ; garder en parallèle
+le shadow `h_c(c)` comme levier architectural sur le nombre d'essais D.
+
+#### 3. Le minimum exact sur la corde tient dans au plus 16 racines
+
+Il existe enfin un étage de face plus fort que K=8/16/32, sans trier tous les
+sites. Chaque site définit une demi-droite stricte en `mu` : si `B>0`, il
+témoigne pour `mu>P/B`; si `B<0`, pour `mu<P/B`; si `B=0`, il témoigne partout
+exactement lorsque `P<0`. Sur la corde fermée
+`[alpha,beta]=[-sqrt(J/2),sqrt(J/2)]`, compter d'abord les témoins constants
+`c0` et poser `r=h4-c0`. Si `r<=0`, la face est morte.
+
+Pour `r>0`, il suffit de conserver :
+
+- les `r` plus petites racines d'entrée (`B>0`) ;
+- les `r` plus grandes racines de sortie (`B<0`).
+
+En effet, leurs comptes actifs valent en tout point les comptes directionnels
+complets écrêtés à `r`. Soit `upper_i` la `(i+1)`-ième plus petite entrée, ou
+`beta` si elle manque, et `lower_i` la `(r-i)`-ième plus grande sortie, ou
+`alpha` si elle manque. Pour `i=0..r-1`, un point de profondeur inférieure à
+`h4` existe exactement lorsque `lower_i<=upper_i`. L'égalité est un échec du
+certificat : à une racine commune, les deux sites sont sur la coquille et aucun
+ne compte. La face est donc morte si `lower_i>upper_i` pour tous les `i`.
+
+Les conventions aux bords sont également strictes : une entrée en `alpha` est
+gardée mais ne compte qu'après `alpha`; une sortie en `beta` est gardée mais ne
+compte qu'avant `beta`; une entrée en `beta` et une sortie en `alpha` ne
+comptent jamais. L'appartenance d'une racine à la corde se décide par
+`2*P*P` contre `J*B*B` en U320. Pour ordonner deux racines, normaliser le
+dénominateur en `abs(B)` et le numérateur en `P*sign(B)` ; les produits croisés
+atteignent environ 159 bits, donc U192 suffit mais i128 ne suffit pas.
+
+Ce verdict seuil exact coûte `O(m log h4)` et `O(h4)` mémoire, donc au plus 16
+racines stockées avec `h4=8`. Il force néanmoins `P` exact et des comparaisons
+larges sur les sites examinés. Le déploiement prudent reste : K=4 tous sites
+d'abord ; sur ses survivants à grosse lentille, shadow du minimum exact avec
+scratch borné et repli fail-open, puis comparaison marginale à K=8/16/32 en
+seeds, essais D et tests évités par nanoseconde et en HWM.
+
+Ce calcul est un excellent oracle et un `h_c(c)` **local à une face déjà
+énumérée** : s'il atteint `h4`, il supprime toute sa boucle D. Il ne remplace
+pas le lift `A x B x C`, qui cherche à amortir ou éviter les scans de plusieurs
+carriers, et ne borne toujours ni leur nombre ni le front WSPD. Pour le sommer
+à `h_a+h_b`, il faut en outre refaire le scan hors `A union B`; avec le scan
+actuel, la composition sûre reste un maximum ou une union d'IDs.

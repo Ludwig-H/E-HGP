@@ -388,6 +388,24 @@ n'énumérer D qu'après cette porte de face. Ce shadow CPU counter-only doit
 mesurer faces, essais D et tests de puissance évités avant toute promotion ou
 auto-jointure globale.
 
+Une correction locale exacte doit précéder ce shadow. Le théorème 10.4 et le
+banc historique `q4_chord_probe` comptent tous les sites dans les morceaux de
+corde, alors que l'intégration saute les `P>0` certifiés avant
+`ChordPieces::update` dans les routes scalaire, shaped et device. Ce saut est
+valide pour le cœur à `mu=0`, pas pour une corde où `P-mu*B` peut devenir
+négatif. Le K=4 tous sites reste conservatif, emploie le même `scan_sites` que
+la profondeur et doit garder le flux candidat identique. La fixture entière
+et le mutant `chord-skip-positive` sont spécifiés dans
+`QUESTION_CLAUDE_Q4_APRES_Q3_20260830.md` ; il faut fermer cette divergence
+entre théorème, sonde et produit avant d'interpréter `seeds_killed_chord`.
+
+Une seconde couture exacte est seulement locale à chaque essai D. Pour une
+complétion `y`, la condition nécessaire est `2*P(y)^2<=J*B(y)^2`, avec rejet
+strict de `>` après la porte `P(y)>0`; sous la convention `L=4P`, elle devient
+`L^2<=8*J*B^2`. Elle peut éviter Cramer et le test du centre, mais elle parcourt
+encore chaque `y` et n'apporte donc aucune borne sous-quadratique. La garder
+distincte de `h_c(c)`, qui seul se place avant l'énumération D.
+
 ### V151--V153 — aucune répétition exacte, utiliser d'abord l'index existant
 
 La colonne nommée `|B|` par V151 est `|A||B|` moyen. La reconstruction des
@@ -667,9 +685,10 @@ complexité sous-quadratique.
 3. Helper commun de préclassification histogramme avant handles ; mesurer le
    plancher rectangle puis `rollback_children_all_dead` avant toute nouvelle
    preuve-partition.
-4. q4 en premier : `oneside_gate`, puis `w4_tape`; q3 sert de garde de
-   non-régression. Garder cœur/corde/complétions séparés après la porte d'ancre
-   et tuer un mutant qui crédite les quatre morceaux sans `ChordPieces::update`.
+4. q4 en premier : réparer `ChordPieces` tous sites dans les trois routes et
+   tuer `chord-skip-positive`, puis `oneside_gate` et `w4_tape`; q3 sert de
+   garde de non-régression. Ajouter ensuite le rejet D par portée de corde sans
+   le confondre avec le shadow `h_c(c)` placé avant D.
 5. Campagne appariée trois graines avec reçus bruts et hashes. Ne construire un
    cache direction–rayon qu'après avoir mesuré les clés uniques
    `(endpoint,opposite_node,lane)` et le HWM.
