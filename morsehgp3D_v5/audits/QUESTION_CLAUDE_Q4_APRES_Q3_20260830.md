@@ -852,9 +852,9 @@ Une campagne terminale `complete` après ce raccord signifie donc seulement
 « tous les runs indépendants ont fini » ; ses écarts de temps et de masses ne
 doivent pas être cités comme effet apparié de la canopée.
 
-### Garde sur les deux brouillons suivants
+### Garde sur le générateur et la fixture suivante
 
-Le brouillon `bump_amp_cap` ouvre une seconde hypothèse intéressante — les six
+Le paramètre `bump_amp_cap` ouvre une seconde hypothèse intéressante — les six
 calottes grandissent elles aussi avec `coord` — mais ne corrige pas le
 couplage. Il remplace la distribution nominale par `[cap/2,cap]` avant tirage,
 au lieu de dériver le bras borné d'une amplitude nominale déjà tirée. Pour
@@ -915,18 +915,32 @@ temps muraux de cette campagne concurrencée ne doivent pas alimenter un ratio
 de performance. Les compteurs entiers, eux, restent exploitables comme
 diagnostic de cohortes indépendantes.
 
-La nouvelle note `docs/TERRAIN_DEUX_ECHELLES.md` peut ainsi être sauvée sans
-jeter les mesures : remplacer « le mur n'est pas algorithmique » et « q4
-redevient linéaire » par « sur trois tailles et trois cohortes, borner les deux
-échelles verticales est associé à des compteurs de tests de cœur presque
-proportionnels à n ». Les valeurs du second factoriel (`bump_amp_cap=30`) n'ont
-encore ni commande, ni sorties brutes, ni hash de binaire dans un reçu ; elles
-sont une hypothèse très encourageante, pas encore un résultat reçu. Trois
-tailles finies ne prouvent par ailleurs aucun exposant asymptotique, même si
-leurs pentes locales sont proches de 1.
+Le commit `c53229b9` ferme ensuite la provenance du second diagnostic : 27/27
+exécutions rendent 0, les 27 identités internes sont `OK`, les stderr sont
+vides, le pin construit est `9f504e52` et le binaire unique vaut
+`b319abda4c26f1a133b3410f2b0ab1a8cfd68a28f965bf7e3949fd7b6aa6e565`.
+Les neuf valeurs `tests_cœur` et leurs pentes sont bien reproduites ; dans la
+variante où les deux distributions de hauteur ont une borne absolue, les six
+pentes locales appartiennent à `[1,0031;1,0142]`. C'est un résultat descriptif
+utile et désormais reproductible.
 
-L'explication géométrique de la note doit être corrigée avant commit. Le cover
-historique q4 n'est pas la boule diamétrale : il vérifie
+Il ne reçoit toutefois ni « le mur n'est pas algorithmique », ni « q4
+redevient linéaire ». Les 27 entrées restent des variantes générées
+indépendamment, avec un run par bras et sans alternance. La matrice ne comporte
+que dépôt, canopée bornée et deux hauteurs bornées : le bras bosses bornées avec
+canopée nominale manque, donc ce n'est pas encore le factoriel `2 x 2` annoncé.
+Trois tailles finies donnent des pentes locales, jamais un exposant
+asymptotique.
+
+Une erreur de transcription doit aussi être réparée dans la note. La ligne
+`covers` annonce `1,47–1,76 / 0,99–1,20 / 0,969–1,061`, alors que le champ
+`masses_q4 covers` donne respectivement
+`1,056–1,097 / 1,001–1,014 / 1,012–1,025`. Les valeurs annoncées ne sont pas
+davantage celles de `sites_retenus`, qui valent
+`1,588–1,904 / 0,989–1,267 / 1,001–1,039`.
+
+L'explication géométrique de la note doit être corrigée par un correctif. Le
+cover historique q4 n'est pas la boule diamétrale : il vérifie
 $\lVert 2z-a-b\rVert^2\leq 3D^2$. Dans le plan horizontal d'altitude $z_0$, son
 rayon vérifie exactement $r_3^2=\frac{3D^2-(2z_0-z_a-z_b)^2}{4}$. Pour une
 ancre avec $z_a=z_0=0$, $z_b=H$ et séparation horizontale $d_{xy}$, cela donne
@@ -938,12 +952,49 @@ ensuite retenus dans la lentille, qui est encore un troisième objet. La formule
 du cover peut donc expliquer une masse offerte au scan du cœur ; elle ne
 prédit pas à elle seule les seeds ni les complétions observés.
 
+Le même calcul fournit néanmoins une meilleure hypothèse positive. Pour
+l'ancre verticale `a=(0,0,0)`, `b=(0,0,H)`, à l'altitude `t`, le cover q4 a
+$r_3^2(t)=H^2/2+Ht-t^2$, le prétest diamétral a
+$r_1^2(t)=t(H-t)$ et la lentille a
+$r_L^2(t)=\min(H^2-t^2,2Ht-t^2)$. L'anneau des seeds aigus possède alors
+l'aire $A_{seed}(t)=\pi H\min(t,H-t)$. Une calotte dont `t=Theta(H)` peut donc
+offrir `Theta(H^2)` seeds, tandis qu'un relief `t=O(1)` n'en offre que
+`Theta(H)`. Cela rend le rôle conjoint des deux hauteurs plausible, sans le
+tenir pour démontré. La note doit aussi remplacer son « seeds q3 » par
+`seeds_q4` : c'est bien la lane mesurée.
+
+Les compteurs montrent en outre deux effets, pas un seul. Le quotient
+`tests_cœur/seeds` aux tailles 8k/16k/32k vaut :
+
+| graine | dépôt | deux distributions bornées |
+|---|---|---|
+| 3 | 19,12 / 27,67 / 50,06 | 11,66 / 11,63 / 11,69 |
+| 4 | 16,37 / 17,72 / 19,31 | 11,61 / 11,65 / 11,69 |
+| 5 | 15,52 / 17,47 / 19,49 | 11,57 / 11,62 / 11,66 |
+
+Les hauteurs croissantes sont donc associées à plus de seeds **et** à des
+préfixes de scan moyens plus longs. Ce quotient inclut encore les seeds tués
+par grille, qui paient zéro test cœur ; publier `core_entered` permettra de
+mesurer le vrai préfixe conditionnel.
+
 L'expérience discriminante courte est d'agréger par ancre, dans des classes de
-`(|dz|,d_xy)`, les cinq quantités `cover.size`, `lens.size`, seeds aigus,
-`q4_core_site_tests` et complétions. Sur le même tape latent et les quatre bras
-du factoriel, elle dira où naît l'écart : enveloppe de coefficient 3, lentille,
-survie des seeds ou boucle de complétion. Cette coupe est plus actionnable pour
-l'architecture qu'un seul nombre d'altitudes distinctes.
+`D/coord`, de `dz^2/D^2` et de la hauteur normalisée des seeds, les quantités
+`C1_open_exact`, `W4_exact`, `C3`, `lens`, seeds aigus, `grid_killed`,
+`core_entered`, `q4_core_site_tests` et complétions. Un histogramme
+logarithmique du nombre de sites réellement visités par seed localisera les
+longs préfixes. Sur le même tape latent et les quatre bras du factoriel, cette
+coupe dira où naît l'écart : cover de coefficient 3, lentille, survie des seeds
+ou boucle de cœur. `pretest_sites` ne peut pas jouer ce rôle : il compte le
+sur-ensemble rectangle, pas le coefficient 1 exact.
+
+Le mot « physique » doit enfin rester prudent. Dans le terrain nominal, rayons
+et amplitudes des six bosses croissent ensemble avec `coord` : la surface
+normalisée est approximativement autosimilaire. Le bras borné garde les rayons
+croissants mais fixe les amplitudes, donc devient progressivement plat ; ce
+n'est pas simplement « le même terrain sans anomalie ». Une contre-famille
+stationnaire plus représentative garderait rayons et hauteurs absolus, ferait
+croître le nombre de motifs avec l'aire et agrandirait seulement la fenêtre
+observée.
 
 Deux voies propres permettent à Claude de continuer immédiatement :
 
@@ -953,9 +1004,21 @@ Deux voies propres permettent à Claude de continuer immédiatement :
 2. pour attribuer causalement l'effet, dériver les quatre bras d'un tape latent
    commun comme décrit plus haut, avec lineage et collisions contrôlés.
 
+Le produit n'expose pas ces options et le chemin par défaut reste inchangé :
+`mhgp5_families_fixture` conserve ses douze digests v4. Les quatre portes
+q4-stage et cette fixture passent 5/5. Il manque en revanche toute porte du
+nouveau paramètre. Le parseur `atoi` accepte texte, suffixe, négatif et option
+hors `terrain` ; employer le parseur entier exact, refuser ces cas par code 2
+et tester `cap=0`/borne valide évitera qu'un reçu mal orthographié mesure
+silencieusement le nominal. Le nom `gelé` est lui aussi excessif : `[15,30]`
+reste une distribution aléatoire.
+
 Le raccord d'`EndpointCredit` dans la sonde est en revanche une correction
 nécessaire et bienvenue. Pour éviter une nouvelle dérive, ajouter une petite
 porte qui compare tous les compteurs/fates q4 de la sonde à un appel produit
 `generate_candidates` sur la même fixture, ou faire du chemin produit
 l'autorité du reçu. La cible actuelle est compilée avec `MHGP5_TESTING` : le
 wrapper doit l'appeler « probe instrumenté », pas « cible PRODUIT ».
+Les métadonnées non ambiguës sont `target_kind=instrumented_probe`,
+`signature_kind=counter_snapshot` et
+`input_relation=unpaired_generator_variants`.
