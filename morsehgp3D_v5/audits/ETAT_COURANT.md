@@ -55,6 +55,17 @@
   certificats, résiduel et sortie canonique le sont ensemble. Le chemin actuel
   est au contraire réfuté sur le dernier palier `terrain` par sa pente de seeds.
 
+  Verrou utilisateur du 30 août : le citron n'est jamais un filtre
+  tout-ou-rien. Si `h_coeur<h3`, toute généralisation doit conserver les
+  tableaux par extrémité et n'envoyer à `C` que les couples vérifiant
+  `h_a(a)+h_b(b)<h3-h_coeur`; `min(h_a)+min(h_b)` ne sert qu'à tuer le
+  rectangle entier. Le produit applique déjà cette porte, mais les filtres
+  aval repartent au seuil complet. Pour réutiliser le crédit sans doublon,
+  `W3` peut compter hors des plages entières `A union B` au seuil
+  `h3-h_a-h_b`, ce qui inclut déjà le cœur. Un patch central se compose au
+  contraire par union d'IDs, ou par `max(h_coeur,g_AB[j])` sans provenance.
+  Le prochain reçu doit mesurer cette cascade avant toute expansion `A x B x C`.
+
 - **Pin V140/V141 précédent :** `4741f5b0`, documentaire ; le dernier source
   du probe reste `bd35b88e`. V140 corrige à juste
   titre V139 : si un patch fermé contenant le centre exact d'un seed porte un

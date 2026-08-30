@@ -3319,3 +3319,91 @@ et la fixture de plateau. Tant que la borne supérieure observée du résiduel
 n'est pas strictement sous 2 et qu'aucun théorème de packing ne la ferme, le
 verdict reste : **voie viable à tester sur les cohortes, sous-quadraticité non
 établie**.
+
+## Verrou du 30 août : le cœur et les facteurs forment une seule cascade
+
+Cette exigence utilisateur prime toute lecture ambiguë des propositions
+précédentes : une généralisation q3 ne doit jamais traiter le citron comme un
+filtre tout-ou-rien, puis oublier `h_a/h_b` lorsque son cœur contient moins de
+neuf témoins. Le certificat de base est composé.
+
+Pour un rectangle WSPD disjoint `A x B`, noter `C0` un ensemble certifié de
+positions hors `A union B` qui appartiennent à tous les fuseaux `W3(a,b)`,
+`CA(a)` les positions de `A` autres que `a` qui appartiennent à tous les
+`W3(a,b)` quand `b` parcourt `B`, et `CB(b)` la construction symétrique. Poser
+`h_coeur=|C0|`, `h_a(a)=|CA(a)|` et `h_b(b)=|CB(b)|`. Les trois domaines sont
+disjoints. Pour tout triplet aigu valide possédé par l'arête `(a,b)`, le
+carrier ne peut appartenir à aucun de ces crédits : il est du mauvais côté du
+fuseau strict, alors qu'un témoin crédité impose l'inégalité stricte opposée.
+Ainsi :
+
+$$\mathrm{depth}(a,b,c)\geq h_{\mathrm{coeur}}+h_a(a)+h_b(b).$$
+
+La cascade obligatoire est donc :
+
+1. calculer `h_coeur`, saturé à `h3`; s'il atteint `h3`, tuer le rectangle ;
+2. sinon poser `r=h3-h_coeur`, calculer les **tableaux** `h_a(a)` et `h_b(b)`,
+   saturés au seuil encore utile ;
+3. tuer le rectangle entier si le certificat ferme tous ses couples :
+
+$$h_{\mathrm{coeur}}+\min_{a\in A}h_a(a)+\min_{b\in B}h_b(b)\geq h_3;$$
+
+4. si ce minimum échoue, ne surtout pas jeter les facteurs : seuls les couples
+   suivants restent à transmettre aux handles `C` :
+
+$$S_{AB}=\lbrace(a,b)\in A\mathbin{\times}B:h_a(a)+h_b(b)<h_3-h_{\mathrm{coeur}}\rbrace.$$
+
+Comme `h3=9` dans le profil courant, des classes saturées et les bitsets
+`B_lt[t]` suffisent : pour chaque `a`, parcourir seulement
+`B_lt[h3-h_coeur-h_a(a)]`. Il n'est pas nécessaire de former le produit dense
+`A x B`. Les minima ne servent qu'à la fermeture globale ; ils ne remplacent
+jamais les valeurs par extrémité dans le résiduel.
+
+Le code produit possède déjà la première version correcte de cette porte :
+`generate.hpp` calcule `need=h3-ar.core`, puis rejette l'ancre lorsque
+`ha[ia]+hb[ib]>=need`; les lanes hôte par lots font de même. Il ne faut donc
+pas « ajouter » un second filtre concurrent, mais préserver cette sémantique
+dans le classifieur fibré et remplacer son double parcours actuel
+`O(|A|^2+|B|^2)` par les requêtes d'arbre saturées déjà spécifiées.
+
+### Propager le crédit, sans le compter deux fois
+
+Le défaut d'efficacité restant est en aval : après la porte histogramme,
+`anchor_universal_kill`, les secteurs, `CellGrid` et le scan exact repartent
+au seuil complet `h3`. C'est fail-open, donc pas une faute d'objet, mais cela
+ne tire pas profit d'une base proche de neuf. Leur prochaine interface doit
+recevoir le seuil résiduel et la provenance des domaines.
+
+Pour `W3` par ancre, la couture la plus simple ne demande aucun tableau d'IDs
+du cœur. Compter seulement les témoins de `W3(a,b)` situés **hors de tout
+`A union B`**, au seuil `h3-h_a(a)-h_b(b)`. Ce compte contient déjà `C0`, donc
+prend nécessairement `h_coeur` en compte. L'implémentation actuelle ne saute
+que les deux endpoints ; elle doit sauter les deux plages entières avant
+d'abaisser le seuil. L'autre implémentation sûre est de démarrer à
+`h_coeur+h_a+h_b`, puis de scanner hors `A union B` en excluant explicitement
+les IDs de `C0`. Ces deux formes sont équivalentes ; il est interdit de faire
+`h_coeur + compte_W3_hors_AB`, car `C0` est inclus dans ce compte.
+
+La même discipline vaut pour les secteurs et les cellules : `h_a+h_b` est
+additionnable à un compte restreint hors `A union B`. En revanche un compte
+central de patch `g_AB[j]` peut reconnaître les mêmes positions que le cœur.
+Avec les identités, utiliser l'union ; sans elles, la seule borne scalaire
+sûre est :
+
+$$h_a(a)+h_b(b)+\max\left(h_{\mathrm{coeur}},g_{AB}[j]\right).$$
+
+Si le constructeur garantit au contraire que `g_AB[j]` exclut les IDs du
+cœur, la somme redevient autorisée. Cette convention doit être portée par un
+type ou un état de provenance, pas par un commentaire implicite. Un cœur
+hérité après `postsep_refine` mérite une attention particulière : si ses IDs
+ne sont pas récupérables et revalidés, rester sur `max`, jamais inventer une
+union.
+
+Le premier reçu causal demandé à Claude compare donc la lane actuelle à cette
+cascade, sans changer la sortie : compte des rectangles tués par le cœur seul,
+des ancres supplémentaires tuées par `h_a/h_b`, des témoins centraux nouveaux
+nécessaires après la base, des couples effectivement transmis à `C`, des tests
+d'acuité et de profondeur évités, mur/HWM, puis égalité des BallKeys, événements
+et forêts. Les fixtures minimales fixent `h_coeur<h3` mais
+`h_coeur+h_a+h_b=h3`, puis `h_coeur+h_a+h_b=h3-1` avec un seul témoin central
+nouveau, ainsi qu'un mutant qui recompte le même site dans le cœur et un patch.

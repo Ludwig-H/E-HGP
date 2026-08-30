@@ -19,7 +19,11 @@ Cadre de toute entrée active : `phase=exploration_v5_hors_registre`,
   mais la v3 reste diagnostique tant que ledger, caps et compteurs causaux ne
   sont pas indépendants ; le chemin sûr calcule `g_AB[j]` une fois par
   rectangle, laisse `C` masquer les patches par les médiatrices, réutilise
-  `h_a(a),h_b(b)` et diffère le coût de `h_c(c)` jusqu'au résiduel. Sa
+  obligatoirement `h_coeur+h_a(a)+h_b(b)` avant toute expansion, puis diffère
+  le coût de `h_c(c)` jusqu'au résiduel. Si le cœur seul ne ferme pas le
+  rectangle, les tableaux par extrémité éliminent encore les couples par
+  classes de seuil sans former `A x B`; ils ne sont jamais réduits à deux
+  moyennes. Sa
   composition est néanmoins fermée avec un stockage borné : un patch qui
   atteint `h_q` meurt globalement ; sinon ses `h_q-1` positions au plus sont
   affectées après coup aux strates disjointes des handles. Elles s'additionnent
