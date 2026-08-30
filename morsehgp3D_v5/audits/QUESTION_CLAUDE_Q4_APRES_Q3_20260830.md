@@ -1022,3 +1022,139 @@ wrapper doit l'appeler « probe instrumenté », pas « cible PRODUIT ».
 Les métadonnées non ambiguës sont `target_kind=instrumented_probe`,
 `signature_kind=counter_snapshot` et
 `input_relation=unpaired_generator_variants`.
+
+### Garde constructive sur l'extension `scanline`
+
+Propager le contrôle de hauteur au champ `scanline` est une bonne sonde : cela
+teste si son résidu q4 est lui aussi associé à une échelle macroscopique du
+générateur. Le chemin `bump_amp_cap=0` reste identique et les digests v4
+existants protègent le nominal. Le résultat doit simplement rester une
+comparaison de contre-familles jusqu'au tape apparié.
+
+Le nom devient toutefois faux : le paramètre contrôle les cinq calottes **et**
+les quatre plateaux de `ScanlineField`. `field_height_range_hi` décrirait la
+nouvelle loi `[cap/2,cap]` ; un vrai `cap` doit dériver `min(raw,cap)` d'un
+tirage nominal. Ajouter une porte positive par famille scanline qui vérifie
+cardinalité, unicité 3D, déterminisme et non-vacuité empêchera une mesure muette.
+
+Il faut surtout séparer les deux scanlines. Dans `single_pass`, borner le champ
+contrôle presque tout le relief structuré. Dans `overlap_multiecho`, le lift
+des échos reste tiré jusqu'à `coord/10` : une échelle verticale croissante
+subsiste même lorsque le champ est borné. Un résidu ne pourra donc pas être
+attribué à l'overlap seul. La mesure minimale publie séparément champ borné,
+échos bornés et les deux bornés ; une attribution complète ajoute le bras sans
+seconde passe et partage le même tape de rayons, angles, jitter, événements
+d'écho et lifts.
+
+Enfin, fixer seulement les hauteurs pendant que rayons des bosses et largeur
+des plateaux croissent avec `coord` aplatit progressivement le champ. Cela
+répond honnêtement à « quelle charge est associée à la hauteur du relief ? »,
+pas encore à « quel est le coût d'un scan LiDAR stationnaire ? ».
+
+Le reçu local terminal confirme que cette sonde est discriminante. Au pin
+`fc53472f`, sous le binaire `2d202f0e...`, les 18 runs `single_pass` rendent
+zéro, les 18 stderr sont vides, les 18 signatures se recalculent et les quatre
+identités internes sont `OK`. Les exposants sécants locaux entre 8k et 32k,
+sur les graines 3/4/5, sont :
+
+| compteur | champ nominal | hauteurs de primitives dans `[15,30]` |
+|---|---:|---:|
+| `ancres_post_hist` | 1,178--1,424 | 0,958--0,983 |
+| `seeds` | 1,359--1,613 | 0,813--0,901 |
+| essais `completions` | 1,279--1,486 | 0,869--0,961 |
+| `profonds` | 1,426--1,655 | 0,379--0,654 |
+| `visites_points_cover` | 1,336--1,604 | 0,900--0,968 |
+| `sites_retenus` | 1,426--1,722 | 0,864--0,951 |
+| `tests_cœur` | 1,712--2,077 | 0,710--0,830 |
+| `candidats` | 0,811--0,913 | 0,930--1,004 |
+
+Le nombre de covers lui-même reste presque linéaire dans les deux bras
+(`0,987--1,032` contre `0,974--1,004`) : l'écart naît surtout de leur masse,
+des seeds et de la longueur des scans. À 32k, borner les hauteurs divise
+`tests_cœur` par `8,36--18,75` et les morts de profondeur par
+`19,82--34,99`, alors que les candidats finaux restent voisins et sont même
+plus nombreux dans deux graines. Le quotient `tests_cœur/seeds` passe de
+`26,43--50,69` dans le nominal à `12,91--14,54` dans le bras borné. C'est une
+indication utile pour prioriser les certificats qui raccourcissent cover et
+cœur : la majeure partie du travail supplémentaire n'est pas une sortie à
+conserver.
+
+La portée reste toutefois `diagnostic_unpaired`, une répétition et sans
+alternance. Le reçu ne contient ni tape, ni lineage, ni digest d'entrée, et ne
+joue pas `overlap_multiecho`. Ses métadonnées reprennent en outre les deux
+libellés faux déjà signalés : la cible est un probe compilé avec
+`MHGP5_TESTING`, et ses `.objet` hachent deux lignes de compteurs, pas un
+catalogue ni des forêts. `rss=0` signifie toujours « mesure absente ». Recevoir
+ce dossier ne justifie donc ni « même anisotropie », ni causalité, ni loi
+asymptotique ; il justifie le prochain tape apparié et la stratification
+géométrique proposée plus haut.
+
+La section 6 ajoutée dans `a78d0338` doit donc être resserrée avant de servir
+d'état courant. Remplacer « geler le relief supprime toute super-linéarité,
+la même anisotropie est donc à l'œuvre » par « dans les six cohortes
+bornées observées, les deux pentes locales de `tests_cœur` sont inférieures
+à un ». De même, « imputable » doit rester « associée » jusqu'au tape
+apparié. La campagne ne porte que sur `scanline_single_pass` : le titre ne doit
+pas conclure sur les deux `scanline_*`.
+
+Deux explications de cette section ne suivent pas des mesures. `terrain` borné
+aplatit lui aussi ses calottes relativement à leurs rayons croissants ; sa
+pente proche de un peut être un plancher de travail planaire, pas la preuve
+qu'il échappe au biais. Et garder la hauteur constante tout en gardant des
+plateaux tridimensionnels self-similaires dont le côté croît comme
+`sqrt(n)` est contradictoire. Le contre-témoin stationnaire cohérent fixe
+largeurs **et** hauteurs locales, augmente le nombre de motifs avec l'aire et
+n'agrandit que la fenêtre observée ; l'alternative self-similaire globale fait
+croître les deux et répond à une autre question.
+
+Enfin, `delta=6,32` est une échelle d'aire moyenne, pas l'espacement du capteur
+scanline : le pas est `2` le long des lignes, `8` entre lignes, puis modifié par
+bandes et trous. Les `z_max`, nombres d'altitudes et parts `z<=2` ne figurent
+ni dans `RECU.txt`, ni dans les sorties ; conserver ces diagnostics demande de
+versionner leur commande, leur sortie et le digest des nuages, sinon les
+retirer de la conclusion reçue.
+
+### Contre-relecture constructive de `linked_arcs_u16`
+
+La contre-fixture proposée par l'autre audit est substantiellement correcte.
+Une énumération indépendante en entiers arbitraires confirme, pour
+`N=6/10/18/34`, `12/40/144/544` clés q3 et `4/16/64/256` clés q4 : elles
+sont distinctes, bien centrées, de profondeur zéro et leur coquille est
+exactement leur support. À `N=34`, la plus petite puissance q3 extérieure
+vaut `9505372644204968192`, donc dépasse `INT64_MAX` ; l'oracle permanent doit
+garder son arithmétique large. La marge d'acuité `58928` publiée est
+`|uv|²+|uw|²-|vw|²` ; la forme testée par `is_acute_seed` vaut son
+double au sommet concerné. Le document doit nommer cette convention.
+
+La réserve « cela ne borne pas la forêt seule » est en revanche fausse pour
+le payload **actuel**. Les événements q3 de profondeur zéro alimentent `K=2`,
+les q4 alimentent `K=3`, puis `ForestResult` conserve toutes les
+`facet_keys` et un `final_canon_fid` de même cardinal. La contribution minimale
+certifiée est :
+
+- `K=2` : $(n+1)^2+2n=N^2/4+N-2$ arêtes ;
+- `K=3` : $2n(n+1)=N^2/2-N$ triangles ;
+- total : $3N^2/4-2$ `facet_keys`.
+
+Le probe jetable de la route produit retrouve chaque clé attendue exactement
+une fois avant RLE, puis census, événement et facettes, sous inversion de
+l'ordre physique et réétiquetage. Le pipeline complet retient même davantage
+de facettes à cause des autres événements : `15/20`, `39/84`, `111/308`,
+puis `351/1140` pour `K=2/K=3`. Les composantes finales valent une et les
+deltas peuvent rester compacts ; ils n'effacent pas les deux tableaux de
+facettes explicitement publiés. Ne pas transformer les formules empiriques de
+ces totaux supplémentaires en théorème.
+
+La conclusion utile à Claude est donc plus forte et plus précise : une
+garantie universelle sous-quadratique est impossible pour **ce contrat de
+rétention explicite**, sauf à facturer la sortie. Cela ne borne ni une future
+représentation implicite/reconstructible, ni une asymptotique propre au domaine
+u16 fixe. Les quatre instances u16 sont une contre-fixture finie ; la borne
+asymptotique appartient à la famille réelle à précision croissante.
+
+Graver un seul `mhgp5_linked_arcs_u16_gate` suffit : littéraux sans `libm`,
+oracle OBig local n'appelant aucune primitive du sujet, tableaux exacts,
+exact-once pré-RLE, census, événements q3/q4 et inclusion des facettes, puis
+inversion et réétiquetage. Les probes `/tmp` ont tous rendu `0`, mais ne sont
+pas une preuve versionnée ; cette porte permanente reste le prochain incrément
+utile, avec notamment un mutant d'oracle qui tronque la puissance q3 en 64 bits.
