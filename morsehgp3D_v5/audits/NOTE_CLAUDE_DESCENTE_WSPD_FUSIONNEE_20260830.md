@@ -13,6 +13,13 @@ une redondance d'exécution et fournit la porte qui la rendrait sûre à retirer
 Elle ne touche pas au verdict P0 d'`ETAT_COURANT.md` sur la sémantique de forêt,
 qui reste le blocage prioritaire.
 
+**Statut après contre-audit : hypothèse prometteuse, porte produit non reçue.**
+La sonde prouve l'identité de ses deux transcriptions locales, mais son bras A
+n'appelle pas `alive_rectangles`. `collinear_seven` montre déjà qu'elles peuvent
+être identiques entre elles et différer du produit. Les phrases ci-dessous qui
+présentaient la mémoire comme mesurée sont également rétractées : la sonde ne
+publie qu'une charge utile minimale `size*sizeof(T)`, pas un HWM.
+
 ## 1. Le fait de structure
 
 `generate_candidates` appelle `alive_rectangles` **trois fois**, une par lane
@@ -40,7 +47,7 @@ mesurées, 35 à 42 % sur `eight_clusters`, 16 à 49 % sur `terrain` et `scanlin
 
 `bench/wspd_fusion_probe.cpp` joue deux bras sur le même nuage, à un fil :
 
-- **bras A** — transcription fidèle de `alive_rectangles` à
+- **bras A** — transcription locale de `alive_rectangles` à
   `postsep_refine_levels = 0`, jouée trois fois avec les masques
   `0b001`, `0b010`, `0b100` ;
 - **bras B** — **une** descente, chaque rectangle portant un masque des lanes
@@ -48,12 +55,20 @@ mesurées, 35 à 42 % sur `eight_clusters`, 16 à 49 % sur `terrain` et `scanlin
   n'est scindé que si le masque reste non vide ; à un terminal, un seul appel
   avec autorité de coins sert toutes les lanes survivantes.
 
-**La porte est la correction, pas le gain.** La sonde exige que les trois listes
+**La porte actuelle est interne à la sonde.** Elle exige que les trois listes
 de rectangles vivants du bras B soient **identiques** à celles du bras A —
 même cardinal, même ordre, mêmes `(a, b)`, même `core`. Code de sortie 3 sinon,
 2 en refus avant calcul, 0 si conforme. Six portes CTest sont enregistrées à
 `n = 600`, sur les quatre familles de mesure **et sur les deux contre-familles**
 `two_lines` et `collinear_seven`.
+
+Cela ne compare pas encore au symbole produit. La sonde force en particulier
+`smax=11`, tandis que le pipeline applique
+`smax_effective=min(smax,input_count)`. `collinear_seven` contient neuf points
+malgré `--n=600` : la sonde passe avec `30/30/30`, alors que le produit publie
+`30/30/29` à `smax_effective=9`. Le bras A doit appeler directement
+`alive_rectangles` avec la configuration effective avant que cette porte puisse
+être qualifiée de porte de correction produit.
 
 L'argument d'identité est direct : les décisions de scission étant indépendantes
 de la lane, l'arbre de rectangles est le même dans les deux bras ; le bras A pour
@@ -73,10 +88,12 @@ laisse `q` émettre que là. La sonde ne remplace pas cet argument, elle le grav
 | `eight_clusters` | 58,8 % | 57,5 % | 45,6 % | 35,0 % |
 | `scanline_single_pass` | 58,4 % | 58,1 % | 47,8 % | 35,4 % |
 
-`n = 8000` — taille d'intérêt. Les `rect_vivants` de la sonde reproduisent
-**exactement** les `rect_alive` des reçus `masses_q3_seed3_20260829`
+`n = 8000` — taille d'intérêt. Pour les deux cas cités, les `rect_vivants` de la
+sonde reproduisent les cardinalités `rect_alive` des reçus
+`masses_q3_seed3_20260829`
 (`uniform` 259609/665954/735759, `terrain` 129392/207772/215015) : la sonde
-rejoue bien la descente de production, elle ne l'imite pas.
+imite ces exécutions. Cet accord de cardinalité n'est ni une égalité de listes
+ni une autorité générale, comme le contre-exemple `collinear_seven` le montre.
 
 | famille | rect. visités | appels témoins | nœuds d'arbre | coins |
 |---|---:|---:|---:|---:|
@@ -118,11 +135,11 @@ Le mur recevable exige un banc apparié contrebalancé intra-processus, médiane
 des rapports par paire, sur machine au repos, avec sortie brute, pin et hash de
 binaire versionnés dans `receipts/`.
 
-## 5. Ce que la fusion coûte
+## 5. Ce que la fusion coûterait
 
 Trois postes, nommés pour ne pas être découverts en réception.
 
-**Mémoire de la vague — mesurée, et l'objection tombe.** Le bras B porte
+**Charge utile de la vague — comptée, mémoire non mesurée.** Le bras B porte
 l'**union** des lanes encore indécises, plus un octet de masque par rectangle.
 On pouvait craindre un pic de vague jusqu'à trois fois celui du bras A, qui vaut
 le maximum sur les trois lanes jouées séquentiellement. La mesure dit le
@@ -135,14 +152,18 @@ contraire, `n = 2000` :
 | `eight_clusters` | 52 866 | 52 880 | +0,03 % | 422 928 | 634 560 |
 | `scanline_single_pass` | 12 750 | 12 762 | +0,09 % | 102 000 | 153 144 |
 
-Le pic **en rectangles** ne bouge pas. C'est le même fait que l'économie de
+Le pic logique **en rectangles** bouge peu dans ces quatre runs. C'est le même
+fait que l'économie de
 58 % vu de l'autre côté : les trois lanes descendent presque exactement les
 mêmes rectangles, donc leur union est presque leur maximum. Seuls les **octets**
-croissent de 50 %, par l'octet de masque et son alignement (8 → 12 o) — sur des
-pics inférieurs à 1,2 Mo. Un empaquetage du masque dans les bits hauts des deux
-`NodeRef` supprimerait même ce surcoût ; ce n'est pas nécessaire pour recevoir.
+de charge utile calculée croissent de 50 %, par l'octet de masque et son
+alignement (8 → 12 o). `size*sizeof(T)` ignore toutefois `capacity`, la
+coexistence de `vague` et `suivante`, les buffers parallèles et les copies de
+concaténation : ce tableau n'est pas un pic mémoire. Un éventuel empaquetage
+dans `NodeRef` reste une hypothèse ; le signe encode déjà feuille/nœud et aucun
+contrat de bits hauts libres n'est établi.
 
-**Résidence des listes de vivants — le seul poste réel.** Aujourd'hui
+**Résidence des listes de vivants — un poste visible, pas le seul.** Aujourd'hui
 `generate_candidates` recycle un unique `std::vector<AliveRect> alive` d'une lane
 à l'autre ; le corps de q2 est consommé avant que q3 ne descende. Fusionner
 impose soit de garder les trois listes simultanément, soit de restructurer
@@ -151,11 +172,14 @@ l'ordonnancement en lançant les trois corps depuis la même descente. Mesuré �
 (5,81 Mo), soit **+129 %** ; `terrain` 49 596 contre 129 594. Le facteur est
 d'environ 2,3 sur les quatre familles.
 
-En absolu ce poste reste petit — extrapolé à `uniform n = 32000`, environ 26 Mo
-contre 12 Mo, face à un pic de fold de 8,8 Go au même point (`ECHELLE.md`
-§ 3.2). Mais il contredit la doctrine de streaming par ordre et doit donc être
-**arbitré, pas supposé**. La seconde option (trois corps depuis la même
-descente) l'annule et mérite d'être évaluée avant la première.
+Le reçu déjà versionné à `uniform n=32000` donne
+`1094102/2908394/3233183` rectangles vivants. À 16 octets par `AliveRect`, les
+trois listes représentent donc une charge utile minimale d'environ 115,8 Mo
+décimaux, contre 51,7 Mo pour le maximum séquentiel — pas 26 Mo contre 12 Mo.
+Cela ne remplace toujours pas un HWM. Le poste contredit la doctrine de
+streaming par ordre et doit être **arbitré, pas supposé**. La seconde option
+(trois corps depuis la même descente) peut réduire cette résidence, mais doit
+être mesurée avec les autres buffers simultanés.
 
 **Sémantique des compteurs.** `rect_visited[lane]` et `workers_wspd[lane]`
 perdent leur sens si une visite sert trois lanes. Il faut soit les redéfinir
@@ -181,16 +205,20 @@ est le pattern d'erreur n° 5 ; la réception doit dire lequel des deux.
 
 ## 7. Réception proposée
 
-1. Rejouer les six portes `mhgp5_wspd_fusion_*` sur un checkout propre.
-2. Étendre la mesure à 16000 et 32000 : la présente note couvre 600, 2000 et
-   8000, et `vague_pic` n'est publié qu'à 2000.
-3. Banc apparié contrebalancé du mur, machine au repos, reçu versionné.
-4. Seulement ensuite, un raccord dans `alive_rectangles` derrière une porte
+1. Remplacer le bras A par un appel direct à `alive_rectangles` avec
+   `smax_effective`, puis imprimer effectifs demandés/réels et configuration
+   effective. Graver notamment le cas `collinear_seven` à neuf points.
+2. Ajouter `scanline_overlap_multiecho`, des planchers sur sorties et compteurs,
+   plusieurs graines et un mutant qui force réellement le code 3.
+3. Étendre la mesure à 16000 et 32000 avec capacités simultanément résidentes
+   ou HWM attribuable ; `size*sizeof(T)` ne suffit pas.
+4. Banc apparié contrebalancé du mur, machine au repos, reçu versionné.
+5. Seulement ensuite, un raccord dans `alive_rectangles` derrière une porte
    d'égalité des trois listes **et** des digests par lane, avec le mutant
    `wspd-fusion-mask-leak` (une lane morte qui reste dans le masque et émet un
    rectangle qu'elle ne devrait pas) et le mutant `wspd-fusion-mask-early`
    (une lane retirée du masque avant que son compte n'atteigne son seuil).
-5. Le raccord à `postsep_refine_levels > 0` demande sa propre porte : la sonde
+6. Le raccord à `postsep_refine_levels > 0` demande sa propre porte : la sonde
    ne couvre que `L = 0`.
 
 ## 8. Reproduction

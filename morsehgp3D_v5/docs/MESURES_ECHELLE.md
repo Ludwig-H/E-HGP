@@ -356,7 +356,7 @@ le cover q4 coefficient 3 ne l'élargit pas et peut retirer des sites incapables
 d'appartenir à une boule admissible. Le plan de test, la borne de boîte
 fail-open et la séparation q3/q4 sont consolidés dans
 [`MATHEMATIQUES.md`](MATHEMATIQUES.md) § 6.1 et dans la réponse d'architecture
-[`REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md`](../audits/REPONSE_A_CLAUDE_BLOCS_ABC_20260829.md).
+[`STRATEGIE_SOUS_QUADRATIQUE_Q3_Q4_20260830.md`](../audits/STRATEGIE_SOUS_QUADRATIQUE_Q3_Q4_20260830.md).
 Le raccord possède ses portes différentielles v5 au pin `7e0ffe79`, mais
 aucune mesure causale de mur ne lui est encore attribuée.
 

@@ -12,10 +12,17 @@ le build/parsing et ajoute l'instrumentation q4. Le worktree d'audit reste
 concurrent. Ses modifications non commitées ne sont jamais substituées au pin ;
 aucun claim de résultat, de complexité ou de fraîcheur ne leur est attribué.
 
+Cette stratégie optimise uniquement la source horizontale actuelle sous
+`forest_semantics=verified_events_only`. Elle ne fournit ni les incidences
+silencieuses Gamma, ni la reconstruction correspondante, ni une raison
+d'accepter `require_exact=true`. Le P0 Gabriel/Gamma et l'ordre de fermeture
+d'`ETAT_COURANT.md` restent prioritaires.
+
 ## Verdict
 
 La direction `A x B`, citron, `h_core`, `h_a`, `h_b`, puis `h_c` est bonne,
-mais elle ne suffit pas seule. La meilleure architecture trouvée est :
+mais elle ne suffit pas seule. Le candidat architectural le plus complet relu
+est :
 
 ```text
 WSPD binaire A x B, pilotée par des cellules, à prouver à s=8
@@ -62,8 +69,10 @@ rectangles WSPD ne borne pas :
 
 Fusionner les trois descentes WSPD, paralléliser ou ajouter une grille plate
 réduit des constantes. Cela ne retire aucun de ces produits. Le diagnostic des
-audits précédents doit donc être resserré : `58 %` de visites WSPD répétées est
-un gain d'ingénierie, pas une stratégie d'exposant.
+audits précédents doit donc être resserré : les `58 %` de visites WSPD évitées
+dans les deux transcriptions internes de la sonde sont un diagnostic
+d'ingénierie, pas encore une comparaison au chemin produit ni une stratégie
+d'exposant.
 
 Le profiler q4 candidat ne doit pas encore guider l'architecture. Le code
 scalaire, shaped et device saute actuellement certains sites certifiés `P>0`
@@ -72,11 +81,13 @@ morceau extérieur. Le théorème et l'ancien probe tous-sites ne mesurent donc
 pas le chemin produit. Les timers `boucle_seeds`, cœur/corde et complétions
 sont en outre emboîtés : ils ne doivent pas être additionnés.
 
-Enfin, le plateau cocyclique à 384 points et 2 322 560 supports pour une même
-`BallKey` interdit de cacher le coût de l'expansion demandée. Il ne prouve pas,
-à lui seul, une borne inférieure quadratique en `BallKey` distinctes. Les
-audits doivent distinguer sortie canonique, incidences de coquille et expansion
-explicite des supports.
+Enfin, le plateau cocyclique historique v3/v4 à 384 points et 2 322 560
+supports pour une même `BallKey` interdit de cacher le coût de l'expansion
+demandée. Ce différentiel n'est pas encore une fixture v5 requalifiée et ne
+prouve pas, à lui seul, une borne inférieure quadratique en `BallKey`
+distinctes. Les audits doivent distinguer sortie canonique, incidences de
+coquille et expansion explicite des supports. Sa source différentielle est
+`morsehgp3D_v4/audits/lectures_20260817/proposition.md` § 5.6.
 
 ## Étage 0 — rendre le front binaire prouvable
 
@@ -115,6 +126,10 @@ terminaux ombre. Le ledger exact-once est conservé à chaque remplacement
 `A x B = A0 x B disjoint_union A1 x B`, et le front réel est un coarsening du
 front de packing. Il reste à écrire le charging par nœud et échelle ; une pente
 empirique ne le remplace pas.
+
+Ce coarsening ne vise ici que `postsep_refine_levels=0`. Tout raffinement
+post-séparation modifie l'arbre de rectangles et demande une projection, un
+ledger et une borne propres.
 
 ### `s>=8` ne constitue pas un profil de coût
 
@@ -207,6 +222,13 @@ bitsets de rôles et le ledger doivent donc survivre à la fermeture.
 
 ## Étage 3 — un moteur plan commun, avec deux contrats de profondeur
 
+Les autorités à requalifier sont
+[`RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md`](../../docs/math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md)
+§§ 4.4–4.6 et
+[`STATUT_PREUVES_ET_HEURISTIQUES.md`](../../docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md)
+§§ 70–72. Elles cadrent la proposition ; elles ne livrent pas le constructeur
+exact v5.
+
 Fixons une ancre `e=(a,b)`. Les centres des sphères passant par `a` et `b`
 vivent dans le plan médiateur de `ab`. Chaque site `z` non axial y définit :
 
@@ -215,10 +237,18 @@ vivent dans le plan médiateur de `ab`. Chaque site `z` non axial y définit :
 
 Les extrémités `a,b` sont exclues du tape. Un autre site situé sur l'axe de
 `ab` donne au contraire un signe constant sur tout le plan : il témoigne
-partout s'il est strictement dans la boule diamétrale de `ab`, nulle part sinon.
+partout s'il est strictement dans la boule diamétrale de `ab`, nulle part sinon
+et reste un site de coquille universel au cas d'égalité pour le census.
 Ces témoins constants sont comptés une fois dans `c0_e`; si `c0_e>=h_q`,
 l'ancre est morte, sinon le moteur travaille au seuil résiduel `h_q-c0_e`. Il
 ne faut pas inventer une droite dégénérée.
+
+Sur le disque utile de Jung, une droite non axiale peut aussi ne jamais entrer
+dans le domaine. Son demi-plan est alors intérieur-universel ou
+extérieur-universel sur ce disque : le premier cas rejoint `c0_e`, le second
+est écarté, et une tangence reste une strate de frontière. Cette classification
+doit être exacte ; elle évite de charger l'arrangement de lignes sans événement
+utile.
 
 La profondeur **relativement à la source du tape** est `c0_e` plus le nombre de
 demi-plans ouverts qui contiennent le centre. Les évaluations restent entières
@@ -228,6 +258,11 @@ témoin intérieur. Chaque position distincte porte en outre ses rôles
 profondeur, mais seules les premières peuvent définir un seed q3 ou un sommet
 q4 à émettre. Avec `cover3`, cette profondeur n'est qu'un minorant certifié de
 la profondeur globale et le census final reste obligatoire.
+
+Nommer donc deux contrats : `delta_e^(3)` pour la profondeur historique sur
+`cover3`, et `delta_e^full` pour la profondeur globale qui porte le rang fermé.
+Ils ne sont pas interchangeables ; `mhgp5_q4_cover_fixture` doit rester la
+fixture de séparation des deux sources.
 
 ### q3 : interroger les centres désignés
 
@@ -333,7 +368,8 @@ Notons :
   descente WSPD ;
 - `V_block` les visites réellement payées par les requêtes de facteur et de
   carriers ;
-- `E` les ancres résiduelles ;
+- `E` les ancres résiduelles **étiquetées par lane** ; une même géométrie q3/q4
+  compte deux fois tant qu'un partage de tape n'est pas reçu ;
 - `m_e` les demi-plans construits pour l'ancre `e` ;
 - `k_e` ses centres q3 désignés ;
 - `z_e` ses centres q4 canoniques peu profonds, comptés par ancre avant la
@@ -362,7 +398,7 @@ prouver**, pas un résultat v5. Le pipeline est sous-quadratique sur une classe
 d'entrées seulement si `V_wspd`, `V_block`, les ancres, les
 incidences/logarithmes, le tri, le census, la forêt et la sortie demandée sont
 tous `o(n^2)`. Une formulation plus utile introduit la charge moyenne
-contrôlable `Lambda=(sum_e(m_e+k_e))/n` : `Lambda` polylogarithmique vise le
+contrôlable `Lambda=(|E|+sum_e(m_e+k_e))/n` : `Lambda` polylogarithmique vise le
 quasi-linéaire seulement si les autres termes le sont aussi, tandis que
 `Lambda=O(n^(1-epsilon))` donne une contribution sous-quadratique à facteurs
 logarithmiques près.

@@ -89,8 +89,11 @@ diagnostic counter-only.
 
 ### V158 — oui comme hypothèse à tester, non comme transfert de verdict
 
-L'ouverture complète q4 est `109,47 deg`, pas `125,26 deg`; elle est donc bien
-plus étroite que les `120 deg` de q3. Cela rend plausible qu'une ancre
+Deux angles doivent être nommés séparément : le critère ponctuel de W4 impose
+`angle(azb)>125,264 deg`, tandis que la pointe du fuseau a une demi-ouverture
+`54,736 deg`, donc une ouverture complète `109,471 deg`. En q3, ces deux
+descriptions donnent fortuitement `120 deg`, ce qui masquait l'ambiguïté. La
+pointe q4 reste donc plus étroite. Cela rend plausible qu'une ancre
 sol--point suspendu ait encore peu de témoins communs. Ce n'est pas un
 « a fortiori » sur la lane : le seuil q4, le carrier, la corde et les
 complétions diffèrent, et un faible compte W4 universel n'exclut pas un
@@ -249,8 +252,10 @@ pas versionnés. Les 2 500 rectangles q4 et les 8 000 rectangles q3 ne sont pas
 appariés par `AnchorKey`; on ne peut donc pas affirmer que les 47 ancres q4 sont
 précisément celles que q3 tue.
 
-Les corrections numériques sont les suivantes : l'angle reste `109,47 deg` ;
-l'exposant q3 des trois valeurs publiées vaut `0,020`, pas `0,013`; les 47
+Les corrections numériques sont les suivantes : le seuil de l'angle sous-tendu
+reste `125,264 deg`, tandis que l'ouverture complète de pointe vaut
+`109,471 deg` ; l'exposant q3 des trois valeurs publiées vaut `0,020`, pas
+`0,013`; les 47
 survivantes valent `0,71 %` des 6 663 ancres échantillonnées, `1,34 %` des 3 509
 survivantes ou `2,72 %` des 1 726 ancres longues, jamais `5,5 %`. Les 50 % de
 masse sont cohérents **dans cet échantillon seed 3** et justifient un banc ciblé,
@@ -302,12 +307,31 @@ binaire, `HEAD` et état du worktree avant tout nouveau verdict.
 
 ### Addendum : deux coutures q4 exactes révélées par la sonde de complétion
 
-Les sorties `cf_*` ferment les identités agrégées qu'elles contrôlent, mais la
-mention `identite_production=OK` ne compare ni les clés ni l'ordre des
-candidats, ni tous les compteurs de rejet. Les temps de `reps.txt` varient
-jusqu'à un facteur deux sur une même entrée et ne sont pas citables. Les taux
-ci-dessous restent donc des diagnostics seed 3 non reçus ; les décisions
-mathématiques, elles, peuvent être prises indépendamment de ces taux.
+Les sorties `cf_*` annoncées n'ont pas été reçues. Les deux fichiers non suivis
+présents à la racine contiennent seulement
+`./q4_compl_probe: No such file or directory` ; ils ne ferment aucune identité
+et doivent être supprimés, pas committés. Les taux ci-dessous restent des
+diagnostics seed 3 non reçus ; les décisions mathématiques, elles, peuvent être
+prises indépendamment de ces taux.
+
+#### 0. La sonde de corde courante est devenue circulaire
+
+Le reçu historique reste attribuable au commit `f8f5b4ff`, qui introduit à la
+fois `q4_chord_probe` et ses sorties. Le pin de configuration `635951d6` imprimé
+dans le reçu ne contient pas encore la source de cette sonde et ne constitue
+donc pas son pin source effectif.
+
+Depuis l'intégration de la grille et de K=4 au produit, la sonde inchangée ne
+forme plus une autorité indépendante. Son bras `emitted` appelle
+`process_anchor_q4` avec grille et K=4 actifs ; le replay manuel omet les morts
+de grille et recalcule K=1/2/4/8. `wrong=0` est alors tautologique pour K=4,
+masqué pour K=2 et partiellement masqué pour K=8. Il passe aussi à vide :
+`--family=uniform --n=2` produit zéro seed, zéro complétion et un code 0.
+
+Conserver le reçu historique comme diagnostic de `f8f5b4ff`, mais reconstruire
+la porte courante avec un bras contrefactuel sans grille ni corde, une partition
+`grille -> cœur -> corde -> faces_D`, des comparaisons par support et des
+planchers explicites.
 
 #### 1. La corde doit lire aussi les sites `P>0`
 
@@ -319,10 +343,11 @@ au centre `mu=0`; si `B(z)` est non nul, `z` peut être strictement intérieur
 sur un morceau extérieur.
 
 Le théorème 10.4 et `ChordPieces::update` n'ont aucune précondition `P<0`.
-`bench/q4_chord_probe.cpp`, qui a produit le reçu historique K=4, parcourt déjà
-**tous** les `P`. La sonde qui a motivé l'intégration et la production ne
-mesurent donc pas le même certificat : le code intégré est strictement plus
-faible que son théorème et que son propre banc.
+`bench/q4_chord_probe.cpp` au commit historique `f8f5b4ff` parcourait déjà
+**tous** les `P`. Ce diagnostic et la production ne mesurent donc pas le même
+certificat : le code intégré est strictement plus faible que son théorème et
+que ce banc historique. La version courante de la sonde ne peut plus recevoir
+ce constat à elle seule, pour la circularité décrite ci-dessus.
 
 La réparation minimale est de calculer `Bz` et d'appeler
 `chord.update(lh,bound,Bz,exact_l)` avant de sortir de la branche `P>0`. Le
@@ -425,7 +450,11 @@ sites. Chaque site définit une demi-droite stricte en `mu` : si `B>0`, il
 témoigne pour `mu>P/B`; si `B<0`, pour `mu<P/B`; si `B=0`, il témoigne partout
 exactement lorsque `P<0`. Sur la corde fermée
 `[alpha,beta]=[-sqrt(J/2),sqrt(J/2)]`, compter d'abord les témoins constants
-`c0` et poser `r=h4-c0`. Si `r<=0`, la face est morte.
+`c0` et poser `r=h4-c0`. Ce compte inclut `B=0,P<0`, mais aussi les racines hors
+corde actives partout : `B>0,P/B<alpha` et `B<0,P/B>beta`. Les cas opposés hors
+corde ne témoignent jamais. Si `r<=0`, la face est morte. Sans cette
+classification, la corde `[-1,1]` avec `P=-2,B=1,h=1` serait déclarée
+survivante alors que le site témoigne partout.
 
 Pour `r>0`, il suffit de conserver :
 
