@@ -367,14 +367,15 @@ faces_D = seeds[1] - seeds_killed_cells[2]
         - seeds_killed_core - seeds_killed_chord
 ```
 
-Dans les reçus seed 3, `terrain` passe de 102 835 faces et 1 293 473 essais à
-2 000 points à 2 692 030 faces et 256 463 974 essais à 32 000. Le vrai quotient
-conditionnel passe donc de `12,58` à `95,27`, soit un facteur `7,57` et un
-exposant sécant local `0,73`, non `0,21`. Le même calcul donne `20,37 -> 64,24`
-sur `scanline`, contre `19,49 -> 20,31` sur `uniform` et `29,92 -> 34,94` sur
-`eight_clusters`. Diviser par tous les seeds, dont ceux morts avant D, masque
-donc précisément le facteur q4 recherché et invalide « ne pas chercher côté
-complétion en premier ».
+Le recalcul direct de
+`receipts/masses_q3_seed3_20260829/out/*_prod_r1.txt` donne, sur `terrain`,
+102 835 faces et 1 293 473 essais à 2 000 points, puis 2 692 030 faces et
+256 463 974 essais à 32 000. Le vrai quotient conditionnel passe donc de
+`12,58` à `95,27`, soit un facteur `7,57` et un exposant sécant local `0,73`,
+non `0,21`. Le même calcul donne `20,37 -> 64,24` sur `scanline`, contre
+`19,49 -> 20,31` sur `uniform` et `29,92 -> 34,94` sur `eight_clusters`.
+Diviser par tous les seeds, dont ceux morts avant D, masque donc précisément le
+facteur q4 recherché et invalide « ne pas chercher côté complétion en premier ».
 
 Ajouter l'identité reçue
 `seeds = cells + core + chord + faces_reaching_completions`, puis publier essais
@@ -489,24 +490,28 @@ replay local de `mhgp5_q4_stage_probe`, un fil, politique produit, `n=8000`,
 ferme ses identités et mesure sur `terrain/scanline` `2258/2410 ms` de
 cœur+corde contre `1057/939 ms` de complétions. Diagnostic seulement, pas reçu.
 
-La suite constructive est un `WitnessTape` par ancre W4 survivante : l'union
-triée et dédupliquée des IDs déjà certifiés par `h_coeur`, `h_a`, `h_b`, puis
-par le scan W4 ; `H_A/H_B` pourront ensuite ajouter leurs **IDs**, jamais leurs
-sommes scalaires. À huit IDs l'ancre meurt ; une survivante en porte donc au
-plus sept. Le profil public refusant les positions dupliquées, le format juste
-est un index de position unique de poids implicite 1, pas un couple
-`(représentant,poids)`.
+La première couture d'un `WitnessTape` ne doit pas inventer la provenance
+derrière les scalaires actuels `h_coeur`, `h_a` et `h_b`. Elle collecte les IDs
+effectivement vus pendant le scan W4 exhaustif d'une survivante, les trie et les
+déduplique ; à huit IDs l'ancre mourrait, donc il en reste au plus sept. Un type
+de provenance ultérieur pourra ajouter les IDs certifiés par le cœur ou les
+extrémités, jamais leurs seules sommes scalaires. Le profil public refusant les
+positions dupliquées, le format juste est un index de position unique de poids
+implicite 1, pas un couple `(représentant,poids)`.
 
-Ces IDs peuvent initialiser directement le cœur de Jung et la profondeur, en
-excluant respectivement `{a,b,x}` et `{a,b,x,y}`, puis en sautant ces mêmes IDs
-dans le scan. Ils ne peuvent pas préremplir aveuglément les quatre compteurs de
-`ChordPieces` : leurs extrémités `muhat` élargissent la corde exacte hors du
-disque de Jung. Chaque ID de la tape doit d'abord passer par le même
-`ChordPieces::update` strict et ne créditer que les morceaux effectivement
-certifiés. Les routes query, cover, batch et device transportent les IDs
-canoniques, jamais des offsets ; tout mapping absent ou dupliqué désactive la
-précharge en fail-open. Séparer les shadows `oneside_gate` et `w4_tape`, sinon
-le placement et la propagation aval restent confondus.
+Ces IDs peuvent précharger le cœur de Jung et la profondeur après exclusion
+respectivement de `{a,b,x}` et `{a,b,x,y}`. Ils ne peuvent pas préremplir
+aveuglément les quatre compteurs de `ChordPieces` : chaque ID repasse par le
+même `ChordPieces::update` strict. Pour isoler la première ablation et préserver
+le flux de propositions historique, la tape initiale est en outre intersectée
+avec `sc.scan_sites()` et garde ses exclusions. Employer des IDs de la requête
+W4 absents de ce scan reste mathématiquement un certificat plus fort et peut
+supprimer plus tôt des candidats : cette variante exige une requalification et
+un reçu propres, tandis que le digest final doit rester identique. Les routes
+query, cover, batch et device transportent les IDs canoniques, jamais des
+offsets ; tout mapping absent ou dupliqué désactive la précharge en fail-open.
+Séparer les shadows `oneside_gate` et `w4_tape`, sinon le placement et la
+propagation aval restent confondus.
 
 ### Fibre `A x B x C` — statut exact de `h_c`
 

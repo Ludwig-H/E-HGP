@@ -96,6 +96,12 @@ sol--point suspendu ait encore peu de témoins communs. Ce n'est pas un
 complétions diffèrent, et un faible compte W4 universel n'exclut pas un
 certificat dépendant de la face ou du carrier.
 
+Le quatrième point `y` ne répare pas lui-même ce déficit pour la boule qu'il
+complète : c'est un support, donc sa puissance est nulle, tandis qu'un témoin
+de profondeur doit être strictement intérieur. Il peut contraindre le centre,
+servir de témoin à une autre boule et multiplier les essais ; aucun de ces
+effets ne fournit un transfert simple de q3 vers q4.
+
 Jouer d'abord le même bras canopée apparié en q4 est la bonne décision. Garder
 `terrain` inchangé comme adversaire et ajouter une contre-famille distincte ;
 figer les tirages latents avant de remapper le lift. À chaque taille et graine,
@@ -103,25 +109,62 @@ publier séparément W4, ancres atteignant les seeds, seeds, complétions, morts
 cœur/corde/profondeur, candidats, mur et HWM. La pente `2,29` des morts de
 profondeur est un compte seed 3, pas encore un artefact causal.
 
-### V159 — poste q4 distinct, causalité non identifiable dans l'agrégat
+### V159 — le bon dénominateur révèle un facteur q4 bien plus fort
 
-Le passage `2,84 -> 5,13` et l'exposant sécant `0,21` se recalculent pour ce run.
-Ils peuvent venir du lift, mais aussi de la taille du cover, de la composition
-des seeds survivants ou des sorties anticipées. Le quotient agrégé ne sépare
-pas ces mécanismes. Le probe q4 doit stratifier `complétions/seed` par octave de
-`|ab|`, type d'ancre (sol--sol, sol--canopée, canopée--canopée), taille du cover
-et fate amont, puis comparer les caps appariés. Avant cela, traiter ce poste
-comme indépendant dans le grand-livre.
+Dans `process_anchor_q4`, `q4_completions` est incrémenté avant les rejets de
+distance, owner, exact-once, i64, puissance de face, déterminant, centre et
+profondeur. Ce compteur mesure donc des **essais D**, pas des complétions
+admissibles. `seeds[1]` contient en outre toutes les faces aiguës, y compris
+celles tuées avant la boucle D. Le nombre de faces qui l'atteignent se déduit :
+
+```text
+faces_D = seeds[1] - seeds_killed_cells[2]
+        - seeds_killed_core - seeds_killed_chord
+```
+
+Le quotient publié mélange deux mécanismes opposés :
+
+$$\frac{\text{essais D}}{\text{seeds}}=\frac{\text{faces D}}{\text{seeds}}\frac{\text{essais D}}{\text{faces D}}.$$
+
+Le recalcul direct de
+`receipts/masses_q3_seed3_20260829/out/*_prod_r1.txt` montre que, sur `terrain`,
+entre 2 000 et 32 000 points, la première fraction tombe de `0,2258` à
+`0,0539`, tandis que la seconde monte de `12,58` à `95,27`, soit un facteur
+`7,57` et un exposant sécant local proche de `0,73`. Leur produit donne le petit
+`0,21` rapporté et masque donc la croissance conditionnelle. Le même calcul
+donne `20,37 -> 64,24` sur `scanline`, contre `19,49 -> 20,31` sur `uniform` et
+`29,92 -> 34,94` sur `eight_clusters`.
+
+Il faut ajouter le compteur explicite `q4_faces_reaching_completions`, fermer
+l'identité `seeds = cells + core + chord + faces_D`, et conserver l'identité
+existante `essais = somme des rejets + profondeur + candidats`. Publier ensuite
+essais par face D, taux cumulé de chaque rejet, entrées et tests de profondeur,
+mur et HWM, stratifiés par octave et type d'ancre. La boucle de complétion est
+donc un poste q4 distinct **ouvert**, possiblement important aussi sur
+`scanline` ; `d280fb2c` ne permet pas de la déprioriser.
 
 ### V160 — ce qui se transporte
 
 - La cascade `h_coeur+h_a+h_b` se transporte à la porte d'ancre W4, avec seuil
   q4 et provenance propre. Elle ne se somme pas ensuite à des témoins de seed,
   corde ou complétion sans IDs dédupliqués ou strates prouvées.
-- L'union du W4 résiduel avec les IDs déjà certifiés est le raccord prometteur.
-  La porter d'abord en shadow sous forme de `WitnessTape` canonique ; toute
-  précharge de corde repasse par le vrai `ChordPieces::update`, jamais par quatre
-  crédits scalaires aveugles.
+- Porter `EndpointCredit` au W4 est une première couture exacte si le scan
+  résiduel exclut **tout** `A union B`, pas seulement `a,b`, puis s'arrête au
+  besoin `h4-credit`. Ne jamais ajouter ce crédit au compte W4 complet, qui
+  reconnaît déjà des siblings d'extrémité. Sur les survivantes, collecter les
+  IDs résiduels effectivement vus dans une `WitnessTape` canonique ; l'union
+  certifiée totale en porte au plus sept pour `h4=8`. Ne pas inventer les IDs
+  derrière les scalaires `core`, `h_a` ou `h_b` tant que leur provenance typée
+  n'existe pas.
+- Toute précharge de corde repasse par le vrai `ChordPieces::update`, jamais par
+  quatre crédits scalaires aveugles. Pour isoler la première ablation et
+  préserver le **flux de propositions** historique, la tape doit être
+  intersectée avec le scan downstream et garder les mêmes exclusions. Employer
+  des IDs trouvés par la requête mais absents de ce scan est mathématiquement un
+  certificat plus fort : il peut changer les candidats émis et exige alors
+  requalification, oracle final et nouveau reçu. Le digest final doit rester
+  identique dans les deux variantes ; il n'existe pas de « digest brut des
+  candidats » à préserver silencieusement.
 - La borne continue q4 est bien le facteur `/8` : Jung donne le rayon hors axe,
   puis l'orthogonalité à `ab` donne la borne coordonnée par coordonnée. Elle
   exige encore son arrondi dirigé, ses égalités et un mutant q4. Le résultat
@@ -132,6 +175,26 @@ comme indépendant dans le grand-livre.
   d'abord requêtes uniques, sites évités, mur et HWM sur les seuls survivants
   q4 ; sans non-vacuité nette, ne pas construire de cache.
 
+La généralisation la plus directe reste asymétrique : conserver la WSPD binaire
+`A x B`, prendre les handles de taille au plus 32 comme blocs `C`, puis traiter
+chaque `c` comme une face avant d'énumérer `D`. Un `h_c(c)` q4 strict doit être
+valable pour toutes les complétions du patch de centres considéré. `h_core` et
+`h_c` comptent des positions uniques hors `A union B` et hors supports ; `h_c`
+porte sur la même fibre valide non vide. Sans IDs ou strates disjointes,
+composer `h_a+h_b+max(h_core,h_c(c))`, jamais la somme nue du cœur et de `h_c`.
+Avec une tape, prendre l'union dédupliquée. Ce niveau face est précisément celui
+qui peut supprimer les `12,58 -> 95,27` essais D par face vivante ; le prototype
+doit rester CPU, counter-only et ciblé d'abord sur les ancres longues du
+diagnostic.
+
+Pour mémoire, la borne `/8` se déduit sans heuristique : si `d=b-a`, `D^2` est
+sa norme carrée et `t` le déplacement du centre depuis le milieu, alors
+`t` est orthogonal à `d` et Jung donne `t` de norme carrée au plus `D^2/8`.
+Cauchy fournit donc
+pour chaque coordonnée :
+
+$$t_i^2\leq\frac{D^2-d_i^2}{8}=\frac{\sum_{j\neq i}d_j^2}{8}.$$
+
 ### V161 — ne pas choisir entre cœur et corde avec des compteurs de morts
 
 Les pentes `chord_kill` et `core_kill` comptent des décisions, pas du temps. Le
@@ -140,14 +203,16 @@ terrain/scanline à `n=8000`) et les place devant les complétions (`1057/939 ms
 mais il n'est pas reçu et ne départage pas les deux sous-étages.
 
 Le prochain incrément utile est donc partagé : instrumenter séparément sites et
-temps du cœur, mises à jour de corde, complétions et profondeur, puis raccorder
-le `WitnessTape` W4 qui peut éviter du travail dans les deux étages et en aval.
-Une fois ce split reçu, optimiser le sous-étage dominant. Cette séquence aide q4
-sans inventer aujourd'hui une priorité à partir de deux compteurs non causaux.
+temps du cœur, mises à jour de corde, faces D, essais D et profondeur, puis
+raccorder le `WitnessTape` W4. En parallèle, le shadow `h_c(c)` sur
+`A x B x C` mesure combien de faces et d'essais D il ferme avant la complétion.
+Le compteur conditionnel montre qu'il ne faut choisir ni une micro-optimisation
+de corde ni l'abandon de la complétion avant ce split.
 
-Verdict borné : mesurer d'abord la canopée q4 et le split cœur/corde ; conserver
-`s=8`, les trois graines et les digests appariés. Aucun claim de complexité,
-d'exactitude Gamma ou de résultat GPU n'en découle.
+Verdict borné : mesurer la canopée q4, le split cœur/corde et le coût
+`essais_D/faces_D` ; prototyper ensuite `WitnessTape -> h_c(c) -> D`, avec
+`s=8`, trois graines et reçus appariés. Aucun claim de complexité, d'exactitude
+Gamma ou de résultat GPU n'en découle.
 
 ### Addendum après `d280fb2c`
 
@@ -170,18 +235,8 @@ dans `W3`, donc `N4<=N3` pour une même ancre et seulement `N3=0` implique
 permanente `q4_source_fixture` réalise précisément `(N3,N4)=(9,0)` et tue le
 mutant `q4-seeds-from-q3-live`; elle doit rester l'autorité de ce résidu.
 
-Enfin, le quotient de complétion publié emploie tous les `seeds[1]`, y compris
-ceux tués par cellule, cœur ou corde avant la boucle D. Le dénominateur exact est
-
-```text
-faces_D = seeds[1] - seeds_killed_cells[2]
-        - seeds_killed_core - seeds_killed_chord
-```
-
-Sur les reçus seed 3, `terrain` passe ainsi de `1 293 473 / 102 835 = 12,58`
-essais par face D à 2 000 points à
-`256 463 974 / 2 692 030 = 95,27` à 32 000 points. Le facteur est `7,57`,
-exposant sécant local `0,73`. La conclusion « ne pas chercher côté complétion »
-est donc retirée. Recevoir en parallèle le certificat ciblé des ancres longues
-et la décomposition `cellule -> cœur -> corde -> faces_D -> essais D` est la
-voie qui départage réellement les deux leviers.
+Enfin, V159 corrige la sémantique de `q4_completions`, donne le dénominateur
+`faces_D` et retire la conclusion « ne pas chercher côté complétion ». Il faut
+recevoir en parallèle le certificat ciblé des ancres longues et la
+décomposition `cellule -> cœur -> corde -> faces_D -> essais D` pour départager
+réellement les deux leviers.
