@@ -170,6 +170,32 @@ sur `uniform n=1200`, q3 donne `12066/11821` morts secteur et
 `1290674/1298238`. Le chemin tout-hôte échoue lui aussi, ce qui localise le
 défaut dans la propagation du contrat, pas dans le kernel device.
 
+### `CREDIT_SECTEUR.md` ferme le lemme, pas encore le coût
+
+La nouvelle note de Claude apporte une clarification juste : au stage exact
+`W_q`, chaque témoin du crédit est déjà dans le compte complet, donc la forme
+résiduelle peut seulement anticiper la même mort ; au stage sectoriel, le
+polygone suffisant peut ne pas recompter ce témoin universel dans chaque
+secteur, et le minorant `max(cnt[k],cnt_out[k]+base)` devient utile. Cette
+séparation mathématique doit être conservée.
+
+Les conclusions de performance de la note dépassent toutefois ses données.
+La table mono-graine n'a encore ni source, commande, stdout, hash ni reçu ; le
+seul code visible emploie le combinateur global plus faible et des routes batch
+non raccordées, donc cette table n'est pas encore attribuable au contrat exact.
+Surtout, « gratuit », « dominant », « ne change pas l'exposant » et
+« le mur reste le cœur » ne découlent pas de `0,28--0,53 %` d'ancres mortes en
+plus. Le code ajoute une classification et jusqu'à huit compteurs par site, et
+une petite population d'ancres peut concentrer une grande part des scans longs.
+Dire **sûr et monotone** est acquis ; dire gratuit ou asymptotiquement neutre
+reste ouvert.
+
+Après le raccord exact et les fixtures, la mesure utile est donc appariée par
+`AnchorKey` : nouvelles morts dues au crédit, somme de `q4_core_site_tests`
+évitée, seeds/essais D évités, temps exclusif et HWM. La note peut rester une
+hypothèse de travail ; elle ne devient durable qu'avec ce reçu et sans s'appuyer
+sur `Q4_MUR_UNITE.md`, dont le compteur fusionne encore cœur et corde.
+
 ### La sonde de corde actuelle n'est plus une autorité indépendante
 
 `q4_chord_probe` construit son flux `emitted` en appelant aujourd'hui le
