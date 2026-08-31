@@ -109,29 +109,90 @@ def fail(msg: str) -> int:
     return 3
 
 
+def sha256_file(path: Path) -> str:
+    import hashlib
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def main() -> int:
-    if len(sys.argv) != 2:
-        print("usage: pentes.py <dossier out/ de campagne>", file=sys.stderr)
+    if len(sys.argv) != 3:
+        print("usage: pentes.py <dossier out/ de campagne> <profil d'autorite>", file=sys.stderr)
         return 2
     out_dir = Path(sys.argv[1])
-    meta = out_dir.parent / "META.txt"
-    status = out_dir.parent / "STATUS.txt"
+    authority = Path(sys.argv[2])
+    root = out_dir.parent
+    meta = root / "META.txt"
+    status = root / "STATUS.txt"
+    if not authority.is_file():
+        return fail("profil d'autorite absent")
     if not meta.is_file() or not status.is_file():
         return fail("META.txt ou STATUS.txt absent")
-    mfam = re.search(r"^familles=(.+?) ; n=(.+?) ; graines=(.+)$", meta.read_text(), re.M)
-    if not mfam:
-        return fail("matrice familles/n/graines absente du META")
-    families = mfam.group(1).split()
-    if len(families) != len(set(families)):
-        return fail("famille dupliquee dans le META")
+    # STATUT TERMINAL : une campagne marquee invalide n'est JAMAIS analysee.
+    if (root / "STATUT_TERMINAL.txt").exists():
+        return fail("STATUT_TERMINAL.txt present : campagne invalidee, refusee")
+    # AUTORITE DE PROFIL EXTERNE (audit : la matrice ne vient jamais du META
+    # seul) : familles/n/graines du profil, non vides ; la copie PROFIL.txt de
+    # la campagne doit etre OCTET POUR OCTET le profil d'autorite.
+    atext = authority.read_text()
+    afam = re.search(r"^familles=(.+)$", atext, re.M)
+    asz = re.search(r"^n=(.+)$", atext, re.M)
+    asd = re.search(r"^graines=(.+)$", atext, re.M)
+    if not afam or not asz or not asd:
+        return fail("profil d'autorite incomplet (familles/n/graines)")
+    families = afam.group(1).split()
+    if not families or len(families) != len(set(families)):
+        return fail("familles du profil vides ou dupliquees")
     try:
-        sizes = [int(x) for x in mfam.group(2).split()]
-        seeds = [int(x) for x in mfam.group(3).split()]
+        sizes = [int(x) for x in asz.group(1).split()]
+        seeds = [int(x) for x in asd.group(1).split()]
     except ValueError:
-        return fail("entier invalide dans la matrice du META")
+        return fail("entier invalide dans le profil d'autorite")
     if sizes != SIZES or seeds != SEEDS:
-        return fail("matrice du META differente de celle de l'analyse")
+        return fail("matrice du profil differente de celle de l'analyse")
+    copied = root / "PROFIL.txt"
+    if not copied.is_file() or copied.is_symlink():
+        return fail("PROFIL.txt absent de la campagne (autorite non gravee) ou lien symbolique")
+    if copied.read_bytes() != authority.read_bytes():
+        return fail("PROFIL.txt de la campagne differe du profil d'autorite")
+    mtext = meta.read_text()
+    mlines = re.findall(r"^familles=(.+?) ; n=(.+?) ; graines=(.+)$", mtext, re.M)
+    if len(mlines) != 1:
+        return fail(f"ligne de matrice du META absente ou dupliquee ({len(mlines)})")
+    if mlines[0] != (afam.group(1), asz.group(1), asd.group(1)):
+        return fail("matrice du META differente du profil d'autorite")
+    # PROVENANCE : pin/commande/hash uniques, HASHES.txt complet et homogene,
+    # binaire prive present et conforme, hashes des sorties recoupes.
+    for key in ("pin", "sha256_binaire_prive", "commande"):
+        if len(re.findall(rf"^{key}=", mtext, re.M)) != 1:
+            return fail(f"ligne {key}= absente ou dupliquee dans le META")
+    mbin = re.search(r"^sha256_binaire_prive=([0-9a-f]{64})$", mtext, re.M)
+    if not mbin:
+        return fail("sha256_binaire_prive non hexadecimal")
+    binary = root / "bin" / "mhgp6"
+    if not binary.is_file() or binary.is_symlink():
+        return fail("binaire prive bin/mhgp6 absent ou lien symbolique")
+    if sha256_file(binary) != mbin.group(1):
+        return fail("le binaire prive ne correspond pas au sha256 du META")
     expected = {(f, n, s) for f in families for n in sizes for s in seeds}
+    hashes_file = root / "HASHES.txt"
+    if not hashes_file.is_file() or hashes_file.is_symlink():
+        return fail("HASHES.txt absent ou lien symbolique")
+    seen_hash_runs = set()
+    for line in hashes_file.read_text().splitlines():
+        m = re.match(r"^avant=([0-9a-f]{64}) apres=([0-9a-f]{64}) run=(\S+)$", line)
+        if not m:
+            return fail(f"ligne HASHES invalide : {line}")
+        if m.group(1) != mbin.group(1) or m.group(2) != mbin.group(1):
+            return fail(f"hash de tuple different du binaire prive : {m.group(3)}")
+        if m.group(3) in seen_hash_runs:
+            return fail(f"tuple duplique dans HASHES : {m.group(3)}")
+        seen_hash_runs.add(m.group(3))
+    if seen_hash_runs != {f"{f}_{n}_s{s}" for (f, n, s) in expected}:
+        return fail("HASHES.txt != matrice (tuples manquants ou en trop)")
 
     # STATUS : derniere ligne exactement DONE, puis bijection avec la matrice.
     st_lines = status.read_text().splitlines()
@@ -154,9 +215,16 @@ def main() -> int:
     if bad:
         return fail(f"{len(bad)} tuple(s) a code non nul : {sorted(bad)[:3]}")
 
-    # Dossier de sorties : bijection exacte, TOUTE extension confondue (un
-    # fichier d'extension inattendue est refuse, audit du cinquieme cycle).
-    all_files = {p.name for p in out_dir.iterdir() if p.is_file()}
+    # Dossier de sorties : bijection exacte, TOUTE entree confondue — un
+    # fichier d'extension inattendue, un SOUS-REPERTOIRE ou un LIEN
+    # SYMBOLIQUE sont refuses (audits du cinquieme cycle puis de l'alerte).
+    entries = list(out_dir.iterdir())
+    for p in entries:
+        if p.is_symlink():
+            return fail(f"lien symbolique dans out/ : {p.name}")
+        if p.is_dir():
+            return fail(f"sous-repertoire inattendu dans out/ : {p.name}")
+    all_files = {p.name for p in entries if p.is_file()}
     want_txts = {f"{f}_{n}_s{s}.txt" for (f, n, s) in expected}
     want_errs = {f"{f}_{n}_s{s}.txt.err" for (f, n, s) in expected}
     want_all = want_txts | want_errs
@@ -166,6 +234,14 @@ def main() -> int:
     for name in want_errs:
         if (out_dir / name).stat().st_size > 0:
             return fail(f"stderr non vide : {name}")
+    # Hashes des sorties : chaque out/<nom>.txt du META recoupe par recalcul.
+    for (f, n, s) in sorted(expected):
+        name = f"{f}_{n}_s{s}.txt"
+        m = re.search(rf"^([0-9a-f]{{64}})  out/{re.escape(name)}$", mtext, re.M)
+        if not m:
+            return fail(f"hash de sortie absent du META : {name}")
+        if sha256_file(out_dir / name) != m.group(1):
+            return fail(f"hash de sortie discordant : {name}")
 
     # Identites, compteurs (exactement une occurrence chacun) et identites
     # fermantes des octaves : TOUT valide avant le premier octet de table.

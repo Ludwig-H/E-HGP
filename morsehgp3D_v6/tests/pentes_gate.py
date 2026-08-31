@@ -52,10 +52,22 @@ digest_all=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 """)
 
 
+def sha256_bytes(data: bytes) -> str:
+    import hashlib
+    return hashlib.sha256(data).hexdigest()
+
+
 def build_campaign(root: Path) -> None:
     out = root / "out"
     out.mkdir(parents=True)
-    status_lines = []
+    (root / "bin").mkdir()
+    binary = b"#!/bin/sh\nexit 0\n"
+    (root / "bin" / "mhgp6").write_bytes(binary)
+    bin_sha = sha256_bytes(binary)
+    profile = f"profil=porte_synthetique\nfamilles={FAM}\nn=8000 16000 32000\ngraines=3 4 5\n"
+    (root / "PROFIL.txt").write_text(profile)
+    (root / "PROFIL_AUTORITE.txt").write_text(profile)
+    status_lines, hash_lines, out_hash_lines = [], [], []
     for n in SIZES:
         for seed in SEEDS:
             base = n // 4  # croissance lineaire : pentes ~1 partout
@@ -64,13 +76,31 @@ def build_campaign(root: Path) -> None:
             (out / f"{FAM}_{n}_s{seed}.txt").write_text(body)
             (out / f"{FAM}_{n}_s{seed}.txt.err").write_text("")
             status_lines.append(f"code=0 fam={FAM} n={n} seed={seed} secs=1")
+            hash_lines.append(f"avant={bin_sha} apres={bin_sha} run={FAM}_{n}_s{seed}")
+            out_hash_lines.append(f"{sha256_bytes(body.encode())}  out/{FAM}_{n}_s{seed}.txt")
     (root / "STATUS.txt").write_text("\n".join(status_lines) + "\nDONE")
+    (root / "HASHES.txt").write_text("\n".join(hash_lines) + "\n")
     (root / "META.txt").write_text(
-        f"recu=campagne synthetique de porte\nfamilles={FAM} ; n=8000 16000 32000 ; graines=3 4 5\n")
+        "recu=campagne synthetique de porte\npin=0000000000000000000000000000000000000000\n"
+        f"sha256_binaire_prive={bin_sha}\n"
+        "commande=bin/mhgp6 --family=<fam> --n=<n>\n"
+        f"familles={FAM} ; n=8000 16000 32000 ; graines=3 4 5\n"
+        + "\n".join(out_hash_lines) + "\n")
+
+
+def rehash_outputs(root: Path) -> None:
+    """Apres une mutation LEGITIME des sorties, remet les hashes du META en
+    coherence (les falsifications de hash, elles, ne l'appellent pas)."""
+    mtext = (root / "META.txt").read_text()
+    for p in sorted((root / "out").glob("*.txt")):
+        mtext = re.sub(rf"^[0-9a-f]{{64}}  out/{re.escape(p.name)}$",
+                       f"{sha256_bytes(p.read_bytes())}  out/{p.name}", mtext, flags=re.M)
+    (root / "META.txt").write_text(mtext)
 
 
 def run_pentes(root: Path) -> tuple[int, str, str]:
-    r = subprocess.run([sys.executable, str(PENTES), str(root / "out")], capture_output=True, text=True)
+    r = subprocess.run([sys.executable, str(PENTES), str(root / "out"), str(root / "PROFIL_AUTORITE.txt")],
+                       capture_output=True, text=True)
     return r.returncode, r.stdout, r.stderr
 
 
@@ -90,11 +120,16 @@ def main() -> int:
         check("nominal accepte", rc == 0 and f"== {FAM}" in out, f"rc={rc} err={err[:200]}")
 
         # Chaque falsification : rejetee (3), stdout VIDE, sans traceback.
-        def falsify(name: str, mutate) -> None:
+        # rehash=True remet les hashes de sorties du META en coherence apres
+        # une mutation de contenu, pour que la falsification echoue sur SA
+        # cause declaree et pas sur le recoupement de hash.
+        def falsify(name: str, mutate, rehash: bool = False) -> None:
             with tempfile.TemporaryDirectory() as td2:
                 r2 = Path(td2) / "campagne"
                 shutil.copytree(root, r2)
                 mutate(r2)
+                if rehash:
+                    rehash_outputs(r2)
                 rc2, out2, err2 = run_pentes(r2)
                 check(name, rc2 == 3 and out2 == "" and "Traceback" not in err2,
                       f"rc={rc2} stdout={len(out2)}o err={err2[:100]}")
@@ -127,26 +162,50 @@ def main() -> int:
                 lambda r: (r / "out" / "intrus.xyz").write_text("x"))
         falsify("stderr non vide", lambda r: (r / "out" / f"{FAM}_8000_s3.txt.err").write_text("boom"))
         falsify("compteur absent d'une graine",
-                lambda r: edit(r, f"{FAM}_32000_s5.txt", lambda t: re.sub(r"tri_comparaisons=\d+ ", "", t)))
+                lambda r: edit(r, f"{FAM}_32000_s5.txt", lambda t: re.sub(r"tri_comparaisons=\d+ ", "", t)), True)
         falsify("compteur duplique (ligne sweep doublee)",
                 lambda r: edit(r, f"{FAM}_8000_s3.txt", lambda t: t.replace(
                     "p_factor=", "sweep tests_coeur=7 tests_prof_q3=7 tests_passe2=7 tri_comparaisons=7 "
                     "seeds_passe2=7 racines_corde=7 groupes=7 racines_hors_corde=7 temoins_constants=1 "
-                    "rejets=lens:1/owner:1/once:1/i64:1/face:1/det:0/centre:1\np_factor=", 1)))
+                    "rejets=lens:1/owner:1/once:1/i64:1/face:1/det:0/centre:1\np_factor=", 1)), True)
         falsify("identite discordante (seed)",
-                lambda r: edit(r, f"{FAM}_8000_s4.txt", lambda t: t.replace("seed=4", "seed=9")))
+                lambda r: edit(r, f"{FAM}_8000_s4.txt", lambda t: t.replace("seed=4", "seed=9")), True)
         falsify("mode digest absent",
-                lambda r: edit(r, f"{FAM}_8000_s3.txt", lambda t: t.replace("digest_all=", "digest_nope=")))
+                lambda r: edit(r, f"{FAM}_8000_s3.txt", lambda t: t.replace("digest_all=", "digest_nope=")), True)
         falsify("digest_all duplique",
-                lambda r: edit(r, f"{FAM}_8000_s3.txt", lambda t: t + "digest_all=" + "b" * 64 + "\n"))
+                lambda r: edit(r, f"{FAM}_8000_s3.txt", lambda t: t + "digest_all=" + "b" * 64 + "\n"), True)
         falsify("digest_all non hexadecimal",
-                lambda r: edit(r, f"{FAM}_8000_s3.txt", lambda t: t.replace("a" * 64, "z" * 64)))
+                lambda r: edit(r, f"{FAM}_8000_s3.txt", lambda t: t.replace("a" * 64, "z" * 64)), True)
         falsify("identite fermante violee (somme des octaves)",
                 lambda r: edit(r, f"{FAM}_8000_s5.txt", lambda t: t.replace(
-                    " w1=2000,0", " w1=2001,0", 1)))
+                    " w1=2000,0", " w1=2001,0", 1)), True)
         falsify("identite par octave violee (seeds != cel+coeur+corde+passe2)",
                 lambda r: edit(r, f"{FAM}_8000_s5.txt", lambda t: t.replace(
-                    " seeds=2000,0", " seeds=2000,0".replace("2000,0", "1999,1"), 1)))
+                    " seeds=2000,0", " seeds=2000,0".replace("2000,0", "1999,1"), 1)), True)
+
+        falsify("profil d'autorite absent", lambda r: (r / "PROFIL_AUTORITE.txt").unlink())
+        falsify("PROFIL.txt divergent de l'autorite",
+                lambda r: (r / "PROFIL.txt").write_text((r / "PROFIL.txt").read_text() + "x\n"))
+        falsify("familles du profil vides",
+                lambda r: [p.write_text(re.sub(r"^familles=.*$", "familles=", p.read_text(), flags=re.M))
+                           for p in (r / "PROFIL.txt", r / "PROFIL_AUTORITE.txt")] and None)
+        falsify("seconde ligne de matrice au META",
+                lambda r: (r / "META.txt").write_text(
+                    (r / "META.txt").read_text() + "familles=fantome ; n=8000 16000 32000 ; graines=3 4 5\n"))
+        falsify("lien symbolique dans out/",
+                lambda r: ((r / "out" / f"{FAM}_8000_s3.txt.err").unlink(),
+                           (r / "out" / f"{FAM}_8000_s3.txt.err").symlink_to("/dev/null"))[-1])
+        falsify("sous-repertoire dans out/", lambda r: (r / "out" / "intrusdir").mkdir())
+        falsify("hash de sortie falsifie (META non recoupe)",
+                lambda r: edit(r, f"{FAM}_8000_s3.txt", lambda t: t.replace("coord=100", "coord=101")))
+        falsify("HASHES.txt heterogene",
+                lambda r: (r / "HASHES.txt").write_text(
+                    (r / "HASHES.txt").read_text().replace("avant=", "avant=0deadbeef", 1)))
+        falsify("binaire prive absent", lambda r: (r / "bin" / "mhgp6").unlink())
+        falsify("binaire prive discordant",
+                lambda r: (r / "bin" / "mhgp6").write_bytes(b"autre binaire"))
+        falsify("STATUT_TERMINAL present (campagne invalidee)",
+                lambda r: (r / "STATUT_TERMINAL.txt").write_text("statut_terminal=invalide"))
 
         # Zero legitime sur un compteur REELLEMENT parse (audit du cinquieme
         # cycle : l'ancien cas portait sur seeds_cellules, absent de la liste,
@@ -159,6 +218,7 @@ def main() -> int:
                 for seed in SEEDS:
                     p = r3 / "out" / f"{FAM}_{n}_s{seed}.txt"
                     p.write_text(re.sub(r"racines_hors_corde=\d+", "racines_hors_corde=0", p.read_text()))
+            rehash_outputs(r3)
             rc3, out3, _ = run_pentes(r3)
             row = next((ln for ln in out3.splitlines() if ln.startswith("sweep_hors_corde")), "")
             check("zero legitime accepte avec pente `-` affichee",
@@ -166,7 +226,7 @@ def main() -> int:
 
     if failures:
         return 1
-    print("pentes_gate : validateur fail-closed conforme (nominal + 20 falsifications + zero legitime avec `-`)")
+    print("pentes_gate : validateur fail-closed conforme (nominal + 31 falsifications dont provenance + zero legitime avec `-`)")
     return 0
 
 

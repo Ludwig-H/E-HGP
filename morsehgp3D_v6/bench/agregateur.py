@@ -1,32 +1,39 @@
 #!/usr/bin/env python3
-"""Agrégateur inter-graines PRÉENREGISTRÉ (exigence de l'audit du 31 août :
-« aucune conclusion mono-graine ; aucun seuil choisi après lecture »).
+"""PORTE E6 BORNÉE inter-graines — trois termes, pas 2 seulement (nommage
+imposé par l'alerte du 31 août : ceci n'est PAS le garde-fou GO complet du
+GRAND_LIVRE § 3, qui exige chaque terme payé sur les deux pas).
 
-RÈGLE FIGÉE AVANT LA CAMPAGNE QU'IL JUGE (campagne_sonde_octaves_20260831
-et suivantes) — provenance des seuils : GRAND_LIVRE.md § 3 (< 2 strictement,
-gravé avant toute campagne) et la lecture post-hoc de la capture INVALIDE
-518e2706 (RECU.md : la queue vit aux octaves ≥ 10) — antérieure à toute
-sortie de la campagne jugée ici, jamais ajustée après.
+RÈGLE PRÉENREGISTRÉE (figée avant la campagne qu'elle juge ; provenance des
+seuils : GRAND_LIVRE.md § 3, gravé avant toute campagne, et la lecture
+post-hoc des captures antérieures — `T_lourde` est une HYPOTHÈSE DÉRIVÉE de
+la première capture, dont la stabilité doit être testée sur une campagne
+indépendante) :
 
-1. Le dossier doit d'abord passer `bench/pentes.py` (fail-closed, identités
-   fermantes) — l'agrégateur refuse sinon (code 3).
-2. Termes jugés par famille : `W_sweep1_evals_coeur`, `m_anchor_q4`, et le
-   terme de QUEUE `T_lourde = Σ_{octave >= 10} w1[o]` (défini ici, publié
-   par graine).
-3. Pente sécante par graine aux deux pas (log2 des rapports) ; agrégat
-   inter-graines = MIN / MÉDIANE / MAX des trois graines (médiane de 3 =
-   valeur centrale) ; une pente indéfinie (zéro) rend l'agrégat de ce terme
-   indéfini `-` et ne déclenche JAMAIS.
-4. VERDICT (binaire, sans interprétation) : pour chaque famille STATIONNAIRE
-   ANNONCÉE (terrain_stationnaire, scanline_stationnaire), `E6_active=oui`
-   ssi MÉDIANE inter-graines de la pente au pas 16000→32000 >= 2,0 pour AU
-   MOINS UN des trois termes. Pour uniform et eight_clusters (garde-fou
-   GO § 3) : `garde_fou_viole=oui` ssi une médiane >= 2,0.
-5. Sortie : AGREGAT.txt dans le dossier parent de out/ (bufferisé, écrit
-   seulement après validation complète), et le même contenu sur stdout.
+1. Le dossier doit d'abord passer `bench/pentes.py` avec le MÊME profil
+   d'autorité (fail-closed, provenance, identités fermantes) — refus sinon
+   (code 3), et tout `AGREGAT.txt` préexistant est SUPPRIMÉ (jamais un
+   agrégat périmé à côté d'un refus).
+2. Termes jugés par famille : `W_sweep1_evals_coeur`, `m_anchor_q4`, et
+   `T_lourde = Σ_{octave >= 10} w1[o]`.
+3. Pente sécante par graine au pas 16000→32000 ; par terme :
+   - toutes les valeurs > 0 : agrégat = MIN/MÉDIANE/MAX des trois graines ;
+   - une transition 0 → positif chez AU MOINS une graine : le terme est
+     classé `EMERGENCE` (indéterminé) — ce n'est NI un déclencheur NI une
+     preuve négative (alerte : « une émergence de bin n'est pas encore une
+     loi d'échelle ») ;
+   - zéro aux deux tailles chez toutes les graines : `-` (indéfini, ne
+     déclenche pas).
+4. VERDICT (binaire, sans interprétation) : famille stationnaire annoncée ⟹
+   `E6_active=oui` ssi la MÉDIANE inter-graines >= 2,0 sur au moins un terme
+   NON indéterminé (la médiane exige donc au moins deux graines sur trois) ;
+   les termes en émergence sont LISTÉS à part (`emergences=`). uniform /
+   eight_clusters ⟹ `garde_fou_borne_viole` par la même médiane — garde-fou
+   BORNÉ à ces trois termes et à ce pas, jamais le § 3 entier.
+5. Sortie : AGREGAT.txt dans le dossier parent de out/ + stdout.
 
-Usage : agregateur.py <dossier out/ de campagne>
-Codes : 0 = agrégat publié (quel que soit le verdict) ; 3 = campagne refusée.
+Usage : agregateur.py <dossier out/ de campagne> <profil d'autorite>
+Codes : 0 = agrégat publié (quel que soit le verdict) ; 3 = campagne refusée
+(AGREGAT.txt supprimé s'il existait).
 """
 
 from __future__ import annotations
@@ -44,7 +51,7 @@ SIZES = [8000, 16000, 32000]
 SEEDS = [3, 4, 5]
 STATIONARY = ("terrain_stationnaire", "scanline_stationnaire")
 GUARDED = ("uniform", "eight_clusters")
-OCTAVE_LOURDE_MIN = 10  # fige AVANT la campagne jugee (voir en-tete)
+OCTAVE_LOURDE_MIN = 10  # hypothese derivee de la premiere capture, figee ici
 SEUIL_PENTE = 2.0       # GRAND_LIVRE.md § 3, fige avant toute campagne
 
 
@@ -54,23 +61,28 @@ def med3(xs):
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        print("usage: agregateur.py <dossier out/ de campagne>", file=sys.stderr)
+    if len(sys.argv) != 3:
+        print("usage: agregateur.py <dossier out/ de campagne> <profil d'autorite>", file=sys.stderr)
         return 2
     out_dir = Path(sys.argv[1])
-    # 1. La campagne doit passer le validateur fail-closed INTEGRALEMENT.
-    r = subprocess.run([sys.executable, str(PENTES), str(out_dir)], capture_output=True, text=True)
+    authority = Path(sys.argv[2])
+    agregat_path = out_dir.parent / "AGREGAT.txt"
+    # 1. La campagne doit passer le validateur fail-closed INTEGRALEMENT,
+    # avec le meme profil d'autorite ; un refus supprime l'agregat perime.
+    r = subprocess.run([sys.executable, str(PENTES), str(out_dir), str(authority)],
+                       capture_output=True, text=True)
     if r.returncode != 0:
-        print(f"REFUS : pentes.py a rendu {r.returncode} — agrégat impossible sur une campagne non validée",
-              file=sys.stderr)
+        if agregat_path.exists():
+            agregat_path.unlink()
+        print(f"REFUS : pentes.py a rendu {r.returncode} — agrégat impossible sur une campagne non validée "
+              f"(AGREGAT.txt supprimé s'il existait)", file=sys.stderr)
         sys.stderr.write(r.stderr)
         return 3
     spec = importlib.util.spec_from_file_location("pentes", PENTES)
     pentes = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(pentes)
 
-    meta = (out_dir.parent / "META.txt").read_text()
-    families = re.search(r"^familles=(.+?) ;", meta, re.M).group(1).split()
+    families = re.search(r"^familles=(.+)$", authority.read_text(), re.M).group(1).split()
 
     def counters_of(fam: str, n: int, seed: int) -> dict:
         text = (out_dir / f"{fam}_{n}_s{seed}.txt").read_text()
@@ -82,41 +94,52 @@ def main() -> int:
         return vals
 
     lines = [
-        "# AGREGAT inter-graines — règle préenregistrée (bench/agregateur.py, seuils figés avant la campagne).",
-        f"# termes juges : W_sweep1_evals_coeur, m_anchor_q4, T_lourde (= somme w1 des octaves >= {OCTAVE_LOURDE_MIN}).",
-        f"# verdict : mediane inter-graines de la pente 16000->32000 >= {SEUIL_PENTE} sur au moins un terme.",
+        "# AGREGAT inter-graines — PORTE E6 BORNEE (trois termes, pas 16000->32000 seulement ;",
+        "# jamais le garde-fou GO complet du GRAND_LIVRE paragraphe 3). Regle preenregistree.",
+        f"# termes : W_sweep1_evals_coeur, m_anchor_q4, T_lourde (= somme w1 des octaves >= {OCTAVE_LOURDE_MIN},",
+        "# hypothese derivee de la premiere capture, stabilite a tester sur campagne independante).",
+        f"# verdict : mediane inter-graines >= {SEUIL_PENTE} sur au moins un terme non indetermine ;",
+        "# une transition 0->positif est une EMERGENCE (indeterminee), ni declencheur ni preuve negative.",
     ]
     verdicts = []
     for fam in families:
         data = {(n, s): counters_of(fam, n, s) for n in SIZES for s in SEEDS}
         lines.append(f"== {fam}")
         med_by_term = {}
+        emergences = []
         for term in ("W_sweep1_evals_coeur", "m_anchor_q4", "T_lourde"):
             slopes2 = []
+            emergence = False
             rows = []
             for s in SEEDS:
                 v = [data[(n, s)][term] for n in SIZES]
                 s1 = math.log2(v[1] / v[0]) if v[0] > 0 and v[1] > 0 else None
                 s2 = math.log2(v[2] / v[1]) if v[1] > 0 and v[2] > 0 else None
+                if v[1] == 0 and v[2] > 0:
+                    emergence = True
                 rows.append((s, v, s1, s2))
                 slopes2.append(s2)
             for s, v, s1, s2 in rows:
                 fmt = lambda x: "  -  " if x is None else f"{x:5.2f}"
                 lines.append(f"  {term:22s} g{s}: {v[0]:>13} {v[1]:>13} {v[2]:>13}  pentes {fmt(s1)} | {fmt(s2)}")
-            if any(x is None for x in slopes2):
+            if emergence:
                 med_by_term[term] = None
-                lines.append(f"  {term:22s} agrégat pas2 : indéfini (zéro légitime) — ne déclenche pas")
+                emergences.append(term)
+                lines.append(f"  {term:22s} agrégat pas2 : EMERGENCE (0 -> positif) — indéterminé, à classer par une campagne de tailles supérieures")
+            elif any(x is None for x in slopes2):
+                med_by_term[term] = None
+                lines.append(f"  {term:22s} agrégat pas2 : indéfini (zéro des deux côtés) — ne déclenche pas")
             else:
                 mn, md, mx = min(slopes2), med3(slopes2), max(slopes2)
                 med_by_term[term] = md
                 lines.append(f"  {term:22s} agrégat pas2 : min={mn:.2f} médiane={md:.2f} max={mx:.2f}")
         trig = [t for t, m in med_by_term.items() if m is not None and m >= SEUIL_PENTE]
+        suffix = (f" termes={','.join(trig)}" if trig else "") + \
+            (f" emergences={','.join(emergences)}" if emergences else "")
         if fam in STATIONARY:
-            verdict = f"E6_active={'oui' if trig else 'non'} famille={fam}" + \
-                (f" termes={','.join(trig)}" if trig else "")
+            verdict = f"E6_active={'oui' if trig else 'non'} famille={fam}" + suffix
         elif fam in GUARDED:
-            verdict = f"garde_fou_viole={'oui' if trig else 'non'} famille={fam}" + \
-                (f" termes={','.join(trig)}" if trig else "")
+            verdict = f"garde_fou_borne_viole={'oui' if trig else 'non'} famille={fam}" + suffix
         else:
             verdict = f"hors_perimetre famille={fam}"
         verdicts.append(verdict)
@@ -124,7 +147,7 @@ def main() -> int:
         lines.append("")
     lines.extend(verdicts)
     content = "\n".join(lines) + "\n"
-    (out_dir.parent / "AGREGAT.txt").write_text(content)
+    agregat_path.write_text(content)
     print(content, end="")
     return 0
 
