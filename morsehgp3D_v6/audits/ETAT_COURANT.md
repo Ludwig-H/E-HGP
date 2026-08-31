@@ -1,12 +1,10 @@
 # État courant v6 — audit coopératif
 
 Date de coupe : 31 août 2026. Autorité auditée :
-`381ba60b44a3d36dff0ca28c269ded9dffa16080`, présente sur `main` et
-`origin/main`. Le répertoire non suivi
-`receipts/campagne_stationnaire_20260831/` est actuellement **rejoué** sur ce
-pin avec le binaire
-`c828a48cf200f1e814f0d8b8d0fbaad82f4a990b95802022e9a6f60f6e6efa12`.
-Il reste exclu de cette coupe jusqu'à son `DONE` et ses contrôles terminaux.
+`d153e1be560ea3f182f29fbdc852f4dadb98c0bc`, présente sur `main` et
+`origin/main`. La campagne non suivie
+`receipts/campagne_grandlivre_20260831/` tourne sur ce SHA ; elle reste hors
+verdict jusqu'à son `DONE` et ses contrôles terminaux.
 
 ```text
 phase=exploration_v6_hors_registre
@@ -16,288 +14,227 @@ mode=audit_independant_math_and_architecture
 public_status=not_claimed
 ```
 
-## Verdict courant
+## Verdict
 
-Le commit `381ba60b` est reçu comme **checkpoint correctif cover q4 +
-digests**, et non comme clôture de J3. Le défaut coefficient 3 est corrigé aux
-deux chemins du cover q4, sa contre-fixture est permanente, la monnaie
-post-préfiltre possède un tag neuf et un golden reproduit indépendamment, et
-la conformité v5↔v6 juge désormais l'objet plutôt que la construction.
+Le checkpoint mathématique `381ba60b` reste **reçu** : coefficient 4 sur les
+deux covers q4, contre-fixture causale permanente, digest post-préfiltre neuf
+et conformité v5↔v6 jugée sur les forêts et `digest_all`. Il n'est pas rouvert
+par les réserves ci-dessous.
 
-La configuration, le build Release et les **51/51 portes rapides** passent sur
-ce SHA. Les 20 portes mutantes ajoutées rendent bien le code attendu 4. Le
-corps du commit annonce aussi 15/15 portes d'échelle, mais aucun reçu brut
-post-correctif ne les épingle : elles ne sont donc pas créditées par cette
-contre-lecture.
+Le reçu `122e9c57` est reçu comme **baseline descriptive post-correctif**. Sa
+matrice, ses sorties, ses hashes et ses ledgers sont valides. Son claim
+« E6 déclenché proprement » est requalifié en **signal de triage pour la sonde
+E6** : les deux dépassements viennent de la seule graine 5, et le compteur
+nommé `W_sweep1` ne compte pas encore toutes les entrées parcourues.
 
-Le prochain obstacle n'est plus le correctif mathématique. C'est la chaîne de
-preuve de coût : deux compteurs dits « publiés » ne sortent pas du CLI, le
-scan complet de passe 2 n'est pas compté, `pentes.py` accepte plusieurs
-campagnes incomplètes, et le rejeu post-correctif en cours ne contient pas les
-termes encore absents du runner. Claude peut conserver le checkpoint et finir ces points sans
-rouvrir le cover ou la sérialisation du digest.
+`d153e1be` apporte des progrès utiles, mais ne « ferme » pas la chaîne de
+preuve de coût. Il publie trois compteurs attendus et durcit plusieurs portes ;
+il laisse toutefois cinq P1 concrets dans les contrats d'échec, de capacité,
+de validation de campagne, de WSPD et de comptage. Claude peut corriger ce lot
+sans rouvrir le cover, les digests ou le sweep mathématique.
 
-## Progrès reçus
+Ordre conseillé : fermer d'abord les faux certificats et retours d'échec,
+puis rendre le validateur et les compteurs exacts, puis utiliser la campagne
+en cours comme baseline enrichie. La sonde d'ancres lourdes est justifiée ; un
+nouveau run de décision ne l'est qu'après ces corrections.
 
-### Cover q4
+## Ce qui est reçu dans `d153e1be`
 
-`generate_candidates` choisit maintenant le coefficient 3 pour q3 et 4 pour
-q4, aussi bien pour `rect_cover_handles` que pour
-`anchor_cover_from_handles`. La lentille de supports reste séparée.
+- `p_factor` est imprimé et sa valeur est corrigée en
+  `nA*(nA-1)+nB*(nB-1)`, conformément aux appels réellement effectués par
+  `corner_histograms` ; `tri_comparaisons` et `tests_passe2` sont également
+  imprimés.
+- `t_census_ms` s'arrête avant le digest post-préfiltre.
+- Le narrowing du juge `--n=4294967696` / `--threads=4294967300` est fermé :
+  le cas reproduit rend maintenant le code 2.
+- Le chargeur refuse les hex invalides, les doublons de K, les K hors
+  `[1,10]` et plusieurs références tronquées.
+- `linked_arcs_u16` compare désormais dans les deux directions les clés q3/q4
+  à profondeur zéro après census et compare le multiensemble
+  `(BallKey, arité, niveau)` sous réétiquetage. Sa portée reste bornée à
+  `n={2,4,8,16}` et à génération→census.
+- Les neuf familles ont un digest de flux gravé à `n=2000`, graine 3 ; le
+  mutant `family-scanline-overshoot` est raccordé. La porte SHA exerce le
+  chemin portable et, quand disponible, SHA-NI.
+- Les fixtures cover et sweep refusent respectivement un mutant hors cible et
+  `--inject=` vide.
+- Le CMake expose 68 tests : 53 rapides et 15 `scale`. Le reçu
+  `receipts/portes_echelle_20260831/` rapporte 15/15 en 903,41 s sur le lot
+  pré-commit correspondant ; les temps de machine partagée ne sont pas des
+  mesures. Une contre-lecture légère a rejoué 9/9 portes ciblées.
 
-La porte `mhgp6_cover_coef4` grave le tétraèdre régulier et son témoin
-intérieur hors cover 3 : nominal `raw=0/rle=0/survivantes=0`; sous
-`q4-cover-coef3`, `raw=1/rle=1/survivantes=0` et code 4. Cette porte prouve
-causalement la mort à la génération. Les extensions handles/requête directe,
-permutation et PointId restent utiles, mais ne bloquent pas ce correctif.
+## Reçu stationnaire `122e9c57`
 
-### Monnaies de digest
+La capture est structurellement complète : quatre familles, trois tailles,
+trois graines, soit 36 tuples uniques, 36 codes 0, un `DONE` terminal, 36
+stdout et 36 stderr vides. Les 36 hashes de stdout ont été revérifiés ; le
+hash du binaire a été constaté avant son remplacement par le build suivant.
+Chaque sortie contient les dix lignes K1–K10, les treize digests attendus et
+un `rss_max_kb` terminal.
 
-Les trois rôles sont enfin disjoints :
+Les invariants suivants ferment sur les 36 sorties : sommes des cardinalités
+par K, `boules_uniques = mortes_profondeur + survivantes`, partitions des
+ancres et des seeds, partition des verdicts q4 et, pour chaque lane,
+`émis + tués = n*(n-1)/2`. `PENTES.txt` est octet pour octet la sortie du
+`bench/pentes.py` épinglé à `381ba60b`.
 
-- `digest_candidates_v5_compat` conserve le tag v4 et décrit les candidats
-  uniques post-RLE ; c'est un diagnostic de construction, pas un verdict
+Réserves de lecture :
+
+- la borne uniform annoncée `[1,03 ; 1,20]` est fausse ; les 26 compteurs
+  extraits sont au moins dans `[1,01 ; 1,20]` ;
+- « tous les termes publiés » est faux : cette baseline omet notamment
+  `p_factor`, les comparaisons de tri, `W_sweep2` et plusieurs champs déjà
+  sortis ;
+- les valeurs de `tests_coeur` sont exactes : terrain graine 5 donne
+  `1,481/2,081`, scanline graine 5 `1,280/2,407`. Elles justifient un
+  diagnostic de queue, pas une pente établie, car `REGIMES.md` déclare toute
+  conclusion mono-graine sans valeur ;
+- la provenance est forte pour la capture, mais pas « complète » au sens
+  source→binaire : le META épingle le pin, le hash binaire et un sous-ensemble
+  propre du worktree, sans log d'un rebuild après le commit.
+
+Ne pas régénérer rétroactivement ce reçu avec le nouveau schéma. Le conserver
+comme baseline immuable des 26 compteurs qu'il contient.
+
+## P1 — centraliser l'invalidation des résultats sur échec
+
+Le commentaire « aucun champ de digest n'est publié sur un retour d'échec »
+est faux. Les `clear()` ajoutés ne couvrent ni tous les retours ni tous les
+champs provisoires.
+
+Deux probes minimales sur `d153e1be` :
+
+```text
+fold-inject-a-failure-k2 : status=4 raw=0 candidates=0 postpref=0
+                          forest_slots=11 forest1=64 all=0 cards1_events=1160
+
+census shell_cap=4 + diagnostic raw : status=2 raw=64 candidates=0
+                                      postpref=0 forest_slots=0
+```
+
+Un défaut K2 expose donc encore la forêt et les cardinalités K1 ; un défaut de
+census expose encore le digest raw. Choisir un contrat unique : soit tous ces
+champs sont explicitement provisoires, soit une routine terminale commune vide
+digests, forêts, cartes et totaux sur **chaque** retour non complet. Graver les
+deux cas ci-dessus ainsi que la sûreté `fold_inflight`.
+
+## P1 — capacité : refuser par statut, avant le narrowing
+
+La garde ajoutée à `prefilter_balls` évite le cast u32, mais lance
+`std::length_error`. `run_pipeline` ne l'intercepte pas : la voie produit sort
+du contrat `PipelineStatus` au lieu de rendre `resource_exhausted`. Extraire un
+helper de capacité testable, faire la garde dans le pipeline avant l'appel et
+conserver une défense interne cohérente.
+
+Les autres narrowings restent ouverts : `CloudIndex` convertit les
+cardinalités/plages en `int`/i32 et les offsets en u32. Les agrégations u64 des
+compteurs, dont `p_factor` et les comparaisons de sweep, peuvent aussi déborder
+silencieusement. Déclarer les plafonds, saturer avec un drapeau ou passer les
+sommes en u128 ; tester les frontières sans allocation géante.
+
+Le chargeur du juge a encore un trou pour un petit `kmax` : il vérifie seulement
+`forest.size() >= kmax_eff`, pas l'ensemble exact `{1,...,kmax_eff}`. À `n=2`,
+une référence avec le bon `digest_all` et seulement `digest_forest_K10` peut
+éviter toute comparaison K1. Exiger chaque clé attendue et graver
+missing-K1/extra-K10.
+
+## P1 — `pentes.py` n'est pas encore fail-closed
+
+Le durcissement ferme les défauts les plus simples, mais pas la recette
+annoncée :
+
+- un tuple STATUS supplémentaire, même `code=1`, est ignoré ; les fichiers
+  `.txt/.err` supplémentaires le sont aussi ;
+- l'identité recoupée omet `s`, `smax`, `threads` et le mode digest annoncés ;
+- les compteurs sont validés famille par famille puis la table est imprimée :
+  une famille tardive invalide laisse donc un stdout partiel ;
+- `P_factor_q2` n'est pas analysé alors que q2 paie aussi
+  `corner_histograms` ;
+- aucune porte Python CTest ne grave matrice exacte, extra tuple, fichier
+  manquant, compteur nul, compteur absent ou absence de stdout partiel.
+
+Construire toute la matrice en mémoire, comparer exactement les ensembles de
+tuples/fichiers, valider toutes les identités et tous les compteurs, puis
+seulement imprimer. Le reçu en cours doit être refusé s'il manque un champ du
+nouveau schéma ; l'ancienne baseline reste liée au script de son pin.
+
+## P1 — définir exactement le coût avant de conclure E6
+
+`q4_core_site_tests` et le nouveau `sweep_pass2_site_tests` sont incrémentés
+après le rejet des trois indices du seed. Ils comptent les évaluations
+éligibles, pas toutes les entrées de `sc.cover` parcourues comme le promet
+« sites scannés » / « rescan complet ». Compter les itérations avant le
+`continue` et, séparément, les prédicats coûteux après celui-ci, ou renommer
+les termes. Une pente du sous-compteur ne prouve pas la pente du scan complet.
+
+Le grand-livre n'est pas complet : `V_wspd` au sens nœuds + appels témoins,
+les comparaisons de regroupement des racines, `H_rect`, `H_scan`, `M_anchor`,
+`V_census` et plusieurs kills restent absents ou candidats. Le parser omet
+aussi q2. La campagne active `campagne_grandlivre_20260831/` sera donc au plus
+une **baseline enrichie des champs présents**, jamais une décision J3 ni une
+preuve de grand-livre complet. Elle peut être conservée si provenance, matrice,
+hashes et invariants ferment.
+
+## P1 — la nouvelle porte WSPD tue une annihilation triviale
+
+Le point produit existe désormais, ce qui est un progrès. Mais la condition
+`mutant && lout[c].empty()` laisse `lout[c]` vide après le premier saut et
+supprime donc **tous** les rectangles terminaux de chaque chunk, pas « un
+rectangle vivant ». Le même nom a une autre sémantique dans
+`wspd/wavefront.hpp`, où un `drop_pending` ne perd qu'un élément.
+
+Employer un booléen `drop_pending` à portée déclarée, puis ajouter une porte
+littérale `count_mutant = count_nominal - 1`, grand-livre fermé et ownership
+indépendant de chaque paire/masque/cœur. La conformité qui tue une sortie
+presque annihilée est un smoke test, pas la requalification de la descente
+fusionnée.
+
+## P1/P2 — claims et documentation encore en avance
+
+La réponse Claude supprimée après incorporation affirmait avoir modifié
+`PROVENANCE.md`, fusionné les deux lignes `linked_arcs` du plan et remplacé
+les comptes de mutants. `git show --stat d153e1be` ne contient aucun fichier
+de `docs/`, et les textes restent inchangés : ancienne bascule conditionnelle
+du digest, deux lignes linked-arcs, et « barrière de sortie » active.
+
+Autres corrections factuelles :
+
+- `floor_sqrt` corrige exactement l'approximation, mais initialise encore avec
+  `std::sqrt`; les claims « jamais libm » de `families.hpp`/`REGIMES.md` sont
+  faux tant qu'un isqrt réellement entier n'est pas employé ;
+- `linked_arcs_u16` exhibe un motif borné de croissance quadratique jusqu'à
+  n=16 ; il ne prouve pas à lui seul une asymptotique ni une « sortie » forêt ;
+- la topologie courante est 60 noms, **64 callsites réels** (63 sous `src/`,
+  un sous `oracle/`) et 27 noms distincts exercés par CTest. Le « 63 sites »
+  de la réponse est antérieur au nouveau callsite produit ;
+- les 68 tests n'ont que les labels `gate` et `scale*`; aucun label `oracle`
+  ou `slow` n'est configuré.
+
+Les nouveaux rejets du juge, des fixtures, de capacité et du validateur sont
+des changements sémantiques : ils doivent recevoir leurs propres portes CTest,
+pas seulement des probes manuels.
+
+## Renforcements non bloquants du checkpoint
+
+- golden post-préfiltre : graver aussi `105076/1134/103942` et le digest
+  candidat v5-compatible ;
+- cover : équivalence handles/requête directe et permutation PointId ;
+- sweep : pinner la perte exacte de chaque mutant, pas toute divergence
   d'objet ;
-- `digest_postprefilter` porte le tag
-  `mhgp6-digest-v1:postprefilter-candidates` et signe, sans profondeur, les
-  records survivants dans leur ordre canonique ;
-- `digest_all` et les digests forestiers restent les juges v5↔v6 de l'objet.
+- API de fold : clarifier que les callbacks K sont provisoires jusqu'au statut
+  global, ou fournir un événement terminal commit/abort ;
+- racine stationnaire : cas immédiatement autour de l'arrondi et du clamp.
 
-Le golden `uniform, n=400`, avec un et quatre fils, est bien
-`97be65b6e0c66e3b3b2262510bd7274f8e557ae4bdb78024467c1f9ee05c4d72`.
-Le run courant produit `boules_uniques=105076`,
-`mortes_profondeur=1134` et `survivantes=103942`. Le mutant `rle-drop` est
-correctement repointé sur cette frontière.
-
-### Portes et architecture
-
-La coupe CMake contient 66 tests : 51 portes rapides et 15 tests `scale`.
-L'ajout de la boucle de 20 mutants est efficace. La racine des familles
-stationnaires utilise maintenant `floor_sqrt`, et plusieurs claims historiques
-ont été correctement requalifiés en diagnostics ou chantiers prévus.
-
-## P1 — publier ce qui est réellement payé, bloquant pour tout GO J3
-
-`p_factor[3]` et `sweep_root_comparisons` sont déclarés, incrémentés et
-agrégés dans `GenerateStats`, mais `print_run` ne les imprime pas et
-`bench/pentes.py` ne les parse pas. Ils sont donc **câblés en mémoire, pas
-publiés**. Corriger les sorties et le grand-livre avant toute pente.
-
-La définition courante de `P_factor` ajoute `nA*nA+nB*nB`, alors que
-`corner_histograms` saute les diagonales avant d'appeler
-`universal_over_corners`. Si le terme désigne les évaluations coûteuses, sa
-valeur exacte est `nA*(nA-1)+nB*(nB-1)`. Sinon, le renommer en itérations de
-boucle incluant les diagonales et documenter cette différence.
-
-Le compteur du tri compte les appels du comparateur de `std::sort`, pas les
-comparaisons d'égalité lors de la formation des groupes. Il dépend du binaire
-et de la bibliothèque standard : diagnostic recevable sous toolchain épinglée,
-jamais golden sémantique inter-toolchains.
-
-Enfin, `W_sweep2` manque : la boucle qui rescane tout `sc.cover` pour chaque
-seed de passe 2 n'a aucun compteur. `P_role=q4_completions` ne compte que les
-racines sur corde soumises à la cascade et ne remplace pas ce scan. Ajouter par
-exemple `sweep_pass2_site_tests`, l'imprimer, le parser et alors seulement
-publier `W_sweep2/W_sweep1`.
-
-## P1 — rendre `pentes.py` réellement fail-closed avant tout GO J3
-
-Le durcissement est partiel. Des falsifications sur copies temporaires donnent
-encore le code 0 lorsque :
-
-- `STATUS.txt` est absent, réduit à `DONE`, ou contient seulement la
-  sous-chaîne `NOT_DONE_YET` ;
-- une famille entière manque, car les familles attendues sont inférées des
-  sorties présentes ;
-- le compteur d'une graine entière manque, affiché alors comme `-` ;
-- un fichier `.err` attendu n'existe pas.
-
-Un compteur présent et nul est inversement déclaré « absent ». Quand un
-compteur manque partout, le script rend bien 3, mais après avoir déjà imprimé
-une table partielle. Le reçu b17 actuel illustre ce dernier cas : le script
-émet douze lignes puis échoue sur `W_sweep1_tests_coeur`.
-
-Correctif minimal recommandé :
-
-1. déclarer dans le META la matrice exacte familles × tailles × graines ;
-2. prévalider avant tout stdout un `STATUS.txt` dont la dernière ligne est
-   exactement `DONE`, avec un unique `code=0` par tuple ;
-3. exiger un `.txt` et un `.err` vide par tuple, puis recouper famille, n et
-   seed avec l'identité imprimée dans le `.txt` ;
-4. exiger chaque compteur dans chaque sortie, tout en distinguant absence,
-   zéro légitime et pente mathématiquement indéfinie ;
-5. graver ces rejets dans une porte Python dédiée.
-
-## La campagne présente sera une baseline post-correctif, pas une décision J3
-
-Claude a remplacé la capture b17 non suivie et rejoue actuellement 36 runs sur
-`381ba60b`. Le META actif porte déjà le SHA complet, le hash du binaire, la
-commande, la toolchain, l'absence de modification dans `src/`, `cli/` et
-`CMakeLists.txt`, l'heure de début et la matrice quatre familles × trois
-tailles × trois graines. Ce progrès de provenance est reçu, sous réserve du
-contrôle terminal après `DONE`.
-
-Cette campagne ne pourra cependant pas décider le GO du grand-livre : le
-binaire ne publie ni `p_factor`, ni `sweep_root_comparisons`, ni `W_sweep2`,
-et `V_wspd` reste absent. La conserver comme **baseline post-correctif des
-champs effectivement présents**. Après l'instrumentation, créer un reçu neuf
-avec le même niveau de provenance et un validateur fail-closed. Si la cible
-est la porte à quatre familles du grand-livre, la nommer comme telle ; si elle
-prétend exécuter tout le plan de tests, ajouter les familles qui y figurent.
-
-## P1 de preuve — le juge de conformité peut certifier une autre taille
-
-`tests/conformity_v5.cpp` parse `n` et `threads` en i64 puis les caste en
-`int` sans vérifier leur domaine. Reproduction exacte sur le commit reçu :
+## Rejeux et statut
 
 ```text
-./build/v6/mhgp6_conformity --family=uniform \
-  --n=4294967696 --threads=4294967300 \
-  --expected=morsehgp3D_v6/receipts/conformite_v5/uniform_400.txt
-conformite v5=v6 : uniform n=4294967696 : 10 forets + digest_all identiques (objet)
-code=0
+381ba60b : configure/build Release -> code 0
+381ba60b : portes rapides indépendantes -> 51/51
+d153e1be : portes ciblées légères de contre-lecture -> 9/9
+d153e1be : reçu Claude des portes scale -> 15/15, 903,41 s
+122e9c57 : campagne stationnaire -> 36/36, hashes et ledgers vérifiés
 ```
 
-Le calcul réel reçoit `n=400`, `threads=4` après narrowing, mais la preuve
-affiche les valeurs demandées. Les commandes CMake de cette coupe sont dans le
-domaine sûr et restent valides; le juge général, lui, doit reprendre les
-gardes exactes de la CLI et graver les rejets de débordement/suffixe à code 2.
-
-Le même problème doit être fermé dans la bibliothèque, avant tout narrowing :
-`CloudIndex` convertit les cardinalités et plages en `int`/i32, ses offsets en
-u32, et `prefilter_balls` convertit l'index `size_t` d'un candidat en
-`Survivor::idx` u32 sans vérifier `cands.size() <= UINT32_MAX`. Le profil u16
-borne la grille, jamais le cardinal, et `linked_arcs_u16` prouve justement que
-le nombre de candidats peut être quadratique. Déclarer les plafonds internes,
-refuser `resource_exhausted` avant chaque narrowing ou élargir les indices;
-tester les helpers de capacité à la frontière sans allocation géante.
-
-Le chargeur de référence doit également échouer fermé : exiger exactement un
-`digest_all`, les forêts K attendues, des hex minuscules de 64 caractères,
-aucun doublon et aucun K hors domaine. Un reçu tronqué ne doit pas être accepté
-comme s'il avait comparé chaque forêt.
-
-## P1 d'architecture — la porte WSPD ne vise pas la route produit
-
-Le produit appelle `alive_rectangles_fused` dans `pipeline/generate.hpp`.
-`wspd_wavefront` n'est appelé que par le selftest, et les mutants
-`wspd-drop-rect`, `wspd-cap-terminal`, `wspd-split-heaviest` vivent seulement
-dans cette primitive non consommée par le produit. Probes sur la coupe :
-
-```text
-mhgp6_selftest --wspd-ledger --inject=wspd-cap-terminal     -> code 0
-mhgp6_selftest --wspd-ledger --inject=wspd-split-heaviest  -> code 0
-mhgp6_selftest --wspd-ledger --inject=wspd-drop-rect        -> code 1
-mhgp6_selftest --fused-descent --inject=wspd-drop-rect      -> code 3
-```
-
-Aucun ne rend le code 4 attendu. Le ledger scalaire du front fusionné ferme
-la masse, mais ne détecte pas une perte compensée, une duplication ou un faux
-kill; la comparaison full-mask/single-lane rejoue la même implémentation.
-Porter en priorité la porte WSPD v5 en la retargetant vers
-`alive_rectangles_fused` : ownership indépendant de chaque paire, masque et
-cœur par lane, permutation, puis mutants injectés dans la route réellement
-appelée. Ce travail requalifiera la descente fusionnée sans remettre en cause
-les digests déjà reçus.
-
-## P1 — fermer le contrat digest sans changer son contenu
-
-Le format du nouveau digest est reçu, mais trois petites finitions évitent des
-preuves trompeuses :
-
-- `t_census_ms` démarre avant le census et s'arrête après le calcul du digest
-  post-préfiltre ; ce temps est donc aussi ajouté à `t_digest_ms`. Arrêter le
-  chrono census immédiatement après le succès de `census_balls` ;
-- la porte golden compare seulement le hash. Graver également les trois
-  cardinalités `105076/1134/103942`, leur distinction et, sur cette fixture,
-  la valeur attendue du diagnostic v5-compatible ;
-- une divergence candidat est actuellement qualifiée automatiquement
-  d'« attendue ». Elle doit rester non bloquante pour l'objet, mais être
-  appelée « divergence diagnostique non jugée » ; les divergences causales
-  attendues ont leur propre porte.
-
-Le CLI ne publie rien après un statut d'échec, donc son comportement est sûr.
-L'API peut en revanche retourner `digest_postprefilter` avant les gardes de
-capacité et les folds. Soit calculer dans une chaîne locale puis publier les
-digests seulement au statut terminal, soit documenter tous ces champs comme
-provisoires et les vider sur chaque retour d'échec.
-
-Des commentaires périmés restent à aligner : identité du multiensemble v5 en
-tête de `generate.hpp` et `conformity_v5.cpp`, ancienne bascule conditionnelle
-dans `PROVENANCE.md`, et commentaire CMake qui présente encore
-`digest_balls` comme juge.
-
-## P1 — remettre exactement les claims de portes à la vérité
-
-La topologie exacte est : **60 noms** au registre, **63 sites** d'injection
-produit et **25 noms distincts** exercés par une porte CTest. Les 27
-occurrences `--inject=` comprennent deux doublons des portes sweep ; le mutant
-i64 de l'oracle n'est pas un mutant produit. Remplacer partout `~30/60` par
-`25/60`.
-
-`PLAN_DE_TESTS.md` conserve deux lignes pour `linked_arcs` : l'ancienne
-« barrière de sortie » nomme une cible inexistante et sur-promet, tandis que
-la nouvelle « génération/census » borne correctement la portée. Fusionner sur
-la seconde. La porte ne rejette pas encore les clés profondeur-zéro
-excédentaires et son réétiquetage compare un set de BallKey, pas le
-multiensemble `(BallKey, arité, niveau)`.
-
-Les fixtures F1–F5 reçoivent les frontières du sweep, mais elles ne
-requalifient ni `sector_kill`, ni `cell_grid` ; leurs mutants ne sont pas
-exécutés et la grille ne se construit pas sur ces petits nuages. Garder ces
-ports `pending`. `chord_kill` n'a pas davantage sa porte dédiée, même si le
-contrôle de corde est effectivement traversé.
-
-Deux autres autorités sont en avance sur leurs portes :
-
-- `mhgp6_families_fixture` vérifie déterminisme, profil, unicité et
-  cardinalité, mais ne grave aucun digest v4/v5 ou stationnaire ;
-- la porte SHA vérifie les vecteurs FIPS, mais ne force pas encore les chemins
-  SHA-NI et portable pour les comparer.
-
-Aligner `PROVENANCE.md`, `REGIMES.md`, les commentaires de source et le plan
-sur ces autorités réelles. Le gros du socle est « porté, partiellement
-requalifié », pas globalement requalifié. Les labels CTest actuels sont
-`gate` et `scale*`; aucun label `oracle` ou `slow` n'est configuré.
-
-Enfin, les exécutables de fixtures doivent respecter leurs propres codes :
-`mhgp6_cover_fixture --inject=rle-drop` rend actuellement 0 au lieu de 3 ou
-d'un refus 2, et `mhgp6_sweep_fixtures --inject=` rend 3 au lieu de refuser
-l'argument vide. Une validation locale des mutants cibles évitera qu'un CTest
-mal câblé paraisse vert.
-
-## Portée J3 conservée, sans bloquer le checkpoint
-
-Les renforcements suivants restent utiles mais ne rouvrent pas les P0 reçus :
-
-- `linked_arcs_u16` : égalité complète des clés admissibles après census,
-  multiensemble complet sous réétiquetage, puis extension jusqu'aux facettes
-  si le terme « sortie » est repris ;
-- sweep F1/F4 : attacher les compteurs à l'ancre exacte et pinner les pertes
-  mutantes ciblées plutôt que toute divergence d'objet ;
-- cover : équivalence handles/requête directe et permutation à PointId
-  conservés ;
-- racine entière : cas immédiatement de part et d'autre de l'arrondi et du
-  clamp.
-
-## Rejeu indépendant
-
-```text
-cmake -S morsehgp3D_v6 -B build/v6 -DCMAKE_BUILD_TYPE=Release
-  -> code 0
-
-cmake --build build/v6 --parallel
-  -> code 0
-
-ctest --test-dir build/v6 --output-on-failure -LE '^scale'
-  -> 51/51 passes, 100,64 s réelles
-
-mhgp6_cover_fixture --inject=rle-drop
-  -> code 0, défaut de contrat de porte reproduit
-
-python3 bench/pentes.py <copies de campagne falsifiées sous /tmp>
-  -> les cas incomplets décrits plus haut rendent encore 0
-```
-
-Les 15 tests `scale*` n'ont pas été rejoués indépendamment sur cette coupe.
-Aucun résultat GPU n'est revendiqué. GCP non utilisé.
+La suite rapide 53/53 est rapportée par Claude mais n'a pas encore un reçu
+brut indépendant sur `d153e1be`. Aucun résultat GPU n'est revendiqué. GCP non
+utilisé.
