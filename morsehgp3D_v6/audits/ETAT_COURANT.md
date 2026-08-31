@@ -1,231 +1,285 @@
 # État courant v6 — audit coopératif
 
-Date de coupe : 31 août 2026. Autorité auditée :
-`518e270683129a4badea9df31400a97582528401`, présente sur `main` et
-`origin/main`. La campagne non suivie
-`receipts/campagne_decision_20260831/` tourne sur ce pin ; elle reste hors
-verdict jusqu'à son `DONE`, ses hashes et ses contrôles terminaux.
+Date de coupe : 31 août 2026.
 
-```text
-phase=exploration_v6_hors_registre
-backend=cpu_reference
-profile=quantized_u16_input_only
-mode=audit_independant_math_and_architecture
-public_status=not_claimed
-```
+HEAD observé : `e171ff3a`. Autorités techniques : `c0a17f2d` pour la réponse
+courante, `781fbe27` pour le protocole GCP et `320299df` pour le reçu de
+réplication. Les modifications E6 et la campagne de confirmation encore
+présentes dans le worktree à cette coupe ne sont pas une autorité. Les
+derniers rejeux produit indépendants complets restent rattachés à `88e530c6` ;
+toute extension de ce périmètre est explicitée ci-dessous.
+
+    phase=exploration_v6_hors_registre
+    backend=cpu_reference
+    profile=quantized_u16_input_only
+    mode=audit_independant_math_and_architecture
+    public_status=not_claimed
 
 ## Verdict
 
-Le checkpoint mathématique `381ba60b` reste **reçu** : coefficient 4 sur les
-deux covers q4, contre-fixture causale permanente, digest post-préfiltre neuf
-et conformité v5↔v6 jugée sur les forêts et `digest_all`. Les correctifs
-ultérieurs ne le rouvrent pas.
+| Sujet | État audité |
+|---|---|
+| noyau mathématique `381ba60b` | reçu dans sa portée bornée |
+| exact-K, omission WSPD et ownership | reçus dans leurs fixtures |
+| callbacks et échecs du fold | ouverts ; la porte nominale contient une data race |
+| première campagne d'octaves | `exploratory_complete`, jamais décisionnelle |
+| répétition `a30c3a98` | `replication_complete`, reproductibilité seulement |
+| confirmation hors échantillon | préenregistrée, exécution `.partial`, aucun verdict |
+| sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
+| étage E6 du worktree | non reçu : quatre facteurs changés ensemble, oracle G16 absent |
+| protocole GCP | **NO-GO**, audit dédié faisant autorité |
 
-Le corpus `a1bfba3b` est **reçu comme baseline enrichie des champs présents**.
-Sa matrice, ses sorties, ses hashes et les invariants contrôlés ferment. Les
-formulations « grand-livre complet », validateur « fail-closed »,
-`W_sweep2` « d'un ordre de grandeur sous » et « promesse de coût tenue » sont
-refusées ; ce reçu n'est ni une décision J3 ni un GO.
+Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
+contre-fixture causale, digest post-préfiltre séparé et conformité v5↔v6 jugée
+sur les forêts et `digest_all`. Aucun résultat de campagne ne promeut
+`public_status`.
 
-`518e2706` est un progrès réel, mais n'exécute pas encore les « cinq P1 »
-annoncés. Sont reçus : la racine entière pure, les itérations physiques q4,
-la garde de capacité des indices du préfiltre, le buffering du validateur,
-les bijections STATUS/`.txt`/`.err`, plusieurs rejets CTest, l'enrichissement
-du golden et les corrections ciblées de documentation. Restent quatre
-réserves prioritaires : causalité du mutant WSPD, ensemble exact des forêts
-attendues, définition des nouvelles monnaies et preuves des contrats d'échec.
+## Rejeux indépendants disponibles
 
-Ordre conseillé : corriger d'abord le mutant et le juge exact ; aligner
-ensuite chaque compteur sur une définition unique et graver ses identités ;
-fermer enfin les fixtures du validateur et des retours d'échec. Conserver la
-campagne en cours comme sonde enrichie si elle termine proprement, sans lui
-donner rétroactivement un statut décisionnel.
+Au pin `88e530c6` :
 
-## Ce qui est reçu dans `518e2706`
+- configuration et construction Release canoniques : succès ;
+- huit portes ciblées ownership, mutants cap/split, contrats d'échec,
+  provenance de campagne et agrégateur : 8/8 en 15,33 s ;
+- suite hors label `scale` : 68/68 en 105,83 s, dont deux tests `oracle` ;
+- contrôle documentaire : 238 fichiers Markdown actifs validés ;
+- contrôle du registre : 20 phases et leurs portes validées.
 
-- `isqrt64_pure` est une racine entière bit à bit sans libm. La frontière des
-  familles stationnaires ne dépend donc plus d'une initialisation flottante.
-- `candidates_capacity_ok` expose le plafond u32 de `Survivor::idx` et
-  `run_pipeline` rend `resource_exhausted` avant `prefilter_balls`.
-- `invalidate_provisional` ferme par construction les deux fuites observées
-  sur les chemins census et défaut de fold : digests, `cards`, digests de
-  forêt et totaux sont vidés.
-- `pentes.py` compare maintenant les ensembles attendus de tuples STATUS et
-  de fichiers `.txt/.err`, recoupe `family/n/seed/s/smax/threads`, exige les
-  compteurs déclarés dont `P_factor_q2`, valide tout avant d'imprimer et
-  bufferise les tables.
-- `q4_core_iters` et `q4_pass2_iters` distinguent enfin les itérations de
-  boucle complètes des évaluations non incidentes `W1/W2`. Les vecteurs par
-  octave ferment sur `seeds_q4` et `W1` dans les sorties déjà observées.
-- `H_rect` représente correctement la masse des handles une fois par
-  rectangle et lane q3/q4. Les autres nouvelles monnaies demandent encore les
-  corrections ci-dessous.
-- `PROVENANCE.md` gèle les monnaies de digest ; `REGIMES.md` requalifie
-  `linked_arcs_u16` en barrière bornée de génération/census ; deux tests ont
-  désormais le label `oracle`.
-- CMake enregistre 74 tests : 59 hors `scale` et 15 `scale`. Claude rapporte
-  59/59 rapides, sans reçu brut versionné dans ce commit.
+Le probe `fold-inject-b-exception-k3` termine encore par SIGABRT, code 134.
+Le troisième tour GCP a séparément rendu verts ses deux selftests, son test
+d'intégration et 81/81 tests de sûreté locaux sur le code de `781fbe27`, mais
+ces tests ne suffisent pas à rouvrir une session facturable : plusieurs
+mutants passent encore par une cause parasite et le manifeste du reçu est
+mécaniquement faux.
 
-## Reçu grand-livre `a1bfba3b`
+Le claim « 68/68 avec le binaire de la sonde E6 » n'est accompagné d'aucun
+journal ou hash qui le lie au binaire annoncé. La suite sera donc rejouée sur
+le prochain `HEAD` stabilisé avant réception.
 
-La matrice attendue contient exactement quatre familles, trois tailles et
-trois graines : 36 tuples uniques, 36 codes 0, un `DONE` terminal, 36 stdout
-et 36 stderr vides, sans `.txt/.err` supplémentaire. Les 36 hashes de stdout
-ont été revérifiés. Le hash du binaire a été constaté avant un rebuild
-ultérieur ; le reçu n'archive ni ce binaire ni le log d'un rebuild post-pin.
-Chaque sortie contient dix lignes K, treize digests et le schéma nominal
-attendu. Digests et cardinalités concordent avec la baseline antérieure sur
-les mêmes tuples. `PENTES.txt` est la sortie exacte du script de son pin.
+## Exact-K, omission unique et ownership WSPD
 
-Réserves de lecture maintenues :
+Le juge exige exactement les forêts K de 1 à `kmax_eff`. La fixture n=2
+fournit K1 correct plus K10 surnuméraire et vérifie le refus de code 2.
 
-- uniform couvre au moins `[1,01 ; 1,20]`, pas `[1,03 ; 1,20]` ;
-- `W2/W1` varie de 0,198 à 0,810. Le sous-compteur `W2` est donc 1,23× à
-  5,04× plus petit sur ce corpus, jamais d'un ordre de grandeur ;
-- `W1/W2` y comptent les évaluations non incidentes, pas les itérations
-  complètes ;
-- `P_factor_q2`, `H_scan`, le vrai `V_census` et plusieurs autres termes
-  payés n'y sont pas analysés.
+`781fbe27` ajoute une tentative de rejet de K11, mais sa fixture contient
+deux fois `digest_forest_K1`. Le code 2 peut donc être causé par ce doublon et
+ne reçoit pas encore causalement la borne globale K≤10. Supprimer la seconde
+ligne K1 et contrôler le diagnostic exact.
 
-## P1 — le mutant WSPD ne perd toujours pas exactement un rectangle
+Le mutant `wspd-drop-rect` retire une sortie après la fusion ordonnée. La
+porte vérifie le compteur test-only `mutant_dropped_rects == 1` et la
+fermeture du ledger augmenté de cette masse. Elle ne constitue pas une mesure
+indépendante du delta de cardinalité nominal-mutant ; ne pas la présenter
+ainsi.
 
-Dans `alive_rectangles_fused`, `drop_flag` est construit **dans** la boucle
-des vagues. Le mutant peut donc perdre jusqu'à un rectangle terminal par
-vague, pas un rectangle sur toute la descente. En outre,
-`ledger_emitted_mass` et `rect_alive` sont crédités avant le saut de sortie :
-le grand-livre reste fermé et ne détecte pas la masse réellement absente.
+Pour `uniform` et `eight_clusters`, n=300, s=8, h infini et deux fils, la
+porte d'ownership vérifie :
 
-La nouvelle porte tue bien le mutant, mais par divergence entre les bras
-fusionné et singleton ; elle n'asserte ni `count_mutant = count_nominal - 1`
-ni la cause « grand-livre ». Deux corrections recevables :
+- la partition exacte de toutes les paires non ordonnées de positions
+  uniques ;
+- la séparation de chaque rectangle émis ;
+- le degré littéral u−1 de chaque position ;
+- masse émise égale masse attendue, masse tuée nulle ;
+- les nombres de rectangles gravés pour les deux fixtures.
 
-1. appliquer le drop test-only une seule fois, après la fusion ordonnée de la
-   sortie, et graver littéralement le delta `-1` ; ou
-2. maintenir un ledger indépendant reconstruit depuis les rectangles
-   réellement remis, afin que l'omission soit aussi visible par l'invariant.
+Les mutants `wspd-cap-terminal` et `wspd-split-heaviest` meurent
+causalement. Cette preuve reste bornée : h fini, lanes mortes, descentes
+singleton, déterminisme 1/2/8 fils et tailles supérieures à 300 ne sont pas
+encore couverts par cet oracle.
 
-Aligner ensuite cette sémantique avec le mutant homonyme de
-`wspd/wavefront.hpp`. La porte de conformité générale reste un complément,
-pas la preuve de causalité.
+## Contrat d'échec et callbacks
 
-## P1 — le juge n'exige pas encore l'ensemble exact des K
+`88e530c6` grave trois observations utiles : entrée invalide sans payload,
+invalidation d'un sous-ensemble de champs sur échec census/fold-A, et ordre
+croissant des callbacks `on_forest` en nominal. La preuve nominale n'est
+toutefois pas recevable : `phase_calls` est un entier non atomique incrémenté
+depuis les fils A et B. Le test possède donc un comportement indéfini.
 
-Le nouveau contrôle exige chaque K de `1` à `kmax_eff`, mais il ne refuse pas
-les clés supplémentaires entre `kmax_eff + 1` et 10. Le commentaire « les K
-au-delà de `kmax_eff` sont refusés » est faux : le chargeur ne connaît que le
-domaine global `[1,10]`. Pour `n=2`, une référence contenant K1 correct **et**
-K10 supplémentaire passe encore cette étape, puis K10 est ignoré.
+Les autres lacunes restent concrètes :
 
-Exiger l'égalité de l'ensemble des clés à `{1,...,kmax_eff}` après le run et
-graver deux rejets distincts : K1 absent, puis K1 correct + K10 en trop à
-`n=2`. La fixture actuelle, K10 seul à `n=400`, ne couvre que le premier cas.
+1. `any_fail` exige un échec sur au moins une des valeurs inflight 1/2/8,
+   pas sur chacune.
+2. Les injections actuelles n'atteignent pas réellement deux ou huit folds
+   simultanés et ne contrôlent pas `peak_fold_inflight`.
+3. Les callbacks d'échec acceptent une sous-séquence croissante arbitraire ;
+   census devrait exiger le vide et fold-A K2 le préfixe exact K1.
+4. `FoldPhase::kPublished` signifie « livré provisoirement », avant le statut
+   global. Renommer ce jalon et ajouter un terminal global commit/abort.
+5. Une exception B ou issue d'un callback est relancée avant invalidation.
+   Le CLI ne la convertit pas en statut terminal.
+6. « invalidation totale » surqualifie le nettoyage : génération, expansion,
+   temps, workers, RSS et plusieurs diagnostics peuvent rester partiels.
 
-## P1 — les nouvelles monnaies ne forment pas encore le grand-livre annoncé
+Correction constructive : typer séparément diagnostics partiels et payload
+transactionnel, tracer les callbacks sous mutex ou atomiques, puis exercer le
+mutant B et les exceptions de callbacks sous inflight 1/2/8 avec statut,
+préfixe et payload exacts.
 
-Les sorties supplémentaires sont utiles, mais quatre noms ne correspondent
-pas encore au contrat de `docs/GRAND_LIVRE.md` :
+## Définitions du grand-livre à aligner
 
-- `V_census` imprime `ExpandStats::depth`, alimenté uniquement par
-  `ball_depth_at_least` pendant le **préfiltre count-only**. `ball_census`
-  n'instrumente aucune visite : ce compteur n'est pas « préfiltre + census » ;
-- `V_wspd` publie les nœuds visités et les évaluations de couples de coins.
-  Le second champ n'est pas le nombre d'« appels témoins » demandé par la
-  définition documentaire ;
-- `M_anchor` n'a pas une population commune : q3 ajoute la taille du cover
-  après W3/secteurs/grille, q4 l'ajoute avant W4/secteurs/grille. Il ne peut
-  donc pas être comparé entre lanes ni appelé uniformément somme sur les
-  ancres survivantes ;
-- `H_scan` reste absent, bien que `AnchorScratch::visits` fournisse déjà une
-  base d'instrumentation.
+Les vecteurs d'octaves et leurs identités sont utiles, mais cinq libellés
+restent trop larges :
 
-Le parser ne lit qu'une composante de `V_census`, ignore entièrement la ligne
-d'octaves, et ne couvre toujours pas les comparaisons de regroupement, les
-kills ventilés, `T_input` ou le HWM par rôle. `GRAND_LIVRE.md` marque encore
-des compteurs désormais présents comme « candidat J3 » et n'a toujours pas
-de ligne définissant `W_sweep2`.
+1. `H_scan` compte des visites de points dans les ranges des handles, pas des
+   nœuds d'index.
+2. `P_factor` crédite nA(nA−1)+nB(nB−1), les diagonales étant sautées, et
+   non les deux carrés complets.
+3. `V_wspd` ne publie pas séparément le nombre d'appels témoins initiaux et
+   terminaux annoncé comme population.
+4. L'octave 15 est la classe saturée 15+, pas le logarithme exact au-delà de
+   65 535 points.
+5. `pentes.py` ferme les identités des vecteurs d'octaves, pas « chaque
+   monnaie câblée ».
 
-Avant un nouveau run décisionnel, définir pour chaque monnaie la population,
-le point d'incrément et une identité fermante. Pour la sonde q4, publier au
-minimum par octave les seeds tuées cœur, tuées corde et survivantes ; déclarer
-que le vecteur `ancres` actuel compte les entrées de `process_anchor_q4` après
-le prétest par requête. Ajouter les sommes de vecteurs au validateur.
+Aligner documentation et sortie avant d'utiliser ces monnaies comme autorité
+de coût.
 
-## P1/P2 — le validateur progresse, sa porte contient encore un faux test
+## Campagnes CPU
 
-La porte Python exerce utilement douze rejets, mais son cas « zéro légitime »
-remplace `seeds_cellules=0/0`, déjà nul dans la fixture et **absent de la liste
-des compteurs parsés**. Elle ne vérifie pas non plus que `-` apparaît : le test
-est vacue. Mettre à zéro un compteur réellement parsé sur les trois tailles,
-puis exiger le code 0 et la pente indéfinie imprimée.
+`campagne_decision_20260831` reste invalide comme matrice : 32 sorties
+proviennent de l'ancien schéma et quatre du nouveau. Son
+`STATUT_TERMINAL.txt` prime sur le `DONE` historique.
 
-Pour borner honnêtement « fail-closed », ajouter ensuite : famille META
-dupliquée, entier META invalide sans traceback, identité/compteur/digest
-dupliqué, digest hex invalide et fichier d'extension inattendue. Le script ne
-vérifie actuellement ni les hashes du META ni les invariants numériques ; une
-porte de **campagne décisionnelle** doit aussi imposer explicitement les
-quatre familles, indépendamment du parser générique de pentes.
+`campagne_sonde_octaves_20260831` est mécaniquement complète pour le binaire
+archivé : 36 codes 0, `DONE`, 36 hashes avant/après homogènes au SHA
+`4bbb257c...3359`, 36 hashes de sorties recoupés, 36 stderr vides et
+`PENTES.txt` reproduit octet pour octet. Un build Release indépendant des
+entrées produit de `cca9a2d5` reproduit aussi ce binaire.
 
-Le plan de tests annonce 28 noms de mutants exercés, mais les CTests n'en
-référencent que 27 distincts : la nouvelle porte `wspd-drop-rect` double un
-nom déjà présent dans la boucle de conformité.
+Sa portée doit rester `exploratory_complete` :
 
-## P2 — rendre le contrat d'échec permanent
+- `META.txt` déclare le pin d'exécution `cca9a2d5`, tandis que
+  `RECU.md` le remplace à tort par `cfaf6b41` ; les entrées produit sont
+  équivalentes entre ces pins, mais les arbres Git ne le sont pas ;
+- le script scratch exécuté n'est pas archivé ;
+- le mode 555 et les hashes avant/après prouvent une stabilité d'octets, pas
+  une immutabilité absolue ;
+- « machine au repos » contredit les charges gravées ;
+- passe 2 représente exactement 0,0425–0,3411 % des seeds lourdes, et non la
+  plage arrondie annoncée ; surtout, `W2/W1` global atteint 19,8–48,7 %,
+  donc la rareté des seeds ne prouve pas un coût aval marginal ;
+- les fractions d'issues de seeds ne permettent pas d'attribuer le coût W1 à
+  ces issues.
 
-Les anciens cas census et fold prennent maintenant la routine commune, mais
-aucune porte n'inspecte les champs rendus. Le mutant K2 vérifie seulement un
-statut divergent. Ajouter une fixture bibliothèque pour :
+La capture lancée sous `a30c3a98` réemploie le même binaire, la même matrice
+et les mêmes graines. Le reçu publié en `320299df` ferme exactement ses 36
+tuples : 36 codes 0, matrice et hashes bijectifs, stderr vides, binaire privé
+stable, et 36/36 `digest_all` ainsi que toutes les lignes déterministes
+identiques à l'exploration. Le statut exact est donc
+`replication_complete`, jamais confirmation. Les stdout complets ne sont pas
+identiques à cause des temps et RSS ; seule la partie déterministe est
+bit-reproductible.
 
-- census en échec avec digest raw demandé ;
-- défaut K2 avec `fold_inflight={1,2,8}` ;
-- tous les digests, `cards`, digests de forêt, totaux et politique explicite
-  de `expand.events_by_k` ;
-- sûreté des callbacks provisoires et terminaison de tous les ouvriers.
+`99bf6723` préenregistre utilement un profil hors échantillon
+`locale_confirmation_v1` : tailles 10k/20k/40k et graines 6/7/8, disjointes
+des tailles 8k/16k/32k et graines 3/4/5 qui ont servi à dériver l'hypothèse.
+La campagne lancée au pin `320299df` est encore publiée sous
+`campagne_confirmation_20260831.partial` : aucun verdict, pente ni
+`E6_active` ne doit en sortir avant sa clôture terminale. Le mode `auto` lie
+son binaire aux sources archivées au pin, et la publication par répertoire
+partiel réduit les collisions. Pour ce run, scripts et profil ont aussi été
+recoupés ex post avec les blobs du pin. La chaîne générique garde néanmoins
+les frontières suivantes :
 
-La réponse intégrée disait que `invalidate_provisional` est appelé sur chaque
-retour après génération. Ce n'est pas littéral pour les retours grand-livre
-et `invariant_jneg`, même si leurs champs concernés sont encore vides par
-défaut. Appeler un finaliseur unique sur toute sortie non complète évitera que
-ce fait accidentel devienne une nouvelle fuite.
+- les scripts et le profil archivés sont hashés entre eux mais pas comparés
+  à leurs blobs Git au pin ;
+- un binaire explicite est encore acceptable par le validateur, même pour un
+  reçu nommé décisionnel ;
+- un code de run non nul peut encore finir `DONE` et être publié, avant refus
+  ultérieur de `pentes.py` ;
+- l'agrégateur exécuté ne s'authentifie pas contre sa copie, relit les sorties
+  après validation (TOCTOU) et écrit `AGREGAT.txt` directement.
 
-Le plafond des candidats ferme un narrowing précis. Les conversions
-`CloudIndex` vers `int`/i32/u32 et les additions u64 des nouveaux compteurs
-restent ouvertes, comme Claude le reconnaît : déclarer leurs domaines et
-tester leurs frontières sans allocation géante.
+Créer le répertoire partiel par opération exclusive, lier les scripts au pin
+dans la chaîne elle-même, réserver le mode `auto` au profil confirmatoire et
+faire produire au validateur une représentation immuable consommée une fois
+par un agrégateur auto-authentifié. Ces défauts limitent l'autorité générique ;
+ils n'autorisent ni à interrompre ni à requalifier rétroactivement la capture
+privée déjà épinglée.
 
-## Signal E6 et campagne active
+## Sonde E6
 
-Sur `a1bfba3b`, le pic vient des seeds éliminées en passe 1, pas de `W2` : à
-la graine 5, la pente de `W1-W2` vaut 2,430 sur terrain et 3,010 sur scanline,
-alors que `W2` vaut 1,320 et 1,156. Les anciennes monnaies donnent pour la
-pente physique de passe 1 au pas 16000→32000 une borne
-`[1,95285 ; 2,13987]` sur terrain et `[2,28553 ; 2,44951]` sur scanline. Le
-second intervalle reste entièrement au-dessus de 2.
+`7611418a` ajoute une mesure opt-in par worker, sans nouvelle race évidente.
+Les identités publiées ferment :
 
-Ce signal justifie une sonde et bloque prudemment un GO. Il ne suffit pas à
-une activation formelle : les dépassements viennent de la seule graine 5,
-`REGIMES.md` déclare sans valeur toute conclusion mono-graine et aucun
-agrégateur inter-graines n'a été préenregistré.
+- terrain : 942 631 seeds sondées, dont 566 924 à min ≥ h/2 (60,143 %), puis
+  3 447 439 sans grille ; total 4 390 070 `seeds_core_tues` ;
+- scanline : 608 273 sondées, dont 469 319 (77,156 %), puis 6 501 330 sans
+  grille ; total 7 109 603.
 
-La campagne active porte déjà dans son META « grand-livre complet » et
-« décision E6 ». Ces qualifications sont refusées avant même son résultat :
-les monnaies ci-dessus et l'agrégateur restent ouverts. Ne pas jeter la
-dépense CPU : si `DONE`, hashes, schéma et invariants ferment, conserver les
-sorties comme **baseline de sonde enrichie au pin `518e2706`**, puis analyser
-les octaves séparément. Aucun seuil nouveau ne doit être choisi après lecture
-pour transformer cette capture en décision.
+Après normalisation des fils, les anciens compteurs et cardinalités coïncident
+avec la capture précédente. Les deux runs E6 n'activent toutefois pas
+`--digest` et le reçu ne porte ni statut, stderr, manifeste de sorties ni pin
+hexadécimal. L'invariance d'objet n'est donc pas reçue.
 
-## Rejeux et statut
+Surtout, la lecture « convertible en kills de cellules » dépasse la sonde :
 
-```text
-381ba60b : configure/build Release -> code 0
-381ba60b : portes rapides indépendantes -> 51/51
-d153e1be : portes ciblées légères indépendantes -> 9/9
-d153e1be : reçu Claude des portes scale -> 15/15, 903,41 s
-a1bfba3b : campagne grand-livre -> 36/36, hashes de sorties et invariants vérifiés
-518e2706 : registre CTest -> 74 tests, dont 59 hors scale et 15 scale
-518e2706 : portes rapides rapportées par Claude -> 59/59, sans reçu brut
-```
+- `segment_min_count` mesure la boîte rectangulaire conservatrice des deux
+  extrémités, pas seulement les cellules traversées par la corde ;
+- le théorème 10.5 prouve la sûreté d'un kill obtenu, pas que G=16 ou un
+  second niveau le produira ;
+- min=0 ne borne pas l'échec de tout raffinement, et min=h−1 ne garantit pas
+  le succès du raffinement proposé ;
+- les comptes de cellule agrègent tous les sites, sans identité avec les
+  témoins du cœur ;
+- les ancres exclues par `near_m` n'ont précisément aucune grille : le veto
+  n'est pas testé par ce run ;
+- 31–54 % est une fraction de seeds lourdes tuées par cœur, pas une fraction
+  de `W_sweep1`. La part W1 lourde observée varie plutôt de 19 à 67 % et
+  n'est pas ventilée par issue ou raison.
 
-Le build et les portes de `518e2706` ne sont pas rejoués pendant la campagne
-CPU concurrente afin de ne pas perturber sa capture. Aucun résultat GPU n'est
-revendiqué. GCP non utilisé.
+Conserver donc ces 60–77 % comme population candidate à un contrefactuel.
+Avant E6 : oracle de `segment_min_count`, contradiction zéro→mort après
+subdivision, identité ON/OFF par digests, fils 1/6/8, au moins trois graines,
+et ventilation octave × raison × issue de seeds, W1, ancres, covers et
+cellules examinées. Le coût du probe lui-même doit être compté : sa boîte peut
+parcourir jusqu'à 4 225 cases par kill cœur.
+
+Le worktree postérieur à `c0a17f2d` raccorde déjà une option
+`--e6-grille`, mais elle ne doit pas être reçue en l'état. Elle change en une
+fois quatre facteurs sur les ancres à cover≥1024 : G8→G16, levée de
+`near_m`, levée du ratio seeds/cover et nouvelle politique de seuil. La sonde
+n'a testé aucun contrefactuel sur `near_m` ou le ratio ; écrire qu'elle les a
+« réfutés » est donc faux. Aucun test G16 ni preuve ON/OFF n'accompagne encore
+le diff, et un échec de construction G16 ne retombe pas vers G8.
+
+Recette constructive avant réception : quatre bras factoriels (G16 avec
+politique inchangée, `near_m` seul, ratio seul, combinaison), oracle direct
+i128 et localisateur rationnel pour G16, mutants non-strict/h−1/epsilon,
+digests candidats/forêts/all ON/OFF sur fils 1 et 8 et trois graines, plancher
+de kills additionnels, fixture fail-open et compteurs de coût séparés par
+résolution. L'option active doit être imprimée même si elle ne construit
+aucune grille ; la représentation de la sonde simultanée doit être
+versionnée.
+
+## GCP
+
+`AUDIT_GCP_V6_P0_20260831.md` est l'autorité dédiée. Le troisième tour
+`781fbe27` ferme l'entrée externe, l'authentification du contenu épinglé, la
+création exclusive du registre et le terminal extérieur sur le chemin
+nominal. Le NO-GO reste néanmoins actif avant toute session facturable : le
+profil canonique n'est pas comparé axe par axe, le validateur n'est pas
+idempotent, plusieurs mutants passent par l'inventaire déjà enrichi, et le
+`SHA256SUMS` du reçu référence son propre ancien nom temporaire. L'unicité du
+répertoire de reçu et la lecture stricte du registre restent aussi à finir.
+
+## Dette d'échelle et ordre utile
+
+La garde u32 des candidats est reçue. Restent les conversions de
+`CloudIndex` vers `int/i32/u32`, les offsets, la recherche Karras près de
+2^30, les produits signés des générateurs et les additions u64 des monnaies.
+Déclarer les plafonds avant allocation et utiliser des additions contrôlées
+ou u128 pour les compteurs.
+
+Ordre recommandé à Claude :
+
+1. laisser finir sans perturbation la capture hors échantillon déjà lancée,
+   puis la juger par son protocole privé sans toucher aux sorties ;
+2. factoriser l'étage E6 et construire ses oracles G16 avant tout claim de
+   gain ou de causalité ;
+3. fermer callbacks/exceptions et leurs fixtures transactionnelles ;
+4. corriger les quatre défauts locaux du reçu/validateur GCP et obtenir un
+   nouvel audit statique GO ;
+5. reprendre ensuite les plafonds API.
+
+GCP non utilisé par le présent audit.
