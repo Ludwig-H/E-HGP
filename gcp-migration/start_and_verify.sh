@@ -28,7 +28,7 @@ SSH_KEY_FILE="${GCP_SSH_KEY_FILE:-}"
 SSH_KEY_EXPIRATION_UTC=""
 ASSUME_YES=0
 HANDOFF_FILE=""
-MUTATION_WITNESS_FILE=""
+LIFECYCLE_STATE_FILE=""
 VERIFIED_LAST_START_TIMESTAMP=""
 TARGET_LAST_START_TIMESTAMP=""
 PRE_START_LAST_START_TIMESTAMP=""
@@ -42,7 +42,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/start_and_verify.sh [--yes] [--guest-shutdown-minutes MINUTES] [--handoff-file CHEMIN] [--mutation-witness-file CHEMIN]
+Usage : ./gcp-migration/start_and_verify.sh [--yes] [--guest-shutdown-minutes MINUTES] [--handoff-file CHEMIN] [--lifecycle-state-file CHEMIN]
 
 Démarre la VM ciblée seulement si son coupe-circuit GCE est borné à huit heures,
 certifie l'échéance après démarrage, puis arme et vérifie un arrêt dans l'OS invité.
@@ -75,14 +75,18 @@ while (($# > 0)); do
             HANDOFF_FILE="$2"
             shift 2
             ;;
-        --mutation-witness-file)
-            # Témoin DURABLE écrit atomiquement au point exact où la mutation
-            # de démarrage commence (audit GCP v6, P0-1) : un refus de
-            # préflight ne l'écrit jamais ; sa présence atteste qu'un start
-            # GCE a été tenté, même si ce script est tué avant le handoff.
-            (($# >= 2)) || die "Valeur manquante après --mutation-witness-file."
-            [[ -z "${MUTATION_WITNESS_FILE:-}" ]] || die "--mutation-witness-file ne peut être fourni qu'une fois."
-            MUTATION_WITNESS_FILE="$2"
+        --lifecycle-state-file)
+            # ENREGISTREMENT DE CYCLE DE VIE partagé avec le lanceur (audit
+            # GCP v6, P0-1, deuxième tour) : publié atomiquement (fsync
+            # fichier + parent, jamais d'écrasement à la création) juste
+            # avant la demande de start — sémantique CONSERVATIVE
+            # `start_may_have_been_requested` — puis mis à jour avec la
+            # génération dès qu'elle est connue, et par le trap interne :
+            # `targeted_stopping` / `targeted_stopped` / `targeted_stop_failed`
+            # / `targeted_running`. Un refus de préflight ne l'écrit jamais.
+            (($# >= 2)) || die "Valeur manquante après --lifecycle-state-file."
+            [[ -z "${LIFECYCLE_STATE_FILE:-}" ]] || die "--lifecycle-state-file ne peut être fourni qu'une fois."
+            LIFECYCLE_STATE_FILE="$2"
             shift 2
             ;;
         -h|--help)
@@ -388,6 +392,9 @@ capture_started_generation() {
     fi
     [[ "${observed_generation}" != "${PRE_START_LAST_START_TIMESTAMP}" ]] || return 1
     TARGET_LAST_START_TIMESTAMP="${observed_generation}"
+    # Génération apprise : gravée aussitôt dans l'enregistrement de cycle de
+    # vie (best effort — un échec de mise à jour laisse l'état conservatif).
+    publish_lifecycle_state "start_may_have_been_requested" 1 || true
 }
 
 instance_status() {
@@ -419,6 +426,7 @@ emergency_stop_on_exit() {
         fi
         printf '[URGENCE] Démarrage non certifié : tentative d’arrêt de la génération %s sur %s.\n' \
             "${TARGET_LAST_START_TIMESTAMP}" "${INSTANCE_NAME}" >&2
+        publish_lifecycle_state "targeted_stopping" 1 || true
         if GCP_PROJECT_ID="${PROJECT_ID}" \
             GCP_INSTANCE_NAME="${INSTANCE_NAME}" \
             GCP_ZONE="${ZONE}" \
@@ -429,6 +437,10 @@ emergency_stop_on_exit() {
             emergency_stop_status=$?
         fi
         if ((emergency_stop_status == 0)); then
+            # TERMINAL PARTAGÉ (audit GCP v6, deuxième tour) : l'arrêt interne
+            # certifié est gravé — le cleanup extérieur ne doit ni bloquer ni
+            # retenter un arrêt sur cette génération.
+            publish_lifecycle_state "targeted_stopped" 1 || true
             if [[ -n "${HANDOFF_FILE}" && -e "${HANDOFF_FILE}" ]]; then
                 rm -f -- "${HANDOFF_FILE}" || \
                     printf '[URGENCE] Arrêt certifié mais témoin impossible à retirer : %s\n' \
@@ -437,6 +449,7 @@ emergency_stop_on_exit() {
             printf '[URGENCE] Arrêt ciblé certifié pour la génération %s.\n' \
                 "${TARGET_LAST_START_TIMESTAMP}" >&2
         else
+            publish_lifecycle_state "targeted_stop_failed" 1 || true
             printf '[URGENCE] Arrêt non vérifié. Projet=%s zone=%s instance=%s. Contrôlez GCP immédiatement.\n' \
                 "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" >&2
             if [[ -n "${HANDOFF_FILE}" && -e "${HANDOFF_FILE}" ]]; then
@@ -445,6 +458,50 @@ emergency_stop_on_exit() {
             fi
         fi
     fi
+}
+
+# Enregistrement de cycle de vie : publication ATOMIQUE (chemin absolu non
+# symbolique, temporaire dans le même répertoire, fsync du fichier, rename,
+# fsync du parent) ; $2 = 0 refuse d'écraser (création initiale), 1 met à
+# jour. La génération courante (éventuellement vide) est toujours gravée.
+publish_lifecycle_state() {
+    local lifecycle_state="${1:?état requis}"
+    local allow_overwrite="${2:-1}"
+    [[ -n "${LIFECYCLE_STATE_FILE}" ]] || return 0
+    python3 - "${LIFECYCLE_STATE_FILE}" "${lifecycle_state}" "${PROJECT_ID}" "${ZONE}" \
+        "${INSTANCE_NAME}" "${TARGET_LAST_START_TIMESTAMP}" "${allow_overwrite}" <<'PY'
+import os
+import sys
+import tempfile
+from pathlib import Path
+
+path = Path(sys.argv[1])
+state, project, zone, instance, generation, allow = sys.argv[2:8]
+if not path.is_absolute() or path.is_symlink():
+    sys.exit(1)
+if allow == "0" and (path.exists() or path.is_symlink()):
+    sys.exit(1)
+data = ("schema=e-hgp.lifecycle-state.v1\n"
+        f"state={state}\n"
+        f"project={project}\n"
+        f"zone={zone}\n"
+        f"instance={instance}\n"
+        f"generation={generation}\n").encode()
+descriptor, temporary = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".partial", dir=str(path.parent))
+try:
+    offset = 0
+    while offset < len(data):
+        offset += os.write(descriptor, data[offset:])
+    os.fsync(descriptor)
+finally:
+    os.close(descriptor)
+os.replace(temporary, path)
+parent = os.open(str(path.parent), os.O_DIRECTORY)
+try:
+    os.fsync(parent)
+finally:
+    os.close(parent)
+PY
 }
 
 publish_targeted_handoff() {
@@ -589,14 +646,8 @@ fi
 
 START_REQUEST_EPOCH="$(date +%s)" || die "Impossible d'horodater la demande de démarrage."
 [[ "${START_REQUEST_EPOCH}" =~ ^[0-9]+$ ]] || die "Horodatage de démarrage invalide."
-if [[ -n "${MUTATION_WITNESS_FILE:-}" ]]; then
-    printf 'schema=e-hgp.start-mutation-witness.v1\nproject=%s\nzone=%s\ninstance=%s\ndate_utc=%s\n' \
-        "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-        > "${MUTATION_WITNESS_FILE}.partial"
-    sync "${MUTATION_WITNESS_FILE}.partial" 2>/dev/null || true
-    mv -- "${MUTATION_WITNESS_FILE}.partial" "${MUTATION_WITNESS_FILE}" \
-        || die "Impossible d'écrire le témoin de mutation ${MUTATION_WITNESS_FILE} ; démarrage refusé."
-fi
+publish_lifecycle_state "start_may_have_been_requested" 0 || \
+    die "Impossible de publier l'enregistrement de cycle de vie ${LIFECYCLE_STATE_FILE} ; démarrage refusé."
 start_attempted=1
 if ! gcloud_mutation compute instances start "${INSTANCE_NAME}" \
     --project="${PROJECT_ID}" \
@@ -671,6 +722,8 @@ done
     "La garde post-démarrage g4-standard-48/SPOT/TERMINATE/STOP n’a pas pu être certifiée : terminationTimestamp est resté absent."
 publish_targeted_handoff "targeted_running" || \
     die "La génération démarrée est certifiée mais son témoin ciblé n’a pas pu être publié."
+publish_lifecycle_state "targeted_running" 1 || \
+    die "La génération démarrée est certifiée mais l'enregistrement de cycle de vie n’a pas pu être mis à jour."
 
 printf '[GARDE-FOU INVITÉ] Armement de shutdown -P +%s via SSH.\n' "${GUEST_SHUTDOWN_MINUTES}"
 ssh_deadline=$((SECONDS + SSH_TIMEOUT_SECONDS))

@@ -156,8 +156,7 @@ PROFILE="${WORK}/profil_campagne.txt"
 {
   echo "profil=selftest_reduit_v1"
   echo "conf_specs=uniform:50000"
-  echo "bench_families=uniform eight_clusters"
-  echo "bench_n=32000"
+  echo "bench_specs=uniform:32000 eight_clusters:32000"
   echo "queue_families=terrain_stationnaire"
   echo "queue_n=64000"
   echo "queue_seeds=3 4"
@@ -169,7 +168,7 @@ run_runner() { # $1 = dossier out ; le reste = env supplementaire
     V5_BIN="${FAKE}/mhgp5" V6_BIN="${FAKE}/mhgp6" CONF_BIN="${FAKE}/mhgp6_conformity" \
     TIME_BIN="${FAKE}/gnutime" OUT_DIR="${out}" THREADS=8 RUN_TIMEOUT=60 \
     CONF_SPECS="uniform:50000" \
-    BENCH_FAMILIES="uniform eight_clusters" BENCH_N="32000" \
+    BENCH_SPECS="uniform:32000 eight_clusters:32000" \
     QUEUE_FAMILIES="terrain_stationnaire" QUEUE_N="64000" QUEUE_SEEDS="3 4" \
     "$@" \
     bash "${RUNNER}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST}" >/dev/null 2>&1
@@ -261,7 +260,7 @@ check_true "falsification refusee : scp_rc non nul" [ "${rc}" -eq 1 ]
 rc=0; run_validator "${OUT}" 0 0 "/nonexistent-profile" >/dev/null || rc=$?
 check_true "falsification refusee : profil absent" [ "${rc}" -eq 1 ]
 PROF2="${WORK}/profil_reduit.txt"
-sed 's/^bench_n=32000/bench_n=64000/' "${PROFILE}" > "${PROF2}"
+sed 's/^bench_specs=.*/bench_specs=uniform:64000 eight_clusters:64000/' "${PROFILE}" > "${PROF2}"
 rc=0; run_validator "${OUT}" 0 0 "${PROF2}" >/dev/null || rc=$?
 check_true "falsification refusee : plans != profil epingle (matrice reduite)" [ "${rc}" -eq 1 ]
 

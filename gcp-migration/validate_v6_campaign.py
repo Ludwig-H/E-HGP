@@ -110,17 +110,17 @@ def conf_sequence(params):
 
 def bench_sequence(params):
     seq, cfg = [], 0
-    for n in params["n_list"].split():
-        for fam in params["families"].split():
-            cfg += 1
-            order = ["v5", "v6", "v6", "v5"] if cfg % 2 == 1 else ["v6", "v5", "v5", "v6"]
-            reps = {"v5": 0, "v6": 0}
-            for pos, eng in enumerate(order, 1):
-                reps[eng] += 1
-                seq.append({"seq": str(len(seq) + 1),
-                            "name": f"bench_{fam}_n{n}_{eng}_r{reps[eng]}",
-                            "family": fam, "n": n, "engine": eng,
-                            "pos": str(pos), "repeat": str(reps[eng])})
+    for spec in params["specs"].split():
+        fam, n = spec.split(":", 1)
+        cfg += 1
+        order = ["v5", "v6", "v6", "v5"] if cfg % 2 == 1 else ["v6", "v5", "v5", "v6"]
+        reps = {"v5": 0, "v6": 0}
+        for pos, eng in enumerate(order, 1):
+            reps[eng] += 1
+            seq.append({"seq": str(len(seq) + 1),
+                        "name": f"bench_{fam}_n{n}_{eng}_r{reps[eng]}",
+                        "family": fam, "n": n, "engine": eng,
+                        "pos": str(pos), "repeat": str(reps[eng])})
     return seq
 
 
@@ -266,7 +266,7 @@ def main():
             if "=" in line:
                 k, v = line.split("=", 1)
                 profile[k] = v
-        for key in ("profil", "conf_specs", "bench_families", "bench_n",
+        for key in ("profil", "conf_specs", "bench_specs",
                     "queue_families", "queue_n", "queue_seeds", "threads"):
             if not profile.get(key, "").strip():
                 bad.append(f"profil de campagne : cle {key} absente")
@@ -285,7 +285,7 @@ def main():
     conf_params, conf_listed = read_plan(out, "conf_plan.txt", "conf_plan",
                                          ("specs", "threads"), bad, version="v2")
     bench_params, bench_listed = read_plan(out, "bench_plan.txt", "bench_plan",
-                                           ("families", "n_list", "threads"), bad)
+                                           ("specs", "threads"), bad, version="v2")
     queue_params, queue_listed = read_plan(out, "queue_plan.txt", "queue_plan",
                                            ("families", "n_list", "seeds", "threads"), bad)
     conf_runs = conf_sequence(conf_params) if conf_params else []
@@ -299,8 +299,7 @@ def main():
     if profile:
         for plan, params, checks in (
                 ("conf_plan.txt", conf_params, (("specs", "conf_specs"), ("threads", "threads"))),
-                ("bench_plan.txt", bench_params, (("families", "bench_families"), ("n_list", "bench_n"),
-                                                  ("threads", "threads"))),
+                ("bench_plan.txt", bench_params, (("specs", "bench_specs"), ("threads", "threads"))),
                 ("queue_plan.txt", queue_params, (("families", "queue_families"), ("n_list", "queue_n"),
                                                   ("seeds", "queue_seeds"), ("threads", "threads")))):
             if params is None:

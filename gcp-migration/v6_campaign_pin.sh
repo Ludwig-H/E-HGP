@@ -1,30 +1,37 @@
 #!/usr/bin/env bash
-# PIN DU PROTOCOLE de campagne v6 (P0-2 de l'audit GCP v6 du 31 aout) :
-# refuse un worktree qui differe de HEAD sur les CHEMINS NORMATIFS — les DEUX
-# moteurs (v6 mesure, v5 sujet differentiel et source de la reference de
-# conformite), le protocole (bootstrap, cycle de vie, runner, validateur, ce
-# script) ET LES TROIS GARDES GCP (set_max/start/stop : controles SPOT, STOP,
-# duree maximale, double coupe-circuit, arret cloture). Puis materialise TOUT
-# depuis le COMMIT : le bundle transfere a la VM et les copies epinglees
-# executees localement (gardes comprises, y compris dans le trap) — le
-# worktree n'intervient plus apres.
+# PIN DU PROTOCOLE de campagne v6 (P0-2 de l'audit GCP v6, deuxieme tour) :
+# le COMMIT est IMPOSE par l'appelant (l'etage 2 du bootstrap, deja
+# authentifie) — aucun `rev-parse HEAD` ici. Refuse un worktree qui differe
+# de ce commit sur les CHEMINS NORMATIFS — moteurs v5/v6 (hors audits/),
+# protocole (bootstrap, cycle de vie, pin, runner, validateur, profils
+# canoniques) ET les trois gardes GCP. Puis materialise TOUT depuis le
+# commit ; le manifeste est CANONIQUE : une ligne `sha256<TAB>taille<TAB>
+# chemin` par fichier dans l'ordre normatif, precedee du schema et du
+# commit — `protocol_manifest_sha256` est le SHA-256 de CE manifeste (les
+# frontieres de fichiers sont liees, contrairement a une concatenation nue).
 #
-# Usage : v6_campaign_pin.sh WORK_DIR
-# Produit : WORK_DIR/bundle.tgz, WORK_DIR/pinned/gcp-migration/* (protocole
-#           et gardes), WORK_DIR/pin_manifest.txt (SHA-256 individuels)
+# Usage : v6_campaign_pin.sh WORK_DIR SOURCE_COMMIT
+# Produit : WORK_DIR/bundle.tgz, WORK_DIR/pinned/gcp-migration/*,
+#           WORK_DIR/pin_manifest.txt (le manifeste canonique lui-meme)
 # Imprime : source_commit= / source_payload_sha256= / protocol_manifest_sha256=
-#           + une ligne sha256 par fichier du protocole.
+#           + une ligne pinned_sha256 par fichier.
 set -euo pipefail
 WORK="${1:?repertoire de travail requis}"
+SOURCE_COMMIT="${2:?commit impose requis (capture par le premier etage authentifie, une seule fois)}"
+git cat-file -e "${SOURCE_COMMIT}^{commit}" 2>/dev/null || {
+  echo "REFUS : commit impose inconnu (${SOURCE_COMMIT})" >&2
+  exit 2
+}
 
-# L'ORDRE de cette liste est NORMATIF : le manifeste est le digest de la
-# concatenation des versions git de ces fichiers, dans cet ordre exact.
+# L'ORDRE de cette liste est NORMATIF (manifeste canonique).
 PROTOCOL_FILES=(
   gcp-migration/session_campagne_v6_g4.sh
   gcp-migration/v6_session_lifecycle.sh
   gcp-migration/v6_campaign_pin.sh
   gcp-migration/v6_campaign_remote.sh
   gcp-migration/validate_v6_campaign.py
+  gcp-migration/profils/decision_v1.env
+  gcp-migration/profils/smoke_v1.env
   gcp-migration/set_max_run_duration_and_verify.sh
   gcp-migration/start_and_verify.sh
   gcp-migration/stop_and_verify.sh
@@ -40,13 +47,8 @@ PROTOCOL_PATHS=(
   ':(exclude)morsehgp3D_v5/audits'
   "${PROTOCOL_FILES[@]}"
 )
-SOURCE_COMMIT="$(git rev-parse HEAD)"
-git diff --quiet -- "${PROTOCOL_PATHS[@]}" || {
-  echo "REFUS : chemins normatifs modifies dans le worktree — committer d'abord" >&2
-  exit 2
-}
-git diff --cached --quiet -- "${PROTOCOL_PATHS[@]}" || {
-  echo "REFUS : chemins normatifs modifies dans l'index — committer d'abord" >&2
+git diff --quiet "${SOURCE_COMMIT}" -- "${PROTOCOL_PATHS[@]}" || {
+  echo "REFUS : chemins normatifs modifies dans le worktree par rapport au commit impose — committer d'abord" >&2
   exit 2
 }
 if [ -n "$(git ls-files --others --exclude-standard -- "${PROTOCOL_PATHS[@]}")" ]; then
@@ -62,28 +64,31 @@ git archive --format=tar.gz -o "${BUNDLE}" "${SOURCE_COMMIT}" \
   gcp-migration/validate_v6_campaign.py
 SOURCE_PAYLOAD_SHA256="$(sha256sum "${BUNDLE}" | awk '{print $1}')"
 
-# MATERIALISATION depuis le COMMIT de TOUT le protocole (gardes comprises) :
-# seules ces copies sont executees ensuite.
-mkdir -p "${WORK}/pinned/gcp-migration"
+# MATERIALISATION depuis le COMMIT de TOUT le protocole (gardes et profils
+# compris) : seules ces copies sont executees ensuite.
+mkdir -p "${WORK}/pinned/gcp-migration/profils"
 for f in "${PROTOCOL_FILES[@]}"; do
   git show "${SOURCE_COMMIT}:${f}" > "${WORK}/pinned/${f}"
   chmod +x "${WORK}/pinned/${f}"
 done
 
-# Manifeste ORDONNE : digest de la concatenation des versions git exactes,
-# plus les SHA-256 individuels (enregistres et imprimes).
-PROTOCOL_MANIFEST_SHA256="$(for f in "${PROTOCOL_FILES[@]}"; do
-  git show "${SOURCE_COMMIT}:${f}"
-done | sha256sum | awk '{print $1}')"
+# MANIFESTE CANONIQUE : schema + commit + une ligne par fichier (sha256,
+# taille en octets, chemin) dans l'ordre normatif ; le digest du protocole
+# est le SHA-256 de ce manifeste exact. Le cycle de vie le RECALCULE depuis
+# les copies materialisees avant toute execution.
 {
-  echo "source_commit=${SOURCE_COMMIT}"
-  echo "ordre_manifeste=${PROTOCOL_FILES[*]}"
+  echo "schema=e-hgp.protocol-manifest.v1"
+  echo "commit=${SOURCE_COMMIT}"
   for f in "${PROTOCOL_FILES[@]}"; do
-    printf 'sha256 %s %s\n' "$(sha256sum "${WORK}/pinned/${f}" | awk '{print $1}')" "${f}"
+    printf '%s\t%s\t%s\n' \
+      "$(sha256sum "${WORK}/pinned/${f}" | awk '{print $1}')" \
+      "$(wc -c < "${WORK}/pinned/${f}")" \
+      "${f}"
   done
 } > "${WORK}/pin_manifest.txt"
+PROTOCOL_MANIFEST_SHA256="$(sha256sum "${WORK}/pin_manifest.txt" | awk '{print $1}')"
 
 echo "source_commit=${SOURCE_COMMIT}"
 echo "source_payload_sha256=${SOURCE_PAYLOAD_SHA256}"
 echo "protocol_manifest_sha256=${PROTOCOL_MANIFEST_SHA256}"
-sed -n 's/^sha256 /pinned_sha256 /p' "${WORK}/pin_manifest.txt"
+awk -F'\t' '/\t/ {print "pinned_sha256 " $1 " " $3}' "${WORK}/pin_manifest.txt"

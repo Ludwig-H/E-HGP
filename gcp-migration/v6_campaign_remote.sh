@@ -48,8 +48,7 @@ RUN_TIMEOUT="${RUN_TIMEOUT:-2400}"
 TIME_BIN="${TIME_BIN:-/usr/bin/time}"
 THREADS="${THREADS:-$(nproc)}"
 CONF_SPECS="${CONF_SPECS:-uniform:32000 terrain:32000 eight_clusters:32000 scanline_single_pass:32000 uniform:50000 terrain:50000 eight_clusters:50000 scanline_single_pass:50000 uniform:100000 eight_clusters:100000 uniform:200000 eight_clusters:200000}"
-BENCH_FAMILIES="${BENCH_FAMILIES:-uniform terrain eight_clusters scanline_single_pass}"
-BENCH_N="${BENCH_N:-32000 100000 200000}"
+BENCH_SPECS="${BENCH_SPECS:-uniform:32000 terrain:32000 eight_clusters:32000 scanline_single_pass:32000 uniform:100000 eight_clusters:100000 uniform:200000 eight_clusters:200000}"
 QUEUE_FAMILIES="${QUEUE_FAMILIES:-terrain_stationnaire scanline_stationnaire}"
 QUEUE_N="${QUEUE_N:-64000 128000 256000}"
 QUEUE_SEEDS="${QUEUE_SEEDS:-3 4 5}"
@@ -62,26 +61,22 @@ test -x "${TIME_BIN}" || {
 
 # REFUS AVANT TOUT RUN d'un parametre mal forme.
 refuse() { echo "REFUS : parametre — $1" >&2; exit 2; }
-for v in ${BENCH_N} ${QUEUE_N} ${QUEUE_SEEDS} ${RUN_TIMEOUT}; do
+for v in ${QUEUE_N} ${QUEUE_SEEDS} ${RUN_TIMEOUT}; do
   [[ "${v}" =~ ^[1-9][0-9]*$ ]] || refuse "valeur '${v}' non entiere >= 1"
 done
 if [ -n "${DEADLINE_EPOCH}" ]; then
   [[ "${DEADLINE_EPOCH}" =~ ^[1-9][0-9]*$ ]] || refuse "echeance '${DEADLINE_EPOCH}' non entiere"
 fi
-for spec in ${CONF_SPECS}; do
-  [[ "${spec}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*$ ]] || refuse "paire de conformite '${spec}' mal formee (fam:n)"
+for spec in ${CONF_SPECS} ${BENCH_SPECS}; do
+  [[ "${spec}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*$ ]] || refuse "paire '${spec}' mal formee (fam:n)"
   case "${spec%%:*}" in uniform|terrain|eight_clusters|scanline_single_pass|scanline_overlap_multiecho) ;;
     *) refuse "famille partagee inconnue '${spec%%:*}'" ;; esac
-done
-for f in ${BENCH_FAMILIES}; do
-  case "${f}" in uniform|terrain|eight_clusters|scanline_single_pass|scanline_overlap_multiecho) ;;
-    *) refuse "famille partagee inconnue '${f}'" ;; esac
 done
 for f in ${QUEUE_FAMILIES}; do
   case "${f}" in terrain_stationnaire|scanline_stationnaire|uniform|terrain|eight_clusters|scanline_single_pass|scanline_overlap_multiecho) ;;
     *) refuse "famille v6 inconnue '${f}'" ;; esac
 done
-for axis in CONF_SPECS BENCH_FAMILIES BENCH_N QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS; do
+for axis in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS; do
   [ -n "${!axis// /}" ] || refuse "axe ${axis} vide"
   vals="$(printf '%s\n' ${!axis} | sort)"
   [ "$(printf '%s\n' "${vals}" | uniq -d | wc -l)" -eq 0 ] || refuse "axe ${axis} avec doublon"
@@ -157,22 +152,20 @@ mv "${OUT_DIR}/topologie.txt.tmp" "${OUT_DIR}/topologie.txt"
 mv "${OUT_DIR}/conf_plan.txt.tmp" "${OUT_DIR}/conf_plan.txt"
 
 {
-  echo "bench_plan=v1"
-  echo "families=$(printf '%s\n' ${BENCH_FAMILIES} | tr '\n' ' ' | sed 's/ $//')"
-  echo "n_list=$(printf '%s\n' ${BENCH_N} | tr '\n' ' ' | sed 's/ $//')"
+  echo "bench_plan=v2"
+  echo "specs=$(printf '%s\n' ${BENCH_SPECS} | tr '\n' ' ' | sed 's/ $//')"
   echo "threads=${THREADS}"
   echo "s=8 smax=11 seed=3"
   seq_no=0; cfg=0
-  for N in ${BENCH_N}; do
-    for fam in ${BENCH_FAMILIES}; do
-      cfg=$((cfg + 1))
-      if [ $((cfg % 2)) -eq 1 ]; then order="v5 v6 v6 v5"; else order="v6 v5 v5 v6"; fi
-      pos=0; r5=0; r6=0
-      for eng in ${order}; do
-        pos=$((pos + 1)); seq_no=$((seq_no + 1))
-        if [ "${eng}" = "v5" ]; then r5=$((r5 + 1)); r=${r5}; else r6=$((r6 + 1)); r=${r6}; fi
-        echo "seq=${seq_no} name=bench_${fam}_n${N}_${eng}_r${r} family=${fam} n=${N} engine=${eng} pos=${pos} repeat=${r}"
-      done
+  for spec in ${BENCH_SPECS}; do
+    fam="${spec%%:*}"; N="${spec##*:}"
+    cfg=$((cfg + 1))
+    if [ $((cfg % 2)) -eq 1 ]; then order="v5 v6 v6 v5"; else order="v6 v5 v5 v6"; fi
+    pos=0; r5=0; r6=0
+    for eng in ${order}; do
+      pos=$((pos + 1)); seq_no=$((seq_no + 1))
+      if [ "${eng}" = "v5" ]; then r5=$((r5 + 1)); r=${r5}; else r6=$((r6 + 1)); r=${r6}; fi
+      echo "seq=${seq_no} name=bench_${fam}_n${N}_${eng}_r${r} family=${fam} n=${N} engine=${eng} pos=${pos} repeat=${r}"
     done
   done
   echo "runs=${seq_no}"

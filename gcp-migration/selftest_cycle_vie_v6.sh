@@ -2,31 +2,38 @@
 # SELFTEST DU CYCLE DE VIE de la session G4 v6 — A LANCER A LA MAIN avant
 # toute session payante (jamais depuis la CI). Ne touche JAMAIS GCP : il
 # execute gcp-migration/v6_session_lifecycle.sh avec de FAUSSES GARDES
-# (set_max/start/stop) et un FAUX gcloud (PATH), et injecte un echec apres
-# chaque frontiere critique (P0-1 de l'audit GCP v6, point 6). Des qu'un
-# start est atteste (temoin de mutation), chaque scenario doit observer
-# EXACTEMENT UNE tentative d'arret ciblee (generation exacte) ou un BLOCAGE
-# explicite pour generation illisible ; un refus anterieur a la mutation ne
-# doit provoquer ni arret ni faux blocage.
+# (set_max/start/stop, enregistrement d'etat de cycle de vie compris) et un
+# FAUX gcloud (PATH), et injecte un echec apres chaque frontiere critique
+# (P0-1 de l'audit GCP v6, deux tours). Des qu'un start est atteste
+# (enregistrement d'etat), chaque scenario doit observer EXACTEMENT UNE
+# tentative d'arret ciblee (generation exacte), un BLOCAGE explicite pour
+# generation illisible, ou la reconnaissance d'un arret DEJA certifie par le
+# garde (jamais un second arret ni un faux blocage).
 #
-# Scenarios :
-#   0. budget : matrice trop large pour la fenetre => refus AVANT toute garde ;
-#   1. refus de preflight sans mutation (start rc=2, aucun temoin) =>
-#      propagation, 0 arret, 0 blocage ;
-#   2. mutation commencee SANS handoff (temoin ecrit, start rc=3) =>
-#      BLOCAGE explicite (exit 71, commande de controle), 0 arret aveugle ;
-#   3. start certifie mais handoff corrompu => BLOCAGE (exit 71), 0 arret ;
-#   4. echeance inderivable (timestamp non parsable) => UN arret cible avec
-#      la generation exacte ;
+# Scenarios (cycle de vie, fausses gardes) :
+#   0. budget : matrice trop large => refus AVANT toute garde ;
+#   1. refus de preflight sans mutation => propagation, 0 arret, 0 blocage ;
+#   2. mutation attestee SANS generation (etat start_may_have_been_requested,
+#      pas de handoff) => BLOCAGE exit 71, commande de controle, 0 arret ;
+#   3. handoff corrompu mais generation dans l'ETAT (targeted_running) =>
+#      UN arret cible sur la generation exacte (plus jamais un faux blocage) ;
+#   4. echeance inderivable (timestamp non parsable) => UN arret cible ;
 #   5. echec du build SSH => UN arret cible ;
-#   6. campagne SSH en echec + JOURNAL VERROUILLE (chmod 444 pendant la
-#      campagne) => le cleanup survit a la panne de journal, UN arret cible ;
-#   7. nominal mecanique (toutes etapes passent, validateur reel sur un out
-#      vide => rc=65) => UN arret cible, exit 65 ;
+#   6. campagne en echec + JOURNAL VERROUILLE => cleanup survit, UN arret ;
+#   7. nominal mecanique => exit 65 (validateur reel sur out vide), UN arret
+#      en DERNIER appel, recu durable publie (RECU_SESSION.txt + SHA256SUMS) ;
 #   8. arret en echec (stop rc=9) => exit 70, ARRET NON CERTIFIE ;
-#   9. P0-2 : une garde alteree dans un clone => v6_campaign_pin.sh refuse
-#      (code 2) avant toute mutation, pour CHACUNE des trois gardes, le
-#      cycle de vie, le runner, le validateur et le lanceur.
+#   9. ARRET DEJA CERTIFIE PAR LE GARDE (etat targeted_stopped) => 0 arret,
+#      0 blocage, propagation, message « arret deja certifie » (contre-
+#      scenario du deuxieme tour) ;
+#  10. TTL OS Login par defaut : la cle demandee tient dans la fenetre du
+#      preflight du garde (MAX_RUN_SECONDS + 660 s).
+# Scenarios bootstrap + pin (clone jetable, worktree jamais touche) :
+#  11. pin altere dans le worktree du clone + garde alteree : l'etage 1
+#      materialise le pin DU COMMIT, qui refuse (le pin altere qui
+#      neutraliserait son propre controle n'est JAMAIS execute) ;
+#  12. bootstrap altere dans le worktree : l'etage 1 refuse (identite) ;
+#  13. chaque fichier du protocole altere => le pin refuse (code 2).
 # Code de sortie : 0 conforme, 1 au moins un scenario en echec.
 set -euo pipefail
 
@@ -49,9 +56,13 @@ check() {
 check_true() { local name="$1"; shift; if "$@"; then check "${name}" 0; else check "${name}" 1; fi; }
 
 FAKE_GEN="2026-08-31T14:00:00Z"
+PROTOCOL_FILES=(session_campagne_v6_g4.sh v6_session_lifecycle.sh v6_campaign_pin.sh
+                v6_campaign_remote.sh validate_v6_campaign.py profils/decision_v1.env
+                profils/smoke_v1.env set_max_run_duration_and_verify.sh
+                start_and_verify.sh stop_and_verify.sh)
 
-# ---- Faux gcloud (PATH) : describe rend la generation, ssh/scp pilotes par
-# FAKE_SSH_MODE, tout le reste rend 0. Compte ses appels ssh dans CALLS.
+# ---- Faux gcloud (PATH) : describe rend la generation ; ssh n1 = handshake
+# boot_id seul, n2 = build (portes), n3 = campagne ; scp materialise out/.
 make_fake_bin() { # $1 = dossier
   cat > "$1/gcloud" <<'EOF'
 #!/usr/bin/env bash
@@ -61,14 +72,15 @@ case "$*" in
   *"compute ssh"*)
     n=$(grep -c "compute ssh" "${FAKE_CALLS}" || true)
     if [ "${n}" -le 1 ]; then
-      # premier SSH = build + portes
+      echo "aaaabbbb-cccc-dddd-eeee-ffff00001111"
+      exit 0
+    fi
+    if [ "${n}" -eq 2 ]; then
       if [ "${FAKE_SSH_MODE:-ok}" = "build_fail" ]; then echo "build casse" >&2; exit 1; fi
-      echo "boot_id=aaaa-bbbb-cccc"
       echo "100% tests passed, 0 tests failed out of 45"
       echo "100% tests passed, 0 tests failed out of 60"
       exit 0
     fi
-    # second SSH = campagne
     if [ "${FAKE_SSH_MODE:-ok}" = "campagne_fail_et_journal_verrouille" ]; then
       chmod 444 "${FAKE_LOG_A_VERROUILLER}" 2>/dev/null || true
       echo "campagne cassee" >&2
@@ -78,7 +90,6 @@ case "$*" in
     exit 0
     ;;
   *"compute scp"*)
-    # rapatriement : materialise un out/ vide (le validateur reel refusera).
     mkdir -p "${FAKE_SCP_DEST}/out"
     exit 0
     ;;
@@ -88,8 +99,8 @@ EOF
   chmod +x "$1/gcloud"
 }
 
-# ---- Fausses gardes : chaque appel est journalise ; start pilote par
-# FAKE_START_MODE ; stop rend FAKE_STOP_RC.
+# ---- Fausses gardes : start pilote par FAKE_START_MODE et ecrit le fichier
+# --lifecycle-state-file comme le vrai garde ; stop rend FAKE_STOP_RC.
 make_fake_guards() { # $1 = dossier
   cat > "$1/set_max_run_duration_and_verify.sh" <<'EOF'
 #!/usr/bin/env bash
@@ -99,25 +110,29 @@ EOF
   cat > "$1/start_and_verify.sh" <<'EOF'
 #!/usr/bin/env bash
 echo "START $*" >> "${FAKE_CALLS}"
-handoff=""; witness=""
+handoff=""; state=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --handoff-file) handoff="$2"; shift 2 ;;
-    --mutation-witness-file) witness="$2"; shift 2 ;;
+    --lifecycle-state-file) state="$2"; shift 2 ;;
     *) shift ;;
   esac
 done
-write_witness() { printf 'schema=e-hgp.start-mutation-witness.v1\n' > "${witness}"; }
+write_state() { # $1 = etat, $2 = generation
+  printf 'schema=e-hgp.lifecycle-state.v1\nstate=%s\nproject=%s\nzone=%s\ninstance=%s\ngeneration=%s\n' \
+    "$1" "${GCP_PROJECT_ID}" "${GCP_ZONE}" "${GCP_INSTANCE_NAME}" "$2" > "${state}"
+}
 write_handoff() { # $1 = last_start_timestamp
   printf '{"guest_shutdown_minutes":470,"instance":"%s","last_start_timestamp":"%s","project":"%s","schema":"e-hgp.start-handoff.v3","status":"targeted_running","zone":"%s"}\n' \
     "${GCP_INSTANCE_NAME}" "$1" "${GCP_PROJECT_ID}" "${GCP_ZONE}" > "${handoff}"
 }
 case "${FAKE_START_MODE:-ok}" in
   refus_preflight) exit 2 ;;
-  mutation_sans_handoff) write_witness; exit 3 ;;
-  ok_handoff_corrompu) write_witness; echo "pas du json" > "${handoff}"; exit 0 ;;
-  ok_bad_timestamp) write_witness; write_handoff "pas-une-date"; exit 0 ;;
-  ok) write_witness; write_handoff "${FAKE_GEN}"; exit 0 ;;
+  mutation_sans_generation) write_state start_may_have_been_requested ""; exit 3 ;;
+  ok_handoff_corrompu) write_state targeted_running "${FAKE_GEN}"; echo "pas du json" > "${handoff}"; exit 0 ;;
+  ok_bad_timestamp) write_state targeted_running "pas-une-date"; write_handoff "pas-une-date"; exit 0 ;;
+  stopped_by_guard) write_state targeted_stopped "${FAKE_GEN}"; exit 5 ;;
+  ok) write_state targeted_running "${FAKE_GEN}"; write_handoff "${FAKE_GEN}"; exit 0 ;;
 esac
 EOF
   cat > "$1/stop_and_verify.sh" <<'EOF'
@@ -128,23 +143,37 @@ EOF
   chmod +x "$1"/*.sh
 }
 
-# ---- Un scenario : prepare WORK (pinned + bundle + gardes fausses), lance
-# le cycle de vie, rend son rc ; CALLS et LOG restent inspectables.
-# run_scenario START_MODE [SSH_MODE] [STOP_RC] [MAX_RUN] — arguments
-# explicites : aucune fuite d'environnement entre scenarios.
+# ---- Un scenario : pinned/ complet (les DIX fichiers du protocole, copies
+# du worktree) + manifeste canonique recalcule, gardes FAUSSES dans un
+# dossier separe, recu durable dans le scenario.
+# run_scenario START_MODE [SSH_MODE] [STOP_RC] [MAX_RUN]
 SCENARIO_DIR=""
 run_scenario() {
   local start_mode="$1" ssh_mode="${2:-ok}" stop_rc="${3:-0}" max_run="${4:-28800}"
   SCENARIO_DIR="$(mktemp -d "${BASE}/scenario.XXXXXX")"
   local W="${SCENARIO_DIR}/work"
-  mkdir -p "${W}/pinned/gcp-migration" "${SCENARIO_DIR}/bin" "${SCENARIO_DIR}/guards"
+  mkdir -p "${W}/pinned/gcp-migration/profils" "${SCENARIO_DIR}/bin" "${SCENARIO_DIR}/guards" \
+           "${SCENARIO_DIR}/recu"
   make_fake_bin "${SCENARIO_DIR}/bin"
   make_fake_guards "${SCENARIO_DIR}/guards"
-  cp "${HERE}/v6_campaign_remote.sh" "${W}/pinned/gcp-migration/"
-  cp "${HERE}/validate_v6_campaign.py" "${W}/pinned/gcp-migration/"
+  for f in "${PROTOCOL_FILES[@]}"; do
+    cp "${HERE}/${f}" "${W}/pinned/gcp-migration/${f}"
+  done
   echo "bundle factice" > "${W}/bundle.tgz"
-  local payload_sha
+  local payload_sha commit="0000000000000000000000000000000000000000"
   payload_sha="$(sha256sum "${W}/bundle.tgz" | awk '{print $1}')"
+  {
+    echo "schema=e-hgp.protocol-manifest.v1"
+    echo "commit=${commit}"
+    for f in "${PROTOCOL_FILES[@]}"; do
+      printf '%s\t%s\t%s\n' \
+        "$(sha256sum "${W}/pinned/gcp-migration/${f}" | awk '{print $1}')" \
+        "$(wc -c < "${W}/pinned/gcp-migration/${f}")" \
+        "gcp-migration/${f}"
+    done
+  } > "${SCENARIO_DIR}/manifest.txt"
+  local manifest_sha
+  manifest_sha="$(sha256sum "${SCENARIO_DIR}/manifest.txt" | awk '{print $1}')"
   export FAKE_CALLS="${SCENARIO_DIR}/calls.log"
   : > "${FAKE_CALLS}"
   export FAKE_GEN FAKE_SCP_DEST="${W}" FAKE_LOG_A_VERROUILLER="${W}/session.log"
@@ -152,18 +181,19 @@ run_scenario() {
   env PATH="${SCENARIO_DIR}/bin:${PATH}" \
     FAKE_START_MODE="${start_mode}" FAKE_SSH_MODE="${ssh_mode}" FAKE_STOP_RC="${stop_rc}" \
     MAX_RUN_SECONDS="${max_run}" \
+    DURABLE_RECEIPT_DIR="${SCENARIO_DIR}/recu" \
     MHGP6_LIFECYCLE_WORK="${W}" \
     MHGP6_LIFECYCLE_GUARDS_DIR="${SCENARIO_DIR}/guards" \
-    MHGP6_LIFECYCLE_SOURCE_COMMIT="0000000000000000000000000000000000000000" \
+    MHGP6_LIFECYCLE_SOURCE_COMMIT="${commit}" \
     MHGP6_LIFECYCLE_PAYLOAD_SHA256="${payload_sha}" \
-    MHGP6_LIFECYCLE_MANIFEST_SHA256="1111111111111111111111111111111111111111111111111111111111111111" \
+    MHGP6_LIFECYCLE_MANIFEST_SHA256="${manifest_sha}" \
     GCP_PROJECT_ID=projet-factice GCP_ZONE=zone-factice GCP_INSTANCE_NAME=instance-factice \
     bash "${LIFECYCLE}" > "${SCENARIO_DIR}/stdout.log" 2> "${SCENARIO_DIR}/stderr.log" || rc=$?
   return "${rc}"
 }
 
-# ---- 0. Budget : matrice trop large => refus AVANT toute garde (le seul
-# appel gcloud autorise est `config set project`, en lecture de config).
+# ---- 0. Budget : matrice trop large => refus AVANT toute garde (seul un
+# `gcloud config set project` en configuration PRIVEE a pu se produire).
 rc=0; run_scenario ok ok 0 3600 || rc=$?
 check_true "budget : refus rc=2 avant toute garde" \
   bash -c "[ '${rc}' -eq 2 ] && ! grep -qE '^(SETMAX|START|STOP) ' '${FAKE_CALLS}'"
@@ -173,18 +203,20 @@ rc=0; run_scenario refus_preflight || rc=$?
 check_true "refus preflight : propagation rc=2, aucun arret, aucun blocage" \
   bash -c "[ '${rc}' -eq 2 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 0 ] && ! grep -q BLOCAGE '${SCENARIO_DIR}/stderr.log'"
 
-# ---- 2. Mutation commencee sans handoff : BLOCAGE explicite, 0 arret.
-rc=0; run_scenario mutation_sans_handoff || rc=$?
-check_true "mutation sans handoff : blocage exit 71, commande de controle, aucun arret" \
+# ---- 2. Mutation attestee sans generation : BLOCAGE explicite, 0 arret.
+rc=0; run_scenario mutation_sans_generation || rc=$?
+check_true "mutation sans generation : blocage exit 71, commande de controle, aucun arret" \
   bash -c "[ '${rc}' -eq 71 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 0 ] \
     && grep -q 'BLOCAGE' '${SCENARIO_DIR}/stderr.log' \
     && grep -q 'instances describe instance-factice' '${SCENARIO_DIR}/stderr.log'"
 
-# ---- 3. Handoff corrompu apres start certifie : BLOCAGE, 0 arret.
+# ---- 3. Handoff corrompu, generation dans l'ETAT : UN arret cible (plus
+# jamais un faux blocage — l'enregistrement partage porte la generation).
 rc=0; run_scenario ok_handoff_corrompu || rc=$?
-check_true "handoff corrompu : blocage exit 71, aucun arret aveugle" \
-  bash -c "[ '${rc}' -eq 71 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 0 ] \
-    && grep -q 'BLOCAGE' '${SCENARIO_DIR}/stderr.log'"
+check_true "handoff corrompu : un arret cible via l'etat partage, aucun blocage" \
+  bash -c "[ '${rc}' -eq 72 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ] \
+    && grep -q -- '--expected-last-start-timestamp ${FAKE_GEN}' '${FAKE_CALLS}' \
+    && ! grep -q 'BLOCAGE' '${SCENARIO_DIR}/stderr.log'"
 
 # ---- 4. Echeance inderivable : UN arret cible avec la generation exacte.
 rc=0; run_scenario ok_bad_timestamp || rc=$?
@@ -204,49 +236,82 @@ check_true "journal verrouille pendant la campagne : un arret cible malgre la pa
   bash -c "[ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ] \
     && grep -q -- '--expected-last-start-timestamp ${FAKE_GEN}' '${FAKE_CALLS}'"
 
-# ---- 7. Nominal mecanique : validateur reel sur out vide => 65, UN arret.
+# ---- 7. Nominal mecanique : exit 65, UN arret en dernier, recu durable.
 rc=0; run_scenario ok || rc=$?
 check_true "nominal mecanique : exit 65 (validateur), un arret cible, ordre des etapes" \
   bash -c "[ '${rc}' -eq 65 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ] \
     && grep -q '^SETMAX ' '${FAKE_CALLS}' && grep -q '^START ' '${FAKE_CALLS}' \
     && [ \"\$(grep -n '^STOP ' '${FAKE_CALLS}' | tail -1 | cut -d: -f1)\" -eq \"\$(wc -l < '${FAKE_CALLS}')\" ]"
+check_true "nominal mecanique : recu durable publie (RECU_SESSION.txt + SHA256SUMS + profil)" \
+  bash -c "[ -s '${SCENARIO_DIR}/recu/RECU_SESSION.txt' ] && [ -s '${SCENARIO_DIR}/recu/SHA256SUMS' ] \
+    && grep -q 'profil_campagne.txt' '${SCENARIO_DIR}/recu/SHA256SUMS' \
+    && grep -q '^profil=decision_v1' '${SCENARIO_DIR}/recu/RECU_SESSION.txt'"
+# TTL OS Login par defaut : dans la fenetre du preflight (scenario 10).
+check_true "TTL OS Login par defaut dans la fenetre du preflight" \
+  bash -c "ttl=\$(grep -oE 'ttl=[0-9]+m' '${FAKE_CALLS}' | head -1 | grep -oE '[0-9]+'); \
+    [ -n \"\${ttl}\" ] && [ \$((ttl * 60)) -le \$((28800 + 660)) ]"
 
 # ---- 8. Arret en echec : exit 70, ARRET NON CERTIFIE.
 rc=0; run_scenario ok build_fail 9 || rc=$?
 check_true "arret en echec : exit 70 et ARRET NON CERTIFIE" \
   bash -c "[ '${rc}' -eq 70 ] && grep -q 'ARRET NON CERTIFIE' '${SCENARIO_DIR}/stderr.log'"
 
-# ---- 9. P0-2 : alteration de chaque fichier du protocole => le pin refuse
-# (code 2) avant toute mutation. Clone local partage (aucun reseau, le
-# worktree reel n'est JAMAIS touche) ; les versions COURANTES du protocole y
-# sont synchronisees depuis le worktree et committees DANS LE CLONE JETABLE
-# (le selftest doit pouvoir prouver le refus avant que le protocole ne soit
-# committe sur main).
+# ---- 9. Arret deja certifie par le garde : 0 arret, 0 blocage, propagation.
+rc=0; run_scenario stopped_by_guard || rc=$?
+check_true "arret deja certifie par le garde : aucun second arret, aucun blocage" \
+  bash -c "[ '${rc}' -eq 5 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 0 ] \
+    && ! grep -q 'BLOCAGE' '${SCENARIO_DIR}/stderr.log' \
+    && grep -q 'arret deja certifie par le garde' '${SCENARIO_DIR}/stdout.log'"
+
+# ---- Scenarios bootstrap + pin : clone jetable, versions COURANTES du
+# protocole synchronisees et committees DANS LE CLONE (commit conditionnel :
+# sur un HEAD deja identique, rien a committer n'est PAS un echec — defaut
+# du premier tour corrige).
 CLONE="${BASE}/clone"
 git clone --quiet --shared --no-hardlinks "${ROOT}" "${CLONE}" 2>/dev/null
-for f in session_campagne_v6_g4.sh v6_session_lifecycle.sh v6_campaign_pin.sh \
-         v6_campaign_remote.sh validate_v6_campaign.py \
-         set_max_run_duration_and_verify.sh start_and_verify.sh stop_and_verify.sh; do
+mkdir -p "${CLONE}/gcp-migration/profils"
+for f in "${PROTOCOL_FILES[@]}"; do
   cp "${HERE}/${f}" "${CLONE}/gcp-migration/${f}"
 done
-( cd "${CLONE}" \
-  && git -c user.name=selftest -c user.email=selftest@local add -- \
-       gcp-migration/session_campagne_v6_g4.sh gcp-migration/v6_session_lifecycle.sh \
-       gcp-migration/v6_campaign_pin.sh gcp-migration/v6_campaign_remote.sh \
-       gcp-migration/validate_v6_campaign.py gcp-migration/set_max_run_duration_and_verify.sh \
-       gcp-migration/start_and_verify.sh gcp-migration/stop_and_verify.sh \
-  && git -c user.name=selftest -c user.email=selftest@local commit --quiet -m "selftest : protocole courant" )
-# Sanite : le pin du clone DOIT accepter l'etat propre avant les alterations.
+(
+  cd "${CLONE}"
+  git -c user.name=selftest -c user.email=selftest@local add -A -- gcp-migration/ >/dev/null
+  git diff --cached --quiet || \
+    git -c user.name=selftest -c user.email=selftest@local commit --quiet -m "selftest : protocole courant"
+)
+CLONE_COMMIT="$(cd "${CLONE}" && git rev-parse HEAD)"
 rc=0
-( cd "${CLONE}" && ./gcp-migration/v6_campaign_pin.sh "$(mktemp -d "${BASE}/pin.XXXXXX")" ) >/dev/null 2>&1 || rc=$?
+( cd "${CLONE}" && ./gcp-migration/v6_campaign_pin.sh "$(mktemp -d "${BASE}/pin.XXXXXX")" "${CLONE_COMMIT}" ) \
+  >/dev/null 2>&1 || rc=$?
 check_true "pin du clone propre : accepte (prealable des refus)" [ "${rc}" -eq 0 ]
-for f in set_max_run_duration_and_verify.sh start_and_verify.sh stop_and_verify.sh \
-         v6_session_lifecycle.sh v6_campaign_remote.sh validate_v6_campaign.py \
-         session_campagne_v6_g4.sh; do
-  ( cd "${CLONE}" && echo "# alteration" >> "gcp-migration/${f}" )
+
+# 11. Pin altere qui neutraliserait son controle + garde alteree : l'etage 1
+# du bootstrap materialise le pin DU COMMIT — le pin altere n'est jamais
+# execute, et le pin honnete refuse la garde alteree.
+sed -i 's/^git diff --quiet/: git diff --quiet/' "${CLONE}/gcp-migration/v6_campaign_pin.sh"
+echo "# garde alteree" >> "${CLONE}/gcp-migration/start_and_verify.sh"
+rc=0
+( cd "${CLONE}" && bash gcp-migration/session_campagne_v6_g4.sh ) >/dev/null 2>"${BASE}/boot11.err" || rc=$?
+check_true "pin altere neutralisant + garde alteree : refus par le pin DU COMMIT (rc=2)" \
+  bash -c "[ '${rc}' -eq 2 ] && grep -q 'REFUS' '${BASE}/boot11.err'"
+( cd "${CLONE}" && git checkout --quiet -- gcp-migration/v6_campaign_pin.sh gcp-migration/start_and_verify.sh )
+
+# 12. Bootstrap altere dans le worktree : l'etage 1 refuse (identite contre
+# la copie materialisee du commit).
+echo "# bootstrap altere" >> "${CLONE}/gcp-migration/session_campagne_v6_g4.sh"
+rc=0
+( cd "${CLONE}" && bash gcp-migration/session_campagne_v6_g4.sh ) >/dev/null 2>"${BASE}/boot12.err" || rc=$?
+check_true "bootstrap altere : refus d'identite de l'etage 1 (rc=2)" \
+  bash -c "[ '${rc}' -eq 2 ] && grep -q 'differe de la version du commit' '${BASE}/boot12.err'"
+( cd "${CLONE}" && git checkout --quiet -- gcp-migration/session_campagne_v6_g4.sh )
+
+# 13. Chaque fichier du protocole altere => le pin refuse (code 2).
+for f in "${PROTOCOL_FILES[@]}"; do
+  echo "# alteration" >> "${CLONE}/gcp-migration/${f}"
   rc=0
-  ( cd "${CLONE}" && ./gcp-migration/v6_campaign_pin.sh "$(mktemp -d "${BASE}/pin.XXXXXX")" ) >/dev/null 2>&1 || rc=$?
-  check_true "pin refuse la garde/le script altere : ${f}" [ "${rc}" -eq 2 ]
+  ( cd "${CLONE}" && ./gcp-migration/v6_campaign_pin.sh "$(mktemp -d "${BASE}/pin.XXXXXX")" "${CLONE_COMMIT}" ) \
+    >/dev/null 2>&1 || rc=$?
+  check_true "pin refuse le fichier altere : ${f}" [ "${rc}" -eq 2 ]
   ( cd "${CLONE}" && git checkout --quiet -- "gcp-migration/${f}" )
 done
 
@@ -254,4 +319,4 @@ if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest cycle de vie v6 : ${FAILURES} echec(s)" >&2
   exit 1
 fi
-echo "selftest cycle de vie v6 : arret cible prouve sur chaque sortie apres demarrage (10 scenarios + 7 refus de pin)"
+echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (12 scenarios + 10 refus de pin, rejouable depuis un HEAD propre)"

@@ -42,6 +42,40 @@ done
 echo "${SOURCE_PAYLOAD_SHA256}  ${BUNDLE}" | sha256sum -c - >/dev/null \
   || { echo "REFUS : bundle epingle au mauvais sha256" >&2; exit 2; }
 
+# REVALIDATION DU MANIFESTE CANONIQUE avant toute execution (audit GCP v6,
+# deuxieme tour) : le manifeste est RECONSTRUIT depuis les copies
+# materialisees (schema + commit + une ligne sha256/taille/chemin par
+# fichier, ordre normatif identique au pin) et son SHA-256 doit EGALER le
+# digest transmis par la chaine authentifiee du bootstrap.
+PROTOCOL_FILES=(
+  gcp-migration/session_campagne_v6_g4.sh
+  gcp-migration/v6_session_lifecycle.sh
+  gcp-migration/v6_campaign_pin.sh
+  gcp-migration/v6_campaign_remote.sh
+  gcp-migration/validate_v6_campaign.py
+  gcp-migration/profils/decision_v1.env
+  gcp-migration/profils/smoke_v1.env
+  gcp-migration/set_max_run_duration_and_verify.sh
+  gcp-migration/start_and_verify.sh
+  gcp-migration/stop_and_verify.sh
+)
+{
+  echo "schema=e-hgp.protocol-manifest.v1"
+  echo "commit=${SOURCE_COMMIT}"
+  for f in "${PROTOCOL_FILES[@]}"; do
+    [ -f "${WORK}/pinned/${f}" ] || { echo "REFUS : copie epinglee absente (${f})" >&2; exit 2; }
+    printf '%s\t%s\t%s\n' \
+      "$(sha256sum "${WORK}/pinned/${f}" | awk '{print $1}')" \
+      "$(wc -c < "${WORK}/pinned/${f}")" \
+      "${f}"
+  done
+} > "${WORK}/manifest_revalide.txt"
+REVALIDATED="$(sha256sum "${WORK}/manifest_revalide.txt" | awk '{print $1}')"
+if [ "${REVALIDATED}" != "${PROTOCOL_MANIFEST_SHA256}" ]; then
+  echo "REFUS : manifeste revalide (${REVALIDATED}) != digest du protocole (${PROTOCOL_MANIFEST_SHA256})" >&2
+  exit 2
+fi
+
 export GCP_PROJECT_ID="${GCP_PROJECT_ID:-devpod-gpu-exploration}"
 export GCP_ZONE="${GCP_ZONE:-europe-west4-a}"
 export GCP_INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}"
@@ -56,26 +90,47 @@ V5_GATE_MIN="${V5_GATE_MIN:-40}"
 V6_GATE_MIN="${V6_GATE_MIN:-60}"
 DURABLE_RECEIPT_DIR="${DURABLE_RECEIPT_DIR:-}"
 
-# Parametres de campagne : valides AVANT toute interpolation SSH (P1 :
-# aucune apostrophe ni caractere hors alphabet sur).
-CONF_SPECS="${CONF_SPECS:-uniform:32000 terrain:32000 eight_clusters:32000 scanline_single_pass:32000 uniform:50000 terrain:50000 eight_clusters:50000 scanline_single_pass:50000 uniform:100000 eight_clusters:100000 uniform:200000 eight_clusters:200000}"
-BENCH_FAMILIES="${BENCH_FAMILIES:-uniform terrain eight_clusters scanline_single_pass}"
-BENCH_N="${BENCH_N:-32000 100000 200000}"
-QUEUE_FAMILIES="${QUEUE_FAMILIES:-terrain_stationnaire scanline_stationnaire}"
-QUEUE_N="${QUEUE_N:-64000 128000 256000}"
-QUEUE_SEEDS="${QUEUE_SEEDS:-3 4 5}"
-RUN_TIMEOUT="${RUN_TIMEOUT:-2400}"
+# PROFIL CANONIQUE (audit deuxieme tour : le fichier d'autorite est
+# versionne et hashe, jamais fabrique par l'environnement). CAMPAIGN_PROFILE
+# nomme un profil epingle (decision_v1 par defaut, smoke_v1 pour la fumee) ;
+# TOUTE surcharge d'un axe par l'environnement degrade le profil effectif en
+# `custom` — un validateur ne peut alors jamais l'appeler decision.
+CAMPAIGN_PROFILE="${CAMPAIGN_PROFILE:-decision_v1}"
+[[ "${CAMPAIGN_PROFILE}" =~ ^[a-z0-9_]+$ ]] || { echo "REFUS : nom de profil mal forme" >&2; exit 2; }
+PROFILE_SRC="${WORK}/pinned/gcp-migration/profils/${CAMPAIGN_PROFILE}.env"
+[ -f "${PROFILE_SRC}" ] || { echo "REFUS : profil canonique inconnu (${CAMPAIGN_PROFILE})" >&2; exit 2; }
+_ov_CONF_SPECS="${CONF_SPECS:-}"; _ov_BENCH_SPECS="${BENCH_SPECS:-}"
+_ov_QUEUE_FAMILIES="${QUEUE_FAMILIES:-}"; _ov_QUEUE_N="${QUEUE_N:-}"
+_ov_QUEUE_SEEDS="${QUEUE_SEEDS:-}"; _ov_RUN_TIMEOUT="${RUN_TIMEOUT:-}"
+# shellcheck disable=SC1090
+source "${PROFILE_SRC}"
+EFFECTIVE_PROFILE="${CAMPAIGN_PROFILE}"
+for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT; do
+  ov="_ov_${v}"
+  if [ -n "${!ov}" ] && [ "${!ov}" != "${!v}" ]; then
+    EFFECTIVE_PROFILE="custom"
+    printf -v "${v}" '%s' "${!ov}"
+  fi
+done
 THREADS_VM="${THREADS_VM:-48}"
 _param_re='^[A-Za-z0-9_: -]*$'
-for v in CONF_SPECS BENCH_FAMILIES BENCH_N QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM; do
+for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM; do
   [[ "${!v}" =~ ${_param_re} ]] || { echo "REFUS : parametre ${v} avec caractere hors alphabet sur" >&2; exit 2; }
 done
+echo "profil canonique : ${CAMPAIGN_PROFILE} ($(sha256sum "${PROFILE_SRC}" | awk '{print $1}')) — profil effectif : ${EFFECTIVE_PROFILE}"
 
 HANDOFF="${WORK}/handoff.json"
-WITNESS="${WORK}/temoin_mutation"
+STATE_FILE="${WORK}/etat_cycle_vie"
 LOG="${WORK}/session.log"
 PROFILE="${WORK}/profil_campagne.txt"
 : > "${LOG}"
+DURABLE_RECEIPT_DIR="${DURABLE_RECEIPT_DIR:?DURABLE_RECEIPT_DIR requis (recu durable obligatoire, audit deuxieme tour)}"
+
+# Lecture de l'enregistrement de cycle de vie partage avec le garde.
+state_field() { # $1 = cle ; vide si fichier absent
+  [ -s "${STATE_FILE}" ] || return 0
+  sed -n "s/^$1=//p" "${STATE_FILE}" 2>/dev/null | head -1
+}
 
 log() { printf '%s\n' "$*" | tee -a "${LOG}"; }
 log_safe() { { printf '%s\n' "$*" >> "${LOG}"; } 2>/dev/null || true; }
@@ -104,23 +159,27 @@ PY
 GENERATION=""
 SESSION_RC=0
 STOP_ATTEMPTED=0
-finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc — best effort, jamais bloquant
-  [ -n "${DURABLE_RECEIPT_DIR}" ] || return 0
+finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu COMPLET est publie
   {
-    mkdir -p "${DURABLE_RECEIPT_DIR}"
+    mkdir -p "${DURABLE_RECEIPT_DIR}" &&
     {
-      printf 'schema=e-hgp.v6-session-receipt.v1\nissue=%s\nrc=%s\nstop_rc=%s\n' "$1" "$3" "${2:-na}"
+      printf 'schema=e-hgp.v6-session-receipt.v2\nissue=%s\nrc=%s\nstop_rc=%s\n' "$1" "$3" "${2:-na}"
+      printf 'profil=%s profil_canonique=%s\n' "${EFFECTIVE_PROFILE:-inconnu}" "${CAMPAIGN_PROFILE:-inconnu}"
       printf 'generation=%s\nprojet=%s zone=%s instance=%s\n' "${GENERATION:-inconnue}" \
         "${GCP_PROJECT_ID}" "${GCP_ZONE}" "${GCP_INSTANCE_NAME}"
       printf 'source_commit=%s\nsource_payload_sha256=%s\nprotocol_manifest_sha256=%s\n' \
         "${SOURCE_COMMIT}" "${SOURCE_PAYLOAD_SHA256}" "${PROTOCOL_MANIFEST_SHA256}"
       printf 'max_run_seconds=%s guest_shutdown_minutes=%s\n' "${MAX_RUN_SECONDS}" "${GUEST_SHUTDOWN_MINUTES}"
+      printf 'etat_cycle_vie=%s\n' "$(state_field state)"
       printf 'date_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-    } > "${DURABLE_RECEIPT_DIR}/RECU_SESSION.txt"
-    cp -f "${LOG}" "${DURABLE_RECEIPT_DIR}/session.log" 2>/dev/null || true
-    cp -f "${PROFILE}" "${DURABLE_RECEIPT_DIR}/profil_campagne.txt" 2>/dev/null || true
-    ( cd "${DURABLE_RECEIPT_DIR}" && sha256sum RECU_SESSION.txt session.log 2>/dev/null > SHA256SUMS ) || true
-  } 2>/dev/null || true
+    } > "${DURABLE_RECEIPT_DIR}/RECU_SESSION.txt" &&
+    cp -f "${LOG}" "${DURABLE_RECEIPT_DIR}/session.log" &&
+    { [ ! -f "${PROFILE}" ] || cp -f "${PROFILE}" "${DURABLE_RECEIPT_DIR}/profil_campagne.txt"; } &&
+    { [ ! -f "${WORK}/out/bench_resume.txt" ] || cp -f "${WORK}/out/bench_resume.txt" "${DURABLE_RECEIPT_DIR}/"; } &&
+    { [ ! -f "${WORK}/out/queue_resume.txt" ] || cp -f "${WORK}/out/queue_resume.txt" "${DURABLE_RECEIPT_DIR}/"; } &&
+    { [ ! -f "${WORK}/manifest_revalide.txt" ] || cp -f "${WORK}/manifest_revalide.txt" "${DURABLE_RECEIPT_DIR}/"; } &&
+    ( cd "${DURABLE_RECEIPT_DIR}" && sha256sum -- * > SHA256SUMS.tmp && mv SHA256SUMS.tmp SHA256SUMS )
+  } 2>/dev/null
 }
 cleanup() {
   local rc=$?
@@ -128,26 +187,52 @@ cleanup() {
   set +e
   if [ "${SESSION_RC}" -ne 0 ]; then rc="${SESSION_RC}"; fi
   log_safe "--- arret certifie (rc=${rc}) ---"
+  local lc_state
+  lc_state="$(state_field state)"
+  local lc_gen
+  lc_gen="$(state_field generation)"
+  if [ -z "${GENERATION}" ] && [ -n "${lc_gen}" ]; then GENERATION="${lc_gen}"; fi
   if [ -z "${GENERATION}" ] && [ -s "${HANDOFF}" ]; then
     GENERATION="$(parse_handoff 2>/dev/null)" || GENERATION=""
   fi
-  if [ ! -e "${WITNESS}" ]; then
+  local receipt_rc=0
+  if [ -z "${lc_state}" ]; then
     # Aucun start GCE atteste : refus avant mutation — ni arret ni blocage.
-    log_safe "aucun temoin de mutation : refus avant demarrage, aucun arret a certifier"
-    finalize_receipt refus_avant_mutation "" "${rc}"
+    log_safe "aucun enregistrement de cycle de vie : refus avant demarrage, aucun arret a certifier"
+    finalize_receipt refus_avant_mutation "" "${rc}" || receipt_rc=66
+    if [ "${receipt_rc}" -ne 0 ]; then
+      echo "[RECU NON PUBLIE] le recu durable n'a pas pu etre ecrit (${DURABLE_RECEIPT_DIR})" >&2
+      exit 66
+    fi
+    exit "${rc}"
+  fi
+  # TERMINAL PARTAGE : le garde a deja certifie l'arret cible de cette
+  # generation — ni second arret, ni faux blocage (audit deuxieme tour).
+  if [ "${lc_state}" = "targeted_stopped" ] && [ -n "${GENERATION}" ] \
+     && [ "$(state_field project)" = "${GCP_PROJECT_ID}" ] \
+     && [ "$(state_field zone)" = "${GCP_ZONE}" ] \
+     && [ "$(state_field instance)" = "${GCP_INSTANCE_NAME}" ]; then
+    log_safe "arret deja certifie par le garde (generation ${GENERATION}) : aucun second arret"
+    echo "arret deja certifie par le garde (generation ${GENERATION})"
+    finalize_receipt arret_certifie_par_le_garde 0 "${rc}" || {
+      echo "[RECU NON PUBLIE] le recu durable n'a pas pu etre ecrit (${DURABLE_RECEIPT_DIR})" >&2
+      exit 66
+    }
     exit "${rc}"
   fi
   if [ -z "${GENERATION}" ]; then
     {
-      echo "[BLOCAGE] mutation de demarrage ATTESTEE mais generation illisible — passage de relais requis."
+      echo "[BLOCAGE] mutation de demarrage ATTESTEE (etat ${lc_state}) mais generation illisible — passage de relais requis."
       echo "[BLOCAGE] projet=${GCP_PROJECT_ID} zone=${GCP_ZONE} instance=${GCP_INSTANCE_NAME}"
-      echo "[BLOCAGE] dernier etat certifie avant mutation : TERMINATED ; temoin : ${WITNESS}"
+      echo "[BLOCAGE] dernier etat certifie avant mutation : TERMINATED ; enregistrement : ${STATE_FILE}"
       echo "[BLOCAGE] controle : gcloud compute instances describe ${GCP_INSTANCE_NAME} --project=${GCP_PROJECT_ID} --zone=${GCP_ZONE} --format='value(status,lastStartTimestamp)'"
     } >&2
-    finalize_receipt blocage_generation_illisible "" 71
+    finalize_receipt blocage_generation_illisible "" 71 || true
     exit 71
   fi
-  # UNE tentative d'arret ciblee, insensible aux pannes de journal.
+  # UNE tentative d'arret ciblee (deliberement retentee si l'arret interne du
+  # garde a echoue : etat targeted_stop_failed), insensible aux pannes de
+  # journal.
   local so="${LOG}"
   ( : >> "${so}" ) 2>/dev/null || so="$(mktemp 2>/dev/null || echo /dev/stderr)"
   STOP_ATTEMPTED=1
@@ -157,10 +242,14 @@ cleanup() {
   log_safe "stop_and_verify (generation ${GENERATION}) : rc=${stop_rc}"
   echo "journal complet : ${LOG}"
   echo "resultats rapatries : ${WORK}/out (si l'etape scp a ete atteinte)"
-  finalize_receipt arret_tente "${stop_rc}" "${rc}"
+  finalize_receipt arret_tente "${stop_rc}" "${rc}" || receipt_rc=66
   if [ "${stop_rc}" -ne 0 ]; then
     echo "[ARRET NON CERTIFIE] stop_and_verify a rendu ${stop_rc} — echec bloquant" >&2
     exit 70
+  fi
+  if [ "${receipt_rc}" -ne 0 ]; then
+    echo "[RECU NON PUBLIE] arret certifie mais recu durable manquant (${DURABLE_RECEIPT_DIR})" >&2
+    exit 66
   fi
   exit "${rc}"
 }
@@ -169,15 +258,26 @@ trap 'exit 129' HUP
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
+# CONFIGURATION GCLOUD PRIVEE a la session (audit deuxieme tour : aucune
+# mutation de la configuration partagee) — copie de la configuration
+# existante (credentials compris) dans le WORK, puis toute commande gcloud
+# de cette session n'ecrit que dans cette copie ; --project/--zone restent
+# explicites sur chaque commande.
+if [ -z "${CLOUDSDK_CONFIG:-}" ] && [ -d "${HOME}/.config/gcloud" ]; then
+  cp -r "${HOME}/.config/gcloud" "${WORK}/gcloud-config"
+  export CLOUDSDK_CONFIG="${WORK}/gcloud-config"
+fi
 gcloud config set project "${GCP_PROJECT_ID}" >/dev/null
 
 # ---- PROFIL DE CAMPAGNE EPINGLE AVANT TOUTE MUTATION (P1 : la matrice est
-# fixee independamment des sorties que le validateur jugera).
+# fixee independamment des sorties que le validateur jugera ; le nom
+# effectif degrade en `custom` des qu'un axe canonique est surcharge).
 {
-  echo "profil=decision_v1"
+  echo "profil=${EFFECTIVE_PROFILE}"
+  echo "profil_canonique=${CAMPAIGN_PROFILE}"
+  echo "profil_canonique_sha256=$(sha256sum "${PROFILE_SRC}" | awk '{print $1}')"
   echo "conf_specs=${CONF_SPECS}"
-  echo "bench_families=${BENCH_FAMILIES}"
-  echo "bench_n=${BENCH_N}"
+  echo "bench_specs=${BENCH_SPECS}"
   echo "queue_families=${QUEUE_FAMILIES}"
   echo "queue_n=${QUEUE_N}"
   echo "queue_seeds=${QUEUE_SEEDS}"
@@ -190,24 +290,25 @@ log "profil de campagne epingle : $(sha256sum "${PROFILE}" | awk '{print $1}')"
 # jamais ajustees apres mesure. Refus AVANT toute mutation si l'estimation
 # depasse la fenetre utile.
 budget_estimate() {
-  python3 - "${CONF_SPECS}" "${BENCH_FAMILIES}" "${BENCH_N}" "${QUEUE_FAMILIES}" "${QUEUE_N}" "${QUEUE_SEEDS}" <<'PY'
+  python3 - "${CONF_SPECS}" "${BENCH_SPECS}" "${QUEUE_FAMILIES}" "${QUEUE_N}" "${QUEUE_SEEDS}" <<'PY'
 import sys
 conf = sys.argv[1].split()
-bench_f, bench_n = sys.argv[2].split(), sys.argv[3].split()
-queue_f, queue_n, queue_s = sys.argv[4].split(), sys.argv[5].split(), sys.argv[6].split()
+bench = sys.argv[2].split()
+queue_f, queue_n, queue_s = sys.argv[3].split(), sys.argv[4].split(), sys.argv[5].split()
 # secondes par run, VM 48 fils, DECLARE AVANT MESURE (recus v5 G4 a 200k
 # ~260s x marge 1,5-2 ; jamais ajuste apres coup) :
-conf_ref = {32000: 60, 50000: 100, 100000: 200, 200000: 450}
-bench = {32000: 80, 100000: 220, 200000: 480}
-queue = {64000: 150, 128000: 350, 256000: 800}
+conf_ref = {8000: 30, 32000: 60, 50000: 100, 100000: 200, 200000: 450}
+bench_ref = {8000: 40, 32000: 80, 100000: 220, 200000: 480}
+queue_ref = {16000: 60, 64000: 150, 128000: 350, 256000: 800}
 total = 0
 for spec in conf:
     n = int(spec.split(":")[1])
     total += 2 * conf_ref.get(n, 900)  # reference v5 + juge v6
-for n in bench_n:
-    total += 4 * len(bench_f) * bench.get(int(n), 900)
+for spec in bench:
+    n = int(spec.split(":")[1])
+    total += 4 * bench_ref.get(n, 900)  # ABBA : quatre runs par paire
 for n in queue_n:
-    total += len(queue_f) * len(queue_s) * queue.get(int(n), 1800)
+    total += len(queue_f) * len(queue_s) * queue_ref.get(int(n), 1800)
 print(total)
 PY
 }
@@ -231,7 +332,15 @@ chmod 700 "${GCP_SSH_KEY_DIR}"
 export GCP_SSH_KEY_FILE="${GCP_SSH_KEY_DIR}/id_ed25519"
 ssh-keygen -q -t ed25519 -N '' -C 'e-hgp-v6-session' -f "${GCP_SSH_KEY_FILE}"
 chmod 600 "${GCP_SSH_KEY_FILE}"
-SSH_TTL_MIN=$((MAX_RUN_SECONDS / 60 + 20))
+# TTL OS Login DANS la fenetre acceptee par le preflight du garde (audit
+# deuxieme tour : le garde refuse une duree restante > MAX_RUN_SECONDS +
+# 660 s ; +600 s laisse 60 s de marge). Garde arithmetique locale : un TTL
+# hors fenetre est refuse ICI, avant toute mutation.
+SSH_TTL_MIN=$(((MAX_RUN_SECONDS + 600) / 60))
+if [ $((SSH_TTL_MIN * 60)) -gt $((MAX_RUN_SECONDS + 660)) ]; then
+  echo "REFUS : TTL OS Login (${SSH_TTL_MIN} min) hors de la fenetre du preflight (MAX_RUN_SECONDS + 660 s)" >&2
+  exit 2
+fi
 GCP_SSH_KEY_EXPIRATION_UTC="$(python3 -c "from datetime import datetime,timedelta,timezone; print((datetime.now(timezone.utc)+timedelta(minutes=${SSH_TTL_MIN})).isoformat(timespec='seconds').replace('+00:00','Z'))")"
 export GCP_SSH_KEY_EXPIRATION_UTC
 gcloud compute os-login ssh-keys add --key-file="${GCP_SSH_KEY_FILE}.pub" --ttl="${SSH_TTL_MIN}m" \
@@ -245,7 +354,7 @@ set +e
 "${GUARDS_DIR}/start_and_verify.sh" --yes \
   --guest-shutdown-minutes "${GUEST_SHUTDOWN_MINUTES}" \
   --handoff-file "${HANDOFF}" \
-  --mutation-witness-file "${WITNESS}" 2>&1 | tee -a "${LOG}"
+  --lifecycle-state-file "${STATE_FILE}" 2>&1 | tee -a "${LOG}"
 START_RC=${PIPESTATUS[0]}
 set -e
 if [ "${START_RC}" -ne 0 ]; then
@@ -291,17 +400,29 @@ REMOTE_TAG="${SOURCE_COMMIT:0:12}_${GEN_EPOCH}"
 REMOTE_DIR="v6camp_${REMOTE_TAG}"
 REMOTE_BUNDLE="/tmp/v6bundle_${REMOTE_TAG}.tgz"
 
-# ---- 4. Envoi du BUNDLE pinne.
+# ---- 4a. HANDSHAKE NON MUTANT (audit deuxieme tour) : un premier SSH qui
+# ne fait QUE lire boot_id, encadre par DEUX controles de generation ; toute
+# commande distante ulterieure REVERIFIE ce boot_id avant de muter quoi que
+# ce soit sur la VM.
+BOOT_ID="$(timeout "${SCP_STEP_TIMEOUT_S}" "${SSH[@]}" 'cat /proc/sys/kernel/random/boot_id' 2>>"${LOG}")" \
+  || { log "REFUS : handshake boot_id impossible"; SESSION_RC=75; exit 75; }
+[[ "${BOOT_ID}" =~ ^[0-9a-f-]{36}$ ]] || { log "REFUS : boot_id mal forme (${BOOT_ID})"; SESSION_RC=75; exit 75; }
+check_generation || { log "REFUS : generation changee pendant le handshake"; SESSION_RC=74; exit 74; }
+log "handshake : boot_id=${BOOT_ID} generation confirmee"
+
+# ---- 4b. Envoi du BUNDLE pinne (lecture seule cote VM), encadre par deux
+# controles de generation.
 timeout "${SCP_STEP_TIMEOUT_S}" "${SCP[@]}" "${BUNDLE}" \
   "${GCP_INSTANCE_NAME}:${REMOTE_BUNDLE}" 2>&1 | tee -a "${LOG}"
+check_generation || { log "REFUS : generation changee apres l'envoi du bundle"; SESSION_RC=74; exit 74; }
 
 # ---- 5. Build v5 + v6, preconditions, REJEU des portes avec JOURNAL COMPLET
-# et planchers (P1 : jamais un tail -4). Le boot_id est capture et reverifie
-# par la campagne (handshake).
+# et planchers (P1 : jamais un tail -4). Le boot_id du handshake est
+# REVERIFIE dans la meme commande distante avant toute mutation.
 BUILD_LOG="${WORK}/build_vm.log"
 timeout "${SSH_STEP_TIMEOUT_S}" "${SSH[@]}" 'set -euo pipefail
+  test "$(cat /proc/sys/kernel/random/boot_id)" = '"'${BOOT_ID}'"' || { echo "REFUS : boot_id different (redemarrage detecte)" >&2; exit 9; }
   export PATH=$HOME/.local/bin:$PATH
-  echo "boot_id=$(cat /proc/sys/kernel/random/boot_id)"
   test -x /usr/bin/time || { echo "REFUS : GNU time absent de la VM" >&2; exit 2; }
   python3 -m pip install --user --quiet --upgrade cmake >/dev/null 2>&1 || true
   export PATH=$HOME/.local/bin:$PATH
@@ -317,8 +438,6 @@ timeout "${SSH_STEP_TIMEOUT_S}" "${SSH[@]}" 'set -euo pipefail
   ctest --test-dir build-v6 -L gate -j24 --output-on-failure
 ' > "${BUILD_LOG}" 2>&1 || { SESSION_RC=$?; log "build/portes VM en echec (rc=${SESSION_RC}, journal ${BUILD_LOG})"; exit "${SESSION_RC}"; }
 cat "${BUILD_LOG}" >> "${LOG}"
-BOOT_ID="$(sed -n 's/^boot_id=//p' "${BUILD_LOG}" | head -1)"
-[ -n "${BOOT_ID}" ] || { log "REFUS : boot_id absent du journal de build"; SESSION_RC=75; exit 75; }
 # Planchers de portes : DEUX blocs 100%, totaux >= planchers (P1).
 mapfile -t GATE_TOTALS < <(grep -oE '100% tests passed, 0 tests failed out of [0-9]+' "${BUILD_LOG}" | grep -oE '[0-9]+$')
 if [ "${#GATE_TOTALS[@]}" -ne 2 ] || [ "${GATE_TOTALS[0]}" -lt "${V5_GATE_MIN}" ] || [ "${GATE_TOTALS[1]}" -lt "${V6_GATE_MIN}" ]; then
@@ -341,7 +460,7 @@ timeout "${CAMPAIGN_TIMEOUT}" "${SSH[@]}" "set -euo pipefail
   cd ~/${REMOTE_DIR}
   THREADS=${THREADS_VM} DEADLINE_EPOCH=${DEADLINE_EPOCH} RUN_TIMEOUT='${RUN_TIMEOUT}' \
     CONF_SPECS='${CONF_SPECS}' \
-    BENCH_FAMILIES='${BENCH_FAMILIES}' BENCH_N='${BENCH_N}' \
+    BENCH_SPECS='${BENCH_SPECS}' \
     QUEUE_FAMILIES='${QUEUE_FAMILIES}' QUEUE_N='${QUEUE_N}' QUEUE_SEEDS='${QUEUE_SEEDS}' \
     bash gcp-migration/v6_campaign_remote.sh ${SOURCE_COMMIT} ${SOURCE_PAYLOAD_SHA256} ${PROTOCOL_MANIFEST_SHA256}
 " 2>&1 | tee -a "${LOG}"
@@ -360,7 +479,13 @@ for attempt in 1 2 3; do
   rc=${PIPESTATUS[0]}
   set -e
   if [ "${rc}" -eq 0 ]; then
-    SCP_RC=0
+    # Controle de generation APRES le rapatriement reussi (audit deuxieme
+    # tour : chaque SCP encadre avant ET apres).
+    if check_generation; then
+      SCP_RC=0
+    else
+      log "generation changee APRES le rapatriement (tentative ${attempt}) : resultat non attribuable"
+    fi
     break
   fi
   log "scp tentative ${attempt} echouee (rc=${rc})"
