@@ -112,7 +112,7 @@ inline bool ball_depth_at_least(const CloudIndex& ix, const BallKey& k, u64 h, u
 enum class CensusStatus { kOk, kInteriorOverflow, kShellOverflow };
 
 inline CensusStatus ball_census(const CloudIndex& ix, const BallKey& k, size_t interior_cap, size_t shell_cap,
-                                std::vector<i32>* interior, std::vector<i32>* shell) {
+                                std::vector<i32>* interior, std::vector<i32>* shell, DepthStats* st = nullptr) {
   interior->clear();
   shell->clear();
   if (ix.unique_count() == 0) return CensusStatus::kOk;
@@ -122,10 +122,12 @@ inline CensusStatus ball_census(const CloudIndex& ix, const BallKey& k, size_t i
   while (!stack.empty()) {
     const NodeRef z = stack.back();
     stack.pop_back();
+    if (st) ++st->nodes;
     i128 mn, mx;
     ab.bounds(ix.box_of(z), &mn, &mx);
     if (mn > 0) continue;  // strict : mn == 0 descend (coquilles a voir)
     if (is_leaf(z)) {
+      if (st) ++st->leaf_tests;
       const i32 u = leaf_index(z);
       const i128 pw = k.power(ix.upos[(size_t)u]);
       if (pw < 0 || (nonstrict && pw == 0)) {

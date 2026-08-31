@@ -100,9 +100,10 @@ echo "famille=\${fam} n=\${n} coord=200 s=8 smax=11 seed=\${seed} threads=\${thr
 echo "generation rect_alive=\${base}/\${base}/\${base} rect_visites_fusionnes=\${base} ancres=\${base}/\${base}/\${base} candidats=\${base}/\${base}/\${base}"
 if [ "${eng}" = "v6" ]; then
   echo "sweep tests_coeur=\${base} tests_prof_q3=\${base} tests_passe2=\${base} tri_comparaisons=\${base} seeds_passe2=\${base} racines_corde=\${base} groupes=\${base} racines_hors_corde=\${base} temoins_constants=1 rejets=lens:1/owner:1/once:1/i64:1/face:1/det:0/centre:1"
-  echo "vwspd nœuds_temoins=\${base} coins=\${base} h_rect=1/1/1 m_anchor=1/1/\${base} iters_coeur=\${base} iters_passe2=\${base}"
+  echo "vwspd nœuds_temoins=\${base} coins=\${base} h_rect=1/1/\${base} h_scan=0/1/\${base} m_anchor=1/1/\${base} entrees_ancres=0/1/\${base} iters_coeur=\${base} iters_passe2=\${base}"
   echo "octaves_q4 ancres=\${base},0,0,0 seeds=\${base},0,0,0 w1=\${base},0,0,0 (octave = log2 de la taille du cover de l'ancre)"
-  echo "vcensus nœuds=\${base} feuilles=1 range_add=1"
+  echo "octaves_q4_seeds cellules=0,0,0,0 coeur=0,0,0,0 corde=0,0,0,0 passe2=\${base},0,0,0"
+  echo "vcensus prefiltre_nœuds=\${base} prefiltre_feuilles=0 range_add=1 census_nœuds=\${base} census_feuilles=1"
   echo "p_factor=1/1/\${base} (evaluations d'auto-produits des histogrammes)"
   echo "ledger_paires emis=1/1/1 tues=1/1/1"
 fi

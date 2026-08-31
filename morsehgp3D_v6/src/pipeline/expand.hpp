@@ -56,7 +56,13 @@ struct ExpandStats {
   u64 unique_balls = 0, dead_depth = 0, survivors = 0, census_interior = 0, census_shell = 0;
   std::vector<u64> events_by_k;  // indexee par K, dimensionnee kmax + 1
   u64 workers_prefilter = 0, workers_census = 0, workers_expand = 0;
+  // V_census — DEUX composantes declarees (audit du 31 aout : « ce compteur
+  // n'est pas prefiltre + census ») : `depth` = traversees de
+  // `ball_depth_at_least` (prefiltre count-only : nœuds, tests de feuille,
+  // masse de range-add) ; `census` = traversees de `ball_census` (passe 2 :
+  // nœuds, tests de puissance en feuille ; range_add_mass = 0 par nature).
   DepthStats depth;
+  DepthStats census;
 };
 
 enum class PipelineStatus { kCompleteRegular, kUnsupportedDegeneracy, kResourceExhausted, kInvalidInput, kInvariantViolated };
@@ -134,11 +140,13 @@ inline PipelineStatus census_balls(const CloudIndex& ix, const std::vector<BallC
   size_t nchunks = 0;
   std::vector<std::vector<BallData>> lb;
   std::vector<int> lrc;
+  std::vector<DepthStats> lcs;
   {
     size_t dummy = 0;
     expand_detail::chunked(survivors.size(), threads, &dummy, [&](size_t, size_t, size_t) {});
     lb.assign(dummy, {});
     lrc.assign(dummy, 0);
+    lcs.assign(dummy, {});
   }
   if (shell_cap > kBallShellMax) return PipelineStatus::kInvalidInput;  // garde du profil (run.hpp la refuse en amont)
   const size_t created = expand_detail::chunked(survivors.size(), threads, &nchunks, [&](size_t c, size_t b, size_t e) {
@@ -154,7 +162,7 @@ inline PipelineStatus census_balls(const CloudIndex& ix, const std::vector<BallC
         lb[c].push_back(bd);
         continue;
       }
-      const CensusStatus cs = ball_census(ix, bc.key, (size_t)(smax - bc.arity), shell_cap, &in, &sh);
+      const CensusStatus cs = ball_census(ix, bc.key, (size_t)(smax - bc.arity), shell_cap, &in, &sh, &lcs[c]);
       if (cs == CensusStatus::kShellOverflow) { lrc[c] = 2; return; }
       if (cs == CensusStatus::kInteriorOverflow || in.size() != (size_t)sv.depth) { lrc[c] = 3; return; }
       if (in.size() > kBallInteriorMax || sh.size() > kBallShellMax) { lrc[c] = 3; return; }  // inatteignable : bornes du profil
@@ -166,6 +174,10 @@ inline PipelineStatus census_balls(const CloudIndex& ix, const std::vector<BallC
     }
   });
   st->workers_census = std::max(st->workers_census, (u64)created);
+  for (size_t c = 0; c < nchunks; ++c) {
+    st->census.nodes += lcs[c].nodes;
+    st->census.leaf_tests += lcs[c].leaf_tests;
+  }
   for (size_t c = 0; c < nchunks; ++c)
     if (lrc[c] != 0) return lrc[c] == 2 ? PipelineStatus::kResourceExhausted : PipelineStatus::kInvariantViolated;
   balls->clear();

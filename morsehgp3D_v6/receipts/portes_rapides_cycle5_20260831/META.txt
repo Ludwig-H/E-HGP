@@ -1,0 +1,10 @@
+recu=rejeu complet des portes rapides (-L gate) apres les correctifs du cinquieme cycle
+pin=le commit de livraison qui contient ce recu (code et recu joints, meme commit)
+resultat=100% tests passed, 0 tests failed out of 60 (59 anterieures + mhgp6_juge_refus_k_en_trop)
+sortie_brute=ctest_gate.txt (exigence du cinquieme cycle : plus de claim 59/59 sans recu brut)
+4bbb257cd31413f2c1058ee7b873f2ffe84158e3ce299a76d1230e6ab3053359  build/v6/mhgp6
+3900cb0a7cfaea940321b61043adabbaf84b3a4c3165a05324cce7ca9a798e94  build/v6/mhgp6_selftest
+45d4a29965a68e3ee7f0227b0a4615e71ad8e3640070cba99165a2268344c40e  build/v6/mhgp6_conformity
+toolchain=g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+date_utc=2026-08-31T13:11:25Z
+machine=codespace 8 vCPU partages, campagne locale concurrente (les portes sont des codes de sortie et des compteurs deterministes, pas des temps)

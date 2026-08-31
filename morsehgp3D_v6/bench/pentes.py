@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 """Pentes sécantes locales par terme du grand-livre (doctrine REGIMES.md § 4).
 
-FAIL-CLOSED (audit du 31 août, deuxième recette) : la matrice exacte
-familles × tailles × graines vient du META ; STATUS.txt et le contenu du
-dossier de sorties doivent correspondre EXACTEMENT à cette matrice (aucun
-tuple ni fichier supplémentaire, aucun manquant) ; l'identité de chaque
-sortie est recoupée (famille, n, seed, s, smax, threads, présence des
-digests) ; chaque compteur est exigé dans chaque sortie (absence = échec,
-zéro légitime = pente indéfinie affichée `-`) ; TOUTE la validation précède
-le premier octet de table sur stdout (les tables sont bufferisées).
+FAIL-CLOSED (audits du 31 août, deuxième recette puis cinquième cycle) : la
+matrice exacte familles × tailles × graines vient du META (familles sans
+doublon, entiers stricts, échec propre sans traceback) ; STATUS.txt et le
+contenu du dossier de sorties doivent correspondre EXACTEMENT à cette matrice
+(aucun tuple ni fichier supplémentaire — quelle que soit son extension —,
+aucun manquant) ; l'identité de chaque sortie est recoupée (famille, n, seed,
+s, smax, threads, digest_all unique et hexadécimal) ; chaque compteur est
+exigé dans chaque sortie et doit y apparaître EXACTEMENT une fois (absence ou
+doublon = échec, zéro légitime = pente indéfinie affichée `-`) ; les vecteurs
+d'octaves de la sonde q4 sont parsés et leurs IDENTITÉS FERMANTES vérifiées
+(Σ ancres == entrées_ancres_q4, Σ w1 == tests_cœur, Σ seeds == seeds_q4, et
+par octave seeds == cellules + cœur + corde + passe2) ; TOUTE la validation
+précède le premier octet de table sur stdout (les tables sont bufferisées).
 Les temps ne sont jamais lus : compteurs déterministes seulement.
 """
 
@@ -30,20 +35,25 @@ PATTERNS = [
     ("vwspd_noeuds", r"vwspd nœuds_temoins=(\d+)"),
     ("vwspd_coins", r"coins=(\d+) h_rect"),
     ("h_rect_q3", r"h_rect=\d+/(\d+)/\d+"),
-    ("h_rect_q4", r"h_rect=\d+/\d+/(\d+)"),
+    ("h_rect_q4", r"h_rect=\d+/\d+/(\d+) h_scan"),
+    ("h_scan_q3", r"h_scan=\d+/(\d+)/\d+"),
+    ("h_scan_q4", r"h_scan=\d+/\d+/(\d+) m_anchor"),
     ("m_anchor_q3", r"m_anchor=\d+/(\d+)/\d+"),
-    ("m_anchor_q4", r"m_anchor=\d+/\d+/(\d+)"),
+    ("m_anchor_q4", r"m_anchor=\d+/\d+/(\d+) entrees_ancres"),
+    ("entrees_ancres_q3", r"entrees_ancres=\d+/(\d+)/\d+"),
+    ("entrees_ancres_q4", r"entrees_ancres=\d+/\d+/(\d+) iters_coeur"),
     ("iters_coeur", r"iters_coeur=(\d+)"),
     ("iters_passe2", r"iters_passe2=(\d+)"),
     ("rect_alive_q2", r"rect_alive=(\d+)/\d+/\d+"),
     ("rect_alive_q3", r"rect_alive=\d+/(\d+)/\d+"),
     ("rect_alive_q4", r"rect_alive=\d+/\d+/(\d+)"),
-    ("ancres_q3", r"ancres=\d+/(\d+)/\d+"),
-    ("ancres_q4", r"ancres=\d+/\d+/(\d+)"),
+    ("ancres_q3", r" ancres=\d+/(\d+)/\d+"),
+    ("ancres_q4", r" ancres=\d+/\d+/(\d+)"),
     ("hist_survivants_q3", r"hist_survivants=\d+/(\d+)/\d+"),
     ("hist_survivants_q4", r"hist_survivants=\d+/\d+/(\d+)"),
     ("seeds_q3", r"seeds=(\d+)/\d+ "),
     ("seeds_q4", r"seeds=\d+/(\d+) "),
+    ("seeds_cellules_q4", r"seeds_cellules=\d+/(\d+)"),
     ("seeds_core_tues", r"seeds_core_tues=(\d+)"),
     ("seeds_corde_tues", r"seeds_corde_tues=(\d+)"),
     ("W_sweep1_evals_coeur", r"tests_coeur=(\d+)"),
@@ -53,7 +63,10 @@ PATTERNS = [
     ("P_factor_q2", r"p_factor=(\d+)/\d+/\d+"),
     ("P_factor_q3", r"p_factor=\d+/(\d+)/\d+"),
     ("P_factor_q4", r"p_factor=\d+/\d+/(\d+)"),
-    ("V_census_noeuds", r"vcensus nœuds=(\d+)"),
+    ("V_prefiltre_noeuds", r"vcensus prefiltre_nœuds=(\d+)"),
+    ("V_prefiltre_range_add", r"range_add=(\d+)"),
+    ("V_census_noeuds", r"census_nœuds=(\d+)"),
+    ("V_census_feuilles", r"census_feuilles=(\d+)"),
     ("sweep_seeds_p2", r"seeds_passe2=(\d+)"),
     ("sweep_racines", r"racines_corde=(\d+)"),
     ("sweep_groupes", r"groupes=(\d+)"),
@@ -62,11 +75,32 @@ PATTERNS = [
     ("candidats_q3", r"candidats=\d+/(\d+)/\d+"),
     ("candidats_q4", r"candidats=\d+/\d+/(\d+)"),
     ("tues_profondeur_q4", r"tues_profondeur=\d+/\d+/(\d+)"),
-    ("emis", r"emis=(\d+)"),
+    ("emis", r"emis=(\d+) boules_uniques"),
     ("boules_uniques", r"boules_uniques=(\d+)"),
-    ("evenements", r"evenements=(\d+)"),
-    ("facettes", r"facettes=(\d+)"),
+    ("evenements", r"census_shell=\d+ evenements=(\d+)"),
+    ("facettes", r"facettes=(\d+) fusions"),
     ("float_repli", r"repli=(\d+) "),
+]
+
+# Vecteurs d'octaves de la sonde q4 (16 composantes chacun) et leurs
+# identités fermantes contre les scalaires ci-dessus.
+OCTAVE_VECTORS = [
+    ("oct_ancres", r"octaves_q4 ancres=([0-9,]+) seeds="),
+    ("oct_seeds", r"octaves_q4 ancres=[0-9,]+ seeds=([0-9,]+) w1="),
+    ("oct_w1", r" w1=([0-9,]+) \(octave"),
+    ("oct_cellules", r"octaves_q4_seeds cellules=([0-9,]+) coeur="),
+    ("oct_coeur", r" coeur=([0-9,]+) corde="),
+    ("oct_corde", r" corde=([0-9,]+) passe2="),
+    ("oct_passe2", r" passe2=([0-9,]+)"),
+]
+OCTAVE_SUM_IDENTITIES = [
+    ("oct_ancres", "entrees_ancres_q4"),
+    ("oct_seeds", "seeds_q4"),
+    ("oct_w1", "W_sweep1_evals_coeur"),
+    ("oct_cellules", "seeds_cellules_q4"),
+    ("oct_coeur", "seeds_core_tues"),
+    ("oct_corde", "seeds_corde_tues"),
+    ("oct_passe2", "sweep_seeds_p2"),
 ]
 
 
@@ -88,8 +122,13 @@ def main() -> int:
     if not mfam:
         return fail("matrice familles/n/graines absente du META")
     families = mfam.group(1).split()
-    sizes = [int(x) for x in mfam.group(2).split()]
-    seeds = [int(x) for x in mfam.group(3).split()]
+    if len(families) != len(set(families)):
+        return fail("famille dupliquee dans le META")
+    try:
+        sizes = [int(x) for x in mfam.group(2).split()]
+        seeds = [int(x) for x in mfam.group(3).split()]
+    except ValueError:
+        return fail("entier invalide dans la matrice du META")
     if sizes != SIZES or seeds != SEEDS:
         return fail("matrice du META differente de celle de l'analyse")
     expected = {(f, n, s) for f in families for n in sizes for s in seeds}
@@ -115,43 +154,59 @@ def main() -> int:
     if bad:
         return fail(f"{len(bad)} tuple(s) a code non nul : {sorted(bad)[:3]}")
 
-    # Dossier de sorties : bijection exacte des fichiers avec la matrice.
-    txts = {p.name for p in out_dir.glob("*.txt")}
-    errs = {p.name for p in out_dir.glob("*.err")}
+    # Dossier de sorties : bijection exacte, TOUTE extension confondue (un
+    # fichier d'extension inattendue est refuse, audit du cinquieme cycle).
+    all_files = {p.name for p in out_dir.iterdir() if p.is_file()}
     want_txts = {f"{f}_{n}_s{s}.txt" for (f, n, s) in expected}
     want_errs = {f"{f}_{n}_s{s}.txt.err" for (f, n, s) in expected}
-    if txts != want_txts:
-        return fail(f"fichiers .txt != matrice (en trop : {sorted(txts - want_txts)[:3]}, "
-                    f"manquants : {sorted(want_txts - txts)[:3]})")
-    if errs != want_errs:
-        return fail(f"fichiers .err != matrice (en trop : {sorted(errs - want_errs)[:3]}, "
-                    f"manquants : {sorted(want_errs - errs)[:3]})")
+    want_all = want_txts | want_errs
+    if all_files != want_all:
+        return fail(f"fichiers != matrice (en trop : {sorted(all_files - want_all)[:3]}, "
+                    f"manquants : {sorted(want_all - all_files)[:3]})")
     for name in want_errs:
         if (out_dir / name).stat().st_size > 0:
             return fail(f"stderr non vide : {name}")
 
-    # Identites et compteurs : TOUT valide avant le premier octet de table.
+    # Identites, compteurs (exactement une occurrence chacun) et identites
+    # fermantes des octaves : TOUT valide avant le premier octet de table.
     data: dict[str, dict[tuple[int, int], dict[str, int]]] = {f: {} for f in families}
     for fam, n, seed in sorted(expected):
         path = out_dir / f"{fam}_{n}_s{seed}.txt"
         text = path.read_text()
-        ident = re.search(r"famille=(\S+) n=(\d+) coord=\d+ s=(\d+) smax=(\d+) seed=(\d+) threads=(\d+)", text)
-        if not ident:
-            return fail(f"ligne d'identite absente : {path.name}")
-        got = (ident.group(1), int(ident.group(2)), int(ident.group(5)))
-        if got != (fam, n, seed):
-            return fail(f"identite discordante dans {path.name} : {got}")
-        if (int(ident.group(3)), int(ident.group(4)), int(ident.group(6))) != (EXPECTED_S, EXPECTED_SMAX,
-                                                                               EXPECTED_THREADS):
+        idents = re.findall(r"famille=(\S+) n=(\d+) coord=\d+ s=(\d+) smax=(\d+) seed=(\d+) threads=(\d+)", text)
+        if len(idents) != 1:
+            return fail(f"ligne d'identite absente ou dupliquee : {path.name}")
+        ident = idents[0]
+        if (ident[0], int(ident[1]), int(ident[4])) != (fam, n, seed):
+            return fail(f"identite discordante dans {path.name} : {ident[:2] + ident[4:5]}")
+        if (int(ident[2]), int(ident[3]), int(ident[5])) != (EXPECTED_S, EXPECTED_SMAX, EXPECTED_THREADS):
             return fail(f"parametres s/smax/threads inattendus dans {path.name}")
-        if "digest_all=" not in text:
-            return fail(f"mode digest absent de {path.name}")
+        digests = re.findall(r"^digest_all=([0-9a-f]{64})$", text, re.M)
+        if len(digests) != 1 or len(re.findall(r"^digest_all=", text, re.M)) != 1:
+            return fail(f"digest_all absent, duplique ou non hexadecimal dans {path.name}")
         counters: dict[str, int] = {}
         for cname, pat in PATTERNS:
-            m = re.search(pat, text)
-            if m is None:
-                return fail(f"compteur {cname} absent de {path.name}")
-            counters[cname] = int(m.group(1))
+            ms = re.findall(pat, text)
+            if len(ms) != 1:
+                return fail(f"compteur {cname} absent ou duplique ({len(ms)} occurrences) dans {path.name}")
+            counters[cname] = int(ms[0])
+        vectors: dict[str, list[int]] = {}
+        for vname, pat in OCTAVE_VECTORS:
+            ms = re.findall(pat, text)
+            if len(ms) != 1:
+                return fail(f"vecteur {vname} absent ou duplique dans {path.name}")
+            vec = [int(x) for x in ms[0].split(",")]
+            if len(vec) != 16:
+                return fail(f"vecteur {vname} a {len(vec)} composantes (16 attendues) dans {path.name}")
+            vectors[vname] = vec
+        for vname, cname in OCTAVE_SUM_IDENTITIES:
+            if sum(vectors[vname]) != counters[cname]:
+                return fail(f"identite fermante violee : somme({vname}) != {cname} dans {path.name}")
+        for o in range(16):
+            total = vectors["oct_cellules"][o] + vectors["oct_coeur"][o] + vectors["oct_corde"][o] + \
+                vectors["oct_passe2"][o]
+            if vectors["oct_seeds"][o] != total:
+                return fail(f"identite par octave violee (octave {o}) dans {path.name}")
         data[fam][(n, seed)] = counters
 
     # Tables : bufferisees, imprimees seulement apres validation complete.

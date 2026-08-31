@@ -213,6 +213,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
       rr.status = PipelineStatus::kInvariantViolated;
       rr.message = "invariant : grand-livre des masses de paires du front fusionne viole (" +
                    std::to_string(violations) + " lane(s))";
+      invalidate_provisional(&rr);  // finaliseur LITTERAL sur toute sortie non complete (audit du 31 aout)
       return rr;
     }
   }
@@ -220,6 +221,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     rr.status = PipelineStatus::kInvariantViolated;
     rr.message = "invariant : seed q4 aigu avec J < 0 (inatteignable par theoreme, MATHEMATIQUES § 2) : " +
                  std::to_string(rr.gen.invariant_jneg) + " occurrence(s)";
+    invalidate_provisional(&rr);
     return rr;
   }
   const auto t_r = std::chrono::steady_clock::now();
@@ -598,26 +600,37 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
   // GRAND-LIVRE GLOBAL DES PAIRES (u128 imprime en deux u64 haut/bas si
   // necessaire ; sous u16 et n <= 2^32 la masse tient en u64).
   std::fprintf(out,
-               "vwspd nœuds_temoins=%llu coins=%llu h_rect=%llu/%llu/%llu m_anchor=%llu/%llu/%llu "
+               "vwspd nœuds_temoins=%llu coins=%llu h_rect=%llu/%llu/%llu h_scan=%llu/%llu/%llu "
+               "m_anchor=%llu/%llu/%llu entrees_ancres=%llu/%llu/%llu "
                "iters_coeur=%llu iters_passe2=%llu\n",
                (unsigned long long)gs.wspd_witness_nodes, (unsigned long long)gs.wspd_corner_evals,
                (unsigned long long)gs.h_rect[0], (unsigned long long)gs.h_rect[1], (unsigned long long)gs.h_rect[2],
+               (unsigned long long)gs.h_scan[0], (unsigned long long)gs.h_scan[1], (unsigned long long)gs.h_scan[2],
                (unsigned long long)gs.m_anchor[0], (unsigned long long)gs.m_anchor[1],
-               (unsigned long long)gs.m_anchor[2], (unsigned long long)gs.q4_core_iters,
-               (unsigned long long)gs.q4_pass2_iters);
-  std::fprintf(out, "octaves_q4 ancres=");
-  for (int i = 0; i < 16; ++i)
-    std::fprintf(out, "%llu%s", (unsigned long long)gs.q4_anchors_by_octave[i], i == 15 ? "" : ",");
-  std::fprintf(out, " seeds=");
-  for (int i = 0; i < 16; ++i)
-    std::fprintf(out, "%llu%s", (unsigned long long)gs.q4_seeds_by_octave[i], i == 15 ? "" : ",");
-  std::fprintf(out, " w1=");
-  for (int i = 0; i < 16; ++i)
-    std::fprintf(out, "%llu%s", (unsigned long long)gs.q4_w1_by_octave[i], i == 15 ? "" : ",");
+               (unsigned long long)gs.m_anchor[2], (unsigned long long)gs.anchor_entries[0],
+               (unsigned long long)gs.anchor_entries[1], (unsigned long long)gs.anchor_entries[2],
+               (unsigned long long)gs.q4_core_iters, (unsigned long long)gs.q4_pass2_iters);
+  const auto print_octaves = [&](const char* name, const u64 v[16]) {
+    std::fprintf(out, "%s", name);
+    for (int i = 0; i < 16; ++i) std::fprintf(out, "%llu%s", (unsigned long long)v[i], i == 15 ? "" : ",");
+  };
+  print_octaves("octaves_q4 ancres=", gs.q4_anchors_by_octave);
+  print_octaves(" seeds=", gs.q4_seeds_by_octave);
+  print_octaves(" w1=", gs.q4_w1_by_octave);
   std::fprintf(out, " (octave = log2 de la taille du cover de l'ancre)\n");
-  std::fprintf(out, "vcensus nœuds=%llu feuilles=%llu range_add=%llu\n",
+  // Les quatre issues d'un seed q4 par octave : identite fermante par octave
+  // seeds[o] == cellules[o] + coeur[o] + corde[o] + passe2[o] (validateur).
+  print_octaves("octaves_q4_seeds cellules=", gs.q4_seedcells_by_octave);
+  print_octaves(" coeur=", gs.q4_seedcore_by_octave);
+  print_octaves(" corde=", gs.q4_seedchord_by_octave);
+  print_octaves(" passe2=", gs.q4_seedpass2_by_octave);
+  std::fprintf(out, "\n");
+  std::fprintf(out,
+               "vcensus prefiltre_nœuds=%llu prefiltre_feuilles=%llu range_add=%llu census_nœuds=%llu "
+               "census_feuilles=%llu\n",
                (unsigned long long)es.depth.nodes, (unsigned long long)es.depth.leaf_tests,
-               (unsigned long long)es.depth.range_add_mass);
+               (unsigned long long)es.depth.range_add_mass, (unsigned long long)es.census.nodes,
+               (unsigned long long)es.census.leaf_tests);
   std::fprintf(out, "p_factor=%llu/%llu/%llu (evaluations d'auto-produits des histogrammes)\n",
                (unsigned long long)gs.p_factor[0], (unsigned long long)gs.p_factor[1],
                (unsigned long long)gs.p_factor[2]);

@@ -170,14 +170,23 @@ int main(int argc, char** argv) {
   }
 
   if (!expected_path.empty()) {
-    // Ensemble EXACT exige : chaque K de 1..kmax_eff present (une reference
-    // reduite a K10 ne doit jamais eviter la comparaison K1 — audit du
-    // 31 aout). Les K au-dela de kmax_eff sont refuses par le chargeur.
+    // Ensemble EXACT exige (audit du 31 aout, cinquieme cycle) : les clefs de
+    // la reference doivent EGALER {1..kmax_eff} — chaque K present (une
+    // reference reduite a K10 ne doit jamais eviter la comparaison K1) ET
+    // aucune clef au-dela de kmax_eff (le chargeur ne connait que le domaine
+    // global [1,10] ; une clef en trop serait silencieusement ignoree par la
+    // boucle de comparaison).
     for (u64 K = 1; K <= rr.kmax_eff; ++K)
       if (!e.forest.count(K)) {
         std::fprintf(stderr, "reference incomplete : digest_forest_K%llu absent\n", (unsigned long long)K);
         return 2;
       }
+    if (e.forest.size() != (size_t)rr.kmax_eff) {
+      std::fprintf(stderr,
+                   "reference avec forets hors profil : %zu clef(s) pour kmax_eff=%llu (ensemble exact exige)\n",
+                   e.forest.size(), (unsigned long long)rr.kmax_eff);
+      return 2;
+    }
   }
   u64 mismatches = 0;
   // La conformite d'OBJET juge digest_all et les forets (P0 du 31 aout : les

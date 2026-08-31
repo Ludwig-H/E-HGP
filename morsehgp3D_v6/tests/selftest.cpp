@@ -286,6 +286,7 @@ int run_wspd_ledger() {
 // a masque singleton (meme code, masque reduit), et le grand-livre ferme.
 int run_fused_descent(bool injected) {
   u64 mismatches = 0;
+  u64 apparatus_bad = 0;  // le mutant lui-meme doit respecter sa declaration
   for (const CloudFamily f :
        {CloudFamily::kUniform, CloudFamily::kTerrain, CloudFamily::kEightClusters, CloudFamily::kCollinearSeven}) {
     const int n = 700;
@@ -297,6 +298,24 @@ int run_fused_descent(bool injected) {
     GenerateStats stf;
     alive_rectangles_fused(ix, 8, h_of, 0b111, 2, &full, &stf);
     const u128 expected = expected_pair_mass(ix);
+    if (injected && mutant_enabled("wspd-drop-rect")) {
+      // DELTA -1 LITTERAL (audit du 31 aout, cinquieme cycle) : le mutant
+      // wspd-drop-rect perd exactement UN rectangle par DESCENTE (plus un par
+      // vague), et le grand-livre reconstruit ferme avec la masse omise :
+      // emis + tues + omis == attendu pour chaque lane. Un mutant qui ne
+      // respecte pas sa declaration rend 3 (survivant), jamais 4.
+      if (stf.mutant_dropped_rects != 1) {
+        ++apparatus_bad;
+        std::fprintf(stderr, "mutant droprect : %llu omission(s) au lieu de 1 (%s)\n",
+                     (unsigned long long)stf.mutant_dropped_rects, cloud_family_name(f));
+      }
+      for (int q = 0; q < 3; ++q)
+        if (stf.ledger_emitted_mass[q] + stf.ledger_killed_mass[q] + stf.mutant_dropped_mass[q] != expected) {
+          ++apparatus_bad;
+          std::fprintf(stderr, "mutant droprect : identite emis+tues+omis != attendu en lane %d (%s)\n", q + 2,
+                       cloud_family_name(f));
+        }
+    }
     // Invariant structurel : une lane emise a un cœur strictement sous h_q
     // (le mutant fused-mask-stuck emet des lanes mortes et le viole — c'est
     // son detecteur, car il mute les deux bras de la porte d'egalite a
@@ -344,8 +363,8 @@ int run_fused_descent(bool injected) {
         }
     }
   }
-  if (injected) return mismatches ? 4 : 3;
-  return mismatches ? 1 : 0;
+  if (injected) return (mismatches && !apparatus_bad) ? 4 : 3;
+  return (mismatches || apparatus_bad) ? 1 : 0;
 }
 
 // ---- --sweep-oracle : l'objet post-prefiltre contre l'enumeration exhaustive.

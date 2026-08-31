@@ -1,0 +1,8 @@
+fixture du cinquieme cycle d'audit (31 aout 2026) : reference uniform n=2 avec
+K1 CORRECT et K10 EN TROP (kmax_eff = 1 a n=2). Le chargeur ne connait que le
+domaine global [1,10] ; sans l'exigence d'ensemble exact, cette reference
+passait et K10 etait silencieusement ignore. Le juge doit la REFUSER (code 2,
+« forets hors profil »), jamais la comparer.
+digest_forest_K1=8a7b6412bb792cefab56f0e2b3463184447820ccd7ea58d2d28048e6029e4be0
+digest_forest_K10=8a7b6412bb792cefab56f0e2b3463184447820ccd7ea58d2d28048e6029e4be0
+digest_all=5b143f90aa9089995ee4a553892bb2e923d9767a16134d289e034457b8ec4e46

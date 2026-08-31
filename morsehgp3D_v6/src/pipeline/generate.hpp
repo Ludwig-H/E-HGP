@@ -74,8 +74,19 @@ struct GenerateStats {
   u64 rect_alive[3] = {0, 0, 0};
   u128 ledger_emitted_mass[3] = {0, 0, 0};
   u128 ledger_killed_mass[3] = {0, 0, 0};
-  u64 wspd_witness_nodes = 0;  // V_wspd : nœuds d'index visites par les comptages de temoins
-  u64 wspd_corner_evals = 0;   // V_wspd : evaluations de coins pendant la descente
+  // V_wspd — deux composantes DECLAREES (population : appels de
+  // `count_universal_witnesses` pendant la descente fusionnee, comptages
+  // initial et terminal compris) : nœuds d'index visites, et evaluations de
+  // COUPLES de coins (`corner_evals` de FusedCounts — ce n'est pas un nombre
+  // d'« appels temoins », c'est la masse d'evaluations geometriques payee).
+  u64 wspd_witness_nodes = 0;
+  u64 wspd_corner_evals = 0;
+  // MUTANT wspd-drop-rect (test-only) : UNE omission par descente, appliquee
+  // apres la fusion ordonnee ; la masse emise du rectangle omis est retiree
+  // du grand-livre (reconstruit depuis les rectangles reellement remis), donc
+  // emis + tues + omis == attendu et la cloture de production echoue.
+  u64 mutant_dropped_rects = 0;
+  u128 mutant_dropped_mass[3] = {0, 0, 0};
   u64 workers_wspd = 0;
   u64 workers_rects = 0;
   double t_wspd_ms = 0;
@@ -89,14 +100,34 @@ struct GenerateStats {
   u64 hist_survivors[3] = {0, 0, 0};
   u64 p_factor[3] = {0, 0, 0};  // P_factor : evaluations d'auto-produits des histogrammes (|A|²+|B|² par rectangle)
   u64 h_rect[3] = {0, 0, 0};    // H_rect : somme des points de handles par rectangle vivant (une fois par rectangle)
-  u64 m_anchor[3] = {0, 0, 0};  // M_anchor : somme des tailles de cover par ancre effectivement scannee
+  // M_anchor — population COMMUNE q3/q4 (audit du 31 aout) : somme des
+  // tailles de cover a l'ENTREE du corps par ancre, pour chaque ancre entree
+  // (apres le prétest par requete, avant tout tueur W3/W4/secteurs/grille).
+  // Identite fermante : la population est `anchor_entries[q]`.
+  u64 m_anchor[3] = {0, 0, 0};
+  // Entrees du corps par ancre (population de M_anchor et du vecteur
+  // `ancres` de la sonde) : hist_survivors − tues du prétest par requete
+  // − paires degenerees D2 == 0 (inatteignables sur positions uniques).
+  u64 anchor_entries[3] = {0, 0, 0};
+  // H_scan : nœuds d'index visites par `anchor_cover_from_handles` (somme de
+  // `AnchorScratch::visits` sur les ancres entrees ; population identique a
+  // M_anchor).
+  u64 h_scan[3] = {0, 0, 0};
   // SONDE DE QUEUE E6 (audit du 31 aout : « les deux depassements viennent
   // de la seule graine 5 ») : distribution des ancres q4 par octave de
   // taille de cover (octave o = floor(log2(taille)), 0..15) et attribution
   // de W_sweep1 (evaluations eligibles) a l'octave de l'ancre porteuse.
+  // Identites fermantes : Σ ancres == anchor_entries[2] ; Σ w1 ==
+  // q4_core_site_tests ; Σ seeds == seeds[1] ; et par octave o,
+  // seeds[o] == cellules[o] + coeur[o] + corde[o] + passe2[o] (les quatre
+  // issues d'un seed q4 : tue par cellule, par cœur/J, par corde, ou passe 2).
   u64 q4_anchors_by_octave[16] = {};
   u64 q4_w1_by_octave[16] = {};
   u64 q4_seeds_by_octave[16] = {};
+  u64 q4_seedcells_by_octave[16] = {};
+  u64 q4_seedcore_by_octave[16] = {};
+  u64 q4_seedchord_by_octave[16] = {};
+  u64 q4_seedpass2_by_octave[16] = {};
   // Tueurs d'ancre.
   u64 anchors_killed_w3 = 0;
   u64 anchors_killed_w4 = 0;
@@ -149,6 +180,9 @@ struct GenerateStats {
       p_factor[i] += o.p_factor[i];
       h_rect[i] += o.h_rect[i];
       m_anchor[i] += o.m_anchor[i];
+      anchor_entries[i] += o.anchor_entries[i];
+      h_scan[i] += o.h_scan[i];
+      mutant_dropped_mass[i] += o.mutant_dropped_mass[i];
       anchors_killed_sectors[i] += o.anchors_killed_sectors[i];
       anchors_killed_cells[i] += o.anchors_killed_cells[i];
       seeds_killed_cells[i] += o.seeds_killed_cells[i];
@@ -181,7 +215,12 @@ struct GenerateStats {
       q4_anchors_by_octave[i] += o.q4_anchors_by_octave[i];
       q4_w1_by_octave[i] += o.q4_w1_by_octave[i];
       q4_seeds_by_octave[i] += o.q4_seeds_by_octave[i];
+      q4_seedcells_by_octave[i] += o.q4_seedcells_by_octave[i];
+      q4_seedcore_by_octave[i] += o.q4_seedcore_by_octave[i];
+      q4_seedchord_by_octave[i] += o.q4_seedchord_by_octave[i];
+      q4_seedpass2_by_octave[i] += o.q4_seedpass2_by_octave[i];
     }
+    mutant_dropped_rects += o.mutant_dropped_rects;
     q4_completions += o.q4_completions;
     q4_rej_lens += o.q4_rej_lens;
     q4_rej_owner += o.q4_rej_owner;
@@ -260,9 +299,7 @@ inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3
     lout.assign(nchunks, {});
     lnext.assign(nchunks, {});
     lst.assign(nchunks, GenerateStats{});
-    std::atomic<bool> drop_flag{MHGP6_MUTANT("wspd-drop-rect")};
     const size_t created = parallel_items(nchunks, (int)T, [&](size_t c, size_t) {
-      bool drop_pending = (c == 0) && drop_flag.exchange(false);
       for (size_t i = c * chunk; i < std::min(nw, c * chunk + chunk); ++i) {
         const Task& t = wave[i];
         ++lst[c].rect_visited_fused;
@@ -298,15 +335,7 @@ inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3
             lst[c].ledger_emitted_mass[q] += pair_mass(t.r);
             ++lst[c].rect_alive[q];
           }
-          if (ar.mask != 0) {
-            // MUTANT wspd-drop-rect : exactement UN rectangle vivant perdu
-            // (le premier du chunk 0) — la masse manque au grand-livre.
-            if (drop_pending && c == 0) {
-              drop_pending = false;
-            } else {
-              lout[c].push_back(ar);
-            }
-          }
+          if (ar.mask != 0) lout[c].push_back(ar);
           continue;
         }
         // SCISSION du facteur de plus grand diametre (jamais une feuille).
@@ -326,6 +355,24 @@ inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3
       st->add_from(lst[c]);
     }
     wave.swap(next);
+  }
+  // MUTANT wspd-drop-rect (audit du 31 aout, option 1) : UNE omission par
+  // DESCENTE, appliquee apres la fusion ordonnee — le premier rectangle
+  // vivant de la sortie est retire, et sa masse emise est SOUSTRAITE du
+  // grand-livre (reconstruction depuis les rectangles reellement remis) :
+  // emis + tues == attendu − masse_omise, la cloture de production echoue et
+  // `mutant_dropped_rects == 1` grave litteralement le delta −1. Meme
+  // semantique une-par-descente que le site homonyme de wspd/wavefront.hpp.
+  if (MHGP6_MUTANT("wspd-drop-rect") && !out->empty()) {
+    const MultiAliveRect dropped = out->front();
+    out->erase(out->begin());
+    ++st->mutant_dropped_rects;
+    for (int q = 0; q < 3; ++q) {
+      if (!(dropped.mask & (1u << q))) continue;
+      st->ledger_emitted_mass[q] -= pair_mass(dropped.r);
+      st->mutant_dropped_mass[q] += pair_mass(dropped.r);
+      --st->rect_alive[q];
+    }
   }
 }
 
@@ -515,7 +562,6 @@ inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 
     }
   }
   if (anchor_grid_stage(ix, sc, ua, ub, pa, pb, D2, Lane::kQ3, h3, float_on, ls)) return;
-  ls->m_anchor[1] += sc.cover.size();
   const i64 d3[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
   sc.affine_filled = false;
   for (const CoverPoint& cp : sc.cover) {
@@ -594,11 +640,12 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
                               i64 D2, u64 h4, bool float_on, bool seed_core_nonstrict, bool no_canonical,
                               bool pretested, std::vector<BallCandidate>* lo, GenerateStats* ls,
                               const EndpointCredit* ec) {
-  // Sonde de queue E6 : octave de la taille du cover de l'ancre.
+  // Sonde de queue E6 : octave de la taille du cover de l'ancre. Le vecteur
+  // `ancres` compte les ENTREES de ce corps (population = anchor_entries[2],
+  // creditee au site d'appel commun) ; M_anchor y est credite aussi.
   int oct = 0;
   for (size_t sz = sc.cover.size(); sz > 1 && oct < 15; sz >>= 1) ++oct;
   ++ls->q4_anchors_by_octave[oct];
-  ls->m_anchor[2] += sc.cover.size();
   if (!pretested) {
     u64 n4 = 0, n4_out = 0;
     const bool use_ec = ec != nullptr && ec->active() && ec->base < h4;
@@ -641,6 +688,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     const P3 nrm = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
     if (sc.grid.built && seed_chord_cell_dead(sc.grid, f3s, d4, nrm, D2, l_ax, l_bx)) {
       ++ls->seeds_killed_cells[2];
+      ++ls->q4_seedcells_by_octave[oct];
       continue;
     }
     // Cœur universel du seed (Jung) : J = D²(3G − 2 l_ax l_bx) >= G·D²/3 > 0
@@ -649,6 +697,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     if (Jb < 0) {
       ++ls->invariant_jneg;  // signale ; run_pipeline refuse en invariant
       ++ls->seeds_killed_core;
+      ++ls->q4_seedcore_by_octave[oct];
       continue;
     }
     if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);
@@ -721,14 +770,18 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       dead = fcount >= h4 || dead_by_chord;
     }
     if (dead) {
-      if (dead_by_chord)
+      if (dead_by_chord) {
         ++ls->seeds_killed_chord;
-      else
+        ++ls->q4_seedchord_by_octave[oct];
+      } else {
         ++ls->seeds_killed_core;
+        ++ls->q4_seedcore_by_octave[oct];
+      }
       continue;
     }
     // ---- PASSE 2 : sweep de corde unifie (remplace la boucle C×D v5).
     ++ls->sweep_pass2_seeds;
+    ++ls->q4_seedpass2_by_octave[oct];
     u64 c0 = 0;  // temoins constants sur toute la corde fermee
     sc.roots.clear();
     for (size_t iz = 0; iz < sc.cover.size(); ++iz) {
@@ -995,7 +1048,15 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
             }
             pretested = true;
           }
+          // Population COMMUNE des monnaies par ancre (audit du 31 aout) :
+          // une ancre « entree » = ce point precis, apres le prétest par
+          // requete — M_anchor, H_scan et `anchor_entries` partagent cette
+          // population pour les deux lanes.
+          const u64 visits_before = sc.visits;
           anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, cover_coef, &sc.cover, &sc.visits, &sc.cover_tmp);
+          ++ls->anchor_entries[li];
+          ls->m_anchor[li] += sc.cover.size();
+          ls->h_scan[li] += sc.visits - visits_before;
           if (li == 1) {
             scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, genfilter_nonstrict, pretested, lo, ls,
                            &ec);

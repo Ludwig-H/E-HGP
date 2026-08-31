@@ -15,14 +15,20 @@ Conventions héritées v5, toutes reconduites :
   compilés seulement sous `MHGP6_TESTING` (posé par `mhgp6_executable`,
   jamais par `mhgp6_product_executable`) ; nom inconnu refusé code 2. Cible :
   chaque nom = un point d'injection + une porte code 4 EXÉCUTÉE. État réel
-  (recompté au quatrième cycle d'audit) : 60 noms au registre, 64 points
-  d'injection (63 sous src/, un sous oracle/) ; 28 noms distincts tués par
-  une porte exécutée (mutants dédiés + boucle de divergence d'objet
-  `mhgp6_mutant_*` + `wspd-drop-rect` par le grand-livre de la route
-  produit + `family-scanline-overshoot`) ; le reste `[PRÉVU]` avec les
-  portes v5 à porter (`fold-inject-b-exception-k3` exige le juge d'in-flight
-  dédié : il termine par signal, jamais par la boucle de conformité). Un
-  contrôle textuel registre ≡ grep est un complément, jamais un kill.
+  (recompté au cinquième cycle d'audit) : 60 noms au registre, 64 points
+  d'injection (63 sous src/, un sous oracle/) ; **27 noms distincts** tués
+  par une porte exécutée (le quatrième cycle annonçait 28 : la porte
+  `mhgp6_fused_mutant_droprect` tue `wspd-drop-rect`, déjà compté dans la
+  boucle de conformité — deux portes, un seul nom) : mutants dédiés + boucle
+  de divergence d'objet `mhgp6_mutant_*` + `family-scanline-overshoot`.
+  `wspd-drop-rect` est désormais UNE omission par DESCENTE appliquée après la
+  fusion ordonnée, masse omise soustraite du grand-livre reconstruit
+  (`emis + tués + omis == attendu`, delta −1 littéral gravé par
+  `mhgp6_fused_mutant_droprect` ; un mutant hors déclaration rend 3, jamais
+  4). Le reste `[PRÉVU]` avec les portes v5 à porter
+  (`fold-inject-b-exception-k3` exige le juge d'in-flight dédié : il termine
+  par signal, jamais par la boucle de conformité). Un contrôle textuel
+  registre ≡ grep est un complément, jamais un kill.
 - Équivariance par permutation physique et par réétiquetage (`PointId` ≠
   index dense ≠ rang Morton, mutant `dense-pointid`).
 - Sortie **bit-identique** quel que soit le nombre de fils (fils ∈ {1, 8, max})
@@ -75,3 +81,17 @@ dilatées + 2 stationnaires × {8000, 16000, 32000} × graines {3,4,5} ; pentes
 sécantes par terme ; reçus immuables dans `receipts/` (pin, hash de binaire,
 sorties brutes). Temps : localement seulement en banc apparié contrebalancé ;
 sinon G4 avec reçu.
+
+Le validateur `bench/pentes.py` est prouvé fail-closed par
+`tests/pentes_gate.py` (cinquième cycle : nominal + 20 falsifications à
+code 3 et stdout vide — dont famille dupliquée du META, entier invalide sans
+traceback, compteur dupliqué, digest dupliqué/non hexadécimal, fichier
+d'extension inattendue, identités fermantes des octaves violées — + zéro
+légitime sur un compteur réellement parsé avec `-` affiché). Le juge de
+conformité refuse une référence à clefs de forêt HORS PROFIL (ensemble exact
+`{1..kmax_eff}` exigé ; porte `mhgp6_juge_refus_k_en_trop`, K1 correct + K10
+en trop à n=2) en plus du narrowing et de la référence tronquée. Le
+protocole G4 v6 (`gcp-migration/session_campagne_v6_g4.sh` : conformité
+v5≡v6 à 50 000, bench apparié ABBA sans digest, queue stationnaire) a son
+selftest transactionnel à faux pilotes (`selftest_campagne_v6.sh`, à lancer
+à la main avant toute session payante).
