@@ -162,6 +162,69 @@ pondérée des rectangles émis **et tués**, la comparer à la masse attendue a
 un code exact, puis conserver en parallèle une porte de multiensemble sur de
 petits arbres. Cette autorité doit précéder la fusion WSPD.
 
+## 2 bis. Pistes WSPD issues d'un panel adversarial, classées
+
+Six lentilles indépendantes, vingt propositions, trois réfutateurs chacune. Neuf
+survivent sans réfutation. Ce qui suit est le classement, avec ce qui a été
+mesuré et ce qui reste à falsifier. Rien n'est livré ; rien ne fait baisser une
+pente — **aucun gain de complexité n'a été trouvé, par aucune lentille**.
+
+**A. Hisser le tampon de pile de `count_universal_witnesses`.** La fonction
+construit un `std::vector<Entry>` **à chaque appel**
+(`src/spindle/witness_count.hpp:72`, vérifié), deux fois par rectangle et par
+lane. Poste chiffré à 4,9–5,6 % du mur de la descente, à surface d'objet nulle
+par construction. C'est aussi le **confondeur** de toutes les pistes qui
+suppriment des appels : à faire **en premier**, sinon leur gain est mal
+attribué.
+
+**B. La descente unique à masque de lanes** — § 1.5 et la note dédiée. Le seul
+mécanisme du dossier dont la neutralité soit *argumentée* et non seulement
+constatée : les compteurs sont écrêtés par `min(c, h)`, la fermeture par lane est
+monotone, et `corner64_universal_34` est monotone dans le bon sens
+(`3H^2 <= Xi` implique `2H^2 <= Xi`, donc le drapeau q3 ne meurt jamais avant le
+drapeau q4, et les valeurs finales ne dépendent pas du masque).
+
+**C. Dériver les candidats diamétraux des handles déjà calculés** au lieu d'une
+seconde traversée depuis la racine. Seule proposition à recevoir un verdict
+« solide » des trois réfutateurs : preuve de contenance indépendante de la
+géométrie, 448 configurations, 6,55 M rectangles, **zéro désaccord et zéro
+doublon**, contre-familles incluses. Gain apparié : −6,4 % (q3) et −5,3 % (q4)
+de la phase des corps, soit 1 à 2 % du mur. Réception : garder
+`rect_diametral_candidates` comme **juge** et non le supprimer, sinon le mutant
+`cover-rect-dmin` devient invisible sur le chemin produit.
+
+**D. Une seule passe par rectangle pour q3 et q4**, le cover d'ancre n'étant
+construit qu'une fois : 46 à 48 % des covers sont aujourd'hui dupliqués entre les
+deux lanes. Mais le gain mesuré est de 4,6 à 5,7 % de la génération et **décroît
+avec n** (part mutualisable 35 % à `uniform` 8000, 14,2 % à `terrain` 32000) :
+c'est la part mutualisable qui décide, pas le taux de doublon. Dépend de B.
+
+**E. Marche de témoins à deux phases** (report des sous-arbres élagués au lieu de
+refaire la marche avec coins). Mécanisme correct, identité des valeurs vérifiée,
+mais après B le résidu tombe à environ 10 % des nœuds, et deux modes de faute
+*fail-closed* ont été exhibés — dont un qui produit des sur-crédits, donc
+`need = 0`, donc des boules perdues. À ne pas tenter avant A et B.
+
+**Deux gratuités.** `GenerateStats` calcule déjà `rect_visited[3]` et la WSPD
+calcule `wave_peak` ; **aucun des deux n'est imprimé** par `print_run` (zéro
+occurrence dans `src/pipeline/run.hpp`). Deux lignes donnent les deux compteurs
+dont toute réception d'échelle a besoin.
+
+**Ce qui est écarté, et pourquoi.** Le raccord `SepCell/SepTight` — la route
+reçue pour prouver la borne — **change `digest_balls` sur 34 configurations sur
+34** et casse six lignes de `receipts/conformite_v4/digests_v4.txt`
+(`digest_all` reste intact). Il viole donc la contrainte dure d'immuabilité des
+reçus, et le lemme d'empilement qui seul porterait le gain n'est pas écrit. La
+conclusion recevable est inversée : **écrire ce lemme sur papier d'abord**, coût
+nul et aucune ligne de code ; s'il ne ferme pas, rien n'a été payé ; s'il ferme,
+il faudra assumer explicitement la requalification de la porte de conformité v4
+plutôt que l'annoncer sous une « porte d'égalité des digests ».
+
+Une proposition prétendait mesurer une pente sur `anchors` : elle est réfutée.
+`anchors` est un **grand-livre fermé** (`+= nA*nB`, incrémenté avant tout
+travail), pas un compteur de coût ; chronométré, il pèse 0,9 % du corps de lane.
+Le compteur de travail est `hist_survivors`.
+
 ## 3. Corrections documentaires à faire indépendamment
 
 - **La borne `O(s^3 n)` est affirmée dans trois en-têtes** (`wavefront.hpp`

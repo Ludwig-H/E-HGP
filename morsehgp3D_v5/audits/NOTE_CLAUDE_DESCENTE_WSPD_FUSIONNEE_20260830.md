@@ -2,7 +2,7 @@
 
 Note Claude, 30 août 2026, ancrée au pin `119b80b0`. Sonde
 `bench/wspd_fusion_probe.cpp`, cible `mhgp5_wspd_fusion_probe`, counter-only,
-un fil, `s = 8`, `smax = 11`, graine 3.
+un fil, `s = 8`, `smax` effectif du pipeline, graine 3.
 
 Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -14,11 +14,24 @@ Elle ne touche pas au verdict P0 d'`ETAT_COURANT.md` sur la sémantique de forê
 qui reste le blocage prioritaire.
 
 **Statut après contre-audit : hypothèse prometteuse, porte produit non reçue.**
-La sonde prouve l'identité de ses deux transcriptions locales, mais son bras A
-n'appelle pas `alive_rectangles`. `collinear_seven` montre déjà qu'elles peuvent
-être identiques entre elles et différer du produit. Les phrases ci-dessous qui
-présentaient la mémoire comme mesurée sont également rétractées : la sonde ne
-publie qu'une charge utile minimale `size*sizeof(T)`, pas un HWM.
+La sonde prouvait l'identité de ses deux transcriptions locales, mais son bras A
+n'appelait pas `alive_rectangles`. `collinear_seven` montrait déjà qu'elles
+peuvent être identiques entre elles et différer du produit. Les phrases
+ci-dessous qui présentaient la mémoire comme mesurée sont également rétractées :
+la sonde ne publie qu'une charge utile minimale `size*sizeof(T)`, pas un HWM.
+
+> [!NOTE]
+> **Le premier de ces deux reproches est fermé.** La sonde porte désormais un
+> **bras PRODUIT** qui appelle `generate_detail::alive_rectangles` telle quelle,
+> et les bras A et B sont l'un comme l'autre jugés **contre lui**, pas l'un
+> contre l'autre. Elle dérive en outre ses seuils de
+> `smax_effective = min(smax, nombre de points rendus)` comme `run.hpp:225`, et
+> imprime les deux effectifs. `collinear_seven` rend bien neuf points malgré
+> `--n=600` et publie **`30/30/29` à `smax_effectif = 9`**, la valeur du produit,
+> au lieu du `30/30/30` de l'ancienne sonde à `smax` forcé. `A==produit=OUI` et
+> `B==produit=OUI` sur les six familles. Les autres réserves — HWM, mur,
+> tailles 16000/32000, `scanline_overlap_multiecho`, plusieurs graines, un mutant
+> qui force réellement le code 3 — restent ouvertes.
 
 ## 1. Le fait de structure
 
@@ -45,30 +58,35 @@ mesurées, 35 à 42 % sur `eight_clusters`, 16 à 49 % sur `terrain` et `scanlin
 
 ## 2. La sonde et sa porte de correction
 
-`bench/wspd_fusion_probe.cpp` joue deux bras sur le même nuage, à un fil :
+`bench/wspd_fusion_probe.cpp` joue **trois** bras sur le même nuage, à un fil :
 
-- **bras A** — transcription locale de `alive_rectangles` à
-  `postsep_refine_levels = 0`, jouée trois fois avec les masques
-  `0b001`, `0b010`, `0b100` ;
+- **bras P (produit)** — `generate_detail::alive_rectangles` appelée telle
+  quelle, trois fois, à la configuration **effective** du pipeline. C'est
+  l'autorité des listes ;
+- **bras A** — la même descente transcrite et instrumentée, jouée trois fois
+  avec les masques `0b001`, `0b010`, `0b100`. Il existe parce que
+  `alive_rectangles` n'expose ni nœuds visités ni évaluations de coins ; sa
+  fidélité est exactement ce que le bras P vérifie ;
 - **bras B** — **une** descente, chaque rectangle portant un masque des lanes
   encore indécises. Une lane sort du masque dès qu'elle est morte ; le rectangle
   n'est scindé que si le masque reste non vide ; à un terminal, un seul appel
   avec autorité de coins sert toutes les lanes survivantes.
 
-**La porte actuelle est interne à la sonde.** Elle exige que les trois listes
-de rectangles vivants du bras B soient **identiques** à celles du bras A —
-même cardinal, même ordre, mêmes `(a, b)`, même `core`. Code de sortie 3 sinon,
-2 en refus avant calcul, 0 si conforme. Six portes CTest sont enregistrées à
-`n = 600`, sur les quatre familles de mesure **et sur les deux contre-familles**
-`two_lines` et `collinear_seven`.
+**La porte compare les deux bras instrumentés au bras produit**, et non l'un à
+l'autre. Elle exige que les trois listes de rectangles vivants des bras A **et**
+B soient **identiques** à celles de `alive_rectangles` — même cardinal, même
+ordre, mêmes `(a, b)`, même `core`. Code de sortie 3 sinon, 2 en refus avant
+calcul, 0 si conforme. Six portes CTest sont enregistrées à `n = 600`, sur les
+quatre familles de mesure **et sur les deux contre-familles** `two_lines` et
+`collinear_seven`.
 
-Cela ne compare pas encore au symbole produit. La sonde force en particulier
-`smax=11`, tandis que le pipeline applique
-`smax_effective=min(smax,input_count)`. `collinear_seven` contient neuf points
-malgré `--n=600` : la sonde passe avec `30/30/30`, alors que le produit publie
-`30/30/29` à `smax_effective=9`. Le bras A doit appeler directement
-`alive_rectangles` avec la configuration effective avant que cette porte puisse
-être qualifiée de porte de correction produit.
+La configuration effective est celle du produit : la sonde dérive ses seuils de
+`smax_effective = min(smax, nombre de points rendus)` comme `run.hpp:225`, et
+imprime `n_demande`, `n_rendu` et `smax_effectif`. Le cas gravé est
+`collinear_seven`, qui rend neuf points malgré `--n=600` : la sonde publie
+désormais **`30/30/29` à `smax_effectif = 9`**, la valeur du produit, là où une
+version antérieure à `smax` forcé publiait `30/30/30`. Sur les six familles,
+`A == produit` et `B == produit`.
 
 L'argument d'identité est direct : les décisions de scission étant indépendantes
 de la lane, l'arbre de rectangles est le même dans les deux bras ; le bras A pour
@@ -77,7 +95,7 @@ laisse `q` émettre que là. La sonde ne remplace pas cet argument, elle le grav
 
 ## 3. Ce que la fusion économise — compteurs exacts
 
-`listes_identiques = OUI` sur les six familles et les deux tailles.
+`A == produit` et `B == produit` sur les six familles et les trois tailles.
 
 `n = 2000`, économie du bras B sur le bras A :
 
@@ -88,12 +106,12 @@ laisse `q` émettre que là. La sonde ne remplace pas cet argument, elle le grav
 | `eight_clusters` | 58,8 % | 57,5 % | 45,6 % | 35,0 % |
 | `scanline_single_pass` | 58,4 % | 58,1 % | 47,8 % | 35,4 % |
 
-`n = 8000` — taille d'intérêt. Pour les deux cas cités, les `rect_vivants` de la
-sonde reproduisent les cardinalités `rect_alive` des reçus
-`masses_q3_seed3_20260829`
-(`uniform` 259609/665954/735759, `terrain` 129392/207772/215015) : la sonde
-imite ces exécutions. Cet accord de cardinalité n'est ni une égalité de listes
-ni une autorité générale, comme le contre-exemple `collinear_seven` le montre.
+`n = 8000` — taille d'intérêt. Les `rect_vivants` du bras produit reproduisent
+les cardinalités `rect_alive` des reçus `masses_q3_seed3_20260829`
+(`uniform` 259609/665954/735759, `terrain` 129392/207772/215015), ce qui est
+attendu puisqu'il s'agit du même appel. L'autorité de la porte ne vient pas de
+cet accord de cardinalité mais de l'égalité **de listes** exigée entre les trois
+bras.
 
 | famille | rect. visités | appels témoins | nœuds d'arbre | coins |
 |---|---:|---:|---:|---:|
@@ -111,7 +129,7 @@ ni une autorité générale, comme le contre-exemple `collinear_seven` le montre
 | `eight_clusters` | 60,8 % | 59,6 % | 48,1 % | 38,8 % |
 | `scanline_single_pass` | 59,9 % | 59,4 % | 48,6 % | 37,1 % |
 | `two_lines` | 65,1 % | 65,0 % | 59,7 % | 47,7 % |
-| `collinear_seven` | 66,7 % | 66,7 % | 62,0 % | 50,0 % |
+| `collinear_seven` | 66,7 % | 66,7 % | 61,9 % | 50,0 % |
 
 Le profil est stable : environ **58 % des visites de rectangles et des appels au
 compteur de témoins**, et **43 à 48 % des nœuds d'arbre**, sont aujourd'hui
@@ -203,9 +221,58 @@ est le pattern d'erreur n° 5 ; la réception doit dire lequel des deux.
 - **Ce n'est pas une livraison.** La sonde et ses portes sont commitées ;
   `alive_rectangles` n'est pas modifiée et le chemin produit est intact.
 
+## 6 bis. Contre-lecture adversariale — trois corrections à ma charge
+
+Un panel de réfutation lancé sur six lentilles a retrouvé cette piste
+indépendamment, avec sa propre sonde et des compteurs qui recoupent les miens à
+la décimale. Il a aussi trouvé trois choses que je n'avais pas vues. Je les ai
+revérifiées dans le code avant de les écrire.
+
+**a) La sonde ne passe pas par `postsep_refine`, donc son ledger est vide par
+vacuité.** Mes deux bras poussent directement dans la liste de sortie. À `L = 0`
+c'est une transcription fidèle — `postsep_refine` s'y réduit à `emit(r, core)` —
+et l'identité des listes reste donc valide. Mais la production alimente aussi,
+au passage, `led->base`, `led->emitted` et `led->parents`. Une intégration qui
+copierait le bras B tel quel obtiendrait un ledger **vide** qui passerait toute
+comparaison d'égalité de ledger : c'est le vert par vacuité, pattern d'erreur
+n° 7. La réception doit donc exiger que le bras fusionné **appelle
+`postsep_refine` par lane survivante** et que le ledger soit **non vide** à
+`L = 0`, en plus des listes identiques.
+
+**b) Une part du gain mesuré est de l'allocation, pas de l'algorithme.**
+`count_universal_witnesses` construit un `std::vector<Entry> stack` **à chaque
+appel** (`src/spindle/witness_count.hpp:72`), soit deux fois par rectangle et
+par lane. Supprimer des appels supprime donc des allocations, et le panel
+chiffre ce seul poste à 4,9–5,6 % du mur de la descente. Ce confondeur doit être
+retiré **avant** d'attribuer quoi que ce soit à la fusion : hisser le tampon en
+variable d'ouvrier est un changement à surface d'objet nulle, mesurable seul, et
+qui doit passer en premier.
+
+**c) Le gain bout-en-bout est plus petit que ce que la part de la phase suggère.**
+Rapporter −28 % de la descente à ses 68 % de la génération donne un ordre de
+grandeur trompeur : le panel mesure **−2,7 % à −9,5 % de bout en bout**, pas les
+−18 à −20 % qu'une simple règle de trois laisse espérer. La raison est que la
+descente et les corps se disputent les mêmes lignes de cache et que les gardes
+d'ancre en aval ne bougent pas. Ne rien annoncer au-delà de cette fourchette
+tant qu'un banc apparié ABBA n'a pas tranché.
+
+**Deux points d'intégration que je n'avais pas nommés.** `alive_rectangles` a
+trois appelants hors `generate_candidates` sur le chemin device ou batch :
+`src/gpu/q3_lane_batched.hpp:438`, `src/gpu/q4_lane_batched.hpp:527` et
+`src/gpu/device_witness.cu:169`. Un changement de signature doit les porter,
+sinon deux définitions de la descente divergent en silence. Et treize sondes de
+`bench/` et portes de `tests/` l'appellent aussi : la signature actuelle doit
+survivre, ou toutes doivent être portées dans le même commit.
+
+**Instrumentation gratuite, à faire avant la mesure.** `GenerateStats` calcule
+déjà `rect_visited[3]`, et la WSPD calcule `wave_peak` ; **ni l'un ni l'autre
+n'est imprimé par `print_run`** (zéro occurrence dans `src/pipeline/run.hpp`).
+Les exposer coûte deux lignes et donne les deux compteurs dont la réception a
+besoin, sans sonde.
+
 ## 7. Réception proposée
 
-1. Remplacer le bras A par un appel direct à `alive_rectangles` avec
+1. **FAIT.** Le bras A est jugé contre un bras PRODUIT appelant directement `alive_rectangles` avec
    `smax_effective`, puis imprimer effectifs demandés/réels et configuration
    effective. Graver notamment le cas `collinear_seven` à neuf points.
 2. Ajouter `scanline_overlap_multiecho`, des planchers sur sorties et compteurs,

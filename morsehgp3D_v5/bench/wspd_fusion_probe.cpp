@@ -10,17 +10,31 @@
 // (`corner64_universal_34` decide q3 ET q4 en un appel).
 //
 // CE QUE LA SONDE MESURE, en counter-only et a un fil :
-//   bras A (statu quo) : trois descentes independantes, masques 0b001/0b010/0b100 ;
+//   bras P (PRODUIT)    : `generate_detail::alive_rectangles` appelee telle
+//                         quelle, trois fois, avec la configuration EFFECTIVE
+//                         du pipeline ; c'est l'autorite des listes ;
+//   bras A (statu quo)  : la meme descente TRANSCRITE et instrumentee, trois
+//                         fois, masques 0b001/0b010/0b100 ;
 //   bras B (fusionnee)  : UNE descente, chaque rectangle portant un masque des
 //                         lanes encore indecises ; un rectangle n'est scinde que
 //                         si au moins une lane y survit.
 // Compteurs compares : rectangles visites, appels au compteur de temoins, nœuds
-// d'arbre visites par ce compteur, evaluations de coins, et le mur des deux bras.
+// d'arbre visites par ce compteur, evaluations de coins, et le mur des deux bras
+// instrumentes. `alive_rectangles` n'expose pas ces compteurs : le bras A existe
+// pour cela, et sa fidelite est justement ce que le bras P verifie.
 //
-// PORTE DE CORRECTION (c'est elle qui fait foi, pas le gain) : les trois listes
-// de rectangles vivants du bras B doivent etre IDENTIQUES a celles du bras A —
-// meme cardinal, meme ordre, memes (a, b), meme `core`. Le code de sortie est 3
-// si un seul element differe, 2 en cas de refus avant calcul, 0 sinon.
+// PORTE DE CORRECTION (c'est elle qui fait foi, pas le gain) : les listes des
+// bras A ET B doivent etre IDENTIQUES a celles du bras PRODUIT — meme cardinal,
+// meme ordre, memes (a, b), meme `core`. Le code de sortie est 3 si un seul
+// element differe, 2 en cas de refus avant calcul, 0 sinon.
+//
+// CONFIGURATION EFFECTIVE (contre-audit du 30 aout). Le pipeline applique
+// `smax_effective = min(smax, nombre de points d'entree)` (run.hpp:225) ; forcer
+// `smax = 11` fait diverger la sonde du produit sur les nuages plus petits que
+// leur `--n` demande. `collinear_seven` rend neuf points malgre `--n=600` : a
+// smax force la sonde publiait 30/30/30, quand le produit publie 30/30/29 a
+// `smax_effective = 9`. La sonde derive donc ses seuils de l'entree reelle et
+// imprime les deux effectifs.
 //
 // La sonde ne construit aucun cover, n'emet aucun candidat et ne touche pas au
 // chemin produit. Elle ne prouve aucune borne : elle chiffre une redondance.
@@ -171,10 +185,22 @@ int main(int argc, char** argv) {
   }
   if (n < 2 || s < 8) return 2;  // le plancher de profil s >= 8 vaut aussi pour la sonde
   if (coord <= 0) coord = cloud_family_default_coord(family, n);
-  const CloudIndex ix = build_cloud_index(make_family_input(family, n, coord, seed));
+  const std::vector<InputPoint> in = make_family_input(family, n, coord, seed);
+  const CloudIndex ix = build_cloud_index(in);
   if (!ix.valid || ix.has_duplicate_positions()) return 2;
-  const u64 smax = 11;
+  // Configuration EFFECTIVE du pipeline (run.hpp:225), et non `smax` force.
+  const u64 smax = std::min<u64>(11, in.size());
+  if (smax < 2) return 2;
   const u64 h_of[3] = {lane_h(Lane::kQ2, smax), lane_h(Lane::kQ3, smax), lane_h(Lane::kQ4, smax)};
+
+  // BRAS PRODUIT : la primitive elle-meme, autorite des listes.
+  std::vector<AliveRect> p_out[3];
+  u64 p_visites = 0;
+  {
+    u64 workers = 0;
+    for (int li = 0; li < 3; ++li)
+      generate_detail::alive_rectangles(ix, s, h_of, li, 1, &p_out[li], &p_visites, &workers);
+  }
 
   std::vector<AliveRect> a_out[3];
   Compteurs A;
@@ -192,14 +218,21 @@ int main(int argc, char** argv) {
     B.ms = ms_depuis(t0);
   }
 
-  bool identique = true;
-  for (int li = 0; li < 3; ++li) identique = identique && memes_listes(a_out[li], b_out[li]);
+  // Les DEUX bras instrumentes sont juges contre le bras PRODUIT.
+  bool id_a = true, id_b = true;
+  for (int li = 0; li < 3; ++li) {
+    id_a = id_a && memes_listes(p_out[li], a_out[li]);
+    id_b = id_b && memes_listes(p_out[li], b_out[li]);
+  }
+  const bool identique = id_a && id_b;
 
   const auto pct = [](u64 av, u64 ap) { return av ? 100.0 * (1.0 - (double)ap / (double)av) : 0.0; };
-  std::printf("famille=%s n=%d coord=%d seed=%lld s=%lld smax=%llu\n", cloud_family_name(family), n, coord, seed, s,
-              (unsigned long long)smax);
-  std::printf("rect_vivants q2/q3/q4 = %zu/%zu/%zu ; listes_identiques=%s\n", a_out[0].size(), a_out[1].size(),
-              a_out[2].size(), identique ? "OUI" : "NON");
+  std::printf("famille=%s n_demande=%d n_rendu=%zu coord=%d seed=%lld s=%lld smax_effectif=%llu\n",
+              cloud_family_name(family), n, in.size(), coord, seed, s, (unsigned long long)smax);
+  std::printf("rect_vivants q2/q3/q4 = %zu/%zu/%zu (bras PRODUIT) ; A==produit=%s ; B==produit=%s\n",
+              p_out[0].size(), p_out[1].size(), p_out[2].size(), id_a ? "OUI" : "NON", id_b ? "OUI" : "NON");
+  std::printf("bras_P_produit          rect_visites=%llu (alive_rectangles n'expose ni noeuds ni coins)\n",
+              (unsigned long long)p_visites);
   std::printf("bras_A_trois_descentes  rect_visites=%llu appels_temoins=%llu noeuds=%llu coins=%llu mur_ms=%.1f\n",
               (unsigned long long)A.rect_visites, (unsigned long long)A.appels_temoins, (unsigned long long)A.noeuds,
               (unsigned long long)A.coins, A.ms);
@@ -221,7 +254,8 @@ int main(int argc, char** argv) {
               (unsigned long long)a_vivants, (unsigned long long)(a_vivants * sizeof(AliveRect)),
               (unsigned long long)b_vivants, (unsigned long long)(b_vivants * sizeof(AliveRect)));
   if (!identique) {
-    std::fprintf(stderr, "INVARIANT VIOLE : les listes de rectangles vivants different entre les deux bras\n");
+    std::fprintf(stderr, "INVARIANT VIOLE : bras A conforme au produit = %s ; bras B conforme au produit = %s\n",
+                 id_a ? "oui" : "NON", id_b ? "oui" : "NON");
     return 3;
   }
   return 0;
