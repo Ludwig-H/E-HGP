@@ -49,6 +49,11 @@ mhgp6_executable(mhgp6_selftest tests/selftest.cpp)
 mhgp6_gate(mhgp6_arith_selftest 0 mhgp6_selftest ARGS --arith)
 mhgp6_gate(mhgp6_sha256_selftest 0 mhgp6_selftest ARGS --sha256)
 mhgp6_gate(mhgp6_families_fixture 0 mhgp6_selftest ARGS --families)
+# Mutant de cardinalite des scanlines : tue par la divergence du digest grave
+# de scanline_overlap_multiecho (n=2000, graine 3). Sur scanline_single_pass
+# il est structurellement invisible (multi_echo=false : la garde de push est
+# redondante avec la borne de boucle) — voir tests/selftest.cpp.
+mhgp6_gate(mhgp6_families_mutant_overshoot 4 mhgp6_selftest ARGS --families --inject=family-scanline-overshoot)
 mhgp6_gate(mhgp6_tree_selftest 0 mhgp6_selftest ARGS --tree)
 mhgp6_gate(mhgp6_wspd_ledger 0 mhgp6_selftest ARGS --wspd-ledger)
 mhgp6_gate(mhgp6_fused_descent 0 mhgp6_selftest ARGS --fused-descent)
@@ -123,7 +128,7 @@ mhgp6_gate(mhgp6_postprefilter_uniform_400 0 mhgp6_conformity
 # ---- Couverture executee des mutants (audit du 31 aout : 20 mutants deja
 # tues par la divergence d'objet de la conformite sur eight_clusters n=400 ;
 # fold-inject-b-exception-k3 exclu — termine par signal, juge dedie a porter).
-foreach(mut census-nonstrict genfilter-nonstrict depth-threshold-minus-one
+foreach(mut wspd-drop-rect census-nonstrict genfilter-nonstrict depth-threshold-minus-one
             range-add-max-le-zero skip-full-census binary-ties repr-ties
             attach-prebatch drop-nonmerge dense-pointid canonical-is-uf-root
             q3-level-4g q4-center-parity q4-eq-sign q4-i64-drop-factor

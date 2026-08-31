@@ -474,7 +474,13 @@ int main(int argc, char** argv) {
   const char* inject = nullptr;
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
-    if (arg.rfind("--inject=", 0) == 0 && !inject) inject = argv[i] + 9;
+    if (arg.rfind("--inject=", 0) == 0 && !inject) {
+      inject = argv[i] + 9;
+      if (*inject == 0) {
+        std::fprintf(stderr, "--inject= vide\n");
+        return 2;
+      }
+    }
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       return 2;

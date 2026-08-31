@@ -30,6 +30,10 @@ int main(int argc, char** argv) {
       return 2;
     }
   }
+  if (inject && std::strcmp(inject, "q4-cover-coef3") != 0) {
+    std::fprintf(stderr, "mutant hors cible de cette porte : %s\n", inject ? inject : "");
+    return 2;
+  }
   if (inject && !mutants_enable(inject)) {
     std::fprintf(stderr, "mutant inconnu : %s\n", inject);
     return 2;

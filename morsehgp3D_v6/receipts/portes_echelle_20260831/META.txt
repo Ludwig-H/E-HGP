@@ -1,0 +1,8 @@
+recu=15 portes de conformite d'objet aux tailles d'interet, rejouees sur le lot instrumente
+pin_worktree=122e9c5785ee30b21de11a51d05a3a7a0372657e plus le lot non commite decrit par le commit qui porte ce recu
+2dc4dcddb90855791367c09436ed73f7a05fe854ca498eecaa40cde12e896904  build/v6/mhgp6_conformity
+043cfbf7428ee9d478883cc776322ab2b87709f9fdf988e721a92708d6678878  build/v6/mhgp6
+toolchain=g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+commande=ctest --test-dir build/v6 -L 'scale8000|scale16000|scale32000'
+heure_utc=2026-08-31T11:33:27Z
+note=machine partagee avec un agent de build concurrent : les temps ne sont pas des mesures, seuls les codes font foi

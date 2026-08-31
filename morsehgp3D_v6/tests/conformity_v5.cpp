@@ -45,26 +45,55 @@ inline constexpr SmallRef kSmallRefs[] = {
     {nullptr, 0, nullptr, nullptr},
 };
 
+bool valid_hex64(const std::string& h) {
+  if (h.size() != 64) return false;
+  for (const char c : h)
+    if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))) return false;
+  return true;
+}
+
+// CHARGEUR FAIL-CLOSED (audit du 31 aout) : exactement un digest_all, des
+// hex minuscules de 64 caracteres, aucun doublon de foret, aucun K hors
+// domaine. Un recu tronque ou altere n'est jamais accepte comme s'il avait
+// compare chaque foret.
 bool load_expected_file(const char* path, Expected* e) {
   std::ifstream f(path);
   if (!f) return false;
   std::string line;
+  u64 n_all = 0;
+  bool bad = false;
   while (std::getline(f, line)) {
     const auto take = [&](const char* prefix) -> const char* {
       const size_t l = std::strlen(prefix);
       return line.compare(0, l, prefix) == 0 ? line.c_str() + l : nullptr;
     };
-    if (const char* v = take("digest_balls=")) e->balls = v;
-    else if (const char* v = take("digest_all=")) e->all = v;
-    else if (line.compare(0, 15, "digest_forest_K") == 0) {
+    if (const char* v = take("digest_balls=")) {
+      e->balls = v;
+      if (!valid_hex64(e->balls)) bad = true;
+    } else if (const char* v = take("digest_all=")) {
+      e->all = v;
+      ++n_all;
+      if (!valid_hex64(e->all)) bad = true;
+    } else if (line.compare(0, 15, "digest_forest_K") == 0) {
       const size_t eq = line.find('=');
-      if (eq != std::string::npos) {
-        i64 k = 0;
-        if (parse_i64_exact(line.substr(15, eq - 15).c_str(), &k)) e->forest[(u64)k] = line.substr(eq + 1);
+      if (eq == std::string::npos) {
+        bad = true;
+        continue;
       }
+      i64 k = 0;
+      if (!parse_i64_exact(line.substr(15, eq - 15).c_str(), &k) || k < 1 || k > 10) {
+        bad = true;
+        continue;
+      }
+      const std::string dg = line.substr(eq + 1);
+      if (!valid_hex64(dg) || e->forest.count((u64)k)) {
+        bad = true;
+        continue;
+      }
+      e->forest[(u64)k] = dg;
     }
   }
-  return !e->all.empty();
+  return !bad && n_all == 1 && !e->forest.empty();
 }
 
 }  // namespace
@@ -82,8 +111,8 @@ int main(int argc, char** argv) {
     };
     i64 v = 0;
     if (const char* s = val("--family=")) ok = parse_cloud_family(s, &family) && ok;
-    else if (const char* s = val("--n=")) { ok = parse_i64_exact(s, &v) && ok; n = v; }
-    else if (const char* s = val("--threads=")) { ok = parse_i64_exact(s, &v) && ok; threads = v; }
+    else if (const char* s = val("--n=")) { ok = parse_i64_exact(s, &v) && v >= 2 && v <= 2147483647 && ok; n = v; }
+    else if (const char* s = val("--threads=")) { ok = parse_i64_exact(s, &v) && v >= 1 && v <= 1024 && ok; threads = v; }
     else if (const char* s = val("--seed=")) { ok = parse_i64_exact(s, &v) && ok; seed = v; }
     else if (const char* s = val("--expected=")) expected_path = s;
     else if (const char* s = val("--postprefilter=")) postprefilter_golden = s;
@@ -138,6 +167,11 @@ int main(int argc, char** argv) {
     }
   }
 
+  if (!expected_path.empty() && e.forest.size() < rr.kmax_eff) {
+    std::fprintf(stderr, "reference incomplete : %zu forets pour kmax_eff=%llu\n", e.forest.size(),
+                 (unsigned long long)rr.kmax_eff);
+    return 2;
+  }
   u64 mismatches = 0;
   // La conformite d'OBJET juge digest_all et les forets (P0 du 31 aout : les
   // deux monnaies de candidats sont gelees separement ; depuis le correctif
@@ -145,8 +179,7 @@ int main(int argc, char** argv) {
   // legitimement de la v5 — rapporte, jamais un critere).
   if (!e.balls.empty() && e.balls != rr.digest_balls)
     std::fprintf(stderr,
-                 "note : candidats v5-compat divergents (attendu depuis le cover q4 coefficient 4) v5=%.16s... "
-                 "v6=%.16s...\n",
+                 "note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=%.16s... v6=%.16s...)\n",
                  e.balls.c_str(), rr.digest_balls.c_str());
   for (const auto& [k, dg] : e.forest) {
     if (k <= rr.kmax_eff && dg != rr.digest_forest[k]) {

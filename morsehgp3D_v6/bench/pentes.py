@@ -35,6 +35,10 @@ PATTERNS = [
     ("seeds_corde_tues", r"seeds_corde_tues=(\d+)"),
     ("W_sweep1_tests_coeur", r"tests_coeur=(\d+)"),
     ("W_scan_q3", r"tests_prof_q3=(\d+)"),
+    ("W_sweep2_tests_passe2", r"tests_passe2=(\d+)"),
+    ("tri_comparaisons", r"tri_comparaisons=(\d+)"),
+    ("P_factor_q3", r"p_factor=\d+/(\d+)/\d+"),
+    ("P_factor_q4", r"p_factor=\d+/\d+/(\d+)"),
     ("sweep_seeds_p2", r"seeds_passe2=(\d+)"),
     ("sweep_racines", r"racines_corde=(\d+)"),
     ("sweep_hors_corde", r"racines_hors_corde=(\d+)"),
@@ -50,13 +54,17 @@ PATTERNS = [
 ]
 
 
-def read_counters(path: Path) -> dict[str, int]:
+def read_counters(path: Path) -> dict[str, int] | None:
+    """Chaque compteur du grand-livre DOIT etre present (zero legitime accepte,
+    absence = echec) — exigence fail-closed de l'audit du 31 aout."""
     text = path.read_text()
     out: dict[str, int] = {}
     for name, pat in PATTERNS:
         m = re.search(pat, text)
-        if m:
-            out[name] = int(m.group(1))
+        if m is None:
+            print(f"ECHEC : compteur {name} absent de {path.name}", file=sys.stderr)
+            return None
+        out[name] = int(m.group(1))
     return out
 
 
@@ -65,21 +73,60 @@ def main() -> int:
         print("usage: pentes.py <dossier out/ de campagne>", file=sys.stderr)
         return 2
     out_dir = Path(sys.argv[1])
+    # VALIDATEUR FAIL-CLOSED (audit du 31 aout) : la matrice attendue vient du
+    # META (`familles=`), jamais des sorties presentes ; STATUS.txt doit
+    # exister, finir par DONE et porter EXACTEMENT un code=0 par tuple ; un
+    # .txt ET un .err vide par tuple, identite recoupee dans le .txt. Tout
+    # manquement echoue AVANT le moindre stdout de table.
+    meta = out_dir.parent / "META.txt"
     status = out_dir.parent / "STATUS.txt"
-    if status.is_file():
-        st = status.read_text()
-        if "DONE" not in st:
-            print("ECHEC : STATUS.txt sans DONE (campagne inachevée)", file=sys.stderr)
-            return 3
-        bad = [l for l in st.splitlines() if l.startswith("code=") and not l.startswith("code=0 ")]
-        if bad:
-            print(f"ECHEC : {len(bad)} run(s) a code non nul", file=sys.stderr)
-            return 3
-    errs = [p for p in out_dir.glob("*.err") if p.stat().st_size > 0]
-    if errs:
-        print(f"ECHEC : stderr non vide pour {len(errs)} run(s)", file=sys.stderr)
+    if not meta.is_file() or not status.is_file():
+        print("ECHEC : META.txt ou STATUS.txt absent", file=sys.stderr)
         return 3
-    families = sorted({p.name.rsplit("_", 2)[0] for p in out_dir.glob("*_s*.txt")})
+    mfam = re.search(r"^familles=(.+?) ; n=(.+?) ; graines=(.+)$", meta.read_text(), re.M)
+    if not mfam:
+        print("ECHEC : matrice familles/n/graines absente du META", file=sys.stderr)
+        return 3
+    families = mfam.group(1).split()
+    sizes = [int(x) for x in mfam.group(2).split()]
+    seeds = [int(x) for x in mfam.group(3).split()]
+    if sizes != SIZES or seeds != SEEDS:
+        print("ECHEC : matrice du META differente de celle de l'analyse", file=sys.stderr)
+        return 3
+    st_lines = status.read_text().splitlines()
+    if not st_lines or st_lines[-1] != "DONE":
+        print("ECHEC : STATUS.txt ne finit pas par DONE", file=sys.stderr)
+        return 3
+    codes = {}
+    for line in st_lines[:-1]:
+        m = re.match(r"^code=(\d+) fam=(\S+) n=(\d+) seed=(\d+) ", line)
+        if not m:
+            print(f"ECHEC : ligne STATUS invalide : {line}", file=sys.stderr)
+            return 3
+        key = (m.group(2), int(m.group(3)), int(m.group(4)))
+        if key in codes:
+            print(f"ECHEC : tuple duplique dans STATUS : {key}", file=sys.stderr)
+            return 3
+        codes[key] = int(m.group(1))
+    for fam in families:
+        for n in sizes:
+            for seed in seeds:
+                key = (fam, n, seed)
+                if codes.get(key) != 0:
+                    print(f"ECHEC : code absent ou non nul pour {key}", file=sys.stderr)
+                    return 3
+                txt = out_dir / f"{fam}_{n}_s{seed}.txt"
+                err = out_dir / f"{fam}_{n}_s{seed}.txt.err"
+                if not txt.is_file() or not err.is_file():
+                    print(f"ECHEC : sortie ou stderr manquant pour {key}", file=sys.stderr)
+                    return 3
+                if err.stat().st_size > 0:
+                    print(f"ECHEC : stderr non vide pour {key}", file=sys.stderr)
+                    return 3
+                ident = re.search(r"famille=(\S+) n=(\d+) .* seed=(\d+)", txt.read_text())
+                if not ident or ident.group(1) != fam or int(ident.group(2)) != n or int(ident.group(3)) != seed:
+                    print(f"ECHEC : identite de la sortie discordante pour {key}", file=sys.stderr)
+                    return 3
     if not families:
         print("aucune sortie trouvée", file=sys.stderr)
         return 2
@@ -87,28 +134,21 @@ def main() -> int:
         data: dict[tuple[int, int], dict[str, int]] = {}
         for n in SIZES:
             for seed in SEEDS:
-                p = out_dir / f"{fam}_{n}_s{seed}.txt"
-                if p.is_file():
-                    data[(n, seed)] = read_counters(p)
-        if len(data) != len(SIZES) * len(SEEDS):
-            print(f"ECHEC {fam} : campagne incomplète ({len(data)}/{len(SIZES) * len(SEEDS)} runs)", file=sys.stderr)
-            return 3
+                counters = read_counters(out_dir / f"{fam}_{n}_s{seed}.txt")
+                if counters is None:
+                    return 3
+                data[(n, seed)] = counters
         print(f"== {fam} — pentes sécantes 8000→16000 | 16000→32000 (graines {SEEDS})")
         header = f"{'compteur':24s} {'pas1 (par graine)':26s} {'pas2 (par graine)':26s} {'étendues p1|p2':12s}"
         print(header)
         for name, _ in PATTERNS:
             rows1, rows2 = [], []
             for seed in SEEDS:
-                v = [data.get((n, seed), {}).get(name) for n in SIZES]
-                if None in v or 0 in v[:2]:
-                    rows1.append(None)
-                    rows2.append(None)
-                    continue
-                rows1.append(math.log2(v[1] / v[0]) if v[0] else None)
-                rows2.append(math.log2(v[2] / v[1]) if v[1] and v[2] else None)
-            if all(r is None for r in rows1):
-                print(f"ECHEC : compteur {name} absent des sorties de {fam}", file=sys.stderr)
-                return 3
+                v = [data[(n, seed)][name] for n in SIZES]
+                # Zero legitime : la pente est mathematiquement indefinie —
+                # affichee `-`, jamais confondue avec une absence (echec plus haut).
+                rows1.append(math.log2(v[1] / v[0]) if v[0] > 0 and v[1] > 0 else None)
+                rows2.append(math.log2(v[2] / v[1]) if v[1] > 0 and v[2] > 0 else None)
             fmt = lambda rows: "/".join("  -  " if r is None else f"{r:5.2f}" for r in rows)
             s1 = [r for r in rows1 if r is not None]
             s2 = [r for r in rows2 if r is not None]

@@ -15,6 +15,7 @@
 #pragma once
 
 #include <algorithm>
+#include <limits>
 #include <span>
 #include <utility>
 #include <vector>
@@ -75,6 +76,11 @@ inline size_t chunked(size_t n, int threads, size_t* nchunks_out, Fn&& fn) {
 
 inline void prefilter_balls(const CloudIndex& ix, const std::vector<BallCandidate>& cands, u64 smax, int threads,
                             std::vector<Survivor>* survivors, ExpandStats* st) {
+  // GARDE DE CAPACITE (audit du 31 aout) : Survivor::idx est u32 et le
+  // nombre de candidats peut etre quadratique (linked_arcs). Refuser avant
+  // tout narrowing ; le profil u16 borne la grille, jamais le cardinal.
+  if (cands.size() > (size_t)std::numeric_limits<u32>::max())
+    throw std::length_error("prefilter_balls : plus de 2^32-1 candidats (indices u32)");
   const bool m_minus_one = MHGP6_MUTANT("depth-threshold-minus-one");
   size_t nchunks = 0;
   std::vector<std::vector<Survivor>> lsv;

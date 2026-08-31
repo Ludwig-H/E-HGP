@@ -1,0 +1,20 @@
+10/15 Test #33: mhgp6_conformity_scanline_single_pass_8000 ..........   Passed    6.15 sec
+      Start 34: mhgp6_conformity_scanline_single_pass_16000
+11/15 Test #34: mhgp6_conformity_scanline_single_pass_16000 .........   Passed   15.58 sec
+      Start 35: mhgp6_conformity_scanline_single_pass_32000
+12/15 Test #35: mhgp6_conformity_scanline_single_pass_32000 .........   Passed   50.01 sec
+      Start 36: mhgp6_conformity_scanline_overlap_multiecho_8000
+13/15 Test #36: mhgp6_conformity_scanline_overlap_multiecho_8000 ....   Passed   12.85 sec
+      Start 37: mhgp6_conformity_scanline_overlap_multiecho_16000
+14/15 Test #37: mhgp6_conformity_scanline_overlap_multiecho_16000 ...   Passed   32.32 sec
+      Start 38: mhgp6_conformity_scanline_overlap_multiecho_32000
+15/15 Test #38: mhgp6_conformity_scanline_overlap_multiecho_32000 ...   Passed   75.63 sec
+
+100% tests passed, 0 tests failed out of 15
+
+Label Time Summary:
+scale16000    = 240.61 sec*proc (5 tests)
+scale32000    = 566.99 sec*proc (5 tests)
+scale8000     =  95.80 sec*proc (5 tests)
+
+Total Test time (real) = 903.41 sec

@@ -239,13 +239,13 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
                      : "invariant : census contredit la passe count-only";
     return rr;
   }
+  rr.t_census_ms = ms(t_c);  // arrete AVANT le digest post-prefiltre (audit du 31 aout)
   if (opt.digest) {
     const auto t_dp = std::chrono::steady_clock::now();
     rr.digest_postprefilter = digest_postprefilter_v6(cands, surv);
     rr.t_digest_ms += ms(t_dp);
   }
   std::vector<Survivor>().swap(surv);
-  rr.t_census_ms = ms(t_c);
   rr.rss_mb[3] = run_detail::rss_mb_now();
 
   // GARDES DE CAPACITE DE TOUS LES ORDRES AVANT TOUTE PUBLICATION.
@@ -256,6 +256,11 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     if (!fold_capacity_ok(kc[K].events, kc[K].incidences, &why)) {
       rr.status = PipelineStatus::kResourceExhausted;
       rr.message = "fold K=" + std::to_string(K) + " : " + why;
+      // Les digests sont PROVISOIRES jusqu'au statut terminal : aucun champ
+      // de digest n'est publie sur un retour d'echec (audit du 31 aout).
+      rr.digest_postprefilter.clear();
+      rr.digest_balls.clear();
+      rr.digest_raw_candidates.clear();
       return rr;
     }
   }
@@ -486,12 +491,18 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     if (first_exc) std::rethrow_exception(first_exc);
     rr.status = first_status;
     rr.message = first_message;
+    rr.digest_postprefilter.clear();
+    rr.digest_balls.clear();
+    rr.digest_raw_candidates.clear();
     return rr;
   }
   if (main_exc) std::rethrow_exception(main_exc);
   if (a_status != PipelineStatus::kCompleteRegular) {
     rr.status = a_status;
     rr.message = a_message;
+    rr.digest_postprefilter.clear();
+    rr.digest_balls.clear();
+    rr.digest_raw_candidates.clear();
     return rr;
   }
   rr.t_fold_wall_ms = ms(t_fold_wall);
@@ -561,9 +572,10 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                (unsigned long long)gs.jung_cert_skip, (unsigned long long)gs.jung_fallback);
   // GRAND-LIVRE DU SWEEP DE CORDE (docs/GRAND_LIVRE.md : W_sweep scinde).
   std::fprintf(out,
-               "sweep tests_coeur=%llu tests_prof_q3=%llu seeds_passe2=%llu racines_corde=%llu groupes=%llu racines_hors_corde=%llu temoins_constants=%llu "
+               "sweep tests_coeur=%llu tests_prof_q3=%llu tests_passe2=%llu tri_comparaisons=%llu seeds_passe2=%llu racines_corde=%llu groupes=%llu racines_hors_corde=%llu temoins_constants=%llu "
                "rejets=lens:%llu/owner:%llu/once:%llu/i64:%llu/face:%llu/det:%llu/centre:%llu\n",
                (unsigned long long)gs.q4_core_site_tests, (unsigned long long)gs.q3_depth_site_tests,
+               (unsigned long long)gs.sweep_pass2_site_tests, (unsigned long long)gs.sweep_root_comparisons,
                (unsigned long long)gs.sweep_pass2_seeds, (unsigned long long)gs.sweep_roots_onchord,
                (unsigned long long)gs.sweep_root_groups,
                (unsigned long long)gs.sweep_roots_offchord, (unsigned long long)gs.sweep_const_interior,
@@ -573,6 +585,9 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                (unsigned long long)gs.q4_rej_center);
   // GRAND-LIVRE GLOBAL DES PAIRES (u128 imprime en deux u64 haut/bas si
   // necessaire ; sous u16 et n <= 2^32 la masse tient en u64).
+  std::fprintf(out, "p_factor=%llu/%llu/%llu (evaluations d'auto-produits des histogrammes)\n",
+               (unsigned long long)gs.p_factor[0], (unsigned long long)gs.p_factor[1],
+               (unsigned long long)gs.p_factor[2]);
   std::fprintf(out, "ledger_paires emis=%llu/%llu/%llu tues=%llu/%llu/%llu\n",
                (unsigned long long)gs.ledger_emitted_mass[0], (unsigned long long)gs.ledger_emitted_mass[1],
                (unsigned long long)gs.ledger_emitted_mass[2], (unsigned long long)gs.ledger_killed_mass[0],

@@ -15,8 +15,11 @@
 //      apres — est EXACTEMENT le compte du filtre v5 (identite affine
 //      signe(q4_power) = signe(P_z − μ·B_z)). Une racine STRICTEMENT hors
 //      corde (2P² > J·B²) correspond exactement a un tetraedre non bien
-//      centre (Jung) : la sauter est un rejet exact, jamais une perte. LE
-//      MULTIENSEMBLE EMIS EST DONC IDENTIQUE A LA v5 (digest_balls compris).
+//      centre (Jung) : la sauter est un rejet exact, jamais une perte.
+//      HISTORIQUE : au checkpoint J2 (cover coefficient 3 herite), le
+//      multiensemble emis etait identique a la v5 ; depuis le correctif P0
+//      (coefficient 4), il en diverge legitimement — la conformite d'objet
+//      juge digest_all + forets, jamais les candidats.
 //      HONNETETE DE COUT (audit v6 du 31 aout) : l'incidence seed–completion
 //      reste materialisee (une racine par site eligible du tape) ; ce qui
 //      disparait est le rescan O(m) PAR candidat — le cout passe de
@@ -99,6 +102,7 @@ struct GenerateStats {
   u64 q4_core_site_tests = 0;  // W_sweep1 : sites visites par le scan cœur+corde (passe 1)
   u64 q3_depth_site_tests = 0; // masse du filtre de profondeur q3 (sites testes)
   u64 sweep_pass2_seeds = 0;   // seeds q4 survivants entres en passe 2
+  u64 sweep_pass2_site_tests = 0;  // W_sweep2 : sites rescannes par la passe 2 (P, B par site)
   u64 sweep_roots_onchord = 0;   // racines triees (observable du grand-livre)
   u64 sweep_root_groups = 0;     // blocs de racines egales traites (regle de bloc)
   u64 sweep_root_comparisons = 0;  // comparaisons exactes payees par le tri des racines
@@ -147,6 +151,7 @@ struct GenerateStats {
     q4_core_site_tests += o.q4_core_site_tests;
     q3_depth_site_tests += o.q3_depth_site_tests;
     sweep_pass2_seeds += o.sweep_pass2_seeds;
+    sweep_pass2_site_tests += o.sweep_pass2_site_tests;
     sweep_roots_onchord += o.sweep_roots_onchord;
     sweep_root_groups += o.sweep_root_groups;
     sweep_root_comparisons += o.sweep_root_comparisons;
@@ -262,7 +267,7 @@ inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3
             lst[c].ledger_emitted_mass[q] += pair_mass(t.r);
             ++lst[c].rect_alive[q];
           }
-          if (ar.mask != 0) lout[c].push_back(ar);
+          if (ar.mask != 0 && !(MHGP6_MUTANT("wspd-drop-rect") && lout[c].empty())) lout[c].push_back(ar);
           continue;
         }
         // SCISSION du facteur de plus grand diametre (jamais une feuille).
@@ -681,6 +686,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     for (size_t iz = 0; iz < sc.cover.size(); ++iz) {
       const CoverPoint& cz = sc.cover[iz];
       if (cz.u == ua || cz.u == ub || cz.u == cx.u) continue;
+      ++ls->sweep_pass2_site_tests;
       const P3& pz = ix.upos[(size_t)cz.u];
       const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
       const i128 Pz = seed.l_exact(sc, iz) / 4;
@@ -869,7 +875,9 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
       if (!(ar.mask & (1u << li))) continue;
       const Lane lane = li == 0 ? Lane::kQ2 : li == 1 ? Lane::kQ3 : Lane::kQ4;
       corner_histograms(ix, lane, ar.r, &sc.ha, &sc.hb);
-      ls->p_factor[li] += nA * nA + nB * nB;
+      // P_factor = evaluations reellement payees par corner_histograms (les
+      // diagonales z == a sont sautees avant universal_over_corners).
+      ls->p_factor[li] += nA * (nA - 1) + nB * (nB - 1);
       const u64 need = h_of[li] > ar.core[li] ? h_of[li] - ar.core[li] : 0;
       ls->anchors[li] += nA * nB;  // le grand-livre reste ferme : toutes les paires comptees
       if (need == 0) {

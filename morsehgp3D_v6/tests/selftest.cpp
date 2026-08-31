@@ -67,27 +67,118 @@ int run_arith() {
   return g_failures ? 1 : 0;
 }
 
-// ---- --sha256 : vecteurs FIPS 180-4 et streaming.
+// ---- --sha256 : vecteurs FIPS 180-4, streaming, et EGALITE EXPLICITE des
+// deux chemins de compression (SHA-NI et portable, `Sha256(force_portable)`).
+// Quand le CPU n'a pas SHA-NI, la comparaison est portable contre portable
+// (trivialement egale) : le verdict inter-chemins n'est etabli que la ou
+// `Sha256::accelerated()` est vrai — la ligne imprimee le dit.
 int run_sha256() {
-  const auto hex = [](const char* msg) {
-    Sha256 h;
+  const auto hex = [](const char* msg, bool force_portable) {
+    Sha256 h(force_portable);
     h.update(msg, std::strlen(msg));
     return h.hex();
   };
-  check(hex("abc") == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "FIPS abc");
-  check(hex("") == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "FIPS vide");
-  check(hex("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq") ==
-            "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1",
-        "FIPS deux blocs");
-  Sha256 s;
-  s.update("ab", 2);
-  s.update("c", 1);
-  check(s.hex() == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "streaming");
+  // Vecteurs FIPS sur CHAQUE chemin (le portable est correct par lui-meme,
+  // pas seulement egal au chemin par defaut).
+  for (const bool portable : {false, true}) {
+    check(hex("abc", portable) == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "FIPS abc");
+    check(hex("", portable) == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "FIPS vide");
+    check(hex("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", portable) ==
+              "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1",
+          "FIPS deux blocs");
+    Sha256 s(portable);
+    s.update("ab", 2);
+    s.update("c", 1);
+    check(s.hex() == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "streaming");
+  }
+  // Tampon pseudo-aleatoire de 1 Mo (deterministe, graine 20260831) : les deux
+  // chemins doivent rendre le meme digest, d'un bloc comme en tranches
+  // irregulieres (61 o, premier avec 64 : toutes les phases du tampon interne).
+  std::vector<unsigned char> buf(1u << 20);
+  std::mt19937_64 rng(20260831ull);
+  for (size_t i = 0; i < buf.size(); i += 8) {
+    const u64 v = rng();
+    for (size_t j = 0; j < 8 && i + j < buf.size(); ++j) buf[i + j] = (unsigned char)(v >> (8 * j));
+  }
+  Sha256 h_auto, h_port(true), h_chunk(true);
+  h_auto.update(buf.data(), buf.size());
+  h_port.update(buf.data(), buf.size());
+  for (size_t off = 0; off < buf.size(); off += 61)
+    h_chunk.update(buf.data() + off, std::min<size_t>(61, buf.size() - off));
+  const std::string d_auto = h_auto.hex(), d_port = h_port.hex(), d_chunk = h_chunk.hex();
+  check(d_auto == d_port, "1 Mo : chemin par defaut == chemin portable force");
+  check(d_port == d_chunk, "1 Mo : portable d'un bloc == portable en tranches de 61 o");
+  std::printf("sha256 : SHA-NI %s ; 1 Mo auto=%.16s... portable=%.16s...\n",
+              Sha256::accelerated() ? "ACTIF (comparaison inter-chemins effective)"
+                                    : "absent (portable contre portable seulement)",
+              d_auto.c_str(), d_port.c_str());
   return g_failures ? 1 : 0;
 }
 
-// ---- --families : determinisme, profil, cardinalite ; stationnaires comprises.
-int run_families() {
+// Digest du FLUX de points d'une famille : pour chaque point, id en u32 LE
+// puis x/y/z en i64 LE (aucune ambiguite de concatenation : largeurs fixes).
+std::string family_stream_digest(CloudFamily f, int n, long long seed) {
+  const int coord = cloud_family_default_coord(f, n);
+  const std::vector<InputPoint> pts = make_family_input(f, n, coord, seed);
+  Sha256 h;
+  for (const InputPoint& p : pts) {
+    unsigned char b[4];
+    for (int i = 0; i < 4; ++i) b[i] = (unsigned char)((u32)p.id >> (8 * i));
+    h.update(b, 4);
+    h.i64le((int64_t)p.position.x);
+    h.i64le((int64_t)p.position.y);
+    h.i64le((int64_t)p.position.z);
+  }
+  return h.hex();
+}
+
+// Digests GRAVES des neuf familles au quadruplet (n = 2000, coord par defaut,
+// graine 3) — copies d'un run d'impression sur ce depot, jamais recalcules
+// par la formule sous test. Toute divergence de generation est un changement
+// d'objet (l'en-tete de src/cloud/families.hpp l'exige).
+struct FamilyDigest {
+  CloudFamily f;
+  const char* hex;
+};
+constexpr FamilyDigest kFamilyDigests2000[] = {
+    {CloudFamily::kUniform, "0b29cc84bcdcfe0871df6d91d757278d5fe8e4fbbe2007f4529fbaf239cefb0a"},
+    {CloudFamily::kTerrain, "05e45b62450e5be5e84c665f6efdbdca237ec2d0d7c54c407fd68b2812d1ec54"},
+    {CloudFamily::kScanlineSinglePass, "688c72d83239dab7c415dce9fab5960692f554a0f2b9b171fc2d74085632f24b"},
+    {CloudFamily::kScanlineOverlapMultiecho, "52791b0dca4774098081d1f5fc8d6265bb16579173deca923a7a46c64326d728"},
+    {CloudFamily::kEightClusters, "990b26dd380a9bac67a398cea7732390c213425a694304616afedd14d2b18eb5"},
+    {CloudFamily::kTwoLines, "94cb1af42b50c56231ba9fff7021bc8781ff5d817aa16f4c9637aa407f4f6caa"},
+    {CloudFamily::kCollinearSeven, "652722d05b1fe242d3a2813126a335ab6dbc957b37af5e117cb360e157fa4aec"},
+    {CloudFamily::kTerrainStationnaire, "015500cbbd475eab602727cfec6d06dc1274ffa4242e5125233a9b06aee7fa7c"},
+    {CloudFamily::kScanlineStationnaire, "7f6b20d2590c939b83097b850fc97c95b0f02ecba592d2c4e473418e02c7b948"},
+};
+
+// ---- --families : determinisme, profil, cardinalite ; stationnaires
+// comprises ; digests graves. Sous --inject (family-scanline-overshoot) :
+// seul le verdict de digest compte — kill (4) si au moins une famille diverge
+// de la table gravee, sinon 3. Le cas grave du kill est
+// scanline_overlap_multiecho a n = 2000, graine 3. LIMITE HONNETE : sur
+// scanline_single_pass le mutant est STRUCTURELLEMENT invisible a tout n —
+// toutes ses passes ont multi_echo = false, donc l'unique push(ground) par
+// site est deja borne par la condition de boucle `pts->size() < n` et la
+// garde relachee de `push` n'est jamais le facteur limitant ; et sur
+// scanline_stationnaire a ce quadruplet, aucun echo ne tombe sur l'instant
+// exact du franchissement du cap (digest inchange, verifie).
+int run_families(bool injected) {
+  if (injected) {
+    u64 diverged = 0;
+    for (const FamilyDigest& fd : kFamilyDigests2000) {
+      const std::string got = family_stream_digest(fd.f, 2000, 3);
+      const bool differ = got != fd.hex;
+      if (differ) ++diverged;
+      std::printf("mutant %-28s digest %s\n", cloud_family_name(fd.f), differ ? "DIVERGE" : "identique");
+    }
+    if (diverged) {
+      std::printf("families : mutant TUE (%llu famille(s) divergente(s))\n", (unsigned long long)diverged);
+      return 4;
+    }
+    std::fprintf(stderr, "families : mutant NON tue (aucun digest ne diverge)\n");
+    return 3;
+  }
   const CloudFamily fams[] = {CloudFamily::kUniform,          CloudFamily::kTerrain,
                               CloudFamily::kEightClusters,    CloudFamily::kScanlineSinglePass,
                               CloudFamily::kScanlineOverlapMultiecho, CloudFamily::kTwoLines,
@@ -120,6 +211,16 @@ int run_families() {
   for (const CloudFamily f : {CloudFamily::kTerrainStationnaire, CloudFamily::kScanlineStationnaire}) {
     const std::vector<InputPoint> p = make_family_input(f, 8000, cloud_family_default_coord(f, 8000), 3);
     check(p.size() == 8000, "stationnaire : cardinal plein a n=8000");
+  }
+  // Digests graves : les neuf familles au quadruplet (n = 2000, coord par
+  // defaut, graine 3) contre la table litterale.
+  for (const FamilyDigest& fd : kFamilyDigests2000) {
+    const std::string got = family_stream_digest(fd.f, 2000, 3);
+    if (got != fd.hex) {
+      check(false, "digest de famille grave (n=2000, graine 3)");
+      std::fprintf(stderr, "  %s : attendu %s\n  %s : obtenu  %s\n", cloud_family_name(fd.f), fd.hex,
+                   cloud_family_name(fd.f), got.c_str());
+    }
   }
   return g_failures ? 1 : 0;
 }
@@ -364,7 +465,7 @@ int main(int argc, char** argv) {
   int rc = 2;
   if (m == "arith") rc = run_arith();
   else if (m == "sha256") rc = run_sha256();
-  else if (m == "families") rc = run_families();
+  else if (m == "families") rc = run_families(injected);
   else if (m == "tree") rc = run_tree();
   else if (m == "wspd-ledger") rc = run_wspd_ledger();
   else if (m == "fused-descent") rc = run_fused_descent(injected);

@@ -15,11 +15,14 @@
 //     support, reduction par pgcd, comptage des cles distinctes.
 // (b) ROUTE PRODUIT : generate_candidates (s = 8, smax = 11) — chaque cle
 //     attendue EXACTEMENT UNE FOIS pre-RLE ; apres sort + deduplicate +
-//     prefilter : survie a profondeur zero ; apres census : interieur vide et
-//     coquille = support.
+//     prefilter : survie a profondeur zero ; apres census : interieur vide,
+//     coquille = support, ET EGALITE DANS LES DEUX DIRECTIONS de l'ensemble
+//     des cles q3/q4 survivantes de profondeur zero (n_interior == 0) avec
+//     l'ensemble de l'oracle — les cles excedentaires sont REJETEES.
 // (c) EQUIVARIANCE : permutation physique (PointId conserves) => meme
 //     multiensemble pre-RLE ; reetiquetage (id -> N-1-id) => meme ensemble de
-//     cles (les cles ne dependent que des positions).
+//     cles ET meme multiensemble pre-RLE (BallKey, arite, niveau via
+//     same_exact_level — les cles et niveaux ne dependent que des positions).
 // (d) PLANCHERS : comptes litteraux et identites entieres exactes
 //     q3 = 2n(n+1), q4 = n·n, n·(q3+q4) = (3n+2)·n².
 //
@@ -502,6 +505,42 @@ u64 check_product(int n, const std::vector<RawPoint>& pts, const std::vector<Exp
                      (int)ek.arity, (int)it->second->n_interior, (int)it->second->n_shell);
       }
     }
+
+    // (b4) REJET DES CLES EXCEDENTAIRES : l'ensemble COMPLET des cles q3/q4
+    // survivantes dont le census donne profondeur zero (n_interior == 0) est
+    // EGAL a l'ensemble attendu de l'oracle — les deux directions, pas la
+    // seule inclusion attendue ⊆ produit de (b2)/(b3). Les survivantes q3/q4
+    // de profondeur NON nulle sont legitimes et hors du perimetre de ce test.
+    std::vector<BallKey> prod0;
+    for (const BallData& b : balls)
+      if ((b.arity == 3 || b.arity == 4) && b.n_interior == 0) prod0.push_back(b.key);
+    std::sort(prod0.begin(), prod0.end());
+    std::vector<BallKey> want0;
+    want0.reserve(expected.size());
+    for (const ExpectedKey& ek : expected) want0.push_back(ek.key);
+    std::sort(want0.begin(), want0.end());
+    u64 excess = 0, absent = 0;
+    size_t ip = 0, iw = 0;
+    while (ip < prod0.size() || iw < want0.size()) {
+      if (iw == want0.size() || (ip < prod0.size() && prod0[ip] < want0[iw])) {
+        ++excess;
+        ++ip;
+      } else if (ip == prod0.size() || want0[iw] < prod0[ip]) {
+        ++absent;
+        ++iw;
+      } else {
+        ++ip;
+        ++iw;
+      }
+    }
+    if (excess != 0 || absent != 0) {
+      ++dis;
+      std::fprintf(stderr,
+                   "n=%d : cles q3/q4 de profondeur zero : produit=%zu, oracle=%zu (excedentaires=%llu, "
+                   "manquantes=%llu)\n",
+                   n, prod0.size(), want0.size(), (unsigned long long)excess, (unsigned long long)absent);
+    }
+    std::printf("n=%d census  : cles q3/q4 profondeur zero = %zu (oracle %zu)\n", n, prod0.size(), want0.size());
   }
 
   // (c1) Permutation physique deterministe, PointId conserves : MEME
@@ -532,7 +571,10 @@ u64 check_product(int n, const std::vector<RawPoint>& pts, const std::vector<Exp
   }
 
   // (c2) Reetiquetage id -> N-1-id : MEME ensemble de cles (les cles ne
-  // dependent que des positions ; le tie-break d'owner peut changer).
+  // dependent que des positions ; le tie-break d'owner peut changer), et MEME
+  // MULTIENSEMBLE pre-RLE (BallKey, arite, niveau) — le niveau se compare par
+  // `same_exact_level` (egalite SEMANTIQUE : les representants U192/i128 non
+  // reduits peuvent differer selon le chemin de generation).
   std::vector<InputPoint> rel = in;
   for (InputPoint& p : rel) p.id = (PointId)(rel.size() - 1) - p.id;
   std::vector<BallCandidate> crel;
@@ -546,6 +588,24 @@ u64 check_product(int n, const std::vector<RawPoint>& pts, const std::vector<Exp
       ++dis;
       std::fprintf(stderr, "n=%d : equivariance (reetiquetage) : %zu vs %zu cles distinctes\n", n, k0.size(),
                    k1.size());
+    }
+    // Multiensemble : tri canonique (cle, arite, representation du niveau)
+    // puis alignement element par element. Deux candidats alignes de meme cle
+    // portent la meme sphere : `same_exact_level` y est l'egalite juste.
+    std::vector<BallCandidate> a = cands, b = crel;
+    sort_candidates(&a, 1);
+    sort_candidates(&b, 1);
+    if (a.size() != b.size()) {
+      ++dis;
+      std::fprintf(stderr, "n=%d : reetiquetage : multiensemble pre-RLE %zu vs %zu candidats\n", n, a.size(),
+                   b.size());
+    } else {
+      for (size_t i = 0; i < a.size(); ++i)
+        if (a[i].key != b[i].key || a[i].arity != b[i].arity || !same_exact_level(a[i].level, b[i].level)) {
+          ++dis;
+          std::fprintf(stderr, "n=%d : reetiquetage : (cle, arite, niveau) divergent au rang %zu\n", n, i);
+          break;
+        }
     }
   }
 
