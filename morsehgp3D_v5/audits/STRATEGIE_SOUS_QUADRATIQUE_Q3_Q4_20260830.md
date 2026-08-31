@@ -7,9 +7,9 @@ Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
 
 Périmètre relu : tout `morsehgp3D_v5/`, notamment les sources WSPD, index,
 pipeline q3/q4, filtres CPU/device, oracles, probes, reçus d'échelle, documents
-mathématiques et audits actifs. La dernière tête amont relue est `92605016`;
-son dernier pin fonctionnel reste `fc53472f`. Le présent audit ne modifie
-aucune source fonctionnelle. Ce pin conserve le crédit sectoriel, la corde
+mathématiques et audits actifs. La dernière consolidation amont relue est
+`81089f0b`; son dernier pin fonctionnel reste `fc53472f`. Le présent audit ne
+modifie aucune source fonctionnelle. Ce pin conserve le crédit sectoriel, la corde
 corrigée et leur raccord à la sonde, puis propage le paramètre de hauteur au
 champ scanline. `a78d0338` versionne le reçu `scanline_relief` et une
 interprétation documentaire sans modifier ces sources ; `92605016` ajoute la
@@ -21,7 +21,9 @@ Mise à jour du 30 août : les corrections CPU de corde et la propagation du
 crédit dans les lots sont cohérentes en lecture et les quatre portes ciblées
 q3/q4 `uniform`/tout-hôte passent après rebuild. Le nouveau combinateur prend
 bien le maximum secteur par secteur et sa fixture croisée tue maintenant
-`sector-credit-global`; l'intégration depuis les histogrammes reste ouverte.
+`sector-credit-global`. Les routes scalaires et batch q3/q4 construisent déjà
+`EndpointCredit` depuis `sc.ha/sc.hb` ; ce qui reste ouvert est une fixture
+produit non vacue qui prouve cette provenance de bout en bout.
 Le kernel est corrigé en lecture, sans `nvcc`, sans fixture exacte à cinq
 points et sans exécution device. Le reçu `canopee_q4` a terminé avec l'ancien
 probe ; le reçu versionné `terrain_deux_echelles` a aussi terminé sur la sonde
@@ -82,8 +84,8 @@ Le statut présent reste **NO-GO pour un claim sous-quadratique global**. Il
 existe même, pour le catalogue explicite de `BallKey`, une famille quadratique
 q3 et q4 dans le modèle exact, détaillée ci-dessous. La cible recevable est
 donc `temps = préparation + coût
-shallow + B + S_shell + S_expand`, sous-quadratique seulement sur les entrées
-où sorties et incidences le sont. Certaines familles pourraient devenir quasi linéaires
+shallow + B + S_shell + S_forest + S_expand`, sous-quadratique seulement sur
+les entrées où sorties et incidences le sont. Certaines familles pourraient devenir quasi linéaires
 si tous les termes du grand-livre sont bornés ; une famille dont la masse
 résiduelle d'ancres, de covers ou de `BallKey` reste quadratique ne sera pas
 sauvée par une WSPD linéaire.
@@ -132,10 +134,13 @@ la lentille et le cover coefficient 3 de chaque ancre, tout en restant hors de
 `W2`, donc hors du cœur, de `W3/W4` et des secteurs. Comme les `b` ont même
 norme, un autre `b'` donne `b' dot b-R^2<=0`; avec `A={a}`, ni `h_a` ni `h_b`
 ne ferme l'ancre. Les marges strictes survivent à une réalisation rationnelle
-puis entière assez fine. Ainsi `sum_e m_e>=k*M=Omega(n^2)` après les portes
-actuelles. Sous u16, il faut graver la plus grande réalisation en plage et la
-qualifier comme contre-fixture bornée, sans transformer le domaine fini en
-théorème asymptotique.
+puis entière assez fine. Cette géométrie établit le cover résiduel, mais pas
+encore que le routage WSPD produit émet les `k` ancres et tapes supposés. Sous
+cette condition, on a `sum_e m_e>=k*M=Omega(n^2)` après les portes actuelles ;
+la borne produit reste donc conditionnelle à une fixture owner+tape exact-once.
+Sous u16, il faut graver la plus grande réalisation en plage et la qualifier
+comme contre-fixture bornée, sans transformer le domaine fini en théorème
+asymptotique.
 
 Il existe aussi une vraie barrière de **sortie pour un catalogue explicite**,
 indépendamment de cette implémentation. La construction `A3(n,Delta)`
@@ -157,10 +162,18 @@ géométriques à chaque étage produit. Source primaire :
 [Maximum Betti Numbers of Čech Complexes](https://pub.ista.ac.at/~edels/Papers/2024-01-MaxBettiCech.pdf),
 § 3.1 et lemme 3.5.
 
+À partir des seuls événements attendus, le payload courant doit déjà contenir
+au minimum `(n+1)^2+2n=N^2/4+N-2` facettes K=2 et
+`2n(n+1)=N^2/2-N` facettes K=3, soit `3N^2/4-2` clés au total, avec autant
+d'entrées dans `final_canon_fid`. La porte permanente doit tester ces planchers
+sans promouvoir en formule générale les comptes supplémentaires propres au
+fold courant.
+
 Cette borne est formelle dans le modèle géométrique exact à précision
-croissante. Un replay préparatoire, non encore reçu ni indépendant de la route
-de calcul qui l'a produit, donne aussi une contre-fixture **entière u16** à
-graver sous le nom `linked_arcs_u16`. Pour `n` dans `{2,4,8,16}`, poser
+croissante. Un replay préparatoire, déjà reproduit par une énumération OBig
+indépendante jetable et par un probe jetable raccordé à la route produit, mais
+sans porte versionnée, donne aussi une contre-fixture **entière u16** à graver
+sous le nom `linked_arcs_u16`. Pour `n` dans `{2,4,8,16}`, poser
 `N=2n+2`, `R=60000`, `o=30000`, `theta=0.04`,
 `t_i=-theta+2*theta*i/n`, puis matérialiser en littéraux les arrondis de
 `A_i=(R*cos(t_i),o+R*sin(t_i),o)` et
@@ -189,14 +202,17 @@ de `BallKey`. Ces deux cas appartiennent à la porte.
 | 16 | 34 | 544 | 256 |
 
 Les identités sont exactement `q3=2n(n+1)` et `q4=n^2`. À `n=16`, la plus
-petite marge brute d'acuité entière vaut `58928`; les plus petites valeurs
+petite marge brute d'acuité entière vaut `58928` pour la forme
+`|uv|^2+|uw|^2-|vw|^2`; les plus petites valeurs
 brutes positives des formes de non-support valent `9505372644204968192` en q3
 et `2588950695868800` en q4. La première dépasse `INT64_MAX` : calcul,
 assertions et impression de ces marges doivent donc rester au moins en `i128`
 ou `OBig`, sans conversion signée étroite. Ces grandeurs précèdent la réduction
 primitive de la `BallKey` : seuls leur signe et leur non-nullité sont
 contractuels. Tous les tétraèdres retenus passent le test strict de centre
-intérieur.
+intérieur. Le helper produit `is_acute_seed` emploie une convention doublée :
+la porte doit comparer les signes et nommer la forme, pas exiger l'égalité
+numérique entre deux normalisations.
 
 La porte permanente doit embarquer les coordonnées ou un digest littéral —
 jamais dépendre de `cos` à l'exécution. Son oracle indépendant parcourt tous les
@@ -207,8 +223,9 @@ clés distinctes. La route produit vérifie séparément profondeur zéro, coqui
 l'énumération géométrique.
 
 Le domaine u16 est fini : quatre tailles ne constituent donc **pas** une borne
-asymptotique. Elles donnent une contre-fixture de profil où `S/n^2` reste
-constant jusqu'à `N=34` et une porte de non-régression forte. L'impossibilité
+asymptotique. Pour le paramètre `n`, les ratios exacts valent
+`q3/n^2=2+2/n`, `q4/n^2=1` et `(q3+q4)/n^2=3+2/n` jusqu'à `N=34` ; ils donnent
+une porte de non-régression forte. L'impossibilité
 asymptotique `Omega(N^2)` est celle de la famille exacte à précision croissante.
 Elle impose une API sortie-sensible à toute généralisation de précision qui
 matérialise ce catalogue ou cette forêt explicite ; une représentation
@@ -216,9 +233,12 @@ implicite/reconstructible relève d'un autre contrat. Dans le profil u16
 courant, la même discipline reste la cible prudente, pas un théorème
 asymptotique inventé.
 
-Une seconde sortie doit rester séparée du nombre de clés. Une `BallKey` de
-profondeur zéro peut avoir une coquille complète `U_B` de taille `Theta(n)`.
-Noter donc `B` le nombre de clés distinctes et
+Une seconde sortie doit rester séparée du nombre de clés. Dans une
+généralisation non plafonnée, une `BallKey` de profondeur zéro peut avoir une
+coquille complète `U_B` de taille `Theta(n)`. Dans le profil courant
+`complete_regular`, une sortie acceptée impose toutefois `shell_cap<=12`, donc
+`S_shell<=12B` ; une coquille plus grande doit finir transactionnellement en
+`resource_exhausted`. Noter donc `B` le nombre de clés distinctes et
 `S_shell=sum_key |U_B|`, puis facturer à part l'expansion éventuelle des
 supports. Dans le lift, q4 groupe exactement tous les hyperplans concourant au
 même sommet ; q3 doit grouper les triples qui donnent la même droite puis le
@@ -585,7 +605,7 @@ les faces et essais `D` évités **après records** ; annoncer des records évit
 exigerait un pré-record distinct. `D` n'est énuméré qu'après survie du rôle de
 seed et de ses portions admissibles.
 
-### Minimum exact sur toute la corde
+### Minimum exact sur la corde continue, minorant pour les complétions
 
 Ce certificat est propre à la fibre q4. En q3, le carrier `c` désigne un seul
 centre, celui de la face `abc` : `h_c_q3` compte le résidu à ce point
@@ -594,6 +614,13 @@ fermé pour **tous** les centres que pourrait créer une complétion `D` ; le bo
 crédit uniforme est donc le minimum sur toute sa corde admissible. Conserver
 deux champs `h_c_q3_point` et `h_c_q4_chord` évite de payer un certificat trop
 faible en q3 ou d'employer fautivement un compte ponctuel en q4.
+
+Le sweep ci-dessous est exact sur l'intervalle continu de Jung. Les centres
+réalisables par les complétions discrètes `D` n'en sont en général qu'un
+sous-ensemble : le minimum continu est alors un minorant sûr, possiblement plus
+faible, et non le minimum exact des complétions sans lemme supplémentaire. La
+fixture géométrique cinq points, son raccord produit et le rejeu device restent
+donc des portes distinctes.
 
 Pour une ancre `(a,b)` et un carrier aigu `c`, reprendre ses quantités q3
 `g_c>0`, `n_c=(b-a) cross (c-a)` et `J_c>0`. Les centres admissibles de la
@@ -1121,9 +1148,14 @@ logarithmiques près.
 
 Cette hypothèse d'incidence doit être vérifiable ou au moins réfutable sur
 l'entrée ; « dimension intrinsèque faible », « WSPD linéaire » ou « candidats
-linéaires » ne la remplace pas. `scanline` illustre précisément l'échec : le
-front et les candidats peuvent paraître presque linéaires alors que la masse
-d'ancres q4 mesurée approche `n^1.98`.
+linéaires » ne la remplace pas. `scanline_relief` illustre précisément l'écart
+entre compteurs : entre 8k et 32k, les exposants sécants de
+`ancres_post_hist` valent `1,178--1,424` au nominal, tandis que ceux de
+`tests_cœur` atteignent `1,712--2,077` ; sous la nouvelle loi de hauteur, ils
+valent respectivement `0,958--0,983` et `0,710--0,830`. Le nombre de covers et
+les candidats restent proches du linéaire. Ce reçu `diagnostic_unpaired`
+localise donc le coût dans la masse par cover, les seeds et le scan du cœur ;
+il ne prouve ni exposant ni causalité.
 
 Le produit complet possède déjà une obstruction quadratique reçue en
 q2/Gabriel. La construction critique liée citée plus haut donne en outre
@@ -1138,9 +1170,11 @@ un objectif d'API universel qui ne facture pas la sortie.
 |---|---|---|---|
 | volumique homogène | cœur puis facteurs | petite route, arrangement sur queue lourde | somme des covers et sorties quasi linéaire |
 | amas séparés | `h_a/h_b`, puis `h_c` inter-amas | arrangement intra-amas lourd | visites mixtes et charge locale sous-quadratiques |
-| surface/terrain borné | patches et `h_c` | arrangement q3/q4 prioritaire | canopée physiquement bornée et incidences mesurées |
-| terrain historique | mêmes portes | banc adversarial obligatoire | aucun claim tant que l'échelle de canopée croît avec `n` |
-| scanline/filiforme exact | rang/déterminant, facteurs, carriers hiérarchiques | arrangement seulement après réduction des ancres | NO-GO si ancres résiduelles ou somme des covers restent proches de `n^2` |
+| terrain à hauteurs bornées | patches et `h_c` | diagnostic apparié avant architecture | aucun claim de stationnarité tant que rayons et largeurs croissent avec `coord` |
+| surface/terrain stationnaire à construire | patches et `h_c` | arrangement q3/q4 prioritaire | hauteurs, rayons/largeurs et densité de motifs fixes, seule la fenêtre croît ; bornes à mesurer sur le corpus cible |
+| terrain historique | mêmes portes | banc adversarial obligatoire | aucun claim tant que canopée et reliefs macroscopiques croissent avec `n` |
+| scanline synthétique | facteurs puis carriers hiérarchiques | arrangement seulement après réduction des ancres | NO-GO si ancres résiduelles ou somme des covers restent proches de `n^2` |
+| rang affine certifié insuffisant | déterminant entier | fermeture de la lane concernée | certificat exact et mutant de rang reçus |
 | cosphérique/cocyclique | détection de groupe | quotient par centre et census | jamais développer les paires sans facturer la sortie |
 | adversarial peu profond | toutes les portes sûres | budget transactionnel | sortie/charge dense annoncée, jamais faux succès |
 
@@ -1168,10 +1202,12 @@ pas un choix unique de micro-kernel.
    attribuer un gain d'exposant.
 3. Publier des timers non chevauchants ou explicitement inclusifs, puis fermer
    `seeds = cells + core + chord + faces_D` sans soustraction saturée.
-4. Graver `linked_arcs_u16` contre l'oracle exhaustif et le pipeline : comptes
-   q3/q4 littéraux, profondeur zéro, shell égal au support, clés post-RLE et
-   owner exact-once. Cette porte fixe le contrat sortie-sensible avant toute
-   promesse de coût.
+4. Graver `linked_arcs_u16` contre un oracle OBig/i128 indépendant et le
+   pipeline : comptes et événements q3/q4 littéraux, facettes K=2/K=3,
+   profondeur zéro, shell égal au support, exact-once avant RLE, permutation
+   physique et réétiquetage équivariant. Un mutant de troncature i64 doit
+   tomber sur la puissance q3 extérieure qui dépasse `INT64_MAX`. Cette porte
+   fixe le contrat sortie-sensible avant toute promesse de coût.
 
 ### P1 — recevoir le front et retirer les auto-produits
 
@@ -1294,9 +1330,11 @@ avec la petite route ; c'est leur répétition non bornée qui est interdite.
    `H_scan`, `M_anchor`, `K_conf` q3 et `P_role` q4 par régime ?
 4. Le premier moteur q4 conserve-t-il `cover3` pour la parité historique, ou
    ouvre-t-il explicitement une requalification `cover4` ?
-5. La sortie demandée est-elle le quotient par `BallKey`, le shell complet ou
-   l'expansion des supports ?
-6. La fixture de corde à deux permutations, shaped puis device, est-elle reçue
+5. Quel payload boule est demandé : quotient par `BallKey`, shell complet ou
+   expansion des supports ?
+6. Indépendamment, la forêt doit-elle publier le payload dense courant ou une
+   représentation reconstructible explicitement versionnée ?
+7. La fixture de corde à deux permutations, shaped puis device, est-elle reçue
    en plus du plancher de masse avant d'interpréter le nouveau profiler ?
 
 Ces réponses déterminent la structure à coder. Elles ne bloquent pas le shadow

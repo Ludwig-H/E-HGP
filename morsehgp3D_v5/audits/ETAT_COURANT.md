@@ -1,4 +1,4 @@
-# État courant audité de MorseHGP3D v5 — 30 août 2026
+# État courant audité de MorseHGP3D v5 — 31 août 2026
 
 Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -7,8 +7,8 @@ Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
 
 ## Fraîcheur
 
-Dernière tête amont relue : `92605016`; son dernier pin fonctionnel est
-`fc53472f`. Le présent audit ne modifie aucune source fonctionnelle.
+Dernière consolidation amont relue : `81089f0b`; son dernier pin fonctionnel
+est `fc53472f`. Le présent audit ne modifie aucune source fonctionnelle.
 Il conserve les corrections q3/q4 de `9f504e52`, versionne dans `c53229b9` le
 reçu terrain construit depuis ce pin, reçoit sa contre-relecture dans
 `1bd91360`, puis propage le paramètre de hauteur au champ scanline. `a78d0338`
@@ -30,23 +30,24 @@ défaut de couplage des distributions décrit ci-dessous. Le reçu versionné
 `scanline_relief` est également terminal : `source_commit=fc53472f`, binaire
 `2d202f0e...`, 18/18 codes zéro, identités internes fermées et stderr vides.
 Sa portée reste `diagnostic_unpaired`, une répétition sans alternance, sans
-tape, lineage ni digest d'entrée, uniquement sur `scanline_single_pass`. Le
-worktree suivi ne contient pas de source fonctionnelle sale ; seules les deux
-consolidations d'audit de cette passe sont présentes. Toute modification source
-ultérieure périme la fraîcheur du verdict, pas les contre-exemples
-mathématiques ni les constats attachés aux pins nommés.
+tape, lineage ni digest d'entrée, uniquement sur `scanline_single_pass`.
+Cette consolidation ne modifie que les audits centraux et le worktree suivi est
+propre à sa publication. Toute modification source ultérieure périme la
+fraîcheur du verdict, pas les contre-exemples mathématiques ni les constats
+attachés aux pins nommés.
 
 ## Verdict
 
-Pour q3/q4, la meilleure cible exacte relue est désormais **sortie-sensible** :
-WSPD binaire `A x B` comme owner/certificat à `s=8`, facteurs et cœur composés
+Pour q3/q4, la cible architecturale candidate la mieux étayée est désormais
+**sortie-sensible** et conditionnelle : WSPD binaire `A x B` comme
+owner/certificat à `s=8`, facteurs et cœur composés
 avec provenance, fibre `C` hiérarchique, requête globale de seuil par `BallKey`
 sur la petite route, puis lift shallow streamé pour les fanouts lourds ; q4 ne
 cherche `D` qu'à partir d'intersections orientées entre un seed aigu vivant et
-une complétion admissible dans les zones non certifiées profondes. Le
-catalogue/digest de conformité de l'architecture actuelle rencontre déjà une
-famille géométrique à nombre quadratique de boules critiques ; sa transposition
-au produit doit encore être gravée par la fixture oracle+pipeline. Le pipeline
+une complétion admissible dans les zones non certifiées profondes. Les probes
+jetables indépendants et de route produit rencontrent déjà une famille
+géométrique à nombre quadratique de boules critiques ; sa transposition au
+contrat doit encore être gravée par la fixture oracle+pipeline. Le pipeline
 courant appelle le fold dense, dont le payload conserve toutes les
 `facet_keys` et un `final_canon_fid` de même cardinal : après réception de
 cette fixture, l'obstruction portera donc aussi sur **cette forêt explicite**,
@@ -66,13 +67,16 @@ claims d'exactitude et de performance, pas l'exploration ni les shadows bornés.
 `docs/SPECIFICATION_MORSEHGP3D.md` et
 `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md` réservent au flot Gabriel brut un
 rôle de proposition ou de connectivité positive. Le contrat Gamma exige aussi
-les incidences silencieuses. La faute doit être localisée précisément :
-`docs/MATHEMATIQUES.md` § 1.2 identifie explicitement « la forêt HGP » au K-MST
-Gabriel et `src/forest/fold.hpp` appelle ses deltas « payload hiérarchique
-complet ». `README.md` et `docs/ARCHITECTURE.md` ne nomment ni Gabriel ni K-MST,
-mais surqualifient la portée en l'identifiant aux dix forêts horizontales HGP.
-La sortie combine en outre `tower_scope=profile_complete_k10` et
-`vertical_maps=none`.
+les incidences silencieuses. La faute documentaire restante doit être localisée
+précisément. `docs/MATHEMATIQUES.md` § 1.2 distingue correctement l'objet K-MST
+visé du flot Gabriel actuellement rendu, et `src/forest/fold.hpp` dit
+explicitement que ses deltas ne forment pas un payload hiérarchique complet et
+ne peuvent pas porter `require_exact=true`. En revanche, `README.md` annonce
+encore « le même objet que la v4 — les dix forêts horizontales HGP » et
+`docs/ARCHITECTURE.md` nomme encore son objet « les dix forêts horizontales
+HGP », tout en déclarant dans les deux cas
+`forest_semantics=verified_events_only`. Cette auto-contradiction, avec
+`tower_scope=profile_complete_k10` et `vertical_maps=none`, est le P0 à fermer.
 
 La fixture `gabriel-point-set-counterexample-5-points-v1` reste décisive : les
 cofaces non-Gabriel `ACD` et `ACE` attachent silencieusement `AC` au niveau
@@ -178,7 +182,7 @@ mutant ; si le mutant tombait sous `20000`, la porte rendrait 3 au lieu du code
 4 contractuel. Le mutant doit rendre 4 si son invariance **ou son plancher**
 échoue, tandis que le nominal vacant garde un code distinct.
 
-### `EndpointCredit` : helper algébrique reçu, crédit du cœur encore absent
+### `EndpointCredit` : raccord présent, provenance end-to-end encore à graver
 
 Le pin propage `h_a+h_b` vers le pré-scan W4 et les secteurs. La
 disjonction est correcte : le crédit vit dans `A union B`, tandis que
@@ -196,10 +200,12 @@ de wire n'était requis.
 Le rejeu reçoit cette progression : build ciblé réussi, registre et fixture
 locale verts, puis q3/q4 `uniform`, `clusters` et les deux routes tout-hôte
 verts, soit `9/9` portes ciblées en `155,65 s`. Ces mêmes parités échouaient
-avant le raccord. La propagation scalar/batch de ce sous-ensemble est donc
-fermée au pin courant ; les autres routes batch et la suite complète
-restent à rejouer après commit. Le second rejeu shaped/corde/secteur/q4-batch
-porte ce sous-ensemble à `14/14` en `47,02 s`.
+avant le raccord. Les routes scalaires et batch q3/q4 construisent désormais
+le token depuis `sc.ha/sc.hb` et le transmettent au prétest puis aux secteurs ;
+le second rejeu shaped/corde/secteur/q4-batch porte le sous-ensemble ciblé à
+`14/14` en `47,02 s`. Le commit `b8082040` rapporte une suite CPU complète
+`303/303` à son pin ; après le pin fonctionnel `fc53472f`, seules les portes
+ciblées nommées dans cette passe ont été rejouées.
 
 La fixture croisée fait toutefois encore confiance à
 `EndpointCredit.base=1`. Elle ne calcule pas ce crédit via
@@ -251,13 +257,14 @@ polygone suffisant peut ne pas recompter ce témoin universel dans chaque
 secteur, et le minorant `max(cnt[k],cnt_out[k]+base)` devient utile. Cette
 séparation mathématique doit être conservée.
 
-La réponse de Claude reçoit aussi honnêtement le second défaut de corde. Dans
-le worktree, les routes scalaire et shaped constatent maintenant la mort après
+La réponse de Claude reçoit aussi honnêtement le second défaut de corde. Au pin
+fonctionnel `fc53472f`, les routes scalaire et shaped constatent la mort après
 la mise à jour positive et avant le `continue`, avec la priorité historique
 préservée. Le vrai `q4_kernels.cuh` forme désormais lui aussi `Bz/my_piece`
 avant de brancher sur `P>0`. Le titre « verrou de corde fermé » reste néanmoins
-prématuré jusqu'à la fixture à deux ordres et au rejeu CUDA : le kernel n'a été
-ni compilé ni exécuté dans cet environnement.
+prématuré jusqu'à la fixture exacte cinq points sur les routes scalaire/shaped
+et au rejeu CUDA : le kernel n'a été ni compilé ni exécuté dans cet
+environnement.
 
 La nouvelle `sector_credit_fixture.cpp` garde bien le mutant au code 4, mais
 elle construit encore
@@ -381,8 +388,10 @@ canopée et lift brut. Les quatre bras dérivent leurs `z` de ce même tape par
 est refusée si un écrêtage crée une collision. Les digests du tape, du nuage
 ordonné et du lineage rendent cette causalité vérifiable.
 
-Les deux options doivent aussi refuser un cap négatif, supérieur au plafond
-nominal ou appliqué hors `terrain`, et imprimer la graine effective `uint32`.
+Les deux options doivent aussi refuser un cap négatif ou supérieur au plafond
+nominal et imprimer la graine effective `uint32`. `canopy_lift_cap` est réservé
+à `terrain` ; la loi de hauteur actuellement nommée `bump_amp_cap` est supportée
+sur `terrain` et les deux familles `scanline_*`, et doit être refusée ailleurs.
 `38fa88af --entrees-differentes` évite honnêtement de comparer comme un objet
 les compteurs de nuages distincts ; il ne restaure aucun appariement. Le reçu
 doit ranger ces hashes comme `signatures_compteurs`, pas comme catalogue ou
@@ -506,18 +515,18 @@ ont une cause commune.
 La section 6 versionnée dans `a78d0338` dépasse donc le reçu lorsqu'elle conclut
 « la même anisotropie » et « imputable ». Le nominal dilate un nombre fixe de
 reliefs macroscopiques de façon approximativement autosimilaire ; la loi
-`[15,30]` les aplatit relativement. Le fait reçu est seulement que les six
-pentes locales de la boucle cœur+corde deviennent inférieures à un dans les
+`[15,30]` les aplatit relativement. Le fait reçu est seulement que les trois
+exposants sécants 8k→32k de `tests_cœur` deviennent inférieurs à un dans les
 cohortes bornées observées. `overlap_multiecho` n'a pas été joué et conserve un
 lift d'écho allant jusqu'à `coord/10`.
 
-Les compteurs terminaux localisent néanmoins bien le prochain travail. Pour les
-trois graines, les pentes locales des itérations de scan cœur+corde valent
-`1,606/2,354`, `2,068/2,086`, `1,629/1,795` au nominal, contre
-`0,533/0,886`, `0,825/0,685`, `0,732/0,929` sous la nouvelle loi. Cela décrit
-trois tailles, pas une complexité sublinéaire. À `n=32000`, nominal/borné donne
-un ratio de seeds de `4,70/5,38/4,08` et un ratio d'itérations cœur+corde de
-`15,42/18,75/8,36`, tandis que les nombres de covers ne diffèrent que de
+Les compteurs terminaux localisent néanmoins bien le prochain travail. Entre
+8k et 32k, les exposants sécants de `tests_cœur` sur les trois graines valent
+`1,712--2,077` au nominal contre `0,710--0,830` sous la nouvelle loi. Cela
+décrit trois tailles, pas une complexité sublinéaire. À `n=32000`,
+nominal/borné donne un ratio de seeds de `4,70/5,38/4,08` et un ratio de
+`tests_cœur` de `15,42/18,75/8,36`, tandis que les nombres de covers ne
+diffèrent que de
 `1,12/1,13/1,06` et les candidats émis de `1,05/0,98/0,79`. Le résidu n'est
 donc pas le nombre de rectangles : il se forme dans la masse par cover, les
 seeds et le scan de fibre. Les `45,58/50,69/26,43` itérations par seed énuméré
@@ -591,11 +600,12 @@ Le raccord à `postsep_refine_levels>0` reste un contrat séparé.
 ## P1 — stratégie sortie-sensible : plan conditionnel reçu, borne ouverte
 
 `STRATEGIE_SOUS_QUADRATIQUE_Q3_Q4_20260830.md` fournit une direction utile :
-front WSPD prouvé à `s=8`, requêtes saturées de facteurs, fermeture
-hiérarchique par `h_c`, puis sous-complexe de faibles profondeurs pour les
-ancres lourdes. Elle sépare correctement les gains de constante, la sortie et
-les termes d'incidence. Elle ne résout pas le P0 Gamma et reste attachée au
-sous-flot horizontal `verified_events_only`.
+front WSPD exact dans sa sémantique de séparation/ownership à `s=8`, mais avec
+borne linéaire et charging du quotient encore ouverts ; requêtes saturées de
+facteurs, fermeture hiérarchique par `h_c`, puis sous-complexe de faibles
+profondeurs pour les ancres lourdes. Elle sépare correctement les gains de
+constante, la sortie et les termes d'incidence. Elle ne résout pas le P0 Gamma
+et reste attachée au sous-flot horizontal `verified_events_only`.
 
 La contre-revue a imposé quatre corrections dans le document : le grand-livre
 paie explicitement chaque ancre résiduelle `|E|`; la profondeur historique
@@ -659,30 +669,39 @@ conserve `facet_keys` puis `final_canon_fid`, donc la barrière atteint aussi ce
 payload `verified_events`. Elle ne s'étend pas automatiquement à un futur
 payload implicite/reconstructible, au fold vivant non raccordé ou à Gamma.
 
-Cette géométrie possède déjà un replay entier préparatoire dans le profil : la fixture
-proposée `linked_arcs_u16`, de tailles `N=6,10,18,34`, donne exactement
+Cette géométrie possède déjà un replay entier préparatoire dans le profil : la
+fixture proposée `linked_arcs_u16`, de tailles `N=6,10,18,34`, donne exactement
 `12/40/144/544` clés q3 et `4/16/64/256` clés q4 après RLE. À `N=34`, toutes
 les marges d'acuité, de centre intérieur et de vide sont strictes. La stratégie
 porte les coordonnées littérales et les marges. Il faut maintenant graver ce
 replay contre l'oracle exact **et** la route produit, avec profondeur zéro,
 coquille égale au support et owner exact-once. L'oracle géométrique et le ledger
 produit sont deux preuves distinctes. `92605016` versionne ces constats et les
-résultats d'un probe jetable, pas la porte permanente ; « receive linked arcs »
-ne ferme donc pas encore ce point. Le domaine u16 fixe ne fournit pas une
+résultats de probes jetables indépendants : une énumération géométrique OBig et
+des appels séparés de la route produit reproduisent les comptes, l'exact-once
+pré-RLE, le census et l'équivariance attendue. Ce ne sont toujours ni un oracle
+exécutable versionné ni une porte permanente ; « receive linked arcs » ne ferme
+donc pas encore ce point. Le domaine u16 fixe ne fournit pas une
 asymptotique infinie : cette série montre seulement un ratio sortie/`N^2`
 constant jusqu'à 34 points. La borne `Omega(N^2)` appartient à la famille
 exacte à précision croissante. Elle suffit à imposer un contrat sortie-sensible
 à toute généralisation de précision qui matérialise ce catalogue ou cette
 forêt explicite ; une représentation implicite/reconstructible est un autre
-contrat. Pour u16, cette cible reste une doctrine prudente et falsifiable, pas
-un théorème asymptotique inventé.
+contrat. Les événements seuls imposent déjà au payload forestier courant au
+minimum `(n+1)^2+2n=N^2/4+N-2` facettes K=2 et
+`2n(n+1)=N^2/2-N` facettes K=3, soit `3N^2/4-2` clés au total, car
+`ForestResult` conserve aussi un `final_canon_fid` par facette. Pour u16, cette
+cible reste une doctrine prudente et falsifiable, pas un théorème asymptotique
+inventé.
 
 Le ledger de sortie sépare en outre `B`, nombre de `BallKey`, de
-`S_shell=sum_key |U_B|`, masse des coquilles complètes. Une seule clé vide peut
-avoir `|U_B|=Theta(n)` ; l'expansion des supports est encore un troisième
-contrat. Le constructeur shallow doit grouper les concurrences exactes et ne
-jamais employer de perturbation symbolique, qui changerait coquille et
-intérieur.
+`S_shell=sum_key |U_B|`, masse des coquilles complètes. Dans le profil courant
+`complete_regular`, une sortie acceptée impose `shell_cap<=12`, donc
+`S_shell<=12B` ; une coquille `Theta(n)` concerne une généralisation non
+plafonnée ou provoque ici un refus transactionnel `resource_exhausted`.
+L'expansion des supports est encore un troisième contrat. Le constructeur
+shallow doit grouper les concurrences exactes et ne jamais employer de
+perturbation symbolique, qui changerait coquille et intérieur.
 
 Le sweep de `h_c` est également précisé. Sur toute la corde du carrier, chaque
 site donne le signe affine `P-mu*B`; un sweep groupé aux racines, extrémités et
@@ -769,13 +788,15 @@ elles ne remplacent aucune de ces preuves.
 1. Conserver le plancher `20000` du replay shaped, graver en plus la fixture
    exacte cinq points, puis rejouer le kernel ; garder CUDA non reçu tant que
    `nvcc` n'a pas passé la porte.
-2. Dériver `EndpointCredit` depuis les histogrammes sur la vraie fixture
-   `o.z=1024`, ajouter les indices `upos` bornés du cœur au crédit résiduel,
-   recevoir l'héritage postsep et fermer les trois
-   compteurs `hist_*` des routes batch.
-3. Graver `linked_arcs_u16` contre oracle et produit. Accepter alors
-   explicitement le contrat sortie-sensible et interdire tout gate de temps
-   universel qui oublierait les `BallKey` demandées.
+2. Graver dans une fixture produit non vacue la dérivation déjà raccordée
+   `corner_histograms -> EndpointCredit -> secteurs`, avec `o.z=1024`, puis
+   ajouter les indices `upos` bornés du cœur au crédit résiduel, recevoir
+   l'héritage postsep et fermer les trois compteurs `hist_*` des routes batch.
+3. Graver `linked_arcs_u16` contre un oracle OBig/i128 indépendant et le
+   produit : événements q3/q4, facettes K=2/K=3, exact-once pré-RLE,
+   permutation physique, réétiquetage équivariant et mutant de troncature i64.
+   Accepter alors explicitement le contrat sortie-sensible et interdire tout
+   gate de temps universel qui oublierait les sorties demandées.
 4. Benchmarker le shadow `ball_depth_at_least` après déduplication bornée des
    clés. Il précède `PlanConflictGrid` : c'est la réutilisation exacte la plus
    courte et elle dira si un arrangement est réellement nécessaire.
@@ -793,16 +814,17 @@ elles ne remplacent aucune de ces preuves.
 
 ## Vérifications indépendantes de cette passe
 
-- à la tête `92605016`, rebuild ciblé de `mhgp5_families_fixture` et
-  `mhgp5_q4_stage_probe`, puis 5/5 CTests verts : fixture de familles, porte de
-  mutants, les deux ordres de corde nominal/mutant et `q4_stage_uniform` ;
-- au pin `b8082040`, sélection corde/secteurs/batch : 16/16 CTests, dont les
-  deux ordres shaped et leur mutant ; ce résultat ne couvre ni la fixture
-  scalaire cinq points ni CUDA ;
+- sur les sources `fc53472f`, rebuild ciblé de `mhgp5_families_fixture` et
+  `mhgp5_q4_stage_probe`, puis 5/5 CTests verts : `mhgp5_families_fixture`,
+  `mhgp5_mutants_gate`, `mhgp5_q4_chord_ordre`, son mutant et
+  `mhgp5_q4_stage_uniform` ;
+- le commit `b8082040` rapporte une suite CPU complète 303/303 à son pin ; elle
+  n'a pas été rejouée intégralement après `fc53472f` et ne reçoit pas CUDA ;
 - replay entier préparatoire non reçu `linked_arcs_u16` : comptes
   q3/q4 `12/4`, `40/16`, `144/64`, `544/256`, clés toutes distinctes et
-  coquille égale au support ; l'oracle indépendant et la porte produit restent
-  à construire ;
+  coquille égale au support ; une énumération OBig indépendante jetable et des
+  probes produit séparés les reproduisent, mais la porte versionnée reste à
+  construire ;
 - `python3 tools/check_docs.py` : 225 fichiers Markdown actifs validés ;
 - `python3 tools/check_implementation_status.py` : 20 phases et portes
   validées ;
