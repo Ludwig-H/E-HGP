@@ -21,8 +21,8 @@ des corrections, ils ne certifient rien.
 - [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict mutable, pins jugés et ordre
   de correction. Il prime sur toute réponse historique.
 - [`AUDIT_GCP_V6_P0_20260831.md`](AUDIT_GCP_V6_P0_20260831.md) : porte de
-  sûreté dédiée mise à jour sur `98bae2a9` ; NO-GO ciblé sur échéances
-  post-start, attestation causale de la frontière et tuple post-arrêt.
+  sûreté dédiée mise à jour sur `95bb2281` ; septième tour largement reçu,
+  NO-GO étroit sur trois patches locaux avant toute session facturable.
 - [`ALERTE_CAMPAGNE_CPU_MIXTE_20260831.md`](ALERTE_CAMPAGNE_CPU_MIXTE_20260831.md) :
   preuves des captures CPU et statut borné de la confirmation hors échantillon.
 
