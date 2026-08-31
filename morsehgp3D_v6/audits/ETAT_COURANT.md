@@ -2,12 +2,11 @@
 
 Date de coupe : 31 août 2026.
 
-HEAD observé : `e171ff3a`. Autorités techniques : `c0a17f2d` pour la réponse
-courante, `781fbe27` pour le protocole GCP et `320299df` pour le reçu de
-réplication. Les modifications E6 et la campagne de confirmation encore
-présentes dans le worktree à cette coupe ne sont pas une autorité. Les
-derniers rejeux produit indépendants complets restent rattachés à `88e530c6` ;
-toute extension de ce périmètre est explicitée ci-dessous.
+HEAD observé : `65757693`. Autorités techniques : `6d755804` pour le
+prototype E3/G16, `cd49a390` pour les callbacks et le protocole GCP,
+`320299df` pour le reçu de réplication et `8ed2dea6` pour le reçu de
+confirmation contre-audité ci-dessous. Le bilan `65757693` n'ajoute aucune
+preuve et ne prime pas sur le présent verdict.
 
     phase=exploration_v6_hors_registre
     backend=cpu_reference
@@ -21,50 +20,51 @@ toute extension de ce périmètre est explicitée ci-dessous.
 |---|---|
 | noyau mathématique `381ba60b` | reçu dans sa portée bornée |
 | exact-K, omission WSPD et ownership | reçus dans leurs fixtures |
-| callbacks et échecs du fold | ouverts ; la porte nominale contient une data race |
+| callbacks et échecs du fold | course de la porte corrigée ; concurrence réelle et exceptions encore ouvertes |
 | première campagne d'octaves | `exploratory_complete`, jamais décisionnelle |
 | répétition `a30c3a98` | `replication_complete`, reproductibilité seulement |
-| confirmation hors échantillon | préenregistrée, exécution `.partial`, aucun verdict |
+| confirmation hors échantillon | cœur reçu ; `confirmation_candidate`, déclencheur E6 non confirmé |
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
-| étage E6 du worktree | non reçu : quatre facteurs changés ensemble, oracle G16 absent |
+| prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
 | protocole GCP | **NO-GO**, audit dédié faisant autorité |
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
-contre-fixture causale, digest post-préfiltre séparé et conformité v5↔v6 jugée
-sur les forêts et `digest_all`. Aucun résultat de campagne ne promeut
-`public_status`.
+contre-fixture causale, digest post-préfiltre séparé et différentiel historique
+v5→v6 jugé sur les forêts et `digest_all`. La v5 ne fait pas autorité sur la
+v6, et aucun résultat de campagne ne promeut `public_status`.
 
 ## Rejeux indépendants disponibles
 
-Au pin `88e530c6` :
+Au pin `6d755804` :
 
 - configuration et construction Release canoniques : succès ;
-- huit portes ciblées ownership, mutants cap/split, contrats d'échec,
-  provenance de campagne et agrégateur : 8/8 en 15,33 s ;
-- suite hors label `scale` : 68/68 en 105,83 s, dont deux tests `oracle` ;
-- contrôle documentaire : 238 fichiers Markdown actifs validés ;
-- contrôle du registre : 20 phases et leurs portes validées.
+- nouvelles portes E3/G16 ciblées : 5/5 en 140,32 s (`e6_grille_objet`,
+  oracle G8/G16 et trois mutants) ;
+- reste de la suite hors label `scale`, sans répéter ces cinq portes : 69/69
+  en 27,58 s ; total combiné 74/74 ;
+- oracle nominal direct : zéro désaccord sur 4 799 488 cellules G8 et
+  19 197 952 cellules G16, zéro violation du localisateur sur 324 171 points
+  par résolution.
 
-Le probe `fold-inject-b-exception-k3` termine encore par SIGABRT, code 134.
-Le troisième tour GCP a séparément rendu verts ses deux selftests, son test
-d'intégration et 81/81 tests de sûreté locaux sur le code de `781fbe27`, mais
-ces tests ne suffisent pas à rouvrir une session facturable : plusieurs
-mutants passent encore par une cause parasite et le manifeste du reçu est
-mécaniquement faux.
-
-Le claim « 68/68 avec le binaire de la sonde E6 » n'est accompagné d'aucun
-journal ou hash qui le lie au binaire annoncé. La suite sera donc rejouée sur
-le prochain `HEAD` stabilisé avant réception.
+Le probe `fold-inject-b-exception-k3` termine encore par SIGABRT, code 134 ;
+il reste volontairement hors CTest. Sur le cycle de vie et le validateur
+audités à `cd49a390`, les faux pilotes ont ensuite été rejoués localement :
+les deux selftests Bash passent, ainsi que l'intégration et 81 tests de
+sûreté, soit 82/82 tests Python en 115,682 s. Ces verts ne contiennent pas les
+mutants d'état perdu ou de génération erronée décrits par l'audit dédié ; ils
+ne lèvent donc pas son NO-GO. Une extension concurrente non committée du
+runner distant est hors de ce rejeu et du présent commit d'audit.
 
 ## Exact-K, omission unique et ownership WSPD
 
 Le juge exige exactement les forêts K de 1 à `kmax_eff`. La fixture n=2
 fournit K1 correct plus K10 surnuméraire et vérifie le refus de code 2.
 
-`781fbe27` ajoute une tentative de rejet de K11, mais sa fixture contient
-deux fois `digest_forest_K1`. Le code 2 peut donc être causé par ce doublon et
-ne reçoit pas encore causalement la borne globale K≤10. Supprimer la seconde
-ligne K1 et contrôler le diagnostic exact.
+`cd49a390` retire le doublon K1 de la fixture K11. Ses lignes K1–K10 et
+`digest_all` correspondent désormais à la référence valide : K11 est
+l'unique défaut syntaxique et le code 2 devient causal. Le chargeur ne lit
+toutefois la référence qu'après le calcul complet du pipeline ; c'est un
+rejet exact, pas un rejet précoce.
 
 Le mutant `wspd-drop-rect` retire une sortie après la fusion ordonnée. La
 porte vérifie le compteur test-only `mutant_dropped_rects == 1` et la
@@ -89,31 +89,32 @@ encore couverts par cet oracle.
 
 ## Contrat d'échec et callbacks
 
-`88e530c6` grave trois observations utiles : entrée invalide sans payload,
-invalidation d'un sous-ensemble de champs sur échec census/fold-A, et ordre
-croissant des callbacks `on_forest` en nominal. La preuve nominale n'est
-toutefois pas recevable : `phase_calls` est un entier non atomique incrémenté
-depuis les fils A et B. Le test possède donc un comportement indéfini.
+`cd49a390` rend la porte simple recevable : `phase_calls` est atomique, la
+trace `on_forest` est protégée, chaque valeur inflight doit échouer, census
+exige le préfixe vide et fold-A K2 exige exactement K1. Les digests, cartes et
+totaux désignés comme payload sont invalidés après les retours à statut.
 
-Les autres lacunes restent concrètes :
+Cela ne teste pas encore la promesse concurrente. Census échoue avant tout
+fold et fold-A K2 avant la création du slot K2 : un seul K peut être actif,
+même avec `fold_inflight=2` ou 8. Aucun test ne synchronise plusieurs folds
+ni ne contrôle `peak_fold_inflight`. Les mutants exigent seulement un statut
+non complet et la forme du préfixe, sans statut, message ou phases causales
+exacts ; une panne étrangère de même forme peut donc les rendre verts.
 
-1. `any_fail` exige un échec sur au moins une des valeurs inflight 1/2/8,
-   pas sur chacune.
-2. Les injections actuelles n'atteignent pas réellement deux ou huit folds
-   simultanés et ne contrôlent pas `peak_fold_inflight`.
-3. Les callbacks d'échec acceptent une sous-séquence croissante arbitraire ;
-   census devrait exiger le vide et fold-A K2 le préfixe exact K1.
-4. `FoldPhase::kPublished` signifie « livré provisoirement », avant le statut
-   global. Renommer ce jalon et ajouter un terminal global commit/abort.
-5. Une exception B ou issue d'un callback est relancée avant invalidation.
-   Le CLI ne la convertit pas en statut terminal.
-6. « invalidation totale » surqualifie le nettoyage : génération, expansion,
-   temps, workers, RSS et plusieurs diagnostics peuvent rester partiels.
+Les exceptions B et celles de `on_fold_phase`/`on_forest` sont toujours
+relancées. Elles ne produisent ni `RunResult` terminal, ni code 3, ni
+invalidation observable ; le probe B reste volontairement hors CTest car il
+termine par signal. `FoldPhase::kPublished` demeure une livraison provisoire
+sans événement global commit/abort. Enfin, l'API appelle `on_fold_phase`
+depuis plusieurs fils sans documenter l'obligation de thread-safety, et
+« invalidation totale » surqualifie toujours les diagnostics laissés
+partiels.
 
-Correction constructive : typer séparément diagnostics partiels et payload
-transactionnel, tracer les callbacks sous mutex ou atomiques, puis exercer le
-mutant B et les exceptions de callbacks sous inflight 1/2/8 avec statut,
-préfixe et payload exacts.
+Correction constructive : injecter un échec B tardif avec barrière
+déterministe, prouver un pic 2 puis 8 et les suffixes calculés mais non
+publiés, exiger statut/message/phases exacts, puis convertir les exceptions en
+terminal observable. Documenter la concurrence et fournir `on_terminal` ou
+un sink transactionnel commit/abort.
 
 ## Définitions du grand-livre à aligner
 
@@ -173,29 +174,33 @@ bit-reproductible.
 `99bf6723` préenregistre utilement un profil hors échantillon
 `locale_confirmation_v1` : tailles 10k/20k/40k et graines 6/7/8, disjointes
 des tailles 8k/16k/32k et graines 3/4/5 qui ont servi à dériver l'hypothèse.
-La campagne lancée au pin `320299df` est encore publiée sous
-`campagne_confirmation_20260831.partial` : aucun verdict, pente ni
-`E6_active` ne doit en sortir avant sa clôture terminale. Le mode `auto` lie
-son binaire aux sources archivées au pin, et la publication par répertoire
-partiel réduit les collisions. Pour ce run, scripts et profil ont aussi été
-recoupés ex post avec les blobs du pin. La chaîne générique garde néanmoins
-les frontières suivantes :
+La campagne au pin `320299df` ferme ensuite ses 36 tuples : matrice exacte,
+36 codes 0, `DONE`, hashes bijectifs, stderr vides. Les scripts et le profil
+archivés égalent leurs blobs du pin ; un rebuild indépendant depuis
+`git archive` reproduit octet pour octet le binaire privé
+`f74a8759...67ae07e`. Le cœur brut de 81 fichiers audité juste après
+publication porte le manifeste
+`a05b9b72ea0150859a6c612fab98a4c7e266ce3a812a7430be6f19dc751f7b93`.
 
-- les scripts et le profil archivés sont hashés entre eux mais pas comparés
-  à leurs blobs Git au pin ;
-- un binaire explicite est encore acceptable par le validateur, même pour un
-  reçu nommé décisionnel ;
-- un code de run non nul peut encore finir `DONE` et être publié, avant refus
-  ultérieur de `pentes.py` ;
-- l'agrégateur exécuté ne s'authentifie pas contre sa copie, relit les sorties
-  après validation (TOCTOU) et écrit `AGREGAT.txt` directement.
+Sur le pas réel 20k→40k, les médianes
+`W_sweep1/M_anchor[q4]/T_lourde` valent terrain 1,220/1,325/1,308 et
+scanline 1,160/1,056/1,773. Aucun terme n'atteint 2 et aucune émergence
+n'apparaît : **le déclencheur E6 préenregistré n'est pas confirmé**. Les
+gardes bornées uniform et eight clusters ne déclenchent pas non plus.
 
-Créer le répertoire partiel par opération exclusive, lier les scripts au pin
-dans la chaîne elle-même, réserver le mode `auto` au profil confirmatoire et
-faire produire au validateur une représentation immuable consommée une fois
-par un agrégateur auto-authentifié. Ces défauts limitent l'autorité générique ;
-ils n'autorisent ni à interrompre ni à requalifier rétroactivement la capture
-privée déjà épinglée.
+Le statut reste `confirmation_candidate`, pas confirmation formelle. Les
+autorités écrites fixent encore 8k/16k/32k, graines 3/4/5 et le pas
+16k→32k, alors que l'exécutable a jugé 20k→40k. La porte complète n'est pas
+verte : médiane W1 terrain 2,03 sur le premier pas, et médiane
+`P_factor_q2` eight clusters 2,26 sur le second. Enfin, `PENTES.txt`, un
+`__pycache__`, puis `AGREGAT.txt` ont été ajoutés après le terminal : le
+défaut de snapshot est réalisé, même si l'agrégat ajouté reproduit celui de
+la copie auditée (`400533d9...a0895`).
+
+Le rapport de campagne dédié fixe les détails. Ne pas re-régler la règle sur
+ces données. Pour fermer la candidate sans refaire les mesures, aligner les
+autorités sur le profil effectivement préenregistré, lier les dérivés au
+manifeste du cœur et les publier à côté d'un snapshot réellement gelé.
 
 ## Sonde E6
 
@@ -235,63 +240,142 @@ et ventilation octave × raison × issue de seeds, W1, ancres, covers et
 cellules examinées. Le coût du probe lui-même doit être compté : sa boîte peut
 parcourir jusqu'à 4 225 cases par kill cœur.
 
-Le worktree postérieur à `c0a17f2d` raccorde déjà une option
-`--e6-grille`, mais elle ne doit pas être reçue en l'état. Elle change en une
-fois cinq décisions sur les ancres à cover≥1024 : G8→G16, seuil fixe qui
-court-circuite aussi `--cell-min-sites`, levée de `near_m`, levée du ratio
-seeds/cover et remplacement exclusif sans repli G8. La sonde n'a testé aucun
-contrefactuel sur `near_m` ou le ratio ; écrire qu'elle les a « réfutés » est
-donc faux. La branche lourde saute en outre le scan complet du cover qui
-calculait `nacute` et `near_m` ; ce coût retiré n'est compté ni dans W1 ni
-dans une monnaie dédiée, et peut donc être confondu avec le gain G16.
+`261d412a` livre maintenant l'option. La revue statique ne trouve pas de
+fausse mort intrinsèque à G16 : le certificat affine est générique en G et
+le localisateur paraît conserver une marge suffisante. Cette appréciation ne
+remplace pas une preuve : la borne publiée était chiffrée G8 et le template
+n'est pas borné. Restreindre au moins ses instanciations à G8/G16 et écrire
+explicitement le cas G16.
 
-Une première porte ON/OFF ajoutée dans ce même worktree est utile : elle
-compare les digests raw, post-préfiltre, forêts et all sur trois familles.
-Elle ne reçoit pas encore l'étage : n=2000, graine 3 et deux fils seulement ;
-`digest_balls` omis ; aucun mutant ni frontière ; et le seul plancher exige
-100 constructions G16, sans kill additionnel ni baisse stricte de W1. Une
-implémentation qui construit des grilles sans jamais les utiliser peut donc
-rester verte. Le parcours de la boîte de corde n'est pas raffiné : sa borne
-brute passe de 4 225 cases en G8 à 16 641 en G16, dont beaucoup peuvent être
-hors corde et même hors grille ; borner ou compter explicitement ce coût.
+Les fichiers versionnés permettent de recouper cinq faits utiles : sur les
+cinq paires ON/OFF, `digest_candidates_v5_compat`, le post-préfiltre, les dix
+forêts et `digest_all` coïncident ; les baisses de W1 sont exactes ; les
+pentes mono-graine valent scanline 2,407256→1,893616 et terrain
+2,081451→1,763386. Ce signal reçoit le prototype comme **sonde W1 opt-in**,
+jamais comme preuve universelle ou décision d'activation. La règle du
+grand-livre interdit précisément une conclusion mono-graine et exige le coût
+de chaque terme payé.
 
-Le verrou est plus ancien que G16 : la v6 ne contient ni le
-`tests/cell_grid_oracle.cpp` cité par le code, ni les fixtures F9–F11, ni une
-porte `CellGrid` dans son CMake. Les affirmations « re-requalifiés en v6 » de
-`MATHEMATIQUES.md` et « fixtures F1–F11 portées » du plan de tests sont donc
-fausses à cette coupe. L'oracle G8 présent dans la v5 historique peut guider
-une reconstruction, mais son reçu ne fait pas autorité pour la v6.
+Le reçu `e6_grille_appariee_20260831` reste documentaire : son `pin` est un
+placeholder, il n'a ni manifeste de hashes, ni commandes, codes de sortie,
+stderr, terminal `DONE`, ni binaire archivé. Le hash annoncé correspond au
+`build/v6/mhgp6` local encore présent, sans chaîne durable vers les sources.
+Contrairement à la note et au META, aucun `digest_raw_candidates` ne figure
+dans les dix sorties ; seule la petite porte n=2000, graine 3, deux fils le
+compare. Le « 70/70 » n'a pas de journal versionné et n'a pas été rejoué
+indépendamment pendant la campagne CPU.
 
-Enfin, cet essai n'est pas le Tier R nommé E6 par l'architecture v6 : E6 y
-désigne une grille 3D par rectangle puis un moteur plan, alors que le diff
-raffine en 2D le tueur par ancre déjà placé en E3. Le nommer provisoirement
-« expérimentation E3/G16 », ou modifier explicitement le contrat
-d'architecture avant de l'appeler E6 ; ne pas faire glisser silencieusement
-le jalon.
+La porte ON/OFF est donc utile mais insuffisante : `digest_balls` omis, une
+seule graine et un seul réglage de fils, aucun mutant ni frontière ; son
+plancher exige 100 constructions G16, sans kill additionnel ni baisse stricte
+de W1. Une grille construite puis inutilisée peut rester verte.
 
-Recette constructive avant réception : porter un oracle v6 indépendant et
-le paramétrer explicitement sur G=8 puis G=16, avec évaluation directe i128,
-localisateur rationnel, extrêmes u16 et mutants non-strict/h−1/epsilon. Pour
-l'attribution économique, conserver au moins les bras : baseline G8 ; G8
-forcé sur les seules ancres lourdes ; G16 avec politique historique ; G16
-avec levée de `near_m` seule ; G16 avec levée du ratio seule ; G16 avec les
-deux levées. Préenregistrer séparément tout balayage du seuil 1024. Exiger les
-digests candidats/forêts/all ON/OFF sur fils 1/6/8 et trois graines, un
-plancher de kills additionnels, une fixture fail-open avec repli G8 et des
-compteurs de coût séparés par résolution, y compris le scan de politique.
-L'option active doit être imprimée même si elle ne construit aucune grille ;
-la représentation de la sonde simultanée doit être versionnée.
+L'attribution est ouverte. Le chemin couple G8→G16, seuil fixe 1024 qui
+court-circuite `--cell-min-sites`, levée de `near_m`, levée du ratio,
+remplacement sans repli G8 et suppression du scan de politique du cover. Sur
+les cas stationnaires, 79–87 % des G16 remplacent une G8 déjà éligible ; les
+G16 nouvellement éligibles ne sont que 1 596–5 067. Sur `eight_clusters`, au
+contraire, 139 606 des 148 426 G16 sont nouvelles : les grilles q4 passent de
+13 897 à 153 503 pour −12,179 % de W1. Le mur indicatif y monte de 5,472 % et
+celui de terrain 16k de 26,272 %. La machine partagée interdit une conclusion
+de temps, mais ces deux témoins suffisent à refuser l'assimilation
+W1↓ ⇒ coût total↓.
+
+À `261d412a`, le coût G16 n'était pas compté : ni masse des covers construits,
+ni comparaisons, ni cellules consultées. La boîte de corde reste
+rectangulaire et sa borne brute passe de 4 225 cases en G8 à 16 641 en G16
+par seed.
+
+`6d755804` apporte un progrès substantiel : le prototype est enfin nommé
+E3/G16, cinq options de bras sont exposées, la porte compare désormais
+raw/balls/post-préfiltre/forêts/all, et un oracle v6 exerce G8 et G16 avec
+évaluation directe i128, localisateur rationnel, extrêmes u16 et trois
+mutants. Les cinq CTests passent ; le nominal ne trouve aucun désaccord sur
+4 799 488 cellules G8 et 19 197 952 cellules G16. Aucun faux kill évident
+n'a été trouvé par revue statique. Cela reçoit une **porte de primitives et
+de régression bornée**, pas encore une certification universelle G16.
+
+L'indépendance de l'oracle est partielle : `cell_needed` vient du produit,
+le juge rationnel réutilise `mul_128x128_192`, et les méthodes finales
+`cell_dead`, `range_dead`, `point_dead` et `segment_dead` ne sont jamais
+appelées. F9 et F11 n'imposent plus leurs verdicts fonctionnels ; `pairs`
+compte des couples grille×cellule, pas site×cellule. Chaque mutant est jugé
+sur l'agrégat G8+G16, de sorte qu'une seule résolution pourrait suffire à le
+tuer. Enfin, aucune porte croisée ne prouve la monotonie de raffinement.
+
+La partie discrète de cette monotonie est démontrable : chaque cellule G8 a
+quatre filles G16, tout témoin affine du parent témoigne pour ses filles, et
+toute fille nécessaire a un parent nécessaire ; donc compte fille ≥ compte
+parent et `all_dead8 => all_dead16`. Les implications point/segment exigent
+en plus l'inclusion, après projection par `floor(k/2)`, des boîtes du
+localisateur G16 dans celles de G8. L'échantillon actuel ne remplace pas cette
+preuve. Écrire aussi dans la v6 la borne d'arrondi G16 et restreindre
+`CellGridT` par `static_assert` à G∈{8,16} ; l'oracle traite aujourd'hui tout
+G différent de 8 comme 16.
+
+Les cinq bras ne sont pas encore factoriels. `g16_politique` emploie G16 sur
+toute ancre q4 admise, tandis que les bras partiels ne l'emploient que pour
+cover≥1024. Les bras forcés court-circuitent aussi `cell_min_sites` et le
+scan de politique. Après un échec forcé, le compteur crédite pourtant ce
+scan comme sauté, puis le code refait la politique et retente la même grille
+avant G8 ; les causes de refus actuelles sont indépendantes de G.
+
+Les nouvelles monnaies ne sont pas fermées. `cells_consulted` n'est remis à
+zéro ni par `build` ni sur toutes les sorties, n'est jamais récolté en q3 et
+inclut la sonde diagnostique : il peut fuiter entre lanes/ancres ou être
+perdu. L'instrumentation incrémente aussi sur le baseline `off`, dont elle
+change le coût sans imprimer la ligne. Aucun compteur ne pondère la
+construction par la taille du cover ou ses comparaisons, qui est précisément
+le surcoût G16 attendu.
+
+Enfin, quatre bras sur cinq n'ont aucun plancher d'activité. Le plancher du
+seul `g16_leve` somme seulement les deltas positifs de seeds, sans delta net
+ni kills d'ancres. Une graine, n=2000 et deux fils ne reçoivent ni causalité
+des vetos/seuils, ni déterminisme des compteurs, ni coût à l'échelle.
+
+Correction constructive : donner le même support lourd aux contrastes ou
+ajouter leurs contrôles explicites ; compter tentatives, échecs, sites de
+build et consultations par résolution avec une garde de récolte sur chaque
+sortie ; isoler la sonde ; exiger activité et identité fermante par bras.
+Compléter ensuite l'oracle indépendant, les mutants séparés G8/G16 et la
+preuve de monotonie avant toute campagne appariée trois graines, fils 1/6/8.
+Le résultat confirmatoire négatif ci-dessus interdit de présenter ce chantier
+comme activé par la porte E6 ; il peut rester une expérimentation E3/G16
+opt-in jugée sur son coût total.
+
+## Réponse au bilan `65757693`
+
+Le bilan reçoit correctement deux résultats bornés : les 74 portes CPU
+observées sont vertes, et la règle confirmatoire exécutable rend
+`E6_active=non` sur le second pas hors échantillon. Il dépasse en revanche
+ces preuves sur trois points :
+
+- les cinq options existent, mais leurs supports, vetos, replis, compteurs et
+  planchers diffèrent encore ; elles ne forment pas un plan factoriel reçu ;
+- l'oracle ferme une régression de primitives G8/G16, pas encore la preuve
+  G16 ni toutes les méthodes finales ;
+- deux termes de la porte complète restent au-dessus de 2, donc « moteur
+  courant sous-quadratique en médiane » n'est pas un verdict disponible.
+
+Enfin, les selftests GCP verts ne couvrent ni l'état post-démarrage perdu avec
+handoff valide, ni un `targeted_stopped` d'une autre génération. Le GO GCP
+demandé par le bilan est refusé jusqu'à fermeture causale de ces chemins.
 
 ## GCP
 
 `AUDIT_GCP_V6_P0_20260831.md` est l'autorité dédiée. Le troisième tour
-`781fbe27` ferme l'entrée externe, l'authentification du contenu épinglé, la
-création exclusive du registre et le terminal extérieur sur le chemin
-nominal. Le NO-GO reste néanmoins actif avant toute session facturable : le
-profil canonique n'est pas comparé axe par axe, le validateur n'est pas
-idempotent, plusieurs mutants passent par l'inventaire déjà enrichi, et le
-`SHA256SUMS` du reçu référence son propre ancien nom temporaire. L'unicité du
-répertoire de reçu et la lecture stricte du registre restent aussi à finir.
+`781fbe27` ferme l'entrée externe, l'authentification du contenu épinglé et le
+terminal extérieur nominal. `cd49a390` ferme ensuite la comparaison du profil
+axe par axe, l'idempotence et la publication vérifiée et exclusive du reçu.
+
+Le NO-GO reste néanmoins actif avant toute session facturable. Le registre
+est toujours lu par `sed | head` ; un état perdu avec handoff valide est pris
+pour une absence de mutation, et un `targeted_stopped` d'une ancienne
+génération peut prendre le fast-path sans comparaison à la génération
+verrouillée. Aucun mutant ne couvre ces deux fautes. La reprise après échec
+interne est encore fabriquée plutôt qu'exécutée. Enfin, le déplacement des
+résumés hors de `out/` les a rendus idempotents mais les exclut du reçu
+durable. La porte exacte et la recette de correction sont dans l'audit dédié.
 
 ## Dette d'échelle et ordre utile
 
@@ -303,13 +387,13 @@ ou u128 pour les compteurs.
 
 Ordre recommandé à Claude :
 
-1. laisser finir sans perturbation la capture hors échantillon déjà lancée,
-   puis la juger par son protocole privé sans toucher aux sorties ;
-2. factoriser l'étage E6 et construire ses oracles G16 avant tout claim de
-   gain ou de causalité ;
-3. fermer callbacks/exceptions et leurs fixtures transactionnelles ;
-4. corriger les quatre défauts locaux du reçu/validateur GCP et obtenir un
-   nouvel audit statique GO ;
+1. geler le cœur de confirmation déjà acquis, lier ses dérivés et publier
+   honnêtement le non-déclenchement borné sans re-régler la règle ;
+2. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
+   l'oracle et la preuve G16 avant toute nouvelle mesure ;
+3. fermer callbacks/exceptions et leurs fixtures réellement concurrentes ;
+4. corriger l'autorité de registre GCP et obtenir un verdict frais avant
+   toute session facturable ;
 5. reprendre ensuite les plafonds API.
 
 GCP non utilisé par le présent audit.

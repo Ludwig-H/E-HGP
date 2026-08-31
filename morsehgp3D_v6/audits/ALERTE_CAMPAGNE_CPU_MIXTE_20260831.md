@@ -1,4 +1,4 @@
-# Suivi des campagnes CPU v6 — provenance réparée, réplication à ne pas confondre avec une confirmation
+# Audit des campagnes CPU v6 — confirmation hors échantillon bornée
 
 Date de constat : 2026-08-31
 
@@ -6,11 +6,17 @@ Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`, `profile=
 
 ## Verdict courant
 
-Trois objets doivent rester séparés :
+Quatre objets doivent rester séparés :
 
 1. `receipts/campagne_decision_20260831/` est **définitivement invalide comme matrice épinglée** parce qu'il mélange deux binaires. Le marqueur terminal ajouté en `9c9ad125` reçoit correctement ce fait.
 2. `receipts/campagne_sonde_octaves_20260831/` utilise une copie privée du binaire, avec hash avant/après chaque tuple. Elle s'est terminée par 36/36 codes 0, `DONE`, 36 hashes de sorties vérifiés et 36 stderr vides. Cette correction de provenance est reçue. La capture reste néanmoins **exploratoire**, pas décisionnelle : son lanceur exact n'est pas versionné et l'agrégateur qualifié de « préenregistré avant la campagne » a été écrit et committé après le début de celle-ci.
 3. `receipts/campagne_decisionnelle_20260831/`, lancée après `a30c3a98`, est prospective vis-à-vis des scripts mais **pas vis-à-vis des données** : elle rejoue le même binaire privé, les mêmes familles, les mêmes tailles et les mêmes graines que la sonde dont `T_lourde` et le seuil d'octave ont été dérivés. Elle est une réplication de reproductibilité, pas un échantillon confirmatoire indépendant. Son nom et son META ne peuvent donc pas lui conférer un statut décisionnel.
+4. `receipts/campagne_confirmation_20260831/` est un vrai échantillon hors
+   tailles/graines initiales. Son cœur brut est mécaniquement reçu, mais son
+   statut reste **`confirmation_candidate`** : la porte exécutable ne
+   déclenche E6 sur aucune famille stationnaire, tandis que les autorités
+   écrites fixent encore une autre matrice et que le dossier a été enrichi
+   après sa publication terminale.
 
 Il n'était pas utile d'interrompre une seconde fois la sonde : ses compteurs forment un échantillon exploratoire propre du binaire privé. Il n'est pas utile non plus d'interrompre la réplication `a30c3a98`, qui peut vérifier la reproductibilité des compteurs. En revanche, ne produire un verdict E6 confirmatoire que sur un profil hors-échantillon fixé avant lecture, avec de nouvelles graines et/ou tailles qui n'ont servi ni à choisir `T_lourde`, ni à choisir l'octave 10, ni à régler le seuil.
 
@@ -142,27 +148,93 @@ Ils ne suffisent pas à faire du validateur une autorité décisionnelle :
    sorties, et l'écriture directe d'`AGREGAT.txt` laissent des courses. Un run
    non nul peut aussi recevoir `DONE` et être publié avant son refus tardif.
 
-## Campagne hors échantillon lancée — candidate, pas verdict acquis
+## Confirmation hors échantillon terminée — cœur reçu, promotion refusée
 
-`campagne_confirmation_20260831.partial` a démarré à 15:10:15Z au pin
-`320299df`, en mode `auto`, avec le profil préenregistré 10k/20k/40k et les
-graines 6/7/8. Il n'est pas utile de l'interrompre : les données sont
-réellement hors échantillon et le binaire vient d'une archive Git.
+La capture s'est terminée naturellement à 16:12:41Z. Un snapshot pris juste
+après publication permet de fermer mécaniquement :
 
-Son statut honnête avant audit terminal est `confirmation_candidate`. Si les
-36 tuples ferment, l'audit peut vérifier après coup que chaque copie de
-protocole correspond au pin et que les courses ci-dessus ne se sont pas
-réalisées. Cela préservera la valeur scientifique de la capture. En revanche,
-aucun `E6_active=non` n'est recevable en présence d'une émergence, et aucun
-verdict formel ne doit être publié avant résolution des contradictions de
-profil et validation des mêmes octets par un snapshot immuable.
+- matrice 4 × 3 × 3 exacte, 36/36 codes 0, `DONE`, 36 stdout non vides et 36
+  stderr vides ;
+- 36 hashes avant/après identiques au binaire privé
+  `f74a8759c3e5...67ae07e` et 36 hashes de stdout recalculés ;
+- profil, lanceur, validateur et agrégateur archivés identiques à leurs blobs
+  au pin `320299df` ; le profil existe depuis `99bf6723`, antérieur au début
+  15:10:15Z ;
+- reconstruction indépendante depuis `git archive 320299df` octet-identique
+  au binaire privé ;
+- rejeu du validateur et de l'agrégateur archivés sur copie : codes 0, sans
+  émergence.
 
-La prochaine itération du lanceur doit graver `campaign_mode`, n'autoriser que
-les deux profils exacts versionnés, échouer dès le premier tuple non nul,
-acquérir le temporaire exclusivement et publier sans écrasement. Le validateur
-et l'agrégateur doivent consommer une représentation immuable unique.
+Le cœur brut audité contient 81 fichiers. Le SHA-256 de son manifeste
+déterministe — chemins et hashes, en excluant seulement les dérivés
+postérieurs `PENTES.txt`, `AGREGAT.txt` et `protocole/__pycache__` — vaut
+`a05b9b72ea0150859a6c612fab98a4c7e266ce3a812a7430be6f19dc751f7b93`.
 
-Cette alerte pourra être absorbée dans `ETAT_COURANT.md` puis supprimée après
-le verdict borné sur cette candidate et la fermeture des portes ci-dessus.
+La règle exécutable applique son second pas réel 20k→40k. Les médianes
+`W_sweep1 / M_anchor[q4] / T_lourde` sont :
+
+| famille | médianes du pas 20k→40k | verdict exécutable borné |
+|---|---:|---|
+| terrain stationnaire | 1,220 / 1,325 / 1,308 | `E6_active=non` |
+| scanline stationnaire | 1,160 / 1,056 / 1,773 | `E6_active=non` |
+| uniform | 1,061 / 1,046 / indéfinie (zéro) | garde bornée non violée |
+| eight clusters | 1,423 / 1,317 / 1,505 | garde bornée non violée |
+
+Ainsi, **la campagne ne confirme pas le déclencheur E6 préenregistré**. Ce
+résultat négatif interdit de promouvoir E6 à partir de cette hypothèse ; il
+ne démontre pas qu'un prototype G16 particulier est inutile, lequel doit
+être jugé par ses propres bras causaux et son coût total.
+
+Le statut reste néanmoins `confirmation_candidate`, pas confirmation
+formelle, pour trois raisons indépendantes :
+
+1. `REGIMES.md` et `PLAN_DE_TESTS.md` fixent encore 8k/16k/32k, graines
+   3/4/5 et les deux pas ; `GRAND_LIVRE.md` et le texte de l'agrégateur
+   annoncent 16k→32k, alors que le calcul ci-dessus porte sur 20k→40k.
+2. La porte complète du grand-livre n'est pas verte : sur 10k→20k, la
+   médiane terrain de W1 vaut 2,03 ; sur 20k→40k, la médiane
+   `eight_clusters/P_factor_q2` vaut 2,26. L'agrégateur n'en juge que trois
+   termes et le second pas.
+3. Le dossier a été muté après publication : `PENTES.txt`, un `__pycache__`,
+   puis `AGREGAT.txt` ont été ajoutés. L'agrégat courant reproduit bien celui
+   du snapshot (`400533d9...a0895`), mais il n'appartenait pas au terminal et
+   le défaut d'immuabilité est réalisé.
+
+La branche tri-valuée reste à corriger même si aucune émergence ne l'exerce
+ici. Pour fermer proprement cette candidate sans relancer ses mesures :
+aligner les autorités sur le profil effectivement préenregistré sans changer
+la règle après lecture, publier les dérivés à côté du cœur et les lier à son
+manifeste, puis geler réellement le reçu. Toute nouvelle hypothèse issue de
+ces résultats exige une autre campagne prospective.
+
+## Contre-audit du reçu `8ed2dea6`
+
+Le `RECU.md` ajouté après le terminal ne reçoit pas le statut
+`confirmation_complete`. Il confond le résultat négatif de la porte bornée
+avec la conformité à la doctrine complète, alors que les deux violations de
+pente ci-dessus et la contradiction de matrice restent actives.
+
+Trois affirmations factuelles doivent aussi être corrigées :
+
+- « sorties non touchées » et « publication atomique » ne décrivent que le
+  cœur à 16:12:41Z ; `PENTES.txt`, `AGREGAT.txt` et `RECU.md` ont été ajoutés
+  ensuite dans le même dossier ;
+- les heures annoncées 15:56Z et 17:04Z sont fausses : le commit
+  `99bf6723` date de 14:47:55Z et le META grave le départ à 15:10:15Z ;
+- `build_pin.log` existe encore localement mais est ignoré et n'appartient
+  pas aux 83 fichiers du commit. Il n'est donc pas « conservé » dans le reçu
+  versionné. Le rebuild indépendant octet-identique compense heureusement ce
+  manque pour lier le binaire au pin.
+
+Le titre de commit « queue intermittente » est une interprétation plausible
+des excursions, pas le verdict préenregistré. Le seul verdict directement
+reçu est plus étroit : absence de médiane ≥2 sur les trois termes du second
+pas. De même, « moteur courant sous-quadratique » est faux sans qualification
+puisque la porte complète contient encore deux médianes ≥2.
+
+Enfin, `git show --check 8ed2dea6` relève trois espaces finaux dans
+`AGREGAT.txt` et une ligne blanche supplémentaire en fin de `PENTES.txt`.
+Ne pas réécrire silencieusement les dérivés pour les nettoyer : une correction
+doit rester explicitement postérieure et liée au manifeste brut.
 
 GCP non utilisé par le présent audit.

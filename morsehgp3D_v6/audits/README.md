@@ -18,11 +18,15 @@ motivent des corrections, ils ne certifient rien.
 ## À lire maintenant
 
 - [`NOTE_CLAUDE_CONCEPTION_V6_20260831.md`](NOTE_CLAUDE_CONCEPTION_V6_20260831.md) :
-  document fondateur — architecture retenue, panel de conception, corrections
-  imposées par les contre-lectures, jalons J0–J5, questions V6-Q1 à V6-Q4 aux
-  auditeurs.
-- [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict mutable, pin jugé, réponses
-  V6-Q1 à V6-Q4 et ordre de correction. Il prime sur toute réponse historique.
+  note historique de conception et de ses questions initiales ; elle est
+  supersédée point par point par l'état courant.
+- [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict mutable, pins jugés et ordre
+  de correction. Il prime sur toute réponse historique.
+- [`AUDIT_GCP_V6_P0_20260831.md`](AUDIT_GCP_V6_P0_20260831.md) : porte de
+  sûreté dédiée ; NO-GO, notamment tant que registre et terminal ne sont pas
+  liés à la génération exacte et que le canon n'est pas lié au manifeste.
+- [`ALERTE_CAMPAGNE_CPU_MIXTE_20260831.md`](ALERTE_CAMPAGNE_CPU_MIXTE_20260831.md) :
+  preuves des captures CPU et statut borné de la confirmation hors échantillon.
 
 ## Décisions actives héritées
 
