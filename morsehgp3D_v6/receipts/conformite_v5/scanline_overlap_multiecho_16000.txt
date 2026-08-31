@@ -1,0 +1,35 @@
+payload=mhgp5-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+backend=cpu_reference
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=scanline_overlap_multiecho n=16000 coord=800 s=8 smax=11 seed=3 threads=8 emis=2149181 boules_uniques=2127564 mortes_profondeur=102269 survivantes=2025295 census_int=10389433 census_shell=6443734 evenements=2266279 facettes=14140073 fusions=14126779 deltas=1440493 noeuds=1197981
+generation rect_alive=327794/599577/639302 ancres=548565/2691234/3552156 candidats=484524/1096444/568213 tues_profondeur=0/31709125/5419601 ancres_w4=1332008 ancres_w3=890258 ancres_secteurs=113569/222031 ancres_cellules=169/133720 seeds_cellules=33481/2590127 grilles=347/163077 seeds=32839050/19697064 completions_q4=60073719 seeds_core_tues=9216995 seeds_corde_tues=6033741 float_cert=658787953/246266909 repli=6698251 ancres_hist=64041/753013/1034318 hist_lignes=38164/482572/659415 hist_seuil=25877/270441/374903 hist_survivants=484524/1938221/2517838 jung=115195996/252331764/3044
+enveloppe_cover active=0 q3_cover=0/0/0/0 q3_query=0/0/0/0 q4_cover=0/0/0/0 q4_query=0/0/0/0 (ancres/sites_avant/sites_apres/tests_transverses)
+postsep L=0 parents=327794/599577/639302 produits=327794/599577/639302 base=548565/2691234/3552156 emis=548565/2691234/3552156 tues=0/0/0 etats=0/0/0 comptages=0/0/0 nœuds=0/0/0 coins=0/0/0 rollbacks=0/0/0 regressions=0/0/0
+ouvriers wspd=8/8/8 rects=8/8/8 rle=8 prefiltre=8 census=8 expansion=8 fold=8
+temps_ms index=4.0 gen=16687.0 (wspd 799.6/2284.8/2540.3 rects 42.8/2898.3/8121.2) rle=380.8 prefiltre=2839.6 census=2466.2 comptage=47.6 expansion=754.2 fold=6494.6 (tri 588.9 intern 1690.0 fusion 646.8 reduce 3566.2) digest=2070.8
+temps_mur_ms=27815.7 (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, pas le mur)
+temps_fold_mur_ms=5028.6 (etages A et B, fold_inflight=2, pic_mesure_en_vol=2)
+rss_mb apres_generation=567 apres_rle=567 apres_prefiltre=609 apres_census=762 max_fold=1723 fin=335
+cardinalites K=1 evenements=49903 facettes=16000 deltas=7209 attachements=0 fusions=15999 noeuds=7209
+cardinalites K=2 evenements=75512 facettes=86646 deltas=18450 attachements=44984 fusions=86626 noeuds=16740
+cardinalites K=3 evenements=104221 facettes=221113 deltas=43965 attachements=148743 fusions=220998 noeuds=33534
+cardinalites K=4 evenements=141978 facettes=440121 deltas=71155 attachements=319177 fusions=439807 noeuds=56648
+cardinalites K=5 evenements=187862 facettes=765182 deltas=102968 attachements=592980 fusions=764605 noeuds=82520
+cardinalites K=6 evenements=233458 facettes=1181418 deltas=140315 attachements=938702 fusions=1180357 noeuds=114529
+cardinalites K=7 evenements=285802 facettes=1731302 deltas=187307 attachements=1417768 fusions=1729731 noeuds=154317
+cardinalites K=8 evenements=338606 facettes=2388885 deltas=235788 attachements=1985479 fusions=2386586 noeuds=196871
+cardinalites K=9 evenements=394684 facettes=3185002 deltas=290167 attachements=2689979 fusions=3181862 noeuds=243879
+cardinalites K=10 evenements=454253 facettes=4124404 deltas=343169 attachements=3522303 fusions=4120208 noeuds=291734
+digest_balls=7ab9ca353b7c493debc9b6ef1aa7af6ce803e54410d27db69f2f7cafb7769893
+digest_forest_K1=4a1e959cf8dd0ccfe68a851de712733c7bd0a289f1d8b1592fc3c2c537b007df
+digest_forest_K2=bbe73183ae525231dbd3a8da3d3971adac126cdfb46a63e01f486541b15a0982
+digest_forest_K3=31b67f8cd7c12c54b8226d3078a91b10b4a60423ddadd005d739db681f8174d9
+digest_forest_K4=c2be570ebe8068f669436353a771d67180e6a904186bd3beea8d63e70b332732
+digest_forest_K5=603318143bb28c979d507ed0d1d55eaa65c34526711de95827b19df944334d82
+digest_forest_K6=78c965192ebbb8ae3840d881a00c716e6e7e9c397b34e60f9ec4d889e7c358c3
+digest_forest_K7=af9f6ec11b55add6b92fc5a9c0c0c9fabf1a1edb4e74d29ee3d4e63677fd002c
+digest_forest_K8=91c80795bd08e51b3e5d3fe79a6149d76b6391ec492c61bf238e47436f48a15b
+digest_forest_K9=700d8e75fbf0bb009c0825d5f8a081c96f7c20d026adac81e2f5767094d13840
+digest_forest_K10=664faa88624f759fa0d730311bedeeba650667b2b93402331f648d08b48fc9c9
+digest_all=1743dfd3616b7760b03bb9679b821512fc543094bf332b1d273ed72868219045
+rss_max_kb=1763888

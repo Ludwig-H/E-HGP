@@ -1,0 +1,16 @@
+code=0 fam=uniform n=8000 secs=32
+code=0 fam=uniform n=16000 secs=69
+code=0 fam=uniform n=32000 secs=153
+code=0 fam=terrain n=8000 secs=5
+code=0 fam=terrain n=16000 secs=15
+code=0 fam=terrain n=32000 secs=47
+code=0 fam=eight_clusters n=8000 secs=31
+code=0 fam=eight_clusters n=16000 secs=78
+code=0 fam=eight_clusters n=32000 secs=191
+code=0 fam=scanline_single_pass n=8000 secs=5
+code=0 fam=scanline_single_pass n=16000 secs=13
+code=0 fam=scanline_single_pass n=32000 secs=39
+code=0 fam=scanline_overlap_multiecho n=8000 secs=11
+code=0 fam=scanline_overlap_multiecho n=16000 secs=28
+code=0 fam=scanline_overlap_multiecho n=32000 secs=67
+DONE
