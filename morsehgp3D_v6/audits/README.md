@@ -21,8 +21,8 @@ motivent des corrections, ils ne certifient rien.
   document fondateur — architecture retenue, panel de conception, corrections
   imposées par les contre-lectures, jalons J0–J5, questions V6-Q1 à V6-Q4 aux
   auditeurs.
-- `ETAT_COURANT.md` : à ouvrir par le premier audit ; il primera sur toute
-  réponse historique.
+- [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict mutable, pin jugé, réponses
+  V6-Q1 à V6-Q4 et ordre de correction. Il prime sur toute réponse historique.
 
 ## Décisions actives héritées
 
