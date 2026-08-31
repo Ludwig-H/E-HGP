@@ -875,7 +875,12 @@ fi
 ' > "${BUILD_LOG}" 2>&1 || { SESSION_RC=$?; log "build/portes VM en echec (rc=${SESSION_RC}, journal ${BUILD_LOG})"; exit "${SESSION_RC}"; }
 cat "${BUILD_LOG}" >> "${LOG}"
 # Planchers de portes : DEUX blocs 100%, totaux >= planchers (P1).
-mapfile -t GATE_TOTALS < <(grep -oE '100% tests passed, 0 tests failed out of [0-9]+' "${BUILD_LOG}" | grep -oE '[0-9]+$')
+# Les DEUX libelles de resume CTest sont acceptes (ctest <= 4.3 :
+# « 100% tests passed, 0 tests failed out of N » ; ctest 4.4+ :
+# « 100% tests passed out of N ») — la session du 1er septembre a ete
+# refusee fail-closed sur ce seul changement de format, portes 100% vertes
+# (recu session_g4_20260831_2a981bc4b73f_1788212429). Toujours 100% exige.
+mapfile -t GATE_TOTALS < <(grep -oE '100% tests passed(, 0 tests failed)? out of [0-9]+' "${BUILD_LOG}" | grep -oE '[0-9]+$')
 if [ "${#GATE_TOTALS[@]}" -ne 2 ] || [ "${GATE_TOTALS[0]}" -lt "${V5_GATE_MIN}" ] || [ "${GATE_TOTALS[1]}" -lt "${V6_GATE_MIN}" ]; then
   log "REFUS : rejeu des portes non conforme (blocs=${#GATE_TOTALS[@]} totaux=${GATE_TOTALS[*]:-aucun}, planchers ${V5_GATE_MIN}/${V6_GATE_MIN})"
   SESSION_RC=76

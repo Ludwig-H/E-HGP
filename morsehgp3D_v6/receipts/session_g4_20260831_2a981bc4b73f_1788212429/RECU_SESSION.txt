@@ -1,0 +1,14 @@
+schema=e-hgp.v6-session-receipt.v3
+run_id=session_g4_20260831_2a981bc4b73f_1788212429
+issue=arret_tente
+rc=76
+stop_rc=0
+profil=g4_mesure_v1 profil_canonique=g4_mesure_v1
+generation=2026-08-31T14:40:29.182-07:00
+projet=devpod-gpu-exploration zone=europe-west4-ai1a instance=ehgp-blackwell-spot-ai1a
+source_commit=2a981bc4b73f6297a28b1ebf2931ccefe5568dbc
+source_payload_sha256=6c157f239f8eb4a6d53a0fca2090c0630107a59ac26e3aa2276c22c2c3dafa23
+protocol_manifest_sha256=b360e02ba61d8a4a0517c79808f0ccbf1c3106e0658f09abcad9f61cebf9f8b4
+max_run_seconds=28800 guest_shutdown_minutes=470
+etat_cycle_vie=targeted_stopped
+date_utc=2026-08-31T21:45:26Z

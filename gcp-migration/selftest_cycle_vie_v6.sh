@@ -83,8 +83,10 @@ case "$*" in
     if [ "${n}" -eq 2 ]; then
       if [ "${FAKE_SSH_MODE:-ok}" = "build_fail" ]; then echo "build casse" >&2; exit 1; fi
       if [ "${FAKE_SSH_MODE:-ok}" = "build_lent" ]; then sleep "${FAKE_BUILD_SLEEP_S:-90}"; fi
+      # UN bloc par format de resume CTest (<=4.3 et 4.4+) : le parseur des
+      # portes doit accepter les deux (refus du 1er septembre).
       echo "100% tests passed, 0 tests failed out of 45"
-      echo "100% tests passed, 0 tests failed out of 60"
+      echo "100% tests passed out of 60"
       exit 0
     fi
     if [ "${FAKE_SSH_MODE:-ok}" = "campagne_fail_et_journal_verrouille" ]; then
