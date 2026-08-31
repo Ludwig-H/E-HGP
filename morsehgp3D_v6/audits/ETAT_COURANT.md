@@ -291,6 +291,12 @@ Avant de fermer la campagne :
   calotte–lentille de coût avec `M_anchor/H_scan`. Ces trois portes sont
   complémentaires; aucune ne remplace les deux autres.
 
+La campagne active est épinglée sur `b17ca2cd`, donc avant la correction du
+cover q4 et la séparation des digests. La conserver comme baseline
+exploratoire, mais rejouer le reçu final après ces deux changements : le
+premier modifie précisément la charge mesurée et le second le contrat de
+sortie. Des pentes pré-correction ne peuvent pas recevoir le code corrigé.
+
 Le prochain reçu doit enfin épingler le SHA complet, le runner ou sa commande,
 l'état du worktree, la toolchain, les heures et les hashes des sorties. Aucun
 claim de pente, de préparation quasi linéaire ou de J3 complet avant ce pin.
