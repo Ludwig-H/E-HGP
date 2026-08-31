@@ -2,8 +2,8 @@
 
 Date de coupe : 31 août 2026.
 
-HEAD observé : `95bb2281`. Autorités techniques : `6d755804` pour le
-prototype E3/G16, `cd49a390` pour les callbacks, `95bb2281` pour le protocole
+Coupe de code observée : `7a8e9cf0`. Autorités techniques : `6d755804` pour le
+prototype E3/G16, `cd49a390` pour les callbacks, `7a8e9cf0` pour le protocole
 GCP, `320299df` pour le reçu de réplication et `8ed2dea6` pour le reçu de
 confirmation contre-audité ci-dessous. Les notes Claude ne priment pas sur le
 présent verdict.
@@ -26,7 +26,7 @@ présent verdict.
 | confirmation hors échantillon | cœur reçu ; `confirmation_candidate`, déclencheur E6 non confirmé |
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
-| protocole GCP `95bb2281` | **NO-GO étroit** ; septième tour largement reçu, trois patches locaux avant dépense |
+| protocole GCP `7a8e9cf0` | **NO-GO très étroit** ; trois anciennes portes reçues, un clamp temporel local avant dépense |
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
@@ -47,12 +47,13 @@ Au pin `6d755804` :
   par résolution.
 
 Le probe `fold-inject-b-exception-k3` termine encore par SIGABRT, code 134 ;
-il reste volontairement hors CTest. Au pin `95bb2281`, le selftest campagne
-passe 64 vérifications et le lifecycle 27 scénarios plus 11 refus de pin. Deux
-rejeux indépendants des 83 tests de sûreté/intégration donnent 83/83 en
-125,256 s et 129,257 s ; les mutants de frontière, le vrai signal 6 et le
-tuple post-arrêt sont reçus dans leur portée. Le NO-GO ne porte plus que sur
-le budget du second arrêt, la grâce distante et l'autorité de GNU time.
+il reste volontairement hors CTest. Au pin `7a8e9cf0`, le selftest campagne
+passe 66 vérifications et le lifecycle 32 scénarios plus 11 refus de pin. Le
+rejeu indépendant des 83 tests de sûreté/intégration donne 83/83 en 135,350 s.
+Les deux arrêts, la grâce fixe et le déclassement de l'instrumentation sont
+reçus dans leur portée. Le seul NO-GO résiduel est leur composition avec le
+describe pré-campagne non clampé et la garde SCP qui ne réserve localement
+qu'un arrêt ; le profil G4 canonique reste algébriquement sûr.
 
 ## Exact-K, omission unique et ownership WSPD
 
@@ -358,34 +359,26 @@ ces preuves sur trois points :
 
 Les chemins état post-démarrage perdu avec handoff valide,
 `targeted_stopped` d'une autre génération, état illisible et cible
-discordante sont couverts et étendus à `95bb2281`. Le GO GCP reste refusé
-pour les trois corrections concentrées décrites ci-dessous.
+discordante restent couverts à `7a8e9cf0`. Le GO GCP reste refusé pour une
+seule composition temporelle concentrée décrite ci-dessous.
 
 ## GCP
 
-`AUDIT_GCP_V6_P0_20260831.md` est l'autorité dédiée. `95bb2281` ferme les
-défauts de registre/cible, l'ancien clamp à 60 secondes, les `describe` sans
-borne, les exécutables principaux résolus par `PATH`, 124/134, le wrapper
-RLIMIT décoratif, les diagnostics mélangés et le tuple post-arrêt incomplet.
-La validation est déplacée après une première tentative d'arrêt et les deux
-selftests sont verts.
+`AUDIT_GCP_V6_P0_20260831.md` est l'autorité dédiée. `7a8e9cf0` reçoit la
+reprise d'arrêt avant validation, les deux réserves globales, la grâce fixe,
+le déclassement d'un faux `TIME_BIN`, la relation invité/GCE avant
+`set-scheduling` et le premier fail-fast sans SSH/SCP. Les deux selftests sont
+verts et la variante canonique G4 conserve 501 s de marge nominale.
 
-Trois patches locaux restent requis. Un échec du premier arrêt peut lancer
-330 secondes de validation puis une seconde garde, bien qu'une seule enveloppe
-soit réservée. `GRACE_S` peut dépasser les 60 secondes post-deadline et
-`TIME_BIN` peut encore inventer RSS et signal. La correction directe est une
-tentative SCP, deux réserves de 900 s avec reprise avant validation, une grâce
-fixe de 30 s et `/usr/bin/time` constant. Cette variante conserve 501 s de
-marge nominale sur G4.
-
-Deux observations du contre-audit concurrent restent utiles comme
-durcissements, sans devenir des portes supplémentaires. Handshake et bundle
-consomment la marge de rendement avant le build ; l'échéance absolue les
-empêche toutefois d'élargir la facture et le profil est déclaré tronquable.
-La relation `guest * 60 + 300 <= maxRunDuration` est déjà vérifiée par
-`start_and_verify.sh` avant `instances start` ; la vérifier aussi avant le
-`set-scheduling` de l'instance arrêtée éviterait une mutation inutile, sans
-changer la sûreté du démarrage.
+Un seul couplage reste ouvert : le `check_generation` pré-campagne n'est pas
+admis contre l'échéance, puis la garde locale du SCP ne compte encore qu'un
+arrêt. Avec `smoke_v1`, `MAX=4800`, invité 75 min, describe 600 s et SCP 60 s,
+le preflight passe mais un describe tardif peut laisser 2 675 s pour un pire
+chemin post-campagne de 3 155 s. Clamper les trois describes initiaux restants
+et compter deux arrêts dans la garde SCP ferme localement ce déficit. Forcer
+en plus `TIME_BIN=/usr/bin/time` dans la commande distante évitera une mesure
+G4 payée puis déclassée ; ce dernier point est un renfort, pas une nouvelle
+porte décisionnelle.
 
 ## Dette d'échelle et ordre utile
 
@@ -397,8 +390,8 @@ ou u128 pour les compteurs.
 
 Ordre recommandé à Claude :
 
-1. finir les trois patches GCP ciblés du verdict frais, puis contre-auditer
-   le commit propre avant toute session facturable ;
+1. fermer le clamp temporel GCP ciblé, puis contre-auditer le commit propre
+   avant toute session facturable ;
 2. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
    re-régler la règle ;
 3. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
