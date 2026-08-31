@@ -1,0 +1,37 @@
+payload=mhgp6-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+backend=cpu_reference
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=terrain_stationnaire n=8000 coord=447 s=8 smax=11 seed=5 threads=8 emis=593235 boules_uniques=592783 mortes_profondeur=20697 survivantes=572086 census_int=2869055 census_shell=1618473 evenements=595285 facettes=3580419 fusions=3577338 deltas=476872 noeuds=370781
+generation rect_alive=129457/206557/213173 rect_visites_fusionnes=1101195 ancres=194034/413369/488945 candidats=181551/371863/39821 tues_profondeur=0/2644149/719519 ancres_w4=132540 ancres_w3=86421 ancres_secteurs=2829/7724 ancres_cellules=0/1475 seeds_cellules=485/990022 grilles=3/13562 seeds=3016497/3564281 completions_q4=9973901 seeds_core_tues=1854460 seeds_corde_tues=271988 float_cert=58712750/37323667 repli=1603859 ancres_hist=12483/31442/51768 hist_lignes=6570/16042/25560 hist_seuil=5913/15400/26208 hist_survivants=181551/381927/437177 jung=18290123/14659694/80
+sweep tests_coeur=62656061 tests_prof_q3=34984215 tests_passe2=31995656 tri_comparaisons=77243028 seeds_passe2=447811 racines_corde=9973901 groupes=9964606 racines_hors_corde=21872602 temoins_constants=1770137 rejets=lens:4046204/owner:12116/once:1957687/i64:170439/face:1971326/det:0/centre:1056789
+p_factor=130010/480808/691416 (evaluations d'auto-produits des histogrammes)
+ledger_paires emis=194034/413369/488945 tues=31801966/31582631/31507055
+ouvriers wspd=8 rects=8 rle=8 prefiltre=8 census=8 expansion=8 fold=8
+temps_ms index=2.2 gen=2778.0 (wspd 1094.3 rects 1683.1) rle=76.9 prefiltre=600.5 census=604.6 comptage=5.2 expansion=116.0 fold=1684.9 (tri 178.0 intern 414.6 fusion 178.6 reduce 913.0) digest=660.3
+temps_mur_ms=5474.2 (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, pas le mur)
+temps_fold_mur_ms=1213.2 (etages A et B, fold_inflight=2, pic_mesure_en_vol=2)
+rss_mb apres_generation=163 apres_rle=163 apres_prefiltre=187 apres_census=440 max_fold=624 fin=343
+cardinalites K=1 evenements=18275 facettes=8000 deltas=6505 attachements=0 fusions=7999 noeuds=6505
+cardinalites K=2 evenements=27428 facettes=36019 deltas=15299 attachements=18271 fusions=36004 noeuds=12223
+cardinalites K=3 evenements=36435 facettes=82672 deltas=25380 attachements=53996 fusions=82584 noeuds=18683
+cardinalites K=4 evenements=45626 facettes=148044 deltas=34161 attachements=107925 fusions=147865 noeuds=25573
+cardinalites K=5 evenements=54436 facettes=230677 deltas=42856 attachements=178533 fusions=230390 noeuds=32695
+cardinalites K=6 evenements=63873 facettes=333988 deltas=51862 attachements=269923 fusions=333646 noeuds=39842
+cardinalites K=7 evenements=73186 facettes=455244 deltas=61141 attachements=378850 fusions=454811 noeuds=47306
+cardinalites K=8 evenements=82503 facettes=595232 deltas=70590 attachements=505962 fusions=594719 noeuds=55084
+cardinalites K=9 evenements=91873 facettes=754565 deltas=79728 attachements=652462 fusions=753982 noeuds=62526
+cardinalites K=10 evenements=101650 facettes=935978 deltas=89350 attachements=821023 fusions=935338 noeuds=70344
+digest_candidates_v5_compat=937d275b034630673aeb0acaf055b822fdf89d41df6502d3b5ce74d594d40a04
+digest_postprefilter=602b79d1aec685ae0dfa4c9d1d3b3ba0ab4929c1f09be569b04998f5c7cb78cf
+digest_forest_K1=d6b2385b083b25cc3d2d495aab8929e1bdd8adfdb4e915aa8a2241e4499a2efc
+digest_forest_K2=e8301b367323aef11bab266f81073e58ad24576c76bbc6534f5845d5109f87ec
+digest_forest_K3=6fcc6b0ca53534581c848a6aa2d06c2479678545a3444f27cfb7b62506d3aa41
+digest_forest_K4=6872cabc7390f0cec5fe8ae4454bafb73addcb8f75de457b4cced4c345802da9
+digest_forest_K5=d4866376752e3de06aa14e04240c7f426f0a10a4e53c3a03be83b5a8413c5eee
+digest_forest_K6=5ff45e1c19803c48e705d09bcf5ea5a894f42c0b95e1a92352e588abf7b84a23
+digest_forest_K7=14cd01f0eb649b43ec189d2f3bbdb21a2554d3e157dd4d0a310ca91c17ffa0bc
+digest_forest_K8=20440cc904e5d93eed81d7ef05329cb4a7fc5368740f63d72e199563cba19282
+digest_forest_K9=e62f0f8b08d453c85ce318ae85aecc5447b4c3584f089a5064828f500a9174e4
+digest_forest_K10=9b3b4c0a301f1fca87ff7f2dd0232b32df7f5aa9e72d44152e7b9ba79e7e372d
+digest_all=3c4d9caf29e0c1793681b3376499d4fd04fefd1859f82e63a90313cdb7045497
+rss_max_kb=638352
