@@ -25,10 +25,11 @@ hashes correspondent aux binaires du build courant, et son inventaire est bien d
 
 La portée doit toutefois rester bornée. Un contre-exemple exact montre que le
 sweep q4 balaie un cover coefficient 3 au lieu du coefficient 4 requis; le
-préfiltre aval répare l'objet final mais masque la faute de génération. Le
-digest conserve en outre la frontière v5 post-RLE alors que la documentation
-annonce une monnaie post-préfiltre. Enfin, 4 mutants seulement sur 59 sont
-réellement injectés par CTest, plusieurs blocs d'architecture marqués
+préfiltre aval retire cette boule avant la frontière finale et masque ainsi la
+faute locale de génération, sans que ce probe démontre l'égalité de l'objet
+complet. Le digest conserve en outre la frontière v5 post-RLE alors que la
+documentation annonce une monnaie post-préfiltre. Enfin, 4 mutants seulement
+sur 59 sont réellement injectés par CTest, plusieurs blocs d'architecture marqués
 `[LIVRÉ]` n'existent pas, et le grand-livre omet encore des coûts payés.
 
 Ces défauts sont localisés et réparables. Claude peut conserver ce commit
@@ -77,9 +78,10 @@ stationnaire, physiquement motivé », la valeur 566 et la qualification de
 ## P0 — le cover q4 courant perd des témoins intérieurs
 
 `edge_cover.hpp` exige le coefficient 4 pour les intérieurs et la coquille q4.
-Le commit audité construit pourtant les handles puis le cover avec le
-coefficient 3 avant de partager ce résultat entre q3 et q4. Le sweep ne peut
-donc pas compter certains intérieurs q4.
+Le commit audité recalcule bien les handles pour chaque lane, mais
+`generate.hpp` impose le coefficient 3 aux deux appels
+`rect_cover_handles` et `anchor_cover_from_handles`, y compris sur la lane q4.
+Le sweep ne peut donc pas compter certains intérieurs q4.
 
 Contre-fixture u16 exacte, avec PointId dans l'ordre indiqué :
 
@@ -101,18 +103,27 @@ prefilter_boundary target_survivors=0 dead_depth=1
 ```
 
 À `smax=4`, donc `h4=1`, la boule fautive est ainsi présente brute et après
-RLE; le préfiltre aval la retire seulement ensuite. Cette réparation préserve
-l'objet final sur cette fixture, mais elle réfute le « cover complet » et
-l'équivalence du filtre de profondeur à la frontière de génération. Elle ne
-prouve pas à elle seule une divergence avec les candidats v5, qui peuvent
-partager le même défaut coefficient 3, ni une divergence de l'objet final.
+RLE; le préfiltre aval retire cette BallKey seulement ensuite. Ce masquage
+local réfute le « cover complet » et l'équivalence du filtre de profondeur à
+la frontière de génération. Il ne prouve pas à lui seul une divergence avec
+les candidats v5, qui peuvent partager le même défaut coefficient 3, ni une
+divergence de l'objet final.
 L'oracle courant masque exactement la faute car il compare après
 `prefilter_balls`.
 
-Correction : partager des handles construits au coefficient 4, puis filtrer
-l'ancre à 3 pour q3 et à 4 pour q4 (ou conserver deux vues), avec lentille de
-supports séparée. La fixture doit juger la frontière **avant RLE/préfiltre** :
-cette BallKey q4 ne doit pas être émise. L'oracle post-préfiltre reste une
+Correction minimale sûre : conserver les recalculs par lane et choisir le
+coefficient 3 pour q3, 4 pour q4, aux deux appels. Cela évite d'élargir q3 et
+de déplacer ses seuils ou son attribution de coût. Une mutualisation future
+peut construire à 4, mais doit alors maintenir deux vues filtrées distinctes;
+la lentille de supports reste séparée, car les nouveaux sites q4 sont des
+témoins de profondeur et non de nouveaux supports.
+
+La fixture doit appeler `generate_candidates` avant tri/RLE/préfiltre, en un
+fil, et imposer zéro occurrence de cette BallKey q4. Sous un mutant
+`q4-cover-coef3`, elle doit en observer exactement une brute et post-RLE, puis
+zéro après préfiltre, avec code 4. Ajouter ensuite l'équivalence des covers
+handles/direct-query aux coefficients 3 et 4, la route query contre handles,
+et la permutation à PointId conservés. L'oracle post-préfiltre reste une
 porte d'objet distincte.
 
 ## P0 — séparer maintenant les deux monnaies de digest
@@ -136,6 +147,22 @@ La fixture `uniform_400` doit imposer `dead_depth>0`, les deux cardinalités
 distinctes, le digest compat égal à la v5 et le digest v6 calculé sur exactement
 103942 records. Aucun renommage conditionnel futur.
 
+Le suffixe `v5_compat` qualifie la **sérialisation**, pas une égalité éternelle
+des candidats. Un rejeu v5 avec `q4-cover-coef4` sur `uniform, n=8000` fournit
+déjà le différentiel causal attendu : 3 134 427 candidats uniques deviennent
+3 134 404, tandis que les 3 103 251 survivantes et `digest_all` restent
+inchangés. La porte de conformité objet doit donc juger uniquement les forêts
+et `digest_all`; la monnaie candidat rapporte séparément cette divergence de
+construction au lieu de la transformer en faux échec produit.
+
+Implémentation minimale : calculer le digest post-préfiltre pendant que
+`surv` existe, sur la sous-suite canonique `cands[s.idx]`, sans inclure la
+profondeur et sans copier les candidats. Avec le tag proposé
+`mhgp6-digest-v1:postprefilter-candidates`, un calcul indépendant sur la coupe
+donne pour `uniform_400` le golden
+`97be65b6e0c66e3b3b2262510bd7274f8e557ae4bdb78024467c1f9ee05c4d72`.
+Le graver seulement après le correctif cover final.
+
 Le nom « multiensemble émis » doit aussi être corrigé : `digest_balls_v4`
 signe actuellement les candidats **uniques post-RLE**, pas le multiensemble
 brut émis. `run.hpp` libère ensuite `surv` et digère encore `cands`; il ne
@@ -146,7 +173,7 @@ peut donc pas, dans l'état courant, signer la frontière post-préfiltre annonc
 La coupe auditée contient :
 
 - 59 noms dans `kMutants`;
-- 59 points d'injection réels `MHGP6_MUTANT`;
+- 62 sites `MHGP6_MUTANT` couvrant ces 59 noms, trois noms ayant deux sites;
 - seulement 4 noms injectés par une porte CTest :
   `fused-mask-stuck`, `sweep-nonstrict-depth`,
   `sweep-drop-exit-root` et `rle-drop`.
@@ -171,6 +198,29 @@ doit encore être exécuté et effectivement tué. La fixture familles actuelle
 ne grave aucun digest et n'exerce pas `family-scanline-overshoot`; elle teste
 seulement déterminisme, profil, unicité et cardinalité. L'oracle OBig est
 présent mais non appelé.
+
+Le port peut commencer sans nouvelle source produit. Un rejeu direct de
+`mhgp6_conformity` sur `eight_clusters, n=400` rend déjà le code 4 pour 20
+mutants non raccordés :
+
+```text
+census-nonstrict genfilter-nonstrict depth-threshold-minus-one
+range-add-max-le-zero skip-full-census binary-ties repr-ties attach-prebatch
+drop-nonmerge dense-pointid canonical-is-uf-root q3-level-4g
+q4-center-parity q4-eq-sign q4-i64-drop-factor q4-i64-pair-min
+witness-no-lane-mask par-drop-shard par-drop-ball-chunk
+fold-inject-a-failure-k2
+```
+
+Une boucle CMake ferait donc passer immédiatement la couverture exécutée à
+24/59. Ne pas y inclure `fold-inject-b-exception-k3`, qui termine actuellement
+par signal (`134`) : porter pour lui le juge d'in-flight dédié. Ensuite, 25
+sources de portes v5 passent déjà la syntaxe après les seuls renommages de
+namespace, macros et includes et offrent des juges connus pour 47 des 55 noms
+non couverts. Ordre de rendement conseillé : `wspd_gate`, `q3_oracle`,
+`cell_grid_oracle`, `prefix_gate`, puis spindle, fold in-flight et render.
+Le contrôle textuel `mutants_gate.py` v5 vérifie la topologie; il ne remplace
+jamais ces kills exécutés.
 
 ## P1 — finir la cohérence documentaire
 
@@ -286,10 +336,18 @@ Avant de fermer la campagne :
   rejette pas encore les clés q3/q4 profondeur-zéro excédentaires. Comparer
   l'égalité complète produit/oracle; sous réétiquetage, comparer aussi
   multiplicités et arités, pas seulement le set de `BallKey`;
+- cette porte s'arrête au census : elle établit une barrière quadratique de
+  génération/census, pas encore une « barrière de sortie » ni `S_forest`.
+  Borner le vocabulaire ou prolonger jusqu'à l'expansion/fold et graver les
+  planchers de facettes annoncés;
 - les fixtures sweep F1–F5 jugent encore après préfiltre. Elles ne contiennent
   ni la fixture coefficient 3/4 `(110,90,83)` de ce rapport, ni la
   calotte–lentille de coût avec `M_anchor/H_scan`. Ces trois portes sont
-  complémentaires; aucune ne remplace les deux autres.
+  complémentaires; aucune ne remplace les deux autres. Leur oracle réutilise
+  en outre les formes q3/q4 produit : il est indépendant du contrôle du sweep,
+  pas un oracle arithmétique entièrement indépendant. Sur F1/F4, relier les
+  compteurs globaux à l'ancre visée ou ajouter un mutant ciblé avant de dire
+  que ce chemin précis est causalement exercé.
 
 La campagne active est épinglée sur `b17ca2cd`, donc avant la correction du
 cover q4 et la séparation des digests. La conserver comme baseline
