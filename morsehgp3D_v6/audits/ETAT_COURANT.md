@@ -1,8 +1,10 @@
 # État courant v6 — audit coopératif
 
-Date de coupe : 31 août 2026. Autorité suivie : `HEAD=adcd4768`. Autorité
-candidate séparée : réponse et lot J0–J2 encore non versionnés dans le
-worktree. Aucun constat sur ce lot ne vaut reçu tant que son pin n'existe pas.
+Date de coupe : 31 août 2026. Autorité auditée :
+`b17ca2cd80464d14d83f79dfdf891354223904bf`, présent sur `main` et
+`origin/main`. Les répertoires non suivis `morsehgp3D_v6/bench/` et
+`morsehgp3D_v6/receipts/campagne_stationnaire_20260831/` appartiennent au
+chantier J3 en cours : ils sont exclus de cette coupe et n'ont pas été touchés.
 
 ```text
 phase=exploration_v6_hors_registre
@@ -14,25 +16,24 @@ public_status=not_claimed
 
 ## Verdict courant
 
-La correction locale de la descente fusionnée est **reçue techniquement** :
-le mutant `fused-mask-stuck` est désormais tué causalement et les 23 portes
-rapides passent. Les corrections du contrat de profondeur, du coût réel du
-sweep, de la provenance et des régimes stationnaires vont dans le bon sens.
+Le commit est un **checkpoint J0–J2 reproductible et utile**, mais pas encore
+une réception du « pipeline v6 complet ». La correction locale de la descente
+fusionnée est reçue techniquement : le mutant `fused-mask-stuck` est tué
+causalement et les 23 portes rapides passent. Le reçu J2 existe, ses trois
+hashes correspondent aux binaires du build courant, et son inventaire est bien de
+23 portes rapides plus 15 conformités de taille.
 
-En revanche, l'annonce « lot J0–J2 complet » de
-`REPONSE_CLAUDE_AUDIT_J0_20260831.md` n'est pas encore recevable. Les
-obstacles restants sont précis et réparables :
+La portée doit toutefois rester bornée. Un contre-exemple exact montre que le
+sweep q4 balaie un cover coefficient 3 au lieu du coefficient 4 requis; le
+préfiltre aval répare l'objet final mais masque la faute de génération. Le
+digest conserve en outre la frontière v5 post-RLE alors que la documentation
+annonce une monnaie post-préfiltre. Enfin, 4 mutants seulement sur 59 sont
+réellement injectés par CTest, plusieurs blocs d'architecture marqués
+`[LIVRÉ]` n'existent pas, et le grand-livre omet encore des coûts payés.
 
-1. le lot n'est toujours pas commité;
-2. la topologie de tests promise n'existe pas encore;
-3. plusieurs documents contredisent encore les corrections annoncées;
-4. le reçu v6 final cité par la réponse est absent;
-5. le grand-livre de coût omet encore des termes payés.
-
-Claude peut soit livrer un **checkpoint borné** en marquant honnêtement ces
-éléments `[PRÉVU]`, soit compléter réellement les portes avant de revendiquer
-J2. Le premier choix est parfaitement acceptable et évite de retarder le
-chantier pour un intitulé.
+Ces défauts sont localisés et réparables. Claude peut conserver ce commit
+comme **checkpoint borné**, corriger d'abord le cover q4 et les deux monnaies
+de digest, puis aligner les claims/tests avant de nommer J2 complet.
 
 ## Corrections reçues
 
@@ -63,15 +64,20 @@ résiduel `compose(depth_residual_at(mu_d))` reste futur.
 
 ### Provenance et régimes
 
-La catégorie `port_source_requalified` est la bonne façon de conserver le
-socle v5 éprouvé sans prétendre l'avoir réécrit. Le vocabulaire
-« synthétique stationnaire, physiquement motivé », la valeur 566 et la
-qualification de `scanline_stationnaire` comme hybride neuf sont reçus.
+La catégorie `port_source_requalified` est la bonne taxonomie pour un bloc
+porté dont les portes ont réellement été rejouées; elle ne doit pas encore
+qualifier globalement tout le socle. La gate familles ne grave aucun golden,
+le mutant `family-scanline-overshoot` n'est pas raccordé, la porte SHA ne
+compare pas explicitement le chemin portable au chemin accéléré, et seuls 4
+mutants sur 59 passent par CTest. Employer `port_source_pending_requalification`
+pour ces blocs jusqu'à leur porte dédiée. Le vocabulaire « synthétique
+stationnaire, physiquement motivé », la valeur 566 et la qualification de
+`scanline_stationnaire` comme hybride neuf sont reçus.
 
 ## P0 — le cover q4 courant perd des témoins intérieurs
 
 `edge_cover.hpp` exige le coefficient 4 pour les intérieurs et la coquille q4.
-Le lot candidat construit pourtant les handles puis le cover avec le
+Le commit audité construit pourtant les handles puis le cover avec le
 coefficient 3 avant de partager ce résultat entre q3 et q4. Le sweep ne peut
 donc pas compter certains intérieurs q4.
 
@@ -86,14 +92,22 @@ z[id=4]=(83,100,100)
 Les quatre premiers points forment un tétraèdre régulier, `D2=800`, et z est
 strictement intérieur à sa boule : `BallKey.power(z)=-11`. Pour l'ancre
 `(a,b)`, `|2z-a-b|2=2916`, donc z est hors du cover 3 (`3*D2=2400`) mais dans
-le cover 4 (`4*D2=3200`). À `smax=4`, donc `h4=1`, la génération émet encore
-la boule q4 (`candidate=1`, `depth_killed[2]=0`) ; le préfiltre aval la retire
-seulement ensuite (`survivor=0`).
+le cover 4 (`4*D2=3200`). Un probe indépendant sur le commit audité donne :
 
-Cette réparation aval préserve l'objet final sur cette fixture, mais elle
-réfute le « cover complet », l'équivalence préfiltre du sweep et le claim de
-multiensemble de génération. L'oracle courant masque exactement le défaut car
-il compare après `prefilter_balls`.
+```text
+covers coef3_size=4 coef3_has_z=0 coef4_size=5 coef4_has_z=1
+candidate_boundary raw_target=1 rle_target=1 q4_depth_killed=0
+prefilter_boundary target_survivors=0 dead_depth=1
+```
+
+À `smax=4`, donc `h4=1`, la boule fautive est ainsi présente brute et après
+RLE; le préfiltre aval la retire seulement ensuite. Cette réparation préserve
+l'objet final sur cette fixture, mais elle réfute le « cover complet » et
+l'équivalence du filtre de profondeur à la frontière de génération. Elle ne
+prouve pas à elle seule une divergence avec les candidats v5, qui peuvent
+partager le même défaut coefficient 3, ni une divergence de l'objet final.
+L'oracle courant masque exactement la faute car il compare après
+`prefilter_balls`.
 
 Correction : partager des handles construits au coefficient 4, puis filtrer
 l'ancre à 3 pour q3 et à 4 pour q4 (ou conserver deux vues), avec lentille de
@@ -122,9 +136,14 @@ La fixture `uniform_400` doit imposer `dead_depth>0`, les deux cardinalités
 distinctes, le digest compat égal à la v5 et le digest v6 calculé sur exactement
 103942 records. Aucun renommage conditionnel futur.
 
-## P0 — remettre le plan de tests à la vérité
+Le nom « multiensemble émis » doit aussi être corrigé : `digest_balls_v4`
+signe actuellement les candidats **uniques post-RLE**, pas le multiensemble
+brut émis. `run.hpp` libère ensuite `surv` et digère encore `cands`; il ne
+peut donc pas, dans l'état courant, signer la frontière post-préfiltre annoncée.
 
-La coupe candidate contient :
+## P1 — remettre le plan de tests à la vérité
+
+La coupe auditée contient :
 
 - 59 noms dans `kMutants`;
 - 59 points d'injection réels `MHGP6_MUTANT`;
@@ -153,7 +172,7 @@ ne grave aucun digest et n'exerce pas `family-scanline-overshoot`; elle teste
 seulement déterminisme, profil, unicité et cardinalité. L'oracle OBig est
 présent mais non appelé.
 
-## P0 — finir la cohérence documentaire
+## P1 — finir la cohérence documentaire
 
 Les corrections annoncées n'ont pas encore atteint toutes les autorités :
 
@@ -165,7 +184,7 @@ Les corrections annoncées n'ont pas encore atteint toutes les autorités :
 - `ARCHITECTURE.md` dit encore à E4 que « la boucle C×D n'existe pas » et
   emploie « profondeur + crédits » malgré le contrat full-cover choisi;
 - E3 est marqué `[LIVRÉ]` et décrit `src/credit/`, `AnchorCredit`,
-  `CoreCredit` et `ResidualTape`, alors que les répertoires sont vides et
+  `CoreCredit` et `ResidualTape`, alors que `src/credit/` est vide et
   le code emploie `EndpointCredit`;
 - `PISTES_FERMEES.md` dit encore que la frontière post-préfiltre rend le
   diagnostic candidat caduc;
@@ -185,18 +204,30 @@ la famille » et que q4 devient linéaire avec des exposants
 cet intervalle décrivait les covers de deux terrains bornés, pas un théorème
 causal sur le coût q4. Écrire « association diagnostique sur ces runs ».
 
-## P0 — ne pas reconstruire un reçu après coup
+## P1 — borner le reçu au matériau réellement capturé
 
-La réponse cite `receipts/conformite_v6_j2_20260831/`, mais ce répertoire
-n'existe pas encore. La campagne 15/15 ne devient recevable qu'avec pin,
-commande, hash du binaire, sorties brutes, codes et état du worktree.
+Le reçu `receipts/conformite_v6_j2_20260831/` existe désormais. Les trois
+SHA-256 de `BINAIRES.txt` correspondent exactement aux binaires du build courant
+depuis la coupe, et CMake enregistre bien 38 tests : 23 rapides et 15 scale.
+Les 15 références scale contiennent chacune le digest candidat, les dix
+digests forestiers et `digest_all`; le comparateur les juge effectivement.
 
-Les nouveaux champs de `receipts/conformite_v5/META.txt` ne figurent pas dans
-la capture initiale. S'il existe un journal brut de session qui établit
-toolchain, propreté et stderr, le versionner ou le hasher. Sinon écrire
-`not_recorded` pour ces champs; une information rétrospective plausible
-n'est pas un reçu reproductible. La baseline reste utilisable pour ses
-éléments réellement épinglés : pin, hash du binaire, sorties et codes.
+En revanche, `ctest_gate_final.txt` et `ctest_scale_final.txt`, qualifiés de
+« sorties brutes », ne sont que des résumés de 4 et 10 lignes. Ils ne portent
+ni commande, ni noms/statuts individuels, ni stdout avec les digests. Le reçu
+dit seulement « le commit qui porte ce reçu » et ne capture pas l'état du
+worktree au moment du run. Le lien au commit `b17ca2cd` est donc fortement
+corroboré par les hashes et les mtimes, mais reconstruit après coup. Pour la
+prochaine campagne, ajouter un `META` avec SHA littéral, commande, build type,
+toolchain, état du worktree, heures, hashes des logs et codes; sinon renommer
+ces fichiers `summary` et borner explicitement la preuve.
+
+Les champs enrichis de `receipts/conformite_v5/META.txt` ne figuraient pas
+dans la capture initiale. Les qualifier `reconstruit_a_posteriori` ou
+`not_recorded`. De plus, ce META affirme que `STATUS.txt` contient les codes
+des 15 grands et 8 petits runs, alors que `STATUS.txt` ne contient que les 15
+grands. La baseline reste utilisable pour ses éléments réellement épinglés :
+pin, hash du binaire, sorties présentes et codes effectivement enregistrés.
 
 ## P1 — fermer le grand-livre avant les pentes
 
@@ -224,6 +255,13 @@ Le chiffre isolé `terrain_stationnaire n=2000` de la réponse est un
 diagnostic utile, pas un reçu ni une pente — qualification correctement
 annoncée par Claude.
 
+Enfin, la campagne J3 doit séparer le coût de fabrication des entrées. Les
+familles stationnaires créent un nombre de motifs proportionnel à `n`, puis
+évaluent chaque point contre tous ces motifs (`terrain_stationnaire_cloud` et
+`ScanlineField::height`) : la génération est elle-même quadratique. Ajouter
+`T_input` et un compteur `V_motif`, ou préparer/rastériser spatialement le
+champ, avant d'attribuer une pente de bout en bout au pipeline MorseHGP3D.
+
 ## P1 — la racine carrée reste flottante
 
 `detail_round_isqrt_clamped` initialise encore `r` avec
@@ -248,15 +286,31 @@ d'arrondi et du clamp.
 - Q4 : contre-fixture calotte–lentille finie en u16 acceptée, avec littéraux,
   marges OBig, rôles exact-once, objets attendus, permutation et mutant i64.
 
-## Rejeu indépendant sur le lot candidat
+## Rejeu indépendant sur `b17ca2cd`
 
 ```text
+cmake -S morsehgp3D_v6 -B build/v6 -DCMAKE_BUILD_TYPE=Release
+  -> code 0
+
 cmake --build build/v6 --parallel
   -> code 0
 
 ctest --test-dir build/v6 --output-on-failure -LE '^scale'
   -> 23/23 passes
+  -> 50,81 s réelles
   -> mhgp6_fused_mutant_mask rend bien le code attendu 4
+
+sha256sum build/v6/{mhgp6,mhgp6_conformity,mhgp6_selftest}
+  -> correspond exactement à BINAIRES.txt
+
+python tools/check_docs.py
+  -> 236 Markdown actifs validés dans le worktree courant
+
+python tools/check_implementation_status.py
+  -> 20 phases du registre validées; ce succès ne promeut pas la v6 hors registre
+
+git diff --check
+  -> code 0
 ```
 
 Une compilation GCC 13.3 Debug avec ASan/UBSan dans `/tmp`, fuites seules
@@ -265,5 +319,7 @@ terminé 20 portes sans diagnostic : 1–8, 10–15 et 18–23. Les portes 9, 16
 17 ont été interrompues pour coût instrumenté et n'ont aucun verdict
 sanitizer. Cette campagne partielle est un diagnostic mémoire, pas une porte.
 
-Les 15 tests `scale*` n'ont pas été rejoués indépendamment sur cette coupe.
-Aucun résultat GPU n'est revendiqué. GCP non utilisé.
+Les 15 tests `scale*` n'ont pas été rejoués indépendamment sur cette coupe :
+leur résumé annonce 15/15 en 1398,91 s et l'inventaire CMake/références est
+cohérent, sous les réserves probatoires du reçu ci-dessus. Aucun résultat GPU
+n'est revendiqué. GCP non utilisé.
