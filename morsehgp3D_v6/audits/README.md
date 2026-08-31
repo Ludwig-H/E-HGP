@@ -11,17 +11,18 @@ Cycle (inchangé) : les auditeurs poussent sur `main` ; leurs `AUDIT_*` /
 `CONTRE_AUDIT_*` / `ADDENDUM_*` se lisent et s'exécutent avant toute
 dépense. Claude répond par `REPONSE_CLAUDE_*` / `NOTE_CLAUDE_*` /
 `QUESTION_CLAUDE_*` dans ce dossier ; chaque livraison produit un reçu
-immuable ancré au commit dans `receipts/<chantier>_<date>/`. Tout fichier est
-daté `_YYYYMMDD` et, s'il juge du code, ancré au hash court. Les audits
-motivent des corrections, ils ne certifient rien.
+immuable ancré au commit dans `receipts/<chantier>_<date>/`. Tout rapport est
+daté `_YYYYMMDD` et, s'il juge du code, ancré au hash court ; `README.md` et
+`ETAT_COURANT.md` sont les deux index mutables non datés. Les audits motivent
+des corrections, ils ne certifient rien.
 
 ## À lire maintenant
 
 - [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict mutable, pins jugés et ordre
   de correction. Il prime sur toute réponse historique.
 - [`AUDIT_GCP_V6_P0_20260831.md`](AUDIT_GCP_V6_P0_20260831.md) : porte de
-  sûreté dédiée mise à jour sur `e018b4c8` ; NO-GO ciblé sur registre/cible,
-  délais/rapatriement et huit mutants causaux de frontière.
+  sûreté dédiée mise à jour sur `98bae2a9` ; NO-GO ciblé sur échéances
+  post-start, attestation causale de la frontière et tuple post-arrêt.
 - [`ALERTE_CAMPAGNE_CPU_MIXTE_20260831.md`](ALERTE_CAMPAGNE_CPU_MIXTE_20260831.md) :
   preuves des captures CPU et statut borné de la confirmation hors échantillon.
 

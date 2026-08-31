@@ -2,8 +2,8 @@
 
 Date de coupe : 31 août 2026.
 
-HEAD observé : `e018b4c8`. Autorités techniques : `6d755804` pour le
-prototype E3/G16, `cd49a390` pour les callbacks, `e018b4c8` pour le protocole
+HEAD observé : `98bae2a9`. Autorités techniques : `6d755804` pour le
+prototype E3/G16, `cd49a390` pour les callbacks, `98bae2a9` pour le protocole
 GCP, `320299df` pour le reçu de réplication et `8ed2dea6` pour le reçu de
 confirmation contre-audité ci-dessous. Les notes Claude ne priment pas sur le
 présent verdict.
@@ -26,7 +26,7 @@ présent verdict.
 | confirmation hors échantillon | cœur reçu ; `confirmation_candidate`, déclencheur E6 non confirmé |
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
-| protocole GCP `e018b4c8` | **NO-GO** ; progrès reçus, mais registre illisible et frontière encore permissifs |
+| protocole GCP `98bae2a9` | **NO-GO** ; registre/cible reçus, mais échéances non fermées et causes frontière non attestées |
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
@@ -47,12 +47,12 @@ Au pin `6d755804` :
   par résolution.
 
 Le probe `fold-inject-b-exception-k3` termine encore par SIGABRT, code 134 ;
-il reste volontairement hors CTest. Au pin `e018b4c8`, les deux selftests GCP
-Bash passent, le profil G4 exact ferme 81 runs avec queue vide, et les 82
-tests de sûreté/intégration passent ; un rejeu indépendant donne 82/82 en
-118,270 s. Ces verts ne sont pas encore causaux pour la frontière : après
-recalcul du manifeste distant, huit mutants de code, durée, motif fatal, argv
-et plafond sont acceptés à tort. Le NO-GO reste donc actif.
+il reste volontairement hors CTest. Au pin `98bae2a9`, les deux selftests GCP
+Bash passent, le profil G4 exact ferme 81 runs avec queue vide, et les 83
+tests de sûreté/intégration passent ; un rejeu indépendant donne 83/83 en
+123,830 s. Les anciens mutants de frontière sont maintenant causaux et
+refusés, mais des contre-exemples nouveaux distinguent encore mal présence
+lexicale et cause exécutée. Le NO-GO reste donc actif.
 
 ## Exact-K, omission unique et ownership WSPD
 
@@ -356,37 +356,41 @@ ces preuves sur trois points :
 - deux termes de la porte complète restent au-dessus de 2, donc « moteur
   courant sous-quadratique en médiane » n'est pas un verdict disponible.
 
-Les chemins état post-démarrage perdu avec handoff valide et
-`targeted_stopped` d'une autre génération sont maintenant couverts à
-`e018b4c8`. Le GO GCP reste refusé pour les contre-exemples plus précis de
-registre présent mais illisible et de frontière décrits ci-dessous.
+Les chemins état post-démarrage perdu avec handoff valide,
+`targeted_stopped` d'une autre génération, état illisible et cible
+discordante sont maintenant couverts à `98bae2a9`. Le GO GCP reste refusé
+pour les contre-exemples temporels et d'attestation décrits ci-dessous.
 
 ## GCP
 
-`AUDIT_GCP_V6_P0_20260831.md` est l'autorité dédiée. `e018b4c8` ferme le
-désaccord 81/82, la génération du fast-path, le retry causal, la publication
-initiale, la liaison canon–manifeste, l'ordre de la frontière et l'inclusion
-des résumés. La phase CUDA est correctement gravée comme contrôle historique
-v5 non autoritaire, et la porte fils comme invariance du grand-livre.
+`AUDIT_GCP_V6_P0_20260831.md` est l'autorité dédiée. `98bae2a9` ferme la
+confusion absent/illisible, l'adoption de cible étrangère, le reçu fast-path,
+les timeouts sans SIGKILL de secours, l'ordre CPU/GPU et les huit mutants
+frontière du tour précédent. La publication initiale sur `EIO` est exercée
+sur le vrai publisher. Le budget G4 est correctement qualifié d'estimation
+nominale tronquable : 23 794 s dans 25 200 s, jamais une promesse de
+complétude.
 
-Trois P0 subsistent. `state_snapshot()` classe tout `OSError` comme absence :
-un registre présent mais illisible sans handoff peut encore produire un faux
-`refus_avant_mutation`. Il adopte aussi une génération issue d'un registre
-pour une autre cible avant d'appeler le stop sur la cible configurée. Les
-`timeout` n'ont aucun `--kill-after` ; un processus ignorant `TERM` peut donc
-dépasser la deadline et retarder le trap d'arrêt. Enfin, le validateur de
-frontière accepte huit mutants après rehash causal, dont code 3 masqué par
-`bad_alloc` et commande sans le `RLIMIT_AS` annoncé. Les falsifications du
-selftest ne recalculent pas le manifeste et sont donc tuées d'abord par le
-hash de transport.
+Le P0 temporel reste ouvert. Les contrôles de génération post-start appellent
+`gcloud` sans borne, le validateur local peut retenir le trap, les paramètres
+temporels surchargeables ne sont pas validés ensemble et une durée de zéro
+désactive GNU timeout. Le cutoff ignore l'arrêt invité, le clamp relance une
+campagne expirée pour 60 s et les calculs d'admission SCP omettent la grâce
+`kill-after`, les contrôles et les sleeps. Avec le profil canonique, deux SCP
+maximaux ne laissent que 135 s pour validation et arrêt ; trois tentatives ne
+tiennent pas. En outre, le runner résout `timeout` et le `bash` du wrapper
+RLIMIT depuis un `PATH` distant préfixé par `$HOME/.local/bin` : ces deux
+exécutables de sûreté ne sont pas encore épinglés.
 
-Le budget G4 est par ailleurs une estimation empirique, pas la borne
-« conservatrice » annoncée : remplacer les 1 860 s estimées pour les deux
-builds GPU par leurs plafonds de 3 600 s porte déjà le total de 22 984 s à
-28 324 s, au-delà de la fenêtre de 26 400 s. Ce point n'affaiblit pas les
-coupe-circuits, mais interdit de garantir la complétude des 81 runs. La marge
-de rapatriement de 1 500 s est même inférieure à une seule tentative SCP de
-1 800 s, trois tentatives étant autorisées.
+La frontière porte désormais quatre étiquettes fermées, mais pas encore
+quatre causes. Un exit 124 du binaire est reçu comme timeout, un simple
+`exit 134` précédé du texte `std::bad_alloc` comme SIGABRT, et des tokens
+`ulimit` placés après un commentaire comme limite exécutée. Arguments
+conflictuels, champs RLIMIT dupliqués, préfixe
+`REFUS resource_exhausted_bogus` et diagnostics de classes mélangés passent
+aussi après rehash. Enfin, la relecture post-stop vérifie seulement
+`state=targeted_stopped` : un tuple strict mais étranger peut être publié dans
+un reçu sans incohérence.
 
 ## Dette d'échelle et ordre utile
 
@@ -398,8 +402,9 @@ ou u128 pour les compteurs.
 
 Ordre recommandé à Claude :
 
-1. fermer registre/cible, timeouts/rapatriement et les huit mutants causaux de
-   frontière avant toute session facturable ;
+1. fermer l'horloge unique, les appels post-start non bornés, les retries,
+   l'attestation causale 124/134/RLIMIT et le tuple post-stop avant toute
+   session facturable ;
 2. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
    re-régler la règle ;
 3. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
