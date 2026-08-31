@@ -2,8 +2,8 @@
 
 Date de coupe : 31 août 2026.
 
-HEAD observé : `d64063b9`. Autorités techniques : `6d755804` pour le
-prototype E3/G16, `cd49a390` pour les callbacks, `d64063b9` pour le protocole
+HEAD observé : `e018b4c8`. Autorités techniques : `6d755804` pour le
+prototype E3/G16, `cd49a390` pour les callbacks, `e018b4c8` pour le protocole
 GCP, `320299df` pour le reçu de réplication et `8ed2dea6` pour le reçu de
 confirmation contre-audité ci-dessous. Les notes Claude ne priment pas sur le
 présent verdict.
@@ -26,7 +26,7 @@ présent verdict.
 | confirmation hors échantillon | cœur reçu ; `confirmation_candidate`, déclencheur E6 non confirmé |
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
-| protocole GCP `d64063b9` | **NO-GO** ; profil G4 auto-invalidant et cycle de vie non fermé |
+| protocole GCP `e018b4c8` | **NO-GO** ; progrès reçus, mais registre illisible et frontière encore permissifs |
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
@@ -47,12 +47,12 @@ Au pin `6d755804` :
   par résolution.
 
 Le probe `fold-inject-b-exception-k3` termine encore par SIGABRT, code 134 ;
-il reste volontairement hors CTest. Au pin `d64063b9`, les deux selftests GCP
-Bash passent, ainsi que l'intégration 1/1 en 4,748 s et les 81 tests de sûreté
-en 125,176 s. Ces verts ne contiennent pas les mutants d'état perdu ou de
-génération erronée. Un probe direct montre en outre que le profil canonique
-G4 à queue `aucun` produit zéro run côté runner mais un run côté validateur ;
-le NO-GO reste donc actif.
+il reste volontairement hors CTest. Au pin `e018b4c8`, les deux selftests GCP
+Bash passent, le profil G4 exact ferme 81 runs avec queue vide, et les 82
+tests de sûreté/intégration passent en 121,048 s. Ces verts ne sont pas encore
+causaux pour la frontière : après recalcul du manifeste distant, six mutants
+de code, durée, motif fatal et argv sont acceptés à tort. Le NO-GO reste donc
+actif.
 
 ## Exact-K, omission unique et ownership WSPD
 
@@ -356,37 +356,32 @@ ces preuves sur trois points :
 - deux termes de la porte complète restent au-dessus de 2, donc « moteur
   courant sous-quadratique en médiane » n'est pas un verdict disponible.
 
-Enfin, les selftests GCP verts ne couvrent ni l'état post-démarrage perdu avec
-handoff valide, ni un `targeted_stopped` d'une autre génération. Le GO GCP
-demandé par le bilan est refusé jusqu'à fermeture causale de ces chemins.
+Les chemins état post-démarrage perdu avec handoff valide et
+`targeted_stopped` d'une autre génération sont maintenant couverts à
+`e018b4c8`. Le GO GCP reste refusé pour les contre-exemples plus précis de
+registre présent mais illisible et de frontière décrits ci-dessous.
 
 ## GCP
 
-`AUDIT_GCP_V6_P0_20260831.md` est l'autorité dédiée. `d64063b9` ajoute une
-infrastructure utile de plans fils/GPU/frontière, mais ne touche pas les
-branches de cleanup qui maintenaient le NO-GO. Un état vide fait encore
-ignorer un handoff valide, et `targeted_stopped` n'est toujours pas comparé à
-la génération verrouillée.
+`AUDIT_GCP_V6_P0_20260831.md` est l'autorité dédiée. `e018b4c8` ferme le
+désaccord 81/82, la génération du fast-path, le retry causal, la publication
+initiale, la liaison canon–manifeste, l'ordre de la frontière et l'inclusion
+des résumés. La phase CUDA est correctement gravée comme contrôle historique
+v5 non autoritaire, et la porte fils comme invariance du grand-livre.
 
-La nouvelle matrice possède aussi ses propres bloqueurs : la sentinelle queue
-`aucun` est reconstruite comme un run par le validateur ; avec le reste du
-scaffold et des pins présent, la frontière accepte n'importe quel code ou
-corps vide comme donnée ; les builds GPU peuvent franchir leur marge
-d'échéance ; et la frontière potentiellement OOM précède le bench. Les cinq
-résumés restent exclus du reçu durable, tandis que le canon n'est toujours pas
-lié à l'entrée exacte du manifeste.
+Deux P0 subsistent. `state_snapshot()` classe tout `OSError` comme absence :
+un registre présent mais illisible sans handoff peut encore produire un faux
+`refus_avant_mutation`. Le validateur de frontière accepte six mutants après
+rehash causal : code non numérique, invariant masqué par `bad_alloc`,
+invariant sur succès, durée non numérique, argv décoré et code 124 avec
+invariant. Les falsifications du selftest ne recalculent pas le manifeste et
+sont donc tuées d'abord par le hash de transport.
 
-La phase CUDA est explicitement v5 : elle reste un contrôle historique non
-autoritaire et ne mesure aucun GPU v6. La porte fils compare des comptes, pas
-les objets bit à bit. Aucun résultat issu de ces deux phases ne devra être
-agrégé comme gain v6 avant correction des libellés, digests et plans appariés.
-
-La note `d64063b9` dit à tort que le NO-GO était une formalité et qu'aucun
-audit plus récent n'existait : `09fdbc80` avait précisément maintenu les deux
-défauts de cycle de vie. Aucun processus de session réel ni reçu G4 n'est
-visible localement ; `gcloud` étant absent, l'état cloud exact reste
-illisible et n'est pas supposé arrêté. La commande de contrôle est gravée
-dans l'audit dédié.
+Le budget G4 est par ailleurs une estimation empirique, pas la borne
+« conservatrice » annoncée : remplacer les 1 860 s estimées pour les deux
+builds GPU par leurs plafonds de 3 600 s porte déjà le total de 22 984 s à
+28 324 s, au-delà de la fenêtre de 26 400 s. Ce point n'affaiblit pas les
+coupe-circuits, mais interdit de garantir la complétude des 81 runs.
 
 ## Dette d'échelle et ordre utile
 
@@ -398,8 +393,8 @@ ou u128 pour les compteurs.
 
 Ordre recommandé à Claude :
 
-1. fermer le cycle de vie et rendre le profil G4 réellement validable avant
-   toute session facturable ;
+1. fermer l'erreur de lecture du registre et les six mutants causaux de
+   frontière avant toute session facturable ;
 2. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
    re-régler la règle ;
 3. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
