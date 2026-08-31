@@ -87,3 +87,19 @@ foreach(fam uniform terrain eight_clusters scanline_single_pass scanline_overlap
                LABELS scale${sz} TIMEOUT 3600)
   endforeach()
 endforeach()
+
+# ---- Barriere de sortie : linked_arcs_u16 (contrat sortie-sensible, barriere
+# d'Edelsbrunner–Pach transposee en entiers u16 : arcs enlaces, q3 = 2n(n+1) et
+# q4 = n² cles de profondeur zero ; oracle local OBig384 + route produit).
+mhgp6_executable(mhgp6_linked_arcs tests/linked_arcs_gate.cpp)
+mhgp6_gate(mhgp6_linked_arcs_u16 0 mhgp6_linked_arcs)
+mhgp6_gate(mhgp6_linked_arcs_oracle_i64 4 mhgp6_linked_arcs ARGS --oracle-i64)
+
+# ---- Fixtures de frontiere du sweep (audit du 31 aout : signes de B, B = 0,
+# racines egales, extremite de Jung — egalite exacte 2P² = J·B² par le
+# tetraedre regulier entier —, completion dans le facteur du rectangle,
+# profondeur gravee h4 − 1 ; verite par objet contre oracle exhaustif).
+mhgp6_executable(mhgp6_sweep_fixtures tests/sweep_fixtures.cpp)
+mhgp6_gate(mhgp6_sweep_frontieres 0 mhgp6_sweep_fixtures)
+mhgp6_gate(mhgp6_sweep_frontieres_mutant_depth 4 mhgp6_sweep_fixtures ARGS --inject=sweep-nonstrict-depth)
+mhgp6_gate(mhgp6_sweep_frontieres_mutant_exit 4 mhgp6_sweep_fixtures ARGS --inject=sweep-drop-exit-root)

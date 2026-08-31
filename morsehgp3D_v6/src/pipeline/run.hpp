@@ -552,8 +552,9 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                (unsigned long long)gs.jung_cert_skip, (unsigned long long)gs.jung_fallback);
   // GRAND-LIVRE DU SWEEP DE CORDE (docs/GRAND_LIVRE.md : W_sweep scinde).
   std::fprintf(out,
-               "sweep seeds_passe2=%llu racines_corde=%llu groupes=%llu racines_hors_corde=%llu temoins_constants=%llu "
+               "sweep tests_coeur=%llu tests_prof_q3=%llu seeds_passe2=%llu racines_corde=%llu groupes=%llu racines_hors_corde=%llu temoins_constants=%llu "
                "rejets=lens:%llu/owner:%llu/once:%llu/i64:%llu/face:%llu/det:%llu/centre:%llu\n",
+               (unsigned long long)gs.q4_core_site_tests, (unsigned long long)gs.q3_depth_site_tests,
                (unsigned long long)gs.sweep_pass2_seeds, (unsigned long long)gs.sweep_roots_onchord,
                (unsigned long long)gs.sweep_root_groups,
                (unsigned long long)gs.sweep_roots_offchord, (unsigned long long)gs.sweep_const_interior,

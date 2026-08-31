@@ -95,6 +95,8 @@ struct GenerateStats {
   u64 seeds_killed_core = 0;   // q4 : cœur de seed (Jung)
   u64 seeds_killed_chord = 0;  // q4 : morceaux de corde (passe 1)
   u64 invariant_jneg = 0;      // J < 0 : inatteignable par theoreme (refus en invariant)
+  u64 q4_core_site_tests = 0;  // W_sweep1 : sites visites par le scan cœur+corde (passe 1)
+  u64 q3_depth_site_tests = 0; // masse du filtre de profondeur q3 (sites testes)
   u64 sweep_pass2_seeds = 0;   // seeds q4 survivants entres en passe 2
   u64 sweep_roots_onchord = 0;   // racines triees (observable du grand-livre)
   u64 sweep_root_groups = 0;     // blocs de racines egales traites (regle de bloc)
@@ -139,6 +141,8 @@ struct GenerateStats {
     seeds_killed_core += o.seeds_killed_core;
     seeds_killed_chord += o.seeds_killed_chord;
     invariant_jneg += o.invariant_jneg;
+    q4_core_site_tests += o.q4_core_site_tests;
+    q3_depth_site_tests += o.q3_depth_site_tests;
     sweep_pass2_seeds += o.sweep_pass2_seeds;
     sweep_roots_onchord += o.sweep_roots_onchord;
     sweep_root_groups += o.sweep_root_groups;
@@ -480,6 +484,7 @@ inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 
     u64 depth = 0;
     bool deep = false;
     for (size_t iz = 0; iz < sc.cover.size() && !deep; ++iz) {
+      ++ls->q3_depth_site_tests;
       const double lh = seed.l_hat(sc, iz);
       bool interior;
       if (lh < -seed.bound) {
@@ -604,6 +609,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       for (size_t iz = 0; iz < sc.cover.size(); ++iz) {
         const CoverPoint& cz = sc.cover[iz];
         if (cz.u == ua || cz.u == ub || cz.u == cx.u) continue;
+        ++ls->q4_core_site_tests;
         const double lh = seed.l_hat(sc, iz);
         const P3& pz = ix.upos[(size_t)cz.u];
         const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
