@@ -97,6 +97,21 @@ NO-GO :
 - balayage répété non borné de bitsets denses ; réénumérations de carriers
   sans compteur.
 
+## 3 bis. Agrégateur inter-graines préenregistré
+
+Aucune conclusion mono-graine n'est recevable (REGIMES.md) et aucun seuil ne
+se choisit après lecture. La règle inter-graines est FIGÉE dans
+`bench/agregateur.py` (porte `mhgp6_agregateur_intergraines`), avant la
+campagne qu'elle juge : termes `W_sweep1`, `M_anchor[q4]` et
+`T_lourde = Σ w1 des octaves ≥ 10` (seuil d'octave issu de la lecture
+post-hoc de la capture invalide 518e2706, antérieure à toute campagne
+jugée) ; agrégat = min/médiane/max des pentes sécantes des trois graines au
+pas 16000→32000 ; `E6_active=oui` pour une famille stationnaire ssi la
+MÉDIANE ≥ 2 sur au moins un terme ; garde-fou GO (§ 3) sur uniform et
+eight_clusters par la même médiane. Une pente indéfinie (zéro légitime) ne
+déclenche jamais. L'agrégateur refuse toute campagne que `bench/pentes.py`
+ne valide pas intégralement.
+
 ## 4. Références des seuils
 
 Les seuils numériques d'une porte sont figés **avant** la mesure qu'ils

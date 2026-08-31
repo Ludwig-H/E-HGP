@@ -172,3 +172,10 @@ add_test(NAME mhgp6_campagne_provenance
                  "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/campagne_gate.py"
                  -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
 set_tests_properties(mhgp6_campagne_provenance PROPERTIES LABELS "gate")
+# Agregateur inter-graines PREENREGISTRE (regle figee avant la campagne
+# jugee) : nominal + refus campagne invalide + activation par T_lourde.
+add_test(NAME mhgp6_agregateur_intergraines
+         COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=python3
+                 "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/agregateur_gate.py"
+                 -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+set_tests_properties(mhgp6_agregateur_intergraines PROPERTIES LABELS "gate")
