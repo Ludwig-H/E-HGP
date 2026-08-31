@@ -142,6 +142,7 @@ case "${FAKE_START_MODE:-ok}" in
   ok_bad_timestamp) write_state targeted_running "pas-une-date"; write_handoff "pas-une-date"; exit 0 ;;
   stopped_by_guard) write_state targeted_stopped "${FAKE_GEN}"; exit 5 ;;
   stopped_wrong_generation) write_state targeted_stopped "generation-perimee"; write_handoff "${FAKE_GEN}"; exit 5 ;;
+  registre_illisible) write_state targeted_running "${FAKE_GEN}"; chmod 000 "${state}"; exit 4 ;;
   publication_interrompue) printf 'schema=e-hgp.lifecycle-st' > "$(dirname "${state}")/.$(basename "${state}").zzz.partial"; exit 3 ;;
   stop_failed_by_guard)
     # REPRISE EXECUTEE (cinquieme tour) : le garde tente REELLEMENT son arret
@@ -368,6 +369,16 @@ check_true "mutant publication interrompue : refus avant mutation, aucun arret, 
     && d=\$(ls -d '${SCENARIO_DIR}'/recu/s_* | head -1) \
     && grep -q '^issue=refus_avant_mutation' \"\$d/RECU_SESSION.txt\""
 
+# (g) P0 sixieme tour : registre PRESENT mais ILLISIBLE (permission), sans
+# handoff ni generation en memoire — une erreur de lecture ne prouve pas
+# l'absence : BLOCAGE 71 exige, jamais « refus avant mutation », zero arret.
+rc=0; run_scenario registre_illisible || rc=$?
+chmod 600 "${SCENARIO_DIR}/work/etat_cycle_vie" 2>/dev/null || true
+check_true "mutant registre illisible sans handoff : BLOCAGE 71, jamais refus avant mutation, aucun arret" \
+  bash -c "[ '${rc}' -eq 71 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 0 ] \
+    && grep -q 'registre de cycle de vie ILLISIBLE' '${SCENARIO_DIR}/stderr.log' \
+    && ! grep -q 'refus avant demarrage' '${SCENARIO_DIR}/stdout.log'"
+
 # ---- Scenarios bootstrap + pin : clone jetable, versions COURANTES du
 # protocole synchronisees et committees DANS LE CLONE (commit conditionnel :
 # sur un HEAD deja identique, rien a committer n'est PAS un echec — defaut
@@ -456,4 +467,4 @@ if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest cycle de vie v6 : ${FAILURES} echec(s)" >&2
   exit 1
 fi
-echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (21 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue — + 11 refus de pin, rejouable depuis un HEAD propre)"
+echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (22 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue, registre illisible=blocage — + 11 refus de pin, rejouable depuis un HEAD propre)"

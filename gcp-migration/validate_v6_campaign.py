@@ -67,6 +67,10 @@ AUX = ("topologie.txt", "conf_plan.txt", "bench_plan.txt", "queue_plan.txt",
        "conf_tronquee.txt", "bench_tronquee.txt", "queue_tronquee.txt",
        "sweep_tronquee.txt", "gpu_tronquee.txt", "frontier_tronquee.txt")
 FORBIDDEN = re.compile(r"REFUS|INVARIANT|DIVERGENCE|PLANCHER|Killed|bad_alloc|AddressSanitizer")
+# Motifs FATALS de la frontiere (sixieme tour) : appliques a TOUTES les
+# classes d'issue — un motif de capacite ne peut pas les masquer.
+FATAL_FRONT = re.compile(r"INVARIANT|DIVERGENCE|PLANCHER|AddressSanitizer|Sanitizer|Killed|"
+                         r"command not found|Segmentation fault")
 COUNTERS = re.compile(r"boules_uniques=\d+.*evenements=\d+.*facettes=\d+")
 IDENT = re.compile(r"^famille=(\S+) n=(\d+) coord=\d+ s=(\d+) smax=(\d+) seed=(\d+) threads=(\d+)", re.M)
 TOWER = re.compile(r"^tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11$", re.M)
@@ -796,18 +800,34 @@ def main():
                                       frontier_threads, bad, code_free=True)
         if st is None:
             continue
-        cm = re.search(r"^code=(\d+)$", st, re.M)
-        code = cm.group(1) if cm else "?"
+        # CODE et DUREE : decimaux EXACTS, exactement une fois (sixieme tour :
+        # code=abc n'est pas une issue, c'est une panne).
+        cms = re.findall(r"^code=(\d+)$", st, re.M)
+        if len(cms) != 1:
+            bad.append(f"{name}: code non decimal ou duplique dans le statut")
+            code = "?"
+        else:
+            code = cms[0]
+        if len(re.findall(r"^duree_s=(\d+)$", st, re.M)) != 1:
+            bad.append(f"{name}: duree_s non decimale ou dupliquee dans le statut")
         for field, want in (("family", run["family"]), ("n", run["n"]), ("seq", run["seq"])):
             fm = re.search(rf"^{field}=(\S+)$", st, re.M)
             if not fm or fm.group(1) != want:
                 bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} (annonce)")
+        # ARGV : jetons EXACTS de la commande gravee (jamais une sous-chaine —
+        # sixieme tour : xxx--n=400000xxx passait).
         cmd = re.search(r"^commande=(.*)$", st, re.M)
-        cmd_text = cmd.group(1) if cmd else ""
+        cmd_tokens = set(cmd.group(1).split()) if cmd else set()
         for arg in (f"--family={run['family']}", f"--n={run['n']}", "--s=8", "--smax=11",
                     "--seed=3", f"--threads={frontier_threads}"):
-            if arg not in cmd_text:
-                bad.append(f"{name}: commande gravee sans {arg}")
+            if arg not in cmd_tokens:
+                bad.append(f"{name}: commande gravee sans le jeton exact {arg}")
+        # MOTIF FATAL : applique a TOUTES les classes — invariant brise,
+        # sanitizer, panne d'infrastructure ; un motif de capacite present ne
+        # les masque pas.
+        fatal = FATAL_FRONT.search(body or "")
+        if fatal:
+            bad.append(f"{name}: motif FATAL ({fatal.group(0)}) — la phase frontiere est invalide")
         note = ""
         if code == "0":
             if body is not None:
@@ -816,7 +836,9 @@ def main():
                 if ANY_DIGEST.search(body):
                     bad.append(f"{name}: digest imprime sur un run de frontiere")
         elif code == "124":
-            note = "timeout"
+            # Timeout OBSERVE PAR L'ENVELOPPE (l'outil timeout du runner) —
+            # non distingue d'un exit 124 du binaire ; decrit prudemment.
+            note = "timeout (enveloppe)"
         else:
             nm = re.search(r"resource_exhausted\S*|std::bad_alloc|bad_alloc", body or "")
             if not nm:

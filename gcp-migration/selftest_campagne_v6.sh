@@ -390,47 +390,86 @@ rc=0; run_runner "${OUT6}" DEADLINE_EPOCH=1000000 || rc=$?
 check_true "echeance passee : troncature et rc=3" \
   bash -c "[ '${rc}' -eq 3 ] && [ -f '${OUT6}/conf_tronquee.txt' ]"
 
-# ---- 7. Falsifications du dossier rapatrie : chacune REFUSEE (rc=1).
-falsify() { # $1 = nom, $2... = commande de mutation (executee dans la copie)
-  local name="$1"; shift
+# ---- 7. Falsifications du dossier rapatrie — DEUX DISCIPLINES DISTINCTES
+# (sixieme tour : un mutant qui meurt sur le hash de transport ne prouve pas
+# la porte semantique annoncee).
+#   falsify_transport : corruption SANS rehash — la cause attendue est le
+#     controle de transport lui-meme ;
+#   falsify_semantique : mutation PUIS recalcul de MANIFESTE_DISTANT.txt
+#     (meme recette que le runner) — le validateur doit refuser pour la
+#     CAUSE SEMANTIQUE exacte, le transport etant redevenu coherent.
+rehash_manifeste() { # $1 = dossier
+  ( cd "$1" && find . -maxdepth 1 -type f ! -name 'MANIFESTE_DISTANT.txt*' -printf '%P\n' | sort \
+    | xargs -d '\n' sha256sum > MANIFESTE_DISTANT.txt.tmp && mv MANIFESTE_DISTANT.txt.tmp MANIFESTE_DISTANT.txt )
+}
+falsify_case() { # $1 = nom, $2 = motif exact exige, $3 = rehash(0|1|apres), reste = mutation
+  local name="$1" motif="$2" mode="$3"; shift 3
   local dir="${WORK}/out_falsif"
   rm -rf "${dir}"
   cp -r "${OUT}" "${dir}"
-  rm -f "${dir}/bench_resume.txt" "${dir}/queue_resume.txt"
+  if [ "${mode}" = "apres" ]; then rehash_manifeste "${dir}"; fi
   ( cd "${dir}" && "$@" )
-  local rc=0
-  run_validator "${dir}" 0 0 >/dev/null || rc=$?
-  check_true "falsification refusee : ${name}" [ "${rc}" -eq 1 ]
+  if [ "${mode}" = "1" ]; then rehash_manifeste "${dir}"; fi
+  local rc=0 sortie
+  sortie="$(run_validator "${dir}" 0 0 2>&1)" || rc=$?
+  check_true "${name}" bash -c "[ \"\$3\" -eq 1 ] && printf '%s' \"\$1\" | grep -q -- \"\$2\"" \
+    _ "${sortie}" "${motif}" "${rc}"
 }
-falsify "statut de bench supprime" rm bench_uniform_n32000_v6_r1.status
-falsify "pin altere dans un statut" \
+falsify_transport() { local n="$1" m="$2"; shift 2; falsify_case "${n}" "${m}" 0 "$@"; }
+falsify_semantique() { local n="$1" m="$2"; shift 2; falsify_case "${n}" "${m}" 1 "$@"; }
+
+# Transport : la corruption meurt sur le controle de transport lui-meme.
+falsify_transport "transport : fichier en trop sans rehash" "liste != artefacts rapatries" \
+  bash -c "echo intrus > intrus.txt"
+falsify_transport "transport : statut altere sans rehash (hash de rapatriement)" "hash different du manifeste distant" \
+  sed -i "s/^code=0/code=0 /" bench_uniform_n32000_v5_r1.status
+
+# Semantique : rehash PUIS diagnostic exact — la porte annoncee tue seule.
+falsify_semantique "semantique : statut de bench supprime" ".status ABSENT" \
+  rm bench_uniform_n32000_v6_r1.status
+falsify_semantique "semantique : pin altere dans un statut" "source_commit absent ou different du pin" \
   sed -i "s/^source_commit=.*/source_commit=badbadbadbad/" bench_uniform_n32000_v5_r1.status
-falsify "digest imprime sur un run de bench" \
+falsify_semantique "semantique : digest imprime sur un run de bench" "digest imprime sur un run de bench" \
   sed -i "1i digest_all=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" bench_uniform_n32000_v6_r1.txt
-falsify "compteurs non deterministes entre repetitions" \
+falsify_semantique "semantique : compteurs non deterministes entre repetitions" "compteurs NON deterministes" \
   sed -i "s/boules_uniques=8000/boules_uniques=8001/" bench_uniform_n32000_v6_r2.txt
-falsify "fichier en trop" bash -c "echo intrus > intrus.txt"
-falsify "plan de bench altere" \
+falsify_semantique "semantique : fichier inattendu (avec rehash)" "fichier inattendu" \
+  bash -c "echo intrus > intrus.txt"
+falsify_semantique "semantique : plan de bench altere" "sequence annoncee != sequence recalculee" \
   sed -i "s/^seq=1 name=bench_uniform_n32000_v5_r1/seq=1 name=bench_uniform_n32000_v6_r9/" bench_plan.txt
-falsify "compteur de queue absent" \
+falsify_semantique "semantique : compteur de queue absent" "compteur W_sweep1_evals_coeur absent" \
   sed -i "/^sweep tests_coeur=/d" queue_terrain_stationnaire_n64000_s3.txt
-falsify "bit-identite entre fils violee (phase FILS)" \
+falsify_semantique "semantique : invariance du grand-livre entre fils violee" "INVARIANCE DU GRAND-LIVRE VIOLEE" \
   sed -i "s/rect_visites_fusionnes=8000/rect_visites_fusionnes=8001/" sweep_uniform_n32000_t8_r1.txt
-falsify "digest GPU different du contrat CPU" \
-  sed -i "s/^digest_all=d/digest_all=e/" gpu_dev_uniform_n50000.txt
-falsify "mutant du temoin device non tue" \
-  sed -i "s/^code=4/code=0/" gpu_mutant.status
-falsify "statut de frontiere supprime (presence exigee meme a code libre)" \
-  rm front_uniform_n400000.status
-falsify "plan GPU supprime" rm gpu_plan.txt
-falsify "argv de route GPU altere (idx sans --gpu-wire=index)" \
-  sed -i "s/ --gpu-wire=index//" gpu_idx_uniform_n50000.status
-falsify "ligne invariante de FILS supprimee (vacuite refusee)" \
+falsify_semantique "semantique : ligne invariante de FILS supprimee (vacuite)" "ligne invariante" \
   sed -i "/^generation /d" sweep_uniform_n32000_t2_r1.txt
-falsify "frontiere : code non nul SANS motif de capacite (panne non typee)" \
-  bash -c "sed -i 's/bad_alloc/xxx/' front_uniform_n400000.txt"
-falsify "MANIFESTE_DISTANT : ligne dupliquee" \
+falsify_semantique "semantique : digest GPU different du contrat CPU" "digest_all DIFFERENT du contrat CPU" \
+  sed -i "s/^digest_all=d/digest_all=e/" gpu_dev_uniform_n50000.txt
+falsify_semantique "semantique : mutant du temoin device non tue" "code=0 (attendu 4)" \
+  sed -i "s/^code=4/code=0/" gpu_mutant.status
+falsify_semantique "semantique : argv de route GPU altere (idx sans --gpu-wire=index)" "argument de route absent" \
+  sed -i "s/ --gpu-wire=index//" gpu_idx_uniform_n50000.status
+falsify_semantique "semantique : statut de frontiere supprime" ".status ABSENT" \
+  rm front_uniform_n400000.status
+falsify_semantique "semantique : plan GPU supprime" "gpu_plan.txt: ABSENT" \
+  rm gpu_plan.txt
+# Les SIX mutants de frontiere du sixieme tour — tous avec rehash causal.
+falsify_semantique "frontiere : code=abc a corps bad_alloc" "code non decimal" \
+  sed -i "s/^code=9/code=abc/" front_uniform_n400000.status
+falsify_semantique "frontiere : INVARIANT ajoute au refus bad_alloc (code 9)" "motif FATAL" \
+  bash -c "echo 'INVARIANT casse' >> front_uniform_n400000.txt"
+falsify_semantique "frontiere : INVARIANT ajoute a un pipeline complet (code 0)" "motif FATAL" \
+  bash -c "echo 'INVARIANT casse' >> front_uniform_n200000.txt"
+falsify_semantique "frontiere : duree_s=abc" "duree_s non decimale" \
+  sed -i "s/^duree_s=[0-9]*/duree_s=abc/" front_uniform_n400000.status
+falsify_semantique "frontiere : argument decore xxx--n=400000xxx" "sans le jeton exact --n=400000" \
+  sed -i "s/--n=400000/xxx--n=400000xxx/" front_uniform_n400000.status
+falsify_semantique "frontiere : code 124 avec INVARIANT" "motif FATAL" \
+  bash -c "sed -i 's/^code=9/code=124/' front_uniform_n400000.status; echo 'INVARIANT casse' >> front_uniform_n400000.txt"
+falsify_case "semantique : MANIFESTE_DISTANT a ligne dupliquee" "chemin duplique" apres \
   bash -c "l=\$(grep topologie.txt MANIFESTE_DISTANT.txt | head -1); printf '%s\n' \"\$l\" >> MANIFESTE_DISTANT.txt"
+falsify_semantique "frontiere : code non nul sans motif de capacite (panne non typee)" "SANS motif structure de capacite" \
+  bash -c "sed -i 's/bad_alloc/xxx/' front_uniform_n400000.txt"
 # CAS SUR SNAPSHOT PROPRE (audit quatrieme tour : plus jamais l'inventaire
 # deja juge) avec DIAGNOSTIC EXACT exige — chaque cas repart d'une copie
 # fraiche du nominal et doit echouer pour SA cause.

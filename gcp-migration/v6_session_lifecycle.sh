@@ -84,9 +84,13 @@ export GCP_INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}"
 # tient dans cette fenetre d'apres le preflight budgetaire ci-dessous.
 MAX_RUN_SECONDS="${MAX_RUN_SECONDS:-28800}"
 GUEST_SHUTDOWN_MINUTES="${GUEST_SHUTDOWN_MINUTES:-470}"
-RAPATRIEMENT_MARGE_S="${RAPATRIEMENT_MARGE_S:-1500}"
+# Marge de rapatriement ALIGNEE (sixieme tour) : echeance de campagne a
+# MAX-2700 ; l'enveloppe distante peut depasser de 300 s ; le scp (900 s par
+# tentative, garde d'echeance) doit FINIR avant MAX-600 = l'arret invite
+# (470 min) ; les 600 dernieres secondes sont pour validation + arret.
+RAPATRIEMENT_MARGE_S="${RAPATRIEMENT_MARGE_S:-2700}"
 SSH_STEP_TIMEOUT_S="${SSH_STEP_TIMEOUT_S:-3600}"
-SCP_STEP_TIMEOUT_S="${SCP_STEP_TIMEOUT_S:-1800}"
+SCP_STEP_TIMEOUT_S="${SCP_STEP_TIMEOUT_S:-900}"
 
 # PROFIL CANONIQUE (audit deuxieme tour : le fichier d'autorite est
 # versionne et hashe, jamais fabrique par l'environnement). CAMPAIGN_PROFILE
@@ -143,21 +147,38 @@ state_field() { # $1 = cle ; vide si fichier absent
 }
 # state_snapshot : parse STRICTEMENT le registre en un enregistrement unique.
 #   sortie « ok <etat> <projet> <zone> <instance> <generation> » et rc=0 ;
-#   rc=3 si le fichier est ABSENT ; rc=4 s'il est ILLISIBLE (schema faux ou
-#   manquant, cle dupliquee ou inconnue, champ manquant, ligne tronquee,
-#   etat hors de l'ensemble autorise). generation peut etre vide (etats
-#   anterieurs a la capture) — jamais pour targeted_stopped.
+#   rc=3 si le fichier est ABSENT (FileNotFoundError SEULEMENT — sixieme
+#   tour : une erreur de lecture ne prouve pas l'absence) ; rc=4 s'il est
+#   ILLISIBLE (permission, EIO, lien symbolique, objet non regulier, schema
+#   faux ou manquant, cle dupliquee ou inconnue, champ manquant, ligne
+#   tronquee, etat hors de l'ensemble autorise, alphabet viole). generation
+#   peut etre vide (etats anterieurs a la capture) — jamais pour
+#   targeted_stopped. Alphabets FERMES sur les champs transportes par mots
+#   (le tuple est relu par `read`) : [A-Za-z0-9._:-] seulement.
 state_snapshot() {
   python3 - "${STATE_FILE}" <<'PY'
+import os
+import re
 import sys
 ALLOWED = {"start_may_have_been_requested", "targeted_running", "targeted_stopping",
            "targeted_stopped", "targeted_stop_failed"}
 KEYS = ("schema", "state", "project", "zone", "instance", "generation")
+WORD = re.compile(r"^[A-Za-z0-9._:-]+$")
+path = sys.argv[1]
+if os.path.islink(path):
+    sys.exit(4)
 try:
-    with open(sys.argv[1], encoding="utf-8") as fh:
-        text = fh.read()
+    if os.path.exists(path) and not os.path.isfile(path):
+        sys.exit(4)
 except OSError:
+    sys.exit(4)
+try:
+    with open(path, encoding="utf-8") as fh:
+        text = fh.read()
+except FileNotFoundError:
     sys.exit(3)
+except OSError:
+    sys.exit(4)
 if not text.endswith("\n"):
     sys.exit(4)  # tronque : la derniere ligne n'est pas terminee
 record = {}
@@ -177,6 +198,11 @@ if record["state"] not in ALLOWED:
 if any(not record[k] for k in ("project", "zone", "instance")):
     sys.exit(4)
 if record["state"] == "targeted_stopped" and not record["generation"]:
+    sys.exit(4)
+for key in ("project", "zone", "instance"):
+    if not WORD.match(record[key]):
+        sys.exit(4)
+if record["generation"] and not WORD.match(record["generation"]):
     sys.exit(4)
 print("ok", record["state"], record["project"], record["zone"], record["instance"],
       record["generation"])
@@ -236,8 +262,9 @@ if record.get("schema") != "e-hgp.start-handoff.v3":
     sys.exit(1)
 if (record.get("project"), record.get("zone"), record.get("instance")) != tuple(sys.argv[2:5]):
     sys.exit(1)
+import re
 generation = record.get("last_start_timestamp", "")
-if not generation or not isinstance(generation, str) or any(c in generation for c in " '\"\n"):
+if not isinstance(generation, str) or not re.match(r"^[A-Za-z0-9._:-]+$", generation):
     sys.exit(1)
 print(generation)
 PY
@@ -249,7 +276,9 @@ SESSION_RC=0
 STOP_ATTEMPTED=0
 finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu COMPLET est publie
   # RUN UNIQUE incluant la generation (audit troisieme tour) : construction
-  # dans un temporaire, publication ATOMIQUE, dossier preexistant REFUSE.
+  # dans un temporaire, publication atomique et coherente apres execution,
+  # dossier preexistant REFUSE ; `sync` final pour la durabilite apres crash
+  # (sixieme tour : sans lui, pas de claim de durabilite).
   local run_id="${DURABLE_RECEIPT_PREFIX}_${GEN_EPOCH:-avorte_$(date +%s)}"
   local dir="${DURABLE_RECEIPT_BASE}/${run_id}"
   local tmp
@@ -283,7 +312,8 @@ finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu CO
       && mv SHA256SUMS.tmp SHA256SUMS \
       && sha256sum -c --quiet SHA256SUMS >/dev/null ) &&
     mv -Tn "${tmp}" "${dir}" &&
-    [ ! -e "${tmp}" ]
+    [ ! -e "${tmp}" ] &&
+    sync
   } 2>/dev/null
 }
 cleanup() {
@@ -349,6 +379,20 @@ cleanup() {
      && [ "${lc_instance}" = "${GCP_INSTANCE_NAME}" ]; then
     log_safe "arret deja certifie par le garde (generation ${lc_gen}, source $( [ -n "${GENERATION}" ] && echo independante+registre || echo registre-strict-du-garde )) : aucun second arret"
     echo "arret deja certifie par le garde (generation ${lc_gen})"
+    # Le recu porte la generation CERTIFIEE et un run_id derive d'elle
+    # (sixieme tour : generation=inconnue et run_id avorte sur ce chemin).
+    GENERATION="${lc_gen}"
+    if [ -z "${GEN_EPOCH:-}" ]; then
+      GEN_EPOCH="$(python3 - "${GENERATION}" <<'PYEPOCH'
+from datetime import datetime
+import sys
+try:
+    print(int(datetime.fromisoformat(sys.argv[1].replace("Z", "+00:00")).timestamp()))
+except Exception:
+    raise SystemExit(1)
+PYEPOCH
+)" || GEN_EPOCH=""
+    fi
     finalize_receipt arret_certifie_par_le_garde 0 "${rc}" || {
       echo "[RECU NON PUBLIE] le recu durable n'a pas pu etre ecrit (${DURABLE_RECEIPT_BASE})" >&2
       exit 66
@@ -361,10 +405,24 @@ cleanup() {
   fi
   # ADOPTION POUR L'ARRET SEULEMENT : sans source independante, la generation
   # d'un snapshot STRICT permet encore un arret cible (jamais un fast-path
-  # au-dela du cas certifie ci-dessus) — scenario handoff corrompu.
+  # au-dela du cas certifie ci-dessus) — scenario handoff corrompu. La CIBLE
+  # DOIT etre exacte (sixieme tour : une generation d'une autre cible
+  # autorisait l'appel mutateur) ; cible discordante sans handoff => BLOCAGE
+  # et controle manuel, jamais un appel.
   if [ -z "${GENERATION}" ] && [ "${snap_rc}" -eq 0 ] && [ -n "${lc_gen}" ]; then
-    GENERATION="${lc_gen}"
-    log_safe "generation adoptee du registre STRICT pour l'arret cible : ${GENERATION}"
+    if [ "${lc_project}" = "${GCP_PROJECT_ID}" ] && [ "${lc_zone}" = "${GCP_ZONE}" ] \
+       && [ "${lc_instance}" = "${GCP_INSTANCE_NAME}" ]; then
+      GENERATION="${lc_gen}"
+      log_safe "generation adoptee du registre STRICT (cible exacte) pour l'arret cible : ${GENERATION}"
+    else
+      {
+        echo "[BLOCAGE] registre STRICT pour une AUTRE cible (${lc_project}/${lc_zone}/${lc_instance}) — aucun appel mutateur, passage de relais requis."
+        echo "[BLOCAGE] cible configuree : ${GCP_PROJECT_ID}/${GCP_ZONE}/${GCP_INSTANCE_NAME}"
+        echo "[BLOCAGE] controle : gcloud compute instances describe ${GCP_INSTANCE_NAME} --project=${GCP_PROJECT_ID} --zone=${GCP_ZONE} --format='value(status,lastStartTimestamp)'"
+      } >&2
+      finalize_receipt blocage_cible_discordante "" 71 || true
+      exit 71
+    fi
   fi
   if [ -z "${GENERATION}" ]; then
     {
@@ -397,8 +455,10 @@ cleanup() {
   log_safe "stop_and_verify (generation ${GENERATION}) : rc=${stop_rc}"
   echo "journal complet : ${LOG}"
   echo "resultats rapatries : ${WORK}/out (si l'etape scp a ete atteinte)"
-  if [ "${stop_rc}" -eq 0 ] && [ "$(state_field state)" != "targeted_stopped" ]; then
-    echo "[INCOHERENCE] arret certifie mais registre != targeted_stopped" >&2
+  local snap2=""
+  snap2="$(state_snapshot 2>/dev/null)" || snap2=""
+  if [ "${stop_rc}" -eq 0 ] && [ "$(printf '%s' "${snap2}" | awk '{print $2}')" != "targeted_stopped" ]; then
+    echo "[INCOHERENCE] arret certifie mais registre (snapshot strict) != targeted_stopped" >&2
     receipt_rc=66
   fi
   finalize_receipt arret_tente "${stop_rc}" "${rc}" || receipt_rc=66
@@ -459,12 +519,17 @@ gcloud config set project "${GCP_PROJECT_ID}" >/dev/null
 mv "${PROFILE}.tmp" "${PROFILE}"
 log "profil de campagne epingle : $(sha256sum "${PROFILE}" | awk '{print $1}')"
 
-# ---- PREFLIGHT BUDGETAIRE (P1) : estimations CONSERVATRICES declarees ici,
-# jamais ajustees apres mesure. Refus AVANT toute mutation si l'estimation
-# depasse la fenetre utile.
+# ---- PREFLIGHT BUDGETAIRE (P1) : PREVISION EMPIRIQUE declaree ici, jamais
+# ajustee apres mesure — PAS une garantie que tous les runs terminent (les
+# bornes dures par run sont les plafonds du profil ; la campagne est
+# EXPLORATOIRE TRONQUABLE : toute troncature a l'echeance est gravee et le
+# validateur juge partial). Les builds GPU sont credites A LEURS PLAFONDS
+# (credit == plafond, sixieme tour) et chaque run porte un petit overhead.
+# Refus AVANT toute mutation si la prevision depasse la fenetre utile.
 budget_estimate() {
   python3 - "${CONF_SPECS}" "${BENCH_SPECS}" "${QUEUE_FAMILIES}" "${QUEUE_N}" "${QUEUE_SEEDS}" \
-    "${SWEEP_SPECS}" "${SWEEP_REPEATS}" "${GPU_SPECS}" "${FRONTIER_SPECS}" <<'PY'
+    "${SWEEP_SPECS}" "${SWEEP_REPEATS}" "${GPU_SPECS}" "${FRONTIER_SPECS}" \
+    "${GPU_BUILD_TIMEOUT}" "${FRONTIER_TIMEOUT}" <<'PY'
 import sys
 conf = [x for x in sys.argv[1].split() if x != "aucun"]
 bench = [x for x in sys.argv[2].split() if x != "aucun"]
@@ -483,39 +548,69 @@ queue_ref = {16000: 60, 64000: 150, 128000: 350, 256000: 800}
 # parallelisme ne peut pas faire mieux que lineaire ; l'exposant < 1 encode
 # la part sequentielle deja payee). Conservateur, jamais ajuste apres coup.
 sweep_base48 = {8000: 15, 16000: 30, 32000: 60, 50000: 100}
-# GPU : temoin+build ~900, lanes+build ~900, mutant 60 ; par famille 4
-# contrats a ~1,2x le cout conf (le digest est paye partout).
-gpu_fixed, gpu_ref = 1860, {32000: 80, 50000: 130, 100000: 260}
-frontier_ref = {200000: 700, 400000: 1700, 800000: 3600}
+# GPU : les deux builds au PLAFOND canonique (credit == plafond) + mutant
+# 60 s ; par famille 4 contrats a ~1,2x le cout conf (digest paye partout).
+gpu_build_cap = int(sys.argv[10])
+frontier_cap = int(sys.argv[11])
+gpu_fixed, gpu_ref = 2 * gpu_build_cap + 60, {32000: 80, 50000: 130, 100000: 260}
+# FRONTIERE : chaque taille inconnue est creditee au PLAFOND ; 800000 est
+# credite au plafond (l'issue attendue est un refus de capacite ou un
+# timeout).
+frontier_ref = {200000: 700, 400000: 1700}
+OVERHEAD_PER_RUN = 10
 total = 0
+runs = 0
 for spec in conf:
     n = int(spec.split(":")[1])
     total += 2 * conf_ref.get(n, 900)  # reference v5 + juge v6
+    runs += 2
 for spec in bench:
     n = int(spec.split(":")[1])
     total += 4 * bench_ref.get(n, 900)  # ABBA : quatre runs par paire
+    runs += 4
 for n in queue_n:
     total += len(queue_f) * len(queue_s) * queue_ref.get(int(n), 1800)
+    runs += len(queue_f) * len(queue_s)
 for spec in sweep:
     fam, n, tl = spec.split(":", 2)
     base = sweep_base48.get(int(n), 900)
     for t in tl.split(","):
         total += sweep_reps * int(base * (48.0 / max(1, int(t))) ** 0.9 + 1)
+        runs += sweep_reps
 if gpu:
     total += gpu_fixed
+    runs += 3
     for spec in gpu:
         n = int(spec.split(":")[1])
         total += 4 * gpu_ref.get(n, 900)  # cpu + dev + ad + idx
+        runs += 4
 for spec in frontier:
     n = int(spec.split(":")[1])
-    total += frontier_ref.get(n, 3600)
-print(total)
+    total += frontier_ref.get(n, frontier_cap)
+    runs += 1
+print(total + OVERHEAD_PER_RUN * runs)
 PY
 }
 BUILD_ESTIMATE_S=900
 ESTIMATE_S="$(budget_estimate)"
 WINDOW_S=$((MAX_RUN_SECONDS - RAPATRIEMENT_MARGE_S - BUILD_ESTIMATE_S))
-log "preflight budgetaire : estimation ${ESTIMATE_S}s (+build ${BUILD_ESTIMATE_S}s) pour une fenetre de ${WINDOW_S}s"
+log "preflight budgetaire : ESTIMATION NOMINALE ${ESTIMATE_S}s (+build ${BUILD_ESTIMATE_S}s) pour une fenetre de ${WINDOW_S}s — campagne exploratoire tronquable"
+# ENVELOPPE DE TERMINAISON publiee separement (sixieme tour) : somme des
+# PLAFONDS par run — elle peut exceder la fenetre ; ce sont les gardes
+# d'echeance du runner qui bornent la session, pas cette somme.
+count_runs() { python3 - "${CONF_SPECS}" "${BENCH_SPECS}" "${QUEUE_FAMILIES}" "${QUEUE_N}" "${QUEUE_SEEDS}" "${SWEEP_SPECS}" "${SWEEP_REPEATS}" "${GPU_SPECS}" "${FRONTIER_SPECS}" <<'PY'
+import sys
+def ax(t): return [x for x in t.split() if x != "aucun"]
+conf, bench, qf = ax(sys.argv[1]), ax(sys.argv[2]), ax(sys.argv[3])
+qn, qs, sweep = sys.argv[4].split(), sys.argv[5].split(), ax(sys.argv[6])
+reps, gpu, front = int(sys.argv[7]), ax(sys.argv[8]), ax(sys.argv[9])
+cpu_runs = 2 * len(conf) + 4 * len(bench) + len(qf) * len(qn) * len(qs)     + sum(reps * len(sp.split(":", 2)[2].split(",")) for sp in sweep) + 4 * len(gpu)
+print(cpu_runs, len(front), 1 if gpu else 0)
+PY
+}
+read -r _CPU_RUNS _FRONT_RUNS _GPU_ON <<< "$(count_runs)"
+ENVELOPE_S=$(( _CPU_RUNS * RUN_TIMEOUT + _FRONT_RUNS * FRONTIER_TIMEOUT + _GPU_ON * (2 * GPU_BUILD_TIMEOUT + RUN_TIMEOUT) ))
+log "enveloppe de terminaison (somme des plafonds par run) : ${ENVELOPE_S}s — bornee en pratique par l'echeance du runner et les coupe-circuits, jamais une promesse de completude"
 if [ "${ESTIMATE_S}" -gt "${WINDOW_S}" ]; then
   echo "REFUS : la matrice declaree (${ESTIMATE_S}s estimes) ne tient pas dans la fenetre (${WINDOW_S}s) — reduire la matrice ou augmenter MAX_RUN_SECONDS" >&2
   exit 2
@@ -604,7 +699,7 @@ REMOTE_BUNDLE="/tmp/v6bundle_${REMOTE_TAG}.tgz"
 # ne fait QUE lire boot_id, encadre par DEUX controles de generation ; toute
 # commande distante ulterieure REVERIFIE ce boot_id avant de muter quoi que
 # ce soit sur la VM.
-BOOT_ID="$(timeout "${SCP_STEP_TIMEOUT_S}" "${SSH[@]}" 'cat /proc/sys/kernel/random/boot_id' 2>>"${LOG}")" \
+BOOT_ID="$(timeout -k 30 "${SCP_STEP_TIMEOUT_S}" "${SSH[@]}" 'cat /proc/sys/kernel/random/boot_id' 2>>"${LOG}")" \
   || { log "REFUS : handshake boot_id impossible"; SESSION_RC=75; exit 75; }
 [[ "${BOOT_ID}" =~ ^[0-9a-f-]{36}$ ]] || { log "REFUS : boot_id mal forme (${BOOT_ID})"; SESSION_RC=75; exit 75; }
 check_generation || { log "REFUS : generation changee pendant le handshake"; SESSION_RC=74; exit 74; }
@@ -612,7 +707,7 @@ log "handshake : boot_id=${BOOT_ID} generation confirmee"
 
 # ---- 4b. Envoi du BUNDLE pinne (lecture seule cote VM), encadre par deux
 # controles de generation.
-timeout "${SCP_STEP_TIMEOUT_S}" "${SCP[@]}" "${BUNDLE}" \
+timeout -k 30 "${SCP_STEP_TIMEOUT_S}" "${SCP[@]}" "${BUNDLE}" \
   "${GCP_INSTANCE_NAME}:${REMOTE_BUNDLE}.recu" 2>&1 | tee -a "${LOG}"
 check_generation || { log "REFUS : generation changee apres l'envoi du bundle"; SESSION_RC=74; exit 74; }
 
@@ -620,7 +715,7 @@ check_generation || { log "REFUS : generation changee apres l'envoi du bundle"; 
 # et planchers (P1 : jamais un tail -4). Le boot_id du handshake est
 # REVERIFIE dans la meme commande distante avant toute mutation.
 BUILD_LOG="${WORK}/build_vm.log"
-timeout "${SSH_STEP_TIMEOUT_S}" "${SSH[@]}" 'set -euo pipefail
+timeout -k 30 "${SSH_STEP_TIMEOUT_S}" "${SSH[@]}" 'set -euo pipefail
   test "$(cat /proc/sys/kernel/random/boot_id)" = '"'${BOOT_ID}'"' || { echo "REFUS : boot_id different (redemarrage detecte)" >&2; exit 9; }
   mv '"${REMOTE_BUNDLE}.recu"' '"${REMOTE_BUNDLE}"'
   export PATH=$HOME/.local/bin:$PATH
@@ -652,10 +747,18 @@ log "portes VM : v5=${GATE_TOTALS[0]} v6=${GATE_TOTALS[1]} (journaux complets da
 # commande distante avant toute execution ; retour CAPTURE sans trap.
 check_generation || { log "REFUS : generation changee avant la campagne"; SESSION_RC=74; exit 74; }
 REMOTE_CAMPAIGN_RC=0
-CAMPAIGN_TIMEOUT=$(( DEADLINE_EPOCH - $(date +%s) + 300 ))
+# Enveloppe SANS depassement (sixieme tour) : le runner tronque LUI-MEME ses
+# runs avant l'echeance (past_deadline) ; +60 s couvrent seulement
+# l'ecriture du manifeste distant apres le dernier run. Bornee aussi par le
+# coupe-circuit scp (MAX-600).
+CAMPAIGN_TIMEOUT=$(( DEADLINE_EPOCH - $(date +%s) + 60 ))
+_hard_stop=$(( GEN_EPOCH + MAX_RUN_SECONDS - 600 ))
+if [ "$(( $(date +%s) + CAMPAIGN_TIMEOUT ))" -gt "${_hard_stop}" ]; then
+  CAMPAIGN_TIMEOUT=$(( _hard_stop - $(date +%s) ))
+fi
 if [ "${CAMPAIGN_TIMEOUT}" -lt 60 ]; then CAMPAIGN_TIMEOUT=60; fi
 set +e
-timeout "${CAMPAIGN_TIMEOUT}" "${SSH[@]}" "set -euo pipefail
+timeout -k 30 "${CAMPAIGN_TIMEOUT}" "${SSH[@]}" "set -euo pipefail
   test \"\$(cat /proc/sys/kernel/random/boot_id)\" = '${BOOT_ID}' || { echo 'REFUS : boot_id different (redemarrage detecte)' >&2; exit 9; }
   export PATH=\$HOME/.local/bin:\$PATH
   cd ~/${REMOTE_DIR}
@@ -675,10 +778,15 @@ printf 'remote_campaign_rc=%d\n' "${REMOTE_CAMPAIGN_RC}" | tee -a "${LOG}"
 # ---- 7. RAPATRIEMENT TOUJOURS, reprises bornees, generation controlee.
 mkdir -p "${WORK}/out"
 SCP_RC=1
+SCP_DEADLINE=$((GEN_EPOCH + MAX_RUN_SECONDS - 600))
 for attempt in 1 2 3; do
+  if [ "$(( $(date +%s) + SCP_STEP_TIMEOUT_S ))" -gt "${SCP_DEADLINE}" ]; then
+    log "rapatriement abandonne avant la tentative ${attempt} : la fenetre scp deborderait sur l'arret (echeance ${SCP_DEADLINE})"
+    break
+  fi
   check_generation || { log "generation changee pendant le rapatriement (tentative ${attempt})"; break; }
   set +e
-  timeout "${SCP_STEP_TIMEOUT_S}" "${SCP[@]}" --recurse \
+  timeout -k 30 "${SCP_STEP_TIMEOUT_S}" "${SCP[@]}" --recurse \
     "${GCP_INSTANCE_NAME}:~/${REMOTE_DIR}/out" "${WORK}/" 2>&1 | tee -a "${LOG}"
   rc=${PIPESTATUS[0]}
   set -e
