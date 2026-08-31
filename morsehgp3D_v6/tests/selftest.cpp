@@ -14,7 +14,9 @@
 // Codes : 0 conforme ; 1 desaccord ; 2 refus (mode ou mutant inconnu) ;
 // 3 mutant injecte non tue ; 4 mutant injecte tue.
 #include <algorithm>
+#include <atomic>
 #include <cstdio>
+#include <mutex>
 #include <cstring>
 #include <limits>
 #include <map>
@@ -335,9 +337,15 @@ int run_failure_contract(bool injected) {
     ok.digest = true;
     ok.diagnostic_raw_candidates_digest = true;
     ok.threads = 2;
+    // Les callbacks arrivent des fils A et B : traces sous mutex/atomique
+    // (l'audit a releve la course de l'ancien compteur nu — UB).
     std::vector<u64> ks;
-    u64 phase_calls = 0;
-    ok.on_forest = [&](u64 K, const std::vector<ForestEvent>&, const ForestResult&) { ks.push_back(K); };
+    std::mutex ks_mutex;
+    std::atomic<u64> phase_calls{0};
+    ok.on_forest = [&](u64 K, const std::vector<ForestEvent>&, const ForestResult&) {
+      std::lock_guard<std::mutex> hold(ks_mutex);
+      ks.push_back(K);
+    };
     ok.on_fold_phase = [&](u64, FoldPhase) { ++phase_calls; };
     const RunResult r2 = run_pipeline(in, ok);
     if (r2.status != PipelineStatus::kCompleteRegular || r2.digest_all.empty() || r2.digest_raw_candidates.empty()) {
@@ -345,14 +353,18 @@ int run_failure_contract(bool injected) {
       std::fprintf(stderr, "run complet : statut ou digests manquants\n");
     }
     check_callbacks(ks, r2.kmax_eff, "run complet");
-    if (ks.size() != r2.kmax_eff || phase_calls == 0) {
+    if (ks.size() != r2.kmax_eff || phase_calls.load() == 0) {
       ++mismatches;
       std::fprintf(stderr, "run complet : %zu callbacks on_forest (kmax_eff=%llu), %llu phases\n", ks.size(),
-                   (unsigned long long)r2.kmax_eff, (unsigned long long)phase_calls);
+                   (unsigned long long)r2.kmax_eff, (unsigned long long)phase_calls.load());
     }
     return mismatches ? 1 : 0;
   }
-  bool any_fail = false;
+  // CHAQUE inflight doit echouer (l'audit a refuse le « au moins un ») ; les
+  // callbacks d'echec ont un contrat EXACT : census => AUCUN on_forest ;
+  // fold-A K2 => le prefixe exact {K1} (K1 provisoire livre, jamais K2+).
+  const bool census_mutant = mutant_enabled("census-nonstrict");
+  u64 fails = 0;
   for (const int infl : {1, 2, 8}) {
     RunOptions o;
     o.digest = true;
@@ -360,17 +372,34 @@ int run_failure_contract(bool injected) {
     o.threads = 2;
     o.fold_inflight = infl;
     std::vector<u64> ks;
-    o.on_forest = [&](u64 K, const std::vector<ForestEvent>&, const ForestResult&) { ks.push_back(K); };
+    std::mutex ks_mutex;
+    o.on_forest = [&](u64 K, const std::vector<ForestEvent>&, const ForestResult&) {
+      std::lock_guard<std::mutex> hold(ks_mutex);
+      ks.push_back(K);
+    };
     const RunResult rr = run_pipeline(in, o);
     char what[64];
     std::snprintf(what, sizeof what, "echec sous mutant (inflight=%d)", infl);
-    if (rr.status != PipelineStatus::kCompleteRegular) {
-      any_fail = true;
-      assert_invalidated(rr, what);
-      check_callbacks(ks, rr.kmax_eff ? rr.kmax_eff : 10, what);
+    if (rr.status == PipelineStatus::kCompleteRegular) {
+      ++mismatches;
+      std::fprintf(stderr, "%s : statut complet inattendu (chaque inflight doit echouer)\n", what);
+      continue;
+    }
+    ++fails;
+    assert_invalidated(rr, what);
+    std::sort(ks.begin(), ks.end());
+    if (census_mutant) {
+      if (!ks.empty()) {
+        ++mismatches;
+        std::fprintf(stderr, "%s : census en echec mais %zu callbacks on_forest\n", what, ks.size());
+      }
+    } else if (ks != std::vector<u64>{1}) {
+      ++mismatches;
+      std::fprintf(stderr, "%s : fold K2 en echec, callbacks != prefixe exact {K1} (%zu recus)\n", what,
+                   ks.size());
     }
   }
-  if (!any_fail) return 3;
+  if (fails != 3) return 3;
   return mismatches ? 3 : 4;
 }
 

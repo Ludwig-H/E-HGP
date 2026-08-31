@@ -1,6 +1,6 @@
-fixture du troisieme tour d'audit gcp : K11 SURNUMERAIRE — le domaine
-global du chargeur est [1,10] ; une clef K11 doit etre refusee (code 2).
-digest_forest_K1=e4c82b979f11d70dae70a0975153c62f584b4e43108e66b095bcf4dc7e68bf2f
+fixture du quatrieme tour d'audit gcp : K11 SURNUMERAIRE seul (le doublon
+K1 de la premiere version masquait la cause — corrige) ; domaine global
+du chargeur [1,10] : la clef K11 doit etre refusee (code 2).
 digest_forest_K1=e4c82b979f11d70dae70a0975153c62f584b4e43108e66b095bcf4dc7e68bf2f
 digest_forest_K2=9b6ff6471806ee573c7b018da7cd80bb92f2cec1ae050916d2b43f1e0267123a
 digest_forest_K3=f245a8502f07678a236f2754f1802542701852c4b0db71a5c60929f46f366390

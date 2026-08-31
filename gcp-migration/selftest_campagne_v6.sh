@@ -155,8 +155,17 @@ chmod +x "${FAKE}/gnutime" "${FAKE}/mhgp6_conformity"
 # Fichier CANONIQUE (liaison exigee par le validateur) + profil de campagne.
 CANON="${WORK}/selftest_reduit_v1.env"
 {
-  echo "# profil canonique du selftest"
-  echo "CONF_SPECS=uniform:50000"
+  echo "# profil canonique du selftest (grammaire fermee : identite + neuf axes)"
+  echo 'PROFIL_NOM="selftest_reduit_v1"' 
+  echo 'CONF_SPECS="uniform:50000"'
+  echo 'BENCH_SPECS="uniform:32000 eight_clusters:32000"'
+  echo 'QUEUE_FAMILIES="terrain_stationnaire"'
+  echo 'QUEUE_N="64000"'
+  echo 'QUEUE_SEEDS="3 4"'
+  echo 'RUN_TIMEOUT=60'
+  echo 'THREADS_VM=8'
+  echo 'V5_GATE_MIN=40'
+  echo 'V6_GATE_MIN=60'
 } > "${CANON}"
 CANON_SHA="$(sha256sum "${CANON}" | awk '{print $1}')"
 PROFILE="${WORK}/profil_campagne.txt"
@@ -169,7 +178,10 @@ PROFILE="${WORK}/profil_campagne.txt"
   echo "queue_families=terrain_stationnaire"
   echo "queue_n=64000"
   echo "queue_seeds=3 4"
+  echo "run_timeout=60"
   echo "threads=8"
+  echo "v5_gate_min=40"
+  echo "v6_gate_min=60"
 } > "${PROFILE}"
 run_runner() { # $1 = dossier out ; le reste = env supplementaire
   local out="$1"; shift
@@ -200,8 +212,13 @@ check_true "nominal : plan ABBA contrebalance (parites 1 et 2)" bash -c "
   grep -q 'seq=4 name=bench_uniform_n32000_v5_r2 .* pos=4' '${OUT}/bench_plan.txt' &&
   grep -q 'seq=5 name=bench_eight_clusters_n32000_v6_r1 .* pos=1' '${OUT}/bench_plan.txt' &&
   grep -q 'seq=8 name=bench_eight_clusters_n32000_v6_r2 .* pos=4' '${OUT}/bench_plan.txt'"
-check_true "nominal : resumes ecrits" \
-  bash -c "test -s '${OUT}/bench_resume.txt' && test -s '${OUT}/queue_resume.txt'"
+check_true "nominal : resumes ecrits HORS de out/ (idempotence)" \
+  bash -c "test -s '${WORK}/bench_resume.txt' && test -s '${WORK}/queue_resume.txt' \
+    && [ ! -e '${OUT}/bench_resume.txt' ]"
+# IDEMPOTENCE (audit quatrieme tour) : un second passage sur le MEME dossier
+# rend le meme verdict (le validateur n'enrichit plus l'inventaire qu'il juge).
+rc=0; run_validator "${OUT}" 0 0 >/dev/null || rc=$?
+check_true "validateur idempotent : second passage rc=0" [ "${rc}" -eq 0 ]
 
 # ---- 2. GNU time absent.
 rc=0
@@ -262,32 +279,41 @@ falsify "plan de bench altere" \
   sed -i "s/^seq=1 name=bench_uniform_n32000_v5_r1/seq=1 name=bench_uniform_n32000_v6_r9/" bench_plan.txt
 falsify "compteur de queue absent" \
   sed -i "/^sweep tests_coeur=/d" queue_terrain_stationnaire_n64000_s3.txt
-rc=0; run_validator "${OUT}" 3 0 >/dev/null || rc=$?
-check_true "falsification refusee : remote_rc non nul" [ "${rc}" -eq 1 ]
-rc=0; run_validator "${OUT}" 0 1 >/dev/null || rc=$?
-check_true "falsification refusee : scp_rc non nul" [ "${rc}" -eq 1 ]
-# Profil epingle : absent => jamais complete ; different des plans => refuse.
-rc=0; run_validator "${OUT}" 0 0 "/nonexistent-profile" >/dev/null || rc=$?
-check_true "falsification refusee : profil absent" [ "${rc}" -eq 1 ]
+# CAS SUR SNAPSHOT PROPRE (audit quatrieme tour : plus jamais l'inventaire
+# deja juge) avec DIAGNOSTIC EXACT exige — chaque cas repart d'une copie
+# fraiche du nominal et doit echouer pour SA cause.
+fresh_case() { # $1 = nom, $2 = remote_rc, $3 = scp_rc, $4 = profil (vide = defaut), $5 = motif stderr exige
+  local dir="${WORK}/cas_propre"
+  rm -rf "${dir}"
+  cp -r "$(dirname "${OUT}")/$(basename "${OUT}")" "${dir}"
+  local rc=0 sortie
+  sortie="$(run_validator "${dir}" "$2" "$3" "${4:-${PROFILE}}" 2>&1)" || rc=$?
+  check_true "$1" bash -c "[ \"\$3\" -eq 1 ] && printf '%s' \"\$1\" | grep -q -- \"\$2\"" _ "${sortie}" "$5" "${rc}"
+}
+fresh_case "falsification refusee : remote_rc non nul (cause exacte)" 3 0 "" "remote_campaign_rc=3"
+fresh_case "falsification refusee : scp_rc non nul (cause exacte)" 0 1 "" "scp_rc=1"
+fresh_case "falsification refusee : profil absent (cause exacte)" 0 0 "/nonexistent-profile" "profil de campagne ABSENT"
 PROF2="${WORK}/profil_reduit.txt"
 sed 's/^bench_specs=.*/bench_specs=uniform:64000 eight_clusters:64000/' "${PROFILE}" > "${PROF2}"
-rc=0; run_validator "${OUT}" 0 0 "${PROF2}" >/dev/null || rc=$?
-check_true "falsification refusee : plans != profil epingle (matrice reduite)" [ "${rc}" -eq 1 ]
-# Liaison canonique : un sha discordant est refuse ; une pretention decision
-# sans le canon decision_v1 ne rend jamais decision_complete.
+fresh_case "falsification refusee : plans != profil epingle (cause exacte)" 0 0 "${PROF2}" "!= profil epingle"
 PROF3="${WORK}/profil_sha_faux.txt"
 sed 's/^profil_canonique_sha256=.*/profil_canonique_sha256='"$(printf 'e%.0s' {1..64})"'/' "${PROFILE}" > "${PROF3}"
-rc=0; run_validator "${OUT}" 0 0 "${PROF3}" >/dev/null || rc=$?
-check_true "falsification refusee : sha du profil canonique discordant" [ "${rc}" -eq 1 ]
+fresh_case "falsification refusee : sha du canon discordant (cause exacte)" 0 0 "${PROF3}" "profil_canonique_sha256 !="
+# MUTANT decision_v1 REDUIT (quatrieme tour) : noms decision_v1 + VRAI sha du
+# canon + plans reduits concordants — doit rester verifie_non_decisionnel
+# pour la cause « axes != canon », jamais decision_complete.
 PROF4="${WORK}/profil_pretendu_decision.txt"
 sed -e 's/^profil=selftest_reduit_v1/profil=decision_v1/' \
     -e 's/^profil_canonique=selftest_reduit_v1/profil_canonique=decision_v1/' "${PROFILE}" > "${PROF4}"
-rc=0; VOUT4="$(run_validator "${OUT}" 0 0 "${PROF4}")" || rc=$?
-check_true "pretention decision sur un canon non-decision : jamais decision_complete" \
-  bash -c "! printf '%s\n' \"\$1\" | grep -q 'decision_complete'" _ "${VOUT4}"
+D4="${WORK}/cas_decision_reduit"
+rm -rf "${D4}"; cp -r "${OUT}" "${D4}"
+rc=0; VOUT4="$(run_validator "${D4}" 0 0 "${PROF4}")" || rc=$?
+check_true "mutant decision_v1 reduit : verifie_non_decisionnel (canon non decisionnel), jamais decision_complete" \
+  bash -c "[ '${rc}' -eq 0 ] && printf '%s\n' \"\$1\" | grep -q 'cause=canon non decisionnel' \
+    && ! printf '%s\n' \"\$1\" | grep -q 'decision_complete'" _ "${VOUT4}"
 
 if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest campagne v6 : ${FAILURES} echec(s)" >&2
   exit 1
 fi
-echo "selftest campagne v6 : runner distant + validateur conformes (nominal + refus + 11 falsifications) — le cycle de vie du lanceur et les gardes GCP sont prouves par selftest_cycle_vie_v6.sh, a lancer aussi"
+echo "selftest campagne v6 : runner distant + validateur conformes (nominal idempotent + refus + falsifications a cause exacte + mutant decision reduit) — le cycle de vie du lanceur et les gardes GCP sont prouves par selftest_cycle_vie_v6.sh, a lancer aussi"

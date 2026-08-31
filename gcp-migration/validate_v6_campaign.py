@@ -42,8 +42,10 @@ import re
 import sys
 
 KMAX = 10
+# Les resumes sont ecrits A COTE de out/ (idempotence : le validateur ne
+# modifie jamais l'inventaire qu'il juge).
 AUX = ("topologie.txt", "conf_plan.txt", "bench_plan.txt", "queue_plan.txt",
-       "bench_resume.txt", "queue_resume.txt", "MANIFESTE_DISTANT.txt",
+       "MANIFESTE_DISTANT.txt",
        "conf_tronquee.txt", "bench_tronquee.txt", "queue_tronquee.txt")
 FORBIDDEN = re.compile(r"REFUS|INVARIANT|DIVERGENCE|PLANCHER|Killed|bad_alloc|AddressSanitizer")
 COUNTERS = re.compile(r"boules_uniques=\d+.*evenements=\d+.*facettes=\d+")
@@ -289,11 +291,32 @@ def main():
                     "queue_families", "queue_n", "queue_seeds", "threads"):
             if not profile.get(key, "").strip():
                 bad.append(f"profil de campagne : cle {key} absente")
-        # LIAISON au fichier canonique versionne (jamais un simple transport).
+        for key in ("run_timeout", "v5_gate_min", "v6_gate_min"):
+            if not profile.get(key, "").strip():
+                bad.append(f"profil de campagne : cle {key} absente")
+        # LIAISON au fichier canonique versionne (jamais un simple transport) :
+        # le canon est PARSE (grammaire fermee, chaque axe exactement une
+        # fois) et chaque axe du profil effectif lui est compare LITTERALEMENT
+        # — l'audit du quatrieme tour a montre qu'un hash transporte sans
+        # comparaison d'axes laissait passer une matrice reduite nommee
+        # decision_v1.
+        canon_axes = {}
         if not os.path.exists(canonical_path):
             bad.append("profil canonique ABSENT (liaison impossible)")
-        elif profile.get("profil_canonique_sha256", "") != sha256_file(canonical_path):
-            bad.append("profil_canonique_sha256 != sha256 du fichier canonique fourni")
+        else:
+            if profile.get("profil_canonique_sha256", "") != sha256_file(canonical_path):
+                bad.append("profil_canonique_sha256 != sha256 du fichier canonique fourni")
+            axis_names = ("PROFIL_NOM", "CONF_SPECS", "BENCH_SPECS", "QUEUE_FAMILIES", "QUEUE_N",
+                          "QUEUE_SEEDS", "RUN_TIMEOUT", "THREADS_VM", "V5_GATE_MIN", "V6_GATE_MIN")
+            for line in read_text(canonical_path).splitlines():
+                m = re.match(r'^([A-Z0-9_]+)="?([^"]*)"?$', line)
+                if m and m.group(1) in axis_names:
+                    if m.group(1) in canon_axes:
+                        bad.append(f"profil canonique : axe {m.group(1)} duplique")
+                    canon_axes[m.group(1)] = m.group(2)
+            for axis in axis_names:
+                if axis not in canon_axes:
+                    bad.append(f"profil canonique : axe {axis} absent")
     for tf in ("conf_tronquee.txt", "bench_tronquee.txt", "queue_tronquee.txt"):
         p = os.path.join(out, tf)
         if os.path.exists(p):
@@ -470,10 +493,11 @@ def main():
                                 fmt(median(murs)), fmt(min(murs) if murs else None),
                                 fmt(max(murs) if murs else None), fmt(median(durees)),
                                 str(max(rss)) if rss else "NA"]))
-    tmp = os.path.join(out, "bench_resume.txt.tmp")
+    resume_dir = os.path.dirname(os.path.abspath(out))
+    tmp = os.path.join(resume_dir, "bench_resume.txt.tmp")
     with open(tmp, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
-    os.replace(tmp, os.path.join(out, "bench_resume.txt"))
+    os.replace(tmp, os.path.join(resume_dir, "bench_resume.txt"))
 
     lines = [
         "# queue_resume — grand-livre de la sonde E6 a l'echelle (compteurs bruts, pas de pente ici).",
@@ -486,24 +510,40 @@ def main():
                                 vals.get("tri_comparaisons", "NA"),
                                 vals.get("m_anchor_q4", "NA"),
                                 fmt(meas[0]), str(meas[2]) if meas[2] is not None else "NA"]))
-    tmp = os.path.join(out, "queue_resume.txt.tmp")
+    tmp = os.path.join(resume_dir, "queue_resume.txt.tmp")
     with open(tmp, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
-    os.replace(tmp, os.path.join(out, "queue_resume.txt"))
+    os.replace(tmp, os.path.join(resume_dir, "queue_resume.txt"))
 
     if bad:
         print("campaign_status=partial_or_failed")
         for b in bad:
             print("  -", b)
         return 1
-    if profile.get("profil") == profile.get("profil_canonique") == "decision_v1":
+    axis_map = (("conf_specs", "CONF_SPECS"), ("bench_specs", "BENCH_SPECS"),
+                ("queue_families", "QUEUE_FAMILIES"), ("queue_n", "QUEUE_N"),
+                ("queue_seeds", "QUEUE_SEEDS"), ("run_timeout", "RUN_TIMEOUT"),
+                ("threads", "THREADS_VM"), ("v5_gate_min", "V5_GATE_MIN"),
+                ("v6_gate_min", "V6_GATE_MIN"))
+    axes_equal = bool(canon_axes) and all(
+        profile.get(pk, "").split() == canon_axes.get(ck, "").split() for pk, ck in axis_map)
+    # L'IDENTITE du canon est dans sa grammaire (PROFIL_NOM) : un canon reduit
+    # renomme ne peut pas porter une pretention decision_v1.
+    canon_is_decision = canon_axes.get("PROFIL_NOM", "") == "decision_v1"
+    if profile.get("profil") == profile.get("profil_canonique") == "decision_v1" and axes_equal and canon_is_decision:
         print(f"campaign_status=decision_complete profil=decision_v1 "
               f"({len(known)} runs valides, source_commit={commit[:12]}, "
               f"resumes bench_resume.txt / queue_resume.txt)")
         print("=== CAMPAGNE COMPLETE ===")
     else:
+        if profile.get("profil") == "decision_v1" and not axes_equal:
+            reason = "axes != canon"
+        elif profile.get("profil") == "decision_v1" and not canon_is_decision:
+            reason = "canon non decisionnel (PROFIL_NOM)"
+        else:
+            reason = "profil non decisionnel"
         print(f"campaign_status=verifie_non_decisionnel profil={profile.get('profil', '?')} "
-              f"canonique={profile.get('profil_canonique', '?')} "
+              f"canonique={profile.get('profil_canonique', '?')} cause={reason} "
               f"({len(known)} runs valides — JAMAIS une decision)")
     return 0
 

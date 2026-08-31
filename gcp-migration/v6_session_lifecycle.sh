@@ -199,10 +199,11 @@ finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu CO
   # dans un temporaire, publication ATOMIQUE, dossier preexistant REFUSE.
   local run_id="${DURABLE_RECEIPT_PREFIX}_${GEN_EPOCH:-avorte_$(date +%s)}"
   local dir="${DURABLE_RECEIPT_BASE}/${run_id}"
-  local tmp="${dir}.partial"
+  local tmp
   {
-    [ ! -e "${dir}" ] && [ ! -e "${tmp}" ] &&
-    mkdir -p "${tmp}" &&
+    [ ! -e "${dir}" ] &&
+    mkdir -p "${DURABLE_RECEIPT_BASE}" &&
+    tmp="$(mktemp -d "${dir}.partial.XXXXXX")" &&
     {
       printf 'schema=e-hgp.v6-session-receipt.v3\nrun_id=%s\nissue=%s\nrc=%s\nstop_rc=%s\n' \
         "${run_id}" "$1" "$3" "${2:-na}"
@@ -220,9 +221,11 @@ finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu CO
     { [ ! -f "${WORK}/validation.txt" ] || cp -f "${WORK}/validation.txt" "${tmp}/validation.txt"; } &&
     { [ ! -f "${WORK}/manifest_revalide.txt" ] || cp -f "${WORK}/manifest_revalide.txt" "${tmp}/"; } &&
     { [ ! -d "${WORK}/out" ] || cp -r "${WORK}/out" "${tmp}/out"; } &&
-    ( cd "${tmp}" && { find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum; } > SHA256SUMS.tmp \
-      && mv SHA256SUMS.tmp SHA256SUMS ) &&
-    mv "${tmp}" "${dir}"
+    ( cd "${tmp}" && { find . -type f ! -name 'SHA256SUMS*' -print0 | sort -z | xargs -0 sha256sum; } > SHA256SUMS.tmp \
+      && mv SHA256SUMS.tmp SHA256SUMS \
+      && sha256sum -c --quiet SHA256SUMS >/dev/null ) &&
+    mv -Tn "${tmp}" "${dir}" &&
+    [ ! -e "${tmp}" ]
   } 2>/dev/null
 }
 cleanup() {
@@ -245,7 +248,7 @@ cleanup() {
     log_safe "aucun enregistrement de cycle de vie : refus avant demarrage, aucun arret a certifier"
     finalize_receipt refus_avant_mutation "" "${rc}" || receipt_rc=66
     if [ "${receipt_rc}" -ne 0 ]; then
-      echo "[RECU NON PUBLIE] le recu durable n'a pas pu etre ecrit (${DURABLE_RECEIPT_DIR})" >&2
+      echo "[RECU NON PUBLIE] le recu durable n'a pas pu etre ecrit (${DURABLE_RECEIPT_BASE})" >&2
       exit 66
     fi
     exit "${rc}"
@@ -259,7 +262,7 @@ cleanup() {
     log_safe "arret deja certifie par le garde (generation ${GENERATION}) : aucun second arret"
     echo "arret deja certifie par le garde (generation ${GENERATION})"
     finalize_receipt arret_certifie_par_le_garde 0 "${rc}" || {
-      echo "[RECU NON PUBLIE] le recu durable n'a pas pu etre ecrit (${DURABLE_RECEIPT_DIR})" >&2
+      echo "[RECU NON PUBLIE] le recu durable n'a pas pu etre ecrit (${DURABLE_RECEIPT_BASE})" >&2
       exit 66
     }
     exit "${rc}"
@@ -305,7 +308,7 @@ cleanup() {
     exit 70
   fi
   if [ "${receipt_rc}" -ne 0 ]; then
-    echo "[RECU NON PUBLIE] arret certifie mais recu durable manquant (${DURABLE_RECEIPT_DIR})" >&2
+    echo "[RECU NON PUBLIE] arret certifie mais recu durable manquant (${DURABLE_RECEIPT_BASE})" >&2
     exit 66
   fi
   exit "${rc}"
@@ -477,7 +480,7 @@ log "handshake : boot_id=${BOOT_ID} generation confirmee"
 # ---- 4b. Envoi du BUNDLE pinne (lecture seule cote VM), encadre par deux
 # controles de generation.
 timeout "${SCP_STEP_TIMEOUT_S}" "${SCP[@]}" "${BUNDLE}" \
-  "${GCP_INSTANCE_NAME}:${REMOTE_BUNDLE}" 2>&1 | tee -a "${LOG}"
+  "${GCP_INSTANCE_NAME}:${REMOTE_BUNDLE}.recu" 2>&1 | tee -a "${LOG}"
 check_generation || { log "REFUS : generation changee apres l'envoi du bundle"; SESSION_RC=74; exit 74; }
 
 # ---- 5. Build v5 + v6, preconditions, REJEU des portes avec JOURNAL COMPLET
@@ -486,6 +489,7 @@ check_generation || { log "REFUS : generation changee apres l'envoi du bundle"; 
 BUILD_LOG="${WORK}/build_vm.log"
 timeout "${SSH_STEP_TIMEOUT_S}" "${SSH[@]}" 'set -euo pipefail
   test "$(cat /proc/sys/kernel/random/boot_id)" = '"'${BOOT_ID}'"' || { echo "REFUS : boot_id different (redemarrage detecte)" >&2; exit 9; }
+  mv '"${REMOTE_BUNDLE}.recu"' '"${REMOTE_BUNDLE}"'
   export PATH=$HOME/.local/bin:$PATH
   test -x /usr/bin/time || { echo "REFUS : GNU time absent de la VM" >&2; exit 2; }
   python3 -m pip install --user --quiet --upgrade cmake >/dev/null 2>&1 || true
