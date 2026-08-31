@@ -92,6 +92,9 @@ done
 if [ "${eng}" = "v5" ] && [ "\${FAKE_V5_BENCH_FAIL:-0}" = "1" ] && [ "\${digest}" = "0" ]; then
   echo "erreur simulee du pilote v5"; exit 7
 fi
+if [ "${eng}" = "v6" ] && [ "\${FAKE_V6_FRONT_FAIL:-0}" = "1" ] && [ "\${n}" = "400000" ]; then
+  echo "terminate called after throwing an instance of 'std::bad_alloc'"; exit 9
+fi
 base=\$((n / 4))
 echo "payload=mhgp${eng#v}-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none"
 echo "backend=cpu_reference"
@@ -114,6 +117,7 @@ done
 echo "temps_mur_ms=1234.5 (etages A et B du fold pipelines)"
 echo "temps_fold_mur_ms=100.0 (etages A et B, fold_inflight=1, pic_mesure_en_vol=1)"
 if [ "\${digest}" = "1" ]; then
+  echo "digest_balls=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
   for k in 1 2 3 4 5 6 7 8 9 10; do
     echo "digest_forest_K\${k}=cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
   done
@@ -148,6 +152,88 @@ exit 0
 EOF
 chmod +x "${FAKE}/gnutime" "${FAKE}/mhgp6_conformity"
 
+# ---- Faux outillage GPU : la phase GPU du runner est exercee de bout en
+# bout (temoin + mutant + lanes + contrats a digests egaux) sans CUDA.
+cat > "${FAKE}/nvcc" <<'EOF'
+#!/usr/bin/env bash
+echo "Cuda compilation tools, release 12.9, V12.9.41"
+echo "Build cuda_12.9.r12.9/compiler.36037853_0"
+EOF
+cat > "${FAKE}/nvidia-smi" <<'EOF'
+#!/usr/bin/env bash
+echo "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.65.06"
+EOF
+cat > "${FAKE}/cmake" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+cat > "${FAKE}/mhgp5_device_witness" <<'EOF'
+#!/usr/bin/env bash
+if [ "${1:-}" = "--inject=witness-no-warp-correction" ]; then
+  echo "DESACCORD device/hote (mutant temoin, correction de warp retiree)"; exit 4
+fi
+echo "arith cas=4096 desaccords=0"
+echo "scan famille=uniform ancres=64 seeds=2000 sites=1000 morts=40 desaccords=0 kernel_ms=1.2"
+echo "scan famille=eight_clusters ancres=64 seeds=2000 sites=1000 morts=40 desaccords=0 kernel_ms=1.3"
+echo "device_witness OK"
+EOF
+make_fake_lane_gate() { # $1 = q3|q4
+  cat > "${FAKE}/mhgp5_${1}_lane_device_gate" <<EOF
+#!/usr/bin/env bash
+fam=""; n=0; fils=1; wire=""
+for a in "\$@"; do
+  case "\$a" in
+    --family=*) fam="\${a#*=}" ;;
+    --n=*) n="\${a#*=}" ;;
+    --threads=*) fils="\${a#*=}" ;;
+    --wire=index) wire=" wire=index" ;;
+  esac
+done
+cand=300; [ "\${n}" = "8000" ] && cand=150000
+echo "${1}_lane_device famille=\${fam} n=\${n} fils=\${fils} candidats_${1}=\${cand} seeds=5 tues=3 lancements=2\${wire} desaccords_vecteur=0 desaccords_compteurs=0"
+echo "${1}_lane_device OK"
+EOF
+  chmod +x "${FAKE}/mhgp5_${1}_lane_device_gate"
+}
+make_fake_lane_gate q3
+make_fake_lane_gate q4
+cat > "${FAKE}/mhgp5_cuda" <<'EOF'
+#!/usr/bin/env bash
+fam=""; n=0; seed=3; threads=8; digest=0; ms=1
+for a in "$@"; do
+  case "$a" in
+    --family=*) fam="${a#*=}" ;;
+    --n=*) n="${a#*=}" ;;
+    --seed=*) seed="${a#*=}" ;;
+    --threads=*) threads="${a#*=}" ;;
+    --digest) digest=1 ;;
+    --gpu-min-sites=*) ms="${a#*=}" ;;
+  esac
+done
+base=$((n / 4))
+echo "payload=mhgp5-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none"
+echo "backend=override_experimental (gpu demande, jamais autoritaire)"
+echo "tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11"
+echo "famille=${fam} n=${n} coord=200 s=8 smax=11 seed=${seed} threads=${threads} emis=${base} boules_uniques=${base} mortes_profondeur=10 survivantes=$((base - 10)) census_int=50 census_shell=20 evenements=${base} facettes=${base} fusions=10 deltas=10 noeuds=10"
+echo "generation rect_alive=${base}/${base}/${base} rect_visites_fusionnes=${base} ancres=${base}/${base}/${base} candidats=${base}/${base}/${base}"
+echo "gpu=1 kernel_ms=12.3 lancements=4 min_sites=${ms} routage_q3=2/1 ancres (seeds 500/100) routage_q4=2/1 ancres (seeds 400/80)"
+echo "ouvriers wspd=${threads} rects=${threads} rle=${threads} prefiltre=${threads} census=${threads} expansion=${threads} fold=${threads}"
+for k in 1 2 3 4 5 6 7 8 9 10; do
+  echo "cardinalites K=${k} evenements=${base} facettes=${base} deltas=1 attachements=0 fusions=1 noeuds=1"
+done
+echo "temps_mur_ms=456.7 (etages A et B du fold pipelines)"
+if [ "${digest}" = "1" ]; then
+  echo "digest_balls=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  for k in 1 2 3 4 5 6 7 8 9 10; do
+    echo "digest_forest_K${k}=cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  done
+  echo "digest_all=dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+fi
+exit 0
+EOF
+chmod +x "${FAKE}/nvcc" "${FAKE}/nvidia-smi" "${FAKE}/cmake" \
+  "${FAKE}/mhgp5_device_witness" "${FAKE}/mhgp5_cuda"
+
 # Matrices reduites : DEUX configs de bench (les deux parites ABBA). Les
 # surcharges de scenario ("$@") viennent EN DERNIER : env garde la derniere.
 # Le PROFIL DE CAMPAGNE est ecrit une fois (matrice epinglee independamment
@@ -166,6 +252,11 @@ CANON="${WORK}/selftest_reduit_v1.env"
   echo 'THREADS_VM=8'
   echo 'V5_GATE_MIN=40'
   echo 'V6_GATE_MIN=60'
+  echo 'SWEEP_SPECS="uniform:32000:2,8"'
+  echo 'SWEEP_REPEATS=2'
+  echo 'GPU_SPECS="uniform:50000"'
+  echo 'FRONTIER_SPECS="uniform:200000 uniform:400000"'
+  echo 'FRONTIER_TIMEOUT=60'
 } > "${CANON}"
 CANON_SHA="$(sha256sum "${CANON}" | awk '{print $1}')"
 PROFILE="${WORK}/profil_campagne.txt"
@@ -182,6 +273,11 @@ PROFILE="${WORK}/profil_campagne.txt"
   echo "threads=8"
   echo "v5_gate_min=40"
   echo "v6_gate_min=60"
+  echo "sweep_specs=uniform:32000:2,8"
+  echo "sweep_repeats=2"
+  echo "gpu_specs=uniform:50000"
+  echo "frontier_specs=uniform:200000 uniform:400000"
+  echo "frontier_timeout=60"
 } > "${PROFILE}"
 run_runner() { # $1 = dossier out ; le reste = env supplementaire
   local out="$1"; shift
@@ -191,6 +287,14 @@ run_runner() { # $1 = dossier out ; le reste = env supplementaire
     CONF_SPECS="uniform:50000" \
     BENCH_SPECS="uniform:32000 eight_clusters:32000" \
     QUEUE_FAMILIES="terrain_stationnaire" QUEUE_N="64000" QUEUE_SEEDS="3 4" \
+    SWEEP_SPECS="uniform:32000:2,8" SWEEP_REPEATS=2 \
+    GPU_SPECS="uniform:50000" FRONTIER_SPECS="uniform:200000 uniform:400000" FRONTIER_TIMEOUT=60 \
+    FAKE_V6_FRONT_FAIL=1 \
+    NVCC_BIN="${FAKE}/nvcc" GPU_CMAKE_BIN="${FAKE}/cmake" \
+    GPU_WITNESS_BIN="${FAKE}/mhgp5_device_witness" \
+    GPU_Q3_GATE="${FAKE}/mhgp5_q3_lane_device_gate" GPU_Q4_GATE="${FAKE}/mhgp5_q4_lane_device_gate" \
+    GPU_BIN="${FAKE}/mhgp5_cuda" V5CPU_BIN="${FAKE}/mhgp5" \
+    PATH="${FAKE}:${PATH}" \
     "$@" \
     bash "${RUNNER}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST}" >/dev/null 2>&1
 }
@@ -214,7 +318,21 @@ check_true "nominal : plan ABBA contrebalance (parites 1 et 2)" bash -c "
   grep -q 'seq=8 name=bench_eight_clusters_n32000_v6_r2 .* pos=4' '${OUT}/bench_plan.txt'"
 check_true "nominal : resumes ecrits HORS de out/ (idempotence)" \
   bash -c "test -s '${WORK}/bench_resume.txt' && test -s '${WORK}/queue_resume.txt' \
-    && [ ! -e '${OUT}/bench_resume.txt' ]"
+    && test -s '${WORK}/sweep_resume.txt' && test -s '${WORK}/gpu_resume.txt' \
+    && test -s '${WORK}/frontier_resume.txt' && [ ! -e '${OUT}/bench_resume.txt' ]"
+check_true "nominal : plan FILS contrebalance (avant r1, arriere r2)" bash -c "
+  grep -q 'seq=1 name=sweep_uniform_n32000_t2_r1 .* pos=1' '${OUT}/sweep_plan.txt' &&
+  grep -q 'seq=2 name=sweep_uniform_n32000_t8_r1 .* pos=2' '${OUT}/sweep_plan.txt' &&
+  grep -q 'seq=3 name=sweep_uniform_n32000_t8_r2 .* pos=1' '${OUT}/sweep_plan.txt' &&
+  grep -q 'seq=4 name=sweep_uniform_n32000_t2_r2 .* pos=2' '${OUT}/sweep_plan.txt'"
+check_true "nominal : phase GPU complete (temoin, mutant tue, 4 contrats)" bash -c "
+  grep -q '^code=0' '${OUT}/gpu_witness.status' && grep -q '^code=4' '${OUT}/gpu_mutant.status' &&
+  grep -q '^code=0' '${OUT}/gpu_idx_uniform_n50000.status' &&
+  grep -q 'device_witness OK' '${OUT}/gpu_witness.txt'"
+check_true "nominal : echec de FRONTIERE tolere (code=9 grave, campagne valide)" bash -c "
+  grep -q '^code=9' '${OUT}/front_uniform_n400000.status' &&
+  grep -q 'bad_alloc' '${WORK}/frontier_resume.txt' &&
+  grep -q '^code=0' '${OUT}/front_uniform_n200000.status'"
 # IDEMPOTENCE (audit quatrieme tour) : un second passage sur le MEME dossier
 # rend le meme verdict (le validateur n'enrichit plus l'inventaire qu'il juge).
 rc=0; run_validator "${OUT}" 0 0 >/dev/null || rc=$?
@@ -279,6 +397,15 @@ falsify "plan de bench altere" \
   sed -i "s/^seq=1 name=bench_uniform_n32000_v5_r1/seq=1 name=bench_uniform_n32000_v6_r9/" bench_plan.txt
 falsify "compteur de queue absent" \
   sed -i "/^sweep tests_coeur=/d" queue_terrain_stationnaire_n64000_s3.txt
+falsify "bit-identite entre fils violee (phase FILS)" \
+  sed -i "s/rect_visites_fusionnes=8000/rect_visites_fusionnes=8001/" sweep_uniform_n32000_t8_r1.txt
+falsify "digest GPU different du contrat CPU" \
+  sed -i "s/^digest_all=d/digest_all=e/" gpu_dev_uniform_n50000.txt
+falsify "mutant du temoin device non tue" \
+  sed -i "s/^code=4/code=0/" gpu_mutant.status
+falsify "statut de frontiere supprime (presence exigee meme a code libre)" \
+  rm front_uniform_n400000.status
+falsify "plan GPU supprime" rm gpu_plan.txt
 # CAS SUR SNAPSHOT PROPRE (audit quatrieme tour : plus jamais l'inventaire
 # deja juge) avec DIAGNOSTIC EXACT exige — chaque cas repart d'une copie
 # fraiche du nominal et doit echouer pour SA cause.
@@ -299,6 +426,9 @@ fresh_case "falsification refusee : plans != profil epingle (cause exacte)" 0 0 
 PROF3="${WORK}/profil_sha_faux.txt"
 sed 's/^profil_canonique_sha256=.*/profil_canonique_sha256='"$(printf 'e%.0s' {1..64})"'/' "${PROFILE}" > "${PROF3}"
 fresh_case "falsification refusee : sha du canon discordant (cause exacte)" 0 0 "${PROF3}" "profil_canonique_sha256 !="
+PROF5="${WORK}/profil_sans_sweep.txt"
+sed '/^sweep_specs=/d' "${PROFILE}" > "${PROF5}"
+fresh_case "falsification refusee : cle sweep_specs absente (cause exacte)" 0 0 "${PROF5}" "cle sweep_specs absente"
 # MUTANT decision_v1 REDUIT (quatrieme tour) : noms decision_v1 + VRAI sha du
 # canon + plans reduits concordants — doit rester verifie_non_decisionnel
 # pour la cause « axes != canon », jamais decision_complete.

@@ -55,6 +55,7 @@ PROTOCOL_FILES=(
   gcp-migration/validate_v6_campaign.py
   gcp-migration/profils/decision_v1.env
   gcp-migration/profils/smoke_v1.env
+  gcp-migration/profils/g4_mesure_v1.env
   gcp-migration/set_max_run_duration_and_verify.sh
   gcp-migration/start_and_verify.sh
   gcp-migration/stop_and_verify.sh
@@ -100,18 +101,23 @@ _ov_CONF_SPECS="${CONF_SPECS:-}"; _ov_BENCH_SPECS="${BENCH_SPECS:-}"
 _ov_QUEUE_FAMILIES="${QUEUE_FAMILIES:-}"; _ov_QUEUE_N="${QUEUE_N:-}"
 _ov_QUEUE_SEEDS="${QUEUE_SEEDS:-}"; _ov_RUN_TIMEOUT="${RUN_TIMEOUT:-}"
 _ov_THREADS_VM="${THREADS_VM:-}"; _ov_V5_GATE_MIN="${V5_GATE_MIN:-}"; _ov_V6_GATE_MIN="${V6_GATE_MIN:-}"
+_ov_SWEEP_SPECS="${SWEEP_SPECS:-}"; _ov_SWEEP_REPEATS="${SWEEP_REPEATS:-}"
+_ov_GPU_SPECS="${GPU_SPECS:-}"; _ov_FRONTIER_SPECS="${FRONTIER_SPECS:-}"
+_ov_FRONTIER_TIMEOUT="${FRONTIER_TIMEOUT:-}"
 # shellcheck disable=SC1090
 source "${PROFILE_SRC}"
 EFFECTIVE_PROFILE="${CAMPAIGN_PROFILE}"
-for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM V5_GATE_MIN V6_GATE_MIN; do
+for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM V5_GATE_MIN V6_GATE_MIN \
+         SWEEP_SPECS SWEEP_REPEATS GPU_SPECS FRONTIER_SPECS FRONTIER_TIMEOUT; do
   ov="_ov_${v}"
   if [ -n "${!ov}" ] && [ "${!ov}" != "${!v}" ]; then
     EFFECTIVE_PROFILE="custom"
     printf -v "${v}" '%s' "${!ov}"
   fi
 done
-_param_re='^[A-Za-z0-9_: -]*$'
-for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM; do
+_param_re='^[A-Za-z0-9_:, -]*$'
+for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM \
+         SWEEP_SPECS SWEEP_REPEATS GPU_SPECS FRONTIER_SPECS FRONTIER_TIMEOUT; do
   [[ "${!v}" =~ ${_param_re} ]] || { echo "REFUS : parametre ${v} avec caractere hors alphabet sur" >&2; exit 2; }
 done
 echo "profil canonique : ${CAMPAIGN_PROFILE} ($(sha256sum "${PROFILE_SRC}" | awk '{print $1}')) — profil effectif : ${EFFECTIVE_PROFILE}"
@@ -349,6 +355,11 @@ gcloud config set project "${GCP_PROJECT_ID}" >/dev/null
   echo "threads=${THREADS_VM}"
   echo "v5_gate_min=${V5_GATE_MIN}"
   echo "v6_gate_min=${V6_GATE_MIN}"
+  echo "sweep_specs=${SWEEP_SPECS}"
+  echo "sweep_repeats=${SWEEP_REPEATS}"
+  echo "gpu_specs=${GPU_SPECS}"
+  echo "frontier_specs=${FRONTIER_SPECS}"
+  echo "frontier_timeout=${FRONTIER_TIMEOUT}"
 } > "${PROFILE}.tmp"
 mv "${PROFILE}.tmp" "${PROFILE}"
 log "profil de campagne epingle : $(sha256sum "${PROFILE}" | awk '{print $1}')"
@@ -357,16 +368,30 @@ log "profil de campagne epingle : $(sha256sum "${PROFILE}" | awk '{print $1}')"
 # jamais ajustees apres mesure. Refus AVANT toute mutation si l'estimation
 # depasse la fenetre utile.
 budget_estimate() {
-  python3 - "${CONF_SPECS}" "${BENCH_SPECS}" "${QUEUE_FAMILIES}" "${QUEUE_N}" "${QUEUE_SEEDS}" <<'PY'
+  python3 - "${CONF_SPECS}" "${BENCH_SPECS}" "${QUEUE_FAMILIES}" "${QUEUE_N}" "${QUEUE_SEEDS}" \
+    "${SWEEP_SPECS}" "${SWEEP_REPEATS}" "${GPU_SPECS}" "${FRONTIER_SPECS}" <<'PY'
 import sys
-conf = sys.argv[1].split()
-bench = sys.argv[2].split()
-queue_f, queue_n, queue_s = sys.argv[3].split(), sys.argv[4].split(), sys.argv[5].split()
+conf = [x for x in sys.argv[1].split() if x != "aucun"]
+bench = [x for x in sys.argv[2].split() if x != "aucun"]
+queue_f = [x for x in sys.argv[3].split() if x != "aucun"]
+queue_n, queue_s = sys.argv[4].split(), sys.argv[5].split()
+sweep = [x for x in sys.argv[6].split() if x != "aucun"]
+sweep_reps = int(sys.argv[7]) if sys.argv[7].isdigit() else 0
+gpu = [x for x in sys.argv[8].split() if x != "aucun"]
+frontier = [x for x in sys.argv[9].split() if x != "aucun"]
 # secondes par run, VM 48 fils, DECLARE AVANT MESURE (recus v5 G4 a 200k
 # ~260s x marge 1,5-2 ; jamais ajuste apres coup) :
 conf_ref = {8000: 30, 32000: 60, 50000: 100, 100000: 200, 200000: 450}
-bench_ref = {8000: 40, 32000: 80, 100000: 220, 200000: 480}
+bench_ref = {8000: 40, 32000: 80, 50000: 120, 100000: 220, 200000: 480}
 queue_ref = {16000: 60, 64000: 150, 128000: 350, 256000: 800}
+# FILS : base a 48 fils, cout multiplie par (48/fils)**0.9 (borne : le
+# parallelisme ne peut pas faire mieux que lineaire ; l'exposant < 1 encode
+# la part sequentielle deja payee). Conservateur, jamais ajuste apres coup.
+sweep_base48 = {8000: 15, 16000: 30, 32000: 60, 50000: 100}
+# GPU : temoin+build ~900, lanes+build ~900, mutant 60 ; par famille 4
+# contrats a ~1,2x le cout conf (le digest est paye partout).
+gpu_fixed, gpu_ref = 1860, {32000: 80, 50000: 130, 100000: 260}
+frontier_ref = {200000: 700, 400000: 1700, 800000: 3600}
 total = 0
 for spec in conf:
     n = int(spec.split(":")[1])
@@ -376,6 +401,19 @@ for spec in bench:
     total += 4 * bench_ref.get(n, 900)  # ABBA : quatre runs par paire
 for n in queue_n:
     total += len(queue_f) * len(queue_s) * queue_ref.get(int(n), 1800)
+for spec in sweep:
+    fam, n, tl = spec.split(":", 2)
+    base = sweep_base48.get(int(n), 900)
+    for t in tl.split(","):
+        total += sweep_reps * int(base * (48.0 / max(1, int(t))) ** 0.9 + 1)
+if gpu:
+    total += gpu_fixed
+    for spec in gpu:
+        n = int(spec.split(":")[1])
+        total += 4 * gpu_ref.get(n, 900)  # cpu + dev + ad + idx
+for spec in frontier:
+    n = int(spec.split(":")[1])
+    total += frontier_ref.get(n, 3600)
 print(total)
 PY
 }
@@ -530,6 +568,8 @@ timeout "${CAMPAIGN_TIMEOUT}" "${SSH[@]}" "set -euo pipefail
     CONF_SPECS='${CONF_SPECS}' \
     BENCH_SPECS='${BENCH_SPECS}' \
     QUEUE_FAMILIES='${QUEUE_FAMILIES}' QUEUE_N='${QUEUE_N}' QUEUE_SEEDS='${QUEUE_SEEDS}' \
+    SWEEP_SPECS='${SWEEP_SPECS}' SWEEP_REPEATS='${SWEEP_REPEATS}' \
+    GPU_SPECS='${GPU_SPECS}' FRONTIER_SPECS='${FRONTIER_SPECS}' FRONTIER_TIMEOUT='${FRONTIER_TIMEOUT}' \
     bash gcp-migration/v6_campaign_remote.sh ${SOURCE_COMMIT} ${SOURCE_PAYLOAD_SHA256} ${PROTOCOL_MANIFEST_SHA256}
 " 2>&1 | tee -a "${LOG}"
 REMOTE_CAMPAIGN_RC=${PIPESTATUS[0]}

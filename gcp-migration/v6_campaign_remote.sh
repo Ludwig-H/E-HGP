@@ -13,8 +13,9 @@
 # queue_plan.txt) ; le validateur recalcule chaque sequence depuis les
 # parametres et exige un statut par run annonce.
 #
-# TROIS PHASES (ordre : conformite, puis la sonde qui DISCRIMINE les
-# hypotheses, puis le bench — audit GCP v6, P1) :
+# SIX PHASES (ordre : conformite, puis les MESURES demandees — fils, GPU,
+# frontiere —, puis la sonde stationnaire, puis le bench ; les axes a
+# sentinelle `aucun` donnent un plan runs=0 et une phase sautee) :
 #   1. CONFORMITE v5 ≡ v6 sur les paires CONF_SPECS (fam:n — les tailles
 #      MESUREES par le bench y figurent, pas seulement 50000) : le pilote v5
 #      (--digest) produit la REFERENCE sur la VM, puis
@@ -52,6 +53,27 @@ BENCH_SPECS="${BENCH_SPECS:-uniform:32000 terrain:32000 eight_clusters:32000 sca
 QUEUE_FAMILIES="${QUEUE_FAMILIES:-terrain_stationnaire scanline_stationnaire}"
 QUEUE_N="${QUEUE_N:-64000 128000 256000}"
 QUEUE_SEEDS="${QUEUE_SEEDS:-3 4 5}"
+# Phase FILS (gain de parallelisme CPU) : paires fam:n:liste_de_fils (csv),
+# repetees en ordre CONTREBALANCE (avant/arriere par repetition), moteur v6,
+# sans digest — la BIT-IDENTITE entre fils est exigee par le validateur
+# (doctrine : sorties identiques quel que soit le nombre de fils).
+SWEEP_SPECS="${SWEEP_SPECS:-aucun}"
+SWEEP_REPEATS="${SWEEP_REPEATS:-2}"
+# Phase GPU (v5, seule ligne a cibles CUDA) : par famille, contrat 50k CPU
+# puis --gpu puis adaptatif (--gpu-min-sites=256, familles denses) — digests
+# CPU == GPU exiges ; temoin device + mutant + lanes en prealable.
+GPU_SPECS="${GPU_SPECS:-aucun}"
+V5CPU_BIN="${V5CPU_BIN:-./build-v5/mhgp5}"
+GPU_BIN="${GPU_BIN:-./build-v5-cuda/mhgp5_cuda}"
+GPU_WITNESS_BIN="${GPU_WITNESS_BIN:-./build-v5-cuda/mhgp5_device_witness}"
+GPU_Q3_GATE="${GPU_Q3_GATE:-./build-v5-cuda/mhgp5_q3_lane_device_gate}"
+GPU_Q4_GATE="${GPU_Q4_GATE:-./build-v5-cuda/mhgp5_q4_lane_device_gate}"
+# Phase FRONTIERE (contrats d'echelle) : v6 a 48 fils, tailles croissantes,
+# RSS graves ; un echec (OOM, refus de capacite, timeout) est une DONNEE de
+# frontiere, pas une faute de campagne — le code est enregistre et la phase
+# continue sur les specs suivants.
+FRONTIER_SPECS="${FRONTIER_SPECS:-aucun}"
+FRONTIER_TIMEOUT="${FRONTIER_TIMEOUT:-3600}"
 DEADLINE_EPOCH="${DEADLINE_EPOCH:-}"
 
 test -x "${TIME_BIN}" || {
@@ -68,15 +90,32 @@ if [ -n "${DEADLINE_EPOCH}" ]; then
   [[ "${DEADLINE_EPOCH}" =~ ^[1-9][0-9]*$ ]] || refuse "echeance '${DEADLINE_EPOCH}' non entiere"
 fi
 for spec in ${CONF_SPECS} ${BENCH_SPECS}; do
+  [ "${spec}" = "aucun" ] && continue
   [[ "${spec}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*$ ]] || refuse "paire '${spec}' mal formee (fam:n)"
   case "${spec%%:*}" in uniform|terrain|eight_clusters|scanline_single_pass|scanline_overlap_multiecho) ;;
     *) refuse "famille partagee inconnue '${spec%%:*}'" ;; esac
 done
+for spec in ${GPU_SPECS}; do
+  [ "${spec}" = "aucun" ] && continue
+  [[ "${spec}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*$ ]] || refuse "paire GPU '${spec}' mal formee (fam:n)"
+  case "${spec%%:*}" in uniform|terrain|eight_clusters|scanline_single_pass|scanline_overlap_multiecho) ;;
+    *) refuse "famille GPU inconnue '${spec%%:*}'" ;; esac
+done
+for spec in ${SWEEP_SPECS}; do
+  [ "${spec}" = "aucun" ] && continue
+  [[ "${spec}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*:[1-9][0-9,]*$ ]] || refuse "triple FILS '${spec}' mal forme (fam:n:fils_csv)"
+done
+for spec in ${FRONTIER_SPECS}; do
+  [ "${spec}" = "aucun" ] && continue
+  [[ "${spec}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*$ ]] || refuse "paire FRONTIERE '${spec}' mal formee (fam:n)"
+done
+[[ "${SWEEP_REPEATS}" =~ ^[1-9][0-9]*$ ]] || refuse "SWEEP_REPEATS non entier"
+[[ "${FRONTIER_TIMEOUT}" =~ ^[1-9][0-9]*$ ]] || refuse "FRONTIER_TIMEOUT non entier"
 for f in ${QUEUE_FAMILIES}; do
-  case "${f}" in terrain_stationnaire|scanline_stationnaire|uniform|terrain|eight_clusters|scanline_single_pass|scanline_overlap_multiecho) ;;
+  case "${f}" in aucun|terrain_stationnaire|scanline_stationnaire|uniform|terrain|eight_clusters|scanline_single_pass|scanline_overlap_multiecho) ;;
     *) refuse "famille v6 inconnue '${f}'" ;; esac
 done
-for axis in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS; do
+for axis in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS SWEEP_SPECS GPU_SPECS FRONTIER_SPECS; do
   [ -n "${!axis// /}" ] || refuse "axe ${axis} vide"
   vals="$(printf '%s\n' ${!axis} | sort)"
   [ "$(printf '%s\n' "${vals}" | uniq -d | wc -l)" -eq 0 ] || refuse "axe ${axis} avec doublon"
@@ -102,7 +141,7 @@ run_one() {
     printf 'duree_s=%d\n' "$((t1 - t0))"
     printf 'peak_rss_kb=%s\n' "${hwm:-inconnu}"
     printf 'timing_scope=%s\n' "${scope}"
-    printf 'threads=%s\n' "${THREADS}"
+    printf 'threads=%s\n' "${THREADS_ONE:-${THREADS}}"
     if [ -n "${EXTRA_STATUS:-}" ]; then printf '%s\n' "${EXTRA_STATUS}"; fi
     printf 'commande=%s\n' "$*"
     printf 'source_commit=%s\n' "${SOURCE_COMMIT}"
@@ -118,8 +157,8 @@ run_one() {
 # Echeance : vrai (0) si le prochain run ne finirait pas a temps ; grave la
 # troncature dans le fichier $3.
 past_deadline() {
-  local name="$1" phase="$2" file="$3"
-  if [ -n "${DEADLINE_EPOCH}" ] && [ "$(( $(date +%s) + RUN_TIMEOUT ))" -gt "${DEADLINE_EPOCH}" ]; then
+  local name="$1" phase="$2" file="$3" margin="${4:-${RUN_TIMEOUT}}"
+  if [ -n "${DEADLINE_EPOCH}" ] && [ "$(( $(date +%s) + margin ))" -gt "${DEADLINE_EPOCH}" ]; then
     printf 'truncated_at=%s\nphase=%s\nreason=echeance (run ne finirait pas avant %s)\n' \
       "${name}" "${phase}" "${DEADLINE_EPOCH}" > "${OUT_DIR}/${file}"
     echo "=== TRONCATURE (${phase}) avant ${name} : echeance ===" >&2
@@ -147,6 +186,7 @@ mv "${OUT_DIR}/topologie.txt.tmp" "${OUT_DIR}/topologie.txt"
   echo "threads=${THREADS}"
   seq_no=0
   for spec in ${CONF_SPECS}; do
+    [ "${spec}" = "aucun" ] && continue
     fam="${spec%%:*}"; N="${spec##*:}"
     seq_no=$((seq_no + 1)); echo "seq=${seq_no} name=v5ref_${fam}_n${N} family=${fam} n=${N} kind=v5ref"
     seq_no=$((seq_no + 1)); echo "seq=${seq_no} name=conf_${fam}_n${N} family=${fam} n=${N} kind=conf"
@@ -162,6 +202,7 @@ mv "${OUT_DIR}/conf_plan.txt.tmp" "${OUT_DIR}/conf_plan.txt"
   echo "s=8 smax=11 seed=3"
   seq_no=0; cfg=0
   for spec in ${BENCH_SPECS}; do
+    [ "${spec}" = "aucun" ] && continue
     fam="${spec%%:*}"; N="${spec##*:}"
     cfg=$((cfg + 1))
     if [ $((cfg % 2)) -eq 1 ]; then order="v5 v6 v6 v5"; else order="v6 v5 v5 v6"; fi
@@ -185,6 +226,7 @@ mv "${OUT_DIR}/bench_plan.txt.tmp" "${OUT_DIR}/bench_plan.txt"
   echo "s=8 smax=11"
   seq_no=0
   for fam in ${QUEUE_FAMILIES}; do
+    [ "${fam}" = "aucun" ] && continue
     for N in ${QUEUE_N}; do
       for seed in ${QUEUE_SEEDS}; do
         seq_no=$((seq_no + 1))
@@ -195,10 +237,76 @@ mv "${OUT_DIR}/bench_plan.txt.tmp" "${OUT_DIR}/bench_plan.txt"
   echo "runs=${seq_no}"
 } > "${OUT_DIR}/queue_plan.txt.tmp"
 mv "${OUT_DIR}/queue_plan.txt.tmp" "${OUT_DIR}/queue_plan.txt"
-echo "=== plans annonces : conf=$(sed -n 's/^runs=//p' "${OUT_DIR}/conf_plan.txt") bench=$(sed -n 's/^runs=//p' "${OUT_DIR}/bench_plan.txt") queue=$(sed -n 's/^runs=//p' "${OUT_DIR}/queue_plan.txt") runs ==="
+{
+  echo "sweep_plan=v1"
+  echo "specs=$(printf '%s\n' ${SWEEP_SPECS} | tr '\n' ' ' | sed 's/ $//')"
+  echo "repeats=${SWEEP_REPEATS}"
+  echo "s=8 smax=11 seed=3"
+  seq_no=0
+  for spec in ${SWEEP_SPECS}; do
+    [ "${spec}" = "aucun" ] && continue
+    fam="${spec%%:*}"; rest="${spec#*:}"; N="${rest%%:*}"; tl="${rest#*:}"
+    fils_avant="$(printf '%s' "${tl}" | tr ',' ' ')"
+    fils_arriere="$(printf '%s\n' ${fils_avant} | tac | tr '\n' ' ' | sed 's/ $//')"
+    r=1
+    while [ "${r}" -le "${SWEEP_REPEATS}" ]; do
+      if [ $((r % 2)) -eq 1 ]; then fils="${fils_avant}"; else fils="${fils_arriere}"; fi
+      pos=0
+      for T in ${fils}; do
+        pos=$((pos + 1)); seq_no=$((seq_no + 1))
+        echo "seq=${seq_no} name=sweep_${fam}_n${N}_t${T}_r${r} family=${fam} n=${N} sweep_threads=${T} repeat=${r} pos=${pos}"
+      done
+      r=$((r + 1))
+    done
+  done
+  echo "runs=${seq_no}"
+} > "${OUT_DIR}/sweep_plan.txt.tmp"
+mv "${OUT_DIR}/sweep_plan.txt.tmp" "${OUT_DIR}/sweep_plan.txt"
+
+{
+  echo "gpu_plan=v1"
+  echo "specs=$(printf '%s\n' ${GPU_SPECS} | tr '\n' ' ' | sed 's/ $//')"
+  echo "threads=${THREADS}"
+  echo "s=8 smax=11 seed=3"
+  seq_no=0
+  if [ "${GPU_SPECS}" != "aucun" ]; then
+    seq_no=1; echo "seq=1 name=gpu_witness kind=witness"
+    seq_no=2; echo "seq=2 name=gpu_lane kind=lane"
+    seq_no=3; echo "seq=3 name=gpu_mutant kind=mutant"
+    for spec in ${GPU_SPECS}; do
+      [ "${spec}" = "aucun" ] && continue
+      fam="${spec%%:*}"; N="${spec##*:}"
+      seq_no=$((seq_no + 1)); echo "seq=${seq_no} name=gpu_cpu_${fam}_n${N} family=${fam} n=${N} kind=cpu"
+      seq_no=$((seq_no + 1)); echo "seq=${seq_no} name=gpu_dev_${fam}_n${N} family=${fam} n=${N} kind=dev"
+      seq_no=$((seq_no + 1)); echo "seq=${seq_no} name=gpu_ad_${fam}_n${N} family=${fam} n=${N} kind=ad"
+      seq_no=$((seq_no + 1)); echo "seq=${seq_no} name=gpu_idx_${fam}_n${N} family=${fam} n=${N} kind=idx"
+    done
+  fi
+  echo "runs=${seq_no}"
+} > "${OUT_DIR}/gpu_plan.txt.tmp"
+mv "${OUT_DIR}/gpu_plan.txt.tmp" "${OUT_DIR}/gpu_plan.txt"
+
+{
+  echo "frontier_plan=v1"
+  echo "specs=$(printf '%s\n' ${FRONTIER_SPECS} | tr '\n' ' ' | sed 's/ $//')"
+  echo "threads=${THREADS}"
+  echo "s=8 smax=11 seed=3"
+  echo "timeout=${FRONTIER_TIMEOUT}"
+  seq_no=0
+  for spec in ${FRONTIER_SPECS}; do
+    [ "${spec}" = "aucun" ] && continue
+    fam="${spec%%:*}"; N="${spec##*:}"
+    seq_no=$((seq_no + 1))
+    echo "seq=${seq_no} name=front_${fam}_n${N} family=${fam} n=${N}"
+  done
+  echo "runs=${seq_no}"
+} > "${OUT_DIR}/frontier_plan.txt.tmp"
+mv "${OUT_DIR}/frontier_plan.txt.tmp" "${OUT_DIR}/frontier_plan.txt"
+echo "=== plans annonces : conf=$(sed -n 's/^runs=//p' "${OUT_DIR}/conf_plan.txt") sweep=$(sed -n 's/^runs=//p' "${OUT_DIR}/sweep_plan.txt") gpu=$(sed -n 's/^runs=//p' "${OUT_DIR}/gpu_plan.txt") frontier=$(sed -n 's/^runs=//p' "${OUT_DIR}/frontier_plan.txt") bench=$(sed -n 's/^runs=//p' "${OUT_DIR}/bench_plan.txt") queue=$(sed -n 's/^runs=//p' "${OUT_DIR}/queue_plan.txt") runs ==="
 
 # PHASE 1 — conformite v5 ≡ v6 sur les paires CONF_SPECS. Un echec ARRETE tout.
 for spec in ${CONF_SPECS}; do
+  [ "${spec}" = "aucun" ] && continue
   fam="${spec%%:*}"; CN="${spec##*:}"
   if past_deadline "v5ref_${fam}_n${CN}" conformite conf_tronquee.txt; then exit 3; fi
   run_one "v5ref_${fam}_n${CN}" conformity_ref \
@@ -218,6 +326,125 @@ for spec in ${CONF_SPECS}; do
     exit 3
   fi
 done
+
+
+# PHASE FILS — gain de parallelisme CPU, moteur v6, ordre contrebalance
+# (avant/arriere par repetition). SANS --digest ; la BIT-IDENTITE des
+# compteurs entre fils est exigee par le validateur (doctrine : sorties
+# identiques quel que soit le nombre de fils). Un run non nul tronque la
+# phase (grave) sans empecher la suite.
+while read -r line; do
+  case "${line}" in seq=*) ;; *) continue ;; esac
+  name="$(printf '%s\n' "${line}" | sed 's/.* name=\([^ ]*\).*/\1/')"
+  fam="$(printf '%s\n' "${line}" | sed 's/.* family=\([^ ]*\).*/\1/')"
+  N="$(printf '%s\n' "${line}" | sed 's/.* n=\([^ ]*\).*/\1/')"
+  T="$(printf '%s\n' "${line}" | sed 's/.* sweep_threads=\([^ ]*\).*/\1/')"
+  r="$(printf '%s\n' "${line}" | sed 's/.* repeat=\([^ ]*\).*/\1/')"
+  pos="$(printf '%s\n' "${line}" | sed 's/.* pos=\([^ ]*\).*/\1/')"
+  seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
+  if past_deadline "${name}" sweep sweep_tronquee.txt; then break; fi
+  THREADS_ONE="${T}" \
+  EXTRA_STATUS="$(printf 'family=%s\nn=%s\nsweep_threads=%s\nrepeat=%s\npos=%s\nseq=%s' \
+                  "${fam}" "${N}" "${T}" "${r}" "${pos}" "${seq_no}")" \
+    run_one "${name}" sweep_fils \
+    "${V6_BIN}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 --seed=3 "--threads=${T}"
+  last_code="$(sed -n 's/^code=//p' "${OUT_DIR}/${name}.status" | head -n 1)"
+  if [ "${last_code:-1}" != "0" ]; then
+    printf 'truncated_at=%s\nphase=sweep\nreason=premier run non nul (code=%s)\n' \
+      "${name}" "${last_code:-?}" > "${OUT_DIR}/sweep_tronquee.txt"
+    echo "=== PHASE FILS TRONQUEE a ${name} : code ${last_code:-?} ===" >&2
+    break
+  fi
+done < "${OUT_DIR}/sweep_plan.txt"
+
+# PHASE GPU — v5, seule ligne a cibles CUDA (protocole herite de
+# v5_campaign_remote.sh) : temoin device (build nvcc separe), lanes q3/q4
+# device contre la production, mutant temoin (code 4 exige), puis par paire
+# GPU_SPECS trois contrats a --digest : CPU (reference), --gpu, adaptatif
+# --gpu-min-sites=256. Le validateur exige les digests IDENTIQUES entre les
+# trois. Toute non-conformite tronque la phase (grave) sans empecher la
+# suite ; l acceleration se lit dans les murs, jamais conclue ici.
+if [ "${GPU_SPECS}" != "aucun" ]; then
+  gpu_ok=1
+  NVCC_BIN="${NVCC_BIN:-$(command -v nvcc 2>/dev/null || ls /usr/local/cuda*/bin/nvcc 2>/dev/null | head -1 || true)}"
+  if [ -z "${NVCC_BIN}" ]; then
+    printf 'code=2\nduree_s=0\npeak_rss_kb=0\ntiming_scope=device_witness\nthreads=%s\ncommande=nvcc-absent\nsource_commit=%s\nsource_payload_sha256=%s\nprotocol_manifest_sha256=%s\nfinished=1\n' \
+      "${THREADS}" "${SOURCE_COMMIT}" "${SOURCE_PAYLOAD_SHA256}" "${PROTOCOL_MANIFEST_SHA256}" > "${OUT_DIR}/gpu_witness.status"
+    echo "REFUS : nvcc absent (temoin device non execute)" > "${OUT_DIR}/gpu_witness.txt"
+    printf 'truncated_at=gpu_witness\nphase=gpu\nreason=nvcc absent\n' > "${OUT_DIR}/gpu_tronquee.txt"
+    gpu_ok=0
+  fi
+  if [ "${gpu_ok}" -eq 1 ]; then
+    if past_deadline gpu_witness gpu gpu_tronquee.txt; then gpu_ok=0; fi
+  fi
+  if [ "${gpu_ok}" -eq 1 ]; then
+    RUN_TIMEOUT_ONE="${GPU_BUILD_TIMEOUT:-3600}" run_one gpu_witness device_witness bash -c "set -e; echo nvcc=${NVCC_BIN}; uname -m; ${NVCC_BIN} --version 2>&1 | tail -2; nvidia-smi --query-gpu=name,driver_version --format=csv,noheader; ${GPU_CMAKE_BIN:-cmake} -S morsehgp3D_v5 -B build-v5-cuda -DCMAKE_BUILD_TYPE=Release -DMHGP5_ENABLE_CUDA=ON -DCMAKE_CUDA_COMPILER=${NVCC_BIN} 2>&1 | tail -40; test \${PIPESTATUS[0]} -eq 0; ${GPU_CMAKE_BIN:-cmake} --build build-v5-cuda --target mhgp5_device_witness -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test \${PIPESTATUS[0]} -eq 0; ${GPU_WITNESS_BIN}"
+    if ! grep -q '^code=0$' "${OUT_DIR}/gpu_witness.status"; then
+      printf 'truncated_at=gpu_witness\nphase=gpu\nreason=temoin device non conforme\n' > "${OUT_DIR}/gpu_tronquee.txt"
+      echo "=== PHASE GPU TRONQUEE : temoin device non conforme (voir gpu_witness.txt) ===" >&2
+      gpu_ok=0
+    fi
+  fi
+  if [ "${gpu_ok}" -eq 1 ]; then
+    if past_deadline gpu_lane gpu gpu_tronquee.txt; then gpu_ok=0; fi
+  fi
+  if [ "${gpu_ok}" -eq 1 ]; then
+    RUN_TIMEOUT_ONE="${GPU_BUILD_TIMEOUT:-3600}" run_one gpu_lane device_lane bash -c "set -e; ${GPU_CMAKE_BIN:-cmake} --build build-v5-cuda --target mhgp5_q3_lane_device_gate mhgp5_q4_lane_device_gate mhgp5_cuda -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test \${PIPESTATUS[0]} -eq 0; ${GPU_Q3_GATE} --family=uniform --n=1200; ${GPU_Q3_GATE} --family=eight_clusters --n=1200 --threads=4; ${GPU_Q3_GATE} --family=uniform --n=8000 --threads=8 --min-candidates=100000; ${GPU_Q4_GATE} --family=uniform --n=1200; ${GPU_Q4_GATE} --family=eight_clusters --n=1200 --threads=4; ${GPU_Q4_GATE} --family=uniform --n=8000 --threads=8 --min-candidates=100000; ${GPU_Q3_GATE} --family=uniform --n=300 --coord=40 --min-candidates=200; ${GPU_Q4_GATE} --family=uniform --n=300 --coord=40 --min-candidates=200 --min-deep=20; ${GPU_Q3_GATE} --family=uniform --n=1200 --wire=index; ${GPU_Q3_GATE} --family=eight_clusters --n=1200 --threads=4 --wire=index; ${GPU_Q3_GATE} --family=uniform --n=300 --coord=40 --min-candidates=200 --wire=index; ${GPU_Q4_GATE} --family=uniform --n=1200 --wire=index; ${GPU_Q4_GATE} --family=eight_clusters --n=1200 --threads=4 --wire=index; ${GPU_Q4_GATE} --family=uniform --n=300 --coord=40 --min-candidates=200 --min-deep=20 --wire=index"
+    run_one gpu_mutant device_mutant "${GPU_WITNESS_BIN}" --inject=witness-no-warp-correction
+    if ! grep -q '^code=0$' "${OUT_DIR}/gpu_lane.status" || ! grep -q '^code=4$' "${OUT_DIR}/gpu_mutant.status"; then
+      printf 'truncated_at=gpu_lane\nphase=gpu\nreason=lane device ou mutant non conformes\n' > "${OUT_DIR}/gpu_tronquee.txt"
+      echo "=== PHASE GPU TRONQUEE : lane device ou mutant non conformes ===" >&2
+      gpu_ok=0
+    fi
+  fi
+  if [ "${gpu_ok}" -eq 1 ]; then
+    for spec in ${GPU_SPECS}; do
+      [ "${spec}" = "aucun" ] && continue
+      fam="${spec%%:*}"; GN="${spec##*:}"
+      if past_deadline "gpu_cpu_${fam}_n${GN}" gpu gpu_tronquee.txt; then gpu_ok=0; break; fi
+      EXTRA_STATUS="$(printf 'family=%s\nn=%s\nkind=cpu' "${fam}" "${GN}")" \
+        run_one "gpu_cpu_${fam}_n${GN}" gpu_contract_cpu \
+        "${V5CPU_BIN}" "--family=${fam}" "--n=${GN}" --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
+      if past_deadline "gpu_dev_${fam}_n${GN}" gpu gpu_tronquee.txt; then gpu_ok=0; break; fi
+      EXTRA_STATUS="$(printf 'family=%s\nn=%s\nkind=dev' "${fam}" "${GN}")" \
+        run_one "gpu_dev_${fam}_n${GN}" gpu_contract_dev \
+        "${GPU_BIN}" --gpu "--family=${fam}" "--n=${GN}" --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
+      if past_deadline "gpu_ad_${fam}_n${GN}" gpu gpu_tronquee.txt; then gpu_ok=0; break; fi
+      EXTRA_STATUS="$(printf 'family=%s\nn=%s\nkind=ad' "${fam}" "${GN}")" \
+        run_one "gpu_ad_${fam}_n${GN}" gpu_contract_ad \
+        "${GPU_BIN}" --gpu --gpu-min-sites=256 "--family=${fam}" "--n=${GN}" --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
+      if past_deadline "gpu_idx_${fam}_n${GN}" gpu gpu_tronquee.txt; then gpu_ok=0; break; fi
+      EXTRA_STATUS="$(printf 'family=%s\nn=%s\nkind=idx' "${fam}" "${GN}")" \
+        run_one "gpu_idx_${fam}_n${GN}" gpu_contract_idx \
+        "${GPU_BIN}" --gpu --gpu-wire=index "--family=${fam}" "--n=${GN}" --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
+      for k in cpu dev ad idx; do
+        if ! grep -q '^code=0$' "${OUT_DIR}/gpu_${k}_${fam}_n${GN}.status"; then
+          printf 'truncated_at=gpu_%s_%s_n%s\nphase=gpu\nreason=contrat non nul\n' \
+            "${k}" "${fam}" "${GN}" > "${OUT_DIR}/gpu_tronquee.txt"
+          echo "=== PHASE GPU TRONQUEE a gpu_${k}_${fam}_n${GN} ===" >&2
+          gpu_ok=0
+        fi
+      done
+      [ "${gpu_ok}" -eq 1 ] || break
+    done
+  fi
+fi
+
+# PHASE FRONTIERE — contrats d echelle v6 : tailles croissantes, RSS graves.
+# Un echec par run (OOM, refus de capacite, timeout) est une DONNEE et la
+# phase CONTINUE ; seule l echeance tronque.
+while read -r line; do
+  case "${line}" in seq=*) ;; *) continue ;; esac
+  name="$(printf '%s\n' "${line}" | sed 's/.* name=\([^ ]*\).*/\1/')"
+  fam="$(printf '%s\n' "${line}" | sed 's/.* family=\([^ ]*\).*/\1/')"
+  N="$(printf '%s\n' "${line}" | sed 's/.* n=\([^ ]*\).*/\1/')"
+  seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
+  if past_deadline "${name}" frontiere frontier_tronquee.txt "$((FRONTIER_TIMEOUT + 60))"; then break; fi
+  RUN_TIMEOUT_ONE="${FRONTIER_TIMEOUT}" \
+  EXTRA_STATUS="$(printf 'family=%s\nn=%s\nseq=%s' "${fam}" "${N}" "${seq_no}")" \
+    run_one "${name}" frontiere \
+    "${V6_BIN}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 --seed=3 "--threads=${THREADS}"
+done < "${OUT_DIR}/frontier_plan.txt"
 
 # PHASE 2 — queue stationnaire v6 (la sonde discriminante d'abord), sans
 # --digest. Un run non nul tronque la queue (grave) sans empecher le bench.

@@ -58,7 +58,7 @@ check_true() { local name="$1"; shift; if "$@"; then check "${name}" 0; else che
 FAKE_GEN="2026-08-31T14:00:00Z"
 PROTOCOL_FILES=(session_campagne_v6_g4.sh v6_session_lifecycle.sh v6_campaign_pin.sh
                 v6_campaign_remote.sh validate_v6_campaign.py profils/decision_v1.env
-                profils/smoke_v1.env set_max_run_duration_and_verify.sh
+                profils/smoke_v1.env profils/g4_mesure_v1.env set_max_run_duration_and_verify.sh
                 start_and_verify.sh stop_and_verify.sh)
 
 # ---- Faux gcloud (PATH) : describe rend la generation ; ssh n1 = handshake

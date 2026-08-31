@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validation LOCALE de la campagne v6 : seule cette validation decide de
 campaign_status — jamais le lanceur, jamais la VM. `complete` exige :
-  - les TROIS plans annonces (conf_plan.txt, bench_plan.txt, queue_plan.txt),
+  - les SIX plans annonces (conf, sweep, gpu, frontier, bench, queue),
     chaque sequence RECALCULEE depuis les parametres et identique a l'annonce
     (bench : ordre ABBA contrebalance par parite de configuration) ;
   - un statut et une sortie pour CHAQUE run annonce : code 0, pin identique
@@ -16,6 +16,19 @@ campaign_status — jamais le lanceur, jamais la VM. `complete` exige :
     entre les deux runs d'un meme (famille, n, moteur) ;
   - phase queue : chaque compteur du grand-livre exige (sweep, vwspd,
     octaves_q4, vcensus, p_factor, ledger_paires), aucun digest ;
+  - phase FILS : moteur v6 seul, et les lignes deterministes INVARIANTES PAR
+    FILS (generation, compteurs, cardinalites — jamais ouvriers ni identite)
+    IDENTIQUES entre TOUS les fils et repetitions d'un meme (famille, n) —
+    la doctrine "sorties bit-identiques quel que soit le nombre de fils"
+    jugee a l'echelle ;
+  - phase GPU (v5, contrats herites de validate_v5_campaign.py) : temoin
+    device conforme (nvcc 12.9, lot arithmetique, scans sans desaccord),
+    mutant du temoin TUE (code 4), lanes q3/q4 device aux planchers exacts,
+    et par famille digest_balls + digest_all IDENTIQUES entre le contrat CPU
+    et chacun des contrats --gpu / adaptatif / wire=index ;
+  - phase FRONTIERE : runs presents et pins exacts, mais le CODE est LIBRE
+    (un OOM, un refus de capacite ou un timeout est une DONNEE de frontiere,
+    gravee au resume, jamais une faute) ;
   - des codes de session (ssh distant, scp) nuls.
 Il ecrit bench_resume.txt et queue_resume.txt (murs / RSS — completude et
 dispersion, JAMAIS une conclusion d'acceleration ni de pente).
@@ -45,8 +58,10 @@ KMAX = 10
 # Les resumes sont ecrits A COTE de out/ (idempotence : le validateur ne
 # modifie jamais l'inventaire qu'il juge).
 AUX = ("topologie.txt", "conf_plan.txt", "bench_plan.txt", "queue_plan.txt",
+       "sweep_plan.txt", "gpu_plan.txt", "frontier_plan.txt",
        "MANIFESTE_DISTANT.txt",
-       "conf_tronquee.txt", "bench_tronquee.txt", "queue_tronquee.txt")
+       "conf_tronquee.txt", "bench_tronquee.txt", "queue_tronquee.txt",
+       "sweep_tronquee.txt", "gpu_tronquee.txt", "frontier_tronquee.txt")
 FORBIDDEN = re.compile(r"REFUS|INVARIANT|DIVERGENCE|PLANCHER|Killed|bad_alloc|AddressSanitizer")
 COUNTERS = re.compile(r"boules_uniques=\d+.*evenements=\d+.*facettes=\d+")
 IDENT = re.compile(r"^famille=(\S+) n=(\d+) coord=\d+ s=(\d+) smax=(\d+) seed=(\d+) threads=(\d+)", re.M)
@@ -144,6 +159,52 @@ def queue_sequence(params):
     return seq
 
 
+def sweep_sequence(params):
+    seq = []
+    reps = int(params["repeats"]) if params["repeats"].isdigit() else 0
+    for spec in params["specs"].split():
+        if spec == "aucun":
+            continue
+        fam, n, tl = spec.split(":", 2)
+        threads = tl.split(",")
+        for r in range(1, reps + 1):
+            order = threads if r % 2 == 1 else list(reversed(threads))
+            for pos, t in enumerate(order, 1):
+                seq.append({"seq": str(len(seq) + 1), "name": f"sweep_{fam}_n{n}_t{t}_r{r}",
+                            "family": fam, "n": n, "sweep_threads": t,
+                            "repeat": str(r), "pos": str(pos)})
+    return seq
+
+
+GPU_KINDS = ("cpu", "dev", "ad", "idx")
+
+
+def gpu_sequence(params):
+    seq = []
+    if params["specs"].strip() == "aucun":
+        return seq
+    for nm, kind in (("gpu_witness", "witness"), ("gpu_lane", "lane"), ("gpu_mutant", "mutant")):
+        seq.append({"seq": str(len(seq) + 1), "name": nm, "kind": kind})
+    for spec in params["specs"].split():
+        if spec == "aucun":
+            continue
+        fam, n = spec.split(":", 1)
+        for kind in GPU_KINDS:
+            seq.append({"seq": str(len(seq) + 1), "name": f"gpu_{kind}_{fam}_n{n}",
+                        "family": fam, "n": n, "kind": kind})
+    return seq
+
+
+def frontier_sequence(params):
+    seq = []
+    for spec in params["specs"].split():
+        if spec == "aucun":
+            continue
+        fam, n = spec.split(":", 1)
+        seq.append({"seq": str(len(seq) + 1), "name": f"front_{fam}_n{n}", "family": fam, "n": n})
+    return seq
+
+
 def check_plan(fname, params, listed, want, bad):
     if params is None:
         return
@@ -153,11 +214,15 @@ def check_plan(fname, params, listed, want, bad):
         bad.append(f"{fname}: sequence annoncee != sequence recalculee")
 
 
-def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad):
+def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad,
+                 want_code="0", code_free=False):
     """Verifications communes a tout run annonce. Retourne le corps .txt (ou
     None), le statut (ou None) et (mur_ms, duree_s, rss_kb). Chaque champ du
     statut est exige EXACTEMENT une fois, et le pic RSS est recoupe avec la
-    sortie complete de GNU time (audit GCP v6, P1)."""
+    sortie complete de GNU time (audit GCP v6, P1). code_free=True (phase
+    frontiere) : le code est enregistre sans etre juge, le RSS peut manquer
+    (OOM tue) et les motifs interdits ne sont pas scannes — l'echec y est la
+    donnee."""
     status = os.path.join(out, name + ".status")
     txt = os.path.join(out, name + ".txt")
     if not os.path.exists(status):
@@ -175,11 +240,12 @@ def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad):
             fields[field] = ms[0]
     if fields.get("finished") != "1":
         bad.append(f"{name}: status incomplet")
-    if fields.get("code") != "0":
-        bad.append(f"{name}: code={fields.get('code') or '?'} (attendu 0)")
+    if not code_free and fields.get("code") != want_code:
+        bad.append(f"{name}: code={fields.get('code') or '?'} (attendu {want_code})")
     kb = fields.get("peak_rss_kb")
     if not kb or not kb.isdigit() or int(kb) <= 0:
-        bad.append(f"{name}: pic RSS absent ou nul")
+        if not code_free:
+            bad.append(f"{name}: pic RSS absent ou nul")
         kb = None
     if fields.get("threads") != threads:
         bad.append(f"{name}: threads={fields.get('threads') or '?'} != {threads} (plan)")
@@ -194,16 +260,18 @@ def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad):
     else:
         tm = re.search(r"Maximum resident set size[^0-9]*(\d+)", read_text(gtime))
         if not tm:
-            bad.append(f"{name}: pic RSS absent de la sortie GNU time")
+            if not code_free:
+                bad.append(f"{name}: pic RSS absent de la sortie GNU time")
         elif kb is not None and tm.group(1) != kb:
             bad.append(f"{name}: peak_rss_kb={kb} != GNU time ({tm.group(1)}) — statut non recoupe")
     if not os.path.exists(txt):
         bad.append(f"{name}: .txt ABSENT")
         return None, st, (None, None, None)
     body = read_text(txt)
-    fb = FORBIDDEN.search(body)
-    if fb:
-        bad.append(f"{name}: motif interdit ({fb.group(0)})")
+    if not code_free:
+        fb = FORBIDDEN.search(body)
+        if fb:
+            bad.append(f"{name}: motif interdit ({fb.group(0)})")
     mur = re.search(r"^temps_mur_ms=([0-9.]+)", body, re.M)
     return body, st, (float(mur.group(1)) if mur else None,
                       int(duree) if duree and duree.isdigit() else None,
@@ -243,6 +311,18 @@ def determinism_signature(body):
     for pat in (r"^famille=.*$", r"^generation .*$", r"^sweep .*$", r"^vwspd .*$", r"^octaves_q4 .*$",
                 r"^octaves_q4_seeds .*$", r"^vcensus .*$", r"^p_factor=.*$", r"^ledger_paires .*$",
                 r"^ouvriers .*$", r"^cardinalites K=\d+ .*$"):
+        sig.extend(re.findall(pat, body, re.M))
+    return tuple(sig)
+
+
+def thread_invariant_signature(body):
+    """Lignes deterministes INVARIANTES PAR FILS : compteurs, generation,
+    cardinalites — jamais l'identite (elle imprime threads=) ni les lignes
+    ouvriers (parallelisme MESURE, par definition dependant des fils)."""
+    sig = []
+    for pat in (r"^generation .*$", r"^sweep .*$", r"^vwspd .*$", r"^octaves_q4 .*$",
+                r"^octaves_q4_seeds .*$", r"^vcensus .*$", r"^p_factor=.*$", r"^ledger_paires .*$",
+                r"^cardinalites K=\d+ .*$"):
         sig.extend(re.findall(pat, body, re.M))
     return tuple(sig)
 
@@ -288,7 +368,8 @@ def main():
                 k, v = line.split("=", 1)
                 profile[k] = v
         for key in ("profil", "profil_canonique", "profil_canonique_sha256", "conf_specs", "bench_specs",
-                    "queue_families", "queue_n", "queue_seeds", "threads"):
+                    "queue_families", "queue_n", "queue_seeds", "threads",
+                    "sweep_specs", "sweep_repeats", "gpu_specs", "frontier_specs", "frontier_timeout"):
             if not profile.get(key, "").strip():
                 bad.append(f"profil de campagne : cle {key} absente")
         for key in ("run_timeout", "v5_gate_min", "v6_gate_min"):
@@ -307,7 +388,9 @@ def main():
             if profile.get("profil_canonique_sha256", "") != sha256_file(canonical_path):
                 bad.append("profil_canonique_sha256 != sha256 du fichier canonique fourni")
             axis_names = ("PROFIL_NOM", "CONF_SPECS", "BENCH_SPECS", "QUEUE_FAMILIES", "QUEUE_N",
-                          "QUEUE_SEEDS", "RUN_TIMEOUT", "THREADS_VM", "V5_GATE_MIN", "V6_GATE_MIN")
+                          "QUEUE_SEEDS", "RUN_TIMEOUT", "THREADS_VM", "V5_GATE_MIN", "V6_GATE_MIN",
+                          "SWEEP_SPECS", "SWEEP_REPEATS", "GPU_SPECS", "FRONTIER_SPECS",
+                          "FRONTIER_TIMEOUT")
             for line in read_text(canonical_path).splitlines():
                 m = re.match(r'^([A-Z0-9_]+)="?([^"]*)"?$', line)
                 if m and m.group(1) in axis_names:
@@ -317,7 +400,8 @@ def main():
             for axis in axis_names:
                 if axis not in canon_axes:
                     bad.append(f"profil canonique : axe {axis} absent")
-    for tf in ("conf_tronquee.txt", "bench_tronquee.txt", "queue_tronquee.txt"):
+    for tf in ("conf_tronquee.txt", "bench_tronquee.txt", "queue_tronquee.txt",
+               "sweep_tronquee.txt", "gpu_tronquee.txt", "frontier_tronquee.txt"):
         p = os.path.join(out, tf)
         if os.path.exists(p):
             bad.append(f"{tf}: campagne TRONQUEE ({read_text(p).strip().replace(chr(10), ' ; ')})")
@@ -335,12 +419,24 @@ def main():
                                            ("specs", "threads"), bad, version="v2")
     queue_params, queue_listed = read_plan(out, "queue_plan.txt", "queue_plan",
                                            ("families", "n_list", "seeds", "threads"), bad)
+    sweep_params, sweep_listed = read_plan(out, "sweep_plan.txt", "sweep_plan",
+                                           ("specs", "repeats"), bad)
+    gpu_params, gpu_listed = read_plan(out, "gpu_plan.txt", "gpu_plan",
+                                       ("specs", "threads"), bad)
+    frontier_params, frontier_listed = read_plan(out, "frontier_plan.txt", "frontier_plan",
+                                                 ("specs", "threads", "timeout"), bad)
     conf_runs = conf_sequence(conf_params) if conf_params else []
     bench_runs = bench_sequence(bench_params) if bench_params else []
     queue_runs = queue_sequence(queue_params) if queue_params else []
+    sweep_runs = sweep_sequence(sweep_params) if sweep_params else []
+    gpu_runs = gpu_sequence(gpu_params) if gpu_params else []
+    frontier_runs = frontier_sequence(frontier_params) if frontier_params else []
     check_plan("conf_plan.txt", conf_params, conf_listed, conf_runs, bad)
     check_plan("bench_plan.txt", bench_params, bench_listed, bench_runs, bad)
     check_plan("queue_plan.txt", queue_params, queue_listed, queue_runs, bad)
+    check_plan("sweep_plan.txt", sweep_params, sweep_listed, sweep_runs, bad)
+    check_plan("gpu_plan.txt", gpu_params, gpu_listed, gpu_runs, bad)
+    check_plan("frontier_plan.txt", frontier_params, frontier_listed, frontier_runs, bad)
     # Les plans annonces doivent EGALER le profil epingle (matrice fixee
     # independamment des sorties jugees).
     if profile:
@@ -348,7 +444,11 @@ def main():
                 ("conf_plan.txt", conf_params, (("specs", "conf_specs"), ("threads", "threads"))),
                 ("bench_plan.txt", bench_params, (("specs", "bench_specs"), ("threads", "threads"))),
                 ("queue_plan.txt", queue_params, (("families", "queue_families"), ("n_list", "queue_n"),
-                                                  ("seeds", "queue_seeds"), ("threads", "threads")))):
+                                                  ("seeds", "queue_seeds"), ("threads", "threads"))),
+                ("sweep_plan.txt", sweep_params, (("specs", "sweep_specs"), ("repeats", "sweep_repeats"))),
+                ("gpu_plan.txt", gpu_params, (("specs", "gpu_specs"), ("threads", "threads"))),
+                ("frontier_plan.txt", frontier_params, (("specs", "frontier_specs"), ("threads", "threads"),
+                                                        ("timeout", "frontier_timeout")))):
             if params is None:
                 continue
             for plan_key, prof_key in checks:
@@ -443,10 +543,175 @@ def main():
                 bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} (annonce)")
         queue_rows.append((run, vals, meas))
 
+
+    # PHASE FILS — moteur v6, bit-identite entre fils jugee a l'echelle.
+    sweep_signatures = {}   # (family, n) -> {signature: [names]}
+    sweep_measures = {}     # (family, n, threads) -> [(mur, duree, rss)]
+    for run in sweep_runs:
+        name = run["name"]
+        body, st, meas = check_common(out, name, commit, payload_sha, manifest_sha,
+                                      run["sweep_threads"], bad)
+        if body is None:
+            continue
+        check_pipeline_run(name, body, run["family"], run["n"], "3", "v6",
+                           run["sweep_threads"], bad)
+        if ANY_DIGEST.search(body):
+            bad.append(f"{name}: digest imprime sur un run de fils (mur non compare a armes egales)")
+        cmd = re.search(r"^commande=(.*)$", st, re.M)
+        if cmd:
+            argv = cmd.group(1).split()
+            if "--digest" in argv:
+                bad.append(f"{name}: --digest dans la commande gravee d'un run de fils")
+            want_args = {f"--family={run['family']}", f"--n={run['n']}", "--s=8", "--smax=11",
+                         "--seed=3", f"--threads={run['sweep_threads']}"}
+            if not want_args.issubset(argv):
+                bad.append(f"{name}: commande gravee sans les arguments contractuels du nom")
+        else:
+            bad.append(f"{name}: commande absente")
+        for field, want in (("family", run["family"]), ("n", run["n"]),
+                            ("sweep_threads", run["sweep_threads"]), ("repeat", run["repeat"]),
+                            ("pos", run["pos"]), ("seq", run["seq"])):
+            fm = re.search(rf"^{field}=(\S+)$", st, re.M)
+            if not fm or fm.group(1) != want:
+                bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} (annonce)")
+        key = (run["family"], run["n"])
+        sweep_signatures.setdefault(key, {}).setdefault(thread_invariant_signature(body), []).append(name)
+        sweep_measures.setdefault((run["family"], run["n"], run["sweep_threads"]), []).append(meas)
+    for key, table in sorted(sweep_signatures.items()):
+        if len(table) > 1:
+            groups = sorted(table.values(), key=len, reverse=True)
+            bad.append(f"fils {key}: BIT-IDENTITE VIOLEE entre fils/repetitions "
+                       f"(dissidents {', '.join(groups[1])})")
+
+    # PHASE GPU — contrats v5 herites de validate_v5_campaign.py.
+    gpu_threads = gpu_params["threads"] if gpu_params else "0"
+    gpu_cpu_bodies = {}     # (family, n) -> body du contrat CPU
+    gpu_rows = []           # (run, meas, kernel_ms)
+    for run in gpu_runs:
+        name = run["name"]
+        want_code = "4" if run["kind"] == "mutant" else "0"
+        body, st, meas = check_common(out, name, commit, payload_sha, manifest_sha,
+                                      gpu_threads, bad, want_code=want_code)
+        if body is None:
+            continue
+        kernel_ms = None
+        if run["kind"] == "witness":
+            if not re.search(r"^nvcc=\S+$", body, re.M) or "release 12.9" not in body:
+                bad.append(f"{name}: provenance nvcc absente ou pas 12.9")
+            if not re.search(r"^NVIDIA .*, \d+\.\d+", body, re.M):
+                bad.append(f"{name}: provenance nvidia-smi absente (fail-closed)")
+            arith = re.search(r"^arith cas=(\d+) desaccords=(\d+)$", body, re.M)
+            if not arith or int(arith.group(1)) < 1000 or int(arith.group(2)) != 0:
+                bad.append(f"{name}: lot arithmetique absent, sous le plancher ou en desaccord")
+            for fam in ("uniform", "eight_clusters"):
+                m = re.search(rf"^scan famille={fam} ancres=\d+ seeds=(\d+) sites=\d+ morts=\d+ desaccords=(\d+) kernel_ms=", body, re.M)
+                if not m or int(m.group(1)) < 1000 or int(m.group(2)) != 0:
+                    bad.append(f"{name}: scan {fam} absent, sous le plancher (1000 seeds) ou en desaccord")
+            if "device_witness OK" not in body:
+                bad.append(f"{name}: temoin device non conforme")
+        elif run["kind"] == "mutant":
+            if "DESACCORD device/hote" not in body:
+                bad.append(f"{name}: le mutant du temoin n'a pas ete tue sur le device")
+        elif run["kind"] == "lane":
+            want_soa = {("uniform", "1200", "1", "soa"): 200, ("eight_clusters", "1200", "4", "soa"): 200,
+                        ("uniform", "8000", "8", "soa"): 100000, ("uniform", "300", "1", "soa"): 200}
+            want_q3 = dict(want_soa)
+            want_q3.update({("uniform", "1200", "1", "index"): 200, ("eight_clusters", "1200", "4", "index"): 200,
+                            ("uniform", "300", "1", "index"): 200})
+            for lane, cand_key, want, n_ok in (("q3_lane_device", "candidats_q3", want_q3, 7),
+                                               ("q4_lane_device", "candidats_q4", want_q3, 7)):
+                rx = re.compile(rf"^{lane} famille=(\S+) n=(\d+) fils=(\d+) (.*) desaccords_vecteur=(\d+) desaccords_compteurs=(\d+)$", re.M)
+                seen = {}
+                for f, n, t, mid, v, k in rx.findall(body):
+                    kv = dict(re.findall(r"(\w+)=([0-9.]+)", mid))
+                    wire = re.search(r"\bwire=(\w+)", mid)
+                    lkey = (f, n, t, wire.group(1) if wire else "soa")
+                    seen[lkey] = seen.get(lkey, 0) + 1
+                    if lkey not in want:
+                        bad.append(f"{name}: {lane} — triple inattendu {lkey}")
+                        continue
+                    if int(v) != 0 or int(k) != 0:
+                        bad.append(f"{name}: {lane} {lkey} — desaccords")
+                    if int(kv.get(cand_key, 0)) < want[lkey]:
+                        bad.append(f"{name}: {lane} {lkey} — plancher de candidats {want[lkey]} non atteint")
+                    if int(kv.get("seeds", 0)) < 1 or int(kv.get("tues", kv.get("coeur_tues", 0))) < 1 \
+                       or int(kv.get("lancements", 0)) < 1:
+                        bad.append(f"{name}: {lane} {lkey} — seeds, morts ou lancements vides")
+                for lkey in want:
+                    if seen.get(lkey, 0) != 1:
+                        bad.append(f"{name}: {lane} {lkey} — {seen.get(lkey, 0)} occurrence(s), une attendue")
+                if body.count(f"{lane} OK") != n_ok:
+                    bad.append(f"{name}: {lane} — {n_ok} OK attendus, {body.count(lane + ' OK')} vus")
+        else:
+            # Contrats par famille : moteur v5, identite, digests obligatoires.
+            check_pipeline_run(name, body, run["family"], run["n"], "3", "v5", gpu_threads, bad)
+            for field, want in (("family", run["family"]), ("n", run["n"]), ("kind", run["kind"])):
+                fm = re.search(rf"^{field}=(\S+)$", st, re.M)
+                if not fm or fm.group(1) != want:
+                    bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} (annonce)")
+            for dkey in ("digest_balls", "digest_all"):
+                if len(re.findall(rf"^{dkey}=([0-9a-f]{{64}})$", body, re.M)) != 1:
+                    bad.append(f"{name}: {dkey} absent ou duplique")
+            if run["kind"] == "cpu":
+                if re.search(r"^gpu=1", body, re.M):
+                    bad.append(f"{name}: le contrat CPU annonce gpu=1")
+                gpu_cpu_bodies[(run["family"], run["n"])] = body
+            else:
+                if not re.search(r"^backend=override_experimental", body, re.M):
+                    bad.append(f"{name}: le run --gpu doit s'annoncer backend=override_experimental (non autoritaire)")
+                g = re.search(r"^gpu=1 kernel_ms=([0-9.]+) lancements=(\d+) min_sites=(\d+) "
+                              r"routage_q3=(\d+)/(\d+) ancres \(seeds (\d+)/(\d+)\) "
+                              r"routage_q4=(\d+)/(\d+) ancres \(seeds (\d+)/(\d+)\)", body, re.M)
+                if not g:
+                    bad.append(f"{name}: ligne gpu= (lancements, min_sites, routage) absente ou mal formee")
+                else:
+                    kernel_ms = float(g.group(1))
+                    launches, min_sites = int(g.group(2)), int(g.group(3))
+                    s3d, s3h, s4d, s4h = int(g.group(6)), int(g.group(7)), int(g.group(10)), int(g.group(11))
+                    if launches < 1:
+                        bad.append(f"{name}: aucun lancement device")
+                    if run["kind"] == "ad":
+                        if min_sites != 256:
+                            bad.append(f"{name}: adaptatif attendu a min_sites=256, vu {min_sites}")
+                        if s3d < 1 or s3h < 1 or s4d < 1 or s4h < 1:
+                            bad.append(f"{name}: adaptatif — les deux routes doivent avoir des seeds "
+                                       f"(q3 {s3d}/{s3h}, q4 {s4d}/{s4h})")
+                    elif min_sites != 1:
+                        bad.append(f"{name}: tout-device attendu a min_sites=1, vu {min_sites}")
+                cpu_body = gpu_cpu_bodies.get((run["family"], run["n"]), "")
+                for dkey in ("digest_balls", "digest_all"):
+                    d_gpu = re.search(rf"^{dkey}=([0-9a-f]{{64}})$", body, re.M)
+                    d_cpu = re.search(rf"^{dkey}=([0-9a-f]{{64}})$", cpu_body, re.M)
+                    if not d_gpu or not d_cpu or d_gpu.group(1) != d_cpu.group(1):
+                        bad.append(f"{name}: {dkey} DIFFERENT du contrat CPU de la meme famille (ou absent)")
+        gpu_rows.append((run, meas, kernel_ms))
+
+    # PHASE FRONTIERE — presence et pins exacts, code LIBRE (la donnee).
+    frontier_threads = frontier_params["threads"] if frontier_params else "0"
+    frontier_rows = []
+    for run in frontier_runs:
+        name = run["name"]
+        body, st, meas = check_common(out, name, commit, payload_sha, manifest_sha,
+                                      frontier_threads, bad, code_free=True)
+        if st is None:
+            continue
+        code = re.search(r"^code=(\d+)$", st, re.M)
+        for field, want in (("family", run["family"]), ("n", run["n"]), ("seq", run["seq"])):
+            fm = re.search(rf"^{field}=(\S+)$", st, re.M)
+            if not fm or fm.group(1) != want:
+                bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} (annonce)")
+        note = ""
+        if body is not None:
+            nm = re.search(r"REFUS[^\n]*|resource_exhausted\S*|std::bad_alloc|bad_alloc|Killed", body)
+            if nm:
+                note = nm.group(0)[:60].replace("\t", " ")
+        frontier_rows.append((run, code.group(1) if code else "?", meas, note))
+
     # CONTROLE EXHAUSTIF des fichiers : chaque fichier de out/ doit etre un
     # artefact d'un run annonce (.txt/.status/.status.time) ou un auxiliaire
     # connu — quelle que soit son extension (audit GCP v6, P1).
-    known = {r["name"] for r in conf_runs + bench_runs + queue_runs}
+    known = {r["name"] for r in conf_runs + bench_runs + queue_runs
+             + sweep_runs + gpu_runs + frontier_runs}
     allowed = set(AUX)
     for name in known:
         allowed.update((f"{name}.txt", f"{name}.status", f"{name}.status.time"))
@@ -515,6 +780,53 @@ def main():
         fh.write("\n".join(lines) + "\n")
     os.replace(tmp, os.path.join(resume_dir, "queue_resume.txt"))
 
+    lines = [
+        "# sweep_resume — murs par nombre de fils (dispersion, JAMAIS une conclusion de speedup).",
+        "famille\tn\tfils\truns\tmur_median_ms\tmur_min_ms\tmur_max_ms\trss_max_kb",
+    ]
+    for key in sorted(sweep_measures, key=lambda k: (k[0], int(k[1]), int(k[2]))):
+        vals = sweep_measures[key]
+        murs = [v[0] for v in vals if v[0] is not None]
+        rss = [v[2] for v in vals if v[2] is not None]
+        lines.append("\t".join([key[0], key[1], key[2], str(len(vals)),
+                                fmt(median(murs)), fmt(min(murs) if murs else None),
+                                fmt(max(murs) if murs else None),
+                                str(max(rss)) if rss else "NA"]))
+    tmp = os.path.join(resume_dir, "sweep_resume.txt.tmp")
+    with open(tmp, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+    os.replace(tmp, os.path.join(resume_dir, "sweep_resume.txt"))
+
+    lines = [
+        "# gpu_resume — murs des contrats CPU/GPU (v5) et kernel_ms (faits, pas de conclusion).",
+        "famille\tn\tkind\tmur_ms\tduree_s\trss_kb\tkernel_ms",
+    ]
+    for run, meas, kernel_ms in gpu_rows:
+        if run["kind"] in ("witness", "lane", "mutant"):
+            continue
+        lines.append("\t".join([run["family"], run["n"], run["kind"], fmt(meas[0]),
+                                str(meas[1]) if meas[1] is not None else "NA",
+                                str(meas[2]) if meas[2] is not None else "NA",
+                                f"{kernel_ms:.1f}" if kernel_ms is not None else "NA"]))
+    tmp = os.path.join(resume_dir, "gpu_resume.txt.tmp")
+    with open(tmp, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+    os.replace(tmp, os.path.join(resume_dir, "gpu_resume.txt"))
+
+    lines = [
+        "# frontier_resume — codes, murs et RSS de la frontiere d'echelle (un echec est une donnee).",
+        "famille\tn\tcode\tmur_ms\tduree_s\trss_kb\tnote",
+    ]
+    for run, code, meas, note in frontier_rows:
+        lines.append("\t".join([run["family"], run["n"], code, fmt(meas[0]),
+                                str(meas[1]) if meas[1] is not None else "NA",
+                                str(meas[2]) if meas[2] is not None else "NA",
+                                note or "-"]))
+    tmp = os.path.join(resume_dir, "frontier_resume.txt.tmp")
+    with open(tmp, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+    os.replace(tmp, os.path.join(resume_dir, "frontier_resume.txt"))
+
     if bad:
         print("campaign_status=partial_or_failed")
         for b in bad:
@@ -524,7 +836,10 @@ def main():
                 ("queue_families", "QUEUE_FAMILIES"), ("queue_n", "QUEUE_N"),
                 ("queue_seeds", "QUEUE_SEEDS"), ("run_timeout", "RUN_TIMEOUT"),
                 ("threads", "THREADS_VM"), ("v5_gate_min", "V5_GATE_MIN"),
-                ("v6_gate_min", "V6_GATE_MIN"))
+                ("v6_gate_min", "V6_GATE_MIN"),
+                ("sweep_specs", "SWEEP_SPECS"), ("sweep_repeats", "SWEEP_REPEATS"),
+                ("gpu_specs", "GPU_SPECS"), ("frontier_specs", "FRONTIER_SPECS"),
+                ("frontier_timeout", "FRONTIER_TIMEOUT"))
     axes_equal = bool(canon_axes) and all(
         profile.get(pk, "").split() == canon_axes.get(ck, "").split() for pk, ck in axis_map)
     # L'IDENTITE du canon est dans sa grammaire (PROFIL_NOM) : un canon reduit

@@ -35,6 +35,7 @@ PROTOCOL_FILES = [
     "validate_v6_campaign.py",
     "profils/decision_v1.env",
     "profils/smoke_v1.env",
+    "profils/g4_mesure_v1.env",
     "set_max_run_duration_and_verify.sh",
     "start_and_verify.sh",
     "stop_and_verify.sh",

@@ -32,6 +32,7 @@ PROTOCOL_FILES=(
   gcp-migration/validate_v6_campaign.py
   gcp-migration/profils/decision_v1.env
   gcp-migration/profils/smoke_v1.env
+  gcp-migration/profils/g4_mesure_v1.env
   gcp-migration/set_max_run_duration_and_verify.sh
   gcp-migration/start_and_verify.sh
   gcp-migration/stop_and_verify.sh
