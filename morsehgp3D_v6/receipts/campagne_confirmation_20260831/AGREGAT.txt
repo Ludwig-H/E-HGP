@@ -1,0 +1,70 @@
+# AGREGAT inter-graines — PORTE E6 BORNEE (trois termes, pas 16000->32000 seulement ;
+# jamais le garde-fou GO complet du GRAND_LIVRE paragraphe 3). Regle preenregistree.
+# termes : W_sweep1_evals_coeur, m_anchor_q4, T_lourde (= somme w1 des octaves >= 10,
+# hypothese derivee de la premiere capture, stabilite a tester sur campagne independante).
+# verdict : mediane inter-graines >= 2.0 sur au moins un terme non indetermine ;
+# une transition 0->positif est une EMERGENCE (indeterminee), ni declencheur ni preuve negative.
+== terrain_stationnaire
+  W_sweep1_evals_coeur   g6:      93467805     382827015    1470840204  pentes  2.03 |  1.94
+  W_sweep1_evals_coeur   g7:      84255264     363529468     847005738  pentes  2.11 |  1.22
+  W_sweep1_evals_coeur   g8:     374303433     609922591     607138933  pentes  0.70 | -0.01
+  W_sweep1_evals_coeur   agrégat pas2 : min=-0.01 médiane=1.22 max=1.94
+  m_anchor_q4            g6:      40905781     101650566     327317780  pentes  1.31 |  1.69
+  m_anchor_q4            g7:      39772017     102583022     257045593  pentes  1.37 |  1.33
+  m_anchor_q4            g8:      59102017     107851832     201568278  pentes  0.87 |  0.90
+  m_anchor_q4            agrégat pas2 : min=0.90 médiane=1.33 max=1.69
+  T_lourde               g6:      29386674     241166669    1135934516  pentes  3.04 |  2.24
+  T_lourde               g7:      12377166     211504698     523718199  pentes  4.09 |  1.31
+  T_lourde               g8:     299806574     464569814     289842880  pentes  0.63 | -0.68
+  T_lourde               agrégat pas2 : min=-0.68 médiane=1.31 max=2.24
+  VERDICT : E6_active=non famille=terrain_stationnaire
+
+== scanline_stationnaire
+  W_sweep1_evals_coeur   g6:     267440744     538015872    2138318703  pentes  1.01 |  1.99
+  W_sweep1_evals_coeur   g7:     231008985    1350035847    2812836782  pentes  2.55 |  1.06
+  W_sweep1_evals_coeur   g8:     251809959     487051810    1088209953  pentes  0.95 |  1.16
+  W_sweep1_evals_coeur   agrégat pas2 : min=1.06 médiane=1.16 max=1.99
+  m_anchor_q4            g6:     120570142     233812120     618492216  pentes  0.96 |  1.40
+  m_anchor_q4            g7:     104653826     268291657     557704323  pentes  1.36 |  1.06
+  m_anchor_q4            g8:     114057795     223817543     455185920  pentes  0.97 |  1.02
+  m_anchor_q4            agrégat pas2 : min=1.02 médiane=1.06 max=1.40
+  T_lourde               g6:      11607582      61974899    1131674183  pentes  2.42 |  4.19
+  T_lourde               g7:      10503190     892234682    1846867447  pentes  6.41 |  1.05
+  T_lourde               g8:       6252577      44368146     151661396  pentes  2.83 |  1.77
+  T_lourde               agrégat pas2 : min=1.05 médiane=1.77 max=4.19
+  VERDICT : E6_active=non famille=scanline_stationnaire
+
+== uniform
+  W_sweep1_evals_coeur   g6:     277536340     581887723    1213678866  pentes  1.07 |  1.06
+  W_sweep1_evals_coeur   g7:     276018182     583151582    1217140181  pentes  1.08 |  1.06
+  W_sweep1_evals_coeur   g8:     275706367     583011295    1213321580  pentes  1.08 |  1.06
+  W_sweep1_evals_coeur   agrégat pas2 : min=1.06 médiane=1.06 max=1.06
+  m_anchor_q4            g6:      82379929     166965704     345960458  pentes  1.02 |  1.05
+  m_anchor_q4            g7:      82746537     168901142     347453310  pentes  1.03 |  1.04
+  m_anchor_q4            g8:      82985471     168519023     347903419  pentes  1.02 |  1.05
+  m_anchor_q4            agrégat pas2 : min=1.04 médiane=1.05 max=1.05
+  T_lourde               g6:             0             0             0  pentes   -   |   -  
+  T_lourde               g7:             0             0             0  pentes   -   |   -  
+  T_lourde               g8:             0             0             0  pentes   -   |   -  
+  T_lourde               agrégat pas2 : indéfini (zéro des deux côtés) — ne déclenche pas
+  VERDICT : garde_fou_borne_viole=non famille=uniform
+
+== eight_clusters
+  W_sweep1_evals_coeur   g6:     713383716    1893889656    5067855756  pentes  1.41 |  1.42
+  W_sweep1_evals_coeur   g7:     726063284    1898831646    5091301328  pentes  1.39 |  1.42
+  W_sweep1_evals_coeur   g8:     699775616    1841295693    4969011017  pentes  1.40 |  1.43
+  W_sweep1_evals_coeur   agrégat pas2 : min=1.42 médiane=1.42 max=1.43
+  m_anchor_q4            g6:     234890266     579799106    1454887722  pentes  1.30 |  1.33
+  m_anchor_q4            g7:     238575961     586628056    1461473733  pentes  1.30 |  1.32
+  m_anchor_q4            g8:     231809784     575245630    1424199384  pentes  1.31 |  1.31
+  m_anchor_q4            agrégat pas2 : min=1.31 médiane=1.32 max=1.33
+  T_lourde               g6:     471665091    1423727678    4031690014  pentes  1.59 |  1.50
+  T_lourde               g7:     487012028    1429166356    4056257544  pentes  1.55 |  1.50
+  T_lourde               g8:     446111024    1370221372    3935843825  pentes  1.62 |  1.52
+  T_lourde               agrégat pas2 : min=1.50 médiane=1.50 max=1.52
+  VERDICT : garde_fou_borne_viole=non famille=eight_clusters
+
+E6_active=non famille=terrain_stationnaire
+E6_active=non famille=scanline_stationnaire
+garde_fou_borne_viole=non famille=uniform
+garde_fou_borne_viole=non famille=eight_clusters
