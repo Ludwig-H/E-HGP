@@ -1,0 +1,7 @@
+recu=sonde contrefactuelle E6 (lecture seule, --sonde-e6) : min des temoins des cellules de corde des seeds tuees par coeur + ventilation des exclusions de grille
+pin=le commit de livraison qui contient ce recu
+f74a8759c3e5add3cc5865d35b0903e763d2a1f869ddbe18dd7c3814f67ae07e  build/v6/mhgp6
+objet_inchange=conformite uniform 400 rc=0 avec le binaire de la sonde ; 68/68 portes
+machine=codespace 8 vCPU, campagne decisionnelle concurrente (compteurs deterministes seulement)
+commande=./build/v6/mhgp6 --family=<fam> --n=16000 --seed=5 --s=8 --smax=11 --threads=6 --sonde-e6
+date_utc=2026-08-31T14:41:23Z

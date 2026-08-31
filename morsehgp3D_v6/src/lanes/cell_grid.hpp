@@ -316,6 +316,23 @@ struct CellGrid {
     int r[4];
     return segment_box(pu0, pv0, pu1, pv1, den, r) && range_dead(r);
   }
+  // SONDE E6 (lecture seule, opt-in --sonde-e6) : MINIMUM du compte de
+  // temoins sur les cellules NECESSAIRES de la boite du segment — la
+  // contrainte qui a empeche le kill par cellules. -1 si la boite sort du
+  // domaine ou ne rencontre aucune cellule necessaire. N'affecte jamais
+  // l'objet : aucune decision n'en depend.
+  long long segment_min_count(i128 pu0, i128 pv0, i128 pu1, i128 pv1, i128 den) const {
+    int r[4];
+    if (!segment_box(pu0, pv0, pu1, pv1, den, r)) return -1;
+    long long mn = -1;
+    for (int j = r[2]; j <= r[3]; ++j)
+      for (int i = r[0]; i <= r[1]; ++i) {
+        if (i < -G || i >= G || j < -G || j >= G || !cell_needed(i, j)) continue;
+        const long long c = (long long)cnt[j + G][i + G];
+        if (mn < 0 || c < mn) mn = c;
+      }
+    return mn;
+  }
 };
 
 }  // namespace mhgp6

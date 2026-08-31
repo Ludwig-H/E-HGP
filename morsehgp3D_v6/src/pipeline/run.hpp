@@ -64,6 +64,8 @@ struct RunOptions {
   // Diagnostic opt-in : signe le multiensemble trie AVANT RLE.
   bool diagnostic_raw_candidates_digest = false;
   int fold_inflight = 2;
+  // Sonde E6 opt-in (--sonde-e6) : lecture seule, objet inchange.
+  bool e6_probe = false;
   std::function<void(u64 K, FoldPhase phase)> on_fold_phase;
   size_t pretest_query_min_points = 512;
   size_t cell_grid_min_sites = kCellGridMinSites;
@@ -198,6 +200,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   go.s = opt.s;
   go.smax = rr.smax_eff;
   go.threads = opt.threads;
+  go.e6_probe = opt.e6_probe;
   generate_candidates(ix, go, &cands, &rr.gen);
   rr.t_gen_ms = ms(t_g);
   rr.rss_mb[0] = run_detail::rss_mb_now();
@@ -625,6 +628,18 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
   print_octaves(" corde=", gs.q4_seedchord_by_octave);
   print_octaves(" passe2=", gs.q4_seedpass2_by_octave);
   std::fprintf(out, "\n");
+  if (gs.e6_sondes || gs.e6_sans_grille) {
+    std::fprintf(out,
+                 "sonde_e6 coeur_cellules=%llu,%llu,%llu,%llu,%llu sans_grille=%llu "
+                 "raisons=cover:%llu/ratio:%llu/nearm:%llu/refus:%llu sondes=%llu "
+                 "(min des temoins des cellules de corde des seeds tuees par coeur : 0 | <h/2 | >=h/2 | h-1 | hors domaine)\n",
+                 (unsigned long long)gs.e6_coeur_cellules[0], (unsigned long long)gs.e6_coeur_cellules[1],
+                 (unsigned long long)gs.e6_coeur_cellules[2], (unsigned long long)gs.e6_coeur_cellules[3],
+                 (unsigned long long)gs.e6_coeur_cellules[4], (unsigned long long)gs.e6_sans_grille,
+                 (unsigned long long)gs.e6_sans_grille_raison[1], (unsigned long long)gs.e6_sans_grille_raison[2],
+                 (unsigned long long)gs.e6_sans_grille_raison[3], (unsigned long long)gs.e6_sans_grille_raison[4],
+                 (unsigned long long)gs.e6_sondes);
+  }
   std::fprintf(out,
                "vcensus prefiltre_nœuds=%llu prefiltre_feuilles=%llu range_add=%llu census_nœuds=%llu "
                "census_feuilles=%llu\n",

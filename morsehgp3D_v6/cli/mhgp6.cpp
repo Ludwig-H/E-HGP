@@ -71,6 +71,8 @@ int main(int argc, char** argv) {
     } else if (const char* s = val("--shell-cap=")) {
       ok = parse_int_range(s, 4, 12, &v) && ok;
       opt.shell_cap = (size_t)v;
+    } else if (arg == "--sonde-e6") {
+      opt.e6_probe = true;
     } else if (arg == "--digest") {
       opt.digest = true;
     } else {

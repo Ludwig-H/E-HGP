@@ -128,6 +128,23 @@ struct GenerateStats {
   u64 q4_seedcore_by_octave[16] = {};
   u64 q4_seedchord_by_octave[16] = {};
   u64 q4_seedpass2_by_octave[16] = {};
+  // SONDE E6 opt-in (--sonde-e6, lecture seule) : pour chaque seed q4 tuee
+  // par CŒUR sur une ancre a grille construite, minimum des temoins des
+  // cellules de corde consultees — la contrainte qui a empeche le kill par
+  // cellules. Godets : [0] min == 0 ; [1] 0 < min < h/2 ; [2] h/2 <= min
+  // < h-1 ; [3] min == h-1 ; [4] boite hors domaine (min illisible).
+  // Si les godets [2]+[3] dominent, un RAFFINEMENT de grille (G > 8, ou
+  // hierarchique) convertit ces scans de cœur en kills de cellules ; si [0]
+  // domine, les temoins ne sont pas communs aux cellules et il faut des
+  // structures PAR SEED (moteur plan / contrat 2). e6_sans_grille : seeds
+  // tuees par cœur sans grille construite (la politique les a exclues).
+  u64 e6_coeur_cellules[5] = {};
+  u64 e6_sans_grille = 0;
+  // Ventilation de e6_sans_grille par raison d'exclusion de la politique :
+  // [1] cover < min_sites, [2] ratio seeds/cover, [3] near_m >= h,
+  // [4] construction refusee/echouee ([0] inutilise).
+  u64 e6_sans_grille_raison[5] = {};
+  u64 e6_sondes = 0;
   // Tueurs d'ancre.
   u64 anchors_killed_w3 = 0;
   u64 anchors_killed_w4 = 0;
@@ -220,6 +237,12 @@ struct GenerateStats {
       q4_seedchord_by_octave[i] += o.q4_seedchord_by_octave[i];
       q4_seedpass2_by_octave[i] += o.q4_seedpass2_by_octave[i];
     }
+    for (int i = 0; i < 5; ++i) {
+      e6_coeur_cellules[i] += o.e6_coeur_cellules[i];
+      e6_sans_grille_raison[i] += o.e6_sans_grille_raison[i];
+    }
+    e6_sans_grille += o.e6_sans_grille;
+    e6_sondes += o.e6_sondes;
     mutant_dropped_rects += o.mutant_dropped_rects;
     q4_completions += o.q4_completions;
     q4_rej_lens += o.q4_rej_lens;
@@ -421,6 +444,10 @@ struct AnchorScratch {
   bool affine_filled = false;
   CellGrid grid;
   size_t cell_min_sites = kCellGridMinSites;
+  // Sonde E6 : pourquoi la grille n'a pas ete construite sur cette ancre
+  // (0 = construite, 1 = cover < min_sites, 2 = ratio seeds/cover, 3 =
+  // near_m >= h, 4 = construction refusee/echouee). Diagnostique seulement.
+  u8 grid_skip_reason = 0;
   // Tampons de la passe 2 du sweep (par ouvrier, reutilises par seed).
   struct ChordRoot {
     i128 num;  // μ = num/den, den > 0 (normalise par le signe de B)
@@ -506,7 +533,11 @@ inline bool anchor_grid_stage(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
                               i64 D2, Lane lane, u64 h, bool float_on, GenerateStats* ls) {
   const int li = lane == Lane::kQ3 ? 1 : 2;
   sc.grid.built = false;
-  if (sc.cell_min_sites != 0 && sc.cover.size() < sc.cell_min_sites) return false;
+  sc.grid_skip_reason = 0;
+  if (sc.cell_min_sites != 0 && sc.cover.size() < sc.cell_min_sites) {
+    sc.grid_skip_reason = 1;
+    return false;
+  }
   size_t nacute = 0, near_m = 0;
   for (const CoverPoint& cz : sc.cover) {
     if (cz.u == ua || cz.u == ub) continue;
@@ -515,9 +546,15 @@ inline bool anchor_grid_stage(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       ++nacute;
   }
   const size_t ratio = lane == Lane::kQ3 ? kCellGridSeedsRatioQ3 : kCellGridSeedsRatioQ4;
-  if (!cell_grid_wanted(sc.cover.size(), nacute, near_m, h, sc.cell_min_sites, ratio)) return false;
+  if (!cell_grid_wanted(sc.cover.size(), nacute, near_m, h, sc.cell_min_sites, ratio)) {
+    sc.grid_skip_reason = (sc.cell_min_sites != 0 && nacute * ratio < sc.cover.size()) ? 2 : 3;
+    return false;
+  }
   ++ls->grids_attempted[li];
-  if (!sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, lane == Lane::kQ3 ? 12 : 8, h, float_on)) return false;
+  if (!sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, lane == Lane::kQ3 ? 12 : 8, h, float_on)) {
+    sc.grid_skip_reason = 4;
+    return false;
+  }
   ++ls->grids_built[li];
   if (!sc.grid.all_dead) return false;
   ++ls->grids_all_dead[li];
@@ -645,7 +682,7 @@ inline int cmp_chord_roots(const AnchorScratch::ChordRoot& r1, const AnchorScrat
 // contrat 2, un chantier J3 distinct.
 inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb,
                               i64 D2, u64 h4, bool float_on, bool seed_core_nonstrict, bool no_canonical,
-                              bool pretested, std::vector<BallCandidate>* lo, GenerateStats* ls,
+                              bool pretested, bool e6_probe, std::vector<BallCandidate>* lo, GenerateStats* ls,
                               const EndpointCredit* ec) {
   // Sonde de queue E6 : octave de la taille du cover de l'ancre. Le vecteur
   // `ancres` compte les ENTREES de ce corps (population = anchor_entries[2],
@@ -783,6 +820,30 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       } else {
         ++ls->seeds_killed_core;
         ++ls->q4_seedcore_by_octave[oct];
+        // SONDE E6 (opt-in, lecture seule) : la contrainte de cellules qui a
+        // laisse cette seed atteindre le scan de cœur.
+        if (e6_probe) {
+          if (!sc.grid.built) {
+            ++ls->e6_sans_grille;
+            ++ls->e6_sans_grille_raison[sc.grid_skip_reason < 5 ? sc.grid_skip_reason : 4];
+          } else {
+            ++ls->e6_sondes;
+            i128 pu0, pv0, pu1, pv1, den;
+            long long mn = -1;
+            if (seed_chord_coords(sc.grid, f3s, d4, nrm, D2, l_ax, l_bx, &pu0, &pv0, &pu1, &pv1, &den))
+              mn = sc.grid.segment_min_count(pu0, pv0, pu1, pv1, den);
+            if (mn < 0)
+              ++ls->e6_coeur_cellules[4];
+            else if (mn == 0)
+              ++ls->e6_coeur_cellules[0];
+            else if ((u64)mn + 1 == h4)
+              ++ls->e6_coeur_cellules[3];
+            else if ((u64)(2 * mn) >= h4)
+              ++ls->e6_coeur_cellules[2];
+            else
+              ++ls->e6_coeur_cellules[1];
+          }
+        }
       }
       continue;
     }
@@ -940,6 +1001,9 @@ struct GenerateOptions {
 #endif
   size_t pretest_query_min_points = 512;
   size_t cell_grid_min_sites = kCellGridMinSites;
+  // Sonde E6 opt-in (--sonde-e6) : compte le min des temoins des cellules de
+  // corde pour les seeds tuees par cœur. Lecture seule, objet inchange.
+  bool e6_probe = false;
 };
 
 inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
@@ -1069,7 +1133,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
                            &ec);
           } else {
             process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, seed_core_nonstrict, no_canonical,
-                              pretested, lo, ls, &ec);
+                              pretested, opt.e6_probe, lo, ls, &ec);
           }
         }
       }
