@@ -237,20 +237,50 @@ parcourir jusqu'à 4 225 cases par kill cœur.
 
 Le worktree postérieur à `c0a17f2d` raccorde déjà une option
 `--e6-grille`, mais elle ne doit pas être reçue en l'état. Elle change en une
-fois quatre facteurs sur les ancres à cover≥1024 : G8→G16, levée de
-`near_m`, levée du ratio seeds/cover et nouvelle politique de seuil. La sonde
-n'a testé aucun contrefactuel sur `near_m` ou le ratio ; écrire qu'elle les a
-« réfutés » est donc faux. Aucun test G16 ni preuve ON/OFF n'accompagne encore
-le diff, et un échec de construction G16 ne retombe pas vers G8.
+fois cinq décisions sur les ancres à cover≥1024 : G8→G16, seuil fixe qui
+court-circuite aussi `--cell-min-sites`, levée de `near_m`, levée du ratio
+seeds/cover et remplacement exclusif sans repli G8. La sonde n'a testé aucun
+contrefactuel sur `near_m` ou le ratio ; écrire qu'elle les a « réfutés » est
+donc faux. La branche lourde saute en outre le scan complet du cover qui
+calculait `nacute` et `near_m` ; ce coût retiré n'est compté ni dans W1 ni
+dans une monnaie dédiée, et peut donc être confondu avec le gain G16.
 
-Recette constructive avant réception : quatre bras factoriels (G16 avec
-politique inchangée, `near_m` seul, ratio seul, combinaison), oracle direct
-i128 et localisateur rationnel pour G16, mutants non-strict/h−1/epsilon,
-digests candidats/forêts/all ON/OFF sur fils 1 et 8 et trois graines, plancher
-de kills additionnels, fixture fail-open et compteurs de coût séparés par
-résolution. L'option active doit être imprimée même si elle ne construit
-aucune grille ; la représentation de la sonde simultanée doit être
-versionnée.
+Une première porte ON/OFF ajoutée dans ce même worktree est utile : elle
+compare les digests raw, post-préfiltre, forêts et all sur trois familles.
+Elle ne reçoit pas encore l'étage : n=2000, graine 3 et deux fils seulement ;
+`digest_balls` omis ; aucun mutant ni frontière ; et le seul plancher exige
+100 constructions G16, sans kill additionnel ni baisse stricte de W1. Une
+implémentation qui construit des grilles sans jamais les utiliser peut donc
+rester verte. Le parcours de la boîte de corde n'est pas raffiné : sa borne
+brute passe de 4 225 cases en G8 à 16 641 en G16, dont beaucoup peuvent être
+hors corde et même hors grille ; borner ou compter explicitement ce coût.
+
+Le verrou est plus ancien que G16 : la v6 ne contient ni le
+`tests/cell_grid_oracle.cpp` cité par le code, ni les fixtures F9–F11, ni une
+porte `CellGrid` dans son CMake. Les affirmations « re-requalifiés en v6 » de
+`MATHEMATIQUES.md` et « fixtures F1–F11 portées » du plan de tests sont donc
+fausses à cette coupe. L'oracle G8 présent dans la v5 historique peut guider
+une reconstruction, mais son reçu ne fait pas autorité pour la v6.
+
+Enfin, cet essai n'est pas le Tier R nommé E6 par l'architecture v6 : E6 y
+désigne une grille 3D par rectangle puis un moteur plan, alors que le diff
+raffine en 2D le tueur par ancre déjà placé en E3. Le nommer provisoirement
+« expérimentation E3/G16 », ou modifier explicitement le contrat
+d'architecture avant de l'appeler E6 ; ne pas faire glisser silencieusement
+le jalon.
+
+Recette constructive avant réception : porter un oracle v6 indépendant et
+le paramétrer explicitement sur G=8 puis G=16, avec évaluation directe i128,
+localisateur rationnel, extrêmes u16 et mutants non-strict/h−1/epsilon. Pour
+l'attribution économique, conserver au moins les bras : baseline G8 ; G8
+forcé sur les seules ancres lourdes ; G16 avec politique historique ; G16
+avec levée de `near_m` seule ; G16 avec levée du ratio seule ; G16 avec les
+deux levées. Préenregistrer séparément tout balayage du seuil 1024. Exiger les
+digests candidats/forêts/all ON/OFF sur fils 1/6/8 et trois graines, un
+plancher de kills additionnels, une fixture fail-open avec repli G8 et des
+compteurs de coût séparés par résolution, y compris le scan de politique.
+L'option active doit être imprimée même si elle ne construit aucune grille ;
+la représentation de la sonde simultanée doit être versionnée.
 
 ## GCP
 
