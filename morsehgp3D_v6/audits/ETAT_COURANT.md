@@ -1,10 +1,10 @@
 # État courant v6 — audit coopératif
 
 Date de coupe : 31 août 2026. Autorité auditée :
-`d153e1be560ea3f182f29fbdc852f4dadb98c0bc`, présente sur `main` et
+`518e270683129a4badea9df31400a97582528401`, présente sur `main` et
 `origin/main`. La campagne non suivie
-`receipts/campagne_grandlivre_20260831/` tourne sur ce SHA ; elle reste hors
-verdict jusqu'à son `DONE` et ses contrôles terminaux.
+`receipts/campagne_decision_20260831/` tourne sur ce pin ; elle reste hors
+verdict jusqu'à son `DONE`, ses hashes et ses contrôles terminaux.
 
 ```text
 phase=exploration_v6_hors_registre
@@ -18,223 +18,214 @@ public_status=not_claimed
 
 Le checkpoint mathématique `381ba60b` reste **reçu** : coefficient 4 sur les
 deux covers q4, contre-fixture causale permanente, digest post-préfiltre neuf
-et conformité v5↔v6 jugée sur les forêts et `digest_all`. Il n'est pas rouvert
-par les réserves ci-dessous.
+et conformité v5↔v6 jugée sur les forêts et `digest_all`. Les correctifs
+ultérieurs ne le rouvrent pas.
 
-Le reçu `122e9c57` est reçu comme **baseline descriptive post-correctif**. Sa
-matrice, ses sorties, ses hashes et ses ledgers sont valides. Son claim
-« E6 déclenché proprement » est requalifié en **signal de triage pour la sonde
-E6** : les deux dépassements viennent de la seule graine 5, et le compteur
-nommé `W_sweep1` ne compte pas encore toutes les entrées parcourues.
+Le corpus `a1bfba3b` est **reçu comme baseline enrichie des champs présents**.
+Sa matrice, ses sorties, ses hashes et les invariants contrôlés ferment. Les
+formulations « grand-livre complet », validateur « fail-closed »,
+`W_sweep2` « d'un ordre de grandeur sous » et « promesse de coût tenue » sont
+refusées ; ce reçu n'est ni une décision J3 ni un GO.
 
-`d153e1be` apporte des progrès utiles, mais ne « ferme » pas la chaîne de
-preuve de coût. Il publie trois compteurs attendus et durcit plusieurs portes ;
-il laisse toutefois cinq P1 concrets dans les contrats d'échec, de capacité,
-de validation de campagne, de WSPD et de comptage. Claude peut corriger ce lot
-sans rouvrir le cover, les digests ou le sweep mathématique.
+`518e2706` est un progrès réel, mais n'exécute pas encore les « cinq P1 »
+annoncés. Sont reçus : la racine entière pure, les itérations physiques q4,
+la garde de capacité des indices du préfiltre, le buffering du validateur,
+les bijections STATUS/`.txt`/`.err`, plusieurs rejets CTest, l'enrichissement
+du golden et les corrections ciblées de documentation. Restent quatre
+réserves prioritaires : causalité du mutant WSPD, ensemble exact des forêts
+attendues, définition des nouvelles monnaies et preuves des contrats d'échec.
 
-Ordre conseillé : fermer d'abord les faux certificats et retours d'échec,
-puis rendre le validateur et les compteurs exacts, puis utiliser la campagne
-en cours comme baseline enrichie. La sonde d'ancres lourdes est justifiée ; un
-nouveau run de décision ne l'est qu'après ces corrections.
+Ordre conseillé : corriger d'abord le mutant et le juge exact ; aligner
+ensuite chaque compteur sur une définition unique et graver ses identités ;
+fermer enfin les fixtures du validateur et des retours d'échec. Conserver la
+campagne en cours comme sonde enrichie si elle termine proprement, sans lui
+donner rétroactivement un statut décisionnel.
 
-## Ce qui est reçu dans `d153e1be`
+## Ce qui est reçu dans `518e2706`
 
-- `p_factor` est imprimé et sa valeur est corrigée en
-  `nA*(nA-1)+nB*(nB-1)`, conformément aux appels réellement effectués par
-  `corner_histograms` ; `tri_comparaisons` et `tests_passe2` sont également
-  imprimés.
-- `t_census_ms` s'arrête avant le digest post-préfiltre.
-- Le narrowing du juge `--n=4294967696` / `--threads=4294967300` est fermé :
-  le cas reproduit rend maintenant le code 2.
-- Le chargeur refuse les hex invalides, les doublons de K, les K hors
-  `[1,10]` et plusieurs références tronquées.
-- `linked_arcs_u16` compare désormais dans les deux directions les clés q3/q4
-  à profondeur zéro après census et compare le multiensemble
-  `(BallKey, arité, niveau)` sous réétiquetage. Sa portée reste bornée à
-  `n={2,4,8,16}` et à génération→census.
-- Les neuf familles ont un digest de flux gravé à `n=2000`, graine 3 ; le
-  mutant `family-scanline-overshoot` est raccordé. La porte SHA exerce le
-  chemin portable et, quand disponible, SHA-NI.
-- Les fixtures cover et sweep refusent respectivement un mutant hors cible et
-  `--inject=` vide.
-- Le CMake expose 68 tests : 53 rapides et 15 `scale`. Le reçu
-  `receipts/portes_echelle_20260831/` rapporte 15/15 en 903,41 s sur le lot
-  pré-commit correspondant ; les temps de machine partagée ne sont pas des
-  mesures. Une contre-lecture légère a rejoué 9/9 portes ciblées.
+- `isqrt64_pure` est une racine entière bit à bit sans libm. La frontière des
+  familles stationnaires ne dépend donc plus d'une initialisation flottante.
+- `candidates_capacity_ok` expose le plafond u32 de `Survivor::idx` et
+  `run_pipeline` rend `resource_exhausted` avant `prefilter_balls`.
+- `invalidate_provisional` ferme par construction les deux fuites observées
+  sur les chemins census et défaut de fold : digests, `cards`, digests de
+  forêt et totaux sont vidés.
+- `pentes.py` compare maintenant les ensembles attendus de tuples STATUS et
+  de fichiers `.txt/.err`, recoupe `family/n/seed/s/smax/threads`, exige les
+  compteurs déclarés dont `P_factor_q2`, valide tout avant d'imprimer et
+  bufferise les tables.
+- `q4_core_iters` et `q4_pass2_iters` distinguent enfin les itérations de
+  boucle complètes des évaluations non incidentes `W1/W2`. Les vecteurs par
+  octave ferment sur `seeds_q4` et `W1` dans les sorties déjà observées.
+- `H_rect` représente correctement la masse des handles une fois par
+  rectangle et lane q3/q4. Les autres nouvelles monnaies demandent encore les
+  corrections ci-dessous.
+- `PROVENANCE.md` gèle les monnaies de digest ; `REGIMES.md` requalifie
+  `linked_arcs_u16` en barrière bornée de génération/census ; deux tests ont
+  désormais le label `oracle`.
+- CMake enregistre 74 tests : 59 hors `scale` et 15 `scale`. Claude rapporte
+  59/59 rapides, sans reçu brut versionné dans ce commit.
 
-## Reçu stationnaire `122e9c57`
+## Reçu grand-livre `a1bfba3b`
 
-La capture est structurellement complète : quatre familles, trois tailles,
-trois graines, soit 36 tuples uniques, 36 codes 0, un `DONE` terminal, 36
-stdout et 36 stderr vides. Les 36 hashes de stdout ont été revérifiés ; le
-hash du binaire a été constaté avant son remplacement par le build suivant.
-Chaque sortie contient les dix lignes K1–K10, les treize digests attendus et
-un `rss_max_kb` terminal.
+La matrice attendue contient exactement quatre familles, trois tailles et
+trois graines : 36 tuples uniques, 36 codes 0, un `DONE` terminal, 36 stdout
+et 36 stderr vides, sans `.txt/.err` supplémentaire. Les 36 hashes de stdout
+ont été revérifiés. Le hash du binaire a été constaté avant un rebuild
+ultérieur ; le reçu n'archive ni ce binaire ni le log d'un rebuild post-pin.
+Chaque sortie contient dix lignes K, treize digests et le schéma nominal
+attendu. Digests et cardinalités concordent avec la baseline antérieure sur
+les mêmes tuples. `PENTES.txt` est la sortie exacte du script de son pin.
 
-Les invariants suivants ferment sur les 36 sorties : sommes des cardinalités
-par K, `boules_uniques = mortes_profondeur + survivantes`, partitions des
-ancres et des seeds, partition des verdicts q4 et, pour chaque lane,
-`émis + tués = n*(n-1)/2`. `PENTES.txt` est octet pour octet la sortie du
-`bench/pentes.py` épinglé à `381ba60b`.
+Réserves de lecture maintenues :
 
-Réserves de lecture :
+- uniform couvre au moins `[1,01 ; 1,20]`, pas `[1,03 ; 1,20]` ;
+- `W2/W1` varie de 0,198 à 0,810. Le sous-compteur `W2` est donc 1,23× à
+  5,04× plus petit sur ce corpus, jamais d'un ordre de grandeur ;
+- `W1/W2` y comptent les évaluations non incidentes, pas les itérations
+  complètes ;
+- `P_factor_q2`, `H_scan`, le vrai `V_census` et plusieurs autres termes
+  payés n'y sont pas analysés.
 
-- la borne uniform annoncée `[1,03 ; 1,20]` est fausse ; les 26 compteurs
-  extraits sont au moins dans `[1,01 ; 1,20]` ;
-- « tous les termes publiés » est faux : cette baseline omet notamment
-  `p_factor`, les comparaisons de tri, `W_sweep2` et plusieurs champs déjà
-  sortis ;
-- les valeurs de `tests_coeur` sont exactes : terrain graine 5 donne
-  `1,481/2,081`, scanline graine 5 `1,280/2,407`. Elles justifient un
-  diagnostic de queue, pas une pente établie, car `REGIMES.md` déclare toute
-  conclusion mono-graine sans valeur ;
-- la provenance est forte pour la capture, mais pas « complète » au sens
-  source→binaire : le META épingle le pin, le hash binaire et un sous-ensemble
-  propre du worktree, sans log d'un rebuild après le commit.
+## P1 — le mutant WSPD ne perd toujours pas exactement un rectangle
 
-Ne pas régénérer rétroactivement ce reçu avec le nouveau schéma. Le conserver
-comme baseline immuable des 26 compteurs qu'il contient.
+Dans `alive_rectangles_fused`, `drop_flag` est construit **dans** la boucle
+des vagues. Le mutant peut donc perdre jusqu'à un rectangle terminal par
+vague, pas un rectangle sur toute la descente. En outre,
+`ledger_emitted_mass` et `rect_alive` sont crédités avant le saut de sortie :
+le grand-livre reste fermé et ne détecte pas la masse réellement absente.
 
-## P1 — centraliser l'invalidation des résultats sur échec
+La nouvelle porte tue bien le mutant, mais par divergence entre les bras
+fusionné et singleton ; elle n'asserte ni `count_mutant = count_nominal - 1`
+ni la cause « grand-livre ». Deux corrections recevables :
 
-Le commentaire « aucun champ de digest n'est publié sur un retour d'échec »
-est faux. Les `clear()` ajoutés ne couvrent ni tous les retours ni tous les
-champs provisoires.
+1. appliquer le drop test-only une seule fois, après la fusion ordonnée de la
+   sortie, et graver littéralement le delta `-1` ; ou
+2. maintenir un ledger indépendant reconstruit depuis les rectangles
+   réellement remis, afin que l'omission soit aussi visible par l'invariant.
 
-Deux probes minimales sur `d153e1be` :
+Aligner ensuite cette sémantique avec le mutant homonyme de
+`wspd/wavefront.hpp`. La porte de conformité générale reste un complément,
+pas la preuve de causalité.
 
-```text
-fold-inject-a-failure-k2 : status=4 raw=0 candidates=0 postpref=0
-                          forest_slots=11 forest1=64 all=0 cards1_events=1160
+## P1 — le juge n'exige pas encore l'ensemble exact des K
 
-census shell_cap=4 + diagnostic raw : status=2 raw=64 candidates=0
-                                      postpref=0 forest_slots=0
-```
+Le nouveau contrôle exige chaque K de `1` à `kmax_eff`, mais il ne refuse pas
+les clés supplémentaires entre `kmax_eff + 1` et 10. Le commentaire « les K
+au-delà de `kmax_eff` sont refusés » est faux : le chargeur ne connaît que le
+domaine global `[1,10]`. Pour `n=2`, une référence contenant K1 correct **et**
+K10 supplémentaire passe encore cette étape, puis K10 est ignoré.
 
-Un défaut K2 expose donc encore la forêt et les cardinalités K1 ; un défaut de
-census expose encore le digest raw. Choisir un contrat unique : soit tous ces
-champs sont explicitement provisoires, soit une routine terminale commune vide
-digests, forêts, cartes et totaux sur **chaque** retour non complet. Graver les
-deux cas ci-dessus ainsi que la sûreté `fold_inflight`.
+Exiger l'égalité de l'ensemble des clés à `{1,...,kmax_eff}` après le run et
+graver deux rejets distincts : K1 absent, puis K1 correct + K10 en trop à
+`n=2`. La fixture actuelle, K10 seul à `n=400`, ne couvre que le premier cas.
 
-## P1 — capacité : refuser par statut, avant le narrowing
+## P1 — les nouvelles monnaies ne forment pas encore le grand-livre annoncé
 
-La garde ajoutée à `prefilter_balls` évite le cast u32, mais lance
-`std::length_error`. `run_pipeline` ne l'intercepte pas : la voie produit sort
-du contrat `PipelineStatus` au lieu de rendre `resource_exhausted`. Extraire un
-helper de capacité testable, faire la garde dans le pipeline avant l'appel et
-conserver une défense interne cohérente.
+Les sorties supplémentaires sont utiles, mais quatre noms ne correspondent
+pas encore au contrat de `docs/GRAND_LIVRE.md` :
 
-Les autres narrowings restent ouverts : `CloudIndex` convertit les
-cardinalités/plages en `int`/i32 et les offsets en u32. Les agrégations u64 des
-compteurs, dont `p_factor` et les comparaisons de sweep, peuvent aussi déborder
-silencieusement. Déclarer les plafonds, saturer avec un drapeau ou passer les
-sommes en u128 ; tester les frontières sans allocation géante.
+- `V_census` imprime `ExpandStats::depth`, alimenté uniquement par
+  `ball_depth_at_least` pendant le **préfiltre count-only**. `ball_census`
+  n'instrumente aucune visite : ce compteur n'est pas « préfiltre + census » ;
+- `V_wspd` publie les nœuds visités et les évaluations de couples de coins.
+  Le second champ n'est pas le nombre d'« appels témoins » demandé par la
+  définition documentaire ;
+- `M_anchor` n'a pas une population commune : q3 ajoute la taille du cover
+  après W3/secteurs/grille, q4 l'ajoute avant W4/secteurs/grille. Il ne peut
+  donc pas être comparé entre lanes ni appelé uniformément somme sur les
+  ancres survivantes ;
+- `H_scan` reste absent, bien que `AnchorScratch::visits` fournisse déjà une
+  base d'instrumentation.
 
-Le chargeur du juge a encore un trou pour un petit `kmax` : il vérifie seulement
-`forest.size() >= kmax_eff`, pas l'ensemble exact `{1,...,kmax_eff}`. À `n=2`,
-une référence avec le bon `digest_all` et seulement `digest_forest_K10` peut
-éviter toute comparaison K1. Exiger chaque clé attendue et graver
-missing-K1/extra-K10.
+Le parser ne lit qu'une composante de `V_census`, ignore entièrement la ligne
+d'octaves, et ne couvre toujours pas les comparaisons de regroupement, les
+kills ventilés, `T_input` ou le HWM par rôle. `GRAND_LIVRE.md` marque encore
+des compteurs désormais présents comme « candidat J3 » et n'a toujours pas
+de ligne définissant `W_sweep2`.
 
-## P1 — `pentes.py` n'est pas encore fail-closed
+Avant un nouveau run décisionnel, définir pour chaque monnaie la population,
+le point d'incrément et une identité fermante. Pour la sonde q4, publier au
+minimum par octave les seeds tuées cœur, tuées corde et survivantes ; déclarer
+que le vecteur `ancres` actuel compte les entrées de `process_anchor_q4` après
+le prétest par requête. Ajouter les sommes de vecteurs au validateur.
 
-Le durcissement ferme les défauts les plus simples, mais pas la recette
-annoncée :
+## P1/P2 — le validateur progresse, sa porte contient encore un faux test
 
-- un tuple STATUS supplémentaire, même `code=1`, est ignoré ; les fichiers
-  `.txt/.err` supplémentaires le sont aussi ;
-- l'identité recoupée omet `s`, `smax`, `threads` et le mode digest annoncés ;
-- les compteurs sont validés famille par famille puis la table est imprimée :
-  une famille tardive invalide laisse donc un stdout partiel ;
-- `P_factor_q2` n'est pas analysé alors que q2 paie aussi
-  `corner_histograms` ;
-- aucune porte Python CTest ne grave matrice exacte, extra tuple, fichier
-  manquant, compteur nul, compteur absent ou absence de stdout partiel.
+La porte Python exerce utilement douze rejets, mais son cas « zéro légitime »
+remplace `seeds_cellules=0/0`, déjà nul dans la fixture et **absent de la liste
+des compteurs parsés**. Elle ne vérifie pas non plus que `-` apparaît : le test
+est vacue. Mettre à zéro un compteur réellement parsé sur les trois tailles,
+puis exiger le code 0 et la pente indéfinie imprimée.
 
-Construire toute la matrice en mémoire, comparer exactement les ensembles de
-tuples/fichiers, valider toutes les identités et tous les compteurs, puis
-seulement imprimer. Le reçu en cours doit être refusé s'il manque un champ du
-nouveau schéma ; l'ancienne baseline reste liée au script de son pin.
+Pour borner honnêtement « fail-closed », ajouter ensuite : famille META
+dupliquée, entier META invalide sans traceback, identité/compteur/digest
+dupliqué, digest hex invalide et fichier d'extension inattendue. Le script ne
+vérifie actuellement ni les hashes du META ni les invariants numériques ; une
+porte de **campagne décisionnelle** doit aussi imposer explicitement les
+quatre familles, indépendamment du parser générique de pentes.
 
-## P1 — définir exactement le coût avant de conclure E6
+Le plan de tests annonce 28 noms de mutants exercés, mais les CTests n'en
+référencent que 27 distincts : la nouvelle porte `wspd-drop-rect` double un
+nom déjà présent dans la boucle de conformité.
 
-`q4_core_site_tests` et le nouveau `sweep_pass2_site_tests` sont incrémentés
-après le rejet des trois indices du seed. Ils comptent les évaluations
-éligibles, pas toutes les entrées de `sc.cover` parcourues comme le promet
-« sites scannés » / « rescan complet ». Compter les itérations avant le
-`continue` et, séparément, les prédicats coûteux après celui-ci, ou renommer
-les termes. Une pente du sous-compteur ne prouve pas la pente du scan complet.
+## P2 — rendre le contrat d'échec permanent
 
-Le grand-livre n'est pas complet : `V_wspd` au sens nœuds + appels témoins,
-les comparaisons de regroupement des racines, `H_rect`, `H_scan`, `M_anchor`,
-`V_census` et plusieurs kills restent absents ou candidats. Le parser omet
-aussi q2. La campagne active `campagne_grandlivre_20260831/` sera donc au plus
-une **baseline enrichie des champs présents**, jamais une décision J3 ni une
-preuve de grand-livre complet. Elle peut être conservée si provenance, matrice,
-hashes et invariants ferment.
+Les anciens cas census et fold prennent maintenant la routine commune, mais
+aucune porte n'inspecte les champs rendus. Le mutant K2 vérifie seulement un
+statut divergent. Ajouter une fixture bibliothèque pour :
 
-## P1 — la nouvelle porte WSPD tue une annihilation triviale
+- census en échec avec digest raw demandé ;
+- défaut K2 avec `fold_inflight={1,2,8}` ;
+- tous les digests, `cards`, digests de forêt, totaux et politique explicite
+  de `expand.events_by_k` ;
+- sûreté des callbacks provisoires et terminaison de tous les ouvriers.
 
-Le point produit existe désormais, ce qui est un progrès. Mais la condition
-`mutant && lout[c].empty()` laisse `lout[c]` vide après le premier saut et
-supprime donc **tous** les rectangles terminaux de chaque chunk, pas « un
-rectangle vivant ». Le même nom a une autre sémantique dans
-`wspd/wavefront.hpp`, où un `drop_pending` ne perd qu'un élément.
+La réponse intégrée disait que `invalidate_provisional` est appelé sur chaque
+retour après génération. Ce n'est pas littéral pour les retours grand-livre
+et `invariant_jneg`, même si leurs champs concernés sont encore vides par
+défaut. Appeler un finaliseur unique sur toute sortie non complète évitera que
+ce fait accidentel devienne une nouvelle fuite.
 
-Employer un booléen `drop_pending` à portée déclarée, puis ajouter une porte
-littérale `count_mutant = count_nominal - 1`, grand-livre fermé et ownership
-indépendant de chaque paire/masque/cœur. La conformité qui tue une sortie
-presque annihilée est un smoke test, pas la requalification de la descente
-fusionnée.
+Le plafond des candidats ferme un narrowing précis. Les conversions
+`CloudIndex` vers `int`/i32/u32 et les additions u64 des nouveaux compteurs
+restent ouvertes, comme Claude le reconnaît : déclarer leurs domaines et
+tester leurs frontières sans allocation géante.
 
-## P1/P2 — claims et documentation encore en avance
+## Signal E6 et campagne active
 
-La réponse Claude supprimée après incorporation affirmait avoir modifié
-`PROVENANCE.md`, fusionné les deux lignes `linked_arcs` du plan et remplacé
-les comptes de mutants. `git show --stat d153e1be` ne contient aucun fichier
-de `docs/`, et les textes restent inchangés : ancienne bascule conditionnelle
-du digest, deux lignes linked-arcs, et « barrière de sortie » active.
+Sur `a1bfba3b`, le pic vient des seeds éliminées en passe 1, pas de `W2` : à
+la graine 5, la pente de `W1-W2` vaut 2,430 sur terrain et 3,010 sur scanline,
+alors que `W2` vaut 1,320 et 1,156. Les anciennes monnaies donnent pour la
+pente physique de passe 1 au pas 16000→32000 une borne
+`[1,95285 ; 2,13987]` sur terrain et `[2,28553 ; 2,44951]` sur scanline. Le
+second intervalle reste entièrement au-dessus de 2.
 
-Autres corrections factuelles :
+Ce signal justifie une sonde et bloque prudemment un GO. Il ne suffit pas à
+une activation formelle : les dépassements viennent de la seule graine 5,
+`REGIMES.md` déclare sans valeur toute conclusion mono-graine et aucun
+agrégateur inter-graines n'a été préenregistré.
 
-- `floor_sqrt` corrige exactement l'approximation, mais initialise encore avec
-  `std::sqrt`; les claims « jamais libm » de `families.hpp`/`REGIMES.md` sont
-  faux tant qu'un isqrt réellement entier n'est pas employé ;
-- `linked_arcs_u16` exhibe un motif borné de croissance quadratique jusqu'à
-  n=16 ; il ne prouve pas à lui seul une asymptotique ni une « sortie » forêt ;
-- la topologie courante est 60 noms, **64 callsites réels** (63 sous `src/`,
-  un sous `oracle/`) et 27 noms distincts exercés par CTest. Le « 63 sites »
-  de la réponse est antérieur au nouveau callsite produit ;
-- les 68 tests n'ont que les labels `gate` et `scale*`; aucun label `oracle`
-  ou `slow` n'est configuré.
-
-Les nouveaux rejets du juge, des fixtures, de capacité et du validateur sont
-des changements sémantiques : ils doivent recevoir leurs propres portes CTest,
-pas seulement des probes manuels.
-
-## Renforcements non bloquants du checkpoint
-
-- golden post-préfiltre : graver aussi `105076/1134/103942` et le digest
-  candidat v5-compatible ;
-- cover : équivalence handles/requête directe et permutation PointId ;
-- sweep : pinner la perte exacte de chaque mutant, pas toute divergence
-  d'objet ;
-- API de fold : clarifier que les callbacks K sont provisoires jusqu'au statut
-  global, ou fournir un événement terminal commit/abort ;
-- racine stationnaire : cas immédiatement autour de l'arrondi et du clamp.
+La campagne active porte déjà dans son META « grand-livre complet » et
+« décision E6 ». Ces qualifications sont refusées avant même son résultat :
+les monnaies ci-dessus et l'agrégateur restent ouverts. Ne pas jeter la
+dépense CPU : si `DONE`, hashes, schéma et invariants ferment, conserver les
+sorties comme **baseline de sonde enrichie au pin `518e2706`**, puis analyser
+les octaves séparément. Aucun seuil nouveau ne doit être choisi après lecture
+pour transformer cette capture en décision.
 
 ## Rejeux et statut
 
 ```text
 381ba60b : configure/build Release -> code 0
 381ba60b : portes rapides indépendantes -> 51/51
-d153e1be : portes ciblées légères de contre-lecture -> 9/9
+d153e1be : portes ciblées légères indépendantes -> 9/9
 d153e1be : reçu Claude des portes scale -> 15/15, 903,41 s
-122e9c57 : campagne stationnaire -> 36/36, hashes et ledgers vérifiés
+a1bfba3b : campagne grand-livre -> 36/36, hashes de sorties et invariants vérifiés
+518e2706 : registre CTest -> 74 tests, dont 59 hors scale et 15 scale
+518e2706 : portes rapides rapportées par Claude -> 59/59, sans reçu brut
 ```
 
-La suite rapide 53/53 est rapportée par Claude mais n'a pas encore un reçu
-brut indépendant sur `d153e1be`. Aucun résultat GPU n'est revendiqué. GCP non
-utilisé.
+Le build et les portes de `518e2706` ne sont pas rejoués pendant la campagne
+CPU concurrente afin de ne pas perturber sa capture. Aucun résultat GPU n'est
+revendiqué. GCP non utilisé.
