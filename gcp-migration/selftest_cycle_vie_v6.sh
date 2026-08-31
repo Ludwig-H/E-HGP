@@ -82,6 +82,7 @@ case "$*" in
     fi
     if [ "${n}" -eq 2 ]; then
       if [ "${FAKE_SSH_MODE:-ok}" = "build_fail" ]; then echo "build casse" >&2; exit 1; fi
+      if [ "${FAKE_SSH_MODE:-ok}" = "build_lent" ]; then sleep "${FAKE_BUILD_SLEEP_S:-90}"; fi
       echo "100% tests passed, 0 tests failed out of 45"
       echo "100% tests passed, 0 tests failed out of 60"
       exit 0
@@ -196,6 +197,12 @@ run_scenario() {
   for f in "${PROTOCOL_FILES[@]}"; do
     cp "${HERE}/${f}" "${W}/pinned/gcp-migration/${f}"
   done
+  if [ "${FAKE_VALIDATOR_STUB:-0}" = "1" ]; then
+    # Substitue AVANT le calcul du manifeste (la copie epinglee reste donc
+    # coherente) : le stub journalise VALIDATE dans le meme ledger que STOP.
+    printf '#!/usr/bin/env python3\nimport os\nwith open(os.environ["FAKE_CALLS"], "a") as fh:\n    fh.write("VALIDATE\\n")\nprint("campaign_status=stub")\nraise SystemExit(1)\n' \
+      > "${W}/pinned/gcp-migration/validate_v6_campaign.py"
+  fi
   echo "bundle factice" > "${W}/bundle.tgz"
   local payload_sha commit="0000000000000000000000000000000000000000"
   payload_sha="$(sha256sum "${W}/bundle.tgz" | awk '{print $1}')"
@@ -309,10 +316,28 @@ check_true "TTL OS Login par defaut dans la fenetre du preflight" \
   bash -c "ttl=\$(grep -oE 'ttl=[0-9]+m' '${FAKE_CALLS}' | head -1 | grep -oE '[0-9]+'); \
     [ -n \"\${ttl}\" ] && [ \$((ttl * 60)) -le \$((28800 + 660)) ]"
 
-# ---- 8. Arret en echec : exit 70, ARRET NON CERTIFIE.
+# ---- 8. Arret en echec persistant : la seconde reserve est employee
+# (dixieme tour), puis exit 70 — DEUX tentatives, jamais trois.
 rc=0; run_scenario ok build_fail 9 || rc=$?
-check_true "arret en echec : exit 70 et ARRET NON CERTIFIE" \
-  bash -c "[ '${rc}' -eq 70 ] && grep -q 'ARRET NON CERTIFIE' '${SCENARIO_DIR}/stderr.log'"
+check_true "arret en echec persistant : deux tentatives du cleanup puis exit 70, ARRET NON CERTIFIE" \
+  bash -c "[ '${rc}' -eq 70 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 2 ] \
+    && grep -q 'ARRET NON CERTIFIE' '${SCENARIO_DIR}/stderr.log'"
+# ---- 8bis (dixieme tour) : sortie PRE-SCP (trop tard) + premier arret en
+# echec TRANSITOIRE — la seconde reserve arrete la cible : deux arrets, le
+# second reussi, zero SSH/SCP/validation, recu rc=77 stop_rc=0.
+_OLD_FAKE_GEN="${FAKE_GEN}"
+FAKE_GEN="$(date -u -d '-28000 seconds' +%Y-%m-%dT%H:%M:%SZ)"
+export FAKE_STOP_FAIL_FIRST=1
+rc=0; run_scenario ok || rc=$?
+unset FAKE_STOP_FAIL_FIRST
+FAKE_GEN="${_OLD_FAKE_GEN}"
+check_true "sortie pre-SCP + echec transitoire : seconde reserve employee, arret certifie, zero SSH/SCP" \
+  bash -c "[ '${rc}' -eq 77 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 2 ] \
+    && ! grep -q 'compute ssh' '${FAKE_CALLS}' && ! grep -q 'compute scp' '${FAKE_CALLS}' \
+    && [ ! -e '${SCENARIO_DIR}/work/validation.txt' ] \
+    && grep -q '^state=targeted_stopped' '${SCENARIO_DIR}/work/etat_cycle_vie' \
+    && d=\$(ls -d '${SCENARIO_DIR}'/recu/s_* | head -1) \
+    && grep -q '^stop_rc=0' \"\$d/RECU_SESSION.txt\""
 
 # ---- 9. Arret deja certifie par le garde : 0 arret, 0 blocage, propagation.
 rc=0; run_scenario stopped_by_guard || rc=$?
@@ -460,13 +485,17 @@ check_true "relation invite/GCE violee : refus rc=2 sans AUCUN SETMAX" \
 # (n) premier arret post-scp en echec : re-tentative IMMEDIATE avant toute
 # validation — STOP1 < STOP2 < VALIDATE, terminal targeted_stopped, le
 # cleanup ne cree pas de troisieme tentative.
-export FAKE_STOP_FAIL_FIRST=1
+export FAKE_STOP_FAIL_FIRST=1 FAKE_VALIDATOR_STUB=1
 rc=0; run_scenario ok || rc=$?
-unset FAKE_STOP_FAIL_FIRST
-check_true "reprise post-scp : deux arrets IMMEDIATS puis validation, jamais une troisieme tentative" \
+unset FAKE_STOP_FAIL_FIRST FAKE_VALIDATOR_STUB
+check_true "reprise post-scp : ordre STOP1 < STOP2 < VALIDATE prouve au ledger, jamais une troisieme tentative" \
   bash -c "[ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 2 ] \
+    && [ \"\$(grep -c '^VALIDATE' '${FAKE_CALLS}' || true)\" -eq 1 ] \
+    && s1=\$(grep -n '^STOP ' '${FAKE_CALLS}' | head -1 | cut -d: -f1) \
+    && s2=\$(grep -n '^STOP ' '${FAKE_CALLS}' | tail -1 | cut -d: -f1) \
+    && v1=\$(grep -n '^VALIDATE' '${FAKE_CALLS}' | head -1 | cut -d: -f1) \
+    && [ \"\${s1}\" -lt \"\${s2}\" ] && [ \"\${s2}\" -lt \"\${v1}\" ] \
     && grep -q 're-tentative IMMEDIATE avant toute validation' '${SCENARIO_DIR}/work/session.log' \
-    && [ -s '${SCENARIO_DIR}/work/validation.txt' ] \
     && grep -q '^state=targeted_stopped' '${SCENARIO_DIR}/work/etat_cycle_vie'"
 # (o) DEUX arrets en echec : validation SAUTEE, aucune conclusion de
 # campagne, exit 70, deux tentatives et jamais une troisieme.
@@ -476,6 +505,44 @@ check_true "double echec d'arret : validation sautee, aucune conclusion, exit 70
     && [ ! -e '${SCENARIO_DIR}/work/validation.txt' ] \
     && ! grep -q 'campaign_status' '${SCENARIO_DIR}/stdout.log' \
     && grep -q 'validation SAUTEE' '${SCENARIO_DIR}/work/session.log'"
+
+# (p) contre-calendrier du neuvieme tour : profil smoke_v1, MAX=4800,
+# invite 75 min (relation exacte 75*60+300=4800), DESCRIBE=600 — le build
+# consomme 90 s reelles, l'echeance tombe pendant : le describe pre-campagne
+# NE DOIT PAS s'executer (clamp), la campagne ne part pas, le scp reste
+# admis par la garde a DEUX arrets et l'arret est certifie.
+export CAMPAIGN_PROFILE=smoke_v1 GUEST_SHUTDOWN_MINUTES=75 DESCRIBE_TIMEOUT_S=600 \
+  SCP_STEP_TIMEOUT_S=60 SSH_STEP_TIMEOUT_S=7200
+_OLD_FAKE_GEN="${FAKE_GEN}"
+FAKE_GEN="$(date -u -d '-595 seconds' +%Y-%m-%dT%H:%M:%SZ)"
+export FAKE_BUILD_SLEEP_S=90
+rc=0; run_scenario ok build_lent 0 4800 || rc=$?
+FAKE_GEN="${_OLD_FAKE_GEN}"
+unset CAMPAIGN_PROFILE GUEST_SHUTDOWN_MINUTES DESCRIBE_TIMEOUT_S SCP_STEP_TIMEOUT_S SSH_STEP_TIMEOUT_S FAKE_BUILD_SLEEP_S
+check_true "contre-calendrier : rc=77 conserve, describe pre-campagne clampe, campagne non lancee, scp budgete a deux arrets, arret certifie" \
+  bash -c "[ '${rc}' -eq 77 ] && grep -q 'avant le controle pre-campagne' '${SCENARIO_DIR}/work/session.log' \
+    && [ \"\$(grep -c 'compute ssh' '${FAKE_CALLS}')\" -eq 2 ] \
+    && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ] \
+    && grep -q '^state=targeted_stopped' '${SCENARIO_DIR}/work/etat_cycle_vie'"
+# La garde scp compte LITTERALEMENT deux reserves d'arret et le backoff
+# (assertion textuelle sur le script epingle — le chemin dynamique « scp
+# refuse » est inatteignable par construction : cutoff - deadline =
+# POST_BUDGET + 90 des la derivation).
+check_true "garde scp CAUSALE a la frontiere d'une seconde : pire cas 3155 s du contre-calendrier, refus a -1 s, coefficient 2 discriminant" \
+  bash -c "
+    src=\$(sed -n '/^scp_worst_case_s() {/,/^}/p' '${HERE}/v6_session_lifecycle.sh')
+    [ -n \"\$src\" ] || exit 1
+    SCP_STEP_TIMEOUT_S=60 GRACE_S=30 DESCRIBE_TIMEOUT_S=600 STOP_RESERVE_S=900
+    eval \"\$src\"
+    w=\$(scp_worst_case_s 1)
+    [ \"\$w\" -eq 3155 ] || exit 1
+    cutoff=1003155
+    # admis a la frontiere exacte, refuse une seconde trop tard
+    [ \$(( 1000000 + w )) -le \"\$cutoff\" ] || exit 1
+    [ \$(( 1000001 + w )) -gt \"\$cutoff\" ] || exit 1
+    # coefficient 1 (l'ancien defaut) aurait encore admis a +900 s : bande causale
+    w1=\$(( w - 900 ))
+    [ \$(( 1000900 + w1 )) -le \"\$cutoff\" ] || exit 1"
 
 # ---- Scenarios bootstrap + pin : clone jetable, versions COURANTES du
 # protocole synchronisees et committees DANS LE CLONE (commit conditionnel :
@@ -565,4 +632,4 @@ if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest cycle de vie v6 : ${FAILURES} echec(s)" >&2
   exit 1
 fi
-echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (32 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue, registre illisible=blocage, surcharge temporelle refusee, trop-tard sans remontee, describe borne, registre etranger post-arret=78, grace fixe 29/31 refusees, relation invite/GCE avant set_max, STOP1<STOP2<VALIDATE, double echec sans validation — + 11 refus de pin, rejouable depuis un HEAD propre)"
+echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (35 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue, registre illisible=blocage, surcharge temporelle refusee, trop-tard sans remontee, describe borne, registre etranger post-arret=78, grace fixe 29/31 refusees, relation invite/GCE avant set_max, STOP1<STOP2<VALIDATE, double echec sans validation, contre-calendrier a describe clampe, ordre STOP1<STOP2<VALIDATE au ledger, sortie pre-SCP a seconde reserve, garde scp causale a la seconde — + 11 refus de pin, rejouable depuis un HEAD propre)"

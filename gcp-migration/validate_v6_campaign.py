@@ -269,7 +269,9 @@ def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad,
         kb = None
     if fields.get("threads") != threads:
         bad.append(f"{name}: threads={fields.get('threads') or '?'} != {threads} (plan)")
-    if fields.get("time_bin"):
+    if fields.get("time_bin") is not None:
+        if not fields["time_bin"]:
+            bad.append(f"{name}: time_bin VIDE (instrumentation non attestee)")
         TIME_BINS.append(fields["time_bin"])
     for field, want in (("source_commit", commit), ("source_payload_sha256", payload_sha),
                         ("protocol_manifest_sha256", manifest_sha)):
@@ -1046,6 +1048,13 @@ def main():
         fh.write("\n".join(lines) + "\n")
     os.replace(tmp, os.path.join(resume_dir, "frontier_resume.txt"))
 
+    # PROFIL DE MESURE G4 (dixieme tour) : une instrumentation non standard
+    # n'est pas un simple declassement — les RSS d'un faux instrument ne
+    # doivent JAMAIS etre publies comme mesures d'une campagne payante.
+    if canon_axes.get("PROFIL_NOM") == "g4_mesure_v1" \
+            and not (len(TIME_BINS) == len(known) and set(TIME_BINS) == {"/usr/bin/time"}):
+        bad.append("profil g4_mesure_v1 : instrumentation NON STANDARD (time_bin != /usr/bin/time, "
+                   "vide ou incomplet) — mesures INVALIDES et NON RECEVABLES (les resumes ecrits ne sont pas des mesures)")
     if bad:
         print("campaign_status=partial_or_failed")
         for b in bad:
@@ -1063,11 +1072,12 @@ def main():
                 ("frontier_ulimit_kb", "FRONTIER_ULIMIT_KB"))
     axes_equal = bool(canon_axes) and all(
         profile.get(pk, "").split() == canon_axes.get(ck, "").split() for pk, ck in axis_map)
-    # INSTRUMENTATION EPINGLEE (huitieme tour) : GNU time enveloppe le
-    # superviseur — un TIME_BIN de test invente RSS et attestations. Toute
-    # instrumentation autre que /usr/bin/time DECLASSE le verdict (jamais
-    # decision_complete).
-    instrumentation_standard = bool(TIME_BINS) and set(TIME_BINS) == {"/usr/bin/time"}
+    # INSTRUMENTATION EPINGLEE (huitieme tour, TOTALITE au dixieme) : GNU
+    # time enveloppe le superviseur — un TIME_BIN de test invente RSS et
+    # attestations. Un time_bin par run annonce, tous /usr/bin/time, sinon
+    # le verdict est DECLASSE (jamais decision_complete).
+    instrumentation_standard = (len(TIME_BINS) == len(known)
+                                and set(TIME_BINS) == {"/usr/bin/time"})
     # L'IDENTITE du canon est dans sa grammaire (PROFIL_NOM) : un canon reduit
     # renomme ne peut pas porter une pretention decision_v1.
     canon_is_decision = canon_axes.get("PROFIL_NOM", "") == "decision_v1"

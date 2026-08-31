@@ -93,10 +93,10 @@ DESCRIBE_TIMEOUT_S="${DESCRIBE_TIMEOUT_S:-60}"
 VALIDATOR_TIMEOUT_S="${VALIDATOR_TIMEOUT_S:-300}"
 SCP_ATTEMPTS="${SCP_ATTEMPTS:-1}"
 STOP_RESERVE_S="${STOP_RESERVE_S:-900}"
-# Marge de rapatriement ALIGNEE (sixieme tour) : echeance de campagne a
-# MAX-2700 ; l'enveloppe distante peut depasser de 300 s ; le scp (900 s par
-# tentative, garde d'echeance) doit FINIR avant MAX-600 = l'arret invite
-# (470 min) ; les 600 dernieres secondes sont pour validation + arret.
+# Enveloppes DERIVEES (neuvieme tour) : echeance du runner = cutoff effectif
+# (min borne GCE / arret invite) moins le budget post-campagne — UNE
+# tentative scp a backoff, describes bornes et DEUX reserves d'arret ; la
+# validation est locale et HORS budget VM (elle court apres l'arret).
 SSH_STEP_TIMEOUT_S="${SSH_STEP_TIMEOUT_S:-3600}"
 SCP_STEP_TIMEOUT_S="${SCP_STEP_TIMEOUT_S:-900}"
 # VALIDATION CONJOINTE des parametres temporels AVANT toute commande GCP
@@ -520,8 +520,20 @@ PYEPOCH
     log_safe "tentatives d'arret epuisees (${STOP_TRIES}) : aucune troisieme tentative du cleanup"
     stop_rc="${LAST_STOP_RC}"
   else
+    # SORTIES PRE-SCP (dixieme tour) : la seconde reserve d'arret existe
+    # pour l'echec TRANSITOIRE — le cleanup boucle jusqu'a DEUX appels
+    # totaux ; si la garde de demarrage a deja consomme son arret interne
+    # (etat targeted_stop_failed a l'entree), UNE seule reprise maintient
+    # la borne de deux appels.
+    local cleanup_allowance=2
+    if [ "${lc_state}" = "targeted_stop_failed" ]; then cleanup_allowance=1; fi
     attempt_targeted_stop
     stop_rc="${LAST_STOP_RC}"
+    if [ "${stop_rc}" -ne 0 ] && [ "${cleanup_allowance}" -ge 2 ] && [ "${STOP_TRIES}" -lt 2 ]; then
+      log_safe "premier arret du cleanup en echec (rc=${stop_rc}) : seconde reserve employee"
+      attempt_targeted_stop
+      stop_rc="${LAST_STOP_RC}"
+    fi
   fi
   log_safe "stop_and_verify (generation ${GENERATION}) : rc=${stop_rc}"
   echo "journal complet : ${LOG}"
@@ -807,6 +819,11 @@ fi
 BOOT_ID="$(/usr/bin/timeout -k "${GRACE_S}" "${SCP_STEP_TIMEOUT_S}" "${SSH[@]}" 'cat /proc/sys/kernel/random/boot_id' 2>>"${LOG}")" \
   || { log "REFUS : handshake boot_id impossible"; SESSION_RC=75; exit 75; }
 [[ "${BOOT_ID}" =~ ^[0-9a-f-]{36}$ ]] || { log "REFUS : boot_id mal forme (${BOOT_ID})"; SESSION_RC=75; exit 75; }
+if too_late "${DESCRIBE_TIMEOUT_S}"; then
+  log "REFUS : echeance atteinte apres le handshake — arret direct"
+  SESSION_RC=77
+  exit 77
+fi
 check_generation || { log "REFUS : generation changee pendant le handshake"; SESSION_RC=74; exit 74; }
 log "handshake : boot_id=${BOOT_ID} generation confirmee"
 
@@ -819,6 +836,11 @@ if too_late "${SCP_STEP_TIMEOUT_S}"; then
 fi
 /usr/bin/timeout -k "${GRACE_S}" "${SCP_STEP_TIMEOUT_S}" "${SCP[@]}" "${BUNDLE}" \
   "${GCP_INSTANCE_NAME}:${REMOTE_BUNDLE}.recu" 2>&1 | tee -a "${LOG}"
+if too_late "${DESCRIBE_TIMEOUT_S}"; then
+  log "REFUS : echeance atteinte apres l'envoi du bundle — arret direct"
+  SESSION_RC=77
+  exit 77
+fi
 check_generation || { log "REFUS : generation changee apres l'envoi du bundle"; SESSION_RC=74; exit 74; }
 
 # ---- 5. Build v5 + v6, preconditions, REJEU des portes avec JOURNAL COMPLET
@@ -863,19 +885,32 @@ log "portes VM : v5=${GATE_TOTALS[0]} v6=${GATE_TOTALS[1]} (journaux complets da
 
 # ---- 6. LA CAMPAGNE. Generation recontrolee, boot_id verifie DANS la meme
 # commande distante avant toute execution ; retour CAPTURE sans trap.
-check_generation || { log "REFUS : generation changee avant la campagne"; SESSION_RC=74; exit 74; }
-REMOTE_CAMPAIGN_RC=0
+# Le describe PRE-CAMPAGNE est clampe LUI AUSSI (neuvieme tour : sans ce
+# clamp il pouvait depenser la seconde reserve d'arret) — trop tard ici =
+# campagne ET rapatriement non lances, arret direct par le chemin nominal.
+CAMPAIGN_SKIPPED=0
+if too_late "${DESCRIBE_TIMEOUT_S}"; then
+  log "REFUS : echeance atteinte avant le controle pre-campagne — campagne non lancee ; rapatriement et arret restent dans leur budget"
+  SESSION_RC=77
+  CAMPAIGN_SKIPPED=1
+  REMOTE_CAMPAIGN_RC=75
+else
+  check_generation || { log "REFUS : generation changee avant la campagne"; SESSION_RC=74; exit 74; }
+  REMOTE_CAMPAIGN_RC=0
+fi
 # Enveloppe SANS depassement (septieme tour) : `now` lu UNE fois, la fin
 # possible (grace comprise) est <= DEADLINE+60 (60 s = ecriture du manifeste
 # distant apres le dernier run tronque par past_deadline). Si le reste est
 # sous le minimum sur : NE PAS LANCER — jamais remonter le temps restant.
-_now=$(date +%s)
-CAMPAIGN_TIMEOUT=$(( DEADLINE_EPOCH + 60 - _now - GRACE_S ))
-CAMPAIGN_SKIPPED=0
-if [ "${CAMPAIGN_TIMEOUT}" -lt 60 ]; then
-  log "campagne NON LANCEE : temps restant insuffisant (${CAMPAIGN_TIMEOUT}s < 60s apres grace) — passage direct au rapatriement puis a l'arret"
-  CAMPAIGN_SKIPPED=1
-  REMOTE_CAMPAIGN_RC=75
+CAMPAIGN_TIMEOUT=60
+if [ "${CAMPAIGN_SKIPPED:-0}" -eq 0 ]; then
+  _now=$(/usr/bin/date +%s)
+  CAMPAIGN_TIMEOUT=$(( DEADLINE_EPOCH + 60 - _now - GRACE_S ))
+  if [ "${CAMPAIGN_TIMEOUT}" -lt 60 ]; then
+    log "campagne NON LANCEE : temps restant insuffisant (${CAMPAIGN_TIMEOUT}s < 60s apres grace) — passage direct au rapatriement puis a l'arret"
+    CAMPAIGN_SKIPPED=1
+    REMOTE_CAMPAIGN_RC=75
+  fi
 fi
 set +e
 if [ "${CAMPAIGN_SKIPPED}" -eq 0 ]; then
@@ -883,6 +918,7 @@ if [ "${CAMPAIGN_SKIPPED}" -eq 0 ]; then
   test \"\$(cat /proc/sys/kernel/random/boot_id)\" = '${BOOT_ID}' || { echo 'REFUS : boot_id different (redemarrage detecte)' >&2; exit 9; }
   export PATH=\$HOME/.local/bin:\$PATH
   cd ~/${REMOTE_DIR}
+  TIME_BIN=/usr/bin/time \
   THREADS=${THREADS_VM} DEADLINE_EPOCH=${DEADLINE_EPOCH} RUN_TIMEOUT='${RUN_TIMEOUT}' \
     CONF_SPECS='${CONF_SPECS}' \
     BENCH_SPECS='${BENCH_SPECS}' \
@@ -901,14 +937,18 @@ printf 'remote_campaign_rc=%d\n' "${REMOTE_CAMPAIGN_RC}" | tee -a "${LOG}"
 # ---- 7. RAPATRIEMENT TOUJOURS, reprises bornees, generation controlee.
 mkdir -p "${WORK}/out"
 SCP_RC=1
-# Chaque tentative reserve son PIRE CAS : timeout scp + grace + describes
-# bornes autour + validateur borne + arret cible — le tout avant le CUTOFF
+# Chaque tentative reserve son PIRE CAS : timeout scp + grace + backoff +
+# describes bornes autour + DEUX reserves d'arret — le tout avant le CUTOFF
 # EFFECTIF (min borne GCE / arret invite), `now` lu une fois par tentative.
+# scp_worst_case_s est FACTORISE pour etre teste a la frontiere d'une
+# seconde par le selftest (dixieme tour : le coefficient 2 doit etre causal).
+scp_worst_case_s() { # $1 = numero de tentative
+  echo $(( SCP_STEP_TIMEOUT_S + GRACE_S + 5 * $1 + 2 * (DESCRIBE_TIMEOUT_S + GRACE_S) + 2 * STOP_RESERVE_S ))
+}
 SCP_CUTOFF=$((GEN_EPOCH + EFFECTIVE_CUTOFF_S))
 for attempt in $(seq 1 "${SCP_ATTEMPTS}"); do
   _now=$(date +%s)
-  if [ "$(( _now + SCP_STEP_TIMEOUT_S + GRACE_S + 2 * (DESCRIBE_TIMEOUT_S + GRACE_S) \
-           + STOP_RESERVE_S ))" -gt "${SCP_CUTOFF}" ]; then
+  if [ "$(( _now + $(scp_worst_case_s "${attempt}") ))" -gt "${SCP_CUTOFF}" ]; then
     log "rapatriement abandonne avant la tentative ${attempt} : le pire cas deborderait sur le cutoff effectif (${SCP_CUTOFF})"
     break
   fi
@@ -964,6 +1004,8 @@ set +e
   "${REMOTE_CAMPAIGN_RC}" "${SCP_RC}" "${PROFILE}" "${PROFILE_SRC}" "${WORK}/manifest_revalide.txt" 2>&1 | tee "${WORK}/validation.txt" | tee -a "${LOG}"
 VALIDATE_RC=${PIPESTATUS[0]}
 set -e
-if [ "${VALIDATE_RC}" -ne 0 ]; then SESSION_RC=65; fi
+# Le validateur ne DEGRADE jamais un refus anterieur (checkpoint dixieme
+# tour : 65 ecrasait le 77 du refus pre-campagne).
+if [ "${VALIDATE_RC}" -ne 0 ] && [ "${SESSION_RC}" -eq 0 ]; then SESSION_RC=65; fi
 
 echo "session terminee ; l arret certifie est declenche par le trap"

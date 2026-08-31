@@ -638,7 +638,7 @@ rc=0
   # shellcheck disable=SC1090
   source "${G4_AXES}"
   V5_BIN="${FAKE}/mhgp5" V6_BIN="${FAKE}/mhgp6" CONF_BIN="${FAKE}/mhgp6_conformity"
-  TIME_BIN="${FAKE}/gnutime" OUT_DIR="${OUTG4}"
+  TIME_BIN="/usr/bin/time" OUT_DIR="${OUTG4}"
   NVCC_BIN="${FAKE}/nvcc" GPU_CMAKE_BIN="${FAKE}/cmake"
   GPU_WITNESS_BIN="${FAKE}/mhgp5_device_witness"
   GPU_Q3_GATE="${FAKE}/mhgp5_q3_lane_device_gate" GPU_Q4_GATE="${FAKE}/mhgp5_q4_lane_device_gate"
@@ -720,6 +720,66 @@ rc=0; VDEC="$(python3 "${VALIDATOR}" "${OUTDEC}" "${PIN_COMMIT}" "${PIN_PAYLOAD}
 check_true "mutant decision_v1 + faux TIME_BIN : DECLASSE (instrumentation de test), jamais decision_complete" \
   bash -c "[ '${rc}' -eq 0 ] && printf '%s\n' \"\$1\" | grep -q 'cause=instrumentation de test' \
     && ! printf '%s\n' \"\$1\" | grep -q 'decision_complete'" _ "${VDEC}"
+
+# ---- MUTANT g4 + FAUX TIME_BIN (dixieme tour) : le profil de MESURE ne
+# publie JAMAIS les RSS d'un faux instrument — invalide, pas declasse.
+OUTG4F="${WORK}/out_g4_faux"
+rc=0
+(
+  set -a
+  # shellcheck disable=SC1090
+  source "${G4_AXES}"
+  V5_BIN="${FAKE}/mhgp5" V6_BIN="${FAKE}/mhgp6" CONF_BIN="${FAKE}/mhgp6_conformity"
+  TIME_BIN="${FAKE}/gnutime" OUT_DIR="${OUTG4F}"
+  NVCC_BIN="${FAKE}/nvcc" GPU_CMAKE_BIN="${FAKE}/cmake"
+  GPU_WITNESS_BIN="${FAKE}/mhgp5_device_witness"
+  GPU_Q3_GATE="${FAKE}/mhgp5_q3_lane_device_gate" GPU_Q4_GATE="${FAKE}/mhgp5_q4_lane_device_gate"
+  GPU_BIN="${FAKE}/mhgp5_cuda" V5CPU_BIN="${FAKE}/mhgp5"
+  PATH="${FAKE}:${PATH}"
+  /bin/bash "${RUNNER}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_G4}"
+) >/dev/null 2>&1 || rc=$?
+check_true "mutant g4 + faux TIME_BIN : runner rc=0" [ "${rc}" -eq 0 ]
+rc=0; VG4F="$(python3 "${VALIDATOR}" "${OUTG4F}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_G4}" 0 0 \
+  "${PROFILE_G4}" "${G4ENV}" "${MANIFESTE_G4}" 2>&1)" || rc=$?
+check_true "mutant g4 + faux TIME_BIN : validateur rc=1, mesures invalides et non recevables" \
+  bash -c "[ \"\$2\" -eq 1 ] && printf '%s\n' \"\$1\" | grep -q 'instrumentation NON STANDARD'" _ "${VG4F}" "${rc}"
+
+# ---- TEMOIN POSITIF APPARIE (neuvieme tour) : decision_v1 + /usr/bin/time
+# REEL => decision_complete reste atteignable (le mutant negatif prouve le
+# declassement, pas l'atteignabilite). Conditionne a la presence de GNU
+# time — son absence est bruyante, jamais un vert par vacuite.
+if [ -x /usr/bin/time ]; then
+  OUTDECP="${WORK}/out_dec_positif"
+  rc=0
+  (
+    set -a
+    # shellcheck disable=SC1090
+    source "${DEC_AXES}"
+    V5_BIN="${FAKE}/mhgp5" V6_BIN="${FAKE}/mhgp6" CONF_BIN="${FAKE}/mhgp6_conformity"
+    TIME_BIN="/usr/bin/time" OUT_DIR="${OUTDECP}"
+    PATH="${FAKE}:${PATH}"
+    /bin/bash "${RUNNER}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_DEC}"
+  ) >/dev/null 2>&1 || rc=$?
+  check_true "temoin positif : decision_v1 + /usr/bin/time reel, runner rc=0" [ "${rc}" -eq 0 ]
+  rc=0; VDECP="$(python3 "${VALIDATOR}" "${OUTDECP}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_DEC}" 0 0 \
+    "${PROFILE_DEC}" "${DECENV}" "${MANIFESTE_DEC}")" || rc=$?
+  check_true "temoin positif : decision_complete ATTEIGNABLE sous instrumentation canonique" \
+    bash -c "[ '${rc}' -eq 0 ] && printf '%s\n' \"\$1\" | grep -q 'campaign_status=decision_complete'" _ "${VDECP}"
+  # time_bin VIDE sur UN statut du temoin positif : la totalite le tue.
+  DVIDE="${WORK}/out_dec_vide"
+  rm -rf "${DVIDE}"; cp -r "${OUTDECP}" "${DVIDE}"
+  onest=$(ls "${DVIDE}"/*.status | head -1)
+  sed -i 's|^time_bin=.*|time_bin=|' "${onest}"
+  rehash_manifeste "${DVIDE}"
+  rc=0; VVIDE="$(python3 "${VALIDATOR}" "${DVIDE}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_DEC}" 0 0 \
+    "${PROFILE_DEC}" "${DECENV}" "${MANIFESTE_DEC}" 2>&1)" || rc=$?
+  check_true "mutant time_bin VIDE : refuse (jamais decision_complete par 81/82)" \
+    bash -c "[ '${rc}' -eq 1 ] && printf '%s\n' \"\$1\" | grep -q 'time_bin VIDE' \
+      && ! printf '%s\n' \"\$1\" | grep -q 'decision_complete'" _ "${VVIDE}"
+else
+  echo "ECHEC selftest : temoin positif IMPOSSIBLE — GNU time absent (/usr/bin/time requis)"
+  FAILURES=$((FAILURES + 1))
+fi
 
 if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest campagne v6 : ${FAILURES} echec(s)" >&2
