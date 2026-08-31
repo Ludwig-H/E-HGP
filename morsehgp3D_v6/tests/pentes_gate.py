@@ -61,12 +61,19 @@ def build_campaign(root: Path) -> None:
     out = root / "out"
     out.mkdir(parents=True)
     (root / "bin").mkdir()
+    (root / "protocole").mkdir()
     binary = b"#!/bin/sh\nexit 0\n"
     (root / "bin" / "mhgp6").write_bytes(binary)
     bin_sha = sha256_bytes(binary)
     profile = f"profil=porte_synthetique\nfamilles={FAM}\nn=8000 16000 32000\ngraines=3 4 5\n"
     (root / "PROFIL.txt").write_text(profile)
     (root / "PROFIL_AUTORITE.txt").write_text(profile)
+    # Copies EXACTES du protocole (liaison par pentes.py : le validateur qui
+    # tourne doit etre la copie archivee).
+    import shutil as _sh
+    _sh.copy(HERE.parent / "bench" / "campagne_locale.sh", root / "protocole" / "campagne_locale.sh")
+    _sh.copy(HERE.parent / "bench" / "pentes.py", root / "protocole" / "pentes.py")
+    _sh.copy(HERE.parent / "bench" / "agregateur.py", root / "protocole" / "agregateur.py")
     status_lines, hash_lines, out_hash_lines = [], [], []
     for n in SIZES:
         for seed in SEEDS:
@@ -83,6 +90,10 @@ def build_campaign(root: Path) -> None:
     (root / "META.txt").write_text(
         "recu=campagne synthetique de porte\npin=0000000000000000000000000000000000000000\n"
         f"sha256_binaire_prive={bin_sha}\n"
+        f"autorite_profil=PROFIL.txt sha256={sha256_bytes(profile.encode())}\n"
+        f"sha256_lanceur={sha256_bytes((root / 'protocole' / 'campagne_locale.sh').read_bytes())}\n"
+        f"sha256_validateur={sha256_bytes((root / 'protocole' / 'pentes.py').read_bytes())}\n"
+        f"sha256_agregateur={sha256_bytes((root / 'protocole' / 'agregateur.py').read_bytes())}\n"
         "commande=bin/mhgp6 --family=<fam> --n=<n>\n"
         f"familles={FAM} ; n=8000 16000 32000 ; graines=3 4 5\n"
         + "\n".join(out_hash_lines) + "\n")
@@ -207,6 +218,25 @@ def main() -> int:
         falsify("STATUT_TERMINAL present (campagne invalidee)",
                 lambda r: (r / "STATUT_TERMINAL.txt").write_text("statut_terminal=invalide"))
 
+        falsify("copie archivee du validateur alteree",
+                lambda r: (r / "protocole" / "pentes.py").write_text(
+                    (r / "protocole" / "pentes.py").read_text() + "# altere\n"))
+        falsify("hash du profil d'autorite discordant au META",
+                lambda r: (r / "META.txt").write_text(re.sub(
+                    r"^autorite_profil=PROFIL.txt sha256=[0-9a-f]{64}$",
+                    "autorite_profil=PROFIL.txt sha256=" + "e" * 64,
+                    (r / "META.txt").read_text(), flags=re.M)))
+        falsify("ligne de hash de sortie EN TROP au META",
+                lambda r: (r / "META.txt").write_text(
+                    (r / "META.txt").read_text() + "f" * 64 + "  out/fantome.txt\n"))
+        falsify("ligne de hash de sortie DUPLIQUEE au META",
+                lambda r: (r / "META.txt").write_text(
+                    (r / "META.txt").read_text()
+                    + re.search(r"^[0-9a-f]{64}  out/\S+$", (r / "META.txt").read_text(), re.M).group(0) + "\n"))
+        falsify("pin non hexadecimal",
+                lambda r: (r / "META.txt").write_text(
+                    (r / "META.txt").read_text().replace("pin=0000000000000000000000000000000000000000", "pin=hors_depot")))
+
         # Zero legitime sur un compteur REELLEMENT parse (audit du cinquieme
         # cycle : l'ancien cas portait sur seeds_cellules, absent de la liste,
         # et ne verifiait pas le `-`) : racines_hors_corde mis a zero sur les
@@ -226,7 +256,7 @@ def main() -> int:
 
     if failures:
         return 1
-    print("pentes_gate : validateur fail-closed conforme (nominal + 31 falsifications dont provenance + zero legitime avec `-`)")
+    print("pentes_gate : validateur fail-closed conforme (nominal + 36 falsifications dont provenance et liaison du protocole + zero legitime avec `-`)")
     return 0
 
 

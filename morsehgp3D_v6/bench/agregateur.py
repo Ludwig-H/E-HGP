@@ -47,8 +47,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PENTES = HERE / "pentes.py"
-SIZES = [8000, 16000, 32000]
-SEEDS = [3, 4, 5]
+# La matrice (tailles, graines) vient du profil d'autorite, comme pour
+# pentes.py (profil de confirmation hors echantillon a tailles decalees).
 STATIONARY = ("terrain_stationnaire", "scanline_stationnaire")
 GUARDED = ("uniform", "eight_clusters")
 OCTAVE_LOURDE_MIN = 10  # hypothese derivee de la premiere capture, figee ici
@@ -82,7 +82,10 @@ def main() -> int:
     pentes = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(pentes)
 
-    families = re.search(r"^familles=(.+)$", authority.read_text(), re.M).group(1).split()
+    atext = authority.read_text()
+    families = re.search(r"^familles=(.+)$", atext, re.M).group(1).split()
+    sizes = [int(x) for x in re.search(r"^n=(.+)$", atext, re.M).group(1).split()]
+    seeds = [int(x) for x in re.search(r"^graines=(.+)$", atext, re.M).group(1).split()]
 
     def counters_of(fam: str, n: int, seed: int) -> dict:
         text = (out_dir / f"{fam}_{n}_s{seed}.txt").read_text()
@@ -103,7 +106,7 @@ def main() -> int:
     ]
     verdicts = []
     for fam in families:
-        data = {(n, s): counters_of(fam, n, s) for n in SIZES for s in SEEDS}
+        data = {(n, s): counters_of(fam, n, s) for n in sizes for s in seeds}
         lines.append(f"== {fam}")
         med_by_term = {}
         emergences = []
@@ -111,8 +114,8 @@ def main() -> int:
             slopes2 = []
             emergence = False
             rows = []
-            for s in SEEDS:
-                v = [data[(n, s)][term] for n in SIZES]
+            for s in seeds:
+                v = [data[(n, s)][term] for n in sizes]
                 s1 = math.log2(v[1] / v[0]) if v[0] > 0 and v[1] > 0 else None
                 s2 = math.log2(v[2] / v[1]) if v[1] > 0 and v[2] > 0 else None
                 if v[1] == 0 and v[2] > 0:

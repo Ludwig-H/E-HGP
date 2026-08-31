@@ -112,13 +112,25 @@ def main() -> int:
               (out1 / "PROFIL.txt").read_text() == PROFILE_1x1x2)
         check("nominal : copie privee non modifiable",
               not os.access(out1 / "bin" / "mhgp6", os.W_OK))
+        check("nominal : protocole archive (lanceur, validateur, agregateur)",
+              all((out1 / "protocole" / f).is_file()
+                  for f in ("campagne_locale.sh", "pentes.py", "agregateur.py")))
+        check("nominal : publication atomique (plus de .partial)",
+              not Path(str(out1) + ".partial").exists())
+
+        # Dossier preexistant : refus (un reçu ne s'ecrit jamais en place).
+        rc0 = run_launcher(out1, src, profile)
+        check("dossier preexistant : refus rc=2", rc0 == 2, f"rc={rc0}")
 
         # 2. Auto-alteration de la copie privee : INVALID sans DONE.
         src2 = base / "faux_tamper"
         write_exec(src2, FAKE_TAMPER)
         out2 = base / "tamper"
         rc2 = run_launcher(out2, src2, profile)
-        status2 = (out2 / "STATUS.txt").read_text().splitlines()
+        # une campagne INVALIDE n'est JAMAIS publiee : elle reste en .partial
+        part2 = Path(str(out2) + ".partial")
+        check("copie alteree : jamais publiee (reste en .partial)", not out2.exists() and part2.exists())
+        status2 = (part2 / "STATUS.txt").read_text().splitlines()
         check("copie alteree : rc=3", rc2 == 3, f"rc={rc2}")
         check("copie alteree : marqueur INVALID hash apres",
               any(line.startswith("INVALID hash apres") for line in status2))

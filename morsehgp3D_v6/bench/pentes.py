@@ -24,8 +24,10 @@ import re
 import sys
 from pathlib import Path
 
-SIZES = [8000, 16000, 32000]
-SEEDS = [3, 4, 5]
+# La matrice (familles, tailles, graines) vient du PROFIL D'AUTORITE — plus
+# aucune constante d'analyse (audit : profil de confirmation hors
+# echantillon a tailles decalees). Structure exigee : exactement trois
+# tailles en DOUBLEMENT (n1 = 2 n0, n2 = 2 n1) et trois graines distinctes.
 EXPECTED_S = 8
 EXPECTED_SMAX = 11
 EXPECTED_THREADS = 8
@@ -151,8 +153,10 @@ def main() -> int:
         seeds = [int(x) for x in asd.group(1).split()]
     except ValueError:
         return fail("entier invalide dans le profil d'autorite")
-    if sizes != SIZES or seeds != SEEDS:
-        return fail("matrice du profil differente de celle de l'analyse")
+    if len(sizes) != 3 or sizes[1] != 2 * sizes[0] or sizes[2] != 2 * sizes[1] or sizes[0] < 2:
+        return fail("tailles du profil sans structure de doublement (n, 2n, 4n exiges)")
+    if len(seeds) != 3 or len(set(seeds)) != 3:
+        return fail("graines du profil non distinctes ou pas au nombre de trois")
     copied = root / "PROFIL.txt"
     if not copied.is_file() or copied.is_symlink():
         return fail("PROFIL.txt absent de la campagne (autorite non gravee) ou lien symbolique")
@@ -177,6 +181,29 @@ def main() -> int:
         return fail("binaire prive bin/mhgp6 absent ou lien symbolique")
     if sha256_file(binary) != mbin.group(1):
         return fail("le binaire prive ne correspond pas au sha256 du META")
+    # LIAISON du protocole (audit : enregistrer n'est pas lier) : les copies
+    # EXACTES archivees dans protocole/ doivent porter les hashes du META, le
+    # validateur QUI TOURNE doit etre celui archive, le hash du profil
+    # d'autorite doit egaler celui du META, et le pin est un commit 40-hex.
+    for meta_key, fname in (("sha256_lanceur", "campagne_locale.sh"),
+                            ("sha256_validateur", "pentes.py"),
+                            ("sha256_agregateur", "agregateur.py")):
+        mh = re.search(rf"^{meta_key}=([0-9a-f]{{64}})$", mtext, re.M)
+        if not mh:
+            return fail(f"{meta_key} absent ou non hexadecimal au META")
+        archived = root / "protocole" / fname
+        if not archived.is_file() or archived.is_symlink():
+            return fail(f"copie archivee protocole/{fname} absente ou lien symbolique")
+        if sha256_file(archived) != mh.group(1):
+            return fail(f"protocole/{fname} ne porte pas le hash {meta_key} du META")
+    if sha256_file(Path(__file__).resolve()) != sha256_file(root / "protocole" / "pentes.py"):
+        return fail("le validateur qui tourne n'est pas la copie archivee (rejouer via protocole/pentes.py)")
+    mprof = re.search(r"^autorite_profil=PROFIL.txt sha256=([0-9a-f]{64})$", mtext, re.M)
+    if not mprof or sha256_file(authority) != mprof.group(1):
+        return fail("le hash du profil d'autorite ne recoupe pas le META")
+    mpin = re.search(r"^pin=([0-9a-f]{40})$", mtext, re.M)
+    if not mpin:
+        return fail("pin absent ou non hexadecimal (40 hex exiges)")
     expected = {(f, n, s) for f in families for n in sizes for s in seeds}
     hashes_file = root / "HASHES.txt"
     if not hashes_file.is_file() or hashes_file.is_symlink():
@@ -234,7 +261,12 @@ def main() -> int:
     for name in want_errs:
         if (out_dir / name).stat().st_size > 0:
             return fail(f"stderr non vide : {name}")
-    # Hashes des sorties : chaque out/<nom>.txt du META recoupe par recalcul.
+    # Hashes des sorties : ensemble EXACT du META (ni doublon ni ligne en
+    # trop), chaque hash recoupe par recalcul.
+    hash_lines = re.findall(r"^[0-9a-f]{64}  (\S+)$", mtext, re.M)
+    want_hash_names = sorted(f"out/{f}_{n}_s{s}.txt" for (f, n, s) in expected)
+    if sorted(hash_lines) != want_hash_names:
+        return fail("lignes de hash de sorties du META != matrice (doublon, manquant ou en trop)")
     for (f, n, s) in sorted(expected):
         name = f"{f}_{n}_s{s}.txt"
         m = re.search(rf"^([0-9a-f]{{64}})  out/{re.escape(name)}$", mtext, re.M)
@@ -288,12 +320,12 @@ def main() -> int:
     # Tables : bufferisees, imprimees seulement apres validation complete.
     out: list[str] = []
     for fam in families:
-        out.append(f"== {fam} — pentes sécantes 8000→16000 | 16000→32000 (graines {SEEDS})")
+        out.append(f"== {fam} — pentes sécantes {sizes[0]}→{sizes[1]} | {sizes[1]}→{sizes[2]} (graines {seeds})")
         out.append(f"{'compteur':24s} {'pas1 (par graine)':26s} {'pas2 (par graine)':26s} {'étendues p1|p2':12s}")
         for cname, _ in PATTERNS:
             rows1, rows2 = [], []
-            for seed in SEEDS:
-                v = [data[fam][(n, seed)][cname] for n in SIZES]
+            for seed in seeds:
+                v = [data[fam][(n, seed)][cname] for n in sizes]
                 rows1.append(math.log2(v[1] / v[0]) if v[0] > 0 and v[1] > 0 else None)
                 rows2.append(math.log2(v[2] / v[1]) if v[1] > 0 and v[2] > 0 else None)
             fmt = lambda rows: "/".join("  -  " if r is None else f"{r:5.2f}" for r in rows)

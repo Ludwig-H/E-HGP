@@ -1,0 +1,4 @@
+profil=locale_confirmation_v1
+familles=terrain_stationnaire scanline_stationnaire uniform eight_clusters
+n=10000 20000 40000
+graines=6 7 8
