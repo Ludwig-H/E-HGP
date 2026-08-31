@@ -20,8 +20,13 @@ campaign_status — jamais le lanceur, jamais la VM. `complete` exige :
 Il ecrit bench_resume.txt et queue_resume.txt (murs / RSS — completude et
 dispersion, JAMAIS une conclusion d'acceleration ni de pente).
 
+Le PROFIL DE CAMPAGNE (7e argument, obligatoire — audit GCP v6, P1) est le
+fichier ecrit par le cycle de vie AVANT la campagne : la matrice attendue en
+vient, jamais des axes declares par le runner lui-meme. Les plans annonces
+doivent EGALER le profil (une matrice reduite n'est jamais `complete`).
+
 Usage : validate_v6_campaign.py OUT_DIR SOURCE_COMMIT SOURCE_PAYLOAD_SHA256 \\
-        PROTOCOL_MANIFEST_SHA256 REMOTE_CAMPAIGN_RC SCP_RC
+        PROTOCOL_MANIFEST_SHA256 REMOTE_CAMPAIGN_RC SCP_RC PROFIL_CAMPAGNE
 Sortie : 0 si complete, 1 sinon (les preuves partielles restent sur place).
 """
 import os
@@ -67,7 +72,7 @@ def read_text(path):
         return fh.read()
 
 
-def read_plan(out, fname, version_key, param_keys, bad):
+def read_plan(out, fname, version_key, param_keys, bad, version="v1"):
     """Lit un plan annonce : parametres complets + lignes seq. Retourne
     (params, listed) ou (None, []) si invalide. L'ABSENCE d'un plan est une
     faute (les plans sont annonces avant le premier run)."""
@@ -82,7 +87,7 @@ def read_plan(out, fname, version_key, param_keys, bad):
         elif "=" in line:
             k, v = line.split("=", 1)
             params[k] = v
-    if params.get(version_key) != "v1":
+    if params.get(version_key) != version:
         bad.append(f"{fname}: version de plan inconnue")
         return None, []
     for key in param_keys + ("runs",):
@@ -94,11 +99,12 @@ def read_plan(out, fname, version_key, param_keys, bad):
 
 def conf_sequence(params):
     seq = []
-    for fam in params["families"].split():
-        seq.append({"seq": str(len(seq) + 1), "name": f"v5ref_{fam}_n{params['n']}",
-                    "family": fam, "kind": "v5ref"})
-        seq.append({"seq": str(len(seq) + 1), "name": f"conf_{fam}_n{params['n']}",
-                    "family": fam, "kind": "conf"})
+    for spec in params["specs"].split():
+        fam, n = spec.split(":", 1)
+        seq.append({"seq": str(len(seq) + 1), "name": f"v5ref_{fam}_n{n}",
+                    "family": fam, "n": n, "kind": "v5ref"})
+        seq.append({"seq": str(len(seq) + 1), "name": f"conf_{fam}_n{n}",
+                    "family": fam, "n": n, "kind": "conf"})
     return seq
 
 
@@ -139,33 +145,48 @@ def check_plan(fname, params, listed, want, bad):
 
 def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad):
     """Verifications communes a tout run annonce. Retourne le corps .txt (ou
-    None), le statut (ou None) et (mur_ms, duree_s, rss_kb)."""
+    None), le statut (ou None) et (mur_ms, duree_s, rss_kb). Chaque champ du
+    statut est exige EXACTEMENT une fois, et le pic RSS est recoupe avec la
+    sortie complete de GNU time (audit GCP v6, P1)."""
     status = os.path.join(out, name + ".status")
     txt = os.path.join(out, name + ".txt")
     if not os.path.exists(status):
         bad.append(f"{name}: .status ABSENT (run annonce non execute)")
         return None, None, (None, None, None)
     st = read_text(status)
-    if "finished=1" not in st:
+    fields = {}
+    for field in ("code", "duree_s", "peak_rss_kb", "threads", "timing_scope", "commande",
+                  "source_commit", "source_payload_sha256", "protocol_manifest_sha256", "finished"):
+        ms = re.findall(rf"^{field}=(.*)$", st, re.M)
+        if len(ms) != 1:
+            bad.append(f"{name}: champ {field} absent ou duplique ({len(ms)}) dans le statut")
+            fields[field] = None
+        else:
+            fields[field] = ms[0]
+    if fields.get("finished") != "1":
         bad.append(f"{name}: status incomplet")
-    m = re.search(r"^code=(\d+)$", st, re.M)
-    if not m or m.group(1) != "0":
-        bad.append(f"{name}: code={m.group(1) if m else '?'} (attendu 0)")
-    kb = re.search(r"^peak_rss_kb=(\d+)$", st, re.M)
-    if not kb or int(kb.group(1)) <= 0:
+    if fields.get("code") != "0":
+        bad.append(f"{name}: code={fields.get('code') or '?'} (attendu 0)")
+    kb = fields.get("peak_rss_kb")
+    if not kb or not kb.isdigit() or int(kb) <= 0:
         bad.append(f"{name}: pic RSS absent ou nul")
-    th = re.search(r"^threads=(\d+)$", st, re.M)
-    if not th or th.group(1) != threads:
-        bad.append(f"{name}: threads={th.group(1) if th else '?'} != {threads} (plan)")
+        kb = None
+    if fields.get("threads") != threads:
+        bad.append(f"{name}: threads={fields.get('threads') or '?'} != {threads} (plan)")
     for field, want in (("source_commit", commit), ("source_payload_sha256", payload_sha),
                         ("protocol_manifest_sha256", manifest_sha)):
-        fm = re.search(rf"^{field}=(\S+)$", st, re.M)
-        if not fm or fm.group(1) != want:
+        if fields.get(field) != want:
             bad.append(f"{name}: {field} absent ou different du pin")
-    duree = re.search(r"^duree_s=(\d+)$", st, re.M)
+    duree = fields.get("duree_s")
     gtime = status + ".time"
-    if not os.path.exists(gtime) or "Maximum resident set size" not in read_text(gtime):
+    if not os.path.exists(gtime):
         bad.append(f"{name}: sortie complete de GNU time absente")
+    else:
+        tm = re.search(r"Maximum resident set size[^0-9]*(\d+)", read_text(gtime))
+        if not tm:
+            bad.append(f"{name}: pic RSS absent de la sortie GNU time")
+        elif kb is not None and tm.group(1) != kb:
+            bad.append(f"{name}: peak_rss_kb={kb} != GNU time ({tm.group(1)}) — statut non recoupe")
     if not os.path.exists(txt):
         bad.append(f"{name}: .txt ABSENT")
         return None, st, (None, None, None)
@@ -175,8 +196,8 @@ def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad):
         bad.append(f"{name}: motif interdit ({fb.group(0)})")
     mur = re.search(r"^temps_mur_ms=([0-9.]+)", body, re.M)
     return body, st, (float(mur.group(1)) if mur else None,
-                      int(duree.group(1)) if duree else None,
-                      int(kb.group(1)) if kb else None)
+                      int(duree) if duree and duree.isdigit() else None,
+                      int(kb) if kb else None)
 
 
 def check_pipeline_run(name, body, fam, n, seed, engine, threads, bad):
@@ -227,12 +248,28 @@ def median(xs):
 
 
 def main():
-    out, commit, payload_sha, manifest_sha, remote_rc, scp_rc = sys.argv[1:7]
+    if len(sys.argv) != 8:
+        print("usage: validate_v6_campaign.py OUT COMMIT PAYLOAD MANIFEST REMOTE_RC SCP_RC PROFIL", file=sys.stderr)
+        return 2
+    out, commit, payload_sha, manifest_sha, remote_rc, scp_rc, profile_path = sys.argv[1:8]
     bad = []
     if remote_rc != "0":
         bad.append(f"session distante : remote_campaign_rc={remote_rc}")
     if scp_rc != "0":
         bad.append(f"rapatriement : scp_rc={scp_rc}")
+    # PROFIL EPINGLE : la matrice attendue vient de lui, jamais du runner.
+    profile = {}
+    if not os.path.exists(profile_path):
+        bad.append("profil de campagne ABSENT (matrice non epinglee)")
+    else:
+        for line in read_text(profile_path).splitlines():
+            if "=" in line:
+                k, v = line.split("=", 1)
+                profile[k] = v
+        for key in ("profil", "conf_specs", "bench_families", "bench_n",
+                    "queue_families", "queue_n", "queue_seeds", "threads"):
+            if not profile.get(key, "").strip():
+                bad.append(f"profil de campagne : cle {key} absente")
     for tf in ("conf_tronquee.txt", "bench_tronquee.txt", "queue_tronquee.txt"):
         p = os.path.join(out, tf)
         if os.path.exists(p):
@@ -246,7 +283,7 @@ def main():
             bad.append("topologie.txt: nproc ou lscpu absent")
 
     conf_params, conf_listed = read_plan(out, "conf_plan.txt", "conf_plan",
-                                         ("families", "n", "threads"), bad)
+                                         ("specs", "threads"), bad, version="v2")
     bench_params, bench_listed = read_plan(out, "bench_plan.txt", "bench_plan",
                                            ("families", "n_list", "threads"), bad)
     queue_params, queue_listed = read_plan(out, "queue_plan.txt", "queue_plan",
@@ -257,8 +294,22 @@ def main():
     check_plan("conf_plan.txt", conf_params, conf_listed, conf_runs, bad)
     check_plan("bench_plan.txt", bench_params, bench_listed, bench_runs, bad)
     check_plan("queue_plan.txt", queue_params, queue_listed, queue_runs, bad)
+    # Les plans annonces doivent EGALER le profil epingle (matrice fixee
+    # independamment des sorties jugees).
+    if profile:
+        for plan, params, checks in (
+                ("conf_plan.txt", conf_params, (("specs", "conf_specs"), ("threads", "threads"))),
+                ("bench_plan.txt", bench_params, (("families", "bench_families"), ("n_list", "bench_n"),
+                                                  ("threads", "threads"))),
+                ("queue_plan.txt", queue_params, (("families", "queue_families"), ("n_list", "queue_n"),
+                                                  ("seeds", "queue_seeds"), ("threads", "threads")))):
+            if params is None:
+                continue
+            for plan_key, prof_key in checks:
+                if params.get(plan_key, "").split() != profile.get(prof_key, "").split():
+                    bad.append(f"{plan}: {plan_key} != profil epingle ({prof_key})")
 
-    # PHASE 1 — conformite.
+    # PHASE 1 — conformite (paires fam:n du profil, tailles mesurees incluses).
     conf_threads = conf_params["threads"] if conf_params else "0"
     v5ref_bodies = {}
     for run in conf_runs:
@@ -267,21 +318,21 @@ def main():
         if body is None:
             continue
         if run["kind"] == "v5ref":
-            check_pipeline_run(name, body, run["family"], conf_params["n"], "3", "v5", conf_threads, bad)
+            check_pipeline_run(name, body, run["family"], run["n"], "3", "v5", conf_threads, bad)
             digests = re.findall(r"^digest_all=([0-9a-f]{64})$", body, re.M)
             if len(digests) != 1:
                 bad.append(f"{name}: digest_all present {len(digests)} fois (attendu 1)")
             cmd = re.search(r"^commande=(.*)$", st, re.M)
             if not cmd or "--digest" not in cmd.group(1).split():
                 bad.append(f"{name}: commande gravee sans --digest (la reference exige les digests)")
-            v5ref_bodies[run["family"]] = body
+            v5ref_bodies[(run["family"], run["n"])] = body
         else:
             if "conformite v5=v6" not in body or "identiques (objet)" not in body:
                 bad.append(f"{name}: conformite v5=v6 non etablie (`identiques (objet)` absent)")
             cmd = re.search(r"^commande=(.*)$", st, re.M)
-            if not cmd or f"v5ref_{run['family']}_n{conf_params['n']}.txt" not in cmd.group(1):
-                bad.append(f"{name}: commande gravee sans la reference v5 de la meme famille")
-            if run["family"] not in v5ref_bodies:
+            if not cmd or f"v5ref_{run['family']}_n{run['n']}.txt" not in cmd.group(1):
+                bad.append(f"{name}: commande gravee sans la reference v5 de la meme paire")
+            if (run["family"], run["n"]) not in v5ref_bodies:
                 bad.append(f"{name}: juge sans reference v5 valide")
 
     # PHASE 2 — bench apparie.
@@ -334,11 +385,11 @@ def main():
             bad.append(f"{name}: digest imprime sur un run de queue")
         vals = {}
         for cname, pat in QUEUE_COUNTERS:
-            m = re.search(pat, body)
-            if m is None:
-                bad.append(f"{name}: compteur {cname} absent (grand-livre incomplet)")
+            ms = re.findall(pat, body)
+            if len(ms) != 1:
+                bad.append(f"{name}: compteur {cname} absent ou duplique ({len(ms)} occurrences)")
             else:
-                vals[cname] = m.group(1)
+                vals[cname] = ms[0]
         for field, want in (("family", run["family"]), ("n", run["n"]),
                             ("seed", run["seed"]), ("seq", run["seq"])):
             fm = re.search(rf"^{field}=(\S+)$", st, re.M)
@@ -346,10 +397,15 @@ def main():
                 bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} (annonce)")
         queue_rows.append((run, vals, meas))
 
-    # Fichiers inattendus.
+    # CONTROLE EXHAUSTIF des fichiers : chaque fichier de out/ doit etre un
+    # artefact d'un run annonce (.txt/.status/.status.time) ou un auxiliaire
+    # connu — quelle que soit son extension (audit GCP v6, P1).
     known = {r["name"] for r in conf_runs + bench_runs + queue_runs}
+    allowed = set(AUX)
+    for name in known:
+        allowed.update((f"{name}.txt", f"{name}.status", f"{name}.status.time"))
     for f in sorted(os.listdir(out)):
-        if f.endswith(".txt") and f[:-4] not in known and f not in AUX:
+        if f not in allowed:
             bad.append(f"{f}: fichier inattendu")
 
     # RESUMES factuels (jamais une conclusion).
@@ -393,7 +449,8 @@ def main():
         for b in bad:
             print("  -", b)
         return 1
-    print(f"campaign_status=complete ({len(known)} runs valides, source_commit={commit[:12]}, "
+    print(f"campaign_status=complete profil={profile.get('profil', '?')} "
+          f"({len(known)} runs valides, source_commit={commit[:12]}, "
           f"resumes bench_resume.txt / queue_resume.txt)")
     print("=== CAMPAGNE COMPLETE ===")
     return 0

@@ -28,6 +28,7 @@ SSH_KEY_FILE="${GCP_SSH_KEY_FILE:-}"
 SSH_KEY_EXPIRATION_UTC=""
 ASSUME_YES=0
 HANDOFF_FILE=""
+MUTATION_WITNESS_FILE=""
 VERIFIED_LAST_START_TIMESTAMP=""
 TARGET_LAST_START_TIMESTAMP=""
 PRE_START_LAST_START_TIMESTAMP=""
@@ -41,7 +42,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/start_and_verify.sh [--yes] [--guest-shutdown-minutes MINUTES] [--handoff-file CHEMIN]
+Usage : ./gcp-migration/start_and_verify.sh [--yes] [--guest-shutdown-minutes MINUTES] [--handoff-file CHEMIN] [--mutation-witness-file CHEMIN]
 
 Démarre la VM ciblée seulement si son coupe-circuit GCE est borné à huit heures,
 certifie l'échéance après démarrage, puis arme et vérifie un arrêt dans l'OS invité.
@@ -72,6 +73,16 @@ while (($# > 0)); do
             (($# >= 2)) || die "Valeur manquante après --handoff-file."
             [[ -z "${HANDOFF_FILE}" ]] || die "--handoff-file ne peut être fourni qu'une fois."
             HANDOFF_FILE="$2"
+            shift 2
+            ;;
+        --mutation-witness-file)
+            # Témoin DURABLE écrit atomiquement au point exact où la mutation
+            # de démarrage commence (audit GCP v6, P0-1) : un refus de
+            # préflight ne l'écrit jamais ; sa présence atteste qu'un start
+            # GCE a été tenté, même si ce script est tué avant le handoff.
+            (($# >= 2)) || die "Valeur manquante après --mutation-witness-file."
+            [[ -z "${MUTATION_WITNESS_FILE:-}" ]] || die "--mutation-witness-file ne peut être fourni qu'une fois."
+            MUTATION_WITNESS_FILE="$2"
             shift 2
             ;;
         -h|--help)
@@ -578,6 +589,14 @@ fi
 
 START_REQUEST_EPOCH="$(date +%s)" || die "Impossible d'horodater la demande de démarrage."
 [[ "${START_REQUEST_EPOCH}" =~ ^[0-9]+$ ]] || die "Horodatage de démarrage invalide."
+if [[ -n "${MUTATION_WITNESS_FILE:-}" ]]; then
+    printf 'schema=e-hgp.start-mutation-witness.v1\nproject=%s\nzone=%s\ninstance=%s\ndate_utc=%s\n' \
+        "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        > "${MUTATION_WITNESS_FILE}.partial"
+    sync "${MUTATION_WITNESS_FILE}.partial" 2>/dev/null || true
+    mv -- "${MUTATION_WITNESS_FILE}.partial" "${MUTATION_WITNESS_FILE}" \
+        || die "Impossible d'écrire le témoin de mutation ${MUTATION_WITNESS_FILE} ; démarrage refusé."
+fi
 start_attempted=1
 if ! gcloud_mutation compute instances start "${INSTANCE_NAME}" \
     --project="${PROJECT_ID}" \

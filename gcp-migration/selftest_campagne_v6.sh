@@ -150,19 +150,32 @@ chmod +x "${FAKE}/gnutime" "${FAKE}/mhgp6_conformity"
 
 # Matrices reduites : DEUX configs de bench (les deux parites ABBA). Les
 # surcharges de scenario ("$@") viennent EN DERNIER : env garde la derniere.
+# Le PROFIL DE CAMPAGNE est ecrit une fois (matrice epinglee independamment
+# du runner) et transmis au validateur — audit GCP v6, P1.
+PROFILE="${WORK}/profil_campagne.txt"
+{
+  echo "profil=selftest_reduit_v1"
+  echo "conf_specs=uniform:50000"
+  echo "bench_families=uniform eight_clusters"
+  echo "bench_n=32000"
+  echo "queue_families=terrain_stationnaire"
+  echo "queue_n=64000"
+  echo "queue_seeds=3 4"
+  echo "threads=8"
+} > "${PROFILE}"
 run_runner() { # $1 = dossier out ; le reste = env supplementaire
   local out="$1"; shift
   env \
     V5_BIN="${FAKE}/mhgp5" V6_BIN="${FAKE}/mhgp6" CONF_BIN="${FAKE}/mhgp6_conformity" \
     TIME_BIN="${FAKE}/gnutime" OUT_DIR="${out}" THREADS=8 RUN_TIMEOUT=60 \
-    CONF_FAMILIES="uniform" CONF_N=50000 \
+    CONF_SPECS="uniform:50000" \
     BENCH_FAMILIES="uniform eight_clusters" BENCH_N="32000" \
     QUEUE_FAMILIES="terrain_stationnaire" QUEUE_N="64000" QUEUE_SEEDS="3 4" \
     "$@" \
     bash "${RUNNER}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST}" >/dev/null 2>&1
 }
-run_validator() { # $1 = dossier out, $2 = remote_rc, $3 = scp_rc
-  python3 "${VALIDATOR}" "$1" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST}" "$2" "$3"
+run_validator() { # $1 = dossier out, $2 = remote_rc, $3 = scp_rc, [$4 = profil]
+  python3 "${VALIDATOR}" "$1" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST}" "$2" "$3" "${4:-${PROFILE}}"
 }
 
 # ---- 1. Nominal.
@@ -244,9 +257,16 @@ rc=0; run_validator "${OUT}" 3 0 >/dev/null || rc=$?
 check_true "falsification refusee : remote_rc non nul" [ "${rc}" -eq 1 ]
 rc=0; run_validator "${OUT}" 0 1 >/dev/null || rc=$?
 check_true "falsification refusee : scp_rc non nul" [ "${rc}" -eq 1 ]
+# Profil epingle : absent => jamais complete ; different des plans => refuse.
+rc=0; run_validator "${OUT}" 0 0 "/nonexistent-profile" >/dev/null || rc=$?
+check_true "falsification refusee : profil absent" [ "${rc}" -eq 1 ]
+PROF2="${WORK}/profil_reduit.txt"
+sed 's/^bench_n=32000/bench_n=64000/' "${PROFILE}" > "${PROF2}"
+rc=0; run_validator "${OUT}" 0 0 "${PROF2}" >/dev/null || rc=$?
+check_true "falsification refusee : plans != profil epingle (matrice reduite)" [ "${rc}" -eq 1 ]
 
 if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest campagne v6 : ${FAILURES} echec(s)" >&2
   exit 1
 fi
-echo "selftest campagne v6 : protocole transactionnel conforme (nominal + refus 2/3/4/5/6 + 9 falsifications)"
+echo "selftest campagne v6 : runner distant + validateur conformes (nominal + refus + 11 falsifications) — le cycle de vie du lanceur et les gardes GCP sont prouves par selftest_cycle_vie_v6.sh, a lancer aussi"

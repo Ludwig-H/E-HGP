@@ -13,22 +13,24 @@
 # queue_plan.txt) ; le validateur recalcule chaque sequence depuis les
 # parametres et exige un statut par run annonce.
 #
-# TROIS PHASES :
-#   1. CONFORMITE v5 ≡ v6 a n=50000 (taille de contrat) : pour chaque famille
-#      partagee, le pilote v5 (--digest) produit la REFERENCE sur la VM, puis
+# TROIS PHASES (ordre : conformite, puis la sonde qui DISCRIMINE les
+# hypotheses, puis le bench — audit GCP v6, P1) :
+#   1. CONFORMITE v5 ≡ v6 sur les paires CONF_SPECS (fam:n — les tailles
+#      MESUREES par le bench y figurent, pas seulement 50000) : le pilote v5
+#      (--digest) produit la REFERENCE sur la VM, puis
 #      `mhgp6_conformity --expected=<cette reference>` juge l'objet v6
-#      (digest_all + dix forets). Un echec ARRETE la campagne (exit 3,
-#      statuts conserves) : pas de mesure sur un moteur non conforme.
-#   2. BENCH APPARIE v5/v6 (mesure, jamais un claim) : pour chaque
+#      (digest_all + forets, ensemble exact des K). Un echec ARRETE la
+#      campagne (exit 3, statuts conserves).
+#   2. QUEUE STATIONNAIRE v6 (sonde E6 a l'echelle) : familles stationnaires
+#      aux tailles etendues x graines, moteur v6 seul, sans --digest — le
+#      grand-livre (tests_coeur, octaves_q4, issues par octave) est la
+#      donnee. Un echec tronque la queue (grave) sans empecher le bench.
+#   3. BENCH APPARIE v5/v6 (mesure, jamais un claim) : pour chaque
 #      (famille, n), QUATRE runs en ordre CONTREBALANCE — config impaire
 #      v5 v6 v6 v5, config paire v6 v5 v5 v6 (schema ABBA) — memes fils,
-#      SANS --digest (le mur compare les moteurs, pas le hachage). Murs et
-#      RSS graves par GNU time ; le validateur exige des compteurs
-#      IDENTIQUES entre les deux runs d'un meme moteur (determinisme) et ne
-#      conclut JAMAIS sur une acceleration.
-#   3. QUEUE STATIONNAIRE v6 (sonde E6 a l'echelle) : familles stationnaires
-#      aux tailles etendues x graines, moteur v6 seul, sans --digest — le
-#      grand-livre (tests_coeur, octaves_q4, ...) est la donnee.
+#      SANS --digest. Murs et RSS graves par GNU time ; compteurs IDENTIQUES
+#      exiges entre les deux runs d'un meme moteur (determinisme) ; aucune
+#      acceleration conclue.
 #
 # ECHEANCE : DEADLINE_EPOCH (epoch, marge de rapatriement comprise) — la
 # campagne s'arrete AVANT un run qui ne pourrait pas finir a temps ; la
@@ -45,8 +47,7 @@ OUT_DIR="${OUT_DIR:-out}"
 RUN_TIMEOUT="${RUN_TIMEOUT:-2400}"
 TIME_BIN="${TIME_BIN:-/usr/bin/time}"
 THREADS="${THREADS:-$(nproc)}"
-CONF_FAMILIES="${CONF_FAMILIES:-uniform terrain eight_clusters scanline_single_pass}"
-CONF_N="${CONF_N:-50000}"
+CONF_SPECS="${CONF_SPECS:-uniform:32000 terrain:32000 eight_clusters:32000 scanline_single_pass:32000 uniform:50000 terrain:50000 eight_clusters:50000 scanline_single_pass:50000 uniform:100000 eight_clusters:100000 uniform:200000 eight_clusters:200000}"
 BENCH_FAMILIES="${BENCH_FAMILIES:-uniform terrain eight_clusters scanline_single_pass}"
 BENCH_N="${BENCH_N:-32000 100000 200000}"
 QUEUE_FAMILIES="${QUEUE_FAMILIES:-terrain_stationnaire scanline_stationnaire}"
@@ -61,13 +62,18 @@ test -x "${TIME_BIN}" || {
 
 # REFUS AVANT TOUT RUN d'un parametre mal forme.
 refuse() { echo "REFUS : parametre — $1" >&2; exit 2; }
-for v in ${CONF_N} ${BENCH_N} ${QUEUE_N} ${QUEUE_SEEDS} ${RUN_TIMEOUT}; do
+for v in ${BENCH_N} ${QUEUE_N} ${QUEUE_SEEDS} ${RUN_TIMEOUT}; do
   [[ "${v}" =~ ^[1-9][0-9]*$ ]] || refuse "valeur '${v}' non entiere >= 1"
 done
 if [ -n "${DEADLINE_EPOCH}" ]; then
   [[ "${DEADLINE_EPOCH}" =~ ^[1-9][0-9]*$ ]] || refuse "echeance '${DEADLINE_EPOCH}' non entiere"
 fi
-for f in ${CONF_FAMILIES} ${BENCH_FAMILIES}; do
+for spec in ${CONF_SPECS}; do
+  [[ "${spec}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*$ ]] || refuse "paire de conformite '${spec}' mal formee (fam:n)"
+  case "${spec%%:*}" in uniform|terrain|eight_clusters|scanline_single_pass|scanline_overlap_multiecho) ;;
+    *) refuse "famille partagee inconnue '${spec%%:*}'" ;; esac
+done
+for f in ${BENCH_FAMILIES}; do
   case "${f}" in uniform|terrain|eight_clusters|scanline_single_pass|scanline_overlap_multiecho) ;;
     *) refuse "famille partagee inconnue '${f}'" ;; esac
 done
@@ -75,7 +81,7 @@ for f in ${QUEUE_FAMILIES}; do
   case "${f}" in terrain_stationnaire|scanline_stationnaire|uniform|terrain|eight_clusters|scanline_single_pass|scanline_overlap_multiecho) ;;
     *) refuse "famille v6 inconnue '${f}'" ;; esac
 done
-for axis in CONF_FAMILIES BENCH_FAMILIES BENCH_N QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS; do
+for axis in CONF_SPECS BENCH_FAMILIES BENCH_N QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS; do
   [ -n "${!axis// /}" ] || refuse "axe ${axis} vide"
   vals="$(printf '%s\n' ${!axis} | sort)"
   [ "$(printf '%s\n' "${vals}" | uniq -d | wc -l)" -eq 0 ] || refuse "axe ${axis} avec doublon"
@@ -137,14 +143,14 @@ mv "${OUT_DIR}/topologie.txt.tmp" "${OUT_DIR}/topologie.txt"
 
 # LES TROIS PLANS, annonces avant le premier run.
 {
-  echo "conf_plan=v1"
-  echo "families=$(printf '%s\n' ${CONF_FAMILIES} | tr '\n' ' ' | sed 's/ $//')"
-  echo "n=${CONF_N}"
+  echo "conf_plan=v2"
+  echo "specs=$(printf '%s\n' ${CONF_SPECS} | tr '\n' ' ' | sed 's/ $//')"
   echo "threads=${THREADS}"
   seq_no=0
-  for fam in ${CONF_FAMILIES}; do
-    seq_no=$((seq_no + 1)); echo "seq=${seq_no} name=v5ref_${fam}_n${CONF_N} family=${fam} kind=v5ref"
-    seq_no=$((seq_no + 1)); echo "seq=${seq_no} name=conf_${fam}_n${CONF_N} family=${fam} kind=conf"
+  for spec in ${CONF_SPECS}; do
+    fam="${spec%%:*}"; N="${spec##*:}"
+    seq_no=$((seq_no + 1)); echo "seq=${seq_no} name=v5ref_${fam}_n${N} family=${fam} n=${N} kind=v5ref"
+    seq_no=$((seq_no + 1)); echo "seq=${seq_no} name=conf_${fam}_n${N} family=${fam} n=${N} kind=conf"
   done
   echo "runs=${seq_no}"
 } > "${OUT_DIR}/conf_plan.txt.tmp"
@@ -194,29 +200,52 @@ mv "${OUT_DIR}/bench_plan.txt.tmp" "${OUT_DIR}/bench_plan.txt"
 mv "${OUT_DIR}/queue_plan.txt.tmp" "${OUT_DIR}/queue_plan.txt"
 echo "=== plans annonces : conf=$(sed -n 's/^runs=//p' "${OUT_DIR}/conf_plan.txt") bench=$(sed -n 's/^runs=//p' "${OUT_DIR}/bench_plan.txt") queue=$(sed -n 's/^runs=//p' "${OUT_DIR}/queue_plan.txt") runs ==="
 
-# PHASE 1 — conformite v5 ≡ v6 a la taille de contrat. Un echec ARRETE tout.
-for fam in ${CONF_FAMILIES}; do
-  if past_deadline "v5ref_${fam}_n${CONF_N}" conformite conf_tronquee.txt; then exit 3; fi
-  run_one "v5ref_${fam}_n${CONF_N}" conformity_ref \
-    "${V5_BIN}" "--family=${fam}" "--n=${CONF_N}" --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
-  if ! grep -q '^code=0$' "${OUT_DIR}/v5ref_${fam}_n${CONF_N}.status" \
-     || ! grep -q '^digest_all=' "${OUT_DIR}/v5ref_${fam}_n${CONF_N}.txt"; then
-    echo "CONFORMITE NON ETABLIE : reference v5 ${fam} n=${CONF_N} invalide — campagne refusee, statuts conserves" >&2
+# PHASE 1 — conformite v5 ≡ v6 sur les paires CONF_SPECS. Un echec ARRETE tout.
+for spec in ${CONF_SPECS}; do
+  fam="${spec%%:*}"; CN="${spec##*:}"
+  if past_deadline "v5ref_${fam}_n${CN}" conformite conf_tronquee.txt; then exit 3; fi
+  run_one "v5ref_${fam}_n${CN}" conformity_ref \
+    "${V5_BIN}" "--family=${fam}" "--n=${CN}" --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
+  if ! grep -q '^code=0$' "${OUT_DIR}/v5ref_${fam}_n${CN}.status" \
+     || ! grep -q '^digest_all=' "${OUT_DIR}/v5ref_${fam}_n${CN}.txt"; then
+    echo "CONFORMITE NON ETABLIE : reference v5 ${fam} n=${CN} invalide — campagne refusee, statuts conserves" >&2
     exit 3
   fi
-  if past_deadline "conf_${fam}_n${CONF_N}" conformite conf_tronquee.txt; then exit 3; fi
-  run_one "conf_${fam}_n${CONF_N}" conformity \
-    "${CONF_BIN}" "--family=${fam}" "--n=${CONF_N}" "--threads=${THREADS}" \
-    "--expected=${OUT_DIR}/v5ref_${fam}_n${CONF_N}.txt"
-  if ! grep -q '^code=0$' "${OUT_DIR}/conf_${fam}_n${CONF_N}.status" \
-     || ! grep -q 'identiques (objet)' "${OUT_DIR}/conf_${fam}_n${CONF_N}.txt"; then
-    echo "CONFORMITE NON ETABLIE : conf_${fam}_n${CONF_N} — bench et queue refuses, statuts conserves" >&2
+  if past_deadline "conf_${fam}_n${CN}" conformite conf_tronquee.txt; then exit 3; fi
+  run_one "conf_${fam}_n${CN}" conformity \
+    "${CONF_BIN}" "--family=${fam}" "--n=${CN}" "--threads=${THREADS}" \
+    "--expected=${OUT_DIR}/v5ref_${fam}_n${CN}.txt"
+  if ! grep -q '^code=0$' "${OUT_DIR}/conf_${fam}_n${CN}.status" \
+     || ! grep -q 'identiques (objet)' "${OUT_DIR}/conf_${fam}_n${CN}.txt"; then
+    echo "CONFORMITE NON ETABLIE : conf_${fam}_n${CN} — queue et bench refuses, statuts conserves" >&2
     exit 3
   fi
 done
 
-# PHASE 2 — bench apparie ABBA, sans --digest. Un run non nul tronque le
-# bench (grave) mais n'empeche pas la phase 3.
+# PHASE 2 — queue stationnaire v6 (la sonde discriminante d'abord), sans
+# --digest. Un run non nul tronque la queue (grave) sans empecher le bench.
+while read -r line; do
+  case "${line}" in seq=*) ;; *) continue ;; esac
+  name="$(printf '%s\n' "${line}" | sed 's/.* name=\([^ ]*\).*/\1/')"
+  fam="$(printf '%s\n' "${line}" | sed 's/.* family=\([^ ]*\).*/\1/')"
+  N="$(printf '%s\n' "${line}" | sed 's/.* n=\([^ ]*\).*/\1/')"
+  seed="$(printf '%s\n' "${line}" | sed 's/.* seed=\([^ ]*\).*/\1/')"
+  seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
+  if past_deadline "${name}" queue queue_tronquee.txt; then break; fi
+  EXTRA_STATUS="$(printf 'family=%s\nn=%s\nseed=%s\nseq=%s' "${fam}" "${N}" "${seed}" "${seq_no}")" \
+    run_one "${name}" queue_stationnaire \
+    "${V6_BIN}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 "--seed=${seed}" "--threads=${THREADS}"
+  last_code="$(sed -n 's/^code=//p' "${OUT_DIR}/${name}.status" | head -n 1)"
+  if [ "${last_code:-1}" != "0" ]; then
+    printf 'truncated_at=%s\nphase=queue\nreason=premier run non nul (code=%s)\n' \
+      "${name}" "${last_code:-?}" > "${OUT_DIR}/queue_tronquee.txt"
+    echo "=== QUEUE TRONQUEE a ${name} : code ${last_code:-?} ===" >&2
+    break
+  fi
+done < "${OUT_DIR}/queue_plan.txt"
+
+# PHASE 3 — bench apparie ABBA, sans --digest. Un run non nul tronque le
+# bench (grave).
 bench_ok=1
 while read -r line; do
   case "${line}" in seq=*) ;; *) continue ;; esac
@@ -243,24 +272,4 @@ while read -r line; do
   fi
 done < "${OUT_DIR}/bench_plan.txt"
 
-# PHASE 3 — queue stationnaire v6, sans --digest. Un run non nul arrete.
-while read -r line; do
-  case "${line}" in seq=*) ;; *) continue ;; esac
-  name="$(printf '%s\n' "${line}" | sed 's/.* name=\([^ ]*\).*/\1/')"
-  fam="$(printf '%s\n' "${line}" | sed 's/.* family=\([^ ]*\).*/\1/')"
-  N="$(printf '%s\n' "${line}" | sed 's/.* n=\([^ ]*\).*/\1/')"
-  seed="$(printf '%s\n' "${line}" | sed 's/.* seed=\([^ ]*\).*/\1/')"
-  seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
-  if past_deadline "${name}" queue queue_tronquee.txt; then break; fi
-  EXTRA_STATUS="$(printf 'family=%s\nn=%s\nseed=%s\nseq=%s' "${fam}" "${N}" "${seed}" "${seq_no}")" \
-    run_one "${name}" queue_stationnaire \
-    "${V6_BIN}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 "--seed=${seed}" "--threads=${THREADS}"
-  last_code="$(sed -n 's/^code=//p' "${OUT_DIR}/${name}.status" | head -n 1)"
-  if [ "${last_code:-1}" != "0" ]; then
-    printf 'truncated_at=%s\nphase=queue\nreason=premier run non nul (code=%s)\n' \
-      "${name}" "${last_code:-?}" > "${OUT_DIR}/queue_tronquee.txt"
-    echo "=== QUEUE TRONQUEE a ${name} : code ${last_code:-?} ===" >&2
-    break
-  fi
-done < "${OUT_DIR}/queue_plan.txt"
 echo "=== fin des runs (la validation locale decide du statut, jamais cette ligne) ==="
