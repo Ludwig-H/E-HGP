@@ -1,4 +1,4 @@
-# Suivi des campagnes CPU v6 — provenance réparée, décision encore prématurée
+# Suivi des campagnes CPU v6 — provenance réparée, réplication à ne pas confondre avec une confirmation
 
 Date de constat : 2026-08-31
 
@@ -6,12 +6,13 @@ Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`, `profile=
 
 ## Verdict courant
 
-Deux objets doivent rester séparés :
+Trois objets doivent rester séparés :
 
 1. `receipts/campagne_decision_20260831/` est **définitivement invalide comme matrice épinglée** parce qu'il mélange deux binaires. Le marqueur terminal ajouté en `9c9ad125` reçoit correctement ce fait.
-2. `receipts/campagne_sonde_octaves_20260831/` utilise désormais une copie privée du binaire, avec hash avant/après chaque tuple. Cette correction de provenance est reçue. La capture reste néanmoins **exploratoire**, pas décisionnelle : son lanceur exact n'est pas versionné et l'agrégateur qualifié de « préenregistré avant la campagne » a été écrit et committé après le début de celle-ci.
+2. `receipts/campagne_sonde_octaves_20260831/` utilise une copie privée du binaire, avec hash avant/après chaque tuple. Elle s'est terminée par 36/36 codes 0, `DONE`, 36 hashes de sorties vérifiés et 36 stderr vides. Cette correction de provenance est reçue. La capture reste néanmoins **exploratoire**, pas décisionnelle : son lanceur exact n'est pas versionné et l'agrégateur qualifié de « préenregistré avant la campagne » a été écrit et committé après le début de celle-ci.
+3. `receipts/campagne_decisionnelle_20260831/`, lancée après `a30c3a98`, est prospective vis-à-vis des scripts mais **pas vis-à-vis des données** : elle rejoue le même binaire privé, les mêmes familles, les mêmes tailles et les mêmes graines que la sonde dont `T_lourde` et le seuil d'octave ont été dérivés. Elle est une réplication de reproductibilité, pas un échantillon confirmatoire indépendant. Son nom et son META ne peuvent donc pas lui conférer un statut décisionnel.
 
-Il n'est pas utile d'interrompre une seconde fois la campagne en cours : conserver ses compteurs comme échantillon exploratoire propre du binaire privé. En revanche, ne pas lui appliquer un verdict E6 préenregistré. Le commit `8157c65d` peut gouverner une campagne **ultérieure**, démarrée seulement après fermeture du validateur et depuis le lanceur committé.
+Il n'était pas utile d'interrompre une seconde fois la sonde : ses compteurs forment un échantillon exploratoire propre du binaire privé. Il n'est pas utile non plus d'interrompre la réplication `a30c3a98`, qui peut vérifier la reproductibilité des compteurs. En revanche, ne produire un verdict E6 confirmatoire que sur un profil hors-échantillon fixé avant lecture, avec de nouvelles graines et/ou tailles qui n'ont servi ni à choisir `T_lourde`, ni à choisir l'octave 10, ni à régler le seuil.
 
 ## Ancienne matrice mixte — invalidation reçue, portée diagnostique étroite
 
@@ -55,27 +56,71 @@ Deux limites empêchent encore le statut décisionnel :
 
 La porte synthétique `agregateur_gate.py` passe, mais elle démontre l'algorithme sur ses fixtures, pas l'antériorité temporelle du protocole.
 
-## Validateur encore insuffisant comme autorité décisionnelle
+## Réplication `a30c3a98` — protocole antérieur, échantillon réutilisé
 
-`bench/pentes.py` a été nettement durci : matrice tailles/graines exacte, bijection statuts/fichiers, codes nuls, identités, compteurs uniques et identités d'octaves. Il accepte encore plusieurs faux reçus :
+Le commit `a30c3a98` précède bien la nouvelle capture : commit à
+`14:27:21Z`, début gravé à `14:27:31Z`. Il ferme plusieurs défauts de la
+première sonde : profil copié, hashes des trois scripts annoncés avant le
+premier tuple, copie/source égales, statut terminal invalide refusé, liens et
+sous-répertoires rejetés, hashes du binaire et des sorties recoupés. Les trois
+portes Python passent indépendamment.
 
-- `familles=` vide avec `STATUS.txt` réduit à `DONE` et `out/` vide ;
-- une famille arbitraire ou une seconde ligne de matrice META, faute de profil externe exact et d'unicité de la ligne ;
-- des fichiers autorisés qui sont des liens symboliques, ainsi que des sous-répertoires inattendus ;
-- un META dont pin, commande ou hash ont été falsifiés, car ni `HASHES.txt`, ni le SHA du binaire privé, ni les hashes de sorties ne sont validés.
-- l'ancienne campagne malgré son `STATUT_TERMINAL.txt` invalide, car ni `pentes.py` ni l'agrégateur ne lisent ce marqueur et son STATUS finit toujours par `DONE`.
+Cette antériorité ne crée toutefois pas un jeu de confirmation. Le profil
+`locale_decision_v1` reprend exactement les quatre familles, les tailles
+8000/16000/32000 et les graines 3/4/5 de la capture exploratoire ; le binaire
+privé porte le même SHA-256 `4bbb257c...3359`. Sur les treize premiers tuples
+terminés contrôlés à cette coupe, 13/13 `digest_all` et toutes les lignes hors
+temps/RSS sont identiques octet pour octet à la sonde. C'est le comportement
+attendu d'un programme déterministe, pas treize observations nouvelles.
 
-Ces cas avaient déjà été reproduits lors du cinquième cycle. L'agrégateur important et exécutant `pentes.py` hérite de cette frontière : « passe le parser actuel » ne signifie pas encore « reçu décisionnel authentifié ».
+Si la capture ferme, le statut honnête est `replication_complete`. Elle peut
+prouver que l'isolation du binaire rend les compteurs reproductibles. Elle ne
+peut ni confirmer la stabilité de l'octave 10 choisie sur les mêmes sorties,
+ni transformer rétrospectivement la médiane de `T_lourde` en verdict E6.
 
-L'agrégateur améliore bien la lecture inter-graines : la médiane exige qu'au moins deux graines sur trois déclenchent, et `T_lourde` somme la queue o10–o15 au lieu de sélectionner o12. Sa sortie `garde_fou_viole=non` ne doit toutefois pas être assimilée au garde-fou GO du § 3 : elle ne juge que trois termes et le second pas, alors que le contrat exige chaque terme payé sur les deux pas. Enfin, si une seule graine contient un zéro, le terme entier devient indéfini et « ne déclenche jamais » ; une transition 0→positif est au contraire une émergence à classer `indéterminé` ou `+inf`, pas une preuve négative. Un refus doit aussi supprimer ou invalider tout `AGREGAT.txt` préexistant.
+## Validateur `a30c3a98` — progrès reçu, chaîne d'autorité encore incomplète
+
+Le validateur tue désormais les contre-fixtures listées au tour précédent et
+l'agrégateur se nomme correctement « porte E6 bornée ». Il classe aussi une
+transition 0→positif comme émergence et supprime un `AGREGAT.txt` périmé sur
+refus. Ces corrections sont reçues.
+
+Il reste une différence entre **enregistrer** une provenance et la **lier** :
+
+- `sha256_lanceur`, `sha256_validateur`, `sha256_agregateur` et le hash du
+  profil sont écrits au META mais `pentes.py` ne les vérifie pas ; les scripts
+  exacts ne sont pas copiés dans le reçu ;
+- le profil externe fourni à `pentes.py` peut être n'importe quel fichier
+  compatible. Le hash `autorite_profil` du META n'est pas recoupé et aucun
+  contrôle ne lie ce fichier au `pin` annoncé ;
+- le `pin` est seulement exigé une fois, sans validation hexadécimale ni
+  preuve que le binaire archivé provient de ce commit. Ici le hash du binaire
+  est corrélé à un ancien reçu de portes, pas lié par le lanceur courant ;
+- les 36 hashes attendus des sorties sont trouvés, mais les lignes de hash
+  supplémentaires ou dupliquées dans le META ne sont pas refusées ;
+- le dossier de campagne peut préexister et est alimenté en place. Pour une
+  autorité décisionnelle, créer un dossier unique inexistant, écrire dans un
+  temporaire et publier atomiquement le terminal évite collisions et restes.
+
+Ces points n'empêchent pas d'exploiter la réplication comme diagnostic. Ils
+doivent être fermés avant de qualifier un futur reçu d'authentifié de bout en
+bout.
 
 ## Correction utile à Claude
 
-1. Classer la capture en cours `exploratory_complete` si elle termine proprement ; ne pas produire `E6_active` sur elle.
-2. Corriger `pentes.py` par un profil externe exact et non vide : quatre familles attendues, matrice unique, pin/commande/hash uniques, hashes du binaire et des sorties, statut terminal valide, refus des liens et de toute entrée de répertoire inattendue, erreurs propres sans traceback.
-3. Démarrer ensuite un nouveau dossier depuis `bench/campagne_locale.sh` au commit qui contient à la fois ce lanceur, le validateur et `agregateur.py` ; graver leurs hashes et l'autorité de profil avant le premier tuple.
-4. Vérifier que le hash de la copie privée égale celui de la source au moment de la copie et refuser avant le premier run sinon ; le lanceur actuel enregistre les deux valeurs sans les comparer.
-5. Conserver les trois termes préannoncés de l'agrégateur, mais le nommer porte E6 bornée à trois termes/pas2, décrire `T_lourde` comme hypothèse dérivée de la première capture et tester sa stabilité sur une campagne indépendante. Ajouter les fixtures majorité 1/3 puis 2/3, seuil exact, zéro partiel/0→positif et violation du seul pas1.
+1. Classer la première sonde `exploratory_complete` et la capture active
+   `replication_complete` si leurs contrôles terminaux ferment ; ne produire
+   aucun `E6_active` confirmatoire sur ces mêmes 36 tuples.
+2. Préenregistrer un **nouveau** profil de confirmation dont les graines sont
+   disjointes et, idéalement, dont les tailles sont décalées ; ne lire aucune
+   sortie avant d'avoir committé profil, règle, seuils et politique des zéros.
+3. Archiver dans chaque reçu les copies exactes du lanceur, du validateur, de
+   l'agrégateur et du profil, puis recouper leurs hashes contre un manifeste
+   canonique lié au commit.
+4. Refuser un dossier de sortie préexistant et publier le reçu depuis un
+   répertoire temporaire unique, avec terminal atomique.
+5. Garder le nom « porte E6 bornée à trois termes/pas2 » et réserver le
+   garde-fou GO à une porte séparée couvrant tous les termes et les deux pas.
 
 Cette alerte pourra être absorbée dans `ETAT_COURANT.md` puis supprimée après réception d'une campagne postérieure au profil committé et d'un validateur qui tue les contre-fixtures ci-dessus.
 
