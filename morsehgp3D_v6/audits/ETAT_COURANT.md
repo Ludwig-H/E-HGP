@@ -49,10 +49,10 @@ Au pin `6d755804` :
 Le probe `fold-inject-b-exception-k3` termine encore par SIGABRT, code 134 ;
 il reste volontairement hors CTest. Au pin `e018b4c8`, les deux selftests GCP
 Bash passent, le profil G4 exact ferme 81 runs avec queue vide, et les 82
-tests de sûreté/intégration passent en 121,048 s. Ces verts ne sont pas encore
-causaux pour la frontière : après recalcul du manifeste distant, six mutants
-de code, durée, motif fatal et argv sont acceptés à tort. Le NO-GO reste donc
-actif.
+tests de sûreté/intégration passent ; un rejeu indépendant donne 82/82 en
+118,270 s. Ces verts ne sont pas encore causaux pour la frontière : après
+recalcul du manifeste distant, huit mutants de code, durée, motif fatal, argv
+et plafond sont acceptés à tort. Le NO-GO reste donc actif.
 
 ## Exact-K, omission unique et ownership WSPD
 
@@ -369,19 +369,24 @@ initiale, la liaison canon–manifeste, l'ordre de la frontière et l'inclusion
 des résumés. La phase CUDA est correctement gravée comme contrôle historique
 v5 non autoritaire, et la porte fils comme invariance du grand-livre.
 
-Deux P0 subsistent. `state_snapshot()` classe tout `OSError` comme absence :
+Trois P0 subsistent. `state_snapshot()` classe tout `OSError` comme absence :
 un registre présent mais illisible sans handoff peut encore produire un faux
-`refus_avant_mutation`. Le validateur de frontière accepte six mutants après
-rehash causal : code non numérique, invariant masqué par `bad_alloc`,
-invariant sur succès, durée non numérique, argv décoré et code 124 avec
-invariant. Les falsifications du selftest ne recalculent pas le manifeste et
-sont donc tuées d'abord par le hash de transport.
+`refus_avant_mutation`. Il adopte aussi une génération issue d'un registre
+pour une autre cible avant d'appeler le stop sur la cible configurée. Les
+`timeout` n'ont aucun `--kill-after` ; un processus ignorant `TERM` peut donc
+dépasser la deadline et retarder le trap d'arrêt. Enfin, le validateur de
+frontière accepte huit mutants après rehash causal, dont code 3 masqué par
+`bad_alloc` et commande sans le `RLIMIT_AS` annoncé. Les falsifications du
+selftest ne recalculent pas le manifeste et sont donc tuées d'abord par le
+hash de transport.
 
 Le budget G4 est par ailleurs une estimation empirique, pas la borne
 « conservatrice » annoncée : remplacer les 1 860 s estimées pour les deux
 builds GPU par leurs plafonds de 3 600 s porte déjà le total de 22 984 s à
 28 324 s, au-delà de la fenêtre de 26 400 s. Ce point n'affaiblit pas les
-coupe-circuits, mais interdit de garantir la complétude des 81 runs.
+coupe-circuits, mais interdit de garantir la complétude des 81 runs. La marge
+de rapatriement de 1 500 s est même inférieure à une seule tentative SCP de
+1 800 s, trois tentatives étant autorisées.
 
 ## Dette d'échelle et ordre utile
 
@@ -393,7 +398,7 @@ ou u128 pour les compteurs.
 
 Ordre recommandé à Claude :
 
-1. fermer l'erreur de lecture du registre et les six mutants causaux de
+1. fermer registre/cible, timeouts/rapatriement et les huit mutants causaux de
    frontière avant toute session facturable ;
 2. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
    re-régler la règle ;

@@ -20,16 +20,13 @@ motivent des corrections, ils ne certifient rien.
 - [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict mutable, pins jugés et ordre
   de correction. Il prime sur toute réponse historique.
 - [`AUDIT_GCP_V6_P0_20260831.md`](AUDIT_GCP_V6_P0_20260831.md) : porte de
-  sûreté dédiée mise à jour sur `e018b4c8` ; NO-GO ciblé sur la lecture
-  fail-closed du registre et six mutants causaux de frontière.
+  sûreté dédiée mise à jour sur `e018b4c8` ; NO-GO ciblé sur registre/cible,
+  délais/rapatriement et huit mutants causaux de frontière.
 - [`ALERTE_CAMPAGNE_CPU_MIXTE_20260831.md`](ALERTE_CAMPAGNE_CPU_MIXTE_20260831.md) :
   preuves des captures CPU et statut borné de la confirmation hors échantillon.
 
 ## Historique de l'échange
 
-- [`REPONSE_CLAUDE_AUDIT_GCP_TOUR5_20260831.md`](REPONSE_CLAUDE_AUDIT_GCP_TOUR5_20260831.md) :
-  réponse portée par `e018b4c8` ; ses fermetures sont reconnues dans l'audit
-  frais, qui en corrige aussi les claims de causalité.
 - [`NOTE_CLAUDE_CONCEPTION_V6_20260831.md`](NOTE_CLAUDE_CONCEPTION_V6_20260831.md) :
   note initiale de conception, supersédée par l'état courant.
 
