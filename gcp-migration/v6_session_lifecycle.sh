@@ -103,12 +103,14 @@ _ov_QUEUE_SEEDS="${QUEUE_SEEDS:-}"; _ov_RUN_TIMEOUT="${RUN_TIMEOUT:-}"
 _ov_THREADS_VM="${THREADS_VM:-}"; _ov_V5_GATE_MIN="${V5_GATE_MIN:-}"; _ov_V6_GATE_MIN="${V6_GATE_MIN:-}"
 _ov_SWEEP_SPECS="${SWEEP_SPECS:-}"; _ov_SWEEP_REPEATS="${SWEEP_REPEATS:-}"
 _ov_GPU_SPECS="${GPU_SPECS:-}"; _ov_FRONTIER_SPECS="${FRONTIER_SPECS:-}"
-_ov_FRONTIER_TIMEOUT="${FRONTIER_TIMEOUT:-}"
+_ov_FRONTIER_TIMEOUT="${FRONTIER_TIMEOUT:-}"; _ov_GPU_BUILD_TIMEOUT="${GPU_BUILD_TIMEOUT:-}"
+_ov_FRONTIER_ULIMIT_KB="${FRONTIER_ULIMIT_KB:-}"
 # shellcheck disable=SC1090
 source "${PROFILE_SRC}"
 EFFECTIVE_PROFILE="${CAMPAIGN_PROFILE}"
 for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM V5_GATE_MIN V6_GATE_MIN \
-         SWEEP_SPECS SWEEP_REPEATS GPU_SPECS FRONTIER_SPECS FRONTIER_TIMEOUT; do
+         SWEEP_SPECS SWEEP_REPEATS GPU_SPECS FRONTIER_SPECS FRONTIER_TIMEOUT \
+         GPU_BUILD_TIMEOUT FRONTIER_ULIMIT_KB; do
   ov="_ov_${v}"
   if [ -n "${!ov}" ] && [ "${!ov}" != "${!v}" ]; then
     EFFECTIVE_PROFILE="custom"
@@ -117,7 +119,8 @@ for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT T
 done
 _param_re='^[A-Za-z0-9_:, -]*$'
 for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM \
-         SWEEP_SPECS SWEEP_REPEATS GPU_SPECS FRONTIER_SPECS FRONTIER_TIMEOUT; do
+         SWEEP_SPECS SWEEP_REPEATS GPU_SPECS FRONTIER_SPECS FRONTIER_TIMEOUT \
+         GPU_BUILD_TIMEOUT FRONTIER_ULIMIT_KB; do
   [[ "${!v}" =~ ${_param_re} ]] || { echo "REFUS : parametre ${v} avec caractere hors alphabet sur" >&2; exit 2; }
 done
 echo "profil canonique : ${CAMPAIGN_PROFILE} ($(sha256sum "${PROFILE_SRC}" | awk '{print $1}')) — profil effectif : ${EFFECTIVE_PROFILE}"
@@ -131,9 +134,53 @@ DURABLE_RECEIPT_BASE="${DURABLE_RECEIPT_BASE:?DURABLE_RECEIPT_BASE requis (recu 
 DURABLE_RECEIPT_PREFIX="${DURABLE_RECEIPT_PREFIX:?DURABLE_RECEIPT_PREFIX requis}"
 
 # Lecture de l'enregistrement de cycle de vie partage avec le garde.
+# state_field n'est utilise QUE pour l'affichage (recu) — toute DECISION du
+# cleanup passe par state_snapshot (cinquieme tour : schema, unicite,
+# completude, ensemble d'etats autorises).
 state_field() { # $1 = cle ; vide si fichier absent
   [ -s "${STATE_FILE}" ] || return 0
   sed -n "s/^$1=//p" "${STATE_FILE}" 2>/dev/null | head -1
+}
+# state_snapshot : parse STRICTEMENT le registre en un enregistrement unique.
+#   sortie « ok <etat> <projet> <zone> <instance> <generation> » et rc=0 ;
+#   rc=3 si le fichier est ABSENT ; rc=4 s'il est ILLISIBLE (schema faux ou
+#   manquant, cle dupliquee ou inconnue, champ manquant, ligne tronquee,
+#   etat hors de l'ensemble autorise). generation peut etre vide (etats
+#   anterieurs a la capture) — jamais pour targeted_stopped.
+state_snapshot() {
+  python3 - "${STATE_FILE}" <<'PY'
+import sys
+ALLOWED = {"start_may_have_been_requested", "targeted_running", "targeted_stopping",
+           "targeted_stopped", "targeted_stop_failed"}
+KEYS = ("schema", "state", "project", "zone", "instance", "generation")
+try:
+    with open(sys.argv[1], encoding="utf-8") as fh:
+        text = fh.read()
+except OSError:
+    sys.exit(3)
+if not text.endswith("\n"):
+    sys.exit(4)  # tronque : la derniere ligne n'est pas terminee
+record = {}
+for line in text.splitlines():
+    if "=" not in line:
+        sys.exit(4)
+    key, value = line.split("=", 1)
+    if key not in KEYS or key in record:
+        sys.exit(4)
+    record[key] = value
+if set(record) != set(KEYS):
+    sys.exit(4)
+if record["schema"] != "e-hgp.lifecycle-state.v1":
+    sys.exit(4)
+if record["state"] not in ALLOWED:
+    sys.exit(4)
+if any(not record[k] for k in ("project", "zone", "instance")):
+    sys.exit(4)
+if record["state"] == "targeted_stopped" and not record["generation"]:
+    sys.exit(4)
+print("ok", record["state"], record["project"], record["zone"], record["instance"],
+      record["generation"])
+PY
 }
 # PUBLICATION de transition par le cleanup EXTERIEUR (audit troisieme tour :
 # le registre doit decrire aussi l'arret nominal) — meme schema et meme
@@ -226,6 +273,11 @@ finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu CO
     { [ ! -f "${PROFILE}" ] || cp -f "${PROFILE}" "${tmp}/profil_campagne.txt"; } &&
     { [ ! -f "${WORK}/validation.txt" ] || cp -f "${WORK}/validation.txt" "${tmp}/validation.txt"; } &&
     { [ ! -f "${WORK}/manifest_revalide.txt" ] || cp -f "${WORK}/manifest_revalide.txt" "${tmp}/"; } &&
+    { _res_ok=1
+      for _res in bench_resume queue_resume sweep_resume gpu_resume frontier_resume; do
+        if [ -f "${WORK}/${_res}.txt" ]; then cp -f "${WORK}/${_res}.txt" "${tmp}/" || _res_ok=0; fi
+      done
+      [ "${_res_ok}" -eq 1 ]; } &&
     { [ ! -d "${WORK}/out" ] || cp -r "${WORK}/out" "${tmp}/out"; } &&
     ( cd "${tmp}" && { find . -type f ! -name 'SHA256SUMS*' -print0 | sort -z | xargs -0 sha256sum; } > SHA256SUMS.tmp \
       && mv SHA256SUMS.tmp SHA256SUMS \
@@ -240,18 +292,24 @@ cleanup() {
   set +e
   if [ "${SESSION_RC}" -ne 0 ]; then rc="${SESSION_RC}"; fi
   log_safe "--- arret certifie (rc=${rc}) ---"
-  local lc_state
-  lc_state="$(state_field state)"
-  local lc_gen
-  lc_gen="$(state_field generation)"
-  if [ -z "${GENERATION}" ] && [ -n "${lc_gen}" ]; then GENERATION="${lc_gen}"; fi
+  # GENERATION VERROUILLEE : memoire de session, sinon handoff relu — JAMAIS
+  # adoptee du registre (cinquieme tour : le fast-path comparait la
+  # generation du registre a elle-meme).
   if [ -z "${GENERATION}" ] && [ -s "${HANDOFF}" ]; then
     GENERATION="$(parse_handoff 2>/dev/null)" || GENERATION=""
   fi
+  # SNAPSHOT STRICT du registre : ok / absent (rc=3) / illisible (rc=4).
+  local snap="" snap_rc=0
+  snap="$(state_snapshot 2>/dev/null)" || snap_rc=$?
+  local lc_state="" lc_project="" lc_zone="" lc_instance="" lc_gen=""
+  if [ "${snap_rc}" -eq 0 ]; then
+    read -r _ lc_state lc_project lc_zone lc_instance lc_gen <<< "${snap}"
+  fi
   local receipt_rc=0
-  if [ -z "${lc_state}" ]; then
-    # Aucun start GCE atteste : refus avant mutation — ni arret ni blocage.
-    log_safe "aucun enregistrement de cycle de vie : refus avant demarrage, aucun arret a certifier"
+  if [ "${snap_rc}" -eq 3 ] && [ -z "${GENERATION}" ]; then
+    # Registre ABSENT et aucune generation independante (ni memoire ni
+    # handoff) : rien n'atteste un start — refus avant mutation.
+    log_safe "aucun enregistrement de cycle de vie ni handoff : refus avant demarrage, aucun arret a certifier"
     finalize_receipt refus_avant_mutation "" "${rc}" || receipt_rc=66
     if [ "${receipt_rc}" -ne 0 ]; then
       echo "[RECU NON PUBLIE] le recu durable n'a pas pu etre ecrit (${DURABLE_RECEIPT_BASE})" >&2
@@ -259,19 +317,54 @@ cleanup() {
     fi
     exit "${rc}"
   fi
-  # TERMINAL PARTAGE : le garde a deja certifie l'arret cible de cette
-  # generation — ni second arret, ni faux blocage (audit deuxieme tour).
-  if [ "${lc_state}" = "targeted_stopped" ] && [ -n "${GENERATION}" ] \
-     && [ "$(state_field project)" = "${GCP_PROJECT_ID}" ] \
-     && [ "$(state_field zone)" = "${GCP_ZONE}" ] \
-     && [ "$(state_field instance)" = "${GCP_INSTANCE_NAME}" ]; then
-    log_safe "arret deja certifie par le garde (generation ${GENERATION}) : aucun second arret"
-    echo "arret deja certifie par le garde (generation ${GENERATION})"
+  if [ "${snap_rc}" -eq 4 ] && [ -z "${GENERATION}" ]; then
+    # Registre PRESENT mais illisible, aucune generation independante : une
+    # mutation est possible et rien ne permet un arret cible — BLOCAGE.
+    {
+      echo "[BLOCAGE] registre de cycle de vie ILLISIBLE (schema, unicite ou troncature) et generation indisponible — passage de relais requis."
+      echo "[BLOCAGE] projet=${GCP_PROJECT_ID} zone=${GCP_ZONE} instance=${GCP_INSTANCE_NAME}"
+      echo "[BLOCAGE] enregistrement : ${STATE_FILE}"
+      echo "[BLOCAGE] controle : gcloud compute instances describe ${GCP_INSTANCE_NAME} --project=${GCP_PROJECT_ID} --zone=${GCP_ZONE} --format='value(status,lastStartTimestamp)'"
+    } >&2
+    finalize_receipt blocage_registre_illisible "" 71 || true
+    exit 71
+  fi
+  # Registre perdu ou illisible AVEC handoff valide (cinquieme tour : ne
+  # JAMAIS conclure « avant mutation » ici) : l'arret cible est tente plus
+  # bas sur la generation verrouillee.
+  if [ "${snap_rc}" -ne 0 ] && [ -n "${GENERATION}" ]; then
+    log_safe "registre $( [ "${snap_rc}" -eq 3 ] && echo absent || echo illisible ) mais generation verrouillee disponible : arret cible tente"
+  fi
+  # TERMINAL PARTAGE : fast-path SEULEMENT sur un snapshot STRICT, cible
+  # exacte ET generation exacte : egale a la generation verrouillee
+  # independante quand elle existe (cinquieme tour : un registre ancien ne
+  # peut plus faire sauter l'arret de la generation courante) ; quand AUCUNE
+  # source independante n'existe (garde arrete avant le handoff), le registre
+  # strict du garde — cree O_EXCL dans NOTRE WORK — reste la certification
+  # acquise au deuxieme tour.
+  if [ "${snap_rc}" -eq 0 ] && [ "${lc_state}" = "targeted_stopped" ] \
+     && { [ -z "${GENERATION}" ] || [ "${lc_gen}" = "${GENERATION}" ]; } \
+     && [ "${lc_project}" = "${GCP_PROJECT_ID}" ] \
+     && [ "${lc_zone}" = "${GCP_ZONE}" ] \
+     && [ "${lc_instance}" = "${GCP_INSTANCE_NAME}" ]; then
+    log_safe "arret deja certifie par le garde (generation ${lc_gen}, source $( [ -n "${GENERATION}" ] && echo independante+registre || echo registre-strict-du-garde )) : aucun second arret"
+    echo "arret deja certifie par le garde (generation ${lc_gen})"
     finalize_receipt arret_certifie_par_le_garde 0 "${rc}" || {
       echo "[RECU NON PUBLIE] le recu durable n'a pas pu etre ecrit (${DURABLE_RECEIPT_BASE})" >&2
       exit 66
     }
     exit "${rc}"
+  fi
+  if [ "${snap_rc}" -eq 0 ] && [ "${lc_state}" = "targeted_stopped" ] \
+     && [ -n "${GENERATION}" ] && [ "${lc_gen}" != "${GENERATION}" ]; then
+    log_safe "registre targeted_stopped d'une AUTRE generation (${lc_gen} != ${GENERATION}) : fast-path refuse, arret cible sur la generation verrouillee"
+  fi
+  # ADOPTION POUR L'ARRET SEULEMENT : sans source independante, la generation
+  # d'un snapshot STRICT permet encore un arret cible (jamais un fast-path
+  # au-dela du cas certifie ci-dessus) — scenario handoff corrompu.
+  if [ -z "${GENERATION}" ] && [ "${snap_rc}" -eq 0 ] && [ -n "${lc_gen}" ]; then
+    GENERATION="${lc_gen}"
+    log_safe "generation adoptee du registre STRICT pour l'arret cible : ${GENERATION}"
   fi
   if [ -z "${GENERATION}" ]; then
     {
@@ -360,6 +453,8 @@ gcloud config set project "${GCP_PROJECT_ID}" >/dev/null
   echo "gpu_specs=${GPU_SPECS}"
   echo "frontier_specs=${FRONTIER_SPECS}"
   echo "frontier_timeout=${FRONTIER_TIMEOUT}"
+  echo "gpu_build_timeout=${GPU_BUILD_TIMEOUT}"
+  echo "frontier_ulimit_kb=${FRONTIER_ULIMIT_KB}"
 } > "${PROFILE}.tmp"
 mv "${PROFILE}.tmp" "${PROFILE}"
 log "profil de campagne epingle : $(sha256sum "${PROFILE}" | awk '{print $1}')"
@@ -570,6 +665,7 @@ timeout "${CAMPAIGN_TIMEOUT}" "${SSH[@]}" "set -euo pipefail
     QUEUE_FAMILIES='${QUEUE_FAMILIES}' QUEUE_N='${QUEUE_N}' QUEUE_SEEDS='${QUEUE_SEEDS}' \
     SWEEP_SPECS='${SWEEP_SPECS}' SWEEP_REPEATS='${SWEEP_REPEATS}' \
     GPU_SPECS='${GPU_SPECS}' FRONTIER_SPECS='${FRONTIER_SPECS}' FRONTIER_TIMEOUT='${FRONTIER_TIMEOUT}' \
+    GPU_BUILD_TIMEOUT='${GPU_BUILD_TIMEOUT}' FRONTIER_ULIMIT_KB='${FRONTIER_ULIMIT_KB}' \
     bash gcp-migration/v6_campaign_remote.sh ${SOURCE_COMMIT} ${SOURCE_PAYLOAD_SHA256} ${PROTOCOL_MANIFEST_SHA256}
 " 2>&1 | tee -a "${LOG}"
 REMOTE_CAMPAIGN_RC=${PIPESTATUS[0]}
@@ -606,7 +702,7 @@ printf 'scp_rc=%d\n' "${SCP_RC}" | tee -a "${LOG}"
 set +e
 python3 "${VALIDATOR}" "${WORK}/out" \
   "${SOURCE_COMMIT}" "${SOURCE_PAYLOAD_SHA256}" "${PROTOCOL_MANIFEST_SHA256}" \
-  "${REMOTE_CAMPAIGN_RC}" "${SCP_RC}" "${PROFILE}" "${PROFILE_SRC}" 2>&1 | tee "${WORK}/validation.txt" | tee -a "${LOG}"
+  "${REMOTE_CAMPAIGN_RC}" "${SCP_RC}" "${PROFILE}" "${PROFILE_SRC}" "${WORK}/manifest_revalide.txt" 2>&1 | tee "${WORK}/validation.txt" | tee -a "${LOG}"
 VALIDATE_RC=${PIPESTATUS[0]}
 set -e
 if [ "${VALIDATE_RC}" -ne 0 ]; then SESSION_RC=65; fi

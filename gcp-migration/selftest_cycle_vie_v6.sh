@@ -86,6 +86,15 @@ case "$*" in
       echo "campagne cassee" >&2
       exit 1
     fi
+    # Mutants permanents du REGISTRE (audit cinquieme tour) : la campagne
+    # echoue APRES avoir perdu/corrompu le registre — le cleanup doit encore
+    # arreter via le handoff, jamais conclure « avant mutation ».
+    case "${FAKE_SSH_MODE:-ok}" in
+      campagne_supprime_registre) rm -f "${FAKE_STATE_CIBLE}"; echo "campagne cassee" >&2; exit 1 ;;
+      campagne_registre_duplique) echo "state=targeted_running" >> "${FAKE_STATE_CIBLE}"; echo "campagne cassee" >&2; exit 1 ;;
+      campagne_registre_sans_schema) sed -i '/^schema=/d' "${FAKE_STATE_CIBLE}"; echo "campagne cassee" >&2; exit 1 ;;
+      campagne_registre_tronque) printf 'schema=e-hgp.lifecycle-state.v1\nstate=targeted_runn' > "${FAKE_STATE_CIBLE}"; echo "campagne cassee" >&2; exit 1 ;;
+    esac
     echo "=== fin des runs (la validation locale decide du statut, jamais cette ligne) ==="
     exit 0
     ;;
@@ -132,13 +141,26 @@ case "${FAKE_START_MODE:-ok}" in
   ok_handoff_corrompu) write_state targeted_running "${FAKE_GEN}"; echo "pas du json" > "${handoff}"; exit 0 ;;
   ok_bad_timestamp) write_state targeted_running "pas-une-date"; write_handoff "pas-une-date"; exit 0 ;;
   stopped_by_guard) write_state targeted_stopped "${FAKE_GEN}"; exit 5 ;;
-  stop_failed_by_guard) write_state targeted_stop_failed "${FAKE_GEN}"; exit 6 ;;
+  stopped_wrong_generation) write_state targeted_stopped "generation-perimee"; write_handoff "${FAKE_GEN}"; exit 5 ;;
+  publication_interrompue) printf 'schema=e-hgp.lifecycle-st' > "$(dirname "${state}")/.$(basename "${state}").zzz.partial"; exit 3 ;;
+  stop_failed_by_guard)
+    # REPRISE EXECUTEE (cinquieme tour) : le garde tente REELLEMENT son arret
+    # interne — c'est son echec observe, jamais un etat fabrique, qui produit
+    # targeted_stop_failed.
+    if "$(dirname "$0")/stop_and_verify.sh" --yes --expected-last-start-timestamp "${FAKE_GEN}"; then
+      write_state targeted_stopped "${FAKE_GEN}"
+    else
+      write_state targeted_stop_failed "${FAKE_GEN}"
+    fi
+    exit 6 ;;
   ok) write_state targeted_running "${FAKE_GEN}"; write_handoff "${FAKE_GEN}"; exit 0 ;;
 esac
 EOF
   cat > "$1/stop_and_verify.sh" <<'EOF'
 #!/usr/bin/env bash
 echo "STOP $*" >> "${FAKE_CALLS}"
+n=$(grep -c '^STOP ' "${FAKE_CALLS}" || true)
+if [ "${FAKE_STOP_FAIL_FIRST:-0}" = "1" ] && [ "${n}" -le 1 ]; then exit 1; fi
 exit "${FAKE_STOP_RC:-0}"
 EOF
   chmod +x "$1"/*.sh
@@ -178,6 +200,7 @@ run_scenario() {
   export FAKE_CALLS="${SCENARIO_DIR}/calls.log"
   : > "${FAKE_CALLS}"
   export FAKE_GEN FAKE_SCP_DEST="${W}" FAKE_LOG_A_VERROUILLER="${W}/session.log"
+  export FAKE_STATE_CIBLE="${W}/etat_cycle_vie"
   local rc=0
   env PATH="${SCENARIO_DIR}/bin:${PATH}" \
     FAKE_START_MODE="${start_mode}" FAKE_SSH_MODE="${ssh_mode}" FAKE_STOP_RC="${stop_rc}" \
@@ -249,6 +272,17 @@ check_true "nominal mecanique : recu durable UNIQUE publie atomiquement (RECU + 
     && grep -q 'profil_campagne.txt' \"\$d/SHA256SUMS\" \
     && grep -q '^profil=decision_v1' \"\$d/RECU_SESSION.txt\" \
     && [ -z \"\$(ls -d '${SCENARIO_DIR}'/recu/*.partial 2>/dev/null)\" ]"
+# VERIFICATION EXTERIEURE du recu (cinquieme tour) : le manifeste se verifie
+# depuis l'exterieur, couvre EXACTEMENT les fichiers publies, les CINQ
+# resumes sont durables, et aucun temporaire du VRAI motif `s_*.partial.*`
+# (mktemp de finalize_receipt) ne survit.
+check_true "nominal mecanique : recu verifie de l'EXTERIEUR (sha256sum -c, couverture exacte, resumes durables, aucun .partial.*)" \
+  bash -c "d=\$(ls -d '${SCENARIO_DIR}'/recu/s_* | head -1) \
+    && (cd \"\$d\" && sha256sum -c --quiet SHA256SUMS >/dev/null 2>&1) \
+    && [ \"\$(cd \"\$d\" && find . -type f ! -name SHA256SUMS | sort)\" = \"\$(cd \"\$d\" && awk '{print \$2}' SHA256SUMS | sort)\" ] \
+    && for r in bench_resume queue_resume sweep_resume gpu_resume frontier_resume; do \
+         grep -q \"\${r}.txt\" \"\$d/SHA256SUMS\" || exit 1; done \
+    && [ -z \"\$(ls -d '${SCENARIO_DIR}'/recu/s_*.partial.* 2>/dev/null)\" ]"
 # Registre partage jusqu'au TERMINAL par le cleanup exterieur (troisieme
 # tour) : apres un arret nominal certifie, l'etat est targeted_stopped et le
 # recu le grave.
@@ -273,14 +307,66 @@ check_true "arret deja certifie par le garde : aucun second arret, aucun blocage
     && ! grep -q 'BLOCAGE' '${SCENARIO_DIR}/stderr.log' \
     && grep -q 'arret deja certifie par le garde' '${SCENARIO_DIR}/stdout.log'"
 
-# ---- 9bis. REPRISE BORNEE : l'arret interne du garde a echoue
-# (targeted_stop_failed) — le cleanup exterieur RE-tente UNE fois l'arret
-# cible et atteint le terminal targeted_stopped.
+# ---- 9bis. REPRISE BORNEE **EXECUTEE** (cinquieme tour) : le garde tente
+# REELLEMENT son arret interne (premier appel de stop_and_verify, en echec),
+# publie targeted_stop_failed d'apres ce resultat observe, puis le cleanup
+# exterieur RE-tente UNE fois — exactement DEUX appels, meme cible, meme
+# generation, dans cet ordre, terminal targeted_stopped.
+export FAKE_STOP_FAIL_FIRST=1
 rc=0; run_scenario stop_failed_by_guard || rc=$?
-check_true "reprise bornee : un arret exterieur apres l'echec interne, terminal targeted_stopped" \
+unset FAKE_STOP_FAIL_FIRST
+check_true "reprise EXECUTEE : deux appels de stop ordonnes (interne au garde puis exterieur), meme generation, terminal targeted_stopped" \
+  bash -c "[ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 2 ] \
+    && [ \"\$(grep -c -- 'STOP --yes --expected-last-start-timestamp ${FAKE_GEN}' '${FAKE_CALLS}')\" -eq 2 ] \
+    && s1=\$(grep -n '^STOP ' '${FAKE_CALLS}' | head -1 | cut -d: -f1) \
+    && s2=\$(grep -n '^STOP ' '${FAKE_CALLS}' | tail -1 | cut -d: -f1) \
+    && d=\$(grep -n '^START ' '${FAKE_CALLS}' | head -1 | cut -d: -f1) \
+    && [ \"\${d}\" -lt \"\${s1}\" ] && [ \"\${s1}\" -lt \"\${s2}\" ] \
+    && [ \"\${s2}\" -eq \"\$(wc -l < '${FAKE_CALLS}')\" ] \
+    && grep -q '^state=targeted_stopped' '${SCENARIO_DIR}/work/etat_cycle_vie'"
+
+# ---- 9ter. MUTANTS PERMANENTS DU REGISTRE (cinquieme tour) : aucun ne doit
+# conclure « avant mutation » ni « deja arrete » sans generation exacte.
+# (a) registre PERDU pendant la campagne, handoff valide : arret via handoff.
+rc=0; run_scenario ok campagne_supprime_registre || rc=$?
+check_true "mutant registre perdu + handoff valide : UN arret cible, jamais refus avant mutation" \
   bash -c "[ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ] \
     && grep -q -- '--expected-last-start-timestamp ${FAKE_GEN}' '${FAKE_CALLS}' \
-    && grep -q '^state=targeted_stopped' '${SCENARIO_DIR}/work/etat_cycle_vie'"
+    && ! grep -q 'refus avant demarrage' '${SCENARIO_DIR}/stdout.log' '${SCENARIO_DIR}/work/session.log' 2>/dev/null \
+    && d=\$(ls -d '${SCENARIO_DIR}'/recu/s_* | head -1) \
+    && grep -q '^issue=arret_tente' \"\$d/RECU_SESSION.txt\""
+# (b) cle dupliquee : snapshot ILLISIBLE -> arret via handoff.
+rc=0; run_scenario ok campagne_registre_duplique || rc=$?
+check_true "mutant cle dupliquee : registre illisible, UN arret cible via le handoff" \
+  bash -c "[ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ] \
+    && grep -q -- '--expected-last-start-timestamp ${FAKE_GEN}' '${FAKE_CALLS}'"
+# (c) schema manquant : idem.
+rc=0; run_scenario ok campagne_registre_sans_schema || rc=$?
+check_true "mutant schema manquant : registre illisible, UN arret cible via le handoff" \
+  bash -c "[ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ] \
+    && grep -q -- '--expected-last-start-timestamp ${FAKE_GEN}' '${FAKE_CALLS}'"
+# (d) fichier tronque (derniere ligne non terminee) : idem.
+rc=0; run_scenario ok campagne_registre_tronque || rc=$?
+check_true "mutant registre tronque : illisible, UN arret cible via le handoff" \
+  bash -c "[ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ] \
+    && grep -q -- '--expected-last-start-timestamp ${FAKE_GEN}' '${FAKE_CALLS}'"
+# (e) targeted_stopped d'une AUTRE generation, handoff valide : fast-path
+# REFUSE, arret sur la generation VERROUILLEE (jamais celle du registre).
+rc=0; run_scenario stopped_wrong_generation || rc=$?
+check_true "mutant targeted_stopped d'une autre generation : fast-path refuse, arret sur la generation verrouillee" \
+  bash -c "[ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ] \
+    && grep -q -- '--expected-last-start-timestamp ${FAKE_GEN}' '${FAKE_CALLS}' \
+    && ! grep -q -- '--expected-last-start-timestamp generation-perimee' '${FAKE_CALLS}' \
+    && ! grep -q 'arret deja certifie par le garde' '${SCENARIO_DIR}/stdout.log'"
+# (f) PREMIERE PUBLICATION INTERROMPUE : seul un temporaire .partial existe,
+# aucun registre final, aucun handoff — la publication atomique garantit
+# qu'aucun start n'a ete demande : refus avant mutation, 0 arret, 0 blocage.
+rc=0; run_scenario publication_interrompue || rc=$?
+check_true "mutant publication interrompue : refus avant mutation, aucun arret, aucun blocage" \
+  bash -c "[ '${rc}' -eq 3 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 0 ] \
+    && ! grep -q 'BLOCAGE' '${SCENARIO_DIR}/stderr.log' \
+    && d=\$(ls -d '${SCENARIO_DIR}'/recu/s_* | head -1) \
+    && grep -q '^issue=refus_avant_mutation' \"\$d/RECU_SESSION.txt\""
 
 # ---- Scenarios bootstrap + pin : clone jetable, versions COURANTES du
 # protocole synchronisees et committees DANS LE CLONE (commit conditionnel :
@@ -370,4 +456,4 @@ if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest cycle de vie v6 : ${FAILURES} echec(s)" >&2
   exit 1
 fi
-echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (15 scenarios dont reprise bornee, point d'entree hors depot et refus d'entree directe + 10 refus de pin, rejouable depuis un HEAD propre)"
+echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (21 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue — + 11 refus de pin, rejouable depuis un HEAD propre)"

@@ -486,13 +486,13 @@ data = ("schema=e-hgp.lifecycle-state.v1\n"
         f"instance={instance}\n"
         f"generation={generation}\n").encode()
 if allow == "0":
-    # CREATION REELLEMENT EXCLUSIVE (audit troisieme tour : un test
-    # exists() suivi d'un replace n'est pas une publication exclusive) :
-    # O_CREAT | O_EXCL — deux producteurs ne peuvent pas franchir.
-    try:
-        descriptor = os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
-    except FileExistsError:
-        sys.exit(1)
+    # CREATION EXCLUSIVE **ET** ATOMIQUE (audit cinquieme tour : ecrire
+    # directement dans le nom final n'est pas atomiquement observable — une
+    # interruption laisserait un registre tronque). Patron du handoff :
+    # temporaire fsynce puis LIEN DUR vers le nom final — le lien echoue si
+    # le nom existe (exclusivite) et publie un contenu complet ou rien
+    # (atomicite) ; fsync du parent ensuite.
+    descriptor, temporary = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".partial", dir=str(path.parent))
     try:
         offset = 0
         while offset < len(data):
@@ -500,6 +500,12 @@ if allow == "0":
         os.fsync(descriptor)
     finally:
         os.close(descriptor)
+    try:
+        os.link(temporary, path)
+    except FileExistsError:
+        os.unlink(temporary)
+        sys.exit(1)
+    os.unlink(temporary)
 else:
     descriptor, temporary = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".partial", dir=str(path.parent))
     try:

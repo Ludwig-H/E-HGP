@@ -242,7 +242,7 @@ chmod +x "${FAKE}/nvcc" "${FAKE}/nvidia-smi" "${FAKE}/cmake" \
 CANON="${WORK}/selftest_reduit_v1.env"
 {
   echo "# profil canonique du selftest (grammaire fermee : identite + neuf axes)"
-  echo 'PROFIL_NOM="selftest_reduit_v1"' 
+  echo 'PROFIL_NOM="selftest_reduit_v1"'
   echo 'CONF_SPECS="uniform:50000"'
   echo 'BENCH_SPECS="uniform:32000 eight_clusters:32000"'
   echo 'QUEUE_FAMILIES="terrain_stationnaire"'
@@ -257,8 +257,22 @@ CANON="${WORK}/selftest_reduit_v1.env"
   echo 'GPU_SPECS="uniform:50000"'
   echo 'FRONTIER_SPECS="uniform:200000 uniform:400000"'
   echo 'FRONTIER_TIMEOUT=60'
+  echo 'GPU_BUILD_TIMEOUT=60'
+  echo 'FRONTIER_ULIMIT_KB=0'
 } > "${CANON}"
 CANON_SHA="$(sha256sum "${CANON}" | awk '{print $1}')"
+MANIFESTE="${WORK}/manifest_revalide.txt"
+{
+  echo "schema=e-hgp.protocol-manifest.v1"
+  echo "commit=${PIN_COMMIT}"
+  printf '%s\t%s\t%s\n' "${CANON_SHA}" "$(wc -c < "${CANON}")" \
+    "gcp-migration/profils/selftest_reduit_v1.env"
+  printf '%s\t%s\t%s\n' \
+    "$(sha256sum "${HERE}/profils/decision_v1.env" | awk '{print $1}')" \
+    "$(wc -c < "${HERE}/profils/decision_v1.env")" \
+    "gcp-migration/profils/decision_v1.env"
+} > "${MANIFESTE}"
+PIN_MANIFEST="$(sha256sum "${MANIFESTE}" | awk '{print $1}')"
 PROFILE="${WORK}/profil_campagne.txt"
 {
   echo "profil=selftest_reduit_v1"
@@ -278,6 +292,8 @@ PROFILE="${WORK}/profil_campagne.txt"
   echo "gpu_specs=uniform:50000"
   echo "frontier_specs=uniform:200000 uniform:400000"
   echo "frontier_timeout=60"
+  echo "gpu_build_timeout=60"
+  echo "frontier_ulimit_kb=0"
 } > "${PROFILE}"
 run_runner() { # $1 = dossier out ; le reste = env supplementaire
   local out="$1"; shift
@@ -289,6 +305,7 @@ run_runner() { # $1 = dossier out ; le reste = env supplementaire
     QUEUE_FAMILIES="terrain_stationnaire" QUEUE_N="64000" QUEUE_SEEDS="3 4" \
     SWEEP_SPECS="uniform:32000:2,8" SWEEP_REPEATS=2 \
     GPU_SPECS="uniform:50000" FRONTIER_SPECS="uniform:200000 uniform:400000" FRONTIER_TIMEOUT=60 \
+    GPU_BUILD_TIMEOUT=60 FRONTIER_ULIMIT_KB=0 \
     FAKE_V6_FRONT_FAIL=1 \
     NVCC_BIN="${FAKE}/nvcc" GPU_CMAKE_BIN="${FAKE}/cmake" \
     GPU_WITNESS_BIN="${FAKE}/mhgp5_device_witness" \
@@ -298,9 +315,9 @@ run_runner() { # $1 = dossier out ; le reste = env supplementaire
     "$@" \
     bash "${RUNNER}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST}" >/dev/null 2>&1
 }
-run_validator() { # $1 = dossier out, $2 = remote_rc, $3 = scp_rc, [$4 = profil], [$5 = canonique]
+run_validator() { # $1 = dossier out, $2 = remote_rc, $3 = scp_rc, [$4 = profil], [$5 = canonique], [$6 = manifeste]
   python3 "${VALIDATOR}" "$1" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST}" "$2" "$3" \
-    "${4:-${PROFILE}}" "${5:-${CANON}}"
+    "${4:-${PROFILE}}" "${5:-${CANON}}" "${6:-${MANIFESTE}}"
 }
 
 # ---- 1. Nominal.
@@ -406,15 +423,23 @@ falsify "mutant du temoin device non tue" \
 falsify "statut de frontiere supprime (presence exigee meme a code libre)" \
   rm front_uniform_n400000.status
 falsify "plan GPU supprime" rm gpu_plan.txt
+falsify "argv de route GPU altere (idx sans --gpu-wire=index)" \
+  sed -i "s/ --gpu-wire=index//" gpu_idx_uniform_n50000.status
+falsify "ligne invariante de FILS supprimee (vacuite refusee)" \
+  sed -i "/^generation /d" sweep_uniform_n32000_t2_r1.txt
+falsify "frontiere : code non nul SANS motif de capacite (panne non typee)" \
+  bash -c "sed -i 's/bad_alloc/xxx/' front_uniform_n400000.txt"
+falsify "MANIFESTE_DISTANT : ligne dupliquee" \
+  bash -c "l=\$(grep topologie.txt MANIFESTE_DISTANT.txt | head -1); printf '%s\n' \"\$l\" >> MANIFESTE_DISTANT.txt"
 # CAS SUR SNAPSHOT PROPRE (audit quatrieme tour : plus jamais l'inventaire
 # deja juge) avec DIAGNOSTIC EXACT exige — chaque cas repart d'une copie
 # fraiche du nominal et doit echouer pour SA cause.
-fresh_case() { # $1 = nom, $2 = remote_rc, $3 = scp_rc, $4 = profil (vide = defaut), $5 = motif stderr exige
+fresh_case() { # $1 = nom, $2 = remote_rc, $3 = scp_rc, $4 = profil (vide = defaut), $5 = motif exige, [$6 = canon], [$7 = manifeste]
   local dir="${WORK}/cas_propre"
   rm -rf "${dir}"
   cp -r "$(dirname "${OUT}")/$(basename "${OUT}")" "${dir}"
   local rc=0 sortie
-  sortie="$(run_validator "${dir}" "$2" "$3" "${4:-${PROFILE}}" 2>&1)" || rc=$?
+  sortie="$(run_validator "${dir}" "$2" "$3" "${4:-${PROFILE}}" "${6:-${CANON}}" "${7:-${MANIFESTE}}" 2>&1)" || rc=$?
   check_true "$1" bash -c "[ \"\$3\" -eq 1 ] && printf '%s' \"\$1\" | grep -q -- \"\$2\"" _ "${sortie}" "$5" "${rc}"
 }
 fresh_case "falsification refusee : remote_rc non nul (cause exacte)" 3 0 "" "remote_campaign_rc=3"
@@ -426,6 +451,16 @@ fresh_case "falsification refusee : plans != profil epingle (cause exacte)" 0 0 
 PROF3="${WORK}/profil_sha_faux.txt"
 sed 's/^profil_canonique_sha256=.*/profil_canonique_sha256='"$(printf 'e%.0s' {1..64})"'/' "${PROFILE}" > "${PROF3}"
 fresh_case "falsification refusee : sha du canon discordant (cause exacte)" 0 0 "${PROF3}" "profil_canonique_sha256 !="
+CANON_INCONNU="${WORK}/canon_ligne_inconnue.env"
+{ cat "${CANON}"; echo 'AXE_INVENTE="x"'; } > "${CANON_INCONNU}"
+PROF_CI="${WORK}/profil_canon_inconnu.txt"
+sed "s/^profil_canonique_sha256=.*/profil_canonique_sha256=$(sha256sum "${CANON_INCONNU}" | awk '{print $1}')/" "${PROFILE}" > "${PROF_CI}"
+fresh_case "falsification refusee : ligne inconnue dans le canon (grammaire totale)" 0 0 "${PROF_CI}" "axe inconnu AXE_INVENTE" "${CANON_INCONNU}"
+CANON_GUILLEMET="${WORK}/canon_guillemet.env"
+sed 's/^CONF_SPECS="uniform:50000"/CONF_SPECS="uniform:50000/' "${CANON}" > "${CANON_GUILLEMET}"
+PROF_CG="${WORK}/profil_canon_guillemet.txt"
+sed "s/^profil_canonique_sha256=.*/profil_canonique_sha256=$(sha256sum "${CANON_GUILLEMET}" | awk '{print $1}')/" "${PROFILE}" > "${PROF_CG}"
+fresh_case "falsification refusee : guillemet desapparie dans le canon" 0 0 "${PROF_CG}" "ligne hors grammaire" "${CANON_GUILLEMET}"
 PROF5="${WORK}/profil_sans_sweep.txt"
 sed '/^sweep_specs=/d' "${PROFILE}" > "${PROF5}"
 fresh_case "falsification refusee : cle sweep_specs absente (cause exacte)" 0 0 "${PROF5}" "cle sweep_specs absente"
@@ -438,12 +473,98 @@ sed -e 's/^profil=selftest_reduit_v1/profil=decision_v1/' \
 D4="${WORK}/cas_decision_reduit"
 rm -rf "${D4}"; cp -r "${OUT}" "${D4}"
 rc=0; VOUT4="$(run_validator "${D4}" 0 0 "${PROF4}")" || rc=$?
-check_true "mutant decision_v1 reduit : verifie_non_decisionnel (canon non decisionnel), jamais decision_complete" \
-  bash -c "[ '${rc}' -eq 0 ] && printf '%s\n' \"\$1\" | grep -q 'cause=canon non decisionnel' \
+check_true "mutant decision_v1 reduit : TUE par l'identite profil_canonique != PROFIL_NOM (jamais decision_complete)" \
+  bash -c "[ '${rc}' -eq 1 ] && printf '%s\n' \"\$1\" | grep -q 'profil_canonique=decision_v1 != PROFIL_NOM' \
     && ! printf '%s\n' \"\$1\" | grep -q 'decision_complete'" _ "${VOUT4}"
+# MUTANT COORDONNE COMPLET (cinquieme tour) : canon REDUIT auto-declare
+# decision_v1, hash et profil effectif recalcules et concordants — seule la
+# LIAISON AU MANIFESTE le tue (le manifeste epingle ne contient pas ce canon).
+CANON5="${WORK}/canon_pretendu_decision.env"
+sed 's/^PROFIL_NOM="selftest_reduit_v1"/PROFIL_NOM="decision_v1"/' "${CANON}" > "${CANON5}"
+PROF5B="${WORK}/profil_coordonne.txt"
+sed -e 's/^profil=selftest_reduit_v1/profil=decision_v1/' \
+    -e 's/^profil_canonique=selftest_reduit_v1/profil_canonique=decision_v1/' \
+    -e "s/^profil_canonique_sha256=.*/profil_canonique_sha256=$(sha256sum "${CANON5}" | awk '{print $1}')/" \
+    "${PROFILE}" > "${PROF5B}"
+D5="${WORK}/cas_coordonne"
+rm -rf "${D5}"; cp -r "${OUT}" "${D5}"
+rc=0; VOUT5="$(run_validator "${D5}" 0 0 "${PROF5B}" "${CANON5}")" || rc=$?
+check_true "mutant coordonne (canon reduit auto-declare + hash concordant) : TUE par la liaison au manifeste" \
+  bash -c "[ '${rc}' -eq 1 ] && printf '%s\n' \"\$1\" | grep -q 'NON LIE au manifeste revalide' \
+    && ! printf '%s\n' \"\$1\" | grep -q 'decision_complete'" _ "${VOUT5}"
+
+# ---- PROFIL CANONIQUE G4 EXACT DE BOUT EN BOUT (cinquieme tour : le profil
+# etait AUTO-INVALIDANT — queue_sequence recalculait la sentinelle. Plus
+# jamais un profil canonique livre sans etre exerce runner -> validateur).
+G4ENV="${HERE}/profils/g4_mesure_v1.env"
+G4_SHA="$(sha256sum "${G4ENV}" | awk '{print $1}')"
+OUTG4="${WORK}/out_g4"
+PROFILE_G4="${WORK}/profil_g4.txt"
+MANIFESTE_G4="${WORK}/manifest_g4.txt"
+G4_AXES="${WORK}/g4_axes.env"
+( set -a; source "${G4ENV}" >/dev/null
+  {
+    echo "profil=g4_mesure_v1"
+    echo "profil_canonique=g4_mesure_v1"
+    echo "profil_canonique_sha256=${G4_SHA}"
+    echo "conf_specs=${CONF_SPECS}"
+    echo "bench_specs=${BENCH_SPECS}"
+    echo "queue_families=${QUEUE_FAMILIES}"
+    echo "queue_n=${QUEUE_N}"
+    echo "queue_seeds=${QUEUE_SEEDS}"
+    echo "run_timeout=${RUN_TIMEOUT}"
+    echo "threads=${THREADS_VM}"
+    echo "v5_gate_min=${V5_GATE_MIN}"
+    echo "v6_gate_min=${V6_GATE_MIN}"
+    echo "sweep_specs=${SWEEP_SPECS}"
+    echo "sweep_repeats=${SWEEP_REPEATS}"
+    echo "gpu_specs=${GPU_SPECS}"
+    echo "frontier_specs=${FRONTIER_SPECS}"
+    echo "frontier_timeout=${FRONTIER_TIMEOUT}"
+    echo "gpu_build_timeout=${GPU_BUILD_TIMEOUT}"
+    echo "frontier_ulimit_kb=${FRONTIER_ULIMIT_KB}"
+  } > "${PROFILE_G4}"
+  {
+    printf 'CONF_SPECS=%q\nBENCH_SPECS=%q\nQUEUE_FAMILIES=%q\nQUEUE_N=%q\nQUEUE_SEEDS=%q\n' \
+      "${CONF_SPECS}" "${BENCH_SPECS}" "${QUEUE_FAMILIES}" "${QUEUE_N}" "${QUEUE_SEEDS}"
+    printf 'RUN_TIMEOUT=%q\nTHREADS=%q\nSWEEP_SPECS=%q\nSWEEP_REPEATS=%q\nGPU_SPECS=%q\n' \
+      "${RUN_TIMEOUT}" "${THREADS_VM}" "${SWEEP_SPECS}" "${SWEEP_REPEATS}" "${GPU_SPECS}"
+    printf 'FRONTIER_SPECS=%q\nFRONTIER_TIMEOUT=%q\nGPU_BUILD_TIMEOUT=%q\nFRONTIER_ULIMIT_KB=%q\n' \
+      "${FRONTIER_SPECS}" "${FRONTIER_TIMEOUT}" "${GPU_BUILD_TIMEOUT}" "${FRONTIER_ULIMIT_KB}"
+  } > "${G4_AXES}"
+)
+{
+  echo "schema=e-hgp.protocol-manifest.v1"
+  echo "commit=${PIN_COMMIT}"
+  printf '%s\t%s\t%s\n' "${G4_SHA}" "$(wc -c < "${G4ENV}")" "gcp-migration/profils/g4_mesure_v1.env"
+} > "${MANIFESTE_G4}"
+PIN_MANIFEST_G4="$(sha256sum "${MANIFESTE_G4}" | awk '{print $1}')"
+rc=0
+(
+  set -a
+  # shellcheck disable=SC1090
+  source "${G4_AXES}"
+  V5_BIN="${FAKE}/mhgp5" V6_BIN="${FAKE}/mhgp6" CONF_BIN="${FAKE}/mhgp6_conformity"
+  TIME_BIN="${FAKE}/gnutime" OUT_DIR="${OUTG4}"
+  NVCC_BIN="${FAKE}/nvcc" GPU_CMAKE_BIN="${FAKE}/cmake"
+  GPU_WITNESS_BIN="${FAKE}/mhgp5_device_witness"
+  GPU_Q3_GATE="${FAKE}/mhgp5_q3_lane_device_gate" GPU_Q4_GATE="${FAKE}/mhgp5_q4_lane_device_gate"
+  GPU_BIN="${FAKE}/mhgp5_cuda" V5CPU_BIN="${FAKE}/mhgp5"
+  PATH="${FAKE}:${PATH}"
+  bash "${RUNNER}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_G4}"
+) >/dev/null 2>&1 || rc=$?
+check_true "profil G4 exact : runner rc=0 (81 runs, queue a zero run)" \
+  bash -c "[ '${rc}' -eq 0 ] && grep -q '^runs=0$' '${OUTG4}/queue_plan.txt' \
+    && [ \"\$(sed -n 's/^runs=//p' '${OUTG4}/sweep_plan.txt')\" = '34' ] \
+    && [ \"\$(sed -n 's/^runs=//p' '${OUTG4}/gpu_plan.txt')\" = '19' ] \
+    && [ \"\$(sed -n 's/^runs=//p' '${OUTG4}/frontier_plan.txt')\" = '4' ]"
+rc=0; VG4="$(python3 "${VALIDATOR}" "${OUTG4}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_G4}" 0 0 \
+  "${PROFILE_G4}" "${G4ENV}" "${MANIFESTE_G4}")" || rc=$?
+check_true "profil G4 exact : validateur rc=0, verifie_non_decisionnel" \
+  bash -c "[ '${rc}' -eq 0 ] && printf '%s\n' \"\$1\" | grep -q 'campaign_status=verifie_non_decisionnel profil=g4_mesure_v1'" _ "${VG4}"
 
 if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest campagne v6 : ${FAILURES} echec(s)" >&2
   exit 1
 fi
-echo "selftest campagne v6 : runner distant + validateur conformes (nominal idempotent + refus + falsifications a cause exacte + mutant decision reduit) — le cycle de vie du lanceur et les gardes GCP sont prouves par selftest_cycle_vie_v6.sh, a lancer aussi"
+echo "selftest campagne v6 : runner distant + validateur conformes (nominal idempotent + profil G4 exact de bout en bout + refus + falsifications a cause exacte + mutants coordonnes tues par identite et liaison au manifeste) — le cycle de vie du lanceur et les gardes GCP sont prouves par selftest_cycle_vie_v6.sh, a lancer aussi"

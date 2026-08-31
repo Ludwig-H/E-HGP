@@ -26,9 +26,13 @@ campaign_status — jamais le lanceur, jamais la VM. `complete` exige :
     mutant du temoin TUE (code 4), lanes q3/q4 device aux planchers exacts,
     et par famille digest_balls + digest_all IDENTIQUES entre le contrat CPU
     et chacun des contrats --gpu / adaptatif / wire=index ;
-  - phase FRONTIERE : runs presents et pins exacts, mais le CODE est LIBRE
-    (un OOM, un refus de capacite ou un timeout est une DONNEE de frontiere,
-    gravee au resume, jamais une faute) ;
+  - phase FRONTIERE : issues TYPEES (cinquieme tour — une panne quelconque
+    n'est pas une frontiere) : code 0 = contrat pipeline complet ; code 124 =
+    timeout ; code non nul AVEC motif structure de capacite
+    (resource_exhausted / bad_alloc) = refus de capacite. Tout autre code
+    (CLI 2, invariant 3, binaire absent 127, signal sans motif) INVALIDE la
+    phase — un SIGKILL sans preuve est une observation censuree, pas un OOM
+    attribue. RSS et sortie GNU time exiges dans tous les cas ;
   - des codes de session (ssh distant, scp) nuls.
 Il ecrit bench_resume.txt et queue_resume.txt (murs / RSS — completude et
 dispersion, JAMAIS une conclusion d'acceleration ni de pente).
@@ -46,7 +50,7 @@ obtient `campaign_status=decision_complete` ; tout autre profil valide rend
 
 Usage : validate_v6_campaign.py OUT_DIR SOURCE_COMMIT SOURCE_PAYLOAD_SHA256 \\
         PROTOCOL_MANIFEST_SHA256 REMOTE_CAMPAIGN_RC SCP_RC PROFIL_CAMPAGNE \\
-        PROFIL_CANONIQUE
+        PROFIL_CANONIQUE MANIFESTE_REVALIDE
 Sortie : 0 si valide, 1 sinon (les preuves partielles restent sur place).
 """
 import hashlib
@@ -122,9 +126,15 @@ def read_plan(out, fname, version_key, param_keys, bad, version="v1"):
     return params, listed
 
 
+def expand_axis(text):
+    """Expansion unique d'un axe : liste de jetons, sentinelle `aucun`
+    filtree — TOUTE phase vide passe par ici (bloquant cinquieme tour)."""
+    return [tok for tok in text.split() if tok != "aucun"]
+
+
 def conf_sequence(params):
     seq = []
-    for spec in params["specs"].split():
+    for spec in expand_axis(params["specs"]):
         fam, n = spec.split(":", 1)
         seq.append({"seq": str(len(seq) + 1), "name": f"v5ref_{fam}_n{n}",
                     "family": fam, "n": n, "kind": "v5ref"})
@@ -135,7 +145,7 @@ def conf_sequence(params):
 
 def bench_sequence(params):
     seq, cfg = [], 0
-    for spec in params["specs"].split():
+    for spec in expand_axis(params["specs"]):
         fam, n = spec.split(":", 1)
         cfg += 1
         order = ["v5", "v6", "v6", "v5"] if cfg % 2 == 1 else ["v6", "v5", "v5", "v6"]
@@ -151,9 +161,9 @@ def bench_sequence(params):
 
 def queue_sequence(params):
     seq = []
-    for fam in params["families"].split():
-        for n in params["n_list"].split():
-            for seed in params["seeds"].split():
+    for fam in expand_axis(params["families"]):
+        for n in expand_axis(params["n_list"]):
+            for seed in expand_axis(params["seeds"]):
                 seq.append({"seq": str(len(seq) + 1), "name": f"queue_{fam}_n{n}_s{seed}",
                             "family": fam, "n": n, "seed": seed})
     return seq
@@ -162,9 +172,7 @@ def queue_sequence(params):
 def sweep_sequence(params):
     seq = []
     reps = int(params["repeats"]) if params["repeats"].isdigit() else 0
-    for spec in params["specs"].split():
-        if spec == "aucun":
-            continue
+    for spec in expand_axis(params["specs"]):
         fam, n, tl = spec.split(":", 2)
         threads = tl.split(",")
         for r in range(1, reps + 1):
@@ -181,13 +189,11 @@ GPU_KINDS = ("cpu", "dev", "ad", "idx")
 
 def gpu_sequence(params):
     seq = []
-    if params["specs"].strip() == "aucun":
+    if not expand_axis(params["specs"]):
         return seq
     for nm, kind in (("gpu_witness", "witness"), ("gpu_lane", "lane"), ("gpu_mutant", "mutant")):
         seq.append({"seq": str(len(seq) + 1), "name": nm, "kind": kind})
-    for spec in params["specs"].split():
-        if spec == "aucun":
-            continue
+    for spec in expand_axis(params["specs"]):
         fam, n = spec.split(":", 1)
         for kind in GPU_KINDS:
             seq.append({"seq": str(len(seq) + 1), "name": f"gpu_{kind}_{fam}_n{n}",
@@ -197,9 +203,7 @@ def gpu_sequence(params):
 
 def frontier_sequence(params):
     seq = []
-    for spec in params["specs"].split():
-        if spec == "aucun":
-            continue
+    for spec in expand_axis(params["specs"]):
         fam, n = spec.split(":", 1)
         seq.append({"seq": str(len(seq) + 1), "name": f"front_{fam}_n{n}", "family": fam, "n": n})
     return seq
@@ -220,9 +224,9 @@ def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad,
     None), le statut (ou None) et (mur_ms, duree_s, rss_kb). Chaque champ du
     statut est exige EXACTEMENT une fois, et le pic RSS est recoupe avec la
     sortie complete de GNU time (audit GCP v6, P1). code_free=True (phase
-    frontiere) : le code est enregistre sans etre juge, le RSS peut manquer
-    (OOM tue) et les motifs interdits ne sont pas scannes — l'echec y est la
-    donnee."""
+    frontiere) : le code est CLASSIFIE par l'appelant au lieu d'etre juge ici,
+    et les motifs interdits ne sont pas scannes (le motif de capacite EST la
+    donnee) ; RSS et sortie GNU time restent exiges."""
     status = os.path.join(out, name + ".status")
     txt = os.path.join(out, name + ".txt")
     if not os.path.exists(status):
@@ -244,8 +248,7 @@ def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad,
         bad.append(f"{name}: code={fields.get('code') or '?'} (attendu {want_code})")
     kb = fields.get("peak_rss_kb")
     if not kb or not kb.isdigit() or int(kb) <= 0:
-        if not code_free:
-            bad.append(f"{name}: pic RSS absent ou nul")
+        bad.append(f"{name}: pic RSS absent ou nul")
         kb = None
     if fields.get("threads") != threads:
         bad.append(f"{name}: threads={fields.get('threads') or '?'} != {threads} (plan)")
@@ -260,8 +263,7 @@ def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad,
     else:
         tm = re.search(r"Maximum resident set size[^0-9]*(\d+)", read_text(gtime))
         if not tm:
-            if not code_free:
-                bad.append(f"{name}: pic RSS absent de la sortie GNU time")
+            bad.append(f"{name}: pic RSS absent de la sortie GNU time")
         elif kb is not None and tm.group(1) != kb:
             bad.append(f"{name}: peak_rss_kb={kb} != GNU time ({tm.group(1)}) — statut non recoupe")
     if not os.path.exists(txt):
@@ -315,14 +317,22 @@ def determinism_signature(body):
     return tuple(sig)
 
 
+# Ce que la phase FILS juge est l'INVARIANCE DU GRAND-LIVRE entre fils —
+# compteurs, generation, cardinalites —, PAS la bit-identite de l'objet (les
+# runs de fils n'impriment pas de digest ; deux forets differentes aux memes
+# comptes passeraient). La bit-identite de l'objet reste prouvee par les
+# portes a digest (conformite, contrats GPU) — cinquieme tour.
+SWEEP_INVARIANT_SINGLE = (r"^generation .*$", r"^sweep .*$", r"^vwspd .*$", r"^octaves_q4 .*$",
+                          r"^octaves_q4_seeds .*$", r"^vcensus .*$", r"^p_factor=.*$",
+                          r"^ledger_paires .*$")
+
+
 def thread_invariant_signature(body):
-    """Lignes deterministes INVARIANTES PAR FILS : compteurs, generation,
-    cardinalites — jamais l'identite (elle imprime threads=) ni les lignes
-    ouvriers (parallelisme MESURE, par definition dependant des fils)."""
+    """Lignes du grand-livre INVARIANTES PAR FILS — jamais l'identite (elle
+    imprime threads=) ni les lignes ouvriers (parallelisme MESURE, par
+    definition dependant des fils)."""
     sig = []
-    for pat in (r"^generation .*$", r"^sweep .*$", r"^vwspd .*$", r"^octaves_q4 .*$",
-                r"^octaves_q4_seeds .*$", r"^vcensus .*$", r"^p_factor=.*$", r"^ledger_paires .*$",
-                r"^cardinalites K=\d+ .*$"):
+    for pat in SWEEP_INVARIANT_SINGLE + (r"^cardinalites K=\d+ .*$",):
         sig.extend(re.findall(pat, body, re.M))
     return tuple(sig)
 
@@ -348,11 +358,12 @@ def sha256_file(path):
 
 
 def main():
-    if len(sys.argv) != 9:
-        print("usage: validate_v6_campaign.py OUT COMMIT PAYLOAD MANIFEST REMOTE_RC SCP_RC PROFIL CANONIQUE",
+    if len(sys.argv) != 10:
+        print("usage: validate_v6_campaign.py OUT COMMIT PAYLOAD MANIFEST REMOTE_RC SCP_RC PROFIL CANONIQUE MANIFESTE_REVALIDE",
               file=sys.stderr)
         return 2
-    out, commit, payload_sha, manifest_sha, remote_rc, scp_rc, profile_path, canonical_path = sys.argv[1:9]
+    (out, commit, payload_sha, manifest_sha, remote_rc, scp_rc, profile_path,
+     canonical_path, revalidated_manifest_path) = sys.argv[1:10]
     bad = []
     if remote_rc != "0":
         bad.append(f"session distante : remote_campaign_rc={remote_rc}")
@@ -360,6 +371,7 @@ def main():
         bad.append(f"rapatriement : scp_rc={scp_rc}")
     # PROFIL EPINGLE : la matrice attendue vient de lui, jamais du runner.
     profile = {}
+    canon_axes = {}
     if not os.path.exists(profile_path):
         bad.append("profil de campagne ABSENT (matrice non epinglee)")
     else:
@@ -369,7 +381,8 @@ def main():
                 profile[k] = v
         for key in ("profil", "profil_canonique", "profil_canonique_sha256", "conf_specs", "bench_specs",
                     "queue_families", "queue_n", "queue_seeds", "threads",
-                    "sweep_specs", "sweep_repeats", "gpu_specs", "frontier_specs", "frontier_timeout"):
+                    "sweep_specs", "sweep_repeats", "gpu_specs", "frontier_specs", "frontier_timeout",
+                    "gpu_build_timeout", "frontier_ulimit_kb"):
             if not profile.get(key, "").strip():
                 bad.append(f"profil de campagne : cle {key} absente")
         for key in ("run_timeout", "v5_gate_min", "v6_gate_min"):
@@ -381,7 +394,6 @@ def main():
         # — l'audit du quatrieme tour a montre qu'un hash transporte sans
         # comparaison d'axes laissait passer une matrice reduite nommee
         # decision_v1.
-        canon_axes = {}
         if not os.path.exists(canonical_path):
             bad.append("profil canonique ABSENT (liaison impossible)")
         else:
@@ -390,16 +402,62 @@ def main():
             axis_names = ("PROFIL_NOM", "CONF_SPECS", "BENCH_SPECS", "QUEUE_FAMILIES", "QUEUE_N",
                           "QUEUE_SEEDS", "RUN_TIMEOUT", "THREADS_VM", "V5_GATE_MIN", "V6_GATE_MIN",
                           "SWEEP_SPECS", "SWEEP_REPEATS", "GPU_SPECS", "FRONTIER_SPECS",
-                          "FRONTIER_TIMEOUT")
+                          "FRONTIER_TIMEOUT", "GPU_BUILD_TIMEOUT", "FRONTIER_ULIMIT_KB")
+            # Grammaire TOTALE : commentaire, ligne vide, ou axe connu a
+            # guillemets equilibres — TOUT le reste est refuse.
+            axis_line = re.compile(r'^([A-Z0-9_]+)=(?:"([^"]*)"|([^"\s]*))$')
             for line in read_text(canonical_path).splitlines():
-                m = re.match(r'^([A-Z0-9_]+)="?([^"]*)"?$', line)
-                if m and m.group(1) in axis_names:
-                    if m.group(1) in canon_axes:
-                        bad.append(f"profil canonique : axe {m.group(1)} duplique")
-                    canon_axes[m.group(1)] = m.group(2)
+                if not line.strip() or line.lstrip().startswith("#"):
+                    continue
+                m = axis_line.match(line)
+                if not m:
+                    bad.append(f"profil canonique : ligne hors grammaire ({line[:60]})")
+                    continue
+                name = m.group(1)
+                value = m.group(2) if m.group(2) is not None else m.group(3)
+                if name not in axis_names:
+                    bad.append(f"profil canonique : axe inconnu {name}")
+                    continue
+                if name in canon_axes:
+                    bad.append(f"profil canonique : axe {name} duplique")
+                canon_axes[name] = value
             for axis in axis_names:
                 if axis not in canon_axes:
                     bad.append(f"profil canonique : axe {axis} absent")
+            # IDENTITE : le profil effectif doit designer le canon par SON nom
+            # (cinquieme tour : jamais compare pour les non decisionnels).
+            if canon_axes.get("PROFIL_NOM") and profile.get("profil_canonique") != canon_axes.get("PROFIL_NOM"):
+                bad.append(f"profil_canonique={profile.get('profil_canonique', '?')} != PROFIL_NOM du canon "
+                           f"({canon_axes.get('PROFIL_NOM')})")
+    # LIAISON AU MANIFESTE REVALIDE (cinquieme tour) : le canon fourni doit
+    # etre EXACTEMENT le fichier epingle du commit — chemin, hash et taille
+    # dans le manifeste dont le sha256 EST le pin grave dans chaque statut.
+    if not os.path.exists(revalidated_manifest_path):
+        bad.append("manifeste revalide ABSENT (liaison canon impossible)")
+    else:
+        if sha256_file(revalidated_manifest_path) != manifest_sha:
+            bad.append("manifeste revalide : sha256 != protocol_manifest_sha256 (pin)")
+        mlines = read_text(revalidated_manifest_path).splitlines()
+        entries = {}
+        if not mlines or mlines[0] != "schema=e-hgp.protocol-manifest.v1":
+            bad.append("manifeste revalide : schema absent ou inconnu")
+        if len(mlines) < 2 or mlines[1] != f"commit={commit}":
+            bad.append("manifeste revalide : commit != pin")
+        for ln in mlines[2:]:
+            m = re.match(r"^([0-9a-f]{64})\t(\d+)\t(\S+)$", ln)
+            if not m:
+                bad.append(f"manifeste revalide : ligne hors grammaire ({ln[:60]})")
+                continue
+            if m.group(3) in entries:
+                bad.append(f"manifeste revalide : chemin duplique {m.group(3)}")
+            entries[m.group(3)] = (m.group(1), m.group(2))
+        canon_name = canon_axes.get("PROFIL_NOM", "")
+        canon_rel = f"gcp-migration/profils/{canon_name}.env"
+        if canon_name and os.path.exists(canonical_path):
+            ent = entries.get(canon_rel)
+            if not ent or ent[0] != sha256_file(canonical_path) \
+               or ent[1] != str(os.path.getsize(canonical_path)):
+                bad.append(f"profil canonique NON LIE au manifeste revalide ({canon_rel} : chemin, hash ou taille)")
     for tf in ("conf_tronquee.txt", "bench_tronquee.txt", "queue_tronquee.txt",
                "sweep_tronquee.txt", "gpu_tronquee.txt", "frontier_tronquee.txt"):
         p = os.path.join(out, tf)
@@ -422,9 +480,9 @@ def main():
     sweep_params, sweep_listed = read_plan(out, "sweep_plan.txt", "sweep_plan",
                                            ("specs", "repeats"), bad)
     gpu_params, gpu_listed = read_plan(out, "gpu_plan.txt", "gpu_plan",
-                                       ("specs", "threads"), bad)
+                                       ("specs", "threads", "build_timeout"), bad)
     frontier_params, frontier_listed = read_plan(out, "frontier_plan.txt", "frontier_plan",
-                                                 ("specs", "threads", "timeout"), bad)
+                                                 ("specs", "threads", "timeout", "ulimit_kb"), bad)
     conf_runs = conf_sequence(conf_params) if conf_params else []
     bench_runs = bench_sequence(bench_params) if bench_params else []
     queue_runs = queue_sequence(queue_params) if queue_params else []
@@ -446,9 +504,11 @@ def main():
                 ("queue_plan.txt", queue_params, (("families", "queue_families"), ("n_list", "queue_n"),
                                                   ("seeds", "queue_seeds"), ("threads", "threads"))),
                 ("sweep_plan.txt", sweep_params, (("specs", "sweep_specs"), ("repeats", "sweep_repeats"))),
-                ("gpu_plan.txt", gpu_params, (("specs", "gpu_specs"), ("threads", "threads"))),
+                ("gpu_plan.txt", gpu_params, (("specs", "gpu_specs"), ("threads", "threads"),
+                                              ("build_timeout", "gpu_build_timeout"))),
                 ("frontier_plan.txt", frontier_params, (("specs", "frontier_specs"), ("threads", "threads"),
-                                                        ("timeout", "frontier_timeout")))):
+                                                        ("timeout", "frontier_timeout"),
+                                                        ("ulimit_kb", "frontier_ulimit_kb")))):
             if params is None:
                 continue
             for plan_key, prof_key in checks:
@@ -574,16 +634,26 @@ def main():
             fm = re.search(rf"^{field}=(\S+)$", st, re.M)
             if not fm or fm.group(1) != want:
                 bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} (annonce)")
+        # NON-VACUITE (cinquieme tour) : chaque ligne invariante annoncee doit
+        # etre presente EXACTEMENT une fois — une signature vide n'egale pas
+        # une signature vide.
+        for pat in SWEEP_INVARIANT_SINGLE:
+            cnt = len(re.findall(pat, body, re.M))
+            if cnt != 1:
+                bad.append(f"{name}: ligne invariante {pat} presente {cnt} fois (attendu 1)")
         key = (run["family"], run["n"])
         sweep_signatures.setdefault(key, {}).setdefault(thread_invariant_signature(body), []).append(name)
         sweep_measures.setdefault((run["family"], run["n"], run["sweep_threads"]), []).append(meas)
     for key, table in sorted(sweep_signatures.items()):
         if len(table) > 1:
             groups = sorted(table.values(), key=len, reverse=True)
-            bad.append(f"fils {key}: BIT-IDENTITE VIOLEE entre fils/repetitions "
+            bad.append(f"fils {key}: INVARIANCE DU GRAND-LIVRE VIOLEE entre fils/repetitions "
                        f"(dissidents {', '.join(groups[1])})")
 
-    # PHASE GPU — contrats v5 herites de validate_v5_campaign.py.
+    # PHASE GPU — contrats v5 herites de validate_v5_campaign.py. CONTROLE
+    # HISTORIQUE NON AUTORITAIRE (cinquieme tour) : la v5 ne mesure ni un GPU
+    # v6 ni l'exactitude de la v6 — chaque run le grave (engine/lineage/
+    # authority) et le resume le rappelle.
     gpu_threads = gpu_params["threads"] if gpu_params else "0"
     gpu_cpu_bodies = {}     # (family, n) -> body du contrat CPU
     gpu_rows = []           # (run, meas, kernel_ms)
@@ -594,6 +664,12 @@ def main():
                                       gpu_threads, bad, want_code=want_code)
         if body is None:
             continue
+        for field, want in (("engine", "v5"), ("lineage", "historical_baseline"),
+                            ("authority", "non_authoritative")):
+            fm = re.search(rf"^{field}=(\S+)$", st, re.M)
+            if not fm or fm.group(1) != want:
+                bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} "
+                           f"(lignee historique non gravee)")
         kernel_ms = None
         if run["kind"] == "witness":
             if not re.search(r"^nvcc=\S+$", body, re.M) or "release 12.9" not in body:
@@ -649,6 +725,23 @@ def main():
                 fm = re.search(rf"^{field}=(\S+)$", st, re.M)
                 if not fm or fm.group(1) != want:
                     bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} (annonce)")
+            # ARGV CONTRACTUEL PAR BRAS (cinquieme tour : retirer
+            # --gpu-wire=index du bras index restait vert).
+            cmd = re.search(r"^commande=(.*)$", st, re.M)
+            argv = cmd.group(1).split() if cmd else []
+            base_args = {f"--family={run['family']}", f"--n={run['n']}", "--s=8", "--smax=11",
+                         "--seed=3", f"--threads={gpu_threads}", "--digest"}
+            if not base_args.issubset(argv):
+                bad.append(f"{name}: commande gravee sans les arguments contractuels du bras")
+            want_in = {"cpu": set(), "dev": {"--gpu"}, "ad": {"--gpu", "--gpu-min-sites=256"},
+                       "idx": {"--gpu", "--gpu-wire=index"}}[run["kind"]]
+            want_out = {"cpu": {"--gpu"}, "dev": {"--gpu-min-sites=256", "--gpu-wire=index"},
+                        "ad": {"--gpu-wire=index"}, "idx": {"--gpu-min-sites=256"}}[run["kind"]]
+            if not want_in.issubset(argv):
+                bad.append(f"{name}: argument de route absent de la commande gravee ({sorted(want_in - set(argv))})")
+            hit = want_out & set(argv)
+            if hit:
+                bad.append(f"{name}: argument d'une autre route dans la commande gravee ({sorted(hit)})")
             for dkey in ("digest_balls", "digest_all"):
                 if len(re.findall(rf"^{dkey}=([0-9a-f]{{64}})$", body, re.M)) != 1:
                     bad.append(f"{name}: {dkey} absent ou duplique")
@@ -686,7 +779,15 @@ def main():
                         bad.append(f"{name}: {dkey} DIFFERENT du contrat CPU de la meme famille (ou absent)")
         gpu_rows.append((run, meas, kernel_ms))
 
-    # PHASE FRONTIERE — presence et pins exacts, code LIBRE (la donnee).
+    # PHASE FRONTIERE — issues TYPEES (cinquieme tour : une panne quelconque
+    # n'est PAS une frontiere). Trois classes admises :
+    #   0   -> succes : contrat pipeline v6 COMPLET (identite, compteurs,
+    #          cardinalites, temps), aucun digest ;
+    #   124 -> timeout de la borne annoncee (l'outil timeout du runner) ;
+    #   != 0 avec motif STRUCTURE de capacite (resource_exhausted /
+    #          bad_alloc) -> refus de capacite, la donnee de frontiere.
+    # TOUT autre code (CLI 2, invariant 3, binaire absent 127, signal sans
+    # motif — SIGKILL non prouve = observation censuree) invalide la phase.
     frontier_threads = frontier_params["threads"] if frontier_params else "0"
     frontier_rows = []
     for run in frontier_runs:
@@ -695,17 +796,36 @@ def main():
                                       frontier_threads, bad, code_free=True)
         if st is None:
             continue
-        code = re.search(r"^code=(\d+)$", st, re.M)
+        cm = re.search(r"^code=(\d+)$", st, re.M)
+        code = cm.group(1) if cm else "?"
         for field, want in (("family", run["family"]), ("n", run["n"]), ("seq", run["seq"])):
             fm = re.search(rf"^{field}=(\S+)$", st, re.M)
             if not fm or fm.group(1) != want:
                 bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} (annonce)")
+        cmd = re.search(r"^commande=(.*)$", st, re.M)
+        cmd_text = cmd.group(1) if cmd else ""
+        for arg in (f"--family={run['family']}", f"--n={run['n']}", "--s=8", "--smax=11",
+                    "--seed=3", f"--threads={frontier_threads}"):
+            if arg not in cmd_text:
+                bad.append(f"{name}: commande gravee sans {arg}")
         note = ""
-        if body is not None:
-            nm = re.search(r"REFUS[^\n]*|resource_exhausted\S*|std::bad_alloc|bad_alloc|Killed", body)
-            if nm:
+        if code == "0":
+            if body is not None:
+                check_pipeline_run(name, body, run["family"], run["n"], "3", "v6",
+                                   frontier_threads, bad)
+                if ANY_DIGEST.search(body):
+                    bad.append(f"{name}: digest imprime sur un run de frontiere")
+        elif code == "124":
+            note = "timeout"
+        else:
+            nm = re.search(r"resource_exhausted\S*|std::bad_alloc|bad_alloc", body or "")
+            if not nm:
+                bad.append(f"{name}: code={code} SANS motif structure de capacite — "
+                           f"panne non typee, la phase frontiere est invalide")
+                note = f"panne non typee (code={code})"
+            else:
                 note = nm.group(0)[:60].replace("\t", " ")
-        frontier_rows.append((run, code.group(1) if code else "?", meas, note))
+        frontier_rows.append((run, code, meas, note))
 
     # CONTROLE EXHAUSTIF des fichiers : chaque fichier de out/ doit etre un
     # artefact d'un run annonce (.txt/.status/.status.time) ou un auxiliaire
@@ -732,8 +852,12 @@ def main():
         listed = {}
         for line in read_text(remote_manifest).splitlines():
             m = re.match(r"^([0-9a-f]{64})  (\S+)$", line)
-            if m:
-                listed[m.group(2)] = m.group(1)
+            if not m:
+                bad.append(f"MANIFESTE_DISTANT.txt: ligne hors grammaire ({line[:60]})")
+                continue
+            if m.group(2) in listed:
+                bad.append(f"MANIFESTE_DISTANT.txt: chemin duplique {m.group(2)}")
+            listed[m.group(2)] = m.group(1)
         expected_files = {f for f in os.listdir(out)
                           if f not in ("MANIFESTE_DISTANT.txt",) and os.path.isfile(os.path.join(out, f))}
         if set(listed) != expected_files:
@@ -798,7 +922,9 @@ def main():
     os.replace(tmp, os.path.join(resume_dir, "sweep_resume.txt"))
 
     lines = [
-        "# gpu_resume — murs des contrats CPU/GPU (v5) et kernel_ms (faits, pas de conclusion).",
+        "# gpu_resume — CONTROLE HISTORIQUE NON AUTORITAIRE (engine=v5, lineage=historical_baseline) :",
+        "# murs des contrats CPU/GPU v5 et kernel_ms — ne mesure NI un GPU v6 NI l'exactitude v6 ;",
+        "# faits seulement, pas de conclusion (un run par route ne suffit pas a attribuer un gain).",
         "famille\tn\tkind\tmur_ms\tduree_s\trss_kb\tkernel_ms",
     ]
     for run, meas, kernel_ms in gpu_rows:
@@ -839,7 +965,9 @@ def main():
                 ("v6_gate_min", "V6_GATE_MIN"),
                 ("sweep_specs", "SWEEP_SPECS"), ("sweep_repeats", "SWEEP_REPEATS"),
                 ("gpu_specs", "GPU_SPECS"), ("frontier_specs", "FRONTIER_SPECS"),
-                ("frontier_timeout", "FRONTIER_TIMEOUT"))
+                ("frontier_timeout", "FRONTIER_TIMEOUT"),
+                ("gpu_build_timeout", "GPU_BUILD_TIMEOUT"),
+                ("frontier_ulimit_kb", "FRONTIER_ULIMIT_KB"))
     axes_equal = bool(canon_axes) and all(
         profile.get(pk, "").split() == canon_axes.get(ck, "").split() for pk, ck in axis_map)
     # L'IDENTITE du canon est dans sa grammaire (PROFIL_NOM) : un canon reduit
