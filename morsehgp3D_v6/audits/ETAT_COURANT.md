@@ -26,7 +26,7 @@ présent verdict.
 | confirmation hors échantillon | cœur reçu ; `confirmation_candidate`, déclencheur E6 non confirmé |
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
-| protocole GCP `7a8e9cf0` | **NO-GO très étroit** ; trois anciennes portes reçues, un clamp temporel local avant dépense |
+| protocole GCP `7a8e9cf0` | **NO-GO ciblé** ; huitième tour reçu, un patch de clôture local avant dépense |
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
@@ -50,10 +50,10 @@ Le probe `fold-inject-b-exception-k3` termine encore par SIGABRT, code 134 ;
 il reste volontairement hors CTest. Au pin `7a8e9cf0`, le selftest campagne
 passe 66 vérifications et le lifecycle 32 scénarios plus 11 refus de pin. Le
 rejeu indépendant des 83 tests de sûreté/intégration donne 83/83 en 135,350 s.
-Les deux arrêts, la grâce fixe et le déclassement de l'instrumentation sont
-reçus dans leur portée. Le seul NO-GO résiduel est leur composition avec le
-describe pré-campagne non clampé et la garde SCP qui ne réserve localement
-qu'un arrêt ; le profil G4 canonique reste algébriquement sûr.
+Les deux arrêts post-rapatriement, la grâce fixe et le déclassement décisionnel
+de l'instrumentation sont reçus dans leur portée. Le NO-GO résiduel tient dans
+un patch local : admission SCP encore calculée avec un arrêt, reprise unique
+sur les sorties pré-SCP et instrumentation G4 non autoritaire.
 
 ## Exact-K, omission unique et ownership WSPD
 
@@ -359,8 +359,8 @@ ces preuves sur trois points :
 
 Les chemins état post-démarrage perdu avec handoff valide,
 `targeted_stopped` d'une autre génération, état illisible et cible
-discordante restent couverts à `7a8e9cf0`. Le GO GCP reste refusé pour une
-seule composition temporelle concentrée décrite ci-dessous.
+discordante restent couverts à `7a8e9cf0`. Le GO GCP reste refusé pour le
+patch de clôture concentré décrit ci-dessous.
 
 ## GCP
 
@@ -370,15 +370,18 @@ le déclassement d'un faux `TIME_BIN`, la relation invité/GCE avant
 `set-scheduling` et le premier fail-fast sans SSH/SCP. Les deux selftests sont
 verts et la variante canonique G4 conserve 501 s de marge nominale.
 
-Un seul couplage reste ouvert : le `check_generation` pré-campagne n'est pas
-admis contre l'échéance, puis la garde locale du SCP ne compte encore qu'un
-arrêt. Avec `smoke_v1`, `MAX=4800`, invité 75 min, describe 600 s et SCP 60 s,
-le preflight passe mais un describe tardif peut laisser 2 675 s pour un pire
-chemin post-campagne de 3 155 s. Clamper les trois describes initiaux restants
-et compter deux arrêts dans la garde SCP ferme localement ce déficit. Forcer
-en plus `TIME_BIN=/usr/bin/time` dans la commande distante évitera une mesure
-G4 payée puis déclassée ; ce dernier point est un renfort, pas une nouvelle
-porte décisionnelle.
+Le patch restant a trois surfaces locales. La garde SCP ne compte encore
+qu'un arrêt : le contre-calendrier `smoke_v1`, `MAX=4800`, invité 75 min,
+describe 600 s et SCP 60 s passe le preflight mais peut laisser 2 675 s pour
+un pire chemin post-campagne de 3 155 s. Compter deux arrêts dans cette garde
+suffit ; clamper les describes est un fail-fast utile, pas une condition
+supplémentaire. Ensuite, une sortie pré-SCP avec premier arrêt transitoirement
+échoué ne retente qu'une fois et termine `targeted_stop_failed`, malgré la
+seconde réserve. Enfin, `g4_mesure_v1` accepte encore rc 0 et publie les RSS
+d'un faux `TIME_BIN`, tandis qu'un champ `time_bin=` vide peut laisser passer
+`decision_complete`. Étendre la reprise précoce à deux appels totaux, épingler
+`/usr/bin/time` dans la commande distante et fermer la totalité du validateur
+complètent la porte sans toucher au moteur.
 
 ## Dette d'échelle et ordre utile
 
@@ -390,7 +393,7 @@ ou u128 pour les compteurs.
 
 Ordre recommandé à Claude :
 
-1. fermer le clamp temporel GCP ciblé, puis contre-auditer le commit propre
+1. fermer le patch GCP ciblé, puis contre-auditer le commit propre
    avant toute session facturable ;
 2. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
    re-régler la règle ;
