@@ -2,8 +2,8 @@
 
 Date de coupe : 31 août 2026.
 
-Coupe de code observée : `7a8e9cf0`. Autorités techniques : `6d755804` pour le
-prototype E3/G16, `cd49a390` pour les callbacks, `7a8e9cf0` pour le protocole
+Coupe de code observée : `2a981bc4`. Autorités techniques : `6d755804` pour le
+prototype E3/G16, `cd49a390` pour les callbacks, `2a981bc4` pour le protocole
 GCP, `320299df` pour le reçu de réplication et `8ed2dea6` pour le reçu de
 confirmation contre-audité ci-dessous. Les notes Claude ne priment pas sur le
 présent verdict.
@@ -26,7 +26,7 @@ présent verdict.
 | confirmation hors échantillon | cœur reçu ; `confirmation_candidate`, déclencheur E6 non confirmé |
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
-| protocole GCP `7a8e9cf0` | **NO-GO ciblé** ; huitième tour reçu, un patch de clôture local avant dépense |
+| protocole GCP `2a981bc4` | **GO borné** pour une session gardée `g4_mesure_v1` au pin exact |
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
@@ -47,13 +47,12 @@ Au pin `6d755804` :
   par résolution.
 
 Le probe `fold-inject-b-exception-k3` termine encore par SIGABRT, code 134 ;
-il reste volontairement hors CTest. Au pin `7a8e9cf0`, le selftest campagne
-passe 66 vérifications et le lifecycle 32 scénarios plus 11 refus de pin. Le
-rejeu indépendant des 83 tests de sûreté/intégration donne 83/83 en 135,350 s.
-Les deux arrêts post-rapatriement, la grâce fixe et le déclassement décisionnel
-de l'instrumentation sont reçus dans leur portée. Le NO-GO résiduel tient dans
-un patch local : admission SCP encore calculée avec un arrêt, reprise unique
-sur les sorties pré-SCP et instrumentation G4 non autoritaire.
+il reste volontairement hors CTest. Au pin `2a981bc4`, le selftest campagne
+passe 71 vérifications et le lifecycle 35 scénarios plus 11 refus de pin
+(51 vérifications). Le rejeu indépendant des 83 tests de sûreté/intégration
+donne 83/83 en 127,066 s. L'admission SCP à deux arrêts, la seconde tentative
+sur les sorties précoces, la grâce fixe et le refus d'une instrumentation G4
+non canonique sont reçus dans leur portée.
 
 ## Exact-K, omission unique et ownership WSPD
 
@@ -359,29 +358,31 @@ ces preuves sur trois points :
 
 Les chemins état post-démarrage perdu avec handoff valide,
 `targeted_stopped` d'une autre génération, état illisible et cible
-discordante restent couverts à `7a8e9cf0`. Le GO GCP reste refusé pour le
-patch de clôture concentré décrit ci-dessous.
+discordante restent couverts à `2a981bc4`. Le GO GCP borné est accordé dans
+les limites ci-dessous.
 
 ## GCP
 
-`AUDIT_GCP_V6_P0_20260831.md` est l'autorité dédiée. `7a8e9cf0` reçoit la
-reprise d'arrêt avant validation, les deux réserves globales, la grâce fixe,
-le déclassement d'un faux `TIME_BIN`, la relation invité/GCE avant
-`set-scheduling` et le premier fail-fast sans SSH/SCP. Les deux selftests sont
-verts et la variante canonique G4 conserve 501 s de marge nominale.
+`AUDIT_GCP_V6_P0_20260831.md` est l'autorité dédiée. À `2a981bc4`, les trois
+surfaces du dernier NO-GO sont fermées causalement : pire cas SCP identique au
+budget post-campagne avec deux arrêts, deux appels totaux réellement
+disponibles sur les sorties précoces, et `TIME_BIN=/usr/bin/time` transmis et
+exigé intégralement pour G4. Trois revues indépendantes ne trouvent plus de
+défaut matériel temporel ou de cycle de vie.
 
-Le patch restant a trois surfaces locales. La garde SCP ne compte encore
-qu'un arrêt : le contre-calendrier `smoke_v1`, `MAX=4800`, invité 75 min,
-describe 600 s et SCP 60 s passe le preflight mais peut laisser 2 675 s pour
-un pire chemin post-campagne de 3 155 s. Compter deux arrêts dans cette garde
-suffit ; clamper les describes est un fail-fast utile, pas une condition
-supplémentaire. Ensuite, une sortie pré-SCP avec premier arrêt transitoirement
-échoué ne retente qu'une fois et termine `targeted_stop_failed`, malgré la
-seconde réserve. Enfin, `g4_mesure_v1` accepte encore rc 0 et publie les RSS
-d'un faux `TIME_BIN`, tandis qu'un champ `time_bin=` vide peut laisser passer
-`decision_complete`. Étendre la reprise précoce à deux appels totaux, épingler
-`/usr/bin/time` dans la commande distante et fermer la totalité du validateur
-complètent la porte sans toucher au moteur.
+Le **GO reste strictement borné à une session** : bootstrap épinglé au commit
+complet `2a981bc4b73f6297a28b1ebf2931ccefe5568dbc`,
+`CAMPAIGN_PROFILE=g4_mesure_v1` passé explicitement, aucun axe canonique
+surchargé, profil effectif G4 confirmé avant mutation, gardes SPOT du dépôt et
+cible exacte certifiée `TERMINATED` au retour. Les résultats ne sont reçus
+que si le validateur rend 0 et si le reçu durable est complet.
+
+Limite non bloquante : le validateur écrit ses `*_resume.txt` avant le contrôle
+final G4. Avec un faux instrument de test, ces fichiers peuvent exister puis
+être invalidés par rc 1. Ils sont alors diagnostiques et non recevables ; le
+claim plus fort « jamais écrits » est refusé. Déplacer le contrôle en amont
+serait un durcissement P1 utile, pas une condition de ce lancement officiel qui
+impose `/usr/bin/time`.
 
 ## Dette d'échelle et ordre utile
 
@@ -393,8 +394,8 @@ ou u128 pour les compteurs.
 
 Ordre recommandé à Claude :
 
-1. fermer le patch GCP ciblé, puis contre-auditer le commit propre
-   avant toute session facturable ;
+1. exécuter au plus une session G4 selon le GO borné ci-dessus, puis auditer
+   le reçu avant toute interprétation scientifique ;
 2. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
    re-régler la règle ;
 3. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
