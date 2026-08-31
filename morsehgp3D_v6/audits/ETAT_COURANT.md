@@ -2,11 +2,11 @@
 
 Date de coupe : 31 août 2026.
 
-HEAD observé : `65757693`. Autorités techniques : `6d755804` pour le
-prototype E3/G16, `cd49a390` pour les callbacks et le protocole GCP,
-`320299df` pour le reçu de réplication et `8ed2dea6` pour le reçu de
-confirmation contre-audité ci-dessous. Le bilan `65757693` n'ajoute aucune
-preuve et ne prime pas sur le présent verdict.
+HEAD observé : `d64063b9`. Autorités techniques : `6d755804` pour le
+prototype E3/G16, `cd49a390` pour les callbacks, `d64063b9` pour le protocole
+GCP, `320299df` pour le reçu de réplication et `8ed2dea6` pour le reçu de
+confirmation contre-audité ci-dessous. Les notes Claude ne priment pas sur le
+présent verdict.
 
     phase=exploration_v6_hors_registre
     backend=cpu_reference
@@ -26,7 +26,7 @@ preuve et ne prime pas sur le présent verdict.
 | confirmation hors échantillon | cœur reçu ; `confirmation_candidate`, déclencheur E6 non confirmé |
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
-| protocole GCP | **NO-GO**, audit dédié faisant autorité |
+| protocole GCP `d64063b9` | **NO-GO** ; profil G4 auto-invalidant et cycle de vie non fermé |
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
@@ -47,13 +47,12 @@ Au pin `6d755804` :
   par résolution.
 
 Le probe `fold-inject-b-exception-k3` termine encore par SIGABRT, code 134 ;
-il reste volontairement hors CTest. Sur le cycle de vie et le validateur
-audités à `cd49a390`, les faux pilotes ont ensuite été rejoués localement :
-les deux selftests Bash passent, ainsi que l'intégration et 81 tests de
-sûreté, soit 82/82 tests Python en 115,682 s. Ces verts ne contiennent pas les
-mutants d'état perdu ou de génération erronée décrits par l'audit dédié ; ils
-ne lèvent donc pas son NO-GO. Une extension concurrente non committée du
-runner distant est hors de ce rejeu et du présent commit d'audit.
+il reste volontairement hors CTest. Au pin `d64063b9`, les deux selftests GCP
+Bash passent, ainsi que l'intégration 1/1 en 4,748 s et les 81 tests de sûreté
+en 125,176 s. Ces verts ne contiennent pas les mutants d'état perdu ou de
+génération erronée. Un probe direct montre en outre que le profil canonique
+G4 à queue `aucun` produit zéro run côté runner mais un run côté validateur ;
+le NO-GO reste donc actif.
 
 ## Exact-K, omission unique et ownership WSPD
 
@@ -363,19 +362,31 @@ demandé par le bilan est refusé jusqu'à fermeture causale de ces chemins.
 
 ## GCP
 
-`AUDIT_GCP_V6_P0_20260831.md` est l'autorité dédiée. Le troisième tour
-`781fbe27` ferme l'entrée externe, l'authentification du contenu épinglé et le
-terminal extérieur nominal. `cd49a390` ferme ensuite la comparaison du profil
-axe par axe, l'idempotence et la publication vérifiée et exclusive du reçu.
+`AUDIT_GCP_V6_P0_20260831.md` est l'autorité dédiée. `d64063b9` ajoute une
+infrastructure utile de plans fils/GPU/frontière, mais ne touche pas les
+branches de cleanup qui maintenaient le NO-GO. Un état vide fait encore
+ignorer un handoff valide, et `targeted_stopped` n'est toujours pas comparé à
+la génération verrouillée.
 
-Le NO-GO reste néanmoins actif avant toute session facturable. Le registre
-est toujours lu par `sed | head` ; un état perdu avec handoff valide est pris
-pour une absence de mutation, et un `targeted_stopped` d'une ancienne
-génération peut prendre le fast-path sans comparaison à la génération
-verrouillée. Aucun mutant ne couvre ces deux fautes. La reprise après échec
-interne est encore fabriquée plutôt qu'exécutée. Enfin, le déplacement des
-résumés hors de `out/` les a rendus idempotents mais les exclut du reçu
-durable. La porte exacte et la recette de correction sont dans l'audit dédié.
+La nouvelle matrice possède aussi ses propres bloqueurs : la sentinelle queue
+`aucun` est reconstruite comme un run par le validateur ; avec le reste du
+scaffold et des pins présent, la frontière accepte n'importe quel code ou
+corps vide comme donnée ; les builds GPU peuvent franchir leur marge
+d'échéance ; et la frontière potentiellement OOM précède le bench. Les cinq
+résumés restent exclus du reçu durable, tandis que le canon n'est toujours pas
+lié à l'entrée exacte du manifeste.
+
+La phase CUDA est explicitement v5 : elle reste un contrôle historique non
+autoritaire et ne mesure aucun GPU v6. La porte fils compare des comptes, pas
+les objets bit à bit. Aucun résultat issu de ces deux phases ne devra être
+agrégé comme gain v6 avant correction des libellés, digests et plans appariés.
+
+La note `d64063b9` dit à tort que le NO-GO était une formalité et qu'aucun
+audit plus récent n'existait : `09fdbc80` avait précisément maintenu les deux
+défauts de cycle de vie. Aucun processus de session réel ni reçu G4 n'est
+visible localement ; `gcloud` étant absent, l'état cloud exact reste
+illisible et n'est pas supposé arrêté. La commande de contrôle est gravée
+dans l'audit dédié.
 
 ## Dette d'échelle et ordre utile
 
@@ -387,13 +398,13 @@ ou u128 pour les compteurs.
 
 Ordre recommandé à Claude :
 
-1. geler le cœur de confirmation déjà acquis, lier ses dérivés et publier
-   honnêtement le non-déclenchement borné sans re-régler la règle ;
-2. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
-   l'oracle et la preuve G16 avant toute nouvelle mesure ;
-3. fermer callbacks/exceptions et leurs fixtures réellement concurrentes ;
-4. corriger l'autorité de registre GCP et obtenir un verdict frais avant
+1. fermer le cycle de vie et rendre le profil G4 réellement validable avant
    toute session facturable ;
+2. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
+   re-régler la règle ;
+3. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
+   l'oracle et la preuve G16 avant toute nouvelle mesure ;
+4. fermer callbacks/exceptions et leurs fixtures réellement concurrentes ;
 5. reprendre ensuite les plafonds API.
 
 GCP non utilisé par le présent audit.
