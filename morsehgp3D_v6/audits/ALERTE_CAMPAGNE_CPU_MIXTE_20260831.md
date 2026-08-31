@@ -78,50 +78,91 @@ prouver que l'isolation du binaire rend les compteurs reproductibles. Elle ne
 peut ni confirmer la stabilité de l'octave 10 choisie sur les mêmes sorties,
 ni transformer rétrospectivement la médiane de `T_lourde` en verdict E6.
 
-## Validateur `a30c3a98` — progrès reçu, chaîne d'autorité encore incomplète
+## Réplication terminée — `replication_complete` reçu
 
-Le validateur tue désormais les contre-fixtures listées au tour précédent et
-l'agrégateur se nomme correctement « porte E6 bornée ». Il classe aussi une
-transition 0→positif comme émergence et supprime un `AGREGAT.txt` périmé sur
-refus. Ces corrections sont reçues.
+La campagne `a30c3a98` s'est terminée naturellement à 15:08:49Z. La
+vérification indépendante ferme exactement :
 
-Il reste une différence entre **enregistrer** une provenance et la **lier** :
+- matrice 4 × 3 × 3, 36/36 codes 0 et un unique `DONE` terminal ;
+- 72/72 fichiers réguliers attendus, 36 stdout non vides et 36 stderr vides ;
+- binaire privé SHA-256 `4bbb257c...3359`, 36 hashes avant/après homogènes et
+  36 hashes de stdout du META recalculés ;
+- 36/36 sorties identiques à la sonde après retrait des seules lignes de
+  temps et RSS ; tous les digests et compteurs déterministes coïncident.
 
-- `sha256_lanceur`, `sha256_validateur`, `sha256_agregateur` et le hash du
-  profil sont écrits au META mais `pentes.py` ne les vérifie pas ; les scripts
-  exacts ne sont pas copiés dans le reçu ;
-- le profil externe fourni à `pentes.py` peut être n'importe quel fichier
-  compatible. Le hash `autorite_profil` du META n'est pas recoupé et aucun
-  contrôle ne lie ce fichier au `pin` annoncé ;
-- le `pin` est seulement exigé une fois, sans validation hexadécimale ni
-  preuve que le binaire archivé provient de ce commit. Ici le hash du binaire
-  est corrélé à un ancien reçu de portes, pas lié par le lanceur courant ;
-- les 36 hashes attendus des sorties sont trouvés, mais les lignes de hash
-  supplémentaires ou dupliquées dans le META ne sont pas refusées ;
-- le dossier de campagne peut préexister et est alimenté en place. Pour une
-  autorité décisionnelle, créer un dossier unique inexistant, écrire dans un
-  temporaire et publier atomiquement le terminal évite collisions et restes.
+Le reçu `320299df` porte donc correctement `replication_complete`. Il établit
+la reproductibilité de ce binaire sur la même machine ; il ne confirme aucune
+hypothèse choisie sur ces mêmes familles, tailles et graines.
 
-Ces points n'empêchent pas d'exploiter la réplication comme diagnostic. Ils
-doivent être fermés avant de qualifier un futur reçu d'authentifié de bout en
-bout.
+## Rectifications du reçu exploratoire à conserver
 
-## Correction utile à Claude
+L'intégrité mécanique de `campagne_sonde_octaves_20260831` est reçue, mais son
+`RECU.md` doit encore éviter quatre raccourcis :
 
-1. Classer la première sonde `exploratory_complete` et la capture active
-   `replication_complete` si leurs contrôles terminaux ferment ; ne produire
-   aucun `E6_active` confirmatoire sur ces mêmes 36 tuples.
-2. Préenregistrer un **nouveau** profil de confirmation dont les graines sont
-   disjointes et, idéalement, dont les tailles sont décalées ; ne lire aucune
-   sortie avant d'avoir committé profil, règle, seuils et politique des zéros.
-3. Archiver dans chaque reçu les copies exactes du lanceur, du validateur, de
-   l'agrégateur et du profil, puis recouper leurs hashes contre un manifeste
-   canonique lié au commit.
-4. Refuser un dossier de sortie préexistant et publier le reçu depuis un
-   répertoire temporaire unique, avec terminal atomique.
-5. Garder le nom « porte E6 bornée à trois termes/pas2 » et réserver le
-   garde-fou GO à une porte séparée couvrant tous les termes et les deux pas.
+- le META grave le HEAD d'exécution `cca9a2d5`, tandis que le reçu annonce
+  `cfaf6b41` ; les entrées produit sont équivalentes, pas les arbres Git ;
+- les charges 3,91/7,46/9,33 au départ et 9,28/9,91/10,10 à la fin décrivent
+  une machine partagée chargée, pas « au repos » ;
+- la part passe 2 exacte vaut 0,0425–0,3411 %, donc 0,0–0,3 % à un chiffre ;
+  « < 0,3 % » est faux pour certains tuples ;
+- `w1/seed_lourde=22–77` divise par toutes les seeds, y compris celles tuées
+  avant le scan cœur. Les 31–54 % sont une fraction de population, pas une
+  fraction de `W_sweep1`. Il faut ventiler W1 par issue avant toute attribution
+  causale.
 
-Cette alerte pourra être absorbée dans `ETAT_COURANT.md` puis supprimée après réception d'une campagne postérieure au profil committé et d'un validateur qui tue les contre-fixtures ci-dessus.
+Ajouter aussi les cinq champs du cadre v6 au reçu lors de sa prochaine mise à
+jour documentaire.
+
+## `99bf6723` — progrès réel, porte décisionnelle encore incomplète
+
+Le mode `auto` construit bien le binaire depuis `git archive <pin>` ; les
+copies exactes du protocole sont archivées ; les hashes de sorties forment un
+ensemble exact ; le profil 10k/20k/40k, graines 6/7/8, est réellement disjoint
+de l'échantillon initial. Ces progrès sont reçus.
+
+Ils ne suffisent pas à faire du validateur une autorité décisionnelle :
+
+1. Le mode `auto` n'est pas exigé par `pentes.py`. Un faux binaire, un profil
+   mono-famille et un pin artificiel peuvent encore passer la porte
+   structurelle.
+2. Les copies archivées sont recoupées avec le META, pas avec
+   `git show <pin>:<chemin>`. L'agrégateur exécuté n'est pas comparé à sa copie
+   archivée.
+3. Toute suite de trois doublements est acceptée, y compris 2/4/8, alors que
+   `REGIMES.md` interdit une pente à n ≤ 2000. Les doublons de clés et
+   l'absence d'un nom de profil canonique ne sont pas refusés.
+4. `REGIMES.md` et `PLAN_DE_TESTS.md` réservent encore les pentes à
+   8k/16k/32k ; `GRAND_LIVRE.md` et l'en-tête de l'agrégateur parlent encore
+   du pas 16k→32k. Le nouveau profil est préenregistré, mais les autorités se
+   contredisent.
+5. Une émergence produit encore `E6_active=non` ou
+   `garde_fou_borne_viole=non`. Le verdict doit être tri-valué : `oui`, `non`
+   ou `indetermine`.
+6. `mkdir -p OUT.partial`, le `mv` final, le hash puis la relecture des
+   sorties, et l'écriture directe d'`AGREGAT.txt` laissent des courses. Un run
+   non nul peut aussi recevoir `DONE` et être publié avant son refus tardif.
+
+## Campagne hors échantillon lancée — candidate, pas verdict acquis
+
+`campagne_confirmation_20260831.partial` a démarré à 15:10:15Z au pin
+`320299df`, en mode `auto`, avec le profil préenregistré 10k/20k/40k et les
+graines 6/7/8. Il n'est pas utile de l'interrompre : les données sont
+réellement hors échantillon et le binaire vient d'une archive Git.
+
+Son statut honnête avant audit terminal est `confirmation_candidate`. Si les
+36 tuples ferment, l'audit peut vérifier après coup que chaque copie de
+protocole correspond au pin et que les courses ci-dessus ne se sont pas
+réalisées. Cela préservera la valeur scientifique de la capture. En revanche,
+aucun `E6_active=non` n'est recevable en présence d'une émergence, et aucun
+verdict formel ne doit être publié avant résolution des contradictions de
+profil et validation des mêmes octets par un snapshot immuable.
+
+La prochaine itération du lanceur doit graver `campaign_mode`, n'autoriser que
+les deux profils exacts versionnés, échouer dès le premier tuple non nul,
+acquérir le temporaire exclusivement et publier sans écrasement. Le validateur
+et l'agrégateur doivent consommer une représentation immuable unique.
+
+Cette alerte pourra être absorbée dans `ETAT_COURANT.md` puis supprimée après
+le verdict borné sur cette candidate et la fermeture des portes ci-dessus.
 
 GCP non utilisé par le présent audit.
