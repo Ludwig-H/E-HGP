@@ -1,0 +1,3 @@
+f68e1a38d40baa7a04e2978ac7149d680503fd2497f14d19d64fe9678be3db38  build/v6/mhgp6
+3259f5df30ba8fc1544ec1cdcb367da900da60c96f5ba39d7edf0e26c10d447f  build/v6/mhgp6_conformity
+0a7f968e08980caa1033fa20a4e2b9f9471e6bff8b1460c951b27b3a2af1ad9c  build/v6/mhgp6_selftest

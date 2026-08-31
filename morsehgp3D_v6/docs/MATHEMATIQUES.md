@@ -72,9 +72,11 @@ centres de la face, paramétrée par μ ; d est sur la sphère ⟺
 `P(d) − μ·B(d) = 0` (identité d'intériorité affine du Th. 10.4) ⟺
 `μ = P(d)/B(d)`. `B(d) = 0 ⟺ d` coplanaire ⟺ `det = 0`, jamais un support q4.
 
-Conséquence : la boucle C×D et le filtre de profondeur par candidat sont
-remplacés par une lecture du balayage des racines triées (une passe
-O(m_e log m_e) par seed **survivant**).
+Conséquence (bornée par l'audit du 31 août) : le **rescan de profondeur par
+candidat** est remplacé par une lecture du balayage des racines triées ;
+l'incidence seed–complétion reste matérialisée (une racine par site éligible).
+Le coût par seed survivant passe de `O(p_e · m_e)` à `O(m_e log m_e + p_e)`,
+où `p_e` compte les complétions soumises à la cascade (`q4_completions`).
 
 Largeurs : `|P| < 2^101` (i128), `|B| < 2^55` ; ordre de deux racines par
 produits croisés signés `P_i·B_j` vs `P_j·B_i` (< 2^157, S192 signe-magnitude
@@ -91,12 +93,22 @@ la règle de bloc : retirer d'abord toutes les sorties dont la racine vaut
 intérieurs), ajouter les entrées après. Les racines confondues sont traitées
 en bloc. Le carrier x est coquille sur toute la corde (exclu, asserté).
 
-### C3 — Mort composée d'une complétion (`derive_v6`, fail-open)
+### C3 — Contrat de profondeur du sweep (`derive_v6`, fail-open)
 
-Si `depth_at(μ_d) + compose_credits ≥ h₄`, le tétraèdre n'est aucun
-événement. Les domaines (A∪B pour E_ab ; U_core recertifié hors A∪B ; tape
-hors A∪B∪U_core) sont disjoints par construction ; la somme minore |I_B|.
-Réciproque fausse : jamais une émission garantie.
+Deux contrats cohérents existent ; **la v6-J2 implémente le contrat 1** et ne
+mélange jamais les deux (audit du 31 août : ne jamais additionner à une
+profondeur complète un crédit dont les témoins y figurent déjà) :
+
+1. **Contrat 1 (courant)** : le sweep balaie le cover complet ; le verdict est
+   `depth_at(μ_d) ≥ h₄`, sans aucun crédit ajouté — les témoins des crédits
+   figurent déjà dans ce compte.
+2. **Contrat 2 (J3, avec `ResidualTape`)** : le tape exclut A∪B∪U_core par
+   identité et par lane ; le verdict devient
+   `compose(depth_residual_at(μ_d)) ≥ h₄` (l'unique opération C5). La formule
+   sectorielle suit le même choix.
+
+Dans les deux cas la mort est fail-open : les domaines comptés minorent
+|I_B| ; réciproque fausse, jamais une émission garantie.
 
 ### C4 — Minimum sur corde et fragments shallow (`derive_v6`)
 

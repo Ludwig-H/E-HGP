@@ -103,9 +103,12 @@ arrêt au seuil, STRICT ; `ball_census` : I_B/U_B complets, plafonds),
 niveaux sémantiquement égaux, deltas, partition dense ; rendu § 9.1),
 `digest.hpp` (format `mhgp4-digest-v1`, monnaie de conformité v5↔v6).
 
-Frontière canonique v6 : `digest_balls` est pris **après le préfiltre exact
-count-only** (l'ensemble des clés survivantes ne dépend que de l'objet).
-La conformité v5↔v6 porte sur `digest_all` et `digest_forest_K*`.
+Frontières de digest : à J2, le multiensemble émis est identique à la v5
+(le sweep est une pure transformation de coût), donc `digest_balls` v6 ==
+`digest_balls` v5 et la conformité le vérifie aussi. Le jour où un tueur v6
+plus fort rompt légitimement cette égalité, `digest_balls` bascule sur la
+frontière post-préfiltre exact (voir `docs/PROVENANCE.md`) ; la conformité
+v5↔v6 reste sur l'objet (`digest_all`, `digest_forest_K*`).
 
 ## E6 — étages conditionnels `[PRÉVU]`
 

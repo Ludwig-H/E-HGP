@@ -1,0 +1,4 @@
+100% tests passed, 0 tests failed out of 23 (portes rapides, -LE scale*)
+gate    =  22.99 sec*proc (23 tests)
+
+Total Test time (real) =  23.00 sec

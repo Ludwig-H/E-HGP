@@ -1,0 +1,89 @@
+# MorseHGP3D v6 — chantier actif. C++20 sans extensions, -Werror.
+cmake_minimum_required(VERSION 3.20)
+project(morsehgp3d_v6 CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+
+find_package(Threads REQUIRED)
+enable_testing()
+
+# Cible PRODUIT : aucun mutant compile (pas de MHGP6_TESTING).
+function(mhgp6_product_executable name)
+  add_executable(${name} ${ARGN})
+  target_link_libraries(${name} PRIVATE Threads::Threads)
+endfunction()
+
+# Cibles de TEST : les points d'injection de mutants sont compiles.
+function(mhgp6_executable name)
+  add_executable(${name} ${ARGN})
+  target_compile_definitions(${name} PRIVATE MHGP6_TESTING=1)
+  target_link_libraries(${name} PRIVATE Threads::Threads)
+endfunction()
+
+# Porte a code de sortie exact : 0 conforme, 1 juge, 2 refus, 3 plancher ou
+# invariant, 4 mutant tue. Labels optionnels apres les arguments.
+function(mhgp6_gate name expected target)
+  cmake_parse_arguments(G "" "TIMEOUT" "LABELS;ARGS" ${ARGN})
+  string(JOIN " " joined ${G_ARGS})
+  add_test(NAME ${name}
+           COMMAND ${CMAKE_COMMAND} -DEXPECTED=${expected} -DCMD=$<TARGET_FILE:${target}> "-DARGS=${joined}"
+                   -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+  if(G_LABELS)
+    set_tests_properties(${name} PROPERTIES LABELS "${G_LABELS}")
+  else()
+    set_tests_properties(${name} PROPERTIES LABELS "gate")
+  endif()
+  if(G_TIMEOUT)
+    set_tests_properties(${name} PROPERTIES TIMEOUT ${G_TIMEOUT})
+  endif()
+endfunction()
+
+# ---- Pilote produit.
+mhgp6_product_executable(mhgp6 cli/mhgp6.cpp)
+
+# ---- Selftests du cœur (etablis en premier ; chaque porte a son code exact).
+mhgp6_executable(mhgp6_selftest tests/selftest.cpp)
+mhgp6_gate(mhgp6_arith_selftest 0 mhgp6_selftest ARGS --arith)
+mhgp6_gate(mhgp6_sha256_selftest 0 mhgp6_selftest ARGS --sha256)
+mhgp6_gate(mhgp6_families_fixture 0 mhgp6_selftest ARGS --families)
+mhgp6_gate(mhgp6_tree_selftest 0 mhgp6_selftest ARGS --tree)
+mhgp6_gate(mhgp6_wspd_ledger 0 mhgp6_selftest ARGS --wspd-ledger)
+mhgp6_gate(mhgp6_fused_descent 0 mhgp6_selftest ARGS --fused-descent)
+mhgp6_gate(mhgp6_sweep_oracle 0 mhgp6_selftest ARGS --sweep-oracle)
+mhgp6_gate(mhgp6_sweep_mutant_depth 4 mhgp6_selftest ARGS --sweep-oracle --inject=sweep-nonstrict-depth)
+mhgp6_gate(mhgp6_fused_mutant_mask 4 mhgp6_selftest ARGS --fused-descent --inject=fused-mask-stuck)
+
+# ---- Conformite differentielle v5 ≡ v6 (digests graves au pin 3bad233d).
+set(REFS ${CMAKE_CURRENT_SOURCE_DIR}/receipts/conformite_v5)
+mhgp6_executable(mhgp6_conformity tests/conformity_v5.cpp)
+foreach(spec "uniform;400" "terrain;400" "eight_clusters;400" "scanline_single_pass;400"
+             "collinear_seven;600" "two_lines;200" "uniform;2000" "terrain;2000")
+  list(GET spec 0 fam)
+  list(GET spec 1 sz)
+  mhgp6_gate(mhgp6_conformity_${fam}_${sz} 0 mhgp6_conformity
+             ARGS --family=${fam} --n=${sz} --threads=4 --expected=${REFS}/${fam}_${sz}.txt TIMEOUT 600)
+endforeach()
+# Mutants du sweep tues par la divergence de conformite (digest_balls, forets).
+mhgp6_gate(mhgp6_sweep_mutant_exit 4 mhgp6_conformity
+           ARGS --family=terrain --n=400 --inject=sweep-drop-exit-root --expected=${REFS}/terrain_400.txt)
+mhgp6_gate(mhgp6_conformity_mutant_rle 4 mhgp6_conformity
+           ARGS --family=uniform --n=400 --inject=rle-drop --expected=${REFS}/uniform_400.txt)
+
+# ---- Refus du CLI (parsing exact, profil).
+mhgp6_gate(mhgp6_cli_refus_s7 2 mhgp6 ARGS --family=uniform --n=200 --s=7)
+mhgp6_gate(mhgp6_cli_refus_s_suffix 2 mhgp6 ARGS --family=uniform --n=200 --s=8junk)
+mhgp6_gate(mhgp6_cli_refus_n_suffix 2 mhgp6 ARGS --family=uniform --n=200x)
+mhgp6_gate(mhgp6_cli_ok_s8 0 mhgp6 ARGS --family=uniform --n=200 --s=8 TIMEOUT 120)
+
+# ---- Tailles d'interet (labels scale*) : conformite aux digests v5 graves.
+foreach(fam uniform terrain eight_clusters scanline_single_pass scanline_overlap_multiecho)
+  foreach(sz 8000 16000 32000)
+    mhgp6_gate(mhgp6_conformity_${fam}_${sz} 0 mhgp6_conformity
+               ARGS --family=${fam} --n=${sz} --threads=8
+                    --expected=${CMAKE_CURRENT_SOURCE_DIR}/receipts/conformite_v5/${fam}_${sz}.txt
+               LABELS scale${sz} TIMEOUT 3600)
+  endforeach()
+endforeach()

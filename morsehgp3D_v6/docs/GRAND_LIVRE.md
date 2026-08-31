@@ -22,8 +22,11 @@ ajustement global peuvent masquer un terme en n^1,8).
 | `M_anchor` | Σ_e m_e — sites de tape par ancre survivante |
 | `E` | ancres résiduelles, étiquetées par lane |
 | `W_sweep1` | passe 1 du sweep : sites scannés (cœur saturé), tous seeds |
-| `W_sweep2` | passe 2 : racines triées × log, seeds survivants seulement |
-| `frag` | fragments shallow émis par les sweeps |
+| `sweep_pass2_seeds` | seeds q4 survivants entrés en passe 2 |
+| `sweep_roots_onchord` | racines sur corde construites et triées (observable, jamais « × log ») |
+| `sweep_root_groups` | blocs de racines égales traités (règle de bloc) |
+| `sweep_roots_offchord` | racines strictement hors corde (rejet exact) |
+| `P_role` | complétions soumises à la cascade (= `q4_completions`) |
 | `S3, S4, S4_surv` | seeds q3, seeds q4, seeds q4 survivants de passe 1 |
 | `kills[t]` | morts par tueur t (W_q, secteurs, grille, cœur, corde, hist, …) |
 | `Q_try` | candidats entrés en cascade finale |

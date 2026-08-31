@@ -1,0 +1,945 @@
+// MorseHGP3D v6 — generation des boules candidates : les trois lanes.
+//
+// CE QUE LA v6 CHANGE PAR RAPPORT A LA v5 (audits/NOTE_CLAUDE_CONCEPTION_V6) :
+//   1. UNE SEULE descente WSPD a masques de lanes (`alive_rectangles_fused`) au
+//      lieu de trois descentes par lane : les decisions de scission (separated,
+//      box_w2, ordre enfant/garde) sont independantes de la lane, l'arbre de
+//      rectangles est identique ; chaque lane sort du masque des que son cœur
+//      atteint h_q. Grand-livre GLOBAL par lane :
+//      masses emises + masses tuees == C(n,2) − Σ C(mult_u, 2).
+//   2. Le RESCAN DE PROFONDEUR PAR CANDIDAT q4 n'existe plus : le SWEEP DE
+//      CORDE UNIFIE mutualise la profondeur PAR SEED (certificats C1/C2 de
+//      docs/MATHEMATIQUES.md § 3). Chaque completion d est une racine
+//      μ_d = P(d)/B(d) de la corde du seed (th. 10.4) ; la profondeur au point
+//      de racine — regle de bloc : sorties retirees, incidents a zero, entrees
+//      apres — est EXACTEMENT le compte du filtre v5 (identite affine
+//      signe(q4_power) = signe(P_z − μ·B_z)). Une racine STRICTEMENT hors
+//      corde (2P² > J·B²) correspond exactement a un tetraedre non bien
+//      centre (Jung) : la sauter est un rejet exact, jamais une perte. LE
+//      MULTIENSEMBLE EMIS EST DONC IDENTIQUE A LA v5 (digest_balls compris).
+//      HONNETETE DE COUT (audit v6 du 31 aout) : l'incidence seed–completion
+//      reste materialisee (une racine par site eligible du tape) ; ce qui
+//      disparait est le rescan O(m) PAR candidat — le cout passe de
+//      O(p_e × m_e) a O(m_e log m_e + p_e) par seed survivant, avec p_e les
+//      completions soumises a la cascade (compteur q4_completions).
+//   3. Non repris de la v5 (docs/PROVENANCE.md) : raffinement post-separation
+//      (mesure +34 % de mur, defaut 0), filtre d'enveloppe (opt-in negatif),
+//      LaneOverride device (aucun recu de gain G4).
+//
+// Le reste est la doctrine v5 inchangee : rectangle MORT si cœur >= h_q sans
+// descente, TERMINAL si separe, SCINDE sinon (plus grand diametre) ;
+// histogrammes h_a/h_b aux 8 coins ; ancres survivantes par
+// h_coeur + h_a + h_b < h_q (disjonction, fail-open) ; q2 toujours emise ;
+// q3 seeds aigus + filtre de profondeur a la generation (etage flottant
+// certifie, repli affine exact) ; q4 W_4 exact + secteurs + grille (10.5) +
+// cœur de Jung + morceaux de corde (10.4) en passe 1. Toutes les decisions
+// entieres ; sortie multiensemble INDEPENDANTE du decoupage parallele
+// (brouillons par ouvrier, fusion en ordre d'ouvrier, tri stable + RLE
+// canonisent). Completude : une boule pertinente pour K <= K_max a
+// |I_B| <= K_max + 1 − q et ses temoins de fuseau sous h_q : aucun filtre ne
+// perd un plateau pertinent — la porte de conformite v5 le grave.
+#pragma once
+
+#include <algorithm>
+#include <chrono>
+#include <functional>
+#include <limits>
+#include <vector>
+
+#include "../lanes/cell_grid.hpp"
+#include "../lanes/chord_kill.hpp"
+#include "../lanes/edge_cover.hpp"
+#include "../lanes/q2.hpp"
+#include "../lanes/q3.hpp"
+#include "../lanes/q4.hpp"
+#include "../lanes/sector_kill.hpp"
+#include "../parallel/pool.hpp"
+#include "../spindle/witness_count.hpp"
+#include "../wspd/wavefront.hpp"
+#include "candidates.hpp"
+#include "float_filter.hpp"
+
+namespace mhgp6 {
+
+// Compteurs de la generation (jamais une autorite). Voir docs/GRAND_LIVRE.md.
+struct GenerateStats {
+  // Front fusionne : visites de paires de nœuds (une visite sert les lanes du
+  // masque), rectangles vivants par lane a l'emission, grand-livre GLOBAL des
+  // masses de paires (PointId) par lane : emitted + killed == expected.
+  u64 rect_visited_fused = 0;
+  u64 rect_alive[3] = {0, 0, 0};
+  u128 ledger_emitted_mass[3] = {0, 0, 0};
+  u128 ledger_killed_mass[3] = {0, 0, 0};
+  u64 workers_wspd = 0;
+  u64 workers_rects = 0;
+  double t_wspd_ms = 0;
+  double t_rects_ms = 0;
+  // Cascade histogramme — trois classes DISJOINTES par lane :
+  // anchors = rows + thresh + survivors.
+  u64 anchors[3] = {0, 0, 0};
+  u64 anchors_killed_hist[3] = {0, 0, 0};
+  u64 hist_killed_rows[3] = {0, 0, 0};
+  u64 hist_killed_thresh[3] = {0, 0, 0};
+  u64 hist_survivors[3] = {0, 0, 0};
+  // Tueurs d'ancre.
+  u64 anchors_killed_w3 = 0;
+  u64 anchors_killed_w4 = 0;
+  u64 anchors_killed_sectors[3] = {0, 0, 0};
+  u64 anchors_killed_cells[3] = {0, 0, 0};
+  u64 seeds_killed_cells[3] = {0, 0, 0};
+  u64 grids_attempted[3] = {0, 0, 0};
+  u64 grids_built[3] = {0, 0, 0};
+  u64 grids_all_dead[3] = {0, 0, 0};
+  // Seeds et sweep q4.
+  u64 seeds[2] = {0, 0};       // q3, q4
+  u64 seeds_killed_core = 0;   // q4 : cœur de seed (Jung)
+  u64 seeds_killed_chord = 0;  // q4 : morceaux de corde (passe 1)
+  u64 invariant_jneg = 0;      // J < 0 : inatteignable par theoreme (refus en invariant)
+  u64 sweep_pass2_seeds = 0;   // seeds q4 survivants entres en passe 2
+  u64 sweep_roots_onchord = 0;   // racines triees (observable du grand-livre)
+  u64 sweep_root_groups = 0;     // blocs de racines egales traites (regle de bloc)
+  u64 sweep_roots_offchord = 0;  // racines strictement hors corde (rejet exact, jamais enumerees)
+  u64 sweep_const_interior = 0;  // sites a contribution constante interieure (c0)
+  // Completions q4 (cascade au point de racine).
+  u64 q4_completions = 0, q4_rej_lens = 0, q4_rej_owner = 0, q4_rej_once = 0, q4_rej_i64 = 0,
+      q4_rej_face_power = 0, q4_rej_det = 0, q4_rej_center = 0;
+  // Emission et profondeur a la generation.
+  u64 candidates[3] = {0, 0, 0};
+  u64 depth_killed[3] = {0, 0, 0};
+  // Certification flottante.
+  u64 float_cert_neg = 0, float_cert_pos = 0, float_fallback = 0;
+  u64 q3_cert[3] = {0, 0, 0};
+  u64 q4_cert[6] = {0, 0, 0, 0, 0, 0};
+  u64 jung_cert_kill = 0, jung_cert_skip = 0, jung_fallback = 0;
+  void add_from(const GenerateStats& o) {
+    rect_visited_fused += o.rect_visited_fused;
+    for (int i = 0; i < 3; ++i) {
+      rect_alive[i] += o.rect_alive[i];
+      ledger_emitted_mass[i] += o.ledger_emitted_mass[i];
+      ledger_killed_mass[i] += o.ledger_killed_mass[i];
+      anchors[i] += o.anchors[i];
+      anchors_killed_hist[i] += o.anchors_killed_hist[i];
+      hist_killed_rows[i] += o.hist_killed_rows[i];
+      hist_killed_thresh[i] += o.hist_killed_thresh[i];
+      hist_survivors[i] += o.hist_survivors[i];
+      anchors_killed_sectors[i] += o.anchors_killed_sectors[i];
+      anchors_killed_cells[i] += o.anchors_killed_cells[i];
+      seeds_killed_cells[i] += o.seeds_killed_cells[i];
+      grids_attempted[i] += o.grids_attempted[i];
+      grids_built[i] += o.grids_built[i];
+      grids_all_dead[i] += o.grids_all_dead[i];
+      candidates[i] += o.candidates[i];
+      depth_killed[i] += o.depth_killed[i];
+      q3_cert[i] += o.q3_cert[i];
+    }
+    anchors_killed_w3 += o.anchors_killed_w3;
+    anchors_killed_w4 += o.anchors_killed_w4;
+    seeds[0] += o.seeds[0];
+    seeds[1] += o.seeds[1];
+    seeds_killed_core += o.seeds_killed_core;
+    seeds_killed_chord += o.seeds_killed_chord;
+    invariant_jneg += o.invariant_jneg;
+    sweep_pass2_seeds += o.sweep_pass2_seeds;
+    sweep_roots_onchord += o.sweep_roots_onchord;
+    sweep_root_groups += o.sweep_root_groups;
+    sweep_roots_offchord += o.sweep_roots_offchord;
+    sweep_const_interior += o.sweep_const_interior;
+    q4_completions += o.q4_completions;
+    q4_rej_lens += o.q4_rej_lens;
+    q4_rej_owner += o.q4_rej_owner;
+    q4_rej_once += o.q4_rej_once;
+    q4_rej_i64 += o.q4_rej_i64;
+    q4_rej_face_power += o.q4_rej_face_power;
+    q4_rej_det += o.q4_rej_det;
+    q4_rej_center += o.q4_rej_center;
+    float_cert_neg += o.float_cert_neg;
+    float_cert_pos += o.float_cert_pos;
+    float_fallback += o.float_fallback;
+    for (int i = 0; i < 6; ++i) q4_cert[i] += o.q4_cert[i];
+    jung_cert_kill += o.jung_cert_kill;
+    jung_cert_skip += o.jung_cert_skip;
+    jung_fallback += o.jung_fallback;
+  }
+};
+
+// Rectangle terminal vivant du front fusionne : masque des lanes encore
+// ouvertes et minorant de cœur (autorite de coins) par lane du masque.
+struct MultiAliveRect {
+  WspdRect r;
+  u8 mask = 0;
+  u64 core[3] = {0, 0, 0};
+};
+
+namespace generate_detail {
+
+inline double ms_since(std::chrono::steady_clock::time_point t0) {
+  return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+}
+
+}  // namespace generate_detail
+
+// DESCENTE WSPD FUSIONNEE. Une seule descente pour toutes les lanes du masque
+// initial : par paire de nœuds, `count_universal_witnesses` (masques, ecretage
+// a h_q) ; une lane dont le cœur atteint h_q sort du masque et sa masse de
+// paires est versee au grand-livre `killed` ; le rectangle n'est scinde que si
+// le masque reste non vide ; a un terminal, un second comptage AVEC autorite
+// de coins fournit core[3] et peut encore fermer des lanes. Les decisions de
+// scission (separated sur boites serrees, plus grand diametre, ordre
+// enfant/garde) sont INDEPENDANTES de la lane : l'arbre de rectangles est
+// identique a celui de descentes separees — la porte `mhgp6_fused_descent`
+// compare a des descentes a masque singleton (meme code, masque reduit).
+// Parallele par tranches ORDONNEES de la vague : sortie bit-identique au
+// sequentiel. Mutant `fused-mask-stuck` : une lane morte reste dans le masque
+// (sur-emission, tuee par le grand-livre et la porte d'egalite).
+// GARDE DE PROFIL : s < 8 refuse sans opt-in test-only greppable.
+inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3], u8 initial_mask, int threads,
+                                   std::vector<MultiAliveRect>* out, GenerateStats* st,
+                                   bool allow_subprofile_separation = false) {
+  out->clear();
+  if (s < kSeparationProfileMin && !allow_subprofile_separation)
+    throw std::invalid_argument("alive_rectangles_fused : separation s < 8 sans opt-in test-only");
+  if (ix.nodes.empty()) return;
+  const bool mask_stuck = MHGP6_MUTANT("fused-mask-stuck");
+  struct Task {
+    WspdRect r;
+    u8 mask;
+  };
+  const auto pair_mass = [&](const WspdRect& r) -> u128 {
+    return (u128)ix.node_weight(r.a) * ix.node_weight(r.b);
+  };
+  std::vector<Task> wave, next;
+  wave.reserve(ix.nodes.size());
+  for (const RadixNode& n : ix.nodes) wave.push_back(Task{WspdRect{n.left, n.right}, initial_mask});
+  std::vector<std::vector<MultiAliveRect>> lout;
+  std::vector<std::vector<Task>> lnext;
+  std::vector<GenerateStats> lst;
+  while (!wave.empty()) {
+    const size_t nw = wave.size();
+    const int t_eff = nw < 256 ? 1 : threads;  // les premieres vagues sont minuscules
+    const size_t T = planned_workers(nw, t_eff);
+    const size_t chunk = std::max<size_t>(1, (nw + 8 * T - 1) / (8 * T));
+    const size_t nchunks = (nw + chunk - 1) / chunk;
+    lout.assign(nchunks, {});
+    lnext.assign(nchunks, {});
+    lst.assign(nchunks, GenerateStats{});
+    const size_t created = parallel_items(nchunks, (int)T, [&](size_t c, size_t) {
+      for (size_t i = c * chunk; i < std::min(nw, c * chunk + chunk); ++i) {
+        const Task& t = wave[i];
+        ++lst[c].rect_visited_fused;
+        const FusedCounts fc = count_universal_witnesses(ix, t.r.a, t.r.b, h_of, t.mask, false);
+        u8 m = t.mask;
+        for (int q = 0; q < 3; ++q) {
+          if (!(m & (1u << q))) continue;
+          if (fc.c[q] >= h_of[q] && !mask_stuck) {
+            m = (u8)(m & ~(1u << q));  // lane MORTE sans descente
+            lst[c].ledger_killed_mass[q] += pair_mass(t.r);
+          }
+        }
+        if (m == 0) continue;  // rectangle mort pour toutes les lanes restantes
+        const AxisBox va = ix.box_of(t.r.a), vb = ix.box_of(t.r.b);
+        if (wspd_detail::separated(va, vb, s, 1)) {
+          // TERMINAL : recomptage avec autorite de coins ; il peut fermer des
+          // lanes de plus (les masses correspondantes vont au grand-livre).
+          const FusedCounts ff = count_universal_witnesses(ix, t.r.a, t.r.b, h_of, m, true);
+          MultiAliveRect ar;
+          ar.r = t.r;
+          for (int q = 0; q < 3; ++q) {
+            if (!(m & (1u << q))) continue;
+            if (ff.c[q] >= h_of[q] && !mask_stuck) {
+              lst[c].ledger_killed_mass[q] += pair_mass(t.r);
+              continue;
+            }
+            ar.mask = (u8)(ar.mask | (1u << q));
+            ar.core[q] = ff.c[q];
+            lst[c].ledger_emitted_mass[q] += pair_mass(t.r);
+            ++lst[c].rect_alive[q];
+          }
+          if (ar.mask != 0) lout[c].push_back(ar);
+          continue;
+        }
+        // SCISSION du facteur de plus grand diametre (jamais une feuille).
+        const i64 w2a = wspd_detail::box_w2(va), w2b = wspd_detail::box_w2(vb);
+        const bool split_a = (t.r.a >= 0) && (t.r.b < 0 || w2a >= w2b);
+        const NodeRef keep = split_a ? t.r.b : t.r.a;
+        const RadixNode& n = ix.nodes[(size_t)(split_a ? t.r.a : t.r.b)];
+        lnext[c].push_back(Task{split_a ? WspdRect{n.left, keep} : WspdRect{keep, n.left}, m});
+        lnext[c].push_back(Task{split_a ? WspdRect{n.right, keep} : WspdRect{keep, n.right}, m});
+      }
+    });
+    st->workers_wspd = std::max(st->workers_wspd, (u64)created);
+    next.clear();
+    for (size_t c = 0; c < nchunks; ++c) {
+      out->insert(out->end(), lout[c].begin(), lout[c].end());
+      next.insert(next.end(), lnext[c].begin(), lnext[c].end());
+      st->add_from(lst[c]);
+    }
+    wave.swap(next);
+  }
+}
+
+namespace generate_detail {
+
+// Histogrammes h_a/h_b (autorite 8 coins, exacte) d'un rectangle, pour une
+// lane. O(|A|² + |B|²) par rectangle : assume, |A||B| ~ 2 a s >= 8 (route S) ;
+// la route M saturee (docs/MATHEMATIQUES.md § C7) est un chantier E2 distinct.
+inline void corner_histograms(const CloudIndex& ix, Lane lane, const WspdRect& r, std::vector<u64>* ha,
+                              std::vector<u64>* hb) {
+  const NodeRange ra = ix.range_of(r.a), rb = ix.range_of(r.b);
+  const AxisBox boxA = ix.box_of(r.a), boxB = ix.box_of(r.b);
+  const int na = ra.last - ra.first + 1, nb = rb.last - rb.first + 1;
+  ha->assign((size_t)na, 0);
+  hb->assign((size_t)nb, 0);
+  for (int ia = 0; ia < na; ++ia)
+    for (int iz = 0; iz < na; ++iz)
+      if (iz != ia &&
+          universal_over_corners(lane, ix.upos[(size_t)(ra.first + ia)], boxB, ix.upos[(size_t)(ra.first + iz)]))
+        ++(*ha)[(size_t)ia];
+  for (int ib = 0; ib < nb; ++ib)
+    for (int iz = 0; iz < nb; ++iz)
+      if (iz != ib &&
+          universal_over_corners(lane, ix.upos[(size_t)(rb.first + ib)], boxA, ix.upos[(size_t)(rb.first + iz)]))
+        ++(*hb)[(size_t)ib];
+}
+
+// Brouillon par ouvrier : histogrammes, handles, cover, lentille, sites
+// affines de l'ancre (u = 2z−a−b, q = |u|²−D², entiers < 2^36 exacts en
+// binaire64), grille de cellules, et tampons du sweep de corde.
+struct AnchorScratch {
+  std::vector<u64> ha, hb;
+  std::vector<NodeRef> handles;
+  std::vector<CoverPoint> cover, cover_tmp, lens, query;
+  u64 handle_points = 0;
+  u64 cover_nodes = 0, visits = 0;
+  std::vector<i64> su0, su1, su2, sq;
+  double qmax_d = 1.0, umax_d = 1.0;
+  bool affine_filled = false;
+  CellGrid grid;
+  size_t cell_min_sites = kCellGridMinSites;
+  // Tampons de la passe 2 du sweep (par ouvrier, reutilises par seed).
+  struct ChordRoot {
+    i128 num;  // μ = num/den, den > 0 (normalise par le signe de B)
+    i64 den;
+    i32 u;      // indice upos du site
+    bool entry;  // B > 0 : le site devient interieur pour μ > μ_z
+  };
+  std::vector<ChordRoot> roots;
+  const std::vector<CoverPoint>& scan_sites() const { return cover; }
+  void fill_affine_sites(const CloudIndex& ix, const P3& pa, const P3& pb, i64 D2) {
+    const size_t nc = cover.size();
+    su0.resize(nc);
+    su1.resize(nc);
+    su2.resize(nc);
+    sq.resize(nc);
+    i64 qmax = 1, umax = 1;
+    const i64 sx = pa.x + pb.x, sy = pa.y + pb.y, sz = pa.z + pb.z;
+    for (size_t i = 0; i < nc; ++i) {
+      const P3& pz = ix.upos[(size_t)cover[i].u];
+      const i64 u0 = 2 * pz.x - sx, u1 = 2 * pz.y - sy, u2 = 2 * pz.z - sz;
+      const i64 qz = u0 * u0 + u1 * u1 + u2 * u2 - D2;
+      su0[i] = u0;
+      su1[i] = u1;
+      su2[i] = u2;
+      sq[i] = qz;
+      qmax = std::max(qmax, qz < 0 ? -qz : qz);
+      umax = std::max({umax, u0 < 0 ? -u0 : u0, u1 < 0 ? -u1 : u1, u2 < 0 ? -u2 : u2});
+    }
+    qmax_d = (double)qmax;
+    umax_d = (double)umax;
+    affine_filled = true;
+  }
+};
+
+// GRILLE DE CELLULES (cell_grid.hpp) — centre v3 = N/(2G), N = W − G·d (q3) ;
+// corde (N ± μ̂·n)/(2G), μ̂ = isqrt(J/2) + 1 (q4, theoreme 10.4).
+inline void seed_center_coords(const CellGrid& g, const Q3Form& f3, const i64 d[3], i128* pu, i128* pv, i128* den) {
+  *pu = 0;
+  *pv = 0;
+  for (int k = 0; k < 3; ++k) {
+    const i128 Nk = f3.w[k] - f3.g * (i128)d[k];
+    *pu += Nk * g.u[k];
+    *pv += Nk * g.v[k];
+  }
+  *den = 2 * f3.g;
+}
+inline bool seed_center_cell_dead(const CellGrid& g, const Q3Form& f3, const i64 d[3]) {
+  i128 pu, pv, den;
+  seed_center_coords(g, f3, d, &pu, &pv, &den);
+  return g.point_dead(pu, pv, den);
+}
+inline bool seed_chord_coords(const CellGrid& g, const Q3Form& f3, const i64 d[3], const P3& nrm, i64 D2, i64 l_ax,
+                              i64 l_bx, i128* pu0, i128* pv0, i128* pu1, i128* pv1, i128* den) {
+  const i128 J = (i128)D2 * (3 * f3.g - 2 * (i128)l_ax * l_bx);
+  if (J < 0) return false;
+  const i128 mu_hat = isqrt128_floor(J / 2) + 1;
+  const i64 nn[3] = {nrm.x, nrm.y, nrm.z};
+  i128 pu = 0, pv = 0, qu = 0, qv = 0;
+  for (int k = 0; k < 3; ++k) {
+    const i128 Nk = f3.w[k] - f3.g * (i128)d[k];
+    pu += Nk * g.u[k];
+    pv += Nk * g.v[k];
+    qu += (i128)nn[k] * g.u[k];
+    qv += (i128)nn[k] * g.v[k];
+  }
+  *pu0 = pu + mu_hat * qu;
+  *pv0 = pv + mu_hat * qv;
+  *pu1 = pu - mu_hat * qu;
+  *pv1 = pv - mu_hat * qv;
+  *den = 2 * f3.g;
+  return true;
+}
+inline bool seed_chord_cell_dead(const CellGrid& g, const Q3Form& f3, const i64 d[3], const P3& nrm, i64 D2, i64 l_ax,
+                                 i64 l_bx) {
+  i128 pu0, pv0, pu1, pv1, den;
+  if (!seed_chord_coords(g, f3, d, nrm, D2, l_ax, l_bx, &pu0, &pv0, &pu1, &pv1, &den)) return false;
+  return g.segment_dead(pu0, pv0, pu1, pv1, den);
+}
+
+// ETAGE GRILLE d'une ancre : politique + construction + compteurs (UNE
+// definition). Rend true si l'ancre est MORTE (toutes cellules mortes).
+inline bool anchor_grid_stage(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb,
+                              i64 D2, Lane lane, u64 h, bool float_on, GenerateStats* ls) {
+  const int li = lane == Lane::kQ3 ? 1 : 2;
+  sc.grid.built = false;
+  if (sc.cell_min_sites != 0 && sc.cover.size() < sc.cell_min_sites) return false;
+  size_t nacute = 0, near_m = 0;
+  for (const CoverPoint& cz : sc.cover) {
+    if (cz.u == ua || cz.u == ub) continue;
+    if (cell_grid_near_m(cz.dist2q, D2)) ++near_m;
+    if (is_acute_seed(pa, pb, ix.upos[(size_t)cz.u], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cz.u)))
+      ++nacute;
+  }
+  const size_t ratio = lane == Lane::kQ3 ? kCellGridSeedsRatioQ3 : kCellGridSeedsRatioQ4;
+  if (!cell_grid_wanted(sc.cover.size(), nacute, near_m, h, sc.cell_min_sites, ratio)) return false;
+  ++ls->grids_attempted[li];
+  if (!sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, lane == Lane::kQ3 ? 12 : 8, h, float_on)) return false;
+  ++ls->grids_built[li];
+  if (!sc.grid.all_dead) return false;
+  ++ls->grids_all_dead[li];
+  ++ls->anchors_killed_cells[li];
+  return true;
+}
+
+// Kernel affine d'un seed sur les sites de l'ancre : N = W − G·d, borne E.
+struct AffineSeed {
+  i128 N0, N1, N2;
+  double Gd, Nd0, Nd1, Nd2, bound;
+  i128 G;
+  AffineSeed(const Q3Form& f3, const P3& pa, const P3& pb, const AnchorScratch& sc, bool float_on)
+      : N0(f3.w[0] - f3.g * (i128)(pb.x - pa.x)),
+        N1(f3.w[1] - f3.g * (i128)(pb.y - pa.y)),
+        N2(f3.w[2] - f3.g * (i128)(pb.z - pa.z)),
+        Gd((double)f3.g),
+        Nd0((double)N0),
+        Nd1((double)N1),
+        Nd2((double)N2),
+        bound(float_on ? affine_l_bound(Gd, Nd0, Nd1, Nd2, sc.qmax_d, sc.umax_d)
+                       : std::numeric_limits<double>::infinity()),
+        G(f3.g) {}
+  double l_hat(const AnchorScratch& sc, size_t iz) const {
+    return affine_l_hat(Gd, Nd0, Nd1, Nd2, (double)sc.su0[iz], (double)sc.su1[iz], (double)sc.su2[iz],
+                        (double)sc.sq[iz]);
+  }
+  // L = 4P exact (i128, |L| < 2^105).
+  i128 l_exact(const AnchorScratch& sc, size_t iz) const {
+    return G * (i128)sc.sq[iz] - 2 * ((i128)sc.su0[iz] * N0 + (i128)sc.su1[iz] * N1 + (i128)sc.su2[iz] * N2);
+  }
+};
+
+// CORPS PAR ANCRE de la lane q3 : tests d'ancre cumules (W_3 exact puis
+// secteurs), grille de cellules, seeds aigus, filtre de profondeur a la
+// generation (etage flottant certifie, repli exact i128), emission.
+inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb,
+                           i64 D2, u64 h3, bool float_on, bool genfilter_nonstrict, bool pretested,
+                           std::vector<BallCandidate>* lo, GenerateStats* ls, const EndpointCredit* ec) {
+  if (!pretested) {
+    const int k = anchor_kill_cumulated(sc.cover, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h3, true, ec);
+    if (k == 1) {
+      ++ls->anchors_killed_w3;
+      return;
+    }
+    if (k == 2) {
+      ++ls->anchors_killed_sectors[1];
+      return;
+    }
+  }
+  if (anchor_grid_stage(ix, sc, ua, ub, pa, pb, D2, Lane::kQ3, h3, float_on, ls)) return;
+  const i64 d3[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
+  sc.affine_filled = false;
+  for (const CoverPoint& cp : sc.cover) {
+    if (cp.u == ua || cp.u == ub) continue;
+    const P3& px = ix.upos[(size_t)cp.u];
+    if (!is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cp.u))) continue;
+    ++ls->seeds[0];
+    const Q3Form f3 = q3_form(pa, pb, px);
+    if (sc.grid.built && seed_center_cell_dead(sc.grid, f3, d3)) {
+      ++ls->seeds_killed_cells[1];
+      continue;
+    }
+    if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);
+    const AffineSeed seed(f3, pa, pb, sc, float_on);
+    u64 depth = 0;
+    bool deep = false;
+    for (size_t iz = 0; iz < sc.cover.size() && !deep; ++iz) {
+      const double lh = seed.l_hat(sc, iz);
+      bool interior;
+      if (lh < -seed.bound) {
+        ++ls->float_cert_neg;
+        ++ls->q3_cert[0];
+        interior = true;
+      } else if (lh > seed.bound) {
+        ++ls->float_cert_pos;
+        ++ls->q3_cert[1];
+        interior = false;
+      } else {
+        ++ls->float_fallback;
+        ++ls->q3_cert[2];
+        const i128 L = seed.l_exact(sc, iz);
+        interior = L < 0 || (genfilter_nonstrict && L <= 0);
+      }
+      if (interior && ++depth >= h3) deep = true;
+    }
+    if (deep) {
+      ++ls->depth_killed[1];
+      continue;
+    }
+    lo->push_back(BallCandidate{q3_ball_key(f3), promote_level(q3_exact_level(pa, pb, px)), 3});
+    ++ls->candidates[1];
+  }
+}
+
+// Comparateur exact de deux racines normalisees (num/den, den > 0) :
+// signe de num1·den2 − num2·den1. |num| < 2^101, den < 2^55 : produits
+// < 2^156, magnitude par mul_128x128_192, comparaison U192.
+inline int cmp_chord_roots(const AnchorScratch::ChordRoot& r1, const AnchorScratch::ChordRoot& r2) {
+  const i128 n1 = r1.num, n2 = r2.num;
+  const bool neg1 = n1 < 0, neg2 = n2 < 0;
+  if (neg1 != neg2) return neg1 ? -1 : 1;
+  const U192 m1 = mul_128x128_192(uabs128(n1), (u128)r2.den);
+  const U192 m2 = mul_128x128_192(uabs128(n2), (u128)r1.den);
+  const int c = cmp_u192(m1, m2);
+  return neg1 ? -c : c;
+}
+
+// CORPS PAR ANCRE de la lane q4. Passe 1 (v5 inchangee) : W_4 exact + credit,
+// secteurs, grille, lentille, seeds aigus, scan partage cœur de Jung +
+// morceaux de corde avec sortie anticipee. Passe 2 (LE NEUF, certificats
+// C1/C2) : pour chaque seed survivant, racines μ_z = P(z)/B(z) triees ;
+// chaque racine sur la corde fermee (2P² <= J·B², egalite comprise — borne de
+// Jung admissible) est une completion potentielle, evaluee a sa profondeur de
+// point (regle de bloc) puis par la cascade exacte O(1). Une racine
+// strictement hors corde ne peut pas etre bien centree (rejet exact) mais
+// reste TEMOIN constant si P < 0. Le multiensemble emis est identique a la
+// boucle de completions v5 (identite affine du th. 10.4) ; l'incidence
+// seed–completion est toujours payee (une racine par site), seul le rescan
+// de profondeur par candidat disparait. CONTRAT DE PROFONDEUR (choix 1 de
+// l'audit v6) : le verdict est depth_at(mu_d) >= h4 sur le COVER COMPLET,
+// sans aucun credit ajoute (les temoins des credits figurent deja dans ce
+// compte) ; la composition residuelle (AnchorCredit/ResidualTape) est le
+// contrat 2, un chantier J3 distinct.
+inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb,
+                              i64 D2, u64 h4, bool float_on, bool seed_core_nonstrict, bool no_canonical,
+                              bool pretested, std::vector<BallCandidate>* lo, GenerateStats* ls,
+                              const EndpointCredit* ec) {
+  if (!pretested) {
+    u64 n4 = 0, n4_out = 0;
+    const bool use_ec = ec != nullptr && ec->active() && ec->base < h4;
+    for (const CoverPoint& cz : sc.cover) {
+      if (cz.u == ua || cz.u == ub) continue;
+      if (!in_spindle(Lane::kQ4, pa, pb, ix.upos[(size_t)cz.u])) continue;
+      if (++n4 >= h4) break;
+      if (use_ec && !ec->in_boxes(cz.u) && ++n4_out + ec->base >= h4) {
+        n4 = h4;
+        break;
+      }
+    }
+    if (n4 >= h4) {
+      ++ls->anchors_killed_w4;
+      return;
+    }
+    u64 wmin = 0;
+    if (anchor_sector_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h4, &wmin, nullptr, true, ec)) {
+      ++ls->anchors_killed_sectors[2];
+      return;
+    }
+  }
+  sc.affine_filled = false;
+  sc.lens.clear();
+  for (const CoverPoint& cz : sc.cover) {
+    const P3& pz = ix.upos[(size_t)cz.u];
+    if (p3_norm2(p3_sub(pz, pa)) <= D2 && p3_norm2(p3_sub(pz, pb)) <= D2) sc.lens.push_back(cz);
+  }
+  if (anchor_grid_stage(ix, sc, ua, ub, pa, pb, D2, Lane::kQ4, h4, float_on, ls)) return;
+  const i64 d4[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
+  for (const CoverPoint& cx : sc.lens) {
+    if (cx.u == ua || cx.u == ub) continue;
+    const P3& px = ix.upos[(size_t)cx.u];
+    if (!is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cx.u))) continue;
+    ++ls->seeds[1];
+    const i64 l_ax = p3_norm2(p3_sub(px, pa));
+    const i64 l_bx = p3_norm2(p3_sub(px, pb));
+    const Q3Form f3s = q3_form(pa, pb, px);
+    const P3 nrm = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
+    if (sc.grid.built && seed_chord_cell_dead(sc.grid, f3s, d4, nrm, D2, l_ax, l_bx)) {
+      ++ls->seeds_killed_cells[2];
+      continue;
+    }
+    // Cœur universel du seed (Jung) : J = D²(3G − 2 l_ax l_bx) >= G·D²/3 > 0
+    // pour tout seed aigu — la branche J < 0 est INATTEIGNABLE par theoreme.
+    const i128 Jb = (i128)D2 * (3 * f3s.g - 2 * (i128)l_ax * l_bx);
+    if (Jb < 0) {
+      ++ls->invariant_jneg;  // signale ; run_pipeline refuse en invariant
+      ++ls->seeds_killed_core;
+      continue;
+    }
+    if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);
+    const AffineSeed seed(f3s, pa, pb, sc, float_on);
+    bool dead = false;
+    bool dead_by_chord = false;
+    {
+      const double Jd = (double)Jb;
+      const double Jlo = Jd * (1.0 - kJungGuard), Jhi = Jd * (1.0 + kJungGuard);
+      ChordPieces chord;
+      chord.init(Jb, MHGP6_MUTANT("chord-nonstrict"));
+      u64 fcount = 0;
+      for (size_t iz = 0; iz < sc.cover.size(); ++iz) {
+        const CoverPoint& cz = sc.cover[iz];
+        if (cz.u == ua || cz.u == ub || cz.u == cx.u) continue;
+        const double lh = seed.l_hat(sc, iz);
+        const P3& pz = ix.upos[(size_t)cz.u];
+        const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
+        // La corde voit aussi les sites certifies P > 0 (audit du 30 aout) :
+        // l'enregistrement precede le saut, la mort se constate apres.
+        const bool skip_pos = lh > seed.bound;
+        if (!(skip_pos && MHGP6_MUTANT("chord-skip-positive")))
+          chord.update(lh, seed.bound, Bz, [&]() { return seed.l_exact(sc, iz); });
+        if (skip_pos) {
+          ++ls->float_cert_pos;
+          ++ls->q4_cert[0];
+          if (!MHGP6_MUTANT("chord-dead-skip-positive") && chord.dead(h4)) {
+            dead_by_chord = true;
+            break;
+          }
+          continue;  // P > 0 certifie : jamais temoin du CŒUR (μ = 0)
+        }
+        if (lh < -seed.bound) {
+          ++ls->float_cert_neg;
+          ++ls->q4_cert[1];
+          const int js = jung_interval_sign(lh, seed.bound, Jlo, Jhi, Bz);
+          if (js != 0) {
+            if (js > 0) {
+              ++ls->jung_cert_kill;
+              ++ls->q4_cert[2];
+              if (++fcount >= h4) break;
+            } else {
+              ++ls->jung_cert_skip;
+              ++ls->q4_cert[3];
+            }
+          } else {
+            ++ls->jung_fallback;
+            ++ls->q4_cert[4];
+            const i128 Pz = seed.l_exact(sc, iz) / 4;
+            const int c = cmp_2p2_jb2(Pz, Jb, Bz);
+            if ((seed_core_nonstrict ? (c >= 0) : (c > 0)) && ++fcount >= h4) break;
+          }
+        } else {
+          ++ls->float_fallback;
+          ++ls->q4_cert[5];
+          const i128 Pz = seed.l_exact(sc, iz) / 4;
+          if (!(seed_core_nonstrict ? (Pz > 0) : (Pz >= 0))) {
+            const int c = cmp_2p2_jb2(Pz, Jb, Bz);
+            if ((seed_core_nonstrict ? (c >= 0) : (c > 0)) && ++fcount >= h4) break;
+          }
+        }
+        if (chord.dead(h4)) {
+          dead_by_chord = true;
+          break;
+        }
+      }
+      dead = fcount >= h4 || dead_by_chord;
+    }
+    if (dead) {
+      if (dead_by_chord)
+        ++ls->seeds_killed_chord;
+      else
+        ++ls->seeds_killed_core;
+      continue;
+    }
+    // ---- PASSE 2 : sweep de corde unifie (remplace la boucle C×D v5).
+    ++ls->sweep_pass2_seeds;
+    u64 c0 = 0;  // temoins constants sur toute la corde fermee
+    sc.roots.clear();
+    for (size_t iz = 0; iz < sc.cover.size(); ++iz) {
+      const CoverPoint& cz = sc.cover[iz];
+      if (cz.u == ua || cz.u == ub || cz.u == cx.u) continue;
+      const P3& pz = ix.upos[(size_t)cz.u];
+      const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
+      const i128 Pz = seed.l_exact(sc, iz) / 4;
+      if (Bz == 0) {
+        // Coplanaire au seed : jamais une completion (det = 0) ; temoin
+        // constant ssi strictement interieur au centre (P < 0).
+        if (Pz < 0) {
+          ++c0;
+          ++ls->sweep_const_interior;
+        }
+        continue;
+      }
+      const int on = cmp_2p2_jb2(Pz > 0 ? -Pz : Pz, Jb, Bz);
+      if (on > 0) {
+        // Racine STRICTEMENT hors corde : signe de (P − μB) constant sur la
+        // corde fermee (= signe de P en μ = 0) ; et le tetraedre correspondant
+        // n'est pas bien centre (Jung) — rejet exact, jamais une perte.
+        ++ls->sweep_roots_offchord;
+        if (Pz < 0) {
+          ++c0;
+          ++ls->sweep_const_interior;
+        }
+        continue;
+      }
+      // Racine sur la corde FERMEE (egalite = borne de Jung, admissible).
+      AnchorScratch::ChordRoot r;
+      if (Bz > 0) {
+        r.num = Pz;
+        r.den = Bz;
+        r.entry = true;
+      } else {
+        r.num = -Pz;
+        r.den = -Bz;
+        r.entry = false;
+      }
+      r.u = cz.u;
+      sc.roots.push_back(r);
+      if (MHGP6_MUTANT("sweep-drop-exit-root") && !r.entry) sc.roots.pop_back();
+    }
+    ls->sweep_roots_onchord += sc.roots.size();
+    std::sort(sc.roots.begin(), sc.roots.end(), [](const AnchorScratch::ChordRoot& x, const AnchorScratch::ChordRoot& y) {
+      const int c = cmp_chord_roots(x, y);
+      if (c != 0) return c < 0;
+      return x.u < y.u;  // departage canonique : determinisme du parcours
+    });
+    u64 ent = 0;
+    u64 ext_after = 0;
+    for (const AnchorScratch::ChordRoot& r : sc.roots)
+      if (!r.entry) ++ext_after;
+    size_t i = 0;
+    const u64 base_depth = c0;
+    while (i < sc.roots.size()) {
+      size_t j = i + 1;
+      while (j < sc.roots.size() && cmp_chord_roots(sc.roots[i], sc.roots[j]) == 0) ++j;
+      u64 ext_at = 0, ent_at = 0;
+      for (size_t k = i; k < j; ++k) {
+        if (sc.roots[k].entry)
+          ++ent_at;
+        else
+          ++ext_at;
+      }
+      // REGLE DE BLOC (certificat C2) : sorties retirees, incidents a zero,
+      // entrees ajoutees apres. Mutant `sweep-nonstrict-depth` : les incidents
+      // (coquille) comptent comme interieurs — fausse profondeur, tuee par la
+      // porte du sweep.
+      ext_after -= ext_at;
+      ++ls->sweep_root_groups;
+      u64 depth_at = base_depth + ent + ext_after;
+      if (MHGP6_MUTANT("sweep-nonstrict-depth")) depth_at += (u64)(j - i);
+      for (size_t k = i; k < j; ++k) {
+        const i32 uy = sc.roots[k].u;
+        ++ls->q4_completions;
+        const P3& py = ix.upos[(size_t)uy];
+        const i64 l_ay = p3_norm2(p3_sub(py, pa));
+        const i64 l_by = p3_norm2(p3_sub(py, pb));
+        const i64 l_xy = p3_norm2(p3_sub(py, px));
+        if (l_ay > D2 || l_by > D2 || l_xy > D2) {
+          ++ls->q4_rej_lens;
+          continue;
+        }
+        // Profondeur au point de racine : identique au filtre v5 (identite
+        // affine du th. 10.4), decidee AVANT la cascade — le cout par
+        // candidat est O(1), le produit candidat × scan n'existe plus.
+        const bool deep = depth_at >= h4;
+        if (!tetra_owned_by(D2, l_ax, l_ay, l_bx, l_by, l_xy, ix.point_id(ua), ix.point_id(ub), ix.point_id(cx.u),
+                            ix.point_id(uy))) {
+          ++ls->q4_rej_owner;
+          continue;
+        }
+        const P3 vy{(i64)(2 * py.x - pa.x - pb.x), (i64)(2 * py.y - pa.y - pb.y), (i64)(2 * py.z - pa.z - pb.z)};
+        if (!no_canonical && p3_norm2(vy) > D2 && ix.point_id(uy) < ix.point_id(cx.u)) {
+          ++ls->q4_rej_once;
+          continue;
+        }
+        if (!q4_i64_prefilter(D2, l_ax, l_bx, l_ay, l_by, l_xy)) {
+          ++ls->q4_rej_i64;
+          continue;
+        }
+        if (!q4_face_power_prefilter(f3s, py)) {
+          ++ls->q4_rej_face_power;
+          continue;
+        }
+        const Q4Form f4 = q4_form(pa, pb, px, py);
+        if (f4.det == 0) {
+          ++ls->q4_rej_det;
+          continue;
+        }
+        if (!q4_center_strictly_inside(f4, pa, pb, px, py)) {
+          ++ls->q4_rej_center;
+          continue;
+        }
+        if (deep) {
+          ++ls->depth_killed[2];
+          continue;
+        }
+        lo->push_back(BallCandidate{ball_key_reduce(q4_ball_form(f4)), q4_level_raw(f4), 4});
+        ++ls->candidates[2];
+      }
+      ent += ent_at;
+      i = j;
+    }
+  }
+}
+
+}  // namespace generate_detail
+
+struct GenerateOptions {
+  i64 s = 8;
+  u64 smax = 11;
+  int threads = 1;
+#if defined(MHGP6_TESTING)
+  // Uniquement compile dans les cibles de test : aucune API ou CLI produit ne
+  // peut contourner le profil s >= 8 par ce champ.
+  bool allow_subprofile_separation_for_tests = false;
+  // Porte de la descente fusionnee : masque initial reduit (une lane), pour la
+  // comparaison fused(m=7) vs trois descentes fused(m=1<<q).
+  u8 fused_mask_for_tests = 0;
+#endif
+  size_t pretest_query_min_points = 512;
+  size_t cell_grid_min_sites = kCellGridMinSites;
+};
+
+inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
+                                GenerateStats* st) {
+  using namespace generate_detail;
+  out->clear();
+  const bool float_on = float_filter_runtime_enabled();
+  const bool genfilter_nonstrict = MHGP6_MUTANT("genfilter-nonstrict");
+  const bool seed_core_nonstrict = MHGP6_MUTANT("q4-seed-core-nonstrict");
+  const bool no_canonical = MHGP6_MUTANT("q4-no-canonical");
+  const u64 h_of[3] = {lane_h(Lane::kQ2, opt.smax), lane_h(Lane::kQ3, opt.smax), lane_h(Lane::kQ4, opt.smax)};
+#if defined(MHGP6_TESTING)
+  const bool allow_subprofile = opt.allow_subprofile_separation_for_tests;
+  const u8 initial_mask = opt.fused_mask_for_tests != 0 ? opt.fused_mask_for_tests : (u8)0b111;
+#else
+  constexpr bool allow_subprofile = false;
+  constexpr u8 initial_mask = 0b111;
+#endif
+
+  // ---- Front fusionne : UNE descente pour les trois lanes.
+  const auto t0 = std::chrono::steady_clock::now();
+  std::vector<MultiAliveRect> alive;
+  alive_rectangles_fused(ix, opt.s, h_of, initial_mask, opt.threads, &alive, st, allow_subprofile);
+  st->t_wspd_ms += ms_since(t0);
+
+  // ---- Corps par rectangle : chaque lane du masque, dans l'ordre q2, q3, q4.
+  const auto t1 = std::chrono::steady_clock::now();
+  const size_t nrect = alive.size();
+  const size_t T = planned_workers(nrect, opt.threads);
+  std::vector<std::vector<BallCandidate>> louts(T);
+  std::vector<GenerateStats> lst(T);
+  std::vector<AnchorScratch> lsc(T);
+  for (AnchorScratch& x : lsc) x.cell_min_sites = opt.cell_grid_min_sites;
+  const size_t created = parallel_items(nrect, (int)T, [&](size_t ri, size_t t) {
+    const MultiAliveRect& ar = alive[ri];
+    AnchorScratch& sc = lsc[t];
+    std::vector<BallCandidate>* lo = &louts[t];
+    GenerateStats* ls = &lst[t];
+    const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
+    const u64 nA = (u64)(ra.last - ra.first + 1), nB = (u64)(rb.last - rb.first + 1);
+    for (int li = 0; li < 3; ++li) {
+      if (!(ar.mask & (1u << li))) continue;
+      const Lane lane = li == 0 ? Lane::kQ2 : li == 1 ? Lane::kQ3 : Lane::kQ4;
+      corner_histograms(ix, lane, ar.r, &sc.ha, &sc.hb);
+      const u64 need = h_of[li] > ar.core[li] ? h_of[li] - ar.core[li] : 0;
+      ls->anchors[li] += nA * nB;  // le grand-livre reste ferme : toutes les paires comptees
+      if (need == 0) {
+        ls->anchors_killed_hist[li] += nA * nB;
+        continue;
+      }
+      // Handles et route de pretest par requete : une fois par (rectangle,
+      // lane q3/q4) — q2 n'a ni cover ni pretest.
+      bool pretest_by_query = false;
+      if (li >= 1) {
+        rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), 3, &sc.handles, &sc.cover_nodes);
+        sc.handle_points = 0;
+        for (const NodeRef h : sc.handles) {
+          const NodeRange r = ix.range_of(h);
+          sc.handle_points += (u64)(r.last - r.first + 1);
+        }
+        pretest_by_query = sc.handle_points >= opt.pretest_query_min_points;
+        if (pretest_by_query)
+          rect_diametral_candidates(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), &sc.query, &sc.cover_nodes);
+      }
+      u64 visitees = 0, tues_ligne = 0, tues_seuil = 0;
+      for (i32 ua = ra.first; ua <= ra.last; ++ua) {
+        const u64 ha_a = sc.ha[(size_t)(ua - ra.first)];
+        if (ha_a >= need) {
+          tues_ligne += nB;
+          continue;  // la ligne entiere meurt d'un seul test
+        }
+        for (i32 ub = rb.first; ub <= rb.last; ++ub) {
+          if (ha_a + sc.hb[(size_t)(ub - rb.first)] >= need) {
+            ++tues_seuil;
+            continue;
+          }
+          ++visitees;
+          const P3& pa = ix.upos[(size_t)ua];
+          const P3& pb = ix.upos[(size_t)ub];
+          const i64 D2 = p3_norm2(p3_sub(pb, pa));
+          if (D2 == 0) continue;
+          if (li == 0) {
+            lo->push_back(BallCandidate{q2_ball_key(pa, pb), promote_level(q2_exact_level(D2)), 2});
+            ++ls->candidates[0];
+            continue;
+          }
+          // Credit d'extremite deja acquis, transmis a la cascade aval.
+          const EndpointCredit ec{ha_a + sc.hb[(size_t)(ub - rb.first)], ra.first, ra.last, rb.first, rb.last};
+          bool pretested = false;
+          if (pretest_by_query) {
+            const int k = anchor_kill_from_candidates(sc.query, ix.upos, ua, ub, pa, pb, D2, lane,
+                                                      li == 1 ? 12 : 8, h_of[li], &ec);
+            if (k == 1) {
+              if (li == 1)
+                ++ls->anchors_killed_w3;
+              else
+                ++ls->anchors_killed_w4;
+              continue;
+            }
+            if (k == 2) {
+              ++ls->anchors_killed_sectors[li];
+              continue;
+            }
+            pretested = true;
+          }
+          anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, 3, &sc.cover, &sc.visits, &sc.cover_tmp);
+          if (li == 1) {
+            scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, genfilter_nonstrict, pretested, lo, ls,
+                           &ec);
+          } else {
+            process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, seed_core_nonstrict, no_canonical,
+                              pretested, lo, ls, &ec);
+          }
+        }
+      }
+      ls->hist_killed_rows[li] += tues_ligne;
+      ls->hist_killed_thresh[li] += tues_seuil;
+      ls->hist_survivors[li] += visitees;
+      ls->anchors_killed_hist[li] += tues_ligne + tues_seuil;
+    }
+  });
+  st->workers_rects = std::max(st->workers_rects, (u64)created);
+  const bool drop = MHGP6_MUTANT("par-drop-shard");
+  for (size_t t = 0; t < T; ++t) {
+    if (drop && t == 0 && T > 1) continue;
+    out->insert(out->end(), louts[t].begin(), louts[t].end());
+    st->add_from(lst[t]);
+  }
+  st->t_rects_ms += ms_since(t1);
+}
+
+}  // namespace mhgp6

@@ -1,0 +1,10 @@
+100% tests passed, 0 tests failed out of 15
+
+Label Time Summary:
+scale16000    = 374.60 sec*proc (5 tests)
+scale32000    = 851.23 sec*proc (5 tests)
+scale8000     = 173.08 sec*proc (5 tests)
+
+Total Test time (real) = 1398.91 sec
+
+[exited with code 0]
