@@ -3,8 +3,10 @@
 Date de coupe : 31 août 2026. Autorité auditée :
 `381ba60b44a3d36dff0ca28c269ded9dffa16080`, présente sur `main` et
 `origin/main`. Le répertoire non suivi
-`receipts/campagne_stationnaire_20260831/` est une capture distincte épinglée
-sur `b17ca2cd`; il n'appartient pas à cette coupe et n'a pas été modifié.
+`receipts/campagne_stationnaire_20260831/` est actuellement **rejoué** sur ce
+pin avec le binaire
+`c828a48cf200f1e814f0d8b8d0fbaad82f4a990b95802022e9a6f60f6e6efa12`.
+Il reste exclu de cette coupe jusqu'à son `DONE` et ses contrôles terminaux.
 
 ```text
 phase=exploration_v6_hors_registre
@@ -31,8 +33,8 @@ contre-lecture.
 Le prochain obstacle n'est plus le correctif mathématique. C'est la chaîne de
 preuve de coût : deux compteurs dits « publiés » ne sortent pas du CLI, le
 scan complet de passe 2 n'est pas compté, `pentes.py` accepte plusieurs
-campagnes incomplètes, et le seul dossier de campagne présent mesure encore
-`b17ca2cd`. Claude peut conserver le checkpoint et finir ces points sans
+campagnes incomplètes, et le rejeu post-correctif en cours ne contient pas les
+termes encore absents du runner. Claude peut conserver le checkpoint et finir ces points sans
 rouvrir le cover ou la sérialisation du digest.
 
 ## Progrès reçus
@@ -74,7 +76,7 @@ L'ajout de la boucle de 20 mutants est efficace. La racine des familles
 stationnaires utilise maintenant `floor_sqrt`, et plusieurs claims historiques
 ont été correctement requalifiés en diagnostics ou chantiers prévus.
 
-## P0 de preuve — publier ce qui est réellement payé
+## P1 — publier ce qui est réellement payé, bloquant pour tout GO J3
 
 `p_factor[3]` et `sweep_root_comparisons` sont déclarés, incrémentés et
 agrégés dans `GenerateStats`, mais `print_run` ne les imprime pas et
@@ -98,7 +100,7 @@ racines sur corde soumises à la cascade et ne remplace pas ce scan. Ajouter par
 exemple `sweep_pass2_site_tests`, l'imprimer, le parser et alors seulement
 publier `W_sweep2/W_sweep1`.
 
-## P0 de reçu — rendre `pentes.py` réellement fail-closed
+## P1 — rendre `pentes.py` réellement fail-closed avant tout GO J3
 
 Le durcissement est partiel. Des falsifications sur copies temporaires donnent
 encore le code 0 lorsque :
@@ -126,25 +128,77 @@ Correctif minimal recommandé :
    zéro légitime et pente mathématiquement indéfinie ;
 5. graver ces rejets dans une porte Python dédiée.
 
-## La campagne présente reste une baseline pré-correctif
+## La campagne présente sera une baseline post-correctif, pas une décision J3
 
-`receipts/campagne_stationnaire_20260831/` contient réellement 36/36 sorties
-pour `terrain_stationnaire`, `scanline_stationnaire`, `uniform` et
-`eight_clusters`, 36 codes 0, 36 stderr vides et un `DONE` final. C'est une
-baseline exploratoire utile.
+Claude a remplacé la capture b17 non suivie et rejoue actuellement 36 runs sur
+`381ba60b`. Le META actif porte déjà le SHA complet, le hash du binaire, la
+commande, la toolchain, l'absence de modification dans `src/`, `cli/` et
+`CMakeLists.txt`, l'heure de début et la matrice quatre familles × trois
+tailles × trois graines. Ce progrès de provenance est reçu, sous réserve du
+contrôle terminal après `DONE`.
 
-Elle ne constitue toutefois pas le rejeu annoncé par la réponse Claude : son
-META dit `pin=b17ca2cd`, ses sorties emploient l'ancienne monnaie
-`digest_balls`, et elles ne peuvent contenir les nouveaux compteurs. Le META
-ne porte encore ni commande, ni toolchain précise, ni état du worktree, ni
-heures, ni manifeste de hashes des sorties. Ne pas l'écraser ou la relabeller
-post-correctif.
+Cette campagne ne pourra cependant pas décider le GO du grand-livre : le
+binaire ne publie ni `p_factor`, ni `sweep_root_comparisons`, ni `W_sweep2`,
+et `V_wspd` reste absent. La conserver comme **baseline post-correctif des
+champs effectivement présents**. Après l'instrumentation, créer un reçu neuf
+avec le même niveau de provenance et un validateur fail-closed. Si la cible
+est la porte à quatre familles du grand-livre, la nommer comme telle ; si elle
+prétend exécuter tout le plan de tests, ajouter les familles qui y figurent.
 
-Après l'instrumentation, créer un reçu neuf épinglé au SHA complet avec la
-matrice explicitement annoncée. Si la cible est la porte à quatre familles du
-grand-livre, la nommer comme telle ; si elle prétend exécuter tout le plan de
-tests, ajouter les trois familles dilatées qui y figurent. Cette décision de
-périmètre doit précéder le run.
+## P1 de preuve — le juge de conformité peut certifier une autre taille
+
+`tests/conformity_v5.cpp` parse `n` et `threads` en i64 puis les caste en
+`int` sans vérifier leur domaine. Reproduction exacte sur le commit reçu :
+
+```text
+./build/v6/mhgp6_conformity --family=uniform \
+  --n=4294967696 --threads=4294967300 \
+  --expected=morsehgp3D_v6/receipts/conformite_v5/uniform_400.txt
+conformite v5=v6 : uniform n=4294967696 : 10 forets + digest_all identiques (objet)
+code=0
+```
+
+Le calcul réel reçoit `n=400`, `threads=4` après narrowing, mais la preuve
+affiche les valeurs demandées. Les commandes CMake de cette coupe sont dans le
+domaine sûr et restent valides; le juge général, lui, doit reprendre les
+gardes exactes de la CLI et graver les rejets de débordement/suffixe à code 2.
+
+Le même problème doit être fermé dans la bibliothèque, avant tout narrowing :
+`CloudIndex` convertit les cardinalités et plages en `int`/i32, ses offsets en
+u32, et `prefilter_balls` convertit l'index `size_t` d'un candidat en
+`Survivor::idx` u32 sans vérifier `cands.size() <= UINT32_MAX`. Le profil u16
+borne la grille, jamais le cardinal, et `linked_arcs_u16` prouve justement que
+le nombre de candidats peut être quadratique. Déclarer les plafonds internes,
+refuser `resource_exhausted` avant chaque narrowing ou élargir les indices;
+tester les helpers de capacité à la frontière sans allocation géante.
+
+Le chargeur de référence doit également échouer fermé : exiger exactement un
+`digest_all`, les forêts K attendues, des hex minuscules de 64 caractères,
+aucun doublon et aucun K hors domaine. Un reçu tronqué ne doit pas être accepté
+comme s'il avait comparé chaque forêt.
+
+## P1 d'architecture — la porte WSPD ne vise pas la route produit
+
+Le produit appelle `alive_rectangles_fused` dans `pipeline/generate.hpp`.
+`wspd_wavefront` n'est appelé que par le selftest, et les mutants
+`wspd-drop-rect`, `wspd-cap-terminal`, `wspd-split-heaviest` vivent seulement
+dans cette primitive non consommée par le produit. Probes sur la coupe :
+
+```text
+mhgp6_selftest --wspd-ledger --inject=wspd-cap-terminal     -> code 0
+mhgp6_selftest --wspd-ledger --inject=wspd-split-heaviest  -> code 0
+mhgp6_selftest --wspd-ledger --inject=wspd-drop-rect        -> code 1
+mhgp6_selftest --fused-descent --inject=wspd-drop-rect      -> code 3
+```
+
+Aucun ne rend le code 4 attendu. Le ledger scalaire du front fusionné ferme
+la masse, mais ne détecte pas une perte compensée, une duplication ou un faux
+kill; la comparaison full-mask/single-lane rejoue la même implémentation.
+Porter en priorité la porte WSPD v5 en la retargetant vers
+`alive_rectangles_fused` : ownership indépendant de chaque paire, masque et
+cœur par lane, permutation, puis mutants injectés dans la route réellement
+appelée. Ce travail requalifiera la descente fusionnée sans remettre en cause
+les digests déjà reçus.
 
 ## P1 — fermer le contrat digest sans changer son contenu
 
