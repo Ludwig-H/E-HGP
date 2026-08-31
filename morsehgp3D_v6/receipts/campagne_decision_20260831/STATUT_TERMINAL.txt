@@ -1,0 +1,4 @@
+statut_terminal=invalide_binaire_mixte
+motif=binaire partage build/v6/mhgp6 reconstruit a 12:58:38Z pendant l'execution — 32 sorties a l'ancien binaire, 4 contaminees (alerte auditeur ALERTE_CAMPAGNE_CPU_MIXTE_20260831, points 1-6)
+consequence=le DONE du STATUS.txt n'est PAS un completed : la matrice de 36 runs est invalide comme campagne epinglee ; seule la lecture diagnostique post-hoc des 27 sorties homogenes (terrain_stationnaire, scanline_stationnaire, uniform) est recevable (RECU.md)
+jamais=preuve de pente, de cout ou de determinisme inter-graines

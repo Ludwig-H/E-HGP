@@ -164,3 +164,11 @@ add_test(NAME mhgp6_pentes_validateur
                  "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/pentes_gate.py"
                  -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
 set_tests_properties(mhgp6_pentes_validateur PROPERTIES LABELS "gate")
+# Provenance d'executable des campagnes locales (alerte « campagne CPU
+# mixte ») : copie privee immuable, hash avant/apres chaque tuple, INVALID
+# sans DONE sur reconstruction concurrente simulee.
+add_test(NAME mhgp6_campagne_provenance
+         COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=python3
+                 "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/campagne_gate.py"
+                 -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+set_tests_properties(mhgp6_campagne_provenance PROPERTIES LABELS "gate")
