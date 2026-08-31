@@ -66,6 +66,11 @@ rc=$?
 {
   echo 'Command being timed: (faux GNU time)'
   echo '        Maximum resident set size (kbytes): 123456'
+  if [ "${rc}" -ge 128 ]; then
+    echo "Command terminated by signal $((rc - 128))"
+  else
+    echo "Exit status: ${rc}"
+  fi
 } > "${out}"
 exit ${rc}
 EOF
@@ -93,7 +98,11 @@ if [ "${eng}" = "v5" ] && [ "\${FAKE_V5_BENCH_FAIL:-0}" = "1" ] && [ "\${digest}
   echo "erreur simulee du pilote v5"; exit 7
 fi
 if [ "${eng}" = "v6" ] && [ "\${FAKE_V6_FRONT_FAIL:-0}" = "1" ] && [ "\${n}" = "400000" ]; then
-  echo "terminate called after throwing an instance of 'std::bad_alloc'"; exit 134
+  echo "terminate called after throwing an instance of 'std::bad_alloc'"
+  kill -ABRT \$\$
+fi
+if [ "${eng}" = "v6" ] && [ "\${FAKE_V6_FRONT_FAIL:-0}" = "1" ] && [ "\${n}" = "800000" ]; then
+  echo "REFUS resource_exhausted : plafond simule du prefiltre" >&2; exit 2
 fi
 base=\$((n / 4))
 echo "payload=mhgp${eng#v}-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none"
@@ -255,7 +264,7 @@ CANON="${WORK}/selftest_reduit_v1.env"
   echo 'SWEEP_SPECS="uniform:32000:2,8"'
   echo 'SWEEP_REPEATS=2'
   echo 'GPU_SPECS="uniform:50000"'
-  echo 'FRONTIER_SPECS="uniform:200000 uniform:400000"'
+  echo 'FRONTIER_SPECS="uniform:200000 uniform:400000 uniform:800000"'
   echo 'FRONTIER_TIMEOUT=60'
   echo 'GPU_BUILD_TIMEOUT=60'
   echo 'FRONTIER_ULIMIT_KB=60000000'
@@ -290,7 +299,7 @@ PROFILE="${WORK}/profil_campagne.txt"
   echo "sweep_specs=uniform:32000:2,8"
   echo "sweep_repeats=2"
   echo "gpu_specs=uniform:50000"
-  echo "frontier_specs=uniform:200000 uniform:400000"
+  echo "frontier_specs=uniform:200000 uniform:400000 uniform:800000"
   echo "frontier_timeout=60"
   echo "gpu_build_timeout=60"
   echo "frontier_ulimit_kb=60000000"
@@ -304,7 +313,7 @@ run_runner() { # $1 = dossier out ; le reste = env supplementaire
     BENCH_SPECS="uniform:32000 eight_clusters:32000" \
     QUEUE_FAMILIES="terrain_stationnaire" QUEUE_N="64000" QUEUE_SEEDS="3 4" \
     SWEEP_SPECS="uniform:32000:2,8" SWEEP_REPEATS=2 \
-    GPU_SPECS="uniform:50000" FRONTIER_SPECS="uniform:200000 uniform:400000" FRONTIER_TIMEOUT=60 \
+    GPU_SPECS="uniform:50000" FRONTIER_SPECS="uniform:200000 uniform:400000 uniform:800000" FRONTIER_TIMEOUT=60 \
     GPU_BUILD_TIMEOUT=60 FRONTIER_ULIMIT_KB=60000000 \
     FAKE_V6_FRONT_FAIL=1 \
     NVCC_BIN="${FAKE}/nvcc" GPU_CMAKE_BIN="${FAKE}/cmake" \
@@ -346,16 +355,39 @@ check_true "nominal : phase GPU complete (temoin, mutant tue, 4 contrats)" bash 
   grep -q '^code=0' '${OUT}/gpu_witness.status' && grep -q '^code=4' '${OUT}/gpu_mutant.status' &&
   grep -q '^code=0' '${OUT}/gpu_idx_uniform_n50000.status' &&
   grep -q 'device_witness OK' '${OUT}/gpu_witness.txt'"
-check_true "nominal : refus de capacite TYPE tolere (134 bad_alloc sous rlimit atteste, campagne valide)" bash -c "
+check_true "nominal : trois classes de frontiere attestees (0 / 134 abort prouve signal 6 / 2 REFUS type)" bash -c "
+  grep -q '^code=0' '${OUT}/front_uniform_n200000.status' &&
   grep -q '^code=134' '${OUT}/front_uniform_n400000.status' &&
+  grep -q 'terminated by signal 6' '${OUT}/front_uniform_n400000.status.time' &&
   grep -q '^limit_kind=rlimit_as' '${OUT}/front_uniform_n400000.status' &&
   grep -q '^limit_kb=60000000' '${OUT}/front_uniform_n400000.status' &&
   grep -q 'bad_alloc sous rlimit_as' '${WORK}/frontier_resume.txt' &&
-  grep -q '^code=0' '${OUT}/front_uniform_n200000.status'"
+  grep -q '^code=2' '${OUT}/front_uniform_n800000.status' &&
+  grep -q 'resource_exhausted (refus du pipeline)' '${WORK}/frontier_resume.txt'"
 # IDEMPOTENCE (audit quatrieme tour) : un second passage sur le MEME dossier
 # rend le meme verdict (le validateur n'enrichit plus l'inventaire qu'il juge).
 rc=0; run_validator "${OUT}" 0 0 >/dev/null || rc=$?
 check_true "validateur idempotent : second passage rc=0" [ "${rc}" -eq 0 ]
+
+# ---- 1bis. PATH EMPOISONNE (septieme tour) : de faux `timeout` et `bash`
+# en tete de PATH ne doivent JAMAIS etre appeles — les porteurs de bornes
+# sont epingles en constantes absolues.
+POISON="${WORK}/poison"
+mkdir -p "${POISON}"
+printf '#!/bin/sh\ntouch "%s/POISON_APPELE_timeout"\nshift 2\nshift\nexec "$@"\n' "${POISON}" > "${POISON}/timeout"
+chmod +x "${POISON}/timeout"
+OUTP="${WORK}/out_poison"
+rc=0
+env V5_BIN="${FAKE}/mhgp5" V6_BIN="${FAKE}/mhgp6" CONF_BIN="${FAKE}/mhgp6_conformity" \
+  TIME_BIN="${FAKE}/gnutime" OUT_DIR="${OUTP}" THREADS=8 RUN_TIMEOUT=60 \
+  CONF_SPECS="uniform:50000" BENCH_SPECS="aucun" QUEUE_FAMILIES="aucun" QUEUE_N="64000" QUEUE_SEEDS="3" \
+  SWEEP_SPECS="aucun" SWEEP_REPEATS=2 GPU_SPECS="aucun" \
+  FRONTIER_SPECS="uniform:200000" FRONTIER_TIMEOUT=60 GPU_BUILD_TIMEOUT=60 FRONTIER_ULIMIT_KB=60000000 \
+  PATH="${POISON}:${FAKE}:${PATH}" \
+  /bin/bash "${RUNNER}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST}" >/dev/null 2>&1 || rc=$?
+check_true "PATH empoisonne : le faux timeout n'est JAMAIS appele et le wrapper grave est /bin/bash (bornes epinglees)" \
+  bash -c "[ '${rc}' -eq 0 ] && [ ! -e '${POISON}/POISON_APPELE_timeout' ] \
+    && grep -q '^commande=/bin/bash -c ulimit' '${OUTP}/front_uniform_n200000.status'"
 
 # ---- 2. GNU time absent.
 rc=0
@@ -458,22 +490,36 @@ falsify_semantique "semantique : plan GPU supprime" "gpu_plan.txt: ABSENT" \
 # Les SIX mutants de frontiere du sixieme tour — tous avec rehash causal.
 falsify_semantique "frontiere : code=abc a corps bad_alloc" "code non decimal" \
   sed -i "s/^code=134/code=abc/" front_uniform_n400000.status
-falsify_semantique "frontiere : code=3 a corps bad_alloc (hors classes)" "HORS des quatre classes fermees" \
+falsify_semantique "frontiere : code=3 a corps bad_alloc (hors classes)" "HORS des trois classes fermees" \
   sed -i "s/^code=134/code=3/" front_uniform_n400000.status
-falsify_semantique "frontiere : commande sans liaison ulimit au plafond du plan" "sans liaison ulimit" \
-  sed -i "s/ulimit -v \"\$1\" && shift && exec \"\$@\" _ 60000000 //" front_uniform_n400000.status
+falsify_semantique "frontiere : wrapper supprime puis jetons decoratifs ajoutes" "correspondance EXACTE" \
+  bash -c "sed -i 's|/bin/bash -c ulimit -v \"\$1\" && shift && exec \"\$@\" _ 60000000 ||' front_uniform_n400000.status; sed -i 's/^commande=\(.*\)$/commande=\1 ulimit 60000000/' front_uniform_n400000.status"
 falsify_semantique "frontiere : INVARIANT ajoute au refus bad_alloc (code 134)" "motif FATAL" \
   bash -c "echo 'INVARIANT casse' >> front_uniform_n400000.txt"
 falsify_semantique "frontiere : INVARIANT ajoute a un pipeline complet (code 0)" "motif FATAL" \
   bash -c "echo 'INVARIANT casse' >> front_uniform_n200000.txt"
 falsify_semantique "frontiere : duree_s=abc" "duree_s non decimale" \
   sed -i "s/^duree_s=[0-9]*/duree_s=abc/" front_uniform_n400000.status
-falsify_semantique "frontiere : argument decore xxx--n=400000xxx" "sans le jeton exact --n=400000" \
+falsify_semantique "frontiere : argument decore xxx--n=400000xxx" "correspondance EXACTE" \
   sed -i "s/--n=400000/xxx--n=400000xxx/" front_uniform_n400000.status
 falsify_semantique "frontiere : code 124 avec INVARIANT" "motif FATAL" \
   bash -c "sed -i 's/^code=134/code=124/' front_uniform_n400000.status; echo 'INVARIANT casse' >> front_uniform_n400000.txt"
-falsify_semantique "frontiere : code 124 sans attestation du superviseur" "sans attestation du superviseur" \
-  sed -i "s/^code=134/code=124/" front_uniform_n400000.status
+falsify_semantique "frontiere : sortie 124 NON ATTRIBUEE (meme avec Exit status: 124)" "NON ATTRIBUEE" \
+  bash -c "sed -i 's/^code=134/code=124/' front_uniform_n400000.status; sed -i 's/terminated by signal 6/Exit status: 124/' front_uniform_n400000.status.time"
+falsify_semantique "frontiere : exit(134) simple sans preuve de signal 6" "sans preuve de signal 6" \
+  sed -i "s/Command terminated by signal 6/Exit status: 134/" front_uniform_n400000.status.time
+falsify_semantique "frontiere : REFUS suffixe resource_exhausted_faux" "sans exactement une ligne" \
+  sed -i "s/REFUS resource_exhausted :/REFUS resource_exhausted_faux :/" front_uniform_n800000.txt
+falsify_semantique "frontiere : classe 2 avec bad_alloc (exclusivite)" "classes non exclusives" \
+  bash -c "echo 'std::bad_alloc' >> front_uniform_n800000.txt"
+falsify_semantique "frontiere : classe 134 avec REFUS (exclusivite)" "classes non exclusives" \
+  bash -c "echo 'REFUS parasite' >> front_uniform_n400000.txt"
+falsify_semantique "frontiere : seconde ligne limit_kind ignoree hier, refusee" "dupliques" \
+  bash -c "echo 'limit_kind=none' >> front_uniform_n400000.status; echo 'limit_kb=1' >> front_uniform_n400000.status"
+falsify_semantique "frontiere : -v retire du wrapper" "correspondance EXACTE" \
+  bash -c "sed -i 's/ulimit -v /ulimit /' front_uniform_n400000.status"
+falsify_semantique "frontiere : arguments en conflit (--n duplique)" "correspondance EXACTE" \
+  bash -c "sed -i 's/--n=400000/--n=400000 --n=1/' front_uniform_n400000.status"
 falsify_case "semantique : MANIFESTE_DISTANT a ligne dupliquee" "chemin duplique" apres \
   bash -c "l=\$(grep topologie.txt MANIFESTE_DISTANT.txt | head -1); printf '%s\n' \"\$l\" >> MANIFESTE_DISTANT.txt"
 falsify_semantique "frontiere : code 134 sans diagnostic std::bad_alloc" "sans diagnostic exact std::bad_alloc" \

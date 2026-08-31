@@ -50,6 +50,13 @@ CONF_BIN="${CONF_BIN:-./build-v6/mhgp6_conformity}"
 OUT_DIR="${OUT_DIR:-out}"
 RUN_TIMEOUT="${RUN_TIMEOUT:-2400}"
 TIME_BIN="${TIME_BIN:-/usr/bin/time}"
+# CONSTANTES EXACTES (revue en vol du septieme tour : un chemin absolu
+# quelconque ne suffit pas) — les porteurs de bornes sont ces deux binaires
+# et rien d'autre.
+readonly TIMEOUT_BIN="/usr/bin/timeout"
+readonly WRAPPER_BASH="/bin/bash"
+# Grace unique TRANSMISE par le cycle de vie (jamais un -k local divergent).
+GRACE_S="${GRACE_S:-30}"
 THREADS="${THREADS:-$(nproc)}"
 CONF_SPECS="${CONF_SPECS:-uniform:32000 terrain:32000 eight_clusters:32000 scanline_single_pass:32000 uniform:50000 terrain:50000 eight_clusters:50000 scanline_single_pass:50000 uniform:100000 eight_clusters:100000 uniform:200000 eight_clusters:200000}"
 BENCH_SPECS="${BENCH_SPECS:-uniform:32000 terrain:32000 eight_clusters:32000 scanline_single_pass:32000 uniform:100000 eight_clusters:100000 uniform:200000 eight_clusters:200000}"
@@ -88,6 +95,11 @@ test -x "${TIME_BIN}" || {
   echo "REFUS : GNU time requis (${TIME_BIN}) pour une campagne a RSS mesure" >&2
   exit 2
 }
+# Les porteurs de bornes sont EPINGLES en chemins absolus (septieme tour) :
+# jamais resolus depuis le PATH.
+test -x "${TIMEOUT_BIN}" || { echo "REFUS : timeout epingle absent (${TIMEOUT_BIN})" >&2; exit 2; }
+test -x "${WRAPPER_BASH}" || { echo "REFUS : bash epingle absent (${WRAPPER_BASH})" >&2; exit 2; }
+[[ "${GRACE_S}" =~ ^[1-9][0-9]{0,2}$ ]] && [ "${GRACE_S}" -le 300 ] || { echo "REFUS : GRACE_S='${GRACE_S}' hors de [1, 300]" >&2; exit 2; }
 
 # REFUS AVANT TOUT RUN d'un parametre mal forme.
 refuse() { echo "REFUS : parametre — $1" >&2; exit 2; }
@@ -141,7 +153,7 @@ run_one() {
   t0=$(date +%s)
   # .txt et .status.time sont eux aussi publies ATOMIQUEMENT (audit
   # troisieme tour : seul .status l'etait).
-  "${TIME_BIN}" -v -o "${status}.time.tmp" timeout -k 30 "${RUN_TIMEOUT_ONE:-${RUN_TIMEOUT}}" "$@" >"${out}.tmp" 2>&1 </dev/null || rc=$?
+  "${TIME_BIN}" -v -o "${status}.time.tmp" "${TIMEOUT_BIN}" -k "${GRACE_S}" "${RUN_TIMEOUT_ONE:-${RUN_TIMEOUT}}" "$@" >"${out}.tmp" 2>&1 </dev/null || rc=$?
   t1=$(date +%s)
   mv "${out}.tmp" "${out}"
   mv "${status}.time.tmp" "${status}.time"
@@ -442,7 +454,7 @@ if [ "${GPU_SPECS}" != "aucun" ]; then
   fi
   if [ "${gpu_ok}" -eq 1 ]; then
     LINEAGE_STATUS="$(printf 'engine=v5\nlineage=historical_baseline\nauthority=non_authoritative')"
-    RUN_TIMEOUT_ONE="${GPU_BUILD_TIMEOUT}" EXTRA_STATUS="${LINEAGE_STATUS}" run_one gpu_witness device_witness bash -c "set -e; echo nvcc=${NVCC_BIN}; uname -m; ${NVCC_BIN} --version 2>&1 | tail -2; nvidia-smi --query-gpu=name,driver_version --format=csv,noheader; ${GPU_CMAKE_BIN:-cmake} -S morsehgp3D_v5 -B build-v5-cuda -DCMAKE_BUILD_TYPE=Release -DMHGP5_ENABLE_CUDA=ON -DCMAKE_CUDA_COMPILER=${NVCC_BIN} 2>&1 | tail -40; test \${PIPESTATUS[0]} -eq 0; ${GPU_CMAKE_BIN:-cmake} --build build-v5-cuda --target mhgp5_device_witness -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test \${PIPESTATUS[0]} -eq 0; ${GPU_WITNESS_BIN}"
+    RUN_TIMEOUT_ONE="${GPU_BUILD_TIMEOUT}" EXTRA_STATUS="${LINEAGE_STATUS}" run_one gpu_witness device_witness "${WRAPPER_BASH}" -c "set -e; echo nvcc=${NVCC_BIN}; uname -m; ${NVCC_BIN} --version 2>&1 | tail -2; nvidia-smi --query-gpu=name,driver_version --format=csv,noheader; ${GPU_CMAKE_BIN:-cmake} -S morsehgp3D_v5 -B build-v5-cuda -DCMAKE_BUILD_TYPE=Release -DMHGP5_ENABLE_CUDA=ON -DCMAKE_CUDA_COMPILER=${NVCC_BIN} 2>&1 | tail -40; test \${PIPESTATUS[0]} -eq 0; ${GPU_CMAKE_BIN:-cmake} --build build-v5-cuda --target mhgp5_device_witness -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test \${PIPESTATUS[0]} -eq 0; ${GPU_WITNESS_BIN}"
     if ! grep -q '^code=0$' "${OUT_DIR}/gpu_witness.status"; then
       printf 'truncated_at=gpu_witness\nphase=gpu\nreason=temoin device non conforme\n' > "${OUT_DIR}/gpu_tronquee.txt"
       echo "=== PHASE GPU TRONQUEE : temoin device non conforme (voir gpu_witness.txt) ===" >&2
@@ -453,7 +465,7 @@ if [ "${GPU_SPECS}" != "aucun" ]; then
     if past_deadline gpu_lane gpu gpu_tronquee.txt "${GPU_BUILD_TIMEOUT}"; then gpu_ok=0; fi
   fi
   if [ "${gpu_ok}" -eq 1 ]; then
-    RUN_TIMEOUT_ONE="${GPU_BUILD_TIMEOUT}" EXTRA_STATUS="${LINEAGE_STATUS}" run_one gpu_lane device_lane bash -c "set -e; ${GPU_CMAKE_BIN:-cmake} --build build-v5-cuda --target mhgp5_q3_lane_device_gate mhgp5_q4_lane_device_gate mhgp5_cuda -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test \${PIPESTATUS[0]} -eq 0; ${GPU_Q3_GATE} --family=uniform --n=1200; ${GPU_Q3_GATE} --family=eight_clusters --n=1200 --threads=4; ${GPU_Q3_GATE} --family=uniform --n=8000 --threads=8 --min-candidates=100000; ${GPU_Q4_GATE} --family=uniform --n=1200; ${GPU_Q4_GATE} --family=eight_clusters --n=1200 --threads=4; ${GPU_Q4_GATE} --family=uniform --n=8000 --threads=8 --min-candidates=100000; ${GPU_Q3_GATE} --family=uniform --n=300 --coord=40 --min-candidates=200; ${GPU_Q4_GATE} --family=uniform --n=300 --coord=40 --min-candidates=200 --min-deep=20; ${GPU_Q3_GATE} --family=uniform --n=1200 --wire=index; ${GPU_Q3_GATE} --family=eight_clusters --n=1200 --threads=4 --wire=index; ${GPU_Q3_GATE} --family=uniform --n=300 --coord=40 --min-candidates=200 --wire=index; ${GPU_Q4_GATE} --family=uniform --n=1200 --wire=index; ${GPU_Q4_GATE} --family=eight_clusters --n=1200 --threads=4 --wire=index; ${GPU_Q4_GATE} --family=uniform --n=300 --coord=40 --min-candidates=200 --min-deep=20 --wire=index"
+    RUN_TIMEOUT_ONE="${GPU_BUILD_TIMEOUT}" EXTRA_STATUS="${LINEAGE_STATUS}" run_one gpu_lane device_lane "${WRAPPER_BASH}" -c "set -e; ${GPU_CMAKE_BIN:-cmake} --build build-v5-cuda --target mhgp5_q3_lane_device_gate mhgp5_q4_lane_device_gate mhgp5_cuda -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test \${PIPESTATUS[0]} -eq 0; ${GPU_Q3_GATE} --family=uniform --n=1200; ${GPU_Q3_GATE} --family=eight_clusters --n=1200 --threads=4; ${GPU_Q3_GATE} --family=uniform --n=8000 --threads=8 --min-candidates=100000; ${GPU_Q4_GATE} --family=uniform --n=1200; ${GPU_Q4_GATE} --family=eight_clusters --n=1200 --threads=4; ${GPU_Q4_GATE} --family=uniform --n=8000 --threads=8 --min-candidates=100000; ${GPU_Q3_GATE} --family=uniform --n=300 --coord=40 --min-candidates=200; ${GPU_Q4_GATE} --family=uniform --n=300 --coord=40 --min-candidates=200 --min-deep=20; ${GPU_Q3_GATE} --family=uniform --n=1200 --wire=index; ${GPU_Q3_GATE} --family=eight_clusters --n=1200 --threads=4 --wire=index; ${GPU_Q3_GATE} --family=uniform --n=300 --coord=40 --min-candidates=200 --wire=index; ${GPU_Q4_GATE} --family=uniform --n=1200 --wire=index; ${GPU_Q4_GATE} --family=eight_clusters --n=1200 --threads=4 --wire=index; ${GPU_Q4_GATE} --family=uniform --n=300 --coord=40 --min-candidates=200 --min-deep=20 --wire=index"
     if past_deadline gpu_mutant gpu gpu_tronquee.txt; then gpu_ok=0; fi
   fi
   if [ "${gpu_ok}" -eq 1 ]; then
@@ -515,7 +527,7 @@ while read -r line; do
   front_cmd=("${V6_BIN}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 --seed=3 "--threads=${THREADS}")
   limit_kind="none"; limit_kb=0
   if [ "${FRONTIER_ULIMIT_KB}" -gt 0 ]; then
-    front_cmd=(bash -c 'ulimit -v "$1" && shift && exec "$@"' _ "${FRONTIER_ULIMIT_KB}" "${front_cmd[@]}")
+    front_cmd=("${WRAPPER_BASH}" -c 'ulimit -v "$1" && shift && exec "$@"' _ "${FRONTIER_ULIMIT_KB}" "${front_cmd[@]}")
     limit_kind="rlimit_as"; limit_kb="${FRONTIER_ULIMIT_KB}"
   fi
   RUN_TIMEOUT_ONE="${FRONTIER_TIMEOUT}" \

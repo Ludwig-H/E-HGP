@@ -84,13 +84,58 @@ export GCP_INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}"
 # tient dans cette fenetre d'apres le preflight budgetaire ci-dessous.
 MAX_RUN_SECONDS="${MAX_RUN_SECONDS:-28800}"
 GUEST_SHUTDOWN_MINUTES="${GUEST_SHUTDOWN_MINUTES:-470}"
+# GRACE UNIQUE de terminaison (septieme tour) : chaque `timeout -k` emploie
+# cette grace et chaque budget ABSOLU la soustrait — plus jamais une borne
+# qui finit apres l'echeance qu'elle annonce.
+GRACE_S="${GRACE_S:-30}"
+DESCRIBE_TIMEOUT_S="${DESCRIBE_TIMEOUT_S:-60}"
+VALIDATOR_TIMEOUT_S="${VALIDATOR_TIMEOUT_S:-300}"
+SCP_ATTEMPTS="${SCP_ATTEMPTS:-2}"
+STOP_RESERVE_S="${STOP_RESERVE_S:-900}"
 # Marge de rapatriement ALIGNEE (sixieme tour) : echeance de campagne a
 # MAX-2700 ; l'enveloppe distante peut depasser de 300 s ; le scp (900 s par
 # tentative, garde d'echeance) doit FINIR avant MAX-600 = l'arret invite
 # (470 min) ; les 600 dernieres secondes sont pour validation + arret.
-RAPATRIEMENT_MARGE_S="${RAPATRIEMENT_MARGE_S:-2700}"
 SSH_STEP_TIMEOUT_S="${SSH_STEP_TIMEOUT_S:-3600}"
 SCP_STEP_TIMEOUT_S="${SCP_STEP_TIMEOUT_S:-900}"
+# VALIDATION CONJOINTE des parametres temporels AVANT toute commande GCP
+# (septieme tour : SSH_STEP_TIMEOUT_S=0 desactivait GNU timeout ; une
+# surcharge invite courte arretait la VM avant l'echeance supposee).
+# Bornes FERMEES des deux cotes (revue en vol du septieme tour : base 10,
+# longueur et plafonds — un `08` octal ou un entier enorme sont refuses).
+_check_range() { # $1 = nom, $2 = min, $3 = max
+  [[ "${!1}" =~ ^[1-9][0-9]{0,5}$ ]] || { echo "REFUS : parametre temporel $1='${!1}' non entier decimal" >&2; exit 2; }
+  [ "${!1}" -ge "$2" ] && [ "${!1}" -le "$3" ] || { echo "REFUS : $1=${!1} hors de [$2, $3]" >&2; exit 2; }
+}
+_check_range MAX_RUN_SECONDS 900 28800
+_check_range GUEST_SHUTDOWN_MINUTES 10 480
+_check_range GRACE_S 1 300
+_check_range DESCRIBE_TIMEOUT_S 10 600
+_check_range VALIDATOR_TIMEOUT_S 60 3600
+_check_range SCP_ATTEMPTS 1 3
+# Reserve d'arret NON REDUCTIBLE : le pire cas de stop_and_verify (lectures,
+# mutation, polling, controles finaux) approche 735 s — plancher 900.
+_check_range STOP_RESERVE_S 900 3600
+_check_range SSH_STEP_TIMEOUT_S 60 7200
+_check_range SCP_STEP_TIMEOUT_S 60 3600
+# Budget POST-CAMPAGNE reserve au pire cas DECLARE : SCP_ATTEMPTS tentatives
+# completes (timeout + grace) + attentes + describes bornes autour des scp
+# + validateur borne + arret cible.
+SCP_BUDGET_S=$(( SCP_ATTEMPTS * (SCP_STEP_TIMEOUT_S + GRACE_S) + 5 * SCP_ATTEMPTS * (SCP_ATTEMPTS + 1) / 2 ))
+# L'arret cible part JUSTE APRES le scp ; la validation est locale et HORS
+# du budget VM (revue en vol) — le budget post-campagne couvre scp,
+# describes et l'arret, jamais le validateur.
+POST_BUDGET_S=$(( SCP_BUDGET_S + 2 * SCP_ATTEMPTS * (DESCRIBE_TIMEOUT_S + GRACE_S) + STOP_RESERVE_S ))
+# Le cutoff est le PLUS PROCHE des deux coupe-circuits (borne GCE dure,
+# arret invite) — jamais la seule borne GCE.
+EFFECTIVE_CUTOFF_S=$(( GUEST_SHUTDOWN_MINUTES * 60 < MAX_RUN_SECONDS ? GUEST_SHUTDOWN_MINUTES * 60 : MAX_RUN_SECONDS ))
+# Echeance du runner derivee du cutoff : campagne (queue du manifeste +60 et
+# grace comprises) puis POST_BUDGET doivent tenir avant le cutoff.
+RAPATRIEMENT_MARGE_S=$(( POST_BUDGET_S + 60 + GRACE_S + (MAX_RUN_SECONDS - EFFECTIVE_CUTOFF_S) ))
+[ $(( EFFECTIVE_CUTOFF_S - POST_BUDGET_S - 60 - GRACE_S )) -ge 900 ] || {
+  echo "REFUS : fenetre insuffisante — cutoff effectif ${EFFECTIVE_CUTOFF_S}s, budget post-campagne ${POST_BUDGET_S}s (rien ne serait mesurable)" >&2
+  exit 2
+}
 
 # PROFIL CANONIQUE (audit deuxieme tour : le fichier d'autorite est
 # versionne et hashe, jamais fabrique par l'environnement). CAMPAIGN_PROFILE
@@ -455,11 +500,25 @@ PYEPOCH
   log_safe "stop_and_verify (generation ${GENERATION}) : rc=${stop_rc}"
   echo "journal complet : ${LOG}"
   echo "resultats rapatries : ${WORK}/out (si l'etape scp a ete atteinte)"
-  local snap2=""
+  # TUPLE COMPLET post-arret (septieme tour : le seul deuxieme champ etait
+  # compare — un registre etranger syntaxiquement strict passait). Toute
+  # discordance est une INCOHERENCE DE PREUVE, distincte d'un recu non
+  # publie, gravee sous sa propre issue.
+  local snap2="" incoherent=0
   snap2="$(state_snapshot 2>/dev/null)" || snap2=""
-  if [ "${stop_rc}" -eq 0 ] && [ "$(printf '%s' "${snap2}" | awk '{print $2}')" != "targeted_stopped" ]; then
-    echo "[INCOHERENCE] arret certifie mais registre (snapshot strict) != targeted_stopped" >&2
-    receipt_rc=66
+  if [ "${stop_rc}" -eq 0 ] && \
+     [ "${snap2}" != "ok targeted_stopped ${GCP_PROJECT_ID} ${GCP_ZONE} ${GCP_INSTANCE_NAME} ${GENERATION}" ]; then
+    echo "[INCOHERENCE] arret certifie mais le registre (snapshot strict) ne porte pas le tuple attendu (${snap2:-illisible})" >&2
+    incoherent=1
+  fi
+  if [ "${incoherent}" -eq 1 ]; then
+    finalize_receipt incoherence_registre_post_arret "${stop_rc}" "${rc}" || receipt_rc=66
+    if [ "${receipt_rc}" -ne 0 ]; then
+      echo "[RECU NON PUBLIE] le recu durable n'a pas pu etre ecrit (${DURABLE_RECEIPT_BASE})" >&2
+      exit 66
+    fi
+    echo "[INCOHERENCE] recu grave sous issue=incoherence_registre_post_arret — preuve corrompue, arret certifie" >&2
+    exit 78
   fi
   finalize_receipt arret_tente "${stop_rc}" "${rc}" || receipt_rc=66
   if [ "${stop_rc}" -ne 0 ]; then
@@ -676,8 +735,11 @@ log "deadline_epoch=${DEADLINE_EPOCH} (generation ${GEN_EPOCH} + ${MAX_RUN_SECON
 # Controle de generation NON MUTANT (describe) : ferme la fenetre entre le
 # start certifie et le premier SSH.
 check_generation() {
+  # Describe BORNE (septieme tour : un controle GCP bloque ne doit jamais
+  # empecher l'arret cible d'etre atteint).
   local seen
-  seen="$(gcloud compute instances describe "${GCP_INSTANCE_NAME}" --project="${GCP_PROJECT_ID}" \
+  seen="$(/usr/bin/timeout -k "${GRACE_S}" "${DESCRIBE_TIMEOUT_S}" \
+          gcloud compute instances describe "${GCP_INSTANCE_NAME}" --project="${GCP_PROJECT_ID}" \
           --zone="${GCP_ZONE}" --format='value(lastStartTimestamp)' 2>>"${LOG}")" || return 1
   [ "${seen}" = "${GENERATION}" ]
 }
@@ -699,7 +761,7 @@ REMOTE_BUNDLE="/tmp/v6bundle_${REMOTE_TAG}.tgz"
 # ne fait QUE lire boot_id, encadre par DEUX controles de generation ; toute
 # commande distante ulterieure REVERIFIE ce boot_id avant de muter quoi que
 # ce soit sur la VM.
-BOOT_ID="$(timeout -k 30 "${SCP_STEP_TIMEOUT_S}" "${SSH[@]}" 'cat /proc/sys/kernel/random/boot_id' 2>>"${LOG}")" \
+BOOT_ID="$(/usr/bin/timeout -k "${GRACE_S}" "${SCP_STEP_TIMEOUT_S}" "${SSH[@]}" 'cat /proc/sys/kernel/random/boot_id' 2>>"${LOG}")" \
   || { log "REFUS : handshake boot_id impossible"; SESSION_RC=75; exit 75; }
 [[ "${BOOT_ID}" =~ ^[0-9a-f-]{36}$ ]] || { log "REFUS : boot_id mal forme (${BOOT_ID})"; SESSION_RC=75; exit 75; }
 check_generation || { log "REFUS : generation changee pendant le handshake"; SESSION_RC=74; exit 74; }
@@ -707,7 +769,7 @@ log "handshake : boot_id=${BOOT_ID} generation confirmee"
 
 # ---- 4b. Envoi du BUNDLE pinne (lecture seule cote VM), encadre par deux
 # controles de generation.
-timeout -k 30 "${SCP_STEP_TIMEOUT_S}" "${SCP[@]}" "${BUNDLE}" \
+/usr/bin/timeout -k "${GRACE_S}" "${SCP_STEP_TIMEOUT_S}" "${SCP[@]}" "${BUNDLE}" \
   "${GCP_INSTANCE_NAME}:${REMOTE_BUNDLE}.recu" 2>&1 | tee -a "${LOG}"
 check_generation || { log "REFUS : generation changee apres l'envoi du bundle"; SESSION_RC=74; exit 74; }
 
@@ -715,7 +777,15 @@ check_generation || { log "REFUS : generation changee apres l'envoi du bundle"; 
 # et planchers (P1 : jamais un tail -4). Le boot_id du handshake est
 # REVERIFIE dans la meme commande distante avant toute mutation.
 BUILD_LOG="${WORK}/build_vm.log"
-timeout -k 30 "${SSH_STEP_TIMEOUT_S}" "${SSH[@]}" 'set -euo pipefail
+_now=$(date +%s)
+BUILD_TIMEOUT_S=$(( DEADLINE_EPOCH - _now - GRACE_S ))
+if [ "${BUILD_TIMEOUT_S}" -gt "${SSH_STEP_TIMEOUT_S}" ]; then BUILD_TIMEOUT_S="${SSH_STEP_TIMEOUT_S}"; fi
+if [ "${BUILD_TIMEOUT_S}" -lt 60 ]; then
+  log "REFUS : temps restant insuffisant pour le build (${BUILD_TIMEOUT_S}s) — arret sans campagne"
+  SESSION_RC=77
+  exit 77
+fi
+/usr/bin/timeout -k "${GRACE_S}" "${BUILD_TIMEOUT_S}" "${SSH[@]}" 'set -euo pipefail
   test "$(cat /proc/sys/kernel/random/boot_id)" = '"'${BOOT_ID}'"' || { echo "REFUS : boot_id different (redemarrage detecte)" >&2; exit 9; }
   mv '"${REMOTE_BUNDLE}.recu"' '"${REMOTE_BUNDLE}"'
   export PATH=$HOME/.local/bin:$PATH
@@ -747,18 +817,21 @@ log "portes VM : v5=${GATE_TOTALS[0]} v6=${GATE_TOTALS[1]} (journaux complets da
 # commande distante avant toute execution ; retour CAPTURE sans trap.
 check_generation || { log "REFUS : generation changee avant la campagne"; SESSION_RC=74; exit 74; }
 REMOTE_CAMPAIGN_RC=0
-# Enveloppe SANS depassement (sixieme tour) : le runner tronque LUI-MEME ses
-# runs avant l'echeance (past_deadline) ; +60 s couvrent seulement
-# l'ecriture du manifeste distant apres le dernier run. Bornee aussi par le
-# coupe-circuit scp (MAX-600).
-CAMPAIGN_TIMEOUT=$(( DEADLINE_EPOCH - $(date +%s) + 60 ))
-_hard_stop=$(( GEN_EPOCH + MAX_RUN_SECONDS - 600 ))
-if [ "$(( $(date +%s) + CAMPAIGN_TIMEOUT ))" -gt "${_hard_stop}" ]; then
-  CAMPAIGN_TIMEOUT=$(( _hard_stop - $(date +%s) ))
+# Enveloppe SANS depassement (septieme tour) : `now` lu UNE fois, la fin
+# possible (grace comprise) est <= DEADLINE+60 (60 s = ecriture du manifeste
+# distant apres le dernier run tronque par past_deadline). Si le reste est
+# sous le minimum sur : NE PAS LANCER — jamais remonter le temps restant.
+_now=$(date +%s)
+CAMPAIGN_TIMEOUT=$(( DEADLINE_EPOCH + 60 - _now - GRACE_S ))
+CAMPAIGN_SKIPPED=0
+if [ "${CAMPAIGN_TIMEOUT}" -lt 60 ]; then
+  log "campagne NON LANCEE : temps restant insuffisant (${CAMPAIGN_TIMEOUT}s < 60s apres grace) — passage direct au rapatriement puis a l'arret"
+  CAMPAIGN_SKIPPED=1
+  REMOTE_CAMPAIGN_RC=75
 fi
-if [ "${CAMPAIGN_TIMEOUT}" -lt 60 ]; then CAMPAIGN_TIMEOUT=60; fi
 set +e
-timeout -k 30 "${CAMPAIGN_TIMEOUT}" "${SSH[@]}" "set -euo pipefail
+if [ "${CAMPAIGN_SKIPPED}" -eq 0 ]; then
+/usr/bin/timeout -k "${GRACE_S}" "${CAMPAIGN_TIMEOUT}" "${SSH[@]}" "set -euo pipefail
   test \"\$(cat /proc/sys/kernel/random/boot_id)\" = '${BOOT_ID}' || { echo 'REFUS : boot_id different (redemarrage detecte)' >&2; exit 9; }
   export PATH=\$HOME/.local/bin:\$PATH
   cd ~/${REMOTE_DIR}
@@ -769,24 +842,31 @@ timeout -k 30 "${CAMPAIGN_TIMEOUT}" "${SSH[@]}" "set -euo pipefail
     SWEEP_SPECS='${SWEEP_SPECS}' SWEEP_REPEATS='${SWEEP_REPEATS}' \
     GPU_SPECS='${GPU_SPECS}' FRONTIER_SPECS='${FRONTIER_SPECS}' FRONTIER_TIMEOUT='${FRONTIER_TIMEOUT}' \
     GPU_BUILD_TIMEOUT='${GPU_BUILD_TIMEOUT}' FRONTIER_ULIMIT_KB='${FRONTIER_ULIMIT_KB}' \
-    bash gcp-migration/v6_campaign_remote.sh ${SOURCE_COMMIT} ${SOURCE_PAYLOAD_SHA256} ${PROTOCOL_MANIFEST_SHA256}
+    GRACE_S='${GRACE_S}' \
+    /bin/bash gcp-migration/v6_campaign_remote.sh ${SOURCE_COMMIT} ${SOURCE_PAYLOAD_SHA256} ${PROTOCOL_MANIFEST_SHA256}
 " 2>&1 | tee -a "${LOG}"
 REMOTE_CAMPAIGN_RC=${PIPESTATUS[0]}
+fi
 set -e
 printf 'remote_campaign_rc=%d\n' "${REMOTE_CAMPAIGN_RC}" | tee -a "${LOG}"
 
 # ---- 7. RAPATRIEMENT TOUJOURS, reprises bornees, generation controlee.
 mkdir -p "${WORK}/out"
 SCP_RC=1
-SCP_DEADLINE=$((GEN_EPOCH + MAX_RUN_SECONDS - 600))
-for attempt in 1 2 3; do
-  if [ "$(( $(date +%s) + SCP_STEP_TIMEOUT_S ))" -gt "${SCP_DEADLINE}" ]; then
-    log "rapatriement abandonne avant la tentative ${attempt} : la fenetre scp deborderait sur l'arret (echeance ${SCP_DEADLINE})"
+# Chaque tentative reserve son PIRE CAS : timeout scp + grace + describes
+# bornes autour + validateur borne + arret cible — le tout avant le CUTOFF
+# EFFECTIF (min borne GCE / arret invite), `now` lu une fois par tentative.
+SCP_CUTOFF=$((GEN_EPOCH + EFFECTIVE_CUTOFF_S))
+for attempt in $(seq 1 "${SCP_ATTEMPTS}"); do
+  _now=$(date +%s)
+  if [ "$(( _now + SCP_STEP_TIMEOUT_S + GRACE_S + 2 * (DESCRIBE_TIMEOUT_S + GRACE_S) \
+           + STOP_RESERVE_S ))" -gt "${SCP_CUTOFF}" ]; then
+    log "rapatriement abandonne avant la tentative ${attempt} : le pire cas deborderait sur le cutoff effectif (${SCP_CUTOFF})"
     break
   fi
   check_generation || { log "generation changee pendant le rapatriement (tentative ${attempt})"; break; }
   set +e
-  timeout -k 30 "${SCP_STEP_TIMEOUT_S}" "${SCP[@]}" --recurse \
+  /usr/bin/timeout -k "${GRACE_S}" "${SCP_STEP_TIMEOUT_S}" "${SCP[@]}" --recurse \
     "${GCP_INSTANCE_NAME}:~/${REMOTE_DIR}/out" "${WORK}/" 2>&1 | tee -a "${LOG}"
   rc=${PIPESTATUS[0]}
   set -e
@@ -805,10 +885,31 @@ for attempt in 1 2 3; do
 done
 printf 'scp_rc=%d\n' "${SCP_RC}" | tee -a "${LOG}"
 
+# ---- 7bis. ARRET CIBLE IMMEDIAT apres le rapatriement (revue en vol du
+# septieme tour : la validation est locale — la VM n'attend pas). Le meme
+# registre est publie ; en cas de succes, le cleanup prend son fast-path
+# (aucun second arret) ; en cas d'echec, la reprise bornee du cleanup
+# re-tente.
+lifecycle_publish_state "targeted_stopping"
+EARLY_STOP_RC=0
+"${GUARDS_DIR}/stop_and_verify.sh" --yes \
+  --expected-last-start-timestamp "${GENERATION}" >> "${LOG}" 2>&1 || EARLY_STOP_RC=$?
+if [ "${EARLY_STOP_RC}" -eq 0 ]; then
+  lifecycle_publish_state "targeted_stopped"
+  log "arret cible post-rapatriement certifie (generation ${GENERATION})"
+else
+  lifecycle_publish_state "targeted_stop_failed"
+  log "arret cible post-rapatriement NON certifie (rc=${EARLY_STOP_RC}) — la reprise bornee du cleanup re-tentera"
+fi
+
 # ---- 8. VALIDATION LOCALE par le validateur EPINGLE, profil epingle joint :
-# seule autorite du statut de campagne.
+# seule autorite du statut de campagne (HORS budget VM : la cible est deja
+# arretee ou en reprise).
 set +e
-python3 "${VALIDATOR}" "${WORK}/out" \
+# Validateur BORNE (septieme tour : un validateur bloque ne doit jamais
+# empecher le trap d'arret d'etre atteint).
+/usr/bin/timeout -k "${GRACE_S}" "${VALIDATOR_TIMEOUT_S}" \
+  python3 "${VALIDATOR}" "${WORK}/out" \
   "${SOURCE_COMMIT}" "${SOURCE_PAYLOAD_SHA256}" "${PROTOCOL_MANIFEST_SHA256}" \
   "${REMOTE_CAMPAIGN_RC}" "${SCP_RC}" "${PROFILE}" "${PROFILE_SRC}" "${WORK}/manifest_revalide.txt" 2>&1 | tee "${WORK}/validation.txt" | tee -a "${LOG}"
 VALIDATE_RC=${PIPESTATUS[0]}

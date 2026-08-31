@@ -55,7 +55,10 @@ check() {
 }
 check_true() { local name="$1"; shift; if "$@"; then check "${name}" 0; else check "${name}" 1; fi; }
 
-FAKE_GEN="2026-08-31T14:00:00Z"
+# Generation RELATIVE au present : l'echeance du cycle de vie derive du
+# cutoff min(GCE, invite) depuis GEN_EPOCH — un horodatage fige casserait
+# les scenarios au fil de l'horloge.
+FAKE_GEN="$(date -u -d '-60 seconds' +%Y-%m-%dT%H:%M:%SZ)"
 PROTOCOL_FILES=(session_campagne_v6_g4.sh v6_session_lifecycle.sh v6_campaign_pin.sh
                 v6_campaign_remote.sh validate_v6_campaign.py profils/decision_v1.env
                 profils/smoke_v1.env profils/g4_mesure_v1.env set_max_run_duration_and_verify.sh
@@ -68,7 +71,9 @@ make_fake_bin() { # $1 = dossier
 #!/usr/bin/env bash
 echo "GCLOUD $*" >> "${FAKE_CALLS}"
 case "$*" in
-  *"instances describe"*) echo "${FAKE_GEN}"; exit 0 ;;
+  *"instances describe"*)
+    if [ "${FAKE_DESCRIBE_HANG:-0}" = "1" ]; then sleep 3600; fi
+    echo "${FAKE_GEN}"; exit 0 ;;
   *"compute ssh"*)
     n=$(grep -c "compute ssh" "${FAKE_CALLS}" || true)
     if [ "${n}" -le 1 ]; then
@@ -162,6 +167,14 @@ EOF
 echo "STOP $*" >> "${FAKE_CALLS}"
 n=$(grep -c '^STOP ' "${FAKE_CALLS}" || true)
 if [ "${FAKE_STOP_FAIL_FIRST:-0}" = "1" ] && [ "${n}" -le 1 ]; then exit 1; fi
+if [ "${FAKE_STOP_VANISH_STATE:-0}" = "1" ]; then
+  rm -f "${FAKE_STATE_CIBLE}"
+  chmod 555 "$(dirname "${FAKE_STATE_CIBLE}")"
+fi
+if [ "${FAKE_STOP_FOREIGN_STATE:-0}" = "1" ]; then
+  printf 'schema=e-hgp.lifecycle-state.v1\nstate=targeted_stopped\nproject=autre-projet\nzone=autre-zone\ninstance=autre-instance\ngeneration=2020-01-01T00:00:00Z\n' > "${FAKE_STATE_CIBLE}"
+  chmod 555 "$(dirname "${FAKE_STATE_CIBLE}")"
+fi
 exit "${FAKE_STOP_RC:-0}"
 EOF
   chmod +x "$1"/*.sh
@@ -335,7 +348,21 @@ check_true "mutant registre perdu + handoff valide : UN arret cible, jamais refu
     && grep -q -- '--expected-last-start-timestamp ${FAKE_GEN}' '${FAKE_CALLS}' \
     && ! grep -q 'refus avant demarrage' '${SCENARIO_DIR}/stdout.log' '${SCENARIO_DIR}/work/session.log' 2>/dev/null \
     && d=\$(ls -d '${SCENARIO_DIR}'/recu/s_* | head -1) \
-    && grep -q '^issue=arret_tente' \"\$d/RECU_SESSION.txt\""
+    && grep -qE '^issue=(arret_tente|arret_certifie_par_le_garde)' \"\$d/RECU_SESSION.txt\""
+# (a2) CAUSAL pour la branche « registre ABSENT au cleanup, handoff valide »
+# (contre-exemple n° 1 du sixieme tour) : le premier arret EFFACE le registre
+# et rend sa republication impossible (dossier fige), puis echoue — le
+# cleanup voit un registre absent AVEC generation verrouillee : il DOIT
+# re-tenter l'arret (l'ancien code concluait refus avant mutation).
+export FAKE_STOP_VANISH_STATE=1 FAKE_STOP_FAIL_FIRST=1
+rc=0; run_scenario ok || rc=$?
+unset FAKE_STOP_VANISH_STATE FAKE_STOP_FAIL_FIRST
+chmod 755 "${SCENARIO_DIR}/work" 2>/dev/null || true
+check_true "mutant registre ABSENT au cleanup + handoff valide : le cleanup re-tente (deux arrets), jamais refus avant mutation" \
+  bash -c "[ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 2 ] \
+    && [ \"\$(grep -c -- '--expected-last-start-timestamp ${FAKE_GEN}' '${FAKE_CALLS}')\" -eq 2 ] \
+    && d=\$(ls -d '${SCENARIO_DIR}'/recu/s_* | head -1) \
+    && ! grep -q '^issue=refus_avant_mutation' \"\$d/RECU_SESSION.txt\""
 # (b) cle dupliquee : snapshot ILLISIBLE -> arret via handoff.
 rc=0; run_scenario ok campagne_registre_duplique || rc=$?
 check_true "mutant cle dupliquee : registre illisible, UN arret cible via le handoff" \
@@ -378,6 +405,41 @@ check_true "mutant registre illisible sans handoff : BLOCAGE 71, jamais refus av
   bash -c "[ '${rc}' -eq 71 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 0 ] \
     && grep -q 'registre de cycle de vie ILLISIBLE' '${SCENARIO_DIR}/stderr.log' \
     && ! grep -q 'refus avant demarrage' '${SCENARIO_DIR}/stdout.log'"
+
+# (h) P0 septieme tour : surcharge temporelle hors bornes refusee AVANT
+# toute garde (SSH_STEP_TIMEOUT_S=0 desactivait GNU timeout).
+export SSH_STEP_TIMEOUT_S=0
+rc=0; run_scenario ok || rc=$?
+unset SSH_STEP_TIMEOUT_S
+check_true "surcharge SSH_STEP_TIMEOUT_S=0 : refus rc=2 avant toute garde" \
+  bash -c "[ '${rc}' -eq 2 ] && ! grep -qE '^(SETMAX|START|STOP) ' '${FAKE_CALLS}'"
+# (i) trop tard, ne pas lancer : generation dans le PASSE — le build refuse
+# (temps restant insuffisant, jamais remonte), UN arret cible, recu grave.
+_OLD_FAKE_GEN="${FAKE_GEN}"
+FAKE_GEN="$(date -u -d '-28000 seconds' +%Y-%m-%dT%H:%M:%SZ)"
+rc=0; run_scenario ok || rc=$?
+FAKE_GEN="${_OLD_FAKE_GEN}"
+check_true "trop tard (generation passee) : refus du build rc=77, UN arret cible, jamais un temps remonte" \
+  bash -c "[ '${rc}' -eq 77 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ]"
+# (j) describe BLOQUE : borne par DESCRIBE_TIMEOUT_S — la session echoue
+# proprement et l'arret cible est atteint (jamais un blocage infini).
+export FAKE_DESCRIBE_HANG=1 DESCRIBE_TIMEOUT_S=10 GRACE_S=1
+rc=0; run_scenario ok || rc=$?
+unset FAKE_DESCRIBE_HANG DESCRIBE_TIMEOUT_S GRACE_S
+check_true "describe bloque : borne, session en echec propre, UN arret cible" \
+  bash -c "[ '${rc}' -ne 0 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ]"
+# (k) P1 septieme tour : registre ETRANGER strict apres l'arret (publication
+# du terminal empechee) — INCOHERENCE DE PREUVE gravee sous sa propre issue,
+# exit 78, jamais le message « recu non publie ».
+export FAKE_STOP_FOREIGN_STATE=1
+rc=0; run_scenario ok || rc=$?
+unset FAKE_STOP_FOREIGN_STATE
+chmod 755 "${SCENARIO_DIR}/work" 2>/dev/null || true
+check_true "registre etranger post-arret : exit 78, issue=incoherence_registre_post_arret, re-tentative puis preuve refusee" \
+  bash -c "[ '${rc}' -eq 78 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 2 ] \
+    && d=\$(ls -d '${SCENARIO_DIR}'/recu/s_* | head -1) \
+    && grep -q '^issue=incoherence_registre_post_arret' \"\$d/RECU_SESSION.txt\" \
+    && ! grep -q 'RECU NON PUBLIE' '${SCENARIO_DIR}/stderr.log'"
 
 # ---- Scenarios bootstrap + pin : clone jetable, versions COURANTES du
 # protocole synchronisees et committees DANS LE CLONE (commit conditionnel :
@@ -467,4 +529,4 @@ if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest cycle de vie v6 : ${FAILURES} echec(s)" >&2
   exit 1
 fi
-echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (22 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue, registre illisible=blocage — + 11 refus de pin, rejouable depuis un HEAD propre)"
+echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (27 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue, registre illisible=blocage, surcharge temporelle refusee, trop-tard sans remontee, describe borne, registre etranger post-arret=78 — + 11 refus de pin, rejouable depuis un HEAD propre)"
