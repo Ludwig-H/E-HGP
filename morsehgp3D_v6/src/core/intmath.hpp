@@ -11,6 +11,27 @@
 namespace mhgp6 {
 
 // floor(sqrt(x)) exact sur i64 >= 0 (x <= 0 donne 0).
+// Racine entiere PURE (bit a bit, AUCUN libm) : pour les frontieres de
+// domaine qui promettent l'independance de la libm (familles stationnaires).
+// O(32) iterations ; exacte sur tout i64 >= 0.
+inline i64 isqrt64_pure(i64 x) {
+  if (x <= 0) return 0;
+  u64 n = (u64)x, r = 0, bit = 1ull << 62;
+  while (bit > n) bit >>= 2;
+  while (bit != 0) {
+    if (n >= r + bit) {
+      n -= r + bit;
+      r = (r >> 1) + bit;
+    } else {
+      r >>= 1;
+    }
+    bit >>= 2;
+  }
+  return (i64)r;
+}
+
+// Graine flottante CORRIGEE par encadrement entier (exacte ; la graine peut
+// venir de libm, la valeur rendue n'en depend jamais) — voie chaude.
 inline i64 floor_sqrt(i64 x) {
   if (x <= 0) return 0;
   i64 r = (i64)std::sqrt((double)x);

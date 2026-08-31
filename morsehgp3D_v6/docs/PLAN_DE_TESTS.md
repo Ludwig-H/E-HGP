@@ -15,9 +15,11 @@ Conventions héritées v5, toutes reconduites :
   compilés seulement sous `MHGP6_TESTING` (posé par `mhgp6_executable`,
   jamais par `mhgp6_product_executable`) ; nom inconnu refusé code 2. Cible :
   chaque nom = un point d'injection + une porte code 4 EXÉCUTÉE. État réel
-  (audit du 31 août) : 60 noms au registre, tous injectés ; ~30 tués par une
-  porte exécutée (mutants dédiés + boucle de divergence d'objet
-  `mhgp6_mutant_*` sur eight_clusters 400) ; le reste `[PRÉVU]` avec les
+  (recompté au quatrième cycle d'audit) : 60 noms au registre, 64 points
+  d'injection (63 sous src/, un sous oracle/) ; 28 noms distincts tués par
+  une porte exécutée (mutants dédiés + boucle de divergence d'objet
+  `mhgp6_mutant_*` + `wspd-drop-rect` par le grand-livre de la route
+  produit + `family-scanline-overshoot`) ; le reste `[PRÉVU]` avec les
   portes v5 à porter (`fold-inject-b-exception-k3` exige le juge d'in-flight
   dédié : il termine par signal, jamais par la boucle de conformité). Un
   contrôle textuel registre ≡ grep est un complément, jamais un kill.
@@ -47,7 +49,6 @@ Conventions héritées v5, toutes reconduites :
 | crédits/tape | mutants `credit-compose-sum`, `core-partial-exclude` ; fixture croisée de lanes (W3-pas-W4) ; fixtures rôles A∪B (membre de A complétion valide, seed valide) |
 | tueurs d'ancre | fixtures F1–F11 portées ; secteurs : fixture croisée + mutant `sector-credit-global` ; grille : fixtures F9/F10 + mutants `cell-kill-h-minus-one`, `cell-kill-nonstrict` |
 | sweep q4 | **oracle du sweep** (re-balayage exhaustif en μ, échange des quantificateurs, racines/frontières) ; fixtures : relais `F1=μ+1, F2=1−μ`, racines confondues, complétion incidente (compte zéro), clip d'égalité à μ*, les trois cas B=0, sortie dans cellule profonde avant portion shallow ; mutants `sweep-drop-exit-root`, `sweep-nonstrict-depth`, `sweep-skip-fragment`, `sweep-completion-from-witness-tape`, `chord-dead-skip-positive` (hérité) |
-| barrière de sortie | `mhgp6_linked_arcs_gate` : littéraux, comptes exacts q3/q4, profondeur zéro, coquille = support, exact-once pré-RLE, équivariance, mutant de troncature i64 de l'oracle |
 | RLE/census | mutants `rle-drop`, `depth-threshold-minus-one`, `range-add-max-le-zero`, `census-nonstrict`, `skip-full-census` ; fixtures plateau (carré cocyclique) |
 | fold/rendu | mutants `drop-nonmerge`, `attach-prebatch`, `repr-ties`, `binary-ties`, `canonical-is-uf-root`, `fold-inject-a-failure-k2` tués (boucle de divergence d'objet). `[PRÉVU]` : juge borné n ≤ 14 (miniboule + cliques + Kruskal à lots), K=1 ≡ MST indépendant, rejeu « catalogue + deltas → partition », juge d'in-flight (`fold-inject-b-exception-k3`), `render-active-only`, planchers |
 | conformité v5 | `mhgp6_conformity_*` : `digest_all` + `digest_forest_K*` (l'OBJET) ≡ `receipts/conformite_v5/` sur 5 familles × {8000, 16000, 32000} (labels scale*) et petites tailles en `gate` ; le digest candidats v5-compat est rapporté, jamais un critère (cover q4 coefficient 4) ; golden post-préfiltre v6 gravé (uniform 400) |

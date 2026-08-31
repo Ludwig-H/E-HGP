@@ -88,9 +88,9 @@ et moteur plan (E6).
 - Auto-produits `corner_histograms` sans saturation ni raccourci de facteurs.
 - Rescan de profondeur par candidat q4 (mutualisé par seed dans le sweep de
   corde unifié ; l'incidence seed–complétion reste payée et publiée).
-- `digest_balls` comme monnaie appelée à mesurer la force des tueurs : tant
-  que le multiensemble reste identique à la v5, il sert de conformité ; dès
-  qu'un tueur le rompt, bascule post-préfiltre (voir plus haut).
+- `digest_balls` comme critère de conformité : les monnaies sont GELÉES
+  (v5-compat = diagnostic, post-préfiltre = non-régression interne, l'objet
+  = digest_all + forêts) — aucune bascule conditionnelle, voir plus haut.
 - Parsing tolérant (`atoi`/`atoll`) : **tout** le CLI v6 passe par
   `parse_i64_exact` ; suffixe, vide, débordement ⟹ code 2.
 - Opt-in s < 8 : la branche est conditionnée `MHGP6_TESTING`, pas seulement

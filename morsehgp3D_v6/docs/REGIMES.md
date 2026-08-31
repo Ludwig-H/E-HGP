@@ -78,7 +78,9 @@ propres digests de non-régression (`mhgp6_families_fixture`).
 ## 3. Contre-familles et fixtures de réfutation (jamais des régimes)
 
 - `two_lines`, `collinear_seven` : portées bit à bit (réfutations gravées).
-- `linked_arcs_u16` : porte permanente de la barrière de sortie
+- `linked_arcs_u16` : porte permanente de la barrière de génération/census
+  (motif borné de croissance quadratique jusqu'à N = 34 ; l'extension aux
+  facettes de forêt est prévue)
   (N = 6/10/18/34 → q3 12/40/144/544, q4 4/16/64/256, profondeur zéro,
   coquille = support, exact-once, équivariance, marges au-delà d'i64).
 - Calotte–lentille (contre-famille de l'auditeur, 30 août) : à graver comme

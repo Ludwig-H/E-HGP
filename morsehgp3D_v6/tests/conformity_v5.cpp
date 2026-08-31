@@ -101,7 +101,7 @@ bool load_expected_file(const char* path, Expected* e) {
 int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
   long long n = 400, threads = 1, seed = 3;
-  std::string expected_path, inject, postprefilter_golden;
+  std::string expected_path, inject, postprefilter_golden, compat_golden, counts_golden;
   bool ok = true;
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
@@ -116,6 +116,8 @@ int main(int argc, char** argv) {
     else if (const char* s = val("--seed=")) { ok = parse_i64_exact(s, &v) && ok; seed = v; }
     else if (const char* s = val("--expected=")) expected_path = s;
     else if (const char* s = val("--postprefilter=")) postprefilter_golden = s;
+    else if (const char* s = val("--expect-compat=")) compat_golden = s;
+    else if (const char* s = val("--expect-counts=")) counts_golden = s;
     else if (const char* s = val("--inject=")) inject = s;
     else { std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str()); ok = false; }
   }
@@ -167,10 +169,15 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (!expected_path.empty() && e.forest.size() < rr.kmax_eff) {
-    std::fprintf(stderr, "reference incomplete : %zu forets pour kmax_eff=%llu\n", e.forest.size(),
-                 (unsigned long long)rr.kmax_eff);
-    return 2;
+  if (!expected_path.empty()) {
+    // Ensemble EXACT exige : chaque K de 1..kmax_eff present (une reference
+    // reduite a K10 ne doit jamais eviter la comparaison K1 — audit du
+    // 31 aout). Les K au-dela de kmax_eff sont refuses par le chargeur.
+    for (u64 K = 1; K <= rr.kmax_eff; ++K)
+      if (!e.forest.count(K)) {
+        std::fprintf(stderr, "reference incomplete : digest_forest_K%llu absent\n", (unsigned long long)K);
+        return 2;
+      }
   }
   u64 mismatches = 0;
   // La conformite d'OBJET juge digest_all et les forets (P0 du 31 aout : les
@@ -191,6 +198,21 @@ int main(int argc, char** argv) {
   if (!e.all.empty() && e.all != rr.digest_all) {
     ++mismatches;
     std::fprintf(stderr, "digest_all : v5=%s v6=%s\n", e.all.c_str(), rr.digest_all.c_str());
+  }
+  if (!compat_golden.empty() && compat_golden != rr.digest_balls) {
+    ++mismatches;
+    std::fprintf(stderr, "digest_candidates_v5_compat : golden=%s v6=%s\n", compat_golden.c_str(),
+                 rr.digest_balls.c_str());
+  }
+  if (!counts_golden.empty()) {
+    char buf[64];
+    std::snprintf(buf, sizeof buf, "%llu/%llu/%llu", (unsigned long long)rr.expand.unique_balls,
+                  (unsigned long long)rr.expand.dead_depth, (unsigned long long)rr.expand.survivors);
+    if (counts_golden != buf) {
+      ++mismatches;
+      std::fprintf(stderr, "cardinalites uniques/mortes/survivantes : golden=%s v6=%s\n", counts_golden.c_str(),
+                   buf);
+    }
   }
   if (!postprefilter_golden.empty() && postprefilter_golden != rr.digest_postprefilter) {
     ++mismatches;

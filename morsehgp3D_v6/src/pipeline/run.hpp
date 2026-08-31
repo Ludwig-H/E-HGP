@@ -153,6 +153,19 @@ inline bool validate_run_options(const std::vector<InputPoint>& in, const RunOpt
   return true;
 }
 
+// ROUTINE TERMINALE COMMUNE (P1 audit du 31 aout) : sur TOUT retour non
+// complet, les champs provisoires sont vides — digests, forets, cartes,
+// totaux. Aucun defaut ne laisse une foret K1 ou un digest raw visibles.
+inline void invalidate_provisional(RunResult* rr) {
+  rr->digest_raw_candidates.clear();
+  rr->digest_balls.clear();
+  rr->digest_postprefilter.clear();
+  rr->digest_all.clear();
+  rr->digest_forest.clear();
+  rr->cards.clear();
+  rr->total_events = rr->total_facets = rr->total_fusions = rr->total_deltas = rr->total_nodes = 0;
+}
+
 inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOptions& opt) {
   using run_detail::ms;
   RunResult rr;
@@ -224,6 +237,12 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   rr.rss_mb[1] = run_detail::rss_mb_now();
   rr.expand.unique_balls = cands.size();
 
+  if (!candidates_capacity_ok(cands.size())) {
+    rr.status = PipelineStatus::kResourceExhausted;
+    rr.message = "resource_exhausted : plus de 2^32-1 boules uniques (indices u32 du prefiltre)";
+    invalidate_provisional(&rr);
+    return rr;
+  }
   const auto t_p = std::chrono::steady_clock::now();
   std::vector<Survivor> surv;
   prefilter_balls(ix, cands, rr.smax_eff, opt.threads, &surv, &rr.expand);
@@ -237,6 +256,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     rr.message = cs == PipelineStatus::kResourceExhausted
                      ? "resource_exhausted : coquille au-dela du plafond (jamais de troncature)"
                      : "invariant : census contredit la passe count-only";
+    invalidate_provisional(&rr);
     return rr;
   }
   rr.t_census_ms = ms(t_c);  // arrete AVANT le digest post-prefiltre (audit du 31 aout)
@@ -256,11 +276,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     if (!fold_capacity_ok(kc[K].events, kc[K].incidences, &why)) {
       rr.status = PipelineStatus::kResourceExhausted;
       rr.message = "fold K=" + std::to_string(K) + " : " + why;
-      // Les digests sont PROVISOIRES jusqu'au statut terminal : aucun champ
-      // de digest n'est publie sur un retour d'echec (audit du 31 aout).
-      rr.digest_postprefilter.clear();
-      rr.digest_balls.clear();
-      rr.digest_raw_candidates.clear();
+      invalidate_provisional(&rr);
       return rr;
     }
   }
@@ -491,18 +507,14 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     if (first_exc) std::rethrow_exception(first_exc);
     rr.status = first_status;
     rr.message = first_message;
-    rr.digest_postprefilter.clear();
-    rr.digest_balls.clear();
-    rr.digest_raw_candidates.clear();
+    invalidate_provisional(&rr);
     return rr;
   }
   if (main_exc) std::rethrow_exception(main_exc);
   if (a_status != PipelineStatus::kCompleteRegular) {
     rr.status = a_status;
     rr.message = a_message;
-    rr.digest_postprefilter.clear();
-    rr.digest_balls.clear();
-    rr.digest_raw_candidates.clear();
+    invalidate_provisional(&rr);
     return rr;
   }
   rr.t_fold_wall_ms = ms(t_fold_wall);
@@ -585,6 +597,27 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                (unsigned long long)gs.q4_rej_center);
   // GRAND-LIVRE GLOBAL DES PAIRES (u128 imprime en deux u64 haut/bas si
   // necessaire ; sous u16 et n <= 2^32 la masse tient en u64).
+  std::fprintf(out,
+               "vwspd nœuds_temoins=%llu coins=%llu h_rect=%llu/%llu/%llu m_anchor=%llu/%llu/%llu "
+               "iters_coeur=%llu iters_passe2=%llu\n",
+               (unsigned long long)gs.wspd_witness_nodes, (unsigned long long)gs.wspd_corner_evals,
+               (unsigned long long)gs.h_rect[0], (unsigned long long)gs.h_rect[1], (unsigned long long)gs.h_rect[2],
+               (unsigned long long)gs.m_anchor[0], (unsigned long long)gs.m_anchor[1],
+               (unsigned long long)gs.m_anchor[2], (unsigned long long)gs.q4_core_iters,
+               (unsigned long long)gs.q4_pass2_iters);
+  std::fprintf(out, "octaves_q4 ancres=");
+  for (int i = 0; i < 16; ++i)
+    std::fprintf(out, "%llu%s", (unsigned long long)gs.q4_anchors_by_octave[i], i == 15 ? "" : ",");
+  std::fprintf(out, " seeds=");
+  for (int i = 0; i < 16; ++i)
+    std::fprintf(out, "%llu%s", (unsigned long long)gs.q4_seeds_by_octave[i], i == 15 ? "" : ",");
+  std::fprintf(out, " w1=");
+  for (int i = 0; i < 16; ++i)
+    std::fprintf(out, "%llu%s", (unsigned long long)gs.q4_w1_by_octave[i], i == 15 ? "" : ",");
+  std::fprintf(out, " (octave = log2 de la taille du cover de l'ancre)\n");
+  std::fprintf(out, "vcensus nœuds=%llu feuilles=%llu range_add=%llu\n",
+               (unsigned long long)es.depth.nodes, (unsigned long long)es.depth.leaf_tests,
+               (unsigned long long)es.depth.range_add_mass);
   std::fprintf(out, "p_factor=%llu/%llu/%llu (evaluations d'auto-produits des histogrammes)\n",
                (unsigned long long)gs.p_factor[0], (unsigned long long)gs.p_factor[1],
                (unsigned long long)gs.p_factor[2]);

@@ -57,7 +57,7 @@ mhgp6_gate(mhgp6_families_mutant_overshoot 4 mhgp6_selftest ARGS --families --in
 mhgp6_gate(mhgp6_tree_selftest 0 mhgp6_selftest ARGS --tree)
 mhgp6_gate(mhgp6_wspd_ledger 0 mhgp6_selftest ARGS --wspd-ledger)
 mhgp6_gate(mhgp6_fused_descent 0 mhgp6_selftest ARGS --fused-descent)
-mhgp6_gate(mhgp6_sweep_oracle 0 mhgp6_selftest ARGS --sweep-oracle)
+mhgp6_gate(mhgp6_sweep_oracle 0 mhgp6_selftest ARGS --sweep-oracle LABELS "gate;oracle")
 mhgp6_gate(mhgp6_sweep_mutant_depth 4 mhgp6_selftest ARGS --sweep-oracle --inject=sweep-nonstrict-depth)
 mhgp6_gate(mhgp6_fused_mutant_mask 4 mhgp6_selftest ARGS --fused-descent --inject=fused-mask-stuck)
 
@@ -100,7 +100,7 @@ endforeach()
 # d'Edelsbrunner–Pach transposee en entiers u16 : arcs enlaces, q3 = 2n(n+1) et
 # q4 = n² cles de profondeur zero ; oracle local OBig384 + route produit).
 mhgp6_executable(mhgp6_linked_arcs tests/linked_arcs_gate.cpp)
-mhgp6_gate(mhgp6_linked_arcs_u16 0 mhgp6_linked_arcs)
+mhgp6_gate(mhgp6_linked_arcs_u16 0 mhgp6_linked_arcs LABELS "gate;oracle")
 mhgp6_gate(mhgp6_linked_arcs_oracle_i64 4 mhgp6_linked_arcs ARGS --oracle-i64)
 
 # ---- Fixtures de frontiere du sweep (audit du 31 aout : signes de B, B = 0,
@@ -123,7 +123,9 @@ mhgp6_gate(mhgp6_cover_coef3_mutant 4 mhgp6_cover_fixture ARGS --inject=q4-cover
 # mhgp6-digest-v1:postprefilter-candidates) : grave apres le correctif cover.
 mhgp6_gate(mhgp6_postprefilter_uniform_400 0 mhgp6_conformity
            ARGS --family=uniform --n=400 --threads=4 --expected=${REFS}/uniform_400.txt
-                --postprefilter=97be65b6e0c66e3b3b2262510bd7274f8e557ae4bdb78024467c1f9ee05c4d72)
+                --postprefilter=97be65b6e0c66e3b3b2262510bd7274f8e557ae4bdb78024467c1f9ee05c4d72
+                --expect-compat=2b50f878e2ddb641f07358dc82c9d52e9db7482ae55a94d0e033b13c71f1e6f4
+                --expect-counts=105076/1134/103942)
 
 # ---- Couverture executee des mutants (audit du 31 aout : 20 mutants deja
 # tues par la divergence d'objet de la conformite sur eight_clusters n=400 ;
@@ -138,3 +140,21 @@ foreach(mut wspd-drop-rect census-nonstrict genfilter-nonstrict depth-threshold-
              ARGS --family=eight_clusters --n=400 --threads=4 --inject=${mut}
                   --expected=${REFS}/eight_clusters_400.txt)
 endforeach()
+
+# ---- Contrats d'echec et validateurs (audit du 31 aout, quatrieme cycle).
+# Le juge refuse un narrowing hors domaine et une reference tronquee ; le
+# validateur de campagne est prouve fail-closed par sa porte Python ; la
+# descente fusionnee tue wspd-drop-rect par son grand-livre (route produit).
+mhgp6_gate(mhgp6_juge_refus_narrowing 2 mhgp6_conformity
+           ARGS --family=uniform --n=4294967696 --threads=4 --expected=${REFS}/uniform_400.txt)
+mhgp6_gate(mhgp6_juge_refus_reference_tronquee 2 mhgp6_conformity
+           ARGS --family=uniform --n=400 --threads=4
+                --expected=${CMAKE_CURRENT_SOURCE_DIR}/tests/refs/uniform_400_tronque_k1_absent.txt)
+mhgp6_gate(mhgp6_cover_refus_mutant_hors_cible 2 mhgp6_cover_fixture ARGS --inject=rle-drop)
+mhgp6_gate(mhgp6_sweep_refus_inject_vide 2 mhgp6_sweep_fixtures ARGS --inject=)
+mhgp6_gate(mhgp6_fused_mutant_droprect 4 mhgp6_selftest ARGS --fused-descent --inject=wspd-drop-rect)
+add_test(NAME mhgp6_pentes_validateur
+         COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=python3
+                 "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/pentes_gate.py"
+                 -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+set_tests_properties(mhgp6_pentes_validateur PROPERTIES LABELS "gate")

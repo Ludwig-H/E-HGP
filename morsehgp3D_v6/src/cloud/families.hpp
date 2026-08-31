@@ -103,8 +103,8 @@ inline bool parse_cloud_family(const char* name, CloudFamily* out) {
 // Racine carree entiere arrondie au plus proche (milieu vers le haut), puis
 // clamp au domaine [4, 65536] des emprises. Exacte et independante de libm.
 inline long long detail_round_isqrt_clamped(long long m) {
-  long long r = (long long)floor_sqrt((i64)m);  // primitive ENTIERE (core/intmath.hpp)
-  if (m > r * (r + 1)) ++r;                     // arrondi au plus proche, milieu vers le haut
+  long long r = (long long)isqrt64_pure((i64)m);  // bit a bit, AUCUN libm (core/intmath.hpp)
+  if (m > r * (r + 1)) ++r;                       // arrondi au plus proche, milieu vers le haut
   return std::max(4ll, std::min(65536ll, r));
 }
 

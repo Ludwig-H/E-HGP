@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
+#include <limits>
 #include <map>
 #include <random>
 #include <string>
@@ -54,6 +55,16 @@ int run_arith() {
   check(cmp_u192(ab1, ab) > 0, "cmp_u192 strict");
   const U320 p1 = mul_192x128_320(ab, (u128)3), p2 = mul_192x128_320(ab, (u128)2);
   check(cmp_u320(p1, p2) > 0, "cmp_u320 strict");
+  // Plafond de capacite du prefiltre (frontiere, sans allocation geante).
+  check(candidates_capacity_ok((size_t)std::numeric_limits<u32>::max()), "capacite : 2^32-1 accepte");
+  check(!candidates_capacity_ok((size_t)std::numeric_limits<u32>::max() + 1), "capacite : 2^32 refuse");
+  // Racine entiere PURE : les deux cotes de la frontiere d'arrondi.
+  check(isqrt64_pure(0) == 0 && isqrt64_pure(1) == 1 && isqrt64_pure(2) == 1, "isqrt64_pure petites");
+  for (const i64 r : {(i64)7, (i64)447, (i64)565, (i64)566, (i64)293938}) {
+    check(isqrt64_pure(r * r) == r, "isqrt64_pure carre exact");
+    check(isqrt64_pure(r * r - 1) == r - 1, "isqrt64_pure sous le carre");
+    check(isqrt64_pure(r * r + 2 * r) == r, "isqrt64_pure dernier avant le carre suivant");
+  }
   // DI128 contre __int128 sur un echantillon deterministe.
   std::mt19937_64 rng(7);
   for (int i = 0; i < 20000; ++i) {

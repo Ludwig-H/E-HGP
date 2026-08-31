@@ -44,6 +44,7 @@
 #pragma once
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <functional>
 #include <limits>
@@ -73,6 +74,8 @@ struct GenerateStats {
   u64 rect_alive[3] = {0, 0, 0};
   u128 ledger_emitted_mass[3] = {0, 0, 0};
   u128 ledger_killed_mass[3] = {0, 0, 0};
+  u64 wspd_witness_nodes = 0;  // V_wspd : nœuds d'index visites par les comptages de temoins
+  u64 wspd_corner_evals = 0;   // V_wspd : evaluations de coins pendant la descente
   u64 workers_wspd = 0;
   u64 workers_rects = 0;
   double t_wspd_ms = 0;
@@ -85,6 +88,15 @@ struct GenerateStats {
   u64 hist_killed_thresh[3] = {0, 0, 0};
   u64 hist_survivors[3] = {0, 0, 0};
   u64 p_factor[3] = {0, 0, 0};  // P_factor : evaluations d'auto-produits des histogrammes (|A|²+|B|² par rectangle)
+  u64 h_rect[3] = {0, 0, 0};    // H_rect : somme des points de handles par rectangle vivant (une fois par rectangle)
+  u64 m_anchor[3] = {0, 0, 0};  // M_anchor : somme des tailles de cover par ancre effectivement scannee
+  // SONDE DE QUEUE E6 (audit du 31 aout : « les deux depassements viennent
+  // de la seule graine 5 ») : distribution des ancres q4 par octave de
+  // taille de cover (octave o = floor(log2(taille)), 0..15) et attribution
+  // de W_sweep1 (evaluations eligibles) a l'octave de l'ancre porteuse.
+  u64 q4_anchors_by_octave[16] = {};
+  u64 q4_w1_by_octave[16] = {};
+  u64 q4_seeds_by_octave[16] = {};
   // Tueurs d'ancre.
   u64 anchors_killed_w3 = 0;
   u64 anchors_killed_w4 = 0;
@@ -99,7 +111,9 @@ struct GenerateStats {
   u64 seeds_killed_core = 0;   // q4 : cœur de seed (Jung)
   u64 seeds_killed_chord = 0;  // q4 : morceaux de corde (passe 1)
   u64 invariant_jneg = 0;      // J < 0 : inatteignable par theoreme (refus en invariant)
-  u64 q4_core_site_tests = 0;  // W_sweep1 : sites visites par le scan cœur+corde (passe 1)
+  u64 q4_core_site_tests = 0;  // W_sweep1 : EVALUATIONS ELIGIBLES du scan cœur+corde (apres le saut des trois indices du seed)
+  u64 q4_core_iters = 0;       // iterations COMPLETES de la boucle de passe 1 (chaque entree de cover parcourue)
+  u64 q4_pass2_iters = 0;      // iterations COMPLETES de la boucle de passe 2
   u64 q3_depth_site_tests = 0; // masse du filtre de profondeur q3 (sites testes)
   u64 sweep_pass2_seeds = 0;   // seeds q4 survivants entres en passe 2
   u64 sweep_pass2_site_tests = 0;  // W_sweep2 : sites rescannes par la passe 2 (P, B par site)
@@ -121,6 +135,8 @@ struct GenerateStats {
   u64 jung_cert_kill = 0, jung_cert_skip = 0, jung_fallback = 0;
   void add_from(const GenerateStats& o) {
     rect_visited_fused += o.rect_visited_fused;
+    wspd_witness_nodes += o.wspd_witness_nodes;
+    wspd_corner_evals += o.wspd_corner_evals;
     for (int i = 0; i < 3; ++i) {
       rect_alive[i] += o.rect_alive[i];
       ledger_emitted_mass[i] += o.ledger_emitted_mass[i];
@@ -131,6 +147,8 @@ struct GenerateStats {
       hist_killed_thresh[i] += o.hist_killed_thresh[i];
       hist_survivors[i] += o.hist_survivors[i];
       p_factor[i] += o.p_factor[i];
+      h_rect[i] += o.h_rect[i];
+      m_anchor[i] += o.m_anchor[i];
       anchors_killed_sectors[i] += o.anchors_killed_sectors[i];
       anchors_killed_cells[i] += o.anchors_killed_cells[i];
       seeds_killed_cells[i] += o.seeds_killed_cells[i];
@@ -149,6 +167,8 @@ struct GenerateStats {
     seeds_killed_chord += o.seeds_killed_chord;
     invariant_jneg += o.invariant_jneg;
     q4_core_site_tests += o.q4_core_site_tests;
+    q4_core_iters += o.q4_core_iters;
+    q4_pass2_iters += o.q4_pass2_iters;
     q3_depth_site_tests += o.q3_depth_site_tests;
     sweep_pass2_seeds += o.sweep_pass2_seeds;
     sweep_pass2_site_tests += o.sweep_pass2_site_tests;
@@ -157,6 +177,11 @@ struct GenerateStats {
     sweep_root_comparisons += o.sweep_root_comparisons;
     sweep_roots_offchord += o.sweep_roots_offchord;
     sweep_const_interior += o.sweep_const_interior;
+    for (int i = 0; i < 16; ++i) {
+      q4_anchors_by_octave[i] += o.q4_anchors_by_octave[i];
+      q4_w1_by_octave[i] += o.q4_w1_by_octave[i];
+      q4_seeds_by_octave[i] += o.q4_seeds_by_octave[i];
+    }
     q4_completions += o.q4_completions;
     q4_rej_lens += o.q4_rej_lens;
     q4_rej_owner += o.q4_rej_owner;
@@ -235,11 +260,15 @@ inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3
     lout.assign(nchunks, {});
     lnext.assign(nchunks, {});
     lst.assign(nchunks, GenerateStats{});
+    std::atomic<bool> drop_flag{MHGP6_MUTANT("wspd-drop-rect")};
     const size_t created = parallel_items(nchunks, (int)T, [&](size_t c, size_t) {
+      bool drop_pending = (c == 0) && drop_flag.exchange(false);
       for (size_t i = c * chunk; i < std::min(nw, c * chunk + chunk); ++i) {
         const Task& t = wave[i];
         ++lst[c].rect_visited_fused;
         const FusedCounts fc = count_universal_witnesses(ix, t.r.a, t.r.b, h_of, t.mask, false);
+        lst[c].wspd_witness_nodes += fc.nodes_visited;
+        lst[c].wspd_corner_evals += fc.corner_evals;
         u8 m = t.mask;
         for (int q = 0; q < 3; ++q) {
           if (!(m & (1u << q))) continue;
@@ -254,6 +283,8 @@ inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3
           // TERMINAL : recomptage avec autorite de coins ; il peut fermer des
           // lanes de plus (les masses correspondantes vont au grand-livre).
           const FusedCounts ff = count_universal_witnesses(ix, t.r.a, t.r.b, h_of, m, true);
+          lst[c].wspd_witness_nodes += ff.nodes_visited;
+          lst[c].wspd_corner_evals += ff.corner_evals;
           MultiAliveRect ar;
           ar.r = t.r;
           for (int q = 0; q < 3; ++q) {
@@ -267,7 +298,15 @@ inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3
             lst[c].ledger_emitted_mass[q] += pair_mass(t.r);
             ++lst[c].rect_alive[q];
           }
-          if (ar.mask != 0 && !(MHGP6_MUTANT("wspd-drop-rect") && lout[c].empty())) lout[c].push_back(ar);
+          if (ar.mask != 0) {
+            // MUTANT wspd-drop-rect : exactement UN rectangle vivant perdu
+            // (le premier du chunk 0) — la masse manque au grand-livre.
+            if (drop_pending && c == 0) {
+              drop_pending = false;
+            } else {
+              lout[c].push_back(ar);
+            }
+          }
           continue;
         }
         // SCISSION du facteur de plus grand diametre (jamais une feuille).
@@ -476,6 +515,7 @@ inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 
     }
   }
   if (anchor_grid_stage(ix, sc, ua, ub, pa, pb, D2, Lane::kQ3, h3, float_on, ls)) return;
+  ls->m_anchor[1] += sc.cover.size();
   const i64 d3[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
   sc.affine_filled = false;
   for (const CoverPoint& cp : sc.cover) {
@@ -554,6 +594,11 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
                               i64 D2, u64 h4, bool float_on, bool seed_core_nonstrict, bool no_canonical,
                               bool pretested, std::vector<BallCandidate>* lo, GenerateStats* ls,
                               const EndpointCredit* ec) {
+  // Sonde de queue E6 : octave de la taille du cover de l'ancre.
+  int oct = 0;
+  for (size_t sz = sc.cover.size(); sz > 1 && oct < 15; sz >>= 1) ++oct;
+  ++ls->q4_anchors_by_octave[oct];
+  ls->m_anchor[2] += sc.cover.size();
   if (!pretested) {
     u64 n4 = 0, n4_out = 0;
     const bool use_ec = ec != nullptr && ec->active() && ec->base < h4;
@@ -589,6 +634,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     const P3& px = ix.upos[(size_t)cx.u];
     if (!is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cx.u))) continue;
     ++ls->seeds[1];
+    ++ls->q4_seeds_by_octave[oct];
     const i64 l_ax = p3_norm2(p3_sub(px, pa));
     const i64 l_bx = p3_norm2(p3_sub(px, pb));
     const Q3Form f3s = q3_form(pa, pb, px);
@@ -616,9 +662,11 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       chord.init(Jb, MHGP6_MUTANT("chord-nonstrict"));
       u64 fcount = 0;
       for (size_t iz = 0; iz < sc.cover.size(); ++iz) {
+        ++ls->q4_core_iters;
         const CoverPoint& cz = sc.cover[iz];
         if (cz.u == ua || cz.u == ub || cz.u == cx.u) continue;
         ++ls->q4_core_site_tests;
+        ++ls->q4_w1_by_octave[oct];
         const double lh = seed.l_hat(sc, iz);
         const P3& pz = ix.upos[(size_t)cz.u];
         const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
@@ -684,6 +732,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     u64 c0 = 0;  // temoins constants sur toute la corde fermee
     sc.roots.clear();
     for (size_t iz = 0; iz < sc.cover.size(); ++iz) {
+      ++ls->q4_pass2_iters;
       const CoverPoint& cz = sc.cover[iz];
       if (cz.u == ua || cz.u == ub || cz.u == cx.u) continue;
       ++ls->sweep_pass2_site_tests;
@@ -900,6 +949,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
           const NodeRange r = ix.range_of(h);
           sc.handle_points += (u64)(r.last - r.first + 1);
         }
+        ls->h_rect[li] += sc.handle_points;
         pretest_by_query = sc.handle_points >= opt.pretest_query_min_points;
         if (pretest_by_query)
           rect_diametral_candidates(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), &sc.query, &sc.cover_nodes);
