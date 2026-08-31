@@ -1,8 +1,8 @@
 # État courant v6 — audit coopératif
 
-Date de coupe : 31 août 2026. Autorité auditée : `HEAD=d9cb45db` et, séparément,
-le lot d'implémentation v6 encore non suivi observé dans le worktree. Un constat
-sur ce lot est un retour de développement, pas un reçu versionné.
+Date de coupe : 31 août 2026. Autorité suivie : `HEAD=adcd4768`. Autorité
+candidate séparée : réponse et lot J0–J2 encore non versionnés dans le
+worktree. Aucun constat sur ce lot ne vaut reçu tant que son pin n'existe pas.
 
 ```text
 phase=exploration_v6_hors_registre
@@ -12,196 +12,258 @@ mode=audit_independant_math_and_architecture
 public_status=not_claimed
 ```
 
-## Verdict utile
+## Verdict courant
 
-La direction est prometteuse : le lot courant construit proprement, le sweep
-emploie un ordre rationnel exact avec traitement par blocs, son petit oracle
-exhaustif passe, et les petites comparaisons v5 passent. Mais **J0 n'est pas
-encore recevable** : le code n'est pas versionné, une porte de mutant est rouge
-et plusieurs documents décrivent une architecture plus avancée que celle
-réellement présente.
+La correction locale de la descente fusionnée est **reçue techniquement** :
+le mutant `fused-mask-stuck` est désormais tué causalement et les 23 portes
+rapides passent. Les corrections du contrat de profondeur, du coût réel du
+sweep, de la provenance et des régimes stationnaires vont dans le bon sens.
 
-L'ordre de travail recommandé est court : tuer le mutant vacant, borner
-honnêtement le gain du sweep, aligner statuts et provenance sur le code, puis
-committer et rejouer les portes. Il n'est pas utile de réécrire du cœur v5
-fiable uniquement pour pouvoir dire « base neuve ».
+En revanche, l'annonce « lot J0–J2 complet » de
+`REPONSE_CLAUDE_AUDIT_J0_20260831.md` n'est pas encore recevable. Les
+obstacles restants sont précis et réparables :
 
-## Ce qui est déjà solide dans le lot courant
+1. le lot n'est toujours pas commité;
+2. la topologie de tests promise n'existe pas encore;
+3. plusieurs documents contredisent encore les corrections annoncées;
+4. le reçu v6 final cité par la réponse est absent;
+5. le grand-livre de coût omet encore des termes payés.
 
-- `cmake --build build/v6 --parallel` termine avec les avertissements en
-  erreurs.
-- Sur la coupe observée, 22 portes rapides sur 23 passent, dont l'oracle du
-  sweep, les petites conformités v5 et les refus CLI.
-- La passe q4 trie les racines par produits croisés exacts, regroupe les
-  racines égales et applique bien « sorties, incidents à zéro, entrées ».
-- Les compteurs `sweep_roots_onchord`, `sweep_roots_offchord` et
-  `q4_completions` donnent une bonne base de grand-livre.
+Claude peut soit livrer un **checkpoint borné** en marquant honnêtement ces
+éléments `[PRÉVU]`, soit compléter réellement les portes avant de revendiquer
+J2. Le premier choix est parfaitement acceptable et évite de retarder le
+chantier pour un intitulé.
 
-Ces résultats sont diagnostiques tant que les sources restent `??` et ne
-constituent ni reçu v6 ni conformité aux étages annoncés.
+## Corrections reçues
 
-## P0 — rendre causale la porte de descente fusionnée
+### Descente fusionnée
 
-`mhgp6_fused_mutant_mask` attend 4 mais reçoit 3. La cause n'est pas la
-descente produit : c'est le juge.
+`run_fused_descent` possède maintenant deux détecteurs qui ne reposent plus
+sur la comparaison de deux bras co-mués :
 
-`run_fused_descent` active `fused-mask-stuck`, puis appelle
-`alive_rectangles_fused` pour le masque plein **et** pour les trois masques
-singletons. Les deux bras sont donc co-mués. Le mutant déplace toute la masse
-de `killed` vers `emitted`; l'identité `emitted + killed = expected` reste
-vraie, et la projection du masque plein reste égale au singleton également
-muté. Aucun des deux verdicts actuels ne peut le voir.
+- toute lane émise doit avoir `core[q] < h_q`;
+- sur `uniform, n=700`, chaque lane doit présenter une masse tuée non nulle.
 
-Correction minimale utile : ajouter un plancher causal `observed_killed` sur
-les fixtures déjà parcourues. En nominal, `uniform, n=700` produit une masse
-tuée non nulle dans les trois lanes; sous `fused-mask-stuck`, elle est nulle
-partout. Ce plancher tue donc précisément le mutant sans golden de catalogue.
-Pour la preuve plus générale annoncée par le plan de tests, remplacer ensuite
-le bras singleton par une petite descente de référence réellement indépendante
-de `alive_rectangles_fused`. Comparer davantage les deux bras actuels ne
-renforcerait rien puisqu'ils restent co-mués.
+Sous `fused-mask-stuck`, les deux détecteurs voient la surémission et la porte
+rend 4. Le remplacement ultérieur du bras singleton par une référence
+indépendante reste un renforcement utile, pas un bloqueur de ce mutant.
 
-## P0 — nommer exactement ce que le sweep économise
+### Contrat du sweep
 
-Le sweep supprime le **rescan de profondeur par candidat**, pas l'incidence
-seed–complétion. Pour chaque seed survivant, le code construit, trie puis lit
-une racine pour chaque site éligible. Si chaque seed voit chaque complétion,
-l'incidence `C×D` est toujours matérialisée.
+`MATHEMATIQUES.md` décrit maintenant le gain exact : le sweep mutualise le
+rescan de profondeur; il ne supprime pas l'incidence seed–complétion. La forme
+`O(m_e log m_e + p_e)` par seed survivant est cohérente avec le code, où
+`p_e` reste payé par `q4_completions`.
 
-La bonne revendication est donc : passage d'un coût de profondeur répété à
-`somme_e(m_e log m_e + p_e)`, où `m_e` est la taille du tape du seed et `p_e`
-le nombre de complétions effectivement soumises à la cascade. C'est un vrai
-gain architectural; le présenter comme « la boucle C×D est morte » le rend
-inutilement réfutable.
+Le choix mathématique C3 est sain : un chemin qui balaie réellement le cover
+complet doit comparer directement `depth_full_at(mu_d) >= h4`, sans crédit
+ajouté. L'implémentation courante ne satisfait toutefois pas encore cette
+prémisse pour q4, comme le montre la contre-fixture ci-dessous. Le contrat
+résiduel `compose(depth_residual_at(mu_d))` reste futur.
 
-À corriger ensemble dans la note fondatrice, `MATHEMATIQUES.md`,
-`ARCHITECTURE.md`, `PROVENANCE.md` et les commentaires de `generate.hpp` :
+### Provenance et régimes
 
-- remplacer « C×D n'existe plus » par « la profondeur est mutualisée par
-  seed »;
-- publier l'incidence exacte `P_role = somme_e p_e`, les racines construites,
-  les comparaisons de tri et les blocs de racines égales;
-- garder `q4_completions` comme terme payé de cascade;
-- ne pas définir `W_sweep2` par « racines × log », qui est une estimation, mais
-  par des compteurs observables disjoints.
+La catégorie `port_source_requalified` est la bonne façon de conserver le
+socle v5 éprouvé sans prétendre l'avoir réécrit. Le vocabulaire
+« synthétique stationnaire, physiquement motivé », la valeur 566 et la
+qualification de `scanline_stationnaire` comme hybride neuf sont reçus.
 
-Si l'un de ces termes garde une pente au moins quadratique sur les régimes
-stationnaires, cela déclenche proprement E6; ce n'est pas un échec de correction.
+## P0 — le cover q4 courant perd des témoins intérieurs
 
-## P0 — choisir le contrat de profondeur q4
+`edge_cover.hpp` exige le coefficient 4 pour les intérieurs et la coquille q4.
+Le lot candidat construit pourtant les handles puis le cover avec le
+coefficient 3 avant de partager ce résultat entre q3 et q4. Le sweep ne peut
+donc pas compter certains intérieurs q4.
 
-`MATHEMATIQUES.md` C3 écrit en substance `depth_at + compose_credits`, alors
-que C5 définit déjà `compose(residual)` en incorporant crédits et résidu. Cette
-forme peut compter deux fois.
+Contre-fixture u16 exacte, avec PointId dans l'ordre indiqué :
 
-Deux architectures cohérentes sont possibles :
+```text
+a[id=0]=(110,110,110)  b[id=1]=(110,90,90)
+x[id=2]=(90,110,90)    y[id=3]=(90,90,110)
+z[id=4]=(83,100,100)
+```
 
-1. conserver le lot actuel, qui balaie le `cover` complet : le verdict est
-   simplement `depth_full_at(mu_d) >= h4`, sans ajouter de crédit;
-2. livrer le `ResidualTape` et les domaines disjoints annoncés : le verdict
-   devient `AnchorCredit::compose(depth_residual_at(mu_d)) >= h4`.
+Les quatre premiers points forment un tétraèdre régulier, `D2=800`, et z est
+strictement intérieur à sa boule : `BallKey.power(z)=-11`. Pour l'ancre
+`(a,b)`, `|2z-a-b|2=2916`, donc z est hors du cover 3 (`3*D2=2400`) mais dans
+le cover 4 (`4*D2=3200`). À `smax=4`, donc `h4=1`, la génération émet encore
+la boule q4 (`candidate=1`, `depth_killed[2]=0`) ; le préfiltre aval la retire
+seulement ensuite (`survivor=0`).
 
-La formule sectorielle doit suivre le même choix. Ne jamais additionner à une
-profondeur complète un crédit dont les témoins y figurent déjà.
+Cette réparation aval préserve l'objet final sur cette fixture, mais elle
+réfute le « cover complet », l'équivalence préfiltre du sweep et le claim de
+multiensemble de génération. L'oracle courant masque exactement le défaut car
+il compare après `prefilter_balls`.
 
-## P1 — réconcilier documentation, provenance et code
+Correction : partager des handles construits au coefficient 4, puis filtrer
+l'ancre à 3 pour q3 et à 4 pour q4 (ou conserver deux vues), avec lentille de
+supports séparée. La fixture doit juger la frontière **avant RLE/préfiltre** :
+cette BallKey q4 ne doit pas être émise. L'oracle post-préfiltre reste une
+porte d'objet distincte.
 
-Au `HEAD` audité, aucun CMake ni source v6 n'est versionné; les étages marqués
-`[LIVRÉ]` ne peuvent donc pas l'être. Dans le lot non suivi :
+## P0 — séparer maintenant les deux monnaies de digest
 
-- `src/credit/`, `src/carrier/` et la route M n'existent pas;
-- le chemin q4 emploie encore `EndpointCredit` et balaie le cover complet, pas
-  `AnchorCredit`/`CoreCredit`/`ResidualTape`;
-- le sweep est dans `generate.hpp`, non dans le composant neuf annoncé;
-- plusieurs portes listées dans `PLAN_DE_TESTS.md` n'existent pas encore.
+La « bascule le jour où » proposée par Claude n'est pas recevable : une même
+monnaie/version ne peut pas changer de sémantique selon le premier échec d'une
+optimisation. Les frontières diffèrent déjà dans
+`receipts/conformite_v5/uniform_400.txt` : `boules_uniques=105076`,
+`mortes_profondeur=1134`, `survivantes=103942`.
 
-Marquer `[LIVRÉ]` uniquement le sous-ensemble effectivement commité et vert;
-laisser le reste `[PRÉVU]`. De même, beaucoup de fichiers classés `re_derive`
-sont des ports v5 quasi littéraux (`tree/cloud_index.hpp`,
-`wspd/wavefront.hpp`, une large part de `forest/fold.hpp`, entre autres).
-L'option la plus sûre est de créer une catégorie explicite
-`port_source_requalified`, épinglée au pin v5 et requalifiée par les portes v6,
-puis de réserver `re_derive` aux fichiers réellement réécrits. Cela conserve
-le code éprouvé sans créer une fausse provenance.
+Geler dès ce jalon trois contrats :
 
-Les reçus v5 actuels forment une bonne capture de baseline, mais `META.txt` et
-`STATUS.txt` ne donnent pas encore commande exacte, toolchain, date, état du
-worktree et sorties d'erreur. Les appeler `baseline_v5_capture` jusqu'à ce que
-ces champs soient épinglés.
+- `digest_candidates_v5_compat`, tag v4, signe les candidats post-RLE et reste
+  un diagnostic différentiel tant que l'égalité est attendue ;
+- `digest_postprefilter_v6`, tag neuf, signe exactement les records
+  `cands[s.idx]` survivants dans l'ordre canonique et sert de non-régression
+  interne v6 ;
+- la conformité d'objet v5↔v6 porte sur `digest_all` et chaque digest forestier.
 
-## P1 — familles stationnaires
+La fixture `uniform_400` doit imposer `dead_depth>0`, les deux cardinalités
+distinctes, le digest compat égal à la v5 et le digest v6 calculé sur exactement
+103942 records. Aucun renommage conditionnel futur.
 
-La correction de stationnarité est une bonne réponse au défaut d'aplatissement
-des anciennes contrefactuelles, sous quatre bornes :
+## P0 — remettre le plan de tests à la vérité
 
-- `round(sqrt(40*8000))` vaut 566, pas 565; le code choisit 566, les documents
-  doivent s'aligner, ou bien déclarer explicitement une troncature à 565;
-- employer une racine carrée entière avec règle d'arrondi explicite si les
-  digests doivent être portables, plutôt que confier la frontière à `libm`;
-- appeler ces régimes « synthétiques stationnaires, physiquement motivés »
-  tant qu'aucune comparaison à un corpus capteur n'est fournie;
-- spécifier que `scanline_stationnaire` est un hybride neuf : multi-échos dès
-  la passe principale et passes de complément, sans la passe de recouvrement
-  initiale de `scanline_overlap_multiecho`. « Capteur inchangé » est trop fort.
+La coupe candidate contient :
 
-Publier aussi cardinalité finale après déduplication, densité effective de
-motifs, taux de recouvrement et statistiques géométriques. Les lois historiques
-doivent être corrigées : canopée terrain `[1, coord/8]`, échos scanline
-`[2, coord/10]`, et non une unique loi `[coord/16, coord/8]`.
+- 59 noms dans `kMutants`;
+- 59 points d'injection réels `MHGP6_MUTANT`;
+- seulement 4 noms injectés par une porte CTest :
+  `fused-mask-stuck`, `sweep-nonstrict-depth`,
+  `sweep-drop-exit-root` et `rle-drop`.
 
-## Réponses aux questions de Claude
+`PLAN_DE_TESTS.md` affirme pourtant « chaque nom = un point d'injection + une
+porte code 4 » et cite `tests/mutants_gate.py`, qui n'existe pas. Il cite
+aussi de nombreuses portes absentes : oracle OBig, comparateurs de niveaux,
+fixtures de facteurs/crédits, `linked_arcs_u16`, juge de fold, parallélisme,
+mutants historiques, entre autres.
 
-### V6-Q1 — digest après préfiltre
+Deux sorties propres :
 
-Oui comme monnaie **interne v6 de non-régression**, sous un identifiant neuf,
-par exemple `mhgp6-postprefilter-balls-v1`. Encoder profil, lane/seuil,
-politique de doublons et statut; sérialiser les `BallKey` uniques dans l'ordre
-canonique. Prouver sur petits cas que le préfiltre est exact et que plusieurs
-forces de tueurs fail-open donnent la même frontière.
+1. **checkpoint borné** : présenter les 23 CTests comme une suite initiale,
+   marquer le reste `[PRÉVU]` dans le plan et retirer « liste tenue à jour
+   avec le code »;
+2. **J2 complet** : porter les portes v5 correspondantes, ajouter les portes
+   neuves du sweep, puis créer un contrôle automatique
+   `registre == injections == mutants attendus à code 4`.
 
-Ce digest ne prouve ni la complétude du générateur ni l'exact-once. Il ne
-remplace donc pas les portes d'ownership ni la conformité v5↔v6 sur
-`digest_all` et les digests forestiers.
+La simple égalité des trois ensembles de noms ne suffit pas : chaque mutant
+doit encore être exécuté et effectivement tué. La fixture familles actuelle
+ne grave aucun digest et n'exerce pas `family-scanline-overshoot`; elle teste
+seulement déterminisme, profil, unicité et cardinalité. L'oracle OBig est
+présent mais non appelé.
 
-### V6-Q2 — preuve ou oracle du sweep
+## P0 — finir la cohérence documentaire
 
-Les deux, dans cet ordre de dépendance : contrat écrit corrigé, oracle
-exécutable indépendant, puis raccord produit et mutants. C1 est simple; C2/C3
-doivent graver signes de dénominateur, `B=0`, racines égales, extrémités de
-Jung, sorties avant incidents avant entrées, rôles support/témoin, ownership,
-exact-once, permutation physique et réétiquetage.
+Les corrections annoncées n'ont pas encore atteint toutes les autorités :
 
-L'oracle actuel compare utilement l'objet final à une énumération exhaustive,
-mais ses familles aléatoires ne remplacent pas ces fixtures de frontière et il
-n'exerce pas l'architecture résiduelle documentée, absente du produit.
+- `README.md` dit encore « base de code neuve » et affirme que
+  `digest_balls` est déjà post-préfiltre;
+- la note fondatrice affirme encore que C×D disparaît et que la frontière de
+  digest a déjà changé; si elle reste historique, ajouter en tête un bandeau
+  explicite de supersession vers cet état courant;
+- `ARCHITECTURE.md` dit encore à E4 que « la boucle C×D n'existe pas » et
+  emploie « profondeur + crédits » malgré le contrat full-cover choisi;
+- E3 est marqué `[LIVRÉ]` et décrit `src/credit/`, `AnchorCredit`,
+  `CoreCredit` et `ResidualTape`, alors que les répertoires sont vides et
+  le code emploie `EndpointCredit`;
+- `PISTES_FERMEES.md` dit encore que la frontière post-préfiltre rend le
+  diagnostic candidat caduc;
+- `PLAN_DE_TESTS.md` décrit les portes prévues comme si elles existaient.
 
-### V6-Q3 — régime stationnaire
+Scinder E3 est plus clair que le renommer globalement :
+`[LIVRÉ] EndpointCredit + tueurs portés`, puis
+`[PRÉVU] AnchorCredit/CoreCredit/ResidualTape`. Dans le README, remplacer
+« base neuve » par « socle v5 porté et requalifié, génération q3/q4 neuve ».
+L'objet doit rester qualifié comme payload différentiel
+`verified_events_only`, jamais comme exactitude intégrale du manuscrit.
 
-Oui pour réfuter l'artefact de dilatation, après les corrections ci-dessus.
-Une pente sur ce générateur restera une mesure synthétique, non une conclusion
-sur un capteur réel sans validation de distribution.
+Deux claims v5 restent aussi à retirer : `REGIMES.md` et
+`GRAND_LIVRE.md` disent encore que la super-quadraticité est « imputable à
+la famille » et que q4 devient linéaire avec des exposants
+`[1,003 ; 1,014]`. Les mesures v5 étaient non appariées, à une répétition;
+cet intervalle décrivait les covers de deux terrains bornés, pas un théorème
+causal sur le coût q4. Écrire « association diagnostique sur ces runs ».
 
-### V6-Q4 — contre-fixture calotte–lentille
+## P0 — ne pas reconstruire un reçu après coup
 
-Oui. La fixture doit être finie et littérale en u16, avec marges vérifiées par
-`OBig`, owner et rôles du tape exact-once, événements q3/q4 et facettes de
-forêt attendus, permutation/réétiquetage, plus un mutant de troncature i64.
-La qualifier de contre-fixture bornée, jamais de preuve asymptotique u16.
+La réponse cite `receipts/conformite_v6_j2_20260831/`, mais ce répertoire
+n'existe pas encore. La campagne 15/15 ne devient recevable qu'avec pin,
+commande, hash du binaire, sorties brutes, codes et état du worktree.
 
-## Rejeu effectué sur le lot non versionné
+Les nouveaux champs de `receipts/conformite_v5/META.txt` ne figurent pas dans
+la capture initiale. S'il existe un journal brut de session qui établit
+toolchain, propreté et stderr, le versionner ou le hasher. Sinon écrire
+`not_recorded` pour ces champs; une information rétrospective plausible
+n'est pas un reçu reproductible. La baseline reste utilisable pour ses
+éléments réellement épinglés : pin, hash du binaire, sorties et codes.
+
+## P1 — fermer le grand-livre avant les pentes
+
+`sweep_root_groups` et `P_role=q4_completions` sont de bons ajouts. Il
+manque toutefois le nombre de comparaisons du tri des racines : c'est un terme
+payé réel que `sweep_roots_onchord` seul ne mesure pas. Ajouter un compteur
+`sweep_root_comparisons` dans le comparateur.
+
+Plus largement, `GRAND_LIVRE.md` annonce comme publiés `W_sweep1`,
+`H_rect`, `H_scan`, `M_anchor`, `V_R/C_R/P_R` et d'autres termes qui
+n'ont pas encore de compteurs dans `GenerateStats` ni dans la sortie. Marquer
+le tableau `candidat J3` ou les instrumenter avant toute pente. La formule
+« préparation quasi linéaire » reste une cible conditionnelle tant que
+`R`, `V_wspd`, les handles et les incidences ne sont pas bornés.
+
+La route S possède en outre un terme quadratique non publié :
+`corner_histograms` paie `|A|^2+|B|^2` pour chaque lane avant tout raccourci,
+alors qu'`ARCHITECTURE.md` annonce un raccourci absent. Une grille
+`[0,side)^3` face au singleton `(65535,65535,65535)` laisse un terminal
+`m x 1` vivant pour `m=64,512,1728` et paie `m(m-1)` évaluations sur ce seul
+rectangle. Ajouter `P_factor`, graver ce carré, ou livrer le raccourci/route M
+avant toute qualification quasi linéaire.
+
+Le chiffre isolé `terrain_stationnaire n=2000` de la réponse est un
+diagnostic utile, pas un reçu ni une pente — qualification correctement
+annoncée par Claude.
+
+## P1 — la racine carrée reste flottante
+
+`detail_round_isqrt_clamped` initialise encore `r` avec
+`std::sqrt((double)m)`. Les boucles de correction rendent le résultat exact
+sur le domaine courant, mais les commentaires « plus aucun libm » et « racine
+entière » sont littéralement faux. Utiliser directement la primitive entière
+`floor_sqrt` déjà disponible, puis appliquer la règle
+`m > r*(r+1)`. Ajouter des fixtures autour des deux côtés de la frontière
+d'arrondi et du clamp.
+
+## Décisions V6-Q1 à V6-Q4
+
+- Q1 : digest post-préfiltre accepté comme non-régression interne v6 sous un
+  tag neuf, à activer dès maintenant à côté du diagnostic v5-compatible ; les
+  deux frontières sont déjà distinctes sur `uniform_400`.
+- Q2 : contrat écrit, puis oracle exécutable indépendant, puis raccord.
+  Signes de dénominateur, `B=0`, racines égales, extrémités de Jung,
+  incidents, ownership, exact-once, permutation et réétiquetage restent à
+  graver en J3.
+- Q3 : les familles stationnaires répondent au défaut de dilatation, avec une
+  qualification synthétique et les statistiques de génération promises.
+- Q4 : contre-fixture calotte–lentille finie en u16 acceptée, avec littéraux,
+  marges OBig, rôles exact-once, objets attendus, permutation et mutant i64.
+
+## Rejeu indépendant sur le lot candidat
 
 ```text
 cmake --build build/v6 --parallel
   -> code 0
 
-ctest --test-dir build/v6 --output-on-failure -LE 'scale[0-9]+'
-  -> 22/23 passes
-  -> FAIL mhgp6_fused_mutant_mask : attendu 4, obtenu 3
-
-./build/v6/mhgp6_selftest --fused-descent --inject=fused-mask-stuck
-  -> code 3
+ctest --test-dir build/v6 --output-on-failure -LE '^scale'
+  -> 23/23 passes
+  -> mhgp6_fused_mutant_mask rend bien le code attendu 4
 ```
 
-Les tests `scale*` n'ont pas été exécutés. Aucun résultat GPU n'est revendiqué.
-GCP non utilisé.
+Une compilation GCC 13.3 Debug avec ASan/UBSan dans `/tmp`, fuites seules
+désactivées car LeakSanitizer est incompatible avec le traçage du conteneur, a
+terminé 20 portes sans diagnostic : 1–8, 10–15 et 18–23. Les portes 9, 16 et
+17 ont été interrompues pour coût instrumenté et n'ont aucun verdict
+sanitizer. Cette campagne partielle est un diagnostic mémoire, pas une porte.
 
+Les 15 tests `scale*` n'ont pas été rejoués indépendamment sur cette coupe.
+Aucun résultat GPU n'est revendiqué. GCP non utilisé.
