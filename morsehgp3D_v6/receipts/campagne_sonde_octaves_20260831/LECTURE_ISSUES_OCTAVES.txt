@@ -1,0 +1,8 @@
+== terrain_stationnaire — issues des seeds par octave lourde (n=32000)
+  g3: seeds_o>=10=  6243764 -> cellules 48.2% | coeur 48.3% | corde 3.2% | passe2 0.3% ; w1_o>=10=195679088 (42% de W1) ; w1/seed_lourde=31
+  g4: seeds_o>=10=  3968035 -> cellules 42.1% | coeur 54.0% | corde 3.6% | passe2 0.3% ; w1_o>=10=113350363 (29% de W1) ; w1/seed_lourde=29
+  g5: seeds_o>=10=  7447208 -> cellules 47.7% | coeur 49.6% | corde 2.4% | passe2 0.3% ; w1_o>=10=459484067 (62% de W1) ; w1/seed_lourde=62
+== scanline_stationnaire — issues des seeds par octave lourde (n=32000)
+  g3: seeds_o>=10=  7771058 -> cellules 66.6% | coeur 31.5% | corde 1.7% | passe2 0.1% ; w1_o>=10=173668969 (19% de W1) ; w1/seed_lourde=22
+  g4: seeds_o>=10=  5694996 -> cellules 62.2% | coeur 35.4% | corde 2.4% | passe2 0.1% ; w1_o>=10=239092741 (25% de W1) ; w1/seed_lourde=42
+  g5: seeds_o>=10= 19690312 -> cellules 65.7% | coeur 33.7% | corde 0.5% | passe2 0.0% ; w1_o>=10=1520665413 (67% de W1) ; w1/seed_lourde=77
