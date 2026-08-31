@@ -73,8 +73,17 @@ int main(int argc, char** argv) {
       opt.shell_cap = (size_t)v;
     } else if (arg == "--sonde-e6") {
       opt.e6_probe = true;
+    } else if (const char* s = val("--e3-g16=")) {
+      const std::string b = s;
+      if (b == "g8_lourdes") opt.e3_mode = E3G16Mode::kG8Lourdes;
+      else if (b == "g16_politique") opt.e3_mode = E3G16Mode::kG16Politique;
+      else if (b == "g16_nearm") opt.e3_mode = E3G16Mode::kG16NearM;
+      else if (b == "g16_ratio") opt.e3_mode = E3G16Mode::kG16Ratio;
+      else if (b == "g16_leve") opt.e3_mode = E3G16Mode::kG16Leve;
+      else ok = false;
     } else if (arg == "--e6-grille") {
-      opt.e6_grid = true;
+      // Alias historique du bras complet (recus du 31 aout).
+      opt.e3_mode = E3G16Mode::kG16Leve;
     } else if (arg == "--digest") {
       opt.digest = true;
     } else {

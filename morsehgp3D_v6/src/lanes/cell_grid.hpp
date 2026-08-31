@@ -103,6 +103,10 @@ struct CellGridT {
   i128 uu_i = 0, vv_i = 0, uv_i = 0, det_i = 0;  // Gram EXACT (i128) — autorite ; les doubles en sont l'image
   double uu = 0, vv = 0, uv = 0, det = 0;        // convertis UNE fois (une conversion = un arrondi, compte dans la borne)
   u32 cnt[NC][NC] = {};                          // [j+G][i+G] : temoins de la cellule
+  // Monnaie de consultation (audit quatrieme tour : le parcours des boites
+  // de corde doit etre compte — jusqu'a (2G+1)^2 cases par kill) ; mutable :
+  // les kills sont const, le scratch est par ouvrier (jamais partage).
+  mutable u64 cells_consulted = 0;
   bool built = false, all_dead = false, nonstrict = false;
   Fail fail = Fail::kNone;
   u64 h = 0;
@@ -306,8 +310,10 @@ struct CellGridT {
   }
   bool range_dead(const int r[4]) const {
     for (int j = r[2]; j <= r[3]; ++j)
-      for (int i = r[0]; i <= r[1]; ++i)
+      for (int i = r[0]; i <= r[1]; ++i) {
+        ++cells_consulted;
         if (!cell_dead(i, j)) return false;
+      }
     return true;
   }
   // Seed q3 : centre v3 = N/(2·G3) ; pu = N·u, pv = N·v (i128 exacts), den = 2·G3.
@@ -331,6 +337,7 @@ struct CellGridT {
     long long mn = -1;
     for (int j = r[2]; j <= r[3]; ++j)
       for (int i = r[0]; i <= r[1]; ++i) {
+        ++cells_consulted;
         if (i < -G || i >= G || j < -G || j >= G || !cell_needed(i, j)) continue;
         const long long c = (long long)cnt[j + G][i + G];
         if (mn < 0 || c < mn) mn = c;

@@ -411,7 +411,9 @@ int run_failure_contract(bool injected) {
 int run_e6_equal(bool injected) {
   if (injected) return 2;  // pas de semantique de mutant pour ce mode
   u64 mismatches = 0;
-  u64 grids16 = 0;
+  u64 grids16 = 0, extra_cell_kills = 0, w1_saved = 0;
+  const E3G16Mode arms[] = {E3G16Mode::kG8Lourdes, E3G16Mode::kG16Politique, E3G16Mode::kG16NearM,
+                            E3G16Mode::kG16Ratio, E3G16Mode::kG16Leve};
   for (const CloudFamily f : {CloudFamily::kTerrainStationnaire, CloudFamily::kScanlineStationnaire,
                               CloudFamily::kEightClusters}) {
     const int n = 2000;
@@ -420,34 +422,54 @@ int run_e6_equal(bool injected) {
     off.digest = true;
     off.diagnostic_raw_candidates_digest = true;
     off.threads = 2;
-    RunOptions on = off;
-    on.e6_grid = true;
     const RunResult a = run_pipeline(in, off);
-    const RunResult b = run_pipeline(in, on);
-    if (a.status != PipelineStatus::kCompleteRegular || b.status != PipelineStatus::kCompleteRegular) {
+    if (a.status != PipelineStatus::kCompleteRegular) {
       ++mismatches;
-      std::fprintf(stderr, "%s : statut non complet\n", cloud_family_name(f));
+      std::fprintf(stderr, "%s : statut OFF non complet\n", cloud_family_name(f));
       continue;
     }
-    if (a.digest_all != b.digest_all || a.digest_raw_candidates != b.digest_raw_candidates ||
-        a.digest_postprefilter != b.digest_postprefilter || a.digest_forest != b.digest_forest) {
+    if (a.gen.e6_grids16_built != 0 || a.gen.e3_g8_heavy_built != 0) {
       ++mismatches;
-      std::fprintf(stderr, "%s : OBJET ou multiensemble DIVERGENT sous --e6-grille\n", cloud_family_name(f));
+      std::fprintf(stderr, "%s : grilles de bras construites SANS option\n", cloud_family_name(f));
     }
-    if (b.gen.q4_core_site_tests > a.gen.q4_core_site_tests) {
-      ++mismatches;
-      std::fprintf(stderr, "%s : W_sweep1 AUGMENTE sous --e6-grille\n", cloud_family_name(f));
-    }
-    grids16 += b.gen.e6_grids16_built;
-    if (a.gen.e6_grids16_built != 0) {
-      ++mismatches;
-      std::fprintf(stderr, "%s : grilles16 construites SANS --e6-grille\n", cloud_family_name(f));
+    // CHAQUE bras : objet et multiensemble bit-identiques (digest_balls
+    // COMPRIS — audit), W_sweep1 jamais augmente.
+    for (const E3G16Mode arm : arms) {
+      RunOptions on = off;
+      on.e3_mode = arm;
+      const RunResult b = run_pipeline(in, on);
+      if (b.status != PipelineStatus::kCompleteRegular) {
+        ++mismatches;
+        std::fprintf(stderr, "%s : statut ON non complet (bras %d)\n", cloud_family_name(f), (int)arm);
+        continue;
+      }
+      if (a.digest_all != b.digest_all || a.digest_raw_candidates != b.digest_raw_candidates ||
+          a.digest_balls != b.digest_balls || a.digest_postprefilter != b.digest_postprefilter ||
+          a.digest_forest != b.digest_forest) {
+        ++mismatches;
+        std::fprintf(stderr, "%s : OBJET ou multiensemble DIVERGENT (bras %d)\n", cloud_family_name(f), (int)arm);
+      }
+      if (b.gen.q4_core_site_tests > a.gen.q4_core_site_tests) {
+        ++mismatches;
+        std::fprintf(stderr, "%s : W_sweep1 AUGMENTE (bras %d)\n", cloud_family_name(f), (int)arm);
+      }
+      if (arm == E3G16Mode::kG16Leve) {
+        grids16 += b.gen.e6_grids16_built;
+        // PLANCHERS ANTI-VACUITE renforces (audit : des grilles construites
+        // sans etre UTILISEES restaient vertes) : le bras complet doit tuer
+        // STRICTEMENT plus par cellules et economiser STRICTEMENT du W1.
+        if (b.gen.seeds_killed_cells[2] > a.gen.seeds_killed_cells[2])
+          extra_cell_kills += b.gen.seeds_killed_cells[2] - a.gen.seeds_killed_cells[2];
+        if (a.gen.q4_core_site_tests > b.gen.q4_core_site_tests)
+          w1_saved += a.gen.q4_core_site_tests - b.gen.q4_core_site_tests;
+      }
     }
   }
-  if (grids16 < 100) {
+  if (grids16 < 100 || extra_cell_kills < 100 || w1_saved == 0) {
     ++mismatches;
-    std::fprintf(stderr, "plancher : %llu grilles raffinees construites (>= 100 exigees)\n",
-                 (unsigned long long)grids16);
+    std::fprintf(stderr,
+                 "plancher : grilles16=%llu (>=100), kills_cellules_additionnels=%llu (>=100), w1_economise=%llu (>0)\n",
+                 (unsigned long long)grids16, (unsigned long long)extra_cell_kills, (unsigned long long)w1_saved);
   }
   return mismatches ? 1 : 0;
 }

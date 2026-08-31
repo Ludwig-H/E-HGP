@@ -145,7 +145,14 @@ struct GenerateStats {
   // [4] construction refusee/echouee ([0] inutilise).
   u64 e6_sans_grille_raison[5] = {};
   u64 e6_sondes = 0;
-  u64 e6_grids16_built = 0;  // grilles raffinees G=16 construites (etage E6)
+  u64 e6_grids16_built = 0;   // grilles raffinees G=16 construites (E3/G16)
+  u64 e3_g8_heavy_built = 0;  // bras g8_lourdes : grilles G8 forcees sur ancres lourdes
+  // Cout de la POLITIQUE (audit : le scan nacute/near_m saute par les bras
+  // forces doit etre visible) et de la CONSULTATION des cellules.
+  u64 policy_scan_sites = 0;
+  u64 policy_scan_skipped_sites = 0;
+  u64 cells_consulted_g8 = 0;
+  u64 cells_consulted_g16 = 0;
   // Tueurs d'ancre.
   u64 anchors_killed_w3 = 0;
   u64 anchors_killed_w4 = 0;
@@ -245,6 +252,11 @@ struct GenerateStats {
     e6_sans_grille += o.e6_sans_grille;
     e6_sondes += o.e6_sondes;
     e6_grids16_built += o.e6_grids16_built;
+    e3_g8_heavy_built += o.e3_g8_heavy_built;
+    policy_scan_sites += o.policy_scan_sites;
+    policy_scan_skipped_sites += o.policy_scan_skipped_sites;
+    cells_consulted_g8 += o.cells_consulted_g8;
+    cells_consulted_g16 += o.cells_consulted_g16;
     mutant_dropped_rects += o.mutant_dropped_rects;
     q4_completions += o.q4_completions;
     q4_rej_lens += o.q4_rej_lens;
@@ -408,6 +420,10 @@ inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3
   }
 }
 
+// Experimentation E3/G16 — BRAS SEPARES (attribution economique, quatrieme
+// tour d'audit) ; kOff = production. Voir anchor_grid_stage.
+enum class E3G16Mode : u8 { kOff = 0, kG8Lourdes, kG16Politique, kG16NearM, kG16Ratio, kG16Leve };
+
 namespace generate_detail {
 
 // Histogrammes h_a/h_b (autorite 8 coins, exacte) d'un rectangle, pour une
@@ -540,39 +556,61 @@ inline bool seed_chord_cell_dead(const Grid& g, const Q3Form& f3, const i64 d[3]
 // pentes superquadratiques vit aux octaves >= 10, cover >= 1024).
 inline constexpr size_t kE6HeavyCover = (size_t)1 << 10;
 
+
 // ETAGE GRILLE d'une ancre : politique + construction + compteurs (UNE
 // definition). Rend true si l'ancre est MORTE (toutes cellules mortes).
-// e6_grid (opt-in --e6-grille) : sur une ancre q4 LOURDE, la grille
-// raffinee G = 16 est TOUJOURS construite (les vetos near_m et ratio sont
-// leves — la sonde E6 a refute leur prediction sur les surfaces
-// stationnaires) ; l'objet est inchange (les kills de cellules sont des
-// certificats du theoreme 10.5, quelle que soit la resolution).
+// Experimentation E3/G16 par BRAS (attribution economique, audit du
+// quatrieme tour) sur les ancres q4 LOURDES (cover >= 2^10) :
+//   g8_lourdes    : G8 force (les deux vetos leves), aucune G16 ;
+//   g16_politique : G16 remplace G8 la ou la POLITIQUE HISTORIQUE construit ;
+//   g16_nearm     : G16 forcee en levant near_m SEUL (ratio maintenu) ;
+//   g16_ratio     : G16 forcee en levant le ratio SEUL (near_m maintenu) ;
+//   g16_leve      : G16 forcee, les deux vetos leves.
+// REPLI : un echec de construction du bras retombe sur la voie historique
+// (fail-open borne, jamais un trou). L'objet est inchange dans tous les
+// bras (certificats du theoreme 10.5, quelle que soit la resolution).
 inline bool anchor_grid_stage(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb,
-                              i64 D2, Lane lane, u64 h, bool float_on, bool e6_grid, GenerateStats* ls) {
+                              i64 D2, Lane lane, u64 h, bool float_on, E3G16Mode e3, GenerateStats* ls) {
   const int li = lane == Lane::kQ3 ? 1 : 2;
   sc.grid.built = false;
   sc.grid16.built = false;
   sc.grid_skip_reason = 0;
-  if (e6_grid && lane == Lane::kQ4 && sc.cover.size() >= kE6HeavyCover) {
+  using E3 = E3G16Mode;
+  const bool heavy = lane == Lane::kQ4 && sc.cover.size() >= kE6HeavyCover;
+  const bool forced_arm = heavy && (e3 == E3::kG8Lourdes || e3 == E3::kG16Leve);
+  // Bras a veto partiel : la politique est evaluee mais UN veto est leve.
+  const bool partial_arm = heavy && (e3 == E3::kG16NearM || e3 == E3::kG16Ratio);
+  if (forced_arm) {
+    // Scan de politique SAUTE : son cout retire est compte (jamais confondu
+    // avec le gain de resolution).
+    ls->policy_scan_skipped_sites += sc.cover.size();
     ++ls->grids_attempted[li];
-    if (sc.grid16.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h, float_on)) {
+    const bool ok = (e3 == E3::kG8Lourdes)
+                        ? sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h, float_on)
+                        : sc.grid16.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h, float_on);
+    if (ok) {
       ++ls->grids_built[li];
-      ++ls->e6_grids16_built;
-      if (sc.grid16.all_dead) {
+      if (e3 == E3::kG8Lourdes) ++ls->e3_g8_heavy_built;
+      else ++ls->e6_grids16_built;
+      const bool all_dead = (e3 == E3::kG8Lourdes) ? sc.grid.all_dead : sc.grid16.all_dead;
+      if (all_dead) {
         ++ls->grids_all_dead[li];
         ++ls->anchors_killed_cells[li];
         return true;
       }
-    } else {
-      sc.grid_skip_reason = 4;
+      return false;
     }
-    return false;
+    sc.grid_skip_reason = 4;
+    // REPLI : la voie historique reprend ci-dessous (G8, politique entiere).
+    sc.grid.built = false;
+    sc.grid16.built = false;
   }
   if (sc.cell_min_sites != 0 && sc.cover.size() < sc.cell_min_sites) {
     sc.grid_skip_reason = 1;
     return false;
   }
   size_t nacute = 0, near_m = 0;
+  ls->policy_scan_sites += sc.cover.size();
   for (const CoverPoint& cz : sc.cover) {
     if (cz.u == ua || cz.u == ub) continue;
     if (cell_grid_near_m(cz.dist2q, D2)) ++near_m;
@@ -580,17 +618,41 @@ inline bool anchor_grid_stage(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       ++nacute;
   }
   const size_t ratio = lane == Lane::kQ3 ? kCellGridSeedsRatioQ3 : kCellGridSeedsRatioQ4;
-  if (!cell_grid_wanted(sc.cover.size(), nacute, near_m, h, sc.cell_min_sites, ratio)) {
-    sc.grid_skip_reason = (sc.cell_min_sites != 0 && nacute * ratio < sc.cover.size()) ? 2 : 3;
+  // Bras a veto partiel : la clause levee est neutralisee APRES le scan (le
+  // cout de la politique reste paye et compte).
+  const size_t eff_near_m = (partial_arm && e3 == E3::kG16NearM) ? 0 : near_m;
+  const size_t eff_nacute = (partial_arm && e3 == E3::kG16Ratio) ? sc.cover.size() : nacute;
+  if (!cell_grid_wanted(sc.cover.size(), eff_nacute, eff_near_m, h, sc.cell_min_sites, ratio)) {
+    sc.grid_skip_reason = (sc.cell_min_sites != 0 && eff_nacute * ratio < sc.cover.size()) ? 2 : 3;
     return false;
   }
+  // Resolution du bras : G16 pour g16_politique (partout ou la politique
+  // construit en q4) et pour les bras partiels sur les ancres lourdes.
+  const bool use_g16 = lane == Lane::kQ4 &&
+                       ((e3 == E3::kG16Politique) || partial_arm || (heavy && e3 == E3::kG16Leve));
   ++ls->grids_attempted[li];
-  if (!sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, lane == Lane::kQ3 ? 12 : 8, h, float_on)) {
+  const bool built = use_g16 ? sc.grid16.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h, float_on)
+                             : sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, lane == Lane::kQ3 ? 12 : 8, h,
+                                             float_on);
+  if (!built) {
     sc.grid_skip_reason = 4;
+    if (use_g16) {
+      // REPLI G8 : jamais un trou de couverture par la resolution fine.
+      if (sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h, float_on)) {
+        ++ls->grids_built[li];
+        if (sc.grid.all_dead) {
+          ++ls->grids_all_dead[li];
+          ++ls->anchors_killed_cells[li];
+          return true;
+        }
+      }
+    }
     return false;
   }
+  if (use_g16) ++ls->e6_grids16_built;
   ++ls->grids_built[li];
-  if (!sc.grid.all_dead) return false;
+  const bool all_dead = use_g16 ? sc.grid16.all_dead : sc.grid.all_dead;
+  if (!all_dead) return false;
   ++ls->grids_all_dead[li];
   ++ls->anchors_killed_cells[li];
   return true;
@@ -639,7 +701,7 @@ inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 
       return;
     }
   }
-  if (anchor_grid_stage(ix, sc, ua, ub, pa, pb, D2, Lane::kQ3, h3, float_on, false, ls)) return;
+  if (anchor_grid_stage(ix, sc, ua, ub, pa, pb, D2, Lane::kQ3, h3, float_on, E3G16Mode::kOff, ls)) return;
   const i64 d3[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
   sc.affine_filled = false;
   for (const CoverPoint& cp : sc.cover) {
@@ -716,8 +778,8 @@ inline int cmp_chord_roots(const AnchorScratch::ChordRoot& r1, const AnchorScrat
 // contrat 2, un chantier J3 distinct.
 inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb,
                               i64 D2, u64 h4, bool float_on, bool seed_core_nonstrict, bool no_canonical,
-                              bool pretested, bool e6_probe, bool e6_grid, std::vector<BallCandidate>* lo,
-                              GenerateStats* ls, const EndpointCredit* ec) {
+                              bool pretested, bool e6_probe, E3G16Mode e3,
+                              std::vector<BallCandidate>* lo, GenerateStats* ls, const EndpointCredit* ec) {
   // Sonde de queue E6 : octave de la taille du cover de l'ancre. Le vecteur
   // `ancres` compte les ENTREES de ce corps (population = anchor_entries[2],
   // creditee au site d'appel commun) ; M_anchor y est credite aussi.
@@ -752,7 +814,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     const P3& pz = ix.upos[(size_t)cz.u];
     if (p3_norm2(p3_sub(pz, pa)) <= D2 && p3_norm2(p3_sub(pz, pb)) <= D2) sc.lens.push_back(cz);
   }
-  if (anchor_grid_stage(ix, sc, ua, ub, pa, pb, D2, Lane::kQ4, h4, float_on, e6_grid, ls)) return;
+  if (anchor_grid_stage(ix, sc, ua, ub, pa, pb, D2, Lane::kQ4, h4, float_on, e3, ls)) return;
   const i64 d4[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
   for (const CoverPoint& cx : sc.lens) {
     if (cx.u == ua || cx.u == ub) continue;
@@ -1021,6 +1083,11 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       i = j;
     }
   }
+  // Recolte de la monnaie de consultation des cellules (une fois par ancre).
+  ls->cells_consulted_g8 += sc.grid.cells_consulted;
+  ls->cells_consulted_g16 += sc.grid16.cells_consulted;
+  sc.grid.cells_consulted = 0;
+  sc.grid16.cells_consulted = 0;
 }
 
 }  // namespace generate_detail
@@ -1042,10 +1109,14 @@ struct GenerateOptions {
   // Sonde E6 opt-in (--sonde-e6) : compte le min des temoins des cellules de
   // corde pour les seeds tuees par cœur. Lecture seule, objet inchange.
   bool e6_probe = false;
-  // Etage E6 opt-in (--e6-grille) : grille raffinee G = 16 sur les ancres
-  // q4 lourdes, vetos leves. Objet INCHANGE (certificats 10.5) — prouve par
-  // conformite appariee ON/OFF.
-  bool e6_grid = false;
+  // Experimentation E3/G16 (nommage impose par l'audit : ce n'est PAS le
+  // Tier R de l'architecture, c'est le raffinement du tueur E3 par ancre).
+  // BRAS SEPARES pour l'attribution economique (quatrieme tour) : chaque
+  // bras change UN facteur ; g16_leve = les deux vetos leves (l'ancien
+  // --e6-grille). Objet INCHANGE dans tous les bras (certificats 10.5).
+  // Repli : sur un echec de construction G16, la voie historique (G8,
+  // politique) reprend — jamais un trou de couverture.
+  E3G16Mode e3_mode = E3G16Mode::kOff;
 };
 
 inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
@@ -1175,7 +1246,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
                            &ec);
           } else {
             process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, seed_core_nonstrict, no_canonical,
-                              pretested, opt.e6_probe, opt.e6_grid, lo, ls, &ec);
+                              pretested, opt.e6_probe, opt.e3_mode, lo, ls, &ec);
           }
         }
       }

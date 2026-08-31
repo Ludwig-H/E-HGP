@@ -120,6 +120,16 @@ mhgp6_executable(mhgp6_linked_arcs tests/linked_arcs_gate.cpp)
 mhgp6_gate(mhgp6_linked_arcs_u16 0 mhgp6_linked_arcs LABELS "gate;oracle")
 mhgp6_gate(mhgp6_linked_arcs_oracle_i64 4 mhgp6_linked_arcs ARGS --oracle-i64)
 
+# ---- Oracle BRUT de la grille de cellules (porte de la v5, quatrieme tour
+# gcp/etat : parametre EXPLICITEMENT sur G=8 ET G=16 — evaluation directe
+# i128 des (2G+1)^2 sommets, localisateur rationnel 256 bits, extremes u16,
+# fixtures F9/F10/F11, sites synthetiques ~2^100 ; trois mutants tues).
+mhgp6_executable(mhgp6_cell_grid_oracle tests/cell_grid_oracle.cpp)
+mhgp6_gate(mhgp6_cell_grid_oracle 0 mhgp6_cell_grid_oracle LABELS "gate;oracle" TIMEOUT 900)
+mhgp6_gate(mhgp6_cell_grid_oracle_mutant_ns 4 mhgp6_cell_grid_oracle ARGS --inject=cell-kill-nonstrict TIMEOUT 900)
+mhgp6_gate(mhgp6_cell_grid_oracle_mutant_eps 4 mhgp6_cell_grid_oracle ARGS --inject=cell-locate-eps-zero TIMEOUT 900)
+mhgp6_gate(mhgp6_cell_grid_oracle_mutant_h1 4 mhgp6_cell_grid_oracle ARGS --inject=cell-kill-h-minus-one TIMEOUT 900)
+
 # ---- Fixtures de frontiere du sweep (audit du 31 aout : signes de B, B = 0,
 # racines egales, extremite de Jung — egalite exacte 2P² = J·B² par le
 # tetraedre regulier entier —, completion dans le facteur du rectangle,
