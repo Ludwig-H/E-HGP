@@ -231,6 +231,9 @@ def check_plan(fname, params, listed, want, bad):
         bad.append(f"{fname}: sequence annoncee != sequence recalculee")
 
 
+TIME_BINS = []  # instrumentation observee sur chaque run (huitieme tour)
+
+
 def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad,
                  want_code="0", code_free=False):
     """Verifications communes a tout run annonce. Retourne le corps .txt (ou
@@ -248,6 +251,7 @@ def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad,
     st = read_text(status)
     fields = {}
     for field in ("code", "duree_s", "peak_rss_kb", "threads", "timing_scope", "commande",
+                  "time_bin",
                   "source_commit", "source_payload_sha256", "protocol_manifest_sha256", "finished"):
         ms = re.findall(rf"^{field}=(.*)$", st, re.M)
         if len(ms) != 1:
@@ -265,6 +269,8 @@ def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad,
         kb = None
     if fields.get("threads") != threads:
         bad.append(f"{name}: threads={fields.get('threads') or '?'} != {threads} (plan)")
+    if fields.get("time_bin"):
+        TIME_BINS.append(fields["time_bin"])
     for field, want in (("source_commit", commit), ("source_payload_sha256", payload_sha),
                         ("protocol_manifest_sha256", manifest_sha)):
         if fields.get(field) != want:
@@ -1057,16 +1063,24 @@ def main():
                 ("frontier_ulimit_kb", "FRONTIER_ULIMIT_KB"))
     axes_equal = bool(canon_axes) and all(
         profile.get(pk, "").split() == canon_axes.get(ck, "").split() for pk, ck in axis_map)
+    # INSTRUMENTATION EPINGLEE (huitieme tour) : GNU time enveloppe le
+    # superviseur — un TIME_BIN de test invente RSS et attestations. Toute
+    # instrumentation autre que /usr/bin/time DECLASSE le verdict (jamais
+    # decision_complete).
+    instrumentation_standard = bool(TIME_BINS) and set(TIME_BINS) == {"/usr/bin/time"}
     # L'IDENTITE du canon est dans sa grammaire (PROFIL_NOM) : un canon reduit
     # renomme ne peut pas porter une pretention decision_v1.
     canon_is_decision = canon_axes.get("PROFIL_NOM", "") == "decision_v1"
-    if profile.get("profil") == profile.get("profil_canonique") == "decision_v1" and axes_equal and canon_is_decision:
+    if profile.get("profil") == profile.get("profil_canonique") == "decision_v1" and axes_equal \
+            and canon_is_decision and instrumentation_standard:
         print(f"campaign_status=decision_complete profil=decision_v1 "
               f"({len(known)} runs valides, source_commit={commit[:12]}, "
               f"resumes bench_resume.txt / queue_resume.txt)")
         print("=== CAMPAGNE COMPLETE ===")
     else:
-        if profile.get("profil") == "decision_v1" and not axes_equal:
+        if profile.get("profil") == "decision_v1" and not instrumentation_standard:
+            reason = "instrumentation de test (TIME_BIN non epingle /usr/bin/time)"
+        elif profile.get("profil") == "decision_v1" and not axes_equal:
             reason = "axes != canon"
         elif profile.get("profil") == "decision_v1" and not canon_is_decision:
             reason = "canon non decisionnel (PROFIL_NOM)"

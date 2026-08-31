@@ -656,6 +656,71 @@ rc=0; VG4="$(python3 "${VALIDATOR}" "${OUTG4}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" 
 check_true "profil G4 exact : validateur rc=0, verifie_non_decisionnel" \
   bash -c "[ '${rc}' -eq 0 ] && printf '%s\n' \"\$1\" | grep -q 'campaign_status=verifie_non_decisionnel profil=g4_mesure_v1'" _ "${VG4}"
 
+# ---- MUTANT decision_v1 + FAUX TIME_BIN (huitieme tour) : le profil
+# DECISIONNEL exact, canon reel epingle au manifeste, execute de bout en
+# bout par les faux pilotes ET un faux GNU time — l'instrumentation gravee
+# (time_bin != /usr/bin/time) doit DECLASSER le verdict : jamais
+# decision_complete, cause exacte.
+DECENV="${HERE}/profils/decision_v1.env"
+DEC_SHA="$(sha256sum "${DECENV}" | awk '{print $1}')"
+OUTDEC="${WORK}/out_dec"
+PROFILE_DEC="${WORK}/profil_dec.txt"
+DEC_AXES="${WORK}/dec_axes.env"
+( set -a; source "${DECENV}" >/dev/null
+  {
+    echo "profil=decision_v1"
+    echo "profil_canonique=decision_v1"
+    echo "profil_canonique_sha256=${DEC_SHA}"
+    echo "conf_specs=${CONF_SPECS}"
+    echo "bench_specs=${BENCH_SPECS}"
+    echo "queue_families=${QUEUE_FAMILIES}"
+    echo "queue_n=${QUEUE_N}"
+    echo "queue_seeds=${QUEUE_SEEDS}"
+    echo "run_timeout=${RUN_TIMEOUT}"
+    echo "threads=${THREADS_VM}"
+    echo "v5_gate_min=${V5_GATE_MIN}"
+    echo "v6_gate_min=${V6_GATE_MIN}"
+    echo "sweep_specs=${SWEEP_SPECS}"
+    echo "sweep_repeats=${SWEEP_REPEATS}"
+    echo "gpu_specs=${GPU_SPECS}"
+    echo "frontier_specs=${FRONTIER_SPECS}"
+    echo "frontier_timeout=${FRONTIER_TIMEOUT}"
+    echo "gpu_build_timeout=${GPU_BUILD_TIMEOUT}"
+    echo "frontier_ulimit_kb=${FRONTIER_ULIMIT_KB}"
+  } > "${PROFILE_DEC}"
+  {
+    printf 'CONF_SPECS=%q\nBENCH_SPECS=%q\nQUEUE_FAMILIES=%q\nQUEUE_N=%q\nQUEUE_SEEDS=%q\n' \
+      "${CONF_SPECS}" "${BENCH_SPECS}" "${QUEUE_FAMILIES}" "${QUEUE_N}" "${QUEUE_SEEDS}"
+    printf 'RUN_TIMEOUT=%q\nTHREADS=%q\nSWEEP_SPECS=%q\nSWEEP_REPEATS=%q\nGPU_SPECS=%q\n' \
+      "${RUN_TIMEOUT}" "${THREADS_VM}" "${SWEEP_SPECS}" "${SWEEP_REPEATS}" "${GPU_SPECS}"
+    printf 'FRONTIER_SPECS=%q\nFRONTIER_TIMEOUT=%q\nGPU_BUILD_TIMEOUT=%q\nFRONTIER_ULIMIT_KB=%q\n' \
+      "${FRONTIER_SPECS}" "${FRONTIER_TIMEOUT}" "${GPU_BUILD_TIMEOUT}" "${FRONTIER_ULIMIT_KB}"
+  } > "${DEC_AXES}"
+)
+MANIFESTE_DEC="${WORK}/manifest_dec.txt"
+{
+  echo "schema=e-hgp.protocol-manifest.v1"
+  echo "commit=${PIN_COMMIT}"
+  printf '%s\t%s\t%s\n' "${DEC_SHA}" "$(wc -c < "${DECENV}")" "gcp-migration/profils/decision_v1.env"
+} > "${MANIFESTE_DEC}"
+PIN_MANIFEST_DEC="$(sha256sum "${MANIFESTE_DEC}" | awk '{print $1}')"
+rc=0
+(
+  set -a
+  # shellcheck disable=SC1090
+  source "${DEC_AXES}"
+  V5_BIN="${FAKE}/mhgp5" V6_BIN="${FAKE}/mhgp6" CONF_BIN="${FAKE}/mhgp6_conformity"
+  TIME_BIN="${FAKE}/gnutime" OUT_DIR="${OUTDEC}"
+  PATH="${FAKE}:${PATH}"
+  /bin/bash "${RUNNER}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_DEC}"
+) >/dev/null 2>&1 || rc=$?
+check_true "mutant decision_v1 + faux TIME_BIN : runner rc=0 (82 runs)" [ "${rc}" -eq 0 ]
+rc=0; VDEC="$(python3 "${VALIDATOR}" "${OUTDEC}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_DEC}" 0 0 \
+  "${PROFILE_DEC}" "${DECENV}" "${MANIFESTE_DEC}")" || rc=$?
+check_true "mutant decision_v1 + faux TIME_BIN : DECLASSE (instrumentation de test), jamais decision_complete" \
+  bash -c "[ '${rc}' -eq 0 ] && printf '%s\n' \"\$1\" | grep -q 'cause=instrumentation de test' \
+    && ! printf '%s\n' \"\$1\" | grep -q 'decision_complete'" _ "${VDEC}"
+
 if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest campagne v6 : ${FAILURES} echec(s)" >&2
   exit 1

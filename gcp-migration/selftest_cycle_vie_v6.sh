@@ -419,13 +419,14 @@ _OLD_FAKE_GEN="${FAKE_GEN}"
 FAKE_GEN="$(date -u -d '-28000 seconds' +%Y-%m-%dT%H:%M:%SZ)"
 rc=0; run_scenario ok || rc=$?
 FAKE_GEN="${_OLD_FAKE_GEN}"
-check_true "trop tard (generation passee) : refus du build rc=77, UN arret cible, jamais un temps remonte" \
-  bash -c "[ '${rc}' -eq 77 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ]"
+check_true "trop tard (generation passee) : refus rc=77 AVANT toute operation initiale (zero SSH/SCP), UN arret cible" \
+  bash -c "[ '${rc}' -eq 77 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ] \
+    && ! grep -q 'compute ssh' '${FAKE_CALLS}' && ! grep -q 'compute scp' '${FAKE_CALLS}'"
 # (j) describe BLOQUE : borne par DESCRIBE_TIMEOUT_S — la session echoue
 # proprement et l'arret cible est atteint (jamais un blocage infini).
-export FAKE_DESCRIBE_HANG=1 DESCRIBE_TIMEOUT_S=10 GRACE_S=1
+export FAKE_DESCRIBE_HANG=1 DESCRIBE_TIMEOUT_S=10
 rc=0; run_scenario ok || rc=$?
-unset FAKE_DESCRIBE_HANG DESCRIBE_TIMEOUT_S GRACE_S
+unset FAKE_DESCRIBE_HANG DESCRIBE_TIMEOUT_S
 check_true "describe bloque : borne, session en echec propre, UN arret cible" \
   bash -c "[ '${rc}' -ne 0 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ]"
 # (k) P1 septieme tour : registre ETRANGER strict apres l'arret (publication
@@ -440,6 +441,41 @@ check_true "registre etranger post-arret : exit 78, issue=incoherence_registre_p
     && d=\$(ls -d '${SCENARIO_DIR}'/recu/s_* | head -1) \
     && grep -q '^issue=incoherence_registre_post_arret' \"\$d/RECU_SESSION.txt\" \
     && ! grep -q 'RECU NON PUBLIE' '${SCENARIO_DIR}/stderr.log'"
+
+# (l) grace protocolaire FIXE : 29 et 31 refuses avant toute garde.
+for g in 29 31; do
+  export GRACE_S="${g}"
+  rc=0; run_scenario ok || rc=$?
+  unset GRACE_S
+  check_true "grace protocolaire : GRACE_S=${g} refuse avant toute garde" \
+    bash -c "[ '${rc}' -eq 2 ] && ! grep -qE '^(SETMAX|START|STOP) ' '${FAKE_CALLS}'"
+done
+# (m) relation invite/GCE testee AVANT set_max : zero SETMAX.
+export GUEST_SHUTDOWN_MINUTES=480
+rc=0; run_scenario ok ok 0 3600 || rc=$?
+unset GUEST_SHUTDOWN_MINUTES
+check_true "relation invite/GCE violee : refus rc=2 sans AUCUN SETMAX" \
+  bash -c "[ '${rc}' -eq 2 ] && ! grep -qE '^(SETMAX|START|STOP) ' '${FAKE_CALLS}' \
+    && grep -q 'relation invite/GCE violee' '${SCENARIO_DIR}/stderr.log'"
+# (n) premier arret post-scp en echec : re-tentative IMMEDIATE avant toute
+# validation — STOP1 < STOP2 < VALIDATE, terminal targeted_stopped, le
+# cleanup ne cree pas de troisieme tentative.
+export FAKE_STOP_FAIL_FIRST=1
+rc=0; run_scenario ok || rc=$?
+unset FAKE_STOP_FAIL_FIRST
+check_true "reprise post-scp : deux arrets IMMEDIATS puis validation, jamais une troisieme tentative" \
+  bash -c "[ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 2 ] \
+    && grep -q 're-tentative IMMEDIATE avant toute validation' '${SCENARIO_DIR}/work/session.log' \
+    && [ -s '${SCENARIO_DIR}/work/validation.txt' ] \
+    && grep -q '^state=targeted_stopped' '${SCENARIO_DIR}/work/etat_cycle_vie'"
+# (o) DEUX arrets en echec : validation SAUTEE, aucune conclusion de
+# campagne, exit 70, deux tentatives et jamais une troisieme.
+rc=0; run_scenario ok ok 9 || rc=$?
+check_true "double echec d'arret : validation sautee, aucune conclusion, exit 70, deux tentatives seulement" \
+  bash -c "[ '${rc}' -eq 70 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 2 ] \
+    && [ ! -e '${SCENARIO_DIR}/work/validation.txt' ] \
+    && ! grep -q 'campaign_status' '${SCENARIO_DIR}/stdout.log' \
+    && grep -q 'validation SAUTEE' '${SCENARIO_DIR}/work/session.log'"
 
 # ---- Scenarios bootstrap + pin : clone jetable, versions COURANTES du
 # protocole synchronisees et committees DANS LE CLONE (commit conditionnel :
@@ -529,4 +565,4 @@ if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest cycle de vie v6 : ${FAILURES} echec(s)" >&2
   exit 1
 fi
-echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (27 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue, registre illisible=blocage, surcharge temporelle refusee, trop-tard sans remontee, describe borne, registre etranger post-arret=78 — + 11 refus de pin, rejouable depuis un HEAD propre)"
+echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (32 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue, registre illisible=blocage, surcharge temporelle refusee, trop-tard sans remontee, describe borne, registre etranger post-arret=78, grace fixe 29/31 refusees, relation invite/GCE avant set_max, STOP1<STOP2<VALIDATE, double echec sans validation — + 11 refus de pin, rejouable depuis un HEAD propre)"

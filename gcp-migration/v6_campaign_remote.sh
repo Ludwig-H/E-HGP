@@ -55,7 +55,7 @@ TIME_BIN="${TIME_BIN:-/usr/bin/time}"
 # et rien d'autre.
 readonly TIMEOUT_BIN="/usr/bin/timeout"
 readonly WRAPPER_BASH="/bin/bash"
-# Grace unique TRANSMISE par le cycle de vie (jamais un -k local divergent).
+# Grace PROTOCOLAIRE fixe (huitieme tour) : 30 s, comme au cycle de vie.
 GRACE_S="${GRACE_S:-30}"
 THREADS="${THREADS:-$(nproc)}"
 CONF_SPECS="${CONF_SPECS:-uniform:32000 terrain:32000 eight_clusters:32000 scanline_single_pass:32000 uniform:50000 terrain:50000 eight_clusters:50000 scanline_single_pass:50000 uniform:100000 eight_clusters:100000 uniform:200000 eight_clusters:200000}"
@@ -99,7 +99,7 @@ test -x "${TIME_BIN}" || {
 # jamais resolus depuis le PATH.
 test -x "${TIMEOUT_BIN}" || { echo "REFUS : timeout epingle absent (${TIMEOUT_BIN})" >&2; exit 2; }
 test -x "${WRAPPER_BASH}" || { echo "REFUS : bash epingle absent (${WRAPPER_BASH})" >&2; exit 2; }
-[[ "${GRACE_S}" =~ ^[1-9][0-9]{0,2}$ ]] && [ "${GRACE_S}" -le 300 ] || { echo "REFUS : GRACE_S='${GRACE_S}' hors de [1, 300]" >&2; exit 2; }
+[ "${GRACE_S}" = "30" ] || { echo "REFUS : GRACE_S='${GRACE_S}' — la grace du protocole est fixee a 30 s" >&2; exit 2; }
 
 # REFUS AVANT TOUT RUN d'un parametre mal forme.
 refuse() { echo "REFUS : parametre — $1" >&2; exit 2; }
@@ -164,6 +164,7 @@ run_one() {
     printf 'peak_rss_kb=%s\n' "${hwm:-inconnu}"
     printf 'timing_scope=%s\n' "${scope}"
     printf 'threads=%s\n' "${THREADS_ONE:-${THREADS}}"
+    printf 'time_bin=%s\n' "${TIME_BIN}"
     if [ -n "${EXTRA_STATUS:-}" ]; then printf '%s\n' "${EXTRA_STATUS}"; fi
     printf 'commande=%s\n' "$*"
     printf 'source_commit=%s\n' "${SOURCE_COMMIT}"

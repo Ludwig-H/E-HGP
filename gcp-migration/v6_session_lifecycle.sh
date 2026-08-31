@@ -84,13 +84,14 @@ export GCP_INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}"
 # tient dans cette fenetre d'apres le preflight budgetaire ci-dessous.
 MAX_RUN_SECONDS="${MAX_RUN_SECONDS:-28800}"
 GUEST_SHUTDOWN_MINUTES="${GUEST_SHUTDOWN_MINUTES:-470}"
-# GRACE UNIQUE de terminaison (septieme tour) : chaque `timeout -k` emploie
-# cette grace et chaque budget ABSOLU la soustrait — plus jamais une borne
-# qui finit apres l'echeance qu'elle annonce.
+# GRACE PROTOCOLAIRE FIXE (huitieme tour) : 30 s, des deux cotes, liee a la
+# queue SSH de +60 s apres l'echeance — toute surcharge est REFUSEE (29
+# comme 31) pour ne jamais rouvrir implicitement cette relation.
 GRACE_S="${GRACE_S:-30}"
+[ "${GRACE_S}" = "30" ] || { echo "REFUS : GRACE_S=${GRACE_S} — la grace du protocole est fixee a 30 s" >&2; exit 2; }
 DESCRIBE_TIMEOUT_S="${DESCRIBE_TIMEOUT_S:-60}"
 VALIDATOR_TIMEOUT_S="${VALIDATOR_TIMEOUT_S:-300}"
-SCP_ATTEMPTS="${SCP_ATTEMPTS:-2}"
+SCP_ATTEMPTS="${SCP_ATTEMPTS:-1}"
 STOP_RESERVE_S="${STOP_RESERVE_S:-900}"
 # Marge de rapatriement ALIGNEE (sixieme tour) : echeance de campagne a
 # MAX-2700 ; l'enveloppe distante peut depasser de 300 s ; le scp (900 s par
@@ -109,23 +110,29 @@ _check_range() { # $1 = nom, $2 = min, $3 = max
 }
 _check_range MAX_RUN_SECONDS 900 28800
 _check_range GUEST_SHUTDOWN_MINUTES 10 480
-_check_range GRACE_S 1 300
 _check_range DESCRIBE_TIMEOUT_S 10 600
 _check_range VALIDATOR_TIMEOUT_S 60 3600
-_check_range SCP_ATTEMPTS 1 3
+_check_range SCP_ATTEMPTS 1 1
 # Reserve d'arret NON REDUCTIBLE : le pire cas de stop_and_verify (lectures,
 # mutation, polling, controles finaux) approche 735 s — plancher 900.
 _check_range STOP_RESERVE_S 900 3600
 _check_range SSH_STEP_TIMEOUT_S 60 7200
 _check_range SCP_STEP_TIMEOUT_S 60 3600
+# RELATION de la garde de demarrage, testee AVANT set_max (huitieme tour :
+# seule la garde suivante la refusait, apres une reconfiguration mutante).
+if [ $(( GUEST_SHUTDOWN_MINUTES * 60 + 300 )) -gt "${MAX_RUN_SECONDS}" ]; then
+  echo "REFUS : relation invite/GCE violee (${GUEST_SHUTDOWN_MINUTES} min * 60 + 300 > ${MAX_RUN_SECONDS} s) — aucune garde appelee" >&2
+  exit 2
+fi
 # Budget POST-CAMPAGNE reserve au pire cas DECLARE : SCP_ATTEMPTS tentatives
 # completes (timeout + grace) + attentes + describes bornes autour des scp
 # + validateur borne + arret cible.
 SCP_BUDGET_S=$(( SCP_ATTEMPTS * (SCP_STEP_TIMEOUT_S + GRACE_S) + 5 * SCP_ATTEMPTS * (SCP_ATTEMPTS + 1) / 2 ))
 # L'arret cible part JUSTE APRES le scp ; la validation est locale et HORS
-# du budget VM (revue en vol) — le budget post-campagne couvre scp,
-# describes et l'arret, jamais le validateur.
-POST_BUDGET_S=$(( SCP_BUDGET_S + 2 * SCP_ATTEMPTS * (DESCRIBE_TIMEOUT_S + GRACE_S) + STOP_RESERVE_S ))
+# du budget VM. Le budget post-campagne reserve DEUX arrets (huitieme tour :
+# le chemin echec-puis-reprise en execute deux) — scp, describes, 2 x arret,
+# jamais le validateur.
+POST_BUDGET_S=$(( SCP_BUDGET_S + 2 * SCP_ATTEMPTS * (DESCRIBE_TIMEOUT_S + GRACE_S) + 2 * STOP_RESERVE_S ))
 # Le cutoff est le PLUS PROCHE des deux coupe-circuits (borne GCE dure,
 # arret invite) — jamais la seule borne GCE.
 EFFECTIVE_CUTOFF_S=$(( GUEST_SHUTDOWN_MINUTES * 60 < MAX_RUN_SECONDS ? GUEST_SHUTDOWN_MINUTES * 60 : MAX_RUN_SECONDS ))
@@ -319,6 +326,26 @@ PY
 GENERATION=""
 SESSION_RC=0
 STOP_ATTEMPTED=0
+# Fonction d'arret PARTAGEE (huitieme tour) entre le chemin nominal
+# post-scp et le cleanup — publie les etats, tolere un journal en panne,
+# compte les tentatives (JAMAIS plus de deux au total).
+STOP_TRIES=0
+LAST_STOP_RC=1
+attempt_targeted_stop() {
+  STOP_TRIES=$((STOP_TRIES + 1))
+  local so="${LOG}"
+  ( : >> "${so}" ) 2>/dev/null || so="$(mktemp 2>/dev/null || echo /dev/null)"
+  lifecycle_publish_state "targeted_stopping"
+  LAST_STOP_RC=0
+  "${GUARDS_DIR}/stop_and_verify.sh" --yes \
+    --expected-last-start-timestamp "${GENERATION}" >> "${so}" 2>&1 || LAST_STOP_RC=$?
+  if [ "${LAST_STOP_RC}" -eq 0 ]; then
+    lifecycle_publish_state "targeted_stopped"
+  else
+    lifecycle_publish_state "targeted_stop_failed"
+  fi
+  return 0
+}
 finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu COMPLET est publie
   # RUN UNIQUE incluant la generation (audit troisieme tour) : construction
   # dans un temporaire, publication atomique et coherente apres execution,
@@ -485,17 +512,16 @@ PYEPOCH
   # Le registre est mis a jour par CE cleanup aussi (audit troisieme tour :
   # l'arret nominal doit y figurer) : targeted_stopping avant, puis
   # targeted_stopped / targeted_stop_failed selon le resultat.
-  local so="${LOG}"
-  ( : >> "${so}" ) 2>/dev/null || so="$(mktemp 2>/dev/null || echo /dev/stderr)"
   STOP_ATTEMPTED=1
-  lifecycle_publish_state "targeted_stopping"
   local stop_rc=0
-  "${GUARDS_DIR}/stop_and_verify.sh" --yes \
-    --expected-last-start-timestamp "${GENERATION}" >> "${so}" 2>&1 || stop_rc=$?
-  if [ "${stop_rc}" -eq 0 ]; then
-    lifecycle_publish_state "targeted_stopped"
+  if [ "${STOP_TRIES}" -ge 2 ]; then
+    # DEUX tentatives deja executees sur le chemin nominal (huitieme tour :
+    # le cleanup ne cree jamais une troisieme) — le coupe-circuit GCE demeure.
+    log_safe "tentatives d'arret epuisees (${STOP_TRIES}) : aucune troisieme tentative du cleanup"
+    stop_rc="${LAST_STOP_RC}"
   else
-    lifecycle_publish_state "targeted_stop_failed"
+    attempt_targeted_stop
+    stop_rc="${LAST_STOP_RC}"
   fi
   log_safe "stop_and_verify (generation ${GENERATION}) : rc=${stop_rc}"
   echo "journal complet : ${LOG}"
@@ -734,6 +760,13 @@ log "deadline_epoch=${DEADLINE_EPOCH} (generation ${GEN_EPOCH} + ${MAX_RUN_SECON
 
 # Controle de generation NON MUTANT (describe) : ferme la fenetre entre le
 # start certifie et le premier SSH.
+# too_late BESOIN : vrai si l'operation de BESOIN secondes ne tient plus
+# avant l'echeance (grace comprise) — /usr/bin/date epingle, `now` lu ici.
+too_late() {
+  local _now
+  _now=$(/usr/bin/date +%s)
+  [ $(( DEADLINE_EPOCH - _now - GRACE_S )) -lt "$1" ]
+}
 check_generation() {
   # Describe BORNE (septieme tour : un controle GCP bloque ne doit jamais
   # empecher l'arret cible d'etre atteint).
@@ -743,6 +776,11 @@ check_generation() {
           --zone="${GCP_ZONE}" --format='value(lastStartTimestamp)' 2>>"${LOG}")" || return 1
   [ "${seen}" = "${GENERATION}" ]
 }
+if too_late "${DESCRIBE_TIMEOUT_S}"; then
+  log "REFUS : echeance atteinte avant la premiere operation — AUCUN SSH/SCP, arret direct"
+  SESSION_RC=77
+  exit 77
+fi
 check_generation || { log "REFUS : generation changee avant SSH"; SESSION_RC=74; exit 74; }
 
 SSH=(gcloud compute ssh "${GCP_INSTANCE_NAME}" --project="${GCP_PROJECT_ID}"
@@ -761,6 +799,11 @@ REMOTE_BUNDLE="/tmp/v6bundle_${REMOTE_TAG}.tgz"
 # ne fait QUE lire boot_id, encadre par DEUX controles de generation ; toute
 # commande distante ulterieure REVERIFIE ce boot_id avant de muter quoi que
 # ce soit sur la VM.
+if too_late "${SCP_STEP_TIMEOUT_S}"; then
+  log "REFUS : echeance atteinte avant le handshake — AUCUN SSH/SCP, arret direct"
+  SESSION_RC=77
+  exit 77
+fi
 BOOT_ID="$(/usr/bin/timeout -k "${GRACE_S}" "${SCP_STEP_TIMEOUT_S}" "${SSH[@]}" 'cat /proc/sys/kernel/random/boot_id' 2>>"${LOG}")" \
   || { log "REFUS : handshake boot_id impossible"; SESSION_RC=75; exit 75; }
 [[ "${BOOT_ID}" =~ ^[0-9a-f-]{36}$ ]] || { log "REFUS : boot_id mal forme (${BOOT_ID})"; SESSION_RC=75; exit 75; }
@@ -769,6 +812,11 @@ log "handshake : boot_id=${BOOT_ID} generation confirmee"
 
 # ---- 4b. Envoi du BUNDLE pinne (lecture seule cote VM), encadre par deux
 # controles de generation.
+if too_late "${SCP_STEP_TIMEOUT_S}"; then
+  log "REFUS : echeance atteinte avant l'envoi du bundle — arret direct"
+  SESSION_RC=77
+  exit 77
+fi
 /usr/bin/timeout -k "${GRACE_S}" "${SCP_STEP_TIMEOUT_S}" "${SCP[@]}" "${BUNDLE}" \
   "${GCP_INSTANCE_NAME}:${REMOTE_BUNDLE}.recu" 2>&1 | tee -a "${LOG}"
 check_generation || { log "REFUS : generation changee apres l'envoi du bundle"; SESSION_RC=74; exit 74; }
@@ -890,16 +938,18 @@ printf 'scp_rc=%d\n' "${SCP_RC}" | tee -a "${LOG}"
 # registre est publie ; en cas de succes, le cleanup prend son fast-path
 # (aucun second arret) ; en cas d'echec, la reprise bornee du cleanup
 # re-tente.
-lifecycle_publish_state "targeted_stopping"
-EARLY_STOP_RC=0
-"${GUARDS_DIR}/stop_and_verify.sh" --yes \
-  --expected-last-start-timestamp "${GENERATION}" >> "${LOG}" 2>&1 || EARLY_STOP_RC=$?
+attempt_targeted_stop
+if [ "${LAST_STOP_RC}" -ne 0 ]; then
+  log "premier arret post-rapatriement en echec (rc=${LAST_STOP_RC}) — re-tentative IMMEDIATE avant toute validation"
+  attempt_targeted_stop
+fi
+EARLY_STOP_RC="${LAST_STOP_RC}"
 if [ "${EARLY_STOP_RC}" -eq 0 ]; then
-  lifecycle_publish_state "targeted_stopped"
-  log "arret cible post-rapatriement certifie (generation ${GENERATION})"
+  log "arret cible post-rapatriement certifie (generation ${GENERATION}, tentative ${STOP_TRIES})"
 else
-  lifecycle_publish_state "targeted_stop_failed"
-  log "arret cible post-rapatriement NON certifie (rc=${EARLY_STOP_RC}) — la reprise bornee du cleanup re-tentera"
+  log "ARRET NON CERTIFIE apres ${STOP_TRIES} tentatives — validation SAUTEE, aucune conclusion de campagne"
+  SESSION_RC=70
+  exit 70
 fi
 
 # ---- 8. VALIDATION LOCALE par le validateur EPINGLE, profil epingle joint :
