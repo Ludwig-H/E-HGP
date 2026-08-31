@@ -65,6 +65,20 @@ def main() -> int:
         print("usage: pentes.py <dossier out/ de campagne>", file=sys.stderr)
         return 2
     out_dir = Path(sys.argv[1])
+    status = out_dir.parent / "STATUS.txt"
+    if status.is_file():
+        st = status.read_text()
+        if "DONE" not in st:
+            print("ECHEC : STATUS.txt sans DONE (campagne inachevée)", file=sys.stderr)
+            return 3
+        bad = [l for l in st.splitlines() if l.startswith("code=") and not l.startswith("code=0 ")]
+        if bad:
+            print(f"ECHEC : {len(bad)} run(s) a code non nul", file=sys.stderr)
+            return 3
+    errs = [p for p in out_dir.glob("*.err") if p.stat().st_size > 0]
+    if errs:
+        print(f"ECHEC : stderr non vide pour {len(errs)} run(s)", file=sys.stderr)
+        return 3
     families = sorted({p.name.rsplit("_", 2)[0] for p in out_dir.glob("*_s*.txt")})
     if not families:
         print("aucune sortie trouvée", file=sys.stderr)
@@ -76,11 +90,11 @@ def main() -> int:
                 p = out_dir / f"{fam}_{n}_s{seed}.txt"
                 if p.is_file():
                     data[(n, seed)] = read_counters(p)
-        if len(data) < 6:
-            print(f"== {fam} : campagne incomplète ({len(data)}/9 runs), ignorée")
-            continue
+        if len(data) != len(SIZES) * len(SEEDS):
+            print(f"ECHEC {fam} : campagne incomplète ({len(data)}/{len(SIZES) * len(SEEDS)} runs)", file=sys.stderr)
+            return 3
         print(f"== {fam} — pentes sécantes 8000→16000 | 16000→32000 (graines {SEEDS})")
-        header = f"{'compteur':24s} {'pas1 (par graine)':26s} {'pas2 (par graine)':26s} {'étendue':8s}"
+        header = f"{'compteur':24s} {'pas1 (par graine)':26s} {'pas2 (par graine)':26s} {'étendues p1|p2':12s}"
         print(header)
         for name, _ in PATTERNS:
             rows1, rows2 = [], []
@@ -93,11 +107,14 @@ def main() -> int:
                 rows1.append(math.log2(v[1] / v[0]) if v[0] else None)
                 rows2.append(math.log2(v[2] / v[1]) if v[1] and v[2] else None)
             if all(r is None for r in rows1):
-                continue
+                print(f"ECHEC : compteur {name} absent des sorties de {fam}", file=sys.stderr)
+                return 3
             fmt = lambda rows: "/".join("  -  " if r is None else f"{r:5.2f}" for r in rows)
-            vals = [r for r in rows1 + rows2 if r is not None]
-            spread = max(vals) - min(vals) if vals else 0.0
-            print(f"{name:24s} {fmt(rows1):26s} {fmt(rows2):26s} {spread:6.2f}")
+            s1 = [r for r in rows1 if r is not None]
+            s2 = [r for r in rows2 if r is not None]
+            sp1 = max(s1) - min(s1) if s1 else 0.0
+            sp2 = max(s2) - min(s2) if s2 else 0.0
+            print(f"{name:24s} {fmt(rows1):26s} {fmt(rows2):26s} {sp1:5.2f}|{sp2:5.2f}")
         print()
     return 0
 

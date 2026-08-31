@@ -72,7 +72,7 @@ bool load_expected_file(const char* path, Expected* e) {
 int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
   long long n = 400, threads = 1, seed = 3;
-  std::string expected_path, inject;
+  std::string expected_path, inject, postprefilter_golden;
   bool ok = true;
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
@@ -86,6 +86,7 @@ int main(int argc, char** argv) {
     else if (const char* s = val("--threads=")) { ok = parse_i64_exact(s, &v) && ok; threads = v; }
     else if (const char* s = val("--seed=")) { ok = parse_i64_exact(s, &v) && ok; seed = v; }
     else if (const char* s = val("--expected=")) expected_path = s;
+    else if (const char* s = val("--postprefilter=")) postprefilter_golden = s;
     else if (const char* s = val("--inject=")) inject = s;
     else { std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str()); ok = false; }
   }
@@ -138,10 +139,15 @@ int main(int argc, char** argv) {
   }
 
   u64 mismatches = 0;
-  if (!e.balls.empty() && e.balls != rr.digest_balls) {
-    ++mismatches;
-    std::fprintf(stderr, "digest_balls : v5=%s v6=%s\n", e.balls.c_str(), rr.digest_balls.c_str());
-  }
+  // La conformite d'OBJET juge digest_all et les forets (P0 du 31 aout : les
+  // deux monnaies de candidats sont gelees separement ; depuis le correctif
+  // du cover q4 au coefficient 4, le multiensemble de candidats diverge
+  // legitimement de la v5 — rapporte, jamais un critere).
+  if (!e.balls.empty() && e.balls != rr.digest_balls)
+    std::fprintf(stderr,
+                 "note : candidats v5-compat divergents (attendu depuis le cover q4 coefficient 4) v5=%.16s... "
+                 "v6=%.16s...\n",
+                 e.balls.c_str(), rr.digest_balls.c_str());
   for (const auto& [k, dg] : e.forest) {
     if (k <= rr.kmax_eff && dg != rr.digest_forest[k]) {
       ++mismatches;
@@ -153,6 +159,11 @@ int main(int argc, char** argv) {
     ++mismatches;
     std::fprintf(stderr, "digest_all : v5=%s v6=%s\n", e.all.c_str(), rr.digest_all.c_str());
   }
+  if (!postprefilter_golden.empty() && postprefilter_golden != rr.digest_postprefilter) {
+    ++mismatches;
+    std::fprintf(stderr, "digest_postprefilter : golden=%s v6=%s\n", postprefilter_golden.c_str(),
+                 rr.digest_postprefilter.c_str());
+  }
   if (!inject.empty()) {
     if (mismatches) {
       std::fprintf(stderr, "mutant %s : %llu divergence(s) — tue\n", inject.c_str(), (unsigned long long)mismatches);
@@ -162,7 +173,7 @@ int main(int argc, char** argv) {
     return 3;
   }
   if (mismatches) return 1;
-  std::printf("conformite v5=v6 : %s n=%lld : digest_balls + %zu forets + digest_all identiques\n",
+  std::printf("conformite v5=v6 : %s n=%lld : %zu forets + digest_all identiques (objet)\n",
               cloud_family_name(family), n, e.forest.size());
   return 0;
 }

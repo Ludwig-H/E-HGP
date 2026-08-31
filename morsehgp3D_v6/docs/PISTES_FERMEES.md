@@ -22,9 +22,13 @@ d'abandon sans casser les contre-exemples ; jamais un benchmark.
 5. **Source kNN à préfixe borné pour les ancres** — fermée (rang de voisinage
    non borné, fixture 50 000 points).
 6. **Couches convexes pour le scan q3** — fermée (mesure).
-7. **Cover q4 coefficient 4 à la génération** — fermée (change
-   `digest_balls` v5 ; en v6 la frontière post-préfiltre rend le point moot,
-   mais le coefficient 3 reste le contrat du tape ; mutant `q4-cover-coef4`).
+7. **Cover q4 coefficient 3 à la génération** — la fermeture v5 (qui
+   IMPOSAIT le coefficient 3 pour la conformité `digest_balls` v4) est
+   SUPERSÉDÉE par le P0 v6 du 31 août : le coefficient 3 perd des témoins
+   intérieurs q4 (contre-fixture au tétraèdre régulier + z, gravée dans
+   `mhgp6_cover_coef4`). Contrat v6 : coefficient 3 pour q3 (sharp), 4 pour
+   q4 ; les monnaies de candidats sont gelées séparément de l'objet ; mutant
+   `q4-cover-coef3` (l'inverse du mutant v5).
 8. **Sélection axiale bornée** — fermée (opt-in négatif mesuré).
 9. **Cœur universel de Jung sur arête maximale comme source** — fermée (pire
    cas quadratique) ; survivent les relaxations `3U < L` / `2H² > Ξ`.

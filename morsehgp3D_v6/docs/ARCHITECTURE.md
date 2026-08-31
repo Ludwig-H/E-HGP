@@ -14,8 +14,8 @@ entrée (PointId u32, positions u16³ distinctes)
   → E1 UNE descente WSPD fusionnée à masques de lanes
        → MultiAliveRect{rect, mask, core[3]}
   → E2 fermeture des facteurs (route S directe / route M saturée)
-  → E3 par ancre : AnchorCredit (compose unique), ResidualTape à rôles,
-       tueurs W_q exact / secteurs corrigés / grille 10.5
+  → E3 par ancre : EndpointCredit + tueurs W_q exact / secteurs corrigés /
+       grille 10.5 (AnchorCredit/ResidualTape : contrat 2, prévu J3)
   → E4 lanes : q2 direct ; q3 seeds aigus + filtre de profondeur ;
        q4 sweep de corde unifié (passe 1 scan saturé, passe 2 racines triées)
   → E5 tri stable + RLE par BallKey → préfiltre exact count-only
@@ -59,17 +59,17 @@ saturées au seuil + range-add (certificat C7) ; compteurs V_R/C_R/P_R.
 Cascade : `need = h_q − core` ; raccourci `(|A|−1) + (|B|−1) < need` ⟹
 histogrammes sautés ; ancres survivantes ssi `core + h_a + h_b < h_q`.
 
-## E3 — crédits et tueurs d'ancre `[LIVRÉ]`
+## E3 — tueurs d'ancre `[LIVRÉ : EndpointCredit + tueurs portés]`
+`[PRÉVU : AnchorCredit/CoreCredit/ResidualTape]`
 
-`src/credit/` : `AnchorCredit` (unique opération `compose`, certificat C5),
-`CoreCredit` (recertification `collect_universal_ids`, V1 nominale
-`r_core == h_core`, repli sans exclusion), `ResidualTape` (rôles
-témoin/support par record, masques de lane, exclusions par lane —
-certificat C6). Tueurs en coût croissant, tous fail-open, tous composant par
-`compose` : comptage W_q exact saturé sur le cover ; secteurs octogone K=8
-(forme corrigée `min_k max(cnt[k], cnt_res[k] + credits) ≥ h_q`, le max
-par secteur AVANT le min) ; grille de cellules G=8 (Th. 10.5,
-`rho2_den` 12/8).
+Livré (ports requalifiés par les portes) : `EndpointCredit` (base h_a+h_b,
+domaine disjoint hors A∪B) transmis aux tueurs ; tueurs en coût croissant,
+tous fail-open : comptage W_q exact saturé sur le cover ; secteurs octogone
+K=8 (forme corrigée `min_k max(cnt[k], cnt_hors[k] + base) ≥ h_q`, le max
+par secteur AVANT le min) ; grille de cellules G=8 (Th. 10.5, `rho2_den`
+12/8). Prévu (contrat 2 de MATHEMATIQUES C3, chantier J3) : `src/credit/`
+avec `AnchorCredit` (unique opération `compose`), `CoreCredit`
+(recertification), `ResidualTape` (rôles et exclusions par lane).
 
 ## E4 — lanes `[LIVRÉ]`
 
@@ -84,13 +84,19 @@ par secteur AVANT le min) ; grille de cellules G=8 (Th. 10.5,
   - passe 1, O(m_e), rôle témoin : `P(z)`, `B(z)` ; cœur de Jung
     (`P < 0 ∧ 2P² > J·B²`) saturé — sortie anticipée identique v5 ;
     au passage `depth0` (profondeur au centre μ = 0) décide le q3 du carrier ;
-  - passe 2, O(m_e log m_e), seeds survivants seulement : racines
-    `μ_z = P/B` triées (produits croisés exacts), clip non strict à ±μ*,
-    balayage → minimum exact sur corde, fragments shallow ; chaque site à
-    rôle support est lu à sa racine `μ_d` : profondeur au point (règle de
-    bloc) + crédits < h₄ ⟹ cascade O(1) (lentille, owner, exact-once,
-    préfiltres i64, puissance de face, Cramer, centre strict) ⟹ émission.
-  La boucle C×D et le filtre de profondeur par candidat n'existent pas en v6.
+  - passe 2, O(m_e log m_e + p_e), seeds survivants seulement : racines
+    `μ_z = P/B` triées (produits croisés exacts, comparaisons comptées),
+    clip non strict à ±μ* ; chaque site à rôle support est lu à sa racine
+    `μ_d` : profondeur au point (règle de bloc, cover complet, AUCUN crédit)
+    < h₄ ⟹ cascade O(1) (lentille, owner, exact-once, préfiltres i64,
+    puissance de face, Cramer, centre strict) ⟹ émission.
+  Le rescan de profondeur PAR CANDIDAT n'existe pas en v6 (mutualisé par
+  seed) ; l'incidence seed–complétion reste payée (une racine par site
+  éligible, `q4_completions`). Contrat de profondeur : contrat 1 de
+  MATHEMATIQUES C3 — cover complet, verdict `depth_at(μ_d) ≥ h₄` sans aucun
+  crédit ajouté. Cover PAR LANE : coefficient 3 pour q3 (sharp), 4 pour q4
+  (les intérieurs q4 vivent dans le coefficient 4 — P0 du 31 août, porte
+  `mhgp6_cover_coef4`, mutant `q4-cover-coef3`).
 
 ## E5 — aval `[LIVRÉ]`
 
@@ -103,12 +109,14 @@ arrêt au seuil, STRICT ; `ball_census` : I_B/U_B complets, plafonds),
 niveaux sémantiquement égaux, deltas, partition dense ; rendu § 9.1),
 `digest.hpp` (format `mhgp4-digest-v1`, monnaie de conformité v5↔v6).
 
-Frontières de digest : à J2, le multiensemble émis est identique à la v5
-(le sweep est une pure transformation de coût), donc `digest_balls` v6 ==
-`digest_balls` v5 et la conformité le vérifie aussi. Le jour où un tueur v6
-plus fort rompt légitimement cette égalité, `digest_balls` bascule sur la
-frontière post-préfiltre exact (voir `docs/PROVENANCE.md`) ; la conformité
-v5↔v6 reste sur l'objet (`digest_all`, `digest_forest_K*`).
+Frontières de digest (gelées, P0 du 31 août) : la conformité d'objet
+v5↔v6 juge `digest_all` et `digest_forest_K*` seulement. Deux monnaies de
+candidats distinctes : `digest_candidates_v5_compat` (tag v4, uniques
+post-RLE — diagnostic différentiel de génération ; diverge légitimement de
+la v5 depuis le cover q4 coefficient 4) et `digest_postprefilter`
+(tag `mhgp6-digest-v1:postprefilter-candidates`, records survivants du
+préfiltre exact — non-régression interne v6, golden gravé sur uniform 400).
+Aucun renommage conditionnel futur.
 
 ## E6 — étages conditionnels `[PRÉVU]`
 

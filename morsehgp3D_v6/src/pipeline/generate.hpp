@@ -81,6 +81,7 @@ struct GenerateStats {
   u64 hist_killed_rows[3] = {0, 0, 0};
   u64 hist_killed_thresh[3] = {0, 0, 0};
   u64 hist_survivors[3] = {0, 0, 0};
+  u64 p_factor[3] = {0, 0, 0};  // P_factor : evaluations d'auto-produits des histogrammes (|A|²+|B|² par rectangle)
   // Tueurs d'ancre.
   u64 anchors_killed_w3 = 0;
   u64 anchors_killed_w4 = 0;
@@ -100,6 +101,7 @@ struct GenerateStats {
   u64 sweep_pass2_seeds = 0;   // seeds q4 survivants entres en passe 2
   u64 sweep_roots_onchord = 0;   // racines triees (observable du grand-livre)
   u64 sweep_root_groups = 0;     // blocs de racines egales traites (regle de bloc)
+  u64 sweep_root_comparisons = 0;  // comparaisons exactes payees par le tri des racines
   u64 sweep_roots_offchord = 0;  // racines strictement hors corde (rejet exact, jamais enumerees)
   u64 sweep_const_interior = 0;  // sites a contribution constante interieure (c0)
   // Completions q4 (cascade au point de racine).
@@ -124,6 +126,7 @@ struct GenerateStats {
       hist_killed_rows[i] += o.hist_killed_rows[i];
       hist_killed_thresh[i] += o.hist_killed_thresh[i];
       hist_survivors[i] += o.hist_survivors[i];
+      p_factor[i] += o.p_factor[i];
       anchors_killed_sectors[i] += o.anchors_killed_sectors[i];
       anchors_killed_cells[i] += o.anchors_killed_cells[i];
       seeds_killed_cells[i] += o.seeds_killed_cells[i];
@@ -146,6 +149,7 @@ struct GenerateStats {
     sweep_pass2_seeds += o.sweep_pass2_seeds;
     sweep_roots_onchord += o.sweep_roots_onchord;
     sweep_root_groups += o.sweep_root_groups;
+    sweep_root_comparisons += o.sweep_root_comparisons;
     sweep_roots_offchord += o.sweep_roots_offchord;
     sweep_const_interior += o.sweep_const_interior;
     q4_completions += o.q4_completions;
@@ -717,11 +721,15 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       if (MHGP6_MUTANT("sweep-drop-exit-root") && !r.entry) sc.roots.pop_back();
     }
     ls->sweep_roots_onchord += sc.roots.size();
-    std::sort(sc.roots.begin(), sc.roots.end(), [](const AnchorScratch::ChordRoot& x, const AnchorScratch::ChordRoot& y) {
-      const int c = cmp_chord_roots(x, y);
-      if (c != 0) return c < 0;
-      return x.u < y.u;  // departage canonique : determinisme du parcours
-    });
+    u64 sort_cmps = 0;
+    std::sort(sc.roots.begin(), sc.roots.end(),
+              [&sort_cmps](const AnchorScratch::ChordRoot& x, const AnchorScratch::ChordRoot& y) {
+                ++sort_cmps;
+                const int c = cmp_chord_roots(x, y);
+                if (c != 0) return c < 0;
+                return x.u < y.u;  // departage canonique : determinisme du parcours
+              });
+    ls->sweep_root_comparisons += sort_cmps;
     u64 ent = 0;
     u64 ext_after = 0;
     for (const AnchorScratch::ChordRoot& r : sc.roots)
@@ -861,6 +869,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
       if (!(ar.mask & (1u << li))) continue;
       const Lane lane = li == 0 ? Lane::kQ2 : li == 1 ? Lane::kQ3 : Lane::kQ4;
       corner_histograms(ix, lane, ar.r, &sc.ha, &sc.hb);
+      ls->p_factor[li] += nA * nA + nB * nB;
       const u64 need = h_of[li] > ar.core[li] ? h_of[li] - ar.core[li] : 0;
       ls->anchors[li] += nA * nB;  // le grand-livre reste ferme : toutes les paires comptees
       if (need == 0) {
@@ -870,8 +879,14 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
       // Handles et route de pretest par requete : une fois par (rectangle,
       // lane q3/q4) — q2 n'a ni cover ni pretest.
       bool pretest_by_query = false;
+      // COEFFICIENT DE COVER PAR LANE (P0 audit v6 31 aout) : 3 pour q3
+      // (sharp : contient tout interieur strict q3), 4 pour q4 (Jung : les
+      // interieurs q4 vivent dans le coefficient 4 — le coefficient 3 v5
+      // perdait des temoins, contre-fixture au tetraedre regulier + z
+      // interieur, |2z-a-b|² = 2916 entre 3D² = 2400 et 4D² = 3200).
+      const i64 cover_coef = (li == 2 && !MHGP6_MUTANT("q4-cover-coef3")) ? 4 : 3;
       if (li >= 1) {
-        rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), 3, &sc.handles, &sc.cover_nodes);
+        rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), cover_coef, &sc.handles, &sc.cover_nodes);
         sc.handle_points = 0;
         for (const NodeRef h : sc.handles) {
           const NodeRange r = ix.range_of(h);
@@ -922,7 +937,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
             }
             pretested = true;
           }
-          anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, 3, &sc.cover, &sc.visits, &sc.cover_tmp);
+          anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, cover_coef, &sc.cover, &sc.visits, &sc.cover_tmp);
           if (li == 1) {
             scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, genfilter_nonstrict, pretested, lo, ls,
                            &ec);

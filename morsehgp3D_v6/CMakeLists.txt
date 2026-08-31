@@ -69,8 +69,11 @@ endforeach()
 # Mutants du sweep tues par la divergence de conformite (digest_balls, forets).
 mhgp6_gate(mhgp6_sweep_mutant_exit 4 mhgp6_conformity
            ARGS --family=terrain --n=400 --inject=sweep-drop-exit-root --expected=${REFS}/terrain_400.txt)
+# rle-drop laisse l'objet intact (union-find idempotent) : son detecteur est
+# la monnaie post-prefiltre (les doublons de survivants changent le digest).
 mhgp6_gate(mhgp6_conformity_mutant_rle 4 mhgp6_conformity
-           ARGS --family=uniform --n=400 --inject=rle-drop --expected=${REFS}/uniform_400.txt)
+           ARGS --family=uniform --n=400 --inject=rle-drop --expected=${REFS}/uniform_400.txt
+                --postprefilter=97be65b6e0c66e3b3b2262510bd7274f8e557ae4bdb78024467c1f9ee05c4d72)
 
 # ---- Refus du CLI (parsing exact, profil).
 mhgp6_gate(mhgp6_cli_refus_s7 2 mhgp6 ARGS --family=uniform --n=200 --s=7)
@@ -103,3 +106,30 @@ mhgp6_executable(mhgp6_sweep_fixtures tests/sweep_fixtures.cpp)
 mhgp6_gate(mhgp6_sweep_frontieres 0 mhgp6_sweep_fixtures)
 mhgp6_gate(mhgp6_sweep_frontieres_mutant_depth 4 mhgp6_sweep_fixtures ARGS --inject=sweep-nonstrict-depth)
 mhgp6_gate(mhgp6_sweep_frontieres_mutant_exit 4 mhgp6_sweep_fixtures ARGS --inject=sweep-drop-exit-root)
+
+# ---- Coefficient de cover q4 (P0 audit du 31 aout : contre-fixture au
+# tetraedre regulier + z interieur hors cover-3 ; le coefficient 4 tue a la
+# generation, le mutant q4-cover-coef3 retablit le defaut herite v5).
+mhgp6_executable(mhgp6_cover_fixture tests/cover_fixture.cpp)
+mhgp6_gate(mhgp6_cover_coef4 0 mhgp6_cover_fixture)
+mhgp6_gate(mhgp6_cover_coef3_mutant 4 mhgp6_cover_fixture ARGS --inject=q4-cover-coef3)
+
+# ---- Golden post-prefiltre (non-regression interne v6, tag
+# mhgp6-digest-v1:postprefilter-candidates) : grave apres le correctif cover.
+mhgp6_gate(mhgp6_postprefilter_uniform_400 0 mhgp6_conformity
+           ARGS --family=uniform --n=400 --threads=4 --expected=${REFS}/uniform_400.txt
+                --postprefilter=97be65b6e0c66e3b3b2262510bd7274f8e557ae4bdb78024467c1f9ee05c4d72)
+
+# ---- Couverture executee des mutants (audit du 31 aout : 20 mutants deja
+# tues par la divergence d'objet de la conformite sur eight_clusters n=400 ;
+# fold-inject-b-exception-k3 exclu — termine par signal, juge dedie a porter).
+foreach(mut census-nonstrict genfilter-nonstrict depth-threshold-minus-one
+            range-add-max-le-zero skip-full-census binary-ties repr-ties
+            attach-prebatch drop-nonmerge dense-pointid canonical-is-uf-root
+            q3-level-4g q4-center-parity q4-eq-sign q4-i64-drop-factor
+            q4-i64-pair-min witness-no-lane-mask par-drop-shard
+            par-drop-ball-chunk fold-inject-a-failure-k2)
+  mhgp6_gate(mhgp6_mutant_${mut} 4 mhgp6_conformity
+             ARGS --family=eight_clusters --n=400 --threads=4 --inject=${mut}
+                  --expected=${REFS}/eight_clusters_400.txt)
+endforeach()

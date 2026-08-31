@@ -12,16 +12,23 @@ ajustement global peuvent masquer un terme en n^1,8).
 
 ## 1. Termes publiés par run
 
+Statut d'instrumentation : un terme sans compteur câblé dans
+`GenerateStats` et la sortie est marqué `(candidat J3)` — il n'entre dans
+aucune pente tant qu'il n'est pas publié (exigence de l'audit du 31 août).
+
 | Terme | Définition |
 |---|---|
 | `R` | rectangles WSPD terminaux vivants (par lane, via masques) |
 | `V_wspd` | visites de la descente fusionnée (nœuds + appels témoins) |
-| `V_R, C_R, P_R` | route M : nœuds classés, couples de coins, couples PENDING |
-| `H_rect` | Σ_R handle_mass(R) — masse offerte par les covers, une fois par rectangle |
-| `H_scan` | masse réellement reparcourue par ancre (Σ ancres_surv × handle) |
-| `M_anchor` | Σ_e m_e — sites de tape par ancre survivante |
-| `E` | ancres résiduelles, étiquetées par lane |
-| `W_sweep1` | passe 1 du sweep : sites scannés (cœur saturé), tous seeds |
+| `V_R, C_R, P_R` | route M (candidat J3) : nœuds classés, couples de coins, couples PENDING |
+| `P_factor` | évaluations d'auto-produits des histogrammes (`p_factor[3]`, câblé) |
+| `H_rect` | (candidat J3) Σ_R handle_mass(R) — masse offerte par les covers |
+| `H_scan` | (candidat J3) masse reparcourue par ancre (Σ ancres_surv × handle) |
+| `M_anchor` | (candidat J3) Σ_e m_e — sites de tape par ancre survivante |
+| `E` | (candidat J3) ancres résiduelles, étiquetées par lane |
+| `W_sweep1` | passe 1 du sweep : sites scannés (`q4_core_site_tests`, câblé) |
+| `W_scan_q3` | masse du filtre de profondeur q3 (`q3_depth_site_tests`, câblé) |
+| `sweep_root_comparisons` | comparaisons exactes payées par le tri des racines (câblé) |
 | `sweep_pass2_seeds` | seeds q4 survivants entrés en passe 2 |
 | `sweep_roots_onchord` | racines sur corde construites et triées (observable, jamais « × log ») |
 | `sweep_root_groups` | blocs de racines égales traités (règle de bloc) |
@@ -33,10 +40,11 @@ ajustement global peuvent masquer un terme en n^1,8).
 | `C_emit` | candidats remis au tri/RLE |
 | `B` | BallKey uniques après RLE |
 | `B_pref` | clés survivantes au préfiltre exact (la frontière de digest v6) |
-| `S_shell` | Σ \|U_B\| (≤ 12·B par plafond) |
-| `V_census` | visites de l'index par le préfiltre + census |
-| `S_forest` | enregistrements de forêt publiés (facettes, deltas, nœuds) |
-| HWM | pic mémoire par rôle (amont / en construction / sortie / temporaires) |
+| `S_shell` | Σ \|U_B\| (`census_shell`, câblé) |
+| `V_census` | (candidat J3) visites de l'index par le préfiltre + census |
+| `S_forest` | enregistrements de forêt publiés (facettes, deltas, nœuds — câblés) |
+| `T_input, V_motif` | (candidat J3) coût de FABRICATION des entrées — les familles stationnaires évaluent chaque point contre ~n motifs : la génération d'entrée est elle-même quadratique et doit être séparée de toute pente du pipeline |
+| HWM | pic mémoire par rôle (rss_mb par paliers, câblé ; par rôle : candidat J3) |
 
 Les temps sont exclusifs ou explicitement inclusifs (`dont`), jamais
 additionnés s'ils s'emboîtent.
@@ -49,8 +57,9 @@ additionnés s'ils s'emboîtent.
 - `M_anchor`, `H_scan` sur la contre-fixture calotte–lentille : aucun
   certificat à témoins ne peut fermer ces ancres ; publié comme réfutation
   bornée.
-- `W_sweep1`, `S4` sur les familles **dilatées** : imputable à la famille
-  (verdict v5), stress non extrapolable.
+- `W_sweep1`, `S4` sur les familles **dilatées** : association diagnostique
+  v5 (cohortes non appariées) avec les échelles de hauteur du générateur ;
+  stress non extrapolable, jamais une pente de lane.
 - `V_R` si tout reste MIXED (peignes entrelacés) : compteur de réfutation de
   la route M.
 

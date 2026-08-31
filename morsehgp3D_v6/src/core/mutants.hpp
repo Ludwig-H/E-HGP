@@ -40,7 +40,7 @@ inline constexpr const char* kMutants[] = {
     "family-scanline-overshoot", "wspd-drop-rect", "wspd-cap-terminal", "wspd-split-heaviest",
     "wspd-wide-drop-k2-mid", "core-ball-ceil-distance", "witness-no-lane-mask", "cover-rect-dmin",
     "cover-envelope-open", "cover-envelope-factor", "q3-prune-ge", "q3-level-4g",
-    "q4-no-canonical", "q4-center-parity", "q4-seed-core-nonstrict", "q4-eq-nonstrict",
+    "q4-no-canonical", "q4-center-parity", "q4-cover-coef3", "q4-seed-core-nonstrict", "q4-eq-nonstrict",
     "q4-eq-sign", "q4-i64-drop-factor", "q4-i64-pair-min", "jung-swap-bounds",
     "level-trunc-hi", "dint-mulhi-dropped", "rle-drop", "census-nonstrict",
     "genfilter-nonstrict", "depth-threshold-minus-one", "range-add-max-le-zero", "skip-full-census",

@@ -8,9 +8,11 @@ conformité) : `uniform`, `eight_clusters`, `terrain`, `scanline_single_pass`,
 verticales croissent avec `coord ∝ sqrt(n)` à espacement sol constant :
 amplitudes des bosses et hauteurs des plateaux dans `[coord/16, coord/8]`,
 canopée dans `[1, coord/8]`, échos dans `[2, coord/10]` — l'étendue verticale
-croît en `sqrt(n)`. Verdict v5 (TERRAIN_DEUX_ECHELLES, reçus terminaux) : la
-super-quadraticité q3/q4 y est imputable à la famille — geler les deux
-échelles rend q4 linéaire (exposants dans `[1,003 ; 1,014]`, trois graines).
+croît en `sqrt(n)`. Association diagnostique v5 (TERRAIN_DEUX_ECHELLES, reçus terminaux mais
+non appariés, une répétition par bras) : dans les cohortes observées, geler
+les deux échelles est associé à des compteurs q4 presque proportionnels à n
+(pentes locales `[1,003 ; 1,014]` sur les covers de deux terrains bornés,
+trois graines) — un diagnostic sur ces runs, jamais un théorème causal.
 **Rôle v6 : conformité différentielle et stress non extrapolable. Jamais une
 pente de lane.**
 

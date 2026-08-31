@@ -8,3 +8,5 @@ date_capture=2026-08-31 (UTC, codespace 8 vCPU)
 worktree_a_la_capture=HEAD 3bad233d propre pour morsehgp3D_v5/ (les ajouts non suivis de morsehgp3D_v6/ n'affectent pas le build v5)
 stderr=vides pour les 15 runs de tailles d'interet et les 8 petits runs (codes 0 : STATUS.txt)
 g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+qualification=les champs commande/toolchain/date/worktree ci-dessus sont reconstruits_a_posteriori (audit du 31 aout) : ils decrivent fidelement la capture mais n'ont pas ete enregistres par elle
+correction=STATUS.txt ne contient que les 15 runs des tailles d'interet ; les codes des 8 petits runs ont ete verifies a la capture (tous 0) mais pas enregistres — not_recorded

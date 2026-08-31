@@ -5,10 +5,12 @@ Principe (AGENTS.md) : rien d'hérité implicitement. Pin v5 de référence :
 
 - **`port_contractuel`** : l'égalité bit à bit EST le contrat, épinglée par
   digests gravés.
-- **`port_source_requalified`** (catégorie ajoutée sur demande de l'audit du
-  31 août) : source v5 quasi littérale, épinglée au pin v5 et requalifiée par
-  les portes v6. C'est le régime honnête des transcriptions mécaniques :
-  conserver le code éprouvé sans créer une fausse provenance « réécrit ».
+- **`port_source_requalified`** : source v5 quasi littérale, épinglée au pin
+  v5 ET requalifiée par une porte v6 dédiée exécutée.
+- **`port_source_pending_requalification`** : même origine, portes dédiées
+  pas encore portées — requalification par les seules portes transverses
+  (conformité d'objet, boucle de mutants). C'est l'état honnête du gros du
+  socle tant que les portes v5 correspondantes ne sont pas portées.
 - **`re_derive`** : réellement réécrit depuis `docs/MATHEMATIQUES.md`,
   requalifié par oracle indépendant et mutants v6.
 - **`neuf`** : sans équivalent v5.
@@ -31,22 +33,30 @@ calculés une fois par la v5 au pin `3bad233d` et gravés dans
 `digest_forest_K*`. Un digest égal prouve « même objet que la v5 », jamais
 l'exactitude HGP.
 
-Constat de J2, plus fort que prévu : le sweep de corde unifié est une pure
-transformation de coût (chaque complétion est une racine, la profondeur au
-point de racine égale le filtre v5 par l'identité affine du th. 10.4, une
-racine strictement hors corde correspond exactement à un tétraèdre non bien
-centré) — le multiensemble émis et donc **`digest_balls` sont eux aussi
-identiques à la v5** au pin de référence. Tant que cette égalité tient, la
-conformité la vérifie aussi ; le jour où un tueur v6 plus fort la rompt
-légitimement, `digest_balls` bascule sur la frontière post-préfiltre exact
-(frontière canonique v6, gravée à ce moment-là avec sa justification), et la
-conformité v5↔v6 reste sur l'objet (`digest_all`, forêts) — le pattern
-d'erreur n° 6 v5 (un digest qui mesure un filtre) reste fermé par doctrine.
+Monnaies de digest GELÉES (P0 du 31 août — aucun renommage conditionnel) :
+la conformité d'objet v5↔v6 porte sur `digest_all` et chaque
+`digest_forest_K*`. `digest_candidates_v5_compat` (tag v4, candidats uniques
+post-RLE) est un diagnostic différentiel de génération : identique à la v5
+au checkpoint J2 (le sweep est une transformation de coût), il DIVERGE
+légitimement depuis le correctif du cover q4 au coefficient 4 (le
+coefficient 3 v5 perdait des témoins intérieurs — P0, porte
+`mhgp6_cover_coef4` ; sur la v5, `q4-cover-coef4` donnait 3 134 427 →
+3 134 404 candidats uniques à uniform 8000, survivantes et `digest_all`
+inchangés). `digest_postprefilter` (tag `mhgp6-digest-v1:postprefilter-candidates`)
+signe les records survivants du préfiltre exact : non-régression interne v6,
+golden gravé (uniform 400). Le pattern d'erreur n° 6 v5 (un digest qui
+mesure un filtre) reste fermé : aucun digest de candidats n'est un critère
+d'objet.
 
-## Ports de source requalifiés (`port_source_requalified`, pin v5 3bad233d)
+## Ports de source (pin v5 3bad233d)
 
 Transcriptions quasi littérales (renommage mhgp5→mhgp6 seulement, diffs
-mécaniques vérifiés à la livraison), requalifiées par les portes v6 :
+mécaniques vérifiés à la livraison). Statut
+`port_source_pending_requalification` par défaut ; passent
+`port_source_requalified` avec leur porte dédiée (état au 31 août :
+sector_kill/chord_kill/cell_grid via les fixtures du sweep et les mutants
+exécutés ; census/candidates via conformité + mutants ; le reste en
+attente) :
 `src/core/{types,morton,intmath,wide,dint,mutants,parse,device}.hpp`,
 `src/tree/cloud_index.hpp`, `src/wspd/wavefront.hpp`,
 `src/spindle/{spindle,witness_count}.hpp`, `src/lanes/{keys,level,q2,q3,q4,

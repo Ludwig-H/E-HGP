@@ -72,15 +72,17 @@ struct Writer {
   }
 };
 
+inline void candidate_record(Writer* d, const BallCandidate& c) {
+  d->i128v(c.key.a);
+  for (int i = 0; i < 3; ++i) d->i128v(c.key.b[i]);
+  d->i128v(c.key.c);
+  d->level(c.level);
+  d->u8v(c.arity);
+}
+
 inline void candidate_records(Writer* d, const std::vector<BallCandidate>& cands) {
   d->u64v((u64)cands.size());
-  for (const BallCandidate& c : cands) {
-    d->i128v(c.key.a);
-    for (int i = 0; i < 3; ++i) d->i128v(c.key.b[i]);
-    d->i128v(c.key.c);
-    d->level(c.level);
-    d->u8v(c.arity);
-  }
+  for (const BallCandidate& c : cands) candidate_record(d, c);
 }
 }  // namespace digest_detail
 
@@ -97,6 +99,22 @@ inline std::string digest_raw_candidates_v6(const std::vector<BallCandidate>& ca
   digest_detail::Writer d;
   d.tag("mhgp6-diagnostic-v1:raw-candidates");
   digest_detail::candidate_records(&d, cands);
+  return d.hex();
+}
+
+// MONNAIE POST-PREFILTRE v6 (P0 audit du 31 aout, tag NEUF gele des J2+) :
+// signe exactement les records `cands[s.idx]` des survivants du prefiltre
+// exact, dans l'ordre canonique (celui des survivants, croissant en idx),
+// sans la profondeur et sans copier les candidats. Non-regression INTERNE
+// v6 : cette frontiere ne depend que de l'objet, jamais de la force des
+// tueurs de generation. Elle ne prouve ni la completude du generateur ni
+// l'exact-once (portes distinctes).
+template <typename SurvivorRange>
+inline std::string digest_postprefilter_v6(const std::vector<BallCandidate>& cands, const SurvivorRange& survivors) {
+  digest_detail::Writer d;
+  d.tag("mhgp6-digest-v1:postprefilter-candidates");
+  d.u64v((u64)survivors.size());
+  for (const auto& s : survivors) digest_detail::candidate_record(&d, cands[s.idx]);
   return d.hex();
 }
 

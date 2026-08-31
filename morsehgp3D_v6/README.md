@@ -14,17 +14,21 @@ La v6 remplace `morsehgp3D_v5/` comme chantier actif. Elle calcule **le même
 objet** que la v5 (les dix forêts horizontales HGP K=1..10 du manuscrit,
 Défs 20–31, Th. 2–7, niveaux ρ² exacts sur le profil u16, sémantique publiée
 `forest_semantics=verified_events_only`, `proof_basis=gabriel_positive_connectivity`,
-aucune sortie ne porte `require_exact=true`) avec **une base de code neuve**
-et une architecture de génération q3/q4 repensée pour un contrat de coût
-**sortie-sensible** (voir `audits/NOTE_CLAUDE_CONCEPTION_V6_20260831.md`,
-document fondateur).
+aucune sortie ne porte `require_exact=true`) sur un **socle v5 porté et
+requalifié** (docs/PROVENANCE.md) avec une **génération q3/q4 neuve** au
+contrat de coût **sortie-sensible** (voir
+`audits/NOTE_CLAUDE_CONCEPTION_V6_20260831.md`, document fondateur, et
+`audits/ETAT_COURANT.md` qui prime).
 
 La v5 est le sujet différentiel : pin de référence `3bad233d`, digests gravés
 dans `receipts/conformite_v5/` (cinq familles × {8000, 16000, 32000}, graine 3,
 s=8, smax=11). La conformité v5↔v6 se prouve sur `digest_all` et les dix
-`digest_forest_K*` (l'objet) ; `digest_balls` v6 est une **nouvelle base**,
-prise après le préfiltre exact count-only (un digest de candidats mesure un
-filtre, jamais l'objet).
+`digest_forest_K*` (l'objet). Deux monnaies de candidats distinctes sont
+gelées : `digest_candidates_v5_compat` (tag v4, post-RLE — diagnostic
+différentiel ; diverge légitimement de la v5 depuis le cover q4 au
+coefficient 4) et `digest_postprefilter` (tag neuf, survivants du préfiltre
+exact — non-régression interne v6). Un digest de candidats mesure un filtre,
+jamais l'objet.
 
 ## Ordre de lecture
 

@@ -83,7 +83,11 @@ struct RunResult {
   ExpandStats expand;
   std::vector<KCardinalities> cards;  // indexee par K
   u64 total_facets = 0, total_fusions = 0, total_deltas = 0, total_nodes = 0, total_events = 0;
-  std::string digest_raw_candidates, digest_balls, digest_all;
+  // digest_balls = digest_candidates_v5_compat (tag v4, candidats uniques
+  // post-RLE : diagnostic differentiel de generation, PAS l'objet) ;
+  // digest_postprefilter = mhgp6-digest-v1:postprefilter-candidates (les
+  // survivants du prefiltre exact : non-regression interne v6).
+  std::string digest_raw_candidates, digest_balls, digest_postprefilter, digest_all;
   std::vector<std::string> digest_forest;  // indexee par K
   double t_index_ms = 0, t_gen_ms = 0, t_rle_ms = 0, t_prefilter_ms = 0, t_census_ms = 0, t_expand_ms = 0,
          t_fold_ms = 0, t_count_ms = 0, t_digest_ms = 0;
@@ -234,6 +238,11 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
                      ? "resource_exhausted : coquille au-dela du plafond (jamais de troncature)"
                      : "invariant : census contredit la passe count-only";
     return rr;
+  }
+  if (opt.digest) {
+    const auto t_dp = std::chrono::steady_clock::now();
+    rr.digest_postprefilter = digest_postprefilter_v6(cands, surv);
+    rr.t_digest_ms += ms(t_dp);
   }
   std::vector<Survivor>().swap(surv);
   rr.t_census_ms = ms(t_c);
@@ -599,7 +608,8 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
   if (opt.digest) {
     if (!rr.digest_raw_candidates.empty())
       std::fprintf(out, "digest_raw_candidates=%s\n", rr.digest_raw_candidates.c_str());
-    std::fprintf(out, "digest_balls=%s\n", rr.digest_balls.c_str());
+    std::fprintf(out, "digest_candidates_v5_compat=%s\n", rr.digest_balls.c_str());
+    std::fprintf(out, "digest_postprefilter=%s\n", rr.digest_postprefilter.c_str());
     for (u64 K = 1; K <= rr.kmax_eff; ++K)
       std::fprintf(out, "digest_forest_K%llu=%s\n", (unsigned long long)K, rr.digest_forest[K].c_str());
     std::fprintf(out, "digest_all=%s\n", rr.digest_all.c_str());

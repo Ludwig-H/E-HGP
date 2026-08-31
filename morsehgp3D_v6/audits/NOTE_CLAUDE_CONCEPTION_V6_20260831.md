@@ -1,5 +1,14 @@
 # Note Claude — conception fondatrice de MorseHGP3D v6 (31 août 2026)
 
+> [!NOTE]
+> Document HISTORIQUE de conception, supersédé point par point par
+> `ETAT_COURANT.md` (qui prime) et les livraisons. En particulier : le sweep
+> mutualise le rescan de profondeur PAR SEED (l'incidence seed–complétion
+> reste payée — « le produit C×D est mort » était trop fort) ; le cover q4
+> est au coefficient 4 depuis le P0 du 31 août ; les monnaies de digest sont
+> gelées séparément (pas de « bascule le jour où ») ; le contrat de
+> profondeur retenu est le contrat 1 (cover complet, aucun crédit ajouté).
+
 Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.

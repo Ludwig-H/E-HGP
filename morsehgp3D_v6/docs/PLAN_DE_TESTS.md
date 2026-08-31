@@ -10,13 +10,17 @@ Conventions héritées v5, toutes reconduites :
   s'énonce), `slow`.
 - **Planchers `--min-*`** sur toute porte contre le vert-par-vacuité
   (violation = code 3).
-- **Mutants causaux** : registre unique exhaustif
-  (`src/core/mutants.hpp::kMutants`), points d'injection
-  `MHGP6_MUTANT("nom")` dans le code de production, compilés seulement sous
-  `MHGP6_TESTING` (posé par `mhgp6_executable`, jamais par
-  `mhgp6_product_executable`) ; nom inconnu refusé code 2 ; chaque nom = un
-  point d'injection + une porte code 4 ; `tests/mutants_gate.py` vérifie
-  registre ≡ grep ≡ portes.
+- **Mutants causaux** : registre unique (`src/core/mutants.hpp::kMutants`),
+  points d'injection `MHGP6_MUTANT("nom")` dans le code de production,
+  compilés seulement sous `MHGP6_TESTING` (posé par `mhgp6_executable`,
+  jamais par `mhgp6_product_executable`) ; nom inconnu refusé code 2. Cible :
+  chaque nom = un point d'injection + une porte code 4 EXÉCUTÉE. État réel
+  (audit du 31 août) : 60 noms au registre, tous injectés ; ~30 tués par une
+  porte exécutée (mutants dédiés + boucle de divergence d'objet
+  `mhgp6_mutant_*` sur eight_clusters 400) ; le reste `[PRÉVU]` avec les
+  portes v5 à porter (`fold-inject-b-exception-k3` exige le juge d'in-flight
+  dédié : il termine par signal, jamais par la boucle de conformité). Un
+  contrôle textuel registre ≡ grep est un complément, jamais un kill.
 - Équivariance par permutation physique et par réétiquetage (`PointId` ≠
   index dense ≠ rang Morton, mutant `dense-pointid`).
 - Sortie **bit-identique** quel que soit le nombre de fils (fils ∈ {1, 8, max})
@@ -29,12 +33,13 @@ Conventions héritées v5, toutes reconduites :
   (`mhgp6_obig_selftest`) contre `__int128` et une reconstruction
   indépendante.
 
-## Portes par étage (liste tenue à jour avec le code)
+## Portes par étage — état RÉEL au 31 août ; tout ce qui n'est pas dans
+`CMakeLists.txt` est `[PRÉVU]`, jamais implicite
 
 | Étage | Portes |
 |---|---|
-| cœur arithmétique | `mhgp6_arith_selftest` (largeurs aux extrêmes u16), `mhgp6_level_cmp` (U192/U320 contre oracle 384 bits, mutant `level-trunc-hi`), `mhgp6_dint_gate`, `mhgp6_sha256_gate` |
-| familles | `mhgp6_families_fixture` : digests v5 gravés pour les familles portées ; digests v6 gravés pour les stationnaires ; mutant `family-scanline-overshoot` |
+| cœur arithmétique | `mhgp6_arith_selftest` (bornes, U192/U320, DI128 vs __int128 échantillonné), `mhgp6_sha256_selftest` (FIPS + streaming). `[PRÉVU]` : `mhgp6_level_cmp` contre l'oracle 384 bits (mutant `level-trunc-hi`), `mhgp6_dint_gate` complet, porte d'égalité SHA-NI/portable |
+| familles | `mhgp6_families_fixture` : déterminisme, profil, unicité, cardinalité (l'égalité bit à bit aux nuages v5 a été vérifiée hors porte à la livraison — 36 configurations). `[PRÉVU]` : digests gravés par famille et mutant `family-scanline-overshoot` raccordé |
 | index | `mhgp6_tree_selftest` (structure, boîtes, équivariance) |
 | WSPD | ledger exact `Σ émis + Σ tués = C(n,2) − Σ C(mult,2)` ; mutants `wspd-cap-terminal`, `wspd-split-heaviest`, `wspd-drop-rect` ; `--check-permutation` |
 | descente fusionnée | `mhgp6_fused_descent_gate` : listes identiques à la triple descente test-only, avec `smax_effective` (cas `collinear_seven` à 9 points gravé) ; mutant `fused-mask-stuck` |
@@ -44,9 +49,12 @@ Conventions héritées v5, toutes reconduites :
 | sweep q4 | **oracle du sweep** (re-balayage exhaustif en μ, échange des quantificateurs, racines/frontières) ; fixtures : relais `F1=μ+1, F2=1−μ`, racines confondues, complétion incidente (compte zéro), clip d'égalité à μ*, les trois cas B=0, sortie dans cellule profonde avant portion shallow ; mutants `sweep-drop-exit-root`, `sweep-nonstrict-depth`, `sweep-skip-fragment`, `sweep-completion-from-witness-tape`, `chord-dead-skip-positive` (hérité) |
 | barrière de sortie | `mhgp6_linked_arcs_gate` : littéraux, comptes exacts q3/q4, profondeur zéro, coquille = support, exact-once pré-RLE, équivariance, mutant de troncature i64 de l'oracle |
 | RLE/census | mutants `rle-drop`, `depth-threshold-minus-one`, `range-add-max-le-zero`, `census-nonstrict`, `skip-full-census` ; fixtures plateau (carré cocyclique) |
-| fold/rendu | juge borné n ≤ 14 (miniboule + cliques + Kruskal à lots) ; K=1 ≡ MST indépendant ; rejeu « catalogue + deltas → partition » ; mutants `drop-nonmerge`, `attach-prebatch`, `repr-ties`, `render-active-only` ; planchers deltas/facettes |
-| conformité v5 | `mhgp6_conformity_*` : `digest_all` + `digest_forest_K*` ≡ `receipts/conformite_v5/` sur 5 familles × {8000, 16000, 32000} (labels scale*) et petites tailles rapides en `gate` |
-| parallélisme | `par_gate` (digest identique fils ∈ {1,8}), mutants `par-drop-shard`, `parallel-sort-unstable` |
+| fold/rendu | mutants `drop-nonmerge`, `attach-prebatch`, `repr-ties`, `binary-ties`, `canonical-is-uf-root`, `fold-inject-a-failure-k2` tués (boucle de divergence d'objet). `[PRÉVU]` : juge borné n ≤ 14 (miniboule + cliques + Kruskal à lots), K=1 ≡ MST indépendant, rejeu « catalogue + deltas → partition », juge d'in-flight (`fold-inject-b-exception-k3`), `render-active-only`, planchers |
+| conformité v5 | `mhgp6_conformity_*` : `digest_all` + `digest_forest_K*` (l'OBJET) ≡ `receipts/conformite_v5/` sur 5 familles × {8000, 16000, 32000} (labels scale*) et petites tailles en `gate` ; le digest candidats v5-compat est rapporté, jamais un critère (cover q4 coefficient 4) ; golden post-préfiltre v6 gravé (uniform 400) |
+| cover q4 | `mhgp6_cover_coef4` (contre-fixture tétraèdre régulier + z, frontière de génération) + mutant `q4-cover-coef3` |
+| barrière de génération/census | `mhgp6_linked_arcs_u16` + mutant d'oracle i64 (portée : génération→census ; l'extension aux facettes de forêt est `[PRÉVU]`) |
+| frontières du sweep | `mhgp6_sweep_frontieres` (F1–F5 : racines égales, extrémité de Jung exacte, B=0, complétion dans le facteur, profondeur h4−1) + 2 mutants |
+| parallélisme | mutants `par-drop-shard`, `par-drop-ball-chunk` tués (boucle). `[PRÉVU]` : `par_gate` digest identique fils ∈ {1,8}, `parallel-sort-unstable`, `fold_inflight` ∈ {1,2,8} |
 
 ## Fixtures permanentes aux coordonnées exactes
 
