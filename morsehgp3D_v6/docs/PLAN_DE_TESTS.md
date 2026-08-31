@@ -15,12 +15,16 @@ Conventions héritées v5, toutes reconduites :
   compilés seulement sous `MHGP6_TESTING` (posé par `mhgp6_executable`,
   jamais par `mhgp6_product_executable`) ; nom inconnu refusé code 2. Cible :
   chaque nom = un point d'injection + une porte code 4 EXÉCUTÉE. État réel
-  (recompté au cinquième cycle d'audit) : 60 noms au registre, 64 points
-  d'injection (63 sous src/, un sous oracle/) ; **27 noms distincts** tués
-  par une porte exécutée (le quatrième cycle annonçait 28 : la porte
+  (recompté après la porte d'ownership) : 60 noms au registre, 66 points
+  d'injection (65 sous src/, un sous oracle/ — `wspd-cap-terminal` et
+  `wspd-split-heaviest` ont maintenant un site sur la route FUSIONNÉE en
+  plus de la route brute) ; **29 noms distincts** tués par une porte
+  exécutée (le quatrième cycle annonçait 28 : la porte
   `mhgp6_fused_mutant_droprect` tue `wspd-drop-rect`, déjà compté dans la
-  boucle de conformité — deux portes, un seul nom) : mutants dédiés + boucle
-  de divergence d'objet `mhgp6_mutant_*` + `family-scanline-overshoot`.
+  boucle de conformité — deux portes, un seul nom ; cap et split sont tués
+  depuis par `mhgp6_wspd_mutant_cap`/`_split` sur la porte d'ownership) :
+  mutants dédiés + boucle de divergence d'objet `mhgp6_mutant_*` +
+  `family-scanline-overshoot`.
   `wspd-drop-rect` est désormais UNE omission par DESCENTE appliquée après la
   fusion ordonnée, masse omise soustraite du grand-livre reconstruit
   (`emis + tués + omis == attendu`, delta −1 littéral gravé par

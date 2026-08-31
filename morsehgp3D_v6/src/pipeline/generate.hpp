@@ -277,6 +277,13 @@ inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3
     throw std::invalid_argument("alive_rectangles_fused : separation s < 8 sans opt-in test-only");
   if (ix.nodes.empty()) return;
   const bool mask_stuck = MHGP6_MUTANT("fused-mask-stuck");
+  // MUTANTS de la descente elle-meme (porte d'ownership --wspd-ownership) :
+  // cap = un rectangle de petite masse est declare terminal SANS etre separe
+  // (le pavage quadratique v3) — tue par l'assertion de separation ; split =
+  // scission du facteur de PLUS PETIT diametre — l'arbre change, tue par la
+  // fixture gravee du nombre de rectangles.
+  const bool mut_cap = MHGP6_MUTANT("wspd-cap-terminal");
+  const bool mut_split_flip = MHGP6_MUTANT("wspd-split-heaviest");
   struct Task {
     WspdRect r;
     u8 mask;
@@ -316,7 +323,7 @@ inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3
         }
         if (m == 0) continue;  // rectangle mort pour toutes les lanes restantes
         const AxisBox va = ix.box_of(t.r.a), vb = ix.box_of(t.r.b);
-        if (wspd_detail::separated(va, vb, s, 1)) {
+        if (wspd_detail::separated(va, vb, s, 1) || (mut_cap && pair_mass(t.r) <= 9)) {
           // TERMINAL : recomptage avec autorite de coins ; il peut fermer des
           // lanes de plus (les masses correspondantes vont au grand-livre).
           const FusedCounts ff = count_universal_witnesses(ix, t.r.a, t.r.b, h_of, m, true);
@@ -340,7 +347,7 @@ inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3
         }
         // SCISSION du facteur de plus grand diametre (jamais une feuille).
         const i64 w2a = wspd_detail::box_w2(va), w2b = wspd_detail::box_w2(vb);
-        const bool split_a = (t.r.a >= 0) && (t.r.b < 0 || w2a >= w2b);
+        const bool split_a = (t.r.a >= 0) && (t.r.b < 0 || (mut_split_flip ? w2a < w2b : w2a >= w2b));
         const NodeRef keep = split_a ? t.r.b : t.r.a;
         const RadixNode& n = ix.nodes[(size_t)(split_a ? t.r.a : t.r.b)];
         lnext[c].push_back(Task{split_a ? WspdRect{n.left, keep} : WspdRect{keep, n.left}, m});

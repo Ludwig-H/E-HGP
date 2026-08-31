@@ -56,6 +56,13 @@ mhgp6_gate(mhgp6_families_fixture 0 mhgp6_selftest ARGS --families)
 mhgp6_gate(mhgp6_families_mutant_overshoot 4 mhgp6_selftest ARGS --families --inject=family-scanline-overshoot)
 mhgp6_gate(mhgp6_tree_selftest 0 mhgp6_selftest ARGS --tree)
 mhgp6_gate(mhgp6_wspd_ledger 0 mhgp6_selftest ARGS --wspd-ledger)
+# Requalification de la descente fusionnee (cinquieme cycle) : ownership par
+# paire (exactement une fois), litteral n-1 par position, separation de
+# chaque rectangle, grand-livre sans masse tuee a h infini, fixtures gravees
+# du nombre de rectangles ; mutants cap/split retargetes sur la route fusionnee.
+mhgp6_gate(mhgp6_wspd_ownership 0 mhgp6_selftest ARGS --wspd-ownership)
+mhgp6_gate(mhgp6_wspd_mutant_cap 4 mhgp6_selftest ARGS --wspd-ownership --inject=wspd-cap-terminal)
+mhgp6_gate(mhgp6_wspd_mutant_split 4 mhgp6_selftest ARGS --wspd-ownership --inject=wspd-split-heaviest)
 mhgp6_gate(mhgp6_fused_descent 0 mhgp6_selftest ARGS --fused-descent)
 mhgp6_gate(mhgp6_sweep_oracle 0 mhgp6_selftest ARGS --sweep-oracle LABELS "gate;oracle")
 mhgp6_gate(mhgp6_sweep_mutant_depth 4 mhgp6_selftest ARGS --sweep-oracle --inject=sweep-nonstrict-depth)

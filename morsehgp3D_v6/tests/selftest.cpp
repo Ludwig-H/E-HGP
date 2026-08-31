@@ -282,6 +282,97 @@ int run_wspd_ledger() {
   return g_failures ? 1 : 0;
 }
 
+// ---- --wspd-ownership : la descente fusionnee PARTITIONNE les paires
+// (requalification demandee par le cinquieme cycle d'audit). A h INFINI
+// (aucune lane ne meurt) : chaque paire de positions uniques appartient a
+// EXACTEMENT UN rectangle vivant, chaque rectangle est separe a s = 8,
+// chaque position voit u−1 partenaires (litteral n−1), le grand-livre ferme
+// avec une masse tuee NULLE, et le nombre de rectangles EGALE la fixture
+// gravee. Mutants sur la route fusionnee : `wspd-cap-terminal` emet un
+// rectangle NON separe (tue par l'assertion de separation) ;
+// `wspd-split-heaviest` scinde le facteur de plus petit diametre (l'arbre
+// change, tue par la fixture du nombre de rectangles).
+int run_wspd_ownership(bool injected) {
+  u64 mismatches = 0;
+  struct Fixture {
+    CloudFamily f;
+    int n;
+    u64 rects;  // gravee : nombre de rectangles vivants a h infini, seed 3
+  };
+  const Fixture fixtures[] = {{CloudFamily::kUniform, 300, 23586},
+                              {CloudFamily::kEightClusters, 300, 12520}};
+  for (const Fixture& fx : fixtures) {
+    const std::vector<InputPoint> in = make_family_input(fx.f, fx.n, cloud_family_default_coord(fx.f, fx.n), 3);
+    const CloudIndex ix = build_cloud_index(in);
+    const u64 huge = (u64)1 << 62;
+    const u64 h_inf[3] = {huge, huge, huge};
+    std::vector<MultiAliveRect> rects;
+    GenerateStats st;
+    alive_rectangles_fused(ix, 8, h_inf, 0b111, 2, &rects, &st);
+    const size_t u = ix.upos.size();
+    if ((u64)rects.size() != fx.rects) {
+      ++mismatches;
+      std::fprintf(stderr, "%s : %zu rectangles vivants != fixture %llu\n", cloud_family_name(fx.f), rects.size(),
+                   (unsigned long long)fx.rects);
+    }
+    for (const MultiAliveRect& r : rects)
+      if (!wspd_detail::separated(ix.box_of(r.r.a), ix.box_of(r.r.b), 8, 1)) {
+        ++mismatches;
+        std::fprintf(stderr, "%s : rectangle NON separe emis\n", cloud_family_name(fx.f));
+        break;
+      }
+    // Ownership : chaque paire non ordonnee couverte EXACTEMENT une fois.
+    std::vector<u8> cover(u * u, 0);
+    bool twice = false;
+    for (const MultiAliveRect& r : rects) {
+      const NodeRange ra = ix.range_of(r.r.a), rb = ix.range_of(r.r.b);
+      for (i32 i = ra.first; i <= ra.last; ++i)
+        for (i32 j = rb.first; j <= rb.last; ++j) {
+          const size_t a = (size_t)std::min(i, j), b = (size_t)std::max(i, j);
+          if (cover[a * u + b]++) twice = true;
+        }
+    }
+    u64 covered = 0;
+    std::vector<u64> deg(u, 0);
+    for (size_t a = 0; a < u; ++a)
+      for (size_t b = a + 1; b < u; ++b)
+        if (cover[a * u + b]) {
+          ++covered;
+          ++deg[a];
+          ++deg[b];
+        }
+    if (twice) {
+      ++mismatches;
+      std::fprintf(stderr, "%s : une paire couverte DEUX fois\n", cloud_family_name(fx.f));
+    }
+    if (covered != (u64)u * (u - 1) / 2) {
+      ++mismatches;
+      std::fprintf(stderr, "%s : %llu paires couvertes != C(%zu,2)\n", cloud_family_name(fx.f),
+                   (unsigned long long)covered, u);
+    }
+    for (size_t i = 0; i < u; ++i)
+      if (deg[i] != (u64)u - 1) {
+        ++mismatches;
+        std::fprintf(stderr, "%s : litteral n-1 viole (position %zu voit %llu partenaires)\n",
+                     cloud_family_name(fx.f), i, (unsigned long long)deg[i]);
+        break;
+      }
+    const u128 expected = expected_pair_mass(ix);
+    for (int q = 0; q < 3; ++q) {
+      if (st.ledger_killed_mass[q] != 0) {
+        ++mismatches;
+        std::fprintf(stderr, "%s : masse tuee non nulle a h infini (lane %d)\n", cloud_family_name(fx.f), q + 2);
+      }
+      if (st.ledger_emitted_mass[q] != expected) {
+        ++mismatches;
+        std::fprintf(stderr, "%s : masse emise != attendue (lane %d)\n", cloud_family_name(fx.f), q + 2);
+      }
+    }
+  }
+  if (injected) return mismatches ? 4 : 3;
+  return mismatches ? 1 : 0;
+}
+
 // ---- --fused-descent : la descente a masque plein egale les trois descentes
 // a masque singleton (meme code, masque reduit), et le grand-livre ferme.
 int run_fused_descent(bool injected) {
@@ -499,6 +590,7 @@ int main(int argc, char** argv) {
   else if (m == "tree") rc = run_tree();
   else if (m == "wspd-ledger") rc = run_wspd_ledger();
   else if (m == "fused-descent") rc = run_fused_descent(injected);
+  else if (m == "wspd-ownership") rc = run_wspd_ownership(injected);
   else if (m == "sweep-oracle") rc = run_sweep_oracle(injected);
   else {
     std::fprintf(stderr, "mode inconnu : %s\n", mode);
