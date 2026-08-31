@@ -70,6 +70,9 @@ mhgp6_gate(mhgp6_wspd_mutant_split 4 mhgp6_selftest ARGS --wspd-ownership --inje
 mhgp6_gate(mhgp6_contrat_echec 0 mhgp6_selftest ARGS --failure-contract TIMEOUT 600)
 mhgp6_gate(mhgp6_contrat_echec_census 4 mhgp6_selftest ARGS --failure-contract --inject=census-nonstrict TIMEOUT 600)
 mhgp6_gate(mhgp6_contrat_echec_fold_k2 4 mhgp6_selftest ARGS --failure-contract --inject=fold-inject-a-failure-k2 TIMEOUT 600)
+# Etage E6 (--e6-grille) : objet et multiensemble emis BIT-IDENTIQUES sous la
+# grille raffinee, W_sweep1 jamais augmente, plancher de grilles construites.
+mhgp6_gate(mhgp6_e6_grille_objet 0 mhgp6_selftest ARGS --e6-equal TIMEOUT 600)
 mhgp6_gate(mhgp6_fused_descent 0 mhgp6_selftest ARGS --fused-descent)
 mhgp6_gate(mhgp6_sweep_oracle 0 mhgp6_selftest ARGS --sweep-oracle LABELS "gate;oracle")
 mhgp6_gate(mhgp6_sweep_mutant_depth 4 mhgp6_selftest ARGS --sweep-oracle --inject=sweep-nonstrict-depth)

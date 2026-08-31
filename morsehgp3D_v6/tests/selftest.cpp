@@ -374,6 +374,55 @@ int run_failure_contract(bool injected) {
   return mismatches ? 3 : 4;
 }
 
+// ---- --e6-equal : l'etage E6 (--e6-grille, grille raffinee G=16 sur les
+// ancres q4 lourdes, vetos leves) laisse l'OBJET et le MULTIENSEMBLE EMIS
+// bit-identiques (les kills de cellules sont des certificats 10.5 : toute
+// seed tuee n'aurait rien emis), et ne peut qu'OTER des evaluations de
+// passe 1. Plancher anti-vacuite : des grilles raffinees construites.
+int run_e6_equal(bool injected) {
+  if (injected) return 2;  // pas de semantique de mutant pour ce mode
+  u64 mismatches = 0;
+  u64 grids16 = 0;
+  for (const CloudFamily f : {CloudFamily::kTerrainStationnaire, CloudFamily::kScanlineStationnaire,
+                              CloudFamily::kEightClusters}) {
+    const int n = 2000;
+    const std::vector<InputPoint> in = make_family_input(f, n, cloud_family_default_coord(f, n), 3);
+    RunOptions off;
+    off.digest = true;
+    off.diagnostic_raw_candidates_digest = true;
+    off.threads = 2;
+    RunOptions on = off;
+    on.e6_grid = true;
+    const RunResult a = run_pipeline(in, off);
+    const RunResult b = run_pipeline(in, on);
+    if (a.status != PipelineStatus::kCompleteRegular || b.status != PipelineStatus::kCompleteRegular) {
+      ++mismatches;
+      std::fprintf(stderr, "%s : statut non complet\n", cloud_family_name(f));
+      continue;
+    }
+    if (a.digest_all != b.digest_all || a.digest_raw_candidates != b.digest_raw_candidates ||
+        a.digest_postprefilter != b.digest_postprefilter || a.digest_forest != b.digest_forest) {
+      ++mismatches;
+      std::fprintf(stderr, "%s : OBJET ou multiensemble DIVERGENT sous --e6-grille\n", cloud_family_name(f));
+    }
+    if (b.gen.q4_core_site_tests > a.gen.q4_core_site_tests) {
+      ++mismatches;
+      std::fprintf(stderr, "%s : W_sweep1 AUGMENTE sous --e6-grille\n", cloud_family_name(f));
+    }
+    grids16 += b.gen.e6_grids16_built;
+    if (a.gen.e6_grids16_built != 0) {
+      ++mismatches;
+      std::fprintf(stderr, "%s : grilles16 construites SANS --e6-grille\n", cloud_family_name(f));
+    }
+  }
+  if (grids16 < 100) {
+    ++mismatches;
+    std::fprintf(stderr, "plancher : %llu grilles raffinees construites (>= 100 exigees)\n",
+                 (unsigned long long)grids16);
+  }
+  return mismatches ? 1 : 0;
+}
+
 // ---- --wspd-ownership : la descente fusionnee PARTITIONNE les paires
 // (requalification demandee par le cinquieme cycle d'audit). A h INFINI
 // (aucune lane ne meurt) : chaque paire de positions uniques appartient a
@@ -684,6 +733,7 @@ int main(int argc, char** argv) {
   else if (m == "fused-descent") rc = run_fused_descent(injected);
   else if (m == "wspd-ownership") rc = run_wspd_ownership(injected);
   else if (m == "failure-contract") rc = run_failure_contract(injected);
+  else if (m == "e6-equal") rc = run_e6_equal(injected);
   else if (m == "sweep-oracle") rc = run_sweep_oracle(injected);
   else {
     std::fprintf(stderr, "mode inconnu : %s\n", mode);

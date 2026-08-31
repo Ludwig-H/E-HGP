@@ -73,6 +73,8 @@ int main(int argc, char** argv) {
       opt.shell_cap = (size_t)v;
     } else if (arg == "--sonde-e6") {
       opt.e6_probe = true;
+    } else if (arg == "--e6-grille") {
+      opt.e6_grid = true;
     } else if (arg == "--digest") {
       opt.digest = true;
     } else {

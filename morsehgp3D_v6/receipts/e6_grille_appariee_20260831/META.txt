@@ -1,0 +1,12 @@
+recu=banc apparie ON/OFF de l'etage E6 (--e6-grille : grille raffinee G=16 sur ancres q4 a cover >= 1024, vetos near_m/ratio leves) — mesure, jamais un claim
+pin=le commit de livraison qui contient ce recu
+e41465e6dd996dd6cd094f0358f465bb942677aa4d41f6624f3dd298952b9ee8  build/v6/mhgp6
+OBJET : digest_all, forets, post-prefiltre et multiensemble emis BIT-IDENTIQUES sur chaque paire (verifie ici et par la porte mhgp6_e6_grille_objet, plancher de grilles construites)
+W_sweep1 (tests_coeur, compteur deterministe) :
+  scanline_stationnaire 16000 g5 : 429349237 -> 365929479 (-14,8%) ; 32000 g5 : 2277544947 -> 1359667302 (-40,3%)
+  terrain_stationnaire  16000 g5 : 174918842 -> 146783460 (-16,1%) ; 32000 g5 :  740313876 ->  498320908 (-32,7%)
+  eight_clusters        16000 g5 : 1406480323 -> 1235186692 (-12,2%)
+PENTE g5 du pas 16000->32000 : scanline 2,41 -> 1,89 ; terrain 2,08 -> 1,76 (sous le seuil 2 du GRAND_LIVRE § 3 sur la PIRE graine)
+murs indicatifs (machine partagee, jamais une mesure) : scanline 32000 141,2s -> 126,4s ; terrain 32000 64,7s -> 61,4s
+machine=codespace 8 vCPU, campagne de confirmation concurrente ; compteurs deterministes seulement
+date_utc=2026-08-31T15:39:45Z

@@ -89,8 +89,12 @@ inline bool cell_grid_wanted(size_t cover_size, size_t acute_seeds, size_t near_
 }
 inline bool cell_grid_near_m(i64 dist2q, i64 D2) { return (i128)100 * dist2q < (i128)36 * D2; }
 
-struct CellGrid {
-  static constexpr int G = kCellGridG;
+// La grille est PARAMETRIQUE en G (etage E6 : G = 16 sur les ancres
+// lourdes) : le certificat 10.5, la borne du localisateur (relative en G,
+// terme absolu 2^-40 inchange) et la construction sont symboliques en G.
+template <int GParam>
+struct CellGridT {
+  static constexpr int G = GParam;
   static constexpr int NV = 2 * G + 1;  // sommets par axe : i' = -G..G -> indice i' + G
   static constexpr int NC = 2 * G;      // cellules par axe : i = -G..G-1 -> indice i + G
   // Motif d'un echec de construction (fail-open : la grille ne tue rien).
@@ -334,5 +338,11 @@ struct CellGrid {
     return mn;
   }
 };
+
+// L'alias historique : la grille de production a G = 8 (theoreme 10.5).
+using CellGrid = CellGridT<kCellGridG>;
+// Grille RAFFINEE de l'etage E6 (opt-in --e6-grille, ancres q4 lourdes).
+inline constexpr int kCellGridGFine = 16;
+using CellGridFine = CellGridT<kCellGridGFine>;
 
 }  // namespace mhgp6

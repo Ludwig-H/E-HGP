@@ -66,6 +66,8 @@ struct RunOptions {
   int fold_inflight = 2;
   // Sonde E6 opt-in (--sonde-e6) : lecture seule, objet inchange.
   bool e6_probe = false;
+  // Etage E6 opt-in (--e6-grille) : grille raffinee sur ancres lourdes.
+  bool e6_grid = false;
   std::function<void(u64 K, FoldPhase phase)> on_fold_phase;
   size_t pretest_query_min_points = 512;
   size_t cell_grid_min_sites = kCellGridMinSites;
@@ -201,6 +203,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   go.smax = rr.smax_eff;
   go.threads = opt.threads;
   go.e6_probe = opt.e6_probe;
+  go.e6_grid = opt.e6_grid;
   generate_candidates(ix, go, &cands, &rr.gen);
   rr.t_gen_ms = ms(t_g);
   rr.rss_mb[0] = run_detail::rss_mb_now();
@@ -628,6 +631,10 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
   print_octaves(" corde=", gs.q4_seedchord_by_octave);
   print_octaves(" passe2=", gs.q4_seedpass2_by_octave);
   std::fprintf(out, "\n");
+  if (gs.e6_grids16_built) {
+    std::fprintf(out, "e6_grille grilles16=%llu (G=16 sur ancres q4 a cover >= 1024, vetos leves)\n",
+                 (unsigned long long)gs.e6_grids16_built);
+  }
   if (gs.e6_sondes || gs.e6_sans_grille) {
     std::fprintf(out,
                  "sonde_e6 coeur_cellules=%llu,%llu,%llu,%llu,%llu sans_grille=%llu "
