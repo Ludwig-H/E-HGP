@@ -5,3 +5,4 @@ resultat=100% tests passed, 0 tests failed out of 65 (60 + campagne_provenance +
 d5120538f37f41e72e0805f9d6af3082c5089b5012ed5fa05dd4439d4d153241  build/v6/mhgp6_selftest
 date_utc=2026-08-31T13:48:27Z
 note=la campagne concurrente execute sa COPIE PRIVEE immuable (bench/campagne_locale.sh) : ce rebuild ne peut plus la contaminer
+addendum=ctest_gate_68.txt : rejeu 68/68 apres la fixture des contrats d'echec (mhgp6_contrat_echec{,_census,_fold_k2}), meme journee, binaires du meme etat de source + selftest recompilé (fb69f87f989b22e75947769bc488ba824112a8452dd0fa3ab2c8c1ccc2c53cb6)

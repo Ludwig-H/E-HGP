@@ -63,6 +63,13 @@ mhgp6_gate(mhgp6_wspd_ledger 0 mhgp6_selftest ARGS --wspd-ledger)
 mhgp6_gate(mhgp6_wspd_ownership 0 mhgp6_selftest ARGS --wspd-ownership)
 mhgp6_gate(mhgp6_wspd_mutant_cap 4 mhgp6_selftest ARGS --wspd-ownership --inject=wspd-cap-terminal)
 mhgp6_gate(mhgp6_wspd_mutant_split 4 mhgp6_selftest ARGS --wspd-ownership --inject=wspd-split-heaviest)
+# Fixture bibliotheque des contrats d'echec (P2 cinquieme cycle) : entree
+# invalide + run complet a callbacks (sequence K stricte) ; sous mutant,
+# chaque echec (census, fold K2 x inflight {1,2,8}) invalide TOUT champ
+# provisoire et les callbacks restent provisoires (authority=status_terminal).
+mhgp6_gate(mhgp6_contrat_echec 0 mhgp6_selftest ARGS --failure-contract TIMEOUT 600)
+mhgp6_gate(mhgp6_contrat_echec_census 4 mhgp6_selftest ARGS --failure-contract --inject=census-nonstrict TIMEOUT 600)
+mhgp6_gate(mhgp6_contrat_echec_fold_k2 4 mhgp6_selftest ARGS --failure-contract --inject=fold-inject-a-failure-k2 TIMEOUT 600)
 mhgp6_gate(mhgp6_fused_descent 0 mhgp6_selftest ARGS --fused-descent)
 mhgp6_gate(mhgp6_sweep_oracle 0 mhgp6_selftest ARGS --sweep-oracle LABELS "gate;oracle")
 mhgp6_gate(mhgp6_sweep_mutant_depth 4 mhgp6_selftest ARGS --sweep-oracle --inject=sweep-nonstrict-depth)

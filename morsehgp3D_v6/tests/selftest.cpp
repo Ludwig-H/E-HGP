@@ -27,6 +27,7 @@
 #include "../src/core/sha256.hpp"
 #include "../src/pipeline/expand.hpp"
 #include "../src/pipeline/generate.hpp"
+#include "../src/pipeline/run.hpp"
 
 using namespace mhgp6;
 
@@ -280,6 +281,97 @@ int run_wspd_ledger() {
     check(st.rectangles > 0, "front non vide");
   }
   return g_failures ? 1 : 0;
+}
+
+// ---- --failure-contract : FIXTURE BIBLIOTHEQUE des contrats d'echec (P2 du
+// cinquieme cycle d'audit). Sans mutant : une entree invalide rend
+// kInvalidInput avec TOUS les champs provisoires vides, et un run complet
+// livre ses callbacks en sequence K STRICTEMENT croissante 1..kmax_eff avec
+// digest_all non vide. Sous mutant (census-nonstrict ou
+// fold-inject-a-failure-k2) : pour fold_inflight dans {1, 2, 8}, chaque
+// echec rend un statut non complet, TOUS les champs provisoires vides
+// (digests raw/compat/postprefiltre/all, forets, cartes, totaux — politique
+// declaree : `expand.events_by_k` reste un compteur de diagnostic, jamais un
+// payload), et les callbacks provisoires n'ont jamais depasse kmax_eff ni
+// regresse (authority=status_terminal : seul le statut fait foi). Code 4 si
+// l'echec est observe ET le contrat tenu ; 3 sinon (y compris un contrat
+// viole : fail-closed).
+int run_failure_contract(bool injected) {
+  u64 mismatches = 0;
+  const auto assert_invalidated = [&](const RunResult& rr, const char* what) {
+    if (rr.status == PipelineStatus::kCompleteRegular) {
+      ++mismatches;
+      std::fprintf(stderr, "%s : statut complet inattendu\n", what);
+      return;
+    }
+    if (!rr.digest_raw_candidates.empty() || !rr.digest_balls.empty() || !rr.digest_postprefilter.empty() ||
+        !rr.digest_all.empty() || !rr.digest_forest.empty() || !rr.cards.empty() || rr.total_events ||
+        rr.total_facets || rr.total_fusions || rr.total_deltas || rr.total_nodes) {
+      ++mismatches;
+      std::fprintf(stderr, "%s : champ provisoire NON vide apres echec\n", what);
+    }
+  };
+  const auto check_callbacks = [&](const std::vector<u64>& ks, u64 kmax, const char* what) {
+    for (size_t i = 0; i < ks.size(); ++i) {
+      if (ks[i] < 1 || ks[i] > kmax || (i > 0 && ks[i] <= ks[i - 1])) {
+        ++mismatches;
+        std::fprintf(stderr, "%s : sequence de callbacks on_forest incoherente\n", what);
+        return;
+      }
+    }
+  };
+  const std::vector<InputPoint> in =
+      make_family_input(CloudFamily::kUniform, 400, cloud_family_default_coord(CloudFamily::kUniform, 400), 3);
+  if (!injected) {
+    RunOptions bad;
+    bad.digest = true;
+    const RunResult r1 = run_pipeline({in[0]}, bad);
+    if (r1.status != PipelineStatus::kInvalidInput) {
+      ++mismatches;
+      std::fprintf(stderr, "entree invalide : statut inattendu\n");
+    }
+    assert_invalidated(r1, "entree invalide");
+    RunOptions ok;
+    ok.digest = true;
+    ok.diagnostic_raw_candidates_digest = true;
+    ok.threads = 2;
+    std::vector<u64> ks;
+    u64 phase_calls = 0;
+    ok.on_forest = [&](u64 K, const std::vector<ForestEvent>&, const ForestResult&) { ks.push_back(K); };
+    ok.on_fold_phase = [&](u64, FoldPhase) { ++phase_calls; };
+    const RunResult r2 = run_pipeline(in, ok);
+    if (r2.status != PipelineStatus::kCompleteRegular || r2.digest_all.empty() || r2.digest_raw_candidates.empty()) {
+      ++mismatches;
+      std::fprintf(stderr, "run complet : statut ou digests manquants\n");
+    }
+    check_callbacks(ks, r2.kmax_eff, "run complet");
+    if (ks.size() != r2.kmax_eff || phase_calls == 0) {
+      ++mismatches;
+      std::fprintf(stderr, "run complet : %zu callbacks on_forest (kmax_eff=%llu), %llu phases\n", ks.size(),
+                   (unsigned long long)r2.kmax_eff, (unsigned long long)phase_calls);
+    }
+    return mismatches ? 1 : 0;
+  }
+  bool any_fail = false;
+  for (const int infl : {1, 2, 8}) {
+    RunOptions o;
+    o.digest = true;
+    o.diagnostic_raw_candidates_digest = true;
+    o.threads = 2;
+    o.fold_inflight = infl;
+    std::vector<u64> ks;
+    o.on_forest = [&](u64 K, const std::vector<ForestEvent>&, const ForestResult&) { ks.push_back(K); };
+    const RunResult rr = run_pipeline(in, o);
+    char what[64];
+    std::snprintf(what, sizeof what, "echec sous mutant (inflight=%d)", infl);
+    if (rr.status != PipelineStatus::kCompleteRegular) {
+      any_fail = true;
+      assert_invalidated(rr, what);
+      check_callbacks(ks, rr.kmax_eff ? rr.kmax_eff : 10, what);
+    }
+  }
+  if (!any_fail) return 3;
+  return mismatches ? 3 : 4;
 }
 
 // ---- --wspd-ownership : la descente fusionnee PARTITIONNE les paires
@@ -591,6 +683,7 @@ int main(int argc, char** argv) {
   else if (m == "wspd-ledger") rc = run_wspd_ledger();
   else if (m == "fused-descent") rc = run_fused_descent(injected);
   else if (m == "wspd-ownership") rc = run_wspd_ownership(injected);
+  else if (m == "failure-contract") rc = run_failure_contract(injected);
   else if (m == "sweep-oracle") rc = run_sweep_oracle(injected);
   else {
     std::fprintf(stderr, "mode inconnu : %s\n", mode);

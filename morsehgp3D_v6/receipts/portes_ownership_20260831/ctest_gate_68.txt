@@ -1,0 +1,146 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v6
+Test project /workspaces/E-HGP/build/v6
+      Start 23: mhgp6_conformity_uniform_2000
+      Start  9: mhgp6_wspd_mutant_split
+      Start 80: mhgp6_fused_mutant_droprect
+      Start  7: mhgp6_wspd_ownership
+      Start 16: mhgp6_fused_mutant_mask
+      Start 76: mhgp6_juge_refus_reference_tronquee
+ 1/68 Test  #7: mhgp6_wspd_ownership ........................   Passed    1.42 sec
+      Start 13: mhgp6_fused_descent
+ 2/68 Test  #9: mhgp6_wspd_mutant_split .....................   Passed    2.46 sec
+      Start 26: mhgp6_conformity_mutant_rle
+ 3/68 Test #76: mhgp6_juge_refus_reference_tronquee .........   Passed    3.40 sec
+      Start  8: mhgp6_wspd_mutant_cap
+ 4/68 Test  #8: mhgp6_wspd_mutant_cap .......................   Passed    0.56 sec
+      Start 81: mhgp6_pentes_validateur
+ 5/68 Test #81: mhgp6_pentes_validateur .....................   Passed    2.17 sec
+      Start 53: mhgp6_postprefilter_uniform_400
+ 6/68 Test #80: mhgp6_fused_mutant_droprect .................   Passed    8.53 sec
+      Start 24: mhgp6_conformity_terrain_2000
+ 7/68 Test #53: mhgp6_postprefilter_uniform_400 .............   Passed    3.60 sec
+      Start 83: mhgp6_agregateur_intergraines
+ 8/68 Test #13: mhgp6_fused_descent .........................   Passed    9.15 sec
+      Start 73: mhgp6_mutant_par-drop-ball-chunk
+ 9/68 Test #83: mhgp6_agregateur_intergraines ...............   Passed    1.22 sec
+      Start 64: mhgp6_mutant_dense-pointid
+10/68 Test #26: mhgp6_conformity_mutant_rle .................   Passed    9.11 sec
+      Start 63: mhgp6_mutant_drop-nonmerge
+11/68 Test #24: mhgp6_conformity_terrain_2000 ...............   Passed    5.91 sec
+      Start 71: mhgp6_mutant_witness-no-lane-mask
+12/68 Test #73: mhgp6_mutant_par-drop-ball-chunk ............   Passed    3.90 sec
+      Start 62: mhgp6_mutant_attach-prebatch
+13/68 Test #64: mhgp6_mutant_dense-pointid ..................   Passed    4.14 sec
+      Start 57: mhgp6_mutant_depth-threshold-minus-one
+14/68 Test #63: mhgp6_mutant_drop-nonmerge ..................   Passed    3.72 sec
+      Start 72: mhgp6_mutant_par-drop-shard
+15/68 Test #16: mhgp6_fused_mutant_mask .....................   Passed   16.36 sec
+      Start 82: mhgp6_campagne_provenance
+16/68 Test #82: mhgp6_campagne_provenance ...................   Passed    0.74 sec
+      Start 70: mhgp6_mutant_q4-i64-pair-min
+17/68 Test #71: mhgp6_mutant_witness-no-lane-mask ...........   Passed    4.49 sec
+      Start 68: mhgp6_mutant_q4-eq-sign
+18/68 Test #62: mhgp6_mutant_attach-prebatch ................   Passed    4.55 sec
+      Start 69: mhgp6_mutant_q4-i64-drop-factor
+19/68 Test #72: mhgp6_mutant_par-drop-shard .................   Passed    3.85 sec
+      Start 17: mhgp6_conformity_uniform_400
+20/68 Test #57: mhgp6_mutant_depth-threshold-minus-one ......   Passed    4.06 sec
+      Start 66: mhgp6_mutant_q3-level-4g
+21/68 Test #70: mhgp6_mutant_q4-i64-pair-min ................   Passed    4.08 sec
+      Start 65: mhgp6_mutant_canonical-is-uf-root
+22/68 Test #69: mhgp6_mutant_q4-i64-drop-factor .............   Passed    3.17 sec
+      Start 67: mhgp6_mutant_q4-center-parity
+23/68 Test #66: mhgp6_mutant_q3-level-4g ....................   Passed    3.21 sec
+      Start 56: mhgp6_mutant_genfilter-nonstrict
+24/68 Test #68: mhgp6_mutant_q4-eq-sign .....................   Passed    3.46 sec
+      Start 30: mhgp6_cli_ok_s8
+25/68 Test #17: mhgp6_conformity_uniform_400 ................   Passed    5.40 sec
+      Start 60: mhgp6_mutant_binary-ties
+26/68 Test #65: mhgp6_mutant_canonical-is-uf-root ...........   Passed    3.54 sec
+      Start 59: mhgp6_mutant_skip-full-census
+27/68 Test #67: mhgp6_mutant_q4-center-parity ...............   Passed    3.00 sec
+      Start 74: mhgp6_mutant_fold-inject-a-failure-k2
+28/68 Test #56: mhgp6_mutant_genfilter-nonstrict ............   Passed    3.57 sec
+      Start 19: mhgp6_conformity_eight_clusters_400
+29/68 Test #60: mhgp6_mutant_binary-ties ....................   Passed    2.92 sec
+      Start 61: mhgp6_mutant_repr-ties
+30/68 Test #59: mhgp6_mutant_skip-full-census ...............   Passed    2.73 sec
+      Start 58: mhgp6_mutant_range-add-max-le-zero
+31/68 Test #30: mhgp6_cli_ok_s8 .............................   Passed    5.73 sec
+      Start 54: mhgp6_mutant_wspd-drop-rect
+32/68 Test #74: mhgp6_mutant_fold-inject-a-failure-k2 .......   Passed    3.12 sec
+      Start 46: mhgp6_linked_arcs_u16
+33/68 Test #23: mhgp6_conformity_uniform_2000 ...............   Passed   29.10 sec
+      Start 55: mhgp6_mutant_census-nonstrict
+34/68 Test #54: mhgp6_mutant_wspd-drop-rect .................   Passed    1.75 sec
+      Start 25: mhgp6_sweep_mutant_exit
+35/68 Test #58: mhgp6_mutant_range-add-max-le-zero ..........   Passed    2.45 sec
+      Start 47: mhgp6_linked_arcs_oracle_i64
+36/68 Test #19: mhgp6_conformity_eight_clusters_400 .........   Passed    4.04 sec
+      Start 20: mhgp6_conformity_scanline_single_pass_400
+37/68 Test #46: mhgp6_linked_arcs_u16 .......................   Passed    1.94 sec
+      Start 18: mhgp6_conformity_terrain_400
+38/68 Test #55: mhgp6_mutant_census-nonstrict ...............   Passed    2.05 sec
+      Start 15: mhgp6_sweep_mutant_depth
+39/68 Test #47: mhgp6_linked_arcs_oracle_i64 ................   Passed    1.31 sec
+      Start 14: mhgp6_sweep_oracle
+40/68 Test #61: mhgp6_mutant_repr-ties ......................   Passed    3.83 sec
+      Start 22: mhgp6_conformity_two_lines_200
+41/68 Test #20: mhgp6_conformity_scanline_single_pass_400 ...   Passed    1.36 sec
+      Start 77: mhgp6_juge_refus_k_en_trop
+42/68 Test #77: mhgp6_juge_refus_k_en_trop ..................   Passed    0.05 sec
+      Start 21: mhgp6_conformity_collinear_seven_600
+43/68 Test #18: mhgp6_conformity_terrain_400 ................   Passed    1.24 sec
+      Start  4: mhgp6_families_mutant_overshoot
+44/68 Test #25: mhgp6_sweep_mutant_exit .....................   Passed    1.63 sec
+      Start 78: mhgp6_cover_refus_mutant_hors_cible
+45/68 Test  #4: mhgp6_families_mutant_overshoot .............   Passed    0.04 sec
+      Start 79: mhgp6_sweep_refus_inject_vide
+46/68 Test #78: mhgp6_cover_refus_mutant_hors_cible .........   Passed    0.03 sec
+      Start 75: mhgp6_juge_refus_narrowing
+47/68 Test #79: mhgp6_sweep_refus_inject_vide ...............   Passed    0.03 sec
+      Start  2: mhgp6_sha256_selftest
+48/68 Test #75: mhgp6_juge_refus_narrowing ..................   Passed    0.04 sec
+      Start  6: mhgp6_wspd_ledger
+49/68 Test #21: mhgp6_conformity_collinear_seven_600 ........   Passed    0.21 sec
+      Start 48: mhgp6_sweep_frontieres
+50/68 Test  #6: mhgp6_wspd_ledger ...........................   Passed    0.05 sec
+      Start  3: mhgp6_families_fixture
+51/68 Test #15: mhgp6_sweep_mutant_depth ....................   Passed    0.50 sec
+      Start  1: mhgp6_arith_selftest
+52/68 Test  #2: mhgp6_sha256_selftest .......................   Passed    0.08 sec
+      Start  5: mhgp6_tree_selftest
+53/68 Test #48: mhgp6_sweep_frontieres ......................   Passed    0.05 sec
+      Start 52: mhgp6_cover_coef3_mutant
+54/68 Test  #1: mhgp6_arith_selftest ........................   Passed    0.04 sec
+      Start 49: mhgp6_sweep_frontieres_mutant_depth
+55/68 Test  #3: mhgp6_families_fixture ......................   Passed    0.06 sec
+      Start 51: mhgp6_cover_coef4
+56/68 Test #52: mhgp6_cover_coef3_mutant ....................   Passed    0.04 sec
+      Start 28: mhgp6_cli_refus_s_suffix
+57/68 Test  #5: mhgp6_tree_selftest .........................   Passed    0.06 sec
+      Start 29: mhgp6_cli_refus_n_suffix
+58/68 Test #49: mhgp6_sweep_frontieres_mutant_depth .........   Passed    0.03 sec
+      Start 27: mhgp6_cli_refus_s7
+59/68 Test #51: mhgp6_cover_coef4 ...........................   Passed    0.03 sec
+      Start 50: mhgp6_sweep_frontieres_mutant_exit
+60/68 Test #28: mhgp6_cli_refus_s_suffix ....................   Passed    0.04 sec
+      Start 10: mhgp6_contrat_echec
+61/68 Test #29: mhgp6_cli_refus_n_suffix ....................   Passed    0.04 sec
+      Start 11: mhgp6_contrat_echec_census
+62/68 Test #27: mhgp6_cli_refus_s7 ..........................   Passed    0.05 sec
+      Start 12: mhgp6_contrat_echec_fold_k2
+63/68 Test #50: mhgp6_sweep_frontieres_mutant_exit ..........   Passed    0.05 sec
+64/68 Test #14: mhgp6_sweep_oracle ..........................   Passed    0.72 sec
+65/68 Test #22: mhgp6_conformity_two_lines_200 ..............   Passed    1.02 sec
+66/68 Test #10: mhgp6_contrat_echec .........................   Passed    5.14 sec
+67/68 Test #11: mhgp6_contrat_echec_census ..................   Passed    8.35 sec
+68/68 Test #12: mhgp6_contrat_echec_fold_k2 .................   Passed   10.79 sec
+
+100% tests passed, 0 tests failed out of 68
+
+Label Time Summary:
+gate      = 215.55 sec*proc (68 tests)
+oracle    =   2.65 sec*proc (2 tests)
+
+Total Test time (real) =  42.57 sec
