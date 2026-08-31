@@ -500,10 +500,18 @@ if allow == "0":
         os.fsync(descriptor)
     finally:
         os.close(descriptor)
+    # TOUT echec du lien nettoie le temporaire (sixieme tour : une EIO
+    # laissait un .partial orphelin) — et aucun start ne suivra.
     try:
         os.link(temporary, path)
     except FileExistsError:
         os.unlink(temporary)
+        sys.exit(1)
+    except OSError:
+        try:
+            os.unlink(temporary)
+        finally:
+            pass
         sys.exit(1)
     os.unlink(temporary)
 else:

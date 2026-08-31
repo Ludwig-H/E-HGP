@@ -88,7 +88,9 @@ class V6LifecycleIntegrationTests(unittest.TestCase):
         self.pre_start_timestamp = (now - timedelta(seconds=20)).isoformat().replace("+00:00", "Z")
         self.last_start_timestamp = (now - timedelta(seconds=10)).isoformat().replace("+00:00", "Z")
 
-    def test_real_start_then_outer_cleanup_reaches_terminal_state(self) -> None:
+    def _compose(self, extra_env: dict | None = None):
+        """Composition commune : VRAI start + faux set_max/stop + pins ;
+        rend (work, calls, receipts, env)."""
         work = self.tmp / "work"
         pinned = work / "pinned" / "gcp-migration" / "profils"
         pinned.mkdir(parents=True)
@@ -154,7 +156,12 @@ class V6LifecycleIntegrationTests(unittest.TestCase):
             ],
             check=True,
         )
-        result = subprocess.run(
+        if extra_env:
+            env.update(extra_env)
+        return work, calls, receipts, env
+
+    def _run_lifecycle(self, env):
+        return subprocess.run(
             ["bash", str(ROOT / "gcp-migration" / "v6_session_lifecycle.sh")],
             cwd=ROOT,
             env=env,
@@ -163,6 +170,10 @@ class V6LifecycleIntegrationTests(unittest.TestCase):
             stderr=subprocess.STDOUT,
             check=False,
         )
+
+    def test_real_start_then_outer_cleanup_reaches_terminal_state(self) -> None:
+        work, calls, receipts, env = self._compose()
+        result = self._run_lifecycle(env)
         # Le VRAI garde a certifie le demarrage (handoff + registre avec
         # generation), puis une etape ulterieure echoue (le faux gcloud ne
         # simule pas le handshake du cycle de vie) : le cleanup EXTERIEUR
@@ -187,6 +198,47 @@ class V6LifecycleIntegrationTests(unittest.TestCase):
         receipt = published[0].read_text(encoding="utf-8")
         self.assertIn("stop_rc=0", receipt)
         self.assertIn("etat_cycle_vie=targeted_stopped", receipt)
+
+    def test_interrupted_initial_publication_real_eio_no_partial_no_start(self) -> None:
+        """Mutant REEL de la publication interrompue (audit GCP, sixieme
+        tour) : un sitecustomize fait lever EIO au `os.link` du VRAI
+        publisher sur le registre — le garde doit refuser AVANT toute
+        mutation, ne laisser NI fichier final NI temporaire `.partial`, et
+        le cleanup conclut refus avant mutation (registre absent, aucun
+        handoff)."""
+        site_dir = self.tmp / "site"
+        site_dir.mkdir()
+        (site_dir / "sitecustomize.py").write_text(
+            "import errno\n"
+            "import os\n"
+            "_link = os.link\n"
+            "def _eio_link(src, dst, **kw):\n"
+            "    if 'etat_cycle_vie' in str(dst):\n"
+            "        raise OSError(errno.EIO, 'injection EIO (mutant publication interrompue)')\n"
+            "    return _link(src, dst, **kw)\n"
+            "os.link = _eio_link\n",
+            encoding="utf-8",
+        )
+        work, calls, receipts, env = self._compose(
+            {"PYTHONPATH": f"{site_dir}:{os.environ.get('PYTHONPATH', '')}"}
+        )
+        result = self._run_lifecycle(env)
+        self.assertNotEqual(result.returncode, 0)
+        # AUCUNE mutation : le faux gcloud n'a jamais recu `instances start`.
+        gcloud_log = Path(env["FAKE_GCLOUD_LOG"])
+        commands = gcloud_log.read_text(encoding="utf-8") if gcloud_log.exists() else ""
+        self.assertNotIn("instances start", commands, result.stdout)
+        # Ni fichier final, ni temporaire orphelin.
+        self.assertFalse((work / "etat_cycle_vie").exists(), result.stdout)
+        partials = list(work.glob(".etat_cycle_vie.*.partial"))
+        self.assertEqual(partials, [], result.stdout)
+        # Aucun appel d'arret, et le recu conclut refus avant mutation.
+        stop_calls = [line for line in calls.read_text(encoding="utf-8").splitlines()
+                      if line.startswith("STOP ")]
+        self.assertEqual(stop_calls, [], result.stdout)
+        published = sorted(receipts.glob("integration_*/RECU_SESSION.txt"))
+        self.assertEqual(len(published), 1, result.stdout)
+        self.assertIn("issue=refus_avant_mutation", published[0].read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

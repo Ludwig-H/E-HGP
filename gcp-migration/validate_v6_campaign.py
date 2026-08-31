@@ -26,13 +26,18 @@ campaign_status — jamais le lanceur, jamais la VM. `complete` exige :
     mutant du temoin TUE (code 4), lanes q3/q4 device aux planchers exacts,
     et par famille digest_balls + digest_all IDENTIQUES entre le contrat CPU
     et chacun des contrats --gpu / adaptatif / wire=index ;
-  - phase FRONTIERE : issues TYPEES (cinquieme tour — une panne quelconque
-    n'est pas une frontiere) : code 0 = contrat pipeline complet ; code 124 =
-    timeout ; code non nul AVEC motif structure de capacite
-    (resource_exhausted / bad_alloc) = refus de capacite. Tout autre code
-    (CLI 2, invariant 3, binaire absent 127, signal sans motif) INVALIDE la
-    phase — un SIGKILL sans preuve est une observation censuree, pas un OOM
-    attribue. RSS et sortie GNU time exiges dans tous les cas ;
+  - phase FRONTIERE : issues TYPEES en QUATRE classes fermees (sixieme
+    tour) : code 0 = contrat pipeline complet + motifs interdits scannes ;
+    code 124 = timeout ATTESTE par le superviseur (« Exit status: 124 » dans
+    la sortie GNU time — non distingue d'un exit 124 du binaire, decrit
+    prudemment) ; code 2 = refus du pipeline au message exact
+    « REFUS resource_exhausted » ; code 134 = abort a diagnostic exact
+    « std::bad_alloc » SOUS RLIMIT_AS atteste (limit_kind/limit_kb graves,
+    plafond du plan lie a la commande executee). Codes 3, 127, 139, code
+    absent/non decimal et signaux non attribues INVALIDENT la phase — un
+    SIGKILL sans preuve est une observation censuree. Meme corrigee, cette
+    mesure est une frontiere SOUS PLAFOND VIRTUEL RLIMIT_AS, pas le mur RAM
+    natif de la VM. RSS et sortie GNU time exiges dans tous les cas ;
   - des codes de session (ssh distant, scp) nuls.
 Il ecrit bench_resume.txt et queue_resume.txt (murs / RSS — completude et
 dispersion, JAMAIS une conclusion d'acceleration ni de pente).
@@ -822,12 +827,29 @@ def main():
                     "--seed=3", f"--threads={frontier_threads}"):
             if arg not in cmd_tokens:
                 bad.append(f"{name}: commande gravee sans le jeton exact {arg}")
+        # LIAISON DU PLAFOND (sixieme tour) : le plafond du PLAN doit etre
+        # grave au statut (limit_kind/limit_kb) ET present dans la commande
+        # executee — le lien profil->plan ne suffit pas.
+        plan_ulimit = frontier_params.get("ulimit_kb", "0") if frontier_params else "0"
+        lk = re.search(r"^limit_kind=(\S+)$", st, re.M)
+        lb = re.search(r"^limit_kb=(\d+)$", st, re.M)
+        if plan_ulimit != "0":
+            if not lk or lk.group(1) != "rlimit_as" or not lb or lb.group(1) != plan_ulimit:
+                bad.append(f"{name}: RLIMIT_AS non atteste au statut "
+                           f"(limit_kind={lk.group(1) if lk else '?'} limit_kb={lb.group(1) if lb else '?'} "
+                           f"!= rlimit_as/{plan_ulimit})")
+            if "ulimit" not in cmd_tokens or plan_ulimit not in cmd_tokens:
+                bad.append(f"{name}: commande gravee sans liaison ulimit au plafond du plan ({plan_ulimit})")
+        else:
+            if not lk or lk.group(1) != "none":
+                bad.append(f"{name}: limit_kind absent ou != none alors que le plan n'impose aucun plafond")
         # MOTIF FATAL : applique a TOUTES les classes — invariant brise,
         # sanitizer, panne d'infrastructure ; un motif de capacite present ne
         # les masque pas.
         fatal = FATAL_FRONT.search(body or "")
         if fatal:
             bad.append(f"{name}: motif FATAL ({fatal.group(0)}) — la phase frontiere est invalide")
+        # QUATRE CLASSES FERMEES et rien d'autre.
         note = ""
         if code == "0":
             if body is not None:
@@ -835,18 +857,38 @@ def main():
                                    frontier_threads, bad)
                 if ANY_DIGEST.search(body):
                     bad.append(f"{name}: digest imprime sur un run de frontiere")
+                fb = FORBIDDEN.search(body)
+                if fb:
+                    bad.append(f"{name}: motif interdit sur un succes de frontiere ({fb.group(0)})")
         elif code == "124":
-            # Timeout OBSERVE PAR L'ENVELOPPE (l'outil timeout du runner) —
-            # non distingue d'un exit 124 du binaire ; decrit prudemment.
-            note = "timeout (enveloppe)"
-        else:
-            nm = re.search(r"resource_exhausted\S*|std::bad_alloc|bad_alloc", body or "")
-            if not nm:
-                bad.append(f"{name}: code={code} SANS motif structure de capacite — "
-                           f"panne non typee, la phase frontiere est invalide")
-                note = f"panne non typee (code={code})"
+            gtime_path = os.path.join(out, name + ".status.time")
+            gt = read_text(gtime_path) if os.path.exists(gtime_path) else ""
+            if not re.search(r"Exit status:\s*124", gt):
+                bad.append(f"{name}: code 124 sans attestation du superviseur "
+                           f"(« Exit status: 124 » absent de la sortie GNU time)")
+                note = "124 non atteste"
             else:
-                note = nm.group(0)[:60].replace("\t", " ")
+                note = "timeout (superviseur ; non distingue d'un exit 124 du binaire)"
+        elif code == "2":
+            if not re.search(r"^REFUS resource_exhausted", body or "", re.M):
+                bad.append(f"{name}: code 2 sans le message exact « REFUS resource_exhausted » du pipeline")
+                note = "code 2 non type"
+            else:
+                note = "resource_exhausted (refus du pipeline)"
+        elif code == "134":
+            if not re.search(r"std::bad_alloc", body or ""):
+                bad.append(f"{name}: code 134 sans diagnostic exact std::bad_alloc")
+                note = "134 non type"
+            elif plan_ulimit == "0":
+                bad.append(f"{name}: code 134 bad_alloc SANS RLIMIT_AS atteste — signal non attribue")
+                note = "134 sans plafond atteste"
+            else:
+                note = f"bad_alloc sous rlimit_as={plan_ulimit}kB"
+        else:
+            bad.append(f"{name}: code={code} HORS des quatre classes fermees "
+                       f"(0, 124 atteste, 2 REFUS resource_exhausted, 134 bad_alloc sous rlimit) — "
+                       f"panne non typee, la phase frontiere est invalide")
+            note = f"panne non typee (code={code})"
         frontier_rows.append((run, code, meas, note))
 
     # CONTROLE EXHAUSTIF des fichiers : chaque fichier de out/ doit etre un
@@ -962,7 +1004,9 @@ def main():
     os.replace(tmp, os.path.join(resume_dir, "gpu_resume.txt"))
 
     lines = [
-        "# frontier_resume — codes, murs et RSS de la frontiere d'echelle (un echec est une donnee).",
+        "# frontier_resume — codes, murs et RSS de la frontiere d'echelle SOUS PLAFOND",
+        "# VIRTUEL RLIMIT_AS (pas le mur RAM natif) ; un refus de capacite type est une donnee.",
+        f"# limit_kind=rlimit_as limit_kb={frontier_params.get('ulimit_kb', '?') if frontier_params else '?'}",
         "famille\tn\tcode\tmur_ms\tduree_s\trss_kb\tnote",
     ]
     for run, code, meas, note in frontier_rows:

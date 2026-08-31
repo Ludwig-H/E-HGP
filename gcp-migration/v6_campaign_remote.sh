@@ -13,10 +13,11 @@
 # queue_plan.txt) ; le validateur recalcule chaque sequence depuis les
 # parametres et exige un statut par run annonce.
 #
-# SIX PHASES (ordre : conformite, puis fils et GPU, puis la sonde
-# stationnaire et le bench, puis la FRONTIERE EN DERNIER — sa pression
-# memoire ne doit contaminer aucune mesure ; les axes a sentinelle `aucun`
-# donnent un plan runs=0 et une phase sautee) :
+# SIX PHASES (ordre : accord differentiel, fils, queue, bench — toutes les
+# mesures CPU d'abord —, puis GPU (son build nvcc -j8 ne doit pas contaminer
+# les murs CPU), puis la FRONTIERE EN DERNIER (sa pression memoire ne doit
+# contaminer aucune mesure) ; les axes a sentinelle `aucun` donnent un plan
+# runs=0 et une phase sautee) :
 #   1. ACCORD DIFFERENTIEL v5 ≡ v6 sur les paires CONF_SPECS (fam:n — les
 #      tailles MESUREES par le bench y figurent, pas seulement 50000) — la
 #      v5 est un SUJET DIFFERENTIEL, jamais une autorite de conformite pour
@@ -140,7 +141,7 @@ run_one() {
   t0=$(date +%s)
   # .txt et .status.time sont eux aussi publies ATOMIQUEMENT (audit
   # troisieme tour : seul .status l'etait).
-  "${TIME_BIN}" -v -o "${status}.time.tmp" timeout "${RUN_TIMEOUT_ONE:-${RUN_TIMEOUT}}" "$@" >"${out}.tmp" 2>&1 </dev/null || rc=$?
+  "${TIME_BIN}" -v -o "${status}.time.tmp" timeout -k 30 "${RUN_TIMEOUT_ONE:-${RUN_TIMEOUT}}" "$@" >"${out}.tmp" 2>&1 </dev/null || rc=$?
   t1=$(date +%s)
   mv "${out}.tmp" "${out}"
   mv "${status}.time.tmp" "${status}.time"
@@ -369,6 +370,56 @@ while read -r line; do
   fi
 done < "${OUT_DIR}/sweep_plan.txt"
 
+# PHASE 2 — queue stationnaire v6 (la sonde discriminante d'abord), sans
+# --digest. Un run non nul tronque la queue (grave) sans empecher le bench.
+while read -r line; do
+  case "${line}" in seq=*) ;; *) continue ;; esac
+  name="$(printf '%s\n' "${line}" | sed 's/.* name=\([^ ]*\).*/\1/')"
+  fam="$(printf '%s\n' "${line}" | sed 's/.* family=\([^ ]*\).*/\1/')"
+  N="$(printf '%s\n' "${line}" | sed 's/.* n=\([^ ]*\).*/\1/')"
+  seed="$(printf '%s\n' "${line}" | sed 's/.* seed=\([^ ]*\).*/\1/')"
+  seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
+  if past_deadline "${name}" queue queue_tronquee.txt; then break; fi
+  EXTRA_STATUS="$(printf 'family=%s\nn=%s\nseed=%s\nseq=%s' "${fam}" "${N}" "${seed}" "${seq_no}")" \
+    run_one "${name}" queue_stationnaire \
+    "${V6_BIN}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 "--seed=${seed}" "--threads=${THREADS}"
+  last_code="$(sed -n 's/^code=//p' "${OUT_DIR}/${name}.status" | head -n 1)"
+  if [ "${last_code:-1}" != "0" ]; then
+    printf 'truncated_at=%s\nphase=queue\nreason=premier run non nul (code=%s)\n' \
+      "${name}" "${last_code:-?}" > "${OUT_DIR}/queue_tronquee.txt"
+    echo "=== QUEUE TRONQUEE a ${name} : code ${last_code:-?} ===" >&2
+    break
+  fi
+done < "${OUT_DIR}/queue_plan.txt"
+
+# PHASE 3 — bench apparie ABBA, sans --digest. Un run non nul tronque le
+# bench (grave).
+bench_ok=1
+while read -r line; do
+  case "${line}" in seq=*) ;; *) continue ;; esac
+  name="$(printf '%s\n' "${line}" | sed 's/.* name=\([^ ]*\).*/\1/')"
+  fam="$(printf '%s\n' "${line}" | sed 's/.* family=\([^ ]*\).*/\1/')"
+  N="$(printf '%s\n' "${line}" | sed 's/.* n=\([^ ]*\).*/\1/')"
+  eng="$(printf '%s\n' "${line}" | sed 's/.* engine=\([^ ]*\).*/\1/')"
+  pos="$(printf '%s\n' "${line}" | sed 's/.* pos=\([^ ]*\).*/\1/')"
+  r="$(printf '%s\n' "${line}" | sed 's/.* repeat=\([^ ]*\).*/\1/')"
+  seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
+  if [ "${bench_ok}" -ne 1 ]; then break; fi
+  if past_deadline "${name}" bench bench_tronquee.txt; then bench_ok=0; break; fi
+  bin="${V6_BIN}"; if [ "${eng}" = "v5" ]; then bin="${V5_BIN}"; fi
+  EXTRA_STATUS="$(printf 'engine=%s\nfamily=%s\nn=%s\npos=%s\nrepeat=%s\nseq=%s' \
+                  "${eng}" "${fam}" "${N}" "${pos}" "${r}" "${seq_no}")" \
+    run_one "${name}" bench_paired \
+    "${bin}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 --seed=3 "--threads=${THREADS}"
+  last_code="$(sed -n 's/^code=//p' "${OUT_DIR}/${name}.status" | head -n 1)"
+  if [ "${last_code:-1}" != "0" ]; then
+    printf 'truncated_at=%s\nphase=bench\nreason=premier run non nul (code=%s)\n' \
+      "${name}" "${last_code:-?}" > "${OUT_DIR}/bench_tronquee.txt"
+    echo "=== BENCH TRONQUE a ${name} : code ${last_code:-?} ===" >&2
+    bench_ok=0
+  fi
+done < "${OUT_DIR}/bench_plan.txt"
+
 # PHASE GPU — v5, seule ligne a cibles CUDA (protocole herite de
 # v5_campaign_remote.sh) : temoin device (build nvcc separe), lanes q3/q4
 # device contre la production, mutant temoin (code 4 exige), puis par paire
@@ -447,56 +498,6 @@ if [ "${GPU_SPECS}" != "aucun" ]; then
 fi
 
 
-# PHASE 2 — queue stationnaire v6 (la sonde discriminante d'abord), sans
-# --digest. Un run non nul tronque la queue (grave) sans empecher le bench.
-while read -r line; do
-  case "${line}" in seq=*) ;; *) continue ;; esac
-  name="$(printf '%s\n' "${line}" | sed 's/.* name=\([^ ]*\).*/\1/')"
-  fam="$(printf '%s\n' "${line}" | sed 's/.* family=\([^ ]*\).*/\1/')"
-  N="$(printf '%s\n' "${line}" | sed 's/.* n=\([^ ]*\).*/\1/')"
-  seed="$(printf '%s\n' "${line}" | sed 's/.* seed=\([^ ]*\).*/\1/')"
-  seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
-  if past_deadline "${name}" queue queue_tronquee.txt; then break; fi
-  EXTRA_STATUS="$(printf 'family=%s\nn=%s\nseed=%s\nseq=%s' "${fam}" "${N}" "${seed}" "${seq_no}")" \
-    run_one "${name}" queue_stationnaire \
-    "${V6_BIN}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 "--seed=${seed}" "--threads=${THREADS}"
-  last_code="$(sed -n 's/^code=//p' "${OUT_DIR}/${name}.status" | head -n 1)"
-  if [ "${last_code:-1}" != "0" ]; then
-    printf 'truncated_at=%s\nphase=queue\nreason=premier run non nul (code=%s)\n' \
-      "${name}" "${last_code:-?}" > "${OUT_DIR}/queue_tronquee.txt"
-    echo "=== QUEUE TRONQUEE a ${name} : code ${last_code:-?} ===" >&2
-    break
-  fi
-done < "${OUT_DIR}/queue_plan.txt"
-
-# PHASE 3 — bench apparie ABBA, sans --digest. Un run non nul tronque le
-# bench (grave).
-bench_ok=1
-while read -r line; do
-  case "${line}" in seq=*) ;; *) continue ;; esac
-  name="$(printf '%s\n' "${line}" | sed 's/.* name=\([^ ]*\).*/\1/')"
-  fam="$(printf '%s\n' "${line}" | sed 's/.* family=\([^ ]*\).*/\1/')"
-  N="$(printf '%s\n' "${line}" | sed 's/.* n=\([^ ]*\).*/\1/')"
-  eng="$(printf '%s\n' "${line}" | sed 's/.* engine=\([^ ]*\).*/\1/')"
-  pos="$(printf '%s\n' "${line}" | sed 's/.* pos=\([^ ]*\).*/\1/')"
-  r="$(printf '%s\n' "${line}" | sed 's/.* repeat=\([^ ]*\).*/\1/')"
-  seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
-  if [ "${bench_ok}" -ne 1 ]; then break; fi
-  if past_deadline "${name}" bench bench_tronquee.txt; then bench_ok=0; break; fi
-  bin="${V6_BIN}"; if [ "${eng}" = "v5" ]; then bin="${V5_BIN}"; fi
-  EXTRA_STATUS="$(printf 'engine=%s\nfamily=%s\nn=%s\npos=%s\nrepeat=%s\nseq=%s' \
-                  "${eng}" "${fam}" "${N}" "${pos}" "${r}" "${seq_no}")" \
-    run_one "${name}" bench_paired \
-    "${bin}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 --seed=3 "--threads=${THREADS}"
-  last_code="$(sed -n 's/^code=//p' "${OUT_DIR}/${name}.status" | head -n 1)"
-  if [ "${last_code:-1}" != "0" ]; then
-    printf 'truncated_at=%s\nphase=bench\nreason=premier run non nul (code=%s)\n' \
-      "${name}" "${last_code:-?}" > "${OUT_DIR}/bench_tronquee.txt"
-    echo "=== BENCH TRONQUE a ${name} : code ${last_code:-?} ===" >&2
-    bench_ok=0
-  fi
-done < "${OUT_DIR}/bench_plan.txt"
-
 # PHASE FRONTIERE — contrats d echelle v6 : tailles croissantes, RSS graves,
 # executee EN DERNIER (cinquieme tour : pression memoire, timeout ou OOM ne
 # doivent pas contaminer le bench). Issues TYPEES par le validateur (0 =
@@ -512,11 +513,14 @@ while read -r line; do
   seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
   if past_deadline "${name}" frontiere frontier_tronquee.txt "$((FRONTIER_TIMEOUT + 60))"; then break; fi
   front_cmd=("${V6_BIN}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 --seed=3 "--threads=${THREADS}")
+  limit_kind="none"; limit_kb=0
   if [ "${FRONTIER_ULIMIT_KB}" -gt 0 ]; then
     front_cmd=(bash -c 'ulimit -v "$1" && shift && exec "$@"' _ "${FRONTIER_ULIMIT_KB}" "${front_cmd[@]}")
+    limit_kind="rlimit_as"; limit_kb="${FRONTIER_ULIMIT_KB}"
   fi
   RUN_TIMEOUT_ONE="${FRONTIER_TIMEOUT}" \
-  EXTRA_STATUS="$(printf 'family=%s\nn=%s\nseq=%s' "${fam}" "${N}" "${seq_no}")" \
+  EXTRA_STATUS="$(printf 'family=%s\nn=%s\nseq=%s\nlimit_kind=%s\nlimit_kb=%s' \
+                  "${fam}" "${N}" "${seq_no}" "${limit_kind}" "${limit_kb}")" \
     run_one "${name}" frontiere "${front_cmd[@]}"
 done < "${OUT_DIR}/frontier_plan.txt"
 

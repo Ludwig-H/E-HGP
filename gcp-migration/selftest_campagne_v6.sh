@@ -93,7 +93,7 @@ if [ "${eng}" = "v5" ] && [ "\${FAKE_V5_BENCH_FAIL:-0}" = "1" ] && [ "\${digest}
   echo "erreur simulee du pilote v5"; exit 7
 fi
 if [ "${eng}" = "v6" ] && [ "\${FAKE_V6_FRONT_FAIL:-0}" = "1" ] && [ "\${n}" = "400000" ]; then
-  echo "terminate called after throwing an instance of 'std::bad_alloc'"; exit 9
+  echo "terminate called after throwing an instance of 'std::bad_alloc'"; exit 134
 fi
 base=\$((n / 4))
 echo "payload=mhgp${eng#v}-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none"
@@ -258,7 +258,7 @@ CANON="${WORK}/selftest_reduit_v1.env"
   echo 'FRONTIER_SPECS="uniform:200000 uniform:400000"'
   echo 'FRONTIER_TIMEOUT=60'
   echo 'GPU_BUILD_TIMEOUT=60'
-  echo 'FRONTIER_ULIMIT_KB=0'
+  echo 'FRONTIER_ULIMIT_KB=60000000'
 } > "${CANON}"
 CANON_SHA="$(sha256sum "${CANON}" | awk '{print $1}')"
 MANIFESTE="${WORK}/manifest_revalide.txt"
@@ -293,7 +293,7 @@ PROFILE="${WORK}/profil_campagne.txt"
   echo "frontier_specs=uniform:200000 uniform:400000"
   echo "frontier_timeout=60"
   echo "gpu_build_timeout=60"
-  echo "frontier_ulimit_kb=0"
+  echo "frontier_ulimit_kb=60000000"
 } > "${PROFILE}"
 run_runner() { # $1 = dossier out ; le reste = env supplementaire
   local out="$1"; shift
@@ -305,7 +305,7 @@ run_runner() { # $1 = dossier out ; le reste = env supplementaire
     QUEUE_FAMILIES="terrain_stationnaire" QUEUE_N="64000" QUEUE_SEEDS="3 4" \
     SWEEP_SPECS="uniform:32000:2,8" SWEEP_REPEATS=2 \
     GPU_SPECS="uniform:50000" FRONTIER_SPECS="uniform:200000 uniform:400000" FRONTIER_TIMEOUT=60 \
-    GPU_BUILD_TIMEOUT=60 FRONTIER_ULIMIT_KB=0 \
+    GPU_BUILD_TIMEOUT=60 FRONTIER_ULIMIT_KB=60000000 \
     FAKE_V6_FRONT_FAIL=1 \
     NVCC_BIN="${FAKE}/nvcc" GPU_CMAKE_BIN="${FAKE}/cmake" \
     GPU_WITNESS_BIN="${FAKE}/mhgp5_device_witness" \
@@ -346,9 +346,11 @@ check_true "nominal : phase GPU complete (temoin, mutant tue, 4 contrats)" bash 
   grep -q '^code=0' '${OUT}/gpu_witness.status' && grep -q '^code=4' '${OUT}/gpu_mutant.status' &&
   grep -q '^code=0' '${OUT}/gpu_idx_uniform_n50000.status' &&
   grep -q 'device_witness OK' '${OUT}/gpu_witness.txt'"
-check_true "nominal : echec de FRONTIERE tolere (code=9 grave, campagne valide)" bash -c "
-  grep -q '^code=9' '${OUT}/front_uniform_n400000.status' &&
-  grep -q 'bad_alloc' '${WORK}/frontier_resume.txt' &&
+check_true "nominal : refus de capacite TYPE tolere (134 bad_alloc sous rlimit atteste, campagne valide)" bash -c "
+  grep -q '^code=134' '${OUT}/front_uniform_n400000.status' &&
+  grep -q '^limit_kind=rlimit_as' '${OUT}/front_uniform_n400000.status' &&
+  grep -q '^limit_kb=60000000' '${OUT}/front_uniform_n400000.status' &&
+  grep -q 'bad_alloc sous rlimit_as' '${WORK}/frontier_resume.txt' &&
   grep -q '^code=0' '${OUT}/front_uniform_n200000.status'"
 # IDEMPOTENCE (audit quatrieme tour) : un second passage sur le MEME dossier
 # rend le meme verdict (le validateur n'enrichit plus l'inventaire qu'il juge).
@@ -455,8 +457,12 @@ falsify_semantique "semantique : plan GPU supprime" "gpu_plan.txt: ABSENT" \
   rm gpu_plan.txt
 # Les SIX mutants de frontiere du sixieme tour — tous avec rehash causal.
 falsify_semantique "frontiere : code=abc a corps bad_alloc" "code non decimal" \
-  sed -i "s/^code=9/code=abc/" front_uniform_n400000.status
-falsify_semantique "frontiere : INVARIANT ajoute au refus bad_alloc (code 9)" "motif FATAL" \
+  sed -i "s/^code=134/code=abc/" front_uniform_n400000.status
+falsify_semantique "frontiere : code=3 a corps bad_alloc (hors classes)" "HORS des quatre classes fermees" \
+  sed -i "s/^code=134/code=3/" front_uniform_n400000.status
+falsify_semantique "frontiere : commande sans liaison ulimit au plafond du plan" "sans liaison ulimit" \
+  sed -i "s/ulimit -v \"\$1\" && shift && exec \"\$@\" _ 60000000 //" front_uniform_n400000.status
+falsify_semantique "frontiere : INVARIANT ajoute au refus bad_alloc (code 134)" "motif FATAL" \
   bash -c "echo 'INVARIANT casse' >> front_uniform_n400000.txt"
 falsify_semantique "frontiere : INVARIANT ajoute a un pipeline complet (code 0)" "motif FATAL" \
   bash -c "echo 'INVARIANT casse' >> front_uniform_n200000.txt"
@@ -465,10 +471,12 @@ falsify_semantique "frontiere : duree_s=abc" "duree_s non decimale" \
 falsify_semantique "frontiere : argument decore xxx--n=400000xxx" "sans le jeton exact --n=400000" \
   sed -i "s/--n=400000/xxx--n=400000xxx/" front_uniform_n400000.status
 falsify_semantique "frontiere : code 124 avec INVARIANT" "motif FATAL" \
-  bash -c "sed -i 's/^code=9/code=124/' front_uniform_n400000.status; echo 'INVARIANT casse' >> front_uniform_n400000.txt"
+  bash -c "sed -i 's/^code=134/code=124/' front_uniform_n400000.status; echo 'INVARIANT casse' >> front_uniform_n400000.txt"
+falsify_semantique "frontiere : code 124 sans attestation du superviseur" "sans attestation du superviseur" \
+  sed -i "s/^code=134/code=124/" front_uniform_n400000.status
 falsify_case "semantique : MANIFESTE_DISTANT a ligne dupliquee" "chemin duplique" apres \
   bash -c "l=\$(grep topologie.txt MANIFESTE_DISTANT.txt | head -1); printf '%s\n' \"\$l\" >> MANIFESTE_DISTANT.txt"
-falsify_semantique "frontiere : code non nul sans motif de capacite (panne non typee)" "SANS motif structure de capacite" \
+falsify_semantique "frontiere : code 134 sans diagnostic std::bad_alloc" "sans diagnostic exact std::bad_alloc" \
   bash -c "sed -i 's/bad_alloc/xxx/' front_uniform_n400000.txt"
 # CAS SUR SNAPSHOT PROPRE (audit quatrieme tour : plus jamais l'inventaire
 # deja juge) avec DIAGNOSTIC EXACT exige — chaque cas repart d'une copie
