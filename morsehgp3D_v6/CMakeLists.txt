@@ -170,6 +170,11 @@ mhgp6_gate(mhgp6_juge_refus_reference_tronquee 2 mhgp6_conformity
 mhgp6_gate(mhgp6_juge_refus_k_en_trop 2 mhgp6_conformity
            ARGS --family=uniform --n=2 --threads=1
                 --expected=${CMAKE_CURRENT_SOURCE_DIR}/tests/refs/uniform_2_k10_en_trop.txt)
+# Troisieme tour gcp : K11 SURNUMERAIRE (hors domaine global [1,10]) refuse
+# par le chargeur lui-meme (code 2), jamais silencieusement ignore.
+mhgp6_gate(mhgp6_juge_refus_k11 2 mhgp6_conformity
+           ARGS --family=uniform --n=400 --threads=4
+                --expected=${CMAKE_CURRENT_SOURCE_DIR}/tests/refs/uniform_400_k11_en_trop.txt)
 mhgp6_gate(mhgp6_cover_refus_mutant_hors_cible 2 mhgp6_cover_fixture ARGS --inject=rle-drop)
 mhgp6_gate(mhgp6_sweep_refus_inject_vide 2 mhgp6_sweep_fixtures ARGS --inject=)
 mhgp6_gate(mhgp6_fused_mutant_droprect 4 mhgp6_selftest ARGS --fused-descent --inject=wspd-drop-rect)

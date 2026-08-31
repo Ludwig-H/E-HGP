@@ -132,6 +132,7 @@ case "${FAKE_START_MODE:-ok}" in
   ok_handoff_corrompu) write_state targeted_running "${FAKE_GEN}"; echo "pas du json" > "${handoff}"; exit 0 ;;
   ok_bad_timestamp) write_state targeted_running "pas-une-date"; write_handoff "pas-une-date"; exit 0 ;;
   stopped_by_guard) write_state targeted_stopped "${FAKE_GEN}"; exit 5 ;;
+  stop_failed_by_guard) write_state targeted_stop_failed "${FAKE_GEN}"; exit 6 ;;
   ok) write_state targeted_running "${FAKE_GEN}"; write_handoff "${FAKE_GEN}"; exit 0 ;;
 esac
 EOF
@@ -181,7 +182,7 @@ run_scenario() {
   env PATH="${SCENARIO_DIR}/bin:${PATH}" \
     FAKE_START_MODE="${start_mode}" FAKE_SSH_MODE="${ssh_mode}" FAKE_STOP_RC="${stop_rc}" \
     MAX_RUN_SECONDS="${max_run}" \
-    DURABLE_RECEIPT_DIR="${SCENARIO_DIR}/recu" \
+    DURABLE_RECEIPT_BASE="${SCENARIO_DIR}/recu" DURABLE_RECEIPT_PREFIX="s" \
     MHGP6_LIFECYCLE_WORK="${W}" \
     MHGP6_LIFECYCLE_GUARDS_DIR="${SCENARIO_DIR}/guards" \
     MHGP6_LIFECYCLE_SOURCE_COMMIT="${commit}" \
@@ -242,10 +243,19 @@ check_true "nominal mecanique : exit 65 (validateur), un arret cible, ordre des 
   bash -c "[ '${rc}' -eq 65 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ] \
     && grep -q '^SETMAX ' '${FAKE_CALLS}' && grep -q '^START ' '${FAKE_CALLS}' \
     && [ \"\$(grep -n '^STOP ' '${FAKE_CALLS}' | tail -1 | cut -d: -f1)\" -eq \"\$(wc -l < '${FAKE_CALLS}')\" ]"
-check_true "nominal mecanique : recu durable publie (RECU_SESSION.txt + SHA256SUMS + profil)" \
-  bash -c "[ -s '${SCENARIO_DIR}/recu/RECU_SESSION.txt' ] && [ -s '${SCENARIO_DIR}/recu/SHA256SUMS' ] \
-    && grep -q 'profil_campagne.txt' '${SCENARIO_DIR}/recu/SHA256SUMS' \
-    && grep -q '^profil=decision_v1' '${SCENARIO_DIR}/recu/RECU_SESSION.txt'"
+check_true "nominal mecanique : recu durable UNIQUE publie atomiquement (RECU + SHA256SUMS + profil)" \
+  bash -c "d=\$(ls -d '${SCENARIO_DIR}'/recu/s_* 2>/dev/null | head -1); [ -n \"\$d\" ] \
+    && [ -s \"\$d/RECU_SESSION.txt\" ] && [ -s \"\$d/SHA256SUMS\" ] \
+    && grep -q 'profil_campagne.txt' \"\$d/SHA256SUMS\" \
+    && grep -q '^profil=decision_v1' \"\$d/RECU_SESSION.txt\" \
+    && [ -z \"\$(ls -d '${SCENARIO_DIR}'/recu/*.partial 2>/dev/null)\" ]"
+# Registre partage jusqu'au TERMINAL par le cleanup exterieur (troisieme
+# tour) : apres un arret nominal certifie, l'etat est targeted_stopped et le
+# recu le grave.
+check_true "nominal mecanique : registre au terminal targeted_stopped, grave au recu" \
+  bash -c "grep -q '^state=targeted_stopped' '${SCENARIO_DIR}/work/etat_cycle_vie' \
+    && d=\$(ls -d '${SCENARIO_DIR}'/recu/s_* | head -1) \
+    && grep -q '^etat_cycle_vie=targeted_stopped' \"\$d/RECU_SESSION.txt\""
 # TTL OS Login par defaut : dans la fenetre du preflight (scenario 10).
 check_true "TTL OS Login par defaut dans la fenetre du preflight" \
   bash -c "ttl=\$(grep -oE 'ttl=[0-9]+m' '${FAKE_CALLS}' | head -1 | grep -oE '[0-9]+'); \
@@ -262,6 +272,15 @@ check_true "arret deja certifie par le garde : aucun second arret, aucun blocage
   bash -c "[ '${rc}' -eq 5 ] && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 0 ] \
     && ! grep -q 'BLOCAGE' '${SCENARIO_DIR}/stderr.log' \
     && grep -q 'arret deja certifie par le garde' '${SCENARIO_DIR}/stdout.log'"
+
+# ---- 9bis. REPRISE BORNEE : l'arret interne du garde a echoue
+# (targeted_stop_failed) — le cleanup exterieur RE-tente UNE fois l'arret
+# cible et atteint le terminal targeted_stopped.
+rc=0; run_scenario stop_failed_by_guard || rc=$?
+check_true "reprise bornee : un arret exterieur apres l'echec interne, terminal targeted_stopped" \
+  bash -c "[ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 1 ] \
+    && grep -q -- '--expected-last-start-timestamp ${FAKE_GEN}' '${FAKE_CALLS}' \
+    && grep -q '^state=targeted_stopped' '${SCENARIO_DIR}/work/etat_cycle_vie'"
 
 # ---- Scenarios bootstrap + pin : clone jetable, versions COURANTES du
 # protocole synchronisees et committees DANS LE CLONE (commit conditionnel :
@@ -305,6 +324,38 @@ check_true "bootstrap altere : refus d'identite de l'etage 1 (rc=2)" \
   bash -c "[ '${rc}' -eq 2 ] && grep -q 'differe de la version du commit' '${BASE}/boot12.err'"
 ( cd "${CLONE}" && git checkout --quiet -- gcp-migration/session_campagne_v6_g4.sh )
 
+# 12bis. POINT D'ENTREE DE CONFIANCE MAXIMAL execute REELLEMENT hors du
+# depot (troisieme tour : la commande documentee doit fonctionner) : le
+# bootstrap est materialise depuis le commit du clone vers /tmp et lance
+# depuis / avec la racine EXPLICITE ; PATH empoisonne par le faux gcloud
+# (aucun contact GCP possible) — la chaine doit atteindre l'etage 2
+# re-authentifie et le pin (source_commit imprime), puis echouer PLUS LOIN
+# que le bootstrap (le vrai garde refuse le faux gcloud), sans aucun arret.
+BOOT="$(mktemp /tmp/ehgp-boot-selftest.XXXXXX.sh)"
+git -C "${CLONE}" show "${CLONE_COMMIT}:gcp-migration/session_campagne_v6_g4.sh" > "${BOOT}"
+ENTRYBIN="$(mktemp -d "${BASE}/entrybin.XXXXXX")"
+make_fake_bin "${ENTRYBIN}"
+export FAKE_CALLS="${BASE}/entry_calls.log"
+: > "${FAKE_CALLS}"
+rc=0
+( cd / && env PATH="${ENTRYBIN}:${PATH}" FAKE_GEN="${FAKE_GEN}" FAKE_CALLS="${FAKE_CALLS}" \
+    MHGP6_BOOTSTRAP_REPO_ROOT="${CLONE}" MHGP6_BOOTSTRAP_COMMIT="${CLONE_COMMIT}" \
+    bash "${BOOT}" ) > "${BASE}/entry.log" 2>&1 || rc=$?
+check_true "point d'entree /tmp hors depot : etage 2 re-authentifie et pin atteints, echec sur (aucun arret)" \
+  bash -c "[ '${rc}' -ne 0 ] && grep -q 'etage 2 : bootstrap et pin re-authentifies' '${BASE}/entry.log' \
+    && grep -q '^source_commit=${CLONE_COMMIT}' '${BASE}/entry.log' \
+    && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}' || true)\" -eq 0 ]"
+rm -f "${BOOT}"
+
+# 12ter. ENTREE DIRECTE en etage 2 (marqueur forge) : refusee.
+FORGE="$(mktemp -d "${BASE}/forge.XXXXXX")"
+rc=0
+env MHGP6_BOOTSTRAP_STAGE2=1 MHGP6_BOOTSTRAP_WORK="${FORGE}" \
+  MHGP6_BOOTSTRAP_COMMIT="${CLONE_COMMIT}" MHGP6_BOOTSTRAP_REPO_ROOT="${CLONE}" \
+  bash "${CLONE}/gcp-migration/session_campagne_v6_g4.sh" > /dev/null 2>"${BASE}/forge.err" || rc=$?
+check_true "entree directe en etage 2 : refusee (marqueur forge)" \
+  bash -c "[ '${rc}' -eq 2 ] && grep -q 'entree directe en etage 2' '${BASE}/forge.err'"
+
 # 13. Chaque fichier du protocole altere => le pin refuse (code 2).
 for f in "${PROTOCOL_FILES[@]}"; do
   echo "# alteration" >> "${CLONE}/gcp-migration/${f}"
@@ -319,4 +370,4 @@ if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest cycle de vie v6 : ${FAILURES} echec(s)" >&2
   exit 1
 fi
-echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (12 scenarios + 10 refus de pin, rejouable depuis un HEAD propre)"
+echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (15 scenarios dont reprise bornee, point d'entree hors depot et refus d'entree directe + 10 refus de pin, rejouable depuis un HEAD propre)"

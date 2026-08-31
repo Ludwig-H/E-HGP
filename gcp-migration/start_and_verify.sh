@@ -479,23 +479,37 @@ path = Path(sys.argv[1])
 state, project, zone, instance, generation, allow = sys.argv[2:8]
 if not path.is_absolute() or path.is_symlink():
     sys.exit(1)
-if allow == "0" and (path.exists() or path.is_symlink()):
-    sys.exit(1)
 data = ("schema=e-hgp.lifecycle-state.v1\n"
         f"state={state}\n"
         f"project={project}\n"
         f"zone={zone}\n"
         f"instance={instance}\n"
         f"generation={generation}\n").encode()
-descriptor, temporary = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".partial", dir=str(path.parent))
-try:
-    offset = 0
-    while offset < len(data):
-        offset += os.write(descriptor, data[offset:])
-    os.fsync(descriptor)
-finally:
-    os.close(descriptor)
-os.replace(temporary, path)
+if allow == "0":
+    # CREATION REELLEMENT EXCLUSIVE (audit troisieme tour : un test
+    # exists() suivi d'un replace n'est pas une publication exclusive) :
+    # O_CREAT | O_EXCL — deux producteurs ne peuvent pas franchir.
+    try:
+        descriptor = os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
+    except FileExistsError:
+        sys.exit(1)
+    try:
+        offset = 0
+        while offset < len(data):
+            offset += os.write(descriptor, data[offset:])
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+else:
+    descriptor, temporary = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".partial", dir=str(path.parent))
+    try:
+        offset = 0
+        while offset < len(data):
+            offset += os.write(descriptor, data[offset:])
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+    os.replace(temporary, path)
 parent = os.open(str(path.parent), os.O_DIRECTORY)
 try:
     os.fsync(parent)

@@ -152,9 +152,18 @@ chmod +x "${FAKE}/gnutime" "${FAKE}/mhgp6_conformity"
 # surcharges de scenario ("$@") viennent EN DERNIER : env garde la derniere.
 # Le PROFIL DE CAMPAGNE est ecrit une fois (matrice epinglee independamment
 # du runner) et transmis au validateur — audit GCP v6, P1.
+# Fichier CANONIQUE (liaison exigee par le validateur) + profil de campagne.
+CANON="${WORK}/selftest_reduit_v1.env"
+{
+  echo "# profil canonique du selftest"
+  echo "CONF_SPECS=uniform:50000"
+} > "${CANON}"
+CANON_SHA="$(sha256sum "${CANON}" | awk '{print $1}')"
 PROFILE="${WORK}/profil_campagne.txt"
 {
   echo "profil=selftest_reduit_v1"
+  echo "profil_canonique=selftest_reduit_v1"
+  echo "profil_canonique_sha256=${CANON_SHA}"
   echo "conf_specs=uniform:50000"
   echo "bench_specs=uniform:32000 eight_clusters:32000"
   echo "queue_families=terrain_stationnaire"
@@ -173,8 +182,9 @@ run_runner() { # $1 = dossier out ; le reste = env supplementaire
     "$@" \
     bash "${RUNNER}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST}" >/dev/null 2>&1
 }
-run_validator() { # $1 = dossier out, $2 = remote_rc, $3 = scp_rc, [$4 = profil]
-  python3 "${VALIDATOR}" "$1" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST}" "$2" "$3" "${4:-${PROFILE}}"
+run_validator() { # $1 = dossier out, $2 = remote_rc, $3 = scp_rc, [$4 = profil], [$5 = canonique]
+  python3 "${VALIDATOR}" "$1" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST}" "$2" "$3" \
+    "${4:-${PROFILE}}" "${5:-${CANON}}"
 }
 
 # ---- 1. Nominal.
@@ -183,8 +193,8 @@ rc=0; run_runner "${OUT}" || rc=$?
 check "nominal : runner rc=0" "${rc}"
 rc=0; VOUT="$(run_validator "${OUT}" 0 0)" || rc=$?
 check "nominal : validateur rc=0" "${rc}"
-check_true "nominal : CAMPAGNE COMPLETE" \
-  bash -c "printf '%s\n' \"\$1\" | grep -q '=== CAMPAGNE COMPLETE ==='" _ "${VOUT}"
+check_true "nominal : verifie_non_decisionnel (profil reduit, jamais une decision)" \
+  bash -c "printf '%s\n' \"\$1\" | grep -q 'campaign_status=verifie_non_decisionnel'" _ "${VOUT}"
 check_true "nominal : plan ABBA contrebalance (parites 1 et 2)" bash -c "
   grep -q 'seq=1 name=bench_uniform_n32000_v5_r1 .* pos=1' '${OUT}/bench_plan.txt' &&
   grep -q 'seq=4 name=bench_uniform_n32000_v5_r2 .* pos=4' '${OUT}/bench_plan.txt' &&
@@ -263,6 +273,18 @@ PROF2="${WORK}/profil_reduit.txt"
 sed 's/^bench_specs=.*/bench_specs=uniform:64000 eight_clusters:64000/' "${PROFILE}" > "${PROF2}"
 rc=0; run_validator "${OUT}" 0 0 "${PROF2}" >/dev/null || rc=$?
 check_true "falsification refusee : plans != profil epingle (matrice reduite)" [ "${rc}" -eq 1 ]
+# Liaison canonique : un sha discordant est refuse ; une pretention decision
+# sans le canon decision_v1 ne rend jamais decision_complete.
+PROF3="${WORK}/profil_sha_faux.txt"
+sed 's/^profil_canonique_sha256=.*/profil_canonique_sha256='"$(printf 'e%.0s' {1..64})"'/' "${PROFILE}" > "${PROF3}"
+rc=0; run_validator "${OUT}" 0 0 "${PROF3}" >/dev/null || rc=$?
+check_true "falsification refusee : sha du profil canonique discordant" [ "${rc}" -eq 1 ]
+PROF4="${WORK}/profil_pretendu_decision.txt"
+sed -e 's/^profil=selftest_reduit_v1/profil=decision_v1/' \
+    -e 's/^profil_canonique=selftest_reduit_v1/profil_canonique=decision_v1/' "${PROFILE}" > "${PROF4}"
+rc=0; VOUT4="$(run_validator "${OUT}" 0 0 "${PROF4}")" || rc=$?
+check_true "pretention decision sur un canon non-decision : jamais decision_complete" \
+  bash -c "! printf '%s\n' \"\$1\" | grep -q 'decision_complete'" _ "${VOUT4}"
 
 if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest campagne v6 : ${FAILURES} echec(s)" >&2

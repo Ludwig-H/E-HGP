@@ -86,9 +86,6 @@ GUEST_SHUTDOWN_MINUTES="${GUEST_SHUTDOWN_MINUTES:-470}"
 RAPATRIEMENT_MARGE_S="${RAPATRIEMENT_MARGE_S:-1500}"
 SSH_STEP_TIMEOUT_S="${SSH_STEP_TIMEOUT_S:-3600}"
 SCP_STEP_TIMEOUT_S="${SCP_STEP_TIMEOUT_S:-1800}"
-V5_GATE_MIN="${V5_GATE_MIN:-40}"
-V6_GATE_MIN="${V6_GATE_MIN:-60}"
-DURABLE_RECEIPT_DIR="${DURABLE_RECEIPT_DIR:-}"
 
 # PROFIL CANONIQUE (audit deuxieme tour : le fichier d'autorite est
 # versionne et hashe, jamais fabrique par l'environnement). CAMPAIGN_PROFILE
@@ -102,17 +99,17 @@ PROFILE_SRC="${WORK}/pinned/gcp-migration/profils/${CAMPAIGN_PROFILE}.env"
 _ov_CONF_SPECS="${CONF_SPECS:-}"; _ov_BENCH_SPECS="${BENCH_SPECS:-}"
 _ov_QUEUE_FAMILIES="${QUEUE_FAMILIES:-}"; _ov_QUEUE_N="${QUEUE_N:-}"
 _ov_QUEUE_SEEDS="${QUEUE_SEEDS:-}"; _ov_RUN_TIMEOUT="${RUN_TIMEOUT:-}"
+_ov_THREADS_VM="${THREADS_VM:-}"; _ov_V5_GATE_MIN="${V5_GATE_MIN:-}"; _ov_V6_GATE_MIN="${V6_GATE_MIN:-}"
 # shellcheck disable=SC1090
 source "${PROFILE_SRC}"
 EFFECTIVE_PROFILE="${CAMPAIGN_PROFILE}"
-for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT; do
+for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM V5_GATE_MIN V6_GATE_MIN; do
   ov="_ov_${v}"
   if [ -n "${!ov}" ] && [ "${!ov}" != "${!v}" ]; then
     EFFECTIVE_PROFILE="custom"
     printf -v "${v}" '%s' "${!ov}"
   fi
 done
-THREADS_VM="${THREADS_VM:-48}"
 _param_re='^[A-Za-z0-9_: -]*$'
 for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM; do
   [[ "${!v}" =~ ${_param_re} ]] || { echo "REFUS : parametre ${v} avec caractere hors alphabet sur" >&2; exit 2; }
@@ -124,12 +121,50 @@ STATE_FILE="${WORK}/etat_cycle_vie"
 LOG="${WORK}/session.log"
 PROFILE="${WORK}/profil_campagne.txt"
 : > "${LOG}"
-DURABLE_RECEIPT_DIR="${DURABLE_RECEIPT_DIR:?DURABLE_RECEIPT_DIR requis (recu durable obligatoire, audit deuxieme tour)}"
+DURABLE_RECEIPT_BASE="${DURABLE_RECEIPT_BASE:?DURABLE_RECEIPT_BASE requis (recu durable obligatoire)}"
+DURABLE_RECEIPT_PREFIX="${DURABLE_RECEIPT_PREFIX:?DURABLE_RECEIPT_PREFIX requis}"
 
 # Lecture de l'enregistrement de cycle de vie partage avec le garde.
 state_field() { # $1 = cle ; vide si fichier absent
   [ -s "${STATE_FILE}" ] || return 0
   sed -n "s/^$1=//p" "${STATE_FILE}" 2>/dev/null | head -1
+}
+# PUBLICATION de transition par le cleanup EXTERIEUR (audit troisieme tour :
+# le registre doit decrire aussi l'arret nominal) — meme schema et meme
+# patron atomique que le garde ; best-effort (jamais bloquant pour l'arret).
+lifecycle_publish_state() { # $1 = etat
+  python3 - "${STATE_FILE}" "$1" "${GCP_PROJECT_ID}" "${GCP_ZONE}" "${GCP_INSTANCE_NAME}" \
+    "${GENERATION}" 2>/dev/null <<'PY' || true
+import os
+import sys
+import tempfile
+from pathlib import Path
+
+path = Path(sys.argv[1])
+state, project, zone, instance, generation = sys.argv[2:7]
+if not path.is_absolute() or path.is_symlink():
+    sys.exit(1)
+data = ("schema=e-hgp.lifecycle-state.v1\n"
+        f"state={state}\n"
+        f"project={project}\n"
+        f"zone={zone}\n"
+        f"instance={instance}\n"
+        f"generation={generation}\n").encode()
+descriptor, temporary = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".partial", dir=str(path.parent))
+try:
+    offset = 0
+    while offset < len(data):
+        offset += os.write(descriptor, data[offset:])
+    os.fsync(descriptor)
+finally:
+    os.close(descriptor)
+os.replace(temporary, path)
+parent = os.open(str(path.parent), os.O_DIRECTORY)
+try:
+    os.fsync(parent)
+finally:
+    os.close(parent)
+PY
 }
 
 log() { printf '%s\n' "$*" | tee -a "${LOG}"; }
@@ -160,10 +195,17 @@ GENERATION=""
 SESSION_RC=0
 STOP_ATTEMPTED=0
 finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu COMPLET est publie
+  # RUN UNIQUE incluant la generation (audit troisieme tour) : construction
+  # dans un temporaire, publication ATOMIQUE, dossier preexistant REFUSE.
+  local run_id="${DURABLE_RECEIPT_PREFIX}_${GEN_EPOCH:-avorte_$(date +%s)}"
+  local dir="${DURABLE_RECEIPT_BASE}/${run_id}"
+  local tmp="${dir}.partial"
   {
-    mkdir -p "${DURABLE_RECEIPT_DIR}" &&
+    [ ! -e "${dir}" ] && [ ! -e "${tmp}" ] &&
+    mkdir -p "${tmp}" &&
     {
-      printf 'schema=e-hgp.v6-session-receipt.v2\nissue=%s\nrc=%s\nstop_rc=%s\n' "$1" "$3" "${2:-na}"
+      printf 'schema=e-hgp.v6-session-receipt.v3\nrun_id=%s\nissue=%s\nrc=%s\nstop_rc=%s\n' \
+        "${run_id}" "$1" "$3" "${2:-na}"
       printf 'profil=%s profil_canonique=%s\n' "${EFFECTIVE_PROFILE:-inconnu}" "${CAMPAIGN_PROFILE:-inconnu}"
       printf 'generation=%s\nprojet=%s zone=%s instance=%s\n' "${GENERATION:-inconnue}" \
         "${GCP_PROJECT_ID}" "${GCP_ZONE}" "${GCP_INSTANCE_NAME}"
@@ -172,13 +214,15 @@ finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu CO
       printf 'max_run_seconds=%s guest_shutdown_minutes=%s\n' "${MAX_RUN_SECONDS}" "${GUEST_SHUTDOWN_MINUTES}"
       printf 'etat_cycle_vie=%s\n' "$(state_field state)"
       printf 'date_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-    } > "${DURABLE_RECEIPT_DIR}/RECU_SESSION.txt" &&
-    cp -f "${LOG}" "${DURABLE_RECEIPT_DIR}/session.log" &&
-    { [ ! -f "${PROFILE}" ] || cp -f "${PROFILE}" "${DURABLE_RECEIPT_DIR}/profil_campagne.txt"; } &&
-    { [ ! -f "${WORK}/out/bench_resume.txt" ] || cp -f "${WORK}/out/bench_resume.txt" "${DURABLE_RECEIPT_DIR}/"; } &&
-    { [ ! -f "${WORK}/out/queue_resume.txt" ] || cp -f "${WORK}/out/queue_resume.txt" "${DURABLE_RECEIPT_DIR}/"; } &&
-    { [ ! -f "${WORK}/manifest_revalide.txt" ] || cp -f "${WORK}/manifest_revalide.txt" "${DURABLE_RECEIPT_DIR}/"; } &&
-    ( cd "${DURABLE_RECEIPT_DIR}" && sha256sum -- * > SHA256SUMS.tmp && mv SHA256SUMS.tmp SHA256SUMS )
+    } > "${tmp}/RECU_SESSION.txt" &&
+    cp -f "${LOG}" "${tmp}/session.log" &&
+    { [ ! -f "${PROFILE}" ] || cp -f "${PROFILE}" "${tmp}/profil_campagne.txt"; } &&
+    { [ ! -f "${WORK}/validation.txt" ] || cp -f "${WORK}/validation.txt" "${tmp}/validation.txt"; } &&
+    { [ ! -f "${WORK}/manifest_revalide.txt" ] || cp -f "${WORK}/manifest_revalide.txt" "${tmp}/"; } &&
+    { [ ! -d "${WORK}/out" ] || cp -r "${WORK}/out" "${tmp}/out"; } &&
+    ( cd "${tmp}" && { find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum; } > SHA256SUMS.tmp \
+      && mv SHA256SUMS.tmp SHA256SUMS ) &&
+    mv "${tmp}" "${dir}"
   } 2>/dev/null
 }
 cleanup() {
@@ -230,18 +274,31 @@ cleanup() {
     finalize_receipt blocage_generation_illisible "" 71 || true
     exit 71
   fi
-  # UNE tentative d'arret ciblee (deliberement retentee si l'arret interne du
-  # garde a echoue : etat targeted_stop_failed), insensible aux pannes de
-  # journal.
+  # REPRISE BORNEE : une tentative d'arret ciblee par le cleanup exterieur —
+  # deliberement RE-tentee si l'arret interne du garde a echoue (etat
+  # targeted_stop_failed) ; jamais une unicite globale de l'appel d'arret.
+  # Le registre est mis a jour par CE cleanup aussi (audit troisieme tour :
+  # l'arret nominal doit y figurer) : targeted_stopping avant, puis
+  # targeted_stopped / targeted_stop_failed selon le resultat.
   local so="${LOG}"
   ( : >> "${so}" ) 2>/dev/null || so="$(mktemp 2>/dev/null || echo /dev/stderr)"
   STOP_ATTEMPTED=1
+  lifecycle_publish_state "targeted_stopping"
   local stop_rc=0
   "${GUARDS_DIR}/stop_and_verify.sh" --yes \
     --expected-last-start-timestamp "${GENERATION}" >> "${so}" 2>&1 || stop_rc=$?
+  if [ "${stop_rc}" -eq 0 ]; then
+    lifecycle_publish_state "targeted_stopped"
+  else
+    lifecycle_publish_state "targeted_stop_failed"
+  fi
   log_safe "stop_and_verify (generation ${GENERATION}) : rc=${stop_rc}"
   echo "journal complet : ${LOG}"
   echo "resultats rapatries : ${WORK}/out (si l'etape scp a ete atteinte)"
+  if [ "${stop_rc}" -eq 0 ] && [ "$(state_field state)" != "targeted_stopped" ]; then
+    echo "[INCOHERENCE] arret certifie mais registre != targeted_stopped" >&2
+    receipt_rc=66
+  fi
   finalize_receipt arret_tente "${stop_rc}" "${rc}" || receipt_rc=66
   if [ "${stop_rc}" -ne 0 ]; then
     echo "[ARRET NON CERTIFIE] stop_and_verify a rendu ${stop_rc} — echec bloquant" >&2
@@ -263,10 +320,14 @@ trap 'exit 143' TERM
 # existante (credentials compris) dans le WORK, puis toute commande gcloud
 # de cette session n'ecrit que dans cette copie ; --project/--zone restent
 # explicites sur chaque commande.
-if [ -z "${CLOUDSDK_CONFIG:-}" ] && [ -d "${HOME}/.config/gcloud" ]; then
-  cp -r "${HOME}/.config/gcloud" "${WORK}/gcloud-config"
-  export CLOUDSDK_CONFIG="${WORK}/gcloud-config"
-fi
+# TOUJOURS prive (audit troisieme tour) : le repertoire est cree dans tous
+# les cas ; la configuration source (CLOUDSDK_CONFIG herite, sinon la
+# configuration par defaut) y est copiee si elle existe — credentials
+# compris — puis seule la copie est exportee.
+_gcloud_src="${CLOUDSDK_CONFIG:-${HOME}/.config/gcloud}"
+mkdir -p "${WORK}/gcloud-config"
+if [ -d "${_gcloud_src}" ]; then cp -r "${_gcloud_src}/." "${WORK}/gcloud-config/"; fi
+export CLOUDSDK_CONFIG="${WORK}/gcloud-config"
 gcloud config set project "${GCP_PROJECT_ID}" >/dev/null
 
 # ---- PROFIL DE CAMPAGNE EPINGLE AVANT TOUTE MUTATION (P1 : la matrice est
@@ -281,7 +342,10 @@ gcloud config set project "${GCP_PROJECT_ID}" >/dev/null
   echo "queue_families=${QUEUE_FAMILIES}"
   echo "queue_n=${QUEUE_N}"
   echo "queue_seeds=${QUEUE_SEEDS}"
+  echo "run_timeout=${RUN_TIMEOUT}"
   echo "threads=${THREADS_VM}"
+  echo "v5_gate_min=${V5_GATE_MIN}"
+  echo "v6_gate_min=${V6_GATE_MIN}"
 } > "${PROFILE}.tmp"
 mv "${PROFILE}.tmp" "${PROFILE}"
 log "profil de campagne epingle : $(sha256sum "${PROFILE}" | awk '{print $1}')"
@@ -498,7 +562,7 @@ printf 'scp_rc=%d\n' "${SCP_RC}" | tee -a "${LOG}"
 set +e
 python3 "${VALIDATOR}" "${WORK}/out" \
   "${SOURCE_COMMIT}" "${SOURCE_PAYLOAD_SHA256}" "${PROTOCOL_MANIFEST_SHA256}" \
-  "${REMOTE_CAMPAIGN_RC}" "${SCP_RC}" "${PROFILE}" 2>&1 | tee -a "${LOG}"
+  "${REMOTE_CAMPAIGN_RC}" "${SCP_RC}" "${PROFILE}" "${PROFILE_SRC}" 2>&1 | tee "${WORK}/validation.txt" | tee -a "${LOG}"
 VALIDATE_RC=${PIPESTATUS[0]}
 set -e
 if [ "${VALIDATE_RC}" -ne 0 ]; then SESSION_RC=65; fi

@@ -25,17 +25,25 @@ fichier ecrit par le cycle de vie AVANT la campagne : la matrice attendue en
 vient, jamais des axes declares par le runner lui-meme. Les plans annonces
 doivent EGALER le profil (une matrice reduite n'est jamais `complete`).
 
+Le PROFIL CANONIQUE (8e argument) est le fichier versionne du manifeste :
+le profil de campagne doit porter son nom et son sha256 EXACTS (liaison,
+audit troisieme tour). Seul un profil effectif == canonique == decision_v1
+obtient `campaign_status=decision_complete` ; tout autre profil valide rend
+`campaign_status=verifie_non_decisionnel` (code 0, jamais une decision).
+
 Usage : validate_v6_campaign.py OUT_DIR SOURCE_COMMIT SOURCE_PAYLOAD_SHA256 \\
-        PROTOCOL_MANIFEST_SHA256 REMOTE_CAMPAIGN_RC SCP_RC PROFIL_CAMPAGNE
-Sortie : 0 si complete, 1 sinon (les preuves partielles restent sur place).
+        PROTOCOL_MANIFEST_SHA256 REMOTE_CAMPAIGN_RC SCP_RC PROFIL_CAMPAGNE \\
+        PROFIL_CANONIQUE
+Sortie : 0 si valide, 1 sinon (les preuves partielles restent sur place).
 """
+import hashlib
 import os
 import re
 import sys
 
 KMAX = 10
 AUX = ("topologie.txt", "conf_plan.txt", "bench_plan.txt", "queue_plan.txt",
-       "bench_resume.txt", "queue_resume.txt",
+       "bench_resume.txt", "queue_resume.txt", "MANIFESTE_DISTANT.txt",
        "conf_tronquee.txt", "bench_tronquee.txt", "queue_tronquee.txt")
 FORBIDDEN = re.compile(r"REFUS|INVARIANT|DIVERGENCE|PLANCHER|Killed|bad_alloc|AddressSanitizer")
 COUNTERS = re.compile(r"boules_uniques=\d+.*evenements=\d+.*facettes=\d+")
@@ -230,7 +238,9 @@ def determinism_signature(body):
     """Lignes deterministes d'un run pilote : compteurs, generation, sweep,
     cardinalites — jamais les temps ni les RSS."""
     sig = []
-    for pat in (r"^famille=.*$", r"^generation .*$", r"^sweep .*$", r"^cardinalites K=\d+ .*$"):
+    for pat in (r"^famille=.*$", r"^generation .*$", r"^sweep .*$", r"^vwspd .*$", r"^octaves_q4 .*$",
+                r"^octaves_q4_seeds .*$", r"^vcensus .*$", r"^p_factor=.*$", r"^ledger_paires .*$",
+                r"^ouvriers .*$", r"^cardinalites K=\d+ .*$"):
         sig.extend(re.findall(pat, body, re.M))
     return tuple(sig)
 
@@ -247,11 +257,20 @@ def median(xs):
     return xs[mid] if len(xs) % 2 else (xs[mid - 1] + xs[mid]) / 2.0
 
 
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def main():
-    if len(sys.argv) != 8:
-        print("usage: validate_v6_campaign.py OUT COMMIT PAYLOAD MANIFEST REMOTE_RC SCP_RC PROFIL", file=sys.stderr)
+    if len(sys.argv) != 9:
+        print("usage: validate_v6_campaign.py OUT COMMIT PAYLOAD MANIFEST REMOTE_RC SCP_RC PROFIL CANONIQUE",
+              file=sys.stderr)
         return 2
-    out, commit, payload_sha, manifest_sha, remote_rc, scp_rc, profile_path = sys.argv[1:8]
+    out, commit, payload_sha, manifest_sha, remote_rc, scp_rc, profile_path, canonical_path = sys.argv[1:9]
     bad = []
     if remote_rc != "0":
         bad.append(f"session distante : remote_campaign_rc={remote_rc}")
@@ -266,10 +285,15 @@ def main():
             if "=" in line:
                 k, v = line.split("=", 1)
                 profile[k] = v
-        for key in ("profil", "conf_specs", "bench_specs",
+        for key in ("profil", "profil_canonique", "profil_canonique_sha256", "conf_specs", "bench_specs",
                     "queue_families", "queue_n", "queue_seeds", "threads"):
             if not profile.get(key, "").strip():
                 bad.append(f"profil de campagne : cle {key} absente")
+        # LIAISON au fichier canonique versionne (jamais un simple transport).
+        if not os.path.exists(canonical_path):
+            bad.append("profil canonique ABSENT (liaison impossible)")
+        elif profile.get("profil_canonique_sha256", "") != sha256_file(canonical_path):
+            bad.append("profil_canonique_sha256 != sha256 du fichier canonique fourni")
     for tf in ("conf_tronquee.txt", "bench_tronquee.txt", "queue_tronquee.txt"):
         p = os.path.join(out, tf)
         if os.path.exists(p):
@@ -404,8 +428,32 @@ def main():
     for name in known:
         allowed.update((f"{name}.txt", f"{name}.status", f"{name}.status.time"))
     for f in sorted(os.listdir(out)):
-        if f not in allowed:
+        full = os.path.join(out, f)
+        if os.path.islink(full):
+            bad.append(f"{f}: lien symbolique refuse")
+        elif os.path.isdir(full):
+            bad.append(f"{f}: repertoire inattendu dans out/")
+        elif f not in allowed:
             bad.append(f"{f}: fichier inattendu")
+    # MANIFESTE DISTANT : le runner grave les sha256 de tous ses artefacts ;
+    # apres rapatriement, chaque fichier est recoupe (corruption scp tuee).
+    remote_manifest = os.path.join(out, "MANIFESTE_DISTANT.txt")
+    if not os.path.exists(remote_manifest):
+        bad.append("MANIFESTE_DISTANT.txt: ABSENT (artefacts distants non hashes)")
+    else:
+        listed = {}
+        for line in read_text(remote_manifest).splitlines():
+            m = re.match(r"^([0-9a-f]{64})  (\S+)$", line)
+            if m:
+                listed[m.group(2)] = m.group(1)
+        expected_files = {f for f in os.listdir(out)
+                          if f not in ("MANIFESTE_DISTANT.txt",) and os.path.isfile(os.path.join(out, f))}
+        if set(listed) != expected_files:
+            bad.append("MANIFESTE_DISTANT.txt: liste != artefacts rapatries")
+        else:
+            for name, want in sorted(listed.items()):
+                if sha256_file(os.path.join(out, name)) != want:
+                    bad.append(f"{name}: hash different du manifeste distant (corruption de rapatriement)")
 
     # RESUMES factuels (jamais une conclusion).
     lines = [
@@ -448,10 +496,15 @@ def main():
         for b in bad:
             print("  -", b)
         return 1
-    print(f"campaign_status=complete profil={profile.get('profil', '?')} "
-          f"({len(known)} runs valides, source_commit={commit[:12]}, "
-          f"resumes bench_resume.txt / queue_resume.txt)")
-    print("=== CAMPAGNE COMPLETE ===")
+    if profile.get("profil") == profile.get("profil_canonique") == "decision_v1":
+        print(f"campaign_status=decision_complete profil=decision_v1 "
+              f"({len(known)} runs valides, source_commit={commit[:12]}, "
+              f"resumes bench_resume.txt / queue_resume.txt)")
+        print("=== CAMPAGNE COMPLETE ===")
+    else:
+        print(f"campaign_status=verifie_non_decisionnel profil={profile.get('profil', '?')} "
+              f"canonique={profile.get('profil_canonique', '?')} "
+              f"({len(known)} runs valides — JAMAIS une decision)")
     return 0
 
 

@@ -90,8 +90,12 @@ run_one() {
   local out="${OUT_DIR}/${name}.txt" status="${OUT_DIR}/${name}.status"
   local rc=0 t0 t1 hwm=""
   t0=$(date +%s)
-  "${TIME_BIN}" -v -o "${status}.time" timeout "${RUN_TIMEOUT_ONE:-${RUN_TIMEOUT}}" "$@" >"${out}" 2>&1 </dev/null || rc=$?
+  # .txt et .status.time sont eux aussi publies ATOMIQUEMENT (audit
+  # troisieme tour : seul .status l'etait).
+  "${TIME_BIN}" -v -o "${status}.time.tmp" timeout "${RUN_TIMEOUT_ONE:-${RUN_TIMEOUT}}" "$@" >"${out}.tmp" 2>&1 </dev/null || rc=$?
   t1=$(date +%s)
+  mv "${out}.tmp" "${out}"
+  mv "${status}.time.tmp" "${status}.time"
   hwm=$(grep -oE 'Maximum resident set size[^0-9]*[0-9]+' "${status}.time" 2>/dev/null | grep -oE '[0-9]+$' || true)
   {
     printf 'code=%d\n' "${rc}"
@@ -265,4 +269,8 @@ while read -r line; do
   fi
 done < "${OUT_DIR}/bench_plan.txt"
 
+# MANIFESTE DISTANT : sha256 de chaque artefact produit, grave en dernier —
+# le validateur recoupe apres rapatriement (corruption scp tuee).
+( cd "${OUT_DIR}" && find . -maxdepth 1 -type f ! -name 'MANIFESTE_DISTANT.txt*' -printf '%P\n' | sort \
+  | xargs -d '\n' sha256sum > MANIFESTE_DISTANT.txt.tmp && mv MANIFESTE_DISTANT.txt.tmp MANIFESTE_DISTANT.txt )
 echo "=== fin des runs (la validation locale decide du statut, jamais cette ligne) ==="
