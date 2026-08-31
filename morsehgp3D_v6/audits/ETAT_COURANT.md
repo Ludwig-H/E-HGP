@@ -262,6 +262,39 @@ familles stationnaires créent un nombre de motifs proportionnel à `n`, puis
 `T_input` et un compteur `V_motif`, ou préparer/rastériser spatialement le
 champ, avant d'attribuer une pente de bout en bout au pipeline MorseHGP3D.
 
+## J3 actif — critères de clôture, sans verdict sur le worktree
+
+Le travail J3 non versionné progresse utilement. Les 18 runs des deux familles
+stationnaires couvrent déjà les tailles 8000/16000/32000 et les graines 3/4/5,
+avec code 0, sorties structurées et stderr vide. Les cinq nouvelles portes
+ciblées `linked_arcs`/sweep compilent et passent localement, dont trois mutants
+attendus à code 4. Ce sont des diagnostics sur un worktree actif, pas encore
+un reçu.
+
+Avant de fermer la campagne :
+
+- `pentes.py` doit exiger exactement 9/9 runs par famille, `DONE`, code 0,
+  stderr vide, identité interne concordante et présence de chaque compteur
+  requis. Le seuil courant `len(data) >= 6` publie à tort une table partielle;
+- une regex ou un terme absent doit faire échouer la porte, pas disparaître
+  silencieusement. Publier l'étendue inter-graines séparément pour chacun des
+  deux pas, au lieu de mélanger les six pentes;
+- les pentes observées sous 2 sur les compteurs actuellement extraits sont un
+  signal positif, mais pas un GO : `P_factor`, `T_input/V_motif`, `H_rect`,
+  `H_scan`, `M_anchor`, `W_sweep1`, `V_census` et les HWM manquent encore;
+- `linked_arcs_u16` prouve l'inclusion exact-once des clés attendues, mais ne
+  rejette pas encore les clés q3/q4 profondeur-zéro excédentaires. Comparer
+  l'égalité complète produit/oracle; sous réétiquetage, comparer aussi
+  multiplicités et arités, pas seulement le set de `BallKey`;
+- les fixtures sweep F1–F5 jugent encore après préfiltre. Elles ne contiennent
+  ni la fixture coefficient 3/4 `(110,90,83)` de ce rapport, ni la
+  calotte–lentille de coût avec `M_anchor/H_scan`. Ces trois portes sont
+  complémentaires; aucune ne remplace les deux autres.
+
+Le prochain reçu doit enfin épingler le SHA complet, le runner ou sa commande,
+l'état du worktree, la toolchain, les heures et les hashes des sorties. Aucun
+claim de pente, de préparation quasi linéaire ou de J3 complet avant ce pin.
+
 ## P1 — la racine carrée reste flottante
 
 `detail_round_isqrt_clamped` initialise encore `r` avec
