@@ -931,9 +931,9 @@ check_true "serie C § 5.15 fail-fast : matrice en echec => bloc GPU v6 SAUTE (a
 # rejoue avec l'ESTIMATEUR REEL extrait du cycle de vie (jamais une
 # reimplementation) sur les axes du profil g4_serie_c_v1 — un profil qui se
 # refuse lui-meme au preflight (l'enveloppe 5 h se refusait de 257 s) ne
-# peut plus etre livre. Fenetre gravee pour 25200 s / 415 min aux defauts
-# du cycle de vie : SCP_BUDGET=935, POST=2915, CUTOFF=24900, MARGE=3305,
-# WINDOW = 25200 - 3305 - 900 = 20995 s. Plancher 10000 s contre un profil
+# peut plus etre livre. Fenetre gravee pour 25200 s / 405 min aux defauts
+# du cycle de vie : SCP_BUDGET=935, POST=2915, CUTOFF=24300, MARGE=3905,
+# WINDOW = 25200 - 3905 - 900 = 20395 s. Plancher 10000 s contre un profil
 # silencieusement vide.
 SERIE_C_ENV="${HERE}/profils/g4_serie_c_v1.env"
 est_c="$(bash -c '
@@ -944,8 +944,8 @@ est_c="$(bash -c '
   source "'"${SERIE_C_ENV}"'"
   budget_estimate
 ' 2>&1)" || est_c="ECHEC:${est_c}"
-check_true "budget serie C : ESTIMATE=${est_c}s tient dans la fenetre 7h gravee (10000 <= est <= 20995)" \
-  bash -c "[[ '${est_c}' =~ ^[0-9]+$ ]] && [ '${est_c}' -ge 10000 ] && [ '${est_c}' -le 20995 ]"
+check_true "budget serie C : ESTIMATE=${est_c}s tient dans la fenetre 7h gravee (10000 <= est <= 20395)" \
+  bash -c "[[ '${est_c}' =~ ^[0-9]+$ ]] && [ '${est_c}' -ge 10000 ] && [ '${est_c}' -le 20395 ]"
 
 # ---- PROFIL CANONIQUE G4 EXACT DE BOUT EN BOUT (cinquieme tour : le profil
 # etait AUTO-INVALIDANT — queue_sequence recalculait la sentinelle. Plus

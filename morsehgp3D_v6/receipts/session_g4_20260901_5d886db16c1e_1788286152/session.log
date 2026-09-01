@@ -1,0 +1,67 @@
+profil de campagne epingle : 068204eb18b37ef68c1b2d7f9e6cb12ba42128f7334cc53bd4d4b97ebf70c6a8
+preflight budgetaire : ESTIMATION NOMINALE 13552s (+build 900s) pour une fenetre de 20995s — campagne exploratoire tronquable
+enveloppe de terminaison (somme des plafonds par run) : 144600s — bornee en pratique par l'echeance du runner et les coupe-circuits, jamais une promesse de completude
+[GARDE pre-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=28800s.
+[SET-SCHEDULING] Reconfiguration protégée demandée :
+  compte              : louis.hauseux@gmail.com
+  projet              : devpod-gpu-exploration
+  zone                : europe-west4-ai1a
+  instance            : ehgp-blackwell-spot-ai1a
+  état certifié       : TERMINATED
+  maxRunDuration cible: 25200 s
+  action              : STOP
+Updated [https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+[GARDE post-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=25200s.
+[OK] maxRunDuration=25200s recertifié sur la cible TERMINATED devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a; aucune VM démarrée ou arrêtée.
+[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:upKcDJD3b0a/aWdj4OUVlkJCqJYho5rfCezMEiYGUgQ).
+[GARDE SSH] Clé OS Login unique, expiration fixe=2026-09-02T01:18:48.071662Z, durée restante=25788s.
+[START] Démarrage protégé demandé :
+  compte                 : louis.hauseux@gmail.com
+  projet                 : devpod-gpu-exploration
+  instance               : ehgp-blackwell-spot-ai1a
+  zone                   : europe-west4-ai1a
+  machine/provisioning   : g4-standard-48 / SPOT
+  maxRunDuration GCE     : 25200 s
+  arrêt invité secondaire : 415 min
+Starting instance(s) ehgp-blackwell-spot-ai1a...
+..................................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+Instance internal IP is 10.164.0.7
+Instance external IP is 34.34.19.250
+[GARDE-FOU GCE] action=STOP, maxRunDuration=25200s, échéance calculée=1788311352, échéance sûre=1788311052, terminationTimestamp=2026-09-02T01:09:03.466938Z
+[GARDE-FOU INVITÉ] Armement de shutdown -P +415 via SSH.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.
+[DIAGNOSTIC GARDE INVITÉE] Shutdown scheduled for Wed 2026-09-02 01:09:28 UTC, use 'shutdown -c' to cancel.
+[ERREUR] Le coupe-circuit invité n’a pas pu être armé puis relu de manière certaine.
+[URGENCE] Démarrage non certifié : tentative d’arrêt de la génération 2026-09-01T11:09:12.911-07:00 sur ehgp-blackwell-spot-ai1a.
+[STOP] État actuel de ehgp-blackwell-spot-ai1a : RUNNING.
+Stopping instance(s) ehgp-blackwell-spot-ai1a...
+..................................................................................................................................................................................................................................................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+[OK] Cible ehgp-blackwell-spot-ai1a arrêtée et vérifiée (état GCE TERMINATED).
+[INFO] Aucune autre VM project=e-hgp active détectée.
+[URGENCE] Arrêt ciblé certifié pour la génération 2026-09-01T11:09:12.911-07:00.
+--- arret certifie (rc=1) ---
+arret deja certifie par le garde (generation 2026-09-01T11:09:12.911-07:00, source registre-strict-du-garde) : aucun second arret

@@ -27,18 +27,22 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tests" / "gcp"))
 import test_gcp_safety  # noqa: E402  (harnais du faux gcloud, scenario guest-success)
 
+# § 5.15.4 : inventaire REPO-RELATIF, meme ordre que les deux listes
+# normatives (pin + lifecycle) — treize fichiers dans deux repertoires.
 PROTOCOL_FILES = [
-    "session_campagne_v6_g4.sh",
-    "v6_session_lifecycle.sh",
-    "v6_campaign_pin.sh",
-    "v6_campaign_remote.sh",
-    "validate_v6_campaign.py",
-    "profils/decision_v1.env",
-    "profils/smoke_v1.env",
-    "profils/g4_mesure_v1.env",
-    "set_max_run_duration_and_verify.sh",
-    "start_and_verify.sh",
-    "stop_and_verify.sh",
+    "gcp-migration/session_campagne_v6_g4.sh",
+    "gcp-migration/v6_session_lifecycle.sh",
+    "gcp-migration/v6_campaign_pin.sh",
+    "gcp-migration/v6_campaign_remote.sh",
+    "gcp-migration/validate_v6_campaign.py",
+    "gcp-migration/profils/decision_v1.env",
+    "gcp-migration/profils/smoke_v1.env",
+    "gcp-migration/profils/g4_mesure_v1.env",
+    "gcp-migration/profils/g4_serie_c_v1.env",
+    "morsehgp3D_v6/tests/pilote_juge.py",
+    "gcp-migration/set_max_run_duration_and_verify.sh",
+    "gcp-migration/start_and_verify.sh",
+    "gcp-migration/stop_and_verify.sh",
 ]
 
 FAKE_SET_MAX = """#!/usr/bin/env bash
@@ -92,11 +96,11 @@ class V6LifecycleIntegrationTests(unittest.TestCase):
         """Composition commune : VRAI start + faux set_max/stop + pins ;
         rend (work, calls, receipts, env)."""
         work = self.tmp / "work"
-        pinned = work / "pinned" / "gcp-migration" / "profils"
-        pinned.mkdir(parents=True)
+        (work / "pinned" / "gcp-migration" / "profils").mkdir(parents=True)
+        (work / "pinned" / "morsehgp3D_v6" / "tests").mkdir(parents=True)
         for name in PROTOCOL_FILES:
-            destination = work / "pinned" / "gcp-migration" / name
-            shutil.copy(ROOT / "gcp-migration" / name, destination)
+            destination = work / "pinned" / name
+            shutil.copy(ROOT / name, destination)
             destination.chmod(0o755)
         guards = self.tmp / "guards"
         guards.mkdir()
@@ -111,9 +115,9 @@ class V6LifecycleIntegrationTests(unittest.TestCase):
         commit = "0" * 40
         manifest_lines = ["schema=e-hgp.protocol-manifest.v1", f"commit={commit}"]
         for name in PROTOCOL_FILES:
-            pinned_file = work / "pinned" / "gcp-migration" / name
+            pinned_file = work / "pinned" / name
             manifest_lines.append(
-                f"{sha256_file(pinned_file)}\t{pinned_file.stat().st_size}\tgcp-migration/{name}"
+                f"{sha256_file(pinned_file)}\t{pinned_file.stat().st_size}\t{name}"
             )
         manifest = self.tmp / "manifest.txt"
         manifest.write_text("\n".join(manifest_lines) + "\n", encoding="utf-8")

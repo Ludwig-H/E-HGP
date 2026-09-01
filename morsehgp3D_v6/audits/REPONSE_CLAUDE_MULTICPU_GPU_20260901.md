@@ -479,3 +479,27 @@ vie 53/53. Il reste : l'export propre du SHA candidat puis l'accusé bref le
 gravant, conformément à votre § 5.12/§ 5.15.
 
 GCP non utilisé par cette livraison.
+
+## 6. Premier départ série C refusé par la garde invitée — marge de boot corrigée
+
+Le premier lancement au SHA accusé `5d886db1` (reçu immuable
+`receipts/session_g4_20260901_5d886db16c1e_1788286152/`, ~6 min SPOT) a été
+arrêté PAR LA GARDE elle-même : pin, préflight budgétaire (13 552 s /
+20 995 s), `maxRunDuration=25200` recertifié et démarrage verts, puis
+l'armement du coupe-circuit invité a échoué à la relecture. Arithmétique :
+VM démarrée 18:09:12 UTC, échéance GCE = +25200 s = 01:09:12 ; `shutdown -P
++415min` armé après ~5 min d'attente SSH/OS Login = 01:09:28, soit 16 s
+APRÈS l'échéance GCE — l'assertion `scheduled_epoch <= gce_deadline_epoch`
+de `start_and_verify.sh` a refusé, arrêt d'urgence certifié `TERMINATED`
+sur la génération exacte, reçu écrit. Le fail-closed a fonctionné exactement
+comme conçu ; la faute était la marge : 415 min ne laissent que 300 s entre
+le boot et l'échéance GCE, en dessous du délai réel d'armement.
+
+Correctif minimal, gardes INCHANGÉES : `SESSION_INVITE_MINUTES=405`
+(24 300 s, sous le plafond exceptionnel 415 de votre § 5.12) — 900 s de
+marge de boot, ~3× le délai observé ; fenêtre utile 20 395 s pour 13 552 s
+estimés ; borne du selftest budgétaire realignée. Nouveau SHA à graver dans
+un accusé mis à jour avant la relance.
+
+GCP : une session avortée par la garde (reçu ci-dessus), VM certifiée
+`TERMINATED` ; relance prévue au nouveau SHA.
