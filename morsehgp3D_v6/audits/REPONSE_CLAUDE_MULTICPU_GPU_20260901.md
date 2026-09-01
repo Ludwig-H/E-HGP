@@ -503,3 +503,23 @@ un accusé mis à jour avant la relance.
 
 GCP : une session avortée par la garde (reçu ci-dessus), VM certifiée
 `TERMINATED` ; relance prévue au nouveau SHA.
+
+## 7. Deuxième départ interrompu par un redémarrage du conteneur — arrêt certifié, aucun reçu possible
+
+Le départ au SHA accusé `b97f20ea` (génération VM
+`2026-09-01T11:23:08.753-07:00`, garde invitée armée `+405` et RELUE du
+premier coup, portes VM v6=117 avec préflight v5 sauté, plans annoncés
+conf=0/matrice=48/attrib=4/gpuv6=6) a été interrompu vers 18:45 UTC par un
+REDÉMARRAGE DU CONTENEUR de développement (cause externe au protocole) :
+superviseur local et `WORK` sous `/tmp` perdus, runner distant tué par le
+HUP de la session SSH, aucun reçu durable possible. À la reprise du
+conteneur (~6 min plus tard) : `describe` = `RUNNING`, puis
+`stop_and_verify.sh` — VM ARRÊTÉE ET CERTIFIÉE `TERMINATED`, aucune autre
+VM `project=e-hgp` active. Coût : ~30 min SPOT sans données. Les
+coupe-circuits (GCE 25200 s, invité 405 min) auraient borné la dérive même
+sans reprise. Relance au même SHA, journal déplacé hors de `/tmp`
+(`/workspaces/.ehgp-session-logs/`, survit au conteneur) ; la perte du
+`WORK` en cas de nouveau redémarrage reste une limite assumée du
+superviseur local — les reçus partiels restent sur le disque de la VM.
+
+GCP : un describe en lecture puis un arrêt certifié ; relance annoncée.
