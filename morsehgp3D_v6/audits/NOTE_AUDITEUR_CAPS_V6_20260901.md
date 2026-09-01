@@ -2,9 +2,10 @@
 
 Date : 1er septembre 2026.
 
-Coupe observée : worktree non committé au-dessus de `534289f2`. Cette note
-n'est pas un verdict sur un commit et sera absorbée puis retirée après le
-checkpoint propre.
+Coupe observée : worktree non committé au-dessus de `534289f2`, empreinte du
+diff normatif `7a775549d451a7fe62687f035620cea58907d692c4d4c4231c54a6c5f16bcd4d`.
+Cette note n'est pas un verdict sur un commit et sera absorbée puis retirée
+après le checkpoint propre.
 
 Cadre :
 
@@ -18,9 +19,10 @@ Cadre :
 
 La direction est bonne : plafonds centralisés, statut
 `resource_exhausted`, invalidation transactionnelle, option de budget et
-fixtures nominale/mutante. Le worktree compile. Les probes directs
-`--caps-refus` et `--caps-refus --inject=caps-drop-emission` rendent
-respectivement 0 et 4.
+fixtures nominale/mutante. Une configuration Release isolée compile les
+cibles `mhgp6_selftest` et `mhgp6`. Les deux CTests `^mhgp6_caps_` passent
+2/2 en 47,78 s ; le probe CLI avec un budget de 1 octet rend le code 2 et le
+refus du tri attendu.
 
 Ces verts prouvent le statut observable et la non-altération du petit témoin.
 Ils ne prouvent pas encore le claim plus fort « refus avant l'allocation qu'il
@@ -49,29 +51,46 @@ protège ».
 
 4. La garde dite « census » intervient après `prefilter_balls`, donc après
    la matérialisation des shards et de `surv`. Elle ne peut pas prévenir
-   l'OOM qu'elle annonce. Employer une borne conservative avant le préfiltre,
-   ou une passe de comptage, puis garder la vérification exacte avant
-   `BallData`.
+   l'OOM qu'elle annonce. Elle sous-compte aussi le pic suivant : les shards
+   `lb` de `BallData` coexistent avec le vecteur `balls` pendant leur fusion,
+   alors que la formule ne compte qu'une population `BallData`. Employer une
+   borne conservative avant le préfiltre, ou une passe de comptage, puis
+   compter les coexistences exactes avant `BallData`.
 
-5. La CLI construit la famille avant d'entrer dans `run_pipeline`. La garde
+5. La garde du fold ne compte que `ForestEvent × (inflight + 1)`. Elle omet
+   notamment l'ordre de tri, les batches, les tableaux `ev_fid`/`ev_part`,
+   les records de partitions, tables, pools, deltas et résultats qui
+   coexistent dans `prepare_fold`/`reduce_fold`. Ce n'est donc pas encore un
+   budget mémoire du fold. Soit fournir un majorant de phase vérifiable, soit
+   renommer ces trois contrôles en budgets partiels de buffers et retirer la
+   promesse anti-OOM globale.
+
+6. La CLI construit la famille avant d'entrer dans `run_pipeline`. La garde
    `n <= 2^30-1` y arrive donc trop tard. Refuser `--n` avant
    `make_family_input` et couvrir aussi l'API de famille :
    `(n + 7) / 8` déborde encore en `int` près de `INT_MAX`. Le budget
    mémoire doit également couvrir ou borner l'entrée si son nom reste
    générique.
 
-6. La fixture crée `callbacks` sans exiger zéro et n'observe pas
+7. La fixture crée `callbacks` sans exiger zéro et n'observe pas
    `on_fold_phase`. Ajouter ces assertions. Séparer ensuite causalement les
    refus génération, tri, préfiltre/census et fold ; « census ou fold » ne
    prouve aucune garde précise. Le mutant actuel saute le refus exact mais
    laisse `cap_stop` actif : il prouve le verdict final sur ce témoin, pas
    l'instant pré-allocation.
 
-7. Retirer le diff dans `morsehgp3D_v5/src/cloud/families.hpp`. La demande
-   utilisateur cible exclusivement la v6 ; la v5 n'est ici qu'une référence
-   historique. Si une correction v5 devenait indispensable à une porte
-   appariée, elle demanderait une autorisation distincte et une justification
-   explicite.
+8. Retirer le diff dans `morsehgp3D_v5/src/cloud/families.hpp` du checkpoint
+   v6. La v5 est une source différentielle épinglée, pas une simple source
+   historique : la modifier change l'entrée normative contrôlée par
+   `v6_campaign_pin.sh` et demande une requalification v5 séparée. En outre,
+   le patch actuel reste asymétrique : `(n + 7) / 8` déborde dans les deux
+   lignées et seul le scanline v6 élargit `(n * 3) / 5`.
+
+9. Les additions et produits de garde restent non contrôlés (`fetch_add`,
+   somme exacte des shards, calculs d'octets). Employer des helpers par
+   soustraction/division ou en `u128`, puis tester égalité, seuil moins un et
+   overflow. Les caps wave/alive doivent devenir abaissables en test afin que
+   leurs branches et leur instant pré-insertion soient réellement exercés.
 
 ## Porte de livraison raisonnable
 
@@ -81,6 +100,7 @@ Un checkpoint recevable n'a pas besoin de résoudre toute l'échelle. Il doit :
 - démontrer au moins un cap mémoire utile avant chaque allocation visée ;
 - tuer un mutant de moment de garde, pas seulement de statut final ;
 - préserver l'objet sous budget et l'absence de callbacks sur chaque refus ;
+- distinguer un budget résident complet d'une estimation partielle de buffer ;
 - rester entièrement dans `morsehgp3D_v6/`.
 
 Le GO G4 `d98f4729` n'est pas révoqué, mais le pin refuse correctement le
