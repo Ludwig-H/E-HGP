@@ -324,15 +324,23 @@ stress frais : le build Release donne 4/4 portes en 20,53 s et le nominal
 devrait seulement être bornée ou transformée en latch pour qu'un défaut de
 fixture rende un échec rapide plutôt qu'un timeout CTest.
 
-La fenêtre file→actif reste en revanche présente : `pop_front()` libère
-`mu_`, puis `active_` n'est incrémenté qu'ensuite. Avec deux workers, une
-fermeture fatale peut donc se linéariser dans cet intervalle et manquer le
-ticket déjà retiré. Déplacer l'incrément dans la même section critique que
-le retrait, et déclarer ce passage comme l'instant d'activation, suffit à
-fermer le cas sans changer l'architecture. Une fixture N >= 2 avec pair
-actif, file non vide et producteur bloqué complétera alors la réception.
-Regrouper aussi `active--` et le compte terminal `failed/succeeded` sous
-`mu_` évitera les snapshots transitoirement non conservatifs.
+Le troisième jet déplace maintenant `active++` dans la section critique du
+`pop_front` et regroupe `active--` avec le compte terminal : la fenêtre du
+code est fermée sans changer l'architecture. La nouvelle scène N = 2 doit
+encore être corrigée avant de servir de preuve : `p34_typed` est un `int`
+incrémenté concurremment par deux producteurs, donc une data race C++. Le
+rendre atomique est immédiat.
+
+Surtout, cette scène passerait encore si `active++` retournait après le
+déverrouillage : elle retient deux jobs déjà entrés mais ne force jamais un
+worker dans l'ancien intervalle. Ajouter un mutant `activate-after-unlock` et
+un hook/latch test-only qui bloque précisément après le pop ; la fermeture
+doit alors voir le ticket actif au nominal et le mutant doit exposer le job
+manqué. Attester aussi l'entrée de `p5` dans l'attente de place si la porte
+revendique le réveil d'un producteur bloqué. Sans ces deux attestations, la
+correction source est juste, mais la fixture n'est pas sa contre-preuve
+permanente. Borner enfin les boucles `queued` des scénarios 9 et 10 comme
+celle du scénario 12.
 
 Enfin, les commentaires annoncent déjà une conversion transactionnelle dans
 `run.hpp`, mais aucun usage du pool ni catch de `DeviceFatalError` n'y existe
@@ -378,20 +386,32 @@ présents dans le worktree. Sa portée reste justement annoncée comme partielle
 il ne compile ni `floor_div128`, ni `AxisBounds`, ni `BallKey::power`, qui sont
 les chemins réellement requis par C3.
 
-Quatre durcissements secondaires garderaient cette bonne porte strictement
-causale :
+Claude a depuis ajouté le SSI par cas pour le mutant carry, corrigé le
+commentaire fake-device et planté un mutant d'écriture sautée. Les trois portes
+stub passent en 0,20 s. Le nouveau mutant sentinelle a toutefois un défaut
+causal important : il rend 4 dès que l'**union** des absences arithmétiques et
+natives vaut 64, avant la vérification de branche et avant tout oracle. Une
+perte native aux mêmes indices, une mauvaise branche ou une autre divergence
+peut donc être masquée. La contre-fixture
+`witness-skip-write,witness-di128-lost-carry` le démontre : elle rend 4 sans
+examiner le carry.
+
+Séparer `unwritten_arith`, `unwritten_native` et `bad_branch_written`, exiger
+les 64 indices arithmétiques exacts, zéro absence native et zéro mauvaise
+branche sur les cases écrites, puis exécuter l'oracle natif complet et l'oracle
+DI sur les cases non sautées avant le code 4. Ce durcissement est plus utile
+qu'un nouveau volume aléatoire.
+
+Quatre corrections déclaratives restent ensuite :
 
 - les 81 affectations initiales `(a,b)` ne forment pas toutes une grille
   effective 9×9, puisque neuf diviseurs extrêmes des cas mode B sont ensuite
   remplacés ; corriger le libellé ou séparer grille et modes ;
 - le domaine écrit `|b| < 2^40` alors que les cas plantés contiennent aussi
   `±2^40` : écrire `<=` si telle est bien la précondition ;
-- comparer, cas par cas, `désaccord de somme` si et seulement si `retenue
-  attendue`, et ajouter un mutant d'écriture sautée qui doit mourir sur la
-  sentinelle ; l'égalité des deux seuls nombres ne localise pas les cas ;
-- retirer du commentaire initial de `dint.hpp` l'ancien besoin de définir
-  `__CUDA_ARCH__` avec `MHGP6_FAKE_DEVICE`, et appeler le stub une preuve de
-  syntaxe **C++ hôte**, pas de syntaxe nvcc.
+- la borne « produits `<= 2^125` » oublie `a*b`, qui approche `2^126` tout en
+  restant dans `i128` ;
+- énumérer le mutant skip dans le wrapper et le plan de tests.
 
 Aucun `nvcc` ni device n'a été exercé localement. Ce chantier non committé ne
 modifie donc pas le verdict sur C1 et n'ouvre aucun GO G4.
@@ -414,14 +434,19 @@ la barrière `injected`, puis a appliqué la seconde contre-lecture :
   cartes, totaux, `events_by_k` et ordre des callbacks, et la double
   sémantique de `emitted_at_refus` est documentée.
 
-Les quatre portes de la version précédente passaient déjà en Release ; un
-rejeu du durcissement ci-dessus est en cours. Sous réserve de ce vert, la
-décision logique peut être reçue. Il reste à corriger le vocabulaire dans
-`caps.hpp`, `GenerateOptions`, le message de refus et le commentaire de la
-fenêtre `(b)` : **2E est un payload logique nommé**, jamais un pic
-d'allocation « au pire ». Les capacités géométriques des shards peuvent
-dépasser leurs tailles et le budget ne promet toujours ni RSS ni absence
-d'OOM.
+Le rejeu local sur binaires reconstruits après les sources donne 12/12 en
+50,84 s réels : quatre portes caps, signature CLI, quatre portes pool et trois
+portes du témoin stub. La décision `2E` est donc reçue dans sa portée logique
+et transactionnelle. Ce vert ne reçoit ni le confinement C1 complet ni CUDA.
+
+Il reste à corriger le vocabulaire dans `caps.hpp`, `GenerateOptions`, le
+message de refus et le commentaire de la fenêtre `(b)` : **2E est un payload
+logique nommé**, jamais un pic d'allocation « au pire ». Les capacités
+géométriques des shards peuvent dépasser leurs tailles et le budget ne promet
+toujours ni RSS ni absence d'OOM. Enfin, `cap_fusion_effectif` doit soit
+prendre le minimum avec `effective_raw_cap`, soit être renommé
+`cap_fusion_budgetaire` : avec un cap brut demandé inférieur, sa valeur
+actuelle n'est pas le cap effectif du run.
 
 ### 5.10 Nouveau profil `reduce` en cours
 
