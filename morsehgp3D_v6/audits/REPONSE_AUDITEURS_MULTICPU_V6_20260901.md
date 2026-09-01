@@ -1094,6 +1094,137 @@ protège le temps de Claude autant que la facture.
 Ce checkpoint ne reçoit encore aucune mesure G4 et ne change pas
 `public_status=not_claimed`.
 
+### 5.17 Réception terminale de la série C et cap d'ingénierie
+
+Le reçu immuable
+`session_g4_20260901_b97f20ea4b8f_1788293187`, archivé par `852ca703`, est
+**reçu comme paquet intègre et mécaniquement valide**, strictement sous le
+statut `verifie_non_decisionnel`. Il contient 203 fichiers : les 202 entrées
+de `SHA256SUMS` passent, la surface couverte est exacte, les 190 artefacts de
+`out/` recoupent le manifeste distant et les 58 statuts rendent tous
+`code=0`, sans troncature : 48 murs matrice, quatre attributions, un build
+CUDA, une exécution CTest agrégée contenant les 16 portes, puis quatre
+pilotes. Le bundle Git recréé, les treize blobs normatifs,
+le profil canonique et le manifeste revalidé recoupent le pin exécuté
+`b97f20ea4b8f0932761c4719b32bb14b8c1f0395`. Le validateur de ce pin rejoué
+sur une copie rend exactement 58 runs valides et **jamais une décision**.
+
+Les deux contrôles manuels exigés au § 5.16 ferment les trous connus pour ce
+reçu précis : les quatre commandes d'attribution ont exactement leurs douze
+jetons attendus, sans suffixe ni option dupliquée, et le build comme les
+quatre en-têtes pilote portent l'architecture 120, le même device SM 12.0 et
+le même UUID. L'inventaire comporte exactement 16 portes GPU, toutes passent,
+et les quatre juges reçoivent chacun un warmup exclu puis quatre records ABBA
+retenus avec parité. Ces contrôles ne réparent pas le validateur générique :
+l'égalité d'argv et le mutant `arch_compilees=86` restent obligatoires avant
+un prochain pin.
+
+Le cycle facturable est fermé : `remote_campaign_rc=0`, `scp_rc=0`, arrêt
+ciblé certifié à la première tentative sur la génération
+`2026-09-01T13:06:27.081-07:00`, puis état GCE `TERMINATED`. Aucun GO ni
+redémarrage ne reste ouvert.
+
+La direction générale de la note Claude `74ab8e7c` est bonne, mais trois
+rectifications empêchent d'en faire une décision plus large que le reçu :
+
+1. « matrice CPU décisionnelle » est le nom interne du sous-plan
+   préenregistré, pas son statut. Le validateur dit explicitement
+   `verifie_non_decisionnel`; il n'y a qu'une famille `uniform`, une graine et
+   trois blocs d'ordre déterministes, non trois répétitions randomisées ;
+2. treize cellules sur seize ont une étendue inférieure à 1 %, mais le maximum
+   atteint 1,58 % au point 50k avec digest. La formule « trois passages
+   concordants < 1 % » est donc à remplacer par « étendue au plus 1,58 % » ;
+3. le tableau pilote mélangeait médianes et valeurs du premier record. Les
+   médianes homogènes des quatre records retenus sont celles-ci ;
+4. le passage de T16 à T48 ne triple pas les ressources : il passe de seize
+   cœurs physiques à vingt-quatre cœurs plus SMT sur cette topologie. Son
+   facteur 1,59× ne démontre donc pas à lui seul une « part sérielle » ;
+5. sous `join=0`, la somme des réductions recouvre plusieurs B et n'est pas
+   une fraction du mur. À 16k/T48 elle vaut 8,585 s alors que le mur du fold
+   vaut environ 5,957 s. `unite` n'est pas non plus le dernier poste : `init`
+   et `liberation` sont plus petits.
+
+| famille | mur CPU (ms) | mur device (ms) | étage CPU (ms) | étage device (ms) | gain étage | gain bout en bout | `wire+rebuild` / étage | plafond si l'étage device disparaît |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| `uniform` | 59 010,8 | 52 890,9 | 14 016,8 | 7 717,2 | 1,82× | 1,116× | 87,8 % | 1,31× |
+| `terrain` | 18 616,8 | 17 895,6 | 2 021,5 | 1 277,3 | 1,58× | 1,040× | 83,7 % | 1,12× |
+| `eight_clusters` | 70 461,5 | 63 865,8 | 13 798,6 | 7 295,1 | 1,89× | 1,103× | 87,8 % | 1,24× |
+| `scanline_single_pass` | 15 048,6 | 14 626,9 | 1 625,4 | 1 186,1 | 1,37× | 1,029× | 84,4 % | 1,12× |
+
+Le dernier plafond est descriptif : il conserve tout le reste de la route
+CPU et met seulement son étage préfiltre+census à zéro. Il borne donc
+clairement la portée de C6 sur ces fixtures : même une suppression irréaliste de l'étage ne
+donne que 1,12--1,31× de bout en bout. Le facteur global `1,7–2×` ne peut pas
+venir de ce seul offload. Les kernels, 17,9 à 154,0 ms, ne représentent que
+1,5--2,1 % de l'étage nommé ; le prochain travail GPU utile porte sur la
+sérialisation `wire`, la reconstruction et, surtout, l'élimination de passages
+de représentation hôte. Une simple optimisation du kernel n'est pas le bon
+premier levier. Cette lecture reste limitée à quatre fixtures, quatre records
+ABBA et une graine ; elle ne qualifie ni bande passante limite, ni débit
+produit.
+
+Le code du pin impose actuellement `wire`, puis tous les lots
+H2D/kernels/D2H, puis `rebuild`. Même un chevauchement parfait des deux coûts
+hôte laisserait au moins le plus grand, soit environ 4,125 s sur `uniform`,
+avant transferts et orchestration : « paralléliser » ne suffit donc pas à
+atteindre une cible inférieure à une seconde. Deux contre-sondes locales sont
+moins risquées qu'un refactor CUDA immédiat : réserver avec débordement gardé
+les `cands.size() * 112` octets du wire, puis mesurer une réserve exacte ou en
+deux passes de `lsurv`/`lballs` ; ensuite seulement, packer, transférer,
+valider et reconstruire **par lot** dans des temporaires privés, avec
+publication transactionnelle finale en ordre global. La première sonde
+distingue le coût des réallocations ; la seconde peut supprimer les
+matérialisations globales de 2 421 702 192 octets d'entrée et
+2 162 234 100 octets de sorties sur `uniform`, sans relâcher le refus tardif.
+
+La matrice CPU donne aussi une décision d'implémentation bornée, pas une
+promotion de performance : sur cette topologie et `uniform`, le réglage de
+débit à conserver est 48 fils, `inflight=2`, `join=0`. Passer de
+`inflight=1` à 2 réduit le mur 16k de 15,79 à 13,58 s ; passer de 2 à 4 ne
+gagne plus rien. À 50k, `join=1` fait passer le mur médian de 48,06 à
+64,76 s, mais le RSS médian baisse de 17,99 à 13,99 Gio. Il faut donc garder
+`join=1` comme mode de pression mémoire documenté, pas conclure simplement
+« ne pas borner la concurrence ». Selon taille et `join`, le digest ajoute
+22,6--30,4 % et reste un coût de preuve hors chemin de débit.
+
+Les quatre profils d'attribution isolent enfin
+`materialisation_tri_copie` comme premier poste interne de chaque réduction
+séquentielle, à 31--36 % du `reduce`. La somme sur K n'est jamais un mur sous
+`join=0`, puisque plusieurs réductions se chevauchent. C'est un poste
+important, mais pas une majorité ; `touch`, `pre`,
+`post_remplissage` et `partition` comptent encore ensemble davantage. L'arbre
+du § 5.10 sélectionne donc **une sonde `CompactDelta`**, pas encore « le »
+levier CPU prouvé. Claude peut avancer sans nouvelle G4 : implémenter le palier
+synchrone, comparer le `ForestResult` complet, deltas, niveaux, partitions,
+cardinalités, statuts et résultats 1/T fils sur les fixtures intra-lot et
+inter-segments, puis mesurer séparément temps et octets sur CPU. Seulement si
+ce palier réduit réellement plusieurs passages du `reduce` faudra ouvrir la
+queue bornée ; le scout atomique reste une ablation postérieure.
+
+Ordre coopératif conseillé à partir de ce reçu :
+
+1. corriger les deux sous-liaisons du validateur, les frontières temporelles
+   600/601 et 480/481 s, puis tester une reprise persistante hors `/tmp` ;
+2. développer et falsifier `CompactDelta` localement, sans toucher au statut
+   public ;
+3. sonder sur CPU/stub une représentation qui évite ou amortit
+   `wire+rebuild`, avec chronos par lot et fermeture du résultat complet ;
+4. ne demander une nouvelle session G4 qu'après qu'un changement mesurable
+   et un nouveau pin exact existent.
+
+Le reçu ferme donc proprement la série C et donne deux bons chantiers à
+Claude. Il ne promeut ni l'exactitude publique, ni un facteur de gain produit :
+`public_status=not_claimed` demeure inchangé.
+
+Attention au WIP de fermeture observé après `74ab8e7c` : si les 480 s sont le
+budget minimal **après** la tolérance `systemd` de 120 s, la garde générique
+doit imposer `guest*60 + 300 + 120 + 480 <= MAX_RUN`, soit un écart nominal
+d'au moins 600 s à l'échéance sûre. Sous `MAX_RUN=3600`, 45 min doivent donc
+être acceptées et 46 refusées ; la frontière 47/48 du WIP est trop permissive
+de 120 s et ne garantit que 360 s dans le pire cas. Nommer séparément réserve
+GCE, tolérance et budget évite de soustraire deux fois ou d'oublier l'une des
+marges.
+
 ## 6. Ordre de travail recommandé
 
 1. **achevé à `4a85c13d`** : C1, garde `2E` et témoin hôte ancrés ensemble,
@@ -1107,10 +1238,12 @@ Ce checkpoint ne reçoit encore aucune mesure G4 et ne change pas
    une affinité reproductible avant l'éclaireur atomique ;
 5. ouvrir l'amont/aval du design A par les paliers décrits, sans promettre le
    facteur `1,7–2` ;
-6. laisser la génération `2026-09-01T13:06:27.081-07:00` finir ou tronquer
-   sous ses garde-fous, auditer son reçu et son arrêt ; fermer ensuite les deux
-   sous-liaisons du validateur et la reprise persistante avant tout nouveau
-   départ facturable.
+6. **achevé à `852ca703`** : génération
+   `2026-09-01T13:06:27.081-07:00` reçue et arrêtée ; fermer maintenant les
+   deux sous-liaisons du validateur et la reprise persistante avant tout
+   nouveau départ facturable ;
+7. sonder `CompactDelta` et la suppression de `wire+rebuild` localement avant
+   de proposer un nouveau pin G4.
 
 Un prototype de réduction ne sera reçu ni par un seul digest ni par un mutant
 d'ordre. Il devra comparer le `ForestResult` complet, les deltas et niveaux de

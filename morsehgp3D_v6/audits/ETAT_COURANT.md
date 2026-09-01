@@ -3,10 +3,11 @@
 Date de coupe : 1er septembre 2026.
 
 Coupe source observée : `1069bc20` pour le profil `reduce`, `cd606257` pour
-la série C C2--C5 et `b97f20ea` pour la préparation et l'exécution G4 de la
-série C. Le `HEAD` `81430eef` n'en diffère que dans `morsehgp3D_v6/audits/` ;
-la relance surveillée exécute explicitement `b97f20ea`, jamais le `HEAD` par
-défaut.
+la série C C2--C5 et `b97f20ea` pour la préparation puis l'exécution G4 de la
+série C. Le reçu terminal est archivé par `852ca703` et lu par Claude à
+`74ab8e7c`. Hors `morsehgp3D_v6/audits/` et
+`morsehgp3D_v6/receipts/`, l'arbre du commit `74ab8e7c` reste identique au
+pin exécuté `b97f20ea`.
 Autorités techniques : `6d755804` pour le
 prototype E3/G16, `cd49a390` pour les callbacks, `d98f4729` pour le protocole
 et la source réellement exécutée sur G4, `94c74155` pour l'autorisation
@@ -17,7 +18,8 @@ le témoin arithmétique hôte, `1069bc20` pour le harnais de profil,
 `cd606257` pour le pin hôte de la série C, `d5ed0fb3` pour le pilote ABBA et
 le profil de session initial, `5d886db1` pour la fermeture technique des
 coutures 5.13--5.15, `b97f20ea` pour la marge invitée corrigée et
-`c6ddf715` pour son accusé de SHA, `62cd2e28` pour la matrice locale
+`c6ddf715` pour son accusé de SHA, `852ca703` pour le reçu terminal intègre,
+`74ab8e7c` pour sa lecture source par Claude, `62cd2e28` pour la matrice locale
 directionnelle, `9c5517c9` pour la demande G4, `e8289d9a` pour son profil
 historique, `320299df` pour le reçu de
 réplication et `8ed2dea6` pour le reçu de confirmation contre-audité
@@ -44,19 +46,41 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | plafonds et budget mémoire `4a85c13d` | cap coopératif et refus transactionnels reçus ; garde logique `2E` avant la réserve de fusion reçue, proxy de payload nommé seulement, sans claim RSS/OOM |
 | saturation multi-CPU du fold `1069bc20` | pin construit et suite `gate` 92/92 ; profil, liveness, builds distincts, projection nommée, `join=1` et effacement K2 reçus dans leur portée ; `d5ed0fb3` recalcule la somme, mais ses tolérances acceptent encore la contre-fixture à neuf composantes nulles ; matrice locale terminée mais non décisionnelle |
 | série C C2--C5 `cd606257` | reçue dans sa portée CPU/stub : six candidats `u32`, refus transactionnels, sentinelles/validateur, digest gravé, porte de readback device enregistrée mais jamais exécutée et multi-lots causal ; export propre Release 113/113 en 232,11 s ; aucun `nvcc` ni device |
-| préparation G4 `b97f20ea` | quatre coutures du § 5.15 reçues sur le chemin épinglé : canon, identité plan/device, architecture 120, fail-fast et manifeste lifecycle à 13 fichiers ; selftests campagne/lifecycle verts et portes G4 v6 117/117 ; deux sous-liaisons du validateur restent à durcir (argv d'attribution seulement inclusif, `arch_compilees` parsé mais non comparé), donc contrôle manuel obligatoire du reçu courant et correction avant tout nouveau pin |
+| préparation G4 `b97f20ea` | quatre coutures du § 5.15 reçues sur le chemin épinglé : canon, identité plan/device, architecture 120, fail-fast et manifeste lifecycle à 13 fichiers ; selftests campagne/lifecycle verts et portes G4 v6 117/117 ; deux sous-liaisons du validateur restent à durcir (argv d'attribution seulement inclusif, `arch_compilees` parsé mais non comparé) ; leurs contrôles manuels sont conformes pour le reçu `852ca703` |
+| reçu G4 série C `852ca703` | paquet intègre : 202/202 hashes, 58/58 statuts code 0, 16/16 portes GPU et quatre pilotes paritaires ; validateur épinglé `verifie_non_decisionnel`, contrôles manuels argv/architecture conformes ; résultats bornés au § 5.17, jamais un claim produit |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
-| protocole GCP série C | premier départ `5d886db1` refusé fail-closed puis arrêté avec reçu intègre ; deuxième départ `b97f20ea` interrompu par redémarrage du conteneur et arrêté, sans reçu durable ; relance distincte `b97f20ea`, génération `2026-09-01T13:06:27.081-07:00`, en cours au checkpoint 20:13 UTC avec deux coupe-circuits et journal durable ; aucun résultat encore recevable |
+| protocole GCP série C | premier départ `5d886db1` refusé fail-closed puis arrêté avec reçu intègre ; deuxième départ `b97f20ea` interrompu par redémarrage du conteneur et arrêté, sans reçu durable ; relance distincte `b97f20ea`, génération `2026-09-01T13:06:27.081-07:00`, reçue puis arrêtée sur la cible exacte ; aucun GO courant |
 
-Le pin `b97f20ea` calcule `ESTIMATE_S=13 552 s` pour
-`WINDOW_S=20 395 s`, soit `6 843 s` de marge sous le profil 7 h/405 min.
-L'écart brut entre les deux arrêts est 900 s, mais la marge d'armement
-certifiable après la réserve GCE de 300 s n'est que 600 s, ou 480 s avec le
-décalage `systemd` maximal toléré. Les selftests campagne et lifecycle sont
-verts ; le rejeu distant de la relance passe 117/117 portes v6 avant la
-matrice. Cette observation en vol n'est ni un reçu, ni une mesure reçue, ni
-une promotion de statut.
+Le reçu terminal contient 203 fichiers, couvre exactement 202 entrées
+SHA-256 et 190 artefacts `out/`, sans troncature. Ses 58 runs sont valides ;
+la campagne demeure explicitement `verifie_non_decisionnel`. Le journal
+atteste `remote_campaign_rc=0`, `scp_rc=0`, `stop_rc=0`, l'arrêt ciblé à la
+première tentative et l'état `TERMINATED` de la génération exacte. Les deux
+lacunes du validateur ont été fermées manuellement pour ce reçu, mais doivent
+être corrigées avec mutants avant tout nouveau pin. Les frontières 600/601 et
+480/481 s ainsi que la reprise persistante du superviseur restent aussi à
+graver avant une nouvelle dépense GCP.
+
+La lecture utile est bornée. Sur cette topologie et `uniform`, 48 fils,
+`inflight=2`, `join=0` est le réglage de débit ; `join=1` coûte environ 35 %
+de mur mais économise environ 22 % de RSS à 50k et reste donc un mode mémoire.
+La sonde CPU suivante est `CompactDelta`, car
+`materialisation_tri_copie` est le premier poste interne du `reduce` à
+31--36 %, sans être sa majorité ; les sommes sur K ne sont pas des murs sous
+`join=0`, car plusieurs réductions se recouvrent. Côté device, le gain de
+l'étage vaut 1,37--1,89× mais le
+gain bout en bout seulement 1,029--1,116× ; `wire+rebuild` occupe
+83,7--87,8 % de l'étage. Le levier est la représentation hôte, pas le kernel
+seul. Le plafond descriptif obtenu en supprimant entièrement cet étage reste
+1,12--1,31× selon la fixture : le facteur global `1,7–2×` exige donc aussi
+des progrès ailleurs dans le pipeline. Ces mesures n'altèrent aucun statut.
+
+Le WIP postérieur au reçu doit encore corriger sa formule de budget : les
+480 s minimales sont postérieures à la tolérance `systemd` de 120 s, donc la
+relation complète ajoute réserve GCE 300 s, tolérance 120 s et budget 480 s.
+Avec `MAX_RUN=3600`, la frontière correcte en minutes est 45 acceptée, 46
+refusée, non 47/48.
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
