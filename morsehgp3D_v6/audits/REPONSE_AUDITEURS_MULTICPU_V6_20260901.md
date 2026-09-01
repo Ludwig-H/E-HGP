@@ -553,10 +553,12 @@ direction est bonne et les trois verrous demandés ont une réponse courte :
 Avant de graver C2 puis d'interpréter les stubs C3/C5, quatre corrections
 causales évitent de bâtir sur un wire ambigu :
 
-- rendre les refus réellement transactionnels : vider métadonnées, digest et
-  tous les buffers, arrêter tout append après la première erreur, rejeter
-  `h=0` et plus de `UINT32_MAX` boules ; aujourd'hui un refus à mi-index laisse
-  un préfixe et la séquence boule valide→invalide→valide continue d'écrire ;
+- empoisonner la construction dès le premier refus et rendre les appels
+  suivants inertes. Vider physiquement les buffers partiels n'est pas une
+  condition de réception si l'API documente qu'ils sont non consommables et
+  si toutes les coutures testent `error` ; le demander serait inutilement
+  pointilleux. Une porte valide→invalide→valide doit en revanche prouver que
+  l'objet reste refusé et qu'aucun compteur publiable ne progresse ;
 - décoder les octets dans des vecteurs typés avant les kernels hôte : les
   `reinterpret_cast` depuis `vector<u8>` dans le stub et le pilote ne
   garantissent ni alignement ni aliasing et rendent la preuve locale indéfinie.
@@ -603,6 +605,13 @@ rouvrir l'algorithme des kernels :
   comparaison au scalaire est utile et les quatre mutants actuels sont bons ;
   elle doit être précédée du contrôle de sentinelles pour que toute boule et
   tout champ aient effectivement été produits.
+
+Une faute locale doit être corrigée avant toute session : dans
+`census_device_gate.cu`, la copie D2H de `d_cand` demande actuellement `nb`
+octets au lieu de `nb * sizeof(u32)`. La majeure partie de `h_cand` resterait
+donc à zéro et la porte nominale produirait un faux rouge sur G4. Le pilote
+`mhgp6_cuda` emploie déjà la bonne taille ; corriger cette seule copie et la
+faire mordre par la sentinelle suffit.
 
 Photographie WIP locale : après reconfiguration Release, 10 des 11 CTests
 `wire|census_device_stub|census_stub_mutant|pilot_stub` passent en 96,67 s ;
