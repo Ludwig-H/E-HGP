@@ -3,7 +3,7 @@
 Date : 1er septembre 2026. Données mesurées à `d98f4729`, question
 `ad005432` et conception `b18f1400`. La course de `671ed3cc` est conservée
 ci-dessous comme contre-fixture historique ; la contre-lecture couvre le
-worktree non committé du huitième jet jusqu'au 1er septembre à 10 h 49 UTC.
+worktree non committé du neuvième jet jusqu'au 1er septembre à 10 h 55 UTC.
 
 Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -318,6 +318,10 @@ réveil par `cv_space_.notify_all()` doit devenir une propriété reçue, ajoute
 un compteur de waiters test-only sous `mu_` et attendre exactement un waiter
 avant de libérer le fatal.
 
+Dette déclarative non bloquante : `docs/GPU.md` énumère encore trois mutants
+du pool et omet `pool-activate-after-unlock`, pourtant enregistré dans CMake
+et dans le plan de tests.
+
 Les commentaires bornent désormais correctement la conversion
 transactionnelle dans `run.hpp` à une intention C2–C5 : aucun chemin produit
 n'utilise encore ce pool. De même, `queue_cap` borne les tickets en deque,
@@ -374,6 +378,11 @@ elle laisse une sentinelle aux indices exacts de `NativeOut`, tout en exigeant
 écrites. Le registre et les portes hôte/device la nomment séparément ; son
 rejeu frais reste à joindre au reçu final du commit source.
 
+Les textes n'ont pas encore tous suivi cet ajout : `docs/GPU.md`, la ligne
+GPU du plan de tests et l'en-tête du témoin parlent encore des anciennes
+portes carry/skip et de codes `0/4`. Les aligner avec carry, skip-arith,
+skip-native et la contre-fixture composée évitera une réception ambiguë.
+
 Avant un reçu CUDA, porter aussi la contre-fixture composée sur la cible GPU
 réelle et certifier dans le reçu l'architecture compilée et le device observé :
 `CMAKE_CUDA_ARCHITECTURES` est actuellement surchargeable et le binaire ne
@@ -416,10 +425,9 @@ huitième jet ajoute les deux refus de non-vacuité demandés : la scène mutant
 rend 3 si son setup a déjà échoué, et les deux bras exigent explicitement un
 callback par K jusqu'à `kmax_eff`.
 
-Le contrôle `g_failures` est encore placé après le calcul du budget et le run
-mutant. Il interdit bien tout faux code 4, donc ne bloque pas 2E ; le déplacer
-au début de la branche évitera néanmoins un run inutile et un sous-débordement
-diagnostique si le témoin amont est déjà invalide.
+Le neuvième jet déplace aussi `g_failures` au début de la branche, avant le
+calcul du budget et le run mutant. Le refus est désormais réellement précoce,
+sans run inutile ni sous-débordement diagnostique sur un témoin amont invalide.
 
 Après reconstruction de ce dernier fichier, les quatre portes caps et la
 signature CLI passent 5/5 en 119,52 s. La décision 2E est donc reçue sur ce
