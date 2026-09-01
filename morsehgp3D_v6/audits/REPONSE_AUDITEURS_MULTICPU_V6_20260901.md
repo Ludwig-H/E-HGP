@@ -864,6 +864,76 @@ Le statut demeure donc **NO START à `d5ed0fb3`**. Cette réponse est une aide
 directe au prochain commit : une fois ces coutures intégrées et falsifiées,
 seul l'accusé bref du SHA exact restera avant le démarrage gardé.
 
+### 5.14 Contre-lecture coopérative du WIP postérieur : noyau local corrigé, intégration encore NO START
+
+Cette photographie porte sur un worktree **non épinglé** postérieur à
+`d5ed0fb3` ; elle aide à finir le commit, mais ne reçoit donc encore aucun
+nouveau pin. Les corrections locales vont dans le bon sens et ne sont pas à
+rouvrir : signatures CPU/device séparées sur exactement le tuple comparé,
+juge commun des cinq records et de l'ordre ABBA/BAAB, seuils de profil
+`0.0051`/`0.006` avec contre-fixture, `CONF_SPECS=aucun`, troisième passage
+`rotation8`, durées de session lues avant les garde-fous, et `taskset` appliqué
+aux murs matrice comme aux attributions. Les contre-fixtures pilote et profil
+passent sous `python3` et `python3 -O`; la syntaxe Bash/Python et
+`git diff --check` sont vertes sur cette coupe.
+
+Quatre coutures matérielles restent, avec une fermeture courte pour chacune.
+
+1. **Le profil et son juge ne sont pas encore dans le pin.**
+   `g4_serie_c_v1.env` manque des deux listes `PROTOCOL_FILES`; il n'est donc
+   ni matérialisé ni revalidé et `CAMPAIGN_PROFILE=g4_serie_c_v1` refuse avant
+   GCP. De même, le validateur cherche
+   `pinned/morsehgp3D_v6/tests/pilote_juge.py`, que le pin ne copie pas.
+   Ajouter ces deux fichiers aux inventaires normatifs dans le même ordre,
+   créer leur répertoire parent pendant la matérialisation, les couvrir par le
+   selftest du manifeste et refuser une modification isolée de chacun. Le
+   lifecycle commun construit encore et teste systématiquement la v5 alors
+   que l'utilisateur a borné ce travail à la **v6** et que conf/bench/GPU-v5
+   valent `aucun`; rendre ce préflight conditionnel et explicite évite de
+   repayer une lignée seulement historique. Ne pas seulement masquer son
+   plancher.
+2. **Le profil 5 h se refuse lui-même.** Le recalcul exact du modèle courant
+   donne matrice `3 084 s`, attribution `488 s`, build+portes CUDA `5 400 s`,
+   pilotes `3 000 s` et overhead `580 s`, soit `ESTIMATE_S=12 552 s`. Avec
+   `18 000 s`, arrêt invité à 270 min, réserves `4 805 s` et build général
+   `900 s`, `WINDOW_S=12 295 s` : le preflight refuse de **257 s avant toute
+   mutation**. Le coefficient est déjà optimiste, car chaque répétition
+   crédite la route device à seulement `0,5` route CPU alors que son gain est
+   précisément inconnu. Si les 16 points, quatre attributions et quatre
+   familles restent obligatoires, la solution honnête est l'enveloppe
+   exceptionnelle déjà autorisée de 7 h/415 min, avec un budget device au
+   moins égal à une route CPU avant mesure; sinon retirer une tâche réellement
+   optionnelle. Ne pas faire passer 5 h en abaissant arbitrairement le modèle.
+   Graver le calcul du profil canonique dans un selftest.
+3. **Le juge doit agir avant la famille suivante et fermer les chronos.** Le
+   runner ne regarde encore que `code=0`; un stdout falsifié mais un code nul
+   consommerait les autres pilotes, puis serait refusé seulement après l'arrêt.
+   Ajouter un mode fichier au même `pilote_juge.py` et l'appeler après chaque
+   pilote. Le juge doit aussi exiger, avec la tolérance d'impression `%.1f`,
+   `route_device_etage_ms + 0.4 >= wire + setup_alloc + h2d + kernels + d2h + rebuild`,
+   puis que les murs CPU/device enveloppent leurs sous-étages. Une
+   contre-fixture où six composantes totalisent 1 000 mais l'étage vaut 1 doit
+   mourir. Stabiliser aussi signature, `nb_total`, octets et lot effectif entre
+   répétitions d'une même entrée.
+4. **Le reçu doit juger les surfaces selon leur nature.** Le contrôle exact
+   des 16 noms GPU doit précéder `ctest -V`, pas seulement découvrir un 17e
+   test après son exécution. Dans le validateur, ne pas appliquer le filtre
+   produit générique `FORBIDDEN` au transcript CTest agrégé : la porte
+   négative attendue `mhgp6_pilote_refus_n` écrit légitimement `REFUS` tout en
+   étant `Passed` — fait reproduit localement. Accepter aussi les deux résumés
+   CTest déjà admis par le lifecycle. Forcer `nounits` sur les snapshots
+   `nvidia-smi`, pinner le juge importé, exiger la finitude et l'ensemble exact
+   des K de l'attribution, puis conserver les hashes des binaires exécutés et
+   copier `matrice_resume.txt`/`gpuv6_resume.txt` dans le reçu durable. Enfin,
+   dériver l'affinité par `(socket, core)` dans le cpuset autorisé, et faire
+   recalculer par le validateur le même masque pour matrice et attribution.
+
+Ordre de fermeture conseillé : pin profil+juges et portée v6-only ; budget
+canonique ; juge fail-fast/fermeture/inventaire pré-exécution ; validateur et
+deux selftests ; enfin export propre du SHA candidat. À ce moment seulement,
+un accusé bref pourra rendre le GO conditionnel exécutable. **Aucune session
+GCP ne doit partir de cette photographie WIP.**
+
 ## 6. Ordre de travail recommandé
 
 1. **achevé à `4a85c13d`** : C1, garde `2E` et témoin hôte ancrés ensemble,
