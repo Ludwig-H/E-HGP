@@ -2,8 +2,8 @@
 
 Date : 1er septembre 2026.
 
-Coupe observée à 08:02 UTC : worktree v6 non committé au-dessus de
-`25ec4362`. Cette note n'est pas un verdict sur un commit ; elle sera absorbée
+Coupe observée à 08:12 UTC : worktree v6 non committé au-dessus de
+`2088beea`. Cette note n'est pas un verdict sur un commit ; elle sera absorbée
 puis retirée après le checkpoint propre.
 
 Cadre :
@@ -42,62 +42,43 @@ candidats et `eight_clusters(2000, 400, 3)` en avait matérialisé 1 033. Le
 nouveau champ `emitted_at_refus` rend enfin cet overshoot observable ; sa borne
 générale est désormais établie ci-dessous.
 
-## Réponse au cinquième jet — rendre le diagnostic portable
+## Réponse au sixième jet — checkpoint source recevable
 
-Le retrait des deux `shrink_to_fit()` est reçu. La réserve unique avant fusion
-globale évite utilement les croissances géométriques de `out`, le message de
-refus brut est maintenant honnête et la distinction entre résidence
-stationnaire et transitoire du fold est meilleure.
+Claude a choisi la bonne séparation : `--mem-budget` garde désormais des
+**payloads logiques nommés** avec les cardinalités exactes `emitted` et
+`unique_balls`; la capacité de l'allocateur reste un diagnostic sans autorité.
+La réserve demandée à la somme exacte évite les croissances géométriques sans
+promettre `capacity()==size()`. La fixture fold `smax=2` demeure causale.
 
-Il reste une correction locale dans ce mécanisme. En C++20,
-`out->reserve(exact)` garantit seulement `capacity() >= exact`, pas
-`capacity() == exact`. Une capacité observée sur le témoin n'est pas non plus
-contractuellement reproductible sur le rejeu. Le commentaire « capacité
-déterministe », le commentaire du diagnostic « après RLE » et toute fenêtre
-calculée depuis la capacité du run précédent restent donc spécifiques à
-l'implémentation locale. La capacité actuelle est capturée **avant le tri**,
-puis conservée à travers le RLE.
+Le cap coopératif est également reçu avec sa borne générale : pour un cap
+`H`, un bloc de publication de 4 096 et `T` ouvriers,
+`H < emitted_at_refus <= H + 4096*T`. Les lectures toutes les 64 émissions
+sont incluses dans ce bloc ; aucun quota atomique par candidat n'est demandé.
 
-Le correctif court ne demande ni nouvelle copie ni nouvelle architecture :
+Preuves locales :
 
-1. décrire la réserve comme une allocation unique demandée à la somme exacte,
-   sans promettre sa capacité finale ;
-2. puisque le budget livré est un proxy de payload logique, garder le tri sur
-   `cands.size()` brut et le préfiltre/census sur `cands.size()` post-RLE ;
-3. calculer les mêmes seuils depuis `emitted` et `unique_balls` dans la
-   fixture : ils sont exacts, déterministes et identiques au contrat gardé ;
-4. conserver la capacité réellement observée comme diagnostic éventuel, sans
-   l'utiliser comme autorité de seuil ni lui imposer une égalité ;
-5. conserver le témoin `smax=2` pour le fold, avec sa fenêtre calculée depuis
-   ses cardinalités exactes.
+- coupe immédiatement précédente, qui contient déjà la réservation exacte :
+  suite v6 hors échelle 77/77 en 281,72 s ;
+- coupe courante après séparation payload/capacité : trois CTest caps 3/3 en
+  62,83 s ;
+- `git diff --check` propre et `python tools/check_docs.py` valide 241 fichiers
+  Markdown actifs.
 
-Le cap coopératif est par ailleurs plus net que ses commentaires actuels. Pour
-un cap `H`, un bloc de publication de 4 096 et `T` ouvriers, le refus vérifie
-`H < emitted_at_refus <= H + 4096*T`. Les observations toutes les 64 émissions
-sont incluses dans ce bloc : il ne faut ajouter ni 65 ni une ancre. Aucun quota
-atomique par candidat n'est nécessaire pour ce checkpoint.
+Il ne reste que du nettoyage de contrat dans le même patch :
 
-Enfin, garder une portée précise pour `--mem-budget`. Les formules tri,
-préfiltre/census et fold majorent des **payloads logiques nommés**, pas toutes
-les allocations : `lsv`, `lb`, `lev` et leurs sorties ont des capacités de
-vecteurs non réservées ou coexistantes, et les tris stables de tranches ont
-leurs propres tampons. C'est un coupe-circuit de volume utile, mais pas encore
-un plafond RAM contractuel. Un vrai claim d'allocation demanderait de réserver
-et comptabiliser tous ces buffers ; il peut rester un jalon distinct.
+- remplacer dans `caps.hpp` les deux `inflight+1` périmés et borner la doctrine
+  « avant allocation » aux allocations globales ou tampons effectivement
+  gardés ;
+- corriger dans `GenerateOptions` les anciennes tranches de 64 K et la promesse
+  « avant matérialisation », puis retirer de la fixture le commentaire hérité
+  des `shrinks` et le `+65` déjà absent de l'assertion ;
+- qualifier `PRE-insertion` comme pré-insertion dans les vecteurs globaux
+  `wave`/`next`/`out`, pas dans les shards locaux.
 
-Alignements encore nécessaires avant checkpoint :
-
-- `caps.hpp` généralise trop « avant l'allocation » et conserve deux
-  `inflight+1` périmés ;
-- `GenerateOptions` annonce 64 K et un refus avant matérialisation ;
-- les commentaires wave/alive doivent réserver `PRE-insertion` aux vecteurs
-  globaux, les shards locaux étant déjà matérialisés ;
-- la sortie CLI doit signer le budget demandé et le cap brut effectif avant
-  toute campagne utilisant `--mem-budget`.
-
-Après ces corrections, rejouer les trois caps, la suite v6 hors échelle et les
-portes documentaires suffit pour proposer le checkpoint à contre-audit. Les
-trois CTests caps gagneraient aussi à recevoir un `TIMEOUT` explicite.
+La signature CLI du budget et du cap effectif est recommandée avant toute
+campagne utilisant `--mem-budget`, mais ne bloque pas ce checkpoint. De même,
+un `TIMEOUT` CTest explicite est une hygiène utile, pas une nouvelle exigence
+de preuve.
 
 Le GO G4 `d98f4729` n'est pas révoqué, mais son pin refuse correctement ce
 worktree normatif sale. Aucun lancement ne doit partir de cet état ; un
