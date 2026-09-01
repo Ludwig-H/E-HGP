@@ -578,6 +578,46 @@ soit compaction stable des survivants avec transport de leur indice candidat
 global jusqu'au census. Les claims actuels décrivent la seconde voie, le code
 la première.
 
+Deux dents complémentaires sont importantes avant une exécution device, sans
+rouvrir l'algorithme des kernels :
+
+- **valider le retour D2H avant de reconstruire.** Le raccord vérifie quelques
+  égalités, puis utilise directement `n_int`, `n_shell` et les ids comme bornes
+  et indices. Une écriture device omise ou corrompue peut donc conduire à une
+  lecture/écriture hors borne avant le refus. Centraliser un validateur qui
+  exige un statut connu, `n_int <= 9`, `n_shell <= 12`, `cand_idx` global
+  attendu et tous les ids dans `[0,n_upos)`, puis seulement construire
+  `BallData`. Préremplir chaque sortie avec une sentinelle et ajouter au moins
+  un mutant `skip-write`/`n_shell` hors domaine rend cette frontière causale ;
+- **ne pas confondre parité de calcul et complétude des écritures.** Les portes
+  stub initialisent déjà certains champs, mais la porte CUDA alloue les
+  sorties non initialisées et ne possède pas de dent d'écriture omise. La
+  comparaison au scalaire est utile et les quatre mutants actuels sont bons ;
+  elle doit être précédée du contrôle de sentinelles pour que toute boule et
+  tout champ aient effectivement été produits.
+
+Photographie WIP locale : après reconfiguration Release, 10 des 11 CTests
+`wire|census_device_stub|census_stub_mutant|pilot_stub` passent en 96,67 s ;
+le seul rouge est le nominal `mhgp6_wire`, volontairement bloqué par
+`GRAVE_AU_PREMIER_RUN`. Les quatre mutants census et les deux mutants pilote
+meurent comme attendu. C'est un bon signal fonctionnel, pas une réception :
+la source n'est pas épinglée et le digest wire manque encore.
+
+La matrice locale `matrice_fold_locale_20260901` ne doit pas décider le design
+A. Ses deux premières cellules, qui ne changent que `fold_inflight`, font déjà
+varier des étages antérieurs au fold d'environ 33--37 %. De plus, notre passe
+CTest ciblée ci-dessus a chevauché la cellule `ref_uniform16000_t8_i2_j0` :
+cette cellule est explicitement contaminée par une charge CPU concurrente.
+Le harnais vivant n'agrège pas les codes de sortie en statut terminal, ne
+rehache les binaires partagés qu'au début et n'effectue ni répétitions ni
+contrebalancement. Le sauvetage utile est borné : archiver le harnais, graver
+hashes et charge de fin, contrôler tous les `rc`, fermer par
+`invalid_for_performance` (ou `interrupted`) et conserver le lot comme
+contre-reçu de bruit/digests seulement. Une future mesure décisionnelle devra
+utiliser des copies privées des binaires, au moins trois répétitions
+contrebalancées et une règle d'invalidation sur les étages amont. Il n'y a
+aucun intérêt à payer les cellules 50k de ce reçu déjà réfuté.
+
 Le plus petit chemin utile est donc C2 vert et transactionnel, puis stub C3/C4
 sur vues typées, puis seulement la couture C5. Si C5 reste dans le même WIP,
 préserver aussi la classe du refus : un `invalid_input` du wire ne doit pas
