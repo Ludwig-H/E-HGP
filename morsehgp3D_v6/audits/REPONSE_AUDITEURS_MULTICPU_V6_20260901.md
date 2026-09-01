@@ -650,6 +650,18 @@ bonne défense avant réutilisation en bibliothèque ; puisque le pilote actuel
 quitte le processus sur l'erreur, ce refactoring n'a pas à retarder seul la
 porte multi-lots ni à rouvrir C3/C4.
 
+Les implémentations de `count` et du commit final sont bonnes, mais leurs
+portes doivent encore devenir sélectives. Conserver le motif rendu par
+`validate_ball_out` et exiger exactement `count jamais ecrit` pour
+`gpu-skip-count-write`. Tester les sentinelles de statut avant celle de
+`count` : sinon `gpu-skip-ball-write`, qui omet les deux, meurt désormais sur
+`count` et ne prouve plus sa dent de statut. Pour la transactionnalité, appeler
+la route stub directement avec sorties et statistiques canarisées, injecter
+une faute tardive et exiger l'identité avant/après ; le seul `RunResult` vide
+ne distingue pas le commit local de l'invalidation faite par l'enveloppe. La
+même porte doit couvrir `nb=0`, qui retourne actuellement sans publier des
+sorties vides et conserve donc les anciennes valeurs du caller.
+
 Avec les copies actuelles, les sentinelles ajoutent bien 2 162 248 000 octets
 H2D au cas 50k ; le compteur les inclut désormais. Deux choix honnêtes restent
 possibles : publier environ 4 585 865 736 octets H2D index compris, ou utiliser
@@ -660,10 +672,11 @@ chronométrant les copies de sûreté.
 La relecture complète des sept tableaux après upload est annoncée dans les
 commentaires mais n'est pas encore présente dans la porte device. L'ajouter ou
 remettre le texte au futur avant le pin ; ce n'est pas un motif pour retoucher
-les kernels. Enfin, harmoniser la partie basse de `GPU.md`, encore restée à
-`t1[3] i64`, 12/92 octets et compaction, avec le contrat `census_all` 9/91
-désormais tranché. Ce nettoyage remplace avantageusement la note transitoire
-Claude une fois ses questions closes.
+les kernels. La partie basse de `GPU.md` est déjà corrigée à six `u32` et
+9/91 octets ; restent à aligner son H2D supérieur et son double tampon non
+implémenté, ainsi que les anciens libellés `t1[3]` du commentaire kernel, de
+CMake et de la note Claude. Supprimer cette note transitoire une fois ses
+questions closes vaut mieux que maintenir deux autorités contradictoires.
 
 La matrice locale `matrice_fold_locale_20260901` ne doit pas décider le design
 A. Ses deux premières cellules, qui ne changent que `fold_inflight`, font déjà
