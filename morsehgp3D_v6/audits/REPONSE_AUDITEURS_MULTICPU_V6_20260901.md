@@ -3,7 +3,7 @@
 Date : 1er septembre 2026. Données mesurées à `d98f4729`, question
 `ad005432` et conception `b18f1400`. La course de `671ed3cc` est conservée
 ci-dessous comme contre-fixture historique ; la contre-lecture couvre le
-worktree non committé du septième jet jusqu'au 1er septembre à 10 h 40 UTC.
+worktree non committé du huitième jet jusqu'au 1er septembre à 10 h 49 UTC.
 
 Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -12,8 +12,8 @@ Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 
 ## Verdict constructif
 
-**GO pour livrer le cœur C1 corrigé et la garde logique 2E après deux derniers
-refus de fixture ; GO pour poursuivre le diagnostic local apparié ;
+**GO pour livrer le cœur C1 corrigé et la garde logique 2E, leurs deux derniers
+refus de fixture étant présents ; GO pour poursuivre le diagnostic local apparié ;
 pas encore pour une réduction par segments ni pour C2/C3 sans contrat wire.**
 Le septième jet ferme bien les deux courses C1 connues dans le code : la
 panne fatale est confinée côté worker avant notification, et le passage
@@ -368,12 +368,11 @@ le repli portable DI128 et l'oracle `__int128`, quotient/reste compris, mais ne
 compile toujours ni `floor_div128`, ni `AxisBounds`, ni `BallKey::power`, qui
 sont les chemins requis par C3. Aucun `nvcc` ni device n'a été exercé.
 
-Une amélioration non bloquante reste utile avant la réception CUDA : le mutant
-de non-écriture saute seulement `ArithOut`. Le nominal détecte bien une
-sentinelle survivante dans `NativeOut`, mais aucune dent sélective n'exerce ce
-second tableau. Un mutant `witness-skip-native-write` séparé — indices exacts,
-arithmétique intégrale et oracle natif sur les cases écrites — évitera de
-surqualifier « toutes les sorties » sans mélanger les deux défauts.
+Le huitième jet ajoute la dent sélective `witness-skip-native-write` demandée :
+elle laisse une sentinelle aux indices exacts de `NativeOut`, tout en exigeant
+`ArithOut` complet, la branche attendue et les oracles conformes sur les cases
+écrites. Le registre et les portes hôte/device la nomment séparément ; son
+rejeu frais reste à joindre au reçu final du commit source.
 
 Avant un reçu CUDA, porter aussi la contre-fixture composée sur la cible GPU
 réelle et certifier dans le reçu l'architecture compilée et le device observé :
@@ -412,21 +411,20 @@ promet ni RSS ni absence d'OOM.
 Le septième jet ferme ces écarts de projection : un helper contrôle tous les
 champs qu'efface `invalidate_provisional`, le budget large compare aussi le
 digest brut, et chaque callback reçoit un digest de ses événements et de la
-projection sémantique de `ForestResult` hors workers/chronométrages. Deux
-petits refus de fixture restent nécessaires pour que ces verts soient
-sélectifs :
+projection sémantique de `ForestResult` hors workers/chronométrages. Le
+huitième jet ajoute les deux refus de non-vacuité demandés : la scène mutante
+rend 3 si son setup a déjà échoué, et les deux bras exigent explicitement un
+callback par K jusqu'à `kmax_eff`.
 
-- avant de rendre 4 dans la scène mutante 2E, rendre 3 si les checks de setup
-  ont déjà alimenté `g_failures` ; une signature aval correcte ne doit jamais
-  masquer un témoin ou une précondition en échec ;
-- exiger explicitement `temoin_cb.size() == temoin.kmax_eff` et
-  `seq_cb.size() == seq_k.size() == r.kmax_eff`. L'égalité des deux séquences
-  ne prouve pas seule leur complétude si une même omission touche les deux
-  bras.
+Le contrôle `g_failures` est encore placé après le calcul du budget et le run
+mutant. Il interdit bien tout faux code 4, donc ne bloque pas 2E ; le déplacer
+au début de la branche évitera néanmoins un run inutile et un sous-débordement
+diagnostique si le témoin amont est déjà invalide.
 
-Les quatre portes caps et les quatre portes stub passent ensemble 8/8 en
-74,17 s sur ce jet. La décision 2E reste reçue dans sa portée logique ; les
-deux conditions ci-dessus nettoient sa preuve avant l'ancrage source.
+Après reconstruction de ce dernier fichier, les quatre portes caps et la
+signature CLI passent 5/5 en 119,52 s. La décision 2E est donc reçue sur ce
+worktree dans sa portée logique et transactionnelle ; elle reste un proxy de
+payload nommé, jamais une preuve RSS ou OOM.
 
 Le vocabulaire source est désormais honnête et le cap CLI a été correctement
 renommé `cap_fusion_budgetaire` plutôt que de prétendre être le cap effectif
@@ -488,9 +486,10 @@ résiduel après arrêt de tous les chronos, est le correctif minimal.
 
 ## 6. Ordre de travail recommandé
 
-1. ajouter les deux refus de fixture 2E, rejouer, puis committer ensemble le
-   C1 désormais stressé, la garde `2E` et le témoin hôte ;
-2. réparer et exécuter le petit profil B/inflight avant de choisir le design A ;
+1. committer ensemble le C1 désormais stressé, la garde `2E` reçue et le
+   témoin hôte ; ne pas mêler à ce checkpoint le brouillon de profil
+   `fold.hpp` tant que les corrections du § 5.10 ne sont pas appliquées ;
+2. réparer puis exécuter le petit profil B/inflight avant de choisir le design A ;
 3. figer le wire, le budget VRAM et le témoin device arithmétique ; C2 peut
    alors devenir une brique hôte testable et C3 un port CUDA falsifiable ;
 4. si la cause CPU est la concurrence A/B, prototyper un budget de workers ou
