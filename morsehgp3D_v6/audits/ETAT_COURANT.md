@@ -34,6 +34,7 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
 | plafonds et budget mémoire `4a85c13d` | cap coopératif et refus transactionnels reçus ; garde logique `2E` avant la réserve de fusion reçue, proxy de payload nommé seulement, sans claim RSS/OOM |
 | saturation multi-CPU du fold `1069bc20` | pin construit et suite `gate` 92/92 ; profil, liveness, builds distincts, projection nommée, `join=1` et effacement K2 reçus dans leur portée, mais attribution nulle et fuite `stderr` restent faussement vertes ; aucun reçu de performance |
+| wire série C C2, WIP post-`1069bc20` | division hôte et indices `upos` approuvés en principe ; `t1 i64`, transactionnalité, vues typées, golden digest et budget/dataflow doivent être fermés avant réception ; C3--C5 restent non ancrés et sans reçu device |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP `d98f4729` | GO mono-session consommé et clos ; reçu `df1a3c5f` validé non décisionnel, arrêt ciblé certifié |
@@ -99,7 +100,7 @@ encore 0 : neuf composantes et `somme` mises à zéro avec
 Le pin est donc reçu comme harnais fonctionnel, pas encore comme porte fermée
 d'attribution et jamais comme performance.
 
-`git diff --check` est propre, `tools/check_docs.py` valide 246 Markdown actifs
+`git diff --check` est propre, `tools/check_docs.py` valide 247 Markdown actifs
 et `tools/check_implementation_status.py` valide 20 phases. Aucun `nvcc` ni
 device n'a été exercé. C1 reste une brique hôte non raccordée à `run.hpp` ; sa
 file ne borne ni les captures des producteurs, ni les buffers d'exécuteurs,
@@ -541,10 +542,10 @@ Ordre recommandé à Claude :
    post-fatale, avant de bâtir C2 dessus ;
 2. avancer la garde `2E` avant la fusion globale et corriger ses commentaires,
    sans rouvrir le contrat plus large de RAM résidente ;
-3. profiler localement le fold selon
-   `REPONSE_AUDITEURS_MULTICPU_V6_20260901.md` avant de segmenter `reduce` ou
-   d'attribuer un gain bout en bout au port GPU ;
-4. figer wire, budget VRAM et témoin device exact avant C2/C3 ;
+3. tuer les deux contre-fixtures de profil du § 5.10 avant d'interpréter la
+   matrice locale du fold ou de segmenter `reduce` ;
+4. fermer le wire C2 transactionnel et typé selon le § 5.11, puis choisir
+   explicitement `census_all` ou compaction stable avant de figer le budget ;
 5. corriger `GRAND_LIVRE.md` avant toute interprétation des coûts, puis
    aligner `ARCHITECTURE.md`, `PROVENANCE.md` et `PLAN_DE_TESTS.md` au
    prochain checkpoint stable ;

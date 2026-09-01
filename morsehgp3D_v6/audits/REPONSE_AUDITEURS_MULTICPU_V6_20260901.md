@@ -510,6 +510,80 @@ si le coût vient du recouvrement A/réduction, borner la concurrence avant de
 toucher au layout. Aucun facteur de gain ni diagnostic « memory-bound » n'est
 encore reçu.
 
+### 5.11 Wire série C : trois décisions tranchées, quatre fermetures avant C3/C5
+
+Contre-lecture du WIP C2 postérieur à `1069bc20`, sans pin et sans GCP. La
+direction est bonne et les trois verrous demandés ont une réponse courte :
+
+1. **Oui à la division hissée côté hôte, mais pas au `t1` brut en `i64`.** Le
+   code calcule le quotient en `i128` puis le rétrécit sans garde ; une clé
+   canonique `a=1, b_0=-2^70` est acceptée alors que son quotient sort de
+   `i64`. Ne pas rejeter pour autant une géométrie u16 valide dont le centre
+   rationnel est lointain. Réutiliser les mêmes 24 octets pour six `u32` : les
+   deux candidats `t1` et `t1+1`, chacun rabattu côté hôte sur `[0,65535]`, par
+   axe. Pour toute boîte incluse dans ce domaine, rabattre d'abord sur le
+   domaine puis sur la boîte donne exactement le même candidat que rabattre
+   directement sur la boîte. La division et `t1+1` disparaissent ainsi du
+   device, le framing reste à 112 octets et la fixture doit inclure un quotient
+   hors `i64`.
+2. **Oui aux indices `upos`, non aux représentants `PointId` sur le wire.**
+   `ball_census` produit déjà `leaf_index`, `BallData` conserve ces `i32`, puis
+   `expand_events_k` applique `CloudIndex::point_id` côté hôte. Garder l'index
+   géométrique évite une représentation redondante ou, avec multiplicité, une
+   représentation insuffisante. Valider néanmoins chaque retour D2H dans
+   `[0,n_upos)` et conserver l'index hôte qui fait autorité pour la
+   reconstruction.
+3. **Le digest actuel suffit pour identifier le payload hôte, pas les octets
+   résidents.** Le nom honnête est donc `host_wire_digest`. Un échantillon D2H
+   ne prouverait pas une identité complète. Dans la porte device de validation,
+   relire une fois les sept tableaux entiers après le premier upload et
+   recalculer le digest est simple et borné : l'index vaut exactement
+   `28*n_nodes + 6*m + 4*(m+1)` octets, soit `38*m-24` pour l'arbre valide à
+   `m-1` nœuds. Séparer ce coût de vérification du mur benchmark ; la route
+   produit peut se contenter des erreurs CUDA et du digest hôte.
+
+Avant de graver C2 puis d'interpréter les stubs C3/C5, quatre corrections
+causales évitent de bâtir sur un wire ambigu :
+
+- rendre les refus réellement transactionnels : vider métadonnées, digest et
+  tous les buffers, arrêter tout append après la première erreur, rejeter
+  `h=0` et plus de `UINT32_MAX` boules ; aujourd'hui un refus à mi-index laisse
+  un préfixe et la séquence boule valide→invalide→valide continue d'écrire ;
+- décoder les octets dans des vecteurs typés avant les kernels hôte : les
+  `reinterpret_cast` depuis `vector<u8>` dans le stub et le pilote ne
+  garantissent ni alignement ni aliasing et rendent la preuve locale indéfinie.
+  Le `cudaMemcpy` réel vers une allocation device correctement alignée n'est
+  pas remis en cause ;
+- fermer la porte wire elle-même : le nominal contient encore
+  `GRAVE_AU_PREMIER_RUN`, `BallIn` n'est pas reparsé champ par champ et le
+  mutant `drop-node` ne contrôle que la taille de `node_left` malgré son claim
+  de digest. Figer d'abord l'ordre exact de hachage, y compris SHA binaire ou
+  hexadécimal, puis graver ; faire traverser au mutant `t1` le vrai chemin
+  append→octets→reparse ;
+- aligner le budget sur les buffers réellement vivants. Les sorties SoA
+  actuelles occupent 9 octets au préfiltre et 91 au census, pas les records
+  documentaires 12/92 avec octets réservés. Tant que compte/statut préfiltre et
+  census coexistent, le lot vaut 112+9+91=212 octets, donc 424 en double
+  tampon, hors compaction. La promesse de compaction est encore future et le
+  chiffre H2D historique de 1,7 Go doit devenir 2 421 717 760 octets pour
+  21 622 480 entrées à 112 octets.
+
+Le pilote C5 apparu pendant la lecture ne réalise encore ni budget, ni double
+tampon, ni compaction : il lance le census sur tous les candidats et rapatrie
+les 9+91 octets de ses deux sorties pour chacun. Sur les 21 622 480 candidats
+du reçu 50k, cela représente 2 162 248 000 octets D2H, et `cand_idx=base+gid`
+n'est exact que parce qu'aucune compaction n'a lieu. Choisir explicitement le
+dataflow avant de figer le budget : soit `census_all`, simple mais volumineux,
+soit compaction stable des survivants avec transport de leur indice candidat
+global jusqu'au census. Les claims actuels décrivent la seconde voie, le code
+la première.
+
+Le plus petit chemin utile est donc C2 vert et transactionnel, puis stub C3/C4
+sur vues typées, puis seulement la couture C5. Si C5 reste dans le même WIP,
+préserver aussi la classe du refus : un `invalid_input` du wire ne doit pas
+être requalifié silencieusement en `resource_exhausted`. Aucun GO G4 n'est
+ouvert par cette réponse.
+
 ## 6. Ordre de travail recommandé
 
 1. **achevé à `4a85c13d`** : C1, garde `2E` et témoin hôte ancrés ensemble,
