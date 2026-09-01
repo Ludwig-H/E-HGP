@@ -538,6 +538,7 @@ def main():
     # PROFIL EPINGLE : la matrice attendue vient de lui, jamais du runner.
     profile = {}
     canon_axes = {}
+    objet_digests = {}
     if not os.path.exists(profile_path):
         bad.append("profil de campagne ABSENT (matrice non epinglee)")
     else:
@@ -564,6 +565,19 @@ def main():
                     "max_run_seconds_effectif", "guest_shutdown_minutes_effectif"):
             if not profile.get(key, "").strip():
                 bad.append(f"profil de campagne : cle {key} absente")
+        # FIXTURE D'EGALITE de l'objet (audit serie C) : famille:n:digest_all
+        # graves dans le profil — le pilote doit calculer CET objet.
+        # (cle OPTIONNELLE : les recus anterieurs a la fixture n'en portent
+        # pas ; le cycle de vie courant l'emet toujours, le canon la lie.)
+        objet_digests = {}
+        for tok in expand_axis(profile.get("gpuv6_objet_digests", "aucun")):
+            m = re.match(r"^([a-z][a-z0-9_]*):(\d+):([0-9a-f]{64})$", tok)
+            if not m:
+                bad.append(f"profil de campagne : gpuv6_objet_digests hors grammaire ({tok[:40]})")
+                continue
+            if (m.group(1), m.group(2)) in objet_digests:
+                bad.append(f"profil de campagne : gpuv6_objet_digests duplique pour {m.group(1)}:{m.group(2)}")
+            objet_digests[(m.group(1), m.group(2))] = m.group(3)
         # § 5.13.4 : les axes de duree du profil pilotent les VRAIS
         # coupe-circuits — un ecart entre l'axe et l'effectif signifie une
         # surcharge d'environnement (profil effectif != canonique).
@@ -596,6 +610,7 @@ def main():
                              "ATTRIB_POINTS", "ATTRIB_TIMEOUT",
                              "GPUV6_GATE_NAMES", "GPUV6_BUILD_TIMEOUT", "GPUV6_GATE_TIMEOUT",
                              "GPUV6_PILOT_SPECS", "GPUV6_PILOT_MIN_LOTS", "GPUV6_PILOT_TIMEOUT",
+                             "GPUV6_OBJET_DIGESTS",
                              "SESSION_MAX_RUN_SECONDS", "SESSION_INVITE_MINUTES")
             # Grammaire TOTALE : commentaire, ligne vide, ou axe connu a
             # guillemets equilibres — TOUT le reste est refuse.
@@ -651,6 +666,7 @@ def main():
                     ("gpuv6_pilot_specs", "GPUV6_PILOT_SPECS"),
                     ("gpuv6_pilot_min_lots", "GPUV6_PILOT_MIN_LOTS"),
                     ("gpuv6_pilot_timeout", "GPUV6_PILOT_TIMEOUT"),
+                    ("gpuv6_objet_digests", "GPUV6_OBJET_DIGESTS"),
                     ("session_max_run_seconds", "SESSION_MAX_RUN_SECONDS"),
                     ("session_invite_minutes", "SESSION_INVITE_MINUTES"))
                 for pk, ck in full_axis_map:
@@ -956,11 +972,15 @@ def main():
             bad.append(f"{name}: commande gravee sans confinement taskset -c <liste demandee>")
         elif os.path.basename(argv[3]) != "mhgp6":
             bad.append(f"{name}: binaire de matrice inattendu ({argv[3]}) — mhgp6 exige")
-        want_args = {f"--family={run['family']}", f"--n={run['n']}", "--s=8", "--smax=11",
-                     "--seed=3", f"--threads={run['mat_threads']}",
-                     f"--fold-inflight={run['inflight']}", f"--fold-join={run['join']}"}
-        if not want_args.issubset(argv):
-            bad.append(f"{name}: commande gravee sans les arguments contractuels du point")
+        # EGALITE d'argv normalisee (§ 5.16) : ni argument en plus, ni
+        # duplique, ni ordre different de celui que le runner construit.
+        want_argv = argv[:4] + [f"--family={run['family']}", f"--n={run['n']}", "--s=8", "--smax=11",
+                                "--seed=3", f"--threads={run['mat_threads']}",
+                                f"--fold-inflight={run['inflight']}", f"--fold-join={run['join']}"] \
+            + (["--digest"] if run["digest"] == "avec" else [])
+        if len(argv) < 4 or argv != want_argv:
+            bad.append(f"{name}: argv grave != vecteur contractuel exact du point "
+                       f"(en plus/en moins/duplique/ordre)")
         if run["digest"] == "avec":
             if "--digest" not in argv:
                 bad.append(f"{name}: bras avec-digest sans --digest dans la commande gravee")
@@ -1042,11 +1062,12 @@ def main():
             bad.append(f"{name}: commande gravee sans confinement taskset -c <liste demandee>")
         elif os.path.basename(argv[3]) != "mhgp6_profile":
             bad.append(f"{name}: binaire d'attribution inattendu ({argv[3]}) — mhgp6_profile exige")
-        want_args = {f"--family={run['family']}", f"--n={run['n']}", "--s=8", "--smax=11",
-                     "--seed=3", f"--threads={run['mat_threads']}",
-                     f"--fold-inflight={run['inflight']}", f"--fold-join={run['join']}"}
-        if not want_args.issubset(argv):
-            bad.append(f"{name}: commande gravee sans les arguments contractuels du point")
+        want_argv = argv[:4] + [f"--family={run['family']}", f"--n={run['n']}", "--s=8", "--smax=11",
+                                "--seed=3", f"--threads={run['mat_threads']}",
+                                f"--fold-inflight={run['inflight']}", f"--fold-join={run['join']}"]
+        if len(argv) < 4 or argv != want_argv:
+            bad.append(f"{name}: argv grave != vecteur contractuel exact du point "
+                       f"(en plus/en moins/duplique/ordre)")
         kind = re.findall(r"^profil_kind=reduce_v2 fold_join=(\d) ", body, re.M)
         if len(kind) != 1 or kind[0] != run["join"]:
             bad.append(f"{name}: profil_kind=reduce_v2 fold_join={run['join']} absent ou multiple")
@@ -1145,10 +1166,18 @@ def main():
                     bad.append(f"{name}: verdict du juge embarque non conforme")
                 cmd = re.search(r"^commande=(.*)$", st, re.M)
                 cmd_full = cmd.group(1) if cmd else ""
-                for tok in (f"--family={run['family']}", f"--n={run['n']}", "--repeat=4",
-                            "--ordre=cpu-device", f"--min-lots={gpuv6_params['min_lots']}"):
-                    if tok not in cmd_full:
-                        bad.append(f"{name}: commande gravee sans {tok}")
+                # EGALITE EXACTE (§ 5.16) de la commande du pilote avec ce que
+                # le runner construit — seul le chemin du binaire est libre.
+                snap = ("nvidia-smi --query-gpu=uuid,temperature.gpu,clocks.sm,clocks.mem "
+                        "--format=csv,noheader,nounits")
+                want_cmd = (r"^" + re.escape("/bin/bash -c set -e; echo '--- gpu_avant ---'; " + snap + "; rc=0; ")
+                            + r"\S+ " + re.escape(f"--family={run['family']} --n={run['n']} --seed=3 "
+                                                  f"--threads={profile.get('threads', '0')} --repeat=4 "
+                                                  f"--ordre=cpu-device --min-lots={gpuv6_params['min_lots']} "
+                                                  "|| rc=$?; echo '--- gpu_apres ---'; " + snap + "; exit ${rc}") + r"$")
+                if not re.match(want_cmd, cmd_full):
+                    bad.append(f"{name}: commande du pilote != contrat exact du runner "
+                               f"(argument en plus/en moins, instantanes, ordre)")
                 for marker in ("--- gpu_avant ---", "--- gpu_apres ---"):
                     idx = body.find(marker)
                     nxt = body[idx + len(marker):].strip().splitlines()
@@ -1168,9 +1197,27 @@ def main():
                     fils_att = int(profile.get("threads", "0")) if profile.get("threads", "0").isdigit() else None
                     verdict = juge_mod.juger(body, "cpu-device", repeat=4, min_lots=plan_min_lots,
                                              famille=run["family"], n=int(run["n"]),
-                                             graine=3, fils=fils_att)
+                                             graine=3, fils=fils_att, arch="120")
                     if verdict is not None:
                         bad.append(f"{name}: records du pilote non conformes ({verdict})")
+                    # LIAISON D'OBJET (audit serie C) : le digest_all des records
+                    # (stable par le juge) doit EGALER celui des bras --digest de
+                    # la matrice pour la meme entree, et la fixture d'egalite du
+                    # profil quand elle existe — un pilote calculant un autre
+                    # objet n'est plus vert.
+                    pdig = sorted(set(re.findall(r"^repetition=\d+ .*?\bdigest_all=([0-9a-f]{64})\b", body, re.M)))
+                    key = (run["family"], run["n"])
+                    if len(pdig) != 1:
+                        bad.append(f"{name}: digest_all du pilote absent ou instable ({len(pdig)} valeurs)")
+                    else:
+                        if key in matrice_digests:
+                            mdig = list(matrice_digests[key])
+                            if len(mdig) != 1 or mdig[0] != pdig[0]:
+                                bad.append(f"{name}: digest_all du pilote != digest_all de la matrice pour "
+                                           f"{key[0]}:{key[1]} (objet different)")
+                        if key in objet_digests and objet_digests[key] != pdig[0]:
+                            bad.append(f"{name}: digest_all du pilote != fixture d'egalite du profil pour "
+                                       f"{key[0]}:{key[1]}")
                     tete = juge_mod.entete(body)
                     if isinstance(tete, dict) and build_ident:
                         if tete["device"] != build_ident["name"]:
@@ -1495,7 +1542,15 @@ def main():
                                 fmt(median(murs)), fmt(min(murs) if murs else None),
                                 fmt(max(murs) if murs else None), fmt(median(durees)),
                                 str(max(rss)) if rss else "NA"]))
-    resume_dir = os.path.dirname(os.path.abspath(out))
+    # RE-VALIDATION D'UN RECU DURABLE (audit serie C) : les resumes s'ecrivent
+    # a cote de out/ ; dans un recu immuable (SHA256SUMS present) cela
+    # reecrirait le recu — refus, sauf V6_RESUMES_DIR explicite (script
+    # revalidate_v6_receipt.sh) qui les redirige hors du recu.
+    resume_dir = os.environ.get("V6_RESUMES_DIR") or os.path.dirname(os.path.abspath(out))
+    if not os.environ.get("V6_RESUMES_DIR") and os.path.exists(os.path.join(resume_dir, "SHA256SUMS")):
+        print("REFUS : le repertoire des resumes est un recu durable (SHA256SUMS present) — "
+              "definir V6_RESUMES_DIR pour re-valider sans reecrire le recu")
+        return 2
     tmp = os.path.join(resume_dir, "bench_resume.txt.tmp")
     with open(tmp, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")

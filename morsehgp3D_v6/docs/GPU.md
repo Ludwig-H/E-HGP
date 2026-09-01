@@ -109,8 +109,15 @@ théorème d'équivalence + fixture, jamais sur un benchmark.
   d'octets (112/100/100 par boule), `lot_effectif = min(lot, nb_total)`,
   chronos finis, étage device ≥ somme de ses six composantes (± 0,4 ms
   d'arrondi %.1f), murs enveloppant leurs sous-étages, stabilité de
-  l'objet/volumes entre répétitions. L'architecture est CONTRACTUELLE :
-  `CMAKE_CUDA_ARCHITECTURES=120` exigée (refus CMake sinon). Le reçu de
+  l'objet/volumes entre répétitions, `arch_compilees` comparé à l'attente
+  (120 sur G4). L'architecture est CONTRACTUELLE :
+  `CMAKE_CUDA_ARCHITECTURES=120` exigée (refus CMake sinon). LIAISON D'OBJET
+  (audit post-session) : le `digest_all` des records doit égaler celui des
+  bras `--digest` de la matrice pour la même entrée ET la fixture d'égalité
+  `GPUV6_OBJET_DIGESTS` du profil (gravée depuis le reçu
+  `session_g4_20260901_b97f20ea4b8f_1788293187`) — un pilote calculant un
+  autre objet à parité interne intacte n'est plus vert. Un reçu durable se
+  re-juge sans être modifié par `gcp-migration/revalidate_v6_receipt.sh`. Le reçu de
   gain 50k+ vient d'une session G4 (profil de campagne, nouveau pin,
   nouveau GO auditeur) — jamais d'un gate ni du reçu GPU v5 historique.
 

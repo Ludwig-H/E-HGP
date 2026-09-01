@@ -64,6 +64,40 @@ def main():
         echecs += 1
     else:
         print("contre-fixture tuee : fermeture somme+residuel != mur")
+    # 1bis/2bis. DENTS ISOLEES (audit : la scene 1 est aussi tuee par la
+    # fermeture, donc un seuil somme regresse a 0.009 ne rougirait pas) :
+    # (a) somme faussee de 0.008 avec fermeture EXACTE (residuel = mur) —
+    #     seule la dent somme (0.0051) peut tuer, et son message est exige ;
+    # (b) fermeture faussee de 0.007 avec somme EXACTE — seule la dent de
+    #     fermeture (0.006) peut tuer ; (c) frontiere honnete : derive 0.005.
+    import contextlib, io
+    def juge_msg(txt):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = juge(txt)
+        return rc, buf.getvalue()
+    rc, msg = juge_msg(scene(somme=0.008, mur=0.010, residuel=0.010))
+    if rc != 1 or "somme imprimee != somme des neuf composantes" not in msg:
+        print("CONTRE-FIXTURE NON CAUSALE : derive de somme 0.008 a fermeture exacte "
+              "non tuee PAR LA DENT SOMME (rc=%s, msg=%r)" % (rc, msg.strip()[:80]))
+        echecs += 1
+    else:
+        print("contre-fixture tuee par la dent somme seule (derive 0.008, fermeture exacte)")
+    comp = {"unite": 0.009}
+    rc, msg = juge_msg(scene(somme=0.009, mur=0.010, residuel=0.008, composantes=comp, fin=0.010))
+    if rc != 1 or "fermeture somme_recalculee+residuel != mur_reduce_interne" not in msg:
+        print("CONTRE-FIXTURE NON CAUSALE : fermeture 0.007 a somme exacte non tuee PAR LA DENT "
+              "FERMETURE (rc=%s, msg=%r)" % (rc, msg.strip()[:80]))
+        echecs += 1
+    else:
+        print("contre-fixture tuee par la dent fermeture seule (ecart 0.007, somme exacte)")
+    comp = {"unite": 0.009}
+    rc = juge(scene(somme=0.014, mur=0.015, residuel=0.006, composantes=comp, fin=0.015))
+    if rc is not None:
+        print("FAUX ROUGE : derive de somme 0.005 (sous 0.0051) refusee (rc=%s)" % rc)
+        echecs += 1
+    else:
+        print("frontiere honnete acceptee (derive de somme 0.005)")
     # 3. Arrondis %.3f honnetes : neuf composantes de 0.001, somme=0.013
     #    (derive 0.004 < 0.0051), residuel=0.002, mur=0.015 (fermeture 0.004
     #    < 0.006) — DOIT rester acceptee, le serrage ne cree pas de faux rouge.

@@ -266,12 +266,20 @@ chmod +x "${FAKE}/nvcc" "${FAKE}/nvidia-smi" "${FAKE}/cmake" \
 
 # ---- Faux outillage SERIE C (§ 5.12) : ctest a inventaire exact, binaire
 # de profil (attribution) et pilote mhgp6_cuda a records conformes au juge.
+cat > "${FAKE}/lscpu" <<'EOF'
+#!/usr/bin/env bash
+# FAKE_LSCPU_EMPTY=1 : topologie illisible (aucune ligne) ; sinon le vrai lscpu.
+if [ "${FAKE_LSCPU_EMPTY:-0}" = "1" ]; then exit 0; fi
+exec /usr/bin/lscpu "$@"
+EOF
 cat > "${FAKE}/ctest" <<'EOF'
 #!/usr/bin/env bash
 # -N = listage sans execution (inventaire pre-execution du runner) ;
-# FAKE_CTEST_EXTRA=1 ajoute un 17e test intrus au listage.
+# FAKE_CTEST_EXTRA=1 ajoute un 17e test intrus au listage ;
+# FAKE_CTEST_EMPTY_N=1 : listage VIDE a code nul.
 case " $* " in
   *" -N "*)
+    if [ "${FAKE_CTEST_EMPTY_N:-0}" = "1" ]; then exit 0; fi
     i=0
     for nm in ${GPUV6_GATE_NAMES:-}; do
       i=$((i + 1))
@@ -340,7 +348,7 @@ while [ "${r}" -le "${repeat}" ]; do
 done
 exit 0
 EOF
-chmod +x "${FAKE}/ctest" "${FAKE}/mhgp6_profile" "${FAKE}/mhgp6_cuda"
+chmod +x "${FAKE}/ctest" "${FAKE}/lscpu" "${FAKE}/mhgp6_profile" "${FAKE}/mhgp6_cuda"
 
 # Matrices reduites : DEUX configs de bench (les deux parites ABBA). Les
 # surcharges de scenario ("$@") viennent EN DERNIER : env garde la derniere.
@@ -395,10 +403,11 @@ emit_serie_c_defaults() {
   echo "gpuv6_pilot_specs=aucun"
   echo "gpuv6_pilot_min_lots=2"
   echo "gpuv6_pilot_timeout=3600"
+  echo "gpuv6_objet_digests=aucun"
   echo "session_max_run_seconds=28800"
-  echo "session_invite_minutes=470"
+  echo "session_invite_minutes=465"
   echo "max_run_seconds_effectif=28800"
-  echo "guest_shutdown_minutes_effectif=470"
+  echo "guest_shutdown_minutes_effectif=465"
 }
 PROFILE="${WORK}/profil_campagne.txt"
 {
@@ -713,7 +722,8 @@ check_true "mutant coordonne (canon reduit auto-declare + hash concordant) : TUE
 # porte gpu absente de l'inventaire, affinite non attestee, somme
 # d'attribution faussee.
 GATE_NAMES_C="mhgp6_device_witness mhgp6_device_witness_mutant_carry mhgp6_device_witness_mutant_skip_write mhgp6_device_witness_mutant_skip_native mhgp6_census_device mhgp6_census_device_mutant_range_le mhgp6_census_device_mutant_stack mhgp6_census_device_mutant_swap mhgp6_census_device_mutant_nonstrict mhgp6_census_device_mutant_skip_write mhgp6_census_device_mutant_nshell mhgp6_census_device_mutant_skip_count mhgp6_pilote_parite_400 mhgp6_pilote_refus_n mhgp6_pilote_lot17 mhgp6_pilote_mutant_base"
-MAT_POINTS_C="uniform:16000:2:2:0:sans uniform:16000:1:1:0:sans uniform:16000:2:2:1:avec"
+MAT_POINTS_C="uniform:16000:2:2:0:sans uniform:16000:1:1:0:sans uniform:16000:2:2:1:avec uniform:50000:1:1:0:avec uniform:50000:2:2:0:sans"
+OBJET_C="uniform:50000:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
 CANON_C="${WORK}/serie_c_selftest_v1.env"
 {
   echo 'PROFIL_NOM="serie_c_selftest_v1"'
@@ -744,6 +754,7 @@ CANON_C="${WORK}/serie_c_selftest_v1.env"
   echo 'GPUV6_PILOT_SPECS="uniform:50000"'
   echo 'GPUV6_PILOT_MIN_LOTS=2'
   echo 'GPUV6_PILOT_TIMEOUT=60'
+  echo "GPUV6_OBJET_DIGESTS=\"${OBJET_C}\""
   echo 'SESSION_MAX_RUN_SECONDS=18000'
   echo 'SESSION_INVITE_MINUTES=270'
 } > "${CANON_C}"
@@ -788,6 +799,7 @@ PROFILE_C="${WORK}/profil_serie_c.txt"
   echo "gpuv6_pilot_specs=uniform:50000"
   echo "gpuv6_pilot_min_lots=2"
   echo "gpuv6_pilot_timeout=60"
+  echo "gpuv6_objet_digests=${OBJET_C}"
   echo "session_max_run_seconds=18000"
   echo "session_invite_minutes=270"
   echo "max_run_seconds_effectif=18000"
@@ -816,12 +828,13 @@ run_runner_c() { # $1 = dossier out ; le reste = env supplementaire
 }
 rc=0; run_runner_c "${OUT8}" || rc=$?
 check "serie C : runner rc=0" "${rc}"
-check_true "serie C : plans matrice (9 = 3 points x 3 passages, rotation8 exacte), attrib (1), gpuv6 (3)" bash -c "
-  [ \"\$(sed -n 's/^runs=//p' '${OUT8}/matrice_plan.txt')\" = '9' ] &&
+check_true "serie C : plans matrice (15 = 5 points x 3 passages, rotation8 = rotation de 3 exacte), attrib (1), gpuv6 (3)" bash -c "
+  [ \"\$(sed -n 's/^runs=//p' '${OUT8}/matrice_plan.txt')\" = '15' ] &&
   [ \"\$(sed -n 's/^runs=//p' '${OUT8}/attrib_plan.txt')\" = '1' ] &&
   [ \"\$(sed -n 's/^runs=//p' '${OUT8}/gpuv6_plan.txt')\" = '3' ] &&
-  grep -q 'seq=7 name=mat_uniform_n16000_t2_i2_j1_avec_p3 .* passage=3 pos=1' '${OUT8}/matrice_plan.txt' &&
-  grep -q 'seq=8 name=mat_uniform_n16000_t2_i2_j0_sans_p3 .* passage=3 pos=2' '${OUT8}/matrice_plan.txt'"
+  grep -q 'seq=11 name=mat_uniform_n50000_t1_i1_j0_avec_p3 .* passage=3 pos=1' '${OUT8}/matrice_plan.txt' &&
+  grep -q 'seq=12 name=mat_uniform_n50000_t2_i2_j0_sans_p3 .* passage=3 pos=2' '${OUT8}/matrice_plan.txt' &&
+  grep -q 'seq=13 name=mat_uniform_n16000_t2_i2_j0_sans_p3 .* passage=3 pos=3' '${OUT8}/matrice_plan.txt'"
 check_true "serie C : affinite demandee ET attestee sur un run de matrice" bash -c "
   grep -q '^affinite_demandee=' '${OUT8}/mat_uniform_n16000_t2_i2_j0_sans_p1.status' &&
   grep -q '^affinite_effective=' '${OUT8}/mat_uniform_n16000_t2_i2_j0_sans_p1.status' &&
@@ -872,7 +885,7 @@ falsify_c "serie C : affinite effective non conforme a la demande" "affinite eff
 falsify_c "serie C : somme d'attribution faussee (seuil 0.0051)" "somme imprimee != somme des neuf composantes" \
   sed -i 's/somme=0.009/somme=0.020/' attrib_uniform_n16000_t2_i2_j0.txt
 falsify_c "serie C : plan matrice altere (rotation8 recalculee)" "sequence annoncee != sequence recalculee" \
-  sed -i 's/^seq=7 name=mat_uniform_n16000_t2_i2_j1_avec_p3/seq=7 name=mat_uniform_n16000_t9_i2_j1_avec_p3/' matrice_plan.txt
+  sed -i 's/^seq=11 name=mat_uniform_n50000_t1_i1_j0_avec_p3/seq=11 name=mat_uniform_n50000_t9_i1_j0_avec_p3/' matrice_plan.txt
 falsify_c "serie C : bras sans-digest contamine par un digest" "digest imprime sur un bras sans-digest" \
   sed -i '1i digest_all=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' mat_uniform_n16000_t2_i2_j0_sans_p1.txt
 # § 5.14.4 : inventaire pre-execution, verdict du juge embarque, identite
@@ -906,6 +919,51 @@ falsify_c "serie C § 5.15 : UUID de l'instantane != UUID du build" "UUID .* != 
   sed -i 's/^GPU-11111111-2222-3333-4444-555555555555, 45/GPU-99999999-2222-3333-4444-555555555555, 45/' pilote_uniform_n50000.txt
 falsify_c "serie C § 5.15 : commande d'attribution sans taskset" "confinement taskset" \
   sed -i 's/^commande=taskset -c [0-9,-]* /commande=/' attrib_uniform_n16000_t2_i2_j0.status
+# Audit serie C (post-session) : chaque garde ajoutee a sa falsification.
+falsify_c "audit : argv d'attribution avec un argument contradictoire en suffixe" "argv grave != vecteur contractuel" \
+  sed -i 's/^\(commande=.*--fold-join=0\)$/\1 --n=999 --threads=1/' attrib_uniform_n16000_t2_i2_j0.status
+falsify_c "audit : argv de matrice duplique" "argv grave != vecteur contractuel" \
+  sed -i 's/^\(commande=.*--fold-join=0\)$/\1 --n=16000/' mat_uniform_n16000_t2_i2_j0_sans_p1.status
+falsify_c "audit : commande du pilote avec un argument en plus" "commande du pilote != contrat exact" \
+  sed -i 's/--min-lots=2 || rc=/--min-lots=2 --n=999 || rc=/' pilote_uniform_n50000.status
+falsify_c "audit : arch_compilees=86 dans l'en-tete du pilote" "arch=" \
+  sed -i 's/ arch_compilees=120 / arch_compilees=86 /' pilote_uniform_n50000.txt
+falsify_c "audit : digest_all du pilote != matrice/fixture (objet different, parite intacte)" "digest_all du pilote" \
+  sed -i 's/digest_all=dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd/digest_all=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/' pilote_uniform_n50000.txt
+falsify_c "audit : digest_all non identique entre bras --digest de la matrice" "digest_all NON identique entre bras" \
+  sed -i 's/^digest_all=d/digest_all=e/' mat_uniform_n50000_t1_i1_j0_avec_p2.txt
+falsify_c "audit : invariance du grand-livre violee entre points de matrice" "INVARIANCE DU GRAND-LIVRE VIOLEE entre points" \
+  sed -i 's/rect_visites_fusionnes=4000/rect_visites_fusionnes=4001/' mat_uniform_n16000_t1_i1_j0_sans_p2.txt
+falsify_c "audit : somme d'attribution a la frontiere 0.006 (> 0.0051) refusee" "somme imprimee != somme des neuf composantes" \
+  sed -i 's/somme=0.009 mur_reduce_interne=0.010 residuel=0.001/somme=0.015 mur_reduce_interne=0.010 residuel=0.001/' attrib_uniform_n16000_t2_i2_j0.txt
+falsify_c "audit : resume ctest total != inventaire" "resume ctest != 100%" \
+  sed -i 's/out of 16$/out of 17/' gpuv6_gates.txt
+falsify_c "audit : instantane nvidia-smi avec unites (nounits absent)" "instantane nvidia-smi" \
+  sed -i '0,/^GPU-11111111-2222-3333-4444-555555555555, 45, 2100, 8001$/s//GPU-11111111-2222-3333-4444-555555555555, 45 C, 2100 MHz, 8001 MHz/' pilote_uniform_n50000.txt
+falsify_c "audit : cardinal du masque d'affinite != fils" "CPU != fils" \
+  sed -i 's/^affinite_demandee=.*/affinite_demandee=0,2,4/; s/^affinite_effective=.*/affinite_effective=0,2,4/; s/taskset -c [0-9,-]*/taskset -c 0,2,4/' mat_uniform_n16000_t2_i2_j0_sans_p1.status
+falsify_c "audit : verdict du juge embarque supprime" "verdict du juge embarque absent" \
+  rm pilote_uniform_n50000.juge.txt
+# Frontiere HONNETE (doit rester verte) : derive de somme 0.005 <= 0.0051.
+DFR="${WORK}/cas_frontiere_somme"
+rm -rf "${DFR}"; cp -r "${OUT8}" "${DFR}"
+sed -i 's/somme=0.009 mur_reduce_interne=0.010 residuel=0.001/somme=0.014 mur_reduce_interne=0.015 residuel=0.006/' "${DFR}/attrib_uniform_n16000_t2_i2_j0.txt"
+rehash_manifeste "${DFR}"
+rc=0; run_validator_c "${DFR}" >/dev/null 2>&1 || rc=$?
+check_true "audit : derive de somme 0.005 (sous 0.0051) et fermeture 0.005 (sous 0.006) ACCEPTEES (pas de faux rouge)" [ "${rc}" -eq 0 ]
+# Plans != profil epingle pour les trois plans serie C (un runner a 3 points
+# au lieu de 16 ne peut plus se declarer conforme au profil).
+for axe in "matrice_points=uniform:16000:2:2:0:sans" "attrib_points=uniform:16000:1:1:0" "gpuv6_gate_names=mhgp6_device_witness"; do
+  k="${axe%%=*}"
+  PROF_X="${WORK}/profil_serie_c_${k}.txt"
+  sed "s|^${k}=.*|${axe}|" "${PROFILE_C}" > "${PROF_X}"
+  DX="${WORK}/cas_plan_${k}"
+  rm -rf "${DX}"; cp -r "${OUT8}" "${DX}"
+  rc=0; VX="$(python3 "${VALIDATOR}" "${DX}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_C}" 0 0 \
+    "${PROF_X}" "${CANON_C}" "${MANIFESTE_C}" 2>&1)" || rc=$?
+  check_true "audit : plan serie C != profil epingle (${k}) REFUSE" \
+    bash -c "[ '${rc}' -eq 1 ] && printf '%s' \"\$1\" | grep -q '!= profil epingle'" _ "${VX}"
+done
 
 # ---- 8bis. FAIL-FAST DU RUNNER (§ 5.14.3/4) : l'inventaire intrus tronque
 # AVANT toute porte ; un stdout de pilote falsifie a code nul tronque APRES
@@ -920,6 +978,16 @@ rc=0; run_runner_c "${OUT8C}" GPUV6_PILOT_SPECS="uniform:50000 terrain:50000" FA
 check_true "serie C fail-fast : records falsifies a code nul => juge tronque avant la famille suivante" \
   bash -c "[ '${rc}' -eq 0 ] && grep -q 'records du pilote refuses par le juge' '${OUT8C}/gpuv6_tronquee.txt' \
     && [ -e '${OUT8C}/pilote_uniform_n50000.status' ] && [ ! -e '${OUT8C}/pilote_terrain_n50000.status' ]"
+OUT8L="${WORK}/out_serie_c_lscpu"
+rc=0; run_runner_c "${OUT8L}" FAKE_LSCPU_EMPTY=1 || rc=$?
+check_true "audit fail-closed : topologie illisible => matrice TRONQUEE (pas un errexit muet), manifeste distant ecrit" \
+  bash -c "[ '${rc}' -eq 0 ] && grep -q 'topologie illisible' '${OUT8L}/matrice_tronquee.txt' \
+    && [ -f '${OUT8L}/MANIFESTE_DISTANT.txt' ] && grep -q 'prerequis' '${OUT8L}/gpuv6_tronquee.txt'"
+OUT8N="${WORK}/out_serie_c_ctest_vide"
+rc=0; run_runner_c "${OUT8N}" FAKE_CTEST_EMPTY_N=1 || rc=$?
+check_true "audit fail-closed : listage ctest -N vide => inventaire TRONQUE (pas un errexit muet), aucune porte, manifeste ecrit" \
+  bash -c "[ '${rc}' -eq 0 ] && grep -q 'inventaire pre-execution non conforme' '${OUT8N}/gpuv6_tronquee.txt' \
+    && [ ! -e '${OUT8N}/gpuv6_gates.status' ] && [ -f '${OUT8N}/MANIFESTE_DISTANT.txt' ]"
 OUT8D="${WORK}/out_serie_c_prereq"
 rc=0; run_runner_c "${OUT8D}" V6_BIN=/bin/false || rc=$?
 check_true "serie C § 5.15 fail-fast : matrice en echec => bloc GPU v6 SAUTE (aucun build, cause publiee)" \

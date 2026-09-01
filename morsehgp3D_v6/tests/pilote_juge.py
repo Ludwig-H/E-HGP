@@ -87,7 +87,7 @@ def entete(text):
 
 
 def juger(text, ordre_base, repeat=4, min_lots=0,
-          famille=None, n=None, graine=None, fils=None):
+          famille=None, n=None, graine=None, fils=None, arch=None):
     """None si conforme, sinon la premiere non-conformite (chaine).
 
     § 5.15.2 : l'en-tete est PARSEE exactement et liee aux attentes fournies
@@ -101,7 +101,8 @@ def juger(text, ordre_base, repeat=4, min_lots=0,
     tete = entete(text)
     if not isinstance(tete, dict):
         return tete
-    for nom, attendu in (("famille", famille), ("n", n), ("graine", graine), ("fils", fils)):
+    for nom, attendu in (("famille", famille), ("n", n), ("graine", graine),
+                         ("fils", fils), ("arch", arch)):
         if attendu is not None and tete[nom] != attendu:
             return "en-tete : %s=%r != attendu %r" % (nom, tete[nom], attendu)
     records = []
@@ -207,7 +208,7 @@ def flux_de_base(repeat=4, ordre_base="cpu-device"):
 
 def contre_fixtures():
     base = flux_de_base()
-    attentes = {"famille": "uniform", "n": 200, "graine": 3, "fils": 4}
+    attentes = {"famille": "uniform", "n": 200, "graine": 3, "fils": 4, "arch": "stub"}
     ok = juger(base, "cpu-device", repeat=4, min_lots=2, **attentes)
     if ok is not None:
         print("CONTRE-FIXTURE : le flux de base est refuse a tort (%s)" % ok)
@@ -265,6 +266,13 @@ def contre_fixtures():
         ("en-tete dupliquee", base.replace(
             "pilote_serie_c device=stub",
             "pilote_serie_c device=stub sm=0.0 arch_compilees=stub famille=uniform n=200 graine=3 fils=4 lot=17\npilote_serie_c device=stub", 1)),
+        # § 5.16 : l'architecture compilee est COMPAREE (86 sous une attente
+        # 120/stub meurt) ; graine, parite imprimee et grammaire hex64 aussi.
+        ("arch_compilees d'une autre architecture", base.replace("arch_compilees=stub ", "arch_compilees=86 ", 1)),
+        ("en-tete d'une autre graine", base.replace("graine=3 fils=4", "graine=4 fils=4", 1)),
+        ("parite=NON imprimee malgre des signatures egales", base.replace("parite=OUI", "parite=NON", 1)),
+        ("digest hors grammaire hex64", base.replace("digest_all=" + "cd" * 32, "digest_all=" + "cd" * 31 + "c", 1)),
+        ("signature hors grammaire hex64", base.replace("signature_cpu=" + "ab" * 32, "signature_cpu=" + "AB" * 32, 1)),
     ]
     rc = 0
     for nom, flux in scenes:
@@ -292,7 +300,7 @@ def main(argv):
         cible = argv[2]
         args = argv[3:]
         ordre_base, repeat, min_lots = "cpu-device", 4, 0
-        attendu = {"famille": None, "n": None, "graine": None, "fils": None}
+        attendu = {"famille": None, "n": None, "graine": None, "fils": None, "arch": None}
         for a in args:
             if a.startswith("--ordre="):
                 ordre_base = a.split("=", 1)[1]
@@ -308,6 +316,8 @@ def main(argv):
                 attendu["graine"] = int(a.split("=", 1)[1])
             elif a.startswith("--threads="):
                 attendu["fils"] = int(a.split("=", 1)[1])
+            elif a.startswith("--arch="):
+                attendu["arch"] = a.split("=", 1)[1]
         if argv[1] == "--fichier":
             try:
                 with open(cible, encoding="utf-8", errors="replace") as fh:

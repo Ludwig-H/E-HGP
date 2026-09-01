@@ -523,3 +523,88 @@ sans reprise. Relance au même SHA, journal déplacé hors de `/tmp`
 superviseur local — les reçus partiels restent sur le disque de la VM.
 
 GCP : un describe en lecture puis un arrêt certifié ; relance annoncée.
+
+## 8. Réponse au § 5.16 et audit adversarial post-session du protocole série C
+
+### 8.1 Reçu `1788293187` — contrôles manuels et lecture
+
+Vos deux contrôles manuels sont CONFORMES (script rejoué sur les quatre
+statuts d'attribution : égalité exacte des 12 jetons, aucun doublon ;
+`arch_compilees=120` dans les quatre en-têtes, device/SM égaux au build).
+La lecture factuelle du reçu est dans
+`NOTE_CLAUDE_RECU_SERIE_C_G4_20260901.md` : 58/58 runs, kernels 154 ms
+pour 21,6 M de boules, gain de mur −10 % bridé par le wire hôte (2,6 s) et
+la reconstruction hôte (4,1 s), matrice concordante à 1 % sur trois
+passages (join=1 +35 %, inflight 2 optimal, digest +23 %), reduce insensible
+aux fils et dominé par `materialisation_tri_copie` (31–36 %). Aucune
+promotion de statut.
+
+### 8.2 Audit adversarial multi-agents du code livré (b1e5463e..b97f20ea)
+
+Six lecteurs à dimensions distinctes (validateur↔runner, juge du pilote,
+robustesse shell, budget/temps, vacuité des selftests, C++/CMake), trois
+sceptiques par constat (lecture, reproduction, doctrine), un critique de
+complétude : 16 constats, 12 survivants, 4 réfutés, 2 constats du critique.
+Tous les survivants sont fermés dans le commit qui porte cette note, chacun
+avec sa falsification :
+
+- **errexit muet dans le runner** (2 majeurs, les seuls capables de brûler
+  une campagne payée sans reçu) : `cpulist="$(cpu_list_for …)"` et
+  `inv_names="$(grep … | sort)"` tuaient le runner sous `set -e` avant les
+  troncatures gravées « topologie illisible » et « inventaire vide » —
+  substitutions neutralisées (`|| true`), scènes runner « lscpu vide » et
+  « ctest -N vide » ajoutées (troncature gravée, manifeste distant écrit,
+  bloc GPU sauté).
+- **relation invité/GCE à l'égalité = 0 s de budget d'armement** (votre
+  § 5.16 et le premier départ) : `GUEST*60 + 300 + 480 <= MAX_RUN` désormais
+  refusé avant toute garde (480 s = 600 s certifiables moins la tolérance
+  systemd de 120 s) ; défaut d'invité 470→465 min ; frontières 467/468 min
+  sous 28800 s gravées au selftest du cycle de vie ; contre-calendrier (p)
+  porté à MAX=5280 à cutoff inchangé ; commentaire du profil corrigé (316 s
+  après l'échéance SÛRE, budget 600/480 s, marge observée 573 s).
+- **liaison d'objet du pilote** (critique + § 5.16) : `digest_all` des
+  records lié aux bras `--digest` de la matrice pour la même entrée ET à la
+  fixture d'égalité `GPUV6_OBJET_DIGESTS` du profil (quatre familles 50k
+  gravées depuis le reçu ; uniform:50000 = v5ref du reçu d98f47296d67 = contrat
+  GPU v5 du 27 août) ; `arch_compilees` comparé par le juge (`--arch=120`
+  passé par le runner et le validateur) ; mutants `86`, graine, `parite=NON`,
+  hex64 tués.
+- **égalité d'argv normalisée** (§ 5.16.1) : vecteur exact pour la matrice,
+  l'attribution et la commande complète du pilote (seul le chemin du
+  binaire est libre) ; mutants « suffixe contradictoire », « doublon »,
+  « argument en plus » tués.
+- **vacuité des selftests** : falsifications ajoutées pour plan≠profil
+  (trois plans série C), bit-identité `digest_all` entre bras `--digest`,
+  invariance du grand-livre entre points, frontière 0.006/0.005 de la somme
+  d'attribution (refus/acceptation), résumé ctest ≠ inventaire, instantané
+  `nvidia-smi` avec unités, cardinal du masque ≠ fils, verdict du juge
+  supprimé ; la matrice du selftest passe à 5 points (rotation8 = rotation
+  de 3, non triviale) dont `uniform:50000 --digest` pour exercer la liaison
+  pilote↔matrice.
+- **contre-fixture du profil non causale** : dents isolées (somme seule,
+  fermeture seule, frontière honnête) avec le message exigé — un seuil
+  régressé à 0.009 rougit désormais.
+- **re-validation d'un reçu immuable** (critique) : le validateur refuse
+  d'écrire ses résumés dans un répertoire portant `SHA256SUMS` ;
+  `revalidate_v6_receipt.sh` re-juge une COPIE du reçu avec le profil
+  canonique tiré de `git show <source_commit>` et compare les résumés — le
+  reçu `1788293187` re-validé sous le validateur corrigé : 58/58, résumés
+  identiques, reçu intact.
+
+Réfutés (non retenus) : bornes inférieures des chronos à 0.0 (l'étage
+peut être nul sans candidats), plancher de `h2d_octets_index` (la taille
+exacte n'est pas transportée), champs inconnus acceptés (grammaire
+extensible voulue), pilote factice sans code non nul (la troncature
+« pilote non nul » est exercée par `/bin/false` ailleurs).
+
+Preuves au HEAD de cette note : selftest campagne 120/120, cycle de vie
+55/55, intégration v6 + sûreté GCP 83/83, juge 27/27 contre-fixtures,
+portes `gate` v6 rejouées. Dette hors périmètre (préexistante au parent
+`b1e5463e`, hors CI) : 5 tests `tests/gcp/test_phase5_*`/`test_phase15_*`.
+
+Reste ouvert, avant toute session facturable : la reprise persistante du
+superviseur (WORK, clé et artefacts hors `/tmp`, commande de récupération
+testée, selftest tuant le superviseur après le handshake) — livraison
+séparée ; puis nouvel accusé explicite pour tout quatrième départ.
+
+GCP non utilisé par cette livraison.
