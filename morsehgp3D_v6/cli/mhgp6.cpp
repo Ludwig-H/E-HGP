@@ -1,5 +1,6 @@
 // MorseHGP3D v6 — pilote en ligne de commande du pipeline (src/pipeline/run.hpp).
-// Codes : 0 complete_regular, 2 refus avant calcul, 3 invariant viole.
+// Codes : 0 complete_regular, 2 refus transactionnel (avant OU pendant le
+// calcul — jamais un prefixe publie), 3 invariant viole.
 // Binaire PRODUIT : compile sans MHGP6_TESTING — aucun mutant n'y existe.
 // PARSING EXACT DE TOUTES LES OPTIONS (docs/PROVENANCE.md, dette v5 fermee) :
 // suffixe, vide, signe explicite ou debordement ⟹ code 2, jamais un atoi
@@ -45,7 +46,14 @@ int main(int argc, char** argv) {
     if (const char* s = val("--family=")) {
       ok = parse_cloud_family(s, &family) && ok;
     } else if (const char* s = val("--n=")) {
-      ok = parse_int_range(s, 2, std::numeric_limits<int>::max(), &n) && ok;
+      // Plafond de l'arbre radix (caps.hpp) applique DES l'analyse : la
+      // famille est construite avant run_pipeline, la garde doit preceder.
+      ok = parse_int_range(s, 2, (int)kMaxTreePositions, &n) && ok;
+    } else if (const char* s = val("--mem-budget=")) {
+      // Budget memoire DECLARE (octets) : refus resource_exhausted aux
+      // residences dominantes (caps.hpp) — 0 = desactive.
+      ok = parse_i64_exact(s, &vi) && vi >= 0 && ok;
+      opt.memory_budget_bytes = (u64)vi;
     } else if (const char* s = val("--coord=")) {
       ok = parse_int_range(s, 1, 65536, &coord) && ok;
     } else if (const char* s = val("--seed=")) {
@@ -106,6 +114,10 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "REFUS %s\n", rr.message.c_str());
     return status_exit_code(rr.status);
   }
+  if (opt.memory_budget_bytes != 0)
+    std::printf("memory_budget_scope=partial_named_payload_proxy_v1 budget=%llu cap_brut_demande=%llu cap_brut_effectif=%llu\n",
+                (unsigned long long)opt.memory_budget_bytes, (unsigned long long)opt.max_raw_candidates,
+                (unsigned long long)effective_raw_cap(opt));
   print_run(stdout, cloud_family_name(family), (int)n, (int)coord, seed, opt, rr);
   // Pic de residence MESURE (RSS max du processus), jamais un pic annonce.
   struct rusage ru;

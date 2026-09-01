@@ -45,7 +45,7 @@ inline constexpr const char* kMutants[] = {
     "level-trunc-hi", "dint-mulhi-dropped", "rle-drop", "census-nonstrict",
     "genfilter-nonstrict", "depth-threshold-minus-one", "range-add-max-le-zero", "skip-full-census",
     "binary-ties", "repr-ties", "attach-prebatch", "drop-nonmerge",
-    "dense-pointid", "canonical-is-uf-root", "attach-detector-disabled", "par-drop-shard",
+    "dense-pointid", "canonical-is-uf-root", "attach-detector-disabled", "par-drop-shard", "caps-drop-emission", "caps-late-wave-check",
     "par-drop-ball-chunk", "parallel-one-worker", "parallel-sort-unstable", "fold-inject-a-failure-k2",
     "fold-inject-b-exception-k3", "render-active-only", "render-collapse-mult", "obig-carry-lost",
     "sector-kill-nonstrict", "sector-credit-inbox", "sector-credit-global", "anchor-kill-h-minus-one",

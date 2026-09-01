@@ -51,6 +51,7 @@
 #include <vector>
 
 #include "../lanes/cell_grid.hpp"
+#include "../core/caps.hpp"
 #include "../lanes/chord_kill.hpp"
 #include "../lanes/edge_cover.hpp"
 #include "../lanes/q2.hpp"
@@ -67,6 +68,19 @@ namespace mhgp6 {
 
 // Compteurs de la generation (jamais une autorite). Voir docs/GRAND_LIVRE.md.
 struct GenerateStats {
+  // Refus de capacite de la generation (kCapRefus*, caps.hpp) — pose par le
+  // NIVEAU APPELANT (jamais par les shards, jamais fusionne par add_from) ;
+  // run_pipeline le mappe vers resource_exhausted.
+  u64 cap_refus = kCapRefusNone;
+  // Pics OBSERVES des files du front fusionne (top-level, jamais fusionnes
+  // par add_from) — la fixture du moment de garde les compare au plafond.
+  u64 wave_peak_tasks = 0, alive_peak_rects = 0;
+  // Emission exacte observee au REFUS (top-level) : pour un cap H et T
+  // ouvriers, la porte verifie H < emitted_at_refus <= H + 4096 x T — borne
+  // PROUVEE : chaque ouvrier publie au plus toutes les 4096 emissions (les
+  // relectures du drapeau toutes les 64 sont INCLUSES dans ce bloc) et
+  // s'arrete a l'observation, l'arret etant remonte a la boucle d'ancres.
+  u64 emitted_at_refus = 0;
   // Front fusionne : visites de paires de nœuds (une visite sert les lanes du
   // masque), rectangles vivants par lane a l'emission, grand-livre GLOBAL des
   // masses de paires (PointId) par lane : emitted + killed == expected.
@@ -308,7 +322,8 @@ inline double ms_since(std::chrono::steady_clock::time_point t0) {
 // GARDE DE PROFIL : s < 8 refuse sans opt-in test-only greppable.
 inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3], u8 initial_mask, int threads,
                                    std::vector<MultiAliveRect>* out, GenerateStats* st,
-                                   bool allow_subprofile_separation = false) {
+                                   bool allow_subprofile_separation = false,
+                                   u64 wave_cap = kMaxWaveTasks, u64 alive_cap = kMaxAliveRects) {
   out->clear();
   if (s < kSeparationProfileMin && !allow_subprofile_separation)
     throw std::invalid_argument("alive_rectangles_fused : separation s < 8 sans opt-in test-only");
@@ -329,6 +344,14 @@ inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3
     return (u128)ix.node_weight(r.a) * ix.node_weight(r.b);
   };
   std::vector<Task> wave, next;
+  // La VAGUE INITIALE (m-1 taches, une par nœud interne) est de la meme
+  // classe d'allocation que les suivantes : gardee avant l'insertion dans le
+  // vecteur GLOBAL elle aussi
+  // (le mutant caps-late-wave-check retablit le comportement tardif).
+  if (!MHGP6_MUTANT("caps-late-wave-check") && (u64)ix.nodes.size() > wave_cap) {
+    st->cap_refus = kCapRefusWaveTasks;
+    return;
+  }
   wave.reserve(ix.nodes.size());
   for (const RadixNode& n : ix.nodes) wave.push_back(Task{WspdRect{n.left, n.right}, initial_mask});
   std::vector<std::vector<MultiAliveRect>> lout;
@@ -392,11 +415,41 @@ inline void alive_rectangles_fused(const CloudIndex& ix, i64 s, const u64 h_of[3
       }
     });
     st->workers_wspd = std::max(st->workers_wspd, (u64)created);
+    // PLAFONDS DE VAGUE (caps.hpp) : tailles PROSPECTIVES verifiees AVANT
+    // toute insertion dans next/out (note auditeur du 1er septembre). Les
+    // shards lnext/lout, eux, sont BORNES PAR CONSTRUCTION : chaque tache de
+    // la vague courante produit au plus deux taches et un terminal, donc
+    // Σ|lnext| <= 2 x |wave| <= 2 x wave_cap et Σ|lout| <= |wave| — la vague
+    // courante ayant elle-meme passe le controle precedent (amorcage
+    // compris). Le mutant caps-late-wave-check retablit le controle tardif —
+    // la fixture l'observe par les pics enregistres.
+    const bool mut_late = MHGP6_MUTANT("caps-late-wave-check");
+    u64 next_prospective = 0, alive_prospective = (u64)out->size();
+    for (size_t c = 0; c < nchunks; ++c) {
+      next_prospective += (u64)lnext[c].size();
+      alive_prospective += (u64)lout[c].size();
+    }
+    if (!mut_late && (next_prospective > wave_cap || alive_prospective > alive_cap)) {
+      st->cap_refus = next_prospective > wave_cap ? kCapRefusWaveTasks : kCapRefusAliveRects;
+      st->wave_peak_tasks = std::max(st->wave_peak_tasks, (u64)wave.size());
+      st->alive_peak_rects = std::max(st->alive_peak_rects, (u64)out->size());
+      return;
+    }
     next.clear();
     for (size_t c = 0; c < nchunks; ++c) {
       out->insert(out->end(), lout[c].begin(), lout[c].end());
       next.insert(next.end(), lnext[c].begin(), lnext[c].end());
       st->add_from(lst[c]);
+      // Liberation IMMEDIATE des tranches fusionnees (balayage du 1er
+      // septembre : la coexistence wave + lnext + next triplait le pic).
+      std::vector<MultiAliveRect>().swap(lout[c]);
+      std::vector<Task>().swap(lnext[c]);
+    }
+    st->wave_peak_tasks = std::max(st->wave_peak_tasks, (u64)next.size());
+    st->alive_peak_rects = std::max(st->alive_peak_rects, (u64)out->size());
+    if (mut_late && ((u64)next.size() > wave_cap || (u64)out->size() > alive_cap)) {
+      st->cap_refus = (u64)next.size() > wave_cap ? kCapRefusWaveTasks : kCapRefusAliveRects;
+      return;
     }
     wave.swap(next);
   }
@@ -451,7 +504,36 @@ inline void corner_histograms(const CloudIndex& ix, Lane lane, const WspdRect& r
 // Brouillon par ouvrier : histogrammes, handles, cover, lentille, sites
 // affines de l'ancre (u = 2z−a−b, q = |u|²−D², entiers < 2^36 exacts en
 // binaire64), grille de cellules, et tampons du sweep de corde.
+// Throttle d'emission PARTAGE (plafond declare, caps.hpp) : chaque ouvrier
+// publie son compte au plus toutes les 4096 emissions puis observe le
+// drapeau, et chaque site d'emission ABANDONNE son ancre des l'observation —
+// overshoot borne par 4096 x T (l'arret est remonte a la boucle d'ancres —
+// aucune ancre entiere apres l'observation ; le contenu sous le plafond est
+// inchange, et tout depassement conclut par un refus qui jette les shards).
+struct EmitThrottle {
+  std::atomic<u64>* total = nullptr;
+  std::atomic<bool>* stop = nullptr;
+  u64 cap = kMaxRawCandidates;
+  u64 pending = 0;
+  bool stopped = false;
+  inline void tick() {
+    ++pending;
+    if ((pending & 63ull) == 0 && stop != nullptr)
+      stopped = stopped || stop->load(std::memory_order_relaxed);
+    if ((pending & 0xFFFull) != 0) return;
+    sync();
+  }
+  inline void sync() {
+    if (total == nullptr) return;
+    const u64 t = total->fetch_add(pending, std::memory_order_relaxed) + pending;
+    pending = 0;
+    if (t > cap) stop->store(true, std::memory_order_relaxed);
+    stopped = stop->load(std::memory_order_relaxed);
+  }
+};
+
 struct AnchorScratch {
+  EmitThrottle emit;
   std::vector<u64> ha, hb;
   std::vector<NodeRef> handles;
   std::vector<CoverPoint> cover, cover_tmp, lens, query;
@@ -743,6 +825,8 @@ inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 
       continue;
     }
     lo->push_back(BallCandidate{q3_ball_key(f3), promote_level(q3_exact_level(pa, pb, px)), 3});
+    sc.emit.tick();
+    if (sc.emit.stopped) return;
     ++ls->candidates[1];
   }
 }
@@ -1077,6 +1161,8 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
           continue;
         }
         lo->push_back(BallCandidate{ball_key_reduce(q4_ball_form(f4)), q4_level_raw(f4), 4});
+        sc.emit.tick();
+        if (sc.emit.stopped) return;
         ++ls->candidates[2];
       }
       ent += ent_at;
@@ -1096,6 +1182,18 @@ struct GenerateOptions {
   i64 s = 8;
   u64 smax = 11;
   int threads = 1;
+  // Plafond d'emission des candidats BRUTS (caps.hpp) : verifie PENDANT
+  // l'emission (compteur approche par tranches de 4096, puis somme exacte a
+  // la fusion) — le refus precede la FUSION GLOBALE et le tri. Abaissable
+  // (tests, campagnes), jamais releve au-dela du structurel.
+  u64 max_raw_candidates = kMaxRawCandidates;
+#if defined(MHGP6_TESTING)
+  // Caps ABAISSABLES en test (0 = structurel) : exercer les branches de
+  // refus du front fusionne et leur instant pre-insertion dans les vecteurs
+  // GLOBAUX wave/next/out (jamais les shards locaux) a petit n.
+  u64 wave_tasks_cap_for_tests = 0;
+  u64 alive_rects_cap_for_tests = 0;
+#endif
 #if defined(MHGP6_TESTING)
   // Uniquement compile dans les cibles de test : aucune API ou CLI produit ne
   // peut contourner le profil s >= 8 par ce champ.
@@ -1139,8 +1237,17 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
   // ---- Front fusionne : UNE descente pour les trois lanes.
   const auto t0 = std::chrono::steady_clock::now();
   std::vector<MultiAliveRect> alive;
-  alive_rectangles_fused(ix, opt.s, h_of, initial_mask, opt.threads, &alive, st, allow_subprofile);
+#if defined(MHGP6_TESTING)
+  const u64 wave_cap_eff = opt.wave_tasks_cap_for_tests ? opt.wave_tasks_cap_for_tests : kMaxWaveTasks;
+  const u64 alive_cap_eff = opt.alive_rects_cap_for_tests ? opt.alive_rects_cap_for_tests : kMaxAliveRects;
+#else
+  const u64 wave_cap_eff = kMaxWaveTasks;
+  const u64 alive_cap_eff = kMaxAliveRects;
+#endif
+  alive_rectangles_fused(ix, opt.s, h_of, initial_mask, opt.threads, &alive, st, allow_subprofile,
+                         wave_cap_eff, alive_cap_eff);
   st->t_wspd_ms += ms_since(t0);
+  if (st->cap_refus != kCapRefusNone) return;
 
   // ---- Corps par rectangle : chaque lane du masque, dans l'ordre q2, q3, q4.
   const auto t1 = std::chrono::steady_clock::now();
@@ -1150,7 +1257,23 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
   std::vector<GenerateStats> lst(T);
   std::vector<AnchorScratch> lsc(T);
   for (AnchorScratch& x : lsc) x.cell_min_sites = opt.cell_grid_min_sites;
+  // CAP DE CARDINALITE A OVERSHOOT BORNE (caps.hpp) — garde PRE-FUSION
+  // GLOBALE, PAS un arret « avant materialisation » : les shards locaux
+  // materialisent jusqu'a l'observation du drapeau. Compte publie par
+  // tranches de 4096 emissions au site meme (drapeau relu toutes les 64,
+  // INCLUSES dans le bloc), arret remonte a la boucle d'ancres, somme
+  // EXACTE avant la fusion : pour un cap H, overshoot borne par 4096 x T.
+  // L'ordre et le contenu des emissions sous le plafond sont inchanges
+  // (bit-identite).
+  std::atomic<u64> emitted_approx{0};
+  std::atomic<bool> cap_stop{false};
+  for (AnchorScratch& x : lsc) {
+    x.emit.total = &emitted_approx;
+    x.emit.stop = &cap_stop;
+    x.emit.cap = opt.max_raw_candidates;
+  }
   const size_t created = parallel_items(nrect, (int)T, [&](size_t ri, size_t t) {
+    if (cap_stop.load(std::memory_order_relaxed)) return;
     const MultiAliveRect& ar = alive[ri];
     AnchorScratch& sc = lsc[t];
     std::vector<BallCandidate>* lo = &louts[t];
@@ -1210,6 +1333,8 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
           if (D2 == 0) continue;
           if (li == 0) {
             lo->push_back(BallCandidate{q2_ball_key(pa, pb), promote_level(q2_exact_level(D2)), 2});
+            sc.emit.tick();
+            if (sc.emit.stopped) return;
             ++ls->candidates[0];
             continue;
           }
@@ -1248,6 +1373,10 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
             process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, seed_core_nonstrict, no_canonical,
                               pretested, opt.e6_probe, opt.e3_mode, lo, ls, &ec);
           }
+          // ARRET D'EMISSION REMONTE (second jet auditeur) : l'appelant
+          // n'entame pas l'ancre suivante — overshoot borne par 4096 x T,
+          // plus aucune ancre entiere.
+          if (sc.emit.stopped) return;
         }
       }
       ls->hist_killed_rows[li] += tues_ligne;
@@ -1255,13 +1384,40 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
       ls->hist_survivors[li] += visitees;
       ls->anchors_killed_hist[li] += tues_ligne + tues_seuil;
     }
+    lsc[t].emit.sync();  // flush du reliquat de l'ancre (borne d'overshoot)
   });
   st->workers_rects = std::max(st->workers_rects, (u64)created);
+  // Somme EXACTE avant fusion : le refus precede la fusion globale.
+  {
+    u64 exact = 0;
+    for (size_t t = 0; t < T; ++t) exact += (u64)louts[t].size();
+    const bool mut_skip = MHGP6_MUTANT("caps-drop-emission");
+    if (!mut_skip && (cap_stop.load(std::memory_order_relaxed) || exact > opt.max_raw_candidates)) {
+      st->cap_refus = kCapRefusRawCandidates;
+      st->emitted_at_refus = exact;
+      for (size_t t = 0; t < T; ++t) std::vector<BallCandidate>().swap(louts[t]);
+      st->t_rects_ms += ms_since(t1);
+      return;
+    }
+  }
+  // RESERVE UNIQUE demandee a la somme exacte (dernier jet auditeur) :
+  // evite les croissances geometriques de la fusion sans compactage
+  // pre-garde. C++20 ne garantit que capacity() >= exact — la capacite
+  // effectivement OBSERVEE est exposee en diagnostic avant le tri et les
+  // fenetres causales de la porte se calculent sur elle.
+  {
+    u64 exact_fusion = 0;
+    for (size_t t = 0; t < T; ++t) exact_fusion += (u64)louts[t].size();
+    out->reserve(out->size() + (size_t)exact_fusion);
+  }
   const bool drop = MHGP6_MUTANT("par-drop-shard");
   for (size_t t = 0; t < T; ++t) {
     if (drop && t == 0 && T > 1) continue;
     out->insert(out->end(), louts[t].begin(), louts[t].end());
     st->add_from(lst[t]);
+    // Liberation du shard des sa fusion (balayage du 1er septembre : la
+    // coexistence louts + out doublait le pic et abaissait le mur a ~1,6M).
+    std::vector<BallCandidate>().swap(louts[t]);
   }
   st->t_rects_ms += ms_since(t1);
 }

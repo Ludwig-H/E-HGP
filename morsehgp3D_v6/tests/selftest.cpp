@@ -753,6 +753,213 @@ int run_sweep_oracle(bool injected) {
 
 }  // namespace
 
+// ---- --caps-refus : PLAFONDS DECLARES et BUDGET PARTIEL DE TAMPONS (dette
+// d'echelle, notes auditeur du 1er septembre). Sans mutant (code 0 exige) :
+//   (u) fits_budget : egalite passe, budget-1 refuse, overflow du produit
+//       refuse (arithmetique de garde controlee) ;
+//   (a) max_raw_candidates minuscule => refus « candidats bruts », ZERO
+//       callback de foret, ZERO phase de fold observee, provisoire vide ;
+//   (a2) budget < sizeof(BallCandidate) x C_brut => le cap DERIVE du budget
+//       refuse la generation elle-meme (propagation budget -> emission) ;
+//   (b) budget dans (144C, 288C) => la generation passe, le TRI refuse ;
+//   (c) budget dans (288C, 608C) => le tri passe, la borne CONSERVATIVE
+//       prefiltre/census refuse AVANT prefilter_balls ;
+//   (w) cap de vague abaisse (test-only) => refus « taches de vague », et le
+//       pic OBSERVE reste <= cap : garde pre-insertion dans wave/next/out ;
+//   (d) budget large => objet IDENTIQUE au temoin (digest_all).
+// Sous --inject=caps-drop-emission : (a) se termine => mutant TUE (code 4).
+// Sous --inject=caps-late-wave-check : (w) laisse le pic DEPASSER le cap
+// (controle retabli APRES insertion) => mutant TUE (code 4).
+static int run_caps_refus(bool injected) {
+  std::vector<InputPoint> in;
+  {
+    const std::vector<P3> pts = uniform_cloud(2000, 200, 3);
+    in.resize(pts.size());
+    for (size_t i = 0; i < pts.size(); ++i) in[i] = {(PointId)i, pts[i]};
+  }
+  RunOptions base;
+  base.s = 8;
+  base.smax = 11;
+  base.threads = 4;
+  base.digest = true;
+  const RunResult temoin = run_pipeline(in, base);
+  check(temoin.status == PipelineStatus::kCompleteRegular, "temoin complet");
+  check(!temoin.digest_all.empty(), "temoin digest_all");
+  const u64 c_brut = (u64)temoin.emitted;
+  check(c_brut > 100000, "temoin : masse brute significative");
+
+  // Chaque refus s'observe avec ZERO callback et ZERO phase de fold —
+  // compteurs ATOMIQUES (les phases arrivent des etages A et des fils B).
+  std::atomic<u64> callbacks{0}, fold_phases{0};
+  const auto arm = [&](RunOptions* o) {
+    callbacks = fold_phases = 0;
+    o->on_forest = [&](u64, const std::vector<ForestEvent>&, const ForestResult&) { ++callbacks; };
+    o->on_fold_phase = [&](u64, FoldPhase) { ++fold_phases; };
+  };
+  const auto check_refus = [&](const RunResult& r, const char* motif, const char* nom) {
+    check(r.status == PipelineStatus::kResourceExhausted, (std::string(nom) + " : resource_exhausted").c_str());
+    check(r.message.find(motif) != std::string::npos, (std::string(nom) + " : message attendu").c_str());
+    check(r.digest_all.empty() && r.digest_balls.empty() && r.cards.empty(),
+          (std::string(nom) + " : provisoire vide").c_str());
+    check(r.total_events == 0, (std::string(nom) + " : totaux vides").c_str());
+    check(callbacks == 0, (std::string(nom) + " : zero callback de foret").c_str());
+    check(fold_phases == 0, (std::string(nom) + " : zero phase de fold").c_str());
+  };
+
+  // (u) arithmetique de garde controlee.
+  check(fits_budget(10, 10, 1, 100), "(u) egalite exacte passe");
+  check(!fits_budget(10, 10, 1, 99), "(u) budget-1 refuse");
+  check(!fits_budget(~0ull / 2, 144, 1, ~0ull), "(u) overflow du produit refuse");
+  check(!fits_budget(2, ~0ull / 4, 3, ~0ull), "(u) overflow du SECOND produit refuse");
+
+  // (a) plafond d'emission minuscule (+ chemin du mutant caps-drop-emission).
+  {
+    RunOptions o = base;
+    o.max_raw_candidates = 1000;
+    arm(&o);
+    const RunResult r = run_pipeline(in, o);
+    if (mutant_enabled("caps-drop-emission")) {
+      if (r.status == PipelineStatus::kCompleteRegular) {
+        std::printf("mutant caps-drop-emission TUE : plafond d'emission ignore detecte\n");
+        return 4;
+      }
+      std::fprintf(stderr, "mutant caps-drop-emission NON detecte\n");
+      return 3;
+    }
+    check_refus(r, "candidats bruts au-dela du plafond declare", "(a)");
+    // OVERSHOOT observable et borne (note auditeur : 1009-1033 mesures pour
+    // cap 1000) : H < emitted_at_refus <= H + 4096 x T.
+    check(r.gen.emitted_at_refus > 1000, "(a) l'exact au refus depasse le cap");
+    check(r.gen.emitted_at_refus <= 1000 + 4 * 4096,
+          "(a) overshoot sous la borne prouvee 4096 x T");
+  }
+  // (w) cap de vague 2048 : la vague INITIALE (1999) passe, la garde
+  // DYNAMIQUE pre-fusion refuse la suivante — pic <= cap (+ mutant du
+  // MOMENT de garde : pic mutant mesure 2518 > 2048).
+  {
+    RunOptions o = base;
+    o.wave_tasks_cap_for_tests = 2048;
+    arm(&o);
+    const RunResult r = run_pipeline(in, o);
+    if (mutant_enabled("caps-late-wave-check")) {
+      if (r.status == PipelineStatus::kResourceExhausted && r.gen.wave_peak_tasks > 2048) {
+        std::printf("mutant caps-late-wave-check TUE : pic %llu > cap 2048 (controle apres insertion detecte)\n",
+                    (unsigned long long)r.gen.wave_peak_tasks);
+        return 4;
+      }
+      std::fprintf(stderr, "mutant caps-late-wave-check NON detecte (statut ou pic inattendu)\n");
+      return 3;
+    }
+    check_refus(r, "taches de vague au-dela du plafond declare", "(w)");
+    check(r.gen.wave_peak_tasks > 0, "(w) la garde exercee est la DYNAMIQUE (vague initiale passee)");
+    check(r.gen.wave_peak_tasks <= 2048, "(w) pic de vague <= cap : garde pre-fusion globale");
+  }
+  // (w2) cap de rectangles vivants : garde dynamique dediee.
+  {
+    RunOptions o = base;
+    o.alive_rects_cap_for_tests = 100;
+    arm(&o);
+    const RunResult r = run_pipeline(in, o);
+    if (mutant_enabled("caps-late-wave-check")) {
+      std::fprintf(stderr, "mutant late-wave : la branche (w) devait conclure avant (w2)\n");
+      return 3;
+    }
+    check_refus(r, "rectangles vivants au-dela du plafond declare", "(w2)");
+    check(r.gen.alive_peak_rects <= 100, "(w2) pic de rectangles vivants <= cap");
+  }
+  if (injected) {
+    std::fprintf(stderr, "mutant injecte : une branche dediee devait conclure\n");
+    return 3;
+  }
+  // (a0) budget < cout d'un candidat : refus AVANT generation.
+  {
+    RunOptions o = base;
+    o.memory_budget_bytes = (u64)sizeof(BallCandidate) - 1;
+    arm(&o);
+    const RunResult r = run_pipeline(in, o);
+    check_refus(r, "budget partiel inferieur au cout d'un seul candidat", "(a0)");
+    RunOptions o2 = base;
+    o2.memory_budget_bytes = (u64)sizeof(BallCandidate);  // egalite : cap derive = 1
+    arm(&o2);
+    const RunResult r2 = run_pipeline(in, o2);
+    check_refus(r2, "candidats bruts au-dela du plafond declare", "(a0=)");
+  }
+  // (a2) propagation budget -> cap d'emission.
+  {
+    RunOptions o = base;
+    o.memory_budget_bytes = (c_brut / 2) * (u64)sizeof(BallCandidate);
+    arm(&o);
+    const RunResult r = run_pipeline(in, o);
+    check_refus(r, "candidats bruts au-dela du plafond declare", "(a2)");
+  }
+  // Fenetres CAUSALES depuis les CARDINALITES EXACTES du temoin (emitted,
+  // unique_balls) — identiques au contrat garde ; la capacite reste un
+  // simple diagnostic.
+  check(temoin.diag_candidates_capacity >= c_brut, "diag : capacite observee >= emission brute");
+  const u64 c_unique = (u64)temoin.expand.unique_balls;
+  const u64 tri_need = c_brut * (u64)sizeof(BallCandidate) * 2;
+  const u64 census_need =
+      c_unique * ((u64)sizeof(BallCandidate) + (u64)sizeof(Survivor) + 2 * (u64)sizeof(BallData));
+  check(tri_need < census_need, "fenetre (b)/(c) : tri_need < census_need (taux de RLE mesure)");
+  // (b) tri_need - 1 : la generation passe (cap derive >= C), le TRI refuse.
+  {
+    RunOptions o = base;
+    o.memory_budget_bytes = tri_need - 1;
+    arm(&o);
+    const RunResult r = run_pipeline(in, o);
+    check_refus(r, "tri des candidats hors budget partiel declare", "(b)");
+  }
+  // (c) tri_need : l'EGALITE passe exactement le tri, la borne conservative
+  // prefiltre/census refuse (strictement sous census_need).
+  {
+    RunOptions o = base;
+    o.memory_budget_bytes = tri_need;
+    arm(&o);
+    const RunResult r = run_pipeline(in, o);
+    check_refus(r, "prefiltre/census hors budget partiel declare", "(c)");
+  }
+  // (f) fenetre du FOLD (facteur inflight+2, coexistence lev+fusion) sur un
+  // SECOND temoin a smax=2 (K=1 seul : evenements ~ candidats, la fenetre
+  // existe — aux regimes pleins la borne conservative du census domine
+  // toujours le tampon du fold, par mesure ratio max_ev/C_u ~ 0,21 < 0,25).
+  {
+    RunOptions o2 = base;
+    o2.smax = 2;
+    const RunResult t2 = run_pipeline(in, o2);
+    check(t2.status == PipelineStatus::kCompleteRegular, "(f) temoin smax=2 complet");
+    u64 max_ev = 0;
+    for (u64 e : t2.expand.events_by_k) max_ev = std::max(max_ev, e);
+    check(max_ev > 0, "(f) temoin smax=2 : evenements exposes");
+    const u64 census2 = (u64)t2.expand.unique_balls *
+        ((u64)sizeof(BallCandidate) + (u64)sizeof(Survivor) + 2 * (u64)sizeof(BallData));
+    int inflight = 1;
+    while (inflight < 16 &&
+           fits_budget(max_ev, (u64)sizeof(ForestEvent), (u64)(inflight + 2), census2))
+      ++inflight;
+    check(!fits_budget(max_ev, (u64)sizeof(ForestEvent), (u64)(inflight + 2), census2),
+          "(f) une fenetre de fold existe a smax=2");
+    RunOptions o = base;
+    o.smax = 2;
+    o.fold_inflight = inflight;
+    o.memory_budget_bytes = census2;
+    arm(&o);
+    const RunResult r = run_pipeline(in, o);
+    check_refus(r, "evenements hors budget partiel declare", "(f)");
+  }
+  // (d) budget large : l'objet est IDENTIQUE au temoin.
+  {
+    RunOptions o = base;
+    o.memory_budget_bytes = (u64)32 << 30;
+    arm(&o);
+    const RunResult r = run_pipeline(in, o);
+    check(r.status == PipelineStatus::kCompleteRegular, "(d) complet sous budget large");
+    check(r.digest_all == temoin.digest_all, "(d) digest_all identique au temoin");
+    check(callbacks > 0, "(d) callbacks livres sous budget large");
+    check(fold_phases > 0, "(d) phases de fold observees au succes");
+  }
+  return g_failures ? 1 : 0;
+}
+
 int main(int argc, char** argv) {
   const char* mode = nullptr;
   const char* inject = nullptr;
@@ -786,6 +993,7 @@ int main(int argc, char** argv) {
   else if (m == "failure-contract") rc = run_failure_contract(injected);
   else if (m == "e6-equal") rc = run_e6_equal(injected);
   else if (m == "sweep-oracle") rc = run_sweep_oracle(injected);
+  else if (m == "caps-refus") rc = run_caps_refus(injected);
   else {
     std::fprintf(stderr, "mode inconnu : %s\n", mode);
     return 2;

@@ -26,10 +26,11 @@ endfunction()
 # Porte a code de sortie exact : 0 conforme, 1 juge, 2 refus, 3 plancher ou
 # invariant, 4 mutant tue. Labels optionnels apres les arguments.
 function(mhgp6_gate name expected target)
-  cmake_parse_arguments(G "" "TIMEOUT" "LABELS;ARGS" ${ARGN})
+  cmake_parse_arguments(G "" "TIMEOUT;EXPECT_LINE" "LABELS;ARGS" ${ARGN})
   string(JOIN " " joined ${G_ARGS})
   add_test(NAME ${name}
            COMMAND ${CMAKE_COMMAND} -DEXPECTED=${expected} -DCMD=$<TARGET_FILE:${target}> "-DARGS=${joined}"
+                   "-DEXPECT_LINE=${G_EXPECT_LINE}"
                    -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
   if(G_LABELS)
     set_tests_properties(${name} PROPERTIES LABELS "${G_LABELS}")
@@ -75,6 +76,13 @@ mhgp6_gate(mhgp6_contrat_echec_fold_k2 4 mhgp6_selftest ARGS --failure-contract 
 mhgp6_gate(mhgp6_e6_grille_objet 0 mhgp6_selftest ARGS --e6-equal TIMEOUT 600)
 mhgp6_gate(mhgp6_fused_descent 0 mhgp6_selftest ARGS --fused-descent)
 mhgp6_gate(mhgp6_sweep_oracle 0 mhgp6_selftest ARGS --sweep-oracle LABELS "gate;oracle")
+# Dette d'echelle (balayage du 1er septembre) : caps de cardinalite a
+# overshoot borne (arret pre-fusion globale), budget partiel de tampons
+# nommes, refus resource_exhausted, objet inchange sous budget large.
+mhgp6_gate(mhgp6_caps_refus 0 mhgp6_selftest ARGS --caps-refus)
+mhgp6_gate(mhgp6_caps_mutant_emission 4 mhgp6_selftest ARGS --caps-refus --inject=caps-drop-emission)
+mhgp6_gate(mhgp6_caps_mutant_late_wave 4 mhgp6_selftest ARGS --caps-refus --inject=caps-late-wave-check)
+set_tests_properties(mhgp6_caps_refus mhgp6_caps_mutant_emission mhgp6_caps_mutant_late_wave PROPERTIES TIMEOUT 600)
 mhgp6_gate(mhgp6_sweep_mutant_depth 4 mhgp6_selftest ARGS --sweep-oracle --inject=sweep-nonstrict-depth)
 mhgp6_gate(mhgp6_fused_mutant_mask 4 mhgp6_selftest ARGS --fused-descent --inject=fused-mask-stuck)
 
@@ -102,6 +110,13 @@ mhgp6_gate(mhgp6_cli_refus_s7 2 mhgp6 ARGS --family=uniform --n=200 --s=7)
 mhgp6_gate(mhgp6_cli_refus_s_suffix 2 mhgp6 ARGS --family=uniform --n=200 --s=8junk)
 mhgp6_gate(mhgp6_cli_refus_n_suffix 2 mhgp6 ARGS --family=uniform --n=200x)
 mhgp6_gate(mhgp6_cli_ok_s8 0 mhgp6 ARGS --family=uniform --n=200 --s=8 TIMEOUT 120)
+# Signature CLI du budget partiel (semantique livree => porte) : UNE SEULE
+# execution jugee sur le code 0 ET la ligne exacte — scope + les trois
+# valeurs, cap effectif du MEME helper que l'execution (2^30 / 144 =
+# 7456540). PASS_REGULAR ignore le code de sortie : run_expect capture et
+# reemet stdout pour juger les deux ensemble.
+mhgp6_gate(mhgp6_cli_budget_signature 0 mhgp6 ARGS --family=uniform --n=200 --s=8 --mem-budget=1073741824 TIMEOUT 120
+  EXPECT_LINE "memory_budget_scope=partial_named_payload_proxy_v1 budget=1073741824 cap_brut_demande=4294967295 cap_brut_effectif=7456540")
 
 # ---- Tailles d'interet (labels scale*) : conformite aux digests v5 graves.
 foreach(fam uniform terrain eight_clusters scanline_single_pass scanline_overlap_multiecho)

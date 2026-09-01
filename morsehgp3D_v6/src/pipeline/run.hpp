@@ -4,8 +4,9 @@
 //   profondeur -> census -> expansion des plateaux -> folds par K, STREAMES.
 //
 // Chaque fold est construit, signe, compte puis LIBERE avant le suivant :
-// la residence est bornee par `fold_inflight + 1` ordres (jamais dix forets
-// residentes). Statuts transactionnels :
+// la residence stationnaire est bornee par `fold_inflight + 1` ordres (jamais
+// dix forets residentes), le transitoire de fusion des shards par
+// `fold_inflight + 2` — le facteur du budget partiel. Statuts transactionnels :
 //   complete_regular | unsupported_degeneracy | resource_exhausted |
 //   invalid_input | invariant_violated.
 // Le consommateur recoit chaque ForestResult par callback (`on_forest`),
@@ -34,6 +35,7 @@
 #include <vector>
 
 #include "../core/mutants.hpp"
+#include "../core/caps.hpp"
 #include "../tree/cloud_index.hpp"
 #include "digest.hpp"
 #include "expand.hpp"
@@ -61,6 +63,24 @@ struct RunOptions {
   int threads = 1;
   size_t shell_cap = 12;
   bool digest = false;
+  // Plafond d'emission des candidats bruts (caps.hpp) — transmis a la
+  // generation ; abaissable, jamais au-dela du structurel.
+  u64 max_raw_candidates = kMaxRawCandidates;
+  // Budget PARTIEL DE TAMPONS DECLARES, optionnel (octets ; 0 = desactive).
+  // Contrat exact : CAP DE CARDINALITE A OVERSHOOT BORNE sur l'emission
+  // (arret cooperatif AVANT la fusion globale et le tri — les shards locaux
+  // materialisent jusqu'a l'observation du drapeau), et refus
+  // resource_exhausted des tampons NOMMES (tri x2, prefiltre/census
+  // conservatif S <= C sur les TAILLES exactes avec BallData x2, evenements
+  // du fold x (inflight+2)) — PROXY DE PAYLOAD LOGIQUE NOMME, pas une
+  // promesse anti-OOM globale.
+  u64 memory_budget_bytes = 0;
+#if defined(MHGP6_TESTING)
+  // Caps abaissables en test (0 = structurel) : branches de refus du front
+  // fusionne et instant PRE-insertion exerces a petit n.
+  u64 wave_tasks_cap_for_tests = 0;
+  u64 alive_rects_cap_for_tests = 0;
+#endif
   // Diagnostic opt-in : signe le multiensemble trie AVANT RLE.
   bool diagnostic_raw_candidates_digest = false;
   int fold_inflight = 2;
@@ -100,6 +120,10 @@ struct RunResult {
   double rss_mb[6] = {0, 0, 0, 0, 0, 0};
   double t_total_ms = 0;
   u64 fold_workers = 0, rle_workers = 0;
+  // DIAGNOSTIC pur (jamais un payload, jamais invalide, AUCUNE autorite de
+  // seuil) : capacite observee du vecteur de candidats, saisie AVANT le tri
+  // et conservee a travers le RLE.
+  u64 diag_candidates_capacity = 0;
   u64 peak_fold_inflight = 0;
 };
 
@@ -130,6 +154,10 @@ inline constexpr const char* kForestPayloadVersion = "mhgp6-forests-horizontal-v
 inline constexpr size_t kShellCapProfile = kBallShellMax;
 
 inline bool validate_run_options(const std::vector<InputPoint>& in, const RunOptions& opt, std::string* why) {
+  if (opt.max_raw_candidates == 0 || opt.max_raw_candidates > kMaxRawCandidates) {
+    *why = "invalid_input : max_raw_candidates hors de [1, 2^32-1]";
+    return false;
+  }
   if (in.size() < 2) {
     *why = "invalid_input : moins de deux points";
     return false;
@@ -157,6 +185,18 @@ inline bool validate_run_options(const std::vector<InputPoint>& in, const RunOpt
   return true;
 }
 
+// CAP EFFECTIF d'emission : structurel, ET derive du budget partiel quand
+// il est declare (division, jamais un produit non controle) — HELPER UNIQUE
+// employe par l'execution ET par la signature CLI du budget.
+inline u64 effective_raw_cap(const RunOptions& opt) {
+  u64 cap = opt.max_raw_candidates;
+  if (opt.memory_budget_bytes != 0) {
+    const u64 from_budget = opt.memory_budget_bytes / (u64)sizeof(BallCandidate);
+    if (from_budget < cap) cap = from_budget == 0 ? 1 : from_budget;
+  }
+  return cap;
+}
+
 // ROUTINE TERMINALE COMMUNE (P1 audit du 31 aout) : sur TOUT retour non
 // complet, les champs provisoires sont vides — digests, forets, cartes,
 // totaux. Aucun defaut ne laisse une foret K1 ou un digest raw visibles.
@@ -174,8 +214,19 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   using run_detail::ms;
   RunResult rr;
   const auto t_all = std::chrono::steady_clock::now();
+  if ((u64)in.size() > kMaxTreePositions) {
+    rr.status = PipelineStatus::kResourceExhausted;
+    rr.message = "resource_exhausted : plus de 2^30-1 positions d'entree (arbre radix a indices i32, recherche de Karras)";
+    return rr;
+  }
   if (!validate_run_options(in, opt, &rr.message)) {
     rr.status = PipelineStatus::kInvalidInput;
+    return rr;
+  }
+  if (opt.memory_budget_bytes != 0 && opt.memory_budget_bytes < (u64)sizeof(BallCandidate)) {
+    rr.status = PipelineStatus::kResourceExhausted;
+    rr.message = "resource_exhausted : budget partiel inferieur au cout d'un seul candidat (" +
+                 std::to_string(sizeof(BallCandidate)) + " octets)";
     return rr;
   }
   const auto t_ix = std::chrono::steady_clock::now();
@@ -204,8 +255,28 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   go.threads = opt.threads;
   go.e6_probe = opt.e6_probe;
   go.e3_mode = opt.e3_mode;
+  // CAP EFFECTIF d'emission par le HELPER PARTAGE (la signature CLI du
+  // budget imprime la MEME valeur que celle executee).
+  go.max_raw_candidates = effective_raw_cap(opt);
+#if defined(MHGP6_TESTING)
+  go.wave_tasks_cap_for_tests = opt.wave_tasks_cap_for_tests;
+  go.alive_rects_cap_for_tests = opt.alive_rects_cap_for_tests;
+#endif
   generate_candidates(ix, go, &cands, &rr.gen);
   rr.t_gen_ms = ms(t_g);
+  // REFUS DE CAPACITE DE LA GENERATION (caps.hpp) : mappe AVANT le
+  // grand-livre (un flux volontairement arrete n'a pas a fermer les
+  // identites de masse).
+  if (rr.gen.cap_refus != kCapRefusNone) {
+    rr.status = PipelineStatus::kResourceExhausted;
+    rr.message = rr.gen.cap_refus == kCapRefusRawCandidates
+                     ? "resource_exhausted : candidats bruts au-dela du plafond declare (arret avant fusion globale et tri)"
+                     : (rr.gen.cap_refus == kCapRefusWaveTasks
+                            ? "resource_exhausted : taches de vague au-dela du plafond declare (front fusionne)"
+                            : "resource_exhausted : rectangles vivants au-dela du plafond declare (front fusionne)");
+    invalidate_provisional(&rr);
+    return rr;
+  }
   rr.rss_mb[0] = run_detail::rss_mb_now();
   // GRAND-LIVRE GLOBAL : par lane du profil, emis + tues == masse attendue.
   {
@@ -232,6 +303,18 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   }
   const auto t_r = std::chrono::steady_clock::now();
   rr.emitted = cands.size();
+  // Capacite OBSERVEE, exposee en DIAGNOSTIC seulement (aucune autorite de
+  // seuil : le budget partiel est un proxy de PAYLOAD LOGIQUE, ses gardes
+  // portent sur les tailles — C++20 ne promet que capacity() >= exact).
+  rr.diag_candidates_capacity = (u64)cands.capacity();
+  if (opt.memory_budget_bytes != 0 &&
+      !fits_budget((u64)cands.size(), (u64)sizeof(BallCandidate), 2, opt.memory_budget_bytes)) {
+    rr.status = PipelineStatus::kResourceExhausted;
+    rr.message = "resource_exhausted : tri des candidats hors budget partiel declare (tampon de fusion 2 x " +
+                 std::to_string(sizeof(BallCandidate)) + " octets x " + std::to_string(cands.size()) + ")";
+    invalidate_provisional(&rr);
+    return rr;
+  }
   rr.rle_workers = sort_candidates(&cands, opt.threads);
   const double t_sort_candidates_ms = ms(t_r);
   if (opt.diagnostic_raw_candidates_digest) {
@@ -253,6 +336,16 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   }
   const auto t_p = std::chrono::steady_clock::now();
   std::vector<Survivor> surv;
+  if (opt.memory_budget_bytes != 0 &&
+      !fits_budget((u64)cands.size(),
+                   (u64)sizeof(BallCandidate) + (u64)sizeof(Survivor) + 2 * (u64)sizeof(BallData), 1,
+                   opt.memory_budget_bytes)) {
+    rr.status = PipelineStatus::kResourceExhausted;
+    rr.message = "resource_exhausted : prefiltre/census hors budget partiel declare (borne conservative "
+                 "S <= C sur la TAILLE post-RLE — proxy de payload logique, coexistence BallData x2)";
+    invalidate_provisional(&rr);
+    return rr;
+  }
   prefilter_balls(ix, cands, rr.smax_eff, opt.threads, &surv, &rr.expand);
   rr.t_prefilter_ms = ms(t_p);
   rr.rss_mb[2] = run_detail::rss_mb_now();
@@ -284,6 +377,18 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     if (!fold_capacity_ok(kc[K].events, kc[K].incidences, &why)) {
       rr.status = PipelineStatus::kResourceExhausted;
       rr.message = "fold K=" + std::to_string(K) + " : " + why;
+      invalidate_provisional(&rr);
+      return rr;
+    }
+    if (opt.memory_budget_bytes != 0 &&
+        !fits_budget(kc[K].events, (u64)sizeof(ForestEvent), (u64)(opt.fold_inflight + 2),
+                     opt.memory_budget_bytes)) {
+      rr.status = PipelineStatus::kResourceExhausted;
+      rr.message = "fold K=" + std::to_string(K) +
+                   " : resource_exhausted : evenements hors budget partiel declare (" +
+                   std::to_string(kc[K].events) + " x " + std::to_string(sizeof(ForestEvent)) +
+                   " octets x (inflight+2, coexistence des shards lev et de la fusion comptee) — "
+                   "tampon NOMME, les autres structures du fold ne sont pas comptees)";
       invalidate_provisional(&rr);
       return rr;
     }

@@ -140,7 +140,7 @@ inline std::vector<P3> uniform_cloud(int n, int coord, long long seed) {
   std::uniform_int_distribution<int> pick(0, coord - 1);
   std::vector<P3> pts;
   std::set<long long> keys;
-  for (int guard = 0; (int)pts.size() < n && guard < 200 * n; ++guard) {
+  for (long long guard = 0; (int)pts.size() < n && guard < 200LL * n; ++guard) {
     P3 q{};
     q.x = (i64)pick(rng);
     q.y = (i64)pick(rng);
@@ -163,8 +163,8 @@ inline std::vector<P3> eight_clusters_cloud(int n, int coord, long long seed) {
   std::vector<P3> pts;
   std::set<long long> keys;
   int placed[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-  const int quota = (n + 7) / 8;
-  for (int guard = 0; (int)pts.size() < n && guard < 400 * n; ++guard) {
+  const int quota = (int)(((long long)n + 7) / 8);
+  for (long long guard = 0; (int)pts.size() < n && guard < 400LL * n; ++guard) {
     int c = -1;  // tourniquet strict : amas equilibres a un point pres
     for (int t = 0; t < 8; ++t) {
       const int cand = (guard + t) % 8;
@@ -219,7 +219,7 @@ inline std::vector<P3> terrain_cloud(int n, int coord, long long seed, int canop
   std::uniform_int_distribution<int> canopy_lift(1, lift_max);
   std::vector<P3> pts;
   std::set<long long> keys;
-  for (int guard = 0; (int)pts.size() < n && guard < 200 * n; ++guard) {
+  for (long long guard = 0; (int)pts.size() < n && guard < 200LL * n; ++guard) {
     const long long x = ground(rng);
     const long long y = ground(rng);
     long long h = 0;
@@ -338,7 +338,7 @@ inline std::vector<P3> scanline_cloud(int n, int coord, long long seed, bool ove
   const int pitch = 8;  // anisotropie 4:1 entre l'inter-ligne et le pas
   std::vector<P3> pts;
   std::set<long long> keys;
-  scanline_pass(&rng, field, overlap_multiecho ? (n * 3) / 5 : n, coord, 0, 1, step_along, pitch,
+  scanline_pass(&rng, field, overlap_multiecho ? (int)(((long long)n * 3) / 5) : n, coord, 0, 1, step_along, pitch,
                 overlap_multiecho, &pts, &keys);
   if (overlap_multiecho)
     scanline_pass(&rng, field, n, coord, step_along / 2 + 1, pitch / 3 + 1, step_along, pitch, true,
@@ -412,7 +412,7 @@ inline std::vector<P3> terrain_stationnaire_cloud(int n, int coord, long long se
   std::uniform_int_distribution<int> canopy_lift(1, 55);  // = [1, max(2, c0/8)]
   std::vector<P3> pts;
   std::set<long long> keys;
-  for (int guard = 0; (int)pts.size() < n && guard < 200 * n; ++guard) {
+  for (long long guard = 0; (int)pts.size() < n && guard < 200LL * n; ++guard) {
     const long long x = ground(rng);
     const long long y = ground(rng);
     long long h = 0;
