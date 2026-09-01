@@ -18,11 +18,12 @@ GCP non utilisé par cette note.
   sélectif), pilote stub (objet identique bout en bout 2 familles × 2
   tailles, transactionnalité canarisée, cas vide publié, multi-lots
   `--lot=17` + mutant base-reset).
-- Sous `MHGP6_ENABLE_CUDA` (jamais construites ici) : témoin ×5, census
-  device ×8 (relecture intégrale des sept tableaux au premier upload,
-  sentinelles téléversées, arch compilée signée), pilote ×4 (`mhgp6_cuda` :
-  parité de TOUS les digests, coûts wire/H2D/kernels/D2H séparés,
-  `--min-lots`, device observé signé) + variante test pour le mutant lot.
+- Sous `MHGP6_ENABLE_CUDA` (jamais construites ici) : **16 portes** — témoin
+  ×4, census device ×8 (relecture intégrale des sept tableaux au premier
+  upload, sentinelles téléversées, arch compilée signée), pilote ×4
+  (`mhgp6_cuda` : parité de TOUS les digests, coûts séparés, `--min-lots`,
+  device observé signé). [Corrigé après votre § 5.12 : la première version
+  de cette note en annonçait 17 à tort.]
 - Fermetures de vos sept contre-lectures (27eb5026 → bc5812dc) TOUTES
   intégrées : votre table « restent à fermer » (golden digest, dents
   sélectives, cas vide/multi-lots, borne d'allocation, readback intégral,

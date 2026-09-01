@@ -46,8 +46,13 @@ double now_ms() {
 }
 
 struct GpuRouteCosts {
-  double wire_ms = 0, h2d_ms = 0, kernel_ms = 0, d2h_ms = 0, rebuild_ms = 0;
-  u64 h2d_bytes = 0, d2h_bytes = 0, lots = 0;
+  // § 5.12 : setup_alloc_ms (cudaMalloc) SEPARE des purs cudaMemcpy H2D —
+  // le chrono de transfert n'est plus contamine par l'allocation ; octets
+  // index / boules / sentinelles comptes SEPAREMENT (le validateur recalcule
+  // H2D = index + 212 * nb_total et D2H = 100 * nb_total).
+  double wire_ms = 0, setup_alloc_ms = 0, h2d_ms = 0, kernel_ms = 0, d2h_ms = 0, rebuild_ms = 0;
+  u64 h2d_index_bytes = 0, h2d_ball_bytes = 0, h2d_sentinel_bytes = 0, d2h_bytes = 0, lots = 0;
+  u64 nb_total = 0, lot_effectif = 0;
 };
 
 // Route device : appelable comme RunOptions::prefilter_census_override.
@@ -64,41 +69,56 @@ std::string device_route(const CloudIndex& ix, const std::vector<BallCandidate>&
   const u64 nb_total = bw.balls;
   if (nb_total == 0) return "";
 
-  // Index resident (une fois).
-  const double t_h0 = now_ms();
+  costs->nb_total = nb_total;
   i32 *d_nl = nullptr, *d_nr = nullptr, *d_nf = nullptr, *d_nlast = nullptr, *d_ids = nullptr;
   u16 *d_nbox = nullptr, *d_up = nullptr;
   u32 *d_ws = nullptr, *d_cand = nullptr;
   u64 *d_balls = nullptr, *d_count = nullptr;
   u8 *d_status = nullptr, *d_cst = nullptr, *d_nint = nullptr, *d_nsh = nullptr;
-  const auto up1 = [&](void** p, const std::vector<u8>& src) -> std::string {
-    CUDA_OK_RET(cudaMalloc(p, src.size()), "cudaMalloc index");
-    CUDA_OK_RET(cudaMemcpy(*p, src.data(), src.size(), cudaMemcpyHostToDevice), "cudaMemcpy index");
-    costs->h2d_bytes += src.size();
-    return "";
-  };
-  std::string e;
-  if (!(e = up1((void**)&d_nl, w.node_left)).empty()) return e;
-  if (!(e = up1((void**)&d_nr, w.node_right)).empty()) return e;
-  if (!(e = up1((void**)&d_nf, w.node_first)).empty()) return e;
-  if (!(e = up1((void**)&d_nlast, w.node_last)).empty()) return e;
-  if (!(e = up1((void**)&d_nbox, w.node_box)).empty()) return e;
-  if (!(e = up1((void**)&d_up, w.upos)).empty()) return e;
-  if (!(e = up1((void**)&d_ws, w.wsum)).empty()) return e;
   // --lot INOFFENSIF (e9cfad9e) : lot_eff = min(lot demande, nb_total) — un
   // lot geant sur un petit nuage n'echoue jamais ; produits d'allocation
   // verifies avant cudaMalloc (aucun rebouclage size_t).
   const size_t lot = std::min<size_t>(lot_balls == 0 ? (size_t)nb_total : lot_balls, (size_t)nb_total);
   if (lot > (size_t)1 << 40) return "invalid_input : lot au-dela de toute allocation sensee";
-  CUDA_OK_RET(cudaMalloc(&d_balls, lot * gpu::kBallWords * 8), "cudaMalloc lot");
-  CUDA_OK_RET(cudaMalloc(&d_count, lot * 8), "cudaMalloc count");
-  CUDA_OK_RET(cudaMalloc(&d_status, lot), "cudaMalloc status");
-  CUDA_OK_RET(cudaMalloc(&d_ids, lot * gpu::kOutIdsPerBall * 4), "cudaMalloc ids");
-  CUDA_OK_RET(cudaMalloc(&d_cst, lot), "cudaMalloc cstatus");
-  CUDA_OK_RET(cudaMalloc(&d_nint, lot), "cudaMalloc nint");
-  CUDA_OK_RET(cudaMalloc(&d_nsh, lot), "cudaMalloc nsh");
-  CUDA_OK_RET(cudaMalloc(&d_cand, lot * 4), "cudaMalloc cand");
-  costs->h2d_ms += now_ms() - t_h0;
+  costs->lot_effectif = lot;
+  // ALLOCATIONS (setup_alloc_ms, § 5.12 : jamais dans le chrono H2D).
+  {
+    const double t_a0 = now_ms();
+    CUDA_OK_RET(cudaMalloc((void**)&d_nl, w.node_left.size()), "cudaMalloc index");
+    CUDA_OK_RET(cudaMalloc((void**)&d_nr, w.node_right.size()), "cudaMalloc index");
+    CUDA_OK_RET(cudaMalloc((void**)&d_nf, w.node_first.size()), "cudaMalloc index");
+    CUDA_OK_RET(cudaMalloc((void**)&d_nlast, w.node_last.size()), "cudaMalloc index");
+    CUDA_OK_RET(cudaMalloc((void**)&d_nbox, w.node_box.size()), "cudaMalloc index");
+    CUDA_OK_RET(cudaMalloc((void**)&d_up, w.upos.size()), "cudaMalloc index");
+    CUDA_OK_RET(cudaMalloc((void**)&d_ws, w.wsum.size()), "cudaMalloc index");
+    CUDA_OK_RET(cudaMalloc(&d_balls, lot * gpu::kBallWords * 8), "cudaMalloc lot");
+    CUDA_OK_RET(cudaMalloc(&d_count, lot * 8), "cudaMalloc count");
+    CUDA_OK_RET(cudaMalloc(&d_status, lot), "cudaMalloc status");
+    CUDA_OK_RET(cudaMalloc(&d_ids, lot * gpu::kOutIdsPerBall * 4), "cudaMalloc ids");
+    CUDA_OK_RET(cudaMalloc(&d_cst, lot), "cudaMalloc cstatus");
+    CUDA_OK_RET(cudaMalloc(&d_nint, lot), "cudaMalloc nint");
+    CUDA_OK_RET(cudaMalloc(&d_nsh, lot), "cudaMalloc nsh");
+    CUDA_OK_RET(cudaMalloc(&d_cand, lot * 4), "cudaMalloc cand");
+    costs->setup_alloc_ms += now_ms() - t_a0;
+  }
+  // TRANSFERT DE L'INDEX (purs cudaMemcpy).
+  {
+    const double t_h0 = now_ms();
+    const auto up1 = [&](void* p, const std::vector<u8>& src) -> std::string {
+      CUDA_OK_RET(cudaMemcpy(p, src.data(), src.size(), cudaMemcpyHostToDevice), "cudaMemcpy index");
+      costs->h2d_index_bytes += src.size();
+      return "";
+    };
+    std::string e;
+    if (!(e = up1(d_nl, w.node_left)).empty()) return e;
+    if (!(e = up1(d_nr, w.node_right)).empty()) return e;
+    if (!(e = up1(d_nf, w.node_first)).empty()) return e;
+    if (!(e = up1(d_nlast, w.node_last)).empty()) return e;
+    if (!(e = up1(d_nbox, w.node_box)).empty()) return e;
+    if (!(e = up1(d_up, w.upos)).empty()) return e;
+    if (!(e = up1(d_ws, w.wsum)).empty()) return e;
+    costs->h2d_ms += now_ms() - t_h0;
+  }
 
   // Sentinelles D2H (f3704e99) : une ecriture omise ne se consomme jamais.
   std::vector<u64> count(nb_total, ~0ull);
@@ -118,10 +138,9 @@ std::string device_route(const CloudIndex& ix, const std::vector<BallCandidate>&
     const u32 nb = (u32)std::min<u64>(lot, nb_total - base);
     ++costs->lots;
     const double t_l0 = now_ms();
-    // Trafic des sentinelles COMPTE (8c60cb8e : une protection de surete
-    // n'apparait jamais gratuitement dans le reçu) : 8+1+84+1+1+1+4 = 100 o
-    // par boule du lot.
-    costs->h2d_bytes += (size_t)nb * (8 + 1 + (size_t)gpu::kOutIdsPerBall * 4 + 1 + 1 + 1 + 4);
+    // Trafic des sentinelles COMPTE SEPAREMENT (8c60cb8e + § 5.12) :
+    // 8+1+84+1+1+1+4 = 100 o par boule du lot.
+    costs->h2d_sentinel_bytes += (size_t)nb * (8 + 1 + (size_t)gpu::kOutIdsPerBall * 4 + 1 + 1 + 1 + 4);
     CUDA_OK_RET(cudaMemcpy(d_count, sl_count.data(), (size_t)nb * 8, cudaMemcpyHostToDevice), "sentinelle count");
     CUDA_OK_RET(cudaMemcpy(d_status, sl_status.data(), nb, cudaMemcpyHostToDevice), "sentinelle status");
     CUDA_OK_RET(cudaMemcpy(d_ids, sl_ids.data(), (size_t)nb * gpu::kOutIdsPerBall * 4, cudaMemcpyHostToDevice),
@@ -133,7 +152,7 @@ std::string device_route(const CloudIndex& ix, const std::vector<BallCandidate>&
     CUDA_OK_RET(cudaMemcpy(d_balls, bw.bytes.data() + base * gpu::kBallWords * 8,
                            (size_t)nb * gpu::kBallWords * 8, cudaMemcpyHostToDevice),
                 "cudaMemcpy lot");
-    costs->h2d_bytes += (size_t)nb * gpu::kBallWords * 8;
+    costs->h2d_ball_bytes += (size_t)nb * gpu::kBallWords * 8;
     const double t_k0 = now_ms();
     costs->h2d_ms += t_k0 - t_l0;
     MHGP6_LAUNCH(gpu::k_prefilter, (nb + 255) / 256, 256, d_nl, d_nr, d_nf, d_nlast, d_nbox, d_up, d_ws,
@@ -218,7 +237,8 @@ int main(int argc, char** argv) {
   // sont des refus code 2).
   std::string family = "uniform";
   std::string inject;
-  i64 n = 50000, seed = 3, threads = 48, repeat = 1, lot = 1 << 21, min_lots = 0;
+  std::string ordre = "cpu-device";  // § 5.12 : ordre EXPLICITE, contrebalance ABBA sur les repetitions
+  i64 n = 50000, seed = 3, threads = 48, repeat = 4, lot = 1 << 21, min_lots = 0;
   bool ok = true;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
@@ -232,6 +252,7 @@ int main(int argc, char** argv) {
     else if (const char* s = val("--repeat=")) ok = parse_i64_exact(s, &repeat) && ok;
     else if (const char* s = val("--lot=")) ok = parse_i64_exact(s, &lot) && ok;
     else if (const char* s = val("--min-lots=")) ok = parse_i64_exact(s, &min_lots) && ok;
+    else if (const char* s = val("--ordre=")) ordre = s;
     else if (const char* s = val("--inject=")) inject = s;
     else {
       std::fprintf(stderr, "REFUS : argument inconnu %s\n", a.c_str());
@@ -240,7 +261,7 @@ int main(int argc, char** argv) {
   }
   if (!inject.empty() && !mutants_enable(inject)) return 2;  // refuse en build produit
   if (!ok || n < 2 || n > (i64)kMaxTreePositions || repeat < 1 || repeat > 1000 || lot < 1 ||
-      threads < 1 || threads > 1024) {
+      threads < 1 || threads > 1024 || (ordre != "cpu-device" && ordre != "device-cpu")) {
     std::fprintf(stderr, "REFUS : parametre hors domaine ou mal forme\n");
     return 2;
   }
@@ -267,19 +288,23 @@ int main(int argc, char** argv) {
               family.c_str(), (long long)n, (long long)seed, (long long)threads, (long long)lot);
 
   const std::vector<InputPoint> in = make_family_input(fam, (int)n, cloud_family_default_coord(fam, (int)n), (long long)seed);
-  for (i64 r = 0; r < repeat; ++r) {
+  // § 5.12 : k = 0 est l'ECHAUFFEMENT (retenue=NON, exclu de toute mesure) ;
+  // k = 1..repeat sont les repetitions MESUREES, ordres contrebalances ABBA
+  // a partir de --ordre : positions 1 et 4 du bloc = ordre demande, 2 et 3 =
+  // inverse. La parite est exigee a CHAQUE run, echauffement compris.
+  const bool base_cpu_first = ordre == "cpu-device";
+  for (i64 r = 0; r <= repeat; ++r) {
+    const bool retenue = r > 0;
+    bool cpu_first = base_cpu_first;
+    if (retenue) {
+      const i64 m = (r - 1) % 4;
+      cpu_first = (m == 0 || m == 3) ? base_cpu_first : !base_cpu_first;
+    }
     RunOptions cpu;
     cpu.s = 8;
     cpu.smax = 11;
     cpu.threads = (int)threads;
     cpu.digest = true;
-    const auto t_a0 = std::chrono::steady_clock::now();
-    const RunResult a = run_pipeline(in, cpu);
-    const double mur_cpu = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t_a0).count();
-    if (a.status != PipelineStatus::kCompleteRegular) {
-      std::fprintf(stderr, "REFUS : route CPU non complete (%s)\n", a.message.c_str());
-      return 2;
-    }
     GpuRouteCosts costs;
     RunOptions dev = cpu;
     dev.prefilter_census_override = [&](const CloudIndex& ix, const std::vector<BallCandidate>& cands,
@@ -287,9 +312,29 @@ int main(int argc, char** argv) {
                                         std::vector<BallData>* bd, ExpandStats* st) {
       return device_route(ix, cands, smax_eff, shell_cap, sv, bd, st, (size_t)lot, &costs);
     };
-    const auto t_b0 = std::chrono::steady_clock::now();
-    const RunResult b = run_pipeline(in, dev);
-    const double mur_gpu = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t_b0).count();
+    RunResult a, b;
+    double mur_cpu = 0, mur_gpu = 0;
+    const auto run_cpu = [&]() {
+      const auto t0 = std::chrono::steady_clock::now();
+      a = run_pipeline(in, cpu);
+      mur_cpu = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+    };
+    const auto run_dev = [&]() {
+      const auto t0 = std::chrono::steady_clock::now();
+      b = run_pipeline(in, dev);
+      mur_gpu = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+    };
+    if (cpu_first) {
+      run_cpu();
+      run_dev();
+    } else {
+      run_dev();
+      run_cpu();
+    }
+    if (a.status != PipelineStatus::kCompleteRegular) {
+      std::fprintf(stderr, "REFUS : route CPU non complete (%s)\n", a.message.c_str());
+      return 2;
+    }
     if (MHGP6_MUTANT("gpu-lot-base-reset")) {
       // Scene-signature multi-lots : base toujours 0 => cand_idx inattendu
       // des le second lot, refus par le VALIDATEUR (fusion en ordre global
@@ -320,14 +365,17 @@ int main(int argc, char** argv) {
     const bool same = a.digest_all == b.digest_all && a.digest_balls == b.digest_balls &&
                       a.digest_postprefilter == b.digest_postprefilter && a.digest_forest == b.digest_forest &&
                       a.cards == b.cards && a.total_events == b.total_events && a.emitted == b.emitted;
-    std::printf("repetition=%lld parite=%s mur_cpu_ms=%.1f mur_route_device_ms=%.1f "
+    std::printf("repetition=%lld retenue=%s ordre=%s parite=%s mur_cpu_ms=%.1f mur_route_device_ms=%.1f "
                 "prefiltre_census_cpu_ms=%.1f route_device_etage_ms=%.1f "
-                "wire_ms=%.1f h2d_ms=%.1f kernels_ms=%.1f d2h_ms=%.1f rebuild_ms=%.1f "
-                "h2d_octets=%llu d2h_octets=%llu lots=%llu digest_all=%s\n",
-                (long long)r, same ? "OUI" : "NON", mur_cpu, mur_gpu, a.t_prefilter_ms + a.t_census_ms,
-                b.t_census_ms,
-                costs.wire_ms, costs.h2d_ms, costs.kernel_ms, costs.d2h_ms, costs.rebuild_ms,
-                (unsigned long long)costs.h2d_bytes, (unsigned long long)costs.d2h_bytes,
+                "wire_ms=%.1f setup_alloc_ms=%.1f h2d_ms=%.1f kernels_ms=%.1f d2h_ms=%.1f rebuild_ms=%.1f "
+                "nb_total=%llu lot_effectif=%llu h2d_octets_index=%llu h2d_octets_boules=%llu "
+                "h2d_octets_sentinelles=%llu d2h_octets=%llu lots=%llu digest_all=%s\n",
+                (long long)r, retenue ? "OUI" : "NON", cpu_first ? "cpu-device" : "device-cpu",
+                same ? "OUI" : "NON", mur_cpu, mur_gpu, a.t_prefilter_ms + a.t_census_ms, b.t_census_ms,
+                costs.wire_ms, costs.setup_alloc_ms, costs.h2d_ms, costs.kernel_ms, costs.d2h_ms,
+                costs.rebuild_ms, (unsigned long long)costs.nb_total, (unsigned long long)costs.lot_effectif,
+                (unsigned long long)costs.h2d_index_bytes, (unsigned long long)costs.h2d_ball_bytes,
+                (unsigned long long)costs.h2d_sentinel_bytes, (unsigned long long)costs.d2h_bytes,
                 (unsigned long long)costs.lots, a.digest_all.c_str());
     if (!same) {
       std::printf("DIVERGENCE : l'objet des deux routes differe\n");

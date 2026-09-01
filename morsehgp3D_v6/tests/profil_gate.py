@@ -151,8 +151,15 @@ def check_profile_output(txt, join, liveness):
     parse_rows(txt, "profil_intern K=", SCHEMA_INTERN)  # schema exact + temps finis non negatifs
     by_k = {}
     for k, f, line in rows:
-        if abs(f["somme"] + f["residuel"] - f["mur_reduce_interne"]) > 0.005:
-            fail("fermeture somme+residuel != mur_reduce_interne (%s)" % line)
+        # SOMME RECALCULEE depuis les NEUF composantes (f97ed226 : croire le
+        # champ imprime laissait une enveloppe a composantes nulles verte —
+        # l'addition independante est le seul durcissement causal).
+        somme_recalc = (f["init"] + f["touch"] + f["pre"] + f["unite"] + f["post_remplissage"] +
+                        f["materialisation_tri_copie"] + f["liveness"] + f["partition"] + f["liberation"])
+        if abs(somme_recalc - f["somme"]) > 0.009:  # neuf arrondis %.3f
+            fail("somme imprimee != somme des neuf composantes (%s)" % line)
+        if abs(somme_recalc + f["residuel"] - f["mur_reduce_interne"]) > 0.014:
+            fail("fermeture somme_recalculee+residuel != mur_reduce_interne (%s)" % line)
         if f["residuel"] < -0.005:
             fail("residuel negatif (%s)" % line)
         if not (f["a_debut"] <= f["a_fin"] <= f["reduce_interne_debut"] <= f["reduce_interne_fin"]):
