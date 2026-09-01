@@ -816,12 +816,61 @@ certifié `TERMINATED`, succès ou échec. Les autres VM sont seulement signalé
 Aucun résultat de cette session ne changera `public_status=not_claimed` sans
 audit du reçu.
 
+### 5.13 Checkpoint `d5ed0fb3` : pilote mieux mesurable, pin de session encore fermé
+
+Le commit reçoit utilement les trois corrections locales demandées, sans
+prétendre être le pin de session. `setup_alloc_ms` isole désormais les
+allocations initiales des copies H2D ; index, boules, sentinelles, D2H,
+`nb_total` et lot effectif sont publiés séparément. Le warm-up porte
+`retenue=NON`, puis les quatre répétitions exécutent réellement ABBA dans les
+deux sens possibles. Un export Git propre construit le profil et le vrai
+fichier `.cu` en stub C++, puis passe les cinq portes touchées **5/5 en
+9,00 s**. Claude rapporte aussi 113/113 `gate` sur son build. Aucun `nvcc` ou
+device n'a été exercé.
+
+Il n'est pas utile de rouvrir les kernels. Quatre coutures courtes doivent en
+revanche précéder le futur accusé de pin :
+
+1. La ligne du pilote ne publie que `parite=OUI` et le `digest_all` CPU, alors
+   que le code compare aussi les deux `digest_balls`, `digest_postprefilter`,
+   vecteurs de digests forêt, cartes, événements et émissions. Publier les
+   deux signatures d'une projection canonique couvrant exactement ce tuple,
+   ou les champs CPU/device séparés, permet au validateur de recalculer
+   l'égalité ; le booléen imprimé reste une redondance, jamais l'autorité.
+   Ajouter au juge stub les cinq records exacts, la séquence ABBA/BAAB, les
+   formules d'octets, les temps finis et les lots rend ces nouveaux champs
+   causaux avant G4.
+2. Le recalcul des neuf composantes est présent, mais ses seuils `0.009` et
+   `0.014` sont trop larges. La contre-fixture exécutée avec neuf composantes
+   à zéro, `somme=0.008`, `residuel=0.012` et `mur_reduce_interne=0.020` rend
+   encore `COUNTERFIXTURE_ACCEPTED`. Avec les impressions `%.3f`, des seuils
+   proches de `0.0051` pour la somme et `0.006` pour la fermeture couvrent les
+   arrondis. Une petite contre-fixture Python autonome doit tuer cette scène.
+3. Le profil dédié garde huit `CONF_SPECS` v5/v6 et une séquence
+   `aller retour aller`. Conformément au § 5.12, mettre la phase
+   différentielle à `aucun` et nommer la troisième permutation cyclique
+   exacte, par exemple une rotation fixe des 16 points. La note Claude reste
+   aussi à marquer supersédée ou à corriger dans sa seconde moitié, où 17
+   portes, trois répétitions, 200k et le produit cartésien sont encore décrits.
+4. Le runner doit appliquer et attester l'affinité demandée — un `taskset` de
+   la commande dérivé de la topologie physique/SMT, pas l'affinité inchangée
+   du shell — et passer explicitement `--repeat=4`, `--ordre=cpu-device` et
+   `--min-lots=2`. Les axes de durée du profil doivent piloter les vrais
+   `MAX_RUN_SECONDS`/`GUEST_SHUTDOWN_MINUTES` avant tout garde-fou ; profil,
+   manifeste, estimateur, transport, validateur et deux selftests restent à
+   fermer ensemble.
+
+Le statut demeure donc **NO START à `d5ed0fb3`**. Cette réponse est une aide
+directe au prochain commit : une fois ces coutures intégrées et falsifiées,
+seul l'accusé bref du SHA exact restera avant le démarrage gardé.
+
 ## 6. Ordre de travail recommandé
 
 1. **achevé à `4a85c13d`** : C1, garde `2E` et témoin hôte ancrés ensemble,
    brouillon `fold.hpp` correctement laissé hors checkpoint ;
-2. recalculer dans la porte la `somme` du profil depuis ses neuf composantes,
-   puis réserver la matrice locale au diagnostic de bruit ;
+2. **partiel à `d5ed0fb3`** : recalculer la `somme` depuis ses neuf
+   composantes ; resserrer maintenant sa tolérance et graver la contre-fixture
+   du § 5.13, puis réserver la matrice locale au diagnostic de bruit ;
 3. **achevé à `cd606257`** : recevoir le wire et la couture C2--C5 dans leur
    portée CPU/stub ; joindre les durcissements P2 au prochain petit correctif ;
 4. si la cause CPU est la concurrence A/B, prototyper un budget de workers ou

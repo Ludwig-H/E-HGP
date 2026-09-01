@@ -2,8 +2,9 @@
 
 Date de coupe : 1er septembre 2026.
 
-Coupe source observée : `1069bc20` pour le profil `reduce` et `cd606257` pour
-la série C C2--C5 ; les mises à jour du seul audit ne changent pas ces coupes.
+Coupe source observée : `1069bc20` pour le profil `reduce`, `cd606257` pour
+la série C C2--C5 et `d5ed0fb3` pour la préparation locale de sa mesure ; les
+mises à jour du seul audit ne changent pas ces coupes.
 Autorités techniques : `6d755804` pour le
 prototype E3/G16, `cd49a390` pour les callbacks, `d98f4729` pour le protocole
 et la source réellement exécutée sur G4, `94c74155` pour l'autorisation
@@ -11,7 +12,8 @@ mono-session désormais consommée, `df1a3c5f` pour l'archivage de son reçu,
 `6e293deb` pour le checkpoint de plafonds, `671ed3cc` pour le premier pool
 d'exécuteurs GPU hôte, `4a85c13d` pour sa correction causale, la garde 2E et
 le témoin arithmétique hôte, `1069bc20` pour le harnais de profil,
-`cd606257` pour le pin hôte de la série C, `62cd2e28` pour la matrice locale
+`cd606257` pour le pin hôte de la série C, `d5ed0fb3` pour le pilote ABBA et
+le profil de session encore non raccordé, `62cd2e28` pour la matrice locale
 directionnelle, `9c5517c9` pour la demande G4, `e8289d9a` pour son profil encore
 non consommé, `320299df` pour le reçu de
 réplication et `8ed2dea6` pour le reçu de confirmation contre-audité
@@ -36,9 +38,9 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
 | plafonds et budget mémoire `4a85c13d` | cap coopératif et refus transactionnels reçus ; garde logique `2E` avant la réserve de fusion reçue, proxy de payload nommé seulement, sans claim RSS/OOM |
-| saturation multi-CPU du fold `1069bc20` | pin construit et suite `gate` 92/92 ; profil, liveness, builds distincts, projection nommée, `join=1` et effacement K2 reçus dans leur portée ; `cd606257` ferme la fuite `stderr` et l'attribution brute nulle, mais doit encore recalculer indépendamment le champ imprimé `somme` ; matrice locale terminée mais non décisionnelle |
+| saturation multi-CPU du fold `1069bc20` | pin construit et suite `gate` 92/92 ; profil, liveness, builds distincts, projection nommée, `join=1` et effacement K2 reçus dans leur portée ; `d5ed0fb3` recalcule la somme, mais ses tolérances acceptent encore la contre-fixture à neuf composantes nulles ; matrice locale terminée mais non décisionnelle |
 | série C C2--C5 `cd606257` | reçue dans sa portée CPU/stub : six candidats `u32`, refus transactionnels, sentinelles/validateur, digest gravé, porte de readback device enregistrée mais jamais exécutée et multi-lots causal ; export propre Release 113/113 en 232,11 s ; aucun `nvcc` ni device |
-| demande G4 `9c5517c9`, profil `e8289d9a` | GO scientifique conditionnel, **NO START au pin courant** : profil dédié non consommé par runner/validateur, 17 portes annoncées contre 16 enregistrées, chrono H2D contaminé par setup et ordre CPU→device non contrebalancé ; après correctif+gates et accusé du pin exact, une session SPOT bornée, sans point 200k ni lot17 à 50k, devient exécutable sans nouvelle revue de design |
+| préparation G4 `d5ed0fb3` | setup/H2D séparés, warm-up et ABBA reçus localement ; export propre ciblé 5/5 en 9,00 s ; **NO START** tant que parité bilatérale, dent du profil, portée v6-only, permutation cyclique, affinité réelle et chaîne pin/runner/validateur/estimateur/selftests ne sont pas fermées au même SHA |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP `d98f4729` | GO mono-session consommé et clos ; reçu `df1a3c5f` validé non décisionnel, arrêt ciblé certifié |
