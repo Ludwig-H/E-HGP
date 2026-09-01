@@ -52,7 +52,9 @@ passe 71 vérifications et le lifecycle 35 scénarios plus 11 refus de pin
 (51 vérifications). Le rejeu indépendant des 83 tests de sûreté/intégration
 donne 83/83 en 387,998 s sur la machine partagée. L'admission SCP à deux
 arrêts, la seconde tentative sur les sorties précoces, la grâce fixe et le
-refus d'une instrumentation G4 non canonique sont reçus dans leur portée.
+refus d'une instrumentation G4 non canonique sont reçus dans leur portée. Le
+rejeu v6 hors labels d'échelle donne 74/74 en 196,14 s ; aucune suite complète
+d'échelle n'est revendiquée par ce contre-audit.
 
 ## Exact-K, omission unique et ownership WSPD
 
@@ -393,6 +395,36 @@ serait un durcissement P1 utile, pas une condition de ce lancement officiel qui
 impose `/usr/bin/time`. Le parseur CTest n'est pas ancré à la ligne entière ;
 sur ce pin, le code non nul de CTest précède le parsing et aucune chaîne
 parasite ne correspond, mais des marqueurs de suite seraient un P1 utile.
+Enfin, le bootstrap exécute encore `pip install --upgrade cmake || true` : la
+version effective de CMake/CTest n'est pas épinglée. Un nouveau changement de
+format échouerait fermé, sans faux vert, mais pourrait consommer une autre
+session courte. Fixer la version ou produire un marqueur machine avant tout
+re-pin ultérieur ; ne pas appeler le présent protocole une toolchain
+reproductible.
+
+## Fraîcheur documentaire et porte Python
+
+Les verts de `tools/check_docs.py` ne détectent pas les décalages sémantiques
+suivants :
+
+- `docs/ARCHITECTURE.md` omet les cinq bras E3/G16 et nomme encore la cible
+  inexistante `mhgp6_fused_descent_gate` ; les garanties transactionnelles y
+  dépassent aussi le contrat d'exceptions/callbacks encore ouvert ;
+- `docs/PROVENANCE.md` classe `linked_arcs_u16` comme prévu alors qu'il est
+  livré, et `docs/PLAN_DE_TESTS.md` laisse prévus des portes déjà dans CMake
+  tout en omettant la portée de l'oracle G8/G16 ;
+- `docs/GRAND_LIVRE.md` conserve les définitions trop larges de `P_factor`,
+  `H_scan` et des octaves déjà rectifiées dans le présent état ;
+- `docs/MATHEMATIQUES.md` laisse C1–C7 au statut `derive_v6` sans associer
+  explicitement les pins, oracles et portées requalifiées ;
+- `tests/agregateur_gate.py` porte encore sa garde de domaine par
+  `assert 0 <= k <= base`. Le nominal actuel passe aussi sous `python3 -O`,
+  donc ce n'est pas un mutant causal, mais cette porte viole la règle du dépôt
+  et doit employer un refus explicite.
+
+Ces dettes ne bloquent pas le GO G4, qui exécute les blobs et gardes épinglés.
+Elles interdisent de présenter les documents cités comme une photographie
+fraîche de toute la v6 avant leur alignement.
 
 ## Dette d'échelle et ordre utile
 
@@ -406,11 +438,13 @@ Ordre recommandé à Claude :
 
 1. réexécuter au plus une session G4 selon le GO re-pinné ci-dessus, puis auditer
    le reçu avant toute interprétation scientifique ;
-2. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
+2. remplacer l'`assert` de la porte Python et aligner les cinq documents
+   périmés avant de les invoquer comme autorités ;
+3. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
    re-régler la règle ;
-3. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
+4. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
    l'oracle et la preuve G16 avant toute nouvelle mesure ;
-4. fermer callbacks/exceptions et leurs fixtures réellement concurrentes ;
-5. reprendre ensuite les plafonds API.
+5. fermer callbacks/exceptions et leurs fixtures réellement concurrentes ;
+6. reprendre ensuite les plafonds API.
 
 GCP non utilisé par le présent audit.
