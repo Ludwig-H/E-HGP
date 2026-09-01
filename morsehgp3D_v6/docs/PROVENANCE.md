@@ -65,6 +65,16 @@ sector_kill,chord_kill,cell_grid,edge_cover}.hpp`,
 `src/forest/{plateau,fold,render}.hpp`, `src/parallel/{pool,sort}.hpp`,
 `oracle/obig.hpp`.
 
+Port GPU (1er septembre 2026, plan série C — blobs v5 épinglés) :
+`src/gpu/executor_pool.hpp` depuis `morsehgp3D_v5/src/gpu/executor_pool.hpp`
+(blob `4072df1c`) et `tests/executor_pool_gate.cpp` depuis
+`morsehgp3D_v5/tests/executor_pool_gate.cpp` (blob `21a6f267`) —
+`port_source_requalified` par la porte `mhgp6_executor_pool` (+ 3 mutants),
+avec UNE addition non-v5 : le confinement de panne
+(`submit_and_wait_contained`, `DeviceFatalError`, mutant
+`pool-close-fatal-missing`) — la dent v5 « close_fatal jamais appelé par
+les wrappers » réparée à la conception.
+
 ## Re-dérivés
 
 `src/pipeline/run.hpp` (orchestration réécrite : front fusionné, grand-livre

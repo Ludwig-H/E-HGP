@@ -83,6 +83,13 @@ mhgp6_gate(mhgp6_caps_refus 0 mhgp6_selftest ARGS --caps-refus)
 mhgp6_gate(mhgp6_caps_mutant_emission 4 mhgp6_selftest ARGS --caps-refus --inject=caps-drop-emission)
 mhgp6_gate(mhgp6_caps_mutant_late_wave 4 mhgp6_selftest ARGS --caps-refus --inject=caps-late-wave-check)
 set_tests_properties(mhgp6_caps_refus mhgp6_caps_mutant_emission mhgp6_caps_mutant_late_wave PROPERTIES TIMEOUT 600)
+# G0' du plan GPU v6 : pool d'executeurs (hote pur, port contractuel v5 +
+# confinement de panne repare — la dent v5).
+mhgp6_executable(mhgp6_executor_pool_gate tests/executor_pool_gate.cpp)
+mhgp6_gate(mhgp6_executor_pool 0 mhgp6_executor_pool_gate TIMEOUT 180)
+mhgp6_gate(mhgp6_executor_pool_mutant_serial 4 mhgp6_executor_pool_gate ARGS --inject=pool-serial TIMEOUT 180)
+mhgp6_gate(mhgp6_executor_pool_mutant_drop_exception 4 mhgp6_executor_pool_gate ARGS --inject=pool-drop-exception TIMEOUT 180)
+mhgp6_gate(mhgp6_executor_pool_mutant_close_fatal 4 mhgp6_executor_pool_gate ARGS --inject=pool-close-fatal-missing TIMEOUT 180)
 mhgp6_gate(mhgp6_sweep_mutant_depth 4 mhgp6_selftest ARGS --sweep-oracle --inject=sweep-nonstrict-depth)
 mhgp6_gate(mhgp6_fused_mutant_mask 4 mhgp6_selftest ARGS --fused-descent --inject=fused-mask-stuck)
 
