@@ -63,6 +63,7 @@ Usage : validate_v6_campaign.py OUT_DIR SOURCE_COMMIT SOURCE_PAYLOAD_SHA256 \\
 Sortie : 0 si valide, 1 sinon (les preuves partielles restent sur place).
 """
 import hashlib
+import math
 import os
 import re
 import sys
@@ -72,9 +73,12 @@ KMAX = 10
 # modifie jamais l'inventaire qu'il juge).
 AUX = ("topologie.txt", "conf_plan.txt", "bench_plan.txt", "queue_plan.txt",
        "sweep_plan.txt", "gpu_plan.txt", "frontier_plan.txt",
+       "matrice_plan.txt", "attrib_plan.txt", "gpuv6_plan.txt",
+       "gpuv6_inventaire.txt",
        "MANIFESTE_DISTANT.txt",
        "conf_tronquee.txt", "bench_tronquee.txt", "queue_tronquee.txt",
-       "sweep_tronquee.txt", "gpu_tronquee.txt", "frontier_tronquee.txt")
+       "sweep_tronquee.txt", "gpu_tronquee.txt", "frontier_tronquee.txt",
+       "matrice_tronquee.txt", "attrib_tronquee.txt", "gpuv6_tronquee.txt")
 FORBIDDEN = re.compile(r"REFUS|INVARIANT|DIVERGENCE|PLANCHER|Killed|bad_alloc|AddressSanitizer")
 # Motifs FATALS de la frontiere (sixieme tour) : appliques a TOUTES les
 # classes d'issue — un motif de capacite ne peut pas les masquer.
@@ -222,6 +226,144 @@ def frontier_sequence(params):
     return seq
 
 
+def matrice_passage_points(points, passage):
+    """Permutation NOMMEE d'un passage (§ 5.12/5.13) : aller = ordre des
+    points, retour = inverse, rotation8 = rotation cyclique fixe de 8."""
+    if passage == "aller":
+        return list(points)
+    if passage == "retour":
+        return list(reversed(points))
+    if passage == "rotation8":
+        if not points:
+            return []
+        rot = 8 % len(points)
+        return list(points[rot:]) + list(points[:rot])
+    return None
+
+
+def matrice_sequence(params, bad):
+    seq = []
+    points = expand_axis(params["points"])
+    if not points:
+        return seq
+    for pas_no, pas in enumerate(params["sequence"].split(), 1):
+        ordered = matrice_passage_points(points, pas)
+        if ordered is None:
+            bad.append(f"matrice_plan.txt: passage inconnu {pas}")
+            return []
+        for pos, pt in enumerate(ordered, 1):
+            parts = pt.split(":")
+            if len(parts) != 6:
+                bad.append(f"matrice_plan.txt: point mal forme {pt}")
+                return []
+            fam, n, t, i, j, d = parts
+            seq.append({"seq": str(len(seq) + 1),
+                        "name": f"mat_{fam}_n{n}_t{t}_i{i}_j{j}_{d}_p{pas_no}",
+                        "family": fam, "n": n, "mat_threads": t, "inflight": i,
+                        "join": j, "digest": d, "passage": str(pas_no), "pos": str(pos)})
+    return seq
+
+
+def attrib_sequence(params, bad):
+    seq = []
+    for pt in expand_axis(params["points"]):
+        parts = pt.split(":")
+        if len(parts) != 5:
+            bad.append(f"attrib_plan.txt: point mal forme {pt}")
+            return []
+        fam, n, t, i, j = parts
+        seq.append({"seq": str(len(seq) + 1), "name": f"attrib_{fam}_n{n}_t{t}_i{i}_j{j}",
+                    "family": fam, "n": n, "mat_threads": t, "inflight": i, "join": j})
+    return seq
+
+
+def gpuv6_sequence(params):
+    seq = []
+    if not expand_axis(params["gate_names"]):
+        return seq
+    seq.append({"seq": "1", "name": "gpuv6_build", "kind": "build"})
+    seq.append({"seq": "2", "name": "gpuv6_gates", "kind": "gates"})
+    for spec in expand_axis(params["pilot_specs"]):
+        fam, n = spec.split(":", 1)
+        seq.append({"seq": str(len(seq) + 1), "name": f"pilote_{fam}_n{n}",
+                    "family": fam, "n": n, "kind": "pilote"})
+    return seq
+
+
+def parse_cpu_list(text):
+    """`taskset -pc` peut imprimer des plages (0-15) ou des listes (0,2,4) :
+    normalisation en ensemble d'entiers ; None si illisible."""
+    cpus = set()
+    for tok in text.strip().split(","):
+        tok = tok.strip()
+        m = re.match(r"^(\d+)-(\d+)$", tok)
+        if m:
+            lo, hi = int(m.group(1)), int(m.group(2))
+            if hi < lo:
+                return None
+            cpus.update(range(lo, hi + 1))
+        elif re.match(r"^\d+$", tok):
+            cpus.add(int(tok))
+        else:
+            return None
+    return cpus
+
+
+def recompute_cpu_list(topo_text, want):
+    """Miroir Python de cpu_list_for du runner (§ 5.14.4) : lignes lscpu_p
+    triees (socket, core, cpu) DANS le cpuset autorise — premier fil de
+    chaque coeur, puis fils SMT restants. None si la topologie gravee ne
+    permet pas le recalcul (le juge refuse alors, fail-closed)."""
+    m = re.search(r"^cpuset_autorise=(\S+)$", topo_text, re.M)
+    if not m:
+        return None
+    allowed = parse_cpu_list(m.group(1))
+    if allowed is None:
+        return None
+    rows, grab = [], False
+    for ln in topo_text.splitlines():
+        if ln.strip() == "--- lscpu_p ---":
+            grab = True
+            continue
+        if grab:
+            mm = re.match(r"^(\d+),(\d+),(\d+)$", ln)
+            if not mm:
+                break
+            rows.append((int(mm.group(3)), int(mm.group(2)), int(mm.group(1))))
+    if not rows:
+        return None
+    rows.sort()
+    firsts, smts, seen = [], [], set()
+    for sock, core, cpu in rows:
+        if cpu not in allowed:
+            continue
+        if (sock, core) not in seen:
+            seen.add((sock, core))
+            firsts.append(cpu)
+        else:
+            smts.append(cpu)
+    ordered = firsts + smts
+    if len(ordered) < want:
+        return None
+    return ",".join(str(c) for c in ordered[:want])
+
+
+def load_pilote_juge():
+    """Le juge des records du pilote est LE MEME que la porte stub locale
+    (morsehgp3D_v6/tests/pilote_juge.py) — importe, jamais reimplemente
+    (§ 5.13.1 : une grammaire causale unique). None si absent (fail-closed
+    par l'appelant)."""
+    import importlib.util
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                        "morsehgp3D_v6", "tests", "pilote_juge.py")
+    if not os.path.exists(path):
+        return None
+    spec = importlib.util.spec_from_file_location("pilote_juge", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def check_plan(fname, params, listed, want, bad):
     if params is None:
         return
@@ -235,7 +377,7 @@ TIME_BINS = []  # instrumentation observee sur chaque run (huitieme tour)
 
 
 def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad,
-                 want_code="0", code_free=False):
+                 want_code="0", code_free=False, forbidden_free=False):
     """Verifications communes a tout run annonce. Retourne le corps .txt (ou
     None), le statut (ou None) et (mur_ms, duree_s, rss_kb). Chaque champ du
     statut est exige EXACTEMENT une fois, et le pic RSS est recoupe avec la
@@ -291,7 +433,10 @@ def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad,
         bad.append(f"{name}: .txt ABSENT")
         return None, st, (None, None, None)
     body = read_text(txt)
-    if not code_free:
+    if not code_free and not forbidden_free:
+        # forbidden_free (§ 5.14.4) : le transcript CTest agrege n'est PAS
+        # une surface produit — la porte negative mhgp6_pilote_refus_n y
+        # ecrit legitimement REFUS tout en etant Passed.
         fb = FORBIDDEN.search(body)
         if fb:
             bad.append(f"{name}: motif interdit ({fb.group(0)})")
@@ -409,6 +554,26 @@ def main():
         for key in ("run_timeout", "v5_gate_min", "v6_gate_min"):
             if not profile.get(key, "").strip():
                 bad.append(f"profil de campagne : cle {key} absente")
+        # AXES SERIE C (§ 5.12/5.13) : toujours emis par le cycle de vie —
+        # leur absence signale un profil de campagne fabrique autrement.
+        for key in ("matrice_points", "matrice_sequence", "matrice_timeout",
+                    "attrib_points", "attrib_timeout",
+                    "gpuv6_gate_names", "gpuv6_build_timeout", "gpuv6_gate_timeout",
+                    "gpuv6_pilot_specs", "gpuv6_pilot_min_lots", "gpuv6_pilot_timeout",
+                    "session_max_run_seconds", "session_invite_minutes",
+                    "max_run_seconds_effectif", "guest_shutdown_minutes_effectif"):
+            if not profile.get(key, "").strip():
+                bad.append(f"profil de campagne : cle {key} absente")
+        # § 5.13.4 : les axes de duree du profil pilotent les VRAIS
+        # coupe-circuits — un ecart entre l'axe et l'effectif signifie une
+        # surcharge d'environnement (profil effectif != canonique).
+        if profile.get("profil") == profile.get("profil_canonique"):
+            if profile.get("max_run_seconds_effectif") != profile.get("session_max_run_seconds"):
+                bad.append("profil de campagne : max_run_seconds_effectif != session_max_run_seconds "
+                           "alors que le profil se dit canonique")
+            if profile.get("guest_shutdown_minutes_effectif") != profile.get("session_invite_minutes"):
+                bad.append("profil de campagne : guest_shutdown_minutes_effectif != session_invite_minutes "
+                           "alors que le profil se dit canonique")
         # LIAISON au fichier canonique versionne (jamais un simple transport) :
         # le canon est PARSE (grammaire fermee, chaque axe exactement une
         # fois) et chaque axe du profil effectif lui est compare LITTERALEMENT
@@ -424,6 +589,14 @@ def main():
                           "QUEUE_SEEDS", "RUN_TIMEOUT", "THREADS_VM", "V5_GATE_MIN", "V6_GATE_MIN",
                           "SWEEP_SPECS", "SWEEP_REPEATS", "GPU_SPECS", "FRONTIER_SPECS",
                           "FRONTIER_TIMEOUT", "GPU_BUILD_TIMEOUT", "FRONTIER_ULIMIT_KB")
+            # Axes serie C OPTIONNELS dans le canon (les profils anterieurs
+            # ne les declarent pas ; le cycle de vie leur donne des valeurs
+            # par defaut « aucun » qui sautent les phases).
+            optional_axes = ("MATRICE_POINTS", "MATRICE_SEQUENCE", "MATRICE_TIMEOUT",
+                             "ATTRIB_POINTS", "ATTRIB_TIMEOUT",
+                             "GPUV6_GATE_NAMES", "GPUV6_BUILD_TIMEOUT", "GPUV6_GATE_TIMEOUT",
+                             "GPUV6_PILOT_SPECS", "GPUV6_PILOT_MIN_LOTS", "GPUV6_PILOT_TIMEOUT",
+                             "SESSION_MAX_RUN_SECONDS", "SESSION_INVITE_MINUTES")
             # Grammaire TOTALE : commentaire, ligne vide, ou axe connu a
             # guillemets equilibres — TOUT le reste est refuse.
             axis_line = re.compile(r'^([A-Z0-9_]+)=(?:"([^"]*)"|([^"\s]*))$')
@@ -436,7 +609,7 @@ def main():
                     continue
                 name = m.group(1)
                 value = m.group(2) if m.group(2) is not None else m.group(3)
-                if name not in axis_names:
+                if name not in axis_names and name not in optional_axes:
                     bad.append(f"profil canonique : axe inconnu {name}")
                     continue
                 if name in canon_axes:
@@ -450,6 +623,42 @@ def main():
             if canon_axes.get("PROFIL_NOM") and profile.get("profil_canonique") != canon_axes.get("PROFIL_NOM"):
                 bad.append(f"profil_canonique={profile.get('profil_canonique', '?')} != PROFIL_NOM du canon "
                            f"({canon_axes.get('PROFIL_NOM')})")
+            # LIAISON LITTERALE (§ 5.15.1) : DES QUE le profil se dit
+            # canonique (profil == profil_canonique, quel que soit le nom),
+            # TOUS les axes communs sont compares — axes historiques, treize
+            # axes serie C et deux durees de session. Seul un axe optionnel
+            # ABSENT d'un ancien canon est ignore. matrice_timeout 60 -> 61
+            # sous un nom canonique doit etre refuse ici, pas seulement dans
+            # la promotion decision_v1.
+            if profile.get("profil") and profile.get("profil") == profile.get("profil_canonique"):
+                full_axis_map = (
+                    ("conf_specs", "CONF_SPECS"), ("bench_specs", "BENCH_SPECS"),
+                    ("queue_families", "QUEUE_FAMILIES"), ("queue_n", "QUEUE_N"),
+                    ("queue_seeds", "QUEUE_SEEDS"), ("run_timeout", "RUN_TIMEOUT"),
+                    ("threads", "THREADS_VM"), ("v5_gate_min", "V5_GATE_MIN"),
+                    ("v6_gate_min", "V6_GATE_MIN"),
+                    ("sweep_specs", "SWEEP_SPECS"), ("sweep_repeats", "SWEEP_REPEATS"),
+                    ("gpu_specs", "GPU_SPECS"), ("frontier_specs", "FRONTIER_SPECS"),
+                    ("frontier_timeout", "FRONTIER_TIMEOUT"),
+                    ("gpu_build_timeout", "GPU_BUILD_TIMEOUT"),
+                    ("frontier_ulimit_kb", "FRONTIER_ULIMIT_KB"),
+                    ("matrice_points", "MATRICE_POINTS"), ("matrice_sequence", "MATRICE_SEQUENCE"),
+                    ("matrice_timeout", "MATRICE_TIMEOUT"),
+                    ("attrib_points", "ATTRIB_POINTS"), ("attrib_timeout", "ATTRIB_TIMEOUT"),
+                    ("gpuv6_gate_names", "GPUV6_GATE_NAMES"),
+                    ("gpuv6_build_timeout", "GPUV6_BUILD_TIMEOUT"),
+                    ("gpuv6_gate_timeout", "GPUV6_GATE_TIMEOUT"),
+                    ("gpuv6_pilot_specs", "GPUV6_PILOT_SPECS"),
+                    ("gpuv6_pilot_min_lots", "GPUV6_PILOT_MIN_LOTS"),
+                    ("gpuv6_pilot_timeout", "GPUV6_PILOT_TIMEOUT"),
+                    ("session_max_run_seconds", "SESSION_MAX_RUN_SECONDS"),
+                    ("session_invite_minutes", "SESSION_INVITE_MINUTES"))
+                for pk, ck in full_axis_map:
+                    if ck not in canon_axes:
+                        continue  # axe optionnel absent d'un ancien canon
+                    if profile.get(pk, "").split() != canon_axes[ck].split():
+                        bad.append(f"profil canonique : axe {pk} != {ck} du canon "
+                                   f"({profile.get(pk, '?')!r} vs {canon_axes[ck]!r})")
     # LIAISON AU MANIFESTE REVALIDE (cinquieme tour) : le canon fourni doit
     # etre EXACTEMENT le fichier epingle du commit — chemin, hash et taille
     # dans le manifeste dont le sha256 EST le pin grave dans chaque statut.
@@ -480,16 +689,18 @@ def main():
                or ent[1] != str(os.path.getsize(canonical_path)):
                 bad.append(f"profil canonique NON LIE au manifeste revalide ({canon_rel} : chemin, hash ou taille)")
     for tf in ("conf_tronquee.txt", "bench_tronquee.txt", "queue_tronquee.txt",
-               "sweep_tronquee.txt", "gpu_tronquee.txt", "frontier_tronquee.txt"):
+               "sweep_tronquee.txt", "gpu_tronquee.txt", "frontier_tronquee.txt",
+               "matrice_tronquee.txt", "attrib_tronquee.txt", "gpuv6_tronquee.txt"):
         p = os.path.join(out, tf)
         if os.path.exists(p):
             bad.append(f"{tf}: campagne TRONQUEE ({read_text(p).strip().replace(chr(10), ' ; ')})")
     topo = os.path.join(out, "topologie.txt")
+    topo_body = ""
     if not os.path.exists(topo):
         bad.append("topologie.txt: ABSENT")
     else:
-        tb = read_text(topo)
-        if not re.search(r"^nproc=\d+$", tb, re.M) or "--- lscpu ---" not in tb:
+        topo_body = read_text(topo)
+        if not re.search(r"^nproc=\d+$", topo_body, re.M) or "--- lscpu ---" not in topo_body:
             bad.append("topologie.txt: nproc ou lscpu absent")
 
     conf_params, conf_listed = read_plan(out, "conf_plan.txt", "conf_plan",
@@ -504,18 +715,30 @@ def main():
                                        ("specs", "threads", "build_timeout"), bad)
     frontier_params, frontier_listed = read_plan(out, "frontier_plan.txt", "frontier_plan",
                                                  ("specs", "threads", "timeout", "ulimit_kb"), bad)
+    matrice_params, matrice_listed = read_plan(out, "matrice_plan.txt", "matrice_plan",
+                                               ("points", "sequence"), bad)
+    attrib_params, attrib_listed = read_plan(out, "attrib_plan.txt", "attrib_plan",
+                                             ("points",), bad)
+    gpuv6_params, gpuv6_listed = read_plan(out, "gpuv6_plan.txt", "gpuv6_plan",
+                                           ("gate_names", "pilot_specs", "min_lots"), bad)
     conf_runs = conf_sequence(conf_params) if conf_params else []
     bench_runs = bench_sequence(bench_params) if bench_params else []
     queue_runs = queue_sequence(queue_params) if queue_params else []
     sweep_runs = sweep_sequence(sweep_params) if sweep_params else []
     gpu_runs = gpu_sequence(gpu_params) if gpu_params else []
     frontier_runs = frontier_sequence(frontier_params) if frontier_params else []
+    matrice_runs = matrice_sequence(matrice_params, bad) if matrice_params else []
+    attrib_runs = attrib_sequence(attrib_params, bad) if attrib_params else []
+    gpuv6_runs = gpuv6_sequence(gpuv6_params) if gpuv6_params else []
     check_plan("conf_plan.txt", conf_params, conf_listed, conf_runs, bad)
     check_plan("bench_plan.txt", bench_params, bench_listed, bench_runs, bad)
     check_plan("queue_plan.txt", queue_params, queue_listed, queue_runs, bad)
     check_plan("sweep_plan.txt", sweep_params, sweep_listed, sweep_runs, bad)
     check_plan("gpu_plan.txt", gpu_params, gpu_listed, gpu_runs, bad)
     check_plan("frontier_plan.txt", frontier_params, frontier_listed, frontier_runs, bad)
+    check_plan("matrice_plan.txt", matrice_params, matrice_listed, matrice_runs, bad)
+    check_plan("attrib_plan.txt", attrib_params, attrib_listed, attrib_runs, bad)
+    check_plan("gpuv6_plan.txt", gpuv6_params, gpuv6_listed, gpuv6_runs, bad)
     # Les plans annonces doivent EGALER le profil epingle (matrice fixee
     # independamment des sorties jugees).
     if profile:
@@ -529,7 +752,13 @@ def main():
                                               ("build_timeout", "gpu_build_timeout"))),
                 ("frontier_plan.txt", frontier_params, (("specs", "frontier_specs"), ("threads", "threads"),
                                                         ("timeout", "frontier_timeout"),
-                                                        ("ulimit_kb", "frontier_ulimit_kb")))):
+                                                        ("ulimit_kb", "frontier_ulimit_kb"))),
+                ("matrice_plan.txt", matrice_params, (("points", "matrice_points"),
+                                                      ("sequence", "matrice_sequence"))),
+                ("attrib_plan.txt", attrib_params, (("points", "attrib_points"),)),
+                ("gpuv6_plan.txt", gpuv6_params, (("gate_names", "gpuv6_gate_names"),
+                                                  ("pilot_specs", "gpuv6_pilot_specs"),
+                                                  ("min_lots", "gpuv6_pilot_min_lots")))):
             if params is None:
                 continue
             for plan_key, prof_key in checks:
@@ -670,6 +899,295 @@ def main():
             groups = sorted(table.values(), key=len, reverse=True)
             bad.append(f"fils {key}: INVARIANCE DU GRAND-LIVRE VIOLEE entre fils/repetitions "
                        f"(dissidents {', '.join(groups[1])})")
+
+    # PHASE MATRICE (§ 5.12/5.13) — contrastes CPU pre-enregistres au binaire
+    # v6 NON instrumente : affinite taskset DERIVEE et ATTESTEE (jamais
+    # l'affinite inchangee du shell), bras digest exact, bit-identite de
+    # l'objet (digest_all identique entre tous les points --digest d'une meme
+    # paire famille/n) et invariance du grand-livre entre fils/inflight/join.
+    matrice_digests = {}     # (family, n) -> {digest_all: [names]}
+    matrice_signatures = {}  # (family, n) -> {signature: [names]}
+    matrice_rows = []
+    matrice_bin_shas, attrib_bin_shas, pilote_bin_shas = set(), set(), set()
+    for run in matrice_runs:
+        name = run["name"]
+        body, st, meas = check_common(out, name, commit, payload_sha, manifest_sha,
+                                      run["mat_threads"], bad)
+        if body is None:
+            continue
+        check_pipeline_run(name, body, run["family"], run["n"], "3", "v6",
+                           run["mat_threads"], bad)
+        for field, want in (("family", run["family"]), ("n", run["n"]),
+                            ("mat_threads", run["mat_threads"]), ("inflight", run["inflight"]),
+                            ("join", run["join"]), ("digest", run["digest"]),
+                            ("passage", run["passage"]), ("pos", run["pos"]), ("seq", run["seq"])):
+            fm = re.search(rf"^{field}=(\S+)$", st, re.M)
+            if not fm or fm.group(1) != want:
+                bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} (annonce)")
+        # AFFINITE (§ 5.13.4) : liste demandee gravee, attestation effective
+        # d'un shell confine EGALE a la demande (plages normalisees), et
+        # cardinal == fils du point.
+        dem = re.search(r"^affinite_demandee=(\S+)$", st, re.M)
+        eff = re.search(r"^affinite_effective=(\S+)$", st, re.M)
+        if not dem or not eff:
+            bad.append(f"{name}: affinite_demandee/affinite_effective absentes du statut")
+        else:
+            sdem, seff = parse_cpu_list(dem.group(1)), parse_cpu_list(eff.group(1))
+            if sdem is None or seff is None or sdem != seff:
+                bad.append(f"{name}: affinite effective ({eff.group(1)}) != demandee ({dem.group(1)})")
+            elif len(sdem) != int(run["mat_threads"]):
+                bad.append(f"{name}: affinite de {len(sdem)} CPU != fils={run['mat_threads']}")
+            # § 5.14.4 : le masque est RECALCULE ici depuis la topologie
+            # gravee ((socket, core) dans le cpuset autorise) — jamais cru.
+            want_mask = recompute_cpu_list(topo_body, int(run["mat_threads"]))
+            if want_mask is None:
+                bad.append(f"{name}: topologie gravee insuffisante pour recalculer le masque")
+            elif dem.group(1) != want_mask:
+                bad.append(f"{name}: affinite demandee ({dem.group(1)}) != masque recalcule ({want_mask})")
+        bs = re.findall(r"^binaire_sha256=([0-9a-f]{64})$", st, re.M)
+        if len(bs) != 1:
+            bad.append(f"{name}: binaire_sha256 absent ou duplique")
+        else:
+            matrice_bin_shas.add(bs[0])
+        cmd = re.search(r"^commande=(.*)$", st, re.M)
+        argv = cmd.group(1).split() if cmd else []
+        if len(argv) < 4 or argv[0] != "taskset" or argv[1] != "-c" \
+           or (dem and argv[2] != dem.group(1)):
+            bad.append(f"{name}: commande gravee sans confinement taskset -c <liste demandee>")
+        elif os.path.basename(argv[3]) != "mhgp6":
+            bad.append(f"{name}: binaire de matrice inattendu ({argv[3]}) — mhgp6 exige")
+        want_args = {f"--family={run['family']}", f"--n={run['n']}", "--s=8", "--smax=11",
+                     "--seed=3", f"--threads={run['mat_threads']}",
+                     f"--fold-inflight={run['inflight']}", f"--fold-join={run['join']}"}
+        if not want_args.issubset(argv):
+            bad.append(f"{name}: commande gravee sans les arguments contractuels du point")
+        if run["digest"] == "avec":
+            if "--digest" not in argv:
+                bad.append(f"{name}: bras avec-digest sans --digest dans la commande gravee")
+            digests = re.findall(r"^digest_all=([0-9a-f]{64})$", body, re.M)
+            if len(digests) != 1:
+                bad.append(f"{name}: digest_all present {len(digests)} fois (attendu 1)")
+            else:
+                matrice_digests.setdefault((run["family"], run["n"]), {}) \
+                    .setdefault(digests[0], []).append(name)
+        else:
+            if "--digest" in argv:
+                bad.append(f"{name}: --digest dans la commande gravee d'un bras sans-digest")
+            if ANY_DIGEST.search(body):
+                bad.append(f"{name}: digest imprime sur un bras sans-digest (mur contamine)")
+        for pat in SWEEP_INVARIANT_SINGLE:
+            cnt = len(re.findall(pat, body, re.M))
+            if cnt != 1:
+                bad.append(f"{name}: ligne invariante {pat} presente {cnt} fois (attendu 1)")
+        matrice_signatures.setdefault((run["family"], run["n"]), {}) \
+            .setdefault(thread_invariant_signature(body), []).append(name)
+        matrice_rows.append((run, meas))
+    for key, table in sorted(matrice_digests.items()):
+        if len(table) > 1:
+            groups = sorted(table.values(), key=len, reverse=True)
+            bad.append(f"matrice {key}: digest_all NON identique entre bras --digest "
+                       f"(dissidents {', '.join(groups[1])})")
+    for key, table in sorted(matrice_signatures.items()):
+        if len(table) > 1:
+            groups = sorted(table.values(), key=len, reverse=True)
+            bad.append(f"matrice {key}: INVARIANCE DU GRAND-LIVRE VIOLEE entre points "
+                       f"(dissidents {', '.join(groups[1])})")
+
+    # PHASE ATTRIBUTION (§ 5.12) — mhgp6_profile : attribution seulement,
+    # jamais un mur. L'autorite de grammaire complete est la porte
+    # tests/profil_gate.py ; ici, les invariants transportables : signature
+    # du build, fold_join signe, records par K, somme RECALCULEE aux seuils
+    # serres du § 5.13 (0.0051 / 0.006).
+    attrib_rows = []
+    for run in attrib_runs:
+        name = run["name"]
+        body, st, meas = check_common(out, name, commit, payload_sha, manifest_sha,
+                                      run["mat_threads"], bad)
+        if body is None:
+            continue
+        check_pipeline_run(name, body, run["family"], run["n"], "3", "v6",
+                           run["mat_threads"], bad)
+        for field, want in (("family", run["family"]), ("n", run["n"]),
+                            ("mat_threads", run["mat_threads"]), ("inflight", run["inflight"]),
+                            ("join", run["join"]), ("seq", run["seq"]),
+                            ("authority", "attribution_seulement")):
+            fm = re.search(rf"^{field}=(\S+)$", st, re.M)
+            if not fm or fm.group(1) != want:
+                bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} (annonce)")
+        dem = re.search(r"^affinite_demandee=(\S+)$", st, re.M)
+        eff = re.search(r"^affinite_effective=(\S+)$", st, re.M)
+        if not dem or not eff:
+            bad.append(f"{name}: affinite_demandee/affinite_effective absentes du statut")
+        else:
+            sdem, seff = parse_cpu_list(dem.group(1)), parse_cpu_list(eff.group(1))
+            if sdem is None or seff is None or sdem != seff or len(sdem) != int(run["mat_threads"]):
+                bad.append(f"{name}: affinite non attestee ou incoherente avec fils")
+            want_mask = recompute_cpu_list(topo_body, int(run["mat_threads"]))
+            if want_mask is None:
+                bad.append(f"{name}: topologie gravee insuffisante pour recalculer le masque")
+            elif dem.group(1) != want_mask:
+                bad.append(f"{name}: affinite demandee ({dem.group(1)}) != masque recalcule ({want_mask})")
+        bs = re.findall(r"^binaire_sha256=([0-9a-f]{64})$", st, re.M)
+        if len(bs) != 1:
+            bad.append(f"{name}: binaire_sha256 absent ou duplique")
+        else:
+            attrib_bin_shas.add(bs[0])
+        # § 5.15.1 : la commande d'attribution est verifiee comme celle de
+        # la matrice — confinement taskset, binaire PROFILE, arguments du
+        # point ; retirer taskset -c ne passe plus malgre les attestations.
+        cmd = re.search(r"^commande=(.*)$", st, re.M)
+        argv = cmd.group(1).split() if cmd else []
+        if len(argv) < 4 or argv[0] != "taskset" or argv[1] != "-c" \
+           or (dem and argv[2] != dem.group(1)):
+            bad.append(f"{name}: commande gravee sans confinement taskset -c <liste demandee>")
+        elif os.path.basename(argv[3]) != "mhgp6_profile":
+            bad.append(f"{name}: binaire d'attribution inattendu ({argv[3]}) — mhgp6_profile exige")
+        want_args = {f"--family={run['family']}", f"--n={run['n']}", "--s=8", "--smax=11",
+                     "--seed=3", f"--threads={run['mat_threads']}",
+                     f"--fold-inflight={run['inflight']}", f"--fold-join={run['join']}"}
+        if not want_args.issubset(argv):
+            bad.append(f"{name}: commande gravee sans les arguments contractuels du point")
+        kind = re.findall(r"^profil_kind=reduce_v2 fold_join=(\d) ", body, re.M)
+        if len(kind) != 1 or kind[0] != run["join"]:
+            bad.append(f"{name}: profil_kind=reduce_v2 fold_join={run['join']} absent ou multiple")
+        reduce_rows = re.findall(r"^profil_reduce K=(\d+) (.*)$", body, re.M)
+        intern_rows = re.findall(r"^profil_intern K=(\d+) .*$", body, re.M)
+        # § 5.14.4 : ENSEMBLE EXACT des K (jamais un plancher) et finitude
+        # de TOUS les champs — smax=11 => K1..10, aucun trou, aucun double.
+        want_ks = [str(k) for k in range(1, KMAX + 1)]
+        if [k for k, _ in reduce_rows] != want_ks or intern_rows != want_ks:
+            bad.append(f"{name}: ensembles de K hors contrat "
+                       f"(reduce={[k for k, _ in reduce_rows]}, intern={intern_rows}, attendu K1..{KMAX})")
+        for k, row in reduce_rows:
+            f = dict((kv.split("=", 1)[0], kv.split("=", 1)[1]) for kv in row.split())
+            try:
+                vals = {kk: float(vv) for kk, vv in f.items()}
+                if any(not math.isfinite(v) for v in vals.values()):
+                    bad.append(f"{name}: champ non fini dans profil_reduce K={k}")
+                comp = sum(vals[kk] for kk in ("init", "touch", "pre", "unite",
+                                               "post_remplissage", "materialisation_tri_copie",
+                                               "liveness", "partition", "liberation"))
+                if abs(comp - vals["somme"]) > 0.0051:
+                    bad.append(f"{name}: somme imprimee != somme des neuf composantes (K={k})")
+                if abs(comp + vals["residuel"] - vals["mur_reduce_interne"]) > 0.006:
+                    bad.append(f"{name}: fermeture somme+residuel != mur_reduce_interne (K={k})")
+            except (KeyError, ValueError):
+                bad.append(f"{name}: record profil_reduce incomplet ou non numerique (K={k})")
+        attrib_rows.append((run, meas))
+
+    # PHASE GPUV6 (§ 5.12) — la serie C : build CUDA signe, inventaire EXACT
+    # des portes (chaque nom Passed ET total == inventaire, jamais un
+    # plancher), puis pilote juge par LE MEME juge que la porte stub
+    # (tests/pilote_juge.py importe — fail-closed s'il est absent).
+    pilote_bodies = {}
+    if gpuv6_runs:
+        juge_mod = load_pilote_juge()
+        plan_min_lots = int(gpuv6_params["min_lots"]) if gpuv6_params["min_lots"].isdigit() else 0
+        gate_names = expand_axis(gpuv6_params["gate_names"])
+        build_ident = {}  # § 5.15.2 : nom / UUID / CC du build, lies aux pilotes
+        # INVENTAIRE PRE-EXECUTION (§ 5.14.4) : le runner liste (ctest -N)
+        # AVANT de courir ; le fichier grave doit porter EXACTEMENT les noms
+        # du plan — un 17e test decouvert apres coup a deja depense.
+        inv_path = os.path.join(out, "gpuv6_inventaire.txt")
+        if not os.path.exists(inv_path):
+            bad.append("gpuv6_inventaire.txt: ABSENT (inventaire pre-execution non grave)")
+        else:
+            inv_names = sorted(re.findall(r"Test +#\d+: ([A-Za-z0-9_]+)", read_text(inv_path)))
+            if inv_names != sorted(gate_names):
+                bad.append(f"gpuv6_inventaire.txt: noms != plan ({len(inv_names)} vs {len(gate_names)})")
+        for run in gpuv6_runs:
+            name = run["name"]
+            # § 5.14.4 : le transcript CTest agrege n'est pas une surface
+            # produit (mhgp6_pilote_refus_n y ecrit REFUS en etant Passed).
+            body, st, meas = check_common(out, name, commit, payload_sha, manifest_sha,
+                                          profile.get("threads", "0"), bad,
+                                          forbidden_free=(run["kind"] == "gates"))
+            if body is None:
+                continue
+            if run["kind"] == "build":
+                if not re.search(r"^nvcc=\S+$", body, re.M):
+                    bad.append(f"{name}: provenance nvcc absente")
+                mident = re.search(r"^(NVIDIA [^,]*), (GPU-[0-9a-f-]+), (\d+\.\d+), \d+", body, re.M)
+                if not mident:
+                    bad.append(f"{name}: identite device (nom, UUID, CC, driver) absente")
+                else:
+                    build_ident = {"name": mident.group(1), "uuid": mident.group(2),
+                                   "cc": mident.group(3)}
+            elif run["kind"] == "gates":
+                # Les DEUX libelles de resume CTest sont admis (<= 4.3 avec
+                # « , 0 tests failed », 4.4+ sans) — meme doctrine que le
+                # lifecycle (7e346926) : 100% exige, total == inventaire.
+                total = re.search(r"100% tests passed(?:, 0 tests failed)? out of (\d+)", body)
+                if not total or total.group(1) != str(len(gate_names)):
+                    bad.append(f"{name}: resume ctest != 100% sur {len(gate_names)} portes "
+                               f"({total.group(0) if total else 'resume ctest absent'})")
+                for nm in gate_names:
+                    if not re.search(rf"Test +#\d+: {re.escape(nm)} \.+ +Passed", body):
+                        bad.append(f"{name}: porte gpu {nm} absente ou non Passed")
+            else:
+                for field, want in (("family", run["family"]), ("n", run["n"]),
+                                    ("kind", "pilote"), ("min_lots", gpuv6_params["min_lots"]),
+                                    ("repeat", "4"), ("ordre", "cpu-device")):
+                    fm = re.search(rf"^{field}=(\S+)$", st, re.M)
+                    if not fm or fm.group(1) != want:
+                        bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} (annonce)")
+                bs = re.findall(r"^binaire_sha256=([0-9a-f]{64})$", st, re.M)
+                if len(bs) != 1:
+                    bad.append(f"{name}: binaire_sha256 absent ou duplique")
+                else:
+                    pilote_bin_shas.add(bs[0])
+                # § 5.14.3 : le juge fail-fast du runner a laisse un verdict
+                # grave par pilote — exige et conforme.
+                juge_path = os.path.join(out, name + ".juge.txt")
+                if not os.path.exists(juge_path):
+                    bad.append(f"{name}: verdict du juge embarque absent ({name}.juge.txt)")
+                elif "pilote juge conforme" not in read_text(juge_path):
+                    bad.append(f"{name}: verdict du juge embarque non conforme")
+                cmd = re.search(r"^commande=(.*)$", st, re.M)
+                cmd_full = cmd.group(1) if cmd else ""
+                for tok in (f"--family={run['family']}", f"--n={run['n']}", "--repeat=4",
+                            "--ordre=cpu-device", f"--min-lots={gpuv6_params['min_lots']}"):
+                    if tok not in cmd_full:
+                        bad.append(f"{name}: commande gravee sans {tok}")
+                for marker in ("--- gpu_avant ---", "--- gpu_apres ---"):
+                    idx = body.find(marker)
+                    nxt = body[idx + len(marker):].strip().splitlines()
+                    snap = re.match(r"^(GPU-[0-9a-f-]+), \d+, \d+, \d+", nxt[0]) if (idx >= 0 and nxt) else None
+                    if not snap:
+                        bad.append(f"{name}: instantane nvidia-smi {marker} absent ou mal forme")
+                    elif build_ident and snap.group(1) != build_ident["uuid"]:
+                        bad.append(f"{name}: UUID {marker} ({snap.group(1)}) != UUID du build "
+                                   f"({build_ident['uuid']}) — device change en cours de session")
+                if juge_mod is None:
+                    bad.append(f"{name}: juge du pilote introuvable "
+                               f"(morsehgp3D_v6/tests/pilote_juge.py) — fail-closed")
+                else:
+                    # § 5.15.2 : identite attendue liee au plan (famille, n,
+                    # graine 3, fils du profil) — le juge la verifie dans
+                    # l'en-tete, puis nom/SM sont lies au build.
+                    fils_att = int(profile.get("threads", "0")) if profile.get("threads", "0").isdigit() else None
+                    verdict = juge_mod.juger(body, "cpu-device", repeat=4, min_lots=plan_min_lots,
+                                             famille=run["family"], n=int(run["n"]),
+                                             graine=3, fils=fils_att)
+                    if verdict is not None:
+                        bad.append(f"{name}: records du pilote non conformes ({verdict})")
+                    tete = juge_mod.entete(body)
+                    if isinstance(tete, dict) and build_ident:
+                        if tete["device"] != build_ident["name"]:
+                            bad.append(f"{name}: device de l'en-tete ({tete['device']!r}) != nom du build "
+                                       f"({build_ident['name']!r})")
+                        if tete["sm"] != build_ident["cc"]:
+                            bad.append(f"{name}: sm de l'en-tete ({tete['sm']}) != compute capability du build "
+                                       f"({build_ident['cc']})")
+                pilote_bodies[name] = (run, body, meas)
+    # IDENTITE DES BINAIRES par phase (§ 5.14.4) : un seul hash par phase —
+    # un binaire change en cours de phase invalide la comparaison.
+    for phase_name, shas, nruns in (("matrice", matrice_bin_shas, len(matrice_runs)),
+                                    ("attribution", attrib_bin_shas, len(attrib_runs)),
+                                    ("pilote", pilote_bin_shas,
+                                     len([r for r in gpuv6_runs if r["kind"] == "pilote"]))):
+        if nruns > 0 and len(shas) != 1:
+            bad.append(f"{phase_name}: binaire_sha256 non unique sur la phase ({len(shas)} valeurs)")
 
     # PHASE GPU — contrats v5 herites de validate_v5_campaign.py. CONTROLE
     # HISTORIQUE NON AUTORITAIRE (cinquieme tour) : la v5 ne mesure ni un GPU
@@ -922,10 +1440,14 @@ def main():
     # artefact d'un run annonce (.txt/.status/.status.time) ou un auxiliaire
     # connu — quelle que soit son extension (audit GCP v6, P1).
     known = {r["name"] for r in conf_runs + bench_runs + queue_runs
-             + sweep_runs + gpu_runs + frontier_runs}
+             + sweep_runs + gpu_runs + frontier_runs
+             + matrice_runs + attrib_runs + gpuv6_runs}
     allowed = set(AUX)
     for name in known:
         allowed.update((f"{name}.txt", f"{name}.status", f"{name}.status.time"))
+    for r in gpuv6_runs:
+        if r["kind"] == "pilote":
+            allowed.add(f"{r['name']}.juge.txt")
     for f in sorted(os.listdir(out)):
         full = os.path.join(out, f)
         if os.path.islink(full):
@@ -1029,6 +1551,46 @@ def main():
     with open(tmp, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
     os.replace(tmp, os.path.join(resume_dir, "gpu_resume.txt"))
+
+    lines = [
+        "# matrice_resume — murs par point pre-enregistre (contrastes fils/inflight/join/",
+        "# digest ; dispersion entre passages, JAMAIS une conclusion — la decision passe",
+        "# par l'arbre pre-enregistre du § 5.10 apres audit).",
+        "famille\tn\tfils\tinflight\tjoin\tdigest\tpassage\tmur_ms\tduree_s\trss_kb",
+    ]
+    for run, meas in matrice_rows:
+        lines.append("\t".join([run["family"], run["n"], run["mat_threads"], run["inflight"],
+                                run["join"], run["digest"], run["passage"], fmt(meas[0]),
+                                str(meas[1]) if meas[1] is not None else "NA",
+                                str(meas[2]) if meas[2] is not None else "NA"]))
+    tmp = os.path.join(resume_dir, "matrice_resume.txt.tmp")
+    with open(tmp, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+    os.replace(tmp, os.path.join(resume_dir, "matrice_resume.txt"))
+
+    lines = [
+        "# gpuv6_resume — records RETENUS du pilote serie C (echauffement exclu) :",
+        "# murs CPU/route device et etages par repetition ; faits seulement, la parite",
+        "# est jugee par le meme juge que la porte stub (pilote_juge.juger).",
+        "famille\tn\trepetition\tordre\tmur_cpu_ms\tmur_route_device_ms\tprefiltre_census_cpu_ms\troute_device_etage_ms\tkernels_ms\th2d_ms\td2h_ms\tlots",
+    ]
+    for name in sorted(pilote_bodies):
+        run, body, meas = pilote_bodies[name]
+        for ln in body.splitlines():
+            if not ln.startswith("repetition=") or "retenue=OUI" not in ln:
+                continue
+            f = dict(kv.split("=", 1) for kv in ln.split() if "=" in kv)
+            lines.append("\t".join([run["family"], run["n"], f.get("repetition", "?"),
+                                    f.get("ordre", "?"), f.get("mur_cpu_ms", "NA"),
+                                    f.get("mur_route_device_ms", "NA"),
+                                    f.get("prefiltre_census_cpu_ms", "NA"),
+                                    f.get("route_device_etage_ms", "NA"),
+                                    f.get("kernels_ms", "NA"), f.get("h2d_ms", "NA"),
+                                    f.get("d2h_ms", "NA"), f.get("lots", "NA")]))
+    tmp = os.path.join(resume_dir, "gpuv6_resume.txt.tmp")
+    with open(tmp, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+    os.replace(tmp, os.path.join(resume_dir, "gpuv6_resume.txt"))
 
     lines = [
         "# frontier_resume — codes, murs et RSS de la frontiere d'echelle SOUS PLAFOND",

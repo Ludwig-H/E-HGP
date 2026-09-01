@@ -19,7 +19,19 @@
 #   7. falsifications du dossier rapatrie (statut supprime, pin altere,
 #      digest sur un run de bench, compteurs non deterministes, fichier en
 #      trop, plan altere, remote_rc non nul, compteur de queue absent) :
-#      validateur rc=1 sur chacune.
+#      validateur rc=1 sur chacune ;
+#   8. SERIE C (§ 5.12-5.15) : matrice (16 points x aller/retour/rotation8,
+#      taskset atteste et recalcule), attribution, build/inventaire/portes/
+#      pilote gpuv6 de bout en bout, puis falsifications a cause exacte
+#      (plan manquant, troncature, parite par signatures, repetition
+#      manquante, ABBA, octets, chronos, porte retiree, affinite, somme,
+#      liaison litterale du canon, identite device/en-tete, UUID, hashes de
+#      binaires, juge embarque) ;
+#   8bis. fail-fast du runner : inventaire -N intrus = AUCUNE porte ; juge
+#      en refus = famille suivante jamais consommee ; matrice tronquee =
+#      bloc GPU v6 saute ;
+#   9. budget du profil canonique serie C rejoue avec l'estimateur REEL
+#      extrait du cycle de vie (fenetre 7 h gravee).
 # Code de sortie : 0 conforme, 1 au moins un scenario en echec.
 set -euo pipefail
 
@@ -170,7 +182,16 @@ echo "Build cuda_12.9.r12.9/compiler.36037853_0"
 EOF
 cat > "${FAKE}/nvidia-smi" <<'EOF'
 #!/usr/bin/env bash
-echo "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.65.06"
+# Reponses par requete : identite complete (build serie C), instantane
+# temperature/horloges (pilote), sinon la ligne historique (phase v5).
+case "$*" in
+  *name,uuid,compute_cap,driver_version*)
+    echo "NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-11111111-2222-3333-4444-555555555555, 12.0, 580.65.06" ;;
+  *uuid,temperature.gpu,clocks.sm,clocks.mem*)
+    echo "GPU-11111111-2222-3333-4444-555555555555, 45, 2100, 8001" ;;
+  *)
+    echo "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.65.06" ;;
+esac
 EOF
 cat > "${FAKE}/cmake" <<'EOF'
 #!/usr/bin/env bash
@@ -243,6 +264,84 @@ EOF
 chmod +x "${FAKE}/nvcc" "${FAKE}/nvidia-smi" "${FAKE}/cmake" \
   "${FAKE}/mhgp5_device_witness" "${FAKE}/mhgp5_cuda"
 
+# ---- Faux outillage SERIE C (§ 5.12) : ctest a inventaire exact, binaire
+# de profil (attribution) et pilote mhgp6_cuda a records conformes au juge.
+cat > "${FAKE}/ctest" <<'EOF'
+#!/usr/bin/env bash
+# -N = listage sans execution (inventaire pre-execution du runner) ;
+# FAKE_CTEST_EXTRA=1 ajoute un 17e test intrus au listage.
+case " $* " in
+  *" -N "*)
+    i=0
+    for nm in ${GPUV6_GATE_NAMES:-}; do
+      i=$((i + 1))
+      echo "  Test #${i}: ${nm}"
+    done
+    if [ "${FAKE_CTEST_EXTRA:-0}" = "1" ]; then
+      i=$((i + 1))
+      echo "  Test #${i}: mhgp6_intrus"
+    fi
+    echo ""
+    echo "Total Tests: ${i}"
+    exit 0 ;;
+esac
+i=0
+for nm in ${GPUV6_GATE_NAMES:-}; do
+  i=$((i + 1))
+  echo "      Start ${i}: ${nm}"
+  echo "Test #${i}: ${nm} ...................................   Passed    0.10 sec"
+done
+echo ""
+echo "100% tests passed, 0 tests failed out of ${i}"
+EOF
+cat > "${FAKE}/mhgp6_profile" <<'EOF'
+#!/usr/bin/env bash
+join=0
+for a in "$@"; do
+  case "$a" in --fold-join=*) join="${a#*=}" ;; esac
+done
+"$(dirname "$0")/mhgp6" "$@"
+echo "profil_kind=reduce_v2 fold_join=${join} pic_workers_b=2 pic_reduce_actif=1"
+for k in 1 2 3 4 5 6 7 8 9 10; do
+  echo "profil_reduce K=${k} init=0.001 touch=0.001 pre=0.001 unite=0.001 post_remplissage=0.001 materialisation_tri_copie=0.001 liveness=0.001 partition=0.001 liberation=0.001 somme=0.009 mur_reduce_interne=0.010 residuel=0.001 reduce_interne_debut=0.000 reduce_interne_fin=0.010 a_debut=0.000 a_fin=0.000 duree_digest_foret_k_ms=0.000"
+  echo "profil_intern K=${k} alloc_empreintes=0.001 offsets_diffusion=0.001 intern_tri=0.001 fusion_et_lib_parts=0.001 remap_et_lib_pools=0.001"
+done
+EOF
+cat > "${FAKE}/mhgp6_cuda" <<'EOF'
+#!/usr/bin/env bash
+fam=""; n=0; repeat=4; ordre="cpu-device"; minlots=0; fils=8; graine=3
+for a in "$@"; do
+  case "$a" in
+    --family=*) fam="${a#*=}" ;;
+    --n=*) n="${a#*=}" ;;
+    --repeat=*) repeat="${a#*=}" ;;
+    --ordre=*) ordre="${a#*=}" ;;
+    --min-lots=*) minlots="${a#*=}" ;;
+    --threads=*) fils="${a#*=}" ;;
+    --seed=*) graine="${a#*=}" ;;
+  esac
+done
+inverse="device-cpu"; [ "${ordre}" = "device-cpu" ] && inverse="cpu-device"
+# Identite coherente avec le faux nvidia-smi (§ 5.15.2) ; lot=500 pour que
+# lot_effectif=500 = min(lot, nb_total=1000) et lots=2.
+echo "pilote_serie_c device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0 arch_compilees=120 famille=${fam} n=${n} graine=${graine} fils=${fils} lot=500"
+r=0
+while [ "${r}" -le "${repeat}" ]; do
+  if [ "${r}" -eq 0 ]; then ret="NON"; o="${ordre}"; else
+    ret="OUI"; m=$(((r - 1) % 4))
+    if [ "${m}" -eq 0 ] || [ "${m}" -eq 3 ]; then o="${ordre}"; else o="${inverse}"; fi
+  fi
+  sig_dev="abababababababababababababababababababababababababababababababab"
+  if [ "${FAKE_PILOT_BAD:-0}" = "1" ] && [ "${r}" -eq 2 ]; then
+    sig_dev="cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+  fi
+  echo "repetition=${r} retenue=${ret} ordre=${o} parite=OUI mur_cpu_ms=100.0 mur_route_device_ms=50.0 prefiltre_census_cpu_ms=40.0 route_device_etage_ms=45.0 wire_ms=5.0 setup_alloc_ms=1.0 h2d_ms=10.0 kernels_ms=20.0 d2h_ms=5.0 rebuild_ms=4.0 nb_total=1000 lot_effectif=500 h2d_octets_index=1234 h2d_octets_boules=112000 h2d_octets_sentinelles=100000 d2h_octets=100000 lots=2 digest_all=dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd signature_cpu=abababababababababababababababababababababababababababababababab signature_device=${sig_dev}"
+  r=$((r + 1))
+done
+exit 0
+EOF
+chmod +x "${FAKE}/ctest" "${FAKE}/mhgp6_profile" "${FAKE}/mhgp6_cuda"
+
 # Matrices reduites : DEUX configs de bench (les deux parites ABBA). Les
 # surcharges de scenario ("$@") viennent EN DERNIER : env garde la derniere.
 # Le PROFIL DE CAMPAGNE est ecrit une fois (matrice epinglee independamment
@@ -282,6 +381,25 @@ MANIFESTE="${WORK}/manifest_revalide.txt"
     "gcp-migration/profils/decision_v1.env"
 } > "${MANIFESTE}"
 PIN_MANIFEST="$(sha256sum "${MANIFESTE}" | awk '{print $1}')"
+# Cles serie C (§ 5.12/5.13) : toujours emises par le cycle de vie — les
+# fixtures de profil du selftest les portent aussi (defauts du cycle de vie).
+emit_serie_c_defaults() {
+  echo "matrice_points=aucun"
+  echo "matrice_sequence=aller retour aller"
+  echo "matrice_timeout=2400"
+  echo "attrib_points=aucun"
+  echo "attrib_timeout=2400"
+  echo "gpuv6_gate_names=aucun"
+  echo "gpuv6_build_timeout=1800"
+  echo "gpuv6_gate_timeout=3600"
+  echo "gpuv6_pilot_specs=aucun"
+  echo "gpuv6_pilot_min_lots=2"
+  echo "gpuv6_pilot_timeout=3600"
+  echo "session_max_run_seconds=28800"
+  echo "session_invite_minutes=470"
+  echo "max_run_seconds_effectif=28800"
+  echo "guest_shutdown_minutes_effectif=470"
+}
 PROFILE="${WORK}/profil_campagne.txt"
 {
   echo "profil=selftest_reduit_v1"
@@ -303,6 +421,7 @@ PROFILE="${WORK}/profil_campagne.txt"
   echo "frontier_timeout=60"
   echo "gpu_build_timeout=60"
   echo "frontier_ulimit_kb=60000000"
+  emit_serie_c_defaults
 } > "${PROFILE}"
 run_runner() { # $1 = dossier out ; le reste = env supplementaire
   local out="$1"; shift
@@ -586,6 +705,248 @@ check_true "mutant coordonne (canon reduit auto-declare + hash concordant) : TUE
   bash -c "[ '${rc}' -eq 1 ] && printf '%s\n' \"\$1\" | grep -q 'NON LIE au manifeste revalide' \
     && ! printf '%s\n' \"\$1\" | grep -q 'decision_complete'" _ "${VOUT5}"
 
+# ---- 8. SERIE C (§ 5.12/5.13) : matrice CPU + attribution + build/portes/
+# pilote gpuv6 de bout en bout (faux outillage), puis les falsifications
+# exigees par le GO conditionnel — plan manquant, parite falsifiee (les
+# SIGNATURES sont l'autorite, jamais le booleen), repetition manquante,
+# ordre hors ABBA, octets falsifies, chrono non termine, troncature gravee,
+# porte gpu absente de l'inventaire, affinite non attestee, somme
+# d'attribution faussee.
+GATE_NAMES_C="mhgp6_device_witness mhgp6_device_witness_mutant_carry mhgp6_device_witness_mutant_skip_write mhgp6_device_witness_mutant_skip_native mhgp6_census_device mhgp6_census_device_mutant_range_le mhgp6_census_device_mutant_stack mhgp6_census_device_mutant_swap mhgp6_census_device_mutant_nonstrict mhgp6_census_device_mutant_skip_write mhgp6_census_device_mutant_nshell mhgp6_census_device_mutant_skip_count mhgp6_pilote_parite_400 mhgp6_pilote_refus_n mhgp6_pilote_lot17 mhgp6_pilote_mutant_base"
+MAT_POINTS_C="uniform:16000:2:2:0:sans uniform:16000:1:1:0:sans uniform:16000:2:2:1:avec"
+CANON_C="${WORK}/serie_c_selftest_v1.env"
+{
+  echo 'PROFIL_NOM="serie_c_selftest_v1"'
+  echo 'CONF_SPECS="uniform:50000"'
+  echo 'BENCH_SPECS="aucun"'
+  echo 'QUEUE_FAMILIES="aucun"'
+  echo 'QUEUE_N="64000"'
+  echo 'QUEUE_SEEDS="3"'
+  echo 'RUN_TIMEOUT=60'
+  echo 'THREADS_VM=8'
+  echo 'V5_GATE_MIN=40'
+  echo 'V6_GATE_MIN=60'
+  echo 'SWEEP_SPECS="aucun"'
+  echo 'SWEEP_REPEATS=1'
+  echo 'GPU_SPECS="aucun"'
+  echo 'FRONTIER_SPECS="aucun"'
+  echo 'FRONTIER_TIMEOUT=60'
+  echo 'GPU_BUILD_TIMEOUT=60'
+  echo 'FRONTIER_ULIMIT_KB=0'
+  echo "MATRICE_POINTS=\"${MAT_POINTS_C}\""
+  echo 'MATRICE_SEQUENCE="aller retour rotation8"'
+  echo 'MATRICE_TIMEOUT=60'
+  echo 'ATTRIB_POINTS="uniform:16000:2:2:0"'
+  echo 'ATTRIB_TIMEOUT=60'
+  echo "GPUV6_GATE_NAMES=\"${GATE_NAMES_C}\""
+  echo 'GPUV6_BUILD_TIMEOUT=60'
+  echo 'GPUV6_GATE_TIMEOUT=60'
+  echo 'GPUV6_PILOT_SPECS="uniform:50000"'
+  echo 'GPUV6_PILOT_MIN_LOTS=2'
+  echo 'GPUV6_PILOT_TIMEOUT=60'
+  echo 'SESSION_MAX_RUN_SECONDS=18000'
+  echo 'SESSION_INVITE_MINUTES=270'
+} > "${CANON_C}"
+CANON_C_SHA="$(sha256sum "${CANON_C}" | awk '{print $1}')"
+MANIFESTE_C="${WORK}/manifest_serie_c.txt"
+{
+  echo "schema=e-hgp.protocol-manifest.v1"
+  echo "commit=${PIN_COMMIT}"
+  printf '%s\t%s\t%s\n' "${CANON_C_SHA}" "$(wc -c < "${CANON_C}")" \
+    "gcp-migration/profils/serie_c_selftest_v1.env"
+} > "${MANIFESTE_C}"
+PIN_MANIFEST_C="$(sha256sum "${MANIFESTE_C}" | awk '{print $1}')"
+PROFILE_C="${WORK}/profil_serie_c.txt"
+{
+  echo "profil=serie_c_selftest_v1"
+  echo "profil_canonique=serie_c_selftest_v1"
+  echo "profil_canonique_sha256=${CANON_C_SHA}"
+  echo "conf_specs=uniform:50000"
+  echo "bench_specs=aucun"
+  echo "queue_families=aucun"
+  echo "queue_n=64000"
+  echo "queue_seeds=3"
+  echo "run_timeout=60"
+  echo "threads=8"
+  echo "v5_gate_min=40"
+  echo "v6_gate_min=60"
+  echo "sweep_specs=aucun"
+  echo "sweep_repeats=1"
+  echo "gpu_specs=aucun"
+  echo "frontier_specs=aucun"
+  echo "frontier_timeout=60"
+  echo "gpu_build_timeout=60"
+  echo "frontier_ulimit_kb=0"
+  echo "matrice_points=${MAT_POINTS_C}"
+  echo "matrice_sequence=aller retour rotation8"
+  echo "matrice_timeout=60"
+  echo "attrib_points=uniform:16000:2:2:0"
+  echo "attrib_timeout=60"
+  echo "gpuv6_gate_names=${GATE_NAMES_C}"
+  echo "gpuv6_build_timeout=60"
+  echo "gpuv6_gate_timeout=60"
+  echo "gpuv6_pilot_specs=uniform:50000"
+  echo "gpuv6_pilot_min_lots=2"
+  echo "gpuv6_pilot_timeout=60"
+  echo "session_max_run_seconds=18000"
+  echo "session_invite_minutes=270"
+  echo "max_run_seconds_effectif=18000"
+  echo "guest_shutdown_minutes_effectif=270"
+} > "${PROFILE_C}"
+OUT8="${WORK}/out_serie_c"
+run_runner_c() { # $1 = dossier out ; le reste = env supplementaire
+  local out="$1"; shift
+  env \
+    V5_BIN="${FAKE}/mhgp5" V6_BIN="${FAKE}/mhgp6" CONF_BIN="${FAKE}/mhgp6_conformity" \
+    V6_PROFILE_BIN="${FAKE}/mhgp6_profile" GPUV6_PILOT_BIN="${FAKE}/mhgp6_cuda" \
+    TIME_BIN="${FAKE}/gnutime" OUT_DIR="${out}" THREADS=8 RUN_TIMEOUT=60 \
+    CONF_SPECS="uniform:50000" BENCH_SPECS="aucun" QUEUE_FAMILIES="aucun" \
+    QUEUE_N="64000" QUEUE_SEEDS="3" SWEEP_SPECS="aucun" SWEEP_REPEATS=1 \
+    GPU_SPECS="aucun" FRONTIER_SPECS="aucun" FRONTIER_TIMEOUT=60 \
+    GPU_BUILD_TIMEOUT=60 FRONTIER_ULIMIT_KB=0 \
+    MATRICE_POINTS="${MAT_POINTS_C}" MATRICE_SEQUENCE="aller retour rotation8" MATRICE_TIMEOUT=60 \
+    ATTRIB_POINTS="uniform:16000:2:2:0" ATTRIB_TIMEOUT=60 \
+    GPUV6_GATE_NAMES="${GATE_NAMES_C}" GPUV6_BUILD_TIMEOUT=60 GPUV6_GATE_TIMEOUT=60 \
+    GPUV6_PILOT_SPECS="uniform:50000" GPUV6_PILOT_MIN_LOTS=2 GPUV6_PILOT_TIMEOUT=60 \
+    NVCC_BIN="${FAKE}/nvcc" GPU_CMAKE_BIN="${FAKE}/cmake" \
+    PILOTE_JUGE="${HERE}/../morsehgp3D_v6/tests/pilote_juge.py" \
+    PATH="${FAKE}:${PATH}" \
+    "$@" \
+    bash "${RUNNER}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_C}" >/dev/null 2>&1
+}
+rc=0; run_runner_c "${OUT8}" || rc=$?
+check "serie C : runner rc=0" "${rc}"
+check_true "serie C : plans matrice (9 = 3 points x 3 passages, rotation8 exacte), attrib (1), gpuv6 (3)" bash -c "
+  [ \"\$(sed -n 's/^runs=//p' '${OUT8}/matrice_plan.txt')\" = '9' ] &&
+  [ \"\$(sed -n 's/^runs=//p' '${OUT8}/attrib_plan.txt')\" = '1' ] &&
+  [ \"\$(sed -n 's/^runs=//p' '${OUT8}/gpuv6_plan.txt')\" = '3' ] &&
+  grep -q 'seq=7 name=mat_uniform_n16000_t2_i2_j1_avec_p3 .* passage=3 pos=1' '${OUT8}/matrice_plan.txt' &&
+  grep -q 'seq=8 name=mat_uniform_n16000_t2_i2_j0_sans_p3 .* passage=3 pos=2' '${OUT8}/matrice_plan.txt'"
+check_true "serie C : affinite demandee ET attestee sur un run de matrice" bash -c "
+  grep -q '^affinite_demandee=' '${OUT8}/mat_uniform_n16000_t2_i2_j0_sans_p1.status' &&
+  grep -q '^affinite_effective=' '${OUT8}/mat_uniform_n16000_t2_i2_j0_sans_p1.status' &&
+  grep -q '^commande=taskset -c ' '${OUT8}/mat_uniform_n16000_t2_i2_j0_sans_p1.status'"
+check_true "serie C : pilote a flags explicites et 5 records" bash -c "
+  grep -q -- '--repeat=4' '${OUT8}/pilote_uniform_n50000.status' &&
+  grep -q -- '--ordre=cpu-device' '${OUT8}/pilote_uniform_n50000.status' &&
+  [ \"\$(grep -c '^repetition=' '${OUT8}/pilote_uniform_n50000.txt')\" = '5' ]"
+run_validator_c() { # $1 = dossier out — le pin du manifeste est CELUI grave par le runner serie C
+  python3 "${VALIDATOR}" "$1" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_C}" 0 0 \
+    "${PROFILE_C}" "${CANON_C}" "${MANIFESTE_C}"
+}
+rc=0; VOUT8="$(run_validator_c "${OUT8}")" || rc=$?
+check_true "serie C : validateur rc=0, verifie_non_decisionnel, resumes matrice + gpuv6 ecrits" \
+  bash -c "[ '${rc}' -eq 0 ] && printf '%s\n' \"\$1\" | grep -q 'campaign_status=verifie_non_decisionnel' \
+    && test -s '${WORK}/matrice_resume.txt' && test -s '${WORK}/gpuv6_resume.txt' \
+    && [ \"\$(grep -c 'uniform' '${WORK}/gpuv6_resume.txt')\" = '4' ]" _ "${VOUT8}"
+falsify_c() { # $1 = nom, $2 = motif exact exige, reste = mutation (rehash causal)
+  local name="$1" motif="$2"; shift 2
+  local dir="${WORK}/out_falsif_c"
+  rm -rf "${dir}"
+  cp -r "${OUT8}" "${dir}"
+  ( cd "${dir}" && "$@" )
+  rehash_manifeste "${dir}"
+  local rc=0 sortie
+  sortie="$(run_validator_c "${dir}" 2>&1)" || rc=$?
+  check_true "${name}" bash -c "[ \"\$3\" -eq 1 ] && printf '%s' \"\$1\" | grep -q -- \"\$2\"" \
+    _ "${sortie}" "${motif}" "${rc}"
+}
+falsify_c "serie C : plan matrice supprime" "matrice_plan.txt: ABSENT" \
+  rm matrice_plan.txt
+falsify_c "serie C : troncature matrice gravee" "campagne TRONQUEE" \
+  bash -c "printf 'truncated_at=x\nphase=matrice\nreason=echeance simulee\n' > matrice_tronquee.txt"
+falsify_c "serie C : parite falsifiee (signatures divergentes, le booleen parite=OUI ne sauve pas)" "signatures CPU/device divergentes" \
+  sed -i 's/\(repetition=2 .*\)signature_device=ab/\1signature_device=cd/' pilote_uniform_n50000.txt
+falsify_c "serie C : repetition manquante du pilote" "records au lieu de" \
+  sed -i '/^repetition=4 /d' pilote_uniform_n50000.txt
+falsify_c "serie C : ordre hors ABBA" "hors sequence ABBA" \
+  sed -i 's/repetition=2 retenue=OUI ordre=device-cpu/repetition=2 retenue=OUI ordre=cpu-device/' pilote_uniform_n50000.txt
+falsify_c "serie C : octets H2D falsifies" "112\*nb_total" \
+  sed -i 's/\(repetition=1 .*\)h2d_octets_boules=112000/\1h2d_octets_boules=112001/' pilote_uniform_n50000.txt
+falsify_c "serie C : chrono non termine (mur nul)" "mur nul" \
+  sed -i 's/\(repetition=3 .*\)mur_cpu_ms=100.0/\1mur_cpu_ms=0.0/' pilote_uniform_n50000.txt
+falsify_c "serie C : porte gpu retiree de l'inventaire" "absente ou non Passed" \
+  sed -i '/Test #3:/d' gpuv6_gates.txt
+falsify_c "serie C : affinite effective non conforme a la demande" "affinite effective" \
+  sed -i 's/^affinite_effective=.*/affinite_effective=63/' mat_uniform_n16000_t2_i2_j0_sans_p1.status
+falsify_c "serie C : somme d'attribution faussee (seuil 0.0051)" "somme imprimee != somme des neuf composantes" \
+  sed -i 's/somme=0.009/somme=0.020/' attrib_uniform_n16000_t2_i2_j0.txt
+falsify_c "serie C : plan matrice altere (rotation8 recalculee)" "sequence annoncee != sequence recalculee" \
+  sed -i 's/^seq=7 name=mat_uniform_n16000_t2_i2_j1_avec_p3/seq=7 name=mat_uniform_n16000_t9_i2_j1_avec_p3/' matrice_plan.txt
+falsify_c "serie C : bras sans-digest contamine par un digest" "digest imprime sur un bras sans-digest" \
+  sed -i '1i digest_all=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' mat_uniform_n16000_t2_i2_j0_sans_p1.txt
+# § 5.14.4 : inventaire pre-execution, verdict du juge embarque, identite
+# des binaires et masque d'affinite recalcule — chacun causal.
+falsify_c "serie C : inventaire pre-execution falsifie" "noms != plan" \
+  sed -i 's/mhgp6_pilote_lot17/mhgp6_intrus_renomme/' gpuv6_inventaire.txt
+falsify_c "serie C : verdict du juge embarque falsifie" "verdict du juge embarque non conforme" \
+  sed -i 's/pilote juge conforme/pilote juge en doute/' pilote_uniform_n50000.juge.txt
+falsify_c "serie C : binaire change en cours de phase (hash non unique)" "binaire_sha256 non unique" \
+  sed -i "s/^binaire_sha256=.*/binaire_sha256=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/" mat_uniform_n16000_t2_i2_j0_sans_p1.status
+falsify_c "serie C : affinite coherente mais hors du masque (socket,core) recalcule" "masque recalcule" \
+  sed -i 's/^affinite_demandee=.*/affinite_demandee=1,3/; s/^affinite_effective=.*/affinite_effective=1,3/; s/taskset -c [0-9,-]*/taskset -c 1,3/' mat_uniform_n16000_t2_i2_j0_sans_p1.status
+
+# § 5.15 : liaison litterale du canon (61 != 60 sous un nom canonique),
+# identite device de l'en-tete du pilote liee au build, UUID stable.
+PROF_C61="${WORK}/profil_serie_c_61.txt"
+sed 's/^matrice_timeout=60$/matrice_timeout=61/' "${PROFILE_C}" > "${PROF_C61}"
+D61="${WORK}/cas_serie_c_61"
+rm -rf "${D61}"; cp -r "${OUT8}" "${D61}"
+rc=0; V61="$(python3 "${VALIDATOR}" "${D61}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_C}" 0 0 \
+  "${PROF_C61}" "${CANON_C}" "${MANIFESTE_C}" 2>&1)" || rc=$?
+check_true "serie C § 5.15 : matrice_timeout 60->61 sous un nom canonique REFUSE (liaison litterale)" \
+  bash -c "[ '${rc}' -eq 1 ] && printf '%s' \"\$1\" | grep -q 'axe matrice_timeout != MATRICE_TIMEOUT'" _ "${V61}"
+falsify_c "serie C § 5.15 : en-tete du pilote annoncant une autre famille" "en-tete : famille=" \
+  sed -i 's/famille=uniform n=50000 graine=3/famille=terrain n=50000 graine=3/' pilote_uniform_n50000.txt
+falsify_c "serie C § 5.15 : device de l'en-tete != nom du build" "device de l'en-tete" \
+  sed -i 's/device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=/device=NVIDIA T4 sm=/' pilote_uniform_n50000.txt
+falsify_c "serie C § 5.15 : sm de l'en-tete != compute capability du build" "sm de l'en-tete" \
+  sed -i 's/ sm=12.0 arch_compilees=/ sm=8.6 arch_compilees=/' pilote_uniform_n50000.txt
+falsify_c "serie C § 5.15 : UUID de l'instantane != UUID du build" "UUID .* != UUID du build" \
+  sed -i 's/^GPU-11111111-2222-3333-4444-555555555555, 45/GPU-99999999-2222-3333-4444-555555555555, 45/' pilote_uniform_n50000.txt
+falsify_c "serie C § 5.15 : commande d'attribution sans taskset" "confinement taskset" \
+  sed -i 's/^commande=taskset -c [0-9,-]* /commande=/' attrib_uniform_n16000_t2_i2_j0.status
+
+# ---- 8bis. FAIL-FAST DU RUNNER (§ 5.14.3/4) : l'inventaire intrus tronque
+# AVANT toute porte ; un stdout de pilote falsifie a code nul tronque APRES
+# la premiere famille — la seconde n'est jamais consommee.
+OUT8B="${WORK}/out_serie_c_intrus"
+rc=0; run_runner_c "${OUT8B}" FAKE_CTEST_EXTRA=1 || rc=$?
+check_true "serie C fail-fast : 17e test au listage -N => troncature AVANT execution (aucune porte)" \
+  bash -c "[ '${rc}' -eq 0 ] && grep -q 'inventaire pre-execution' '${OUT8B}/gpuv6_tronquee.txt' \
+    && [ ! -e '${OUT8B}/gpuv6_gates.status' ] && [ ! -e '${OUT8B}/pilote_uniform_n50000.status' ]"
+OUT8C="${WORK}/out_serie_c_juge"
+rc=0; run_runner_c "${OUT8C}" GPUV6_PILOT_SPECS="uniform:50000 terrain:50000" FAKE_PILOT_BAD=1 || rc=$?
+check_true "serie C fail-fast : records falsifies a code nul => juge tronque avant la famille suivante" \
+  bash -c "[ '${rc}' -eq 0 ] && grep -q 'records du pilote refuses par le juge' '${OUT8C}/gpuv6_tronquee.txt' \
+    && [ -e '${OUT8C}/pilote_uniform_n50000.status' ] && [ ! -e '${OUT8C}/pilote_terrain_n50000.status' ]"
+OUT8D="${WORK}/out_serie_c_prereq"
+rc=0; run_runner_c "${OUT8D}" V6_BIN=/bin/false || rc=$?
+check_true "serie C § 5.15 fail-fast : matrice en echec => bloc GPU v6 SAUTE (aucun build, cause publiee)" \
+  bash -c "[ '${rc}' -eq 0 ] && grep -q 'premier run non nul' '${OUT8D}/matrice_tronquee.txt' \
+    && grep -q 'prerequis matrice/attribution tronques' '${OUT8D}/gpuv6_tronquee.txt' \
+    && [ ! -e '${OUT8D}/gpuv6_build.status' ] && [ ! -e '${OUT8D}/pilote_uniform_n50000.status' ]"
+
+# ---- 9. BUDGET DU PROFIL CANONIQUE SERIE C (§ 5.14.2) : le calcul est
+# rejoue avec l'ESTIMATEUR REEL extrait du cycle de vie (jamais une
+# reimplementation) sur les axes du profil g4_serie_c_v1 — un profil qui se
+# refuse lui-meme au preflight (l'enveloppe 5 h se refusait de 257 s) ne
+# peut plus etre livre. Fenetre gravee pour 25200 s / 415 min aux defauts
+# du cycle de vie : SCP_BUDGET=935, POST=2915, CUTOFF=24900, MARGE=3305,
+# WINDOW = 25200 - 3305 - 900 = 20995 s. Plancher 10000 s contre un profil
+# silencieusement vide.
+SERIE_C_ENV="${HERE}/profils/g4_serie_c_v1.env"
+est_c="$(bash -c '
+  set -euo pipefail
+  '"$(sed -n '/^budget_estimate() {/,/^}$/p' "${HERE}/v6_session_lifecycle.sh")"'
+  set -a
+  # shellcheck disable=SC1090
+  source "'"${SERIE_C_ENV}"'"
+  budget_estimate
+' 2>&1)" || est_c="ECHEC:${est_c}"
+check_true "budget serie C : ESTIMATE=${est_c}s tient dans la fenetre 7h gravee (10000 <= est <= 20995)" \
+  bash -c "[[ '${est_c}' =~ ^[0-9]+$ ]] && [ '${est_c}' -ge 10000 ] && [ '${est_c}' -le 20995 ]"
+
 # ---- PROFIL CANONIQUE G4 EXACT DE BOUT EN BOUT (cinquieme tour : le profil
 # etait AUTO-INVALIDANT — queue_sequence recalculait la sentinelle. Plus
 # jamais un profil canonique livre sans etre exerce runner -> validateur).
@@ -616,6 +977,7 @@ G4_AXES="${WORK}/g4_axes.env"
     echo "frontier_timeout=${FRONTIER_TIMEOUT}"
     echo "gpu_build_timeout=${GPU_BUILD_TIMEOUT}"
     echo "frontier_ulimit_kb=${FRONTIER_ULIMIT_KB}"
+    emit_serie_c_defaults
   } > "${PROFILE_G4}"
   {
     printf 'CONF_SPECS=%q\nBENCH_SPECS=%q\nQUEUE_FAMILIES=%q\nQUEUE_N=%q\nQUEUE_SEEDS=%q\n' \
@@ -687,6 +1049,7 @@ DEC_AXES="${WORK}/dec_axes.env"
     echo "frontier_timeout=${FRONTIER_TIMEOUT}"
     echo "gpu_build_timeout=${GPU_BUILD_TIMEOUT}"
     echo "frontier_ulimit_kb=${FRONTIER_ULIMIT_KB}"
+    emit_serie_c_defaults
   } > "${PROFILE_DEC}"
   {
     printf 'CONF_SPECS=%q\nBENCH_SPECS=%q\nQUEUE_FAMILIES=%q\nQUEUE_N=%q\nQUEUE_SEEDS=%q\n' \

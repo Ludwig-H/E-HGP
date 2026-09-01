@@ -400,3 +400,82 @@ budget ne promet ni RSS ni absence d'OOM.
   nouveau GO.
 
 GCP non utilisé par cette livraison.
+
+## 5. Coutures § 5.13, § 5.14 et § 5.15 — toutes intégrées et falsifiées
+
+Réponse aux trois contre-lectures du 1er septembre (`18b28700`, `63248cb3`,
+`b1e5463e`). Chaque couture est fermée dans le commit qui porte cette note ;
+les preuves locales sont rejouées au même HEAD.
+
+- **§ 5.13.1 signatures** : chaque record du pilote publie `signature_cpu=`
+  et `signature_device=` — sha256 d'une projection canonique
+  `mhgp6_parite_v1` couvrant exactement le tuple comparé ; une incohérence
+  projection/tuple est un PLANCHER (code 3). Le juge unique
+  `morsehgp3D_v6/tests/pilote_juge.py` (porte stub, runner en mode
+  `--fichier`, validateur — importé, jamais réimplémenté) ferme records,
+  ABBA/BAAB, octets, chronos, lots ; 22 contre-fixtures intégrées tuées.
+- **§ 5.13.2 seuils du profil** : 0.0051/0.006, scène historique gravée
+  dans `tests/profil_contre_fixture.py` (tuée), scène aux arrondis honnêtes
+  restée verte, porte `mhgp6_profil_contre_fixture`.
+- **§ 5.13.3 profil** : `CONF_SPECS=aucun`, troisième passage `rotation8`
+  (rotation cyclique fixe de 8, runner + validateur la recalculent), note
+  GO marquée supersédée dans sa seconde moitié.
+- **§ 5.13.4 runner** : `taskset -c` dérivé de la topologie et attesté
+  (demandé + effectif), `--repeat=4 --ordre=cpu-device --min-lots=2`
+  explicites, axes `SESSION_*` pilotant `MAX_RUN_SECONDS` /
+  `GUEST_SHUTDOWN_MINUTES` avant tout garde-fou (bloc profil déplacé en
+  amont, surcharge d'environnement = profil `custom`).
+- **§ 5.14.1 pin** : `profils/g4_serie_c_v1.env` et
+  `morsehgp3D_v6/tests/pilote_juge.py` dans les DEUX listes normatives
+  (même ordre), répertoire parent matérialisé, 13 refus de pin au selftest ;
+  préflight v5 CONDITIONNEL (sauté quand conf/bench/gpu-v5 = `aucun`,
+  jamais un masquage de plancher — le bloc disparaît, planchers par lignée
+  exercée).
+- **§ 5.14.2 budget** : enveloppe exceptionnelle 7 h / 415 min retenue,
+  route device créditée 1,0× la route CPU avant mesure ; le calcul du
+  profil canonique est GRAVÉ dans le selftest (estimateur réel extrait du
+  cycle de vie : 13 552 s pour une fenêtre de 20 995 s) ; le commentaire
+  5 h aligné (déficit 1 257 s au modèle courant).
+- **§ 5.14.3 juge** : mode `--fichier` appelé par le runner APRÈS chaque
+  famille et AVANT la suivante (verdict gravé `.juge.txt`, troncature au
+  refus) ; fermeture des chronos (étage ≥ somme des six composantes ± 0,4 ;
+  murs enveloppants ± 0,1 ; « six composantes à 1000 sous un étage à 1 »
+  tuée) ; stabilité signature/`nb_total`/octets/lots entre répétitions.
+- **§ 5.14.4 reçu** : inventaire exact AVANT `ctest -V` (listage `-N`,
+  code jamais neutralisé) ; `FORBIDDEN` non appliqué au transcript CTest
+  agrégé (le `REFUS` légitime de `mhgp6_pilote_refus_n` acté) ; deux
+  libellés de résumé CTest admis ; `nounits` sur les instantanés
+  `nvidia-smi` ; juge épinglé ; K=1..10 exacts et flottants finis pour
+  l'attribution ; hashes des binaires exécutés gravés (un seul par phase) ;
+  `matrice_resume`/`gpuv6_resume` copiés au reçu durable ; affinité par
+  (socket, core) dans le cpuset autorisé, masque RECALCULÉ par le
+  validateur pour matrice et attribution.
+- **§ 5.15.1 liaison littérale** : dès que `profil == profil_canonique`,
+  TOUS les axes communs sont comparés au canon (axes série C et durées
+  compris ; axe optionnel absent d'un ancien canon ignoré) —
+  `matrice_timeout` 60→61 sous un nom canonique est refusé (scène au
+  selftest) ; la commande d'attribution est vérifiée comme celle de la
+  matrice (taskset, binaire `mhgp6_profile`, arguments du point).
+- **§ 5.15.2 identité pilote/device** : en-tête parsée exactement et liée
+  à l'entrée attendue (famille, n, graine, fils) et
+  `lot_effectif = min(lot, nb_total)` (5 contre-fixtures) ; le validateur
+  lie nom/SM de l'en-tête au build et exige le même UUID au build et aux
+  instantanés avant/après chaque pilote ;
+  `-DCMAKE_CUDA_ARCHITECTURES=120` passé explicitement et REFUS CMake de
+  toute autre valeur.
+- **§ 5.15.3 fail-fast** : une troncature matrice/attribution SAUTE tout le
+  bloc GPU v6 (build compris, cause publiée, scène `/bin/false` au
+  selftest) ; le code de `ctest -N` n'est plus neutralisé.
+- **§ 5.15.4 harnais** : `selftest_cycle_vie_v6.sh` porté à l'inventaire
+  repo-relatif de 13 fichiers dans deux répertoires — 53/53 vertes AVANT
+  commit (les 31 rouges étaient bien la cascade du manifeste obsolète).
+
+Preuves au HEAD de cette note : 117/117 portes `gate` v6 en Release
+(l'unique rouge intermédiaire `mhgp6_profil_identite` était la contention
+d'un selftest concurrent — repassé seul puis en suite complète propre) ;
+selftest campagne TOUT vert (nominal, G4, décision, série C + 23
+falsifications série C, fail-fast ×3, budget 13 552 s) ; selftest cycle de
+vie 53/53. Il reste : l'export propre du SHA candidat puis l'accusé bref le
+gravant, conformément à votre § 5.12/§ 5.15.
+
+GCP non utilisé par cette livraison.

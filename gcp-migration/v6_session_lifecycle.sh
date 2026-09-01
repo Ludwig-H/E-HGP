@@ -56,6 +56,8 @@ PROTOCOL_FILES=(
   gcp-migration/profils/decision_v1.env
   gcp-migration/profils/smoke_v1.env
   gcp-migration/profils/g4_mesure_v1.env
+  gcp-migration/profils/g4_serie_c_v1.env
+  morsehgp3D_v6/tests/pilote_juge.py
   gcp-migration/set_max_run_duration_and_verify.sh
   gcp-migration/start_and_verify.sh
   gcp-migration/stop_and_verify.sh
@@ -80,10 +82,80 @@ fi
 export GCP_PROJECT_ID="${GCP_PROJECT_ID:-devpod-gpu-exploration}"
 export GCP_ZONE="${GCP_ZONE:-europe-west4-a}"
 export GCP_INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}"
-# 8 h (maximum autorise par AGENTS.md) : la matrice de decision par defaut
-# tient dans cette fenetre d'apres le preflight budgetaire ci-dessous.
-MAX_RUN_SECONDS="${MAX_RUN_SECONDS:-28800}"
-GUEST_SHUTDOWN_MINUTES="${GUEST_SHUTDOWN_MINUTES:-470}"
+# PROFIL CANONIQUE (audit deuxieme tour : le fichier d'autorite est
+# versionne et hashe, jamais fabrique par l'environnement). CAMPAIGN_PROFILE
+# nomme un profil epingle (decision_v1 par defaut, smoke_v1 pour la fumee) ;
+# TOUTE surcharge d'un axe par l'environnement degrade le profil effectif en
+# `custom` — un validateur ne peut alors jamais l'appeler decision.
+CAMPAIGN_PROFILE="${CAMPAIGN_PROFILE:-decision_v1}"
+[[ "${CAMPAIGN_PROFILE}" =~ ^[a-z0-9_]+$ ]] || { echo "REFUS : nom de profil mal forme" >&2; exit 2; }
+PROFILE_SRC="${WORK}/pinned/gcp-migration/profils/${CAMPAIGN_PROFILE}.env"
+[ -f "${PROFILE_SRC}" ] || { echo "REFUS : profil canonique inconnu (${CAMPAIGN_PROFILE})" >&2; exit 2; }
+_ov_CONF_SPECS="${CONF_SPECS:-}"; _ov_BENCH_SPECS="${BENCH_SPECS:-}"
+_ov_QUEUE_FAMILIES="${QUEUE_FAMILIES:-}"; _ov_QUEUE_N="${QUEUE_N:-}"
+_ov_QUEUE_SEEDS="${QUEUE_SEEDS:-}"; _ov_RUN_TIMEOUT="${RUN_TIMEOUT:-}"
+_ov_THREADS_VM="${THREADS_VM:-}"; _ov_V5_GATE_MIN="${V5_GATE_MIN:-}"; _ov_V6_GATE_MIN="${V6_GATE_MIN:-}"
+_ov_SWEEP_SPECS="${SWEEP_SPECS:-}"; _ov_SWEEP_REPEATS="${SWEEP_REPEATS:-}"
+_ov_GPU_SPECS="${GPU_SPECS:-}"; _ov_FRONTIER_SPECS="${FRONTIER_SPECS:-}"
+_ov_FRONTIER_TIMEOUT="${FRONTIER_TIMEOUT:-}"; _ov_GPU_BUILD_TIMEOUT="${GPU_BUILD_TIMEOUT:-}"
+_ov_FRONTIER_ULIMIT_KB="${FRONTIER_ULIMIT_KB:-}"
+_ov_MATRICE_POINTS="${MATRICE_POINTS:-}"; _ov_MATRICE_SEQUENCE="${MATRICE_SEQUENCE:-}"
+_ov_MATRICE_TIMEOUT="${MATRICE_TIMEOUT:-}"; _ov_ATTRIB_POINTS="${ATTRIB_POINTS:-}"
+_ov_ATTRIB_TIMEOUT="${ATTRIB_TIMEOUT:-}"; _ov_GPUV6_GATE_NAMES="${GPUV6_GATE_NAMES:-}"
+_ov_GPUV6_BUILD_TIMEOUT="${GPUV6_BUILD_TIMEOUT:-}"; _ov_GPUV6_GATE_TIMEOUT="${GPUV6_GATE_TIMEOUT:-}"
+_ov_GPUV6_PILOT_SPECS="${GPUV6_PILOT_SPECS:-}"; _ov_GPUV6_PILOT_MIN_LOTS="${GPUV6_PILOT_MIN_LOTS:-}"
+_ov_GPUV6_PILOT_TIMEOUT="${GPUV6_PILOT_TIMEOUT:-}"
+_ov_SESSION_MAX_RUN_SECONDS="${SESSION_MAX_RUN_SECONDS:-}"; _ov_SESSION_INVITE_MINUTES="${SESSION_INVITE_MINUTES:-}"
+# Valeurs par defaut des NOUVEAUX axes serie C (profils anterieurs sans ces
+# cles : sentinelle `aucun` = phases sautees, plans runs=0).
+MATRICE_POINTS="aucun"; MATRICE_SEQUENCE="aller retour aller"; MATRICE_TIMEOUT="2400"
+ATTRIB_POINTS="aucun"; ATTRIB_TIMEOUT="2400"
+GPUV6_GATE_NAMES="aucun"; GPUV6_BUILD_TIMEOUT="1800"; GPUV6_GATE_TIMEOUT="3600"
+GPUV6_PILOT_SPECS="aucun"; GPUV6_PILOT_MIN_LOTS="2"; GPUV6_PILOT_TIMEOUT="3600"
+# § 5.13.4 : axes de duree de SESSION — pilotes par le profil, avec les
+# anciennes valeurs par defaut pour les profils qui ne les declarent pas.
+SESSION_MAX_RUN_SECONDS="28800"; SESSION_INVITE_MINUTES="470"
+# shellcheck disable=SC1090
+source "${PROFILE_SRC}"
+EFFECTIVE_PROFILE="${CAMPAIGN_PROFILE}"
+for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM V5_GATE_MIN V6_GATE_MIN \
+         SWEEP_SPECS SWEEP_REPEATS GPU_SPECS FRONTIER_SPECS FRONTIER_TIMEOUT \
+         GPU_BUILD_TIMEOUT FRONTIER_ULIMIT_KB \
+         MATRICE_POINTS MATRICE_SEQUENCE MATRICE_TIMEOUT ATTRIB_POINTS ATTRIB_TIMEOUT \
+         GPUV6_GATE_NAMES GPUV6_BUILD_TIMEOUT GPUV6_GATE_TIMEOUT \
+         GPUV6_PILOT_SPECS GPUV6_PILOT_MIN_LOTS GPUV6_PILOT_TIMEOUT \
+         SESSION_MAX_RUN_SECONDS SESSION_INVITE_MINUTES; do
+  ov="_ov_${v}"
+  if [ -n "${!ov}" ] && [ "${!ov}" != "${!v}" ]; then
+    EFFECTIVE_PROFILE="custom"
+    printf -v "${v}" '%s' "${!ov}"
+  fi
+done
+_param_re='^[A-Za-z0-9_:, -]*$'
+for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM \
+         SWEEP_SPECS SWEEP_REPEATS GPU_SPECS FRONTIER_SPECS FRONTIER_TIMEOUT \
+         GPU_BUILD_TIMEOUT FRONTIER_ULIMIT_KB \
+         MATRICE_POINTS MATRICE_SEQUENCE MATRICE_TIMEOUT ATTRIB_POINTS ATTRIB_TIMEOUT \
+         GPUV6_GATE_NAMES GPUV6_BUILD_TIMEOUT GPUV6_GATE_TIMEOUT \
+         GPUV6_PILOT_SPECS GPUV6_PILOT_MIN_LOTS GPUV6_PILOT_TIMEOUT \
+         SESSION_MAX_RUN_SECONDS SESSION_INVITE_MINUTES; do
+  [[ "${!v}" =~ ${_param_re} ]] || { echo "REFUS : parametre ${v} avec caractere hors alphabet sur" >&2; exit 2; }
+done
+echo "profil canonique : ${CAMPAIGN_PROFILE} ($(sha256sum "${PROFILE_SRC}" | awk '{print $1}')) — profil effectif : ${EFFECTIVE_PROFILE}"
+
+# § 5.13.4 : les axes de duree du PROFIL pilotent les vrais coupe-circuits
+# AVANT tout garde-fou (bloc profil deplace en amont pour cela) ; une
+# surcharge directe de MAX_RUN_SECONDS / GUEST_SHUTDOWN_MINUTES par
+# l'environnement degrade aussi le profil effectif en `custom`. Le plafond
+# 8 h d'AGENTS.md reste verifie par _check_range ci-dessous.
+if [ -n "${MAX_RUN_SECONDS:-}" ] && [ "${MAX_RUN_SECONDS}" != "${SESSION_MAX_RUN_SECONDS}" ]; then
+  EFFECTIVE_PROFILE="custom"
+fi
+if [ -n "${GUEST_SHUTDOWN_MINUTES:-}" ] && [ "${GUEST_SHUTDOWN_MINUTES}" != "${SESSION_INVITE_MINUTES}" ]; then
+  EFFECTIVE_PROFILE="custom"
+fi
+MAX_RUN_SECONDS="${MAX_RUN_SECONDS:-${SESSION_MAX_RUN_SECONDS}}"
+GUEST_SHUTDOWN_MINUTES="${GUEST_SHUTDOWN_MINUTES:-${SESSION_INVITE_MINUTES}}"
 # GRACE PROTOCOLAIRE FIXE (huitieme tour) : 30 s, des deux cotes, liee a la
 # queue SSH de +60 s apres l'echeance — toute surcharge est REFUSEE (29
 # comme 31) pour ne jamais rouvrir implicitement cette relation.
@@ -143,43 +215,6 @@ RAPATRIEMENT_MARGE_S=$(( POST_BUDGET_S + 60 + GRACE_S + (MAX_RUN_SECONDS - EFFEC
   echo "REFUS : fenetre insuffisante — cutoff effectif ${EFFECTIVE_CUTOFF_S}s, budget post-campagne ${POST_BUDGET_S}s (rien ne serait mesurable)" >&2
   exit 2
 }
-
-# PROFIL CANONIQUE (audit deuxieme tour : le fichier d'autorite est
-# versionne et hashe, jamais fabrique par l'environnement). CAMPAIGN_PROFILE
-# nomme un profil epingle (decision_v1 par defaut, smoke_v1 pour la fumee) ;
-# TOUTE surcharge d'un axe par l'environnement degrade le profil effectif en
-# `custom` — un validateur ne peut alors jamais l'appeler decision.
-CAMPAIGN_PROFILE="${CAMPAIGN_PROFILE:-decision_v1}"
-[[ "${CAMPAIGN_PROFILE}" =~ ^[a-z0-9_]+$ ]] || { echo "REFUS : nom de profil mal forme" >&2; exit 2; }
-PROFILE_SRC="${WORK}/pinned/gcp-migration/profils/${CAMPAIGN_PROFILE}.env"
-[ -f "${PROFILE_SRC}" ] || { echo "REFUS : profil canonique inconnu (${CAMPAIGN_PROFILE})" >&2; exit 2; }
-_ov_CONF_SPECS="${CONF_SPECS:-}"; _ov_BENCH_SPECS="${BENCH_SPECS:-}"
-_ov_QUEUE_FAMILIES="${QUEUE_FAMILIES:-}"; _ov_QUEUE_N="${QUEUE_N:-}"
-_ov_QUEUE_SEEDS="${QUEUE_SEEDS:-}"; _ov_RUN_TIMEOUT="${RUN_TIMEOUT:-}"
-_ov_THREADS_VM="${THREADS_VM:-}"; _ov_V5_GATE_MIN="${V5_GATE_MIN:-}"; _ov_V6_GATE_MIN="${V6_GATE_MIN:-}"
-_ov_SWEEP_SPECS="${SWEEP_SPECS:-}"; _ov_SWEEP_REPEATS="${SWEEP_REPEATS:-}"
-_ov_GPU_SPECS="${GPU_SPECS:-}"; _ov_FRONTIER_SPECS="${FRONTIER_SPECS:-}"
-_ov_FRONTIER_TIMEOUT="${FRONTIER_TIMEOUT:-}"; _ov_GPU_BUILD_TIMEOUT="${GPU_BUILD_TIMEOUT:-}"
-_ov_FRONTIER_ULIMIT_KB="${FRONTIER_ULIMIT_KB:-}"
-# shellcheck disable=SC1090
-source "${PROFILE_SRC}"
-EFFECTIVE_PROFILE="${CAMPAIGN_PROFILE}"
-for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM V5_GATE_MIN V6_GATE_MIN \
-         SWEEP_SPECS SWEEP_REPEATS GPU_SPECS FRONTIER_SPECS FRONTIER_TIMEOUT \
-         GPU_BUILD_TIMEOUT FRONTIER_ULIMIT_KB; do
-  ov="_ov_${v}"
-  if [ -n "${!ov}" ] && [ "${!ov}" != "${!v}" ]; then
-    EFFECTIVE_PROFILE="custom"
-    printf -v "${v}" '%s' "${!ov}"
-  fi
-done
-_param_re='^[A-Za-z0-9_:, -]*$'
-for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM \
-         SWEEP_SPECS SWEEP_REPEATS GPU_SPECS FRONTIER_SPECS FRONTIER_TIMEOUT \
-         GPU_BUILD_TIMEOUT FRONTIER_ULIMIT_KB; do
-  [[ "${!v}" =~ ${_param_re} ]] || { echo "REFUS : parametre ${v} avec caractere hors alphabet sur" >&2; exit 2; }
-done
-echo "profil canonique : ${CAMPAIGN_PROFILE} ($(sha256sum "${PROFILE_SRC}" | awk '{print $1}')) — profil effectif : ${EFFECTIVE_PROFILE}"
 
 HANDOFF="${WORK}/handoff.json"
 STATE_FILE="${WORK}/etat_cycle_vie"
@@ -375,7 +410,7 @@ finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu CO
     { [ ! -f "${WORK}/validation.txt" ] || cp -f "${WORK}/validation.txt" "${tmp}/validation.txt"; } &&
     { [ ! -f "${WORK}/manifest_revalide.txt" ] || cp -f "${WORK}/manifest_revalide.txt" "${tmp}/"; } &&
     { _res_ok=1
-      for _res in bench_resume queue_resume sweep_resume gpu_resume frontier_resume; do
+      for _res in bench_resume queue_resume sweep_resume gpu_resume frontier_resume matrice_resume gpuv6_resume; do
         if [ -f "${WORK}/${_res}.txt" ]; then cp -f "${WORK}/${_res}.txt" "${tmp}/" || _res_ok=0; fi
       done
       [ "${_res_ok}" -eq 1 ]; } &&
@@ -612,6 +647,21 @@ gcloud config set project "${GCP_PROJECT_ID}" >/dev/null
   echo "frontier_timeout=${FRONTIER_TIMEOUT}"
   echo "gpu_build_timeout=${GPU_BUILD_TIMEOUT}"
   echo "frontier_ulimit_kb=${FRONTIER_ULIMIT_KB}"
+  echo "matrice_points=${MATRICE_POINTS}"
+  echo "matrice_sequence=${MATRICE_SEQUENCE}"
+  echo "matrice_timeout=${MATRICE_TIMEOUT}"
+  echo "attrib_points=${ATTRIB_POINTS}"
+  echo "attrib_timeout=${ATTRIB_TIMEOUT}"
+  echo "gpuv6_gate_names=${GPUV6_GATE_NAMES}"
+  echo "gpuv6_build_timeout=${GPUV6_BUILD_TIMEOUT}"
+  echo "gpuv6_gate_timeout=${GPUV6_GATE_TIMEOUT}"
+  echo "gpuv6_pilot_specs=${GPUV6_PILOT_SPECS}"
+  echo "gpuv6_pilot_min_lots=${GPUV6_PILOT_MIN_LOTS}"
+  echo "gpuv6_pilot_timeout=${GPUV6_PILOT_TIMEOUT}"
+  echo "session_max_run_seconds=${SESSION_MAX_RUN_SECONDS}"
+  echo "session_invite_minutes=${SESSION_INVITE_MINUTES}"
+  echo "max_run_seconds_effectif=${MAX_RUN_SECONDS}"
+  echo "guest_shutdown_minutes_effectif=${GUEST_SHUTDOWN_MINUTES}"
 } > "${PROFILE}.tmp"
 mv "${PROFILE}.tmp" "${PROFILE}"
 log "profil de campagne epingle : $(sha256sum "${PROFILE}" | awk '{print $1}')"
@@ -626,7 +676,9 @@ log "profil de campagne epingle : $(sha256sum "${PROFILE}" | awk '{print $1}')"
 budget_estimate() {
   python3 - "${CONF_SPECS}" "${BENCH_SPECS}" "${QUEUE_FAMILIES}" "${QUEUE_N}" "${QUEUE_SEEDS}" \
     "${SWEEP_SPECS}" "${SWEEP_REPEATS}" "${GPU_SPECS}" "${FRONTIER_SPECS}" \
-    "${GPU_BUILD_TIMEOUT}" "${FRONTIER_TIMEOUT}" <<'PY'
+    "${GPU_BUILD_TIMEOUT}" "${FRONTIER_TIMEOUT}" \
+    "${MATRICE_POINTS}" "${MATRICE_SEQUENCE}" "${ATTRIB_POINTS}" \
+    "${GPUV6_GATE_NAMES}" "${GPUV6_PILOT_SPECS}" "${GPUV6_BUILD_TIMEOUT}" "${GPUV6_GATE_TIMEOUT}" <<'PY'
 import sys
 conf = [x for x in sys.argv[1].split() if x != "aucun"]
 bench = [x for x in sys.argv[2].split() if x != "aucun"]
@@ -654,6 +706,26 @@ gpu_fixed, gpu_ref = 2 * gpu_build_cap + 60, {32000: 80, 50000: 130, 100000: 260
 # credite au plafond (l'issue attendue est un refus de capacite ou un
 # timeout).
 frontier_ref = {200000: 700, 400000: 1700}
+# SERIE C (§ 5.12), DECLARE AVANT MESURE : matrice CPU au modele sweep
+# (base 48 fils x (48/fils)**0.9, digest `avec` x1,25), un run par point et
+# par passage de la sequence ; attribution au binaire instrumente creditee
+# 2x le point non instrumente ; build CUDA et phase de portes credites A
+# LEURS PLAFONDS (credit == plafond) ; pilote par famille : echauffement +
+# 4 repetitions, chaque repetition = route CPU (conf_ref) + route device
+# creditee 0,5x la route CPU (transferts domines par H2D, jamais un mur).
+matrice = [x for x in sys.argv[12].split() if x != "aucun"]
+matrice_passages = max(1, len(sys.argv[13].split()))
+attrib = [x for x in sys.argv[14].split() if x != "aucun"]
+gpuv6_gates = [x for x in sys.argv[15].split() if x != "aucun"]
+gpuv6_pilot = [x for x in sys.argv[16].split() if x != "aucun"]
+gpuv6_build_cap, gpuv6_gate_cap = int(sys.argv[17]), int(sys.argv[18])
+def matrice_point_cost(spec):
+    parts = spec.split(":")
+    n, fils = int(parts[1]), int(parts[2])
+    digest = len(parts) > 5 and parts[5] == "avec"
+    base = sweep_base48.get(n, 900)
+    c = base * (48.0 / max(1, fils)) ** 0.9
+    return int(c * (1.25 if digest else 1.0) + 1)
 OVERHEAD_PER_RUN = 10
 total = 0
 runs = 0
@@ -685,6 +757,22 @@ for spec in frontier:
     n = int(spec.split(":")[1])
     total += frontier_ref.get(n, frontier_cap)
     runs += 1
+for spec in matrice:
+    total += matrice_passages * matrice_point_cost(spec)
+    runs += matrice_passages
+for spec in attrib:
+    total += 2 * matrice_point_cost(spec)
+    runs += 1
+if gpuv6_gates or gpuv6_pilot:
+    total += gpuv6_build_cap + gpuv6_gate_cap  # credit == plafond
+    runs += 2
+for spec in gpuv6_pilot:
+    n = int(spec.split(":")[1])
+    # § 5.14.2 : la route device est creditee >= 1,0x la route CPU AVANT
+    # mesure (son gain est precisement inconnu) — jamais un coefficient
+    # abaisse pour faire tenir une fenetre.
+    total += 5 * 2 * conf_ref.get(n, 900)  # echauffement + 4 reps, cpu + 1,0x device
+    runs += 1
 print(total + OVERHEAD_PER_RUN * runs)
 PY
 }
@@ -695,18 +783,25 @@ log "preflight budgetaire : ESTIMATION NOMINALE ${ESTIMATE_S}s (+build ${BUILD_E
 # ENVELOPPE DE TERMINAISON publiee separement (sixieme tour) : somme des
 # PLAFONDS par run — elle peut exceder la fenetre ; ce sont les gardes
 # d'echeance du runner qui bornent la session, pas cette somme.
-count_runs() { python3 - "${CONF_SPECS}" "${BENCH_SPECS}" "${QUEUE_FAMILIES}" "${QUEUE_N}" "${QUEUE_SEEDS}" "${SWEEP_SPECS}" "${SWEEP_REPEATS}" "${GPU_SPECS}" "${FRONTIER_SPECS}" <<'PY'
+count_runs() { python3 - "${CONF_SPECS}" "${BENCH_SPECS}" "${QUEUE_FAMILIES}" "${QUEUE_N}" "${QUEUE_SEEDS}" "${SWEEP_SPECS}" "${SWEEP_REPEATS}" "${GPU_SPECS}" "${FRONTIER_SPECS}" \
+  "${MATRICE_POINTS}" "${MATRICE_SEQUENCE}" "${ATTRIB_POINTS}" "${GPUV6_GATE_NAMES}" "${GPUV6_PILOT_SPECS}" <<'PY'
 import sys
 def ax(t): return [x for x in t.split() if x != "aucun"]
 conf, bench, qf = ax(sys.argv[1]), ax(sys.argv[2]), ax(sys.argv[3])
 qn, qs, sweep = sys.argv[4].split(), sys.argv[5].split(), ax(sys.argv[6])
 reps, gpu, front = int(sys.argv[7]), ax(sys.argv[8]), ax(sys.argv[9])
+matrice, attrib = ax(sys.argv[10]), ax(sys.argv[12])
+passages = max(1, len(sys.argv[11].split()))
+gpuv6_on = 1 if (ax(sys.argv[13]) or ax(sys.argv[14])) else 0
 cpu_runs = 2 * len(conf) + 4 * len(bench) + len(qf) * len(qn) * len(qs)     + sum(reps * len(sp.split(":", 2)[2].split(",")) for sp in sweep) + 4 * len(gpu)
-print(cpu_runs, len(front), 1 if gpu else 0)
+print(cpu_runs, len(front), 1 if gpu else 0,
+      passages * len(matrice), len(attrib), gpuv6_on, len(ax(sys.argv[14])))
 PY
 }
-read -r _CPU_RUNS _FRONT_RUNS _GPU_ON <<< "$(count_runs)"
-ENVELOPE_S=$(( _CPU_RUNS * RUN_TIMEOUT + _FRONT_RUNS * FRONTIER_TIMEOUT + _GPU_ON * (2 * GPU_BUILD_TIMEOUT + RUN_TIMEOUT) ))
+read -r _CPU_RUNS _FRONT_RUNS _GPU_ON _MATRICE_RUNS _ATTRIB_RUNS _GPUV6_ON _GPUV6_PILOTS <<< "$(count_runs)"
+ENVELOPE_S=$(( _CPU_RUNS * RUN_TIMEOUT + _FRONT_RUNS * FRONTIER_TIMEOUT + _GPU_ON * (2 * GPU_BUILD_TIMEOUT + RUN_TIMEOUT) \
+  + _MATRICE_RUNS * MATRICE_TIMEOUT + _ATTRIB_RUNS * ATTRIB_TIMEOUT \
+  + _GPUV6_ON * (GPUV6_BUILD_TIMEOUT + GPUV6_GATE_TIMEOUT) + _GPUV6_PILOTS * GPUV6_PILOT_TIMEOUT ))
 log "enveloppe de terminaison (somme des plafonds par run) : ${ENVELOPE_S}s — bornee en pratique par l'echeance du runner et les coupe-circuits, jamais une promesse de completude"
 if [ "${ESTIMATE_S}" -gt "${WINDOW_S}" ]; then
   echo "REFUS : la matrice declaree (${ESTIMATE_S}s estimes) ne tient pas dans la fenetre (${WINDOW_S}s) — reduire la matrice ou augmenter MAX_RUN_SECONDS" >&2
@@ -843,9 +938,24 @@ if too_late "${DESCRIBE_TIMEOUT_S}"; then
 fi
 check_generation || { log "REFUS : generation changee apres l'envoi du bundle"; SESSION_RC=74; exit 74; }
 
-# ---- 5. Build v5 + v6, preconditions, REJEU des portes avec JOURNAL COMPLET
-# et planchers (P1 : jamais un tail -4). Le boot_id du handshake est
-# REVERIFIE dans la meme commande distante avant toute mutation.
+# ---- 5. Build v6 (+ v5 SEULEMENT si une phase l'exerce, § 5.14.1),
+# preconditions, REJEU des portes avec JOURNAL COMPLET et planchers (P1 :
+# jamais un tail -4). Le boot_id du handshake est REVERIFIE dans la meme
+# commande distante avant toute mutation. La v5 est une lignee seulement
+# historique : la session serie C bornee a la v6 ne la repaye pas.
+V5_NEEDED=0
+for _ax in "${CONF_SPECS}" "${BENCH_SPECS}" "${GPU_SPECS}"; do
+  for _tok in ${_ax}; do
+    [ "${_tok}" != "aucun" ] && V5_NEEDED=1
+  done
+done
+if [ "${V5_NEEDED}" -eq 1 ]; then
+  V5_PREFLIGHT_CMDS='cmake -S morsehgp3D_v5 -B build-v5 -DCMAKE_BUILD_TYPE=Release
+  cmake --build build-v5 -j48 2>&1 | tail -3
+  ctest --test-dir build-v5 -L gate -j24 --output-on-failure'
+else
+  V5_PREFLIGHT_CMDS='echo "preflight v5 : saute (aucune phase conf/bench/gpu-v5)"'
+fi
 BUILD_LOG="${WORK}/build_vm.log"
 _now=$(date +%s)
 BUILD_TIMEOUT_S=$(( DEADLINE_EPOCH - _now - GRACE_S ))
@@ -866,27 +976,34 @@ fi
   echo "'"${SOURCE_PAYLOAD_SHA256}"'  '"${REMOTE_BUNDLE}"'" | sha256sum -c -
   tar xzf '"${REMOTE_BUNDLE}"'
   echo "coeurs=$(nproc)"; grep MemTotal /proc/meminfo; cmake --version | head -1
-  cmake -S morsehgp3D_v5 -B build-v5 -DCMAKE_BUILD_TYPE=Release
-  cmake --build build-v5 -j48 2>&1 | tail -3
-  ctest --test-dir build-v5 -L gate -j24 --output-on-failure
+  '"${V5_PREFLIGHT_CMDS}"'
   cmake -S morsehgp3D_v6 -B build-v6 -DCMAKE_BUILD_TYPE=Release
   cmake --build build-v6 -j48 2>&1 | tail -3
   ctest --test-dir build-v6 -L gate -j24 --output-on-failure
 ' > "${BUILD_LOG}" 2>&1 || { SESSION_RC=$?; log "build/portes VM en echec (rc=${SESSION_RC}, journal ${BUILD_LOG})"; exit "${SESSION_RC}"; }
 cat "${BUILD_LOG}" >> "${LOG}"
-# Planchers de portes : DEUX blocs 100%, totaux >= planchers (P1).
+# Planchers de portes : un bloc 100% par lignee EXERCEE, totaux >= planchers
+# (P1 ; § 5.14.1 : v5 conditionnelle, jamais un masquage de plancher — le
+# bloc v5 disparait ENTIEREMENT quand aucune phase ne l'exerce).
 # Les DEUX libelles de resume CTest sont acceptes (ctest <= 4.3 :
 # « 100% tests passed, 0 tests failed out of N » ; ctest 4.4+ :
 # « 100% tests passed out of N ») — la session du 1er septembre a ete
 # refusee fail-closed sur ce seul changement de format, portes 100% vertes
 # (recu session_g4_20260831_2a981bc4b73f_1788212429). Toujours 100% exige.
 mapfile -t GATE_TOTALS < <(grep -oE '100% tests passed(, 0 tests failed)? out of [0-9]+' "${BUILD_LOG}" | grep -oE '[0-9]+$')
-if [ "${#GATE_TOTALS[@]}" -ne 2 ] || [ "${GATE_TOTALS[0]}" -lt "${V5_GATE_MIN}" ] || [ "${GATE_TOTALS[1]}" -lt "${V6_GATE_MIN}" ]; then
-  log "REFUS : rejeu des portes non conforme (blocs=${#GATE_TOTALS[@]} totaux=${GATE_TOTALS[*]:-aucun}, planchers ${V5_GATE_MIN}/${V6_GATE_MIN})"
+EXPECTED_GATE_BLOCKS=$((1 + V5_NEEDED))
+if [ "${#GATE_TOTALS[@]}" -ne "${EXPECTED_GATE_BLOCKS}" ] \
+   || { [ "${V5_NEEDED}" -eq 1 ] && [ "${GATE_TOTALS[0]}" -lt "${V5_GATE_MIN}" ]; } \
+   || [ "${GATE_TOTALS[$((EXPECTED_GATE_BLOCKS - 1))]}" -lt "${V6_GATE_MIN}" ]; then
+  log "REFUS : rejeu des portes non conforme (blocs=${#GATE_TOTALS[@]}/${EXPECTED_GATE_BLOCKS} totaux=${GATE_TOTALS[*]:-aucun}, planchers ${V5_GATE_MIN}/${V6_GATE_MIN}, v5_exercee=${V5_NEEDED})"
   SESSION_RC=76
   exit 76
 fi
-log "portes VM : v5=${GATE_TOTALS[0]} v6=${GATE_TOTALS[1]} (journaux complets dans ${BUILD_LOG})"
+if [ "${V5_NEEDED}" -eq 1 ]; then
+  log "portes VM : v5=${GATE_TOTALS[0]} v6=${GATE_TOTALS[1]} (journaux complets dans ${BUILD_LOG})"
+else
+  log "portes VM : v6=${GATE_TOTALS[0]} — preflight v5 SAUTE (aucune phase conf/bench/gpu-v5, § 5.14.1)"
+fi
 
 # ---- 6. LA CAMPAGNE. Generation recontrolee, boot_id verifie DANS la meme
 # commande distante avant toute execution ; retour CAPTURE sans trap.
@@ -931,6 +1048,10 @@ if [ "${CAMPAIGN_SKIPPED}" -eq 0 ]; then
     SWEEP_SPECS='${SWEEP_SPECS}' SWEEP_REPEATS='${SWEEP_REPEATS}' \
     GPU_SPECS='${GPU_SPECS}' FRONTIER_SPECS='${FRONTIER_SPECS}' FRONTIER_TIMEOUT='${FRONTIER_TIMEOUT}' \
     GPU_BUILD_TIMEOUT='${GPU_BUILD_TIMEOUT}' FRONTIER_ULIMIT_KB='${FRONTIER_ULIMIT_KB}' \
+    MATRICE_POINTS='${MATRICE_POINTS}' MATRICE_SEQUENCE='${MATRICE_SEQUENCE}' MATRICE_TIMEOUT='${MATRICE_TIMEOUT}' \
+    ATTRIB_POINTS='${ATTRIB_POINTS}' ATTRIB_TIMEOUT='${ATTRIB_TIMEOUT}' \
+    GPUV6_GATE_NAMES='${GPUV6_GATE_NAMES}' GPUV6_BUILD_TIMEOUT='${GPUV6_BUILD_TIMEOUT}' GPUV6_GATE_TIMEOUT='${GPUV6_GATE_TIMEOUT}' \
+    GPUV6_PILOT_SPECS='${GPUV6_PILOT_SPECS}' GPUV6_PILOT_MIN_LOTS='${GPUV6_PILOT_MIN_LOTS}' GPUV6_PILOT_TIMEOUT='${GPUV6_PILOT_TIMEOUT}' \
     GRACE_S='${GRACE_S}' \
     /bin/bash gcp-migration/v6_campaign_remote.sh ${SOURCE_COMMIT} ${SOURCE_PAYLOAD_SHA256} ${PROTOCOL_MANIFEST_SHA256}
 " 2>&1 | tee -a "${LOG}"

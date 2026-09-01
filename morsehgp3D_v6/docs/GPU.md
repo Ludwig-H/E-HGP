@@ -96,7 +96,21 @@ théorème d'équivalence + fixture, jamais sur un benchmark.
   cartes, totaux) CPU vs route série C sur 2 familles × 2 tailles, refus du
   run entier sous mutants ; pilote `cli/mhgp6_cuda.cu` (les deux routes,
   parité exigée, coûts wire/H2D/kernels/D2H séparés, `--repeat`, parsing
-  exact, arch + device signés) + son stub de syntaxe/logique. Le reçu de
+  exact, arch + device signés) + son stub de syntaxe/logique. Records
+  (§ 5.13-5.15) : chaque répétition publie les DEUX signatures d'une
+  projection canonique `mhgp6_parite_v1` couvrant EXACTEMENT le tuple
+  comparé (`digest_all`, `digest_balls`, `digest_postprefilter`, forêts par
+  K, cartes par K, `total_events`, `emitted`) — le validateur recalcule
+  l'égalité lui-même, le booléen `parite=` n'est qu'une redondance, et une
+  incohérence projection/tuple est un PLANCHER (code 3). Le juge unique
+  `tests/pilote_juge.py` (porte stub, runner G4 en mode `--fichier` après
+  CHAQUE famille, validateur) ferme : en-tête exacte liée à l'entrée
+  (famille, n, graine, fils, lot), cinq records ABBA/BAAB, formules
+  d'octets (112/100/100 par boule), `lot_effectif = min(lot, nb_total)`,
+  chronos finis, étage device ≥ somme de ses six composantes (± 0,4 ms
+  d'arrondi %.1f), murs enveloppant leurs sous-étages, stabilité de
+  l'objet/volumes entre répétitions. L'architecture est CONTRACTUELLE :
+  `CMAKE_CUDA_ARCHITECTURES=120` exigée (refus CMake sinon). Le reçu de
   gain 50k+ vient d'une session G4 (profil de campagne, nouveau pin,
   nouveau GO auditeur) — jamais d'un gate ni du reçu GPU v5 historique.
 

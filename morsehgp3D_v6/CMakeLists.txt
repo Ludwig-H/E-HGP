@@ -136,6 +136,28 @@ mhgp6_gate(mhgp6_pilote_stub_parite_200 0 mhgp6_pilote_stub_check ARGS --family=
 mhgp6_gate(mhgp6_pilote_stub_lot17 0 mhgp6_pilote_stub_check ARGS --family=uniform --n=200 --seed=3 --threads=4 --lot=17 --min-lots=2 TIMEOUT 600)
 mhgp6_executable(mhgp6_pilote_stub_check_test tests/pilot_cuda_stub_check.cpp)
 mhgp6_gate(mhgp6_pilote_stub_mutant_base 4 mhgp6_pilote_stub_check_test ARGS --family=uniform --n=200 --seed=3 --threads=4 --lot=17 --min-lots=2 --inject=gpu-lot-base-reset TIMEOUT 600)
+# JUGE DES RECORDS (§ 5.13) : la grammaire publiee par le pilote (cinq
+# records exacts, ABBA/BAAB, signatures canoniques recalculees, formules
+# d'octets 112/100/100 par boule, temps finis, lots) est jugee par
+# tests/pilote_juge.py — le MEME juge que le validateur G4 applique aux
+# reçus : les champs sont causaux avant toute depense device. Les deux
+# ordres de base sont exerces ; les contre-fixtures integrees du juge
+# doivent toutes etre tuees (jamais un vert par vacuite).
+add_test(NAME mhgp6_pilote_juge_contre_fixtures
+         COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=python3
+                 "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/pilote_juge.py --contre-fixtures"
+                 -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+set_tests_properties(mhgp6_pilote_juge_contre_fixtures PROPERTIES LABELS "gate" TIMEOUT 120)
+add_test(NAME mhgp6_pilote_stub_juge
+         COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=python3
+                 "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/pilote_juge.py --binaire $<TARGET_FILE:mhgp6_pilote_stub_check> --family=uniform --n=200 --seed=3 --threads=4 --lot=17 --min-lots=2 --repeat=4 --ordre=cpu-device"
+                 -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+set_tests_properties(mhgp6_pilote_stub_juge PROPERTIES LABELS "gate" TIMEOUT 600)
+add_test(NAME mhgp6_pilote_stub_juge_ordre_inverse
+         COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=python3
+                 "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/pilote_juge.py --binaire $<TARGET_FILE:mhgp6_pilote_stub_check> --family=uniform --n=200 --seed=3 --threads=4 --lot=17 --min-lots=2 --repeat=4 --ordre=device-cpu"
+                 -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+set_tests_properties(mhgp6_pilote_stub_juge_ordre_inverse PROPERTIES LABELS "gate" TIMEOUT 600)
 mhgp6_gate(mhgp6_pilot_stub_mutant_stack 4 mhgp6_pilot_stub_gate ARGS --inject=gpu-stack-shallow TIMEOUT 600)
 mhgp6_gate(mhgp6_pilot_stub_mutant_nonstrict 4 mhgp6_pilot_stub_gate ARGS --inject=gpu-census-nonstrict TIMEOUT 600)
 # Frontiere D2H causale (f3704e99) : ecriture omise et n_shell hors domaine
@@ -319,6 +341,15 @@ add_test(NAME mhgp6_profil_identite
                  "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/profil_gate.py $<TARGET_FILE:mhgp6> $<TARGET_FILE:mhgp6_profile> $<TARGET_FILE:mhgp6_profile_liveness>"
                  -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
 set_tests_properties(mhgp6_profil_identite PROPERTIES LABELS "gate" TIMEOUT 600)
+# CONTRE-FIXTURE AUTONOME des seuils (§ 5.13) : la scene « neuf composantes
+# nulles, somme=0.008, residuel=0.012, mur=0.020 » doit etre tuee par les
+# seuils serres 0.0051/0.006, et la scene aux arrondis %.3f honnetes rester
+# verte — le juge exerce est le VRAI check_profile_output importe.
+add_test(NAME mhgp6_profil_contre_fixture
+         COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=python3
+                 "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/profil_contre_fixture.py"
+                 -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+set_tests_properties(mhgp6_profil_contre_fixture PROPERTIES LABELS "gate" TIMEOUT 120)
 # Contrat d'echec sous profil, COMPILE (71528f8a : le CLI ne print jamais
 # apres un refus — l'inspection porte sur le RunResult, jamais sur stdout).
 add_executable(mhgp6_profil_contrat tests/profil_contrat_echec.cpp)
@@ -343,6 +374,12 @@ if(MHGP6_ENABLE_CUDA)
   # l'architecture par defaut (lecon v5, session G4 50fee05c).
   if(NOT CMAKE_CUDA_ARCHITECTURES)
     set(CMAKE_CUDA_ARCHITECTURES 120)
+  endif()
+  # § 5.15.2 : l'architecture serie C est CONTRACTUELLE (sm_120, G4/RTX PRO
+  # 6000 Blackwell) — une surcharge (86, all, ...) fabriquerait un recu
+  # device d'une autre machine : refus a la configuration.
+  if(NOT CMAKE_CUDA_ARCHITECTURES STREQUAL "120")
+    message(FATAL_ERROR "MHGP6_ENABLE_CUDA exige CMAKE_CUDA_ARCHITECTURES=120 (recu ${CMAKE_CUDA_ARCHITECTURES})")
   endif()
   enable_language(CUDA)
   set(CMAKE_CUDA_STANDARD 20)

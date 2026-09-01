@@ -33,6 +33,8 @@ PROTOCOL_FILES=(
   gcp-migration/profils/decision_v1.env
   gcp-migration/profils/smoke_v1.env
   gcp-migration/profils/g4_mesure_v1.env
+  gcp-migration/profils/g4_serie_c_v1.env
+  morsehgp3D_v6/tests/pilote_juge.py
   gcp-migration/set_max_run_duration_and_verify.sh
   gcp-migration/start_and_verify.sh
   gcp-migration/stop_and_verify.sh
@@ -67,7 +69,7 @@ SOURCE_PAYLOAD_SHA256="$(sha256sum "${BUNDLE}" | awk '{print $1}')"
 
 # MATERIALISATION depuis le COMMIT de TOUT le protocole (gardes et profils
 # compris) : seules ces copies sont executees ensuite.
-mkdir -p "${WORK}/pinned/gcp-migration/profils"
+mkdir -p "${WORK}/pinned/gcp-migration/profils" "${WORK}/pinned/morsehgp3D_v6/tests"
 for f in "${PROTOCOL_FILES[@]}"; do
   git show "${SOURCE_COMMIT}:${f}" > "${WORK}/pinned/${f}"
   chmod +x "${WORK}/pinned/${f}"

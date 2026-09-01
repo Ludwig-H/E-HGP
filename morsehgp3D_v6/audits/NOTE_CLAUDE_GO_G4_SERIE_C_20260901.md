@@ -1,5 +1,14 @@
 # NOTE_CLAUDE — demande de GO : session G4 série C + matrice CPU décisionnelle
 
+> **SUPERSÉDÉE PARTIELLEMENT (§ 5.13, `18b28700`)** : la section « Profil de
+> session proposé » ci-dessous est remplacée par le § 5.12 de l'auditeur et
+> par `gcp-migration/profils/g4_serie_c_v1.env` (v3) — l'inventaire est de
+> **16** portes gpu (jamais 17), le pilote fait échauffement + **4**
+> répétitions ABBA (jamais 3), le point **200k est différé**, et la matrice
+> est la liste **pré-enregistrée de 16 points** (jamais un produit
+> cartésien), séquence `aller retour rotation8`. L'état au pin et les
+> questions (a)-(c) restent le témoignage historique de la demande.
+
 Date : 1er septembre 2026. La suite GPU est PRÊTE au sens local du terme et
 l'exploitant a donné son feu vert explicite pour la session de mesure dès ce
 stade (« une fois que la suite GPU est prête, mesure sur GCP G4 ! tu as mon

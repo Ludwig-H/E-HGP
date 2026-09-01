@@ -19,6 +19,7 @@
 
 #include "../src/cloud/families.hpp"
 #include "../src/core/parse.hpp"
+#include "../src/core/sha256.hpp"
 #include "../src/gpu/census_kernels.cuh"
 #include "../src/gpu/wire.hpp"
 #include "../src/pipeline/run.hpp"
@@ -39,6 +40,36 @@ int main() {
   } while (0)
 
 namespace {
+
+// § 5.13 : projection canonique du tuple de parite — EXACTEMENT les champs
+// compares par `same` (digest_all, digest_balls, digest_postprefilter, forets
+// par K, cartes par K, total_events, emitted), serialises en texte delimite
+// puis haches. Les DEUX signatures sont publiees a chaque record : le
+// validateur recalcule l'egalite lui-meme, le booleen `parite=` imprime
+// n'est qu'une redondance, jamais l'autorite.
+std::string parity_signature(const RunResult& r) {
+  std::string s = "mhgp6_parite_v1\n";
+  s += "all=" + r.digest_all + "\nboules=" + r.digest_balls + "\npost=" + r.digest_postprefilter + "\n";
+  char buf[192];
+  for (size_t k = 0; k < r.digest_forest.size(); ++k) {
+    std::snprintf(buf, sizeof buf, "foret_K%zu=%s\n", k, r.digest_forest[k].c_str());
+    s += buf;
+  }
+  for (size_t k = 0; k < r.cards.size(); ++k) {
+    const KCardinalities& c = r.cards[k];
+    std::snprintf(buf, sizeof buf, "cartes_K%zu=%llu,%llu,%llu,%llu,%llu,%llu\n", k,
+                  (unsigned long long)c.events, (unsigned long long)c.facets,
+                  (unsigned long long)c.deltas, (unsigned long long)c.attachments,
+                  (unsigned long long)c.fusions, (unsigned long long)c.nodes);
+    s += buf;
+  }
+  std::snprintf(buf, sizeof buf, "evenements=%llu\nemis=%llu\n",
+                (unsigned long long)r.total_events, (unsigned long long)r.emitted);
+  s += buf;
+  Sha256 h;
+  h.update(reinterpret_cast<const uint8_t*>(s.data()), s.size());
+  return h.hex();
+}
 
 double now_ms() {
   static const auto t0 = std::chrono::steady_clock::now();
@@ -365,18 +396,29 @@ int main(int argc, char** argv) {
     const bool same = a.digest_all == b.digest_all && a.digest_balls == b.digest_balls &&
                       a.digest_postprefilter == b.digest_postprefilter && a.digest_forest == b.digest_forest &&
                       a.cards == b.cards && a.total_events == b.total_events && a.emitted == b.emitted;
+    // § 5.13 : la projection canonique couvre exactement le tuple de `same` —
+    // signatures separees CPU/device pour un recalcul d'egalite externe.
+    const std::string sig_cpu = parity_signature(a), sig_dev = parity_signature(b);
     std::printf("repetition=%lld retenue=%s ordre=%s parite=%s mur_cpu_ms=%.1f mur_route_device_ms=%.1f "
                 "prefiltre_census_cpu_ms=%.1f route_device_etage_ms=%.1f "
                 "wire_ms=%.1f setup_alloc_ms=%.1f h2d_ms=%.1f kernels_ms=%.1f d2h_ms=%.1f rebuild_ms=%.1f "
                 "nb_total=%llu lot_effectif=%llu h2d_octets_index=%llu h2d_octets_boules=%llu "
-                "h2d_octets_sentinelles=%llu d2h_octets=%llu lots=%llu digest_all=%s\n",
+                "h2d_octets_sentinelles=%llu d2h_octets=%llu lots=%llu digest_all=%s "
+                "signature_cpu=%s signature_device=%s\n",
                 (long long)r, retenue ? "OUI" : "NON", cpu_first ? "cpu-device" : "device-cpu",
                 same ? "OUI" : "NON", mur_cpu, mur_gpu, a.t_prefilter_ms + a.t_census_ms, b.t_census_ms,
                 costs.wire_ms, costs.setup_alloc_ms, costs.h2d_ms, costs.kernel_ms, costs.d2h_ms,
                 costs.rebuild_ms, (unsigned long long)costs.nb_total, (unsigned long long)costs.lot_effectif,
                 (unsigned long long)costs.h2d_index_bytes, (unsigned long long)costs.h2d_ball_bytes,
                 (unsigned long long)costs.h2d_sentinel_bytes, (unsigned long long)costs.d2h_bytes,
-                (unsigned long long)costs.lots, a.digest_all.c_str());
+                (unsigned long long)costs.lots, a.digest_all.c_str(),
+                sig_cpu.c_str(), sig_dev.c_str());
+    if (same != (sig_cpu == sig_dev)) {
+      // La projection DOIT etre exactement aussi discriminante que `same` :
+      // toute divergence entre les deux verdicts est un invariant viole.
+      std::printf("PLANCHER : projection canonique incoherente avec le tuple compare\n");
+      return 3;
+    }
     if (!same) {
       std::printf("DIVERGENCE : l'objet des deux routes differe\n");
       return 1;

@@ -59,10 +59,16 @@ check_true() { local name="$1"; shift; if "$@"; then check "${name}" 0; else che
 # cutoff min(GCE, invite) depuis GEN_EPOCH — un horodatage fige casserait
 # les scenarios au fil de l'horloge.
 FAKE_GEN="$(date -u -d '-60 seconds' +%Y-%m-%dT%H:%M:%SZ)"
-PROTOCOL_FILES=(session_campagne_v6_g4.sh v6_session_lifecycle.sh v6_campaign_pin.sh
-                v6_campaign_remote.sh validate_v6_campaign.py profils/decision_v1.env
-                profils/smoke_v1.env profils/g4_mesure_v1.env set_max_run_duration_and_verify.sh
-                start_and_verify.sh stop_and_verify.sh)
+# § 5.15.4 : chemins REPO-RELATIFS, meme inventaire et meme ordre que les
+# deux listes normatives (pin + lifecycle) — treize fichiers dans DEUX
+# repertoires (le juge du pilote vit sous morsehgp3D_v6/tests/).
+PROTOCOL_FILES=(gcp-migration/session_campagne_v6_g4.sh gcp-migration/v6_session_lifecycle.sh
+                gcp-migration/v6_campaign_pin.sh gcp-migration/v6_campaign_remote.sh
+                gcp-migration/validate_v6_campaign.py gcp-migration/profils/decision_v1.env
+                gcp-migration/profils/smoke_v1.env gcp-migration/profils/g4_mesure_v1.env
+                gcp-migration/profils/g4_serie_c_v1.env morsehgp3D_v6/tests/pilote_juge.py
+                gcp-migration/set_max_run_duration_and_verify.sh
+                gcp-migration/start_and_verify.sh gcp-migration/stop_and_verify.sh)
 
 # ---- Faux gcloud (PATH) : describe rend la generation ; ssh n1 = handshake
 # boot_id seul, n2 = build (portes), n3 = campagne ; scp materialise out/.
@@ -192,12 +198,12 @@ run_scenario() {
   local start_mode="$1" ssh_mode="${2:-ok}" stop_rc="${3:-0}" max_run="${4:-28800}"
   SCENARIO_DIR="$(mktemp -d "${BASE}/scenario.XXXXXX")"
   local W="${SCENARIO_DIR}/work"
-  mkdir -p "${W}/pinned/gcp-migration/profils" "${SCENARIO_DIR}/bin" "${SCENARIO_DIR}/guards" \
-           "${SCENARIO_DIR}/recu"
+  mkdir -p "${W}/pinned/gcp-migration/profils" "${W}/pinned/morsehgp3D_v6/tests" \
+           "${SCENARIO_DIR}/bin" "${SCENARIO_DIR}/guards" "${SCENARIO_DIR}/recu"
   make_fake_bin "${SCENARIO_DIR}/bin"
   make_fake_guards "${SCENARIO_DIR}/guards"
   for f in "${PROTOCOL_FILES[@]}"; do
-    cp "${HERE}/${f}" "${W}/pinned/gcp-migration/${f}"
+    cp "${ROOT}/${f}" "${W}/pinned/${f}"
   done
   if [ "${FAKE_VALIDATOR_STUB:-0}" = "1" ]; then
     # Substitue AVANT le calcul du manifeste (la copie epinglee reste donc
@@ -213,9 +219,9 @@ run_scenario() {
     echo "commit=${commit}"
     for f in "${PROTOCOL_FILES[@]}"; do
       printf '%s\t%s\t%s\n' \
-        "$(sha256sum "${W}/pinned/gcp-migration/${f}" | awk '{print $1}')" \
-        "$(wc -c < "${W}/pinned/gcp-migration/${f}")" \
-        "gcp-migration/${f}"
+        "$(sha256sum "${W}/pinned/${f}" | awk '{print $1}')" \
+        "$(wc -c < "${W}/pinned/${f}")" \
+        "${f}"
     done
   } > "${SCENARIO_DIR}/manifest.txt"
   local manifest_sha
@@ -552,13 +558,13 @@ check_true "garde scp CAUSALE a la frontiere d'une seconde : pire cas 3155 s du 
 # du premier tour corrige).
 CLONE="${BASE}/clone"
 git clone --quiet --shared --no-hardlinks "${ROOT}" "${CLONE}" 2>/dev/null
-mkdir -p "${CLONE}/gcp-migration/profils"
+mkdir -p "${CLONE}/gcp-migration/profils" "${CLONE}/morsehgp3D_v6/tests"
 for f in "${PROTOCOL_FILES[@]}"; do
-  cp "${HERE}/${f}" "${CLONE}/gcp-migration/${f}"
+  cp "${ROOT}/${f}" "${CLONE}/${f}"
 done
 (
   cd "${CLONE}"
-  git -c user.name=selftest -c user.email=selftest@local add -A -- gcp-migration/ >/dev/null
+  git -c user.name=selftest -c user.email=selftest@local add -- "${PROTOCOL_FILES[@]}" >/dev/null
   git diff --cached --quiet || \
     git -c user.name=selftest -c user.email=selftest@local commit --quiet -m "selftest : protocole courant"
 )
@@ -622,16 +628,16 @@ check_true "entree directe en etage 2 : refusee (marqueur forge)" \
 
 # 13. Chaque fichier du protocole altere => le pin refuse (code 2).
 for f in "${PROTOCOL_FILES[@]}"; do
-  echo "# alteration" >> "${CLONE}/gcp-migration/${f}"
+  echo "# alteration" >> "${CLONE}/${f}"
   rc=0
   ( cd "${CLONE}" && ./gcp-migration/v6_campaign_pin.sh "$(mktemp -d "${BASE}/pin.XXXXXX")" "${CLONE_COMMIT}" ) \
     >/dev/null 2>&1 || rc=$?
   check_true "pin refuse le fichier altere : ${f}" [ "${rc}" -eq 2 ]
-  ( cd "${CLONE}" && git checkout --quiet -- "gcp-migration/${f}" )
+  ( cd "${CLONE}" && git checkout --quiet -- "${f}" )
 done
 
 if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest cycle de vie v6 : ${FAILURES} echec(s)" >&2
   exit 1
 fi
-echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (35 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue, registre illisible=blocage, surcharge temporelle refusee, trop-tard sans remontee, describe borne, registre etranger post-arret=78, grace fixe 29/31 refusees, relation invite/GCE avant set_max, STOP1<STOP2<VALIDATE, double echec sans validation, contre-calendrier a describe clampe, ordre STOP1<STOP2<VALIDATE au ledger, sortie pre-SCP a seconde reserve, garde scp causale a la seconde — + 11 refus de pin, rejouable depuis un HEAD propre)"
+echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (35 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue, registre illisible=blocage, surcharge temporelle refusee, trop-tard sans remontee, describe borne, registre etranger post-arret=78, grace fixe 29/31 refusees, relation invite/GCE avant set_max, STOP1<STOP2<VALIDATE, double echec sans validation, contre-calendrier a describe clampe, ordre STOP1<STOP2<VALIDATE au ledger, sortie pre-SCP a seconde reserve, garde scp causale a la seconde — + 13 refus de pin sur l inventaire repo-relatif a deux repertoires, rejouable depuis un HEAD propre)"

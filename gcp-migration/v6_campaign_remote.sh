@@ -89,6 +89,31 @@ FRONTIER_TIMEOUT="${FRONTIER_TIMEOUT:-3600}"
 # transforme un OOM muet (SIGKILL non attribuable) en std::bad_alloc TYPE.
 # 0 = pas de plafond.
 FRONTIER_ULIMIT_KB="${FRONTIER_ULIMIT_KB:-0}"
+# ---- SERIE C v6 (profil g4_serie_c_v1, § 5.12 — sentinelle `aucun` = phase
+# sautee, plan runs=0) : MATRICE CPU decisionnelle a CONTRASTES
+# PRE-ENREGISTRES (points famille:n:fils:inflight:join:digest, sequence
+# globale de passages aller|retour), ATTRIBUTION (mhgp6_profile — jamais un
+# mur), build CUDA v6 + INVENTAIRE EXACT de portes `gpu` (le premier rouge
+# interdit le pilote), puis PILOTE mhgp6_cuda (echauffement exclu + 4
+# repetitions ABBA, parite exigee a chacune, --min-lots).
+MATRICE_POINTS="${MATRICE_POINTS:-aucun}"
+MATRICE_SEQUENCE="${MATRICE_SEQUENCE:-aller retour aller}"
+MATRICE_TIMEOUT="${MATRICE_TIMEOUT:-2400}"
+ATTRIB_POINTS="${ATTRIB_POINTS:-aucun}"
+ATTRIB_TIMEOUT="${ATTRIB_TIMEOUT:-2400}"
+V6_PROFILE_BIN="${V6_PROFILE_BIN:-./build-v6/mhgp6_profile}"
+GPUV6_GATE_NAMES="${GPUV6_GATE_NAMES:-aucun}"
+GPUV6_BUILD_TIMEOUT="${GPUV6_BUILD_TIMEOUT:-1800}"
+GPUV6_GATE_TIMEOUT="${GPUV6_GATE_TIMEOUT:-3600}"
+GPUV6_PILOT_SPECS="${GPUV6_PILOT_SPECS:-aucun}"
+GPUV6_PILOT_MIN_LOTS="${GPUV6_PILOT_MIN_LOTS:-2}"
+GPUV6_PILOT_TIMEOUT="${GPUV6_PILOT_TIMEOUT:-3600}"
+GPUV6_PILOT_BIN="${GPUV6_PILOT_BIN:-./build-v6-cuda/mhgp6_cuda}"
+# § 5.14.3 : LE juge des records (le meme que la porte stub et que le
+# validateur), applique en mode fichier apres chaque pilote — present dans
+# le bundle epingle (morsehgp3D_v6/ est empaquete, le fichier est aussi
+# dans PROTOCOL_FILES).
+PILOTE_JUGE="${PILOTE_JUGE:-morsehgp3D_v6/tests/pilote_juge.py}"
 DEADLINE_EPOCH="${DEADLINE_EPOCH:-}"
 
 test -x "${TIME_BIN}" || {
@@ -129,6 +154,34 @@ for spec in ${FRONTIER_SPECS}; do
   [ "${spec}" = "aucun" ] && continue
   [[ "${spec}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*$ ]] || refuse "paire FRONTIERE '${spec}' mal formee (fam:n)"
 done
+for pt in ${MATRICE_POINTS}; do
+  [ "${pt}" = "aucun" ] && continue
+  [[ "${pt}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*:[1-9][0-9]*:[1-9][0-9]*:[01]:(avec|sans)$ ]] \
+    || refuse "point MATRICE '${pt}' mal forme (fam:n:fils:inflight:join:digest)"
+done
+for pt in ${ATTRIB_POINTS}; do
+  [ "${pt}" = "aucun" ] && continue
+  [[ "${pt}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*:[1-9][0-9]*:[1-9][0-9]*:[01]$ ]] \
+    || refuse "point ATTRIB '${pt}' mal forme (fam:n:fils:inflight:join)"
+done
+for pas in ${MATRICE_SEQUENCE}; do
+  case "${pas}" in aller|retour|rotation8) ;; *) refuse "passage MATRICE '${pas}' inconnu (aller|retour|rotation8)" ;; esac
+done
+for spec in ${GPUV6_PILOT_SPECS}; do
+  [ "${spec}" = "aucun" ] && continue
+  [[ "${spec}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*$ ]] || refuse "paire PILOTE '${spec}' mal formee (fam:n)"
+done
+[[ "${MATRICE_TIMEOUT}" =~ ^[1-9][0-9]*$ ]] || refuse "MATRICE_TIMEOUT non entier"
+[[ "${ATTRIB_TIMEOUT}" =~ ^[1-9][0-9]*$ ]] || refuse "ATTRIB_TIMEOUT non entier"
+[[ "${GPUV6_BUILD_TIMEOUT}" =~ ^[1-9][0-9]*$ ]] || refuse "GPUV6_BUILD_TIMEOUT non entier"
+[[ "${GPUV6_GATE_TIMEOUT}" =~ ^[1-9][0-9]*$ ]] || refuse "GPUV6_GATE_TIMEOUT non entier"
+[[ "${GPUV6_PILOT_TIMEOUT}" =~ ^[1-9][0-9]*$ ]] || refuse "GPUV6_PILOT_TIMEOUT non entier"
+[[ "${GPUV6_PILOT_MIN_LOTS}" =~ ^[1-9][0-9]*$ ]] || refuse "GPUV6_PILOT_MIN_LOTS non entier"
+if [ "${GPUV6_GATE_NAMES}" != "aucun" ]; then
+  for nm in ${GPUV6_GATE_NAMES}; do
+    [[ "${nm}" =~ ^mhgp6_[a-z0-9_]+$ ]] || refuse "nom de porte gpu '${nm}' mal forme"
+  done
+fi
 [[ "${SWEEP_REPEATS}" =~ ^[1-9][0-9]*$ ]] || refuse "SWEEP_REPEATS non entier"
 [[ "${FRONTIER_TIMEOUT}" =~ ^[1-9][0-9]*$ ]] || refuse "FRONTIER_TIMEOUT non entier"
 [[ "${GPU_BUILD_TIMEOUT}" =~ ^[1-9][0-9]*$ ]] || refuse "GPU_BUILD_TIMEOUT non entier"
@@ -137,7 +190,8 @@ for f in ${QUEUE_FAMILIES}; do
   case "${f}" in aucun|terrain_stationnaire|scanline_stationnaire|uniform|terrain|eight_clusters|scanline_single_pass|scanline_overlap_multiecho) ;;
     *) refuse "famille v6 inconnue '${f}'" ;; esac
 done
-for axis in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS SWEEP_SPECS GPU_SPECS FRONTIER_SPECS; do
+for axis in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS SWEEP_SPECS GPU_SPECS FRONTIER_SPECS \
+            MATRICE_POINTS ATTRIB_POINTS GPUV6_PILOT_SPECS GPUV6_GATE_NAMES; do
   [ -n "${!axis// /}" ] || refuse "axe ${axis} vide"
   vals="$(printf '%s\n' ${!axis} | sort)"
   [ "$(printf '%s\n' "${vals}" | uniq -d | wc -l)" -eq 0 ] || refuse "axe ${axis} avec doublon"
@@ -149,7 +203,9 @@ mkdir -p "${OUT_DIR}"
 run_one() {
   local name="$1" scope="$2"; shift 2
   local out="${OUT_DIR}/${name}.txt" status="${OUT_DIR}/${name}.status"
-  local rc=0 t0 t1 hwm=""
+  local rc=0 t0 t1 hwm="" load0 aff
+  load0="$(cat /proc/loadavg 2>/dev/null || echo inconnue)"
+  aff="$(taskset -pc $$ 2>/dev/null | sed 's/.*: //' || echo inconnue)"
   t0=$(date +%s)
   # .txt et .status.time sont eux aussi publies ATOMIQUEMENT (audit
   # troisieme tour : seul .status l'etait).
@@ -165,6 +221,8 @@ run_one() {
     printf 'timing_scope=%s\n' "${scope}"
     printf 'threads=%s\n' "${THREADS_ONE:-${THREADS}}"
     printf 'time_bin=%s\n' "${TIME_BIN}"
+    printf 'charge_avant=%s\n' "${load0}"
+    printf 'affinite=%s\n' "${aff}"
     if [ -n "${EXTRA_STATUS:-}" ]; then printf '%s\n' "${EXTRA_STATUS}"; fi
     printf 'commande=%s\n' "$*"
     printf 'source_commit=%s\n' "${SOURCE_COMMIT}"
@@ -175,6 +233,47 @@ run_one() {
   mv "${status}.tmp" "${status}"
   echo "--- fini ${name} (code=${rc}, $((t1 - t0))s, rss=${hwm:-?}kB)"
   return 0
+}
+
+# AFFINITE DERIVEE DE LA TOPOLOGIE (§ 5.13.4) : `--threads` seul ne prouve
+# rien — la matrice CPU confine chaque run par `taskset -c` sur une liste
+# DERIVEE de lscpu : un CPU logique par coeur physique d'abord (premier fil
+# de chaque coeur), puis les fils SMT restants si T depasse le nombre de
+# coeurs. La liste demandee est gravee (affinite_demandee=) et l'affinite
+# effective attestee par un shell confine qui lit la sienne
+# (affinite_effective=). Liste vide = topologie illisible : la phase est
+# TRONQUEE (fail-closed), jamais un run a affinite non attestee.
+cpu_list_for() {
+  # § 5.14.4 : derivation par (socket, core) DANS le cpuset autorise du
+  # runner (jamais un CPU hors masque herite) ; le validateur recalcule le
+  # meme masque depuis topologie.txt.
+  local want="$1" allowed
+  allowed="$(taskset -pc $$ 2>/dev/null | sed 's/.*: //' || echo '')"
+  # Tri externe (socket, core, cpu) : awk portable (mawk compris, pas
+  # d'asorti) ; premiere passe = premier fil de chaque (socket, core),
+  # seconde passe = fils SMT restants, dans le meme ordre.
+  lscpu -p=CPU,CORE,SOCKET 2>/dev/null | grep '^[0-9]' | sort -t, -k3,3n -k2,2n -k1,1n \
+    | awk -F, -v want="${want}" -v allowed="${allowed}" '
+    BEGIN {
+      n_allow = split(allowed, toks, ",")
+      for (t = 1; t <= n_allow; t++) {
+        if (split(toks[t], r, "-") == 2) { for (c = r[1] + 0; c <= r[2] + 0; c++) ok[c] = 1 }
+        else if (toks[t] != "") ok[toks[t] + 0] = 1
+      }
+      n_first = 0; n_smt = 0
+    }
+    {
+      if (!(($1 + 0) in ok)) next
+      key = $3 "_" $2
+      if (!(key in seen)) { seen[key] = 1; firsts[n_first++] = $1 }
+      else { smts[n_smt++] = $1 }
+    }
+    END {
+      out = ""; count = 0
+      for (i = 0; i < n_first && count < want; i++) { out = out (count ? "," : "") firsts[i]; count++ }
+      for (i = 0; i < n_smt && count < want; i++) { out = out (count ? "," : "") smts[i]; count++ }
+      if (count == want) print out
+    }'
 }
 
 # Echeance : vrai (0) si le prochain run ne finirait pas a temps ; grave la
@@ -197,6 +296,9 @@ past_deadline() {
   echo "date_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "uname=$(uname -srm)"
   grep -E '^(MemTotal|MemAvailable)' /proc/meminfo 2>/dev/null || true
+  echo "cpuset_autorise=$(taskset -pc $$ 2>/dev/null | sed 's/.*: //' || echo inconnu)"
+  echo "--- lscpu_p ---"
+  lscpu -p=CPU,CORE,SOCKET 2>/dev/null | grep '^[0-9]' || echo "lscpu_p indisponible"
   echo "--- lscpu ---"
   lscpu 2>/dev/null || echo "lscpu indisponible"
 } > "${OUT_DIR}/topologie.txt.tmp"
@@ -327,7 +429,76 @@ mv "${OUT_DIR}/gpu_plan.txt.tmp" "${OUT_DIR}/gpu_plan.txt"
   echo "runs=${seq_no}"
 } > "${OUT_DIR}/frontier_plan.txt.tmp"
 mv "${OUT_DIR}/frontier_plan.txt.tmp" "${OUT_DIR}/frontier_plan.txt"
-echo "=== plans annonces : conf=$(sed -n 's/^runs=//p' "${OUT_DIR}/conf_plan.txt") sweep=$(sed -n 's/^runs=//p' "${OUT_DIR}/sweep_plan.txt") gpu=$(sed -n 's/^runs=//p' "${OUT_DIR}/gpu_plan.txt") frontier=$(sed -n 's/^runs=//p' "${OUT_DIR}/frontier_plan.txt") bench=$(sed -n 's/^runs=//p' "${OUT_DIR}/bench_plan.txt") queue=$(sed -n 's/^runs=//p' "${OUT_DIR}/queue_plan.txt") runs ==="
+# PLAN MATRICE (§ 5.12) : points x passages pre-enregistres (aller = ordre
+# des points, retour = inverse, rotation8 = rotation cyclique fixe de 8
+# positions, § 5.13) — l'expansion est ECRITE ici, le validateur la
+# recalcule et exige un statut par run.
+{
+  echo "matrice_plan=v1"
+  echo "points=${MATRICE_POINTS}"
+  echo "sequence=${MATRICE_SEQUENCE}"
+  seq_no=0
+  if [ "${MATRICE_POINTS}" != "aucun" ]; then
+    pas_no=0
+    for pas in ${MATRICE_SEQUENCE}; do
+      pas_no=$((pas_no + 1))
+      pts="$(printf '%s\n' ${MATRICE_POINTS})"
+      if [ "${pas}" = "retour" ]; then pts="$(printf '%s\n' ${MATRICE_POINTS} | tac)"; fi
+      if [ "${pas}" = "rotation8" ]; then
+        npts="$(printf '%s\n' ${MATRICE_POINTS} | wc -l)"
+        rot=$((8 % npts))
+        pts="$( { printf '%s\n' ${MATRICE_POINTS} | tail -n +$((rot + 1)); printf '%s\n' ${MATRICE_POINTS} | head -n "${rot}"; } )"
+      fi
+      pos=0
+      while read -r pt; do
+        pos=$((pos + 1))
+        fam="$(echo "${pt}" | cut -d: -f1)"; N="$(echo "${pt}" | cut -d: -f2)"
+        T="$(echo "${pt}" | cut -d: -f3)"; I="$(echo "${pt}" | cut -d: -f4)"
+        J="$(echo "${pt}" | cut -d: -f5)"; D="$(echo "${pt}" | cut -d: -f6)"
+        seq_no=$((seq_no + 1))
+        echo "seq=${seq_no} name=mat_${fam}_n${N}_t${T}_i${I}_j${J}_${D}_p${pas_no} family=${fam} n=${N} mat_threads=${T} inflight=${I} join=${J} digest=${D} passage=${pas_no} pos=${pos}"
+      done <<< "${pts}"
+    done
+  fi
+  echo "runs=${seq_no}"
+} > "${OUT_DIR}/matrice_plan.txt.tmp"
+mv "${OUT_DIR}/matrice_plan.txt.tmp" "${OUT_DIR}/matrice_plan.txt"
+{
+  echo "attrib_plan=v1"
+  echo "points=${ATTRIB_POINTS}"
+  seq_no=0
+  if [ "${ATTRIB_POINTS}" != "aucun" ]; then
+    for pt in ${ATTRIB_POINTS}; do
+      fam="$(echo "${pt}" | cut -d: -f1)"; N="$(echo "${pt}" | cut -d: -f2)"
+      T="$(echo "${pt}" | cut -d: -f3)"; I="$(echo "${pt}" | cut -d: -f4)"; J="$(echo "${pt}" | cut -d: -f5)"
+      seq_no=$((seq_no + 1))
+      echo "seq=${seq_no} name=attrib_${fam}_n${N}_t${T}_i${I}_j${J} family=${fam} n=${N} mat_threads=${T} inflight=${I} join=${J}"
+    done
+  fi
+  echo "runs=${seq_no}"
+} > "${OUT_DIR}/attrib_plan.txt.tmp"
+mv "${OUT_DIR}/attrib_plan.txt.tmp" "${OUT_DIR}/attrib_plan.txt"
+{
+  echo "gpuv6_plan=v1"
+  echo "gate_names=${GPUV6_GATE_NAMES}"
+  echo "pilot_specs=${GPUV6_PILOT_SPECS}"
+  echo "min_lots=${GPUV6_PILOT_MIN_LOTS}"
+  seq_no=0
+  if [ "${GPUV6_GATE_NAMES}" != "aucun" ]; then
+    seq_no=1; echo "seq=1 name=gpuv6_build kind=build"
+    seq_no=2; echo "seq=2 name=gpuv6_gates kind=gates"
+    if [ "${GPUV6_PILOT_SPECS}" != "aucun" ]; then
+      for spec in ${GPUV6_PILOT_SPECS}; do
+        fam="${spec%%:*}"; PN="${spec##*:}"
+        seq_no=$((seq_no + 1))
+        echo "seq=${seq_no} name=pilote_${fam}_n${PN} family=${fam} n=${PN} kind=pilote"
+      done
+    fi
+  fi
+  echo "runs=${seq_no}"
+} > "${OUT_DIR}/gpuv6_plan.txt.tmp"
+mv "${OUT_DIR}/gpuv6_plan.txt.tmp" "${OUT_DIR}/gpuv6_plan.txt"
+echo "=== plans annonces : conf=$(sed -n 's/^runs=//p' "${OUT_DIR}/conf_plan.txt") matrice=$(sed -n 's/^runs=//p' "${OUT_DIR}/matrice_plan.txt") attrib=$(sed -n 's/^runs=//p' "${OUT_DIR}/attrib_plan.txt") gpuv6=$(sed -n 's/^runs=//p' "${OUT_DIR}/gpuv6_plan.txt") sweep=$(sed -n 's/^runs=//p' "${OUT_DIR}/sweep_plan.txt") gpu=$(sed -n 's/^runs=//p' "${OUT_DIR}/gpu_plan.txt") frontier=$(sed -n 's/^runs=//p' "${OUT_DIR}/frontier_plan.txt") bench=$(sed -n 's/^runs=//p' "${OUT_DIR}/bench_plan.txt") queue=$(sed -n 's/^runs=//p' "${OUT_DIR}/queue_plan.txt") runs ==="
 
 # PHASE 1 — conformite v5 ≡ v6 sur les paires CONF_SPECS. Un echec ARRETE tout.
 for spec in ${CONF_SPECS}; do
@@ -352,6 +523,85 @@ for spec in ${CONF_SPECS}; do
   fi
 done
 
+
+# PHASE MATRICE (§ 5.12, AVANT tout build nvcc) — contrastes CPU
+# pre-enregistres au binaire de reference NON instrumente : murs de debit.
+# Un run non nul tronque la phase (grave) sans empecher la suite. Le hash
+# du binaire execute est grave sur chaque statut (§ 5.14.4).
+V6_BIN_SHA="$(sha256sum "${V6_BIN}" 2>/dev/null | awk '{print $1}' || echo inconnu)"
+while read -r line; do
+  case "${line}" in seq=*) ;; *) continue ;; esac
+  name="$(printf '%s\n' "${line}" | sed 's/.* name=\([^ ]*\).*/\1/')"
+  fam="$(printf '%s\n' "${line}" | sed 's/.* family=\([^ ]*\).*/\1/')"
+  N="$(printf '%s\n' "${line}" | sed 's/.* n=\([^ ]*\).*/\1/')"
+  T="$(printf '%s\n' "${line}" | sed 's/.* mat_threads=\([^ ]*\).*/\1/')"
+  I="$(printf '%s\n' "${line}" | sed 's/.* inflight=\([^ ]*\).*/\1/')"
+  J="$(printf '%s\n' "${line}" | sed 's/.* join=\([^ ]*\).*/\1/')"
+  D="$(printf '%s\n' "${line}" | sed 's/.* digest=\([^ ]*\).*/\1/')"
+  pas="$(printf '%s\n' "${line}" | sed 's/.* passage=\([^ ]*\).*/\1/')"
+  pos="$(printf '%s\n' "${line}" | sed 's/.* pos=\([^ ]*\).*/\1/')"
+  seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
+  if past_deadline "${name}" matrice matrice_tronquee.txt "${MATRICE_TIMEOUT}"; then break; fi
+  cpulist="$(cpu_list_for "${T}")"
+  if [ -z "${cpulist}" ]; then
+    printf 'truncated_at=%s\nphase=matrice\nreason=topologie illisible (affinite non derivable pour T=%s)\n' \
+      "${name}" "${T}" > "${OUT_DIR}/matrice_tronquee.txt"
+    echo "=== MATRICE TRONQUEE a ${name} : affinite non derivable ===" >&2
+    break
+  fi
+  aff_eff="$(taskset -c "${cpulist}" "${WRAPPER_BASH}" -c 'taskset -pc $$' 2>/dev/null | sed 's/.*: //' || echo inconnue)"
+  mat_cmd=(taskset -c "${cpulist}" "${V6_BIN}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 --seed=3 "--threads=${T}" \
+           "--fold-inflight=${I}" "--fold-join=${J}")
+  if [ "${D}" = "avec" ]; then mat_cmd+=(--digest); fi
+  RUN_TIMEOUT_ONE="${MATRICE_TIMEOUT}" THREADS_ONE="${T}" \
+  EXTRA_STATUS="$(printf 'family=%s\nn=%s\nmat_threads=%s\ninflight=%s\njoin=%s\ndigest=%s\npassage=%s\npos=%s\nseq=%s\naffinite_demandee=%s\naffinite_effective=%s\nbinaire_sha256=%s' \
+                  "${fam}" "${N}" "${T}" "${I}" "${J}" "${D}" "${pas}" "${pos}" "${seq_no}" "${cpulist}" "${aff_eff}" "${V6_BIN_SHA}")" \
+    run_one "${name}" matrice_cpu "${mat_cmd[@]}"
+  last_code="$(sed -n 's/^code=//p' "${OUT_DIR}/${name}.status" | head -n 1)"
+  if [ "${last_code:-1}" != "0" ]; then
+    printf 'truncated_at=%s\nphase=matrice\nreason=premier run non nul (code=%s)\n' \
+      "${name}" "${last_code:-?}" > "${OUT_DIR}/matrice_tronquee.txt"
+    echo "=== MATRICE TRONQUEE a ${name} : code ${last_code:-?} ===" >&2
+    break
+  fi
+done < "${OUT_DIR}/matrice_plan.txt"
+
+# PHASE ATTRIBUTION (§ 5.12) — mhgp6_profile : ATTRIBUTION seulement, jamais
+# un mur (le binaire signe profil_kind/fold_join ; le validateur l'exige).
+V6_PROFILE_BIN_SHA="$(sha256sum "${V6_PROFILE_BIN}" 2>/dev/null | awk '{print $1}' || echo inconnu)"
+while read -r line; do
+  case "${line}" in seq=*) ;; *) continue ;; esac
+  name="$(printf '%s\n' "${line}" | sed 's/.* name=\([^ ]*\).*/\1/')"
+  fam="$(printf '%s\n' "${line}" | sed 's/.* family=\([^ ]*\).*/\1/')"
+  N="$(printf '%s\n' "${line}" | sed 's/.* n=\([^ ]*\).*/\1/')"
+  T="$(printf '%s\n' "${line}" | sed 's/.* mat_threads=\([^ ]*\).*/\1/')"
+  I="$(printf '%s\n' "${line}" | sed 's/.* inflight=\([^ ]*\).*/\1/')"
+  J="$(printf '%s\n' "${line}" | sed 's/.* join=\([^ ]*\).*/\1/')"
+  seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
+  if past_deadline "${name}" attribution attrib_tronquee.txt "${ATTRIB_TIMEOUT}"; then break; fi
+  cpulist="$(cpu_list_for "${T}")"
+  if [ -z "${cpulist}" ]; then
+    printf 'truncated_at=%s\nphase=attribution\nreason=topologie illisible (affinite non derivable pour T=%s)\n' \
+      "${name}" "${T}" > "${OUT_DIR}/attrib_tronquee.txt"
+    echo "=== ATTRIBUTION TRONQUEE a ${name} : affinite non derivable ===" >&2
+    break
+  fi
+  aff_eff="$(taskset -c "${cpulist}" "${WRAPPER_BASH}" -c 'taskset -pc $$' 2>/dev/null | sed 's/.*: //' || echo inconnue)"
+  RUN_TIMEOUT_ONE="${ATTRIB_TIMEOUT}" THREADS_ONE="${T}" \
+  EXTRA_STATUS="$(printf 'family=%s\nn=%s\nmat_threads=%s\ninflight=%s\njoin=%s\nseq=%s\nauthority=attribution_seulement\naffinite_demandee=%s\naffinite_effective=%s\nbinaire_sha256=%s' \
+                  "${fam}" "${N}" "${T}" "${I}" "${J}" "${seq_no}" "${cpulist}" "${aff_eff}" "${V6_PROFILE_BIN_SHA}")" \
+    run_one "${name}" attribution_profil \
+    taskset -c "${cpulist}" \
+    "${V6_PROFILE_BIN}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 --seed=3 "--threads=${T}" \
+    "--fold-inflight=${I}" "--fold-join=${J}"
+  last_code="$(sed -n 's/^code=//p' "${OUT_DIR}/${name}.status" | head -n 1)"
+  if [ "${last_code:-1}" != "0" ]; then
+    printf 'truncated_at=%s\nphase=attribution\nreason=premier run non nul (code=%s)\n' \
+      "${name}" "${last_code:-?}" > "${OUT_DIR}/attrib_tronquee.txt"
+    echo "=== ATTRIBUTION TRONQUEE a ${name} : code ${last_code:-?} ===" >&2
+    break
+  fi
+done < "${OUT_DIR}/attrib_plan.txt"
 
 # PHASE FILS — gain de parallelisme CPU, moteur v6, ordre contrebalance
 # (avant/arriere par repetition). SANS --digest ; le validateur exige
@@ -510,6 +760,119 @@ if [ "${GPU_SPECS}" != "aucun" ]; then
   fi
 fi
 
+
+# PHASE GPUV6 (§ 5.12) — la SERIE C v6 : build CUDA (jamais avant les murs
+# CPU), puis `ctest -V -L gpu` juge sur l'INVENTAIRE EXACT des noms (le
+# validateur exige chaque nom Passed — jamais un plancher) ; au premier
+# rouge, AUCUN pilote. Puis le pilote mhgp6_cuda par famille : echauffement
+# non retenu + 4 repetitions ABBA (le binaire), parite exigee a chacune,
+# --min-lots ; nvidia-smi (UUID, CC, temperature, horloges) grave avant et
+# apres chaque run dans la sortie.
+if [ "${GPUV6_GATE_NAMES}" != "aucun" ]; then
+  gpuv6_ok=1
+  # § 5.15.3 : les murs matrice et l'attribution sont les PREREQUIS de la
+  # serie C device — une troncature en amont SAUTE tout le bloc GPU v6
+  # (build compris), publie sa cause, et le validateur refuse le recu ;
+  # plus jamais un build CUDA et des pilotes consommes apres un /bin/false.
+  if [ -f "${OUT_DIR}/matrice_tronquee.txt" ] || [ -f "${OUT_DIR}/attrib_tronquee.txt" ]; then
+    printf 'truncated_at=gpuv6_build\nphase=gpuv6\nreason=prerequis matrice/attribution tronques\n' > "${OUT_DIR}/gpuv6_tronquee.txt"
+    echo "=== PHASE GPUV6 SAUTEE : prerequis matrice/attribution tronques ===" >&2
+    gpuv6_ok=0
+  fi
+  if [ "${gpuv6_ok}" -eq 1 ]; then
+    NVCC_BIN="${NVCC_BIN:-$(command -v nvcc 2>/dev/null || ls /usr/local/cuda*/bin/nvcc 2>/dev/null | head -1 || true)}"
+    if [ -z "${NVCC_BIN}" ]; then
+      printf 'truncated_at=gpuv6_build\nphase=gpuv6\nreason=nvcc absent\n' > "${OUT_DIR}/gpuv6_tronquee.txt"
+      echo "=== PHASE GPUV6 TRONQUEE : nvcc absent ===" >&2
+      gpuv6_ok=0
+    fi
+  fi
+  if [ "${gpuv6_ok}" -eq 1 ]; then
+    if past_deadline gpuv6_build gpuv6 gpuv6_tronquee.txt "${GPUV6_BUILD_TIMEOUT}"; then gpuv6_ok=0; fi
+  fi
+  if [ "${gpuv6_ok}" -eq 1 ]; then
+    RUN_TIMEOUT_ONE="${GPUV6_BUILD_TIMEOUT}" EXTRA_STATUS="$(printf 'kind=build\nengine=v6_serie_c')" \
+      run_one gpuv6_build gpuv6_build "${WRAPPER_BASH}" -c "set -e; echo nvcc=${NVCC_BIN}; ${NVCC_BIN} --version 2>&1 | tail -2; nvidia-smi --query-gpu=name,uuid,compute_cap,driver_version --format=csv,noheader,nounits; ${GPU_CMAKE_BIN:-cmake} -S morsehgp3D_v6 -B build-v6-cuda -DCMAKE_BUILD_TYPE=Release -DMHGP6_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=120 -DCMAKE_CUDA_COMPILER=${NVCC_BIN} 2>&1 | tail -30; test \${PIPESTATUS[0]} -eq 0; ${GPU_CMAKE_BIN:-cmake} --build build-v6-cuda -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test \${PIPESTATUS[0]} -eq 0"
+    if ! grep -q '^code=0$' "${OUT_DIR}/gpuv6_build.status"; then
+      printf 'truncated_at=gpuv6_build\nphase=gpuv6\nreason=build cuda v6 non conforme\n' > "${OUT_DIR}/gpuv6_tronquee.txt"
+      echo "=== PHASE GPUV6 TRONQUEE : build cuda v6 non conforme ===" >&2
+      gpuv6_ok=0
+    fi
+  fi
+  if [ "${gpuv6_ok}" -eq 1 ]; then
+    if past_deadline gpuv6_gates gpuv6 gpuv6_tronquee.txt "${GPUV6_GATE_TIMEOUT}"; then gpuv6_ok=0; fi
+  fi
+  if [ "${gpuv6_ok}" -eq 1 ]; then
+    # § 5.14.4 : l'INVENTAIRE EXACT est controle AVANT toute execution (un
+    # 17e test decouvert apres coup a deja depense) — ctest -N liste sans
+    # courir ; toute difference tronque la phase, AUCUNE porte ne court.
+    inv_rc=0
+    ctest --test-dir build-v6-cuda -N -L gpu > "${OUT_DIR}/gpuv6_inventaire.txt.tmp" 2>&1 || inv_rc=$?
+    mv "${OUT_DIR}/gpuv6_inventaire.txt.tmp" "${OUT_DIR}/gpuv6_inventaire.txt"
+    inv_names="$(grep -oE 'Test +#[0-9]+: [A-Za-z0-9_]+' "${OUT_DIR}/gpuv6_inventaire.txt" | sed 's/.*: //' | sort)"
+    want_names="$(printf '%s\n' ${GPUV6_GATE_NAMES} | sort)"
+    # § 5.15.3 : le code du listage n'est JAMAIS neutralise — un listing
+    # textuellement exact termine au code 7 est une panne, pas un inventaire.
+    if [ "${inv_rc}" -ne 0 ] || [ -z "${inv_names}" ] || [ "${inv_names}" != "${want_names}" ]; then
+      printf 'truncated_at=gpuv6_gates\nphase=gpuv6\nreason=inventaire pre-execution non conforme (rc=%s)\n' "${inv_rc}" > "${OUT_DIR}/gpuv6_tronquee.txt"
+      echo "=== PHASE GPUV6 TRONQUEE : inventaire pre-execution non conforme (rc=${inv_rc}) — AUCUNE porte executee ===" >&2
+      gpuv6_ok=0
+    fi
+  fi
+  if [ "${gpuv6_ok}" -eq 1 ]; then
+    RUN_TIMEOUT_ONE="${GPUV6_GATE_TIMEOUT}" EXTRA_STATUS="$(printf 'kind=gates\nengine=v6_serie_c\ngate_names=%s' "${GPUV6_GATE_NAMES}")" \
+      run_one gpuv6_gates gpuv6_gates ctest --test-dir build-v6-cuda -V -L gpu --output-on-failure
+    gates_ok=1
+    grep -q '^code=0$' "${OUT_DIR}/gpuv6_gates.status" || gates_ok=0
+    for nm in ${GPUV6_GATE_NAMES}; do
+      grep -qE "Test +#[0-9]+: ${nm} \.+ +Passed" "${OUT_DIR}/gpuv6_gates.txt" || {
+        echo "=== porte gpu absente ou non verte : ${nm} ===" >&2
+        gates_ok=0
+      }
+    done
+    if [ "${gates_ok}" -ne 1 ]; then
+      printf 'truncated_at=gpuv6_gates\nphase=gpuv6\nreason=inventaire de portes gpu non conforme\n' > "${OUT_DIR}/gpuv6_tronquee.txt"
+      echo "=== PHASE GPUV6 TRONQUEE : inventaire de portes non conforme — AUCUN pilote ===" >&2
+      gpuv6_ok=0
+    fi
+  fi
+  if [ "${gpuv6_ok}" -eq 1 ] && [ "${GPUV6_PILOT_SPECS}" != "aucun" ]; then
+    GPUV6_PILOT_BIN_SHA="$(sha256sum "${GPUV6_PILOT_BIN}" 2>/dev/null | awk '{print $1}' || echo inconnu)"
+    for spec in ${GPUV6_PILOT_SPECS}; do
+      fam="${spec%%:*}"; PN="${spec##*:}"
+      name="pilote_${fam}_n${PN}"
+      if past_deadline "${name}" gpuv6 gpuv6_tronquee.txt "${GPUV6_PILOT_TIMEOUT}"; then gpuv6_ok=0; break; fi
+      RUN_TIMEOUT_ONE="${GPUV6_PILOT_TIMEOUT}" \
+      EXTRA_STATUS="$(printf 'family=%s\nn=%s\nkind=pilote\nengine=v6_serie_c\nmin_lots=%s\nrepeat=4\nordre=cpu-device\nbinaire_sha256=%s' "${fam}" "${PN}" "${GPUV6_PILOT_MIN_LOTS}" "${GPUV6_PILOT_BIN_SHA}")" \
+        run_one "${name}" gpuv6_pilote "${WRAPPER_BASH}" -c "set -e; echo '--- gpu_avant ---'; nvidia-smi --query-gpu=uuid,temperature.gpu,clocks.sm,clocks.mem --format=csv,noheader,nounits; rc=0; ${GPUV6_PILOT_BIN} --family=${fam} --n=${PN} --seed=3 --threads=${THREADS} --repeat=4 --ordre=cpu-device --min-lots=${GPUV6_PILOT_MIN_LOTS} || rc=\$?; echo '--- gpu_apres ---'; nvidia-smi --query-gpu=uuid,temperature.gpu,clocks.sm,clocks.mem --format=csv,noheader,nounits; exit \${rc}"
+      last_code="$(sed -n 's/^code=//p' "${OUT_DIR}/${name}.status" | head -n 1)"
+      if [ "${last_code:-1}" != "0" ]; then
+        printf 'truncated_at=%s\nphase=gpuv6\nreason=pilote non nul (code=%s)\n' \
+          "${name}" "${last_code:-?}" > "${OUT_DIR}/gpuv6_tronquee.txt"
+        echo "=== PILOTE TRONQUE a ${name} : code ${last_code:-?} ===" >&2
+        gpuv6_ok=0
+        break
+      fi
+      # § 5.14.3 : le juge agit APRES CHAQUE pilote et AVANT la famille
+      # suivante (fail-fast) — un stdout falsifie a code nul ne consomme
+      # pas les pilotes restants. Le MEME juge que la porte stub et que le
+      # validateur (pilote_juge.py, mode fichier), verdict grave.
+      juge_rc=0
+      python3 "${PILOTE_JUGE}" --fichier "${OUT_DIR}/${name}.txt" --ordre=cpu-device --repeat=4 \
+        "--min-lots=${GPUV6_PILOT_MIN_LOTS}" \
+        "--family=${fam}" "--n=${PN}" --seed=3 "--threads=${THREADS}" \
+        > "${OUT_DIR}/${name}.juge.txt.tmp" 2>&1 || juge_rc=$?
+      mv "${OUT_DIR}/${name}.juge.txt.tmp" "${OUT_DIR}/${name}.juge.txt"
+      if [ "${juge_rc}" -ne 0 ]; then
+        printf 'truncated_at=%s\nphase=gpuv6\nreason=records du pilote refuses par le juge (rc=%s)\n' \
+          "${name}" "${juge_rc}" > "${OUT_DIR}/gpuv6_tronquee.txt"
+        echo "=== PILOTE TRONQUE a ${name} : juge des records en refus ===" >&2
+        gpuv6_ok=0
+        break
+      fi
+    done
+  fi
+fi
 
 # PHASE FRONTIERE — contrats d echelle v6 : tailles croissantes, RSS graves,
 # executee EN DERNIER (cinquieme tour : pression memoire, timeout ou OOM ne

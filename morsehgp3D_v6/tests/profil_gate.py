@@ -156,9 +156,14 @@ def check_profile_output(txt, join, liveness):
         # l'addition independante est le seul durcissement causal).
         somme_recalc = (f["init"] + f["touch"] + f["pre"] + f["unite"] + f["post_remplissage"] +
                         f["materialisation_tri_copie"] + f["liveness"] + f["partition"] + f["liberation"])
-        if abs(somme_recalc - f["somme"]) > 0.009:  # neuf arrondis %.3f
+        # Seuils SERRES aux arrondis %.3f pres (§ 5.13 : 0.009/0.014
+        # laissaient passer neuf composantes nulles avec somme=0.008,
+        # residuel=0.012, mur=0.020) : somme <= 9 demi-arrondis + 1 =
+        # 0.0051 ; fermeture <= 9 + 2 demi-arrondis = 0.006. La scene est
+        # gravee dans tests/profil_contre_fixture.py.
+        if abs(somme_recalc - f["somme"]) > 0.0051:
             fail("somme imprimee != somme des neuf composantes (%s)" % line)
-        if abs(somme_recalc + f["residuel"] - f["mur_reduce_interne"]) > 0.014:
+        if abs(somme_recalc + f["residuel"] - f["mur_reduce_interne"]) > 0.006:
             fail("fermeture somme_recalculee+residuel != mur_reduce_interne (%s)" % line)
         if f["residuel"] < -0.005:
             fail("residuel negatif (%s)" % line)
@@ -238,4 +243,5 @@ def main():
     sys.exit(0)
 
 
-main()
+if __name__ == "__main__":
+    main()
