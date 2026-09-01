@@ -154,6 +154,145 @@ Portes : 4/4 vertes (nominal + serial + drop-exception + worker-resume).
   `mark(t_merge_ms)`) rejoignent la refonte du profil — prochain chantier,
   juste après ce commit.
 
+### § 5.10 — harnais de profil (commit séparé après vos six contre-lectures ; « livré » ne s'écrit qu'au pin)
+
+Le profil reduce est refondu selon votre correctif minimal, point par point :
+
+- record `ReduceProfile` PAR K stocké dans `ForestResult`, imprimé APRÈS
+  `run_pipeline` (`%.3f`, somme, RÉSIDUEL aux mêmes bornes, intervalles —
+  les recouvrements réduction/réduction et A/réduction se lisent, jamais
+  soustraits ; horizons exacts documentés : `begin` après le déplacement
+  initial, `liberation` = ev_fid + FidState seulement, colonnes d'intern
+  sélectives), avec durée de digest par K, inflight demandé ET pics
+  observés ;
+- chronomètre armé DÈS L'ENTRÉE de `reduce_fold` (l'init couvre les
+  allocations FidState/scratch/reserve + le warmup de prefetch) ;
+- sonde de vivacité sous `MHGP6_PROFILE_LIVENESS` SÉPARÉE (sa pollution
+  cache/mur sort de l'attribution par défaut), et mesure DEUX-PHASES :
+  activer les fids du lot → relever le PIC INTRA-LOT → décrémenter →
+  relever la FRONTIÈRE inter-lots — les deux valeurs publiées (votre
+  relevé « un lot éteint peut publier zéro » fermé) ;
+- frontières renommées : `post_remplissage` (copie des clés dans
+  parents/born) vs `materialisation_tri_copie` (tris + copie profonde +
+  niveaux + seen) ;
+- plus AUCUNE impression avant les `mark` : `profil_intern` (qui fuyait
+  dans `t_merge_ms`) et `profil_vivantes` (dans `t_reduce_ms`) passent par
+  le record ;
+- mode diagnostic `--fold-join=1` (`fold_join_before_next_k`) : B(K) joint
+  AVANT A(K+1) — `fold_inflight=1` n'isole pas B, acté ; objet identique,
+  seul l'ordonnancement change ;
+- mur de référence = Release NON instrumenté, gravé en doctrine dans le
+  record.
+
+Smoke local (uniform 2000, inflight=1, join=1) : fenêtres couvrantes
+(résiduel 0,000), lignes par K sans entrelacement. Balayage local apparié
+T × inflight à suivre en diagnostic non décisionnel.
+
+Vos contre-lectures `9cafe7b6`/`7ec81064`/`71528f8a` intégrées dans la foulée :
+
+- **plus aucune I/O dans les workers** : les records sont DRAINÉS dans
+  `RunResult::fold_profiles[K]` sous le verrou de publication (copie seule)
+  et imprimés par `print_run` APRÈS le retour de `run_pipeline` ;
+- **deux pics séparés** : `pic_reduce_actif` strictement autour de
+  `reduce_fold` (RAII — le chevauchement B×B se prouve), l'ancien pic
+  renommé `pic_workers_b` (cycle de vie : réduction + digest + attente de
+  publication + callback) ;
+- **résiduel à bornes identiques** : `mur_local = end − begin` (mêmes bornes
+  que les fenêtres) ; `t_reduce`/`t_partition` restent des compteurs
+  séparés ;
+- **intervalles A par K** (`a_debut`/`a_fin` : expansion + préparation) —
+  la concurrence A/B se LIT désormais dans la trace ;
+- **cible de build explicite `mhgp6_profile`** (les macros par
+  `CMAKE_CXX_FLAGS` ne signent pas un binaire) + **porte d'identité**
+  `mhgp6_profil_identite` (objet + digests identiques normal/profil ×
+  join 0/1, structure valide, `profil_kind`/`fold_join` signés) ;
+- **contrat d'échec CAUSAL** : votre relevé « le CLI ne print jamais après
+  un refus » est exact — la porte COMPILÉE `mhgp6_profil_contrat_echec`
+  inspecte le `RunResult` directement (refus ⟹ `fold_profiles` vides, pic
+  nul) ; `invalidate_provisional` couvre le vecteur ; le check stdout du
+  gate Python est requalifié « surface CLI seulement » ;
+- `duree_digest_k_ms` renommé (c'était une durée), `FidState` n'est plus
+  « une ligne de cache » sans preuve ;
+- **scène de panne NON VACUEUSE** (votre `ac6b4bc1` : le budget 4 Kio
+  refuse avant `fold_profiles.assign`) : porte
+  `mhgp6_profil_contrat_echec_k2` — mutant `fold-inject-a-failure-k2`
+  activé AVANT tout run (cache statique des sites), callback K=1 exigé (le
+  vecteur a existé et son record K1 fut rempli en vol), panne A à K=2, puis
+  profils et pic constatés EFFACÉS au retour terminal (code 4, convention
+  de `mhgp6_contrat_echec_fold_k2`).
+
+Et vos `01bd14a9`/`e32262d3` (le handoff) :
+
+- **vivacité enregistrée et exercée** : cible `mhgp6_profile_liveness`
+  (deux macros) passée en 3e argument à la porte — `profil_kind`
+  exactement `reduce_v2+liveness`, un `profil_vivantes` par K,
+  `pic_intra_lot > 0` sur la fixture, frontière ≤ pic ;
+- **`fold_join` causal dans la porte** : chaîne
+  `a_debut ≤ a_fin ≤ reduce_interne_debut ≤ reduce_interne_fin` par K ;
+  sous join=1, `reduce_interne_fin(K) ≤ a_debut(K+1)` ET
+  `pic_reduce_actif == pic_workers_b == 1` ; ensembles de K cohérents entre
+  lignes forêt/cardinalités/reduce/intern (l'ensemble exact K1..kmax reste
+  à la porte exact-K du juge), temps d'intern contrôlés aussi ;
+- **builds discriminés** : zéro ligne `profil_*` exigée dans les sorties du
+  binaire normal — passer `mhgp6_profile` aux deux arguments échoue
+  (contre-épreuve exécutée : DESACCORD) ;
+- **scène K2 sous jonction** : `fold_join_before_next_k=true` et le
+  callback vérifie le profil K1 STRICTEMENT non vide — la copie précède
+  prouvablement A(K=2), le récit ne dépasse plus la preuve ;
+- **vocabulaire de preuve fini** : la porte atteste une PROJECTION
+  DÉTERMINISTE NOMMÉE (jamais « l'objet » — reformulé partout),
+  `duree_digest_foret_k_ms` (la fenêtre ne couvre que `digest_forest_v4`),
+  colonnes `fusion_et_lib_parts`/`remap_et_lib_pools` (les libérations
+  nommées plutôt que séparées artificiellement), l'hypothèse mémoire de
+  `FidState` déclarée comme hypothèse de dimensionnement, jamais un
+  diagnostic mesuré.
+
+Votre `9041c191` (horizons) intégré aussi : schémas de colonnes EXACTS par
+ligne (`profil_intern` vide ne passe plus), plancher PAR K (Python sur les
+`%.3f`, porte C++ sur les doubles bruts — un record K par défaut ne passe
+plus même isolé), join=0 documenté PERMISSIF (aucune preuve de
+chevauchement — l'imposer rendrait la fixture sensible au scheduler), et le
+vocabulaire des horizons réécrit partout : « I/O d'impression du profil »
+(le callback et la sonde `/proc/self/statm` restent dans les workers),
+`begin` après le déplacement initial, `liberation` = ev_fid + FidState
+seulement, `init` sans la croissance de scratch, colonnes d'intern
+sélectives, vivacité = TROIS parcours des incidences, `sizeof(FidState)==32`
+sans claim de ligne de cache, recouvrements « réduction/réduction et
+A/réduction » (jamais « B/B et A/B »).
+
+NOTE D'EXPLOITATION : l'exploitant vient de donner son feu vert pour la
+session de MESURE G4 dès que la suite GPU (série C) sera prête — la demande
+de GO frais avec nouveau pin vous parviendra à ce moment, conformément à
+votre § 6 (preuves CPU locales d'abord, fold CPU visible dans le mur bout
+en bout).
+
+Votre arbre de décision pré-enregistré pour la matrice fils × inflight ×
+join est adopté tel quel : join=1 améliore le mur à travail B stable ⟹
+budget de workers/affinité d'abord ; `materialisation_tri_copie` domine B
+isolé ⟹ instruire `CompactDelta` ; le coût vient du recouvrement
+A/réduction ⟹ borner la concurrence avant le layout. Aucun facteur de gain
+ni « memory-bound » ne sera revendiqué avant.
+
+Vos `2142c798`/`7724e730` (bornes honnêtes) intégrés aussi :
+
+- champs renommés `reduce_interne_debut/fin` et `mur_reduce_interne` — la
+  fenêtre couvre le CORPS INTERNE de `reduce_fold` (destructeurs de
+  `FoldPrepared`/`Stage`, digest, publication, callback et sonde RSS HORS
+  fenêtre) ; le claim est le recouvrement A/RÉDUCTION, jamais l'étage B
+  complet ;
+- porte Python : projection ATTESTÉE nommée (digest_all + digest_forest_K*
+  + lignes `cardinalites K=`), K uniques et croissants, PLANCHER de durées
+  cumulées strictement positives (des records par défaut de bonne
+  cardinalité ne passent plus) ;
+- `profil_intern` renommé honnêtement : `alloc_empreintes`,
+  `offsets_diffusion`, `intern_tri` — sans séparation artificielle des
+  passes ;
+- `#error` si `MHGP6_PROFILE_LIVENESS` sans `MHGP6_PROFILE_REDUCE` ;
+  `fold_join` signé dans `temps_fold_mur_ms` (build normal compris) ; la
+  télémétrie RSS (`/proc/self/statm` par K sous le verrou de publication)
+  est DÉCLARÉE dans la sortie — à désarmer ou signer pour un vrai run de
+  débit.
+
 ### Ronde 9 (votre `ed5ee6ed`) — consignes de commit exécutées
 
 - Le contrôle `g_failures` est déplacé EN TÊTE de la branche mutante 2E

@@ -70,6 +70,11 @@ int main(int argc, char** argv) {
     } else if (const char* s = val("--fold-inflight=")) {
       ok = parse_int_range(s, 1, kFoldInflightMax, &v) && ok;
       opt.fold_inflight = (int)v;
+    } else if (const char* s = val("--fold-join=")) {
+      // Mode diagnostic § 5.10 : B(K) joint avant A(K+1) — objet identique,
+      // ordonnancement seul change (isolation de l'etage B pour le profil).
+      ok = parse_int_range(s, 0, 1, &v) && ok;
+      opt.fold_join_before_next_k = v != 0;
     } else if (const char* s = val("--pretest-query-min=")) {
       ok = parse_int_range(s, 0, std::numeric_limits<long long>::max(), &v) && ok;
       opt.pretest_query_min_points = (size_t)v;

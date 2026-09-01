@@ -64,6 +64,56 @@ struct ComponentDelta {
   std::vector<FacetKey> born;     // triees
 };
 
+#if defined(MHGP6_PROFILE_LIVENESS) && !defined(MHGP6_PROFILE_REDUCE)
+#error "MHGP6_PROFILE_LIVENESS exige MHGP6_PROFILE_REDUCE (la sonde n'existe pas seule)"
+#endif
+
+#ifdef MHGP6_PROFILE_REDUCE
+// PROFIL DU REDUCE (§ 5.10 de REPONSE_AUDITEURS_MULTICPU_V6) — record PAR K,
+// stocke dans ForestResult et imprime par run.hpp APRES run_pipeline (aucune
+// impression du profil dans les chronos ; %.3f ; somme + residuel aux memes
+// bornes ; intervalles pour rendre VISIBLES les recouvrements
+// reduction/reduction et A/reduction — chaque fenetre est un temps mur LOCAL
+// a un K, leur somme est un cumul qui peut depasser le mur du fold et n'en
+// est JAMAIS soustraite). HORIZONS EXACTS (7e contre-lecture 9041c191) :
+// begin est pris apres le deplacement initial et le test de refus ; end
+// avant les destructeurs restants — liberation_ms ne couvre QUE ev_fid et
+// FidState ; init_ms ne couvre PAS la croissance dynamique de scratch (elle
+// tombe dans post_remplissage) ; les colonnes d'internement sont des
+// fenetres locales SELECTIVES, jamais un bilan exhaustif des temporaires.
+// Le mur de reference vient d'un Release NON instrumente ; ces colonnes ne
+// sont qu'une ATTRIBUTION. La sonde de vivacite (TROIS parcours des
+// incidences : precompte, activation, decrement) n'existe que sous
+// MHGP6_PROFILE_LIVENESS (a definir EN PLUS de MHGP6_PROFILE_REDUCE) : sa
+// pollution cache/mur ne contamine plus l'attribution par defaut.
+struct ReduceProfile {
+  // prepare (etage intern) : fenetres de l'internement des facettes.
+  double intern_empreintes_ms = 0, intern_diffusion_ms = 0, intern_tri_ms = 0, intern_fusion_ms = 0,
+         intern_remap_ms = 0;
+  // reduce : initialisation (allocations FidState + warmup de prefetch,
+  // mesuree des l'entree — scratch grandit plus tard), fenetres par lot, fin.
+  double init_ms = 0, touch_ms = 0, pre_ms = 0, unite_ms = 0, post_remplissage_ms = 0,
+         materialisation_tri_copie_ms = 0, liveness_ms = 0, partition_ms = 0, liberation_ms = 0;
+  std::chrono::steady_clock::time_point begin{}, end{};
+  // Champs remplis par run.hpp (jamais par le fold) : intervalles de l'etage
+  // A (preparation) — la concurrence A/B se LIT dans la trace —, duree du
+  // digest par K, et le drapeau join du run.
+  std::chrono::steady_clock::time_point a_begin{}, a_end{};
+  double duree_digest_foret_k_ms = 0;
+  double somme() const {
+    return init_ms + touch_ms + pre_ms + unite_ms + post_remplissage_ms +
+           materialisation_tri_copie_ms + liveness_ms + partition_ms + liberation_ms;
+  }
+#ifdef MHGP6_PROFILE_LIVENESS
+  // Vivacite : PIC INTRA-LOT (fids du lot actives PUIS releve PUIS
+  // decrementation des derniers contacts — l'ancien releve post-extinction
+  // pouvait publier zero sur un lot au pic eleve) ET frontiere inter-lots.
+  u64 live_peak_intra = 0, live_frontier_max = 0;
+  double live_frontier_mean_pct = 0;
+#endif
+};
+#endif
+
 struct ForestResult {
   std::string refusal;                 // non vide = refus AVANT allocation
   u64 facets = 0, fusions = 0, batches = 0, new_attachments = 0;
@@ -81,6 +131,9 @@ struct ForestResult {
   std::vector<ExactLevel> batch_levels;
   u64 workers = 0;  // ouvriers reellement crees (max sur les phases paralleles)
   double t_sort_ms = 0, t_intern_ms = 0, t_merge_ms = 0, t_reduce_ms = 0, t_partition_ms = 0;
+#ifdef MHGP6_PROFILE_REDUCE
+  ReduceProfile profile;  // rempli par prepare/reduce, imprime a la publication (run.hpp)
+#endif
 };
 
 namespace fold_detail {
@@ -492,8 +545,14 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
     });
     r.workers = std::max(r.workers, (u64)created);
 #ifdef MHGP6_PROFILE_REDUCE
+    // § 5.10 : plus AUCUNE impression avant les mark — les fenetres intern
+    // sont stockees dans le record et imprimees a la publication ordonnee.
     pitick(4);
-    std::fprintf(stderr, "profil_intern evenements=%zu facettes=%zu empreintes=%.0f diffusion=%.0f intern+tri=%.0f fusion=%.0f remap=%.0f ms\n", ne, keys.size(), pi[0], pi[1], pi[2], pi[3], pi[4]);
+    r.profile.intern_empreintes_ms += pi[0];
+    r.profile.intern_diffusion_ms += pi[1];
+    r.profile.intern_tri_ms += pi[2];
+    r.profile.intern_fusion_ms += pi[3];
+    r.profile.intern_remap_ms += pi[4];
 #endif
     mark(&r.t_merge_ms);
   }
@@ -501,11 +560,12 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
   return fp;
 }
 
-// Etat par facette PACKE sur une ligne de cache de 32 octets : le reduce est
-// sequentiel et lie a la latence memoire (a 200 k points, 56 M facettes par
-// ordre, ~6 facettes touchees par evenement, chacune dans ~5 tableaux
-// distincts = ~30 defauts de cache par evenement, ~1,6 us). Une seule ligne
-// par facette et une prefetch glissante (fenetre kReduceAhead evenements)
+// Etat par facette PACKE sur 32 octets (sizeof fige — ni ligne de cache ni
+// alignement prouves) : le reduce est sequentiel ; l'HYPOTHESE DE
+// DIMENSIONNEMENT (jamais un diagnostic mesure) est la latence memoire — a 200 k points, 56 M facettes
+// par ordre, ~6 facettes touchees par evenement dans plusieurs tableaux
+// distincts. Un etat compact par facette et une prefetch glissante (fenetre
+// kReduceAhead evenements)
 // recouvrent ces defauts. SEMANTIQUE INCHANGEE : memes racines (la racine de
 // `first` absorbe), meme compression par moitie, memes epoques, meme ordre
 // des deltas (racines triees) — le digest v5 est bit-identique (conformites,
@@ -518,7 +578,7 @@ struct FidState {
   u8 role_bits, seen;
   u8 pad_[2];
 };
-static_assert(sizeof(FidState) == 32, "FidState : une ligne de 32 octets");
+static_assert(sizeof(FidState) == 32, "FidState : 32 octets (taille figee du DSU chaud)");
 
 inline constexpr size_t kReduceAhead = 8;
 
@@ -534,6 +594,20 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
   using namespace fold_detail;
   ForestResult r = std::move(fp.r);
   if (!r.refusal.empty()) return r;
+#ifdef MHGP6_PROFILE_REDUCE
+  // § 5.10 : le chronometre du profil demarre DES L'ENTREE — la fenetre init
+  // couvre les allocations produit (FidState, scratch, deltas.reserve) ET le
+  // warmup de prefetch, plus rien ne fuit dans la premiere fenetre touch.
+  //   0 touch, 1 pre, 2 unite, 3 post_remplissage, 4 materialisation_tri_
+  //   copie, 5 bookkeeping vivacite (LIVENESS seulement), 6 init,
+  //   7 partition finale, 8 liberation.
+  double pt[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  auto pm = std::chrono::steady_clock::now();
+  r.profile.begin = pm;
+  const auto ptick = [&](int i) { const auto now = std::chrono::steady_clock::now(); pt[i] += std::chrono::duration<double, std::milli>(now - pm).count(); pm = now; };
+#else
+  const auto ptick = [](int) {};
+#endif
   const std::vector<ForestEvent>& events = *fp.events;
   const std::vector<u32>& order = fp.order;
   const auto evt = [&](size_t i) -> const ForestEvent& { return events[(size_t)order[i]]; };
@@ -574,13 +648,6 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
   std::vector<ComponentDelta> scratch;
   const size_t ne = order.size();
   r.deltas.reserve(batches.size());
-#ifdef MHGP6_PROFILE_REDUCE
-  double pt[6] = {0, 0, 0, 0, 0, 0};
-  auto pm = std::chrono::steady_clock::now();
-  const auto ptick = [&](int i) { const auto now = std::chrono::steady_clock::now(); pt[i] += std::chrono::duration<double, std::milli>(now - pm).count(); pm = now; };
-#else
-  const auto ptick = [](int) {};
-#endif
   const auto prefetch_event = [&](size_t e) {
     const ForestEvent& pv = evt(e);
     const u32* f = &ev_fid[e * 11];
@@ -593,17 +660,20 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
     reduce_prefetch(&events[(size_t)order[e]]);
     prefetch_event(e);
   }
-#ifdef MHGP6_PROFILE_REDUCE
-  // INSTRUMENT (jamais en production) : fraction de facettes VIVANTES au fil
-  // des lots — touchees mais pas encore a leur dernier contact — pour le
-  // dimensionnement d'un fold streame a etat borne (compaction).
+  ptick(6);  // initialisation : allocations produit + warmup de prefetch (fermee AVANT la sonde)
+#if defined(MHGP6_PROFILE_REDUCE) && defined(MHGP6_PROFILE_LIVENESS)
+  // SONDE DE VIVACITE (opt-in SEPARE, § 5.10 : deux balayages de toutes les
+  // incidences + bookkeeping par lot polluent caches et mur — jamais dans
+  // l'attribution par defaut) : fraction de facettes VIVANTES au fil des
+  // lots, pour le dimensionnement d'un fold streame a etat borne.
   std::vector<u32> remaining(nfid, 0);
   for (size_t e = 0; e < ne; ++e) {
     const ForestEvent& ev = evt(e);
     for (int t = 0; t < (int)ev.q + (int)ev.d; ++t) ++remaining[ev_fid[e * 11 + (size_t)t]];
   }
   std::vector<u8> alive_flag(nfid, 0);
-  u64 live = 0, live_max = 0, live_sum = 0;
+  u64 live = 0, live_peak_intra = 0, live_frontier_max = 0, live_sum = 0;
+  ptick(5);  // le pre-balayage de vivacite est SA fenetre, jamais l'init
 #endif
   for (size_t b = 0; b < batches.size(); ++b) {
     const size_t e0 = batches[b].first, e1 = batches[b].second;
@@ -702,29 +772,36 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
     for (const u32 fid : touched) st[(size_t)fid].seen = 1;
     ++r.batches;
     ptick(4);
-#ifdef MHGP6_PROFILE_REDUCE
+#if defined(MHGP6_PROFILE_REDUCE) && defined(MHGP6_PROFILE_LIVENESS)
+    // DEUX PHASES (§ 5.10 : l'ancien releve post-extinction pouvait publier
+    // zero sur un lot dont chaque facette avait son dernier contact, malgre
+    // un pic intra-lot eleve) : activer d'abord TOUS les fids du lot,
+    // relever le pic INTRA-LOT, puis decrementer les derniers contacts et
+    // relever la FRONTIERE inter-lots — les deux valeurs sont publiees.
     for (size_t e = e0; e < e1; ++e) {
       const ForestEvent& ev = evt(e);
       for (int t = 0; t < (int)ev.q + (int)ev.d; ++t) {
         const u32 fid = ev_fid[e * 11 + (size_t)t];
         if (!alive_flag[fid]) { alive_flag[fid] = 1; ++live; }
+      }
+    }
+    live_peak_intra = std::max(live_peak_intra, live);
+    for (size_t e = e0; e < e1; ++e) {
+      const ForestEvent& ev = evt(e);
+      for (int t = 0; t < (int)ev.q + (int)ev.d; ++t) {
+        const u32 fid = ev_fid[e * 11 + (size_t)t];
         if (--remaining[fid] == 0) { alive_flag[fid] = 2; --live; }
       }
     }
-    live_max = std::max(live_max, live);
+    live_frontier_max = std::max(live_frontier_max, live);
     live_sum += live;
+    ptick(5);  // bookkeeping de la sonde : isole, ne fuit plus dans le pt[0] suivant
 #endif
   }
-#ifdef MHGP6_PROFILE_REDUCE
-  std::fprintf(stderr, "profil_vivantes facettes=%zu lots=%zu vivantes_max=%llu (%.1f %%) vivantes_moyenne=%.1f %%\n", nfid, batches.size(),
-               (unsigned long long)live_max, nfid ? 100.0 * (double)live_max / (double)nfid : 0.0,
-               nfid && !batches.empty() ? 100.0 * (double)live_sum / ((double)nfid * (double)batches.size()) : 0.0);
-#endif
-#ifdef MHGP6_PROFILE_REDUCE
-  std::fprintf(stderr, "profil_reduce facettes=%zu evenements=%zu lots=%llu touch=%.0f pre=%.0f unite=%.0f post=%.0f deltas=%.0f ms\n", nfid, ne,
-               (unsigned long long)r.batches, pt[0], pt[1], pt[2], pt[3], pt[4]);
-#endif
   mark(&r.t_reduce_ms);
+#ifdef MHGP6_PROFILE_REDUCE
+  pm = std::chrono::steady_clock::now();  // re-armement post-mark (plus aucune impression ici)
+#endif
   r.final_canon_fid.resize(nfid);
   for (size_t fid = 0; fid < nfid; ++fid) {
     const u32 c = st[(size_t)find((i32)fid)].canon;
@@ -733,10 +810,33 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
   }
   for (size_t fid = 1; fid < nfid; ++fid)
     if (!(keys[fid - 1] < keys[fid])) ++r.partition_violations;
+  ptick(7);  // partition finale
   std::vector<u32>().swap(ev_fid);
   std::vector<FidState>().swap(st);
+  ptick(8);  // liberation des arenes (hors chrono reduce, mesuree quand meme)
   r.facet_keys = std::move(keys);
   mark(&r.t_partition_ms);
+#ifdef MHGP6_PROFILE_REDUCE
+  // § 5.10 : AUCUNE impression ici — le record est rempli apres l'arret de
+  // tous les chronometres et imprime par run.hpp a la publication ordonnee
+  // (avec K, somme, residuel, intervalles debut/fin, inflight et pic).
+  r.profile.touch_ms = pt[0];
+  r.profile.pre_ms = pt[1];
+  r.profile.unite_ms = pt[2];
+  r.profile.post_remplissage_ms = pt[3];
+  r.profile.materialisation_tri_copie_ms = pt[4];
+  r.profile.liveness_ms = pt[5];
+  r.profile.init_ms = pt[6];
+  r.profile.partition_ms = pt[7];
+  r.profile.liberation_ms = pt[8];
+  r.profile.end = std::chrono::steady_clock::now();
+#ifdef MHGP6_PROFILE_LIVENESS
+  r.profile.live_peak_intra = live_peak_intra;
+  r.profile.live_frontier_max = live_frontier_max;
+  r.profile.live_frontier_mean_pct =
+      nfid && !batches.empty() ? 100.0 * (double)live_sum / ((double)nfid * (double)batches.size()) : 0.0;
+#endif
+#endif
   return r;
 }
 

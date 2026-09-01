@@ -256,6 +256,36 @@ add_test(NAME mhgp6_agregateur_intergraines
                  -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
 set_tests_properties(mhgp6_agregateur_intergraines PROPERTIES LABELS "gate")
 
+# ---- Cibles de PROFIL explicites + porte (§ 5.10) : l'identite de build est
+# signee par la CIBLE (jamais par des macros de CMAKE_CXX_FLAGS) ; la porte
+# atteste une PROJECTION DETERMINISTE NOMMEE (digest_all + digest_forest_K* +
+# cardinalites K=) identique entre normal, profil, vivacite et join 0/1 —
+# jamais « l'objet » complet — plus la structure (schemas exacts par K,
+# planchers PAR K, fermeture somme/residuel aux bornes INTERNES du corps de
+# reduce_fold, causalite de fold_join, discrimination des builds). Les
+# intervalles rendent lisibles les recouvrements reduction/reduction et
+# A/reduction. Le binaire de profil n'est JAMAIS un mur de debit.
+mhgp6_product_executable(mhgp6_profile cli/mhgp6.cpp)
+target_compile_definitions(mhgp6_profile PRIVATE MHGP6_PROFILE_REDUCE=1)
+# Variante VIVACITE enregistree et exercee (contre-lecture 01bd14a9 : le
+# garde de compilation seul ne couvre pas cette branche).
+mhgp6_product_executable(mhgp6_profile_liveness cli/mhgp6.cpp)
+target_compile_definitions(mhgp6_profile_liveness PRIVATE MHGP6_PROFILE_REDUCE=1 MHGP6_PROFILE_LIVENESS=1)
+add_test(NAME mhgp6_profil_identite
+         COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=python3
+                 "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/profil_gate.py $<TARGET_FILE:mhgp6> $<TARGET_FILE:mhgp6_profile> $<TARGET_FILE:mhgp6_profile_liveness>"
+                 -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+set_tests_properties(mhgp6_profil_identite PROPERTIES LABELS "gate" TIMEOUT 600)
+# Contrat d'echec sous profil, COMPILE (71528f8a : le CLI ne print jamais
+# apres un refus — l'inspection porte sur le RunResult, jamais sur stdout).
+add_executable(mhgp6_profil_contrat tests/profil_contrat_echec.cpp)
+target_compile_definitions(mhgp6_profil_contrat PRIVATE MHGP6_PROFILE_REDUCE=1 MHGP6_TESTING=1)
+target_link_libraries(mhgp6_profil_contrat PRIVATE Threads::Threads)
+mhgp6_gate(mhgp6_profil_contrat_echec 0 mhgp6_profil_contrat TIMEOUT 600)
+# Scene NON VACUEUSE (ac6b4bc1) : K1 publie puis panne A a K=2 — le refus
+# budget minuscule precederait fold_profiles.assign et ne prouverait rien.
+mhgp6_gate(mhgp6_profil_contrat_echec_k2 4 mhgp6_profil_contrat ARGS --inject=fold-inject-a-failure-k2 TIMEOUT 600)
+
 # ---- CUDA (serie C, docs/GPU.md) : OFF par defaut, JAMAIS construit en CI.
 # Les portes `gpu` ne s'executent qu'en session G4 (sm_120, RTX PRO 6000
 # Blackwell). -fmad=false : aucune contraction implicite ; le socle serie C

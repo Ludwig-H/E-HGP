@@ -84,6 +84,12 @@ struct RunOptions {
   // Diagnostic opt-in : signe le multiensemble trie AVANT RLE.
   bool diagnostic_raw_candidates_digest = false;
   int fold_inflight = 2;
+  // MODE DIAGNOSTIC (§ 5.10) : joindre B(K) AVANT de preparer A(K+1) —
+  // fold_inflight=1 n'isole PAS B (la preparation suivante co-tourne) ; ce
+  // mode isole vraiment l'etage B pour le profil. L'OBJET est identique
+  // (meme ordre de publication) ; seul l'ordonnancement change. Jamais un
+  // mode de mesure du mur nominal.
+  bool fold_join_before_next_k = false;
   // Sonde E6 opt-in (--sonde-e6) : lecture seule, objet inchange.
   bool e6_probe = false;
   // Experimentation E3/G16 par bras (kOff = production).
@@ -125,7 +131,18 @@ struct RunResult {
   // seuil) : capacite observee du vecteur de candidats, saisie AVANT le tri
   // et conservee a travers le RLE.
   u64 diag_candidates_capacity = 0;
-  u64 peak_fold_inflight = 0;
+  u64 peak_fold_inflight = 0;  // cycle de vie des workers B (reduction + digest + attente de publication + callback)
+#ifdef MHGP6_PROFILE_REDUCE
+  // § 5.10 : records draines sans I/O D'IMPRESSION du profil (l'impression
+  // dans le worker serialisait la publication et contaminait le mur) —
+  // imprimes par print_run APRES le retour de run_pipeline. Le worker
+  // execute toujours le callback et lit /proc/self/statm sous pub_mutex :
+  // ne jamais ecrire « aucune I/O dans les workers ».
+  std::vector<ReduceProfile> fold_profiles;  // indexes par K (0 inutilise)
+  u64 peak_reduce_active = 0;                // pic STRICTEMENT autour de reduce_fold (chevauchement B×B prouve)
+  std::chrono::steady_clock::time_point fold_epoch{};  // origine des intervalles debut/fin
+  bool profile_join = false;                 // fold_join du run, signe dans la sortie
+#endif
 };
 
 namespace run_detail {
@@ -220,6 +237,12 @@ inline void invalidate_provisional(RunResult* rr) {
   rr->digest_forest.clear();
   rr->cards.clear();
   rr->total_events = rr->total_facets = rr->total_fusions = rr->total_deltas = rr->total_nodes = 0;
+#ifdef MHGP6_PROFILE_REDUCE
+  // § 5.10 (contre-lecture 7ec81064) : une panne B ne rouvre jamais un canal
+  // provisoire par les records de profil — vides sur tout retour non complet.
+  rr->fold_profiles.clear();
+  rr->peak_reduce_active = 0;
+#endif
 }
 
 inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOptions& opt) {
@@ -427,6 +450,10 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   std::vector<BallCandidate>().swap(cands);
   DigestAll dg_all;
   rr.digest_forest.assign(rr.kmax_eff + 1, std::string());
+#ifdef MHGP6_PROFILE_REDUCE
+  rr.fold_profiles.assign(rr.kmax_eff + 1, ReduceProfile{});
+  rr.profile_join = opt.fold_join_before_next_k;
+#endif
   rr.cards.assign(rr.kmax_eff + 1, KCardinalities{});
   rr.expand.events_by_k.assign(rr.kmax_eff + 1, 0);
   // STREAMING PAR K, PIPELINE A DEUX ETAGES — transcription v5 (suretes 1-3 de
@@ -436,6 +463,9 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     u64 K = 0;
     std::vector<ForestEvent> events;
     FoldPrepared prep;
+#ifdef MHGP6_PROFILE_REDUCE
+    std::chrono::steady_clock::time_point a_begin{}, a_end{};  // intervalle de l'etage A (expansion + preparation)
+#endif
   };
   struct BSlot {
     std::thread t;
@@ -494,6 +524,10 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     rr.peak_fold_inflight = b_peak.load();
   };
   const auto t_fold_wall = std::chrono::steady_clock::now();
+#ifdef MHGP6_PROFILE_REDUCE
+  rr.fold_epoch = t_fold_wall;
+  std::atomic<u64> reduce_active{0}, reduce_peak{0};
+#endif
   std::exception_ptr main_exc;
   PipelineStatus a_status = PipelineStatus::kCompleteRegular;
   std::string a_message;
@@ -504,6 +538,9 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
       auto st = std::make_unique<Stage>();
       st->K = K;
       const auto t_k = std::chrono::steady_clock::now();
+#ifdef MHGP6_PROFILE_REDUCE
+      st->a_begin = t_k;
+#endif
       expand_events_k(ix, balls, K, rr.kmax_eff, opt.threads, &st->events, &rr.expand);
       rr.t_expand_ms += ms(t_k);
       bool count_mismatch = st->events.size() != kc[K].events;
@@ -517,6 +554,9 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
       const auto t_f = std::chrono::steady_clock::now();
       st->prep = prepare_fold(st->events, opt.threads);
       t_prepare_total_ms += ms(t_f);
+#ifdef MHGP6_PROFILE_REDUCE
+      st->a_end = std::chrono::steady_clock::now();
+#endif
       if (!st->prep.r.refusal.empty()) {
         a_status = PipelineStatus::kInvariantViolated;
         a_message = "invariant : refus de fold apres la garde de capacite (K=" + std::to_string(K) + ")";
@@ -524,10 +564,14 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
         break;
       }
       if ((int)slots.size() >= inflight && !reap_front()) break;
+      const bool join_b_now = opt.fold_join_before_next_k;  // § 5.10 : B(K) joint avant A(K+1)
       slots.push_back(std::make_unique<BSlot>());
       BSlot* sp = slots.back().get();
       sp->K = K;
       sp->t = std::thread([&rr, &opt, &dg_all, &pub_mutex, &pub_cv, &next_publish, &pub_failed, &b_inflight, &b_peak,
+#ifdef MHGP6_PROFILE_REDUCE
+                           &reduce_active, &reduce_peak,
+#endif
                            sp, st = std::move(st)]() mutable {
         const u64 K = st->K;
         struct Inflight {
@@ -555,7 +599,26 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
         try {
           observe(FoldPhase::kReduceBegin);
           const auto t_r = std::chrono::steady_clock::now();
+#ifdef MHGP6_PROFILE_REDUCE
+          {  // pic STRICTEMENT autour de reduce_fold (§ 5.10 : l'ancien
+             // pic_inflight couvrait digest, attente de publication,
+             // callback et I/O — il ne prouvait aucun chevauchement B×B) ;
+             // RAII : une exception de la reduction ne fuit pas le compteur.
+            struct ReduceScope {
+              std::atomic<u64>& active;
+              explicit ReduceScope(std::atomic<u64>& a, std::atomic<u64>& peak) : active(a) {
+                const u64 nowv = active.fetch_add(1) + 1;
+                u64 seen = peak.load();
+                while (seen < nowv && !peak.compare_exchange_weak(seen, nowv)) {
+                }
+              }
+              ~ReduceScope() { active.fetch_sub(1); }
+            } reduce_scope{reduce_active, reduce_peak};
+            r = reduce_fold(std::move(st->prep));
+          }
+#else
           r = reduce_fold(std::move(st->prep));
+#endif
           t_fold_local = run_detail::ms(t_r);
           if (MHGP6_MUTANT("fold-inject-b-exception-k3") && K == 3)
             throw std::runtime_error("mutant fold-inject-b-exception-k3 : exception de reduction (K=3)");
@@ -614,6 +677,18 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
               !r.batch_levels.empty())
             r.batch_levels.push_back(r.batch_levels.back());
           if (opt.on_forest) opt.on_forest(K, st->events, r);
+#ifdef MHGP6_PROFILE_REDUCE
+          // § 5.10 (2e contre-lecture) : AUCUNE I/O ici — l'impression dans
+          // le worker, sous le verrou de publication et avant l'arret du mur
+          // du fold, serialisait la publication et contaminait le scheduler.
+          // Le record est DRAINE (copie) et imprime par print_run apres le
+          // retour de run_pipeline.
+          rr.fold_profiles[K] = r.profile;
+          rr.fold_profiles[K].a_begin = st->a_begin;
+          rr.fold_profiles[K].a_end = st->a_end;
+          rr.fold_profiles[K].duree_digest_foret_k_ms = t_dg;
+          rr.peak_reduce_active = reduce_peak.load();
+#endif
           rr.rss_mb[4] = std::max(rr.rss_mb[4], run_detail::rss_mb_now());
         } catch (...) {
           if (!sp->exc) sp->exc = std::current_exception();
@@ -637,6 +712,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
         lk.unlock();
         pub_cv.notify_all();
       });
+      if (join_b_now && !reap_front()) break;  // § 5.10 : B(K) au bout avant A(K+1)
     }
   } catch (...) {
     main_exc = std::current_exception();
@@ -818,11 +894,70 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                "temps_mur_ms=%.1f (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, "
                "pas le mur)\n",
                rr.t_total_ms);
-  std::fprintf(out, "temps_fold_mur_ms=%.1f (etages A et B, fold_inflight=%d, pic_mesure_en_vol=%llu)\n",
-               rr.t_fold_wall_ms, opt.fold_inflight, (unsigned long long)rr.peak_fold_inflight);
+  std::fprintf(out, "temps_fold_mur_ms=%.1f (etages A et B, fold_inflight=%d, fold_join=%d, pic_mesure_en_vol=%llu)\n",
+               rr.t_fold_wall_ms, opt.fold_inflight, opt.fold_join_before_next_k ? 1 : 0,
+               (unsigned long long)rr.peak_fold_inflight);
+#ifdef MHGP6_PROFILE_REDUCE
+  // DRAIN DU PROFIL (§ 5.10, 2e contre-lecture) : impression APRES le retour
+  // de run_pipeline — plus aucune I/O dans les workers ni sous le verrou de
+  // publication. Bornes du residuel = MEMES bornes que les fenetres
+  // (end - begin, jamais t_reduce + t_partition — ceux-ci restent des
+  // compteurs separes) ; pic_reduce_actif = chevauchement B×B STRICT autour
+  // de reduce_fold (l'ancien pic est le cycle de vie des workers) ; les
+  // intervalles A par K rendent la concurrence A/B LISIBLE dans la trace.
+  // Le seul mur de debit reste celui d'un Release NON instrumente.
+  std::fprintf(out,
+               "profil_kind=reduce_v2%s fold_join=%d inflight_demande=%d pic_workers_b=%llu pic_reduce_actif=%llu\n",
+#ifdef MHGP6_PROFILE_LIVENESS
+               "+liveness",
+#else
+               "",
+#endif
+               rr.profile_join ? 1 : 0, opt.fold_inflight, (unsigned long long)rr.peak_fold_inflight,
+               (unsigned long long)rr.peak_reduce_active);
+  for (u64 K = 1; K < (u64)rr.fold_profiles.size(); ++K) {
+    const ReduceProfile& pf = rr.fold_profiles[K];
+    const auto rel = [&](std::chrono::steady_clock::time_point tp) {
+      return std::chrono::duration<double, std::milli>(tp - rr.fold_epoch).count();
+    };
+    const double mur = std::chrono::duration<double, std::milli>(pf.end - pf.begin).count();
+    // BORNES HONNETES (contre-lecture 2142c798) : cette fenetre couvre le
+    // CORPS INTERNE de reduce_fold (apres le deplacement initial, avant ses
+    // destructeurs) — les liberations de FoldPrepared/Stage, le digest, la
+    // publication, le callback et la sonde RSS sont HORS fenetre. Le claim
+    // est le recouvrement A/REDUCTION, jamais l'etage B complet.
+    std::fprintf(out,
+                 "profil_reduce K=%llu init=%.3f touch=%.3f pre=%.3f unite=%.3f post_remplissage=%.3f "
+                 "materialisation_tri_copie=%.3f liveness=%.3f partition=%.3f liberation=%.3f "
+                 "somme=%.3f mur_reduce_interne=%.3f residuel=%.3f reduce_interne_debut=%.3f "
+                 "reduce_interne_fin=%.3f a_debut=%.3f a_fin=%.3f duree_digest_foret_k_ms=%.3f\n",
+                 (unsigned long long)K, pf.init_ms, pf.touch_ms, pf.pre_ms, pf.unite_ms,
+                 pf.post_remplissage_ms, pf.materialisation_tri_copie_ms, pf.liveness_ms, pf.partition_ms,
+                 pf.liberation_ms, pf.somme(), mur, mur - pf.somme(), rel(pf.begin), rel(pf.end),
+                 rel(pf.a_begin), rel(pf.a_end), pf.duree_digest_foret_k_ms);
+    // Noms HONNETES (contre-lecture 7724e730) : alloc_empreintes inclut les
+    // allocations de preparation, offsets_diffusion les offsets, intern_tri
+    // toute la passe d'internement exact PUIS le tri local — pas de
+    // separation artificielle qui perturberait elle-meme le profil.
+    // fusion_et_lib_parts / remap_et_lib_pools : la liberation de `parts`
+    // tombe dans la fenetre fusion et celle de `pools` dans la fenetre remap
+    // (contre-lecture 01bd14a9 : nommer plutot que separer artificiellement).
+    std::fprintf(out,
+                 "profil_intern K=%llu alloc_empreintes=%.3f offsets_diffusion=%.3f intern_tri=%.3f "
+                 "fusion_et_lib_parts=%.3f remap_et_lib_pools=%.3f\n",
+                 (unsigned long long)K, pf.intern_empreintes_ms, pf.intern_diffusion_ms, pf.intern_tri_ms,
+                 pf.intern_fusion_ms, pf.intern_remap_ms);
+#ifdef MHGP6_PROFILE_LIVENESS
+    std::fprintf(out, "profil_vivantes K=%llu pic_intra_lot=%llu frontiere_max=%llu moyenne_frontiere_pct=%.1f\n",
+                 (unsigned long long)K, (unsigned long long)pf.live_peak_intra,
+                 (unsigned long long)pf.live_frontier_max, pf.live_frontier_mean_pct);
+#endif
+  }
+#endif
   std::fprintf(out,
                "rss_mb apres_generation=%.0f apres_rle=%.0f apres_prefiltre=%.0f apres_census=%.0f max_fold=%.0f "
-               "fin=%.0f\n",
+               "fin=%.0f (telemetrie active : lecture /proc/self/statm par K sous le verrou de publication — "
+               "a desarmer ou signer pour un run de debit)\n",
                rr.rss_mb[0], rr.rss_mb[1], rr.rss_mb[2], rr.rss_mb[3], rr.rss_mb[4], rr.rss_mb[5]);
   for (u64 K = 1; K <= rr.kmax_eff; ++K)
     std::fprintf(
