@@ -479,6 +479,10 @@ vecteur `fold_profiles` : sous la macro, une panne B ne doit pas rouvrir un
 canal provisoire que le contrat terminal oublie d'effacer ou de juger.
 La porte doit inspecter directement le `RunResult` : le CLI n'appelle jamais
 `print_run` après un refus et resterait donc vert même si ce vecteur fuyait.
+Un budget de 4 Kio refuse toutefois avant même `fold_profiles.assign` et reste
+vacueux. Employer `fold-inject-a-failure-k2`, activé avant tout premier run à
+cause du cache statique des sites mutants, exiger le callback K1 puis constater
+qu'au retour terminal profils et pic ont bien été effacés.
 Renommer aussi `digest_K_ms`, qui est une durée et non le digest K, et corriger
 le commentaire qui transforme sans preuve un objet `FidState` de 32 octets en
 « ligne de cache de 32 octets » avec trente défauts par événement. Les lectures
