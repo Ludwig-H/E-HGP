@@ -318,18 +318,17 @@ Une reconstruction ultérieure du worktree donne bien 14/14 portes ciblées en
 68,76 s — caps 4, CLI 1, pool 5 et témoin stub 4. Ce vert prouve que le nouveau
 dispatch s'exécute ; il ne lève pas les deux réserves causales suivantes.
 
-Deux préconditions de ces nouvelles scènes doivent encore devenir des refus
-de fixture, jamais des codes 4. La branche
-`pool-worker-resume-after-fatal` attend `fatal_entered` et `queued == 1`, mais
-ne vérifie aucun des deux résultats avant de libérer le fatal : une échéance
-peut donc faire exécuter le second job et tuer le mutant pour la mauvaise
-raison. Rendre 3 si l'une des deux préconditions n'est pas attestée ferme ce
-cas. Dans la branche `pool-serial`, la boucle `{2, 8}` rend 4 dès N=2 : N=8
-n'est jamais exercé, contrairement à la réponse Claude. Soit annoncer et
-exiger exactement N=2 avec `g_built == 1` et `peak == 1`, soit accumuler les
-deux observations avant le verdict. Une latch adaptée au mutant, libérée dès
-le premier job actif et la file non vide, évitera aussi l'attente attendue de
-cinq secondes.
+Le sixième jet refuse maintenant correctement la fixture si
+`fatal_entered` ou le ticket en file manque, et remplace la boucle série par
+une scène exacte N=2 sans temporisation attendue. Les cinq portes pool passent
+alors en 0,11 s. Un stress indépendant révèle toutefois une dernière course
+dans **la fixture série**, pas dans le pool : 200/200 nominales et 100/100 pour
+drop/resume/activate rendent le code attendu, mais `pool-serial` rend 1 dès la
+9e répétition avec `active=1`, `queued=1`, `g_built=1` et `peak=0`. La scène
+lit `peak_active()` avant de libérer les jobs ; `counters()` peut déjà voir
+l'activation alors que le worker n'a pas encore exécuté la mise à jour du pic,
+placée juste après la section critique. Lire ce compteur monotone **après les
+deux `join()`** ferme le flake sans ajouter de sleep ni affaiblir la signature.
 
 Le scénario 12 ne prouve pas que `p5` est entré dans `cv_space_.wait` avant
 la fermeture ; il peut être ordonnancé après celle-ci et recevoir la même
