@@ -438,65 +438,80 @@ renommé `cap_fusion_budgetaire` plutôt que de prétendre être le cap effectif
 du run. `PLAN_DE_TESTS.md` et le § 3 de la réponse Claude sont maintenant
 alignés.
 
-### 5.10 Refonte du profil `reduce` en cours
+### 5.10 Profil `reduce` : cœur sain, ancrage encore prématuré
 
-Le second jet du worktree ferme utilement l'essentiel de la première
-contre-lecture : records drainés dans `RunResult` puis imprimés après
-`run_pipeline`, pic atomique RAII strictement autour de `reduce_fold`, ancien
-pic renommé comme cycle de vie des workers, résiduel calculé sur les mêmes
-bornes que les buckets, intervalles A par K, cible `mhgp6_profile`, identité de
-build signée et contrat d'échec compilé. `duree_digest_k_ms` et le commentaire
-sur les 32 octets sont aussi corrigés. La scène d'échec K2 est bien enregistrée
-avec le code 4 : callback K1 non vide, puis profils et pic effacés au terminal.
+La dernière édition du worktree après `7724e730` ferme les trois défauts
+principaux de la contre-lecture précédente : les bornes publiques sont
+désormais honnêtement nommées `reduce_interne_debut/fin` et
+`mur_reduce_interne`, la projection comparée comprend `digest_all`,
+`digest_forest_K*` et les cardinalités, avec K uniques et plancher temporel
+positif, et les colonnes d'internement sont devenues `alloc_empreintes`,
+`offsets_diffusion` et `intern_tri`. Le mode standard signe aussi `fold_join`
+et la télémétrie `/proc/self/statm`. La vivacité en deux temps publie maintenant
+séparément le pic intra-lot et la frontière inter-lots ; le garde de
+préprocesseur refuse correctement `MHGP6_PROFILE_LIVENESS` seul.
 
-Sur le worktree partagé, une construction Release propre passe les trois
-portes ciblées `mhgp6_profil_identite`, `mhgp6_profil_contrat_echec` et
-`mhgp6_profil_contrat_echec_k2` en 7,67 s. C'est un contrôle de harnais non
-ancré, jamais une mesure de performance ni un reçu de commit.
+Sur cette source non ancrée mais stable pendant le rejeu, une construction
+Release isolée passe `mhgp6_profil_identite`,
+`mhgp6_profil_contrat_echec` et `mhgp6_profil_contrat_echec_k2` : 3/3 en
+6,06 s. Une compilation manuelle `-Werror` avec
+`MHGP6_PROFILE_REDUCE+MHGP6_PROFILE_LIVENESS` passe la même porte d'identité et
+publie K1--K10 avec des pics non nuls ; la compilation avec
+`MHGP6_PROFILE_LIVENESS` seul échoue sur le garde prévu. Ce sont des contrôles
+du worktree, jamais un reçu de commit ni une mesure de performance.
 
-Trois corrections restent nécessaires avant d'ancrer ce profil :
+Trois finitions matérielles restent avant l'ancrage :
 
-- `b_debut`/`b_fin` et le « mur local » ne couvrent pas l'étage B complet. Les
-  bornes sont prises **dans** `reduce_fold`, après le déplacement initial, et
-  s'arrêtent avant ses destructeurs ; les libérations de `FoldPrepared` et du
-  `Stage`, le digest, la publication, le callback et la sonde RSS sont hors de
-  cette fenêtre. Le résiduel nul ferme donc correctement le corps instrumenté,
-  pas tout B. La correction minimale et suffisante pour le diagnostic demandé
-  est de renommer ces champs `reduce_interne_debut/fin` et
-  `mur_reduce_interne`, puis de revendiquer seulement le recouvrement
-  A/réduction. Si le coût complet de B devient nécessaire, ajouter des bornes
-  externes et un poste explicite de nettoyage/digest au lieu d'étendre
-  silencieusement ce claim ;
-- la porte Python annonce l'identité de « l'objet », mais son comparateur ne
-  sélectionne que `digest_forest_K*` et `digest_all`. Ce digest couvre clés,
-  partition finale et deltas, pas tous les compteurs ni `batch_levels`.
-  Comparer au minimum aussi les lignes déterministes `cardinalites K=`, puis
-  nommer exactement la projection attestée. Surtout, exiger des K uniques et
-  un plancher `end > begin` avec une durée ou somme strictement positive. La
-  porte Python actuelle détecterait déjà la disparition brute de la copie par
-  ses bornes relatives négatives ; le plancher reste requis pour attester
-  directement une instrumentation non vide, sans dépendre de cet effet de
-  l'époque. Le contrat d'effacement K2, lui, est causal dans sa portée ;
-- `profil_intern` reste impropre à une décision d'architecture : la colonne
-  `tri` contient toute la passe d'internement exact puis le tri local,
-  `empreintes` inclut les allocations de préparation et `diffusion` les
-  offsets. Renommer au minimum en `alloc_empreintes`, `offsets_diffusion` et
-  `intern_tri`, sans séparer artificiellement les passes si cette séparation
-  perturbe elle-même le profil.
+1. **Enregistrer et exercer la vivacité.** Le CMake ne construit encore que
+   `mhgp6_profile`. Ajouter une cible explicite
+   `mhgp6_profile_liveness` portant les deux macros et une porte qui exige
+   exactement `profil_kind=reduce_v2+liveness`, un `profil_vivantes` pour le
+   même ensemble de K, `pic_intra_lot > 0` sur cette fixture et une frontière
+   bornée par le pic. Le garde de compilation seul ne couvre pas cette branche.
+2. **Rendre `fold_join` causal dans la porte.** La porte vérifie actuellement
+   la signature `fold_join`, pas son effet. Pour chaque K, exiger
+   `a_debut <= a_fin <= reduce_interne_debut <= reduce_interne_fin`; avec
+   `join=1`, exiger aussi `reduce_interne_fin(K) <= a_debut(K+1)` et
+   `pic_reduce_actif == pic_workers_b == 1`. Sinon ignorer entièrement
+   `fold_join` laisserait encore la porte verte. Comparer les ensembles de K
+   des lignes forêt, cardinalités, `profil_reduce` et `profil_intern`; si cette
+   porte veut elle-même revendiquer K1--K10, l'ensemble attendu doit venir de
+   `smax_effective`, sinon elle doit renvoyer explicitement à la porte exact-K
+   déjà existante.
+3. **Finir les portées et le vocabulaire de preuve.** La porte atteste une
+   projection déterministe nommée, pas « l'objet » ni tous les digests : cette
+   surqualification subsiste dans le commentaire et le message de
+   `profil_gate.py`, le CMake, `PLAN_DE_TESTS.md` et la réponse Claude. On peut
+   ajouter les digests candidats/préfiltre, mais même alors `batch_levels` et
+   le `ForestResult` complet restent hors preuve. Dans l'internement, la
+   libération de `parts` est imputée à `fusion` et celle de `pools` à `remap` :
+   les séparer ou les nommer avant une décision d'architecture. Renommer aussi
+   `duree_digest_k_ms` en `duree_digest_foret_k_ms`, car la fenêtre ne couvre
+   que `digest_forest_v4`, et retirer le commentaire résiduel présentant les
+   32 octets de `FidState` comme « une ligne de cache ».
 
-Trois durcissements sont peu coûteux mais ne bloquent pas l'attribution interne :
-faire échouer la compilation si `MHGP6_PROFILE_LIVENESS` est défini sans
-`MHGP6_PROFILE_REDUCE` et construire explicitement cette variante, signer
-`fold_join` dans la sortie standard ou refuser l'option hors profil, et
-déclarer la lecture de `/proc/self/statm`. Cette
-dernière reste une I/O sous le verrou de publication, y compris dans le Release
-normal ; un vrai run de débit devra la désarmer ou signer explicitement la
-télémétrie active.
+Le contrat d'effacement K2 est causal pour la propriété réellement jugée : le
+vecteur est alloué avant la panne et l'absence de `clear()` serait visible. Son
+récit va toutefois un peu plus loin que sa preuve, puisque le callback K1
+précède la copie vers `RunResult::fold_profiles`. Durcissement peu coûteux :
+mettre cette scène en `fold_join_before_next_k=true` et vérifier dans le
+callback que le `ForestResult::profile` K1 est strictement non vide ; la
+jonction garantit alors que sa copie précède réellement A(K2).
 
-Après ces deux corrections de portée et de non-vacuité, le profil sera
-recevable pour attribuer le corps du reduce et mesurer son recouvrement avec A.
-Il pourra alors décider entre budget de workers/affinité, travail sur le layout
-ou `CompactDelta`. Aucun facteur de gain ni diagnostic « memory-bound » n'est
+Enfin, la réponse Claude dit déjà « livré (commit séparé) », alors que code,
+deux tests et réponse sont encore non suivis ou modifiés. Conserver le terme
+WIP jusqu'au commit source, puis mettre le présent paragraphe et
+`ETAT_COURANT.md` à jour en place au pin exact plutôt que d'empiler un nouvel
+audit.
+
+Une fois ce harnais ancré, le prochain pas utile n'est pas un nouveau design
+à l'aveugle : exécuter une petite matrice appariée fils × inflight × join. Le
+mur de débit vient du Release non instrumenté ; le binaire de profil attribue
+seulement les fenêtres internes. Si `join=1` améliore le mur à travail B
+stable, travailler d'abord le budget de workers ou l'affinité ; si
+`materialisation_tri_copie` domine encore B isolé, instruire `CompactDelta` ;
+si le coût vient du recouvrement A/réduction, borner la concurrence avant de
+toucher au layout. Aucun facteur de gain ni diagnostic « memory-bound » n'est
 encore reçu.
 
 ## 6. Ordre de travail recommandé
