@@ -1008,21 +1008,109 @@ selftests rejoués et accusé du SHA exact. Ce reliquat justifie encore
 **NO START**, mais il ne demande ni nouveau design mathématique ni réouverture
 des kernels. Aucun lancement GCP n'a été effectué pendant cette revue.
 
+### 5.16 Réception du pin `b97f20ea` et surveillance coopérative de la relance
+
+Le pin technique est désormais recevable pour l'exécution bornée prévue. Les
+quatre coutures du § 5.15 sont fermées sur le chemin réellement épinglé :
+liaison du profil canonique, identité du plan et du device, architecture 120
+imposée, propagation fail-fast et harnais lifecycle aligné sur les treize
+fichiers. Le selftest de campagne rejoué isolément rend 0 ; le selftest du
+cycle de vie passe ses 35 scénarios et 13 refus de pin, l'intégration Python
+passe 2/2 et la contre-fixture du juge passe aussi sous `python3 -O`. Une
+configuration CUDA explicitement forcée à 86 est refusée par CMake. Sur la
+VM, le preflight du même SHA passe 117/117 portes v6 avant toute mesure.
+
+Deux sous-liaisons du validateur restent néanmoins réelles. Elles ne rendent
+pas le runner épinglé divergent, mais elles peuvent laisser un reçu modifié
+se déclarer valide :
+
+1. le contrôle de la commande d'attribution exige seulement que les arguments
+   attendus soient inclus. Ajouter en suffixe des options contradictoires
+   telles que `--n=999 --threads=1 --fold-join=1`, puis recalculer le manifeste
+   distant, laisse encore le validateur rendre 0 ;
+2. `arch_compilees` est parsé par le juge mais n'est comparé ni par celui-ci,
+   ni par le validateur. Remplacer 120 par 86 dans une en-tête pilote et
+   recalculer le manifeste laisse encore le reçu de selftest accepté.
+
+Le risque de la session courante est circonscrit : le runner passe ses argv
+de façon déterministe, donne explicitement
+`-DCMAKE_CUDA_ARCHITECTURES=120`, et CMake refuse toute autre valeur. Avant de
+recevoir ses mesures, il faudra donc comparer manuellement chaque commande
+d'attribution au point exact du profil, refuser tout argument supplémentaire
+ou dupliqué, et constater `arch_compilees=120` dans chaque en-tête pilote.
+Avant un prochain pin, remplacer la relation d'inclusion par une égalité
+d'argv normalisée et ajouter le mutant `arch_compilees=86` au juge et au
+validateur. Ces deux correctifs sont ciblés ; ils ne justifient pas de jeter
+une session déjà correctement épinglée et protégée.
+
+La chronologie GCP doit rester explicite :
+
+- le premier départ à `5d886db1`, génération
+  `2026-09-01T11:09:12.911-07:00`, a réellement démarré puis a été refusé
+  fail-closed, car l'arrêt invité à +415 min dépassait de 16 s l'échéance
+  GCE. Le reçu versionné passe ses quatre hashes, atteste `stop_rc=0` et
+  `targeted_stopped`, et ne contient aucune donnée scientifique ;
+- le deuxième départ à `b97f20ea`, génération
+  `2026-09-01T11:23:08.753-07:00`, a perdu son superviseur et son `WORK` lors
+  du redémarrage du conteneur. Le dépôt ne possède pas de reçu durable de
+  cette tentative. L'état `TERMINATED` est toutefois corroboré avant la
+  mutation suivante par la garde du troisième départ ; aucune mesure de la
+  deuxième tentative n'est recevable ;
+- la relance distincte observée à 20:06 UTC exécute explicitement le SHA
+  complet `b97f20ea4b8f0932761c4719b32bb14b8c1f0395`, génération
+  `2026-09-01T13:06:27.081-07:00`. Le bundle, le manifeste et leurs treize
+  blobs recoupent ce commit. Les deux coupe-circuits sont relus : arrêt invité
+  02:51:54 UTC, GCE `STOP` à 03:06:17 UTC. Au checkpoint 20:13 UTC, les
+  117 portes sont vertes et les douze premiers points de matrice sont verts ;
+  le journal hors `/tmp` continue bien d'être alimenté.
+
+L'accusé `c6ddf715` annonçait une seule session `b97f20ea`; la tentative
+interrompue l'a consommée. La relance actuelle constitue donc un écart au
+protocole d'accusé borné de cet audit, pas une absence de l'autorisation GCP
+SPOT permanente du dépôt. L'action utile n'est pas d'interrompre maintenant
+une génération saine : **CONTINUER CETTE GÉNÉRATION, AUCUN NOUVEAU
+REDÉMARRAGE**. Ses résultats restent suspendus à un reçu durable complet, aux
+deux contrôles manuels ci-dessus et à l'arrêt certifié de cette génération
+exacte. Toute quatrième tentative demandera un nouvel accusé explicite.
+
+La marge doit aussi être nommée correctement. Sous 7 h GCE et 405 min invité,
+la fenêtre utile vaut `20 395 s`, l'estimation `13 552 s` et le slack
+scientifique `6 843 s`. Les 900 s sont seulement l'écart brut entre les
+échéances ; après la réserve GCE de 300 s, le budget d'armement certifiable
+est 600 s, voire 480 s avec le décalage `systemd` maximal toléré. Ajouter les
+frontières 600/601 s et 480/481 s au selftest évitera de transformer le
+commentaire « environ trois fois » en garantie erronée.
+
+Enfin, le journal externe améliore la reprise mais le `WORK`, la clé de
+session et les artefacts locaux restent sous `/tmp`. Avant une autre session
+facturable, déplacer ce registre de reprise dans un répertoire persistant à
+permissions restreintes, ou fournir une commande de récupération testée qui
+réattache la génération et rapatrie les sorties distantes avant l'arrêt. Un
+selftest doit tuer le superviseur après le handshake, puis prouver la reprise,
+le rapatriement éventuellement partiel, le classement invalide et l'arrêt
+ciblé. Il s'agit du correctif le plus rentable révélé par les deux échecs : il
+protège le temps de Claude autant que la facture.
+
+Ce checkpoint ne reçoit encore aucune mesure G4 et ne change pas
+`public_status=not_claimed`.
+
 ## 6. Ordre de travail recommandé
 
 1. **achevé à `4a85c13d`** : C1, garde `2E` et témoin hôte ancrés ensemble,
    brouillon `fold.hpp` correctement laissé hors checkpoint ;
-2. **partiel à `d5ed0fb3`** : recalculer la `somme` depuis ses neuf
-   composantes ; resserrer maintenant sa tolérance et graver la contre-fixture
-   du § 5.13, puis réserver la matrice locale au diagnostic de bruit ;
+2. **achevé à `5d886db1`** : `somme` recalculée depuis ses neuf composantes,
+   tolérance resserrée et contre-fixture du § 5.13 gravée ; la matrice locale
+   reste un diagnostic de bruit ;
 3. **achevé à `cd606257`** : recevoir le wire et la couture C2--C5 dans leur
    portée CPU/stub ; joindre les durcissements P2 au prochain petit correctif ;
 4. si la cause CPU est la concurrence A/B, prototyper un budget de workers ou
    une affinité reproductible avant l'éclaireur atomique ;
 5. ouvrir l'amont/aval du design A par les paliers décrits, sans promettre le
    facteur `1,7–2` ;
-6. rendre exécutable et falsifiable le profil dédié du § 5.12, puis appliquer
-   son GO conditionnel sous nouveau pin, avec arrêt GCP ciblé certifié.
+6. laisser la génération `2026-09-01T13:06:27.081-07:00` finir ou tronquer
+   sous ses garde-fous, auditer son reçu et son arrêt ; fermer ensuite les deux
+   sous-liaisons du validateur et la reprise persistante avant tout nouveau
+   départ facturable.
 
 Un prototype de réduction ne sera reçu ni par un seul digest ni par un mutant
 d'ordre. Il devra comparer le `ForestResult` complet, les deltas et niveaux de

@@ -3,8 +3,10 @@
 Date de coupe : 1er septembre 2026.
 
 Coupe source observée : `1069bc20` pour le profil `reduce`, `cd606257` pour
-la série C C2--C5 et `d5ed0fb3` pour la préparation locale de sa mesure ; les
-mises à jour du seul audit ne changent pas ces coupes.
+la série C C2--C5 et `b97f20ea` pour la préparation et l'exécution G4 de la
+série C. Le `HEAD` `81430eef` n'en diffère que dans `morsehgp3D_v6/audits/` ;
+la relance surveillée exécute explicitement `b97f20ea`, jamais le `HEAD` par
+défaut.
 Autorités techniques : `6d755804` pour le
 prototype E3/G16, `cd49a390` pour les callbacks, `d98f4729` pour le protocole
 et la source réellement exécutée sur G4, `94c74155` pour l'autorisation
@@ -13,9 +15,11 @@ mono-session désormais consommée, `df1a3c5f` pour l'archivage de son reçu,
 d'exécuteurs GPU hôte, `4a85c13d` pour sa correction causale, la garde 2E et
 le témoin arithmétique hôte, `1069bc20` pour le harnais de profil,
 `cd606257` pour le pin hôte de la série C, `d5ed0fb3` pour le pilote ABBA et
-le profil de session encore non raccordé, `62cd2e28` pour la matrice locale
-directionnelle, `9c5517c9` pour la demande G4, `e8289d9a` pour son profil encore
-non consommé, `320299df` pour le reçu de
+le profil de session initial, `5d886db1` pour la fermeture technique des
+coutures 5.13--5.15, `b97f20ea` pour la marge invitée corrigée et
+`c6ddf715` pour son accusé de SHA, `62cd2e28` pour la matrice locale
+directionnelle, `9c5517c9` pour la demande G4, `e8289d9a` pour son profil
+historique, `320299df` pour le reçu de
 réplication et `8ed2dea6` pour le reçu de confirmation contre-audité
 ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 
@@ -40,18 +44,19 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | plafonds et budget mémoire `4a85c13d` | cap coopératif et refus transactionnels reçus ; garde logique `2E` avant la réserve de fusion reçue, proxy de payload nommé seulement, sans claim RSS/OOM |
 | saturation multi-CPU du fold `1069bc20` | pin construit et suite `gate` 92/92 ; profil, liveness, builds distincts, projection nommée, `join=1` et effacement K2 reçus dans leur portée ; `d5ed0fb3` recalcule la somme, mais ses tolérances acceptent encore la contre-fixture à neuf composantes nulles ; matrice locale terminée mais non décisionnelle |
 | série C C2--C5 `cd606257` | reçue dans sa portée CPU/stub : six candidats `u32`, refus transactionnels, sentinelles/validateur, digest gravé, porte de readback device enregistrée mais jamais exécutée et multi-lots causal ; export propre Release 113/113 en 232,11 s ; aucun `nvcc` ni device |
-| préparation G4 `d5ed0fb3` + WIP postérieur | pin profil/juge, portée v6-only, budget 7 h, fermeture temporelle, inventaire pré-CTest, fail-fast par famille, hashes, affinité, validateur CTest/K et résumés durables correctement raccordés dans le WIP ; selftest campagne vert ; **NO START** : liaison canon/commande et en-tête/device incomplète, architecture 120 seulement par défaut, CUDA encore consommé après un prérequis CPU rouge, code de `ctest -N` neutralisé et harnais lifecycle sur l'ancien manifeste ; aucun nouveau pin reçu |
+| préparation G4 `b97f20ea` | quatre coutures du § 5.15 reçues sur le chemin épinglé : canon, identité plan/device, architecture 120, fail-fast et manifeste lifecycle à 13 fichiers ; selftests campagne/lifecycle verts et portes G4 v6 117/117 ; deux sous-liaisons du validateur restent à durcir (argv d'attribution seulement inclusif, `arch_compilees` parsé mais non comparé), donc contrôle manuel obligatoire du reçu courant et correction avant tout nouveau pin |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
-| protocole GCP `d98f4729` | GO mono-session consommé et clos ; reçu `df1a3c5f` validé non décisionnel, arrêt ciblé certifié |
+| protocole GCP série C | premier départ `5d886db1` refusé fail-closed puis arrêté avec reçu intègre ; deuxième départ `b97f20ea` interrompu par redémarrage du conteneur et arrêté, sans reçu durable ; relance distincte `b97f20ea`, génération `2026-09-01T13:06:27.081-07:00`, en cours au checkpoint 20:13 UTC avec deux coupe-circuits et journal durable ; aucun résultat encore recevable |
 
-La coupe WIP du § 5.15 calcule `ESTIMATE_S=13 552 s` pour
-`WINDOW_S=20 995 s`, soit `7 443 s` de marge sous le profil 7 h/415 min.
-Les contre-fixtures juge/profil passent sous Python normal et optimisé, les
-quatre CTests ciblés passent 4/4 en Release et le selftest de campagne complet
-est vert. Le selftest lifecycle reste rouge uniquement parce que son propre
-inventaire n'a pas encore suivi les treize fichiers du pin ; ce harnais n'est
-pas une preuve fraîche tant qu'il n'est pas remis à niveau.
+Le pin `b97f20ea` calcule `ESTIMATE_S=13 552 s` pour
+`WINDOW_S=20 395 s`, soit `6 843 s` de marge sous le profil 7 h/405 min.
+L'écart brut entre les deux arrêts est 900 s, mais la marge d'armement
+certifiable après la réserve GCE de 300 s n'est que 600 s, ou 480 s avec le
+décalage `systemd` maximal toléré. Les selftests campagne et lifecycle sont
+verts ; le rejeu distant de la relance passe 117/117 portes v6 avant la
+matrice. Cette observation en vol n'est ni un reçu, ni une mesure reçue, ni
+une promotion de statut.
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
