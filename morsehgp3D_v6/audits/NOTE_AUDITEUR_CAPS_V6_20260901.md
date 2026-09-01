@@ -2,8 +2,8 @@
 
 Date : 1er septembre 2026.
 
-Coupe observée : worktree non committé au-dessus de `534289f2`, empreinte du
-diff normatif `7a775549d451a7fe62687f035620cea58907d692c4d4c4231c54a6c5f16bcd4d`.
+Coupe observée : worktree non committé au-dessus de `7c4d5e0a`, empreinte du
+diff normatif `bdd1b6d932f8a133b1392431d7188ccafe5b62d3fb3d3db8f6cc54416185014c`.
 Cette note n'est pas un verdict sur un commit et sera absorbée puis retirée
 après le checkpoint propre.
 
@@ -27,6 +27,34 @@ refus du tri attendu.
 Ces verts prouvent le statut observable et la non-altération du petit témoin.
 Ils ne prouvent pas encore le claim plus fort « refus avant l'allocation qu'il
 protège ».
+
+## Rejeu de la réponse en vol
+
+Claude a utilement retiré le diff v5, sécurisé les produits de budget, placé
+la borne conservative census avant le préfiltre, prévalidé `--n` dans la CLI
+et renommé le budget en « partiel de tampons ». Après correction de la vague
+initiale, les trois CTests `^mhgp6_caps_` passent 3/3 en 67,94 s. La première
+version de la nouvelle porte avait justement échoué sur
+`pic de vague <= cap`, ce qui a permis de garder aussi la vague initiale avant
+son `reserve`.
+
+Le cap candidat n'est toutefois pas encore un cap de matérialisation. Deux
+probes Debug arrêtés au site exact du refus ont observé, pour un cap de 1 000 :
+
+- `uniform(2000, 200, 3)` : 1 009 candidats dans les quatre shards ;
+- `eight_clusters(2000, 400, 3)` : 1 033 candidats dans les quatre shards.
+
+La porte ne publie pas cet observable et reste donc verte. Le commentaire
+borne l'overshoot par `T × 4096 + une ancre par ouvrier`, mais q3/q4 ne
+remontent l'arrêt que hors de leur helper : la boucle du rectangle peut encore
+visiter d'autres ancres, chacune poussant avant d'observer `stopped`. Soit
+réserver le quota avant chaque `push_back`, soit propager explicitement
+l'abandon jusqu'au rectangle et exposer/tester le pic ainsi que le slack réel.
+
+De même, la porte wave à 64 exerce maintenant la vague initiale ; elle ne
+prouve pas que les shards `lnext`/`lout` sont bornés, car ceux-ci sont encore
+matérialisés avant le calcul prospectif. Le mutant prouve l'instant de la
+seconde insertion dans `next/out`, pas l'absence d'OOM dans les shards.
 
 ## Corrections matérielles avant livraison
 
@@ -64,6 +92,13 @@ protège ».
    budget mémoire du fold. Soit fournir un majorant de phase vérifiable, soit
    renommer ces trois contrôles en budgets partiels de buffers et retirer la
    promesse anti-OOM globale.
+
+   Le renommage actuel en budget partiel est la bonne résolution de portée.
+   Il faut encore éviter d'appeler « conservative » une formule basée sur
+   `cands.size()` après RLE : le vecteur garde alors sa capacité brute, souvent
+   bien supérieure, et les shards `Survivor`/`BallData` peuvent avoir une
+   capacité supérieure à leur taille. Compter les `capacity()` réellement
+   résidentes ou libérer/réserver explicitement avant de publier un majorant.
 
 6. La CLI construit la famille avant d'entrer dans `run_pipeline`. La garde
    `n <= 2^30-1` y arrive donc trop tard. Refuser `--n` avant
