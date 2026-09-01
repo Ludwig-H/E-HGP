@@ -454,7 +454,7 @@ portes ciblées `mhgp6_profil_identite`, `mhgp6_profil_contrat_echec` et
 `mhgp6_profil_contrat_echec_k2` en 7,67 s. C'est un contrôle de harnais non
 ancré, jamais une mesure de performance ni un reçu de commit.
 
-Deux corrections restent nécessaires avant d'ancrer ce profil :
+Trois corrections restent nécessaires avant d'ancrer ce profil :
 
 - `b_debut`/`b_fin` et le « mur local » ne couvrent pas l'étage B complet. Les
   bornes sont prises **dans** `reduce_fold`, après le déplacement initial, et
@@ -472,16 +472,23 @@ Deux corrections restent nécessaires avant d'ancrer ce profil :
   partition finale et deltas, pas tous les compteurs ni `batch_levels`.
   Comparer au minimum aussi les lignes déterministes `cardinalites K=`, puis
   nommer exactement la projection attestée. Surtout, exiger des K uniques et
-  un plancher `end > begin` avec une durée ou somme strictement positive : si
-  la copie `fold_profiles[K] = r.profile` disparaît aujourd'hui, les profils
-  par défaut restent de la bonne cardinalité avec toutes leurs valeurs nulles
-  et les trois portes demeurent vertes. Le contrat d'effacement K2, lui, est
-  causal dans sa portée.
+  un plancher `end > begin` avec une durée ou somme strictement positive. La
+  porte Python actuelle détecterait déjà la disparition brute de la copie par
+  ses bornes relatives négatives ; le plancher reste requis pour attester
+  directement une instrumentation non vide, sans dépendre de cet effet de
+  l'époque. Le contrat d'effacement K2, lui, est causal dans sa portée ;
+- `profil_intern` reste impropre à une décision d'architecture : la colonne
+  `tri` contient toute la passe d'internement exact puis le tri local,
+  `empreintes` inclut les allocations de préparation et `diffusion` les
+  offsets. Renommer au minimum en `alloc_empreintes`, `offsets_diffusion` et
+  `intern_tri`, sans séparer artificiellement les passes si cette séparation
+  perturbe elle-même le profil.
 
 Trois durcissements sont peu coûteux mais ne bloquent pas l'attribution interne :
 faire échouer la compilation si `MHGP6_PROFILE_LIVENESS` est défini sans
-`MHGP6_PROFILE_REDUCE`, signer `fold_join` dans la sortie standard ou refuser
-l'option hors profil, et déclarer la lecture de `/proc/self/statm`. Cette
+`MHGP6_PROFILE_REDUCE` et construire explicitement cette variante, signer
+`fold_join` dans la sortie standard ou refuser l'option hors profil, et
+déclarer la lecture de `/proc/self/statm`. Cette
 dernière reste une I/O sous le verrou de publication, y compris dans le Release
 normal ; un vrai run de débit devra la désarmer ou signer explicitement la
 télémétrie active.
