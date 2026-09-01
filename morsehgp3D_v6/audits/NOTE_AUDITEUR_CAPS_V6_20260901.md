@@ -1,10 +1,12 @@
-# Note en vol à Claude — second jet des plafonds v6
+# Note en vol à Claude — dernier ajustement des plafonds v6
 
 Date : 1er septembre 2026.
 
-Coupe observée : worktree v6 non committé au-dessus de `7c4d5e0a`, sources
-stables observées entre 07:23 et 07:26 UTC. Cette note n'est pas un verdict
-sur un commit ; elle sera absorbée puis retirée après le checkpoint propre.
+Coupe observée à 07:45 UTC : worktree v6 non committé au-dessus de
+`629b2053`, empreinte du diff suivi avec `caps.hpp`
+`e8d0c6cae1e63735ab10b133c02be80004430578872b9018f18e8de4942e19b4`.
+Cette note n'est pas un verdict sur un commit ; elle sera absorbée puis
+retirée après le checkpoint propre.
 
 Cadre :
 
@@ -42,57 +44,48 @@ candidats et `eight_clusters(2000, 400, 3)` en avait matérialisé 1 033. Le
 nouveau champ `emitted_at_refus` rend enfin cet overshoot observable ; sa borne
 sur ces témoins est une non-régression mesurée, pas encore une borne générale.
 
-## Trois corrections utiles avant le checkpoint
+## Réponse au troisième jet — chemin court vers le checkpoint
 
-1. **Faire remonter l'arrêt d'émission q3/q4.** Les helpers retournent après
-   avoir vu `sc.emit.stopped`, mais leur appelant continue les ancres
-   suivantes. Chacune peut alors pousser encore un candidat avant de
-   retourner : l'overshoot n'est pas borné par `T × 4096 + une ancre` comme
-   l'annonce le commentaire. Le sondage supplémentaire du drapeau toutes les
-   64 émissions ne propage pas ce retour hors du helper. Faire retourner un
-   booléen, ou tester
-   `sc.emit.stopped || cap_stop.load()` immédiatement après chaque appel,
-   ferme ce trou à faible coût.
+Les corrections demandées sont maintenant effectivement présentes : arrêt
+q3/q4 remonté jusqu'au rectangle, vague dynamique exercée à 2 048, garde
+`alive` dédiée, compteurs de callbacks atomiques, petit budget refusé avant
+génération, second produit de `fits_budget` exercé et commentaire CLI corrigé.
+Le cap coopératif à overshoot borné est une solution recevable pour ce
+checkpoint ; aucun quota atomique par candidat n'est demandé.
 
-2. **Choisir explicitement le niveau de garantie des caps.** `lout`, `lnext`
-   et les shards candidats sont matérialisés avant leurs contrôles globaux ;
-   `Σ|lnext| <= 2|wave|` est une borne utile, mais autorise précisément la
-   première allocation à dépasser `wave_cap`. Les capacités de `std::vector`,
-   la capacité brute conservée par `cands` après RLE et la coexistence
-   shard/sortie ne sont pas déduites du budget. Deux solutions sont
-   recevables :
+Il reste **une seule fragilité de porte** : un rejeu Release a échoué sur
+`mhgp6_caps_refus` avec `(c) : message attendu`, tandis que deux rejeux
+concurrents ont passé les trois caps. Cette alternance vient d'un décalage
+mécanique : le test choisit son budget avec `temoin.emitted`, alors que les
+gardes utilisent désormais la `cands.capacity()` résidente. Pour rendre les
+étages causaux sans valeur magique :
 
-   - pour le claim fort « pré-allocation », acquérir un quota avant chaque
-     append local et compter la résidence transitoire ;
-   - pour ce checkpoint, conserver le mécanisme actuel mais parler de
-     « garde pré-fusion globale » et de « cap de cardinalité à overshoot
-     borné », jamais d'arrêt « avant matérialisation » ni de borne exacte en
-     octets.
+1. exposer la capacité candidate du témoin comme diagnostic non-payload ;
+2. calculer par helpers contrôlés
+   `tri_need = capacity × sizeof(BallCandidate) × 2` et
+   `census_need = capacity × (sizeof(BallCandidate) + sizeof(Survivor) + 2 × sizeof(BallData))` ;
+3. tester le tri avec `tri_need - 1`, puis le préfiltre/census avec
+   `tri_need` : l'égalité passe exactement le tri et reste strictement sous
+   `census_need`.
 
-   La fixture vague doit alors employer un seuil proche de 2048 pour exercer
-   la transition dynamique : le probe donne pic nominal 1999 et pic mutant
-   2518. Avec 64, elle ne teste que la nouvelle garde initiale. Ajouter aussi
-   un cas `alive_rects_cap_for_tests`, aujourd'hui non exercé.
+Un petit calcul est également à aligner dans la garde du fold. Pendant
+`expand_events_k`, les shards `lev` et la sortie fusionnée coexistent, alors
+que jusqu'à `fold_inflight` stages précédents peuvent encore être résidents :
+le facteur cardinalitaire conservateur du tampon `ForestEvent` est donc
+`inflight+2`, pas `inflight+1`. Changer ce facteur et exercer une fois ce refus
+suffit ; le budget complet des autres structures du fold n'est pas demandé.
 
-3. **Fermer deux bords de preuve.** Dans le run réussi, `fold_phases` est
-   incrémenté depuis l'étage A et les threads B sans synchronisation : la
-   fixture a une data race. Employer un compteur atomique et exiger un nombre
-   strictement positif au succès. Ensuite, refuser avant génération lorsque
-   `0 < memory_budget_bytes < sizeof(BallCandidate)` : forcer actuellement le
-   cap dérivé à 1 permet déjà une allocation supérieure au budget. Tester
-   `sizeof(BallCandidate)-1`, l'égalité et zéro callback.
+Deux alignements textuels terminent le patch. Les commentaires parlent encore
+de tranches de 64 K alors que le code publie toutes les 4 096 émissions, et
+`caps.hpp`, `GenerateOptions`, `run_pipeline` ainsi que CMake disent encore
+« avant matérialisation/allocation ». Le contrat réellement livré est plus
+précis : **cap de cardinalité à overshoot borné, arrêt avant fusion globale et
+tri**. Les shards WSPD sont bornés par construction mais non gardés avant leur
+allocation locale ; conserver le terme « pré-fusion globale ». La
+qualification explicite du budget comme partiel reste acceptée.
 
-Deux micro-nettoyages peuvent accompagner ce même patch : le test
-`fits_budget(4, UINT64_MAX/2, 3, ...)` déborde dès le premier produit et ne
-couvre donc pas le second (un témoin comme `2, UINT64_MAX/4, 3` le ferait) ;
-le « mur réel 1,6–3,2 M » de `caps.hpp` doit être nommé ordre de grandeur
-extrapolé, et le commentaire CLI « code 2 refus avant calcul » n'est plus vrai
-pour les refus après génération.
-
-Le budget complet du fold n'est **pas** demandé pour ce checkpoint : sa
-requalification explicite en budget partiel est une réponse acceptable. De
-même, les caps structurels maximaux peuvent rester un jalon ultérieur dès
-lors que le claim local est exact.
+Après ces ajustements, rejouer les trois caps, la suite v6 hors échelle et les
+portes documentaires suffit pour proposer le checkpoint à contre-audit.
 
 Le GO G4 `d98f4729` n'est pas révoqué, mais son pin refuse correctement ce
 worktree normatif sale. Aucun lancement ne doit partir de cet état ; un
