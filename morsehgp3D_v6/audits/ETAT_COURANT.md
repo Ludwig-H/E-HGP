@@ -2,12 +2,13 @@
 
 Date de coupe : 1er septembre 2026.
 
-Coupe de code observée : `671ed3cc`. Autorités techniques : `6d755804` pour le
+Coupe de code observée : `4a85c13d`. Autorités techniques : `6d755804` pour le
 prototype E3/G16, `cd49a390` pour les callbacks, `d98f4729` pour le protocole
 et la source réellement exécutée sur G4, `94c74155` pour l'autorisation
 mono-session désormais consommée, `df1a3c5f` pour l'archivage de son reçu,
 `6e293deb` pour le checkpoint de plafonds, `671ed3cc` pour le premier pool
-d'exécuteurs GPU hôte, `320299df` pour le reçu de
+d'exécuteurs GPU hôte, `4a85c13d` pour sa correction causale, la garde 2E et
+le témoin arithmétique hôte, `320299df` pour le reçu de
 réplication et `8ed2dea6` pour le reçu de confirmation contre-audité
 ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 
@@ -29,9 +30,10 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | confirmation hors échantillon | cœur reçu ; `confirmation_candidate`, déclencheur E6 non confirmé |
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
-| plafonds et budget mémoire `6e293deb` | cap coopératif et refus transactionnels reçus ; budget de payload logique honnêtement partiel, mais sa garde `2E` de fusion arrive encore après l'allocation globale correspondante |
+| plafonds et budget mémoire `4a85c13d` | cap coopératif et refus transactionnels reçus ; garde logique `2E` avant la réserve de fusion reçue, proxy de payload nommé seulement, sans claim RSS/OOM |
 | saturation multi-CPU du fold | GO pour profil B isolé et inflight apparié ; raccord temporel naïf réfuté, décomposition par composantes seulement après mesure du déséquilibre et preuve des deltas |
-| pool d'exécuteurs C1 `671ed3cc` | architecture hôte utile et 4/4 portes vertes, mais confinement fatal non reçu : réutilisation post-fatale et fenêtre dépilé/non-actif non couvertes |
+| pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
+| témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP `d98f4729` | GO mono-session consommé et clos ; reçu `df1a3c5f` validé non décisionnel, arrêt ciblé certifié |
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
@@ -71,21 +73,31 @@ propre, `tools/check_docs.py` valide 245 fichiers Markdown actifs et
 `tools/check_implementation_status.py` valide 20 phases. Ce rejeu est local,
 CPU et hors échelle ; il ne mesure pas le comportement G4 du nouveau code.
 
-À `671ed3cc`, les quatre portes du pool C1 passent en 20,26 s, mutants
-compris. Elles ne couvrent cependant pas la course qu'annonce le contrat :
-une sonde GCC 13.3 avec un exécuteur, un job levant `DeviceFatalError` et un
-ticket déjà en file observe 199 travaux post-fatals exécutés sur 200 essais.
-`run()` lit `fatal_` avant de notifier, tandis que la fermeture n'est appelée
-qu'après le réveil du producteur dans `submit_and_wait_contained`. La
-fermeture doit donc partir du worker avant notification et avant rebouclage,
-avec une fixture fatal + file non vide. Les verts actuels ne reçoivent pas la
-propriété transactionnelle.
+Le lot `4a85c13d` ferme la contre-fixture historique de `671ed3cc` : la
+fermeture fatale part du worker avant notification, le passage file→actif est
+indivisible sous `mu_`, et les quatre mutants possèdent chacun une scène
+sélective. Sur le worktree ensuite ancré par ce commit, reconstruction Release
+et rejeu ciblé donnent 15/15 en 158,26 s : cinq portes pool, cinq portes
+caps/CLI et cinq portes du témoin hôte. Le stress pool donne 200/200 nominales
+et 50/50 pour chacune des quatre injections, soit 400/400 codes attendus.
 
-Le même correctif doit rendre indivisible, vis-à-vis de `close_fatal`, le
-passage d'un ticket de la file à l'état actif. C1 n'est pas encore raccordé à
-`run.hpp` et ne borne ni les captures des producteurs bloqués, ni les buffers
-d'exécuteurs, ni la VRAM. Le contrat de port est utile, mais la mention
-`port_source_requalified` et la coche C1 de `docs/GPU.md` sont prématurées.
+Le message du commit consigne en plus une suite Claude complète à code 0 sur
+89 portes, échelle comprise. Ce chiffre n'est pas repris comme rejeu
+indépendant : une tentative séquentielle concurrente a vu E6 atteindre son
+timeout de 600 s pendant qu'une autre suite `-j8`, deux conformités 32k et
+plusieurs oracles chargeaient la machine à 33–48 ; la même porte avait passé
+en 138,60 s plus tôt. Cette tentative est écartée comme contention observée,
+ni vert ni contradiction E6.
+
+`git diff --check` est propre, `tools/check_docs.py` valide 246 Markdown actifs
+et `tools/check_implementation_status.py` valide 20 phases. Aucun `nvcc` ni
+device n'a été exercé. C1 reste une brique hôte non raccordée à `run.hpp` ; sa
+file ne borne ni les captures des producteurs, ni les buffers d'exécuteurs,
+ni la VRAM. Le témoin ne couvre pas encore `BallKey::power`, `AxisBounds` ou
+la division plancher. La garde 2E reste un proxy logique de tailles, sans
+promesse RSS/OOM. Le seul écart de worktree après le commit est le brouillon
+instrumenté `src/forest/fold.hpp`, explicitement hors checkpoint et hors GO de
+performance.
 
 ## Exact-K, omission unique et ownership WSPD
 

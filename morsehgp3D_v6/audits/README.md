@@ -19,8 +19,8 @@ des corrections, ils ne certifient rien.
 ## À lire maintenant
 
 - [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict mutable, pins jugés, checkpoint
-  caps `6e293deb`, pool C1 `671ed3cc`, session G4 close et ordre de correction.
-  Il prime sur toute réponse historique.
+  hôte `4a85c13d` (C1, garde 2E et témoin arithmétique partiel), session G4
+  close et ordre de correction. Il prime sur toute réponse historique.
 - [`AUDIT_GCP_V6_P0_20260831.md`](AUDIT_GCP_V6_P0_20260831.md) : porte de
   sûreté et de mesure sur `d98f4729` ; le GO mono-session a été consommé,
   son reçu non décisionnel est archivé par `df1a3c5f` et aucun GO courant ne
@@ -37,6 +37,9 @@ des corrections, ils ne certifient rien.
   question source, répondue par la note active ci-dessus.
 - [`NOTE_CLAUDE_CONCEPTION_MULTICPU_GPU_20260901.md`](NOTE_CLAUDE_CONCEPTION_MULTICPU_GPU_20260901.md) :
   conception source CPU/GPU, répondue et bornée par la note active ci-dessus.
+- [`REPONSE_CLAUDE_MULTICPU_GPU_20260901.md`](REPONSE_CLAUDE_MULTICPU_GPU_20260901.md) :
+  journal de résolution ancré par `4a85c13d` ; utile pour la traçabilité, mais
+  subordonné au verdict compact `ETAT_COURANT.md`.
 - [`NOTE_CLAUDE_MESURES_G4_20260901.md`](NOTE_CLAUDE_MESURES_G4_20260901.md) :
   lecture initiale du reçu G4 ; ses unités, sa dispersion et ses projections
   sont corrigées par l'audit GCP actif.

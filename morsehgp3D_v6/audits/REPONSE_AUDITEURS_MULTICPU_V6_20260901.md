@@ -3,7 +3,8 @@
 Date : 1er septembre 2026. Données mesurées à `d98f4729`, question
 `ad005432` et conception `b18f1400`. La course de `671ed3cc` est conservée
 ci-dessous comme contre-fixture historique ; la contre-lecture couvre le
-worktree non committé du neuvième jet jusqu'au 1er septembre à 10 h 55 UTC.
+checkpoint source `4a85c13d`. Seul le brouillon de profil `fold.hpp` reste
+hors commit dans le worktree.
 
 Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -12,15 +13,14 @@ Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 
 ## Verdict constructif
 
-**GO pour livrer le cœur C1 corrigé et la garde logique 2E, leurs deux derniers
-refus de fixture étant présents ; GO pour poursuivre le diagnostic local apparié ;
+**C1 hôte, garde logique 2E et témoin hôte partiel reçus à `4a85c13d` ; GO
+pour poursuivre le diagnostic local apparié ;
 pas encore pour une réduction par segments ni pour C2/C3 sans contrat wire.**
 Le septième jet ferme bien les deux courses C1 connues dans le code : la
 panne fatale est confinée côté worker avant notification, et le passage
 file→actif est linéarisé sous le mutex. Le hook et le mutant ciblent maintenant
 la frontière exacte, les quatre signatures sont isolées et le flake du pic
-série est réparé. Le § 5.6 reçoit ce C1 hôte sur le worktree actuel ; il reste
-à l'ancrer avec le commit source qui portera ce lot.
+série est réparé. Le § 5.6 reçoit ce C1 hôte au pin source `4a85c13d`.
 
 Le témoin arithmétique hôte et la garde 2E ont aussi progressé jusqu'à une
 portée utile et honnête. Ils ne constituent toujours ni une compilation
@@ -318,9 +318,8 @@ réveil par `cv_space_.notify_all()` doit devenir une propriété reçue, ajoute
 un compteur de waiters test-only sous `mu_` et attendre exactement un waiter
 avant de libérer le fatal.
 
-Dette déclarative non bloquante : `docs/GPU.md` énumère encore trois mutants
-du pool et omet `pool-activate-after-unlock`, pourtant enregistré dans CMake
-et dans le plan de tests.
+`docs/GPU.md`, CMake et le plan de tests énumèrent désormais les quatre dents
+du pool de façon cohérente.
 
 Les commentaires bornent désormais correctement la conversion
 transactionnelle dans `run.hpp` à une intention C2–C5 : aucun chemin produit
@@ -350,7 +349,7 @@ mesurée améliore aussi `scanline` d'environ 9,6 %, pas seulement `terrain`.
 Ces chiffres n'ont qu'un run par route et restent historiques v5 ; ils
 n'autorisent aucune projection de performance v6.
 
-### 5.8 Témoin device en cours dans le worktree
+### 5.8 Témoin device hôte reçu à `4a85c13d`
 
 Le défaut causal du mutant sentinelle est corrigé. Le worktree sépare
 `unwritten_arith`, `unwritten_native` et `bad_branch_written`, exige les 64
@@ -375,13 +374,8 @@ sont les chemins requis par C3. Aucun `nvcc` ni device n'a été exercé.
 Le huitième jet ajoute la dent sélective `witness-skip-native-write` demandée :
 elle laisse une sentinelle aux indices exacts de `NativeOut`, tout en exigeant
 `ArithOut` complet, la branche attendue et les oracles conformes sur les cases
-écrites. Le registre et les portes hôte/device la nomment séparément ; son
-rejeu frais reste à joindre au reçu final du commit source.
-
-Les textes n'ont pas encore tous suivi cet ajout : `docs/GPU.md`, la ligne
-GPU du plan de tests et l'en-tête du témoin parlent encore des anciennes
-portes carry/skip et de codes `0/4`. Les aligner avec carry, skip-arith,
-skip-native et la contre-fixture composée évitera une réception ambiguë.
+écrites. Le registre, les textes et les portes hôte/device la nomment
+séparément. Le rejeu ciblé final couvre les cinq portes du témoin hôte.
 
 Avant un reçu CUDA, porter aussi la contre-fixture composée sur la cible GPU
 réelle et certifier dans le reçu l'architecture compilée et le device observé :
@@ -392,7 +386,7 @@ configuration ou la faire vérifier par le protocole de build évitera un faux
 refus protecteur. Ces points ne bloquent pas le harnais hôte et n'ouvrent
 aucun GO G4.
 
-### 5.9 Garde `2E` en cours dans le worktree
+### 5.9 Garde `2E` reçue à `4a85c13d`
 
 La garde placée avant `out->reserve` ferme bien le défaut architectural
 signalé : le refus logique intervient avant d'ajouter la sortie globale aux
@@ -430,15 +424,15 @@ calcul du budget et le run mutant. Le refus est désormais réellement précoce,
 sans run inutile ni sous-débordement diagnostique sur un témoin amont invalide.
 
 Après reconstruction de ce dernier fichier, les quatre portes caps et la
-signature CLI passent 5/5 en 119,52 s. La décision 2E est donc reçue sur ce
-worktree dans sa portée logique et transactionnelle ; elle reste un proxy de
-payload nommé, jamais une preuve RSS ou OOM.
+signature CLI passent 5/5 en 119,52 s. Le rejeu ciblé final du lot qui devient
+`4a85c13d` passe 15/15 en 158,26 s, pool et témoin hôte compris. La décision
+2E est donc reçue dans sa portée logique et transactionnelle ; elle reste un
+proxy de payload nommé, jamais une preuve RSS ou OOM.
 
 Le vocabulaire source est désormais honnête et le cap CLI a été correctement
 renommé `cap_fusion_budgetaire` plutôt que de prétendre être le cap effectif
 du run. `PLAN_DE_TESTS.md` et le § 3 de la réponse Claude sont maintenant
-alignés. Un rejeu frais des portes caps/CLI après le commit source remplacera
-le reçu historique.
+alignés.
 
 ### 5.10 Nouveau profil `reduce` en cours
 
@@ -494,9 +488,8 @@ résiduel après arrêt de tous les chronos, est le correctif minimal.
 
 ## 6. Ordre de travail recommandé
 
-1. committer ensemble le C1 désormais stressé, la garde `2E` reçue et le
-   témoin hôte ; ne pas mêler à ce checkpoint le brouillon de profil
-   `fold.hpp` tant que les corrections du § 5.10 ne sont pas appliquées ;
+1. **achevé à `4a85c13d`** : C1, garde `2E` et témoin hôte ancrés ensemble,
+   brouillon `fold.hpp` correctement laissé hors checkpoint ;
 2. réparer puis exécuter le petit profil B/inflight avant de choisir le design A ;
 3. figer le wire, le budget VRAM et le témoin device arithmétique ; C2 peut
    alors devenir une brique hôte testable et C3 un port CUDA falsifiable ;
