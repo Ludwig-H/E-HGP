@@ -308,15 +308,31 @@ Trois durcissements connexes évitent de refermer seulement le cas mesuré :
 - remplacer les temporisations 100/200 ms de la porte par des latches, puis
   tester l'échec de construction d'un `Executor`.
 
-Le correctif en cours dans le worktree confirme ce besoin. Ses six portes
-ciblées passent une fois, mais des répétitions nominales échouent à la 27e
+Le premier correctif du worktree confirmait ce besoin. Ses six portes ciblées
+passaient une fois, mais des répétitions nominales échouaient à la 27e
 exécution sur 50, à la 2e sur 80 et, sur une sonde concurrente, 36 fois sur
-400, uniquement sur le scénario post-fatal. Le thread du second producteur
-peut gagner l'ordonnancement et exécuter son job avant que le premier ait
-effectivement retenu l'unique worker. Ajouter une latch `fatal_job_entered`
-attendue **avant de lancer** le second producteur, puis une attestation causale
-`queued==1` sans polling temporel ; garder séparément la fixture file→actif
-signalée ci-dessus.
+400, uniquement sur le scénario post-fatal : le second producteur pouvait
+gagner l'ordonnancement avant que le fatal ait retenu l'unique worker.
+
+Le second jet corrige proprement cette vacuité avec une latch
+`fatal_entered` attendue avant le lancement du second producteur. Il place
+aussi `submitted++` après le `push_back` réussi, porte un bit d'annulation
+indépendant de l'`exception_ptr` et ajoute les échecs total et partiel de
+construction d'un `Executor`. Ces quatre points peuvent être reçus après un
+stress frais : le build Release donne 4/4 portes en 20,53 s et le nominal
+100/100 codes 0 sous stress concurrent. La boucle d'attente de `queued==1`
+devrait seulement être bornée ou transformée en latch pour qu'un défaut de
+fixture rende un échec rapide plutôt qu'un timeout CTest.
+
+La fenêtre file→actif reste en revanche présente : `pop_front()` libère
+`mu_`, puis `active_` n'est incrémenté qu'ensuite. Avec deux workers, une
+fermeture fatale peut donc se linéariser dans cet intervalle et manquer le
+ticket déjà retiré. Déplacer l'incrément dans la même section critique que
+le retrait, et déclarer ce passage comme l'instant d'activation, suffit à
+fermer le cas sans changer l'architecture. Une fixture N >= 2 avec pair
+actif, file non vide et producteur bloqué complétera alors la réception.
+Regrouper aussi `active--` et le compte terminal `failed/succeeded` sous
+`mu_` évitera les snapshots transitoirement non conservatifs.
 
 Enfin, les commentaires annoncent déjà une conversion transactionnelle dans
 `run.hpp`, mais aucun usage du pool ni catch de `DeviceFatalError` n'y existe
@@ -382,37 +398,30 @@ modifie donc pas le verdict sur C1 et n'ouvre aucun GO G4.
 
 ### 5.9 Garde `2E` en cours dans le worktree
 
-La nouvelle garde placée avant `out->reserve` ferme bien le défaut architectural
-signalé : les shards et la sortie globale ne sont plus alloués ensemble avant
-le refus logique. Le premier mutant n'atteignait pas sa scène, mais Claude a
-placé sa fenêtre dédiée avant la barrière `injected`. Au dernier rejeu local,
-`mhgp6_caps_refus` et `mhgp6_caps_mutant_prefusion` passent respectivement en
-95,05 s et 140,26 s. Le mécanisme est donc prometteur ; il reste à faire de ce
-vert une preuve causale de l'instant d'allocation.
+La garde placée avant `out->reserve` ferme bien le défaut architectural
+signalé : le refus logique intervient avant d'ajouter la sortie globale aux
+shards. Le premier mutant n'atteignait pas sa scène ; Claude l'a placé avant
+la barrière `injected`, puis a appliqué la seconde contre-lecture :
 
-Deux durcissements gardent la correction alignée sur son contrat :
+- le facteur 2 passe maintenant dans `fits_budget`, sans multiplication de E
+  susceptible de déborder avant le helper ;
+- le nominal exige `emitted == 0`, capacité diagnostique nulle, code de refus
+  dédié et somme exacte E ; le mutant exige E matérialisé, capacité au moins
+  E, refus aval et absence de provisoires/callbacks ;
+- la sortie CLI signe `cap_fusion_effectif=3728270` à 1 GiB, le `switch`
+  nomme les quatre refus et transforme un code inconnu en invariant ;
+- le budget large compare maintenant émission, digests intermédiaires,
+  cartes, totaux, `events_by_k` et ordre des callbacks, et la double
+  sémantique de `emitted_at_refus` est documentée.
 
-- appeler directement `fits_budget(exact_fusion, sizeof(BallCandidate), 2,
-  budget)` ; calculer `2 * exact_fusion` avant le helper contourne précisément
-  sa protection d'overflow et `out->size()` vaut zéro après `clear()` ;
-- dans `(b)`, exiger en plus du message que le nominal garde
-  `rr.emitted == 0`, la capacité diagnostique nulle,
-  `cap_refus == kCapRefusFusionBudget` et `emitted_at_refus == E`. La fenêtre
-  mutante doit constater `rr.emitted == E`, capacité au moins `E`, puis le
-  même contrat transactionnel sans provisoires ni callbacks ;
-- comparer, sous budget large, l'émission, tous les digests intermédiaires,
-  cartes, totaux, `events_by_k`, statut et séquence exacte `on_forest`, pas
-  seulement `digest_all` et deux planchers de callbacks.
-
-La signature CLI doit enfin publier un `cap_fusion_effectif` calculé par le
-même helper que l'exécution ; pour 1 GiB et 144 octets par candidat, il vaut
-3 728 270. Cela signe la nouvelle décision et évite que seule l'ancienne
-borne brute apparaisse dans une sortie pourtant versionnée comme contrat de
-budget. Le `switch` des refus devrait aussi nommer explicitement
-`kCapRefusAliveRects` et traiter tout code inconnu en invariant, plutôt que le
-confondre par défaut avec ce cas. Enfin, borner le commentaire
-`emitted_at_refus` au refus de cap brut ou documenter sa seconde sémantique
-`E` au refus 2E.
+Les quatre portes de la version précédente passaient déjà en Release ; un
+rejeu du durcissement ci-dessus est en cours. Sous réserve de ce vert, la
+décision logique peut être reçue. Il reste à corriger le vocabulaire dans
+`caps.hpp`, `GenerateOptions`, le message de refus et le commentaire de la
+fenêtre `(b)` : **2E est un payload logique nommé**, jamais un pic
+d'allocation « au pire ». Les capacités géométriques des shards peuvent
+dépasser leurs tailles et le budget ne promet toujours ni RSS ni absence
+d'OOM.
 
 ### 5.10 Nouveau profil `reduce` en cours
 
@@ -439,6 +448,14 @@ absente. Elle ne permet toutefois pas encore de calibrer A ou B :
   record dans `ForestResult`, puis l'imprimer avec K à la publication. Publier
   aussi le digest forêt par K : `t_digest_ms` global mélange plusieurs étages.
 
+Deux conditions d'expérience sont également nécessaires. D'abord,
+`fold_inflight=1` n'isole pas B : A(K+1) peut encore être préparé pendant
+B(K). Employer un banc dont les `FoldPrepared` sont construits hors chrono,
+ou un mode diagnostic qui joint B avant de préparer le K suivant. Ensuite,
+signer inflight demandé **et pic observé** : le petit run instrumenté n=400
+demandant 4 n'a exercé qu'un pic de 1, donc aucune contention B×B. Le build
+et ces petits runs passent ; ils valident seulement le harnais en cours.
+
 Chaque bucket est un temps mur **local à un K**. Sa somme sur K reste un cumul
 qui peut dépasser `t_fold_wall_ms` lorsque B/B ou A/B se recouvrent ; ajouter
 K et les intervalles début/fin, éventuellement le temps CPU du thread, plutôt
@@ -448,7 +465,9 @@ finalisation ne partagent pas tous le même chronomètre.
 
 Ce profil reste utile comme brouillon diagnostic ; il ne réfute pas le plan B.
 Il faut seulement éviter que sa propre contention sur `stderr` ou sa sonde de
-vivacité devienne le phénomène que le prochain balayage prétend mesurer.
+vivacité devienne le phénomène que le prochain balayage prétend mesurer. Une
+petite structure de profil taguée par K, imprimée en `%.3f` ms avec somme et
+résiduel après arrêt de tous les chronos, est le correctif minimal.
 
 ## 6. Ordre de travail recommandé
 
