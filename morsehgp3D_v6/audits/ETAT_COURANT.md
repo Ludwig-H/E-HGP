@@ -2,11 +2,14 @@
 
 Date de coupe : 1er septembre 2026.
 
-Coupe de code observée : `d98f4729`. Autorités techniques : `6d755804` pour le
+Coupe de code observée : `671ed3cc`. Autorités techniques : `6d755804` pour le
 prototype E3/G16, `cd49a390` pour les callbacks, `d98f4729` pour le protocole
-GCP, `320299df` pour le reçu de réplication et `8ed2dea6` pour le reçu de
-confirmation contre-audité ci-dessous. Les notes Claude ne priment pas sur le
-présent verdict.
+et la source réellement exécutée sur G4, `94c74155` pour l'autorisation
+mono-session désormais consommée, `df1a3c5f` pour l'archivage de son reçu,
+`6e293deb` pour le checkpoint de plafonds, `671ed3cc` pour le premier pool
+d'exécuteurs GPU hôte, `320299df` pour le reçu de
+réplication et `8ed2dea6` pour le reçu de confirmation contre-audité
+ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 
     phase=exploration_v6_hors_registre
     backend=cpu_reference
@@ -26,8 +29,10 @@ présent verdict.
 | confirmation hors échantillon | cœur reçu ; `confirmation_candidate`, déclencheur E6 non confirmé |
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
-| plafonds et budget mémoire en vol | raccord `resource_exhausted` reçu sur petit témoin ; garde pré-allocation et budget résident non reçus |
-| protocole GCP `d98f4729` | **GO re-pinné** pour une nouvelle session gardée `g4_mesure_v1` |
+| plafonds et budget mémoire `6e293deb` | cap coopératif et refus transactionnels reçus ; budget de payload logique honnêtement partiel, mais sa garde `2E` de fusion arrive encore après l'allocation globale correspondante |
+| saturation multi-CPU du fold | GO pour profil B isolé et inflight apparié ; raccord temporel naïf réfuté, décomposition par composantes seulement après mesure du déséquilibre et preuve des deltas |
+| pool d'exécuteurs C1 `671ed3cc` | architecture hôte utile et 4/4 portes vertes, mais confinement fatal non reçu : réutilisation post-fatale et fenêtre dépilé/non-actif non couvertes |
+| protocole GCP `d98f4729` | GO mono-session consommé et clos ; reçu `df1a3c5f` validé non décisionnel, arrêt ciblé certifié |
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
@@ -56,6 +61,31 @@ arrêts, la seconde tentative sur les sorties précoces, la grâce fixe et le
 refus d'une instrumentation G4 non canonique sont reçus dans leur portée. Le
 rejeu v6 hors labels d'échelle donne 74/74 en 196,14 s ; aucune suite complète
 d'échelle n'est revendiquée par ce contre-audit.
+
+Au pin propre `6e293deb`, une reconstruction Release suivie de la suite v6
+hors labels `scale8000|scale16000|scale32000` donne 78/78 en 265,96 s réels.
+Elle inclut les trois portes caps et la porte CLI monoprocessus qui exige dans
+la même exécution le code 0 et la signature
+`memory_budget_scope=partial_named_payload_proxy_v1`. `git diff --check` est
+propre, `tools/check_docs.py` valide 245 fichiers Markdown actifs et
+`tools/check_implementation_status.py` valide 20 phases. Ce rejeu est local,
+CPU et hors échelle ; il ne mesure pas le comportement G4 du nouveau code.
+
+À `671ed3cc`, les quatre portes du pool C1 passent en 20,26 s, mutants
+compris. Elles ne couvrent cependant pas la course qu'annonce le contrat :
+une sonde GCC 13.3 avec un exécuteur, un job levant `DeviceFatalError` et un
+ticket déjà en file observe 199 travaux post-fatals exécutés sur 200 essais.
+`run()` lit `fatal_` avant de notifier, tandis que la fermeture n'est appelée
+qu'après le réveil du producteur dans `submit_and_wait_contained`. La
+fermeture doit donc partir du worker avant notification et avant rebouclage,
+avec une fixture fatal + file non vide. Les verts actuels ne reçoivent pas la
+propriété transactionnelle.
+
+Le même correctif doit rendre indivisible, vis-à-vis de `close_fatal`, le
+passage d'un ticket de la file à l'état actif. C1 n'est pas encore raccordé à
+`run.hpp` et ne borne ni les captures des producteurs bloqués, ni les buffers
+d'exécuteurs, ni la VRAM. Le contrat de port est utile, mais la mention
+`port_source_requalified` et la coche C1 de `docs/GPU.md` sont prématurées.
 
 ## Exact-K, omission unique et ownership WSPD
 
@@ -361,8 +391,8 @@ ces preuves sur trois points :
 
 Les chemins état post-démarrage perdu avec handoff valide,
 `targeted_stopped` d'une autre génération, état illisible et cible
-discordante restent couverts à `d98f4729`. Le GO GCP borné est accordé dans
-les limites ci-dessous.
+discordante restent couverts à `d98f4729`. Le GO GCP borné avait été accordé
+dans les limites ci-dessous ; il est maintenant consommé.
 
 ## GCP
 
@@ -381,12 +411,27 @@ formats sans relâcher le code de sortie, les deux blocs ou les planchers.
 `d98f4729` ajoute le `session.log` initialement ignoré et rend le reçu
 auto-vérifiable ; aucune mesure scientifique n'est issue de cette tentative.
 
-Le **nouveau GO reste strictement borné à une session** : bootstrap épinglé au
-commit complet `d98f47296d675d3cbdb1b53019dcc1a8b3b292b4`,
-`CAMPAIGN_PROFILE=g4_mesure_v1` passé explicitement, aucun axe canonique
-surchargé, profil effectif G4 confirmé avant mutation, gardes SPOT du dépôt et
-cible exacte certifiée `TERMINATED` au retour. Les résultats ne sont reçus
-que si le validateur rend 0 et si le reçu durable est complet.
+Le GO mono-session `94c74155` a ensuite été consommé par
+`session_g4_20260901_d98f47296d67_1788245493`, exclusivement sur la source
+`d98f47296d675d3cbdb1b53019dcc1a8b3b292b4`. Le profil canonique et effectif
+est `g4_mesure_v1`, `remote_campaign_rc=0`, `scp_rc=0` et le validateur rend
+0. Le reçu archivé par `df1a3c5f` porte 81 issues reconnues par le profil :
+79 codes 0, le mutant GPU attendu au code 4 et la frontière uniform 800k au
+code 134, typée `bad_alloc` sous `RLIMIT_AS=183500800` KiB. Ce sont 81 issues
+valides, pas 81 succès.
+
+Le reçu certifie `issue=arret_certifie_par_le_garde`, `rc=0`, `stop_rc=0` et
+`etat_cycle_vie=targeted_stopped` pour la cible exacte
+`devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a`. Les
+SHA-256 du reçu se revérifient sans divergence. Le statut demeure
+`verifie_non_decisionnel` : les deux répétitions v5/v6 à 50k et les sweeps
+CPU sont descriptifs, le contrôle GPU appartient à la lignée v5 historique,
+et le refus 800k est un mur virtuel sous limite, pas un mur RAM natif. Aucun
+résultat GPU v6 ni avantage de performance n'est reçu.
+
+Ce GO est clos et aucune autorisation de lancement courante n'en découle. Un
+futur lancement du code caps demanderait un nouveau pin et une nouvelle
+autorité ; cela ne réécrit ni ne révoque le reçu historique `d98f4729`.
 
 Limites non bloquantes : le validateur écrit ses `*_resume.txt` avant le contrôle
 final G4. Avec un faux instrument de test, ces fichiers peuvent exister puis
@@ -424,36 +469,71 @@ suivants :
   donc ce n'est pas un mutant causal, mais cette porte viole la règle du dépôt
   et doit employer un refus explicite.
 
-Ces dettes ne bloquent pas le GO G4, qui exécute les blobs et gardes épinglés.
-Elles interdisent de présenter les documents cités comme une photographie
-fraîche de toute la v6 avant leur alignement.
+Ces dettes n'ont pas bloqué la session G4 historique, qui a exécuté les blobs
+et gardes épinglés. Aucun GO courant n'est ouvert. Elles interdisent de
+présenter les documents cités comme une photographie fraîche de toute la v6
+avant leur alignement.
 
 ## Dette d'échelle et ordre utile
 
-La borne structurelle u32 des candidats et son raccord transactionnel sont
-présents, mais le claim « refus avant allocation/OOM » n'est pas reçu : les
-shards candidats et les fronts WSPD sont encore alimentés avant leurs gardes,
-et les formules census/fold ne majorent pas toutes les résidences coexistantes.
-Restent aussi les conversions de `CloudIndex` vers `int/i32/u32`, les offsets,
-la recherche Karras près de 2^30, les produits signés des générateurs et les
-additions u64 des monnaies. Voir la note en vol épinglée dans l'index ; employer
-des additions contrôlées ou u128 et des portes causales aux frontières.
+`6e293deb` ferme le cap brut borné demandé. Pour un cap `H` et `T` ouvriers,
+la publication par blocs prouve
+`H < emitted_at_refus <= H + 4096*T` ; le refus intervient avant fusion
+globale et tri, sans quota atomique par candidat. Les vagues et rectangles
+vivants sont gardés prospectivement avant insertion dans les vecteurs
+globaux ; les shards locaux, explicitement bornés par la vague courante,
+peuvent néanmoins être matérialisés. Les refus restent transactionnels avant
+callbacks et folds.
+
+`memory_budget_bytes` est volontairement un
+`partial_named_payload_proxy_v1` calculé sur les cardinalités logiques des
+payloads nommés. La capacité d'allocateur n'est qu'un diagnostic. Ce contrat
+ne majore ni le RSS, ni toutes les structures résidentes, ni les allocations
+locales ; il ne promet donc jamais un refus global avant OOM. La session G4
+historique a précisément observé un `bad_alloc` à 800k sous `RLIMIT_AS`, mais
+elle exécutait `d98f4729`, pas ce checkpoint. Restent à exercer les frontières
+extrêmes de `CloudIndex`/Karras et à contrôler les additions u64 des monnaies.
+
+Une garde est toutefois placée trop tard par rapport à son propre contrat.
+Si `E` est la somme exacte des shards, ceux-ci possèdent déjà au moins `E`
+emplacements puis `out->reserve(E)` en alloue au moins `E` autres. La garde
+logique `2E*sizeof(BallCandidate)` de `run.hpp` n'est consultée qu'après le
+retour de `generate_candidates`. La fixture `(b)` provoque donc l'allocation
+qu'elle prétend prévenir, puis refuse. Correction courte : propager une borne
+de fusion dérivée du budget, la tester au point `exact_fusion` avant
+`reserve`, et tuer la variante tardive par un mutant. Cela reste un proxy
+logique ; supprimer réellement la coexistence des deux copies demanderait une
+fusion segmentée.
+
+Les commentaires de `caps.hpp` et `generate.hpp` doivent suivre cette portée :
+la fenêtre de test se calcule sur les cardinalités, pas sur `capacity()`, et
+la projection 1,6–3,2 M / `ECHELLE.md § 3` n'a pas d'autorité v6. La porte
+CLI juge désormais code et signature dans un seul processus ; son
+`EXPECT_LINE` reste une recherche de sous-chaîne et les refus ne gravent pas
+stdout vide. Ce sont des durcissements P2, tout comme l'isolation des trois
+sites q2/q3/q4 et de la garde de vague initiale.
 
 Ordre recommandé à Claude :
 
-1. réexécuter au plus une session G4 selon le GO re-pinné ci-dessus, puis auditer
-   le reçu avant toute interprétation scientifique ;
-2. stabiliser le chantier de plafonds v6 décrit dans
-   `NOTE_AUDITEUR_CAPS_V6_20260901.md`, sans modifier la v5 ;
-3. corriger `GRAND_LIVRE.md` avant toute interprétation des coûts, puis
+1. fermer causalement le pool C1 côté worker et tuer sa réutilisation
+   post-fatale, avant de bâtir C2 dessus ;
+2. avancer la garde `2E` avant la fusion globale et corriger ses commentaires,
+   sans rouvrir le contrat plus large de RAM résidente ;
+3. profiler localement le fold selon
+   `REPONSE_AUDITEURS_MULTICPU_V6_20260901.md` avant de segmenter `reduce` ou
+   d'attribuer un gain bout en bout au port GPU ;
+4. figer wire, budget VRAM et témoin device exact avant C2/C3 ;
+5. corriger `GRAND_LIVRE.md` avant toute interprétation des coûts, puis
    aligner `ARCHITECTURE.md`, `PROVENANCE.md` et `PLAN_DE_TESTS.md` au
    prochain checkpoint stable ;
-4. enrichir seulement C1–C4 dans `MATHEMATIQUES.md` et remplacer l'`assert`
+6. enrichir seulement C1–C4 dans `MATHEMATIQUES.md` et remplacer l'`assert`
    Python opportunément : ce microcorrectif P2 ne bloque aucun résultat ;
-5. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
+7. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
    re-régler la règle ;
-6. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
+8. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
    l'oracle et la preuve G16 avant toute nouvelle mesure ;
-7. fermer callbacks/exceptions et leurs fixtures réellement concurrentes.
+9. fermer callbacks/exceptions et leurs fixtures réellement concurrentes ;
+10. ne rouvrir une mesure d'échelle ou G4 qu'avec une question décisionnelle,
+   un nouveau pin exact et un budget couvrant les résidences revendiquées.
 
 GCP non utilisé par le présent audit.

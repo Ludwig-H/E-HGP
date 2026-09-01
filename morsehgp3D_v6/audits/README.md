@@ -18,21 +18,31 @@ des corrections, ils ne certifient rien.
 
 ## À lire maintenant
 
-- [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict mutable, pins jugés et ordre
-  de correction. Il prime sur toute réponse historique.
+- [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict mutable, pins jugés, checkpoint
+  caps `6e293deb`, pool C1 `671ed3cc`, session G4 close et ordre de correction.
+  Il prime sur toute réponse historique.
 - [`AUDIT_GCP_V6_P0_20260831.md`](AUDIT_GCP_V6_P0_20260831.md) : porte de
-  sûreté et de mesure mise à jour sur `d98f4729` ; refus fail-closed reçu,
-  journal sauvé et GO re-pinné pour une session gardée `g4_mesure_v1`.
-- [`NOTE_AUDITEUR_CAPS_V6_20260901.md`](NOTE_AUDITEUR_CAPS_V6_20260901.md) :
-  aide temporaire au chantier en vol ; garde avant allocation, budget
-  réellement propagé et retrait du diff v5.
-- [`ALERTE_CAMPAGNE_CPU_MIXTE_20260831.md`](ALERTE_CAMPAGNE_CPU_MIXTE_20260831.md) :
-  preuves des captures CPU et statut borné de la confirmation hors échantillon.
+  sûreté et de mesure sur `d98f4729` ; le GO mono-session a été consommé,
+  son reçu non décisionnel est archivé par `df1a3c5f` et aucun GO courant ne
+  subsiste.
+- [`REPONSE_AUDITEURS_MULTICPU_V6_20260901.md`](REPONSE_AUDITEURS_MULTICPU_V6_20260901.md) :
+  réponse à la saturation du fold et à la conception GPU ; profil apparié,
+  snapshots du design A, contrats wire/device et correction causale C1.
 
 ## Historique de l'échange
 
 - [`NOTE_CLAUDE_CONCEPTION_V6_20260831.md`](NOTE_CLAUDE_CONCEPTION_V6_20260831.md) :
   note initiale de conception, supersédée par l'état courant.
+- [`QUESTION_CLAUDE_MULTICPU_20260901.md`](QUESTION_CLAUDE_MULTICPU_20260901.md) :
+  question source, répondue par la note active ci-dessus.
+- [`NOTE_CLAUDE_CONCEPTION_MULTICPU_GPU_20260901.md`](NOTE_CLAUDE_CONCEPTION_MULTICPU_GPU_20260901.md) :
+  conception source CPU/GPU, répondue et bornée par la note active ci-dessus.
+- [`NOTE_CLAUDE_MESURES_G4_20260901.md`](NOTE_CLAUDE_MESURES_G4_20260901.md) :
+  lecture initiale du reçu G4 ; ses unités, sa dispersion et ses projections
+  sont corrigées par l'audit GCP actif.
+- [`ALERTE_CAMPAGNE_CPU_MIXTE_20260831.md`](ALERTE_CAMPAGNE_CPU_MIXTE_20260831.md) :
+  preuves historiques des captures CPU et statut borné de la confirmation
+  hors échantillon.
 
 ## Décisions actives héritées
 
