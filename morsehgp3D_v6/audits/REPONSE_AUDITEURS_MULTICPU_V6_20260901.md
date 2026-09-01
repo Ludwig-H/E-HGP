@@ -5,7 +5,9 @@ Date : 1er septembre 2026. Données mesurées à `d98f4729`, question
 ci-dessous comme contre-fixture historique ; la contre-lecture couvre le
 checkpoint source `4a85c13d`, puis le profil ancré à `1069bc20`. Ce dernier a
 été rejoué depuis un export Git isolé : le WIP C2 postérieur n'entre donc dans
-aucun verdict de profil ci-dessous.
+aucun verdict de profil ci-dessous. La série C a depuis été épinglée à
+`cd606257`, puis sa matrice CPU directionnelle archivée à `62cd2e28` ; ces deux
+objets ont des portées distinctes.
 
 Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -14,9 +16,9 @@ Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 
 ## Verdict constructif
 
-**C1 hôte, garde logique 2E et témoin hôte partiel reçus à `4a85c13d` ; GO
-pour poursuivre le diagnostic local apparié ;
-pas encore pour une réduction par segments ni pour C2/C3 sans contrat wire.**
+**C1 hôte, garde logique 2E et témoin hôte partiel reçus à `4a85c13d` ; série
+C C2--C5 reçue dans sa portée CPU/stub locale à `cd606257` ; aucun résultat
+device ni GO G4 inconditionnel.**
 Le septième jet ferme bien les deux courses C1 connues dans le code : la
 panne fatale est confinée côté worker avant notification, et le passage
 file→actif est linéarisé sous le mutex. Le hook et le mutant ciblent maintenant
@@ -25,10 +27,12 @@ série est réparé. Le § 5.6 reçoit ce C1 hôte au pin source `4a85c13d`.
 
 Le témoin arithmétique hôte et la garde 2E ont aussi progressé jusqu'à une
 portée utile et honnête. Ils ne constituent toujours ni une compilation
-`nvcc`, ni une exécution device, ni une preuve C3. Le profil B est maintenant
-ancré et fonctionnel, mais deux contre-fixtures de sa porte restent à tuer
-avant de lancer la matrice `fold_inflight=1/2/4/8` : attribution entièrement
-nulle et fuite de profil sur `stderr`.
+`nvcc`, ni une exécution device, ni une preuve C3. Le profil B est ancré et
+fonctionnel. Le pin `cd606257`, postérieur au reçu de profil, rejette désormais
+la fuite
+`profil_*` sur `stderr` et exige une attribution brute non nulle ; il lui reste
+seulement à recalculer indépendamment le champ imprimé `somme` depuis ses neuf
+composantes avant d'utiliser la matrice comme attribution.
 
 La projection « 49 s vers 30 s » n'est pas encore déduite des compteurs. À
 50k/48 fils, `t_fold_reduce_ms=27,9 s` est la **somme** de plusieurs réductions
@@ -475,6 +479,18 @@ preuve d'attribution :
    surfaces provisoires `profil_*`/`digest_*` dans les deux flux du refus. Le
    diagnostic de refus attendu peut naturellement rester sur stderr.
 
+Mise à jour postérieure, désormais épinglée à `cd606257` : la seconde
+contre-fixture est fermée par l'inspection explicite de `stderr`, et la porte
+compilée exige
+maintenant `pf.somme() > 0` sur chaque record. La première n'est fermée qu'à
+moitié : `profil_gate.py` exige bien le champ imprimé `somme > 0`, mais ne le
+recalcule toujours pas depuis `init`, `touch`, `pre`, `unite`,
+`post_remplissage`, `materialisation_tri_copie`, `liveness`, `partition` et
+`liberation`. Cette addition indépendante est le seul durcissement causal
+restant ici. Les trois portes ciblées passent localement dans la campagne
+24/24 rapportée au § 5.11 ; ce vert reçoit le harnais épinglé, pas encore son
+usage comme attribution de performance.
+
 Une passe de vocabulaire peut être jointe au même petit correctif sans bloquer
 Claude davantage. Les commentaires locaux disent encore que `init` commence
 « dès l'entrée » et alloue `scratch`, que la vivacité fait deux parcours, que
@@ -510,10 +526,10 @@ si le coût vient du recouvrement A/réduction, borner la concurrence avant de
 toucher au layout. Aucun facteur de gain ni diagnostic « memory-bound » n'est
 encore reçu.
 
-### 5.11 Wire série C : trois décisions tranchées, quatre fermetures avant C3/C5
+### 5.11 Wire série C : décisions tranchées, portes locales vertes, mesure G4 encore fermée
 
-Contre-lecture du WIP C2 postérieur à `1069bc20`, sans pin et sans GCP. La
-direction est bonne et les trois verrous demandés ont une réponse courte :
+Contre-lecture commencée sur le WIP C2 postérieur à `1069bc20`, puis fermée au
+pin `cd606257`, sans GCP. Les trois verrous demandés ont une réponse courte :
 
 1. **Oui à la division hissée côté hôte, mais pas au `t1` brut en `i64`.** Le
    code calcule le quotient en `i128` puis le rétrécit sans garde ; une clé
@@ -625,94 +641,195 @@ six candidats `u32` bornés construits sans négation signée dangereuse, fixtur
 hors `i64` et `INT128_MIN`, round-trip `BallIn`, vues hôte décodées, dataflow
 `census_all` et volumes assumés, copie `cand_idx` corrigée, validateur avant
 reconstruction et deux mutants de frontière. Il ne faut pas rouvrir ces
-décisions. Claude a depuis fermé dans le WIP les deux dents alors signalées :
+décisions. Claude a ensuite fermé dans le WIP les deux dents alors signalées :
 les sept sorties sont préremplies sur le **device** à chaque lot, et le
 validateur impose désormais les ensembles de statuts propres au préfiltre et
 au census. La porte CUDA faisait déjà le premier travail ; la généralisation
-au pilote produit était bien l'écart. Ces corrections ne sont pas encore un
-pin ni un reçu, mais il ne faut plus les présenter comme manquantes.
+au pilote produit était bien l'écart. Cette observation préliminaire est
+supersédée par la réception au pin du paragraphe suivant ; ces points ne sont
+plus manquants.
 
-Claude a également fermé dans le WIP la validation `count/h/masse`, la
-reconstruction transactionnelle dans des temporaires et le comptage des 100
-octets H2D de sentinelles par candidat. Il reste une fermeture fonctionnelle
-avant le pin : **aucune porte n'exerce plusieurs lots**. Le gate 400 conserve
-le défaut `lot=2^21`, donc `base_idx`, l'offset `base*112`, les destinations
-D2H et la fusion en ordre global ne sont jugés qu'avec `base=0`. Ajouter une
-porte locale puis device avec `--lot=17`, exiger `lots>1`, et idéalement un
-mutant `base-reset` suffit ; nul besoin de retoucher l'algorithme des kernels.
+Le pin `cd606257` ferme la validation
+`count/h/masse`, la reconstruction transactionnelle dans des temporaires, les
+dents sélectives de statut et de `count`, la scène tardive canarisée et le cas
+vide de la route stub. Il a aussi ajouté la relecture intégrale des sept
+tableaux dans la porte CUDA, gravé le digest hôte, borné le lot effectif, puis
+ajouté les portes `--lot=17 --min-lots=2` et le mutant
+`gpu-lot-base-reset`. La dent est causale : au second lot, le mutant publie de
+nouveau les indices 0--16 et le validateur attend 17--33. Les binaires produit
+ne portent pas `MHGP6_TESTING` et refusent toute injection ; seules les cibles
+`_test` activent le mutant.
 
-Le paramètre `--lot` doit aussi devenir inoffensif : prendre
-`lot_eff=min(lot_demande, nb_total)` et vérifier les produits d'allocation
-avant `cudaMalloc`. Un petit nuage ne doit pas échouer parce que l'utilisateur
-a demandé un lot gigantesque ou parce qu'une multiplication `size_t` a
-rebouclé. Le passage complet des allocations à un propriétaire RAII est une
-bonne défense avant réutilisation en bibliothèque ; puisque le pilote actuel
-quitte le processus sur l'erreur, ce refactoring n'a pas à retarder seul la
-porte multi-lots ni à rouvrir C3/C4.
+Sur la photographie ensuite épinglée à l'identique, une reconfiguration
+Release suivie de 24 CTest ciblés passe **24/24 en 188,28 s** : wire nominal et deux mutants, census
+stub et ses sept mutants, pilote stub nominal et cinq mutants, parsing/parité
+du wrapper `.cu`, nominal multi-lots et mutant de base, puis les trois portes
+du profil. Le test bout en bout `mhgp6_pilot_stub` passe en 161,16 s. C'est une
+validation locale CPU/stub utile. Un second rejeu, depuis un
+`git archive cd606257` dans un build Release neuf, passe la suite complète du
+label `gate` **113/113 en 232,11 s** (1 168,42 s cumulées par CTest). La série C
+est donc reçue dans cette portée hôte ; aucun `nvcc`, device ou reçu de
+performance n'en découle.
 
-Les implémentations de `count` et du commit final sont bonnes, mais leurs
-portes doivent encore devenir sélectives. Conserver le motif rendu par
-`validate_ball_out` et exiger exactement `count jamais ecrit` pour
-`gpu-skip-count-write`. Tester les sentinelles de statut avant celle de
-`count` : sinon `gpu-skip-ball-write`, qui omet les deux, meurt désormais sur
-`count` et ne prouve plus sa dent de statut. Pour la transactionnalité, appeler
-la route stub directement avec sorties et statistiques canarisées, injecter
-une faute tardive et exiger l'identité avant/après ; le seul `RunResult` vide
-ne distingue pas le commit local de l'invalidation faite par l'enveloppe. La
-même porte doit couvrir `nb=0`, qui retourne actuellement sans publier des
-sorties vides et conserve donc les anciennes valeurs du caller.
+Deux durcissements P2 restent raisonnables sans rouvrir cette réception.
+D'abord,
+`decode_index_wire` déduit le nombre de nœuds de `node_left`, puis lit
+`node_right`, `node_first` et `node_last` sans vérifier leurs longueurs ; la
+porte ne contrôle pas non plus explicitement ces trois tailles. Le seul
+producteur actuel est le builder interne, donc ce n'est ni un P0 ni un motif
+pour rouvrir les kernels, mais une validation commune des sept formes rendrait
+le refus wire réellement total. Ensuite, la route device retourne sur
+`nb_total==0` sans publier les sorties vides, contrairement à la route stub
+désormais corrigée. Aligner ce cas rend le callback directement substituable.
+Les constantes inutilisées `kWirePrefilterOutBytes=12` et
+`kWireCensusOutBytes=92` doivent enfin devenir 9/91 ou être supprimées : elles
+contredisent autrement le wire SoA réellement consommé.
 
-Avec les copies actuelles, les sentinelles ajoutent bien 2 162 248 000 octets
-H2D au cas 50k ; le compteur les inclut désormais. Deux choix honnêtes restent
-possibles : publier environ 4 585 865 736 octets H2D index compris, ou utiliser
-des initialisations device (`cudaMemset`) et comptabiliser séparément leur
-coût. Le reçu ne doit pas continuer d'annoncer seulement 2,42 Go tout en
-chronométrant les copies de sûreté.
+La dernière fermeture **avant un reçu G4**, et non avant la parité locale,
+porte sur la mesure. Les copies actuelles valent 112 octets d'entrée + 100
+octets de sentinelles H2D par candidat, soit 4 583 965 760 octets à 21 622 480
+candidats, plus l'index ; le D2H vaut 2 162 248 000 octets. Le pilote utilise
+un seul jeu de tampons de 212 octets par boule, réutilisé sur des lots
+séquentiels ; 424 octets décrivent seulement un futur double tampon. De plus,
+`h2d_ms` englobe actuellement l'initialisation du contexte et les allocations
+initiales. Séparer `setup_alloc_ms` des seuls `cudaMemcpy`, ou renommer
+honnêtement la métrique, est requis avant de lui attribuer un temps H2D. Le
+RAII complet, le plafond extrême de grille et un budget VRAM agrégé restent de
+bonnes défenses P2, mais ne doivent pas retarder seuls le pin fonctionnel.
 
-La relecture complète des sept tableaux après upload est annoncée dans les
-commentaires mais n'est pas encore présente dans la porte device. L'ajouter ou
-remettre le texte au futur avant le pin ; ce n'est pas un motif pour retoucher
-les kernels. La partie basse de `GPU.md` est déjà corrigée à six `u32` et
-9/91 octets ; restent à aligner son H2D supérieur et son double tampon non
-implémenté, ainsi que les anciens libellés `t1[3]` du commentaire kernel, de
-CMake et de la note Claude. Supprimer cette note transitoire une fois ses
-questions closes vaut mieux que maintenir deux autorités contradictoires.
+Aligner `GPU.md` sur ces volumes, borner son plafond d'Amdahl à `uniform`,
+ajouter les cinq champs du cadre et supprimer la note Claude C2 transitoire
+suffit pour la documentation ; nul besoin d'un nouvel audit.
 
-La matrice locale `matrice_fold_locale_20260901` ne doit pas décider le design
-A. Ses deux premières cellules, qui ne changent que `fold_inflight`, font déjà
-varier des étages antérieurs au fold d'environ 33--37 %. De plus, notre passe
-CTest ciblée ci-dessus a chevauché la cellule `ref_uniform16000_t8_i2_j0` :
-cette cellule est explicitement contaminée par une charge CPU concurrente.
-Le harnais vivant n'agrège pas les codes de sortie en statut terminal, ne
-rehache les binaires partagés qu'au début et n'effectue ni répétitions ni
-contrebalancement. Le sauvetage utile est borné : archiver le harnais, graver
-hashes et charge de fin, contrôler tous les `rc`, fermer par
-`invalid_for_performance` (ou `interrupted`) et conserver le lot comme
-contre-reçu de bruit/digests seulement. Une future mesure décisionnelle devra
-utiliser des copies privées des binaires, au moins trois répétitions
-contrebalancées et une règle d'invalidation sur les étages amont. Il n'y a
-aucun intérêt à payer les cellules 50k de ce reçu déjà réfuté.
+La matrice locale `matrice_fold_locale_20260901`, archivée par `62cd2e28`, est
+mécaniquement terminée et hashée, mais ne doit pas décider le design A. Ses
+deux premières cellules, qui ne changent que `fold_inflight`, font déjà varier des étages antérieurs au fold
+d'environ 33--37 %. De plus, notre passe CTest ciblée antérieure a chevauché la
+cellule `ref_uniform16000_t8_i2_j0` : cette cellule est explicitement
+contaminée par une charge CPU concurrente. Le reçu porte l'intitulé honnête
+`diagnostic_non_decisionnel`, mais le dossier ne conserve pas le harnais
+exécuté et n'effectue ni répétitions ni contrebalancement. Sa lecture
+`CompactDelta` est une bonne priorité de sonde, pas une décision acquise. Une
+future mesure décisionnelle devra utiliser des copies
+privées des binaires, au moins trois répétitions avec un ordre global
+préenregistré et une règle d'invalidation sur les étages amont.
 
-Le plus petit chemin utile est donc C2 vert et transactionnel, puis stub C3/C4
-sur vues typées, puis seulement la couture C5. Si C5 reste dans le même WIP,
-préserver aussi la classe du refus : un `invalid_input` du wire ne doit pas
-être requalifié silencieusement en `resource_exhausted`. Aucun GO G4 n'est
-ouvert par cette réponse.
+Le chemin local C2→C5 est désormais acquis. Le prochain travail utile ne porte
+plus sur les kernels mais sur un protocole de mesure falsifiable ; la réponse
+à la demande de GO `9c5517c9` est donnée ci-dessous.
+
+### 5.12 Demande G4 série C `9c5517c9` : GO conditionnel, aucun démarrage au pin courant
+
+La demande est légitime et l'autorisation exploitant/SPOT est acquise. Le
+profil proposé ne peut toutefois pas être lancé au pin courant :
+`g4_serie_c_v1.env` déclare lui-même que ses clés `GPUV6_*`, `MATRICE_*` et
+`ATTRIB_*` ne sont consommées ni par le runner ni par le validateur. Une
+session maintenant produirait donc soit zéro run de ces phases, soit des
+sorties hors manifeste impossibles à recevoir. Ce **NO START** est borné au
+protocole actuel ; il ne remet pas en cause le GO scientifique de la série C.
+
+Réponse aux trois questions de Claude :
+
+1. **Profil dédié `g4_serie_c_v1`, dans le cycle de vie v6 existant.** Étendre
+   le runner, le validateur, le pin de protocole et leurs selftests, mais
+   réutiliser impérativement `session_campagne_v6_g4.sh`,
+   `v6_session_lifecycle.sh`, `start_and_verify.sh` et
+   `stop_and_verify.sh`. Ne pas créer un lanceur brut. La v6 CPU du même pin
+   est la référence appariée du pilote ; les phases différentielles v5 de ce
+   profil dédié deviennent `aucun`, la v5 restant historique.
+2. **Pas de point 200k dans la première session.** Il ne conditionne ni la
+   parité device, ni le verdict 50k, et multiplie une résidence hôte non encore
+   budgétée. Le rouvrir dans la même session seulement comme point optionnel à
+   une répétition, après scellement des quatre familles 50k et si le deadline
+   laisse la marge d'arrêt/rapatriement, demanderait un plan et un budget
+   mémoire explicites ; le chemin sobre est de le différer.
+3. **Le reçu doit ajouter causalité de mesure et fermeture temporelle.** Les
+   signatures arch/device, la relecture d'index et la parité sont nécessaires
+   mais insuffisantes ; les exigences ci-dessous sont la fermeture minimale.
+
+Avant le nouveau pin, trois corrections courtes suffisent :
+
+- séparer `setup_alloc_ms` du temps des seuls `cudaMemcpy` H2D, puis imprimer
+  `nb_total`, `lot_effectif`, octets index, boules et sentinelles séparément ;
+  le validateur recalcule `H2D = index + 212 * nb_total`, puis
+  `D2H = 100 * nb_total`, pour l'implémentation actuelle ;
+- ne plus mesurer systématiquement CPU puis device. Ajouter un ordre explicite
+  `cpu-device` / `device-cpu`, exécuter un échauffement non retenu, puis quatre
+  répétitions mesurées contrebalancées ABBA. Le validateur exige les indices de
+  répétition, `parite=OUI` à chacune et refuse toute répétition absente,
+  dupliquée ou non finie ;
+- recalculer dans `profil_gate.py` la `somme` depuis les neuf composantes avant
+  toute attribution de la matrice CPU. Joindre les petites cohérences
+  documentaires du § 5.11 au même commit, sans refactorer les kernels.
+
+Le profil `e8289d9a` doit aussi corriger deux faits avant d'entrer au manifeste.
+Le CMake courant enregistre exactement **16** portes `gpu` — quatre témoins,
+huit census et quatre pilotes — et non 17 ; le validateur doit exiger leurs
+noms exacts, jamais seulement un plancher. Ajouter une cinquième porte témoin
+n'est pas requis pour cette session. Ensuite, le point CPU 50k promet
+`avec/sans --digest` mais n'annonce actuellement que `avec` : le plan effectif
+doit porter les deux bras et une expansion de séquence non ambiguë. La même
+porte grave l'affinité réelle des 24 cœurs physiques et des 48 fils SMT ; le
+seul argument `--threads` ne la prouve pas.
+
+Le profil de campagne peut être nettement plus court que le produit cartésien
+proposé. Préenregistrer des contrastes explicites suffit : T dans
+`{16,24,32,48}` à `inflight=2, join=0, digest=off` ; inflight dans `{1,2,4}`
+à T=24 et 48 ; join 0/1 à T=16 et 48, inflight=2 ; digest off/on à T=48,
+inflight=2 pour les deux joins ; enfin le point 50k T48/inflight2/join0/1,
+digest off/on. Trois répétitions par point, ordonnées par une séquence globale
+préenregistrée aller/retour/cyclique, plus les quatre attributions déjà
+proposées, répondent à l'arbre de décision sans payer deux fois tous les axes.
+Cet ordre de matrice n'est pas nommé ABBA ; ABBA désigne seulement les quatre
+paires CPU/device du pilote.
+
+Ordre des phases sur la VM : matrice CPU et attribution d'abord, avant tout
+build `nvcc`, conformément à la doctrine du runner ; chaque phase reste
+fail-fast. Construire ensuite CUDA, puis exécuter `ctest -V -L gpu` sur
+l'inventaire exact des 16 noms afin que les signatures des tests verts soient
+archivées ; au premier rouge, aucun pilote. Les quatre familles 50k suivent
+avec un warm-up exclu et quatre répétitions mesurées ABBA. Le contrôle
+multi-lots utilise le lot produit par défaut avec `--min-lots=2` : à environ
+21,6 millions de candidats il exerce déjà plusieurs lots. **Ne jamais employer
+`--lot=17` à 50k**, qui provoquerait environ 1,27 million de lancements ; cette
+valeur reste réservée à la petite porte n=400. Chaque run conserve commande,
+code, stdout/stderr, GNU time/RSS, hashes binaires, charge/affinité/NUMA,
+versions driver/nvcc, UUID et compute capability, température/horloges avant
+et après, ainsi que les chronos bruts et leur fermeture contre le mur d'étage.
+Le validateur doit posséder des contre-fixtures pour plan manquant, mauvaise
+parité, répétition manquante, mauvais ordre, compte d'octets falsifié, chrono
+non fini et troncature deadline.
+
+Une fois ce protocole commité sur `main`, ses selftests verts et le pin local
+rejoué, le **GO G4 devient exécutable sans nouvelle discussion de design**,
+mais seulement après un accusé bref qui grave le SHA d'exécution exact et ces
+résultats. Ce GO ne se transfère à aucun `HEAD` ultérieur : une seule VM
+`g4-standard-48` SPOT, `instanceTerminationAction=STOP`. Le nouvel estimateur
+doit prouver que le plan obligatoire et sa marge tiennent avant le démarrage.
+Préférer 5 h GCE (`maxRunDuration=18000`) et 270 min invité si le profil réduit
+tient ; sinon réduire encore les tâches optionnelles. Le plafond exceptionnel
+de cette session est 7 h GCE (`25200`) et 415 min invité, jamais le 8 h par
+défaut ni un dépassement silencieux. La deadline de campagne garde au moins
+30 min pour rapatriement/arrêt. Le démarrage passe exclusivement par
+le script gardé et l'arrêt du projet/zone/instance/génération exacts est
+certifié `TERMINATED`, succès ou échec. Les autres VM sont seulement signalées.
+Aucun résultat de cette session ne changera `public_status=not_claimed` sans
+audit du reçu.
 
 ## 6. Ordre de travail recommandé
 
 1. **achevé à `4a85c13d`** : C1, garde `2E` et témoin hôte ancrés ensemble,
    brouillon `fold.hpp` correctement laissé hors checkpoint ;
-2. tuer les deux contre-fixtures causales du profil au § 5.10, aligner ses
-   libellés, puis exécuter B/inflight avant de choisir le design A ;
-3. figer le wire, le budget VRAM et le témoin device arithmétique ; C2 peut
-   alors devenir une brique hôte testable et C3 un port CUDA falsifiable ;
+2. recalculer dans la porte la `somme` du profil depuis ses neuf composantes,
+   puis réserver la matrice locale au diagnostic de bruit ;
+3. **achevé à `cd606257`** : recevoir le wire et la couture C2--C5 dans leur
+   portée CPU/stub ; joindre les durcissements P2 au prochain petit correctif ;
 4. si la cause CPU est la concurrence A/B, prototyper un budget de workers ou
    une affinité reproductible avant l'éclaireur atomique ;
 5. ouvrir l'amont/aval du design A par les paliers décrits, sans promettre le
    facteur `1,7–2` ;
-6. ne lancer C5 sur G4 qu'après les preuves CPU locales, sous nouveau pin et
-   nouveau GO, avec le fold CPU clairement visible dans le mur bout en bout.
+6. rendre exécutable et falsifiable le profil dédié du § 5.12, puis appliquer
+   son GO conditionnel sous nouveau pin, avec arrêt GCP ciblé certifié.
 
 Un prototype de réduction ne sera reçu ni par un seul digest ni par un mutant
 d'ordre. Il devra comparer le `ForestResult` complet, les deltas et niveaux de

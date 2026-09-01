@@ -20,15 +20,21 @@ des corrections, ils ne certifient rien.
 
 - [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict mutable, pins jugés, checkpoint
   hôte `4a85c13d` (C1, garde 2E et témoin arithmétique partiel), profil
-  `1069bc20`, session G4 close et ordre de correction. Il prime sur toute
-  réponse historique.
+  `1069bc20`, série C locale `cd606257`, demande G4 conditionnelle et ordre de
+  correction. Il prime sur toute réponse historique.
 - [`AUDIT_GCP_V6_P0_20260831.md`](AUDIT_GCP_V6_P0_20260831.md) : porte de
   sûreté et de mesure sur `d98f4729` ; le GO mono-session a été consommé,
-  son reçu non décisionnel est archivé par `df1a3c5f` et aucun GO courant ne
-  subsiste.
+  son reçu non décisionnel est archivé par `df1a3c5f` et il n'ouvre aucun
+  droit de démarrage actuel. Le seul GO de design restant est celui,
+  conditionnel et non transférable, du § 5.12 de la réponse ci-dessous.
 - [`REPONSE_AUDITEURS_MULTICPU_V6_20260901.md`](REPONSE_AUDITEURS_MULTICPU_V6_20260901.md) :
   réponse à la saturation du fold et à la conception GPU ; profil apparié,
-  snapshots du design A, contrats wire/device et correction causale C1.
+  snapshots du design A, réception locale CPU/stub, portes device enregistrées
+  et réponse conditionnelle à la demande G4 série C.
+- [`NOTE_CLAUDE_GO_G4_SERIE_C_20260901.md`](NOTE_CLAUDE_GO_G4_SERIE_C_20260901.md) :
+  question active de Claude ; le § 5.12 de la réponse ci-dessus autorise la
+  session après fermeture locale du runner, du validateur et des biais de
+  mesure, mais interdit tout démarrage au pin courant.
 
 ## Historique de l'échange
 

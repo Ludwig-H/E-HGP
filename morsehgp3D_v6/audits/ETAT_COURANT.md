@@ -2,15 +2,18 @@
 
 Date de coupe : 1er septembre 2026.
 
-Coupe source observée : `1069bc20` pour le profil `reduce`; les mises à jour
-du seul audit ne changent pas cette coupe. Autorités techniques : `6d755804` pour le
+Coupe source observée : `1069bc20` pour le profil `reduce` et `cd606257` pour
+la série C C2--C5 ; les mises à jour du seul audit ne changent pas ces coupes.
+Autorités techniques : `6d755804` pour le
 prototype E3/G16, `cd49a390` pour les callbacks, `d98f4729` pour le protocole
 et la source réellement exécutée sur G4, `94c74155` pour l'autorisation
 mono-session désormais consommée, `df1a3c5f` pour l'archivage de son reçu,
 `6e293deb` pour le checkpoint de plafonds, `671ed3cc` pour le premier pool
 d'exécuteurs GPU hôte, `4a85c13d` pour sa correction causale, la garde 2E et
 le témoin arithmétique hôte, `1069bc20` pour le harnais de profil,
-`320299df` pour le reçu de
+`cd606257` pour le pin hôte de la série C, `62cd2e28` pour la matrice locale
+directionnelle, `9c5517c9` pour la demande G4, `e8289d9a` pour son profil encore
+non consommé, `320299df` pour le reçu de
 réplication et `8ed2dea6` pour le reçu de confirmation contre-audité
 ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 
@@ -33,8 +36,9 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
 | plafonds et budget mémoire `4a85c13d` | cap coopératif et refus transactionnels reçus ; garde logique `2E` avant la réserve de fusion reçue, proxy de payload nommé seulement, sans claim RSS/OOM |
-| saturation multi-CPU du fold `1069bc20` | pin construit et suite `gate` 92/92 ; profil, liveness, builds distincts, projection nommée, `join=1` et effacement K2 reçus dans leur portée, mais attribution nulle et fuite `stderr` restent faussement vertes ; aucun reçu de performance |
-| wire série C C2--C5, WIP post-`1069bc20` | six candidats `u32`, indices `upos`, vues typées, refus empoisonnés, sentinelles device, validation `count/h/masse`, temporaires transactionnels et compteur H2D sont présents dans le WIP ; golden digest, dents sélectives de sentinelle/transaction, cas vide et multi-lots, borne d'allocation, readback intégral et cohérence docs/dataflow restent à fermer ; aucun reçu device ni GO G4 |
+| saturation multi-CPU du fold `1069bc20` | pin construit et suite `gate` 92/92 ; profil, liveness, builds distincts, projection nommée, `join=1` et effacement K2 reçus dans leur portée ; `cd606257` ferme la fuite `stderr` et l'attribution brute nulle, mais doit encore recalculer indépendamment le champ imprimé `somme` ; matrice locale terminée mais non décisionnelle |
+| série C C2--C5 `cd606257` | reçue dans sa portée CPU/stub : six candidats `u32`, refus transactionnels, sentinelles/validateur, digest gravé, porte de readback device enregistrée mais jamais exécutée et multi-lots causal ; export propre Release 113/113 en 232,11 s ; aucun `nvcc` ni device |
+| demande G4 `9c5517c9`, profil `e8289d9a` | GO scientifique conditionnel, **NO START au pin courant** : profil dédié non consommé par runner/validateur, 17 portes annoncées contre 16 enregistrées, chrono H2D contaminé par setup et ordre CPU→device non contrebalancé ; après correctif+gates et accusé du pin exact, une session SPOT bornée, sans point 200k ni lot17 à 50k, devient exécutable sans nouvelle revue de design |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP `d98f4729` | GO mono-session consommé et clos ; reçu `df1a3c5f` validé non décisionnel, arrêt ciblé certifié |
@@ -108,7 +112,21 @@ ni la VRAM. Le témoin ne couvre pas encore `BallKey::power`, `AxisBounds` ou
 la division plancher. La garde 2E reste un proxy logique de tailles, sans
 promesse RSS/OOM. Les écarts de worktree postérieurs à `1069bc20` concernent
 le nouveau WIP C2/wire ; ils sont exclus de ce reçu de profil et de tout GO de
-performance.
+performance. Cette phrase décrit l'état du worktree au moment du rejeu.
+
+Le pin `cd606257` rejette désormais les lignes `profil_*` sur stderr et
+exige `pf.somme() > 0` dans la porte compilée. La contre-fixture d'attribution
+n'est toutefois que partiellement fermée : la porte Python croit encore le
+champ imprimé `somme` au lieu de le recalculer depuis les neuf composantes. Les
+trois portes de profil passent dans le lot local 24/24 décrit ci-dessous. Ce
+durcissement est épinglé, mais ne remplace pas le reçu isolé de `1069bc20` et
+ne rend pas encore l'attribution décisionnelle.
+
+Au pin `cd606257`, un export Git indépendant construit toute la v6 en Release
+avec warnings fatals et passe 113/113 portes `gate` en 232,11 s réelles
+(1 168,42 s cumulées). Les 24 portes ciblées série C/profil avaient déjà passé
+24/24 en 188,28 s dans le build partagé. Cette réception est strictement
+CPU/stub : aucune compilation `nvcc`, exécution device ou mesure G4.
 
 ## Exact-K, omission unique et ownership WSPD
 
@@ -493,9 +511,11 @@ suivants :
   et doit employer un refus explicite.
 
 Ces dettes n'ont pas bloqué la session G4 historique, qui a exécuté les blobs
-et gardes épinglés. Aucun GO courant n'est ouvert. Elles interdisent de
-présenter les documents cités comme une photographie fraîche de toute la v6
-avant leur alignement.
+et gardes épinglés ; son GO est consommé. Au protocole `e8289d9a`, aucun droit
+de démarrage n'est ouvert : seul subsiste le GO de design conditionnel du
+§ 5.12, à convertir en accusé du futur pin exact après ses selftests. Ces
+dettes interdisent de présenter les documents cités comme une photographie
+fraîche de toute la v6 avant leur alignement.
 
 ## Dette d'échelle et ordre utile
 
