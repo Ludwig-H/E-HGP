@@ -473,9 +473,14 @@ Trois finitions matérielles restent avant l'ancrage :
    `a_debut <= a_fin <= reduce_interne_debut <= reduce_interne_fin`; avec
    `join=1`, exiger aussi `reduce_interne_fin(K) <= a_debut(K+1)` et
    `pic_reduce_actif == pic_workers_b == 1`. Sinon ignorer entièrement
-   `fold_join` laisserait encore la porte verte. Comparer les ensembles de K
-   des lignes forêt, cardinalités, `profil_reduce` et `profil_intern`; si cette
-   porte veut elle-même revendiquer K1--K10, l'ensemble attendu doit venir de
+   `fold_join` laisserait encore la porte verte. La séparation des builds doit
+   aussi avoir une dent : fournir aujourd'hui `mhgp6_profile` comme argument
+   « normal » **et** « profil » donne encore le code 0. Exiger zéro ligne
+   `profil_kind`, `profil_reduce`, `profil_intern` et `profil_vivantes` dans
+   les deux sorties normales. Comparer enfin les ensembles de K des lignes
+   forêt, cardinalités, `profil_reduce` et `profil_intern`, puis contrôler les
+   temps finis et non négatifs de cette dernière ; si cette porte veut
+   elle-même revendiquer K1--K10, l'ensemble attendu doit venir de
    `smax_effective`, sinon elle doit renvoyer explicitement à la porte exact-K
    déjà existante.
 3. **Finir les portées et le vocabulaire de preuve.** La porte atteste une

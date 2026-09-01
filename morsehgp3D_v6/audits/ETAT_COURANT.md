@@ -31,7 +31,7 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
 | plafonds et budget mémoire `4a85c13d` | cap coopératif et refus transactionnels reçus ; garde logique `2E` avant la réserve de fusion reçue, proxy de payload nommé seulement, sans claim RSS/OOM |
-| saturation multi-CPU du fold | le dernier WIP non ancré ferme I/O d'impression, pic strict, bornes internes, projection cardinalités/digests et non-vacuité ; restent la cible liveness enregistrée, la causalité de `fold_join` dans la porte et les dernières portées de libération/vocabulaire avant attribution diagnostique, sans reçu de performance |
+| saturation multi-CPU du fold | le dernier WIP non ancré ferme I/O d'impression, pic strict, bornes internes, projection cardinalités/digests et non-vacuité ; restent la cible liveness enregistrée, la séparation normale/profilée et la causalité de `fold_join` dans la porte, puis les dernières portées de libération/vocabulaire avant attribution diagnostique, sans reçu de performance |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP `d98f4729` | GO mono-session consommé et clos ; reçu `df1a3c5f` validé non décisionnel, arrêt ciblé certifié |
