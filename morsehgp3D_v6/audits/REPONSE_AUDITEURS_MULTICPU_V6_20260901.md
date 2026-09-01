@@ -3,7 +3,7 @@
 Date : 1er septembre 2026. Données mesurées à `d98f4729`, question
 `ad005432` et conception `b18f1400`. La course de `671ed3cc` est conservée
 ci-dessous comme contre-fixture historique ; la contre-lecture couvre le
-worktree non committé du quatrième jet jusqu'au 1er septembre à 10 h 15 UTC.
+worktree non committé du septième jet jusqu'au 1er septembre à 10 h 40 UTC.
 
 Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -12,17 +12,15 @@ Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 
 ## Verdict constructif
 
-**GO pour livrer le cœur C1 corrigé et la garde logique 2E après un dernier
-nettoyage de leurs portes ; GO pour poursuivre le diagnostic local apparié ;
+**GO pour livrer le cœur C1 corrigé et la garde logique 2E après deux derniers
+refus de fixture ; GO pour poursuivre le diagnostic local apparié ;
 pas encore pour une réduction par segments ni pour C2/C3 sans contrat wire.**
-Le quatrième jet ferme bien les deux courses C1 connues dans le code : la
+Le septième jet ferme bien les deux courses C1 connues dans le code : la
 panne fatale est confinée côté worker avant notification, et le passage
-file→actif est linéarisé sous le mutex. Le mutant ajouté localise utilement la
-fenêtre après le hook, mais ne prouve pas encore que l'activation reste sous
-le mutex ; le § 5.6 donne le petit réordonnancement qui rend cette dent exacte.
-Les quatre portes mutantes viennent par ailleurs d'être isolées dans le
-worktree. Il reste à reconstruire et rejouer sur le commit source qui portera
-ce lot.
+file→actif est linéarisé sous le mutex. Le hook et le mutant ciblent maintenant
+la frontière exacte, les quatre signatures sont isolées et le flake du pic
+série est réparé. Le § 5.6 reçoit ce C1 hôte sur le worktree actuel ; il reste
+à l'ancrer avec le commit source qui portera ce lot.
 
 Le témoin arithmétique hôte et la garde 2E ont aussi progressé jusqu'à une
 portée utile et honnête. Ils ne constituent toujours ni une compilation
@@ -293,42 +291,24 @@ partiel de construction sont exercés, et `p34_typed` est atomique. La fenêtre
 file→actif est aussi fermée dans le **code** par `pop_front + active++` sous le
 même mutex.
 
-La preuve permanente de ce dernier point est cependant encore un cran trop
-faible. Le hook actuel vient après la section critique dans les deux chemins ;
-le mutant retarde en plus `active++` après ce hook. Il tue donc exactement
-« activation après le hook », mais une régression réelle
-`pop ; unlock ; active++ ; hook` resterait verte alors que l'activation aurait
-quitté `mu_`. Le nom `pool-activate-after-unlock` surqualifie ainsi la dent.
+Le hook `pre_activate` vient désormais immédiatement avant `active++`, sous
+`mu_` au nominal et après l'unlock sous le mutant. Le closer reste derrière le
+verrou au nominal, tandis qu'il capture le ticket manqué avant de libérer le
+hook mutant ; le corps du job reste retenu jusqu'au snapshot. La dent cible
+donc le déplacement exact hors verrou, pas un délai artificiel ultérieur.
 
-Le correctif est petit et aide à tester la vraie frontière : appeler un hook
-`pre_activate` immédiatement **avant** `active++`, sous `mu_` au nominal et
-après l'unlock sous le mutant. Lancer `close_fatal` dans un fil closer. Au
-nominal, ce fil reste derrière `mu_` jusqu'à la libération du hook, puis voit
-le ticket actif ; sous le mutant, attendre que le closer ait fermé et capturé
-`active=0, queued=0` avant de libérer le hook. Garder le corps du job retenu
-jusqu'au snapshot évite une course avec sa décrémentation. Cette scène tue
-alors le déplacement exact hors verrou, pas un délai artificiel ultérieur.
+La **sélectivité des portes mutantes** est également reçue : chaque injection
+saute à sa scène-signature, et les préconditions `fatal_entered`, ticket en
+file et hook atteint rendent 3 si la fixture n'est pas attestée. La première
+version rapide de `pool-serial` avait encore une course de test : elle lisait
+`peak_active()` avant que le worker ait publié ce compteur hors de la section
+critique, donnant un code 1 avec `active=1, queued=1, peak=0`. Le septième jet
+lit le pic monotone après les deux `join()`.
 
-La **sélectivité des portes mutantes** vient en revanche d'être corrigée dans
-le worktree : chaque injection saute directement à sa scène-signature. C'est
-la bonne forme et cela retire notamment les 40 s et échecs parasites du mutant
-`pool-serial` observés sur le binaire précédent. Elle demande encore un build
-et un rejeu frais, car la suite déjà en cours a commencé avant cette édition.
-Une reconstruction ultérieure du worktree donne bien 14/14 portes ciblées en
-68,76 s — caps 4, CLI 1, pool 5 et témoin stub 4. Ce vert prouve que le nouveau
-dispatch s'exécute ; il ne lève pas les deux réserves causales suivantes.
-
-Le sixième jet refuse maintenant correctement la fixture si
-`fatal_entered` ou le ticket en file manque, et remplace la boucle série par
-une scène exacte N=2 sans temporisation attendue. Les cinq portes pool passent
-alors en 0,11 s. Un stress indépendant révèle toutefois une dernière course
-dans **la fixture série**, pas dans le pool : 200/200 nominales et 100/100 pour
-drop/resume/activate rendent le code attendu, mais `pool-serial` rend 1 dès la
-9e répétition avec `active=1`, `queued=1`, `g_built=1` et `peak=0`. La scène
-lit `peak_active()` avant de libérer les jobs ; `counters()` peut déjà voir
-l'activation alors que le worker n'a pas encore exécuté la mise à jour du pic,
-placée juste après la section critique. Lire ce compteur monotone **après les
-deux `join()`** ferme le flake sans ajouter de sleep ni affaiblir la signature.
+Reconstruction Release : nominal et quatre mutants passent 5/5 en 0,12 s.
+Le stress frais donne 200/200 nominales et 50/50 pour chacun des quatre
+mutants, soit 400/400 codes attendus. Le cœur C1 hôte est donc reçu sur ce
+worktree ; aucun raccord à `run.hpp` ni aucune propriété CUDA n'en découle.
 
 Le scénario 12 ne prouve pas que `p5` est entré dans `cv_space_.wait` avant
 la fermeture ; il peut être ordonnancé après celle-ci et recevoir la même
@@ -337,11 +317,6 @@ de retirer « producteur bloqué » du titre/commentaire de la scène. Si le
 réveil par `cv_space_.notify_all()` doit devenir une propriété reçue, ajouter
 un compteur de waiters test-only sous `mu_` et attendre exactement un waiter
 avant de libérer le fatal.
-
-Enfin, le premier `wait_for(held_started >= 2)` du scénario 9 ignore encore
-son résultat. Ajouter l'assertion déjà employée au scénario 12 transforme un
-timeout de fixture en échec explicite au lieu de poursuivre sur un état non
-attesté.
 
 Les commentaires bornent désormais correctement la conversion
 transactionnelle dans `run.hpp` à une intention C2–C5 : aucun chemin produit
@@ -384,17 +359,21 @@ Les quatre portes stub donnent 4/4 en Release (0,27 s), puis 4/4 dans un build
 Debug ASan/UBSan (1,44 s, aucune alerte). Le nominal rend 0, carry rend 4 avec
 130 902 désaccords exactement, skip rend 4 avec 64 absences aux bons indices,
 et le composé rend 1. Les bornes de domaine et de produit sont maintenant
-réalignées. Le libellé de grille reste seulement trompeur : le code crée 81
-couples 9×9, puis remplace neuf cases en damier dans les deux colonnes extrêmes
-du mode B. Il conserve donc 72 couples de la grille initiale ; ce n'est ni une
-grille « effective côté mode A seulement », ni une grille 9×7 avec deux
-colonnes retirées. Décrire ces 81 affectations initiales puis les neuf
-substitutions suffit, sans changer le témoin.
+réalignées. Le libellé décrit aussi sans ambiguïté les 81 affectations 9×9
+initiales, les neuf substitutions en damier du mode B et les 72 couples
+conservés.
 
 Cette réception reste volontairement **hôte et partielle**. Le témoin couvre
 le repli portable DI128 et l'oracle `__int128`, quotient/reste compris, mais ne
 compile toujours ni `floor_div128`, ni `AxisBounds`, ni `BallKey::power`, qui
 sont les chemins requis par C3. Aucun `nvcc` ni device n'a été exercé.
+
+Une amélioration non bloquante reste utile avant la réception CUDA : le mutant
+de non-écriture saute seulement `ArithOut`. Le nominal détecte bien une
+sentinelle survivante dans `NativeOut`, mais aucune dent sélective n'exerce ce
+second tableau. Un mutant `witness-skip-native-write` séparé — indices exacts,
+arithmétique intégrale et oracle natif sur les cases écrites — évitera de
+surqualifier « toutes les sorties » sans mélanger les deux défauts.
 
 Avant un reçu CUDA, porter aussi la contre-fixture composée sur la cible GPU
 réelle et certifier dans le reçu l'architecture compilée et le device observé :
@@ -430,27 +409,30 @@ néanmoins reçue par inspection dans sa portée logique : le facteur passe dans
 émission, et le budget large compare une projection aval étendue. Elle ne
 promet ni RSS ni absence d'OOM.
 
-Deux formulations de la porte doivent encore être bornées ou complétées avant
-de parler de preuve transactionnelle complète. Le helper de refus et la scène
-mutante ne contrôlent aujourd'hui que `digest_all`, `digest_balls`, `cards`,
-`total_events` et le silence des callbacks/phases ; `invalidate_provisional`
-efface aussi `digest_raw_candidates`, `digest_postprefilter`,
-`digest_forest` et quatre autres totaux. Centraliser dans le test une
-projection « tous les provisoires vides » évite que l'un de ces champs régresse
-sans tuer la porte. De même, la scène (d) compare les digests de forêt, mais le
-callback ne mémorise que K et `ev.size()` : son assertion prouve l'ordre des K
-et les tailles, pas une « séquence exacte d'événements ». Capturer un digest
-du vecteur callback et une projection sémantique de `ForestResult` — hors
-workers et chronométrages — fermerait ce dernier écart. Ajouter aussi
-`digest_raw_candidates` à la comparaison du budget large rendrait la liste de
-digests réellement complète.
+Le septième jet ferme ces écarts de projection : un helper contrôle tous les
+champs qu'efface `invalidate_provisional`, le budget large compare aussi le
+digest brut, et chaque callback reçoit un digest de ses événements et de la
+projection sémantique de `ForestResult` hors workers/chronométrages. Deux
+petits refus de fixture restent nécessaires pour que ces verts soient
+sélectifs :
+
+- avant de rendre 4 dans la scène mutante 2E, rendre 3 si les checks de setup
+  ont déjà alimenté `g_failures` ; une signature aval correcte ne doit jamais
+  masquer un témoin ou une précondition en échec ;
+- exiger explicitement `temoin_cb.size() == temoin.kmax_eff` et
+  `seq_cb.size() == seq_k.size() == r.kmax_eff`. L'égalité des deux séquences
+  ne prouve pas seule leur complétude si une même omission touche les deux
+  bras.
+
+Les quatre portes caps et les quatre portes stub passent ensemble 8/8 en
+74,17 s sur ce jet. La décision 2E reste reçue dans sa portée logique ; les
+deux conditions ci-dessus nettoient sa preuve avant l'ancrage source.
 
 Le vocabulaire source est désormais honnête et le cap CLI a été correctement
 renommé `cap_fusion_budgetaire` plutôt que de prétendre être le cap effectif
-du run. `PLAN_DE_TESTS.md` est maintenant aligné ; le § 3 de la réponse Claude
-non suivie emploie encore l'ancien nom `cap_fusion_effectif` malgré sa ronde 4
-correcte. Un rejeu frais des portes caps/CLI après le commit source remplacera
-le 12/12 historique.
+du run. `PLAN_DE_TESTS.md` et le § 3 de la réponse Claude sont maintenant
+alignés. Un rejeu frais des portes caps/CLI après le commit source remplacera
+le reçu historique.
 
 ### 5.10 Nouveau profil `reduce` en cours
 
@@ -466,9 +448,15 @@ absente. Elle ne permet toutefois pas encore de calibrer A ou B :
   lectures d'horloge par lot continuent de polluer caches et mur même si leur
   durée est rangée dans une colonne. Le mur de référence doit venir d'un
   Release normal ; les colonnes instrumentées ne sont qu'une attribution ;
-- `profil_vivantes` est imprimé avant `mark(t_reduce_ms)` et son verrou/I/O
-  entre donc dans le cumul `reduce` sans colonne. Reporter toute impression
-  après les chronos, idéalement lors de la publication ordonnée ;
+- `vivantes_max` n'est relevé qu'après activation puis extinction de tout le
+  lot. Un lot dont chaque facette a son dernier contact peut ainsi publier
+  zéro malgré un pic intra-lot élevé. Activer d'abord les fids uniques du lot,
+  relever ce pic, puis décrémenter, ou renommer la mesure en frontière
+  inter-lots et publier les deux valeurs ;
+- `profil_intern` est imprimé avant `mark(t_merge_ms)` et `profil_vivantes`
+  avant `mark(t_reduce_ms)` : leurs verrous/I/O entrent donc dans les cumuls
+  sans colonne. Reporter toute impression après les chronos, idéalement lors
+  de la publication ordonnée ;
 - `post/groupement` copie déjà les clés dans `parents`/`born`, tandis que
   `materialisation` contient tris, copie profonde des deltas, niveaux, `seen`
   et compteurs. Renommer ces frontières ou séparer remplissage et tri/copie
@@ -500,9 +488,8 @@ résiduel après arrêt de tous les chronos, est le correctif minimal.
 
 ## 6. Ordre de travail recommandé
 
-1. isoler les signatures des quatre mutants C1, aligner les deux petits textes
-   résiduels, puis reconstruire, stresser et committer ensemble C1, la garde
-   `2E` et le témoin hôte ;
+1. ajouter les deux refus de fixture 2E, rejouer, puis committer ensemble le
+   C1 désormais stressé, la garde `2E` et le témoin hôte ;
 2. réparer et exécuter le petit profil B/inflight avant de choisir le design A ;
 3. figer le wire, le budget VRAM et le témoin device arithmétique ; C2 peut
    alors devenir une brique hôte testable et C3 un port CUDA falsifiable ;
