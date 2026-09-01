@@ -2,8 +2,8 @@
 
 Date : 1er septembre 2026.
 
-Coupe observée à 08:23 UTC : worktree v6 non committé au-dessus de
-`9627f013`. Cette note n'est pas un verdict sur un commit ; elle sera absorbée
+Coupe observée à 08:28 UTC : worktree v6 non committé au-dessus de
+`df1a3c5f`. Cette note n'est pas un verdict sur un commit ; elle sera absorbée
 puis retirée après le checkpoint propre.
 
 Cadre :
@@ -69,9 +69,9 @@ parlent maintenant de proxy de payload logique, le throttle porte la borne
 `4096*T`, le diagnostic est correctement situé avant tri et les trois CTests
 caps ont `TIMEOUT 600`.
 
-Il reste deux commentaires mécaniques à retirer dans le même patch : la réserve
-dit encore que les fenêtres se calculent sur sa capacité, et la fixture répète
-deux fois l'introduction des fenêtres cardinalitaires.
+Les deux derniers commentaires mécaniques ont été corrigés : la réserve ne
+donne plus d'autorité à `capacity()` et l'introduction des fenêtres
+cardinalitaires n'est plus dupliquée.
 
 La signature CLI est aussi implémentée par un helper commun. Sonde positive :
 
@@ -81,11 +81,22 @@ memory_budget_scope=partial_named_payload_proxy_v1 budget=1073741824 cap_brut_de
 code 0 ; stderr vide
 ```
 
-Cette sortie n'a toutefois encore aucune porte : `mhgp6_cli_ok_s8` n'active
-pas le budget et le wrapper ne contrôle que le code de sortie. Comme cette
-ligne est désormais un changement sémantique livré, étendre la porte CLI pour
-en vérifier au moins le scope et les trois valeurs avant le checkpoint. Toute
-campagne `--mem-budget` reste interdite tant que cette preuve manque.
+Le jet de 08:28 ajoute deux CTests, qui passent localement 2/2 : une exécution
+juge le code exact via `run_expect.cmake`, une autre juge la ligne via
+`PASS_REGULAR_EXPRESSION`. Cette forme ne ferme cependant pas encore la porte :
+la documentation CTest dit explicitement que `PASS_REGULAR_EXPRESSION` ignore
+le code de sortie, et les deux propriétés portent donc sur deux processus
+distincts. Un processus peut publier la ligne puis échouer, tandis que l'autre
+run réussit. Une contre-sonde isolée sous `/tmp` le confirme : une commande
+qui imprime le motif puis sort avec le code `2` est marquée `Passed` par CTest.
+
+Correction minimale utile à Claude : faire capturer puis réémettre stdout par
+`run_expect.cmake`, lui ajouter un paramètre optionnel de ligne attendue, et
+remplacer ces deux tests par **une seule** porte qui exige dans la même
+exécution le code `0` et la ligne exacte ci-dessus. Les trois refus existants
+peuvent aussi recevoir, sans bloquer ce checkpoint, une attente de stdout vide
+pour graver la transaction CLI. Toute campagne `--mem-budget` reste interdite
+tant que la preuve causale unique manque.
 
 Le GO G4 `d98f4729` n'est pas révoqué, mais son pin refuse correctement ce
 worktree normatif sale. Aucun lancement ne doit partir de cet état ; un
