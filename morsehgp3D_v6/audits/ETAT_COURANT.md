@@ -26,6 +26,7 @@ présent verdict.
 | confirmation hors échantillon | cœur reçu ; `confirmation_candidate`, déclencheur E6 non confirmé |
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
+| plafonds et budget mémoire en vol | raccord `resource_exhausted` reçu sur petit témoin ; garde pré-allocation et budget résident non reçus |
 | protocole GCP `d98f4729` | **GO re-pinné** pour une nouvelle session gardée `g4_mesure_v1` |
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
@@ -429,11 +430,14 @@ fraîche de toute la v6 avant leur alignement.
 
 ## Dette d'échelle et ordre utile
 
-La garde u32 des candidats est reçue. Restent les conversions de
-`CloudIndex` vers `int/i32/u32`, les offsets, la recherche Karras près de
-2^30, les produits signés des générateurs et les additions u64 des monnaies.
-Déclarer les plafonds avant allocation et utiliser des additions contrôlées
-ou u128 pour les compteurs.
+La borne structurelle u32 des candidats et son raccord transactionnel sont
+présents, mais le claim « refus avant allocation/OOM » n'est pas reçu : les
+shards candidats et les fronts WSPD sont encore alimentés avant leurs gardes,
+et les formules census/fold ne majorent pas toutes les résidences coexistantes.
+Restent aussi les conversions de `CloudIndex` vers `int/i32/u32`, les offsets,
+la recherche Karras près de 2^30, les produits signés des générateurs et les
+additions u64 des monnaies. Voir la note en vol épinglée dans l'index ; employer
+des additions contrôlées ou u128 et des portes causales aux frontières.
 
 Ordre recommandé à Claude :
 
