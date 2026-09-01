@@ -308,6 +308,16 @@ Trois durcissements connexes évitent de refermer seulement le cas mesuré :
 - remplacer les temporisations 100/200 ms de la porte par des latches, puis
   tester l'échec de construction d'un `Executor`.
 
+Le correctif en cours dans le worktree confirme ce besoin. Ses six portes
+ciblées passent une fois, mais des répétitions nominales échouent à la 27e
+exécution sur 50, à la 2e sur 80 et, sur une sonde concurrente, 36 fois sur
+400, uniquement sur le scénario post-fatal. Le thread du second producteur
+peut gagner l'ordonnancement et exécuter son job avant que le premier ait
+effectivement retenu l'unique worker. Ajouter une latch `fatal_job_entered`
+attendue **avant de lancer** le second producteur, puis une attestation causale
+`queued==1` sans polling temporel ; garder séparément la fixture file→actif
+signalée ci-dessus.
+
 Enfin, les commentaires annoncent déjà une conversion transactionnelle dans
 `run.hpp`, mais aucun usage du pool ni catch de `DeviceFatalError` n'y existe
 à `671ed3cc`, et `PipelineStatus` ne contient pas `numeric_failure`. C'est une
@@ -338,31 +348,107 @@ n'autorisent aucune projection de performance v6.
 
 ### 5.8 Témoin device en cours dans le worktree
 
-Le stub hôte nominal et son mutant passent en Release et sous ASan/UBSan, mais
-cela ne reçoit encore ni le chemin portable ni CUDA :
+La première contre-lecture trouvait cinq défauts de porte. Claude en a déjà
+corrigé quatre dans le worktree : options d'avertissement bornées au langage
+CXX et transmises séparément à CUDA, sélection fake du repli portable avec
+attestation `di_mulhi_branch`, sentinelles d'écriture, désaccords par primitive
+avec nombre exact de retenues, bords DI128 plantés, `cudaFree` contrôlés et
+timeouts GPU. Les deux portes Release repassent en 0,14 s sur la branche fake
+portable. C'est une progression propre et directement issue de l'audit.
 
-- les options globales `-Wall -Wextra -Wpedantic -Werror` de CMake atteignent
-  aussi CUDA et peuvent faire refuser `nvcc`; les borner à
-  `COMPILE_LANGUAGE:CXX`, puis transmettre séparément les avertissements hôte
-  CUDA avec `-Xcompiler`, comme dans le correctif v5 ;
-- `MHGP6_FAKE_DEVICE` seul ne sélectionne pas le repli portable de
-  `di_mulhi_u64`, dont la branche exige `__CUDA_ARCH__` : le stub vert exerce
-  actuellement le chemin hôte `u128`. Ajouter un sélecteur fake dédié et une
-  attestation de branche, sans définir globalement `__CUDA_ARCH__` ;
-- le mutant carry est non vacue, mais son verdict repose sur le compteur
-  agrégé `mism_di` : une autre panne DI pourrait le tuer. Compter les
-  désaccords par primitive et exiger le nombre de retenues plantées ;
-- « `1<<18` tirages + 81 bords » est inexact : les 81 sont inclus, neuf
-  couples sont ensuite réécrits et aucun bord explicite n'est planté pour
-  `x/y`. Le plancher `n < constante` est tautologique ; initialiser les sorties
-  à une sentinelle ou ajouter `seen` pour prouver chaque écriture ;
-- le témoin ne compile toujours ni `BallKey::power`, ni `AxisBounds`, ni la
-  division/plancher dont C3 dépend. Le recevoir comme socle arithmétique
-  partiel seulement, avec `TIMEOUT`, erreurs `cudaFree` contrôlées et raccords
-  `PROVENANCE`/`GPU`/`PLAN_DE_TESTS`.
+Le témoin exerce aussi désormais quotient/reste `__int128` et la division
+DI128 exacte par quatre ; les raccords `PROVENANCE`/`GPU`/`PLAN_DE_TESTS` sont
+présents dans le worktree. Sa portée reste justement annoncée comme partielle :
+il ne compile ni `floor_div128`, ni `AxisBounds`, ni `BallKey::power`, qui sont
+les chemins réellement requis par C3.
+
+Quatre durcissements secondaires garderaient cette bonne porte strictement
+causale :
+
+- les 81 affectations initiales `(a,b)` ne forment pas toutes une grille
+  effective 9×9, puisque neuf diviseurs extrêmes des cas mode B sont ensuite
+  remplacés ; corriger le libellé ou séparer grille et modes ;
+- le domaine écrit `|b| < 2^40` alors que les cas plantés contiennent aussi
+  `±2^40` : écrire `<=` si telle est bien la précondition ;
+- comparer, cas par cas, `désaccord de somme` si et seulement si `retenue
+  attendue`, et ajouter un mutant d'écriture sautée qui doit mourir sur la
+  sentinelle ; l'égalité des deux seuls nombres ne localise pas les cas ;
+- retirer du commentaire initial de `dint.hpp` l'ancien besoin de définir
+  `__CUDA_ARCH__` avec `MHGP6_FAKE_DEVICE`, et appeler le stub une preuve de
+  syntaxe **C++ hôte**, pas de syntaxe nvcc.
 
 Aucun `nvcc` ni device n'a été exercé localement. Ce chantier non committé ne
 modifie donc pas le verdict sur C1 et n'ouvre aucun GO G4.
+
+### 5.9 Garde `2E` en cours dans le worktree
+
+La nouvelle garde placée avant `out->reserve` ferme bien le défaut architectural
+signalé : les shards et la sortie globale ne sont plus alloués ensemble avant
+le refus logique. Le premier mutant n'atteignait pas sa scène, mais Claude a
+placé sa fenêtre dédiée avant la barrière `injected`. Au dernier rejeu local,
+`mhgp6_caps_refus` et `mhgp6_caps_mutant_prefusion` passent respectivement en
+95,05 s et 140,26 s. Le mécanisme est donc prometteur ; il reste à faire de ce
+vert une preuve causale de l'instant d'allocation.
+
+Deux durcissements gardent la correction alignée sur son contrat :
+
+- appeler directement `fits_budget(exact_fusion, sizeof(BallCandidate), 2,
+  budget)` ; calculer `2 * exact_fusion` avant le helper contourne précisément
+  sa protection d'overflow et `out->size()` vaut zéro après `clear()` ;
+- dans `(b)`, exiger en plus du message que le nominal garde
+  `rr.emitted == 0`, la capacité diagnostique nulle,
+  `cap_refus == kCapRefusFusionBudget` et `emitted_at_refus == E`. La fenêtre
+  mutante doit constater `rr.emitted == E`, capacité au moins `E`, puis le
+  même contrat transactionnel sans provisoires ni callbacks ;
+- comparer, sous budget large, l'émission, tous les digests intermédiaires,
+  cartes, totaux, `events_by_k`, statut et séquence exacte `on_forest`, pas
+  seulement `digest_all` et deux planchers de callbacks.
+
+La signature CLI doit enfin publier un `cap_fusion_effectif` calculé par le
+même helper que l'exécution ; pour 1 GiB et 144 octets par candidat, il vaut
+3 728 270. Cela signe la nouvelle décision et évite que seule l'ancienne
+borne brute apparaisse dans une sortie pourtant versionnée comme contrat de
+budget. Le `switch` des refus devrait aussi nommer explicitement
+`kCapRefusAliveRects` et traiter tout code inconnu en invariant, plutôt que le
+confondre par défaut avec ce cas. Enfin, borner le commentaire
+`emitted_at_refus` au refus de cap brut ou documenter sa seconde sémantique
+`E` au refus 2E.
+
+### 5.10 Nouveau profil `reduce` en cours
+
+La séparation fraîche des neuf fenêtres corrige la fuite la plus visible du
+profil précédent et garde le chemin produit inchangé quand la macro est
+absente. Elle ne permet toutefois pas encore de calibrer A ou B :
+
+- `init` démarre après l'allocation et l'initialisation de `FidState`, les
+  scratchs et `deltas.reserve`, puis mélange warmup produit et pré-balayage de
+  vivacité ajouté par l'instrumentation ; séparer ce dernier dans une macro
+  `PROFILE_LIVENESS` et démarrer l'init avant les allocations produit ;
+- `remaining`/`alive_flag`, deux balayages de toutes les incidences et six
+  lectures d'horloge par lot continuent de polluer caches et mur même si leur
+  durée est rangée dans une colonne. Le mur de référence doit venir d'un
+  Release normal ; les colonnes instrumentées ne sont qu'une attribution ;
+- `profil_vivantes` est imprimé avant `mark(t_reduce_ms)` et son verrou/I/O
+  entre donc dans le cumul `reduce` sans colonne. Reporter toute impression
+  après les chronos, idéalement lors de la publication ordonnée ;
+- `post/groupement` copie déjà les clés dans `parents`/`born`, tandis que
+  `materialisation` contient tris, copie profonde des deltas, niveaux, `seen`
+  et compteurs. Renommer ces frontières ou séparer remplissage et tri/copie
+  avant d'estimer ce que le matérialiseur asynchrone déplacerait ;
+- les lignes concurrentes ne portent pas K et peuvent s'entrelacer. Stocker un
+  record dans `ForestResult`, puis l'imprimer avec K à la publication. Publier
+  aussi le digest forêt par K : `t_digest_ms` global mélange plusieurs étages.
+
+Chaque bucket est un temps mur **local à un K**. Sa somme sur K reste un cumul
+qui peut dépasser `t_fold_wall_ms` lorsque B/B ou A/B se recouvrent ; ajouter
+K et les intervalles début/fin, éventuellement le temps CPU du thread, plutôt
+que soustraire ces cumuls du mur. Le digest n'est pas davantage une fenêtre
+unique aujourd'hui : `digest_forest_v4`, chaînage dans `digest_all` et
+finalisation ne partagent pas tous le même chronomètre.
+
+Ce profil reste utile comme brouillon diagnostic ; il ne réfute pas le plan B.
+Il faut seulement éviter que sa propre contention sur `stderr` ou sa sonde de
+vivacité devienne le phénomène que le prochain balayage prétend mesurer.
 
 ## 6. Ordre de travail recommandé
 
