@@ -1,0 +1,20 @@
+# gpuv6_resume — records RETENUS du pilote serie C (echauffement exclu) :
+# murs CPU/route device et etages par repetition ; faits seulement, la parite
+# est jugee par le meme juge que la porte stub (pilote_juge.juger).
+famille	n	repetition	ordre	mur_cpu_ms	mur_route_device_ms	prefiltre_census_cpu_ms	route_device_etage_ms	kernels_ms	h2d_ms	d2h_ms	lots
+eight_clusters	50000	1	cpu-device	70311.8	63631.4	13818.7	7269.0	154.0	159.8	70.0	10
+eight_clusters	50000	2	device-cpu	70909.9	64100.2	14357.3	7292.9	154.0	161.7	69.6	10
+eight_clusters	50000	3	device-cpu	69937.7	63609.7	13619.4	7297.2	154.1	166.4	74.0	10
+eight_clusters	50000	4	cpu-device	70611.1	64135.4	13778.4	7416.3	154.0	163.3	71.7	10
+scanline_single_pass	50000	1	cpu-device	15050.1	14629.4	1568.2	1206.3	17.8	30.8	13.4	2
+scanline_single_pass	50000	2	device-cpu	15043.6	14612.7	1621.5	1174.4	17.9	30.6	13.2	2
+scanline_single_pass	50000	3	device-cpu	15102.5	14624.4	1637.6	1173.8	17.9	30.0	12.7	2
+scanline_single_pass	50000	4	cpu-device	15047.0	14691.1	1629.3	1197.7	18.0	30.7	13.2	2
+terrain	50000	1	cpu-device	18627.6	17812.1	2039.2	1273.8	23.5	33.2	15.2	2
+terrain	50000	2	device-cpu	18618.4	17976.0	2016.8	1256.0	23.5	31.9	13.7	2
+terrain	50000	3	device-cpu	18544.4	17815.2	2026.2	1283.8	23.5	33.2	14.6	2
+terrain	50000	4	cpu-device	18615.2	18004.2	1979.6	1280.7	23.5	33.1	14.5	2
+uniform	50000	1	cpu-device	59018.0	52837.9	14145.8	7677.8	154.0	171.1	76.6	11
+uniform	50000	2	device-cpu	59440.4	52977.7	14214.8	7750.9	153.9	173.7	78.4	11
+uniform	50000	3	device-cpu	59003.6	52943.9	13887.7	7773.3	153.9	176.7	79.1	11
+uniform	50000	4	cpu-device	58810.8	52314.2	13848.9	7683.5	154.0	170.9	75.5	11

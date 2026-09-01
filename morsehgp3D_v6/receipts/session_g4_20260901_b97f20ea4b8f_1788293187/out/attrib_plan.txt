@@ -1,0 +1,7 @@
+attrib_plan=v1
+points=uniform:16000:16:2:0 uniform:16000:48:2:0 uniform:16000:48:2:1 uniform:50000:48:2:1
+seq=1 name=attrib_uniform_n16000_t16_i2_j0 family=uniform n=16000 mat_threads=16 inflight=2 join=0
+seq=2 name=attrib_uniform_n16000_t48_i2_j0 family=uniform n=16000 mat_threads=48 inflight=2 join=0
+seq=3 name=attrib_uniform_n16000_t48_i2_j1 family=uniform n=16000 mat_threads=48 inflight=2 join=1
+seq=4 name=attrib_uniform_n50000_t48_i2_j1 family=uniform n=50000 mat_threads=48 inflight=2 join=1
+runs=4

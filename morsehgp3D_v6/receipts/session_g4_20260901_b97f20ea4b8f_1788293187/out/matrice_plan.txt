@@ -1,0 +1,52 @@
+matrice_plan=v1
+points=uniform:16000:16:2:0:sans uniform:16000:24:2:0:sans uniform:16000:32:2:0:sans uniform:16000:48:2:0:sans uniform:16000:24:1:0:sans uniform:16000:24:4:0:sans uniform:16000:48:1:0:sans uniform:16000:48:4:0:sans uniform:16000:16:2:1:sans uniform:16000:48:2:1:sans uniform:16000:48:2:0:avec uniform:16000:48:2:1:avec uniform:50000:48:2:0:sans uniform:50000:48:2:1:sans uniform:50000:48:2:0:avec uniform:50000:48:2:1:avec
+sequence=aller retour rotation8
+seq=1 name=mat_uniform_n16000_t16_i2_j0_sans_p1 family=uniform n=16000 mat_threads=16 inflight=2 join=0 digest=sans passage=1 pos=1
+seq=2 name=mat_uniform_n16000_t24_i2_j0_sans_p1 family=uniform n=16000 mat_threads=24 inflight=2 join=0 digest=sans passage=1 pos=2
+seq=3 name=mat_uniform_n16000_t32_i2_j0_sans_p1 family=uniform n=16000 mat_threads=32 inflight=2 join=0 digest=sans passage=1 pos=3
+seq=4 name=mat_uniform_n16000_t48_i2_j0_sans_p1 family=uniform n=16000 mat_threads=48 inflight=2 join=0 digest=sans passage=1 pos=4
+seq=5 name=mat_uniform_n16000_t24_i1_j0_sans_p1 family=uniform n=16000 mat_threads=24 inflight=1 join=0 digest=sans passage=1 pos=5
+seq=6 name=mat_uniform_n16000_t24_i4_j0_sans_p1 family=uniform n=16000 mat_threads=24 inflight=4 join=0 digest=sans passage=1 pos=6
+seq=7 name=mat_uniform_n16000_t48_i1_j0_sans_p1 family=uniform n=16000 mat_threads=48 inflight=1 join=0 digest=sans passage=1 pos=7
+seq=8 name=mat_uniform_n16000_t48_i4_j0_sans_p1 family=uniform n=16000 mat_threads=48 inflight=4 join=0 digest=sans passage=1 pos=8
+seq=9 name=mat_uniform_n16000_t16_i2_j1_sans_p1 family=uniform n=16000 mat_threads=16 inflight=2 join=1 digest=sans passage=1 pos=9
+seq=10 name=mat_uniform_n16000_t48_i2_j1_sans_p1 family=uniform n=16000 mat_threads=48 inflight=2 join=1 digest=sans passage=1 pos=10
+seq=11 name=mat_uniform_n16000_t48_i2_j0_avec_p1 family=uniform n=16000 mat_threads=48 inflight=2 join=0 digest=avec passage=1 pos=11
+seq=12 name=mat_uniform_n16000_t48_i2_j1_avec_p1 family=uniform n=16000 mat_threads=48 inflight=2 join=1 digest=avec passage=1 pos=12
+seq=13 name=mat_uniform_n50000_t48_i2_j0_sans_p1 family=uniform n=50000 mat_threads=48 inflight=2 join=0 digest=sans passage=1 pos=13
+seq=14 name=mat_uniform_n50000_t48_i2_j1_sans_p1 family=uniform n=50000 mat_threads=48 inflight=2 join=1 digest=sans passage=1 pos=14
+seq=15 name=mat_uniform_n50000_t48_i2_j0_avec_p1 family=uniform n=50000 mat_threads=48 inflight=2 join=0 digest=avec passage=1 pos=15
+seq=16 name=mat_uniform_n50000_t48_i2_j1_avec_p1 family=uniform n=50000 mat_threads=48 inflight=2 join=1 digest=avec passage=1 pos=16
+seq=17 name=mat_uniform_n50000_t48_i2_j1_avec_p2 family=uniform n=50000 mat_threads=48 inflight=2 join=1 digest=avec passage=2 pos=1
+seq=18 name=mat_uniform_n50000_t48_i2_j0_avec_p2 family=uniform n=50000 mat_threads=48 inflight=2 join=0 digest=avec passage=2 pos=2
+seq=19 name=mat_uniform_n50000_t48_i2_j1_sans_p2 family=uniform n=50000 mat_threads=48 inflight=2 join=1 digest=sans passage=2 pos=3
+seq=20 name=mat_uniform_n50000_t48_i2_j0_sans_p2 family=uniform n=50000 mat_threads=48 inflight=2 join=0 digest=sans passage=2 pos=4
+seq=21 name=mat_uniform_n16000_t48_i2_j1_avec_p2 family=uniform n=16000 mat_threads=48 inflight=2 join=1 digest=avec passage=2 pos=5
+seq=22 name=mat_uniform_n16000_t48_i2_j0_avec_p2 family=uniform n=16000 mat_threads=48 inflight=2 join=0 digest=avec passage=2 pos=6
+seq=23 name=mat_uniform_n16000_t48_i2_j1_sans_p2 family=uniform n=16000 mat_threads=48 inflight=2 join=1 digest=sans passage=2 pos=7
+seq=24 name=mat_uniform_n16000_t16_i2_j1_sans_p2 family=uniform n=16000 mat_threads=16 inflight=2 join=1 digest=sans passage=2 pos=8
+seq=25 name=mat_uniform_n16000_t48_i4_j0_sans_p2 family=uniform n=16000 mat_threads=48 inflight=4 join=0 digest=sans passage=2 pos=9
+seq=26 name=mat_uniform_n16000_t48_i1_j0_sans_p2 family=uniform n=16000 mat_threads=48 inflight=1 join=0 digest=sans passage=2 pos=10
+seq=27 name=mat_uniform_n16000_t24_i4_j0_sans_p2 family=uniform n=16000 mat_threads=24 inflight=4 join=0 digest=sans passage=2 pos=11
+seq=28 name=mat_uniform_n16000_t24_i1_j0_sans_p2 family=uniform n=16000 mat_threads=24 inflight=1 join=0 digest=sans passage=2 pos=12
+seq=29 name=mat_uniform_n16000_t48_i2_j0_sans_p2 family=uniform n=16000 mat_threads=48 inflight=2 join=0 digest=sans passage=2 pos=13
+seq=30 name=mat_uniform_n16000_t32_i2_j0_sans_p2 family=uniform n=16000 mat_threads=32 inflight=2 join=0 digest=sans passage=2 pos=14
+seq=31 name=mat_uniform_n16000_t24_i2_j0_sans_p2 family=uniform n=16000 mat_threads=24 inflight=2 join=0 digest=sans passage=2 pos=15
+seq=32 name=mat_uniform_n16000_t16_i2_j0_sans_p2 family=uniform n=16000 mat_threads=16 inflight=2 join=0 digest=sans passage=2 pos=16
+seq=33 name=mat_uniform_n16000_t16_i2_j1_sans_p3 family=uniform n=16000 mat_threads=16 inflight=2 join=1 digest=sans passage=3 pos=1
+seq=34 name=mat_uniform_n16000_t48_i2_j1_sans_p3 family=uniform n=16000 mat_threads=48 inflight=2 join=1 digest=sans passage=3 pos=2
+seq=35 name=mat_uniform_n16000_t48_i2_j0_avec_p3 family=uniform n=16000 mat_threads=48 inflight=2 join=0 digest=avec passage=3 pos=3
+seq=36 name=mat_uniform_n16000_t48_i2_j1_avec_p3 family=uniform n=16000 mat_threads=48 inflight=2 join=1 digest=avec passage=3 pos=4
+seq=37 name=mat_uniform_n50000_t48_i2_j0_sans_p3 family=uniform n=50000 mat_threads=48 inflight=2 join=0 digest=sans passage=3 pos=5
+seq=38 name=mat_uniform_n50000_t48_i2_j1_sans_p3 family=uniform n=50000 mat_threads=48 inflight=2 join=1 digest=sans passage=3 pos=6
+seq=39 name=mat_uniform_n50000_t48_i2_j0_avec_p3 family=uniform n=50000 mat_threads=48 inflight=2 join=0 digest=avec passage=3 pos=7
+seq=40 name=mat_uniform_n50000_t48_i2_j1_avec_p3 family=uniform n=50000 mat_threads=48 inflight=2 join=1 digest=avec passage=3 pos=8
+seq=41 name=mat_uniform_n16000_t16_i2_j0_sans_p3 family=uniform n=16000 mat_threads=16 inflight=2 join=0 digest=sans passage=3 pos=9
+seq=42 name=mat_uniform_n16000_t24_i2_j0_sans_p3 family=uniform n=16000 mat_threads=24 inflight=2 join=0 digest=sans passage=3 pos=10
+seq=43 name=mat_uniform_n16000_t32_i2_j0_sans_p3 family=uniform n=16000 mat_threads=32 inflight=2 join=0 digest=sans passage=3 pos=11
+seq=44 name=mat_uniform_n16000_t48_i2_j0_sans_p3 family=uniform n=16000 mat_threads=48 inflight=2 join=0 digest=sans passage=3 pos=12
+seq=45 name=mat_uniform_n16000_t24_i1_j0_sans_p3 family=uniform n=16000 mat_threads=24 inflight=1 join=0 digest=sans passage=3 pos=13
+seq=46 name=mat_uniform_n16000_t24_i4_j0_sans_p3 family=uniform n=16000 mat_threads=24 inflight=4 join=0 digest=sans passage=3 pos=14
+seq=47 name=mat_uniform_n16000_t48_i1_j0_sans_p3 family=uniform n=16000 mat_threads=48 inflight=1 join=0 digest=sans passage=3 pos=15
+seq=48 name=mat_uniform_n16000_t48_i4_j0_sans_p3 family=uniform n=16000 mat_threads=48 inflight=4 join=0 digest=sans passage=3 pos=16
+runs=48

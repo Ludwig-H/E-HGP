@@ -1,0 +1,15 @@
+code=0
+duree_s=29
+peak_rss_kb=691584
+timing_scope=gpuv6_build
+threads=48
+time_bin=/usr/bin/time
+charge_avant=22.04 21.80 16.94 1/640 291105
+affinite=0-47
+kind=build
+engine=v6_serie_c
+commande=/bin/bash -c set -e; echo nvcc=/usr/local/cuda-12.9/bin/nvcc; /usr/local/cuda-12.9/bin/nvcc --version 2>&1 | tail -2; nvidia-smi --query-gpu=name,uuid,compute_cap,driver_version --format=csv,noheader,nounits; cmake -S morsehgp3D_v6 -B build-v6-cuda -DCMAKE_BUILD_TYPE=Release -DMHGP6_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=120 -DCMAKE_CUDA_COMPILER=/usr/local/cuda-12.9/bin/nvcc 2>&1 | tail -30; test ${PIPESTATUS[0]} -eq 0; cmake --build build-v6-cuda -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test ${PIPESTATUS[0]} -eq 0
+source_commit=b97f20ea4b8f0932761c4719b32bb14b8c1f0395
+source_payload_sha256=a031785084273a5a66899bbc49e9bdf45776c8bf2782021cbf931f6588bed3b4
+protocol_manifest_sha256=c556896acf032ab034118841671c3e48f9040a0e97fce931b07bc7fc6420ce37
+finished=1

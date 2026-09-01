@@ -1,0 +1,4 @@
+# frontier_resume — codes, murs et RSS de la frontiere d'echelle SOUS PLAFOND
+# VIRTUEL RLIMIT_AS (pas le mur RAM natif) ; un refus de capacite type est une donnee.
+# limit_kind=none (aucun plafond impose par le plan)
+famille	n	code	mur_ms	duree_s	rss_kb	note

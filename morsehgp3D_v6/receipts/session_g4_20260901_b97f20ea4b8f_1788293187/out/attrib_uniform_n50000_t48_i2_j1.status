@@ -1,0 +1,23 @@
+code=0
+duree_s=68
+peak_rss_kb=14660888
+timing_scope=attribution_profil
+threads=48
+time_bin=/usr/bin/time
+charge_avant=26.37 21.41 16.40 1/640 285182
+affinite=0-47
+family=uniform
+n=50000
+mat_threads=48
+inflight=2
+join=1
+seq=4
+authority=attribution_seulement
+affinite_demandee=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47
+affinite_effective=0-47
+binaire_sha256=0710e718c046274bb4703c888c782d56f00561b8015aa1e44f191cc718037fd6
+commande=taskset -c 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47 ./build-v6/mhgp6_profile --family=uniform --n=50000 --s=8 --smax=11 --seed=3 --threads=48 --fold-inflight=2 --fold-join=1
+source_commit=b97f20ea4b8f0932761c4719b32bb14b8c1f0395
+source_payload_sha256=a031785084273a5a66899bbc49e9bdf45776c8bf2782021cbf931f6588bed3b4
+protocol_manifest_sha256=c556896acf032ab034118841671c3e48f9040a0e97fce931b07bc7fc6420ce37
+finished=1

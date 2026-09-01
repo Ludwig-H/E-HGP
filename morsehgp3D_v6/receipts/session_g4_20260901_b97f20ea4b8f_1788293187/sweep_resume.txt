@@ -1,0 +1,2 @@
+# sweep_resume — murs par nombre de fils (dispersion, JAMAIS une conclusion de speedup).
+famille	n	fils	runs	mur_median_ms	mur_min_ms	mur_max_ms	rss_max_kb

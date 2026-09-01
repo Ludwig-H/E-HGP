@@ -1,0 +1,16 @@
+code=0
+duree_s=53
+peak_rss_kb=430604
+timing_scope=gpuv6_gates
+threads=48
+time_bin=/usr/bin/time
+charge_avant=16.62 20.56 16.66 2/640 291722
+affinite=0-47
+kind=gates
+engine=v6_serie_c
+gate_names=mhgp6_device_witness mhgp6_device_witness_mutant_carry mhgp6_device_witness_mutant_skip_write mhgp6_device_witness_mutant_skip_native mhgp6_census_device mhgp6_census_device_mutant_range_le mhgp6_census_device_mutant_stack mhgp6_census_device_mutant_swap mhgp6_census_device_mutant_nonstrict mhgp6_census_device_mutant_skip_write mhgp6_census_device_mutant_nshell mhgp6_census_device_mutant_skip_count mhgp6_pilote_parite_400 mhgp6_pilote_refus_n mhgp6_pilote_lot17 mhgp6_pilote_mutant_base
+commande=ctest --test-dir build-v6-cuda -V -L gpu --output-on-failure
+source_commit=b97f20ea4b8f0932761c4719b32bb14b8c1f0395
+source_payload_sha256=a031785084273a5a66899bbc49e9bdf45776c8bf2782021cbf931f6588bed3b4
+protocol_manifest_sha256=c556896acf032ab034118841671c3e48f9040a0e97fce931b07bc7fc6420ce37
+finished=1

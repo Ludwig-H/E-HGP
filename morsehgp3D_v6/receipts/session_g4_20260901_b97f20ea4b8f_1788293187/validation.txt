@@ -1,0 +1,1 @@
+campaign_status=verifie_non_decisionnel profil=g4_serie_c_v1 canonique=g4_serie_c_v1 cause=profil non decisionnel (58 runs valides — JAMAIS une decision)

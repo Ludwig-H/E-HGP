@@ -1,0 +1,21 @@
+code=0
+duree_s=675
+peak_rss_kb=18864352
+timing_scope=gpuv6_pilote
+threads=48
+time_bin=/usr/bin/time
+charge_avant=27.57 24.49 20.23 1/641 425736
+affinite=0-47
+family=eight_clusters
+n=50000
+kind=pilote
+engine=v6_serie_c
+min_lots=2
+repeat=4
+ordre=cpu-device
+binaire_sha256=92617ebf10952f27b9458456e5b7e3ca8e74fbdd6bb9f8d02763fec1c4daa041
+commande=/bin/bash -c set -e; echo '--- gpu_avant ---'; nvidia-smi --query-gpu=uuid,temperature.gpu,clocks.sm,clocks.mem --format=csv,noheader,nounits; rc=0; ./build-v6-cuda/mhgp6_cuda --family=eight_clusters --n=50000 --seed=3 --threads=48 --repeat=4 --ordre=cpu-device --min-lots=2 || rc=$?; echo '--- gpu_apres ---'; nvidia-smi --query-gpu=uuid,temperature.gpu,clocks.sm,clocks.mem --format=csv,noheader,nounits; exit ${rc}
+source_commit=b97f20ea4b8f0932761c4719b32bb14b8c1f0395
+source_payload_sha256=a031785084273a5a66899bbc49e9bdf45776c8bf2782021cbf931f6588bed3b4
+protocol_manifest_sha256=c556896acf032ab034118841671c3e48f9040a0e97fce931b07bc7fc6420ce37
+finished=1

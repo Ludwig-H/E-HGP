@@ -1,0 +1,4 @@
+# gpu_resume — CONTROLE HISTORIQUE NON AUTORITAIRE (engine=v5, lineage=historical_baseline) :
+# murs des contrats CPU/GPU v5 et kernel_ms — ne mesure NI un GPU v6 NI l'exactitude v6 ;
+# faits seulement, pas de conclusion (un run par route ne suffit pas a attribuer un gain).
+famille	n	kind	mur_ms	duree_s	rss_kb	kernel_ms

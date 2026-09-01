@@ -1,0 +1,25 @@
+code=0
+duree_s=27
+peak_rss_kb=4489164
+timing_scope=matrice_cpu
+threads=16
+time_bin=/usr/bin/time
+charge_avant=18.95 18.92 11.94 1/643 165068
+affinite=0-47
+family=uniform
+n=16000
+mat_threads=16
+inflight=2
+join=1
+digest=sans
+passage=2
+pos=8
+seq=24
+affinite_demandee=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+affinite_effective=0-15
+binaire_sha256=4e6e6b9d7b861dff544821ac180d3403fd7180ea38bfc4938211b2a875b8993d
+commande=taskset -c 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 ./build-v6/mhgp6 --family=uniform --n=16000 --s=8 --smax=11 --seed=3 --threads=16 --fold-inflight=2 --fold-join=1
+source_commit=b97f20ea4b8f0932761c4719b32bb14b8c1f0395
+source_payload_sha256=a031785084273a5a66899bbc49e9bdf45776c8bf2782021cbf931f6588bed3b4
+protocol_manifest_sha256=c556896acf032ab034118841671c3e48f9040a0e97fce931b07bc7fc6420ce37
+finished=1

@@ -1,0 +1,377 @@
+profil de campagne epingle : a55c1bf0fb166729fd5be7f5fa4049b7d2dfb95600503250334d67af924cfcb3
+preflight budgetaire : ESTIMATION NOMINALE 13552s (+build 900s) pour une fenetre de 20395s — campagne exploratoire tronquable
+enveloppe de terminaison (somme des plafonds par run) : 144600s — bornee en pratique par l'echeance du runner et les coupe-circuits, jamais une promesse de completude
+[GARDE pre-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=25200s.
+[SET-SCHEDULING] Reconfiguration protégée demandée :
+  compte              : louis.hauseux@gmail.com
+  projet              : devpod-gpu-exploration
+  zone                : europe-west4-ai1a
+  instance            : ehgp-blackwell-spot-ai1a
+  état certifié       : TERMINATED
+  maxRunDuration cible: 25200 s
+  action              : STOP
+Updated [https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+[GARDE post-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=25200s.
+[OK] maxRunDuration=25200s recertifié sur la cible TERMINATED devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a; aucune VM démarrée ou arrêtée.
+[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:/8zYrTcYUHx4qGDROH6+qp7Uc4M5ekYcPXGXS7g6BlM).
+[GARDE SSH] Clé OS Login unique, expiration fixe=2026-09-02T03:16:00.820486Z, durée restante=25786s.
+[START] Démarrage protégé demandé :
+  compte                 : louis.hauseux@gmail.com
+  projet                 : devpod-gpu-exploration
+  instance               : ehgp-blackwell-spot-ai1a
+  zone                   : europe-west4-ai1a
+  machine/provisioning   : g4-standard-48 / SPOT
+  maxRunDuration GCE     : 25200 s
+  arrêt invité secondaire : 405 min
+Starting instance(s) ehgp-blackwell-spot-ai1a...
+.................................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+Instance internal IP is 10.164.0.7
+Instance external IP is 34.12.26.73
+[GARDE-FOU GCE] action=STOP, maxRunDuration=25200s, échéance calculée=1788318387, échéance sûre=1788318087, terminationTimestamp=2026-09-02T03:06:17.817555Z
+[GARDE-FOU INVITÉ] Armement de shutdown -P +405 via SSH.
+Shutdown scheduled for Wed 2026-09-02 02:51:54 UTC, use 'shutdown -c' to cancel.
+MODE=poweroff
+USEC=1788317514388562
+
+[GARDE-FOU GCE] action=STOP, maxRunDuration=25200s, échéance calculée=1788318387, échéance sûre=1788318087, terminationTimestamp=2026-09-02T03:06:17.817555Z
+[SUCCÈS] VM démarrée avec deux coupe-circuits vérifiés. Fermez la session avec stop_and_verify.sh.
+generation verrouillee : 2026-09-01T13:06:27.081-07:00
+deadline_epoch=1788314482 (generation 1788293187 + 25200 - 3905)
+handshake : boot_id=3f6424c2-0ee9-483c-ba0f-22f12a5369ea generation confirmee
+/tmp/v6bundle_b97f20ea4b8f_1788293187.tgz: OK
+coeurs=48
+MemTotal:       185463904 kB
+cmake version 4.4.3
+preflight v5 : saute (aucune phase conf/bench/gpu-v5)
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Configuring done (0.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/louis_hauseux_gmail_com/v6camp_b97f20ea4b8f_1788293187/build-v6
+[ 97%] Built target mhgp6_pilote_stub_check_test
+[100%] Linking CXX executable mhgp6_selftest
+[100%] Built target mhgp6_selftest
+Test project /home/louis_hauseux_gmail_com/v6camp_b97f20ea4b8f_1788293187/build-v6
+        Start   1: mhgp6_arith_selftest
+        Start   2: mhgp6_sha256_selftest
+        Start   3: mhgp6_families_fixture
+        Start   4: mhgp6_families_mutant_overshoot
+        Start   5: mhgp6_tree_selftest
+        Start   6: mhgp6_wspd_ledger
+        Start   7: mhgp6_wspd_ownership
+        Start   8: mhgp6_wspd_mutant_cap
+        Start   9: mhgp6_wspd_mutant_split
+        Start  10: mhgp6_contrat_echec
+        Start  11: mhgp6_contrat_echec_census
+        Start  12: mhgp6_contrat_echec_fold_k2
+        Start  13: mhgp6_e6_grille_objet
+        Start  14: mhgp6_fused_descent
+        Start  15: mhgp6_sweep_oracle
+        Start  16: mhgp6_caps_refus
+        Start  17: mhgp6_caps_mutant_emission
+        Start  18: mhgp6_caps_mutant_late_wave
+        Start  19: mhgp6_caps_mutant_prefusion
+        Start  20: mhgp6_executor_pool
+        Start  21: mhgp6_executor_pool_mutant_serial
+        Start  22: mhgp6_executor_pool_mutant_drop_exception
+        Start  23: mhgp6_executor_pool_mutant_worker_resume
+        Start  24: mhgp6_executor_pool_mutant_activate_late
+  1/117 Test   #1: mhgp6_arith_selftest ...........................   Passed    0.01 sec
+  2/117 Test   #4: mhgp6_families_mutant_overshoot ................   Passed    0.01 sec
+  3/117 Test   #5: mhgp6_tree_selftest ............................   Passed    0.01 sec
+  4/117 Test   #6: mhgp6_wspd_ledger ..............................   Passed    0.01 sec
+        Start  25: mhgp6_wire
+        Start  26: mhgp6_wire_mutant_drop_node
+        Start  27: mhgp6_wire_mutant_t1
+        Start  28: mhgp6_census_device_stub
+  5/117 Test   #3: mhgp6_families_fixture .........................   Passed    0.01 sec
+  6/117 Test  #21: mhgp6_executor_pool_mutant_serial ..............   Passed    0.00 sec
+        Start  29: mhgp6_census_stub_mutant_range_le
+        Start  30: mhgp6_census_stub_mutant_stack
+  7/117 Test  #22: mhgp6_executor_pool_mutant_drop_exception ......   Passed    0.01 sec
+        Start  31: mhgp6_census_stub_mutant_swap_push
+  8/117 Test   #2: mhgp6_sha256_selftest ..........................   Passed    0.01 sec
+  9/117 Test  #23: mhgp6_executor_pool_mutant_worker_resume .......   Passed    0.01 sec
+ 10/117 Test  #24: mhgp6_executor_pool_mutant_activate_late .......   Passed    0.01 sec
+        Start  32: mhgp6_census_stub_mutant_nonstrict
+        Start  33: mhgp6_census_stub_mutant_skip_write
+        Start  34: mhgp6_census_stub_mutant_nshell
+ 11/117 Test  #25: mhgp6_wire .....................................   Passed    0.01 sec
+ 12/117 Test  #26: mhgp6_wire_mutant_drop_node ....................   Passed    0.01 sec
+ 13/117 Test  #27: mhgp6_wire_mutant_t1 ...........................   Passed    0.01 sec
+        Start  35: mhgp6_census_stub_mutant_skip_count
+        Start  36: mhgp6_pilot_stub
+        Start  37: mhgp6_pilote_stub_refus_n
+ 14/117 Test  #37: mhgp6_pilote_stub_refus_n ......................   Passed    0.00 sec
+        Start  38: mhgp6_pilote_stub_parite_200
+ 15/117 Test  #20: mhgp6_executor_pool ............................   Passed    0.12 sec
+        Start  39: mhgp6_pilote_stub_lot17
+ 16/117 Test  #15: mhgp6_sweep_oracle .............................   Passed    0.21 sec
+        Start  40: mhgp6_pilote_stub_mutant_base
+ 17/117 Test   #8: mhgp6_wspd_mutant_cap ..........................   Passed    0.24 sec
+        Start  41: mhgp6_pilote_juge_contre_fixtures
+ 18/117 Test  #41: mhgp6_pilote_juge_contre_fixtures ..............   Passed    0.02 sec
+        Start  42: mhgp6_pilote_stub_juge
+ 19/117 Test   #7: mhgp6_wspd_ownership ...........................   Passed    0.58 sec
+        Start  43: mhgp6_pilote_stub_juge_ordre_inverse
+ 20/117 Test   #9: mhgp6_wspd_mutant_split ........................   Passed    0.81 sec
+        Start  44: mhgp6_pilot_stub_mutant_stack
+ 21/117 Test  #40: mhgp6_pilote_stub_mutant_base ..................   Passed    0.85 sec
+        Start  45: mhgp6_pilot_stub_mutant_nonstrict
+ 22/117 Test  #10: mhgp6_contrat_echec ............................   Passed    2.00 sec
+        Start  46: mhgp6_pilot_stub_mutant_skip_write
+ 23/117 Test  #44: mhgp6_pilot_stub_mutant_stack ..................   Passed    2.19 sec
+        Start  47: mhgp6_pilot_stub_mutant_nshell
+ 24/117 Test  #30: mhgp6_census_stub_mutant_stack .................   Passed    3.19 sec
+        Start  48: mhgp6_pilot_stub_mutant_skip_count
+ 25/117 Test  #29: mhgp6_census_stub_mutant_range_le ..............   Passed    3.26 sec
+        Start  49: mhgp6_device_witness_stub
+ 26/117 Test  #49: mhgp6_device_witness_stub ......................   Passed    0.08 sec
+        Start  50: mhgp6_device_witness_stub_mutant_carry
+ 27/117 Test  #45: mhgp6_pilot_stub_mutant_nonstrict ..............   Passed    2.31 sec
+        Start  51: mhgp6_device_witness_stub_mutant_skip_write
+ 28/117 Test  #32: mhgp6_census_stub_mutant_nonstrict .............   Passed    3.38 sec
+        Start  52: mhgp6_device_witness_stub_mutant_skip_native
+ 29/117 Test  #28: mhgp6_census_device_stub .......................   Passed    3.42 sec
+        Start  53: mhgp6_device_witness_stub_contre_double
+ 30/117 Test  #31: mhgp6_census_stub_mutant_swap_push .............   Passed    3.42 sec
+        Start  54: mhgp6_sweep_mutant_depth
+ 31/117 Test  #33: mhgp6_census_stub_mutant_skip_write ............   Passed    3.42 sec
+        Start  55: mhgp6_fused_mutant_mask
+ 32/117 Test  #35: mhgp6_census_stub_mutant_skip_count ............   Passed    3.43 sec
+        Start  56: mhgp6_conformity_uniform_400
+ 33/117 Test  #50: mhgp6_device_witness_stub_mutant_carry .........   Passed    0.09 sec
+        Start  57: mhgp6_conformity_terrain_400
+ 34/117 Test  #51: mhgp6_device_witness_stub_mutant_skip_write ....   Passed    0.13 sec
+        Start  58: mhgp6_conformity_eight_clusters_400
+ 35/117 Test  #53: mhgp6_device_witness_stub_contre_double ........   Passed    0.10 sec
+        Start  59: mhgp6_conformity_scanline_single_pass_400
+ 36/117 Test  #34: mhgp6_census_stub_mutant_nshell ................   Passed    3.51 sec
+        Start  60: mhgp6_conformity_collinear_seven_600
+ 37/117 Test  #52: mhgp6_device_witness_stub_mutant_skip_native ...   Passed    0.15 sec
+        Start  61: mhgp6_conformity_two_lines_200
+ 38/117 Test  #60: mhgp6_conformity_collinear_seven_600 ...........   Passed    0.06 sec
+        Start  62: mhgp6_conformity_uniform_2000
+ 39/117 Test  #11: mhgp6_contrat_echec_census .....................   Passed    3.65 sec
+        Start  63: mhgp6_conformity_terrain_2000
+ 40/117 Test  #54: mhgp6_sweep_mutant_depth .......................   Passed    0.24 sec
+        Start  64: mhgp6_sweep_mutant_exit
+ 41/117 Test  #14: mhgp6_fused_descent ............................   Passed    3.77 sec
+        Start  65: mhgp6_conformity_mutant_rle
+ 42/117 Test  #57: mhgp6_conformity_terrain_400 ...................   Passed    0.40 sec
+        Start  66: mhgp6_cli_refus_s7
+ 43/117 Test  #66: mhgp6_cli_refus_s7 .............................   Passed    0.01 sec
+        Start  67: mhgp6_cli_refus_s_suffix
+ 44/117 Test  #67: mhgp6_cli_refus_s_suffix .......................   Passed    0.01 sec
+        Start  68: mhgp6_cli_refus_n_suffix
+ 45/117 Test  #68: mhgp6_cli_refus_n_suffix .......................   Passed    0.01 sec
+        Start  69: mhgp6_cli_ok_s8
+ 46/117 Test  #61: mhgp6_conformity_two_lines_200 .................   Passed    0.32 sec
+        Start  70: mhgp6_cli_budget_signature
+ 47/117 Test  #59: mhgp6_conformity_scanline_single_pass_400 ......   Passed    0.40 sec
+        Start  86: mhgp6_linked_arcs_u16
+ 48/117 Test  #64: mhgp6_sweep_mutant_exit ........................   Passed    0.52 sec
+        Start  87: mhgp6_linked_arcs_oracle_i64
+ 49/117 Test  #46: mhgp6_pilot_stub_mutant_skip_write .............   Passed    2.37 sec
+        Start  88: mhgp6_cell_grid_oracle
+ 50/117 Test  #87: mhgp6_linked_arcs_oracle_i64 ...................   Passed    0.30 sec
+        Start  89: mhgp6_cell_grid_oracle_mutant_ns
+ 51/117 Test  #86: mhgp6_linked_arcs_u16 ..........................   Passed    0.56 sec
+        Start  90: mhgp6_cell_grid_oracle_mutant_eps
+ 52/117 Test  #58: mhgp6_conformity_eight_clusters_400 ............   Passed    1.09 sec
+        Start  91: mhgp6_cell_grid_oracle_mutant_h1
+ 53/117 Test  #12: mhgp6_contrat_echec_fold_k2 ....................   Passed    4.72 sec
+        Start  92: mhgp6_sweep_frontieres
+ 54/117 Test  #92: mhgp6_sweep_frontieres .........................   Passed    0.01 sec
+        Start  93: mhgp6_sweep_frontieres_mutant_depth
+ 55/117 Test  #93: mhgp6_sweep_frontieres_mutant_depth ............   Passed    0.01 sec
+        Start  94: mhgp6_sweep_frontieres_mutant_exit
+ 56/117 Test  #94: mhgp6_sweep_frontieres_mutant_exit .............   Passed    0.01 sec
+        Start  95: mhgp6_cover_coef4
+ 57/117 Test  #95: mhgp6_cover_coef4 ..............................   Passed    0.01 sec
+        Start  96: mhgp6_cover_coef3_mutant
+ 58/117 Test  #96: mhgp6_cover_coef3_mutant .......................   Passed    0.01 sec
+        Start  97: mhgp6_postprefilter_uniform_400
+ 59/117 Test  #70: mhgp6_cli_budget_signature .....................   Passed    0.91 sec
+        Start  98: mhgp6_mutant_wspd-drop-rect
+ 60/117 Test  #69: mhgp6_cli_ok_s8 ................................   Passed    0.96 sec
+        Start  99: mhgp6_mutant_census-nonstrict
+ 61/117 Test  #56: mhgp6_conformity_uniform_400 ...................   Passed    1.43 sec
+        Start 100: mhgp6_mutant_genfilter-nonstrict
+ 62/117 Test  #98: mhgp6_mutant_wspd-drop-rect ....................   Passed    0.46 sec
+        Start 101: mhgp6_mutant_depth-threshold-minus-one
+ 63/117 Test  #47: mhgp6_pilot_stub_mutant_nshell .................   Passed    2.45 sec
+        Start 102: mhgp6_mutant_range-add-max-le-zero
+ 64/117 Test  #99: mhgp6_mutant_census-nonstrict ..................   Passed    0.64 sec
+        Start 103: mhgp6_mutant_skip-full-census
+ 65/117 Test  #63: mhgp6_conformity_terrain_2000 ..................   Passed    1.96 sec
+        Start 104: mhgp6_mutant_binary-ties
+ 66/117 Test  #48: mhgp6_pilot_stub_mutant_skip_count .............   Passed    2.42 sec
+        Start 105: mhgp6_mutant_repr-ties
+ 67/117 Test #100: mhgp6_mutant_genfilter-nonstrict ...............   Passed    1.01 sec
+        Start 106: mhgp6_mutant_attach-prebatch
+ 68/117 Test  #38: mhgp6_pilote_stub_parite_200 ...................   Passed    6.03 sec
+        Start 107: mhgp6_mutant_drop-nonmerge
+ 69/117 Test #102: mhgp6_mutant_range-add-max-le-zero .............   Passed    0.63 sec
+        Start 108: mhgp6_mutant_dense-pointid
+ 70/117 Test #103: mhgp6_mutant_skip-full-census ..................   Passed    0.78 sec
+        Start 109: mhgp6_mutant_canonical-is-uf-root
+ 71/117 Test  #39: mhgp6_pilote_stub_lot17 ........................   Passed    6.15 sec
+        Start 110: mhgp6_mutant_q3-level-4g
+ 72/117 Test  #97: mhgp6_postprefilter_uniform_400 ................   Passed    1.54 sec
+        Start 111: mhgp6_mutant_q4-center-parity
+ 73/117 Test #101: mhgp6_mutant_depth-threshold-minus-one .........   Passed    1.10 sec
+        Start 112: mhgp6_mutant_q4-eq-sign
+ 74/117 Test  #65: mhgp6_conformity_mutant_rle ....................   Passed    2.74 sec
+        Start 113: mhgp6_mutant_q4-i64-drop-factor
+ 75/117 Test #104: mhgp6_mutant_binary-ties .......................   Passed    0.92 sec
+        Start 114: mhgp6_mutant_q4-i64-pair-min
+ 76/117 Test  #42: mhgp6_pilote_stub_juge .........................   Passed    6.33 sec
+        Start 115: mhgp6_mutant_witness-no-lane-mask
+ 77/117 Test #105: mhgp6_mutant_repr-ties .........................   Passed    1.26 sec
+        Start 116: mhgp6_mutant_par-drop-shard
+ 78/117 Test  #43: mhgp6_pilote_stub_juge_ordre_inverse ...........   Passed    6.42 sec
+        Start 117: mhgp6_mutant_par-drop-ball-chunk
+ 79/117 Test #106: mhgp6_mutant_attach-prebatch ...................   Passed    1.19 sec
+        Start 118: mhgp6_mutant_fold-inject-a-failure-k2
+ 80/117 Test #109: mhgp6_mutant_canonical-is-uf-root ..............   Passed    0.83 sec
+        Start 119: mhgp6_juge_refus_narrowing
+ 81/117 Test #119: mhgp6_juge_refus_narrowing .....................   Passed    0.01 sec
+        Start 120: mhgp6_juge_refus_reference_tronquee
+ 82/117 Test #110: mhgp6_mutant_q3-level-4g .......................   Passed    0.82 sec
+        Start 121: mhgp6_juge_refus_k_en_trop
+ 83/117 Test #121: mhgp6_juge_refus_k_en_trop .....................   Passed    0.01 sec
+        Start 122: mhgp6_juge_refus_k11
+ 84/117 Test #111: mhgp6_mutant_q4-center-parity ..................   Passed    0.89 sec
+        Start 123: mhgp6_cover_refus_mutant_hors_cible
+ 85/117 Test #123: mhgp6_cover_refus_mutant_hors_cible ............   Passed    0.01 sec
+        Start 124: mhgp6_sweep_refus_inject_vide
+ 86/117 Test #124: mhgp6_sweep_refus_inject_vide ..................   Passed    0.00 sec
+        Start 125: mhgp6_fused_mutant_droprect
+ 87/117 Test #107: mhgp6_mutant_drop-nonmerge .....................   Passed    1.17 sec
+        Start 126: mhgp6_pentes_validateur
+ 88/117 Test #112: mhgp6_mutant_q4-eq-sign ........................   Passed    0.89 sec
+        Start 127: mhgp6_campagne_provenance
+ 89/117 Test #108: mhgp6_mutant_dense-pointid .....................   Passed    1.17 sec
+        Start 128: mhgp6_agregateur_intergraines
+ 90/117 Test #113: mhgp6_mutant_q4-i64-drop-factor ................   Passed    0.88 sec
+        Start 129: mhgp6_profil_identite
+ 91/117 Test #114: mhgp6_mutant_q4-i64-pair-min ...................   Passed    1.01 sec
+        Start 130: mhgp6_profil_contre_fixture
+ 92/117 Test #130: mhgp6_profil_contre_fixture ....................   Passed    0.03 sec
+        Start 131: mhgp6_profil_contrat_echec
+ 93/117 Test #127: mhgp6_campagne_provenance ......................   Passed    0.41 sec
+        Start 132: mhgp6_profil_contrat_echec_k2
+ 94/117 Test #115: mhgp6_mutant_witness-no-lane-mask ..............   Passed    1.08 sec
+ 95/117 Test #118: mhgp6_mutant_fold-inject-a-failure-k2 ..........   Passed    0.73 sec
+ 96/117 Test #116: mhgp6_mutant_par-drop-shard ....................   Passed    0.96 sec
+ 97/117 Test #128: mhgp6_agregateur_intergraines ..................   Passed    0.65 sec
+ 98/117 Test #117: mhgp6_mutant_par-drop-ball-chunk ...............   Passed    0.95 sec
+ 99/117 Test #120: mhgp6_juge_refus_reference_tronquee ............   Passed    1.31 sec
+100/117 Test #122: mhgp6_juge_refus_k11 ...........................   Passed    1.31 sec
+101/117 Test #126: mhgp6_pentes_validateur ........................   Passed    1.24 sec
+102/117 Test #132: mhgp6_profil_contrat_echec_k2 ..................   Passed    0.93 sec
+103/117 Test #131: mhgp6_profil_contrat_echec .....................   Passed    1.15 sec
+104/117 Test  #55: mhgp6_fused_mutant_mask ........................   Passed    5.70 sec
+105/117 Test #125: mhgp6_fused_mutant_droprect ....................   Passed    2.79 sec
+106/117 Test  #18: mhgp6_caps_mutant_late_wave ....................   Passed   10.49 sec
+107/117 Test  #17: mhgp6_caps_mutant_emission .....................   Passed   10.61 sec
+108/117 Test  #62: mhgp6_conformity_uniform_2000 ..................   Passed    8.25 sec
+109/117 Test  #19: mhgp6_caps_mutant_prefusion ....................   Passed   12.81 sec
+110/117 Test #129: mhgp6_profil_identite ..........................   Passed    5.58 sec
+111/117 Test  #90: mhgp6_cell_grid_oracle_mutant_eps ..............   Passed   12.43 sec
+112/117 Test  #88: mhgp6_cell_grid_oracle .........................   Passed   12.60 sec
+113/117 Test  #89: mhgp6_cell_grid_oracle_mutant_ns ...............   Passed   12.93 sec
+114/117 Test  #91: mhgp6_cell_grid_oracle_mutant_h1 ...............   Passed   12.95 sec
+115/117 Test  #16: mhgp6_caps_refus ...............................   Passed   22.90 sec
+116/117 Test  #36: mhgp6_pilot_stub ...............................   Passed   28.67 sec
+117/117 Test  #13: mhgp6_e6_grille_objet ..........................   Passed   98.66 sec
+
+100% tests passed out of 117
+
+Label Time Summary:
+gate      = 378.63 sec*proc (117 tests)
+oracle    =  13.37 sec*proc (3 tests)
+
+Total Test time (real) =  98.67 sec
+portes VM : v6=117 — preflight v5 SAUTE (aucune phase conf/bench/gpu-v5, § 5.14.1)
+=== plans annonces : conf=0 matrice=48 attrib=4 gpuv6=6 sweep=0 gpu=0 frontier=0 bench=0 queue=0 runs ===
+--- fini mat_uniform_n16000_t16_i2_j0_sans_p1 (code=0, 21s, rss=5162892kB)
+--- fini mat_uniform_n16000_t24_i2_j0_sans_p1 (code=0, 18s, rss=5880776kB)
+--- fini mat_uniform_n16000_t32_i2_j0_sans_p1 (code=0, 15s, rss=5793916kB)
+--- fini mat_uniform_n16000_t48_i2_j0_sans_p1 (code=0, 14s, rss=6590304kB)
+--- fini mat_uniform_n16000_t24_i1_j0_sans_p1 (code=0, 19s, rss=5326340kB)
+--- fini mat_uniform_n16000_t24_i4_j0_sans_p1 (code=0, 17s, rss=5840708kB)
+--- fini mat_uniform_n16000_t48_i1_j0_sans_p1 (code=0, 16s, rss=5933080kB)
+--- fini mat_uniform_n16000_t48_i4_j0_sans_p1 (code=0, 14s, rss=6588000kB)
+--- fini mat_uniform_n16000_t16_i2_j1_sans_p1 (code=0, 26s, rss=4536064kB)
+--- fini mat_uniform_n16000_t48_i2_j1_sans_p1 (code=0, 19s, rss=5514280kB)
+--- fini mat_uniform_n16000_t48_i2_j0_avec_p1 (code=0, 17s, rss=6798656kB)
+--- fini mat_uniform_n16000_t48_i2_j1_avec_p1 (code=0, 24s, rss=5667972kB)
+--- fini mat_uniform_n50000_t48_i2_j0_sans_p1 (code=0, 48s, rss=18861224kB)
+--- fini mat_uniform_n50000_t48_i2_j1_sans_p1 (code=0, 65s, rss=14674668kB)
+--- fini mat_uniform_n50000_t48_i2_j0_avec_p1 (code=0, 59s, rss=19832568kB)
+--- fini mat_uniform_n50000_t48_i2_j1_avec_p1 (code=0, 83s, rss=15103652kB)
+--- fini mat_uniform_n50000_t48_i2_j1_avec_p2 (code=0, 83s, rss=15566732kB)
+--- fini mat_uniform_n50000_t48_i2_j0_avec_p2 (code=0, 58s, rss=19787788kB)
+--- fini mat_uniform_n50000_t48_i2_j1_sans_p2 (code=0, 65s, rss=14654328kB)
+--- fini mat_uniform_n50000_t48_i2_j0_sans_p2 (code=0, 48s, rss=18134432kB)
+--- fini mat_uniform_n16000_t48_i2_j1_avec_p2 (code=0, 24s, rss=5629624kB)
+--- fini mat_uniform_n16000_t48_i2_j0_avec_p2 (code=0, 17s, rss=6740888kB)
+--- fini mat_uniform_n16000_t48_i2_j1_sans_p2 (code=0, 18s, rss=5542220kB)
+--- fini mat_uniform_n16000_t16_i2_j1_sans_p2 (code=0, 27s, rss=4489164kB)
+--- fini mat_uniform_n16000_t48_i4_j0_sans_p2 (code=0, 13s, rss=6570348kB)
+--- fini mat_uniform_n16000_t48_i1_j0_sans_p2 (code=0, 16s, rss=5991984kB)
+--- fini mat_uniform_n16000_t24_i4_j0_sans_p2 (code=0, 17s, rss=5838160kB)
+--- fini mat_uniform_n16000_t24_i1_j0_sans_p2 (code=0, 19s, rss=5303408kB)
+--- fini mat_uniform_n16000_t48_i2_j0_sans_p2 (code=0, 14s, rss=6581680kB)
+--- fini mat_uniform_n16000_t32_i2_j0_sans_p2 (code=0, 16s, rss=5809496kB)
+--- fini mat_uniform_n16000_t24_i2_j0_sans_p2 (code=0, 17s, rss=5881316kB)
+--- fini mat_uniform_n16000_t16_i2_j0_sans_p2 (code=0, 22s, rss=5152744kB)
+--- fini mat_uniform_n16000_t16_i2_j1_sans_p3 (code=0, 27s, rss=4493964kB)
+--- fini mat_uniform_n16000_t48_i2_j1_sans_p3 (code=0, 18s, rss=5534132kB)
+--- fini mat_uniform_n16000_t48_i2_j0_avec_p3 (code=0, 17s, rss=6750636kB)
+--- fini mat_uniform_n16000_t48_i2_j1_avec_p3 (code=0, 24s, rss=5842896kB)
+--- fini mat_uniform_n50000_t48_i2_j0_sans_p3 (code=0, 48s, rss=18901732kB)
+--- fini mat_uniform_n50000_t48_i2_j1_sans_p3 (code=0, 65s, rss=14669760kB)
+--- fini mat_uniform_n50000_t48_i2_j0_avec_p3 (code=0, 59s, rss=19774628kB)
+--- fini mat_uniform_n50000_t48_i2_j1_avec_p3 (code=0, 83s, rss=15042900kB)
+--- fini mat_uniform_n16000_t16_i2_j0_sans_p3 (code=0, 22s, rss=5154308kB)
+--- fini mat_uniform_n16000_t24_i2_j0_sans_p3 (code=0, 17s, rss=5876136kB)
+--- fini mat_uniform_n16000_t32_i2_j0_sans_p3 (code=0, 16s, rss=5757212kB)
+--- fini mat_uniform_n16000_t48_i2_j0_sans_p3 (code=0, 14s, rss=6677144kB)
+--- fini mat_uniform_n16000_t24_i1_j0_sans_p3 (code=0, 18s, rss=5336976kB)
+--- fini mat_uniform_n16000_t24_i4_j0_sans_p3 (code=0, 18s, rss=5886328kB)
+--- fini mat_uniform_n16000_t48_i1_j0_sans_p3 (code=0, 15s, rss=6078092kB)
+--- fini mat_uniform_n16000_t48_i4_j0_sans_p3 (code=0, 14s, rss=6633760kB)
+--- fini attrib_uniform_n16000_t16_i2_j0 (code=0, 22s, rss=5419696kB)
+--- fini attrib_uniform_n16000_t48_i2_j0 (code=0, 14s, rss=6552960kB)
+--- fini attrib_uniform_n16000_t48_i2_j1 (code=0, 19s, rss=5598216kB)
+--- fini attrib_uniform_n50000_t48_i2_j1 (code=0, 68s, rss=14660888kB)
+--- fini gpuv6_build (code=0, 29s, rss=691584kB)
+--- fini gpuv6_gates (code=0, 53s, rss=430604kB)
+--- fini pilote_uniform_n50000 (code=0, 562s, rss=20743564kB)
+--- fini pilote_terrain_n50000 (code=0, 186s, rss=4940268kB)
+--- fini pilote_eight_clusters_n50000 (code=0, 675s, rss=18864352kB)
+--- fini pilote_scanline_single_pass_n50000 (code=0, 153s, rss=4461260kB)
+=== fin des runs (la validation locale decide du statut, jamais cette ligne) ===
+remote_campaign_rc=0
+scp_rc=0
+[STOP] État actuel de ehgp-blackwell-spot-ai1a : RUNNING.
+Stopping instance(s) ehgp-blackwell-spot-ai1a...
+.........................................................................................................................................................................................................................................................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+[OK] Cible ehgp-blackwell-spot-ai1a arrêtée et vérifiée (état GCE TERMINATED).
+[INFO] Aucune autre VM project=e-hgp active détectée.
+arret cible post-rapatriement certifie (generation 2026-09-01T13:06:27.081-07:00, tentative 1)
+campaign_status=verifie_non_decisionnel profil=g4_serie_c_v1 canonique=g4_serie_c_v1 cause=profil non decisionnel (58 runs valides — JAMAIS une decision)
+--- arret certifie (rc=0) ---
+arret deja certifie par le garde (generation 2026-09-01T13:06:27.081-07:00, source independante+registre) : aucun second arret

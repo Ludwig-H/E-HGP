@@ -1,0 +1,7 @@
+frontier_plan=v1
+specs=aucun
+threads=48
+s=8 smax=11 seed=3
+timeout=3600
+ulimit_kb=0
+runs=0
