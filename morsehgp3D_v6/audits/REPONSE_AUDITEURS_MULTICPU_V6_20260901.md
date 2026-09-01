@@ -17,9 +17,12 @@ nettoyage de leurs portes ; GO pour poursuivre le diagnostic local apparié ;
 pas encore pour une réduction par segments ni pour C2/C3 sans contrat wire.**
 Le quatrième jet ferme bien les deux courses C1 connues dans le code : la
 panne fatale est confinée côté worker avant notification, et le passage
-file→actif est linéarisé sous le mutex. Le mutant causal et son hook reçoivent
-ce second point. Il reste à rendre les portes de mutants sélectives, puis à
-reconstruire et rejouer sur le commit source qui portera ce worktree.
+file→actif est linéarisé sous le mutex. Le mutant ajouté localise utilement la
+fenêtre après le hook, mais ne prouve pas encore que l'activation reste sous
+le mutex ; le § 5.6 donne le petit réordonnancement qui rend cette dent exacte.
+Les quatre portes mutantes viennent par ailleurs d'être isolées dans le
+worktree. Il reste à reconstruire et rejouer sur le commit source qui portera
+ce lot.
 
 Le témoin arithmétique hôte et la garde 2E ont aussi progressé jusqu'à une
 portée utile et honnête. Ils ne constituent toujours ni une compilation
@@ -274,7 +277,7 @@ Les petits cas adversariaux champ par champ doivent précéder les digests 50k ;
 C5 exige une nouvelle source v6 épinglée, répétitions et coûts H2D/D2H, pas le
 reçu GPU v5 historique.
 
-### 5.6 C1 : cœur corrigé, portes mutantes à isoler
+### 5.6 C1 : cœur corrigé, dernière dent à rendre exacte
 
 La sonde historique de `671ed3cc` reste une bonne contre-fixture : avec un
 exécuteur, un job fatal puis un ticket effectivement en file, elle observait
@@ -287,28 +290,43 @@ Les durcissements connexes sont présents : `submitted_` est incrémenté après
 le `push_back`, l'annulation possède un bit indépendant de
 `exception_ptr`, les attentes `queued` sont bornées, les échecs total et
 partiel de construction sont exercés, et `p34_typed` est atomique. La fenêtre
-file→actif est aussi fermée dans le code par `pop_front + active++` sous le
-même mutex. Le nouveau mutant `pool-activate-after-unlock`, un hook test-only
-placé exactement après cette section critique et le scénario 13 forment la
-contre-preuve causale manquante. Un build Release temporaire donne 2/2 sur le
-nominal et cette porte en 0,32 s ; le mutant rend 4 avec le snapshot attendu
-« ticket ni actif ni en file ».
+file→actif est aussi fermée dans le **code** par `pop_front + active++` sous le
+même mutex.
 
-Le seul nettoyage substantiel avant réception du paquet est la **sélectivité
-des portes mutantes**. En exécution directe actuelle, `pool-serial` rend bien
-4 mais après 40,26 s et avec deux échecs parasites : le scénario de
-constructeur partiel ne peut plus construire son second exécuteur, et le
-scénario 12 exige deux workers alors que ce mutant force N=1.
-`pool-drop-exception` fait de même échouer quatre scénarios fatals sans rapport
-avec sa dent propre. La clause terminale accepte aujourd'hui toute combinaison
-via `failures || !peak_exact || !exc_ok`. Isoler chaque injection sur sa
-signature causale — pic manqué pour `pool-serial`, exception avalée pour
-`pool-drop-exception`, réutilisation post-fatale pour
-`pool-worker-resume-after-fatal`, ticket manqué pour
-`pool-activate-after-unlock` — rendra le vert beaucoup plus informatif et
-supprimera les attentes inutiles. Le correctif minimal est de sauter les
-scènes nominales incompatibles sous chaque mutant, puis d'exiger zéro échec
-parasite autour de la signature visée.
+La preuve permanente de ce dernier point est cependant encore un cran trop
+faible. Le hook actuel vient après la section critique dans les deux chemins ;
+le mutant retarde en plus `active++` après ce hook. Il tue donc exactement
+« activation après le hook », mais une régression réelle
+`pop ; unlock ; active++ ; hook` resterait verte alors que l'activation aurait
+quitté `mu_`. Le nom `pool-activate-after-unlock` surqualifie ainsi la dent.
+
+Le correctif est petit et aide à tester la vraie frontière : appeler un hook
+`pre_activate` immédiatement **avant** `active++`, sous `mu_` au nominal et
+après l'unlock sous le mutant. Lancer `close_fatal` dans un fil closer. Au
+nominal, ce fil reste derrière `mu_` jusqu'à la libération du hook, puis voit
+le ticket actif ; sous le mutant, attendre que le closer ait fermé et capturé
+`active=0, queued=0` avant de libérer le hook. Garder le corps du job retenu
+jusqu'au snapshot évite une course avec sa décrémentation. Cette scène tue
+alors le déplacement exact hors verrou, pas un délai artificiel ultérieur.
+
+La **sélectivité des portes mutantes** vient en revanche d'être corrigée dans
+le worktree : chaque injection saute directement à sa scène-signature. C'est
+la bonne forme et cela retire notamment les 40 s et échecs parasites du mutant
+`pool-serial` observés sur le binaire précédent. Elle demande encore un build
+et un rejeu frais, car la suite déjà en cours a commencé avant cette édition.
+
+Deux préconditions de ces nouvelles scènes doivent encore devenir des refus
+de fixture, jamais des codes 4. La branche
+`pool-worker-resume-after-fatal` attend `fatal_entered` et `queued == 1`, mais
+ne vérifie aucun des deux résultats avant de libérer le fatal : une échéance
+peut donc faire exécuter le second job et tuer le mutant pour la mauvaise
+raison. Rendre 3 si l'une des deux préconditions n'est pas attestée ferme ce
+cas. Dans la branche `pool-serial`, la boucle `{2, 8}` rend 4 dès N=2 : N=8
+n'est jamais exercé, contrairement à la réponse Claude. Soit annoncer et
+exiger exactement N=2 avec `g_built == 1` et `peak == 1`, soit accumuler les
+deux observations avant le verdict. Une latch adaptée au mutant, libérée dès
+le premier job actif et la file non vide, évitera aussi l'attente attendue de
+cinq secondes.
 
 Le scénario 12 ne prouve pas que `p5` est entré dans `cv_space_.wait` avant
 la fermeture ; il peut être ordonnancé après celle-ci et recevoir la même
@@ -317,6 +335,11 @@ de retirer « producteur bloqué » du titre/commentaire de la scène. Si le
 réveil par `cv_space_.notify_all()` doit devenir une propriété reçue, ajouter
 un compteur de waiters test-only sous `mu_` et attendre exactement un waiter
 avant de libérer le fatal.
+
+Enfin, le premier `wait_for(held_started >= 2)` du scénario 9 ignore encore
+son résultat. Ajouter l'assertion déjà employée au scénario 12 transforme un
+timeout de fixture en échec explicite au lieu de poursuivre sur un état non
+attesté.
 
 Les commentaires bornent désormais correctement la conversion
 transactionnelle dans `run.hpp` à une intention C2–C5 : aucun chemin produit
