@@ -2,11 +2,9 @@
 
 Date : 1er septembre 2026.
 
-Coupe observée à 07:45 UTC : worktree v6 non committé au-dessus de
-`629b2053`, empreinte du diff suivi avec `caps.hpp`
-`e8d0c6cae1e63735ab10b133c02be80004430578872b9018f18e8de4942e19b4`.
-Cette note n'est pas un verdict sur un commit ; elle sera absorbée puis
-retirée après le checkpoint propre.
+Coupe observée à 07:52 UTC : worktree v6 non committé au-dessus de
+`58270bac`. Cette note n'est pas un verdict sur un commit ; elle sera absorbée
+puis retirée après le checkpoint propre.
 
 Cadre :
 
@@ -44,48 +42,38 @@ candidats et `eight_clusters(2000, 400, 3)` en avait matérialisé 1 033. Le
 nouveau champ `emitted_at_refus` rend enfin cet overshoot observable ; sa borne
 sur ces témoins est une non-régression mesurée, pas encore une borne générale.
 
-## Réponse au troisième jet — chemin court vers le checkpoint
+## Réponse au quatrième jet — une dernière correction locale
 
-Les corrections demandées sont maintenant effectivement présentes : arrêt
-q3/q4 remonté jusqu'au rectangle, vague dynamique exercée à 2 048, garde
-`alive` dédiée, compteurs de callbacks atomiques, petit budget refusé avant
-génération, second produit de `fits_budget` exercé et commentaire CLI corrigé.
-Le cap coopératif à overshoot borné est une solution recevable pour ce
-checkpoint ; aucun quota atomique par candidat n'est demandé.
+Les corrections demandées sont désormais présentes. Le facteur du tampon
+`ForestEvent` vaut `inflight+2` et sa fixture séparée `smax=2` est causale :
+sur le témoin observé, tri et census passent à 2,12 Mio et 4,48 Mio, puis seul
+le fold refuse à 5,24 Mio avec `inflight=3`. Le rejeu Release passe les trois
+CTest caps en 84,92 s. Le cap coopératif à overshoot borné reste une solution
+recevable ; aucun quota atomique par candidat n'est demandé.
 
-Il reste **une seule fragilité de porte** : un rejeu Release a échoué sur
-`mhgp6_caps_refus` avec `(c) : message attendu`, tandis que deux rejeux
-concurrents ont passé les trois caps. Cette alternance vient d'un décalage
-mécanique : le test choisit son budget avec `temoin.emitted`, alors que les
-gardes utilisent désormais la `cands.capacity()` résidente. Pour rendre les
-étages causaux sans valeur magique :
+Ne pas conserver en revanche les deux `shrink_to_fit()` introduits pour
+stabiliser la fixture. En C++ cette requête est non contraignante : elle ne
+prouve pas `capacity()==size()`. Surtout, celle placée avant la garde du tri
+peut allouer et copier tout le vecteur avant le refus censé protéger son
+tampon.
 
-1. exposer la capacité candidate du témoin comme diagnostic non-payload ;
-2. calculer par helpers contrôlés
-   `tri_need = capacity × sizeof(BallCandidate) × 2` et
-   `census_need = capacity × (sizeof(BallCandidate) + sizeof(Survivor) + 2 × sizeof(BallData))` ;
-3. tester le tri avec `tri_need - 1`, puis le préfiltre/census avec
-   `tri_need` : l'égalité passe exactement le tri et reste strictement sous
-   `census_need`.
+Le chemin court est déjà disponible dans `generate_candidates` : après la
+somme exacte et le contrôle du cap, réserver `exact` dans `out` **avant** la
+fusion globale, puis fusionner les shards. Cela évite les croissances variables
+sans ajouter de copie pré-garde. Conserver cette capacité résidente à travers
+le RLE, l'exposer juste avant le tri et calculer les fenêtres causales à partir
+d'elle ; aucun compactage supplémentaire n'est nécessaire.
 
-Un petit calcul est également à aligner dans la garde du fold. Pendant
-`expand_events_k`, les shards `lev` et la sortie fusionnée coexistent, alors
-que jusqu'à `fold_inflight` stages précédents peuvent encore être résidents :
-le facteur cardinalitaire conservateur du tampon `ForestEvent` est donc
-`inflight+2`, pas `inflight+1`. Changer ce facteur et exercer une fois ce refus
-suffit ; le budget complet des autres structures du fold n'est pas demandé.
+Enfin, aligner les quatre libellés encore anciens : `GenerateOptions` parle de
+64 K et d'un refus avant matérialisation, le message de refus brut répète cette
+dernière promesse, le commentaire de somme exacte parle de « matérialisation
+unique », et l'en-tête de `run.hpp` annonce toujours `fold_inflight+1`. Le
+contrat livré est : **cap de cardinalité à overshoot borné, arrêt avant fusion
+globale et tri**, avec budget partiel de tampons nommés.
 
-Deux alignements textuels terminent le patch. Les commentaires parlent encore
-de tranches de 64 K alors que le code publie toutes les 4 096 émissions, et
-`caps.hpp`, `GenerateOptions`, `run_pipeline` ainsi que CMake disent encore
-« avant matérialisation/allocation ». Le contrat réellement livré est plus
-précis : **cap de cardinalité à overshoot borné, arrêt avant fusion globale et
-tri**. Les shards WSPD sont bornés par construction mais non gardés avant leur
-allocation locale ; conserver le terme « pré-fusion globale ». La
-qualification explicite du budget comme partiel reste acceptée.
-
-Après ces ajustements, rejouer les trois caps, la suite v6 hors échelle et les
-portes documentaires suffit pour proposer le checkpoint à contre-audit.
+Après ce remplacement local, rejouer deux fois le nominal caps, les deux
+mutants, la suite v6 hors échelle et les portes documentaires suffit pour
+proposer le checkpoint à contre-audit.
 
 Le GO G4 `d98f4729` n'est pas révoqué, mais son pin refuse correctement ce
 worktree normatif sale. Aucun lancement ne doit partir de cet état ; un
