@@ -2,13 +2,15 @@
 
 Date de coupe : 1er septembre 2026.
 
-Coupe de code observée : `4a85c13d`. Autorités techniques : `6d755804` pour le
+Coupe source observée : `1069bc20` pour le profil `reduce`; les mises à jour
+du seul audit ne changent pas cette coupe. Autorités techniques : `6d755804` pour le
 prototype E3/G16, `cd49a390` pour les callbacks, `d98f4729` pour le protocole
 et la source réellement exécutée sur G4, `94c74155` pour l'autorisation
 mono-session désormais consommée, `df1a3c5f` pour l'archivage de son reçu,
 `6e293deb` pour le checkpoint de plafonds, `671ed3cc` pour le premier pool
 d'exécuteurs GPU hôte, `4a85c13d` pour sa correction causale, la garde 2E et
-le témoin arithmétique hôte, `320299df` pour le reçu de
+le témoin arithmétique hôte, `1069bc20` pour le harnais de profil,
+`320299df` pour le reçu de
 réplication et `8ed2dea6` pour le reçu de confirmation contre-audité
 ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 
@@ -31,7 +33,7 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
 | plafonds et budget mémoire `4a85c13d` | cap coopératif et refus transactionnels reçus ; garde logique `2E` avant la réserve de fusion reçue, proxy de payload nommé seulement, sans claim RSS/OOM |
-| saturation multi-CPU du fold | le dernier WIP non ancré construit et exerce profil, liveness, séparation des builds, `join=1` causal et effacement K2 ; restent les champs/planchers par K et l'alignement exact des horizons/vocabulaire avant attribution diagnostique, sans reçu de performance |
+| saturation multi-CPU du fold `1069bc20` | pin construit et suite `gate` 92/92 ; profil, liveness, builds distincts, projection nommée, `join=1` et effacement K2 reçus dans leur portée, mais attribution nulle et fuite `stderr` restent faussement vertes ; aucun reçu de performance |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP `d98f4729` | GO mono-session consommé et clos ; reçu `df1a3c5f` validé non décisionnel, arrêt ciblé certifié |
@@ -87,12 +89,15 @@ leurs durées reflètent la contention. En particulier, 89 est le nombre de
 tests **hors échelle**, jamais une suite « échelle comprise ». Aucun rejeu
 indépendant des 15 tests d'échelle n'est revendiqué à ce pin.
 
-Après `e32262d3`, le worktree de profil non ancré a été reconstruit dans un
-build Release isolé : normal, profil, vivacité et contrat compilent, puis les
-trois portes ciblées passent 3/3 en 8,45 s, avec empreintes source identiques
-avant et après. La contre-preuve qui substitue le binaire profilé au binaire
-normal rend désormais 1. Ces résultats qualifient le harnais en cours, pas un
-pin ni une performance.
+Depuis un `git archive 1069bc20`, les cibles normales, profilées, vivacité et
+contrat ont été construites en Release avec warnings fatals. Les trois portes
+ciblées passent 3/3 en 9,32 s ; la suite locale du label `gate` passe 92/92 en
+264,93 s réelles et 796,36 s cumulées par CTest. La substitution du binaire
+profilé au normal rend bien 1. Deux enveloppes jetables rendent toutefois
+encore 0 : neuf composantes et `somme` mises à zéro avec
+`residuel=mur_reduce_interne`, puis une ligne `profil_*` ajoutée sur stderr.
+Le pin est donc reçu comme harnais fonctionnel, pas encore comme porte fermée
+d'attribution et jamais comme performance.
 
 `git diff --check` est propre, `tools/check_docs.py` valide 246 Markdown actifs
 et `tools/check_implementation_status.py` valide 20 phases. Aucun `nvcc` ni
@@ -100,10 +105,9 @@ device n'a été exercé. C1 reste une brique hôte non raccordée à `run.hpp` 
 file ne borne ni les captures des producteurs, ni les buffers d'exécuteurs,
 ni la VRAM. Le témoin ne couvre pas encore `BallKey::power`, `AxisBounds` ou
 la division plancher. La garde 2E reste un proxy logique de tailles, sans
-promesse RSS/OOM. Les écarts de worktree après le commit sont la refonte
-instrumentée de `src/forest/fold.hpp`, son raccord dans `src/pipeline/run.hpp`,
-son option CLI, sa cible CMake, ses deux portes et leur entrée dans le plan de
-tests, explicitement hors checkpoint et hors GO de performance.
+promesse RSS/OOM. Les écarts de worktree postérieurs à `1069bc20` concernent
+le nouveau WIP C2/wire ; ils sont exclus de ce reçu de profil et de tout GO de
+performance.
 
 ## Exact-K, omission unique et ownership WSPD
 

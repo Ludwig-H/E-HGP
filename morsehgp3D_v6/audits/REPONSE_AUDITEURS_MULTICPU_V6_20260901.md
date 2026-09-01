@@ -3,9 +3,9 @@
 Date : 1er septembre 2026. Données mesurées à `d98f4729`, question
 `ad005432` et conception `b18f1400`. La course de `671ed3cc` est conservée
 ci-dessous comme contre-fixture historique ; la contre-lecture couvre le
-checkpoint source `4a85c13d`. La refonte de profil suivante touche désormais
-le manifeste, le plan de tests, `fold.hpp`, `run.hpp`, la CLI et deux portes
-hors commit ; elle ne fait pas partie de ce reçu.
+checkpoint source `4a85c13d`, puis le profil ancré à `1069bc20`. Ce dernier a
+été rejoué depuis un export Git isolé : le WIP C2 postérieur n'entre donc dans
+aucun verdict de profil ci-dessous.
 
 Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -25,10 +25,10 @@ série est réparé. Le § 5.6 reçoit ce C1 hôte au pin source `4a85c13d`.
 
 Le témoin arithmétique hôte et la garde 2E ont aussi progressé jusqu'à une
 portée utile et honnête. Ils ne constituent toujours ni une compilation
-`nvcc`, ni une exécution device, ni une preuve C3. Le prochain travail CPU
-utile reste le profil B corrigé : isoler réellement B, comparer
-`fold_inflight=1/2/4/8`, séparer cœurs physiques et SMT, puis mesurer la
-concurrence avec l'étage A avant tout choix de nouvelle architecture.
+`nvcc`, ni une exécution device, ni une preuve C3. Le profil B est maintenant
+ancré et fonctionnel, mais deux contre-fixtures de sa porte restent à tuer
+avant de lancer la matrice `fold_inflight=1/2/4/8` : attribution entièrement
+nulle et fuite de profil sur `stderr`.
 
 La projection « 49 s vers 30 s » n'est pas encore déduite des compteurs. À
 50k/48 fils, `t_fold_reduce_ms=27,9 s` est la **somme** de plusieurs réductions
@@ -438,53 +438,55 @@ renommé `cap_fusion_budgetaire` plutôt que de prétendre être le cap effectif
 du run. `PLAN_DE_TESTS.md` et le § 3 de la réponse Claude sont maintenant
 alignés.
 
-### 5.10 Profil `reduce` : harnais fonctionnel, portées à finir avant le pin
+### 5.10 Profil `reduce` à `1069bc20` : pin fonctionnel, porte d'attribution encore ajourée
 
-Le jet postérieur à `e32262d3` ferme les dents principales demandées : cible
-CMake `mhgp6_profile_liveness` réellement exécutée, type de profil exact,
-vivacité non vide par K, séparation causale des builds, ensembles de K
-cohérents, chaîne A vers réduction et sérialisation inter-K sous `join=1`, pics
-à un dans ce mode, et scène K2 jointe avec profil K1 positif avant effacement
-terminal. Les noms publics `duree_digest_foret_k_ms`,
-`fusion_et_lib_parts` et `remap_et_lib_pools` bornent aussi mieux les fenêtres.
+Un export exact de `1069bc20` construit en Release les cibles normales,
+profilées et de vivacité avec les warnings fatals. Les trois portes ciblées
+passent 3/3 en 9,32 s. La suite locale portant le label `gate` passe 92/92 en
+264,93 s réelles (796,36 s cumulées par CTest). Ce rejeu CPU valide le pin et
+ses contrats existants ; ce n'est ni une mesure de débit, ni un résultat GPU.
 
-Sur une source non ancrée mais stable pendant tout le rejeu, les quatre cibles
-`mhgp6`, `mhgp6_profile`, `mhgp6_profile_liveness` et
-`mhgp6_profil_contrat` se construisent en Release avec les warnings fatals.
-Les trois CTests ciblés passent 3/3 en 8,45 s. La contre-preuve de build est
-désormais discriminante : fournir `mhgp6_profile` à la place du binaire normal
-rend 1 sur la ligne profilée inattendue. Ce sont des preuves du worktree,
-jamais un reçu de commit ni une mesure de performance.
+Le pin reçoit dans leur portée bornée la cible liveness réellement distincte,
+les schémas exacts par ligne, la projection déterministe nommée, la
+discrimination normal/profil, les ensembles de K cohérents, la chaîne
+A→réduction, la sérialisation observée sous `join=1`, la scène K2 non vacue et
+l'effacement terminal. L'implémentation de la jonction et le RAII du pic ne
+présentent pas de défaut fonctionnel à la lecture. L'exactitude de l'ensemble
+K1--`kmax_eff` reste volontairement au juge exact-K ; la dupliquer ici
+n'ajouterait pas une dent indépendante. De même, `join=0` reste permissif :
+exiger un chevauchement temporel dépendrait du scheduler.
 
-Aucun défaut fonctionnel nouveau n'apparaît dans la vivacité à deux phases, le
-RAII du pic de réduction, la jonction, la publication ordonnée ou
-l'invalidation terminale. Deux finitions restent utiles avant l'ancrage :
+Deux contre-fixtures causales empêchent encore de recevoir la porte comme
+preuve d'attribution :
 
-1. **Rendre le schéma non vacu et explicite par K.** `profil_intern K=n` sans
-   aucune des cinq colonnes attendues passe encore, car seule la finitude des
-   champs présents est vérifiée. Exiger exactement les champs contractuels
-   renommés. Exiger aussi `mur_reduce_interne > 0` ou `somme > 0` pour chaque K,
-   et le même plancher non arrondi dans la porte C++ ; le plancher agrégé actuel
-   autorise un record K vide si les autres sont positifs. Il n'est en revanche
-   pas utile de dupliquer ici tout le juge exact-K : l'égalité des ensembles
-   normal/profil/vivacité est le contrat propre à cette porte, tandis que
-   l'exactitude K1--`kmax_eff` reste portée par les fixtures du juge.
-2. **Écrire les horizons réellement mesurés.** Le CMake et le début de la
-   réponse Claude disent encore « objet + digests » ou B/B et A/B, alors que la
-   preuve porte sur une projection déterministe et les intervalles sur
-   réduction/réduction et A/réduction. `profile.begin` est pris après le
-   déplacement initial et le test de refus ; le record est copié à la
-   publication mais imprimé après `run_pipeline`. Le profil n'ajoute plus
-   d'I/O dans les workers, mais le worker peut toujours exécuter un callback et
-   lit `/proc/self/statm` sous `pub_mutex` : ne pas écrire « aucune I/O dans les
-   workers ». `init_ms` ne couvre pas d'allocation dynamique de `scratch`, qui
-   grandit dans `post_remplissage`; `liberation_ms` ne couvre que `ev_fid` et
-   `FidState`, les autres destructeurs restant après `profile.end`. Les
-   colonnes d'internement sont elles aussi des fenêtres locales sélectives,
-   pas un bilan exhaustif de tous les temporaires. Enfin, la vivacité parcourt
-   les incidences trois fois — précompte, activation, décrément — et
-   `sizeof(FidState)==32` ne prouve ni ligne de cache de 64 octets ni alignement
-   permettant « deux par ligne ».
+1. **Exiger une attribution non nulle et recalculée.** Une enveloppe locale
+   remplace les neuf composantes et `somme` par zéro, puis pose
+   `residuel=mur_reduce_interne` ; la porte rend encore 0. Elle ne recalcule pas
+   non plus `somme` depuis les neuf composantes. Dans `profil_gate.py`, calculer
+   ce total, le comparer au champ imprimé à la tolérance d'arrondi, puis exiger
+   le total strictement positif pour chaque K. Dans
+   `profil_contrat_echec.cpp`, remplacer `mur > 0 || somme > 0` par
+   `somme > 0` pour chaque record ; la scène K2 ne couvre actuellement cette
+   exigence que pour K1.
+2. **Observer `stdout` et `stderr`.** Une enveloppe qui conserve stdout mais
+   ajoute `profil_worker_contaminant=1` sur stderr rend encore 0. Faire
+   retourner les deux flux par `run()`, rejeter toute ligne `profil_*`
+   inattendue sur stderr des succès normal/profil/vivacité, et rechercher les
+   surfaces provisoires `profil_*`/`digest_*` dans les deux flux du refus. Le
+   diagnostic de refus attendu peut naturellement rester sur stderr.
+
+Une passe de vocabulaire peut être jointe au même petit correctif sans bloquer
+Claude davantage. Les commentaires locaux disent encore que `init` commence
+« dès l'entrée » et alloue `scratch`, que la vivacité fait deux parcours, que
+le record est imprimé à la publication et qu'aucune I/O n'a lieu dans les
+workers. En réalité le début suit le déplacement/refus, `scratch` grandit dans
+`post_remplissage`, les incidences sont parcourues trois fois, le record est
+copié à la publication puis imprimé après `run_pipeline`, et callback/RSS
+peuvent faire de l'I/O côté worker. La colonne `liberation` ne couvre que
+`ev_fid` et `FidState`; `offsets_diffusion` inclut aussi la libération de
+`crec`. Les renommer ou documenter explicitement suffit. Enfin, compactage et
+prefetch restent des hypothèses face à une latence mémoire non mesurée, pas des
+remèdes établis.
 
 La porte atteste désormais causalement le chemin `join=1`. Elle ne prouve pas
 que `join=0` produit effectivement un chevauchement : l'imposer sur une mesure
@@ -493,14 +495,13 @@ constructive : décrire `join=0` comme permissif ; si la différenciation devien
 un contrat, ajouter plus tard une barrière test-only qui force deux workers en
 vol plutôt qu'un plancher temporel fragile.
 
-La réponse Claude a correctement retiré « livré » de son titre, mais code,
-deux tests et réponse restent non suivis ou modifiés. Conserver le terme WIP
-jusqu'au commit source, puis mettre le présent paragraphe et
-`ETAT_COURANT.md` à jour en place au pin exact plutôt que d'empiler un nouvel
+La source, les deux tests et la réponse Claude sont ancrés ensemble à
+`1069bc20`. Un petit correctif qui tue ces deux contre-fixtures et aligne les
+libellés suffit ; ne pas rouvrir le design du profil ni empiler un nouvel
 audit.
 
-Une fois ce harnais ancré, le prochain pas utile n'est pas un nouveau design
-à l'aveugle : exécuter une petite matrice appariée fils × inflight × join. Le
+Une fois ces deux dents fermées, le prochain pas utile n'est pas un nouveau
+design à l'aveugle : exécuter une petite matrice appariée fils × inflight × join. Le
 mur de débit vient du Release non instrumenté ; le binaire de profil attribue
 seulement les fenêtres internes. Si `join=1` améliore le mur à travail B
 stable, travailler d'abord le budget de workers ou l'affinité ; si
@@ -513,8 +514,8 @@ encore reçu.
 
 1. **achevé à `4a85c13d`** : C1, garde `2E` et témoin hôte ancrés ensemble,
    brouillon `fold.hpp` correctement laissé hors checkpoint ;
-2. fermer les quatre défauts de profil du § 5.10, graver sa porte d'identité,
-   puis exécuter B/inflight avant de choisir le design A ;
+2. tuer les deux contre-fixtures causales du profil au § 5.10, aligner ses
+   libellés, puis exécuter B/inflight avant de choisir le design A ;
 3. figer le wire, le budget VRAM et le témoin device arithmétique ; C2 peut
    alors devenir une brique hôte testable et C3 un port CUDA falsifiable ;
 4. si la cause CPU est la concurrence A/B, prototyper un budget de workers ou
