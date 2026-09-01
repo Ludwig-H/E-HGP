@@ -606,12 +606,11 @@ rouvrir l'algorithme des kernels :
   elle doit être précédée du contrôle de sentinelles pour que toute boule et
   tout champ aient effectivement été produits.
 
-Une faute locale doit être corrigée avant toute session : dans
-`census_device_gate.cu`, la copie D2H de `d_cand` demande actuellement `nb`
-octets au lieu de `nb * sizeof(u32)`. La majeure partie de `h_cand` resterait
-donc à zéro et la porte nominale produirait un faux rouge sur G4. Le pilote
-`mhgp6_cuda` emploie déjà la bonne taille ; corriger cette seule copie et la
-faire mordre par la sentinelle suffit.
+Une faute locale détectée pendant la lecture a été corrigée dans le WIP :
+`census_device_gate.cu` demandait `nb` octets pour la copie D2H de `d_cand`
+au lieu de `nb * sizeof(u32)`. La majeure partie de `h_cand` serait restée à
+zéro et la porte nominale aurait produit un faux rouge sur G4. La taille est
+désormais correcte et la sentinelle la couvre ; ne pas rouvrir ce point.
 
 Photographie WIP locale antérieure aux corrections ci-dessous : après
 reconfiguration Release, 10 des 11 CTests
@@ -633,26 +632,30 @@ au census. La porte CUDA faisait déjà le premier travail ; la généralisation
 au pilote produit était bien l'écart. Ces corrections ne sont pas encore un
 pin ni un reçu, mais il ne faut plus les présenter comme manquantes.
 
-Deux fermetures courtes restent en revanche avant le pin :
+Claude a également fermé dans le WIP la validation `count/h/masse`, la
+reconstruction transactionnelle dans des temporaires et le comptage des 100
+octets H2D de sentinelles par candidat. Il reste une fermeture fonctionnelle
+avant le pin : **aucune porte n'exerce plusieurs lots**. Le gate 400 conserve
+le défaut `lot=2^21`, donc `base_idx`, l'offset `base*112`, les destinations
+D2H et la fusion en ordre global ne sont jugés qu'avec `base=0`. Ajouter une
+porte locale puis device avec `--lot=17`, exiger `lots>1`, et idéalement un
+mutant `base-reset` suffit ; nul besoin de retoucher l'algorithme des kernels.
 
-- passer aussi `count`, `h` et la masse totale au validateur. Aujourd'hui un
-  `count=~0` survivant est ignoré pour une boule déclarée morte. Refuser la
-  sentinelle, exiger `count <= masse_totale`, puis `ok => count < h` et
-  `at_least_h => count >= h`. Une dent `skip-count-write` ou une table unitaire
-  du validateur est plus causale que `skip-ball-write`, qui saute les deux
-  statuts en même temps ;
-- rendre les deux routes transactionnelles en propre : valider toutes les
-  lignes, reconstruire dans des temporaires et accumuler des statistiques
-  locales, puis seulement échanger/publier. Un refus tardif laisse actuellement
-  un préfixe dans `surv`/`balls` et des compteurs déjà incrémentés. L'enveloppe
-  `run_pipeline` invalide bien ses claims terminaux, mais cela ne rend pas
-  l'API de route elle-même transactionnelle.
+Le paramètre `--lot` doit aussi devenir inoffensif : prendre
+`lot_eff=min(lot_demande, nb_total)` et vérifier les produits d'allocation
+avant `cudaMalloc`. Un petit nuage ne doit pas échouer parce que l'utilisateur
+a demandé un lot gigantesque ou parce qu'une multiplication `size_t` a
+rebouclé. Le passage complet des allocations à un propriétaire RAII est une
+bonne défense avant réutilisation en bibliothèque ; puisque le pilote actuel
+quitte le processus sur l'erreur, ce refactoring n'a pas à retarder seul la
+porte multi-lots ni à rouvrir C3/C4.
 
-Le préremplissage device est chronométré, mais ses 100 octets par candidat ne
-sont pas ajoutés à `h2d_bytes`. Pour 21 622 480 candidats, ce trafic vaut
-2 162 248 000 octets ; avec les boules et l'index, le H2D réellement déclaré
-devrait donc totaliser 4 585 865 736 octets. Corriger le compteur avec le
-texte évite qu'une protection de sûreté apparaisse gratuitement dans le reçu.
+Avec les copies actuelles, les sentinelles ajoutent bien 2 162 248 000 octets
+H2D au cas 50k ; le compteur les inclut désormais. Deux choix honnêtes restent
+possibles : publier environ 4 585 865 736 octets H2D index compris, ou utiliser
+des initialisations device (`cudaMemset`) et comptabiliser séparément leur
+coût. Le reçu ne doit pas continuer d'annoncer seulement 2,42 Go tout en
+chronométrant les copies de sûreté.
 
 La relecture complète des sept tableaux après upload est annoncée dans les
 commentaires mais n'est pas encore présente dans la porte device. L'ajouter ou
