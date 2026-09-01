@@ -3,8 +3,9 @@
 Date : 1er septembre 2026. Données mesurées à `d98f4729`, question
 `ad005432` et conception `b18f1400`. La course de `671ed3cc` est conservée
 ci-dessous comme contre-fixture historique ; la contre-lecture couvre le
-checkpoint source `4a85c13d`. Seul le brouillon de profil `fold.hpp` reste
-hors commit dans le worktree.
+checkpoint source `4a85c13d`. La refonte de profil suivante touche désormais
+`fold.hpp`, `run.hpp` et la CLI hors commit ; elle ne fait pas partie de ce
+reçu.
 
 Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -351,7 +352,7 @@ n'autorisent aucune projection de performance v6.
 
 ### 5.8 Témoin device hôte reçu à `4a85c13d`
 
-Le défaut causal du mutant sentinelle est corrigé. Le worktree sépare
+Le défaut causal du mutant sentinelle est corrigé. Le checkpoint sépare
 `unwritten_arith`, `unwritten_native` et `bad_branch_written`, exige les 64
 indices sautés exacts, vérifie la branche seulement sur les cases écrites,
 exécute l'oracle DI sur celles-ci et l'oracle natif intégral avant tout code 4.
@@ -424,73 +425,73 @@ calcul du budget et le run mutant. Le refus est désormais réellement précoce,
 sans run inutile ni sous-débordement diagnostique sur un témoin amont invalide.
 
 Après reconstruction de ce dernier fichier, les quatre portes caps et la
-signature CLI passent 5/5 en 119,52 s. Le rejeu ciblé final du lot qui devient
-`4a85c13d` passe 15/15 en 158,26 s, pool et témoin hôte compris. La décision
-2E est donc reçue dans sa portée logique et transactionnelle ; elle reste un
-proxy de payload nommé, jamais une preuve RSS ou OOM.
+signature CLI passent 5/5 en 119,52 s sur le worktree. Une reconstruction
+indépendante depuis `git archive 4a85c13d` passe ensuite 15/15 portes ciblées
+en 45,93 s, pool et témoin hôte compris, puis 89/89 hors labels
+`scale8000|scale16000|scale32000` en 194,02 s. La décision 2E est donc reçue
+dans sa portée logique et transactionnelle ; elle reste un proxy de payload
+nommé, jamais une preuve RSS ou OOM. Ces durées locales ne sont pas des
+mesures de performance.
 
 Le vocabulaire source est désormais honnête et le cap CLI a été correctement
 renommé `cap_fusion_budgetaire` plutôt que de prétendre être le cap effectif
 du run. `PLAN_DE_TESTS.md` et le § 3 de la réponse Claude sont maintenant
 alignés.
 
-### 5.10 Nouveau profil `reduce` en cours
+### 5.10 Refonte du profil `reduce` en cours
 
-La séparation fraîche des neuf fenêtres corrige la fuite la plus visible du
-profil précédent et garde le chemin produit inchangé quand la macro est
-absente. Elle ne permet toutefois pas encore de calibrer A ou B :
+Le nouveau jet reçoit plusieurs corrections structurelles utiles : record
+local par K, précision `%.3f`, fenêtres renommées, `init` démarré avant les
+allocations produit, bornes début/fin de B, séparation stricte
+`MHGP6_PROFILE_REDUCE` / `MHGP6_PROFILE_LIVENESS`, pic intra-lot distinct de
+la frontière inter-lots et mode diagnostic `--fold-join=1`. Le build timing
+Release compile. Cela rend le harnais beaucoup plus proche d'un diagnostic
+causal, mais pas encore apte à mesurer ou choisir le design A.
 
-- `init` démarre après l'allocation et l'initialisation de `FidState`, les
-  scratchs et `deltas.reserve`, puis mélange warmup produit et pré-balayage de
-  vivacité ajouté par l'instrumentation ; séparer ce dernier dans une macro
-  `PROFILE_LIVENESS` et démarrer l'init avant les allocations produit ;
-- `remaining`/`alive_flag`, deux balayages de toutes les incidences et six
-  lectures d'horloge par lot continuent de polluer caches et mur même si leur
-  durée est rangée dans une colonne. Le mur de référence doit venir d'un
-  Release normal ; les colonnes instrumentées ne sont qu'une attribution ;
-- `vivantes_max` n'est relevé qu'après activation puis extinction de tout le
-  lot. Un lot dont chaque facette a son dernier contact peut ainsi publier
-  zéro malgré un pic intra-lot élevé. Activer d'abord les fids uniques du lot,
-  relever ce pic, puis décrémenter, ou renommer la mesure en frontière
-  inter-lots et publier les deux valeurs ;
-- `profil_intern` est imprimé avant `mark(t_merge_ms)` et `profil_vivantes`
-  avant `mark(t_reduce_ms)` : leurs verrous/I/O entrent donc dans les cumuls
-  sans colonne. Reporter toute impression après les chronos, idéalement lors
-  de la publication ordonnée ;
-- `post/groupement` copie déjà les clés dans `parents`/`born`, tandis que
-  `materialisation` contient tris, copie profonde des deltas, niveaux, `seen`
-  et compteurs. Renommer ces frontières ou séparer remplissage et tri/copie
-  avant d'estimer ce que le matérialiseur asynchrone déplacerait ;
-- les lignes concurrentes ne portent pas K et peuvent s'entrelacer. Stocker un
-  record dans `ForestResult`, puis l'imprimer avec K à la publication. Publier
-  aussi le digest forêt par K : `t_digest_ms` global mélange plusieurs étages.
+Quatre corrections ferment le chemin critique :
 
-Deux conditions d'expérience sont également nécessaires. D'abord,
-`fold_inflight=1` n'isole pas B : A(K+1) peut encore être préparé pendant
-B(K). Employer un banc dont les `FoldPrepared` sont construits hors chrono,
-ou un mode diagnostic qui joint B avant de préparer le K suivant. Ensuite,
-signer inflight demandé **et pic observé** : le petit run instrumenté n=400
-demandant 4 n'a exercé qu'un pic de 1, donc aucune contention B×B. Le build
-et ces petits runs passent ; ils valident seulement le harnais en cours.
+- les deux ou trois `fprintf(stderr)` par K restent dans le worker, sous
+  `pub_mutex`, avant `next_publish` et avant l'arrêt de `t_fold_wall_ms` ; ils
+  sérialisent la publication et contaminent le scheduler et le mur. Conserver
+  les records dans `RunResult::fold_profiles[K]`, puis les imprimer seulement
+  dans `print_run`, après le retour de `run_pipeline` ;
+- `pic_inflight` couvre aujourd'hui réduction, digest, attente de publication,
+  callback, I/O et RSS. Un petit run frais donne des intervalles B disjoints
+  mais `pic_inflight=2` : ce compteur ne prouve donc pas un chevauchement de
+  réductions. Ajouter `active_reduce`/`peak_reduce_active` exactement autour
+  de `reduce_fold`, et renommer l'ancien pic en cycle de vie des workers ;
+- le « résiduel » soustrait des intervalles différents : `profile.begin`
+  précède le timer de `t_reduce_ms`, tandis que `profile.end` suit celui de
+  `t_partition_ms`. Employer directement
+  `duration(profile.end - profile.begin)` avec les mêmes bornes que les
+  buckets ; garder les anciens `t_*` comme compteurs séparés ;
+- les bornes de B rendent B/B lisible, pas A/B : aucun début/fin de
+  préparation A n'est enregistré. Ajouter les intervalles A par K avant de
+  revendiquer que la concurrence A/B se lit dans la trace.
 
-Chaque bucket est un temps mur **local à un K**. Sa somme sur K reste un cumul
-qui peut dépasser `t_fold_wall_ms` lorsque B/B ou A/B se recouvrent ; ajouter
-K et les intervalles début/fin, éventuellement le temps CPU du thread, plutôt
-que soustraire ces cumuls du mur. Le digest n'est pas davantage une fenêtre
-unique aujourd'hui : `digest_forest_v4`, chaînage dans `digest_all` et
-finalisation ne partagent pas tous le même chronomètre.
+Avant commit, ajouter une cible de profil explicite et une porte structurelle :
+un record par K, temps finis et non négatifs, fermeture somme/résiduel,
+`profile_kind` et `fold_join` signés dans la sortie, puis égalité large de
+l'objet et des digests entre normal, profil et join 0/1. Les macros injectées
+seulement via `CMAKE_CXX_FLAGS` ne donnent pas encore une identité de build.
+Renommer aussi `digest_K_ms`, qui est une durée et non le digest K, et corriger
+le commentaire qui transforme sans preuve un objet `FidState` de 32 octets en
+« ligne de cache de 32 octets » avec trente défauts par événement. Les lectures
+d'horloge par lot restent intrusives : le seul mur de débit demeure celui du
+Release normal.
 
-Ce profil reste utile comme brouillon diagnostic ; il ne réfute pas le plan B.
-Il faut seulement éviter que sa propre contention sur `stderr` ou sa sonde de
-vivacité devienne le phénomène que le prochain balayage prétend mesurer. Une
-petite structure de profil taguée par K, imprimée en `%.3f` ms avec somme et
-résiduel après arrêt de tous les chronos, est le correctif minimal.
+Séquence constructive : stocker et drainer les records sans I/O, fermer les
+deux pics et le résiduel, graver la porte d'identité, puis exécuter B isolé et
+A/B apparié. Ce profil pourra alors décider entre budget de workers/affinité,
+travail sur le layout, ou `CompactDelta` ; avant cela, aucun facteur de gain ni
+diagnostic « memory-bound » n'est reçu.
 
 ## 6. Ordre de travail recommandé
 
 1. **achevé à `4a85c13d`** : C1, garde `2E` et témoin hôte ancrés ensemble,
    brouillon `fold.hpp` correctement laissé hors checkpoint ;
-2. réparer puis exécuter le petit profil B/inflight avant de choisir le design A ;
+2. fermer les quatre défauts de profil du § 5.10, graver sa porte d'identité,
+   puis exécuter B/inflight avant de choisir le design A ;
 3. figer le wire, le budget VRAM et le témoin device arithmétique ; C2 peut
    alors devenir une brique hôte testable et C3 un port CUDA falsifiable ;
 4. si la cause CPU est la concurrence A/B, prototyper un budget de workers ou
