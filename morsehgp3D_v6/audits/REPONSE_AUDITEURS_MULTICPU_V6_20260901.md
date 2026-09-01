@@ -526,6 +526,14 @@ direction est bonne et les trois verrous demandés ont une réponse courte :
    directement sur la boîte. La division et `t1+1` disparaissent ainsi du
    device, le framing reste à 112 octets et la fixture doit inclure un quotient
    hors `i64`.
+
+   L'implémentation doit aussi éviter les deux débordements signés restés dans
+   `-b` et `2*a`. Une construction bornée n'a besoin d'aucun signed `i128`
+   intermédiaire : si `b>0`, les deux candidats rabattus valent zéro ; si
+   `b=0`, ils valent 0 et 1 ; si `b<0`, calculer en `u128`
+   `q=uabs128(b)/(2*u128(a))`, puis saturer `q` et `q+1` à 65535. Cela couvre
+   même `b=INT128_MIN` et tout `a>0`, sans inventer un sous-profil de
+   coefficients.
 2. **Oui aux indices `upos`, non aux représentants `PointId` sur le wire.**
    `ball_census` produit déjà `leaf_index`, `BallData` conserve ces `i32`, puis
    `expand_events_k` applique `CloudIndex::point_id` côté hôte. Garder l'index
