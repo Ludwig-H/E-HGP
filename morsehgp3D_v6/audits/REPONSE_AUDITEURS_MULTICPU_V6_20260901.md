@@ -336,6 +336,34 @@ mesurée améliore aussi `scanline` d'environ 9,6 %, pas seulement `terrain`.
 Ces chiffres n'ont qu'un run par route et restent historiques v5 ; ils
 n'autorisent aucune projection de performance v6.
 
+### 5.8 Témoin device en cours dans le worktree
+
+Le stub hôte nominal et son mutant passent en Release et sous ASan/UBSan, mais
+cela ne reçoit encore ni le chemin portable ni CUDA :
+
+- les options globales `-Wall -Wextra -Wpedantic -Werror` de CMake atteignent
+  aussi CUDA et peuvent faire refuser `nvcc`; les borner à
+  `COMPILE_LANGUAGE:CXX`, puis transmettre séparément les avertissements hôte
+  CUDA avec `-Xcompiler`, comme dans le correctif v5 ;
+- `MHGP6_FAKE_DEVICE` seul ne sélectionne pas le repli portable de
+  `di_mulhi_u64`, dont la branche exige `__CUDA_ARCH__` : le stub vert exerce
+  actuellement le chemin hôte `u128`. Ajouter un sélecteur fake dédié et une
+  attestation de branche, sans définir globalement `__CUDA_ARCH__` ;
+- le mutant carry est non vacue, mais son verdict repose sur le compteur
+  agrégé `mism_di` : une autre panne DI pourrait le tuer. Compter les
+  désaccords par primitive et exiger le nombre de retenues plantées ;
+- « `1<<18` tirages + 81 bords » est inexact : les 81 sont inclus, neuf
+  couples sont ensuite réécrits et aucun bord explicite n'est planté pour
+  `x/y`. Le plancher `n < constante` est tautologique ; initialiser les sorties
+  à une sentinelle ou ajouter `seen` pour prouver chaque écriture ;
+- le témoin ne compile toujours ni `BallKey::power`, ni `AxisBounds`, ni la
+  division/plancher dont C3 dépend. Le recevoir comme socle arithmétique
+  partiel seulement, avec `TIMEOUT`, erreurs `cudaFree` contrôlées et raccords
+  `PROVENANCE`/`GPU`/`PLAN_DE_TESTS`.
+
+Aucun `nvcc` ni device n'a été exercé localement. Ce chantier non committé ne
+modifie donc pas le verdict sur C1 et n'ouvre aucun GO G4.
+
 ## 6. Ordre de travail recommandé
 
 1. corriger la course fatale de C1 et sa fixture, puis avancer la garde
