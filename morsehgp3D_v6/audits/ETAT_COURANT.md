@@ -31,7 +31,7 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
 | plafonds et budget mémoire `4a85c13d` | cap coopératif et refus transactionnels reçus ; garde logique `2E` avant la réserve de fusion reçue, proxy de payload nommé seulement, sans claim RSS/OOM |
-| saturation multi-CPU du fold | GO pour finir le harnais puis profiler B isolé et A/B apparié ; WIP actuel non recevable en performance tant que I/O, pic de réduction, résiduel et porte d'identité ne sont pas fermés |
+| saturation multi-CPU du fold | GO pour finir le harnais puis profiler le reduce isolé et A/reduce apparié ; le second WIP ferme I/O d'impression, pic strict et résiduel interne, mais doit encore borner honnêtement ses fenêtres et rendre la porte d'identité non vacueuse avant tout reçu de performance |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP `d98f4729` | GO mono-session consommé et clos ; reçu `df1a3c5f` validé non décisionnel, arrêt ciblé certifié |
@@ -93,10 +93,10 @@ device n'a été exercé. C1 reste une brique hôte non raccordée à `run.hpp` 
 file ne borne ni les captures des producteurs, ni les buffers d'exécuteurs,
 ni la VRAM. Le témoin ne couvre pas encore `BallKey::power`, `AxisBounds` ou
 la division plancher. La garde 2E reste un proxy logique de tailles, sans
-promesse RSS/OOM. Les seuls écarts de worktree après le commit sont la refonte
-instrumentée de `src/forest/fold.hpp`, son raccord dans
-`src/pipeline/run.hpp` et son option CLI, explicitement hors checkpoint et
-hors GO de performance.
+promesse RSS/OOM. Les écarts de worktree après le commit sont la refonte
+instrumentée de `src/forest/fold.hpp`, son raccord dans `src/pipeline/run.hpp`,
+son option CLI, sa cible CMake, ses deux portes et leur entrée dans le plan de
+tests, explicitement hors checkpoint et hors GO de performance.
 
 ## Exact-K, omission unique et ownership WSPD
 

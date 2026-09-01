@@ -4,8 +4,8 @@ Date : 1er septembre 2026. Données mesurées à `d98f4729`, question
 `ad005432` et conception `b18f1400`. La course de `671ed3cc` est conservée
 ci-dessous comme contre-fixture historique ; la contre-lecture couvre le
 checkpoint source `4a85c13d`. La refonte de profil suivante touche désormais
-`fold.hpp`, `run.hpp` et la CLI hors commit ; elle ne fait pas partie de ce
-reçu.
+le manifeste, le plan de tests, `fold.hpp`, `run.hpp`, la CLI et deux portes
+hors commit ; elle ne fait pas partie de ce reçu.
 
 Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -440,60 +440,57 @@ alignés.
 
 ### 5.10 Refonte du profil `reduce` en cours
 
-Le nouveau jet reçoit plusieurs corrections structurelles utiles : record
-local par K, précision `%.3f`, fenêtres renommées, `init` démarré avant les
-allocations produit, bornes début/fin de B, séparation stricte
-`MHGP6_PROFILE_REDUCE` / `MHGP6_PROFILE_LIVENESS`, pic intra-lot distinct de
-la frontière inter-lots et mode diagnostic `--fold-join=1`. Le build timing
-Release compile. Cela rend le harnais beaucoup plus proche d'un diagnostic
-causal, mais pas encore apte à mesurer ou choisir le design A.
+Le second jet du worktree ferme utilement l'essentiel de la première
+contre-lecture : records drainés dans `RunResult` puis imprimés après
+`run_pipeline`, pic atomique RAII strictement autour de `reduce_fold`, ancien
+pic renommé comme cycle de vie des workers, résiduel calculé sur les mêmes
+bornes que les buckets, intervalles A par K, cible `mhgp6_profile`, identité de
+build signée et contrat d'échec compilé. `duree_digest_k_ms` et le commentaire
+sur les 32 octets sont aussi corrigés. La scène d'échec K2 est bien enregistrée
+avec le code 4 : callback K1 non vide, puis profils et pic effacés au terminal.
 
-Quatre corrections ferment le chemin critique :
+Sur le worktree partagé, une construction Release propre passe les trois
+portes ciblées `mhgp6_profil_identite`, `mhgp6_profil_contrat_echec` et
+`mhgp6_profil_contrat_echec_k2` en 7,67 s. C'est un contrôle de harnais non
+ancré, jamais une mesure de performance ni un reçu de commit.
 
-- les deux ou trois `fprintf(stderr)` par K restent dans le worker, sous
-  `pub_mutex`, avant `next_publish` et avant l'arrêt de `t_fold_wall_ms` ; ils
-  sérialisent la publication et contaminent le scheduler et le mur. Conserver
-  les records dans `RunResult::fold_profiles[K]`, puis les imprimer seulement
-  dans `print_run`, après le retour de `run_pipeline` ;
-- `pic_inflight` couvre aujourd'hui réduction, digest, attente de publication,
-  callback, I/O et RSS. Un petit run frais donne des intervalles B disjoints
-  mais `pic_inflight=2` : ce compteur ne prouve donc pas un chevauchement de
-  réductions. Ajouter `active_reduce`/`peak_reduce_active` exactement autour
-  de `reduce_fold`, et renommer l'ancien pic en cycle de vie des workers ;
-- le « résiduel » soustrait des intervalles différents : `profile.begin`
-  précède le timer de `t_reduce_ms`, tandis que `profile.end` suit celui de
-  `t_partition_ms`. Employer directement
-  `duration(profile.end - profile.begin)` avec les mêmes bornes que les
-  buckets ; garder les anciens `t_*` comme compteurs séparés ;
-- les bornes de B rendent B/B lisible, pas A/B : aucun début/fin de
-  préparation A n'est enregistré. Ajouter les intervalles A par K avant de
-  revendiquer que la concurrence A/B se lit dans la trace.
+Deux corrections restent nécessaires avant d'ancrer ce profil :
 
-Avant commit, ajouter une cible de profil explicite et une porte structurelle :
-un record par K, temps finis et non négatifs, fermeture somme/résiduel,
-`profile_kind` et `fold_join` signés dans la sortie, puis égalité large de
-l'objet et des digests entre normal, profil et join 0/1. Les macros injectées
-seulement via `CMAKE_CXX_FLAGS` ne donnent pas encore une identité de build.
-Étendre aussi `invalidate_provisional` et `--failure-contract` au nouveau
-vecteur `fold_profiles` : sous la macro, une panne B ne doit pas rouvrir un
-canal provisoire que le contrat terminal oublie d'effacer ou de juger.
-La porte doit inspecter directement le `RunResult` : le CLI n'appelle jamais
-`print_run` après un refus et resterait donc vert même si ce vecteur fuyait.
-Un budget de 4 Kio refuse toutefois avant même `fold_profiles.assign` et reste
-vacueux. Employer `fold-inject-a-failure-k2`, activé avant tout premier run à
-cause du cache statique des sites mutants, exiger le callback K1 puis constater
-qu'au retour terminal profils et pic ont bien été effacés.
-Renommer aussi `digest_K_ms`, qui est une durée et non le digest K, et corriger
-le commentaire qui transforme sans preuve un objet `FidState` de 32 octets en
-« ligne de cache de 32 octets » avec trente défauts par événement. Les lectures
-d'horloge par lot restent intrusives : le seul mur de débit demeure celui du
-Release normal.
+- `b_debut`/`b_fin` et le « mur local » ne couvrent pas l'étage B complet. Les
+  bornes sont prises **dans** `reduce_fold`, après le déplacement initial, et
+  s'arrêtent avant ses destructeurs ; les libérations de `FoldPrepared` et du
+  `Stage`, le digest, la publication, le callback et la sonde RSS sont hors de
+  cette fenêtre. Le résiduel nul ferme donc correctement le corps instrumenté,
+  pas tout B. La correction minimale et suffisante pour le diagnostic demandé
+  est de renommer ces champs `reduce_interne_debut/fin` et
+  `mur_reduce_interne`, puis de revendiquer seulement le recouvrement
+  A/réduction. Si le coût complet de B devient nécessaire, ajouter des bornes
+  externes et un poste explicite de nettoyage/digest au lieu d'étendre
+  silencieusement ce claim ;
+- la porte Python annonce l'identité de « l'objet », mais son comparateur ne
+  sélectionne que `digest_forest_K*` et `digest_all`. Ce digest couvre clés,
+  partition finale et deltas, pas tous les compteurs ni `batch_levels`.
+  Comparer au minimum aussi les lignes déterministes `cardinalites K=`, puis
+  nommer exactement la projection attestée. Surtout, exiger des K uniques et
+  un plancher `end > begin` avec une durée ou somme strictement positive : si
+  la copie `fold_profiles[K] = r.profile` disparaît aujourd'hui, les profils
+  par défaut restent de la bonne cardinalité avec toutes leurs valeurs nulles
+  et les trois portes demeurent vertes. Le contrat d'effacement K2, lui, est
+  causal dans sa portée.
 
-Séquence constructive : stocker et drainer les records sans I/O, fermer les
-deux pics et le résiduel, graver la porte d'identité, puis exécuter B isolé et
-A/B apparié. Ce profil pourra alors décider entre budget de workers/affinité,
-travail sur le layout, ou `CompactDelta` ; avant cela, aucun facteur de gain ni
-diagnostic « memory-bound » n'est reçu.
+Trois durcissements sont peu coûteux mais ne bloquent pas l'attribution interne :
+faire échouer la compilation si `MHGP6_PROFILE_LIVENESS` est défini sans
+`MHGP6_PROFILE_REDUCE`, signer `fold_join` dans la sortie standard ou refuser
+l'option hors profil, et déclarer la lecture de `/proc/self/statm`. Cette
+dernière reste une I/O sous le verrou de publication, y compris dans le Release
+normal ; un vrai run de débit devra la désarmer ou signer explicitement la
+télémétrie active.
+
+Après ces deux corrections de portée et de non-vacuité, le profil sera
+recevable pour attribuer le corps du reduce et mesurer son recouvrement avec A.
+Il pourra alors décider entre budget de workers/affinité, travail sur le layout
+ou `CompactDelta`. Aucun facteur de gain ni diagnostic « memory-bound » n'est
+encore reçu.
 
 ## 6. Ordre de travail recommandé
 
