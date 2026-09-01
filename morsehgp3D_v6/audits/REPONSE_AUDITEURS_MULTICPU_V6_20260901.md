@@ -613,7 +613,8 @@ donc à zéro et la porte nominale produirait un faux rouge sur G4. Le pilote
 `mhgp6_cuda` emploie déjà la bonne taille ; corriger cette seule copie et la
 faire mordre par la sentinelle suffit.
 
-Photographie WIP locale : après reconfiguration Release, 10 des 11 CTests
+Photographie WIP locale antérieure aux corrections ci-dessous : après
+reconfiguration Release, 10 des 11 CTests
 `wire|census_device_stub|census_stub_mutant|pilot_stub` passent en 96,67 s ;
 le seul rouge est le nominal `mhgp6_wire`, volontairement bloqué par
 `GRAVE_AU_PREMIER_RUN`. Les quatre mutants census et les deux mutants pilote
@@ -625,19 +626,33 @@ six candidats `u32` bornés construits sans négation signée dangereuse, fixtur
 hors `i64` et `INT128_MIN`, round-trip `BallIn`, vues hôte décodées, dataflow
 `census_all` et volumes assumés, copie `cand_idx` corrigée, validateur avant
 reconstruction et deux mutants de frontière. Il ne faut pas rouvrir ces
-décisions. Il reste seulement deux dents fonctionnelles courtes avant G4 :
+décisions. Claude a depuis fermé dans le WIP les deux dents alors signalées :
+les sept sorties sont préremplies sur le **device** à chaque lot, et le
+validateur impose désormais les ensembles de statuts propres au préfiltre et
+au census. La porte CUDA faisait déjà le premier travail ; la généralisation
+au pilote produit était bien l'écart. Ces corrections ne sont pas encore un
+pin ni un reçu, mais il ne faut plus les présenter comme manquantes.
 
-- le pilote produit initialise les vecteurs hôte avec les sentinelles, mais ne
-  préremplit pas les buffers `d_count`, `d_status`, `d_ids`, `d_cst`,
-  `d_nint`, `d_nsh`, `d_cand` avant les kernels. Une écriture omise y relirait
-  donc une allocation CUDA indéterminée, pas la sentinelle attendue. Faire le
-  préremplissage device pour chaque lot, dans le même stream et avant les deux
-  lancements ; la porte CUDA le fait déjà correctement ;
-- `validate_ball_out` accepte aujourd'hui tout statut numérique entre 0 et 4.
-  Or le préfiltre n'autorise que `ok|at_least_h|stack_overflow`, et le census
-  seulement `ok|interior_overflow|shell_overflow|stack_overflow`. Rejeter les
-  deux combinaisons impossibles évite qu'un `interior_overflow` de préfiltre ou
-  un `at_least_h` de census soit interprété comme un succès.
+Deux fermetures courtes restent en revanche avant le pin :
+
+- passer aussi `count`, `h` et la masse totale au validateur. Aujourd'hui un
+  `count=~0` survivant est ignoré pour une boule déclarée morte. Refuser la
+  sentinelle, exiger `count <= masse_totale`, puis `ok => count < h` et
+  `at_least_h => count >= h`. Une dent `skip-count-write` ou une table unitaire
+  du validateur est plus causale que `skip-ball-write`, qui saute les deux
+  statuts en même temps ;
+- rendre les deux routes transactionnelles en propre : valider toutes les
+  lignes, reconstruire dans des temporaires et accumuler des statistiques
+  locales, puis seulement échanger/publier. Un refus tardif laisse actuellement
+  un préfixe dans `surv`/`balls` et des compteurs déjà incrémentés. L'enveloppe
+  `run_pipeline` invalide bien ses claims terminaux, mais cela ne rend pas
+  l'API de route elle-même transactionnelle.
+
+Le préremplissage device est chronométré, mais ses 100 octets par candidat ne
+sont pas ajoutés à `h2d_bytes`. Pour 21 622 480 candidats, ce trafic vaut
+2 162 248 000 octets ; avec les boules et l'index, le H2D réellement déclaré
+devrait donc totaliser 4 585 865 736 octets. Corriger le compteur avec le
+texte évite qu'une protection de sûreté apparaisse gratuitement dans le reçu.
 
 La relecture complète des sept tableaux après upload est annoncée dans les
 commentaires mais n'est pas encore présente dans la porte device. L'ajouter ou
