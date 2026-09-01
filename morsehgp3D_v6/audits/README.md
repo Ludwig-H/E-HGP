@@ -23,6 +23,9 @@ des corrections, ils ne certifient rien.
 - [`AUDIT_GCP_V6_P0_20260831.md`](AUDIT_GCP_V6_P0_20260831.md) : porte de
   sûreté et de mesure mise à jour sur `d98f4729` ; refus fail-closed reçu,
   journal sauvé et GO re-pinné pour une session gardée `g4_mesure_v1`.
+- [`NOTE_AUDITEUR_CAPS_V6_20260901.md`](NOTE_AUDITEUR_CAPS_V6_20260901.md) :
+  aide temporaire au chantier en vol ; garde avant allocation, budget
+  réellement propagé et retrait du diff v5.
 - [`ALERTE_CAMPAGNE_CPU_MIXTE_20260831.md`](ALERTE_CAMPAGNE_CPU_MIXTE_20260831.md) :
   preuves des captures CPU et statut borné de la confirmation hors échantillon.
 

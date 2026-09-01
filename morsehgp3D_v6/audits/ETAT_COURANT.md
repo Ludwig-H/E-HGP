@@ -398,9 +398,9 @@ parasite ne correspond, mais des marqueurs de suite seraient un P1 utile.
 Enfin, le bootstrap exécute encore `pip install --upgrade cmake || true` : la
 version effective de CMake/CTest n'est pas épinglée. Un nouveau changement de
 format échouerait fermé, sans faux vert, mais pourrait consommer une autre
-session courte. Fixer la version ou produire un marqueur machine avant tout
-re-pin ultérieur ; ne pas appeler le présent protocole une toolchain
-reproductible.
+session courte. Fixer et vérifier la version avant tout re-pin ultérieur ; un
+marqueur machine peut durcir le parseur, mais ne remplace pas ce pin de
+toolchain. Ne pas appeler le présent protocole une toolchain reproductible.
 
 ## Fraîcheur documentaire et porte Python
 
@@ -415,8 +415,9 @@ suivants :
   tout en omettant la portée de l'oracle G8/G16 ;
 - `docs/GRAND_LIVRE.md` conserve les définitions trop larges de `P_factor`,
   `H_scan` et des octaves déjà rectifiées dans le présent état ;
-- `docs/MATHEMATIQUES.md` laisse C1–C7 au statut `derive_v6` sans associer
-  explicitement les pins, oracles et portées requalifiées ;
+- `docs/MATHEMATIQUES.md` pourrait associer C1–C4 aux pins, oracles et
+  portées bornées déjà disponibles ; C5–C7 restent réellement dérivés ou
+  planifiés et ne doivent pas être promus artificiellement ;
 - `tests/agregateur_gate.py` porte encore sa garde de domaine par
   `assert 0 <= k <= base`. Le nominal actuel passe aussi sous `python3 -O`,
   donc ce n'est pas un mutant causal, mais cette porte viole la règle du dépôt
@@ -438,13 +439,17 @@ Ordre recommandé à Claude :
 
 1. réexécuter au plus une session G4 selon le GO re-pinné ci-dessus, puis auditer
    le reçu avant toute interprétation scientifique ;
-2. remplacer l'`assert` de la porte Python et aligner les cinq documents
-   périmés avant de les invoquer comme autorités ;
-3. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
+2. stabiliser le chantier de plafonds v6 décrit dans
+   `NOTE_AUDITEUR_CAPS_V6_20260901.md`, sans modifier la v5 ;
+3. corriger `GRAND_LIVRE.md` avant toute interprétation des coûts, puis
+   aligner `ARCHITECTURE.md`, `PROVENANCE.md` et `PLAN_DE_TESTS.md` au
+   prochain checkpoint stable ;
+4. enrichir seulement C1–C4 dans `MATHEMATIQUES.md` et remplacer l'`assert`
+   Python opportunément : ce microcorrectif P2 ne bloque aucun résultat ;
+5. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
    re-régler la règle ;
-4. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
+6. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
    l'oracle et la preuve G16 avant toute nouvelle mesure ;
-5. fermer callbacks/exceptions et leurs fixtures réellement concurrentes ;
-6. reprendre ensuite les plafonds API.
+7. fermer callbacks/exceptions et leurs fixtures réellement concurrentes.
 
 GCP non utilisé par le présent audit.
