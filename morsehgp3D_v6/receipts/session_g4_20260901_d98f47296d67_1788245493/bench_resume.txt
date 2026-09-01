@@ -1,0 +1,7 @@
+# bench_resume — COMPLETUDE et DISPERSION, produit par validate_v6_campaign.py.
+# Aucune conclusion de speedup : le validateur juge presence, pins, determinisme.
+famille	n	moteur	runs	mur_median_ms	mur_min_ms	mur_max_ms	duree_med_s	rss_max_kb
+eight_clusters	50000	v5	2	55708.8	55653.6	55764.1	56.0	16576004
+eight_clusters	50000	v6	2	62372.8	61898.2	62847.5	62.5	17048356
+uniform	50000	v5	2	48924.3	48844.5	49004.1	49.0	18823456
+uniform	50000	v6	2	49211.4	49115.4	49307.3	49.5	18796308

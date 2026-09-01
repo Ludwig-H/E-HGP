@@ -1,0 +1,16 @@
+code=0
+duree_s=78
+peak_rss_kb=22948848
+timing_scope=frontiere
+threads=48
+time_bin=/usr/bin/time
+family=scanline_stationnaire
+n=200000
+seq=2
+limit_kind=rlimit_as
+limit_kb=183500800
+commande=/bin/bash -c ulimit -v "$1" && shift && exec "$@" _ 183500800 ./build-v6/mhgp6 --family=scanline_stationnaire --n=200000 --s=8 --smax=11 --seed=3 --threads=48
+source_commit=d98f47296d675d3cbdb1b53019dcc1a8b3b292b4
+source_payload_sha256=5dd4c905d3100682fa03147ee8bcf8fd67fcacd35057f3798579a8dcdd3f8ae9
+protocol_manifest_sha256=f9c3869128832192aec23e6390f8ece641a0d50c0e0011914855da4811852712
+finished=1

@@ -1,0 +1,1 @@
+conformite v5=v6 : scanline_single_pass n=50000 : 10 forets + digest_all identiques (objet)

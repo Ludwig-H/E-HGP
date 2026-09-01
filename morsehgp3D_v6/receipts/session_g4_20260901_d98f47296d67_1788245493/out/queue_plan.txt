@@ -1,0 +1,7 @@
+queue_plan=v1
+families=aucun
+n_list=64000
+seeds=3
+threads=48
+s=8 smax=11
+runs=0

@@ -1,0 +1,17 @@
+code=0
+duree_s=14
+peak_rss_kb=5375196
+timing_scope=gpu_contract_dev
+threads=48
+time_bin=/usr/bin/time
+family=scanline_single_pass
+n=50000
+kind=dev
+engine=v5
+lineage=historical_baseline
+authority=non_authoritative
+commande=./build-v5-cuda/mhgp5_cuda --gpu --family=scanline_single_pass --n=50000 --s=8 --smax=11 --seed=3 --threads=48 --digest
+source_commit=d98f47296d675d3cbdb1b53019dcc1a8b3b292b4
+source_payload_sha256=5dd4c905d3100682fa03147ee8bcf8fd67fcacd35057f3798579a8dcdd3f8ae9
+protocol_manifest_sha256=f9c3869128832192aec23e6390f8ece641a0d50c0e0011914855da4811852712
+finished=1

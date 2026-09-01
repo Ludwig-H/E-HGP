@@ -1,0 +1,2 @@
+note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=8a1ff36695180c77... v6=c062395a8dc6d480...)
+conformite v5=v6 : uniform n=50000 : 10 forets + digest_all identiques (objet)

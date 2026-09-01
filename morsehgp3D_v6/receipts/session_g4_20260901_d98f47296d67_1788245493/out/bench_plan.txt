@@ -1,0 +1,13 @@
+bench_plan=v2
+specs=uniform:50000 eight_clusters:50000
+threads=48
+s=8 smax=11 seed=3
+seq=1 name=bench_uniform_n50000_v5_r1 family=uniform n=50000 engine=v5 pos=1 repeat=1
+seq=2 name=bench_uniform_n50000_v6_r1 family=uniform n=50000 engine=v6 pos=2 repeat=1
+seq=3 name=bench_uniform_n50000_v6_r2 family=uniform n=50000 engine=v6 pos=3 repeat=2
+seq=4 name=bench_uniform_n50000_v5_r2 family=uniform n=50000 engine=v5 pos=4 repeat=2
+seq=5 name=bench_eight_clusters_n50000_v6_r1 family=eight_clusters n=50000 engine=v6 pos=1 repeat=1
+seq=6 name=bench_eight_clusters_n50000_v5_r1 family=eight_clusters n=50000 engine=v5 pos=2 repeat=1
+seq=7 name=bench_eight_clusters_n50000_v5_r2 family=eight_clusters n=50000 engine=v5 pos=3 repeat=2
+seq=8 name=bench_eight_clusters_n50000_v6_r2 family=eight_clusters n=50000 engine=v6 pos=4 repeat=2
+runs=8

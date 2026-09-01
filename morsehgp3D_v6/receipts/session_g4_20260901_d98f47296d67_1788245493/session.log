@@ -1,0 +1,914 @@
+profil de campagne epingle : 821167594b94cf91d29d7278ea8a0e6df19208fc97fc017aa12c6e8137f28d73
+preflight budgetaire : ESTIMATION NOMINALE 23794s (+build 900s) pour une fenetre de 24295s — campagne exploratoire tronquable
+enveloppe de terminaison (somme des plafonds par run) : 196200s — bornee en pratique par l'echeance du runner et les coupe-circuits, jamais une promesse de completude
+[GARDE pre-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=28800s.
+[SET-SCHEDULING] Reconfiguration protégée demandée :
+  compte              : louis.hauseux@gmail.com
+  projet              : devpod-gpu-exploration
+  zone                : europe-west4-ai1a
+  instance            : ehgp-blackwell-spot-ai1a
+  état certifié       : TERMINATED
+  maxRunDuration cible: 28800 s
+  action              : STOP
+Updated [https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+[GARDE post-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=28800s.
+[OK] maxRunDuration=28800s recertifié sur la cible TERMINATED devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a; aucune VM démarrée ou arrêtée.
+[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:xG3NvbNX+D0ZgfsnOuV3UpZnjLZn6RODab0M0tg7fmA).
+[GARDE SSH] Clé OS Login unique, expiration fixe=2026-09-01T15:01:08.612215Z, durée restante=29387s.
+[START] Démarrage protégé demandé :
+  compte                 : louis.hauseux@gmail.com
+  projet                 : devpod-gpu-exploration
+  instance               : ehgp-blackwell-spot-ai1a
+  zone                   : europe-west4-ai1a
+  machine/provisioning   : g4-standard-48 / SPOT
+  maxRunDuration GCE     : 28800 s
+  arrêt invité secondaire : 470 min
+Starting instance(s) ehgp-blackwell-spot-ai1a...
+...............................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+Instance internal IP is 10.164.0.7
+Instance external IP is 34.6.172.31
+[GARDE-FOU GCE] action=STOP, maxRunDuration=28800s, échéance calculée=1788274293, échéance sûre=1788273993, terminationTimestamp=2026-09-01T14:51:23.932911Z
+[GARDE-FOU INVITÉ] Armement de shutdown -P +470 via SSH.
+Shutdown scheduled for Tue 2026-09-01 14:41:59 UTC, use 'shutdown -c' to cancel.
+MODE=poweroff
+USEC=1788273719339567
+
+[GARDE-FOU GCE] action=STOP, maxRunDuration=28800s, échéance calculée=1788274293, échéance sûre=1788273993, terminationTimestamp=2026-09-01T14:51:23.932911Z
+[SUCCÈS] VM démarrée avec deux coupe-circuits vérifiés. Fermez la session avec stop_and_verify.sh.
+generation verrouillee : 2026-08-31T23:51:33.050-07:00
+deadline_epoch=1788270688 (generation 1788245493 + 28800 - 3605)
+handshake : boot_id=0a0d5029-66dd-4983-8940-6f53f69bf7ae generation confirmee
+/tmp/v6bundle_d98f47296d67_1788245493.tgz: OK
+coeurs=48
+MemTotal:       185463908 kB
+cmake version 4.4.3
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Found Python3: /usr/bin/python3.10 (found version "3.10.12") found components: Interpreter
+-- Configuring done (0.4s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/louis_hauseux_gmail_com/v6camp_d98f47296d67_1788245493/build-v5
+[ 99%] Built target mhgp5_fold_live_gate
+[100%] Linking CXX executable mhgp5_forest_judge
+[100%] Built target mhgp5_forest_judge
+Test project /home/louis_hauseux_gmail_com/v6camp_d98f47296d67_1788245493/build-v5
+        Start   1: mhgp5_tree_selftest
+        Start   2: mhgp5_families_fixture
+        Start   3: mhgp5_families_mutant_overshoot
+        Start   4: mhgp5_families_refus_mutant_inconnu
+        Start   5: mhgp5_wspd_ledger_uniform
+        Start   6: mhgp5_wspd_ledger_terrain
+        Start   7: mhgp5_wspd_ledger_eight_clusters
+        Start   8: mhgp5_wspd_ledger_scanline_single_pass
+        Start   9: mhgp5_wspd_ledger_scanline_overlap_multiecho
+        Start  10: mhgp5_wspd_ledger_two_lines
+        Start  11: mhgp5_wspd_mutant_drop_rect
+        Start  12: mhgp5_wspd_discriminate_cap
+        Start  13: mhgp5_wspd_discriminate_split
+        Start  14: mhgp5_wspd_refus_famille
+        Start  15: mhgp5_wspd_refus_n
+        Start  16: mhgp5_spindle_judge_uniform
+        Start  17: mhgp5_spindle_judge_clusters
+        Start  18: mhgp5_spindle_judge_terrain
+        Start  19: mhgp5_spindle_judge_two_lines
+        Start  20: mhgp5_spindle_refus_s_non_positif
+        Start  21: mhgp5_spindle_mutant_ceil
+        Start  22: mhgp5_spindle_mutant_mask
+        Start  23: mhgp5_cli_s_min
+        Start  24: mhgp5_cli_s_10
+  1/288 Test   #4: mhgp5_families_refus_mutant_inconnu ................   Passed    0.01 sec
+        Start  25: mhgp5_cli_s_max
+  2/288 Test   #1: mhgp5_tree_selftest ................................   Passed    0.01 sec
+  3/288 Test   #3: mhgp5_families_mutant_overshoot ....................   Passed    0.01 sec
+  4/288 Test  #10: mhgp5_wspd_ledger_two_lines ........................   Passed    0.01 sec
+  5/288 Test  #14: mhgp5_wspd_refus_famille ...........................   Passed    0.00 sec
+  6/288 Test  #15: mhgp5_wspd_refus_n .................................   Passed    0.00 sec
+        Start  26: mhgp5_cli_refus_s_0
+        Start  27: mhgp5_cli_refus_s_1
+        Start  28: mhgp5_cli_refus_s_7
+        Start  29: mhgp5_cli_refus_s_empty
+        Start  30: mhgp5_cli_refus_s_text
+  7/288 Test  #20: mhgp5_spindle_refus_s_non_positif ..................   Passed    0.00 sec
+        Start  31: mhgp5_cli_refus_s_suffix
+  8/288 Test  #23: mhgp5_cli_s_min ....................................   Passed    0.00 sec
+        Start  32: mhgp5_cli_refus_s_overflow
+  9/288 Test  #12: mhgp5_wspd_discriminate_cap ........................   Passed    0.01 sec
+        Start  33: mhgp5_cli_refus_s_negative
+ 10/288 Test  #24: mhgp5_cli_s_10 .....................................   Passed    0.00 sec
+ 11/288 Test  #26: mhgp5_cli_refus_s_0 ................................   Passed    0.00 sec
+        Start  34: mhgp5_cli_refus_s_min_i64
+        Start  35: mhgp5_cli_postsep_l0
+ 12/288 Test  #27: mhgp5_cli_refus_s_1 ................................   Passed    0.00 sec
+        Start  36: mhgp5_cli_postsep_l3
+ 13/288 Test  #28: mhgp5_cli_refus_s_7 ................................   Passed    0.00 sec
+ 14/288 Test  #25: mhgp5_cli_s_max ....................................   Passed    0.01 sec
+ 15/288 Test  #29: mhgp5_cli_refus_s_empty ............................   Passed    0.00 sec
+        Start  37: mhgp5_cli_refus_postsep_text
+        Start  38: mhgp5_cli_refus_postsep_suffix
+        Start  39: mhgp5_cli_refus_postsep_empty
+ 16/288 Test  #31: mhgp5_cli_refus_s_suffix ...........................   Passed    0.00 sec
+ 17/288 Test  #30: mhgp5_cli_refus_s_text .............................   Passed    0.01 sec
+        Start  40: mhgp5_cli_refus_postsep_negative
+        Start  41: mhgp5_cli_refus_postsep_high
+ 18/288 Test  #32: mhgp5_cli_refus_s_overflow .........................   Passed    0.01 sec
+ 19/288 Test  #33: mhgp5_cli_refus_s_negative .........................   Passed    0.00 sec
+ 20/288 Test  #34: mhgp5_cli_refus_s_min_i64 ..........................   Passed    0.00 sec
+        Start  42: mhgp5_cli_refus_cover_envelope_
+        Start  43: mhgp5_cli_refus_cover_envelope_abc
+        Start  44: mhgp5_cli_refus_cover_envelope_1junk
+ 21/288 Test  #35: mhgp5_cli_postsep_l0 ...............................   Passed    0.01 sec
+ 22/288 Test  #36: mhgp5_cli_postsep_l3 ...............................   Passed    0.00 sec
+        Start  45: mhgp5_cli_refus_cover_envelope_-1
+        Start  46: mhgp5_cli_refus_cover_envelope_2
+ 23/288 Test  #37: mhgp5_cli_refus_postsep_text .......................   Passed    0.00 sec
+ 24/288 Test  #38: mhgp5_cli_refus_postsep_suffix .....................   Passed    0.00 sec
+        Start  47: mhgp5_cli_refus_pretest_query_min_
+        Start  48: mhgp5_cli_refus_pretest_query_min_abc
+ 25/288 Test  #39: mhgp5_cli_refus_postsep_empty ......................   Passed    0.00 sec
+ 26/288 Test  #40: mhgp5_cli_refus_postsep_negative ...................   Passed    0.00 sec
+ 27/288 Test  #41: mhgp5_cli_refus_postsep_high .......................   Passed    0.00 sec
+        Start  49: mhgp5_cli_refus_pretest_query_min_2junk
+        Start  50: mhgp5_cli_refus_pretest_query_min_-1
+        Start  63: mhgp5_conformity_eight_clusters_n400
+ 28/288 Test  #42: mhgp5_cli_refus_cover_envelope_ ....................   Passed    0.00 sec
+        Start  64: mhgp5_conformity_terrain_n400
+ 29/288 Test  #43: mhgp5_cli_refus_cover_envelope_abc .................   Passed    0.00 sec
+ 30/288 Test  #44: mhgp5_cli_refus_cover_envelope_1junk ...............   Passed    0.00 sec
+        Start  65: mhgp5_conformity_scanline_single_pass_n400
+        Start  66: mhgp5_conformity_scanline_overlap_multiecho_n400
+ 31/288 Test  #45: mhgp5_cli_refus_cover_envelope_-1 ..................   Passed    0.00 sec
+        Start  67: mhgp5_conformity_uniform_n1200
+ 32/288 Test  #46: mhgp5_cli_refus_cover_envelope_2 ...................   Passed    0.00 sec
+ 33/288 Test  #47: mhgp5_cli_refus_pretest_query_min_ .................   Passed    0.00 sec
+ 34/288 Test  #48: mhgp5_cli_refus_pretest_query_min_abc ..............   Passed    0.00 sec
+        Start  68: mhgp5_conformity_eight_clusters_n1200
+        Start  70: mhgp5_conformity_refus_absent
+        Start  71: mhgp5_mutants_gate
+ 35/288 Test  #49: mhgp5_cli_refus_pretest_query_min_2junk ............   Passed    0.00 sec
+ 36/288 Test  #50: mhgp5_cli_refus_pretest_query_min_-1 ...............   Passed    0.00 sec
+        Start  72: mhgp5_pipeline_mutant_rle-drop
+        Start  73: mhgp5_pipeline_mutant_census-nonstrict
+ 37/288 Test   #8: mhgp5_wspd_ledger_scanline_single_pass .............   Passed    0.02 sec
+        Start  74: mhgp5_pipeline_mutant_genfilter-nonstrict
+ 38/288 Test  #70: mhgp5_conformity_refus_absent ......................   Passed    0.00 sec
+        Start  75: mhgp5_pipeline_mutant_depth-threshold-minus-one
+ 39/288 Test   #6: mhgp5_wspd_ledger_terrain ..........................   Passed    0.03 sec
+        Start  76: mhgp5_pipeline_mutant_range-add-max-le-zero
+ 40/288 Test   #9: mhgp5_wspd_ledger_scanline_overlap_multiecho .......   Passed    0.03 sec
+        Start  77: mhgp5_pipeline_mutant_skip-full-census
+ 41/288 Test   #2: mhgp5_families_fixture .............................   Passed    0.04 sec
+        Start  78: mhgp5_pipeline_mutant_binary-ties
+ 42/288 Test   #7: mhgp5_wspd_ledger_eight_clusters ...................   Passed    0.06 sec
+        Start  79: mhgp5_pipeline_mutant_repr-ties
+ 43/288 Test  #71: mhgp5_mutants_gate .................................   Passed    0.04 sec
+        Start  80: mhgp5_pipeline_mutant_attach-prebatch
+ 44/288 Test  #11: mhgp5_wspd_mutant_drop_rect ........................   Passed    0.06 sec
+        Start  81: mhgp5_pipeline_mutant_drop-nonmerge
+ 45/288 Test  #13: mhgp5_wspd_discriminate_split ......................   Passed    0.06 sec
+        Start  82: mhgp5_pipeline_mutant_canonical-is-uf-root
+ 46/288 Test  #19: mhgp5_spindle_judge_two_lines ......................   Passed    0.09 sec
+        Start  83: mhgp5_pipeline_mutant_dense-pointid
+ 47/288 Test   #5: mhgp5_wspd_ledger_uniform ..........................   Passed    0.12 sec
+        Start  84: mhgp5_pipeline_mutant_q3-level-4g
+ 48/288 Test  #64: mhgp5_conformity_terrain_n400 ......................   Passed    0.56 sec
+        Start  85: mhgp5_pipeline_mutant_q4-center-parity
+ 49/288 Test  #65: mhgp5_conformity_scanline_single_pass_n400 .........   Passed    0.59 sec
+        Start  86: mhgp5_pipeline_mutant_q4-eq-sign
+ 50/288 Test  #66: mhgp5_conformity_scanline_overlap_multiecho_n400 ...   Passed    0.71 sec
+        Start  87: mhgp5_pipeline_mutant_q4-i64-drop-factor
+ 51/288 Test  #63: mhgp5_conformity_eight_clusters_n400 ...............   Passed    0.97 sec
+        Start  88: mhgp5_pipeline_mutant_q4-i64-pair-min
+ 52/288 Test  #73: mhgp5_pipeline_mutant_census-nonstrict .............   Passed    1.61 sec
+        Start  89: mhgp5_par_gate_uniform
+ 53/288 Test  #76: mhgp5_pipeline_mutant_range-add-max-le-zero ........   Passed    1.69 sec
+        Start  90: mhgp5_par_gate_clusters
+ 54/288 Test  #77: mhgp5_pipeline_mutant_skip-full-census .............   Passed    1.73 sec
+        Start  91: mhgp5_par_mutant_drop_shard
+ 55/288 Test  #78: mhgp5_pipeline_mutant_binary-ties ..................   Passed    1.81 sec
+        Start  92: mhgp5_par_mutant_drop_chunk
+ 56/288 Test  #82: mhgp5_pipeline_mutant_canonical-is-uf-root .........   Passed    1.79 sec
+        Start  93: mhgp5_par_mutant_one_worker
+ 57/288 Test  #74: mhgp5_pipeline_mutant_genfilter-nonstrict ..........   Passed    1.87 sec
+        Start  94: mhgp5_relabel_gate
+ 58/288 Test  #84: mhgp5_pipeline_mutant_q3-level-4g ..................   Passed    1.84 sec
+        Start  95: mhgp5_fold_inflight_safety
+ 59/288 Test  #75: mhgp5_pipeline_mutant_depth-threshold-minus-one ....   Passed    1.94 sec
+        Start  96: mhgp5_fold_inflight_mutant_a_failure_k2
+ 60/288 Test  #72: mhgp5_pipeline_mutant_rle-drop .....................   Passed    2.06 sec
+        Start  97: mhgp5_fold_inflight_mutant_b_exception_k3
+ 61/288 Test  #79: mhgp5_pipeline_mutant_repr-ties ....................   Passed    2.04 sec
+        Start  98: mhgp5_fold_inflight_refus_mutant_inconnu
+ 62/288 Test  #98: mhgp5_fold_inflight_refus_mutant_inconnu ...........   Passed    0.01 sec
+        Start  99: mhgp5_relabel_mutant_dense
+ 63/288 Test  #81: mhgp5_pipeline_mutant_drop-nonmerge ................   Passed    2.09 sec
+        Start 100: mhgp5_render_gate
+ 64/288 Test #100: mhgp5_render_gate ..................................   Passed    0.01 sec
+        Start 101: mhgp5_render_mutant_active
+ 65/288 Test  #80: mhgp5_pipeline_mutant_attach-prebatch ..............   Passed    2.10 sec
+        Start 102: mhgp5_render_mutant_collapse
+ 66/288 Test #101: mhgp5_render_mutant_active .........................   Passed    0.01 sec
+        Start 103: mhgp5_render_mutant_birth
+ 67/288 Test #103: mhgp5_render_mutant_birth ..........................   Passed    0.01 sec
+        Start 104: mhgp5_float_rounding_gate
+ 68/288 Test #102: mhgp5_render_mutant_collapse .......................   Passed    0.01 sec
+        Start 105: mhgp5_q3_affine_gate
+ 69/288 Test  #83: mhgp5_pipeline_mutant_dense-pointid ................   Passed    2.10 sec
+        Start 106: mhgp5_q3_affine_mutant_small
+ 70/288 Test #105: mhgp5_q3_affine_gate ...............................   Passed    0.05 sec
+        Start 107: mhgp5_q3_affine_mutant_jung
+ 71/288 Test #106: mhgp5_q3_affine_mutant_small .......................   Passed    0.05 sec
+        Start 108: mhgp5_obig_selftest
+ 72/288 Test #107: mhgp5_q3_affine_mutant_jung ........................   Passed    0.04 sec
+        Start 109: mhgp5_obig_mutant_carry_lost
+ 73/288 Test #108: mhgp5_obig_selftest ................................   Passed    0.03 sec
+        Start 110: mhgp5_obig_refus_mutant_inconnu
+ 74/288 Test #110: mhgp5_obig_refus_mutant_inconnu ....................   Passed    0.01 sec
+        Start 111: mhgp5_level_cmp_uniform
+ 75/288 Test  #85: mhgp5_pipeline_mutant_q4-center-parity .............   Passed    1.71 sec
+        Start 112: mhgp5_level_cmp_eight_clusters
+ 76/288 Test #109: mhgp5_obig_mutant_carry_lost .......................   Passed    0.02 sec
+        Start 113: mhgp5_level_mutant_trunc_hi
+ 77/288 Test  #86: mhgp5_pipeline_mutant_q4-eq-sign ...................   Passed    1.72 sec
+        Start 114: mhgp5_level_refus_famille
+ 78/288 Test #114: mhgp5_level_refus_famille ..........................   Passed    0.01 sec
+        Start 115: mhgp5_level_refus_mutant_inconnu
+ 79/288 Test #115: mhgp5_level_refus_mutant_inconnu ...................   Passed    0.01 sec
+        Start 116: mhgp5_q3_skinny_center
+ 80/288 Test #116: mhgp5_q3_skinny_center .............................   Passed    0.01 sec
+        Start 117: mhgp5_q3_oracle_uniform
+ 81/288 Test  #87: mhgp5_pipeline_mutant_q4-i64-drop-factor ...........   Passed    1.71 sec
+        Start 118: mhgp5_q3_oracle_eight_clusters
+ 82/288 Test  #88: mhgp5_pipeline_mutant_q4-i64-pair-min ..............   Passed    1.64 sec
+        Start 119: mhgp5_q3_oracle_mutant_prune_ge
+ 83/288 Test  #96: mhgp5_fold_inflight_mutant_a_failure_k2 ............   Passed    0.66 sec
+        Start 120: mhgp5_q3_oracle_mutant_level_4g
+ 84/288 Test  #97: mhgp5_fold_inflight_mutant_b_exception_k3 ..........   Passed    0.62 sec
+        Start 121: mhgp5_q3_oracle_mutant_trunc_hi
+ 85/288 Test  #68: mhgp5_conformity_eight_clusters_n1200 ..............   Passed    2.74 sec
+        Start 122: mhgp5_q3_oracle_mutant_carry_lost
+ 86/288 Test  #18: mhgp5_spindle_judge_terrain ........................   Passed    3.22 sec
+        Start 123: mhgp5_q3_oracle_mutant_sign_p
+ 87/288 Test  #67: mhgp5_conformity_uniform_n1200 .....................   Passed    3.25 sec
+        Start 124: mhgp5_q3_oracle_mutant_cramer_swap
+ 88/288 Test #113: mhgp5_level_mutant_trunc_hi ........................   Passed    1.07 sec
+        Start 125: mhgp5_q3_oracle_refus_famille
+ 89/288 Test #125: mhgp5_q3_oracle_refus_famille ......................   Passed    0.01 sec
+        Start 126: mhgp5_q3_oracle_refus_mutant_inconnu
+ 90/288 Test #126: mhgp5_q3_oracle_refus_mutant_inconnu ...............   Passed    0.01 sec
+        Start 127: mhgp5_api_guard_gate
+ 91/288 Test #104: mhgp5_float_rounding_gate ..........................   Passed    1.35 sec
+        Start 128: mhgp5_executor_pool
+ 92/288 Test #111: mhgp5_level_cmp_uniform ............................   Passed    1.29 sec
+        Start 129: mhgp5_executor_pool_mutant_serial
+ 93/288 Test #120: mhgp5_q3_oracle_mutant_level_4g ....................   Passed    0.94 sec
+        Start 130: mhgp5_executor_pool_mutant_drop_exception
+ 94/288 Test #119: mhgp5_q3_oracle_mutant_prune_ge ....................   Passed    0.99 sec
+        Start 131: mhgp5_delta_replay
+ 95/288 Test #112: mhgp5_level_cmp_eight_clusters .....................   Passed    1.44 sec
+        Start 132: mhgp5_delta_replay_mutant_drop_nonmerge
+ 96/288 Test  #90: mhgp5_par_gate_clusters ............................   Passed    2.12 sec
+        Start 133: mhgp5_delta_replay_mutant_attach_prebatch
+ 97/288 Test #128: mhgp5_executor_pool ................................   Passed    0.33 sec
+        Start 134: mhgp5_fold_live
+ 98/288 Test #121: mhgp5_q3_oracle_mutant_trunc_hi ....................   Passed    1.16 sec
+        Start 135: mhgp5_fold_live_mutant_free_on_absorb
+ 99/288 Test #135: mhgp5_fold_live_mutant_free_on_absorb ..............   Passed    0.01 sec
+        Start 136: mhgp5_fold_live_mutant_root_key_mutable
+100/288 Test #136: mhgp5_fold_live_mutant_root_key_mutable ............   Passed    0.01 sec
+        Start 137: mhgp5_fold_live_mutant_canon_not_min
+101/288 Test #137: mhgp5_fold_live_mutant_canon_not_min ...............   Passed    0.00 sec
+        Start 138: mhgp5_fold_live_mutant_last_mark_shifted
+102/288 Test #138: mhgp5_fold_live_mutant_last_mark_shifted ...........   Passed    0.01 sec
+        Start 139: mhgp5_fold_live_mutant_physical_root
+103/288 Test #139: mhgp5_fold_live_mutant_physical_root ...............   Passed    0.01 sec
+        Start 140: mhgp5_fold_live_mutant_slot_cap
+104/288 Test #140: mhgp5_fold_live_mutant_slot_cap ....................   Passed    0.01 sec
+        Start 141: mhgp5_fold_fixtures
+105/288 Test #141: mhgp5_fold_fixtures ................................   Passed    0.01 sec
+        Start 142: mhgp5_postsep_refine
+106/288 Test #130: mhgp5_executor_pool_mutant_drop_exception ..........   Passed    0.36 sec
+        Start 143: mhgp5_postsep_refine_mutant_h1
+107/288 Test #117: mhgp5_q3_oracle_uniform ............................   Passed    1.59 sec
+        Start 144: mhgp5_postsep_refine_mutant_drop
+108/288 Test #123: mhgp5_q3_oracle_mutant_sign_p ......................   Passed    0.73 sec
+        Start 145: mhgp5_postsep_refine_mutant_duplicate
+109/288 Test #144: mhgp5_postsep_refine_mutant_drop ...................   Passed    0.07 sec
+        Start 146: mhgp5_postsep_refine_mutant_q2
+110/288 Test #145: mhgp5_postsep_refine_mutant_duplicate ..............   Passed    0.08 sec
+        Start 147: mhgp5_postsep_refine_mutant_core_corners
+111/288 Test #122: mhgp5_q3_oracle_mutant_carry_lost ..................   Passed    1.37 sec
+        Start 148: mhgp5_prefix_k5_uniform
+112/288 Test #147: mhgp5_postsep_refine_mutant_core_corners ...........   Passed    0.12 sec
+        Start 149: mhgp5_prefix_k5_clusters
+113/288 Test #146: mhgp5_postsep_refine_mutant_q2 .....................   Passed    0.17 sec
+        Start 150: mhgp5_prefix_k5_scanline
+114/288 Test  #94: mhgp5_relabel_gate .................................   Passed    2.30 sec
+        Start 151: mhgp5_prefix_k4_uniform
+115/288 Test #124: mhgp5_q3_oracle_mutant_cramer_swap .................   Passed    1.07 sec
+        Start 152: mhgp5_prefix_mutant_h1
+116/288 Test  #99: mhgp5_relabel_mutant_dense .........................   Passed    2.38 sec
+        Start 153: mhgp5_prefix_k5_ex_aequo
+117/288 Test #153: mhgp5_prefix_k5_ex_aequo ...........................   Passed    0.22 sec
+        Start 154: mhgp5_prefix_mutant_event_order
+118/288 Test  #89: mhgp5_par_gate_uniform .............................   Passed    3.30 sec
+        Start 155: mhgp5_prefix_mutant_batch_levels
+119/288 Test  #92: mhgp5_par_mutant_drop_chunk ........................   Passed    3.47 sec
+        Start 156: mhgp5_q4_cover_fixture
+120/288 Test  #91: mhgp5_par_mutant_drop_shard ........................   Passed    3.73 sec
+        Start 157: mhgp5_q4_cover_envelope
+121/288 Test #118: mhgp5_q3_oracle_eight_clusters .....................   Passed    3.24 sec
+        Start 158: mhgp5_q4_cover_mutant_coef4
+122/288 Test  #17: mhgp5_spindle_judge_clusters .......................   Passed    6.03 sec
+        Start 159: mhgp5_wspd_mutant_cap_terminal
+123/288 Test #159: mhgp5_wspd_mutant_cap_terminal .....................   Passed    0.03 sec
+        Start 160: mhgp5_wspd_mutant_split_heaviest
+124/288 Test #160: mhgp5_wspd_mutant_split_heaviest ...................   Passed    0.12 sec
+        Start 161: mhgp5_wspd_mutant_wide
+125/288 Test #161: mhgp5_wspd_mutant_wide .............................   Passed    0.01 sec
+        Start 162: mhgp5_q4_oracle
+126/288 Test #150: mhgp5_prefix_k5_scanline ...........................   Passed    2.31 sec
+        Start 163: mhgp5_q4_oracle_mutant_q4-center-parity
+127/288 Test  #95: mhgp5_fold_inflight_safety .........................   Passed    4.80 sec
+        Start 164: mhgp5_q4_oracle_mutant_q4-eq-nonstrict
+128/288 Test  #93: mhgp5_par_mutant_one_worker ........................   Passed    5.19 sec
+        Start 165: mhgp5_q4_oracle_mutant_q4-eq-sign
+129/288 Test #156: mhgp5_q4_cover_fixture .............................   Passed    1.98 sec
+        Start 166: mhgp5_q4_oracle_mutant_q4-i64-drop-factor
+130/288 Test #158: mhgp5_q4_cover_mutant_coef4 ........................   Passed    1.69 sec
+        Start 167: mhgp5_q4_oracle_mutant_q4-i64-pair-min
+131/288 Test #157: mhgp5_q4_cover_envelope ............................   Passed    1.97 sec
+        Start 168: mhgp5_q4_source_fixture_22
+132/288 Test #168: mhgp5_q4_source_fixture_22 .........................   Passed    0.02 sec
+        Start 169: mhgp5_q4_source_fixture_13p8
+133/288 Test #169: mhgp5_q4_source_fixture_13p8 .......................   Passed    0.01 sec
+        Start 170: mhgp5_q4_source_mutant_q3_live
+134/288 Test #170: mhgp5_q4_source_mutant_q3_live .....................   Passed    0.02 sec
+        Start 171: mhgp5_forest_judge
+135/288 Test #171: mhgp5_forest_judge .................................   Passed    0.06 sec
+        Start 172: mhgp5_forest_judge_mutant_binary-ties
+136/288 Test #172: mhgp5_forest_judge_mutant_binary-ties ..............   Passed    0.02 sec
+        Start 173: mhgp5_forest_judge_mutant_repr-ties
+137/288 Test #173: mhgp5_forest_judge_mutant_repr-ties ................   Passed    0.09 sec
+        Start 174: mhgp5_forest_judge_mutant_attach-prebatch
+138/288 Test #174: mhgp5_forest_judge_mutant_attach-prebatch ..........   Passed    0.08 sec
+        Start 175: mhgp5_forest_judge_mutant_drop-nonmerge
+139/288 Test #175: mhgp5_forest_judge_mutant_drop-nonmerge ............   Passed    0.04 sec
+        Start 176: mhgp5_forest_judge_mutant_canonical-is-uf-root
+140/288 Test #176: mhgp5_forest_judge_mutant_canonical-is-uf-root .....   Passed    0.01 sec
+        Start 177: mhgp5_forest_judge_mutant_rle-drop
+141/288 Test #177: mhgp5_forest_judge_mutant_rle-drop .................   Passed    0.10 sec
+        Start 178: mhgp5_forest_judge_mutant_census-nonstrict
+142/288 Test #178: mhgp5_forest_judge_mutant_census-nonstrict .........   Passed    0.01 sec
+        Start 179: mhgp5_forest_judge_mutant_genfilter-nonstrict
+143/288 Test #179: mhgp5_forest_judge_mutant_genfilter-nonstrict ......   Passed    0.09 sec
+        Start 180: mhgp5_forest_judge_mutant_dense-pointid
+144/288 Test #180: mhgp5_forest_judge_mutant_dense-pointid ............   Passed    0.08 sec
+        Start 181: mhgp5_plateau_shell_relevance
+145/288 Test #181: mhgp5_plateau_shell_relevance ......................   Passed    0.02 sec
+        Start 182: mhgp5_detector_gate
+146/288 Test #182: mhgp5_detector_gate ................................   Passed    0.01 sec
+        Start 183: mhgp5_detector_mutant_disabled
+147/288 Test #183: mhgp5_detector_mutant_disabled .....................   Passed    0.00 sec
+        Start 184: mhgp5_cover_gate
+148/288 Test #149: mhgp5_prefix_k5_clusters ...........................   Passed    5.15 sec
+        Start 185: mhgp5_cover_mutant_dmin
+149/288 Test #127: mhgp5_api_guard_gate ...............................   Passed    5.97 sec
+        Start 186: mhgp5_cover_envelope_cover
+150/288 Test #151: mhgp5_prefix_k4_uniform ............................   Passed    5.96 sec
+        Start 187: mhgp5_cover_envelope_query
+151/288 Test #184: mhgp5_cover_gate ...................................   Passed    2.06 sec
+        Start 188: mhgp5_cover_envelope_terrain
+152/288 Test #162: mhgp5_q4_oracle ....................................   Passed    4.08 sec
+        Start 189: mhgp5_cover_envelope_scanline_single_pass
+153/288 Test #148: mhgp5_prefix_k5_uniform ............................   Passed    6.26 sec
+        Start 190: mhgp5_cover_envelope_scanline_overlap_multiecho
+154/288 Test #163: mhgp5_q4_oracle_mutant_q4-center-parity ............   Passed    4.03 sec
+        Start 191: mhgp5_cover_envelope_two_lines
+155/288 Test #152: mhgp5_prefix_mutant_h1 .............................   Passed    6.34 sec
+        Start 192: mhgp5_cover_envelope_mutant_open
+156/288 Test #192: mhgp5_cover_envelope_mutant_open ...................   Passed    0.01 sec
+        Start 193: mhgp5_cover_envelope_mutant_factor
+157/288 Test #193: mhgp5_cover_envelope_mutant_factor .................   Passed    0.01 sec
+        Start 194: mhgp5_q4_once_gate
+158/288 Test #194: mhgp5_q4_once_gate .................................   Passed    0.07 sec
+        Start 195: mhgp5_q4_once_mutant_no_canonical
+159/288 Test #195: mhgp5_q4_once_mutant_no_canonical ..................   Passed    0.08 sec
+        Start 196: mhgp5_q4_seed_core_fixture
+160/288 Test #196: mhgp5_q4_seed_core_fixture .........................   Passed    0.00 sec
+        Start 197: mhgp5_q4_seed_core_mutant_nonstrict
+161/288 Test #197: mhgp5_q4_seed_core_mutant_nonstrict ................   Passed    0.00 sec
+        Start 198: mhgp5_parallel_sort_gate
+162/288 Test #164: mhgp5_q4_oracle_mutant_q4-eq-nonstrict .............   Passed    4.10 sec
+        Start 199: mhgp5_parallel_sort_mutant_unstable
+163/288 Test #165: mhgp5_q4_oracle_mutant_q4-eq-sign ..................   Passed    3.89 sec
+        Start 200: mhgp5_parallel_sort_refus_mutant_inconnu
+164/288 Test #200: mhgp5_parallel_sort_refus_mutant_inconnu ...........   Passed    0.00 sec
+        Start 201: mhgp5_fold_bench_signature
+165/288 Test #154: mhgp5_prefix_mutant_event_order ....................   Passed    6.28 sec
+        Start 202: mhgp5_fold_bench_refus_s_7
+166/288 Test #202: mhgp5_fold_bench_refus_s_7 .........................   Passed    0.01 sec
+        Start 203: mhgp5_fold_bench_refus_s_suffix
+167/288 Test #203: mhgp5_fold_bench_refus_s_suffix ....................   Passed    0.00 sec
+        Start 204: mhgp5_fold_bench_refus_s_overflow
+168/288 Test #204: mhgp5_fold_bench_refus_s_overflow ..................   Passed    0.00 sec
+        Start 205: mhgp5_sha256_gate
+169/288 Test #205: mhgp5_sha256_gate ..................................   Passed    0.02 sec
+        Start 206: mhgp5_dint_gate
+170/288 Test #155: mhgp5_prefix_mutant_batch_levels ...................   Passed    6.11 sec
+        Start 207: mhgp5_dint_mutant_mulhi_dropped
+171/288 Test #207: mhgp5_dint_mutant_mulhi_dropped ....................   Passed    0.03 sec
+        Start 208: mhgp5_dint_refus_mutant_inconnu
+172/288 Test #208: mhgp5_dint_refus_mutant_inconnu ....................   Passed    0.00 sec
+        Start 209: mhgp5_dint_refus_argument
+173/288 Test #209: mhgp5_dint_refus_argument ..........................   Passed    0.00 sec
+        Start 210: mhgp5_q3_scan_shaped_uniform
+174/288 Test #166: mhgp5_q4_oracle_mutant_q4-i64-drop-factor ..........   Passed    3.82 sec
+        Start 211: mhgp5_q3_scan_shaped_clusters
+175/288 Test #167: mhgp5_q4_oracle_mutant_q4-i64-pair-min .............   Passed    3.81 sec
+        Start 212: mhgp5_q3_scan_shaped_cocirc
+176/288 Test #206: mhgp5_dint_gate ....................................   Passed    0.32 sec
+        Start 213: mhgp5_q3_scan_shaped_mutant_flip
+177/288 Test #185: mhgp5_cover_mutant_dmin ............................   Passed    2.06 sec
+        Start 214: mhgp5_q4_core_shaped_uniform
+178/288 Test #212: mhgp5_q3_scan_shaped_cocirc ........................   Passed    0.35 sec
+        Start 215: mhgp5_q4_core_shaped_clusters
+179/288 Test #210: mhgp5_q3_scan_shaped_uniform .......................   Passed    0.44 sec
+        Start 216: mhgp5_q4_core_shaped_cocirc
+180/288 Test #213: mhgp5_q3_scan_shaped_mutant_flip ...................   Passed    0.34 sec
+        Start 217: mhgp5_q4_core_shaped_mutant_skip
+181/288 Test #211: mhgp5_q3_scan_shaped_clusters ......................   Passed    0.73 sec
+        Start 218: mhgp5_q4_chord_ordre
+182/288 Test #199: mhgp5_parallel_sort_mutant_unstable ................   Passed    1.05 sec
+        Start 219: mhgp5_q4_chord_ordre_mutant
+183/288 Test #188: mhgp5_cover_envelope_terrain .......................   Passed    1.72 sec
+        Start 220: mhgp5_q4_completion_shaped_uniform
+184/288 Test #216: mhgp5_q4_core_shaped_cocirc ........................   Passed    0.42 sec
+        Start 221: mhgp5_q4_completion_shaped_clusters
+185/288 Test #218: mhgp5_q4_chord_ordre ...............................   Passed    0.22 sec
+        Start 222: mhgp5_q4_completion_shaped_cocirc
+186/288 Test #214: mhgp5_q4_core_shaped_uniform .......................   Passed    0.69 sec
+        Start 223: mhgp5_q4_completion_shaped_mutant_once
+187/288 Test #219: mhgp5_q4_chord_ordre_mutant ........................   Passed    0.18 sec
+        Start 224: mhgp5_batch_contract
+188/288 Test #224: mhgp5_batch_contract ...............................   Passed    0.01 sec
+        Start 225: mhgp5_parallel_exception
+189/288 Test #217: mhgp5_q4_core_shaped_mutant_skip ...................   Passed    0.49 sec
+        Start 226: mhgp5_gpu_instrument
+190/288 Test #187: mhgp5_cover_envelope_query .........................   Passed    2.13 sec
+        Start 227: mhgp5_gpu_instrument_mutant_class
+191/288 Test #225: mhgp5_parallel_exception ...........................   Passed    0.19 sec
+        Start 228: mhgp5_gpu_instrument_mutant_gauge
+192/288 Test #215: mhgp5_q4_core_shaped_clusters ......................   Passed    0.90 sec
+        Start 229: mhgp5_gpu_instrument_plancher
+193/288 Test #189: mhgp5_cover_envelope_scanline_single_pass ..........   Passed    2.33 sec
+        Start 230: mhgp5_gpu_instrument_refus
+194/288 Test #230: mhgp5_gpu_instrument_refus .........................   Passed    0.01 sec
+        Start 231: mhgp5_chord_positive
+195/288 Test #222: mhgp5_q4_completion_shaped_cocirc ..................   Passed    0.70 sec
+        Start 232: mhgp5_chord_positive_mutant
+196/288 Test #186: mhgp5_cover_envelope_cover .........................   Passed    3.49 sec
+        Start 233: mhgp5_q4_stage_uniform
+197/288 Test #220: mhgp5_q4_completion_shaped_uniform .................   Passed    1.07 sec
+        Start 234: mhgp5_q4_stage_eight_clusters
+198/288 Test #223: mhgp5_q4_completion_shaped_mutant_once .............   Passed    0.96 sec
+        Start 235: mhgp5_q4_stage_terrain
+199/288 Test #198: mhgp5_parallel_sort_gate ...........................   Passed    2.24 sec
+        Start 236: mhgp5_q4_stage_scanline_single_pass
+200/288 Test #235: mhgp5_q4_stage_terrain .............................   Passed    0.13 sec
+        Start 237: mhgp5_wspd_fusion_uniform
+201/288 Test #236: mhgp5_q4_stage_scanline_single_pass ................   Passed    0.16 sec
+        Start 238: mhgp5_wspd_fusion_terrain
+202/288 Test #190: mhgp5_cover_envelope_scanline_overlap_multiecho ....   Passed    2.95 sec
+        Start 239: mhgp5_wspd_fusion_eight_clusters
+203/288 Test #221: mhgp5_q4_completion_shaped_clusters ................   Passed    1.56 sec
+        Start 240: mhgp5_wspd_fusion_scanline_single_pass
+204/288 Test #229: mhgp5_gpu_instrument_plancher ......................   Passed    1.10 sec
+        Start 241: mhgp5_wspd_fusion_two_lines
+205/288 Test #233: mhgp5_q4_stage_uniform .............................   Passed    0.69 sec
+        Start 242: mhgp5_wspd_fusion_collinear_seven
+206/288 Test #242: mhgp5_wspd_fusion_collinear_seven ..................   Passed    0.01 sec
+        Start 243: mhgp5_sector_reach_probe_smoke
+207/288 Test #243: mhgp5_sector_reach_probe_smoke .....................   Passed    0.01 sec
+        Start 244: mhgp5_q3_patch_block_probe_smoke
+208/288 Test #241: mhgp5_wspd_fusion_two_lines ........................   Passed    0.08 sec
+        Start 245: mhgp5_q3_patch_block_credit_sum_mutant
+209/288 Test #234: mhgp5_q4_stage_eight_clusters ......................   Passed    0.63 sec
+        Start 246: mhgp5_separation_sous_profil_refusee
+210/288 Test #246: mhgp5_separation_sous_profil_refusee ...............   Passed    0.01 sec
+        Start 247: mhgp5_separation_profil_minimal_acceptee
+211/288 Test #244: mhgp5_q3_patch_block_probe_smoke ...................   Passed    0.09 sec
+        Start 248: mhgp5_q3_patch_block_rho_mutant
+212/288 Test #226: mhgp5_gpu_instrument ...............................   Passed    1.49 sec
+        Start 249: mhgp5_sector_kill_fixture
+213/288 Test #227: mhgp5_gpu_instrument_mutant_class ..................   Passed    1.40 sec
+        Start 250: mhgp5_sector_kill_mutant_nonstrict
+214/288 Test #249: mhgp5_sector_kill_fixture ..........................   Passed    0.02 sec
+        Start 251: mhgp5_sector_credit_fixture
+215/288 Test #251: mhgp5_sector_credit_fixture ........................   Passed    0.00 sec
+        Start 252: mhgp5_sector_credit_mutant_inbox
+216/288 Test #252: mhgp5_sector_credit_mutant_inbox ...................   Passed    0.00 sec
+        Start 253: mhgp5_sector_credit_crossed
+217/288 Test #253: mhgp5_sector_credit_crossed ........................   Passed    0.00 sec
+        Start 254: mhgp5_sector_credit_mutant_global
+218/288 Test #250: mhgp5_sector_kill_mutant_nonstrict .................   Passed    0.01 sec
+        Start 257: mhgp5_anchor_kill_fixture
+219/288 Test #254: mhgp5_sector_credit_mutant_global ..................   Passed    0.00 sec
+        Start 258: mhgp5_anchor_kill_mutant_h1
+220/288 Test #258: mhgp5_anchor_kill_mutant_h1 ........................   Passed    0.00 sec
+        Start 259: mhgp5_anchor_kill_mutant_nonstrict
+221/288 Test #257: mhgp5_anchor_kill_fixture ..........................   Passed    0.01 sec
+        Start 260: mhgp5_anchor_kill_mutant_chord
+222/288 Test #260: mhgp5_anchor_kill_mutant_chord .....................   Passed    0.01 sec
+        Start 261: mhgp5_anchor_kill_mutant_cell_nonstrict
+223/288 Test #259: mhgp5_anchor_kill_mutant_nonstrict .................   Passed    0.01 sec
+        Start 262: mhgp5_anchor_kill_mutant_cell_eps0
+224/288 Test #261: mhgp5_anchor_kill_mutant_cell_nonstrict ............   Passed    0.01 sec
+        Start 263: mhgp5_cell_grid_oracle
+225/288 Test #262: mhgp5_anchor_kill_mutant_cell_eps0 .................   Passed    0.01 sec
+        Start 264: mhgp5_cell_grid_oracle_mutant_nonstrict
+226/288 Test #228: mhgp5_gpu_instrument_mutant_gauge ..................   Passed    1.50 sec
+        Start 265: mhgp5_cell_grid_oracle_mutant_h1
+227/288 Test #245: mhgp5_q3_patch_block_credit_sum_mutant .............   Passed    0.46 sec
+        Start 266: mhgp5_cell_grid_oracle_mutant_eps0
+228/288 Test #248: mhgp5_q3_patch_block_rho_mutant ....................   Passed    0.50 sec
+        Start 267: mhgp5_fold_contract
+229/288 Test #267: mhgp5_fold_contract ................................   Passed    0.00 sec
+        Start 268: mhgp5_q3_lane_batched_uniform
+230/288 Test #238: mhgp5_wspd_fusion_terrain ..........................   Passed    0.92 sec
+        Start 269: mhgp5_q3_lane_batched_clusters
+231/288 Test #247: mhgp5_separation_profil_minimal_acceptee ...........   Passed    0.56 sec
+        Start 270: mhgp5_q3_lane_batched_terrain
+232/288 Test #240: mhgp5_wspd_fusion_scanline_single_pass .............   Passed    0.72 sec
+        Start 271: mhgp5_q3_lane_batched_cocirc
+233/288 Test #132: mhgp5_delta_replay_mutant_drop_nonmerge ............   Passed   10.70 sec
+        Start 272: mhgp5_q3_lane_batched_mutant_dead
+234/288 Test #231: mhgp5_chord_positive ...............................   Passed    2.06 sec
+        Start 273: mhgp5_q3_lane_batched_postsep_l1
+235/288 Test #232: mhgp5_chord_positive_mutant ........................   Passed    1.99 sec
+        Start 274: mhgp5_q3_lane_batched_envelope
+236/288 Test #239: mhgp5_wspd_fusion_eight_clusters ...................   Passed    1.57 sec
+        Start 275: mhgp5_q3_lane_batched_envelope_host
+237/288 Test #131: mhgp5_delta_replay .................................   Passed   11.33 sec
+        Start 276: mhgp5_q3_lane_batched_envelope_mixed
+238/288 Test #270: mhgp5_q3_lane_batched_terrain ......................   Passed    0.86 sec
+        Start 277: mhgp5_q3_lane_batched_envelope_oversized
+239/288 Test #133: mhgp5_delta_replay_mutant_attach_prebatch ..........   Passed   11.32 sec
+        Start 278: mhgp5_q4_lane_batched_uniform
+240/288 Test  #16: mhgp5_spindle_judge_uniform ........................   Passed   15.18 sec
+        Start 279: mhgp5_q4_lane_batched_clusters
+241/288 Test #271: mhgp5_q3_lane_batched_cocirc .......................   Passed    0.98 sec
+        Start 280: mhgp5_q4_lane_batched_terrain
+242/288 Test  #22: mhgp5_spindle_mutant_mask ..........................   Passed   15.64 sec
+        Start 281: mhgp5_q4_lane_batched_cocirc
+243/288 Test #277: mhgp5_q3_lane_batched_envelope_oversized ...........   Passed    0.79 sec
+        Start 282: mhgp5_q4_lane_batched_ordre
+244/288 Test #265: mhgp5_cell_grid_oracle_mutant_h1 ...................   Passed    2.15 sec
+        Start 283: mhgp5_q4_lane_batched_mutant_deep
+245/288 Test  #21: mhgp5_spindle_mutant_ceil ..........................   Passed   16.07 sec
+        Start 284: mhgp5_q4_lane_batched_postsep_l1
+246/288 Test #263: mhgp5_cell_grid_oracle .............................   Passed    2.40 sec
+        Start 285: mhgp5_q4_lane_batched_envelope
+247/288 Test #272: mhgp5_q3_lane_batched_mutant_dead ..................   Passed    1.72 sec
+        Start 286: mhgp5_q4_lane_batched_envelope_host
+248/288 Test #280: mhgp5_q4_lane_batched_terrain ......................   Passed    0.97 sec
+        Start 287: mhgp5_q4_lane_batched_envelope_mixed
+249/288 Test #237: mhgp5_wspd_fusion_uniform ..........................   Passed    3.05 sec
+        Start 288: mhgp5_q4_lane_batched_envelope_oversized
+250/288 Test #274: mhgp5_q3_lane_batched_envelope .....................   Passed    1.50 sec
+        Start 290: mhgp5_q3_lane_batched_petit_lot
+251/288 Test #264: mhgp5_cell_grid_oracle_mutant_nonstrict ............   Passed    2.60 sec
+        Start 291: mhgp5_q4_lane_batched_petit_lot
+252/288 Test #266: mhgp5_cell_grid_oracle_mutant_eps0 .................   Passed    2.35 sec
+        Start 292: mhgp5_q3_lane_batched_seuil_zero
+253/288 Test #292: mhgp5_q3_lane_batched_seuil_zero ...................   Passed    0.01 sec
+        Start 293: mhgp5_q4_lane_batched_seuil_negatif
+254/288 Test #293: mhgp5_q4_lane_batched_seuil_negatif ................   Passed    0.00 sec
+        Start 294: mhgp5_q3_lane_batched_route_256
+255/288 Test #275: mhgp5_q3_lane_batched_envelope_host ................   Passed    1.53 sec
+        Start 295: mhgp5_q4_lane_batched_route_256
+256/288 Test #273: mhgp5_q3_lane_batched_postsep_l1 ...................   Passed    1.84 sec
+        Start 296: mhgp5_q3_lane_batched_route_tout_hote
+257/288 Test #269: mhgp5_q3_lane_batched_clusters .....................   Passed    2.59 sec
+        Start 297: mhgp5_q4_lane_batched_route_tout_hote
+258/288 Test #281: mhgp5_q4_lane_batched_cocirc .......................   Passed    1.20 sec
+        Start 298: mhgp5_q3_lane_batched_route_mutant
+259/288 Test #288: mhgp5_q4_lane_batched_envelope_oversized ...........   Passed    0.92 sec
+        Start 299: mhgp5_q4_lane_batched_route_mutant
+260/288 Test #268: mhgp5_q3_lane_batched_uniform ......................   Passed    3.19 sec
+        Start 300: mhgp5_q3_lane_batched_ancre_trop_grande
+261/288 Test #296: mhgp5_q3_lane_batched_route_tout_hote ..............   Passed    0.94 sec
+        Start 301: mhgp5_q4_lane_batched_ancre_trop_grande
+262/288 Test #276: mhgp5_q3_lane_batched_envelope_mixed ...............   Passed    2.66 sec
+        Start 302: mhgp5_q4_lane_batched_petit_lot_paires
+263/288 Test #282: mhgp5_q4_lane_batched_ordre ........................   Passed    1.83 sec
+        Start 303: mhgp5_q4_lane_batched_petit_lot_sites
+264/288 Test #297: mhgp5_q4_lane_batched_route_tout_hote ..............   Passed    1.03 sec
+        Start 304: mhgp5_q3_lane_batched_petit_lot_sites
+265/288 Test #283: mhgp5_q4_lane_batched_mutant_deep ..................   Passed    2.02 sec
+266/288 Test #290: mhgp5_q3_lane_batched_petit_lot ....................   Passed    1.71 sec
+267/288 Test #286: mhgp5_q4_lane_batched_envelope_host ................   Passed    1.83 sec
+268/288 Test #285: mhgp5_q4_lane_batched_envelope .....................   Passed    1.99 sec
+269/288 Test #300: mhgp5_q3_lane_batched_ancre_trop_grande ............   Passed    0.79 sec
+270/288 Test #201: mhgp5_fold_bench_signature .........................   Passed    7.26 sec
+271/288 Test #284: mhgp5_q4_lane_batched_postsep_l1 ...................   Passed    2.20 sec
+272/288 Test #291: mhgp5_q4_lane_batched_petit_lot ....................   Passed    1.99 sec
+273/288 Test #301: mhgp5_q4_lane_batched_ancre_trop_grande ............   Passed    0.93 sec
+274/288 Test #279: mhgp5_q4_lane_batched_clusters .....................   Passed    3.28 sec
+275/288 Test #134: mhgp5_fold_live ....................................   Passed   14.69 sec
+276/288 Test #302: mhgp5_q4_lane_batched_petit_lot_paires .............   Passed    0.95 sec
+277/288 Test #303: mhgp5_q4_lane_batched_petit_lot_sites ..............   Passed    0.98 sec
+278/288 Test #304: mhgp5_q3_lane_batched_petit_lot_sites ..............   Passed    0.86 sec
+279/288 Test #278: mhgp5_q4_lane_batched_uniform ......................   Passed    3.54 sec
+280/288 Test #129: mhgp5_executor_pool_mutant_serial ..................   Passed   15.33 sec
+281/288 Test #294: mhgp5_q3_lane_batched_route_256 ....................   Passed    2.53 sec
+282/288 Test #287: mhgp5_q4_lane_batched_envelope_mixed ...............   Passed    2.98 sec
+283/288 Test #298: mhgp5_q3_lane_batched_route_mutant .................   Passed    2.47 sec
+284/288 Test #295: mhgp5_q4_lane_batched_route_256 ....................   Passed    2.92 sec
+285/288 Test #191: mhgp5_cover_envelope_two_lines .....................   Passed    9.19 sec
+286/288 Test #299: mhgp5_q4_lane_batched_route_mutant .................   Passed    2.73 sec
+287/288 Test #143: mhgp5_postsep_refine_mutant_h1 .....................   Passed   60.53 sec
+288/288 Test #142: mhgp5_postsep_refine ...............................   Passed   60.70 sec
+
+100% tests passed out of 288
+
+Label Time Summary:
+gate      = 539.11 sec*proc (288 tests)
+oracle    =  21.22 sec*proc (11 tests)
+
+Total Test time (real) =  64.62 sec
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/louis_hauseux_gmail_com/v6camp_d98f47296d67_1788245493/build-v6
+[ 92%] Built target mhgp6_conformity
+[100%] Linking CXX executable mhgp6_selftest
+[100%] Built target mhgp6_selftest
+Test project /home/louis_hauseux_gmail_com/v6camp_d98f47296d67_1788245493/build-v6
+      Start  1: mhgp6_arith_selftest
+      Start  2: mhgp6_sha256_selftest
+      Start  3: mhgp6_families_fixture
+      Start  4: mhgp6_families_mutant_overshoot
+      Start  5: mhgp6_tree_selftest
+      Start  6: mhgp6_wspd_ledger
+      Start  7: mhgp6_wspd_ownership
+      Start  8: mhgp6_wspd_mutant_cap
+      Start  9: mhgp6_wspd_mutant_split
+      Start 10: mhgp6_contrat_echec
+      Start 11: mhgp6_contrat_echec_census
+      Start 12: mhgp6_contrat_echec_fold_k2
+      Start 13: mhgp6_e6_grille_objet
+      Start 14: mhgp6_fused_descent
+      Start 15: mhgp6_sweep_oracle
+      Start 16: mhgp6_sweep_mutant_depth
+      Start 17: mhgp6_fused_mutant_mask
+      Start 18: mhgp6_conformity_uniform_400
+      Start 19: mhgp6_conformity_terrain_400
+      Start 20: mhgp6_conformity_eight_clusters_400
+      Start 21: mhgp6_conformity_scanline_single_pass_400
+      Start 22: mhgp6_conformity_collinear_seven_600
+      Start 23: mhgp6_conformity_two_lines_200
+      Start 24: mhgp6_conformity_uniform_2000
+ 1/74 Test  #1: mhgp6_arith_selftest ........................   Passed    0.01 sec
+ 2/74 Test  #4: mhgp6_families_mutant_overshoot .............   Passed    0.01 sec
+ 3/74 Test  #5: mhgp6_tree_selftest .........................   Passed    0.01 sec
+      Start 25: mhgp6_conformity_terrain_2000
+      Start 26: mhgp6_sweep_mutant_exit
+      Start 27: mhgp6_conformity_mutant_rle
+ 4/74 Test  #6: mhgp6_wspd_ledger ...........................   Passed    0.01 sec
+      Start 28: mhgp6_cli_refus_s7
+ 5/74 Test  #3: mhgp6_families_fixture ......................   Passed    0.01 sec
+      Start 29: mhgp6_cli_refus_s_suffix
+ 6/74 Test  #2: mhgp6_sha256_selftest .......................   Passed    0.01 sec
+      Start 30: mhgp6_cli_refus_n_suffix
+ 7/74 Test #28: mhgp6_cli_refus_s7 ..........................   Passed    0.00 sec
+      Start 31: mhgp6_cli_ok_s8
+ 8/74 Test #29: mhgp6_cli_refus_s_suffix ....................   Passed    0.00 sec
+      Start 47: mhgp6_linked_arcs_u16
+ 9/74 Test #30: mhgp6_cli_refus_n_suffix ....................   Passed    0.00 sec
+      Start 48: mhgp6_linked_arcs_oracle_i64
+10/74 Test #22: mhgp6_conformity_collinear_seven_600 ........   Passed    0.03 sec
+      Start 49: mhgp6_cell_grid_oracle
+11/74 Test  #8: mhgp6_wspd_mutant_cap .......................   Passed    0.17 sec
+      Start 50: mhgp6_cell_grid_oracle_mutant_ns
+12/74 Test #15: mhgp6_sweep_oracle ..........................   Passed    0.19 sec
+      Start 51: mhgp6_cell_grid_oracle_mutant_eps
+13/74 Test #16: mhgp6_sweep_mutant_depth ....................   Passed    0.19 sec
+      Start 52: mhgp6_cell_grid_oracle_mutant_h1
+14/74 Test #23: mhgp6_conformity_two_lines_200 ..............   Passed    0.20 sec
+      Start 53: mhgp6_sweep_frontieres
+15/74 Test #53: mhgp6_sweep_frontieres ......................   Passed    0.01 sec
+      Start 54: mhgp6_sweep_frontieres_mutant_depth
+16/74 Test #54: mhgp6_sweep_frontieres_mutant_depth .........   Passed    0.00 sec
+      Start 55: mhgp6_sweep_frontieres_mutant_exit
+17/74 Test #55: mhgp6_sweep_frontieres_mutant_exit ..........   Passed    0.00 sec
+      Start 56: mhgp6_cover_coef4
+18/74 Test #56: mhgp6_cover_coef4 ...........................   Passed    0.00 sec
+      Start 57: mhgp6_cover_coef3_mutant
+19/74 Test #57: mhgp6_cover_coef3_mutant ....................   Passed    0.00 sec
+      Start 58: mhgp6_postprefilter_uniform_400
+20/74 Test #19: mhgp6_conformity_terrain_400 ................   Passed    0.24 sec
+      Start 59: mhgp6_mutant_wspd-drop-rect
+21/74 Test #21: mhgp6_conformity_scanline_single_pass_400 ...   Passed    0.24 sec
+      Start 60: mhgp6_mutant_census-nonstrict
+22/74 Test #48: mhgp6_linked_arcs_oracle_i64 ................   Passed    0.29 sec
+      Start 61: mhgp6_mutant_genfilter-nonstrict
+23/74 Test  #7: mhgp6_wspd_ownership ........................   Passed    0.47 sec
+      Start 62: mhgp6_mutant_depth-threshold-minus-one
+24/74 Test #47: mhgp6_linked_arcs_u16 .......................   Passed    0.48 sec
+      Start 63: mhgp6_mutant_range-add-max-le-zero
+25/74 Test #26: mhgp6_sweep_mutant_exit .....................   Passed    0.50 sec
+      Start 64: mhgp6_mutant_skip-full-census
+26/74 Test #59: mhgp6_mutant_wspd-drop-rect .................   Passed    0.38 sec
+      Start 65: mhgp6_mutant_binary-ties
+27/74 Test #60: mhgp6_mutant_census-nonstrict ...............   Passed    0.54 sec
+      Start 66: mhgp6_mutant_repr-ties
+28/74 Test  #9: mhgp6_wspd_mutant_split .....................   Passed    0.84 sec
+      Start 67: mhgp6_mutant_attach-prebatch
+29/74 Test #31: mhgp6_cli_ok_s8 .............................   Passed    0.88 sec
+      Start 68: mhgp6_mutant_drop-nonmerge
+30/74 Test #20: mhgp6_conformity_eight_clusters_400 .........   Passed    0.89 sec
+      Start 69: mhgp6_mutant_dense-pointid
+31/74 Test #63: mhgp6_mutant_range-add-max-le-zero ..........   Passed    0.54 sec
+      Start 70: mhgp6_mutant_canonical-is-uf-root
+32/74 Test #64: mhgp6_mutant_skip-full-census ...............   Passed    0.68 sec
+      Start 71: mhgp6_mutant_q3-level-4g
+33/74 Test #61: mhgp6_mutant_genfilter-nonstrict ............   Passed    0.91 sec
+      Start 72: mhgp6_mutant_q4-center-parity
+34/74 Test #18: mhgp6_conformity_uniform_400 ................   Passed    1.32 sec
+      Start 73: mhgp6_mutant_q4-eq-sign
+35/74 Test #62: mhgp6_mutant_depth-threshold-minus-one ......   Passed    0.92 sec
+      Start 74: mhgp6_mutant_q4-i64-drop-factor
+36/74 Test #65: mhgp6_mutant_binary-ties ....................   Passed    0.82 sec
+      Start 75: mhgp6_mutant_q4-i64-pair-min
+37/74 Test #58: mhgp6_postprefilter_uniform_400 .............   Passed    1.31 sec
+      Start 76: mhgp6_mutant_witness-no-lane-mask
+38/74 Test #25: mhgp6_conformity_terrain_2000 ...............   Passed    1.61 sec
+      Start 77: mhgp6_mutant_par-drop-shard
+39/74 Test #70: mhgp6_mutant_canonical-is-uf-root ...........   Passed    0.74 sec
+      Start 78: mhgp6_mutant_par-drop-ball-chunk
+40/74 Test #66: mhgp6_mutant_repr-ties ......................   Passed    1.04 sec
+      Start 79: mhgp6_mutant_fold-inject-a-failure-k2
+41/74 Test #67: mhgp6_mutant_attach-prebatch ................   Passed    1.00 sec
+      Start 80: mhgp6_juge_refus_narrowing
+42/74 Test #80: mhgp6_juge_refus_narrowing ..................   Passed    0.01 sec
+      Start 81: mhgp6_juge_refus_reference_tronquee
+43/74 Test #68: mhgp6_mutant_drop-nonmerge ..................   Passed    0.99 sec
+      Start 82: mhgp6_juge_refus_k_en_trop
+44/74 Test #69: mhgp6_mutant_dense-pointid ..................   Passed    0.99 sec
+      Start 83: mhgp6_juge_refus_k11
+45/74 Test #82: mhgp6_juge_refus_k_en_trop ..................   Passed    0.01 sec
+      Start 84: mhgp6_cover_refus_mutant_hors_cible
+46/74 Test #84: mhgp6_cover_refus_mutant_hors_cible .........   Passed    0.00 sec
+      Start 85: mhgp6_sweep_refus_inject_vide
+47/74 Test #85: mhgp6_sweep_refus_inject_vide ...............   Passed    0.00 sec
+      Start 86: mhgp6_fused_mutant_droprect
+48/74 Test #10: mhgp6_contrat_echec .........................   Passed    1.91 sec
+      Start 87: mhgp6_pentes_validateur
+49/74 Test #71: mhgp6_mutant_q3-level-4g ....................   Passed    0.74 sec
+      Start 88: mhgp6_campagne_provenance
+50/74 Test #72: mhgp6_mutant_q4-center-parity ...............   Passed    0.77 sec
+      Start 89: mhgp6_agregateur_intergraines
+51/74 Test #73: mhgp6_mutant_q4-eq-sign .....................   Passed    0.80 sec
+52/74 Test #74: mhgp6_mutant_q4-i64-drop-factor .............   Passed    0.81 sec
+53/74 Test #88: mhgp6_campagne_provenance ...................   Passed    0.31 sec
+54/74 Test #75: mhgp6_mutant_q4-i64-pair-min ................   Passed    0.82 sec
+55/74 Test #77: mhgp6_mutant_par-drop-shard .................   Passed    0.72 sec
+56/74 Test #76: mhgp6_mutant_witness-no-lane-mask ...........   Passed    0.82 sec
+57/74 Test #79: mhgp6_mutant_fold-inject-a-failure-k2 .......   Passed    0.63 sec
+58/74 Test #89: mhgp6_agregateur_intergraines ...............   Passed    0.50 sec
+59/74 Test #78: mhgp6_mutant_par-drop-ball-chunk ............   Passed    0.77 sec
+60/74 Test #27: mhgp6_conformity_mutant_rle .................   Passed    2.65 sec
+61/74 Test #83: mhgp6_juge_refus_k11 ........................   Passed    0.97 sec
+62/74 Test #87: mhgp6_pentes_validateur .....................   Passed    0.95 sec
+63/74 Test #81: mhgp6_juge_refus_reference_tronquee .........   Passed    1.05 sec
+64/74 Test #11: mhgp6_contrat_echec_census ..................   Passed    3.12 sec
+65/74 Test #14: mhgp6_fused_descent .........................   Passed    3.13 sec
+66/74 Test #12: mhgp6_contrat_echec_fold_k2 .................   Passed    3.92 sec
+67/74 Test #17: mhgp6_fused_mutant_mask .....................   Passed    4.07 sec
+68/74 Test #86: mhgp6_fused_mutant_droprect .................   Passed    2.24 sec
+69/74 Test #24: mhgp6_conformity_uniform_2000 ...............   Passed    6.54 sec
+70/74 Test #49: mhgp6_cell_grid_oracle ......................   Passed   11.64 sec
+71/74 Test #51: mhgp6_cell_grid_oracle_mutant_eps ...........   Passed   11.55 sec
+72/74 Test #50: mhgp6_cell_grid_oracle_mutant_ns ............   Passed   11.62 sec
+73/74 Test #52: mhgp6_cell_grid_oracle_mutant_h1 ............   Passed   11.64 sec
+74/74 Test #13: mhgp6_e6_grille_objet .......................   Passed   95.60 sec
+
+100% tests passed out of 74
+
+Label Time Summary:
+gate      = 199.80 sec*proc (74 tests)
+oracle    =  12.31 sec*proc (3 tests)
+
+Total Test time (real) =  95.61 sec
+portes VM : v5=288 v6=74 (journaux complets dans /tmp/ehgp-v6session.OS0c4cTZ/build_vm.log)
+=== plans annonces : conf=16 sweep=34 gpu=19 frontier=4 bench=8 queue=0 runs ===
+--- fini v5ref_uniform_n32000 (code=0, 35s, rss=12277204kB)
+--- fini conf_uniform_n32000 (code=0, 37s, rss=12249636kB)
+--- fini v5ref_terrain_n32000 (code=0, 8s, rss=2384524kB)
+--- fini conf_terrain_n32000 (code=0, 9s, rss=2543992kB)
+--- fini v5ref_eight_clusters_n32000 (code=0, 37s, rss=10925312kB)
+--- fini conf_eight_clusters_n32000 (code=0, 43s, rss=10935152kB)
+--- fini v5ref_scanline_single_pass_n32000 (code=0, 7s, rss=2268524kB)
+--- fini conf_scanline_single_pass_n32000 (code=0, 8s, rss=2415920kB)
+--- fini v5ref_uniform_n50000 (code=0, 57s, rss=19850788kB)
+--- fini conf_uniform_n50000 (code=0, 59s, rss=19824992kB)
+--- fini v5ref_terrain_n50000 (code=0, 17s, rss=3943252kB)
+--- fini conf_terrain_n50000 (code=0, 20s, rss=4136296kB)
+--- fini v5ref_eight_clusters_n50000 (code=0, 63s, rss=18286944kB)
+--- fini conf_eight_clusters_n50000 (code=0, 75s, rss=18164792kB)
+--- fini v5ref_scanline_single_pass_n50000 (code=0, 13s, rss=3622396kB)
+--- fini conf_scanline_single_pass_n50000 (code=0, 16s, rss=3950184kB)
+--- fini sweep_uniform_n16000_t1_r1 (code=0, 185s, rss=3935332kB)
+--- fini sweep_uniform_n16000_t2_r1 (code=0, 117s, rss=4009868kB)
+--- fini sweep_uniform_n16000_t4_r1 (code=0, 63s, rss=4138180kB)
+--- fini sweep_uniform_n16000_t8_r1 (code=0, 39s, rss=4370572kB)
+--- fini sweep_uniform_n16000_t16_r1 (code=0, 23s, rss=5234456kB)
+--- fini sweep_uniform_n16000_t32_r1 (code=0, 15s, rss=5746908kB)
+--- fini sweep_uniform_n16000_t48_r1 (code=0, 14s, rss=7041324kB)
+--- fini sweep_uniform_n16000_t48_r2 (code=0, 14s, rss=6950244kB)
+--- fini sweep_uniform_n16000_t32_r2 (code=0, 16s, rss=5736960kB)
+--- fini sweep_uniform_n16000_t16_r2 (code=0, 22s, rss=5253588kB)
+--- fini sweep_uniform_n16000_t8_r2 (code=0, 40s, rss=4353080kB)
+--- fini sweep_uniform_n16000_t4_r2 (code=0, 65s, rss=4137668kB)
+--- fini sweep_uniform_n16000_t2_r2 (code=0, 119s, rss=4010024kB)
+--- fini sweep_uniform_n16000_t1_r2 (code=0, 184s, rss=3935420kB)
+--- fini sweep_eight_clusters_n16000_t1_r1 (code=0, 233s, rss=3460024kB)
+--- fini sweep_eight_clusters_n16000_t2_r1 (code=0, 138s, rss=3562084kB)
+--- fini sweep_eight_clusters_n16000_t4_r1 (code=0, 75s, rss=3680720kB)
+--- fini sweep_eight_clusters_n16000_t8_r1 (code=0, 43s, rss=3878184kB)
+--- fini sweep_eight_clusters_n16000_t16_r1 (code=0, 24s, rss=4865928kB)
+--- fini sweep_eight_clusters_n16000_t32_r1 (code=0, 17s, rss=5023680kB)
+--- fini sweep_eight_clusters_n16000_t48_r1 (code=0, 15s, rss=6030276kB)
+--- fini sweep_eight_clusters_n16000_t48_r2 (code=0, 15s, rss=6019204kB)
+--- fini sweep_eight_clusters_n16000_t32_r2 (code=0, 17s, rss=5029960kB)
+--- fini sweep_eight_clusters_n16000_t16_r2 (code=0, 24s, rss=4897556kB)
+--- fini sweep_eight_clusters_n16000_t8_r2 (code=0, 43s, rss=3870332kB)
+--- fini sweep_eight_clusters_n16000_t4_r2 (code=0, 75s, rss=3682176kB)
+--- fini sweep_eight_clusters_n16000_t2_r2 (code=0, 138s, rss=3562824kB)
+--- fini sweep_eight_clusters_n16000_t1_r2 (code=0, 233s, rss=3459384kB)
+--- fini sweep_uniform_n50000_t8_r1 (code=0, 134s, rss=13864252kB)
+--- fini sweep_uniform_n50000_t16_r1 (code=0, 82s, rss=16079840kB)
+--- fini sweep_uniform_n50000_t48_r1 (code=0, 49s, rss=18760384kB)
+--- fini sweep_uniform_n50000_t48_r2 (code=0, 49s, rss=19067344kB)
+--- fini sweep_uniform_n50000_t16_r2 (code=0, 81s, rss=16092020kB)
+--- fini sweep_uniform_n50000_t8_r2 (code=0, 133s, rss=13997180kB)
+--- fini bench_uniform_n50000_v5_r1 (code=0, 49s, rss=18591936kB)
+--- fini bench_uniform_n50000_v6_r1 (code=0, 50s, rss=18788512kB)
+--- fini bench_uniform_n50000_v6_r2 (code=0, 49s, rss=18796308kB)
+--- fini bench_uniform_n50000_v5_r2 (code=0, 49s, rss=18823456kB)
+--- fini bench_eight_clusters_n50000_v6_r1 (code=0, 62s, rss=17048356kB)
+--- fini bench_eight_clusters_n50000_v5_r1 (code=0, 56s, rss=16552296kB)
+--- fini bench_eight_clusters_n50000_v5_r2 (code=0, 56s, rss=16576004kB)
+--- fini bench_eight_clusters_n50000_v6_r2 (code=0, 63s, rss=16630464kB)
+--- fini gpu_witness (code=0, 12s, rss=873292kB)
+--- fini gpu_lane (code=0, 106s, rss=2041640kB)
+--- fini gpu_mutant (code=4, 3s, rss=807412kB)
+--- fini gpu_cpu_uniform_n50000 (code=0, 57s, rss=19583876kB)
+--- fini gpu_dev_uniform_n50000 (code=0, 60s, rss=19762300kB)
+--- fini gpu_ad_uniform_n50000 (code=0, 58s, rss=19552944kB)
+--- fini gpu_idx_uniform_n50000 (code=0, 60s, rss=19718636kB)
+--- fini gpu_cpu_terrain_n50000 (code=0, 17s, rss=3837404kB)
+--- fini gpu_dev_terrain_n50000 (code=0, 15s, rss=4304324kB)
+--- fini gpu_ad_terrain_n50000 (code=0, 16s, rss=4997772kB)
+--- fini gpu_idx_terrain_n50000 (code=0, 15s, rss=4072472kB)
+--- fini gpu_cpu_eight_clusters_n50000 (code=0, 63s, rss=18361728kB)
+--- fini gpu_dev_eight_clusters_n50000 (code=0, 65s, rss=17872148kB)
+--- fini gpu_ad_eight_clusters_n50000 (code=0, 65s, rss=17963872kB)
+--- fini gpu_idx_eight_clusters_n50000 (code=0, 64s, rss=17999584kB)
+--- fini gpu_cpu_scanline_single_pass_n50000 (code=0, 13s, rss=3674384kB)
+--- fini gpu_dev_scanline_single_pass_n50000 (code=0, 14s, rss=5375196kB)
+--- fini gpu_ad_scanline_single_pass_n50000 (code=0, 13s, rss=5586592kB)
+--- fini gpu_idx_scanline_single_pass_n50000 (code=0, 13s, rss=5410208kB)
+--- fini front_uniform_n200000 (code=0, 225s, rss=78817760kB)
+--- fini front_scanline_stationnaire_n200000 (code=0, 78s, rss=22948848kB)
+--- fini front_uniform_n400000 (code=0, 479s, rss=153866088kB)
+--- fini front_uniform_n800000 (code=134, 550s, rss=141041116kB)
+=== fin des runs (la validation locale decide du statut, jamais cette ligne) ===
+remote_campaign_rc=0
+scp_rc=0
+[STOP] État actuel de ehgp-blackwell-spot-ai1a : RUNNING.
+Stopping instance(s) ehgp-blackwell-spot-ai1a...
+...............................................................................................................................................................................................................................................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+[OK] Cible ehgp-blackwell-spot-ai1a arrêtée et vérifiée (état GCE TERMINATED).
+[INFO] Aucune autre VM project=e-hgp active détectée.
+arret cible post-rapatriement certifie (generation 2026-08-31T23:51:33.050-07:00, tentative 1)
+campaign_status=verifie_non_decisionnel profil=g4_mesure_v1 canonique=g4_mesure_v1 cause=profil non decisionnel (81 runs valides — JAMAIS une decision)
+--- arret certifie (rc=0) ---
+arret deja certifie par le garde (generation 2026-08-31T23:51:33.050-07:00, source independante+registre) : aucun second arret

@@ -1,0 +1,17 @@
+code=0
+duree_s=233
+peak_rss_kb=3460024
+timing_scope=sweep_fils
+threads=1
+time_bin=/usr/bin/time
+family=eight_clusters
+n=16000
+sweep_threads=1
+repeat=1
+pos=1
+seq=15
+commande=./build-v6/mhgp6 --family=eight_clusters --n=16000 --s=8 --smax=11 --seed=3 --threads=1
+source_commit=d98f47296d675d3cbdb1b53019dcc1a8b3b292b4
+source_payload_sha256=5dd4c905d3100682fa03147ee8bcf8fd67fcacd35057f3798579a8dcdd3f8ae9
+protocol_manifest_sha256=f9c3869128832192aec23e6390f8ece641a0d50c0e0011914855da4811852712
+finished=1

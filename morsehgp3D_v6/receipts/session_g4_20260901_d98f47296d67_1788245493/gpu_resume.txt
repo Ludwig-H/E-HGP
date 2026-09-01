@@ -1,0 +1,20 @@
+# gpu_resume — CONTROLE HISTORIQUE NON AUTORITAIRE (engine=v5, lineage=historical_baseline) :
+# murs des contrats CPU/GPU v5 et kernel_ms — ne mesure NI un GPU v6 NI l'exactitude v6 ;
+# faits seulement, pas de conclusion (un run par route ne suffit pas a attribuer un gain).
+famille	n	kind	mur_ms	duree_s	rss_kb	kernel_ms
+uniform	50000	cpu	57068.6	57	19583876	NA
+uniform	50000	dev	58352.1	60	19762300	745.9
+uniform	50000	ad	57109.9	58	19552944	1.1
+uniform	50000	idx	57948.1	60	19718636	769.2
+terrain	50000	cpu	16760.8	17	3837404	NA
+terrain	50000	dev	14326.2	15	4304324	2824.9
+terrain	50000	ad	13834.8	16	4997772	2653.7
+terrain	50000	idx	13491.4	15	4072472	2878.5
+eight_clusters	50000	cpu	62802.1	63	18361728	NA
+eight_clusters	50000	dev	63802.2	65	17872148	2651.6
+eight_clusters	50000	ad	63588.5	65	17963872	1712.3
+eight_clusters	50000	idx	62743.0	64	17999584	2618.5
+scanline_single_pass	50000	cpu	12883.9	13	3674384	NA
+scanline_single_pass	50000	dev	12197.3	14	5375196	1183.8
+scanline_single_pass	50000	ad	11898.9	13	5586592	1084.7
+scanline_single_pass	50000	idx	11646.4	13	5410208	1137.3

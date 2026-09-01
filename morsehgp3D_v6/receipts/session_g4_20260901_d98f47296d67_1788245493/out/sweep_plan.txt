@@ -1,0 +1,39 @@
+sweep_plan=v1
+specs=uniform:16000:1,2,4,8,16,32,48 eight_clusters:16000:1,2,4,8,16,32,48 uniform:50000:8,16,48
+repeats=2
+s=8 smax=11 seed=3
+seq=1 name=sweep_uniform_n16000_t1_r1 family=uniform n=16000 sweep_threads=1 repeat=1 pos=1
+seq=2 name=sweep_uniform_n16000_t2_r1 family=uniform n=16000 sweep_threads=2 repeat=1 pos=2
+seq=3 name=sweep_uniform_n16000_t4_r1 family=uniform n=16000 sweep_threads=4 repeat=1 pos=3
+seq=4 name=sweep_uniform_n16000_t8_r1 family=uniform n=16000 sweep_threads=8 repeat=1 pos=4
+seq=5 name=sweep_uniform_n16000_t16_r1 family=uniform n=16000 sweep_threads=16 repeat=1 pos=5
+seq=6 name=sweep_uniform_n16000_t32_r1 family=uniform n=16000 sweep_threads=32 repeat=1 pos=6
+seq=7 name=sweep_uniform_n16000_t48_r1 family=uniform n=16000 sweep_threads=48 repeat=1 pos=7
+seq=8 name=sweep_uniform_n16000_t48_r2 family=uniform n=16000 sweep_threads=48 repeat=2 pos=1
+seq=9 name=sweep_uniform_n16000_t32_r2 family=uniform n=16000 sweep_threads=32 repeat=2 pos=2
+seq=10 name=sweep_uniform_n16000_t16_r2 family=uniform n=16000 sweep_threads=16 repeat=2 pos=3
+seq=11 name=sweep_uniform_n16000_t8_r2 family=uniform n=16000 sweep_threads=8 repeat=2 pos=4
+seq=12 name=sweep_uniform_n16000_t4_r2 family=uniform n=16000 sweep_threads=4 repeat=2 pos=5
+seq=13 name=sweep_uniform_n16000_t2_r2 family=uniform n=16000 sweep_threads=2 repeat=2 pos=6
+seq=14 name=sweep_uniform_n16000_t1_r2 family=uniform n=16000 sweep_threads=1 repeat=2 pos=7
+seq=15 name=sweep_eight_clusters_n16000_t1_r1 family=eight_clusters n=16000 sweep_threads=1 repeat=1 pos=1
+seq=16 name=sweep_eight_clusters_n16000_t2_r1 family=eight_clusters n=16000 sweep_threads=2 repeat=1 pos=2
+seq=17 name=sweep_eight_clusters_n16000_t4_r1 family=eight_clusters n=16000 sweep_threads=4 repeat=1 pos=3
+seq=18 name=sweep_eight_clusters_n16000_t8_r1 family=eight_clusters n=16000 sweep_threads=8 repeat=1 pos=4
+seq=19 name=sweep_eight_clusters_n16000_t16_r1 family=eight_clusters n=16000 sweep_threads=16 repeat=1 pos=5
+seq=20 name=sweep_eight_clusters_n16000_t32_r1 family=eight_clusters n=16000 sweep_threads=32 repeat=1 pos=6
+seq=21 name=sweep_eight_clusters_n16000_t48_r1 family=eight_clusters n=16000 sweep_threads=48 repeat=1 pos=7
+seq=22 name=sweep_eight_clusters_n16000_t48_r2 family=eight_clusters n=16000 sweep_threads=48 repeat=2 pos=1
+seq=23 name=sweep_eight_clusters_n16000_t32_r2 family=eight_clusters n=16000 sweep_threads=32 repeat=2 pos=2
+seq=24 name=sweep_eight_clusters_n16000_t16_r2 family=eight_clusters n=16000 sweep_threads=16 repeat=2 pos=3
+seq=25 name=sweep_eight_clusters_n16000_t8_r2 family=eight_clusters n=16000 sweep_threads=8 repeat=2 pos=4
+seq=26 name=sweep_eight_clusters_n16000_t4_r2 family=eight_clusters n=16000 sweep_threads=4 repeat=2 pos=5
+seq=27 name=sweep_eight_clusters_n16000_t2_r2 family=eight_clusters n=16000 sweep_threads=2 repeat=2 pos=6
+seq=28 name=sweep_eight_clusters_n16000_t1_r2 family=eight_clusters n=16000 sweep_threads=1 repeat=2 pos=7
+seq=29 name=sweep_uniform_n50000_t8_r1 family=uniform n=50000 sweep_threads=8 repeat=1 pos=1
+seq=30 name=sweep_uniform_n50000_t16_r1 family=uniform n=50000 sweep_threads=16 repeat=1 pos=2
+seq=31 name=sweep_uniform_n50000_t48_r1 family=uniform n=50000 sweep_threads=48 repeat=1 pos=3
+seq=32 name=sweep_uniform_n50000_t48_r2 family=uniform n=50000 sweep_threads=48 repeat=2 pos=1
+seq=33 name=sweep_uniform_n50000_t16_r2 family=uniform n=50000 sweep_threads=16 repeat=2 pos=2
+seq=34 name=sweep_uniform_n50000_t8_r2 family=uniform n=50000 sweep_threads=8 repeat=2 pos=3
+runs=34

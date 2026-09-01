@@ -1,0 +1,23 @@
+	Command being timed: "/usr/bin/timeout -k 30 900 /bin/bash -c set -e; echo nvcc=/usr/local/cuda-12.9/bin/nvcc; uname -m; /usr/local/cuda-12.9/bin/nvcc --version 2>&1 | tail -2; nvidia-smi --query-gpu=name,driver_version --format=csv,noheader; cmake -S morsehgp3D_v5 -B build-v5-cuda -DCMAKE_BUILD_TYPE=Release -DMHGP5_ENABLE_CUDA=ON -DCMAKE_CUDA_COMPILER=/usr/local/cuda-12.9/bin/nvcc 2>&1 | tail -40; test ${PIPESTATUS[0]} -eq 0; cmake --build build-v5-cuda --target mhgp5_device_witness -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test ${PIPESTATUS[0]} -eq 0; ./build-v5-cuda/mhgp5_device_witness"
+	User time (seconds): 6.42
+	System time (seconds): 3.90
+	Percent of CPU this job got: 84%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:12.29
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 873292
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 905
+	Minor (reclaiming a frame) page faults: 962087
+	Voluntary context switches: 2122
+	Involuntary context switches: 46
+	Swaps: 0
+	File system inputs: 259152
+	File system outputs: 59032
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

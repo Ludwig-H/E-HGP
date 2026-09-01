@@ -1,0 +1,20 @@
+conf_plan=v2
+specs=uniform:32000 terrain:32000 eight_clusters:32000 scanline_single_pass:32000 uniform:50000 terrain:50000 eight_clusters:50000 scanline_single_pass:50000
+threads=48
+seq=1 name=v5ref_uniform_n32000 family=uniform n=32000 kind=v5ref
+seq=2 name=conf_uniform_n32000 family=uniform n=32000 kind=conf
+seq=3 name=v5ref_terrain_n32000 family=terrain n=32000 kind=v5ref
+seq=4 name=conf_terrain_n32000 family=terrain n=32000 kind=conf
+seq=5 name=v5ref_eight_clusters_n32000 family=eight_clusters n=32000 kind=v5ref
+seq=6 name=conf_eight_clusters_n32000 family=eight_clusters n=32000 kind=conf
+seq=7 name=v5ref_scanline_single_pass_n32000 family=scanline_single_pass n=32000 kind=v5ref
+seq=8 name=conf_scanline_single_pass_n32000 family=scanline_single_pass n=32000 kind=conf
+seq=9 name=v5ref_uniform_n50000 family=uniform n=50000 kind=v5ref
+seq=10 name=conf_uniform_n50000 family=uniform n=50000 kind=conf
+seq=11 name=v5ref_terrain_n50000 family=terrain n=50000 kind=v5ref
+seq=12 name=conf_terrain_n50000 family=terrain n=50000 kind=conf
+seq=13 name=v5ref_eight_clusters_n50000 family=eight_clusters n=50000 kind=v5ref
+seq=14 name=conf_eight_clusters_n50000 family=eight_clusters n=50000 kind=conf
+seq=15 name=v5ref_scanline_single_pass_n50000 family=scanline_single_pass n=50000 kind=v5ref
+seq=16 name=conf_scanline_single_pass_n50000 family=scanline_single_pass n=50000 kind=conf
+runs=16

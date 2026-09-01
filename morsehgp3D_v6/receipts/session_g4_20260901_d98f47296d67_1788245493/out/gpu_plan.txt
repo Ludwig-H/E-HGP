@@ -1,0 +1,25 @@
+gpu_plan=v1
+specs=uniform:50000 terrain:50000 eight_clusters:50000 scanline_single_pass:50000
+threads=48
+build_timeout=900
+s=8 smax=11 seed=3
+seq=1 name=gpu_witness kind=witness
+seq=2 name=gpu_lane kind=lane
+seq=3 name=gpu_mutant kind=mutant
+seq=4 name=gpu_cpu_uniform_n50000 family=uniform n=50000 kind=cpu
+seq=5 name=gpu_dev_uniform_n50000 family=uniform n=50000 kind=dev
+seq=6 name=gpu_ad_uniform_n50000 family=uniform n=50000 kind=ad
+seq=7 name=gpu_idx_uniform_n50000 family=uniform n=50000 kind=idx
+seq=8 name=gpu_cpu_terrain_n50000 family=terrain n=50000 kind=cpu
+seq=9 name=gpu_dev_terrain_n50000 family=terrain n=50000 kind=dev
+seq=10 name=gpu_ad_terrain_n50000 family=terrain n=50000 kind=ad
+seq=11 name=gpu_idx_terrain_n50000 family=terrain n=50000 kind=idx
+seq=12 name=gpu_cpu_eight_clusters_n50000 family=eight_clusters n=50000 kind=cpu
+seq=13 name=gpu_dev_eight_clusters_n50000 family=eight_clusters n=50000 kind=dev
+seq=14 name=gpu_ad_eight_clusters_n50000 family=eight_clusters n=50000 kind=ad
+seq=15 name=gpu_idx_eight_clusters_n50000 family=eight_clusters n=50000 kind=idx
+seq=16 name=gpu_cpu_scanline_single_pass_n50000 family=scanline_single_pass n=50000 kind=cpu
+seq=17 name=gpu_dev_scanline_single_pass_n50000 family=scanline_single_pass n=50000 kind=dev
+seq=18 name=gpu_ad_scanline_single_pass_n50000 family=scanline_single_pass n=50000 kind=ad
+seq=19 name=gpu_idx_scanline_single_pass_n50000 family=scanline_single_pass n=50000 kind=idx
+runs=19

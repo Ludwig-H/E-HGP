@@ -1,0 +1,8 @@
+# frontier_resume — codes, murs et RSS de la frontiere d'echelle SOUS PLAFOND
+# VIRTUEL RLIMIT_AS (pas le mur RAM natif) ; un refus de capacite type est une donnee.
+# limit_kind=rlimit_as limit_kb=183500800
+famille	n	code	mur_ms	duree_s	rss_kb	note
+uniform	200000	0	224684.8	225	78817760	-
+scanline_stationnaire	200000	0	77421.7	78	22948848	-
+uniform	400000	0	479461.3	479	153866088	-
+uniform	800000	134	NA	550	141041116	bad_alloc sous rlimit_as=183500800kB (signal 6 prouve)

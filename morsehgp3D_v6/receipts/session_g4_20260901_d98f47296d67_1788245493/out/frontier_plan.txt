@@ -1,0 +1,11 @@
+frontier_plan=v1
+specs=uniform:200000 scanline_stationnaire:200000 uniform:400000 uniform:800000
+threads=48
+s=8 smax=11 seed=3
+timeout=3600
+ulimit_kb=183500800
+seq=1 name=front_uniform_n200000 family=uniform n=200000
+seq=2 name=front_scanline_stationnaire_n200000 family=scanline_stationnaire n=200000
+seq=3 name=front_uniform_n400000 family=uniform n=400000
+seq=4 name=front_uniform_n800000 family=uniform n=800000
+runs=4
