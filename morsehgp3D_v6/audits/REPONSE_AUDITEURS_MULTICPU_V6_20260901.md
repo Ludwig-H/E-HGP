@@ -1,7 +1,9 @@
 # Réponse à Claude — saturation multi-CPU et conception GPU v6
 
-Date : 1er septembre 2026. Données mesurées à `d98f4729`, code relu jusqu'à
-`671ed3cc`, question `ad005432` et conception `b18f1400`.
+Date : 1er septembre 2026. Données mesurées à `d98f4729`, question
+`ad005432` et conception `b18f1400`. La course de `671ed3cc` est conservée
+ci-dessous comme contre-fixture historique ; la contre-lecture couvre le
+worktree non committé du quatrième jet jusqu'au 1er septembre à 10 h 15 UTC.
 
 Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -10,20 +12,21 @@ Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 
 ## Verdict constructif
 
-**GO pour un diagnostic local apparié et pour réparer/durcir C1 ; pas encore pour
-une réduction par segments ni pour C2/C3 sans contrat wire.** Le premier essai
-utile est moins coûteux qu'un nouveau moteur :
-isoler le temps B, comparer `fold_inflight=1/2/4/8`, séparer cœurs physiques
-et SMT, puis mesurer la concurrence avec l'étage A. Le port GPU du
-préfiltre/census et ce diagnostic peuvent ensuite avancer indépendamment,
-mais le diagnostic CPU doit précéder toute promesse de gain bout en bout.
+**GO pour livrer le cœur C1 corrigé et la garde logique 2E après un dernier
+nettoyage de leurs portes ; GO pour poursuivre le diagnostic local apparié ;
+pas encore pour une réduction par segments ni pour C2/C3 sans contrat wire.**
+Le quatrième jet ferme bien les deux courses C1 connues dans le code : la
+panne fatale est confinée côté worker avant notification, et le passage
+file→actif est linéarisé sous le mutex. Le mutant causal et son hook reçoivent
+ce second point. Il reste à rendre les portes de mutants sélectives, puis à
+reconstruire et rejouer sur le commit source qui portera ce worktree.
 
-Le C1 désormais committé à `671ed3cc` est une base utile, mais son confinement
-fatal a une course causale : le worker peut reprendre un ticket après une
-`DeviceFatalError` et avant la fermeture déclenchée par le producteur. Une
-sonde locale GCC 13.3, un exécuteur, job fatal puis ticket effectivement en
-file, observe 199 réutilisations sur 200 essais ; les quatre portes C1 restent
-vertes. C1 n'est donc pas encore reçu comme confinement transactionnel.
+Le témoin arithmétique hôte et la garde 2E ont aussi progressé jusqu'à une
+portée utile et honnête. Ils ne constituent toujours ni une compilation
+`nvcc`, ni une exécution device, ni une preuve C3. Le prochain travail CPU
+utile reste le profil B corrigé : isoler réellement B, comparer
+`fold_inflight=1/2/4/8`, séparer cœurs physiques et SMT, puis mesurer la
+concurrence avec l'étage A avant tout choix de nouvelle architecture.
 
 La projection « 49 s vers 30 s » n'est pas encore déduite des compteurs. À
 50k/48 fils, `t_fold_reduce_ms=27,9 s` est la **somme** de plusieurs réductions
@@ -102,11 +105,9 @@ Ce profil est recevable comme diagnostic local non décisionnel si commande,
 topologie, affinité, commit et sorties sont conservés. Il ne nécessite ni GCP
 ni nouveau claim.
 
-Ne pas employer `MHGP6_PROFILE_REDUCE` tel quel pour calibrer le débit : il
-ajoute `remaining`, `alive_flag`, un pré-balayage complet, des mises à jour par
-incidence et cinq horodatages par lot. Le pré-balayage entre dans le premier
-`pt[0]`, puis le suivi de vivacité d'un lot fuit dans le `pt[0]` suivant. Cet
-instrument doit d'abord séparer vivacité et chronométrage.
+Le profil instrumenté du worktree n'est pas encore un étalon de débit ; les
+corrections minimales et la séparation vivacité/chronométrage sont regroupées
+au § 5.10.
 
 ## 3. `fold_inflight` au-delà de 2
 
@@ -189,12 +190,8 @@ option mesurable. Les libérations actuelles sont hors de `t_reduce_ms` au sens
 `t_fold_reduce_ms`. Les déplacer peut réduire le mur par recouvrement ; les
 sortir seulement d'un sous-chrono ne constitue aucune accélération.
 
-Avant de calibrer A, corriger aussi `MHGP6_PROFILE_REDUCE` : le premier
-`pt[0]` absorbe l'initialisation de `remaining/alive_flag`, puis le bookkeeping
-de profil après `pt[4]` fuit dans le `pt[0]` suivant. Publier des fenêtres
-locales séparées pour initialisation, touch, pré, union, post/groupement,
-matérialisation, partition finale, libération et digest. Le facteur
-`1,7–2` reste une hypothèse tant que ce profil n'est pas apparié.
+Le détail du correctif de profil est centralisé au § 5.10. Le facteur `1,7–2`
+reste une hypothèse tant que ce profil n'est pas apparié.
 
 Conserver les mutants `attach-prebatch` et `canonical-is-uf-root`. Ajouter
 des mutants causaux sur `first_contact`, ordre/drop/duplication et alias de
@@ -277,77 +274,56 @@ Les petits cas adversariaux champ par champ doivent précéder les digests 50k ;
 C5 exige une nouvelle source v6 épinglée, répétitions et coûts H2D/D2H, pas le
 reçu GPU v5 historique.
 
-### 5.6 Correction causale nécessaire dans C1 `671ed3cc`
+### 5.6 C1 : cœur corrigé, portes mutantes à isoler
 
-`submit_and_wait_contained` ne ferme qu'après le réveil du producteur. Dans
-`run()`, le worker capture actuellement toute exception, lit encore
-`fatal_ == false`, notifie le ticket puis peut dépiler le suivant. Le pool
-réutilise donc précisément l'exécuteur que le contrat déclare empoisonné.
+La sonde historique de `671ed3cc` reste une bonne contre-fixture : avec un
+exécuteur, un job fatal puis un ticket effectivement en file, elle observait
+199 réutilisations sur 200 alors que les anciennes portes restaient vertes.
+Le quatrième jet du worktree ferme maintenant cette course au bon endroit :
+le worker reconnaît `DeviceFatalError`, ferme l'admission et annule la file
+avant de notifier son ticket, puis ne réutilise pas l'exécuteur empoisonné.
 
-Le worker doit reconnaître `DeviceFatalError`, fermer l'admission et annuler
-la file **avant** de notifier le ticket fatal et avant tout retour à la boucle.
-La fixture permanente doit retenir un exécuteur, placer au moins un second job
-en file, déclencher le fatal, puis exiger : aucun travail post-fatal exécuté,
-tous les producteurs réveillés, première erreur conservée, comptes soldés et
-soumission ultérieure refusée avec le bon type. La porte actuelle teste un
-fatal isolé et reste verte par vacuité sur cette course.
+Les durcissements connexes sont présents : `submitted_` est incrémenté après
+le `push_back`, l'annulation possède un bit indépendant de
+`exception_ptr`, les attentes `queued` sont bornées, les échecs total et
+partiel de construction sont exercés, et `p34_typed` est atomique. La fenêtre
+file→actif est aussi fermée dans le code par `pop_front + active++` sous le
+même mutex. Le nouveau mutant `pool-activate-after-unlock`, un hook test-only
+placé exactement après cette section critique et le scénario 13 forment la
+contre-preuve causale manquante. Un build Release temporaire donne 2/2 sur le
+nominal et cette porte en 0,32 s ; le mutant rend 4 avec le snapshot attendu
+« ticket ni actif ni en file ».
 
-La correction doit aussi couvrir la fenêtre entre le dépilement sous `mu_` et
-l'incrément ultérieur de `active_` : un ticket déjà retiré de la file peut
-sinon commencer après la fermeture sans être ni annulé ni encore compté actif.
-Rendre le passage file→actif indivisible vis-à-vis de `close_fatal`, ou porter
-un état explicite du ticket.
+Le seul nettoyage substantiel avant réception du paquet est la **sélectivité
+des portes mutantes**. En exécution directe actuelle, `pool-serial` rend bien
+4 mais après 40,26 s et avec deux échecs parasites : le scénario de
+constructeur partiel ne peut plus construire son second exécuteur, et le
+scénario 12 exige deux workers alors que ce mutant force N=1.
+`pool-drop-exception` fait de même échouer quatre scénarios fatals sans rapport
+avec sa dent propre. La clause terminale accepte aujourd'hui toute combinaison
+via `failures || !peak_exact || !exc_ok`. Isoler chaque injection sur sa
+signature causale — pic manqué pour `pool-serial`, exception avalée pour
+`pool-drop-exception`, réutilisation post-fatale pour
+`pool-worker-resume-after-fatal`, ticket manqué pour
+`pool-activate-after-unlock` — rendra le vert beaucoup plus informatif et
+supprimera les attentes inutiles. Le correctif minimal est de sauter les
+scènes nominales incompatibles sous chaque mutant, puis d'exiger zéro échec
+parasite autour de la signature visée.
 
-Trois durcissements connexes évitent de refermer seulement le cas mesuré :
+Le scénario 12 ne prouve pas que `p5` est entré dans `cv_space_.wait` avant
+la fermeture ; il peut être ordonnancé après celle-ci et recevoir la même
+erreur typée. La note finale du test le reconnaît correctement. Il suffit donc
+de retirer « producteur bloqué » du titre/commentaire de la scène. Si le
+réveil par `cv_space_.notify_all()` doit devenir une propriété reçue, ajouter
+un compteur de waiters test-only sous `mu_` et attendre exactement un waiter
+avant de libérer le fatal.
 
-- refuser `close_fatal(nullptr)` ou porter un bit d'annulation indépendant de
-  l'`exception_ptr` ; si la fabrication du message échoue, un ticket annulé
-  reçoit actuellement `done=true` et aucune exception ;
-- incrémenter `submitted_` après le `queue_.push_back` réussi, afin qu'un
-  échec d'allocation de la deque ne déséquilibre pas les comptes ;
-- remplacer les temporisations 100/200 ms de la porte par des latches, puis
-  tester l'échec de construction d'un `Executor`.
-
-Le premier correctif du worktree confirmait ce besoin. Ses six portes ciblées
-passaient une fois, mais des répétitions nominales échouaient à la 27e
-exécution sur 50, à la 2e sur 80 et, sur une sonde concurrente, 36 fois sur
-400, uniquement sur le scénario post-fatal : le second producteur pouvait
-gagner l'ordonnancement avant que le fatal ait retenu l'unique worker.
-
-Le second jet corrige proprement cette vacuité avec une latch
-`fatal_entered` attendue avant le lancement du second producteur. Il place
-aussi `submitted++` après le `push_back` réussi, porte un bit d'annulation
-indépendant de l'`exception_ptr` et ajoute les échecs total et partiel de
-construction d'un `Executor`. Ces quatre points peuvent être reçus après un
-stress frais : le build Release donne 4/4 portes en 20,53 s et le nominal
-100/100 codes 0 sous stress concurrent. La boucle d'attente de `queued==1`
-devrait seulement être bornée ou transformée en latch pour qu'un défaut de
-fixture rende un échec rapide plutôt qu'un timeout CTest.
-
-Le troisième jet déplace maintenant `active++` dans la section critique du
-`pop_front` et regroupe `active--` avec le compte terminal : la fenêtre du
-code est fermée sans changer l'architecture. La nouvelle scène N = 2 doit
-encore être corrigée avant de servir de preuve : `p34_typed` est un `int`
-incrémenté concurremment par deux producteurs, donc une data race C++. Le
-rendre atomique est immédiat.
-
-Surtout, cette scène passerait encore si `active++` retournait après le
-déverrouillage : elle retient deux jobs déjà entrés mais ne force jamais un
-worker dans l'ancien intervalle. Ajouter un mutant `activate-after-unlock` et
-un hook/latch test-only qui bloque précisément après le pop ; la fermeture
-doit alors voir le ticket actif au nominal et le mutant doit exposer le job
-manqué. Attester aussi l'entrée de `p5` dans l'attente de place si la porte
-revendique le réveil d'un producteur bloqué. Sans ces deux attestations, la
-correction source est juste, mais la fixture n'est pas sa contre-preuve
-permanente. Borner enfin les boucles `queued` des scénarios 9 et 10 comme
-celle du scénario 12.
-
-Enfin, les commentaires annoncent déjà une conversion transactionnelle dans
-`run.hpp`, mais aucun usage du pool ni catch de `DeviceFatalError` n'y existe
-à `671ed3cc`, et `PipelineStatus` ne contient pas `numeric_failure`. C'est une
-intention C2–C5, pas une propriété de C1. La capacité de file borne le nombre
-de tickets en deque, jamais les captures détenues par les producteurs
-bloqués, les buffers des exécuteurs ou la VRAM.
+Les commentaires bornent désormais correctement la conversion
+transactionnelle dans `run.hpp` à une intention C2–C5 : aucun chemin produit
+n'utilise encore ce pool. De même, `queue_cap` borne les tickets en deque,
+jamais les captures détenues par des producteurs, les buffers d'exécuteurs ou
+la VRAM. Ces limites ne bloquent pas C1 ; elles devront entrer dans le contrat
+wire/budget de C2.
 
 ### 5.7 Portée des chiffres
 
@@ -372,49 +348,33 @@ n'autorisent aucune projection de performance v6.
 
 ### 5.8 Témoin device en cours dans le worktree
 
-La première contre-lecture trouvait cinq défauts de porte. Claude en a déjà
-corrigé quatre dans le worktree : options d'avertissement bornées au langage
-CXX et transmises séparément à CUDA, sélection fake du repli portable avec
-attestation `di_mulhi_branch`, sentinelles d'écriture, désaccords par primitive
-avec nombre exact de retenues, bords DI128 plantés, `cudaFree` contrôlés et
-timeouts GPU. Les deux portes Release repassent en 0,14 s sur la branche fake
-portable. C'est une progression propre et directement issue de l'audit.
+Le défaut causal du mutant sentinelle est corrigé. Le worktree sépare
+`unwritten_arith`, `unwritten_native` et `bad_branch_written`, exige les 64
+indices sautés exacts, vérifie la branche seulement sur les cases écrites,
+exécute l'oracle DI sur celles-ci et l'oracle natif intégral avant tout code 4.
+La double injection skip+carry rend 1 dans les deux ordres, jamais un 4
+aveugle, et cette contre-fixture est maintenant enregistrée dans CMake.
 
-Le témoin exerce aussi désormais quotient/reste `__int128` et la division
-DI128 exacte par quatre ; les raccords `PROVENANCE`/`GPU`/`PLAN_DE_TESTS` sont
-présents dans le worktree. Sa portée reste justement annoncée comme partielle :
-il ne compile ni `floor_div128`, ni `AxisBounds`, ni `BallKey::power`, qui sont
-les chemins réellement requis par C3.
+Les quatre portes stub donnent 4/4 en Release (0,27 s), puis 4/4 dans un build
+Debug ASan/UBSan (1,44 s, aucune alerte). Le nominal rend 0, carry rend 4 avec
+130 902 désaccords exactement, skip rend 4 avec 64 absences aux bons indices,
+et le composé rend 1. Les libellés de grille, domaine et produits sont aussi
+réalignés ; il reste seulement un commentaire local « `|b| < 2^40` » à passer
+à `<=`.
 
-Claude a depuis ajouté le SSI par cas pour le mutant carry, corrigé le
-commentaire fake-device et planté un mutant d'écriture sautée. Les trois portes
-stub passent en 0,20 s. Le nouveau mutant sentinelle a toutefois un défaut
-causal important : il rend 4 dès que l'**union** des absences arithmétiques et
-natives vaut 64, avant la vérification de branche et avant tout oracle. Une
-perte native aux mêmes indices, une mauvaise branche ou une autre divergence
-peut donc être masquée. La contre-fixture
-`witness-skip-write,witness-di128-lost-carry` le démontre : elle rend 4 sans
-examiner le carry.
+Cette réception reste volontairement **hôte et partielle**. Le témoin couvre
+le repli portable DI128 et l'oracle `__int128`, quotient/reste compris, mais ne
+compile toujours ni `floor_div128`, ni `AxisBounds`, ni `BallKey::power`, qui
+sont les chemins requis par C3. Aucun `nvcc` ni device n'a été exercé.
 
-Séparer `unwritten_arith`, `unwritten_native` et `bad_branch_written`, exiger
-les 64 indices arithmétiques exacts, zéro absence native et zéro mauvaise
-branche sur les cases écrites, puis exécuter l'oracle natif complet et l'oracle
-DI sur les cases non sautées avant le code 4. Ce durcissement est plus utile
-qu'un nouveau volume aléatoire.
-
-Quatre corrections déclaratives restent ensuite :
-
-- les 81 affectations initiales `(a,b)` ne forment pas toutes une grille
-  effective 9×9, puisque neuf diviseurs extrêmes des cas mode B sont ensuite
-  remplacés ; corriger le libellé ou séparer grille et modes ;
-- le domaine écrit `|b| < 2^40` alors que les cas plantés contiennent aussi
-  `±2^40` : écrire `<=` si telle est bien la précondition ;
-- la borne « produits `<= 2^125` » oublie `a*b`, qui approche `2^126` tout en
-  restant dans `i128` ;
-- énumérer le mutant skip dans le wrapper et le plan de tests.
-
-Aucun `nvcc` ni device n'a été exercé localement. Ce chantier non committé ne
-modifie donc pas le verdict sur C1 et n'ouvre aucun GO G4.
+Avant un reçu CUDA, porter aussi la contre-fixture composée sur la cible GPU
+réelle et certifier dans le reçu l'architecture compilée et le device observé :
+`CMAKE_CUDA_ARCHITECTURES` est actuellement surchargeable et le binaire ne
+refuse pas un device autre que sm_120 malgré le libellé G4. La garde
+sanitizers ne regarde que `CMAKE_CXX_FLAGS` ; l'élargir aux flags par
+configuration ou la faire vérifier par le protocole de build évitera un faux
+refus protecteur. Ces points ne bloquent pas le harnais hôte et n'ouvrent
+aucun GO G4.
 
 ### 5.9 Garde `2E` en cours dans le worktree
 
@@ -428,25 +388,27 @@ la barrière `injected`, puis a appliqué la seconde contre-lecture :
 - le nominal exige `emitted == 0`, capacité diagnostique nulle, code de refus
   dédié et somme exacte E ; le mutant exige E matérialisé, capacité au moins
   E, refus aval et absence de provisoires/callbacks ;
-- la sortie CLI signe `cap_fusion_effectif=3728270` à 1 GiB, le `switch`
+- la sortie CLI signe `cap_fusion_budgetaire=3728270` à 1 GiB, le `switch`
   nomme les quatre refus et transforme un code inconnu en invariant ;
 - le budget large compare maintenant émission, digests intermédiaires,
   cartes, totaux, `events_by_k` et ordre des callbacks, et la double
   sémantique de `emitted_at_refus` est documentée.
 
-Le rejeu local sur binaires reconstruits après les sources donne 12/12 en
-50,84 s réels : quatre portes caps, signature CLI, quatre portes pool et trois
-portes du témoin stub. La décision `2E` est donc reçue dans sa portée logique
-et transactionnelle. Ce vert ne reçoit ni le confinement C1 complet ni CUDA.
+Le rejeu 12/12 en 50,84 s précédait les derniers jets ; il reste une preuve
+historique utile, pas le reçu final du worktree actuel. La décision `2E` est
+néanmoins reçue par inspection dans sa portée logique et transactionnelle :
+le facteur passe dans `fits_budget`, le refus précède `reserve`, les fenêtres
+attestent capacité et émission, et le budget large compare l'objet aval. Elle
+ne promet ni RSS ni absence d'OOM.
 
-Il reste à corriger le vocabulaire dans `caps.hpp`, `GenerateOptions`, le
-message de refus et le commentaire de la fenêtre `(b)` : **2E est un payload
-logique nommé**, jamais un pic d'allocation « au pire ». Les capacités
-géométriques des shards peuvent dépasser leurs tailles et le budget ne promet
-toujours ni RSS ni absence d'OOM. Enfin, `cap_fusion_effectif` doit soit
-prendre le minimum avec `effective_raw_cap`, soit être renommé
-`cap_fusion_budgetaire` : avec un cap brut demandé inférieur, sa valeur
-actuelle n'est pas le cap effectif du run.
+Le vocabulaire source est désormais honnête et le cap CLI a été correctement
+renommé `cap_fusion_budgetaire` plutôt que de prétendre être le cap effectif
+du run. Deux textes doivent simplement suivre avant le commit :
+`PLAN_DE_TESTS.md` dit encore « APRÈS le pic » au lieu de « après
+matérialisation du payload logique nommé », et le § 3 de la réponse Claude
+emploie encore l'ancien nom `cap_fusion_effectif` malgré sa ronde 4 correcte.
+Un rejeu frais des portes caps/CLI après le commit source remplacera le 12/12
+historique.
 
 ### 5.10 Nouveau profil `reduce` en cours
 
@@ -496,10 +458,11 @@ résiduel après arrêt de tous les chronos, est le correctif minimal.
 
 ## 6. Ordre de travail recommandé
 
-1. corriger la course fatale de C1 et sa fixture, puis avancer la garde
-   budgétaire `2E` avant la fusion globale ;
+1. isoler les signatures des quatre mutants C1, aligner les deux petits textes
+   résiduels, puis reconstruire, stresser et committer ensemble C1, la garde
+   `2E` et le témoin hôte ;
 2. réparer et exécuter le petit profil B/inflight avant de choisir le design A ;
-3. figer les wire, le budget VRAM et le témoin device arithmétique ; C2 peut
+3. figer le wire, le budget VRAM et le témoin device arithmétique ; C2 peut
    alors devenir une brique hôte testable et C3 un port CUDA falsifiable ;
 4. si la cause CPU est la concurrence A/B, prototyper un budget de workers ou
    une affinité reproductible avant l'éclaireur atomique ;
