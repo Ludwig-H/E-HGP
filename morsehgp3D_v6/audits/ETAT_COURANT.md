@@ -82,6 +82,16 @@ relation complète ajoute réserve GCE 300 s, tolérance 120 s et budget 480 s.
 Avec `MAX_RUN=3600`, la frontière correcte en minutes est 45 acceptée, 46
 refusée, non 47/48.
 
+La contre-lecture détaillée du § 5.18 reçoit la direction du WIP, pas encore
+son pin. Campagne, lifecycle, juges normal/optimisé et revalidation du reçu
+sont verts. Restent avant de qualifier la fermeture : appliquer le même
+budget 300+120+480 dans lifecycle et `start_and_verify.sh`, préserver les
+codes d'échec des producteurs de topologie/inventaire, lier les trois chemins
+de binaires, rendre `--arch` obligatoire au juge fichier, égaliser les clés
+des digests avec les pilotes et empêcher tout contournement du répertoire de
+résumés. La reprise persistante hors `/tmp` reste entièrement à construire
+avant une nouvelle G4 ; le retry dans un même processus ne la remplace pas.
+
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
 v5→v6 jugé sur les forêts et `digest_all`. La v5 ne fait pas autorité sur la

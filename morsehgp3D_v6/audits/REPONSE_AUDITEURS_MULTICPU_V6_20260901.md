@@ -1225,6 +1225,76 @@ de 120 s et ne garantit que 360 s dans le pire cas. Nommer séparément réserve
 GCE, tolérance et budget évite de soustraire deux fois ou d'oublier l'une des
 marges.
 
+### 5.18 Contre-lecture coopérative du WIP postérieur à `910e70f0`
+
+Le WIP va dans le bon sens et ne doit pas être jeté. L'égalité des arguments
+refuse désormais suffixe, doublon et ordre divergent ; `arch_compilees=86`
+meurt dans le juge et le validateur ; les digests d'objet gravés correspondent
+aux quatre sorties du reçu courant et aux références différentielles
+historiques ; le validateur sait écrire ses résumés hors d'un reçu durable.
+Les contre-fixtures du juge et du profil passent avec et sans `python3 -O`, le
+selftest campagne complet rend 0, le lifecycle complet rend 0 et la
+revalidation du reçu b97 rend encore 58 runs non décisionnels avec sept
+résumés identiques et 202/202 hashes après passage. Ce sont de vraies
+fermetures, même si le WIP n'est pas encore un pin reçu.
+
+Six coutures courtes restent ; les trois premières sont causales avant de
+nommer les nouveaux contrats « exacts ».
+
+1. **Budget invité : ajouter la tolérance, ici et au point d'entrée.** Le
+   prédicat courant ajoute 300+480, alors que 480 est annoncé après une
+   tolérance de 120 ; il doit donc ajouter 300+120+480. Avec 28 800 s, la
+   frontière est 465 min acceptée et 466 refusée, non 467/468. Graver aussi
+   600/599 s avant tolérance et 480/479 s après tolérance, plutôt que seulement
+   deux minutes entières. `start_and_verify.sh` conserve séparément la garde
+   plus faible `guest*60+300<=max` : centraliser le même prédicat avant toute
+   mutation, puis borner l'armement par l'échéance absolue, évite qu'un appel
+   direct brûle à nouveau une session.
+2. **Ne pas neutraliser le code qui produit une preuve.** Les formes
+   `cpu_list_for ... || true` et `grep|sed|sort || true` distinguent bien une
+   sortie vide, mais accepteraient une topologie ou un inventaire complet
+   suivi d'un code 7. Capturer le code séparément, exiger à la fois code zéro
+   et contenu exact, puis ajouter les mutants « sortie valide puis rc=7 ».
+3. **Lier le chemin du binaire, pas seulement son basename.** Matrice et
+   attribution réemploient `argv[:4]` puis n'exigent que `mhgp6` ou
+   `mhgp6_profile`; le pilote accepte tout jeton non blanc. Les variables
+   distantes restent surchargeables, donc `/tmp/mhgp6`,
+   `./autre/mhgp6_profile` ou `/bin/true` peuvent encore passer après rehash.
+   Le profil canonique doit imposer les trois chemins produits
+   `./build-v6/mhgp6`, `./build-v6/mhgp6_profile` et
+   `./build-v6-cuda/mhgp6_cuda`, avec un mutant par phase. Si cette liberté est
+   volontaire, renommer honnêtement le contrat en « arguments exacts ».
+4. **Rendre l'architecture obligatoire au juge fichier.** Le runner passe
+   maintenant `--arch=120`, mais retirer ce seul argument remet le défaut
+   `arch=None` et le premier pilote 86 n'est plus refusé avant la famille
+   suivante. Rendre `--arch` obligatoire en mode `--fichier`, ou graver une
+   scène fail-fast premier pilote 86/deuxième famille absente, ferme la
+   couture du runner et pas seulement le rejeu final.
+5. **Fermer les nouvelles surfaces de revalidation.** Quand
+   `GPUV6_OBJET_DIGESTS` existe, ses clés `(famille,n)` doivent égaler
+   exactement `GPUV6_PILOT_SPECS`; refuser fixture manquante et fixture
+   inutilisée. Les valeurs actuelles sont corroborées, mais la v5 reste une
+   référence différentielle historique, jamais l'autorité v6. Dans
+   `revalidate_v6_receipt.sh`, relire les uniques `remote_campaign_rc` et
+   `scp_rc` du journal au lieu d'employer `RECU.rc` et zéro ; refuser un
+   `V6_RESUMES_DIR` résolu égal ou interne au reçu ; neutraliser seulement le
+   `diff` d'affichage, dont le code 1 ne doit pas court-circuiter la vérification
+   finale.
+6. **Ne pas appeler le retry courant une reprise persistante.** `WORK`, clé,
+   état, handoff et artefacts restent sous `/tmp`; le scénario « reprise
+   EXECUTÉE » effectue deux arrêts dans le même processus. Avant une nouvelle
+   G4, publier dans une base 0700 persistante les états distincts
+   `guest_guard_pending` puis `double_guard_verified`. Un second processus
+   lancé après SIGKILL ne doit jamais redémarrer la VM : sans la seconde
+   marque il arrête immédiatement ; avec elle, il tente le rapatriement,
+   classe le paquet partiel/invalide puis certifie l'arrêt de la même
+   génération. Continuer une campagne demanderait en plus un job distant
+   détaché ; ce n'est pas nécessaire pour fermer d'abord la sûreté.
+
+Ordre minimal : corriger 1--4 et leurs mutants, fermer 5 comme utilitaire
+d'audit, puis traiter 6 avant toute dépense. Aucune de ces coutures ne demande
+de rouvrir les kernels ni les résultats scientifiques du reçu.
+
 ## 6. Ordre de travail recommandé
 
 1. **achevé à `4a85c13d`** : C1, garde `2E` et témoin hôte ancrés ensemble,
