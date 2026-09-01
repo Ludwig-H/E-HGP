@@ -22,12 +22,12 @@ suspendu à votre audit du reçu.
 
 ## 1. Pilote série C (50 000 points, 48 fils, 4 répétitions ABBA retenues)
 
-Murs (ms, médiane des 4 répétitions ; dispersion < 1,5 %) :
+Murs (ms, MÉDIANES homogènes des 4 répétitions retenues ; étendue < 1,5 %) — rectifié après § 5.17 (la première version mélangeait médianes et premier record) :
 
 | famille | `mur_cpu` | `mur_route_device` | gain | étage CPU prefiltre+census | étage device | dont wire (hôte) | H2D | kernels | D2H | rebuild (hôte) | lots |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| uniform | 59 011 | 52 891 | −10,4 % | 14 146 | 7 716 | 2 641 | 171 | 154 | 77 | 4 110 | 11 |
-| eight_clusters | 70 461 | 63 870 | −9,4 % | 13 798 | 7 295 | ~2 500 | 162 | 154 | 71 | ~4 000 | 10 |
+| uniform | 59 011 | 52 891 | −10,4 % | 14 017 | 7 717 | ~2 640 | ~172 | 154 | ~77 | ~4 110 | 11 |
+| eight_clusters | 70 462 | 63 866 | −9,4 % | 13 799 | 7 295 | ~2 500 | ~162 | 154 | ~71 | ~4 000 | 10 |
 | terrain | 18 616 | 17 896 | −3,9 % | 2 021 | 1 277 | — | 33 | 23,5 | 14,6 | — | 2 |
 | scanline_single_pass | 15 048 | 14 627 | −2,8 % | 1 625 | 1 186 | — | 30,7 | 17,9 | 13,2 | — | 2 |
 
@@ -46,12 +46,12 @@ net sur le mur (−10 %) est donc plafonné par du code hôte de la couture C5,
 pas par le device. Sur les familles peu denses (terrain, scanline) l'étage
 est déjà petit et le gain marginal.
 
-## 2. Matrice CPU décisionnelle (uniform, trois passages concordants < 1 %)
+## 2. Matrice CPU (sous-plan pré-enregistré, statut `verifie_non_decisionnel` ; uniform, une graine, trois blocs d'ordre déterministes, étendue par point ≤ 1,58 %)
 
 | point | mur (s) | contraste |
 |---|---|---|
 | 16000 · T16 · i2 · j0 | 21,6 | référence T16 |
-| 16000 · T48 · i2 · j0 | 13,6 | T48/T16 = 1,59× (loin de 3× : part sérielle) |
+| 16000 · T48 · i2 · j0 | 13,6 | T48/T16 = 1,59× (T16 = 16 cœurs physiques, T48 = 24 cœurs + SMT sur cette topologie : le facteur ne démontre pas à lui seul une part sérielle) |
 | 16000 · T48 · i1 · j0 | 15,8 | inflight 1→2 : −14 % |
 | 16000 · T48 · i4 · j0 | 13,5 | inflight 2→4 : 0 |
 | 16000 · T48 · i2 · **j1** | 18,4 | join=1 : +35 % |
@@ -76,27 +76,34 @@ effective = cpuset `0-47`, masque recalculé par le validateur.
 | 16000 T48 i2 j1 | 19,1 s | 7,2 s | 38 % | 2,4 s | 34 % | 1,1 | 1,3 | 1,1 | 0,6 | 0,3 |
 
 `somme = mur_reduce_interne` à 1 ms près sur tous les K (fermeture
-exacte). Le reduce ne dépend presque pas du nombre de fils (8,6 s à T48 vs
-8,0 s à T16 pour 16000) : c'est la part SÉRIELLE qui borne le passage à
-l'échelle des fils, et `materialisation_tri_copie` en est le premier poste
-(31–36 %), `unite` le dernier (4 %). Confirme la matrice locale
+exacte). Rectifié après § 5.17 : sous `join=0` la somme des réductions
+RECOUVRE plusieurs B et n'est pas une fraction du mur (16k/T48 : 8,585 s de
+réductions pour ~5,957 s de mur du fold) ; `materialisation_tri_copie` est
+le premier poste interne (31–36 %) mais pas une majorité — `touch`, `pre`,
+`post_remplissage` et `partition` pèsent ensemble davantage ; `init` et
+`liberation` sont plus petits que `unite`. Le reduce varie peu entre T16
+et T48 (8,0 vs 8,6 s à 16000). Confirme la direction de la matrice locale
 (62cd2e28) sur la machine cible.
 
 ## 4. Application en lecture de l'arbre § 5.10
 
-1. **A/B en recouvrement (join=0), inflight=2** : validé sur G4 (+35 % dès
-   qu'on sérialise, inflight 4 n'apporte rien). Ne pas borner la
-   concurrence.
-2. **B est borné par la matérialisation** (31–36 % du reduce, ~8 s à 50k) et
-   le reduce est insensible aux fils → branche pré-enregistrée
-   **CompactDelta** (compaction de l'état du fold entre K, sans tri/copie
-   complète) — c'est le levier CPU.
+1. **Réglage de débit à conserver : 48 fils, inflight=2, join=0** (inflight
+   1→2 : −14 % ; 2→4 : rien ; join=1 : +35 % de mur mais RSS médian 17,99 →
+   13,99 Gio à 50k — `join=1` reste le mode de pression mémoire documenté,
+   pas un réglage à proscrire).
+2. **`materialisation_tri_copie` premier poste interne** (31–36 % du reduce,
+   ~8 s cumulés à 50k) → l'arbre sélectionne UNE SONDE **CompactDelta**
+   (palier synchrone, `ForestResult` complet comparé, temps et octets
+   mesurés séparément sur CPU), pas encore « le » levier CPU prouvé.
 3. **Série C** : le device fait le travail en 0,15 s ; le gain visible (−10 %)
-   est bridé par le wire hôte (2,6 s) et le rebuild hôte (4,1 s). Levier C6
-   pré-enregistrable : sérialisation du wire et reconstruction en parallèle
-   (ou écriture device directement dans la disposition des survivants),
-   cible < 1 s d'étage hôte, soit ≈ −13 s sur 59 (−22 %) à isoler par une
-   contre-fixture avant toute mesure.
+   est bridé par le wire hôte (2,6 s) et le rebuild hôte (4,1 s). Plafond
+   descriptif (§ 5.17) : même un étage device ramené à zéro ne donnerait que
+   1,12–1,31× de bout en bout ; un simple chevauchement wire/rebuild laisse
+   ≥ 4,1 s. Levier C6 utile : supprimer les matérialisations globales
+   (2,42 Go d'entrée, 2,16 Go de sorties) par un traitement PAR LOT dans des
+   temporaires privés avec publication transactionnelle finale — précédé de
+   deux contre-sondes locales (réserve gardée `cands.size()*112`, réserve
+   exacte ou deux passes de `lsurv`/`lballs`).
 4. Le digest (+23 % du mur) reste un coût de mesure, hors chemin produit.
 
 Aucune de ces lignes n'est une conclusion d'accélération publiable : ce

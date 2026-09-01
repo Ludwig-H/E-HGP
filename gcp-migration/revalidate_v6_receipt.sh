@@ -20,26 +20,35 @@ field() { sed -n "s/^$1=//p" "${RECU}/RECU_SESSION.txt" | head -n 1; }
 COMMIT="$(field source_commit)"
 PAYLOAD="$(field source_payload_sha256)"
 MANIFEST="$(field protocol_manifest_sha256)"
-RC_REMOTE="$(field rc)"
+# § 5.18.5 : les codes de session viennent des lignes UNIQUES du journal
+# (remote_campaign_rc=, scp_rc=), jamais du rc global du recu ni d'un zero.
+RC_REMOTE="$(grep -E '^remote_campaign_rc=[0-9]+$' "${RECU}/session.log" | sed 's/.*=//' | sort -u)"
+SCP_RC="$(grep -E '^scp_rc=[0-9]+$' "${RECU}/session.log" | sed 's/.*=//' | sort -u)"
+[[ "${RC_REMOTE}" =~ ^[0-9]+$ ]] || { echo "REFUS : remote_campaign_rc absent ou multiple dans session.log" >&2; exit 2; }
+[[ "${SCP_RC}" =~ ^[0-9]+$ ]] || { echo "REFUS : scp_rc absent ou multiple dans session.log" >&2; exit 2; }
 STOP_RC="$(field stop_rc)"
 PROFIL_NOM="$(sed -n 's/^profil_canonique=//p' "${RECU}/profil_campagne.txt" | head -n 1)"
 [[ "${COMMIT}" =~ ^[0-9a-f]{40}$ ]] || { echo "REFUS : source_commit illisible" >&2; exit 2; }
 [[ "${PROFIL_NOM}" =~ ^[a-z0-9_]+$ ]] || { echo "REFUS : profil_canonique illisible" >&2; exit 2; }
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/ehgp-revalid.XXXXXXXX")"
 trap 'rm -rf "${WORK}"' EXIT
+# Le repertoire des resumes ne peut etre ni le recu ni un sous-repertoire.
+RECU_ABS="$(cd "${RECU}" && pwd -P)"
+case "$(cd "${WORK}" && pwd -P)/" in "${RECU_ABS}/"*) echo "REFUS : V6_RESUMES_DIR dans le recu" >&2; exit 2 ;; esac
 cp -r "${RECU}/out" "${WORK}/out"
 git -C "${ROOT}" show "${COMMIT}:gcp-migration/profils/${PROFIL_NOM}.env" > "${WORK}/${PROFIL_NOM}.env"
-echo "recu ${RECU} : commit ${COMMIT:0:12}, profil ${PROFIL_NOM}, rc distant ${RC_REMOTE}, stop_rc ${STOP_RC}"
+echo "recu ${RECU} : commit ${COMMIT:0:12}, profil ${PROFIL_NOM}, remote_campaign_rc ${RC_REMOTE}, scp_rc ${SCP_RC}, stop_rc ${STOP_RC}"
 rc=0
 V6_RESUMES_DIR="${WORK}" python3 "${VALIDATOR}" "${WORK}/out" "${COMMIT}" "${PAYLOAD}" "${MANIFEST}" \
-  "${RC_REMOTE}" 0 "${RECU}/profil_campagne.txt" "${WORK}/${PROFIL_NOM}.env" "${RECU}/manifest_revalide.txt" || rc=$?
+  "${RC_REMOTE}" "${SCP_RC}" "${RECU}/profil_campagne.txt" "${WORK}/${PROFIL_NOM}.env" "${RECU}/manifest_revalide.txt" || rc=$?
 echo "validateur (${VALIDATOR}) : rc=${rc}"
 for r in bench queue sweep gpu frontier matrice gpuv6; do
   if [ -f "${RECU}/${r}_resume.txt" ] && [ -f "${WORK}/${r}_resume.txt" ]; then
     if cmp -s "${RECU}/${r}_resume.txt" "${WORK}/${r}_resume.txt"; then
       echo "resume ${r} : identique au recu"
     else
-      echo "resume ${r} : DIFFERENT du recu (le recu reste intact)"; diff "${RECU}/${r}_resume.txt" "${WORK}/${r}_resume.txt" | head -5
+      echo "resume ${r} : DIFFERENT du recu (le recu reste intact)"
+      { diff "${RECU}/${r}_resume.txt" "${WORK}/${r}_resume.txt" || true; } | head -5  # affichage seul, jamais un court-circuit
     fi
   fi
 done

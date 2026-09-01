@@ -490,20 +490,27 @@ unset GUEST_SHUTDOWN_MINUTES
 check_true "relation invite/GCE violee : refus rc=2 sans AUCUN SETMAX" \
   bash -c "[ '${rc}' -eq 2 ] && ! grep -qE '^(SETMAX|START|STOP) ' '${FAKE_CALLS}' \
     && grep -q 'relation invite/GCE violee' '${SCENARIO_DIR}/stderr.log'"
-# (m2/m3) FRONTIERES du budget d'armement (§ 5.16, premier depart brule) :
-# MAX_RUN=28800 => GUEST*60 + 300 (reserve GCE) + 480 (budget) <= 28800 <=>
-# GUEST <= 467 min. 467 accepte (SETMAX atteint, relation muette), 468
-# refuse avant toute garde (la fenetre utile reste large : la seule dent
-# exercee est la relation).
-export GUEST_SHUTDOWN_MINUTES=467
+# (m2/m3) FRONTIERES du budget d'armement (§ 5.16/5.18.1, premier depart
+# brule) : MAX_RUN=28800 => GUEST*60 + 300 (reserve GCE) + 120 (tolerance
+# systemd) + 480 (budget) <= 28800 <=> GUEST <= 465 min. 465 accepte (SETMAX
+# atteint, relation muette), 466 refuse avant toute garde ; puis A LA
+# SECONDE : 465 min sous 28800 s = 600 s avant tolerance (480 apres)
+# accepte, sous 28799 s = 599 s (479 apres) refuse.
+export GUEST_SHUTDOWN_MINUTES=465
 rc=0; run_scenario ok ok 0 28800 || rc=$?
 unset GUEST_SHUTDOWN_MINUTES
-check_true "frontiere budget d'armement : 467 min sous 28800 s ACCEPTE (SETMAX atteint, relation muette)" \
+check_true "frontiere budget d'armement : 465 min sous 28800 s ACCEPTE (600 s avant tolerance = 480 apres ; SETMAX atteint)" \
   bash -c "grep -qE '^SETMAX ' '${FAKE_CALLS}' && ! grep -q 'relation invite/GCE violee' '${SCENARIO_DIR}/stderr.log'"
-export GUEST_SHUTDOWN_MINUTES=468
+export GUEST_SHUTDOWN_MINUTES=465
+rc=0; run_scenario ok ok 0 28799 || rc=$?
+unset GUEST_SHUTDOWN_MINUTES
+check_true "frontiere budget d'armement A LA SECONDE : 465 min sous 28799 s REFUSE (599 s avant tolerance = 479 apres), zero SETMAX" \
+  bash -c "[ '${rc}' -eq 2 ] && ! grep -qE '^(SETMAX|START|STOP) ' '${FAKE_CALLS}' \
+    && grep -q 'budget d.armement' '${SCENARIO_DIR}/stderr.log'"
+export GUEST_SHUTDOWN_MINUTES=466
 rc=0; run_scenario ok ok 0 28800 || rc=$?
 unset GUEST_SHUTDOWN_MINUTES
-check_true "frontiere budget d'armement : 468 min sous 28800 s REFUSE (budget < 480 s), zero SETMAX" \
+check_true "frontiere budget d'armement : 466 min sous 28800 s REFUSE (budget < 480 s), zero SETMAX" \
   bash -c "[ '${rc}' -eq 2 ] && ! grep -qE '^(SETMAX|START|STOP) ' '${FAKE_CALLS}' \
     && grep -q 'budget d.armement' '${SCENARIO_DIR}/stderr.log'"
 # (n) premier arret post-scp en echec : re-tentative IMMEDIATE avant toute
@@ -530,9 +537,9 @@ check_true "double echec d'arret : validation sautee, aucune conclusion, exit 70
     && ! grep -q 'campaign_status' '${SCENARIO_DIR}/stdout.log' \
     && grep -q 'validation SAUTEE' '${SCENARIO_DIR}/work/session.log'"
 
-# (p) contre-calendrier du neuvieme tour : profil smoke_v1, MAX=5280,
-# invite 75 min (relation exacte 75*60+300+480=5280 depuis le budget
-# d'armement du § 5.16 ; le cutoff effectif reste 4500 s = l'invite, donc
+# (p) contre-calendrier du neuvieme tour : profil smoke_v1, MAX=5400,
+# invite 75 min (relation exacte 75*60+300+120+480=5400 depuis le budget
+# d'armement du § 5.18.1 ; le cutoff effectif reste 4500 s = l'invite, donc
 # l'echeance du runner — gen + cutoff - POST - 90 — est inchangee), DESCRIBE=600 — le build
 # consomme 90 s reelles, l'echeance tombe pendant : le describe pre-campagne
 # NE DOIT PAS s'executer (clamp), la campagne ne part pas, le scp reste
@@ -542,7 +549,7 @@ export CAMPAIGN_PROFILE=smoke_v1 GUEST_SHUTDOWN_MINUTES=75 DESCRIBE_TIMEOUT_S=60
 _OLD_FAKE_GEN="${FAKE_GEN}"
 FAKE_GEN="$(date -u -d '-595 seconds' +%Y-%m-%dT%H:%M:%SZ)"
 export FAKE_BUILD_SLEEP_S=90
-rc=0; run_scenario ok build_lent 0 5280 || rc=$?
+rc=0; run_scenario ok build_lent 0 5400 || rc=$?
 FAKE_GEN="${_OLD_FAKE_GEN}"
 unset CAMPAIGN_PROFILE GUEST_SHUTDOWN_MINUTES DESCRIBE_TIMEOUT_S SCP_STEP_TIMEOUT_S SSH_STEP_TIMEOUT_S FAKE_BUILD_SLEEP_S
 check_true "contre-calendrier : rc=77 conserve, describe pre-campagne clampe, campagne non lancee, scp budgete a deux arrets, arret certifie" \

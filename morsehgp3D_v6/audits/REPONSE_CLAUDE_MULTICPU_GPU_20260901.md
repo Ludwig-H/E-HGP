@@ -608,3 +608,64 @@ testée, selftest tuant le superviseur après le handshake) — livraison
 séparée ; puis nouvel accusé explicite pour tout quatrième départ.
 
 GCP non utilisé par cette livraison.
+
+## 9. Réponse aux § 5.17 et § 5.18
+
+### 9.1 § 5.17 — rectifications intégrées à la note de lecture
+
+Les cinq rectifications sont portées dans
+`NOTE_CLAUDE_RECU_SERIE_C_G4_20260901.md` : la matrice est un sous-plan
+pré-enregistré au statut `verifie_non_decisionnel` (une famille, une
+graine, trois blocs d'ordre déterministes, étendue par point ≤ 1,58 %) ;
+le tableau pilote est en médianes homogènes des quatre records retenus ;
+T16→T48 est 16 cœurs physiques → 24 cœurs + SMT sur cette topologie (le
+1,59× ne démontre pas seul une part sérielle) ; sous `join=0` la somme des
+réductions recouvre plusieurs B et n'est pas une fraction du mur
+(`materialisation_tri_copie` premier poste interne mais pas majoritaire,
+`init`/`liberation` plus petits que `unite`) ; `join=1` reste le mode de
+pression mémoire documenté (RSS 17,99 → 13,99 Gio). L'arbre sélectionne
+UNE SONDE `CompactDelta` ; le plafond descriptif 1,12–1,31× borne C6, dont
+le levier utile est la suppression des matérialisations globales par lot
+(deux contre-sondes locales d'abord). Ordre coopératif adopté tel quel.
+
+### 9.2 § 5.18 — les six coutures, fermées et falsifiées
+
+1. **Budget invité avec tolérance** : prédicat `GUEST*60 + 300 + 120 + 480
+   <= MAX_RUN`, nommé terme à terme (réserve GCE, tolérance systemd, budget
+   d'armement) dans le cycle de vie ET dans `start_and_verify.sh` (sa garde
+   faible `guest*60 + 300` est remplacée par le même prédicat — la garde
+   invitée conserve la borne absolue à l'échéance sûre) ; frontières 465/466
+   min sous 28800 s ET à la seconde 600/599 s avant tolérance (= 480/479
+   après) via `MAX_RUN` 28800/28799, gravées au selftest du cycle de vie ;
+   contre-calendrier (p) porté à `MAX=5400` à cutoff inchangé ; défaut
+   d'invité 465 min ; `test_gcp_safety` 81/81 après le changement de garde.
+2. **Codes qui produisent une preuve** : `cpu_rc` et le code du listage
+   `-N` sont capturés séparément et exigés nuls en plus du contenu ; mutants
+   « topologie complète puis `lscpu` rc=7 » et « listage exact puis
+   `ctest -N` rc=7 » tués (troncature avec le code gravé, aucune porte, aucun
+   run à affinité douteuse).
+3. **Chemins des binaires liés** : axes `BIN_MATRICE`, `BIN_ATTRIB`,
+   `BIN_PILOTE` (profil canonique, alphabet dédié `./…`, transportés au
+   runner comme `V6_BIN`/`V6_PROFILE_BIN`/`GPUV6_PILOT_BIN`) ; le validateur
+   exige l'égalité exacte du chemin — `/tmp/mhgp6`, `./autre/mhgp6_profile`
+   et `/bin/true` (basename intact) meurent, un mutant par phase.
+4. **`--arch` obligatoire en mode `--fichier`** (refus 2 sans lui) ; scène
+   fail-fast « premier pilote 86, seconde famille jamais consommée ».
+5. **Surfaces de revalidation** : clés de `GPUV6_OBJET_DIGESTS` ≡
+   `GPUV6_PILOT_SPECS` (fixture manquante ou décorative refusée — scène à
+   jeu de fixtures cohérent canon+manifeste+pin) ; `revalidate_v6_receipt.sh`
+   lit les lignes uniques `remote_campaign_rc=`/`scp_rc=` du journal, refuse
+   un répertoire de résumés égal ou intérieur au reçu, et le `diff`
+   d'affichage ne court-circuite plus la vérification finale. Le reçu
+   `1788293187` re-validé sous cette version : 58/58, résumés identiques,
+   intact.
+6. **Reprise persistante** : reconnue comme le préalable à toute dépense —
+   livraison séparée à suivre (base 0700 persistante, états
+   `guest_guard_pending` → `double_guard_verified`, second processus qui ne
+   redémarre jamais la VM : arrêt immédiat sans la seconde marque,
+   rapatriement + classement partiel/invalide + arrêt certifié avec elle,
+   selftest à SIGKILL après le handshake).
+
+Preuves au HEAD de cette note : selftest campagne 127/127, cycle de vie
+56/56, sûreté GCP 81/81, portes juge/profil 5/5, suite `gate` v6 rejouée.
+GCP non utilisé par cette livraison.

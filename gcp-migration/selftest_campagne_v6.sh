@@ -270,6 +270,7 @@ cat > "${FAKE}/lscpu" <<'EOF'
 #!/usr/bin/env bash
 # FAKE_LSCPU_EMPTY=1 : topologie illisible (aucune ligne) ; sinon le vrai lscpu.
 if [ "${FAKE_LSCPU_EMPTY:-0}" = "1" ]; then exit 0; fi
+if [ "${FAKE_LSCPU_RC7:-0}" = "1" ]; then /usr/bin/lscpu "$@"; exit 7; fi
 exec /usr/bin/lscpu "$@"
 EOF
 cat > "${FAKE}/ctest" <<'EOF'
@@ -291,6 +292,7 @@ case " $* " in
     fi
     echo ""
     echo "Total Tests: ${i}"
+    if [ "${FAKE_CTEST_N_RC7:-0}" = "1" ]; then exit 7; fi
     exit 0 ;;
 esac
 i=0
@@ -332,7 +334,8 @@ done
 inverse="device-cpu"; [ "${ordre}" = "device-cpu" ] && inverse="cpu-device"
 # Identite coherente avec le faux nvidia-smi (§ 5.15.2) ; lot=500 pour que
 # lot_effectif=500 = min(lot, nb_total=1000) et lots=2.
-echo "pilote_serie_c device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0 arch_compilees=120 famille=${fam} n=${n} graine=${graine} fils=${fils} lot=500"
+arch=120; [ "${FAKE_PILOT_ARCH86:-0}" = "1" ] && arch=86
+echo "pilote_serie_c device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0 arch_compilees=${arch} famille=${fam} n=${n} graine=${graine} fils=${fils} lot=500"
 r=0
 while [ "${r}" -le "${repeat}" ]; do
   if [ "${r}" -eq 0 ]; then ret="NON"; o="${ordre}"; else
@@ -404,6 +407,9 @@ emit_serie_c_defaults() {
   echo "gpuv6_pilot_min_lots=2"
   echo "gpuv6_pilot_timeout=3600"
   echo "gpuv6_objet_digests=aucun"
+  echo "bin_matrice=./build-v6/mhgp6"
+  echo "bin_attrib=./build-v6/mhgp6_profile"
+  echo "bin_pilote=./build-v6-cuda/mhgp6_cuda"
   echo "session_max_run_seconds=28800"
   echo "session_invite_minutes=465"
   echo "max_run_seconds_effectif=28800"
@@ -755,6 +761,9 @@ CANON_C="${WORK}/serie_c_selftest_v1.env"
   echo 'GPUV6_PILOT_MIN_LOTS=2'
   echo 'GPUV6_PILOT_TIMEOUT=60'
   echo "GPUV6_OBJET_DIGESTS=\"${OBJET_C}\""
+  echo "BIN_MATRICE=\"${FAKE}/mhgp6\""
+  echo "BIN_ATTRIB=\"${FAKE}/mhgp6_profile\""
+  echo "BIN_PILOTE=\"${FAKE}/mhgp6_cuda\""
   echo 'SESSION_MAX_RUN_SECONDS=18000'
   echo 'SESSION_INVITE_MINUTES=270'
 } > "${CANON_C}"
@@ -800,6 +809,9 @@ PROFILE_C="${WORK}/profil_serie_c.txt"
   echo "gpuv6_pilot_min_lots=2"
   echo "gpuv6_pilot_timeout=60"
   echo "gpuv6_objet_digests=${OBJET_C}"
+  echo "bin_matrice=${FAKE}/mhgp6"
+  echo "bin_attrib=${FAKE}/mhgp6_profile"
+  echo "bin_pilote=${FAKE}/mhgp6_cuda"
   echo "session_max_run_seconds=18000"
   echo "session_invite_minutes=270"
   echo "max_run_seconds_effectif=18000"
@@ -944,6 +956,13 @@ falsify_c "audit : cardinal du masque d'affinite != fils" "CPU != fils" \
   sed -i 's/^affinite_demandee=.*/affinite_demandee=0,2,4/; s/^affinite_effective=.*/affinite_effective=0,2,4/; s/taskset -c [0-9,-]*/taskset -c 0,2,4/' mat_uniform_n16000_t2_i2_j0_sans_p1.status
 falsify_c "audit : verdict du juge embarque supprime" "verdict du juge embarque absent" \
   rm pilote_uniform_n50000.juge.txt
+# § 5.18.3 : chemins des binaires lies (un mutant par phase, basename intact).
+falsify_c "§ 5.18.3 : binaire de matrice deplace (/tmp/mhgp6, basename intact)" "chemin lie par le profil" \
+  bash -c "sed -i 's|taskset -c \([0-9,]*\) [^ ]*/mhgp6 |taskset -c \1 /tmp/mhgp6 |' mat_uniform_n16000_t2_i2_j0_sans_p1.status"
+falsify_c "§ 5.18.3 : binaire d'attribution deplace (./autre/mhgp6_profile)" "chemin lie par le profil" \
+  bash -c "sed -i 's|taskset -c \([0-9,]*\) [^ ]*/mhgp6_profile |taskset -c \1 ./autre/mhgp6_profile |' attrib_uniform_n16000_t2_i2_j0.status"
+falsify_c "§ 5.18.3 : binaire du pilote remplace par /bin/true" "commande du pilote != contrat exact" \
+  bash -c "sed -i 's|rc=0; [^ ]*/mhgp6_cuda --family|rc=0; /bin/true --family|' pilote_uniform_n50000.status"
 # Frontiere HONNETE (doit rester verte) : derive de somme 0.005 <= 0.0051.
 DFR="${WORK}/cas_frontiere_somme"
 rm -rf "${DFR}"; cp -r "${OUT8}" "${DFR}"
@@ -988,6 +1007,52 @@ rc=0; run_runner_c "${OUT8N}" FAKE_CTEST_EMPTY_N=1 || rc=$?
 check_true "audit fail-closed : listage ctest -N vide => inventaire TRONQUE (pas un errexit muet), aucune porte, manifeste ecrit" \
   bash -c "[ '${rc}' -eq 0 ] && grep -q 'inventaire pre-execution non conforme' '${OUT8N}/gpuv6_tronquee.txt' \
     && [ ! -e '${OUT8N}/gpuv6_gates.status' ] && [ -f '${OUT8N}/MANIFESTE_DISTANT.txt' ]"
+OUT8R="${WORK}/out_serie_c_lscpu_rc7"
+rc=0; run_runner_c "${OUT8R}" FAKE_LSCPU_RC7=1 || rc=$?
+check_true "§ 5.18.2 : topologie COMPLETE puis lscpu rc=7 => matrice tronquee (rc=7 grave), jamais une liste acceptee" \
+  bash -c "[ '${rc}' -eq 0 ] && grep -q 'topologie illisible.*rc=7' '${OUT8R}/matrice_tronquee.txt' \
+    && [ ! -e '${OUT8R}/mat_uniform_n16000_t2_i2_j0_sans_p1.status' ]"
+OUT8T="${WORK}/out_serie_c_ctest_rc7"
+rc=0; run_runner_c "${OUT8T}" FAKE_CTEST_N_RC7=1 || rc=$?
+check_true "§ 5.18.2 : listage ctest -N exact puis rc=7 => inventaire tronque (rc=7 grave), aucune porte" \
+  bash -c "[ '${rc}' -eq 0 ] && grep -q 'inventaire pre-execution non conforme (rc=7)' '${OUT8T}/gpuv6_tronquee.txt' \
+    && [ ! -e '${OUT8T}/gpuv6_gates.status' ]"
+OUT8A="${WORK}/out_serie_c_arch86"
+rc=0; run_runner_c "${OUT8A}" GPUV6_PILOT_SPECS="uniform:50000 terrain:50000" FAKE_PILOT_ARCH86=1 || rc=$?
+check_true "§ 5.18.4 fail-fast : premier pilote arch_compilees=86 => juge en refus, seconde famille jamais consommee" \
+  bash -c "[ '${rc}' -eq 0 ] && grep -q 'records du pilote refuses par le juge' '${OUT8A}/gpuv6_tronquee.txt' \
+    && grep -q \"arch='86'\" '${OUT8A}/pilote_uniform_n50000.juge.txt' \
+    && [ ! -e '${OUT8A}/pilote_terrain_n50000.status' ]"
+# § 5.18.5 : fixture d'objet decorative (cle sans pilote) refusee — jeu de
+# fixtures COHERENT (canon + manifeste + pin + profil) pour atteindre la dent.
+CANON_C3="${WORK}/serie_c_selftest_v3.env"
+sed "s|^GPUV6_OBJET_DIGESTS=.*|GPUV6_OBJET_DIGESTS=\"${OBJET_C} terrain:50000:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\"|; s|^PROFIL_NOM=.*|PROFIL_NOM=\"serie_c_selftest_v3\"|" "${CANON_C}" > "${CANON_C3}"
+CANON_C3_SHA="$(sha256sum "${CANON_C3}" | awk '{print $1}')"
+MANIFESTE_C3="${WORK}/manifest_serie_c3.txt"
+{ echo "schema=e-hgp.protocol-manifest.v1"; echo "commit=${PIN_COMMIT}"
+  printf '%s\t%s\t%s\n' "${CANON_C3_SHA}" "$(wc -c < "${CANON_C3}")" "gcp-migration/profils/serie_c_selftest_v3.env"; } > "${MANIFESTE_C3}"
+PIN_MANIFEST_C3="$(sha256sum "${MANIFESTE_C3}" | awk '{print $1}')"
+PROFILE_C3="${WORK}/profil_serie_c3.txt"
+sed "s|^gpuv6_objet_digests=.*|gpuv6_objet_digests=${OBJET_C} terrain:50000:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee|; s|^profil=.*|profil=serie_c_selftest_v3|; s|^profil_canonique=.*|profil_canonique=serie_c_selftest_v3|; s|^profil_canonique_sha256=.*|profil_canonique_sha256=${CANON_C3_SHA}|" "${PROFILE_C}" > "${PROFILE_C3}"
+OUT8F="${WORK}/out_serie_c_fixture_decorative"
+rc=0
+env V5_BIN="${FAKE}/mhgp5" V6_BIN="${FAKE}/mhgp6" CONF_BIN="${FAKE}/mhgp6_conformity" \
+    V6_PROFILE_BIN="${FAKE}/mhgp6_profile" GPUV6_PILOT_BIN="${FAKE}/mhgp6_cuda" \
+    TIME_BIN="${FAKE}/gnutime" OUT_DIR="${OUT8F}" THREADS=8 RUN_TIMEOUT=60 \
+    CONF_SPECS="uniform:50000" BENCH_SPECS="aucun" QUEUE_FAMILIES="aucun" QUEUE_N="64000" QUEUE_SEEDS="3" \
+    SWEEP_SPECS="aucun" SWEEP_REPEATS=1 GPU_SPECS="aucun" FRONTIER_SPECS="aucun" FRONTIER_TIMEOUT=60 \
+    GPU_BUILD_TIMEOUT=60 FRONTIER_ULIMIT_KB=0 \
+    MATRICE_POINTS="${MAT_POINTS_C}" MATRICE_SEQUENCE="aller retour rotation8" MATRICE_TIMEOUT=60 \
+    ATTRIB_POINTS="uniform:16000:2:2:0" ATTRIB_TIMEOUT=60 \
+    GPUV6_GATE_NAMES="${GATE_NAMES_C}" GPUV6_BUILD_TIMEOUT=60 GPUV6_GATE_TIMEOUT=60 \
+    GPUV6_PILOT_SPECS="uniform:50000" GPUV6_PILOT_MIN_LOTS=2 GPUV6_PILOT_TIMEOUT=60 \
+    NVCC_BIN="${FAKE}/nvcc" GPU_CMAKE_BIN="${FAKE}/cmake" \
+    PILOTE_JUGE="${HERE}/../morsehgp3D_v6/tests/pilote_juge.py" PATH="${FAKE}:${PATH}" \
+    bash "${RUNNER}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_C3}" >/dev/null 2>&1 || rc=$?
+V8F="$(python3 "${VALIDATOR}" "${OUT8F}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_C3}" 0 0 \
+  "${PROFILE_C3}" "${CANON_C3}" "${MANIFESTE_C3}" 2>&1)" || rc=$?
+check_true "§ 5.18.5 : fixture d'objet sans pilote (terrain) REFUSEE — cles != GPUV6_PILOT_SPECS" \
+  bash -c "[ '${rc}' -eq 1 ] && printf '%s' \"\$1\" | grep -q 'cles != GPUV6_PILOT_SPECS'" _ "${V8F}"
 OUT8D="${WORK}/out_serie_c_prereq"
 rc=0; run_runner_c "${OUT8D}" V6_BIN=/bin/false || rc=$?
 check_true "serie C § 5.15 fail-fast : matrice en echec => bloc GPU v6 SAUTE (aucun build, cause publiee)" \

@@ -643,8 +643,15 @@ status="$(instance_status)" || die "Impossible de lire l’état de ${INSTANCE_N
     die "État ${status} : le script ne démarre qu’une VM explicitement arrêtée (TERMINATED)."
 verify_static_guard || \
     die "Préconditions absentes : cible g4-standard-48 Spot, maintenance TERMINATE, redémarrage automatique désactivé, label project=e-hgp, action STOP et maxRunDuration entre 30 s et 8 h sont obligatoires."
-((GUEST_SHUTDOWN_MINUTES * 60 + TIMESTAMP_TOLERANCE_SECONDS <= VERIFIED_MAX_RUN_SECONDS)) || \
-    die "Le coupe-circuit invité (${GUEST_SHUTDOWN_MINUTES} min) et sa marge de ${TIMESTAMP_TOLERANCE_SECONDS} s dépassent maxRunDuration (${VERIFIED_MAX_RUN_SECONDS} s)."
+# Predicat CENTRALISE avec le cycle de vie (audit serie C § 5.18.1, premier
+# depart brule) : reserve GCE (TIMESTAMP_TOLERANCE_SECONDS = 300 s, deja
+# soustraite de l'echeance sure) + tolerance systemd 120 s + budget
+# d'armement minimal 480 s — un appel direct ne peut plus brûler une session
+# que la garde invitee refusera ensuite a l'echeance sure.
+readonly GUEST_SYSTEMD_TOLERANCE_SECONDS=120
+readonly GUEST_ARMING_BUDGET_SECONDS=480
+((GUEST_SHUTDOWN_MINUTES * 60 + TIMESTAMP_TOLERANCE_SECONDS + GUEST_SYSTEMD_TOLERANCE_SECONDS + GUEST_ARMING_BUDGET_SECONDS <= VERIFIED_MAX_RUN_SECONDS)) || \
+    die "Le coupe-circuit invité (${GUEST_SHUTDOWN_MINUTES} min) plus la réserve GCE (${TIMESTAMP_TOLERANCE_SECONDS} s), la tolérance systemd (${GUEST_SYSTEMD_TOLERANCE_SECONDS} s) et le budget d'armement (${GUEST_ARMING_BUDGET_SECONDS} s) dépassent maxRunDuration (${VERIFIED_MAX_RUN_SECONDS} s)."
 verify_batch_ssh_key || \
     die "La clé SSH de session n'est pas utilisable de manière non interactive; démarrage refusé."
 verify_oslogin_session_key || \

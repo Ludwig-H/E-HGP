@@ -542,10 +542,12 @@ while read -r line; do
   pos="$(printf '%s\n' "${line}" | sed 's/.* pos=\([^ ]*\).*/\1/')"
   seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
   if past_deadline "${name}" matrice matrice_tronquee.txt "${MATRICE_TIMEOUT}"; then break; fi
-  cpulist="$(cpu_list_for "${T}" || true)"  # errexit neutralise : le fail-closed ci-dessous juge la liste vide
-  if [ -z "${cpulist}" ]; then
-    printf 'truncated_at=%s\nphase=matrice\nreason=topologie illisible (affinite non derivable pour T=%s)\n' \
-      "${name}" "${T}" > "${OUT_DIR}/matrice_tronquee.txt"
+  # § 5.18.2 : le CODE de la derivation est capture separement et exige nul
+  # — une topologie complete suivie d'un code 7 est une panne, pas une liste.
+  cpu_rc=0; cpulist="$(cpu_list_for "${T}")" || cpu_rc=$?
+  if [ "${cpu_rc}" -ne 0 ] || [ -z "${cpulist}" ]; then
+    printf 'truncated_at=%s\nphase=matrice\nreason=topologie illisible (affinite non derivable pour T=%s, rc=%s)\n' \
+      "${name}" "${T}" "${cpu_rc}" > "${OUT_DIR}/matrice_tronquee.txt"
     echo "=== MATRICE TRONQUEE a ${name} : affinite non derivable ===" >&2
     break
   fi
@@ -579,10 +581,10 @@ while read -r line; do
   J="$(printf '%s\n' "${line}" | sed 's/.* join=\([^ ]*\).*/\1/')"
   seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
   if past_deadline "${name}" attribution attrib_tronquee.txt "${ATTRIB_TIMEOUT}"; then break; fi
-  cpulist="$(cpu_list_for "${T}" || true)"  # errexit neutralise : le fail-closed ci-dessous juge la liste vide
-  if [ -z "${cpulist}" ]; then
-    printf 'truncated_at=%s\nphase=attribution\nreason=topologie illisible (affinite non derivable pour T=%s)\n' \
-      "${name}" "${T}" > "${OUT_DIR}/attrib_tronquee.txt"
+  cpu_rc=0; cpulist="$(cpu_list_for "${T}")" || cpu_rc=$?
+  if [ "${cpu_rc}" -ne 0 ] || [ -z "${cpulist}" ]; then
+    printf 'truncated_at=%s\nphase=attribution\nreason=topologie illisible (affinite non derivable pour T=%s, rc=%s)\n' \
+      "${name}" "${T}" "${cpu_rc}" > "${OUT_DIR}/attrib_tronquee.txt"
     echo "=== ATTRIBUTION TRONQUEE a ${name} : affinite non derivable ===" >&2
     break
   fi
@@ -809,7 +811,7 @@ if [ "${GPUV6_GATE_NAMES}" != "aucun" ]; then
     inv_rc=0
     ctest --test-dir build-v6-cuda -N -L gpu > "${OUT_DIR}/gpuv6_inventaire.txt.tmp" 2>&1 || inv_rc=$?
     mv "${OUT_DIR}/gpuv6_inventaire.txt.tmp" "${OUT_DIR}/gpuv6_inventaire.txt"
-    inv_names="$(grep -oE 'Test +#[0-9]+: [A-Za-z0-9_]+' "${OUT_DIR}/gpuv6_inventaire.txt" | sed 's/.*: //' | sort || true)"  # errexit neutralise : la garde ci-dessous juge le vide
+    inv_names="$(grep -oE 'Test +#[0-9]+: [A-Za-z0-9_]+' "${OUT_DIR}/gpuv6_inventaire.txt" | sed 's/.*: //' | sort)" || inv_names=""
     want_names="$(printf '%s\n' ${GPUV6_GATE_NAMES} | sort)"
     # § 5.15.3 : le code du listage n'est JAMAIS neutralise — un listing
     # textuellement exact termine au code 7 est une panne, pas un inventaire.

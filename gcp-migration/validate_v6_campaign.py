@@ -539,6 +539,8 @@ def main():
     profile = {}
     canon_axes = {}
     objet_digests = {}
+    bins = {"matrice": "./build-v6/mhgp6", "attrib": "./build-v6/mhgp6_profile",
+            "pilote": "./build-v6-cuda/mhgp6_cuda"}
     if not os.path.exists(profile_path):
         bad.append("profil de campagne ABSENT (matrice non epinglee)")
     else:
@@ -567,6 +569,12 @@ def main():
                 bad.append(f"profil de campagne : cle {key} absente")
         # FIXTURE D'EGALITE de l'objet (audit serie C) : famille:n:digest_all
         # graves dans le profil — le pilote doit calculer CET objet.
+        # § 5.18.3 : chemins des binaires lies par le profil (defauts produit
+        # pour les recus anterieurs a ces axes).
+        for k in bins:
+            v = profile.get("bin_" + k, "").strip()
+            if v:
+                bins[k] = v
         # (cle OPTIONNELLE : les recus anterieurs a la fixture n'en portent
         # pas ; le cycle de vie courant l'emet toujours, le canon la lie.)
         objet_digests = {}
@@ -610,7 +618,7 @@ def main():
                              "ATTRIB_POINTS", "ATTRIB_TIMEOUT",
                              "GPUV6_GATE_NAMES", "GPUV6_BUILD_TIMEOUT", "GPUV6_GATE_TIMEOUT",
                              "GPUV6_PILOT_SPECS", "GPUV6_PILOT_MIN_LOTS", "GPUV6_PILOT_TIMEOUT",
-                             "GPUV6_OBJET_DIGESTS",
+                             "GPUV6_OBJET_DIGESTS", "BIN_MATRICE", "BIN_ATTRIB", "BIN_PILOTE",
                              "SESSION_MAX_RUN_SECONDS", "SESSION_INVITE_MINUTES")
             # Grammaire TOTALE : commentaire, ligne vide, ou axe connu a
             # guillemets equilibres — TOUT le reste est refuse.
@@ -667,6 +675,7 @@ def main():
                     ("gpuv6_pilot_min_lots", "GPUV6_PILOT_MIN_LOTS"),
                     ("gpuv6_pilot_timeout", "GPUV6_PILOT_TIMEOUT"),
                     ("gpuv6_objet_digests", "GPUV6_OBJET_DIGESTS"),
+                    ("bin_matrice", "BIN_MATRICE"), ("bin_attrib", "BIN_ATTRIB"), ("bin_pilote", "BIN_PILOTE"),
                     ("session_max_run_seconds", "SESSION_MAX_RUN_SECONDS"),
                     ("session_invite_minutes", "SESSION_INVITE_MINUTES"))
                 for pk, ck in full_axis_map:
@@ -970,8 +979,8 @@ def main():
         if len(argv) < 4 or argv[0] != "taskset" or argv[1] != "-c" \
            or (dem and argv[2] != dem.group(1)):
             bad.append(f"{name}: commande gravee sans confinement taskset -c <liste demandee>")
-        elif os.path.basename(argv[3]) != "mhgp6":
-            bad.append(f"{name}: binaire de matrice inattendu ({argv[3]}) — mhgp6 exige")
+        elif argv[3] != bins["matrice"]:
+            bad.append(f"{name}: binaire de matrice ({argv[3]}) != chemin lie par le profil ({bins['matrice']})")
         # EGALITE d'argv normalisee (§ 5.16) : ni argument en plus, ni
         # duplique, ni ordre different de celui que le runner construit.
         want_argv = argv[:4] + [f"--family={run['family']}", f"--n={run['n']}", "--s=8", "--smax=11",
@@ -1060,8 +1069,8 @@ def main():
         if len(argv) < 4 or argv[0] != "taskset" or argv[1] != "-c" \
            or (dem and argv[2] != dem.group(1)):
             bad.append(f"{name}: commande gravee sans confinement taskset -c <liste demandee>")
-        elif os.path.basename(argv[3]) != "mhgp6_profile":
-            bad.append(f"{name}: binaire d'attribution inattendu ({argv[3]}) — mhgp6_profile exige")
+        elif argv[3] != bins["attrib"]:
+            bad.append(f"{name}: binaire d'attribution ({argv[3]}) != chemin lie par le profil ({bins['attrib']})")
         want_argv = argv[:4] + [f"--family={run['family']}", f"--n={run['n']}", "--s=8", "--smax=11",
                                 "--seed=3", f"--threads={run['mat_threads']}",
                                 f"--fold-inflight={run['inflight']}", f"--fold-join={run['join']}"]
@@ -1106,6 +1115,14 @@ def main():
         plan_min_lots = int(gpuv6_params["min_lots"]) if gpuv6_params["min_lots"].isdigit() else 0
         gate_names = expand_axis(gpuv6_params["gate_names"])
         build_ident = {}  # § 5.15.2 : nom / UUID / CC du build, lies aux pilotes
+        # § 5.18.5 : quand la fixture d'objet existe, ses cles (famille, n)
+        # EGALENT exactement les specs du pilote — fixture manquante ou
+        # inutilisee refusee (jamais une fixture decorative).
+        if objet_digests:
+            want_keys = {tuple(spec.split(":", 1)) for spec in expand_axis(gpuv6_params["pilot_specs"])}
+            if set(objet_digests) != want_keys:
+                bad.append("gpuv6_objet_digests : cles != GPUV6_PILOT_SPECS "
+                           f"(fixtures {sorted(objet_digests)} vs pilotes {sorted(want_keys)})")
         # INVENTAIRE PRE-EXECUTION (§ 5.14.4) : le runner liste (ctest -N)
         # AVANT de courir ; le fichier grave doit porter EXACTEMENT les noms
         # du plan — un 17e test decouvert apres coup a deja depense.
@@ -1171,13 +1188,13 @@ def main():
                 snap = ("nvidia-smi --query-gpu=uuid,temperature.gpu,clocks.sm,clocks.mem "
                         "--format=csv,noheader,nounits")
                 want_cmd = (r"^" + re.escape("/bin/bash -c set -e; echo '--- gpu_avant ---'; " + snap + "; rc=0; ")
-                            + r"\S+ " + re.escape(f"--family={run['family']} --n={run['n']} --seed=3 "
+                            + re.escape(bins["pilote"]) + " " + re.escape(f"--family={run['family']} --n={run['n']} --seed=3 "
                                                   f"--threads={profile.get('threads', '0')} --repeat=4 "
                                                   f"--ordre=cpu-device --min-lots={gpuv6_params['min_lots']} "
                                                   "|| rc=$?; echo '--- gpu_apres ---'; " + snap + "; exit ${rc}") + r"$")
                 if not re.match(want_cmd, cmd_full):
                     bad.append(f"{name}: commande du pilote != contrat exact du runner "
-                               f"(argument en plus/en moins, instantanes, ordre)")
+                               f"(binaire {bins['pilote']}, argument en plus/en moins, instantanes, ordre)")
                 for marker in ("--- gpu_avant ---", "--- gpu_apres ---"):
                     idx = body.find(marker)
                     nxt = body[idx + len(marker):].strip().splitlines()

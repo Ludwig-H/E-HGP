@@ -105,6 +105,7 @@ _ov_ATTRIB_TIMEOUT="${ATTRIB_TIMEOUT:-}"; _ov_GPUV6_GATE_NAMES="${GPUV6_GATE_NAM
 _ov_GPUV6_BUILD_TIMEOUT="${GPUV6_BUILD_TIMEOUT:-}"; _ov_GPUV6_GATE_TIMEOUT="${GPUV6_GATE_TIMEOUT:-}"
 _ov_GPUV6_PILOT_SPECS="${GPUV6_PILOT_SPECS:-}"; _ov_GPUV6_PILOT_MIN_LOTS="${GPUV6_PILOT_MIN_LOTS:-}"
 _ov_GPUV6_PILOT_TIMEOUT="${GPUV6_PILOT_TIMEOUT:-}"; _ov_GPUV6_OBJET_DIGESTS="${GPUV6_OBJET_DIGESTS:-}"
+_ov_BIN_MATRICE="${BIN_MATRICE:-}"; _ov_BIN_ATTRIB="${BIN_ATTRIB:-}"; _ov_BIN_PILOTE="${BIN_PILOTE:-}"
 _ov_SESSION_MAX_RUN_SECONDS="${SESSION_MAX_RUN_SECONDS:-}"; _ov_SESSION_INVITE_MINUTES="${SESSION_INVITE_MINUTES:-}"
 # Valeurs par defaut des NOUVEAUX axes serie C (profils anterieurs sans ces
 # cles : sentinelle `aucun` = phases sautees, plans runs=0).
@@ -113,6 +114,9 @@ ATTRIB_POINTS="aucun"; ATTRIB_TIMEOUT="2400"
 GPUV6_GATE_NAMES="aucun"; GPUV6_BUILD_TIMEOUT="1800"; GPUV6_GATE_TIMEOUT="3600"
 GPUV6_PILOT_SPECS="aucun"; GPUV6_PILOT_MIN_LOTS="2"; GPUV6_PILOT_TIMEOUT="3600"
 GPUV6_OBJET_DIGESTS="aucun"
+# § 5.18.3 : CHEMINS des binaires executes, lies par le profil (le
+# validateur exige l'egalite exacte, jamais un simple basename).
+BIN_MATRICE="./build-v6/mhgp6"; BIN_ATTRIB="./build-v6/mhgp6_profile"; BIN_PILOTE="./build-v6-cuda/mhgp6_cuda"
 # § 5.13.4 : axes de duree de SESSION — pilotes par le profil, avec les
 # anciennes valeurs par defaut pour les profils qui ne les declarent pas.
 SESSION_MAX_RUN_SECONDS="28800"; SESSION_INVITE_MINUTES="465"
@@ -125,6 +129,7 @@ for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT T
          MATRICE_POINTS MATRICE_SEQUENCE MATRICE_TIMEOUT ATTRIB_POINTS ATTRIB_TIMEOUT \
          GPUV6_GATE_NAMES GPUV6_BUILD_TIMEOUT GPUV6_GATE_TIMEOUT \
          GPUV6_PILOT_SPECS GPUV6_PILOT_MIN_LOTS GPUV6_PILOT_TIMEOUT GPUV6_OBJET_DIGESTS \
+         BIN_MATRICE BIN_ATTRIB BIN_PILOTE \
          SESSION_MAX_RUN_SECONDS SESSION_INVITE_MINUTES; do
   ov="_ov_${v}"
   if [ -n "${!ov}" ] && [ "${!ov}" != "${!v}" ]; then
@@ -141,6 +146,9 @@ for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT T
          GPUV6_PILOT_SPECS GPUV6_PILOT_MIN_LOTS GPUV6_PILOT_TIMEOUT GPUV6_OBJET_DIGESTS \
          SESSION_MAX_RUN_SECONDS SESSION_INVITE_MINUTES; do
   [[ "${!v}" =~ ${_param_re} ]] || { echo "REFUS : parametre ${v} avec caractere hors alphabet sur" >&2; exit 2; }
+done
+for v in BIN_MATRICE BIN_ATTRIB BIN_PILOTE; do
+  [[ "${!v}" =~ ^\./[A-Za-z0-9_./-]+$ ]] || { echo "REFUS : ${v}='${!v}' hors alphabet (chemin relatif ./… sans espace)" >&2; exit 2; }
 done
 echo "profil canonique : ${CAMPAIGN_PROFILE} ($(sha256sum "${PROFILE_SRC}" | awk '{print $1}')) — profil effectif : ${EFFECTIVE_PROFILE}"
 
@@ -198,11 +206,16 @@ _check_range SCP_STEP_TIMEOUT_S 60 3600
 # shutdown est arme ~5 min apres le demarrage (SSH + OS Login). La relation
 # a l'egalite (GUEST*60 + 300 == MAX_RUN) laissait 0 s de marge de boot et a
 # brule un depart. Budget minimal certifiable : 480 s (600 s moins la
-# tolerance systemd de 120 s). Frontieres gravees au selftest du cycle de
-# vie : (MAX_RUN - 780)/60 accepte, la minute suivante refusee.
+# tolerance systemd de 120 s, comptee EXPLICITEMENT : § 5.18.1). Predicat :
+# GUEST*60 + 300 (reserve GCE) + 120 (tolerance systemd) + 480 (budget) <=
+# MAX_RUN. Frontieres gravees au selftest du cycle de vie : 465/466 min
+# sous 28800 s, et a la seconde pres 600/599 s avant tolerance (= 480/479 s
+# apres) via MAX_RUN 28800/28799.
+readonly GCE_RESERVE_S=300
+readonly SYSTEMD_TOLERANCE_S=120
 readonly MIN_BOOT_BUDGET_S=480
-if [ $(( GUEST_SHUTDOWN_MINUTES * 60 + 300 + MIN_BOOT_BUDGET_S )) -gt "${MAX_RUN_SECONDS}" ]; then
-  echo "REFUS : relation invite/GCE violee (${GUEST_SHUTDOWN_MINUTES} min * 60 + 300 s de reserve GCE + ${MIN_BOOT_BUDGET_S} s de budget d'armement > ${MAX_RUN_SECONDS} s) — aucune garde appelee" >&2
+if [ $(( GUEST_SHUTDOWN_MINUTES * 60 + GCE_RESERVE_S + SYSTEMD_TOLERANCE_S + MIN_BOOT_BUDGET_S )) -gt "${MAX_RUN_SECONDS}" ]; then
+  echo "REFUS : relation invite/GCE violee (${GUEST_SHUTDOWN_MINUTES} min * 60 + ${GCE_RESERVE_S} s de reserve GCE + ${SYSTEMD_TOLERANCE_S} s de tolerance systemd + ${MIN_BOOT_BUDGET_S} s de budget d'armement > ${MAX_RUN_SECONDS} s) — aucune garde appelee" >&2
   exit 2
 fi
 # Budget POST-CAMPAGNE reserve au pire cas DECLARE : SCP_ATTEMPTS tentatives
@@ -668,6 +681,9 @@ gcloud config set project "${GCP_PROJECT_ID}" >/dev/null
   echo "gpuv6_pilot_min_lots=${GPUV6_PILOT_MIN_LOTS}"
   echo "gpuv6_pilot_timeout=${GPUV6_PILOT_TIMEOUT}"
   echo "gpuv6_objet_digests=${GPUV6_OBJET_DIGESTS}"
+  echo "bin_matrice=${BIN_MATRICE}"
+  echo "bin_attrib=${BIN_ATTRIB}"
+  echo "bin_pilote=${BIN_PILOTE}"
   echo "session_max_run_seconds=${SESSION_MAX_RUN_SECONDS}"
   echo "session_invite_minutes=${SESSION_INVITE_MINUTES}"
   echo "max_run_seconds_effectif=${MAX_RUN_SECONDS}"
@@ -1062,6 +1078,7 @@ if [ "${CAMPAIGN_SKIPPED}" -eq 0 ]; then
     ATTRIB_POINTS='${ATTRIB_POINTS}' ATTRIB_TIMEOUT='${ATTRIB_TIMEOUT}' \
     GPUV6_GATE_NAMES='${GPUV6_GATE_NAMES}' GPUV6_BUILD_TIMEOUT='${GPUV6_BUILD_TIMEOUT}' GPUV6_GATE_TIMEOUT='${GPUV6_GATE_TIMEOUT}' \
     GPUV6_PILOT_SPECS='${GPUV6_PILOT_SPECS}' GPUV6_PILOT_MIN_LOTS='${GPUV6_PILOT_MIN_LOTS}' GPUV6_PILOT_TIMEOUT='${GPUV6_PILOT_TIMEOUT}' \
+    V6_BIN='${BIN_MATRICE}' V6_PROFILE_BIN='${BIN_ATTRIB}' GPUV6_PILOT_BIN='${BIN_PILOTE}' \
     GRACE_S='${GRACE_S}' \
     /bin/bash gcp-migration/v6_campaign_remote.sh ${SOURCE_COMMIT} ${SOURCE_PAYLOAD_SHA256} ${PROTOCOL_MANIFEST_SHA256}
 " 2>&1 | tee -a "${LOG}"

@@ -319,6 +319,12 @@ def main(argv):
             elif a.startswith("--arch="):
                 attendu["arch"] = a.split("=", 1)[1]
         if argv[1] == "--fichier":
+            # § 5.18.4 : en mode fichier (runner, validateur) l'architecture
+            # attendue est OBLIGATOIRE — sans elle un pilote 86 passerait la
+            # famille suivante avant le rejeu final.
+            if attendu["arch"] is None:
+                print("REFUS : --arch=<architecture attendue> est obligatoire en mode --fichier")
+                return 2
             try:
                 with open(cible, encoding="utf-8", errors="replace") as fh:
                     texte = fh.read()
