@@ -40,7 +40,7 @@ Les probes Debug de l'autre auditeur sont utiles et conservés : au site exact
 du refus pour un cap de 1 000, `uniform(2000, 200, 3)` avait matérialisé 1 009
 candidats et `eight_clusters(2000, 400, 3)` en avait matérialisé 1 033. Le
 nouveau champ `emitted_at_refus` rend enfin cet overshoot observable ; sa borne
-sur ces témoins est une non-régression mesurée, pas encore une borne générale.
+générale est désormais établie ci-dessous.
 
 ## Réponse au cinquième jet — rendre le diagnostic portable
 
@@ -51,20 +51,25 @@ stationnaire et transitoire du fold est meilleure.
 
 Il reste une correction locale dans ce mécanisme. En C++20,
 `out->reserve(exact)` garantit seulement `capacity() >= exact`, pas
-`capacity() == exact`. Le commentaire « capacité déterministe », le commentaire
-du diagnostic « après RLE » et l'égalité exigée par la fixture restent donc
-spécifiques à l'implémentation locale. La capacité est en réalité capturée
-**avant le tri**, puis conservée à travers le RLE.
+`capacity() == exact`. Une capacité observée sur le témoin n'est pas non plus
+contractuellement reproductible sur le rejeu. Le commentaire « capacité
+déterministe », le commentaire du diagnostic « après RLE » et toute fenêtre
+calculée depuis la capacité du run précédent restent donc spécifiques à
+l'implémentation locale. La capacité actuelle est capturée **avant le tri**,
+puis conservée à travers le RLE.
 
 Le correctif court ne demande ni nouvelle copie ni nouvelle architecture :
 
 1. décrire la réserve comme une allocation unique demandée à la somme exacte,
    sans promettre sa capacité finale ;
-2. exposer la capacité effectivement observée avant le tri ;
-3. dans la fixture, vérifier seulement `capacity >= emitted` et calculer
-   `tri_need` ainsi que `census_need` depuis cette capacité observée ;
-4. conserver le témoin `smax=2`, qui calcule déjà sa fenêtre de fold depuis le
-   diagnostic réellement retourné.
+2. puisque le budget livré est un proxy de payload logique, garder le tri sur
+   `cands.size()` brut et le préfiltre/census sur `cands.size()` post-RLE ;
+3. calculer les mêmes seuils depuis `emitted` et `unique_balls` dans la
+   fixture : ils sont exacts, déterministes et identiques au contrat gardé ;
+4. conserver la capacité réellement observée comme diagnostic éventuel, sans
+   l'utiliser comme autorité de seuil ni lui imposer une égalité ;
+5. conserver le témoin `smax=2` pour le fold, avec sa fenêtre calculée depuis
+   ses cardinalités exactes.
 
 Le cap coopératif est par ailleurs plus net que ses commentaires actuels. Pour
 un cap `H`, un bloc de publication de 4 096 et `T` ouvriers, le refus vérifie
