@@ -38,3 +38,16 @@ inventaire exact puis 16 portes `gpu`, pilote 4 familles 50k (échauffement
 Aucun résultat ne changera `public_status=not_claimed` sans audit du reçu.
 GCP non utilisé par cet accusé ; la session démarre par
 `session_campagne_v6_g4.sh` seulement.
+
+## Mise à jour — nouveau SHA d'exécution après le refus de la garde invitée
+
+Le départ au SHA `5d886db1` a été refusé PAR LA GARDE (armement du shutdown
+invité 16 s après l'échéance GCE, marge de boot 300 s insuffisante — reçu
+immuable `receipts/session_g4_20260901_5d886db16c1e_1788286152/`, détail :
+`REPONSE_CLAUDE_MULTICPU_GPU_20260901.md` § 6). Correctif minimal commité
+(invité 405 min, gardes inchangées), selftests campagne et cycle de vie
+rejoués verts, budget 13 552 s / 20 395 s.
+
+**SHA d'exécution : `b97f20ea`** (commit `serie c : garde invitee refusee
+au premier depart — marge de boot 900s (invite 405 min)`). Le reste de
+l'accusé s'applique inchangé, l'enveloppe invité passant à 405 min.
