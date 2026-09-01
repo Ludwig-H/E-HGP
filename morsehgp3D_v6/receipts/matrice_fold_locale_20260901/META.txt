@@ -1,0 +1,9 @@
+recu=matrice_fold_locale_20260901 statut=diagnostic_non_decisionnel
+commit=1069bc20fcac960d5be825bb0034d1d03f082b1a
+dirty=0
+bin_ref_sha256=2e4b742006ff69dfd9ab064fbcd2bb063640a00f28c7f91e5a79d0a6bac67bd2
+bin_prof_sha256=9712030b4aafbba1c911bb5f8678f7ca0b4aacc50825f319c041303f11323b89
+date_utc=20260901T142512Z
+charge_avant=2.76 4.97 3.45 2/1094 2195346
+note=activite concurrente legere possible (lectures de fichiers de la meme session) ; gravee ici
+charge_apres=5.40 6.02 5.43 1/1106 2413863
