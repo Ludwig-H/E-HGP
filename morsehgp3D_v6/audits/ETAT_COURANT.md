@@ -31,7 +31,7 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
 | plafonds et budget mémoire `4a85c13d` | cap coopératif et refus transactionnels reçus ; garde logique `2E` avant la réserve de fusion reçue, proxy de payload nommé seulement, sans claim RSS/OOM |
-| saturation multi-CPU du fold | le dernier WIP non ancré ferme I/O d'impression, pic strict, bornes internes, projection cardinalités/digests et non-vacuité ; restent la cible liveness enregistrée, la séparation normale/profilée et la causalité de `fold_join` dans la porte, puis les dernières portées de libération/vocabulaire avant attribution diagnostique, sans reçu de performance |
+| saturation multi-CPU du fold | le dernier WIP non ancré construit et exerce profil, liveness, séparation des builds, `join=1` causal et effacement K2 ; restent les champs/planchers par K et l'alignement exact des horizons/vocabulaire avant attribution diagnostique, sans reçu de performance |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP `d98f4729` | GO mono-session consommé et clos ; reçu `df1a3c5f` validé non décisionnel, arrêt ciblé certifié |
@@ -87,12 +87,12 @@ leurs durées reflètent la contention. En particulier, 89 est le nombre de
 tests **hors échelle**, jamais une suite « échelle comprise ». Aucun rejeu
 indépendant des 15 tests d'échelle n'est revendiqué à ce pin.
 
-Après `7724e730`, le worktree de profil non ancré a aussi été reconstruit dans
-un build Release isolé : ses trois portes ciblées passent 3/3 en 6,06 s, avec
-empreintes source identiques avant et après. Une compilation diagnostique
-manuelle de la variante vivacité passe et publie des pics non nuls ; cette
-variante n'est toutefois toujours ni une cible CMake ni une porte enregistrée.
-Ces résultats qualifient le harnais en cours, pas un pin ni une performance.
+Après `e32262d3`, le worktree de profil non ancré a été reconstruit dans un
+build Release isolé : normal, profil, vivacité et contrat compilent, puis les
+trois portes ciblées passent 3/3 en 8,45 s, avec empreintes source identiques
+avant et après. La contre-preuve qui substitue le binaire profilé au binaire
+normal rend désormais 1. Ces résultats qualifient le harnais en cours, pas un
+pin ni une performance.
 
 `git diff --check` est propre, `tools/check_docs.py` valide 246 Markdown actifs
 et `tools/check_implementation_status.py` valide 20 phases. Aucun `nvcc` ni

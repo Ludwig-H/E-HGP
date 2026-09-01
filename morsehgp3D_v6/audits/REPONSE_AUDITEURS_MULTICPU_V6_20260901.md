@@ -438,74 +438,64 @@ renommé `cap_fusion_budgetaire` plutôt que de prétendre être le cap effectif
 du run. `PLAN_DE_TESTS.md` et le § 3 de la réponse Claude sont maintenant
 alignés.
 
-### 5.10 Profil `reduce` : cœur sain, ancrage encore prématuré
+### 5.10 Profil `reduce` : harnais fonctionnel, portées à finir avant le pin
 
-La dernière édition du worktree après `7724e730` ferme les trois défauts
-principaux de la contre-lecture précédente : les bornes publiques sont
-désormais honnêtement nommées `reduce_interne_debut/fin` et
-`mur_reduce_interne`, la projection comparée comprend `digest_all`,
-`digest_forest_K*` et les cardinalités, avec K uniques et plancher temporel
-positif, et les colonnes d'internement sont devenues `alloc_empreintes`,
-`offsets_diffusion` et `intern_tri`. Le mode standard signe aussi `fold_join`
-et la télémétrie `/proc/self/statm`. La vivacité en deux temps publie maintenant
-séparément le pic intra-lot et la frontière inter-lots ; le garde de
-préprocesseur refuse correctement `MHGP6_PROFILE_LIVENESS` seul.
+Le jet postérieur à `e32262d3` ferme les dents principales demandées : cible
+CMake `mhgp6_profile_liveness` réellement exécutée, type de profil exact,
+vivacité non vide par K, séparation causale des builds, ensembles de K
+cohérents, chaîne A vers réduction et sérialisation inter-K sous `join=1`, pics
+à un dans ce mode, et scène K2 jointe avec profil K1 positif avant effacement
+terminal. Les noms publics `duree_digest_foret_k_ms`,
+`fusion_et_lib_parts` et `remap_et_lib_pools` bornent aussi mieux les fenêtres.
 
-Sur cette source non ancrée mais stable pendant le rejeu, une construction
-Release isolée passe `mhgp6_profil_identite`,
-`mhgp6_profil_contrat_echec` et `mhgp6_profil_contrat_echec_k2` : 3/3 en
-6,06 s. Une compilation manuelle `-Werror` avec
-`MHGP6_PROFILE_REDUCE+MHGP6_PROFILE_LIVENESS` passe la même porte d'identité et
-publie K1--K10 avec des pics non nuls ; la compilation avec
-`MHGP6_PROFILE_LIVENESS` seul échoue sur le garde prévu. Ce sont des contrôles
-du worktree, jamais un reçu de commit ni une mesure de performance.
+Sur une source non ancrée mais stable pendant tout le rejeu, les quatre cibles
+`mhgp6`, `mhgp6_profile`, `mhgp6_profile_liveness` et
+`mhgp6_profil_contrat` se construisent en Release avec les warnings fatals.
+Les trois CTests ciblés passent 3/3 en 8,45 s. La contre-preuve de build est
+désormais discriminante : fournir `mhgp6_profile` à la place du binaire normal
+rend 1 sur la ligne profilée inattendue. Ce sont des preuves du worktree,
+jamais un reçu de commit ni une mesure de performance.
 
-Trois finitions matérielles restent avant l'ancrage :
+Aucun défaut fonctionnel nouveau n'apparaît dans la vivacité à deux phases, le
+RAII du pic de réduction, la jonction, la publication ordonnée ou
+l'invalidation terminale. Deux finitions restent utiles avant l'ancrage :
 
-1. **Enregistrer et exercer la vivacité.** Le CMake ne construit encore que
-   `mhgp6_profile`. Ajouter une cible explicite
-   `mhgp6_profile_liveness` portant les deux macros et une porte qui exige
-   exactement `profil_kind=reduce_v2+liveness`, un `profil_vivantes` pour le
-   même ensemble de K, `pic_intra_lot > 0` sur cette fixture et une frontière
-   bornée par le pic. Le garde de compilation seul ne couvre pas cette branche.
-2. **Rendre `fold_join` causal dans la porte.** La porte vérifie actuellement
-   la signature `fold_join`, pas son effet. Pour chaque K, exiger
-   `a_debut <= a_fin <= reduce_interne_debut <= reduce_interne_fin`; avec
-   `join=1`, exiger aussi `reduce_interne_fin(K) <= a_debut(K+1)` et
-   `pic_reduce_actif == pic_workers_b == 1`. Sinon ignorer entièrement
-   `fold_join` laisserait encore la porte verte. La séparation des builds doit
-   aussi avoir une dent : fournir aujourd'hui `mhgp6_profile` comme argument
-   « normal » **et** « profil » donne encore le code 0. Exiger zéro ligne
-   `profil_kind`, `profil_reduce`, `profil_intern` et `profil_vivantes` dans
-   les deux sorties normales. Comparer enfin les ensembles de K des lignes
-   forêt, cardinalités, `profil_reduce` et `profil_intern`, puis contrôler les
-   temps finis et non négatifs de cette dernière ; si cette porte veut
-   elle-même revendiquer K1--K10, l'ensemble attendu doit venir de
-   `smax_effective`, sinon elle doit renvoyer explicitement à la porte exact-K
-   déjà existante.
-3. **Finir les portées et le vocabulaire de preuve.** La porte atteste une
-   projection déterministe nommée, pas « l'objet » ni tous les digests : cette
-   surqualification subsiste dans le commentaire et le message de
-   `profil_gate.py`, le CMake, `PLAN_DE_TESTS.md` et la réponse Claude. On peut
-   ajouter les digests candidats/préfiltre, mais même alors `batch_levels` et
-   le `ForestResult` complet restent hors preuve. Dans l'internement, la
-   libération de `parts` est imputée à `fusion` et celle de `pools` à `remap` :
-   les séparer ou les nommer avant une décision d'architecture. Renommer aussi
-   `duree_digest_k_ms` en `duree_digest_foret_k_ms`, car la fenêtre ne couvre
-   que `digest_forest_v4`, et retirer le commentaire résiduel présentant les
-   32 octets de `FidState` comme « une ligne de cache ».
+1. **Rendre le schéma non vacu et explicite par K.** `profil_intern K=n` sans
+   aucune des cinq colonnes attendues passe encore, car seule la finitude des
+   champs présents est vérifiée. Exiger exactement les champs contractuels
+   renommés. Exiger aussi `mur_reduce_interne > 0` ou `somme > 0` pour chaque K,
+   et le même plancher non arrondi dans la porte C++ ; le plancher agrégé actuel
+   autorise un record K vide si les autres sont positifs. Il n'est en revanche
+   pas utile de dupliquer ici tout le juge exact-K : l'égalité des ensembles
+   normal/profil/vivacité est le contrat propre à cette porte, tandis que
+   l'exactitude K1--`kmax_eff` reste portée par les fixtures du juge.
+2. **Écrire les horizons réellement mesurés.** Le CMake et le début de la
+   réponse Claude disent encore « objet + digests » ou B/B et A/B, alors que la
+   preuve porte sur une projection déterministe et les intervalles sur
+   réduction/réduction et A/réduction. `profile.begin` est pris après le
+   déplacement initial et le test de refus ; le record est copié à la
+   publication mais imprimé après `run_pipeline`. Le profil n'ajoute plus
+   d'I/O dans les workers, mais le worker peut toujours exécuter un callback et
+   lit `/proc/self/statm` sous `pub_mutex` : ne pas écrire « aucune I/O dans les
+   workers ». `init_ms` ne couvre pas d'allocation dynamique de `scratch`, qui
+   grandit dans `post_remplissage`; `liberation_ms` ne couvre que `ev_fid` et
+   `FidState`, les autres destructeurs restant après `profile.end`. Les
+   colonnes d'internement sont elles aussi des fenêtres locales sélectives,
+   pas un bilan exhaustif de tous les temporaires. Enfin, la vivacité parcourt
+   les incidences trois fois — précompte, activation, décrément — et
+   `sizeof(FidState)==32` ne prouve ni ligne de cache de 64 octets ni alignement
+   permettant « deux par ligne ».
 
-Le contrat d'effacement K2 est causal pour la propriété réellement jugée : le
-vecteur est alloué avant la panne et l'absence de `clear()` serait visible. Son
-récit va toutefois un peu plus loin que sa preuve, puisque le callback K1
-précède la copie vers `RunResult::fold_profiles`. Durcissement peu coûteux :
-mettre cette scène en `fold_join_before_next_k=true` et vérifier dans le
-callback que le `ForestResult::profile` K1 est strictement non vide ; la
-jonction garantit alors que sa copie précède réellement A(K2).
+La porte atteste désormais causalement le chemin `join=1`. Elle ne prouve pas
+que `join=0` produit effectivement un chevauchement : l'imposer sur une mesure
+de temps ou un pic observé rendrait la fixture sensible au scheduler. Borne
+constructive : décrire `join=0` comme permissif ; si la différenciation devient
+un contrat, ajouter plus tard une barrière test-only qui force deux workers en
+vol plutôt qu'un plancher temporel fragile.
 
-Enfin, la réponse Claude dit déjà « livré (commit séparé) », alors que code,
-deux tests et réponse sont encore non suivis ou modifiés. Conserver le terme
-WIP jusqu'au commit source, puis mettre le présent paragraphe et
+La réponse Claude a correctement retiré « livré » de son titre, mais code,
+deux tests et réponse restent non suivis ou modifiés. Conserver le terme WIP
+jusqu'au commit source, puis mettre le présent paragraphe et
 `ETAT_COURANT.md` à jour en place au pin exact plutôt que d'empiler un nouvel
 audit.
 
