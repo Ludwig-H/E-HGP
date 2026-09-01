@@ -2,8 +2,8 @@
 
 Date : 1er septembre 2026.
 
-Coupe observée à 08:12 UTC : worktree v6 non committé au-dessus de
-`2088beea`. Cette note n'est pas un verdict sur un commit ; elle sera absorbée
+Coupe observée à 08:19 UTC : worktree v6 non committé au-dessus de
+`9627f013`. Cette note n'est pas un verdict sur un commit ; elle sera absorbée
 puis retirée après le checkpoint propre.
 
 Cadre :
@@ -30,17 +30,17 @@ Le second jet répond substantiellement à la première revue :
 - les refus observés sont transactionnels et précèdent les callbacks de
   forêt comme les phases de fold.
 
-Sur cette coupe, une construction Release isolée avec GCC 13.3 réussit. Les
-trois CTests `^mhgp6_caps_` passent 3/3 : nominal en 39,97 s, mutant émission
-en 11,50 s et mutant vague tardive en 13,70 s. Ces verts prouvent les statuts,
-la fermeture de l'objet et le moment de la **fusion globale** ; ils ne
-prouvent pas encore un refus avant toute allocation locale.
+Sur la coupe fonctionnelle stable de 08:13, une construction Release isolée
+avec GCC 13.3 réussit. Le contre-rejeu des trois CTests `^mhgp6_caps_` passe
+3/3 : nominal en 64,95 s, mutant émission en 30,90 s et mutant vague tardive
+en 29,83 s (64,97 s réel). Les 74 autres tests hors échelle passent ensuite
+74/74 en 196,75 s réel, E6 compris.
 
-Les probes Debug de l'autre auditeur sont utiles et conservés : au site exact
-du refus pour un cap de 1 000, `uniform(2000, 200, 3)` avait matérialisé 1 009
-candidats et `eight_clusters(2000, 400, 3)` en avait matérialisé 1 033. Le
-nouveau champ `emitted_at_refus` rend enfin cet overshoot observable ; sa borne
-générale est désormais établie ci-dessous.
+`caps.hpp`, `generate.hpp` et `selftest.cpp` ont reçu des alignements de
+commentaires pendant ce second rejeu. Le 74/74 prouve donc la coupe compilée à
+08:13, pas encore le futur commit. Ces verts prouvent les statuts, la fermeture
+de l'objet et le moment de la **fusion globale** ; ils ne prouvent pas un refus
+avant toute allocation locale.
 
 ## Réponse au sixième jet — checkpoint source recevable
 
@@ -64,21 +64,24 @@ Preuves locales :
 - `git diff --check` propre et `python tools/check_docs.py` valide 241 fichiers
   Markdown actifs.
 
-Il ne reste que du nettoyage de contrat dans le même patch :
+Le mécanisme est recevable **sous réserve** du nettoyage de contrat dans le
+même patch. Sur la coupe 08:19, il reste exactement :
 
-- remplacer dans `caps.hpp` les deux `inflight+1` périmés et borner la doctrine
-  « avant allocation » aux allocations globales ou tampons effectivement
-  gardés ;
-- corriger dans `GenerateOptions` les anciennes tranches de 64 K et la promesse
-  « avant matérialisation », puis retirer de la fixture le commentaire hérité
-  des `shrinks` et le `+65` déjà absent de l'assertion ;
-- qualifier `PRE-insertion` comme pré-insertion dans les vecteurs globaux
-  `wave`/`next`/`out`, pas dans les shards locaux.
+- remplacer dans `caps.hpp` « borne les tampons » et dans `RunOptions`
+  « conservatif sur la capacité » par l'autorité réellement livrée : proxy de
+  payload logique nommé ;
+- retirer du commentaire du throttle le terme d'une ancre, déjà supprimé par
+  la propagation, et retirer de la fixture le commentaire `4096+65` ;
+- corriger le commentaire de la réserve, qui dit encore que les fenêtres se
+  calculent sur sa capacité, ainsi que le doublon de commentaire de fixture ;
+- décrire `diag_candidates_capacity` comme saisi avant tri, pas après RLE.
 
-La signature CLI du budget et du cap effectif est recommandée avant toute
-campagne utilisant `--mem-budget`, mais ne bloque pas ce checkpoint. De même,
-un `TIMEOUT` CTest explicite est une hygiène utile, pas une nouvelle exigence
-de preuve.
+La signature CLI du budget et du cap effectif ne bloque pas ce checkpoint,
+mais elle bloque toute campagne qui utiliserait `--mem-budget`. Une ligne
+stable peut porter `memory_budget_scope=partial_named_payload_proxy_v1`, le
+budget demandé et les caps bruts demandé/effectif ; le cap effectif doit venir
+du même helper que l'exécution. De même, `TIMEOUT 600` sur les trois CTests caps
+est une hygiène utile, pas une nouvelle exigence mathématique.
 
 Le GO G4 `d98f4729` n'est pas révoqué, mais son pin refuse correctement ce
 worktree normatif sale. Aucun lancement ne doit partir de cet état ; un
