@@ -1,9 +1,9 @@
 # État courant v6 — audit coopératif
 
-Date de coupe : 31 août 2026.
+Date de coupe : 1er septembre 2026.
 
-Coupe de code observée : `2a981bc4`. Autorités techniques : `6d755804` pour le
-prototype E3/G16, `cd49a390` pour les callbacks, `2a981bc4` pour le protocole
+Coupe de code observée : `d98f4729`. Autorités techniques : `6d755804` pour le
+prototype E3/G16, `cd49a390` pour les callbacks, `d98f4729` pour le protocole
 GCP, `320299df` pour le reçu de réplication et `8ed2dea6` pour le reçu de
 confirmation contre-audité ci-dessous. Les notes Claude ne priment pas sur le
 présent verdict.
@@ -26,7 +26,7 @@ présent verdict.
 | confirmation hors échantillon | cœur reçu ; `confirmation_candidate`, déclencheur E6 non confirmé |
 | sonde E6 `7611418a` | diagnostic utile, causalité et gain non démontrés |
 | prototype E3/G16 `6d755804` | oracle de primitives reçu ; cinq bras et attribution économique non reçus |
-| protocole GCP `2a981bc4` | **GO borné** pour une session gardée `g4_mesure_v1` au pin exact |
+| protocole GCP `d98f4729` | **GO re-pinné** pour une nouvelle session gardée `g4_mesure_v1` |
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
@@ -47,12 +47,12 @@ Au pin `6d755804` :
   par résolution.
 
 Le probe `fold-inject-b-exception-k3` termine encore par SIGABRT, code 134 ;
-il reste volontairement hors CTest. Au pin `2a981bc4`, le selftest campagne
+il reste volontairement hors CTest. Au pin `d98f4729`, le selftest campagne
 passe 71 vérifications et le lifecycle 35 scénarios plus 11 refus de pin
 (51 vérifications). Le rejeu indépendant des 83 tests de sûreté/intégration
-donne 83/83 en 127,066 s. L'admission SCP à deux arrêts, la seconde tentative
-sur les sorties précoces, la grâce fixe et le refus d'une instrumentation G4
-non canonique sont reçus dans leur portée.
+donne 83/83 en 387,998 s sur la machine partagée. L'admission SCP à deux
+arrêts, la seconde tentative sur les sorties précoces, la grâce fixe et le
+refus d'une instrumentation G4 non canonique sont reçus dans leur portée.
 
 ## Exact-K, omission unique et ownership WSPD
 
@@ -358,31 +358,41 @@ ces preuves sur trois points :
 
 Les chemins état post-démarrage perdu avec handoff valide,
 `targeted_stopped` d'une autre génération, état illisible et cible
-discordante restent couverts à `2a981bc4`. Le GO GCP borné est accordé dans
+discordante restent couverts à `d98f4729`. Le GO GCP borné est accordé dans
 les limites ci-dessous.
 
 ## GCP
 
-`AUDIT_GCP_V6_P0_20260831.md` est l'autorité dédiée. À `2a981bc4`, les trois
+`AUDIT_GCP_V6_P0_20260831.md` est l'autorité dédiée. À `d98f4729`, les trois
 surfaces du dernier NO-GO sont fermées causalement : pire cas SCP identique au
 budget post-campagne avec deux arrêts, deux appels totaux réellement
 disponibles sur les sorties précoces, et `TIME_BIN=/usr/bin/time` transmis et
 exigé intégralement pour G4. Trois revues indépendantes ne trouvent plus de
 défaut matériel temporel ou de cycle de vie.
 
-Le **GO reste strictement borné à une session** : bootstrap épinglé au commit
-complet `2a981bc4b73f6297a28b1ebf2931ccefe5568dbc`,
+Le premier GO a été consommé par un refus fail-closed rc 76 avant campagne :
+les portes réelles sont vertes (v5 288/288, v6 74/74), mais CTest 4.4.3 a
+retiré `, 0 tests failed` de son résumé. L'arrêt de la génération exacte est
+certifié `TERMINATED` après environ cinq minutes. `7e346926` accepte les deux
+formats sans relâcher le code de sortie, les deux blocs ou les planchers.
+`d98f4729` ajoute le `session.log` initialement ignoré et rend le reçu
+auto-vérifiable ; aucune mesure scientifique n'est issue de cette tentative.
+
+Le **nouveau GO reste strictement borné à une session** : bootstrap épinglé au
+commit complet `d98f47296d675d3cbdb1b53019dcc1a8b3b292b4`,
 `CAMPAIGN_PROFILE=g4_mesure_v1` passé explicitement, aucun axe canonique
 surchargé, profil effectif G4 confirmé avant mutation, gardes SPOT du dépôt et
 cible exacte certifiée `TERMINATED` au retour. Les résultats ne sont reçus
 que si le validateur rend 0 et si le reçu durable est complet.
 
-Limite non bloquante : le validateur écrit ses `*_resume.txt` avant le contrôle
+Limites non bloquantes : le validateur écrit ses `*_resume.txt` avant le contrôle
 final G4. Avec un faux instrument de test, ces fichiers peuvent exister puis
 être invalidés par rc 1. Ils sont alors diagnostiques et non recevables ; le
 claim plus fort « jamais écrits » est refusé. Déplacer le contrôle en amont
 serait un durcissement P1 utile, pas une condition de ce lancement officiel qui
-impose `/usr/bin/time`.
+impose `/usr/bin/time`. Le parseur CTest n'est pas ancré à la ligne entière ;
+sur ce pin, le code non nul de CTest précède le parsing et aucune chaîne
+parasite ne correspond, mais des marqueurs de suite seraient un P1 utile.
 
 ## Dette d'échelle et ordre utile
 
@@ -394,7 +404,7 @@ ou u128 pour les compteurs.
 
 Ordre recommandé à Claude :
 
-1. exécuter au plus une session G4 selon le GO borné ci-dessus, puis auditer
+1. réexécuter au plus une session G4 selon le GO re-pinné ci-dessus, puis auditer
    le reçu avant toute interprétation scientifique ;
 2. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
    re-régler la règle ;
