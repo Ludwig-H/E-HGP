@@ -100,6 +100,49 @@ mhgp6_gate(mhgp6_executor_pool_mutant_serial 4 mhgp6_executor_pool_gate ARGS --i
 mhgp6_gate(mhgp6_executor_pool_mutant_drop_exception 4 mhgp6_executor_pool_gate ARGS --inject=pool-drop-exception TIMEOUT 180)
 mhgp6_gate(mhgp6_executor_pool_mutant_worker_resume 4 mhgp6_executor_pool_gate ARGS --inject=pool-worker-resume-after-fatal TIMEOUT 180)
 mhgp6_gate(mhgp6_executor_pool_mutant_activate_late 4 mhgp6_executor_pool_gate ARGS --inject=pool-activate-after-unlock TIMEOUT 180)
+# C2 : wire serie C v1 (docs/GPU.md § Wire) — brique hote pure, division
+# hissee (six candidats u32 par boule), serialisation canonique + digest, refus
+# fail-closed ; mutants gpu-index-drop-node et wire-t1-plus-one.
+mhgp6_executable(mhgp6_wire_gate tests/wire_gate.cpp)
+mhgp6_gate(mhgp6_wire 0 mhgp6_wire_gate TIMEOUT 180)
+mhgp6_gate(mhgp6_wire_mutant_drop_node 4 mhgp6_wire_gate ARGS --inject=gpu-index-drop-node TIMEOUT 180)
+mhgp6_gate(mhgp6_wire_mutant_t1 4 mhgp6_wire_gate ARGS --inject=wire-t1-plus-one TIMEOUT 180)
+# C3/C4 : kernels prefiltre+census en STUB HOTE — bit-identite boule a boule
+# contre le scalaire de production sur les candidats REELS (deux familles),
+# ordre de pile du scalaire compris ; 4 mutants device par drapeaux (l'hote
+# traduit le registre, le device ne le consulte jamais).
+mhgp6_executable(mhgp6_census_device_stub_gate tests/census_device_stub_gate.cpp)
+mhgp6_gate(mhgp6_census_device_stub 0 mhgp6_census_device_stub_gate TIMEOUT 600)
+mhgp6_gate(mhgp6_census_stub_mutant_range_le 4 mhgp6_census_device_stub_gate ARGS --inject=gpu-range-add-le TIMEOUT 600)
+mhgp6_gate(mhgp6_census_stub_mutant_stack 4 mhgp6_census_device_stub_gate ARGS --inject=gpu-stack-shallow TIMEOUT 600)
+mhgp6_gate(mhgp6_census_stub_mutant_swap_push 4 mhgp6_census_device_stub_gate ARGS --inject=gpu-swap-push-order TIMEOUT 600)
+mhgp6_gate(mhgp6_census_stub_mutant_nonstrict 4 mhgp6_census_device_stub_gate ARGS --inject=gpu-census-nonstrict TIMEOUT 600)
+mhgp6_gate(mhgp6_census_stub_mutant_skip_write 4 mhgp6_census_device_stub_gate ARGS --inject=gpu-skip-ball-write TIMEOUT 600)
+mhgp6_gate(mhgp6_census_stub_mutant_nshell 4 mhgp6_census_device_stub_gate ARGS --inject=gpu-nshell-overdomain TIMEOUT 600)
+mhgp6_gate(mhgp6_census_stub_mutant_skip_count 4 mhgp6_census_device_stub_gate ARGS --inject=gpu-skip-count-write TIMEOUT 600)
+# C5 (preuve locale) : le pipeline COMPLET avec la route serie C en stub —
+# objet identique a la route CPU (digests, cartes, totaux), refus
+# transactionnel du run entier sous mutants (jamais un prefixe publie).
+mhgp6_executable(mhgp6_pilot_stub_gate tests/pilot_stub_gate.cpp)
+mhgp6_gate(mhgp6_pilot_stub 0 mhgp6_pilot_stub_gate TIMEOUT 600)
+# Le PILOTE lui-meme en stub (syntaxe + logique C++ hote du .cu, refus de
+# parsing exerce ; la parite est prouvee par mhgp6_pilot_stub ci-dessus).
+mhgp6_product_executable(mhgp6_pilote_stub_check tests/pilot_cuda_stub_check.cpp)
+mhgp6_gate(mhgp6_pilote_stub_refus_n 2 mhgp6_pilote_stub_check ARGS --n=200x TIMEOUT 120)
+mhgp6_gate(mhgp6_pilote_stub_parite_200 0 mhgp6_pilote_stub_check ARGS --family=uniform --n=200 --seed=3 --threads=4 TIMEOUT 600)
+# FRONTIERE MULTI-LOTS (e9cfad9e) : --lot=17 avec plancher lots > 1 — base,
+# offsets et fusion en ordre GLOBAL juges au-dela de base=0 ; variante TEST
+# pour le mutant base-reset (le build produit refuse toute injection).
+mhgp6_gate(mhgp6_pilote_stub_lot17 0 mhgp6_pilote_stub_check ARGS --family=uniform --n=200 --seed=3 --threads=4 --lot=17 --min-lots=2 TIMEOUT 600)
+mhgp6_executable(mhgp6_pilote_stub_check_test tests/pilot_cuda_stub_check.cpp)
+mhgp6_gate(mhgp6_pilote_stub_mutant_base 4 mhgp6_pilote_stub_check_test ARGS --family=uniform --n=200 --seed=3 --threads=4 --lot=17 --min-lots=2 --inject=gpu-lot-base-reset TIMEOUT 600)
+mhgp6_gate(mhgp6_pilot_stub_mutant_stack 4 mhgp6_pilot_stub_gate ARGS --inject=gpu-stack-shallow TIMEOUT 600)
+mhgp6_gate(mhgp6_pilot_stub_mutant_nonstrict 4 mhgp6_pilot_stub_gate ARGS --inject=gpu-census-nonstrict TIMEOUT 600)
+# Frontiere D2H causale (f3704e99) : ecriture omise et n_shell hors domaine
+# refuses par le VALIDATEUR avant toute reconstruction.
+mhgp6_gate(mhgp6_pilot_stub_mutant_skip_write 4 mhgp6_pilot_stub_gate ARGS --inject=gpu-skip-ball-write TIMEOUT 600)
+mhgp6_gate(mhgp6_pilot_stub_mutant_nshell 4 mhgp6_pilot_stub_gate ARGS --inject=gpu-nshell-overdomain TIMEOUT 600)
+mhgp6_gate(mhgp6_pilot_stub_mutant_skip_count 4 mhgp6_pilot_stub_gate ARGS --inject=gpu-skip-count-write TIMEOUT 600)
 # C1 (suite) : temoin device en STUB HOTE — le .cu compile comme C++ pur via
 # le wrapper (tests/cuda_stub.hpp, kernels en boucles sequentielles). Prouve
 # localement syntaxe + logique + mutant AVANT toute session G4 ; jamais un
@@ -313,4 +356,39 @@ if(MHGP6_ENABLE_CUDA)
   mhgp6_gate(mhgp6_device_witness_mutant_carry 4 mhgp6_device_witness ARGS --inject=witness-di128-lost-carry LABELS gpu TIMEOUT 600)
   mhgp6_gate(mhgp6_device_witness_mutant_skip_write 4 mhgp6_device_witness ARGS --inject=witness-skip-write LABELS gpu TIMEOUT 600)
   mhgp6_gate(mhgp6_device_witness_mutant_skip_native 4 mhgp6_device_witness ARGS --inject=witness-skip-native-write LABELS gpu TIMEOUT 600)
+  # C3/C4 DEVICE : memes exigences que la porte stub, kernels sur le device
+  # reel ; l'architecture compilee est SIGNEE dans le binaire (§ 5.8 : le
+  # recu certifie arch compilee ET device observe).
+  add_executable(mhgp6_census_device_gate tests/census_device_gate.cu)
+  target_compile_options(mhgp6_census_device_gate PRIVATE
+    "$<$<COMPILE_LANGUAGE:CUDA>:-fmad=false;--expt-relaxed-constexpr;-Xcompiler=-Wall,-Wextra,-Werror>")
+  target_compile_definitions(mhgp6_census_device_gate PRIVATE MHGP6_TESTING=1
+    MHGP6_CUDA_ARCHS="${CMAKE_CUDA_ARCHITECTURES}")
+  target_link_libraries(mhgp6_census_device_gate PRIVATE Threads::Threads)
+  mhgp6_gate(mhgp6_census_device 0 mhgp6_census_device_gate LABELS gpu TIMEOUT 600)
+  mhgp6_gate(mhgp6_census_device_mutant_range_le 4 mhgp6_census_device_gate ARGS --inject=gpu-range-add-le LABELS gpu TIMEOUT 600)
+  mhgp6_gate(mhgp6_census_device_mutant_stack 4 mhgp6_census_device_gate ARGS --inject=gpu-stack-shallow LABELS gpu TIMEOUT 600)
+  mhgp6_gate(mhgp6_census_device_mutant_swap 4 mhgp6_census_device_gate ARGS --inject=gpu-swap-push-order LABELS gpu TIMEOUT 600)
+  mhgp6_gate(mhgp6_census_device_mutant_nonstrict 4 mhgp6_census_device_gate ARGS --inject=gpu-census-nonstrict LABELS gpu TIMEOUT 600)
+  mhgp6_gate(mhgp6_census_device_mutant_skip_write 4 mhgp6_census_device_gate ARGS --inject=gpu-skip-ball-write LABELS gpu TIMEOUT 600)
+  mhgp6_gate(mhgp6_census_device_mutant_nshell 4 mhgp6_census_device_gate ARGS --inject=gpu-nshell-overdomain LABELS gpu TIMEOUT 600)
+  mhgp6_gate(mhgp6_census_device_mutant_skip_count 4 mhgp6_census_device_gate ARGS --inject=gpu-skip-count-write LABELS gpu TIMEOUT 600)
+  # C5 : PILOTE serie C — les deux routes sur le meme nuage, parite de TOUS
+  # les digests exigee, couts wire/H2D/kernels/D2H separes (§ 5.5). La porte
+  # 400 est la verification fonctionnelle ; les mesures 50k+ viennent du
+  # profil de campagne, jamais d'un gate.
+  add_executable(mhgp6_cuda cli/mhgp6_cuda.cu)
+  target_compile_options(mhgp6_cuda PRIVATE
+    "$<$<COMPILE_LANGUAGE:CUDA>:-fmad=false;--expt-relaxed-constexpr;-Xcompiler=-Wall,-Wextra,-Werror>")
+  target_compile_definitions(mhgp6_cuda PRIVATE MHGP6_CUDA_ARCHS="${CMAKE_CUDA_ARCHITECTURES}")
+  target_link_libraries(mhgp6_cuda PRIVATE Threads::Threads)
+  mhgp6_gate(mhgp6_pilote_parite_400 0 mhgp6_cuda ARGS --family=uniform --n=400 --seed=3 --threads=8 LABELS gpu TIMEOUT 600)
+  mhgp6_gate(mhgp6_pilote_refus_n 2 mhgp6_cuda ARGS --n=200x LABELS gpu TIMEOUT 120)
+  mhgp6_gate(mhgp6_pilote_lot17 0 mhgp6_cuda ARGS --family=uniform --n=400 --seed=3 --threads=8 --lot=17 --min-lots=2 LABELS gpu TIMEOUT 600)
+  add_executable(mhgp6_cuda_test cli/mhgp6_cuda.cu)
+  target_compile_options(mhgp6_cuda_test PRIVATE
+    "$<$<COMPILE_LANGUAGE:CUDA>:-fmad=false;--expt-relaxed-constexpr;-Xcompiler=-Wall,-Wextra,-Werror>")
+  target_compile_definitions(mhgp6_cuda_test PRIVATE MHGP6_TESTING=1 MHGP6_CUDA_ARCHS="${CMAKE_CUDA_ARCHITECTURES}")
+  target_link_libraries(mhgp6_cuda_test PRIVATE Threads::Threads)
+  mhgp6_gate(mhgp6_pilote_mutant_base 4 mhgp6_cuda_test ARGS --family=uniform --n=400 --seed=3 --threads=8 --lot=17 --min-lots=2 --inject=gpu-lot-base-reset LABELS gpu TIMEOUT 600)
 endif()

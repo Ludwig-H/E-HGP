@@ -98,6 +98,18 @@ struct RunOptions {
   size_t pretest_query_min_points = 512;
   size_t cell_grid_min_sites = kCellGridMinSites;
   std::function<void(u64 K, const std::vector<ForestEvent>& events, const ForestResult& r)> on_forest;
+  // COUTURE SERIE C (C5, docs/GPU.md) : substitution du PREFILTRE+CENSUS par
+  // un executeur externe (GPU — ou son stub hote pour la preuve locale).
+  // Recoit l'index, les candidats uniques, smax_eff, shell_cap ; REMPLIT
+  // survivants (ordre des candidats) et BallData (ordre des survivants,
+  // n_int == depth croise comme la route CPU) et les stats de census
+  // fournies par la route. Rend "" ou un message de REFUS transactionnel
+  // (mappe resource_exhausted — lots et prefixes jetes, jamais un prefixe
+  // publie). nullptr = route CPU de production, STRICTEMENT inchangee.
+  // L'OBJET aval est le meme ; la porte pilote prouve les digests egaux.
+  std::function<std::string(const CloudIndex&, const std::vector<BallCandidate>&, u64 smax_eff,
+                            size_t shell_cap, std::vector<Survivor>*, std::vector<BallData>*, ExpandStats*)>
+      prefilter_census_override;
 };
 
 struct KCardinalities {
@@ -395,21 +407,43 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     invalidate_provisional(&rr);
     return rr;
   }
-  prefilter_balls(ix, cands, rr.smax_eff, opt.threads, &surv, &rr.expand);
-  rr.t_prefilter_ms = ms(t_p);
-  rr.rss_mb[2] = run_detail::rss_mb_now();
-  const auto t_c = std::chrono::steady_clock::now();
   std::vector<BallData> balls;
-  const PipelineStatus cs = census_balls(ix, cands, surv, rr.smax_eff, opt.shell_cap, opt.threads, &balls, &rr.expand);
-  if (cs != PipelineStatus::kCompleteRegular) {
-    rr.status = cs;
-    rr.message = cs == PipelineStatus::kResourceExhausted
-                     ? "resource_exhausted : coquille au-dela du plafond (jamais de troncature)"
-                     : "invariant : census contredit la passe count-only";
-    invalidate_provisional(&rr);
-    return rr;
+  if (opt.prefilter_census_override) {
+    // Route serie C : le temps combine tombe dans t_census_ms (t_prefilter
+    // reste 0 — semantique documentee de la couture, les deux etages sont un
+    // seul aller-retour device).
+    const std::string err =
+        opt.prefilter_census_override(ix, cands, rr.smax_eff, opt.shell_cap, &surv, &balls, &rr.expand);
+    if (!err.empty()) {
+      // § 5.11 : la CLASSE du refus est preservee — un invalid_input du wire
+      // n'est jamais requalifie silencieusement en resource_exhausted.
+      const bool inv = err.rfind("invariant", 0) == 0;
+      const bool bad_in = err.rfind("invalid_input", 0) == 0;
+      rr.status = inv ? PipelineStatus::kInvariantViolated
+                      : bad_in ? PipelineStatus::kInvalidInput : PipelineStatus::kResourceExhausted;
+      rr.message = std::string(inv ? "invariant" : bad_in ? "invalid_input" : "resource_exhausted") +
+                   " : route serie C — " + err;
+      invalidate_provisional(&rr);
+      return rr;
+    }
+    rr.t_census_ms = ms(t_p);
+  } else {
+    prefilter_balls(ix, cands, rr.smax_eff, opt.threads, &surv, &rr.expand);
+    rr.t_prefilter_ms = ms(t_p);
+    rr.rss_mb[2] = run_detail::rss_mb_now();
+    const auto t_c = std::chrono::steady_clock::now();
+    const PipelineStatus cs =
+        census_balls(ix, cands, surv, rr.smax_eff, opt.shell_cap, opt.threads, &balls, &rr.expand);
+    if (cs != PipelineStatus::kCompleteRegular) {
+      rr.status = cs;
+      rr.message = cs == PipelineStatus::kResourceExhausted
+                       ? "resource_exhausted : coquille au-dela du plafond (jamais de troncature)"
+                       : "invariant : census contredit la passe count-only";
+      invalidate_provisional(&rr);
+      return rr;
+    }
+    rr.t_census_ms = ms(t_c);  // arrete AVANT le digest post-prefiltre (audit du 31 aout)
   }
-  rr.t_census_ms = ms(t_c);  // arrete AVANT le digest post-prefiltre (audit du 31 aout)
   if (opt.digest) {
     const auto t_dp = std::chrono::steady_clock::now();
     rr.digest_postprefilter = digest_postprefilter_v6(cands, surv);

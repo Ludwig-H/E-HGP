@@ -45,6 +45,13 @@ def run(binp, join):
     if p.returncode != 0:
         print("REFUS : %s rc=%d" % (" ".join(cmd), p.returncode))
         sys.exit(2)
+    # CONTRE-ENVELOPPE stderr (8e contre-lecture 99eec23d) : le contrat
+    # § 5.10 imprime le profil par print_run sur STDOUT apres run_pipeline —
+    # toute ligne profil_* sur stderr est une fuite d'I/O de worker.
+    for line in p.stderr.splitlines():
+        if line.startswith("profil_"):
+            print("DESACCORD : ligne profil_* sur STDERR (fuite d'I/O) : %s" % line)
+            sys.exit(1)
     return p.stdout
 
 
@@ -150,10 +157,15 @@ def check_profile_output(txt, join, liveness):
             fail("residuel negatif (%s)" % line)
         if not (f["a_debut"] <= f["a_fin"] <= f["reduce_interne_debut"] <= f["reduce_interne_fin"]):
             fail("chaine A -> reduce_interne non ordonnee (%s)" % line)
-        # PLANCHER PAR K (9041c191 : un plancher agrege autorisait un record K
-        # vide si les autres etaient positifs).
+        # PLANCHER PAR K (9041c191) : un record sans duree ne passe pas ; et
+        # ATTRIBUTION NON NULLE (99eec23d : neuf composantes a zero avec
+        # residuel == mur restaient vertes) — des que le mur est mesurable a
+        # l'arrondi %.3f pres, la somme des fenetres doit etre positive.
         if f["mur_reduce_interne"] <= 0.0 and f["somme"] <= 0.0:
             fail("plancher : record K=%d sans duree (join=%d)" % (k, join))
+        if f["mur_reduce_interne"] >= 0.002 and f["somme"] <= 0.0:
+            fail("attribution nulle : mur=%.3f mais somme=0 (K=%d, join=%d)" %
+                 (f["mur_reduce_interne"], k, join))
         by_k[k] = f
     if join == 1:
         # CAUSALITE : B(K) joint avant A(K+1), un seul worker et une seule

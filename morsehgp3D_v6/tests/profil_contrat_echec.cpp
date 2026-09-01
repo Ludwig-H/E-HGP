@@ -114,11 +114,12 @@ int main(int argc, char** argv) {
         expect(false, "succes : fenetres finies et non negatives");
         break;
       }
-      // PLANCHER PAR K, NON ARRONDI (9041c191 : la porte Python lit des %.3f
-      // — ici les doubles bruts ; un record K par defaut ne passe pas meme
-      // si les autres sont positifs).
-      if (!(mur > 0.0 || somme > 0.0)) {
-        expect(false, "succes : chaque record K porte une duree strictement positive");
+      // PLANCHER PAR K, NON ARRONDI (9041c191) + ATTRIBUTION NON NULLE
+      // (99eec23d : tout-dans-le-residuel restait vert) : sur les doubles
+      // bruts, chaque record K porte une somme de fenetres STRICTEMENT
+      // positive — les horloges ns rendent toute fenetre reelle > 0.
+      if (!(somme > 0.0 && mur > 0.0)) {
+        expect(false, "succes : chaque record K porte somme > 0 ET mur > 0 (attribution non nulle)");
         break;
       }
       if (mur - somme < -0.005) {
