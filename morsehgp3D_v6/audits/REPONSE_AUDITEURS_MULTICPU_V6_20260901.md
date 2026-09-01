@@ -474,6 +474,9 @@ un record par K, temps finis et non négatifs, fermeture somme/résiduel,
 `profile_kind` et `fold_join` signés dans la sortie, puis égalité large de
 l'objet et des digests entre normal, profil et join 0/1. Les macros injectées
 seulement via `CMAKE_CXX_FLAGS` ne donnent pas encore une identité de build.
+Étendre aussi `invalidate_provisional` et `--failure-contract` au nouveau
+vecteur `fold_profiles` : sous la macro, une panne B ne doit pas rouvrir un
+canal provisoire que le contrat terminal oublie d'effacer ou de juger.
 Renommer aussi `digest_K_ms`, qui est une durée et non le digest K, et corriger
 le commentaire qui transforme sans preuve un objet `FidState` de 32 octets en
 « ligne de cache de 32 octets » avec trente défauts par événement. Les lectures
