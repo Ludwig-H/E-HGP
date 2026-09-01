@@ -2,7 +2,7 @@
 
 Date : 1er septembre 2026.
 
-Coupe observée à 08:19 UTC : worktree v6 non committé au-dessus de
+Coupe observée à 08:23 UTC : worktree v6 non committé au-dessus de
 `9627f013`. Cette note n'est pas un verdict sur un commit ; elle sera absorbée
 puis retirée après le checkpoint propre.
 
@@ -64,24 +64,28 @@ Preuves locales :
 - `git diff --check` propre et `python tools/check_docs.py` valide 241 fichiers
   Markdown actifs.
 
-Le mécanisme est recevable **sous réserve** du nettoyage de contrat dans le
-même patch. Sur la coupe 08:19, il reste exactement :
+La coupe 08:23 reçoit les principaux nettoyages : `caps.hpp` et `RunOptions`
+parlent maintenant de proxy de payload logique, le throttle porte la borne
+`4096*T`, le diagnostic est correctement situé avant tri et les trois CTests
+caps ont `TIMEOUT 600`.
 
-- remplacer dans `caps.hpp` « borne les tampons » et dans `RunOptions`
-  « conservatif sur la capacité » par l'autorité réellement livrée : proxy de
-  payload logique nommé ;
-- retirer du commentaire du throttle le terme d'une ancre, déjà supprimé par
-  la propagation, et retirer de la fixture le commentaire `4096+65` ;
-- corriger le commentaire de la réserve, qui dit encore que les fenêtres se
-  calculent sur sa capacité, ainsi que le doublon de commentaire de fixture ;
-- décrire `diag_candidates_capacity` comme saisi avant tri, pas après RLE.
+Il reste deux commentaires mécaniques à retirer dans le même patch : la réserve
+dit encore que les fenêtres se calculent sur sa capacité, et la fixture répète
+deux fois l'introduction des fenêtres cardinalitaires.
 
-La signature CLI du budget et du cap effectif ne bloque pas ce checkpoint,
-mais elle bloque toute campagne qui utiliserait `--mem-budget`. Une ligne
-stable peut porter `memory_budget_scope=partial_named_payload_proxy_v1`, le
-budget demandé et les caps bruts demandé/effectif ; le cap effectif doit venir
-du même helper que l'exécution. De même, `TIMEOUT 600` sur les trois CTests caps
-est une hygiène utile, pas une nouvelle exigence mathématique.
+La signature CLI est aussi implémentée par un helper commun. Sonde positive :
+
+```text
+mhgp6 --family=uniform --n=200 --s=8 --mem-budget=1073741824
+memory_budget_scope=partial_named_payload_proxy_v1 budget=1073741824 cap_brut_demande=4294967295 cap_brut_effectif=7456540
+code 0 ; stderr vide
+```
+
+Cette sortie n'a toutefois encore aucune porte : `mhgp6_cli_ok_s8` n'active
+pas le budget et le wrapper ne contrôle que le code de sortie. Comme cette
+ligne est désormais un changement sémantique livré, étendre la porte CLI pour
+en vérifier au moins le scope et les trois valeurs avant le checkpoint. Toute
+campagne `--mem-budget` reste interdite tant que cette preuve manque.
 
 Le GO G4 `d98f4729` n'est pas révoqué, mais son pin refuse correctement ce
 worktree normatif sale. Aucun lancement ne doit partir de cet état ; un
