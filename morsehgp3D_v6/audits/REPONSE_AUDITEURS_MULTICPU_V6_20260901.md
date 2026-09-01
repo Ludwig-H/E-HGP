@@ -934,6 +934,80 @@ deux selftests ; enfin export propre du SHA candidat. À ce moment seulement,
 un accusé bref pourra rendre le GO conditionnel exécutable. **Aucune session
 GCP ne doit partir de cette photographie WIP.**
 
+### 5.15 Contre-lecture du WIP intégré : budget et causalité largement fermés, quatre coutures finales
+
+Cette seconde photographie WIP, toujours postérieure à `63248cb3` et non
+épinglée, solde plusieurs points du § 5.14. Le profil et le juge commun sont
+désormais dans les deux inventaires du pin, le préflight v5 est conditionnel
+et disparaît entièrement du profil série C, et les durées du profil pilotent
+bien les garde-fous avant toute mutation. Le budget canonique recalcule
+`13 552 s` d'estimation pour une fenêtre utile de `20 995 s` sous 7 h GCE et
+415 min invitées, soit `7 443 s` de marge. Le verrou budgétaire est donc
+fermé ; l'ancien commentaire « -257 s » doit seulement être aligné sur le
+recalcul 5 h actuel, déficitaire de `1 257 s`.
+
+Le juge ferme maintenant la somme des chronos, les murs enveloppants et la
+stabilité des signatures, volumes et lots entre les cinq records. Le runner
+l'appelle après chaque famille, avant la suivante, et grave son verdict. Il
+liste aussi les portes GPU avant exécution, dérive l'affinité par couple
+`(socket, core)` dans le cpuset autorisé, emploie `nvidia-smi` sans unités et
+grave les hashes des binaires. Le validateur recalcule le masque, exige un
+hash unique par phase, accepte les deux formats de résumé CTest, ne scanne
+plus le `REFUS` légitime de la porte négative comme une sortie produit, exige
+`K=1..10` et des flottants finis pour l'attribution, puis reçoit les verdicts
+du juge. Les résumés matrice et GPU v6 sont maintenant copiés dans le reçu
+durable. Le selftest de campagne passe sur cette coupe, y compris l'inventaire
+intrus, le fail-fast pilote, les hashes et le budget ; les quatre CTests
+ciblés juge/profil passent aussi localement en Release.
+
+Il reste quatre fermetures matérielles, toutes courtes et accompagnées d'un
+contre-exemple accepté aujourd'hui.
+
+1. **Lier littéralement tout profil qui se dit canonique.** Un profil
+   `serie_c_selftest_v1` dont seul `matrice_timeout` passe de 60 à 61 est
+   encore validé avec un code nul : les axes série C sont parsés, mais la
+   comparaison `profile ↔ canon_axes` n'agit que dans la promotion
+   `decision_v1`. Comparer tous les axes communs, y compris les treize axes
+   série C et les deux durées, dès que
+   `profil == profil_canonique`; ignorer seulement un axe optionnel absent
+   d'un ancien canon. Dans l'attribution, reprendre aussi la vérification
+   exacte de `commande=` de la matrice : retirer `taskset -c` de la commande
+   passe encore malgré les deux attestations préalables. Exiger le binaire
+   profilé et tous les arguments du point.
+2. **Lier l'identité du pilote au plan et au device.** Le juge ne fait encore
+   que constater la présence d'une ligne `pilote_serie_c`; une en-tête
+   annonçant une autre famille, `n`, graine, nombre de fils, lot, SM et
+   architecture reste verte. Parser exactement une en-tête, la comparer au
+   statut et au plan, puis exiger `lot_effectif = min(lot, nb_total)`. Le
+   validateur doit en outre relier le nom et la compute capability du build
+   au nom/SM de l'en-tête, et exiger le même UUID au build, avant et après
+   chaque pilote. Passer explicitement
+   `-DCMAKE_CUDA_ARCHITECTURES=120` et refuser toute valeur différente : le
+   CMake actuel n'utilise 120 que comme défaut et accepte encore une
+   surcharge 86.
+3. **Rendre toute la chaîne série C fail-fast.** Un run matrice ou attribution
+   non nul grave bien une troncature, mais le runner construit ensuite CUDA
+   et peut consommer les pilotes ; deux exécutions locales avec un binaire
+   `/bin/false` le reproduisent. Une troncature de ces prérequis doit sauter
+   tout le bloc GPU v6, publier sa cause et laisser le validateur refuser le
+   reçu. De même, ne pas neutraliser par `|| true` le code de `ctest -N` : un
+   listing textuellement exact terminé au code 7 passe actuellement jusqu'aux
+   portes.
+4. **Remettre le selftest du cycle de vie au même manifeste.** Son inventaire
+   historique suppose encore onze chemins sous `gcp-migration/`; le pin et le
+   lifecycle en ont treize dans deux répertoires. Les 31 assertions rouges
+   actuelles sont toutes la cascade de ce manifeste obsolète, et non 31
+   défauts du cycle de vie : avec la seule copie repo-relative du profil et
+   de `morsehgp3D_v6/tests/pilote_juge.py`, tous les scénarios passent en
+   mémoire. Porter cette correction dans le harnais et ajouter les mutants
+   des trois points précédents donnera un signal propre avant le pin.
+
+Ordre utile : liaison canon/commande ; identité pilote/device et architecture
+120 ; propagation fail-fast ; harnais lifecycle ; enfin export Git propre,
+selftests rejoués et accusé du SHA exact. Ce reliquat justifie encore
+**NO START**, mais il ne demande ni nouveau design mathématique ni réouverture
+des kernels. Aucun lancement GCP n'a été effectué pendant cette revue.
+
 ## 6. Ordre de travail recommandé
 
 1. **achevé à `4a85c13d`** : C1, garde `2E` et témoin hôte ancrés ensemble,

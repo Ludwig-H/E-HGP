@@ -40,10 +40,18 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | plafonds et budget mémoire `4a85c13d` | cap coopératif et refus transactionnels reçus ; garde logique `2E` avant la réserve de fusion reçue, proxy de payload nommé seulement, sans claim RSS/OOM |
 | saturation multi-CPU du fold `1069bc20` | pin construit et suite `gate` 92/92 ; profil, liveness, builds distincts, projection nommée, `join=1` et effacement K2 reçus dans leur portée ; `d5ed0fb3` recalcule la somme, mais ses tolérances acceptent encore la contre-fixture à neuf composantes nulles ; matrice locale terminée mais non décisionnelle |
 | série C C2--C5 `cd606257` | reçue dans sa portée CPU/stub : six candidats `u32`, refus transactionnels, sentinelles/validateur, digest gravé, porte de readback device enregistrée mais jamais exécutée et multi-lots causal ; export propre Release 113/113 en 232,11 s ; aucun `nvcc` ni device |
-| préparation G4 `d5ed0fb3` + WIP postérieur | setup/H2D, warm-up/ABBA, signatures bilatérales, dent du profil et rotation8 correctement fermés dans le WIP ; **NO START** : profil et juge absents du pin, préflight encore v5, budget 5 h rouge (`12 552 > 12 295 s`), juge non fail-fast sans fermeture temporelle, inventaire/validateur/reçu/selftests incomplets ; aucun nouveau pin reçu |
+| préparation G4 `d5ed0fb3` + WIP postérieur | pin profil/juge, portée v6-only, budget 7 h, fermeture temporelle, inventaire pré-CTest, fail-fast par famille, hashes, affinité, validateur CTest/K et résumés durables correctement raccordés dans le WIP ; selftest campagne vert ; **NO START** : liaison canon/commande et en-tête/device incomplète, architecture 120 seulement par défaut, CUDA encore consommé après un prérequis CPU rouge, code de `ctest -N` neutralisé et harnais lifecycle sur l'ancien manifeste ; aucun nouveau pin reçu |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP `d98f4729` | GO mono-session consommé et clos ; reçu `df1a3c5f` validé non décisionnel, arrêt ciblé certifié |
+
+La coupe WIP du § 5.15 calcule `ESTIMATE_S=13 552 s` pour
+`WINDOW_S=20 995 s`, soit `7 443 s` de marge sous le profil 7 h/415 min.
+Les contre-fixtures juge/profil passent sous Python normal et optimisé, les
+quatre CTests ciblés passent 4/4 en Release et le selftest de campagne complet
+est vert. Le selftest lifecycle reste rouge uniquement parce que son propre
+inventaire n'a pas encore suivi les treize fichiers du pin ; ce harnais n'est
+pas une preuve fraîche tant qu'il n'est pas remis à niveau.
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
