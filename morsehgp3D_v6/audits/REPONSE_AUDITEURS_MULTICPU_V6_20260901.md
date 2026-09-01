@@ -314,6 +314,9 @@ le worktree : chaque injection saute directement à sa scène-signature. C'est
 la bonne forme et cela retire notamment les 40 s et échecs parasites du mutant
 `pool-serial` observés sur le binaire précédent. Elle demande encore un build
 et un rejeu frais, car la suite déjà en cours a commencé avant cette édition.
+Une reconstruction ultérieure du worktree donne bien 14/14 portes ciblées en
+68,76 s — caps 4, CLI 1, pool 5 et témoin stub 4. Ce vert prouve que le nouveau
+dispatch s'exécute ; il ne lève pas les deux réserves causales suivantes.
 
 Deux préconditions de ces nouvelles scènes doivent encore devenir des refus
 de fixture, jamais des codes 4. La branche
@@ -381,9 +384,13 @@ aveugle, et cette contre-fixture est maintenant enregistrée dans CMake.
 Les quatre portes stub donnent 4/4 en Release (0,27 s), puis 4/4 dans un build
 Debug ASan/UBSan (1,44 s, aucune alerte). Le nominal rend 0, carry rend 4 avec
 130 902 désaccords exactement, skip rend 4 avec 64 absences aux bons indices,
-et le composé rend 1. Les libellés de grille, domaine et produits sont aussi
-réalignés ; il reste seulement un commentaire local « `|b| < 2^40` » à passer
-à `<=`.
+et le composé rend 1. Les bornes de domaine et de produit sont maintenant
+réalignées. Le libellé de grille reste seulement trompeur : le code crée 81
+couples 9×9, puis remplace neuf cases en damier dans les deux colonnes extrêmes
+du mode B. Il conserve donc 72 couples de la grille initiale ; ce n'est ni une
+grille « effective côté mode A seulement », ni une grille 9×7 avec deux
+colonnes retirées. Décrire ces 81 affectations initiales puis les neuf
+substitutions suffit, sans changer le témoin.
 
 Cette réception reste volontairement **hôte et partielle**. Le témoin couvre
 le repli portable DI128 et l'oracle `__int128`, quotient/reste compris, mais ne
@@ -419,19 +426,32 @@ la barrière `injected`, puis a appliqué la seconde contre-lecture :
 
 Le rejeu 12/12 en 50,84 s précédait les derniers jets ; il reste une preuve
 historique utile, pas le reçu final du worktree actuel. La décision `2E` est
-néanmoins reçue par inspection dans sa portée logique et transactionnelle :
-le facteur passe dans `fits_budget`, le refus précède `reserve`, les fenêtres
-attestent capacité et émission, et le budget large compare l'objet aval. Elle
-ne promet ni RSS ni absence d'OOM.
+néanmoins reçue par inspection dans sa portée logique : le facteur passe dans
+`fits_budget`, le refus précède `reserve`, les fenêtres attestent capacité et
+émission, et le budget large compare une projection aval étendue. Elle ne
+promet ni RSS ni absence d'OOM.
+
+Deux formulations de la porte doivent encore être bornées ou complétées avant
+de parler de preuve transactionnelle complète. Le helper de refus et la scène
+mutante ne contrôlent aujourd'hui que `digest_all`, `digest_balls`, `cards`,
+`total_events` et le silence des callbacks/phases ; `invalidate_provisional`
+efface aussi `digest_raw_candidates`, `digest_postprefilter`,
+`digest_forest` et quatre autres totaux. Centraliser dans le test une
+projection « tous les provisoires vides » évite que l'un de ces champs régresse
+sans tuer la porte. De même, la scène (d) compare les digests de forêt, mais le
+callback ne mémorise que K et `ev.size()` : son assertion prouve l'ordre des K
+et les tailles, pas une « séquence exacte d'événements ». Capturer un digest
+du vecteur callback et une projection sémantique de `ForestResult` — hors
+workers et chronométrages — fermerait ce dernier écart. Ajouter aussi
+`digest_raw_candidates` à la comparaison du budget large rendrait la liste de
+digests réellement complète.
 
 Le vocabulaire source est désormais honnête et le cap CLI a été correctement
 renommé `cap_fusion_budgetaire` plutôt que de prétendre être le cap effectif
-du run. Deux textes doivent simplement suivre avant le commit :
-`PLAN_DE_TESTS.md` dit encore « APRÈS le pic » au lieu de « après
-matérialisation du payload logique nommé », et le § 3 de la réponse Claude
-emploie encore l'ancien nom `cap_fusion_effectif` malgré sa ronde 4 correcte.
-Un rejeu frais des portes caps/CLI après le commit source remplacera le 12/12
-historique.
+du run. `PLAN_DE_TESTS.md` est maintenant aligné ; le § 3 de la réponse Claude
+non suivie emploie encore l'ancien nom `cap_fusion_effectif` malgré sa ronde 4
+correcte. Un rejeu frais des portes caps/CLI après le commit source remplacera
+le 12/12 historique.
 
 ### 5.10 Nouveau profil `reduce` en cours
 
