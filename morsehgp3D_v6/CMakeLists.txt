@@ -5,7 +5,10 @@ project(morsehgp3d_v6 CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+# Bornes a COMPILE_LANGUAGE:CXX (audit § 5.8) : sinon ces options globales
+# atteignent nvcc quand MHGP6_ENABLE_CUDA est ON et le font refuser ; les
+# avertissements hote des cibles CUDA passent separement par -Xcompiler.
+add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic;-Werror>")
 
 find_package(Threads REQUIRED)
 enable_testing()
@@ -82,14 +85,33 @@ mhgp6_gate(mhgp6_sweep_oracle 0 mhgp6_selftest ARGS --sweep-oracle LABELS "gate;
 mhgp6_gate(mhgp6_caps_refus 0 mhgp6_selftest ARGS --caps-refus)
 mhgp6_gate(mhgp6_caps_mutant_emission 4 mhgp6_selftest ARGS --caps-refus --inject=caps-drop-emission)
 mhgp6_gate(mhgp6_caps_mutant_late_wave 4 mhgp6_selftest ARGS --caps-refus --inject=caps-late-wave-check)
-set_tests_properties(mhgp6_caps_refus mhgp6_caps_mutant_emission mhgp6_caps_mutant_late_wave PROPERTIES TIMEOUT 600)
+# Garde 2E de la fusion globale (§ 6.1) : sautee, le refus retombe sur le tri
+# APRES la materialisation du payload logique nomme — message different, tue
+# par la fenetre dediee du selftest.
+mhgp6_gate(mhgp6_caps_mutant_prefusion 4 mhgp6_selftest ARGS --caps-refus --inject=caps-skip-prefusion-budget)
+set_tests_properties(mhgp6_caps_refus mhgp6_caps_mutant_emission mhgp6_caps_mutant_late_wave mhgp6_caps_mutant_prefusion PROPERTIES TIMEOUT 600)
 # G0' du plan GPU v6 : pool d'executeurs (hote pur, port contractuel v5 +
-# confinement de panne repare — la dent v5).
+# confinement de panne COTE WORKER — la dent v5 reparee la ou la course
+# causale du confinement producteur ne peut pas exister, REPONSE_AUDITEURS
+# § 5.6 ; fixture permanente du travail poste-fatal, scenario 10).
 mhgp6_executable(mhgp6_executor_pool_gate tests/executor_pool_gate.cpp)
 mhgp6_gate(mhgp6_executor_pool 0 mhgp6_executor_pool_gate TIMEOUT 180)
 mhgp6_gate(mhgp6_executor_pool_mutant_serial 4 mhgp6_executor_pool_gate ARGS --inject=pool-serial TIMEOUT 180)
 mhgp6_gate(mhgp6_executor_pool_mutant_drop_exception 4 mhgp6_executor_pool_gate ARGS --inject=pool-drop-exception TIMEOUT 180)
-mhgp6_gate(mhgp6_executor_pool_mutant_close_fatal 4 mhgp6_executor_pool_gate ARGS --inject=pool-close-fatal-missing TIMEOUT 180)
+mhgp6_gate(mhgp6_executor_pool_mutant_worker_resume 4 mhgp6_executor_pool_gate ARGS --inject=pool-worker-resume-after-fatal TIMEOUT 180)
+mhgp6_gate(mhgp6_executor_pool_mutant_activate_late 4 mhgp6_executor_pool_gate ARGS --inject=pool-activate-after-unlock TIMEOUT 180)
+# C1 (suite) : temoin device en STUB HOTE — le .cu compile comme C++ pur via
+# le wrapper (tests/cuda_stub.hpp, kernels en boucles sequentielles). Prouve
+# localement syntaxe + logique + mutant AVANT toute session G4 ; jamais un
+# recu device. Le meme .cu est la cible reelle du bloc MHGP6_ENABLE_CUDA.
+mhgp6_executable(mhgp6_device_witness_stub tests/device_witness_stub.cpp)
+mhgp6_gate(mhgp6_device_witness_stub 0 mhgp6_device_witness_stub TIMEOUT 180)
+mhgp6_gate(mhgp6_device_witness_stub_mutant_carry 4 mhgp6_device_witness_stub ARGS --inject=witness-di128-lost-carry TIMEOUT 180)
+mhgp6_gate(mhgp6_device_witness_stub_mutant_skip_write 4 mhgp6_device_witness_stub ARGS --inject=witness-skip-write TIMEOUT 180)
+mhgp6_gate(mhgp6_device_witness_stub_mutant_skip_native 4 mhgp6_device_witness_stub ARGS --inject=witness-skip-native-write TIMEOUT 180)
+# Contre-fixture gravee (5e contre-lecture § 5.8) : la DOUBLE injection
+# skip+carry ne rend jamais un 4 aveugle — les oracles tranchent (code 1).
+mhgp6_gate(mhgp6_device_witness_stub_contre_double 1 mhgp6_device_witness_stub ARGS "--inject=witness-skip-write,witness-di128-lost-carry" TIMEOUT 180)
 mhgp6_gate(mhgp6_sweep_mutant_depth 4 mhgp6_selftest ARGS --sweep-oracle --inject=sweep-nonstrict-depth)
 mhgp6_gate(mhgp6_fused_mutant_mask 4 mhgp6_selftest ARGS --fused-descent --inject=fused-mask-stuck)
 
@@ -123,7 +145,7 @@ mhgp6_gate(mhgp6_cli_ok_s8 0 mhgp6 ARGS --family=uniform --n=200 --s=8 TIMEOUT 1
 # 7456540). PASS_REGULAR ignore le code de sortie : run_expect capture et
 # reemet stdout pour juger les deux ensemble.
 mhgp6_gate(mhgp6_cli_budget_signature 0 mhgp6 ARGS --family=uniform --n=200 --s=8 --mem-budget=1073741824 TIMEOUT 120
-  EXPECT_LINE "memory_budget_scope=partial_named_payload_proxy_v1 budget=1073741824 cap_brut_demande=4294967295 cap_brut_effectif=7456540")
+  EXPECT_LINE "memory_budget_scope=partial_named_payload_proxy_v1 budget=1073741824 cap_brut_demande=4294967295 cap_brut_effectif=7456540 cap_fusion_budgetaire=3728270")
 
 # ---- Tailles d'interet (labels scale*) : conformite aux digests v5 graves.
 foreach(fam uniform terrain eight_clusters scanline_single_pass scanline_overlap_multiecho)
@@ -233,3 +255,32 @@ add_test(NAME mhgp6_agregateur_intergraines
                  "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/agregateur_gate.py"
                  -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
 set_tests_properties(mhgp6_agregateur_intergraines PROPERTIES LABELS "gate")
+
+# ---- CUDA (serie C, docs/GPU.md) : OFF par defaut, JAMAIS construit en CI.
+# Les portes `gpu` ne s'executent qu'en session G4 (sm_120, RTX PRO 6000
+# Blackwell). -fmad=false : aucune contraction implicite ; le socle serie C
+# est 100 % entier, le flottant n'y entre pas. Incompatible avec tout futur
+# profil sanitizers (motif v5 : refus explicite si les deux sont demandes).
+option(MHGP6_ENABLE_CUDA "Construire les cibles device de la serie C (G4 seulement)" OFF)
+if(MHGP6_ENABLE_CUDA)
+  if(CMAKE_CXX_FLAGS MATCHES "fsanitize")
+    message(FATAL_ERROR "MHGP6_ENABLE_CUDA est incompatible avec des flags sanitizers")
+  endif()
+  # sm_120 : a fixer AVANT enable_language, sinon CMake initialise
+  # l'architecture par defaut (lecon v5, session G4 50fee05c).
+  if(NOT CMAKE_CUDA_ARCHITECTURES)
+    set(CMAKE_CUDA_ARCHITECTURES 120)
+  endif()
+  enable_language(CUDA)
+  set(CMAKE_CUDA_STANDARD 20)
+  set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+  add_executable(mhgp6_device_witness src/gpu/device_witness.cu)
+  target_compile_options(mhgp6_device_witness PRIVATE
+    "$<$<COMPILE_LANGUAGE:CUDA>:-fmad=false;--expt-relaxed-constexpr;-Xcompiler=-Wall,-Wextra,-Werror>")
+  target_compile_definitions(mhgp6_device_witness PRIVATE MHGP6_TESTING=1)
+  target_link_libraries(mhgp6_device_witness PRIVATE Threads::Threads)
+  mhgp6_gate(mhgp6_device_witness 0 mhgp6_device_witness LABELS gpu TIMEOUT 600)
+  mhgp6_gate(mhgp6_device_witness_mutant_carry 4 mhgp6_device_witness ARGS --inject=witness-di128-lost-carry LABELS gpu TIMEOUT 600)
+  mhgp6_gate(mhgp6_device_witness_mutant_skip_write 4 mhgp6_device_witness ARGS --inject=witness-skip-write LABELS gpu TIMEOUT 600)
+  mhgp6_gate(mhgp6_device_witness_mutant_skip_native 4 mhgp6_device_witness ARGS --inject=witness-skip-native-write LABELS gpu TIMEOUT 600)
+endif()

@@ -6,8 +6,10 @@
 // des u64 et un seul « mot haut du produit 64×64 » (mulhi) :
 //   host   : `(u64)(((u128)x * y) >> 64)` ;
 //   device : `__umul64hi(x, y)` (intrinseque CUDA, sm_xx, sans en-tete) ;
-//   simulation device sur host (-D__CUDA_ARCH__ -DMHGP6_FAKE_DEVICE) : repli
-//            en limbes 32 bits `di_mulhi_u64_portable` (aucun u128).
+//   stub hote (-DMHGP6_FAKE_DEVICE SEUL, jamais -D__CUDA_ARCH__) : repli en
+//            limbes 32 bits `di_mulhi_u64_portable` (aucun u128), branche
+//            attestee par `di_mulhi_branch()`. Le stub est une preuve de
+//            syntaxe et de logique C++ HOTE — jamais une preuve nvcc.
 // Tout est MHGP6_HD inline, constexpr des que le chemin ne passe pas par une
 // intrinseque (MHGP6_DI_CONSTEXPR). Aucune allocation, aucune boucle non
 // bornee (les boucles sont sur 3 mots au plus).
@@ -89,12 +91,28 @@ MHGP6_HD inline constexpr u64 di_mulhi_u64_portable(u64 x, u64 y) {
   return p11 + (p01 >> 32) + (p10 >> 32) + (mid >> 32);
 }
 
-// Mot haut de x·y : selection par cible.
+// Mot haut de x·y : selection par cible. `MHGP6_FAKE_DEVICE` (stub hote des
+// portes GPU, tests/cuda_stub.hpp) selectionne le REPLI PORTABLE — le chemin
+// le plus proche de la semantique device — sans jamais definir
+// `__CUDA_ARCH__` globalement (audit § 5.8 : le stub exercait le chemin hote
+// u128, vert par substitution). `di_mulhi_branch()` atteste la branche
+// effectivement compilee (1 = intrinseque device, 2 = portable, 3 = u128
+// hote) ; le temoin device la grave dans chaque sortie et REFUSE une branche
+// inattendue.
+MHGP6_HD inline constexpr int di_mulhi_branch() {
+#if defined(__CUDA_ARCH__) && !defined(MHGP6_FAKE_DEVICE)
+  return 1;
+#elif defined(__CUDA_ARCH__) || defined(MHGP6_FAKE_DEVICE)
+  return 2;
+#else
+  return 3;
+#endif
+}
 MHGP6_HD inline MHGP6_DI_CONSTEXPR u64 di_mulhi_u64(u64 x, u64 y) {
 #if defined(__CUDA_ARCH__) && !defined(MHGP6_FAKE_DEVICE)
   return __umul64hi(x, y);  // intrinseque device CUDA (unsigned long long × 2)
-#elif defined(__CUDA_ARCH__)
-  return di_mulhi_u64_portable(x, y);  // simulation device sur host
+#elif defined(__CUDA_ARCH__) || defined(MHGP6_FAKE_DEVICE)
+  return di_mulhi_u64_portable(x, y);  // simulation device (stub hote inclus)
 #else
   if (!std::is_constant_evaluated()) {
     if (MHGP6_MUTANT("dint-mulhi-dropped")) return 0;  // MUTANT : mot haut jete

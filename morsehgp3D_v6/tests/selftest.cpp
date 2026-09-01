@@ -782,9 +782,64 @@ static int run_caps_refus(bool injected) {
   base.smax = 11;
   base.threads = 4;
   base.digest = true;
-  const RunResult temoin = run_pipeline(in, base);
+  // DIGEST DE CALLBACK (7e contre-lecture § 5.9) : le vecteur d'evenements
+  // recu par on_forest ET une projection SEMANTIQUE de ForestResult (hors
+  // workers et chronometrages), serialises par le Writer canonique — la
+  // fenetre (d) compare la sequence EXACTE, pas seulement K et les tailles.
+  const auto digest_callback = [](u64 k, const std::vector<ForestEvent>& ev, const ForestResult& fr) {
+    digest_detail::Writer d;
+    d.tag("cbK");
+    d.u64v(k);
+    d.u64v((u64)ev.size());
+    for (const ForestEvent& e : ev) {
+      d.u8v(e.q);
+      d.u8v(e.d);
+      d.u32v((u32)e.active_mask);
+      for (int i = 0; i < 11; ++i) d.u32v(e.support[i]);
+      for (int i = 0; i < 9; ++i) d.u32v(e.interior[i]);
+      d.level(e.level);
+    }
+    d.tag("fr");
+    d.u64v(fr.facets);
+    d.u64v(fr.fusions);
+    d.u64v(fr.batches);
+    d.u64v(fr.new_attachments);
+    d.u64v(fr.attach_violations);
+    d.u64v(fr.birth_violations);
+    d.u64v(fr.partition_violations);
+    d.u64v(fr.nodes);
+    d.u64v((u64)fr.facet_keys.size());
+    for (const FacetKey& f : fr.facet_keys) d.facet(f);
+    d.u64v((u64)fr.final_canon_fid.size());
+    for (const u32 c : fr.final_canon_fid) d.u32v(c);
+    d.u64v((u64)fr.deltas.size());
+    for (const ComponentDelta& cd : fr.deltas) {
+      d.u64v(cd.batch);
+      d.level(cd.level);
+      d.facet(cd.output);
+      d.u64v((u64)cd.parents.size());
+      for (const FacetKey& p : cd.parents) d.facet(p);
+      d.u64v((u64)cd.born.size());
+      for (const FacetKey& b : cd.born) d.facet(b);
+    }
+    d.u64v((u64)fr.batch_levels.size());
+    for (const ExactLevel& l : fr.batch_levels) d.level(l);
+    return d.hex();
+  };
+  std::vector<std::string> temoin_cb;
+  RunOptions bt = base;  // copie DEDIEE : base reste sans callback (les autres fenetres copient base)
+  bt.diagnostic_raw_candidates_digest = true;
+  bt.on_forest = [&](u64 k, const std::vector<ForestEvent>& ev, const ForestResult& fr) {
+    temoin_cb.push_back(digest_callback(k, ev, fr));
+  };
+  const RunResult temoin = run_pipeline(in, bt);
   check(temoin.status == PipelineStatus::kCompleteRegular, "temoin complet");
   check(!temoin.digest_all.empty(), "temoin digest_all");
+  check(!temoin.digest_raw_candidates.empty(), "temoin digest_raw (diagnostic arme)");
+  // COMPLETUDE des deux bras (8e contre-lecture) : l'egalite des sequences
+  // ne prouve rien si une meme omission touche les deux — la taille est
+  // exigee contre kmax_eff.
+  check(temoin_cb.size() == (size_t)temoin.kmax_eff, "temoin : un digest de callback par K (kmax_eff)");
   const u64 c_brut = (u64)temoin.emitted;
   check(c_brut > 100000, "temoin : masse brute significative");
 
@@ -796,12 +851,19 @@ static int run_caps_refus(bool injected) {
     o->on_forest = [&](u64, const std::vector<ForestEvent>&, const ForestResult&) { ++callbacks; };
     o->on_fold_phase = [&](u64, FoldPhase) { ++fold_phases; };
   };
+  // Projection COMPLETE « tous les provisoires vides » (7e contre-lecture
+  // § 5.9) : exactement les champs qu'invalidate_provisional efface — aucun
+  // ne peut regresser sans tuer la porte.
+  const auto provisoires_vides = [](const RunResult& r) {
+    return r.digest_raw_candidates.empty() && r.digest_balls.empty() &&
+           r.digest_postprefilter.empty() && r.digest_all.empty() && r.digest_forest.empty() &&
+           r.cards.empty() && r.total_events == 0 && r.total_facets == 0 &&
+           r.total_fusions == 0 && r.total_deltas == 0 && r.total_nodes == 0;
+  };
   const auto check_refus = [&](const RunResult& r, const char* motif, const char* nom) {
     check(r.status == PipelineStatus::kResourceExhausted, (std::string(nom) + " : resource_exhausted").c_str());
     check(r.message.find(motif) != std::string::npos, (std::string(nom) + " : message attendu").c_str());
-    check(r.digest_all.empty() && r.digest_balls.empty() && r.cards.empty(),
-          (std::string(nom) + " : provisoire vide").c_str());
-    check(r.total_events == 0, (std::string(nom) + " : totaux vides").c_str());
+    check(provisoires_vides(r), (std::string(nom) + " : TOUS les provisoires vides").c_str());
     check(callbacks == 0, (std::string(nom) + " : zero callback de foret").c_str());
     check(fold_phases == 0, (std::string(nom) + " : zero phase de fold").c_str());
   };
@@ -867,6 +929,39 @@ static int run_caps_refus(bool injected) {
     check_refus(r, "rectangles vivants au-dela du plafond declare", "(w2)");
     check(r.gen.alive_peak_rects <= 100, "(w2) pic de rectangles vivants <= cap");
   }
+  // Fenetre dediee au mutant de la GARDE 2E DE LA FUSION GLOBALE (§ 6.1),
+  // AVANT la barriere `injected` : garde sautee, le refus retombe sur le TRI
+  // (meme arithmetique 2E x 144, mais APRES la materialisation du payload
+  // logique nomme) — message different = payload non prevenu, mutant TUE.
+  if (mutant_enabled("caps-skip-prefusion-budget")) {
+    if (g_failures) {
+      // REFUS DE FIXTURE EN TETE de branche (9e contre-lecture) : un temoin
+      // amont deja invalide interdit meme le run mutant — jamais un faux 4,
+      // et aucun run inutile.
+      std::fprintf(stderr, "REFUS FIXTURE : %d echec(s) de setup avant la scene mutante 2E\n", g_failures);
+      return 3;
+    }
+    RunOptions o = base;
+    o.memory_budget_bytes = c_brut * (u64)sizeof(BallCandidate) * 2 - 1;
+    arm(&o);
+    const RunResult r = run_pipeline(in, o);
+    // Preuve CAUSALE de l'instant de materialisation (§ 5.9) : sous la garde
+    // sautee, le payload logique nomme a ete MATERIALISE — emitted = E et
+    // capacite observee >= E — avant que le tri ne refuse ; le contrat
+    // transactionnel tient (aucun provisoire, aucun callback).
+    const bool fell_to_tri = r.status == PipelineStatus::kResourceExhausted &&
+                             r.message.find("tri des candidats hors budget partiel declare") != std::string::npos;
+    const bool peak_existed = r.emitted == (size_t)c_brut && r.diag_candidates_capacity >= c_brut;
+    const bool transactional = provisoires_vides(r) && callbacks == 0 && fold_phases == 0;
+    if (fell_to_tri && peak_existed && transactional) {
+      std::printf("mutant caps-skip-prefusion-budget TUE : refus retombe sur le tri, payload 2E materialise atteste (emitted=%llu capacite=%llu)\n",
+                  (unsigned long long)r.emitted, (unsigned long long)r.diag_candidates_capacity);
+      return 4;
+    }
+    std::fprintf(stderr, "mutant caps-skip-prefusion-budget NON detecte (tri=%d pic=%d transactionnel=%d)\n",
+                 fell_to_tri ? 1 : 0, peak_existed ? 1 : 0, transactional ? 1 : 0);
+    return 3;
+  }
   if (injected) {
     std::fprintf(stderr, "mutant injecte : une branche dediee devait conclure\n");
     return 3;
@@ -901,13 +996,23 @@ static int run_caps_refus(bool injected) {
   const u64 census_need =
       c_unique * ((u64)sizeof(BallCandidate) + (u64)sizeof(Survivor) + 2 * (u64)sizeof(BallData));
   check(tri_need < census_need, "fenetre (b)/(c) : tri_need < census_need (taux de RLE mesure)");
-  // (b) tri_need - 1 : la generation passe (cap derive >= C), le TRI refuse.
+  // (b) tri_need - 1 : la generation passe (cap derive >= C) et la GARDE 2E
+  // DE LA FUSION GLOBALE refuse (meme arithmetique que le tri — 2E x 144 —
+  // mais AVANT de materialiser le payload logique nomme shards + sortie,
+  // § 6.1/§ 5.9). Le mutant caps-skip-prefusion-budget a sa fenetre dediee
+  // avant la barriere.
   {
     RunOptions o = base;
     o.memory_budget_bytes = tri_need - 1;
     arm(&o);
     const RunResult r = run_pipeline(in, o);
-    check_refus(r, "tri des candidats hors budget partiel declare", "(b)");
+    check_refus(r, "fusion globale des candidats hors budget partiel declare", "(b)");
+    // Contrat renforce (§ 5.9) : le refus PRECEDE la fusion — rien n'est
+    // publie ni reserve, le code et la somme exacte E sont attestes.
+    check(r.emitted == 0, "(b) emitted nul (refus avant fusion)");
+    check(r.diag_candidates_capacity == 0, "(b) capacite diagnostique nulle (reserve jamais faite)");
+    check(r.gen.cap_refus == kCapRefusFusionBudget, "(b) code kCapRefusFusionBudget");
+    check(r.gen.emitted_at_refus == c_brut, "(b) emitted_at_refus = E exact");
   }
   // (c) tri_need : l'EGALITE passe exactement le tri, la borne conservative
   // prefiltre/census refuse (strictement sous census_need).
@@ -946,15 +1051,45 @@ static int run_caps_refus(bool injected) {
     const RunResult r = run_pipeline(in, o);
     check_refus(r, "evenements hors budget partiel declare", "(f)");
   }
-  // (d) budget large : l'objet est IDENTIQUE au temoin.
+  // (d) budget large : l'objet est IDENTIQUE au temoin — comparaison LARGE
+  // (§ 5.9 : emission, digests intermediaires, cartes, totaux, events_by_k,
+  // statut et sequence exacte on_forest, pas seulement digest_all).
   {
     RunOptions o = base;
     o.memory_budget_bytes = (u64)32 << 30;
+    o.diagnostic_raw_candidates_digest = true;
     arm(&o);
+    std::vector<u64> seq_k;
+    std::vector<std::string> seq_cb;
+    o.on_forest = [&](u64 k, const std::vector<ForestEvent>& ev, const ForestResult& fr) {
+      ++callbacks;
+      seq_k.push_back(k);
+      seq_cb.push_back(digest_callback(k, ev, fr));
+    };
     const RunResult r = run_pipeline(in, o);
     check(r.status == PipelineStatus::kCompleteRegular, "(d) complet sous budget large");
+    check(r.emitted == temoin.emitted, "(d) emission identique au temoin");
+    check(r.digest_raw_candidates == temoin.digest_raw_candidates, "(d) digest_raw identique");
+    check(r.digest_balls == temoin.digest_balls, "(d) digest_balls identique");
+    check(r.digest_postprefilter == temoin.digest_postprefilter, "(d) digest post-prefiltre identique");
     check(r.digest_all == temoin.digest_all, "(d) digest_all identique au temoin");
+    check(r.digest_forest == temoin.digest_forest, "(d) digests de forets identiques");
+    check(r.cards == temoin.cards, "(d) cartes identiques");
+    check(r.total_events == temoin.total_events && r.total_facets == temoin.total_facets &&
+              r.total_fusions == temoin.total_fusions && r.total_deltas == temoin.total_deltas &&
+              r.total_nodes == temoin.total_nodes,
+          "(d) totaux identiques");
+    check(r.expand.events_by_k == temoin.expand.events_by_k, "(d) events_by_k identiques");
     check(callbacks > 0, "(d) callbacks livres sous budget large");
+    bool seq_ok = seq_k.size() == (size_t)callbacks;
+    for (size_t i = 0; i < seq_k.size(); ++i)
+      if (seq_k[i] != (u64)i + 1) seq_ok = false;  // K = 1..kmax dans l'ordre strict
+    check(seq_ok, "(d) ordre des K strict 1..kmax");
+    check(seq_cb.size() == seq_k.size() && seq_cb.size() == (size_t)r.kmax_eff,
+          "(d) completude : un digest de callback par K (kmax_eff)");
+    // Sequence EXACTE (7e contre-lecture) : digest du vecteur d'evenements
+    // ET projection semantique de ForestResult, callback par callback.
+    check(seq_cb == temoin_cb, "(d) sequence on_forest exacte (digests de callbacks identiques au temoin)");
     check(fold_phases > 0, "(d) phases de fold observees au succes");
   }
   return g_failures ? 1 : 0;

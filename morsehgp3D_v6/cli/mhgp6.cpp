@@ -115,9 +115,10 @@ int main(int argc, char** argv) {
     return status_exit_code(rr.status);
   }
   if (opt.memory_budget_bytes != 0)
-    std::printf("memory_budget_scope=partial_named_payload_proxy_v1 budget=%llu cap_brut_demande=%llu cap_brut_effectif=%llu\n",
-                (unsigned long long)opt.memory_budget_bytes, (unsigned long long)opt.max_raw_candidates,
-                (unsigned long long)effective_raw_cap(opt));
+    std::printf(
+        "memory_budget_scope=partial_named_payload_proxy_v1 budget=%llu cap_brut_demande=%llu cap_brut_effectif=%llu cap_fusion_budgetaire=%llu\n",
+        (unsigned long long)opt.memory_budget_bytes, (unsigned long long)opt.max_raw_candidates,
+        (unsigned long long)effective_raw_cap(opt), (unsigned long long)budget_fusion_cap(opt));
   print_run(stdout, cloud_family_name(family), (int)n, (int)coord, seed, opt, rr);
   // Pic de residence MESURE (RSS max du processus), jamais un pic annonce.
   struct rusage ru;

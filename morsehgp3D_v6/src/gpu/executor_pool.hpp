@@ -3,12 +3,17 @@
 // morsehgp3D_v5/src/gpu/executor_pool.hpp (pin : voir docs/PROVENANCE.md),
 // requalifie par la porte mhgp6_executor_pool — plus la DENT v5 REPAREE :
 // le confinement de panne device. En v5, close_fatal existait mais aucun
-// wrapper ne l'appelait sur une erreur CUDA ; ici `submit_and_wait_contained`
-// FERME le pool (usage unique) sur toute DeviceFatalError AVANT de la
-// relancer au producteur — run.hpp la convertit en refus transactionnel,
-// jamais un verdict ni un prefixe publie. Mutant `pool-close-fatal-missing` :
-// le confinement saute la fermeture — tue par la porte (pool encore ouvert
-// apres une panne fatale).
+// wrapper ne l'appelait sur une erreur CUDA. Le confinement appartient au
+// WORKER (REPONSE_AUDITEURS_MULTICPU § 5.6 : un confinement cote producteur
+// laisse une course causale — le worker peut depiler et executer le travail
+// suivant sur l'executeur empoisonne avant que le producteur reveille n'ait
+// ferme ; sonde auditeur : 199 reutilisations sur 200) : le fil de pool qui
+// voit une DeviceFatalError FERME l'admission et ANNULE la file AVANT de
+// notifier le ticket fatal, puis sort — l'executeur empoisonne n'est jamais
+// reutilise. Le producteur recoit l'erreur typee et la mappe en refus
+// transactionnel (run.hpp), jamais un verdict ni un prefixe publie. Mutant
+// `pool-worker-resume-after-fatal` : le worker ne ferme pas et reboucle —
+// tue par la fixture du travail poste-fatal (porte du pool, scenario 10).
 //
 // Avant : chaque ouvrier CPU (jusqu'a 48) possedait un executeur device
 // `thread_local` ephemere (flux, evenements, tampons crees puis detruits avec
@@ -67,10 +72,13 @@ namespace gpu {
 
 inline constexpr int kGpuExecutorsMax = 8;
 
-// PANNE DEVICE FATALE typee : les wrappers CUDA la levent (apres cudaError
-// irrecuperable) ; le confinement ferme le pool puis la remonte ; run.hpp la
-// mappe en refus transactionnel (resource_exhausted / numeric_failure selon
-// la cause), jamais un verdict.
+// PANNE DEVICE FATALE typee : les wrappers CUDA la leveront (apres cudaError
+// irrecuperable) ; le confinement ferme le pool puis la remonte. La
+// conversion en refus transactionnel du RUN entier est une INTENTION C2-C5
+// (les lanes serie C la feront ; rien dans run.hpp ne consomme le pool a ce
+// jour) — jamais un verdict. NB : `queue_cap` borne le nombre de tickets en
+// deque, pas les captures detenues par les producteurs bloques, les tampons
+// des executeurs ni la VRAM (budget VRAM = contrat C2).
 struct DeviceFatalError : std::runtime_error {
   using std::runtime_error::runtime_error;
 };
@@ -150,6 +158,18 @@ class ExecutorPool {
     return c;
   }
 
+#if defined(MHGP6_TESTING)
+  // HOOK TEST-ONLY (6e contre-lecture § 5.6) : appele par le worker
+  // immediatement AVANT `active++` — SOUS mu_ au nominal (un fil closer qui
+  // appelle close_fatal pendant le hook reste DERRIERE le verrou : il ne
+  // peut voir que l'etat post-activation), et APRES le deverrouillage sous
+  // le mutant pool-activate-after-unlock (le closer s'intercale : il voit
+  // active == 0 ET file vide — le ticket est MANQUE). Ce placement tue le
+  // deplacement EXACT de l'activation hors du verrou, pas un delai
+  // artificiel ulterieur (l'ancien hook post-section surqualifiait la dent).
+  std::function<void()> test_hook_pre_activate;
+#endif
+
   // ERREUR DEVICE FATALE (P1) : le pool devient a USAGE UNIQUE. L'admission
   // ferme, la premiere erreur est memorisee, les tickets en file sont ANNULES
   // avec cette erreur (jamais laisses en attente), toutes les attentes sont
@@ -178,6 +198,9 @@ class ExecutorPool {
         ++cancelled_;
         std::lock_guard<std::mutex> tl(t->mu);
         t->exc = fatal_;
+        t->cancelled = true;  // bit INDEPENDANT de l'exception_ptr : meme si
+                              // sa fabrication a echoue, le producteur ne
+                              // repart jamais comme si le travail avait reussi
         t->done = true;
         t->cv.notify_all();
       }
@@ -190,21 +213,11 @@ class ExecutorPool {
     return stop_;
   }
 
-  // Soumet et ATTEND avec CONFINEMENT DE PANNE (la dent v5 reparee) : une
-  // DeviceFatalError levee par le travail FERME le pool (usage unique, files
-  // annulees, executeurs non reutilises) AVANT de remonter au producteur.
-  // Une exception ordinaire remonte sans fermer (recuperable).
-  void submit_and_wait_contained(Job job) {
-    try {
-      submit_and_wait(std::move(job));
-    } catch (const DeviceFatalError&) {
-      if (!MHGP6_MUTANT("pool-close-fatal-missing")) close_fatal(std::current_exception());
-      throw;
-    }
-  }
-
   // Soumet et ATTEND (contre-pression si la file est pleine) ; relance dans
-  // l'appelant l'exception levee par le travail.
+  // l'appelant l'exception levee par le travail. Le CONFINEMENT DE PANNE est
+  // dans le worker (voir run()) : quand l'exception recue est une
+  // DeviceFatalError, le pool est DEJA ferme (usage unique, file annulee,
+  // executeur empoisonne jamais reutilise) au moment ou elle remonte ici.
   void submit_and_wait(Job job) {
     if (current_pool_job() != nullptr)
       throw std::runtime_error("pool d'executeurs : soumission depuis un travail de pool (aucun emboitement admis)");
@@ -217,8 +230,8 @@ class ExecutorPool {
         if (fatal_) std::rethrow_exception(fatal_);
         throw std::runtime_error("pool d'executeurs arrete");
       }
-      ++submitted_;
       queue_.push_back(&t);
+      ++submitted_;  // APRES le push reussi : un bad_alloc de la deque ne desequilibre pas les comptes
       const u32 q = (u32)queue_.size();
       u32 pq = peak_queued_.load(std::memory_order_relaxed);
       while (q > pq && !peak_queued_.compare_exchange_weak(pq, q, std::memory_order_acq_rel)) {}
@@ -227,6 +240,8 @@ class ExecutorPool {
     std::unique_lock<std::mutex> lk(t.mu);
     t.cv.wait(lk, [&] { return t.done; });
     if (t.exc && !MHGP6_MUTANT("pool-drop-exception")) std::rethrow_exception(t.exc);
+    if (t.cancelled)  // annule sans porteur d'erreur : JAMAIS un retour normal
+      throw std::runtime_error("pool d'executeurs : travail annule par fermeture fatale (erreur sans porteur)");
   }
 
  private:
@@ -235,6 +250,7 @@ class ExecutorPool {
     std::mutex mu;
     std::condition_variable cv;
     bool done = false;
+    bool cancelled = false;
     std::exception_ptr exc;
   };
 
@@ -276,35 +292,69 @@ class ExecutorPool {
     cv_ready_.notify_all();
     for (;;) {
       Ticket* t = nullptr;
+      u32 cur = 0;
       {
         std::unique_lock<std::mutex> lk(mu_);
         cv_.wait(lk, [&] { return stop_ || !queue_.empty(); });
         if (queue_.empty()) return;  // stop_ et rien a faire
         t = queue_.front();
         queue_.pop_front();
+        // INSTANT D'ACTIVATION = le retrait, SOUS mu_ (fenetre file->actif
+        // fermee, § 5.6 3e contre-lecture) : a tout instant un ticket est
+        // soit EN FILE (annulable par close_fatal) soit ACTIF (il va au bout,
+        // son executeur se retire ensuite) — jamais entre les deux, ou une
+        // fermeture fatale linearisee dans l'intervalle le manquerait.
+        // Mutant pool-activate-after-unlock : l'activation retombe apres le
+        // deverrouillage (l'ancien intervalle) — le hook pre_activate migre
+        // AVEC elle, le closer de la scene-signature s'intercale et expose
+        // le ticket manque.
+        if (!MHGP6_MUTANT("pool-activate-after-unlock")) {
+#if defined(MHGP6_TESTING)
+          if (test_hook_pre_activate) test_hook_pre_activate();
+#endif
+          cur = active_.fetch_add(1, std::memory_order_acq_rel) + 1;
+        }
       }
       cv_space_.notify_one();
-      const u32 cur = active_.fetch_add(1, std::memory_order_acq_rel) + 1;
+      if (MHGP6_MUTANT("pool-activate-after-unlock")) {
+#if defined(MHGP6_TESTING)
+        if (test_hook_pre_activate) test_hook_pre_activate();
+#endif
+        cur = active_.fetch_add(1, std::memory_order_acq_rel) + 1;
+      }
       u32 p = peak_.load(std::memory_order_relaxed);
       while (cur > p && !peak_.compare_exchange_weak(p, cur, std::memory_order_acq_rel)) {}
       current_pool_job() = this;
       bool threw = false;
+      std::exception_ptr fatal_exc;  // non nul ssi le travail a leve une DeviceFatalError
       try {
         t->job(*ex);
+      } catch (const DeviceFatalError&) {
+        threw = true;
+        fatal_exc = std::current_exception();
+        std::lock_guard<std::mutex> lk(t->mu);
+        t->exc = fatal_exc;
       } catch (...) {
         threw = true;
         std::lock_guard<std::mutex> lk(t->mu);
         t->exc = std::current_exception();
       }
       current_pool_job() = nullptr;
-      active_.fetch_sub(1, std::memory_order_acq_rel);
       done_.fetch_add(1, std::memory_order_acq_rel);
+      // CONFINEMENT (§ 5.6) : fermer l'admission et annuler la file AVANT de
+      // notifier le ticket fatal et avant tout retour a la boucle — sinon ce
+      // fil peut depiler le travail suivant et l'executer sur l'executeur
+      // empoisonne pendant que le producteur reveille n'a pas encore agi.
+      if (fatal_exc && !MHGP6_MUTANT("pool-worker-resume-after-fatal")) close_fatal(fatal_exc);
       bool poisoned = false;
       {
+        // Desactivation ET compte terminal dans la MEME section critique :
+        // aucun snapshot counters() transitoirement non conservatif.
         std::lock_guard<std::mutex> lk(mu_);
+        active_.fetch_sub(1, std::memory_order_acq_rel);
         if (threw) ++failed_jobs_;
         else ++succeeded_;
-        poisoned = (bool)fatal_;  // erreur fatale : cet executeur n'est plus reutilise
+        poisoned = (bool)fatal_;  // erreur fatale (ici ou ailleurs) : cet executeur n'est plus reutilise
       }
       {  // Notification SOUS le verrou du ticket ; apres ce bloc, `t` peut
          // avoir ete detruit par son producteur : ne plus y toucher.

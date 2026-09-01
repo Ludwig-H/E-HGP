@@ -70,10 +70,21 @@ Port GPU (1er septembre 2026, plan série C — blobs v5 épinglés) :
 (blob `4072df1c`) et `tests/executor_pool_gate.cpp` depuis
 `morsehgp3D_v5/tests/executor_pool_gate.cpp` (blob `21a6f267`) —
 `port_source_requalified` par la porte `mhgp6_executor_pool` (+ 3 mutants),
-avec UNE addition non-v5 : le confinement de panne
-(`submit_and_wait_contained`, `DeviceFatalError`, mutant
-`pool-close-fatal-missing`) — la dent v5 « close_fatal jamais appelé par
-les wrappers » réparée à la conception.
+avec UNE addition non-v5 : le confinement de panne (`DeviceFatalError`) —
+la dent v5 « close_fatal jamais appelé par les wrappers » réparée à la
+conception. La première forme (wrapper producteur
+`submit_and_wait_contained`, mutant `pool-close-fatal-missing`) portait une
+course causale (§ 5.6 de `REPONSE_AUDITEURS_MULTICPU_V6_20260901.md`) :
+remplacée le même jour par le confinement CÔTÉ WORKER (mutant
+`pool-worker-resume-after-fatal`, fixture scénario 10). Témoin device :
+`src/gpu/device_witness.cu` porte le LOT 1 (arithmétique DI128) de
+`morsehgp3D_v5/src/gpu/device_witness.cu` (blob `23b206c4`) — le lot 2
+(scan q3 warp) n'est PAS porté (série L subordonnée à C5) ; additions
+non-v5 : lot `__int128` natif avec quotient/reste, preuve d'écriture par
+sentinelle, attestation de branche mulhi, verdict mutant par primitive,
+stub hôte exécutable (`tests/cuda_stub.hpp`). Requalification locale par
+les portes stub 0/4 ; la requalification DEVICE n'existera qu'au premier
+run G4 sous `MHGP6_ENABLE_CUDA` (aucun nvcc exercé à ce jour).
 
 ## Re-dérivés
 

@@ -96,6 +96,7 @@ struct RunOptions {
 
 struct KCardinalities {
   u64 events = 0, facets = 0, deltas = 0, attachments = 0, fusions = 0, nodes = 0;
+  bool operator==(const KCardinalities&) const = default;  // comparaison large de la fenetre (d)
 };
 
 struct RunResult {
@@ -197,6 +198,17 @@ inline u64 effective_raw_cap(const RunOptions& opt) {
   return cap;
 }
 
+// CAP DE FUSION BUDGETAIRE (§ 5.9, 5e contre-lecture) : plus grande emission
+// E que la garde 2E de la fusion globale accepte sous le budget declare —
+// budget / (2 x 144), la MEME division que `fits_budget(E, sizeof, 2,
+// budget)` executee ; publie par la signature CLI sous le nom
+// `cap_fusion_budgetaire` (PAS « effectif » : un cap brut demande plus bas
+// peut borner le run avant cette garde ; 0 = pas de budget).
+inline u64 budget_fusion_cap(const RunOptions& opt) {
+  if (opt.memory_budget_bytes == 0) return 0;
+  return opt.memory_budget_bytes / (2 * (u64)sizeof(BallCandidate));
+}
+
 // ROUTINE TERMINALE COMMUNE (P1 audit du 31 aout) : sur TOUT retour non
 // complet, les champs provisoires sont vides — digests, forets, cartes,
 // totaux. Aucun defaut ne laisse une foret K1 ou un digest raw visibles.
@@ -258,6 +270,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   // CAP EFFECTIF d'emission par le HELPER PARTAGE (la signature CLI du
   // budget imprime la MEME valeur que celle executee).
   go.max_raw_candidates = effective_raw_cap(opt);
+  go.memory_budget_bytes = opt.memory_budget_bytes;  // garde 2E de la fusion globale
 #if defined(MHGP6_TESTING)
   go.wave_tasks_cap_for_tests = opt.wave_tasks_cap_for_tests;
   go.alive_rects_cap_for_tests = opt.alive_rects_cap_for_tests;
@@ -269,11 +282,24 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   // identites de masse).
   if (rr.gen.cap_refus != kCapRefusNone) {
     rr.status = PipelineStatus::kResourceExhausted;
-    rr.message = rr.gen.cap_refus == kCapRefusRawCandidates
-                     ? "resource_exhausted : candidats bruts au-dela du plafond declare (arret avant fusion globale et tri)"
-                     : (rr.gen.cap_refus == kCapRefusWaveTasks
-                            ? "resource_exhausted : taches de vague au-dela du plafond declare (front fusionne)"
-                            : "resource_exhausted : rectangles vivants au-dela du plafond declare (front fusionne)");
+    switch (rr.gen.cap_refus) {
+      case kCapRefusRawCandidates:
+        rr.message = "resource_exhausted : candidats bruts au-dela du plafond declare (arret avant fusion globale et tri)";
+        break;
+      case kCapRefusWaveTasks:
+        rr.message = "resource_exhausted : taches de vague au-dela du plafond declare (front fusionne)";
+        break;
+      case kCapRefusAliveRects:
+        rr.message = "resource_exhausted : rectangles vivants au-dela du plafond declare (front fusionne)";
+        break;
+      case kCapRefusFusionBudget:
+        rr.message = "resource_exhausted : fusion globale des candidats hors budget partiel declare (payload logique nomme 2E : shards + sortie)";
+        break;
+      default:  // code inconnu = faute d'implementation, jamais confondu avec un refus nomme (§ 5.9)
+        rr.status = PipelineStatus::kInvariantViolated;
+        rr.message = "invariant : code de refus de capacite inconnu (" + std::to_string(rr.gen.cap_refus) + ")";
+        break;
+    }
     invalidate_provisional(&rr);
     return rr;
   }

@@ -75,11 +75,14 @@ struct GenerateStats {
   // Pics OBSERVES des files du front fusionne (top-level, jamais fusionnes
   // par add_from) — la fixture du moment de garde les compare au plafond.
   u64 wave_peak_tasks = 0, alive_peak_rects = 0;
-  // Emission exacte observee au REFUS (top-level) : pour un cap H et T
-  // ouvriers, la porte verifie H < emitted_at_refus <= H + 4096 x T — borne
-  // PROUVEE : chaque ouvrier publie au plus toutes les 4096 emissions (les
-  // relectures du drapeau toutes les 64 sont INCLUSES dans ce bloc) et
-  // s'arrete a l'observation, l'arret etant remonte a la boucle d'ancres.
+  // Emission exacte observee au REFUS (top-level). DEUX semantiques selon le
+  // code (§ 5.9) : au refus de cap BRUT (kCapRefusRawCandidates), pour un cap
+  // H et T ouvriers la porte verifie H < emitted_at_refus <= H + 4096 x T —
+  // borne PROUVEE : chaque ouvrier publie au plus toutes les 4096 emissions
+  // (les relectures du drapeau toutes les 64 sont INCLUSES dans ce bloc) et
+  // s'arrete a l'observation, l'arret etant remonte a la boucle d'ancres. Au
+  // refus BUDGETAIRE 2E (kCapRefusFusionBudget), c'est E : la somme exacte
+  // des shards au moment du refus pre-fusion (aucun overshoot possible).
   u64 emitted_at_refus = 0;
   // Front fusionne : visites de paires de nœuds (une visite sert les lanes du
   // masque), rectangles vivants par lane a l'emission, grand-livre GLOBAL des
@@ -1187,6 +1190,11 @@ struct GenerateOptions {
   // la fusion) — le refus precede la FUSION GLOBALE et le tri. Abaissable
   // (tests, campagnes), jamais releve au-dela du structurel.
   u64 max_raw_candidates = kMaxRawCandidates;
+  // Budget partiel (proxy de payload logique nomme, 0 = aucun) : ici il ne
+  // garde QUE le payload 2E de la fusion globale (sortie a reserver + shards
+  // nommes encore vivants — des TAILLES, jamais un pic d'allocation) ; les
+  // autres consommateurs nommes sont gardes par run.hpp.
+  u64 memory_budget_bytes = 0;
 #if defined(MHGP6_TESTING)
   // Caps ABAISSABLES en test (0 = structurel) : exercer les branches de
   // refus du front fusionne et leur instant pre-insertion dans les vecteurs
@@ -1388,6 +1396,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
   });
   st->workers_rects = std::max(st->workers_rects, (u64)created);
   // Somme EXACTE avant fusion : le refus precede la fusion globale.
+  u64 exact_fusion = 0;
   {
     u64 exact = 0;
     for (size_t t = 0; t < T; ++t) exact += (u64)louts[t].size();
@@ -1399,17 +1408,35 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
       st->t_rects_ms += ms_since(t1);
       return;
     }
+    exact_fusion = exact;
+  }
+  // GARDE BUDGETAIRE 2E AVANT LA FUSION GLOBALE (REPONSE_AUDITEURS § 6.1,
+  // vocabulaire § 5.9 3e contre-lecture) : a la fusion, le PAYLOAD LOGIQUE
+  // NOMME vaut 2E x sizeof(BallCandidate) — la sortie a reserver (E) plus
+  // les shards nommes encore vivants (E) ; ce sont des TAILLES, jamais un
+  // pic d'allocation « au pire » (les capacites geometriques des shards
+  // peuvent depasser leurs tailles, le budget ne promet ni RSS ni absence
+  // d'OOM). `out` est structurellement VIDE ici (unique appel de
+  // generate_candidates). Le facteur 2 passe DANS le helper (jamais un
+  // `2 * E` pre-calcule qui contournerait sa protection d'overflow). Le
+  // refus PRECEDE la reserve : la garde du tri en aval (meme arithmetique)
+  // arrive APRES que le payload a ete materialise. Mutant
+  // caps-skip-prefusion-budget : garde sautee, le refus retombe sur le tri
+  // (message DIFFERENT — tue par la fenetre dediee du selftest).
+  if (opt.memory_budget_bytes != 0 && !MHGP6_MUTANT("caps-skip-prefusion-budget") &&
+      !fits_budget(exact_fusion, (u64)sizeof(BallCandidate), 2, opt.memory_budget_bytes)) {
+    st->cap_refus = kCapRefusFusionBudget;
+    st->emitted_at_refus = exact_fusion;
+    for (size_t t = 0; t < T; ++t) std::vector<BallCandidate>().swap(louts[t]);
+    st->t_rects_ms += ms_since(t1);
+    return;
   }
   // RESERVE UNIQUE demandee a la somme exacte (dernier jet auditeur) :
   // evite les croissances geometriques de la fusion sans compactage
   // pre-garde. C++20 ne garantit que capacity() >= exact — la capacite
   // effectivement OBSERVEE est exposee en diagnostic avant le tri et les
   // fenetres causales de la porte se calculent sur elle.
-  {
-    u64 exact_fusion = 0;
-    for (size_t t = 0; t < T; ++t) exact_fusion += (u64)louts[t].size();
-    out->reserve(out->size() + (size_t)exact_fusion);
-  }
+  out->reserve(out->size() + (size_t)exact_fusion);
   const bool drop = MHGP6_MUTANT("par-drop-shard");
   for (size_t t = 0; t < T; ++t) {
     if (drop && t == 0 && T > 1) continue;

@@ -69,5 +69,12 @@ inline constexpr u64 kCapRefusNone = 0;
 inline constexpr u64 kCapRefusRawCandidates = 1;
 inline constexpr u64 kCapRefusWaveTasks = 2;
 inline constexpr u64 kCapRefusAliveRects = 3;
+// Budget partiel viole a la FUSION GLOBALE : le PAYLOAD LOGIQUE NOMME vaut
+// 2E (sortie a reserver + shards nommes encore vivants) — un proxy de
+// tailles, JAMAIS un pic d'allocation « au pire » (les capacites
+// geometriques des shards peuvent depasser leurs tailles ; le budget ne
+// promet ni RSS ni absence d'OOM). Le refus precede la reserve, jamais
+// rattrape apres coup par la garde du tri (REPONSE_AUDITEURS § 6.1/§ 5.9).
+inline constexpr u64 kCapRefusFusionBudget = 4;
 
 }  // namespace mhgp6
