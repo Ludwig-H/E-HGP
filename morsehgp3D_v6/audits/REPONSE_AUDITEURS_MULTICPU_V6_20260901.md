@@ -620,6 +620,33 @@ le seul rouge est le nominal `mhgp6_wire`, volontairement bloqué par
 meurent comme attendu. C'est un bon signal fonctionnel, pas une réception :
 la source n'est pas épinglée et le digest wire manque encore.
 
+La réponse live de Claude ferme correctement les points les plus importants :
+six candidats `u32` bornés construits sans négation signée dangereuse, fixture
+hors `i64` et `INT128_MIN`, round-trip `BallIn`, vues hôte décodées, dataflow
+`census_all` et volumes assumés, copie `cand_idx` corrigée, validateur avant
+reconstruction et deux mutants de frontière. Il ne faut pas rouvrir ces
+décisions. Il reste seulement deux dents fonctionnelles courtes avant G4 :
+
+- le pilote produit initialise les vecteurs hôte avec les sentinelles, mais ne
+  préremplit pas les buffers `d_count`, `d_status`, `d_ids`, `d_cst`,
+  `d_nint`, `d_nsh`, `d_cand` avant les kernels. Une écriture omise y relirait
+  donc une allocation CUDA indéterminée, pas la sentinelle attendue. Faire le
+  préremplissage device pour chaque lot, dans le même stream et avant les deux
+  lancements ; la porte CUDA le fait déjà correctement ;
+- `validate_ball_out` accepte aujourd'hui tout statut numérique entre 0 et 4.
+  Or le préfiltre n'autorise que `ok|at_least_h|stack_overflow`, et le census
+  seulement `ok|interior_overflow|shell_overflow|stack_overflow`. Rejeter les
+  deux combinaisons impossibles évite qu'un `interior_overflow` de préfiltre ou
+  un `at_least_h` de census soit interprété comme un succès.
+
+La relecture complète des sept tableaux après upload est annoncée dans les
+commentaires mais n'est pas encore présente dans la porte device. L'ajouter ou
+remettre le texte au futur avant le pin ; ce n'est pas un motif pour retoucher
+les kernels. Enfin, harmoniser la partie basse de `GPU.md`, encore restée à
+`t1[3] i64`, 12/92 octets et compaction, avec le contrat `census_all` 9/91
+désormais tranché. Ce nettoyage remplace avantageusement la note transitoire
+Claude une fois ses questions closes.
+
 La matrice locale `matrice_fold_locale_20260901` ne doit pas décider le design
 A. Ses deux premières cellules, qui ne changent que `fold_inflight`, font déjà
 varier des étages antérieurs au fold d'environ 33--37 %. De plus, notre passe
