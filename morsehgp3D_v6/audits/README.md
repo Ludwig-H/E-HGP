@@ -30,8 +30,11 @@ des corrections, ils ne certifient rien.
   arbitrage des six verrous de `4d79dbd3`. Les cinq paliers RAM peuvent
   avancer ; doublons, statuts, digest v2, disque et oubli des facettes sont
   bornés sans changement silencieux d'objet. L'ordre résident est confirmé,
-  l'ordre externe doit porter son ordinal. La note corrige aussi l'erreur
-  numérique `×6` et exige la provenance des mesures K5.
+  l'ordre externe doit porter son ordinal. La contre-lecture du WIP P1--P3
+  ferme une référence préfixe clairsemée réellement acceptée, borne `VmHWM` au
+  processus cumulatif et propose l'écriture directe qui retire réellement les
+  doubles capacités ; aucun gain mémoire n'est encore reçu. La note corrige
+  aussi l'erreur numérique `×6` et exige la provenance des mesures K5.
 - [`REPONSE_AUDITEURS_MULTICPU_V6_20260901.md`](REPONSE_AUDITEURS_MULTICPU_V6_20260901.md) :
   réponse à la saturation du fold et à la conception GPU ; profil apparié,
   snapshots du design A, réception locale CPU/stub, portes device enregistrées
@@ -60,8 +63,9 @@ des corrections, ils ne certifient rien.
   protocole ; **NO START**. Le WIP non épinglé ferme fonctionnellement layout
   et normalisation `:11`, mais il manque encore la fixture lifecycle non vide,
   la cause d'allocation sans tas, les pools, la politique v2 du code 134 et la
-  grammaire/binaire du plan. Q2 est correctement séparée ; portée et budget
-  restent bornés par la même note.
+  grammaire/version/binaire du plan. Les trois suites locales sont vertes mais
+  leurs faux positifs sont reproduits. Q2 est correctement séparée ; portée et
+  budget restent bornés par la même note.
 - [`REPONSE_AUDITEUR_CONCEPTION_C6_20260902.md`](REPONSE_AUDITEUR_CONCEPTION_C6_20260902.md) :
   GO de conception borné pour C6, sans code ni GO G4. Le premier jalon emploie
   deux IN + deux OUT hôte aux leases séparés, un flux et un jeu device ; la

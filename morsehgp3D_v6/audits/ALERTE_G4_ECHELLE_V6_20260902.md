@@ -143,8 +143,17 @@ Deux fermetures de protocole restent utiles :
 - fermer réellement la grammaire v1/v2 : `read_plan` accepte encore clés et
   jetons inconnus ou dupliqués, ne juge pas la ligne fixe `s=8 smax=11 seed=3`,
   et la commande frontière accepte tout binaire `\S+` au lieu du
-  `BIN_MATRICE` canonique. Une seule fixture combinée peut exiger l'unicité des
-  clés/tokens et l'identité de la commande ;
+  `BIN_MATRICE` canonique. Les probes directs rendent tous une liste d'erreurs
+  vide pour une clé et un token inconnus, des clés/tokens dupliqués et une ligne
+  `s=999 smax=2 seed=666`; le regex de commande accepte aussi
+  `./build-v6/mhgp6`, `/tmp/rogue` et `./build-v5/mhgp5`. Une seule fixture
+  combinée peut exiger l'unicité, les ensembles exacts par version, la ligne
+  fixe littérale et l'identité du binaire ;
+- recalculer la version depuis les axes autoritaires : la branche courante
+  interdit bien `decision_v1` lorsqu'un axe est demandé, mais accepte
+  `decision_v2` lorsqu'aucun axe ne l'est. Un canon legacy tout-K10 peut donc
+  être artificiellement promu en v2 en ajoutant des champs cohérents ; une
+  version déclarée ne doit jamais s'auto-justifier ;
 - refuser avant tout run un pilote non vide sans inventaire de portes ; Q2
   étant désormais absente du profil d'échelle, aucun digest historique 50k
   n'est revendiqué par cette session.
@@ -153,13 +162,14 @@ Deux fermetures de protocole restent utiles :
 
 Sur le pin moteur courant `28d02459`, la contre-vérification locale donne 4/4
 portes `mhgp6_bad_alloc_*`. Sur le WIP protocolaire, syntaxe shell/Python
-propre, selftest campagne complet et selftest lifecycle complet sont verts ;
+propre, selftest campagne complet, selftest lifecycle complet et intégration
+lifecycle 2/2 sont verts ;
 ce dernier n'appelle que des gardes factices et ne touche aucune ressource GCP.
 La copie WIP ajoute la normalisation `:11` et le raccord fonctionnel du layout.
 Elle ne contient encore ni trajet lifecycle causal avec layout non vide, ni
 vraie porte de la sous-classe d'allocation. Grammaire, binaire, renommage du
-refus et code 134 v2 restent des dents utiles du prochain lot, sans ouvrir un
-nouvel audit.
+refus, dérivation de version et code 134 v2 restent des dents utiles du prochain
+lot, sans ouvrir un nouvel audit.
 
 ## Fermeture minimale avant nouvelle dépense
 
@@ -168,8 +178,9 @@ nouvel audit.
 2. Fermer la cause d'allocation de bout en bout, son secours sans tas, la
    création partielle des pools — sas obligatoire pour le tri — et la politique v2 du code 134 ; conserver Q2
    désarmée.
-3. Recevoir la normalisation `:11` déjà présente ; fermer le parseur de plan et
-   lier le binaire, avec les contre-fixtures correspondantes avant tout run.
+3. Recevoir la normalisation `:11` déjà présente ; fermer le parseur de plan,
+   dériver la version et lier le binaire, avec les contre-fixtures
+   correspondantes avant tout run.
 4. Requalifier la portée et le budget, puis rejouer les selftests locaux sur
    un commit d'implémentation propre.
 

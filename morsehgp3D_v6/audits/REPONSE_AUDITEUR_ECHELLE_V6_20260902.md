@@ -30,6 +30,114 @@ Décisions compactes :
 | V5, attachement | le lemme est prouvable, mais ses prémisses doivent être certifiées ; ne pas supprimer le détecteur sur la seule télémétrie observée |
 | V6, ordre | lecture confirmée pour le résident ; une fusion externe doit conserver explicitement le rang stable global |
 
+## Contre-lecture des paliers P1--P3 en cours
+
+Snapshot observé : `HEAD=dd24f7c1` avec un worktree produit non épinglé ; ce
+paragraphe aide à fermer le lot, mais ne le reçoit pas. La construction Release
+séparée réussit et les 21 portes `prefix|residence` du label `gate` passent. Les
+trois idées sont utiles : la comparaison de préfixes couvre enfin `smax < 11`,
+le HWM de processus révèle des pics invisibles aux instantanés, et la libération
+anticipée des tranches conserve l'ordre de fusion. Trois claims doivent
+toutefois être corrigés avant le pin.
+
+### P1 — exiger l'autorité complète, pas seulement une référence plus longue
+
+Le juge vérifie bien `K=1..kmax_eff`, puis demande seulement que les maps
+`forest` et `cards` contiennent plus de `kmax_eff` entrées. Une référence
+composée de `K1..K5` et `K10` satisfait donc les deux conditions à `smax=6`.
+La contre-fixture a été exécutée en retirant `K6..K9` de
+`uniform_400.txt` : le binaire rend code 0 et annonce
+`5 ordre(s) sur 6 de la reference`.
+
+La fermeture est locale : en mode préfixe du profil courant, exiger pour les
+deux maps l'ensemble exact `{1,...,10}`, puis ajouter une fixture clairsemée
+`K1..K5 + K10`. La fixture courte à cinq ordres reste pertinente, mais ne tue
+pas ce faux vert. Si un profil de référence variable est voulu plus tard, il
+faut porter son `full_kmax` signé au lieu de l'inférer de la taille d'une map.
+
+### P2 — HWM de processus reçu comme télémétrie, pas comme pic d'étage
+
+`VmHWM` est cumulatif depuis la création de l'espace mémoire du processus. Un
+relevé après un étage signifie donc « plus haut pic observé jusqu'ici » ; il ne
+donne pas le pic propre de cet étage et un ancien record masque tous les pics
+ultérieurs plus petits. `ru_maxrss` est également cumulatif et reste préservé
+à travers `execve`, alors que le nouveau `/proc/self/status` repart avec le
+nouvel espace mémoire. Ce ne sont pas deux sources indépendantes nécessairement
+égales.
+
+La porte ne rejette actuellement que `ru_maxrss + 1 < VmHWM`. Une reproduction
+contrôlée alloue et touche 300 MiB dans Python, les libère, puis fait `execve`
+du test K5 : `VmHWM=25 MiB`, `ru_maxrss=309,8 MiB`, code 0. La comparaison
+bilatérale ne doit pas être ajoutée telle quelle : elle échouerait légitimement
+dans ce cas. Soit `ru_maxrss` reste un simple majorant historique et le texte
+cesse d'annoncer une égalité indépendante, soit un petit superviseur démarre un
+enfant dont la baseline est explicitement contrôlée.
+
+La porte ne distingue pas non plus un vrai HWM de
+`max_{i<=j}(rss_mb[i])`. Ce contre-mutant satisfait non-vacuité, monotonie,
+domination des six instantanés et écart final. À l'inverse, le mutant courant
+`hwm-instant-rss` survit sous une politique glibc qui retient les pages : avec
+`MALLOC_ARENA_MAX=1`, `MALLOC_TRIM_THRESHOLD_=-1` et
+`MALLOC_MMAP_THRESHOLD_=1000000000`, ses six RSS restent monotones. Dans ce
+même environnement, un run correct est refusé uniquement parce que
+`min_ecart_fin_mb` exige une chute de RSS. Cette exigence teste donc
+l'allocateur, pas l'instrumentation.
+
+Fermeture minimale conseillée :
+
+1. publier `process_hwm_cumulative_mib` avec
+   `measurement_scope=process_lifetime`, exiger un processus frais pour les
+   comparaisons de campagne, et conserver les six valeurs comme une chronologie
+   cumulative utile plutôt que parler de « vrai pic à chaque étage » ;
+2. remplacer le plancher de chute finale par une micro-fixture déterministe qui
+   alloue, touche puis libère une zone contrôlée, et ajouter le contre-mutant
+   `hwm-sampled-rss-max` ;
+3. exiger le masque de jalons attendu (`0x3f` sur la route CPU), car
+   `rss == hwm == 0` est aujourd'hui silencieusement ignoré ;
+4. publier le HWM déjà acquis aussi sur `resource_exhausted`, qui est précisément
+   la frontière recherchée par la campagne ; utiliser de préférence
+   `getrusage` ou un champ non allouant dans le chemin de secours ;
+5. sérialiser ou poser un `RESOURCE_LOCK` sur les portes d'environ 500 MiB.
+
+Deux corrections de contrat sont secondaires mais simples : `statm` doit
+employer `sysconf(_SC_PAGESIZE)` plutôt que 4096 en dur, et les unités calculées
+sont des MiB. Pour attribuer réellement un pic à un étage, ajouter des compteurs
+logiques internes ou un sampler de processus tagué par l'étage ; les six lectures
+de frontière ne peuvent pas fournir cette attribution à elles seules.
+
+### P3 — gain plausible sur les pages touchées, aucune borne d'allocation
+
+Dans les trois fusions, `reserve(total)` est appelé alors que toutes les tranches
+sources existent encore ; les `swap` n'arrivent qu'après la copie de chaque
+tranche. Cela peut réduire le RSS simultanément touché si l'allocateur restitue
+effectivement les pages au fil de la copie. Cela ne retire pas la coexistence
+virtuelle `sources complètes + destination complète` au moment de la réserve,
+donc ne ferme pas directement un mur `RLIMIT_AS`, et la bibliothèque standard
+ne garantit pas que `free` abaisse le RSS du noyau. La phrase « une copie plus
+une tranche » doit rester une hypothèse d'allocateur à mesurer, pas une borne
+d'architecture.
+
+Un A/B exploratoire en processus frais, trois alternances sur
+`uniform n=2000, threads=4`, illustre pourquoi il ne faut pas conclure sur un
+run : WIP `650536, 660672, 641208 KiB`, pin `659976, 570924, 679972 KiB`.
+Médiane légèrement favorable au WIP, moyenne légèrement défavorable ; aucun
+gain stable n'est démontré.
+
+Le chemin propre pour une vraie baisse de capacité vivante est déjà accessible :
+
+- census : `resize(survivors.size())`, puis écriture parallèle directe à
+  l'indice, avec effacement transactionnel en cas d'erreur ;
+- expansion : conserver les comptes par tranche de `count_events_by_k`, former
+  leurs offsets et remplir des plages finales disjointes ;
+- préfiltre : passe compte/offset/remplissage, ou fusion producteur-consommateur
+  explicitement bornée.
+
+Ajouter `VmPeak`/`VmSize` et un compteur déterministe des capacités sources et
+destination vivantes rendra la décision indépendante du bruit de RSS. Un mutant
+qui retarde la libération des tranches doit alors augmenter ce compteur et être
+tué ; les planchers HWM actuels rendraient au contraire une rétention plus forte
+plus facile à accepter.
+
 ## V1 — ne pas confondre capacité de l'index et sémantique du produit
 
 `CloudIndex` sait ranger plusieurs identités dans un bucket, mais le pipeline
