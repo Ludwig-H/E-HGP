@@ -118,7 +118,39 @@ matrices vides, agrégateur et manifeste fatals. Les parts de fenêtre du § 3
 restent des bornes hautes ; la section 5 n'est qu'une hypothèse à
 falsifier avec différences appariées et égalité complète du `ForestResult`.
 
-## 7. Limites
+## 7. Seconde mesure sous le lanceur fail-closed (plan de Williams, 4 blocs)
+
+Reçu `receipts/sonde_ablation_reduce_20260902b/` (commit `2aaa4a53`,
+worktree propre, copie privée du binaire `74a46046…` hachée avant/après
+chacun des 48 runs, `statut=exploratory_noncausal_upper_bounds`).
+Différences **appariées par bloc** (bras − témoin, même bloc, même
+taille), médiane [min ; max] sur quatre blocs, Σ_K :
+
+| n | fenêtre | sans copie | sans tris | clé factice (borne composite) |
+|---|---|---|---|---|
+| 8000 | materialisation_tri_copie | −962 [−971 ; −923] | −487 [−501 ; −459] | −308 [−314 ; −260] |
+| 8000 | post_remplissage | −6 [−39 ; +8] | −9 [−14 ; +12] | −755 [−772 ; −740] |
+| 8000 | somme reduce | −1066 [−1146 ; −978] | −528 [−575 ; −505] | −1112 [−1198 ; −1073] |
+| 16000 | materialisation_tri_copie | −2415 [−2462 ; −2319] | −1052 [−1074 ; −1035] | −669 [−704 ; −588] |
+| 16000 | post_remplissage | −6 [−95 ; +9] | +3 [−82 ; +69] | −1608 [−1719 ; −1605] |
+| 16000 | somme reduce | −2632 [−3031 ; −2580] | −1128 [−1456 ; −936] | −2397 [−2811 ; −2232] |
+| 32000 | materialisation_tri_copie | −5314 [−5368 ; −5268] | −2258 [−2374 ; −2195] | −1400 [−1467 ; −1342] |
+| 32000 | post_remplissage | −65 [−67 ; +70] | −31 [−58 ; +156] | −3399 [−3415 ; −3365] |
+| 32000 | somme reduce | −5941 [−6008 ; −5121] | −2511 [−2810 ; −1218] | −5140 [−5245 ; −4412] |
+
+Parts retirées de la fenêtre du témoin, appariées (médiane [min ; max]) :
+sans copie 53,6 [52,3 ; 54,0] / 57,9 [56,8 ; 58,4] / 59,3 [59,2 ; 59,6] % de
+`materialisation_tri_copie` ; sans tris 27,0 / 25,4 / 25,2 % ; clé factice
+17,1 / 16,1 / 15,7 % de la fenêtre de matérialisation **et** 74,4 / 74,1 /
+75,1 % de `post_remplissage`. Les intervalles des fenêtres dominantes sont
+étroits (≤ 2 points) ; ceux des fenêtres de trafic (`touch`, `pre`) et du
+mur instrumenté restent larges (dérive de charge), ce qui confirme la
+lecture de l'auditeur : seules les fenêtres directement ablatées portent un
+signal, et ce signal reste une borne haute non causale. Le premier reçu
+(trois répétitions, non équilibré) est corroboré à moins d'un point sur les
+trois parts.
+
+## 8. Limites
 
 Machine partagée 8 vCPU, trois répétitions (dispersion des médianes ≤ 3 %
 sur les fenêtres dominantes, ≤ 10 % sur `liberation` sub-milliseconde) ;

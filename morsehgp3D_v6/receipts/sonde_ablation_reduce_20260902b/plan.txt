@@ -1,0 +1,18 @@
+# plan equilibre : carre de Williams 4x4 (A=aucune B=ablation-mat-sans-copie C=ablation-mat-sans-tris D=ablation-post-cle-factice)
+# lignes : A B C D | B D A C | C A D B | D C B A | bloc b utilise la ligne ((b-1) mod 4) ; a l'interieur d'un bloc les tailles sont parcourues dans l'ordre n_list, et pour chaque taille les quatre bras dans l'ordre de la ligne
+bloc=1 position=1 bras=aucune
+bloc=1 position=2 bras=ablation-mat-sans-copie
+bloc=1 position=3 bras=ablation-mat-sans-tris
+bloc=1 position=4 bras=ablation-post-cle-factice
+bloc=2 position=1 bras=ablation-mat-sans-copie
+bloc=2 position=2 bras=ablation-post-cle-factice
+bloc=2 position=3 bras=aucune
+bloc=2 position=4 bras=ablation-mat-sans-tris
+bloc=3 position=1 bras=ablation-mat-sans-tris
+bloc=3 position=2 bras=aucune
+bloc=3 position=3 bras=ablation-post-cle-factice
+bloc=3 position=4 bras=ablation-mat-sans-copie
+bloc=4 position=1 bras=ablation-post-cle-factice
+bloc=4 position=2 bras=ablation-mat-sans-tris
+bloc=4 position=3 bras=ablation-mat-sans-copie
+bloc=4 position=4 bras=aucune

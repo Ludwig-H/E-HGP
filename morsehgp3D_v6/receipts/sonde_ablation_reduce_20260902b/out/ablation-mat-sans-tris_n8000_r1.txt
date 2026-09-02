@@ -1,0 +1,49 @@
+payload=mhgp6-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+backend=cpu_reference
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=uniform n=8000 coord=200 s=8 smax=11 seed=3 threads=8 emis=3135204 boules_uniques=3134404 mortes_profondeur=31153 survivantes=3103251 census_int=16052179 census_shell=10447608 evenements=3126158 facettes=19466907 fusions=19465140 deltas=2791148 noeuds=1974086
+generation rect_alive=259609/665954/735759 rect_visites_fusionnes=5053015 ancres=323872/1098708/1282964 candidats=313095/1425847/1396262 tues_profondeur=0/10777052/2356243 ancres_w4=354156 ancres_w3=264685 ancres_secteurs=124410/243653 ancres_cellules=0/4997 seeds_cellules=0/25103 grilles=0/5447 seeds=12202899/10755223 completions_q4=39387002 seeds_core_tues=2580407 seeds_corde_tues=6126945 float_cert=208153640/157681585 repli=6338503 ancres_hist=10777/41298/49730 hist_lignes=5510/20745/25044 hist_seuil=5267/20553/24686 hist_survivants=313095/1057410/1233234 jung=62849562/40777974/99
+sweep tests_coeur=217537383 tests_prof_q3=154636345 tests_passe2=116102659 tri_comparaisons=198856306 seeds_passe2=2022768 racines_corde=39387002 groupes=39367296 racines_hors_corde=76665788 temoins_constants=5731840 rejets=lens:20588929/owner:71465/once:6158216/i64:730809/face:5856337/det:0/centre:2228741
+vwspd nœuds_temoins=614213305 coins=173903800 h_rect=0/252494046/395782738 h_scan=0/241732740/262188824 m_anchor=0/53426746/65406111 entrees_ancres=0/745571/677576 iters_coeur=227554215 iters_passe2=122170963
+octaves_q4 ancres=0,7899,15695,30792,61024,121857,232174,201802,6330,3,0,0,0,0,0,0 seeds=0,689,10330,53969,245540,1052160,3965803,5363487,62888,357,0,0,0,0,0,0 w1=0,0,29679,490274,5273353,41796490,105404643,64197754,343316,1874,0,0,0,0,0,0 (octave = log2 de la taille du cover de l'ancre)
+octaves_q4_seeds cellules=0,0,0,0,0,0,0,0,24970,133,0,0,0,0,0,0 coeur=0,0,0,0,103,22279,628746,1894487,34568,224,0,0,0,0,0,0 corde=0,0,0,0,541,158879,2536164,3428034,3327,0,0,0,0,0,0,0 passe2=0,689,10330,53969,244896,871002,800893,40966,23,0,0,0,0,0,0,0
+vcensus prefiltre_nœuds=286550349 prefiltre_feuilles=0 range_add=16369815 census_nœuds=292952871 census_feuilles=26499787
+p_factor=123898/814932/1026942 (evaluations d'auto-produits des histogrammes)
+ledger_paires emis=323872/1098708/1282964 tues=31672128/30897292/30713036
+ouvriers wspd=8 rects=8 rle=8 prefiltre=8 census=8 expansion=8 fold=8
+temps_ms index=2.2 gen=12402.4 (wspd 6542.5 rects 5859.6) rle=552.0 prefiltre=4814.2 census=4785.1 comptage=11.0 expansion=335.5 fold=8185.8 (tri 675.2 intern 2360.3 fusion 738.5 reduce 4411.3) digest=0.0
+temps_mur_ms=31414.9 (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, pas le mur)
+temps_fold_mur_ms=8842.7 (etages A et B, fold_inflight=2, fold_join=1, pic_mesure_en_vol=1)
+profil_kind=reduce_v2 fold_join=1 inflight_demande=2 pic_workers_b=1 pic_reduce_actif=1
+profil_reduce K=1 init=0.034 touch=0.420 pre=1.102 unite=0.463 post_remplissage=0.453 materialisation_tri_copie=0.952 liveness=0.000 partition=0.035 liberation=0.000 somme=3.459 mur_reduce_interne=3.460 residuel=0.000 reduce_interne_debut=27.753 reduce_interne_fin=31.212 a_debut=0.000 a_fin=27.720 duree_digest_foret_k_ms=0.000
+profil_intern K=1 alloc_empreintes=0.516 offsets_diffusion=0.369 intern_tri=0.567 fusion_et_lib_parts=0.408 remap_et_lib_pools=0.382
+profil_reduce K=2 init=0.403 touch=3.024 pre=4.906 unite=2.414 post_remplissage=3.500 materialisation_tri_copie=7.315 liveness=0.000 partition=0.659 liberation=0.001 somme=22.222 mur_reduce_interne=22.222 residuel=0.000 reduce_interne_debut=63.700 reduce_interne_fin=85.923 a_debut=31.474 a_fin=63.670 duree_digest_foret_k_ms=0.000
+profil_intern K=2 alloc_empreintes=1.207 offsets_diffusion=0.378 intern_tri=2.269 fusion_et_lib_parts=1.518 remap_et_lib_pools=0.653
+profil_reduce K=3 init=2.722 touch=11.764 pre=11.427 unite=5.068 post_remplissage=14.874 materialisation_tri_copie=19.871 liveness=0.000 partition=2.937 liberation=0.002 somme=68.666 mur_reduce_interne=68.666 residuel=0.000 reduce_interne_debut=142.766 reduce_interne_fin=211.433 a_debut=87.056 a_fin=142.734 duree_digest_foret_k_ms=0.000
+profil_intern K=3 alloc_empreintes=3.193 offsets_diffusion=0.704 intern_tri=8.264 fusion_et_lib_parts=4.842 remap_et_lib_pools=2.074
+profil_reduce K=4 init=2.231 touch=26.742 pre=20.975 unite=8.613 post_remplissage=30.672 materialisation_tri_copie=41.671 liveness=0.000 partition=7.584 liberation=0.002 somme=138.489 mur_reduce_interne=138.490 residuel=0.000 reduce_interne_debut=313.700 reduce_interne_fin=452.190 a_debut=217.048 a_fin=313.666 duree_digest_foret_k_ms=0.000
+profil_intern K=4 alloc_empreintes=7.199 offsets_diffusion=1.686 intern_tri=23.257 fusion_et_lib_parts=11.744 remap_et_lib_pools=3.822
+profil_reduce K=5 init=6.638 touch=45.006 pre=34.225 unite=13.269 post_remplissage=54.000 materialisation_tri_copie=70.064 liveness=0.000 partition=18.035 liberation=0.003 somme=241.240 mur_reduce_interne=241.240 residuel=0.000 reduce_interne_debut=636.879 reduce_interne_fin=878.119 a_debut=463.444 a_fin=636.839 duree_digest_foret_k_ms=0.000
+profil_intern K=5 alloc_empreintes=15.440 offsets_diffusion=2.518 intern_tri=52.065 fusion_et_lib_parts=24.749 remap_et_lib_pools=5.804
+profil_reduce K=6 init=9.526 touch=69.664 pre=51.008 unite=19.088 post_remplissage=87.161 materialisation_tri_copie=102.112 liveness=0.000 partition=26.278 liberation=0.638 somme=365.474 mur_reduce_interne=365.475 residuel=0.000 reduce_interne_debut=1192.539 reduce_interne_fin=1558.014 a_debut=898.776 a_fin=1192.464 duree_digest_foret_k_ms=0.000
+profil_intern K=6 alloc_empreintes=31.506 offsets_diffusion=5.482 intern_tri=89.100 fusion_et_lib_parts=43.622 remap_et_lib_pools=7.931
+profil_reduce K=7 init=14.083 touch=96.227 pre=73.323 unite=26.734 post_remplissage=122.470 materialisation_tri_copie=146.804 liveness=0.000 partition=43.855 liberation=0.605 somme=524.101 mur_reduce_interne=524.101 residuel=0.000 reduce_interne_debut=2043.459 reduce_interne_fin=2567.561 a_debut=1584.261 a_fin=2043.416 duree_digest_foret_k_ms=0.000
+profil_intern K=7 alloc_empreintes=63.256 offsets_diffusion=9.803 intern_tri=142.650 fusion_et_lib_parts=70.373 remap_et_lib_pools=15.703
+profil_reduce K=8 init=19.667 touch=129.775 pre=102.073 unite=35.335 post_remplissage=173.023 materialisation_tri_copie=215.063 liveness=0.000 partition=65.369 liberation=0.731 somme=741.034 mur_reduce_interne=741.035 residuel=0.001 reduce_interne_debut=3278.355 reduce_interne_fin=4019.390 a_debut=2601.594 a_fin=3278.313 duree_digest_foret_k_ms=0.000
+profil_intern K=8 alloc_empreintes=85.980 offsets_diffusion=12.097 intern_tri=246.534 fusion_et_lib_parts=105.922 remap_et_lib_pools=12.996
+profil_reduce K=9 init=27.345 touch=165.845 pre=132.460 unite=45.397 post_remplissage=230.406 materialisation_tri_copie=282.812 liveness=0.000 partition=91.816 liberation=0.724 somme=976.807 mur_reduce_interne=976.807 residuel=0.000 reduce_interne_debut=5070.063 reduce_interne_fin=6046.870 a_debut=4073.172 a_fin=5070.010 duree_digest_foret_k_ms=0.000
+profil_intern K=9 alloc_empreintes=127.245 offsets_diffusion=17.828 intern_tri=384.410 fusion_et_lib_parts=163.699 remap_et_lib_pools=18.665
+profil_reduce K=10 init=35.874 touch=222.238 pre=176.647 unite=58.269 post_remplissage=305.244 materialisation_tri_copie=402.478 liveness=0.000 partition=127.729 liberation=1.321 somme=1329.801 mur_reduce_interne=1329.802 residuel=0.001 reduce_interne_debut=7420.798 reduce_interne_fin=8750.600 a_debut=6123.003 a_fin=7420.747 duree_digest_foret_k_ms=0.000
+profil_intern K=10 alloc_empreintes=190.517 offsets_diffusion=19.193 intern_tri=465.758 fusion_et_lib_parts=224.814 remap_et_lib_pools=21.494
+rss_mb apres_generation=585 apres_rle=585 apres_prefiltre=666 apres_census=1138 max_fold=1898 fin=407 (telemetrie active : lecture /proc/self/statm par K sous le verrou de publication — a desarmer ou signer pour un run de debit)
+cardinalites K=1 evenements=30581 facettes=8000 deltas=6521 attachements=0 fusions=7999 noeuds=6521
+cardinalites K=2 evenements=64097 facettes=62699 deltas=25826 attachements=30291 fusions=62692 noeuds=23238
+cardinalites K=3 evenements=109455 facettes=202080 deltas=79451 attachements=127721 fusions=202065 noeuds=49332
+cardinalites K=4 evenements=165548 facettes=459261 deltas=134649 attachements=324724 fusions=459229 noeuds=85855
+cardinalites K=5 evenements=232523 facettes=867751 deltas=199988 attachements=655550 fusions=867685 noeuds=131937
+cardinalites K=6 evenements=310254 facettes=1459519 deltas=276619 attachements=1151950 fusions=1459373 noeuds=188149
+cardinalites K=7 evenements=397786 facettes=2262017 deltas=362637 attachements=1841978 fusions=2261838 noeuds=252750
+cardinalites K=8 evenements=495262 facettes=3305510 deltas=459151 attachements=2756825 fusions=3305192 noeuds=326155
+cardinalites K=9 evenements=602212 facettes=4616847 deltas=565470 attachements=3922424 fusions=4616421 noeuds=409298
+cardinalites K=10 evenements=718440 facettes=6223223 deltas=680836 attachements=5366384 fusions=6222646 noeuds=500851
+rss_max_kb=2244276

@@ -1,0 +1,7 @@
+ablation=ablation-post-cle-factice n=16000 rep=3 position=3 code=0
+commande=taskset -c 0-7 bin/mhgp6_profile_sonde --family=uniform --n=16000 --s=8 --smax=11 --seed=3 --threads=8 --fold-inflight=2 --fold-join=1 --inject=ablation-post-cle-factice
+duree_s=67.187
+loadavg_avant=5.27 6.43 6.37
+loadavg_apres=6.15 6.49 6.40
+sha256_avant=74a460467e9fbf1815e315dc00c55aa415fe2f2a637162336371a0fce41757ce
+sha256_apres=74a460467e9fbf1815e315dc00c55aa415fe2f2a637162336371a0fce41757ce

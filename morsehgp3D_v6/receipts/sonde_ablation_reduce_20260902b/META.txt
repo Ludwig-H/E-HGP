@@ -1,0 +1,24 @@
+schema=e-hgp.sonde-ablation-reduce.v2
+date_utc=2026-09-02T04:05:06Z
+commit=2aaa4a532f4bc295cb0c3e6ebcceab7769e9d79d
+worktree_sources_modifies=0
+worktree_diff=aucun
+binaire_source=build/v6/mhgp6_profile_sonde
+binaire_prive=bin/mhgp6_profile_sonde (copie immuable chmod 555, seule executee ; sha256 verifie avant et apres chaque tuple, HASHES.txt)
+binaire_sha256=74a460467e9fbf1815e315dc00c55aa415fe2f2a637162336371a0fce41757ce
+famille=uniform
+n_list=8000 16000 32000
+reps=4
+parametres=threads=8 cpus=0-7 fold_inflight=2 fold_join=1 seed=3 s=8 smax=11
+ablations=aucune ablation-mat-sans-copie ablation-mat-sans-tris ablation-post-cle-factice
+plan=williams_4x4 blocs=4 (plan.txt grave avant le premier run ; appariement par bloc dans l'agregateur)
+etiquette_ablation-post-cle-factice=borne composite (lecture keys[] + tri de cles egales) — jamais « lecture seule »
+sha256_lanceur=17c05c4f5dd5a0453554954bb9d2e1a1f45f71171c4ff3e8a97bba36106ac210
+sha256_agregateur=696552e6d1031f0222fc55df8963c4502b85e7c66d5feba3d6e9e77857b438d8
+libstdcxx=/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+gcc=13.3.0
+hote=Linux 6.8.0-1052-azure x86_64
+statut=exploratory_noncausal_upper_bounds (bornes exploratoires non causales sur binaire instrumente, join=1 : jamais un benchmark, jamais un mur, jamais un choix de palier)
+runs_effectues=48
+runs_attendus=48
+fin_utc=2026-09-02T05:11:43Z
