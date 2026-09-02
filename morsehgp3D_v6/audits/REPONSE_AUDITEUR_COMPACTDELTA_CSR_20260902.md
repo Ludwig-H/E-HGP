@@ -11,8 +11,10 @@ Pièces examinées :
 `QUESTION_CLAUDE_COMPACTDELTA_CSR_20260902.md`,
 `QUESTION_CLAUDE_PREREG_MESURE_KEYCSR_20260902.md` au pin `53610911`,
 `NOTE_CLAUDE_SONDE_ABLATION_REDUCE_20260902.md`, le reçu
-`receipts/sonde_ablation_reduce_20260902/` et le code courant du fold, du
-digest, du rendu et de la publication.
+`receipts/sonde_ablation_reduce_20260902/`, son complément
+`receipts/sonde_ablation_reduce_20260902b/`, le générateur et sa porte au pin
+`d6888093`, ainsi que le code courant du fold, du digest, du rendu et de la
+publication.
 
 ## Verdict opérationnel
 
@@ -23,9 +25,9 @@ digest, du rendu et de la publication.
    n'ont pas à rester l'interface du produit.
 2. **Q2 — pré-inscription recevable sous corrections bornées.** Le nouveau
    plan à six blocs et deux tailles ferme les faiblesses de la proposition
-   initiale. Il peut être implémenté sans reprendre son principe ; les
-   frontières de destruction, le sink du callback, les strates, la charge et
-   la table de verdicts doivent être corrigés avant de le sceller.
+   initiale. Son tirage déterministe est maintenant reçu à `d6888093` ; les
+   frontières de destruction, le sink du callback, le scellement exécutable et
+   la table de verdicts restent à fermer sans reprendre son principe.
 3. **Q3 — palier et reçu séparés.** Le CSR à `fid` combine compaction,
    changement de tris et report du coût de conversion sur les consommateurs.
    Il ne doit être ouvert qu'après gel sémantique du CSR à clés.
@@ -48,9 +50,10 @@ Réponse courte aux trois questions :
 2. **L'unanimité inclusive `max R_b <= 0,55` est acceptée comme règle
    d'ingénierie.** `loadavg > 2,0` n'est pas accepté comme invalidation : sur
    huit CPU logiques il n'est pas normalisé et la moyenne à une minute reste
-   chargée par le run précédent. Dans le reçu de sonde disponible, 82 des 84
-   départs dépassent déjà `2,0` ; cette règle éliminerait donc presque toute la
-   matrice et la valeur précédant le second bras dépendrait du premier.
+   chargée par le run précédent. Les deux reçus de sonde disponibles comptent
+   respectivement 35 départs sur 36 puis 47 sur 48 au-dessus de `2,0`, soit
+   82 sur 84 au total ; cette règle éliminerait donc presque toute la matrice
+   et la valeur précédant le second bras dépendrait du premier.
    Conserver `loadavg` avant/après comme diagnostic ; les causes
    d'incomparabilité indépendantes du bras et l'A/A portent la décision.
 3. **Une graine externe est retenue.** La graine de base est
@@ -67,8 +70,10 @@ coutures actives du harnais — outil final hérité d'un `PATH` hostile et liai
 exacte de la commande/META au régime, à la famille et à la vivacité. Ces
 travaux sont courts et indépendants de l'instrumentation. Après ajout de
 `reduce_v3`, toutes les portes sémantiques sont néanmoins rejouées sur le
-**commit exact de mesure**, qui épingle aussi les deux binaires, le lanceur et
-l'agrégateur : un pin antérieur à l'instrumentation ne suffit pas.
+**commit source exact de mesure** : un pin antérieur à l'instrumentation ne
+suffit pas. Ce commit épingle les sources, pas les exécutables. Le reçu doit
+donc copier et hacher avant/après les deux binaires exacts, puis lier aussi la
+chaîne de construction, le lanceur et l'agrégateur réellement employés.
 
 ### Frontières à graver dans `reduce_v3`
 
@@ -114,9 +119,11 @@ l'agrégateur : un pin antérieur à l'instrumentation ne suffit pas.
   le total classique par un parcours tardif de tous les deltas dans le worker :
   ce travail linéaire, absent du bras CSR, entrerait dans
   `temps_fold_mur_ms` et fabriquerait un avantage CSR. Soit les capacités sont
-  cumulées à l'émission avec une comptabilité symétrique, soit elles sont lues
-  dans une exécution diagnostique séparée dont aucun mur n'entre dans une
-  garde. L'impression reste drainée après le retour du pipeline.
+  cumulées à l'émission avec une comptabilité symétrique — au classique, cela
+  comprend notamment `r.deltas.back().parents.capacity()` et
+  `r.deltas.back().born.capacity()` après chaque append accepté — soit elles
+  sont lues dans une exécution diagnostique séparée dont aucun mur n'entre
+  dans une garde. L'impression reste drainée après le retour du pipeline.
 - Un compteur comparable doit observer les changements de capacité dans les
   deux layouts. À défaut, conserver `csr_capacity_growths` comme diagnostic
   unilatéral et ne jamais comparer son zéro classique. Lire les vrais
@@ -149,8 +156,9 @@ déléguer le canon à un `shuffle` dépendant d'une bibliothèque. Chaque comma
 grave au minimum famille, `n`, seed d'entrée, coordonnées, `s`, `smax`, fils,
 inflight, join, layout, digest, callback et schéma. L'affinité `0-7` est acceptable sur la
 machine courante seulement après attestation du cpuset et de la topologie ;
-elle représente ici huit fils matériels sur quatre cœurs physiques et doit
-être décrite ainsi, pas comme huit cœurs.
+`lscpu` expose ici huit CPU logiques répartis sur quatre identifiants de cœur,
+avec deux fils par cœur. Sous Hyper-V, ne pas transformer cette vue exposée en
+certification de quatre cœurs physiques ni de huit fils matériels.
 
 Pour chaque taille, `R_b` est le rapport des `delta_payload_build_total` sommés
 sur K8--K10, avec ces trois K exactement présents et positifs. L'enveloppe
@@ -179,9 +187,13 @@ Ordre de décision :
    lecture des temps n'est permis.
 2. Sur une comparaison intègre et terminée, toute divergence sémantique donne
    prioritairement `NO-GO_SEMANTIQUE`, même si les ratios semblent favorables.
-3. Sur un tuple intègre, un code produit non nul, un fallback, un stockage
-   invalide ou une non-vacuité violée sur une entrée précontrôlée donne
-   `NO-GO_IMPLEMENTATION`, pas un bloc jeté ni `INCONCLUSIF`.
+3. Sur un tuple intègre dont l'entrée et le bras classique sont valides, une
+   défaillance terminale attribuable au bras CSR — refus de ressource ou
+   d'invariant connu, fallback, stockage invalide ou non-vacuité violée —
+   donne `NO-GO_IMPLEMENTATION`, pas un bloc jeté ni `INCONCLUSIF`. Un signal,
+   timeout, résultat terminal absent, échec classique ou échec bilatéral sans
+   attribution reste `INCONCLUSIF` ou relève du verdict de baseline ; le code
+   de retour seul ne décide pas la cause.
 4. Sans divergence ni échec d'implémentation, `max R_b <= 0,55` sur 16k et 32k, puis
    toutes les gardes reduce et octets, donne `GO_MECANISME_UNIFORM`.
 5. Si `min R_b > 0,55` sur au moins une taille décisionnelle, le résultat est
@@ -214,6 +226,10 @@ celui avec `eight_clusters` en contient 20 et 280, sans modifier le préfixe
 `3 AB + 3 BA` et les deux A/A sont bien séparés. Le SHA-256 du plan sans
 extension est
 `b46e34e9b2a871497cbdbb216e696f41938c808b9aa3a67bb767ca289301faa3`.
+Les cellules supplémentaires sont recevables, mais le plan ou son manifeste
+scellé doit nommer leur rôle, et l'agrégateur l'exiger, pour empêcher leur
+promotion : mécanisme `uniform` à 16k/32k, mur Release à 32k seulement, 8k
+diagnostique et extension séparée.
 
 Deux dents courtes précèdent le statut de porte permanente :
 
@@ -226,6 +242,11 @@ Deux dents courtes précèdent le statut de porte permanente :
   `(bloc=0,position=1,orientation=AB,bras=A)` puis
   `(bloc=0,position=2,orientation=AB,bras=B)`. Conserver ces deux mutations
   comme dents ;
+- vérifier aussi les lignes brutes, et pas seulement les groupes reconstruits,
+  afin que les deux bras de chaque bloc soient adjacents, position 1 puis
+  position 2. Le mutant qui regroupe les six positions 1 avant les six
+  positions 2 passe encore les scènes courantes alors qu'il détruit
+  l'appariement temporel ;
 - enregistrer le juge dans CMake/CTest, en exécution normale **et** sous
   `python3 -O`. Son succès direct est une preuve locale utile, pas encore une
   porte de la suite canonique.
@@ -233,14 +254,19 @@ Deux dents courtes précèdent le statut de porte permanente :
 Le fichier produit est volontairement un squelette : `binaire=profil|release`
 reste symbolique, `commande=` omet le chemin de la copie, le callback est
 `A_CONFIRMER`, `coord=defaut` n'est pas une coordonnée numérique et
-l'affinité est déléguée au futur lanceur. Avant le premier run, soit ce plan
-est enrichi, soit un **manifeste d'exécution scellé séparé** lie son SHA-256 au
-commit instrumenté et à l'état du worktree, aux chemins et SHA-256 des copies
-profil/Release, aux lanceur et agrégateur, à chaque commande complète, au
-callback résolu, à la coordonnée effectivement appliquée et au
-cpuset/topologie attestés. Le lanceur régénère et compare le canon, puis
+l'affinité est déléguée au futur lanceur. Au pin reçu, `--callback-temoin`,
+`reduce_v3` et `--layout` ne sont d'ailleurs pas encore acceptés par les
+binaires : la porte valide donc ici du texte, pas un argv exécutable. Avant le
+premier run, soit ce plan est enrichi, soit un **manifeste d'exécution scellé
+séparé** lie son SHA-256 au commit source et à l'état du worktree, à la chaîne
+de construction, aux chemins et SHA-256 des copies profil/Release, aux
+lanceur et agrégateur, à chaque commande complète, au callback résolu, à la
+coordonnée effectivement appliquée et au cpuset/topologie attestés. Les
+coordonnées actuelles à graver sont `uniform` 8k/16k/32k = `200/251/317` et
+`eight_clusters` 32k = `634`. Le lanceur régénère et compare le canon, puis
 refuse tout placeholder ou écart ; un auto-hash recalculable ne constitue pas
-à lui seul une autorité.
+à lui seul une autorité. Le SHA courant ci-dessus reste donc un diagnostic,
+pas le canon final à figer avant remplacement des commandes.
 
 Le mapping modulo est défini, déterministe et rejoué ; son biais microscopique
 ne justifie ni un reroulage de ce calendrier ni un blocage. La phrase
@@ -398,6 +424,14 @@ couvert. Ce point de portée ne bloque pas l'égalité d'objet ; il ne doit pas
 
 La réception définitive attend donc ce petit verrou de durée de vie, un commit
 stable et le rejeu des portes enregistrées, pas une reprise de conception.
+
+Un durcissement P2 utile concerne seulement la preuve transactionnelle : le
+helper de test `csr_payload_empty` et le nettoyage CSR ignorent encore
+`r.deltas`. Un résultat déclaré CSR en échec pourrait donc conserver un delta
+classique parasite tout en passant les contrôles « payload vide ». Ajouter
+`r.deltas.empty()` au helper et au nettoyage, avec une contre-fixture de fuite,
+ferme ce faux vert ; aucun chemin nominal courant n'est pour autant démontré
+fautif.
 
 Un second point concernait seulement le futur reçu de performance :
 `storage_allocations` était initialisé à 4 alors que trois `reserve` sont

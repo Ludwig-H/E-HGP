@@ -39,12 +39,13 @@ des corrections, ils ne certifient rien.
   principe et graine externe fixée. Le générateur `d6888093` est reçu comme
   calendrier déterministe (210/280 runs, portes directes normale et `-O`), pas
   comme plan exécutable final : grammaire sans doublons, orientation des
-  échauffements et inscription CTest restent à fermer, puis les identités des
-  copies, commandes, callback et affinité doivent être scellées. Avant le pin
+  échauffements, adjacence des bras, rôles décisionnels et inscription CTest
+  restent à fermer, puis les identités des copies, commandes, coordonnées,
+  callback et affinité doivent être scellées. Avant le pin
   sémantique, `for_each_delta` doit encore refuser les temporaires ; avant la
   mesure, la comparaison au classique, le scratch, les vrais derniers offsets
   et la liaison au kind construit doivent être instrumentés sans contaminer le
-  mur, puis les portes sémantiques rejouées sur ce commit exact.
+  mur, puis les portes sémantiques rejouées sur ce commit source exact.
 - [`ALERTE_SONDE_ABLATION_REDUCE_20260902.md`](ALERTE_SONDE_ABLATION_REDUCE_20260902.md) :
   réception fonctionnelle de `32da1550` : la réagrégation après scellement et
   le statut exact sont reçus avec 21/21 scènes normales et optimisées, plus
