@@ -1,8 +1,8 @@
 # Préflight statique — profil G4 échelle v6
 
-Date : 2 septembre 2026. Pins jugés : réponse documentaire `fec58e1f`, puis
-capture moteur `9243d69f`. Le code encore décrit comme WIP est postérieur et
-non attribuable à ces pins.
+Date : 2 septembre 2026. Pins jugés : réponse documentaire `fec58e1f`, capture
+moteur `9243d69f`, puis correctif moteur `28d02459`. Le profil et le protocole
+encore décrits comme WIP sont postérieurs et non attribuables à ces pins.
 
 Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -15,11 +15,11 @@ elle n'est ni adoptée ni arrêtée ici.
 
 ## Verdict utile
 
-Le **NO START reste actif**. `fec58e1f` ajoute seulement la réponse de Claude.
-`9243d69f` livre utilement le curseur d'étage, la capture de `std::bad_alloc`
-dans `run_pipeline`, l'invalidation interne et trois portes moteur non vacues,
-mais ne modifie aucun profil ni fichier `gcp-migration/`. Le raccord de
-campagne reste donc à faire.
+Le **NO START reste actif**. `28d02459` ferme réellement trois défauts du
+premier moteur : texte compatible avec les classes du validateur, réservation
+sous la garde avec une quatrième porte, et portée exacte des callbacks
+provisoires. Il ne livre toujours aucun profil ni fichier `gcp-migration/` ; le
+raccord de campagne reste un WIP non épinglé.
 
 La direction est bonne : timeout classé comme observation censurée, layout
 `classic` annoncé, plan v2 pour les axes nouveaux, `RLIMIT_AS` ramené à
@@ -31,38 +31,37 @@ demander un GO.
 ## P1 — rendre le profil canonique effectivement exécutable
 
 1. Le profil déclare `FRONTIER_LAYOUT=classic`, mais le lifecycle ne capture,
-   valide, compare, grave ni transmet cet axe, et le validateur ne l'autorise
-   pas parmi les axes canoniques. Le profil sera donc refusé comme contenant un
-   axe inconnu ; si cette porte était contournée, le runner choisirait `classic`
-   par son propre défaut, sans preuve de liaison au canon. Le selftest courant
-   injecte directement `FRONTIER_LAYOUT` au runner et ne teste pas ce trajet.
-2. Le profil renseigne deux `GPUV6_PILOT_SPECS`, mais omet
-   `GPUV6_GATE_NAMES`. Son défaut `aucun` produit `gpuv6_plan runs=0` : aucun
-   build, aucune porte et aucun pilote ne seraient exécutés. Refuser avant tout
-   run `pilot_specs != aucun && gate_names == aucun`, puis inscrire l'inventaire
-   exact des portes dans le profil.
-3. La priorité annoncée est inversée : le profil promet la frontière Q1 en
-   préfixe obligatoire et les pilotes Q2 en suffixe optionnel, alors que le
-   runner exécute GPUV6 avant la frontière, toujours marquée « EN DERNIER ».
-   Exécuter Q1 avant Q2, désarmer Q2 dans ce profil, ou scinder les sessions.
+   initialise, compare, grave ni transmet cet axe. Le validateur WIP le
+   reconnaît désormais dans le canon et dans `full_axis_map` ; précisément pour
+   cette raison, le profil effectif dépourvu de `frontier_layout` ne peut pas
+   prouver son égalité au canon. Le selftest courant injecte directement
+   `FRONTIER_LAYOUT` au runner et ne teste pas le trajet
+   canon→lifecycle→SSH→runner.
+
+Le WIP a en revanche correctement simplifié la question :
+`GPUV6_GATE_NAMES=aucun` **et** `GPUV6_PILOT_SPECS=aucun`. Q2 est désarmée et
+renvoyée à une session distincte ; Q1 ne peut plus être consommée par une
+phase optionnelle antérieure. Conserver dans le protocole générique le refus
+pré-run `pilot_specs != aucun && gate_names == aucun` évitera de réintroduire
+silencieusement ce cas dans un prochain profil.
 
 ## P1 — joindre le refus mémoire au reçu
 
-Au pin exact `9243d69f`, le moteur rend code 2 avec
+Au pin `9243d69f`, le moteur rend code 2 avec
 `REFUS resource_exhausted : bad_alloc a l'etage ...`, tandis que le validateur
 inchangé classe explicitement tout `bad_alloc` sous code 2 comme contradiction.
 Le cas recherché invalide donc le reçu. De plus, `rr.message.reserve(256)` est
 encore avant le `try` : son propre `bad_alloc` échappe à la promesse « jamais
 un abort ». Les 188 portes rapportées prouvent le moteur, pas le trajet
-CLI→runner→validateur.
+CLI→runner→validateur. `28d02459` corrige les deux défauts moteur et porte les
+portes dédiées à 4/4.
 
-Le WIP postérieur va dans le bon sens : réservation sous la garde, injection
-pré-corps, texte `allocation impossible` et portée des callbacks resserrée.
-Le renommage lexical ne suffit toutefois pas. Le validateur doit reconnaître
-une sous-classe machine-readable, recouper sa cause, `refus_etage`, le message
-et les RSS, puis la porte doit exercer le trajet complet. Si la doctrine est
-désormais « un abort n'est pas une donnée », le code 134 ne peut plus rester
-une classe de frontière valide comme aujourd'hui.
+Le WIP protocolaire va aussi dans le bon sens : sa sous-classe validateur
+recoupe désormais la cause, l'étage et les cinq RSS entre les deux lignes. Il
+reste à l'exercer par une porte CLI→runner→validateur, puis à versionner la
+politique : si la doctrine est désormais « un abort n'est pas une donnée », le
+plan v2 doit refuser ou censurer le code 134 ; le rejeu des reçus v1 peut
+conserver sa règle historique.
 
 Il reste aussi un cas de vraie pénurie : si la réservation du message échoue
 par manque persistant, l'assignation dans le `catch` peut échouer à son tour
@@ -73,10 +72,24 @@ secours fiable. La fabrication du nuage, située avant `run_pipeline`, reste par
 ailleurs hors capture : borner la promesse au pipeline ou ajouter une garde
 CLI explicite.
 
+Une seconde ouverture peut encore produire exactement l'abort que la session
+cherche à remplacer. Dans `parallel/pool.hpp` et `parallel/sort.hpp`, si une
+création intermédiaire de `std::thread` échoue, les fils déjà construits restent
+joignables pendant le déroulage et le destructeur appelle `std::terminate`.
+Armer une garde stop+join avant la boucle de création, puis typer séparément
+`worker_start_failed`, est plus robuste que la seule mention d'un
+`std::system_error` non capturé.
+
 Enfin, conserver le contrat historique précis : les callbacks déjà appelés
 sont **provisoires jusqu'au statut terminal** ; l'invalidation interne ne peut
 pas reprendre un effet externe. La porte K=1 prouve zéro callback seulement
 pour une panne antérieure au premier callback.
+
+Pour l'API bibliothèque, un `std::bad_alloc` lancé par `on_fold_phase`,
+`on_forest` ou `prefilter_census_override` est aussi capturé globalement et
+attribué à l'étage interne courant. Cela ne bloque pas la CLI de la campagne,
+qui n'installe pas ces hooks, mais l'origine devra rester distincte au prochain
+jalon du contrat d'exceptions.
 
 ## Portée et budget à dire exactement
 
@@ -87,28 +100,46 @@ effectivement échantillonnées et le plus grand `n` **testé** qui complète so
 ce pin, ce layout et ce plafond. Sans bracket same-pin, ce n'est pas le plus
 grand `n` tenant en mémoire.
 
-Le lifecycle WIP estime 16 130 s : frontière 10 300, pilotes 3 000,
-build/portes 2 700 et 13×10 s d'overhead. L'enveloppe obtenue en remplaçant
-chaque estimation par son plafond vaut 18 900 s, ou 19 030 s avec cet overhead,
-pas 19 010 s. Publier séparément **estimateur nominal** et **enveloppe de
-plafonds**, de préférence depuis le même calcul que le journal du lifecycle.
+Après désarmement de Q2 et réduction à cinq heures, le lifecycle WIP estime
+10 390 s : frontière 10 300 et 9×10 s d'overhead. L'enveloppe de plafonds
+vaut 10 800 s, ou 10 890 s avec cet overhead. La fenêtre calculée par le
+lifecycle vaut bien 13 195 s : `18000 - 3905` de marge de rapatriement
+effective, puis `-900` de build source. Le commentaire est donc juste sur la
+fenêtre, mais appelle à tort 10 890 s la sortie de l'estimateur nominal.
+Publier séparément **estimateur nominal**, **enveloppe** et **fenêtre** depuis
+ce même calcul.
 
 Deux fermetures de protocole restent utiles :
 
 - normaliser `fam:n` et `fam:n:11` avant le contrôle de doublons et avant
-  l'émission de `specs=` ; ils ciblent aujourd'hui le même artefact mais le
-  header conserve les octets différents ;
-- soit graver le digest historique 50k dans le profil, soit limiter le claim à
-  la parité CPU/device du run courant : `GPUV6_OBJET_DIGESTS=aucun` ne compare
-  encore rien au reçu `1788293187`.
+  l'émission de `specs=`. Aujourd'hui, les deux formes seules donnent des plans
+  différents dans ce header ; présentes ensemble, elles donnent deux lignes de
+  même nom et un seul triplet d'artefacts écrasé, sans refus pré-run ;
+- fermer réellement la grammaire v1/v2 : `read_plan` accepte encore clés et
+  jetons inconnus ou dupliqués, ne juge pas la ligne fixe `s=8 smax=11 seed=3`,
+  et la commande frontière accepte tout binaire `\S+` au lieu du
+  `BIN_MATRICE` canonique ;
+- refuser avant tout run un pilote non vide sans inventaire de portes ; Q2
+  étant désormais absente du profil d'échelle, aucun digest historique 50k
+  n'est revendiqué par cette session.
+
+## Rejeu indépendant du pin moteur
+
+Sur le pin moteur courant `28d02459`, la contre-vérification locale donne 4/4
+portes `mhgp6_bad_alloc_*`. Sur le WIP protocolaire, syntaxe shell/Python
+propre, selftest campagne complet et selftest lifecycle complet sont verts ;
+ce dernier n'appelle que des gardes factices et ne touche aucune ressource GCP.
+Ces suites ne contiennent encore ni trajet lifecycle du layout, ni collision
+normalisée `:11`, ni vraie porte de la sous-classe d'allocation.
 
 ## Fermeture minimale avant nouvelle dépense
 
-1. Raccorder `FRONTIER_LAYOUT` et l'inventaire GPUV6 sur tout le trajet
+1. Raccorder `FRONTIER_LAYOUT` sur tout le trajet
    canon→lifecycle→SSH→runner→plan/statut→validateur.
-2. Mettre Q1 avant Q2 et joindre le refus typé du moteur au validateur.
-3. Ajouter les contre-fixtures de layout re-hashé, pilotes muets, code 2
-   `bad_alloc`, doublon normalisé et `:11` explicitement équivalent.
+2. Fermer la sous-classe d'allocation de bout en bout, la création partielle
+   des pools et la politique v2 du code 134 ; conserver Q2 désarmée.
+3. Normaliser `:11`, fermer le parseur de plan et lier le binaire, avec les
+   contre-fixtures correspondantes avant tout run.
 4. Requalifier la portée et le budget, puis rejouer les selftests locaux sur
    un commit d'implémentation propre.
 

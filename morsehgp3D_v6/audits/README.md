@@ -50,16 +50,16 @@ des corrections, ils ne certifient rien.
   `sha256sum` doit être restaurée en confinant le faux test. Ces dents précèdent
   une nouvelle mesure, sans bloquer KeyCSR.
 - [`ALERTE_G4_ECHELLE_V6_20260902.md`](ALERTE_G4_ECHELLE_V6_20260902.md) :
-  préflight mis à jour sur la réponse `fec58e1f`, la capture moteur
-  `9243d69f` et leur WIP ; **NO START** jusqu'au raccord machine-readable du
-  refus d'allocation, du layout canonique, de l'inventaire GPUV6 et de l'ordre
-  Q1→Q2. Portée, budget, normalisation `:11` et digest historique sont bornés
-  par la même note.
+  préflight mis à jour jusqu'au moteur corrigé `28d02459` et au WIP de
+  protocole ; **NO START** jusqu'au trajet lifecycle du layout, à la porte
+  complète du refus d'allocation, aux pools et à la politique v2 du code 134.
+  Q2 est correctement séparée ; portée, budget, normalisation `:11` et
+  fermeture du plan sont bornés par la même note.
 - [`REPONSE_AUDITEUR_CONCEPTION_C6_20260902.md`](REPONSE_AUDITEUR_CONCEPTION_C6_20260902.md) :
-  GO de conception borné pour C6, sans code ni GO G4. Deux slots monolithiques
-  ne portent pas les trois lots simultanés ; la réponse donne les leases,
-  invariants transactionnels, chronos non additifs, portée du stub et jalons
-  qui permettent à Claude d'avancer sans rouvrir l'objet mathématique.
+  GO de conception borné pour C6, sans code ni GO G4. Le premier jalon emploie
+  deux IN + deux OUT hôte aux leases séparés, un flux et un jeu device ; la
+  réponse fixe validation transactionnelle, chronos non additifs, modèle C6
+  séparé du stub séquentiel et jalons sans rouvrir l'objet mathématique.
 - [`CONTRE_AUDIT_REPRISE_PERSISTANTE_V6_20260902.md`](CONTRE_AUDIT_REPRISE_PERSISTANTE_V6_20260902.md) :
   contre-audit du chemin de reprise, mis à jour pour `c2d2ac69`. Les quatre
   mutants résiduels de `4ef96717` sont corrigés et le revalidateur passe 22
