@@ -181,3 +181,148 @@ secondes ; ajouter `clamp_environment()` et un timeout de harnais.
 Le verdict reste donc : progrès net, **porte autonome non reçue**, aucune
 nouvelle dépense GCP. Les six priorités de la coupe `c8f69673` restent
 historiquement exactes ; cette section les reclasse pour le WIP courant.
+
+## Réception critique du pin `fa9b2633`
+
+Le lot § 5.21 est désormais commité par `fa9b2633` et inchangé dans le `HEAD`
+`1cb60655`. Un rejeu complet encadré par les SHA-256 des scripts jugés donne :
+
+- `bash gcp-migration/selftest_revalidate_v6.sh` : 15 scènes vertes ;
+- `bash gcp-migration/selftest_cycle_vie_v6.sh` : code 0, 35 scénarios,
+  `D9`--`D11bis` verts ;
+- contrôle extérieur : `AUDIT_RC=0 SNAPSHOT_STABLE=oui`.
+
+La priorité 68 est donc bien appliquée sur les deux sorties terminales et la
+promotion conditionnelle du staging est reçue dans les scènes présentes. Ce
+progrès ferme les quatre défauts qui motivaient le § 5.21, mais **pas** le
+contrat complet de cycle de vie ni celui du revalidateur.
+
+### Contrats encore ouverts
+
+1. **Un échec local peut encore court-circuiter le STOP.** La reprise est sous
+   `set -e` sans trap d'arrêt. Après connaissance de la génération et avant la
+   garde épinglée, un échec de `date`, `rlog`, `rm` ou `mv` termine donc le
+   processus. La collision de `out.partiel_$(date +%s)` rend ce chemin
+   matériel. Router toute sortie vers un funnel d'arrêt inconditionnel, ou
+   arrêter avant toute sauvegarde/promotion locale ; ajouter un `mv` non nul
+   qui exige exactement un STOP de la génération.
+2. **La provenance de `out/` n'est pas établie.** Après l'arrêt, le validateur
+   se contente d'un `WORK/out` non vide. Si le SCP courant n'a rien promu, un
+   `out/` hérité d'une tentative antérieure peut être validé. Graver un état de
+   promotion atomique lié à la génération, au commit et au succès SCP, puis
+   rendre cet état obligatoire avant validation. La dent `D10` doit partir
+   avec un ancien `out/` non vide.
+3. **Purge nominale : le vert `D8` est un faux vert.** Le plan de tests exige
+   explicitement qu'un échec de purge rende 67 dans la reprise et le cycle
+   nominal. Or le lifecycle ne possède que `WITNESS_RC` ; sa branche
+   `purge_incomplete` écrit le marqueur puis rend vrai, et les deux sorties ne
+   propagent que 68. `D8` masque le code avec `wait ... || true` et ne
+   l'asserte pas. Reprendre le patron déjà correct de `recover_v6_session.sh` :
+   porter `PURGE_RC=67`, définir sa priorité terminale avec 68, faire exiger 67
+   à `D8`, puis conserver `D8bis=0` avec zéro appel GCP.
+4. **Le revalidateur accepte un juge muet.** La commande
+   `revalidate_v6_receipt.sh <reçu-c8f69673> /dev/null` rend 0 et affiche
+   « recu intact » sans aucun résumé. Le second argument n'est pas authentifié
+   et la boucle ne compare un résumé que si les deux côtés existent. Hors mode
+   selftest explicite, exiger le validateur canonique et son hash ; dans tous
+   les modes, exiger chaque résumé attendu. Ajouter aussi un fichier régulier
+   qui rend 0 sans écrire de résumé : tester seulement `-f` ne suffit pas.
+5. **Un `SHA256SUMS` imbriqué reste invisible.** Les générateurs de reçus, le
+   revalidateur et leurs selftests emploient `! -name SHA256SUMS` ou
+   `! -name 'SHA256SUMS*'`. Ils excluent donc aussi `out/SHA256SUMS` et
+   `marques/SHA256SUMS`. Seul `./SHA256SUMS` racine doit être omis ; ajouter
+   les deux contre-fixtures, à la construction puis pendant la revalidation.
+6. **L'inventaire texte n'est pas injectif.** Un nom contenant un saut de
+   ligne peut se sérialiser comme plusieurs entrées autorisées ; par exemple
+   un seul répertoire `out\nmarques` se confond avec deux noms. Comparer des
+   séquences NUL ou leurs digests, sans substitution de commande ni boucle
+   `for` sur du texte.
+
+`D11` mérite enfin une dent causale plus étroite : son attente du handshake est
+tolérée avec `|| true`, puis elle ne compte ni le STOP ni l'issue du reçu.
+Rendre le rendez-vous fatal, exiger exactement un STOP au total, le message du
+fast-path et `issue=arret_certifie_par_le_garde`. Le code observé est bon ;
+c'est la preuve permanente qui est encore trop permissive.
+
+Deux durcissements P2 restent utiles : nettoyer le
+`.recu_publie.*.partial` si `os.replace` échoue, et borner le reçu minimal à
+la liste des marques connues sans développer tous les `*.partial.*`. Le mot
+« intact » doit aussi être borné aux noms, types et octets, ou lier
+explicitement modes et métadonnées.
+
+La livraison utile suivante reste locale : funnel STOP, provenance de
+promotion, `D8=67`, dent causale `D11`, puis les trois dents du revalidateur.
+Aucun nouveau design, aucun nouveau résultat G4 et aucune VM ne sont
+nécessaires ; aucun GO GCP n'est ouvert.
+
+## Réception critique du pin `4ef96717`
+
+Le pin § 5.22 apporte des fermetures utiles et vérifiées : D8 propage 67,
+D11 exige son rendez-vous, un STOP et l'issue exacte, le validateur canonique
+est authentifié, un juge muet est refusé, un `SHA256SUMS` imbriqué redevient un
+fichier ordinaire et les noms contenant un saut de ligne sont rejetés. Le
+selftest de revalidation rend 20/20 ; les rejeux ciblés D8, D11 et D12
+ordinaires sont verts. Ces progrès sont reçus.
+
+Quatre mutants plus précis restent acceptés au pin et empêchent seulement de
+qualifier le durcissement complet ou de rouvrir une session facturable :
+
+1. **STOP encore évitable dans la garde.** Un faux `tee` qui échoue uniquement
+   sur le journal « arret cible : » donne code 1, zéro STOP et laisse le registre
+   `targeted_stopping`. `STOP_ATTEMPTED=1` et `trap - ERR` précèdent encore le
+   journal et l'appel réel. Passer toute la primitive en non-fatal, rendre
+   publications et journaux best effort, puis exécuter la garde quoi qu'il
+   arrive ; son échec doit rendre 70 et dominer l'erreur locale.
+2. **Marqueur de promotion rejouable.** Un ancien `out/` et un
+   `out.promotion` plausible portant la même génération, le même commit et
+   `scp_rc=0`, suivis d'une SCP courante en échec, autorisent encore le
+   validateur sur l'ancien contenu. Le wrapper rend 0 et le reçu montre
+   pourtant `scp_rc=1`. Lier le marqueur à un nonce de la tentative courante
+   et précharger D13 avec l'ancien marqueur, pas seulement avec `out/`.
+3. **Allowlist de répertoires réinterprétée par le shell.** Un répertoire
+   racine vide nommé `out marques` est découpé en deux noms autorisés ; la
+   revalidation canonique rend 0 et « recu intact ». Lire et comparer les chemins
+   NUL directement, puis garder ce nom exact comme contre-fixture.
+4. **Résumé différent non fatal.** Un faux validateur qui reproduit tous les
+   résumés puis change un octet de l'un d'eux peut encore afficher
+   « DIFFERENT » puis rendre 0. Accumuler la divergence et rendre 3 après le
+   contrôle d'intégrité.
+
+Le WIP postérieur au pin suit déjà ces quatre corrections : garde non fatale,
+identifiant de tentative dans `out.promotion`, allowlist NUL/Python et drapeau
+de résumé divergent. Il reste à épingler ce contenu et à faire porter aux
+selftests les mutants exacts ci-dessus. Cette passe locale ne remet pas en
+cause `fa9b2633`, les reçus G4 déjà arrêtés ni le prototype sémantique KeyCSR,
+qui peut continuer en parallèle. Aucun GO GCP n'est ouvert.
+
+## Réception critique du pin `c2d2ac69`
+
+Le lot correctif est reçu dans sa portée principale. Le selftest du
+revalidateur passe ses 22 scènes avec sources stables ; le répertoire
+`out marques` est refusé, un résumé reproduit différent rend 3 et les noms
+NUL restent comparés sans réinterprétation du shell. Le lifecycle complet rend
+0 et ses dents D12--D15 passent. En particulier, l'ancien marqueur de promotion
+ne permet plus de valider un `out/` hérité lorsque la SCP de la tentative
+courante échoue. Les quatre défauts précis du pin `4ef96717` sont donc fermés.
+
+Il reste une seule fenêtre de sûreté, plus étroite mais causale. La génération
+est résolue avant le calcul de `GEN_EPOCH`, tandis que le trap du funnel n'est
+armé qu'après ce calcul. Un faux `python3` qui laisse passer les parseurs de
+marques puis rend 42 uniquement sur la conversion de la génération produit :
+code 42, zéro STOP, registre `targeted_running` et aucun reçu. Les deux
+coupe-circuits bornent encore la session, mais l'arrêt immédiat promis est
+sauté. Déplacer cette conversion juste après l'armement, rendre une époque vide
+fatale sous le trap et conserver le mutant donne la fermeture minimale : STOP
+réussi attendu à 74, STOP échoué attendu à 70, exactement une tentative dans
+les deux cas.
+
+Un écart secondaire ne doit pas masquer ce progrès. Si `tee` échoue seulement
+sur le journal « arret cible », la garde effectue bien un STOP unique ; un
+échec d'arrêt rend 70, mais un arrêt réussi est rapporté 0 au lieu de 74. Claude
+peut soit mémoriser séparément l'erreur locale du journal, y compris
+`PIPESTATUS[1]`, puis passer par le funnel sans second STOP, soit déclarer cette
+télémétrie best effort. C'est un choix de contrat P2, pas une nouvelle faille
+d'arrêt ni un motif pour suspendre KeyCSR.
+
+Aucune VM n'est nécessaire pour fermer ces deux points : les faux outils du
+selftest local suffisent. Aucun GO GCP n'est ouvert.

@@ -128,6 +128,41 @@ Enfin, le rendu courant n'est pas un consommateur de `r.deltas` :
 raccorder le rendu au CSR ni lui attribuer un coût déplacé sans nouveau
 contrat séparé.
 
+## Retour constructif sur le prototype KeyCSR non épinglé
+
+Le WIP suit bien le dessin proposé : route `classic|csr` explicite, stockage
+versionné, arènes possédées, vues reconstruites, absence de repli, digest par
+l'accesseur commun, comparateur `first_divergence` séparé et rejeu de la
+partition. Les fixtures born-only, parents-only, continuation, multi-racines,
+forêt vide, copie post-callback, offsets, capacités et mutants ciblent les
+bonnes coutures. Après recompilation Release du snapshot courant, 39/39 portes
+ciblées passent. C'est une base sémantique solide, pas un prototype à reprendre.
+
+Une première contre-lecture avait soupçonné `FacetKeyRange::size()` parce que
+la plage vide est `{nullptr, nullptr}` et que la fonction calcule `e - b`.
+Cette alerte est **retirée** après vérification normative : le cas spécial de
+deux pointeurs nuls vaut zéro en C++20 (`[expr.add]`), contrairement à la
+soustraction générale de pointeurs qui ne désignent pas le même tableau. La
+preuve dynamique bornée concorde : GCC 13 et Clang 18 passent les cas vides
+sous UBSan/ASan, `pointer-overflow`, puis `pointer-subtract` avec détection des
+paires invalides. Les fixtures, offsets, copie/alias et débordement courts
+passent aussi sans diagnostic, avec hashes des sources stables. Il n'y a donc
+ici ni UB ni correctif sémantique à demander à Claude ; une garde explicite ne
+serait qu'un choix de lisibilité.
+
+Aucun blocage sémantique n'a été trouvé dans ce snapshot non épinglé. Sa
+réception définitive attend seulement un commit stable et le rejeu de ses
+portes enregistrées, pas une reprise de conception.
+
+Un second point concernait seulement le futur reçu de performance :
+`storage_allocations` était initialisé à 4 alors que trois `reserve` sont
+appelés, et une forêt vide n'observe en pratique que les deux allocations
+d'offsets (`reserve(0)` ne croît pas). Le WIP courant part désormais de zéro et
+incrémente sur chaque changement réel de `capacity()`, réserves et croissances
+d'arènes comprises. C'est le correctif demandé ; il reste seulement à le
+recevoir sur un pin. L'instrumentation séparée du scratch appartient au futur
+protocole de mesure, pas à l'égalité d'objet ni au prototype actuel.
+
 ## Q2 — protocole de mesure à graver à la place
 
 ### Pourquoi la proposition actuelle ne décide pas

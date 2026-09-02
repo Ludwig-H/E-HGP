@@ -7,9 +7,13 @@ la série C C2--C5, `b97f20ea` pour la première exécution G4, `13669280` pour
 le durcissement post-session et `c8f69673` pour la reprise persistante ainsi
 que la seconde exécution G4. Le reçu courant est archivé par `e66cd978`, lu
 par Claude et son validateur à `d5d0bdd4`. Le lot local `2aaa4a53` ferme les
-frontières runtime, versionne le canon tests v2 et durcit les validateurs et
-la reprise ; la seconde sonde locale est archivée par `b79e29a5`. Hors
-protocole,
+frontières runtime et versionne le canon tests v2 ; la seconde sonde locale
+est archivée par `b79e29a5`. Le pin `fa9b2633` durcit la reprise et le
+revalidateur, puis `1cb60655` ferme les cinq faux positifs historiques du
+harnais de sonde. `fc8e28b1` ferme ensuite ses coutures de publication et
+`32da1550` ajoute la réagrégation après scellement. `4ef96717` livre le § 5.22
+de reprise/revalidation, repris par `c2d2ac69` sur ses quatre mutants
+résiduels. Hors protocole,
 profils, audits et reçus, le moteur `src/`, `cli/` et `CMakeLists.txt` exécuté
 à `c8f69673` reste identique à celui de la première série C `b97f20ea`.
 Autorités techniques : `6d755804` pour le
@@ -31,9 +35,13 @@ profil tests K10/K5, `c8f69673` pour la reprise et le pin réellement exécuté,
 `d5d0bdd4` pour sa lecture et ses fixtures post hoc, `81623528` pour la sonde
 locale destructive, `1bea4bc4` pour son alerte causale et de revalidation,
 `b9ea4659` pour le contre-audit de reprise, `2aaa4a53` pour les fermetures
-locales reçues avec réserves, `b79e29a5` pour la sonde équilibrée et
-`38281dc7` pour la réponse architecturale KeyCSR, `9c5517c9` pour la
-demande G4 historique, `e8289d9a` pour son profil
+locales reçues avec réserves, `b79e29a5` pour la sonde équilibrée,
+`fa9b2633` pour le durcissement de reprise/revalidation, `1cb60655` pour le
+premier harnais de sonde, `fc8e28b1` puis `32da1550` pour son scellement et sa
+réagrégation renforcés,
+`4ef96717` puis `c2d2ac69` pour le lifecycle § 5.22 et `38281dc7` pour la réponse
+architecturale KeyCSR,
+`9c5517c9` pour la demande G4 historique, `e8289d9a` pour son profil
 historique, `320299df` pour le reçu de
 réplication et `8ed2dea6` pour le reçu de confirmation contre-audité
 ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
@@ -61,12 +69,13 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | série C C2--C5 `cd606257` | reçue dans sa portée CPU/stub : six candidats `u32`, refus transactionnels, sentinelles/validateur, digest gravé, porte de readback device enregistrée mais jamais exécutée et multi-lots causal ; export propre Release 113/113 en 232,11 s ; aucun `nvcc` ni device |
 | préparation G4 `b97f20ea` | quatre coutures du § 5.15 reçues sur le chemin épinglé : canon, identité plan/device, architecture 120, fail-fast et manifeste lifecycle à 13 fichiers ; selftests campagne/lifecycle verts et portes G4 v6 117/117 ; deux sous-liaisons du validateur restent à durcir (argv d'attribution seulement inclusif, `arch_compilees` parsé mais non comparé) ; leurs contrôles manuels sont conformes pour le reçu `852ca703` |
 | reçu G4 série C `852ca703` | paquet intègre : 202/202 hashes, 58/58 statuts code 0, 16/16 portes GPU et quatre pilotes paritaires ; validateur épinglé `verifie_non_decisionnel`, contrôles manuels argv/architecture conformes ; résultats bornés au § 5.17, jamais un claim produit |
-| durcissement local `2aaa4a53` | frontières invitées 600/601 et 480/481, clamp absolu, rc SSH/horloge, provenance legacy, exactitude K5/K10 et canon prospectif `g4_tests_v2` reçus ; le revalidateur doit encore recontrôler les répertoires créés ou supprimés pendant son appel |
-| reprise persistante `2aaa4a53` / audit `b9ea4659` | verrou noyau, registre/marques stricts, SID/PGID, génération avant SCP, stop-first, garde épinglée et purge-before-witness reçus ; quatre coutures locales restent : terminal à relire sous verrou, promotion seulement après SCP réussi et tuple postérieur recevable, échec du témoin fatal, reçu rc70 réellement borné ; aucun nouveau GO GCP |
+| durcissement local `2aaa4a53` | frontières invitées 600/601 et 480/481, clamp absolu, rc SSH/horloge, provenance legacy, exactitude K5/K10 et canon prospectif `g4_tests_v2` reçus |
+| revalidateur `c2d2ac69` | validateur canonique, juge muet, `SHA256SUMS` imbriqué, noms NUL et résumés absents ou différents fermés ; 22/22 avec snapshot stable, reçu dans cette portée |
+| reprise persistante `c2d2ac69` / audit `b9ea4659` | D8=67, D11 causal, garde non fatale, promotion liée à la tentative et quatre mutants de `4ef96717` corrigés ; une conversion `GEN_EPOCH` reste faillible entre connaissance de la génération et armement du funnel ; aucun nouveau GO GCP |
 | reçu G4 tests K10/K5 `e66cd978` | paquet intègre : 278/278 hashes, 84/84 statuts code 0 et terminés, pins reconstruits, sept résumés identiques, arrêt exact à la première tentative ; égalités de préfixe observées sur cardinalités/digests ; profil et campagne strictement non décisionnels, accusé consommé |
 | porte de préfixe `2aaa4a53` | listes K exactes, appariement par clé complète et jumeau K10 obligatoire reçus ; les pins K5 de v1 restent post hoc, tandis que v2 porte ses huit fixtures avant toute future exécution |
-| sonde équilibrée `b79e29a5` | reçu concret intègre et recalculable : 153/153 hashes, 48 triplets, plan Williams exécuté et différences appariées ; le signal priorise une falsification KeyCSR, jamais son gain ; le harnais générique garde cinq faux positifs à fermer avant réutilisation |
-| réponse KeyCSR `38281dc7` | GO exploratoire sémantique reçu : stockage versionné, arènes propriétaires, vues non persistantes et comparateur complet indépendant du digest ; FidCSR et mesure de performance restent deux paliers ultérieurs séparés |
+| sonde équilibrée `b79e29a5` / harnais `32da1550` | reçu concret intègre et recalculable ; réagrégation après scellement, statut exact et `profil_kind` durci reçus, 21/21 scènes normales et sous `-O`, CTest 2/2 ; quatre faux positifs de la même liaison de régime restent dans argv/META, `liveness` et l'identité préfixe ; seule une nouvelle mesure réutilisable les attend |
+| réponse KeyCSR `38281dc7` / prototype WIP | architecture conforme au GO : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; build Release, 39/39 ciblées, matrice exhaustive et 21/21 mutants verts ; aucun blocage sémantique trouvé dans la contre-lecture, campagne sanitizer courte propre ; la garde vide et le compteur d'allocations causal sont déjà corrigés dans le WIP, le scratch reste à instrumenter seulement avant un reçu de performance |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP série C | départ refusé fail-closed puis arrêté ; perte de superviseur arrêtée sans reçu ; deux relances distinctes reçues et arrêtées sur leurs générations exactes, la plus récente `2026-09-01T18:34:33.420-07:00` ; aucun GO courant |
@@ -97,16 +106,44 @@ seul. Le plafond descriptif obtenu en supprimant entièrement cet étage reste
 1,12--1,31× selon la fixture : le facteur global `1,7–2×` exige donc aussi
 des progrès ailleurs dans le pipeline. Ces mesures n'altèrent aucun statut.
 
-La contre-lecture détaillée des § 5.18--5.21 reçoit maintenant les frontières
-runtime, le clamp, la provenance legacy, la porte de préfixe et le canon v2 de
-`2aaa4a53`. La reprise reçoit aussi ses fermetures structurelles, sans reprendre
-la formule globale « livrée et falsifiée » : sa décision terminale doit être
-refaite sous `flock`, un staging ne devient canonique qu'après SCP réussi et
-tuple post-SCP lisible de la même génération, l'échec du témoin doit dominer le
-code retour et le chemin rc70 ne doit copier ni hacher des journaux non bornés.
-Le revalidateur doit enfin comparer les répertoires avant/après, pas seulement
-les fichiers. Le reçu G4 déjà arrêté n'est pas affecté ; ces coutures sont
-locales et aucun nouveau départ GCP n'est nécessaire ni ouvert.
+La contre-lecture détaillée des § 5.18--5.22 reçoit les frontières runtime,
+le clamp, la provenance legacy, la porte de préfixe et le canon v2 de
+`2aaa4a53`, puis les fermetures structurelles de `fa9b2633`. Au pin
+`4ef96717`, D8 rend 67, D11 devient causal, D12 couvre une panne post-SCP et le
+reçu minimal est borné. `c2d2ac69` ferme ensuite les quatre mutants plus
+étroits : garde non fatale avant STOP, promotion liée à la tentative courante,
+allowlist NUL et résumé reproduit différent fatal. Le revalidateur passe 22
+scènes avec snapshot stable. Une fenêtre locale subsiste dans la reprise :
+`GEN_EPOCH` est calculé par `python3` après connaissance de `GENERATION`, mais
+avant l'armement du funnel ; un échec y sort encore sans STOP. Déplacer ce
+calcul sous le trap ou le rendre explicitement non fatal, puis graver la dent
+qui exige STOP, code et reçu minimal. Le reçu G4 déjà arrêté n'est pas affecté
+et aucun GO GCP n'est ouvert.
+
+Au pin `32da1550`, la sonde reçoit sa réagrégation v4 après scellement : le
+résumé transitoirement forgé est maintenant refusé, le statut est exact, le
+profil kind/join est durci et la compatibilité v2 reste explicitement bornée.
+Les 21 scènes passent normalement et sous `python3 -O`, puis les deux CTests
+ciblés passent. Il ne reste qu'une famille de liaison de régime : argv et
+META peuvent encore annoncer `fold_join=0`, `liveness` peut disparaître et
+l'identité de cible accepte un suffixe. Les champs inflight/pics et famille
+suivent la même couture. Parser l'objet de régime une fois, reconstruire la
+commande canonique, exiger `liveness` et séparer identité et glose suffit ; la
+provenance complète de l'interpréteur est un P2. Le prototype sémantique
+KeyCSR peut avancer indépendamment ; seule une nouvelle mesure réutilisant ce
+harnais attend ces dents.
+
+Le prototype KeyCSR non épinglé est architecturalement proche de la cible :
+deux routes signées sans repli, arènes possédées, vue reconstruite, comparateur
+tiers, rejeu et refus transactionnels. Les 39 portes ciblées, la matrice
+exhaustive et les 21 mutants passent en Release. Une alerte sur
+`FacetKeyRange::size()` est retirée : C++20 définit explicitement la
+soustraction de deux pointeurs nuls à zéro, et les essais GCC/Clang sous
+ASan/UBSan et sanitizers de pointeurs passent. Aucun blocage sémantique n'est
+donc identifié. Le WIP a depuis ajouté une garde explicite sur la plage vide et
+compte les changements réels de `capacity()` au lieu d'initialiser une
+constante. Le scratch non instrumenté bloque seulement le futur reçu de
+télémétrie/performance, pas le prototype sémantique.
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
@@ -602,16 +639,13 @@ historique a précisément observé un `bad_alloc` à 800k sous `RLIMIT_AS`, mai
 elle exécutait `d98f4729`, pas ce checkpoint. Restent à exercer les frontières
 extrêmes de `CloudIndex`/Karras et à contrôler les additions u64 des monnaies.
 
-Une garde est toutefois placée trop tard par rapport à son propre contrat.
-Si `E` est la somme exacte des shards, ceux-ci possèdent déjà au moins `E`
-emplacements puis `out->reserve(E)` en alloue au moins `E` autres. La garde
-logique `2E*sizeof(BallCandidate)` de `run.hpp` n'est consultée qu'après le
-retour de `generate_candidates`. La fixture `(b)` provoque donc l'allocation
-qu'elle prétend prévenir, puis refuse. Correction courte : propager une borne
-de fusion dérivée du budget, la tester au point `exact_fusion` avant
-`reserve`, et tuer la variante tardive par un mutant. Cela reste un proxy
-logique ; supprimer réellement la coexistence des deux copies demanderait une
-fusion segmentée.
+La garde logique `2E*sizeof(BallCandidate)` n'est plus placée après la
+génération. Depuis `4a85c13d`, `generate.hpp` la teste sur `exact_fusion` avant
+`out->reserve`, libère les shards au refus et tue
+`caps-skip-prefusion-budget` par une fenêtre dédiée. Cette fermeture reste un
+proxy de tailles du payload nommé : elle ne majore ni les capacités
+géométriques, ni le RSS, et supprimer réellement la coexistence des deux
+copies demanderait toujours une fusion segmentée.
 
 Les commentaires de `caps.hpp` et `generate.hpp` doivent suivre cette portée :
 la fenêtre de test se calcule sur les cardinalités, pas sur `capacity()`, et
@@ -623,25 +657,22 @@ sites q2/q3/q4 et de la garde de vague initiale.
 
 Ordre recommandé à Claude :
 
-1. fermer causalement le pool C1 côté worker et tuer sa réutilisation
-   post-fatale, avant de bâtir C2 dessus ;
-2. avancer la garde `2E` avant la fusion globale et corriger ses commentaires,
-   sans rouvrir le contrat plus large de RAM résidente ;
-3. tuer les deux contre-fixtures de profil du § 5.10 avant d'interpréter la
-   matrice locale du fold ou de segmenter `reduce` ;
-4. fermer le wire C2 transactionnel et typé selon le § 5.11, puis choisir
-   explicitement `census_all` ou compaction stable avant de figer le budget ;
-5. corriger `GRAND_LIVRE.md` avant toute interprétation des coûts, puis
-   aligner `ARCHITECTURE.md`, `PROVENANCE.md` et `PLAN_DE_TESTS.md` au
-   prochain checkpoint stable ;
-6. enrichir seulement C1–C4 dans `MATHEMATIQUES.md` et remplacer l'`assert`
+1. fermer la fenêtre `GEN_EPOCH` de `c2d2ac69`, puis rejouer le lifecycle
+   complet sur un snapshot stable, entièrement en local ;
+2. fermer la liaison de régime du harnais (argv/META, `liveness`, famille,
+   paramètres de profil et identité exacte) avant sa prochaine mesure ;
+3. épingler le prototype KeyCSR avec son comparateur, son rejeu et sa matrice
+   déjà verts ; instrumenter le scratch seulement avant toute mesure ;
+4. corriger `GRAND_LIVRE.md`, puis aligner `ARCHITECTURE.md`, `PROVENANCE.md`
+   et `PLAN_DE_TESTS.md` au prochain checkpoint stable ;
+5. enrichir seulement C1–C4 dans `MATHEMATIQUES.md` et remplacer l'`assert`
    Python opportunément : ce microcorrectif P2 ne bloque aucun résultat ;
-7. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
+6. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
    re-régler la règle ;
-8. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
+7. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
    l'oracle et la preuve G16 avant toute nouvelle mesure ;
-9. fermer callbacks/exceptions et leurs fixtures réellement concurrentes ;
-10. ne rouvrir une mesure d'échelle ou G4 qu'avec une question décisionnelle,
+8. fermer callbacks/exceptions et leurs fixtures réellement concurrentes ;
+9. ne rouvrir une mesure d'échelle ou G4 qu'avec une question décisionnelle,
    un nouveau pin exact et un budget couvrant les résidences revendiquées.
 
 GCP non utilisé par le présent audit.
