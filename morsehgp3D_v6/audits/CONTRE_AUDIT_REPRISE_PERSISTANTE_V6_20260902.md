@@ -88,6 +88,31 @@ des rejeux **manuels**, idempotents, sérialisés, liés à la génération et
 toujours `stop-first` ; il ne faut pas transformer cela en boucle automatique
 illimitée.
 
+## Signalement adjacent sur le clamp invité WIP
+
+Ce point ne vise pas `c8f69673`, mais le worktree non commité de
+`start_and_verify.sh`. Deux chemins fail-open doivent être fermés avant de
+recevoir ce lot :
+
+- le succès final dépend seulement de la présence de
+  `__EHGP_GUEST_GUARD_VERIFIED__` dans la sortie capturée. Le code ne conserve
+  pas le fait que `gcloud_ssh_guard` a rendu zéro. Un SSH en échec qui réimprime
+  sa commande — laquelle contient littéralement ce marqueur — peut donc finir
+  par être certifié. Publier un booléen uniquement dans la branche `rc=0`,
+  après une ligne terminale exacte, puis décider exclusivement sur ce booléen ;
+- le clamp évalue directement `$(date +%s)` dans une condition arithmétique.
+  Dans ce contexte, un `date` en échec ou non numérique n'est pas une preuve
+  de dépassement et la boucle peut continuer. Capturer l'instant, vérifier le
+  code et la grammaire, puis comparer ; toute horloge illisible déclenche
+  l'arrêt ciblé.
+
+Ajouter les mutants « SSH imprime le marqueur puis rend 255 », `date` non nul
+et date non numérique. Le nouveau test d'intégration du clamp attend par
+construction environ 200 secondes réelles, sans timeout de `run_script`, et
+n'établit qu'une borne large. Une horloge et un `sleep` factices doivent rendre
+ce scénario instantané, avec nombre et ordre exacts des appels puis arrêt de la
+génération simulée.
+
 ## Dents minimales
 
 - deux reprises synchronisées dans le même `sid` : une seule franchit le

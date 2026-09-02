@@ -85,3 +85,10 @@ vérification finale devient verte. Graver avant l'appel le SHA-256 (ou les
 octets) de `SHA256SUMS`, l'exiger inchangé après l'appel, et ajouter le mutant
 « altération + rehash » au selftest. Le mutant existant « altération sans
 rehash » ne tue pas ce contournement.
+
+L'ensemble dit exact ne couvre enfin que `find -type f`. Un lien symbolique
+non haché ajouté à la racine du reçu passe actuellement la revalidation et le
+contrôle final. Inventorier toutes les entrées, refuser les types spéciaux et
+les liens, puis n'autoriser que les répertoires attendus et des fichiers
+réguliers. Ajouter un mutant symlink ; il complète les cas fichier régulier
+absent ou supplémentaire sans les remplacer.
