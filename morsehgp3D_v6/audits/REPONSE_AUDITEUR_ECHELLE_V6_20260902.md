@@ -34,11 +34,13 @@ Décisions compactes :
 
 Snapshot observé : `HEAD=dd24f7c1` avec un worktree produit non épinglé ; ce
 paragraphe aide à fermer le lot, mais ne le reçoit pas. La construction Release
-séparée réussit et les 21 portes `prefix|residence` du label `gate` passent. Les
-trois idées sont utiles : la comparaison de préfixes couvre enfin `smax < 11`,
-le HWM de processus révèle des pics invisibles aux instantanés, et la libération
-anticipée des tranches conserve l'ordre de fusion. Trois claims doivent
-toutefois être corrigés avant le pin.
+séparée réussit. Après retrait de toute charge concurrente, 206/206 portes
+`gate` hors résidence passent en 954,20 s, puis les quatre portes de résidence
+passent isolément en 18,01 s : 210/210 au total. Les trois idées sont utiles :
+la comparaison de préfixes couvre enfin `smax < 11`, le HWM de processus révèle
+des pics invisibles aux instantanés, et la libération anticipée des tranches
+conserve l'ordre de fusion. Trois claims doivent toutefois être corrigés avant
+le pin ; une suite entièrement verte n'élève pas la force de ses assertions.
 
 ### P1 — exiger l'autorité complète, pas seulement une référence plus longue
 
