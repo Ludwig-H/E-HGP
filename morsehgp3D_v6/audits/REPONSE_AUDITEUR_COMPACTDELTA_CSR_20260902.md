@@ -135,8 +135,10 @@ versionné, arènes possédées, vues reconstruites, absence de repli, digest pa
 l'accesseur commun, comparateur `first_divergence` séparé et rejeu de la
 partition. Les fixtures born-only, parents-only, continuation, multi-racines,
 forêt vide, copie post-callback, offsets, capacités et mutants ciblent les
-bonnes coutures. Après recompilation Release du snapshot courant, 39/39 portes
-ciblées passent. C'est une base sémantique solide, pas un prototype à reprendre.
+bonnes coutures. Après recompilation Release du snapshot courant, les 39
+portes initiales passent ; une sélection élargie de 56 portes non-`scale`
+(fixtures, offsets, débordement, copie, conformité, mutants et CLI) passe
+aussi 56/56. C'est une base sémantique solide, pas un prototype à reprendre.
 
 Une première contre-lecture avait soupçonné `FacetKeyRange::size()` parce que
 la plage vide est `{nullptr, nullptr}` et que la fonction calcule `e - b`.
@@ -150,9 +152,28 @@ passent aussi sans diagnostic, avec hashes des sources stables. Il n'y a donc
 ici ni UB ni correctif sémantique à demander à Claude ; une garde explicite ne
 serait qu'un choix de lisibilité.
 
-Aucun blocage sémantique n'a été trouvé dans ce snapshot non épinglé. Sa
-réception définitive attend seulement un commit stable et le rejeu de ses
-portes enregistrées, pas une reprise de conception.
+Une couture d'API/ownership reste à fermer avant le pin. `delta(i)` est bien
+qualifié `const&` et sa surcharge `const&&` est supprimée, mais son enveloppe
+`for_each_delta(F&&) const` reste appelable sur un `ForestResult` temporaire.
+Un callback qui conserve la `ComponentDeltaView` observe ensuite un
+heap-use-after-free sous ASan lorsque l'arène du temporaire est détruite. La
+correction minimale est symétrique à l'accesseur : qualifier la boucle
+`const&`, supprimer sa surcharge `const&&`, puis ajouter une dent de
+compilation avec un concept dépendant qui exige que l'appel sur rvalue soit
+ill-formé. Aucun autre wrapper de vue de `src/` ou `cli/` ne contourne la
+durée de vie.
+
+Les réserves initiales de `delta_meta` et des offsets sont par ailleurs hors
+du `try` qui capture le mutant `csr-inject-bad-alloc`. Le contrat écrit et la
+dent courante portent précisément sur un **append d'arène** après une écriture
+partielle ; ils ne prouvent pas la capture de toute allocation du fold. Deux
+choix simples sont recevables : englober aussi l'initialisation CSR et tester
+son échec, ou resserrer les commentaires au site d'append effectivement
+couvert. Ce point de portée ne bloque pas l'égalité d'objet ; il ne doit pas
+être transformé en promesse générale d'interception de tout OOM.
+
+La réception définitive attend donc ce petit verrou de durée de vie, un commit
+stable et le rejeu des portes enregistrées, pas une reprise de conception.
 
 Un second point concernait seulement le futur reçu de performance :
 `storage_allocations` était initialisé à 4 alors que trois `reserve` sont

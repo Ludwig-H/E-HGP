@@ -75,7 +75,7 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | reçu G4 tests K10/K5 `e66cd978` | paquet intègre : 278/278 hashes, 84/84 statuts code 0 et terminés, pins reconstruits, sept résumés identiques, arrêt exact à la première tentative ; égalités de préfixe observées sur cardinalités/digests ; profil et campagne strictement non décisionnels, accusé consommé |
 | porte de préfixe `2aaa4a53` | listes K exactes, appariement par clé complète et jumeau K10 obligatoire reçus ; les pins K5 de v1 restent post hoc, tandis que v2 porte ses huit fixtures avant toute future exécution |
 | sonde équilibrée `b79e29a5` / harnais `32da1550` | reçu concret intègre et recalculable ; réagrégation après scellement, statut exact et `profil_kind` durci reçus, 21/21 scènes normales et sous `-O`, CTest 2/2 ; un faux `sha256sum` du `PATH` peut encore corrompre après le dernier contrôle, et la liaison de régime reste partielle dans argv/META, `liveness` et l'identité préfixe ; seule une nouvelle mesure réutilisable attend ces fermetures |
-| réponse KeyCSR `38281dc7` / prototype WIP | architecture conforme au GO : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; build Release, 39/39 ciblées, matrice exhaustive et 21/21 mutants verts ; aucun blocage sémantique trouvé dans la contre-lecture, campagne sanitizer courte propre ; la garde vide et le compteur d'allocations causal sont déjà corrigés dans le WIP, le scratch reste à instrumenter seulement avant un reçu de performance |
+| réponse KeyCSR `38281dc7` / prototype WIP | architecture conforme au GO : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; 56/56 non-`scale`, matrice exhaustive et raccord runtime verts ; une vue peut encore échapper de `for_each_delta` appelé sur un temporaire et devient pendante, verrou `const&`/`const&&` à fermer avant le pin ; compteur causal reçu dans le WIP, scratch à instrumenter seulement avant une mesure |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP série C | départ refusé fail-closed puis arrêté ; perte de superviseur arrêtée sans reçu ; deux relances distinctes reçues et arrêtées sur leurs générations exactes, la plus récente `2026-09-01T18:34:33.420-07:00` ; aucun GO courant |
@@ -149,11 +149,16 @@ tiers, rejeu et refus transactionnels. Les 39 portes ciblées, la matrice
 exhaustive et les 21 mutants passent en Release. Une alerte sur
 `FacetKeyRange::size()` est retirée : C++20 définit explicitement la
 soustraction de deux pointeurs nuls à zéro, et les essais GCC/Clang sous
-ASan/UBSan et sanitizers de pointeurs passent. Aucun blocage sémantique n'est
-donc identifié. Le WIP a depuis ajouté une garde explicite sur la plage vide et
-compte les changements réels de `capacity()` au lieu d'initialiser une
-constante. Le scratch non instrumenté bloque seulement le futur reçu de
-télémétrie/performance, pas le prototype sémantique.
+ASan/UBSan et sanitizers de pointeurs passent. Le WIP a depuis ajouté une garde
+explicite sur la plage vide et compte les changements réels de `capacity()` au
+lieu d'initialiser une constante. Une couture de durée de vie reste toutefois
+causale : `for_each_delta` n'est pas ref-qualifié et peut être appelé sur un
+temporaire ; un callback qui conserve sa vue déclenche ensuite un
+heap-use-after-free sous ASan. Qualifier la boucle `const&`, supprimer
+`const&&` et garder un rejet de compilation suffit avant le pin. Les réserves
+CSR initiales hors du `try` sont un durcissement optionnel, car le contrat
+actuel borne explicitement sa capture au `bad_alloc` d'append d'arène. Le
+scratch non instrumenté attend seulement le futur reçu de performance.
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
@@ -672,8 +677,9 @@ Ordre recommandé à Claude :
 2. borner la frontière des outils critiques du harnais, puis fermer sa liaison
    de régime (argv/META, `liveness`, famille, paramètres de profil et identité
    exacte) avant sa prochaine mesure ;
-3. épingler le prototype KeyCSR avec son comparateur, son rejeu et sa matrice
-   déjà verts ; instrumenter le scratch seulement avant toute mesure ;
+3. fermer l'appel rvalue de `for_each_delta`, puis épingler le prototype
+   KeyCSR avec son comparateur, son rejeu et sa matrice déjà verts ;
+   instrumenter le scratch seulement avant toute mesure ;
 4. corriger `GRAND_LIVRE.md`, puis aligner `ARCHITECTURE.md`, `PROVENANCE.md`
    et `PLAN_DE_TESTS.md` au prochain checkpoint stable ;
 5. enrichir seulement C1–C4 dans `MATHEMATIQUES.md` et remplacer l'`assert`

@@ -35,10 +35,10 @@ des corrections, ils ne certifient rien.
 - [`REPONSE_AUDITEUR_COMPACTDELTA_CSR_20260902.md`](REPONSE_AUDITEUR_COMPACTDELTA_CSR_20260902.md) :
   GO exploratoire pour KeyCSR, sous égalité sémantique complète ; FidCSR et
   toute décision de performance restent des paliers séparés. Le prototype WIP
-  est structurellement solide, ses portes courtes et sa campagne sanitizer
-  sont vertes, sans blocage sémantique identifié ; la garde vide et le compteur
-  causal sont déjà corrigés, le scratch non instrumenté attend seulement le
-  futur reçu de mesure.
+  est structurellement solide et ses portes sont vertes. Avant son pin,
+  `for_each_delta` doit encore refuser les temporaires pour empêcher une vue
+  pendante ; la garde vide et le compteur causal sont déjà corrigés. Le scratch
+  non instrumenté attend seulement le futur reçu de mesure.
 - [`ALERTE_SONDE_ABLATION_REDUCE_20260902.md`](ALERTE_SONDE_ABLATION_REDUCE_20260902.md) :
   réception fonctionnelle de `32da1550` : la réagrégation après scellement et
   le statut exact sont reçus avec 21/21 scènes normales et optimisées, plus
