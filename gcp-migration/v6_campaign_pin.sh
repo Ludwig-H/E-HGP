@@ -41,6 +41,7 @@ PROTOCOL_FILES=(
   gcp-migration/start_and_verify.sh
   gcp-migration/stop_and_verify.sh
   gcp-migration/recover_v6_session.sh
+  gcp-migration/profils/g4_echelle_v1.env
 )
 
 # `morsehgp3D_v5/audits` et `morsehgp3D_v6/audits` sont les canaux

@@ -64,6 +64,7 @@ PROTOCOL_FILES=(
   gcp-migration/start_and_verify.sh
   gcp-migration/stop_and_verify.sh
   gcp-migration/recover_v6_session.sh
+  gcp-migration/profils/g4_echelle_v1.env
 )
 {
   echo "schema=e-hgp.protocol-manifest.v1"
@@ -101,7 +102,7 @@ _ov_THREADS_VM="${THREADS_VM:-}"; _ov_V5_GATE_MIN="${V5_GATE_MIN:-}"; _ov_V6_GAT
 _ov_SWEEP_SPECS="${SWEEP_SPECS:-}"; _ov_SWEEP_REPEATS="${SWEEP_REPEATS:-}"
 _ov_GPU_SPECS="${GPU_SPECS:-}"; _ov_FRONTIER_SPECS="${FRONTIER_SPECS:-}"
 _ov_FRONTIER_TIMEOUT="${FRONTIER_TIMEOUT:-}"; _ov_GPU_BUILD_TIMEOUT="${GPU_BUILD_TIMEOUT:-}"
-_ov_FRONTIER_ULIMIT_KB="${FRONTIER_ULIMIT_KB:-}"
+_ov_FRONTIER_ULIMIT_KB="${FRONTIER_ULIMIT_KB:-}"; _ov_FRONTIER_LAYOUT="${FRONTIER_LAYOUT:-}"
 _ov_MATRICE_POINTS="${MATRICE_POINTS:-}"; _ov_MATRICE_SEQUENCE="${MATRICE_SEQUENCE:-}"
 _ov_MATRICE_TIMEOUT="${MATRICE_TIMEOUT:-}"; _ov_ATTRIB_POINTS="${ATTRIB_POINTS:-}"
 _ov_ATTRIB_TIMEOUT="${ATTRIB_TIMEOUT:-}"; _ov_GPUV6_GATE_NAMES="${GPUV6_GATE_NAMES:-}"
@@ -111,6 +112,11 @@ _ov_GPUV6_PILOT_TIMEOUT="${GPUV6_PILOT_TIMEOUT:-}"; _ov_GPUV6_OBJET_DIGESTS="${G
 _ov_MATRICE_OBJET_DIGESTS="${MATRICE_OBJET_DIGESTS:-}"
 _ov_BIN_MATRICE="${BIN_MATRICE:-}"; _ov_BIN_ATTRIB="${BIN_ATTRIB:-}"; _ov_BIN_PILOTE="${BIN_PILOTE:-}"
 _ov_SESSION_MAX_RUN_SECONDS="${SESSION_MAX_RUN_SECONDS:-}"; _ov_SESSION_INVITE_MINUTES="${SESSION_INVITE_MINUTES:-}"
+# ROUTE DE STOCKAGE du fold pour la FRONTIERE (pin KeyCSR, axe du 2
+# septembre) : VIDE = axe non demande, le runner reste alors en plan v1 et
+# n'ecrit aucun jeton `--layout` (octets des recus anterieurs). Les profils
+# qui ne declarent pas l'axe heritent donc du comportement d'avant l'axe.
+FRONTIER_LAYOUT=""
 # Valeurs par defaut des NOUVEAUX axes serie C (profils anterieurs sans ces
 # cles : sentinelle `aucun` = phases sautees, plans runs=0).
 MATRICE_POINTS="aucun"; MATRICE_SEQUENCE="aller retour aller"; MATRICE_TIMEOUT="2400"
@@ -132,7 +138,7 @@ source "${PROFILE_SRC}"
 EFFECTIVE_PROFILE="${CAMPAIGN_PROFILE}"
 for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM V5_GATE_MIN V6_GATE_MIN \
          SWEEP_SPECS SWEEP_REPEATS GPU_SPECS FRONTIER_SPECS FRONTIER_TIMEOUT \
-         GPU_BUILD_TIMEOUT FRONTIER_ULIMIT_KB \
+         GPU_BUILD_TIMEOUT FRONTIER_ULIMIT_KB FRONTIER_LAYOUT \
          MATRICE_POINTS MATRICE_SEQUENCE MATRICE_TIMEOUT ATTRIB_POINTS ATTRIB_TIMEOUT \
          GPUV6_GATE_NAMES GPUV6_BUILD_TIMEOUT GPUV6_GATE_TIMEOUT \
          GPUV6_PILOT_SPECS GPUV6_PILOT_MIN_LOTS GPUV6_PILOT_TIMEOUT GPUV6_OBJET_DIGESTS MATRICE_OBJET_DIGESTS \
@@ -147,7 +153,7 @@ done
 _param_re='^[A-Za-z0-9_:, -]*$'
 for v in CONF_SPECS BENCH_SPECS QUEUE_FAMILIES QUEUE_N QUEUE_SEEDS RUN_TIMEOUT THREADS_VM \
          SWEEP_SPECS SWEEP_REPEATS GPU_SPECS FRONTIER_SPECS FRONTIER_TIMEOUT \
-         GPU_BUILD_TIMEOUT FRONTIER_ULIMIT_KB \
+         GPU_BUILD_TIMEOUT FRONTIER_ULIMIT_KB FRONTIER_LAYOUT \
          MATRICE_POINTS MATRICE_SEQUENCE MATRICE_TIMEOUT ATTRIB_POINTS ATTRIB_TIMEOUT \
          GPUV6_GATE_NAMES GPUV6_BUILD_TIMEOUT GPUV6_GATE_TIMEOUT \
          GPUV6_PILOT_SPECS GPUV6_PILOT_MIN_LOTS GPUV6_PILOT_TIMEOUT GPUV6_OBJET_DIGESTS MATRICE_OBJET_DIGESTS \
@@ -770,6 +776,10 @@ gcloud config set project "${GCP_PROJECT_ID}" >/dev/null
   echo "frontier_timeout=${FRONTIER_TIMEOUT}"
   echo "gpu_build_timeout=${GPU_BUILD_TIMEOUT}"
   echo "frontier_ulimit_kb=${FRONTIER_ULIMIT_KB}"
+  # ROUTE DE STOCKAGE DE LA FRONTIERE : gravee MEME VIDE — un profil qui ne
+  # demande pas l'axe le dit, et le validateur peut alors distinguer « axe
+  # non demande » de « axe perdu en chemin ».
+  echo "frontier_layout=${FRONTIER_LAYOUT}"
   echo "matrice_points=${MATRICE_POINTS}"
   echo "matrice_sequence=${MATRICE_SEQUENCE}"
   echo "matrice_timeout=${MATRICE_TIMEOUT}"
@@ -832,7 +842,10 @@ frontier_cap = int(sys.argv[11])
 gpu_fixed, gpu_ref = 2 * gpu_build_cap + 60, {32000: 80, 50000: 130, 100000: 260}
 # FRONTIERE : chaque taille inconnue est creditee au PLAFOND ; 800000 est
 # credite au plafond (l'issue attendue est un refus de capacite ou un
-# timeout).
+# timeout). La table est calibree a K=10 (smax=11) : un spec famille:n:smax
+# hors 11 n'y a AUCUN temoin (l'objet calcule est un prefixe, son cout est
+# inconnu avant mesure) — il est credite au PLAFOND, jamais a une reference
+# d'une autre echelle.
 frontier_ref = {200000: 700, 400000: 1700}
 # SERIE C (§ 5.12), DECLARE AVANT MESURE : matrice CPU au modele sweep
 # (base 48 fils x (48/fils)**0.9, digest `avec` x1,25), un run par point et
@@ -882,8 +895,10 @@ if gpu:
         total += 4 * gpu_ref.get(n, 900)  # cpu + dev + ad + idx
         runs += 4
 for spec in frontier:
-    n = int(spec.split(":")[1])
-    total += frontier_ref.get(n, frontier_cap)
+    parts = spec.split(":")
+    n = int(parts[1])
+    smax = parts[2] if len(parts) > 2 else "11"
+    total += frontier_ref.get(n, frontier_cap) if smax == "11" else frontier_cap
     runs += 1
 for spec in matrice:
     total += matrice_passages * matrice_point_cost(spec)
@@ -1179,6 +1194,7 @@ if [ "${CAMPAIGN_SKIPPED}" -eq 0 ]; then
     SWEEP_SPECS='${SWEEP_SPECS}' SWEEP_REPEATS='${SWEEP_REPEATS}' \
     GPU_SPECS='${GPU_SPECS}' FRONTIER_SPECS='${FRONTIER_SPECS}' FRONTIER_TIMEOUT='${FRONTIER_TIMEOUT}' \
     GPU_BUILD_TIMEOUT='${GPU_BUILD_TIMEOUT}' FRONTIER_ULIMIT_KB='${FRONTIER_ULIMIT_KB}' \
+    FRONTIER_LAYOUT='${FRONTIER_LAYOUT}' \
     MATRICE_POINTS='${MATRICE_POINTS}' MATRICE_SEQUENCE='${MATRICE_SEQUENCE}' MATRICE_TIMEOUT='${MATRICE_TIMEOUT}' \
     ATTRIB_POINTS='${ATTRIB_POINTS}' ATTRIB_TIMEOUT='${ATTRIB_TIMEOUT}' \
     GPUV6_GATE_NAMES='${GPUV6_GATE_NAMES}' GPUV6_BUILD_TIMEOUT='${GPUV6_BUILD_TIMEOUT}' GPUV6_GATE_TIMEOUT='${GPUV6_GATE_TIMEOUT}' \

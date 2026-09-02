@@ -30,7 +30,13 @@ campaign_status — jamais le lanceur, jamais la VM. `complete` exige :
     (septieme tour) : code 0 = contrat pipeline complet + motifs interdits
     scannes ; code 2 = refus du pipeline a la grammaire fermee
     « REFUS resource_exhausted : ... » (exactement une ligne, jamais
-    bad_alloc dans le corps) ; code 134 = abort a diagnostic exact
+    bad_alloc dans le corps) — avec une SOUS-CLASSE, le refus d'ALLOCATION
+    PAR ETAGE, dont le message porte l'etage atteint (liste FERMEE :
+    entree, generation, rle, prefiltre, census, fold, publication) et les
+    cinq RSS par etage, RECOUPES champ par champ avec l'unique ligne
+    `refus_etage=` ; toute incoherence entre les deux est un DESACCORD, pas
+    une donnee de frontiere, et la sous-classe est notee au resume ; code
+    134 = abort a diagnostic exact
     « std::bad_alloc », PROUVE par le superviseur (« terminated by
     signal 6 » dans la sortie GNU time — coreutils timeout propage le
     signal du fils en se le renvoyant), SOUS RLIMIT_AS atteste
@@ -41,7 +47,19 @@ campaign_status — jamais le lanceur, jamais la VM. `complete` exige :
     phase, comme 3, 127, 139, un code absent/non decimal et tout signal
     non prouve. Meme correcte, cette mesure est une frontiere SOUS PLAFOND
     VIRTUEL RLIMIT_AS, pas le mur RAM natif de la VM. RSS et sortie GNU
-    time exiges dans tous les cas ;
+    time exiges dans tous les cas. Le spec d'un run est `famille:n[:smax]`
+    (smax dans [2,11], K = smax - 1) ; NORMALISATION DU SPEC : un smax=11
+    explicite vaut EXACTEMENT son absence (meme nom de run, meme ligne, meme
+    commande, meme statut) et un smax != 11 suffixe le nom `_s<smax>` (aucune
+    collision K5/K10). Le PLAN est VERSIONNE et les deux versions ont une
+    grammaire FERMEE : `frontier_plan=v1` (recus anterieurs) n'a AUCUN jeton
+    smax ni layout — ni en en-tete, ni sur une ligne, ni dans l'argv, ni au
+    statut, ni au resume — et interdit un spec a smax != 11 ;
+    `frontier_plan=v2` porte `layout=<classic|csr>` en en-tete (jamais
+    implicite depuis le pin KeyCSR), `smax=<smax>` sur CHAQUE ligne,
+    `--smax=<smax> ... --layout=<layout>` dans chaque commande, `smax=` et
+    `layout=` au statut de chaque run (une occurrence, egales au plan), et
+    une colonne `smax` inseree apres `n` dans frontier_resume.txt ;
   - des codes de session (ssh distant, scp) nuls.
 Il ecrit bench_resume.txt et queue_resume.txt (murs / RSS — completude et
 dispersion, JAMAIS une conclusion d'acceleration ni de pente).
@@ -133,7 +151,8 @@ def read_plan(out, fname, version_key, param_keys, bad, version="v1"):
         elif "=" in line:
             k, v = line.split("=", 1)
             params[k] = v
-    if params.get(version_key) != version:
+    versions = (version,) if isinstance(version, str) else tuple(version)
+    if params.get(version_key) not in versions:
         bad.append(f"{fname}: version de plan inconnue")
         return None, []
     for key in param_keys + ("runs",):
@@ -218,11 +237,47 @@ def gpu_sequence(params):
     return seq
 
 
-def frontier_sequence(params):
+def normalise_frontier_specs(axe):
+    """`fam:n:11` et `fam:n` designent le MEME run : les deux sont ramenes aux
+    MEMES OCTETS avant toute comparaison. Le runner normalise a la source (son
+    plan ne porte plus jamais `:11`) ; le profil epingle, lui, garde les octets
+    ecrits par l'exploitant — la liaison plan/profil se fait donc normalisee,
+    jamais a la lettre."""
+    sortie = []
+    for spec in axe.split():
+        parts = spec.split(":")
+        if len(parts) == 3 and parts[2] == "11":
+            spec = ":".join(parts[:2])
+        sortie.append(spec)
+    return sortie
+
+
+def frontier_sequence(params, bad):
+    """Spec de frontiere : famille:n[:smax], smax dans [2,11] (K = smax - 1).
+    NORMALISATION : un smax=11 EXPLICITE est traite EXACTEMENT comme son
+    absence — meme nom de run, meme ligne de plan, meme commande, aucun champ
+    de statut supplementaire (les recus anterieurs restent re-jugeables). Deux
+    specs qui normalisent vers le MEME nom sont un plan qui ecrirait deux fois
+    dans le meme artefact : refus, jamais un run juge deux fois."""
     seq = []
     for spec in expand_axis(params["specs"]):
-        fam, n = spec.split(":", 1)
-        seq.append({"seq": str(len(seq) + 1), "name": f"front_{fam}_n{n}", "family": fam, "n": n})
+        parts = spec.split(":")
+        if len(parts) not in (2, 3):
+            bad.append(f"frontier_plan.txt: spec mal forme {spec}")
+            return []
+        fam, n = parts[0], parts[1]
+        smax = parts[2] if len(parts) == 3 else "11"
+        if not re.match(r"^([2-9]|1[01])$", smax):
+            bad.append(f"frontier_plan.txt: smax hors domaine {spec}")
+            return []
+        sfx = "" if smax == "11" else f"_s{smax}"
+        seq.append({"seq": str(len(seq) + 1), "name": f"front_{fam}_n{n}{sfx}",
+                    "family": fam, "n": n, "smax": smax})
+    noms = [x["name"] for x in seq]
+    if len(set(noms)) != len(noms):
+        bad.append("frontier_plan.txt: deux specs normalisent vers le meme nom de run "
+                   "(collision d'artefact)")
+        return []
     return seq
 
 
@@ -482,6 +537,53 @@ def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad,
                       int(kb) if kb else None)
 
 
+# SOUS-CLASSE EXACTE du code 2 (alerte G4 du 2 septembre) : le moteur
+# convertit un echec d'allocation en REFUS TRANSACTIONNEL et joint l'ETAGE
+# atteint plus les cinq RSS par etage. La liste des etages est FERMEE (elle
+# suit `run_stage_name` du moteur) et le diagnostic est RECOUPE : la ligne
+# `refus_etage=` doit exister exactement une fois, porter le MEME etage que
+# le message et les MEMES cinq RSS. Une incoherence est un DESACCORD (la
+# phase est invalide), jamais une donnee de frontiere.
+ETAGES_REFUS = ("entree", "generation", "rle", "prefiltre", "census", "fold", "publication")
+RSS_ETAGES = ("apres_generation", "apres_rle", "apres_prefiltre", "apres_census", "max_fold")
+_RSS_RE = " ".join(rf"{champ}=(-?\d+)" for champ in RSS_ETAGES)
+REFUS_ETAGE_MSG = re.compile(rf"^REFUS resource_exhausted : allocation impossible a l'etage "
+                             rf"(\S+) \(rss_mb {_RSS_RE}\)$")
+REFUS_ETAGE_LIGNE = re.compile(rf"^refus_etage=(\S+) rss_mb {_RSS_RE} "
+                               rf"\(frontiere de completion : dernier etage atteint\)$", re.M)
+
+
+def classe_refus_etage(name, ligne_refus, body, bad):
+    """Rend la NOTE du run pour un code 2 deja type. Deux sous-classes :
+    le refus de capacite ORDINAIRE (caps declares, aucun etage — grammaire
+    et recus anterieurs INCHANGES) et le refus d'ALLOCATION PAR ETAGE, qui
+    est recoupe champ par champ avec la ligne `refus_etage=`."""
+    if "allocation impossible a l'etage" not in ligne_refus:
+        return "resource_exhausted (refus du pipeline)"
+    m = REFUS_ETAGE_MSG.match(ligne_refus)
+    if not m:
+        bad.append(f"{name}: refus d'allocation hors grammaire exacte "
+                   f"(« allocation impossible a l'etage <etage> (rss_mb {' '.join(RSS_ETAGES)}) »)")
+        return "refus d'allocation hors grammaire"
+    etage, rss_msg = m.group(1), m.groups()[1:]
+    if etage not in ETAGES_REFUS:
+        bad.append(f"{name}: etage de refus '{etage}' hors de la liste fermee {ETAGES_REFUS}")
+        return f"etage inconnu ({etage})"
+    lignes = REFUS_ETAGE_LIGNE.findall(body)
+    if len(lignes) != 1:
+        bad.append(f"{name}: message d'etage sans exactement une ligne « refus_etage=... » "
+                   f"({len(lignes)} vues) — diagnostic non recoupe")
+        return "refus d'etage non recoupe"
+    etage_ligne, rss_ligne = lignes[0][0], tuple(lignes[0][1:])
+    if etage_ligne != etage:
+        bad.append(f"{name}: refus_etage={etage_ligne} != etage du message ({etage}) — desaccord")
+        return "etage contradictoire"
+    if rss_ligne != rss_msg:
+        bad.append(f"{name}: rss_mb de refus_etage= {rss_ligne} != rss_mb du message {rss_msg} — desaccord")
+        return "rss d'etage contradictoires"
+    return f"resource_exhausted a l'etage {etage}"
+
+
 def check_pipeline_run(name, body, fam, n, seed, engine, threads, bad, smax="11"):
     """Un run de pilote (v5 ou v6) : identite, portee de tour, compteurs.
     smax != 11 (K = smax - 1) : la portee est `prefix_k<K>` a smax demande
@@ -666,7 +768,8 @@ def main():
             # Axes serie C OPTIONNELS dans le canon (les profils anterieurs
             # ne les declarent pas ; le cycle de vie leur donne des valeurs
             # par defaut « aucun » qui sautent les phases).
-            optional_axes = ("MATRICE_POINTS", "MATRICE_SEQUENCE", "MATRICE_TIMEOUT",
+            optional_axes = ("FRONTIER_LAYOUT",
+                             "MATRICE_POINTS", "MATRICE_SEQUENCE", "MATRICE_TIMEOUT",
                              "ATTRIB_POINTS", "ATTRIB_TIMEOUT",
                              "GPUV6_GATE_NAMES", "GPUV6_BUILD_TIMEOUT", "GPUV6_GATE_TIMEOUT",
                              "GPUV6_PILOT_SPECS", "GPUV6_PILOT_MIN_LOTS", "GPUV6_PILOT_TIMEOUT",
@@ -747,6 +850,7 @@ def main():
                     ("frontier_timeout", "FRONTIER_TIMEOUT"),
                     ("gpu_build_timeout", "GPU_BUILD_TIMEOUT"),
                     ("frontier_ulimit_kb", "FRONTIER_ULIMIT_KB"),
+                    ("frontier_layout", "FRONTIER_LAYOUT"),
                     ("matrice_points", "MATRICE_POINTS"), ("matrice_sequence", "MATRICE_SEQUENCE"),
                     ("matrice_timeout", "MATRICE_TIMEOUT"),
                     ("attrib_points", "ATTRIB_POINTS"), ("attrib_timeout", "ATTRIB_TIMEOUT"),
@@ -821,8 +925,13 @@ def main():
                                            ("specs", "repeats"), bad)
     gpu_params, gpu_listed = read_plan(out, "gpu_plan.txt", "gpu_plan",
                                        ("specs", "threads", "build_timeout"), bad)
+    # PLAN DE FRONTIERE VERSIONNE : v1 = grammaire d'avant les axes smax et
+    # layout (aucun jeton nulle part) ; v2 = grammaire explicite des deux
+    # axes. `layout` n'est PAS un parametre obligatoire ici : il est exige
+    # (et interdit) plus bas selon la version.
     frontier_params, frontier_listed = read_plan(out, "frontier_plan.txt", "frontier_plan",
-                                                 ("specs", "threads", "timeout", "ulimit_kb"), bad)
+                                                 ("specs", "threads", "timeout", "ulimit_kb"), bad,
+                                                 version=("v1", "v2"))
     matrice_params, matrice_listed = read_plan(out, "matrice_plan.txt", "matrice_plan",
                                                ("points", "sequence"), bad)
     attrib_params, attrib_listed = read_plan(out, "attrib_plan.txt", "attrib_plan",
@@ -834,7 +943,7 @@ def main():
     queue_runs = queue_sequence(queue_params) if queue_params else []
     sweep_runs = sweep_sequence(sweep_params) if sweep_params else []
     gpu_runs = gpu_sequence(gpu_params) if gpu_params else []
-    frontier_runs = frontier_sequence(frontier_params) if frontier_params else []
+    frontier_runs = frontier_sequence(frontier_params, bad) if frontier_params else []
     matrice_runs = matrice_sequence(matrice_params, bad) if matrice_params else []
     matrice_plan_has_smax = bool(matrice_listed) and all("smax" in x for x in matrice_listed)
     attrib_runs = attrib_sequence(attrib_params, bad) if attrib_params else []
@@ -845,6 +954,45 @@ def main():
     check_plan("sweep_plan.txt", sweep_params, sweep_listed, sweep_runs, bad)
     check_plan("gpu_plan.txt", gpu_params, gpu_listed, gpu_runs, bad)
     check_plan("frontier_plan.txt", frontier_params, frontier_listed, frontier_runs, bad)
+    # GRAMMAIRE FERMEE DES DEUX VERSIONS DU PLAN DE FRONTIERE.
+    #   v1 : AUCUN jeton smax ni layout — ni en en-tete, ni sur une ligne
+    #        (et donc, plus bas, ni dans l'argv ni au statut ni au resume) ;
+    #        un spec a smax != 11 y est impossible.
+    #   v2 : `layout` en en-tete (classic | csr, jamais implicite depuis le
+    #        pin KeyCSR) et `smax` sur CHAQUE ligne, egal au recalcul du spec.
+    frontier_version = frontier_params.get("frontier_plan") if frontier_params else None
+    frontier_layout = frontier_params.get("layout") if frontier_params else None
+    if frontier_params is not None:
+        if frontier_version == "v1":
+            if "layout" in frontier_params:
+                bad.append("frontier_plan.txt: champ layout dans un plan v1 "
+                           "(la v1 est la grammaire d'avant l'axe de route)")
+            if any(run["smax"] != "11" for run in frontier_runs):
+                bad.append("frontier_plan.txt: plan v1 avec un spec a smax != 11 "
+                           "(l'axe smax exige la v2)")
+            if (profile.get("frontier_layout", "") if profile else "").strip():
+                bad.append(f"frontier_plan.txt: plan v1 alors que le profil epingle demande "
+                           f"frontier_layout={profile.get('frontier_layout')} (l'axe layout exige la v2)")
+            for got in frontier_listed:
+                if "smax" in got:
+                    bad.append(f"frontier_plan.txt: {got.get('name', '?')}: champ smax sur une ligne "
+                               f"de plan v1 (grammaire d'avant l'axe)")
+        else:
+            if frontier_layout not in ("classic", "csr"):
+                bad.append(f"frontier_plan.txt: layout={frontier_layout or 'absent'} hors "
+                           f"{{classic, csr}} — un plan v2 grave TOUJOURS sa route de stockage")
+            # LIAISON AU PROFIL EPINGLE quand il declare l'axe (les profils
+            # anterieurs ne le declarent pas : aucune contrainte, la baseline
+            # `classic` du runner suffit).
+            profil_layout = (profile.get("frontier_layout", "") if profile else "").strip()
+            if profil_layout and profil_layout != frontier_layout:
+                bad.append(f"frontier_plan.txt: layout={frontier_layout or 'absent'} != profil "
+                           f"epingle (frontier_layout={profil_layout})")
+            if len(frontier_listed) == len(frontier_runs):
+                for got, want in zip(frontier_listed, frontier_runs):
+                    if got.get("smax") != want["smax"]:
+                        bad.append(f"frontier_plan.txt: {want['name']}: smax="
+                                   f"{got.get('smax', 'absent')} != {want['smax']} (recalcul du spec)")
     check_plan("matrice_plan.txt", matrice_params, matrice_listed, matrice_runs, bad)
     check_plan("attrib_plan.txt", attrib_params, attrib_listed, attrib_runs, bad)
     check_plan("gpuv6_plan.txt", gpuv6_params, gpuv6_listed, gpuv6_runs, bad)
@@ -871,7 +1019,14 @@ def main():
             if params is None:
                 continue
             for plan_key, prof_key in checks:
-                if params.get(plan_key, "").split() != profile.get(prof_key, "").split():
+                annonce, epingle = params.get(plan_key, "").split(), profile.get(prof_key, "").split()
+                # FRONTIERE : la liaison se fait sur les specs NORMALISES —
+                # `fam:n:11` du profil et `fam:n` du plan sont le meme run,
+                # et rien d'autre n'est absorbe par cette normalisation.
+                if (plan, plan_key) == ("frontier_plan.txt", "specs"):
+                    annonce = normalise_frontier_specs(params.get(plan_key, ""))
+                    epingle = normalise_frontier_specs(profile.get(prof_key, ""))
+                if annonce != epingle:
                     bad.append(f"{plan}: {plan_key} != profil epingle ({prof_key})")
 
     # PHASE 1 — conformite (paires fam:n du profil, tailles mesurees incluses).
@@ -1536,14 +1691,18 @@ def main():
         gpu_rows.append((run, meas, kernel_ms))
 
     # PHASE FRONTIERE — issues TYPEES (cinquieme tour : une panne quelconque
-    # n'est PAS une frontiere). Trois classes admises :
+    # n'est PAS une frontiere). TROIS classes admises, et rien d'autre :
     #   0   -> succes : contrat pipeline v6 COMPLET (identite, compteurs,
     #          cardinalites, temps), aucun digest ;
-    #   124 -> timeout de la borne annoncee (l'outil timeout du runner) ;
-    #   != 0 avec motif STRUCTURE de capacite (resource_exhausted /
-    #          bad_alloc) -> refus de capacite, la donnee de frontiere.
-    # TOUT autre code (CLI 2, invariant 3, binaire absent 127, signal sans
-    # motif — SIGKILL non prouve = observation censuree) invalide la phase.
+    #   2   -> refus du pipeline, grammaire fermee « REFUS
+    #          resource_exhausted : ... » (exactement une ligne) ;
+    #   134 -> std::bad_alloc PROUVE (signal 6 atteste par GNU time) SOUS un
+    #          RLIMIT_AS lui-meme atteste : la donnee de frontiere.
+    # TOUT autre code invalide la phase — y compris 124 : un timeout n'est
+    # PAS une donnee ici, aucun marqueur causal ne distingue le timeout du
+    # superviseur d'un exit(124) du binaire (voir plus bas, classe « 124 non
+    # attribue »). Idem CLI 2 non type, invariant 3, binaire absent 127,
+    # signal sans motif (SIGKILL non prouve = observation censuree).
     frontier_threads = frontier_params["threads"] if frontier_params else "0"
     frontier_rows = []
     for run in frontier_runs:
@@ -1566,6 +1725,22 @@ def main():
             fm = re.search(rf"^{field}=(\S+)$", st, re.M)
             if not fm or fm.group(1) != want:
                 bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} (annonce)")
+        # STATUT selon la VERSION du plan : v1 n'a ni smax ni layout (octets
+        # d'avant les axes) ; v2 exige les deux, exactement une fois, egaux
+        # au plan.
+        smax_lignes = re.findall(r"^smax=(\S+)$", st, re.M)
+        layout_lignes = re.findall(r"^layout=(\S+)$", st, re.M)
+        if frontier_version == "v1":
+            if smax_lignes or layout_lignes:
+                bad.append(f"{name}: champ smax/layout ({smax_lignes}/{layout_lignes}) grave sur un "
+                           f"run de plan v1 (grammaire d'avant les axes)")
+        else:
+            if smax_lignes != [run["smax"]]:
+                bad.append(f"{name}: smax={smax_lignes or 'absent'} != ['{run['smax']}'] (plan) "
+                           f"ou duplique dans le statut")
+            if layout_lignes != [frontier_layout]:
+                bad.append(f"{name}: layout={layout_lignes or 'absent'} != ['{frontier_layout}'] "
+                           f"(plan) ou duplique dans le statut")
         cmd = re.search(r"^commande=(.*)$", st, re.M)
         # LIAISON DU PLAFOND (septieme tour : les jetons decoratifs sont
         # morts) : occurrences UNIQUES de limit_kind/limit_kb, et la commande
@@ -1582,7 +1757,11 @@ def main():
         if lks != [want_kind] or lbs != [want_kb]:
             bad.append(f"{name}: attestation de plafond {lks}/{lbs} != {want_kind}/{want_kb} (plan)")
         args_re = (rf"--family={re.escape(run['family'])} --n={run['n']} "
-                   rf"--s=8 --smax=11 --seed=3 --threads={frontier_threads}")
+                   rf"--s=8 --smax={run['smax']} --seed=3 --threads={frontier_threads}")
+        # v2 : la route de stockage est le DERNIER argument contractuel — un
+        # plan v2 dont la commande laisserait le layout implicite est refuse.
+        if frontier_version != "v1":
+            args_re += rf" --layout={re.escape(frontier_layout or '')}"
         if plan_ulimit != "0":
             cmd_re = (r"^/bin/bash -c ulimit -v \"\$1\" && shift && exec \"\$@\" _ "
                       + plan_ulimit + r" \S+ " + args_re + r"$")
@@ -1605,7 +1784,7 @@ def main():
         if code == "0":
             if body is not None:
                 check_pipeline_run(name, body, run["family"], run["n"], "3", "v6",
-                                   frontier_threads, bad)
+                                   frontier_threads, bad, smax=run["smax"])
                 if ANY_DIGEST.search(body):
                     bad.append(f"{name}: digest imprime sur un run de frontiere")
                 fb = FORBIDDEN.search(body)
@@ -1624,7 +1803,7 @@ def main():
                 bad.append(f"{name}: code 2 avec un diagnostic bad_alloc — classes non exclusives")
                 note = "code 2 contradictoire"
             else:
-                note = "resource_exhausted (refus du pipeline)"
+                note = classe_refus_etage(name, refus[0], body or "", bad)
         elif code == "134":
             if not re.search(r"std::bad_alloc", body or ""):
                 bad.append(f"{name}: code 134 sans diagnostic exact std::bad_alloc")
@@ -1827,19 +2006,32 @@ def main():
         fh.write("\n".join(lines) + "\n")
     os.replace(tmp, os.path.join(resume_dir, "gpuv6_resume.txt"))
 
+    # RESUME selon la VERSION du plan : v2 ajoute la colonne `smax` (inseree
+    # apres `n`) et la ligne de route ; v1 rend exactement les octets d'avant
+    # les axes — c'est ce qui rend les resumes des recus anterieurs
+    # re-productibles a l'identique par le validateur courant.
+    frontier_v2 = frontier_params is not None and frontier_params.get("frontier_plan") != "v1"
     lines = [
         "# frontier_resume — codes, murs et RSS de la frontiere d'echelle SOUS PLAFOND",
         "# VIRTUEL RLIMIT_AS (pas le mur RAM natif) ; un refus de capacite type est une donnee.",
         ("# limit_kind=rlimit_as limit_kb=" + frontier_params.get("ulimit_kb", "?")
          if frontier_params and frontier_params.get("ulimit_kb", "0") != "0"
          else "# limit_kind=none (aucun plafond impose par le plan)"),
-        "famille\tn\tcode\tmur_ms\tduree_s\trss_kb\tnote",
     ]
+    if frontier_v2:
+        lines.append("# plan=v2 layout=" + (frontier_layout or "?")
+                     + " (route de stockage du fold, gravee dans chaque argv)")
+    lines.append("famille\tn\tsmax\tcode\tmur_ms\tduree_s\trss_kb\tnote" if frontier_v2
+                 else "famille\tn\tcode\tmur_ms\tduree_s\trss_kb\tnote")
     for run, code, meas, note in frontier_rows:
-        lines.append("\t".join([run["family"], run["n"], code, fmt(meas[0]),
-                                str(meas[1]) if meas[1] is not None else "NA",
-                                str(meas[2]) if meas[2] is not None else "NA",
-                                note or "-"]))
+        champs = [run["family"], run["n"]]
+        if frontier_v2:
+            champs.append(run["smax"])
+        champs.extend([code, fmt(meas[0]),
+                       str(meas[1]) if meas[1] is not None else "NA",
+                       str(meas[2]) if meas[2] is not None else "NA",
+                       note or "-"])
+        lines.append("\t".join(champs))
     tmp = os.path.join(resume_dir, "frontier_resume.txt.tmp")
     with open(tmp, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
@@ -1866,7 +2058,8 @@ def main():
                 ("gpu_specs", "GPU_SPECS"), ("frontier_specs", "FRONTIER_SPECS"),
                 ("frontier_timeout", "FRONTIER_TIMEOUT"),
                 ("gpu_build_timeout", "GPU_BUILD_TIMEOUT"),
-                ("frontier_ulimit_kb", "FRONTIER_ULIMIT_KB"))
+                ("frontier_ulimit_kb", "FRONTIER_ULIMIT_KB"),
+                ("frontier_layout", "FRONTIER_LAYOUT"))
     axes_equal = bool(canon_axes) and all(
         profile.get(pk, "").split() == canon_axes.get(ck, "").split() for pk, ck in axis_map)
     # INSTRUMENTATION EPINGLEE (huitieme tour, TOTALITE au dixieme) : GNU

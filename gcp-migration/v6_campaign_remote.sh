@@ -83,12 +83,23 @@ GPU_Q4_GATE="${GPU_Q4_GATE:-./build-v5-cuda/mhgp5_q4_lane_device_gate}"
 # RSS graves ; un echec (OOM, refus de capacite, timeout) est une DONNEE de
 # frontiere, pas une faute de campagne — le code est enregistre et la phase
 # continue sur les specs suivants.
+# Grammaire d'un spec : famille:n[:smax], smax dans [2,11] (K = smax - 1).
+# NORMALISATION DU SPEC : un smax=11 EXPLICITE est traite EXACTEMENT comme
+# son absence — meme nom de run, meme ligne de plan, meme commande gravee,
+# meme statut. Le PLAN est versionne : v1 tant qu'aucun axe nouveau n'est
+# demande (aucun smax != 11 et aucun FRONTIER_LAYOUT), v2 des qu'un seul
+# l'est ; les recus anterieurs sont donc en v1, octet pour octet.
 FRONTIER_SPECS="${FRONTIER_SPECS:-aucun}"
 FRONTIER_TIMEOUT="${FRONTIER_TIMEOUT:-3600}"
 # Plafond de memoire VIRTUELLE (kB) par run de frontiere : l'instrument qui
 # transforme un OOM muet (SIGKILL non attribuable) en std::bad_alloc TYPE.
 # 0 = pas de plafond.
 FRONTIER_ULIMIT_KB="${FRONTIER_ULIMIT_KB:-0}"
+# ROUTE DE STOCKAGE du fold (pin KeyCSR 8afd1057) : `classic` (delta vectoriel)
+# ou `csr` (cles de facettes CSR) — MEME objet, jamais un repli. VIDE = axe
+# non demande : le plan reste en v1 et la commande ne porte aucun jeton
+# `--layout` (exactement les octets des recus anterieurs a cet axe).
+FRONTIER_LAYOUT="${FRONTIER_LAYOUT:-}"
 # ---- SERIE C v6 (profil g4_serie_c_v1, § 5.12 — sentinelle `aucun` = phase
 # sautee, plan runs=0) : MATRICE CPU decisionnelle a CONTRASTES
 # PRE-ENREGISTRES (points famille:n:fils:inflight:join:digest, sequence
@@ -152,8 +163,39 @@ for spec in ${SWEEP_SPECS}; do
 done
 for spec in ${FRONTIER_SPECS}; do
   [ "${spec}" = "aucun" ] && continue
-  [[ "${spec}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*$ ]] || refuse "paire FRONTIERE '${spec}' mal formee (fam:n)"
+  [[ "${spec}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*(:([2-9]|1[01]))?$ ]] \
+    || refuse "spec FRONTIERE '${spec}' mal forme (fam:n[:smax], smax dans [2,11])"
 done
+[[ "${FRONTIER_LAYOUT}" =~ ^(classic|csr)?$ ]] \
+  || refuse "FRONTIER_LAYOUT '${FRONTIER_LAYOUT}' inconnu (vide | classic | csr)"
+# VERSION DU PLAN DE FRONTIERE (ordre de travail des auditeurs, 2 septembre) :
+# v1 = grammaire d'avant les axes smax/layout, emise A L'IDENTIQUE tant
+# qu'aucun axe nouveau n'est demande (aucun spec a smax != 11 ET aucun
+# layout) ; v2 = grammaire explicite des DEUX axes des qu'un seul est
+# demande. La conservation bit a bit des recus anterieurs se lit alors sur
+# la version : ils sont en v1.
+FRONTIER_PLAN_VERSION=v1
+for spec in ${FRONTIER_SPECS}; do
+  [ "${spec}" = "aucun" ] && continue
+  case "${spec}" in *:*:*) [ "${spec##*:}" = "11" ] || FRONTIER_PLAN_VERSION=v2 ;; esac
+done
+[ -z "${FRONTIER_LAYOUT}" ] || FRONTIER_PLAN_VERSION=v2
+# En v2 le layout est TOUJOURS grave (un recu v2 sans jeton de route serait
+# architecturalement ambigu depuis le pin KeyCSR) : `classic` est la
+# baseline quand l'axe n'est pas demande explicitement.
+FRONTIER_LAYOUT_EFF=""
+[ "${FRONTIER_PLAN_VERSION}" = "v1" ] || FRONTIER_LAYOUT_EFF="${FRONTIER_LAYOUT:-classic}"
+# NORMALISATION DU SPEC AVANT TOUT USAGE (retour auditeur du 2 septembre) :
+# `fam:n:11` et `fam:n` designent le MEME run (meme nom, meme commande, meme
+# statut) — ils sont donc ramenes aux MEMES OCTETS avant le controle de
+# doublons et avant l'emission de `specs=`. Sans cela deux specs distincts a
+# la lettre ecriraient dans le meme artefact sans qu'aucune porte ne le voie.
+_front_norm=""
+for spec in ${FRONTIER_SPECS}; do
+  case "${spec}" in *:*:11) spec="${spec%:11}" ;; esac
+  _front_norm="${_front_norm} ${spec}"
+done
+FRONTIER_SPECS="${_front_norm# }"
 for pt in ${MATRICE_POINTS}; do
   [ "${pt}" = "aucun" ] && continue
   [[ "${pt}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*:[1-9][0-9]*:[1-9][0-9]*:[01]:(avec|sans)(:([2-9]|1[01]))?$ ]] \
@@ -413,18 +455,29 @@ mv "${OUT_DIR}/sweep_plan.txt.tmp" "${OUT_DIR}/sweep_plan.txt"
 mv "${OUT_DIR}/gpu_plan.txt.tmp" "${OUT_DIR}/gpu_plan.txt"
 
 {
-  echo "frontier_plan=v1"
+  echo "frontier_plan=${FRONTIER_PLAN_VERSION}"
   echo "specs=$(printf '%s\n' ${FRONTIER_SPECS} | tr '\n' ' ' | sed 's/ $//')"
   echo "threads=${THREADS}"
   echo "s=8 smax=11 seed=3"
+  # v2 seulement : la route de stockage est un champ d'en-tete a part entiere
+  # (v1 n'en porte aucun — octets d'avant l'axe).
+  [ "${FRONTIER_PLAN_VERSION}" = "v1" ] || echo "layout=${FRONTIER_LAYOUT_EFF}"
   echo "timeout=${FRONTIER_TIMEOUT}"
   echo "ulimit_kb=${FRONTIER_ULIMIT_KB}"
   seq_no=0
   for spec in ${FRONTIER_SPECS}; do
     [ "${spec}" = "aucun" ] && continue
-    fam="${spec%%:*}"; N="${spec##*:}"
+    fam="$(echo "${spec}" | cut -d: -f1)"; N="$(echo "${spec}" | cut -d: -f2)"
+    S="$(echo "${spec}" | cut -d: -f3)"; S="${S:-11}"
+    # NORMALISATION DU SPEC : `:11` explicite EQUIVAUT a son absence — meme
+    # nom de run, meme ligne, meme commande, meme statut. Seul un smax != 11
+    # suffixe le nom (`_s<smax>`, pas de collision K5/K10) et fait passer le
+    # plan en v2, ou le champ smax est grave sur CHAQUE ligne.
+    sfx=""; smax_champ=""
+    [ "${S}" = "11" ] || sfx="_s${S}"
+    [ "${FRONTIER_PLAN_VERSION}" = "v1" ] || smax_champ=" smax=${S}"
     seq_no=$((seq_no + 1))
-    echo "seq=${seq_no} name=front_${fam}_n${N} family=${fam} n=${N}"
+    echo "seq=${seq_no} name=front_${fam}_n${N}${sfx} family=${fam} n=${N}${smax_champ}"
   done
   echo "runs=${seq_no}"
 } > "${OUT_DIR}/frontier_plan.txt.tmp"
@@ -893,17 +946,28 @@ while read -r line; do
   name="$(printf '%s\n' "${line}" | sed 's/.* name=\([^ ]*\).*/\1/')"
   fam="$(printf '%s\n' "${line}" | sed 's/.* family=\([^ ]*\).*/\1/')"
   N="$(printf '%s\n' "${line}" | sed 's/.* n=\([^ ]*\).*/\1/')"
+  # smax : ABSENT de la ligne (plan v1) = 11 — `sed -n ...p` rend une chaine
+  # vide au lieu de recopier la ligne quand le champ manque.
+  S="$(printf '%s\n' "${line}" | sed -n 's/.* smax=\([^ ]*\).*/\1/p')"; S="${S:-11}"
   seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
   if past_deadline "${name}" frontiere frontier_tronquee.txt "$((FRONTIER_TIMEOUT + 60))"; then break; fi
-  front_cmd=("${V6_BIN}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 --seed=3 "--threads=${THREADS}")
+  front_cmd=("${V6_BIN}" "--family=${fam}" "--n=${N}" --s=8 "--smax=${S}" --seed=3 "--threads=${THREADS}")
+  # v2 : la route de stockage est gravee dans l'argv (jamais implicite).
+  [ "${FRONTIER_PLAN_VERSION}" = "v1" ] || front_cmd+=("--layout=${FRONTIER_LAYOUT_EFF}")
   limit_kind="none"; limit_kb=0
   if [ "${FRONTIER_ULIMIT_KB}" -gt 0 ]; then
     front_cmd=("${WRAPPER_BASH}" -c 'ulimit -v "$1" && shift && exec "$@"' _ "${FRONTIER_ULIMIT_KB}" "${front_cmd[@]}")
     limit_kind="rlimit_as"; limit_kb="${FRONTIER_ULIMIT_KB}"
   fi
+  front_status="$(printf 'family=%s\nn=%s\nseq=%s\nlimit_kind=%s\nlimit_kb=%s' \
+                  "${fam}" "${N}" "${seq_no}" "${limit_kind}" "${limit_kb}")"
+  # v1 : aucun champ smax ni layout au statut (octets d'avant les axes).
+  # v2 : les deux, sur CHAQUE run, egaux au plan.
+  if [ "${FRONTIER_PLAN_VERSION}" != "v1" ]; then
+    front_status="$(printf '%s\nsmax=%s\nlayout=%s' "${front_status}" "${S}" "${FRONTIER_LAYOUT_EFF}")"
+  fi
   RUN_TIMEOUT_ONE="${FRONTIER_TIMEOUT}" \
-  EXTRA_STATUS="$(printf 'family=%s\nn=%s\nseq=%s\nlimit_kind=%s\nlimit_kb=%s' \
-                  "${fam}" "${N}" "${seq_no}" "${limit_kind}" "${limit_kb}")" \
+  EXTRA_STATUS="${front_status}" \
     run_one "${name}" frontiere "${front_cmd[@]}"
 done < "${OUT_DIR}/frontier_plan.txt"
 

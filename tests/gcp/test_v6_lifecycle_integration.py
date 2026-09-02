@@ -28,7 +28,9 @@ sys.path.insert(0, str(ROOT / "tests" / "gcp"))
 import test_gcp_safety  # noqa: E402  (harnais du faux gcloud, scenario guest-success)
 
 # § 5.15.4 : inventaire REPO-RELATIF, meme ordre que les deux listes
-# normatives (pin + lifecycle) — treize fichiers dans deux repertoires.
+# normatives (pin + lifecycle) — dix-sept fichiers dans deux repertoires.
+# Les profils ajoutes apres coup vont en FIN de liste : l'ordre est
+# normatif (le manifeste canonique en depend).
 PROTOCOL_FILES = [
     "gcp-migration/session_campagne_v6_g4.sh",
     "gcp-migration/v6_session_lifecycle.sh",
@@ -46,6 +48,7 @@ PROTOCOL_FILES = [
     "gcp-migration/start_and_verify.sh",
     "gcp-migration/stop_and_verify.sh",
     "gcp-migration/recover_v6_session.sh",
+    "gcp-migration/profils/g4_echelle_v1.env",
 ]
 
 FAKE_SET_MAX = """#!/usr/bin/env bash

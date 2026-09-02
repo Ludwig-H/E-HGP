@@ -61,8 +61,11 @@ check_true() { local name="$1"; shift; if "$@"; then check "${name}" 0; else che
 # les scenarios au fil de l'horloge.
 FAKE_GEN="$(date -u -d '-60 seconds' +%Y-%m-%dT%H:%M:%SZ)"
 # § 5.15.4 : chemins REPO-RELATIFS, meme inventaire et meme ordre que les
-# deux listes normatives (pin + lifecycle) — treize fichiers dans DEUX
-# repertoires (le juge du pilote vit sous morsehgp3D_v6/tests/).
+# deux listes normatives (pin + lifecycle) — dix-sept fichiers dans DEUX
+# repertoires (le juge du pilote vit sous morsehgp3D_v6/tests/). Les profils
+# ajoutes apres coup sont mis en FIN de liste : l'ordre est normatif (le
+# manifeste canonique en depend), deplacer une entree existante changerait
+# le digest de protocole de tous les inventaires a la fois.
 PROTOCOL_FILES=(gcp-migration/session_campagne_v6_g4.sh gcp-migration/v6_session_lifecycle.sh
                 gcp-migration/v6_campaign_pin.sh gcp-migration/v6_campaign_remote.sh
                 gcp-migration/validate_v6_campaign.py gcp-migration/profils/decision_v1.env
@@ -72,7 +75,8 @@ PROTOCOL_FILES=(gcp-migration/session_campagne_v6_g4.sh gcp-migration/v6_session
                 morsehgp3D_v6/tests/pilote_juge.py
                 gcp-migration/set_max_run_duration_and_verify.sh
                 gcp-migration/start_and_verify.sh gcp-migration/stop_and_verify.sh
-                gcp-migration/recover_v6_session.sh)
+                gcp-migration/recover_v6_session.sh
+                gcp-migration/profils/g4_echelle_v1.env)
 
 # ---- Faux gcloud (PATH) : describe rend la generation ; ssh n1 = handshake
 # boot_id seul, n2 = build (portes), n3 = campagne ; scp materialise out/.
@@ -476,6 +480,15 @@ check_true "nominal mecanique : recu durable UNIQUE publie atomiquement (RECU + 
     && grep -q 'profil_campagne.txt' \"\$d/SHA256SUMS\" \
     && grep -q '^profil=decision_v1' \"\$d/RECU_SESSION.txt\" \
     && [ -z \"\$(ls -d '${SCENARIO_DIR}'/recu/*.partial 2>/dev/null)\" ]"
+# AXE FRONTIER_LAYOUT (alerte G4 du 2 septembre, P1) : le cycle de vie doit
+# le CAPTURER du canon, le GRAVER au profil epingle (meme vide : « axe non
+# demande » se distingue alors de « axe perdu ») et le TRANSMETTRE au runner
+# distant — sans ce trajet, un profil qui declare la route serait refuse comme
+# portant un axe inconnu, ou la route serait choisie par defaut sans preuve.
+check_true "nominal mecanique : axe FRONTIER_LAYOUT capture, grave au profil epingle et transmis au runner" \
+  bash -c "d=\$(ls -d '${SCENARIO_DIR}'/recu/s_* 2>/dev/null | head -1); [ -n \"\$d\" ] \
+    && grep -q '^frontier_layout=' \"\$d/profil_campagne.txt\" \
+    && grep -q \"FRONTIER_LAYOUT='\" '${FAKE_CALLS}'"
 # VERIFICATION EXTERIEURE du recu (cinquieme tour) : le manifeste se verifie
 # depuis l'exterieur, couvre EXACTEMENT les fichiers publies, les CINQ
 # resumes sont durables, et aucun temporaire du VRAI motif `s_*.partial.*`
@@ -1214,4 +1227,4 @@ if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest cycle de vie v6 : ${FAILURES} echec(s)" >&2
   exit 1
 fi
-echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (35 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue, registre illisible=blocage, surcharge temporelle refusee, trop-tard sans remontee, describe borne, registre etranger post-arret=78, grace fixe 29/31 refusees, relation invite/GCE avant set_max, STOP1<STOP2<VALIDATE, double echec sans validation, contre-calendrier a describe clampe, ordre STOP1<STOP2<VALIDATE au ledger, sortie pre-SCP a seconde reserve, garde scp causale a la seconde — + 15 refus de pin sur l inventaire repo-relatif a deux repertoires, reprise persistante § 5.18.6 : SIGKILL de la session du superviseur apres le handshake puis reprise re-authentifiee — superviseur vivant refuse, un seul STOP exact, scp partielle/echec, classification forcee, sans seconde marque arret immediat, mutants generation/cible/copie alteree/pid recycle/base 755, rejouable depuis un HEAD propre)"
+echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (35 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue, registre illisible=blocage, surcharge temporelle refusee, trop-tard sans remontee, describe borne, registre etranger post-arret=78, grace fixe 29/31 refusees, relation invite/GCE avant set_max, STOP1<STOP2<VALIDATE, double echec sans validation, contre-calendrier a describe clampe, ordre STOP1<STOP2<VALIDATE au ledger, sortie pre-SCP a seconde reserve, garde scp causale a la seconde — + 17 refus de pin sur l inventaire repo-relatif a deux repertoires, reprise persistante § 5.18.6 : SIGKILL de la session du superviseur apres le handshake puis reprise re-authentifiee — superviseur vivant refuse, un seul STOP exact, scp partielle/echec, classification forcee, sans seconde marque arret immediat, mutants generation/cible/copie alteree/pid recycle/base 755, rejouable depuis un HEAD propre)"

@@ -20,6 +20,22 @@
 #      digest sur un run de bench, compteurs non deterministes, fichier en
 #      trop, plan altere, remote_rc non nul, compteur de queue absent) :
 #      validateur rc=1 sur chacune ;
+#   7ter. axes smax et LAYOUT de la FRONTIERE, plan VERSIONNE : v1 sans
+#      aucun jeton (recus anterieurs, octets conserves), v2 des qu'un axe
+#      est demande (layout=<classic|csr> en en-tete, smax sur chaque ligne,
+#      --smax/--layout dans l'argv, les deux champs au statut, colonne smax
+#      au resume) ; declenchement par smax ET par layout seul, sept
+#      falsifications a cause exacte, deux refus de grammaire, liaison au
+#      profil epingle (plan classic sous un profil csr = refus),
+#      normalisation `:11` prouvee BIT A BIT contre le spec nu et doublon
+#      normalise refuse avant tout run ;
+#   7quater. SOUS-CLASSE du code 2 « refus d'ALLOCATION PAR ETAGE » (moteur
+#      du 2 septembre) : message sans bad_alloc portant l'etage et cinq RSS,
+#      RECOUPE avec la ligne `refus_etage=` (etage et RSS), etage dans une
+#      liste fermee, note portee au resume ; le refus de capacite ORDINAIRE
+#      garde sa note d'avant, et six mutants a cause exacte (ligne retiree,
+#      dupliquee, etage contradictoire, RSS contradictoires, etage inconnu,
+#      message ampute) ;
 #   8. SERIE C (§ 5.12-5.15) : matrice (16 points x aller/retour/rotation8,
 #      taskset atteste et recalcule), attribution, build/inventaire/portes/
 #      pilote gpuv6 de bout en bout, puis falsifications a cause exacte
@@ -30,8 +46,12 @@
 #   8bis. fail-fast du runner : inventaire -N intrus = AUCUNE porte ; juge
 #      en refus = famille suivante jamais consommee ; matrice tronquee =
 #      bloc GPU v6 saute ;
-#   9. budget du profil canonique serie C rejoue avec l'estimateur REEL
-#      extrait du cycle de vie (fenetre 7 h gravee).
+#   9. budget des profils canoniques rejoue avec l'estimateur REEL extrait
+#      du cycle de vie (serie C : fenetre 7 h ; tests K10/K5 et echelle :
+#      fenetre 5 h), puis les profils g4_mesure_v1 et g4_echelle_v1
+#      EXERCES de bout en bout canon -> profil epingle -> runner ->
+#      validateur (l'echelle publie estimateur, enveloppe et fenetre en
+#      trois nombres distincts).
 # Code de sortie : 0 conforme, 1 au moins un scenario en echec.
 set -euo pipefail
 
@@ -117,6 +137,15 @@ if [ "${eng}" = "v6" ] && [ "\${FAKE_V6_FRONT_FAIL:-0}" = "1" ] && [ "\${n}" = "
 fi
 if [ "${eng}" = "v6" ] && [ "\${FAKE_V6_FRONT_FAIL:-0}" = "1" ] && [ "\${n}" = "800000" ]; then
   echo "REFUS resource_exhausted : plafond simule du prefiltre" >&2; exit 2
+fi
+# SOUS-CLASSE « refus d'allocation par etage » (moteur v6 du 2 septembre) :
+# code 2, message SANS bad_alloc portant l'etage atteint et les cinq RSS par
+# etage, puis la ligne \`refus_etage=\` qui REPETE les memes champs. Les deux
+# lignes sont ecrites mot pour mot comme cli/mhgp6.cpp et src/pipeline/run.hpp.
+if [ "${eng}" = "v6" ] && [ "\${FAKE_V6_FRONT_FAIL:-0}" = "1" ] && [ "\${n}" = "500000" ]; then
+  echo "REFUS resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=1024 apres_rle=2048 apres_prefiltre=3072 apres_census=4096 max_fold=0)" >&2
+  echo "refus_etage=census rss_mb apres_generation=1024 apres_rle=2048 apres_prefiltre=3072 apres_census=4096 max_fold=0 (frontiere de completion : dernier etage atteint)" >&2
+  exit 2
 fi
 base=\$((n / 4))
 echo "payload=mhgp${eng#v}-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none"
@@ -385,7 +414,7 @@ CANON="${WORK}/selftest_reduit_v1.env"
   echo 'SWEEP_SPECS="uniform:32000:2,8"'
   echo 'SWEEP_REPEATS=2'
   echo 'GPU_SPECS="uniform:50000"'
-  echo 'FRONTIER_SPECS="uniform:200000 uniform:400000 uniform:800000"'
+  echo 'FRONTIER_SPECS="uniform:200000 uniform:400000 uniform:500000 uniform:800000"'
   echo 'FRONTIER_TIMEOUT=60'
   echo 'GPU_BUILD_TIMEOUT=60'
   echo 'FRONTIER_ULIMIT_KB=60000000'
@@ -443,7 +472,7 @@ PROFILE="${WORK}/profil_campagne.txt"
   echo "sweep_specs=uniform:32000:2,8"
   echo "sweep_repeats=2"
   echo "gpu_specs=uniform:50000"
-  echo "frontier_specs=uniform:200000 uniform:400000 uniform:800000"
+  echo "frontier_specs=uniform:200000 uniform:400000 uniform:500000 uniform:800000"
   echo "frontier_timeout=60"
   echo "gpu_build_timeout=60"
   echo "frontier_ulimit_kb=60000000"
@@ -458,7 +487,7 @@ run_runner() { # $1 = dossier out ; le reste = env supplementaire
     BENCH_SPECS="uniform:32000 eight_clusters:32000" \
     QUEUE_FAMILIES="terrain_stationnaire" QUEUE_N="64000" QUEUE_SEEDS="3 4" \
     SWEEP_SPECS="uniform:32000:2,8" SWEEP_REPEATS=2 \
-    GPU_SPECS="uniform:50000" FRONTIER_SPECS="uniform:200000 uniform:400000 uniform:800000" FRONTIER_TIMEOUT=60 \
+    GPU_SPECS="uniform:50000" FRONTIER_SPECS="uniform:200000 uniform:400000 uniform:500000 uniform:800000" FRONTIER_TIMEOUT=60 \
     GPU_BUILD_TIMEOUT=60 FRONTIER_ULIMIT_KB=60000000 \
     FAKE_V6_FRONT_FAIL=1 \
     NVCC_BIN="${FAKE}/nvcc" GPU_CMAKE_BIN="${FAKE}/cmake" \
@@ -509,6 +538,16 @@ check_true "nominal : trois classes de frontiere attestees (0 / 134 abort prouve
   grep -q 'bad_alloc sous rlimit_as' '${WORK}/frontier_resume.txt' &&
   grep -q '^code=2' '${OUT}/front_uniform_n800000.status' &&
   grep -q 'resource_exhausted (refus du pipeline)' '${WORK}/frontier_resume.txt'"
+# SOUS-CLASSE DU CODE 2 : le refus d'ALLOCATION PAR ETAGE est distingue du
+# refus de capacite ordinaire (caps declares) et l'etage est NOTE au resume ;
+# le refus ordinaire garde exactement sa note d'avant (recus anterieurs).
+check_true "frontiere : sous-classe « refus d'allocation par etage » notee au resume, refus ordinaire inchange" bash -c "
+  grep -q '^code=2' '${OUT}/front_uniform_n500000.status' &&
+  grep -q \"allocation impossible a l'etage census\" '${OUT}/front_uniform_n500000.txt' &&
+  grep -q '^refus_etage=census rss_mb ' '${OUT}/front_uniform_n500000.txt' &&
+  ! grep -q 'bad_alloc' '${OUT}/front_uniform_n500000.txt' &&
+  grep -q 'resource_exhausted a l.etage census' '${WORK}/frontier_resume.txt' &&
+  [ \"\$(grep -c 'resource_exhausted (refus du pipeline)' '${WORK}/frontier_resume.txt')\" = '1' ]"
 # IDEMPOTENCE (audit quatrieme tour) : un second passage sur le MEME dossier
 # rend le meme verdict (le validateur n'enrichit plus l'inventaire qu'il juge).
 rc=0; run_validator "${OUT}" 0 0 >/dev/null || rc=$?
@@ -669,6 +708,21 @@ falsify_case "semantique : MANIFESTE_DISTANT a ligne dupliquee" "chemin duplique
   bash -c "l=\$(grep topologie.txt MANIFESTE_DISTANT.txt | head -1); printf '%s\n' \"\$l\" >> MANIFESTE_DISTANT.txt"
 falsify_semantique "frontiere : code 134 sans diagnostic std::bad_alloc" "sans diagnostic exact std::bad_alloc" \
   bash -c "sed -i 's/bad_alloc/xxx/' front_uniform_n400000.txt"
+# SOUS-CLASSE « refus d'allocation par etage » : le diagnostic est RECOUPE
+# (message contre ligne `refus_etage=`) — toute incoherence est un DESACCORD,
+# jamais une donnee de frontiere. Cinq mutants a cause exacte.
+falsify_semantique "frontiere/etage : ligne refus_etage= supprimee (diagnostic non recoupe)" "diagnostic non recoupe" \
+  sed -i "/^refus_etage=/d" front_uniform_n500000.txt
+falsify_semantique "frontiere/etage : refus_etage=fold contre un message disant census" "!= etage du message" \
+  sed -i "s/^refus_etage=census /refus_etage=fold /" front_uniform_n500000.txt
+falsify_semantique "frontiere/etage : rss_mb divergents entre le message et refus_etage=" "!= rss_mb du message" \
+  sed -i "/^refus_etage=/s/apres_census=4096/apres_census=9999/" front_uniform_n500000.txt
+falsify_semantique "frontiere/etage : etage 'inconnu' hors de la liste fermee" "hors de la liste fermee" \
+  bash -c "sed -i \"s/a l'etage census/a l'etage inconnu/; s/^refus_etage=census /refus_etage=inconnu /\" front_uniform_n500000.txt"
+falsify_semantique "frontiere/etage : message ampute d'un RSS (grammaire exacte)" "hors grammaire exacte" \
+  sed -i "s/ max_fold=0)/)/" front_uniform_n500000.txt
+falsify_semantique "frontiere/etage : ligne refus_etage= dupliquee (une seule exigee)" "diagnostic non recoupe" \
+  bash -c "l=\$(grep '^refus_etage=' front_uniform_n500000.txt | head -1); printf '%s\n' \"\$l\" >> front_uniform_n500000.txt"
 # CAS SUR SNAPSHOT PROPRE (audit quatrieme tour : plus jamais l'inventaire
 # deja juge) avec DIAGNOSTIC EXACT exige — chaque cas repart d'une copie
 # fraiche du nominal et doit echouer pour SA cause.
@@ -730,6 +784,255 @@ rc=0; VOUT5="$(run_validator "${D5}" 0 0 "${PROF5B}" "${CANON5}")" || rc=$?
 check_true "mutant coordonne (canon reduit auto-declare + hash concordant) : TUE par la liaison au manifeste" \
   bash -c "[ '${rc}' -eq 1 ] && printf '%s\n' \"\$1\" | grep -q 'NON LIE au manifeste revalide' \
     && ! printf '%s\n' \"\$1\" | grep -q 'decision_complete'" _ "${VOUT5}"
+
+# ---- 7ter. AXES smax ET LAYOUT DE LA FRONTIERE, PLAN VERSIONNE.
+# Spec : `famille:n[:smax]`, smax dans [2,11] (K = smax - 1). NORMALISATION
+# DU SPEC : `:11` explicite EQUIVAUT a son absence (meme nom, meme ligne,
+# meme commande, meme statut) ; un smax != 11 suffixe le nom `_s<smax>`
+# (aucune collision K5/K10). Le PLAN est VERSIONNE, deux grammaires FERMEES :
+#   v1 (recus anterieurs) : aucun jeton smax ni layout — en-tete, lignes,
+#      argv, statut, resume — et un spec a smax != 11 y est impossible ;
+#   v2 : `layout=<classic|csr>` en en-tete (jamais implicite depuis le pin
+#      KeyCSR), `smax=` sur chaque ligne, `--smax=... --layout=...` dans
+#      chaque commande, les deux champs au statut, colonne `smax` au resume.
+# La v2 se declenche des qu'UN axe est demande : un spec a smax != 11 OU un
+# FRONTIER_LAYOUT non vide (la baseline gravee est alors `classic`).
+FS_SPECS="uniform:200000 uniform:200000:6"
+ecrire_canon_fs() { # $1 = fichier, $2 = PROFIL_NOM, $3 = FRONTIER_SPECS, [$4] = FRONTIER_LAYOUT
+  {
+    echo "PROFIL_NOM=\"$2\""
+    echo 'CONF_SPECS="uniform:50000"'
+    echo 'BENCH_SPECS="aucun"'
+    echo 'QUEUE_FAMILIES="aucun"'
+    echo 'QUEUE_N="64000"'
+    echo 'QUEUE_SEEDS="3"'
+    echo 'RUN_TIMEOUT=60'
+    echo 'THREADS_VM=8'
+    echo 'V5_GATE_MIN=40'
+    echo 'V6_GATE_MIN=60'
+    echo 'SWEEP_SPECS="aucun"'
+    echo 'SWEEP_REPEATS=1'
+    echo 'GPU_SPECS="aucun"'
+    echo "FRONTIER_SPECS=\"$3\""
+    echo 'FRONTIER_TIMEOUT=60'
+    echo 'GPU_BUILD_TIMEOUT=60'
+    echo 'FRONTIER_ULIMIT_KB=60000000'
+    # AXE OPTIONNEL : un canon qui ne le declare pas laisse la route
+    # implicite (comportement d'avant l'axe) ; le declarer LIE le plan.
+    [ -z "${4:-}" ] || echo "FRONTIER_LAYOUT=\"$4\""
+  } > "$1"
+}
+ecrire_profil_fs() { # $1 = fichier, $2 = PROFIL_NOM, $3 = FRONTIER_SPECS, $4 = sha du canon, [$5] = layout
+  {
+    echo "profil=$2"
+    echo "profil_canonique=$2"
+    echo "profil_canonique_sha256=$4"
+    echo "conf_specs=uniform:50000"
+    echo "bench_specs=aucun"
+    echo "queue_families=aucun"
+    echo "queue_n=64000"
+    echo "queue_seeds=3"
+    echo "run_timeout=60"
+    echo "threads=8"
+    echo "v5_gate_min=40"
+    echo "v6_gate_min=60"
+    echo "sweep_specs=aucun"
+    echo "sweep_repeats=1"
+    echo "gpu_specs=aucun"
+    echo "frontier_specs=$3"
+    echo "frontier_timeout=60"
+    echo "gpu_build_timeout=60"
+    echo "frontier_ulimit_kb=60000000"
+    # Le cycle de vie grave l'axe MEME VIDE : le profil epingle du selftest
+    # imite ce trajet canon -> lifecycle -> profil epingle.
+    echo "frontier_layout=${5:-}"
+    emit_serie_c_defaults
+  } > "$1"
+}
+CANON_FS="${WORK}/frontiere_smax_selftest_v1.env"
+ecrire_canon_fs "${CANON_FS}" frontiere_smax_selftest_v1 "${FS_SPECS}" classic
+CANON_FS_SHA="$(sha256sum "${CANON_FS}" | awk '{print $1}')"
+MANIFESTE_FS="${WORK}/manifest_front_smax.txt"
+{
+  echo "schema=e-hgp.protocol-manifest.v1"
+  echo "commit=${PIN_COMMIT}"
+  printf '%s\t%s\t%s\n' "${CANON_FS_SHA}" "$(wc -c < "${CANON_FS}")" \
+    "gcp-migration/profils/frontiere_smax_selftest_v1.env"
+} > "${MANIFESTE_FS}"
+PIN_MANIFEST_FS="$(sha256sum "${MANIFESTE_FS}" | awk '{print $1}')"
+PROFILE_FS="${WORK}/profil_front_smax.txt"
+ecrire_profil_fs "${PROFILE_FS}" frontiere_smax_selftest_v1 "${FS_SPECS}" "${CANON_FS_SHA}" classic
+# Second couple canon/profil : layout SEUL (specs sans smax) — la v2 doit se
+# declencher sur le layout, pas seulement sur smax.
+FL_SPECS="uniform:200000"
+CANON_FL="${WORK}/frontiere_layout_selftest_v1.env"
+ecrire_canon_fs "${CANON_FL}" frontiere_layout_selftest_v1 "${FL_SPECS}" csr
+CANON_FL_SHA="$(sha256sum "${CANON_FL}" | awk '{print $1}')"
+MANIFESTE_FL="${WORK}/manifest_front_layout.txt"
+{
+  echo "schema=e-hgp.protocol-manifest.v1"
+  echo "commit=${PIN_COMMIT}"
+  printf '%s\t%s\t%s\n' "${CANON_FL_SHA}" "$(wc -c < "${CANON_FL}")" \
+    "gcp-migration/profils/frontiere_layout_selftest_v1.env"
+} > "${MANIFESTE_FL}"
+PIN_MANIFEST_FL="$(sha256sum "${MANIFESTE_FL}" | awk '{print $1}')"
+PROFILE_FL="${WORK}/profil_front_layout.txt"
+ecrire_profil_fs "${PROFILE_FL}" frontiere_layout_selftest_v1 "${FL_SPECS}" "${CANON_FL_SHA}" csr
+OUTFS="${WORK}/out_front_smax"
+OUTFL="${WORK}/out_front_layout"
+RESUMES_FS="${WORK}/resumes_front_smax"
+mkdir -p "${RESUMES_FS}" "${RESUMES_FS}/nominal" "${RESUMES_FS}/layout" "${RESUMES_FS}/s11"
+env_runner_fs() { # arguments d'environnement communs a la scene
+  printf '%s\n' V5_BIN="${FAKE}/mhgp5" V6_BIN="${FAKE}/mhgp6" CONF_BIN="${FAKE}/mhgp6_conformity" \
+    TIME_BIN="${FAKE}/gnutime" THREADS=8 RUN_TIMEOUT=60 CONF_SPECS="uniform:50000" \
+    BENCH_SPECS="aucun" QUEUE_FAMILIES="aucun" QUEUE_N="64000" QUEUE_SEEDS="3" \
+    SWEEP_SPECS="aucun" SWEEP_REPEATS=1 GPU_SPECS="aucun" FRONTIER_TIMEOUT=60 \
+    GPU_BUILD_TIMEOUT=60 FRONTIER_ULIMIT_KB=60000000
+}
+run_runner_fs() { # $1 = out, $2 = FRONTIER_SPECS, $3 = pin du manifeste, [$4...] = env
+  local out="$1" specs="$2" pin="$3"; shift 3
+  env $(env_runner_fs) OUT_DIR="${out}" FRONTIER_SPECS="${specs}" PATH="${FAKE}:${PATH}" "$@" \
+    bash "${RUNNER}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${pin}" 2>&1
+}
+run_validator_fs() { # $1 = dossier out, [$2] = profil epingle ; resumes HORS des autres scenes
+  V6_RESUMES_DIR="${RESUMES_FS}" python3 "${VALIDATOR}" "$1" "${PIN_COMMIT}" "${PIN_PAYLOAD}" \
+    "${PIN_MANIFEST_FS}" 0 0 "${2:-${PROFILE_FS}}" "${CANON_FS}" "${MANIFESTE_FS}"
+}
+rc=0; run_runner_fs "${OUTFS}" "${FS_SPECS}" "${PIN_MANIFEST_FS}" FRONTIER_LAYOUT=classic >/dev/null || rc=$?
+check "frontiere v2 : runner rc=0" "${rc}"
+check_true "frontiere v2 : en-tete versionne (frontier_plan=v2, layout=classic) et smax sur CHAQUE ligne" bash -c "
+  [ \"\$(sed -n 's/^runs=//p' '${OUTFS}/frontier_plan.txt')\" = '2' ] &&
+  grep -qx 'frontier_plan=v2' '${OUTFS}/frontier_plan.txt' &&
+  grep -qx 'layout=classic' '${OUTFS}/frontier_plan.txt' &&
+  grep -qx 's=8 smax=11 seed=3' '${OUTFS}/frontier_plan.txt' &&
+  grep -qx 'seq=1 name=front_uniform_n200000 family=uniform n=200000 smax=11' '${OUTFS}/frontier_plan.txt' &&
+  grep -qx 'seq=2 name=front_uniform_n200000_s6 family=uniform n=200000 smax=6' '${OUTFS}/frontier_plan.txt'"
+check_true "frontiere v2 : argv --smax=<smax> --layout=classic et les DEUX champs au statut" bash -c "
+  grep -q -- '--s=8 --smax=11 --seed=3 --threads=8 --layout=classic\$' '${OUTFS}/front_uniform_n200000.status' &&
+  grep -q -- '--s=8 --smax=6 --seed=3 --threads=8 --layout=classic\$' '${OUTFS}/front_uniform_n200000_s6.status' &&
+  grep -qx 'smax=11' '${OUTFS}/front_uniform_n200000.status' &&
+  grep -qx 'smax=6' '${OUTFS}/front_uniform_n200000_s6.status' &&
+  [ \"\$(grep -c '^layout=classic\$' '${OUTFS}/front_uniform_n200000_s6.status')\" = '1' ] &&
+  grep -q '^tower_scope=prefix_k5 smax_requested=6 smax_effective=6' '${OUTFS}/front_uniform_n200000_s6.txt' &&
+  grep -q '^tower_scope=profile_complete_k10 ' '${OUTFS}/front_uniform_n200000.txt'"
+rc=0; VOUTFS="$(run_validator_fs "${OUTFS}" 2>&1)" || rc=$?
+check "frontiere v2 : validateur rc=0" "${rc}"
+FS_ENTETE="$(printf 'famille\tn\tsmax\tcode\tmur_ms\tduree_s\trss_kb\tnote')"
+FS_L11="$(printf 'uniform\t200000\t11\t0\t')"
+FS_L6="$(printf 'uniform\t200000\t6\t0\t')"
+check_true "frontiere v2 : resume a ligne de route et colonne smax apres n (deux lignes, 11 et 6)" bash -c "
+  grep -q '^# plan=v2 layout=classic ' '${RESUMES_FS}/frontier_resume.txt' &&
+  grep -qF -- \"\$1\" '${RESUMES_FS}/frontier_resume.txt' &&
+  grep -qF -- \"\$2\" '${RESUMES_FS}/frontier_resume.txt' &&
+  grep -qF -- \"\$3\" '${RESUMES_FS}/frontier_resume.txt' &&
+  [ \"\$(grep -c '^uniform' '${RESUMES_FS}/frontier_resume.txt')\" = '2' ]" \
+  _ "${FS_ENTETE}" "${FS_L11}" "${FS_L6}"
+# CONSERVATION : le nominal ne demande AUCUN axe — son plan reste en v1 et
+# son resume rend les octets d'avant les axes (c'est ce qui rend les resumes
+# des recus durables anterieurs re-productibles a l'identique).
+FS_ENTETE_NUE="$(printf 'famille\tn\tcode\tmur_ms\tduree_s\trss_kb\tnote')"
+rc=0; V6_RESUMES_DIR="${RESUMES_FS}/nominal" run_validator "${OUT}" 0 0 >/dev/null || rc=$?
+check_true "frontiere v1 : aucun axe demande => plan v1 sans jeton et resume d'avant les axes" bash -c "
+  [ '${rc}' -eq 0 ] && grep -qx 'frontier_plan=v1' '${OUT}/frontier_plan.txt' \
+    && ! grep -q 'layout' '${OUT}/frontier_plan.txt' \
+    && ! grep -q '^smax=\|^layout=' '${OUT}/front_uniform_n200000.status' \
+    && grep -qF -- \"\$1\" '${RESUMES_FS}/nominal/frontier_resume.txt' \
+    && ! grep -q 'smax\|layout' '${RESUMES_FS}/nominal/frontier_resume.txt'" _ "${FS_ENTETE_NUE}"
+# LAYOUT SEUL : specs sans smax, FRONTIER_LAYOUT=csr => v2 quand meme.
+rc=0; run_runner_fs "${OUTFL}" "${FL_SPECS}" "${PIN_MANIFEST_FL}" FRONTIER_LAYOUT=csr >/dev/null || rc=$?
+check "frontiere v2 par le layout seul : runner rc=0" "${rc}"
+rc=0
+VOUTFL="$(V6_RESUMES_DIR="${RESUMES_FS}/layout" python3 "${VALIDATOR}" "${OUTFL}" "${PIN_COMMIT}" \
+  "${PIN_PAYLOAD}" "${PIN_MANIFEST_FL}" 0 0 "${PROFILE_FL}" "${CANON_FL}" "${MANIFESTE_FL}" 2>&1)" || rc=$?
+check_true "frontiere v2 par le layout seul : plan v2 layout=csr, smax=11 partout, validateur rc=0" bash -c "
+  [ '${rc}' -eq 0 ] &&
+  grep -qx 'frontier_plan=v2' '${OUTFL}/frontier_plan.txt' &&
+  grep -qx 'layout=csr' '${OUTFL}/frontier_plan.txt' &&
+  grep -qx 'seq=1 name=front_uniform_n200000 family=uniform n=200000 smax=11' '${OUTFL}/frontier_plan.txt' &&
+  grep -q -- '--smax=11 --seed=3 --threads=8 --layout=csr\$' '${OUTFL}/front_uniform_n200000.status' &&
+  grep -qx 'layout=csr' '${OUTFL}/front_uniform_n200000.status' &&
+  grep -q '^# plan=v2 layout=csr ' '${RESUMES_FS}/layout/frontier_resume.txt'"
+falsify_fs() { # $1 = nom, $2 = motif exact exige, reste = mutation (mutation PUIS rehash)
+  local name="$1" motif="$2"; shift 2
+  local dir="${WORK}/out_front_smax_falsif"
+  rm -rf "${dir}"; cp -r "${OUTFS}" "${dir}"
+  ( cd "${dir}" && "$@" )
+  rehash_manifeste "${dir}"
+  local rc=0 sortie
+  sortie="$(run_validator_fs "${dir}" 2>&1)" || rc=$?
+  check_true "${name}" bash -c "[ \"\$3\" -eq 1 ] && printf '%s' \"\$1\" | grep -q -- \"\$2\"" \
+    _ "${sortie}" "${motif}" "${rc}"
+}
+falsify_fs "frontiere v2 : champ smax=6 RETIRE du statut du run court" "smax=absent !=" \
+  sed -i "/^smax=6\$/d" front_uniform_n200000_s6.status
+falsify_fs "frontiere v2 : commande --smax=6 ramenee a --smax=11" "correspondance EXACTE" \
+  sed -i "s/--smax=6 /--smax=11 /" front_uniform_n200000_s6.status
+falsify_fs "frontiere v2 : champ layout RETIRE du statut" "layout=absent !=" \
+  sed -i "/^layout=classic\$/d" front_uniform_n200000_s6.status
+falsify_fs "frontiere v2 : --layout retire de la commande (route redevenue implicite)" "correspondance EXACTE" \
+  sed -i "s/ --layout=classic\$//" front_uniform_n200000_s6.status
+falsify_fs "frontiere v2 : layout=csr en en-tete pour des argv classic" "layout=\['classic'\] != \['csr'\]" \
+  sed -i "s/^layout=classic\$/layout=csr/" frontier_plan.txt
+falsify_fs "frontiere v2 : plan degrade en v1 alors qu'un spec porte smax=6" "plan v1 avec un spec a smax != 11" \
+  bash -c "sed -i 's/^frontier_plan=v2\$/frontier_plan=v1/; /^layout=classic\$/d; s/ smax=[0-9]*\$//' frontier_plan.txt"
+falsify_fs "frontiere v2 : plan a smax=7 pour un spec a 6 (desaccord plan/recalcul)" "!= 6 (recalcul du spec)" \
+  sed -i "s/ smax=6\$/ smax=7/" frontier_plan.txt
+rc=0
+SORTIE_FS_G="$(run_runner_fs "${WORK}/out_front_smax_grammaire" "uniform:200000:12" "${PIN_MANIFEST_FS}")" || rc=$?
+check_true "frontiere : spec 'uniform:200000:12' (hors [2,11]) REFUSE avant tout run (rc=2)" bash -c "
+  [ '${rc}' -eq 2 ] && [ ! -d '${WORK}/out_front_smax_grammaire' ] \
+    && printf '%s' \"\$1\" | grep -q \"spec FRONTIERE 'uniform:200000:12' mal forme\"" _ "${SORTIE_FS_G}"
+rc=0
+SORTIE_FS_L="$(run_runner_fs "${WORK}/out_front_layout_grammaire" "${FL_SPECS}" "${PIN_MANIFEST_FL}" FRONTIER_LAYOUT=hybride)" || rc=$?
+check_true "frontiere : FRONTIER_LAYOUT='hybride' REFUSE avant tout run (rc=2)" bash -c "
+  [ '${rc}' -eq 2 ] && [ ! -d '${WORK}/out_front_layout_grammaire' ] \
+    && printf '%s' \"\$1\" | grep -q \"FRONTIER_LAYOUT 'hybride' inconnu\"" _ "${SORTIE_FS_L}"
+# LIAISON AU PROFIL EPINGLE (trajet canonique, retour auditeur P1) : la route
+# du plan doit EGALER celle que le profil epingle declare — un plan `classic`
+# sous un profil `csr` est un axe perdu en chemin, pas une valeur par defaut.
+PROFILE_FS_CSR="${WORK}/profil_front_smax_csr.txt"
+sed 's/^frontier_layout=classic$/frontier_layout=csr/' "${PROFILE_FS}" > "${PROFILE_FS_CSR}"
+rc=0; VOUT_FSC="$(run_validator_fs "${OUTFS}" "${PROFILE_FS_CSR}" 2>&1)" || rc=$?
+check_true "frontiere v2 : plan layout=classic sous un profil epingle frontier_layout=csr REFUSE" bash -c "
+  [ '${rc}' -eq 1 ] && printf '%s' \"\$1\" | grep -q -- '!= profil epingle (frontier_layout=csr)'" _ "${VOUT_FSC}"
+# NORMALISATION `:11` DE BOUT EN BOUT (fermeture de protocole demandee par
+# l'audit) : un `:11` EXPLICITE produit LES MEMES OCTETS que son absence — le
+# plan est compare BIT A BIT a celui du spec nu — et la liaison au profil
+# epingle (qui garde `:11`) se fait normalisee. Deux specs qui normalisent
+# vers le meme run sont un doublon, refuse AVANT tout run.
+F11_SPECS="uniform:200000:11"
+CANON_F11="${WORK}/frontiere_smax11_selftest_v1.env"
+ecrire_canon_fs "${CANON_F11}" frontiere_smax11_selftest_v1 "${F11_SPECS}"
+CANON_F11_SHA="$(sha256sum "${CANON_F11}" | awk '{print $1}')"
+MANIFESTE_F11="${WORK}/manifest_front_smax11.txt"
+{
+  echo "schema=e-hgp.protocol-manifest.v1"
+  echo "commit=${PIN_COMMIT}"
+  printf '%s\t%s\t%s\n' "${CANON_F11_SHA}" "$(wc -c < "${CANON_F11}")" \
+    "gcp-migration/profils/frontiere_smax11_selftest_v1.env"
+} > "${MANIFESTE_F11}"
+PIN_MANIFEST_F11="$(sha256sum "${MANIFESTE_F11}" | awk '{print $1}')"
+PROFILE_F11="${WORK}/profil_front_smax11.txt"
+ecrire_profil_fs "${PROFILE_F11}" frontiere_smax11_selftest_v1 "${F11_SPECS}" "${CANON_F11_SHA}"
+OUT11="${WORK}/out_front_s11"; OUT11B="${WORK}/out_front_nu"
+rc=0; run_runner_fs "${OUT11}" "${F11_SPECS}" "${PIN_MANIFEST_F11}" >/dev/null || rc=$?
+rc2=0; run_runner_fs "${OUT11B}" "uniform:200000" "${PIN_MANIFEST_F11}" >/dev/null || rc2=$?
+rc3=0
+VOUT11="$(V6_RESUMES_DIR="${RESUMES_FS}/s11" python3 "${VALIDATOR}" "${OUT11}" "${PIN_COMMIT}" \
+  "${PIN_PAYLOAD}" "${PIN_MANIFEST_F11}" 0 0 "${PROFILE_F11}" "${CANON_F11}" "${MANIFESTE_F11}" 2>&1)" || rc3=$?
+check_true "frontiere : ':11' explicite = MEMES OCTETS que le spec nu (plan v1 bit a bit) et validateur rc=0" bash -c "
+  [ '${rc}' -eq 0 ] && [ '${rc2}' -eq 0 ] && [ '${rc3}' -eq 0 ] &&
+  cmp -s '${OUT11}/frontier_plan.txt' '${OUT11B}/frontier_plan.txt' &&
+  grep -qx 'frontier_plan=v1' '${OUT11}/frontier_plan.txt' &&
+  grep -qx 'specs=uniform:200000' '${OUT11}/frontier_plan.txt' &&
+  grep -qx 'seq=1 name=front_uniform_n200000 family=uniform n=200000' '${OUT11}/frontier_plan.txt' &&
+  ! grep -q '^smax=\|^layout=' '${OUT11}/front_uniform_n200000.status' &&
+  ! grep -q 'smax\|layout' '${RESUMES_FS}/s11/frontier_resume.txt'"
+rc=0
+SORTIE_F11D="$(run_runner_fs "${WORK}/out_front_doublon" "uniform:200000 uniform:200000:11" "${PIN_MANIFEST_F11}")" || rc=$?
+check_true "frontiere : 'uniform:200000 uniform:200000:11' = doublon normalise REFUSE avant tout run (rc=2)" bash -c "
+  [ '${rc}' -eq 2 ] && [ ! -d '${WORK}/out_front_doublon' ] \
+    && printf '%s' \"\$1\" | grep -q 'axe FRONTIER_SPECS avec doublon'" _ "${SORTIE_F11D}"
 
 # ---- 8. SERIE C (§ 5.12/5.13) : matrice CPU + attribution + build/portes/
 # pilote gpuv6 de bout en bout (faux outillage), puis les falsifications
@@ -1239,6 +1542,136 @@ rc=0; VG4="$(python3 "${VALIDATOR}" "${OUTG4}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" 
   "${PROFILE_G4}" "${G4ENV}" "${MANIFESTE_G4}")" || rc=$?
 check_true "profil G4 exact : validateur rc=0, verifie_non_decisionnel" \
   bash -c "[ '${rc}' -eq 0 ] && printf '%s\n' \"\$1\" | grep -q 'campaign_status=verifie_non_decisionnel profil=g4_mesure_v1'" _ "${VG4}"
+
+# ---- PROFIL CANONIQUE g4_echelle_v1 EXACT DE BOUT EN BOUT (alerte G4 du
+# 2 septembre) : le profil de la session ECHELLE demande les DEUX axes
+# nouveaux (neuf specs de frontiere dont sept a `smax=6`, route `classic`)
+# et desarme le device. Il est exerce canon -> profil epingle -> runner ->
+# validateur : plan v2, `smax` sur chaque ligne, `--smax`/`--layout` dans
+# chaque argv, les deux champs a chaque statut, colonne `smax` au resume.
+# BUDGET publie en TROIS nombres distincts (retour auditeur) : estimateur
+# nominal (calcul REEL du cycle de vie), enveloppe des plafonds
+# (9 x FRONTIER_TIMEOUT) et fenetre gravee 5 h / 285 min (13195 s).
+ECHENV="${HERE}/profils/g4_echelle_v1.env"
+ECH_SHA="$(sha256sum "${ECHENV}" | awk '{print $1}')"
+OUTECH="${WORK}/out_echelle"
+PROFILE_ECH="${WORK}/profil_echelle.txt"
+MANIFESTE_ECH="${WORK}/manifest_echelle.txt"
+ECH_AXES="${WORK}/echelle_axes.env"
+est_e="$(bash -c '
+  set -euo pipefail
+  '"$(sed -n '/^budget_estimate() {/,/^}$/p' "${HERE}/v6_session_lifecycle.sh")"'
+  set -a
+  # shellcheck disable=SC1090
+  source "'"${ECHENV}"'"
+  budget_estimate
+' 2>&1)" || est_e="ECHEC:${est_e}"
+ENV_ECH=$(( 9 * 1200 ))
+check_true "budget echelle : ESTIMATE=${est_e}s <= enveloppe ${ENV_ECH}s <= fenetre 13195s, Q2 DESARMEE, route gravee" \
+  bash -c "[[ '${est_e}' =~ ^[0-9]+\$ ]] && [ '${est_e}' -ge 9000 ] && [ '${est_e}' -le '${ENV_ECH}' ] \
+    && [ '${ENV_ECH}' -le 13195 ] \
+    && grep -qx 'FRONTIER_LAYOUT=\"classic\"' '${ECHENV}' \
+    && grep -qx 'GPUV6_GATE_NAMES=\"aucun\"' '${ECHENV}' \
+    && grep -qx 'GPUV6_PILOT_SPECS=\"aucun\"' '${ECHENV}' \
+    && grep -qx 'SESSION_MAX_RUN_SECONDS=18000' '${ECHENV}' \
+    && [ \"\$(sed -n 's/^FRONTIER_SPECS=\"\(.*\)\"\$/\1/p' '${ECHENV}' | wc -w)\" = '9' ]"
+# Profil epingle : MEME contenu que celui du cycle de vie (tous les axes du
+# canon, y compris `frontier_layout`), jamais des defauts qui masqueraient
+# une perte d'axe.
+( set -a; source "${ECHENV}" >/dev/null
+  {
+    echo "profil=g4_echelle_v1"
+    echo "profil_canonique=g4_echelle_v1"
+    echo "profil_canonique_sha256=${ECH_SHA}"
+    echo "conf_specs=${CONF_SPECS}"
+    echo "bench_specs=${BENCH_SPECS}"
+    echo "queue_families=${QUEUE_FAMILIES}"
+    echo "queue_n=${QUEUE_N}"
+    echo "queue_seeds=${QUEUE_SEEDS}"
+    echo "run_timeout=${RUN_TIMEOUT}"
+    echo "threads=${THREADS_VM}"
+    echo "v5_gate_min=${V5_GATE_MIN}"
+    echo "v6_gate_min=${V6_GATE_MIN}"
+    echo "sweep_specs=${SWEEP_SPECS}"
+    echo "sweep_repeats=${SWEEP_REPEATS}"
+    echo "gpu_specs=${GPU_SPECS}"
+    echo "frontier_specs=${FRONTIER_SPECS}"
+    echo "frontier_timeout=${FRONTIER_TIMEOUT}"
+    echo "gpu_build_timeout=${GPU_BUILD_TIMEOUT}"
+    echo "frontier_ulimit_kb=${FRONTIER_ULIMIT_KB}"
+    echo "frontier_layout=${FRONTIER_LAYOUT}"
+    echo "matrice_points=${MATRICE_POINTS}"
+    echo "matrice_sequence=${MATRICE_SEQUENCE}"
+    echo "matrice_timeout=${MATRICE_TIMEOUT}"
+    echo "attrib_points=${ATTRIB_POINTS}"
+    echo "attrib_timeout=${ATTRIB_TIMEOUT}"
+    echo "gpuv6_gate_names=${GPUV6_GATE_NAMES}"
+    echo "gpuv6_build_timeout=${GPUV6_BUILD_TIMEOUT}"
+    echo "gpuv6_gate_timeout=${GPUV6_GATE_TIMEOUT}"
+    echo "gpuv6_pilot_specs=${GPUV6_PILOT_SPECS}"
+    echo "gpuv6_pilot_min_lots=${GPUV6_PILOT_MIN_LOTS}"
+    echo "gpuv6_pilot_timeout=${GPUV6_PILOT_TIMEOUT}"
+    echo "gpuv6_objet_digests=${GPUV6_OBJET_DIGESTS}"
+    echo "matrice_objet_digests=${MATRICE_OBJET_DIGESTS}"
+    echo "bin_matrice=${BIN_MATRICE}"
+    echo "bin_attrib=${BIN_ATTRIB}"
+    echo "bin_pilote=${BIN_PILOTE}"
+    echo "session_max_run_seconds=${SESSION_MAX_RUN_SECONDS}"
+    echo "session_invite_minutes=${SESSION_INVITE_MINUTES}"
+    echo "max_run_seconds_effectif=${SESSION_MAX_RUN_SECONDS}"
+    echo "guest_shutdown_minutes_effectif=${SESSION_INVITE_MINUTES}"
+  } > "${PROFILE_ECH}"
+  {
+    printf 'CONF_SPECS=%q\nBENCH_SPECS=%q\nQUEUE_FAMILIES=%q\nQUEUE_N=%q\nQUEUE_SEEDS=%q\n' \
+      "${CONF_SPECS}" "${BENCH_SPECS}" "${QUEUE_FAMILIES}" "${QUEUE_N}" "${QUEUE_SEEDS}"
+    printf 'RUN_TIMEOUT=%q\nTHREADS=%q\nSWEEP_SPECS=%q\nSWEEP_REPEATS=%q\nGPU_SPECS=%q\n' \
+      "${RUN_TIMEOUT}" "${THREADS_VM}" "${SWEEP_SPECS}" "${SWEEP_REPEATS}" "${GPU_SPECS}"
+    printf 'FRONTIER_SPECS=%q\nFRONTIER_TIMEOUT=%q\nGPU_BUILD_TIMEOUT=%q\nFRONTIER_ULIMIT_KB=%q\n' \
+      "${FRONTIER_SPECS}" "${FRONTIER_TIMEOUT}" "${GPU_BUILD_TIMEOUT}" "${FRONTIER_ULIMIT_KB}"
+    printf 'FRONTIER_LAYOUT=%q\nMATRICE_POINTS=%q\nMATRICE_SEQUENCE=%q\nMATRICE_TIMEOUT=%q\n' \
+      "${FRONTIER_LAYOUT}" "${MATRICE_POINTS}" "${MATRICE_SEQUENCE}" "${MATRICE_TIMEOUT}"
+    printf 'ATTRIB_POINTS=%q\nATTRIB_TIMEOUT=%q\nGPUV6_GATE_NAMES=%q\nGPUV6_BUILD_TIMEOUT=%q\n' \
+      "${ATTRIB_POINTS}" "${ATTRIB_TIMEOUT}" "${GPUV6_GATE_NAMES}" "${GPUV6_BUILD_TIMEOUT}"
+    printf 'GPUV6_GATE_TIMEOUT=%q\nGPUV6_PILOT_SPECS=%q\nGPUV6_PILOT_MIN_LOTS=%q\nGPUV6_PILOT_TIMEOUT=%q\n' \
+      "${GPUV6_GATE_TIMEOUT}" "${GPUV6_PILOT_SPECS}" "${GPUV6_PILOT_MIN_LOTS}" "${GPUV6_PILOT_TIMEOUT}"
+  } > "${ECH_AXES}"
+)
+{
+  echo "schema=e-hgp.protocol-manifest.v1"
+  echo "commit=${PIN_COMMIT}"
+  printf '%s\t%s\t%s\n' "${ECH_SHA}" "$(wc -c < "${ECHENV}")" "gcp-migration/profils/g4_echelle_v1.env"
+} > "${MANIFESTE_ECH}"
+PIN_MANIFEST_ECH="$(sha256sum "${MANIFESTE_ECH}" | awk '{print $1}')"
+rc=0
+(
+  set -a
+  # shellcheck disable=SC1090
+  source "${ECH_AXES}"
+  V5_BIN="${FAKE}/mhgp5" V6_BIN="${FAKE}/mhgp6" CONF_BIN="${FAKE}/mhgp6_conformity"
+  TIME_BIN="/usr/bin/time" OUT_DIR="${OUTECH}"
+  PATH="${FAKE}:${PATH}"
+  bash "${RUNNER}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_ECH}"
+) >/dev/null 2>&1 || rc=$?
+check_true "profil echelle exact : runner rc=0, plan v2 a 9 runs, route classic, sept noms _s6 et deux K10" \
+  bash -c "[ '${rc}' -eq 0 ] \
+    && [ \"\$(sed -n 's/^runs=//p' '${OUTECH}/frontier_plan.txt')\" = '9' ] \
+    && grep -qx 'frontier_plan=v2' '${OUTECH}/frontier_plan.txt' \
+    && grep -qx 'layout=classic' '${OUTECH}/frontier_plan.txt' \
+    && [ \"\$(grep -c ' smax=6\$' '${OUTECH}/frontier_plan.txt')\" = '7' ] \
+    && [ \"\$(grep -c ' smax=11\$' '${OUTECH}/frontier_plan.txt')\" = '2' ] \
+    && grep -qx 'seq=4 name=front_uniform_n2000000_s6 family=uniform n=2000000 smax=6' '${OUTECH}/frontier_plan.txt' \
+    && grep -qx 'seq=9 name=front_uniform_n600000 family=uniform n=600000 smax=11' '${OUTECH}/frontier_plan.txt' \
+    && grep -q -- '--s=8 --smax=6 --seed=3 --threads=48 --layout=classic\$' '${OUTECH}/front_terrain_n1000000_s6.status' \
+    && grep -qx 'smax=6' '${OUTECH}/front_terrain_n1000000_s6.status' \
+    && grep -qx 'layout=classic' '${OUTECH}/front_terrain_n1000000_s6.status'"
+rc=0
+mkdir -p "${WORK}/resumes_echelle"
+VECH="$(V6_RESUMES_DIR="${WORK}/resumes_echelle" python3 "${VALIDATOR}" "${OUTECH}" "${PIN_COMMIT}" \
+  "${PIN_PAYLOAD}" "${PIN_MANIFEST_ECH}" 0 0 "${PROFILE_ECH}" "${ECHENV}" "${MANIFESTE_ECH}" 2>&1)" || rc=$?
+check_true "profil echelle exact : validateur rc=0, resume a colonne smax et ligne de route" \
+  bash -c "[ '${rc}' -eq 0 ] && printf '%s\n' \"\$1\" | grep -q 'campaign_status=verifie_non_decisionnel profil=g4_echelle_v1' \
+    && grep -q '^# plan=v2 layout=classic ' '${WORK}/resumes_echelle/frontier_resume.txt' \
+    && [ \"\$(grep -c '^uniform\|^terrain' '${WORK}/resumes_echelle/frontier_resume.txt')\" = '9' ]" _ "${VECH}"
 
 # ---- MUTANT decision_v1 + FAUX TIME_BIN (huitieme tour) : le profil
 # DECISIONNEL exact, canon reel epingle au manifeste, execute de bout en
