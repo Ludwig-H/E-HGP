@@ -44,7 +44,9 @@ réagrégation renforcés,
 `4ef96717` puis `c2d2ac69` pour le lifecycle § 5.22, `38281dc7` pour la réponse
 architecturale KeyCSR, `53610911` pour sa pré-inscription, `c5b52c9c` pour son
 durcissement, `d6888093` pour son générateur de plan déterministe et
-`8afd1057` pour son pin sémantique,
+`8afd1057` pour son pin sémantique, `17b6dbea` pour la question de conception
+C6, `fec58e1f` pour la réponse au préflight d'échelle et `9243d69f` pour la
+capture moteur de `bad_alloc` — les deux premiers sont documentaires,
 `9c5517c9` pour la demande G4 historique, `e8289d9a` pour son profil
 historique, `320299df` pour le reçu de
 réplication et `8ed2dea6` pour le reçu de confirmation contre-audité
@@ -80,7 +82,8 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | porte de préfixe `2aaa4a53` | listes K exactes, appariement par clé complète et jumeau K10 obligatoire reçus ; les pins K5 de v1 restent post hoc, tandis que v2 porte ses huit fixtures avant toute future exécution |
 | sonde équilibrée `b79e29a5` / harnais `8afd1057` | reçu concret historique intègre et recalculable ; le harnais courant ferme la commande critique héritée du `PATH`, atteste outils/topologie et passe 23 scènes normales/optimisées ; `liveness`, layout, inflight/pics, coordonnée, clés inconnues, `lscpu` et identité stricte restent permissifs ; restaurer aussi l'option terminale `--` de `sha256sum` en corrigeant le faux test ; seule une nouvelle mesure réutilisable attend ces dents |
 | KeyCSR `8afd1057` / pré-inscription durcie `c5b52c9c` / générateur `d6888093` | pin sémantique reçu : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; rvalue refusée à la compilation, kind construit et vrais offsets signés ; matrice 112 cellules, 818 069 deltas et 6 395 137 clés sans désaccord, 185/185 portes rapportées, sonde finale et sanitizers ciblés verts ; aucun GO performance ; générateur reçu comme calendrier seulement, sa grammaire/adjacence, sa variante CTest `-O`, les identités et les frontières `reduce_v3` restent pré-campagne |
-| profil d'échelle G4 `g4_echelle_v1` WIP | **NO START** : fichier non suivi et absent du manifeste ; les six specs `famille:n:6` sont refusées avant tout run par la chaîne frontière v1 câblée sur `smax=11` ; une correction partielle créerait des risques de mauvais parse et de collision K5/K10 ; budget nominal 23 140 s pour 23 995 s utiles ; la chaîne locale exige SPOT/STOP mais aucune cible externe n'a été vérifiée par cet audit |
+| profil d'échelle G4 / moteur `9243d69f` / WIP postérieur | **NO START** : le pin livre une capture moteur utile, mais son code 2 `bad_alloc` est rejeté par le validateur exact et sa réservation de message reste hors garde ; le WIP corrige ces deux symptômes sans encore lier une sous-classe d'allocation ni invalider l'abort 134 ; `FRONTIER_LAYOUT` ne traverse pas le lifecycle/canon, les pilotes sont muets faute de `GPUV6_GATE_NAMES` et Q2 précède Q1 ; grille, budget, `:11` et digest historique restent à fermer |
+| conception C6 `17b6dbea` | direction reçue, sans code ni GO G4 : deux slots monolithiques ne portent pas simultanément pack(k+1), device(k) et rebuild(k−1) ; commencer par un anneau conservateur ou spécifier des leases IN/device/OUT, garder fill hôte et rebuild séquentiel au premier jalon, traiter les chronos de travail comme non additifs et qualifier le stub différé d'auto-test du scheduler seulement |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP série C | départ refusé fail-closed puis arrêté ; perte de superviseur arrêtée sans reçu ; deux relances distinctes reçues et arrêtées sur leurs générations exactes, la plus récente `2026-09-01T18:34:33.420-07:00` ; aucun GO courant |
@@ -191,15 +194,38 @@ la chaîne de construction, aux commandes complètes, au callback résolu, aux
 coordonnées et à l'affinité attestée. Aucun résultat de performance n'existe à
 ce stade.
 
-Le profil `g4_echelle_v1` reste **NO START**. Il est non suivi et absent des
-inventaires scellés ; sa grammaire `famille:n:6` est refusée avant tout run
-par une frontière v1 entièrement câblée sur `smax=11`. Un plan v2 doit porter
-`smax` et le layout choisi jusqu'au nom, statut, argv, validateur et résumé,
-avec compatibilité v1 et contre-fixtures de collision. Son estimateur vaut
-23 140 s pour 23 995 s utiles, marge trop mince pour promettre la complétude,
-et son commentaire répartit mal frontières et pilotes. Les gardes SPOT/STOP
-sont exigées par la chaîne locale, mais aucune cible externe n'a été vérifiée
-par ce préflight ; aucun GO GCP n'est ouvert.
+Le profil `g4_echelle_v1` reste **NO START**. `fec58e1f` ne contient que la
+réponse de Claude ; `9243d69f` livre ensuite le curseur et trois portes moteur,
+mais aucun fichier de campagne. À ce pin, son code 2 contient `bad_alloc`, que
+le validateur exact interdit, et la réservation du message reste avant le
+`try`. Le WIP postérieur déplace cette réservation, ajoute une injection et
+renomme le diagnostic. Il doit encore donner au validateur une sous-classe
+machine-readable liant cause, étage, message et RSS ; un abort 134 ne peut
+rester une donnée si la nouvelle doctrine dit l'inverse. Un vrai échec de la
+réservation peut aussi empêcher toute allocation du message : cause et étage
+doivent survivre sans tas.
+
+Dans le reste du WIP, `smax` et les 17 entrées d'inventaire progressent, mais
+le layout canonique n'est pas transporté par le lifecycle, les deux pilotes
+sont muets faute d'inventaire de portes, et leur phase passe encore avant la
+frontière pourtant déclarée prioritaire. La grille ne justifie pas quatre
+tailles par famille et par K. L'estimateur WIP vaut 16 130 s, tandis que
+l'enveloppe de plafonds avec overhead vaut 19 030 s : ni l'un ni l'autre n'est
+19 010 s. Normaliser `fam:n:11` avant doublons et émission, et graver le digest
+50k ou borner le claim au run courant. Les gardes SPOT/STOP restent exigées,
+mais aucune cible externe n'a été interrogée ou certifiée par ce préflight ;
+aucun GO GCP n'est ouvert.
+
+La question C6 de `17b6dbea` est reçue comme conception prometteuse. La
+réponse active corrige son point de concurrence central : avec des slots qui
+possèdent IN, device et OUT jusqu'au rebuild, deux slots ne peuvent héberger
+trois lots vivants. Claude peut avancer par un anneau conservateur, puis ouvrir
+des leases séparés si la mesure le justifie. Le fill device, la reconstruction
+parallèle et le triple recouvrement restent des facteurs successifs ; les
+durées de travail chevauchées ne ferment pas le mur par addition. Le stub
+différé prouve le scheduler seulement, et la porte device doit forcer plusieurs
+rotations. C6 peut modifier la résidence ; la mesurer avant de le classer comme
+gain de débit uniquement.
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
@@ -720,19 +746,22 @@ Ordre recommandé à Claude :
    `sha256sum --` avec une contre-fixture hermétique avant sa prochaine mesure ;
 3. **achevé à `8afd1057`** : recevoir le pin sémantique KeyCSR ; ajouter la
    dent P2 `r.deltas` au prochain petit lot, sans rouvrir l'architecture ;
-4. raccorder `g4_echelle_v1` à un `frontier_plan=v2` qui porte `smax` et le
-   layout choisi jusqu'au validateur, corriger son budget et rejouer les trois
-   selftests avant tout nouveau départ G4 ;
-5. corriger `GRAND_LIVRE.md`, puis aligner `ARCHITECTURE.md`, `PROVENANCE.md`
+4. fermer les quatre raccords du profil d'échelle : layout canonique, inventaire
+   GPUV6, ordre Q1→Q2 et refus code 2 typé ; normaliser `:11`, corriger
+   portée/budget et rejouer les selftests avant tout nouveau départ G4 ;
+5. pour C6, livrer d'abord le pack à offsets fixes et le modèle différé d'un
+   anneau conservateur ; n'ouvrir leases, rebuild parallèle et fill device
+   qu'en facteurs isolés, après la baseline d'échelle ;
+6. corriger `GRAND_LIVRE.md`, puis aligner `ARCHITECTURE.md`, `PROVENANCE.md`
    et `PLAN_DE_TESTS.md` au prochain checkpoint stable ;
-6. enrichir seulement C1–C4 dans `MATHEMATIQUES.md` et remplacer l'`assert`
+7. enrichir seulement C1–C4 dans `MATHEMATIQUES.md` et remplacer l'`assert`
    Python opportunément : ce microcorrectif P2 ne bloque aucun résultat ;
-7. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
+8. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
    re-régler la règle ;
-8. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
+9. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
    l'oracle et la preuve G16 avant toute nouvelle mesure ;
-9. fermer callbacks/exceptions et leurs fixtures réellement concurrentes ;
-10. ne rouvrir une mesure d'échelle ou G4 qu'avec une question décisionnelle,
+10. fermer callbacks/exceptions et leurs fixtures réellement concurrentes ;
+11. ne rouvrir une mesure d'échelle ou G4 qu'avec une question décisionnelle,
    un nouveau pin exact et un budget couvrant les résidences revendiquées.
 
 GCP non utilisé par le présent audit.

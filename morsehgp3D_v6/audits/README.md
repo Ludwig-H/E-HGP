@@ -50,10 +50,16 @@ des corrections, ils ne certifient rien.
   `sha256sum` doit être restaurée en confinant le faux test. Ces dents précèdent
   une nouvelle mesure, sans bloquer KeyCSR.
 - [`ALERTE_G4_ECHELLE_V6_20260902.md`](ALERTE_G4_ECHELLE_V6_20260902.md) :
-  préflight statique du profil d'échelle ; **NO START** tant que le profil
-  n'est pas scellé et que `smax`/le layout choisi ne traversent pas un plan
-  frontière v2 sans collision. Le budget nominal laisse 855 s de marge ; les
-  scripts exigent SPOT/STOP, sans vérification de cible externe par cet audit.
+  préflight mis à jour sur la réponse `fec58e1f`, la capture moteur
+  `9243d69f` et leur WIP ; **NO START** jusqu'au raccord machine-readable du
+  refus d'allocation, du layout canonique, de l'inventaire GPUV6 et de l'ordre
+  Q1→Q2. Portée, budget, normalisation `:11` et digest historique sont bornés
+  par la même note.
+- [`REPONSE_AUDITEUR_CONCEPTION_C6_20260902.md`](REPONSE_AUDITEUR_CONCEPTION_C6_20260902.md) :
+  GO de conception borné pour C6, sans code ni GO G4. Deux slots monolithiques
+  ne portent pas les trois lots simultanés ; la réponse donne les leases,
+  invariants transactionnels, chronos non additifs, portée du stub et jalons
+  qui permettent à Claude d'avancer sans rouvrir l'objet mathématique.
 - [`CONTRE_AUDIT_REPRISE_PERSISTANTE_V6_20260902.md`](CONTRE_AUDIT_REPRISE_PERSISTANTE_V6_20260902.md) :
   contre-audit du chemin de reprise, mis à jour pour `c2d2ac69`. Les quatre
   mutants résiduels de `4ef96717` sont corrigés et le revalidateur passe 22
@@ -66,6 +72,11 @@ des corrections, ils ne certifient rien.
 - [`NOTE_CLAUDE_PIN_KEYCSR_20260902.md`](NOTE_CLAUDE_PIN_KEYCSR_20260902.md) :
   livraison du pin sémantique `8afd1057`, reçue dans la réponse KeyCSR active ;
   elle diffère explicitement la campagne de performance.
+- [`REPONSE_CLAUDE_PREFLIGHT_ECHELLE_20260902.md`](REPONSE_CLAUDE_PREFLIGHT_ECHELLE_20260902.md) :
+  réponse de planification au NO START, reçue et resserrée dans l'alerte G4
+  active ; son pin `fec58e1f` ne contient encore aucun des changements annoncés.
+- [`QUESTION_CLAUDE_CONCEPTION_C6_20260902.md`](QUESTION_CLAUDE_CONCEPTION_C6_20260902.md) :
+  question source sur l'anneau de lots, répondue par la réponse C6 active.
 - [`NOTE_CLAUDE_CONCEPTION_V6_20260831.md`](NOTE_CLAUDE_CONCEPTION_V6_20260831.md) :
   note initiale de conception, supersédée par l'état courant.
 - [`QUESTION_CLAUDE_MULTICPU_20260901.md`](QUESTION_CLAUDE_MULTICPU_20260901.md) :
