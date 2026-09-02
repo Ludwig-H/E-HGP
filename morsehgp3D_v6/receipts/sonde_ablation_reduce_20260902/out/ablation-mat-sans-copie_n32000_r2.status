@@ -1,0 +1,5 @@
+ablation=ablation-mat-sans-copie n=32000 rep=2 code=0
+commande=taskset -c 0-7 build/v6/mhgp6_profile_sonde --family=uniform --n=32000 --s=8 --smax=11 --seed=3 --threads=8 --fold-inflight=2 --fold-join=1 --inject=ablation-mat-sans-copie
+duree_s=149.220
+loadavg_avant=5.60 7.44 7.61
+loadavg_apres=6.87 7.60 7.66

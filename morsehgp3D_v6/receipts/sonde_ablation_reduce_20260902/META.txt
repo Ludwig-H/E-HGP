@@ -1,0 +1,13 @@
+schema=e-hgp.sonde-ablation-reduce.v1
+date_utc=2026-09-02T02:35:18Z
+commit=81623528f36fed45526f79c72cd23cca51816d87
+worktree_sources_modifies=1
+binaire=build/v6/mhgp6_profile_sonde
+binaire_sha256=74a460467e9fbf1815e315dc00c55aa415fe2f2a637162336371a0fce41757ce
+famille=uniform n_list=8000 16000 32000 reps=3 threads=8 cpus=0-7 fold_inflight=2 fold_join=1 seed=3 s=8 smax=11
+ablations=aucune ablation-mat-sans-copie ablation-mat-sans-tris ablation-post-cle-factice
+libstdcxx=/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+gcc=13.3.0
+hote=Linux 6.8.0-1052-azure x86_64
+statut=sonde_locale_non_decisionnelle (attribution decomposee sur binaire instrumente ; jamais un mur)
+echecs=0

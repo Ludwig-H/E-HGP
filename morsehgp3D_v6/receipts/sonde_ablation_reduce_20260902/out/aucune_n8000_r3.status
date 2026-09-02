@@ -1,0 +1,5 @@
+ablation=aucune n=8000 rep=3 code=0
+commande=taskset -c 0-7 build/v6/mhgp6_profile_sonde --family=uniform --n=8000 --s=8 --smax=11 --seed=3 --threads=8 --fold-inflight=2 --fold-join=1 
+duree_s=32.704
+loadavg_avant=7.58 7.90 7.79
+loadavg_apres=7.12 7.79 7.76

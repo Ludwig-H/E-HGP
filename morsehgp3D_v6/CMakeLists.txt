@@ -362,6 +362,15 @@ add_test(NAME mhgp6_profil_contre_fixture
                  "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/profil_contre_fixture.py"
                  -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
 set_tests_properties(mhgp6_profil_contre_fixture PROPERTIES LABELS "gate" TIMEOUT 120)
+# PORTE DE VACUITE de la sonde d'ablation (ALERTE_SONDE_ABLATION_REDUCE du
+# 2 septembre) : faux binaire rapide, plan de Williams, copie privee hashee
+# avant/apres chaque tuple, agregateur et manifeste fatals, binaire produit
+# refuse — le lanceur et l'agregateur de bench/ sont exerces tels quels.
+add_test(NAME mhgp6_sonde_ablation_gate
+         COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=python3
+                 "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/sonde_ablation_gate.py ${CMAKE_CURRENT_SOURCE_DIR}/bench"
+                 -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+set_tests_properties(mhgp6_sonde_ablation_gate PROPERTIES LABELS "gate" TIMEOUT 300)
 # Contrat d'echec sous profil, COMPILE (71528f8a : le CLI ne print jamais
 # apres un refus — l'inspection porte sur le RunResult, jamais sur stdout).
 add_executable(mhgp6_profil_contrat tests/profil_contrat_echec.cpp)

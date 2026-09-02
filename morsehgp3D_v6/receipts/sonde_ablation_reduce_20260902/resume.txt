@@ -1,0 +1,97 @@
+# sonde ablation reduce — medianes sur repetitions, ms ; ecart = bras - aucune (negatif = fenetre reduite). Attribution sur binaire instrumente, join=1 : JAMAIS un mur.
+
+## n=8000
+repetitions : aucune=3 ablation-mat-sans-copie=3 ablation-mat-sans-tris=3 ablation-post-cle-factice=3
+
+K=8	init	touch	pre	unite	post_remplissage	materialisation_tri_copie	partition	liberation	somme
+aucune	19.0	129.7	105.5	37.8	174.0	301.6	69.0	0.5	839.1
+ablation-mat-sans-copie	19.5 (+0.5)	123.3 (-6.4)	97.4 (-8.1)	38.1 (+0.3)	173.2 (-0.8)	139.3 (-162.3)	63.4 (-5.6)	0.6 (+0.1)	654.8 (-184.3)
+ablation-mat-sans-tris	19.7 (+0.7)	127.4 (-2.3)	101.6 (-3.9)	35.5 (-2.4)	173.5 (-0.5)	218.8 (-82.8)	65.6 (-3.4)	0.7 (+0.2)	742.6 (-96.5)
+ablation-post-cle-factice	19.7 (+0.7)	132.8 (+3.0)	101.7 (-3.8)	36.8 (-1.1)	45.7 (-128.3)	263.6 (-38.0)	66.8 (-2.3)	0.8 (+0.3)	666.1 (-173.0)
+
+K=9	init	touch	pre	unite	post_remplissage	materialisation_tri_copie	partition	liberation	somme
+aucune	26.4	168.0	144.1	49.4	231.7	421.9	92.9	0.7	1133.8
+ablation-mat-sans-copie	26.7 (+0.3)	155.0 (-13.0)	127.2 (-17.0)	48.6 (-0.9)	226.3 (-5.4)	184.8 (-237.2)	90.8 (-2.1)	0.7 (+0.0)	860.1 (-273.7)
+ablation-mat-sans-tris	26.5 (+0.1)	171.7 (+3.7)	141.2 (-2.9)	46.8 (-2.7)	240.1 (+8.4)	303.6 (-118.3)	93.5 (+0.6)	0.7 (-0.0)	1027.1 (-106.7)
+ablation-post-cle-factice	26.4 (-0.0)	168.4 (+0.4)	132.9 (-11.2)	46.7 (-2.7)	57.5 (-174.3)	343.5 (-78.5)	92.0 (-0.9)	0.7 (-0.0)	870.6 (-263.2)
+
+K=10	init	touch	pre	unite	post_remplissage	materialisation_tri_copie	partition	liberation	somme
+aucune	35.4	221.8	184.9	63.3	303.1	586.2	136.1	1.2	1530.8
+ablation-mat-sans-copie	36.1 (+0.7)	203.2 (-18.6)	166.3 (-18.6)	62.2 (-1.1)	293.6 (-9.5)	250.2 (-336.0)	126.7 (-9.4)	1.4 (+0.2)	1149.8 (-381.1)
+ablation-mat-sans-tris	36.2 (+0.7)	215.1 (-6.7)	179.3 (-5.6)	57.9 (-5.4)	297.1 (-6.0)	400.9 (-185.3)	130.6 (-5.4)	1.3 (+0.1)	1321.1 (-209.8)
+ablation-post-cle-factice	35.7 (+0.2)	223.4 (+1.6)	170.7 (-14.1)	59.0 (-4.3)	73.8 (-229.3)	459.1 (-127.0)	129.4 (-6.7)	1.3 (+0.1)	1154.5 (-376.4)
+
+Σ_K	init	touch	pre	unite	post_remplissage	materialisation_tri_copie	partition	liberation	somme	mur_instrumente_ms	rss_max_kb
+aucune	119.9	771.1	633.6	230.0	1022.6	1816.0	399.6	3.4	4979.0	32683.3	2249644
+ablation-mat-sans-copie	121.0 (+1.1)	726.4 (-44.7)	581.7 (-52.0)	227.2 (-2.8)	1010.7 (-11.9)	839.5 (-976.5)	381.1 (-18.4)	3.6 (+0.2)	3871.3 (-1107.7)	31121.8 (-1561.5)	2114392
+ablation-mat-sans-tris	119.7 (-0.2)	764.8 (-6.3)	624.3 (-9.3)	217.1 (-12.9)	1030.1 (+7.5)	1317.5 (-498.5)	393.7 (-5.9)	3.8 (+0.4)	4464.5 (-514.6)	32273.8 (-409.5)	2247892
+ablation-post-cle-factice	120.2 (+0.3)	779.4 (+8.3)	606.0 (-27.6)	219.9 (-10.1)	267.1 (-755.6)	1536.1 (-279.9)	389.6 (-10.0)	4.0 (+0.6)	3921.8 (-1057.3)	31577.3 (-1106.0)	2242024
+
+parts Σ_K (en % de la fenetre du bras aucune) :
+  ablation-mat-sans-copie: materialisation_tri_copie +53.8 % ; post_remplissage +1.2 %
+  ablation-mat-sans-tris: materialisation_tri_copie +27.5 % ; post_remplissage -0.7 %
+  ablation-post-cle-factice: materialisation_tri_copie +15.4 % ; post_remplissage +73.9 %
+
+## n=16000
+repetitions : aucune=3 ablation-mat-sans-copie=3 ablation-mat-sans-tris=3 ablation-post-cle-factice=3
+
+K=8	init	touch	pre	unite	post_remplissage	materialisation_tri_copie	partition	liberation	somme
+aucune	42.7	284.3	275.6	81.2	375.8	681.1	149.8	1.6	1892.8
+ablation-mat-sans-copie	45.2 (+2.5)	277.1 (-7.2)	259.5 (-16.1)	82.2 (+1.0)	382.8 (+7.0)	291.7 (-389.4)	152.6 (+2.7)	1.7 (+0.1)	1495.6 (-397.2)
+ablation-mat-sans-tris	40.5 (-2.2)	274.4 (-9.9)	260.5 (-15.1)	75.6 (-5.5)	372.2 (-3.5)	496.4 (-184.7)	147.8 (-2.1)	1.4 (-0.2)	1666.9 (-225.9)
+ablation-post-cle-factice	40.9 (-1.8)	292.1 (+7.8)	259.0 (-16.6)	78.8 (-2.4)	93.3 (-282.5)	587.7 (-93.4)	152.0 (+2.1)	1.8 (+0.2)	1505.7 (-387.1)
+
+K=9	init	touch	pre	unite	post_remplissage	materialisation_tri_copie	partition	liberation	somme
+aucune	55.9	363.1	357.9	105.9	496.3	965.5	215.6	2.0	2562.1
+ablation-mat-sans-copie	56.9 (+1.1)	362.7 (-0.4)	359.6 (+1.7)	107.9 (+2.0)	519.0 (+22.7)	410.7 (-554.8)	211.1 (-4.5)	2.3 (+0.3)	2030.2 (-531.9)
+ablation-mat-sans-tris	55.4 (-0.5)	368.6 (+5.5)	365.3 (+7.5)	101.7 (-4.2)	506.2 (+9.9)	709.0 (-256.5)	217.2 (+1.7)	1.9 (-0.1)	2330.2 (-231.9)
+ablation-post-cle-factice	56.2 (+0.3)	374.2 (+11.1)	342.8 (-15.0)	101.4 (-4.5)	126.7 (-369.6)	834.1 (-131.4)	215.0 (-0.6)	1.9 (-0.0)	2054.8 (-507.3)
+
+K=10	init	touch	pre	unite	post_remplissage	materialisation_tri_copie	partition	liberation	somme
+aucune	74.5	478.6	474.8	134.8	650.4	1353.1	297.5	2.4	3468.9
+ablation-mat-sans-copie	73.9 (-0.7)	446.3 (-32.4)	427.4 (-47.4)	132.5 (-2.4)	648.1 (-2.3)	549.5 (-803.6)	301.6 (+4.1)	2.3 (-0.1)	2575.5 (-893.3)
+ablation-mat-sans-tris	74.8 (+0.3)	464.2 (-14.4)	452.4 (-22.4)	124.9 (-9.9)	636.1 (-14.3)	957.5 (-395.6)	304.2 (+6.7)	2.4 (-0.0)	3006.9 (-462.0)
+ablation-post-cle-factice	75.4 (+0.9)	474.1 (-4.5)	431.8 (-43.0)	126.4 (-8.4)	168.5 (-481.9)	1081.1 (-272.0)	319.1 (+21.6)	2.3 (-0.1)	2692.8 (-776.0)
+
+Σ_K	init	touch	pre	unite	post_remplissage	materialisation_tri_copie	partition	liberation	somme	mur_instrumente_ms	rss_max_kb
+aucune	239.6	1686.6	1606.4	487.9	2193.8	4161.7	878.6	8.2	11262.5	72259.9	4241140
+ablation-mat-sans-copie	240.2 (+0.5)	1622.1 (-64.4)	1498.6 (-107.8)	488.8 (+0.9)	2200.8 (+7.0)	1790.8 (-2370.8)	888.6 (+10.0)	8.7 (+0.5)	8719.0 (-2543.5)	72929.2 (+669.3)	4238428
+ablation-mat-sans-tris	235.4 (-4.2)	1684.2 (-2.4)	1585.9 (-20.5)	463.8 (-24.2)	2208.5 (+14.7)	3089.9 (-1071.8)	893.3 (+14.7)	8.2 (+0.1)	10167.5 (-1095.0)	71337.3 (-922.6)	4237720
+ablation-post-cle-factice	235.7 (-3.9)	1693.4 (+6.9)	1494.7 (-111.7)	466.9 (-21.0)	581.9 (-1611.9)	3563.5 (-598.2)	901.7 (+23.1)	8.3 (+0.1)	8922.9 (-2339.6)	70866.5 (-1393.4)	4251372
+
+parts Σ_K (en % de la fenetre du bras aucune) :
+  ablation-mat-sans-copie: materialisation_tri_copie +57.0 % ; post_remplissage -0.3 %
+  ablation-mat-sans-tris: materialisation_tri_copie +25.8 % ; post_remplissage -0.7 %
+  ablation-post-cle-factice: materialisation_tri_copie +14.4 % ; post_remplissage +73.5 %
+
+## n=32000
+repetitions : aucune=3 ablation-mat-sans-copie=3 ablation-mat-sans-tris=3 ablation-post-cle-factice=3
+
+K=8	init	touch	pre	unite	post_remplissage	materialisation_tri_copie	partition	liberation	somme
+aucune	82.8	595.4	663.9	172.7	780.7	1513.0	344.8	2.5	4159.0
+ablation-mat-sans-copie	81.7 (-1.1)	555.9 (-39.5)	613.8 (-50.0)	169.6 (-3.1)	783.9 (+3.2)	602.8 (-910.2)	346.0 (+1.2)	2.6 (+0.1)	3151.5 (-1007.5)
+ablation-mat-sans-tris	81.4 (-1.4)	585.4 (-10.0)	652.4 (-11.5)	161.9 (-10.8)	775.6 (-5.1)	1133.8 (-379.2)	351.8 (+7.0)	2.5 (+0.0)	3747.2 (-411.8)
+ablation-post-cle-factice	81.9 (-1.0)	592.5 (-2.9)	611.2 (-52.7)	163.2 (-9.5)	190.5 (-590.2)	1280.6 (-232.4)	351.0 (+6.2)	2.5 (+0.0)	3271.1 (-887.9)
+
+K=9	init	touch	pre	unite	post_remplissage	materialisation_tri_copie	partition	liberation	somme
+aucune	112.9	765.8	886.5	226.0	1036.8	2109.1	516.5	3.5	5662.8
+ablation-mat-sans-copie	115.2 (+2.3)	715.5 (-50.3)	817.8 (-68.7)	220.4 (-5.6)	1033.9 (-2.9)	830.6 (-1278.5)	501.7 (-14.8)	3.6 (+0.1)	4243.0 (-1419.8)
+ablation-mat-sans-tris	112.8 (-0.2)	749.0 (-16.8)	855.7 (-30.8)	209.9 (-16.1)	1022.1 (-14.7)	1530.7 (-578.4)	496.1 (-20.4)	3.5 (+0.0)	4994.2 (-668.6)
+ablation-post-cle-factice	114.7 (+1.7)	771.3 (+5.5)	823.1 (-63.4)	211.9 (-14.1)	251.5 (-785.3)	1727.2 (-381.9)	495.9 (-20.6)	3.6 (+0.1)	4388.4 (-1274.4)
+
+K=10	init	touch	pre	unite	post_remplissage	materialisation_tri_copie	partition	liberation	somme
+aucune	155.2	997.2	1133.9	286.3	1351.2	2878.5	687.5	4.4	7484.7
+ablation-mat-sans-copie	151.5 (-3.8)	929.3 (-67.8)	1048.0 (-85.8)	281.9 (-4.4)	1335.4 (-15.8)	1124.3 (-1754.3)	678.5 (-8.9)	4.5 (+0.1)	5558.5 (-1926.3)
+ablation-mat-sans-tris	154.6 (-0.6)	974.4 (-22.8)	1106.0 (-27.9)	266.1 (-20.2)	1327.9 (-23.2)	2041.5 (-837.1)	683.7 (-3.8)	4.4 (+0.1)	6581.0 (-903.7)
+ablation-post-cle-factice	155.9 (+0.7)	995.4 (-1.7)	1073.1 (-60.8)	269.4 (-16.9)	326.7 (-1024.5)	2327.0 (-551.5)	714.7 (+27.2)	4.4 (-0.0)	5823.5 (-1661.2)
+
+Σ_K	init	touch	pre	unite	post_remplissage	materialisation_tri_copie	partition	liberation	somme	mur_instrumente_ms	rss_max_kb
+aucune	484.0	3535.6	3894.3	1032.6	4549.9	8947.7	2042.4	15.5	24493.5	160619.6	8579300
+ablation-mat-sans-copie	481.9 (-2.1)	3331.3 (-204.2)	3578.4 (-315.9)	1016.3 (-16.4)	4519.7 (-30.1)	3651.7 (-5296.0)	1990.0 (-52.4)	15.7 (+0.2)	18611.3 (-5882.2)	149191.4 (-11428.2)	8581228
+ablation-mat-sans-tris	485.0 (+1.0)	3509.9 (-25.7)	3822.9 (-71.4)	977.3 (-55.3)	4533.1 (-16.7)	6675.0 (-2272.7)	2027.1 (-15.3)	15.7 (+0.3)	22047.1 (-2446.4)	154913.9 (-5705.7)	8581992
+ablation-post-cle-factice	481.5 (-2.5)	3524.7 (-10.9)	3655.0 (-239.3)	983.6 (-49.0)	1135.2 (-3414.6)	7577.0 (-1370.7)	2045.4 (+3.0)	15.8 (+0.4)	19418.0 (-5075.4)	153317.8 (-7301.8)	8584828
+
+parts Σ_K (en % de la fenetre du bras aucune) :
+  ablation-mat-sans-copie: materialisation_tri_copie +59.2 % ; post_remplissage +0.7 %
+  ablation-mat-sans-tris: materialisation_tri_copie +25.4 % ; post_remplissage +0.4 %
+  ablation-post-cle-factice: materialisation_tri_copie +15.3 % ; post_remplissage +75.0 %
