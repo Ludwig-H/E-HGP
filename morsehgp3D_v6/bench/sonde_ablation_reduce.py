@@ -10,29 +10,36 @@ du § 5.22 : compteurs facultatifs, grammaire profil incomplete, repertoire
 vide a la racine, hashes de protocoles non recalcules, identite de cible).
 
 Autorite : META.txt (n_list, reps, ablations, statut, binaire_sha256,
-runs_*, sha256_*, identite_cible, injections_*) et plan.txt (bloc, position,
-bras — carre de Williams). Le resume n'est produit que si :
-  - META.txt porte le schema COURANT (v3) ou un schema ANTERIEUR accepte
-    EXPLICITEMENT (v2 : les champs d'identite de cible n'existaient pas ; le
-    resume imprime alors « claim borne, NON VERIFIE » pour ces champs — tout
-    le reste est aussi strict qu'en v3), aucune ligne `campagne INVALIDE`,
-    des tailles distinctes (deux tuples de meme taille porteraient le meme
-    tag), des hash a la grammaire EXACTE ^[0-9a-f]{64}$ (binaire, lanceur,
-    agregateur) ;
-  - `runs_effectues` et `runs_attendus` sont OBLIGATOIRES (v2 et v3 : le
+runs_*, sha256_*, identite_cible, injections_*, interpreteur) et plan.txt
+(bloc, position, bras — carre de Williams). Le resume n'est produit que si :
+  - META.txt porte le schema COURANT (v4) ou un schema ANTERIEUR accepte
+    EXPLICITEMENT (v2 : les champs d'identite de cible et l'interpreteur
+    n'existaient pas ; v3 : l'interpreteur n'existait pas ; le resume imprime
+    alors « claim borne, NON VERIFIE » pour les seuls champs que ce schema ne
+    gravait pas — tout le reste est aussi strict qu'en v4), aucune ligne
+    `campagne INVALIDE`, des tailles distinctes (deux tuples de meme taille
+    porteraient le meme tag), des hash a la grammaire EXACTE ^[0-9a-f]{64}$
+    (binaire, lanceur, agregateur) ;
+  - `runs_effectues` et `runs_attendus` sont OBLIGATOIRES (tout schema : le
     lanceur les a toujours graves) et egaux au cardinal exact bras x tailles
     x repetitions ; un champ obligatoire absent est un refus (jamais un
     defaut substitue) ;
-  - `statut` commence par exploratory_noncausal_upper_bounds ; les bras sont
-    EXACTEMENT le temoin et les trois ablations de la sonde (identite de
-    cible : mhgp6_profile_sonde accepte tout mutant de kMutants, donc un
-    reçu ne vaut que si les seuls --inject= emis — lus sur la ligne
-    commande= de CHAQUE .status — sont ces trois ablations, une par tuple
-    non temoin ; v3 : injections_autorisees/injections_emises du META en
-    sont l'ensemble exact et identite_cible nomme mhgp6_profile_sonde) ;
+  - `statut` est EXACTEMENT le libelle exploratoire du lanceur (jeton
+    exploratory_noncausal_upper_bounds et sa glose, LIBELLE_STATUT) : un
+    statut promu, un prefixe etendu, une glose reformulee sont des refus ;
+    `ablations` est EXACTEMENT la liste fermee en ORDRE FIXE temoin puis les
+    trois ablations (BRAS_SONDE : bras manquant, renomme, duplique, permute
+    ou hors sonde = refus) ; identite de cible : mhgp6_profile_sonde accepte
+    tout mutant de kMutants, donc un reçu ne vaut que si les seuls --inject=
+    emis — lus sur la ligne commande= de CHAQUE .status — sont ces trois
+    ablations, une par tuple non temoin ; v3+ : injections_autorisees et
+    injections_emises du META sont cette liste exacte en ordre fixe et
+    identite_cible nomme mhgp6_profile_sonde ; v4 : `interpreteur` est un
+    chemin ABSOLU sans blanc (l'interpreteur de la reagregation du jeu
+    scelle par le lanceur, grave avant la campagne) ;
   - les hashes sha256_lanceur / sha256_agregateur du META sont RECALCULES
     depuis protocole_lanceur.sh / protocole_agregateur.py presents dans le
-    reçu (difference ou absence = refus) ;
+    reçu (difference ou absence = refus : 64 zeros ne sont pas un hash) ;
   - la RACINE du reçu porte exactement les fichiers attendus (+ SHA256SUMS
     optionnel, + le couple worktree_diff.* si et seulement si
     worktree_sources_modifies != 0) et exactement les repertoires bin/ et
@@ -53,6 +60,13 @@ bras — carre de Williams). Le resume n'est produit que si :
     bras occupe chaque position une fois ET chaque succession ordonnee X→Y
     (bras adjacents dans un bloc) apparait exactement une fois — un carre
     latin cyclique (ABCD/BCDA/CDAB/DABC) est refuse ;
+  - chaque sortie porte EXACTEMENT UNE ligne `profil_kind=` a jetons
+    `cle=valeur` uniques, avec `profil_kind=reduce_v2` (jamais reduce_v1,
+    jamais reduce_v2+liveness : autre instrumentation) et `fold_join=1`
+    (etage B isole) ; le jeton `layout=` — que le prototype KeyCSR ajoute a
+    cette ligne — n'est exige que s'il est present et vaut alors
+    EXACTEMENT `classic` (`csr` : autre objet, autre sonde) ; la ligne
+    absente, dupliquee ou malformee est un refus ;
   - chaque sortie porte exactement dix lignes `profil_reduce K=1..10` (une
     par K, aucune autre) a la grammaire STRICTE : `K=<entier>` en tete, puis
     des jetons `nom=valeur` (nom ^[a-z][a-z0-9_]*$, valeur decimale
@@ -80,16 +94,28 @@ import re
 import statistics
 import sys
 
-SCHEMA = "e-hgp.sonde-ablation-reduce.v3"
-# Schemas anterieurs acceptes EXPLICITEMENT : v2 = memes fichiers et memes
-# compteurs, sans les champs d'identite de cible (identite_cible,
-# injections_autorisees, injections_emises) — ces trois-la sont alors un
-# claim borne, NON VERIFIE au META, imprime en tete du resume. Le v1 est refuse.
-SCHEMAS_ANTERIEURS = ("e-hgp.sonde-ablation-reduce.v2",)
+SCHEMA = "e-hgp.sonde-ablation-reduce.v4"
+# Champs du META nes avec un schema : v3 = identite de cible ; v4 =
+# interpreteur de la reagregation. Un schema ANTERIEUR accepte EXPLICITEMENT
+# est nomme avec les champs que son lanceur ne gravait pas encore — ces
+# champs-la sont alors un claim borne, NON VERIFIE au META, imprime en tete
+# du resume (presents malgre tout, ils sont verifies). Le v1 est refuse.
+CHAMPS_META_V3 = ("identite_cible", "injections_autorisees", "injections_emises")
+CHAMPS_META_V4 = ("interpreteur",)
+SCHEMAS_ANTERIEURS = {
+    "e-hgp.sonde-ablation-reduce.v2": CHAMPS_META_V3 + CHAMPS_META_V4,
+    "e-hgp.sonde-ablation-reduce.v3": CHAMPS_META_V4,
+}
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 NOM_CHAMP = re.compile(r"^[a-z][a-z0-9_]*$")
 DECIMAL = re.compile(r"^-?[0-9]+(?:\.[0-9]+)?$")
 LIGNE_PROFIL = re.compile(r"^profil_reduce(?:[ \t]+(.*))?[ \t]*$", re.M)
+LIGNE_KIND = re.compile(r"^profil_kind=.*$", re.M)
+# Verrou de la ligne `profil_kind=` : jetons EXIGES a valeur exacte, jetons
+# verifies seulement s'ils sont presents (layout= : ajoute par le prototype
+# KeyCSR ; cette sonde ne mesure que la route classic).
+PROFIL_JETONS_REQUIS = (("profil_kind", "reduce_v2"), ("fold_join", "1"))
+PROFIL_JETONS_SI_PRESENTS = (("layout", "classic"),)
 WINDOWS = ("init", "touch", "pre", "unite", "post_remplissage",
            "materialisation_tri_copie", "partition", "liberation", "somme")
 # Composantes dont `somme` est la somme (liveness figure dans reduce_v2 ; si
@@ -108,8 +134,15 @@ BRAS_TEMOIN = "aucune"
 # et refuse tout reçu dont un .status en emet un autre.
 ABLATIONS_SONDE = ("ablation-mat-sans-copie", "ablation-mat-sans-tris",
                    "ablation-post-cle-factice")
+# Liste FERMEE des bras en ORDRE FIXE (celui du lanceur, ABLATIONS=...) :
+# `ablations=` du META doit lui etre EGALE, pas seulement egale a l'ensemble.
+BRAS_SONDE = (BRAS_TEMOIN,) + ABLATIONS_SONDE
 IDENTITE_CIBLE = "mhgp6_profile_sonde"
 STATUT_ATTENDU = "exploratory_noncausal_upper_bounds"
+# Libelle EXACT grave par le lanceur (jeton + glose) : le seul statut d'un
+# reçu de sonde — jamais une promotion, jamais un prefixe etendu.
+LIBELLE_STATUT = (STATUT_ATTENDU + " (bornes exploratoires non causales sur binaire instrumente,"
+                  " join=1 : jamais un benchmark, jamais un mur, jamais un choix de palier)")
 SEUIL_SOMME = 0.0051
 ETIQUETTES = {
     "ablation-mat-sans-copie": "borne : copie profonde retiree (objet change)",
@@ -124,7 +157,6 @@ CHAMPS_STATUS = ("ablation", "n", "rep", "position", "code", "commande",
 CHAMPS_META = ("schema", "n_list", "reps", "ablations", "statut",
                "binaire_sha256", "sha256_lanceur", "sha256_agregateur",
                "runs_effectues", "runs_attendus", "worktree_sources_modifies")
-CHAMPS_META_V3 = ("identite_cible", "injections_autorisees", "injections_emises")
 FICHIERS_RACINE = ("HASHES.txt", "META.txt", "lscpu.txt", "plan.txt",
                    "protocole_agregateur.py", "protocole_lanceur.sh",
                    "resume.err", "resume.txt")
@@ -201,30 +233,40 @@ def lire_meta(work):
                 raise Refus(f"META.txt porte « {line.strip()} » — reçu invalide, jamais agrege")
     meta = lire_kv(path, CHAMPS_META)
     schema = meta["schema"]
-    bornes = []
     if schema == SCHEMA:
-        for k in CHAMPS_META_V3:
-            if k not in meta:
-                raise Refus(f"META.txt : champ obligatoire {k}= absent (schema {SCHEMA})")
-        if not meta["identite_cible"].startswith(IDENTITE_CIBLE):
-            raise Refus(f"META.txt : identite_cible={meta['identite_cible']!r} ne nomme pas "
-                        f"{IDENTITE_CIBLE}")
-        for k in ("injections_autorisees", "injections_emises"):
-            if sorted(meta[k].split()) != sorted(ABLATIONS_SONDE):
-                raise Refus(f"META.txt : {k}={meta[k]!r} != les trois ablations de la sonde "
-                            f"{list(ABLATIONS_SONDE)} (identite de cible : jamais un mutant "
-                            "produit de kMutants)")
+        absents = ()
     elif schema in SCHEMAS_ANTERIEURS:
-        bornes.append(f"identite_cible / injections_autorisees / injections_emises : claim borne, "
-                      f"NON VERIFIE au META (schema {schema} anterieur a ces champs) ; les "
-                      "--inject= de chaque .status sont neanmoins verifies contre les trois "
-                      "ablations de la sonde")
+        absents = SCHEMAS_ANTERIEURS[schema]
     else:
         raise Refus(f"META.txt : schema {schema!r} ni courant ({SCHEMA}) ni anterieur accepte "
-                    f"{list(SCHEMAS_ANTERIEURS)}")
-    if not meta["statut"].startswith(STATUT_ATTENDU):
-        raise Refus(f"META.txt : statut={meta['statut']!r} ne commence pas par {STATUT_ATTENDU}"
-                    " — un reçu de sonde n'a pas d'autre statut")
+                    f"{sorted(SCHEMAS_ANTERIEURS)}")
+    bornes = []
+    for k in CHAMPS_META_V3 + CHAMPS_META_V4:
+        if k not in meta and k not in absents:
+            raise Refus(f"META.txt : champ obligatoire {k}= absent (schema {schema})")
+    if absents:
+        bornes.append(f"{' / '.join(absents)} : claim borne, NON VERIFIE au META (schema {schema}"
+                      " anterieur a ces champs) ; les --inject= de chaque .status sont neanmoins"
+                      " verifies contre les trois ablations de la sonde, et la reagregation du"
+                      " jeu scelle reste rejouable depuis protocole_agregateur.py")
+    # Champs d'identite et d'interpreteur : verifies des qu'ils sont presents.
+    if "identite_cible" in meta and not meta["identite_cible"].startswith(IDENTITE_CIBLE):
+        raise Refus(f"META.txt : identite_cible={meta['identite_cible']!r} ne nomme pas "
+                    f"{IDENTITE_CIBLE}")
+    for k in ("injections_autorisees", "injections_emises"):
+        if k in meta and tuple(meta[k].split()) != ABLATIONS_SONDE:
+            raise Refus(f"META.txt : {k}={meta[k]!r} != les trois ablations de la sonde en ordre "
+                        f"fixe {list(ABLATIONS_SONDE)} (identite de cible : jamais un mutant "
+                        "produit de kMutants, jamais une liste permutee)")
+    if "interpreteur" in meta:
+        v = meta["interpreteur"]
+        if not v.startswith("/") or any(c.isspace() for c in v) or "/../" in v + "/":
+            raise Refus(f"META.txt : interpreteur={v!r} n'est pas un chemin absolu canonique sans "
+                        "blanc — l'interpreteur de la reagregation est grave, jamais relatif")
+    if meta["statut"] != LIBELLE_STATUT:
+        raise Refus(f"META.txt : statut={meta['statut']!r} != libelle exploratoire exact "
+                    f"{LIBELLE_STATUT!r} — un reçu de sonde n'a pas d'autre statut (jamais une "
+                    "promotion, jamais un prefixe etendu, jamais une glose reformulee)")
     for k in ("binaire_sha256", "sha256_lanceur", "sha256_agregateur"):
         exiger_hex64(meta[k], f"META.txt {k}=")
     ns = [entier(x, "META.txt n_list element") for x in meta["n_list"].split()]
@@ -238,10 +280,10 @@ def lire_meta(work):
         doublons = sorted({n for n in ns if ns.count(n) > 1})
         raise Refus(f"META.txt : n_list avec taille dupliquee {doublons} — les tags "
                     "<bras>_n<n>_r<bloc> de deux tuples s'ecraseraient")
-    if sorted(bras) != sorted((BRAS_TEMOIN,) + ABLATIONS_SONDE):
-        raise Refus(f"META.txt : ablations={bras} != temoin {BRAS_TEMOIN} + les trois ablations "
-                    f"{list(ABLATIONS_SONDE)} (bras hors sonde, duplique, absent : identite de "
-                    "cible non tenue)")
+    if tuple(bras) != BRAS_SONDE:
+        raise Refus(f"META.txt : ablations={bras} != liste fermee en ordre fixe {list(BRAS_SONDE)} "
+                    "(bras hors sonde, duplique, absent, renomme ou permute : identite de cible "
+                    "non tenue)")
     cardinal = len(bras) * len(ns) * reps
     for k in ("runs_effectues", "runs_attendus"):
         v = entier(meta[k], f"META.txt {k}")
@@ -476,12 +518,41 @@ def valeur_decimale(base, k, name, v):
     return x
 
 
+def verifier_profil_kind(base, text):
+    """EXACTEMENT une ligne `profil_kind=` : jetons `cle=valeur` uniques,
+    profil_kind=reduce_v2 et fold_join=1 exiges, layout= (s'il est present)
+    exactement classic — une instrumentation ou une route differente n'est
+    pas une mesure de cette sonde."""
+    lignes = LIGNE_KIND.findall(text)
+    if len(lignes) != 1:
+        raise Refus(f"{base} : ligne profil_kind= absente ou dupliquee ({len(lignes)} occurrence(s))"
+                    " — jamais la premiere ni la derniere valeur")
+    jetons = tokens_kv(lignes[0].split(), f"{base} ligne profil_kind")
+    for k in jetons:
+        if not NOM_CHAMP.match(k):
+            raise Refus(f"{base} : ligne profil_kind, nom de jeton hors grammaire ({k!r})")
+    for k, attendu in PROFIL_JETONS_REQUIS:
+        if k not in jetons:
+            raise Refus(f"{base} : ligne profil_kind sans jeton {k}= (attendu {k}={attendu})")
+        if jetons[k] != attendu:
+            raise Refus(f"{base} : {k}={jetons[k]!r} != {attendu!r} sur la ligne profil_kind — "
+                        "la sonde exige reduce_v2 avec join=1 (etage B isole) ; une autre "
+                        "instrumentation ou un join libre n'est pas une mesure de cette sonde")
+    for k, attendu in PROFIL_JETONS_SI_PRESENTS:
+        if k in jetons and jetons[k] != attendu:
+            raise Refus(f"{base} : {k}={jetons[k]!r} != {attendu!r} sur la ligne profil_kind — "
+                        "cette sonde ne mesure que la route classic (csr : autre objet, autre "
+                        "sonde)")
+
+
 def parse_profile(path):
     """-> ({K: {champ: float}}, temps_mur_ms, rss_max_kb) ; refus sinon.
-    Toute ligne commencant par `profil_reduce` est parsee STRICTEMENT."""
+    La ligne `profil_kind=` est verrouillee et toute ligne commencant par
+    `profil_reduce` est parsee STRICTEMENT."""
     base = os.path.basename(path)
     with open(path, encoding="utf-8") as f:
         text = f.read()
+    verifier_profil_kind(base, text)
     per_k = {}
     for m in LIGNE_PROFIL.finditer(text):
         ligne = m.group(0).strip()
@@ -642,7 +713,9 @@ def main():
           "benchmark, jamais un mur, jamais un choix de palier.")
     print(f"# schema={meta['schema']} ; identite de cible (claim borne) : "
           f"{meta.get('identite_cible', IDENTITE_CIBLE + ' (schema anterieur : non grave)')} ; "
-          f"--inject= emis, verifies sur chaque .status : {' '.join(ABLATIONS_SONDE)}")
+          f"--inject= emis, verifies sur chaque .status : {' '.join(ABLATIONS_SONDE)} ; "
+          f"interpreteur de la reagregation du jeu scelle : "
+          f"{meta.get('interpreteur', '(schema anterieur : non grave)')}")
     for b in bornes:
         print(f"# claim borne, NON VERIFIE : {b}")
     print("# bras : " + " ; ".join([f"{BRAS_TEMOIN} (temoin)"] + [etiquette(a) for a in autres]))

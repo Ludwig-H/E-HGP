@@ -88,14 +88,32 @@
 #     vide. Le manifeste couvre TOUT fichier regulier sauf le seul
 #     ./SHA256SUMS racine (un out/SHA256SUMS ou tout intrus est hache, donc
 #     visible, puis refuse par l'inventaire). Un reçu INVALIDE reste en
-#     `<OUT>.partial`, jamais publie. Fenetre residuelle : le `mv` lui-meme
-#     (un faux `mv` en PATH) — aucun controle interne ne peut la voir.
+#     `<OUT>.partial`, jamais publie.
+#   - REAGREGATION DU JEU SCELLE (TOCTOU semantique, « Reception critique du
+#     pin 1cb60655 » de l'alerte) : la premiere agregation passe par `python3`
+#     en PATH ; un faux interpreteur peut relayer vers le vrai agregateur puis
+#     muter META (vu par les empreintes d'avant agregation) ou FORGER le
+#     resume qu'il relaie (invisible a toute empreinte : resume.txt nait de
+#     lui). Donc, APRES le manifeste et sa premiere verification, le jeu
+#     scelle est REAGREGE depuis la copie archivee protocole_agregateur.py par
+#     l'INTERPRETEUR ABSOLU ET CANONIQUE resolu AVANT la campagne et grave au
+#     META (`interpreteur=`, hors PATH : point fixe de sys.executable, binaire
+#     ELF — un script relais ou un chemin qui se resout ailleurs est un REFUS
+#     2 avant toute ecriture), hors du reçu, et compare BIT A BIT (stdout et
+#     stderr, rc de `cmp` capture ET sha256 des deux fichiers) a resume.txt et
+#     resume.err scelles ; puis TOUS les controles de publication sont
+#     rejoues (repertoires, inventaire == manifeste, protocoles, copie privee,
+#     `sha256sum -c --strict`) et le `mv` suit immediatement. Toute
+#     divergence => INVALIDE 3, jamais publie. Fenetres residuelles : le `mv`
+#     lui-meme (un faux `mv` en PATH) et un faux interpreteur COMPILE qui se
+#     nomme lui-meme de facon coherente — aucun controle interne ne peut les
+#     voir ; le second est au moins grave au META pour l'auditeur.
 #   - Worktree : commit et nombre de fichiers modifies graves ; si non nul,
 #     `git diff HEAD` embarque dans worktree_diff.patch (+ statut porcelain et
 #     `git diff HEAD --summary --stat` dans worktree_diff_summary.txt), sinon
 #     worktree_diff=aucun.
-# Porte : tests/sonde_ablation_gate.py (faux binaire rapide, dix-huit scenes,
-# cas (a)–(u)).
+# Porte : tests/sonde_ablation_gate.py (faux binaire rapide, vingt et une
+# scenes, cas (a)–(x)).
 # Usage : sonde_ablation_reduce.sh OUT_DIR BIN_SONDE [N_LIST="8000 16000 32000"] [REPS=4]
 #   (un troisieme argument VIDE est une liste vide, donc un refus — pas le defaut)
 #   ou  : sonde_ablation_reduce.sh --inventaire DIR
@@ -195,6 +213,30 @@ done
 taskset -c "${CPUS}" true >/dev/null 2>&1 || refus "CPUS=${CPUS} invalide pour taskset"
 [ -f "${BIN_SRC}" ] && [ -x "${BIN_SRC}" ] || refus "binaire absent, non regulier ou non executable (${BIN_SRC})"
 
+# --- Interpreteur de la reagregation : resolu AVANT la campagne, hors PATH --
+# `python3` en PATH ne sert qu'a la premiere agregation ; la reagregation du
+# jeu scelle passe par ce chemin ABSOLU et CANONIQUE (readlink -f), grave au
+# META. Un relais (script ou chemin qui se resout ailleurs) est refuse : le
+# chemin doit etre son propre sys.executable (point fixe) et un binaire ELF.
+INTERPRETEUR="$(python3 -c 'import sys; print(sys.executable)' 2>/dev/null)" \
+  || refus "interpreteur python3 introuvable ou muet (python3 -c 'import sys; print(sys.executable)')"
+case "${INTERPRETEUR}" in
+  /*) ;;
+  *) refus "interpreteur python3 non absolu (${INTERPRETEUR:-vide}) — jamais grave" ;;
+esac
+case "${INTERPRETEUR}" in *[[:space:]]*) refus "interpreteur python3 avec blanc (${INTERPRETEUR}) — jamais grave" ;; esac
+INTERPRETEUR="$(readlink -f "${INTERPRETEUR}" 2>/dev/null)" || refus "interpreteur python3 non canonisable (readlink -f)"
+[ -f "${INTERPRETEUR}" ] && [ -x "${INTERPRETEUR}" ] \
+  || refus "interpreteur ${INTERPRETEUR:-vide} absent, non regulier ou non executable"
+FIXE="$("${INTERPRETEUR}" -c 'import sys; print(sys.executable)' 2>/dev/null)" \
+  || refus "interpreteur ${INTERPRETEUR} muet ou en echec sur sys.executable"
+FIXE_CANON="$(readlink -f "${FIXE}" 2>/dev/null || printf '%s' "${FIXE}")"
+[ "${FIXE_CANON}" = "${INTERPRETEUR}" ] \
+  || refus "interpreteur ${INTERPRETEUR} ne se resout pas sur lui-meme (sys.executable=${FIXE:-vide}) : relais ou wrapper, jamais grave"
+MAGIE="$(head -c 4 "${INTERPRETEUR}" 2>/dev/null | od -An -tx1 | tr -d ' \n')"
+[ "${MAGIE}" = "7f454c46" ] \
+  || refus "interpreteur ${INTERPRETEUR} n'est pas un binaire ELF (en-tete ${MAGIE:-vide}) : script relais, jamais grave"
+
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "${HERE}/../.." && pwd)"
 SRC_PATHS="morsehgp3D_v6/src morsehgp3D_v6/cli morsehgp3D_v6/CMakeLists.txt morsehgp3D_v6/bench"
@@ -286,7 +328,7 @@ if [ "${DIRTY}" -ne 0 ]; then
 fi
 
 {
-  echo "schema=e-hgp.sonde-ablation-reduce.v3"
+  echo "schema=e-hgp.sonde-ablation-reduce.v4"
   echo "date_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "commit=${PIN}"
   echo "worktree_sources_modifies=${DIRTY}"
@@ -305,6 +347,7 @@ fi
   echo "etiquette_ablation-post-cle-factice=borne composite (lecture keys[] + tri de cles egales) — jamais « lecture seule »"
   echo "sha256_lanceur=${H_LANCEUR}"
   echo "sha256_agregateur=${H_AGREGATEUR}"
+  echo "interpreteur=${INTERPRETEUR}"
   echo "libstdcxx=$(readlink -f /usr/lib/x86_64-linux-gnu/libstdc++.so.6 2>/dev/null || echo inconnu)"
   echo "gcc=$(gcc -dumpfullversion 2>/dev/null || echo inconnu)"
   echo "hote=$(uname -srm)"
@@ -431,28 +474,74 @@ while read -r h p; do
 done < "${WORKD}/SHA256SUMS"
 [ "${NSOMMES}" -eq $((PRE_N + 2)) ] || invalide "manifeste : ${NSOMMES} entrees != ${PRE_N} empreintes d'avant agregation + resume.txt + resume.err"
 
-# --- Derniers controles, puis publication SANS AUTRE OPERATION -----------
-# Tout est RELU ici, apres le manifeste : repertoires, fichiers, protocoles,
-# copie privee, puis `sha256sum -c --strict` et le `mv` immediatement apres.
-exiger_listes_egales "repertoires du reçu != {bin out} (repertoire vide ou inattendu)" \
-  "$(printf '%s\n' bin out)" \
-  "$(cd "${WORKD}" && find . -mindepth 1 -type d -printf '%P\n' | LC_ALL=C sort)"
-SPECIAUX="$(cd "${WORKD}" && find . ! -type f ! -type d | wc -l)"
-[ "${SPECIAUX}" -eq 0 ] || invalide "${SPECIAUX} entree(s) non reguliere(s) (lien ou special) apparue(s) avant publication"
-exiger_listes_egales "inventaire final != manifeste (fichier apparu ou disparu apres le manifeste)" \
-  "$(entrees_manifeste)" "$(cd "${WORKD}" && lister_fichiers)"
-HL="$(hash_de "${WORKD}/protocole_lanceur.sh")" || invalide "protocole_lanceur.sh archive illisible avant publication"
-[ "${HL}" = "${H_LANCEUR}" ] || invalide "protocole_lanceur.sh archive relu avant publication (${HL}) != sha256_lanceur du META (${H_LANCEUR})"
-HLS="$(hash_de "${HERE}/sonde_ablation_reduce.sh")" || invalide "lanceur source illisible avant publication"
-[ "${HLS}" = "${H_LANCEUR}" ] || invalide "lanceur source relu avant publication (${HLS}) != copie archivee (${H_LANCEUR}) — protocole modifie pendant la campagne"
-HA="$(hash_de "${WORKD}/protocole_agregateur.py")" || invalide "protocole_agregateur.py archive illisible avant publication"
-[ "${HA}" = "${H_AGREGATEUR}" ] || invalide "protocole_agregateur.py archive relu avant publication (${HA}) != sha256_agregateur du META (${H_AGREGATEUR})"
-HAS="$(hash_de "${HERE}/sonde_ablation_reduce.py")" || invalide "agregateur source illisible avant publication"
-[ "${HAS}" = "${H_AGREGATEUR}" ] || invalide "agregateur source relu avant publication (${HAS}) != copie archivee (${H_AGREGATEUR}) — protocole modifie pendant la campagne"
-HF="$(hash_de "${BIN}")" || invalide "copie privee illisible avant publication"
-[ "${HF}" = "${H}" ] || invalide "copie privee relue avant publication (${HF}) != binaire_sha256 du META (${H})"
-( cd "${WORKD}" && sha256sum -c --quiet --strict SHA256SUMS ) >/dev/null 2>&1 \
-  || invalide "verification finale sha256sum -c en echec"
+# --- Derniers controles (scelles puis RELUS), reagregation, publication -----
+# controles_avant_publication : tout est RELU apres le manifeste —
+# repertoires, entrees speciales, fichiers reguliers == manifeste, protocoles
+# archives == META == sources, copie privee == META, puis
+# `sha256sum -c --strict`. Appele DEUX fois : avant la reagregation (le jeu
+# est scelle et verifie) et apres elle (le jeu est integralement re-verifie),
+# le `mv` IMMEDIATEMENT apres la seconde.
+controles_avant_publication() {
+  local hl hls ha has hf
+  exiger_listes_egales "repertoires du reçu != {bin out} (repertoire vide ou inattendu)" \
+    "$(printf '%s\n' bin out)" \
+    "$(cd "${WORKD}" && find . -mindepth 1 -type d -printf '%P\n' | LC_ALL=C sort)"
+  SPECIAUX="$(cd "${WORKD}" && find . ! -type f ! -type d | wc -l)"
+  [ "${SPECIAUX}" -eq 0 ] || invalide "${SPECIAUX} entree(s) non reguliere(s) (lien ou special) apparue(s) avant publication"
+  exiger_listes_egales "inventaire final != manifeste (fichier apparu ou disparu apres le manifeste)" \
+    "$(entrees_manifeste)" "$(cd "${WORKD}" && lister_fichiers)"
+  hl="$(hash_de "${WORKD}/protocole_lanceur.sh")" || invalide "protocole_lanceur.sh archive illisible avant publication"
+  [ "${hl}" = "${H_LANCEUR}" ] || invalide "protocole_lanceur.sh archive relu avant publication (${hl}) != sha256_lanceur du META (${H_LANCEUR})"
+  hls="$(hash_de "${HERE}/sonde_ablation_reduce.sh")" || invalide "lanceur source illisible avant publication"
+  [ "${hls}" = "${H_LANCEUR}" ] || invalide "lanceur source relu avant publication (${hls}) != copie archivee (${H_LANCEUR}) — protocole modifie pendant la campagne"
+  ha="$(hash_de "${WORKD}/protocole_agregateur.py")" || invalide "protocole_agregateur.py archive illisible avant publication"
+  [ "${ha}" = "${H_AGREGATEUR}" ] || invalide "protocole_agregateur.py archive relu avant publication (${ha}) != sha256_agregateur du META (${H_AGREGATEUR})"
+  has="$(hash_de "${HERE}/sonde_ablation_reduce.py")" || invalide "agregateur source illisible avant publication"
+  [ "${has}" = "${H_AGREGATEUR}" ] || invalide "agregateur source relu avant publication (${has}) != copie archivee (${H_AGREGATEUR}) — protocole modifie pendant la campagne"
+  hf="$(hash_de "${BIN}")" || invalide "copie privee illisible avant publication"
+  [ "${hf}" = "${H}" ] || invalide "copie privee relue avant publication (${hf}) != binaire_sha256 du META (${H})"
+  ( cd "${WORKD}" && sha256sum -c --quiet --strict SHA256SUMS ) >/dev/null 2>&1 \
+    || invalide "verification finale sha256sum -c en echec"
+}
+# Identite BIT A BIT de deux fichiers, a deux temoins : le rc de `cmp` est
+# CAPTURE (0 identique, 1 different, autre => « comparaison impossible ») ET
+# les deux sha256 (hash_de) doivent coincider — un faux `cmp` muet a 0 est vu
+# par les hashes, un faux sha256sum constant par `cmp`. Jamais fail-open.
+exiger_fichiers_identiques() { # $1 = libelle, $2 = scelle, $3 = reagrege
+  local rc=0 h2 h3
+  cmp -s "$2" "$3" || rc=$?
+  case "${rc}" in
+    0) ;;
+    1) invalide "$1 (premier ecart : $(cmp "$2" "$3" 2>&1 | head -1 | cut -c1-200))" ;;
+    *) invalide "$1 : comparaison impossible (cmp rc=${rc}) — jamais fail-open" ;;
+  esac
+  h2="$(hash_de "$2")" || invalide "$1 : sha256 du fichier scelle illisible"
+  h3="$(hash_de "$3")" || invalide "$1 : sha256 de la reagregation illisible"
+  [ "${h2}" = "${h3}" ] || invalide "$1 (cmp muet a 0 mais sha256 ${h2} != ${h3})"
+}
+controles_avant_publication
+
+# --- REAGREGATION du jeu scelle (TOCTOU semantique apres agregation) --------
+# La copie archivee protocole_agregateur.py (hash == META, relu a l'instant)
+# est rejouee sur le jeu SCELLE par l'interpreteur ABSOLU grave au META
+# (INTERPRETEUR, hors PATH), hors du reçu (dossier temporaire retire quoi
+# qu'il arrive), et son stdout/stderr doivent etre BIT A BIT resume.txt /
+# resume.err scelles : un resume forge par un faux `python3` en PATH, ou un
+# META mute apres la premiere agregation, ne se reproduisent pas.
+REAGR="$(mktemp -d)" || invalide "reagregation : dossier temporaire impossible (mktemp -d)"
+trap 'rm -rf "${REAGR}"' EXIT
+rc=0
+"${INTERPRETEUR}" "${WORKD}/protocole_agregateur.py" "${WORKD}" \
+  > "${REAGR}/resume.txt" 2> "${REAGR}/resume.err" || rc=$?
+[ "${rc}" -eq 0 ] || invalide "reagregation du jeu scelle par ${INTERPRETEUR} en echec (code ${rc} : $(head -c 300 "${REAGR}/resume.err" | tr '\n' ' '))"
+exiger_fichiers_identiques "resume.txt scelle != reagregation du jeu scelle par ${INTERPRETEUR} (copie archivee) — META et resume incoherents ou resume forge, jamais publie" \
+  "${WORKD}/resume.txt" "${REAGR}/resume.txt"
+exiger_fichiers_identiques "resume.err scelle != reagregation du jeu scelle par ${INTERPRETEUR} (copie archivee) — jamais publie" \
+  "${WORKD}/resume.err" "${REAGR}/resume.err"
+rm -rf "${REAGR}"
+# Le jeu est RE-VERIFIE integralement apres la reagregation (rien n'a pu
+# apparaitre, disparaitre ni changer), puis publie sans autre operation.
+controles_avant_publication
 mv "${WORKD}" "${OUT}" || invalide "publication (mv) impossible"
 echo "reçu publie : ${OUT}"
 cat "${OUT}/resume.txt"

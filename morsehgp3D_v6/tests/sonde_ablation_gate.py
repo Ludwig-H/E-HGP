@@ -96,6 +96,30 @@ Scenes :
   (u) `diff` fail-open : faux diff rendant 2 sans sortie => INVALIDE 3
       (« comparaison impossible ») ; faux diff rendant 1 sans sortie =>
       INVALIDE 3 (jamais un test sur la seule sortie vide).
+  Reception critique du pin 1cb60655 (alerte, quatre familles ; la frontiere
+  CLI est traitee a part, hors de cette porte) :
+  (v) TOCTOU SEMANTIQUE apres agregation : faux python3 relayant le vrai
+      agregateur puis promouvant `statut=` de META => INVALIDE 3 (empreinte
+      d'avant agregation != manifeste ; META et resume se contredisent dans
+      le .partial, jamais publie) ; faux python3 relayant le vrai agregateur
+      puis FORGEANT le resume qu'il relaie (META intact, aucune empreinte ne
+      le voit, le manifeste le scelle, `sha256sum -c` passe) => INVALIDE 3
+      par la REAGREGATION du jeu scelle par l'interpreteur ABSOLU grave au
+      META (hors PATH), comparee bit a bit ; interpreteur MENTEUR (script qui
+      se nomme lui-meme a la sonde sys.executable) => refus 2 « ELF » ;
+      interpreteur RELAIS (chemin qui se resout ailleurs) => refus 2 « ne se
+      resout pas sur lui-meme » — aucun .partial dans les deux cas ;
+  (w) contrat META EXACT : statut promu (decision_complete, aussi sous
+      `python3 -O`), prefixe etendu, glose reformulee, jeton nu => 1 ; bras
+      manquant, renomme, permute => 1 ; injections_autorisees permutees =>
+      1 ; sha256_lanceur / sha256_agregateur = 64 zeros => 1 (recalcule) ;
+      interpreteur relatif, avec blanc, absent (v4) => 1 ; schema v3
+      explicite => 0 avec « interpreteur : claim borne, NON VERIFIE » ; v3
+      portant un interpreteur relatif => 1 (present, donc verifie) ;
+  (x) ligne `profil_kind=` VERROUILLEE : fold_join=0, layout=csr,
+      reduce_v1, reduce_v2+liveness, fold_join= absent, jeton sans `=`,
+      jeton duplique, ligne absente, ligne dupliquee => 1 ; layout=classic
+      ajoute => 0 et resume bit-identique au nominal (temoin de causalite).
 
 Usage : sonde_ablation_gate.py <dossier bench>. Codes : 0 conforme ;
 1 au moins un controle en echec. Aucun assert (python3 -O).
@@ -115,12 +139,18 @@ BRAS = ("aucune", "ablation-mat-sans-copie", "ablation-mat-sans-tris",
 LETTRES = dict(zip("ABCD", BRAS))
 LATIN_CYCLIQUE = ("A B C D", "B C D A", "C D A B", "D A B C")
 WILLIAMS_PERMUTE = ("B D A C", "C A D B", "D C B A", "A B C D")
-SCHEMA = "e-hgp.sonde-ablation-reduce.v3"
+SCHEMA = "e-hgp.sonde-ablation-reduce.v4"
+SCHEMA_V3 = "e-hgp.sonde-ablation-reduce.v3"
 SCHEMA_V2 = "e-hgp.sonde-ablation-reduce.v2"
 INJECTIONS = "ablation-mat-sans-copie ablation-mat-sans-tris ablation-post-cle-factice"
 IDENTITE_CIBLE = ("mhgp6_profile_sonde (accepte tout mutant de kMutants ; "
                   "seules les ablations sont selectionnees ici)")
 CHAMPS_V3 = ("identite_cible", "injections_autorisees", "injections_emises")
+CHAMPS_V4 = ("interpreteur",)
+LIBELLE_STATUT = ("exploratory_noncausal_upper_bounds (bornes exploratoires non causales sur "
+                  "binaire instrumente, join=1 : jamais un benchmark, jamais un mur, jamais un "
+                  "choix de palier)")
+LIGNE_KIND = "profil_kind=reduce_v2 fold_join=1 inflight_demande=2 pic_workers_b=1 pic_reduce_actif=1"
 LIGNE_ABLATIONS = ('ABLATIONS="aucune ablation-mat-sans-copie ablation-mat-sans-tris '
                    'ablation-post-cle-factice"')
 
@@ -228,14 +258,21 @@ FAUX_SHA256SUM_VIDE = """#!/usr/bin/env bash
 exit 0
 """
 
+# Faux python3 RELAIS : tout appel est relaye au vrai interpreteur (la sonde
+# sys.executable du lanceur repond donc le vrai chemin) ; le mutant n'agit
+# qu'apres l'appel de l'AGREGATEUR (premier argument protocole_agregateur.py),
+# sur le dossier de reçu (dernier argument).
+FAUX_PYTHON3_TETE = """#!/usr/bin/env bash
+"%REAL%" "$@"
+rc=$?
+case "${1:-}" in */protocole_agregateur.py) ;; *) exit $rc ;; esac
+w="${@: -1}"
+"""
+
 # Mutant (n) : faux python3 qui execute l'agregateur REEL puis, apres son
 # retour et avant le manifeste, ajoute un intrus a la racine et un
 # out/SHA256SUMS — la fenetre entre l'agregateur et la generation du manifeste.
-FAUX_PYTHON3_INTRUS = """#!/usr/bin/env bash
-"%REAL%" "$@"
-rc=$?
-w="${@: -1}"
-: > "${w}/intrus_racine.txt"
+FAUX_PYTHON3_INTRUS = FAUX_PYTHON3_TETE + """: > "${w}/intrus_racine.txt"
 : > "${w}/out/SHA256SUMS"
 exit $rc
 """
@@ -243,23 +280,53 @@ exit $rc
 # Mutant (q) : faux python3 qui, apres l'agregateur reel et avant le
 # manifeste, cree un repertoire VIDE a la racine du reçu — invisible a un
 # manifeste de fichiers, visible a l'inventaire des repertoires du lanceur.
-FAUX_PYTHON3_VIDE = """#!/usr/bin/env bash
-"%REAL%" "$@"
-rc=$?
-w="${@: -1}"
-mkdir "${w}/vide"
+FAUX_PYTHON3_VIDE = FAUX_PYTHON3_TETE + """mkdir "${w}/vide"
 exit $rc
 """
 
 # Mutant (t) : faux python3 qui, apres l'agregateur reel et avant le
 # manifeste, MODIFIE une sortie deja lue (mutation semantique) : le manifeste
 # scelle alors le contenu mute et `sha256sum -c` seul publierait.
-FAUX_PYTHON3_MUTATION = """#!/usr/bin/env bash
-"%REAL%" "$@"
-rc=$?
-w="${@: -1}"
-echo "# mutation apres agregation (mutant de porte)" >> "${w}/out/aucune_n64_r1.txt"
+FAUX_PYTHON3_MUTATION = FAUX_PYTHON3_TETE + """echo "# mutation apres agregation (mutant de porte)" >> "${w}/out/aucune_n64_r1.txt"
 exit $rc
+"""
+
+# Mutant (v) des auditeurs : faux python3 qui execute l'agregateur REEL puis
+# PROMEUT `statut=` de META.txt — META et resume se contredisent.
+FAUX_PYTHON3_META_STATUT = FAUX_PYTHON3_TETE + """sed -i 's/^statut=.*/statut=decision_complete/' "${w}/META.txt"
+exit $rc
+"""
+
+# Mutant (v) : faux python3 qui execute l'agregateur REEL (son stdout est
+# deja resume.txt) puis FORGE le resume qu'il vient de relayer — META intact,
+# aucune empreinte d'avant agregation ne le voit, le manifeste le scelle.
+# Seule la REAGREGATION du jeu scelle par l'interpreteur grave (hors PATH)
+# peut le contredire.
+FAUX_PYTHON3_RESUME_FORGE = FAUX_PYTHON3_TETE + """sed -i '1s/statut=exploratory_noncausal_upper_bounds/statut=decision_complete/' "${w}/resume.txt"
+exit $rc
+"""
+
+# Mutant (v) : interpreteur MENTEUR — a la sonde sys.executable il se nomme
+# lui-meme (chemin absolu, coherent a chaque appel : le point fixe passe) ;
+# c'est un script, pas un binaire ELF => refus 2 avant toute ecriture.
+FAUX_PYTHON3_MENTEUR = """#!/usr/bin/env bash
+case "${1:-}" in
+  -c) case "${2:-}" in *sys.executable*) printf '%s\\n' "$0"; exit 0 ;; esac ;;
+esac
+exec "%REAL%" "$@"
+"""
+
+# Mutant (v) : interpreteur RELAIS — a la sonde sys.executable il nomme un
+# second script (python3.relais) qui relaie au vrai interpreteur : ce chemin
+# ne se resout pas sur lui-meme (le vrai repond son propre chemin) => refus 2.
+FAUX_PYTHON3_RELAIS = """#!/usr/bin/env bash
+case "${1:-}" in
+  -c) case "${2:-}" in *sys.executable*) printf '%s\\n' "$(dirname "$0")/python3.relais"; exit 0 ;; esac ;;
+esac
+exec "%REAL%" "$@"
+"""
+FAUX_PYTHON3_RELAIS_CIBLE = """#!/usr/bin/env bash
+exec "%REAL%" "$@"
 """
 
 # Mutants (r)(t) : faux sha256sum qui n'agit que sur la GENERATION du
@@ -407,12 +474,21 @@ def retirer_ligne(p, path, prefixe, nom):
 
 
 def retrograder_v2(p, dossier):
-    """META v3 -> v2 : schema v2 et retrait des trois champs d'identite (le
-    lanceur v2 ne les gravait pas) ; tout le reste est inchange."""
+    """META v4 -> v2 : schema v2 et retrait des trois champs d'identite et de
+    l'interpreteur (le lanceur v2 ne les gravait pas) ; le reste est inchange."""
     meta = dossier / "META.txt"
     remplacer_ligne(p, meta, "schema=", f"schema={SCHEMA_V2}", "retrogradation v2")
-    for champ in CHAMPS_V3:
+    for champ in CHAMPS_V3 + CHAMPS_V4:
         retirer_ligne(p, meta, f"{champ}=", "retrogradation v2")
+
+
+def retrograder_v3(p, dossier):
+    """META v4 -> v3 : schema v3 et retrait du seul interpreteur (le lanceur
+    v3 ne le gravait pas) ; les champs d'identite restent."""
+    meta = dossier / "META.txt"
+    remplacer_ligne(p, meta, "schema=", f"schema={SCHEMA_V3}", "retrogradation v3")
+    for champ in CHAMPS_V4:
+        retirer_ligne(p, meta, f"{champ}=", "retrogradation v3")
 
 
 def scene_nominal(p, base, faux):
@@ -425,9 +501,20 @@ def scene_nominal(p, base, faux):
     if not out.is_dir():
         return
     meta = lire_kv(out / "META.txt")
-    p.check("nominal : statut exploratory_noncausal_upper_bounds",
-            meta.get("statut", "").startswith("exploratory_noncausal_upper_bounds"))
-    p.check("nominal : schema v3", meta.get("schema") == SCHEMA, repr(meta.get("schema")))
+    p.check("nominal : statut = libelle exploratoire exact",
+            meta.get("statut") == LIBELLE_STATUT, repr(meta.get("statut")))
+    p.check("nominal : schema v4", meta.get("schema") == SCHEMA, repr(meta.get("schema")))
+    interp = meta.get("interpreteur", "")
+    p.check("nominal : interpreteur= grave, absolu, canonique, executable, binaire ELF",
+            os.path.isabs(interp) and os.path.realpath(interp) == interp
+            and os.path.isfile(interp) and os.access(interp, os.X_OK)
+            and open(interp, "rb").read(4) == b"\x7fELF", repr(interp))
+    if interp and os.access(interp, os.X_OK):
+        fixe = subprocess.run([interp, "-c", "import sys; print(sys.executable)"],
+                              capture_output=True, text=True)
+        p.check("nominal : l'interpreteur grave est son propre sys.executable (point fixe)",
+                fixe.returncode == 0 and os.path.realpath(fixe.stdout.strip()) == interp,
+                repr(fixe.stdout))
     p.check("nominal : identite_cible (claim borne) gravee au META",
             meta.get("identite_cible") == IDENTITE_CIBLE, repr(meta.get("identite_cible")))
     p.check("nominal : injections_autorisees == injections_emises == les trois ablations",
@@ -874,8 +961,13 @@ def scene_runs_obligatoires(p, base, nominal, bench):
     p.refus_agregateur("schema v2 sans runs_attendus (strict aussi en v2)", v2b,
                        ("champ obligatoire", "runs_attendus="))
     v3b = p.copier_recu(base, nominal, "v3_sans_identite")
+    retrograder_v3(p, v3b)
     retirer_ligne(p, v3b / "META.txt", "identite_cible=", "v3 sans identite_cible")
-    p.refus_agregateur("schema v3 sans identite_cible (obligatoire en v3)", v3b,
+    p.refus_agregateur("schema v3 sans identite_cible (obligatoire des v3)", v3b,
+                       ("champ obligatoire", "identite_cible="))
+    v4b = p.copier_recu(base, nominal, "v4_sans_identite")
+    retirer_ligne(p, v4b / "META.txt", "identite_cible=", "v4 sans identite_cible")
+    p.refus_agregateur("schema v4 sans identite_cible", v4b,
                        ("champ obligatoire", "identite_cible="))
     v1 = p.copier_recu(base, nominal, "schema_v1")
     remplacer_ligne(p, v1 / "META.txt", "schema=", "schema=e-hgp.sonde-ablation-reduce.v1", "v1")
@@ -1175,6 +1267,208 @@ def scene_diff_fail_open(p, base, faux):
                     and (partial / "resume.txt").stat().st_size > 0)
 
 
+def scene_toctou_semantique(p, base, faux):
+    p.scene("(v) TOCTOU semantique apres agregation : META statut promu => 3 ; resume forge => 3 par reagregation hors PATH ; interpreteur menteur / relais => refus 2")
+    reel_py = shutil.which("python3") or sys.executable
+    # 1. Mutant des auditeurs : le faux python3 relaie le vrai agregateur puis
+    #    promeut statut= au META. Les empreintes d'avant agregation le voient
+    #    au manifeste ; le .partial porte un META et un resume contradictoires.
+    fakebin = base / "fakebin_python3_statut"
+    fakebin.mkdir()
+    ecrire_exec(fakebin / "python3", FAUX_PYTHON3_META_STATUT.replace("%REAL%", reel_py))
+    out = base / "toctou_statut"
+    partial = Path(str(out) + ".partial")
+    r = p.lancer(out, faux, "64", "4", {"PATH": f"{fakebin}:{os.environ['PATH']}"})
+    p.check("statut promu apres agregation : rc=3", r.returncode == 3,
+            f"rc={r.returncode} {r.stderr[-200:]!r}")
+    p.check("statut promu apres agregation : jamais publie, reste en .partial",
+            not out.exists() and partial.is_dir())
+    if partial.is_dir():
+        meta = (partial / "META.txt").read_text(encoding="utf-8")
+        p.check("statut promu : la mutation a eu lieu (META porte statut=decision_complete)",
+                "\nstatut=decision_complete\n" in meta)
+        p.check("statut promu : motif « META.txt modifie entre la lecture de l'agregateur et le scellement »",
+                "campagne INVALIDE : META.txt modifie entre la lecture de l'agregateur et le scellement"
+                in meta, repr(meta[-300:]))
+        resume = partial / "resume.txt"
+        p.check("statut promu : le resume du .partial contredit le META (jamais publie ensemble)",
+                resume.is_file() and "statut=exploratory_noncausal_upper_bounds" in
+                resume.read_text(encoding="utf-8").splitlines()[0])
+    # 2. Resume FORGE (META intact) : seule la reagregation du jeu scelle par
+    #    l'interpreteur grave, hors PATH, le contredit — bit a bit.
+    fakebin2 = base / "fakebin_python3_forge"
+    fakebin2.mkdir()
+    ecrire_exec(fakebin2 / "python3", FAUX_PYTHON3_RESUME_FORGE.replace("%REAL%", reel_py))
+    out2 = base / "toctou_forge"
+    partial2 = Path(str(out2) + ".partial")
+    r2 = p.lancer(out2, faux, "64", "4", {"PATH": f"{fakebin2}:{os.environ['PATH']}"})
+    p.check("resume forge : rc=3", r2.returncode == 3, f"rc={r2.returncode} {r2.stderr[-200:]!r}")
+    p.check("resume forge : jamais publie, reste en .partial", not out2.exists() and partial2.is_dir())
+    if partial2.is_dir():
+        meta2 = (partial2 / "META.txt").read_text(encoding="utf-8")
+        interp = lire_kv(partial2 / "META.txt").get("interpreteur", "")
+        p.check("resume forge : interpreteur grave absolu, canonique, hors du faux PATH",
+                os.path.isabs(interp) and os.path.realpath(interp) == interp
+                and not interp.startswith(str(base)), repr(interp))
+        p.check("resume forge : motif « resume.txt scelle != reagregation du jeu scelle par <interpreteur> »",
+                f"campagne INVALIDE : resume.txt scelle != reagregation du jeu scelle par {interp} "
+                in meta2 and "resume forge" in meta2, repr(meta2[-300:]))
+        p.check("resume forge : un seul motif INVALIDE (les empreintes d'avant agregation n'ont rien vu)",
+                meta2.count("campagne INVALIDE") == 1)
+        resume2 = partial2 / "resume.txt"
+        forge = resume2.is_file() and "statut=decision_complete" in \
+            resume2.read_text(encoding="utf-8").splitlines()[0]
+        p.check("resume forge : le resume scelle est bien le forge (statut promu en tete)", forge)
+        sums = partial2 / "SHA256SUMS"
+        p.check("resume forge : le manifeste existe et SCELLE le resume forge (sha256sum -c seul publierait)",
+                sums.is_file() and dict(
+                    l.split("  ", 1)[::-1] for l in sums.read_text(encoding="utf-8").splitlines()
+                ).get("resume.txt") == sha256(resume2))
+        p.check("resume forge : META intact (statut exploratoire exact)",
+                lire_kv(partial2 / "META.txt").get("statut") == LIBELLE_STATUT)
+    # 3. Interpreteur MENTEUR (script qui se nomme lui-meme : point fixe
+    #    tenu, pas un ELF) et RELAIS (chemin qui se resout ailleurs) : refus 2
+    #    avant toute ecriture — jamais graves au META.
+    fakebin3 = base / "fakebin_python3_menteur"
+    fakebin3.mkdir()
+    ecrire_exec(fakebin3 / "python3", FAUX_PYTHON3_MENTEUR.replace("%REAL%", reel_py))
+    out3 = base / "interp_menteur"
+    r3 = p.lancer(out3, faux, "64", "4", {"PATH": f"{fakebin3}:{os.environ['PATH']}"})
+    p.check("interpreteur menteur (script se nommant lui-meme) : refus 2", r3.returncode == 2,
+            f"rc={r3.returncode} {r3.stderr[-200:]!r}")
+    p.check("interpreteur menteur : motif « n'est pas un binaire ELF »",
+            "n'est pas un binaire ELF" in r3.stderr and str(fakebin3) in r3.stderr,
+            repr(r3.stderr[-200:]))
+    p.check("interpreteur menteur : aucun dossier ni .partial laisse",
+            not out3.exists() and not Path(str(out3) + ".partial").exists())
+    fakebin4 = base / "fakebin_python3_relais"
+    fakebin4.mkdir()
+    ecrire_exec(fakebin4 / "python3", FAUX_PYTHON3_RELAIS.replace("%REAL%", reel_py))
+    ecrire_exec(fakebin4 / "python3.relais", FAUX_PYTHON3_RELAIS_CIBLE.replace("%REAL%", reel_py))
+    out4 = base / "interp_relais"
+    r4 = p.lancer(out4, faux, "64", "4", {"PATH": f"{fakebin4}:{os.environ['PATH']}"})
+    p.check("interpreteur relais (se resout ailleurs) : refus 2", r4.returncode == 2,
+            f"rc={r4.returncode} {r4.stderr[-200:]!r}")
+    p.check("interpreteur relais : motif « ne se resout pas sur lui-meme »",
+            "ne se resout pas sur lui-meme" in r4.stderr and "python3.relais" in r4.stderr,
+            repr(r4.stderr[-200:]))
+    p.check("interpreteur relais : aucun dossier ni .partial laisse",
+            not out4.exists() and not Path(str(out4) + ".partial").exists())
+
+
+def scene_contrat_meta(p, base, nominal):
+    p.scene("(w) contrat META exact : statut promu (aussi sous -O) / prefixe etendu / glose reformulee / jeton nu, bras manquant / renomme / permute, injections permutees, sha256 protocoles = 64 zeros, interpreteur relatif / absent : agregateur 1 ; v3 explicite : 0 + claim borne")
+    meta_nominal = lire_kv(nominal / "META.txt")
+    p.check("contrat META : statut nominal = libelle exact attendu par la porte",
+            meta_nominal.get("statut") == LIBELLE_STATUT)
+    cas_statut = [("promu", "statut=decision_complete",
+                   ("statut=", "decision_complete", "libelle exploratoire exact")),
+                  ("prefixe_etendu", "statut=exploratory_noncausal_upper_bounds_promu (bornes "
+                   "exploratoires non causales sur binaire instrumente, join=1 : jamais un "
+                   "benchmark, jamais un mur, jamais un choix de palier)",
+                   ("statut=", "prefixe etendu")),
+                  ("glose_reformulee", "statut=exploratory_noncausal_upper_bounds (bornes causales)",
+                   ("statut=", "glose reformulee")),
+                  ("jeton_nu", "statut=exploratory_noncausal_upper_bounds",
+                   ("statut=", "libelle exploratoire exact"))]
+    for nom, ligne, motifs in cas_statut:
+        recu = p.copier_recu(base, nominal, f"statut_{nom}")
+        remplacer_ligne(p, recu / "META.txt", "statut=", ligne, f"statut {nom}")
+        p.refus_agregateur(f"statut {nom} ({ligne[:60]!r})", recu, motifs)
+        if nom == "promu":
+            a = subprocess.run([sys.executable, "-O", str(p.agregateur), str(recu)],
+                               capture_output=True, text=True)
+            p.check("statut promu sous `python3 -O` : agregateur rc=1 (aucun assert)",
+                    a.returncode == 1 and "libelle exploratoire exact" in a.stderr,
+                    f"rc={a.returncode} {a.stderr[-200:]!r}")
+    cas_bras = [("manquant", "ablations=aucune ablation-mat-sans-copie ablation-mat-sans-tris",
+                 "absent"),
+                ("renomme", "ablations=aucune ablation-mat-sans-copie ablation-mat-sans-tri "
+                 "ablation-post-cle-factice", "renomme"),
+                ("permute", "ablations=ablation-mat-sans-copie aucune ablation-mat-sans-tris "
+                 "ablation-post-cle-factice", "permute")]
+    for nom, ligne, motif in cas_bras:
+        recu = p.copier_recu(base, nominal, f"bras_{nom}")
+        remplacer_ligne(p, recu / "META.txt", "ablations=", ligne, f"bras {nom}")
+        p.refus_agregateur(f"bras {nom}", recu, ("ablations=", "liste fermee en ordre fixe", motif))
+    recu = p.copier_recu(base, nominal, "injections_permutees")
+    remplacer_ligne(p, recu / "META.txt", "injections_autorisees=",
+                    "injections_autorisees=ablation-mat-sans-tris ablation-mat-sans-copie "
+                    "ablation-post-cle-factice", "injections permutees")
+    p.refus_agregateur("injections_autorisees permutees", recu,
+                       ("injections_autorisees=", "ordre fixe", "permutee"))
+    for nom, champ in (("protocole_lanceur.sh", "sha256_lanceur"),
+                       ("protocole_agregateur.py", "sha256_agregateur")):
+        recu = p.copier_recu(base, nominal, f"zeros_{champ}")
+        remplacer_ligne(p, recu / "META.txt", f"{champ}=", f"{champ}={'0' * 64}", f"{champ} zeros")
+        p.refus_agregateur(f"META {champ}= 64 zeros", recu, (nom, "recalcule", champ, "0" * 64))
+    for nom, ligne in (("relatif", "interpreteur=python3"),
+                       ("blanc", "interpreteur=/usr/bin/python3 -O"),
+                       ("parent", "interpreteur=/usr/bin/../bin/python3")):
+        recu = p.copier_recu(base, nominal, f"interp_{nom}")
+        remplacer_ligne(p, recu / "META.txt", "interpreteur=", ligne, f"interpreteur {nom}")
+        p.refus_agregateur(f"interpreteur {nom} ({ligne!r})", recu,
+                           ("interpreteur=", "chemin absolu canonique sans blanc"))
+    recu = p.copier_recu(base, nominal, "interp_absent")
+    retirer_ligne(p, recu / "META.txt", "interpreteur=", "interpreteur absent")
+    p.refus_agregateur("v4 sans interpreteur", recu, ("champ obligatoire", "interpreteur="))
+    # Schema v3 explicite : accepte, l'interpreteur seul en claim borne ; un
+    # v3 qui porte malgre tout un interpreteur le voit verifie.
+    v3 = p.copier_recu(base, nominal, "schema_v3")
+    retrograder_v3(p, v3)
+    a = p.agreger(v3)
+    p.check("schema v3 explicite : agregateur 0, « interpreteur : claim borne, NON VERIFIE » seul",
+            a.returncode == 0 and "# claim borne, NON VERIFIE : interpreteur : claim borne" in a.stdout
+            and "identite_cible / " not in a.stdout, f"rc={a.returncode} {a.stderr[-200:]!r}")
+    v3b = p.copier_recu(base, nominal, "schema_v3_interp_relatif")
+    remplacer_ligne(p, v3b / "META.txt", "schema=", f"schema={SCHEMA_V3}", "v3 avec interpreteur")
+    remplacer_ligne(p, v3b / "META.txt", "interpreteur=", "interpreteur=python3", "v3 interp relatif")
+    p.refus_agregateur("schema v3 portant un interpreteur relatif (present, donc verifie)", v3b,
+                       ("interpreteur=", "chemin absolu"))
+
+
+def scene_profil_kind(p, base, nominal):
+    p.scene("(x) ligne profil_kind verrouillee : fold_join=0, layout=csr, reduce_v1, +liveness, jeton absent / malforme / duplique, ligne absente / dupliquee : agregateur 1 ; layout=classic : 0 bit-identique")
+    txt = "out/aucune_n64_r1.txt"
+    p.check("profil_kind : la ligne nominale est celle attendue",
+            LIGNE_KIND + "\n" in (nominal / txt).read_text(encoding="utf-8"))
+    cas = [("fold_join_0", LIGNE_KIND.replace("fold_join=1", "fold_join=0"),
+            ("aucune_n64_r1.txt", "fold_join='0' != '1'", "profil_kind")),
+           ("layout_csr", LIGNE_KIND + " layout=csr",
+            ("aucune_n64_r1.txt", "layout='csr' != 'classic'", "route classic")),
+           ("reduce_v1", LIGNE_KIND.replace("reduce_v2", "reduce_v1"),
+            ("aucune_n64_r1.txt", "profil_kind='reduce_v1' != 'reduce_v2'")),
+           ("liveness", LIGNE_KIND.replace("reduce_v2", "reduce_v2+liveness"),
+            ("aucune_n64_r1.txt", "profil_kind='reduce_v2+liveness' != 'reduce_v2'")),
+           ("sans_fold_join", LIGNE_KIND.replace(" fold_join=1", ""),
+            ("aucune_n64_r1.txt", "sans jeton fold_join=")),
+           ("jeton_sans_egal", LIGNE_KIND.replace("fold_join=1", "fold_join"),
+            ("aucune_n64_r1.txt", "profil_kind", "sans `=`", "fold_join")),
+           ("jeton_duplique", LIGNE_KIND.replace("fold_join=1", "fold_join=1 fold_join=0"),
+            ("aucune_n64_r1.txt", "profil_kind", "fold_join=", "duplique"))]
+    for nom, ligne, motifs in cas:
+        recu = p.copier_recu(base, nominal, f"kind_{nom}")
+        remplacer_ligne(p, recu / txt, "profil_kind=", ligne, f"profil_kind {nom}")
+        p.refus_agregateur(f"profil_kind {nom} ({ligne[-40:]!r})", recu, motifs)
+    recu = p.copier_recu(base, nominal, "kind_absente")
+    retirer_ligne(p, recu / txt, "profil_kind=", "profil_kind absente")
+    p.refus_agregateur("ligne profil_kind absente", recu,
+                       ("aucune_n64_r1.txt", "profil_kind=", "absente ou dupliquee", "0 occurrence"))
+    recu = p.copier_recu(base, nominal, "kind_dupliquee")
+    with open(recu / txt, "a", encoding="utf-8") as f:
+        f.write(LIGNE_KIND + "\n")
+    p.refus_agregateur("ligne profil_kind dupliquee", recu,
+                       ("aucune_n64_r1.txt", "profil_kind=", "absente ou dupliquee", "2 occurrence"))
+    # Temoin de causalite : layout=classic (le jeton du prototype KeyCSR) est
+    # accepte et le resume est bit-identique au nominal.
+    temoin = p.copier_recu(base, nominal, "kind_layout_classic")
+    remplacer_ligne(p, temoin / txt, "profil_kind=", LIGNE_KIND + " layout=classic", "layout classic")
+    a = p.agreger(temoin)
+    p.check("profil_kind layout=classic : agregateur 0, resume bit-identique au nominal",
+            a.returncode == 0 and a.stdout == (nominal / "resume.txt").read_text(encoding="utf-8"),
+            f"rc={a.returncode} {a.stderr[-200:]!r}")
+
+
 def main():
     if len(sys.argv) != 2:
         print("usage: sonde_ablation_gate.py <dossier bench>", file=sys.stderr)
@@ -1210,6 +1504,9 @@ def main():
             scene_identite_cible(p, base, faux, nominal, bench)
             scene_toctou(p, base, faux)
             scene_diff_fail_open(p, base, faux)
+            scene_toctou_semantique(p, base, faux)
+            scene_contrat_meta(p, base, nominal)
+            scene_profil_kind(p, base, nominal)
     if p.echecs:
         print(f"sonde_ablation_gate : {p.echecs} controle(s) en echec sur {p.scenes} scenes")
         return 1
@@ -1217,7 +1514,8 @@ def main():
           "copie alteree, agregateur fail-closed, manifeste fatal, binaire produit, taille dupliquee, "
           "hash vide, champ duplique, plan non Williams, inventaire exact, compteurs obligatoires, "
           "profil malforme, repertoire inattendu, protocoles recalcules, identite de cible bornee, "
-          "TOCTOU avant scellement, diff fail-open)")
+          "TOCTOU avant scellement, diff fail-open, TOCTOU semantique et reagregation hors PATH, "
+          "contrat META exact, profil_kind verrouille)")
     return 0
 
 
