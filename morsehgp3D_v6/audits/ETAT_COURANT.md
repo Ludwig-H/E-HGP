@@ -74,7 +74,7 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | reprise persistante `c2d2ac69` / audit `b9ea4659` | D8=67, D11 causal, garde non fatale, promotion liée à la tentative et quatre mutants de `4ef96717` corrigés ; une conversion `GEN_EPOCH` reste faillible entre connaissance de la génération et armement du funnel ; aucun nouveau GO GCP |
 | reçu G4 tests K10/K5 `e66cd978` | paquet intègre : 278/278 hashes, 84/84 statuts code 0 et terminés, pins reconstruits, sept résumés identiques, arrêt exact à la première tentative ; égalités de préfixe observées sur cardinalités/digests ; profil et campagne strictement non décisionnels, accusé consommé |
 | porte de préfixe `2aaa4a53` | listes K exactes, appariement par clé complète et jumeau K10 obligatoire reçus ; les pins K5 de v1 restent post hoc, tandis que v2 porte ses huit fixtures avant toute future exécution |
-| sonde équilibrée `b79e29a5` / harnais `32da1550` | reçu concret intègre et recalculable ; réagrégation après scellement, statut exact et `profil_kind` durci reçus, 21/21 scènes normales et sous `-O`, CTest 2/2 ; quatre faux positifs de la même liaison de régime restent dans argv/META, `liveness` et l'identité préfixe ; seule une nouvelle mesure réutilisable les attend |
+| sonde équilibrée `b79e29a5` / harnais `32da1550` | reçu concret intègre et recalculable ; réagrégation après scellement, statut exact et `profil_kind` durci reçus, 21/21 scènes normales et sous `-O`, CTest 2/2 ; un faux `sha256sum` du `PATH` peut encore corrompre après le dernier contrôle, et la liaison de régime reste partielle dans argv/META, `liveness` et l'identité préfixe ; seule une nouvelle mesure réutilisable attend ces fermetures |
 | réponse KeyCSR `38281dc7` / prototype WIP | architecture conforme au GO : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; build Release, 39/39 ciblées, matrice exhaustive et 21/21 mutants verts ; aucun blocage sémantique trouvé dans la contre-lecture, campagne sanitizer courte propre ; la garde vide et le compteur d'allocations causal sont déjà corrigés dans le WIP, le scratch reste à instrumenter seulement avant un reçu de performance |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
@@ -115,21 +115,31 @@ reçu minimal est borné. `c2d2ac69` ferme ensuite les quatre mutants plus
 allowlist NUL et résumé reproduit différent fatal. Le revalidateur passe 22
 scènes avec snapshot stable. Une fenêtre locale subsiste dans la reprise :
 `GEN_EPOCH` est calculé par `python3` après connaissance de `GENERATION`, mais
-avant l'armement du funnel ; un échec y sort encore sans STOP. Déplacer ce
-calcul sous le trap ou le rendre explicitement non fatal, puis graver la dent
-qui exige STOP, code et reçu minimal. Le reçu G4 déjà arrêté n'est pas affecté
-et aucun GO GCP n'est ouvert.
+avant l'armement du funnel. Sur la copie exacte, une panne 42 limitée à cet
+appel rend 42 avec zéro STOP, registre encore `targeted_running` et aucun reçu.
+Le mutant historique de `tee` est en revanche bien fermé : STOP unique,
+registre `targeted_stopped`, reçu et témoin présents. Déplacer le calcul
+`GEN_EPOCH` sous le trap, puis graver les issues 74/70 avec exactement une
+tentative. Le reçu G4 déjà arrêté n'est pas affecté et aucun GO GCP n'est
+ouvert.
 
 Au pin `32da1550`, la sonde reçoit sa réagrégation v4 après scellement : le
 résumé transitoirement forgé est maintenant refusé, le statut est exact, le
 profil kind/join est durci et la compatibilité v2 reste explicitement bornée.
 Les 21 scènes passent normalement et sous `python3 -O`, puis les deux CTests
-ciblés passent. Il ne reste qu'une famille de liaison de régime : argv et
-META peuvent encore annoncer `fold_join=0`, `liveness` peut disparaître et
-l'identité de cible accepte un suffixe. Les champs inflight/pics et famille
-suivent la même couture. Parser l'objet de régime une fois, reconstruire la
-commande canonique, exiger `liveness` et séparer identité et glose suffit ; la
-provenance complète de l'interpréteur est un P2. Le prototype sémantique
+ciblés passent. Une frontière de publication demeure toutefois ouverte sous
+le modèle de `PATH` hostile déjà exercé par la porte : un faux `sha256sum`
+peut déléguer la seconde vérification au vrai programme, muter ensuite META et
+rendre 0 ; le reçu est publié alors qu'un contrôle système ultérieur rend 1.
+Il faut invoquer une chaîne critique résolue et explicitement fiable, ou
+réunir contrôle final et renommage dans le même scelleur approuvé.
+
+La liaison de régime reste elle aussi partielle : argv et META peuvent encore
+annoncer `fold_join=0`, `liveness` peut disparaître et l'identité de cible
+accepte un suffixe. Les champs inflight/pics et famille suivent la même
+couture. Parser l'objet de régime une fois, reconstruire la commande
+canonique, exiger `liveness` et séparer identité et glose suffit ; la
+revalidation autonome de l'interpréteur est un P2. Le prototype sémantique
 KeyCSR peut avancer indépendamment ; seule une nouvelle mesure réutilisant ce
 harnais attend ces dents.
 
@@ -659,8 +669,9 @@ Ordre recommandé à Claude :
 
 1. fermer la fenêtre `GEN_EPOCH` de `c2d2ac69`, puis rejouer le lifecycle
    complet sur un snapshot stable, entièrement en local ;
-2. fermer la liaison de régime du harnais (argv/META, `liveness`, famille,
-   paramètres de profil et identité exacte) avant sa prochaine mesure ;
+2. borner la frontière des outils critiques du harnais, puis fermer sa liaison
+   de régime (argv/META, `liveness`, famille, paramètres de profil et identité
+   exacte) avant sa prochaine mesure ;
 3. épingler le prototype KeyCSR avec son comparateur, son rejeu et sa matrice
    déjà verts ; instrumenter le scratch seulement avant toute mesure ;
 4. corriger `GRAND_LIVRE.md`, puis aligner `ARCHITECTURE.md`, `PROVENANCE.md`

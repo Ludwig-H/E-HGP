@@ -40,11 +40,12 @@ des corrections, ils ne certifient rien.
   causal sont déjà corrigés, le scratch non instrumenté attend seulement le
   futur reçu de mesure.
 - [`ALERTE_SONDE_ABLATION_REDUCE_20260902.md`](ALERTE_SONDE_ABLATION_REDUCE_20260902.md) :
-  limites causales historiques et réception de `32da1550` : la réagrégation
-  après scellement et le statut exact sont reçus avec 21/21 scènes normales et
-  optimisées, plus CTest 2/2. La dernière liaison du régime (argv/META,
-  `liveness`, famille, paramètres de profil et identité exacte) précède toute
-  nouvelle mesure, sans bloquer KeyCSR.
+  réception fonctionnelle de `32da1550` : la réagrégation après scellement et
+  le statut exact sont reçus avec 21/21 scènes normales et optimisées, plus
+  CTest 2/2. Une commande critique encore héritée du `PATH` peut toutefois
+  corrompre le reçu après son dernier contrôle ; cette frontière et la liaison
+  exacte du régime (argv/META, `profil_kind`, `liveness`, famille et identité)
+  précèdent toute nouvelle mesure, sans bloquer KeyCSR.
 - [`CONTRE_AUDIT_REPRISE_PERSISTANTE_V6_20260902.md`](CONTRE_AUDIT_REPRISE_PERSISTANTE_V6_20260902.md) :
   contre-audit du chemin de reprise, mis à jour pour `c2d2ac69`. Les quatre
   mutants résiduels de `4ef96717` sont corrigés et le revalidateur passe 22
