@@ -187,8 +187,11 @@ statut, ni nouveau format.
    (`mhgp6_residence_mutant_tranches_gardees`, mutant `keep-ball-chunks`).
 4. **Tri par permutation et piles hissées** : supprimer le double exact du
    tableau de candidats et deux allocations par boule.
-5. **Crochets de test sur les gardes du fold** : les deux premiers verrous
-   durs ne sont exerçables par aucune porte à petit `n` aujourd'hui.
+5. **Crochets de test sur les gardes du fold** [livré] : les deux premiers
+   verrous durs, inexerçables jusqu'ici, le sont désormais à petit `n` par des
+   plafonds abaissables en test seulement, avec témoin non abaissé, refus
+   nommant le plafond structurel et l'ordre fautif, et un mutant qui saute la
+   garde.
 6. **Point d'arrêt : la session de mesure** décide de la suite.
 7. Ensuite seulement, et conditionnellement : largeur de fil découplée du
    format de digest, types au profil, fusion du census et de l'expansion,

@@ -356,9 +356,27 @@ struct FacetIntern {
 // les seuls comptes (evenements <= UINT32_MAX ; Σ(q+d) <= INT32_MAX pour les
 // fid de l'union-find i32 ; lots <= evenements < UINT32_MAX, sentinelle des
 // tables a epoque).
+// PLAFONDS ABAISSABLES EN TEST (palier P5 de docs/ECHELLE.md) : les deux
+// verrous durs du fold tirent au-dela de 10^6 points a K=10 — aucune porte ne
+// les exercait donc, alors que ce sont les PREMIERS refus types que rencontre
+// une campagne d'echelle. Meme patron que csr_keys_cap_for_tests : le plafond
+// structurel est la valeur par defaut, un test peut l'abaisser, et le binaire
+// produit ne connait aucun crochet (constantes).
+#if defined(MHGP6_TESTING)
+inline u64& fold_events_cap_for_tests() { static u64 cap = (u64)UINT32_MAX / 11; return cap; }
+inline u64& fold_incidences_cap_for_tests() { static u64 cap = (u64)INT32_MAX; return cap; }
+inline u64 fold_events_cap() { return fold_events_cap_for_tests(); }
+inline u64 fold_incidences_cap() { return fold_incidences_cap_for_tests(); }
+#else
+inline u64 fold_events_cap() { return (u64)UINT32_MAX / 11; }
+inline u64 fold_incidences_cap() { return (u64)INT32_MAX; }
+#endif
+
 inline bool fold_capacity_ok(u64 events, u64 incidences, std::string* why) {
-  if (events >= (u64)UINT32_MAX / 11) { *why = "resource_exhausted/requires_tiling : evenements >= (2^32-1)/11 (positions d'incidence u32)"; return false; }
-  if (incidences > (u64)INT32_MAX) { *why = "resource_exhausted/requires_tiling : incidences > 2^31-1"; return false; }
+  // Le message NOMME le plafond structurel, jamais la valeur abaissee : un
+  // reçu de campagne ne doit pas pouvoir etre confondu avec une scene de test.
+  if (!MHGP6_MUTANT("caps-fold-guard-skip") && events >= fold_events_cap()) { *why = "resource_exhausted/requires_tiling : evenements >= (2^32-1)/11 (positions d'incidence u32)"; return false; }
+  if (!MHGP6_MUTANT("caps-fold-guard-skip") && incidences > fold_incidences_cap()) { *why = "resource_exhausted/requires_tiling : incidences > 2^31-1"; return false; }
   return true;
 }
 

@@ -574,6 +574,24 @@ mhgp6_gate(mhgp6_lot_ring_mutant_prefixe 4 mhgp6_lot_ring_gate ARGS --inject=c6-
 mhgp6_gate(mhgp6_lot_ring_mutant_rebuild_tot 4 mhgp6_lot_ring_gate
            ARGS --inject=c6-rebuild-before-validate TIMEOUT 180)
 
+# ---- P5 (docs/ECHELLE.md) : les DEUX GARDES DURES du fold, exercables a petit
+# n par les crochets fold_events_cap_for_tests / fold_incidences_cap_for_tests
+# (MHGP6_TESTING seulement). Le temoin non abaisse est l'anti-vacuite ; le refus
+# doit nommer le plafond STRUCTUREL et l'ordre fautif, ne publier aucun callback
+# et ne laisser aucun provisoire, aux trois ordonnancements.
+mhgp6_executable(mhgp6_fold_caps_gate tests/fold_caps_gate.cpp)
+mhgp6_gate(mhgp6_fold_cap_evenements 0 mhgp6_fold_caps_gate
+           ARGS --garde=evenements --threads=4 --min-evenements=10000 --min-incidences=100000 TIMEOUT 300)
+mhgp6_gate(mhgp6_fold_cap_incidences 0 mhgp6_fold_caps_gate
+           ARGS --garde=incidences --threads=4 --min-evenements=10000 --min-incidences=100000 TIMEOUT 300)
+mhgp6_gate(mhgp6_fold_cap_mutant_evenements 4 mhgp6_fold_caps_gate
+           ARGS --garde=evenements --threads=4 --inject=caps-fold-guard-skip TIMEOUT 300)
+mhgp6_gate(mhgp6_fold_cap_mutant_incidences 4 mhgp6_fold_caps_gate
+           ARGS --garde=incidences --threads=4 --inject=caps-fold-guard-skip TIMEOUT 300)
+mhgp6_gate(mhgp6_fold_cap_plancher 3 mhgp6_fold_caps_gate
+           ARGS --garde=evenements --threads=4 --min-evenements=99999999 TIMEOUT 300)
+mhgp6_gate(mhgp6_fold_cap_refus_arg 2 mhgp6_fold_caps_gate ARGS --garde=bidon TIMEOUT 60)
+
 mhgp6_executable(mhgp6_profile_sonde cli/mhgp6.cpp)
 target_compile_definitions(mhgp6_profile_sonde PRIVATE MHGP6_PROFILE_REDUCE=1)
 mhgp6_gate(mhgp6_profile_refuse_inject 2 mhgp6_profile

@@ -105,6 +105,11 @@ inline constexpr const char* kMutants[] = {
     // entierement valide.
     "c6-reuse-before-lease", "c6-merge-by-completion", "c6-wrong-epoch", "c6-publish-prefix",
     "c6-rebuild-before-validate",
+    // GARDES DURES DU FOLD (palier P5) : la garde de capacite est sautee, donc
+    // un ordre au-dela du plafond passe. Tue code 4 par tests/fold_caps_gate.cpp
+    // (le refus ATTENDU devient absent), plafonds abaisses par les crochets
+    // fold_events_cap_for_tests / fold_incidences_cap_for_tests.
+    "caps-fold-guard-skip",
     // CONTRE-CORRECTIONS DES PALIERS P2/P3 (2 septembre, retours des deux
     // relecteurs). Points d'injection dans src/pipeline/run.hpp et
     // src/pipeline/expand.hpp, tues code 4 par tests/selftest.cpp
