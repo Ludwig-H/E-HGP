@@ -22,7 +22,10 @@ La première réponse était trop catégorique : deux slots à **lease unique** 
 peuvent pas porter simultanément `pack(k+1)`, device(k) et `rebuild(k-1)`, mais
 deux paires dont IN et OUT ont des leases séparés le peuvent. `pack(k+1)` écrit
 IN[p] pendant que `rebuild(k-1)` lit OUT[p] ; seul le futur D2H vers OUT[p]
-doit attendre `rebuild_done`.
+doit attendre `rebuild_done`. Si le préremplissage hôte des sentinelles emploie
+ce même OUT comme source H2D, son fill et son H2D attendent eux aussi ce lease.
+L'alternative est un template épinglé immuable distinct, dont les
+`100×lot_effectif` octets doivent alors entrer dans le budget pinned.
 
 Le premier jalon C6a recommandé est donc plus simple que deux flux complets :
 
@@ -42,9 +45,12 @@ après `h2d_done`, le jeu device après `d2h_done`, OUT seulement après
 `rebuild_done`. Le D2H suivant vers un OUT réutilisé attend explicitement son
 lease ; aucune fin CUDA ne vaut implicitement fin de lecture hôte.
 
-Chaque lot suit l'ordre logique
+Trois tickets de lots logiques coexistent donc bien (`k-1`, `k`, `k+1`) : la
+profondeur deux porte séparément sur les ressources IN et OUT, pas sur deux
+`LotSlot` monolithiques à état unique. Chaque ticket suit l'ordre logique
 `FREE→PACKING→READY→H2D→KERNELS→D2H→READY_HOST→VALIDATED→REBUILT→FREE`.
-H2D, remplissage éventuel, kernels, D2H et événement d'un lot restent dans le
+Les FSM et epochs de réutilisation IN/OUT restent distinctes. H2D, remplissage
+éventuel, kernels, D2H et événement d'un lot restent dans le
 même flux non défaut. Le wrapper de lancement porte explicitement ce flux,
 même si les corps des kernels restent inchangés. Si un palier à deux lots
 device est ouvert plus tard, il exigera alors deux zones device disjointes.
@@ -95,6 +101,9 @@ Publier en entiers :
   ouvriers, et `host_wait_device_ns`, tous explicitement **non additifs** au
   mur. Si pack/rebuild désignent plutôt une enveloppe murale, les nommer
   `*_wall_envelope_ns` ;
+- des attentes de backpressure séparées, par exemple `wait_in_h2d_ns` et
+  `wait_out_rebuild_ns`, afin de distinguer un device affamé d'un simple temps
+  d'attente terminal ;
 - H2D/kernels/D2H en `*_event_us` avec une règle de quantification déclarée :
   les événements CUDA fournissent un flottant en millisecondes, pas des
   nanosecondes exactes partageant l'origine de `steady_clock`.
@@ -114,8 +123,10 @@ slot, tail, erreur précoce et tardive, et tuer au moins
 `publish-prefix`. Il ne prouve ni device ni absence de course.
 
 La parité réelle ×5 à 50k prouve l'objet sur ce point, pas la concurrence.
-La garde device doit aussi exercer plusieurs rotations, tailles de tail et
-ordres d'achèvement, avec les outils CUDA appropriés ; aucun verdict de
+La garde device C6a doit aussi exercer plusieurs rotations, tailles de tail et
+la dépendance event-before-reuse en FIFO. Avec un flux et un jeu device, les
+fins CUDA de lots ne peuvent pas s'inverser : les ordres d'achèvement inversés
+restent au modèle différé, puis à la future porte deux flux. Aucun verdict de
 performance ne vient du stub.
 
 ### 4. `resize`
@@ -126,8 +137,11 @@ des `push_back` concurrents sûrs. Avec l'API actuelle, une reconstruction
 parallèle exige `resize`, un stockage non initialisé correctement géré, ou
 des vecteurs privés suivis d'une concaténation qui coûte copie et résidence.
 Le premier jalon peut donc garder un rebuild séquentiel avec
-`reserve(nb_total)` comme borne conservatrice, ou compter en deux passes avant
-une réserve exacte, et n'ouvrir cette arène qu'après mesure.
+`reserve(nb_total)` comme borne conservatrice. Obtenir d'abord une taille
+globale exacte en deux passes contredit le streaming mono-passe : il faut
+rejouer le device, retenir les OUT de tous les lots, ou garder des vecteurs par
+lot puis les concaténer, avec leur coût de copie et de résidence. N'ouvrir cette
+variante qu'après mesure.
 
 De même, deux appels hôte qui créent chacun `threads` travailleurs peuvent
 sur-souscrire la G4. Pack et rebuild partagent un scheduler persistant borné
@@ -145,8 +159,10 @@ se recouvrant avec le device.
   pic device.
 - Conserver `cand_idx = base + gid`, l'ordre global, les digests et tous les
   rejets de C5. Comparer sur le même pin le `GpuBallIn` concaténé octet par
-  octet, puis l'objet sémantique, les digests, cartes et totaux ; records de
-  chronométrie C5/C6 ne sont évidemment pas bit-identiques.
+  octet dans une porte bornée, ou son digest calculé en streaming à l'échelle,
+  puis l'objet sémantique, les digests, cartes et totaux. Ne pas reconstruire
+  ce concaténé dans le chemin produit, ce qui annulerait le gain de résidence ;
+  les records de chronométrie C5/C6 ne sont évidemment pas bit-identiques.
 - Corriger ou supprimer d'abord les constantes inutilisées
   `kWirePrefilterOutBytes=12` et `kWireCensusOutBytes=92` : le contrat et les
   copies effectifs portent 9 et 91 octets, soit 100 par boule. Il ne faut pas

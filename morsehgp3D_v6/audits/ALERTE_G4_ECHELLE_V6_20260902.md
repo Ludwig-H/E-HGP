@@ -30,20 +30,15 @@ demander un GO.
 
 ## P1 — rendre le profil canonique effectivement exécutable
 
-1. Le profil déclare `FRONTIER_LAYOUT=classic`, mais le lifecycle ne capture,
-   initialise, compare, grave ni transmet cet axe. Le validateur WIP le
-   reconnaît désormais dans le canon et dans `full_axis_map` ; précisément pour
-   cette raison, le profil effectif dépourvu de `frontier_layout` ne peut pas
-   prouver son égalité au canon. Le selftest courant injecte directement
-   `FRONTIER_LAYOUT` au runner et ne teste pas le trajet
-   canon→lifecycle→SSH→runner.
-
-Une seconde contre-fixture montre que la liaison doit venir de l'autorité, pas
-du reçu observé : sur une fixture v2 dont le profil effectif n'a pas cet axe,
-muter ensemble `classic→csr` dans l'en-tête, les statuts et les argv, puis
-rehacher, reste accepté. Le test existant ne mute que l'en-tête. Pour v2,
-l'attente doit être le layout du canon, ou `classic` pour un canon historique
-sans axe, jamais le layout auto-cohérent du plan.
+1. Aux pins jugés, le profil déclare `FRONTIER_LAYOUT=classic` sans raccord
+   lifecycle. La copie WIP observée après `4d79dbd3` ferme maintenant le trajet
+   fonctionnel profil→lifecycle→SSH→runner→plan/statut/argv→validateur et lie le
+   plan v2 au profil épinglé. Cette correction reste non attribuable tant
+   qu'elle n'est pas commitée. Il lui manque encore sa preuve causale : le
+   selftest lifecycle transporte seulement `FRONTIER_LAYOUT=''`, tandis que la
+   scène à valeur non vide appelle directement le runner. Ajouter une scène
+   `classic` de bout en bout, puis muter ensemble plan, statut et argv en `csr`
+   tout en gardant le canon `classic` ; elle doit refuser avant toute dépense.
 
 Le WIP a en revanche correctement simplifié la question :
 `GPUV6_GATE_NAMES=aucun` **et** `GPUV6_PILOT_SPECS=aucun`. Q2 est désarmée et
@@ -88,9 +83,26 @@ Une seconde ouverture peut encore produire exactement l'abort que la session
 cherche à remplacer. Dans `parallel/pool.hpp` et `parallel/sort.hpp`, si une
 création intermédiaire de `std::thread` échoue, les fils déjà construits restent
 joignables pendant le déroulage et le destructeur appelle `std::terminate`.
-Armer une garde stop+join avant la boucle de création, puis typer séparément
-`worker_start_failed`, est plus robuste que la seule mention d'un
-`std::system_error` non capturé.
+La recommandation précédente « garde stop+join » était incomplète pour le tri :
+ses travailleurs déjà lancés peuvent attendre une barrière dimensionnée pour
+une équipe qui ne sera jamais complète, et le join bloquerait. Pour
+`parallel_ranges/items`, une garde RAII armée avant la boucle, puis stop+join,
+suffit. Pour `parallel_stable_sort`, retenir d'abord les travailleurs derrière
+un sas de départ ; sur échec de lancement, poser abort, ouvrir le sas et joindre,
+sans laisser aucun travail atteindre la barrière. Convertir seulement les
+`std::system_error` des constructeurs de fils en une cause non allouante
+`worker_start`, puis la rendre comme `resource_exhausted` à l'étage courant.
+Le `BJoiner` du fold rend déjà sa destruction sûre, mais son constructeur de fil
+doit employer la même cause typée.
+
+La fermeture minimale commune est un champ non allouant de `RunResult`, par
+exemple `none | heap_allocation | worker_start`, et un helper CLI qui formate
+les deux refus depuis cette cause, l'étage et les RSS avec `fprintf`, sans
+dépendre de `rr.message`. Ce dernier reste un diagnostic best-effort. Les portes
+utiles injectent l'échec au deuxième fil de chaque pool, exigent absence de
+hang/terminate et équipe jointe ; pour le tri, elles exigent aussi entrée
+inchangée. Une porte subprocess doit vérifier code 2, stdout vide et stderr
+exact : `run_expect.cmake` ne contrôle actuellement que stdout.
 
 Enfin, conserver le contrat historique précis : les callbacks déjà appelés
 sont **provisoires jusqu'au statut terminal** ; l'invalidation interne ne peut
@@ -121,13 +133,13 @@ fenêtre, mais appelle à tort 10 890 s la sortie de l'estimateur nominal.
 Publier séparément **estimateur nominal**, **enveloppe** et **fenêtre** depuis
 ce même calcul.
 
+La copie WIP ferme désormais une des coutures de protocole : elle normalise
+`fam:n` et `fam:n:11` avant le contrôle des doublons et avant l'émission, prouve
+l'identité octet par octet des plans, puis refuse leur coexistence avant tout
+artefact. Cette fermeture n'est reçue qu'après un pin propre.
+
 Deux fermetures de protocole restent utiles :
 
-- normaliser `fam:n` et `fam:n:11` avant le contrôle de doublons et avant
-  l'émission de `specs=`. Aujourd'hui, les deux formes seules donnent des plans
-  différents dans ce header ; présentes ensemble, elles donnent deux lignes de
-  même nom et un seul triplet d'artefacts écrasé, sans refus pré-run. Les deux
-  contre-fixtures terminent actuellement runner=0 et validateur=0 ;
 - fermer réellement la grammaire v1/v2 : `read_plan` accepte encore clés et
   jetons inconnus ou dupliqués, ne juge pas la ligne fixe `s=8 smax=11 seed=3`,
   et la commande frontière accepte tout binaire `\S+` au lieu du
@@ -143,21 +155,21 @@ Sur le pin moteur courant `28d02459`, la contre-vérification locale donne 4/4
 portes `mhgp6_bad_alloc_*`. Sur le WIP protocolaire, syntaxe shell/Python
 propre, selftest campagne complet et selftest lifecycle complet sont verts ;
 ce dernier n'appelle que des gardes factices et ne touche aucune ressource GCP.
-Ces suites ne contiennent encore ni trajet lifecycle du layout, ni collision
-normalisée `:11`, ni vraie porte de la sous-classe d'allocation. Les
-contre-fixtures indépendantes `:11` explicite, doublon normalisé, mutation
-coordonnée du layout et renommage du refus restent toutes vertes ; elles sont
-donc les dents utiles du prochain lot, sans ouvrir un nouvel audit.
+La copie WIP ajoute la normalisation `:11` et le raccord fonctionnel du layout.
+Elle ne contient encore ni trajet lifecycle causal avec layout non vide, ni
+vraie porte de la sous-classe d'allocation. Grammaire, binaire, renommage du
+refus et code 134 v2 restent des dents utiles du prochain lot, sans ouvrir un
+nouvel audit.
 
 ## Fermeture minimale avant nouvelle dépense
 
-1. Raccorder `FRONTIER_LAYOUT` sur tout le trajet
-   canon→lifecycle→SSH→runner→plan/statut→validateur.
+1. Épingler le raccord `FRONTIER_LAYOUT` déjà présent dans le WIP et lui ajouter
+   la fixture causale non vide sur tout le trajet lifecycle.
 2. Fermer la cause d'allocation de bout en bout, son secours sans tas, la
-   création partielle des pools et la politique v2 du code 134 ; conserver Q2
+   création partielle des pools — sas obligatoire pour le tri — et la politique v2 du code 134 ; conserver Q2
    désarmée.
-3. Normaliser `:11`, fermer le parseur de plan et lier le binaire, avec les
-   contre-fixtures correspondantes avant tout run.
+3. Recevoir la normalisation `:11` déjà présente ; fermer le parseur de plan et
+   lier le binaire, avec les contre-fixtures correspondantes avant tout run.
 4. Requalifier la portée et le budget, puis rejouer les selftests locaux sur
    un commit d'implémentation propre.
 

@@ -47,7 +47,8 @@ durcissement, `d6888093` pour son générateur de plan déterministe et
 `8afd1057` pour son pin sémantique, `17b6dbea` pour la question de conception
 C6, `fec58e1f` pour la réponse au préflight d'échelle, `9243d69f` pour la
 capture moteur de `bad_alloc` et `28d02459` pour son correctif de texte,
-provision et portée — la question C6 et `fec58e1f` sont documentaires,
+provision et portée, `4d79dbd3` pour le plan d'échelle et ses six questions
+— la question C6, `fec58e1f` et `4d79dbd3` sont documentaires,
 `9c5517c9` pour la demande G4 historique, `e8289d9a` pour son profil
 historique, `320299df` pour le reçu de
 réplication et `8ed2dea6` pour le reçu de confirmation contre-audité
@@ -83,7 +84,8 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | porte de préfixe `2aaa4a53` | listes K exactes, appariement par clé complète et jumeau K10 obligatoire reçus ; les pins K5 de v1 restent post hoc, tandis que v2 porte ses huit fixtures avant toute future exécution |
 | sonde équilibrée `b79e29a5` / harnais `8afd1057` | reçu concret historique intègre et recalculable ; le harnais courant ferme la commande critique héritée du `PATH`, atteste outils/topologie et passe 23 scènes normales/optimisées ; `liveness`, layout, inflight/pics, coordonnée, clés inconnues, `lscpu` et identité stricte restent permissifs ; restaurer aussi l'option terminale `--` de `sha256sum` en corrigeant le faux test ; seule une nouvelle mesure réutilisable attend ces dents |
 | KeyCSR `8afd1057` / pré-inscription durcie `c5b52c9c` / générateur `d6888093` | pin sémantique reçu : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; rvalue refusée à la compilation, kind construit et vrais offsets signés ; matrice 112 cellules, 818 069 deltas et 6 395 137 clés sans désaccord, 185/185 portes rapportées, sonde finale et sanitizers ciblés verts ; aucun GO performance ; générateur reçu comme calendrier seulement, sa grammaire/adjacence, sa variante CTest `-O`, les identités et les frontières `reduce_v3` restent pré-campagne |
-| profil d'échelle G4 / moteur `28d02459` / WIP postérieur | **NO START** : le moteur corrigé et ses 4/4 portes sont reçus ; le WIP recoupe texte/étage/RSS et désarme correctement Q2. Restent l'autorité lifecycle de `FRONTIER_LAYOUT`, une cause fermée CLI→validateur avec secours sans tas, les créations partielles de pools, la politique v2 du code 134, la normalisation `:11`, la grammaire/binaire du plan, la portée et le budget |
+| profil d'échelle G4 / moteur `28d02459` / WIP postérieur | **NO START** : le moteur corrigé et ses 4/4 portes sont reçus ; le WIP non épinglé ferme fonctionnellement layout et normalisation `:11`, recoupe texte/étage/RSS et désarme Q2. Restent la fixture lifecycle à layout non vide, une cause CLI→validateur avec secours sans tas, les créations partielles de pools, la politique v2 du code 134, la grammaire/binaire du plan, la portée et le budget |
+| plan d'échelle `4d79dbd3` | GO local borné pour les cinq paliers RAM ; six verrous arbitrés sans changement d'objet. Provenance K5, erreur `×6`, modèle mémoire et portée des gardes à corriger avant d'en faire une référence ; aucun GO disque ou GCP |
 | conception C6 `17b6dbea` / réponse `489972a5` corrigée | GO de conception borné, sans code ni GO G4 : premier jalon à deux IN + deux OUT hôte aux leases séparés, un flux et un jeu device ; fill hôte et rebuild séquentiel, validation lot-local transactionnelle versionnée, chronos de travail non additifs et modèle différé C6 séparé de `cuda_stub.hpp` |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
@@ -208,22 +210,25 @@ cause et étage doivent donc survivre sans tas. Après réservation réussie, la
 capacité couvre correctement le diagnostic. La construction du nuage en amont
 de `run_pipeline` reste hors capture. Une création partielle des pools
 `std::thread` peut encore dérouler des fils joignables et appeler
-`std::terminate` : armer stop+join avant leur construction ferme mieux la
-frontière qu'un simple `system_error` laissé hors capture.
+`std::terminate` : stop+join suffit aux pools sans barrière, mais le tri doit
+d'abord retenir ses workers derrière un sas, sans quoi le join attendrait une
+barrière dont l'équipe reste incomplète. Cause non allouante et impression CLI
+indépendante de `rr.message` ferment ensemble cette frontière.
 
-Dans le reste du WIP, `smax` et les 17 entrées d'inventaire progressent, mais
-le layout canonique n'est pas transporté par le lifecycle. Q2 est maintenant
-correctement désarmée dans ce profil et reportée à une session distincte ; le
-protocole générique doit encore refuser un pilote sans inventaire de portes. La
-grille ne justifie pas quatre tailles par famille et par K. Après réduction à
-cinq heures, l'estimateur WIP vaut 10 390 s, l'enveloppe de plafonds avec
-overhead 10 890 s et la fenêtre calculée 13 195 s. Le commentaire donne la
-bonne fenêtre mais appelle à tort 10 890 s l'estimateur. Normaliser
-`fam:n:11` avant doublons et émission : les deux formes ensemble écrasent
-aujourd'hui le même artefact tout en passant runner et validateur. Une mutation
-coordonnée `classic→csr` passe aussi sans autorité de layout dans le profil.
-Fermer enfin les clés/tokens du plan et lier sa commande au `BIN_MATRICE`
-canonique. Les gardes SPOT/STOP restent exigées,
+Dans le reste du WIP, `smax` et les 17 entrées d'inventaire progressent. Le
+layout canonique est désormais transporté fonctionnellement par le lifecycle
+et recoupé par le validateur, mais le selftest lifecycle n'exerce encore qu'une
+valeur vide ; la scène non vide contourne ce trajet. La normalisation de
+`fam:n:11`, l'identité des plans et le rejet du doublon avant artefact sont
+aussi présents. Ces deux progrès restent non attribuables avant commit et
+rejeu. Q2 est correctement désarmée dans ce profil et reportée à une session
+distincte ; le protocole générique doit encore refuser un pilote sans
+inventaire de portes. La grille ne justifie pas quatre tailles par famille et
+par K. Après réduction à cinq heures, l'estimateur WIP vaut 10 390 s,
+l'enveloppe de plafonds avec overhead 10 890 s et la fenêtre calculée 13 195 s.
+Le commentaire donne la bonne fenêtre mais appelle à tort 10 890 s
+l'estimateur. Fermer enfin les clés/tokens du plan et lier sa commande au
+`BIN_MATRICE` canonique. Les gardes SPOT/STOP restent exigées,
 mais aucune cible externe n'a été interrogée ou certifiée par ce préflight ;
 aucun GO GCP n'est ouvert.
 
@@ -238,6 +243,19 @@ différé C6 reste séparé du `cuda_stub.hpp` séquentiel, et la porte device d
 forcer plusieurs rotations. La portée ambiguë de « avant toute reconstruction »
 est à versionner par lot avec une corruption tardive et publication nulle. C6 peut
 modifier la résidence ; la mesurer avant de le classer comme gain de débit.
+
+Le plan d'échelle `4d79dbd3` reçoit ses cinq paliers locaux, pas ses
+généralisations quantitatives. Les mesures K5 100k/200k et la sécante 1,088
+n'ont pas de reçu versionné au pin ; appliquer les exposants minces 1,60–1,76
+de 50k à 10M donne un facteur relatif 15–35, soit environ 12–28 heures à partir
+de l'extrapolation annoncée, et non `×6`. La limite u32 du digest est latente :
+le fold courant refuse auparavant sur les incidences. Les doublons restent
+refusés jusqu'à définition site/multiensemble et reprojection ; les cinq
+statuts du moteur restent distincts des états de campagne/checkpoint ; digest
+v2 sera double-signé sur le recouvrement ; le disque réel reste fermé ; le
+lemme « attachement = première incidence » est reçu sous prémisses et doit
+garder un certificat fail-closed ; l'ordre résident est confirmé, tandis que
+les runs externes doivent porter leur ordinal global.
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique

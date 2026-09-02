@@ -26,6 +26,12 @@ des corrections, ils ne certifient rien.
   sémantique KeyCSR `8afd1057`.
   Il prime sur toute réponse historique ; aucun GO GCP n'est actuellement
   ouvert.
+- [`REPONSE_AUDITEUR_ECHELLE_V6_20260902.md`](REPONSE_AUDITEUR_ECHELLE_V6_20260902.md) :
+  arbitrage des six verrous de `4d79dbd3`. Les cinq paliers RAM peuvent
+  avancer ; doublons, statuts, digest v2, disque et oubli des facettes sont
+  bornés sans changement silencieux d'objet. L'ordre résident est confirmé,
+  l'ordre externe doit porter son ordinal. La note corrige aussi l'erreur
+  numérique `×6` et exige la provenance des mesures K5.
 - [`REPONSE_AUDITEURS_MULTICPU_V6_20260901.md`](REPONSE_AUDITEURS_MULTICPU_V6_20260901.md) :
   réponse à la saturation du fold et à la conception GPU ; profil apparié,
   snapshots du design A, réception locale CPU/stub, portes device enregistrées
@@ -51,10 +57,11 @@ des corrections, ils ne certifient rien.
   une nouvelle mesure, sans bloquer KeyCSR.
 - [`ALERTE_G4_ECHELLE_V6_20260902.md`](ALERTE_G4_ECHELLE_V6_20260902.md) :
   préflight mis à jour jusqu'au moteur corrigé `28d02459` et au WIP de
-  protocole ; **NO START** jusqu'au trajet lifecycle du layout, à la porte
-  complète de sa cause d'allocation, aux pools et à la politique v2 du code
-  134. Q2 est correctement séparée ; portée, budget, normalisation `:11`,
-  autorité du layout et fermeture du plan sont bornés par la même note.
+  protocole ; **NO START**. Le WIP non épinglé ferme fonctionnellement layout
+  et normalisation `:11`, mais il manque encore la fixture lifecycle non vide,
+  la cause d'allocation sans tas, les pools, la politique v2 du code 134 et la
+  grammaire/binaire du plan. Q2 est correctement séparée ; portée et budget
+  restent bornés par la même note.
 - [`REPONSE_AUDITEUR_CONCEPTION_C6_20260902.md`](REPONSE_AUDITEUR_CONCEPTION_C6_20260902.md) :
   GO de conception borné pour C6, sans code ni GO G4. Le premier jalon emploie
   deux IN + deux OUT hôte aux leases séparés, un flux et un jeu device ; la
@@ -69,6 +76,9 @@ des corrections, ils ne certifient rien.
 
 ## Historique de l'échange
 
+- [`QUESTION_CLAUDE_ECHELLE_V6_20260902.md`](QUESTION_CLAUDE_ECHELLE_V6_20260902.md) :
+  question source sur le plan d'échelle et ses six verrous, répondue par la
+  réponse active ci-dessus.
 - [`NOTE_CLAUDE_PIN_KEYCSR_20260902.md`](NOTE_CLAUDE_PIN_KEYCSR_20260902.md) :
   livraison du pin sémantique `8afd1057`, reçue dans la réponse KeyCSR active ;
   elle diffère explicitement la campagne de performance.
