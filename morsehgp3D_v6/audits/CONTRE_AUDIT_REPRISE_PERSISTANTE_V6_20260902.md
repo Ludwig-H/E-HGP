@@ -137,3 +137,47 @@ génération simulée.
 Jusqu'à ces dents, conserver le résultat déjà acquis et l'arrêt certifié du
 reçu `1788312873`, mais ne pas prendre son succès nominal comme preuve des
 chemins de reprise. Aucun GO GCP n'est ouvert par ce document.
+
+## État du WIP après le contre-audit
+
+Photographie : worktree non commité au-dessus de `38281dc7`. Claude a fermé
+une part substantielle du rapport : `flock` remplace le verrou non atomique,
+la garde STOP extérieure au pin est refusée, une génération vide est rejetée,
+les marques sont parsées strictement, SID/PGID sont persistés, les états
+incertains sont routés stop-first, le staging est lié à `REMOTE_DIR` puis
+recontrôlé après SCP, le validateur est interdit après STOP non certifié, la
+purge précède le témoin et la politique de rejeu manuel est explicite. Le code
+WIP du clamp invité lie aussi le marqueur à un rc SSH nul et ferme l'horloge
+hôte illisible.
+
+Quatre coutures nouvelles ou encore incomplètes empêchent de recevoir ce WIP :
+
+1. **Promotion après collecte non prouvée.** Après le SCP, le cas
+   `describe_indisponible` ne devient pas une erreur et le staging peut être
+   promu. Un `SCP_RC` non nul n'interdit pas non plus explicitement la
+   promotion d'un `out/` partiel. Exiger succès SCP et tuple post-SCP strict,
+   lisible et de la génération attendue avant tout `mv`.
+2. **Le chemin d'échec n'est pas encore borné.** Le reçu dit minimal copie
+   récursivement `marques/`, puis le hache ; `session.log` et `reprise.log` ne
+   sont pas bornés. Après un STOP non certifié, n'écrire qu'un témoin minimal
+   de taille plafonnée, sans copie ni hash récursifs.
+3. **L'échec du témoin terminal peut être masqué.** Dans la reprise, une purge
+   réussie suivie d'un `publish_witness` en échec peut encore rendre zéro. Le
+   cycle nominal masque de même l'échec du Python de publication par son
+   `true` final. Le succès doit dépendre de la publication atomique et du
+   `sync` du parent.
+4. **Le terminal est testé avant le verrou.** `recu_publie` est lu avant
+   l'acquisition de `flock`, sans seconde lecture sous verrou. Une reprise
+   suspendue avant le verrou puis réveillée après la conclusion d'une autre
+   peut conclure une seconde fois. Refaire tous les choix terminaux sous le
+   verrou acquis.
+
+`selftest_cycle_vie_v6.sh` n'ajoute encore aucun mutant causal pour ces
+fermetures et ces quatre coutures ; son changement observé se limite à
+l'inventaire du nouveau profil. Le test « marqueur puis rc 255 » oublie par
+ailleurs de borner son environnement et peut durer plusieurs dizaines de
+secondes ; ajouter `clamp_environment()` et un timeout de harnais.
+
+Le verdict reste donc : progrès net, **porte autonome non reçue**, aucune
+nouvelle dépense GCP. Les six priorités de la coupe `c8f69673` restent
+historiquement exactes ; cette section les reclasse pour le WIP courant.

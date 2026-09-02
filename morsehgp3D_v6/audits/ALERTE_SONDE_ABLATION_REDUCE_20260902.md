@@ -98,31 +98,32 @@ Le libellé embarqué reste
 « attribution » est trop fort au regard du plan ; le verdict extérieur de ce
 rapport prime et classe le reçu `exploratory_noncausal_upper_bounds`.
 
-## Signalement court sur le WIP de revalidation adjacent
+## Signalement mis à jour sur le WIP de revalidation adjacent
 
-Le contrôle d'ensemble exact ajouté dans le worktree à
-`gcp-migration/revalidate_v6_receipt.sh` est juste dans son intention, mais sa
-normalisation courante rejette tous les reçus intègres : `SHA256SUMS` porte des
-chemins comme `./RECU_SESSION.txt`, tandis que `find ... -printf '%P'` produit
-`RECU_SESSION.txt`. La comparaison observée sur le reçu `1788312873` est donc
-rouge avant même le validateur. Après le retrait éventuel du préfixe `*`,
-retirer aussi exactement un préfixe `./` côté manifeste, puis conserver une
-contre-fixture pour chacun des cas fichier absent, fichier supplémentaire et
-entrée dupliquée. Ce constat vise uniquement le WIP non commité ; il ne remet
-pas en cause l'intégrité déjà vérifiée du reçu.
+Photographie : worktree non commité au-dessus de `38281dc7`. Trois fermetures
+sont réelles : la normalisation retire maintenant exactement `./`, le hash du
+manifeste initial domine le contrôle final, et liens/types spéciaux sont
+refusés. Les doublons de codes session sont aussi comptés avant extraction.
+Les mutants rehash, symlink, fichier intrus et codes dupliqués du selftest
+courant sont verts.
 
-Le contrôle final doit également lier **le manifeste initial lui-même**. Dans
-le WIP courant, il relit le `SHA256SUMS` présent après le validateur : un faux
-validateur peut modifier `session.log`, régénérer `SHA256SUMS` avec les
-nouveaux hashes, puis rendre 0 ; l'ensemble des noms reste identique et la
-vérification finale devient verte. Graver avant l'appel le SHA-256 (ou les
-octets) de `SHA256SUMS`, l'exiger inchangé après l'appel, et ajouter le mutant
-« altération + rehash » au selftest. Le mutant existant « altération sans
-rehash » ne tue pas ce contournement.
+Cette progression ne ferme pas encore la revalidation :
 
-L'ensemble dit exact ne couvre enfin que `find -type f`. Un lien symbolique
-non haché ajouté à la racine du reçu passe actuellement la revalidation et le
-contrôle final. Inventorier toutes les entrées, refuser les types spéciaux et
-les liens, puis n'autoriser que les répertoires attendus et des fichiers
-réguliers. Ajouter un mutant symlink ; il complète les cas fichier régulier
-absent ou supplémentaire sans les remplacer.
+1. **Le validateur n'est pas authentifié.** Le second argument reste un chemin
+   arbitraire. L'exécution avec `/dev/null` rend effectivement `0`, ne produit
+   aucun résumé et affiche pourtant « recu intact ». En mode normal, exiger la
+   cible attendue et graver son hash ; si l'injection d'un faux validateur est
+   nécessaire aux tests, la réserver à un mode selftest explicite qui ne peut
+   jamais publier un verdict de revalidation.
+2. **Tout basename `SHA256SUMS` est exclu.** `find ... ! -name SHA256SUMS`
+   retire aussi `out/SHA256SUMS` et `marques/SHA256SUMS` de l'inventaire. Seul
+   `./SHA256SUMS` à la racine doit être exclu. Ajouter les deux contre-fixtures
+   imbriquées.
+3. **Les répertoires ne sont liés qu'avant l'appel.** Le contrôle final
+   recompare les fichiers et les types irréguliers, pas l'ensemble exact des
+   répertoires. Un validateur hostile peut laisser un répertoire vide ajouté
+   ou supprimé. Graver puis revalider aussi cet ensemble.
+
+`selftest_revalidate_v6.sh` est vert, mais ne contient aucune de ces trois
+dents. Ce constat vise uniquement le WIP ; il ne remet pas en cause
+l'intégrité déjà vérifiée du reçu.

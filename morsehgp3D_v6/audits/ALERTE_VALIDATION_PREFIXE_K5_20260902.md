@@ -77,3 +77,21 @@ avec une politique explicite pour les anciens canons.
 Ces corrections sont locales et ne demandent aucune nouvelle session G4. En
 attendant, conserver l'égalité K5 observée comme lecture factuelle du reçu,
 pas comme propriété promue par le validateur.
+
+## État du WIP après l'alerte
+
+Photographie : worktree non commité au-dessus de `38281dc7`. Le validateur
+courant ferme effectivement les quatre causes : listes K exactes avant mise en
+dictionnaire, rejet de K0 et des doublons, appariement par coordonnées
+complètes du plan, et jumeau K10 obligatoire sans `continue` silencieux. Les
+quatre nouveaux mutants producteur sont tués. Le profil historique
+`g4_tests_v1.env` a été restauré et la nouvelle fixture est portée séparément
+par `g4_tests_v2.env`.
+
+La suite complète n'est cependant pas encore verte :
+`selftest_campagne_v6.sh` attend pour le mutant « digest K5 manquant » l'ancien
+texte `digest_forest_K1..K5 incomplets`, alors que le rejet renforcé émet
+désormais `digest_forest_K != liste exacte...`. Mettre la dent à jour sans
+l'affaiblir, puis rejouer la suite entière. Jusqu'au commit propre et à ce
+rejeu, l'alerte reste active ; après eux, elle pourra être marquée fermée sans
+réinterpréter rétroactivement le reçu.
