@@ -78,7 +78,7 @@ inline constexpr const char* kMutants[] = {
     // de l'etage B au premier ordre (fold). Tues par tests/bad_alloc_gate.cpp :
     // le refus doit etre resource_exhausted, NOMMER l'etage, ne publier aucun
     // callback ni provisoire, et ne JAMAIS terminer par signal (code 134).
-    "caps-throw-bad-alloc-census", "caps-throw-bad-alloc-fold",
+    "caps-throw-bad-alloc-provision", "caps-throw-bad-alloc-census", "caps-throw-bad-alloc-fold",
 };
 
 inline std::vector<std::string>& mutant_registry() {

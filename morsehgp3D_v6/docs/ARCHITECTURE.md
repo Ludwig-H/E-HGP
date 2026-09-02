@@ -167,4 +167,4 @@ fold — en refus transactionnel `resource_exhausted` qui **nomme l'étage
 atteint** (curseur `RunResult::stage_reached`, avancé aux mêmes points que
 les `rss_mb`), sans jamais publier de préfixe de payload ; ce n'est pas une
 garantie anti-OOM (l'OOM killer reste hors de portée, `RLIMIT_AS` borne
-l'espace virtuel et non le RSS).
+l'espace virtuel et non le RSS). Le texte du refus ne porte jamais la sous-chaîne `bad_alloc` : le validateur de campagne tient les classes d'issue de la phase frontière pour mutuellement exclusives, un code 2 étant un refus typé et un code 134 une allocation non capturée. La provision du message est elle-même sous la garde (mutant `caps-throw-bad-alloc-provision`). « Aucun préfixe publié » se lit avec sa portée exacte : les callbacks déjà appelés restent provisoires jusqu'au statut terminal et l'invalidation interne ne reprend aucun effet externe, donc la porte ne prouve l'absence de publication que pour une panne antérieure au premier callback.

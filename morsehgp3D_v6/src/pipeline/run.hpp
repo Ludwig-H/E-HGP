@@ -914,14 +914,26 @@ inline void run_pipeline_into(const std::vector<InputPoint>& in, const RunOption
 
 // ENROBAGE TRANSACTIONNEL DE L'EPUISEMENT MEMOIRE (alerte G4 du 2 septembre).
 // `std::bad_alloc` est la SEULE exception capturee ici : elle devient un refus
-// `resource_exhausted` qui NOMME l'etage atteint et grave les RSS d'etage —
-// une donnee, la ou un abort (code 134) n'en est pas une. Toute autre
+// dont le TEXTE ne porte jamais la sous-chaine `bad_alloc` — le validateur de
+// campagne (gcp-migration/validate_v6_campaign.py) tient les classes d'issue de
+// la phase frontiere pour mutuellement exclusives : un code 2 doit etre un refus
+// type SANS diagnostic d'allocation brute, un code 134 est le bad_alloc NON
+// capture (abort). Changer ce texte casserait cette exclusivite. Le refus
+// NOMME l'etage atteint et grave les RSS d'etage — une donnee, la ou un abort
+// (code 134) n'en est pas une. Toute autre
 // exception se propage exactement comme avant (fold-inject-b-exception-k3
 // termine toujours par signal : sa porte est inchangee).
 // AUCUN PREFIXE DE PAYLOAD N'EST PUBLIE : `invalidate_provisional` vide
 // digests, forets, cartes, totaux et signatures de stockage ; les seuls
 // survivants sont le statut, le message, l'etage, les chronos et les RSS
 // d'etage (diagnostic, jamais l'objet), comme sur tout autre refus.
+// PORTEE EXACTE DU « AUCUN PREFIXE PUBLIE » (retour auditeur) : les callbacks
+// deja appeles sont PROVISOIRES jusqu'au statut terminal, et l'invalidation
+// interne ne reprend aucun effet EXTERNE deja produit chez l'appelant. La
+// porte ne prouve donc l'absence de publication que pour une panne ANTERIEURE
+// au premier callback (scene K=1) ; au-dela, le contrat est celui, historique,
+// des provisoires — l'appelant jette ce qu'il a recu quand le statut n'est pas
+// complete_regular.
 // CE QUE CETTE CAPTURE NE PROMET PAS : ce n'est pas une garantie anti-OOM.
 // L'OOM killer du noyau frappe hors de toute portee C++, `RLIMIT_AS` borne
 // l'espace virtuel et non le RSS, et un allocateur qui rendrait un pointeur
@@ -929,17 +941,20 @@ inline void run_pipeline_into(const std::vector<InputPoint>& in, const RunOption
 inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOptions& opt) {
   RunResult rr;
   const auto t_all = std::chrono::steady_clock::now();
-  // Le message du refus est PROVISIONNE avant tout calcul : le formater sur un
-  // tas deja epuise ne doit pas re-allouer (l'assignation depuis le tampon de
-  // pile tient alors dans la capacite reservee).
-  rr.message.reserve(256);
   try {
+    // La PROVISION du message est SOUS LA GARDE (retour auditeur du 2
+    // septembre) : placee avant le `try`, son propre echec d'allocation
+    // s'echappait de l'enrobage et rendait un abort — exactement le cas que
+    // cet enrobage doit convertir. Le mutant caps-throw-bad-alloc-provision
+    // injecte la panne A CET INSTANT, avant le corps du pipeline.
+    if (MHGP6_MUTANT("caps-throw-bad-alloc-provision")) throw std::bad_alloc();
+    rr.message.reserve(256);
     run_detail::run_pipeline_into(in, opt, rr);
   } catch (const std::bad_alloc&) {
     rr.status = PipelineStatus::kResourceExhausted;
     char buf[256];
     std::snprintf(buf, sizeof buf,
-                  "resource_exhausted : bad_alloc a l'etage %s (rss_mb apres_generation=%.0f apres_rle=%.0f "
+                  "resource_exhausted : allocation impossible a l'etage %s (rss_mb apres_generation=%.0f apres_rle=%.0f "
                   "apres_prefiltre=%.0f apres_census=%.0f max_fold=%.0f)",
                   run_stage_name(rr.stage_reached), rr.rss_mb[0], rr.rss_mb[1], rr.rss_mb[2], rr.rss_mb[3],
                   rr.rss_mb[4]);

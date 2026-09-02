@@ -82,12 +82,15 @@ mhgp6_gate(mhgp6_contrat_echec_fold_k2 4 mhgp6_selftest ARGS --failure-contract 
 # execution. La scene `fold` couvre le seul etage a WORKERS.
 mhgp6_executable(mhgp6_bad_alloc_gate tests/bad_alloc_gate.cpp)
 mhgp6_gate(mhgp6_bad_alloc_temoin 0 mhgp6_bad_alloc_gate ARGS --threads=4 TIMEOUT 600)
+mhgp6_gate(mhgp6_bad_alloc_etage_provision 2 mhgp6_bad_alloc_gate
+           ARGS --inject=caps-throw-bad-alloc-provision --etage=entree --threads=4
+           EXPECT_LINE "resource_exhausted : allocation impossible a l'etage entree (rss_mb apres_generation=" TIMEOUT 600)
 mhgp6_gate(mhgp6_bad_alloc_etage_census 2 mhgp6_bad_alloc_gate
            ARGS --threads=4 --inject=caps-throw-bad-alloc-census --etage=census
-           EXPECT_LINE "resource_exhausted : bad_alloc a l'etage census (rss_mb apres_generation=" TIMEOUT 600)
+           EXPECT_LINE "resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=" TIMEOUT 600)
 mhgp6_gate(mhgp6_bad_alloc_etage_fold 2 mhgp6_bad_alloc_gate
            ARGS --threads=4 --inject=caps-throw-bad-alloc-fold --etage=fold
-           EXPECT_LINE "resource_exhausted : bad_alloc a l'etage fold (rss_mb apres_generation=" TIMEOUT 600)
+           EXPECT_LINE "resource_exhausted : allocation impossible a l'etage fold (rss_mb apres_generation=" TIMEOUT 600)
 # Etage E6 (--e6-grille) : objet et multiensemble emis BIT-IDENTIQUES sous la
 # grille raffinee, W_sweep1 jamais augmente, plancher de grilles construites.
 mhgp6_gate(mhgp6_e6_grille_objet 0 mhgp6_selftest ARGS --e6-equal TIMEOUT 600)

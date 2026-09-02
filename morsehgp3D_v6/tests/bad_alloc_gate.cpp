@@ -10,6 +10,10 @@
 //   temoin (sans --inject) : le MEME nuage et les MEMES options COMPLETENT —
 //     anti-vacuite (la scene injectee n'est pas verte parce qu'elle echouerait
 //     de toute facon), curseur final `publication`, callbacks 1..kmax_eff.
+//   --inject=caps-throw-bad-alloc-provision : panne AVANT le corps du
+//     pipeline, a la provision du message de refus elle-meme (retour
+//     auditeur : placee hors de la garde, elle rendait un abort) — etage
+//     attendu `entree`, aucune phase de fold, aucun callback.
 //   --inject=caps-throw-bad-alloc-census : panne d'allocation sur le FIL
 //     PRINCIPAL, entre le prefiltre et le census.
 //   --inject=caps-throw-bad-alloc-fold : panne dans un WORKER de l'etage B au
@@ -127,12 +131,17 @@ int main(int argc, char** argv) {
     return g_bad ? 1 : 0;
   }
 
-  if (inject != "caps-throw-bad-alloc-census" && inject != "caps-throw-bad-alloc-fold")
-    return refus_argument("--inject hors des deux mutants de cette porte");
-  if (etage != "census" && etage != "fold") return refus_argument("--etage attendu : census ou fold");
+  if (inject != "caps-throw-bad-alloc-census" && inject != "caps-throw-bad-alloc-fold" &&
+      inject != "caps-throw-bad-alloc-provision")
+    return refus_argument("--inject hors des trois mutants de cette porte");
+  if (etage != "census" && etage != "fold" && etage != "entree")
+    return refus_argument("--etage attendu : entree, census ou fold");
   if (!mutants_enable(inject)) return refus_argument("mutant inconnu du registre (cible hors MHGP6_TESTING ?)");
 
-  const std::string prefixe = "resource_exhausted : bad_alloc a l'etage " + etage + " (";
+  // Le texte NE PORTE PAS la sous-chaine `bad_alloc` : classes d'issue
+  // mutuellement exclusives du validateur de campagne (code 2 = refus type,
+  // code 134 = allocation non capturee).
+  const std::string prefixe = "resource_exhausted : allocation impossible a l'etage " + etage + " (";
   u64 refus = 0;
   for (const int infl : {1, 2, 8}) {
     RunOptions o;
@@ -164,6 +173,10 @@ int main(int argc, char** argv) {
       bad(std::string(tag) + " : aucune phase de fold observee (scene vacue, l'etage B n'a pas ete atteint)");
     if (etage == "census" && phases.load() != 0)
       bad(std::string(tag) + " : phases de fold observees alors que le refus precede l'etage B");
+    if (etage == "entree" && phases.load() != 0)
+      bad(std::string(tag) + " : phases de fold observees alors que le refus precede tout calcul");
+    if (etage == "entree" && rr.rss_mb[0] != 0.0)
+      bad(std::string(tag) + " : RSS de generation non nul alors que le corps n'a pas commence");
     std::printf("%s : %s\n", tag, rr.message.c_str());
   }
   if (refus != 3) {
