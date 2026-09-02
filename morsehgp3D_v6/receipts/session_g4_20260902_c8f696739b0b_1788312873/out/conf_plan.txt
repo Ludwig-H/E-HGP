@@ -1,0 +1,4 @@
+conf_plan=v2
+specs=aucun
+threads=48
+runs=0

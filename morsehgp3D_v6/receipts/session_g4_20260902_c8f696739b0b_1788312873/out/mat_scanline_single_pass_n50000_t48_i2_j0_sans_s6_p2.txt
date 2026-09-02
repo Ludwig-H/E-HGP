@@ -1,0 +1,23 @@
+payload=mhgp6-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+backend=cpu_reference
+tower_scope=prefix_k5 smax_requested=6 smax_effective=6 (K = 1..5, prefixe exact de l'objet complet)
+famille=scanline_single_pass n=50000 coord=1414 s=8 smax=6 seed=3 threads=48 emis=1177412 boules_uniques=1157669 mortes_profondeur=96442 survivantes=1061227 census_int=2031258 census_shell=2874973 evenements=1253902 facettes=3329918 fusions=3329313 deltas=314833 noeuds=285080
+generation rect_alive=501392/653657/599857 rect_visites_fusionnes=4062571 ancres=937485/7645974/11763982 candidats=641480/502738/33194 tues_profondeur=0/35602586/1543573 ancres_w4=2393133 ancres_w3=1725576 ancres_secteurs=632928/987381 ancres_cellules=0/43992 seeds_cellules=0/6078974 grilles=0/63373 seeds=36105324/24759355 completions_q4=49884383 seeds_core_tues=13840569 seeds_corde_tues=4298402 float_cert=886374742/347712949 repli=3502091 ancres_hist=296005/4287563/7521711 hist_lignes=177341/2861274/5204679 hist_seuil=118664/1426289/2317032 hist_survivants=641480/3358411/4242271 jung=47270965/695715339/714
+sweep tests_coeur=1040892615 tests_prof_q3=196697167 tests_passe2=164790996 tri_comparaisons=524125832 seeds_passe2=541410 racines_corde=49884383 groupes=49398832 racines_hors_corde=114052476 temoins_constants=515574 rejets=lens:38434945/owner:49022/once:3375026/i64:106319/face:3819224/det:0/centre:2523080
+vwspd nœuds_temoins=259172219 coins=73519506 h_rect=0/122000939/191541903 h_scan=0/483349246/653702185 m_anchor=0/252122306/377115307 entrees_ancres=0/1135541/1053656 iters_coeur=1049978805 iters_passe2=166415226
+octaves_q4 ancres=0,57301,77629,183153,219878,232621,83244,7003,698,25815,119713,40087,5230,1284,0,0 seeds=0,177,1649,314722,551808,771997,208032,14015,7791,1171794,9443449,7521308,2669139,2083474,0,0 w1=0,0,5109,2576402,4197394,4237536,1057843,53740,381786,28852886,268038095,277440800,228022322,226028702,0,0 (octave = log2 de la taille du cover de l'ancre)
+octaves_q4_seeds cellules=0,0,0,0,0,0,0,0,1079,103472,1679670,3293478,491861,509414,0,0 coeur=0,0,4,79980,379762,700905,197347,13922,3190,687311,4602354,3519315,2082419,1574060,0,0 corde=0,0,0,2722,19072,27160,6797,85,2815,364856,3082368,698128,94399,0,0,0 passe2=0,177,1645,232020,152974,43932,3888,8,707,16155,79057,10387,460,0,0,0
+vcensus prefiltre_nœuds=57774749 prefiltre_feuilles=0 range_add=2560213 census_nœuds=57470121 census_feuilles=4906231
+p_factor=858006/15610940/25625184 (evaluations d'auto-produits des histogrammes)
+ledger_paires emis=937485/7645974/11763982 tues=1249037515/1242329026/1238211018
+ouvriers wspd=48 rects=48 rle=48 prefiltre=48 census=48 expansion=48 fold=48
+temps_ms index=6.9 gen=3127.5 (wspd 446.8 rects 2679.5) rle=76.4 prefiltre=196.2 census=216.6 comptage=5.6 expansion=113.8 fold=743.0 (tri 49.7 intern 112.3 fusion 50.3 reduce 526.2) digest=0.0
+temps_mur_ms=4199.5 (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, pas le mur)
+temps_fold_mur_ms=553.1 (etages A et B, fold_inflight=2, fold_join=0, pic_mesure_en_vol=2)
+rss_mb apres_generation=560 apres_rle=560 apres_prefiltre=590 apres_census=831 max_fold=1029 fin=460 (telemetrie active : lecture /proc/self/statm par K sous le verrou de publication — a desarmer ou signer pour un run de debit)
+cardinalites K=1 evenements=140802 facettes=50000 deltas=22891 attachements=0 fusions=49999 noeuds=22891
+cardinalites K=2 evenements=198899 facettes=239694 deltas=28556 attachements=132843 fusions=239623 noeuds=27944
+cardinalites K=3 evenements=244122 facettes=535108 deltas=50855 attachements=366521 fusions=534996 noeuds=45642
+cardinalites K=4 evenements=301395 facettes=954118 deltas=89777 attachements=724695 fusions=953950 noeuds=79879
+cardinalites K=5 evenements=368684 facettes=1550998 deltas=122754 attachements=1249837 fusions=1550745 noeuds=108724
+rss_max_kb=1135468

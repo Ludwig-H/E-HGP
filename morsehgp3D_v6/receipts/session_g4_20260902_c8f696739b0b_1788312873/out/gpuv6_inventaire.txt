@@ -1,0 +1,19 @@
+Test project /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+  Test #133: mhgp6_device_witness
+  Test #134: mhgp6_device_witness_mutant_carry
+  Test #135: mhgp6_device_witness_mutant_skip_write
+  Test #136: mhgp6_device_witness_mutant_skip_native
+  Test #137: mhgp6_census_device
+  Test #138: mhgp6_census_device_mutant_range_le
+  Test #139: mhgp6_census_device_mutant_stack
+  Test #140: mhgp6_census_device_mutant_swap
+  Test #141: mhgp6_census_device_mutant_nonstrict
+  Test #142: mhgp6_census_device_mutant_skip_write
+  Test #143: mhgp6_census_device_mutant_nshell
+  Test #144: mhgp6_census_device_mutant_skip_count
+  Test #145: mhgp6_pilote_parite_400
+  Test #146: mhgp6_pilote_refus_n
+  Test #147: mhgp6_pilote_lot17
+  Test #148: mhgp6_pilote_mutant_base
+
+Total Tests: 16

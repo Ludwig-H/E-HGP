@@ -1,0 +1,15 @@
+schema=e-hgp.v6-session-receipt.v3
+run_id=session_g4_20260902_c8f696739b0b_1788312873
+issue=arret_certifie_par_le_garde
+rc=0
+stop_rc=0
+profil=g4_tests_v1 profil_canonique=g4_tests_v1
+generation=2026-09-01T18:34:33.420-07:00
+projet=devpod-gpu-exploration zone=europe-west4-ai1a instance=ehgp-blackwell-spot-ai1a
+source_commit=c8f696739b0b5f1692432f9a7f4954bdceb7b2bb
+source_payload_sha256=e446678c239f3a679abf6b8b90c9c0859a2165a68182f4a12ac8092607990b4b
+protocol_manifest_sha256=939a79ad13f2bfe2c78b4e7eff2bf5098ecac9f38cdf702a458af4950c3ffcaa
+max_run_seconds=18000 guest_shutdown_minutes=285
+etat_cycle_vie=targeted_stopped
+marques=double_guard_verified guest_guard_pending 
+date_utc=2026-09-02T01:55:40Z

@@ -1,0 +1,6 @@
+gpu_plan=v1
+specs=aucun
+threads=48
+build_timeout=900
+s=8 smax=11 seed=3
+runs=0

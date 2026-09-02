@@ -1,0 +1,4 @@
+# gpuv6_resume — records RETENUS du pilote serie C (echauffement exclu) :
+# murs CPU/route device et etages par repetition ; faits seulement, la parite
+# est jugee par le meme juge que la porte stub (pilote_juge.juger).
+famille	n	repetition	ordre	mur_cpu_ms	mur_route_device_ms	prefiltre_census_cpu_ms	route_device_etage_ms	kernels_ms	h2d_ms	d2h_ms	lots

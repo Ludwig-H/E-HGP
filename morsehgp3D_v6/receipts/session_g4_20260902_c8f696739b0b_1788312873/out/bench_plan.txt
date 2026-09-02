@@ -1,0 +1,5 @@
+bench_plan=v2
+specs=aucun
+threads=48
+s=8 smax=11 seed=3
+runs=0

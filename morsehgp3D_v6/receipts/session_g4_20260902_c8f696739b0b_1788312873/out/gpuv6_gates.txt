@@ -1,0 +1,228 @@
+UpdateCTestConfiguration  from :/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/DartConfiguration.tcl
+Test project /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 133
+      Start 133: mhgp6_device_witness
+
+133: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=0" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_device_witness" "-DARGS=" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+133: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+133: Test timeout computed to be: 600
+133: device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0
+133: ecritures_arith=262144/262144 ecritures_native=262144/262144 mulhi_branche_attendue=1 hors_branche_ecrites=0
+133: arith cas=262144 desaccords=0
+133: arith_detail sum=0 dif=0 mul64=0 mulx=0 shl=0 div4=0 cmp=0 retenues_attendues=130902
+133: arith_native cas=262144 desaccords=0 (sum=0 mul=0 mulx=0 divrem=0 cmp=0)
+133: device_witness OK
+133: 
+ 1/16 Test #133: mhgp6_device_witness ......................   Passed    1.52 sec
+test 134
+      Start 134: mhgp6_device_witness_mutant_carry
+
+134: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=4" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_device_witness" "-DARGS=--inject=witness-di128-lost-carry" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+134: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+134: Test timeout computed to be: 600
+134: device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0
+134: ecritures_arith=262144/262144 ecritures_native=262144/262144 mulhi_branche_attendue=1 hors_branche_ecrites=0
+134: arith cas=262144 desaccords=130902
+134: arith_detail sum=130902 dif=0 mul64=0 mulx=0 shl=0 div4=0 cmp=0 retenues_attendues=130902
+134: arith_native cas=262144 desaccords=0 (sum=0 mul=0 mulx=0 divrem=0 cmp=0)
+134: mutant witness-di128-lost-carry TUE : 130902 desaccords de somme = retenues attendues, ssi par cas (0 violation)
+134: 
+ 2/16 Test #134: mhgp6_device_witness_mutant_carry .........   Passed    1.50 sec
+test 135
+      Start 135: mhgp6_device_witness_mutant_skip_write
+
+135: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=4" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_device_witness" "-DARGS=--inject=witness-skip-write" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+135: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+135: Test timeout computed to be: 600
+135: device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0
+135: ecritures_arith=262080/262144 ecritures_native=262144/262144 mulhi_branche_attendue=1 hors_branche_ecrites=0
+135: arith cas=262144 desaccords=0
+135: arith_detail sum=0 dif=0 mul64=0 mulx=0 shl=0 div4=0 cmp=0 retenues_attendues=130902
+135: arith_native cas=262144 desaccords=0 (sum=0 mul=0 mulx=0 divrem=0 cmp=0)
+135: mutant witness-skip-write TUE : 64 sentinelles aux indices exacts, natif complet, oracles conformes
+135: 
+ 3/16 Test #135: mhgp6_device_witness_mutant_skip_write ....   Passed    1.51 sec
+test 136
+      Start 136: mhgp6_device_witness_mutant_skip_native
+
+136: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=4" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_device_witness" "-DARGS=--inject=witness-skip-native-write" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+136: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+136: Test timeout computed to be: 600
+136: device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0
+136: ecritures_arith=262144/262144 ecritures_native=262080/262144 mulhi_branche_attendue=1 hors_branche_ecrites=0
+136: arith cas=262144 desaccords=0
+136: arith_detail sum=0 dif=0 mul64=0 mulx=0 shl=0 div4=0 cmp=0 retenues_attendues=130902
+136: arith_native cas=262144 desaccords=0 (sum=0 mul=0 mulx=0 divrem=0 cmp=0)
+136: mutant witness-skip-native-write TUE : 64 sentinelles natives aux indices exacts, arith complet, oracles conformes
+136: 
+ 4/16 Test #136: mhgp6_device_witness_mutant_skip_native ...   Passed    1.49 sec
+test 137
+      Start 137: mhgp6_census_device
+
+137: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=0" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_census_device_gate" "-DARGS=" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+137: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+137: Test timeout computed to be: 600
+137: device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0 arch_compilees=120
+137: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+137: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+137: bilan boules=172153 tuees=3441 coquille4=68016 masse_range_add=877420 div_prefiltre=0 div_census=0 div_ordre=0 overflow=0
+137: validateur_refus=0 (statut_omis=0 count_omis=0 comptes_profil=0 autre=0)
+137: ok : validateur D2H : aucune sentinelle au nominal
+137: ok : prefiltre device bit-identique au scalaire
+137: ok : census device bit-identique (ordre compris)
+137: ok : aucun stack_overflow au nominal
+137: ok : plancher : >= 20 000 boules jugees
+137: ok : planchers de masse
+137: 
+ 5/16 Test #137: mhgp6_census_device .......................   Passed    2.85 sec
+test 138
+      Start 138: mhgp6_census_device_mutant_range_le
+
+138: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=4" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_census_device_gate" "-DARGS=--inject=gpu-range-add-le" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+138: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+138: Test timeout computed to be: 600
+138: device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0 arch_compilees=120
+138: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+138: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+138: bilan boules=172153 tuees=3441 coquille4=50565 masse_range_add=877420 div_prefiltre=37570 div_census=0 div_ordre=0 overflow=0
+138: validateur_refus=0 (statut_omis=0 count_omis=0 comptes_profil=0 autre=0)
+138: 
+ 6/16 Test #138: mhgp6_census_device_mutant_range_le .......   Passed    2.73 sec
+test 139
+      Start 139: mhgp6_census_device_mutant_stack
+
+139: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=4" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_census_device_gate" "-DARGS=--inject=gpu-stack-shallow" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+139: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+139: Test timeout computed to be: 600
+139: device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0 arch_compilees=120
+139: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+139: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+139: bilan boules=172153 tuees=2526 coquille4=53668 masse_range_add=877420 div_prefiltre=0 div_census=0 div_ordre=0 overflow=36472
+139: validateur_refus=0 (statut_omis=0 count_omis=0 comptes_profil=0 autre=0)
+139: 
+ 7/16 Test #139: mhgp6_census_device_mutant_stack ..........   Passed    2.75 sec
+test 140
+      Start 140: mhgp6_census_device_mutant_swap
+
+140: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=4" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_census_device_gate" "-DARGS=--inject=gpu-swap-push-order" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+140: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+140: Test timeout computed to be: 600
+140: device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0 arch_compilees=120
+140: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+140: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+140: bilan boules=172153 tuees=3441 coquille4=68016 masse_range_add=877420 div_prefiltre=0 div_census=0 div_ordre=168712 overflow=0
+140: validateur_refus=0 (statut_omis=0 count_omis=0 comptes_profil=0 autre=0)
+140: 
+ 8/16 Test #140: mhgp6_census_device_mutant_swap ...........   Passed    2.85 sec
+test 141
+      Start 141: mhgp6_census_device_mutant_nonstrict
+
+141: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=4" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_census_device_gate" "-DARGS=--inject=gpu-census-nonstrict" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+141: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+141: Test timeout computed to be: 600
+141: device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0 arch_compilees=120
+141: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+141: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+141: bilan boules=172153 tuees=3441 coquille4=13178 masse_range_add=877420 div_prefiltre=0 div_census=168712 div_ordre=0 overflow=0
+141: validateur_refus=0 (statut_omis=0 count_omis=0 comptes_profil=0 autre=0)
+141: 
+ 9/16 Test #141: mhgp6_census_device_mutant_nonstrict ......   Passed    2.84 sec
+test 142
+      Start 142: mhgp6_census_device_mutant_skip_write
+
+142: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=4" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_census_device_gate" "-DARGS=--inject=gpu-skip-ball-write" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+142: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+142: Test timeout computed to be: 600
+142: device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0 arch_compilees=120
+142: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+142: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+142: bilan boules=172153 tuees=3441 coquille4=67998 masse_range_add=877225 div_prefiltre=0 div_census=0 div_ordre=0 overflow=0
+142: validateur_refus=43 (statut_omis=43 count_omis=0 comptes_profil=0 autre=0)
+142: 
+10/16 Test #142: mhgp6_census_device_mutant_skip_write .....   Passed    2.84 sec
+test 143
+      Start 143: mhgp6_census_device_mutant_nshell
+
+143: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=4" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_census_device_gate" "-DARGS=--inject=gpu-nshell-overdomain" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+143: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+143: Test timeout computed to be: 600
+143: device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0 arch_compilees=120
+143: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+143: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+143: bilan boules=172153 tuees=3440 coquille4=68001 masse_range_add=877213 div_prefiltre=0 div_census=0 div_ordre=0 overflow=0
+143: validateur_refus=43 (statut_omis=0 count_omis=0 comptes_profil=43 autre=0)
+143: 
+11/16 Test #143: mhgp6_census_device_mutant_nshell .........   Passed    2.83 sec
+test 144
+      Start 144: mhgp6_census_device_mutant_skip_count
+
+144: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=4" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_census_device_gate" "-DARGS=--inject=gpu-skip-count-write" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+144: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+144: Test timeout computed to be: 600
+144: device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0 arch_compilees=120
+144: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+144: ok : relecture : les sept tableaux residents == payload hote (identite des octets)
+144: bilan boules=172153 tuees=3441 coquille4=68001 masse_range_add=877203 div_prefiltre=0 div_census=0 div_ordre=0 overflow=0
+144: validateur_refus=43 (statut_omis=0 count_omis=43 comptes_profil=0 autre=0)
+144: 
+12/16 Test #144: mhgp6_census_device_mutant_skip_count .....   Passed    2.84 sec
+test 145
+      Start 145: mhgp6_pilote_parite_400
+
+145: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=0" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_cuda" "-DARGS=--family=uniform --n=400 --seed=3 --threads=8" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+145: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+145: Test timeout computed to be: 600
+145: pilote_serie_c device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0 arch_compilees=120 famille=uniform n=400 graine=3 fils=8 lot=2097152
+145: repetition=0 retenue=NON ordre=cpu-device parite=OUI mur_cpu_ms=480.8 mur_route_device_ms=378.2 prefiltre_census_cpu_ms=196.3 route_device_etage_ms=109.5 wire_ms=18.5 setup_alloc_ms=65.5 h2d_ms=1.1 kernels_ms=1.1 d2h_ms=0.5 rebuild_ms=18.5 nb_total=105076 lot_effectif=105076 h2d_octets_index=15176 h2d_octets_boules=11768512 h2d_octets_sentinelles=10507600 d2h_octets=10507600 lots=1 digest_all=de9098a99d1eb1be3c81c3970a128f7ccb10c80626454b212fa893c349533f5d signature_cpu=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956 signature_device=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956
+145: repetition=1 retenue=OUI ordre=cpu-device parite=OUI mur_cpu_ms=462.5 mur_route_device_ms=299.8 prefiltre_census_cpu_ms=192.6 route_device_etage_ms=32.2 wire_ms=15.3 setup_alloc_ms=0.3 h2d_ms=1.0 kernels_ms=0.9 d2h_ms=0.5 rebuild_ms=13.3 nb_total=105076 lot_effectif=105076 h2d_octets_index=15176 h2d_octets_boules=11768512 h2d_octets_sentinelles=10507600 d2h_octets=10507600 lots=1 digest_all=de9098a99d1eb1be3c81c3970a128f7ccb10c80626454b212fa893c349533f5d signature_cpu=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956 signature_device=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956
+145: repetition=2 retenue=OUI ordre=device-cpu parite=OUI mur_cpu_ms=473.4 mur_route_device_ms=307.9 prefiltre_census_cpu_ms=206.5 route_device_etage_ms=38.4 wire_ms=16.6 setup_alloc_ms=0.3 h2d_ms=1.1 kernels_ms=0.9 d2h_ms=0.5 rebuild_ms=16.9 nb_total=105076 lot_effectif=105076 h2d_octets_index=15176 h2d_octets_boules=11768512 h2d_octets_sentinelles=10507600 d2h_octets=10507600 lots=1 digest_all=de9098a99d1eb1be3c81c3970a128f7ccb10c80626454b212fa893c349533f5d signature_cpu=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956 signature_device=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956
+145: repetition=3 retenue=OUI ordre=device-cpu parite=OUI mur_cpu_ms=460.9 mur_route_device_ms=304.4 prefiltre_census_cpu_ms=194.0 route_device_etage_ms=37.6 wire_ms=17.7 setup_alloc_ms=0.3 h2d_ms=1.0 kernels_ms=0.9 d2h_ms=0.5 rebuild_ms=16.3 nb_total=105076 lot_effectif=105076 h2d_octets_index=15176 h2d_octets_boules=11768512 h2d_octets_sentinelles=10507600 d2h_octets=10507600 lots=1 digest_all=de9098a99d1eb1be3c81c3970a128f7ccb10c80626454b212fa893c349533f5d signature_cpu=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956 signature_device=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956
+145: repetition=4 retenue=OUI ordre=cpu-device parite=OUI mur_cpu_ms=470.0 mur_route_device_ms=304.4 prefiltre_census_cpu_ms=203.2 route_device_etage_ms=35.8 wire_ms=16.1 setup_alloc_ms=0.3 h2d_ms=1.0 kernels_ms=0.9 d2h_ms=0.5 rebuild_ms=16.1 nb_total=105076 lot_effectif=105076 h2d_octets_index=15176 h2d_octets_boules=11768512 h2d_octets_sentinelles=10507600 d2h_octets=10507600 lots=1 digest_all=de9098a99d1eb1be3c81c3970a128f7ccb10c80626454b212fa893c349533f5d signature_cpu=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956 signature_device=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956
+145: 
+13/16 Test #145: mhgp6_pilote_parite_400 ...................   Passed    5.33 sec
+test 146
+      Start 146: mhgp6_pilote_refus_n
+
+146: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=2" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_cuda" "-DARGS=--n=200x" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+146: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+146: Test timeout computed to be: 120
+146: REFUS : parametre hors domaine ou mal forme
+146: 
+14/16 Test #146: mhgp6_pilote_refus_n ......................   Passed    0.00 sec
+test 147
+      Start 147: mhgp6_pilote_lot17
+
+147: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=0" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_cuda" "-DARGS=--family=uniform --n=400 --seed=3 --threads=8 --lot=17 --min-lots=2" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+147: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+147: Test timeout computed to be: 600
+147: pilote_serie_c device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0 arch_compilees=120 famille=uniform n=400 graine=3 fils=8 lot=17
+147: repetition=0 retenue=NON ordre=cpu-device parite=OUI mur_cpu_ms=478.4 mur_route_device_ms=2358.7 prefiltre_census_cpu_ms=196.5 route_device_etage_ms=2088.3 wire_ms=18.2 setup_alloc_ms=64.0 h2d_ms=238.6 kernels_ms=1437.2 d2h_ms=311.2 rebuild_ms=16.9 nb_total=105076 lot_effectif=17 h2d_octets_index=15176 h2d_octets_boules=11768512 h2d_octets_sentinelles=10507600 d2h_octets=10507600 lots=6181 digest_all=de9098a99d1eb1be3c81c3970a128f7ccb10c80626454b212fa893c349533f5d signature_cpu=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956 signature_device=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956
+147: repetition=1 retenue=OUI ordre=cpu-device parite=OUI mur_cpu_ms=453.0 mur_route_device_ms=2258.7 prefiltre_census_cpu_ms=182.8 route_device_etage_ms=1993.6 wire_ms=14.5 setup_alloc_ms=0.2 h2d_ms=237.6 kernels_ms=1416.2 d2h_ms=311.4 rebuild_ms=13.0 nb_total=105076 lot_effectif=17 h2d_octets_index=15176 h2d_octets_boules=11768512 h2d_octets_sentinelles=10507600 d2h_octets=10507600 lots=6181 digest_all=de9098a99d1eb1be3c81c3970a128f7ccb10c80626454b212fa893c349533f5d signature_cpu=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956 signature_device=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956
+147: repetition=2 retenue=OUI ordre=device-cpu parite=OUI mur_cpu_ms=450.3 mur_route_device_ms=2265.8 prefiltre_census_cpu_ms=184.3 route_device_etage_ms=1994.6 wire_ms=13.6 setup_alloc_ms=0.2 h2d_ms=237.5 kernels_ms=1416.4 d2h_ms=311.4 rebuild_ms=14.9 nb_total=105076 lot_effectif=17 h2d_octets_index=15176 h2d_octets_boules=11768512 h2d_octets_sentinelles=10507600 d2h_octets=10507600 lots=6181 digest_all=de9098a99d1eb1be3c81c3970a128f7ccb10c80626454b212fa893c349533f5d signature_cpu=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956 signature_device=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956
+147: repetition=3 retenue=OUI ordre=device-cpu parite=OUI mur_cpu_ms=454.1 mur_route_device_ms=2262.8 prefiltre_census_cpu_ms=187.0 route_device_etage_ms=1994.9 wire_ms=14.2 setup_alloc_ms=0.2 h2d_ms=237.3 kernels_ms=1416.6 d2h_ms=311.6 rebuild_ms=14.3 nb_total=105076 lot_effectif=17 h2d_octets_index=15176 h2d_octets_boules=11768512 h2d_octets_sentinelles=10507600 d2h_octets=10507600 lots=6181 digest_all=de9098a99d1eb1be3c81c3970a128f7ccb10c80626454b212fa893c349533f5d signature_cpu=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956 signature_device=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956
+147: repetition=4 retenue=OUI ordre=cpu-device parite=OUI mur_cpu_ms=456.9 mur_route_device_ms=2264.8 prefiltre_census_cpu_ms=189.3 route_device_etage_ms=1996.3 wire_ms=16.6 setup_alloc_ms=0.2 h2d_ms=237.1 kernels_ms=1416.2 d2h_ms=311.1 rebuild_ms=14.5 nb_total=105076 lot_effectif=17 h2d_octets_index=15176 h2d_octets_boules=11768512 h2d_octets_sentinelles=10507600 d2h_octets=10507600 lots=6181 digest_all=de9098a99d1eb1be3c81c3970a128f7ccb10c80626454b212fa893c349533f5d signature_cpu=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956 signature_device=618b19d464a51c25b47646f49e44aa06ba9b86d19d7f9288a413a3ec38cac956
+147: 
+15/16 Test #147: mhgp6_pilote_lot17 ........................   Passed   15.10 sec
+test 148
+      Start 148: mhgp6_pilote_mutant_base
+
+148: Test command: /home/louis_hauseux_gmail_com/.local/lib/python3.10/site-packages/cmake/data/bin/cmake "-DEXPECTED=4" "-DCMD=/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda/mhgp6_cuda_test" "-DARGS=--family=uniform --n=400 --seed=3 --threads=8 --lot=17 --min-lots=2 --inject=gpu-lot-base-reset" "-DEXPECT_LINE=" "-P" "/home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/morsehgp3D_v6/cmake/run_expect.cmake"
+148: Working Directory: /home/louis_hauseux_gmail_com/v6camp_c8f696739b0b_1788312873/build-v6-cuda
+148: Test timeout computed to be: 600
+148: pilote_serie_c device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0 arch_compilees=120 famille=uniform n=400 graine=3 fils=8 lot=17
+148: mutant gpu-lot-base-reset TUE : cand_idx refuse au second lot (lots=6181)
+148: 
+16/16 Test #148: mhgp6_pilote_mutant_base ..................   Passed    4.04 sec
+
+100% tests passed out of 16
+
+Label Time Summary:
+gpu    =  53.01 sec*proc (16 tests)
+
+Total Test time (real) =  53.02 sec

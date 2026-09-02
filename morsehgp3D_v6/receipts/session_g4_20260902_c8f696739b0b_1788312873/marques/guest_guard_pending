@@ -1,0 +1,9 @@
+schema=e-hgp.guard-mark.v1
+mark=guest_guard_pending
+project=devpod-gpu-exploration
+zone=europe-west4-ai1a
+instance=ehgp-blackwell-spot-ai1a
+generation=2026-09-01T18:34:33.420-07:00
+max_run_seconds=18000
+guest_shutdown_minutes=285
+date_utc=2026-09-02T01:34:54Z

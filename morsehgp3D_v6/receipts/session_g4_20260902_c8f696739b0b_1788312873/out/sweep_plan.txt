@@ -1,0 +1,5 @@
+sweep_plan=v1
+specs=aucun
+repeats=1
+s=8 smax=11 seed=3
+runs=0
