@@ -36,8 +36,11 @@ des corrections, ils ne certifient rien.
   GO exploratoire pour KeyCSR, sous égalité sémantique complète ; FidCSR et
   toute décision de performance restent des paliers séparés. Elle répond aussi
   à la pré-inscription `53610911` : six blocs et seuil `0,55` reçus dans leur
-  principe, graine externe fixée, mais frontières de destruction/callback,
-  strates, invalidations et verdicts à corriger avant scellement. Avant le pin
+  principe et graine externe fixée. Le générateur `d6888093` est reçu comme
+  calendrier déterministe (210/280 runs, portes directes normale et `-O`), pas
+  comme plan exécutable final : grammaire sans doublons, orientation des
+  échauffements et inscription CTest restent à fermer, puis les identités des
+  copies, commandes, callback et affinité doivent être scellées. Avant le pin
   sémantique, `for_each_delta` doit encore refuser les temporaires ; avant la
   mesure, la comparaison au classique, le scratch, les vrais derniers offsets
   et la liaison au kind construit doivent être instrumentés sans contaminer le

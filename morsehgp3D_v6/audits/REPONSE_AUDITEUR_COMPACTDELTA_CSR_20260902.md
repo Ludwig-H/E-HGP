@@ -200,6 +200,60 @@ la même règle préinscrite ; avec un seul passage, elle reste diagnostique.
 Aucune de ces issues ne change
 `public_status=not_claimed`.
 
+## Réception du générateur de plan `d6888093`
+
+Le commit `d6888093` est **reçu comme générateur déterministe de
+l'ordonnancement pré-inscrit**, pas encore comme plan de campagne exécutable
+et scellé. Les exécutions directes
+`python3 morsehgp3D_v6/tests/plan_keycsr_gate.py` et `python3 -O` rendent 0.
+Elles rejouent la graine `0xa2ffb4db2884ddc4`, SplitMix64, le Fisher--Yates,
+le flux unique et les orientations de la première strate
+`BA,AB,AB,AB,BA,BA`. Le plan sans extension contient 15 strates et 210 runs ;
+celui avec `eight_clusters` en contient 20 et 280, sans modifier le préfixe
+`uniform`. Les cinq strates, leurs deux échauffements, leurs six blocs
+`3 AB + 3 BA` et les deux A/A sont bien séparés. Le SHA-256 du plan sans
+extension est
+`b46e34e9b2a871497cbdbb216e696f41938c808b9aa3a67bb767ca289301faa3`.
+
+Deux dents courtes précèdent le statut de porte permanente :
+
+- le parseur du juge transforme encore chaque ligne en dictionnaire avec une
+  sémantique « dernière valeur gagnante ». Un en-tête avec deux
+  `graine_hex` ou un run avec `orientation=XX` suivi de la bonne valeur passe
+  après rescellement. Imposer la grammaire canonique complète : inventaire et
+  ordre exacts, une occurrence de chaque clé, aucune clé inconnue. La scène
+  des échauffements doit aussi exiger exactement
+  `(bloc=0,position=1,orientation=AB,bras=A)` puis
+  `(bloc=0,position=2,orientation=AB,bras=B)`. Conserver ces deux mutations
+  comme dents ;
+- enregistrer le juge dans CMake/CTest, en exécution normale **et** sous
+  `python3 -O`. Son succès direct est une preuve locale utile, pas encore une
+  porte de la suite canonique.
+
+Le fichier produit est volontairement un squelette : `binaire=profil|release`
+reste symbolique, `commande=` omet le chemin de la copie, le callback est
+`A_CONFIRMER`, `coord=defaut` n'est pas une coordonnée numérique et
+l'affinité est déléguée au futur lanceur. Avant le premier run, soit ce plan
+est enrichi, soit un **manifeste d'exécution scellé séparé** lie son SHA-256 au
+commit instrumenté et à l'état du worktree, aux chemins et SHA-256 des copies
+profil/Release, aux lanceur et agrégateur, à chaque commande complète, au
+callback résolu, à la coordonnée effectivement appliquée et au
+cpuset/topologie attestés. Le lanceur régénère et compare le canon, puis
+refuse tout placeholder ou écart ; un auto-hash recalculable ne constitue pas
+à lui seul une autorité.
+
+Le mapping modulo est défini, déterministe et rejoué ; son biais microscopique
+ne justifie ni un reroulage de ce calendrier ni un blocage. La phrase
+« accepté explicitement par la pré-inscription » est toutefois trop forte :
+le verrou demandait un mapping défini et rejoué, sans attribuer cette
+acceptation aux auditeurs. Le qualifier comme choix déclaré du générateur
+suffit.
+
+Cette réception n'ouvre toujours aucune campagne : le pin sémantique, le
+callback et `reduce_v3`, les identités d'exécution, les deux coutures actives
+de la sonde et le rejeu des portes sur le commit instrumenté exact restent les
+préconditions utiles.
+
 ## Q1 — même objet, nouvelle représentation explicite
 
 Le payload sémantique peut rester « forêts horizontales ». Il faut cependant

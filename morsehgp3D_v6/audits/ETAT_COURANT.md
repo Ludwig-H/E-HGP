@@ -39,8 +39,9 @@ locales reçues avec réserves, `b79e29a5` pour la sonde équilibrée,
 `fa9b2633` pour le durcissement de reprise/revalidation, `1cb60655` pour le
 premier harnais de sonde, `fc8e28b1` puis `32da1550` pour son scellement et sa
 réagrégation renforcés,
-`4ef96717` puis `c2d2ac69` pour le lifecycle § 5.22 et `38281dc7` pour la réponse
-architecturale KeyCSR,
+`4ef96717` puis `c2d2ac69` pour le lifecycle § 5.22, `38281dc7` pour la réponse
+architecturale KeyCSR, `53610911` pour sa pré-inscription, `c5b52c9c` pour son
+durcissement et `d6888093` pour son générateur de plan déterministe,
 `9c5517c9` pour la demande G4 historique, `e8289d9a` pour son profil
 historique, `320299df` pour le reçu de
 réplication et `8ed2dea6` pour le reçu de confirmation contre-audité
@@ -75,7 +76,7 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | reçu G4 tests K10/K5 `e66cd978` | paquet intègre : 278/278 hashes, 84/84 statuts code 0 et terminés, pins reconstruits, sept résumés identiques, arrêt exact à la première tentative ; égalités de préfixe observées sur cardinalités/digests ; profil et campagne strictement non décisionnels, accusé consommé |
 | porte de préfixe `2aaa4a53` | listes K exactes, appariement par clé complète et jumeau K10 obligatoire reçus ; les pins K5 de v1 restent post hoc, tandis que v2 porte ses huit fixtures avant toute future exécution |
 | sonde équilibrée `b79e29a5` / harnais `32da1550` | reçu concret intègre et recalculable ; réagrégation après scellement, statut exact et `profil_kind` durci reçus, 21/21 scènes normales et sous `-O`, CTest 2/2 ; un faux `sha256sum` du `PATH` peut encore corrompre après le dernier contrôle, et la liaison de régime reste partielle dans argv/META, `liveness` et l'identité préfixe ; seule une nouvelle mesure réutilisable attend ces fermetures |
-| réponse KeyCSR `38281dc7` / pré-inscription `53610911` / prototype WIP | architecture conforme au GO : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; 57/57 non-`scale` hors longue matrice, matrice `uniform/400` et raccord runtime verts ; une vue peut encore échapper de `for_each_delta` appelé sur un temporaire et devient pendante, verrou `const&`/`const&&` à fermer avant le pin ; plan à six blocs accepté dans son principe, mais campagne encore fermée par ses frontières de destruction/callback, sa télémétrie asymétrique, le rejeu au commit instrumenté exact et les coutures actives de la sonde |
+| réponse KeyCSR `38281dc7` / pré-inscription durcie `c5b52c9c` / générateur `d6888093` / prototype WIP | architecture conforme au GO : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; 57/57 non-`scale` hors longue matrice, matrice `uniform/400` et raccord runtime verts ; une vue peut encore échapper de `for_each_delta` appelé sur un temporaire et devient pendante, verrou `const&`/`const&&` à fermer avant le pin ; générateur d'ordonnancement reçu, avec 210/280 runs et portes directes normales/`-O` vertes, mais sa grammaire doit refuser doublons/inconnues et signer les échauffements avant inscription CTest ; plan exécutable encore fermé par les identités, placeholders, frontières de mesure, rejeu au commit instrumenté exact et coutures actives de la sonde |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP série C | départ refusé fail-closed puis arrêté ; perte de superviseur arrêtée sans reçu ; deux relances distinctes reçues et arrêtées sur leurs générations exactes, la plus récente `2026-09-01T18:34:33.420-07:00` ; aucun GO courant |
@@ -180,6 +181,17 @@ classiques sont cumulées symétriquement ou mesurées hors de tout mur
 décisionnel. L'instrumentation peut avancer ; aucune campagne ne part avant
 le rejeu sémantique sur son commit exact et les deux coutures actives de la
 sonde `32da1550`.
+
+Le générateur `d6888093` ferme correctement le calendrier déterministe de
+cette pré-inscription : graine et PRNG rejoués, flux unique, cinq strates par
+cellule, deux échauffements et six blocs équilibrés ; les plans sans et avec
+extension comptent 210 et 280 runs. Sa porte directe passe normalement et
+sous `python3 -O`. Il est reçu comme générateur d'ordonnancement seulement.
+Avant son inscription CTest, le juge doit refuser clés dupliquées/inconnues et
+vérifier l'orientation `AB` des échauffements. Avant campagne, un manifeste
+scellé doit encore lier le plan aux copies exactes, aux commandes complètes,
+au callback résolu, aux coordonnées et à l'affinité attestée. Aucun résultat
+de performance n'existe à ce stade.
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
