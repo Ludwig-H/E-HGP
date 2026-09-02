@@ -96,16 +96,18 @@ make_fake_pilot() { # $1 = chemin, $2 = v5|v6
   local path="$1" eng="$2"
   cat > "${path}" <<EOF
 #!/usr/bin/env bash
-fam=""; n=0; seed=3; threads=8; digest=0
+fam=""; n=0; seed=3; threads=8; digest=0; smax=11
 for a in "\$@"; do
   case "\$a" in
     --family=*) fam="\${a#*=}" ;;
     --n=*) n="\${a#*=}" ;;
     --seed=*) seed="\${a#*=}" ;;
     --threads=*) threads="\${a#*=}" ;;
+    --smax=*) smax="\${a#*=}" ;;
     --digest) digest=1 ;;
   esac
 done
+kmax=\$((smax - 1))
 if [ "${eng}" = "v5" ] && [ "\${FAKE_V5_BENCH_FAIL:-0}" = "1" ] && [ "\${digest}" = "0" ]; then
   echo "erreur simulee du pilote v5"; exit 7
 fi
@@ -119,8 +121,12 @@ fi
 base=\$((n / 4))
 echo "payload=mhgp${eng#v}-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none"
 echo "backend=cpu_reference"
-echo "tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11"
-echo "famille=\${fam} n=\${n} coord=200 s=8 smax=11 seed=\${seed} threads=\${threads} emis=\${base} boules_uniques=\${base} mortes_profondeur=10 survivantes=\$((base - 10)) census_int=50 census_shell=20 evenements=\${base} facettes=\${base} fusions=10 deltas=10 noeuds=10"
+if [ "\${smax}" = "11" ]; then
+  echo "tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11"
+else
+  echo "tower_scope=prefix_k\${kmax} smax_requested=\${smax} smax_effective=\${smax} (K = 1..\${kmax}, prefixe exact de l'objet complet)"
+fi
+echo "famille=\${fam} n=\${n} coord=200 s=8 smax=\${smax} seed=\${seed} threads=\${threads} emis=\${base} boules_uniques=\${base} mortes_profondeur=10 survivantes=\$((base - 10)) census_int=50 census_shell=20 evenements=\${base} facettes=\${base} fusions=10 deltas=10 noeuds=10"
 echo "generation rect_alive=\${base}/\${base}/\${base} rect_visites_fusionnes=\${base} ancres=\${base}/\${base}/\${base} candidats=\${base}/\${base}/\${base}"
 if [ "${eng}" = "v6" ]; then
   echo "sweep tests_coeur=\${base} tests_prof_q3=\${base} tests_passe2=\${base} tri_comparaisons=\${base} seeds_passe2=\${base} racines_corde=\${base} groupes=\${base} racines_hors_corde=\${base} temoins_constants=1 rejets=lens:1/owner:1/once:1/i64:1/face:1/det:0/centre:1"
@@ -132,17 +138,22 @@ if [ "${eng}" = "v6" ]; then
   echo "ledger_paires emis=1/1/1 tues=1/1/1"
 fi
 echo "ouvriers wspd=\${threads} rects=\${threads} rle=\${threads} prefiltre=\${threads} census=\${threads} expansion=\${threads} fold=\${threads}"
-for k in 1 2 3 4 5 6 7 8 9 10; do
+for k in \$(seq 1 "\${kmax}"); do
   echo "cardinalites K=\${k} evenements=\${base} facettes=\${base} deltas=1 attachements=0 fusions=1 noeuds=1"
 done
 echo "temps_mur_ms=1234.5 (etages A et B du fold pipelines)"
 echo "temps_fold_mur_ms=100.0 (etages A et B, fold_inflight=1, pic_mesure_en_vol=1)"
 if [ "\${digest}" = "1" ]; then
   echo "digest_balls=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-  for k in 1 2 3 4 5 6 7 8 9 10; do
+  for k in \$(seq 1 "\${kmax}"); do
     echo "digest_forest_K\${k}=cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
   done
-  echo "digest_all=dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  # objet K=5 distinct de l'objet K=10 (digest different par smax)
+  if [ "\${smax}" = "11" ]; then
+    echo "digest_all=dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  else
+    echo "digest_all=5555555555555555555555555555555555555555555555555555555555555555"
+  fi
 fi
 exit 0
 EOF
@@ -728,7 +739,7 @@ check_true "mutant coordonne (canon reduit auto-declare + hash concordant) : TUE
 # porte gpu absente de l'inventaire, affinite non attestee, somme
 # d'attribution faussee.
 GATE_NAMES_C="mhgp6_device_witness mhgp6_device_witness_mutant_carry mhgp6_device_witness_mutant_skip_write mhgp6_device_witness_mutant_skip_native mhgp6_census_device mhgp6_census_device_mutant_range_le mhgp6_census_device_mutant_stack mhgp6_census_device_mutant_swap mhgp6_census_device_mutant_nonstrict mhgp6_census_device_mutant_skip_write mhgp6_census_device_mutant_nshell mhgp6_census_device_mutant_skip_count mhgp6_pilote_parite_400 mhgp6_pilote_refus_n mhgp6_pilote_lot17 mhgp6_pilote_mutant_base"
-MAT_POINTS_C="uniform:16000:2:2:0:sans uniform:16000:1:1:0:sans uniform:16000:2:2:1:avec uniform:50000:1:1:0:avec uniform:50000:2:2:0:sans"
+MAT_POINTS_C="uniform:16000:2:2:0:sans uniform:16000:1:1:0:sans uniform:16000:2:2:1:avec uniform:50000:1:1:0:avec uniform:50000:2:2:0:sans uniform:16000:2:2:0:avec:6"
 OBJET_C="uniform:50000:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
 CANON_C="${WORK}/serie_c_selftest_v1.env"
 {
@@ -840,13 +851,16 @@ run_runner_c() { # $1 = dossier out ; le reste = env supplementaire
 }
 rc=0; run_runner_c "${OUT8}" || rc=$?
 check "serie C : runner rc=0" "${rc}"
-check_true "serie C : plans matrice (15 = 5 points x 3 passages, rotation8 = rotation de 3 exacte), attrib (1), gpuv6 (3)" bash -c "
-  [ \"\$(sed -n 's/^runs=//p' '${OUT8}/matrice_plan.txt')\" = '15' ] &&
+check_true "serie C : plans matrice (18 = 6 points x 3 passages, rotation8 = rotation de 2 exacte, point K=5 nomme _s6), attrib (1), gpuv6 (3)" bash -c "
+  [ \"\$(sed -n 's/^runs=//p' '${OUT8}/matrice_plan.txt')\" = '18' ] &&
   [ \"\$(sed -n 's/^runs=//p' '${OUT8}/attrib_plan.txt')\" = '1' ] &&
   [ \"\$(sed -n 's/^runs=//p' '${OUT8}/gpuv6_plan.txt')\" = '3' ] &&
-  grep -q 'seq=11 name=mat_uniform_n50000_t1_i1_j0_avec_p3 .* passage=3 pos=1' '${OUT8}/matrice_plan.txt' &&
-  grep -q 'seq=12 name=mat_uniform_n50000_t2_i2_j0_sans_p3 .* passage=3 pos=2' '${OUT8}/matrice_plan.txt' &&
-  grep -q 'seq=13 name=mat_uniform_n16000_t2_i2_j0_sans_p3 .* passage=3 pos=3' '${OUT8}/matrice_plan.txt'"
+  grep -q 'seq=13 name=mat_uniform_n16000_t2_i2_j1_avec_p3 .* smax=11 passage=3 pos=1' '${OUT8}/matrice_plan.txt' &&
+  grep -q 'seq=14 name=mat_uniform_n50000_t1_i1_j0_avec_p3 .* passage=3 pos=2' '${OUT8}/matrice_plan.txt' &&
+  grep -q 'seq=16 name=mat_uniform_n16000_t2_i2_j0_avec_s6_p3 .* smax=6 passage=3 pos=4' '${OUT8}/matrice_plan.txt' &&
+  grep -q 'seq=18 name=mat_uniform_n16000_t1_i1_j0_sans_p3 .* passage=3 pos=6' '${OUT8}/matrice_plan.txt' &&
+  grep -q '^smax=6$' '${OUT8}/mat_uniform_n16000_t2_i2_j0_avec_s6_p1.status' &&
+  grep -q '^tower_scope=prefix_k5 smax_requested=6' '${OUT8}/mat_uniform_n16000_t2_i2_j0_avec_s6_p1.txt'"
 check_true "serie C : affinite demandee ET attestee sur un run de matrice" bash -c "
   grep -q '^affinite_demandee=' '${OUT8}/mat_uniform_n16000_t2_i2_j0_sans_p1.status' &&
   grep -q '^affinite_effective=' '${OUT8}/mat_uniform_n16000_t2_i2_j0_sans_p1.status' &&
@@ -897,7 +911,14 @@ falsify_c "serie C : affinite effective non conforme a la demande" "affinite eff
 falsify_c "serie C : somme d'attribution faussee (seuil 0.0051)" "somme imprimee != somme des neuf composantes" \
   sed -i 's/somme=0.009/somme=0.020/' attrib_uniform_n16000_t2_i2_j0.txt
 falsify_c "serie C : plan matrice altere (rotation8 recalculee)" "sequence annoncee != sequence recalculee" \
-  sed -i 's/^seq=11 name=mat_uniform_n50000_t1_i1_j0_avec_p3/seq=11 name=mat_uniform_n50000_t9_i1_j0_avec_p3/' matrice_plan.txt
+  sed -i 's/^seq=14 name=mat_uniform_n50000_t1_i1_j0_avec_p3/seq=14 name=mat_uniform_n50000_t9_i1_j0_avec_p3/' matrice_plan.txt
+# Axe smax (K=5) : statut, portee de tour et argv lies au point.
+falsify_c "axe smax : statut smax=11 sur un point K=5" "smax=11 != 6" \
+  sed -i 's/^smax=6$/smax=11/' mat_uniform_n16000_t2_i2_j0_avec_s6_p1.status
+falsify_c "axe smax : portee de tour k10 imprimee sur un point K=5" "tower_scope absente ou hors contrat (smax=6)" \
+  sed -i 's/^tower_scope=prefix_k5 smax_requested=6 smax_effective=6.*/tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11/' mat_uniform_n16000_t2_i2_j0_avec_s6_p1.txt
+falsify_c "axe smax : argv --smax=11 sur un point K=5" "argv grave != vecteur contractuel" \
+  sed -i 's/--smax=6 /--smax=11 /' mat_uniform_n16000_t2_i2_j0_avec_s6_p1.status
 falsify_c "serie C : bras sans-digest contamine par un digest" "digest imprime sur un bras sans-digest" \
   sed -i '1i digest_all=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' mat_uniform_n16000_t2_i2_j0_sans_p1.txt
 # § 5.14.4 : inventaire pre-execution, verdict du juge embarque, identite
@@ -1079,6 +1100,20 @@ est_c="$(bash -c '
 ' 2>&1)" || est_c="ECHEC:${est_c}"
 check_true "budget serie C : ESTIMATE=${est_c}s tient dans la fenetre 7h gravee (10000 <= est <= 20395)" \
   bash -c "[[ '${est_c}' =~ ^[0-9]+$ ]] && [ '${est_c}' -ge 10000 ] && [ '${est_c}' -le 20395 ]"
+# Profil de TESTS (K=10 + K=5) sous 5 h GCE / 285 min : CUTOFF=17100,
+# MARGE=2915+90+900=3905, WINDOW = 18000 - 3905 - 900 = 13195 s ;
+# plancher 6000 s (40 murs + 2 attributions + build/portes).
+TESTS_ENV="${HERE}/profils/g4_tests_v1.env"
+est_t="$(bash -c '
+  set -euo pipefail
+  '"$(sed -n '/^budget_estimate() {/,/^}$/p' "${HERE}/v6_session_lifecycle.sh")"'
+  set -a
+  # shellcheck disable=SC1090
+  source "'"${TESTS_ENV}"'"
+  budget_estimate
+' 2>&1)" || est_t="ECHEC:${est_t}"
+check_true "budget tests K10/K5 : ESTIMATE=${est_t}s tient dans la fenetre 5h gravee (6000 <= est <= 13195)" \
+  bash -c "[[ '${est_t}' =~ ^[0-9]+$ ]] && [ '${est_t}' -ge 6000 ] && [ '${est_t}' -le 13195 ]"
 
 # ---- PROFIL CANONIQUE G4 EXACT DE BOUT EN BOUT (cinquieme tour : le profil
 # etait AUTO-INVALIDANT — queue_sequence recalculait la sentinelle. Plus

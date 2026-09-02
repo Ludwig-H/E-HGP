@@ -253,14 +253,21 @@ def matrice_sequence(params, bad):
             return []
         for pos, pt in enumerate(ordered, 1):
             parts = pt.split(":")
-            if len(parts) != 6:
+            if len(parts) not in (6, 7):
                 bad.append(f"matrice_plan.txt: point mal forme {pt}")
                 return []
-            fam, n, t, i, j, d = parts
+            fam, n, t, i, j, d = parts[:6]
+            smax = parts[6] if len(parts) == 7 else "11"
+            if not re.match(r"^([2-9]|1[01])$", smax):
+                bad.append(f"matrice_plan.txt: smax hors domaine {pt}")
+                return []
+            # smax (K = smax - 1) : suffixe _s<smax> seulement hors 11 — noms
+            # des recus anterieurs inchanges.
+            sfx = "" if smax == "11" else f"_s{smax}"
             seq.append({"seq": str(len(seq) + 1),
-                        "name": f"mat_{fam}_n{n}_t{t}_i{i}_j{j}_{d}_p{pas_no}",
+                        "name": f"mat_{fam}_n{n}_t{t}_i{i}_j{j}_{d}{sfx}_p{pas_no}",
                         "family": fam, "n": n, "mat_threads": t, "inflight": i,
-                        "join": j, "digest": d, "passage": str(pas_no), "pos": str(pos)})
+                        "join": j, "digest": d, "smax": smax, "passage": str(pas_no), "pos": str(pos)})
     return seq
 
 
@@ -446,28 +453,41 @@ def check_common(out, name, commit, payload_sha, manifest_sha, threads, bad,
                       int(kb) if kb else None)
 
 
-def check_pipeline_run(name, body, fam, n, seed, engine, threads, bad):
-    """Un run de pilote (v5 ou v6) : identite, portee de tour, compteurs."""
+def check_pipeline_run(name, body, fam, n, seed, engine, threads, bad, smax="11"):
+    """Un run de pilote (v5 ou v6) : identite, portee de tour, compteurs.
+    smax != 11 (K = smax - 1) : la portee est `prefix_k<K>` a smax demande
+    = effectif — jamais le profil complet k10."""
     if body is None:
         return
     payload = "mhgp5-forests-horizontal-v1" if engine == "v5" else "mhgp6-forests-horizontal-v1"
     if f"payload={payload}" not in body:
         bad.append(f"{name}: ligne payload={payload} absente (moteur incoherent avec le nom)")
-    if not TOWER.search(body):
-        bad.append(f"{name}: ligne tower_scope absente")
+    if smax == "11":
+        tower_ok = bool(TOWER.search(body))
+    else:
+        tower_ok = bool(re.search(rf"^tower_scope=prefix_k{int(smax) - 1} smax_requested={smax} "
+                                  rf"smax_effective={smax}( |$)", body, re.M))
+    if not tower_ok:
+        bad.append(f"{name}: ligne tower_scope absente ou hors contrat (smax={smax})")
     if not COUNTERS.search(body):
         bad.append(f"{name}: ligne de compteurs absente")
     ident = IDENT.search(body)
     if not ident:
         bad.append(f"{name}: ligne d'identite absente")
     elif (ident.group(1), ident.group(2), ident.group(3), ident.group(4),
-          ident.group(5), ident.group(6)) != (fam, n, "8", "11", seed, threads):
+          ident.group(5), ident.group(6)) != (fam, n, "8", smax, seed, threads):
         bad.append(f"{name}: identite imprimee ({'/'.join(ident.groups())}) != nom du run")
+    # ENSEMBLE EXACT des K : 1..smax-1 (prefix_k<K> hors 11), chacun une fois,
+    # aucun K au-dela.
     cards = re.findall(r"^cardinalites K=(\d+) ", body, re.M)
-    for k in range(1, KMAX + 1):
+    kmax = int(smax) - 1
+    for k in range(1, kmax + 1):
         c = sum(1 for kk in cards if int(kk) == k)
         if c != 1:
             bad.append(f"{name}: cardinalites K={k} presente {c} fois (attendu 1)")
+    extra = sorted({int(kk) for kk in cards if int(kk) > kmax})
+    if extra:
+        bad.append(f"{name}: cardinalites K={extra} au-dela de K={kmax} (smax={smax})")
     if not re.search(r"^temps_mur_ms=", body, re.M):
         bad.append(f"{name}: temps_mur_ms absent")
 
@@ -753,6 +773,7 @@ def main():
     gpu_runs = gpu_sequence(gpu_params) if gpu_params else []
     frontier_runs = frontier_sequence(frontier_params) if frontier_params else []
     matrice_runs = matrice_sequence(matrice_params, bad) if matrice_params else []
+    matrice_plan_has_smax = bool(matrice_listed) and all("smax" in x for x in matrice_listed)
     attrib_runs = attrib_sequence(attrib_params, bad) if attrib_params else []
     gpuv6_runs = gpuv6_sequence(gpuv6_params) if gpuv6_params else []
     check_plan("conf_plan.txt", conf_params, conf_listed, conf_runs, bad)
@@ -941,11 +962,16 @@ def main():
         if body is None:
             continue
         check_pipeline_run(name, body, run["family"], run["n"], "3", "v6",
-                           run["mat_threads"], bad)
-        for field, want in (("family", run["family"]), ("n", run["n"]),
-                            ("mat_threads", run["mat_threads"]), ("inflight", run["inflight"]),
-                            ("join", run["join"]), ("digest", run["digest"]),
-                            ("passage", run["passage"]), ("pos", run["pos"]), ("seq", run["seq"])):
+                           run["mat_threads"], bad, smax=run["smax"])
+        champs = [("family", run["family"]), ("n", run["n"]),
+                  ("mat_threads", run["mat_threads"]), ("inflight", run["inflight"]),
+                  ("join", run["join"]), ("digest", run["digest"]),
+                  ("passage", run["passage"]), ("pos", run["pos"]), ("seq", run["seq"])]
+        # smax grave au statut des que le plan le porte (recus anterieurs :
+        # plan sans smax = 11 implicite, statut sans le champ).
+        if matrice_plan_has_smax:
+            champs.append(("smax", run["smax"]))
+        for field, want in champs:
             fm = re.search(rf"^{field}=(\S+)$", st, re.M)
             if not fm or fm.group(1) != want:
                 bad.append(f"{name}: {field}={fm.group(1) if fm else '?'} != {want} (annonce)")
@@ -983,7 +1009,7 @@ def main():
             bad.append(f"{name}: binaire de matrice ({argv[3]}) != chemin lie par le profil ({bins['matrice']})")
         # EGALITE d'argv normalisee (§ 5.16) : ni argument en plus, ni
         # duplique, ni ordre different de celui que le runner construit.
-        want_argv = argv[:4] + [f"--family={run['family']}", f"--n={run['n']}", "--s=8", "--smax=11",
+        want_argv = argv[:4] + [f"--family={run['family']}", f"--n={run['n']}", "--s=8", f"--smax={run['smax']}",
                                 "--seed=3", f"--threads={run['mat_threads']}",
                                 f"--fold-inflight={run['inflight']}", f"--fold-join={run['join']}"] \
             + (["--digest"] if run["digest"] == "avec" else [])
@@ -997,7 +1023,7 @@ def main():
             if len(digests) != 1:
                 bad.append(f"{name}: digest_all present {len(digests)} fois (attendu 1)")
             else:
-                matrice_digests.setdefault((run["family"], run["n"]), {}) \
+                matrice_digests.setdefault((run["family"], run["n"], run["smax"]), {}) \
                     .setdefault(digests[0], []).append(name)
         else:
             if "--digest" in argv:
@@ -1008,7 +1034,7 @@ def main():
             cnt = len(re.findall(pat, body, re.M))
             if cnt != 1:
                 bad.append(f"{name}: ligne invariante {pat} presente {cnt} fois (attendu 1)")
-        matrice_signatures.setdefault((run["family"], run["n"]), {}) \
+        matrice_signatures.setdefault((run["family"], run["n"], run["smax"]), {}) \
             .setdefault(thread_invariant_signature(body), []).append(name)
         matrice_rows.append((run, meas))
     for key, table in sorted(matrice_digests.items()):
@@ -1224,11 +1250,12 @@ def main():
                     # objet n'est plus vert.
                     pdig = sorted(set(re.findall(r"^repetition=\d+ .*?\bdigest_all=([0-9a-f]{64})\b", body, re.M)))
                     key = (run["family"], run["n"])
+                    key_mat = (run["family"], run["n"], "11")
                     if len(pdig) != 1:
                         bad.append(f"{name}: digest_all du pilote absent ou instable ({len(pdig)} valeurs)")
                     else:
-                        if key in matrice_digests:
-                            mdig = list(matrice_digests[key])
+                        if key_mat in matrice_digests:
+                            mdig = list(matrice_digests[key_mat])
                             if len(mdig) != 1 or mdig[0] != pdig[0]:
                                 bad.append(f"{name}: digest_all du pilote != digest_all de la matrice pour "
                                            f"{key[0]}:{key[1]} (objet different)")
@@ -1628,11 +1655,11 @@ def main():
         "# matrice_resume — murs par point pre-enregistre (contrastes fils/inflight/join/",
         "# digest ; dispersion entre passages, JAMAIS une conclusion — la decision passe",
         "# par l'arbre pre-enregistre du § 5.10 apres audit).",
-        "famille\tn\tfils\tinflight\tjoin\tdigest\tpassage\tmur_ms\tduree_s\trss_kb",
+        "famille\tn\tfils\tinflight\tjoin\tdigest\tsmax\tpassage\tmur_ms\tduree_s\trss_kb",
     ]
     for run, meas in matrice_rows:
         lines.append("\t".join([run["family"], run["n"], run["mat_threads"], run["inflight"],
-                                run["join"], run["digest"], run["passage"], fmt(meas[0]),
+                                run["join"], run["digest"], run["smax"], run["passage"], fmt(meas[0]),
                                 str(meas[1]) if meas[1] is not None else "NA",
                                 str(meas[2]) if meas[2] is not None else "NA"]))
     tmp = os.path.join(resume_dir, "matrice_resume.txt.tmp")

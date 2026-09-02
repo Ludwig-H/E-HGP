@@ -66,7 +66,8 @@ PROTOCOL_FILES=(gcp-migration/session_campagne_v6_g4.sh gcp-migration/v6_session
                 gcp-migration/v6_campaign_pin.sh gcp-migration/v6_campaign_remote.sh
                 gcp-migration/validate_v6_campaign.py gcp-migration/profils/decision_v1.env
                 gcp-migration/profils/smoke_v1.env gcp-migration/profils/g4_mesure_v1.env
-                gcp-migration/profils/g4_serie_c_v1.env morsehgp3D_v6/tests/pilote_juge.py
+                gcp-migration/profils/g4_serie_c_v1.env gcp-migration/profils/g4_tests_v1.env
+                morsehgp3D_v6/tests/pilote_juge.py
                 gcp-migration/set_max_run_duration_and_verify.sh
                 gcp-migration/start_and_verify.sh gcp-migration/stop_and_verify.sh)
 

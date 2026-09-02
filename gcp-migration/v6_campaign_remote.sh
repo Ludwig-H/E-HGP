@@ -156,8 +156,8 @@ for spec in ${FRONTIER_SPECS}; do
 done
 for pt in ${MATRICE_POINTS}; do
   [ "${pt}" = "aucun" ] && continue
-  [[ "${pt}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*:[1-9][0-9]*:[1-9][0-9]*:[01]:(avec|sans)$ ]] \
-    || refuse "point MATRICE '${pt}' mal forme (fam:n:fils:inflight:join:digest)"
+  [[ "${pt}" =~ ^[a-z][a-z0-9_]*:[1-9][0-9]*:[1-9][0-9]*:[1-9][0-9]*:[01]:(avec|sans)(:([2-9]|1[01]))?$ ]] \
+    || refuse "point MATRICE '${pt}' mal forme (fam:n:fils:inflight:join:digest[:smax])"
 done
 for pt in ${ATTRIB_POINTS}; do
   [ "${pt}" = "aucun" ] && continue
@@ -455,8 +455,12 @@ mv "${OUT_DIR}/frontier_plan.txt.tmp" "${OUT_DIR}/frontier_plan.txt"
         fam="$(echo "${pt}" | cut -d: -f1)"; N="$(echo "${pt}" | cut -d: -f2)"
         T="$(echo "${pt}" | cut -d: -f3)"; I="$(echo "${pt}" | cut -d: -f4)"
         J="$(echo "${pt}" | cut -d: -f5)"; D="$(echo "${pt}" | cut -d: -f6)"
+        S="$(echo "${pt}" | cut -d: -f7)"; S="${S:-11}"
+        # smax (K = smax - 1) : suffixe _s<smax> seulement hors 11 — les noms
+        # des recus anterieurs restent inchanges.
+        sfx=""; [ "${S}" != "11" ] && sfx="_s${S}"
         seq_no=$((seq_no + 1))
-        echo "seq=${seq_no} name=mat_${fam}_n${N}_t${T}_i${I}_j${J}_${D}_p${pas_no} family=${fam} n=${N} mat_threads=${T} inflight=${I} join=${J} digest=${D} passage=${pas_no} pos=${pos}"
+        echo "seq=${seq_no} name=mat_${fam}_n${N}_t${T}_i${I}_j${J}_${D}${sfx}_p${pas_no} family=${fam} n=${N} mat_threads=${T} inflight=${I} join=${J} digest=${D} smax=${S} passage=${pas_no} pos=${pos}"
       done <<< "${pts}"
     done
   fi
@@ -538,6 +542,7 @@ while read -r line; do
   I="$(printf '%s\n' "${line}" | sed 's/.* inflight=\([^ ]*\).*/\1/')"
   J="$(printf '%s\n' "${line}" | sed 's/.* join=\([^ ]*\).*/\1/')"
   D="$(printf '%s\n' "${line}" | sed 's/.* digest=\([^ ]*\).*/\1/')"
+  S="$(printf '%s\n' "${line}" | sed 's/.* smax=\([^ ]*\).*/\1/')"
   pas="$(printf '%s\n' "${line}" | sed 's/.* passage=\([^ ]*\).*/\1/')"
   pos="$(printf '%s\n' "${line}" | sed 's/.* pos=\([^ ]*\).*/\1/')"
   seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
@@ -552,12 +557,12 @@ while read -r line; do
     break
   fi
   aff_eff="$(taskset -c "${cpulist}" "${WRAPPER_BASH}" -c 'taskset -pc $$' 2>/dev/null | sed 's/.*: //' || echo inconnue)"
-  mat_cmd=(taskset -c "${cpulist}" "${V6_BIN}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 --seed=3 "--threads=${T}" \
+  mat_cmd=(taskset -c "${cpulist}" "${V6_BIN}" "--family=${fam}" "--n=${N}" --s=8 "--smax=${S}" --seed=3 "--threads=${T}" \
            "--fold-inflight=${I}" "--fold-join=${J}")
   if [ "${D}" = "avec" ]; then mat_cmd+=(--digest); fi
   RUN_TIMEOUT_ONE="${MATRICE_TIMEOUT}" THREADS_ONE="${T}" \
-  EXTRA_STATUS="$(printf 'family=%s\nn=%s\nmat_threads=%s\ninflight=%s\njoin=%s\ndigest=%s\npassage=%s\npos=%s\nseq=%s\naffinite_demandee=%s\naffinite_effective=%s\nbinaire_sha256=%s' \
-                  "${fam}" "${N}" "${T}" "${I}" "${J}" "${D}" "${pas}" "${pos}" "${seq_no}" "${cpulist}" "${aff_eff}" "${V6_BIN_SHA}")" \
+  EXTRA_STATUS="$(printf 'family=%s\nn=%s\nmat_threads=%s\ninflight=%s\njoin=%s\ndigest=%s\nsmax=%s\npassage=%s\npos=%s\nseq=%s\naffinite_demandee=%s\naffinite_effective=%s\nbinaire_sha256=%s' \
+                  "${fam}" "${N}" "${T}" "${I}" "${J}" "${D}" "${S}" "${pas}" "${pos}" "${seq_no}" "${cpulist}" "${aff_eff}" "${V6_BIN_SHA}")" \
     run_one "${name}" matrice_cpu "${mat_cmd[@]}"
   last_code="$(sed -n 's/^code=//p' "${OUT_DIR}/${name}.status" | head -n 1)"
   if [ "${last_code:-1}" != "0" ]; then

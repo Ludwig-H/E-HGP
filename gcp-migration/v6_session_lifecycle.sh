@@ -57,6 +57,7 @@ PROTOCOL_FILES=(
   gcp-migration/profils/smoke_v1.env
   gcp-migration/profils/g4_mesure_v1.env
   gcp-migration/profils/g4_serie_c_v1.env
+  gcp-migration/profils/g4_tests_v1.env
   morsehgp3D_v6/tests/pilote_juge.py
   gcp-migration/set_max_run_duration_and_verify.sh
   gcp-migration/start_and_verify.sh
