@@ -62,6 +62,7 @@ PROTOCOL_FILES=(
   gcp-migration/set_max_run_duration_and_verify.sh
   gcp-migration/start_and_verify.sh
   gcp-migration/stop_and_verify.sh
+  gcp-migration/recover_v6_session.sh
 )
 {
   echo "schema=e-hgp.protocol-manifest.v1"
@@ -239,10 +240,21 @@ RAPATRIEMENT_MARGE_S=$(( POST_BUDGET_S + 60 + GRACE_S + (MAX_RUN_SECONDS - EFFEC
   exit 2
 }
 
+# REPRISE PERSISTANTE (§ 5.18.6) : WORK vit dans une base 0700 persistante
+# (bootstrap) ; tout ecrit de la session est prive (umask 077) ; le
+# materiel de reprise (session.env, superviseur.pid, marques/) est publie
+# AVANT toute mutation pour qu'un second processus puisse conclure sans
+# jamais redemarrer la VM.
+umask 077
+[ ! -L "${WORK}" ] && [ -d "${WORK}" ] && [ "$(stat -c '%a %u' "${WORK}")" = "700 $(id -u)" ] \
+  || { echo "REFUS : WORK (${WORK}) doit etre un repertoire 0700 non symbolique du proprietaire" >&2; exit 2; }
 HANDOFF="${WORK}/handoff.json"
 STATE_FILE="${WORK}/etat_cycle_vie"
 LOG="${WORK}/session.log"
 PROFILE="${WORK}/profil_campagne.txt"
+MARKS_DIR="${WORK}/marques"
+PID_FILE="${WORK}/superviseur.pid"
+SESSION_ENV="${WORK}/session.env"
 : > "${LOG}"
 DURABLE_RECEIPT_BASE="${DURABLE_RECEIPT_BASE:?DURABLE_RECEIPT_BASE requis (recu durable obligatoire)}"
 DURABLE_RECEIPT_PREFIX="${DURABLE_RECEIPT_PREFIX:?DURABLE_RECEIPT_PREFIX requis}"
@@ -426,8 +438,10 @@ finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu CO
         "${SOURCE_COMMIT}" "${SOURCE_PAYLOAD_SHA256}" "${PROTOCOL_MANIFEST_SHA256}"
       printf 'max_run_seconds=%s guest_shutdown_minutes=%s\n' "${MAX_RUN_SECONDS}" "${GUEST_SHUTDOWN_MINUTES}"
       printf 'etat_cycle_vie=%s\n' "$(state_field state)"
+      printf 'marques=%s\n' "$(ls "${MARKS_DIR}" 2>/dev/null | tr '\n' ' ')"
       printf 'date_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     } > "${tmp}/RECU_SESSION.txt" &&
+    { [ ! -d "${MARKS_DIR}" ] || cp -r "${MARKS_DIR}" "${tmp}/marques"; } &&
     cp -f "${LOG}" "${tmp}/session.log" &&
     { [ ! -f "${PROFILE}" ] || cp -f "${PROFILE}" "${tmp}/profil_campagne.txt"; } &&
     { [ ! -f "${WORK}/validation.txt" ] || cp -f "${WORK}/validation.txt" "${tmp}/validation.txt"; } &&
@@ -443,7 +457,18 @@ finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu CO
       && sha256sum -c --quiet SHA256SUMS >/dev/null ) &&
     mv -Tn "${tmp}" "${dir}" &&
     [ ! -e "${tmp}" ] &&
-    sync
+    sync &&
+    {
+      # Temoin de session CONCLUE (la reprise refuse) seulement si l'arret
+      # est certifie au registre ; alors les credentials copies dans le WORK
+      # persistant (gcloud, cle privee) sont detruits — le .pub reste.
+      if [ "$(state_field state)" = "targeted_stopped" ]; then
+        printf '%s\n' "${dir}" > "${WORK}/recu_publie"
+        rm -rf "${WORK}/gcloud-config"
+        [ ! -f "${WORK}/ssh/id_ed25519" ] || shred -u "${WORK}/ssh/id_ed25519" 2>/dev/null || rm -f "${WORK}/ssh/id_ed25519"
+      fi
+      true
+    }
   } 2>/dev/null
 }
 cleanup() {
@@ -631,6 +656,42 @@ trap cleanup EXIT
 trap 'exit 129' HUP
 trap 'exit 130' INT
 trap 'exit 143' TERM
+
+# ---- MATERIEL DE REPRISE (§ 5.18.6), AVANT toute commande gcloud mutante :
+# session.env (cible, pin, budgets, chemins — alphabet strict, parse par un
+# lecteur dedie, jamais `source`), superviseur.pid (pid + starttime +
+# boot_id : un pid recycle ne passe pas pour vivant), marques/ 0700.
+publish_session_env() {
+  local tmp="${SESSION_ENV}.tmp.$$"
+  {
+    echo "schema=e-hgp.session-env.v1"
+    echo "REPO_ROOT=${MHGP6_BOOTSTRAP_REPO_ROOT:-${PWD}}"
+    echo "GCP_PROJECT_ID=${GCP_PROJECT_ID}"
+    echo "GCP_ZONE=${GCP_ZONE}"
+    echo "GCP_INSTANCE_NAME=${GCP_INSTANCE_NAME}"
+    echo "GUARDS_DIR=${GUARDS_DIR}"
+    echo "SOURCE_COMMIT=${SOURCE_COMMIT}"
+    echo "SOURCE_PAYLOAD_SHA256=${SOURCE_PAYLOAD_SHA256}"
+    echo "PROTOCOL_MANIFEST_SHA256=${PROTOCOL_MANIFEST_SHA256}"
+    echo "DURABLE_RECEIPT_BASE=${DURABLE_RECEIPT_BASE}"
+    echo "DURABLE_RECEIPT_PREFIX=${DURABLE_RECEIPT_PREFIX}"
+    echo "MAX_RUN_SECONDS=${MAX_RUN_SECONDS}"
+    echo "GUEST_SHUTDOWN_MINUTES=${GUEST_SHUTDOWN_MINUTES}"
+    echo "EFFECTIVE_CUTOFF_S=${EFFECTIVE_CUTOFF_S}"
+    echo "GRACE_S=${GRACE_S}"
+    echo "SCP_STEP_TIMEOUT_S=${SCP_STEP_TIMEOUT_S}"
+    echo "DESCRIBE_TIMEOUT_S=${DESCRIBE_TIMEOUT_S}"
+    echo "STOP_RESERVE_S=${STOP_RESERVE_S}"
+    echo "VALIDATOR_TIMEOUT_S=${VALIDATOR_TIMEOUT_S}"
+    echo "CAMPAIGN_PROFILE=${CAMPAIGN_PROFILE}"
+    echo "EFFECTIVE_PROFILE=${EFFECTIVE_PROFILE}"
+    echo "GCP_SSH_KEY_EXPIRATION_UTC=${GCP_SSH_KEY_EXPIRATION_UTC:-}"
+    echo "REMOTE_DIR=${REMOTE_DIR:-}"
+  } > "${tmp}" && sync -f "${tmp}" 2>/dev/null; mv -f "${tmp}" "${SESSION_ENV}"
+}
+mkdir -m 0700 -p "${MARKS_DIR}"
+publish_session_env
+printf '%s %s %s\n' "$$" "$(awk '{print $22}' /proc/$$/stat)" "$(cat /proc/sys/kernel/random/boot_id)" > "${PID_FILE}"
 
 # CONFIGURATION GCLOUD PRIVEE a la session (audit deuxieme tour : aucune
 # mutation de la configuration partagee) — copie de la configuration
@@ -859,6 +920,7 @@ GCP_SSH_KEY_EXPIRATION_UTC="$(python3 -c "from datetime import datetime,timedelt
 export GCP_SSH_KEY_EXPIRATION_UTC
 gcloud compute os-login ssh-keys add --key-file="${GCP_SSH_KEY_FILE}.pub" --ttl="${SSH_TTL_MIN}m" \
   --project="${GCP_PROJECT_ID}" >/dev/null
+publish_session_env
 
 # ---- 3. Demarrage garde (epingle), temoin de mutation durable, handoff
 # atomique. Le retour est CAPTURE : quel qu'il soit, cleanup decide via la
@@ -868,7 +930,8 @@ set +e
 "${GUARDS_DIR}/start_and_verify.sh" --yes \
   --guest-shutdown-minutes "${GUEST_SHUTDOWN_MINUTES}" \
   --handoff-file "${HANDOFF}" \
-  --lifecycle-state-file "${STATE_FILE}" 2>&1 | tee -a "${LOG}"
+  --lifecycle-state-file "${STATE_FILE}" \
+  --guard-mark-dir "${MARKS_DIR}" 2>&1 | tee -a "${LOG}"
 START_RC=${PIPESTATUS[0]}
 set -e
 if [ "${START_RC}" -ne 0 ]; then
@@ -927,6 +990,7 @@ SCP=(gcloud compute scp --project="${GCP_PROJECT_ID}" --zone="${GCP_ZONE}"
 # Chemins distants propres a (pin, generation) — jamais reutilises (P1).
 REMOTE_TAG="${SOURCE_COMMIT:0:12}_${GEN_EPOCH}"
 REMOTE_DIR="v6camp_${REMOTE_TAG}"
+publish_session_env  # le repertoire distant devient connu de la reprise
 REMOTE_BUNDLE="/tmp/v6bundle_${REMOTE_TAG}.tgz"
 
 # ---- 4a. HANDSHAKE NON MUTANT (audit deuxieme tour) : un premier SSH qui

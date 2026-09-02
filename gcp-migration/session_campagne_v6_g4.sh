@@ -31,8 +31,27 @@ if [ -z "${MHGP6_BOOTSTRAP_STAGE2:-}" ]; then
     || { echo "REFUS : ${REPO_ROOT} n'est pas un depot git" >&2; exit 2; }
   SOURCE_COMMIT="$(git -C "${REPO_ROOT}" rev-parse --verify "${MHGP6_BOOTSTRAP_COMMIT:-HEAD}^{commit}" 2>/dev/null)" \
     || { echo "REFUS : commit impose irresoluble (${MHGP6_BOOTSTRAP_COMMIT:-HEAD})" >&2; exit 2; }
-  WORK="$(mktemp -d /tmp/ehgp-v6session.XXXXXXXX)"
+  # BASE PERSISTANTE 0700 (§ 5.18.6) : WORK, cle, registre, handoff et
+  # artefacts survivent au conteneur (le volume du checkout, pas /tmp ni
+  # l'overlay) ; mkdir -m 0700 AVANT tout ecrit, jamais un lien symbolique,
+  # meme peripherique que le depot pour la base par defaut. Materialisation
+  # en STAGING puis mv : un bootstrap refuse ne laisse aucun residu.
+  SESSION_BASE="${MHGP6_SESSION_BASE:-$(dirname "${REPO_ROOT}")/.ehgp-sessions}"
+  [ ! -L "${SESSION_BASE}" ] || { echo "REFUS : base de sessions symbolique (${SESSION_BASE})" >&2; exit 2; }
+  [ -d "${SESSION_BASE}" ] || mkdir -m 0700 "${SESSION_BASE}"
+  [ "$(stat -c '%a %u' "${SESSION_BASE}")" = "700 $(id -u)" ] \
+    || { echo "REFUS : ${SESSION_BASE} doit etre 0700 et appartenir a $(id -u)" >&2; exit 2; }
+  if [ -z "${MHGP6_SESSION_BASE:-}" ] && [ "$(stat -c %d "${SESSION_BASE}")" != "$(stat -c %d "${REPO_ROOT}")" ]; then
+    echo "REFUS : base de sessions hors du volume du depot (non persistante)" >&2; exit 2
+  fi
+  umask 077
+  STAGING="$(mktemp -d "${SESSION_BASE}/.staging.XXXXXXXX")"
+  WORK="${SESSION_BASE}/v6session.$(date -u +%Y%m%dT%H%M%SZ).${STAGING##*.}"
   echo "session dans ${WORK} (racine ${REPO_ROOT}, commit ${SOURCE_COMMIT})"
+  echo "reprise apres perte du superviseur : git -C ${REPO_ROOT} show ${SOURCE_COMMIT}:gcp-migration/recover_v6_session.sh > /tmp/rec.sh && bash /tmp/rec.sh ${WORK}"
+  _boot_refus() { rm -rf "${STAGING}"; }
+  trap _boot_refus EXIT
+  WORK_FINAL="${WORK}"; WORK="${STAGING}"
   git -C "${REPO_ROOT}" show "${SOURCE_COMMIT}:gcp-migration/session_campagne_v6_g4.sh" > "${WORK}/bootstrap.sh"
   git -C "${REPO_ROOT}" show "${SOURCE_COMMIT}:gcp-migration/v6_campaign_pin.sh" > "${WORK}/pin.sh"
   chmod +x "${WORK}/bootstrap.sh" "${WORK}/pin.sh"
@@ -42,6 +61,11 @@ if [ -z "${MHGP6_BOOTSTRAP_STAGE2:-}" ]; then
     echo "REFUS : le bootstrap execute (${SELF_SHA}) differe de la version du commit (${PINNED_SHA}) — committer d'abord ou passer par le point d'entree de confiance" >&2
     exit 2
   fi
+  # Identite prouvee : promotion du staging vers WORK (mv atomique dans la
+  # meme base), puis le trap de refus est leve.
+  mv -Tn "${STAGING}" "${WORK_FINAL}" || { echo "REFUS : promotion du staging impossible" >&2; exit 2; }
+  trap - EXIT
+  WORK="${WORK_FINAL}"
   MHGP6_BOOTSTRAP_STAGE2=1 MHGP6_BOOTSTRAP_WORK="${WORK}" \
     MHGP6_BOOTSTRAP_COMMIT="${SOURCE_COMMIT}" MHGP6_BOOTSTRAP_REPO_ROOT="${REPO_ROOT}" \
     exec bash "${WORK}/bootstrap.sh"
@@ -86,4 +110,7 @@ export MHGP6_LIFECYCLE_GUARDS_DIR="${WORK}/pinned/gcp-migration"
 export MHGP6_LIFECYCLE_SOURCE_COMMIT="${SOURCE_COMMIT}"
 export MHGP6_LIFECYCLE_PAYLOAD_SHA256="${SOURCE_PAYLOAD_SHA256}"
 export MHGP6_LIFECYCLE_MANIFEST_SHA256="${PROTOCOL_MANIFEST_SHA256}"
-exec bash "${WORK}/pinned/gcp-migration/v6_session_lifecycle.sh"
+# setsid -w : le cycle de vie forme sa PROPRE session de processus (la
+# reprise refuse tant qu'un processus de cette session vit ; le selftest tue
+# la session entiere) ; -w attend le fils pour rendre son code.
+exec setsid -w bash "${WORK}/pinned/gcp-migration/v6_session_lifecycle.sh"

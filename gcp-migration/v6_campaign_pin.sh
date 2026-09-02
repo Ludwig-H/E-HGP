@@ -39,6 +39,7 @@ PROTOCOL_FILES=(
   gcp-migration/set_max_run_duration_and_verify.sh
   gcp-migration/start_and_verify.sh
   gcp-migration/stop_and_verify.sh
+  gcp-migration/recover_v6_session.sh
 )
 
 # `morsehgp3D_v5/audits` et `morsehgp3D_v6/audits` sont les canaux

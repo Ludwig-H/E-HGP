@@ -44,6 +44,7 @@ PROTOCOL_FILES = [
     "gcp-migration/set_max_run_duration_and_verify.sh",
     "gcp-migration/start_and_verify.sh",
     "gcp-migration/stop_and_verify.sh",
+    "gcp-migration/recover_v6_session.sh",
 ]
 
 FAKE_SET_MAX = """#!/usr/bin/env bash
@@ -99,6 +100,7 @@ class V6LifecycleIntegrationTests(unittest.TestCase):
         work = self.tmp / "work"
         (work / "pinned" / "gcp-migration" / "profils").mkdir(parents=True)
         (work / "pinned" / "morsehgp3D_v6" / "tests").mkdir(parents=True)
+        work.chmod(0o700)  # § 5.18.6 : WORK 0700 exige par le cycle de vie
         for name in PROTOCOL_FILES:
             destination = work / "pinned" / name
             shutil.copy(ROOT / name, destination)
@@ -186,6 +188,17 @@ class V6LifecycleIntegrationTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         handoff = work / "handoff.json"
         self.assertTrue(handoff.exists(), result.stdout)
+        # § 5.18.6 : le VRAI garde publie les deux marques de reprise,
+        # distinctes, avec la generation exacte, dans marques/ (0700).
+        marks = work / "marques"
+        for mark in ("guest_guard_pending", "double_guard_verified"):
+            text = (marks / mark).read_text(encoding="utf-8")
+            self.assertIn("schema=e-hgp.guard-mark.v1", text, mark)
+            self.assertIn(f"mark={mark}", text)
+            self.assertIn(f"generation={self.last_start_timestamp}", text, mark)
+        self.assertEqual(oct((marks.stat().st_mode & 0o777)), oct(0o700))
+        self.assertTrue((work / "session.env").exists())
+        self.assertTrue((work / "superviseur.pid").exists())
         state = (work / "etat_cycle_vie").read_text(encoding="utf-8")
         self.assertIn("schema=e-hgp.lifecycle-state.v1", state)
         self.assertIn("state=targeted_stopped", state)

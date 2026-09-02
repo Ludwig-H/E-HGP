@@ -104,3 +104,22 @@ protocole G4 v6 (`gcp-migration/session_campagne_v6_g4.sh` : conformité
 v5≡v6 à 50 000, bench apparié ABBA sans digest, queue stationnaire) a son
 selftest transactionnel à faux pilotes (`selftest_campagne_v6.sh`, à lancer
 à la main avant toute session payante).
+
+Reprise persistante (audit série C § 5.18.6, `selftest_cycle_vie_v6.sh`) :
+le bootstrap matérialise `WORK` dans une base 0700 persistante sur le
+volume du dépôt (`/workspaces/.ehgp-sessions`, jamais `/tmp`), le cycle de
+vie s'exécute en session de processus propre (`setsid`) et publie avant
+toute mutation `session.env`, `superviseur.pid` (pid + starttime +
+boot_id) et `marques/` ; le garde `start_and_verify.sh` y publie deux
+marques exclusives et distinctes — `guest_guard_pending` (génération
+certifiée par la garde GCE) puis `double_guard_verified` (armement invité
+relu). `recover_v6_session.sh` (épinglé, deux étages ré-authentifiés par
+`git show`) ne démarre JAMAIS la VM : superviseur vivant → refus ;
+registre `targeted_stopped` → rien ; sans seconde marque → arrêt immédiat
+sur la génération exacte ; avec → scp bornée, un STOP, validateur épinglé,
+classification FORCÉE `partiel_ou_invalide`, reçu `…_reprise_<epoch>`
+jamais une décision ; génération inconnue → blocage 71 avec la commande à
+lancer à la main. Scénarios : SIGKILL de toute la session après le
+handshake puis reprise (R1), superviseur vivant refusé (R2), tué entre les
+deux marques (R3), mutants génération discordante / copie épinglée altérée
+/ cible discordante / pid recyclé (R4), scp en échec (R5), base 755 refusée.

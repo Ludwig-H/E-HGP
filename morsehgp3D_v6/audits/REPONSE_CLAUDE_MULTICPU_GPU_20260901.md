@@ -669,3 +669,73 @@ le levier utile est la suppression des matérialisations globales par lot
 Preuves au HEAD de cette note : selftest campagne 127/127, cycle de vie
 56/56, sûreté GCP 81/81, portes juge/profil 5/5, suite `gate` v6 rejouée.
 GCP non utilisé par cette livraison.
+
+## 10. Reprise persistante après perte du superviseur (§ 5.18.6) — livrée et falsifiée
+
+Conception et contre-lecture préalables par workflow (trois cartographies,
+un architecte, deux sceptiques), puis implémentation :
+
+- **Base persistante 0700** : le bootstrap matérialise `WORK` dans
+  `$(dirname REPO_ROOT)/.ehgp-sessions` (= `/workspaces/.ehgp-sessions`,
+  même volume que le checkout — contrôle `stat %d`, refus d'un lien
+  symbolique ou d'une base non 0700 ; `MHGP6_SESSION_BASE` pour les
+  harnais), en staging puis `mv` (un bootstrap refusé ne laisse rien),
+  `umask 077`, et exécute le cycle de vie sous `setsid -w` (session de
+  processus propre). Le cycle de vie exige `WORK` 0700 et publie AVANT
+  toute mutation `session.env` (cible, pin, budgets, chemins, `GUARDS_DIR`,
+  expiration de clé, répertoire distant — alphabets stricts, jamais
+  `source`), `superviseur.pid` (pid + starttime + boot_id) et `marques/`.
+- **Deux marques distinctes publiées par le GARDE** (`--guard-mark-dir`,
+  création exclusive, jamais réécrites, schéma `e-hgp.guard-mark.v1`) :
+  `guest_guard_pending` juste après `targeted_running` (génération
+  certifiée par la garde GCE), `double_guard_verified` après l'armement
+  invité relu et la garde GCE recertifiée. Le dict du handoff et le
+  registre du garde sont intacts (`test_gcp_safety` 81/81 ; l'intégration
+  avec le VRAI garde atteste les deux marques et la génération).
+- **`recover_v6_session.sh`** (15ᵉ fichier épinglé, deux étages
+  ré-authentifiés contre `git show <commit>` — lui-même ET la copie
+  épinglée, puis chaque fichier épinglé utilisé) : ne démarre JAMAIS la
+  VM ; refuse si un processus de la session vit (pid+starttime+boot_id, ou
+  tout processus d'une AUTRE session référençant `WORK`) ou si la session
+  est conclue (`recu_publie`) ; toutes les sources de génération présentes
+  (registre strict, handoff, marques) doivent concorder et viser la cible
+  de `session.env`, sinon blocage 71 sans appel ; registre
+  `targeted_stopped` → rien ; sans seconde marque → `stop_and_verify`
+  immédiat sur la génération exacte, aucune scp ; avec → describe, scp
+  bornée seulement si `RUNNING`, clé non expirée et fenêtre ouverte
+  (`scp_worst_case` + cutoff effectif), UN STOP, validateur ÉPINGLÉ borné,
+  classification FORCÉE `partiel_ou_invalide` ; génération inconnue →
+  blocage 71 avec le describe exécuté en lecture seule et la commande
+  d'arrêt à copier ; reçu `<prefix>_<gen_epoch>_reprise_<epoch>`
+  (`reprise=1`, `classification`, `decision=aucune`, `scp_rc`,
+  `validate_rc`, marques, journaux non tronqués, résidus `.partial`
+  listés), témoin `recu_publie` et purge des credentials (`gcloud-config`,
+  clé privée) seulement sur registre `targeted_stopped` ; un arrêt en
+  échec rend 70, laisse le registre `targeted_stop_failed` et permet une
+  seconde reprise. `revalidate_v6_receipt.sh` refuse tout reçu `reprise_*`.
+- **Écarts assumés** : l'arrêt précède le validateur local (la VM ne sert
+  plus après le scp, moins de facturation) ; sans génération la reprise
+  BLOQUE au lieu d'arrêter — jamais un arrêt aveugle, la couverture est
+  `maxRunDuration` déjà vérifié.
+- **Selftest** (`selftest_cycle_vie_v6.sh`, copies épinglées tirées du
+  COMMIT d'un clone pour que la ré-authentification soit réelle) : R2
+  superviseur vivant → refus ; R1 SIGKILL de toute la session après le
+  handshake (`pkill -s`, plus aucun processus référençant `WORK`) puis
+  reprise : 0 SETMAX/START/ssh, 1 scp partielle, 1 STOP exact, validateur
+  épinglé `partial_or_failed`, reçu complet, registre `targeted_stopped`,
+  credentials purgés, seconde reprise refusée ; R3 tué entre les deux
+  marques → arrêt immédiat sans scp ; R4 mutants (génération discordante
+  → 71, copie épinglée altérée → 2 avant tout appel, cible discordante →
+  71, pid recyclé → la reprise procède) ; R5 scp en échec → STOP quand
+  même, `scp_rc=1` ; R6 arrêt en échec → 70, `targeted_stop_failed`,
+  aucun témoin ni purge, seconde reprise certifiée ; base 755 → refus.
+  Le harnais a révélé et tué un vrai bug de sûreté de la reprise : après
+  `cmd | tee || true`, `PIPESTATUS[0]` était celui de `true` — un
+  `stop_and_verify` en échec aurait été publié `targeted_stopped` ; les
+  codes sont désormais lus sous `set +e` comme dans le cycle de vie.
+- **Persistance de la base** : `/workspaces` (loop persistant du
+  Codespace) porte le checkout et `.ehgp-session-logs/`, qui a survécu au
+  redémarrage du 1ᵉʳ septembre là où `/tmp` a été perdu ; le contrôle
+  « même périphérique que le dépôt » est gravé au bootstrap.
+
+GCP non utilisé par cette livraison.

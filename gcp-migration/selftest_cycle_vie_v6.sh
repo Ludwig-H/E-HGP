@@ -69,7 +69,8 @@ PROTOCOL_FILES=(gcp-migration/session_campagne_v6_g4.sh gcp-migration/v6_session
                 gcp-migration/profils/g4_serie_c_v1.env gcp-migration/profils/g4_tests_v1.env
                 morsehgp3D_v6/tests/pilote_juge.py
                 gcp-migration/set_max_run_duration_and_verify.sh
-                gcp-migration/start_and_verify.sh gcp-migration/stop_and_verify.sh)
+                gcp-migration/start_and_verify.sh gcp-migration/stop_and_verify.sh
+                gcp-migration/recover_v6_session.sh)
 
 # ---- Faux gcloud (PATH) : describe rend la generation ; ssh n1 = handshake
 # boot_id seul, n2 = build (portes), n3 = campagne ; scp materialise out/.
@@ -77,9 +78,11 @@ make_fake_bin() { # $1 = dossier
   cat > "$1/gcloud" <<'EOF'
 #!/usr/bin/env bash
 echo "GCLOUD $*" >> "${FAKE_CALLS}"
+echo "CLOUDSDK ${CLOUDSDK_CONFIG:-aucun}" >> "${FAKE_CALLS}"
 case "$*" in
   *"instances describe"*)
     if [ "${FAKE_DESCRIBE_HANG:-0}" = "1" ]; then sleep 3600; fi
+    case "$*" in *"value(status,lastStartTimestamp)"*) printf 'RUNNING\t%s\n' "${FAKE_GEN}"; exit 0 ;; esac
     echo "${FAKE_GEN}"; exit 0 ;;
   *"compute ssh"*)
     n=$(grep -c "compute ssh" "${FAKE_CALLS}" || true)
@@ -90,6 +93,9 @@ case "$*" in
     if [ "${n}" -eq 2 ]; then
       if [ "${FAKE_SSH_MODE:-ok}" = "build_fail" ]; then echo "build casse" >&2; exit 1; fi
       if [ "${FAKE_SSH_MODE:-ok}" = "build_lent" ]; then sleep "${FAKE_BUILD_SLEEP_S:-90}"; fi
+      # build_bloque (§ 5.18.6) : le build ne rend jamais la main — le
+      # selftest tue toute la session du superviseur pendant ce blocage.
+      if [ "${FAKE_SSH_MODE:-ok}" = "build_bloque" ]; then echo "$$" > "${FAKE_SSH_BLOQUE_PID:-/dev/null}"; sleep 3600; exit 1; fi
       # UN bloc par format de resume CTest (<=4.3 et 4.4+) : le parseur des
       # portes doit accepter les deux (refus du 1er septembre).
       echo "100% tests passed, 0 tests failed out of 45"
@@ -114,6 +120,10 @@ case "$*" in
     exit 0
     ;;
   *"compute scp"*)
+    case "${FAKE_SCP_MODE:-ok}" in
+      echec) exit 1 ;;
+      partiel) mkdir -p "${FAKE_SCP_DEST}/out"; echo "partiel" > "${FAKE_SCP_DEST}/out/bench_resume.txt"; exit 0 ;;
+    esac
     mkdir -p "${FAKE_SCP_DEST}/out"
     exit 0
     ;;
@@ -134,14 +144,21 @@ EOF
   cat > "$1/start_and_verify.sh" <<'EOF'
 #!/usr/bin/env bash
 echo "START $*" >> "${FAKE_CALLS}"
-handoff=""; state=""
+handoff=""; state=""; marks=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --handoff-file) handoff="$2"; shift 2 ;;
     --lifecycle-state-file) state="$2"; shift 2 ;;
+    --guard-mark-dir) marks="$2"; shift 2 ;;
     *) shift ;;
   esac
 done
+write_mark() { # $1 = nom, $2 = generation (marque O_EXCL : jamais reecrite)
+  [ -n "${marks}" ] || return 0
+  [ ! -e "${marks}/$1" ] || return 1
+  printf 'schema=e-hgp.guard-mark.v1\nmark=%s\nproject=%s\nzone=%s\ninstance=%s\ngeneration=%s\nmax_run_seconds=%s\nguest_shutdown_minutes=%s\ndate_utc=%s\n' \
+    "$1" "${GCP_PROJECT_ID}" "${GCP_ZONE}" "${GCP_INSTANCE_NAME}" "$2" "${FAKE_MAX_RUN:-28800}" "470" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "${marks}/$1"
+}
 write_state() { # $1 = etat, $2 = generation
   printf 'schema=e-hgp.lifecycle-state.v1\nstate=%s\nproject=%s\nzone=%s\ninstance=%s\ngeneration=%s\n' \
     "$1" "${GCP_PROJECT_ID}" "${GCP_ZONE}" "${GCP_INSTANCE_NAME}" "$2" > "${state}"
@@ -169,7 +186,13 @@ case "${FAKE_START_MODE:-ok}" in
       write_state targeted_stop_failed "${FAKE_GEN}"
     fi
     exit 6 ;;
-  ok) write_state targeted_running "${FAKE_GEN}"; write_handoff "${FAKE_GEN}"; exit 0 ;;
+  ok_bloque)
+    # § 5.18.6 : la premiere marque est publiee puis le garde ne rend jamais
+    # la main (armement invite « en cours ») — la seconde marque n'existe
+    # pas quand le superviseur est tue.
+    write_handoff "${FAKE_GEN}"; write_state targeted_running "${FAKE_GEN}"; write_mark guest_guard_pending "${FAKE_GEN}"
+    echo "$$" > "${FAKE_START_BLOQUE_PID:-/dev/null}"; sleep 3600; exit 1 ;;
+  ok) write_handoff "${FAKE_GEN}"; write_state targeted_running "${FAKE_GEN}"; write_mark guest_guard_pending "${FAKE_GEN}"; write_mark double_guard_verified "${FAKE_GEN}"; exit 0 ;;
 esac
 EOF
   cat > "$1/stop_and_verify.sh" <<'EOF'
@@ -195,16 +218,26 @@ EOF
 # dossier separe, recu durable dans le scenario.
 # run_scenario START_MODE [SSH_MODE] [STOP_RC] [MAX_RUN]
 SCENARIO_DIR=""
-run_scenario() {
+SCEN_W=""; SCEN_COMMIT=""; SCEN_PAYLOAD=""; SCEN_MANIFEST=""
+# prepare_scenario : tout sauf le lancement. PIN_SOURCE=clone => les copies
+# epinglees viennent de `git show CLONE_COMMIT:` (commit REEL des fichiers
+# courants) : indispensable a la reprise, qui se re-authentifie contre le
+# commit ; sinon copies du worktree et commit factice.
+prepare_scenario() {
   local start_mode="$1" ssh_mode="${2:-ok}" stop_rc="${3:-0}" max_run="${4:-28800}"
   SCENARIO_DIR="$(mktemp -d "${BASE}/scenario.XXXXXX")"
   local W="${SCENARIO_DIR}/work"
   mkdir -p "${W}/pinned/gcp-migration/profils" "${W}/pinned/morsehgp3D_v6/tests" \
            "${SCENARIO_DIR}/bin" "${SCENARIO_DIR}/guards" "${SCENARIO_DIR}/recu"
+  chmod 700 "${W}"  # § 5.18.6 : WORK 0700 exige par le cycle de vie
   make_fake_bin "${SCENARIO_DIR}/bin"
   make_fake_guards "${SCENARIO_DIR}/guards"
   for f in "${PROTOCOL_FILES[@]}"; do
-    cp "${ROOT}/${f}" "${W}/pinned/${f}"
+    if [ "${PIN_SOURCE:-worktree}" = "clone" ]; then
+      git -C "${CLONE}" show "${CLONE_COMMIT}:${f}" > "${W}/pinned/${f}"; chmod +x "${W}/pinned/${f}"
+    else
+      cp "${ROOT}/${f}" "${W}/pinned/${f}"
+    fi
   done
   if [ "${FAKE_VALIDATOR_STUB:-0}" = "1" ]; then
     # Substitue AVANT le calcul du manifeste (la copie epinglee reste donc
@@ -214,6 +247,7 @@ run_scenario() {
   fi
   echo "bundle factice" > "${W}/bundle.tgz"
   local payload_sha commit="0000000000000000000000000000000000000000"
+  [ "${PIN_SOURCE:-worktree}" != "clone" ] || commit="${CLONE_COMMIT}"
   payload_sha="$(sha256sum "${W}/bundle.tgz" | awk '{print $1}')"
   {
     echo "schema=e-hgp.protocol-manifest.v1"
@@ -231,18 +265,80 @@ run_scenario() {
   : > "${FAKE_CALLS}"
   export FAKE_GEN FAKE_SCP_DEST="${W}" FAKE_LOG_A_VERROUILLER="${W}/session.log"
   export FAKE_STATE_CIBLE="${W}/etat_cycle_vie"
-  local rc=0
+  export FAKE_SSH_BLOQUE_PID="${SCENARIO_DIR}/ssh_bloque.pid" FAKE_START_BLOQUE_PID="${SCENARIO_DIR}/start_bloque.pid"
+  export FAKE_MAX_RUN="${max_run}"
+  SCEN_W="${W}"; SCEN_COMMIT="${commit}"; SCEN_PAYLOAD="${payload_sha}"; SCEN_MANIFEST="${manifest_sha}"
+  SCEN_START_MODE="${start_mode}"; SCEN_SSH_MODE="${ssh_mode}"; SCEN_STOP_RC="${stop_rc}"; SCEN_MAX_RUN="${max_run}"
+}
+launch_scenario_env() { # imprime la commande env du cycle de vie (partagee premier plan / arriere-plan)
+  local lifecycle="${LIFECYCLE}"
+  [ "${PIN_SOURCE:-worktree}" != "clone" ] || lifecycle="${SCEN_W}/pinned/gcp-migration/v6_session_lifecycle.sh"
   env PATH="${SCENARIO_DIR}/bin:${PATH}" \
-    FAKE_START_MODE="${start_mode}" FAKE_SSH_MODE="${ssh_mode}" FAKE_STOP_RC="${stop_rc}" \
-    MAX_RUN_SECONDS="${max_run}" \
+    FAKE_START_MODE="${SCEN_START_MODE}" FAKE_SSH_MODE="${SCEN_SSH_MODE}" FAKE_STOP_RC="${SCEN_STOP_RC}" \
+    MAX_RUN_SECONDS="${SCEN_MAX_RUN}" \
     DURABLE_RECEIPT_BASE="${SCENARIO_DIR}/recu" DURABLE_RECEIPT_PREFIX="s" \
-    MHGP6_LIFECYCLE_WORK="${W}" \
+    MHGP6_LIFECYCLE_WORK="${SCEN_W}" \
     MHGP6_LIFECYCLE_GUARDS_DIR="${SCENARIO_DIR}/guards" \
-    MHGP6_LIFECYCLE_SOURCE_COMMIT="${commit}" \
-    MHGP6_LIFECYCLE_PAYLOAD_SHA256="${payload_sha}" \
-    MHGP6_LIFECYCLE_MANIFEST_SHA256="${manifest_sha}" \
+    MHGP6_LIFECYCLE_SOURCE_COMMIT="${SCEN_COMMIT}" \
+    MHGP6_LIFECYCLE_PAYLOAD_SHA256="${SCEN_PAYLOAD}" \
+    MHGP6_LIFECYCLE_MANIFEST_SHA256="${SCEN_MANIFEST}" \
+    MHGP6_BOOTSTRAP_REPO_ROOT="${CLONE:-${ROOT}}" \
     GCP_PROJECT_ID=projet-factice GCP_ZONE=zone-factice GCP_INSTANCE_NAME=instance-factice \
-    bash "${LIFECYCLE}" > "${SCENARIO_DIR}/stdout.log" 2> "${SCENARIO_DIR}/stderr.log" || rc=$?
+    setsid -w bash "${lifecycle}" "$@"
+}
+run_scenario() {
+  prepare_scenario "$@"
+  local rc=0
+  launch_scenario_env > "${SCENARIO_DIR}/stdout.log" 2> "${SCENARIO_DIR}/stderr.log" || rc=$?
+  return "${rc}"
+}
+# run_scenario_bg : lancement en session de processus PROPRE (setsid) ; le
+# superviseur se grave lui-meme dans superviseur.pid — la session entiere
+# (garde, timeout, faux gcloud endormis) est tuee par `pkill -s <pid>`.
+SUP_PID=""
+run_scenario_bg() {
+  prepare_scenario "$@"
+  launch_scenario_env > "${SCENARIO_DIR}/stdout.log" 2> "${SCENARIO_DIR}/stderr.log" &
+  SUP_WAIT_PID=$!
+}
+wait_for_line() { # $1 = fichier, $2 = motif, $3 = secondes
+  local i=0
+  while [ "${i}" -lt "$3" ]; do
+    [ -f "$1" ] && grep -q "$2" "$1" && return 0
+    sleep 1; i=$((i + 1))
+  done
+  return 1
+}
+kill_session() { # tue toute la session de processus du superviseur (pid du fichier)
+  local sid
+  sid="$(awk '{print $1}' "${SCEN_W}/superviseur.pid" 2>/dev/null || true)"
+  [ -n "${sid}" ] || return 1
+  pkill -9 -s "${sid}" 2>/dev/null || true
+  wait "${SUP_WAIT_PID}" 2>/dev/null || true
+  for f in "${SCENARIO_DIR}/ssh_bloque.pid" "${SCENARIO_DIR}/start_bloque.pid"; do
+    [ -f "${f}" ] && kill -9 "$(cat "${f}")" 2>/dev/null || true
+  done
+  sleep 1
+  # Mort du conteneur simulee : tout processus referencant encore WORK
+  # (hors cette commande) est tue, et liste avant s'il en restait.
+  local surv
+  surv="$(pgrep -f -- "${SCEN_W}/[p]inned|MHGP6_LIFECYCLE_WORK=${SCEN_W%?}[${SCEN_W: -1}]|[-]-ssh-key-file=${SCEN_W}" 2>/dev/null | grep -vx "$$" || true)"
+  if [ -n "${surv}" ]; then
+    echo "kill_session : survivants apres pkill -s ${sid} :" >&2
+    ps -o pid,ppid,sid,pgid,args --no-headers -p "${surv//$'\n'/,}" >&2 || true
+    kill -9 ${surv} 2>/dev/null || true
+    sleep 1
+  fi
+  ! kill -0 "${sid}" 2>/dev/null
+}
+run_recovery() { # point d'entree de confiance : git show CLONE_COMMIT puis bash <copie> WORK
+  local entry="${SCENARIO_DIR}/rec_entree.sh" rc=0
+  git -C "${CLONE}" show "${CLONE_COMMIT}:gcp-migration/recover_v6_session.sh" > "${entry}"
+  # FAKE_SCP_MODE_REPRISE : mode du faux scp pour la REPRISE seulement (le
+  # superviseur, lui, doit reussir son scp de bundle avant d'etre tue).
+  env PATH="${SCENARIO_DIR}/bin:${PATH}" FAKE_STOP_RC="${FAKE_STOP_RC_REPRISE:-0}" \
+    FAKE_SCP_MODE="${FAKE_SCP_MODE_REPRISE:-${FAKE_SCP_MODE:-ok}}" \
+    bash "${entry}" "${SCEN_W}" > "${SCENARIO_DIR}/reprise_stdout.log" 2> "${SCENARIO_DIR}/reprise_stderr.log" || rc=$?
   return "${rc}"
 }
 
@@ -600,6 +696,144 @@ rc=0
   >/dev/null 2>&1 || rc=$?
 check_true "pin du clone propre : accepte (prealable des refus)" [ "${rc}" -eq 0 ]
 
+# ---- R. REPRISE PERSISTANTE (§ 5.18.6) : copies epinglees tirees du COMMIT
+# du clone (la reprise se re-authentifie contre lui), superviseur lance en
+# session propre puis SIGKILL de toute sa session apres le handshake.
+export PIN_SOURCE=clone
+# R2+R1 : superviseur vivant => refus ; puis kill -9 de la session, reprise
+# avec seconde marque : scp partielle, UN STOP sur la generation exacte,
+# validateur reel (partiel), classification forcee, recu de reprise.
+# SSH_STEP_TIMEOUT_S=7200 : le build bloque ne se debloque jamais seul (un
+# superviseur qui conclurait pendant l'attente ecrirait son propre recu et
+# la reprise refuserait a bon droit « deja conclue »).
+export FAKE_SCP_MODE=partiel SSH_STEP_TIMEOUT_S=7200
+run_scenario_bg ok build_bloque 0 28800
+check_true "reprise : handshake atteint, superviseur.pid grave (pid + starttime + boot_id)" \
+  bash -c "$(declare -f wait_for_line); wait_for_line '${SCEN_W}/session.log' 'handshake : boot_id=' 60 \
+    && [ \"\$(awk 'NF==3{print 1}' '${SCEN_W}/superviseur.pid')\" = '1' ] \
+    && [ -f '${SCEN_W}/marques/guest_guard_pending' ] && [ -f '${SCEN_W}/marques/double_guard_verified' ] \
+    && grep -q 'generation=${FAKE_GEN}' '${SCEN_W}/marques/double_guard_verified' \
+    && grep -q '^GUARDS_DIR=' '${SCEN_W}/session.env'"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "R2 : reprise pendant que le superviseur vit => REFUS 2, aucun appel gcloud/garde" \
+  bash -c "[ '${rc}' -eq 2 ] && grep -q 'superviseur vivant' '${SCENARIO_DIR}/reprise_stderr.log' \
+    && [ \"\$(wc -l < '${FAKE_CALLS}')\" -eq '${N0}' ]"
+check_true "R1 : SIGKILL de toute la session du superviseur (aucun processus ne reference WORK)" \
+  bash -c "$(declare -f kill_session); SCEN_W='${SCEN_W}'; SUP_WAIT_PID='${SUP_WAIT_PID}'; SCENARIO_DIR='${SCENARIO_DIR}'; kill_session \
+    && [ -z \"\$(pgrep -f -- '${SCEN_W}/[p]inned' || true)\" ]"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "R1 : reprise avec double_guard_verified => rc 0, 0 SETMAX/START/ssh, 1 scp, 1 STOP sur la generation exacte, avant validation" \
+  bash -c "[ '${rc}' -eq 0 ] && tail -n +$((N0 + 1)) '${FAKE_CALLS}' > '${SCENARIO_DIR}/reprise_calls.log' \
+    && ! grep -qE '^(SETMAX|START) ' '${SCENARIO_DIR}/reprise_calls.log' \
+    && ! grep -q 'compute ssh' '${SCENARIO_DIR}/reprise_calls.log' \
+    && [ \"\$(grep -c 'compute scp' '${SCENARIO_DIR}/reprise_calls.log')\" -eq 1 ] \
+    && [ \"\$(grep -c '^STOP ' '${SCENARIO_DIR}/reprise_calls.log')\" -eq 1 ] \
+    && grep -q -- '^STOP .*--expected-last-start-timestamp ${FAKE_GEN}' '${SCENARIO_DIR}/reprise_calls.log' \
+    && grep -q '^CLOUDSDK ${SCEN_W}/gcloud-config' '${SCENARIO_DIR}/reprise_calls.log'"
+RECU_R1="$(ls -d "${SCENARIO_DIR}"/recu/s_*_reprise_* 2>/dev/null | head -1 || true)"
+tail -n 12 "${SCENARIO_DIR}/reprise_stderr.log" "${SCENARIO_DIR}/reprise_stdout.log" >&2 || true
+check_true "R1 : recu de reprise (issue, classification forcee, jamais une decision, marques, journaux, SHA256SUMS), registre targeted_stopped, credentials purges" \
+  bash -c "[ -n '${RECU_R1}' ] && grep -q '^issue=reprise_apres_perte_superviseur' '${RECU_R1}/RECU_SESSION.txt' \
+    && grep -q '^classification=partiel_ou_invalide' '${RECU_R1}/RECU_SESSION.txt' \
+    && grep -q '^decision=aucune' '${RECU_R1}/RECU_SESSION.txt' && grep -q '^scp_rc=0' '${RECU_R1}/RECU_SESSION.txt' \
+    && grep -q '^validate_rc=1' '${RECU_R1}/RECU_SESSION.txt' && grep -q 'campaign_status=partial_or_failed' '${RECU_R1}/validation.txt' \
+    && grep -q '^marques=.*double_guard_verified' '${RECU_R1}/RECU_SESSION.txt' \
+    && [ -f '${RECU_R1}/marques/guest_guard_pending' ] && [ -f '${RECU_R1}/reprise.log' ] \
+    && grep -q 'handshake : boot_id=' '${RECU_R1}/session.log' && [ -f '${RECU_R1}/out/bench_resume.txt' ] \
+    && ( cd '${RECU_R1}' && sha256sum -c --quiet SHA256SUMS ) && [ ! -d '${RECU_R1}/ssh' ] && [ ! -d '${RECU_R1}/gcloud-config' ] \
+    && grep -q '^state=targeted_stopped' '${SCEN_W}/etat_cycle_vie' && grep -q '^generation=${FAKE_GEN}' '${SCEN_W}/etat_cycle_vie' \
+    && [ -f '${SCEN_W}/recu_publie' ] && [ ! -e '${SCEN_W}/ssh/id_ed25519' ] && [ ! -d '${SCEN_W}/gcloud-config' ]"
+rc=0; run_recovery || rc=$?
+check_true "R1bis : seconde reprise apres session conclue => REFUS 2 (recu_publie), aucun appel" \
+  bash -c "[ '${rc}' -eq 2 ] && grep -q 'deja conclue' '${SCENARIO_DIR}/reprise_stderr.log'"
+unset FAKE_SCP_MODE
+
+# R3 : superviseur tue ENTRE les deux marques (garde bloque avant l'armement
+# invite) => stop immediat sur la generation exacte, aucune scp.
+run_scenario_bg ok_bloque ok 0 28800
+check_true "R3 : premiere marque publiee, seconde absente (garde bloque)" \
+  bash -c "$(declare -f wait_for_line); wait_for_line '${SCEN_W}/marques/guest_guard_pending' 'generation=${FAKE_GEN}' 60 \
+    && [ ! -e '${SCEN_W}/marques/double_guard_verified' ]"
+bash -c "$(declare -f kill_session); SCEN_W='${SCEN_W}'; SUP_WAIT_PID='${SUP_WAIT_PID}'; SCENARIO_DIR='${SCENARIO_DIR}'; kill_session" || true
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+RECU_R3="$(ls -d "${SCENARIO_DIR}"/recu/s_*_reprise_* 2>/dev/null | head -1 || true)"
+tail -n 6 "${SCENARIO_DIR}/reprise_stderr.log" >&2 || true
+check_true "R3 : reprise sans double_guard_verified => arret immediat (1 STOP exact), 0 scp, issue=reprise_sans_double_garde" \
+  bash -c "[ '${rc}' -eq 0 ] && tail -n +$((N0 + 1)) '${FAKE_CALLS}' > '${SCENARIO_DIR}/reprise_calls.log' \
+    && ! grep -q 'compute scp' '${SCENARIO_DIR}/reprise_calls.log' && ! grep -qE '^(SETMAX|START) ' '${SCENARIO_DIR}/reprise_calls.log' \
+    && [ \"\$(grep -c '^STOP ' '${SCENARIO_DIR}/reprise_calls.log')\" -eq 1 ] \
+    && grep -q -- '--expected-last-start-timestamp ${FAKE_GEN}' '${SCENARIO_DIR}/reprise_calls.log' \
+    && [ -n '${RECU_R3}' ] && grep -q '^issue=reprise_sans_double_garde' '${RECU_R3}/RECU_SESSION.txt' \
+    && ! grep -q 'double_guard_verified' '${RECU_R3}/RECU_SESSION.txt'"
+
+# R4 : mutants de la reprise (chacun sur une session tuee apres handshake) ;
+# le scp en echec ne concerne que la reprise (R5), jamais le bundle du superviseur.
+export FAKE_SCP_MODE_REPRISE=echec
+run_scenario_bg ok build_bloque 0 28800
+check_true "R4 : handshake atteint puis session du superviseur tuee (aucun recu du superviseur)" \
+  bash -c "$(declare -f wait_for_line kill_session); SCEN_W='${SCEN_W}'; SUP_WAIT_PID='${SUP_WAIT_PID}'; SCENARIO_DIR='${SCENARIO_DIR}'; \
+    wait_for_line '${SCEN_W}/session.log' 'handshake : boot_id=' 60 && kill_session \
+    && [ -z \"\$(ls -d '${SCENARIO_DIR}'/recu/s_* 2>/dev/null)\" ] && [ ! -e '${SCEN_W}/recu_publie' ]"
+# R4a : marque 2 d'une autre generation => BLOCAGE 71, aucun STOP.
+cp "${SCEN_W}/marques/double_guard_verified" "${SCENARIO_DIR}/m2.sauv"
+sed -i 's/^generation=.*/generation=generation-perimee/' "${SCEN_W}/marques/double_guard_verified"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "R4a : generations discordantes registre/marque => BLOCAGE 71, zero STOP" \
+  bash -c "[ '${rc}' -eq 71 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c '^STOP ' || true)\" -eq 0 ]"
+cp -f "${SCENARIO_DIR}/m2.sauv" "${SCEN_W}/marques/double_guard_verified"
+# R4b : copie epinglee de la reprise alteree => refus 2 a l'etage 1, aucun appel.
+echo "# altere" >> "${SCEN_W}/pinned/gcp-migration/recover_v6_session.sh"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "R4b : copie epinglee de la reprise alteree => refus 2 avant tout appel" \
+  bash -c "[ '${rc}' -eq 2 ] && grep -q 'alteree' '${SCENARIO_DIR}/reprise_stderr.log' && [ \"\$(wc -l < '${FAKE_CALLS}')\" -eq '${N0}' ]"
+git -C "${CLONE}" show "${CLONE_COMMIT}:gcp-migration/recover_v6_session.sh" > "${SCEN_W}/pinned/gcp-migration/recover_v6_session.sh"
+# R4c : session.env d'une autre cible => refus/blocage sans appel.
+sed -i 's/^GCP_INSTANCE_NAME=.*/GCP_INSTANCE_NAME=autre-instance/' "${SCEN_W}/session.env"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "R4c : cible de session.env != registre => blocage 71, zero STOP" \
+  bash -c "[ '${rc}' -eq 71 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c '^STOP ' || true)\" -eq 0 ]"
+sed -i 's/^GCP_INSTANCE_NAME=.*/GCP_INSTANCE_NAME=instance-factice/' "${SCEN_W}/session.env"
+# R4d : pid recycle simule (starttime faux) => la reprise PROCEDE ; R5 : scp
+# en echec => STOP quand meme, scp_rc=1 au recu.
+sed -i 's/^\([0-9]*\) [0-9]* /\1 999999999 /' "${SCEN_W}/superviseur.pid"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+RECU_R5="$(ls -d "${SCENARIO_DIR}"/recu/s_*_reprise_* 2>/dev/null | head -1 || true)"
+tail -n 6 "${SCENARIO_DIR}/reprise_stderr.log" >&2 || true
+check_true "R4d/R5 : pid recycle (starttime different) => reprise executee ; scp en echec => 1 STOP exact, scp_rc=1 grave" \
+  bash -c "[ '${rc}' -eq 0 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c '^STOP ')\" -eq 1 ] \
+    && [ -n '${RECU_R5}' ] && grep -q '^scp_rc=1' '${RECU_R5}/RECU_SESSION.txt' \
+    && grep -q '^issue=reprise_apres_perte_superviseur' '${RECU_R5}/RECU_SESSION.txt'"
+# R6 : ARRET EN ECHEC pendant la reprise (la dent revelee par le bug de
+# PIPESTATUS) : rc 70, registre targeted_stop_failed, AUCUN temoin de
+# conclusion ni purge, seconde reprise permise et cette fois certifiee.
+unset FAKE_SCP_MODE_REPRISE
+run_scenario_bg ok build_bloque 0 28800
+check_true "R6 : handshake atteint puis session tuee" \
+  bash -c "$(declare -f wait_for_line kill_session); SCEN_W='${SCEN_W}'; SUP_WAIT_PID='${SUP_WAIT_PID}'; SCENARIO_DIR='${SCENARIO_DIR}'; \
+    wait_for_line '${SCEN_W}/session.log' 'handshake : boot_id=' 60 && kill_session"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; FAKE_STOP_RC_REPRISE=9 run_recovery || rc=$?
+RECU_R6="$(ls -d "${SCENARIO_DIR}"/recu/s_*_reprise_* 2>/dev/null | head -1 || true)"
+check_true "R6 : stop en echec => rc 70, registre targeted_stop_failed, aucun recu_publie ni purge, ARRET NON CERTIFIE annonce" \
+  bash -c "[ '${rc}' -eq 70 ] && grep -q '^state=targeted_stop_failed' '${SCEN_W}/etat_cycle_vie' \
+    && [ ! -e '${SCEN_W}/recu_publie' ] && [ -f '${SCEN_W}/ssh/id_ed25519' ] && [ -d '${SCEN_W}/gcloud-config' ] \
+    && grep -q 'ARRET NON CERTIFIE' '${SCENARIO_DIR}/reprise_stderr.log' \
+    && [ -n '${RECU_R6}' ] && grep -q '^stop_rc=9' '${RECU_R6}/RECU_SESSION.txt'"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "R6bis : seconde reprise apres echec d'arret => permise, 1 STOP exact certifie, registre targeted_stopped, credentials purges" \
+  bash -c "[ '${rc}' -eq 0 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c '^STOP ')\" -eq 1 ] \
+    && grep -q '^state=targeted_stopped' '${SCEN_W}/etat_cycle_vie' && [ -f '${SCEN_W}/recu_publie' ] \
+    && [ ! -e '${SCEN_W}/ssh/id_ed25519' ] && [ ! -d '${SCEN_W}/gcloud-config' ]"
+unset SSH_STEP_TIMEOUT_S PIN_SOURCE
+
 # 11. Pin altere qui neutraliserait son controle + garde alteree : l'etage 1
 # du bootstrap materialise le pin DU COMMIT — le pin altere n'est jamais
 # execute, et le pin honnete refuse la garde alteree.
@@ -610,6 +844,13 @@ rc=0
 check_true "pin altere neutralisant + garde alteree : refus par le pin DU COMMIT (rc=2)" \
   bash -c "[ '${rc}' -eq 2 ] && grep -q 'REFUS' '${BASE}/boot11.err'"
 ( cd "${CLONE}" && git checkout --quiet -- gcp-migration/v6_campaign_pin.sh gcp-migration/start_and_verify.sh )
+
+# 11bis. Base de sessions NON 0700 => refus 2 avant tout `git show`.
+BASE755="$(mktemp -d "${BASE}/base755.XXXXXX")"; chmod 755 "${BASE755}"
+rc=0
+( cd "${CLONE}" && MHGP6_SESSION_BASE="${BASE755}" bash gcp-migration/session_campagne_v6_g4.sh ) >/dev/null 2>"${BASE}/boot11bis.err" || rc=$?
+check_true "base de sessions 755 : refus 2 avant materialisation (base 0700 exigee)" \
+  bash -c "[ '${rc}' -eq 2 ] && grep -q '0700' '${BASE}/boot11bis.err' && [ -z \"\$(ls -A '${BASE755}')\" ]"
 
 # 12. Bootstrap altere dans le worktree : l'etage 1 refuse (identite contre
 # la copie materialisee du commit).
@@ -666,4 +907,4 @@ if [ "${FAILURES}" -ne 0 ]; then
   echo "selftest cycle de vie v6 : ${FAILURES} echec(s)" >&2
   exit 1
 fi
-echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (35 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue, registre illisible=blocage, surcharge temporelle refusee, trop-tard sans remontee, describe borne, registre etranger post-arret=78, grace fixe 29/31 refusees, relation invite/GCE avant set_max, STOP1<STOP2<VALIDATE, double echec sans validation, contre-calendrier a describe clampe, ordre STOP1<STOP2<VALIDATE au ledger, sortie pre-SCP a seconde reserve, garde scp causale a la seconde — + 13 refus de pin sur l inventaire repo-relatif a deux repertoires, rejouable depuis un HEAD propre)"
+echo "selftest cycle de vie v6 : arret cible ou blocage prouve sur chaque sortie apres demarrage (35 scenarios dont reprise EXECUTEE a deux appels ordonnes et six mutants permanents du registre — perdu, duplique, sans schema, tronque, targeted_stopped d'une autre generation, publication interrompue, registre illisible=blocage, surcharge temporelle refusee, trop-tard sans remontee, describe borne, registre etranger post-arret=78, grace fixe 29/31 refusees, relation invite/GCE avant set_max, STOP1<STOP2<VALIDATE, double echec sans validation, contre-calendrier a describe clampe, ordre STOP1<STOP2<VALIDATE au ledger, sortie pre-SCP a seconde reserve, garde scp causale a la seconde — + 15 refus de pin sur l inventaire repo-relatif a deux repertoires, reprise persistante § 5.18.6 : SIGKILL de la session du superviseur apres le handshake puis reprise re-authentifiee — superviseur vivant refuse, un seul STOP exact, scp partielle/echec, classification forcee, sans seconde marque arret immediat, mutants generation/cible/copie alteree/pid recycle/base 755, rejouable depuis un HEAD propre)"

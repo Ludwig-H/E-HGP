@@ -29,6 +29,7 @@ SSH_KEY_EXPIRATION_UTC=""
 ASSUME_YES=0
 HANDOFF_FILE=""
 LIFECYCLE_STATE_FILE=""
+GUARD_MARK_DIR=""
 VERIFIED_LAST_START_TIMESTAMP=""
 TARGET_LAST_START_TIMESTAMP=""
 PRE_START_LAST_START_TIMESTAMP=""
@@ -87,6 +88,20 @@ while (($# > 0)); do
             (($# >= 2)) || die "Valeur manquante après --lifecycle-state-file."
             [[ -z "${LIFECYCLE_STATE_FILE:-}" ]] || die "--lifecycle-state-file ne peut être fourni qu'une fois."
             LIFECYCLE_STATE_FILE="$2"
+            shift 2
+            ;;
+        --guard-mark-dir)
+            # MARQUES DE REPRISE (audit serie C § 5.18.6) : deux fichiers
+            # DISTINCTS, crees en exclusivite et jamais reecrits, dans un
+            # repertoire persistant 0700 fourni par le lanceur :
+            # `guest_guard_pending` des que la generation est certifiee par
+            # la garde GCE (juste apres `targeted_running`), puis
+            # `double_guard_verified` apres l'armement invite relu et la
+            # garde GCE recertifiee. Un processus de reprise les lit sans
+            # jamais redemarrer la VM.
+            (($# >= 2)) || die "Valeur manquante après --guard-mark-dir."
+            [[ -z "${GUARD_MARK_DIR}" ]] || die "--guard-mark-dir ne peut être fourni qu'une fois."
+            GUARD_MARK_DIR="$2"
             shift 2
             ;;
         -h|--help)
@@ -532,6 +547,57 @@ finally:
 PY
 }
 
+publish_guard_mark() { # $1 = nom de marque ; generation = TARGET_LAST_START_TIMESTAMP
+    local mark_name="${1:?marque requise}"
+    [[ -n "${GUARD_MARK_DIR}" ]] || return 0
+    python3 - "${GUARD_MARK_DIR}" "${mark_name}" "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" \
+        "${TARGET_LAST_START_TIMESTAMP}" "${VERIFIED_MAX_RUN_SECONDS:-}" "${GUEST_SHUTDOWN_MINUTES}" <<'PY'
+import datetime
+import os
+import sys
+import tempfile
+from pathlib import Path
+
+base = Path(sys.argv[1])
+mark, project, zone, instance, generation, max_run, guest = sys.argv[2:9]
+if not base.is_absolute() or base.is_symlink() or not base.is_dir():
+    sys.exit(1)
+if (base.stat().st_mode & 0o777) != 0o700:
+    sys.exit(1)
+if not generation:
+    sys.exit(1)
+path = base / mark
+data = ("schema=e-hgp.guard-mark.v1\n"
+        f"mark={mark}\n"
+        f"project={project}\n"
+        f"zone={zone}\n"
+        f"instance={instance}\n"
+        f"generation={generation}\n"
+        f"max_run_seconds={max_run}\n"
+        f"guest_shutdown_minutes={guest}\n"
+        f"date_utc={datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}\n").encode()
+descriptor, temporary = tempfile.mkstemp(prefix=f".{mark}.", suffix=".partial", dir=str(base))
+try:
+    offset = 0
+    while offset < len(data):
+        offset += os.write(descriptor, data[offset:])
+    os.fsync(descriptor)
+finally:
+    os.close(descriptor)
+try:
+    os.link(temporary, path)  # EXCLUSIF : une marque n'est jamais reecrite
+except OSError:
+    os.unlink(temporary)
+    sys.exit(1)
+os.unlink(temporary)
+parent = os.open(str(base), os.O_DIRECTORY)
+try:
+    os.fsync(parent)
+finally:
+    os.close(parent)
+PY
+}
+
 publish_targeted_handoff() {
     local handoff_status="${1:-targeted_running}"
     [[ -n "${HANDOFF_FILE}" ]] || return 0
@@ -759,6 +825,8 @@ publish_targeted_handoff "targeted_running" || \
     die "La génération démarrée est certifiée mais son témoin ciblé n’a pas pu être publié."
 publish_lifecycle_state "targeted_running" 1 || \
     die "La génération démarrée est certifiée mais l'enregistrement de cycle de vie n’a pas pu être mis à jour."
+publish_guard_mark "guest_guard_pending" || \
+    die "La marque de reprise guest_guard_pending n’a pas pu être publiée (répertoire 0700 absent ou marque déjà présente)."
 
 printf '[GARDE-FOU INVITÉ] Armement de shutdown -P +%s via SSH.\n' "${GUEST_SHUTDOWN_MINUTES}"
 ssh_deadline=$((SECONDS + SSH_TIMEOUT_SECONDS))
@@ -827,5 +895,7 @@ fi
 printf '%s\n' "${guest_guard_output/__EHGP_GUEST_GUARD_VERIFIED__/}"
 
 verify_running_guard || die "Le garde-fou GCE n’est plus certifiable après l’armement invité."
+publish_guard_mark "double_guard_verified" || \
+    die "La marque de reprise double_guard_verified n’a pas pu être publiée."
 start_certified=1
 printf '[SUCCÈS] VM démarrée avec deux coupe-circuits vérifiés. Fermez la session avec stop_and_verify.sh.\n'

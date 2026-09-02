@@ -17,6 +17,8 @@ VALIDATOR="${2:-${HERE}/validate_v6_campaign.py}"
   || { echo "REFUS : ${RECU} n'est pas un recu durable complet (RECU_SESSION.txt, out/, SHA256SUMS)" >&2; exit 2; }
 ( cd "${RECU}" && sha256sum -c --quiet SHA256SUMS ) || { echo "REFUS : SHA256SUMS du recu non verifie" >&2; exit 2; }
 field() { sed -n "s/^$1=//p" "${RECU}/RECU_SESSION.txt" | head -n 1; }
+# Un recu de REPRISE (superviseur perdu) n'est jamais requalifie en resultat.
+case "$(field issue)" in reprise_*) echo "REFUS : recu de reprise (issue=$(field issue)) — jamais une decision ni une mesure recevable" >&2; exit 2 ;; esac
 COMMIT="$(field source_commit)"
 PAYLOAD="$(field source_payload_sha256)"
 MANIFEST="$(field protocol_manifest_sha256)"
