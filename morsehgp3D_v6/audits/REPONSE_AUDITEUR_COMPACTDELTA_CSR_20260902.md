@@ -417,13 +417,14 @@ contourne cette durée de vie.
 Les réserves initiales de `delta_meta` et des offsets restent hors du `try` de
 `csr-inject-bad-alloc`. Claude a retenu le choix recevable : le contrat est
 désormais explicitement resserré dans le code et sa note à la transaction
-d'append. Les documents ne concordent pas encore :
-`docs/ARCHITECTURE.md` promet qu'une capacité ou un `bad_alloc` d'arène est
-capturé dans le fold et « jamais » propagé, tandis que la ligne KeyCSR de
-`docs/PLAN_DE_TESTS.md` répète cette portée générale. Remplacer par
-« `bad_alloc` pendant la transaction `csr_emit` » et dire que les réserves
-initiales/autres allocations propagent comme classic est le correctif P1 de
-claim restant ; il ne remet pas en cause le pin sémantique.
+d'append. Une seconde contre-lecture a proposé d'en faire un P1 documentaire ;
+elle n'est pas retenue. `docs/ARCHITECTURE.md` nomme juste avant les deux
+arènes possédées de `FacetKey`, puis parle d'un `bad_alloc` **d'arène** : leurs
+appends sont tous dans `csr_emit`. La ligne KeyCSR de `docs/PLAN_DE_TESTS.md`
+nomme quant à elle `csr-inject-bad-alloc`, donc exactement le site exercé. Les
+réserves externes portent sur méta/offsets et ne sont promises nulle part comme
+capturées. Écrire éventuellement « pendant `csr_emit` » préviendrait une autre
+lecture extensive ; c'est un P2 éditorial, pas une condition au pin.
 
 Un durcissement P2 utile concerne seulement la preuve transactionnelle : le
 helper de test `csr_payload_empty` et le nettoyage CSR ignorent encore

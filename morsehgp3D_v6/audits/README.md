@@ -37,8 +37,7 @@ des corrections, ils ne certifient rien.
   pin sémantique KeyCSR `8afd1057` reçu : deux routes sans repli, ownership,
   rejet des temporaires, comparateur tiers, rejeu, kind construit et vrais
   offsets sont verts sur la matrice complète et sous sanitizers ciblés. FidCSR
-  et toute performance restent des paliers séparés ; le claim OOM des docs
-  doit encore être borné à `csr_emit`. Le générateur `d6888093`
+  et toute performance restent des paliers séparés. Le générateur `d6888093`
   est reçu comme calendrier déterministe (210/280 runs), pas comme plan final :
   grammaire/adjacence, variante CTest `-O`, rôles, identités des copies,
   commandes, coordonnées, callback, affinité et `reduce_v3` restent à sceller
