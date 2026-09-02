@@ -52,9 +52,9 @@ des corrections, ils ne certifient rien.
 - [`ALERTE_G4_ECHELLE_V6_20260902.md`](ALERTE_G4_ECHELLE_V6_20260902.md) :
   préflight mis à jour jusqu'au moteur corrigé `28d02459` et au WIP de
   protocole ; **NO START** jusqu'au trajet lifecycle du layout, à la porte
-  complète du refus d'allocation, aux pools et à la politique v2 du code 134.
-  Q2 est correctement séparée ; portée, budget, normalisation `:11` et
-  fermeture du plan sont bornés par la même note.
+  complète de sa cause d'allocation, aux pools et à la politique v2 du code
+  134. Q2 est correctement séparée ; portée, budget, normalisation `:11`,
+  autorité du layout et fermeture du plan sont bornés par la même note.
 - [`REPONSE_AUDITEUR_CONCEPTION_C6_20260902.md`](REPONSE_AUDITEUR_CONCEPTION_C6_20260902.md) :
   GO de conception borné pour C6, sans code ni GO G4. Le premier jalon emploie
   deux IN + deux OUT hôte aux leases séparés, un flux et un jeu device ; la

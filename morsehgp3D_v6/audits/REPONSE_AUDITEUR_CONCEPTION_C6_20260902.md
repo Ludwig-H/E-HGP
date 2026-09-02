@@ -50,12 +50,13 @@ même si les corps des kernels restent inchangés. Si un palier à deux lots
 device est ouvert plus tard, il exigera alors deux zones device disjointes.
 
 La retraite reste strictement ordonnée par `base_global`, jamais par ordre de
-fin CUDA. Il faut ici fermer une contradiction préexistante : `GPU.md` et le
-commentaire CMake disent « toutes les sorties validées avant toute
-reconstruction », tandis que C5 valide chaque record puis le reconstruit dans
-un temporaire avant de valider le suivant. C6 doit versionner la règle retenue.
-La règle utile est : lot entièrement validé avant toute lecture/reconstruction
-de ce lot, lots antérieurs conservés dans des temporaires invisibles, et toute
+fin CUDA. Il faut ici lever une ambiguïté préexistante : la formule de `GPU.md`
+et du commentaire CMake, « avant toute reconstruction », peut se lire à l'échelle
+du lot, tandis que C5 valide chaque record avant de le reconstruire dans un
+temporaire. Ce n'est pas une brèche transactionnelle puisque le swap reste
+terminal, mais C6 doit versionner la granularité retenue. La règle la plus
+simple à juger est : lot entièrement validé avant toute reconstruction de ce
+lot, lots antérieurs conservés dans des temporaires invisibles, et toute
 corruption d'un lot tardif jette l'ensemble. Une fixture de corruption tardive
 doit donc prouver zéro `Survivor`, `BallData` ou `ExpandStats` visible.
 
