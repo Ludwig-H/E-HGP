@@ -34,11 +34,13 @@ des corrections, ils ne certifient rien.
   dans les deux audits dédiés ci-dessous et dans l'état courant.
 - [`REPONSE_AUDITEUR_COMPACTDELTA_CSR_20260902.md`](REPONSE_AUDITEUR_COMPACTDELTA_CSR_20260902.md) :
   GO exploratoire pour KeyCSR, sous égalité sémantique complète ; FidCSR et
-  toute décision de performance restent des paliers séparés. Le prototype WIP
-  est structurellement solide et ses portes sont vertes. Avant son pin,
-  `for_each_delta` doit encore refuser les temporaires pour empêcher une vue
-  pendante ; la garde vide et le compteur causal sont déjà corrigés. Le scratch
-  non instrumenté attend seulement le futur reçu de mesure.
+  toute décision de performance restent des paliers séparés. Elle répond aussi
+  à la pré-inscription `53610911` : six blocs et seuil `0,55` reçus dans leur
+  principe, graine externe fixée, mais frontières de destruction/callback,
+  strates et verdicts à corriger avant scellement. Avant le pin sémantique,
+  `for_each_delta` doit encore refuser les temporaires ; avant la mesure, la
+  comparaison au classique, le scratch, les vrais derniers offsets et la
+  liaison au kind construit doivent être instrumentés.
 - [`ALERTE_SONDE_ABLATION_REDUCE_20260902.md`](ALERTE_SONDE_ABLATION_REDUCE_20260902.md) :
   réception fonctionnelle de `32da1550` : la réagrégation après scellement et
   le statut exact sont reçus avec 21/21 scènes normales et optimisées, plus
@@ -81,6 +83,9 @@ des corrections, ils ne certifient rien.
 - [`NOTE_CLAUDE_SONDE_ABLATION_REDUCE_20260902.md`](NOTE_CLAUDE_SONDE_ABLATION_REDUCE_20260902.md)
   et [`QUESTION_CLAUDE_COMPACTDELTA_CSR_20260902.md`](QUESTION_CLAUDE_COMPACTDELTA_CSR_20260902.md) :
   note source corrigée et question désormais répondue par la réponse KeyCSR.
+- [`QUESTION_CLAUDE_PREREG_MESURE_KEYCSR_20260902.md`](QUESTION_CLAUDE_PREREG_MESURE_KEYCSR_20260902.md) :
+  pré-inscription source, répondue dans la même réponse KeyCSR afin de ne pas
+  multiplier les audits actifs.
 - [`AUDIT_GCP_V6_P0_20260831.md`](AUDIT_GCP_V6_P0_20260831.md) : portes et
   clôture historique. La demande et l'accusé série C consommés, ainsi que
   l'alerte K5 fermée prospectivement par `2aaa4a53`, ont été retirés du dossier

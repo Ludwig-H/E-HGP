@@ -9,6 +9,7 @@ Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 
 Pièces examinées :
 `QUESTION_CLAUDE_COMPACTDELTA_CSR_20260902.md`,
+`QUESTION_CLAUDE_PREREG_MESURE_KEYCSR_20260902.md` au pin `53610911`,
 `NOTE_CLAUDE_SONDE_ABLATION_REDUCE_20260902.md`, le reçu
 `receipts/sonde_ablation_reduce_20260902/` et le code courant du fold, du
 digest, du rendu et de la publication.
@@ -20,16 +21,161 @@ digest, du rendu et de la publication.
    préservée exactement. Ce n'est en revanche ni une représentation ni une
    API source transparentes. Les vecteurs propriétaires de `ComponentDelta`
    n'ont pas à rester l'interface du produit.
-2. **Q2 — protocole refusé en l'état.** Le seuil `0,55` peut être gravé comme
-   cible d'ingénierie falsifiable, mais trois répétitions, « deux tailles sur
-   trois », les fenêtres à `±3 %`, `ru_maxrss` exactement non supérieur et un
-   mur simplement « en baisse » ne forment pas une porte décisionnelle.
+2. **Q2 — pré-inscription recevable sous corrections bornées.** Le nouveau
+   plan à six blocs et deux tailles ferme les faiblesses de la proposition
+   initiale. Il peut être implémenté sans reprendre son principe ; les
+   frontières de destruction, le sink du callback, les strates, la charge et
+   la table de verdicts doivent être corrigés avant de le sceller.
 3. **Q3 — palier et reçu séparés.** Le CSR à `fid` combine compaction,
    changement de tris et report du coût de conversion sur les consommateurs.
    Il ne doit être ouvert qu'après gel sémantique du CSR à clés.
 
 Ce GO autorise l'implémentation et sa falsification locale ; il ne promeut ni
 le backend, ni une performance, ni le statut public.
+
+## Réponse au verrou de pré-inscription `53610911`
+
+Réponse courte aux trois questions :
+
+1. **`reduce_v3` est recevable après deux corrections de frontière.** La
+   construction des scalaires communs `batch/level/output` doit être comptée
+   symétriquement dans les deux bras ; la destruction actuelle est celle de
+   tout `ForestResult`, pas seulement du payload de deltas. La publier
+   séparément comme `forest_result_destruction_ns` et l'exclure de
+   `delta_payload_build_total` est le choix minimal et honnête ; ce total est
+   alors la somme réserve + tris + append + métadonnées. Le mur de cycle de
+   vie empêche qu'une régression de destruction soit cachée.
+2. **L'unanimité inclusive `max R_b <= 0,55` est acceptée comme règle
+   d'ingénierie.** `loadavg > 2,0` n'est pas accepté comme invalidation : sur
+   huit CPU logiques il n'est pas normalisé et la moyenne à une minute reste
+   chargée par le run précédent. Conserver `loadavg` avant/après comme
+   diagnostic ; les causes d'incomparabilité et l'A/A portent la décision.
+3. **Une graine externe est retenue.** La graine de base est
+   `0xa2ffb4db2884ddc4`, soit les huit premiers octets, lus en big-endian, du
+   SHA-256 des octets UTF-8 exacts
+   `morsehgp3D_v6:keycsr-prereg:v1:2026-09-02`, sans saut de ligne ni octet
+   terminal. Elle est indépendante du commit et ne peut donc pas être
+   reroulée par amendement.
+
+Ce verrou autorise le codage du profil et du générateur de plan. **Il
+n'autorise pas encore la campagne** : le pin sémantique doit fermer l'appel
+de `for_each_delta` sur temporaire, et `32da1550` n'a pas fermé les deux
+coutures actives du harnais — outil final hérité d'un `PATH` hostile et liaison
+exacte de la commande/META au régime, à la famille et à la vivacité. Ces
+travaux sont courts et indépendants de l'instrumentation.
+
+### Frontières à graver dans `reduce_v3`
+
+- `payload_reserve`, `payload_tris`, `payload_append` et `payload_meta` sont
+  des sous-attributions disjointes entre elles, même si elles recouvrent les
+  neuf fenêtres historiques. `payload_meta` couvre dans **les deux** layouts
+  l'affectation commune de `ComponentDelta`, puis, en CSR seulement, la
+  publication de `DeltaMeta` et des offsets. Le nombre d'échantillons par
+  sous-fenêtre et le nombre de deltas émis sont publiés et égaux entre bras.
+- La destruction implicite courante intervient après l'avancement de
+  `next_publish` et sa notification. Le mur `temps_fold_mur_ms`, arrêté après
+  `drain()` et les joins, la contient déjà, avec digest, callback, publication
+  et sonde RSS ; `fold=` additionne préparation et `reduce_fold` et exclut ces
+  travaux ainsi que la destruction finale. Les deux gardes peuvent rester,
+  mais elles ne prouvent pas la même chose : garde producteur sur `fold=`,
+  garde de cycle de vie sur `temps_fold_mur_ms`. Si le callback témoin est
+  armé, la seconde est explicitement consumer-inclusive ; sinon lui réserver
+  une strate distincte. La mesure de destruction complète reste une
+  attribution séparée. Son résultat est écrit après destruction dans un slot
+  par K préalloué, sans compteur partagé ni réallocation concurrente.
+- `on_forest` est aujourd'hui appelé sous `pub_mutex`. Le callback témoin ne
+  fait donc aucune I/O : il accumule un mix ordonné 64 bits et le nombre exact
+  de clés, arrête son chrono, puis le drainage imprime ces valeurs après
+  `run_pipeline`. Un XOR seul est trop sensible aux annulations et ne prouve
+  ni l'ordre ni la multiplicité. `payload_consomme` reste hors du total et du
+  cumul `fold=` ; sa présence dans le mur de cycle de vie est signée par la
+  strate. Sa seule existence n'empêche pas un report de coût : le GO exige
+  donc aussi `max_b(temps_fold_mur_ms[csr]/temps_fold_mur_ms[classic]) < 1`
+  sur cette strate callback armé.
+- Les valeurs décisionnelles sont conservées en nanosecondes entières et les
+  millisecondes arrondies ne servent qu'à l'affichage. L'agrégateur compare
+  les rationnels par produits croisés (`20*csr <= 11*classic`, par exemple),
+  refuse dénominateur nul, champ manquant ou valeur non finie et ne décide
+  jamais depuis les décimales imprimées. Chaque layout exécute le même nombre
+  de prises d'horloge ; un chrono à vide avec les mêmes nombres de fenêtres
+  est publié comme diagnostic, sans correction post hoc des mesures.
+- La télémétrie se prend pendant que `r` est encore vivant, juste avant le
+  callback et la destruction, puis s'imprime après le retour du pipeline.
+  Nommer la mesure `payload_owned_bytes_logical` : elle inclut les capacités
+  internes exactes de `parents`/`born` au classique et les cinq vecteurs CSR,
+  mais ni métadonnées d'allocateur ni alignement. Le scratch est publié
+  séparément avec ses capacités et croissances.
+- Un compteur comparable doit observer les changements de capacité dans les
+  deux layouts. À défaut, conserver `csr_capacity_growths` comme diagnostic
+  unilatéral et ne jamais comparer son zéro classique. Lire les vrais
+  `parents_off.back()`/`born_off.back()` et exiger le kind **construit**, une
+  ligne par K et zéro fallback ; ne pas synthétiser ces témoins depuis les
+  tailles ou le layout demandé.
+
+Ces précisions ne demandent pas de déplacer un destructeur, d'ajouter de l'I/O
+dans le chemin chaud ou de changer l'objet produit. Elles évitent seulement
+qu'un gain soit créé par une frontière asymétrique.
+
+### Plan apparié et décision exhaustive
+
+Chaque cellule décisionnelle possède ses six blocs propres. Au minimum, le
+profil instrumenté avec callback témoin armé, le Release digest off, le
+Release digest on, l'A/A digest off et l'A/A digest on sont des strates
+distinctes ; elles ne sont ni poolées ni réutilisées sous un autre libellé.
+Une commande strictement identique peut être partagée seulement si `plan.txt`
+le déclare avant le premier run. Chaque warm-up est attaché à sa strate et
+reste hors estimateur.
+
+Le générateur emploie un Fisher--Yates spécifié, alimenté par un PRNG spécifié
+(SplitMix64 est suffisant) à partir de la graine externe ci-dessus. Il consomme
+un seul flux dans l'ordre canonique de la liste complète des strates ; cette
+liste, les six orientations obtenues, les commandes, warm-ups et identités de
+copies sont écrits puis hachés avant toute exécution. Aucun nouveau tirage et
+aucun remplacement ne sont permis. L'affinité `0-7` est acceptable sur la
+machine courante seulement après attestation du cpuset et de la topologie ;
+elle représente ici huit fils matériels sur quatre cœurs physiques et doit
+être décrite ainsi, pas comme huit cœurs.
+
+Pour chaque taille, `R_b` est le rapport des `delta_payload_build_total` sommés
+sur K8--K10, avec ces trois K exactement présents et positifs. L'enveloppe
+observée est `[min R_b,max R_b]`. La médiane de six observations est la moyenne
+arithmétique exacte des troisième et quatrième ratios triés. Pour le mur,
+définir séparément
+`W_{b,d}` pour chaque mode digest `d`; l'A/A emploie le pseudo-rapport
+deuxième position/première position. `W < 1` signifie « favorise CSR » ;
+digest off et on rendent deux verdicts distincts. Le seuil A/A strict de
+`0,03` et la médiane `<= 0,97` restent des portes d'ingénierie, pas une preuve
+inférentielle que trois pour cent sont résolus.
+
+L'égalité de `digest_all` n'est exigible que lorsque le digest est calculé.
+Sous digest off, l'identité des entrées, commandes et compteurs non vacus est
+la porte ; un témoin digest on et `first_divergence` est conservé par taille.
+Le RSS reste diagnostique tant qu'aucun ratio A/A, seuil et agrégation par
+mode join ne sont définis. La garde mémoire décisionnelle porte donc sur les
+octets logiques exacts ; les croissances de capacité restent diagnostiques si
+elles ne sont pas instrumentées symétriquement.
+
+Ordre de décision :
+
+1. Une identité de binaire ou d'entrée illisible/modifiée, un run absent, un
+   chrono invalide ou un tuple incomplet donne `INCONCLUSIF`.
+2. Sur une comparaison intègre et terminée, toute divergence sémantique donne
+   prioritairement `NO-GO_SEMANTIQUE`, même si les ratios semblent favorables.
+3. Sans divergence ni bloc invalide, `max R_b <= 0,55` sur 16k et 32k, puis
+   toutes les gardes reduce et octets, donne `GO_MECANISME_UNIFORM`.
+4. Si `min R_b > 0,55` sur au moins une taille décisionnelle, le résultat est
+   `NO-GO_PERFORMANCE_PALIER`. Une enveloppe qui traverse `0,55` est
+   `INCONCLUSIF` ; supprimer le mot non défini « nettement ».
+5. Si la cible mécanisme passe mais une garde échoue, rendre
+   `NO-GO_GARDE` avec la garde nommée, au lieu de laisser ce cas sans verdict.
+6. Le verdict mur est séparé par mode digest : A/A insuffisant donne
+   `INCONCLUSIF`; sinon six `W_{b,d} < 1` et une médiane `<= 0,97` reçoivent
+   le gain, toute autre configuration ne le reçoit pas.
+
+8k reste purement diagnostique. `eight_clusters` à 32k décide uniquement de
+l'extension au-delà de `uniform` et ne réécrit jamais rétroactivement le
+verdict primaire sur `uniform`. Aucune de ces issues ne change
+`public_status=not_claimed`.
 
 ## Q1 — même objet, nouvelle représentation explicite
 
@@ -136,9 +282,10 @@ l'accesseur commun, comparateur `first_divergence` séparé et rejeu de la
 partition. Les fixtures born-only, parents-only, continuation, multi-racines,
 forêt vide, copie post-callback, offsets, capacités et mutants ciblent les
 bonnes coutures. Après recompilation Release du snapshot courant, les 39
-portes initiales passent ; une sélection élargie de 56 portes non-`scale`
-(fixtures, offsets, débordement, copie, conformité, mutants et CLI) passe
-aussi 56/56. C'est une base sémantique solide, pas un prototype à reprendre.
+portes initiales passent ; une sélection élargie de 57 portes non-`scale`, en
+excluant la longue matrice pipeline (fixtures, offsets, débordement, copie,
+conformité, mutants et CLI), passe aussi 57/57 en 67,09 s. C'est une base
+sémantique solide, pas un prototype à reprendre.
 
 Une première contre-lecture avait soupçonné `FacetKeyRange::size()` parce que
 la plage vide est `{nullptr, nullptr}` et que la fonction calcule `e - b`.
@@ -183,6 +330,29 @@ incrémente sur chaque changement réel de `capacity()`, réserves et croissance
 d'arènes comprises. C'est le correctif demandé ; il reste seulement à le
 recevoir sur un pin. L'instrumentation séparée du scratch appartient au futur
 protocole de mesure, pas à l'égalité d'objet ni au prototype actuel.
+
+Trois précisions bornent cette télémétrie avant tout reçu de performance :
+
+- `allocations=0` sous `classic` signifie actuellement « non instrumenté »,
+  tandis que la valeur CSR compte les croissances de ses cinq vecteurs. Ne pas
+  comparer ces nombres ; renommer le champ en `csr_capacity_growths` ou compter
+  les deux layouts symétriquement ;
+- `octets_possedes exact=0` du classique est une borne inférieure, car les
+  capacités des vecteurs internes ne sont pas parcourues. Le scratch commun
+  manque aussi. Un ratio mémoire attend donc les capacités internes exactes
+  des deux bras ;
+- `offset_dernier_parents` et `offset_dernier_nes` sont imprimés depuis la
+  taille des arènes, pas lus depuis `parents_off.back()` et `born_off.back()`.
+  L'invariant validé les rend égaux sur un résultat sain, mais le champ ne
+  constitue pas un témoin indépendant : lire la valeur réelle ou le supprimer.
+
+Enfin, la porte de profil signe aujourd'hui le `layout` **demandé**. Elle
+accepte encore une sortie synthétique `layout=csr` dont les kinds construits
+ont tous été remplacés par `classic`. Les portes sémantiques/CLI empêchent le
+repli dans le prototype, mais le futur validateur de mesure doit aussi exiger
+une ligne de tête unique avec kind construit, zéro fallback et exactement un
+`stockage_foret` cohérent par K. Ces quatre points ne retardent pas le pin
+sémantique ; ils empêchent seulement un reçu de mesure ambigu.
 
 ## Q2 — protocole de mesure à graver à la place
 
