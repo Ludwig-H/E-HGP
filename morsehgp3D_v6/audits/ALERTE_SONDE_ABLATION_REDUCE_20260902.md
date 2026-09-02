@@ -76,3 +76,12 @@ retirer aussi exactement un préfixe `./` côté manifeste, puis conserver une
 contre-fixture pour chacun des cas fichier absent, fichier supplémentaire et
 entrée dupliquée. Ce constat vise uniquement le WIP non commité ; il ne remet
 pas en cause l'intégrité déjà vérifiée du reçu.
+
+Le contrôle final doit également lier **le manifeste initial lui-même**. Dans
+le WIP courant, il relit le `SHA256SUMS` présent après le validateur : un faux
+validateur peut modifier `session.log`, régénérer `SHA256SUMS` avec les
+nouveaux hashes, puis rendre 0 ; l'ensemble des noms reste identique et la
+vérification finale devient verte. Graver avant l'appel le SHA-256 (ou les
+octets) de `SHA256SUMS`, l'exiger inchangé après l'appel, et ajouter le mutant
+« altération + rehash » au selftest. Le mutant existant « altération sans
+rehash » ne tue pas ce contournement.
