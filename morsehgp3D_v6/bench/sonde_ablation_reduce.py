@@ -4,19 +4,44 @@
 audits/ALERTE_SONDE_ABLATION_REDUCE_20260902.md, puis les cinq
 contre-fixtures encore vertes de son « Etat du WIP » et du § 5.21 de
 REPONSE_AUDITEURS_MULTICPU_V6 : taille dupliquee, hash vide, champ duplique,
-carre latin non Williams, artefact inattendu dans out/).
+carre latin non Williams, artefact inattendu dans out/ ; puis les dents du
+2 septembre d'ETAT_COURANT (ligne « sonde equilibree … harnais ») et de la fin
+du § 5.22 : compteurs facultatifs, grammaire profil incomplete, repertoire
+vide a la racine, hashes de protocoles non recalcules, identite de cible).
 
-Autorite : META.txt (n_list, reps, ablations, statut, binaire_sha256) et
-plan.txt (bloc, position, bras — carre de Williams). Le resume n'est produit
-que si :
-  - META.txt porte le schema v2, aucune ligne `campagne INVALIDE`, des
-    tailles distinctes (deux tuples de meme taille porteraient le meme tag),
-    des hash a la grammaire EXACTE ^[0-9a-f]{64}$ (binaire, lanceur,
-    agregateur), et `runs_effectues` egal au cardinal de la matrice ;
+Autorite : META.txt (n_list, reps, ablations, statut, binaire_sha256,
+runs_*, sha256_*, identite_cible, injections_*) et plan.txt (bloc, position,
+bras — carre de Williams). Le resume n'est produit que si :
+  - META.txt porte le schema COURANT (v3) ou un schema ANTERIEUR accepte
+    EXPLICITEMENT (v2 : les champs d'identite de cible n'existaient pas ; le
+    resume imprime alors « claim borne, NON VERIFIE » pour ces champs — tout
+    le reste est aussi strict qu'en v3), aucune ligne `campagne INVALIDE`,
+    des tailles distinctes (deux tuples de meme taille porteraient le meme
+    tag), des hash a la grammaire EXACTE ^[0-9a-f]{64}$ (binaire, lanceur,
+    agregateur) ;
+  - `runs_effectues` et `runs_attendus` sont OBLIGATOIRES (v2 et v3 : le
+    lanceur les a toujours graves) et egaux au cardinal exact bras x tailles
+    x repetitions ; un champ obligatoire absent est un refus (jamais un
+    defaut substitue) ;
+  - `statut` commence par exploratory_noncausal_upper_bounds ; les bras sont
+    EXACTEMENT le temoin et les trois ablations de la sonde (identite de
+    cible : mhgp6_profile_sonde accepte tout mutant de kMutants, donc un
+    reçu ne vaut que si les seuls --inject= emis — lus sur la ligne
+    commande= de CHAQUE .status — sont ces trois ablations, une par tuple
+    non temoin ; v3 : injections_autorisees/injections_emises du META en
+    sont l'ensemble exact et identite_cible nomme mhgp6_profile_sonde) ;
+  - les hashes sha256_lanceur / sha256_agregateur du META sont RECALCULES
+    depuis protocole_lanceur.sh / protocole_agregateur.py presents dans le
+    reçu (difference ou absence = refus) ;
+  - la RACINE du reçu porte exactement les fichiers attendus (+ SHA256SUMS
+    optionnel, + le couple worktree_diff.* si et seulement si
+    worktree_sources_modifies != 0) et exactement les repertoires bin/ et
+    out/ : un repertoire VIDE ou inattendu, un lien, une entree speciale est
+    un refus ; bin/ contient exactement mhgp6_profile_sonde ;
   - tout champ est UNIQUE : un champ present deux fois dans META.txt, un
     .status, une ligne de plan.txt ou une ligne profil_reduce est un refus
-    (jamais la premiere ni la derniere valeur), une ligne de plan ou de
-    profil malformee (jeton sans `=`) aussi ;
+    (jamais la premiere ni la derniere valeur) ; temps_mur_ms et rss_max_kb
+    exactement une fois par sortie ;
   - la matrice bras x tailles x repetitions est EXACTE : out/ contient
     exactement le triplet <tag>.txt|.err|.status de chaque tuple attendu et
     RIEN d'autre (ni intrus, ni repertoire, ni lien, ni out/SHA256SUMS),
@@ -29,9 +54,13 @@ que si :
     (bras adjacents dans un bloc) apparait exactement une fois — un carre
     latin cyclique (ABCD/BCDA/CDAB/DABC) est refuse ;
   - chaque sortie porte exactement dix lignes `profil_reduce K=1..10` (une
-    par K, aucune autre), toutes les fenetres requises presentes et FINIES,
-    `somme` coherente avec ses composantes (seuil 0.0051 du § 5.13),
-    `temps_mur_ms` et `rss_max_kb` presents et finis.
+    par K, aucune autre) a la grammaire STRICTE : `K=<entier>` en tete, puis
+    des jetons `nom=valeur` (nom ^[a-z][a-z0-9_]*$, valeur decimale
+    ^-?[0-9]+(\\.[0-9]+)?$ finie) ; un jeton sans `=`, une valeur vide, non
+    numerique, nan/inf ou en notation exposant, un K non entier, une ligne
+    tronquee sont des refus — jamais ignores ; toutes les fenetres requises
+    presentes, `somme` coherente avec ses composantes (seuil 0.0051 du
+    § 5.13), `temps_mur_ms` et `rss_max_kb` presents, uniques et finis.
 Une mesure absente n'est JAMAIS remplacee par zero : elle est un refus.
 
 Tableau principal : differences APPARIEES PAR BLOC (bras − aucune au sein
@@ -51,8 +80,16 @@ import re
 import statistics
 import sys
 
-SCHEMA = "e-hgp.sonde-ablation-reduce.v2"
+SCHEMA = "e-hgp.sonde-ablation-reduce.v3"
+# Schemas anterieurs acceptes EXPLICITEMENT : v2 = memes fichiers et memes
+# compteurs, sans les champs d'identite de cible (identite_cible,
+# injections_autorisees, injections_emises) — ces trois-la sont alors un
+# claim borne, NON VERIFIE au META, imprime en tete du resume. Le v1 est refuse.
+SCHEMAS_ANTERIEURS = ("e-hgp.sonde-ablation-reduce.v2",)
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
+NOM_CHAMP = re.compile(r"^[a-z][a-z0-9_]*$")
+DECIMAL = re.compile(r"^-?[0-9]+(?:\.[0-9]+)?$")
+LIGNE_PROFIL = re.compile(r"^profil_reduce(?:[ \t]+(.*))?[ \t]*$", re.M)
 WINDOWS = ("init", "touch", "pre", "unite", "post_remplissage",
            "materialisation_tri_copie", "partition", "liberation", "somme")
 # Composantes dont `somme` est la somme (liveness figure dans reduce_v2 ; si
@@ -65,6 +102,14 @@ CHAMPS_REQUIS = WINDOWS + ("mur_reduce_interne", "residuel")
 KS = tuple(range(1, 11))
 KS_SHOWN = (8, 9, 10)
 BRAS_TEMOIN = "aucune"
+# Identite de cible (claim BORNE) : mhgp6_profile_sonde est construit sous
+# MHGP6_TESTING et `mutants_enable` accepte TOUT nom de kMutants
+# (drop-nonmerge compris) ; la sonde ne selectionne que ces trois ablations
+# et refuse tout reçu dont un .status en emet un autre.
+ABLATIONS_SONDE = ("ablation-mat-sans-copie", "ablation-mat-sans-tris",
+                   "ablation-post-cle-factice")
+IDENTITE_CIBLE = "mhgp6_profile_sonde"
+STATUT_ATTENDU = "exploratory_noncausal_upper_bounds"
 SEUIL_SOMME = 0.0051
 ETIQUETTES = {
     "ablation-mat-sans-copie": "borne : copie profonde retiree (objet change)",
@@ -74,10 +119,21 @@ ETIQUETTES = {
 }
 PARTS = ("materialisation_tri_copie", "post_remplissage")
 EXTENSIONS = ("txt", "err", "status")
-CHAMPS_STATUS = ("ablation", "n", "rep", "position", "code",
+CHAMPS_STATUS = ("ablation", "n", "rep", "position", "code", "commande",
                  "sha256_avant", "sha256_apres")
 CHAMPS_META = ("schema", "n_list", "reps", "ablations", "statut",
-               "binaire_sha256", "sha256_lanceur", "sha256_agregateur")
+               "binaire_sha256", "sha256_lanceur", "sha256_agregateur",
+               "runs_effectues", "runs_attendus", "worktree_sources_modifies")
+CHAMPS_META_V3 = ("identite_cible", "injections_autorisees", "injections_emises")
+FICHIERS_RACINE = ("HASHES.txt", "META.txt", "lscpu.txt", "plan.txt",
+                   "protocole_agregateur.py", "protocole_lanceur.sh",
+                   "resume.err", "resume.txt")
+FICHIERS_RACINE_OPTIONNELS = ("SHA256SUMS",)   # absent tant que le lanceur agrege
+FICHIERS_WORKTREE = ("worktree_diff.patch", "worktree_diff_summary.txt")
+REPERTOIRES_RACINE = ("bin", "out")
+COPIE_PRIVEE = "mhgp6_profile_sonde"
+PROTOCOLES = (("protocole_lanceur.sh", "sha256_lanceur"),
+              ("protocole_agregateur.py", "sha256_agregateur"))
 
 
 class Refus(Exception):
@@ -106,7 +162,8 @@ def tokens_kv(tokens, contexte):
 
 
 def lire_kv(path, requis=()):
-    """Fichier `cle=valeur` par ligne ; un champ present deux fois est un refus."""
+    """Fichier `cle=valeur` par ligne ; un champ present deux fois est un refus,
+    un champ OBLIGATOIRE absent aussi (jamais un defaut substitue)."""
     kv = {}
     base = os.path.basename(path)
     with open(path, encoding="utf-8") as f:
@@ -121,11 +178,20 @@ def lire_kv(path, requis=()):
             kv[k] = v
     for k in requis:
         if k not in kv:
-            raise Refus(f"{base} sans champ {k}=")
+            raise Refus(f"{base} : champ obligatoire {k}= absent — refus, jamais un defaut")
     return kv
 
 
+def entier(texte, contexte):
+    try:
+        return int(texte)
+    except ValueError:
+        raise Refus(f"{contexte}={texte!r} non entier")
+
+
 def lire_meta(work):
+    """-> (meta, ns, reps, bras, bornes) ; bornes = claims NON VERIFIES d'un
+    schema anterieur, imprimes en tete du resume."""
     path = os.path.join(work, "META.txt")
     if not os.path.isfile(path):
         raise Refus("META.txt absent")
@@ -134,15 +200,35 @@ def lire_meta(work):
             if line.startswith("campagne INVALIDE"):
                 raise Refus(f"META.txt porte « {line.strip()} » — reçu invalide, jamais agrege")
     meta = lire_kv(path, CHAMPS_META)
-    if meta["schema"] != SCHEMA:
-        raise Refus(f"META.txt : schema {meta['schema']!r} != {SCHEMA}")
+    schema = meta["schema"]
+    bornes = []
+    if schema == SCHEMA:
+        for k in CHAMPS_META_V3:
+            if k not in meta:
+                raise Refus(f"META.txt : champ obligatoire {k}= absent (schema {SCHEMA})")
+        if not meta["identite_cible"].startswith(IDENTITE_CIBLE):
+            raise Refus(f"META.txt : identite_cible={meta['identite_cible']!r} ne nomme pas "
+                        f"{IDENTITE_CIBLE}")
+        for k in ("injections_autorisees", "injections_emises"):
+            if sorted(meta[k].split()) != sorted(ABLATIONS_SONDE):
+                raise Refus(f"META.txt : {k}={meta[k]!r} != les trois ablations de la sonde "
+                            f"{list(ABLATIONS_SONDE)} (identite de cible : jamais un mutant "
+                            "produit de kMutants)")
+    elif schema in SCHEMAS_ANTERIEURS:
+        bornes.append(f"identite_cible / injections_autorisees / injections_emises : claim borne, "
+                      f"NON VERIFIE au META (schema {schema} anterieur a ces champs) ; les "
+                      "--inject= de chaque .status sont neanmoins verifies contre les trois "
+                      "ablations de la sonde")
+    else:
+        raise Refus(f"META.txt : schema {schema!r} ni courant ({SCHEMA}) ni anterieur accepte "
+                    f"{list(SCHEMAS_ANTERIEURS)}")
+    if not meta["statut"].startswith(STATUT_ATTENDU):
+        raise Refus(f"META.txt : statut={meta['statut']!r} ne commence pas par {STATUT_ATTENDU}"
+                    " — un reçu de sonde n'a pas d'autre statut")
     for k in ("binaire_sha256", "sha256_lanceur", "sha256_agregateur"):
         exiger_hex64(meta[k], f"META.txt {k}=")
-    try:
-        ns = [int(x) for x in meta["n_list"].split()]
-        reps = int(meta["reps"])
-    except ValueError as e:
-        raise Refus(f"META.txt : n_list/reps non entiers ({e})")
+    ns = [entier(x, "META.txt n_list element") for x in meta["n_list"].split()]
+    reps = entier(meta["reps"], "META.txt reps")
     bras = meta["ablations"].split()
     if not ns or reps <= 0:
         raise Refus("META.txt : matrice vide (n_list vide ou reps <= 0)")
@@ -152,19 +238,69 @@ def lire_meta(work):
         doublons = sorted({n for n in ns if ns.count(n) > 1})
         raise Refus(f"META.txt : n_list avec taille dupliquee {doublons} — les tags "
                     "<bras>_n<n>_r<bloc> de deux tuples s'ecraseraient")
-    if BRAS_TEMOIN not in bras or len(bras) != len(set(bras)):
-        raise Refus(f"META.txt : bras temoin {BRAS_TEMOIN} absent ou bras dupliques")
+    if sorted(bras) != sorted((BRAS_TEMOIN,) + ABLATIONS_SONDE):
+        raise Refus(f"META.txt : ablations={bras} != temoin {BRAS_TEMOIN} + les trois ablations "
+                    f"{list(ABLATIONS_SONDE)} (bras hors sonde, duplique, absent : identite de "
+                    "cible non tenue)")
     cardinal = len(bras) * len(ns) * reps
     for k in ("runs_effectues", "runs_attendus"):
-        if k in meta:
-            try:
-                v = int(meta[k])
-            except ValueError:
-                raise Refus(f"META.txt : {k}={meta[k]!r} non entier")
-            if v != cardinal:
-                raise Refus(f"META.txt : {k}={v} != cardinal de la matrice {cardinal} "
-                            f"({len(bras)} bras x {len(ns)} tailles x {reps} blocs)")
-    return meta, ns, reps, bras
+        v = entier(meta[k], f"META.txt {k}")
+        if v != cardinal:
+            raise Refus(f"META.txt : {k}={v} != cardinal de la matrice {cardinal} "
+                        f"({len(bras)} bras x {len(ns)} tailles x {reps} blocs)")
+    entier(meta["worktree_sources_modifies"], "META.txt worktree_sources_modifies")
+    return meta, ns, reps, bras, bornes
+
+
+def inventaire_racine(work, worktree_modifie):
+    """La racine du reçu = exactement les fichiers attendus et les repertoires
+    bin/ et out/. Un repertoire VIDE ou inattendu, un lien, une entree
+    speciale, un fichier intrus ou attendu absent : refus."""
+    attendus = set(FICHIERS_RACINE)
+    if worktree_modifie:
+        attendus |= set(FICHIERS_WORKTREE)
+    fichiers, repertoires = set(), set()
+    for e in sorted(os.listdir(work)):
+        chemin = os.path.join(work, e)
+        if os.path.islink(chemin):
+            raise Refus(f"racine : {e} est un lien symbolique — aucun lien dans un reçu")
+        if os.path.isdir(chemin):
+            repertoires.add(e)
+        elif os.path.isfile(chemin):
+            fichiers.add(e)
+        else:
+            raise Refus(f"racine : {e} entree speciale — aucune entree speciale dans un reçu")
+    inattendus = sorted(repertoires - set(REPERTOIRES_RACINE))
+    if inattendus:
+        raise Refus(f"racine : repertoire(s) inattendu(s) {inattendus[:4]} (vide ou non) — "
+                    f"seuls {list(REPERTOIRES_RACINE)} sont attendus")
+    manquants = sorted(set(REPERTOIRES_RACINE) - repertoires)
+    if manquants:
+        raise Refus(f"racine : repertoire(s) attendu(s) absent(s) {manquants}")
+    inattendus = sorted(fichiers - attendus - set(FICHIERS_RACINE_OPTIONNELS))
+    if inattendus:
+        raise Refus(f"racine : fichier(s) inattendu(s) {inattendus[:4]} — inventaire racine exact "
+                    f"(worktree_sources_modifies={'!=0' if worktree_modifie else '0'})")
+    manquants = sorted(attendus - fichiers)
+    if manquants:
+        raise Refus(f"racine : fichier(s) attendu(s) absent(s) {manquants[:4]}")
+    contenu_bin = sorted(os.listdir(os.path.join(work, "bin")))
+    if contenu_bin != [COPIE_PRIVEE]:
+        raise Refus(f"bin/ : contenu {contenu_bin[:4]} != [{COPIE_PRIVEE!r}] — la copie privee "
+                    "seule")
+
+
+def verifier_protocoles(work, meta):
+    """sha256_lanceur / sha256_agregateur du META RECALCULES depuis les copies
+    archivees ; difference ou absence = refus (protocole altere apres coup)."""
+    for nom, champ in PROTOCOLES:
+        p = os.path.join(work, nom)
+        if os.path.islink(p) or not os.path.isfile(p):
+            raise Refus(f"{nom} absent ou non regulier — le protocole archive est obligatoire")
+        h = sha256_fichier(p)
+        if h != meta[champ]:
+            raise Refus(f"{nom} : sha256 recalcule {h} != {champ} du META {meta[champ]} "
+                        "(protocole archive altere apres coup)")
 
 
 def verifier_williams(plan, bras, blocs):
@@ -227,9 +363,9 @@ def lire_plan(work, reps, bras):
 
 
 def lire_status(path):
-    """-> (ablation, n, rep, position, code, sha256_avant, sha256_apres).
-    Premiere ligne = jetons ; lignes suivantes = cle=valeur ; tout champ
-    present deux fois (sur la ligne 1 ou entre lignes) est un refus."""
+    """-> dict des champs. Premiere ligne = jetons ; lignes suivantes =
+    cle=valeur ; tout champ present deux fois (sur la ligne 1 ou entre
+    lignes) est un refus ; tout champ de CHAMPS_STATUS est obligatoire."""
     base = os.path.basename(path)
     with open(path, encoding="utf-8") as f:
         lignes = f.read().splitlines()
@@ -246,12 +382,41 @@ def lire_status(path):
         kv[k] = v
     for k in CHAMPS_STATUS:
         if k not in kv:
-            raise Refus(f"{base} : champ {k}= absent")
-    try:
-        return (kv["ablation"], int(kv["n"]), int(kv["rep"]), int(kv["position"]),
-                int(kv["code"]), kv["sha256_avant"], kv["sha256_apres"])
-    except ValueError:
-        raise Refus(f"{base} : n/rep/position/code non entiers")
+            raise Refus(f"{base} : champ obligatoire {k}= absent")
+    for k in ("n", "rep", "position", "code"):
+        entier(kv[k], f"{base} {k}")
+    return kv
+
+
+def injections_de(commande):
+    """Noms passes par --inject= sur la ligne commande= (csv accepte par la
+    CLI : chaque nom compte)."""
+    noms = []
+    for tok in commande.split():
+        if tok.startswith("--inject="):
+            noms.extend(x for x in tok[len("--inject="):].split(","))
+    return noms
+
+
+def verifier_injections(nom, abl, commande):
+    """Identite de cible tenue par les faits : le bras temoin n'emet aucun
+    --inject=, tout autre bras emet exactement le sien, et tout nom emis est
+    l'une des trois ablations de la sonde (un mutant produit de kMutants,
+    que mhgp6_profile_sonde accepte, n'est pas une mesure de la sonde)."""
+    if f"bin/{COPIE_PRIVEE}" not in commande.split():
+        raise Refus(f"{nom} : commande= n'execute pas bin/{COPIE_PRIVEE} (copie privee)")
+    inj = injections_de(commande)
+    for x in inj:
+        if x not in ABLATIONS_SONDE:
+            raise Refus(f"{nom} : --inject={x} hors sonde — seules les trois ablations "
+                        f"{list(ABLATIONS_SONDE)} sont selectionnees (identite de cible : "
+                        "un mutant produit de kMutants n'est jamais une mesure de la sonde)")
+    if abl == BRAS_TEMOIN:
+        if inj:
+            raise Refus(f"{nom} : bras temoin {BRAS_TEMOIN} avec --inject={inj}")
+    elif inj != [abl]:
+        raise Refus(f"{nom} : --inject= emis {inj} != [{abl!r}] (exactement le mutant du bras)")
+    return inj
 
 
 def lire_hashes(work, tags, h_meta):
@@ -294,29 +459,55 @@ def sha256_fichier(path):
     return h.hexdigest()
 
 
+def valeur_decimale(base, k, name, v):
+    """Valeur d'une fenetre : decimale finie, ou refus explicite (vide,
+    non numerique, nan/inf, exposant) — jamais un nan silencieux."""
+    if v == "":
+        raise Refus(f"{base} : K={k} {name}= vide (ligne profil_reduce tronquee)")
+    try:
+        x = float(v)
+    except ValueError:
+        raise Refus(f"{base} : K={k} valeur non numerique {name}={v!r} (ligne profil_reduce "
+                    "malformee) — jamais ignoree")
+    if not math.isfinite(x):
+        raise Refus(f"{base} : K={k} fenetre {name} non finie ({v})")
+    if not DECIMAL.match(v):
+        raise Refus(f"{base} : K={k} {name}={v!r} hors grammaire decimale ^-?[0-9]+(.[0-9]+)?$")
+    return x
+
+
 def parse_profile(path):
-    """-> ({K: {champ: float}}, temps_mur_ms, rss_max_kb) ; refus sinon."""
+    """-> ({K: {champ: float}}, temps_mur_ms, rss_max_kb) ; refus sinon.
+    Toute ligne commencant par `profil_reduce` est parsee STRICTEMENT."""
     base = os.path.basename(path)
     with open(path, encoding="utf-8") as f:
         text = f.read()
     per_k = {}
-    for m in re.finditer(r"^profil_reduce K=(\d+) (.*)$", text, re.M):
-        k = int(m.group(1))
+    for m in LIGNE_PROFIL.finditer(text):
+        ligne = m.group(0).strip()
+        tokens = (m.group(1) or "").split()
+        if not tokens:
+            raise Refus(f"{base} : ligne profil_reduce tronquee ou vide ({ligne!r})")
+        if not tokens[0].startswith("K="):
+            raise Refus(f"{base} : ligne profil_reduce sans K= en tete ({ligne[:80]!r})")
+        k_txt = tokens[0][2:]
+        if not re.fullmatch(r"[0-9]+", k_txt):
+            raise Refus(f"{base} : K non entier ({tokens[0]!r}) — ligne profil_reduce malformee")
+        k = int(k_txt)
         if k not in KS:
             raise Refus(f"{base} : K={k} hors 1..10")
         if k in per_k:
             raise Refus(f"{base} : ligne K={k} dupliquee")
+        if len(tokens) == 1:
+            raise Refus(f"{base} : ligne K={k} tronquee (aucune fenetre)")
         fields = {}
-        for name, v in tokens_kv(m.group(2).split(), f"{base} profil_reduce K={k}").items():
-            try:
-                fields[name] = float(v)
-            except ValueError:
-                fields[name] = float("nan")
+        for name, v in tokens_kv(tokens[1:], f"{base} profil_reduce K={k}").items():
+            if not NOM_CHAMP.match(name):
+                raise Refus(f"{base} : K={k} nom de champ hors grammaire ({name!r})")
+            fields[name] = valeur_decimale(base, k, name, v)
         for name in CHAMPS_REQUIS:
             if name not in fields:
                 raise Refus(f"{base} : K={k} sans fenetre {name}")
-            if not math.isfinite(fields[name]):
-                raise Refus(f"{base} : K={k} fenetre {name} non finie")
         recalc = sum(fields[c] for c in COMPOSANTES if c in fields)
         if not math.isfinite(recalc) or abs(recalc - fields["somme"]) > SEUIL_SOMME:
             raise Refus(f"{base} : K={k} somme imprimee {fields['somme']:.3f}"
@@ -325,19 +516,23 @@ def parse_profile(path):
     manquants = [k for k in KS if k not in per_k]
     if manquants:
         raise Refus(f"{base} : ligne(s) K manquante(s) {manquants}")
-    mur = re.search(r"^temps_mur_ms=(\S+)", text, re.M)
-    rss = re.search(r"^rss_max_kb=(\d+)$", text, re.M)
-    if not mur:
-        raise Refus(f"{base} : temps_mur_ms absent")
+    murs = re.findall(r"^temps_mur_ms=(\S*)", text, re.M)
+    if len(murs) != 1:
+        raise Refus(f"{base} : temps_mur_ms absent ou duplique ({len(murs)} occurrence(s)) — "
+                    "jamais la premiere ni la derniere valeur")
     try:
-        mur_ms = float(mur.group(1))
+        mur_ms = float(murs[0])
     except ValueError:
-        raise Refus(f"{base} : temps_mur_ms illisible")
+        raise Refus(f"{base} : temps_mur_ms illisible ({murs[0]!r})")
     if not math.isfinite(mur_ms):
         raise Refus(f"{base} : temps_mur_ms non fini")
-    if not rss:
-        raise Refus(f"{base} : rss_max_kb absent")
-    return per_k, mur_ms, int(rss.group(1))
+    rss = re.findall(r"^rss_max_kb=(\S*)", text, re.M)
+    if len(rss) != 1:
+        raise Refus(f"{base} : rss_max_kb absent ou duplique ({len(rss)} occurrence(s)) — "
+                    "jamais la premiere ni la derniere valeur")
+    if not re.fullmatch(r"[0-9]+", rss[0]):
+        raise Refus(f"{base} : rss_max_kb non entier ({rss[0]!r})")
+    return per_k, mur_ms, int(rss[0])
 
 
 def inventaire_out(out, attendus):
@@ -359,44 +554,50 @@ def inventaire_out(out, attendus):
 
 
 def charger(work):
-    meta, ns, reps, bras = lire_meta(work)
+    meta, ns, reps, bras, bornes = lire_meta(work)
+    inventaire_racine(work, int(meta["worktree_sources_modifies"]) != 0)
+    verifier_protocoles(work, meta)
     plan = lire_plan(work, reps, bras)
     h_meta = meta["binaire_sha256"]
-    copie = os.path.join(work, "bin", "mhgp6_profile_sonde")
+    copie = os.path.join(work, "bin", COPIE_PRIVEE)
     if not os.path.isfile(copie) or os.path.islink(copie):
-        raise Refus("bin/mhgp6_profile_sonde absent ou non regulier")
+        raise Refus(f"bin/{COPIE_PRIVEE} absent ou non regulier")
     h_copie = sha256_fichier(copie)
     if h_copie != h_meta:
-        raise Refus(f"bin/mhgp6_profile_sonde : sha256 {h_copie} != binaire_sha256 du META {h_meta}")
+        raise Refus(f"bin/{COPIE_PRIVEE} : sha256 {h_copie} != binaire_sha256 du META {h_meta}")
     out = os.path.join(work, "out")
-    if not os.path.isdir(out):
-        raise Refus("dossier out/ absent")
     attendus = sorted((a, n, r) for a in bras for n in ns for r in range(1, reps + 1))
     lire_hashes(work, {f"{a}_n{n}_r{r}" for (a, n, r) in attendus}, h_meta)
     inventaire_out(out, attendus)
     mesures = {}
+    emis = set()
     for key in attendus:
         a, n, r = key
         tag = f"{a}_n{n}_r{r}"
         f = f"{tag}.status"
-        abl, n_lu, rep, pos, code, h_avant, h_apres = lire_status(os.path.join(out, f))
+        kv = lire_status(os.path.join(out, f))
+        abl, n_lu, rep, pos = kv["ablation"], int(kv["n"]), int(kv["rep"]), int(kv["position"])
         if (abl, n_lu, rep) != key:
             raise Refus(f"nom de statut incoherent avec son contenu : {f} "
                         f"(contenu {abl}_n{n_lu}_r{rep})")
-        if code != 0:
-            raise Refus(f"run en echec (code {code}) : {f}")
+        if int(kv["code"]) != 0:
+            raise Refus(f"run en echec (code {kv['code']}) : {f}")
         if plan[(rep, abl)] != pos:
             raise Refus(f"position executee {pos} != plan {plan[(rep, abl)]} : {f}")
-        for k, h in (("sha256_avant", h_avant), ("sha256_apres", h_apres)):
-            exiger_hex64(h, f"{f} {k}=")
-            if h != h_meta:
-                raise Refus(f"{f} : {k}={h} != binaire_sha256 du META {h_meta}")
+        for k in ("sha256_avant", "sha256_apres"):
+            exiger_hex64(kv[k], f"{f} {k}=")
+            if kv[k] != h_meta:
+                raise Refus(f"{f} : {k}={kv[k]} != binaire_sha256 du META {h_meta}")
+        emis.update(verifier_injections(f, abl, kv["commande"]))
         mesures[key] = parse_profile(os.path.join(out, f"{tag}.txt"))
+    if sorted(emis) != sorted(ABLATIONS_SONDE):
+        raise Refus(f"ensemble des --inject= emis {sorted(emis)} != les trois ablations "
+                    f"{list(ABLATIONS_SONDE)}")
     manquants = sorted(set(attendus) - set(mesures))
     if manquants:
         raise Refus(f"matrice incomplete : {len(manquants)} tuple(s) absent(s), "
                     f"premiers {manquants[:4]}")
-    return meta, ns, reps, bras, mesures
+    return meta, ns, reps, bras, mesures, bornes
 
 
 def valeurs(mesures, abl, n, rep):
@@ -428,7 +629,7 @@ def main():
               file=sys.stderr)
         return 2
     try:
-        meta, ns, reps, bras, mesures = charger(sys.argv[1])
+        meta, ns, reps, bras, mesures, bornes = charger(sys.argv[1])
     except Refus as e:
         print(f"REFUS : {e}", file=sys.stderr)
         return 1
@@ -439,6 +640,11 @@ def main():
     print(f"# sonde ablation reduce — statut={meta['statut']}")
     print("# bornes exploratoires NON CAUSALES sur binaire instrumente (join=1) : jamais un "
           "benchmark, jamais un mur, jamais un choix de palier.")
+    print(f"# schema={meta['schema']} ; identite de cible (claim borne) : "
+          f"{meta.get('identite_cible', IDENTITE_CIBLE + ' (schema anterieur : non grave)')} ; "
+          f"--inject= emis, verifies sur chaque .status : {' '.join(ABLATIONS_SONDE)}")
+    for b in bornes:
+        print(f"# claim borne, NON VERIFIE : {b}")
     print("# bras : " + " ; ".join([f"{BRAS_TEMOIN} (temoin)"] + [etiquette(a) for a in autres]))
     print(f"# plan : williams_4x4, blocs={reps}, tailles={ns} ; appariement PAR BLOC : "
           f"d_b = bras(b) − {BRAS_TEMOIN}(b), meme bloc, meme taille.")

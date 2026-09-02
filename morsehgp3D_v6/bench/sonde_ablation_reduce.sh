@@ -4,7 +4,11 @@
 # d'ecrire un palier » ; fermeture minimale exigee par
 # audits/ALERTE_SONDE_ABLATION_REDUCE_20260902.md, puis les cinq
 # contre-fixtures encore vertes de la fin de son « Etat du WIP » et du § 5.21
-# de REPONSE_AUDITEURS_MULTICPU_V6). Doctrine :
+# de REPONSE_AUDITEURS_MULTICPU_V6, puis les dents d'ETAT_COURANT du
+# 2 septembre (ligne « sonde equilibree … harnais ») et de la fin du § 5.22 :
+# compteurs facultatifs, profil malforme, repertoire vide, hashes de
+# protocoles non recalcules, identite de cible, TOCTOU avant scellement,
+# `diff` fail-open). Doctrine :
 #   - BORNES EXPLORATOIRES NON CAUSALES (statut=exploratory_noncausal_upper_bounds) :
 #     binaire de PROFIL sous MHGP6_TESTING (mhgp6_profile_sonde), fenetres
 #     par K (profil_reduce), join=1 pour isoler l'etage B. Chaque ablation
@@ -14,6 +18,21 @@
 #     BORNE COMPOSITE (lecture keys[] + tri de cles egales), pas « lecture
 #     seule » : il change aussi la distribution du tri de la fenetre
 #     materialisation_tri_copie.
+#   - IDENTITE DE CIBLE (P2, claim BORNE) : mhgp6_profile_sonde est construit
+#     sous MHGP6_TESTING et `mutants_enable` accepte TOUT nom de kMutants
+#     (drop-nonmerge compris, verifie le 2 septembre : rc 0). Le lanceur ne
+#     peut donc pas distinguer la cible d'un autre binaire de test par un
+#     mutant produit ; il ne le pretend pas. Ce qu'il garantit : (1) les
+#     sondes d'identite (accepte --inject=ablation-mat-sans-tris, refuse un
+#     nom inconnu par le code 2 exact) ; (2) les SEULS --inject= qu'il emet
+#     sont les trois ablations — ABLATIONS est verifie contre cette liste
+#     avant toute ecriture (refus 2), chaque tuple la re-verifie avant
+#     d'executer (un plan.txt altere en campagne => INVALIDE 3), et apres le
+#     dernier tuple les lignes commande= des .status sont RECOMPTEES
+#     (ensemble exact et une occurrence par tuple non temoin, sinon INVALIDE
+#     3) ; META grave identite_cible, injections_autorisees (avant) et
+#     injections_emises (apres) ; l'agregateur refuse tout .status dont le
+#     --inject= n'est pas l'ablation de son bras.
 #   - PLAN EQUILIBRE (carre de Williams 4x4 : ABCD BDAC CADB DCBA) : les
 #     blocs sont les repetitions ; sur quatre blocs consecutifs chaque bras
 #     occupe une fois chaque position et suit une fois chaque autre bras.
@@ -29,33 +48,54 @@
 #     (code 3), aucun mv de publication. Tout hash passe par la primitive
 #     hash_de : exactement 64 hexadecimaux ou echec FATAL (un sha256sum muet
 #     ne produit jamais une chaine vide « egale » a une autre chaine vide).
+#   - PROTOCOLES ARCHIVES : protocole_lanceur.sh / protocole_agregateur.py
+#     sont copies dans le reçu, leur sha256 grave au META et compare a la
+#     source relue des la copie (INVALIDE si different) puis A NOUVEAU avant
+#     publication (copie relue == META == source relue) ; l'agregateur les
+#     recalcule et refuse toute difference.
 #   - FAIL-CLOSED : liste de tailles vide, taille DUPLIQUEE (deux tuples
 #     porteraient le meme tag <bras>_n<n>_r<bloc> et s'ecraseraient),
-#     REPS <= 0, REPS non multiple de 4, CPUS invalide, hash illisible,
-#     binaire qui n'accepte pas --inject=ablation-* (binaire produit) ou qui
-#     accepte un nom inconnu => REFUS 2 avant tout run (le .partial est
-#     retire) ; un run a code non nul => INVALIDE 3 immediat ; l'agregateur
-#     (copie archivee protocole_agregateur.py) exige l'ensemble EXACT bras x
+#     REPS <= 0, REPS non multiple de 4, CPUS invalide, hash illisible, bras
+#     hors sonde, binaire qui n'accepte pas --inject=ablation-* (binaire
+#     produit) ou qui accepte un nom inconnu => REFUS 2 avant tout run (le
+#     .partial est retire) ; un run a code non nul => INVALIDE 3 immediat ;
+#     runs_effectues et runs_attendus sont graves (cardinal exact bras x
+#     tailles x repetitions) et l'agregateur (copie archivee
+#     protocole_agregateur.py) les exige, exige l'ensemble EXACT bras x
 #     tailles x repetitions, le triplet EXACT <tag>.txt|.err|.status par
 #     tuple et rien d'autre dans out/, le plan de Williams (successions
 #     ordonnees, pas seulement les positions), tout champ unique (META,
 #     statut, plan, profil), la grammaire 64-hex de chaque hash, dix lignes
-#     K, toutes les fenetres finies (jamais un zero substitue) et rend 1
-#     sinon ; agregateur, generation de SHA256SUMS, INVENTAIRE EXACT du reçu
-#     (les entrees du manifeste doivent etre exactement l'ensemble attendu :
-#     fichiers fixes + triplets de out/ [+ diff de worktree]) puis
-#     `sha256sum -c --strict` finale sont FATALS (3). Le manifeste couvre
-#     TOUT fichier regulier sauf le seul ./SHA256SUMS racine (un
-#     out/SHA256SUMS ou tout intrus est hache, donc visible, puis refuse par
-#     l'inventaire). Le manifeste est le DERNIER fichier ecrit : apres sa
-#     verification la seule operation restante est le `mv` de publication.
-#     Un reçu INVALIDE reste en `<OUT>.partial`, jamais publie.
+#     K a la grammaire stricte (jeton sans `=`, valeur non numerique, K non
+#     entier, ligne tronquee = refus, jamais ignores), toutes les fenetres
+#     finies (jamais un zero substitue), la racine du reçu exacte (aucun
+#     repertoire vide ou inattendu) et rend 1 sinon.
+#   - SCELLEMENT SANS TOCTOU : AVANT l'agregateur, l'empreinte sha256 de
+#     chaque fichier du reçu est relevee (ce que l'agregateur va lire) ;
+#     APRES, le manifeste SHA256SUMS est genere et doit porter exactement ces
+#     empreintes plus resume.txt/resume.err (un fichier modifie entre la
+#     lecture de l'agregateur et le scellement => INVALIDE 3 : une mutation
+#     semantique n'est jamais publiee). Puis, sans autre operation entre eux
+#     que ces controles : inventaire des repertoires (exactement bin/ et
+#     out/, un repertoire vide ou inattendu => INVALIDE), inventaire final des
+#     fichiers reguliers == entrees du manifeste (fichier apparu ou disparu
+#     apres le manifeste => INVALIDE), protocoles archives relus == META ==
+#     sources, copie privee relue == META, `sha256sum -c --strict`, et le
+#     `mv` de publication IMMEDIATEMENT apres. Toute comparaison de listes
+#     passe par exiger_listes_egales : le rc de `diff` est CAPTURE (0 =
+#     identique, 1 = different => INVALIDE, autre => INVALIDE « comparaison
+#     impossible ») — jamais un `|| true`, jamais un test sur la seule sortie
+#     vide. Le manifeste couvre TOUT fichier regulier sauf le seul
+#     ./SHA256SUMS racine (un out/SHA256SUMS ou tout intrus est hache, donc
+#     visible, puis refuse par l'inventaire). Un reçu INVALIDE reste en
+#     `<OUT>.partial`, jamais publie. Fenetre residuelle : le `mv` lui-meme
+#     (un faux `mv` en PATH) — aucun controle interne ne peut la voir.
 #   - Worktree : commit et nombre de fichiers modifies graves ; si non nul,
 #     `git diff HEAD` embarque dans worktree_diff.patch (+ statut porcelain et
 #     `git diff HEAD --summary --stat` dans worktree_diff_summary.txt), sinon
 #     worktree_diff=aucun.
-# Porte : tests/sonde_ablation_gate.py (faux binaire rapide, onze scenes,
-# cas (a)–(n)).
+# Porte : tests/sonde_ablation_gate.py (faux binaire rapide, dix-huit scenes,
+# cas (a)–(u)).
 # Usage : sonde_ablation_reduce.sh OUT_DIR BIN_SONDE [N_LIST="8000 16000 32000"] [REPS=4]
 #   (un troisieme argument VIDE est une liste vide, donc un refus — pas le defaut)
 #   ou  : sonde_ablation_reduce.sh --inventaire DIR
@@ -82,6 +122,10 @@ THREADS="${THREADS:-8}"
 CPUS="${CPUS:-0-7}"
 FAMILY="${FAMILY:-uniform}"
 ABLATIONS="aucune ablation-mat-sans-copie ablation-mat-sans-tris ablation-post-cle-factice"
+# Les SEULS --inject= que ce lanceur emet (identite de cible, claim borne :
+# la cible accepte tout kMutants, la sonde ne selectionne que ces trois-la).
+INJECTIONS_SONDE="ablation-mat-sans-copie ablation-mat-sans-tris ablation-post-cle-factice"
+IDENTITE_CIBLE="mhgp6_profile_sonde (accepte tout mutant de kMutants ; seules les ablations sont selectionnees ici)"
 # Carre de Williams pour quatre traitements : chaque lettre une fois par
 # position et chaque succession ordonnee (X puis Y) exactement une fois.
 WILLIAMS=("A B C D" "B D A C" "C A D B" "D C B A")
@@ -95,6 +139,14 @@ bras_de() {
     D) echo ablation-post-cle-factice ;;
     *) refus "lettre de plan inconnue ($1)" ;;
   esac
+}
+# Une ablation de la sonde, et rien d'autre (liste fermee, jamais un mutant
+# produit de kMutants meme si mhgp6_profile_sonde l'accepte).
+est_ablation_sonde() {
+  case "$1" in
+    ablation-mat-sans-copie|ablation-mat-sans-tris|ablation-post-cle-factice) return 0 ;;
+  esac
+  return 1
 }
 # Primitive de hash FATALE : imprime le sha256 (64 hexadecimaux) ou rend 1.
 # Jamais une chaine vide : un sha256sum muet, absent ou tronque est un echec.
@@ -130,6 +182,16 @@ case "${REPS}" in ''|*[!0-9]*) refus "REPS non entier (${REPS})" ;; esac
 REPS=$((10#${REPS}))
 [ "${REPS}" -gt 0 ] || refus "REPS <= 0 — un reçu vide n'est pas un reçu"
 [ $((REPS % 4)) -eq 0 ] || refus "REPS=${REPS} n'est pas un multiple de 4 (carre de Williams 4x4 : chaque bras une fois a chaque position par groupe de quatre blocs)"
+# Identite de cible tenue par les bras : le temoin et les trois ablations,
+# rien d'autre — un ABLATIONS edite vers un mutant produit est un refus.
+case " ${ABLATIONS} " in *" aucune "*) ;; *) refus "bras temoin aucune absent de ABLATIONS" ;; esac
+NBRAS=0
+for abl in ${ABLATIONS}; do
+  NBRAS=$((NBRAS + 1))
+  [ "${abl}" = aucune ] || est_ablation_sonde "${abl}" \
+    || refus "bras ${abl} hors sonde : les seuls --inject= emis par ce lanceur sont les trois ablations (${INJECTIONS_SONDE}) — jamais un mutant produit de kMutants, meme si mhgp6_profile_sonde l'accepte"
+done
+[ "${NBRAS}" -eq 4 ] || refus "ABLATIONS porte ${NBRAS} bras au lieu de 4 (temoin + trois ablations)"
 taskset -c "${CPUS}" true >/dev/null 2>&1 || refus "CPUS=${CPUS} invalide pour taskset"
 [ -f "${BIN_SRC}" ] && [ -x "${BIN_SRC}" ] || refus "binaire absent, non regulier ou non executable (${BIN_SRC})"
 
@@ -166,6 +228,20 @@ invalide() {
   echo "INVALIDE : $1 — reçu laisse en ${WORKD}, jamais publie" >&2
   exit 3
 }
+# Comparaison EXACTE de deux listes (une entree par ligne, deja triees) :
+# le rc de diff est CAPTURE — 0 = identique (et sortie vide), 1 = different
+# => INVALIDE avec les ecarts, tout autre (diff absent, en erreur, muet)
+# => INVALIDE « comparaison impossible ». Jamais un `|| true`, jamais un test
+# sur la seule sortie vide.
+exiger_listes_egales() { # $1 = libelle, $2 = attendu, $3 = obtenu
+  local sortie rc=0
+  sortie="$(LC_ALL=C diff <(printf '%s\n' "$2") <(printf '%s\n' "$3") 2>&1)" || rc=$?
+  case "${rc}" in
+    0) [ -z "${sortie}" ] || invalide "$1 : diff rc=0 mais sortie non vide (${sortie:0:200})" ;;
+    1) invalide "$1 (< attendu absent, > inattendu) : $(printf '%s\n' "${sortie}" | grep '^[<>]' | head -6 | tr '\n' ' ')" ;;
+    *) invalide "$1 : comparaison impossible (diff rc=${rc}${sortie:+ : ${sortie:0:200}}) — jamais fail-open" ;;
+  esac
+}
 H2="$(hash_de "${BIN}")" || invalide "sha256 de la copie privee illisible apres les sondes d'identite (sha256sum muet ou hors grammaire 64-hex)"
 [ "${H2}" = "${H}" ] || invalide "copie privee alteree par les sondes d'identite (${H2} != ${H})"
 
@@ -182,10 +258,16 @@ H2="$(hash_de "${BIN}")" || invalide "sha256 de la copie privee illisible apres 
   done
 } > "${WORKD}/plan.txt"
 
+# Protocoles archives : copie == source relue, des maintenant (et a nouveau
+# avant publication). Un hash grave est un hash relu, jamais suppose.
 cp "${HERE}/sonde_ablation_reduce.sh" "${WORKD}/protocole_lanceur.sh" || invalide "archivage du lanceur impossible"
 cp "${HERE}/sonde_ablation_reduce.py" "${WORKD}/protocole_agregateur.py" || invalide "archivage de l'agregateur impossible"
 H_LANCEUR="$(hash_de "${WORKD}/protocole_lanceur.sh")" || invalide "sha256 du lanceur archive illisible (hors grammaire 64-hex)"
 H_AGREGATEUR="$(hash_de "${WORKD}/protocole_agregateur.py")" || invalide "sha256 de l'agregateur archive illisible (hors grammaire 64-hex)"
+H_LANCEUR_SRC="$(hash_de "${HERE}/sonde_ablation_reduce.sh")" || invalide "sha256 du lanceur source illisible (hors grammaire 64-hex)"
+H_AGREGATEUR_SRC="$(hash_de "${HERE}/sonde_ablation_reduce.py")" || invalide "sha256 de l'agregateur source illisible (hors grammaire 64-hex)"
+[ "${H_LANCEUR}" = "${H_LANCEUR_SRC}" ] || invalide "protocole_lanceur.sh archive (${H_LANCEUR}) != source relue (${H_LANCEUR_SRC})"
+[ "${H_AGREGATEUR}" = "${H_AGREGATEUR_SRC}" ] || invalide "protocole_agregateur.py archive (${H_AGREGATEUR}) != source relue (${H_AGREGATEUR_SRC})"
 lscpu > "${WORKD}/lscpu.txt" 2>&1 || true
 
 WT_DIFF="aucun"
@@ -204,7 +286,7 @@ if [ "${DIRTY}" -ne 0 ]; then
 fi
 
 {
-  echo "schema=e-hgp.sonde-ablation-reduce.v2"
+  echo "schema=e-hgp.sonde-ablation-reduce.v3"
   echo "date_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "commit=${PIN}"
   echo "worktree_sources_modifies=${DIRTY}"
@@ -212,6 +294,8 @@ fi
   echo "binaire_source=${BIN_SRC}"
   echo "binaire_prive=bin/mhgp6_profile_sonde (copie immuable chmod 555, seule executee ; sha256 verifie avant et apres chaque tuple, HASHES.txt)"
   echo "binaire_sha256=${H}"
+  echo "identite_cible=${IDENTITE_CIBLE}"
+  echo "injections_autorisees=${INJECTIONS_SONDE}"
   echo "famille=${FAMILY}"
   echo "n_list=${N_LIST}"
   echo "reps=${REPS}"
@@ -231,6 +315,12 @@ fi
 run_one() { # $1 = ablation, $2 = n, $3 = bloc (repetition), $4 = position dans le bloc
   local abl="$1" n="$2" rep="$3" pos="$4"
   local tag="${abl}_n${n}_r${rep}"
+  # Garde d'identite AVANT toute execution : un bras qui n'est ni le temoin
+  # ni une ablation de la sonde (plan.txt altere en campagne) n'emet rien.
+  case "${abl}" in
+    aucune) ;;
+    *) est_ablation_sonde "${abl}" || invalide "bras ${abl} hors sonde au tuple ${tag} (plan.txt altere ?) — aucun --inject= hors des trois ablations n'est emis" ;;
+  esac
   local inj=()
   [ "${abl}" = "aucune" ] || inj=("--inject=${abl}")
   local load_before load_after t0 t1 hb ha rc=0
@@ -271,12 +361,31 @@ for rep in $(seq 1 "${REPS}"); do
     done < <(grep "^bloc=${rep} " "${WORKD}/plan.txt")
   done
 done
+# Recomptage des --inject= REELLEMENT emis (lignes commande= des .status) :
+# ensemble exact = les trois ablations, une occurrence par tuple non temoin.
+EMIS="$(cd "${WORKD}/out" && cat ./*.status | grep -o -- '--inject=[^ ]*' | sed 's/^--inject=//' | LC_ALL=C sort -u | tr '\n' ' ' | sed 's/ $//')"
+NINJ="$(cd "${WORKD}/out" && cat ./*.status | grep -c -- '--inject=')"
+ATTENDU_INJ="$(printf '%s\n' ${INJECTIONS_SONDE} | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//')"
 {
+  echo "injections_emises=${EMIS}"
   echo "runs_effectues=${NRUNS}"
   echo "runs_attendus=$((4 * NN * REPS))"
   echo "fin_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 } >> "${WORKD}/META.txt"
+[ "${EMIS}" = "${ATTENDU_INJ}" ] || invalide "--inject= emis {${EMIS}} != les trois ablations {${ATTENDU_INJ}} (identite de cible non tenue)"
+[ "${NINJ}" -eq $((3 * NN * REPS)) ] || invalide "${NINJ} occurrence(s) de --inject= dans les .status != $((3 * NN * REPS)) tuples non temoins"
 [ "${NRUNS}" -eq $((4 * NN * REPS)) ] || invalide "runs effectues ${NRUNS} != attendus $((4 * NN * REPS))"
+
+# --- Empreintes AVANT l'agregateur : ce qu'il lit est ce qui sera scelle ---
+declare -A PRE_H
+PRE_N=0
+while IFS= read -r p; do
+  [ -n "${p}" ] || continue
+  h="$(hash_de "${WORKD}/${p}")" || invalide "empreinte avant agregation illisible (${p})"
+  PRE_H["${p}"]="${h}"
+  PRE_N=$((PRE_N + 1))
+done < <(cd "${WORKD}" && lister_fichiers)
+[ "${PRE_N}" -gt 0 ] && [ "${PRE_N}" -eq "${#PRE_H[@]}" ] || invalide "empreintes avant agregation vides ou non injectives (${PRE_N} / ${#PRE_H[@]})"
 
 # --- Agregation FATALE (copie archivee), puis manifeste = dernier fichier -----
 python3 "${WORKD}/protocole_agregateur.py" "${WORKD}" > "${WORKD}/resume.txt" 2> "${WORKD}/resume.err" \
@@ -307,10 +416,41 @@ inventaire_attendu() {
     done
   done
 }
-ECART="$(LC_ALL=C diff <(inventaire_attendu | LC_ALL=C sort) \
-                       <(sed -n 's/^[0-9a-f]\{64\}  //p' "${WORKD}/SHA256SUMS" | LC_ALL=C sort) \
-         | grep '^[<>]' | head -6 | tr '\n' ' ')"
-[ -z "${ECART}" ] || invalide "inventaire du reçu != ensemble attendu (< attendu absent, > fichier inattendu hache) : ${ECART}"
+entrees_manifeste() { sed -n 's/^[0-9a-f]\{64\}  //p' "${WORKD}/SHA256SUMS" | LC_ALL=C sort; }
+exiger_listes_egales "inventaire du reçu != ensemble attendu" \
+  "$(inventaire_attendu | LC_ALL=C sort)" "$(entrees_manifeste)"
+# Le manifeste scelle EXACTEMENT ce que l'agregateur a lu : chaque empreinte
+# d'avant agregation se retrouve a l'identique, et les seules entrees
+# nouvelles sont resume.txt et resume.err (ecrits par l'agregateur).
+while read -r h p; do
+  if [ -n "${PRE_H[${p}]+x}" ]; then
+    [ "${PRE_H[${p}]}" = "${h}" ] || invalide "${p} modifie entre la lecture de l'agregateur et le scellement (${PRE_H[${p}]} avant agregation, ${h} au manifeste) — mutation semantique, jamais publiee"
+  else
+    case "${p}" in resume.txt|resume.err) ;; *) invalide "${p} apparu apres les empreintes d'avant agregation" ;; esac
+  fi
+done < "${WORKD}/SHA256SUMS"
+[ "${NSOMMES}" -eq $((PRE_N + 2)) ] || invalide "manifeste : ${NSOMMES} entrees != ${PRE_N} empreintes d'avant agregation + resume.txt + resume.err"
+
+# --- Derniers controles, puis publication SANS AUTRE OPERATION -----------
+# Tout est RELU ici, apres le manifeste : repertoires, fichiers, protocoles,
+# copie privee, puis `sha256sum -c --strict` et le `mv` immediatement apres.
+exiger_listes_egales "repertoires du reçu != {bin out} (repertoire vide ou inattendu)" \
+  "$(printf '%s\n' bin out)" \
+  "$(cd "${WORKD}" && find . -mindepth 1 -type d -printf '%P\n' | LC_ALL=C sort)"
+SPECIAUX="$(cd "${WORKD}" && find . ! -type f ! -type d | wc -l)"
+[ "${SPECIAUX}" -eq 0 ] || invalide "${SPECIAUX} entree(s) non reguliere(s) (lien ou special) apparue(s) avant publication"
+exiger_listes_egales "inventaire final != manifeste (fichier apparu ou disparu apres le manifeste)" \
+  "$(entrees_manifeste)" "$(cd "${WORKD}" && lister_fichiers)"
+HL="$(hash_de "${WORKD}/protocole_lanceur.sh")" || invalide "protocole_lanceur.sh archive illisible avant publication"
+[ "${HL}" = "${H_LANCEUR}" ] || invalide "protocole_lanceur.sh archive relu avant publication (${HL}) != sha256_lanceur du META (${H_LANCEUR})"
+HLS="$(hash_de "${HERE}/sonde_ablation_reduce.sh")" || invalide "lanceur source illisible avant publication"
+[ "${HLS}" = "${H_LANCEUR}" ] || invalide "lanceur source relu avant publication (${HLS}) != copie archivee (${H_LANCEUR}) — protocole modifie pendant la campagne"
+HA="$(hash_de "${WORKD}/protocole_agregateur.py")" || invalide "protocole_agregateur.py archive illisible avant publication"
+[ "${HA}" = "${H_AGREGATEUR}" ] || invalide "protocole_agregateur.py archive relu avant publication (${HA}) != sha256_agregateur du META (${H_AGREGATEUR})"
+HAS="$(hash_de "${HERE}/sonde_ablation_reduce.py")" || invalide "agregateur source illisible avant publication"
+[ "${HAS}" = "${H_AGREGATEUR}" ] || invalide "agregateur source relu avant publication (${HAS}) != copie archivee (${H_AGREGATEUR}) — protocole modifie pendant la campagne"
+HF="$(hash_de "${BIN}")" || invalide "copie privee illisible avant publication"
+[ "${HF}" = "${H}" ] || invalide "copie privee relue avant publication (${HF}) != binaire_sha256 du META (${H})"
 ( cd "${WORKD}" && sha256sum -c --quiet --strict SHA256SUMS ) >/dev/null 2>&1 \
   || invalide "verification finale sha256sum -c en echec"
 mv "${WORKD}" "${OUT}" || invalide "publication (mv) impossible"

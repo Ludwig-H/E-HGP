@@ -58,6 +58,44 @@ Scenes :
       python3 ajoutant intrus_racine.txt et out/SHA256SUMS APRES l'agregateur
       et AVANT le manifeste => INVALIDE 3 par l'inventaire, les deux intrus
       figurant dans le SHA256SUMS du .partial (haches, donc visibles).
+  Dents du 2 septembre (ETAT_COURANT, ligne « sonde equilibree … harnais »,
+  et fin du § 5.22 ; memes regles : un mutant, un code, un motif) :
+  (o) runs_effectues / runs_attendus OBLIGATOIRES : META sans l'un des deux
+      => agregateur 1 (« champ obligatoire ») ; runs_effectues=31 => 1 ;
+      schema v2 explicite (sans les champs d'identite) => 0 avec « claim
+      borne, NON VERIFIE » imprime ; v2 sans runs_attendus => 1 ; v1 => 1 ;
+      le reçu publie receipts/sonde_ablation_reduce_20260902b, s'il est
+      present, => 0 sans modification, claim borne imprime ;
+  (p) ligne profil_reduce MALFORMEE, jamais ignoree : touch=abc, jeton sans
+      `=`, K=8.0 / K=huit, valeur vide (tronquee), ligne sans fenetre, ligne
+      `profil_reduce` seule, champ non requis non numerique, notation
+      exposant, temps_mur_ms ou rss_max_kb duplique => agregateur 1 ;
+  (q) repertoire VIDE vide/ ou inattendu a la racine, lien a la racine,
+      bin/ pollue, fichier intrus a la racine => agregateur 1 ; faux python3
+      creant vide/ APRES l'agregateur et AVANT le manifeste => INVALIDE 3 du
+      lanceur (inventaire des repertoires, invisible au manifeste) ;
+  (r) protocole_lanceur.sh / protocole_agregateur.py alteres apres coup ou
+      retires => agregateur 1 (hash RECALCULE != META) ; faux sha256sum
+      alterant la copie archivee du lanceur APRES le manifeste => INVALIDE 3
+      du lanceur (copie relue avant publication != META) ;
+  (s) identite de cible (claim BORNE : la cible reelle accepte tout kMutants,
+      verifie ici sur build/v6/mhgp6_profile_sonde s'il existe) : META porte
+      identite_cible et injections_autorisees == injections_emises == les
+      trois ablations ; .status avec --inject=drop-nonmerge, META
+      injections_emises ou ablations portant drop-nonmerge, v3 sans
+      identite_cible => agregateur 1 ; lanceur dont ABLATIONS est etendu a
+      drop-nonmerge => refus 2 avant toute ecriture ; plan.txt altere en
+      campagne vers bras=drop-nonmerge => INVALIDE 3, aucun .status ne porte
+      ce --inject= ;
+  (t) TOCTOU avant scellement : faux python3 MODIFIANT out/aucune_n64_r1.txt
+      APRES l'agregateur et AVANT le manifeste (le manifeste scelle le
+      contenu mute, `sha256sum -c` seul le publierait) => INVALIDE 3
+      (empreinte d'avant agregation != manifeste) ; faux sha256sum modifiant
+      le meme fichier APRES la generation du manifeste => INVALIDE 3
+      (verification finale, derniere operation avant le mv) ;
+  (u) `diff` fail-open : faux diff rendant 2 sans sortie => INVALIDE 3
+      (« comparaison impossible ») ; faux diff rendant 1 sans sortie =>
+      INVALIDE 3 (jamais un test sur la seule sortie vide).
 
 Usage : sonde_ablation_gate.py <dossier bench>. Codes : 0 conforme ;
 1 au moins un controle en echec. Aucun assert (python3 -O).
@@ -77,6 +115,14 @@ BRAS = ("aucune", "ablation-mat-sans-copie", "ablation-mat-sans-tris",
 LETTRES = dict(zip("ABCD", BRAS))
 LATIN_CYCLIQUE = ("A B C D", "B C D A", "C D A B", "D A B C")
 WILLIAMS_PERMUTE = ("B D A C", "C A D B", "D C B A", "A B C D")
+SCHEMA = "e-hgp.sonde-ablation-reduce.v3"
+SCHEMA_V2 = "e-hgp.sonde-ablation-reduce.v2"
+INJECTIONS = "ablation-mat-sans-copie ablation-mat-sans-tris ablation-post-cle-factice"
+IDENTITE_CIBLE = ("mhgp6_profile_sonde (accepte tout mutant de kMutants ; "
+                  "seules les ablations sont selectionnees ici)")
+CHAMPS_V3 = ("identite_cible", "injections_autorisees", "injections_emises")
+LIGNE_ABLATIONS = ('ABLATIONS="aucune ablation-mat-sans-copie ablation-mat-sans-tris '
+                   'ablation-post-cle-factice"')
 
 FAUX_SONDE = r"""#!/usr/bin/env bash
 # Faux mhgp6_profile_sonde de la porte : memes options, dix lignes
@@ -122,6 +168,17 @@ if [ "$mutant" = intrus_out ]; then
   fi
   : > "${d}/intrus.txt"
   : > "${d}/SHA256SUMS"
+fi
+if [ "$mutant" = plan_hors_sonde ]; then
+  # Le binaire altere plan.txt du reçu pendant la campagne : le bras D des
+  # lignes de plan devient un mutant PRODUIT (drop-nonmerge). Le lanceur ne
+  # doit jamais l'emettre (garde de run_one, INVALIDE 3).
+  d="$(dirname "$(readlink -f "/proc/$$/fd/1")")"
+  if [ "$(basename "$d")" != out ]; then
+    echo "mutant plan_hors_sonde : sortie non redirigee vers un dossier out/ ($d)" >&2
+    exit 9
+  fi
+  sed -i 's/bras=ablation-post-cle-factice$/bras=drop-nonmerge/' "${d}/../plan.txt"
 fi
 echo "profil_kind=reduce_v2 fold_join=1 inflight_demande=2 pic_workers_b=1 pic_reduce_actif=1"
 mat_f=6
@@ -183,6 +240,48 @@ w="${@: -1}"
 exit $rc
 """
 
+# Mutant (q) : faux python3 qui, apres l'agregateur reel et avant le
+# manifeste, cree un repertoire VIDE a la racine du reçu — invisible a un
+# manifeste de fichiers, visible a l'inventaire des repertoires du lanceur.
+FAUX_PYTHON3_VIDE = """#!/usr/bin/env bash
+"%REAL%" "$@"
+rc=$?
+w="${@: -1}"
+mkdir "${w}/vide"
+exit $rc
+"""
+
+# Mutant (t) : faux python3 qui, apres l'agregateur reel et avant le
+# manifeste, MODIFIE une sortie deja lue (mutation semantique) : le manifeste
+# scelle alors le contenu mute et `sha256sum -c` seul publierait.
+FAUX_PYTHON3_MUTATION = """#!/usr/bin/env bash
+"%REAL%" "$@"
+rc=$?
+w="${@: -1}"
+echo "# mutation apres agregation (mutant de porte)" >> "${w}/out/aucune_n64_r1.txt"
+exit $rc
+"""
+
+# Mutants (r)(t) : faux sha256sum qui n'agit que sur la GENERATION du
+# manifeste (plusieurs fichiers en arguments, pas -c ; hash_de n'en passe
+# qu'un) : il execute le vrai puis modifie %CIBLE% — APRES le manifeste,
+# AVANT sa verification finale. Les appels a un fichier et -c passent au vrai.
+FAUX_SHA256SUM_TARDIF = """#!/usr/bin/env bash
+if [ "$#" -gt 1 ] && [ "${1:-}" != "-c" ]; then
+  %REAL% "$@"
+  rc=$?
+  echo "# mutation apres le manifeste (mutant de porte)" >> "%CIBLE%"
+  exit $rc
+fi
+exec %REAL% "$@"
+"""
+
+# Mutants (u) : faux diff MUET rendant %RC% — un diff en erreur (2) ou
+# « different » sans sortie (1) ne doit jamais valoir « identique ».
+FAUX_DIFF = """#!/usr/bin/env bash
+exit %RC%
+"""
+
 
 def sha256(path):
     h = hashlib.sha256()
@@ -223,11 +322,11 @@ class Porte:
         self.scenes += 1
         print(f"scene {self.scenes} : {nom}")
 
-    def lancer(self, out, binaire, n_list, reps, env_extra=None):
+    def lancer(self, out, binaire, n_list, reps, env_extra=None, lanceur=None):
         env = dict(os.environ, THREADS="1", CPUS=self.cpu, FAMILY="uniform")
         if env_extra:
             env.update(env_extra)
-        argv = ["bash", str(self.lanceur), str(out), str(binaire)]
+        argv = ["bash", str(lanceur or self.lanceur), str(out), str(binaire)]
         if n_list is not None:
             argv.append(n_list)
         if reps is not None:
@@ -286,6 +385,36 @@ def reecrire_plan(dossier, lignes):
         st.write_text("\n".join(lignes_st) + "\n", encoding="utf-8")
 
 
+def remplacer_ligne(p, path, prefixe, nouvelle, nom):
+    """Remplace la premiere ligne commencant par `prefixe` ; l'absence est un
+    echec de porte (le mutant doit viser une cible presente)."""
+    lignes = path.read_text(encoding="utf-8").splitlines()
+    idx = [i for i, l in enumerate(lignes) if l.startswith(prefixe)]
+    p.check(f"{nom} : ligne cible presente ({prefixe!r})", bool(idx))
+    if idx:
+        lignes[idx[0]] = nouvelle
+    path.write_text("\n".join(lignes) + "\n", encoding="utf-8")
+
+
+def retirer_ligne(p, path, prefixe, nom):
+    """Retire la premiere ligne commencant par `prefixe` (champ absent)."""
+    lignes = path.read_text(encoding="utf-8").splitlines()
+    idx = [i for i, l in enumerate(lignes) if l.startswith(prefixe)]
+    p.check(f"{nom} : ligne cible presente ({prefixe!r})", bool(idx))
+    if idx:
+        del lignes[idx[0]]
+    path.write_text("\n".join(lignes) + "\n", encoding="utf-8")
+
+
+def retrograder_v2(p, dossier):
+    """META v3 -> v2 : schema v2 et retrait des trois champs d'identite (le
+    lanceur v2 ne les gravait pas) ; tout le reste est inchange."""
+    meta = dossier / "META.txt"
+    remplacer_ligne(p, meta, "schema=", f"schema={SCHEMA_V2}", "retrogradation v2")
+    for champ in CHAMPS_V3:
+        retirer_ligne(p, meta, f"{champ}=", "retrogradation v2")
+
+
 def scene_nominal(p, base, faux):
     p.scene("(a) nominal REPS=4 N_LIST='64 128' : reçu publie et fail-closed verifie")
     out = base / "nominal"
@@ -298,7 +427,17 @@ def scene_nominal(p, base, faux):
     meta = lire_kv(out / "META.txt")
     p.check("nominal : statut exploratory_noncausal_upper_bounds",
             meta.get("statut", "").startswith("exploratory_noncausal_upper_bounds"))
-    p.check("nominal : schema v2", meta.get("schema") == "e-hgp.sonde-ablation-reduce.v2")
+    p.check("nominal : schema v3", meta.get("schema") == SCHEMA, repr(meta.get("schema")))
+    p.check("nominal : identite_cible (claim borne) gravee au META",
+            meta.get("identite_cible") == IDENTITE_CIBLE, repr(meta.get("identite_cible")))
+    p.check("nominal : injections_autorisees == injections_emises == les trois ablations",
+            meta.get("injections_autorisees") == INJECTIONS
+            and meta.get("injections_emises") == INJECTIONS,
+            f"{meta.get('injections_autorisees')!r} / {meta.get('injections_emises')!r}")
+    p.check("nominal : runs_attendus=32 au META", meta.get("runs_attendus") == "32")
+    p.check("nominal : sha256_lanceur/sha256_agregateur == copies archivees recalculees",
+            meta.get("sha256_lanceur") == sha256(out / "protocole_lanceur.sh")
+            and meta.get("sha256_agregateur") == sha256(out / "protocole_agregateur.py"))
     p.check("nominal : etiquette borne composite au META",
             "borne composite (lecture keys[] + tri de cles egales)"
             in meta.get("etiquette_ablation-post-cle-factice", ""))
@@ -365,6 +504,9 @@ def scene_nominal(p, base, faux):
             in resume)
     p.check("nominal : libelle non causal dans le resume",
             "statut=exploratory_noncausal_upper_bounds" in resume and "NON CAUSALES" in resume)
+    p.check("nominal : identite de cible (claim borne) dans le resume, aucun claim NON VERIFIE (v3)",
+            "identite de cible (claim borne) : mhgp6_profile_sonde (accepte tout mutant" in resume
+            and "NON VERIFIE" not in resume)
     # n=64, K=8 : materialisation_tri_copie temoin 48, sans-copie 24 => d=-24.0 sur chaque bloc.
     lignes = resume.splitlines()
     try:
@@ -707,6 +849,332 @@ def scene_inventaire(p, base, faux, nominal):
                 (partial2 / "resume.txt").is_file() and (partial2 / "resume.txt").stat().st_size > 0)
 
 
+def scene_runs_obligatoires(p, base, nominal, bench):
+    p.scene("(o) runs_effectues/runs_attendus obligatoires (v3 et v2) : agregateur 1 ; schema v2 sans identite : 0 + claim borne ; v1 : 1")
+    for champ in ("runs_attendus", "runs_effectues"):
+        recu = p.copier_recu(base, nominal, f"sans_{champ}")
+        retirer_ligne(p, recu / "META.txt", f"{champ}=", f"META sans {champ}")
+        p.refus_agregateur(f"META sans {champ}", recu,
+                           ("META.txt", "champ obligatoire", f"{champ}="))
+    recu = p.copier_recu(base, nominal, "runs_31")
+    p.remplacer(recu / "META.txt", "runs_effectues=32", "runs_effectues=31", "runs_effectues=31")
+    p.refus_agregateur("META runs_effectues=31 != cardinal 32", recu,
+                       ("runs_effectues=31", "cardinal", "32"))
+    # Schema v2 explicite : accepte, les champs d'identite imprimes en claim
+    # borne NON VERIFIE ; mais runs_* restent obligatoires en v2 aussi.
+    v2 = p.copier_recu(base, nominal, "schema_v2")
+    retrograder_v2(p, v2)
+    a = p.agreger(v2)
+    p.check("schema v2 sans identite_cible : agregateur 0, « claim borne, NON VERIFIE » imprime",
+            a.returncode == 0 and "claim borne, NON VERIFIE" in a.stdout
+            and "schema anterieur" in a.stdout, f"rc={a.returncode} {a.stderr[-200:]!r}")
+    v2b = p.copier_recu(base, nominal, "schema_v2_sans_runs")
+    retrograder_v2(p, v2b)
+    retirer_ligne(p, v2b / "META.txt", "runs_attendus=", "v2 sans runs_attendus")
+    p.refus_agregateur("schema v2 sans runs_attendus (strict aussi en v2)", v2b,
+                       ("champ obligatoire", "runs_attendus="))
+    v3b = p.copier_recu(base, nominal, "v3_sans_identite")
+    retirer_ligne(p, v3b / "META.txt", "identite_cible=", "v3 sans identite_cible")
+    p.refus_agregateur("schema v3 sans identite_cible (obligatoire en v3)", v3b,
+                       ("champ obligatoire", "identite_cible="))
+    v1 = p.copier_recu(base, nominal, "schema_v1")
+    remplacer_ligne(p, v1 / "META.txt", "schema=", "schema=e-hgp.sonde-ablation-reduce.v1", "v1")
+    p.refus_agregateur("schema v1 (jamais accepte)", v1, ("schema", "v1"))
+    # Reçu publie du 2 septembre (schema v2) : accepte SANS modification.
+    publie = bench.parent / "receipts" / "sonde_ablation_reduce_20260902b"
+    if publie.is_dir():
+        avant = sorted((str(f.relative_to(publie)), f.stat().st_mtime_ns)
+                       for f in publie.rglob("*") if f.is_file())
+        a = p.agreger(publie)
+        apres = sorted((str(f.relative_to(publie)), f.stat().st_mtime_ns)
+                       for f in publie.rglob("*") if f.is_file())
+        p.check("reçu publie 20260902b (v2) : agregateur 0, claim borne imprime, reçu intact",
+                a.returncode == 0 and "claim borne, NON VERIFIE" in a.stdout and avant == apres,
+                f"rc={a.returncode} {a.stderr[-200:]!r}")
+
+
+def scene_profil_malforme(p, base, nominal):
+    p.scene("(p) ligne profil_reduce malformee (touch=abc, jeton sans =, K non entier, tronquee, exposant, mur/rss dupliques) : agregateur 1")
+    txt = "out/aucune_n64_r1.txt"
+    cible = "K=8 init=8.000 touch=16.000"
+    cas = [("abc", cible, "K=8 init=8.000 touch=abc",
+            ("aucune_n64_r1.txt", "touch=", "non numerique")),
+           ("sans_egal", cible, "K=8 init=8.000 touch16.000",
+            ("aucune_n64_r1.txt", "sans `=`", "touch16.000")),
+           ("vide", cible, "K=8 init=8.000 touch=",
+            ("aucune_n64_r1.txt", "touch=", "tronquee")),
+           ("exposant", cible, "K=8 init=8.000 touch=16e0",
+            ("aucune_n64_r1.txt", "touch=", "hors grammaire decimale")),
+           ("non_requis", "reduce_interne_debut=0.000", "reduce_interne_debut=abc",
+            ("aucune_n64_r1.txt", "reduce_interne_debut=", "non numerique")),
+           ("k_decimal", "profil_reduce K=8 ", "profil_reduce K=8.0 ",
+            ("aucune_n64_r1.txt", "K non entier")),
+           ("k_lettres", "profil_reduce K=8 ", "profil_reduce K=huit ",
+            ("aucune_n64_r1.txt", "K non entier"))]
+    for nom, ancien, nouveau, motifs in cas:
+        recu = p.copier_recu(base, nominal, f"profil_{nom}")
+        p.remplacer(recu / txt, ancien, nouveau, f"profil {nom}")
+        p.refus_agregateur(f"profil {nom} ({nouveau.strip()!r})", recu, motifs)
+    recu = p.copier_recu(base, nominal, "profil_ligne_tronquee")
+    remplacer_ligne(p, recu / txt, "profil_reduce K=8 ", "profil_reduce K=8", "ligne K=8 tronquee")
+    p.refus_agregateur("ligne `profil_reduce K=8` sans fenetre", recu,
+                       ("aucune_n64_r1.txt", "K=8", "tronquee"))
+    recu = p.copier_recu(base, nominal, "profil_ligne_seule")
+    remplacer_ligne(p, recu / txt, "profil_reduce K=8 ", "profil_reduce", "ligne profil_reduce seule")
+    p.refus_agregateur("ligne `profil_reduce` seule", recu, ("aucune_n64_r1.txt", "tronquee"))
+    for champ, valeur in (("temps_mur_ms", "1.0"), ("rss_max_kb", "1")):
+        recu = p.copier_recu(base, nominal, f"dup_{champ}")
+        with open(recu / txt, "a", encoding="utf-8") as f:
+            f.write(f"{champ}={valeur}\n")
+        p.refus_agregateur(f"{champ} duplique", recu, ("aucune_n64_r1.txt", champ, "duplique"))
+
+
+def scene_repertoire_inattendu(p, base, faux, nominal):
+    p.scene("(q) repertoire vide/ ou inattendu, lien, bin/ pollue, intrus racine : agregateur 1 ; vide/ cree apres l'agregateur : INVALIDE 3")
+    recu = p.copier_recu(base, nominal, "rep_vide")
+    (recu / "vide").mkdir()
+    p.refus_agregateur("repertoire vide vide/ a la racine", recu,
+                       ("racine", "repertoire", "inattendu", "vide"))
+    recu = p.copier_recu(base, nominal, "rep_extra")
+    (recu / "extra").mkdir()
+    (recu / "extra" / "x.txt").write_text("x\n", encoding="utf-8")
+    p.refus_agregateur("repertoire extra/ non vide a la racine", recu,
+                       ("racine", "repertoire", "inattendu", "extra"))
+    recu = p.copier_recu(base, nominal, "rep_lien")
+    os.symlink("META.txt", recu / "lien")
+    p.refus_agregateur("lien symbolique a la racine", recu, ("racine", "lien"))
+    recu = p.copier_recu(base, nominal, "bin_pollue")
+    (recu / "bin" / "autre").write_text("", encoding="utf-8")
+    p.refus_agregateur("bin/autre ajoute", recu, ("bin/", "autre", "mhgp6_profile_sonde"))
+    recu = p.copier_recu(base, nominal, "intrus_racine")
+    (recu / "intrus_racine.txt").write_text("", encoding="utf-8")
+    p.refus_agregateur("fichier intrus a la racine", recu,
+                       ("racine", "inattendu", "intrus_racine.txt"))
+    recu = p.copier_recu(base, nominal, "out_absent")
+    shutil.rmtree(recu / "out")
+    p.refus_agregateur("out/ retire", recu, ("racine", "absent", "out"))
+    # Lanceur : vide/ cree APRES l'agregateur reel, AVANT le manifeste — un
+    # manifeste de fichiers ne le voit pas ; l'inventaire des repertoires oui.
+    reel = shutil.which("python3") or sys.executable
+    fakebin = base / "fakebin_python3_vide"
+    fakebin.mkdir()
+    ecrire_exec(fakebin / "python3", FAUX_PYTHON3_VIDE.replace("%REAL%", reel))
+    out = base / "rep_vide_lanceur"
+    partial = Path(str(out) + ".partial")
+    r = p.lancer(out, faux, "64", "4", {"PATH": f"{fakebin}:{os.environ['PATH']}"})
+    p.check("vide/ tardif : rc=3", r.returncode == 3, f"rc={r.returncode} {r.stderr[-200:]!r}")
+    p.check("vide/ tardif : jamais publie, reste en .partial", not out.exists() and partial.is_dir())
+    if partial.is_dir():
+        meta = (partial / "META.txt").read_text(encoding="utf-8")
+        p.check("vide/ tardif : inventaire des repertoires en echec au META, vide nomme",
+                "campagne INVALIDE : repertoires du reçu != {bin out}" in meta and "> vide" in meta,
+                repr(meta[-300:]))
+        p.check("vide/ tardif : le manifeste existe et le repertoire vide est bien la",
+                (partial / "SHA256SUMS").is_file() and (partial / "vide").is_dir())
+
+
+def scene_protocoles_alteres(p, base, faux, nominal):
+    p.scene("(r) protocoles archives alteres/retires : agregateur 1 (hash recalcule != META) ; copie du lanceur alteree apres le manifeste : INVALIDE 3")
+    for nom, champ in (("protocole_lanceur.sh", "sha256_lanceur"),
+                       ("protocole_agregateur.py", "sha256_agregateur")):
+        recu = p.copier_recu(base, nominal, f"altere_{nom}")
+        with open(recu / nom, "a", encoding="utf-8") as f:
+            f.write("# altere apres coup\n")
+        p.refus_agregateur(f"{nom} altere apres coup", recu, (nom, "recalcule", champ))
+    recu = p.copier_recu(base, nominal, "lanceur_retire")
+    (recu / "protocole_lanceur.sh").unlink()
+    p.refus_agregateur("protocole_lanceur.sh retire", recu, ("protocole_lanceur.sh", "absent"))
+    # Lanceur : la copie archivee est alteree APRES la generation du manifeste
+    # (faux sha256sum n'agissant que sur la generation) : relue avant
+    # publication, elle ne porte plus le hash du META => INVALIDE 3.
+    reel = shutil.which("sha256sum")
+    p.check("sha256sum reel trouve", reel is not None)
+    if reel is None:
+        return
+    fakebin = base / "fakebin_sha_protocole"
+    fakebin.mkdir()
+    ecrire_exec(fakebin / "sha256sum", FAUX_SHA256SUM_TARDIF.replace("%REAL%", reel)
+                .replace("%CIBLE%", "protocole_lanceur.sh"))
+    out = base / "protocole_tardif"
+    partial = Path(str(out) + ".partial")
+    r = p.lancer(out, faux, "64", "4", {"PATH": f"{fakebin}:{os.environ['PATH']}"})
+    p.check("copie du lanceur alteree apres le manifeste : rc=3", r.returncode == 3,
+            f"rc={r.returncode} {r.stderr[-200:]!r}")
+    p.check("copie du lanceur alteree : jamais publiee, reste en .partial",
+            not out.exists() and partial.is_dir())
+    if partial.is_dir():
+        meta = (partial / "META.txt").read_text(encoding="utf-8")
+        p.check("copie du lanceur alteree : motif « relu avant publication != sha256_lanceur »",
+                "campagne INVALIDE : protocole_lanceur.sh archive relu avant publication" in meta
+                and "sha256_lanceur du META" in meta, repr(meta[-300:]))
+        p.check("copie du lanceur alteree : le manifeste existait deja (mutation apres lui)",
+                (partial / "SHA256SUMS").is_file()
+                and "mutation apres le manifeste" in
+                (partial / "protocole_lanceur.sh").read_text(encoding="utf-8"))
+
+
+def scene_identite_cible(p, base, faux, nominal, bench):
+    p.scene("(s) identite de cible (claim borne) : mutant produit dans un .status/META => 1 ; lanceur a bras hors sonde => 2 ; plan altere en campagne => 3")
+    recu = p.copier_recu(base, nominal, "inject_produit")
+    p.remplacer(recu / "out" / "ablation-mat-sans-tris_n64_r1.status",
+                "--inject=ablation-mat-sans-tris", "--inject=drop-nonmerge", ".status drop-nonmerge")
+    p.refus_agregateur(".status commande= avec --inject=drop-nonmerge", recu,
+                       ("ablation-mat-sans-tris_n64_r1.status", "drop-nonmerge", "hors sonde"))
+    recu = p.copier_recu(base, nominal, "inject_double")
+    p.remplacer(recu / "out" / "ablation-mat-sans-tris_n64_r1.status",
+                "--inject=ablation-mat-sans-tris", "--inject=ablation-mat-sans-copie",
+                ".status mutant d'un autre bras")
+    p.refus_agregateur(".status commande= avec l'ablation d'un autre bras", recu,
+                       ("ablation-mat-sans-tris_n64_r1.status", "exactement le mutant du bras"))
+    recu = p.copier_recu(base, nominal, "temoin_injecte")
+    p.remplacer(recu / "out" / "aucune_n64_r1.status", "--fold-join=1 ",
+                "--fold-join=1 --inject=ablation-mat-sans-tris", "temoin avec --inject=")
+    p.refus_agregateur("bras temoin avec un --inject=", recu,
+                       ("aucune_n64_r1.status", "temoin", "--inject="))
+    recu = p.copier_recu(base, nominal, "meta_emises_produit")
+    p.remplacer(recu / "META.txt", "injections_emises=ablation-mat-sans-copie",
+                "injections_emises=drop-nonmerge ablation-mat-sans-copie", "META injections_emises")
+    p.refus_agregateur("META injections_emises avec drop-nonmerge", recu,
+                       ("injections_emises", "trois ablations"))
+    recu = p.copier_recu(base, nominal, "meta_bras_produit")
+    p.remplacer(recu / "META.txt", "ablations=aucune ", "ablations=aucune drop-nonmerge ",
+                "META ablations")
+    p.refus_agregateur("META ablations avec un cinquieme bras drop-nonmerge", recu,
+                       ("ablations", "hors sonde"))
+    recu = p.copier_recu(base, nominal, "meta_identite_autre")
+    remplacer_ligne(p, recu / "META.txt", "identite_cible=", "identite_cible=mhgp6_profile",
+                    "identite_cible autre")
+    p.refus_agregateur("META identite_cible ne nommant pas mhgp6_profile_sonde", recu,
+                       ("identite_cible", "mhgp6_profile_sonde"))
+    # Lanceur mutant : ABLATIONS etendu a un mutant produit => refus 2 avant
+    # toute ecriture (la liste des --inject= emissibles est fermee).
+    mut = base / "lanceur_mutant"
+    mut.mkdir()
+    shutil.copy(p.agregateur, mut / "sonde_ablation_reduce.py")
+    texte = p.lanceur.read_text(encoding="utf-8")
+    p.check("lanceur mutant : la ligne ABLATIONS existe telle quelle", LIGNE_ABLATIONS in texte)
+    ecrire_exec(mut / "sonde_ablation_reduce.sh",
+                texte.replace(LIGNE_ABLATIONS, LIGNE_ABLATIONS[:-1] + ' drop-nonmerge"', 1))
+    out = base / "bras_produit"
+    r = p.lancer(out, faux, "64", "4", lanceur=mut / "sonde_ablation_reduce.sh")
+    p.check("lanceur a bras drop-nonmerge : refus 2", r.returncode == 2, f"rc={r.returncode}")
+    p.check("lanceur a bras drop-nonmerge : motif « hors sonde »", "hors sonde" in r.stderr,
+            repr(r.stderr[-200:]))
+    p.check("lanceur a bras drop-nonmerge : aucun dossier laisse",
+            not out.exists() and not Path(str(out) + ".partial").exists())
+    # Plan altere en campagne (le binaire reecrit bras=D en drop-nonmerge au
+    # premier tuple) : la garde de run_one refuse avant d'emettre.
+    out2 = base / "plan_altere"
+    partial2 = Path(str(out2) + ".partial")
+    r2 = p.lancer(out2, faux, "64 128", "4", p.env_mutant(base, "plan_hors_sonde", 3))
+    p.check("plan altere en campagne : rc=3", r2.returncode == 3,
+            f"rc={r2.returncode} {r2.stderr[-200:]!r}")
+    p.check("plan altere : jamais publie, reste en .partial", not out2.exists() and partial2.is_dir())
+    if partial2.is_dir():
+        meta2 = (partial2 / "META.txt").read_text(encoding="utf-8")
+        statuts = list((partial2 / "out").glob("*.status"))
+        p.check("plan altere : motif « bras drop-nonmerge hors sonde » au META",
+                "campagne INVALIDE : bras drop-nonmerge hors sonde" in meta2, repr(meta2[-300:]))
+        p.check("plan altere : arret avant la matrice complete, aucun .status n'emet drop-nonmerge",
+                0 < len(statuts) < 32 and not any(
+                    "drop-nonmerge" in s.read_text(encoding="utf-8") for s in statuts),
+                f"{len(statuts)} statuts")
+        p.check("plan altere : plan.txt du reçu porte bien la mutation",
+                "bras=drop-nonmerge" in (partial2 / "plan.txt").read_text(encoding="utf-8"))
+    # La cible REELLE, si elle est construite : elle accepte un mutant produit
+    # (claim borne, verifie ; jamais une mesure).
+    reel = bench.parent.parent / "build" / "v6" / "mhgp6_profile_sonde"
+    if reel.is_file() and os.access(reel, os.X_OK):
+        try:
+            rr = subprocess.run([str(reel), "--family=uniform", "--n=64", "--threads=1",
+                                 "--inject=drop-nonmerge"], capture_output=True, timeout=300)
+            p.check("build/v6/mhgp6_profile_sonde accepte --inject=drop-nonmerge (claim P2 borne, "
+                    "non fermable par le lanceur)", rr.returncode == 0, f"rc={rr.returncode}")
+        except subprocess.TimeoutExpired:
+            p.check("build/v6/mhgp6_profile_sonde : sonde d'identite en temps borne", False)
+    else:
+        print("  (build/v6/mhgp6_profile_sonde absent : claim P2 borne non re-verifie sur la cible reelle)")
+
+
+def scene_toctou(p, base, faux):
+    p.scene("(t) TOCTOU avant scellement : sortie modifiee apres l'agregateur (manifeste scelle le mute) ou apres le manifeste : INVALIDE 3")
+    reel_py = shutil.which("python3") or sys.executable
+    fakebin = base / "fakebin_python3_mutation"
+    fakebin.mkdir()
+    ecrire_exec(fakebin / "python3", FAUX_PYTHON3_MUTATION.replace("%REAL%", reel_py))
+    out = base / "toctou_agregation"
+    partial = Path(str(out) + ".partial")
+    r = p.lancer(out, faux, "64", "4", {"PATH": f"{fakebin}:{os.environ['PATH']}"})
+    p.check("mutation apres agregation : rc=3", r.returncode == 3,
+            f"rc={r.returncode} {r.stderr[-200:]!r}")
+    p.check("mutation apres agregation : jamais publiee, reste en .partial",
+            not out.exists() and partial.is_dir())
+    if partial.is_dir():
+        meta = (partial / "META.txt").read_text(encoding="utf-8")
+        p.check("mutation apres agregation : motif « modifie entre la lecture de l'agregateur et le scellement »",
+                "campagne INVALIDE : out/aucune_n64_r1.txt modifie entre la lecture de l'agregateur "
+                "et le scellement" in meta, repr(meta[-300:]))
+        sums = partial / "SHA256SUMS"
+        p.check("mutation apres agregation : le manifeste existe", sums.is_file())
+        if sums.is_file():
+            entrees = dict(l.split("  ", 1)[::-1]
+                           for l in sums.read_text(encoding="utf-8").splitlines())
+            fichier = partial / "out" / "aucune_n64_r1.txt"
+            p.check("mutation apres agregation : le manifeste SCELLE le contenu mute (sha256sum -c "
+                    "seul aurait publie)", entrees.get("out/aucune_n64_r1.txt") == sha256(fichier)
+                    and "mutation apres agregation" in fichier.read_text(encoding="utf-8"))
+        p.check("mutation apres agregation : l'agregateur reel avait accepte (resume.txt non vide)",
+                (partial / "resume.txt").is_file() and (partial / "resume.txt").stat().st_size > 0)
+    # Apres le manifeste, avant sa verification finale : la derniere
+    # operation avant le mv est `sha256sum -c --strict`, qui refuse.
+    reel_sha = shutil.which("sha256sum")
+    p.check("sha256sum reel trouve", reel_sha is not None)
+    if reel_sha is None:
+        return
+    fakebin2 = base / "fakebin_sha_tardif"
+    fakebin2.mkdir()
+    ecrire_exec(fakebin2 / "sha256sum", FAUX_SHA256SUM_TARDIF.replace("%REAL%", reel_sha)
+                .replace("%CIBLE%", "out/aucune_n64_r1.txt"))
+    out2 = base / "toctou_manifeste"
+    partial2 = Path(str(out2) + ".partial")
+    r2 = p.lancer(out2, faux, "64", "4", {"PATH": f"{fakebin2}:{os.environ['PATH']}"})
+    p.check("mutation apres le manifeste : rc=3", r2.returncode == 3,
+            f"rc={r2.returncode} {r2.stderr[-200:]!r}")
+    p.check("mutation apres le manifeste : jamais publiee, reste en .partial",
+            not out2.exists() and partial2.is_dir())
+    if partial2.is_dir():
+        meta2 = (partial2 / "META.txt").read_text(encoding="utf-8")
+        p.check("mutation apres le manifeste : verification finale en echec au META",
+                "campagne INVALIDE : verification finale sha256sum -c" in meta2, repr(meta2[-300:]))
+        p.check("mutation apres le manifeste : le fichier mute et le manifeste anterieur existent",
+                (partial2 / "SHA256SUMS").is_file() and "mutation apres le manifeste" in
+                (partial2 / "out" / "aucune_n64_r1.txt").read_text(encoding="utf-8"))
+
+
+def scene_diff_fail_open(p, base, faux):
+    p.scene("(u) diff fail-open : faux diff muet rendant 2 (erreur) ou 1 (different) : INVALIDE 3, jamais « identique »")
+    for rc_faux, motif in ((2, "comparaison impossible (diff rc=2)"),
+                           (1, "(< attendu absent, > inattendu)")):
+        fakebin = base / f"fakebin_diff_{rc_faux}"
+        fakebin.mkdir()
+        ecrire_exec(fakebin / "diff", FAUX_DIFF.replace("%RC%", str(rc_faux)))
+        out = base / f"diff_rc{rc_faux}"
+        partial = Path(str(out) + ".partial")
+        r = p.lancer(out, faux, "64", "4", {"PATH": f"{fakebin}:{os.environ['PATH']}"})
+        p.check(f"faux diff rc={rc_faux} muet : rc=3", r.returncode == 3,
+                f"rc={r.returncode} {r.stderr[-200:]!r}")
+        p.check(f"faux diff rc={rc_faux} : jamais publie, reste en .partial",
+                not out.exists() and partial.is_dir())
+        if partial.is_dir():
+            meta = (partial / "META.txt").read_text(encoding="utf-8")
+            p.check(f"faux diff rc={rc_faux} : motif « {motif} » au META",
+                    "campagne INVALIDE : inventaire du reçu != ensemble attendu" in meta
+                    and motif in meta, repr(meta[-300:]))
+            p.check(f"faux diff rc={rc_faux} : le manifeste existe, l'agregateur avait accepte",
+                    (partial / "SHA256SUMS").is_file()
+                    and (partial / "resume.txt").stat().st_size > 0)
+
+
 def main():
     if len(sys.argv) != 2:
         print("usage: sonde_ablation_gate.py <dossier bench>", file=sys.stderr)
@@ -735,12 +1203,21 @@ def main():
             scene_champ_duplique(p, base, nominal)
             scene_plan_non_williams(p, base, nominal)
             scene_inventaire(p, base, faux, nominal)
+            scene_runs_obligatoires(p, base, nominal, bench)
+            scene_profil_malforme(p, base, nominal)
+            scene_repertoire_inattendu(p, base, faux, nominal)
+            scene_protocoles_alteres(p, base, faux, nominal)
+            scene_identite_cible(p, base, faux, nominal, bench)
+            scene_toctou(p, base, faux)
+            scene_diff_fail_open(p, base, faux)
     if p.echecs:
         print(f"sonde_ablation_gate : {p.echecs} controle(s) en echec sur {p.scenes} scenes")
         return 1
     print(f"sonde_ablation_gate : {p.scenes} scenes vertes (nominal apparie, refus de parametres, "
           "copie alteree, agregateur fail-closed, manifeste fatal, binaire produit, taille dupliquee, "
-          "hash vide, champ duplique, plan non Williams, inventaire exact)")
+          "hash vide, champ duplique, plan non Williams, inventaire exact, compteurs obligatoires, "
+          "profil malforme, repertoire inattendu, protocoles recalcules, identite de cible bornee, "
+          "TOCTOU avant scellement, diff fail-open)")
     return 0
 
 
