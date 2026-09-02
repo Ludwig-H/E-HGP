@@ -260,6 +260,7 @@ PROFILE="${WORK}/profil_campagne.txt"
 MARKS_DIR="${WORK}/marques"
 PID_FILE="${WORK}/superviseur.pid"
 WITNESS_RC=0  # § 5.21 : temoin non publie => code 68 (domine un succes)
+PURGE_RC=0    # § 5.22 : purge des credentials incomplete => code 67 (domine 68 et les succes)
 SESSION_ENV="${WORK}/session.env"
 : > "${LOG}"
 DURABLE_RECEIPT_BASE="${DURABLE_RECEIPT_BASE:?DURABLE_RECEIPT_BASE requis (recu durable obligatoire)}"
@@ -458,7 +459,7 @@ finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu CO
       done
       [ "${_res_ok}" -eq 1 ]; } &&
     { [ ! -d "${WORK}/out" ] || cp -r "${WORK}/out" "${tmp}/out"; } &&
-    ( cd "${tmp}" && { find . -type f ! -name 'SHA256SUMS*' -print0 | sort -z | xargs -0 sha256sum; } > SHA256SUMS.tmp \
+    ( cd "${tmp}" && { find . -type f ! -path ./SHA256SUMS ! -path ./SHA256SUMS.tmp -print0 | sort -z | xargs -0 sha256sum; } > SHA256SUMS.tmp \
       && mv SHA256SUMS.tmp SHA256SUMS \
       && sha256sum -c --quiet SHA256SUMS >/dev/null ) &&
     mv -Tn "${tmp}" "${dir}" &&
@@ -494,8 +495,9 @@ PY
             log "TEMOIN NON PUBLIE : purge faite mais recu_publie non ecrit — code 68 ; relancer la reprise (aucun appel GCP)"
           fi
         else
+          PURGE_RC=67
           printf '%s\n' "purge incomplete : credentials encore presents (reprise locale : recover_v6_session.sh ${WORK})" > "${WORK}/purge_incomplete"
-          log "PURGE INCOMPLETE : credentials encore presents dans ${WORK} — aucun temoin recu_publie ; relancer la reprise (purge locale, aucun appel GCP)"
+          log "PURGE INCOMPLETE : credentials encore presents dans ${WORK} — aucun temoin recu_publie, code 67 ; relancer la reprise (purge locale, aucun appel GCP)"
         fi
       fi
       true
@@ -584,7 +586,7 @@ PYEPOCH
       exit 66
     }
     # § 5.21 : temoin non publie => 68 aussi sur ce chemin (conclusion normale).
-    case "${rc}" in 0|65) [ "${WITNESS_RC}" -eq 0 ] || rc="${WITNESS_RC}" ;; esac
+    case "${rc}" in 0|65) if [ "${PURGE_RC}" -ne 0 ]; then rc="${PURGE_RC}"; elif [ "${WITNESS_RC}" -ne 0 ]; then rc="${WITNESS_RC}"; fi ;; esac
     exit "${rc}"
   fi
   if [ "${snap_rc}" -eq 0 ] && [ "${lc_state}" = "targeted_stopped" ] \
@@ -685,7 +687,7 @@ PYEPOCH
   fi
   # § 5.21 : un temoin non publie DOMINE une conclusion normale (0 ou le
   # verdict non decisionnel 65) ; un echec deja signale garde son code.
-  case "${rc}" in 0|65) [ "${WITNESS_RC}" -eq 0 ] || rc="${WITNESS_RC}" ;; esac
+  case "${rc}" in 0|65) if [ "${PURGE_RC}" -ne 0 ]; then rc="${PURGE_RC}"; elif [ "${WITNESS_RC}" -ne 0 ]; then rc="${WITNESS_RC}"; fi ;; esac
   exit "${rc}"
 }
 trap cleanup EXIT

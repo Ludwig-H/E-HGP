@@ -51,6 +51,7 @@
 #   git -C <racine> show <commit>:gcp-migration/recover_v6_session.sh > /tmp/rec.sh
 #   bash /tmp/rec.sh <WORK>)
 set -euo pipefail
+set -o errtrace   # § 5.22 : le trap ERR du funnel d'arret est HERITE par les fonctions (rlog, etc.)
 umask 077
 
 WORK="${1:?repertoire de session requis}"
@@ -333,7 +334,12 @@ import os, sys, tempfile
 path, content = sys.argv[1:3]
 d = os.path.dirname(path)
 fd, tmp = tempfile.mkstemp(prefix=".recu_publie.", suffix=".partial", dir=d)
-os.write(fd, (content + "\n").encode()); os.fsync(fd); os.close(fd); os.replace(tmp, path)
+try:
+    os.write(fd, (content + "\n").encode()); os.fsync(fd); os.close(fd); os.replace(tmp, path)
+except Exception:
+    try: os.unlink(tmp)
+    except Exception: pass
+    raise
 dfd = os.open(d, os.O_RDONLY); os.fsync(dfd); os.close(dfd)
 PY
 }
@@ -357,7 +363,12 @@ finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc, $4 = classification, $
       printf 'generation=%s\nprojet=%s zone=%s instance=%s\n' "${GENERATION:-inconnue}" "${GCP_PROJECT_ID}" "${GCP_ZONE}" "${GCP_INSTANCE_NAME}"
       printf 'source_commit=%s\nsource_payload_sha256=%s\nprotocol_manifest_sha256=%s\n' "${SOURCE_COMMIT}" "${SOURCE_PAYLOAD_SHA256}" "${PROTOCOL_MANIFEST_SHA256}"
       printf 'max_run_seconds=%s guest_shutdown_minutes=%s\n' "${MAX_RUN_SECONDS}" "${GUEST_SHUTDOWN_MINUTES}"
-      printf 'etat_cycle_vie=%s\nmarques=%s\nresidus_recus=%s\n' "${final_state:-absent}" "$(ls "${MARKS_DIR}" 2>/dev/null | tr '\n' ' ')" "${residus}"
+      if [ "${minimal}" = 1 ]; then
+        printf 'etat_cycle_vie=%s\nmarques=%s\nresidus_recus=non_enumeres_en_mode_minimal\n' "${final_state:-absent}" \
+          "$( for mk in guest_guard_pending double_guard_verified; do [ -f "${MARKS_DIR}/${mk}" ] && printf '%s ' "${mk}"; done )"
+      else
+        printf 'etat_cycle_vie=%s\nmarques=%s\nresidus_recus=%s\n' "${final_state:-absent}" "$(ls "${MARKS_DIR}" 2>/dev/null | tr '\n' ' ')" "${residus}"
+      fi
       printf 'superviseur_pid=%s\ndate_utc=%s\n' "${sup_pid:-inconnu}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     } > "${tmp}/RECU_SESSION.txt" &&
     { if [ "${minimal}" = 1 ]; then
@@ -375,7 +386,7 @@ finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc, $4 = classification, $
     { [ "${minimal}" = 1 ] || [ ! -f "${WORK}/validation.txt" ] || cp -f "${WORK}/validation.txt" "${tmp}/"; } &&
     { [ "${minimal}" = 1 ] || [ ! -f "${WORK}/manifest_revalide.txt" ] || cp -f "${WORK}/manifest_revalide.txt" "${tmp}/"; } &&
     { [ "${minimal}" = 1 ] || [ ! -d "${WORK}/out" ] || cp -r "${WORK}/out" "${tmp}/out"; } &&
-    ( cd "${tmp}" && { find . -type f ! -name 'SHA256SUMS*' -print0 | sort -z | xargs -0 sha256sum; } > SHA256SUMS.tmp \
+    ( cd "${tmp}" && { find . -type f ! -path ./SHA256SUMS ! -path ./SHA256SUMS.tmp -print0 | sort -z | xargs -0 sha256sum; } > SHA256SUMS.tmp \
       && mv SHA256SUMS.tmp SHA256SUMS && sha256sum -c --quiet SHA256SUMS >/dev/null ) &&
     mv -Tn "${tmp}" "${dir}" && [ ! -e "${tmp}" ] && { [ "${minimal}" = 1 ] || sync; }
   } 2>/dev/null && rlog "recu de reprise publie : ${dir}" || return 1
@@ -412,6 +423,41 @@ describe_ro() { # lecture seule, bornee ; tuple "STATUS<TAB>GENERATION" ou descr
 tuple_status() { printf '%s' "${1%%$'\t'*}"; }
 tuple_gen() { case "$1" in *$'\t'*) printf '%s' "${1#*$'\t'}" ;; *) printf '' ;; esac; }
 
+# ---- FUNNEL D'ARRET (§ 5.22) : des que la generation est connue, une erreur
+# LOCALE (set -e : rm, mv, date, tee, mkdir...) ne peut plus court-circuiter
+# l'arret cible — le trap ERR execute exactement UN stop_and_verify epingle
+# si aucun n'a encore ete tente, publie le registre, ecrit un temoin minimal
+# et rend 74 (erreur locale, arret tente par le funnel).
+STOP_ATTEMPTED=0; STOP_RC=na
+# NOTE bash 5.2 : sous errtrace, le trap ERR est herite par les fonctions (une
+# panne de rlog/tee dans une fonction declenche le funnel) et un `trap - ERR`
+# dans une fonction desarme le trap global (verifie empiriquement, scratchpad
+# trap_test.sh). La garde d'arret desarme donc le funnel a son entree : son
+# echec est lu et publie explicitement (targeted_stop_failed), jamais un funnel,
+# et apres la tentative d'arret le funnel n'a plus d'objet.
+run_stop_guard() { # une seule tentative par rejeu ; STOP_RC lu sur le pipeline
+  [ "${STOP_ATTEMPTED}" -eq 0 ] || return 0
+  STOP_ATTEMPTED=1
+  trap - ERR
+  publish_state targeted_stopping
+  rlog "arret cible : ${STOP_GUARD} --yes --expected-last-start-timestamp ${GENERATION}"
+  set +e
+  "${STOP_GUARD}" --yes --expected-last-start-timestamp "${GENERATION}" 2>&1 | tee -a "${RLOG}"
+  STOP_RC="${PIPESTATUS[0]}"
+  set -e
+  if [ "${STOP_RC}" -eq 0 ]; then publish_state targeted_stopped; else publish_state targeted_stop_failed; fi
+  rlog "stop_rc=${STOP_RC}"
+}
+funnel_stop() {
+  local where="$1"
+  trap - ERR
+  set +e
+  rlog "ERREUR LOCALE (ligne ${where}) avant/pendant la reprise : funnel d'arret inconditionnel"
+  run_stop_guard
+  finalize_receipt reprise_erreur_locale "${STOP_RC}" 74 aucune "${SCP_RC:-na}" na 1 || true
+  echo "ERREUR LOCALE : arret cible tente par le funnel (stop_rc=${STOP_RC}) — rc 74" >&2
+  exit 74
+}
 # ---- CAS 1 : aucune generation => jamais un arret aveugle (BLOCAGE 71).
 if [ -z "${GENERATION}" ]; then
   obs="$(describe_ro)"
@@ -428,6 +474,7 @@ if [ -n "${REMOTE_DIR}" ] && [ "${REMOTE_DIR}" != "v6camp_${SOURCE_COMMIT:0:12}_
   exit 71
 fi
 
+trap 'funnel_stop "${LINENO}"' ERR
 # ---- CAS 2 : registre deja targeted_stopped sur cette generation => aucun
 # appel GCP ; purge (re-jouable) puis temoin.
 if [ "${snap_state}" = "targeted_stopped" ]; then
@@ -472,7 +519,9 @@ if [ -n "${m2_gen}" ] && [ "${STOP_FIRST}" -eq 0 ]; then
     rlog "rapatriement borne de ~/${REMOTE_DIR}/out vers un staging (${SCP_STEP_TIMEOUT_S} s)"
     rm -rf "${STAGING}"; mkdir -p "${STAGING}"
     # Code du scp lu sur le PIPELINE lui-meme (set +e : jamais un `|| true`
-    # qui masquerait l'echec derriere le code de `true`).
+    # qui masquerait l'echec derriere le code de `true`) ; l'echec du scp est
+    # TOLERE (partiel conserve) : le funnel est desarme le temps du pipeline.
+    trap - ERR
     set +e
     /usr/bin/timeout -k "${GRACE_S}" "${SCP_STEP_TIMEOUT_S}" gcloud compute scp --recurse \
       --project="${GCP_PROJECT_ID}" --zone="${GCP_ZONE}" --quiet \
@@ -480,6 +529,7 @@ if [ -n "${m2_gen}" ] && [ "${STOP_FIRST}" -eq 0 ]; then
       "${GCP_INSTANCE_NAME}:~/${REMOTE_DIR}/out" "${STAGING}/" 2>&1 | tee -a "${RLOG}"
     SCP_RC="${PIPESTATUS[0]}"
     set -e
+    trap 'funnel_stop "${LINENO}"' ERR
     rlog "scp_rc=${SCP_RC}"
     # Relecture du tuple APRES la scp : promotion seulement si la generation
     # est inchangee ; sinon le staging est detruit et rien n'est promu.
@@ -491,36 +541,55 @@ if [ -n "${m2_gen}" ] && [ "${STOP_FIRST}" -eq 0 ]; then
       finalize_receipt reprise_generation_concurrente na 71 aucune "${SCP_RC}" na 1 || true
       exit 71
     fi
-    # § 5.21 : l'espace canonique out/ n'est remplace que si la scp a REUSSI
-    # et si le tuple posterieur est lisible, exact et de la generation
-    # attendue ; sinon le partiel est conserve sous un nom explicite et seul
-    # l'arret cible de la generation connue se poursuit.
+    # § 5.21/5.22 : la DECISION de promotion est prise ici (scp reussie ET
+    # tuple posterieur lisible, exact, de la generation attendue), mais
+    # l'espace canonique out/ n'est touche qu'APRES l'arret cible (aucune
+    # sauvegarde locale ne precede le STOP) ; sinon le partiel est conserve
+    # sous un nom explicite sans collision, best effort.
+    PROMOTE=0
     if [ "${SCP_RC}" -eq 0 ] && [ "${obs2}" != "describe_indisponible" ] && [ "${obs2_status}" = "RUNNING" ] \
        && [ "${obs2_gen}" = "${GENERATION}" ] && [ -d "${STAGING}/out" ]; then
-      rm -rf "${WORK}/out"; mv -T "${STAGING}/out" "${WORK}/out"
-      rlog "staging promu en out/ (scp reussie, tuple posterieur exact)"
-    elif [ -d "${STAGING}/out" ] && [ -n "$(ls -A "${STAGING}/out" 2>/dev/null)" ]; then
-      partiel="${WORK}/out.partiel_$(date +%s)"
-      mv -T "${STAGING}" "${partiel}"
-      rlog "staging NON promu (scp_rc=${SCP_RC}, describe apres scp : ${obs2}) — conserve sous ${partiel}"
+      PROMOTE=1
     fi
-    rm -rf "${STAGING}"
   else
     SCP_RC=77; rlog "rapatriement saute (status=${obs_status}, generation_observee=${obs_gen:-∅}, cle_ok=${key_ok}, fenetre_ok=${fenetre_ok})"
   fi
 fi
 
-# ---- CAS 4 : ARRET CIBLE par la garde EPINGLEE (une tentative par rejeu).
-publish_state targeted_stopping
-rlog "arret cible : ${STOP_GUARD} --yes --expected-last-start-timestamp ${GENERATION}"
-# Code de la garde d'arret lu sur le PIPELINE (set +e) : un arret en echec
-# ne doit JAMAIS etre publie targeted_stopped.
+# ---- CAS 4 : ARRET CIBLE par la garde EPINGLEE (une tentative par rejeu),
+# AVANT toute promotion ou sauvegarde locale. Code lu sur le PIPELINE : un
+# arret en echec ne doit JAMAIS etre publie targeted_stopped.
+run_stop_guard
+trap - ERR
+# ---- PROMOTION / SAUVEGARDE (apres l'arret ; best effort, jamais bloquant) :
+# marqueur ATOMIQUE de provenance out.promotion (generation, commit, scp_rc,
+# epoque) — le validateur ne court que sur un out/ promu par CE rapatriement.
 set +e
-"${STOP_GUARD}" --yes --expected-last-start-timestamp "${GENERATION}" 2>&1 | tee -a "${RLOG}"
-STOP_RC="${PIPESTATUS[0]}"
+if [ "${PROMOTE:-0}" -eq 1 ]; then
+  rm -rf "${WORK}/out" && mv -T "${STAGING}/out" "${WORK}/out" \
+    && python3 - "${WORK}/out.promotion" "${GENERATION}" "${SOURCE_COMMIT}" "${SCP_RC}" <<'PY'
+import os, sys, tempfile, time
+path, gen, commit, scp_rc = sys.argv[1:5]
+d = os.path.dirname(path)
+fd, tmp = tempfile.mkstemp(prefix=".out.promotion.", suffix=".partial", dir=d)
+try:
+    os.write(fd, f"schema=e-hgp.out-promotion.v1\ngeneration={gen}\nsource_commit={commit}\nscp_rc={scp_rc}\nepoch={int(time.time())}\n".encode())
+    os.fsync(fd); os.close(fd); os.replace(tmp, path)
+except Exception:
+    try: os.close(fd)
+    except Exception: pass
+    try: os.unlink(tmp)
+    except Exception: pass
+    raise
+dfd = os.open(d, os.O_RDONLY); os.fsync(dfd); os.close(dfd)
+PY
+  if [ $? -eq 0 ]; then rlog "staging promu en out/ (scp reussie, tuple posterieur exact) — marqueur out.promotion ecrit"; else rlog "PROMOTION EN ECHEC (best effort) : out/ non promu, aucun marqueur"; rm -f "${WORK}/out.promotion"; fi
+elif [ -d "${STAGING}/out" ] && [ -n "$(ls -A "${STAGING}/out" 2>/dev/null)" ]; then
+  partiel="${WORK}/out.partiel_$(date +%s)_$$"
+  if mv -T "${STAGING}" "${partiel}"; then rlog "staging NON promu (scp_rc=${SCP_RC:-na}, describe apres scp : ${obs2:-na}) — conserve sous ${partiel}"; else rlog "staging NON promu et sauvegarde en echec (best effort)"; fi
+fi
+rm -rf "${STAGING}"
 set -e
-if [ "${STOP_RC}" -eq 0 ]; then publish_state targeted_stopped; else publish_state targeted_stop_failed; fi
-rlog "stop_rc=${STOP_RC}"
 
 # ---- CAS 5 : validateur epingle sur les sorties rapatriees, SEULEMENT apres
 # un arret certifie (classification FORCEE partiel_ou_invalide : le code
@@ -529,7 +598,10 @@ if [ -n "${m2_gen}" ]; then
   classification=partiel_ou_invalide
   # Validateur SEULEMENT sur un out/ promu et non vide (un out/ vide cree par
   # le cycle de vie n'est pas un rapatriement).
-  if [ "${STOP_RC}" -eq 0 ] && [ -n "$(ls -A "${WORK}/out" 2>/dev/null)" ] && [ -f "${WORK}/profil_campagne.txt" ]; then
+  promoted=0
+  if [ -f "${WORK}/out.promotion" ] && grep -qx "generation=${GENERATION}" "${WORK}/out.promotion" \
+     && grep -qx "source_commit=${SOURCE_COMMIT}" "${WORK}/out.promotion" && grep -qx "scp_rc=0" "${WORK}/out.promotion"; then promoted=1; fi
+  if [ "${STOP_RC}" -eq 0 ] && [ "${promoted}" -eq 1 ] && [ -n "$(ls -A "${WORK}/out" 2>/dev/null)" ] && [ -f "${WORK}/profil_campagne.txt" ]; then
     canon="${WORK}/pinned/gcp-migration/profils/${CAMPAIGN_PROFILE}.env"
     VALIDATE_RC=0
     V6_RESUMES_DIR="${WORK}" /usr/bin/timeout -k "${GRACE_S}" "${VALIDATOR_TIMEOUT_S}" python3 "${PINNED_DIR}/validate_v6_campaign.py" \
@@ -539,7 +611,7 @@ if [ -n "${m2_gen}" ]; then
   elif [ "${STOP_RC}" -ne 0 ]; then
     VALIDATE_RC=na; rlog "arret non certifie : aucun validateur, aucune copie (temoin minimal)"
   else
-    VALIDATE_RC=na; rlog "aucune sortie rapatriee : classification ${classification}"
+    VALIDATE_RC=na; rlog "aucun out/ promu par CE rapatriement (marqueur out.promotion absent ou d'une autre generation) : classification ${classification}, aucun validateur"
   fi
   issue=reprise_apres_perte_superviseur
 else

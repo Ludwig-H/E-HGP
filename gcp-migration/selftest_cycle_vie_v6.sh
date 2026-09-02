@@ -77,6 +77,16 @@ PROTOCOL_FILES=(gcp-migration/session_campagne_v6_g4.sh gcp-migration/v6_session
 # ---- Faux gcloud (PATH) : describe rend la generation ; ssh n1 = handshake
 # boot_id seul, n2 = build (portes), n3 = campagne ; scp materialise out/.
 make_fake_bin() { # $1 = dossier
+  # Faux tee : echoue (FAKE_TEE_FAIL_AFTER_SCP=1) apres une scp de rapatriement
+  # locale => erreur LOCALE pre-STOP dans la reprise (dent du funnel d'arret).
+  cat > "$1/tee" <<'EOF'
+#!/usr/bin/env bash
+# Echoue UNE fois (premier tee apres la scp locale) : l'erreur locale est
+# injectee, puis le journal de reprise redevient lisible pour le diagnostic.
+if [ "${FAKE_TEE_FAIL_AFTER_SCP:-0}" = "1" ] && [ -e "${FAKE_CALLS}.scp_local" ] && [ ! -e "${FAKE_CALLS}.tee_failed" ]; then : > "${FAKE_CALLS}.tee_failed"; cat >/dev/null; exit 1; fi
+exec /usr/bin/tee "$@"
+EOF
+  chmod +x "$1/tee"
   cat > "$1/gcloud" <<'EOF'
 #!/usr/bin/env bash
 echo "GCLOUD $*" >> "${FAKE_CALLS}"
@@ -166,7 +176,7 @@ case "$*" in
     case "${last}" in /*) dest="${last%/}"; : > "${FAKE_CALLS}.scp_local" ;; esac
     case "${FAKE_SCP_MODE:-ok}" in
       echec) exit 1 ;;
-      partiel) mkdir -p "${dest}/out"; echo "partiel" > "${dest}/out/bench_resume.txt"; exit 0 ;;
+      partiel) mkdir -p "${dest}/out"; echo "partiel" > "${dest}/out/bench_resume.txt"; printf 'leurre  x\n' > "${dest}/out/SHA256SUMS"; exit 0 ;;
     esac
     mkdir -p "${dest}/out"
     exit 0
@@ -792,6 +802,7 @@ check_true "R1 : recu de reprise (issue, classification forcee, jamais une decis
     && grep -q '^marques=.*double_guard_verified' '${RECU_R1}/RECU_SESSION.txt' && grep -q '^verrou=flock' '${RECU_R1}/RECU_SESSION.txt' \
     && [ -f '${RECU_R1}/marques/guest_guard_pending' ] && [ -f '${RECU_R1}/reprise.log' ] \
     && grep -q 'handshake : boot_id=' '${RECU_R1}/session.log' && [ -f '${RECU_R1}/out/bench_resume.txt' ] \
+    && grep -q ' \./out/SHA256SUMS$' '${RECU_R1}/SHA256SUMS' && [ -f '${SCEN_W}/out.promotion' ] && grep -qx 'generation=${FAKE_GEN}' '${SCEN_W}/out.promotion' \
     && ( cd '${RECU_R1}' && sha256sum -c --quiet SHA256SUMS ) && [ ! -d '${RECU_R1}/ssh' ] && [ ! -d '${RECU_R1}/gcloud-config' ] \
     && grep -q '^state=targeted_stopped' '${SCEN_W}/etat_cycle_vie' && grep -q '^generation=${FAKE_GEN}' '${SCEN_W}/etat_cycle_vie' \
     && [ -f '${SCEN_W}/recu_publie' ] && [ ! -e '${SCEN_W}/ssh/id_ed25519' ] && [ ! -d '${SCEN_W}/gcloud-config' ]"
@@ -1003,9 +1014,9 @@ export FAKE_BUILD_SLEEP_S=12
 run_scenario_bg ok build_lent 0 28800
 bash -c "$(declare -f wait_for_line); wait_for_line '${SCEN_W}/session.log' 'handshake : boot_id=' 60" || true
 chmod 500 "${SCEN_W}/ssh"
-wait "${SUP_WAIT_PID}" 2>/dev/null || true
-check_true "D8 : cycle nominal, purge des credentials en echec apres targeted_stopped => aucun recu_publie, marqueur purge_incomplete, cle encore presente, registre targeted_stopped" \
-  bash -c "[ ! -e '${SCEN_W}/recu_publie' ] && [ -f '${SCEN_W}/purge_incomplete' ] && [ -f '${SCEN_W}/ssh/id_ed25519' ] \
+rc=0; wait "${SUP_WAIT_PID}" 2>/dev/null || rc=$?
+check_true "D8 : cycle nominal, purge des credentials en echec apres targeted_stopped => code 67, aucun recu_publie, marqueur purge_incomplete, cle encore presente, registre targeted_stopped" \
+  bash -c "[ '${rc}' -eq 67 ] && [ ! -e '${SCEN_W}/recu_publie' ] && [ -f '${SCEN_W}/purge_incomplete' ] && [ -f '${SCEN_W}/ssh/id_ed25519' ] \
     && grep -q '^state=targeted_stopped' '${SCEN_W}/etat_cycle_vie' && grep -q 'PURGE INCOMPLETE' '${SCEN_W}/session.log'"
 chmod 700 "${SCEN_W}/ssh"
 N0="$(wc -l < "${FAKE_CALLS}")"
@@ -1040,17 +1051,47 @@ check_true "D10 : describe indisponible apres la scp => staging NON promu (out/ 
     && grep -q 'staging NON promu' '${SCEN_W}/reprise.log' \
     && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ] && [ ! -f '${SCEN_W}/validation.txt' ]"
 unset FAKE_DESCRIBE_FAIL_AFTER_SCP FAKE_SCP_MODE_REPRISE
+# D12 (§ 5.22) : ERREUR LOCALE pre-STOP (faux tee en echec apres la scp) => le
+# funnel d'arret execute exactement UN stop cible, registre targeted_stopped,
+# rc 74, temoin minimal (issue=reprise_erreur_locale).
+new_killed_session || true
+export FAKE_TEE_FAIL_AFTER_SCP=1 FAKE_SCP_MODE_REPRISE=partiel
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+RECU_D12="$(ls -td "${SCENARIO_DIR}"/recu/s_*_reprise_* 2>/dev/null | head -1 || true)"
+check_true "D12 : erreur locale apres la scp (tee en echec) => funnel : exactement un STOP, registre targeted_stopped, rc 74, issue=reprise_erreur_locale" \
+  bash -c "[ '${rc}' -eq 74 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ] \
+    && grep -q '^state=targeted_stopped' '${SCEN_W}/etat_cycle_vie' \
+    && [ -n '${RECU_D12}' ] && grep -q '^issue=reprise_erreur_locale' '${RECU_D12}/RECU_SESSION.txt' && grep -q '^temoin_minimal=1' '${RECU_D12}/RECU_SESSION.txt'"
+unset FAKE_TEE_FAIL_AFTER_SCP FAKE_SCP_MODE_REPRISE
+# D13 (§ 5.22) : PROVENANCE de out/ — un out/ non vide laisse par une tentative
+# anterieure, scp courante en echec => aucun marqueur out.promotion, aucun
+# validateur, classification forcee ; le partiel n'est pas promu.
+new_killed_session || true
+mkdir -p "${SCEN_W}/out"; echo "ancien" > "${SCEN_W}/out/bench_resume.txt"
+export FAKE_SCP_MODE_REPRISE=echec
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D13 : out/ non vide d'une tentative anterieure + scp en echec => aucun out.promotion, aucun validateur (validation.txt absent), un STOP, rc 0" \
+  bash -c "[ '${rc}' -eq 0 ] && [ ! -e '${SCEN_W}/out.promotion' ] && [ ! -f '${SCEN_W}/validation.txt' ] \
+    && grep -q 'aucun out/ promu par CE rapatriement' '${SCEN_W}/reprise.log' \
+    && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ]"
+unset FAKE_SCP_MODE_REPRISE
 # D11 (§ 5.21) : cycle NOMINAL, temoin non publiable (recu_publie est un
 # repertoire cree apres le handshake) => code 68 dedie, marqueur
 # temoin_non_publie, purge faite ; la reprise publie ensuite le temoin.
 export FAKE_BUILD_SLEEP_S=12
 run_scenario_bg ok build_lent 0 28800
-bash -c "$(declare -f wait_for_line); wait_for_line '${SCEN_W}/session.log' 'handshake : boot_id=' 60" || true
+RDV=0; bash -c "$(declare -f wait_for_line); wait_for_line '${SCEN_W}/session.log' 'handshake : boot_id=' 60" || RDV=$?
+check_true "D11 : rendez-vous du handshake atteint (fatal sinon)" [ "${RDV}" -eq 0 ]
 mkdir -p "${SCEN_W}/recu_publie"
 rc=0; wait "${SUP_WAIT_PID}" 2>/dev/null || rc=$?
-check_true "D11 : cycle nominal, temoin non publiable => code 68, marqueur temoin_non_publie, TEMOIN NON PUBLIE au journal, credentials purges, registre targeted_stopped" \
+RECU_D11="$(ls -td "${SCENARIO_DIR}"/recu/s_* 2>/dev/null | head -1 || true)"
+check_true "D11 : cycle nominal, temoin non publiable => code 68, marqueur temoin_non_publie, TEMOIN NON PUBLIE au journal, credentials purges, registre targeted_stopped, EXACTEMENT un STOP, fast-path « deja certifie par le garde », issue=arret_certifie_par_le_garde" \
   bash -c "[ '${rc}' -eq 68 ] && [ -f '${SCEN_W}/temoin_non_publie' ] && grep -q 'TEMOIN NON PUBLIE' '${SCEN_W}/session.log' \
-    && [ ! -e '${SCEN_W}/ssh/id_ed25519' ] && grep -q '^state=targeted_stopped' '${SCEN_W}/etat_cycle_vie'"
+    && [ ! -e '${SCEN_W}/ssh/id_ed25519' ] && grep -q '^state=targeted_stopped' '${SCEN_W}/etat_cycle_vie' \
+    && [ \"\$(grep -c '^STOP ' '${FAKE_CALLS}')\" -eq 1 ] && grep -q 'arret deja certifie par le garde' '${SCENARIO_DIR}/stdout.log' \
+    && [ -n '${RECU_D11}' ] && grep -q '^issue=arret_certifie_par_le_garde' '${RECU_D11}/RECU_SESSION.txt'"
 rmdir "${SCEN_W}/recu_publie"
 N0="$(wc -l < "${FAKE_CALLS}")"
 rc=0; run_recovery || rc=$?

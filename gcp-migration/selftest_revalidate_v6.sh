@@ -36,8 +36,9 @@ fresh_copy() { # $1 = nom de cas -> imprime le chemin
   rm -rf "${d}"; cp -r "${SOURCE}" "${d}"; printf '%s' "${d}"
 }
 run_reval() { # $1 = recu, [$2 = validateur] -> rc dans REVAL_RC, sortie dans REVAL_OUT
+  # Un validateur non canonique n'est admis qu'en mode selftest EXPLICITE.
   REVAL_RC=0
-  REVAL_OUT="$(cd "${ROOT}" && bash "${REVALIDATE}" "$1" ${2:+"$2"} 2>&1)" || REVAL_RC=$?
+  REVAL_OUT="$(cd "${ROOT}" && EHGP_REVALIDATE_SELFTEST="${2:+1}" bash "${REVALIDATE}" "$1" ${2:+"$2"} 2>&1)" || REVAL_RC=$?
 }
 
 echo "selftest revalidate v6 : recu source $(basename "${SOURCE}")"
@@ -71,9 +72,15 @@ check_true "matrice_resume.txt supprime (rehash) : REFUS piece durable absente" 
 # le controle final doit dominer (rc 3), jamais 0.
 FAKEV="${WORK}/faux_validateur.py"
 cat > "${FAKEV}" <<'EOF'
-import os, sys
-out = sys.argv[1]
+import os, shutil, sys
+def _copie_resumes(recu):
+    work = os.environ["V6_RESUMES_DIR"]
+    for r in ("bench", "queue", "sweep", "gpu", "frontier", "matrice", "gpuv6"):
+        src = os.path.join(recu, r + "_resume.txt")
+        if os.path.exists(src):
+            shutil.copyfile(src, os.path.join(work, r + "_resume.txt"))
 recu = os.path.dirname(sys.argv[7])  # profil_campagne.txt du recu
+_copie_resumes(recu)
 with open(os.path.join(recu, "session.log"), "a", encoding="utf-8") as fh:
     fh.write("altere par un faux validateur\n")
 print("campaign_status=verifie_non_decisionnel (FAUX)")
@@ -86,8 +93,15 @@ check_true "validateur alterant session.log puis rc=0 : le controle final DOMINE
 # reste vrai) puis rend 0 : l'ensemble final differe => rc 3.
 FAKEV2="${WORK}/faux_validateur_ajout.py"
 cat > "${FAKEV2}" <<'EOF'
-import os, sys
+import os, shutil, sys
+def _copie_resumes(recu):
+    work = os.environ["V6_RESUMES_DIR"]
+    for r in ("bench", "queue", "sweep", "gpu", "frontier", "matrice", "gpuv6"):
+        src = os.path.join(recu, r + "_resume.txt")
+        if os.path.exists(src):
+            shutil.copyfile(src, os.path.join(work, r + "_resume.txt"))
 recu = os.path.dirname(sys.argv[7])
+_copie_resumes(recu)
 with open(os.path.join(recu, "ajout_par_validateur.txt"), "w", encoding="utf-8") as fh:
     fh.write("x\n")
 sys.exit(0)
@@ -101,8 +115,16 @@ check_true "validateur ajoutant un fichier au recu puis rc=0 : ensemble final di
 # octets => rc 3.
 FAKEV3="${WORK}/faux_validateur_rehash.py"
 cat > "${FAKEV3}" <<'EOF'
-import hashlib, os, sys
+import hashlib
+import os, shutil, sys
+def _copie_resumes(recu):
+    work = os.environ["V6_RESUMES_DIR"]
+    for r in ("bench", "queue", "sweep", "gpu", "frontier", "matrice", "gpuv6"):
+        src = os.path.join(recu, r + "_resume.txt")
+        if os.path.exists(src):
+            shutil.copyfile(src, os.path.join(work, r + "_resume.txt"))
 recu = os.path.dirname(sys.argv[7])
+_copie_resumes(recu)
 with open(os.path.join(recu, "session.log"), "a", encoding="utf-8") as fh:
     fh.write("altere puis rehash\n")
 lines = []
@@ -126,8 +148,15 @@ check_true "validateur alterant session.log PUIS regenerant SHA256SUMS, rc=0 : m
 # rend 0 (§ 5.21) : l'inventaire des repertoires est recompare => rc 3.
 FAKEV4="${WORK}/faux_validateur_repertoire.py"
 cat > "${FAKEV4}" <<'EOF'
-import os, sys
+import os, shutil, sys
+def _copie_resumes(recu):
+    work = os.environ["V6_RESUMES_DIR"]
+    for r in ("bench", "queue", "sweep", "gpu", "frontier", "matrice", "gpuv6"):
+        src = os.path.join(recu, r + "_resume.txt")
+        if os.path.exists(src):
+            shutil.copyfile(src, os.path.join(work, r + "_resume.txt"))
 recu = os.path.dirname(sys.argv[7])
+_copie_resumes(recu)
 os.mkdir(os.path.join(recu, "repertoire_vide_du_validateur"))
 sys.exit(0)
 EOF
@@ -173,6 +202,42 @@ rc=0; VOUT="$(cd "${ROOT}" && V6_RESUMES_DIR="${D}/out/sous" python3 "${VALIDATO
   "${D}/profil_campagne.txt" "${WORK}/canon.env" "${D}/manifest_revalide.txt" 2>&1)" || rc=$?
 check_true "validateur direct, V6_RESUMES_DIR explicite DANS le recu : REFUS 2, aucun resume ecrit" \
   bash -c "[ \"\$1\" -eq 2 ] && printf '%s' \"\$2\" | grep -q 'HORS du recu' && [ ! -e \"\$3/out/sous/bench_resume.txt\" ]" _ "${rc}" "${VOUT}" "${D}"
+
+# ---- § 5.22 : validateur MUET (fichier regulier rendant 0 sans ecrire de
+# resume) => rc 3 « VALIDATEUR MUET », jamais « recu intact ».
+FAKEV5="${WORK}/faux_validateur_muet.sh"; printf '#!/bin/sh\nexit 0\n' > "${FAKEV5}"; chmod +x "${FAKEV5}"
+D="$(fresh_copy validateur_muet)"; run_reval "${D}" "${FAKEV5}"
+check_true "validateur muet (rc 0, aucun resume ecrit) : REFUS rc 3 VALIDATEUR MUET" \
+  bash -c "[ \"\$1\" -eq 3 ] && printf '%s' \"\$2\" | grep -q 'VALIDATEUR MUET' && ! printf '%s' \"\$2\" | grep -q 'recu intact'" _ "${REVAL_RC}" "${REVAL_OUT}"
+# ---- /dev/null comme validateur HORS mode selftest : refus 2 avant tout appel.
+D="$(fresh_copy validateur_devnull)"; rc=0; VOUT="$(cd "${ROOT}" && bash "${REVALIDATE}" "${D}" /dev/null 2>&1)" || rc=$?
+check_true "validateur /dev/null hors mode selftest : REFUS 2 (validateur non canonique)" \
+  bash -c "[ \"\$1\" -eq 2 ] && printf '%s' \"\$2\" | grep -q 'non canonique'" _ "${rc}" "${VOUT}"
+# ---- SHA256SUMS IMBRIQUE (out/SHA256SUMS) non liste : un fichier comme un autre => ensemble exact refuse.
+D="$(fresh_copy sha_imbrique)"; printf 'deadbeef  x\n' > "${D}/out/SHA256SUMS"; run_reval "${D}"
+check_true "out/SHA256SUMS imbrique non liste au manifeste : REFUS ensemble exact (seul le manifeste racine est special)" \
+  bash -c "[ \"\$1\" -eq 2 ] && printf '%s' \"\$2\" | grep -q 'ensemble des fichiers du recu != SHA256SUMS'" _ "${REVAL_RC}" "${REVAL_OUT}"
+# ---- Nom d'entree a saut de ligne (repertoire physique « out\nmarques ») : inventaire non injectif => refus.
+D="$(fresh_copy nom_saut_de_ligne)"; mkdir "${D}/out
+marques"; run_reval "${D}"
+check_true "repertoire nomme avec un saut de ligne : REFUS (inventaire NUL injectif)" \
+  bash -c "[ \"\$1\" -eq 2 ] && printf '%s' \"\$2\" | grep -q 'saut de ligne'" _ "${REVAL_RC}" "${REVAL_OUT}"
+# ---- Mode change pendant la re-validation (validateur qui chmod un fichier) : « intact » couvre les modes.
+FAKEV6="${WORK}/faux_validateur_chmod.py"
+cat > "${FAKEV6}" <<'EOF'
+import os, sys, shutil
+recu = os.path.dirname(sys.argv[7])
+os.chmod(os.path.join(recu, "session.log"), 0o755)
+work = os.environ["V6_RESUMES_DIR"]
+for r in ("bench", "queue", "sweep", "gpu", "frontier", "matrice", "gpuv6"):
+    src = os.path.join(recu, r + "_resume.txt")
+    if os.path.exists(src):
+        shutil.copyfile(src, os.path.join(work, r + "_resume.txt"))
+sys.exit(0)
+EOF
+D="$(fresh_copy validateur_chmod)"; run_reval "${D}" "${FAKEV6}"
+check_true "validateur changeant un mode de fichier puis rc=0 (resumes recopies) : inventaire types/modes/noms different (rc 3)" \
+  bash -c "[ \"\$1\" -eq 3 ] && printf '%s' \"\$2\" | grep -q 'RECU ALTERE PENDANT LA RE-VALIDATION'" _ "${REVAL_RC}" "${REVAL_OUT}"
 
 # ---- Recu de reprise : jamais requalifie.
 D="$(fresh_copy reprise)"; sed -i 's/^issue=.*/issue=reprise_partielle/' "${D}/RECU_SESSION.txt"; rehash "${D}"; run_reval "${D}"

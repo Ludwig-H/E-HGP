@@ -12,7 +12,16 @@ set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "${HERE}/.." && pwd)"
 RECU="${1:?recu durable requis}"
-VALIDATOR="${2:-${HERE}/validate_v6_campaign.py}"
+# § 5.22 : le validateur est le CANONIQUE du worktree ; un autre chemin n'est
+# admis qu'en mode selftest EXPLICITE (EHGP_REVALIDATE_SELFTEST=1) ; son
+# sha256 est grave dans la sortie.
+VALIDATOR_CANON="${HERE}/validate_v6_campaign.py"
+VALIDATOR="${2:-${VALIDATOR_CANON}}"
+if [ "$(readlink -f "${VALIDATOR}")" != "$(readlink -f "${VALIDATOR_CANON}")" ] && [ "${EHGP_REVALIDATE_SELFTEST:-0}" != "1" ]; then
+  echo "REFUS : validateur non canonique (${VALIDATOR}) hors mode selftest explicite" >&2; exit 2
+fi
+[ -f "${VALIDATOR}" ] || { echo "REFUS : validateur absent (${VALIDATOR})" >&2; exit 2; }
+VALIDATOR_SHA="$(sha256sum "${VALIDATOR}" | awk '{print $1}')"
 [ -f "${RECU}/RECU_SESSION.txt" ] && [ -d "${RECU}/out" ] && [ -f "${RECU}/SHA256SUMS" ] \
   || { echo "REFUS : ${RECU} n'est pas un recu durable complet (RECU_SESSION.txt, out/, SHA256SUMS)" >&2; exit 2; }
 ( cd "${RECU}" && sha256sum -c --quiet SHA256SUMS ) || { echo "REFUS : SHA256SUMS du recu non verifie" >&2; exit 2; }
@@ -21,15 +30,24 @@ VALIDATOR="${2:-${HERE}/validate_v6_campaign.py}"
 # session existent — un recu ampute ou augmente n'est jamais re-juge.
 # Inventaire de TOUTES les entrees : seuls des fichiers reguliers et les
 # repertoires attendus (out, marques) — un lien symbolique ou un type
-# special non hache n'est jamais un recu.
+# special non hache n'est jamais un recu. § 5.22 : enregistrements NUL de bout
+# en bout (type, mode, nom) pour un inventaire INJECTIF ; un nom portant un
+# saut de ligne est refuse d'emblee ; seul le manifeste RACINE est special
+# (un out/SHA256SUMS ou marques/SHA256SUMS est un fichier comme un autre).
+if [ -n "$(cd "${RECU}" && find . -mindepth 1 -name "$(printf '*\n*')" -print -quit)" ]; then
+  echo "REFUS : nom d'entree contenant un saut de ligne dans le recu" >&2; exit 2
+fi
 IRREGULIERS="$(cd "${RECU}" && find . -mindepth 1 ! -type f ! -type d -printf '%y %P\n')"
 [ -z "${IRREGULIERS}" ] || { echo "REFUS : entree non reguliere dans le recu (lien ou type special) : ${IRREGULIERS}" >&2; exit 2; }
 REPERTOIRES="$(cd "${RECU}" && find . -mindepth 1 -type d -printf '%P\n' | sort)"
 for d in ${REPERTOIRES}; do
   case "${d}" in out|marques) ;; *) echo "REFUS : repertoire inattendu dans le recu (${d})" >&2; exit 2 ;; esac
 done
+inventaire_sha() { # empreinte NUL-separee (type, mode, nom) de toutes les entrees hors ./SHA256SUMS
+  ( cd "${RECU}" && find . -mindepth 1 ! -path ./SHA256SUMS -printf '%y %m %P\0' | sort -z | sha256sum | awk '{print $1}' )
+}
 LISTES="$(awk '{sub(/^\*/, "", $2); sub(/^\.\//, "", $2); print $2}' "${RECU}/SHA256SUMS" | sort)"
-PRESENTS="$(cd "${RECU}" && find . -type f ! -name SHA256SUMS -printf '%P\n' | sort)"
+PRESENTS="$(cd "${RECU}" && find . -type f ! -path ./SHA256SUMS -printf '%P\n' | sort)"
 [ "${LISTES}" = "${PRESENTS}" ] || {
   echo "REFUS : ensemble des fichiers du recu != SHA256SUMS (fichier non liste, liste sans fichier ou entree dupliquee)" >&2
   diff <(printf '%s\n' "${LISTES}") <(printf '%s\n' "${PRESENTS}") | head -n 5 >&2 || true
@@ -48,6 +66,7 @@ done
 # Le MANIFESTE INITIAL est lie par ses octets : un validateur qui altererait
 # une piece puis regenererait SHA256SUMS ne peut pas passer le controle final.
 MANIFESTE_INITIAL_SHA="$(sha256sum "${RECU}/SHA256SUMS" | awk '{print $1}')"
+INVENTAIRE_INITIAL_SHA="$(inventaire_sha)"
 field() { sed -n "s/^$1=//p" "${RECU}/RECU_SESSION.txt" | head -n 1; }
 # Un recu de REPRISE (superviseur perdu) n'est jamais requalifie en resultat.
 case "$(field issue)" in reprise_*) echo "REFUS : recu de reprise (issue=$(field issue)) — jamais une decision ni une mesure recevable" >&2; exit 2 ;; esac
@@ -76,32 +95,41 @@ case "$(cd "${WORK}" && pwd -P)/" in "${RECU_ABS}/"*) echo "REFUS : V6_RESUMES_D
 cp -r "${RECU}/out" "${WORK}/out"
 git -C "${ROOT}" show "${COMMIT}:gcp-migration/profils/${PROFIL_NOM}.env" > "${WORK}/${PROFIL_NOM}.env"
 echo "recu ${RECU} : commit ${COMMIT:0:12}, profil ${PROFIL_NOM}, remote_campaign_rc ${RC_REMOTE}, scp_rc ${SCP_RC}, stop_rc ${STOP_RC}"
+echo "validateur_sha256=${VALIDATOR_SHA} ($( [ "${VALIDATOR}" = "${VALIDATOR_CANON}" ] && echo canonique || echo "selftest : ${VALIDATOR}" ))"
 rc=0
 V6_RESUMES_DIR="${WORK}" python3 "${VALIDATOR}" "${WORK}/out" "${COMMIT}" "${PAYLOAD}" "${MANIFEST}" \
   "${RC_REMOTE}" "${SCP_RC}" "${RECU}/profil_campagne.txt" "${WORK}/${PROFIL_NOM}.env" "${RECU}/manifest_revalide.txt" || rc=$?
 echo "validateur (${VALIDATOR}) : rc=${rc}"
+# § 5.22 : chaque resume attendu (present au recu) doit avoir ete RE-PRODUIT
+# par le validateur et est compare — un validateur muet ou arbitraire qui
+# rend 0 sans ecrire les resumes est refuse (rc 3), jamais « recu intact ».
+RESUMES_ABSENTS=""
 for r in bench queue sweep gpu frontier matrice gpuv6; do
-  if [ -f "${RECU}/${r}_resume.txt" ] && [ -f "${WORK}/${r}_resume.txt" ]; then
-    if cmp -s "${RECU}/${r}_resume.txt" "${WORK}/${r}_resume.txt"; then
-      echo "resume ${r} : identique au recu"
-    else
-      echo "resume ${r} : DIFFERENT du recu (le recu reste intact)"
-      { diff "${RECU}/${r}_resume.txt" "${WORK}/${r}_resume.txt" || true; } | head -5  # affichage seul, jamais un court-circuit
-    fi
+  [ -f "${RECU}/${r}_resume.txt" ] || continue
+  if [ ! -f "${WORK}/${r}_resume.txt" ]; then RESUMES_ABSENTS="${RESUMES_ABSENTS} ${r}"; continue; fi
+  if cmp -s "${RECU}/${r}_resume.txt" "${WORK}/${r}_resume.txt"; then
+    echo "resume ${r} : identique au recu"
+  else
+    echo "resume ${r} : DIFFERENT du recu (le recu reste intact)"
+    { diff "${RECU}/${r}_resume.txt" "${WORK}/${r}_resume.txt" || true; } | head -5  # affichage seul, jamais un court-circuit
   fi
 done
+if [ -n "${RESUMES_ABSENTS}" ]; then
+  echo "VALIDATEUR MUET : resumes attendus non produits (${RESUMES_ABSENTS# }) — verdict rejete" >&2
+  exit 3
+fi
 # Le controle final DOMINE le code du validateur (§ 5.19.3 : un validateur
 # qui altere le recu ne peut pas rendre 0 par un `&&` a gauche).
 # § 5.21 : l'inventaire des REPERTOIRES est lui aussi recompare (un
 # validateur qui cree seulement un repertoire vide n'est pas « intact »).
+# « intact » = noms, types, modes et octets : manifeste initial identique,
+# hashes verifies, inventaire NUL (type, mode, nom) identique.
 if [ "$(sha256sum "${RECU}/SHA256SUMS" | awk '{print $1}')" = "${MANIFESTE_INITIAL_SHA}" ] \
    && ( cd "${RECU}" && sha256sum -c --quiet SHA256SUMS ) \
-   && [ -z "$(cd "${RECU}" && find . -mindepth 1 ! -type f ! -type d -printf '%P\n')" ] \
-   && [ "$(cd "${RECU}" && find . -mindepth 1 -type d -printf '%P\n' | sort)" = "${REPERTOIRES}" ] \
-   && [ "$(cd "${RECU}" && find . -type f ! -name SHA256SUMS -printf '%P\n' | sort)" = "${PRESENTS}" ]; then
-  echo "recu intact apres re-validation (manifeste initial identique, SHA256SUMS verifie, ensembles de fichiers et de repertoires inchanges)"
+   && [ "$(inventaire_sha)" = "${INVENTAIRE_INITIAL_SHA}" ]; then
+  echo "recu intact apres re-validation (manifeste initial identique, SHA256SUMS verifie, inventaire types/modes/noms inchange)"
 else
-  echo "RECU ALTERE PENDANT LA RE-VALIDATION (manifeste, hashes, ensemble de fichiers ou de repertoires) — verdict rejete" >&2
+  echo "RECU ALTERE PENDANT LA RE-VALIDATION (manifeste, hashes ou inventaire types/modes/noms) — verdict rejete" >&2
   exit 3
 fi
 exit "${rc}"

@@ -15,16 +15,16 @@ Conventions héritées v5, toutes reconduites :
   compilés seulement sous `MHGP6_TESTING` (posé par `mhgp6_executable`,
   jamais par `mhgp6_product_executable`) ; nom inconnu refusé code 2. Cible :
   chaque nom = un point d'injection + une porte code 4 EXÉCUTÉE. État réel
-  (recompté après la porte d'ownership) : 60 noms au registre, 66 points
-  d'injection (65 sous src/, un sous oracle/ — `wspd-cap-terminal` et
-  `wspd-split-heaviest` ont maintenant un site sur la route FUSIONNÉE en
-  plus de la route brute) ; **29 noms distincts** tués par une porte
-  exécutée (le quatrième cycle annonçait 28 : la porte
-  `mhgp6_fused_mutant_droprect` tue `wspd-drop-rect`, déjà compté dans la
-  boucle de conformité — deux portes, un seul nom ; cap et split sont tués
-  depuis par `mhgp6_wspd_mutant_cap`/`_split` sur la porte d'ownership) :
-  mutants dédiés + boucle de divergence d'objet `mhgp6_mutant_*` +
-  `family-scanline-overshoot`.
+  (recompté au palier KeyCSR du 2 septembre par
+  `grep -rn MHGP6_MUTANT src/ cli/ oracle/`, hors `#define`) : 97 noms au
+  registre, 99 points d'injection pour 90 noms distincts porteurs d'un site
+  hôte (les sept `gpu-*` de census sont traduits en drapeaux device, sans
+  site `MHGP6_MUTANT` hôte ; `wspd-cap-terminal` et `wspd-split-heaviest`
+  ont un site sur la route FUSIONNÉE en plus de la route brute) ;
+  **69 noms distincts** tués par une porte exécutée, dont les 14 `csr-*`
+  (`mhgp6_fold_csr_mutant_*` sur le champ annoncé + boucle
+  `mhgp6_mutant_csr_*`) : mutants dédiés + boucle de divergence d'objet
+  `mhgp6_mutant_*` + `family-scanline-overshoot`.
   `wspd-drop-rect` est désormais UNE omission par DESCENTE appliquée après la
   fusion ordonnée, masse omise soustraite du grand-livre reconstruit
   (`emis + tués + omis == attendu`, delta −1 littéral gravé par
@@ -60,13 +60,13 @@ Conventions héritées v5, toutes reconduites :
 | tueurs d'ancre | fixtures F1–F11 portées ; secteurs : fixture croisée + mutant `sector-credit-global` ; grille : fixtures F9/F10 + mutants `cell-kill-h-minus-one`, `cell-kill-nonstrict` |
 | sweep q4 | **oracle du sweep** (re-balayage exhaustif en μ, échange des quantificateurs, racines/frontières) ; fixtures : relais `F1=μ+1, F2=1−μ`, racines confondues, complétion incidente (compte zéro), clip d'égalité à μ*, les trois cas B=0, sortie dans cellule profonde avant portion shallow ; mutants `sweep-drop-exit-root`, `sweep-nonstrict-depth`, `sweep-skip-fragment`, `sweep-completion-from-witness-tape`, `chord-dead-skip-positive` (hérité) |
 | RLE/census | mutants `rle-drop`, `depth-threshold-minus-one`, `range-add-max-le-zero`, `census-nonstrict`, `skip-full-census` ; fixtures plateau (carré cocyclique) |
-| fold/rendu | mutants `drop-nonmerge`, `attach-prebatch`, `repr-ties`, `binary-ties`, `canonical-is-uf-root`, `fold-inject-a-failure-k2` tués (boucle de divergence d'objet) ; sondes d'ablation du reduce `ablation-mat-sans-copie`, `ablation-mat-sans-tris`, `ablation-post-cle-factice` (chacune change l'objet, tuée dans la même boucle ; binaire `mhgp6_profile_sonde` sous `MHGP6_TESTING` seul à accepter `--inject=`, le produit refuse : `mhgp6_profile_refuse_inject`, `mhgp6_profile_sonde_refuse_inconnu` ; reçu `bench/sonde_ablation_reduce.sh`, jamais un mur). `[PRÉVU]` : juge borné n ≤ 14 (miniboule + cliques + Kruskal à lots), K=1 ≡ MST indépendant, rejeu « catalogue + deltas → partition », juge d'in-flight (`fold-inject-b-exception-k3`), `render-active-only`, planchers |
-| conformité v5 | `mhgp6_conformity_*` : `digest_all` + `digest_forest_K*` (l'OBJET) ≡ `receipts/conformite_v5/` sur 5 familles × {8000, 16000, 32000} (labels scale*) et petites tailles en `gate` ; le digest candidats v5-compat est rapporté, jamais un critère (cover q4 coefficient 4) ; golden post-préfiltre v6 gravé (uniform 400) |
+| fold/rendu | mutants `drop-nonmerge`, `attach-prebatch`, `repr-ties`, `binary-ties`, `canonical-is-uf-root`, `fold-inject-a-failure-k2` tués (boucle de divergence d'objet) ; sondes d'ablation du reduce `ablation-mat-sans-copie`, `ablation-mat-sans-tris`, `ablation-post-cle-factice` (chacune change l'objet, tuée dans la même boucle ; binaire `mhgp6_profile_sonde` sous `MHGP6_TESTING` seul à accepter `--inject=`, le produit refuse : `mhgp6_profile_refuse_inject`, `mhgp6_profile_sonde_refuse_inconnu` ; reçu `bench/sonde_ablation_reduce.sh`, jamais un mur). **KeyCSR** (stockage `csr_facet_keys_v1`, route `--layout=csr`, même objet, aucune route de repli) : `mhgp6_fold_csr_{fixtures,offsets,overflow,copie,pipeline}` — 13 fixtures gravées du fold (bras classique contre texte, compteurs et pins de digest ; bras csr contre le classique par `first_divergence`, lecteur tiers de `tests/forest_witness.hpp`), validateur d'offsets (cinq contrôles, message exact), gardes de capacité (plafond d'append ET majorant, deux crochets test-only distincts), copie autonome post-callback, matrice fils × inflight × join × layout ; 14 mutants `csr-*` tués sur le champ ANNONCÉ (`--expect-divergence=`, sinon code 1) + refus pipeline `mhgp6_fold_csr_refus_csr-offset-*` (invariant, zéro callback, provisoires vides) + boucle `mhgp6_mutant_csr_*` ; rejeu « catalogue + deltas → partition » (seconde autorité, deux layouts, fixtures et pipeline). `[PRÉVU]` : juge borné n ≤ 14 (miniboule + cliques + Kruskal à lots), K=1 ≡ MST indépendant, juge d'in-flight (`fold-inject-b-exception-k3`), `render-active-only`, planchers |
+| conformité v5 | `mhgp6_conformity_*` : `digest_all` + `digest_forest_K*` (l'OBJET) ≡ `receipts/conformite_v5/` sur 5 familles × {8000, 16000, 32000} (labels scale*) et petites tailles en `gate` ; le digest candidats v5-compat est rapporté, jamais un critère (cover q4 coefficient 4) ; golden post-préfiltre v6 gravé (uniform 400) ; + `mhgp6_conformity_csr_*` : MÊMES reçus sous `--layout=csr` (8 petites en `gate`, 15 `scale*`) avec non-vacuité `csr_fallback=0` et `ordres_storage_conformes=kmax_eff`, refus 2 d'un layout inconnu (`mhgp6_conformity_refus_layout_inconnu`, `mhgp6_cli_refus_layout_{inconnu,vide}`), signatures CLI `mhgp6_cli_layout_{classic,csr}_signature` |
 | cover q4 | `mhgp6_cover_coef4` (contre-fixture tétraèdre régulier + z, frontière de génération) + mutant `q4-cover-coef3` |
 | barrière de génération/census | `mhgp6_linked_arcs_u16` + mutant d'oracle i64 (portée : génération→census ; l'extension aux facettes de forêt est `[PRÉVU]`) |
 | frontières du sweep | `mhgp6_sweep_frontieres` (F1–F5 : racines égales, extrémité de Jung exacte, B=0, complétion dans le facteur, profondeur h4−1) + 2 mutants |
-| parallélisme | mutants `par-drop-shard`, `par-drop-ball-chunk` tués (boucle). `[PRÉVU]` : `par_gate` digest identique fils ∈ {1,8}, `parallel-sort-unstable`, `fold_inflight` ∈ {1,2,8} |
-| profil reduce (§ 5.10) | cibles EXPLICITES `mhgp6_profile` et `mhgp6_profile_liveness` (identité de build signée par la cible, jamais par des flags) ; `mhgp6_profil_identite` : la PROJECTION DÉTERMINISTE NOMMÉE (`digest_all` + `digest_forest_K*` + `cardinalites K=` — ni `batch_levels` ni le `ForestResult` complet) identique entre normal/profil/vivacité × join 0/1, builds DISCRIMINÉS (zéro ligne `profil_*` côté normal), structure valide (K cohérents entre forêt/cardinalités/reduce/intern/vivantes, temps finis non négatifs, fermeture somme/résiduel aux bornes INTERNES `mur_reduce_interne`, planchers strictement positifs), causalité de `fold_join` (chaîne A→reduce ordonnée par K ; join=1 ⟹ sérialisation inter-K et pics à 1), vivacité (pic intra-lot > 0, frontière ≤ pic) ; `mhgp6_profil_contrat_echec` + `mhgp6_profil_contrat_echec_k2` (COMPILÉS, inspectent le `RunResult` — le CLI ne print jamais après un refus ; scène K2 sous jonction, profil K1 non vide vérifié au callback, effacement au terminal) ; `mhgp6_profil_contre_fixture` (§ 5.13 : la scène « neuf composantes nulles, somme=0.008, residuel=0.012, mur=0.020 » tuée par les seuils serrés 0.0051/0.006 ; audit post-session : DENTS ISOLÉES — dérive de somme 0.008 à fermeture exacte tuée par la seule dent somme avec son message, écart de fermeture 0.007 à somme exacte tué par la seule dent fermeture, frontière honnête 0.005 acceptée — le juge exercé est le VRAI `check_profile_output` importé). Le binaire de profil n'est JAMAIS un mur de débit |
+| parallélisme | mutants `par-drop-shard`, `par-drop-ball-chunk` tués (boucle) ; `mhgp6_fold_csr_pipeline` : matrice fils {1,8} × inflight {1,2} × join {0,1} × layout {classic,csr} sur les sept familles des petites conformités, témoin complet par K (`first_divergence`) contre la référence classique 1 fil, digests/cartes/totaux identiques, rejeu csr par K. `[PRÉVU]` : `parallel-sort-unstable`, `fold_inflight=8` |
+| profil reduce (§ 5.10) | cibles EXPLICITES `mhgp6_profile` et `mhgp6_profile_liveness` (identité de build signée par la cible, jamais par des flags) ; `mhgp6_profil_identite` : la PROJECTION DÉTERMINISTE NOMMÉE (`digest_all` + `digest_forest_K*` + `cardinalites K=` — ni `batch_levels` ni le `ForestResult` complet) identique entre normal/profil/vivacité × join 0/1 × layout classic/csr (jeton `layout=` exigé sur `profil_kind=`, aucune colonne ajoutée à `profil_reduce`/`profil_intern`), builds DISCRIMINÉS (zéro ligne `profil_*` côté normal), structure valide (K cohérents entre forêt/cardinalités/reduce/intern/vivantes, temps finis non négatifs, fermeture somme/résiduel aux bornes INTERNES `mur_reduce_interne`, planchers strictement positifs), causalité de `fold_join` (chaîne A→reduce ordonnée par K ; join=1 ⟹ sérialisation inter-K et pics à 1), vivacité (pic intra-lot > 0, frontière ≤ pic) ; `mhgp6_profil_contrat_echec` + `mhgp6_profil_contrat_echec_k2` (COMPILÉS, inspectent le `RunResult` — le CLI ne print jamais après un refus ; scène K2 sous jonction, profil K1 non vide vérifié au callback, effacement au terminal) ; `mhgp6_profil_contre_fixture` (§ 5.13 : la scène « neuf composantes nulles, somme=0.008, residuel=0.012, mur=0.020 » tuée par les seuils serrés 0.0051/0.006 ; audit post-session : DENTS ISOLÉES — dérive de somme 0.008 à fermeture exacte tuée par la seule dent somme avec son message, écart de fermeture 0.007 à somme exacte tué par la seule dent fermeture, frontière honnête 0.005 acceptée — le juge exercé est le VRAI `check_profile_output` importé). Le binaire de profil n'est JAMAIS un mur de débit |
 | caps/budget | `mhgp6_caps_refus` (fenêtres (u)/(a)/(a0)/(a2)/(b)/(c)/(w)/(w2)/(f)/(d)) + mutants `caps-drop-emission`, `caps-late-wave-check`, `caps-skip-prefusion-budget` (garde 2E AVANT la fusion globale, § 6.1 de la réponse auditeurs — sautée, le refus retombe sur le tri APRÈS la matérialisation du payload logique nommé) ; signature CLI `mhgp6_cli_budget_signature` (code + ligne exacte en une exécution) |
 | GPU série C (hôte) | `mhgp6_executor_pool` + mutants `pool-serial`, `pool-drop-exception`, `pool-worker-resume-after-fatal` (fixture permanente scénario 10 : second travail en file, fatal déclenché, AUCUN travail post-fatal — la course § 5.6), `pool-activate-after-unlock` (scénario 13 : hook test-only, fermeture linéarisée après le pop — le ticket doit être VU actif) ; scénarios 11 (échecs de construction) et 12 (fenêtre file→actif N=2) ; témoin stub `mhgp6_device_witness_stub` : nominal 0, trois dents à 4 (carry, skip-arith, skip-native — tableaux séparés) + contre-fixture composée skip+carry gravée à code 1 (preuve C++ hôte — jamais un reçu device) |
 | GPU série C — wire et kernels (hôte) | `mhgp6_wire` (aller-retour bit-exact du `GpuCloudIndexWire`, t1 contre balayage exhaustif, 3 refus hors-domaine, digest gravé) + mutants `gpu-index-drop-node`/`wire-t1-plus-one` ; `mhgp6_census_device_stub` (bit-identité boule à boule contre le scalaire sur candidats réels, 2 familles) + 4 mutants (`gpu-range-add-le`, `gpu-stack-shallow`, `gpu-swap-push-order` à multiset égal, `gpu-census-nonstrict`) ; `mhgp6_pilot_stub` (pipeline COMPLET : objet identique CPU vs route série C, refus du run entier sous mutants) ; `mhgp6_pilote_stub_*` (syntaxe/logique du pilote .cu, refus de parsing) ; JUGE DES RECORDS (§ 5.13-5.15, `tests/pilote_juge.py` — LE MÊME juge pour la porte stub, le runner G4 en mode fichier et le validateur) : `mhgp6_pilote_juge_contre_fixtures` (27 flux falsifiés intégrés tous tués : records/ABBA/signatures recalculées/formules d'octets 112-100-100/chronos fermés et enveloppants/stabilité inter-répétitions/identité d'en-tête famille-n-graine-fils-**arch**/lot_effectif=min/parité imprimée/grammaire hex64), `mhgp6_pilote_stub_juge` + `_ordre_inverse` (le pilote stub réel jugé sous les deux ordres de base) |
@@ -81,7 +81,15 @@ annulation, contre-familles `two_lines`/`collinear_seven`, F1–F11 des tests
 d'ancre, sphère diamétrale à 37 sites. Corpus neuf : fixtures du sweep
 (ci-dessus), `linked_arcs_u16`, fixture de masque de lane
 `a=(1000,1000,1000), b=(2000,1000,1000), z=(1010,1016,1000)`,
-calotte–lentille (V6-Q4), peigne de facteurs singletons.
+calotte–lentille (V6-Q4), peigne de facteurs singletons. Fixtures du fold
+(palier KeyCSR, `tests/fold_csr_gate.cpp`, dérivées à la main puis
+re-dérivées machine, pins du bras classique) : F1 born-only, F2/F2b
+parents-only (support inversé), F3 continuation (`batch_levels` de taille 2
+pour un seul delta), F4/F4-min multi-parents S5 (ordre de `pre_list` ≠ ordre
+des canons), F5 S2 (deux racines post d'un lot, ordre par racine UF ≠ ordre
+par output), F6 forêt vide, S1/S1a/S1b inter-segments (output figé au lot,
+niveau = représentation du premier événement du lot), R2/R2b encodage réel
+K=2.
 
 ## Campagnes
 
@@ -157,4 +165,20 @@ l'identité sid/pgid enregistrée, pas un descendant qui refait `setsid`. Dents 
 témoin non publiable (D9 reprise, D11 nominal) puis publication sans appel
 GCP, describe indisponible après la scp (D10 : partiel conservé, rien promu).
 Le revalidateur recompare aussi l'inventaire des répertoires (mutant :
-répertoire vide créé par le validateur).
+répertoire vide créé par le validateur). Dents du § 5.22 : funnel d'arrêt
+inconditionnel (dès que la génération est connue, une erreur locale pré-STOP
+déclenche exactement un arrêt ciblé, rc 74, témoin minimal — D12, faux `tee`
+en échec après la scp) ; l'arrêt précède toute promotion ou sauvegarde
+locale ; provenance de `out/` par marqueur atomique `out.promotion`
+(génération, commit, `scp_rc`), seul un `out/` promu par CE rapatriement est
+validé (D13 : `out/` résiduel + scp en échec ⇒ aucun validateur) ; purge
+nominale incomplète ⇒ code 67 (priorité 67 > 68 > 0/65, D8 l'exige) ; reçu
+minimal aux champs bornés (marques connues seulement, résidus non énumérés) ;
+D11 causal (rendez-vous fatal, exactement un STOP, fast-path et
+`issue=arret_certifie_par_le_garde`) ; les manifestes de reçus n'excluent que
+le `SHA256SUMS` racine (un `out/SHA256SUMS` est inventorié : leurre du faux
+scp assert en R1). Revalidateur : validateur canonique authentifié (sha256
+gravé ; autre chemin seulement sous `EHGP_REVALIDATE_SELFTEST=1`), résumés
+attendus exigés après l'appel (juge muet ⇒ rc 3), inventaire NUL injectif
+(type, mode, nom ; nom à saut de ligne refusé), « intact » = noms, types,
+modes et octets — `selftest_revalidate_v6.sh` (20 scènes).

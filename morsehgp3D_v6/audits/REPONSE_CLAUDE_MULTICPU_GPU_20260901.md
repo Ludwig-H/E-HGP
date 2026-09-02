@@ -884,3 +884,47 @@ cycle de vie, selftest campagne 141/141, `test_gcp_safety`, intégration v6
 2/2, `selftest_revalidate_v6.sh` 15/15, porte de sonde 6/6).
 
 GCP non utilisé par cette livraison.
+
+## 13. Réponse au § 5.22 et à l'`ETAT_COURANT` du 2 septembre (reprise, revalidateur, harnais de sonde)
+
+Tout local, aucun appel GCP, aucun GO demandé.
+
+- **Funnel d'arrêt inconditionnel** : dès que la génération est connue, un
+  trap `ERR` (sous `errtrace`, donc hérité par les fonctions : une panne de
+  `tee` dans `rlog` ne peut plus faire mourir la reprise en silence — c'était
+  exactement le fail-open) exécute UN `stop_and_verify` épinglé, publie le
+  registre, écrit un témoin minimal et rend 74 ; l'arrêt précède désormais
+  toute promotion ou sauvegarde locale ; le funnel est désarmé en ligne
+  autour des pipelines à échec toléré (scp) et à l'entrée de la garde. Dent
+  D12 (faux `tee` en échec après la scp ⇒ exactement un STOP, registre
+  `targeted_stopped`, rc 74, `issue=reprise_erreur_locale`).
+- **Provenance de `out/`** : marqueur atomique `out.promotion` (génération,
+  commit, `scp_rc`, époque) écrit seulement à la promotion ; le validateur ne
+  court que sur un `out/` promu par CE rapatriement (D13 : `out/` résiduel +
+  scp en échec ⇒ aucun marqueur, aucun validateur ; R1 assert le marqueur).
+- **D8 = 67** dans le cycle nominal (`PURGE_RC`, priorité 67 > 68 > 0/65,
+  masque `|| true` retiré) ; **D11** causal (rendez-vous fatal, exactement un
+  STOP, message du fast-path, `issue=arret_certifie_par_le_garde`).
+- **Reçu minimal borné** : `marques=` limité aux deux marques connues,
+  `residus_recus` non énumérés ; `.recu_publie.*.partial` nettoyé si
+  `os.replace` échoue ; `out.partiel_<epoch>_<pid>` best effort sans collision.
+- **Manifestes** : les reçus (cycle nominal, reprise, sonde) n'excluent que le
+  `SHA256SUMS` racine ; un `out/SHA256SUMS` est inventorié (leurre du faux scp
+  assert en R1).
+- **Revalidateur** : validateur canonique authentifié (sha256 gravé ; un autre
+  chemin seulement sous `EHGP_REVALIDATE_SELFTEST=1` — `/dev/null` refusé) ;
+  chaque résumé attendu doit être re-produit et comparé (juge muet ⇒ rc 3) ;
+  inventaire NUL injectif (type, mode, nom ; nom à saut de ligne refusé) ;
+  « intact » = noms, types, modes et octets. `selftest_revalidate_v6.sh`
+  20/20.
+- **Harnais de sonde** (`fc8e28b1`) : `runs_*` obligatoires, `profil_reduce`
+  malformée refusée, racine exacte relue avant le `mv`, protocoles rehachés,
+  identité de cible bornée et gravée, TOCTOU et `diff` fail-open fermés —
+  porte 18/18.
+
+Rejeux : selftest cycle de vie 98/98, intégration v6 2/2, revalidateur 20/20.
+Leçon gravée : sans `errtrace`, le trap `ERR` n'est pas hérité par les
+fonctions et `set -e` y tue le script sans trap ; sous `errtrace`, un
+`trap - ERR` dans une fonction désarme globalement (test scratchpad).
+
+GCP non utilisé par cette livraison.
