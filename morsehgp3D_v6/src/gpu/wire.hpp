@@ -52,11 +52,20 @@ inline constexpr const char* kWireVersion = "gpu_wire_v1";
 inline constexpr size_t kWireBytesPerNode = 4 + 4 + 4 + 4 + 12;  // left,right,first,last,box u16x6
 inline constexpr size_t kWireBytesPerUpos = 6 + 4;               // pos u16x3 + wsum u32
 inline constexpr size_t kWireBallInBytes = 112;                  // cle 80 + t1 24 + h 8
-inline constexpr size_t kWirePrefilterOutBytes = 12;
-inline constexpr size_t kWireCensusOutBytes = 92;                // cand_idx 4 + statut/comptes 4 + ids 84
+// SORTIES par boule, decomposition EXACTE du transport reel (cli/mhgp6_cuda.cu,
+// juge tests/pilote_juge.py : 100 o par boule en D2H comme en sentinelles) —
+// les valeurs 12 et 92 gravees ici jusqu'au 2 septembre etaient fausses et
+// inutilisees : deux autorites concurrentes pour dimensionner le meme slab
+// (retour auditeur, REPONSE_AUDITEUR_CONCEPTION_C6_20260902).
+inline constexpr size_t kWirePrefilterOutBytes = 8 + 1;                    // count u64 + statut u8
+inline constexpr size_t kWireCensusOutBytes = 21 * 4 + 1 + 1 + 1 + 4;      // ids upos + cstatut + n_int + n_shell + cand_idx
+inline constexpr size_t kWireOutBytesPerBall = kWirePrefilterOutBytes + kWireCensusOutBytes;
 static_assert(kWireBytesPerNode == 28 && kWireBytesPerUpos == 10,
               "cible < 60 o/upos demontree par les types wire (38 o/upos)");
-static_assert(kWireCensusOutBytes == 4 + 4 + 21 * 4, "payload census fixe : 21 ids upos");
+static_assert(kWirePrefilterOutBytes == 9 && kWireCensusOutBytes == 91,
+              "payload census fixe : 21 ids upos, statut et comptes");
+static_assert(kWireOutBytesPerBall == 100,
+              "contrat D2H et sentinelles : 100 o par boule (juge pilote_juge.py)");
 
 namespace wire_detail {
 

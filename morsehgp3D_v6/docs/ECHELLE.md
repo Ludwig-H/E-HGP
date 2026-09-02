@@ -5,10 +5,21 @@ morts vers `ECHELLE.md § 3` et `§ 8 bis` que portaient `src/core/caps.hpp` et
 `src/forest/fold.hpp` (le fichier visé était celui de la v5 et n'existe pas
 dans ce chantier).
 
-Chaque chiffre porte sa nature : **[M]** mesuré dans un reçu immuable ou une
-exécution tracée, **[C]** calculé depuis le code (taille compilée, arithmétique
-de plafond), **[E]** extrapolation — jamais une loi, jamais une promesse.
-`public_status=not_claimed` ; aucun chiffre de ce document ne le change.
+Chaque chiffre porte sa nature : **[M]** mesuré dans un reçu immuable et
+**sourcé** (reçu, fichier, champ), **[O]** observation locale tracée mais **non
+opposable** (hors reçu, machine de développement, graine unique), **[C]** calculé
+depuis le code (taille compilée, arithmétique de plafond), **[E]** extrapolation
+— jamais une loi, jamais une promesse. `public_status=not_claimed` ; aucun
+chiffre de ce document ne le change.
+
+Sources des **[M]** de ce document : reçu
+`receipts/session_g4_20260901_d98f47296d67_1788245493` (`frontier_resume.txt`,
+`bench_resume.txt`) pour la frontière K=10 et les accélérations ; reçu
+`receipts/session_g4_20260902_c8f696739b0b_1788312873` (`matrice_resume.txt`)
+pour les murs K=10 et K=5 et la propriété de préfixe ; reçu
+`receipts/session_g4_20260901_b97f20ea4b8f_1788293187` (`gpuv6_resume.txt`) pour
+le pilote série C. Les valeurs locales K=5 à 100 000 et 200 000 points sont des
+**[O]** : huit fils, machine de développement, graine 3, aucune répétition.
 
 ## 1. Vocabulaire : deux sens de « streamé »
 
@@ -26,8 +37,8 @@ statuts ; ne jamais lire l'un pour l'autre.
 | K=10, uniform, 800 000 points | avortement à 550 s (échec d'allocation, signal 6) | [M] |
 | K=10 | mur encadré par 400 000 et 800 000 points ; estimé vers 4,8 · 10^5 sur 180 Gio | [M] puis [E] |
 | K=5 (`smax=6`), 50 000 points, 48 fils | 9,08 s et 3,80 Gio, contre 47,68 s et 18,08 Gio à K=10 | [M] |
-| K=5, 8 fils, 100 000 et 200 000 points | 5,21 Go et 10,37 Go, soit 0,052 Mo par point et 83 boules par point | [M] |
-| K=5 | mur estimé entre 2,4 · 10^6 et 3,9 · 10^6 points | [E] |
+| K=5, 8 fils, 100 000 et 200 000 points | 5,21 Go et 10,37 Go, soit 0,052 Mo par point et 83 boules par point | [O] |
+| K=5 | mur estimé entre 2,4 · 10^6 et 3,9 · 10^6 points, **sur la seule base d'une observation locale non opposable** | [E] sur [O] |
 
 L'écart d'un facteur 1,6 sur le mur K=5 est le traitement de la **rétention
 d'allocateur** ; aucune mesure ne le tranche aujourd'hui. La session
@@ -47,34 +58,42 @@ Tailles compilées [C] : `BallCandidate` 144 o, `Survivor` 16 o, `BallData`
 224 o, `ForestEvent` 144 o, `FacetKey` 44 o, `FidState` 32 o,
 `ComponentDelta` 160 o, `DeltaMeta` 96 o.
 
-Les postes dominants du pic, à 400 000 points et K=10 [E] calé sur [M] :
-les `BallData` résidents pendant les dix folds (26 %), le bloc d'internement
-du fold (23 %), les arènes de deltas des ordres en vol (15 %), la rétention
-d'allocateur (12 %, indépendante de `n` [M]), les événements des ordres en vol
-(10 %), les états de facettes (8 %).
+Décomposition **estimée** du pic à 400 000 points et K=10, à fermer par les
+nouveaux relevés de pic par étage (aucun reçu ne l'établit aujourd'hui) : les
+`BallData` résidents pendant les dix folds (26 %), le bloc d'internement du fold
+(23 %), les arènes de deltas des ordres en vol (15 %), la rétention d'allocateur
+(12 % ; son indépendance vis-à-vis de `n` est une hypothèse, pas un résultat de
+reçu), les événements des ordres en vol (10 %), les états de facettes (8 %).
 
 Trois pics ne sont échantillonnés par aucun des six jalons `rss_mb` [C] : la
 fusion des shards, le tri des candidats (un double exact du tableau, détruit
 avant la mesure suivante) et le census (le tampon par tranche coexiste avec
 le tableau final). L'écart entre le dernier jalon et le pic réel du processus
 vaut +3,6 % à 50 000 points et K=5, +4,7 % à 50 000 et K=10, **+20,5 % à
-400 000 et K=10** [M] : il **croît avec `n`**, donc tout budget déclaré à
-partir des jalons est optimiste.
+400 000 et K=10** [M]. Trois points croissants ne démontrent pas une loi ; ils
+suffisent à conclure que tout budget déclaré à partir des jalons est optimiste,
+et d'autant plus que `n` est grand sur les cas observés.
 
-Le temps, lui, n'est jamais le verrou : l'exposant du mur vaut 1,097 sur
-50 000 → 200 000 → 400 000 points à K=10 [M] et 1,088 à K=5 [M], ce qui
-placerait 10^6 points à K=10 vers 22 minutes et 10^7 à K=5 vers 48 minutes
-[E]. Sur une fenêtre de huit heures, le budget en temps autoriserait des
-dizaines de millions de points ; **c'est la résidence qui interdit la
-taille**. Réserve : sur les familles minces la dernière sécante mesurée vaut
-1,60 à 1,76 [M], ce qui multiplierait ces durées par environ six si elle
-tenait à l'échelle.
+**Sur les runs uniformes observés, le temps extrapolé est secondaire au mur
+de résidence actuel.** L'exposant du mur vaut 1,097 sur 50 000 → 200 000 →
+400 000 points à K=10 [M] et 1,088 à K=5 [M] ; à cet exposant, 10^6 points à
+K=10 se placeraient vers 22 minutes et 10^7 à K=5 vers 48 minutes [E]. La
+formule absolue « le temps n'est jamais le verrou » est **fausse** hors de ce
+régime : sur les familles minces la dernière sécante mesurée vaut 1,60 à 1,76
+[M] et, appliquée de 50 000 à 10^7 points, elle multiplie la durée par 15 à 35
+relativement à l'exposant 1,088 — les 48 minutes deviendraient 12 à 28 heures ;
+depuis 200 000 points le facteur relatif vaut encore 7,4 à 13,9. Sur les seules
+familles denses observées, c'est donc la résidence qui interdit la taille avant
+le temps.
 
 ## 4. Les plafonds de type, dans l'ordre où ils tirent
 
-Tous sont des refus transactionnels décidés **sur les comptes, avant
-allocation**. Aucun débordement silencieux n'a été trouvé dans le chemin
-produit [C].
+**Chaque garde précède les allocations qu'elle protège** — ce qui n'est pas
+« tout refus précède toute allocation » : le comptage et les structures amont
+sont déjà alloués quand les gardes du fold décident, le plafond de candidats
+bruts est coopératif après la matérialisation possible de shards locaux, et la
+limite du format de digest est latente (aucune garde ne la porte). Aucun
+débordement silencieux n'a été trouvé dans le chemin produit [C].
 
 | Verrou | Site | K=10 | K=5 |
 |---|---|---|---|
@@ -111,6 +130,23 @@ et deux objets distincts pourraient signer pareil.
   la clé complète.
 - **Le reduce du fold ne se porte pas sur GPU** (`docs/GPU.md`, piste F0).
 
+## 5 bis. Ce que les variantes déjà mesurées plafonnent
+
+Le multi-CPU et le GPU ont un **plafond mesuré sur les variantes livrées**, ce
+qui n'est pas la même chose qu'un axe épuisé. De 1 à 48 fils l'accélération vaut
+13,02 sur `uniform` et 15,68 sur `eight_clusters` à 16 000 points [M], soit une
+fraction séquentielle de 5,7 % et 4,4 % : il reste ×1,34 à ×1,45 par le
+parallélisme seul, et le pic croît avec le nombre de fils (×1,79 de 1 à 48 [M]),
+donc élargir la largeur rapproche le mur. Côté device, les variantes C1 à C5
+donnent −10,4 % du mur au mieux [M], leur étage étant à 88 % du code hôte ; même
+un étage nul ne dépasserait pas ×1,31.
+
+Le palier C6 vise précisément cette résidence hôte (plusieurs gigaoctets de
+staging global) et **n'a pas encore été mesuré** : aucune donnée n'établit
+aujourd'hui qu'il ne déplace ni le mur ni l'exposant. Son classement comme
+palier de débit seulement attend la mesure du RSS, de la mémoire verrouillée et
+des pics par phase.
+
 ## 6. L'ordre de travail
 
 Les paliers sont livrables séparément, chacun avec son code, ses portes, ses
@@ -123,8 +159,10 @@ statut, ni nouveau format.
 2. **Vrai pic de résidence** : relever le pic historique du processus à
    chaque frontière d'étage, sans quoi aucune économie n'est vérifiable.
 3. **Libérations par tranche** : rendre la mémoire des tampons dès leur
-   consommation. Ne déplace pas le mur à 48 fils [C] ; achète le régime à
-   faible parallélisme et la vérité du budget déclaré.
+   consommation. L'hypothèse de travail est qu'elles ne déplacent pas le mur à
+   48 fils (le pic du census resterait sous celui du fold) : c'est **à mesurer**,
+   pas un résultat. Le gain sûr est le régime à faible parallélisme et la vérité
+   du budget déclaré.
 4. **Tri par permutation et piles hissées** : supprimer le double exact du
    tableau de candidats et deux allocations par boule.
 5. **Crochets de test sur les gardes du fold** : les deux premiers verrous
@@ -136,14 +174,28 @@ statut, ni nouveau format.
 
 ## 7. Verrous ouverts
 
-- **Positions dupliquées.** Le pipeline refuse aujourd'hui tout nuage qui en
-  contient (`unsupported_degeneracy`), alors que l'index sait déjà les
-  regrouper. Un nuage réel quantifié sur u16 en produit presque sûrement, et
-  les familles synthétiques les écartent d'elles-mêmes, ce qui masque le
-  verrou dans toutes les campagnes. Optimiser le mur d'un moteur qui refuse
-  le cas d'usage serait une dépense mal ordonnée.
-- **Statuts.** Le code porte cinq statuts, la doctrine d'échelle en nomme
-  six ; à trancher avant qu'un palier n'en ajoute un.
+- **Positions dupliquées.** Le pipeline refuse tout nuage qui en contient
+  (`unsupported_degeneracy`). L'index sait ranger plusieurs identités dans un
+  bucket, mais **le pipeline ne sait pas produire l'objet correspondant** : le
+  représentant d'un bucket est le plus petit identifiant, et accepter les
+  buckets tels quels ferait disparaître des sommets étiquetés. « Un nuage réel
+  en produit presque sûrement » était une déduction fautive : sur 2^48 positions
+  tirées uniformément, 10^7 points n'ont qu'environ 16 % de chance de porter une
+  collision, et 4,8 · 10^5 points environ 0,04 %. Un capteur réel peut être très
+  non uniforme, mais cela **se mesure** : le prochain pas est une sonde en
+  lecture seule sur les données cibles (sites uniques, masse des buckets non
+  unitaires, multiplicité maximale, stabilité de la correspondance identifiant →
+  site), puis seulement le choix entre un quotient par sites avec reprojection
+  et une définition pondérée ou multiensemble. Jusque-là le refus est le
+  comportement sûr.
+- **Statuts.** Les cinq statuts du moteur sont conservés, `invariant_violated`
+  compris : une contradiction interne n'est ni une donnée non supportée ni une
+  ressource manquante. Trois vocabulaires distincts sont à tenir séparés : le
+  résultat terminal de l'objet, l'état d'une tentative de campagne (terminée,
+  refusée, expirée, tuée par signal) et, si le disque est un jour ouvert, l'état
+  d'un point de reprise. Le manifeste atomique et l'invalidation des sorties
+  provisoires restent utiles même sous huit heures : une panne, une préemption
+  ou un dépassement mémoire ne sont pas des prédictions de temps.
 - **Disque.** Toute variante streamée demande des centaines de gigaoctets de
   haute eau et une mutation d'infrastructure absente des scripts gardés ; le
   débit doit être mesuré au préflight, jamais supposé.
