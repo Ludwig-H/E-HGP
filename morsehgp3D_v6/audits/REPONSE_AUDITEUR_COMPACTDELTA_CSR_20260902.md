@@ -48,8 +48,11 @@ Réponse courte aux trois questions :
 2. **L'unanimité inclusive `max R_b <= 0,55` est acceptée comme règle
    d'ingénierie.** `loadavg > 2,0` n'est pas accepté comme invalidation : sur
    huit CPU logiques il n'est pas normalisé et la moyenne à une minute reste
-   chargée par le run précédent. Conserver `loadavg` avant/après comme
-   diagnostic ; les causes d'incomparabilité et l'A/A portent la décision.
+   chargée par le run précédent. Dans le reçu de sonde disponible, 82 des 84
+   départs dépassent déjà `2,0` ; cette règle éliminerait donc presque toute la
+   matrice et la valeur précédant le second bras dépendrait du premier.
+   Conserver `loadavg` avant/après comme diagnostic ; les causes
+   d'incomparabilité indépendantes du bras et l'A/A portent la décision.
 3. **Une graine externe est retenue.** La graine de base est
    `0xa2ffb4db2884ddc4`, soit les huit premiers octets, lus en big-endian, du
    SHA-256 des octets UTF-8 exacts
@@ -62,7 +65,10 @@ n'autorise pas encore la campagne** : le pin sémantique doit fermer l'appel
 de `for_each_delta` sur temporaire, et `32da1550` n'a pas fermé les deux
 coutures actives du harnais — outil final hérité d'un `PATH` hostile et liaison
 exacte de la commande/META au régime, à la famille et à la vivacité. Ces
-travaux sont courts et indépendants de l'instrumentation.
+travaux sont courts et indépendants de l'instrumentation. Après ajout de
+`reduce_v3`, toutes les portes sémantiques sont néanmoins rejouées sur le
+**commit exact de mesure**, qui épingle aussi les deux binaires, le lanceur et
+l'agrégateur : un pin antérieur à l'instrumentation ne suffit pas.
 
 ### Frontières à graver dans `reduce_v3`
 
@@ -83,6 +89,8 @@ travaux sont courts et indépendants de l'instrumentation.
   une strate distincte. La mesure de destruction complète reste une
   attribution séparée. Son résultat est écrit après destruction dans un slot
   par K préalloué, sans compteur partagé ni réallocation concurrente.
+  L'agrégateur ancre le premier compteur à la ligne unique `temps_ms` : une
+  recherche libre de `fold=` rencontrerait aussi la ligne des ouvriers.
 - `on_forest` est aujourd'hui appelé sous `pub_mutex`. Le callback témoin ne
   fait donc aucune I/O : il accumule un mix ordonné 64 bits et le nombre exact
   de clés, arrête son chrono, puis le drainage imprime ces valeurs après
@@ -99,12 +107,16 @@ travaux sont courts et indépendants de l'instrumentation.
   jamais depuis les décimales imprimées. Chaque layout exécute le même nombre
   de prises d'horloge ; un chrono à vide avec les mêmes nombres de fenêtres
   est publié comme diagnostic, sans correction post hoc des mesures.
-- La télémétrie se prend pendant que `r` est encore vivant, juste avant le
-  callback et la destruction, puis s'imprime après le retour du pipeline.
-  Nommer la mesure `payload_owned_bytes_logical` : elle inclut les capacités
+- Nommer la mesure `payload_owned_bytes_logical` : elle inclut les capacités
   internes exactes de `parents`/`born` au classique et les cinq vecteurs CSR,
   mais ni métadonnées d'allocateur ni alignement. Le scratch est publié
-  séparément avec ses capacités et croissances.
+  séparément avec ses capacités et croissances. En revanche, ne pas calculer
+  le total classique par un parcours tardif de tous les deltas dans le worker :
+  ce travail linéaire, absent du bras CSR, entrerait dans
+  `temps_fold_mur_ms` et fabriquerait un avantage CSR. Soit les capacités sont
+  cumulées à l'émission avec une comptabilité symétrique, soit elles sont lues
+  dans une exécution diagnostique séparée dont aucun mur n'entre dans une
+  garde. L'impression reste drainée après le retour du pipeline.
 - Un compteur comparable doit observer les changements de capacité dans les
   deux layouts. À défaut, conserver `csr_capacity_growths` comme diagnostic
   unilatéral et ne jamais comparer son zéro classique. Lire les vrais
@@ -131,7 +143,11 @@ Le générateur emploie un Fisher--Yates spécifié, alimenté par un PRNG spéc
 un seul flux dans l'ordre canonique de la liste complète des strates ; cette
 liste, les six orientations obtenues, les commandes, warm-ups et identités de
 copies sont écrits puis hachés avant toute exécution. Aucun nouveau tirage et
-aucun remplacement ne sont permis. L'affinité `0-7` est acceptable sur la
+aucun remplacement ne sont permis. Le passage d'un mot de 64 bits à l'indice
+borné de Fisher--Yates est lui aussi défini et rejoué par une fixture ; ne pas
+déléguer le canon à un `shuffle` dépendant d'une bibliothèque. Chaque commande
+grave au minimum famille, `n`, seed d'entrée, coordonnées, `s`, `smax`, fils,
+inflight, join, layout, digest, callback et schéma. L'affinité `0-7` est acceptable sur la
 machine courante seulement après attestation du cpuset et de la topologie ;
 elle représente ici huit fils matériels sur quatre cœurs physiques et doit
 être décrite ainsi, pas comme huit cœurs.
@@ -157,24 +173,31 @@ elles ne sont pas instrumentées symétriquement.
 
 Ordre de décision :
 
-1. Une identité de binaire ou d'entrée illisible/modifiée, un run absent, un
-   chrono invalide ou un tuple incomplet donne `INCONCLUSIF`.
+1. Une identité de binaire ou d'entrée illisible/modifiée, un chrono invalide,
+   un tuple absent par défaillance du harnais ou un incident externe constaté
+   indépendamment des bras donne `INCONCLUSIF`. Aucun rejet décidé après
+   lecture des temps n'est permis.
 2. Sur une comparaison intègre et terminée, toute divergence sémantique donne
    prioritairement `NO-GO_SEMANTIQUE`, même si les ratios semblent favorables.
-3. Sans divergence ni bloc invalide, `max R_b <= 0,55` sur 16k et 32k, puis
+3. Sur un tuple intègre, un code produit non nul, un fallback, un stockage
+   invalide ou une non-vacuité violée sur une entrée précontrôlée donne
+   `NO-GO_IMPLEMENTATION`, pas un bloc jeté ni `INCONCLUSIF`.
+4. Sans divergence ni échec d'implémentation, `max R_b <= 0,55` sur 16k et 32k, puis
    toutes les gardes reduce et octets, donne `GO_MECANISME_UNIFORM`.
-4. Si `min R_b > 0,55` sur au moins une taille décisionnelle, le résultat est
+5. Si `min R_b > 0,55` sur au moins une taille décisionnelle, le résultat est
    `NO-GO_PERFORMANCE_PALIER`. Une enveloppe qui traverse `0,55` est
    `INCONCLUSIF` ; supprimer le mot non défini « nettement ».
-5. Si la cible mécanisme passe mais une garde échoue, rendre
+6. Si la cible mécanisme passe mais une garde échoue, rendre
    `NO-GO_GARDE` avec la garde nommée, au lieu de laisser ce cas sans verdict.
-6. Le verdict mur est séparé par mode digest : A/A insuffisant donne
+7. Le verdict mur est séparé par mode digest : A/A insuffisant donne
    `INCONCLUSIF`; sinon six `W_{b,d} < 1` et une médiane `<= 0,97` reçoivent
    le gain, toute autre configuration ne le reçoit pas.
 
 8k reste purement diagnostique. `eight_clusters` à 32k décide uniquement de
 l'extension au-delà de `uniform` et ne réécrit jamais rétroactivement le
-verdict primaire sur `uniform`. Aucune de ces issues ne change
+verdict primaire sur `uniform`. Cette extension exige ses propres six blocs et
+la même règle préinscrite ; avec un seul passage, elle reste diagnostique.
+Aucune de ces issues ne change
 `public_status=not_claimed`.
 
 ## Q1 — même objet, nouvelle représentation explicite

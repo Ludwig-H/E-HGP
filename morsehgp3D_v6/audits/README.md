@@ -37,10 +37,11 @@ des corrections, ils ne certifient rien.
   toute décision de performance restent des paliers séparés. Elle répond aussi
   à la pré-inscription `53610911` : six blocs et seuil `0,55` reçus dans leur
   principe, graine externe fixée, mais frontières de destruction/callback,
-  strates et verdicts à corriger avant scellement. Avant le pin sémantique,
-  `for_each_delta` doit encore refuser les temporaires ; avant la mesure, la
-  comparaison au classique, le scratch, les vrais derniers offsets et la
-  liaison au kind construit doivent être instrumentés.
+  strates, invalidations et verdicts à corriger avant scellement. Avant le pin
+  sémantique, `for_each_delta` doit encore refuser les temporaires ; avant la
+  mesure, la comparaison au classique, le scratch, les vrais derniers offsets
+  et la liaison au kind construit doivent être instrumentés sans contaminer le
+  mur, puis les portes sémantiques rejouées sur ce commit exact.
 - [`ALERTE_SONDE_ABLATION_REDUCE_20260902.md`](ALERTE_SONDE_ABLATION_REDUCE_20260902.md) :
   réception fonctionnelle de `32da1550` : la réagrégation après scellement et
   le statut exact sont reçus avec 21/21 scènes normales et optimisées, plus

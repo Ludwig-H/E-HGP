@@ -75,7 +75,7 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | reçu G4 tests K10/K5 `e66cd978` | paquet intègre : 278/278 hashes, 84/84 statuts code 0 et terminés, pins reconstruits, sept résumés identiques, arrêt exact à la première tentative ; égalités de préfixe observées sur cardinalités/digests ; profil et campagne strictement non décisionnels, accusé consommé |
 | porte de préfixe `2aaa4a53` | listes K exactes, appariement par clé complète et jumeau K10 obligatoire reçus ; les pins K5 de v1 restent post hoc, tandis que v2 porte ses huit fixtures avant toute future exécution |
 | sonde équilibrée `b79e29a5` / harnais `32da1550` | reçu concret intègre et recalculable ; réagrégation après scellement, statut exact et `profil_kind` durci reçus, 21/21 scènes normales et sous `-O`, CTest 2/2 ; un faux `sha256sum` du `PATH` peut encore corrompre après le dernier contrôle, et la liaison de régime reste partielle dans argv/META, `liveness` et l'identité préfixe ; seule une nouvelle mesure réutilisable attend ces fermetures |
-| réponse KeyCSR `38281dc7` / pré-inscription `53610911` / prototype WIP | architecture conforme au GO : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; 57/57 non-`scale` hors longue matrice, matrice `uniform/400` et raccord runtime verts ; une vue peut encore échapper de `for_each_delta` appelé sur un temporaire et devient pendante, verrou `const&`/`const&&` à fermer avant le pin ; plan à six blocs accepté dans son principe, mais campagne encore fermée par ses frontières de destruction/callback, sa télémétrie asymétrique et les coutures actives de la sonde |
+| réponse KeyCSR `38281dc7` / pré-inscription `53610911` / prototype WIP | architecture conforme au GO : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; 57/57 non-`scale` hors longue matrice, matrice `uniform/400` et raccord runtime verts ; une vue peut encore échapper de `for_each_delta` appelé sur un temporaire et devient pendante, verrou `const&`/`const&&` à fermer avant le pin ; plan à six blocs accepté dans son principe, mais campagne encore fermée par ses frontières de destruction/callback, sa télémétrie asymétrique, le rejeu au commit instrumenté exact et les coutures actives de la sonde |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP série C | départ refusé fail-closed puis arrêté ; perte de superviseur arrêtée sans reçu ; deux relances distinctes reçues et arrêtées sur leurs générations exactes, la plus récente `2026-09-01T18:34:33.420-07:00` ; aucun GO courant |
@@ -171,11 +171,15 @@ doit toutefois compter les métadonnées communes symétriquement, publier la
 destruction complète hors de `delta_payload_build_total`, drainer le sink du
 callback sans I/O sous verrou et décider depuis des nanosecondes entières. Les
 strates digest off/on et leurs A/A sont séparées. `loadavg > 2,0` devient un
-diagnostic, pas une invalidation ; la graine externe est
+diagnostic, pas une invalidation : il éliminerait 82 des 84 départs de la
+sonde antérieure et dépend du bras précédent. La graine externe est
 `0xa2ffb4db2884ddc4`. Un verdict de garde explicite ferme le cas où le ratio
-payload passe mais le reduce ou les octets régressent. L'instrumentation peut
-avancer ; aucune campagne ne part avant le pin sémantique et les deux coutures
-actives de la sonde `32da1550`.
+payload passe mais le reduce ou les octets régressent ; un échec produit
+intègre est un `NO-GO_IMPLEMENTATION`, jamais une donnée jetée. Les capacités
+classiques sont cumulées symétriquement ou mesurées hors de tout mur
+décisionnel. L'instrumentation peut avancer ; aucune campagne ne part avant
+le rejeu sémantique sur son commit exact et les deux coutures actives de la
+sonde `32da1550`.
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
