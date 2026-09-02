@@ -1,7 +1,8 @@
-# AUDIT — sonde d'ablation `reduce` au pin `32da1550`
+# AUDIT — sonde d'ablation `reduce`, de `32da1550` à `8afd1057`
 
-Date : 2 septembre 2026. Coupe auditée :
-`32da1550d5de7f9498553fe89c94b6fb2ef7043a`. Cadre :
+Date : 2 septembre 2026. Coupe initiale :
+`32da1550d5de7f9498553fe89c94b6fb2ef7043a` ; réception courante :
+`8afd105789cf822ecb16176b030449db8fe26e2e`. Cadre :
 `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`,
@@ -16,13 +17,12 @@ réagrégation après scellement rendent la sonde nettement plus fiable. En
 particulier, le faux `python3` qui forge le premier résumé est maintenant
 détecté par la réagrégation hors `PATH`.
 
-Le pin est donc **reçu comme harnais fonctionnel et comme fermeture de cette
-falsification sémantique**. Il ne l'est pas encore comme reçu réutilisable sous
-le modèle de menace qu'il annonce : une commande critique encore héritée du
-`PATH` peut modifier le jeu après son propre contrôle, et les trois
-descriptions du régime ne sont pas comparées à un même objet canonique. Ces
-deux coutures n'empêchent ni le développement ni la validation sémantique de
-KeyCSR ; elles précèdent seulement une nouvelle mesure de performance.
+`32da1550` est donc **reçu historiquement comme harnais fonctionnel et comme
+fermeture de cette falsification sémantique**. `8afd1057` ferme ensuite la
+commande critique héritée du `PATH`, mais pas encore le schéma exact du régime :
+champs facultatifs, clés inconnues et identité suffixée restent acceptés. La
+sonde n'est donc toujours pas réutilisable pour une nouvelle mesure. Cette
+dette n'empêche ni le développement ni le pin sémantique KeyCSR.
 
 ## Preuves positives rejouées
 
@@ -51,7 +51,7 @@ Le reçu concret `b79e29a5` conserve ainsi sa valeur diagnostique historique.
 Il reste une reconnaissance par ablations destructives, jamais une décision
 de représentation ni une preuve de gain KeyCSR.
 
-## P1 — fermer la frontière de confiance avant publication
+## P1 historique — frontière `PATH` fermée à `8afd1057`
 
 Le lanceur traite plusieurs exécutables du `PATH` comme potentiellement
 hostiles dans ses propres mutants, mais son dernier
@@ -119,7 +119,7 @@ répéter ces contrôles dans un revalidateur autonome. Ce point n'annule ni la
 réagrégation ni le pin ; il interdit seulement de présenter l'agrégateur seul
 comme vérificateur complet de provenance.
 
-## Contre-lecture du WIP non épinglé
+## Historique du WIP, supersédé par la réception ci-dessous
 
 Le WIP observé après `fc24d634` va dans la bonne direction. Le lanceur résout
 les outils critiques hors du `PATH` ordinaire, vérifie leurs chemins et leurs
@@ -163,21 +163,11 @@ lancement et le dépôt restent inchangés. Tant que cette scène n'est pas à l
 fois causale et hermétique, ne pas compter son vert éventuel comme preuve de
 fermeture de la publication.
 
-## Ordre conseillé
-
-1. Confiner et rendre causal le mutant `sha256sum`, puis fixer la frontière de
-   confiance.
-2. Canonicaliser le régime v4 et ajouter la contre-fixture composée.
-3. Relancer toutes les scènes, leur variante `-O` et les CTests sans laisser
-   aucun fichier hors des temporaires.
-4. Continuer KeyCSR en parallèle ; ne relancer aucune campagne de mesure avant
-   ces deux fermetures.
-
 ## Réception critique du lot `8afd1057`
 
 Le lot ferme bien la couture `PATH` dans sa frontière annoncée : outils
-résolus hors `PATH`, chemins absolus, hashes gravés et relus, schéma v5
-cohérent. La porte finale passe 23/23 normalement et 23/23 sous `python3 -O`,
+résolus hors `PATH`, chemins absolus, hashes gravés et relus, étiquettes de
+schéma v5 cohérentes. La porte finale passe 23/23 normalement et 23/23 sous `python3 -O`,
 et ses scènes `PATH` sont causales. C'est un vrai progrès ; il ne rend pas
 encore le harnais admissible pour une nouvelle mesure.
 

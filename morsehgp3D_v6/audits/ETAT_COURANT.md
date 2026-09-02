@@ -79,8 +79,8 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | reçu G4 tests K10/K5 `e66cd978` | paquet intègre : 278/278 hashes, 84/84 statuts code 0 et terminés, pins reconstruits, sept résumés identiques, arrêt exact à la première tentative ; égalités de préfixe observées sur cardinalités/digests ; profil et campagne strictement non décisionnels, accusé consommé |
 | porte de préfixe `2aaa4a53` | listes K exactes, appariement par clé complète et jumeau K10 obligatoire reçus ; les pins K5 de v1 restent post hoc, tandis que v2 porte ses huit fixtures avant toute future exécution |
 | sonde équilibrée `b79e29a5` / harnais `8afd1057` | reçu concret historique intègre et recalculable ; le harnais courant ferme la commande critique héritée du `PATH`, atteste outils/topologie et passe 23 scènes normales/optimisées ; `liveness`, layout, inflight/pics, coordonnée, clés inconnues, `lscpu` et identité stricte restent permissifs ; restaurer aussi l'option terminale `--` de `sha256sum` en corrigeant le faux test ; seule une nouvelle mesure réutilisable attend ces dents |
-| KeyCSR `8afd1057` / pré-inscription durcie `c5b52c9c` / générateur `d6888093` | pin sémantique reçu : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; rvalue refusée à la compilation, kind construit et vrais offsets signés ; matrice 112 cellules, 818 069 deltas et 6 395 137 clés sans désaccord, 185/185 portes rapportées, sonde finale et sanitizers ciblés verts ; aucun GO performance ; générateur reçu comme calendrier seulement, sa grammaire/adjacence, sa variante CTest `-O`, les identités et les frontières `reduce_v3` restent pré-campagne |
-| profil d'échelle G4 `g4_echelle_v1` WIP | **NO START** : fichier non suivi et absent du manifeste ; les six specs `famille:n:6` sont refusées avant tout run par la chaîne frontière v1 câblée sur `smax=11` ; une correction partielle créerait des risques de mauvais parse et de collision K5/K10 ; budget nominal 23 140 s pour 23 995 s utiles ; gardes SPOT/STOP conformes mais aucun GO courant |
+| KeyCSR `8afd1057` / pré-inscription durcie `c5b52c9c` / générateur `d6888093` | pin sémantique reçu : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; rvalue refusée à la compilation, kind construit et vrais offsets signés ; matrice 112 cellules, 818 069 deltas et 6 395 137 clés sans désaccord, 185/185 portes rapportées, sonde finale et sanitizers ciblés verts ; claim OOM documentaire à borner à `csr_emit`, aucun GO performance ; générateur reçu comme calendrier seulement, sa grammaire/adjacence, sa variante CTest `-O`, les identités et les frontières `reduce_v3` restent pré-campagne |
+| profil d'échelle G4 `g4_echelle_v1` WIP | **NO START** : fichier non suivi et absent du manifeste ; les six specs `famille:n:6` sont refusées avant tout run par la chaîne frontière v1 câblée sur `smax=11` ; une correction partielle créerait des risques de mauvais parse et de collision K5/K10 ; budget nominal 23 140 s pour 23 995 s utiles ; la chaîne locale exige SPOT/STOP mais aucune cible externe n'a été vérifiée par cet audit |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP série C | départ refusé fail-closed puis arrêté ; perte de superviseur arrêtée sans reçu ; deux relances distinctes reçues et arrêtées sur leurs générations exactes, la plus récente `2026-09-01T18:34:33.420-07:00` ; aucun GO courant |
@@ -149,9 +149,10 @@ signés ; `csr_capacity_growths` est correctement déclaré unilatéral et les
 octets classiques restent explicitement une borne inférieure. La matrice
 pipeline et les sanitizers ciblés sont verts ; Claude rapporte 185/185 portes
 et a rejoué la sonde finale sur son harnais exact. Code, architecture et plan
-de tests bornent correctement le `bad_alloc` capturé à l'arène/au mutant de
-`csr_emit` ; aucune promesse générale d'interception OOM n'est reçue. Le
-helper `csr_payload_empty` et le nettoyage
+de tests ne sont pas encore alignés : le code et la note bornent la capture au
+`bad_alloc` de `csr_emit`, mais `ARCHITECTURE.md` et `PLAN_DE_TESTS.md`
+promettent encore trop largement une interception dans le fold. Ce P1 de claim
+ne rouvre pas le pin. Le helper `csr_payload_empty` et le nettoyage
 pourraient encore inclure `r.deltas` comme dent P2 contre une future pollution
 croisée ; aucun chemin nominal courant n'est démontré fautif.
 
@@ -196,7 +197,8 @@ par une frontière v1 entièrement câblée sur `smax=11`. Un plan v2 doit porte
 avec compatibilité v1 et contre-fixtures de collision. Son estimateur vaut
 23 140 s pour 23 995 s utiles, marge trop mince pour promettre la complétude,
 et son commentaire répartit mal frontières et pilotes. Les gardes SPOT/STOP
-ne sont pas en cause ; aucun GO GCP n'est ouvert.
+sont exigées par la chaîne locale, mais aucune cible externe n'a été vérifiée
+par ce préflight ; aucun GO GCP n'est ouvert.
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
@@ -716,7 +718,8 @@ Ordre recommandé à Claude :
    inflight/pics, coordonnée, `lscpu`, identité) et restaurer
    `sha256sum --` avec une contre-fixture hermétique avant sa prochaine mesure ;
 3. **achevé à `8afd1057`** : recevoir le pin sémantique KeyCSR ; ajouter la
-   dent P2 `r.deltas` au prochain petit lot, sans rouvrir l'architecture ;
+   dent P2 `r.deltas` et borner le claim OOM documentaire au prochain petit
+   lot, sans rouvrir l'architecture ;
 4. raccorder `g4_echelle_v1` à un `frontier_plan=v2` qui porte `smax` et le
    layout choisi jusqu'au validateur, corriger son budget et rejouer les trois
    selftests avant tout nouveau départ G4 ;

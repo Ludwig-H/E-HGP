@@ -10,19 +10,20 @@ Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `public_status=not_claimed`.
 
 Audit strictement statique : aucun appel GCP et aucune mutation externe par
-l'auditeur. Une session gardée lancée par Claude reste sa cible ; elle n'est
-ni adoptée ni arrêtée ici.
+l'auditeur. Toute éventuelle session gardée lancée par Claude reste sa cible ;
+elle n'est ni adoptée ni arrêtée ici.
 
 ## Verdict utile
 
-La sécurité de session est correctement dessinée : `g4-standard-48`, SPOT,
+La chaîne locale exige `g4-standard-48`, SPOT,
 `instanceTerminationAction=STOP`, arrêt invité, durée GCE de 28 800 s et
 arrêt ciblé vérifié. Les 465 minutes invitées satisfont exactement la borne du
-lifecycle. Aucun P0 de coupe-circuit n'est trouvé.
+lifecycle. Aucun P0 statique de coupe-circuit n'est trouvé ; aucune cible
+externe n'a été interrogée ou certifiée par cet audit.
 
 Le profil n'est en revanche **pas exécutable par le canon courant**. Il doit
 rester en NO START jusqu'au raccord local ci-dessous ; ce refus n'invite ni à
-contourner le lifecycle ni à prolonger une session déjà ouverte.
+contourner le lifecycle ni à prolonger une éventuelle session déjà ouverte.
 
 ## P1 — raccorder réellement le profil et l'axe K
 
