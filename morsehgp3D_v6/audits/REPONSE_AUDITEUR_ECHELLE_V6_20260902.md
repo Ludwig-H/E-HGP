@@ -54,6 +54,10 @@ deux maps l'ensemble exact `{1,...,10}`, puis ajouter une fixture clairsemée
 `K1..K5 + K10`. La fixture courte à cinq ordres reste pertinente, mais ne tue
 pas ce faux vert. Si un profil de référence variable est voulu plus tard, il
 faut porter son `full_kmax` signé au lieu de l'inférer de la taille d'une map.
+Enfin, le CTest de référence courte n'exige aujourd'hui que le code 2 : une
+fixture absente produit le même code et le rendrait vert. Lui poser
+`REQUIRED_FILES` et juger le diagnostic exact « référence non prefixable »
+sépare le rejet voulu d'une erreur de plomberie.
 
 ### P2 — HWM de processus reçu comme télémétrie, pas comme pic d'étage
 
@@ -97,7 +101,12 @@ Fermeture minimale conseillée :
 4. publier le HWM déjà acquis aussi sur `resource_exhausted`, qui est précisément
    la frontière recherchée par la campagne ; utiliser de préférence
    `getrusage` ou un champ non allouant dans le chemin de secours ;
-5. sérialiser ou poser un `RESOURCE_LOCK` sur les portes d'environ 500 MiB.
+5. sérialiser ou poser un `RESOURCE_LOCK` sur les portes d'environ 500 MiB ;
+6. exiger des valeurs finies et ne jamais déclarer le mutant tué sur un simple
+   statut moteur non complet. Le code courant transforme tout refus/OOM sous
+   `--inject=hwm-instant-rss` en code 4, même si le mutant n'a causé aucune
+   divergence d'instrumentation ; un tel échec doit rester inconclusif ou
+   conserver son code moteur.
 
 Deux corrections de contrat sont secondaires mais simples : `statm` doit
 employer `sysconf(_SC_PAGESIZE)` plutôt que 4096 en dur, et les unités calculées
