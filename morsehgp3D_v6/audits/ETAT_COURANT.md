@@ -48,7 +48,9 @@ durcissement, `d6888093` pour son générateur de plan déterministe et
 C6, `fec58e1f` pour la réponse au préflight d'échelle, `9243d69f` pour la
 capture moteur de `bad_alloc` et `28d02459` pour son correctif de texte,
 provision et portée, `4d79dbd3` pour le plan d'échelle et ses six questions
-— la question C6, `fec58e1f` et `4d79dbd3` sont documentaires,
+— la question C6, `fec58e1f` et `4d79dbd3` sont documentaires —,
+`d8d7a7f7` pour le profil d'échelle et son raccord de campagne, puis
+`788b22da` pour les corrections de portée et les constantes wire,
 `9c5517c9` pour la demande G4 historique, `e8289d9a` pour son profil
 historique, `320299df` pour le reçu de
 réplication et `8ed2dea6` pour le reçu de confirmation contre-audité
@@ -84,9 +86,9 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | porte de préfixe `2aaa4a53` | listes K exactes, appariement par clé complète et jumeau K10 obligatoire reçus ; les pins K5 de v1 restent post hoc, tandis que v2 porte ses huit fixtures avant toute future exécution |
 | sonde équilibrée `b79e29a5` / harnais `8afd1057` | reçu concret historique intègre et recalculable ; le harnais courant ferme la commande critique héritée du `PATH`, atteste outils/topologie et passe 23 scènes normales/optimisées ; `liveness`, layout, inflight/pics, coordonnée, clés inconnues, `lscpu` et identité stricte restent permissifs ; restaurer aussi l'option terminale `--` de `sha256sum` en corrigeant le faux test ; seule une nouvelle mesure réutilisable attend ces dents |
 | KeyCSR `8afd1057` / pré-inscription durcie `c5b52c9c` / générateur `d6888093` | pin sémantique reçu : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; rvalue refusée à la compilation, kind construit et vrais offsets signés ; matrice 112 cellules, 818 069 deltas et 6 395 137 clés sans désaccord, 185/185 portes rapportées, sonde finale et sanitizers ciblés verts ; aucun GO performance ; générateur reçu comme calendrier seulement, sa grammaire/adjacence, sa variante CTest `-O`, les identités et les frontières `reduce_v3` restent pré-campagne |
-| profil d'échelle G4 / moteur `28d02459` / WIP postérieur | **NO START** : le moteur corrigé et ses 4/4 portes sont reçus ; le WIP non épinglé ferme fonctionnellement layout et normalisation `:11`, recoupe texte/étage/RSS et désarme Q2. Restent la fixture lifecycle à layout non vide, une cause CLI→validateur avec secours sans tas, les créations partielles de pools, la politique v2 du code 134 et les faux verts reproduits de grammaire, dérivation de version et binaire du plan, puis la portée et le budget |
-| plan d'échelle `4d79dbd3` / WIP P1--P3 | GO local borné pour les cinq paliers RAM ; six verrous arbitrés sans changement d'objet. Le WIP est constructif mais non reçu : référence préfixe clairsemée acceptée, HWM cumulatif improprement attribué aux étages, porte dépendante de glibc et libérations sans baisse garantie du pic d'adresse. Écriture directe et compteurs de capacités proposés ; aucun gain mémoire stable n'est mesuré. Provenance K5, erreur `×6`, modèle mémoire et portée des gardes restent à corriger ; aucun GO disque ou GCP |
-| conception C6 `17b6dbea` / réponse `489972a5` corrigée | GO de conception borné, sans code ni GO G4 : premier jalon à deux IN + deux OUT hôte aux leases séparés, un flux et un jeu device ; fill hôte et rebuild séquentiel, validation lot-local transactionnelle versionnée, chronos de travail non additifs et modèle différé C6 séparé de `cuda_stub.hpp` |
+| profil d'échelle G4 `d8d7a7f7` / moteur `28d02459` | **NO START resserré** : profil, inventaires, smax/layout, normalisation `:11`, Q2 désarmée et budget 10 390/10 800/10 890/13 195 reçus. Le selftest campagne du pin reste rouge par code 141 avant sa dernière contre-fixture. Restent avant dépense : correction de ce `pipefail`, corps code 2 sans payload et vrai trajet CLI→runner→validateur, cause sans tas, créations partielles de fils sûres, binaire frontière lié à `BIN_MATRICE`, lifecycle à layout `classic` et portée de grille corrigée. Code 134 peut rester une borne haute de complétion non attribuée ; grammaire/version génériques passent en P2 |
+| plan d'échelle `4d79dbd3`, correction `788b22da` / WIP P1--P3 | GO local borné pour les cinq paliers RAM ; six verrous arbitrés sans changement d'objet. `788b22da` corrige provenance `[M]/[O]`, erreur `×6`, modèle mémoire, portée des gardes et claims C1–C6. Le WIP reste non reçu : référence préfixe clairsemée acceptée, HWM cumulatif improprement attribué aux étages, jalons nuls tolérés, porte dépendante de l'allocateur, sérialisation non testée et libérations sans baisse garantie du pic d'adresse. Aucun gain mémoire stable, aucun GO disque ou GCP |
+| conception C6 `17b6dbea` / réponse `489972a5` corrigée / WIP encodeur-anneau | GO de conception borné, sans GO G4 : premier jalon à deux IN + deux OUT hôte aux leases séparés, un flux et un jeu device ; fill hôte et rebuild séquentiel, validation lot-local transactionnelle versionnée, chronos non additifs et modèle différé séparé. L'encodeur WIP à offsets fixes égale `append`, mais son template relit `Source` : réduire l'API à un span const stable/noalias/noexcept. L'anneau ferme déjà kernels→D2H ; ses fins restent rejouables sur des slots rendus, `publish` reprend l'objet au second appel, l'abandon n'est pas terminal et l'étage device dépend encore du timing. Fermer ces cycles puis raccorder CMake/registre avant réception |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP série C | départ refusé fail-closed puis arrêté ; perte de superviseur arrêtée sans reçu ; deux relances distinctes reçues et arrêtées sur leurs générations exactes, la plus récente `2026-09-01T18:34:33.420-07:00` ; aucun GO courant |
@@ -197,40 +199,36 @@ la chaîne de construction, aux commandes complètes, au callback résolu, aux
 coordonnées et à l'affinité attestée. Aucun résultat de performance n'existe à
 ce stade.
 
-Le profil `g4_echelle_v1` reste **NO START**. `28d02459` reçoit le correctif
-moteur : texte compatible, réservation sous garde, portée des callbacks et
-4/4 portes ciblées. Le WIP protocolaire recoupe maintenant le texte, l'étage
-et les RSS, mais la cause reste dispatchée par une seule sous-chaîne : une
-variante lexicale devient à tort un refus ordinaire valide. Il manque donc une
-porte CLI→runner→validateur et une politique versionnée :
-le plan v2 doit refuser ou censurer un abort 134 si la nouvelle doctrine dit
-qu'il n'est plus une donnée, sans casser le rejeu historique v1. Un vrai échec
-de la réservation initiale peut empêcher l'allocation du message de secours ;
-cause et étage doivent donc survivre sans tas. Après réservation réussie, la
-capacité couvre correctement le diagnostic. La construction du nuage en amont
-de `run_pipeline` reste hors capture. Une création partielle des pools
-`std::thread` peut encore dérouler des fils joignables et appeler
-`std::terminate` : stop+join suffit aux pools sans barrière, mais le tri doit
-d'abord retenir ses workers derrière un sas, sans quoi le join attendrait une
-barrière dont l'équipe reste incomplète. Cause non allouante et impression CLI
-indépendante de `rr.message` ferment ensemble cette frontière.
+Le profil `g4_echelle_v1` reste **NO START**, mais `d8d7a7f7` reçoit maintenant
+son raccord : smax/layout parcourent le cycle complet, `:11` est normalisé
+avant doublons et artefacts, les 17 entrées sont épinglées, Q2 est désarmée et
+le budget publié sépare 10 390 s d'estimation nominale, 10 800 s de plafonds
+de runs, 10 890 s avec overhead et 13 195 s de fenêtre. Le suivi antérieur qui appelait cela « WIP non
+épinglé » est périmé.
 
-Dans le reste du WIP, `smax` et les 17 entrées d'inventaire progressent. Le
-layout canonique est désormais transporté fonctionnellement par le lifecycle
-et recoupé par le validateur, mais le selftest lifecycle n'exerce encore qu'une
-valeur vide ; la scène non vide contourne ce trajet. La normalisation de
-`fam:n:11`, l'identité des plans et le rejet du doublon avant artefact sont
-aussi présents. Ces deux progrès restent non attribuables avant commit et
-rejeu. Q2 est correctement désarmée dans ce profil et reportée à une session
-distincte ; le protocole générique doit encore refuser un pilote sans
-inventaire de portes. La grille ne justifie pas quatre tailles par famille et
-par K. Après réduction à cinq heures, l'estimateur WIP vaut 10 390 s,
-l'enveloppe de plafonds avec overhead 10 890 s et la fenêtre calculée 13 195 s.
-Le commentaire donne la bonne fenêtre mais appelle à tort 10 890 s
-l'estimateur. Fermer enfin les clés/tokens du plan et lier sa commande au
-`BIN_MATRICE` canonique. Les gardes SPOT/STOP restent exigées,
-mais aucune cible externe n'a été interrogée ou certifiée par ce préflight ;
-aucun GO GCP n'est ouvert.
+Le selftest campagne n'est toutefois pas total à ce pin : depuis un export
+exact, `ls ... | head -1` sous `pipefail` reçoit SIGPIPE et rend 141 après le
+témoin positif, avant la contre-fixture finale `time_bin` vide. Le lifecycle
+du même export, replacé dans un dépôt Git local, rend 0. Remplacer ce pipeline
+par une sélection shell sans producteur tué, puis exiger le témoin final et le
+code 0, est une fermeture locale prioritaire.
+
+Les dents restantes sont causales. Le validateur accepte encore un code 2 avec
+digest, cardinalités et lignes parasites ; une variante `au stade` évite le
+recoupement d'étage, et le faux binaire du selftest ne prouve pas le vrai trajet
+CLI→runner→validateur. Une cause non allouante et un renderer commun ferment en
+même temps le secours sans tas. Les créations partielles de fils restent
+dangereuses sous `RLIMIT_AS` : stop+join pour les pools simples, sas de départ
+pour le tri à barrière et conversion typée du worker B. Enfin, la commande doit
+nommer exactement `BIN_MATRICE`, et le lifecycle doit exercer un layout
+`classic` non vide. La grille autorise seulement des sécantes et le plus grand
+`n` testé ; elle n'a ni quatre tailles par famille et par K, ni toujours un
+bracket same-pin. L'exigence précédente d'interdire tout code 134 en v2 était
+trop forte : un bad_alloc sous plafond peut rester une borne haute de
+complétion **non attribuée**, jamais un claim d'étage. La fermeture totale de
+la grammaire/version générique et le pilote sans inventaire passent en P2 pour
+ce profil précis. Aucune cible externe n'a été interrogée ou certifiée par ce
+préflight ; aucun GO GCP n'est ouvert.
 
 La question C6 de `17b6dbea` est reçue comme conception prometteuse. La
 contre-lecture corrige l'audit initial : deux slots à lease unique sont trop

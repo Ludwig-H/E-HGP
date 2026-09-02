@@ -1,6 +1,7 @@
 # Réponse aux six verrous du plan d'échelle v6
 
-Date : 2 septembre 2026. Pin documentaire jugé : `4d79dbd3`.
+Date : 2 septembre 2026. Pins documentaires jugés : `4d79dbd3`, puis réponse
+et corrections `788b22da`.
 
 Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -15,9 +16,10 @@ Le plan local sans disque peut avancer : les portes de préfixe, la mesure du
 vrai pic, les libérations par tranche, le tri moins résident et les crochets
 des gardes sont de bons paliers falsifiables. Ils ne doivent pas attendre une
 sémantique nouvelle des doublons. Le document `docs/ECHELLE.md` est une bonne
-base de travail, mais pas encore une référence de mesures : plusieurs phrases
-transforment des extrapolations ou des limites futures en faits présents et les
-sources exactes des marqueurs `[M]` ne sont pas données.
+base de travail. Au pin initial, plusieurs phrases transformaient des
+extrapolations ou des limites futures en faits présents et les sources exactes
+des marqueurs `[M]` manquaient ; `788b22da` corrige ces formulations. Cela ne
+reçoit pas encore les paliers produit non épinglés.
 
 Décisions compactes :
 
@@ -30,9 +32,34 @@ Décisions compactes :
 | V5, attachement | le lemme est prouvable, mais ses prémisses doivent être certifiées ; ne pas supprimer le détecteur sur la seule télémétrie observée |
 | V6, ordre | lecture confirmée pour le résident ; une fusion externe doit conserver explicitement le rang stable global |
 
+## Réception de la réponse `788b22da`
+
+La réponse de Claude est utile et ferme les surclaims signalés : les mesures
+locales K5 deviennent `[O]`, les `[M]` nomment leurs reçus, l'erreur numérique
+`×6` devient le facteur relatif 15–35 et 12–28 h, C1–C5 sont un plafond des
+variantes mesurées plutôt qu'un axe épuisé, C6 reste non mesurée, les gardes ne
+prétendent plus précéder toute allocation et les doublons restent refusés sans
+probabilité inventée. Ces corrections documentaires sont reçues.
+
+La provenance de l'exposant K5 est elle aussi fermée : les extrémités 8 000
+et 50 000 de `matrice_resume.txt` donnent
+`log(9095/1237) / log(50000/8000) = 1,08865`. Deux formulations résiduelles
+doivent seulement suivre cette portée corrigée : renommer le titre absolu
+« la résidence, jamais le temps » et remplacer « pic par étage » / « vrai pic à
+chaque frontière » par « HWM cumulatif du processus observé à la frontière ».
+Cela n'empêche pas le travail local ; cela évite que la correction du corps
+reste contredite par ses titres.
+
+Les constantes wire 12/92 sont bien corrigées en 9/91 et leur somme vaut 100.
+Au pin `788b22da`, l'assertion ne lie encore que ces trois constantes entre
+elles : le pilote CUDA recalcule toujours 100 par une formule séparée. Le WIP
+C6 commence à consommer `kWireOutBytesPerBall`; avant son pin, faire aussi
+consommer cette autorité par les compteurs/allocation du pilote, ou poser une
+assertion croisée avec `kOutIdsPerBall`, évitera le retour de deux autorités.
+
 ## Contre-lecture des paliers P1--P3 en cours
 
-Snapshot observé : `HEAD=dd24f7c1` avec un worktree produit non épinglé ; ce
+Snapshot courant observé : `HEAD=788b22da` avec un worktree produit non épinglé ; ce
 paragraphe aide à fermer le lot, mais ne le reçoit pas. La construction Release
 séparée réussit. Après retrait de toute charge concurrente, 206/206 portes
 `gate` hors résidence passent en 954,20 s, puis les quatre portes de résidence
@@ -95,9 +122,9 @@ Fermeture minimale conseillée :
    `measurement_scope=process_lifetime`, exiger un processus frais pour les
    comparaisons de campagne, et conserver les six valeurs comme une chronologie
    cumulative utile plutôt que parler de « vrai pic à chaque étage » ;
-2. remplacer le plancher de chute finale par une micro-fixture déterministe qui
-   alloue, touche puis libère une zone contrôlée, et ajouter le contre-mutant
-   `hwm-sampled-rss-max` ;
+2. remplacer le plancher de chute finale par une micro-fixture dédiée, exécutée
+   dans un enfant frais, qui alloue, touche puis libère une zone contrôlée, et
+   ajouter le contre-mutant `hwm-sampled-rss-max` ;
 3. exiger le masque de jalons attendu (`0x3f` sur la route CPU), car
    `rss == hwm == 0` est aujourd'hui silencieusement ignoré ;
 4. publier le HWM déjà acquis aussi sur `resource_exhausted`, qui est précisément
@@ -108,9 +135,16 @@ Fermeture minimale conseillée :
    statut moteur non complet. Le code courant transforme tout refus/OOM sous
    `--inject=hwm-instant-rss` en code 4, même si le mutant n'a causé aucune
    divergence d'instrumentation ; un tel échec doit rester inconclusif ou
-   conserver son code moteur.
+   conserver son code moteur ;
+7. exercer `print_run` ou la vraie CLI : la porte actuelle lit directement
+   `RunResult` et ne prouve ni la présence, ni l'unicité, ni la cohérence des
+   deux nouvelles lignes sérialisées.
 
-Deux corrections de contrat sont secondaires mais simples : `statm` doit
+`VmHWM` et `ru_maxrss` sont deux interfaces vers un high-water noyau, pas deux
+mesures indépendantes. Le contrôle unilatéral courant ne prouve donc pas leur
+égalité ; parler de deux lectures et garder `ru_maxrss` comme majorant suffit,
+ou bien un enfant à baseline contrôlée doit permettre une borne bilatérale.
+Deux autres corrections de contrat sont secondaires mais simples : `statm` doit
 employer `sysconf(_SC_PAGESIZE)` plutôt que 4096 en dur, et les unités calculées
 sont des MiB. Pour attribuer réellement un pic à un étage, ajouter des compteurs
 logiques internes ou un sampler de processus tagué par l'étage ; les six lectures
@@ -349,6 +383,7 @@ pas l'ordre utile des paliers.
 4. Décider la sémantique des doublons à partir du probe.
 5. N'ouvrir digest v2 et disque que lorsqu'un palier mesuré les rend nécessaires.
 
-Le profil G4 d'échelle reste soumis au **NO START** de
-`ALERTE_G4_ECHELLE_V6_20260902.md` jusqu'à son pin propre et à la fermeture de
-ses raccords. Aucun de ces arbitrages ne promeut `public_status`.
+Le profil G4 d'échelle est désormais épinglé par `d8d7a7f7`, mais reste soumis
+au **NO START** resserré de `ALERTE_G4_ECHELLE_V6_20260902.md` jusqu'à la
+fermeture de son chemin mémoire, de ses créations de fils et des deux liaisons
+causales restantes. Aucun de ces arbitrages ne promeut `public_status`.

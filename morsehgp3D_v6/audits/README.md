@@ -23,7 +23,8 @@ des corrections, ils ne certifient rien.
   `1069bc20`, série C locale `cd606257`, reprise `c8f69673` et reçu G4 tests
   terminal `e66cd978`, durcissement local `2aaa4a53`, sonde équilibrée
   `b79e29a5`, reprise/revalidation `c2d2ac69`, harnais de sonde et pin
-  sémantique KeyCSR `8afd1057`.
+  sémantique KeyCSR `8afd1057`, profil d'échelle `d8d7a7f7` et corrections de
+  portée `788b22da`.
   Il prime sur toute réponse historique ; aucun GO GCP n'est actuellement
   ouvert.
 - [`REPONSE_AUDITEUR_ECHELLE_V6_20260902.md`](REPONSE_AUDITEUR_ECHELLE_V6_20260902.md) :
@@ -33,8 +34,10 @@ des corrections, ils ne certifient rien.
   l'ordre externe doit porter son ordinal. La contre-lecture du WIP P1--P3
   ferme une référence préfixe clairsemée réellement acceptée, borne `VmHWM` au
   processus cumulatif et propose l'écriture directe qui retire réellement les
-  doubles capacités ; aucun gain mémoire n'est encore reçu. La note corrige
-  aussi l'erreur numérique `×6` et exige la provenance des mesures K5.
+  doubles capacités ; aucun gain mémoire n'est encore reçu. `788b22da` reçoit
+  les corrections de provenance, l'erreur numérique `×6`, les claims C1–C6 et
+  la portée des gardes. Jalons CPU obligatoires, sérialisation et indépendance
+  supposée de `ru_maxrss` restent à fermer dans le WIP.
 - [`REPONSE_AUDITEURS_MULTICPU_V6_20260901.md`](REPONSE_AUDITEURS_MULTICPU_V6_20260901.md) :
   réponse à la saturation du fold et à la conception GPU ; profil apparié,
   snapshots du design A, réception locale CPU/stub, portes device enregistrées
@@ -59,18 +62,26 @@ des corrections, ils ne certifient rien.
   `sha256sum` doit être restaurée en confinant le faux test. Ces dents précèdent
   une nouvelle mesure, sans bloquer KeyCSR.
 - [`ALERTE_G4_ECHELLE_V6_20260902.md`](ALERTE_G4_ECHELLE_V6_20260902.md) :
-  préflight mis à jour jusqu'au moteur corrigé `28d02459` et au WIP de
-  protocole ; **NO START**. Le WIP non épinglé ferme fonctionnellement layout
-  et normalisation `:11`, mais il manque encore la fixture lifecycle non vide,
-  la cause d'allocation sans tas, les pools, la politique v2 du code 134 et la
-  grammaire/version/binaire du plan. Les trois suites locales sont vertes mais
-  leurs faux positifs sont reproduits. Q2 est correctement séparée ; portée et
-  budget restent bornés par la même note.
+  préflight actualisé au profil épinglé `d8d7a7f7` ; **NO START resserré**.
+  Smax/layout, normalisation `:11`, inventaires, Q2 désarmée et budget sont
+  reçus. Restent le corps code 2 sans payload et son vrai trajet CLI, le secours
+  sans tas, les créations partielles de fils, `BIN_MATRICE`, le lifecycle à
+  layout non vide et la portée exacte de la grille. Le selftest campagne du pin
+  sort aussi 141 sous `pipefail` avant sa contre-fixture finale. L'audit corrige sa
+  demande trop forte d'interdire tout code 134 en v2 et repousse les dents
+  génériques de grammaire/version en P2.
 - [`REPONSE_AUDITEUR_CONCEPTION_C6_20260902.md`](REPONSE_AUDITEUR_CONCEPTION_C6_20260902.md) :
   GO de conception borné pour C6, sans code ni GO G4. Le premier jalon emploie
   deux IN + deux OUT hôte aux leases séparés, un flux et un jeu device ; la
   réponse fixe validation transactionnelle, chronos non additifs, modèle C6
-  séparé du stub séquentiel et jalons sans rouvrir l'objet mathématique.
+  séparé du stub séquentiel et jalons sans rouvrir l'objet mathématique. La
+  contre-lecture du WIP d'encodeur reçoit les offsets fixes mais ferme une
+  double lecture de `Source` qui permet encore d'écrire une clé invalide après
+  prévalidation ; l'API réelle doit être stable, `noexcept` et sans alias avant
+  son raccord CMake. L'anneau différé progresse, mais doit encore rendre
+  ses fins one-shot, rendre `publish` et l'abandon terminaux, figer le contexte
+  des erreurs device et libérer ses baux sans allocation dans les destructeurs
+  RAII avant son raccord CMake/registre.
 - [`CONTRE_AUDIT_REPRISE_PERSISTANTE_V6_20260902.md`](CONTRE_AUDIT_REPRISE_PERSISTANTE_V6_20260902.md) :
   contre-audit du chemin de reprise, mis à jour pour `c2d2ac69`. Les quatre
   mutants résiduels de `4ef96717` sont corrigés et le revalidateur passe 22
@@ -89,6 +100,10 @@ des corrections, ils ne certifient rien.
 - [`REPONSE_CLAUDE_PREFLIGHT_ECHELLE_20260902.md`](REPONSE_CLAUDE_PREFLIGHT_ECHELLE_20260902.md) :
   réponse de planification au NO START, reçue et resserrée dans l'alerte G4
   active ; son pin `fec58e1f` ne contient encore aucun des changements annoncés.
+- [`REPONSE_CLAUDE_ECHELLE_ET_C6_20260902.md`](REPONSE_CLAUDE_ECHELLE_ET_C6_20260902.md) :
+  accusé de Claude aux arbitrages échelle/C6, reçu par `788b22da` pour ses
+  corrections documentaires et l'arithmétique wire 9/91 ; les paliers produit
+  et l'encodeur C6 restent des WIP séparés jusqu'à leur pin.
 - [`QUESTION_CLAUDE_CONCEPTION_C6_20260902.md`](QUESTION_CLAUDE_CONCEPTION_C6_20260902.md) :
   question source sur l'anneau de lots, répondue par la réponse C6 active.
 - [`NOTE_CLAUDE_CONCEPTION_V6_20260831.md`](NOTE_CLAUDE_CONCEPTION_V6_20260831.md) :

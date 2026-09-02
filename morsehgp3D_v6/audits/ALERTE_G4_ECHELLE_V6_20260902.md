@@ -1,188 +1,165 @@
 # Préflight statique — profil G4 échelle v6
 
-Date : 2 septembre 2026. Pins jugés : réponse documentaire `fec58e1f`, capture
-moteur `9243d69f`, puis correctif moteur `28d02459`. Le profil et le protocole
-encore décrits comme WIP sont postérieurs et non attribuables à ces pins.
+Date : 2 septembre 2026. Pins jugés : moteur `28d02459`, raccord de campagne
+`d8d7a7f7`, puis correction documentaire et wire `788b22da`.
 
 Cadre : `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-Audit strictement statique : GCP non utilisé, aucune cible externe interrogée
-ou certifiée. Toute session éventuellement ouverte par Claude reste sa cible ;
-elle n'est ni adoptée ni arrêtée ici.
+Audit local et statique : GCP non utilisé, aucune cible externe interrogée.
 
 ## Verdict utile
 
-Le **NO START reste actif**. `28d02459` ferme réellement trois défauts du
-premier moteur : texte compatible avec les classes du validateur, réservation
-sous la garde avec une quatrième porte, et portée exacte des callbacks
-provisoires. Il ne livre toujours aucun profil ni fichier `gcp-migration/` ; le
-raccord de campagne reste un WIP non épinglé.
+Le profil n'est plus un WIP absent : `d8d7a7f7` livre réellement
+`g4_echelle_v1`, son inventaire à 17 fichiers, le trajet
+profil → lifecycle → SSH → runner → plan/statut/argv → validateur, la
+normalisation de `fam:n:11` avant doublons et artefacts, et la séparation de
+Q2. Le calcul publié distingue bien 10 390 s d'estimation nominale, 10 800 s
+pour les neuf plafonds de runs, 10 890 s avec les quelque 90 s d'overhead, et
+13 195 s de fenêtre utile. Ces progrès sont reçus. Le selftest campagne, lui,
+n'est pas encore reçu : son export exact termine par code 141 avant sa dernière
+contre-fixture.
 
-La direction est bonne : timeout classé comme observation censurée, layout
-`classic` annoncé, plan v2 pour les axes nouveaux, `RLIMIT_AS` ramené à
-168 Gio et refus mémoire destiné à être typé. Le WIP postérieur porte déjà
-`smax` dans le plan, le nom, l'argv et le statut, et aligne les inventaires sur
-17 fichiers. Il faut maintenant fermer les raccords ci-dessous avant de
-demander un GO.
+Le **NO START reste toutefois actif**. Il ne dépend plus d'une longue liste de
+finitions génériques : le selftest et les fermetures causales ci-dessous
+suffisent avant de dépenser la session.
 
-## P1 — rendre le profil canonique effectivement exécutable
+## P1 — fermer le refus mémoire réellement exercé
 
-1. Aux pins jugés, le profil déclare `FRONTIER_LAYOUT=classic` sans raccord
-   lifecycle. La copie WIP observée après `4d79dbd3` ferme maintenant le trajet
-   fonctionnel profil→lifecycle→SSH→runner→plan/statut/argv→validateur et lie le
-   plan v2 au profil épinglé. Cette correction reste non attribuable tant
-   qu'elle n'est pas commitée. Il lui manque encore sa preuve causale : le
-   selftest lifecycle transporte seulement `FRONTIER_LAYOUT=''`, tandis que la
-   scène à valeur non vide appelle directement le runner. Ajouter une scène
-   `classic` de bout en bout, puis muter ensemble plan, statut et argv en `csr`
-   tout en gardant le canon `classic` ; elle doit refuser avant toute dépense.
+Le validateur n'impose pas encore « aucun payload publié » sur un code 2. Un
+probe direct lui donne le refus d'allocation exact et sa ligne `refus_etage=`,
+puis ajoute `digest_all=...`, une ligne `cardinalites K=...` et un second
+`REFUS` non typé : `classe_refus_etage` rend
+`resource_exhausted a l'etage census` avec une liste d'erreurs vide. Renommer
+seulement `allocation impossible a l'etage` en `allocation impossible au
+stade` déclasse aussi le même incident en refus ordinaire, même si
+`refus_etage` le contredit. Des RSS négatifs concordants passent enfin la
+grammaire.
 
-Le WIP a en revanche correctement simplifié la question :
-`GPUV6_GATE_NAMES=aucun` **et** `GPUV6_PILOT_SPECS=aucun`. Q2 est désarmée et
-renvoyée à une session distincte ; Q1 ne peut plus être consommée par une
-phase optionnelle antérieure. Conserver dans le protocole générique le refus
-pré-run `pilot_specs != aucun && gate_names == aucun` évitera de réintroduire
-silencieusement ce cas dans un prochain profil.
+La fermeture utile est petite : définir le corps exact autorisé d'un code 2,
+interdire tout digest, cardinalité, payload ou ligne supplémentaire, et porter
+une cause non allouante distincte du texte. Un helper commun doit imprimer les
+deux lignes avec `fprintf` depuis `cause`, `stage_reached` et les cinq RSS ;
+`rr.message` reste un diagnostic best-effort. Cela ferme aussi le cas où
+`rr.message.reserve(256)` échoue durablement : le statut et l'étage existent
+alors, mais le CLI courant imprime `REFUS ` et le reçu devient inutilisable.
 
-## P1 — joindre le refus mémoire au reçu
+La preuve de `d8d7a7f7` est synthétique : son faux binaire fabrique lui-même
+les deux lignes attendues. Ajouter un subprocess qui traverse le vrai renderer
+CLI, le runner puis le validateur, exige code 2, stdout vide, les deux seules
+lignes stderr et zéro sortie d'objet. Conserver la portée honnête des
+callbacks : ils sont provisoires jusqu'au statut terminal ; l'invalidation
+interne ne reprend pas un effet externe déjà observé.
 
-Au pin `9243d69f`, le moteur rend code 2 avec
-`REFUS resource_exhausted : bad_alloc a l'etage ...`, tandis que le validateur
-inchangé classe explicitement tout `bad_alloc` sous code 2 comme contradiction.
-Le cas recherché invalide donc le reçu. De plus, `rr.message.reserve(256)` est
-encore avant le `try` : son propre `bad_alloc` échappe à la promesse « jamais
-un abort ». Les 188 portes rapportées prouvent le moteur, pas le trajet
-CLI→runner→validateur. `28d02459` corrige les deux défauts moteur et porte les
-portes dédiées à 4/4.
+## P1 — rendre les créations partielles de fils sûres
 
-Le WIP protocolaire va aussi dans le bon sens : sa sous-classe reconnaît le
-texte exact et recoupe l'étage et les cinq RSS entre les deux lignes. Elle ne
-recoupe toutefois pas encore une cause machine-readable : changer seulement
-`a l'etage` en `au stade` déclasse le même corps en refus de capacité ordinaire,
-même avec une ligne `refus_etage` contradictoire, et le validateur rend vert.
-Fermer la liste des refus ordinaires ou publier une cause séparée, puis exercer
-le trajet CLI→runner→validateur. Enfin, versionner la politique : si la doctrine
-est désormais « un abort n'est pas une donnée », le plan v2 doit refuser ou
-censurer le code 134 ; le rejeu des reçus v1 peut conserver sa règle historique.
+Sous `RLIMIT_AS`, la création d'un fil peut précisément être l'allocation qui
+échoue. Dans `parallel_ranges` et `parallel_items`, une exception au deuxième
+`emplace_back` déroule un vecteur contenant déjà un `std::thread` joignable et
+appelle `std::terminate`. Dans `parallel_stable_sort`, joindre naïvement ne
+suffit pas : les fils déjà lancés peuvent attendre une barrière dimensionnée
+pour une équipe jamais complète. Le worker B du fold ne termine pas par le
+même destructeur fautif, mais son `std::system_error` sort encore non typé.
 
-Le résidu moteur est borné. Après un `reserve(256)` réussi, l'assignation du
-diagnostic tient dans la capacité provisionnée. En revanche, une interposition
-qui fait échouer durablement cette réservation produit bien statut 2 et
-`stage=entree`, mais le message reste vide ; le vrai CLI imprime `REFUS ` et le
-validateur le refuse. Le mutant qui lève une fois avant la réservation ne simule
-pas ce cas. Porter aussi la cause dans un champ sans allocation, puis faire
-formater la ligne exacte par le CLI, ferme ce dernier secours. La fabrication
-du nuage, située avant `run_pipeline`, reste par ailleurs hors capture : une
-panne injectée là donne encore l'abort 134. Borner la promesse au pipeline ou
-ajouter une garde CLI explicite.
+Solution commune : injecter l'échec au deuxième lancement ; armer stop+join
+avant la boucle pour les pools simples ; retenir les travailleurs du tri
+derrière un sas de départ, puis ouvrir le sas en mode abandon et joindre si le
+lancement reste incomplet ; convertir seulement les erreurs de ressources du
+constructeur de fil en une cause non allouante `worker_start`. Les portes
+exigent absence de hang/terminate, équipe jointe et, pour le tri, entrée
+inchangée.
 
-Une seconde ouverture peut encore produire exactement l'abort que la session
-cherche à remplacer. Dans `parallel/pool.hpp` et `parallel/sort.hpp`, si une
-création intermédiaire de `std::thread` échoue, les fils déjà construits restent
-joignables pendant le déroulage et le destructeur appelle `std::terminate`.
-La recommandation précédente « garde stop+join » était incomplète pour le tri :
-ses travailleurs déjà lancés peuvent attendre une barrière dimensionnée pour
-une équipe qui ne sera jamais complète, et le join bloquerait. Pour
-`parallel_ranges/items`, une garde RAII armée avant la boucle, puis stop+join,
-suffit. Pour `parallel_stable_sort`, retenir d'abord les travailleurs derrière
-un sas de départ ; sur échec de lancement, poser abort, ouvrir le sas et joindre,
-sans laisser aucun travail atteindre la barrière. Convertir seulement les
-`std::system_error` des constructeurs de fils en une cause non allouante
-`worker_start`, puis la rendre comme `resource_exhausted` à l'étage courant.
-Le `BJoiner` du fold rend déjà sa destruction sûre, mais son constructeur de fil
-doit employer la même cause typée.
+## P1 — lier le reçu au binaire et exercer le layout non vide
 
-La fermeture minimale commune est un champ non allouant de `RunResult`, par
-exemple `none | heap_allocation | worker_start`, et un helper CLI qui formate
-les deux refus depuis cette cause, l'étage et les RSS avec `fprintf`, sans
-dépendre de `rr.message`. Ce dernier reste un diagnostic best-effort. Les portes
-utiles injectent l'échec au deuxième fil de chaque pool, exigent absence de
-hang/terminate et équipe jointe ; pour le tri, elles exigent aussi entrée
-inchangée. Une porte subprocess doit vérifier code 2, stdout vide et stderr
-exact : `run_expect.cmake` ne contrôle actuellement que stdout.
+Le trajet fonctionnel du layout est présent, mais le selftest lifecycle ne
+transporte encore que `FRONTIER_LAYOUT=''`; la scène `classic` appelle le
+runner directement. Ajouter une scène lifecycle canonique `classic`, puis une
+mutation cohérente plan/statut/argv en `csr` alors que le canon reste
+`classic`, donne la preuve causale manquante.
 
-Enfin, conserver le contrat historique précis : les callbacks déjà appelés
-sont **provisoires jusqu'au statut terminal** ; l'invalidation interne ne peut
-pas reprendre un effet externe. La porte K=1 prouve zéro callback seulement
-pour une panne antérieure au premier callback.
+La commande frontière accepte encore n'importe quel binaire `\S+`. Sur un
+reçu rehashé, remplacer tous les exécutables frontière par `/tmp/rogue` laisse
+le verdict inchangé. Le chemin attendu est déjà autoritaire dans
+`BIN_MATRICE`; le regex doit exiger exactement cette valeur dérivée du canon.
 
-Pour l'API bibliothèque, un `std::bad_alloc` lancé par `on_fold_phase`,
-`on_forest` ou `prefilter_census_override` est aussi capturé globalement et
-attribué à l'étage interne courant. Cela ne bloque pas la CLI de la campagne,
-qui n'installe pas ces hooks, mais l'origine devra rester distincte au prochain
-jalon du contrat d'exceptions.
+## P1 — annoncer seulement la grille réellement mesurée
 
-## Portée et budget à dire exactement
+La grille contient quatre points `uniform/K5`, trois `terrain/K5`, deux
+`uniform/K10` et aucun `terrain/K10`. Elle ne mesure donc ni « quatre tailles
+par famille et par K », ni le plus grand `n` tenant en mémoire. Elle peut
+rapporter les sécantes échantillonnées, le plus grand `n` **testé** qui
+complète, et un bracket uniquement si succès et échec existent sous le même
+pin, le même layout et le même plafond. Corriger cette pré-inscription est
+préférable à ajouter des runs qui ne tiendraient plus dans la fenêtre.
 
-La grille WIP contient quatre points `uniform/K5`, trois `terrain/K5`, deux
-`uniform/K10` et aucun `terrain/K10`. Elle ne mesure donc pas une pente sur
-« quatre tailles par famille et par K ». Elle peut rapporter les sécantes
-effectivement échantillonnées et le plus grand `n` **testé** qui complète sous
-ce pin, ce layout et ce plafond. Sans bracket same-pin, ce n'est pas le plus
-grand `n` tenant en mémoire.
+## Contre-lecture critique des exigences précédentes
 
-Après désarmement de Q2 et réduction à cinq heures, le lifecycle WIP estime
-10 390 s : frontière 10 300 et 9×10 s d'overhead. L'enveloppe de plafonds
-vaut 10 800 s, ou 10 890 s avec cet overhead. La fenêtre calculée par le
-lifecycle vaut bien 13 195 s : `18000 - 3905` de marge de rapatriement
-effective, puis `-900` de build source. Le commentaire est donc juste sur la
-fenêtre, mais appelle à tort 10 890 s la sortie de l'estimateur nominal.
-Publier séparément **estimateur nominal**, **enveloppe** et **fenêtre** depuis
-ce même calcul.
+Deux demandes de l'audit antérieur étaient trop catégoriques :
 
-La copie WIP ferme désormais une des coutures de protocole : elle normalise
-`fam:n` et `fam:n:11` avant le contrôle des doublons et avant l'émission, prouve
-l'identité octet par octet des plans, puis refuse leur coexistence avant tout
-artefact. Cette fermeture n'est reçue qu'après un pin propre.
+- interdire tout code 134 en plan v2 n'est pas nécessaire pour une simple
+  frontière de **complétion**. Un signal 6 avec diagnostic `std::bad_alloc`
+  et `RLIMIT_AS` attesté peut rester une borne haute non attribuée au processus,
+  à condition de ne jamais le présenter comme un refus transactionnel ni comme
+  l'étage coupable. Si la question devient l'attribution par étage, il faut le
+  censurer ; cette distinction de claim suffit ;
+- la fermeture totale de toutes les clés/tokens et la dérivation générale de
+  v1/v2 sont souhaitables, mais ne falsifient pas à elles seules ce profil :
+  son canon demande `layout=classic`, donc impose déjà v2. Elles passent en P2
+  après les quatre fermetures ci-dessus.
 
-Deux fermetures de protocole restent utiles :
+Les faux verts génériques restent reproduits et doivent donc rester au backlog :
+un plan rehashé accepte une clé inconnue, `threads` dupliqué et la ligne fixe
+`s=999 smax=2 seed=666`; un reçu legacy sans axe peut s'auto-promouvoir en v2
+en ajoutant des champs cohérents. Fermer `read_plan` par ensembles exacts de
+clés et tokens, unicité et ligne fixe littérale évitera leur retour. Le refus
+pré-run d'un pilote non vide sans inventaire de portes est aussi utile au
+protocole générique, mais Q2 est désarmée ici et ne bloque pas cette session.
 
-- fermer réellement la grammaire v1/v2 : `read_plan` accepte encore clés et
-  jetons inconnus ou dupliqués, ne juge pas la ligne fixe `s=8 smax=11 seed=3`,
-  et la commande frontière accepte tout binaire `\S+` au lieu du
-  `BIN_MATRICE` canonique. Les probes directs rendent tous une liste d'erreurs
-  vide pour une clé et un token inconnus, des clés/tokens dupliqués et une ligne
-  `s=999 smax=2 seed=666`; le regex de commande accepte aussi
-  `./build-v6/mhgp6`, `/tmp/rogue` et `./build-v5/mhgp5`. Une seule fixture
-  combinée peut exiger l'unicité, les ensembles exacts par version, la ligne
-  fixe littérale et l'identité du binaire ;
-- recalculer la version depuis les axes autoritaires : la branche courante
-  interdit bien `decision_v1` lorsqu'un axe est demandé, mais accepte
-  `decision_v2` lorsqu'aucun axe ne l'est. Un canon legacy tout-K10 peut donc
-  être artificiellement promu en v2 en ajoutant des champs cohérents ; une
-  version déclarée ne doit jamais s'auto-justifier ;
-- refuser avant tout run un pilote non vide sans inventaire de portes ; Q2
-  étant désormais absente du profil d'échelle, aucun digest historique 50k
-  n'est revendiqué par cette session.
+## P1 — rendre le selftest total et stable sous `pipefail`
 
-## Rejeu indépendant du pin moteur
+Sur un export exact de `d8d7a7f7`, le selftest campagne s'arrête par code 141
+après le témoin `decision_complete`. La commande
+`onest=$(ls "${DVIDE}"/*.status | head -1)` reçoit le SIGPIPE de `head` sous
+`set -o pipefail` ; la contre-fixture `time_bin` vide qui suit n'est jamais
+exécutée. Un rejeu peut passer selon le volume et le buffering de `ls`, ce qui
+en fait une porte instable, pas une preuve 171/171. Sélectionner le premier
+fichier par une expansion shell ou une boucle sans pipeline, puis exiger le
+code terminal 0 et le témoin final, ferme ce défaut sans toucher au protocole.
 
-Sur le pin moteur courant `28d02459`, la contre-vérification locale donne 4/4
-portes `mhgp6_bad_alloc_*`. Sur le WIP protocolaire, syntaxe shell/Python
-propre, selftest campagne complet, selftest lifecycle complet et intégration
-lifecycle 2/2 sont verts ;
-ce dernier n'appelle que des gardes factices et ne touche aucune ressource GCP.
-La copie WIP ajoute la normalisation `:11` et le raccord fonctionnel du layout.
-Elle ne contient encore ni trajet lifecycle causal avec layout non vide, ni
-vraie porte de la sous-classe d'allocation. Grammaire, binaire, renommage du
-refus, dérivation de version et code 134 v2 restent des dents utiles du prochain
-lot, sans ouvrir un nouvel audit.
+Le lifecycle, rejoué depuis le même export initialisé en dépôt Git local,
+termine en revanche par code 0 ; les deux échecs D9/D9bis vus dans le worktree
+partagé ne sont pas attribués au pin.
+
+## Documentation à remettre en phase
+
+`tests/bad_alloc_gate.cpp` documente encore l'ancien texte
+`bad_alloc a l'etage` et affirme que le fold serait le seul étage à workers ;
+génération, RLE/tri, préfiltre, census et expansion utilisent eux aussi les
+pools. Corriger ces commentaires avec les portes ci-dessus évite de conserver
+un contrat historique faux.
 
 ## Fermeture minimale avant nouvelle dépense
 
-1. Épingler le raccord `FRONTIER_LAYOUT` déjà présent dans le WIP et lui ajouter
-   la fixture causale non vide sur tout le trajet lifecycle.
-2. Fermer la cause d'allocation de bout en bout, son secours sans tas, la
-   création partielle des pools — sas obligatoire pour le tri — et la politique v2 du code 134 ; conserver Q2
-   désarmée.
-3. Recevoir la normalisation `:11` déjà présente ; fermer le parseur de plan,
-   dériver la version et lier le binaire, avec les contre-fixtures
-   correspondantes avant tout run.
-4. Requalifier la portée et le budget, puis rejouer les selftests locaux sur
-   un commit d'implémentation propre.
+1. Supprimer le pipeline `ls | head` et prouver que la dernière contre-fixture
+   du selftest campagne est effectivement atteinte.
+2. Cause non allouante + renderer commun, grammaire totale du code 2 et vraie
+   scène CLI → runner → validateur sans payload.
+3. Lancements partiels sûrs pour ranges/items, tri à sas et worker B, avec
+   injections ciblées.
+4. `BIN_MATRICE` exact et fixture lifecycle `FRONTIER_LAYOUT=classic` non vide.
+5. Pré-inscription réduite aux points et brackets réellement présents, puis
+   rejeu des selftests sur le commit source propre.
 
-Aucun résultat G4, aucun claim produit et aucun GO ne sont créés par ce
+## Contre-vérification locale
+
+- export exact `d8d7a7f7`, `selftest_campagne_v6.sh` : code 141 après le
+  témoin positif ; la dernière contre-fixture n'est pas atteinte ;
+- même export initialisé en dépôt Git local, `selftest_cycle_vie_v6.sh` :
+  code 0, sans ligne d'échec ;
+- intégration Python du lifecycle : 2/2 verte lors du rejeu indépendant ;
+- syntaxe shell/Python et `git diff --check` : propres au snapshot contrôlé.
+
+Aucun résultat G4, aucun claim produit et aucun GO GCP ne sont créés par ce
 préflight.

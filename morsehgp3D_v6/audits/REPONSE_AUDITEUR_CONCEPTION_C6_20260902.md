@@ -16,6 +16,88 @@ de session ni une réception d'implémentation. La bonne cible est de supprimer
 la matérialisation globale, puis de paralléliser et recouvrir la couture tout
 en gardant `gpu_wire_v1` et l'objet aval identiques.
 
+## Contre-lecture du WIP d'encodeur après `788b22da`
+
+Le nouveau `pack_ball_in` est une bonne brique : offsets little-endian
+explicites, produits de tailles vérifiés, écriture disjointe et confrontation
+octet pour octet avec `append_ball_in`. Sur le snapshot lu, le témoin direct
+passe et les deux mutants stride/slack rendent code 4. Ce lot reste non reçu
+tant qu'il est non commité et non raccordé à CMake.
+
+Une brèche précise doit être fermée avant ce pin. Le template
+`pack_ball_range` appelle `Source` deux fois, une fois pour valider et une fois
+pour écrire, tout en promettant qu'un succès signifie que les boules écrites
+ont été validées. Un `Source` mutable peut rendre une clé valide à la première
+passe, puis `a=0` à la seconde : le probe rend `kOk` et écrit la clé invalide.
+Un chevauchement source/destination non déclaré peut de même corrompre une
+boule future ; une scène locale finit jusque dans une division par zéro de
+`wire_t1_candidates`. Une callback qui lève à la seconde passe détruit aussi la
+promesse « valeur de refus, jamais écriture partielle ».
+
+La fermeture la plus simple respecte le jalon : faire de
+`pack_candidate_range` l'API transactionnelle réelle sur un `CandidateSpan`
+const, vérifier avant écriture `arity <= smax + 1`, stabilité/non-chevauchement
+et toutes les clés, puis écrire directement ce même tableau. Le helper template
+reste interne avec préconditions explicites `stable`, `noexcept`, `noalias`, ou
+perd son claim transactionnel. Il n'est pas utile d'allouer une copie pour
+sauver une généralité que C6 ne consomme pas.
+
+Avant commit, raccorder le témoin code 0, les deux mutants code 4 et un plancher
+dans CMake ; ils sont actuellement au registre mais orphelins. Le commentaire
+du test doit enfin distinguer les additions/caps réellement exercés du statut
+`kByteOverflow` : sur une cible 64 bits, la borne `2^32-1` rend le débordement
+de `nb*112` inatteignable. Tester `mul_checked` directement ou annoncer cette
+dominance est plus exact que revendiquer une dent absente.
+
+La confrontation partage aussi `wire_threshold` entre le bras `append` et le
+bras `pack` : une erreur commune de seuil reste verte. Ajouter quelques attentes
+indépendantes, par exemple `h=10,9,8` pour les arités 2,3,4 à `smax=11`, suffit.
+La dérivation T1 partagée est déjà jugée par la porte wire historique ; le
+rapport doit donc parler d'indépendance de sérialisation, pas de deux encodeurs
+entièrement indépendants. Distinguer enfin `kNullSource` de `kNullBuffer`
+évitera qu'un refus de source nulle soit rendu comme « tampon nul ».
+
+## Contre-lecture du WIP d'anneau différé
+
+Le modèle est une aide constructive : les leases IN/device/OUT sont séparés,
+les fins inversées et corruptions tardives sont exercées, et Claude a déjà
+fermé pendant la relecture la transition prématurée kernels→D2H avec
+`kernels_done`. En compilation autonome `-Werror` avec `MHGP6_TESTING`, le
+nominal passe 21 scènes, 64 lots, 87 rotations, trois queues et 76 fins
+inversées ; les cinq mutants rendent chacun code 4 et un plancher forcé code 3.
+Ce WIP reste un auto-test hôte non épinglé, sans preuve de course ni de CUDA.
+
+Quatre coutures locales restent à fermer avant son pin :
+
+1. Les fins ne sont pas one-shot. Après `h2d_end`, le ticket reste `H2D` alors
+   que son slot IN devient `kNoSlot`; un second appel franchit `expect` puis
+   indexe les slots avec cette sentinelle. Le probe ASan/UBSan termine en faute
+   mémoire. `kernels_end` est répétable, et `rebuild_end` l'est aussi pour un
+   lot achevé hors ordre, resté `REBUILT` après avoir rendu OUT. Des états ou
+   drapeaux `*_done`, vérifiés avant tout `slot_of`, et des fixtures de double
+   complétion ferment la classe entière.
+2. `publish()` accepte un second appel : les deux rendent vrai et le second
+   rééchange l'objet vers `pending_`, vidant la sortie. Après reconstruction
+   complète, `abort_all()` puis `publish()` réussit de même avec un objet vide.
+   Un état terminal explicite doit faire refuser sans mutation tout rappel et
+   toute publication après abandon.
+3. `fail_device` déduit le rang de l'état mutable au moment du signalement et
+   accepte même un lot libre ou jamais admis. Un même échec asynchrone peut donc
+   changer de rang selon son timing. Le callback doit capturer lot, epoch,
+   étape et base, faire vérifier leur bail actif, puis rejouer les tie-breaks
+   étape/code/message dans les deux ordres d'arrivée.
+4. `ScopedRelease::~ScopedRelease()` appelle `release()`, qui alloue encore via
+   `journal_.push_back`. Un `bad_alloc` peut donc terminer le processus dans le
+   destructeur censé rendre le bail. Libérer état et compteurs par un chemin
+   strictement non allouant ; préallouer le journal ou le rendre best-effort.
+
+Deux finitions sont P2 : le témoin indépendant de journal doit comparer tout le
+tuple `{lot, epoch, base, nb}` au rendu, pas seulement le lot ; le hook
+`(u8)(shell_cap + 200)` reboucle sous la borne pour `shell_cap` entre 56 et 64,
+donc employer `shell_cap + 1` et graver ce bord. Enfin, ni `lot_ring` ni les
+mutants `c6-*` ne sont encore raccordés au CMake et au registre ; le fallback
+local convient au WIP, pas au pin.
+
 ## Correction structurante : séparer les leases avant de doubler le device
 
 La première réponse était trop catégorique : deux slots à **lease unique** ne
