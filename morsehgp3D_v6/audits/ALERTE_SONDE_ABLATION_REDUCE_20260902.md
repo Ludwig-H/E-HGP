@@ -63,3 +63,16 @@ Trois coutures suffisent ; il n'est pas nécessaire de rouvrir le pipeline.
 
 Cette fermeture est locale et CPU. Elle ne demande ni nouvelle session G4 ni
 modification du statut public.
+
+## Signalement court sur le WIP de revalidation adjacent
+
+Le contrôle d'ensemble exact ajouté dans le worktree à
+`gcp-migration/revalidate_v6_receipt.sh` est juste dans son intention, mais sa
+normalisation courante rejette tous les reçus intègres : `SHA256SUMS` porte des
+chemins comme `./RECU_SESSION.txt`, tandis que `find ... -printf '%P'` produit
+`RECU_SESSION.txt`. La comparaison observée sur le reçu `1788312873` est donc
+rouge avant même le validateur. Après le retrait éventuel du préfixe `*`,
+retirer aussi exactement un préfixe `./` côté manifeste, puis conserver une
+contre-fixture pour chacun des cas fichier absent, fichier supplémentaire et
+entrée dupliquée. Ce constat vise uniquement le WIP non commité ; il ne remet
+pas en cause l'intégrité déjà vérifiée du reçu.
