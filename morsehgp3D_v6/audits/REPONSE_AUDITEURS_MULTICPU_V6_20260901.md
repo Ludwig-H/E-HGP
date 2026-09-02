@@ -1295,6 +1295,314 @@ Ordre minimal : corriger 1--4 et leurs mutants, fermer 5 comme utilitaire
 d'audit, puis traiter 6 avant toute dépense. Aucune de ces coutures ne demande
 de rouvrir les kernels ni les résultats scientifiques du reçu.
 
+### 5.19 Réception constructive du pin `13669280`
+
+`13669280` succède utilement au pin intermédiaire `33a12ccc`. Cinq fermetures
+sont réelles et doivent être conservées : le prédicat statique
+`guest*60+300+120+480<=MAX` est identique dans le lifecycle et le garde direct ;
+les codes des producteurs de topologie et d'inventaire sont capturés ; les
+trois chemins exécutables sont liés au profil ; `--arch` est obligatoire au
+juge fichier ; le jeu de fixtures d'objet doit égaler les pilotes pour les
+nouveaux profils. Le profil 25 200 s / 405 min est exactement à 600 s de marge
+nominale, donc 480 s après tolérance. Les sondes du vrai garde donnent aussi
+45 min / 3 600 s accepté et 45 min / 3 599 s refusé avant `START`.
+
+Rejeux indépendants au pin : syntaxe shell et Python propre ; juges pilote et
+profil verts en mode normal et sous `python3 -O` ; selftests campagne et
+lifecycle complets verts ; intégration avec le vrai `start_and_verify.sh`
+2/2 ; revalidation du reçu historique toujours à 58 runs
+`verifie_non_decisionnel`, sept résumés identiques et 202/202 hashes. Les
+mutants de chemins, de codes retour,
+d'architecture et de keyset rendent bien rouge. C'est un progrès substantiel,
+sans nouvelle dépense GCP ni changement de statut public.
+
+Trois coutures matérielles restent, sans rouvrir les kernels ni les résultats
+scientifiques.
+
+1. **La marge disponible n'est pas l'instant d'armement.** Le selftest
+   versionné exerce 600/599 s de marge nominale, soit 480/479 s après
+   tolérance. Il n'exécute pas l'arithmétique `systemd` du script invité : le
+   faux `gcloud` imprime directement le jeton de succès. À marge nominale
+   600 s, il faut encore tuer les quatre frontières temporelles : armement à
+   600 s accepté et 601 s refusé sans skew ; armement à 480 s accepté et 481 s
+   refusé avec skew +120 s. La boucle hôte utilise par ailleurs
+   `ssh_deadline=SECONDS+300` au lieu de la borner par la dernière échéance
+   absolue encore armable, dérivée de `VERIFIED_SAFE_DEADLINE_EPOCH`, du délai
+   invité et des 120 s. La commande distante échoue bien fermée trop tard,
+   mais le garde peut continuer des tentatives devenues mathématiquement
+   inutiles après avoir démarré la VM. Factoriser le prédicat et clamper la
+   boucle donnent une fermeture causale.
+2. **La reprise persistante reste la porte P0.** Le point 6 de la réponse de
+   Claude le reconnaît lui-même : travail, clé, état, handoff et artefacts ne
+   survivent pas encore à la perte du codespace ; aucun second processus
+   incapable de `START`, aucun état `guest_guard_pending` puis
+   `double_guard_verified`, aucun test `SIGKILL` après handshake. Le scénario
+   nommé « reprise EXECUTÉE » reste deux tentatives dans le même processus.
+   Livrer séparément une base 0700 persistante, un verrou portant cible et
+   génération, puis un entrypoint de récupération qui rapatrie/classifie et
+   certifie l'arrêt exact. Tant que cette porte manque, aucun nouveau GO GCP.
+3. **La revalidation est verte sur le happy path, pas encore fermée contre
+   son propre outil.** La lecture des vrais codes distant/SCP et la poursuite
+   après un `diff` sont corrigées. En revanche, `sort -u` accepte deux lignes
+   identiques de `remote_campaign_rc` ou `scp_rc` ; compter exactement une
+   occurrence. Un appel direct du validateur peut encore pointer explicitement
+   `V6_RESUMES_DIR` dans le reçu, car sa garde ne s'applique que lorsque la
+   variable est absente. Le contrôle SHA final est le membre gauche d'une
+   liste `&&` : un faux validateur qui altère `session.log` affiche l'échec du
+   hash mais le wrapper rend encore 0. Enfin `SHA256SUMS` n'interdit ni fichier
+   supplémentaire non listé, ni résumé durable absent. Vérifier l'ensemble
+   exact, exiger les sept résumés attendus et faire dominer tout échec final
+   sur le code du validateur. Le reçu courant n'est pas affecté : son contrôle
+   final observé est vert.
+
+Une précision de provenance demeure : le reçu `852ca703` ne contient pas
+l'axe `gpuv6_objet_digests`. Les quatre valeurs ajoutées au profil courant
+corroborent ses sorties après coup, mais la revalidation recharge le canon
+historique sans ces clés ; elle ne rétro-lie donc pas les trois familles sans
+bras digest dans la matrice. Garder le verdict non décisionnel est correct ;
+ne pas présenter la fixture HEAD comme une autorité rétroactive. Le même cas
+legacy existe pour les chemins : lorsque le canon ancien ne porte aucun axe
+`BIN_*`, le validateur accepte aujourd'hui des champs `bin_*` ajoutés au profil
+effectif et les prend comme attente. Une copie coordonnée avec trois chemins
+forgés et manifeste recalculé reste verte à 58 runs. Pour un canon legacy,
+interdire ces champs ou imposer les trois défauts ; pour un canon moderne,
+dériver l'attente du canon lié, jamais du profil effectif libre.
+
+Le titre « les six coutures, fermées » du § 9.2 et le sujet du commit sont
+trop larges puisque leur propre point 6 annonce une livraison ultérieure.
+Formulation exacte : cinq fermetures techniques reçues, frontières runtime et
+revalidation à finir, reprise persistante encore ouverte. Ce petit ajustement
+documentaire aide davantage Claude qu'un rejet global du bon travail déjà
+acquis.
+
+### 5.20 Reprise persistante et reçu tests : progrès reçu, portes P0 ciblées
+
+La séquence `c8f69673`--`e66cd978` est un progrès substantiel. Le premier pin
+livre bien une base et des `WORK` 0700 sous `/workspaces/.ehgp-sessions`, une
+promotion staging→finale, `umask 077`, `session.env`, l'identité
+PID/starttime/boot, deux marques exclusives, un entrypoint de reprise à deux
+étages ré-authentifié contre le commit, l'absence de tout `START` dans ce
+chemin, un rapatriement borné, un arrêt lié à la génération et une
+classification de reprise toujours non décisionnelle. Le reçu normal
+`e66cd978` exerce réellement les deux publications :
+`guest_guard_pending` à 01:34:54 UTC puis `double_guard_verified` à 01:35:06
+UTC, toutes deux sur la cible et la génération exactes. Il ne faut donc plus
+écrire que la reprise est « entièrement à construire ».
+
+Ce positif nominal ne ferme cependant pas encore la porte P0. Il prouve les
+marques et le code épinglé, pas une reprise réelle après perte du superviseur :
+le reçu n'est pas un reçu `reprise=1`, et il ne grave ni le chemin/mode/device
+du `WORK` effectif. Deux courses matérielles restent dans
+`recover_v6_session.sh` :
+
+1. `reprise.pid` est acquis par test, éventuel `rm`, puis simple redirection.
+   Deux repreneurs partis ensemble peuvent franchir la fenêtre et lancer deux
+   chemins SCP/STOP. Sérialiser avant tout appel externe par acquisition
+   atomique (`mkdir`, création exclusive ou `flock`), graver cible et
+   génération dans le verrou, puis tuer un mutant à deux repreneurs.
+2. La mort du PID principal est bien protégée contre le recyclage, mais le
+   repli `pgrep` ne voit que les lignes de commande contenant `WORK`. Un fils
+   orphelin de la session `setsid` dont l'argv ne contient plus ce chemin peut
+   donc survivre. Graver SID/PGID avec le PID, refuser tout membre vivant de
+   cette session, et ajouter le scénario « superviseur tué, fils sans `WORK`
+   encore vivant ». Le selftest actuel tue toute la session et contourne
+   précisément cette dent.
+3. Le `describe` pré-SCP transporte `status,lastStartTimestamp`, mais le code
+   ne teste que le préfixe `RUNNING`. Une génération concurrente peut donc être
+   rapatriée avant que le garde d'arrêt ne refuse, trop tard, son timestamp.
+   Parser exactement les deux champs et rendre 71, sans SCP ni mutation, si
+   `lastStartTimestamp != GENERATION`.
+4. Après un `stop_and_verify` non nul, le chemin lance encore le validateur
+   local avant de rendre 70. La cible peut rester facturable pendant ce délai.
+   Publier immédiatement l'échec borné puis rendre la main à une reprise
+   sérialisée de l'arrêt ; aucune validation ne doit précéder
+   `targeted_stopped`.
+
+Le compteur `allowance` inutilisé ne borne pas les relances après
+`targeted_stop_failed`. Soit persister un ledger par génération conforme au
+budget annoncé, soit retirer la promesse « une seconde seulement » et décrire
+les retries exacts autorisés. De même, `MHGP6_SESSION_BASE` écarte aujourd'hui
+le contrôle de même volume dès qu'il est fourni : réserver explicitement cette
+échappatoire aux harnais. Le contre-audit dédié
+`CONTRE_AUDIT_REPRISE_PERSISTANTE_V6_20260902.md` ajoute justement deux
+finitions de défense en profondeur : refuser tout `GUARDS_DIR` non épinglé
+hors d'un mode de test impossible en production, puis vérifier la purge des
+credentials avant de publier `recu_publie`. Son choix de retries répétables,
+sérialisés et liés à la génération est plus sûr qu'une limite arbitraire ; il
+faut alors aligner le commentaire et le budget. Ce document omet en revanche
+le fils orphelin sans `WORK` ci-dessus : conserver aussi cette dent. Les quatre
+points numérotés maintiennent l'absence de nouveau GO GCP ; les finitions de
+purge et de mode test se ferment dans le même lot local.
+
+Le reçu `e66cd978` lui-même est reçu dans sa portée stricte. Les contrôles
+indépendants donnent 279 fichiers, 278 entrées SHA-256 exactes, 264 fichiers
+`out/`, 84 statuts `code=0` et `finished=1` : 80 matrice, deux attributions,
+un build et un transcript de portes. Les pins source/payload/manifeste sont
+uniformes et se reconstruisent depuis `c8f69673`; les sept résumés se
+revalident à l'identique. La campagne ne porte aucun pilote de mesure, même si
+quatre des seize CTests GPU sont des portes du pilote CUDA. Le journal donne
+`remote_campaign_rc=0`, `scp_rc=0`, arrêt à la première tentative,
+`stop_rc=0`, puis `TERMINATED` sur la génération
+`2026-09-01T18:34:33.420-07:00`. L'accusé correspondant est consommé.
+
+Les égalités utiles sont réelles mais bornées : 40 paires `smax=6/11` ont les
+mêmes cardinalités K1--K5, les huit paires avec digest à 32 000 ont aussi les
+mêmes `digest_forest_K1..K5`, et les quatre `digest_all` K10 rejoignent les
+fixtures différentielles v5 antérieures. Cela observe la surface
+cardinalités+digests de préfixe sur une graine et ce reçu ; ce n'est pas un
+théorème général sur « l'objet complet ».
+
+`d5d0bdd4` ajoute après l'exécution une bonne porte de préfixe et les quatre
+premiers pins K5. Ils deviennent des fixtures de régression futures, pas un
+oracle indépendant ni une autorité rétroactive. Le canon réellement exécuté
+à `c8f69673` ne contient pas `MATRICE_OBJET_DIGESTS` : remplacer de façon
+coordonnée les deux `digest_all` uniform/K5, puis recalculer les manifestes,
+reste revalidable. Qualifier ce reçu `legacy_unbound` sur cet axe est donc plus
+exact. Pour les prochains profils, rendre l'axe présent et son keyset exact
+dès qu'un point `--digest` existe. Compter aussi exactement une occurrence de
+chaque `digest_forest_K`; la conversion actuelle en dictionnaire masque un
+doublon conflictuel placé avant la bonne ligne.
+
+La note de lecture de Claude est globalement fidèle aux tableaux, avec quatre
+rectifications utiles : les écarts de pente K10/K5 sont observés au plus à
+0,0615 sur seulement quatre tailles, une graine et deux passages, donc les
+pentes ne sont pas démontrées « indépendantes de K » ; le ratio RSS ne prouve
+pas que la résidence vient des forêts plutôt que de la génération, puisque
+`apres_generation` varie déjà fortement ; les 18,235 s et 16,059 s de
+`reduce` sont des cumuls par K avec deux réductions actives, jamais 61 % et
+46 % du mur ; seuls les rapports 34,6 % et 34,9 % de
+`materialisation_tri_copie` au cumul `reduce` sont recevables. Les maxima de
+dispersion sont 1,621 % et 2,838 %, simples arrondis à corriger. La conclusion
+utile reste positive : cette fenêtre mérite une sonde locale, sans être un
+goulot exclusif démontré.
+
+L'alerte concurrente `ALERTE_SONDE_ABLATION_REDUCE_20260902.md` est fondée sur
+ses trois points matériels : le plan direct/inverse/direct à trois blocs
+confond position et bras ; la clé factice modifie aussi la distribution du
+tri ; le reçu tolère vacuité, binaire mutable et échec non fatal de son hash.
+Elle borne correctement le partiel comme
+`exploratory_noncausal_upper_bounds`. Elle ne remet pas en cause les trois
+mutants tués par la conformité ni le reçu G4, et le partiel en cours doit être
+conservé plutôt que relancé ou effacé. Une éventuelle seconde mesure locale
+peut employer quatre séquences équilibrées, différences appariées, copie
+privée du binaire et ensemble exact des cellules. Avant tout palier
+`CompactDelta`, le candidat sémantiquement valide devra ensuite égaler le
+`ForestResult` complet ; les bras destructifs restent seulement des bornes de
+reconnaissance.
+
+Après le dernier pin de code `81623528`, les frontières runtime, le clamp
+absolu et les finitions de revalidation sont encore un WIP non reçu. Leur
+direction est la bonne ; le premier essai d'ensemble exact révélait seulement
+une différence de normalisation `./chemin` contre `chemin`, capturée par
+l'alerte à `013faf1b`. `1bea4bc4` capture ensuite une couture plus profonde :
+le contrôle final doit
+comparer les octets ou le hash du `SHA256SUMS` initial, car un faux validateur
+peut modifier un fichier puis rehasher le manifeste. Ne pas mêler ces défauts
+de travail aux verdicts des commits déjà reçus.
+
+### 5.21 Réception du durcissement `2aaa4a53` et de la sonde équilibrée `b79e29a5`
+
+Le lot `2aaa4a53` ferme réellement la plupart des alertes locales précédentes.
+Les rejeux indépendants donnent 8/8 scènes d'arithmétique invitée, également
+8/8 sous `python3 -O`, quatre contrôles ciblés du clamp, de l'horloge et du
+transport, 141/141 contrôles du selftest campagne et 15/15 scènes du
+revalidateur. Les frontières 600/601 et 480/481 sont exercées sur le texte
+invité exact ; le succès SSH dépend maintenant du code nul et d'une ligne
+terminale exacte. La provenance legacy des chemins et des deux cartes de
+digests est dérivée du canon lié : une copie coordonnée qui forge ces cinq
+champs est refusée. La porte K5/K10 compte les occurrences, rejette les K hors
+domaine et compare chaque paire sur la clé complète du plan. Enfin,
+`g4_tests_v1` retrouve son contenu historique et `g4_tests_v2` est bien une
+nouvelle identité portant ses huit fixtures avant toute future exécution.
+L'alerte de préfixe est donc fermée **prospectivement**, sans donner d'autorité
+rétroactive aux pins K5 de v1.
+
+Le revalidateur conserve une seule dent d'immuabilité. Il grave et recompare
+l'ensemble des fichiers, mais pas celui des répertoires : un validateur qui
+crée seulement un répertoire vide dans le reçu rend encore 0 et laisse
+« recu intact ». Mémoriser aussi l'inventaire initial des répertoires, le
+recomparer après l'appel et ajouter ce mutant suffit. Ce défaut n'altère aucun
+fichier du reçu courant, ni les égalités K5 ; il borne seulement le claim
+d'ensemble exact de l'utilitaire.
+
+La reprise de `2aaa4a53` reçoit aussi des progrès substantiels : `flock`,
+registre et marques stricts, SID/PGID persistés, génération vérifiée avant le
+SCP, états incertains routés stop-first, garde d'arrêt épinglée, purge avant
+témoin et politique manuelle des rejeux. Quatre coutures précises empêchent
+encore de la qualifier de porte autonome :
+
+1. `recu_publie` est testé avant l'acquisition de `flock`, sans seconde lecture
+   sous verrou. Un repreneur suspendu avant le verrou peut reprendre après la
+   conclusion d'un autre et publier une seconde fois. Acquérir le verrou
+   d'abord, puis refaire sous verrou tous les choix terminaux.
+2. Après le SCP, `describe_indisponible` n'est pas un refus et un répertoire
+   `out/` partiel peut être promu même si `SCP_RC` est non nul. Le chemin de
+   salvage peut rester non décisionnel, mais l'espace canonique ne doit être
+   remplacé que si le SCP a réussi et si le tuple postérieur est lisible,
+   exact et de la génération attendue ; sinon conserver le partiel sous un
+   nom explicite et poursuivre seulement l'arrêt ciblé de la génération
+   connue.
+3. Une purge réussie suivie d'un échec de `publish_witness` est masquée par le
+   `return 0` de `finalize_receipt`; le cycle nominal masque pareillement son
+   Python par un `true` final. La publication atomique et le `fsync` doivent
+   dominer le code de succès, avec un code local dédié en cas d'échec.
+4. Le reçu dit minimal après STOP non certifié copie encore `session.log`,
+   `reprise.log` et `marques/`, puis les hache et appelle `sync`. Ces volumes
+   ne sont pas bornés et peuvent retarder le rc70 pendant que l'état externe
+   reste incertain. Émettre d'abord un statut à champs fixes, éventuellement
+   des tails plafonnés, sans copie récursive ni hash massif ; archiver le reste
+   seulement en best effort après le signalement.
+
+Les rejeux manuels sont bornés par tentative, pas par un ledger persistant ;
+le texte doit le dire ainsi ou porter un compteur/deadline par génération.
+De même, le test D5 prouve le SID/PGID enregistré, pas un descendant qui fait
+`setsid` puis retire `WORK` de son argv. Borner le claim à cette identité est
+acceptable pour le lot local ; un claim sur **tout** descendant demanderait
+un cgroup dédié et son `cgroup.procs` vide. Ces deux points de portée ne
+retirent rien au caractère stop-first de la correction, mais ils ne doivent pas
+être transformés en preuve plus large.
+
+Le reçu `b79e29a5` est reçu dans sa portée concrète. Il contient 154 fichiers,
+dont 153 couverts exactement par `SHA256SUMS`; les 48 tags sont uniques, les
+48 triplets `txt/err/status` sont présents avec code nul et erreurs vides, le
+binaire privé garde le même SHA-256 avant/après chaque tuple, et le plan
+exécuté couvre à chaque taille les quatre positions et les douze successions
+dirigées. L'agrégateur archivé rejoue bit à bit, en mode normal et optimisé.
+Les parts appariées retirées par le bras sans copie sont 53,6 %, 57,9 % et
+59,3 % de `materialisation_tri_copie`; elles corroborent le premier reçu et
+font du stockage/copie la bonne hypothèse suivante à falsifier. Elles ne
+prédisent pas le gain KeyCSR : l'ablation supprime l'objet, ses allocations,
+son append et sa destruction, tandis que KeyCSR conservera une copie vers une
+arène.
+
+Le mot générique « fail-closed » du harnais n'est en revanche pas encore reçu.
+Les contre-fixtures de l'alerte restent valides : taille dupliquée écrasant les
+tags, hash vide sans grammaire 64-hex, champ dupliqué écrasé par un dictionnaire,
+carré latin équilibré mais non Williams, et artefact inattendu ou
+`out/SHA256SUMS` exclu de l'inventaire. Aucun de ces cas n'existe dans le reçu
+`b79e29a5`, contrôlé indépendamment ; ils sont donc de priorité basse pendant
+le prototype, mais obligatoires avant de réutiliser le lanceur pour une mesure
+CSR. La limite du § 8 de la note Claude doit aussi dire **quatre blocs** pour
+ce second reçu, pas trois répétitions.
+
+La réponse `REPONSE_AUDITEUR_COMPACTDELTA_CSR_20260902.md` est autrement bien
+orientée et sert de verrou de conception : GO exploratoire pour KeyCSR comme
+nouvelle forme versionnée du même objet, arènes possédées par `ForestResult`,
+aucune vue persistante, offsets vérifiés, copie autonome après callback et
+comparateur champ par champ indépendant du digest. FidCSR reste un second
+palier. Deux précisions statistiques sont requises seulement avant la mesure :
+la « borne unilatérale appariée » doit nommer estimateur, niveau, égalités et
+invalidations ; le chiffre `1/64` suppose aussi indépendance ou échangeabilité,
+non prouvée par six blocs séquentiels sur un hôte partagé. Employer
+l'unanimité comme règle d'ingénierie, ou randomiser et pré-enregistrer les
+orientations, évite de surqualifier cette règle en p-value.
+
+Décision utile pour Claude : le prototype sémantique KeyCSR peut commencer
+maintenant, entièrement en local et sous le comparateur complet. Les quatre
+coutures de reprise bloquent seulement toute nouvelle session GCP. Les cinq
+dents du harnais et les précisions statistiques bloquent seulement la future
+campagne de performance, pas l'implémentation ni les tests de l'objet.
+
 ## 6. Ordre de travail recommandé
 
 1. **achevé à `4a85c13d`** : C1, garde `2E` et témoin hôte ancrés ensemble,
@@ -1308,12 +1616,14 @@ de rouvrir les kernels ni les résultats scientifiques du reçu.
    une affinité reproductible avant l'éclaireur atomique ;
 5. ouvrir l'amont/aval du design A par les paliers décrits, sans promettre le
    facteur `1,7–2` ;
-6. **achevé à `852ca703`** : génération
-   `2026-09-01T13:06:27.081-07:00` reçue et arrêtée ; fermer maintenant les
-   deux sous-liaisons du validateur et la reprise persistante avant tout
-   nouveau départ facturable ;
-7. sonder `CompactDelta` et la suppression de `wire+rebuild` localement avant
-   de proposer un nouveau pin G4.
+6. **achevé à `e66cd978`** : les deux générations G4 ont un reçu terminal et
+   sont arrêtées ; l'accusé le plus récent est consommé ;
+7. fermer les quatre coutures résiduelles de reprise et l'inventaire final des
+   répertoires du revalidateur avant tout nouveau départ facturable ;
+8. **GO exploratoire local** : implémenter KeyCSR comme stockage versionné et
+   prouver l'égalité complète de l'objet avec un comparateur indépendant ;
+9. avant sa mesure seulement, fermer les cinq faux positifs du harnais,
+   pré-enregistrer la statistique exacte et garder FidCSR comme palier séparé.
 
 Un prototype de réduction ne sera reçu ni par un seul digest ni par un mutant
 d'ordre. Il devra comparer le `ForestResult` complet, les deltas et niveaux de

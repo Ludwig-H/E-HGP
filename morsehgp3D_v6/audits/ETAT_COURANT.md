@@ -1,13 +1,17 @@
 # État courant v6 — audit coopératif
 
-Date de coupe : 1er septembre 2026.
+Date de coupe : 2 septembre 2026.
 
 Coupe source observée : `1069bc20` pour le profil `reduce`, `cd606257` pour
-la série C C2--C5 et `b97f20ea` pour la préparation puis l'exécution G4 de la
-série C. Le reçu terminal est archivé par `852ca703` et lu par Claude à
-`74ab8e7c`. Hors `morsehgp3D_v6/audits/` et
-`morsehgp3D_v6/receipts/`, l'arbre du commit `74ab8e7c` reste identique au
-pin exécuté `b97f20ea`.
+la série C C2--C5, `b97f20ea` pour la première exécution G4, `13669280` pour
+le durcissement post-session et `c8f69673` pour la reprise persistante ainsi
+que la seconde exécution G4. Le reçu courant est archivé par `e66cd978`, lu
+par Claude et son validateur à `d5d0bdd4`. Le lot local `2aaa4a53` ferme les
+frontières runtime, versionne le canon tests v2 et durcit les validateurs et
+la reprise ; la seconde sonde locale est archivée par `b79e29a5`. Hors
+protocole,
+profils, audits et reçus, le moteur `src/`, `cli/` et `CMakeLists.txt` exécuté
+à `c8f69673` reste identique à celui de la première série C `b97f20ea`.
 Autorités techniques : `6d755804` pour le
 prototype E3/G16, `cd49a390` pour les callbacks, `d98f4729` pour le protocole
 et la source réellement exécutée sur G4, `94c74155` pour l'autorisation
@@ -20,7 +24,16 @@ le profil de session initial, `5d886db1` pour la fermeture technique des
 coutures 5.13--5.15, `b97f20ea` pour la marge invitée corrigée et
 `c6ddf715` pour son accusé de SHA, `852ca703` pour le reçu terminal intègre,
 `74ab8e7c` pour sa lecture source par Claude, `62cd2e28` pour la matrice locale
-directionnelle, `9c5517c9` pour la demande G4, `e8289d9a` pour son profil
+directionnelle, `33a12ccc` pour le lot post-session intermédiaire et
+`13669280` pour ses cinq fermetures techniques reçues, `1395c4f2` pour le
+profil tests K10/K5, `c8f69673` pour la reprise et le pin réellement exécuté,
+`1756d4ba` pour l'accusé consommé, `e66cd978` pour le reçu terminal courant,
+`d5d0bdd4` pour sa lecture et ses fixtures post hoc, `81623528` pour la sonde
+locale destructive, `1bea4bc4` pour son alerte causale et de revalidation,
+`b9ea4659` pour le contre-audit de reprise, `2aaa4a53` pour les fermetures
+locales reçues avec réserves, `b79e29a5` pour la sonde équilibrée et
+`38281dc7` pour la réponse architecturale KeyCSR, `9c5517c9` pour la
+demande G4 historique, `e8289d9a` pour son profil
 historique, `320299df` pour le reçu de
 réplication et `8ed2dea6` pour le reçu de confirmation contre-audité
 ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
@@ -48,27 +61,35 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | série C C2--C5 `cd606257` | reçue dans sa portée CPU/stub : six candidats `u32`, refus transactionnels, sentinelles/validateur, digest gravé, porte de readback device enregistrée mais jamais exécutée et multi-lots causal ; export propre Release 113/113 en 232,11 s ; aucun `nvcc` ni device |
 | préparation G4 `b97f20ea` | quatre coutures du § 5.15 reçues sur le chemin épinglé : canon, identité plan/device, architecture 120, fail-fast et manifeste lifecycle à 13 fichiers ; selftests campagne/lifecycle verts et portes G4 v6 117/117 ; deux sous-liaisons du validateur restent à durcir (argv d'attribution seulement inclusif, `arch_compilees` parsé mais non comparé) ; leurs contrôles manuels sont conformes pour le reçu `852ca703` |
 | reçu G4 série C `852ca703` | paquet intègre : 202/202 hashes, 58/58 statuts code 0, 16/16 portes GPU et quatre pilotes paritaires ; validateur épinglé `verifie_non_decisionnel`, contrôles manuels argv/architecture conformes ; résultats bornés au § 5.17, jamais un claim produit |
+| durcissement local `2aaa4a53` | frontières invitées 600/601 et 480/481, clamp absolu, rc SSH/horloge, provenance legacy, exactitude K5/K10 et canon prospectif `g4_tests_v2` reçus ; le revalidateur doit encore recontrôler les répertoires créés ou supprimés pendant son appel |
+| reprise persistante `2aaa4a53` / audit `b9ea4659` | verrou noyau, registre/marques stricts, SID/PGID, génération avant SCP, stop-first, garde épinglée et purge-before-witness reçus ; quatre coutures locales restent : terminal à relire sous verrou, promotion seulement après SCP réussi et tuple postérieur recevable, échec du témoin fatal, reçu rc70 réellement borné ; aucun nouveau GO GCP |
+| reçu G4 tests K10/K5 `e66cd978` | paquet intègre : 278/278 hashes, 84/84 statuts code 0 et terminés, pins reconstruits, sept résumés identiques, arrêt exact à la première tentative ; égalités de préfixe observées sur cardinalités/digests ; profil et campagne strictement non décisionnels, accusé consommé |
+| porte de préfixe `2aaa4a53` | listes K exactes, appariement par clé complète et jumeau K10 obligatoire reçus ; les pins K5 de v1 restent post hoc, tandis que v2 porte ses huit fixtures avant toute future exécution |
+| sonde équilibrée `b79e29a5` | reçu concret intègre et recalculable : 153/153 hashes, 48 triplets, plan Williams exécuté et différences appariées ; le signal priorise une falsification KeyCSR, jamais son gain ; le harnais générique garde cinq faux positifs à fermer avant réutilisation |
+| réponse KeyCSR `38281dc7` | GO exploratoire sémantique reçu : stockage versionné, arènes propriétaires, vues non persistantes et comparateur complet indépendant du digest ; FidCSR et mesure de performance restent deux paliers ultérieurs séparés |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
-| protocole GCP série C | premier départ `5d886db1` refusé fail-closed puis arrêté avec reçu intègre ; deuxième départ `b97f20ea` interrompu par redémarrage du conteneur et arrêté, sans reçu durable ; relance distincte `b97f20ea`, génération `2026-09-01T13:06:27.081-07:00`, reçue puis arrêtée sur la cible exacte ; aucun GO courant |
+| protocole GCP série C | départ refusé fail-closed puis arrêté ; perte de superviseur arrêtée sans reçu ; deux relances distinctes reçues et arrêtées sur leurs générations exactes, la plus récente `2026-09-01T18:34:33.420-07:00` ; aucun GO courant |
 
-Le reçu terminal contient 203 fichiers, couvre exactement 202 entrées
-SHA-256 et 190 artefacts `out/`, sans troncature. Ses 58 runs sont valides ;
-la campagne demeure explicitement `verifie_non_decisionnel`. Le journal
-atteste `remote_campaign_rc=0`, `scp_rc=0`, `stop_rc=0`, l'arrêt ciblé à la
-première tentative et l'état `TERMINATED` de la génération exacte. Les deux
-lacunes du validateur ont été fermées manuellement pour ce reçu, mais doivent
-être corrigées avec mutants avant tout nouveau pin. Les frontières 600/601 et
-480/481 s ainsi que la reprise persistante du superviseur restent aussi à
-graver avant une nouvelle dépense GCP.
+Le reçu terminal courant contient 279 fichiers et couvre exactement les 278
+autres par SHA-256 ; son inventaire distant ferme aussi ses 263 artefacts. Les
+84 runs sont valides, terminés et liés aux mêmes source, payload et manifeste.
+Le journal atteste `remote_campaign_rc=0`, `scp_rc=0`, `stop_rc=0`, l'arrêt
+ciblé à la première tentative et l'état `TERMINATED` de la génération exacte.
+La campagne demeure explicitement `verifie_non_decisionnel`. Le reçu série C
+précédent `852ca703` conserve séparément ses 202/202 hashes et 58/58 runs ;
+aucun résultat ni GO ne se transfère entre les deux sessions.
 
-La lecture utile est bornée. Sur cette topologie et `uniform`, 48 fils,
+La lecture utile reste bornée. Sur cette topologie et `uniform`, 48 fils,
 `inflight=2`, `join=0` est le réglage de débit ; `join=1` coûte environ 35 %
 de mur mais économise environ 22 % de RSS à 50k et reste donc un mode mémoire.
-La sonde CPU suivante est `CompactDelta`, car
-`materialisation_tri_copie` est le premier poste interne du `reduce` à
-31--36 %, sans être sa majorité ; les sommes sur K ne sont pas des murs sous
-`join=0`, car plusieurs réductions se recouvrent. Côté device, le gain de
+Le reçu tests observe un rapport K10/K5 d'environ 3,1--5,3 selon famille et
+taille ; ses écarts de pente restent empiriques sur quatre tailles, une graine
+et deux passages. `materialisation_tri_copie` vaut 34,6--34,9 % du cumul
+`reduce` à 32k sur deux familles : une cible de sonde, pas une part du mur ni
+un goulot exclusif. La sonde destructive courante est donc une reconnaissance
+à conserver ; un palier `CompactDelta` ne sera choisi qu'après une mesure
+causale et une égalité complète de l'objet. Côté device, le gain de
 l'étage vaut 1,37--1,89× mais le
 gain bout en bout seulement 1,029--1,116× ; `wire+rebuild` occupe
 83,7--87,8 % de l'étage. Le levier est la représentation hôte, pas le kernel
@@ -76,21 +97,16 @@ seul. Le plafond descriptif obtenu en supprimant entièrement cet étage reste
 1,12--1,31× selon la fixture : le facteur global `1,7–2×` exige donc aussi
 des progrès ailleurs dans le pipeline. Ces mesures n'altèrent aucun statut.
 
-Le WIP postérieur au reçu doit encore corriger sa formule de budget : les
-480 s minimales sont postérieures à la tolérance `systemd` de 120 s, donc la
-relation complète ajoute réserve GCE 300 s, tolérance 120 s et budget 480 s.
-Avec `MAX_RUN=3600`, la frontière correcte en minutes est 45 acceptée, 46
-refusée, non 47/48.
-
-La contre-lecture détaillée du § 5.18 reçoit la direction du WIP, pas encore
-son pin. Campagne, lifecycle, juges normal/optimisé et revalidation du reçu
-sont verts. Restent avant de qualifier la fermeture : appliquer le même
-budget 300+120+480 dans lifecycle et `start_and_verify.sh`, préserver les
-codes d'échec des producteurs de topologie/inventaire, lier les trois chemins
-de binaires, rendre `--arch` obligatoire au juge fichier, égaliser les clés
-des digests avec les pilotes et empêcher tout contournement du répertoire de
-résumés. La reprise persistante hors `/tmp` reste entièrement à construire
-avant une nouvelle G4 ; le retry dans un même processus ne la remplace pas.
+La contre-lecture détaillée des § 5.18--5.21 reçoit maintenant les frontières
+runtime, le clamp, la provenance legacy, la porte de préfixe et le canon v2 de
+`2aaa4a53`. La reprise reçoit aussi ses fermetures structurelles, sans reprendre
+la formule globale « livrée et falsifiée » : sa décision terminale doit être
+refaite sous `flock`, un staging ne devient canonique qu'après SCP réussi et
+tuple post-SCP lisible de la même génération, l'échec du témoin doit dominer le
+code retour et le chemin rc70 ne doit copier ni hacher des journaux non bornés.
+Le revalidateur doit enfin comparer les répertoires avant/après, pas seulement
+les fichiers. Le reçu G4 déjà arrêté n'est pas affecté ; ces coutures sont
+locales et aucun nouveau départ GCP n'est nécessaire ni ouvert.
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
