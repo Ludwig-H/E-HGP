@@ -61,12 +61,16 @@ void bad(const std::string& what) {
 
 // Les provisoires EXACTEMENT au sens de invalidate_provisional : rien de tout
 // cela ne survit a un refus (gen/expand restent des compteurs de diagnostic,
-// comme sur tout autre refus transactionnel).
+// comme sur tout autre refus transactionnel). Sigma|parents| (palier P2) en
+// fait partie : il DECRIT le payload publie, et un refus a K=2 laisserait
+// sinon visible le Sigma|parents| de la foret K=1 — un prefixe exact de
+// payload. Mutant `provisional-keep-sum-parents`.
 bool provisoires_vides(const RunResult& rr) {
   return rr.digest_raw_candidates.empty() && rr.digest_balls.empty() && rr.digest_postprefilter.empty() &&
          rr.digest_all.empty() && rr.digest_forest.empty() && rr.cards.empty() && rr.total_events == 0 &&
          rr.total_facets == 0 && rr.total_fusions == 0 && rr.total_deltas == 0 && rr.total_nodes == 0 &&
-         rr.forest_storage.empty() && rr.csr_fallback == 0 && rr.forest_storage_conformes == 0;
+         rr.forest_storage.empty() && rr.csr_fallback == 0 && rr.forest_storage_conformes == 0 &&
+         rr.sum_parents_by_k.empty() && rr.sum_parents_total == 0;
 }
 
 int refus_argument(const char* why) {

@@ -30,6 +30,7 @@
 #include <chrono>
 #include <condition_variable>
 #include <cstdio>
+#include <cstring>
 #include <deque>
 #include <exception>
 #include <functional>
@@ -193,6 +194,30 @@ struct RunResult {
   double t_fold_sort_ms = 0, t_fold_intern_ms = 0, t_fold_merge_ms = 0, t_fold_reduce_ms = 0;
   double t_fold_wall_ms = 0;
   double rss_mb[6] = {0, 0, 0, 0, 0, 0};
+  // PIC HISTORIQUE de residence (VmHWM de /proc/self/status), releve aux MEMES
+  // frontieres d'etage que `rss_mb` — releve, jamais une garde. Les `rss_mb`
+  // sont des instantanes : ils manquent structurellement tout pic NE et MORT
+  // entre deux jalons (fusion des shards, tri des candidats, transitoire du
+  // census). VmHWM est monotone (le noyau ne le redescend jamais) et domine le
+  // resident : c'est ce que la porte de RESIDENCE verifie. RESERVE MESUREE le
+  // 2 septembre, et non supposee : la lecture de VmHWM peut RETARDER de
+  // quelques centaines de kilo-octets sur celle de statm (compteurs de RSS par
+  // tache synchronises par lots), donc `hwm_mb[j] >= rss_mb[j]` ne vaut qu'a
+  // cette tolerance pres — la porte la rend explicite et publie le retard.
+  // hwm_mb[2] n'est releve que sur la route CPU (comme rss_mb[2] : la couture
+  // serie C ne separe pas prefiltre et census).
+  double hwm_mb[6] = {0, 0, 0, 0, 0, 0};
+  // COMPTEURS DE FORME supposes par les conceptions et jamais mesures :
+  //  - `plateau_balls` : boules dont la coquille depasse l'arite du candidat
+  //    (n_shell != arity), donc celles qui passent par expand_plateau ;
+  //    `census_balls` est le denominateur de la fraction.
+  //  - `sum_parents_by_k` : Sigma|parents| des deltas emis a l'ordre K. La
+  //    valeur EXISTAIT deja, enfouie dans la signature de stockage
+  //    (`stockage_foret ... cles_parents=`) ; elle est ici un compteur de
+  //    premier rang, avec son TOTAL (qui, lui, n'existait nulle part).
+  u64 plateau_balls = 0, census_balls = 0;
+  std::vector<u64> sum_parents_by_k;  // indexe par K (0 inutilise)
+  u64 sum_parents_total = 0;
   double t_total_ms = 0;
   u64 fold_workers = 0, rle_workers = 0;
   // DIAGNOSTIC pur (jamais un payload, jamais invalide, AUCUNE autorite de
@@ -238,6 +263,36 @@ inline double rss_mb_now() {
   if (got != 2) return 0.0;
   return (double)resident * 4096.0 / (1024.0 * 1024.0);
 }
+
+// PIC HISTORIQUE du RSS : VmHWM de /proc/self/status, en Mo. Contrairement a
+// /proc/self/statm (resident INSTANTANE), le noyau ne le redescend jamais : il
+// capture les pics qui naissent et meurent entre deux jalons. 0 si la ligne est
+// absente (noyau sans VmHWM) — la porte de residence traite 0 comme un plancher
+// viole, jamais comme un vert.
+// Mutant `hwm-instant-rss` : rend l'instantane a la place du pic — le defaut
+// historique que ces six jalons avaient exactement (tue par la porte de
+// residence : hwm cesse d'etre non decroissant des que le fold se libere).
+inline double vm_hwm_mb_now() {
+  if (MHGP6_MUTANT("hwm-instant-rss")) return rss_mb_now();
+  std::FILE* f = std::fopen("/proc/self/status", "r");
+  if (!f) return 0.0;
+  char line[256];
+  double mb = 0.0;
+  while (std::fgets(line, sizeof line, f)) {
+    if (std::strncmp(line, "VmHWM:", 6) != 0) continue;
+    unsigned long long kb = 0;
+    if (std::sscanf(line + 6, "%llu", &kb) == 1) mb = (double)kb / 1024.0;
+    break;
+  }
+  std::fclose(f);
+  return mb;
+}
+
+// Noms des SIX frontieres d'etage ou `rss_mb` et `hwm_mb` sont releves —
+// source unique, partagee par print_run et par la porte de residence (une
+// route qui ajoute un jalon change ce tableau et rien d'autre).
+inline constexpr const char* kResidenceStageLabel[6] = {"apres_generation", "apres_rle", "apres_prefiltre",
+                                                        "apres_census",     "max_fold",  "fin"};
 
 inline double ms(std::chrono::steady_clock::time_point t0) {
   return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
@@ -320,6 +375,17 @@ inline void invalidate_provisional(RunResult* rr) {
   rr->cards.clear();
   rr->total_events = rr->total_facets = rr->total_fusions = rr->total_deltas = rr->total_nodes = 0;
   rr->forest_storage.clear();  // signatures de stockage : provisoires comme les cartes
+  // Sigma|parents| DECRIT le payload (cardinalite des deltas publies) : efface
+  // comme les cartes. `plateau_balls` / `census_balls` decrivent le census, au
+  // meme titre que `expand` et les `rss_mb` — diagnostic conserve.
+  // Mutant `provisional-keep-sum-parents` : ne l'efface plus. Un refus a K=2
+  // laisserait alors visible le Sigma|parents| de la foret K=1 — un PREFIXE
+  // EXACT de payload publie, ce que la doctrine interdit (tue par la
+  // projection `provisoires_vides` de selftest.cpp et bad_alloc_gate.cpp).
+  if (!MHGP6_MUTANT("provisional-keep-sum-parents")) {
+    rr->sum_parents_by_k.clear();
+    rr->sum_parents_total = 0;
+  }
   rr->csr_fallback = 0;
   rr->forest_storage_conformes = 0;
 #ifdef MHGP6_PROFILE_REDUCE
@@ -418,6 +484,7 @@ inline void run_pipeline_into(const std::vector<InputPoint>& in, const RunOption
     return;
   }
   rr.rss_mb[0] = run_detail::rss_mb_now();
+  rr.hwm_mb[0] = run_detail::vm_hwm_mb_now();
   rr.stage_reached = kRunStageRle;
   // GRAND-LIVRE GLOBAL : par lane du profil, emis + tues == masse attendue.
   {
@@ -466,7 +533,15 @@ inline void run_pipeline_into(const std::vector<InputPoint>& in, const RunOption
   const auto t_u = std::chrono::steady_clock::now();
   deduplicate_candidates(&cands);
   rr.t_rle_ms = t_sort_candidates_ms + ms(t_u);
-  rr.rss_mb[1] = run_detail::rss_mb_now();
+  // Mutant `drop-stage-milestone` : le jalon apres_rle n'est plus releve DU
+  // TOUT (ni instantane, ni pic) — le defaut qu'une route future (serie C,
+  // GPU) introduirait par accident. Sans plancher de JALONS JUGES, la porte
+  // de residence saute simplement le jalon et reste verte : c'est ce que ce
+  // mutant interdit.
+  if (!MHGP6_MUTANT("drop-stage-milestone")) {
+    rr.rss_mb[1] = run_detail::rss_mb_now();
+    rr.hwm_mb[1] = run_detail::vm_hwm_mb_now();
+  }
   rr.stage_reached = kRunStagePrefiltre;
   rr.expand.unique_balls = cands.size();
 
@@ -512,6 +587,7 @@ inline void run_pipeline_into(const std::vector<InputPoint>& in, const RunOption
     prefilter_balls(ix, cands, rr.smax_eff, opt.threads, &surv, &rr.expand);
     rr.t_prefilter_ms = ms(t_p);
     rr.rss_mb[2] = run_detail::rss_mb_now();
+    rr.hwm_mb[2] = run_detail::vm_hwm_mb_now();
     rr.stage_reached = kRunStageCensus;
     const auto t_c = std::chrono::steady_clock::now();
     // Panne d'allocation INJECTEE a l'etage census : l'enrobage doit la
@@ -536,7 +612,17 @@ inline void run_pipeline_into(const std::vector<InputPoint>& in, const RunOption
     rr.t_digest_ms += ms(t_dp);
   }
   std::vector<Survivor>().swap(surv);
+  // FRACTION DE BOULES A PLATEAU (compteur neuf) : une boule dont la coquille
+  // depasse l'arite du candidat (n_shell != arity) est cospherique et passe
+  // par expand_plateau — c'est elle qui fait exploser le nombre d'evenements
+  // d'un ordre. Un simple balayage O(#boules) des BallData deja resident :
+  // aucune structure ajoutee, aucune influence sur l'objet.
+  rr.census_balls = (u64)balls.size();
+  rr.plateau_balls = 0;
+  for (const BallData& bd : balls)
+    if ((u64)bd.n_shell != (u64)bd.arity) ++rr.plateau_balls;
   rr.rss_mb[3] = run_detail::rss_mb_now();
+  rr.hwm_mb[3] = run_detail::vm_hwm_mb_now();
   rr.stage_reached = kRunStageFold;
 
   // GARDES DE CAPACITE DE TOUS LES ORDRES AVANT TOUTE PUBLICATION.
@@ -578,6 +664,8 @@ inline void run_pipeline_into(const std::vector<InputPoint>& in, const RunOption
   rr.cards.assign(rr.kmax_eff + 1, KCardinalities{});
   rr.forest_layout = opt.forest_layout;
   rr.forest_storage.assign(rr.kmax_eff + 1, RunResult::ForestStorageStats{});
+  rr.sum_parents_by_k.assign(rr.kmax_eff + 1, 0);
+  rr.sum_parents_total = 0;
   rr.expand.events_by_k.assign(rr.kmax_eff + 1, 0);
   // STREAMING PAR K, PIPELINE A DEUX ETAGES — transcription v5 (suretes 1-3 de
   // l'audit du 28 aout 2026 conservees : possession du slot avant demarrage,
@@ -817,6 +905,8 @@ inline void run_pipeline_into(const std::vector<InputPoint>& in, const RunOption
             s.deltas = r.delta_count();
             s.keys_parents = r.keys_parents;
             s.keys_born = r.keys_born;
+            rr.sum_parents_by_k[K] = r.keys_parents;  // compteur de premier rang, plus seulement un champ de stockage
+            rr.sum_parents_total += r.keys_parents;
             s.meta_size = r.delta_meta.size();
             s.meta_capacity = r.delta_meta.capacity();
             s.offsets_size = r.parents_off.size() + r.born_off.size();
@@ -859,6 +949,7 @@ inline void run_pipeline_into(const std::vector<InputPoint>& in, const RunOption
           rr.peak_reduce_active = reduce_peak.load();
 #endif
           rr.rss_mb[4] = std::max(rr.rss_mb[4], run_detail::rss_mb_now());
+          rr.hwm_mb[4] = std::max(rr.hwm_mb[4], run_detail::vm_hwm_mb_now());
         } catch (...) {
           if (!sp->exc) sp->exc = std::current_exception();
           pub_failed.store(true);
@@ -907,6 +998,7 @@ inline void run_pipeline_into(const std::vector<InputPoint>& in, const RunOption
   std::vector<BallData>().swap(balls);
   if (opt.digest) rr.digest_all = dg_all.hex();
   rr.rss_mb[5] = run_detail::rss_mb_now();
+  rr.hwm_mb[5] = run_detail::vm_hwm_mb_now();
   rr.t_total_ms = ms(t_all);
 }
 
@@ -1206,7 +1298,8 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
 #endif
   std::fprintf(out,
                "rss_mb apres_generation=%.0f apres_rle=%.0f apres_prefiltre=%.0f apres_census=%.0f max_fold=%.0f "
-               "fin=%.0f (telemetrie active : lecture /proc/self/statm par K sous le verrou de publication — "
+               "fin=%.0f (telemetrie active : DEUX lectures par jalon — /proc/self/statm (instantane, ~57 us) "
+               "et /proc/self/status (VmHWM, ~109 us) — dont une paire par K sous le verrou de publication ; "
                "a desarmer ou signer pour un run de debit)\n",
                rr.rss_mb[0], rr.rss_mb[1], rr.rss_mb[2], rr.rss_mb[3], rr.rss_mb[4], rr.rss_mb[5]);
   // Ligne ADJACENTE (la ligne rss_mb ci-dessus est gravee textuellement dans
@@ -1214,6 +1307,52 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
   // toujours `publication` ; sur un refus, c'est l'etage que le message NOMME.
   std::fprintf(out, "etage_atteint=%s (curseur d'etage ; un refus le nomme dans son message)\n",
                run_stage_name(rr.stage_reached));
+  // Ligne PROPRE, ADJACENTE (la ligne rss_mb ci-dessus reste bit-identique aux
+  // recus immuables) : PIC HISTORIQUE de residence a chaque frontiere d'etage.
+  // LECTURE EXACTE (rectifiee le 2 septembre par les relecteurs) : hwm_mb[j]
+  // est le maximum HISTORIQUE depuis le debut du processus, pas le pic de
+  // l'etage j. La seule quantite imputable a l'intervalle ]j-1, j] est
+  // l'INCREMENT hwm_mb[j] - hwm_mb[j-1] (et hwm_mb[0] pour le premier) ; la
+  // difference hwm_mb[j] - rss_mb[j] n'est qu'un MAJORANT GLOBAL, et elle
+  // reste grande sur un etage qui n'alloue rien (le maximum d'un etage
+  // anterieur y est simplement perime). SECONDE RECTIFICATION : VmHWM n'est
+  // pas strictement monotone — /proc/pid/status publie max(mm->hiwater_rss,
+  // resident courant) et hiwater_rss n'est rafraichi qu'a certains points, donc
+  // deux lectures successives peuvent decroitre de quelques centaines de kio
+  // (MESURE : 0,758 Mo sur le pipeline a smax=6, 0,18 Mo en sonde dediee).
+  // C'est la porte de residence qui juge les increments, jamais cette ligne. MESURE DE RESIDENCE, jamais une preuve
+  // de correction ni une garde. apres_prefiltre=0 signale la couture serie C
+  // (le jalon n'existe pas), jamais un pic nul.
+  std::fprintf(out,
+               "residence_hwm_mb apres_generation=%.0f apres_rle=%.0f apres_prefiltre=%.0f apres_census=%.0f "
+               "max_fold=%.0f fin=%.0f (VmHWM de /proc/self/status, maximum HISTORIQUE depuis le debut du "
+               "processus — non decroissant a quelques centaines de kio pres, VmHWM valant max(hiwater "
+               "enregistre, resident courant) ; l'ecart avec le rss_mb du meme jalon est un majorant global, "
+               "pas une mesure d'etage)\n",
+               rr.hwm_mb[0], rr.hwm_mb[1], rr.hwm_mb[2], rr.hwm_mb[3], rr.hwm_mb[4], rr.hwm_mb[5]);
+  {
+    // INCREMENTS : hwm_mb[j] - hwm_mb[j-1], seule quantite imputable a
+    // l'intervalle. Un jalon non releve (route serie C, mutant
+    // `drop-stage-milestone`) vaut 0 et reporte sa masse sur le suivant.
+    double prev = 0.0;
+    std::fprintf(out, "residence_increment_mb");
+    for (int j = 0; j < 6; ++j) {
+      const double h = rr.hwm_mb[j];
+      const double inc = h > prev ? h - prev : 0.0;
+      std::fprintf(out, " %s=%.0f", run_detail::kResidenceStageLabel[j], inc);
+      prev = std::max(prev, h);
+    }
+    std::fprintf(out, " (increments du pic historique : ce que CHAQUE etage a ajoute au maximum)\n");
+  }
+  {
+    const double pct = rr.census_balls ? 100.0 * (double)rr.plateau_balls / (double)rr.census_balls : 0.0;
+    std::fprintf(out, "residence_compteurs boules_census=%llu boules_plateau=%llu plateau_pct=%.3f somme_parents_total=%llu somme_parents_par_K=",
+                 (unsigned long long)rr.census_balls, (unsigned long long)rr.plateau_balls, pct,
+                 (unsigned long long)rr.sum_parents_total);
+    for (u64 K = 1; K < (u64)rr.sum_parents_by_k.size(); ++K)
+      std::fprintf(out, "%s%llu", K == 1 ? "" : ",", (unsigned long long)rr.sum_parents_by_k[K]);
+    std::fprintf(out, "%s\n", rr.sum_parents_by_k.size() > 1 ? "" : "(aucun ordre publie)");
+  }
   for (u64 K = 1; K <= rr.kmax_eff; ++K)
     std::fprintf(
         out, "cardinalites K=%llu evenements=%llu facettes=%llu deltas=%llu attachements=%llu fusions=%llu noeuds=%llu\n",

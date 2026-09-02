@@ -307,10 +307,14 @@ int run_failure_contract(bool injected) {
       std::fprintf(stderr, "%s : statut complet inattendu\n", what);
       return;
     }
+    // Sigma|parents| (palier P2) DECRIT le payload : sans lui dans la
+    // projection, un refus a K=2 laisserait visible le Sigma|parents| de la
+    // foret K=1 — un PREFIXE EXACT de payload publie. Mutant
+    // `provisional-keep-sum-parents` : c'est exactement ce qu'il retablit.
     if (!rr.digest_raw_candidates.empty() || !rr.digest_balls.empty() || !rr.digest_postprefilter.empty() ||
         !rr.digest_all.empty() || !rr.digest_forest.empty() || !rr.cards.empty() || rr.total_events ||
         rr.total_facets || rr.total_fusions || rr.total_deltas || rr.total_nodes || !rr.forest_storage.empty() ||
-        rr.csr_fallback || rr.forest_storage_conformes) {
+        rr.csr_fallback || rr.forest_storage_conformes || !rr.sum_parents_by_k.empty() || rr.sum_parents_total) {
       ++mismatches;
       std::fprintf(stderr, "%s : champ provisoire NON vide apres echec\n", what);
     }
@@ -366,6 +370,12 @@ int run_failure_contract(bool injected) {
   // callbacks d'echec ont un contrat EXACT : census => AUCUN on_forest ;
   // fold-A K2 => le prefixe exact {K1} (K1 provisoire livre, jamais K2+).
   const bool census_mutant = mutant_enabled("census-nonstrict");
+  // MUTANT CONTRE-CONTRAT : les mutants habituels de ce mode PROVOQUENT
+  // l'echec et leur contrat doit TENIR (contrat tenu => 4). Celui-ci vise la
+  // PROJECTION elle-meme : il laisse un champ provisoire vivant apres le
+  // refus. Pour lui, un contrat VIOLE est la preuve de mort — la polarite est
+  // donc inversee, explicitement et nommement, jamais par defaut.
+  const bool contre_contrat = mutant_enabled("provisional-keep-sum-parents");
   u64 fails = 0;
   for (const int infl : {1, 2, 8}) {
     RunOptions o;
@@ -402,6 +412,14 @@ int run_failure_contract(bool injected) {
     }
   }
   if (fails != 3) return 3;
+  if (contre_contrat) {
+    if (mismatches) {
+      std::fprintf(stderr, "mutant provisional-keep-sum-parents : contrat des provisoires VIOLE — tue\n");
+      return 4;
+    }
+    std::fprintf(stderr, "mutant provisional-keep-sum-parents : AUCUNE fuite observee — survivant\n");
+    return 3;
+  }
   return mismatches ? 3 : 4;
 }
 
@@ -820,13 +838,18 @@ static int run_caps_refus(bool injected) {
   };
   // Projection COMPLETE « tous les provisoires vides » (7e contre-lecture
   // § 5.9) : exactement les champs qu'invalidate_provisional efface — aucun
-  // ne peut regresser sans tuer la porte.
+  // ne peut regresser sans tuer la porte. Sigma|parents| (palier P2) DECRIT le
+  // payload (cardinalite des deltas publies) : il entre dans la projection au
+  // meme titre que les cartes, faute de quoi un prefixe exact de payload — le
+  // Sigma|parents| des forets deja publiees — survivrait a un refus. Mutant
+  // `provisional-keep-sum-parents` : il ne l'efface plus (tue ici).
   const auto provisoires_vides = [](const RunResult& r) {
     return r.digest_raw_candidates.empty() && r.digest_balls.empty() &&
            r.digest_postprefilter.empty() && r.digest_all.empty() && r.digest_forest.empty() &&
            r.cards.empty() && r.total_events == 0 && r.total_facets == 0 &&
            r.total_fusions == 0 && r.total_deltas == 0 && r.total_nodes == 0 &&
-           r.forest_storage.empty() && r.csr_fallback == 0 && r.forest_storage_conformes == 0;
+           r.forest_storage.empty() && r.csr_fallback == 0 && r.forest_storage_conformes == 0 &&
+           r.sum_parents_by_k.empty() && r.sum_parents_total == 0;
   };
   const auto check_refus = [&](const RunResult& r, const char* motif, const char* nom) {
     check(r.status == PipelineStatus::kResourceExhausted, (std::string(nom) + " : resource_exhausted").c_str());

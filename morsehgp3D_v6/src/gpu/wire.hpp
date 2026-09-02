@@ -30,10 +30,14 @@
 //     les octets — jamais un reinterpret_cast (alignement/aliasing).
 // Mutants : `gpu-index-drop-node` (un nœud omis — comptes ET digest
 // divergent) ; `wire-t1-plus-one` (candidats decales, traversant le chemin
-// append -> octets -> reparse — tue par le balayage exhaustif d'axis_min).
+// append -> octets -> reparse — tue par le balayage exhaustif d'axis_min) ;
+// `wire-pack-stride-short` et `wire-pack-slack-size` (encodeur pur a offsets
+// fixes, plus bas — tues par tests/wire_pack_gate.cpp).
 #pragma once
 
+#include <cstddef>
 #include <cstring>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -314,6 +318,222 @@ inline void append_ball_in(GpuBallInWire* w, const BallKey& k, u64 h) {
   put_u64(&w->bytes, h);
   ++w->balls;
 }
+
+// =====================================================================
+// ENCODEUR PUR A OFFSETS FIXES (C6, jalon 2 de la sequence de livraison
+// de REPONSE_AUDITEUR_CONCEPTION_C6_20260902).
+//
+// MEME FORMAT `gpu_wire_v1`, OCTET POUR OCTET (contrat versionne, 112 o
+// par boule) — mais ecrit a l'offset FIXE `index * 112` d'un tampon DEJA
+// dimensionne par l'appelant : aucune allocation, aucun `push_back`,
+// aucun etat partage, aucune ecriture hors de la plage demandee. Plusieurs
+// fils peuvent donc appeler `pack_ball_range` sur des plages DISJOINTES du
+// MEME tampon (contrat C6 : « ecritures par offsets disjoints, aucun
+// push_back partage »).
+//
+// Il ne REMPLACE PAS `append_ball_in` dans le chemin produit : la bascule
+// est le palier C6a. Les deux encodeurs restent volontairement
+// INDEPENDANTS (aucun ne s'exprime par l'autre) pour que l'egalite
+// `pack == append` soit une CONFRONTATION et non une tautologie
+// (tests/wire_pack_gate.cpp).
+//
+// CONVENTION D'OFFSET : les offsets sont ABSOLUS depuis `dst`. La plage
+// [base_index, base_index + nb) occupe [base_index * 112, (base_index +
+// nb) * 112) et `dst_bytes` mesure le tampon DEPUIS `dst`. Un lot de
+// l'anneau C6 passe donc `dst` = son propre tampon et `base_index` = 0.
+//
+// PREVALIDATION AVANT TOUTE ECRITURE (exigence auditeur explicite) : le
+// nombre de boules, les produits de tailles `nb * 112` (entree H2D) et
+// `nb * 100` (sortie D2H et sentinelles, kWireOutBytesPerBall) et la borne
+// du tampon sont juges AVANT le premier octet. Un depassement est un REFUS
+// NET rendu comme VALEUR (`PackStatus`) — jamais une exception, jamais une
+// ecriture partielle.
+//
+// Mutants (registre src/core/mutants.hpp, tues code 4 par
+// tests/wire_pack_gate.cpp) :
+//   `wire-pack-stride-short` : l'offset d'ecriture n'est plus le pas fixe
+//     du contrat (112 - 8) — les offsets cessent d'etre fixes et les
+//     enregistrements se chevauchent des la deuxieme boule ;
+//   `wire-pack-slack-size`   : la prevalidation tolere une boule au-dela du
+//     tampon annonce — le refus de capacite disparait.
+enum class PackStatus : int {
+  kOk = 0,
+  kNullBuffer,         // dst == nullptr avec une plage non vide
+  kBallCountOverflow,  // base + nb hors du contrat (au plus 2^32 - 1 boules)
+  kByteOverflow,       // un produit de tailles deborde size_t
+  kBufferTooSmall,     // la plage sort du tampon annonce
+  kKeyNotCanonical,    // a <= 0 (MEME refus que append_ball_in)
+  kThresholdZero,      // h == 0 (idem)
+};
+
+inline const char* pack_status_name(PackStatus s) {
+  switch (s) {
+    case PackStatus::kOk: return "ok";
+    case PackStatus::kNullBuffer: return "invalid_input : tampon nul";
+    case PackStatus::kBallCountOverflow: return "invalid_input : plus de 2^32 - 1 boules";
+    case PackStatus::kByteOverflow: return "invalid_input : produit de tailles hors size_t";
+    case PackStatus::kBufferTooSmall: return "invalid_input : tampon trop petit pour la plage";
+    case PackStatus::kKeyNotCanonical: return "invalid_input : cle non canonisee (a <= 0)";
+    case PackStatus::kThresholdZero: return "invalid_input : seuil h nul";
+  }
+  return "invalid_input : statut inconnu";
+}
+
+// Borne du contrat : `append_ball_in` refuse la boule d'indice 0xffffffff,
+// donc au plus 0xffffffff boules — la MEME borne ici.
+inline constexpr u64 kWireMaxBalls = 0xffffffffull;
+
+namespace wire_detail {
+
+inline bool mul_checked(size_t a, size_t b, size_t* out) {
+  if (a != 0 && b > (std::numeric_limits<size_t>::max)() / a) return false;
+  *out = a * b;
+  return true;
+}
+inline bool add_checked(size_t a, size_t b, size_t* out) {
+  if (b > (std::numeric_limits<size_t>::max)() - a) return false;
+  *out = a + b;
+  return true;
+}
+
+// Ecritures PETIT-BOUTISTES a offset fixe (jamais un memcpy de struct ABI
+// ni son padding, jamais un reinterpret_cast : le contrat porte des octets).
+inline void store_u32(u8* p, u32 v) {
+  for (int i = 0; i < 4; ++i) p[i] = (u8)(v >> (8 * i));
+}
+inline void store_u64(u8* p, u64 v) {
+  for (int i = 0; i < 8; ++i) p[i] = (u8)(v >> (8 * i));
+}
+inline void store_i128(u8* p, i128 v) {
+  const u128 u = (u128)v;
+  store_u64(p, (u64)u);
+  store_u64(p + 8, (u64)(u >> 64));
+}
+
+}  // namespace wire_detail
+
+// Plan de tailles d'un lot de `nb` boules : entree (H2D) et sortie (D2H et
+// sentinelles). PREVALIDE les produits — un depassement rend un statut, et
+// les tailles restent nulles (jamais un chiffre a moitie faux a allouer).
+struct WireSizePlan {
+  PackStatus status = PackStatus::kOk;
+  size_t in_bytes = 0;   // nb * kWireBallInBytes
+  size_t out_bytes = 0;  // nb * kWireOutBytesPerBall
+};
+
+inline WireSizePlan wire_plan_bytes(size_t nb) {
+  WireSizePlan p;
+  if ((u64)nb > kWireMaxBalls) {
+    p.status = PackStatus::kBallCountOverflow;
+    return p;
+  }
+  if (!wire_detail::mul_checked(nb, kWireBallInBytes, &p.in_bytes) ||
+      !wire_detail::mul_checked(nb, kWireOutBytesPerBall, &p.out_bytes)) {
+    p.status = PackStatus::kByteOverflow;
+    p.in_bytes = 0;
+    p.out_bytes = 0;
+  }
+  return p;
+}
+
+// PREVALIDATION SEULE (fonction pure, aucune ecriture) : la plage
+// [base_index, base_index + nb) tient-elle dans `dst_bytes` octets depuis
+// `dst`, sous la borne du contrat et sans debordement de size_t ?
+inline PackStatus pack_prevalidate(const u8* dst, size_t dst_bytes, size_t base_index, size_t nb) {
+  size_t last = 0;
+  if (!wire_detail::add_checked(base_index, nb, &last)) return PackStatus::kBallCountOverflow;
+  const WireSizePlan plan = wire_plan_bytes(last);
+  if (plan.status != PackStatus::kOk) return plan.status;
+  if (nb == 0) return PackStatus::kOk;  // plage vide : rien a ecrire, rien a refuser
+  if (dst == nullptr) return PackStatus::kNullBuffer;
+  size_t slack = 0;
+  // MUTANT : la prevalidation tolere une boule de trop (le refus de capacite
+  // disparait — en production, un debordement du tampon epingle).
+  if (MHGP6_MUTANT("wire-pack-slack-size")) slack = kWireBallInBytes;
+  if (plan.in_bytes > dst_bytes && plan.in_bytes - dst_bytes > slack) return PackStatus::kBufferTooSmall;
+  return PackStatus::kOk;
+}
+
+// Validation d'UNE boule, mots pour mots les refus de `append_ball_in`.
+inline PackStatus pack_check_ball(const BallKey& k, u64 h) {
+  if (!(k.a > 0)) return PackStatus::kKeyNotCanonical;
+  if (h == 0) return PackStatus::kThresholdZero;
+  return PackStatus::kOk;
+}
+
+// Offset d'ecriture de l'enregistrement `index` : le PAS FIXE du contrat.
+inline size_t pack_write_offset(size_t index) {
+  size_t stride = kWireBallInBytes;
+  // MUTANT : pas raccourci — les offsets cessent d'etre fixes, les
+  // enregistrements se chevauchent des la deuxieme boule (l'ecriture reste
+  // dans le tampon prevalide, la porte la voit octet pour octet).
+  if (MHGP6_MUTANT("wire-pack-stride-short")) stride -= 8;
+  return index * stride;
+}
+
+// Ecriture NUE des 112 octets (l'appelant a deja prevalide taille ET boule).
+// Ordre de champs IDENTIQUE a `append_ball_in` : a, b[0..2], c (i128 en
+// paires u64 petit-boutistes), puis c0/c1 par axe, puis h.
+inline void pack_ball_unchecked(u8* dst, size_t index, const BallKey& k, u64 h) {
+  using namespace wire_detail;
+  static_assert(kWireBallInBytes == 16 * 5 + 4 * 6 + 8, "offsets fixes du contrat gpu_wire_v1");
+  u8* p = dst + pack_write_offset(index);
+  store_i128(p + 0, k.a);
+  for (int i = 0; i < 3; ++i) store_i128(p + 16 + 16 * (size_t)i, k.b[i]);
+  store_i128(p + 64, k.c);
+  for (int i = 0; i < 3; ++i) {
+    u32 c0 = 0, c1 = 0;
+    wire_t1_candidates(k, i, &c0, &c1);  // MEME source de candidats que append
+    store_u32(p + 80 + 8 * (size_t)i, c0);
+    store_u32(p + 84 + 8 * (size_t)i, c1);
+  }
+  store_u64(p + 104, h);
+}
+
+// UNE boule a l'offset FIXE `index * 112`. Rend kOk seulement si 112 octets
+// ont ete ecrits ; tout autre statut = AUCUN octet ecrit.
+inline PackStatus pack_ball_in(u8* dst, size_t dst_bytes, size_t index, const BallKey& k, u64 h) {
+  const PackStatus pv = pack_prevalidate(dst, dst_bytes, index, 1);
+  if (pv != PackStatus::kOk) return pv;
+  const PackStatus pb = pack_check_ball(k, h);
+  if (pb != PackStatus::kOk) return pb;
+  pack_ball_unchecked(dst, index, k, h);
+  return PackStatus::kOk;
+}
+
+// UNE PLAGE de `nb` boules aux offsets [base_index, base_index + nb).
+// `src(i, &k, &h)` fournit la i-eme boule de la plage (i local, 0..nb-1) ;
+// l'appelant garde la propriete de la source et decide du decoupage.
+//
+// TRANSACTIONNEL DANS SA PLAGE : la prevalidation des tailles PUIS une passe
+// de validation de TOUTES les boules precedent la premiere ecriture — un
+// refus laisse la plage exactement dans l'etat ou elle etait (jamais une
+// ecriture partielle). Un refus rendu par un fil condamne le TAMPON ENTIER :
+// les autres plages restent valides mais le lot ne doit pas etre consomme
+// (le contrat transactionnel du lot est au-dessus, cote appelant).
+//
+// AUCUN etat partage : la fonction ne lit et n'ecrit que `dst + [base*112,
+// (base+nb)*112)`. Des plages disjointes sont donc sures en concurrence.
+template <class Source>
+inline PackStatus pack_ball_range(u8* dst, size_t dst_bytes, size_t base_index, size_t nb, Source src) {
+  const PackStatus pv = pack_prevalidate(dst, dst_bytes, base_index, nb);
+  if (pv != PackStatus::kOk) return pv;
+  for (size_t i = 0; i < nb; ++i) {
+    BallKey k{0, {0, 0, 0}, 0};
+    u64 h = 0;
+    src(i, &k, &h);
+    const PackStatus pb = pack_check_ball(k, h);
+    if (pb != PackStatus::kOk) return pb;  // refus NET : rien n'a ete ecrit
+  }
+  for (size_t i = 0; i < nb; ++i) {
+    BallKey k{0, {0, 0, 0}, 0};
+    u64 h = 0;
+    src(i, &k, &h);
+    pack_ball_unchecked(dst, base_index + i, k, h);
+  }
+  return PackStatus::kOk;
+}
+
 
 // Reparse champ par champ (la porte confronte le chemin COMPLET
 // append -> octets -> reparse ; la route stub consomme ces mots).

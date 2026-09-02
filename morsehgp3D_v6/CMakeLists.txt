@@ -74,6 +74,15 @@ mhgp6_gate(mhgp6_wspd_mutant_split 4 mhgp6_selftest ARGS --wspd-ownership --inje
 mhgp6_gate(mhgp6_contrat_echec 0 mhgp6_selftest ARGS --failure-contract TIMEOUT 600)
 mhgp6_gate(mhgp6_contrat_echec_census 4 mhgp6_selftest ARGS --failure-contract --inject=census-nonstrict TIMEOUT 600)
 mhgp6_gate(mhgp6_contrat_echec_fold_k2 4 mhgp6_selftest ARGS --failure-contract --inject=fold-inject-a-failure-k2 TIMEOUT 600)
+# FUITE DE PREFIXE DE PAYLOAD (relecture adverse du 2 septembre) : Sigma|parents|
+# DECRIT le payload publie et entre donc dans invalidate_provisional ; il
+# manquait aux deux projections `provisoires_vides`. Mutant CONTRE-CONTRAT
+# `provisional-keep-sum-parents` : il ne l'efface plus, et le refus a K=2
+# laisse alors visible le Sigma|parents| de la foret K=1 — un prefixe exact de
+# payload. Injecte AVEC le mutant qui provoque le refus (sans echec, rien a
+# observer) ; polarite inversee et nommee dans le mode.
+mhgp6_gate(mhgp6_contrat_echec_fuite_sum_parents 4 mhgp6_selftest
+           ARGS --failure-contract --inject=fold-inject-a-failure-k2,provisional-keep-sum-parents TIMEOUT 600)
 # ETAGE NOMME D'UN bad_alloc (alerte G4 du 2 septembre) : une panne
 # d'allocation devient un refus transactionnel resource_exhausted qui NOMME
 # l'etage atteint — jamais un abort (code 134) qui ne dit rien. Le temoin
@@ -239,6 +248,178 @@ foreach(fam uniform terrain eight_clusters scanline_single_pass scanline_overlap
   endforeach()
 endforeach()
 
+# ---- PREFIXE EXACT (palier P1) : la tour a smax=S est le prefixe de la tour a
+# smax=11. Une porte par reference gravee (23), a smax=6 : memes digest_forest_K
+# et memes cardinalites pour K = 1..5, contre les DIX ordres de la reference
+# (dont on exige qu'elle soit strictement plus longue). Les planchers --min-*
+# sont graves a ~50 % des valeurs MESUREES le 2 septembre sur ce depot.
+# Motif : les mutants prefix-tamper-* sont gardes par kmax < 10 ; sans une porte
+# a smax < 11 ils sont ORPHELINS (un nom au registre sans porte qui le tue).
+# PORTEE EXACTE de --min-orders (rectifiee le 2 septembre) : `cmp_orders` vaut
+# kmax_eff PAR CONSTRUCTION (la boucle va de 1 a kmax_eff sans continuation) ;
+# --min-orders=5 n'est donc PAS un plancher de couverture mais le TEMOIN QUE
+# LE CABLAGE DES PLANCHERS EST VIVANT (contre-fixture mhgp6_prefix_plancher_cable,
+# --min-orders=99, code 3). Les vrais planchers de couverture sont
+# --min-deltas/--min-facets/--min-events, accumules sur les cardinalites DU RUN.
+set(PREFIX_SMAX 6)
+foreach(spec "uniform;400;4;9200;30000;11000"
+             "terrain;400;4;3000;11000;4100"
+             "eight_clusters;400;4;7400;21900;8200"
+             "scanline_single_pass;400;4;1900;12300;4600"
+             "collinear_seven;600;4;5;42;15"
+             "two_lines;200;4;9;1475;490"
+             "uniform;2000;4;52000;181000;68000"
+             "terrain;2000;4;15000;60000;22000")
+  list(GET spec 0 fam)
+  list(GET spec 1 sz)
+  list(GET spec 2 th)
+  list(GET spec 3 mind)
+  list(GET spec 4 minf)
+  list(GET spec 5 mine)
+  mhgp6_gate(mhgp6_prefix_${fam}_${sz} 0 mhgp6_conformity
+             ARGS --family=${fam} --n=${sz} --threads=${th} --smax=${PREFIX_SMAX} --prefix
+                  --expected=${REFS}/${fam}_${sz}.txt
+                  --min-orders=5 --min-deltas=${mind} --min-facets=${minf} --min-events=${mine}
+             TIMEOUT 600)
+endforeach()
+foreach(spec "uniform;8000;223000;799000;301000"
+             "uniform;16000;447000;1655000;622000"
+             "uniform;32000;866000;3391000;1275000"
+             "terrain;8000;61000;256000;92000"
+             "terrain;16000;122000;522000;187000"
+             "terrain;32000;238000;1048000;375000"
+             "eight_clusters;8000;210000;712000;266000"
+             "eight_clusters;16000;436000;1507000;565000"
+             "eight_clusters;32000;899000;3153000;1183000"
+             "scanline_single_pass;8000;29000;265000;99000"
+             "scanline_single_pass;16000;55000;536000;201000"
+             "scanline_single_pass;32000;105000;1066000;400000"
+             "scanline_overlap_multiecho;8000;58000;373000;136000"
+             "scanline_overlap_multiecho;16000;121000;764000;279000"
+             "scanline_overlap_multiecho;32000;247000;1558000;570000")
+  list(GET spec 0 fam)
+  list(GET spec 1 sz)
+  list(GET spec 2 mind)
+  list(GET spec 3 minf)
+  list(GET spec 4 mine)
+  mhgp6_gate(mhgp6_prefix_${fam}_${sz} 0 mhgp6_conformity
+             ARGS --family=${fam} --n=${sz} --threads=8 --smax=${PREFIX_SMAX} --prefix
+                  --expected=${REFS}/${fam}_${sz}.txt
+                  --min-orders=5 --min-deltas=${mind} --min-facets=${minf} --min-events=${mine}
+             LABELS scale${sz} TIMEOUT 3600)
+endforeach()
+# TEMOIN DU MULTIENSEMBLE D'EVENEMENTS (--prefix-witness) : second run smax=11
+# dans le meme processus, evenements TRIES compares ordre par ordre. Le seul
+# observable qui voit prefix-tamper-event-order — l'echange interior[0]/[1] ne
+# change NI les facettes (ensembles tries), NI le digest, NI une cardinalite :
+# aucun plancher ni aucun digest ne peut le tuer, seule la signature canonique
+# des evenements le peut. Sous --prefix seul il SURVIT (code 3) : c'est grave
+# ci-dessous comme contre-fixture, pour que la porte ne mente pas sur sa portee.
+mhgp6_gate(mhgp6_prefix_temoin_evenements 0 mhgp6_conformity
+           ARGS --family=uniform --n=400 --threads=4 --smax=${PREFIX_SMAX} --prefix-witness
+                --expected=${REFS}/uniform_400.txt
+                --min-orders=5 --min-deltas=9200 --min-facets=30000 --min-events=11000 TIMEOUT 600)
+mhgp6_gate(mhgp6_prefix_mutant_event_order 4 mhgp6_conformity
+           ARGS --family=uniform --n=400 --threads=4 --smax=${PREFIX_SMAX} --prefix-witness
+                --expected=${REFS}/uniform_400.txt --inject=prefix-tamper-event-order TIMEOUT 600)
+mhgp6_gate(mhgp6_prefix_contre_event_order_sans_temoin 3 mhgp6_conformity
+           ARGS --family=uniform --n=400 --threads=4 --smax=${PREFIX_SMAX} --prefix
+                --expected=${REFS}/uniform_400.txt --inject=prefix-tamper-event-order TIMEOUT 600)
+# prefix-tamper-batch-levels altere r.batch_levels APRES le digest de la foret :
+# aucun digest ne le voit ; l'invariant de lot batch_levels.size() == batches,
+# verifie au callback, le tue.
+mhgp6_gate(mhgp6_prefix_mutant_batch_levels 4 mhgp6_conformity
+           ARGS --family=uniform --n=400 --threads=4 --smax=${PREFIX_SMAX} --prefix
+                --expected=${REFS}/uniform_400.txt --inject=prefix-tamper-batch-levels TIMEOUT 600)
+# depth-threshold-minus-one exerce a smax=6 (il l'etait deja a smax=11) : le
+# seuil h_q = smax + 1 - arite depend de smax, le defaut doit mourir aux deux.
+mhgp6_gate(mhgp6_prefix_mutant_depth_smax6 4 mhgp6_conformity
+           ARGS --family=uniform --n=400 --threads=4 --smax=${PREFIX_SMAX} --prefix
+                --expected=${REFS}/uniform_400.txt --inject=depth-threshold-minus-one TIMEOUT 600)
+# Refus du mode prefixe mal arme (jamais un vert par defaut).
+mhgp6_gate(mhgp6_prefix_refus_smax11 2 mhgp6_conformity
+           ARGS --family=uniform --n=400 --threads=4 --smax=11 --prefix --expected=${REFS}/uniform_400.txt)
+mhgp6_gate(mhgp6_prefix_refus_sans_reference 2 mhgp6_conformity
+           ARGS --family=uniform --n=400 --threads=4 --smax=${PREFIX_SMAX} --prefix)
+# Reference AUSSI COURTE que le prefixe : ce n'est plus la lecture d'un prefixe,
+# la porte se validerait elle-meme. Refus 2, jamais une comparaison.
+mhgp6_gate(mhgp6_prefix_refus_reference_courte 2 mhgp6_conformity
+           ARGS --family=uniform --n=400 --threads=4 --smax=${PREFIX_SMAX} --prefix
+                --expected=${CMAKE_CURRENT_SOURCE_DIR}/tests/refs/uniform_400_cinq_ordres.txt)
+# Plancher de couverture CABLE (contre-fixture : un plancher inatteignable rend 3).
+mhgp6_gate(mhgp6_prefix_plancher_cable 3 mhgp6_conformity
+           ARGS --family=uniform --n=400 --threads=4 --smax=${PREFIX_SMAX} --prefix
+                --expected=${REFS}/uniform_400.txt --min-orders=99)
+
+# ---- PORTE DE RESIDENCE (paliers P2/P3) : jalons memoire et residence de
+# l'etage de census, JAMAIS une preuve de correction. Label `gate;residence` :
+# elle tourne avec la suite mais ne compte PAS parmi les portes de correction
+# (`ctest -L residence` les isole ; `ctest -L gate -LE residence` compte les
+# autres). Les six `rss_mb` sont des INSTANTANES et manquent structurellement
+# tout pic ne et mort entre deux jalons ; `residence_hwm_mb` releve VmHWM (pic
+# HISTORIQUE) aux MEMES frontieres, et `residence_increment_mb` en publie les
+# increments — seule quantite imputable a un etage.
+mhgp6_executable(mhgp6_residence_gate tests/residence_gate.cpp)
+# PLANCHERS : uniquement les quantites DETERMINISTES (fonctions de la seule
+# entree, insensibles a l'allocateur et a la machine), gravees a ~50 % du
+# mesure. Les anciens planchers memoire (--min-hwm-mb, --min-ecart-fin-mb) sont
+# RETIRES : MESURE du 2 septembre, `MALLOC_TRIM_THRESHOLD_` suffit a faire
+# tomber l'ecart de fin a 0 sur du code sain (code 3 indiscernable d'une
+# regression), et un plancher sur la memoire rougirait sur un palier reussi.
+# PLAFOND : --max-coexistence-census-pct borne la coexistence MESUREE de la
+# fusion du census (octets copies + octets encore detenus par les tranches non
+# consommees, maximises sur les pas), en pour-cent de survivants x
+# sizeof(BallData). Compteur DETERMINISTE : fonction de l'entree, invariant par
+# nombre de fils, insensible a l'allocateur. C'est la garde du palier P3 et le
+# tueur de `keep-ball-chunks`, et il va dans le SENS du chantier (il rougit
+# quand la residence MONTE, la ou un plancher rougirait quand elle baisse).
+# MESURE du 2 septembre (uniform n=2000, fils 1/4/8, valeurs identiques) :
+# smax=11 sain 155,2 % contre 255,2 % sous mutant (plafond grave 180) ;
+# smax=6 sain 193,8 % contre 293,8 % (plafond grave 215). Un plafond sur le RSS
+# ne separait PAS (increment de pic du census 201 Mo contre 213) : glibc ne rend
+# une tranche liberee a l'OS qu'au-dela de son seuil dynamique de mmap.
+# --min-jalons ferme le vert par vacuite du compte de jalons.
+mhgp6_gate(mhgp6_residence_jalons 0 mhgp6_residence_gate LABELS "gate;residence"
+           ARGS --family=uniform --n=2000 --threads=4 --smax=11 --min-jalons=6
+                --max-coexistence-census-pct=180
+                --min-census-balls=337000 --min-plateau-balls=2600
+                --min-sum-parents=668000 TIMEOUT 900)
+# Mutant `hwm-instant-rss` : rend l'instantane a la place du pic — le defaut
+# historique des six jalons. Tue par la SONDE auto-portee (mmap/touch/munmap :
+# le noyau retire les pages de facon deterministe, l'allocateur n'a aucune
+# autorite sur le verdict), et non par la retombee du RSS a la fin du fold.
+mhgp6_gate(mhgp6_residence_mutant_hwm_instantane 4 mhgp6_residence_gate LABELS "gate;residence"
+           ARGS --family=uniform --n=2000 --threads=4 --smax=11 --min-jalons=6
+                --max-coexistence-census-pct=180 --inject=hwm-instant-rss TIMEOUT 900)
+# Mutant `drop-stage-milestone` : le jalon apres_rle n'est plus releve du tout.
+# Sans --min-jalons la porte le sautait et restait VERTE en annoncant 6 jalons.
+mhgp6_gate(mhgp6_residence_mutant_jalon_manquant 4 mhgp6_residence_gate LABELS "gate;residence"
+           ARGS --family=uniform --n=2000 --threads=4 --smax=11 --min-jalons=6
+                --max-coexistence-census-pct=180 --inject=drop-stage-milestone TIMEOUT 900)
+# Mutant `keep-ball-chunks` (palier P3) : les trois liberations par tranche
+# retirees — la fusion reporte DEUX FOIS la residence de l'etage. Aucun digest,
+# aucune cardinalite, aucun plancher ne peut le voir : seul ce plafond le tue.
+mhgp6_gate(mhgp6_residence_mutant_tranches_gardees 4 mhgp6_residence_gate LABELS "gate;residence"
+           ARGS --family=uniform --n=2000 --threads=4 --smax=11 --min-jalons=6
+                --max-coexistence-census-pct=180 --inject=keep-ball-chunks TIMEOUT 900)
+# Contre-fixture du PLAFOND : cable, pas decoratif (un plafond inatteignable
+# rend 3 sur un run sain).
+mhgp6_gate(mhgp6_residence_plafond_cable 3 mhgp6_residence_gate LABELS "gate;residence"
+           ARGS --family=uniform --n=2000 --threads=4 --smax=11 --min-jalons=6
+                --max-coexistence-census-pct=0 TIMEOUT 900)
+# Contre-fixture du PLANCHER de jalons : cable de la meme facon.
+mhgp6_gate(mhgp6_residence_plancher_cable 3 mhgp6_residence_gate LABELS "gate;residence"
+           ARGS --family=uniform --n=2000 --threads=4 --smax=11
+                --min-census-balls=999999999 TIMEOUT 900)
+mhgp6_gate(mhgp6_residence_refus_smax 2 mhgp6_residence_gate LABELS "gate;residence" ARGS --smax=12)
+# Jalons a smax=6 : le prefixe a sa propre residence (les deux paliers se
+# mesurent sur la meme instrumentation).
+mhgp6_gate(mhgp6_residence_jalons_prefixe 0 mhgp6_residence_gate LABELS "gate;residence"
+           ARGS --family=uniform --n=2000 --threads=4 --smax=6 --min-jalons=6
+                --max-coexistence-census-pct=215
+                --min-census-balls=67000 --min-plateau-balls=1090
+                --min-sum-parents=105000 TIMEOUT 900)
+
 # ---- Barriere de sortie : linked_arcs_u16 (contrat sortie-sensible, barriere
 # d'Edelsbrunner–Pach transposee en entiers u16 : arcs enlaces, q3 = 2n(n+1) et
 # q4 = n² cles de profondeur zero ; oracle local OBig384 + route produit).
@@ -359,6 +540,40 @@ target_compile_definitions(mhgp6_profile_liveness PRIVATE MHGP6_PROFILE_REDUCE=1
 # tris retires, cle factice au remplissage). Chaque ablation change l'objet
 # et est tuee (code 4) dans la boucle des mutants ; le binaire produit
 # refuse --inject= (code 2). Jamais un mur : une attribution decomposee.
+# ---- C6 jalon 2 : ENCODEUR PUR a offsets fixes (pack == append octet pour
+# octet). Le format gpu_wire_v1 est inchange ; append_ball_in reste le chemin
+# de production, la bascule est C6a.
+mhgp6_executable(mhgp6_wire_pack_gate tests/wire_pack_gate.cpp)
+mhgp6_gate(mhgp6_wire_pack 0 mhgp6_wire_pack_gate TIMEOUT 180)
+mhgp6_gate(mhgp6_wire_pack_mutant_stride 4 mhgp6_wire_pack_gate ARGS --inject=wire-pack-stride-short TIMEOUT 180)
+mhgp6_gate(mhgp6_wire_pack_mutant_slack 4 mhgp6_wire_pack_gate ARGS --inject=wire-pack-slack-size TIMEOUT 180)
+# Contre-fixture de SELECTIVITE : deux injections a la fois ne prouvent plus
+# quel defaut a ete vu (code 1, jamais un 4 aveugle).
+mhgp6_gate(mhgp6_wire_pack_contre_double 1 mhgp6_wire_pack_gate
+           ARGS "--inject=wire-pack-stride-short,wire-pack-slack-size" TIMEOUT 180)
+mhgp6_gate(mhgp6_wire_pack_refus_arg 2 mhgp6_wire_pack_gate ARGS --min-balls=1x TIMEOUT 60)
+mhgp6_gate(mhgp6_wire_pack_plancher 3 mhgp6_wire_pack_gate ARGS --min-tails=99999 TIMEOUT 180)
+# ---- C6 jalons 1 et 3 : CONTRAT DES BAUX de l'anneau de lots (hote pur —
+# entree/device/sortie a durees de vie SEPAREES, retraite ordonnee par
+# base_global, granularite lot_ring_granularite_v1, regle d'erreur
+# lot_ring_erreur_v1) juge sous un modele d'achevements DIFFERES pilote par le
+# test : aucun CUDA, aucun fil, aucun sleep. tests/cuda_stub.hpp reste
+# SEQUENTIEL et intact ; ce modele est un AUTO-TEST DU SCHEDULER, il ne prouve
+# ni le device ni l'absence de course.
+mhgp6_executable(mhgp6_lot_ring_gate tests/lot_ring_gate.cpp)
+mhgp6_gate(mhgp6_lot_ring 0 mhgp6_lot_ring_gate
+           ARGS --min-lots=30 --min-rotations=40 --min-tails=2 --min-inversions=36
+                --min-erreurs=2 --min-blocages=4 --min-triples=2 TIMEOUT 180)
+mhgp6_gate(mhgp6_lot_ring_plancher 3 mhgp6_lot_ring_gate ARGS --min-tails=9 TIMEOUT 180)
+mhgp6_gate(mhgp6_lot_ring_refus_arg 2 mhgp6_lot_ring_gate ARGS --min-tails=2x TIMEOUT 180)
+mhgp6_gate(mhgp6_lot_ring_refus_mutant 2 mhgp6_lot_ring_gate ARGS --inject=c6-inconnu TIMEOUT 180)
+mhgp6_gate(mhgp6_lot_ring_mutant_reuse 4 mhgp6_lot_ring_gate ARGS --inject=c6-reuse-before-lease TIMEOUT 180)
+mhgp6_gate(mhgp6_lot_ring_mutant_merge 4 mhgp6_lot_ring_gate ARGS --inject=c6-merge-by-completion TIMEOUT 180)
+mhgp6_gate(mhgp6_lot_ring_mutant_epoch 4 mhgp6_lot_ring_gate ARGS --inject=c6-wrong-epoch TIMEOUT 180)
+mhgp6_gate(mhgp6_lot_ring_mutant_prefixe 4 mhgp6_lot_ring_gate ARGS --inject=c6-publish-prefix TIMEOUT 180)
+mhgp6_gate(mhgp6_lot_ring_mutant_rebuild_tot 4 mhgp6_lot_ring_gate
+           ARGS --inject=c6-rebuild-before-validate TIMEOUT 180)
+
 mhgp6_executable(mhgp6_profile_sonde cli/mhgp6.cpp)
 target_compile_definitions(mhgp6_profile_sonde PRIVATE MHGP6_PROFILE_REDUCE=1)
 mhgp6_gate(mhgp6_profile_refuse_inject 2 mhgp6_profile

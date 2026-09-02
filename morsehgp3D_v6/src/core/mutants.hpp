@@ -79,6 +79,49 @@ inline constexpr const char* kMutants[] = {
     // le refus doit etre resource_exhausted, NOMMER l'etage, ne publier aucun
     // callback ni provisoire, et ne JAMAIS terminer par signal (code 134).
     "caps-throw-bad-alloc-provision", "caps-throw-bad-alloc-census", "caps-throw-bad-alloc-fold",
+    // JALONS DE RESIDENCE (2 septembre, palier P2) : le defaut historique des
+    // six `rss_mb` — un INSTANTANE la ou il faut un PIC. Point d'injection dans
+    // src/pipeline/run.hpp (vm_hwm_mb_now), tue code 4 par tests/residence_gate.cpp
+    // (le pic cesse d'etre non decroissant des que le fold libere sa memoire).
+    "hwm-instant-rss",
+    // ENCODEUR PUR A OFFSETS FIXES (2 septembre, C6 jalon 2,
+    // REPONSE_AUDITEUR_CONCEPTION_C6_20260902) : points d'injection dans
+    // src/gpu/wire.hpp (pack_write_offset, pack_prevalidate), tues code 4 par
+    // tests/wire_pack_gate.cpp. `wire-pack-stride-short` : le pas d'ecriture
+    // n'est plus 112 — les offsets cessent d'etre fixes (divergence octet
+    // pour octet contre append_ball_in). `wire-pack-slack-size` : la
+    // prevalidation tolere une boule au-dela du tampon — le refus de
+    // capacite disparait (dent SEPAREE : aucun octet ne diverge).
+    "wire-pack-stride-short", "wire-pack-slack-size",
+    // ANNEAU DE LOTS ET CONTRAT DES BAUX (2 septembre, C6 jalons 1 et 3,
+    // REPONSE_AUDITEUR_CONCEPTION_C6_20260902) : points d'injection dans
+    // src/gpu/lot_ring.hpp, tues code 4 par tests/lot_ring_gate.cpp, chacun par
+    // sa scene-signature. c6-reuse-before-lease : un emplacement est repris
+    // alors que son bail court encore ; c6-merge-by-completion : la retraite
+    // suit l'ordre d'achevement au lieu de base_global ; c6-wrong-epoch : au
+    // bouclage, le bail garde l'epoque et la base de l'occupant precedent ;
+    // c6-publish-prefix : l'echange terminal a lieu malgre le refus ;
+    // c6-rebuild-before-validate : la reconstruction accepte un lot pas
+    // entierement valide.
+    "c6-reuse-before-lease", "c6-merge-by-completion", "c6-wrong-epoch", "c6-publish-prefix",
+    "c6-rebuild-before-validate",
+    // CONTRE-CORRECTIONS DES PALIERS P2/P3 (2 septembre, retours des deux
+    // relecteurs). Points d'injection dans src/pipeline/run.hpp et
+    // src/pipeline/expand.hpp, tues code 4 par tests/selftest.cpp
+    // (--failure-contract), tests/bad_alloc_gate.cpp et
+    // tests/residence_gate.cpp.
+    //  - `provisional-keep-sum-parents` : invalidate_provisional n'efface plus
+    //    Sigma|parents| — un PREFIXE EXACT de payload (le Sigma|parents| des
+    //    forets deja publiees) survivrait a un refus transactionnel.
+    //  - `drop-stage-milestone` : le jalon apres_rle n'est plus releve du tout
+    //    (ni rss, ni hwm) — exactement ce qu'une route future ferait par
+    //    accident ; tue par le plancher de JALONS JUGES de la porte de
+    //    residence, sans lequel elle serait verte par vacuite.
+    //  - `keep-ball-chunks` : les trois liberations par tranche du palier P3
+    //    (prefiltre, census, expansion) sont retirees — la fusion reporte
+    //    DEUX FOIS la residence de l'etage ; tue par le PLAFOND d'increment de
+    //    pic du census de la porte de residence.
+    "provisional-keep-sum-parents", "drop-stage-milestone", "keep-ball-chunks",
 };
 
 inline std::vector<std::string>& mutant_registry() {

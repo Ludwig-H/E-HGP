@@ -213,3 +213,66 @@ préfiltre apparaissent.
 **Erreurs** : statut PAR BOULE puis réduction déterministe au plus petit
 index global ⟹ refus du RUN ENTIER (lots et préfixes jetés, callbacks
 muets, pool fermé via `DeviceFatalError`) ; `cudaError` ⟹ pareil.
+
+## C6 — supprimer le coût hôte de la couture (jalons 1 à 3 livrés)
+
+Le reçu `session_g4_20260901_b97f20ea4b8f_1788293187` mesure un étage device de
+7 717 ms à 50 000 points dont **154 ms de noyaux** : 88 % est du code hôte à un
+seul fil (sérialisation 2 641 ms, reconstruction 4 110 ms), et le gain net sur
+le mur plafonne à −10,4 %. C6 attaque cette couture, jamais l'objet.
+
+**Forme retenue** (`audits/REPONSE_AUDITEUR_CONCEPTION_C6_20260902.md`, GO de
+conception borné) : deux tampons d'entrée et deux de sortie épinglés à **baux
+séparés**, **un seul flux** et **un seul jeu de mémoire device** au premier
+jalon, reconstruction séquentielle, recouvrement hôte/device seulement. Deux
+flux et deux zones device ne viendront que si une mesure les exige. Écartées :
+faire lire au device les enregistrements hôte à leur disposition mémoire
+(contredit « jamais un memcpy de struct ABI ni son padding », padding
+indéterminé transféré) et remplacer la sortie du regroupement par une table
+servie aux deux routes (change la route CPU que la couture promet inchangée).
+
+**Jalon 1 — contrat des baux** (`src/gpu/lot_ring.hpp`, hôte pur, sans CUDA).
+Trois ressources à baux séparés : entrée rendue après le transfert montant, jeu
+device après le transfert descendant, sortie **seulement** après la
+reconstruction ; un transfert descendant vers une sortie réutilisée attend
+explicitement son bail, et aucune fin de calcul ne vaut fin de lecture hôte.
+Machine à états par ticket, compteurs d'époque distincts par ressource, retraite
+strictement ordonnée par `base_global` et **jamais** par ordre d'achèvement.
+Granularité versionnée `lot_ring_granularite_v1` : un lot est entièrement validé
+avant toute reconstruction de ce lot, les lots antérieurs restent dans des
+temporaires invisibles, et la corruption d'un lot tardif jette l'ensemble. Règle
+d'erreur `lot_ring_erreur_v1` : la première erreur ferme l'admission et draine,
+puis le verdict est le minimum lexicographique de (index global, rang d'étage,
+code, message) — donc indépendant de l'ordre d'arrivée.
+
+**Jalon 2 — encodeur pur** (`src/gpu/wire.hpp`, `src/gpu/pack.hpp`). Écriture à
+**offsets fixes absolus** depuis le tampon (pas de 112 octets, table d'offsets
+gravée par `static_assert`), sans allocation ni `push_back`, appelable par
+plusieurs fils sur des plages disjointes ; produits de tailles **prévalidés**
+contre le débordement, refus rendus comme valeur (`PackStatus`), jamais une
+écriture partielle. Le format `gpu_wire_v1` est inchangé octet pour octet, et
+`append_ball_in` reste le chemin de production : la bascule est C6a.
+
+**Jalon 3 — modèle différé** (`tests/lot_ring_modele_differe.hpp`). Auto-test de
+l'ordonnanceur, à achèvements pilotés par le test, sans fil ni horloge :
+`tests/cuda_stub.hpp` **reste séquentiel et intact**. Il prouve la discipline
+d'ordonnancement ; il ne prouve ni le matériel, ni l'absence de course, ni
+aucun temps.
+
+**Portes et mutants.** `mhgp6_wire_pack` (l'encodeur égale l'ancien chemin octet
+pour octet sur plus de deux millions de boules, lots incomplets, bords, un à
+huit fils) avec `wire-pack-stride-short` et `wire-pack-slack-size`, plus une
+contre-fixture à double injection qui exige la sélectivité ; `mhgp6_lot_ring`
+avec `c6-reuse-before-lease`, `c6-merge-by-completion`, `c6-wrong-epoch`,
+`c6-publish-prefix` et `c6-rebuild-before-validate`.
+
+**Chronométrie à venir** : sous recouvrement, l'étage ne se ferme pas par la
+somme des seaux. Le contrat sera en entiers, avec une partition externe
+disjointe, des durées d'ouvriers explicitement **non additives**, des attentes
+de contre-pression séparées, et **aucun** indicateur de gain de recouvrement
+publié. Le juge sera versionné ; sans jeton C6, la grammaire actuelle reste
+inchangée.
+
+**Constantes du contrat rectifiées** : `kWirePrefilterOutBytes` et
+`kWireCensusOutBytes` valaient 12 et 92 alors que le transport porte 9 et 91 ;
+elles sont désormais liées par assertion à `kWireOutBytesPerBall == 100`.

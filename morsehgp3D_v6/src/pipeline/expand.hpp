@@ -11,7 +11,11 @@
 //     par le representant du bucket ; mutant `dense-pointid` : cast du rang).
 // Toutes les phases sont paralleles par tranches d'index avec fusion en
 // ordre de tranche : sortie bit-identique au sequentiel (mutant
-// `par-drop-ball-chunk` : une tranche de census oubliee).
+// `par-drop-ball-chunk` : une tranche de census oubliee). Chaque tranche est
+// LIBEREE des sa consommation (std::vector<T>().swap) et la destination est
+// reservee au total deja connu : la fusion ne porte plus DEUX FOIS la
+// residence de l'etage. A une seule tranche (threads = 1) il n'y a rien a
+// liberer avant la fin — le gain est celui du regime parallele.
 #pragma once
 
 #include <algorithm>
@@ -63,6 +67,18 @@ struct ExpandStats {
   // nœuds, tests de puissance en feuille ; range_add_mass = 0 par nature).
   DepthStats depth;
   DepthStats census;
+  // COEXISTENCE MESUREE de la fusion du census (palier P3), en octets : a
+  // chaque pas, ce qui est deja copie dans `balls` PLUS ce que detiennent
+  // encore les tranches non consommees, maximise sur les pas. Compteur
+  // DETERMINISTE — fonction de l'entree et du nombre de tranches, jamais de
+  // l'allocateur. C'est LUI qui atteste la liberation par tranche : le RSS du
+  // processus, lui, depend de la politique de retention de la libc (une
+  // tranche liberee n'est rendue a l'OS que si elle etait mmap'ee, ce qui
+  // n'arrive qu'au-dela du seuil dynamique de mmap — d'ou un gain de RSS qui
+  // ne se voit qu'aux grandes tailles). Le rapport a `survivors * 224` est
+  // borne par ~1,5 avec liberation et vaut ~2,5 sans (mutant
+  // `keep-ball-chunks`), a capacite geometrique des tranches pres.
+  u64 census_merge_peak_bytes = 0;
 };
 
 enum class PipelineStatus { kCompleteRegular, kUnsupportedDegeneracy, kResourceExhausted, kInvalidInput, kInvariantViolated };
@@ -93,6 +109,7 @@ inline void prefilter_balls(const CloudIndex& ix, const std::vector<BallCandidat
   if (!candidates_capacity_ok(cands.size()))
     throw std::length_error("prefilter_balls : plus de 2^32-1 candidats (garde interne ; le pipeline refuse avant)");
   const bool m_minus_one = MHGP6_MUTANT("depth-threshold-minus-one");
+  const bool m_keep_chunks = MHGP6_MUTANT("keep-ball-chunks");
   size_t nchunks = 0;
   std::vector<std::vector<Survivor>> lsv;
   std::vector<DepthStats> lds;
@@ -121,12 +138,23 @@ inline void prefilter_balls(const CloudIndex& ix, const std::vector<BallCandidat
   });
   st->workers_prefilter = std::max(st->workers_prefilter, (u64)created);
   survivors->clear();
+  size_t n_surv = 0;
+  for (size_t c = 0; c < nchunks; ++c) n_surv += lsv[c].size();
+  survivors->reserve(n_surv);  // total connu AVANT la fusion : aucune reallocation geometrique
   for (size_t c = 0; c < nchunks; ++c) {
     survivors->insert(survivors->end(), lsv[c].begin(), lsv[c].end());
     dead += ldead[c];
     st->depth.nodes += lds[c].nodes;
     st->depth.leaf_tests += lds[c].leaf_tests;
     st->depth.range_add_mass += lds[c].range_add_mass;
+    // Liberation de la tranche DES qu'elle est consommee (le vecteur vide
+    // rend la page au repartiteur ; clear() la garderait). La fusion reste
+    // en ORDRE DE TRANCHE : sortie bit-identique au sequentiel.
+    // Mutant `keep-ball-chunks` : la liberation est retiree aux TROIS etages —
+    // la fusion reporte de nouveau DEUX FOIS la residence de l'etage. Aucun
+    // digest, aucune cardinalite, aucun plancher ne peut le voir (l'objet est
+    // inchange) : seul le PLAFOND d'increment de pic du census le tue.
+    if (!m_keep_chunks) std::vector<Survivor>().swap(lsv[c]);
   }
   st->dead_depth = dead;
   st->survivors = survivors->size();
@@ -137,6 +165,7 @@ inline PipelineStatus census_balls(const CloudIndex& ix, const std::vector<BallC
                                    std::vector<BallData>* balls, ExpandStats* st) {
   const bool m_skip_full = MHGP6_MUTANT("skip-full-census");
   const bool m_drop_chunk = MHGP6_MUTANT("par-drop-ball-chunk");
+  const bool m_keep_chunks = MHGP6_MUTANT("keep-ball-chunks");
   size_t nchunks = 0;
   std::vector<std::vector<BallData>> lb;
   std::vector<int> lrc;
@@ -181,15 +210,37 @@ inline PipelineStatus census_balls(const CloudIndex& ix, const std::vector<BallC
   for (size_t c = 0; c < nchunks; ++c)
     if (lrc[c] != 0) return lrc[c] == 2 ? PipelineStatus::kResourceExhausted : PipelineStatus::kInvariantViolated;
   balls->clear();
-  balls->reserve(survivors.size());
+  balls->reserve(survivors.size());  // total connu : une BallData par survivante
+  u64 alive = 0;
+  for (size_t c = 0; c < nchunks; ++c) alive += (u64)lb[c].capacity() * (u64)sizeof(BallData);
+  u64 written = 0, coexist_peak = alive;
   for (size_t c = 0; c < nchunks; ++c) {
-    if (m_drop_chunk && nchunks > 1 && c == 0) continue;
-    for (BallData& bd : lb[c]) {
-      st->census_interior += bd.n_interior;
-      st->census_shell += bd.n_shell;
-      balls->push_back(bd);
+    // Mutant `par-drop-ball-chunk` : la tranche est SAUTEE et le tableau se
+    // DECALE (jamais des BallData nuls d'arite 0 en place, qui feraient
+    // sous-deborder K = q + d - 1 en size_t) — la boucle de copie reste le
+    // point d'injection.
+    const bool dropped = m_drop_chunk && nchunks > 1 && c == 0;
+    if (!dropped)
+      for (BallData& bd : lb[c]) {
+        st->census_interior += bd.n_interior;
+        st->census_shell += bd.n_shell;
+        balls->push_back(bd);
+      }
+    // Liberation par tranche : le pic du census cesse de porter DEUX FOIS la
+    // residence des BallData (les tranches entieres + le tableau fusionne) ;
+    // il n'en porte plus qu'une, a une tranche pres. Sans effet quand il n'y
+    // a qu'une tranche (threads = 1 => T = 1 => nchunks = 1).
+    // Mutant `keep-ball-chunks` : point d'injection PRINCIPAL du palier P3 —
+    // la coexistence mesuree remonte d'environ 1,5 a environ 2,5 copies des
+    // BallData, ce que le PLAFOND de la porte de residence refuse.
+    if (!dropped) written += (u64)lb[c].size() * (u64)sizeof(BallData);
+    if (!m_keep_chunks) {
+      alive -= (u64)lb[c].capacity() * (u64)sizeof(BallData);
+      std::vector<BallData>().swap(lb[c]);
     }
+    if (written + alive > coexist_peak) coexist_peak = written + alive;
   }
+  st->census_merge_peak_bytes = coexist_peak;
   return PipelineStatus::kCompleteRegular;
 }
 
@@ -270,6 +321,7 @@ inline ForestEvent make_event(const CloudIndex& ix, const BallData& bd, std::spa
 inline void expand_events_k(const CloudIndex& ix, const std::vector<BallData>& balls, u64 K, u64 kmax, int threads,
                             std::vector<ForestEvent>* out, ExpandStats* st) {
   const bool m_dense = MHGP6_MUTANT("dense-pointid");
+  const bool m_keep_chunks = MHGP6_MUTANT("keep-ball-chunks");
   size_t nchunks = 0;
   std::vector<std::vector<ForestEvent>> lev;
   {
@@ -314,7 +366,13 @@ inline void expand_events_k(const CloudIndex& ix, const std::vector<BallData>& b
 
   st->workers_expand = std::max(st->workers_expand, (u64)created);
   out->clear();
-  for (size_t c = 0; c < nchunks; ++c) out->insert(out->end(), lev[c].begin(), lev[c].end());
+  size_t n_ev = 0;
+  for (size_t c = 0; c < nchunks; ++c) n_ev += lev[c].size();
+  out->reserve(n_ev);  // total de l'ordre K connu AVANT la fusion (= kc[K].events, revalide par l'appelant)
+  for (size_t c = 0; c < nchunks; ++c) {
+    out->insert(out->end(), lev[c].begin(), lev[c].end());
+    if (!m_keep_chunks) std::vector<ForestEvent>().swap(lev[c]);  // meme motif : la tranche meurt des sa consommation
+  }
   if (st->events_by_k.size() < (size_t)kmax + 1) st->events_by_k.assign((size_t)kmax + 1, 0);
   st->events_by_k[K] = out->size();
 }

@@ -123,6 +123,30 @@ observés de `capacity()`, réserves initiales comprises (télémétrie causale 
 le classique n'est pas instrumenté et publie 0, jamais un chiffre comparable) ;
 `offset_dernier_*` est lu depuis `parents_off.back()` / `born_off.back()`.
 
+Résidence des trois étages par tranches d'`expand.hpp` (préfiltre, census,
+expansion) : chaque tranche est libérée dès sa consommation
+(`std::vector<T>().swap`) et la destination est réservée au total déjà connu,
+donc la fusion ne porte plus deux fois la résidence de l'étage — le pic du
+census passe de deux copies des `BallData` (tranches + tableau fusionné) à une
+seule copie plus une tranche. L'ordre de fusion reste l'ordre de tranche
+(sortie bit-identique, mutant `par-drop-ball-chunk` inchangé) ; à une seule
+tranche (`threads = 1`) il n'y a rien à libérer avant la fin — le gain est
+celui du régime parallèle.
+
+Conséquence sur la garde de budget, **dite telle quelle** (rectification du
+2 septembre) : `run.hpp` facture
+`sizeof(BallCandidate) + sizeof(Survivor) + 2 × sizeof(BallData)` par candidat
+au titre de la « coexistence `BallData × 2` ». Après le palier, la coexistence
+réelle vaut environ `(1 + 1/nchunks) × sizeof(BallData)` par survivante ; la
+garde est donc désormais **conservative d'un facteur ≈ 2 et refusera en
+`resource_exhausted` des runs qui tiendraient**. Ce n'est pas un gain : c'est
+une perte de domaine admissible, assumée tant que la constante n'est pas
+remplacée par `(1 + 1/nchunks)` avec sa propre porte de signature de budget.
+Ce que le palier achète réellement est mesuré ailleurs : la coexistence de la
+fusion du census, comptée en octets par `expand.census_merge_peak_bytes` et
+plafonnée par `mhgp6_residence_jalons` (155 % contre 255 % de
+`survivantes × sizeof(BallData)`, mutant `keep-ball-chunks`).
+
 Frontières de digest (gelées, P0 du 31 août) : la conformité d'objet
 v5↔v6 juge `digest_all` et `digest_forest_K*` seulement. Deux monnaies de
 candidats distinctes : `digest_candidates_v5_compat` (tag v4, uniques

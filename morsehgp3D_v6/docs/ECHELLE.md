@@ -68,7 +68,15 @@ reçu), les événements des ordres en vol (10 %), les états de facettes (8 %).
 Trois pics ne sont échantillonnés par aucun des six jalons `rss_mb` [C] : la
 fusion des shards, le tri des candidats (un double exact du tableau, détruit
 avant la mesure suivante) et le census (le tampon par tranche coexiste avec
-le tableau final). L'écart entre le dernier jalon et le pic réel du processus
+le tableau final). **Depuis le palier P2, les six mêmes frontières portent
+aussi `residence_hwm_mb`** (`VmHWM`, maximum historique) et
+`residence_increment_mb` (les incréments `hwm[j] − hwm[j−1]`, seule quantité
+imputable à un intervalle) : les pics nés et morts entre deux jalons y sont
+bornés. Mesuré à `n=8000`, 8 fils, `smax=11` : incréments 678 / 553 / 0 / 729 /
+504 / 0 Mo — l'étage `après_RLE` ajoute à lui seul 553 Mo au maximum, que les
+instantanés ne voyaient pas (`rss_mb` y reste à 586). Attention à la lecture :
+`hwm[j] − rss[j]` est un **majorant global**, pas une mesure d'étage (un étage
+qui n'alloue rien affiche un écart hérité de l'étage précédent). L'écart entre le dernier jalon et le pic réel du processus
 vaut +3,6 % à 50 000 points et K=5, +4,7 % à 50 000 et K=10, **+20,5 % à
 400 000 et K=10** [M]. Trois points croissants ne démontrent pas une loi ; ils
 suffisent à conclure que tout budget déclaré à partir des jalons est optimiste,
@@ -158,11 +166,25 @@ statut, ni nouveau format.
    couverture que seule une session payante vérifiait.
 2. **Vrai pic de résidence** : relever le pic historique du processus à
    chaque frontière d'étage, sans quoi aucune économie n'est vérifiable.
-3. **Libérations par tranche** : rendre la mémoire des tampons dès leur
+3. **Libérations par tranche** (livré) : rendre la mémoire des tampons dès leur
    consommation. L'hypothèse de travail est qu'elles ne déplacent pas le mur à
    48 fils (le pic du census resterait sous celui du fold) : c'est **à mesurer**,
-   pas un résultat. Le gain sûr est le régime à faible parallélisme et la vérité
-   du budget déclaré.
+   pas un résultat — rien ici ne porte au-delà de 8 fils.
+   **CORRECTION DU 2 SEPTEMBRE, mesurée** : le gain est celui du régime
+   **parallèle**, et il est **structurellement nul** à faible parallélisme —
+   `expand_detail::chunked` appelle `planned_workers`, qui rend `T = 1` pour
+   `threads ≤ 1`, d'où `chunk = n` et **une seule tranche** : il n'y a rien à
+   libérer avant la fin de la fonction. C'est pourtant à 1 fil que le
+   transitoire du census **est** le pic du processus (7864 Mo contre 6561 pour
+   le fold à `n=32000`) : le seul régime où ce transitoire est le mur est celui
+   où le palier ne peut pas l'attaquer. Le gain vaut
+   `(1 − 1/nchunks) × survivantes × 224 o` et ne se voit sur le RSS qu'aux
+   grandes tailles : glibc ne rend une tranche libérée à l'OS que si elle
+   dépassait son seuil dynamique de `mmap` (mesuré à `n=2000` : la coexistence
+   réelle tombe de 255 % à 155 % de `survivantes × 224 o` pour seulement
+   201 Mo contre 213 Mo d'incrément de pic). La garde du palier est donc un
+   **plafond sur la coexistence mesurée**, pas sur le RSS
+   (`mhgp6_residence_mutant_tranches_gardees`, mutant `keep-ball-chunks`).
 4. **Tri par permutation et piles hissées** : supprimer le double exact du
    tableau de candidats et deux allocations par boule.
 5. **Crochets de test sur les gardes du fold** : les deux premiers verrous
