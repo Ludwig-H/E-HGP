@@ -16,14 +16,15 @@ Conventions héritées v5, toutes reconduites :
   jamais par `mhgp6_product_executable`) ; nom inconnu refusé code 2. Cible :
   chaque nom = un point d'injection + une porte code 4 EXÉCUTÉE. État réel
   (recompté au palier KeyCSR du 2 septembre par
-  `grep -rn MHGP6_MUTANT src/ cli/ oracle/`, hors `#define`) : 97 noms au
-  registre, 99 points d'injection pour 90 noms distincts porteurs d'un site
+  `grep -rn MHGP6_MUTANT src/ cli/ oracle/`, hors `#define`, passage de correction KeyCSR compris) : 98 noms au
+  registre, 100 points d'injection pour 91 noms distincts porteurs d'un site
   hôte (les sept `gpu-*` de census sont traduits en drapeaux device, sans
   site `MHGP6_MUTANT` hôte ; `wspd-cap-terminal` et `wspd-split-heaviest`
   ont un site sur la route FUSIONNÉE en plus de la route brute) ;
-  **69 noms distincts** tués par une porte exécutée, dont les 14 `csr-*`
-  (`mhgp6_fold_csr_mutant_*` sur le champ annoncé + boucle
-  `mhgp6_mutant_csr_*`) : mutants dédiés + boucle de divergence d'objet
+  **70 noms distincts** tués par une porte exécutée, dont les 15 `csr-*`
+  (`mhgp6_fold_csr_mutant_*` sur le champ annoncé ; la boucle
+  `mhgp6_mutant_csr_*` ne reprend que ceux qui changent l'objet — jamais un
+  refus compté comme mise à mort) : mutants dédiés + boucle de divergence d'objet
   `mhgp6_mutant_*` + `family-scanline-overshoot`.
   `wspd-drop-rect` est désormais UNE omission par DESCENTE appliquée après la
   fusion ordonnée, masse omise soustraite du grand-livre reconstruit
@@ -60,7 +61,7 @@ Conventions héritées v5, toutes reconduites :
 | tueurs d'ancre | fixtures F1–F11 portées ; secteurs : fixture croisée + mutant `sector-credit-global` ; grille : fixtures F9/F10 + mutants `cell-kill-h-minus-one`, `cell-kill-nonstrict` |
 | sweep q4 | **oracle du sweep** (re-balayage exhaustif en μ, échange des quantificateurs, racines/frontières) ; fixtures : relais `F1=μ+1, F2=1−μ`, racines confondues, complétion incidente (compte zéro), clip d'égalité à μ*, les trois cas B=0, sortie dans cellule profonde avant portion shallow ; mutants `sweep-drop-exit-root`, `sweep-nonstrict-depth`, `sweep-skip-fragment`, `sweep-completion-from-witness-tape`, `chord-dead-skip-positive` (hérité) |
 | RLE/census | mutants `rle-drop`, `depth-threshold-minus-one`, `range-add-max-le-zero`, `census-nonstrict`, `skip-full-census` ; fixtures plateau (carré cocyclique) |
-| fold/rendu | mutants `drop-nonmerge`, `attach-prebatch`, `repr-ties`, `binary-ties`, `canonical-is-uf-root`, `fold-inject-a-failure-k2` tués (boucle de divergence d'objet) ; sondes d'ablation du reduce `ablation-mat-sans-copie`, `ablation-mat-sans-tris`, `ablation-post-cle-factice` (chacune change l'objet, tuée dans la même boucle ; binaire `mhgp6_profile_sonde` sous `MHGP6_TESTING` seul à accepter `--inject=`, le produit refuse : `mhgp6_profile_refuse_inject`, `mhgp6_profile_sonde_refuse_inconnu` ; reçu `bench/sonde_ablation_reduce.sh`, jamais un mur). **KeyCSR** (stockage `csr_facet_keys_v1`, route `--layout=csr`, même objet, aucune route de repli) : `mhgp6_fold_csr_{fixtures,offsets,overflow,copie,pipeline}` — 13 fixtures gravées du fold (bras classique contre texte, compteurs et pins de digest ; bras csr contre le classique par `first_divergence`, lecteur tiers de `tests/forest_witness.hpp`), validateur d'offsets (cinq contrôles, message exact), gardes de capacité (plafond d'append ET majorant, deux crochets test-only distincts), copie autonome post-callback, matrice fils × inflight × join × layout ; 14 mutants `csr-*` tués sur le champ ANNONCÉ (`--expect-divergence=`, sinon code 1) + refus pipeline `mhgp6_fold_csr_refus_csr-offset-*` (invariant, zéro callback, provisoires vides) + boucle `mhgp6_mutant_csr_*` ; rejeu « catalogue + deltas → partition » (seconde autorité, deux layouts, fixtures et pipeline). `[PRÉVU]` : juge borné n ≤ 14 (miniboule + cliques + Kruskal à lots), K=1 ≡ MST indépendant, juge d'in-flight (`fold-inject-b-exception-k3`), `render-active-only`, planchers |
+| fold/rendu | mutants `drop-nonmerge`, `attach-prebatch`, `repr-ties`, `binary-ties`, `canonical-is-uf-root`, `fold-inject-a-failure-k2` tués (boucle de divergence d'objet) ; sondes d'ablation du reduce `ablation-mat-sans-copie`, `ablation-mat-sans-tris`, `ablation-post-cle-factice` (chacune change l'objet, tuée dans la même boucle ; binaire `mhgp6_profile_sonde` sous `MHGP6_TESTING` seul à accepter `--inject=`, le produit refuse : `mhgp6_profile_refuse_inject`, `mhgp6_profile_sonde_refuse_inconnu`, allowlist des trois ablations sans item vide `mhgp6_profile_sonde_refuse_inject_vide` / `_virgule` / `_mutant_production` ; reçu `bench/sonde_ablation_reduce.sh`, jamais un mur). **KeyCSR** (stockage `csr_facet_keys_v1`, route `--layout=csr`, même objet, aucune route de repli) : `mhgp6_fold_csr_{fixtures,offsets,overflow,copie,pipeline}` — 13 fixtures gravées du fold + refus amont sous csr (kind csr signé, payload vide, `--min-refus`) (bras classique contre texte, compteurs et pins de digest ; bras csr contre le classique par `first_divergence`, lecteur tiers de `tests/forest_witness.hpp` lisant les deux stockages À CRU, sans l'accesseur `delta(i)`), validateur d'offsets (cinq contrôles, message exact), gardes de capacité (plafond d'append ET majorant, deux crochets test-only distincts), copie autonome post-callback, matrice fils × inflight × join × layout ; 15 mutants `csr-*` tués sur le champ ANNONCÉ (`--expect-divergence=`, sinon code 1, jugé en `--fixtures` comme en `--overflow`) + refus pipeline `mhgp6_fold_csr_refus_csr-offset-*` (invariant, zéro callback, provisoires vides — SEULE preuve des `csr-offset-*`, exclus de la boucle de conformité où tout statut non complet vaudrait 4 par vacuité de refus) + `csr-inject-bad-alloc` (`bad_alloc` d'arène capturé dans le fold → `resource_exhausted`, payload vide, zéro callback, jamais une exception hors de `reduce_fold`) + boucle `mhgp6_mutant_csr_*` (mutants qui changent l'objet seulement) ; rejeu « catalogue + deltas → partition » (seconde autorité, deux layouts, fixtures et pipeline) ; dent de compilation : `delta(i)` et `for_each_delta` refusés sur un `ForestResult` temporaire ; pré-inscription de mesure `mhgp6_plan_keycsr_gate` (`bench/plan_keycsr.py` : graine dérivée `0xa2ffb4db2884ddc4`, SplitMix64, Fisher–Yates spécifié, fixture des orientations). `[PRÉVU]` : juge borné n ≤ 14 (miniboule + cliques + Kruskal à lots), K=1 ≡ MST indépendant, juge d'in-flight (`fold-inject-b-exception-k3`), `render-active-only`, planchers |
 | conformité v5 | `mhgp6_conformity_*` : `digest_all` + `digest_forest_K*` (l'OBJET) ≡ `receipts/conformite_v5/` sur 5 familles × {8000, 16000, 32000} (labels scale*) et petites tailles en `gate` ; le digest candidats v5-compat est rapporté, jamais un critère (cover q4 coefficient 4) ; golden post-préfiltre v6 gravé (uniform 400) ; + `mhgp6_conformity_csr_*` : MÊMES reçus sous `--layout=csr` (8 petites en `gate`, 15 `scale*`) avec non-vacuité `csr_fallback=0` et `ordres_storage_conformes=kmax_eff`, refus 2 d'un layout inconnu (`mhgp6_conformity_refus_layout_inconnu`, `mhgp6_cli_refus_layout_{inconnu,vide}`), signatures CLI `mhgp6_cli_layout_{classic,csr}_signature` |
 | cover q4 | `mhgp6_cover_coef4` (contre-fixture tétraèdre régulier + z, frontière de génération) + mutant `q4-cover-coef3` |
 | barrière de génération/census | `mhgp6_linked_arcs_u16` + mutant d'oracle i64 (portée : génération→census ; l'extension aux facettes de forêt est `[PRÉVU]`) |
@@ -89,7 +90,8 @@ pour un seul delta), F4/F4-min multi-parents S5 (ordre de `pre_list` ≠ ordre
 des canons), F5 S2 (deux racines post d'un lot, ordre par racine UF ≠ ordre
 par output), F6 forêt vide, S1/S1a/S1b inter-segments (output figé au lot,
 niveau = représentation du premier événement du lot), R2/R2b encodage réel
-K=2.
+K=2 ; refus amont (deux identifiants égaux) sous les deux routes : même
+refus, kind csr signé, payload vide.
 
 ## Campagnes
 

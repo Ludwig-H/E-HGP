@@ -30,6 +30,7 @@
 #include "../src/pipeline/expand.hpp"
 #include "../src/pipeline/generate.hpp"
 #include "../src/pipeline/run.hpp"
+#include "forest_witness.hpp"
 
 using namespace mhgp6;
 
@@ -308,7 +309,8 @@ int run_failure_contract(bool injected) {
     }
     if (!rr.digest_raw_candidates.empty() || !rr.digest_balls.empty() || !rr.digest_postprefilter.empty() ||
         !rr.digest_all.empty() || !rr.digest_forest.empty() || !rr.cards.empty() || rr.total_events ||
-        rr.total_facets || rr.total_fusions || rr.total_deltas || rr.total_nodes) {
+        rr.total_facets || rr.total_fusions || rr.total_deltas || rr.total_nodes || !rr.forest_storage.empty() ||
+        rr.csr_fallback || rr.forest_storage_conformes) {
       ++mismatches;
       std::fprintf(stderr, "%s : champ provisoire NON vide apres echec\n", what);
     }
@@ -786,45 +788,10 @@ static int run_caps_refus(bool injected) {
   // recu par on_forest ET une projection SEMANTIQUE de ForestResult (hors
   // workers et chronometrages), serialises par le Writer canonique — la
   // fenetre (d) compare la sequence EXACTE, pas seulement K et les tailles.
+  // Temoin partage tests/forest_witness.hpp (palier KeyCSR : deltas lus par
+  // l'accesseur agnostique, projection du stockage ajoutee).
   const auto digest_callback = [](u64 k, const std::vector<ForestEvent>& ev, const ForestResult& fr) {
-    digest_detail::Writer d;
-    d.tag("cbK");
-    d.u64v(k);
-    d.u64v((u64)ev.size());
-    for (const ForestEvent& e : ev) {
-      d.u8v(e.q);
-      d.u8v(e.d);
-      d.u32v((u32)e.active_mask);
-      for (int i = 0; i < 11; ++i) d.u32v(e.support[i]);
-      for (int i = 0; i < 9; ++i) d.u32v(e.interior[i]);
-      d.level(e.level);
-    }
-    d.tag("fr");
-    d.u64v(fr.facets);
-    d.u64v(fr.fusions);
-    d.u64v(fr.batches);
-    d.u64v(fr.new_attachments);
-    d.u64v(fr.attach_violations);
-    d.u64v(fr.birth_violations);
-    d.u64v(fr.partition_violations);
-    d.u64v(fr.nodes);
-    d.u64v((u64)fr.facet_keys.size());
-    for (const FacetKey& f : fr.facet_keys) d.facet(f);
-    d.u64v((u64)fr.final_canon_fid.size());
-    for (const u32 c : fr.final_canon_fid) d.u32v(c);
-    d.u64v((u64)fr.deltas.size());
-    for (const ComponentDelta& cd : fr.deltas) {
-      d.u64v(cd.batch);
-      d.level(cd.level);
-      d.facet(cd.output);
-      d.u64v((u64)cd.parents.size());
-      for (const FacetKey& p : cd.parents) d.facet(p);
-      d.u64v((u64)cd.born.size());
-      for (const FacetKey& b : cd.born) d.facet(b);
-    }
-    d.u64v((u64)fr.batch_levels.size());
-    for (const ExactLevel& l : fr.batch_levels) d.level(l);
-    return d.hex();
+    return witness::digest_callback_witness(k, ev, fr);
   };
   std::vector<std::string> temoin_cb;
   RunOptions bt = base;  // copie DEDIEE : base reste sans callback (les autres fenetres copient base)
@@ -858,7 +825,8 @@ static int run_caps_refus(bool injected) {
     return r.digest_raw_candidates.empty() && r.digest_balls.empty() &&
            r.digest_postprefilter.empty() && r.digest_all.empty() && r.digest_forest.empty() &&
            r.cards.empty() && r.total_events == 0 && r.total_facets == 0 &&
-           r.total_fusions == 0 && r.total_deltas == 0 && r.total_nodes == 0;
+           r.total_fusions == 0 && r.total_deltas == 0 && r.total_nodes == 0 &&
+           r.forest_storage.empty() && r.csr_fallback == 0 && r.forest_storage_conformes == 0;
   };
   const auto check_refus = [&](const RunResult& r, const char* motif, const char* nom) {
     check(r.status == PipelineStatus::kResourceExhausted, (std::string(nom) + " : resource_exhausted").c_str());

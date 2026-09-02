@@ -56,6 +56,19 @@ d'abandon sans casser les contre-exemples ; jamais un benchmark.
     W_q, le compte plein les revaudrait deux fois ⟹ fausses morts. Survit :
     la discipline `ResidualTape` (exclusions par identité et par lane) ou le
     compte contre h_q nu.
+16. **Vue ou span mémorisé dans `ForestResult`** (palier KeyCSR, 2 septembre)
+    — fermée avant code : `ForestResult` est copiable, une vue persistante
+    pointerait l'ancienne arène après copie ou déplacement. Survit : la vue
+    `ComponentDeltaView` reconstruite à la demande par `delta(i)`, jamais
+    stockée (`mhgp6_fold_csr_copie`).
+17. **Retri des deltas par `output` ou par canon** — fermée avant code :
+    l'ordre est celui de `post_list` triée par racine UF historique (fixtures
+    F4/F5, mutant `csr-order-by-output`) ; un tri par output changerait le
+    digest sans changer l'objet mathématique.
+18. **Double réserve du majorant `total_recs` par arène** — fermée avant
+    code : doublerait la borne prouvée `Σ|parents|+Σ|born| ≤ Σ(q+d)`.
+    Survit : une vérification unique du majorant + croissance géométrique
+    comptée (`csr_capacity_growths`) et garde d'append par arène.
 
 ## Patterns d'erreur reconduits (v5 § F)
 

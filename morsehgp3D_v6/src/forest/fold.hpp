@@ -34,7 +34,12 @@
 #include <algorithm>
 #include <atomic>
 #include <array>
+#include <climits>
+#include <cstdint>
+#include <cstring>
+#include <new>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include <chrono>
@@ -62,6 +67,64 @@ struct ComponentDelta {
   FacetKey output;
   std::vector<FacetKey> parents;  // tries
   std::vector<FacetKey> born;     // triees
+};
+
+// STOCKAGE DES DELTAS (GO exploratoire REPONSE_AUDITEUR_COMPACTDELTA_CSR_20260902) :
+// le payload semantique reste « forets horizontales » (kForestPayloadVersion) ;
+// son STOCKAGE est versionne separement. Le digest canonique ne depend jamais
+// des octets bruts d'une structure C++ (padding, capacite). Deux routes
+// signees dans le meme binaire (RunOptions::forest_layout), AUCUNE route de
+// repli : un echec CSR est un refus transactionnel, jamais un retour au
+// classique (csr_fallback se MESURE dans run.hpp et vaut 0 par construction).
+enum class ForestLayout : u8 { kClassic = 0, kCsr = 1 };
+enum class ForestStorageKind : u8 { kVectorComponentDeltaV1 = 0, kCsrFacetKeysV1 = 1 };
+inline constexpr const char* forest_layout_name(ForestLayout l) { return l == ForestLayout::kCsr ? "csr" : "classic"; }
+inline constexpr const char* forest_storage_kind_name(ForestStorageKind k) {
+  return k == ForestStorageKind::kCsrFacetKeysV1 ? "csr_facet_keys_v1" : "vector_component_delta_v1";
+}
+// Parsing EXACT (valeur inconnue ou vide = false, l'appelant refuse code 2).
+inline bool parse_forest_layout(const char* s, ForestLayout* out) {
+  if (std::strcmp(s, "classic") == 0) { *out = ForestLayout::kClassic; return true; }
+  if (std::strcmp(s, "csr") == 0) { *out = ForestLayout::kCsr; return true; }
+  return false;
+}
+
+static_assert(std::is_trivially_copyable_v<FacetKey>, "arene CSR : copie brute de FacetKey");
+static_assert(std::is_trivially_copyable_v<ExactLevel>, "DeltaMeta : copie brute d'ExactLevel");
+
+// Metadonnee CSR d'un delta : 96 octets (align 16 par i128), sans les listes.
+// `batch` en u32 : lots <= evenements < UINT32_MAX (fold_capacity_ok) ; la vue
+// l'elargit en u64 (le digest ecrit un u64 : octets identiques).
+struct DeltaMeta {
+  ExactLevel level{};   // REPRESENTATION figee de evt(e0).level (num/den bruts, jamais reduits)
+  FacetKey output;      // keys[canon post-lot], figee a l'emission, jamais recalculee
+  u32 batch = 0;
+};
+static_assert(sizeof(DeltaMeta) == 96, "DeltaMeta : 96 octets (taille figee)");
+
+// Plage CONTIGUE de cles dans une arene (range semantique : des const FacetKey&,
+// jamais une promesse durable de std::span — le CSR a fids sera indirect).
+struct FacetKeyRange {
+  const FacetKey* b = nullptr;
+  const FacetKey* e = nullptr;
+  const FacetKey* begin() const { return b; }
+  const FacetKey* end() const { return e; }
+  // Plage vide = {nullptr, nullptr} : nullptr - nullptr vaut 0 en C++ ([expr.add]) ;
+  // la garde est un choix de lisibilite (reponse auditeur, § « Retour
+  // constructif »), pas un correctif d'UB.
+  size_t size() const { return b ? (size_t)(e - b) : 0; }
+  bool empty() const { return b == e; }
+  const FacetKey& operator[](size_t i) const { return b[i]; }
+};
+
+// VUE reconstruite a la demande par ForestResult::delta(i) — JAMAIS stockee
+// dans ForestResult (copiable : une vue memorisee pointerait l'ancienne arene).
+// Valide tant que le ForestResult source vit et n'est pas modifie.
+struct ComponentDeltaView {
+  u64 batch = 0;
+  ExactLevel level{};
+  FacetKey output;
+  FacetKeyRange parents, born;
 };
 
 #if defined(MHGP6_PROFILE_LIVENESS) && !defined(MHGP6_PROFILE_REDUCE)
@@ -134,7 +197,61 @@ struct ForestResult {
 #ifdef MHGP6_PROFILE_REDUCE
   ReduceProfile profile;  // rempli par prepare/reduce, imprime a la publication (run.hpp)
 #endif
+  // ---- STOCKAGE (csr_facet_keys_v1) : ce qui a ete CONSTRUIT par reduce_fold,
+  // jamais ce qui a ete demande (csr_fallback se MESURE dans run.hpp).
+  ForestStorageKind storage_kind = ForestStorageKind::kVectorComponentDeltaV1;
+  std::vector<DeltaMeta> delta_meta;             // csr seulement ; classic : vide
+  std::vector<u32> parents_off, born_off;        // csr : delta_meta.size()+1 offsets demi-ouverts
+  std::vector<FacetKey> parents_keys, born_keys; // arenes POSSEDEES (copie profonde a la copie de ForestResult)
+  u64 keys_parents = 0, keys_born = 0;   // Σ|parents|, Σ|born| des deltas EMIS (compte partage aux deux routes)
+  u64 csr_capacity_growths = 0;          // csr SEULEMENT : croissances observees (capacity changee) des cinq
+                                         // vecteurs ; classic = 0 = NON INSTRUMENTE, jamais un chiffre comparable
+  u64 storage_violations = 0;            // structure (offsets/domaine/coherence) -> invariant, jamais publie
+  std::string storage_message;           // texte du refus/violation de stockage ; non vide sans violation = capacite (resource_exhausted)
+  size_t delta_count() const {
+    return storage_kind == ForestStorageKind::kCsrFacetKeysV1 ? delta_meta.size() : deltas.size();
+  }
+  // Ref-qualifie : une vue prise sur un ForestResult TEMPORAIRE pendrait
+  // (arene detruite en fin d'expression) — refusee a la compilation.
+  ComponentDeltaView delta(size_t i) const&;   // defini apres la struct
+  ComponentDeltaView delta(size_t i) const&& = delete;
+  // Meme ref-qualification que delta(i) : un callback qui conserverait la vue
+  // d'un temporaire observerait une arene detruite (dent : tests/fold_csr_gate.cpp).
+  template <typename F> void for_each_delta(F&& f) const& { for (size_t i = 0, n = delta_count(); i < n; ++i) f(delta(i)); }
+  template <typename F> void for_each_delta(F&&) const&& = delete;
 };
+
+// ACCESSEUR AGNOSTIQUE : la meme sequence logique (batch, level, output,
+// parents tries, nes tries) sous les deux stockages — c'est par lui que passent
+// le digest canonique et tout consommateur, jamais par les octets d'arene.
+inline ComponentDeltaView ForestResult::delta(size_t i) const& {
+  ComponentDeltaView v;
+  if (storage_kind == ForestStorageKind::kCsrFacetKeysV1) {
+    const DeltaMeta& m = delta_meta[i];
+    v.batch = (u64)m.batch;
+    v.level = m.level;
+    v.output = m.output;
+    // Une arene vide donne une plage {nullptr, nullptr} (jamais un pointeur
+    // arithmetique sur data() d'un vecteur vide).
+    const auto range = [](const std::vector<FacetKey>& arena, u32 b, u32 e) -> FacetKeyRange {
+      if (arena.empty()) return FacetKeyRange{};
+      const FacetKey* p = arena.data();
+      return FacetKeyRange{p + b, p + e};
+    };
+    v.parents = range(parents_keys, parents_off[i], parents_off[i + 1]);
+    v.born = range(born_keys, born_off[i], born_off[i + 1]);
+  } else {
+    const ComponentDelta& cd = deltas[i];
+    v.batch = cd.batch;
+    v.level = cd.level;
+    v.output = cd.output;
+    v.parents = cd.parents.empty() ? FacetKeyRange{} : FacetKeyRange{cd.parents.data(), cd.parents.data() + cd.parents.size()};
+    v.born = cd.born.empty() ? FacetKeyRange{} : FacetKeyRange{cd.born.data(), cd.born.data() + cd.born.size()};
+  }
+  return v;
+}
+static_assert(std::is_copy_constructible_v<ForestResult> && std::is_nothrow_move_constructible_v<ForestResult>,
+              "ForestResult : copiable, autonome");
 
 namespace fold_detail {
 
@@ -284,6 +401,8 @@ struct FoldPrepared {
   std::vector<FacetKey> keys;
   std::vector<u32> ev_fid;
   bool mutants[6] = {false, false, false, false, false, false};  // binary, repr, attach_pre, drop_nonmerge, canon_root, no_detector
+  ForestLayout layout = ForestLayout::kClassic;  // route demandee (RunOptions::forest_layout)
+  u64 total_recs = 0;                            // Σ(q+d) : majorant PROUVE de Σ|parents|+Σ|born| (conserve, jamais recalcule)
 };
 
 // VALIDATION STRUCTURELLE (P0 de l'audit 9762daaf), distincte de la garde de
@@ -326,10 +445,12 @@ inline bool validate_fold_events(const std::vector<ForestEvent>& events, int thr
   return true;
 }
 
-inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int threads = 1) {
+inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int threads = 1,
+                                 ForestLayout layout = ForestLayout::kClassic) {
   using namespace fold_detail;
   FoldPrepared fp;
   fp.events = &events;
+  fp.layout = layout;  // signe AVANT tout refus : reduce_fold lit la route demandee
   ForestResult& r = fp.r;
   const bool m_binary = MHGP6_MUTANT("binary-ties");
   const bool m_repr = MHGP6_MUTANT("repr-ties");
@@ -349,6 +470,7 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
   if (!validate_fold_events(events, threads, &r.refusal)) return fp;
   u64 total_recs = 0;
   for (const ForestEvent& ev : events) total_recs += (u64)ev.q + ev.d;
+  fp.total_recs = total_recs;
   if (!fold_capacity_ok((u64)events.size(), total_recs, &r.refusal)) return fp;
   fp.order = sort_events_by_level(events, threads, &r.workers);
   const std::vector<u32>& order = fp.order;
@@ -570,6 +692,68 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
 // `first` absorbe), meme compression par moitie, memes epoques, meme ordre
 // des deltas (racines triees) — le digest v5 est bit-identique (conformites,
 // banc a signature identique).
+namespace fold_detail {
+
+// PLAFONDS de cles par arene : UINT32_MAX en produit (offsets u32) ;
+// abaissables SOUS MHGP6_TESTING seulement (scenes de debordement de
+// tests/fold_csr_gate.cpp). Deux crochets DISTINCTS : le majorant Σ(q+d) est
+// verifie une fois avant toute reserve, la garde d'append avant chaque
+// ecriture — avec un seul seuil, la garde d'append serait mathematiquement
+// morte (toute arene est bornee par le majorant), donc invérifiable.
+#if defined(MHGP6_TESTING)
+inline size_t& csr_keys_cap_for_tests() { static size_t cap = (size_t)UINT32_MAX; return cap; }
+inline size_t& csr_majorant_cap_for_tests() { static size_t cap = (size_t)UINT32_MAX; return cap; }
+inline size_t csr_keys_cap() { return csr_keys_cap_for_tests(); }
+inline size_t csr_majorant_cap() { return csr_majorant_cap_for_tests(); }
+#else
+inline size_t csr_keys_cap() { return (size_t)UINT32_MAX; }
+inline size_t csr_majorant_cap() { return (size_t)UINT32_MAX; }
+#endif
+
+// Garde AVANT append (auditeurs : max_size, conversions size_t, produit en octets) —
+// verifiee pour les DEUX arenes avant d'ecrire dans l'une (aucune queue orpheline transitoire).
+inline bool csr_can_append(const std::vector<FacetKey>& arena, size_t n, std::string* why) {
+  const size_t sz = arena.size();
+  if (n > arena.max_size() - sz) { *why = "resource_exhausted : arene CSR au-dela de max_size"; return false; }
+  if (sz + n > csr_keys_cap()) { *why = "resource_exhausted : arene CSR au-dela du plafond de cles (offsets u32)"; return false; }
+  if (sz + n > SIZE_MAX / sizeof(FacetKey)) { *why = "resource_exhausted : produit octets d'arene CSR hors size_t"; return false; }
+  return true;
+}
+
+// Verification une fois sur le MAJORANT (jamais deux reserves de total_recs).
+inline bool csr_capacity_ok(u64 total_recs, size_t batches, std::string* why) {
+  if (total_recs > (u64)csr_majorant_cap()) { *why = "resource_exhausted : majorant Σ(q+d) au-dela du plafond de cles CSR"; return false; }
+  if (total_recs > (u64)(SIZE_MAX / sizeof(FacetKey))) { *why = "resource_exhausted : majorant en octets hors size_t"; return false; }
+  if (batches >= (size_t)UINT32_MAX || batches + 1 > std::vector<u32>().max_size()) { *why = "resource_exhausted : lots hors offsets"; return false; }
+  return true;
+}
+
+// ORDRE GRAVE des controles (chaque scene de --offsets en exerce exactement un,
+// message exact exige) : (1) nombre, (2) premier nul, (3) domaine, (4) monotonie, (5) fin.
+inline bool csr_offsets_ok(const std::vector<u32>& off, size_t n_meta, size_t arena_size, const char* nom, std::string* why) {
+  const std::string pre = std::string("invariant stockage csr : ") + nom;
+  if (off.size() != n_meta + 1) { *why = pre + " : nombre d'offsets != deltas + 1"; return false; }
+  if (off[0] != 0) { *why = pre + " : premier offset non nul (trou en tete d'arene)"; return false; }
+  for (size_t i = 0; i < off.size(); ++i)
+    if ((size_t)off[i] > arena_size) { *why = pre + " : offset hors domaine (> taille d'arene)"; return false; }
+  for (size_t i = 1; i < off.size(); ++i)
+    if (off[i] < off[i - 1]) { *why = pre + " : offsets non monotones (chevauchement)"; return false; }
+  if ((size_t)off.back() != arena_size) { *why = pre + " : dernier offset != taille d'arene (fin inexacte, queue orpheline)"; return false; }
+  return true;
+}
+
+// Sur TOUT echec csr : payload VIDE (swap) avant retour — delta_count() == 0,
+// aucune vue possible, aucun digest, aucun callback.
+inline void csr_clear_payload(ForestResult* r) {
+  std::vector<DeltaMeta>().swap(r->delta_meta);
+  std::vector<u32>().swap(r->parents_off);
+  std::vector<u32>().swap(r->born_off);
+  std::vector<FacetKey>().swap(r->parents_keys);
+  std::vector<FacetKey>().swap(r->born_keys);
+}
+
+}  // namespace fold_detail
+
 struct FidState {
   i32 parent;
   u32 canon;
@@ -593,6 +777,11 @@ inline void reduce_prefetch(const void* p) {
 inline ForestResult reduce_fold(FoldPrepared&& fp) {
   using namespace fold_detail;
   ForestResult r = std::move(fp.r);
+  // Kind du stockage signe AVANT le refus amont : un fold refuse sous csr
+  // rend un payload VIDE de kind csr (jamais un repli fantome pour un
+  // appelant qui compterait « kind construit != route demandee »). Hors
+  // refus, c'est bien ce que la branche csr CONSTRUIT (aucune autre sortie).
+  if (fp.layout == ForestLayout::kCsr) r.storage_kind = ForestStorageKind::kCsrFacetKeysV1;
   if (!r.refusal.empty()) return r;
 #ifdef MHGP6_PROFILE_REDUCE
   // § 5.10 : le chronometre du profil demarre DES L'ENTREE — la fenetre init
@@ -627,6 +816,26 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
              abl_sans_tris = MHGP6_MUTANT("ablation-mat-sans-tris"),
              abl_cle_factice = MHGP6_MUTANT("ablation-post-cle-factice");
   const FacetKey cle_factice = keys.empty() ? FacetKey{} : keys[0];
+  const bool csr = fp.layout == ForestLayout::kCsr;
+  // MUTANTS csr-* : sites EXCLUSIVEMENT dans la branche csr (un site partage
+  // corromprait les deux bras et rendrait le comparateur vacu, code 3 non 4).
+  const bool m_csr_order_output = MHGP6_MUTANT("csr-order-by-output"),
+             m_csr_keep_cont = MHGP6_MUTANT("csr-keep-continuation"),
+             m_csr_stale_level = MHGP6_MUTANT("csr-stale-level"),
+             m_csr_stale_output = MHGP6_MUTANT("csr-stale-output"),
+             m_csr_unsorted_born = MHGP6_MUTANT("csr-unsorted-born"),
+             m_csr_unsorted_parents = MHGP6_MUTANT("csr-unsorted-parents"),
+             m_csr_drop_delta = MHGP6_MUTANT("csr-drop-delta"),
+             m_csr_dup_delta = MHGP6_MUTANT("csr-dup-delta"),
+             m_csr_shift_offset = MHGP6_MUTANT("csr-shift-offset"),
+             m_csr_off_hole = MHGP6_MUTANT("csr-offset-hole"),
+             m_csr_off_overlap = MHGP6_MUTANT("csr-offset-overlap"),
+             m_csr_off_end = MHGP6_MUTANT("csr-offset-end"),
+             m_csr_off_domain = MHGP6_MUTANT("csr-offset-domain"),
+             m_csr_guard_skip = MHGP6_MUTANT("csr-guard-skip"),
+             m_csr_inject_bad_alloc = MHGP6_MUTANT("csr-inject-bad-alloc");  // panne d'allocation injectee (bad_alloc)
+  bool csr_dead = false;  // un echec de capacite : plus aucune emission, payload vide au retour
+  bool csr_drop_done = false;  // mutant csr-drop-delta : un seul delta saute
   auto tmark = std::chrono::steady_clock::now();
   const auto mark = [&](double* out) {
     const auto now = std::chrono::steady_clock::now();
@@ -658,13 +867,94 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
   std::vector<i32> pre_list, post_list;
   std::vector<ComponentDelta> scratch;
   const size_t ne = order.size();
-  r.deltas.reserve(batches.size());
+  // csr_capacity_growths : telemetrie CAUSALE (reponse auditeur, second
+  // correctif) — une allocation = un changement OBSERVE de capacity(), reserves
+  // initiales comprises ; reserve(0) sur une foret vide n'alloue rien et ne
+  // compte pas (forte vide : les deux offsets seulement).
+  const auto grow = [&](auto& v, size_t n) {
+    const size_t c = v.capacity();
+    v.reserve(n);
+    if (v.capacity() != c) ++r.csr_capacity_growths;
+  };
+  const auto pushc = [&](auto& v, const auto& x) {
+    const size_t c = v.capacity();
+    v.push_back(x);
+    if (v.capacity() != c) ++r.csr_capacity_growths;
+  };
+  if (!csr) {
+    r.deltas.reserve(batches.size());
+  } else {
+    // (storage_kind deja signe en tete de reduce_fold.)
+    if (!csr_capacity_ok(fp.total_recs, batches.size(), &r.storage_message)) csr_dead = true;
+    else {
+      grow(r.delta_meta, batches.size());  // heuristique de la reserve classique (lots), jamais total_recs
+      grow(r.parents_off, batches.size() + 1);
+      grow(r.born_off, batches.size() + 1);
+      pushc(r.parents_off, (u32)0);
+      pushc(r.born_off, (u32)0);
+    }
+  }
   const auto prefetch_event = [&](size_t e) {
     const ForestEvent& pv = evt(e);
     const u32* f = &ev_fid[e * 11];
     for (int s = 0; s < (int)pv.q + (int)pv.d; ++s) {
       reduce_prefetch(&st[(size_t)f[s]]);
       reduce_prefetch(&keys[(size_t)f[s]]);  // clef copiee dans parents/born
+    }
+  };
+  // EMISSION CSR d'un delta deja trie et filtre : gardes des deux arenes AVANT
+  // tout append, puis appends, puis meta + offsets (transaction fermee : la
+  // meta n'existe qu'avec ses plages ; un echec de garde arrete toute emission,
+  // le payload est vide au retour). La meta est figee depuis `cd` — UNE seule
+  // source : cd.batch, cd.level = evt(e0).level et cd.output = keys[canon]
+  // sont poses par la boucle sur les memes lignes que la route classique.
+  // Un bad_alloc de l'execution (csr_can_append borne une cardinalite, pas la
+  // memoire disponible) est CAPTURE ici : refus transactionnel
+  // resource_exhausted, jamais une exception hors du fold ; la queue
+  // orpheline d'un append partiel est videe en fin de reduce (csr_dead).
+  // PORTEE EXACTE (retour auditeur) : le try ne couvre que la TRANSACTION
+  // D'APPEND (gardes, appends d'arene, meta/offsets) ; les reserves initiales
+  // (delta_meta, offsets, arenes) et le reste du fold restent hors du try et
+  // propagent comme la route classique — aucune interception generale de
+  // l'OOM n'est promise ; la dent csr-inject-bad-alloc n'atteste que ce site.
+  const auto csr_emit = [&](const ComponentDelta& cd, size_t b) {
+    if (csr_dead) return;
+    try {
+      std::string why;
+      // (1) GARDES des deux arenes AVANT tout append (mutant csr-guard-skip : gardes sautees).
+      if (!m_csr_guard_skip &&
+          (!csr_can_append(r.parents_keys, cd.parents.size(), &why) || !csr_can_append(r.born_keys, cd.born.size(), &why) ||
+           r.delta_meta.size() == r.delta_meta.max_size() || r.parents_off.size() == r.parents_off.max_size())) {
+        r.storage_message = why.empty() ? "resource_exhausted : metadonnees CSR au-dela de max_size" : why;
+        csr_dead = true;
+        return;
+      }
+      const auto append = [&](std::vector<FacetKey>& arena, const std::vector<FacetKey>& src, bool reversed) {
+        const size_t cap = arena.capacity();
+        if (!reversed) arena.insert(arena.end(), src.begin(), src.end());
+        else arena.insert(arena.end(), src.rbegin(), src.rend());  // mutants csr-unsorted-*
+        if (arena.capacity() != cap) ++r.csr_capacity_growths;
+      };
+      // (2) APPENDS (listes deja triees, filtres continuation/drop-nonmerge deja appliques).
+      append(r.parents_keys, cd.parents, m_csr_unsorted_parents);
+      if (m_csr_inject_bad_alloc && r.delta_meta.size() == 3)  // mutant : panne d'allocation APRES un append partiel (queue orpheline de parents)
+        throw std::bad_alloc();
+      append(r.born_keys, cd.born, m_csr_unsorted_born);
+      // (3) META + OFFSETS.
+      DeltaMeta m;
+      m.level = (m_csr_stale_level && b > 0) ? evt(batches[b - 1].first).level : cd.level;  // mutant : niveau du lot precedent
+      m.output = cd.output;
+      m.batch = (u32)cd.batch;
+      pushc(r.delta_meta, m);
+      pushc(r.parents_off, (u32)r.parents_keys.size());
+      pushc(r.born_off, (u32)r.born_keys.size());
+    } catch (const std::bad_alloc&) {
+      csr_dead = true;
+      try {
+        r.storage_message = "resource_exhausted : allocation d'arene CSR refusee (bad_alloc)";
+      } catch (...) {
+        // message impossible : la fin du reduce pose un motif de secours ou une violation (fail-closed)
+      }
     }
   };
   for (size_t e = 0; e < std::min(kReduceAhead, ne); ++e) {
@@ -769,6 +1059,9 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
     }
     ptick(3);
     std::sort(post_list.begin(), post_list.end());
+    if (csr && m_csr_order_output)  // mutant : ordre par output au lieu des racines UF historiques
+      std::sort(post_list.begin(), post_list.end(),
+                [&](i32 x, i32 y) { return keys[st[(size_t)find(x)].canon] < keys[st[(size_t)find(y)].canon]; });
     for (const i32 rt : post_list) {
       ComponentDelta& cd = scratch[st[(size_t)rt].post_slot];
       if (!abl_sans_tris) {
@@ -776,13 +1069,35 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
         std::sort(cd.born.begin(), cd.born.end());
       }
       if (cd.parents.size() >= 2) ++r.nodes;
+      if (csr && m_csr_keep_cont && cd.parents.size() == 1 && cd.born.empty()) {  // mutant : continuation EMISE
+        // Les compteurs partages keys_parents/keys_born ne sont PAS incrementes
+        // ici : la premiere divergence (F3) reste `delta_count` ; les incrementer
+        // la deplacerait sur `keys_parents` et la porte rendrait 1 (regraver la
+        // table du gate, pas ce site).
+        cd.batch = (u64)b;
+        cd.level = evt(e0).level;
+        cd.output = keys[st[(size_t)find(rt)].canon];
+        if (!abl_sans_copie) csr_emit(cd, b);
+        continue;
+      }
       if (cd.parents.size() == 1 && cd.born.empty()) continue;  // continuation
       if (m_drop_nonmerge && cd.parents.size() < 2) continue;
       cd.batch = (u64)b;
       cd.level = evt(e0).level;
       cd.output = keys[st[(size_t)find(rt)].canon];
-      if (!abl_sans_copie)
-        r.deltas.push_back(cd);  // copie : le deplacement (mesure) ne fait que deplacer les allocations vers le scratch
+      r.keys_parents += cd.parents.size();  // partage aux deux routes (non-vacuite du stockage)
+      r.keys_born += cd.born.size();
+      if (!csr) {
+        if (!abl_sans_copie)
+          r.deltas.push_back(cd);  // copie : le deplacement (mesure) ne fait que deplacer les allocations vers le scratch
+      } else if (!abl_sans_copie) {  // la sonde d'ablation (a) s'applique a l'identique : aucune materialisation
+        if (m_csr_drop_delta && r.delta_meta.size() == 1 && !csr_drop_done) {  // mutant : deuxieme delta emis saute (structure valide)
+          csr_drop_done = true;
+          continue;
+        }
+        csr_emit(cd, b);
+        if (m_csr_dup_delta && r.delta_meta.size() == 1) csr_emit(cd, b);  // mutant : premier delta emis deux fois
+      }
     }
     r.batch_levels.push_back(evt(e0).level);
     for (const u32 fid : touched) st[(size_t)fid].seen = 1;
@@ -826,7 +1141,54 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
   }
   for (size_t fid = 1; fid < nfid; ++fid)
     if (!(keys[fid - 1] < keys[fid])) ++r.partition_violations;
-  ptick(7);  // partition finale
+  if (csr) {
+    // Mutants de structure (sites csr seulement ; `keys` est encore vivant ici,
+    // le deplacement vers r.facet_keys vient apres).
+    if (m_csr_stale_output) {  // mutant : output RECALCULE via final_canon_fid (interdit par les auditeurs)
+      for (DeltaMeta& m : r.delta_meta) {
+        const auto it = std::lower_bound(keys.begin(), keys.end(), m.output);
+        if (it != keys.end() && *it == m.output) m.output = keys[r.final_canon_fid[(size_t)(it - keys.begin())]];
+      }
+    }
+    const size_t nm = r.delta_meta.size();
+    if (m_csr_shift_offset) {  // mutant : decalage STRUCTURELLEMENT VALIDE (une cle migre vers le delta precedent)
+      bool done = false;
+      for (size_t i = 1; i + 1 < r.born_off.size() && !done; ++i)
+        if (r.born_off[i] < r.born_off[i + 1]) { ++r.born_off[i]; done = true; }
+      for (size_t i = 1; i + 1 < r.parents_off.size() && !done; ++i)
+        if (r.parents_off[i] < r.parents_off[i + 1]) { ++r.parents_off[i]; done = true; }
+    }
+    std::vector<u32>& off_ne = r.born_keys.empty() ? r.parents_off : r.born_off;  // arene non vide visee par les mutants d'offset
+    std::vector<FacetKey>& ar_ne = r.born_keys.empty() ? r.parents_keys : r.born_keys;
+    if (m_csr_off_hole && !ar_ne.empty()) off_ne[0] = 1;
+    if (m_csr_off_overlap)
+      for (size_t i = 1; i + 1 < off_ne.size(); ++i)
+        if (off_ne[i] < off_ne[i + 1]) { std::swap(off_ne[i], off_ne[i + 1]); break; }
+    if (m_csr_off_end && nm) ar_ne.push_back(FacetKey{});           // queue orpheline : dernier offset != taille
+    if (m_csr_off_domain && nm) off_ne[1] = (u32)ar_ne.size() + 1;  // hors domaine (controle (3), avant la monotonie)
+    // VALIDATION AVANT TOUTE VUE (structure -> invariant ; capacite deja en storage_message).
+    std::string why;
+    if (csr_dead) {
+      csr_clear_payload(&r);  // queue orpheline d'un append partiel comprise
+      if (r.storage_message.empty()) {  // fail-closed : jamais un payload vide publie sans motif
+        try {
+          r.storage_message = "resource_exhausted : stockage csr abandonne";
+        } catch (...) {
+          ++r.storage_violations;
+        }
+      }
+    } else if (!r.deltas.empty()) {
+      ++r.storage_violations;
+      r.storage_message = "invariant stockage csr : deltas classiques non vides sous csr";
+      csr_clear_payload(&r);
+    } else if (!csr_offsets_ok(r.parents_off, nm, r.parents_keys.size(), "parents", &why) ||
+               !csr_offsets_ok(r.born_off, nm, r.born_keys.size(), "nes", &why)) {
+      ++r.storage_violations;
+      r.storage_message = why;
+      csr_clear_payload(&r);
+    }
+  }
+  ptick(7);  // partition finale (+ validation csr : aucune colonne nouvelle a ce palier)
   std::vector<u32>().swap(ev_fid);
   std::vector<FidState>().swap(st);
   ptick(8);  // liberation des arenes (hors chrono reduce, mesuree quand meme)
@@ -857,8 +1219,9 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
 }
 
 // Le fold complet, sequentiel de bout en bout du point de vue de l'appelant.
-inline ForestResult build_forest(const std::vector<ForestEvent>& events, int threads = 1) {
-  return reduce_fold(prepare_fold(events, threads));
+inline ForestResult build_forest(const std::vector<ForestEvent>& events, int threads = 1,
+                                 ForestLayout layout = ForestLayout::kClassic) {
+  return reduce_fold(prepare_fold(events, threads, layout));
 }
 
 }  // namespace mhgp6

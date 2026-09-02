@@ -102,6 +102,7 @@ int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
   long long n = 400, threads = 1, seed = 3;
   std::string expected_path, inject, postprefilter_golden, compat_golden, counts_golden;
+  ForestLayout layout = ForestLayout::kClassic;
   bool ok = true;
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
@@ -119,6 +120,7 @@ int main(int argc, char** argv) {
     else if (const char* s = val("--expect-compat=")) compat_golden = s;
     else if (const char* s = val("--expect-counts=")) counts_golden = s;
     else if (const char* s = val("--inject=")) inject = s;
+    else if (const char* s = val("--layout=")) ok = parse_forest_layout(s, &layout) && ok;  // classic | csr, exact
     else { std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str()); ok = false; }
   }
   if (!ok) return 2;
@@ -135,6 +137,7 @@ int main(int argc, char** argv) {
   opt.smax = 11;
   opt.threads = (int)threads;
   opt.digest = true;
+  opt.forest_layout = layout;
   const RunResult rr = run_pipeline(in, opt);
   if (rr.status != PipelineStatus::kCompleteRegular) {
     // Sous mutant, un refus/invariant EST une divergence detectee.
@@ -145,6 +148,16 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "REFUS %s\n", rr.message.c_str());
     return status_exit_code(rr.status);
   }
+  // NON-VACUITE du stockage demande (palier KeyCSR) : sous --layout=csr, chaque
+  // K publie doit avoir CONSTRUIT le csr (csr_fallback est mesure, 0 exige).
+  if (layout == ForestLayout::kCsr && (rr.csr_fallback != 0 || rr.forest_storage_conformes != rr.kmax_eff)) {
+    std::fprintf(stderr, "layout=csr demande mais non construit sur tous les K (fallback=%llu, conformes=%llu/%llu)\n",
+                 (unsigned long long)rr.csr_fallback, (unsigned long long)rr.forest_storage_conformes,
+                 (unsigned long long)rr.kmax_eff);
+    return 1;
+  }
+  std::printf("forest_layout=%s csr_fallback=%llu ordres_storage_conformes=%llu\n", forest_layout_name(layout),
+              (unsigned long long)rr.csr_fallback, (unsigned long long)rr.forest_storage_conformes);
 
   Expected e;
   if (!expected_path.empty()) {

@@ -27,8 +27,9 @@ Scenes :
   (f) ligne K=7 omise sur un run => INVALIDE 3 (agregateur), sans manifeste ;
   (g) touch=nan sur un run => INVALIDE 3 (agregateur) ;
   (h) alteration d'un fichier entre la generation de SHA256SUMS et sa
-      verification (faux sha256sum en PATH n'agissant que sur -c) =>
-      INVALIDE 3, jamais publie ;
+      verification (faux sha256sum n'agissant que sur -c, SUBSTITUE a
+      l'outil resolu par un LANCEUR MUTANT — le PATH ne peut plus l'y
+      porter, scene (y)) => INVALIDE 3, jamais publie ;
   (i) binaire PRODUIT (build/v6/mhgp6_profile s'il existe, sinon un faux
       refusant --inject=) => refus 2, aucun .partial laisse.
   Contre-fixtures des auditeurs (chacune : le mutant precis, le code attendu,
@@ -39,8 +40,9 @@ Scenes :
       META n_list="64 64" => agregateur 1 ;
   (k) hash VIDE ou hors grammaire 64-hex : META binaire_sha256= vide ou a
       63 caracteres, HASHES.txt avant= vide, .status sha256_apres= vide =>
-      agregateur 1 ; faux sha256sum muet en PATH => lanceur refus 2, aucun
-      .partial (jamais un hash vide grave) ;
+      agregateur 1 ; faux sha256sum muet substitue (lanceur mutant) =>
+      lanceur refus 2 avant toute ecriture, aucun .partial (jamais un hash
+      vide grave, pas meme celui d'un outil) ;
   (l) champ DUPLIQUE a valeurs differentes : .status avec code= repete (en
       fin de fichier ou sur la premiere ligne), META reps= repete, plan.txt
       position= repete sur une ligne, profil `touch=nan touch=<fini>` =>
@@ -76,8 +78,9 @@ Scenes :
       lanceur (inventaire des repertoires, invisible au manifeste) ;
   (r) protocole_lanceur.sh / protocole_agregateur.py alteres apres coup ou
       retires => agregateur 1 (hash RECALCULE != META) ; faux sha256sum
-      alterant la copie archivee du lanceur APRES le manifeste => INVALIDE 3
-      du lanceur (copie relue avant publication != META) ;
+      (substitue, lanceur mutant) alterant la copie archivee du lanceur
+      APRES le manifeste => INVALIDE 3 du lanceur (copie relue avant
+      publication != META) ;
   (s) identite de cible (claim BORNE : la cible reelle accepte tout kMutants,
       verifie ici sur build/v6/mhgp6_profile_sonde s'il existe) : META porte
       identite_cible et injections_autorisees == injections_emises == les
@@ -90,12 +93,12 @@ Scenes :
   (t) TOCTOU avant scellement : faux python3 MODIFIANT out/aucune_n64_r1.txt
       APRES l'agregateur et AVANT le manifeste (le manifeste scelle le
       contenu mute, `sha256sum -c` seul le publierait) => INVALIDE 3
-      (empreinte d'avant agregation != manifeste) ; faux sha256sum modifiant
-      le meme fichier APRES la generation du manifeste => INVALIDE 3
-      (verification finale, derniere operation avant le mv) ;
-  (u) `diff` fail-open : faux diff rendant 2 sans sortie => INVALIDE 3
-      (« comparaison impossible ») ; faux diff rendant 1 sans sortie =>
-      INVALIDE 3 (jamais un test sur la seule sortie vide).
+      (empreinte d'avant agregation != manifeste) ; faux sha256sum
+      (substitue) modifiant le meme fichier APRES la generation du manifeste
+      => INVALIDE 3 (verification finale, derniere operation avant le mv) ;
+  (u) `diff` fail-open : faux diff (substitue) rendant 2 sans sortie =>
+      INVALIDE 3 (« comparaison impossible ») ; faux diff rendant 1 sans
+      sortie => INVALIDE 3 (jamais un test sur la seule sortie vide).
   Reception critique du pin 1cb60655 (alerte, quatre familles ; la frontiere
   CLI est traitee a part, hors de cette porte) :
   (v) TOCTOU SEMANTIQUE apres agregation : faux python3 relayant le vrai
@@ -120,6 +123,39 @@ Scenes :
       reduce_v1, reduce_v2+liveness, fold_join= absent, jeton sans `=`,
       jeton duplique, ligne absente, ligne dupliquee => 1 ; layout=classic
       ajoute => 0 et resume bit-identique au nominal (temoin de causalite).
+  Coutures ACTIVES nommees par REPONSE_AUDITEUR_COMPACTDELTA_CSR_20260902
+  (« Reponse au verrou de pre-inscription 53610911 ») :
+  (y) OUTILS HORS PATH : nominal => META outils= (nom=chemin:sha256, chemins
+      absolus canoniques, ELF, sha256 RECALCULES egaux), topologie= /
+      cpuset= / affinite= graves et coherents avec lscpu ; faux mv,
+      sha256sum, cmp, diff, find, sort, taskset, git, xargs… DEPOSES APRES
+      la resolution (par le faux binaire de sonde a son premier tuple, dans
+      un dossier vide place en tete de PATH) => reçu publie (0), AUCUN faux
+      execute (fichier de trace absent), outils= == chemins reels ; memes
+      faux presents en PATH AVANT le lancement => idem (le PATH n'est jamais
+      consulte : `command -v -p`) ; fonctions `mv`/`sha256sum` EXPORTEES
+      dans l'environnement => idem (mode privilegie `bash -p`, aucune
+      fonction importee) ; LD_PRELOAD / BASH_ENV / PYTHONPATH definis =>
+      refus 2, aucun .partial ; lanceur mutant exigeant un outil inexistant
+      => refus 2 « non resoluble » ; exigeant un script standard (ldd, s'il
+      en est un) => refus 2 « non ELF » ; CPUS hors grammaire ou hors
+      machine => refus 2, aucun .partial ; honnetement : un ELF imposteur
+      dans /usr/bin (root) serait accepte et grave — la porte ne le
+      simule pas, elle le dit ;
+  (z) LIAISON commande / META / sortie (agregateur, tout schema) : .status
+      avec --threads=4 (META 1) => 1 ; ligne d'identite threads=4 dans la
+      sortie => 1 ; taskset -c 0-3 => 1 ; argument en plus (--n=999 en
+      suffixe) => 1 ; argument en moins (--seed=) => 1 ; ordre permute
+      (--smax= avant --s=) => 1 ; famille de la sortie != META => 1 ; META
+      famille= ou parametres threads= changes => 1 ; parametres sans seed=
+      ou fold_join=0 => 1 ; profil_kind inflight_demande=1 => 1 ; ligne
+      d'identite absente / dupliquee => 1 ; coord= different entre deux
+      tuples d'une meme taille => 1 ; v5 : affinite cpus= != parametres,
+      cpuset excluant cpus, outils= sans mv, chemin relatif, hash a 63,
+      topologie fils= incoherent => 1 ; schema v4 explicite (champs v5
+      retires) => 0 + « outils / topologie / cpuset / affinite : claim
+      borne » ; le reçu publie 20260902b (v2) => 0, liaison VERIFIEE
+      (ses .status et son META la satisfont sans amenagement).
 
 Usage : sonde_ablation_gate.py <dossier bench>. Codes : 0 conforme ;
 1 au moins un controle en echec. Aucun assert (python3 -O).
@@ -139,7 +175,8 @@ BRAS = ("aucune", "ablation-mat-sans-copie", "ablation-mat-sans-tris",
 LETTRES = dict(zip("ABCD", BRAS))
 LATIN_CYCLIQUE = ("A B C D", "B C D A", "C D A B", "D A B C")
 WILLIAMS_PERMUTE = ("B D A C", "C A D B", "D C B A", "A B C D")
-SCHEMA = "e-hgp.sonde-ablation-reduce.v4"
+SCHEMA = "e-hgp.sonde-ablation-reduce.v5"
+SCHEMA_V4 = "e-hgp.sonde-ablation-reduce.v4"
 SCHEMA_V3 = "e-hgp.sonde-ablation-reduce.v3"
 SCHEMA_V2 = "e-hgp.sonde-ablation-reduce.v2"
 INJECTIONS = "ablation-mat-sans-copie ablation-mat-sans-tris ablation-post-cle-factice"
@@ -147,6 +184,17 @@ IDENTITE_CIBLE = ("mhgp6_profile_sonde (accepte tout mutant de kMutants ; "
                   "seules les ablations sont selectionnees ici)")
 CHAMPS_V3 = ("identite_cible", "injections_autorisees", "injections_emises")
 CHAMPS_V4 = ("interpreteur",)
+CHAMPS_V5 = ("outils", "topologie", "cpuset", "affinite")
+# Variables d'environnement que le lanceur REFUSE (chargement etranger) : la
+# porte les retire de l'environnement nominal et les pose une a une en (y).
+VARIABLES_REFUSEES = ("BASH_ENV", "ENV", "LD_PRELOAD", "LD_AUDIT", "LD_LIBRARY_PATH",
+                      "PYTHONHOME", "PYTHONPATH")
+# Outils que le lanceur resout hors PATH (sa ligne OUTILS_REQUIS, remplacee
+# telle quelle par les lanceurs mutants de (y)) et son ancre de substitution.
+LIGNE_OUTILS = ('OUTILS_REQUIS="cmp cp chmod diff find git lscpu mkdir mktemp mv readlink rm '
+                'sha256sum sort taskset uname xargs"')
+OUTILS = LIGNE_OUTILS.split('"')[1].split()
+ANCRE_OUTILS = ": # ANCRE_PORTE_OUTILS"
 LIBELLE_STATUT = ("exploratory_noncausal_upper_bounds (bornes exploratoires non causales sur "
                   "binaire instrumente, join=1 : jamais un benchmark, jamais un mur, jamais un "
                   "choix de palier)")
@@ -159,12 +207,18 @@ FAUX_SONDE = r"""#!/usr/bin/env bash
 # profil_reduce conformes, refus 2 d'un --inject= inconnu, rapide.
 set -u
 inject=""
-n=0
+n=0; family=uniform; s=8; smax=11; seed=3; threads=1; inflight=2; join=1
 for a in "$@"; do
   case "$a" in
     --inject=*) inject="${a#--inject=}" ;;
     --n=*) n="${a#--n=}" ;;
-    --family=*|--s=*|--smax=*|--seed=*|--threads=*|--fold-inflight=*|--fold-join=*) ;;
+    --family=*) family="${a#--family=}" ;;
+    --s=*) s="${a#--s=}" ;;
+    --smax=*) smax="${a#--smax=}" ;;
+    --seed=*) seed="${a#--seed=}" ;;
+    --threads=*) threads="${a#--threads=}" ;;
+    --fold-inflight=*) inflight="${a#--fold-inflight=}" ;;
+    --fold-join=*) join="${a#--fold-join=}" ;;
     *) echo "argument inconnu : $a" >&2; exit 2 ;;
   esac
 done
@@ -210,7 +264,19 @@ if [ "$mutant" = plan_hors_sonde ]; then
   fi
   sed -i 's/bras=ablation-post-cle-factice$/bras=drop-nonmerge/' "${d}/../plan.txt"
 fi
-echo "profil_kind=reduce_v2 fold_join=1 inflight_demande=2 pic_workers_b=1 pic_reduce_actif=1"
+if [ "$mutant" = deposer_faux_outils ]; then
+  # Scene (y) : le binaire depose, APRES la resolution des outils par le
+  # lanceur, de faux outils dans un dossier place en tete de PATH ; chacun,
+  # s'il etait execute, tracerait son appel dans FAKE_TRACE et mentirait
+  # (code 0 sans rien faire). Aucun ne doit jamais s'executer.
+  for outil in %OUTILS%; do
+    printf '#!/usr/bin/env bash\nprintf "%%s %%s\\n" "$0" "$*" >> "${FAKE_TRACE}"\nexit 0\n' > "${FAKE_OUTILS_DIR}/${outil}"
+    chmod 755 "${FAKE_OUTILS_DIR}/${outil}"
+  done
+fi
+echo "payload=mhgp6-forests-horizontal-v1 authority=status_terminal (faux binaire de porte)"
+echo "famille=${family} n=${n} coord=200 s=${s} smax=${smax} seed=${seed} threads=${threads} emis=0"
+echo "profil_kind=reduce_v2 fold_join=${join} inflight_demande=${inflight} pic_workers_b=1 pic_reduce_actif=1"
 mat_f=6
 post_f=4
 case "$inject" in
@@ -265,7 +331,9 @@ exit 0
 FAUX_PYTHON3_TETE = """#!/usr/bin/env bash
 "%REAL%" "$@"
 rc=$?
-case "${1:-}" in */protocole_agregateur.py) ;; *) exit $rc ;; esac
+agr=0
+for a in "$@"; do case "$a" in */protocole_agregateur.py) agr=1 ;; esac; done
+[ "$agr" = 1 ] || exit $rc
 w="${@: -1}"
 """
 
@@ -389,16 +457,47 @@ class Porte:
         self.scenes += 1
         print(f"scene {self.scenes} : {nom}")
 
-    def lancer(self, out, binaire, n_list, reps, env_extra=None, lanceur=None):
+    def lancer(self, out, binaire, n_list, reps, env_extra=None, lanceur=None, outils=None,
+               remplacements=None):
+        """Lance le lanceur (ou un LANCEUR MUTANT : `outils` substitue a
+        l'ancre les faux outils {nom: chemin}, `remplacements` remplace des
+        lignes exactes) ; l'environnement nominal ne porte aucune variable
+        refusee (elles sont posees explicitement par les scenes)."""
         env = dict(os.environ, THREADS="1", CPUS=self.cpu, FAMILY="uniform")
+        for v in VARIABLES_REFUSEES:
+            env.pop(v, None)
         if env_extra:
             env.update(env_extra)
+        if outils or remplacements:
+            lanceur = self.lanceur_mutant(out.parent / f"mutant_{out.name}", outils, remplacements)
         argv = ["bash", str(lanceur or self.lanceur), str(out), str(binaire)]
         if n_list is not None:
             argv.append(n_list)
         if reps is not None:
             argv.append(reps)
         return subprocess.run(argv, capture_output=True, text=True, env=env)
+
+    def lanceur_mutant(self, dossier, outils=None, remplacements=None):
+        """Copie du lanceur (avec l'agregateur a cote, qu'il archive) ou
+        l'ancre ANCRE_PORTE_OUTILS devient `OUTIL[nom]="faux"` — le seul
+        chemin par lequel un faux outil peut encore atteindre les controles
+        finaux, le PATH ne les portant plus."""
+        dossier.mkdir()
+        shutil.copy(self.agregateur, dossier / "sonde_ablation_reduce.py")
+        texte = self.lanceur.read_text(encoding="utf-8")
+        if outils:
+            lignes = texte.splitlines()
+            idx = [i for i, l in enumerate(lignes) if l.startswith(ANCRE_OUTILS)]
+            self.check("lanceur mutant : ancre ANCRE_PORTE_OUTILS presente une fois", len(idx) == 1)
+            if idx:
+                lignes[idx[0]:idx[0] + 1] = [f'OUTIL[{k}]="{v}"' for k, v in outils.items()]
+            texte = "\n".join(lignes) + "\n"
+        for ancien, nouveau in (remplacements or ()):
+            self.check(f"lanceur mutant : cible presente ({ancien[:40]!r})", ancien in texte)
+            texte = texte.replace(ancien, nouveau, 1)
+        chemin = dossier / "sonde_ablation_reduce.sh"
+        ecrire_exec(chemin, texte)
+        return chemin
 
     def env_mutant(self, base, mutant, appel):
         compteur = base / f"compteur_{mutant}"
@@ -474,21 +573,76 @@ def retirer_ligne(p, path, prefixe, nom):
 
 
 def retrograder_v2(p, dossier):
-    """META v4 -> v2 : schema v2 et retrait des trois champs d'identite et de
-    l'interpreteur (le lanceur v2 ne les gravait pas) ; le reste est inchange."""
+    """META v5 -> v2 : schema v2 et retrait des trois champs d'identite, de
+    l'interpreteur et des champs v5 (le lanceur v2 ne les gravait pas) ; le
+    reste est inchange."""
     meta = dossier / "META.txt"
     remplacer_ligne(p, meta, "schema=", f"schema={SCHEMA_V2}", "retrogradation v2")
-    for champ in CHAMPS_V3 + CHAMPS_V4:
+    for champ in CHAMPS_V3 + CHAMPS_V4 + CHAMPS_V5:
         retirer_ligne(p, meta, f"{champ}=", "retrogradation v2")
 
 
 def retrograder_v3(p, dossier):
-    """META v4 -> v3 : schema v3 et retrait du seul interpreteur (le lanceur
-    v3 ne le gravait pas) ; les champs d'identite restent."""
+    """META v5 -> v3 : schema v3 et retrait de l'interpreteur et des champs v5
+    (le lanceur v3 ne les gravait pas) ; les champs d'identite restent."""
     meta = dossier / "META.txt"
     remplacer_ligne(p, meta, "schema=", f"schema={SCHEMA_V3}", "retrogradation v3")
-    for champ in CHAMPS_V4:
+    for champ in CHAMPS_V4 + CHAMPS_V5:
         retirer_ligne(p, meta, f"{champ}=", "retrogradation v3")
+
+
+def retrograder_v4(p, dossier):
+    """META v5 -> v4 : schema v4 et retrait des seuls champs v5 (outils,
+    topologie, cpuset, affinite) ; interpreteur et identite restent."""
+    meta = dossier / "META.txt"
+    remplacer_ligne(p, meta, "schema=", f"schema={SCHEMA_V4}", "retrogradation v4")
+    for champ in CHAMPS_V5:
+        retirer_ligne(p, meta, f"{champ}=", "retrogradation v4")
+
+
+def verifier_outils_meta(p, meta, nom):
+    """v5 au META : outils= (chemins absolus canoniques, ELF, sha256
+    recalcules EGAUX, tous les outils de la liste fermee), topologie=,
+    cpuset= et affinite= coherents avec lscpu et l'affinite de la porte."""
+    outils = {}
+    for tok in meta.get("outils", "").split():
+        nom_outil, _, reste = tok.partition("=")
+        chemin, _, h = reste.rpartition(":")
+        outils[nom_outil] = (chemin, h)
+    p.check(f"{nom} : outils= grave pour toute la liste fermee ({len(OUTILS)} outils)",
+            set(OUTILS) <= set(outils), f"manque={sorted(set(OUTILS) - set(outils))}")
+    for o in OUTILS:
+        chemin, h = outils.get(o, ("", ""))
+        ok = (os.path.isabs(chemin) and os.path.realpath(chemin) == chemin
+              and os.path.isfile(chemin) and os.access(chemin, os.X_OK))
+        p.check(f"{nom} : outil {o} = chemin absolu canonique executable", ok, repr(chemin))
+        if ok:
+            with open(chemin, "rb") as f:
+                p.check(f"{nom} : outil {o} est un binaire ELF", f.read(4) == b"\x7fELF")
+            p.check(f"{nom} : outil {o} sha256 recalcule == grave", sha256(chemin) == h)
+    aff = os.sched_getaffinity(0)
+    p.check(f"{nom} : affinite= cpus == CPUS de la porte, 1 fil materiel sur 1 coeur",
+            meta.get("affinite", "").startswith(
+                f"cpus={p.cpu} fils_materiels=1 coeurs_physiques=1 sockets=1 (1 fils materiels sur "
+                "1 coeurs physiques"), repr(meta.get("affinite")))
+    topo = meta.get("topologie", "")
+    p.check(f"{nom} : topologie= sockets/coeurs/fils/cpus_en_ligne graves",
+            topo.startswith("sockets=") and " coeurs=" in topo and " fils=" in topo
+            and " cpus_en_ligne=" in topo and "lscpu -p" in topo, repr(topo))
+    cpuset = meta.get("cpuset", "")
+    p.check(f"{nom} : cpuset= liste et masque du lanceur graves, CPU de la porte inclus",
+            " masque=" in cpuset and "Cpus_allowed_list" in cpuset
+            and int(p.cpu) in expandre(cpuset.split()[0]), repr(cpuset))
+    p.check(f"{nom} : cpuset= ⊆ affinite de la porte", expandre(cpuset.split()[0]) <= aff
+            if cpuset else False)
+
+
+def expandre(spec):
+    cpus = set()
+    for part in spec.split(","):
+        a, _, b = part.partition("-")
+        cpus.update(range(int(a), int(b or a) + 1))
+    return cpus
 
 
 def scene_nominal(p, base, faux):
@@ -503,7 +657,8 @@ def scene_nominal(p, base, faux):
     meta = lire_kv(out / "META.txt")
     p.check("nominal : statut = libelle exploratoire exact",
             meta.get("statut") == LIBELLE_STATUT, repr(meta.get("statut")))
-    p.check("nominal : schema v4", meta.get("schema") == SCHEMA, repr(meta.get("schema")))
+    p.check("nominal : schema v5", meta.get("schema") == SCHEMA, repr(meta.get("schema")))
+    verifier_outils_meta(p, meta, "nominal")
     interp = meta.get("interpreteur", "")
     p.check("nominal : interpreteur= grave, absolu, canonique, executable, binaire ELF",
             os.path.isabs(interp) and os.path.realpath(interp) == interp
@@ -720,7 +875,7 @@ def scene_manifeste(p, base, faux):
     ecrire_exec(fakebin / "sha256sum", FAUX_SHA256SUM.replace("%REAL%", reel))
     out = base / "manifeste"
     partial = Path(str(out) + ".partial")
-    r = p.lancer(out, faux, "64", "4", {"PATH": f"{fakebin}:{os.environ['PATH']}"})
+    r = p.lancer(out, faux, "64", "4", outils={"sha256sum": str(fakebin / "sha256sum")})
     p.check("manifeste altere : rc=3", r.returncode == 3, f"rc={r.returncode}")
     p.check("manifeste altere : jamais publie, reste en .partial",
             not out.exists() and partial.is_dir())
@@ -750,7 +905,7 @@ def scene_produit(p, base, bench):
     laxiste = base / "faux_laxiste"
     refus_inconnu = '*) echo "REFUS : arguments (mutant inconnu ${inject})" >&2; exit 2 ;;'
     p.check("laxiste : la clause de refus existe dans le faux", refus_inconnu in FAUX_SONDE)
-    ecrire_exec(laxiste, FAUX_SONDE.replace(refus_inconnu, "*) ;;"))
+    ecrire_exec(laxiste, FAUX_SONDE.replace(refus_inconnu, "*) ;;").replace("%OUTILS%", " ".join(OUTILS)))
     out2 = base / "laxiste"
     r2 = p.lancer(out2, laxiste, "64", "4")
     p.check("binaire acceptant un --inject= inconnu : refus 2", r2.returncode == 2,
@@ -797,12 +952,14 @@ def scene_hash_vide(p, base, faux, nominal):
     p.remplacer(st, f"sha256_apres={h}", "sha256_apres=", ".status sha256_apres= vide")
     p.refus_agregateur(".status sha256_apres= vide", recu,
                        ("ablation-mat-sans-tris_n128_r3.status", "sha256_apres", "64-hex"))
-    # Lanceur : sha256sum MUET en PATH => refus 2, aucun hash vide grave, aucun .partial.
+    # Lanceur : sha256sum MUET substitue a l'outil resolu (lanceur mutant :
+    # le PATH ne peut plus l'y porter) => refus 2 des le hash des outils,
+    # aucun hash vide grave, aucun .partial.
     fakebin = base / "fakebin_sha_vide"
     fakebin.mkdir()
     ecrire_exec(fakebin / "sha256sum", FAUX_SHA256SUM_VIDE)
     out = base / "sha_vide"
-    r = p.lancer(out, faux, "64", "4", {"PATH": f"{fakebin}:{os.environ['PATH']}"})
+    r = p.lancer(out, faux, "64", "4", outils={"sha256sum": str(fakebin / "sha256sum")})
     p.check("sha256sum muet : lanceur refus 2", r.returncode == 2, f"rc={r.returncode}")
     p.check("sha256sum muet : motif 64-hex au refus", "64-hex" in r.stderr, repr(r.stderr[-200:]))
     p.check("sha256sum muet : aucun dossier ni .partial laisse",
@@ -965,10 +1122,23 @@ def scene_runs_obligatoires(p, base, nominal, bench):
     retirer_ligne(p, v3b / "META.txt", "identite_cible=", "v3 sans identite_cible")
     p.refus_agregateur("schema v3 sans identite_cible (obligatoire des v3)", v3b,
                        ("champ obligatoire", "identite_cible="))
-    v4b = p.copier_recu(base, nominal, "v4_sans_identite")
-    retirer_ligne(p, v4b / "META.txt", "identite_cible=", "v4 sans identite_cible")
-    p.refus_agregateur("schema v4 sans identite_cible", v4b,
+    v5b = p.copier_recu(base, nominal, "v5_sans_identite")
+    retirer_ligne(p, v5b / "META.txt", "identite_cible=", "v5 sans identite_cible")
+    p.refus_agregateur("schema v5 sans identite_cible", v5b,
                        ("champ obligatoire", "identite_cible="))
+    # Schema v4 explicite : accepte, les champs v5 seuls en claim borne.
+    v4 = p.copier_recu(base, nominal, "schema_v4")
+    retrograder_v4(p, v4)
+    a = p.agreger(v4)
+    p.check("schema v4 explicite : agregateur 0, « outils / topologie / cpuset / affinite : claim borne »",
+            a.returncode == 0
+            and "# claim borne, NON VERIFIE : outils / topologie / cpuset / affinite : claim borne" in a.stdout
+            and "NON graves : rien ne prouve qu'ils ont ete resolus hors PATH" in a.stdout
+            and "identite_cible / " not in a.stdout, f"rc={a.returncode} {a.stderr[-200:]!r}")
+    for champ in CHAMPS_V5:
+        v5c = p.copier_recu(base, nominal, f"v5_sans_{champ}")
+        retirer_ligne(p, v5c / "META.txt", f"{champ}=", f"v5 sans {champ}")
+        p.refus_agregateur(f"schema v5 sans {champ}", v5c, ("champ obligatoire", f"{champ}="))
     v1 = p.copier_recu(base, nominal, "schema_v1")
     remplacer_ligne(p, v1 / "META.txt", "schema=", "schema=e-hgp.sonde-ablation-reduce.v1", "v1")
     p.refus_agregateur("schema v1 (jamais accepte)", v1, ("schema", "v1"))
@@ -980,8 +1150,10 @@ def scene_runs_obligatoires(p, base, nominal, bench):
         a = p.agreger(publie)
         apres = sorted((str(f.relative_to(publie)), f.stat().st_mtime_ns)
                        for f in publie.rglob("*") if f.is_file())
-        p.check("reçu publie 20260902b (v2) : agregateur 0, claim borne imprime, reçu intact",
-                a.returncode == 0 and "claim borne, NON VERIFIE" in a.stdout and avant == apres,
+        p.check("reçu publie 20260902b (v2) : agregateur 0, claim borne imprime, liaison VERIFIEE, reçu intact",
+                a.returncode == 0 and "claim borne, NON VERIFIE" in a.stdout and avant == apres
+                and "liaison commande / META / sortie VERIFIEE sur chaque tuple" in a.stdout
+                and "coord par taille : n=8000:coord=200 n=16000:coord=251 n=32000:coord=317" in a.stdout,
                 f"rc={a.returncode} {a.stderr[-200:]!r}")
 
 
@@ -1089,7 +1261,7 @@ def scene_protocoles_alteres(p, base, faux, nominal):
                 .replace("%CIBLE%", "protocole_lanceur.sh"))
     out = base / "protocole_tardif"
     partial = Path(str(out) + ".partial")
-    r = p.lancer(out, faux, "64", "4", {"PATH": f"{fakebin}:{os.environ['PATH']}"})
+    r = p.lancer(out, faux, "64", "4", outils={"sha256sum": str(fakebin / "sha256sum")})
     p.check("copie du lanceur alteree apres le manifeste : rc=3", r.returncode == 3,
             f"rc={r.returncode} {r.stderr[-200:]!r}")
     p.check("copie du lanceur alteree : jamais publiee, reste en .partial",
@@ -1175,13 +1347,25 @@ def scene_identite_cible(p, base, faux, nominal, bench):
                 "bras=drop-nonmerge" in (partial2 / "plan.txt").read_text(encoding="utf-8"))
     # La cible REELLE, si elle est construite : elle accepte un mutant produit
     # (claim borne, verifie ; jamais une mesure).
+    # Deux issues honnetes : la cible ACCEPTE drop-nonmerge (claim P2 borne,
+    # non fermable par le lanceur — etat du 2 septembre au matin) ou le
+    # REFUSE par le code 2 exact (claim P2 ferme cote binaire par un commit
+    # ulterieur) ; tout autre code est un echec de porte. L'issue observee
+    # est imprimee, jamais supposee.
     reel = bench.parent.parent / "build" / "v6" / "mhgp6_profile_sonde"
     if reel.is_file() and os.access(reel, os.X_OK):
         try:
             rr = subprocess.run([str(reel), "--family=uniform", "--n=64", "--threads=1",
                                  "--inject=drop-nonmerge"], capture_output=True, timeout=300)
-            p.check("build/v6/mhgp6_profile_sonde accepte --inject=drop-nonmerge (claim P2 borne, "
-                    "non fermable par le lanceur)", rr.returncode == 0, f"rc={rr.returncode}")
+            p.check("build/v6/mhgp6_profile_sonde sur --inject=drop-nonmerge : code 0 (accepte, "
+                    "claim P2 borne) ou 2 exact (refuse, claim P2 ferme cote binaire)",
+                    rr.returncode in (0, 2), f"rc={rr.returncode}")
+            if rr.returncode == 0:
+                print("  build/v6/mhgp6_profile_sonde ACCEPTE --inject=drop-nonmerge : claim P2 "
+                      "borne, non fermable par le lanceur (identite tenue par les seuls --inject= emis)")
+            elif rr.returncode == 2:
+                print("  build/v6/mhgp6_profile_sonde REFUSE --inject=drop-nonmerge (code 2) : claim "
+                      "P2 ferme cote binaire au commit courant ; le lanceur garde sa liste fermee")
         except subprocess.TimeoutExpired:
             p.check("build/v6/mhgp6_profile_sonde : sonde d'identite en temps borne", False)
     else:
@@ -1229,7 +1413,7 @@ def scene_toctou(p, base, faux):
                 .replace("%CIBLE%", "out/aucune_n64_r1.txt"))
     out2 = base / "toctou_manifeste"
     partial2 = Path(str(out2) + ".partial")
-    r2 = p.lancer(out2, faux, "64", "4", {"PATH": f"{fakebin2}:{os.environ['PATH']}"})
+    r2 = p.lancer(out2, faux, "64", "4", outils={"sha256sum": str(fakebin2 / "sha256sum")})
     p.check("mutation apres le manifeste : rc=3", r2.returncode == 3,
             f"rc={r2.returncode} {r2.stderr[-200:]!r}")
     p.check("mutation apres le manifeste : jamais publiee, reste en .partial",
@@ -1252,7 +1436,7 @@ def scene_diff_fail_open(p, base, faux):
         ecrire_exec(fakebin / "diff", FAUX_DIFF.replace("%RC%", str(rc_faux)))
         out = base / f"diff_rc{rc_faux}"
         partial = Path(str(out) + ".partial")
-        r = p.lancer(out, faux, "64", "4", {"PATH": f"{fakebin}:{os.environ['PATH']}"})
+        r = p.lancer(out, faux, "64", "4", outils={"diff": str(fakebin / "diff")})
         p.check(f"faux diff rc={rc_faux} muet : rc=3", r.returncode == 3,
                 f"rc={r.returncode} {r.stderr[-200:]!r}")
         p.check(f"faux diff rc={rc_faux} : jamais publie, reste en .partial",
@@ -1417,8 +1601,9 @@ def scene_contrat_meta(p, base, nominal):
     v3 = p.copier_recu(base, nominal, "schema_v3")
     retrograder_v3(p, v3)
     a = p.agreger(v3)
-    p.check("schema v3 explicite : agregateur 0, « interpreteur : claim borne, NON VERIFIE » seul",
-            a.returncode == 0 and "# claim borne, NON VERIFIE : interpreteur : claim borne" in a.stdout
+    p.check("schema v3 explicite : agregateur 0, « interpreteur / outils / … : claim borne, NON VERIFIE » seul",
+            a.returncode == 0 and "# claim borne, NON VERIFIE : interpreteur / outils / topologie / "
+            "cpuset / affinite : claim borne" in a.stdout
             and "identite_cible / " not in a.stdout, f"rc={a.returncode} {a.stderr[-200:]!r}")
     v3b = p.copier_recu(base, nominal, "schema_v3_interp_relatif")
     remplacer_ligne(p, v3b / "META.txt", "schema=", f"schema={SCHEMA_V3}", "v3 avec interpreteur")
@@ -1469,6 +1654,233 @@ def scene_profil_kind(p, base, nominal):
             f"rc={a.returncode} {a.stderr[-200:]!r}")
 
 
+def scene_outils_hors_path(p, base, faux, nominal):
+    p.scene("(y) outils hors PATH : faux outils deposes apres la resolution / presents avant / fonctions exportees => jamais executes, publie ; LD_PRELOAD, BASH_ENV, PYTHONPATH => refus 2 ; outil inexistant ou non ELF => refus 2 ; CPUS hors machine => refus 2")
+    # 1. Faux outils DEPOSES APRES la resolution : un dossier VIDE en tete de
+    #    PATH au lancement ; le faux binaire y ecrit, a son premier tuple
+    #    (appel 3), un faux de chaque outil de la liste fermee, qui tracerait
+    #    tout appel. Le reçu est publie et la trace reste absente.
+    depot = base / "depot_faux_outils"
+    depot.mkdir()
+    trace = base / "trace_faux_outils.txt"
+    env = p.env_mutant(base, "deposer_faux_outils", 3)
+    env.update({"PATH": f"{depot}:{os.environ['PATH']}", "FAKE_OUTILS_DIR": str(depot),
+                "FAKE_TRACE": str(trace)})
+    out = base / "outils_deposes"
+    r = p.lancer(out, faux, "64", "4", env)
+    p.check("faux outils deposes apres la resolution : rc=0, publie", r.returncode == 0
+            and out.is_dir() and not Path(str(out) + ".partial").exists(),
+            f"rc={r.returncode} {r.stderr[-300:]!r}")
+    p.check("faux outils deposes : les faux ont bien ete deposes (mutant actif)",
+            all((depot / o).is_file() for o in OUTILS), f"{sorted(x.name for x in depot.iterdir())[:5]}")
+    p.check("faux outils deposes : AUCUN faux execute (trace absente)", not trace.exists(),
+            trace.read_text(encoding="utf-8")[:300] if trace.exists() else "")
+    # Temoin de causalite : un faux depose, appele directement, TRACE bien.
+    if (depot / "mv").is_file():
+        subprocess.run(["bash", str(depot / "mv"), "a", "b"], env={"FAKE_TRACE": str(trace)},
+                       capture_output=True)
+        p.check("faux outils deposes : temoin — un faux appele directement laisse une trace",
+                trace.is_file() and "mv a b" in trace.read_text(encoding="utf-8"))
+        trace.unlink(missing_ok=True)
+    if out.is_dir():
+        meta = lire_kv(out / "META.txt")
+        verifier_outils_meta(p, meta, "faux outils deposes")
+        p.check("faux outils deposes : aucun chemin grave sous le depot",
+                str(depot) not in meta.get("outils", "") and str(depot) not in meta.get("interpreteur", ""))
+    # 2. Faux mv et sha256sum PRESENTS en PATH AVANT le lancement (scripts) :
+    #    jamais consultes — `command -v -p` ignore le PATH, avant comme apres.
+    #    Honnetement : un ELF imposteur dans /usr/bin (root) serait accepte
+    #    et grave ; la porte ne peut pas le simuler sans root, elle le dit.
+    fakebin = base / "fakebin_avant"
+    fakebin.mkdir()
+    trace2 = base / "trace_avant.txt"
+    for o in ("mv", "sha256sum", "cmp", "diff", "find", "sort", "taskset"):
+        ecrire_exec(fakebin / o, '#!/usr/bin/env bash\nprintf "%s %s\\n" "$0" "$*" >> "$FAKE_TRACE"\nexit 0\n')
+    out2 = base / "outils_avant"
+    r2 = p.lancer(out2, faux, "64", "4", {"PATH": f"{fakebin}:{os.environ['PATH']}",
+                                          "FAKE_TRACE": str(trace2)})
+    p.check("faux outils en PATH avant le lancement : rc=0, publie, trace absente",
+            r2.returncode == 0 and out2.is_dir() and not trace2.exists(),
+            f"rc={r2.returncode} {r2.stderr[-300:]!r}")
+    subprocess.run(["bash", "-c", "sha256sum META.txt"], capture_output=True,
+                   env={"PATH": f"{fakebin}:{os.environ['PATH']}", "FAKE_TRACE": str(trace2)})
+    p.check("faux outils en PATH avant : temoin — un shell ordinaire, lui, execute le faux (trace)",
+            trace2.is_file() and "sha256sum META.txt" in trace2.read_text(encoding="utf-8"))
+    trace2.unlink(missing_ok=True)
+    if out2.is_dir():
+        p.check("faux outils en PATH avant : outils= graves hors du faux dossier, sha256 recalcules",
+                str(fakebin) not in lire_kv(out2 / "META.txt").get("outils", ""))
+        verifier_outils_meta(p, lire_kv(out2 / "META.txt"), "faux outils avant")
+    # 3. Fonctions `mv` et `sha256sum` EXPORTEES dans l'environnement
+    #    (BASH_FUNC_x%%) : le premier bash les importe, le re-exec en mode
+    #    privilegie (`bash -p`) ne les importe plus ; jamais appelees.
+    trace3 = base / "trace_fonctions.txt"
+    corps = '() { printf "%s %s\\n" fonction "$*" >> "$FAKE_TRACE"; return 0; }'
+    out3 = base / "outils_fonctions"
+    r3 = p.lancer(out3, faux, "64", "4", {"BASH_FUNC_mv%%": corps, "BASH_FUNC_sha256sum%%": corps,
+                                          "BASH_FUNC_cmp%%": corps, "FAKE_TRACE": str(trace3)})
+    p.check("fonctions mv/sha256sum/cmp exportees : rc=0, publie, jamais appelees (mode privilegie)",
+            r3.returncode == 0 and out3.is_dir() and not trace3.exists(),
+            f"rc={r3.returncode} {r3.stderr[-300:]!r}")
+    subprocess.run(["bash", "-c", "mv x y"], capture_output=True,
+                   env=dict(os.environ, **{"BASH_FUNC_mv%%": corps, "FAKE_TRACE": str(trace3)}))
+    p.check("fonctions exportees : temoin — un bash ordinaire, lui, importe et appelle la fonction",
+            trace3.is_file() and "fonction x y" in trace3.read_text(encoding="utf-8"))
+    trace3.unlink(missing_ok=True)
+    # 4. Environnement de chargement etranger : refus 2 avant toute ecriture.
+    for var, val in (("LD_PRELOAD", "/nonexistent/hostile.so"), ("BASH_ENV", str(base / "inexistant.sh")),
+                     ("PYTHONPATH", str(base)), ("LD_LIBRARY_PATH", str(base))):
+        out4 = base / f"env_{var}"
+        r4 = p.lancer(out4, faux, "64", "4", {var: val})
+        p.check(f"{var} defini : refus 2, motif nomme la variable", r4.returncode == 2
+                and f"variable {var} definie" in r4.stderr, f"rc={r4.returncode} {r4.stderr[-200:]!r}")
+        p.check(f"{var} defini : aucun dossier ni .partial laisse",
+                not out4.exists() and not Path(str(out4) + ".partial").exists())
+    # 5. Lanceur mutant exigeant un outil inexistant, puis un script standard
+    #    (non ELF) : refus 2, aucune ecriture.
+    out5 = base / "outil_inexistant"
+    r5 = p.lancer(out5, faux, "64", "4",
+                  remplacements=[(LIGNE_OUTILS, LIGNE_OUTILS[:-1] + ' outil_inexistant_de_porte"')])
+    p.check("outil inexistant exige : refus 2 « non resoluble hors PATH »", r5.returncode == 2
+            and "outil outil_inexistant_de_porte non resoluble hors PATH" in r5.stderr,
+            f"rc={r5.returncode} {r5.stderr[-200:]!r}")
+    p.check("outil inexistant : aucun dossier ni .partial laisse",
+            not out5.exists() and not Path(str(out5) + ".partial").exists())
+    ldd = shutil.which("ldd", path="/usr/bin:/bin")
+    if ldd and open(os.path.realpath(ldd), "rb").read(2) == b"#!":
+        out6 = base / "outil_script"
+        r6 = p.lancer(out6, faux, "64", "4", remplacements=[(LIGNE_OUTILS, LIGNE_OUTILS[:-1] + ' ldd"')])
+        p.check("outil standard non ELF exige (ldd, script) : refus 2", r6.returncode == 2
+                and "outil ldd non resoluble" in r6.stderr and "non ELF" in r6.stderr,
+                f"rc={r6.returncode} {r6.stderr[-200:]!r}")
+        p.check("outil non ELF : aucun dossier ni .partial laisse",
+                not out6.exists() and not Path(str(out6) + ".partial").exists())
+    else:
+        print("  (ldd absent ou binaire : refus « non ELF » non re-verifie sur un script standard)")
+    # 6. Faux outil substitue a l'ancre (mv menteur : code 0 sans deplacer) —
+    #    la publication ne peut pas etre feinte : le lanceur mutant l'appelle
+    #    et le reçu reste en .partial ; rc 0 du lanceur SERAIT un faux
+    #    positif, mais le manifeste, les hashes et l'absence du dossier
+    #    publie le trahissent. Ce cas documente la porte residuelle de
+    #    l'ancre (un lanceur modifie), pas une couture du lanceur publie.
+    out7 = base / "mv_menteur"
+    mv_faux = base / "mv_faux"
+    ecrire_exec(mv_faux, "#!/usr/bin/env bash\nexit 0\n")
+    r7 = p.lancer(out7, faux, "64", "4", outils={"mv": str(mv_faux)})
+    p.check("mv menteur substitue par un lanceur mutant : reçu jamais publie (reste en .partial)",
+            not out7.exists() and Path(str(out7) + ".partial").is_dir()
+            and str(mv_faux) in lire_kv(Path(str(out7) + ".partial") / "META.txt").get("outils", ""),
+            f"rc={r7.returncode}")
+    # 7. CPUS hors grammaire (pas) ou hors machine : refus 2 avant toute ecriture.
+    for cpus, motif in (("0-1:2", "hors grammaire"), ("1-0", "hors grammaire"), ("4095", "")):
+        out8 = base / f"cpus_{cpus.replace(':', '_').replace('-', '_')}"
+        r8 = p.lancer(out8, faux, "64", "4", {"CPUS": cpus})
+        p.check(f"CPUS={cpus} : refus 2 {motif}", r8.returncode == 2 and motif in r8.stderr,
+                f"rc={r8.returncode} {r8.stderr[-200:]!r}")
+        p.check(f"CPUS={cpus} : aucun dossier ni .partial laisse",
+                not out8.exists() and not Path(str(out8) + ".partial").exists())
+
+
+def scene_liaison(p, base, nominal):
+    p.scene("(z) liaison commande / META / sortie : argv exact, ligne d'identite, profil_kind, coord ; v5 outils/topologie/cpuset/affinite : agregateur 1 ; v4 explicite : 0 + claim borne")
+    st = "out/ablation-mat-sans-tris_n64_r2.status"
+    txt = "out/ablation-mat-sans-tris_n64_r2.txt"
+    nom_st = "ablation-mat-sans-tris_n64_r2.status"
+    nom_txt = "ablation-mat-sans-tris_n64_r2.txt"
+    cas_status = [
+        ("threads4", "--threads=1", "--threads=4", ("argv reconstruit", "position", "--threads=4")),
+        ("taskset", f"taskset -c {p.cpu} ", "taskset -c 0-3 ", ("argv reconstruit", "'0-3'")),
+        ("en_plus", "--inject=ablation-mat-sans-tris", "--inject=ablation-mat-sans-tris --n=999",
+         ("argv reconstruit", "en plus", "--n=999")),
+        ("en_moins", " --seed=3", "", ("argv reconstruit", "en moins", "--seed=3")),
+        ("ordre", "--s=8 --smax=11", "--smax=11 --s=8", ("argv reconstruit", "ordre different")),
+        ("fold_join0", "--fold-join=1", "--fold-join=0", ("argv reconstruit", "--fold-join=0")),
+        ("famille_cmd", "--family=uniform", "--family=terrain", ("argv reconstruit", "terrain")),
+    ]
+    for nom, ancien, nouveau, motifs in cas_status:
+        recu = p.copier_recu(base, nominal, f"liaison_{nom}")
+        p.remplacer(recu / st, ancien, nouveau, f"liaison {nom}")
+        p.refus_agregateur(f"liaison .status {nom}", recu, (nom_st,) + motifs)
+    recu = p.copier_recu(base, nominal, "liaison_en_moins_temoin")
+    p.remplacer(recu / "out/aucune_n64_r2.status", " --seed=3", "", "temoin sans --seed")
+    p.refus_agregateur("liaison .status temoin sans --seed=3 (argument en moins)", recu,
+                       ("aucune_n64_r2.status", "argv reconstruit", "en moins", "--seed=3"))
+    cas_txt = [
+        ("identite_threads4", "seed=3 threads=1 ", "seed=3 threads=4 ",
+         ("ligne d'identite", "threads='4'", "--threads='1'")),
+        ("identite_famille", "famille=uniform n=64", "famille=terrain n=64",
+         ("ligne d'identite", "famille='terrain'", "--family='uniform'")),
+        ("identite_n", "famille=uniform n=64", "famille=uniform n=65",
+         ("ligne d'identite", "n='65'")),
+        ("kind_inflight", "inflight_demande=2", "inflight_demande=1",
+         ("profil_kind inflight_demande='1'", "--fold-inflight='2'")),
+        ("coord", "coord=200", "coord=201", ("coord='201'", "'200'", "meme entree")),
+    ]
+    for nom, ancien, nouveau, motifs in cas_txt:
+        recu = p.copier_recu(base, nominal, f"liaison_{nom}")
+        p.remplacer(recu / txt, ancien, nouveau, f"liaison {nom}")
+        p.refus_agregateur(f"liaison sortie {nom}", recu, (nom_txt,) + motifs)
+    recu = p.copier_recu(base, nominal, "liaison_identite_absente")
+    retirer_ligne(p, recu / txt, "famille=", "identite absente")
+    p.refus_agregateur("ligne d'identite absente", recu, (nom_txt, "ligne d'identite", "0 occurrence"))
+    recu = p.copier_recu(base, nominal, "liaison_identite_dupliquee")
+    with open(recu / txt, "a", encoding="utf-8") as f:
+        f.write("famille=uniform n=64 coord=200 s=8 smax=11 seed=3 threads=1 emis=0\n")
+    p.refus_agregateur("ligne d'identite dupliquee", recu, (nom_txt, "ligne d'identite", "2 occurrence"))
+    cas_meta = [
+        ("famille", "famille=", "famille=terrain",
+         (".status", "argv reconstruit", "'--family=terrain'")),
+        ("threads", "parametres=", "parametres=threads=8 cpus=%CPU% fold_inflight=2 fold_join=1 seed=3 s=8 smax=11",
+         (".status", "argv reconstruit", "'--threads=8'")),
+        ("sans_seed", "parametres=", "parametres=threads=1 cpus=%CPU% fold_inflight=2 fold_join=1 s=8 smax=11",
+         ("META.txt", "parametres= sans seed=")),
+        ("join0", "parametres=", "parametres=threads=1 cpus=%CPU% fold_inflight=2 fold_join=0 seed=3 s=8 smax=11",
+         ("META.txt", "fold_join='0' != '1'")),
+        ("cpus_grammaire", "parametres=", "parametres=threads=1 cpus=0-1:2 fold_inflight=2 fold_join=1 seed=3 s=8 smax=11",
+         ("META.txt", "cpus=", "hors grammaire")),
+        ("affinite_cpus", "affinite=", "affinite=cpus=0-3 fils_materiels=4 coeurs_physiques=2 sockets=1",
+         ("META.txt", "affinite cpus=0-3 != parametres cpus=")),
+        ("affinite_fils", "affinite=", "affinite=cpus=%CPU% fils_materiels=2 coeurs_physiques=1 sockets=1",
+         ("META.txt", "fils_materiels=2 != |cpus| = 1")),
+        ("cpuset_exclut", "cpuset=", "cpuset=4000-4001 masque=ff", ("META.txt", "hors du cpuset")),
+        ("cpuset_grammaire", "cpuset=", "cpuset=abc masque=ff", ("META.txt", "cpuset=", "hors grammaire")),
+        ("topologie_fils", "topologie=", "topologie=sockets=1 coeurs=1 fils=1 cpus_en_ligne=0-7",
+         ("META.txt", "topologie incoherente")),
+        ("topologie_hors_ligne", "topologie=", "topologie=sockets=1 coeurs=1 fils=1 cpus_en_ligne=4000",
+         ("META.txt", "hors des CPU en ligne")),
+        ("topologie_grammaire", "topologie=", "topologie=sockets=un coeurs=4 fils=8 cpus_en_ligne=0-7",
+         ("META.txt", "topologie=", "hors grammaire")),
+    ]
+    for nom, prefixe, ligne, motifs in cas_meta:
+        recu = p.copier_recu(base, nominal, f"liaison_meta_{nom}")
+        remplacer_ligne(p, recu / "META.txt", prefixe, ligne.replace("%CPU%", p.cpu), f"META {nom}")
+        p.refus_agregateur(f"META {nom}", recu, motifs)
+    meta_nom = lire_kv(nominal / "META.txt")
+    outils = meta_nom.get("outils", "")
+    p.check("liaison : outils= nominal porte mv=", " mv=" in " " + outils)
+    tok_mv = next((t for t in outils.split() if t.startswith("mv=")), "")
+    cas_outils = [
+        ("sans_mv", outils.replace(tok_mv, "").strip(), ("outils= sans ['mv']",)),
+        ("relatif", outils.replace(tok_mv, "mv=usr/bin/mv:" + tok_mv.rsplit(":", 1)[1]),
+         ("outils= jeton hors grammaire", "mv=usr/bin/mv")),
+        ("hash_court", outils.replace(tok_mv, tok_mv[:-1]), ("outils= jeton hors grammaire", "mv=")),
+        ("non_canonique", outils.replace(tok_mv, "mv=/usr/bin/../bin/mv:" + tok_mv.rsplit(":", 1)[1]),
+         ("chemin non canonique pour mv",)),
+        ("duplique", outils + " " + tok_mv, ("outils= nom mv duplique",)),
+    ]
+    for nom, ligne, motifs in cas_outils:
+        recu = p.copier_recu(base, nominal, f"liaison_outils_{nom}")
+        remplacer_ligne(p, recu / "META.txt", "outils=", "outils=" + ligne, f"outils {nom}")
+        p.refus_agregateur(f"META outils {nom}", recu, ("META.txt",) + motifs)
+    # Temoin de causalite : le nominal est accepte et son resume porte la
+    # liaison verifiee et les quatre champs v5.
+    a = p.agreger(nominal)
+    p.check("liaison : nominal accepte, resume porte la liaison VERIFIEE et les champs v5",
+            a.returncode == 0 and "liaison commande / META / sortie VERIFIEE sur chaque tuple" in a.stdout
+            and "coord par taille : n=64:coord=200 n=128:coord=200" in a.stdout
+            and all(f"# {k}=" in a.stdout for k in CHAMPS_V5), f"rc={a.returncode} {a.stderr[-200:]!r}")
+
+
 def main():
     if len(sys.argv) != 2:
         print("usage: sonde_ablation_gate.py <dossier bench>", file=sys.stderr)
@@ -1481,7 +1893,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix="sonde_ablation_gate_") as td:
         base = Path(td)
         faux = base / "faux_sonde"
-        ecrire_exec(faux, FAUX_SONDE)
+        ecrire_exec(faux, FAUX_SONDE.replace("%OUTILS%", " ".join(OUTILS)))
         scene_nominal(p, base, faux)
         scene_refus_parametres(p, base, faux)
         scene_copie_alteree(p, base, faux)
@@ -1507,6 +1919,8 @@ def main():
             scene_toctou_semantique(p, base, faux)
             scene_contrat_meta(p, base, nominal)
             scene_profil_kind(p, base, nominal)
+            scene_outils_hors_path(p, base, faux, nominal)
+            scene_liaison(p, base, nominal)
     if p.echecs:
         print(f"sonde_ablation_gate : {p.echecs} controle(s) en echec sur {p.scenes} scenes")
         return 1
@@ -1515,7 +1929,8 @@ def main():
           "hash vide, champ duplique, plan non Williams, inventaire exact, compteurs obligatoires, "
           "profil malforme, repertoire inattendu, protocoles recalcules, identite de cible bornee, "
           "TOCTOU avant scellement, diff fail-open, TOCTOU semantique et reagregation hors PATH, "
-          "contrat META exact, profil_kind verrouille)")
+          "contrat META exact, profil_kind verrouille, outils hors PATH et topologie attestee, "
+          "liaison commande/META/sortie)")
     return 0
 
 

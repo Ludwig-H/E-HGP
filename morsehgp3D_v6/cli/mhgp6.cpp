@@ -13,6 +13,7 @@
 #include <cstring>
 #include <limits>
 #include <string>
+#include <string_view>
 
 #include "../src/cloud/families.hpp"
 #include "../src/core/parse.hpp"
@@ -29,6 +30,29 @@ bool parse_int_range(const char* text, long long lo, long long hi, long long* ou
   *out = (long long)v;
   return true;
 }
+
+#ifdef MHGP6_TESTING
+// ALLOWLIST de la cible de sonde (mhgp6_profile_sonde) : exactement les trois
+// ablations du reduce, separees par des virgules, aucun item vide (`--inject=`
+// et `--inject=,` refuses), jamais un mutant de production (render-active-only,
+// csr-*, ...) meme s'il figure au registre kMutants.
+bool sonde_inject_allowed(const char* csv) {
+  static constexpr const char* kAllowed[] = {"ablation-mat-sans-copie", "ablation-mat-sans-tris",
+                                             "ablation-post-cle-factice"};
+  const std::string_view s = csv;
+  if (s.empty()) return false;
+  size_t start = 0;
+  while (true) {
+    const size_t comma = s.find(',', start);
+    const std::string_view item = s.substr(start, comma == std::string_view::npos ? std::string_view::npos : comma - start);
+    bool known = false;
+    for (const char* a : kAllowed) known = known || item == a;
+    if (item.empty() || !known) return false;
+    if (comma == std::string_view::npos) return true;
+    start = comma + 1;
+  }
+}
+#endif
 
 }  // namespace
 
@@ -77,6 +101,10 @@ int main(int argc, char** argv) {
       // ordonnancement seul change (isolation de l'etage B pour le profil).
       ok = parse_int_range(s, 0, 1, &v) && ok;
       opt.fold_join_before_next_k = v != 0;
+    } else if (const char* s = val("--layout=")) {
+      // Route de STOCKAGE des deltas (palier KeyCSR) : classic (defaut) | csr ;
+      // valeur inconnue ou vide = refus 2. Option PRODUIT (hors MHGP6_TESTING).
+      ok = parse_forest_layout(s, &opt.forest_layout) && ok;
     } else if (const char* s = val("--pretest-query-min=")) {
       ok = parse_int_range(s, 0, std::numeric_limits<long long>::max(), &v) && ok;
       opt.pretest_query_min_points = (size_t)v;
@@ -103,9 +131,10 @@ int main(int argc, char** argv) {
       opt.digest = true;
 #ifdef MHGP6_TESTING
     } else if (const char* s = val("--inject=")) {
-      // Cible de SONDE seulement (mhgp6_profile_sonde) : ablations du reduce ;
-      // nom inconnu => refus 2. Le binaire produit ne connait pas l'option.
-      ok = mutants_enable(s) && ok;
+      // Cible de SONDE seulement (mhgp6_profile_sonde) : ALLOWLIST des trois
+      // ablations du reduce ; vide, item vide ou nom hors allowlist => refus 2.
+      // Le binaire produit ne connait pas l'option.
+      ok = sonde_inject_allowed(s) && mutants_enable(s) && ok;
 #endif
     } else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());

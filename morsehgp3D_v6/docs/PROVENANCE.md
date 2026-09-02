@@ -65,6 +65,16 @@ sector_kill,chord_kill,cell_grid,edge_cover}.hpp`,
 `src/forest/{plateau,fold,render}.hpp`, `src/parallel/{pool,sort}.hpp`,
 `oracle/obig.hpp`.
 
+Port des témoins du fold (2 septembre 2026, palier KeyCSR) :
+`tests/fold_csr_gate.cpp` porte les helpers de fixtures (`lvl`, `ev`,
+rendu texte gravé) de `morsehgp3D_v5/tests/fold_fixtures_gate.cpp` et le
+rejeu « catalogue + deltas → partition » de
+`morsehgp3D_v5/tests/delta_replay_gate.cpp` (pin v5 `bc66ade7`,
+`mhgp5→mhgp6`, lecture par la vue `ComponentDeltaView`) —
+`port_source_requalified` par les portes `mhgp6_fold_csr_*` exécutées ; la
+triple vérification (R)/(V)/(H) de la v5 n'est pas portée (`fold_live.hpp`
+n'existe pas en v6).
+
 Port GPU (1er septembre 2026, plan série C — blobs v5 épinglés) :
 `src/gpu/executor_pool.hpp` depuis `morsehgp3D_v5/src/gpu/executor_pool.hpp`
 (blob `4072df1c`) et `tests/executor_pool_gate.cpp` depuis

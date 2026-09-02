@@ -90,6 +90,10 @@ struct RunOptions {
   // (meme ordre de publication) ; seul l'ordonnancement change. Jamais un
   // mode de mesure du mur nominal.
   bool fold_join_before_next_k = false;
+  // ROUTE DE STOCKAGE des deltas (palier KeyCSR) : classic (defaut) | csr —
+  // meme objet, meme digest ; AUCUNE route de repli (un echec csr est un refus
+  // transactionnel, csr_fallback est mesure et vaut 0 par construction).
+  ForestLayout forest_layout = ForestLayout::kClassic;
   // Sonde E6 opt-in (--sonde-e6) : lecture seule, objet inchange.
   bool e6_probe = false;
   // Experimentation E3/G16 par bras (kOff = production).
@@ -144,6 +148,20 @@ struct RunResult {
   // et conservee a travers le RLE.
   u64 diag_candidates_capacity = 0;
   u64 peak_fold_inflight = 0;  // cycle de vie des workers B (reduction + digest + attente de publication + callback)
+  // STOCKAGE DES FORETS (palier KeyCSR) : signe par K a la publication, PROVISOIRE
+  // (efface par invalidate_provisional). csr_fallback est MESURE : aucune route de repli n'existe.
+  struct ForestStorageStats {
+    u8 kind = 0;  // ForestStorageKind construit
+    u64 deltas = 0, keys_parents = 0, keys_born = 0;
+    u64 meta_size = 0, meta_capacity = 0, offsets_size = 0, offsets_capacity = 0;
+    u64 parents_size = 0, parents_capacity = 0, born_size = 0, born_capacity = 0;
+    u64 csr_capacity_growths = 0, bytes_owned = 0;  // growths : csr seulement (classic non instrumente = 0)
+    u64 parents_off_back = 0, born_off_back = 0;    // csr : *_off.back() LUS (temoin independant des tailles d'arene)
+    bool bytes_exact = false;  // classic : borne inferieure (vecteurs internes non parcourus)
+  };
+  ForestLayout forest_layout = ForestLayout::kClassic;  // demande
+  u64 csr_fallback = 0, forest_storage_conformes = 0;
+  std::vector<ForestStorageStats> forest_storage;  // indexe par K (0 inutilise)
 #ifdef MHGP6_PROFILE_REDUCE
   // § 5.10 : records draines sans I/O D'IMPRESSION du profil (l'impression
   // dans le worker serialisait la publication et contaminait le mur) —
@@ -249,6 +267,9 @@ inline void invalidate_provisional(RunResult* rr) {
   rr->digest_forest.clear();
   rr->cards.clear();
   rr->total_events = rr->total_facets = rr->total_fusions = rr->total_deltas = rr->total_nodes = 0;
+  rr->forest_storage.clear();  // signatures de stockage : provisoires comme les cartes
+  rr->csr_fallback = 0;
+  rr->forest_storage_conformes = 0;
 #ifdef MHGP6_PROFILE_REDUCE
   // § 5.10 (contre-lecture 7ec81064) : une panne B ne rouvre jamais un canal
   // provisoire par les records de profil — vides sur tout retour non complet.
@@ -489,6 +510,8 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   rr.profile_join = opt.fold_join_before_next_k;
 #endif
   rr.cards.assign(rr.kmax_eff + 1, KCardinalities{});
+  rr.forest_layout = opt.forest_layout;
+  rr.forest_storage.assign(rr.kmax_eff + 1, RunResult::ForestStorageStats{});
   rr.expand.events_by_k.assign(rr.kmax_eff + 1, 0);
   // STREAMING PAR K, PIPELINE A DEUX ETAGES — transcription v5 (suretes 1-3 de
   // l'audit du 28 aout 2026 conservees : possession du slot avant demarrage,
@@ -586,7 +609,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
         break;
       }
       const auto t_f = std::chrono::steady_clock::now();
-      st->prep = prepare_fold(st->events, opt.threads);
+      st->prep = prepare_fold(st->events, opt.threads, opt.forest_layout);
       t_prepare_total_ms += ms(t_f);
 #ifdef MHGP6_PROFILE_REDUCE
       st->a_end = std::chrono::steady_clock::now();
@@ -656,7 +679,9 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
           t_fold_local = run_detail::ms(t_r);
           if (MHGP6_MUTANT("fold-inject-b-exception-k3") && K == 3)
             throw std::runtime_error("mutant fold-inject-b-exception-k3 : exception de reduction (K=3)");
-          if (opt.digest) {
+          // Aucune vue avant validation du stockage (le payload csr est de toute
+          // facon vide en echec) : pas de digest d'un fold refuse.
+          if (opt.digest && r.storage_violations == 0 && r.storage_message.empty()) {
             const auto t_d = std::chrono::steady_clock::now();
             dg = digest_forest_v4((u32)K, r);
             t_dg = run_detail::ms(t_d);
@@ -673,10 +698,20 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
           return;
         }
         sp->decided = true;
-        if (!sp->exc && (r.attach_violations || r.birth_violations || r.partition_violations)) {
+        if (!sp->exc && (r.attach_violations || r.birth_violations || r.partition_violations || r.storage_violations)) {
           sp->status = PipelineStatus::kInvariantViolated;
           try {
-            sp->message = "invariant : violations de roles ou de partition (K=" + std::to_string(K) + ")";
+            sp->message = "invariant : violations de roles, de partition ou de stockage (K=" + std::to_string(K) + ")" +
+                          (r.storage_violations ? " : " + r.storage_message : std::string());
+          } catch (...) {
+            sp->message.clear();
+          }
+        } else if (!sp->exc && !r.storage_message.empty()) {
+          // Capacite du stockage csr (gardes max_size/plafond/octets) : refus
+          // transactionnel resource_exhausted, jamais un repli vers le classique.
+          sp->status = PipelineStatus::kResourceExhausted;
+          try {
+            sp->message = "fold K=" + std::to_string(K) + " : " + r.storage_message;
           } catch (...) {
             sp->message.clear();
           }
@@ -696,12 +731,41 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
           rr.t_fold_reduce_ms += r.t_reduce_ms + r.t_partition_ms;
           rr.fold_workers = std::max(rr.fold_workers, r.workers);
           rr.cards[K] =
-              KCardinalities{st->events.size(), r.facets, r.deltas.size(), r.new_attachments, r.fusions, r.nodes};
+              KCardinalities{st->events.size(), r.facets, r.delta_count(), r.new_attachments, r.fusions, r.nodes};
           rr.total_events += st->events.size();
           rr.total_facets += r.facets;
           rr.total_fusions += r.fusions;
-          rr.total_deltas += r.deltas.size();
+          rr.total_deltas += r.delta_count();
           rr.total_nodes += r.nodes;
+          {
+            // SIGNATURE DE STOCKAGE par K (lectures size()/capacity() seulement,
+            // aucun parcours) ; conformite = stockage CONSTRUIT == layout DEMANDE.
+            RunResult::ForestStorageStats& s = rr.forest_storage[K];
+            const bool is_csr = r.storage_kind == ForestStorageKind::kCsrFacetKeysV1;
+            s.kind = (u8)r.storage_kind;
+            s.deltas = r.delta_count();
+            s.keys_parents = r.keys_parents;
+            s.keys_born = r.keys_born;
+            s.meta_size = r.delta_meta.size();
+            s.meta_capacity = r.delta_meta.capacity();
+            s.offsets_size = r.parents_off.size() + r.born_off.size();
+            s.offsets_capacity = r.parents_off.capacity() + r.born_off.capacity();
+            s.parents_size = r.parents_keys.size();
+            s.parents_capacity = r.parents_keys.capacity();
+            s.born_size = r.born_keys.size();
+            s.born_capacity = r.born_keys.capacity();
+            s.csr_capacity_growths = r.csr_capacity_growths;
+            s.parents_off_back = r.parents_off.empty() ? 0 : r.parents_off.back();
+            s.born_off_back = r.born_off.empty() ? 0 : r.born_off.back();
+            s.bytes_exact = is_csr;
+            s.bytes_owned = is_csr ? s.meta_capacity * sizeof(DeltaMeta) + s.offsets_capacity * sizeof(u32) +
+                                         (s.parents_capacity + s.born_capacity) * sizeof(FacetKey)
+                                   : r.deltas.capacity() * sizeof(ComponentDelta) +
+                                         (r.keys_parents + r.keys_born) * sizeof(FacetKey);
+            const bool conforme = (opt.forest_layout == ForestLayout::kCsr) == is_csr;
+            if (conforme) ++rr.forest_storage_conformes;
+            else ++rr.csr_fallback;
+          }
           if (opt.digest) {
             rr.digest_forest[K] = dg;
             dg_all.add(dg);
@@ -782,6 +846,26 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
   const ExpandStats& es = rr.expand;
   std::fprintf(out, "payload=%s authority=status_terminal callbacks=provisional vertical_maps=none\n",
                kForestPayloadVersion);
+  // Ligne SEPAREE (la ligne payload= est gravee textuellement par les
+  // validateurs) : route DEMANDEE (forest_layout), stockage CONSTRUIT
+  // (forest_storage_kind = kind commun des K publies, `mixte` s'ils
+  // different, `aucun` sans ordre publie — jamais derive de la demande), repli
+  // mesure (0 par construction), ordres publies et conformes.
+  const char* kind_construit = "aucun";
+  {
+    bool any = false, mixte = false;
+    u8 k0 = 0;
+    for (u64 K = 1; K < (u64)rr.forest_storage.size() && K <= rr.kmax_eff; ++K) {
+      const u8 k = rr.forest_storage[K].kind;
+      if (!any) { k0 = k; any = true; }
+      else if (k != k0) mixte = true;
+    }
+    if (any) kind_construit = mixte ? "mixte" : forest_storage_kind_name((ForestStorageKind)k0);
+  }
+  std::fprintf(out, "forest_layout=%s forest_storage_kind=%s csr_fallback=%llu ordres_publies=%llu ordres_storage_conformes=%llu\n",
+               forest_layout_name(opt.forest_layout), kind_construit,
+               (unsigned long long)rr.csr_fallback, (unsigned long long)rr.kmax_eff,
+               (unsigned long long)rr.forest_storage_conformes);
   std::fprintf(out, "backend=cpu_reference\n");
   if (rr.smax_eff == 11)
     std::fprintf(out, "tower_scope=profile_complete_k10 smax_requested=%llu smax_effective=%llu\n",
@@ -941,14 +1025,14 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
   // intervalles A par K rendent la concurrence A/B LISIBLE dans la trace.
   // Le seul mur de debit reste celui d'un Release NON instrumente.
   std::fprintf(out,
-               "profil_kind=reduce_v2%s fold_join=%d inflight_demande=%d pic_workers_b=%llu pic_reduce_actif=%llu\n",
+               "profil_kind=reduce_v2%s fold_join=%d inflight_demande=%d pic_workers_b=%llu pic_reduce_actif=%llu layout=%s\n",
 #ifdef MHGP6_PROFILE_LIVENESS
                "+liveness",
 #else
                "",
 #endif
                rr.profile_join ? 1 : 0, opt.fold_inflight, (unsigned long long)rr.peak_fold_inflight,
-               (unsigned long long)rr.peak_reduce_active);
+               (unsigned long long)rr.peak_reduce_active, forest_layout_name(opt.forest_layout));
   for (u64 K = 1; K < (u64)rr.fold_profiles.size(); ++K) {
     const ReduceProfile& pf = rr.fold_profiles[K];
     const auto rel = [&](std::chrono::steady_clock::time_point tp) {
@@ -999,6 +1083,27 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
         (unsigned long long)K, (unsigned long long)rr.cards[K].events, (unsigned long long)rr.cards[K].facets,
         (unsigned long long)rr.cards[K].deltas, (unsigned long long)rr.cards[K].attachments,
         (unsigned long long)rr.cards[K].fusions, (unsigned long long)rr.cards[K].nodes);
+  // SIGNATURE DE STOCKAGE par K (palier KeyCSR) : offset_dernier_* = valeur LUE
+  // de parents_off.back() / born_off.back() en csr (temoin independant : le juge
+  // exige offset_dernier_* == cles_*), cles_* en classic ; csr_capacity_growths
+  // n'est instrumente qu'en csr (0 = non instrumente en classic, incomparable).
+  for (u64 K = 1; K < (u64)rr.forest_storage.size() && K <= rr.kmax_eff; ++K) {
+    const RunResult::ForestStorageStats& s = rr.forest_storage[K];
+    const bool is_csr = s.kind == (u8)ForestStorageKind::kCsrFacetKeysV1;
+    std::fprintf(out,
+                 "stockage_foret K=%llu kind=%s deltas=%llu cles_parents=%llu cles_nes=%llu meta=%llu/%llu offsets=%llu/%llu "
+                 "parents=%llu/%llu nes=%llu/%llu csr_capacity_growths=%llu octets_possedes=%llu exact=%d "
+                 "offset_dernier_parents=%llu offset_dernier_nes=%llu\n",
+                 (unsigned long long)K, forest_storage_kind_name((ForestStorageKind)s.kind), (unsigned long long)s.deltas,
+                 (unsigned long long)s.keys_parents, (unsigned long long)s.keys_born, (unsigned long long)s.meta_size,
+                 (unsigned long long)s.meta_capacity, (unsigned long long)s.offsets_size,
+                 (unsigned long long)s.offsets_capacity, (unsigned long long)s.parents_size,
+                 (unsigned long long)s.parents_capacity, (unsigned long long)s.born_size,
+                 (unsigned long long)s.born_capacity, (unsigned long long)s.csr_capacity_growths,
+                 (unsigned long long)s.bytes_owned, s.bytes_exact ? 1 : 0,
+                 (unsigned long long)(is_csr ? s.parents_off_back : s.keys_parents),
+                 (unsigned long long)(is_csr ? s.born_off_back : s.keys_born));
+  }
   if (opt.digest) {
     if (!rr.digest_raw_candidates.empty())
       std::fprintf(out, "digest_raw_candidates=%s\n", rr.digest_raw_candidates.c_str());

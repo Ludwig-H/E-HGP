@@ -60,6 +60,18 @@ inline constexpr const char* kMutants[] = {
     // ablation CHANGE l'objet (tuee code 4 par la conformite) : elle ne peut
     // ni survivre dans une porte ni exister dans un binaire produit.
     "ablation-mat-sans-copie", "ablation-mat-sans-tris", "ablation-post-cle-factice",
+    // CSR de FacetKey (2 septembre, GO exploratoire COMPACTDELTA_CSR) : chaque
+    // site vit EXCLUSIVEMENT dans la branche csr de reduce_fold ; tue par
+    // tests/fold_csr_gate.cpp (first_divergence sur le champ ANNONCE, sinon code 1)
+    // et, pour ceux qui CHANGENT l'objet, par la conformite --layout=csr. Les
+    // csr-offset-* (refus avant vue) et csr-guard-skip / csr-inject-bad-alloc
+    // (gardes de capacite, panne d'allocation injectee) ne sont tues que par
+    // leur porte dediee : sous la conformite, tout statut non complet vaut 4
+    // par vacuite de refus, ce qui ne prouverait rien.
+    "csr-order-by-output", "csr-keep-continuation", "csr-stale-level", "csr-stale-output",
+    "csr-unsorted-born", "csr-unsorted-parents", "csr-drop-delta", "csr-dup-delta", "csr-shift-offset",
+    "csr-offset-hole", "csr-offset-overlap", "csr-offset-end", "csr-offset-domain", "csr-guard-skip",
+    "csr-inject-bad-alloc",
 };
 
 inline std::vector<std::string>& mutant_registry() {

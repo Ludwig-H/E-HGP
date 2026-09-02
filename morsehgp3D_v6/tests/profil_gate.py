@@ -38,9 +38,11 @@ import subprocess
 import sys
 
 
-def run(binp, join):
+def run(binp, join, layout="classic"):
+    # Dimension LAYOUT (palier KeyCSR) : le meme binaire porte les deux routes de
+    # stockage ; la projection nommee doit etre identique sous --layout=csr.
     cmd = [binp, "--family=uniform", "--n=400", "--seed=3", "--threads=4",
-           "--fold-join=%d" % join, "--digest"]
+           "--fold-join=%d" % join, "--layout=%s" % layout, "--digest"]
     p = subprocess.run(cmd, capture_output=True, text=True)
     if p.returncode != 0:
         print("REFUS : %s rc=%d" % (" ".join(cmd), p.returncode))
@@ -126,13 +128,35 @@ def parse_rows(txt, prefix, schema):
     return rows
 
 
-def check_profile_output(txt, join, liveness):
+def check_profile_output(txt, join, liveness, layout="classic"):
     kind = [l for l in txt.splitlines() if l.startswith("profil_kind=")]
     expected_kind = "profil_kind=reduce_v2+liveness" if liveness else "profil_kind=reduce_v2"
     if len(kind) != 1 or not kind[0].startswith(expected_kind + " "):
         fail("profil_kind attendu '%s' absent ou multiple (join=%d)" % (expected_kind, join))
     if ("fold_join=%d" % join) not in kind[0]:
         fail("fold_join non signe (join=%d)" % join)
+    # Jeton de ROUTE DE STOCKAGE (palier KeyCSR) : la route demandee est signee
+    # sur la ligne profil_kind (aucune colonne ajoutee a profil_reduce/intern).
+    if not any(tok == "layout=%s" % layout for tok in kind[0].split()):
+        fail("layout=%s non signe sur profil_kind (join=%d)" % (layout, join))
+    # Kind CONSTRUIT (retour auditeur KeyCSR) : une ligne de tete UNIQUE
+    # forest_layout=<demande> forest_storage_kind=<construit> csr_fallback=0 et
+    # chaque `stockage_foret K=` porte ce kind — une sortie qui signe la demande
+    # mais construit autre chose est refusee.
+    kind_name = "csr_facet_keys_v1" if layout == "csr" else "vector_component_delta_v1"
+    heads = [l for l in txt.splitlines() if l.startswith("forest_layout=")]
+    if len(heads) != 1:
+        fail("ligne forest_layout= absente ou multiple (layout=%s, join=%d)" % (layout, join))
+    head_toks = heads[0].split()
+    for want in ("forest_layout=%s" % layout, "forest_storage_kind=%s" % kind_name, "csr_fallback=0"):
+        if want not in head_toks:
+            fail("%s absent de la ligne de tete du stockage (join=%d)" % (want, join))
+    stock = [l for l in txt.splitlines() if l.startswith("stockage_foret K=")]
+    if not stock:
+        fail("aucune ligne stockage_foret K= (layout=%s, join=%d)" % (layout, join))
+    for line in stock:
+        if ("kind=%s" % kind_name) not in line.split():
+            fail("stockage_foret sans kind construit %s : %s" % (kind_name, line[:80]))
     pics = {}
     for tok in kind[0].split():
         name, _, val = tok.partition("=")
@@ -210,8 +234,9 @@ def main():
     outs = {}
     for tag, binp in [("normal", normal), ("profil", prof)] + ([("vivacite", live)] if live else []):
         for join in (0, 1):
-            outs[(tag, join)] = run(binp, join)
-    ref = projection(outs[("normal", 0)])
+            for layout in ("classic", "csr"):
+                outs[(tag, join, layout)] = run(binp, join, layout)
+    ref = projection(outs[("normal", 0, "classic")])
     if len(ref) < 3:
         print("PLANCHER : projection absente du run de reference")
         sys.exit(3)
@@ -221,13 +246,15 @@ def main():
     # DISCRIMINATION des builds : le binaire normal n'emet AUCUNE ligne
     # profil_* — donner le binaire de profil aux deux arguments echoue ici.
     for join in (0, 1):
-        leaked = [l for l in outs[("normal", join)].splitlines() if l.startswith("profil_")]
-        if leaked:
-            fail("binaire 'normal' emet du profil (%s) — mauvais binaire passe en premier argument" % leaked[0])
+        for layout in ("classic", "csr"):
+            leaked = [l for l in outs[("normal", join, layout)].splitlines() if l.startswith("profil_")]
+            if leaked:
+                fail("binaire 'normal' emet du profil (%s) — mauvais binaire passe en premier argument" % leaked[0])
     for join in (0, 1):
-        check_profile_output(outs[("profil", join)], join, liveness=False)
-        if live:
-            check_profile_output(outs[("vivacite", join)], join, liveness=True)
+        for layout in ("classic", "csr"):
+            check_profile_output(outs[("profil", join, layout)], join, liveness=False, layout=layout)
+            if live:
+                check_profile_output(outs[("vivacite", join, layout)], join, liveness=True, layout=layout)
     # Surface CLI du refus SEULEMENT (le CLI n'appelle jamais print_run apres
     # un refus : la preuve causale sur le RunResult est la porte COMPILEE
     # mhgp6_profil_contrat_echec_k2).
@@ -239,7 +266,8 @@ def main():
     if [l for l in p.stdout.splitlines() if l.startswith("profil_") or l.startswith("digest_")]:
         fail("le refus emet une surface provisoire sur stdout")
     print("porte du profil : projection deterministe nommee (digest_all + digest_forest_K* + "
-          "cardinalites K=*) identique, builds discrimines, structure/planchers/causalite fold_join valides")
+          "cardinalites K=*) identique (normal/profil/vivacite x join 0/1 x layout classic/csr), "
+          "builds discrimines, structure/planchers/causalite fold_join valides")
     sys.exit(0)
 
 

@@ -17,8 +17,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import profil_gate  # noqa: E402
 
 
-def scene(somme, mur, residuel, composantes=None, fin=None):
-    """Texte de profil synthetique minimal, un seul K, join=0."""
+def scene(somme, mur, residuel, composantes=None, fin=None, layout="classic",
+          kind_construit=None):
+    """Texte de profil synthetique minimal, un seul K, join=0.
+
+    `layout` est la route DEMANDEE (signee sur profil_kind) ; `kind_construit`
+    le kind signe par la ligne de tete du stockage et par `stockage_foret K=`
+    (par defaut le kind coherent avec la demande).
+    """
+    if kind_construit is None:
+        kind_construit = "csr_facet_keys_v1" if layout == "csr" else "vector_component_delta_v1"
     comp = composantes or {}
     keys = ["init", "touch", "pre", "unite", "post_remplissage",
             "materialisation_tri_copie", "liveness", "partition", "liberation"]
@@ -26,7 +34,9 @@ def scene(somme, mur, residuel, composantes=None, fin=None):
     if fin is None:
         fin = mur
     return "\n".join([
-        "profil_kind=reduce_v2 fold_join=0 pic_workers_b=2 pic_reduce_actif=1",
+        "profil_kind=reduce_v2 fold_join=0 pic_workers_b=2 pic_reduce_actif=1 layout=%s" % layout,
+        "forest_layout=%s forest_storage_kind=%s csr_fallback=0 ordres_publies=1 "
+        "ordres_storage_conformes=1" % (layout, kind_construit),
         "digest_forest_K1=" + "ab" * 32,
         "cardinalites K=1 events=1 facets=1 deltas=0 attachments=0 fusions=0 nodes=1",
         "profil_reduce K=1 %s somme=%.3f mur_reduce_interne=%.3f residuel=%.3f "
@@ -34,13 +44,16 @@ def scene(somme, mur, residuel, composantes=None, fin=None):
         "duree_digest_foret_k_ms=0.000" % (cols, somme, mur, residuel, fin),
         "profil_intern K=1 alloc_empreintes=0.000 offsets_diffusion=0.000 intern_tri=0.000 "
         "fusion_et_lib_parts=0.000 remap_et_lib_pools=0.000",
+        "stockage_foret K=1 kind=%s deltas=0 cles_parents=0 cles_nes=0 meta=0/0 offsets=0/0 "
+        "parents=0/0 nes=0/0 csr_capacity_growths=0 octets_possedes=0 exact=0 "
+        "offset_dernier_parents=0 offset_dernier_nes=0" % kind_construit,
     ]) + "\n"
 
 
-def juge(txt):
+def juge(txt, layout="classic"):
     """rc du juge reel : None si accepte, code de sortie sinon."""
     try:
-        profil_gate.check_profile_output(txt, 0, liveness=False)
+        profil_gate.check_profile_output(txt, 0, liveness=False, layout=layout)
     except SystemExit as e:
         return e.code if e.code is not None else 0
     return None
@@ -110,9 +123,47 @@ def main():
         echecs += 1
     else:
         print("scene aux arrondis honnetes acceptee (pas de faux rouge)")
+    # 4. KIND CONSTRUIT (retour auditeur KeyCSR) : une sortie qui signe la
+    #    demande layout=csr mais dont les kinds construits sont classiques
+    #    (ligne de tete OU stockage_foret) DOIT etre refusee ; la sortie csr
+    #    coherente reste acceptee (pas de faux rouge).
+    comp = {k: 0.001 for k in ("init", "touch", "pre", "unite", "post_remplissage",
+                               "materialisation_tri_copie", "liveness", "partition",
+                               "liberation")}
+    rc = juge(scene(somme=0.013, mur=0.015, residuel=0.002, composantes=comp, fin=0.015,
+                    layout="csr"), layout="csr")
+    if rc is not None:
+        print("FAUX ROUGE : sortie csr coherente (kind construit csr) refusee (rc=%s)" % rc)
+        echecs += 1
+    else:
+        print("sortie csr coherente acceptee (kind construit csr)")
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = juge(scene(somme=0.013, mur=0.015, residuel=0.002, composantes=comp, fin=0.015,
+                        layout="csr", kind_construit="vector_component_delta_v1"), layout="csr")
+    msg = buf.getvalue()
+    if rc != 1 or "forest_storage_kind=csr_facet_keys_v1 absent" not in msg:
+        print("CONTRE-FIXTURE NON TUEE : layout=csr demande, kinds construits classiques "
+              "acceptes (rc=%s, msg=%r)" % (rc, msg.strip()[:80]))
+        echecs += 1
+    else:
+        print("contre-fixture tuee : demande csr, kind construit classique (ligne de tete)")
+    txt = scene(somme=0.013, mur=0.015, residuel=0.002, composantes=comp, fin=0.015, layout="csr")
+    txt = txt.replace("stockage_foret K=1 kind=csr_facet_keys_v1",
+                      "stockage_foret K=1 kind=vector_component_delta_v1")
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = juge(txt, layout="csr")
+    msg = buf.getvalue()
+    if rc != 1 or "stockage_foret sans kind construit csr_facet_keys_v1" not in msg:
+        print("CONTRE-FIXTURE NON TUEE : ligne de tete csr mais stockage_foret classique "
+              "accepte (rc=%s, msg=%r)" % (rc, msg.strip()[:80]))
+        echecs += 1
+    else:
+        print("contre-fixture tuee : ligne de tete csr, stockage_foret K=1 classique")
     if echecs:
         return 1
-    print("contre-fixtures du profil : seuils 0.0051/0.006 causaux")
+    print("contre-fixtures du profil : seuils 0.0051/0.006 causaux, kind construit exige")
     return 0
 
 

@@ -126,15 +126,24 @@ inline std::string digest_forest_v4(u32 K, const ForestResult& r) {
   for (const FacetKey& f : r.facet_keys) d.facet(f);
   d.u64v((u64)r.final_canon_fid.size());
   for (const u32 v : r.final_canon_fid) d.u32v(v);
-  d.u64v((u64)r.deltas.size());
-  for (const ComponentDelta& cd : r.deltas) {
-    d.u64v(cd.batch);
-    d.level(cd.level);
-    d.facet(cd.output);
-    d.u64v((u64)cd.parents.size());
-    for (const FacetKey& f : cd.parents) d.facet(f);
-    d.u64v((u64)cd.born.size());
-    for (const FacetKey& f : cd.born) d.facet(f);
+  // ACCESSEUR AGNOSTIQUE du stockage (palier KeyCSR) : la meme sequence
+  // logique champ par champ (jamais un memcpy d'arene — FacetKey et ExactLevel
+  // portent du padding) ; pour le stockage classique, delta(i) reproduit
+  // deltas[i] par copie des scalaires et plages sur les vecteurs internes :
+  // octets IDENTIQUES a l'ancienne boucle, receipts/conformite_v5 reste
+  // l'autorite pour les deux layouts. Ni kind, ni offsets, ni capacite
+  // n'entrent ici.
+  const size_t nd = r.delta_count();
+  d.u64v((u64)nd);
+  for (size_t i = 0; i < nd; ++i) {
+    const ComponentDeltaView v = r.delta(i);
+    d.u64v(v.batch);
+    d.level(v.level);
+    d.facet(v.output);
+    d.u64v((u64)v.parents.size());
+    for (const FacetKey& f : v.parents) d.facet(f);
+    d.u64v((u64)v.born.size());
+    for (const FacetKey& f : v.born) d.facet(f);
   }
   return d.hex();
 }

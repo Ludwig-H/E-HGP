@@ -108,6 +108,20 @@ arrêt au seuil, STRICT ; `ball_census` : I_B/U_B complets, plafonds),
 `src/forest/` (fold streamé par K, `fold_inflight` borné, macro-lots de
 niveaux sémantiquement égaux, deltas, partition dense ; rendu § 9.1),
 `digest.hpp` (format `mhgp4-digest-v1`, monnaie de conformité v5↔v6).
+Deltas en deux stockages signés `forest_storage_kind ∈
+{vector_component_delta_v1, csr_facet_keys_v1}` (route `--layout=`, défaut
+classic, aucune route de repli, `csr_fallback` mesuré et nul par
+construction) : le CSR porte `DeltaMeta` (96 octets), deux vecteurs
+d'offsets demi-ouverts u32 et deux arènes possédées de `FacetKey` ; vue
+`ComponentDeltaView` reconstruite à la demande par `ForestResult::delta(i)`,
+jamais stockée ; digest champ par champ via l'accesseur — octets identiques
+pour les deux stockages. Un échec csr (structure → `invariant_violated`,
+capacité ou `bad_alloc` d'arène capturé dans le fold → `resource_exhausted`,
+jamais une exception hors de `reduce_fold`) vide le payload avant tout
+callback ; `csr_capacity_growths` compte, sous csr seulement, les changements
+observés de `capacity()`, réserves initiales comprises (télémétrie causale ;
+le classique n'est pas instrumenté et publie 0, jamais un chiffre comparable) ;
+`offset_dernier_*` est lu depuis `parents_off.back()` / `born_off.back()`.
 
 Frontières de digest (gelées, P0 du 31 août) : la conformité d'objet
 v5↔v6 juge `digest_all` et `digest_forest_K*` seulement. Deux monnaies de
@@ -116,7 +130,9 @@ post-RLE — diagnostic différentiel de génération ; diverge légitimement de
 la v5 depuis le cover q4 coefficient 4) et `digest_postprefilter`
 (tag `mhgp6-digest-v1:postprefilter-candidates`, records survivants du
 préfiltre exact — non-régression interne v6, golden gravé sur uniform 400).
-Aucun renommage conditionnel futur.
+Aucun renommage conditionnel futur. Le stockage des deltas n'entre jamais
+dans le digest (ni kind, ni offsets, ni padding, ni capacité) : la
+conformité v5 juge le même reçu sous `--layout=classic` et `--layout=csr`.
 
 ## E6 — étages conditionnels `[PRÉVU]`
 
@@ -131,7 +147,9 @@ route adaptative m0).
 Brouillons par ouvrier, fusion en ordre d'ouvrier, tri stable + RLE
 canonisent ; sortie bit-identique quel que soit le nombre de fils ; ouvriers
 mesurés (compteurs retournés). Fold : étage A parallèle, étage B en vol borné
-par `fold_inflight`, publication dans l'ordre des K. GPU : subordonné aux
+par `fold_inflight`, publication dans l'ordre des K. `ForestResult` est
+copiable et autonome : une copie prise dans `on_forest` reste lisible après
+la destruction de l'original et des événements (`mhgp6_fold_csr_copie`). GPU : subordonné aux
 reçus G4 (voir la note de conception § 7) ; aucun code device en v6 tant
 qu'aucun reçu de gain n'existe.
 

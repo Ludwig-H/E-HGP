@@ -348,6 +348,12 @@ mhgp6_gate(mhgp6_profile_refuse_inject 2 mhgp6_profile
            ARGS --family=uniform --n=400 --inject=ablation-mat-sans-copie)
 mhgp6_gate(mhgp6_profile_sonde_refuse_inconnu 2 mhgp6_profile_sonde
            ARGS --family=uniform --n=400 --inject=ablation-inconnue)
+# ALLOWLIST de la sonde (retour auditeur KeyCSR) : vide, item vide et mutant de
+# production presents au registre sont refuses AVANT tout calcul.
+mhgp6_gate(mhgp6_profile_sonde_refuse_inject_vide 2 mhgp6_profile_sonde ARGS --family=uniform --n=400 --inject=)
+mhgp6_gate(mhgp6_profile_sonde_refuse_inject_virgule 2 mhgp6_profile_sonde ARGS --family=uniform --n=400 --inject=,)
+mhgp6_gate(mhgp6_profile_sonde_refuse_mutant_production 2 mhgp6_profile_sonde
+           ARGS --family=uniform --n=400 --inject=render-active-only)
 add_test(NAME mhgp6_profil_identite
          COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=python3
                  "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/profil_gate.py $<TARGET_FILE:mhgp6> $<TARGET_FILE:mhgp6_profile> $<TARGET_FILE:mhgp6_profile_liveness>"
@@ -362,6 +368,13 @@ add_test(NAME mhgp6_profil_contre_fixture
                  "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/profil_contre_fixture.py"
                  -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
 set_tests_properties(mhgp6_profil_contre_fixture PROPERTIES LABELS "gate" TIMEOUT 120)
+# PRE-INSCRIPTION KeyCSR : generateur de plan a graine derivee (bench/plan_keycsr.py),
+# fixture des orientations et du flux SplitMix64, determinisme bit a bit.
+add_test(NAME mhgp6_plan_keycsr_gate
+         COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=python3
+                 "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/plan_keycsr_gate.py"
+                 -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+set_tests_properties(mhgp6_plan_keycsr_gate PROPERTIES LABELS "gate" TIMEOUT 120)
 # PORTE DE VACUITE de la sonde d'ablation (ALERTE_SONDE_ABLATION_REDUCE du
 # 2 septembre) : faux binaire rapide, plan de Williams, copie privee hashee
 # avant/apres chaque tuple, agregateur et manifeste fatals, binaire produit
@@ -380,6 +393,100 @@ mhgp6_gate(mhgp6_profil_contrat_echec 0 mhgp6_profil_contrat TIMEOUT 600)
 # Scene NON VACUEUSE (ac6b4bc1) : K1 publie puis panne A a K=2 — le refus
 # budget minuscule precederait fold_profiles.assign et ne prouverait rien.
 mhgp6_gate(mhgp6_profil_contrat_echec_k2 4 mhgp6_profil_contrat ARGS --inject=fold-inject-a-failure-k2 TIMEOUT 600)
+
+# ---- CSR de FacetKey (GO exploratoire REPONSE_AUDITEUR_COMPACTDELTA_CSR_20260902) :
+# fixtures gravees (born-only, parents-only, continuation, multi-parents, plusieurs
+# racines par lot, foret vide, S1/S1a/S1b, R2/R2b), comparateur first_divergence
+# (lecteur tiers, tests/forest_witness.hpp), rejeu catalogue+deltas -> partition
+# (seconde autorite, deux layouts), matrice fils x inflight x join x layout,
+# copie autonome, validateur d'offsets, gardes de capacite (append ET majorant).
+mhgp6_executable(mhgp6_fold_csr_gate tests/fold_csr_gate.cpp)
+mhgp6_gate(mhgp6_fold_csr_fixtures 0 mhgp6_fold_csr_gate
+           ARGS --fixtures --min-fixtures=13 --min-deltas=25 --min-continuations=1 --min-multi-root-lots=3 --min-vides=1
+                --min-refus=1 TIMEOUT 120)
+mhgp6_gate(mhgp6_fold_csr_offsets 0 mhgp6_fold_csr_gate ARGS --offsets TIMEOUT 60)
+mhgp6_gate(mhgp6_fold_csr_overflow 0 mhgp6_fold_csr_gate ARGS --overflow --threads=4 TIMEOUT 300)
+mhgp6_gate(mhgp6_fold_csr_copie 0 mhgp6_fold_csr_gate ARGS --copy-alias --threads=4 TIMEOUT 300)
+# Planchers a ~50 % de l'observe (matrice 7 familles, 112 cellules : 68 ordres
+# publies, 818 069 deltas, 6 395 137 cles de reference ; uniform 400 seul en
+# fournit 97 236 / 736 335 — les anciens 20000/20000 etaient vacus a 6 familles sur 7).
+mhgp6_gate(mhgp6_fold_csr_pipeline 0 mhgp6_fold_csr_gate
+           ARGS --pipeline --threads=8 --min-orders=60 --min-deltas=400000 --min-keys=3000000 TIMEOUT 1800)
+# Identite de la matrice a une taille d'INTERET (label scale8000, jamais en gate).
+# Planchers a ~50 % de l'observe (premier run : 16 cellules, 10 ordres,
+# 2 791 148 deltas, 22 256 288 cles de reference, 0 desaccord, 1705 s).
+mhgp6_gate(mhgp6_fold_csr_pipeline_uniform_8000 0 mhgp6_fold_csr_gate
+           ARGS --pipeline --family=uniform --n=8000 --threads=8 --min-orders=10 --min-deltas=1400000 --min-keys=11000000
+           LABELS scale8000 TIMEOUT 3600)
+mhgp6_gate(mhgp6_fold_csr_refus_inject_vide 2 mhgp6_fold_csr_gate ARGS --fixtures --inject=)
+mhgp6_gate(mhgp6_fold_csr_refus_mutant_inconnu 2 mhgp6_fold_csr_gate ARGS --fixtures --inject=csr-inconnu)
+mhgp6_gate(mhgp6_fold_csr_refus_mutant_hors_cible 2 mhgp6_fold_csr_gate ARGS --fixtures --inject=drop-nonmerge)
+mhgp6_gate(mhgp6_fold_csr_refus_pipeline_sans_inject 2 mhgp6_fold_csr_gate ARGS --pipeline-refus)
+# Mutants csr-* : code 4 SEULEMENT si la premiere divergence (first_divergence)
+# sur la fixture annoncee porte le champ annonce ; tout autre resultat = 1.
+foreach(spec "csr-order-by-output;delta[0].output" "csr-keep-continuation;delta_count"
+             "csr-stale-level;delta[2].level" "csr-stale-output;delta[0].output"
+             "csr-unsorted-born;delta[0].born[0]" "csr-unsorted-parents;delta[2].parents[0]"
+             "csr-drop-delta;delta_count" "csr-dup-delta;delta_count" "csr-shift-offset;delta[0].born.size"
+             "csr-offset-hole;storage_violations" "csr-offset-overlap;storage_violations"
+             "csr-offset-end;storage_violations" "csr-offset-domain;storage_violations")
+  list(GET spec 0 mut)
+  list(GET spec 1 field)
+  mhgp6_gate(mhgp6_fold_csr_mutant_${mut} 4 mhgp6_fold_csr_gate
+             ARGS --fixtures --inject=${mut} --expect-divergence=${field} TIMEOUT 120)
+endforeach()
+foreach(mut csr-offset-hole csr-offset-overlap csr-offset-end csr-offset-domain)
+  mhgp6_gate(mhgp6_fold_csr_refus_${mut} 4 mhgp6_fold_csr_gate ARGS --pipeline-refus --threads=4 --inject=${mut} TIMEOUT 300)
+endforeach()
+mhgp6_gate(mhgp6_fold_csr_mutant_csr-guard-skip 4 mhgp6_fold_csr_gate
+           ARGS --overflow --threads=4 --inject=csr-guard-skip --expect-divergence=storage_message TIMEOUT 300)
+# Panne d'allocation injectee (bad_alloc d'arene apres un append partiel) :
+# capturee dans le fold -> resource_exhausted, payload vide, zero callback,
+# provisoires vides ; jamais une exception hors de reduce_fold.
+mhgp6_gate(mhgp6_fold_csr_mutant_csr-inject-bad-alloc 4 mhgp6_fold_csr_gate
+           ARGS --overflow --threads=4 --inject=csr-inject-bad-alloc --expect-divergence=storage_message TIMEOUT 300)
+# Conformite v5 sous --layout=csr : MEMES recus (l'objet est le meme), petites
+# tailles en gate, tailles d'interet en scale* ; refus 2 d'un layout inconnu.
+foreach(spec "uniform;400" "terrain;400" "eight_clusters;400" "scanline_single_pass;400"
+             "collinear_seven;600" "two_lines;200" "uniform;2000" "terrain;2000")
+  list(GET spec 0 fam)
+  list(GET spec 1 sz)
+  mhgp6_gate(mhgp6_conformity_csr_${fam}_${sz} 0 mhgp6_conformity
+             ARGS --family=${fam} --n=${sz} --threads=4 --layout=csr --expected=${REFS}/${fam}_${sz}.txt TIMEOUT 600)
+endforeach()
+foreach(fam uniform terrain eight_clusters scanline_single_pass scanline_overlap_multiecho)
+  foreach(sz 8000 16000 32000)
+    mhgp6_gate(mhgp6_conformity_csr_${fam}_${sz} 0 mhgp6_conformity
+               ARGS --family=${fam} --n=${sz} --threads=8 --layout=csr --expected=${REFS}/${fam}_${sz}.txt
+               LABELS scale${sz} TIMEOUT 3600)
+  endforeach()
+endforeach()
+mhgp6_gate(mhgp6_conformity_refus_layout_inconnu 2 mhgp6_conformity
+           ARGS --family=uniform --n=400 --layout=fid --expected=${REFS}/uniform_400.txt)
+# Boucle de mise a mort sous csr : les csr-* ne sont exerces que si le juge
+# tourne en csr ; les sondes d'ablation et les mutants du fold y restent tues.
+# Seuls les mutants qui CHANGENT L'OBJET y figurent (divergence de digest sur
+# le recu) : csr-offset-* en sont EXCLUS — sous la conformite, tout statut non
+# complet vaut 4 par vacuite de refus, ce qui ne prouverait rien ; leur preuve
+# (refus AVANT vue, zero callback, provisoires vides) est portee par
+# mhgp6_fold_csr_refus_csr-offset-* et mhgp6_fold_csr_mutant_csr-offset-*.
+# csr-guard-skip et csr-inject-bad-alloc exclus de meme (portes --overflow).
+foreach(mut csr-order-by-output csr-keep-continuation csr-stale-level csr-stale-output
+            csr-unsorted-born csr-unsorted-parents csr-drop-delta csr-dup-delta csr-shift-offset
+            ablation-mat-sans-copie ablation-mat-sans-tris ablation-post-cle-factice
+            binary-ties repr-ties attach-prebatch drop-nonmerge canonical-is-uf-root)
+  mhgp6_gate(mhgp6_mutant_csr_${mut} 4 mhgp6_conformity
+             ARGS --family=eight_clusters --n=400 --threads=4 --layout=csr --inject=${mut}
+                  --expected=${REFS}/eight_clusters_400.txt)
+endforeach()
+# Signature CLI des deux routes (code 0 ET ligne exacte en UNE execution) ; refus
+# exact d'un layout inconnu ou vide (option PRODUIT, hors MHGP6_TESTING).
+mhgp6_gate(mhgp6_cli_layout_classic_signature 0 mhgp6 ARGS --family=uniform --n=200 --s=8 TIMEOUT 120
+  EXPECT_LINE "forest_layout=classic forest_storage_kind=vector_component_delta_v1 csr_fallback=0")
+mhgp6_gate(mhgp6_cli_layout_csr_signature 0 mhgp6 ARGS --family=uniform --n=200 --s=8 --layout=csr TIMEOUT 120
+  EXPECT_LINE "forest_layout=csr forest_storage_kind=csr_facet_keys_v1 csr_fallback=0")
+mhgp6_gate(mhgp6_cli_refus_layout_inconnu 2 mhgp6 ARGS --family=uniform --n=200 --layout=fid)
+mhgp6_gate(mhgp6_cli_refus_layout_vide 2 mhgp6 ARGS --family=uniform --n=200 --layout=)
 
 # ---- CUDA (serie C, docs/GPU.md) : OFF par defaut, JAMAIS construit en CI.
 # Les portes `gpu` ne s'executent qu'en session G4 (sm_120, RTX PRO 6000
