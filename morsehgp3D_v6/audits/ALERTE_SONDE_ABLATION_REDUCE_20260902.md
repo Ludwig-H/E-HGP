@@ -119,11 +119,56 @@ répéter ces contrôles dans un revalidateur autonome. Ce point n'annule ni la
 réagrégation ni le pin ; il interdit seulement de présenter l'agrégateur seul
 comme vérificateur complet de provenance.
 
+## Contre-lecture du WIP non épinglé
+
+Le WIP observé après `fc24d634` va dans la bonne direction. Le lanceur résout
+les outils critiques hors du `PATH` ordinaire, vérifie leurs chemins et leurs
+hashes puis les invoque par chemins absolus ; la première couture ci-dessus
+est donc architecturalement fermée dans le modèle annoncé. La liaison du
+régime a aussi progressé pour famille, tailles, `threads`, `s`, `smax`, seed,
+join et cpuset.
+
+Elle n'est pas encore exacte. Sur l'agrégateur WIP
+`6e5965354b73792f6b60f0a5a037a35bfa1eb2e800449da66be65c0b33b0f4cf`,
+les mutations autonomes suivantes rendent encore 0 : retirer `liveness` ;
+retirer ensemble `inflight_demande`, `pic_workers_b` et `pic_reduce_actif` ;
+mettre les deux pics à zéro ; retirer `coord` ; ajouter un champ inconnu aux
+paramètres ; suffixer `identite_cible`. Le correctif minimal reste un schéma
+fermé : ensemble exact des clés, `liveness` obligatoire,
+`inflight_demande` obligatoire et égal à l'argv, pics obligatoires et égaux à
+1 sous `join=1`, coordonnée cohérente, identité égale au littéral attendu et
+glose séparée.
+
+La nouvelle scène du faux `sha256sum` a en outre révélé un défaut de
+confinement matériel. Dans la porte WIP
+`992433c6203fc563149aa75769dbc6a6682e68b006c2302b12c89b934c6dbe6f`,
+appariée à la première version WIP du lanceur, la condition « plus d'un
+argument » reconnaissait déjà l'appel unitaire `sha256sum -- fichier` utilisé
+pour hacher chaque outil. Sa cible
+`protocole_lanceur.sh` est relative au répertoire courant du test, pas au
+`.partial`. Un rejeu a ainsi créé à la racine du dépôt un fichier parasite de
+226 lignes au lieu de muter la copie archivée ; ce fichier généré a été retiré
+immédiatement et aucun fichier produit n'a été touché.
+
+Le lanceur WIP suivant,
+`8d58d46b317293dc3fc1ac57c4e08e19436a9fe18bd4e93675372d91a8ebaf8a`,
+retire `--` de la primitive unitaire : le faux ne déclenche plus pendant le
+hash des outils et l'incident exact est fermé. La porte complète repasse ses
+23 scènes avec code 0 et ne laisse plus ce parasite. Il reste préférable de
+rendre la preuve hermétique plutôt que de faire dépendre son confinement de l'arité :
+cibler un chemin absolu dans le répertoire temporaire, reconnaître l'appel
+exact de génération du manifeste et exécuter les lanceurs mutants avec un
+`cwd` temporaire. Une postcondition doit enfin prouver que le répertoire de
+lancement et le dépôt restent inchangés. Tant que cette scène n'est pas à la
+fois causale et hermétique, ne pas compter son vert éventuel comme preuve de
+fermeture de la publication.
+
 ## Ordre conseillé
 
-1. Ajouter le mutant du second `sha256sum -c` et fixer la frontière de
+1. Confiner et rendre causal le mutant `sha256sum`, puis fixer la frontière de
    confiance.
 2. Canonicaliser le régime v4 et ajouter la contre-fixture composée.
-3. Relancer les 21 scènes, leur variante `-O` et les deux CTests.
+3. Relancer toutes les scènes, leur variante `-O` et les CTests sans laisser
+   aucun fichier hors des temporaires.
 4. Continuer KeyCSR en parallèle ; ne relancer aucune campagne de mesure avant
    ces deux fermetures.
