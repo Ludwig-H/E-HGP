@@ -954,3 +954,51 @@ GCP non utilisé par cette livraison.
 
 Rejeux : selftest cycle de vie 100/100, revalidateur 22/22, intégration 2/2.
 GCP non utilisé.
+
+## 15. Accusé du verrou de pré-inscription (`6d9f9d71`) et du retour KeyCSR
+
+Verrou reçu tel quel ; ce que je grave en conséquence, avant tout codage de
+la mesure :
+
+- **`reduce_v3`** : `delta_payload_build_total = reserve + tris + append +
+  meta` (les quatre sous-attributions disjointes, `payload_meta` symétrique :
+  affectation commune de `ComponentDelta` dans les deux layouts, puis
+  `DeltaMeta`/offsets en csr) ; la destruction est publiée à part
+  (`forest_result_destruction_ns`, écrite après destruction dans un slot par
+  K préalloué) et exclue du total ; nanosecondes entières pour la décision,
+  comparaisons rationnelles par produits croisés, même nombre de prises
+  d'horloge par layout, chrono à vide diagnostique ; callback témoin sans
+  I/O (mix ordonné 64 bits + nombre exact de clés, drainé après
+  `run_pipeline`) ; `payload_owned_bytes_logical` cumulé à l'émission
+  symétriquement (jamais un parcours tardif dans le worker) ;
+  `csr_capacity_growths` diagnostique tant que les deux layouts ne comptent
+  pas symétriquement ; `parents_off.back()`/`born_off.back()` lus réellement ;
+  kind CONSTRUIT par K, zéro fallback, une ligne de tête unique.
+- **Règle** : unanimité inclusive `max_b R_b ≤ 0,55` ; `loadavg` diagnostic
+  seulement (jamais une invalidation) ; invalidations = causes indépendantes
+  du bras et A/A ; ordre de décision à sept étapes tel que vous l'écrivez
+  (`INCONCLUSIF` d'intégrité, `NO-GO_SEMANTIQUE`, `NO-GO_IMPLEMENTATION`,
+  `GO_MECANISME_UNIFORM`, `NO-GO_PERFORMANCE_PALIER` si `min R_b > 0,55`,
+  enveloppe traversant ⇒ `INCONCLUSIF`, `NO-GO_GARDE` nommée, mur par mode
+  digest avec `W_{b,d}` et A/A en pseudo-rapport) ; « nettement » retiré.
+- **Plan** : graine externe `0xa2ffb4db2884ddc4` (huit premiers octets
+  big-endian du SHA-256 de `morsehgp3D_v6:keycsr-prereg:v1:2026-09-02`),
+  SplitMix64 + Fisher–Yates spécifiés (passage 64 bits → indice borné défini
+  et rejoué par une fixture, jamais un `shuffle` de bibliothèque), un seul
+  flux sur la liste canonique des cinq strates (profil + callback armé,
+  Release digest off, Release digest on, A/A off, A/A on), chacune avec ses
+  six blocs et ses échauffements propres ; plan, commandes (famille, `n`,
+  graine d'entrée, coordonnées, `s`, `smax`, fils, inflight, join, layout,
+  digest, callback, schéma), identités de copies écrits et hachés avant tout
+  run ; affinité `0-7` décrite comme huit fils matériels sur quatre cœurs
+  physiques après attestation du cpuset.
+- **Préalables à la campagne** (aucune mesure avant) : pin sémantique KeyCSR
+  avec `for_each_delta` non appelable sur un temporaire (qualification
+  `const&`, surcharge `const&&` supprimée, dent de compilation), portée du
+  mutant `csr-inject-bad-alloc` clarifiée, télémétrie renommée/bornée
+  (`csr_capacity_growths`, octets logiques symétriques, offsets lus) ; harnais
+  de sonde : outils finaux résolus hors d'un `PATH` hostile, liaison exacte
+  commande/META au régime, à la famille et à la vivacité ; puis rejeu de
+  toutes les portes sémantiques sur le commit exact de mesure.
+
+GCP non utilisé.
