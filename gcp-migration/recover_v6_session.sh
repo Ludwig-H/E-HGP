@@ -42,8 +42,11 @@
 #     decision.
 # POLITIQUE DES REJEUX (explicite) : les rejeux sont MANUELS, idempotents,
 # serialises par le verrou, lies a la generation et toujours stop-first ;
-# aucune boucle automatique, aucune borne persistante — chaque rejeu apres
-# `targeted_stop_failed` refait exactement UN arret cible.
+# aucune boucle automatique ; ils sont BORNES PAR TENTATIVE (un arret cible
+# par rejeu), pas par un ledger persistant — aucun compteur ni deadline par
+# generation n'est promis. PORTEE de la vivacite : l'identite sid/pgid
+# enregistree par le superviseur ; un descendant qui refait `setsid` et retire
+# WORK de son argv n'est pas couvert (un cgroup dedie le serait).
 # Usage : bash recover_v6_session.sh <WORK>   (point d'entree de confiance :
 #   git -C <racine> show <commit>:gcp-migration/recover_v6_session.sh > /tmp/rec.sh
 #   bash /tmp/rec.sh <WORK>)
@@ -137,14 +140,18 @@ STATE_FILE="${WORK}/etat_cycle_vie"; HANDOFF="${WORK}/handoff.json"; MARKS_DIR="
 PID_FILE="${WORK}/superviseur.pid"; LOCK_FILE="${WORK}/reprise.lock"; LOCK_DIAG="${WORK}/reprise.pid"; RLOG="${WORK}/reprise.log"
 rlog() { printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" | tee -a "${RLOG}"; }
 
-[ ! -e "${WORK}/recu_publie" ] || { echo "REFUS : session deja conclue (recu $(cat "${WORK}/recu_publie"))" >&2; exit 2; }
-
 # ---- VERROU NOYAU (contre-audit, point 1) : flock -n sur un descripteur du
 # WORK, tenu jusqu'a la sortie du processus ; deux reprises simultanees —
 # meme depuis la meme session POSIX — ne peuvent pas franchir ensemble.
+# § 5.21 : TOUS les choix terminaux (session deja conclue, registre, marques,
+# generation) sont faits SOUS le verrou — un repreneur suspendu avant le
+# verrou ne peut pas conclure sur un etat lu avant.
 exec 9>>"${LOCK_FILE}"
 flock -n 9 || { echo "REFUS : une reprise est deja en cours (verrou ${LOCK_FILE})" >&2; exit 2; }
 printf '%s %s %s\n' "$$" "$(sed 's/.*) //' /proc/$$/stat | awk '{print $20}')" "$(cat /proc/sys/kernel/random/boot_id)" > "${LOCK_DIAG}"
+# Un temoin est un FICHIER REGULIER ; toute autre entree a ce nom n'est pas
+# une conclusion (elle fera echouer la publication atomique => code 68).
+[ ! -f "${WORK}/recu_publie" ] || { echo "REFUS : session deja conclue (recu $(cat "${WORK}/recu_publie"))" >&2; exit 2; }
 
 # ---- VIVACITE : le superviseur (pid + starttime + boot_id), TOUT membre
 # vivant de sa session / de son groupe de processus (sid, pgid graves par
@@ -331,6 +338,7 @@ dfd = os.open(d, os.O_RDONLY); os.fsync(dfd); os.close(dfd)
 PY
 }
 PURGE_RC=0
+WITNESS_RC=0
 finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc, $4 = classification, $5 = scp_rc, $6 = validate_rc, $7 = minimal(0|1)
   # epoch + pid : deux reprises dans la meme seconde ne collisionnent pas
   local run_id="${DURABLE_RECEIPT_PREFIX}_${GEN_EPOCH:-avorte}_reprise_$(date +%s)_$$"
@@ -352,22 +360,35 @@ finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc, $4 = classification, $
       printf 'etat_cycle_vie=%s\nmarques=%s\nresidus_recus=%s\n' "${final_state:-absent}" "$(ls "${MARKS_DIR}" 2>/dev/null | tr '\n' ' ')" "${residus}"
       printf 'superviseur_pid=%s\ndate_utc=%s\n' "${sup_pid:-inconnu}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     } > "${tmp}/RECU_SESSION.txt" &&
-    { [ ! -f "${WORK}/session.log" ] || cp -f "${WORK}/session.log" "${tmp}/session.log"; } &&
-    cp -f "${RLOG}" "${tmp}/reprise.log" &&
-    { [ ! -d "${MARKS_DIR}" ] || cp -r "${MARKS_DIR}" "${tmp}/marques"; } &&
+    { if [ "${minimal}" = 1 ]; then
+        # § 5.21 : temoin MINIMAL BORNE — tails plafonnes (64 Kio), aucune
+        # copie recursive (ni out/ ni marques/), aucun sync ; le signalement
+        # (code 70/71/78) ne doit pas attendre un archivage.
+        { [ ! -f "${WORK}/session.log" ] || tail -c 65536 "${WORK}/session.log" > "${tmp}/session.tail.log"; } &&
+        tail -c 65536 "${RLOG}" > "${tmp}/reprise.tail.log"
+      else
+        { [ ! -f "${WORK}/session.log" ] || cp -f "${WORK}/session.log" "${tmp}/session.log"; } &&
+        cp -f "${RLOG}" "${tmp}/reprise.log" &&
+        { [ ! -d "${MARKS_DIR}" ] || cp -r "${MARKS_DIR}" "${tmp}/marques"; }
+      fi; } &&
     { [ "${minimal}" = 1 ] || [ ! -f "${WORK}/profil_campagne.txt" ] || cp -f "${WORK}/profil_campagne.txt" "${tmp}/"; } &&
     { [ "${minimal}" = 1 ] || [ ! -f "${WORK}/validation.txt" ] || cp -f "${WORK}/validation.txt" "${tmp}/"; } &&
     { [ "${minimal}" = 1 ] || [ ! -f "${WORK}/manifest_revalide.txt" ] || cp -f "${WORK}/manifest_revalide.txt" "${tmp}/"; } &&
     { [ "${minimal}" = 1 ] || [ ! -d "${WORK}/out" ] || cp -r "${WORK}/out" "${tmp}/out"; } &&
     ( cd "${tmp}" && { find . -type f ! -name 'SHA256SUMS*' -print0 | sort -z | xargs -0 sha256sum; } > SHA256SUMS.tmp \
       && mv SHA256SUMS.tmp SHA256SUMS && sha256sum -c --quiet SHA256SUMS >/dev/null ) &&
-    mv -Tn "${tmp}" "${dir}" && [ ! -e "${tmp}" ] && sync
+    mv -Tn "${tmp}" "${dir}" && [ ! -e "${tmp}" ] && { [ "${minimal}" = 1 ] || sync; }
   } 2>/dev/null && rlog "recu de reprise publie : ${dir}" || return 1
   # Contre-audit, point 6 : PURGE VERIFIEE d'abord, TEMOIN ensuite — jamais
   # un temoin terminal au-dessus de credentials encore presents.
   if [ "${final_state}" = "targeted_stopped" ]; then
     if purge_credentials; then
-      publish_witness "${dir}" && rlog "credentials purges, temoin recu_publie publie"
+      if publish_witness "${dir}"; then
+        rlog "credentials purges, temoin recu_publie publie"
+      else
+        WITNESS_RC=68
+        rlog "TEMOIN NON PUBLIE : purge faite mais recu_publie non ecrit (mkstemp/rename/fsync en echec) — rejouer la reprise (aucun appel GCP)"
+      fi
     else
       PURGE_RC=67
       rlog "PURGE INCOMPLETE : credentials encore presents dans ${WORK} — aucun temoin ; relancer la reprise (purge locale, aucun appel GCP)"
@@ -412,7 +433,8 @@ fi
 if [ "${snap_state}" = "targeted_stopped" ]; then
   rlog "arret deja certifie au registre pour ${GENERATION} — aucun appel"
   finalize_receipt reprise_deja_certifiee 0 0 aucune na na 1 || { echo "RECU NON PUBLIE" >&2; exit 66; }
-  exit "${PURGE_RC}"
+  [ "${PURGE_RC}" -eq 0 ] || exit "${PURGE_RC}"
+  exit "${WITNESS_RC}"
 fi
 
 # ---- STOP-FIRST (contre-audit, point 4) : apres un arret incertain, rien
@@ -462,15 +484,25 @@ if [ -n "${m2_gen}" ] && [ "${STOP_FIRST}" -eq 0 ]; then
     # Relecture du tuple APRES la scp : promotion seulement si la generation
     # est inchangee ; sinon le staging est detruit et rien n'est promu.
     obs2="$(describe_ro)"; rlog "describe apres scp : ${obs2}"
-    obs2_gen="$(tuple_gen "${obs2}")"
-    if [ "${obs2}" != "describe_indisponible" ] && [ "${obs2_gen}" != "${GENERATION}" ]; then
+    obs2_status="$(tuple_status "${obs2}")"; obs2_gen="$(tuple_gen "${obs2}")"
+    if [ "${obs2}" != "describe_indisponible" ] && [ -n "${obs2_gen}" ] && [ "${obs2_gen}" != "${GENERATION}" ]; then
       rm -rf "${STAGING}"
-      rlog "BLOCAGE : generation changee pendant le rapatriement (${obs2_gen:-∅}) — staging detruit, rien promu, aucun arret"
+      rlog "BLOCAGE : generation changee pendant le rapatriement (${obs2_gen}) — staging detruit, rien promu, aucun arret"
       finalize_receipt reprise_generation_concurrente na 71 aucune "${SCP_RC}" na 1 || true
       exit 71
     fi
-    if [ -d "${STAGING}/out" ]; then
+    # § 5.21 : l'espace canonique out/ n'est remplace que si la scp a REUSSI
+    # et si le tuple posterieur est lisible, exact et de la generation
+    # attendue ; sinon le partiel est conserve sous un nom explicite et seul
+    # l'arret cible de la generation connue se poursuit.
+    if [ "${SCP_RC}" -eq 0 ] && [ "${obs2}" != "describe_indisponible" ] && [ "${obs2_status}" = "RUNNING" ] \
+       && [ "${obs2_gen}" = "${GENERATION}" ] && [ -d "${STAGING}/out" ]; then
       rm -rf "${WORK}/out"; mv -T "${STAGING}/out" "${WORK}/out"
+      rlog "staging promu en out/ (scp reussie, tuple posterieur exact)"
+    elif [ -d "${STAGING}/out" ] && [ -n "$(ls -A "${STAGING}/out" 2>/dev/null)" ]; then
+      partiel="${WORK}/out.partiel_$(date +%s)"
+      mv -T "${STAGING}" "${partiel}"
+      rlog "staging NON promu (scp_rc=${SCP_RC}, describe apres scp : ${obs2}) — conserve sous ${partiel}"
     fi
     rm -rf "${STAGING}"
   else
@@ -495,7 +527,9 @@ rlog "stop_rc=${STOP_RC}"
 # distant est inconnu par construction).
 if [ -n "${m2_gen}" ]; then
   classification=partiel_ou_invalide
-  if [ "${STOP_RC}" -eq 0 ] && [ -d "${WORK}/out" ] && [ -f "${WORK}/profil_campagne.txt" ]; then
+  # Validateur SEULEMENT sur un out/ promu et non vide (un out/ vide cree par
+  # le cycle de vie n'est pas un rapatriement).
+  if [ "${STOP_RC}" -eq 0 ] && [ -n "$(ls -A "${WORK}/out" 2>/dev/null)" ] && [ -f "${WORK}/profil_campagne.txt" ]; then
     canon="${WORK}/pinned/gcp-migration/profils/${CAMPAIGN_PROFILE}.env"
     VALIDATE_RC=0
     V6_RESUMES_DIR="${WORK}" /usr/bin/timeout -k "${GRACE_S}" "${VALIDATOR_TIMEOUT_S}" python3 "${PINNED_DIR}/validate_v6_campaign.py" \
@@ -523,4 +557,5 @@ if [ "${rc}" -ne 0 ]; then
   echo "ARRET NON CERTIFIE (stop_rc=${STOP_RC}) — rejeu MANUEL de la reprise (stop-first) ou arret a la main : ${STOP_GUARD} --yes --expected-last-start-timestamp ${GENERATION}" >&2
   exit "${rc}"
 fi
-exit "${PURGE_RC}"
+[ "${PURGE_RC}" -eq 0 ] || exit "${PURGE_RC}"
+exit "${WITNESS_RC}"

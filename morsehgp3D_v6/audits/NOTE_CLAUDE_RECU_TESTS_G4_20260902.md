@@ -56,8 +56,8 @@ reste la seule voie de décision.
 
 ## 3. Murs CPU, K=10 contre K=5 (48 fils, inflight 2, join 0, sans digest)
 
-Moyenne des deux passages ; dispersion entre passages ≤ 1,6 % partout
-(≤ 2,8 % sur les murs sub-seconde). Mémoire = `rss_max_kb` maximal des
+Moyenne des deux passages ; dispersion entre passages au plus 1,621 %
+(2,838 % sur les murs sub-seconde). Mémoire = `rss_max_kb` maximal des
 deux passages.
 
 | famille | n | mur K=10 (ms) | mur K=5 (ms) | ratio | rss K=10 (Mo) | rss K=5 (Mo) | ratio |
@@ -83,28 +83,34 @@ Lecture factuelle :
 
 - Le passage de K=10 à K=5 divise le mur par **≈ 5** sur les familles
   denses (uniform, eight_clusters) et par **≈ 3,2–3,5** sur les familles
-  minces (terrain, scanline) ; le rapport croît lentement avec `n`. La
-  mémoire suit le même rapport — la résidence est dominée par les forêts
-  hautes, pas par la génération.
+  minces (terrain, scanline). Les ratios observés varient avec `n`, sans
+  monotonie générale (scanline revient de 3,34 à 3,17 au dernier pas). La
+  mémoire suit un rapport voisin ; cela ne prouve pas que la résidence vient
+  des forêts plutôt que de la génération (`rss apres_generation` varie déjà
+  fortement — rectification des auditeurs).
 - **Pentes log-log 8000 → 50000** (mur) : uniform 1,11 / 1,09 (K=10 /
   K=5), eight_clusters 1,27 / 1,25, scanline 1,36 / 1,36, terrain 1,47 /
-  1,41. Les pentes sont **indépendantes de K** à 0,06 près : réduire la
-  hauteur de la tour change la constante, pas l'exposant. Le segment
+  1,41. Les écarts de pente K10/K5 observés sont au plus 0,0615 — sur quatre
+  tailles, une graine et deux passages : une observation, pas une pente
+  « indépendante de K » démontrée (rectification des auditeurs, § 5.20). Le segment
   32000 → 50000 est plus raide sur les familles minces (terrain 1,76,
   scanline 1,60–1,71) — quatre tailles ne suffisent pas à trancher entre
   une pente asymptotique et un effet de cache ; à mesurer, pas à conclure.
-- Pentes mémoire 0,93–1,01 : linéaires en `n` pour les deux K.
+- Pentes mémoire log-log observées 0,93–1,01 : compatibles avec une croissance
+  proche de la linéarité sur cette fenêtre, sans la démontrer au-delà des
+  quatre tailles, de la graine unique et des deux passages.
 - Surcoût du `--digest` à 32000 : +14 à +23 % du mur à K=10, +11 à +19 %
   à K=5 (le digest est un cumul par étage, hors des murs « sans »).
 
 ## 4. Attribution K=10 à 32000 et reproductibilité inter-sessions
 
-- `attrib_uniform_n32000` : reduce séquentiel cumulé 18 235 ms pour un mur
-  de 29 836 ms (61 %) ; `materialisation_tri_copie` 6 314 ms = **35 % du
-  reduce**, puis `pre` 3 384, `touch` 3 096, `post_remplissage` 2 330,
-  `partition` 1 615, `unite` 761. `attrib_eight_clusters_n32000` : reduce
-  16 059 ms / 35 216 ms (46 %), `materialisation_tri_copie` 5 604 ms
-  (35 %). Mêmes proportions qu'au reçu série C (31–36 %) : la cible
+- `attrib_uniform_n32000` : reduce cumulé par K 18 235 ms (cumul de
+  réductions dont deux sont actives en vol — jamais une part du mur, la
+  formulation « 61 % du mur » est retirée) ; `materialisation_tri_copie`
+  6 314 ms = **34,6 % du cumul reduce**, puis `pre` 3 384, `touch` 3 096,
+  `post_remplissage` 2 330, `partition` 1 615, `unite` 761.
+  `attrib_eight_clusters_n32000` : cumul reduce 16 059 ms,
+  `materialisation_tri_copie` 5 604 ms (34,9 %). Mêmes proportions qu'au reçu série C (31–36 %) : la cible
   CompactDelta du § 5.10 est confirmée à cette taille, sur deux familles.
 - Uniform K=10 à binaire identique, même réglage : 16000 → série C
   13 642 / 13 580 / 13 560 ms, tests 13 234 / 13 450 ms ; 50000 → série C

@@ -36,8 +36,9 @@ sonde.
   48 → 8 fils (`taskset -c 0-7`, Codespace 8 vCPU EPYC 9V74 partagé),
   `--fold-inflight=2 --fold-join=1` (étage B isolé), graine 3, trois
   répétitions en ordre aller/retour, médianes par fenêtre et par K.
-  `loadavg` avant/après chaque run gravé (1,3–2,0 pendant la sonde, aucune
-  autre charge lancée).
+  `loadavg` avant/après chaque run gravé — première composante entre 1,78
+  et 9,88 sur ce reçu (rectification des auditeurs : le reçu ne permet pas
+  d'affirmer l'absence d'autre charge ; le second reçu va de 0,55 à 7,67).
 - Lecture des colonnes `profil_reduce K=…` seulement : attribution sur
   binaire instrumenté, `join=1` — le mur `temps_mur_ms` de ce binaire
   n'est pas un mur.
@@ -67,9 +68,10 @@ copie (−1754), 2042 sans tris (−837), 2327 à clé factice (−552) ;
 1. **La copie profonde domine** : 54–59 % de `materialisation_tri_copie`
    sur les trois tailles, part **croissante avec n** (8000 → 32000), soit
    22–24 % du reduce séquentiel entier (5,3 s sur 24,5 s Σ_K à 32000, 1,75 s
-   sur le seul K = 10). C'est `r.deltas.push_back(cd)` : deux allocations par
-   delta plus la copie de 44 o par clé (`parents` + `born`, 14,6 M clés à
-   16000 K = 10).
+   sur le seul K = 10). C'est `r.deltas.push_back(cd)` : zéro, une ou deux
+   allocations par delta (une par liste non vide — « deux par delta » n'est
+   pas un invariant, rectification des auditeurs) plus la copie de 44 o par
+   clé (`parents` + `born`, 14,6 M clés à 16000 K = 10).
 2. **Les tris de clés 44 o** pèsent 25–27 % de la fenêtre, stables en n.
 3. **La lecture aléatoire `keys[]` du remplissage** pèse 73–75 % de
    `post_remplissage` (3,4 s sur 4,5 s à 32000), stable en n. Sa part
@@ -94,8 +96,10 @@ copie (−1754), 2042 sans tris (−837), 2327 à clé factice (−552) ;
   amortie, mêmes clés, même ordre) supprime les 2 allocations par delta et
   la copie élément par élément — l'ablation « sans copie » en est la borne
   haute : jusqu'à −59 % de la fenêtre, ≈ −22 % du reduce Σ_K. Cela change
-  la **forme** du payload `ForestResult` (le digest, le rendu et
-  `on_forest` lisent `r.deltas`), pas l'objet : c'est une question aux
+  la **forme** du payload `ForestResult` (le digest et `on_forest` lisent
+  `r.deltas` ; le rendu, lui, se reconstruit depuis les événements et n'est
+  pas un consommateur — rectification des auditeurs), pas l'objet : c'est
+  une question aux
   auditeurs (`QUESTION_CLAUDE_COMPACTDELTA_CSR_20260902.md`), pas un repli
   pré-enregistré.
 - La mémoire : `rss_max_kb` est insensible aux ablations (les arènes du
@@ -152,8 +156,11 @@ trois parts.
 
 ## 8. Limites
 
-Machine partagée 8 vCPU, trois répétitions (dispersion des médianes ≤ 3 %
-sur les fenêtres dominantes, ≤ 10 % sur `liberation` sub-milliseconde) ;
+Machine partagée 8 vCPU ; trois répétitions pour le premier reçu, **quatre
+blocs** (carré de Williams) pour le second ; la dispersion n'est PAS
+uniformément ≤ 3 % (rectification des auditeurs : témoin 8000, sommes `pre`
+632,3 / 665,9 / 633,6 ms et `partition` 399,6 / 405,7 / 382,5 ms, étendues
+> 3 % de la médiane) — seules les fenêtres ablatées portent un signal net ;
 binaire instrumenté ; `join=1` (le mur nominal est `join=0`) ; une seule
 famille (`uniform`) ; les ablations changent l'objet, leurs nombres ne
 valent que comme décomposition de fenêtres. Ce reçu n'établit ni un gain ni

@@ -259,6 +259,7 @@ LOG="${WORK}/session.log"
 PROFILE="${WORK}/profil_campagne.txt"
 MARKS_DIR="${WORK}/marques"
 PID_FILE="${WORK}/superviseur.pid"
+WITNESS_RC=0  # § 5.21 : temoin non publie => code 68 (domine un succes)
 SESSION_ENV="${WORK}/session.env"
 : > "${LOG}"
 DURABLE_RECEIPT_BASE="${DURABLE_RECEIPT_BASE:?DURABLE_RECEIPT_BASE requis (recu durable obligatoire)}"
@@ -477,7 +478,9 @@ finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu CO
           shred -u "${WORK}/ssh/id_ed25519" 2>/dev/null || rm -f "${WORK}/ssh/id_ed25519" 2>/dev/null || true
         fi
         if [ ! -e "${WORK}/gcloud-config" ] && [ ! -e "${WORK}/ssh/id_ed25519" ]; then
-          python3 - "${WORK}/recu_publie" "${dir}" <<'PY'
+          # § 5.21 : l'echec de la publication atomique du temoin DOMINE le
+          # code de succes (code local 68), jamais masque par un `true`.
+          if ! python3 - "${WORK}/recu_publie" "${dir}" <<'PY'
 import os, sys, tempfile
 path, content = sys.argv[1:3]
 d = os.path.dirname(path)
@@ -485,6 +488,11 @@ fd, tmp = tempfile.mkstemp(prefix=".recu_publie.", suffix=".partial", dir=d)
 os.write(fd, (content + "\n").encode()); os.fsync(fd); os.close(fd); os.replace(tmp, path)
 dfd = os.open(d, os.O_RDONLY); os.fsync(dfd); os.close(dfd)
 PY
+          then
+            WITNESS_RC=68
+            printf '%s\n' "temoin recu_publie non publie (mkstemp/rename/fsync) — rejouer la reprise locale : recover_v6_session.sh ${WORK}" > "${WORK}/temoin_non_publie"
+            log "TEMOIN NON PUBLIE : purge faite mais recu_publie non ecrit — code 68 ; relancer la reprise (aucun appel GCP)"
+          fi
         else
           printf '%s\n' "purge incomplete : credentials encore presents (reprise locale : recover_v6_session.sh ${WORK})" > "${WORK}/purge_incomplete"
           log "PURGE INCOMPLETE : credentials encore presents dans ${WORK} — aucun temoin recu_publie ; relancer la reprise (purge locale, aucun appel GCP)"
@@ -575,6 +583,8 @@ PYEPOCH
       echo "[RECU NON PUBLIE] le recu durable n'a pas pu etre ecrit (${DURABLE_RECEIPT_BASE})" >&2
       exit 66
     }
+    # § 5.21 : temoin non publie => 68 aussi sur ce chemin (conclusion normale).
+    case "${rc}" in 0|65) [ "${WITNESS_RC}" -eq 0 ] || rc="${WITNESS_RC}" ;; esac
     exit "${rc}"
   fi
   if [ "${snap_rc}" -eq 0 ] && [ "${lc_state}" = "targeted_stopped" ] \
@@ -673,6 +683,9 @@ PYEPOCH
     echo "[RECU NON PUBLIE] arret certifie mais recu durable manquant (${DURABLE_RECEIPT_BASE})" >&2
     exit 66
   fi
+  # § 5.21 : un temoin non publie DOMINE une conclusion normale (0 ou le
+  # verdict non decisionnel 65) ; un echec deja signale garde son code.
+  case "${rc}" in 0|65) [ "${WITNESS_RC}" -eq 0 ] || rc="${WITNESS_RC}" ;; esac
   exit "${rc}"
 }
 trap cleanup EXIT

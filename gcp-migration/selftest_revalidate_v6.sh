@@ -122,6 +122,19 @@ D="$(fresh_copy validateur_rehash)"; run_reval "${D}" "${FAKEV3}"
 check_true "validateur alterant session.log PUIS regenerant SHA256SUMS, rc=0 : manifeste initial lie (rc 3)" \
   bash -c "[ \"\$1\" -eq 3 ] && printf '%s' \"\$2\" | grep -q 'RECU ALTERE PENDANT LA RE-VALIDATION'" _ "${REVAL_RC}" "${REVAL_OUT}"
 
+# ---- Validateur qui cree seulement un REPERTOIRE vide dans le recu puis
+# rend 0 (§ 5.21) : l'inventaire des repertoires est recompare => rc 3.
+FAKEV4="${WORK}/faux_validateur_repertoire.py"
+cat > "${FAKEV4}" <<'EOF'
+import os, sys
+recu = os.path.dirname(sys.argv[7])
+os.mkdir(os.path.join(recu, "repertoire_vide_du_validateur"))
+sys.exit(0)
+EOF
+D="$(fresh_copy validateur_repertoire)"; run_reval "${D}" "${FAKEV4}"
+check_true "validateur creant un repertoire vide dans le recu puis rc=0 : inventaire des repertoires recompare (rc 3)" \
+  bash -c "[ \"\$1\" -eq 3 ] && printf '%s' \"\$2\" | grep -q 'RECU ALTERE PENDANT LA RE-VALIDATION'" _ "${REVAL_RC}" "${REVAL_OUT}"
+
 # ---- Lien symbolique non hache a la racine : refus AVANT le validateur.
 D="$(fresh_copy symlink)"; ln -s out/MANIFESTE_DISTANT.txt "${D}/lien_intrus"; run_reval "${D}"
 check_true "lien symbolique ajoute au recu : REFUS entree non reguliere" \

@@ -94,6 +94,12 @@ case "$*" in
     # le faux scp quand la destination est un chemin local), jamais la scp
     # d'envoi du bundle du superviseur.
     if [ -n "${FAKE_DESCRIBE_GEN_AFTER_SCP:-}" ] && [ -e "${FAKE_CALLS}.scp_local" ]; then gen="${FAKE_DESCRIBE_GEN_AFTER_SCP}"; fi
+    # describe en echec APRES la scp locale : seulement la lecture en TUPLE de
+    # la reprise (la vraie garde d'arret relit ses champs un a un et doit
+    # pouvoir certifier l'arret).
+    case "$*" in *"value(status,lastStartTimestamp)"*)
+      if [ "${FAKE_DESCRIBE_FAIL_AFTER_SCP:-0}" = "1" ] && [ -e "${FAKE_CALLS}.scp_local" ]; then echo "describe indisponible (faux)" >&2; exit 1; fi ;;
+    esac
     # TERMINATED seulement apres un `instances stop` REUSSI (marqueur), jamais
     # apres une tentative en echec — sinon la vraie garde conclurait « deja
     # arretee » sans arret lors d'un rejeu stop-first.
@@ -853,6 +859,7 @@ tail -n 6 "${SCENARIO_DIR}/reprise_stderr.log" >&2 || true
 check_true "R4d/R5 : pid recycle (starttime different) => reprise executee ; scp en echec => 1 STOP exact, scp_rc=1 grave" \
   bash -c "[ '${rc}' -eq 0 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ] \
     && [ -n '${RECU_R5}' ] && grep -q '^scp_rc=1' '${RECU_R5}/RECU_SESSION.txt' \
+    && [ -z \"\$(ls -A '${SCEN_W}/out' 2>/dev/null)\" ] && [ -z \"\$(ls -d '${SCEN_W}'/out.partiel_* 2>/dev/null)\" ] \
     && grep -q '^issue=reprise_apres_perte_superviseur' '${RECU_R5}/RECU_SESSION.txt'"
 # R6 : ARRET EN ECHEC pendant la reprise (la dent revelee par le bug de
 # PIPESTATUS) : rc 70, registre targeted_stop_failed, AUCUN temoin de
@@ -870,7 +877,8 @@ check_true "R6 : stop en echec (vraie garde, faux instances stop rc=1) => rc 70,
     && [ ! -e '${SCEN_W}/recu_publie' ] && [ -f '${SCEN_W}/ssh/id_ed25519' ] && [ -d '${SCEN_W}/gcloud-config' ] \
     && grep -q 'ARRET NON CERTIFIE' '${SCENARIO_DIR}/reprise_stderr.log' \
     && [ -n '${RECU_R6}' ] && grep -q '^stop_rc=1' '${RECU_R6}/RECU_SESSION.txt' && grep -q '^temoin_minimal=1' '${RECU_R6}/RECU_SESSION.txt' \
-    && [ ! -d '${RECU_R6}/out' ] && [ ! -f '${RECU_R6}/validation.txt' ] && [ ! -f '${SCEN_W}/validation.txt' ]"
+    && [ ! -d '${RECU_R6}/out' ] && [ ! -d '${RECU_R6}/marques' ] && [ ! -f '${RECU_R6}/validation.txt' ] && [ ! -f '${SCEN_W}/validation.txt' ] \
+    && [ -f '${RECU_R6}/reprise.tail.log' ] && [ \"\$(stat -c %s '${RECU_R6}/reprise.tail.log')\" -le 65536 ] && [ ! -f '${RECU_R6}/reprise.log' ]"
 N0="$(wc -l < "${FAKE_CALLS}")"
 rc=0; run_recovery || rc=$?
 RECU_R6B="$(ls -td "${SCENARIO_DIR}"/recu/s_*_reprise_* 2>/dev/null | head -1 || true)"
@@ -1005,6 +1013,49 @@ rc=0; run_recovery || rc=$?
 check_true "D8bis : reprise apres purge nominale en echec => purge locale, temoin publie, rc 0, AUCUN appel GCP" \
   bash -c "[ '${rc}' -eq 0 ] && [ -f '${SCEN_W}/recu_publie' ] && [ ! -e '${SCEN_W}/ssh/id_ed25519' ] && [ ! -d '${SCEN_W}/gcloud-config' ] \
     && [ \"\$(wc -l < '${FAKE_CALLS}')\" -eq '${N0}' ]"
+unset FAKE_BUILD_SLEEP_S
+# D9 (§ 5.21) : temoin NON publiable (recu_publie est un repertoire) apres un
+# arret certifie et une purge reussie => code 68 dedie, jamais 0 ; une fois
+# l'obstacle retire, la reprise publie le temoin sans appel GCP.
+new_killed_session || true
+mkdir -p "${SCEN_W}/recu_publie"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D9 : temoin non publiable apres arret certifie et purge => rc 68, TEMOIN NON PUBLIE, credentials purges, registre targeted_stopped" \
+  bash -c "[ '${rc}' -eq 68 ] && grep -q 'TEMOIN NON PUBLIE' '${SCEN_W}/reprise.log' && [ ! -e '${SCEN_W}/ssh/id_ed25519' ] \
+    && grep -q '^state=targeted_stopped' '${SCEN_W}/etat_cycle_vie' && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ]"
+rmdir "${SCEN_W}/recu_publie"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D9bis : obstacle retire => temoin publie, rc 0, AUCUN appel GCP" \
+  bash -c "[ '${rc}' -eq 0 ] && [ -f '${SCEN_W}/recu_publie' ] && [ \"\$(wc -l < '${FAKE_CALLS}')\" -eq '${N0}' ]"
+# D10 (§ 5.21) : tuple posterieur ILLISIBLE apres la scp => rien promu, partiel
+# conserve sous un nom explicite, un seul arret cible de la generation connue.
+new_killed_session || true
+export FAKE_DESCRIBE_FAIL_AFTER_SCP=1 FAKE_SCP_MODE_REPRISE=partiel
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D10 : describe indisponible apres la scp => staging NON promu (out/ vide, out.partiel_* conserve), un STOP exact, rc 0" \
+  bash -c "[ '${rc}' -eq 0 ] && [ -z \"\$(ls -A '${SCEN_W}/out' 2>/dev/null)\" ] && [ -n \"\$(ls -d '${SCEN_W}'/out.partiel_* 2>/dev/null)\" ] \
+    && grep -q 'staging NON promu' '${SCEN_W}/reprise.log' \
+    && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ] && [ ! -f '${SCEN_W}/validation.txt' ]"
+unset FAKE_DESCRIBE_FAIL_AFTER_SCP FAKE_SCP_MODE_REPRISE
+# D11 (§ 5.21) : cycle NOMINAL, temoin non publiable (recu_publie est un
+# repertoire cree apres le handshake) => code 68 dedie, marqueur
+# temoin_non_publie, purge faite ; la reprise publie ensuite le temoin.
+export FAKE_BUILD_SLEEP_S=12
+run_scenario_bg ok build_lent 0 28800
+bash -c "$(declare -f wait_for_line); wait_for_line '${SCEN_W}/session.log' 'handshake : boot_id=' 60" || true
+mkdir -p "${SCEN_W}/recu_publie"
+rc=0; wait "${SUP_WAIT_PID}" 2>/dev/null || rc=$?
+check_true "D11 : cycle nominal, temoin non publiable => code 68, marqueur temoin_non_publie, TEMOIN NON PUBLIE au journal, credentials purges, registre targeted_stopped" \
+  bash -c "[ '${rc}' -eq 68 ] && [ -f '${SCEN_W}/temoin_non_publie' ] && grep -q 'TEMOIN NON PUBLIE' '${SCEN_W}/session.log' \
+    && [ ! -e '${SCEN_W}/ssh/id_ed25519' ] && grep -q '^state=targeted_stopped' '${SCEN_W}/etat_cycle_vie'"
+rmdir "${SCEN_W}/recu_publie"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D11bis : reprise apres temoin nominal non publie => temoin publie, rc 0, AUCUN appel GCP" \
+  bash -c "[ '${rc}' -eq 0 ] && [ -f '${SCEN_W}/recu_publie' ] && [ \"\$(wc -l < '${FAKE_CALLS}')\" -eq '${N0}' ]"
 unset FAKE_BUILD_SLEEP_S
 unset SSH_STEP_TIMEOUT_S PIN_SOURCE
 

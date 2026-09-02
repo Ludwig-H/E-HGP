@@ -92,13 +92,16 @@ for r in bench queue sweep gpu frontier matrice gpuv6; do
 done
 # Le controle final DOMINE le code du validateur (§ 5.19.3 : un validateur
 # qui altere le recu ne peut pas rendre 0 par un `&&` a gauche).
+# § 5.21 : l'inventaire des REPERTOIRES est lui aussi recompare (un
+# validateur qui cree seulement un repertoire vide n'est pas « intact »).
 if [ "$(sha256sum "${RECU}/SHA256SUMS" | awk '{print $1}')" = "${MANIFESTE_INITIAL_SHA}" ] \
    && ( cd "${RECU}" && sha256sum -c --quiet SHA256SUMS ) \
    && [ -z "$(cd "${RECU}" && find . -mindepth 1 ! -type f ! -type d -printf '%P\n')" ] \
+   && [ "$(cd "${RECU}" && find . -mindepth 1 -type d -printf '%P\n' | sort)" = "${REPERTOIRES}" ] \
    && [ "$(cd "${RECU}" && find . -type f ! -name SHA256SUMS -printf '%P\n' | sort)" = "${PRESENTS}" ]; then
-  echo "recu intact apres re-validation (manifeste initial identique, SHA256SUMS verifie, ensemble de fichiers inchange)"
+  echo "recu intact apres re-validation (manifeste initial identique, SHA256SUMS verifie, ensembles de fichiers et de repertoires inchanges)"
 else
-  echo "RECU ALTERE PENDANT LA RE-VALIDATION (manifeste, hashes ou ensemble de fichiers) — verdict rejete" >&2
+  echo "RECU ALTERE PENDANT LA RE-VALIDATION (manifeste, hashes, ensemble de fichiers ou de repertoires) — verdict rejete" >&2
   exit 3
 fi
 exit "${rc}"

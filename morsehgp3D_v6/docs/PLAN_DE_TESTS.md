@@ -143,4 +143,18 @@ chacun, jamais de boucle). Dents : deux reprises simultanées (D1),
 `targeted_stopped` sans génération (D2), génération concurrente avant /
 pendant la scp (D3), marque au champ `mark=` falsifié (D4), orphelin de
 session sans `WORK` dans son argv (D5), purge en échec puis re-purge locale
-(D6, D8 nominal), stop-first et troisième rejeu (D7).
+(D6, D8 nominal), stop-first et troisième rejeu (D7). Coutures du § 5.21 :
+tous les choix terminaux (session déjà conclue comprise) sont pris SOUS le
+verrou ; le staging n'est promu en `out/` que si la scp a réussi et si le
+tuple postérieur est lisible, exact et de la génération attendue, sinon le
+partiel est conservé sous `out.partiel_<epoch>` et seul l'arrêt ciblé se
+poursuit ; l'échec de la publication du témoin domine le succès (code 68,
+marqueur `temoin_non_publie`, dans la reprise et le cycle nominal) ; le
+témoin minimal après arrêt non certifié ne porte que des champs fixes et des
+tails plafonnés à 64 Kio (ni `out/`, ni `marques/`, ni `sync`) ; les rejeux
+sont bornés par tentative, jamais par un ledger ; la vivacité couvre
+l'identité sid/pgid enregistrée, pas un descendant qui refait `setsid`. Dents :
+témoin non publiable (D9 reprise, D11 nominal) puis publication sans appel
+GCP, describe indisponible après la scp (D10 : partiel conservé, rien promu).
+Le revalidateur recompare aussi l'inventaire des répertoires (mutant :
+répertoire vide créé par le validateur).
