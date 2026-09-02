@@ -116,8 +116,16 @@ théorème d'équivalence + fixture, jamais sur un benchmark.
   bras `--digest` de la matrice pour la même entrée ET la fixture d'égalité
   `GPUV6_OBJET_DIGESTS` du profil (gravée depuis le reçu
   `session_g4_20260901_b97f20ea4b8f_1788293187`) — un pilote calculant un
-  autre objet à parité interne intacte n'est plus vert. Un reçu durable se
-  re-juge sans être modifié par `gcp-migration/revalidate_v6_receipt.sh`. Le reçu de
+  autre objet à parité interne intacte n'est plus vert. La matrice a sa
+  propre fixture `MATRICE_OBJET_DIGESTS` (`famille:n:smax:digest_all`, clés
+  ≡ points `--digest`, gravée dans `g4_tests_v1.env` depuis le reçu
+  `session_g4_20260902_c8f696739b0b_1788312873` pour K=10 et K=5 à 32000),
+  et le validateur vérifie la PROPRIÉTÉ DE PRÉFIXE : un point `--smax=s`
+  (K = 1..s−1) doit porter des `cardinalites K` et des `digest_forest_K`
+  égaux à ceux des jumeaux `smax=11` de la même entrée dans le même reçu —
+  `tower_scope=prefix_k<K>` l'affirme, le validateur le vérifie. Un reçu
+  durable se re-juge sans être modifié par
+  `gcp-migration/revalidate_v6_receipt.sh`. Le reçu de
   gain 50k+ vient d'une session G4 (profil de campagne, nouveau pin,
   nouveau GO auditeur) — jamais d'un gate ni du reçu GPU v5 historique.
 

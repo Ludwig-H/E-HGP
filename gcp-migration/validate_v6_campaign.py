@@ -559,6 +559,7 @@ def main():
     profile = {}
     canon_axes = {}
     objet_digests = {}
+    matrice_objet_digests = {}
     bins = {"matrice": "./build-v6/mhgp6", "attrib": "./build-v6/mhgp6_profile",
             "pilote": "./build-v6-cuda/mhgp6_cuda"}
     if not os.path.exists(profile_path):
@@ -606,6 +607,20 @@ def main():
             if (m.group(1), m.group(2)) in objet_digests:
                 bad.append(f"profil de campagne : gpuv6_objet_digests duplique pour {m.group(1)}:{m.group(2)}")
             objet_digests[(m.group(1), m.group(2))] = m.group(3)
+        # FIXTURE D'EGALITE DE LA MATRICE (2 septembre) : famille:n:smax:
+        # digest_all — chaque bras --digest du point doit calculer CET objet ;
+        # les cles EGALENT exactement les points --digest (§ 5.18.5, jamais
+        # une fixture decorative). Cle optionnelle (recus anterieurs).
+        matrice_objet_digests = {}
+        for tok in expand_axis(profile.get("matrice_objet_digests", "aucun")):
+            m = re.match(r"^([a-z][a-z0-9_]*):(\d+):([2-9]|1[01]):([0-9a-f]{64})$", tok)
+            if not m:
+                bad.append(f"profil de campagne : matrice_objet_digests hors grammaire ({tok[:40]})")
+                continue
+            mkey = (m.group(1), m.group(2), m.group(3))
+            if mkey in matrice_objet_digests:
+                bad.append(f"profil de campagne : matrice_objet_digests duplique pour {':'.join(mkey)}")
+            matrice_objet_digests[mkey] = m.group(4)
         # § 5.13.4 : les axes de duree du profil pilotent les VRAIS
         # coupe-circuits — un ecart entre l'axe et l'effectif signifie une
         # surcharge d'environnement (profil effectif != canonique).
@@ -638,7 +653,8 @@ def main():
                              "ATTRIB_POINTS", "ATTRIB_TIMEOUT",
                              "GPUV6_GATE_NAMES", "GPUV6_BUILD_TIMEOUT", "GPUV6_GATE_TIMEOUT",
                              "GPUV6_PILOT_SPECS", "GPUV6_PILOT_MIN_LOTS", "GPUV6_PILOT_TIMEOUT",
-                             "GPUV6_OBJET_DIGESTS", "BIN_MATRICE", "BIN_ATTRIB", "BIN_PILOTE",
+                             "GPUV6_OBJET_DIGESTS", "MATRICE_OBJET_DIGESTS",
+                             "BIN_MATRICE", "BIN_ATTRIB", "BIN_PILOTE",
                              "SESSION_MAX_RUN_SECONDS", "SESSION_INVITE_MINUTES")
             # Grammaire TOTALE : commentaire, ligne vide, ou axe connu a
             # guillemets equilibres — TOUT le reste est refuse.
@@ -695,6 +711,7 @@ def main():
                     ("gpuv6_pilot_min_lots", "GPUV6_PILOT_MIN_LOTS"),
                     ("gpuv6_pilot_timeout", "GPUV6_PILOT_TIMEOUT"),
                     ("gpuv6_objet_digests", "GPUV6_OBJET_DIGESTS"),
+                    ("matrice_objet_digests", "MATRICE_OBJET_DIGESTS"),
                     ("bin_matrice", "BIN_MATRICE"), ("bin_attrib", "BIN_ATTRIB"), ("bin_pilote", "BIN_PILOTE"),
                     ("session_max_run_seconds", "SESSION_MAX_RUN_SECONDS"),
                     ("session_invite_minutes", "SESSION_INVITE_MINUTES"))
@@ -951,8 +968,9 @@ def main():
     # l'affinite inchangee du shell), bras digest exact, bit-identite de
     # l'objet (digest_all identique entre tous les points --digest d'une meme
     # paire famille/n) et invariance du grand-livre entre fils/inflight/join.
-    matrice_digests = {}     # (family, n) -> {digest_all: [names]}
-    matrice_signatures = {}  # (family, n) -> {signature: [names]}
+    matrice_digests = {}     # (family, n, smax) -> {digest_all: [names]}
+    matrice_signatures = {}  # (family, n, smax) -> {signature: [names]}
+    matrice_prefix = {}      # (family, n) -> {smax: {name: (cardinalites par K, digest_forest par K)}}
     matrice_rows = []
     matrice_bin_shas, attrib_bin_shas, pilote_bin_shas = set(), set(), set()
     for run in matrice_runs:
@@ -1036,6 +1054,15 @@ def main():
                 bad.append(f"{name}: ligne invariante {pat} presente {cnt} fois (attendu 1)")
         matrice_signatures.setdefault((run["family"], run["n"], run["smax"]), {}) \
             .setdefault(thread_invariant_signature(body), []).append(name)
+        # PREFIXE (2 septembre) : lignes par K de ce run, comparees plus bas
+        # aux jumeaux smax=11 de la meme famille/n.
+        cards_k = {int(k): rest for k, rest in re.findall(r"^cardinalites K=(\d+) (.*)$", body, re.M)}
+        dfor_k = {int(k): d for k, d in re.findall(r"^digest_forest_K(\d+)=([0-9a-f]{64})$", body, re.M)}
+        if run["digest"] == "avec" and sorted(dfor_k) != list(range(1, int(run["smax"]))):
+            bad.append(f"{name}: digest_forest_K1..K{int(run['smax']) - 1} incomplets ou en trop "
+                       f"({sorted(dfor_k)})")
+        matrice_prefix.setdefault((run["family"], run["n"]), {}) \
+            .setdefault(run["smax"], {})[name] = (cards_k, dfor_k)
         matrice_rows.append((run, meas))
     for key, table in sorted(matrice_digests.items()):
         if len(table) > 1:
@@ -1047,6 +1074,57 @@ def main():
             groups = sorted(table.values(), key=len, reverse=True)
             bad.append(f"matrice {key}: INVARIANCE DU GRAND-LIVRE VIOLEE entre points "
                        f"(dissidents {', '.join(groups[1])})")
+    # PROPRIETE DE PREFIXE (2 septembre) : un point smax < 11 (K = 1..smax-1)
+    # calcule le PREFIXE EXACT de l'objet complet — cardinalites K=1..kmax
+    # et digest_forest_K1..Kkmax (bras --digest) EGAUX a ceux des jumeaux
+    # smax=11 de la meme famille/n dans le meme recu. tower_scope l'affirme ;
+    # ici on le verifie contre un representant (les jumeaux smax=11 sont deja
+    # prouves identiques entre eux par l'invariance et digest_all).
+    for key, by_smax in sorted(matrice_prefix.items()):
+        full = by_smax.get("11", {})
+        if not full:
+            continue
+        # Representants : cardinalites depuis n'importe quel jumeau (toutes les
+        # branches les impriment), digest_forest depuis un jumeau --digest
+        # (un representant sans digest ferait SAUTER la comparaison).
+        ref_name = sorted(full)[0]
+        ref_cards = full[ref_name][0]
+        ref_dig = sorted(nm for nm, (_c, d) in full.items() if d)
+        ref_dname = ref_dig[0] if ref_dig else None
+        ref_dfor = full[ref_dname][1] if ref_dname else {}
+        for smax, runs_p in sorted(by_smax.items()):
+            if smax == "11":
+                continue
+            kmax = int(smax) - 1
+            for name, (cards, dfor) in sorted(runs_p.items()):
+                for k in range(1, kmax + 1):
+                    if k in cards and k in ref_cards and cards[k] != ref_cards[k]:
+                        bad.append(f"{name}: PREFIXE K=1..{kmax} DIFFERENT de l'objet complet "
+                                   f"(cardinalites K={k} != {ref_name})")
+                        break
+                if dfor and not ref_dfor:
+                    bad.append(f"{name}: PREFIXE K=1..{kmax} INVERIFIABLE (aucun jumeau smax=11 --digest "
+                               f"pour {key[0]}:{key[1]})")
+                elif dfor:
+                    for k in range(1, kmax + 1):
+                        if k in dfor and k in ref_dfor and dfor[k] != ref_dfor[k]:
+                            bad.append(f"{name}: PREFIXE K=1..{kmax} DIFFERENT de l'objet complet "
+                                       f"(digest_forest_K{k} != {ref_dname})")
+                            break
+    # FIXTURE D'EGALITE DE LA MATRICE : cles == points --digest du profil,
+    # et chaque bras --digest calcule l'objet grave.
+    if matrice_objet_digests:
+        want_mat = {(r["family"], r["n"], r["smax"]) for r in matrice_runs if r["digest"] == "avec"}
+        if set(matrice_objet_digests) != want_mat:
+            bad.append("matrice_objet_digests : cles != points --digest de MATRICE_POINTS "
+                       f"(fixtures {sorted(matrice_objet_digests)} vs points {sorted(want_mat)})")
+        for key, table in sorted(matrice_digests.items()):
+            if key not in matrice_objet_digests:
+                continue
+            for d, names in sorted(table.items()):
+                if d != matrice_objet_digests[key]:
+                    bad.append(f"matrice {key}: digest_all != fixture d'egalite du profil "
+                               f"(dissidents {', '.join(names)})")
 
     # PHASE ATTRIBUTION (§ 5.12) — mhgp6_profile : attribution seulement,
     # jamais un mur. L'autorite de grammaire complete est la porte

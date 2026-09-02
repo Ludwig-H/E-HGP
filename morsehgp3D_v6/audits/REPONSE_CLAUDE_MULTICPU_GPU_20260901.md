@@ -739,3 +739,21 @@ un architecte, deux sceptiques), puis implémentation :
   « même périphérique que le dépôt » est gravé au bootstrap.
 
 GCP non utilisé par cette livraison.
+
+## 11. Session G4 « tests K=10 / K=5 » — reçu `1788312873` (2 septembre)
+
+Quatrième départ facturable, accusé `ACCUSE_CLAUDE_GO_G4_TESTS_20260902.md`
+(SHA d'exécution `c8f69673`), profil `g4_tests_v1` : 84 runs valides,
+`verifie_non_decisionnel`, arrêt `TERMINATED` certifié par le garde sur la
+génération exacte, premier reçu portant les deux marques de reprise
+(`marques=double_guard_verified guest_guard_pending`), aucune reprise
+nécessaire, ~22 min de VM. Lecture factuelle dans
+`NOTE_CLAUDE_RECU_TESTS_G4_20260902.md` : les quatre `digest_all` K=10 à
+32000 égalent les fixtures de conformité v5 ; les runs `--smax=6` sont le
+préfixe exact (`digest_forest_K1..K5` et cardinalités égales aux jumeaux
+`smax=11`) ; K=10 / K=5 : mur ÷ ≈ 5 (uniform, eight_clusters) et ÷ ≈ 3,3
+(terrain, scanline), pentes 8000 → 50000 indépendantes de K ;
+`materialisation_tri_copie` = 35 % du reduce à 32000 sur deux familles.
+Aucune décision ; `public_status=not_claimed`.
+
+GCP non utilisé par ce paragraphe (session arrêtée et certifiée au reçu).

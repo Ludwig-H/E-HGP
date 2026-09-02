@@ -741,6 +741,8 @@ check_true "mutant coordonne (canon reduit auto-declare + hash concordant) : TUE
 GATE_NAMES_C="mhgp6_device_witness mhgp6_device_witness_mutant_carry mhgp6_device_witness_mutant_skip_write mhgp6_device_witness_mutant_skip_native mhgp6_census_device mhgp6_census_device_mutant_range_le mhgp6_census_device_mutant_stack mhgp6_census_device_mutant_swap mhgp6_census_device_mutant_nonstrict mhgp6_census_device_mutant_skip_write mhgp6_census_device_mutant_nshell mhgp6_census_device_mutant_skip_count mhgp6_pilote_parite_400 mhgp6_pilote_refus_n mhgp6_pilote_lot17 mhgp6_pilote_mutant_base"
 MAT_POINTS_C="uniform:16000:2:2:0:sans uniform:16000:1:1:0:sans uniform:16000:2:2:1:avec uniform:50000:1:1:0:avec uniform:50000:2:2:0:sans uniform:16000:2:2:0:avec:6"
 OBJET_C="uniform:50000:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+# Fixture d'egalite de la MATRICE : une cle par point --digest (K=10 et K=5).
+OBJET_MAT_C="uniform:16000:11:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd uniform:50000:11:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd uniform:16000:6:5555555555555555555555555555555555555555555555555555555555555555"
 CANON_C="${WORK}/serie_c_selftest_v1.env"
 {
   echo 'PROFIL_NOM="serie_c_selftest_v1"'
@@ -772,6 +774,7 @@ CANON_C="${WORK}/serie_c_selftest_v1.env"
   echo 'GPUV6_PILOT_MIN_LOTS=2'
   echo 'GPUV6_PILOT_TIMEOUT=60'
   echo "GPUV6_OBJET_DIGESTS=\"${OBJET_C}\""
+  echo "MATRICE_OBJET_DIGESTS=\"${OBJET_MAT_C}\""
   echo "BIN_MATRICE=\"${FAKE}/mhgp6\""
   echo "BIN_ATTRIB=\"${FAKE}/mhgp6_profile\""
   echo "BIN_PILOTE=\"${FAKE}/mhgp6_cuda\""
@@ -820,6 +823,7 @@ PROFILE_C="${WORK}/profil_serie_c.txt"
   echo "gpuv6_pilot_min_lots=2"
   echo "gpuv6_pilot_timeout=60"
   echo "gpuv6_objet_digests=${OBJET_C}"
+  echo "matrice_objet_digests=${OBJET_MAT_C}"
   echo "bin_matrice=${FAKE}/mhgp6"
   echo "bin_attrib=${FAKE}/mhgp6_profile"
   echo "bin_pilote=${FAKE}/mhgp6_cuda"
@@ -919,6 +923,19 @@ falsify_c "axe smax : portee de tour k10 imprimee sur un point K=5" "tower_scope
   sed -i 's/^tower_scope=prefix_k5 smax_requested=6 smax_effective=6.*/tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11/' mat_uniform_n16000_t2_i2_j0_avec_s6_p1.txt
 falsify_c "axe smax : argv --smax=11 sur un point K=5" "argv grave != vecteur contractuel" \
   sed -i 's/--smax=6 /--smax=11 /' mat_uniform_n16000_t2_i2_j0_avec_s6_p1.status
+# Propriete de PREFIXE (2 septembre) : le point K=5 est le prefixe exact de
+# l'objet complet — digest_forest_K1..K5 et cardinalites K=1..5 egaux aux
+# jumeaux smax=11 (mutations sur les TROIS passages quand l'invariance
+# intra-groupe tiendrait sinon lieu de cause) ; fixture d'egalite de la
+# matrice liee a chaque bras --digest.
+falsify_c "prefixe : digest_forest_K3 du point K=5 != jumeau smax=11" "PREFIXE K=1..5 DIFFERENT de l'objet complet (digest_forest_K3" \
+  sed -i 's/^digest_forest_K3=c/digest_forest_K3=e/' mat_uniform_n16000_t2_i2_j0_avec_s6_p1.txt
+falsify_c "prefixe : cardinalites K=2 du point K=5 (trois passages) != jumeau smax=11" "PREFIXE K=1..5 DIFFERENT de l'objet complet (cardinalites K=2" \
+  bash -c "sed -i 's/^cardinalites K=2 evenements=4000 /cardinalites K=2 evenements=4001 /' mat_uniform_n16000_t2_i2_j0_avec_s6_p1.txt mat_uniform_n16000_t2_i2_j0_avec_s6_p2.txt mat_uniform_n16000_t2_i2_j0_avec_s6_p3.txt"
+falsify_c "prefixe : digest_forest_K5 manquant sur un bras --digest K=5" "digest_forest_K1..K5 incomplets" \
+  sed -i '/^digest_forest_K5=/d' mat_uniform_n16000_t2_i2_j0_avec_s6_p2.txt
+falsify_c "fixture matrice : digest_all du point K=5 (trois passages) != fixture du profil" "digest_all != fixture d'egalite du profil" \
+  bash -c "sed -i 's/^digest_all=5/digest_all=6/' mat_uniform_n16000_t2_i2_j0_avec_s6_p1.txt mat_uniform_n16000_t2_i2_j0_avec_s6_p2.txt mat_uniform_n16000_t2_i2_j0_avec_s6_p3.txt"
 falsify_c "serie C : bras sans-digest contamine par un digest" "digest imprime sur un bras sans-digest" \
   sed -i '1i digest_all=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' mat_uniform_n16000_t2_i2_j0_sans_p1.txt
 # § 5.14.4 : inventaire pre-execution, verdict du juge embarque, identite
