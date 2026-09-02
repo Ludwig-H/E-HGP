@@ -1,7 +1,7 @@
 # ALERTE — sonde d'ablation `reduce` : reconnaissance utile, attribution non causale
 
 Date : 2 septembre 2026. Coupe auditée : `81623528`, avec la campagne locale
-`receipts/sonde_ablation_reduce_20260902.partial/` encore en cours. Cadre :
+`receipts/sonde_ablation_reduce_20260902/` désormais terminée. Cadre :
 `phase=exploration_v6_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`,
@@ -11,7 +11,7 @@ Date : 2 septembre 2026. Coupe auditée : `81623528`, avec la campagne locale
 
 La décomposition avant écriture d'un palier est la bonne étape. Les mutants
 destructifs donnent des **bornes exploratoires** sur trois groupes de travail
-et les portes qui les tuent protègent le produit. Le reçu en cours doit être
+et les portes qui les tuent protègent le produit. Le reçu final doit être
 conservé comme reconnaissance négative/diagnostique, mais il ne peut pas
 encore attribuer causalement un écart à la copie, au tri ou aux lectures de
 clés, ni choisir une implémentation `CompactDelta`.
@@ -29,9 +29,10 @@ Trois coutures suffisent ; il n'est pas nécessaire de rouvrir le pipeline.
 2. **La “clé factice” ne retire pas seulement une lecture aléatoire.** Elle
    remplace le multiensemble de `parents`/`born` par une clé constante, puis
    trie ces clés identiques. Elle change donc aussi le coût et la distribution
-   du tri dans `materialisation_tri_copie`. Le partiel à `n=8000`, répétition
-   1, montre déjà ce débordement : `post_remplissage` baisse de 73,8 %, mais
-   `materialisation_tri_copie` baisse aussi de 15,1 %. Renommer ce bras en
+   du tri dans `materialisation_tri_copie`. Les médianes finales confirment ce
+   débordement : `post_remplissage` baisse de 73,9 %, 73,5 % et 75,0 % selon
+   la taille, tandis que `materialisation_tri_copie` baisse aussi de 15,4 %,
+   14,4 % et 15,3 %. Renommer ce bras en
    borne composite, ou pré-matérialiser hors fenêtre les **mêmes valeurs** dans
    le même ordre et conserver exactement le multiensemble trié. Tout bras
    candidat à une optimisation doit ensuite comparer le `ForestResult`
@@ -40,9 +41,9 @@ Trois coutures suffisent ; il n'est pas nécessaire de rouvrir le pipeline.
 3. **Le reçu est fail-open et le binaire reste mutable.** Le SHA-256 n'est lu
    qu'au début ; le binaire partagé `build/v6/mhgp6_profile_sonde` est exécuté
    directement, sans copie privée ni contrôle avant/après chaque tuple. Le
-   hash observé pendant cette contre-lecture est encore celui du `META`
-   (`74a46046...`), donc aucune contamination n'est constatée à cet instant,
-   mais le protocole ne la détecterait pas plus tard. En outre `REPS=0` publie
+   hash observé après publication est encore celui du `META`
+   (`74a46046...`), donc aucune contamination n'est constatée sur ce run,
+   mais le protocole ne l'aurait pas détectée. En outre `REPS=0` publie
    un reçu vide, l'agrégateur accepte une matrice absente et transforme des
    fenêtres manquantes en zéros, et l'échec de génération de `SHA256SUMS`
    n'est pas fatal.
@@ -58,11 +59,44 @@ Trois coutures suffisent ; il n'est pas nécessaire de rouvrir le pipeline.
   une mesure absente ;
 - rendre fatals l'agrégateur, la génération puis la vérification finale de
   `SHA256SUMS`, avec une porte de vacuité et un mutant de binaire remplacé ;
-- publier le run courant, s'il termine, sous un libellé explicite du type
+- conserver le run terminé sous un libellé explicite du type
   `exploratory_noncausal_upper_bounds`, sans en tirer un choix de palier.
 
 Cette fermeture est locale et CPU. Elle ne demande ni nouvelle session G4 ni
 modification du statut public.
+
+## Clôture factuelle du reçu terminé
+
+La mécanique de cette exécution particulière est intacte : 115 fichiers,
+114 entrées SHA-256 couvrant exactement les autres fichiers réguliers, 36
+cellules exactes (`4 bras × 3 tailles × 3 répétitions`), tous les codes nuls,
+dix lignes K et neuf fenêtres par sortie. Les copies du lanceur et de
+l'agrégateur égalent bit à bit `81623528`; le résumé est reproductible bit à
+bit depuis les sorties. Le hash du binaire partagé est resté identique après
+publication. Ces faits reçoivent le paquet, pas son attribution causale.
+
+Le signal utile est une priorité de falsification. La suppression destructive
+de la copie borne à 53,8 %, 57,0 % et 59,2 % la part retirée de la fenêtre
+`materialisation_tri_copie`; la suppression du tri la borne à 27,5 %, 25,8 %
+et 25,4 %. Mais le gain apparent du premier bras sur le mur instrumenté vaut
+4,8 %, -0,9 % puis 7,1 % : signe suffisant qu'ordre, charge et autres étages
+dominent encore la comparaison. À 16k, la différence des médianes dit même
+`+669 ms`, alors que les trois différences appariées valent `-847`, `+669` et
+`-3634 ms`, de médiane `-847 ms` : l'agrégation courante peut inverser le
+signal. Une représentation sans copie est donc la
+première hypothèse sémantiquement valide à **falsifier**, avec différences
+appariées et égalité complète du `ForestResult`, pas un palier déjà choisi.
+
+`META.txt` grave en outre `worktree_sources_modifies=1` sans embarquer le diff
+correspondant. La copie du protocole rejoint le pin et le worktree observé ne
+montre qu'un changement de mode sur ce lanceur, mais le reçu seul ne prouve
+pas cette explication. Cela renforce son statut exploratoire et interdit d'en
+faire un benchmark de référence.
+
+Le libellé embarqué reste
+`sonde_locale_non_decisionnelle (attribution decomposee...)`. Le mot
+« attribution » est trop fort au regard du plan ; le verdict extérieur de ce
+rapport prime et classe le reçu `exploratory_noncausal_upper_bounds`.
 
 ## Signalement court sur le WIP de revalidation adjacent
 
