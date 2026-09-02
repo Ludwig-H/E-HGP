@@ -98,6 +98,44 @@ Le libellé embarqué reste
 « attribution » est trop fort au regard du plan ; le verdict extérieur de ce
 rapport prime et classe le reçu `exploratory_noncausal_upper_bounds`.
 
+## État du WIP de fermeture de la sonde
+
+Photographie : worktree non commité au-dessus de `101c33cf`. Le nouveau
+lanceur ferme réellement l'essentiel du protocole nominal : carré de Williams
+`ABCD/BDAC/CADB/DCBA`, répétitions positives multiples de quatre, plan gravé
+avant exécution, différences appariées par bloc, binaire privé seul exécuté et
+hashé autour de chaque tuple, ensemble ordinaire des cellules/K/fenêtres,
+agrégateur et génération/vérification du manifeste fatals. La porte directe,
+son exécution sous `python3 -O` et le CTest passent localement.
+
+Cinq contre-fixtures publient néanmoins encore un reçu avec code nul :
+
+1. **Hash vide.** Un faux `sha256sum` qui rend zéro sans sortie produit
+   `binaire_sha256=` et des lignes `avant= apres=` vides. Centraliser une
+   primitive de hash fatale et exiger exactement 64 hexadécimaux pour source,
+   copie, protocoles et chaque tuple.
+2. **Taille dupliquée.** `N_LIST="64 64"` écrase les tags de cellules ; le
+   reçu annonce 32 runs mais ne porte que 16 statuts. Refuser les doublons
+   dans le lanceur et l'agrégateur, puis comparer compte annoncé et cardinal
+   exact des artefacts.
+3. **Plan latin non Williams.** Un carré cyclique garde l'équilibre des
+   positions mais répète quatre transitions au lieu de couvrir les douze ;
+   l'agrégateur l'accepte. Vérifier les quatre lignes canoniques ou l'ensemble
+   exact des successions ordonnées, pas les seules positions.
+4. **Champ dupliqué.** `touch=nan touch=<fini>` passe parce que le dictionnaire
+   écrase la première valeur. Refuser tout champ profil, META, statut ou plan
+   dupliqué et toute ligne `profil_reduce` malformée au lieu de l'ignorer.
+5. **Manifeste imbriqué invisible.** Un `out/sub/SHA256SUMS` créé par le
+   binaire est publié mais absent du manifeste, car `! -name SHA256SUMS`
+   exclut tous les basenames. Exclure seulement `./SHA256SUMS`.
+
+L'inventaire `out/` doit en plus exiger exactement un triplet
+`txt/err/status` par cellule et aucun fichier ou répertoire supplémentaire :
+un `.err` manquant et des artefacts arbitraires passent encore. Ajouter ces
+cinq dents, l'échec de **génération** du manifeste et l'inventaire exact aux
+mutants permanents. Le plan et l'appariement sont reçus comme progrès ; la
+fermeture fail-closed ne l'est pas encore.
+
 ## Signalement mis à jour sur le WIP de revalidation adjacent
 
 Photographie : worktree non commité au-dessus de `38281dc7`. Trois fermetures
