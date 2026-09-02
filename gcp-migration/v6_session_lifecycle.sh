@@ -58,6 +58,7 @@ PROTOCOL_FILES=(
   gcp-migration/profils/g4_mesure_v1.env
   gcp-migration/profils/g4_serie_c_v1.env
   gcp-migration/profils/g4_tests_v1.env
+  gcp-migration/profils/g4_tests_v2.env
   morsehgp3D_v6/tests/pilote_juge.py
   gcp-migration/set_max_run_duration_and_verify.sh
   gcp-migration/start_and_verify.sh
@@ -466,10 +467,28 @@ finalize_receipt() { # $1 = issue, $2 = stop_rc, $3 = rc ; rend 0 ssi le recu CO
       # Temoin de session CONCLUE (la reprise refuse) seulement si l'arret
       # est certifie au registre ; alors les credentials copies dans le WORK
       # persistant (gcloud, cle privee) sont detruits — le .pub reste.
+      # PURGE VERIFIEE d'abord, TEMOIN ensuite (contre-audit reprise, point
+      # 6) : un temoin terminal n'est jamais publie au-dessus de credentials
+      # encore presents ; en echec, marqueur purge_incomplete et la reprise
+      # re-purge localement sans appel GCP.
       if [ "$(state_field state)" = "targeted_stopped" ]; then
-        printf '%s\n' "${dir}" > "${WORK}/recu_publie"
-        rm -rf "${WORK}/gcloud-config"
-        [ ! -f "${WORK}/ssh/id_ed25519" ] || shred -u "${WORK}/ssh/id_ed25519" 2>/dev/null || rm -f "${WORK}/ssh/id_ed25519"
+        rm -rf "${WORK}/gcloud-config" 2>/dev/null || true
+        if [ -f "${WORK}/ssh/id_ed25519" ]; then
+          shred -u "${WORK}/ssh/id_ed25519" 2>/dev/null || rm -f "${WORK}/ssh/id_ed25519" 2>/dev/null || true
+        fi
+        if [ ! -e "${WORK}/gcloud-config" ] && [ ! -e "${WORK}/ssh/id_ed25519" ]; then
+          python3 - "${WORK}/recu_publie" "${dir}" <<'PY'
+import os, sys, tempfile
+path, content = sys.argv[1:3]
+d = os.path.dirname(path)
+fd, tmp = tempfile.mkstemp(prefix=".recu_publie.", suffix=".partial", dir=d)
+os.write(fd, (content + "\n").encode()); os.fsync(fd); os.close(fd); os.replace(tmp, path)
+dfd = os.open(d, os.O_RDONLY); os.fsync(dfd); os.close(dfd)
+PY
+        else
+          printf '%s\n' "purge incomplete : credentials encore presents (reprise locale : recover_v6_session.sh ${WORK})" > "${WORK}/purge_incomplete"
+          log "PURGE INCOMPLETE : credentials encore presents dans ${WORK} — aucun temoin recu_publie ; relancer la reprise (purge locale, aucun appel GCP)"
+        fi
       fi
       true
     }
@@ -695,7 +714,8 @@ publish_session_env() {
 }
 mkdir -m 0700 -p "${MARKS_DIR}"
 publish_session_env
-printf '%s %s %s\n' "$$" "$(awk '{print $22}' /proc/$$/stat)" "$(cat /proc/sys/kernel/random/boot_id)" > "${PID_FILE}"
+printf '%s %s %s %s %s\n' "$$" "$(awk '{print $22}' /proc/$$/stat)" "$(cat /proc/sys/kernel/random/boot_id)" \
+  "$(ps -o sid= -p "$$" | tr -d ' ')" "$(ps -o pgid= -p "$$" | tr -d ' ')" > "${PID_FILE}"
 
 # CONFIGURATION GCLOUD PRIVEE a la session (audit deuxieme tour : aucune
 # mutation de la configuration partagee) — copie de la configuration

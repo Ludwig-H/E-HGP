@@ -270,6 +270,8 @@ elif args[:3] == ["compute", "instances", "describe"]:
         "generation-race",
         "guest-interrupt",
         "guest-readback",
+        "guest-ssh-transport-failure",
+        "guest-marker-then-failure",
         "guest-publickey-denied",
         "guest-success",
         "guest-success-late-termination-timestamp",
@@ -387,6 +389,8 @@ elif args[:3] in (["compute", "instances", "start"], ["compute", "instances", "s
     if scenario not in {
         "guest-interrupt",
         "guest-readback",
+        "guest-ssh-transport-failure",
+        "guest-marker-then-failure",
         "guest-publickey-denied",
         "guest-success",
         "guest-success-late-termination-timestamp",
@@ -408,6 +412,15 @@ elif args[:2] == ["compute", "ssh"]:
     )
     if scenario == "guest-publickey-denied":
         print("tester@203.0.113.10: Permission denied (publickey).", file=sys.stderr)
+        sys.exit(255)
+    elif scenario == "guest-ssh-transport-failure":
+        print("ssh: connect to host 203.0.113.10 port 22: Connection timed out", file=sys.stderr)
+        sys.exit(255)
+    elif scenario == "guest-marker-then-failure":
+        # Contre-audit : un SSH en echec qui reimprime le marqueur (meme sur
+        # une ligne exacte) puis rend 255 ne doit JAMAIS certifier.
+        print("MODE=poweroff\nUSEC=9999999999999999\n__EHGP_GUEST_GUARD_VERIFIED__")
+        print("ssh_exchange_identification: Connection closed by remote host", file=sys.stderr)
         sys.exit(255)
     elif scenario == "guest-readback":
         print("No scheduled shutdown")
@@ -1385,18 +1398,131 @@ while True:
         source = (ROOT / "gcp-migration" / "start_and_verify.sh").read_text(
             encoding="utf-8"
         )
-        start = source.index('guest_guard_script="$(printf')
+        # § 5.19.1 : le texte vit dans guest_guard_script_text() (imprimable
+        # hors VM) ; la commande transportee le prend tel quel.
+        fn_start = source.index("guest_guard_script_text() {")
+        fn_end = source.index("\n}\n", fn_start)
+        body = source[fn_start:fn_end]
+        start = source.index('guest_guard_script="$(guest_guard_script_text)"')
         end = source.index("while ((SECONDS < ssh_deadline))", start)
         transport = source[start:end]
 
+        self.assertIn("printf '%s; '", body)
+        self.assertIn('readonly requested_minutes="$1"', body)
+        self.assertIn('readonly gce_deadline_epoch="$2"', body)
+        self.assertIn('readonly scheduled_file="${3:-/run/systemd/shutdown/scheduled}"', body)
         self.assertIn('guest_guard_command="sudo -n bash -c', transport)
-        self.assertIn("printf '%s; '", transport)
-        self.assertIn('readonly requested_minutes="$1"', transport)
-        self.assertIn('readonly gce_deadline_epoch="$2"', transport)
-        self.assertNotIn("bash -s", transport)
-        self.assertNotIn("<<", transport)
-        self.assertNotIn("__EHGP_GUEST_GUARD__", transport)
+        self.assertIn("last_armable_epoch=$((VERIFIED_SAFE_DEADLINE_EPOCH - GUEST_SHUTDOWN_MINUTES * 60 - GUEST_SYSTEMD_TOLERANCE_SECONDS))", transport)
+        for text in (body, transport):
+            self.assertNotIn("bash -s", text)
+            self.assertNotIn("<<", text)
+            self.assertNotIn("__EHGP_GUEST_GUARD__", text)
         self.assertIn("--ssh-flag='-n'", source)
+
+    def arm_fake_clock(self, mode: str) -> None:
+        """Horloge et sommeil FACTICES (contre-audit : le scenario de clamp
+        doit etre instantane). `date +%s` avance de FAKE_CLOCK_STEP secondes
+        a chaque appel (mode `step:N`), ou echoue (`fail_after:N`) / imprime
+        du texte (`garbage_after:N`) a partir du N-ieme appel ; tout autre
+        format est delegue au vrai date. `sleep` ne dort jamais."""
+        clock_bin = self.tmp / "clock-bin"
+        clock_bin.mkdir(exist_ok=True)
+        counter = self.tmp / "clock-calls"
+        fake_date = clock_bin / "date"
+        fake_date.write_text(
+            "#!/usr/bin/env bash\n"
+            "if [ \"$1\" != \"+%s\" ]; then exec /bin/date \"$@\"; fi\n"
+            f"counter='{counter}'\n"
+            "n=0; [ -f \"$counter\" ] && n=$(cat \"$counter\")\n"
+            "n=$((n + 1)); echo \"$n\" > \"$counter\"\n"
+            f"mode='{mode}'\n"
+            "kind=\"${mode%%:*}\"; arg=\"${mode#*:}\"\n"
+            "real=$(/bin/date +%s)\n"
+            "case \"$kind\" in\n"
+            "  step) echo $((real + arg * (n - 1))) ;;\n"
+            "  fail_after) if [ \"$n\" -gt \"$arg\" ]; then exit 1; fi; echo \"$real\" ;;\n"
+            "  garbage_after) if [ \"$n\" -gt \"$arg\" ]; then echo 'pas-une-horloge'; else echo \"$real\"; fi ;;\n"
+            "  *) exit 9 ;;\n"
+            "esac\n",
+            encoding="utf-8",
+        )
+        fake_date.chmod(0o755)
+        fake_sleep = clock_bin / "sleep"
+        fake_sleep.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
+        fake_sleep.chmod(0o755)
+        self.env["PATH"] = f"{clock_bin}:{self.env['PATH']}"
+        self.clock_counter = counter
+
+    def clamp_environment(self) -> None:
+        # § 5.19.1 : marge nominale exactement 480 s (3600 - 300 - 45*60 - 120)
+        # et generation demarree 240 s avant la demande : dernier instant
+        # armable = start + 480 = maintenant + 240 s, sous le chrono SSH
+        # (300 s) — atteint en une quinzaine de lectures d'horloge factice.
+        now = datetime.now(timezone.utc)
+        start = now - timedelta(seconds=240)
+        self.env["FAKE_PRE_START_TIMESTAMP"] = (
+            (now - timedelta(seconds=250)).isoformat().replace("+00:00", "Z")
+        )
+        self.env["FAKE_LAST_START_TIMESTAMP"] = start.isoformat().replace("+00:00", "Z")
+        self.env["FAKE_TERMINATION_TIMESTAMP"] = (
+            (start + timedelta(seconds=3600)).isoformat().replace("+00:00", "Z")
+        )
+        self.env["FAKE_MAX_RUN_SECONDS"] = "3600"
+
+    def test_guest_arming_loop_is_clamped_by_the_last_armable_epoch(self) -> None:
+        # Le transport SSH echoue a chaque essai : la boucle doit s'arreter au
+        # dernier instant armable (pas au chrono SSH de 300 s), puis arreter la
+        # generation demarree — le tout instantanement sous horloge factice.
+        self.clamp_environment()
+        self.arm_fake_clock("step:15")
+        self.env["FAKE_GCLOUD_SCENARIO"] = "guest-ssh-transport-failure"
+        began = time.monotonic()
+        result = self.run_script(
+            "start_and_verify.sh", "--yes", "--guest-shutdown-minutes", "45"
+        )
+        elapsed = time.monotonic() - began
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Dernier instant armable dépassé", result.stdout)
+        self.assertNotIn("[SUCCÈS]", result.stdout)
+        commands = self.commands()
+        self.assertIn("compute instances start", commands)
+        self.assertIn("compute instances stop", commands)
+        self.assertLess(commands.rindex("compute ssh"), commands.rindex("compute instances stop"))
+        attempts = commands.count("compute ssh")
+        self.assertGreaterEqual(attempts, 8, commands)
+        self.assertLessEqual(attempts, 20, commands)
+        self.assertLess(elapsed, 60.0, "le scenario de clamp doit etre instantane sous horloge factice")
+
+    def test_unreadable_host_clock_during_arming_stops_the_generation(self) -> None:
+        # Un `date` en echec (ou non numerique) n'est pas une preuve de
+        # depassement : arret cible immediat, zero tentative SSH.
+        # Deux lectures d'horloge precedent la boucle (horodatage de la demande
+        # de demarrage, certification de la garde GCE) : la PREMIERE lecture
+        # de la boucle est la troisieme => aucune tentative SSH.
+        for mode in ("fail_after:2", "garbage_after:2"):
+            with self.subTest(mode=mode):
+                self.setUp()
+                self.clamp_environment()
+                self.arm_fake_clock(mode)
+                self.env["FAKE_GCLOUD_SCENARIO"] = "guest-ssh-transport-failure"
+                result = self.run_script(
+                    "start_and_verify.sh", "--yes", "--guest-shutdown-minutes", "45"
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("Horloge hôte illisible", result.stdout)
+                self.assertNotIn("[SUCCÈS]", result.stdout)
+                self.assertIn("compute instances stop", self.commands())
+                self.assertEqual(self.commands().count("compute ssh"), 0, self.commands())
+
+    def test_marker_printed_by_a_failed_ssh_never_certifies(self) -> None:
+        # Le succes est un booleen de la branche rc=0 : un SSH qui reimprime le
+        # marqueur exact puis rend 255 doit rester non certifie et arreter.
+        self.arm_fake_clock("step:15")
+        self.env["FAKE_GCLOUD_SCENARIO"] = "guest-marker-then-failure"
+        result = self.run_script("start_and_verify.sh", "--yes")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertNotIn("[SUCCÈS]", result.stdout)
+        self.assertIn("compute instances stop", self.commands())
 
     def test_start_rejects_unusable_session_keys_before_gce_mutation(self) -> None:
         original_key = self.env["GCP_SSH_KEY_FILE"]

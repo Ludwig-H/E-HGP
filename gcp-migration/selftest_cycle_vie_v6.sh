@@ -41,7 +41,8 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LIFECYCLE="${HERE}/v6_session_lifecycle.sh"
 ROOT="$(cd "${HERE}/.." && pwd)"
 BASE="$(mktemp -d /tmp/ehgp-v6cyclevie.XXXXXXXX)"
-trap 'rm -rf "${BASE}"' EXIT
+# EHGP_SELFTEST_KEEP=1 : conserver BASE pour diagnostic (jamais en CI).
+trap '[ "${EHGP_SELFTEST_KEEP:-0}" = "1" ] || rm -rf "${BASE}"' EXIT
 
 FAILURES=0
 check() {
@@ -67,6 +68,7 @@ PROTOCOL_FILES=(gcp-migration/session_campagne_v6_g4.sh gcp-migration/v6_session
                 gcp-migration/validate_v6_campaign.py gcp-migration/profils/decision_v1.env
                 gcp-migration/profils/smoke_v1.env gcp-migration/profils/g4_mesure_v1.env
                 gcp-migration/profils/g4_serie_c_v1.env gcp-migration/profils/g4_tests_v1.env
+                gcp-migration/profils/g4_tests_v2.env
                 morsehgp3D_v6/tests/pilote_juge.py
                 gcp-migration/set_max_run_duration_and_verify.sh
                 gcp-migration/start_and_verify.sh gcp-migration/stop_and_verify.sh
@@ -82,8 +84,39 @@ echo "CLOUDSDK ${CLOUDSDK_CONFIG:-aucun}" >> "${FAKE_CALLS}"
 case "$*" in
   *"instances describe"*)
     if [ "${FAKE_DESCRIBE_HANG:-0}" = "1" ]; then sleep 3600; fi
-    case "$*" in *"value(status,lastStartTimestamp)"*) printf 'RUNNING\t%s\n' "${FAKE_GEN}"; exit 0 ;; esac
-    echo "${FAKE_GEN}"; exit 0 ;;
+    # Generation observee : FAKE_DESCRIBE_GEN (concurrente des le depart) ou
+    # FAKE_DESCRIBE_GEN_AFTER_SCP (change pendant le rapatriement) ; statut
+    # TERMINATED des qu'un `instances stop` a ete journalise (la VRAIE garde
+    # d'arret epinglee, exercee par la reprise, relit ces champs un a un).
+    gen="${FAKE_GEN}"
+    [ -z "${FAKE_DESCRIBE_GEN:-}" ] || gen="${FAKE_DESCRIBE_GEN}"
+    # « apres la scp » = apres une scp de RAPATRIEMENT local (marqueur pose par
+    # le faux scp quand la destination est un chemin local), jamais la scp
+    # d'envoi du bundle du superviseur.
+    if [ -n "${FAKE_DESCRIBE_GEN_AFTER_SCP:-}" ] && [ -e "${FAKE_CALLS}.scp_local" ]; then gen="${FAKE_DESCRIBE_GEN_AFTER_SCP}"; fi
+    # TERMINATED seulement apres un `instances stop` REUSSI (marqueur), jamais
+    # apres une tentative en echec — sinon la vraie garde conclurait « deja
+    # arretee » sans arret lors d'un rejeu stop-first.
+    status=RUNNING
+    if [ -e "${FAKE_CALLS}.stopped" ]; then status=TERMINATED; fi
+    case "$*" in
+      *"value(status,lastStartTimestamp)"*) printf '%s\t%s\n' "${status}" "${gen}"; exit 0 ;;
+      *"value(status)"*) echo "${status}"; exit 0 ;;
+      *"value(labels.project)"*) echo "e-hgp"; exit 0 ;;
+      *"value(lastStartTimestamp)"*) echo "${gen}"; exit 0 ;;
+    esac
+    echo "${gen}"; exit 0 ;;
+  *"config get-value project"*) echo "${GCP_PROJECT_ID}"; exit 0 ;;
+  *"instances list"*)
+    case "$*" in
+      *"labels.project=e-hgp"*)
+        st=RUNNING; [ -e "${FAKE_CALLS}.stopped" ] && st=TERMINATED
+        echo "${GCP_INSTANCE_NAME},${GCP_ZONE},${st}"; exit 0 ;;
+      *) echo "${GCP_INSTANCE_NAME}"; exit 0 ;;
+    esac ;;
+  *"instances stop"*)
+    if [ "${FAKE_GCLOUD_STOP_RC:-0}" = "0" ]; then : > "${FAKE_CALLS}.stopped"; exit 0; fi
+    exit "${FAKE_GCLOUD_STOP_RC}" ;;
   *"compute ssh"*)
     n=$(grep -c "compute ssh" "${FAKE_CALLS}" || true)
     if [ "${n}" -le 1 ]; then
@@ -120,11 +153,16 @@ case "$*" in
     exit 0
     ;;
   *"compute scp"*)
+    # Destination HONOREE quand le dernier argument est un chemin local (la
+    # reprise rapatrie dans un staging) ; sinon la destination historique.
+    dest="${FAKE_SCP_DEST}"
+    for last; do :; done
+    case "${last}" in /*) dest="${last%/}"; : > "${FAKE_CALLS}.scp_local" ;; esac
     case "${FAKE_SCP_MODE:-ok}" in
       echec) exit 1 ;;
-      partiel) mkdir -p "${FAKE_SCP_DEST}/out"; echo "partiel" > "${FAKE_SCP_DEST}/out/bench_resume.txt"; exit 0 ;;
+      partiel) mkdir -p "${dest}/out"; echo "partiel" > "${dest}/out/bench_resume.txt"; exit 0 ;;
     esac
-    mkdir -p "${FAKE_SCP_DEST}/out"
+    mkdir -p "${dest}/out"
     exit 0
     ;;
   *) exit 0 ;;
@@ -331,15 +369,20 @@ kill_session() { # tue toute la session de processus du superviseur (pid du fich
   fi
   ! kill -0 "${sid}" 2>/dev/null
 }
-run_recovery() { # point d'entree de confiance : git show CLONE_COMMIT puis bash <copie> WORK
-  local entry="${SCENARIO_DIR}/rec_entree.sh" rc=0
+run_recovery() { # point d'entree de confiance : git show CLONE_COMMIT puis bash <copie> WORK ; [$1 = suffixe de journal]
+  local entry="${SCENARIO_DIR}/rec_entree${1:+_$1}.sh" rc=0 sfx="${1:-}"
   git -C "${CLONE}" show "${CLONE_COMMIT}:gcp-migration/recover_v6_session.sh" > "${entry}"
   # FAKE_SCP_MODE_REPRISE : mode du faux scp pour la REPRISE seulement (le
   # superviseur, lui, doit reussir son scp de bundle avant d'etre tue).
-  env PATH="${SCENARIO_DIR}/bin:${PATH}" FAKE_STOP_RC="${FAKE_STOP_RC_REPRISE:-0}" \
+  # FAKE_GCLOUD_STOP_RC_REPRISE : code du faux `instances stop` vu par la
+  # VRAIE garde d'arret epinglee (contre-audit : jamais une fausse garde).
+  env PATH="${SCENARIO_DIR}/bin:${PATH}" FAKE_GCLOUD_STOP_RC="${FAKE_GCLOUD_STOP_RC_REPRISE:-0}" \
     FAKE_SCP_MODE="${FAKE_SCP_MODE_REPRISE:-${FAKE_SCP_MODE:-ok}}" \
-    bash "${entry}" "${SCEN_W}" > "${SCENARIO_DIR}/reprise_stdout.log" 2> "${SCENARIO_DIR}/reprise_stderr.log" || rc=$?
+    bash "${entry}" "${SCEN_W}" > "${SCENARIO_DIR}/reprise_stdout${sfx:+_$sfx}.log" 2> "${SCENARIO_DIR}/reprise_stderr${sfx:+_$sfx}.log" || rc=$?
   return "${rc}"
+}
+stops_since() { # $1 = N0 : nombre d'arrets GCP journalises depuis la ligne N0
+  tail -n +"$(($1 + 1))" "${FAKE_CALLS}" | grep -c 'compute instances stop' || true
 }
 
 # ---- 0. Budget : matrice trop large => refus AVANT toute garde (seul un
@@ -710,7 +753,7 @@ export FAKE_SCP_MODE=partiel SSH_STEP_TIMEOUT_S=7200
 run_scenario_bg ok build_bloque 0 28800
 check_true "reprise : handshake atteint, superviseur.pid grave (pid + starttime + boot_id)" \
   bash -c "$(declare -f wait_for_line); wait_for_line '${SCEN_W}/session.log' 'handshake : boot_id=' 60 \
-    && [ \"\$(awk 'NF==3{print 1}' '${SCEN_W}/superviseur.pid')\" = '1' ] \
+    && [ \"\$(awk 'NF==5{print 1}' '${SCEN_W}/superviseur.pid')\" = '1' ] \
     && [ -f '${SCEN_W}/marques/guest_guard_pending' ] && [ -f '${SCEN_W}/marques/double_guard_verified' ] \
     && grep -q 'generation=${FAKE_GEN}' '${SCEN_W}/marques/double_guard_verified' \
     && grep -q '^GUARDS_DIR=' '${SCEN_W}/session.env'"
@@ -729,8 +772,9 @@ check_true "R1 : reprise avec double_guard_verified => rc 0, 0 SETMAX/START/ssh,
     && ! grep -qE '^(SETMAX|START) ' '${SCENARIO_DIR}/reprise_calls.log' \
     && ! grep -q 'compute ssh' '${SCENARIO_DIR}/reprise_calls.log' \
     && [ \"\$(grep -c 'compute scp' '${SCENARIO_DIR}/reprise_calls.log')\" -eq 1 ] \
-    && [ \"\$(grep -c '^STOP ' '${SCENARIO_DIR}/reprise_calls.log')\" -eq 1 ] \
-    && grep -q -- '^STOP .*--expected-last-start-timestamp ${FAKE_GEN}' '${SCENARIO_DIR}/reprise_calls.log' \
+    && [ \"\$(grep -c 'compute instances stop' '${SCENARIO_DIR}/reprise_calls.log')\" -eq 1 ] \
+    && grep -q -- 'arret cible : ${SCEN_W}/pinned/gcp-migration/stop_and_verify.sh --yes --expected-last-start-timestamp ${FAKE_GEN}' '${SCENARIO_DIR}/reprise_stdout.log' \
+    && grep -q 'compute instances describe .*value(lastStartTimestamp)' '${SCENARIO_DIR}/reprise_calls.log' \
     && grep -q '^CLOUDSDK ${SCEN_W}/gcloud-config' '${SCENARIO_DIR}/reprise_calls.log'"
 RECU_R1="$(ls -d "${SCENARIO_DIR}"/recu/s_*_reprise_* 2>/dev/null | head -1 || true)"
 tail -n 12 "${SCENARIO_DIR}/reprise_stderr.log" "${SCENARIO_DIR}/reprise_stdout.log" >&2 || true
@@ -739,7 +783,7 @@ check_true "R1 : recu de reprise (issue, classification forcee, jamais une decis
     && grep -q '^classification=partiel_ou_invalide' '${RECU_R1}/RECU_SESSION.txt' \
     && grep -q '^decision=aucune' '${RECU_R1}/RECU_SESSION.txt' && grep -q '^scp_rc=0' '${RECU_R1}/RECU_SESSION.txt' \
     && grep -q '^validate_rc=1' '${RECU_R1}/RECU_SESSION.txt' && grep -q 'campaign_status=partial_or_failed' '${RECU_R1}/validation.txt' \
-    && grep -q '^marques=.*double_guard_verified' '${RECU_R1}/RECU_SESSION.txt' \
+    && grep -q '^marques=.*double_guard_verified' '${RECU_R1}/RECU_SESSION.txt' && grep -q '^verrou=flock' '${RECU_R1}/RECU_SESSION.txt' \
     && [ -f '${RECU_R1}/marques/guest_guard_pending' ] && [ -f '${RECU_R1}/reprise.log' ] \
     && grep -q 'handshake : boot_id=' '${RECU_R1}/session.log' && [ -f '${RECU_R1}/out/bench_resume.txt' ] \
     && ( cd '${RECU_R1}' && sha256sum -c --quiet SHA256SUMS ) && [ ! -d '${RECU_R1}/ssh' ] && [ ! -d '${RECU_R1}/gcloud-config' ] \
@@ -764,8 +808,8 @@ tail -n 6 "${SCENARIO_DIR}/reprise_stderr.log" >&2 || true
 check_true "R3 : reprise sans double_guard_verified => arret immediat (1 STOP exact), 0 scp, issue=reprise_sans_double_garde" \
   bash -c "[ '${rc}' -eq 0 ] && tail -n +$((N0 + 1)) '${FAKE_CALLS}' > '${SCENARIO_DIR}/reprise_calls.log' \
     && ! grep -q 'compute scp' '${SCENARIO_DIR}/reprise_calls.log' && ! grep -qE '^(SETMAX|START) ' '${SCENARIO_DIR}/reprise_calls.log' \
-    && [ \"\$(grep -c '^STOP ' '${SCENARIO_DIR}/reprise_calls.log')\" -eq 1 ] \
-    && grep -q -- '--expected-last-start-timestamp ${FAKE_GEN}' '${SCENARIO_DIR}/reprise_calls.log' \
+    && [ \"\$(grep -c 'compute instances stop' '${SCENARIO_DIR}/reprise_calls.log')\" -eq 1 ] \
+    && grep -q -- 'arret cible : .*--expected-last-start-timestamp ${FAKE_GEN}' '${SCENARIO_DIR}/reprise_stdout.log' \
     && [ -n '${RECU_R3}' ] && grep -q '^issue=reprise_sans_double_garde' '${RECU_R3}/RECU_SESSION.txt' \
     && ! grep -q 'double_guard_verified' '${RECU_R3}/RECU_SESSION.txt'"
 
@@ -783,7 +827,7 @@ sed -i 's/^generation=.*/generation=generation-perimee/' "${SCEN_W}/marques/doub
 N0="$(wc -l < "${FAKE_CALLS}")"
 rc=0; run_recovery || rc=$?
 check_true "R4a : generations discordantes registre/marque => BLOCAGE 71, zero STOP" \
-  bash -c "[ '${rc}' -eq 71 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c '^STOP ' || true)\" -eq 0 ]"
+  bash -c "[ '${rc}' -eq 71 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop' || true)\" -eq 0 ]"
 cp -f "${SCENARIO_DIR}/m2.sauv" "${SCEN_W}/marques/double_guard_verified"
 # R4b : copie epinglee de la reprise alteree => refus 2 a l'etage 1, aucun appel.
 echo "# altere" >> "${SCEN_W}/pinned/gcp-migration/recover_v6_session.sh"
@@ -797,7 +841,7 @@ sed -i 's/^GCP_INSTANCE_NAME=.*/GCP_INSTANCE_NAME=autre-instance/' "${SCEN_W}/se
 N0="$(wc -l < "${FAKE_CALLS}")"
 rc=0; run_recovery || rc=$?
 check_true "R4c : cible de session.env != registre => blocage 71, zero STOP" \
-  bash -c "[ '${rc}' -eq 71 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c '^STOP ' || true)\" -eq 0 ]"
+  bash -c "[ '${rc}' -eq 71 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop' || true)\" -eq 0 ]"
 sed -i 's/^GCP_INSTANCE_NAME=.*/GCP_INSTANCE_NAME=instance-factice/' "${SCEN_W}/session.env"
 # R4d : pid recycle simule (starttime faux) => la reprise PROCEDE ; R5 : scp
 # en echec => STOP quand meme, scp_rc=1 au recu.
@@ -807,7 +851,7 @@ rc=0; run_recovery || rc=$?
 RECU_R5="$(ls -d "${SCENARIO_DIR}"/recu/s_*_reprise_* 2>/dev/null | head -1 || true)"
 tail -n 6 "${SCENARIO_DIR}/reprise_stderr.log" >&2 || true
 check_true "R4d/R5 : pid recycle (starttime different) => reprise executee ; scp en echec => 1 STOP exact, scp_rc=1 grave" \
-  bash -c "[ '${rc}' -eq 0 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c '^STOP ')\" -eq 1 ] \
+  bash -c "[ '${rc}' -eq 0 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ] \
     && [ -n '${RECU_R5}' ] && grep -q '^scp_rc=1' '${RECU_R5}/RECU_SESSION.txt' \
     && grep -q '^issue=reprise_apres_perte_superviseur' '${RECU_R5}/RECU_SESSION.txt'"
 # R6 : ARRET EN ECHEC pendant la reprise (la dent revelee par le bug de
@@ -819,19 +863,149 @@ check_true "R6 : handshake atteint puis session tuee" \
   bash -c "$(declare -f wait_for_line kill_session); SCEN_W='${SCEN_W}'; SUP_WAIT_PID='${SUP_WAIT_PID}'; SCENARIO_DIR='${SCENARIO_DIR}'; \
     wait_for_line '${SCEN_W}/session.log' 'handshake : boot_id=' 60 && kill_session"
 N0="$(wc -l < "${FAKE_CALLS}")"
-rc=0; FAKE_STOP_RC_REPRISE=9 run_recovery || rc=$?
+rc=0; FAKE_GCLOUD_STOP_RC_REPRISE=1 run_recovery || rc=$?
 RECU_R6="$(ls -d "${SCENARIO_DIR}"/recu/s_*_reprise_* 2>/dev/null | head -1 || true)"
-check_true "R6 : stop en echec => rc 70, registre targeted_stop_failed, aucun recu_publie ni purge, ARRET NON CERTIFIE annonce" \
+check_true "R6 : stop en echec (vraie garde, faux instances stop rc=1) => rc 70, registre targeted_stop_failed, aucun recu_publie ni purge, temoin MINIMAL (ni out/ ni validation), ARRET NON CERTIFIE annonce" \
   bash -c "[ '${rc}' -eq 70 ] && grep -q '^state=targeted_stop_failed' '${SCEN_W}/etat_cycle_vie' \
     && [ ! -e '${SCEN_W}/recu_publie' ] && [ -f '${SCEN_W}/ssh/id_ed25519' ] && [ -d '${SCEN_W}/gcloud-config' ] \
     && grep -q 'ARRET NON CERTIFIE' '${SCENARIO_DIR}/reprise_stderr.log' \
-    && [ -n '${RECU_R6}' ] && grep -q '^stop_rc=9' '${RECU_R6}/RECU_SESSION.txt'"
+    && [ -n '${RECU_R6}' ] && grep -q '^stop_rc=1' '${RECU_R6}/RECU_SESSION.txt' && grep -q '^temoin_minimal=1' '${RECU_R6}/RECU_SESSION.txt' \
+    && [ ! -d '${RECU_R6}/out' ] && [ ! -f '${RECU_R6}/validation.txt' ] && [ ! -f '${SCEN_W}/validation.txt' ]"
 N0="$(wc -l < "${FAKE_CALLS}")"
 rc=0; run_recovery || rc=$?
-check_true "R6bis : seconde reprise apres echec d'arret => permise, 1 STOP exact certifie, registre targeted_stopped, credentials purges" \
-  bash -c "[ '${rc}' -eq 0 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c '^STOP ')\" -eq 1 ] \
+RECU_R6B="$(ls -td "${SCENARIO_DIR}"/recu/s_*_reprise_* 2>/dev/null | head -1 || true)"
+check_true "R6bis : seconde reprise apres echec d'arret => STOP-FIRST (aucun scp ni describe de reprise avant l'arret), 1 STOP exact certifie, registre targeted_stopped, credentials purges, stop_first=1" \
+  bash -c "[ '${rc}' -eq 0 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ] \
+    && ! tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -q 'compute scp' \
+    && ! tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -q 'value(status,lastStartTimestamp)' \
     && grep -q '^state=targeted_stopped' '${SCEN_W}/etat_cycle_vie' && [ -f '${SCEN_W}/recu_publie' ] \
-    && [ ! -e '${SCEN_W}/ssh/id_ed25519' ] && [ ! -d '${SCEN_W}/gcloud-config' ]"
+    && [ ! -e '${SCEN_W}/ssh/id_ed25519' ] && [ ! -d '${SCEN_W}/gcloud-config' ] \
+    && [ -n '${RECU_R6B}' ] && grep -q '^stop_first=1' '${RECU_R6B}/RECU_SESSION.txt'"
+
+# ---- DENTS DU CONTRE-AUDIT (CONTRE_AUDIT_REPRISE_PERSISTANTE_V6_20260902).
+new_killed_session() { # session tuee apres handshake, prete pour une reprise
+  run_scenario_bg ok build_bloque 0 28800
+  bash -c "$(declare -f wait_for_line kill_session); SCEN_W='${SCEN_W}'; SUP_WAIT_PID='${SUP_WAIT_PID}'; SCENARIO_DIR='${SCENARIO_DIR}'; \
+    wait_for_line '${SCEN_W}/session.log' 'handshake : boot_id=' 60 && kill_session" || return 1
+  # Les variables de session sont deja celles du scenario courant.
+  return 0
+}
+# D1 : deux reprises SIMULTANEES dans la meme session POSIX => une seule
+# franchit le verrou noyau, exactement un arret GCP.
+new_killed_session || true
+N0="$(wc -l < "${FAKE_CALLS}")"
+run_recovery a & PA=$!
+run_recovery b & PB=$!
+rca=0; wait "${PA}" || rca=$?
+rcb=0; wait "${PB}" || rcb=$?
+check_true "D1 : deux reprises simultanees (meme sid) => une passe (rc 0), l'autre est refusee par le verrou (rc 2), UN seul arret GCP" \
+  bash -c "{ [ '${rca}' -eq 0 ] && [ '${rcb}' -eq 2 ]; } || { [ '${rca}' -eq 2 ] && [ '${rcb}' -eq 0 ]; } \
+    && grep -q 'verrou' '${SCENARIO_DIR}/reprise_stderr_a.log' '${SCENARIO_DIR}/reprise_stderr_b.log' \
+    && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ]"
+# D2 : registre targeted_stopped a generation VIDE + handoff valide => 71,
+# zero temoin, zero purge, zero appel.
+new_killed_session || true
+printf 'schema=e-hgp.lifecycle-state.v1\nstate=targeted_stopped\nproject=%s\nzone=%s\ninstance=%s\ngeneration=\n' \
+  projet-factice zone-factice instance-factice > "${SCEN_W}/etat_cycle_vie"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D2 : targeted_stopped sans generation (handoff valide) => BLOCAGE 71, aucun temoin, credentials intacts, aucun appel" \
+  bash -c "[ '${rc}' -eq 71 ] && [ ! -e '${SCEN_W}/recu_publie' ] && [ -f '${SCEN_W}/ssh/id_ed25519' ] \
+    && [ \"\$(wc -l < '${FAKE_CALLS}')\" -eq '${N0}' ]"
+# D3 : describe = RUNNING <autre generation> AVANT la scp => 71, zero scp,
+# zero promotion, zero arret de cette autre generation.
+new_killed_session || true
+export FAKE_DESCRIBE_GEN=generation-concurrente
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D3 : cible portant une AUTRE generation avant la scp => 71, zero scp, zero out/ promu, zero STOP" \
+  bash -c "[ '${rc}' -eq 71 ] && ! tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -q 'compute scp' \
+    && [ -z \"\$(ls -A '${SCEN_W}/out' 2>/dev/null)\" ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop' || true)\" -eq 0 ] \
+    && grep -q 'AUTRE generation' '${SCEN_W}/reprise.log'"
+unset FAKE_DESCRIBE_GEN
+# D3bis : generation changee PENDANT la scp => 71, staging detruit, rien promu, zero STOP.
+new_killed_session || true
+export FAKE_DESCRIBE_GEN_AFTER_SCP=generation-concurrente
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D3bis : generation changee pendant le rapatriement => 71, une scp, staging detruit, aucun out/ promu, zero STOP" \
+  bash -c "[ '${rc}' -eq 71 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute scp')\" -eq 1 ] \
+    && [ -z \"\$(ls -A '${SCEN_W}/out' 2>/dev/null)\" ] && [ ! -d '${SCEN_W}/out.staging' ] \
+    && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop' || true)\" -eq 0 ]"
+unset FAKE_DESCRIBE_GEN_AFTER_SCP
+# D4 : marque double_guard_verified dont mark=guest_guard_pending => 71, ni scp ni STOP.
+new_killed_session || true
+sed -i 's/^mark=double_guard_verified$/mark=guest_guard_pending/' "${SCEN_W}/marques/double_guard_verified"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D4 : marque double_guard_verified au champ mark=guest_guard_pending => BLOCAGE 71, ni scp ni STOP" \
+  bash -c "[ '${rc}' -eq 71 ] && ! tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -qE 'compute scp|compute instances stop'"
+# D5 : membre orphelin de la session du superviseur (sid grave) sans WORK
+# dans son argv => reprise refusee ; tue => la reprise procede.
+new_killed_session || true
+setsid -f bash -c 'echo $$ > "$1"; exec sleep 300' _ "${SCENARIO_DIR}/orph.pid"
+sleep 1; ORPH="$(cat "${SCENARIO_DIR}/orph.pid")"
+ORPH_SID="$(ps -o sid= -p "${ORPH}" | tr -d ' ')"
+awk -v s="${ORPH_SID}" '{ $4 = s; print }' "${SCEN_W}/superviseur.pid" > "${SCEN_W}/superviseur.pid.tmp" && mv "${SCEN_W}/superviseur.pid.tmp" "${SCEN_W}/superviseur.pid"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D5 : fils orphelin vivant dans la session (sid) du superviseur, sans WORK dans son argv => REFUS 2, aucun appel" \
+  bash -c "[ '${rc}' -eq 2 ] && grep -q 'membres de la session' '${SCENARIO_DIR}/reprise_stderr.log' && [ \"\$(wc -l < '${FAKE_CALLS}')\" -eq '${N0}' ]"
+kill -9 "${ORPH}" 2>/dev/null || true; sleep 1
+rc=0; run_recovery || rc=$?
+check_true "D5bis : orphelin tue => la reprise procede (rc 0, un STOP)" \
+  bash -c "[ '${rc}' -eq 0 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ]"
+# D6 : PURGE EN ECHEC apres targeted_stopped (repertoire ssh non modifiable)
+# => aucun temoin, rc 67 ; puis purge locale re-jouable SANS appel GCP.
+new_killed_session || true
+chmod 500 "${SCEN_W}/ssh"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D6 : purge des credentials en echec apres arret certifie => rc 67, PURGE INCOMPLETE, aucun temoin recu_publie, registre targeted_stopped" \
+  bash -c "[ '${rc}' -eq 67 ] && [ ! -e '${SCEN_W}/recu_publie' ] && [ -f '${SCEN_W}/ssh/id_ed25519' ] \
+    && grep -q 'PURGE INCOMPLETE' '${SCEN_W}/reprise.log' && grep -q '^state=targeted_stopped' '${SCEN_W}/etat_cycle_vie'"
+chmod 700 "${SCEN_W}/ssh"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D6bis : reprise apres purge en echec => purge locale, temoin publie, rc 0, AUCUN appel GCP (ni describe, ni scp, ni STOP)" \
+  bash -c "[ '${rc}' -eq 0 ] && [ -f '${SCEN_W}/recu_publie' ] && [ ! -e '${SCEN_W}/ssh/id_ed25519' ] && [ ! -d '${SCEN_W}/gcloud-config' ] \
+    && [ \"\$(wc -l < '${FAKE_CALLS}')\" -eq '${N0}' ]"
+# D7 : stop-first des l'entree en targeted_stop_failed, puis TROISIEME rejeu
+# conforme a la politique (rejeux manuels, un STOP chacun, jamais de boucle).
+new_killed_session || true
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; FAKE_GCLOUD_STOP_RC_REPRISE=1 run_recovery || rc=$?
+check_true "D7 : premier rejeu (arret en echec) => rc 70, une scp puis un STOP" \
+  bash -c "[ '${rc}' -eq 70 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ]"
+N1="$(wc -l < "${FAKE_CALLS}")"
+rc=0; FAKE_GCLOUD_STOP_RC_REPRISE=1 run_recovery || rc=$?
+check_true "D7bis : deuxieme rejeu depuis targeted_stop_failed => STOP-FIRST : premier appel externe = arret (aucun describe de reprise, aucune scp), rc 70, temoin minimal" \
+  bash -c "[ '${rc}' -eq 70 ] && [ \"\$(tail -n +$((N1 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ] \
+    && ! tail -n +$((N1 + 1)) '${FAKE_CALLS}' | grep -qE 'compute scp|value\(status,lastStartTimestamp\)' \
+    && [ \"\$(tail -n +$((N1 + 1)) '${FAKE_CALLS}' | grep 'GCLOUD' | head -n 1 | grep -c 'config get-value project')\" -eq 1 ]"
+N2="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D7ter : troisieme rejeu => admis (politique : rejeux manuels, stop-first, un STOP), certifie, rc 0" \
+  bash -c "[ '${rc}' -eq 0 ] && [ \"\$(tail -n +$((N2 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ] \
+    && grep -q '^state=targeted_stopped' '${SCEN_W}/etat_cycle_vie' && [ -f '${SCEN_W}/recu_publie' ]"
+# D8 : purge en echec dans le CYCLE NOMINAL (repertoire ssh non modifiable
+# apres le handshake) => aucun temoin, marqueur purge_incomplete ; la
+# reprise re-purge ensuite localement sans appel GCP.
+export FAKE_BUILD_SLEEP_S=12
+run_scenario_bg ok build_lent 0 28800
+bash -c "$(declare -f wait_for_line); wait_for_line '${SCEN_W}/session.log' 'handshake : boot_id=' 60" || true
+chmod 500 "${SCEN_W}/ssh"
+wait "${SUP_WAIT_PID}" 2>/dev/null || true
+check_true "D8 : cycle nominal, purge des credentials en echec apres targeted_stopped => aucun recu_publie, marqueur purge_incomplete, cle encore presente, registre targeted_stopped" \
+  bash -c "[ ! -e '${SCEN_W}/recu_publie' ] && [ -f '${SCEN_W}/purge_incomplete' ] && [ -f '${SCEN_W}/ssh/id_ed25519' ] \
+    && grep -q '^state=targeted_stopped' '${SCEN_W}/etat_cycle_vie' && grep -q 'PURGE INCOMPLETE' '${SCEN_W}/session.log'"
+chmod 700 "${SCEN_W}/ssh"
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D8bis : reprise apres purge nominale en echec => purge locale, temoin publie, rc 0, AUCUN appel GCP" \
+  bash -c "[ '${rc}' -eq 0 ] && [ -f '${SCEN_W}/recu_publie' ] && [ ! -e '${SCEN_W}/ssh/id_ed25519' ] && [ ! -d '${SCEN_W}/gcloud-config' ] \
+    && [ \"\$(wc -l < '${FAKE_CALLS}')\" -eq '${N0}' ]"
+unset FAKE_BUILD_SLEEP_S
 unset SSH_STEP_TIMEOUT_S PIN_SOURCE
 
 # 11. Pin altere qui neutraliserait son controle + garde alteree : l'etage 1

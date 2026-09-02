@@ -123,3 +123,24 @@ lancer à la main. Scénarios : SIGKILL de toute la session après le
 handshake puis reprise (R1), superviseur vivant refusé (R2), tué entre les
 deux marques (R3), mutants génération discordante / copie épinglée altérée
 / cible discordante / pid recyclé (R4), scp en échec (R5), base 755 refusée.
+Durcissements du contre-audit (`CONTRE_AUDIT_REPRISE_PERSISTANTE_V6_20260902`) :
+exclusion par verrou noyau (`flock -n` tenu jusqu'à la sortie, pid/starttime
+en diagnostic) ; vivacité par pid + starttime + boot_id ET par sid/pgid
+gravés dans `superviseur.pid` (cinq champs) ; registre strict (un état qui
+implique une cible démarrée porte une génération non vide) ; marques
+parsées comme objets stricts (fichier régulier, keyset exact, `mark=<nom>`,
+génération non vide) ; describe en tuple exact (RUNNING, génération) avant
+la scp, scp vers un staging puis relecture du tuple avant promotion, toute
+autre génération → 71 sans STOP ; `REMOTE_DIR` lié à (commit, époque de la
+génération) ; entrée en `targeted_stop_failed`/`targeted_stopping` →
+STOP-FIRST (ni describe, ni scp, ni validateur avant l'arrêt certifié),
+arrêt non certifié → témoin MINIMAL ; purge des credentials VÉRIFIÉE avant
+le témoin `recu_publie` (reprise et cycle nominal), échec → rc 67 et
+re-purge locale sans appel GCP ; la reprise n'exécute QUE la garde d'arrêt
+épinglée ré-authentifiée (le harnais exerce la VRAIE `stop_and_verify.sh`
+sous un faux `gcloud`) ; politique des rejeux explicite (manuels, un STOP
+chacun, jamais de boucle). Dents : deux reprises simultanées (D1),
+`targeted_stopped` sans génération (D2), génération concurrente avant /
+pendant la scp (D3), marque au champ `mark=` falsifié (D4), orphelin de
+session sans `WORK` dans son argv (D5), purge en échec puis re-purge locale
+(D6, D8 nominal), stop-first et troisième rejeu (D7).

@@ -739,7 +739,7 @@ check_true "mutant coordonne (canon reduit auto-declare + hash concordant) : TUE
 # porte gpu absente de l'inventaire, affinite non attestee, somme
 # d'attribution faussee.
 GATE_NAMES_C="mhgp6_device_witness mhgp6_device_witness_mutant_carry mhgp6_device_witness_mutant_skip_write mhgp6_device_witness_mutant_skip_native mhgp6_census_device mhgp6_census_device_mutant_range_le mhgp6_census_device_mutant_stack mhgp6_census_device_mutant_swap mhgp6_census_device_mutant_nonstrict mhgp6_census_device_mutant_skip_write mhgp6_census_device_mutant_nshell mhgp6_census_device_mutant_skip_count mhgp6_pilote_parite_400 mhgp6_pilote_refus_n mhgp6_pilote_lot17 mhgp6_pilote_mutant_base"
-MAT_POINTS_C="uniform:16000:2:2:0:sans uniform:16000:1:1:0:sans uniform:16000:2:2:1:avec uniform:50000:1:1:0:avec uniform:50000:2:2:0:sans uniform:16000:2:2:0:avec:6"
+MAT_POINTS_C="uniform:16000:2:2:0:sans uniform:16000:1:1:0:sans uniform:16000:2:2:1:avec uniform:50000:1:1:0:avec uniform:50000:2:2:0:sans uniform:16000:2:2:1:avec:6"
 OBJET_C="uniform:50000:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
 # Fixture d'egalite de la MATRICE : une cle par point --digest (K=10 et K=5).
 OBJET_MAT_C="uniform:16000:11:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd uniform:50000:11:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd uniform:16000:6:5555555555555555555555555555555555555555555555555555555555555555"
@@ -861,10 +861,10 @@ check_true "serie C : plans matrice (18 = 6 points x 3 passages, rotation8 = rot
   [ \"\$(sed -n 's/^runs=//p' '${OUT8}/gpuv6_plan.txt')\" = '3' ] &&
   grep -q 'seq=13 name=mat_uniform_n16000_t2_i2_j1_avec_p3 .* smax=11 passage=3 pos=1' '${OUT8}/matrice_plan.txt' &&
   grep -q 'seq=14 name=mat_uniform_n50000_t1_i1_j0_avec_p3 .* passage=3 pos=2' '${OUT8}/matrice_plan.txt' &&
-  grep -q 'seq=16 name=mat_uniform_n16000_t2_i2_j0_avec_s6_p3 .* smax=6 passage=3 pos=4' '${OUT8}/matrice_plan.txt' &&
+  grep -q 'seq=16 name=mat_uniform_n16000_t2_i2_j1_avec_s6_p3 .* smax=6 passage=3 pos=4' '${OUT8}/matrice_plan.txt' &&
   grep -q 'seq=18 name=mat_uniform_n16000_t1_i1_j0_sans_p3 .* passage=3 pos=6' '${OUT8}/matrice_plan.txt' &&
-  grep -q '^smax=6$' '${OUT8}/mat_uniform_n16000_t2_i2_j0_avec_s6_p1.status' &&
-  grep -q '^tower_scope=prefix_k5 smax_requested=6' '${OUT8}/mat_uniform_n16000_t2_i2_j0_avec_s6_p1.txt'"
+  grep -q '^smax=6$' '${OUT8}/mat_uniform_n16000_t2_i2_j1_avec_s6_p1.status' &&
+  grep -q '^tower_scope=prefix_k5 smax_requested=6' '${OUT8}/mat_uniform_n16000_t2_i2_j1_avec_s6_p1.txt'"
 check_true "serie C : affinite demandee ET attestee sur un run de matrice" bash -c "
   grep -q '^affinite_demandee=' '${OUT8}/mat_uniform_n16000_t2_i2_j0_sans_p1.status' &&
   grep -q '^affinite_effective=' '${OUT8}/mat_uniform_n16000_t2_i2_j0_sans_p1.status' &&
@@ -918,24 +918,47 @@ falsify_c "serie C : plan matrice altere (rotation8 recalculee)" "sequence annon
   sed -i 's/^seq=14 name=mat_uniform_n50000_t1_i1_j0_avec_p3/seq=14 name=mat_uniform_n50000_t9_i1_j0_avec_p3/' matrice_plan.txt
 # Axe smax (K=5) : statut, portee de tour et argv lies au point.
 falsify_c "axe smax : statut smax=11 sur un point K=5" "smax=11 != 6" \
-  sed -i 's/^smax=6$/smax=11/' mat_uniform_n16000_t2_i2_j0_avec_s6_p1.status
+  sed -i 's/^smax=6$/smax=11/' mat_uniform_n16000_t2_i2_j1_avec_s6_p1.status
 falsify_c "axe smax : portee de tour k10 imprimee sur un point K=5" "tower_scope absente ou hors contrat (smax=6)" \
-  sed -i 's/^tower_scope=prefix_k5 smax_requested=6 smax_effective=6.*/tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11/' mat_uniform_n16000_t2_i2_j0_avec_s6_p1.txt
+  sed -i 's/^tower_scope=prefix_k5 smax_requested=6 smax_effective=6.*/tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11/' mat_uniform_n16000_t2_i2_j1_avec_s6_p1.txt
 falsify_c "axe smax : argv --smax=11 sur un point K=5" "argv grave != vecteur contractuel" \
-  sed -i 's/--smax=6 /--smax=11 /' mat_uniform_n16000_t2_i2_j0_avec_s6_p1.status
+  sed -i 's/--smax=6 /--smax=11 /' mat_uniform_n16000_t2_i2_j1_avec_s6_p1.status
 # Propriete de PREFIXE (2 septembre) : le point K=5 est le prefixe exact de
 # l'objet complet — digest_forest_K1..K5 et cardinalites K=1..5 egaux aux
 # jumeaux smax=11 (mutations sur les TROIS passages quand l'invariance
 # intra-groupe tiendrait sinon lieu de cause) ; fixture d'egalite de la
 # matrice liee a chaque bras --digest.
 falsify_c "prefixe : digest_forest_K3 du point K=5 != jumeau smax=11" "PREFIXE K=1..5 DIFFERENT de l'objet complet (digest_forest_K3" \
-  sed -i 's/^digest_forest_K3=c/digest_forest_K3=e/' mat_uniform_n16000_t2_i2_j0_avec_s6_p1.txt
+  sed -i 's/^digest_forest_K3=c/digest_forest_K3=e/' mat_uniform_n16000_t2_i2_j1_avec_s6_p1.txt
 falsify_c "prefixe : cardinalites K=2 du point K=5 (trois passages) != jumeau smax=11" "PREFIXE K=1..5 DIFFERENT de l'objet complet (cardinalites K=2" \
-  bash -c "sed -i 's/^cardinalites K=2 evenements=4000 /cardinalites K=2 evenements=4001 /' mat_uniform_n16000_t2_i2_j0_avec_s6_p1.txt mat_uniform_n16000_t2_i2_j0_avec_s6_p2.txt mat_uniform_n16000_t2_i2_j0_avec_s6_p3.txt"
-falsify_c "prefixe : digest_forest_K5 manquant sur un bras --digest K=5" "digest_forest_K1..K5 incomplets" \
-  sed -i '/^digest_forest_K5=/d' mat_uniform_n16000_t2_i2_j0_avec_s6_p2.txt
+  bash -c "sed -i 's/^cardinalites K=2 evenements=4000 /cardinalites K=2 evenements=4001 /' mat_uniform_n16000_t2_i2_j1_avec_s6_p1.txt mat_uniform_n16000_t2_i2_j1_avec_s6_p2.txt mat_uniform_n16000_t2_i2_j1_avec_s6_p3.txt"
+falsify_c "prefixe : digest_forest_K5 manquant sur un bras --digest K=5" "digest_forest_K != liste exacte 1..5" \
+  sed -i '/^digest_forest_K5=/d' mat_uniform_n16000_t2_i2_j1_avec_s6_p2.txt
 falsify_c "fixture matrice : digest_all du point K=5 (trois passages) != fixture du profil" "digest_all != fixture d'egalite du profil" \
-  bash -c "sed -i 's/^digest_all=5/digest_all=6/' mat_uniform_n16000_t2_i2_j0_avec_s6_p1.txt mat_uniform_n16000_t2_i2_j0_avec_s6_p2.txt mat_uniform_n16000_t2_i2_j0_avec_s6_p3.txt"
+  bash -c "sed -i 's/^digest_all=5/digest_all=6/' mat_uniform_n16000_t2_i2_j1_avec_s6_p1.txt mat_uniform_n16000_t2_i2_j1_avec_s6_p2.txt mat_uniform_n16000_t2_i2_j1_avec_s6_p3.txt"
+# ALERTE_VALIDATION_PREFIXE_K5 (2 septembre) : quatre mutants permanents —
+# digest par K duplique (valeur conflictuelle), K=0 emis par TOUS les
+# jumeaux, jumeau K10 du passage 2 seul falsifie (aucun representant), point
+# court sans jumeau complet dans le plan (scene separee ci-dessous).
+falsify_c "prefixe K5 : digest_forest_K5 DUPLIQUE (valeur conflictuelle) sur le bras K=5 p2" "digest_forest_K != liste exacte 1..5" \
+  bash -c "printf 'digest_forest_K5=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\n' >> mat_uniform_n16000_t2_i2_j1_avec_s6_p2.txt"
+falsify_c "prefixe K5 : cardinalites K=0 emise par TOUS les jumeaux K10 et K5" "cardinalites K != liste exacte" \
+  bash -c "for f in mat_uniform_n16000_t2_i2_j1_avec_p1.txt mat_uniform_n16000_t2_i2_j1_avec_p2.txt mat_uniform_n16000_t2_i2_j1_avec_p3.txt mat_uniform_n16000_t2_i2_j1_avec_s6_p1.txt mat_uniform_n16000_t2_i2_j1_avec_s6_p2.txt mat_uniform_n16000_t2_i2_j1_avec_s6_p3.txt; do sed -i 's/^cardinalites K=1 /cardinalites K=0 evenements=1 facettes=1 deltas=1 attachements=0 fusions=1 noeuds=1\ncardinalites K=1 /' \"\$f\"; done"
+falsify_c "prefixe K5 : digest_forest_K3 du jumeau K10 du passage 2 SEUL falsifie (comparaison par paire, aucun representant)" "PREFIXE K=1..5 DIFFERENT de l'objet complet (digest_forest_K3 != mat_uniform_n16000_t2_i2_j1_avec_p2)" \
+  sed -i 's/^digest_forest_K3=c/digest_forest_K3=e/' mat_uniform_n16000_t2_i2_j1_avec_p2.txt
+# Point court SANS jumeau complet dans le plan : runner rejoue avec un plan
+# reduit (profil effectif non canonique), le validateur doit refuser —
+# propriete de prefixe inverifiable, jamais un `continue`.
+OUT9="${WORK}/out_serie_c_sans_jumeau"
+MAT_POINTS_9="uniform:16000:2:2:0:sans uniform:16000:2:2:0:avec:6"
+rc=0; run_runner_c "${OUT9}" MATRICE_POINTS="${MAT_POINTS_9}" || rc=$?
+check "serie C sans jumeau : runner rc=0" "${rc}"
+PROFILE_C9="${WORK}/profil_serie_c_sans_jumeau.txt"
+sed "s|^profil=serie_c_selftest_v1$|profil=serie_c_sans_jumeau|; s|^matrice_points=.*|matrice_points=${MAT_POINTS_9}|" "${PROFILE_C}" > "${PROFILE_C9}"
+rc=0; V9="$(python3 "${VALIDATOR}" "${OUT9}" "${PIN_COMMIT}" "${PIN_PAYLOAD}" "${PIN_MANIFEST_C}" 0 0 \
+  "${PROFILE_C9}" "${CANON_C}" "${MANIFESTE_C}" 2>&1)" || rc=$?
+check_true "prefixe K5 : point court (--smax=6) SANS jumeau smax=11 dans le plan => REFUS (inverifiable)" \
+  bash -c "[ '${rc}' -eq 1 ] && printf '%s' \"\$1\" | grep -q 'INVERIFIABLE — jumeau smax=11 absent du plan'" _ "${V9}"
 falsify_c "serie C : bras sans-digest contamine par un digest" "digest imprime sur un bras sans-digest" \
   sed -i '1i digest_all=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' mat_uniform_n16000_t2_i2_j0_sans_p1.txt
 # § 5.14.4 : inventaire pre-execution, verdict du juge embarque, identite
@@ -1131,6 +1154,20 @@ est_t="$(bash -c '
 ' 2>&1)" || est_t="ECHEC:${est_t}"
 check_true "budget tests K10/K5 : ESTIMATE=${est_t}s tient dans la fenetre 5h gravee (6000 <= est <= 13195)" \
   bash -c "[[ '${est_t}' =~ ^[0-9]+$ ]] && [ '${est_t}' -ge 6000 ] && [ '${est_t}' -le 13195 ]"
+# g4_tests_v2 (fixture MATRICE_OBJET_DIGESTS gravee AVANT execution, canon
+# reversionne : ALERTE_VALIDATION_PREFIXE_K5) : meme budget, fixture a huit
+# cles == points --digest.
+TESTS2_ENV="${HERE}/profils/g4_tests_v2.env"
+est_t2="$(bash -c '
+  set -euo pipefail
+  '"$(sed -n '/^budget_estimate() {/,/^}$/p' "${HERE}/v6_session_lifecycle.sh")"'
+  set -a
+  # shellcheck disable=SC1090
+  source "'"${TESTS2_ENV}"'"
+  budget_estimate
+' 2>&1)" || est_t2="ECHEC:${est_t2}"
+check_true "budget tests v2 : ESTIMATE=${est_t2}s identique a v1 et fixture matrice a 8 cles" \
+  bash -c "[ '${est_t2}' = '${est_t}' ] && [ \"\$(grep -o ':32000:\(11\|6\):[0-9a-f]\{64\}' '${TESTS2_ENV}' | wc -l)\" = '8' ] && grep -q '^PROFIL_NOM=\"g4_tests_v2\"' '${TESTS2_ENV}'"
 
 # ---- PROFIL CANONIQUE G4 EXACT DE BOUT EN BOUT (cinquieme tour : le profil
 # etait AUTO-INVALIDANT — queue_sequence recalculait la sentinelle. Plus

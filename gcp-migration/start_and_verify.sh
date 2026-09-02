@@ -44,6 +44,7 @@ die() {
 usage() {
     cat <<'EOF'
 Usage : ./gcp-migration/start_and_verify.sh [--yes] [--guest-shutdown-minutes MINUTES] [--handoff-file CHEMIN] [--lifecycle-state-file CHEMIN]
+        ./gcp-migration/start_and_verify.sh --print-guest-guard-script   (texte de la garde invitée, aucun appel GCP)
 
 Démarre la VM ciblée seulement si son coupe-circuit GCE est borné à huit heures,
 certifie l'échéance après démarrage, puis arme et vérifie un arrêt dans l'OS invité.
@@ -59,10 +60,51 @@ toutes deux explicitement à la garde invitée.
 EOF
 }
 
+# TEXTE EXACT de la garde invitee (§ 5.19.1 : exercable HORS VM par
+# `--print-guest-guard-script`, avec un faux shutdown/date et un fichier
+# scheduled fourni en TROISIEME argument optionnel — la production n'en
+# passe que deux, le defaut est le chemin systemd). Arithmetique : l'invite
+# relit le shutdown programme, exige poweroff, un instant strictement futur,
+# a ±120 s de now+minutes et JAMAIS au-dela de l'echeance sure GCE.
+guest_guard_script_text() {
+    printf '%s; ' \
+        'set -euo pipefail' \
+        'readonly requested_minutes="$1"' \
+        'readonly gce_deadline_epoch="$2"' \
+        'readonly tolerance_seconds=120' \
+        'readonly scheduled_file="${3:-/run/systemd/shutdown/scheduled}"' \
+        '[[ "${requested_minutes}" =~ ^[1-9][0-9]*$ ]]' \
+        '[[ "${gce_deadline_epoch}" =~ ^[0-9]+$ ]]' \
+        'shutdown -c >/dev/null 2>&1 || true' \
+        'shutdown -P "+${requested_minutes}" "Coupe-circuit E-HGP"' \
+        '[[ -r "${scheduled_file}" ]]' \
+        'mode="$(sed -n "s/^MODE=\\(.*\\)$/\\1/p" "${scheduled_file}")"' \
+        'scheduled_usec="$(sed -n "s/^USEC=\\([0-9][0-9]*\\)$/\\1/p" "${scheduled_file}")"' \
+        '[[ "${mode}" == "poweroff" ]]' \
+        '[[ "${scheduled_usec}" =~ ^[0-9]{1,18}$ ]]' \
+        'now_epoch="$(date +%s)"' \
+        'scheduled_epoch=$((10#${scheduled_usec} / 1000000))' \
+        'expected_epoch=$((now_epoch + requested_minutes * 60))' \
+        'minimum_expected=$((expected_epoch - tolerance_seconds))' \
+        'maximum_expected=$((expected_epoch + tolerance_seconds))' \
+        '((scheduled_epoch > now_epoch))' \
+        '((scheduled_epoch >= minimum_expected && scheduled_epoch <= maximum_expected))' \
+        '((scheduled_epoch <= gce_deadline_epoch))' \
+        'printf "MODE=%s\nUSEC=%s\n" "${mode}" "${scheduled_usec}"' \
+        'printf "__EHGP_GUEST_GUARD_VERIFIED__\n"'
+}
+PRINT_GUEST_GUARD_SCRIPT=0
+
 while (($# > 0)); do
     case "$1" in
         --yes)
             ASSUME_YES=1
+            shift
+            ;;
+        --print-guest-guard-script)
+            # Imprime le texte exact de la garde invitee et sort AVANT toute
+            # lecture ou mutation GCE (falsification locale de l'arithmetique).
+            PRINT_GUEST_GUARD_SCRIPT=1
             shift
             ;;
         --guest-shutdown-minutes)
@@ -113,6 +155,10 @@ while (($# > 0)); do
             ;;
     esac
 done
+if ((PRINT_GUEST_GUARD_SCRIPT == 1)); then
+    guest_guard_script_text
+    exit 0
+fi
 
 timestamp_to_epoch() {
     python3 - "$1" <<'PY'
@@ -832,37 +878,33 @@ printf '[GARDE-FOU INVITÉ] Armement de shutdown -P +%s via SSH.\n' "${GUEST_SHU
 ssh_deadline=$((SECONDS + SSH_TIMEOUT_SECONDS))
 guest_guard_output=""
 publickey_denials=0
-guest_guard_script="$(printf '%s; ' \
-    'set -euo pipefail' \
-    'readonly requested_minutes="$1"' \
-    'readonly gce_deadline_epoch="$2"' \
-    'readonly tolerance_seconds=120' \
-    'readonly scheduled_file=/run/systemd/shutdown/scheduled' \
-    '[[ "${requested_minutes}" =~ ^[1-9][0-9]*$ ]]' \
-    '[[ "${gce_deadline_epoch}" =~ ^[0-9]+$ ]]' \
-    'shutdown -c >/dev/null 2>&1 || true' \
-    'shutdown -P "+${requested_minutes}" "Coupe-circuit E-HGP"' \
-    '[[ -r "${scheduled_file}" ]]' \
-    'mode="$(sed -n "s/^MODE=\\(.*\\)$/\\1/p" "${scheduled_file}")"' \
-    'scheduled_usec="$(sed -n "s/^USEC=\\([0-9][0-9]*\\)$/\\1/p" "${scheduled_file}")"' \
-    '[[ "${mode}" == "poweroff" ]]' \
-    '[[ "${scheduled_usec}" =~ ^[0-9]{1,18}$ ]]' \
-    'now_epoch="$(date +%s)"' \
-    'scheduled_epoch=$((10#${scheduled_usec} / 1000000))' \
-    'expected_epoch=$((now_epoch + requested_minutes * 60))' \
-    'minimum_expected=$((expected_epoch - tolerance_seconds))' \
-    'maximum_expected=$((expected_epoch + tolerance_seconds))' \
-    '((scheduled_epoch > now_epoch))' \
-    '((scheduled_epoch >= minimum_expected && scheduled_epoch <= maximum_expected))' \
-    '((scheduled_epoch <= gce_deadline_epoch))' \
-    'printf "MODE=%s\nUSEC=%s\n" "${mode}" "${scheduled_usec}"' \
-    'printf "__EHGP_GUEST_GUARD_VERIFIED__\n"' \
-)" || die "Impossible de construire la commande du coupe-circuit invité."
+guest_guard_script="$(guest_guard_script_text)" || die "Impossible de construire la commande du coupe-circuit invité."
 [[ "${guest_guard_script}" != *"'"* ]] || \
     die "La commande du coupe-circuit invité contient une apostrophe non transportable."
 guest_guard_command="sudo -n bash -c '${guest_guard_script}' -- '${GUEST_SHUTDOWN_MINUTES}' '${VERIFIED_SAFE_DEADLINE_EPOCH}'"
+# § 5.19.1 : DERNIER INSTANT ABSOLU encore armable — au-dela, aucune tentative
+# ne peut plus reussir (l'invite refuse scheduled > echeance sure, meme au
+# pire skew systemd +120 s) : la boucle est clampee par cette echeance
+# derivee de VERIFIED_SAFE_DEADLINE_EPOCH, jamais par le seul chrono SSH.
+last_armable_epoch=$((VERIFIED_SAFE_DEADLINE_EPOCH - GUEST_SHUTDOWN_MINUTES * 60 - GUEST_SYSTEMD_TOLERANCE_SECONDS))
+arming_too_late=0
+host_clock_unreadable=0
+guest_guard_verified=0
 while ((SECONDS < ssh_deadline)); do
-    if guest_guard_output="$(gcloud_ssh_guard compute ssh "${INSTANCE_NAME}" \
+    # Horloge hote CAPTUREE et verifiee (contre-audit : un `date` en echec ou
+    # non numerique n'est pas une preuve de dépassement — il est un motif
+    # d'arret cible, jamais de poursuite).
+    host_now="$(date +%s)" || host_now=""
+    if [[ ! "${host_now}" =~ ^[0-9]+$ ]]; then
+        host_clock_unreadable=1
+        break
+    fi
+    if ((host_now > last_armable_epoch)); then
+        arming_too_late=1
+        break
+    fi
+    guest_guard_rc=0
+    guest_guard_output="$(gcloud_ssh_guard compute ssh "${INSTANCE_NAME}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
         --quiet \
@@ -871,8 +913,15 @@ while ((SECONDS < ssh_deadline)); do
         --ssh-flag='-n' \
         --ssh-flag='-o ConnectTimeout=15' \
         --ssh-flag='-o BatchMode=yes' \
-        --command="${guest_guard_command}" 2>&1)"; then
-        break
+        --command="${guest_guard_command}" 2>&1)" || guest_guard_rc=$?
+    if ((guest_guard_rc == 0)); then
+        # Le succes est un BOOLEEN publie uniquement dans la branche rc=0, sur
+        # une ligne EXACTE (grep -x) : un SSH en echec qui reimprime sa
+        # commande contient litteralement le marqueur, jamais comme ligne.
+        if printf '%s\n' "${guest_guard_output}" | grep -qx '__EHGP_GUEST_GUARD_VERIFIED__'; then
+            guest_guard_verified=1
+            break
+        fi
     fi
     if [[ "${guest_guard_output}" == *"Permission denied (publickey)"* ]]; then
         ((publickey_denials += 1))
@@ -887,7 +936,15 @@ while ((SECONDS < ssh_deadline)); do
     printf '[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.\n' >&2
     sleep 10
 done
-if [[ "${guest_guard_output}" != *"__EHGP_GUEST_GUARD_VERIFIED__"* ]]; then
+if ((host_clock_unreadable == 1)); then
+    die "Horloge hôte illisible pendant l’armement invité (date +%s non numérique) ; arrêt de la génération démarrée."
+fi
+if ((arming_too_late == 1)) && ((guest_guard_verified == 0)); then
+    printf '[ERREUR] Dernier instant armable dépassé (%s) : plus aucune tentative SSH ne peut réussir avant l’échéance sûre.\n' \
+        "${last_armable_epoch}" >&2
+    die "Le coupe-circuit invité ne peut plus être armé avant l’échéance sûre ; arrêt de la génération démarrée."
+fi
+if ((guest_guard_verified == 0)); then
     printf '[DIAGNOSTIC GARDE INVITÉE] %s\n' \
         "${guest_guard_output:-aucune sortie SSH reçue}" >&2
     die "Le coupe-circuit invité n’a pas pu être armé puis relu de manière certaine."

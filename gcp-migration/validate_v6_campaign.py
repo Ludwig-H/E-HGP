@@ -226,6 +226,35 @@ def frontier_sequence(params):
     return seq
 
 
+def parse_objet_digests(text, bad, label):
+    """Fixture d'egalite des pilotes : famille:n:digest_all (cles uniques)."""
+    out = {}
+    for tok in expand_axis(text or "aucun"):
+        m = re.match(r"^([a-z][a-z0-9_]*):(\d+):([0-9a-f]{64})$", tok)
+        if not m:
+            bad.append(f"{label} : gpuv6_objet_digests hors grammaire ({tok[:40]})")
+            continue
+        if (m.group(1), m.group(2)) in out:
+            bad.append(f"{label} : gpuv6_objet_digests duplique pour {m.group(1)}:{m.group(2)}")
+        out[(m.group(1), m.group(2))] = m.group(3)
+    return out
+
+
+def parse_matrice_objet_digests(text, bad, label):
+    """Fixture d'egalite de la matrice : famille:n:smax:digest_all (cles uniques)."""
+    out = {}
+    for tok in expand_axis(text or "aucun"):
+        m = re.match(r"^([a-z][a-z0-9_]*):(\d+):([2-9]|1[01]):([0-9a-f]{64})$", tok)
+        if not m:
+            bad.append(f"{label} : matrice_objet_digests hors grammaire ({tok[:40]})")
+            continue
+        mkey = (m.group(1), m.group(2), m.group(3))
+        if mkey in out:
+            bad.append(f"{label} : matrice_objet_digests duplique pour {':'.join(mkey)}")
+        out[mkey] = m.group(4)
+    return out
+
+
 def matrice_passage_points(points, passage):
     """Permutation NOMMEE d'un passage (§ 5.12/5.13) : aller = ordre des
     points, retour = inverse, rotation8 = rotation cyclique fixe de 8."""
@@ -477,17 +506,14 @@ def check_pipeline_run(name, body, fam, n, seed, engine, threads, bad, smax="11"
     elif (ident.group(1), ident.group(2), ident.group(3), ident.group(4),
           ident.group(5), ident.group(6)) != (fam, n, "8", smax, seed, threads):
         bad.append(f"{name}: identite imprimee ({'/'.join(ident.groups())}) != nom du run")
-    # ENSEMBLE EXACT des K : 1..smax-1 (prefix_k<K> hors 11), chacun une fois,
-    # aucun K au-dela.
-    cards = re.findall(r"^cardinalites K=(\d+) ", body, re.M)
+    # LISTE EXACTE des K (ALERTE_VALIDATION_PREFIXE_K5) : 1..smax-1
+    # (prefix_k<K> hors 11), chacun UNE fois, aucune autre valeur — ni K=0,
+    # ni doublon, ni K au-dela ; les lignes sont comptees en liste, jamais
+    # ecrasees par un dictionnaire.
+    cards = [int(k) for k in re.findall(r"^cardinalites K=(\d+) ", body, re.M)]
     kmax = int(smax) - 1
-    for k in range(1, kmax + 1):
-        c = sum(1 for kk in cards if int(kk) == k)
-        if c != 1:
-            bad.append(f"{name}: cardinalites K={k} presente {c} fois (attendu 1)")
-    extra = sorted({int(kk) for kk in cards if int(kk) > kmax})
-    if extra:
-        bad.append(f"{name}: cardinalites K={extra} au-dela de K={kmax} (smax={smax})")
+    if sorted(cards) != list(range(1, kmax + 1)):
+        bad.append(f"{name}: cardinalites K != liste exacte 1..{kmax} (lues {sorted(cards)})")
     if not re.search(r"^temps_mur_ms=", body, re.M):
         bad.append(f"{name}: temps_mur_ms absent")
 
@@ -596,31 +622,22 @@ def main():
             v = profile.get("bin_" + k, "").strip()
             if v:
                 bins[k] = v
+        # (les valeurs ci-dessus sont RE-DERIVEES du canon lie plus bas —
+        # § 5.19 : un canon legacy sans axe BIN_* impose les trois defauts, un
+        # canon moderne impose SES valeurs ; le profil effectif n'est jamais
+        # l'attente.)
         # (cle OPTIONNELLE : les recus anterieurs a la fixture n'en portent
         # pas ; le cycle de vie courant l'emet toujours, le canon la lie.)
-        objet_digests = {}
-        for tok in expand_axis(profile.get("gpuv6_objet_digests", "aucun")):
-            m = re.match(r"^([a-z][a-z0-9_]*):(\d+):([0-9a-f]{64})$", tok)
-            if not m:
-                bad.append(f"profil de campagne : gpuv6_objet_digests hors grammaire ({tok[:40]})")
-                continue
-            if (m.group(1), m.group(2)) in objet_digests:
-                bad.append(f"profil de campagne : gpuv6_objet_digests duplique pour {m.group(1)}:{m.group(2)}")
-            objet_digests[(m.group(1), m.group(2))] = m.group(3)
+        # (grammaire du profil effectif ; l'AUTORITE des deux cartes est
+        # re-derivee du canon lie plus bas — ALERTE_VALIDATION_PREFIXE_K5 :
+        # jamais le profil effectif libre.)
+        objet_digests = parse_objet_digests(profile.get("gpuv6_objet_digests", "aucun"), bad, "profil de campagne")
         # FIXTURE D'EGALITE DE LA MATRICE (2 septembre) : famille:n:smax:
         # digest_all — chaque bras --digest du point doit calculer CET objet ;
         # les cles EGALENT exactement les points --digest (§ 5.18.5, jamais
         # une fixture decorative). Cle optionnelle (recus anterieurs).
-        matrice_objet_digests = {}
-        for tok in expand_axis(profile.get("matrice_objet_digests", "aucun")):
-            m = re.match(r"^([a-z][a-z0-9_]*):(\d+):([2-9]|1[01]):([0-9a-f]{64})$", tok)
-            if not m:
-                bad.append(f"profil de campagne : matrice_objet_digests hors grammaire ({tok[:40]})")
-                continue
-            mkey = (m.group(1), m.group(2), m.group(3))
-            if mkey in matrice_objet_digests:
-                bad.append(f"profil de campagne : matrice_objet_digests duplique pour {':'.join(mkey)}")
-            matrice_objet_digests[mkey] = m.group(4)
+        matrice_objet_digests = parse_matrice_objet_digests(
+            profile.get("matrice_objet_digests", "aucun"), bad, "profil de campagne")
         # § 5.13.4 : les axes de duree du profil pilotent les VRAIS
         # coupe-circuits — un ecart entre l'axe et l'effectif signifie une
         # surcharge d'environnement (profil effectif != canonique).
@@ -677,6 +694,35 @@ def main():
             for axis in axis_names:
                 if axis not in canon_axes:
                     bad.append(f"profil canonique : axe {axis} absent")
+            # § 5.19 (provenance) : pour les axes OPTIONNELS a valeur d'attente
+            # (chemins de binaires, fixtures d'objet), l'attente vient du CANON
+            # LIE : canon legacy sans l'axe => le profil effectif doit porter le
+            # defaut produit (aucun champ forge admis) ; canon moderne => la
+            # valeur du canon, jamais celle du profil effectif libre.
+            legacy_defaults = (("bin_matrice", "BIN_MATRICE", "./build-v6/mhgp6"),
+                               ("bin_attrib", "BIN_ATTRIB", "./build-v6/mhgp6_profile"),
+                               ("bin_pilote", "BIN_PILOTE", "./build-v6-cuda/mhgp6_cuda"),
+                               ("gpuv6_objet_digests", "GPUV6_OBJET_DIGESTS", "aucun"),
+                               ("matrice_objet_digests", "MATRICE_OBJET_DIGESTS", "aucun"))
+            for pk, ck, default in legacy_defaults:
+                effective = profile.get(pk, "").strip()
+                if ck in canon_axes:
+                    expected = canon_axes[ck].strip()
+                    if effective and effective.split() != expected.split():
+                        bad.append(f"provenance : {pk} du profil effectif ({effective[:40]!r}) != {ck} du canon lie "
+                                   f"({expected[:40]!r}) — l'attente vient du canon")
+                elif effective and effective.split() != default.split():
+                    bad.append(f"provenance : canon legacy sans axe {ck}, {pk}={effective[:40]!r} forge dans le "
+                               f"profil effectif (defaut {default!r} impose)")
+                # Attente EFFECTIVE re-derivee du canon (ou du defaut legacy) :
+                # chemins ET les deux cartes de fixtures.
+                if pk.startswith("bin_"):
+                    bins[pk[len("bin_"):]] = canon_axes[ck].strip() if ck in canon_axes else default
+                elif pk == "gpuv6_objet_digests":
+                    objet_digests = parse_objet_digests(canon_axes.get(ck, "aucun"), bad, "profil canonique")
+                elif pk == "matrice_objet_digests":
+                    matrice_objet_digests = parse_matrice_objet_digests(canon_axes.get(ck, "aucun"), bad,
+                                                                        "profil canonique")
             # IDENTITE : le profil effectif doit designer le canon par SON nom
             # (cinquieme tour : jamais compare pour les non decisionnels).
             if canon_axes.get("PROFIL_NOM") and profile.get("profil_canonique") != canon_axes.get("PROFIL_NOM"):
@@ -970,7 +1016,7 @@ def main():
     # paire famille/n) et invariance du grand-livre entre fils/inflight/join.
     matrice_digests = {}     # (family, n, smax) -> {digest_all: [names]}
     matrice_signatures = {}  # (family, n, smax) -> {signature: [names]}
-    matrice_prefix = {}      # (family, n) -> {smax: {name: (cardinalites par K, digest_forest par K)}}
+    matrice_prefix = {}      # cle complete du plan -> {smax: (name, cardinalites par K, digest_forest par K)}
     matrice_rows = []
     matrice_bin_shas, attrib_bin_shas, pilote_bin_shas = set(), set(), set()
     for run in matrice_runs:
@@ -1054,15 +1100,21 @@ def main():
                 bad.append(f"{name}: ligne invariante {pat} presente {cnt} fois (attendu 1)")
         matrice_signatures.setdefault((run["family"], run["n"], run["smax"]), {}) \
             .setdefault(thread_invariant_signature(body), []).append(name)
-        # PREFIXE (2 septembre) : lignes par K de ce run, comparees plus bas
-        # aux jumeaux smax=11 de la meme famille/n.
-        cards_k = {int(k): rest for k, rest in re.findall(r"^cardinalites K=(\d+) (.*)$", body, re.M)}
-        dfor_k = {int(k): d for k, d in re.findall(r"^digest_forest_K(\d+)=([0-9a-f]{64})$", body, re.M)}
-        if run["digest"] == "avec" and sorted(dfor_k) != list(range(1, int(run["smax"]))):
-            bad.append(f"{name}: digest_forest_K1..K{int(run['smax']) - 1} incomplets ou en trop "
-                       f"({sorted(dfor_k)})")
-        matrice_prefix.setdefault((run["family"], run["n"]), {}) \
-            .setdefault(run["smax"], {})[name] = (cards_k, dfor_k)
+        # PREFIXE (ALERTE_VALIDATION_PREFIXE_K5) : lignes par K de ce run en
+        # LISTES exactes (doublon = refus), indexees par la cle COMPLETE du
+        # plan (famille, n, fils, inflight, join, bras digest, passage) : le
+        # jumeau smax=11 d'un point court est le run de MEME cle, jamais un
+        # representant global.
+        cards_list = re.findall(r"^cardinalites K=(\d+) (.*)$", body, re.M)
+        dfor_list = re.findall(r"^digest_forest_K(\d+)=([0-9a-f]{64})$", body, re.M)
+        kmax_run = int(run["smax"]) - 1
+        if run["digest"] == "avec" and sorted(int(k) for k, _d in dfor_list) != list(range(1, kmax_run + 1)):
+            bad.append(f"{name}: digest_forest_K != liste exacte 1..{kmax_run} "
+                       f"(lus {sorted(int(k) for k, _d in dfor_list)})")
+        plan_key = (run["family"], run["n"], run["mat_threads"], run["inflight"], run["join"],
+                    run["digest"], run["passage"])
+        matrice_prefix.setdefault(plan_key, {})[run["smax"]] = \
+            (name, {int(k): rest for k, rest in cards_list}, {int(k): d for k, d in dfor_list})
         matrice_rows.append((run, meas))
     for key, table in sorted(matrice_digests.items()):
         if len(table) > 1:
@@ -1074,43 +1126,39 @@ def main():
             groups = sorted(table.values(), key=len, reverse=True)
             bad.append(f"matrice {key}: INVARIANCE DU GRAND-LIVRE VIOLEE entre points "
                        f"(dissidents {', '.join(groups[1])})")
-    # PROPRIETE DE PREFIXE (2 septembre) : un point smax < 11 (K = 1..smax-1)
-    # calcule le PREFIXE EXACT de l'objet complet — cardinalites K=1..kmax
-    # et digest_forest_K1..Kkmax (bras --digest) EGAUX a ceux des jumeaux
-    # smax=11 de la meme famille/n dans le meme recu. tower_scope l'affirme ;
-    # ici on le verifie contre un representant (les jumeaux smax=11 sont deja
-    # prouves identiques entre eux par l'invariance et digest_all).
-    for key, by_smax in sorted(matrice_prefix.items()):
-        full = by_smax.get("11", {})
-        if not full:
+    # PROPRIETE DE PREFIXE (ALERTE_VALIDATION_PREFIXE_K5) : un point smax < 11
+    # (K = 1..smax-1) calcule le PREFIXE EXACT de l'objet complet —
+    # cardinalites K=1..kmax et digest_forest_K1..Kkmax (bras --digest) EGAUX
+    # a ceux de son JUMEAU smax=11 de meme cle complete du plan (famille, n,
+    # fils, inflight, join, bras, passage). Le jumeau est EXIGE (un point
+    # court sans jumeau complet est invérifiable => refus), chaque paire est
+    # comparee ligne a ligne, aucun representant, aucun `continue`.
+    for plan_key, by_smax in sorted(matrice_prefix.items()):
+        shorts = sorted(sm for sm in by_smax if sm != "11")
+        if not shorts:
             continue
-        # Representants : cardinalites depuis n'importe quel jumeau (toutes les
-        # branches les impriment), digest_forest depuis un jumeau --digest
-        # (un representant sans digest ferait SAUTER la comparaison).
-        ref_name = sorted(full)[0]
-        ref_cards = full[ref_name][0]
-        ref_dig = sorted(nm for nm, (_c, d) in full.items() if d)
-        ref_dname = ref_dig[0] if ref_dig else None
-        ref_dfor = full[ref_dname][1] if ref_dname else {}
-        for smax, runs_p in sorted(by_smax.items()):
-            if smax == "11":
-                continue
-            kmax = int(smax) - 1
-            for name, (cards, dfor) in sorted(runs_p.items()):
+        if "11" not in by_smax:
+            for sm in shorts:
+                bad.append(f"{by_smax[sm][0]}: PREFIXE K=1..{int(sm) - 1} INVERIFIABLE — jumeau smax=11 "
+                           f"absent du plan pour {':'.join(plan_key)}")
+            continue
+        full_name, full_cards, full_dfor = by_smax["11"]
+        for sm in shorts:
+            name, cards, dfor = by_smax[sm]
+            kmax = int(sm) - 1
+            for k in range(1, kmax + 1):
+                if cards.get(k) != full_cards.get(k):
+                    bad.append(f"{name}: PREFIXE K=1..{kmax} DIFFERENT de l'objet complet "
+                               f"(cardinalites K={k} != {full_name})")
+                    break
+            if plan_key[5] == "avec":
+                if not full_dfor:
+                    bad.append(f"{name}: PREFIXE K=1..{kmax} INVERIFIABLE (jumeau {full_name} sans digest_forest)")
                 for k in range(1, kmax + 1):
-                    if k in cards and k in ref_cards and cards[k] != ref_cards[k]:
+                    if dfor.get(k) != full_dfor.get(k):
                         bad.append(f"{name}: PREFIXE K=1..{kmax} DIFFERENT de l'objet complet "
-                                   f"(cardinalites K={k} != {ref_name})")
+                                   f"(digest_forest_K{k} != {full_name})")
                         break
-                if dfor and not ref_dfor:
-                    bad.append(f"{name}: PREFIXE K=1..{kmax} INVERIFIABLE (aucun jumeau smax=11 --digest "
-                               f"pour {key[0]}:{key[1]})")
-                elif dfor:
-                    for k in range(1, kmax + 1):
-                        if k in dfor and k in ref_dfor and dfor[k] != ref_dfor[k]:
-                            bad.append(f"{name}: PREFIXE K=1..{kmax} DIFFERENT de l'objet complet "
-                                       f"(digest_forest_K{k} != {ref_dname})")
-                            break
     # FIXTURE D'EGALITE DE LA MATRICE : cles == points --digest du profil,
     # et chaque bras --digest calcule l'objet grave.
     if matrice_objet_digests:
@@ -1669,10 +1717,20 @@ def main():
     # reecrirait le recu — refus, sauf V6_RESUMES_DIR explicite (script
     # revalidate_v6_receipt.sh) qui les redirige hors du recu.
     resume_dir = os.environ.get("V6_RESUMES_DIR") or os.path.dirname(os.path.abspath(out))
-    if not os.environ.get("V6_RESUMES_DIR") and os.path.exists(os.path.join(resume_dir, "SHA256SUMS")):
-        print("REFUS : le repertoire des resumes est un recu durable (SHA256SUMS present) — "
-              "definir V6_RESUMES_DIR pour re-valider sans reecrire le recu")
-        return 2
+    # § 5.19.3 : la garde s'applique QUEL QUE SOIT le mode — un V6_RESUMES_DIR
+    # explicite pointant dans un recu durable (ou l'un de ses sous-repertoires)
+    # est refuse comme le defaut.
+    resume_real = os.path.realpath(resume_dir)
+    probe = resume_real
+    while True:
+        if os.path.exists(os.path.join(probe, "SHA256SUMS")):
+            print("REFUS : le repertoire des resumes est (ou est dans) un recu durable (SHA256SUMS present) — "
+                  "definir V6_RESUMES_DIR HORS du recu pour re-valider sans le reecrire")
+            return 2
+        parent = os.path.dirname(probe)
+        if parent == probe:
+            break
+        probe = parent
     tmp = os.path.join(resume_dir, "bench_resume.txt.tmp")
     with open(tmp, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")

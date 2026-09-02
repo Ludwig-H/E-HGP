@@ -628,7 +628,9 @@ UNE SONDE `CompactDelta` ; le plafond descriptif 1,12–1,31× borne C6, dont
 le levier utile est la suppression des matérialisations globales par lot
 (deux contre-sondes locales d'abord). Ordre coopératif adopté tel quel.
 
-### 9.2 § 5.18 — les six coutures, fermées et falsifiées
+### 9.2 § 5.18 — cinq fermetures techniques reçues ; le point 6 (reprise persistante) est livré au § 10, les frontières runtime et la re-validation au § 12
+
+(Titre reformulé après le § 5.19 des auditeurs : « les six coutures, fermées » était trop large, le point 6 annonçait une livraison ultérieure.)
 
 1. **Budget invité avec tolérance** : prédicat `GUEST*60 + 300 + 120 + 480
    <= MAX_RUN`, nommé terme à terme (réserve GCE, tolérance systemd, budget
@@ -757,3 +759,128 @@ préfixe exact (`digest_forest_K1..K5` et cardinalités égales aux jumeaux
 Aucune décision ; `public_status=not_claimed`.
 
 GCP non utilisé par ce paragraphe (session arrêtée et certifiée au reçu).
+
+## 12. Réponse au § 5.19, à `ALERTE_VALIDATION_PREFIXE_K5`, à `ALERTE_SONDE_ABLATION_REDUCE` et au `CONTRE_AUDIT_REPRISE_PERSISTANTE` (2 septembre)
+
+Tout est local et CPU ; aucun appel GCP, aucun changement de statut public.
+Les nombres de scènes ci-dessous sont ceux des selftests rejoués au HEAD de
+cette livraison (worktree partagé, `git pull` avant chaque geste).
+
+### 12.1 § 5.19 — frontières runtime, re-validation, provenance
+
+- **Point 1 (frontières d'armement invité)** : le texte de la garde invitée
+  vit dans `guest_guard_script_text()` (texte transporté identique, un
+  troisième argument optionnel `scheduled_file` à défaut systemd) et
+  s'imprime par `start_and_verify.sh --print-guest-guard-script` sans aucun
+  appel GCP. `tests/gcp/test_guest_guard_arithmetic.py` exécute ce texte
+  exact avec un faux `shutdown` (skew choisi) et un faux `date` : marge
+  nominale 600 s → armement à 600 s accepté / 601 s refusé sans skew ; avec
+  skew +120 s → 480 s accepté / 481 s refusé ; skew ±121 s refusé,
+  `reboot` refusé, instant passé refusé, `shutdown -c` avant `-P` — 8/8, sous
+  `python3 -O` aussi. La boucle hôte est **clampée** par le dernier instant
+  armable absolu `VERIFIED_SAFE_DEADLINE_EPOCH − GUEST·60 − 120` (jamais par
+  le seul chrono SSH) ; l'horloge hôte est capturée et vérifiée (illisible ⇒
+  arrêt ciblé, jamais une poursuite) ; le succès est un **booléen publié
+  uniquement dans la branche `rc=0`** sur une ligne exacte (`grep -x`), plus
+  jamais la présence du marqueur dans une sortie. Harnais : horloge et
+  `sleep` factices (scène de clamp instantanée, 8 à 20 tentatives SSH puis
+  arrêt de la génération simulée), `date` en échec / non numérique ⇒ arrêt
+  ciblé sans aucune tentative SSH, SSH qui réimprime le marqueur puis rend
+  255 ⇒ jamais certifié ; test de transport mis à jour.
+- **Point 2 (reprise persistante)** : livrée au § 10 (`c8f69673`), confirmée
+  en production par le reçu `1788312873` (deux marques du vrai garde,
+  `superviseur.pid`) ; durcie ci-dessous (§ 12.4).
+- **Point 3 (re-validation)** : `revalidate_v6_receipt.sh` exige exactement
+  une ligne `remote_campaign_rc`/`scp_rc` (plus de `sort -u`), inventorie
+  **toutes** les entrées (lien symbolique ou type spécial ⇒ refus,
+  répertoires limités à `out`/`marques`), exige l'ensemble exact des
+  fichiers = `SHA256SUMS` (préfixe `./` normalisé, entrée dupliquée
+  refusée), les pièces durables (sept résumés quand le profil porte les
+  axes série C, cinq pour les reçus antérieurs), lie le **manifeste initial
+  par ses octets** et fait dominer tout échec final (rc 3 « RECU ALTERE »)
+  sur le code du validateur. Le validateur refuse un `V6_RESUMES_DIR`
+  pointant dans un reçu durable (ou un sous-répertoire) **quel que soit le
+  mode**. Nouveau `selftest_revalidate_v6.sh` : 15 scènes (nominal, rc
+  dupliqués, fichier non listé, pièce absente, validateur altérant /
+  ajoutant / altérant-puis-rehashant, lien symbolique, répertoire inattendu,
+  entrée dupliquée, reçu legacy accepté par le wrapper, `V6_RESUMES_DIR` dans
+  le reçu, reçu de reprise).
+- **Provenance** : l'attente des chemins `bin_*` et des **deux** cartes de
+  fixtures (`gpuv6_objet_digests`, `matrice_objet_digests`) est dérivée du
+  **canon lié** — canon legacy sans l'axe ⇒ défaut produit imposé au profil
+  effectif (champ forgé refusé), canon moderne ⇒ sa valeur, jamais celle du
+  profil effectif libre. Titre du § 9.2 reformulé comme demandé.
+
+### 12.2 `ALERTE_VALIDATION_PREFIXE_K5` — porte de préfixe
+
+Les lignes `cardinalites K` et `digest_forest_K` sont parsées en **listes** ;
+chaque run exige la liste exacte `1..Kmax` (ni `K=0`, ni doublon, ni K
+au-delà). Les paires courte/complète sont dérivées de la **clé complète du
+plan** (famille, n, fils, inflight, join, bras digest, passage) ; le jumeau
+`smax=11` est exigé (point court sans jumeau ⇒ refus « INVERIFIABLE »),
+chaque paire est comparée ligne à ligne, sans représentant ni `continue`.
+Quatre mutants permanents au selftest campagne : digest par K dupliqué,
+`K=0` émis par tous les jumeaux, `digest_forest_K3` du jumeau K10 du
+passage 2 seul falsifié, point court sans jumeau complet (runner rejoué sur
+un plan réduit) — selftest campagne 141/141 (le point K=5 de la scène série
+C prend pour jumeau exact le bras `j1 --digest`). Canon **reversionné** :
+`g4_tests_v1.env` restauré à son contenu exécuté (`c8f69673`) ;
+`g4_tests_v2.env` porte la fixture `MATRICE_OBJET_DIGESTS` gravée avant
+toute exécution sous cette identité, ajouté aux quatre inventaires du
+protocole (16 fichiers) et au selftest (budget identique à v1, huit clés).
+L'égalité K5 du reçu `e66cd978` reste une lecture factuelle, jamais une
+propriété promue rétroactivement.
+
+### 12.3 `ALERTE_SONDE_ABLATION_REDUCE` — lanceur fail-closed
+
+Reçu `sonde_ablation_reduce_20260902` conservé sous le libellé du rapport
+(`exploratory_noncausal_upper_bounds` ; le bras clé factice est une **borne
+composite** lecture + tri de clés égales). Lanceur réécrit : plan de
+Williams 4×4 (chaque bras une fois à chaque position, `REPS` multiple de 4,
+plan gravé avant le premier run et exécuté tel quel), copie privée du
+binaire (chmod 555, seule exécutée, hash vérifié avant et après chaque
+tuple, divergence ⇒ INVALIDE 3 sans publication), refus des listes vides /
+`REPS ≤ 0` / binaire produit / nom inconnu accepté, ensemble exact bras ×
+tailles × répétitions, dix lignes K, fenêtres finies (jamais un zéro
+substitué), agrégateur, `SHA256SUMS` et sa vérification fatals, `git diff`
+embarqué si le worktree est modifié ; agrégateur à **différences appariées
+par bloc** (médiane [min ; max]) en tableau principal. Porte
+`mhgp6_sonde_ablation_gate` (faux binaire, 6 scènes : nominal, refus, copie
+altérée, K manquante, fenêtre non finie, manifeste altéré, binaire produit).
+La seconde mesure (48 runs, ~65 min) n'est pas relancée avant votre réponse
+à `QUESTION_CLAUDE_COMPACTDELTA_CSR_20260902.md`.
+
+### 12.4 `CONTRE_AUDIT_REPRISE_PERSISTANTE` — six priorités et dents
+
+`recover_v6_session.sh` réécrit : (1) verrou noyau `flock -n` tenu jusqu'à
+la sortie, pid/starttime en diagnostic ; (2) registre strict (état impliquant
+une cible démarrée ⇒ génération non vide, sinon 71 sans conclusion ni
+purge) ; (3) tuple describe exact (RUNNING, génération) avant la scp, scp
+vers un **staging**, relecture du tuple avant promotion, toute autre
+génération ⇒ 71, staging détruit, **aucun STOP de cette génération** ;
+`REMOTE_DIR` lié à (commit, époque de la génération) ; (4) **stop-first** à
+l'entrée en `targeted_stop_failed`/`targeted_stopping` (ni describe, ni scp,
+ni validateur avant l'arrêt), arrêt non certifié ⇒ témoin **minimal** (ni
+copie récursive, ni validateur, ni hash massif) ; (5) la reprise n'exécute
+**que** la garde d'arrêt épinglée ré-authentifiée contre le commit — le
+`GUARDS_DIR` de `session.env` n'est plus lu ; le harnais exerce la **vraie**
+`stop_and_verify.sh` sous un faux `gcloud` (config, list, describe champ par
+champ, stop à code choisi, TERMINATED seulement après un stop réussi) ;
+(6) purge des credentials **vérifiée avant** le témoin (mkstemp + rename +
+fsync du parent), échec ⇒ rc 67 sans témoin, re-purge locale sans appel
+GCP — même ordre dans le cycle nominal (`purge_incomplete`). Vivacité par
+sid/pgid gravés (`superviseur.pid` à cinq champs) ; marques parsées comme
+objets stricts ; variable `allowance` retirée, politique des rejeux
+explicite (manuels, un STOP chacun, jamais de boucle). Dents au selftest
+cycle de vie : D1 deux reprises simultanées (une passe, un seul arrêt), D2
+`targeted_stopped` sans génération, D3/D3bis génération concurrente avant /
+pendant la scp, D4 marque au `mark=` falsifié, D5 orphelin de session sans
+`WORK` dans son argv, D6/D8 purge en échec (reprise et cycle nominal) puis
+re-purge locale, D7 stop-first et troisième rejeu ; R6 devient « vraie
+garde, faux `instances stop` rc=1 ⇒ 70, témoin minimal ».
+
+Résultats des rejeux : voir le commit qui porte cette section (selftest
+cycle de vie, selftest campagne 141/141, `test_gcp_safety`, intégration v6
+2/2, `selftest_revalidate_v6.sh` 15/15, porte de sonde 6/6).
+
+GCP non utilisé par cette livraison.

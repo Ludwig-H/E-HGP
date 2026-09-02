@@ -1,0 +1,173 @@
+#!/usr/bin/env bash
+# SELFTEST de revalidate_v6_receipt.sh (audit serie C § 5.19.3) : le
+# re-jugement d'un recu durable est ferme contre son propre outil. Sur une
+# COPIE d'un recu durable versionne : nominal vert ; puis chaque mutation
+# doit etre REFUSEE pour sa cause exacte — ligne rc dupliquee, fichier non
+# liste, piece durable absente, validateur qui altere le recu (le controle
+# final domine), V6_RESUMES_DIR pointant dans le recu (garde permanente du
+# validateur), recu de reprise. Ne touche JAMAIS GCP.
+# Usage : selftest_revalidate_v6.sh [recu durable] (defaut : le dernier reçu
+#         session_g4_* commite sous morsehgp3D_v6/receipts)
+set -u
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "${HERE}/.." && pwd)"
+REVALIDATE="${HERE}/revalidate_v6_receipt.sh"
+VALIDATOR="${HERE}/validate_v6_campaign.py"
+SOURCE="${1:-}"
+if [ -z "${SOURCE}" ]; then
+  SOURCE="$(ls -d "${ROOT}"/morsehgp3D_v6/receipts/session_g4_*/ 2>/dev/null | sort | tail -n 1)"
+  SOURCE="${SOURCE%/}"
+fi
+[ -f "${SOURCE}/RECU_SESSION.txt" ] || { echo "REFUS : recu source absent (${SOURCE})" >&2; exit 2; }
+case "$(sed -n 's/^issue=//p' "${SOURCE}/RECU_SESSION.txt")" in reprise_*) echo "REFUS : le recu source est un recu de reprise" >&2; exit 2 ;; esac
+
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/ehgp-selftest-revalid.XXXXXXXX")"
+trap 'rm -rf "${WORK}"' EXIT
+FAILS=0
+check_true() { # $1 = nom, reste = commande
+  local name="$1"; shift
+  if "$@"; then echo "ok : ${name}"; else echo "ECHEC selftest : ${name}"; FAILS=$((FAILS + 1)); fi
+}
+rehash() { # $1 = recu
+  ( cd "$1" && find . -type f ! -name SHA256SUMS -printf '%P\n' | sort | xargs -d '\n' sha256sum > SHA256SUMS )
+}
+fresh_copy() { # $1 = nom de cas -> imprime le chemin
+  local d="${WORK}/$1"
+  rm -rf "${d}"; cp -r "${SOURCE}" "${d}"; printf '%s' "${d}"
+}
+run_reval() { # $1 = recu, [$2 = validateur] -> rc dans REVAL_RC, sortie dans REVAL_OUT
+  REVAL_RC=0
+  REVAL_OUT="$(cd "${ROOT}" && bash "${REVALIDATE}" "$1" ${2:+"$2"} 2>&1)" || REVAL_RC=$?
+}
+
+echo "selftest revalidate v6 : recu source $(basename "${SOURCE}")"
+
+# ---- Nominal : copie intacte => code du validateur (0 attendu sur un recu
+# valide), recu intact apres re-validation.
+D="$(fresh_copy nominal)"; run_reval "${D}"
+check_true "nominal : copie intacte re-validee rc=0, recu intact" \
+  bash -c "[ \"\$1\" -eq 0 ] && printf '%s' \"\$2\" | grep -q 'recu intact apres re-validation'" _ "${REVAL_RC}" "${REVAL_OUT}"
+
+# ---- Ligne rc dupliquee (journal rejoue) : refus, meme avec rehash.
+D="$(fresh_copy rc_double)"; echo "remote_campaign_rc=0" >> "${D}/session.log"; rehash "${D}"; run_reval "${D}"
+check_true "remote_campaign_rc duplique (rehash) : REFUS exactement une ligne" \
+  bash -c "[ \"\$1\" -eq 2 ] && printf '%s' \"\$2\" | grep -q 'exactement une ligne exigee'" _ "${REVAL_RC}" "${REVAL_OUT}"
+D="$(fresh_copy scp_double)"; echo "scp_rc=0" >> "${D}/session.log"; rehash "${D}"; run_reval "${D}"
+check_true "scp_rc duplique (rehash) : REFUS exactement une ligne" \
+  bash -c "[ \"\$1\" -eq 2 ] && printf '%s' \"\$2\" | grep -q 'scp_rc absent ou multiple'" _ "${REVAL_RC}" "${REVAL_OUT}"
+
+# ---- Fichier present non liste (sans rehash : SHA256SUMS reste vrai pour
+# les fichiers listes) : refus de l'ensemble exact.
+D="$(fresh_copy intrus)"; echo "intrus" > "${D}/out/intrus.txt"; run_reval "${D}"
+check_true "fichier non liste dans le recu : REFUS ensemble exact" \
+  bash -c "[ \"\$1\" -eq 2 ] && printf '%s' \"\$2\" | grep -q 'ensemble des fichiers du recu != SHA256SUMS'" _ "${REVAL_RC}" "${REVAL_OUT}"
+
+# ---- Piece durable absente (avec rehash : l'ensemble est coherent, la piece manque).
+D="$(fresh_copy resume_absent)"; rm "${D}/matrice_resume.txt"; rehash "${D}"; run_reval "${D}"
+check_true "matrice_resume.txt supprime (rehash) : REFUS piece durable absente" \
+  bash -c "[ \"\$1\" -eq 2 ] && printf '%s' \"\$2\" | grep -q 'piece durable absente du recu (matrice_resume.txt)'" _ "${REVAL_RC}" "${REVAL_OUT}"
+
+# ---- Validateur qui ALTERE le recu (ecrit dans session.log) puis rend 0 :
+# le controle final doit dominer (rc 3), jamais 0.
+FAKEV="${WORK}/faux_validateur.py"
+cat > "${FAKEV}" <<'EOF'
+import os, sys
+out = sys.argv[1]
+recu = os.path.dirname(sys.argv[7])  # profil_campagne.txt du recu
+with open(os.path.join(recu, "session.log"), "a", encoding="utf-8") as fh:
+    fh.write("altere par un faux validateur\n")
+print("campaign_status=verifie_non_decisionnel (FAUX)")
+sys.exit(0)
+EOF
+D="$(fresh_copy validateur_alterant)"; run_reval "${D}" "${FAKEV}"
+check_true "validateur alterant session.log puis rc=0 : le controle final DOMINE (rc 3, RECU ALTERE)" \
+  bash -c "[ \"\$1\" -eq 3 ] && printf '%s' \"\$2\" | grep -q 'RECU ALTERE PENDANT LA RE-VALIDATION'" _ "${REVAL_RC}" "${REVAL_OUT}"
+# Variante : validateur qui AJOUTE un fichier au recu (SHA256SUMS des listes
+# reste vrai) puis rend 0 : l'ensemble final differe => rc 3.
+FAKEV2="${WORK}/faux_validateur_ajout.py"
+cat > "${FAKEV2}" <<'EOF'
+import os, sys
+recu = os.path.dirname(sys.argv[7])
+with open(os.path.join(recu, "ajout_par_validateur.txt"), "w", encoding="utf-8") as fh:
+    fh.write("x\n")
+sys.exit(0)
+EOF
+D="$(fresh_copy validateur_ajoutant)"; run_reval "${D}" "${FAKEV2}"
+check_true "validateur ajoutant un fichier au recu puis rc=0 : ensemble final different (rc 3)" \
+  bash -c "[ \"\$1\" -eq 3 ] && printf '%s' \"\$2\" | grep -q 'RECU ALTERE PENDANT LA RE-VALIDATION'" _ "${REVAL_RC}" "${REVAL_OUT}"
+
+# ---- Validateur qui altere PUIS regenere SHA256SUMS (meme ensemble de
+# noms, nouveaux hashes) puis rend 0 : le manifeste initial est lie par ses
+# octets => rc 3.
+FAKEV3="${WORK}/faux_validateur_rehash.py"
+cat > "${FAKEV3}" <<'EOF'
+import hashlib, os, sys
+recu = os.path.dirname(sys.argv[7])
+with open(os.path.join(recu, "session.log"), "a", encoding="utf-8") as fh:
+    fh.write("altere puis rehash\n")
+lines = []
+for root, _dirs, files in os.walk(recu):
+    for f in files:
+        if f == "SHA256SUMS":
+            continue
+        path = os.path.join(root, f)
+        rel = os.path.relpath(path, recu)
+        h = hashlib.sha256(open(path, "rb").read()).hexdigest()
+        lines.append(f"{h}  ./{rel}")
+with open(os.path.join(recu, "SHA256SUMS"), "w", encoding="utf-8") as fh:
+    fh.write("\n".join(sorted(lines)) + "\n")
+sys.exit(0)
+EOF
+D="$(fresh_copy validateur_rehash)"; run_reval "${D}" "${FAKEV3}"
+check_true "validateur alterant session.log PUIS regenerant SHA256SUMS, rc=0 : manifeste initial lie (rc 3)" \
+  bash -c "[ \"\$1\" -eq 3 ] && printf '%s' \"\$2\" | grep -q 'RECU ALTERE PENDANT LA RE-VALIDATION'" _ "${REVAL_RC}" "${REVAL_OUT}"
+
+# ---- Lien symbolique non hache a la racine : refus AVANT le validateur.
+D="$(fresh_copy symlink)"; ln -s out/MANIFESTE_DISTANT.txt "${D}/lien_intrus"; run_reval "${D}"
+check_true "lien symbolique ajoute au recu : REFUS entree non reguliere" \
+  bash -c "[ \"\$1\" -eq 2 ] && printf '%s' \"\$2\" | grep -q 'entree non reguliere'" _ "${REVAL_RC}" "${REVAL_OUT}"
+# ---- Repertoire inattendu.
+D="$(fresh_copy repertoire)"; mkdir "${D}/autre"; echo x > "${D}/autre/x.txt"; run_reval "${D}"
+check_true "repertoire inattendu dans le recu : REFUS" \
+  bash -c "[ \"\$1\" -eq 2 ] && printf '%s' \"\$2\" | grep -q 'repertoire inattendu'" _ "${REVAL_RC}" "${REVAL_OUT}"
+# ---- Entree dupliquee dans SHA256SUMS (hash exact) : l'ensemble n'est plus exact.
+D="$(fresh_copy dup_entry)"; head -n 1 "${D}/SHA256SUMS" >> "${D}/SHA256SUMS"; run_reval "${D}"
+check_true "entree dupliquee dans SHA256SUMS : REFUS ensemble exact" \
+  bash -c "[ \"\$1\" -eq 2 ] && printf '%s' \"\$2\" | grep -q 'ensemble des fichiers du recu != SHA256SUMS'" _ "${REVAL_RC}" "${REVAL_OUT}"
+# ---- Recu LEGACY (anterieur a la serie C : cinq resumes, sans axe matrice) :
+# doit rester recevable quand il existe dans le depot.
+LEGACY="${ROOT}/morsehgp3D_v6/receipts/session_g4_20260901_d98f47296d67_1788245493"
+if [ -f "${LEGACY}/RECU_SESSION.txt" ] && ! grep -qE '^matrice_points=' "${LEGACY}/profil_campagne.txt"; then
+  # Le validateur serie C juge ce recu anterieur `partial_or_failed` (axes
+  # serie C absents de son profil) : ce qui est exige ici est que le WRAPPER
+  # ne le refuse pas de lui-meme (aucun REFUS, pieces legacy acceptees) et
+  # que le recu reste intact — le verdict du validateur est le sien.
+  D="${WORK}/legacy"; rm -rf "${D}"; cp -r "${LEGACY}" "${D}"; run_reval "${D}"
+  check_true "recu legacy (cinq resumes, sans axe matrice) : accepte par le wrapper (aucun REFUS), recu intact, verdict du validateur (rc 0 ou 1)" \
+    bash -c "{ [ \"\$1\" -eq 0 ] || [ \"\$1\" -eq 1 ]; } && ! printf '%s' \"\$2\" | grep -q '^REFUS' && printf '%s' \"\$2\" | grep -q 'recu intact apres re-validation'" _ "${REVAL_RC}" "${REVAL_OUT}"
+fi
+
+# ---- Appel DIRECT du validateur avec V6_RESUMES_DIR dans le recu (ou un
+# sous-repertoire) : garde permanente, refus 2, aucun resume ecrit.
+D="$(fresh_copy resumes_dans_recu)"
+COMMIT="$(sed -n 's/^source_commit=//p' "${D}/RECU_SESSION.txt")"
+PAYLOAD="$(sed -n 's/^source_payload_sha256=//p' "${D}/RECU_SESSION.txt")"
+MANIFEST="$(sed -n 's/^protocol_manifest_sha256=//p' "${D}/RECU_SESSION.txt")"
+PROFIL_NOM="$(sed -n 's/^profil_canonique=//p' "${D}/profil_campagne.txt")"
+git -C "${ROOT}" show "${COMMIT}:gcp-migration/profils/${PROFIL_NOM}.env" > "${WORK}/canon.env"
+mkdir -p "${D}/out/sous"
+rc=0; VOUT="$(cd "${ROOT}" && V6_RESUMES_DIR="${D}/out/sous" python3 "${VALIDATOR}" "${D}/out" "${COMMIT}" "${PAYLOAD}" "${MANIFEST}" 0 0 \
+  "${D}/profil_campagne.txt" "${WORK}/canon.env" "${D}/manifest_revalide.txt" 2>&1)" || rc=$?
+check_true "validateur direct, V6_RESUMES_DIR explicite DANS le recu : REFUS 2, aucun resume ecrit" \
+  bash -c "[ \"\$1\" -eq 2 ] && printf '%s' \"\$2\" | grep -q 'HORS du recu' && [ ! -e \"\$3/out/sous/bench_resume.txt\" ]" _ "${rc}" "${VOUT}" "${D}"
+
+# ---- Recu de reprise : jamais requalifie.
+D="$(fresh_copy reprise)"; sed -i 's/^issue=.*/issue=reprise_partielle/' "${D}/RECU_SESSION.txt"; rehash "${D}"; run_reval "${D}"
+check_true "recu de reprise (issue=reprise_*) : REFUS" \
+  bash -c "[ \"\$1\" -eq 2 ] && printf '%s' \"\$2\" | grep -q 'recu de reprise'" _ "${REVAL_RC}" "${REVAL_OUT}"
+
+if [ "${FAILS}" -ne 0 ]; then
+  echo "selftest revalidate v6 : ${FAILS} echec(s)"
+  exit 1
+fi
+echo "selftest revalidate v6 : re-jugement ferme contre son outil (ensemble exact, pieces exigees, rc uniques, controle final dominant, garde V6_RESUMES_DIR permanente, reprise refusee)"
