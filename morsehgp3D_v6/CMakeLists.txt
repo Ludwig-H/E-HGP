@@ -74,6 +74,20 @@ mhgp6_gate(mhgp6_wspd_mutant_split 4 mhgp6_selftest ARGS --wspd-ownership --inje
 mhgp6_gate(mhgp6_contrat_echec 0 mhgp6_selftest ARGS --failure-contract TIMEOUT 600)
 mhgp6_gate(mhgp6_contrat_echec_census 4 mhgp6_selftest ARGS --failure-contract --inject=census-nonstrict TIMEOUT 600)
 mhgp6_gate(mhgp6_contrat_echec_fold_k2 4 mhgp6_selftest ARGS --failure-contract --inject=fold-inject-a-failure-k2 TIMEOUT 600)
+# ETAGE NOMME D'UN bad_alloc (alerte G4 du 2 septembre) : une panne
+# d'allocation devient un refus transactionnel resource_exhausted qui NOMME
+# l'etage atteint — jamais un abort (code 134) qui ne dit rien. Le temoin
+# (code 0) interdit le vert par vacuite ; les deux scenes injectees exigent le
+# code EXACT du refus (2) ET la ligne portant le nom de l'etage, sur la MEME
+# execution. La scene `fold` couvre le seul etage a WORKERS.
+mhgp6_executable(mhgp6_bad_alloc_gate tests/bad_alloc_gate.cpp)
+mhgp6_gate(mhgp6_bad_alloc_temoin 0 mhgp6_bad_alloc_gate ARGS --threads=4 TIMEOUT 600)
+mhgp6_gate(mhgp6_bad_alloc_etage_census 2 mhgp6_bad_alloc_gate
+           ARGS --threads=4 --inject=caps-throw-bad-alloc-census --etage=census
+           EXPECT_LINE "resource_exhausted : bad_alloc a l'etage census (rss_mb apres_generation=" TIMEOUT 600)
+mhgp6_gate(mhgp6_bad_alloc_etage_fold 2 mhgp6_bad_alloc_gate
+           ARGS --threads=4 --inject=caps-throw-bad-alloc-fold --etage=fold
+           EXPECT_LINE "resource_exhausted : bad_alloc a l'etage fold (rss_mb apres_generation=" TIMEOUT 600)
 # Etage E6 (--e6-grille) : objet et multiensemble emis BIT-IDENTIQUES sous la
 # grille raffinee, W_sweep1 jamais augmente, plancher de grilles construites.
 mhgp6_gate(mhgp6_e6_grille_objet 0 mhgp6_selftest ARGS --e6-equal TIMEOUT 600)

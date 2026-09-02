@@ -72,6 +72,13 @@ inline constexpr const char* kMutants[] = {
     "csr-unsorted-born", "csr-unsorted-parents", "csr-drop-delta", "csr-dup-delta", "csr-shift-offset",
     "csr-offset-hole", "csr-offset-overlap", "csr-offset-end", "csr-offset-domain", "csr-guard-skip",
     "csr-inject-bad-alloc",
+    // ETAGE NOMME D'UN bad_alloc (2 septembre, ALERTE_G4_ECHELLE_V6) : panne
+    // d'allocation injectee dans src/pipeline/run.hpp a DEUX etages
+    // differents — l'un sur le fil principal (census), l'autre dans un WORKER
+    // de l'etage B au premier ordre (fold). Tues par tests/bad_alloc_gate.cpp :
+    // le refus doit etre resource_exhausted, NOMMER l'etage, ne publier aucun
+    // callback ni provisoire, et ne JAMAIS terminer par signal (code 134).
+    "caps-throw-bad-alloc-census", "caps-throw-bad-alloc-fold",
 };
 
 inline std::vector<std::string>& mutant_registry() {

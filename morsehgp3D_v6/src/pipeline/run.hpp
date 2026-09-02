@@ -13,6 +13,12 @@
 // PROVISOIRE jusqu'au statut terminal ; la signature au format v4 est
 // calculee ici pour la porte de conformite v5 ≡ v6.
 //
+// EPUISEMENT MEMOIRE : `run_pipeline` enrobe le corps du pipeline et convertit
+// un `std::bad_alloc` en refus transactionnel `resource_exhausted` qui NOMME
+// l'etage atteint (curseur `RunResult::stage_reached`, avance aux memes points
+// que les `rss_mb`), sans jamais publier un prefixe de payload. Ce n'est pas
+// une garantie anti-OOM : voir le commentaire de l'enrobage.
+//
 // GRAND-LIVRE GLOBAL DU FRONT FUSIONNE (remplace le ledger postsep v5, la v6
 // n'ayant pas de raffinement post-separation) : par lane,
 //   masses emises + masses tuees == C(n,2) − Σ C(mult_u, 2)
@@ -29,6 +35,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <new>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -121,9 +128,54 @@ struct KCardinalities {
   bool operator==(const KCardinalities&) const = default;  // comparaison large de la fenetre (d)
 };
 
+// CURSEUR D'ETAGE du pipeline (alerte G4 du 2 septembre : un `std::bad_alloc`
+// generique ne nomme pas l'etage qui deborde, et les RSS par etage ne sont
+// imprimes qu'apres SUCCES). Le curseur nomme l'etage EN COURS : il est
+// avance aux MEMES points que les mesures `rss_mb`, chacune prise a la FIN
+// d'un etage — donc a l'instant ou l'etage suivant commence. Il n'est JAMAIS
+// reconstruit apres coup. Seule exception : `entree -> generation`, avance
+// juste avant `generate_candidates` (l'entree n'a pas de mesure rss). La
+// couture serie C (prefilter_census_override) est UN SEUL aller-retour : le
+// curseur y reste `prefiltre`, les deux etages n'y sont pas separables.
+enum : u8 {
+  kRunStageEntree = 0,       // validation des options, index du nuage
+  kRunStageGeneration = 1,   // front fusionne, trois lanes  (clos par rss_mb[0])
+  kRunStageRle = 2,          // tri + deduplication des candidats (rss_mb[1])
+  kRunStagePrefiltre = 3,    // prefiltre de profondeur (rss_mb[2])
+  kRunStageCensus = 4,       // census I_B / U_B + plateaux (rss_mb[3])
+  kRunStageFold = 5,         // comptage, expansion, folds par K (rss_mb[4])
+  kRunStagePublication = 6,  // digest global, liberations, retour (rss_mb[5])
+  kRunStageCount = 7
+};
+
+inline const char* run_stage_name(u8 stage) {
+  switch (stage) {
+    case kRunStageEntree:
+      return "entree";
+    case kRunStageGeneration:
+      return "generation";
+    case kRunStageRle:
+      return "rle";
+    case kRunStagePrefiltre:
+      return "prefiltre";
+    case kRunStageCensus:
+      return "census";
+    case kRunStageFold:
+      return "fold";
+    case kRunStagePublication:
+      return "publication";
+    default:
+      return "inconnu";
+  }
+}
+
 struct RunResult {
   PipelineStatus status = PipelineStatus::kCompleteRegular;
   std::string message;
+  // Etage ATTEINT (en cours) au moment du retour : diagnostic, jamais un
+  // payload — il survit a un refus avec le statut, le message, les chronos et
+  // les RSS d'etage, et rien d'autre.
+  u8 stage_reached = kRunStageEntree;
   u64 smax_eff = 0, kmax_eff = 0;
   size_t emitted = 0;
   GenerateStats gen;
@@ -278,24 +330,29 @@ inline void invalidate_provisional(RunResult* rr) {
 #endif
 }
 
-inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOptions& opt) {
+namespace run_detail {
+
+// CORPS du pipeline. Ecrit dans `rr` au fil de l'eau (curseur d'etage compris)
+// et peut PROPAGER une exception : c'est l'enrobage `run_pipeline` qui decide
+// du sort d'un `std::bad_alloc`. Toute autre exception continue de sortir
+// telle quelle (first_exc / main_exc), comportement inchange.
+inline void run_pipeline_into(const std::vector<InputPoint>& in, const RunOptions& opt, RunResult& rr) {
   using run_detail::ms;
-  RunResult rr;
   const auto t_all = std::chrono::steady_clock::now();
   if ((u64)in.size() > kMaxTreePositions) {
     rr.status = PipelineStatus::kResourceExhausted;
     rr.message = "resource_exhausted : plus de 2^30-1 positions d'entree (arbre radix a indices i32, recherche de Karras)";
-    return rr;
+    return;
   }
   if (!validate_run_options(in, opt, &rr.message)) {
     rr.status = PipelineStatus::kInvalidInput;
-    return rr;
+    return;
   }
   if (opt.memory_budget_bytes != 0 && opt.memory_budget_bytes < (u64)sizeof(BallCandidate)) {
     rr.status = PipelineStatus::kResourceExhausted;
     rr.message = "resource_exhausted : budget partiel inferieur au cout d'un seul candidat (" +
                  std::to_string(sizeof(BallCandidate)) + " octets)";
-    return rr;
+    return;
   }
   const auto t_ix = std::chrono::steady_clock::now();
   const CloudIndex ix = build_cloud_index(in);
@@ -303,12 +360,12 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   if (!ix.valid) {
     rr.status = PipelineStatus::kInvalidInput;
     rr.message = "invalid_input : coordonnee hors profil u16 ou PointId duplique";
-    return rr;
+    return;
   }
   if (ix.has_duplicate_positions()) {
     rr.status = PipelineStatus::kUnsupportedDegeneracy;
     rr.message = "unsupported_degeneracy : positions dupliquees";
-    return rr;
+    return;
   }
   rr.smax_eff = std::min<u64>(opt.smax, in.size());
   rr.kmax_eff = rr.smax_eff - 1;
@@ -331,6 +388,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   go.wave_tasks_cap_for_tests = opt.wave_tasks_cap_for_tests;
   go.alive_rects_cap_for_tests = opt.alive_rects_cap_for_tests;
 #endif
+  rr.stage_reached = kRunStageGeneration;
   generate_candidates(ix, go, &cands, &rr.gen);
   rr.t_gen_ms = ms(t_g);
   // REFUS DE CAPACITE DE LA GENERATION (caps.hpp) : mappe AVANT le
@@ -357,9 +415,10 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
         break;
     }
     invalidate_provisional(&rr);
-    return rr;
+    return;
   }
   rr.rss_mb[0] = run_detail::rss_mb_now();
+  rr.stage_reached = kRunStageRle;
   // GRAND-LIVRE GLOBAL : par lane du profil, emis + tues == masse attendue.
   {
     const u128 expected = expected_pair_mass(ix);
@@ -373,7 +432,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
       rr.message = "invariant : grand-livre des masses de paires du front fusionne viole (" +
                    std::to_string(violations) + " lane(s))";
       invalidate_provisional(&rr);  // finaliseur LITTERAL sur toute sortie non complete (audit du 31 aout)
-      return rr;
+      return;
     }
   }
   if (rr.gen.invariant_jneg) {
@@ -381,7 +440,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     rr.message = "invariant : seed q4 aigu avec J < 0 (inatteignable par theoreme, MATHEMATIQUES § 2) : " +
                  std::to_string(rr.gen.invariant_jneg) + " occurrence(s)";
     invalidate_provisional(&rr);
-    return rr;
+    return;
   }
   const auto t_r = std::chrono::steady_clock::now();
   rr.emitted = cands.size();
@@ -395,7 +454,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     rr.message = "resource_exhausted : tri des candidats hors budget partiel declare (tampon de fusion 2 x " +
                  std::to_string(sizeof(BallCandidate)) + " octets x " + std::to_string(cands.size()) + ")";
     invalidate_provisional(&rr);
-    return rr;
+    return;
   }
   rr.rle_workers = sort_candidates(&cands, opt.threads);
   const double t_sort_candidates_ms = ms(t_r);
@@ -408,13 +467,14 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   deduplicate_candidates(&cands);
   rr.t_rle_ms = t_sort_candidates_ms + ms(t_u);
   rr.rss_mb[1] = run_detail::rss_mb_now();
+  rr.stage_reached = kRunStagePrefiltre;
   rr.expand.unique_balls = cands.size();
 
   if (!candidates_capacity_ok(cands.size())) {
     rr.status = PipelineStatus::kResourceExhausted;
     rr.message = "resource_exhausted : plus de 2^32-1 boules uniques (indices u32 du prefiltre)";
     invalidate_provisional(&rr);
-    return rr;
+    return;
   }
   const auto t_p = std::chrono::steady_clock::now();
   std::vector<Survivor> surv;
@@ -426,7 +486,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     rr.message = "resource_exhausted : prefiltre/census hors budget partiel declare (borne conservative "
                  "S <= C sur la TAILLE post-RLE — proxy de payload logique, coexistence BallData x2)";
     invalidate_provisional(&rr);
-    return rr;
+    return;
   }
   std::vector<BallData> balls;
   if (opt.prefilter_census_override) {
@@ -445,14 +505,19 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
       rr.message = std::string(inv ? "invariant" : bad_in ? "invalid_input" : "resource_exhausted") +
                    " : route serie C — " + err;
       invalidate_provisional(&rr);
-      return rr;
+      return;
     }
     rr.t_census_ms = ms(t_p);
   } else {
     prefilter_balls(ix, cands, rr.smax_eff, opt.threads, &surv, &rr.expand);
     rr.t_prefilter_ms = ms(t_p);
     rr.rss_mb[2] = run_detail::rss_mb_now();
+    rr.stage_reached = kRunStageCensus;
     const auto t_c = std::chrono::steady_clock::now();
+    // Panne d'allocation INJECTEE a l'etage census : l'enrobage doit la
+    // convertir en refus transactionnel NOMMANT l'etage, jamais laisser
+    // l'exception terminer le processus (code 134).
+    if (MHGP6_MUTANT("caps-throw-bad-alloc-census")) throw std::bad_alloc();
     const PipelineStatus cs =
         census_balls(ix, cands, surv, rr.smax_eff, opt.shell_cap, opt.threads, &balls, &rr.expand);
     if (cs != PipelineStatus::kCompleteRegular) {
@@ -461,7 +526,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
                        ? "resource_exhausted : coquille au-dela du plafond (jamais de troncature)"
                        : "invariant : census contredit la passe count-only";
       invalidate_provisional(&rr);
-      return rr;
+      return;
     }
     rr.t_census_ms = ms(t_c);  // arrete AVANT le digest post-prefiltre (audit du 31 aout)
   }
@@ -472,6 +537,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   }
   std::vector<Survivor>().swap(surv);
   rr.rss_mb[3] = run_detail::rss_mb_now();
+  rr.stage_reached = kRunStageFold;
 
   // GARDES DE CAPACITE DE TOUS LES ORDRES AVANT TOUTE PUBLICATION.
   const auto t_e = std::chrono::steady_clock::now();
@@ -482,7 +548,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
       rr.status = PipelineStatus::kResourceExhausted;
       rr.message = "fold K=" + std::to_string(K) + " : " + why;
       invalidate_provisional(&rr);
-      return rr;
+      return;
     }
     if (opt.memory_budget_bytes != 0 &&
         !fits_budget(kc[K].events, (u64)sizeof(ForestEvent), (u64)(opt.fold_inflight + 2),
@@ -494,7 +560,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
                    " octets x (inflight+2, coexistence des shards lev et de la fusion comptee) — "
                    "tampon NOMME, les autres structures du fold ne sont pas comptees)";
       invalidate_provisional(&rr);
-      return rr;
+      return;
     }
   }
   rr.t_count_ms += ms(t_e);
@@ -679,6 +745,11 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
           t_fold_local = run_detail::ms(t_r);
           if (MHGP6_MUTANT("fold-inject-b-exception-k3") && K == 3)
             throw std::runtime_error("mutant fold-inject-b-exception-k3 : exception de reduction (K=3)");
+          // Panne d'allocation INJECTEE dans un WORKER de l'etage B, au
+          // PREMIER ordre (K=1) : aucun ordre n'a encore ete publie, donc la
+          // scene exige zero callback. Le worker la capture (sp->exc), le fil
+          // principal la relance, l'enrobage la convertit en refus « fold ».
+          if (MHGP6_MUTANT("caps-throw-bad-alloc-fold") && K == 1) throw std::bad_alloc();
           // Aucune vue avant validation du stockage (le payload csr est de toute
           // facon vide en echec) : pas de digest d'un fold refuse.
           if (opt.digest && r.storage_violations == 0 && r.storage_message.empty()) {
@@ -821,21 +892,67 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     rr.status = first_status;
     rr.message = first_message;
     invalidate_provisional(&rr);
-    return rr;
+    return;
   }
   if (main_exc) std::rethrow_exception(main_exc);
   if (a_status != PipelineStatus::kCompleteRegular) {
     rr.status = a_status;
     rr.message = a_message;
     invalidate_provisional(&rr);
-    return rr;
+    return;
   }
+  rr.stage_reached = kRunStagePublication;
   rr.t_fold_wall_ms = ms(t_fold_wall);
   rr.t_fold_ms += t_prepare_total_ms;
   std::vector<BallData>().swap(balls);
   if (opt.digest) rr.digest_all = dg_all.hex();
   rr.rss_mb[5] = run_detail::rss_mb_now();
   rr.t_total_ms = ms(t_all);
+}
+
+}  // namespace run_detail
+
+// ENROBAGE TRANSACTIONNEL DE L'EPUISEMENT MEMOIRE (alerte G4 du 2 septembre).
+// `std::bad_alloc` est la SEULE exception capturee ici : elle devient un refus
+// `resource_exhausted` qui NOMME l'etage atteint et grave les RSS d'etage —
+// une donnee, la ou un abort (code 134) n'en est pas une. Toute autre
+// exception se propage exactement comme avant (fold-inject-b-exception-k3
+// termine toujours par signal : sa porte est inchangee).
+// AUCUN PREFIXE DE PAYLOAD N'EST PUBLIE : `invalidate_provisional` vide
+// digests, forets, cartes, totaux et signatures de stockage ; les seuls
+// survivants sont le statut, le message, l'etage, les chronos et les RSS
+// d'etage (diagnostic, jamais l'objet), comme sur tout autre refus.
+// CE QUE CETTE CAPTURE NE PROMET PAS : ce n'est pas une garantie anti-OOM.
+// L'OOM killer du noyau frappe hors de toute portee C++, `RLIMIT_AS` borne
+// l'espace virtuel et non le RSS, et un allocateur qui rendrait un pointeur
+// invalide au lieu de lever ne passe pas par ici.
+inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOptions& opt) {
+  RunResult rr;
+  const auto t_all = std::chrono::steady_clock::now();
+  // Le message du refus est PROVISIONNE avant tout calcul : le formater sur un
+  // tas deja epuise ne doit pas re-allouer (l'assignation depuis le tampon de
+  // pile tient alors dans la capacite reservee).
+  rr.message.reserve(256);
+  try {
+    run_detail::run_pipeline_into(in, opt, rr);
+  } catch (const std::bad_alloc&) {
+    rr.status = PipelineStatus::kResourceExhausted;
+    char buf[256];
+    std::snprintf(buf, sizeof buf,
+                  "resource_exhausted : bad_alloc a l'etage %s (rss_mb apres_generation=%.0f apres_rle=%.0f "
+                  "apres_prefiltre=%.0f apres_census=%.0f max_fold=%.0f)",
+                  run_stage_name(rr.stage_reached), rr.rss_mb[0], rr.rss_mb[1], rr.rss_mb[2], rr.rss_mb[3],
+                  rr.rss_mb[4]);
+    rr.message.clear();
+    try {
+      rr.message.assign(buf);
+    } catch (...) {
+      // Tas encore epuise : le statut et l'etage font foi, jamais un message
+      // menteur (le champ reste vide).
+    }
+    invalidate_provisional(&rr);
+    rr.t_total_ms = run_detail::ms(t_all);
+  }
   return rr;
 }
 
@@ -1077,6 +1194,11 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                "fin=%.0f (telemetrie active : lecture /proc/self/statm par K sous le verrou de publication — "
                "a desarmer ou signer pour un run de debit)\n",
                rr.rss_mb[0], rr.rss_mb[1], rr.rss_mb[2], rr.rss_mb[3], rr.rss_mb[4], rr.rss_mb[5]);
+  // Ligne ADJACENTE (la ligne rss_mb ci-dessus est gravee textuellement dans
+  // les recus, elle ne bouge pas) : curseur d'etage du run. Au succes il vaut
+  // toujours `publication` ; sur un refus, c'est l'etage que le message NOMME.
+  std::fprintf(out, "etage_atteint=%s (curseur d'etage ; un refus le nomme dans son message)\n",
+               run_stage_name(rr.stage_reached));
   for (u64 K = 1; K <= rr.kmax_eff; ++K)
     std::fprintf(
         out, "cardinalites K=%llu evenements=%llu facettes=%llu deltas=%llu attachements=%llu fusions=%llu noeuds=%llu\n",

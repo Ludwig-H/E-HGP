@@ -160,3 +160,11 @@ invalid_input | invariant_violated` ; gardes de bibliothèque avant tout
 calcul ; jamais un préfixe publié ; callbacks provisoires jusqu'au statut
 terminal. Payload `mhgp6-forests-horizontal-v1`,
 `forest_semantics=verified_events_only`, `vertical_maps=none`.
+
+`run_pipeline` enrobe le corps du pipeline et convertit un `std::bad_alloc`
+— la seule exception qu'il capture, y compris relancée depuis un worker du
+fold — en refus transactionnel `resource_exhausted` qui **nomme l'étage
+atteint** (curseur `RunResult::stage_reached`, avancé aux mêmes points que
+les `rss_mb`), sans jamais publier de préfixe de payload ; ce n'est pas une
+garantie anti-OOM (l'OOM killer reste hors de portée, `RLIMIT_AS` borne
+l'espace virtuel et non le RSS).

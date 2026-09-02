@@ -153,7 +153,16 @@ int main(int argc, char** argv) {
   }
   const RunResult rr = run_pipeline(in, opt);
   if (rr.status != PipelineStatus::kCompleteRegular) {
+    // FORMAT DU REFUS INCHANGE (ligne `REFUS <message>`), puis le DIAGNOSTIC
+    // D'ETAGE (alerte G4 du 2 septembre) : l'etage atteint et les RSS par
+    // etage, sur stderr, sans rien publier d'autre — aucun payload, aucun
+    // digest, aucune cardinalite ne sort d'un refus.
     std::fprintf(stderr, "REFUS %s\n", rr.message.c_str());
+    std::fprintf(stderr,
+                 "refus_etage=%s rss_mb apres_generation=%.0f apres_rle=%.0f apres_prefiltre=%.0f "
+                 "apres_census=%.0f max_fold=%.0f (frontiere de completion : dernier etage atteint)\n",
+                 run_stage_name(rr.stage_reached), rr.rss_mb[0], rr.rss_mb[1], rr.rss_mb[2], rr.rss_mb[3],
+                 rr.rss_mb[4]);
     return status_exit_code(rr.status);
   }
   if (opt.memory_budget_bytes != 0)
