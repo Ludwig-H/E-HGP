@@ -55,6 +55,11 @@ inline constexpr const char* kMutants[] = {
     "chord-nonstrict", "chord-skip-positive", "chord-dead-skip-positive", "cell-kill-nonstrict",
     "cell-kill-h-minus-one", "prefix-tamper-event-order", "prefix-tamper-batch-levels", "cell-locate-eps-zero",
     "fused-mask-stuck", "sweep-drop-exit-root", "sweep-nonstrict-depth",
+    // SONDES D'ABLATION du reduce (2 septembre, arbre § 5.10) : decomposer
+    // materialisation_tri_copie / post_remplissage AVANT tout palier. Chaque
+    // ablation CHANGE l'objet (tuee code 4 par la conformite) : elle ne peut
+    // ni survivre dans une porte ni exister dans un binaire produit.
+    "ablation-mat-sans-copie", "ablation-mat-sans-tris", "ablation-post-cle-factice",
 };
 
 inline std::vector<std::string>& mutant_registry() {

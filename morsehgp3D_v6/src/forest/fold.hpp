@@ -616,6 +616,17 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
   std::vector<u32>& ev_fid = fp.ev_fid;
   const bool m_attach_pre = fp.mutants[2], m_drop_nonmerge = fp.mutants[3], m_canon_root = fp.mutants[4],
              m_no_detector = fp.mutants[5];
+  // SONDES D'ABLATION (2 septembre, arbre § 5.10 : decomposer la fenetre
+  // materialisation_tri_copie AVANT d'ecrire un palier) — trois retraits
+  // isoles, chacun change l'objet (conformite code 4), constante false hors
+  // MHGP6_TESTING : (a) copie profonde scratch -> r.deltas retiree ; (b) tris
+  // des parents/nes (44 o) retires ; (c) lecture aleatoire keys[fid] du
+  // remplissage remplacee par une cle CHAUDE (copie locale de keys[0]) — le
+  // prefetch de keys[] reste arme, l'ablation n'isole que la lecture.
+  const bool abl_sans_copie = MHGP6_MUTANT("ablation-mat-sans-copie"),
+             abl_sans_tris = MHGP6_MUTANT("ablation-mat-sans-tris"),
+             abl_cle_factice = MHGP6_MUTANT("ablation-post-cle-factice");
+  const FacetKey cle_factice = keys.empty() ? FacetKey{} : keys[0];
   auto tmark = std::chrono::steady_clock::now();
   const auto mark = [&](double* out) {
     const auto now = std::chrono::steady_clock::now();
@@ -749,24 +760,29 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
       }
       return scratch[fr.post_slot];
     };
-    for (const i32 pr : pre_list) post_of(find(pr)).parents.push_back(keys[st[(size_t)pr].pre_canon]);
+    for (const i32 pr : pre_list)
+      post_of(find(pr)).parents.push_back(abl_cle_factice ? cle_factice : keys[st[(size_t)pr].pre_canon]);
     for (const u32 fid : touched) {
       const u8 bits = st[(size_t)fid].role_bits;
-      if ((bits & kAttach) && !(bits & kActive)) post_of(find((i32)fid)).born.push_back(keys[fid]);
+      if ((bits & kAttach) && !(bits & kActive))
+        post_of(find((i32)fid)).born.push_back(abl_cle_factice ? cle_factice : keys[fid]);
     }
     ptick(3);
     std::sort(post_list.begin(), post_list.end());
     for (const i32 rt : post_list) {
       ComponentDelta& cd = scratch[st[(size_t)rt].post_slot];
-      std::sort(cd.parents.begin(), cd.parents.end());
-      std::sort(cd.born.begin(), cd.born.end());
+      if (!abl_sans_tris) {
+        std::sort(cd.parents.begin(), cd.parents.end());
+        std::sort(cd.born.begin(), cd.born.end());
+      }
       if (cd.parents.size() >= 2) ++r.nodes;
       if (cd.parents.size() == 1 && cd.born.empty()) continue;  // continuation
       if (m_drop_nonmerge && cd.parents.size() < 2) continue;
       cd.batch = (u64)b;
       cd.level = evt(e0).level;
       cd.output = keys[st[(size_t)find(rt)].canon];
-      r.deltas.push_back(cd);  // copie : le deplacement (mesure) ne fait que deplacer les allocations vers le scratch
+      if (!abl_sans_copie)
+        r.deltas.push_back(cd);  // copie : le deplacement (mesure) ne fait que deplacer les allocations vers le scratch
     }
     r.batch_levels.push_back(evt(e0).level);
     for (const u32 fid : touched) st[(size_t)fid].seen = 1;

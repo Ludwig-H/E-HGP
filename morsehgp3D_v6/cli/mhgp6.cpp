@@ -1,7 +1,9 @@
 // MorseHGP3D v6 — pilote en ligne de commande du pipeline (src/pipeline/run.hpp).
 // Codes : 0 complete_regular, 2 refus transactionnel (avant OU pendant le
 // calcul — jamais un prefixe publie), 3 invariant viole.
-// Binaire PRODUIT : compile sans MHGP6_TESTING — aucun mutant n'y existe.
+// Binaire PRODUIT : compile sans MHGP6_TESTING — aucun mutant n'y existe
+// (--inject= y est un argument inconnu, code 2 : porte mhgp6_profile_refuse_inject) ;
+// la cible de sonde mhgp6_profile_sonde (MHGP6_TESTING) accepte --inject=ablation-*.
 // PARSING EXACT DE TOUTES LES OPTIONS (docs/PROVENANCE.md, dette v5 fermee) :
 // suffixe, vide, signe explicite ou debordement ⟹ code 2, jamais un atoi
 // tolerant qui selectionnerait silencieusement un autre regime.
@@ -99,6 +101,12 @@ int main(int argc, char** argv) {
       opt.e3_mode = E3G16Mode::kG16Leve;
     } else if (arg == "--digest") {
       opt.digest = true;
+#ifdef MHGP6_TESTING
+    } else if (const char* s = val("--inject=")) {
+      // Cible de SONDE seulement (mhgp6_profile_sonde) : ablations du reduce ;
+      // nom inconnu => refus 2. Le binaire produit ne connait pas l'option.
+      ok = mutants_enable(s) && ok;
+#endif
     } else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       ok = false;

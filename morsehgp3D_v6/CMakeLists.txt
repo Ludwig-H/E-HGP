@@ -271,7 +271,8 @@ foreach(mut wspd-drop-rect census-nonstrict genfilter-nonstrict depth-threshold-
             attach-prebatch drop-nonmerge dense-pointid canonical-is-uf-root
             q3-level-4g q4-center-parity q4-eq-sign q4-i64-drop-factor
             q4-i64-pair-min witness-no-lane-mask par-drop-shard
-            par-drop-ball-chunk fold-inject-a-failure-k2)
+            par-drop-ball-chunk fold-inject-a-failure-k2
+            ablation-mat-sans-copie ablation-mat-sans-tris ablation-post-cle-factice)
   mhgp6_gate(mhgp6_mutant_${mut} 4 mhgp6_conformity
              ARGS --family=eight_clusters --n=400 --threads=4 --inject=${mut}
                   --expected=${REFS}/eight_clusters_400.txt)
@@ -336,6 +337,17 @@ target_compile_definitions(mhgp6_profile PRIVATE MHGP6_PROFILE_REDUCE=1)
 # garde de compilation seul ne couvre pas cette branche).
 mhgp6_product_executable(mhgp6_profile_liveness cli/mhgp6.cpp)
 target_compile_definitions(mhgp6_profile_liveness PRIVATE MHGP6_PROFILE_REDUCE=1 MHGP6_PROFILE_LIVENESS=1)
+# SONDE D'ABLATION du reduce (2 septembre, arbre § 5.10) : binaire de PROFIL
+# sous MHGP6_TESTING, accepte --inject=ablation-* (copie profonde retiree,
+# tris retires, cle factice au remplissage). Chaque ablation change l'objet
+# et est tuee (code 4) dans la boucle des mutants ; le binaire produit
+# refuse --inject= (code 2). Jamais un mur : une attribution decomposee.
+mhgp6_executable(mhgp6_profile_sonde cli/mhgp6.cpp)
+target_compile_definitions(mhgp6_profile_sonde PRIVATE MHGP6_PROFILE_REDUCE=1)
+mhgp6_gate(mhgp6_profile_refuse_inject 2 mhgp6_profile
+           ARGS --family=uniform --n=400 --inject=ablation-mat-sans-copie)
+mhgp6_gate(mhgp6_profile_sonde_refuse_inconnu 2 mhgp6_profile_sonde
+           ARGS --family=uniform --n=400 --inject=ablation-inconnue)
 add_test(NAME mhgp6_profil_identite
          COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=python3
                  "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/profil_gate.py $<TARGET_FILE:mhgp6> $<TARGET_FILE:mhgp6_profile> $<TARGET_FILE:mhgp6_profile_liveness>"
