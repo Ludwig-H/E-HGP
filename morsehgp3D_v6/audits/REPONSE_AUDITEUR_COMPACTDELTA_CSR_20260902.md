@@ -13,8 +13,8 @@ Pièces examinées :
 `NOTE_CLAUDE_SONDE_ABLATION_REDUCE_20260902.md`, le reçu
 `receipts/sonde_ablation_reduce_20260902/`, son complément
 `receipts/sonde_ablation_reduce_20260902b/`, le générateur et sa porte au pin
-`d6888093`, ainsi que le code courant du fold, du digest, du rendu et de la
-publication.
+`d6888093`, puis `NOTE_CLAUDE_PIN_KEYCSR_20260902.md` et le code exact du
+fold, du digest, du rendu et de la publication au pin `8afd1057`.
 
 ## Verdict opérationnel
 
@@ -247,16 +247,17 @@ Deux dents courtes précèdent le statut de porte permanente :
   position 2. Le mutant qui regroupe les six positions 1 avant les six
   positions 2 passe encore les scènes courantes alors qu'il détruit
   l'appariement temporel ;
-- enregistrer le juge dans CMake/CTest, en exécution normale **et** sous
-  `python3 -O`. Son succès direct est une preuve locale utile, pas encore une
-  porte de la suite canonique.
+- le pin `8afd1057` enregistre le juge dans CMake/CTest en exécution normale.
+  Ajouter sa variante `python3 -O` avant de qualifier cette porte de
+  canonique ; son succès direct optimisé est déjà rejoué.
 
 Le fichier produit est volontairement un squelette : `binaire=profil|release`
 reste symbolique, `commande=` omet le chemin de la copie, le callback est
 `A_CONFIRMER`, `coord=defaut` n'est pas une coordonnée numérique et
-l'affinité est déléguée au futur lanceur. Au pin reçu, `--callback-temoin`,
-`reduce_v3` et `--layout` ne sont d'ailleurs pas encore acceptés par les
-binaires : la porte valide donc ici du texte, pas un argv exécutable. Avant le
+l'affinité est déléguée au futur lanceur. Au commit `d6888093`,
+`--callback-temoin`, `reduce_v3` et `--layout` n'étaient d'ailleurs pas encore
+acceptés par les binaires : la porte valide donc ici du texte, pas un argv
+exécutable. Avant le
 premier run, soit ce plan est enrichi, soit un **manifeste d'exécution scellé
 séparé** lie son SHA-256 au commit source et à l'état du worktree, à la chaîne
 de construction, aux chemins et SHA-256 des copies profil/Release, aux
@@ -275,10 +276,10 @@ le verrou demandait un mapping défini et rejoué, sans attribuer cette
 acceptation aux auditeurs. Le qualifier comme choix déclaré du générateur
 suffit.
 
-Cette réception n'ouvre toujours aucune campagne : le pin sémantique, le
-callback et `reduce_v3`, les identités d'exécution, les deux coutures actives
-de la sonde et le rejeu des portes sur le commit instrumenté exact restent les
-préconditions utiles.
+Le pin sémantique `8afd1057` ferme depuis la première de ces préconditions.
+Cette réception n'ouvre toujours aucune campagne : le callback et `reduce_v3`,
+les identités d'exécution, la liaison résiduelle de la sonde et le rejeu des
+portes sur le commit instrumenté exact restent les préconditions utiles.
 
 ## Q1 — même objet, nouvelle représentation explicite
 
@@ -349,8 +350,9 @@ indépendant du lecteur de digest, avec `first_divergence`, qui vérifie :
 La matrice fils `{1,T}` × inflight `{1,2}` × join `{0,1}`, les digests
 bit-identiques et `mhgp6_profil_identite` restent de bonnes portes
 secondaires. Un rejeu indépendant « catalogue + deltas vers partition » est
-souhaitable comme seconde autorité, au lieu de faire confiance à deux
-lecteurs partageant le même bug.
+souhaitable comme second vérificateur indépendant du fold, au lieu de faire
+confiance à deux lecteurs partageant le même bug ; il ne devient pas pour
+autant un oracle mathématique indépendant de la vue produit.
 
 Les mutants proposés sont conservés. Ajouter au minimum :
 
@@ -377,18 +379,22 @@ Enfin, le rendu courant n'est pas un consommateur de `r.deltas` :
 raccorder le rendu au CSR ni lui attribuer un coût déplacé sans nouveau
 contrat séparé.
 
-## Retour constructif sur le prototype KeyCSR non épinglé
+## Réception du pin sémantique KeyCSR `8afd1057`
 
-Le WIP suit bien le dessin proposé : route `classic|csr` explicite, stockage
-versionné, arènes possédées, vues reconstruites, absence de repli, digest par
-l'accesseur commun, comparateur `first_divergence` séparé et rejeu de la
-partition. Les fixtures born-only, parents-only, continuation, multi-racines,
-forêt vide, copie post-callback, offsets, capacités et mutants ciblent les
-bonnes coutures. Après recompilation Release du snapshot courant, les 39
-portes initiales passent ; une sélection élargie de 57 portes non-`scale`, en
-excluant la longue matrice pipeline (fixtures, offsets, débordement, copie,
-conformité, mutants et CLI), passe aussi 57/57 en 67,09 s. C'est une base
-sémantique solide, pas un prototype à reprendre.
+**GO pour le pin sémantique, sans GO de performance ni de campagne.** Le pin
+conserve les deux routes `classic|csr`, le stockage versionné, les arènes
+possédées, les vues reconstruites et l'absence de repli. Son comparateur tiers
+lit les deux stockages à cru ; le rejeu catalogue+deltas apporte un second
+vérificateur indépendant du fold, mais dépendant de la vue produit — pas une
+seconde autorité mathématique. Les fixtures couvrent born-only, parents-only, continuation,
+multi-racines, forêt vide, copie post-callback, offsets et capacités.
+
+La matrice pipeline parcourt 112 cellules, 68 ordres, 818 069 deltas et
+6 395 137 clés sans désaccord. Claude rapporte 185/185 portes en 638 s et a
+rejoué la porte sonde sur son harnais final. Les rejeux indépendants ajoutent
+49 portes ciblées CSR/conformité/profil, la porte du plan sous `python3 -O`,
+puis ASan+UBSan sur fixtures, offsets, copie de 97 236 deltas et débordement,
+sans diagnostic. Aucun P0 ni défaut sémantique KeyCSR n'est trouvé.
 
 Une première contre-lecture avait soupçonné `FacetKeyRange::size()` parce que
 la plage vide est `{nullptr, nullptr}` et que la fonction calcule `e - b`.
@@ -402,28 +408,19 @@ passent aussi sans diagnostic, avec hashes des sources stables. Il n'y a donc
 ici ni UB ni correctif sémantique à demander à Claude ; une garde explicite ne
 serait qu'un choix de lisibilité.
 
-Une couture d'API/ownership reste à fermer avant le pin. `delta(i)` est bien
-qualifié `const&` et sa surcharge `const&&` est supprimée, mais son enveloppe
-`for_each_delta(F&&) const` reste appelable sur un `ForestResult` temporaire.
-Un callback qui conserve la `ComponentDeltaView` observe ensuite un
-heap-use-after-free sous ASan lorsque l'arène du temporaire est détruite. La
-correction minimale est symétrique à l'accesseur : qualifier la boucle
-`const&`, supprimer sa surcharge `const&&`, puis ajouter une dent de
-compilation avec un concept dépendant qui exige que l'appel sur rvalue soit
-ill-formé. Aucun autre wrapper de vue de `src/` ou `cli/` ne contourne la
-durée de vie.
+La couture d'API/ownership est fermée : `delta(i)` et `for_each_delta` sont
+qualifiés `const&`, leurs surcharges `const&&` sont supprimées et deux concepts
+dépendants imposent le rejet de compilation sur temporaire tout en conservant
+l'appel sur lvalue. Aucun autre wrapper de vue de `src/` ou `cli/` ne
+contourne cette durée de vie.
 
-Les réserves initiales de `delta_meta` et des offsets sont par ailleurs hors
-du `try` qui capture le mutant `csr-inject-bad-alloc`. Le contrat écrit et la
-dent courante portent précisément sur un **append d'arène** après une écriture
-partielle ; ils ne prouvent pas la capture de toute allocation du fold. Deux
-choix simples sont recevables : englober aussi l'initialisation CSR et tester
-son échec, ou resserrer les commentaires au site d'append effectivement
-couvert. Ce point de portée ne bloque pas l'égalité d'objet ; il ne doit pas
-être transformé en promesse générale d'interception de tout OOM.
-
-La réception définitive attend donc ce petit verrou de durée de vie, un commit
-stable et le rejeu des portes enregistrées, pas une reprise de conception.
+Les réserves initiales de `delta_meta` et des offsets restent hors du `try` de
+`csr-inject-bad-alloc`. Claude a retenu le choix recevable : le contrat est
+désormais explicitement resserré dans le code et sa note à la transaction
+d'append. Les documents concordent avec cette portée :
+`docs/ARCHITECTURE.md` parle d'un `bad_alloc` d'arène et la ligne KeyCSR de
+`docs/PLAN_DE_TESTS.md` nomme le mutant exact. Préciser éventuellement
+« pendant `csr_emit` » serait un P2 éditorial, pas une condition au pin.
 
 Un durcissement P2 utile concerne seulement la preuve transactionnelle : le
 helper de test `csr_payload_empty` et le nettoyage CSR ignorent encore
@@ -433,37 +430,35 @@ classique parasite tout en passant les contrôles « payload vide ». Ajouter
 ferme ce faux vert ; aucun chemin nominal courant n'est pour autant démontré
 fautif.
 
-Un second point concernait seulement le futur reçu de performance :
-`storage_allocations` était initialisé à 4 alors que trois `reserve` sont
-appelés, et une forêt vide n'observe en pratique que les deux allocations
-d'offsets (`reserve(0)` ne croît pas). Le WIP courant part désormais de zéro et
-incrémente sur chaque changement réel de `capacity()`, réserves et croissances
-d'arènes comprises. C'est le correctif demandé ; il reste seulement à le
-recevoir sur un pin. L'instrumentation séparée du scratch appartient au futur
-protocole de mesure, pas à l'égalité d'objet ni au prototype actuel.
+Un second point concernait seulement le futur reçu de performance : le pin
+part de zéro, incrémente chaque changement réel de `capacity()` et nomme
+correctement le résultat `csr_capacity_growths`. L'instrumentation séparée du
+scratch appartient au futur protocole de mesure, pas à l'égalité d'objet.
 
 Trois précisions bornent cette télémétrie avant tout reçu de performance :
 
-- `allocations=0` sous `classic` signifie actuellement « non instrumenté »,
-  tandis que la valeur CSR compte les croissances de ses cinq vecteurs. Ne pas
-  comparer ces nombres ; renommer le champ en `csr_capacity_growths` ou compter
-  les deux layouts symétriquement ;
+- `csr_capacity_growths=0` sous `classic` signifie « non instrumenté », tandis
+  que la valeur CSR compte les croissances de ses cinq vecteurs. Ne pas
+  comparer ces nombres avant une comptabilité symétrique ;
 - `octets_possedes exact=0` du classique est une borne inférieure, car les
   capacités des vecteurs internes ne sont pas parcourues. Le scratch commun
   manque aussi. Un ratio mémoire attend donc les capacités internes exactes
   des deux bras ;
-- `offset_dernier_parents` et `offset_dernier_nes` sont imprimés depuis la
-  taille des arènes, pas lus depuis `parents_off.back()` et `born_off.back()`.
-  L'invariant validé les rend égaux sur un résultat sain, mais le champ ne
-  constitue pas un témoin indépendant : lire la valeur réelle ou le supprimer.
+- `offset_dernier_parents` et `offset_dernier_nes` sont maintenant lus depuis
+  `parents_off.back()` et `born_off.back()` : ce témoin est reçu.
 
-Enfin, la porte de profil signe aujourd'hui le `layout` **demandé**. Elle
-accepte encore une sortie synthétique `layout=csr` dont les kinds construits
-ont tous été remplacés par `classic`. Les portes sémantiques/CLI empêchent le
-repli dans le prototype, mais le futur validateur de mesure doit aussi exiger
-une ligne de tête unique avec kind construit, zéro fallback et exactement un
-`stockage_foret` cohérent par K. Ces quatre points ne retardent pas le pin
-sémantique ; ils empêchent seulement un reçu de mesure ambigu.
+Enfin, la porte de profil exige maintenant une ligne de tête unique avec kind
+**construit**, zéro fallback et un `stockage_foret` cohérent par K. La
+contre-fixture demande CSR tout en annonçant des kinds classiques et est bien
+tuée. Le futur validateur de mesure pourra reprendre cette dent au lieu de la
+réinventer.
+
+Le générateur `d6888093` est maintenant inscrit dans CTest. Ses dents
+restantes — doublons et clés d'en-tête inconnues, orientation des warm-ups,
+adjacence brute, rôles décisionnels et commandes résolues — bornent seulement
+la future campagne KeyCSR. Elles ne suspendent pas ce pin sémantique. La
+mention « scale8000 3/3 » doit enfin nommer les trois tests ou leur regex, car
+le label `scale8000` courant en contient onze.
 
 ## Q2 — protocole de mesure à graver à la place
 

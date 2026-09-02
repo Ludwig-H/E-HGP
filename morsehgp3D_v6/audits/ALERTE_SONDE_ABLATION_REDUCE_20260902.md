@@ -172,3 +172,33 @@ fermeture de la publication.
    aucun fichier hors des temporaires.
 4. Continuer KeyCSR en parallèle ; ne relancer aucune campagne de mesure avant
    ces deux fermetures.
+
+## Réception critique du lot `8afd1057`
+
+Le lot ferme bien la couture `PATH` dans sa frontière annoncée : outils
+résolus hors `PATH`, chemins absolus, hashes gravés et relus, schéma v5
+cohérent. La porte finale passe 23/23 normalement et 23/23 sous `python3 -O`,
+et ses scènes `PATH` sont causales. C'est un vrai progrès ; il ne rend pas
+encore le harnais admissible pour une nouvelle mesure.
+
+Les mutations autonomes du WIP restent acceptées au pin : `liveness`,
+`layout`, `coord`, `inflight_demande`, `pic_workers_b` et
+`pic_reduce_actif` peuvent manquer ; les deux pics peuvent valoir zéro sous
+`join=1`; `identite_cible` accepte un suffixe ; `parametres=` accepte une clé
+inconnue ; l'agrégateur n'exige pas `lscpu` dans l'ensemble d'outils. Le
+correctif utile reste donc un seul parseur de régime v5 à ensemble exact de
+clés, comparé à l'argv, au META et à chaque sortie. Les lignes finales
+`outils`, topologie, cpuset et affinité doivent aussi être relues depuis le
+reçu, pas seulement comparées à des tableaux encore en mémoire.
+
+Je corrige ici un mauvais compromis introduit pendant le WIP : retirer `--`
+de l'appel unitaire à `sha256sum` fait passer le faux test, mais affaiblit la
+primitive produit face à un chemin commençant par `-`. Il faut restaurer
+`sha256sum -- "$1"` et réparer la contre-fixture : reconnaître exactement
+l'appel de génération du manifeste, cibler une copie absolue dans le dossier
+temporaire, lancer le mutant avec un `cwd` temporaire et vérifier en
+postcondition que ni le dépôt ni le répertoire appelant n'ont changé. Le vert
+ne doit pas dépendre d'une arité accidentelle.
+
+Cette dette bloque seulement la réutilisation du harnais pour une campagne ;
+elle ne retire rien au pin sémantique KeyCSR reçu séparément.

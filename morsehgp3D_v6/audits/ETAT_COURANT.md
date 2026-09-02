@@ -13,9 +13,11 @@ revalidateur, puis `1cb60655` ferme les cinq faux positifs historiques du
 harnais de sonde. `fc8e28b1` ferme ensuite ses coutures de publication et
 `32da1550` ajoute la réagrégation après scellement. `4ef96717` livre le § 5.22
 de reprise/revalidation, repris par `c2d2ac69` sur ses quatre mutants
-résiduels. Hors protocole,
-profils, audits et reçus, le moteur `src/`, `cli/` et `CMakeLists.txt` exécuté
-à `c8f69673` reste identique à celui de la première série C `b97f20ea`.
+résiduels. `8afd1057` épingle ensuite le palier sémantique KeyCSR. Le moteur
+effectivement exécuté lors de la seconde session G4 reste celui de
+`c8f69673`, identique à la première série C `b97f20ea` hors protocoles,
+profils, audits et reçus ; le moteur courant `8afd1057` n'hérite d'aucun
+résultat G4.
 Autorités techniques : `6d755804` pour le
 prototype E3/G16, `cd49a390` pour les callbacks, `d98f4729` pour le protocole
 et la source réellement exécutée sur G4, `94c74155` pour l'autorisation
@@ -41,7 +43,8 @@ premier harnais de sonde, `fc8e28b1` puis `32da1550` pour son scellement et sa
 réagrégation renforcés,
 `4ef96717` puis `c2d2ac69` pour le lifecycle § 5.22, `38281dc7` pour la réponse
 architecturale KeyCSR, `53610911` pour sa pré-inscription, `c5b52c9c` pour son
-durcissement et `d6888093` pour son générateur de plan déterministe,
+durcissement, `d6888093` pour son générateur de plan déterministe et
+`8afd1057` pour son pin sémantique,
 `9c5517c9` pour la demande G4 historique, `e8289d9a` pour son profil
 historique, `320299df` pour le reçu de
 réplication et `8ed2dea6` pour le reçu de confirmation contre-audité
@@ -75,8 +78,9 @@ ci-dessous. Les notes Claude ne priment pas sur le présent verdict.
 | reprise persistante `c2d2ac69` / audit `b9ea4659` | D8=67, D11 causal, garde non fatale, promotion liée à la tentative et quatre mutants de `4ef96717` corrigés ; une conversion `GEN_EPOCH` reste faillible entre connaissance de la génération et armement du funnel ; aucun nouveau GO GCP |
 | reçu G4 tests K10/K5 `e66cd978` | paquet intègre : 278/278 hashes, 84/84 statuts code 0 et terminés, pins reconstruits, sept résumés identiques, arrêt exact à la première tentative ; égalités de préfixe observées sur cardinalités/digests ; profil et campagne strictement non décisionnels, accusé consommé |
 | porte de préfixe `2aaa4a53` | listes K exactes, appariement par clé complète et jumeau K10 obligatoire reçus ; les pins K5 de v1 restent post hoc, tandis que v2 porte ses huit fixtures avant toute future exécution |
-| sonde équilibrée `b79e29a5` / harnais `32da1550` | reçu concret intègre et recalculable ; réagrégation après scellement, statut exact et `profil_kind` durci reçus, 21/21 scènes normales et sous `-O`, CTest 2/2 ; un faux `sha256sum` du `PATH` peut encore corrompre après le dernier contrôle, et la liaison de régime reste partielle dans argv/META, `liveness` et l'identité préfixe ; seule une nouvelle mesure réutilisable attend ces fermetures |
-| réponse KeyCSR `38281dc7` / pré-inscription durcie `c5b52c9c` / générateur `d6888093` / prototype WIP | architecture conforme au GO : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; 57/57 non-`scale` hors longue matrice, matrice `uniform/400` et raccord runtime verts ; une vue peut encore échapper de `for_each_delta` appelé sur un temporaire et devient pendante, verrou `const&`/`const&&` à fermer avant le pin ; générateur d'ordonnancement reçu, avec 210/280 runs et portes directes normales/`-O` vertes, mais sa grammaire doit refuser doublons/inconnues, signer les échauffements, vérifier l'adjacence des bras et nommer le rôle des cellules avant inscription CTest ; plan exécutable encore fermé par les identités, coordonnées, placeholders, frontières de mesure, rejeu au commit source instrumenté exact et coutures actives de la sonde |
+| sonde équilibrée `b79e29a5` / harnais `8afd1057` | reçu concret historique intègre et recalculable ; le harnais courant ferme la commande critique héritée du `PATH`, atteste outils/topologie et passe 23 scènes normales/optimisées ; `liveness`, layout, inflight/pics, coordonnée, clés inconnues, `lscpu` et identité stricte restent permissifs ; restaurer aussi l'option terminale `--` de `sha256sum` en corrigeant le faux test ; seule une nouvelle mesure réutilisable attend ces dents |
+| KeyCSR `8afd1057` / pré-inscription durcie `c5b52c9c` / générateur `d6888093` | pin sémantique reçu : deux routes sans repli, arènes possédées, comparateur tiers et rejeu ; rvalue refusée à la compilation, kind construit et vrais offsets signés ; matrice 112 cellules, 818 069 deltas et 6 395 137 clés sans désaccord, 185/185 portes rapportées, sonde finale et sanitizers ciblés verts ; aucun GO performance ; générateur reçu comme calendrier seulement, sa grammaire/adjacence, sa variante CTest `-O`, les identités et les frontières `reduce_v3` restent pré-campagne |
+| profil d'échelle G4 `g4_echelle_v1` WIP | **NO START** : fichier non suivi et absent du manifeste ; les six specs `famille:n:6` sont refusées avant tout run par la chaîne frontière v1 câblée sur `smax=11` ; une correction partielle créerait des risques de mauvais parse et de collision K5/K10 ; budget nominal 23 140 s pour 23 995 s utiles ; gardes SPOT/STOP conformes mais aucun GO courant |
 | pool d'exécuteurs C1 `4a85c13d` | reçu comme brique hôte : confinement fatal côté worker, passage file→actif sous verrou et quatre dents sélectives ; aucun raccord produit/CUDA |
 | témoin arithmétique série C `4a85c13d` | reçu comme harnais C++ hôte partiel avec trois dents et contre-fixture composée ; aucun `nvcc`, device, `BallKey::power`, `AxisBounds` ou division plancher C3 |
 | protocole GCP série C | départ refusé fail-closed puis arrêté ; perte de superviseur arrêtée sans reçu ; deux relances distinctes reçues et arrêtées sur leurs générations exactes, la plus récente `2026-09-01T18:34:33.420-07:00` ; aucun GO courant |
@@ -124,47 +128,32 @@ registre `targeted_stopped`, reçu et témoin présents. Déplacer le calcul
 tentative. Le reçu G4 déjà arrêté n'est pas affecté et aucun GO GCP n'est
 ouvert.
 
-Au pin `32da1550`, la sonde reçoit sa réagrégation v4 après scellement : le
-résumé transitoirement forgé est maintenant refusé, le statut est exact, le
-profil kind/join est durci et la compatibilité v2 reste explicitement bornée.
-Les 21 scènes passent normalement et sous `python3 -O`, puis les deux CTests
-ciblés passent. Une frontière de publication demeure toutefois ouverte sous
-le modèle de `PATH` hostile déjà exercé par la porte : un faux `sha256sum`
-peut déléguer la seconde vérification au vrai programme, muter ensuite META et
-rendre 0 ; le reçu est publié alors qu'un contrôle système ultérieur rend 1.
-Il faut invoquer une chaîne critique résolue et explicitement fiable, ou
-réunir contrôle final et renommage dans le même scelleur approuvé.
+Au pin `8afd1057`, la sonde résout ses outils critiques hors du `PATH`
+ordinaire, les invoque par chemins absolus, les hache et les relit avant
+publication. L'incident exact du faux `sha256sum` est fermé ; la porte finale
+passe 23 scènes et ne laisse aucun parasite. La famille, l'argv, les CPU,
+threads, seed, `s/smax`, inflight et join sont liés. La promesse « champ à
+champ » reste néanmoins trop large : l'agrégateur accepte encore la disparition
+de `liveness`, du layout, de l'inflight et des pics, des pics nuls, une
+coordonnée absente, une clé de régime inconnue, `lscpu` absent de l'ensemble
+d'outils et une identité suffixée. Fermer ce schéma avant une nouvelle mesure.
+Le retrait de `--` dans l'appel unitaire à `sha256sum` doit être annulé ; c'est
+le faux test qui doit reconnaître l'appel exact au manifeste et rester confiné
+dans son temporaire. Cela ne remet pas en cause le reçu historique.
 
-La liaison de régime reste elle aussi partielle : argv et META peuvent encore
-annoncer `fold_join=0`, `liveness` peut disparaître et l'identité de cible
-accepte un suffixe. Les champs inflight/pics et famille suivent la même
-couture. Parser l'objet de régime une fois, reconstruire la commande
-canonique, exiger `liveness` et séparer identité et glose suffit ; la
-revalidation autonome de l'interpréteur est un P2. Le prototype sémantique
-KeyCSR peut avancer indépendamment ; seule une nouvelle mesure réutilisant ce
-harnais attend ces dents.
-
-Le prototype KeyCSR non épinglé est architecturalement proche de la cible :
-deux routes signées sans repli, arènes possédées, vue reconstruite, comparateur
-tiers, rejeu et refus transactionnels. Les 57 portes locales non-`scale` hors
-longue matrice et la matrice `uniform/400` passent en Release. Une alerte sur
-`FacetKeyRange::size()` est retirée : C++20 définit explicitement la
-soustraction de deux pointeurs nuls à zéro, et les essais GCC/Clang sous
-ASan/UBSan et sanitizers de pointeurs passent. Le WIP a depuis ajouté une garde
-explicite sur la plage vide et compte les changements réels de `capacity()` au
-lieu d'initialiser une constante. Une couture de durée de vie reste toutefois
-causale : `for_each_delta` n'est pas ref-qualifié et peut être appelé sur un
-temporaire ; un callback qui conserve sa vue déclenche ensuite un
-heap-use-after-free sous ASan. Qualifier la boucle `const&`, supprimer
-`const&&` et garder un rejet de compilation suffit avant le pin. Les réserves
-CSR initiales hors du `try` sont un durcissement optionnel, car le contrat
-actuel borne explicitement sa capture au `bad_alloc` d'append d'arène. Le
-scratch non instrumenté attend seulement le futur reçu de performance. Le
-compteur du classique vaut encore zéro faute d'instrumentation, ses octets
-sont une borne inférieure, les derniers offsets publiés sont synthétisés
-depuis les tailles d'arènes et la porte profil ne relit pas le kind construit.
-Ces points bornent un futur comparatif mémoire/performance ; ils ne remettent
-pas en cause l'égalité d'objet.
+Le pin sémantique KeyCSR `8afd1057` est reçu. Il porte deux routes signées sans
+repli, arènes possédées, vue reconstruite, comparateur tiers, rejeu et refus
+transactionnels. `for_each_delta` est maintenant ref-qualifié avec rejet de
+compilation sur rvalue. Le kind construit et les vrais derniers offsets sont
+signés ; `csr_capacity_growths` est correctement déclaré unilatéral et les
+octets classiques restent explicitement une borne inférieure. La matrice
+pipeline et les sanitizers ciblés sont verts ; Claude rapporte 185/185 portes
+et a rejoué la sonde finale sur son harnais exact. Code, architecture et plan
+de tests bornent correctement le `bad_alloc` capturé à l'arène/au mutant de
+`csr_emit` ; aucune promesse générale d'interception OOM n'est reçue. Le
+helper `csr_payload_empty` et le nettoyage
+pourraient encore inclure `r.deltas` comme dent P2 contre une future pollution
+croisée ; aucun chemin nominal courant n'est démontré fautif.
 
 La pré-inscription `53610911` reçoit l'unanimité inclusive à `0,55`, les deux
 tailles décisionnelles et les six blocs AB/BA sans remplacement. Le profil
@@ -183,21 +172,31 @@ classique/bilatéral non attribué restent inconclusifs. Les capacités
 classiques sont cumulées symétriquement ou mesurées hors de tout mur
 décisionnel. L'instrumentation peut avancer ; aucune campagne ne part avant
 le rejeu sémantique sur son commit source exact, le scellement des deux
-exécutables et les deux coutures actives de la sonde `32da1550`.
+exécutables et la fermeture de la liaison résiduelle de la sonde.
 
 Le générateur `d6888093` ferme correctement le calendrier déterministe de
 cette pré-inscription : graine et PRNG rejoués, flux unique, cinq strates par
 cellule, deux échauffements et six blocs équilibrés ; les plans sans et avec
 extension comptent 210 et 280 runs. Sa porte directe passe normalement et
 sous `python3 -O`. Il est reçu comme générateur d'ordonnancement seulement.
-Avant son inscription CTest, le juge doit refuser clés dupliquées/inconnues,
-vérifier l'orientation `AB` des échauffements et l'adjacence brute des deux
-bras. Le plan ou son manifeste doit aussi nommer le rôle décisionnel de chaque
-cellule et l'agrégateur doit l'exiger. Avant campagne, un manifeste scellé doit
-encore lier le plan aux copies exactes, à
+`8afd1057` inscrit sa variante normale dans CTest ; la variante `-O` reste à
+enregistrer. Avant de qualifier la porte de canonique, le juge doit refuser
+clés dupliquées/inconnues, vérifier l'orientation `AB` des échauffements et
+l'adjacence brute des deux bras. Le plan ou son manifeste doit aussi nommer le
+rôle décisionnel de chaque cellule et l'agrégateur doit l'exiger. Avant
+campagne, un manifeste scellé doit encore lier le plan aux copies exactes, à
 la chaîne de construction, aux commandes complètes, au callback résolu, aux
 coordonnées et à l'affinité attestée. Aucun résultat de performance n'existe à
 ce stade.
+
+Le profil `g4_echelle_v1` reste **NO START**. Il est non suivi et absent des
+inventaires scellés ; sa grammaire `famille:n:6` est refusée avant tout run
+par une frontière v1 entièrement câblée sur `smax=11`. Un plan v2 doit porter
+`smax` et le layout choisi jusqu'au nom, statut, argv, validateur et résumé,
+avec compatibilité v1 et contre-fixtures de collision. Son estimateur vaut
+23 140 s pour 23 995 s utiles, marge trop mince pour promettre la complétude,
+et son commentaire répartit mal frontières et pilotes. Les gardes SPOT/STOP
+ne sont pas en cause ; aucun GO GCP n'est ouvert.
 
 Le checkpoint mathématique reste reçu : coefficient 4 sur les deux covers q4,
 contre-fixture causale, digest post-préfiltre séparé et différentiel historique
@@ -713,22 +712,24 @@ Ordre recommandé à Claude :
 
 1. fermer la fenêtre `GEN_EPOCH` de `c2d2ac69`, puis rejouer le lifecycle
    complet sur un snapshot stable, entièrement en local ;
-2. borner la frontière des outils critiques du harnais, puis fermer sa liaison
-   de régime (argv/META, `liveness`, famille, paramètres de profil et identité
-   exacte) avant sa prochaine mesure ;
-3. fermer l'appel rvalue de `for_each_delta`, puis épingler le prototype
-   KeyCSR avec son comparateur, son rejeu et sa matrice déjà verts ;
-   instrumenter le scratch seulement avant toute mesure ;
-4. corriger `GRAND_LIVRE.md`, puis aligner `ARCHITECTURE.md`, `PROVENANCE.md`
+2. fermer le schéma exact du harnais (argv/META, `liveness`, layout,
+   inflight/pics, coordonnée, `lscpu`, identité) et restaurer
+   `sha256sum --` avec une contre-fixture hermétique avant sa prochaine mesure ;
+3. **achevé à `8afd1057`** : recevoir le pin sémantique KeyCSR ; ajouter la
+   dent P2 `r.deltas` au prochain petit lot, sans rouvrir l'architecture ;
+4. raccorder `g4_echelle_v1` à un `frontier_plan=v2` qui porte `smax` et le
+   layout choisi jusqu'au validateur, corriger son budget et rejouer les trois
+   selftests avant tout nouveau départ G4 ;
+5. corriger `GRAND_LIVRE.md`, puis aligner `ARCHITECTURE.md`, `PROVENANCE.md`
    et `PLAN_DE_TESTS.md` au prochain checkpoint stable ;
-5. enrichir seulement C1–C4 dans `MATHEMATIQUES.md` et remplacer l'`assert`
+6. enrichir seulement C1–C4 dans `MATHEMATIQUES.md` et remplacer l'`assert`
    Python opportunément : ce microcorrectif P2 ne bloque aucun résultat ;
-6. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
+7. geler le cœur de confirmation déjà acquis et lier ses dérivés sans
    re-régler la règle ;
-7. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
+8. réparer les supports, compteurs et planchers des bras E3/G16, puis fermer
    l'oracle et la preuve G16 avant toute nouvelle mesure ;
-8. fermer callbacks/exceptions et leurs fixtures réellement concurrentes ;
-9. ne rouvrir une mesure d'échelle ou G4 qu'avec une question décisionnelle,
+9. fermer callbacks/exceptions et leurs fixtures réellement concurrentes ;
+10. ne rouvrir une mesure d'échelle ou G4 qu'avec une question décisionnelle,
    un nouveau pin exact et un budget couvrant les résidences revendiquées.
 
 GCP non utilisé par le présent audit.

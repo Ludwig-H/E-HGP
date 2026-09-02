@@ -22,7 +22,8 @@ des corrections, ils ne certifient rien.
   hôte `4a85c13d` (C1, garde 2E et témoin arithmétique partiel), profil
   `1069bc20`, série C locale `cd606257`, reprise `c8f69673` et reçu G4 tests
   terminal `e66cd978`, durcissement local `2aaa4a53`, sonde équilibrée
-  `b79e29a5`, reprise/revalidation `c2d2ac69` et harnais de sonde `32da1550`.
+  `b79e29a5`, reprise/revalidation `c2d2ac69`, harnais de sonde et pin
+  sémantique KeyCSR `8afd1057`.
   Il prime sur toute réponse historique ; aucun GO GCP n'est actuellement
   ouvert.
 - [`REPONSE_AUDITEURS_MULTICPU_V6_20260901.md`](REPONSE_AUDITEURS_MULTICPU_V6_20260901.md) :
@@ -31,28 +32,28 @@ des corrections, ils ne certifient rien.
   et réceptions critiques des reçus série C au § 5.17, du durcissement au
   § 5.19, de la reprise et du reçu tests au § 5.20, puis du lot local et de la
   sonde équilibrée au § 5.21. Les pins plus récents sont reçus et bornés
-  dans les deux audits dédiés ci-dessous et dans l'état courant.
+  dans les audits dédiés ci-dessous et dans l'état courant.
 - [`REPONSE_AUDITEUR_COMPACTDELTA_CSR_20260902.md`](REPONSE_AUDITEUR_COMPACTDELTA_CSR_20260902.md) :
-  GO exploratoire pour KeyCSR, sous égalité sémantique complète ; FidCSR et
-  toute décision de performance restent des paliers séparés. Elle répond aussi
-  à la pré-inscription `53610911` : six blocs et seuil `0,55` reçus dans leur
-  principe et graine externe fixée. Le générateur `d6888093` est reçu comme
-  calendrier déterministe (210/280 runs, portes directes normale et `-O`), pas
-  comme plan exécutable final : grammaire sans doublons, orientation des
-  échauffements, adjacence des bras, rôles décisionnels et inscription CTest
-  restent à fermer, puis les identités des copies, commandes, coordonnées,
-  callback et affinité doivent être scellées. Avant le pin
-  sémantique, `for_each_delta` doit encore refuser les temporaires ; avant la
-  mesure, la comparaison au classique, le scratch, les vrais derniers offsets
-  et la liaison au kind construit doivent être instrumentés sans contaminer le
-  mur, puis les portes sémantiques rejouées sur ce commit source exact.
+  pin sémantique KeyCSR `8afd1057` reçu : deux routes sans repli, ownership,
+  rejet des temporaires, comparateur tiers, rejeu, kind construit et vrais
+  offsets sont verts sur la matrice complète et sous sanitizers ciblés. FidCSR
+  et toute performance restent des paliers séparés. Le générateur `d6888093`
+  est reçu comme calendrier déterministe (210/280 runs), pas comme plan final :
+  grammaire/adjacence, variante CTest `-O`, rôles, identités des copies,
+  commandes, coordonnées, callback, affinité et `reduce_v3` restent à sceller
+  avant campagne.
 - [`ALERTE_SONDE_ABLATION_REDUCE_20260902.md`](ALERTE_SONDE_ABLATION_REDUCE_20260902.md) :
-  réception fonctionnelle de `32da1550` : la réagrégation après scellement et
-  le statut exact sont reçus avec 21/21 scènes normales et optimisées, plus
-  CTest 2/2. Une commande critique encore héritée du `PATH` peut toutefois
-  corrompre le reçu après son dernier contrôle ; cette frontière et la liaison
-  exacte du régime (argv/META, `profil_kind`, `liveness`, famille et identité)
-  précèdent toute nouvelle mesure, sans bloquer KeyCSR.
+  réception fonctionnelle de `32da1550`, puis contre-lecture du harnais
+  `8afd1057` : outils critiques hors `PATH` et 23 scènes reçus ; famille, argv
+  et CPU sont liés, mais `liveness`, layout, inflight/pics, coordonnée, clés
+  inconnues, `lscpu` et identité stricte restent permissifs ; l'option `--` de
+  `sha256sum` doit être restaurée en confinant le faux test. Ces dents précèdent
+  une nouvelle mesure, sans bloquer KeyCSR.
+- [`ALERTE_G4_ECHELLE_V6_20260902.md`](ALERTE_G4_ECHELLE_V6_20260902.md) :
+  préflight statique du profil d'échelle ; **NO START** tant que le profil
+  n'est pas scellé et que `smax`/le layout choisi ne traversent pas un plan
+  frontière v2 sans collision. Le budget nominal laisse 855 s de marge ; les
+  gardes SPOT/STOP restent recevables et GCP n'a pas été utilisé par l'audit.
 - [`CONTRE_AUDIT_REPRISE_PERSISTANTE_V6_20260902.md`](CONTRE_AUDIT_REPRISE_PERSISTANTE_V6_20260902.md) :
   contre-audit du chemin de reprise, mis à jour pour `c2d2ac69`. Les quatre
   mutants résiduels de `4ef96717` sont corrigés et le revalidateur passe 22
@@ -62,6 +63,9 @@ des corrections, ils ne certifient rien.
 
 ## Historique de l'échange
 
+- [`NOTE_CLAUDE_PIN_KEYCSR_20260902.md`](NOTE_CLAUDE_PIN_KEYCSR_20260902.md) :
+  livraison du pin sémantique `8afd1057`, reçue dans la réponse KeyCSR active ;
+  elle diffère explicitement la campagne de performance.
 - [`NOTE_CLAUDE_CONCEPTION_V6_20260831.md`](NOTE_CLAUDE_CONCEPTION_V6_20260831.md) :
   note initiale de conception, supersédée par l'état courant.
 - [`QUESTION_CLAUDE_MULTICPU_20260901.md`](QUESTION_CLAUDE_MULTICPU_20260901.md) :
