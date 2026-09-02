@@ -2,7 +2,9 @@
 # SONDE D'ABLATION du reduce — reçu FAIL-CLOSED (2 septembre 2026, arbre
 # § 5.10 de REPONSE_AUDITEURS_MULTICPU_V6 « decomposer la fenetre AVANT
 # d'ecrire un palier » ; fermeture minimale exigee par
-# audits/ALERTE_SONDE_ABLATION_REDUCE_20260902.md). Doctrine :
+# audits/ALERTE_SONDE_ABLATION_REDUCE_20260902.md, puis les cinq
+# contre-fixtures encore vertes de la fin de son « Etat du WIP » et du § 5.21
+# de REPONSE_AUDITEURS_MULTICPU_V6). Doctrine :
 #   - BORNES EXPLORATOIRES NON CAUSALES (statut=exploratory_noncausal_upper_bounds) :
 #     binaire de PROFIL sous MHGP6_TESTING (mhgp6_profile_sonde), fenetres
 #     par K (profil_reduce), join=1 pour isoler l'etage B. Chaque ablation
@@ -24,27 +26,54 @@
 #   - COPIE PRIVEE du binaire dans <OUT>.partial/bin/ (chmod 555), SEULE
 #     executee (les sondes d'identite aussi) ; sha256 grave au META, verifie
 #     AVANT et APRES chaque tuple (HASHES.txt) ; divergence => INVALIDE
-#     (code 3), aucun mv de publication.
-#   - FAIL-CLOSED : liste de tailles vide, REPS <= 0, REPS non multiple de 4,
-#     CPUS invalide, binaire qui n'accepte pas --inject=ablation-* (binaire
-#     produit) ou qui accepte un nom inconnu => REFUS 2 avant tout run (le
-#     .partial est retire) ; un run a code non nul => INVALIDE 3 immediat ;
-#     l'agregateur (copie archivee protocole_agregateur.py) exige l'ensemble
-#     EXACT bras x tailles x repetitions, dix lignes K, toutes les fenetres
-#     finies (jamais un zero substitue) et rend 1 sinon ; agregateur,
-#     generation de SHA256SUMS puis `sha256sum -c --strict` finale sont
-#     FATALS (3). Le manifeste est le DERNIER fichier ecrit : apres sa
-#     verification la seule operation restante est le `mv` de publication,
-#     aucun fichier ne peut donc s'ajouter au reçu par construction. Un reçu
-#     INVALIDE reste en `<OUT>.partial`, jamais publie.
+#     (code 3), aucun mv de publication. Tout hash passe par la primitive
+#     hash_de : exactement 64 hexadecimaux ou echec FATAL (un sha256sum muet
+#     ne produit jamais une chaine vide « egale » a une autre chaine vide).
+#   - FAIL-CLOSED : liste de tailles vide, taille DUPLIQUEE (deux tuples
+#     porteraient le meme tag <bras>_n<n>_r<bloc> et s'ecraseraient),
+#     REPS <= 0, REPS non multiple de 4, CPUS invalide, hash illisible,
+#     binaire qui n'accepte pas --inject=ablation-* (binaire produit) ou qui
+#     accepte un nom inconnu => REFUS 2 avant tout run (le .partial est
+#     retire) ; un run a code non nul => INVALIDE 3 immediat ; l'agregateur
+#     (copie archivee protocole_agregateur.py) exige l'ensemble EXACT bras x
+#     tailles x repetitions, le triplet EXACT <tag>.txt|.err|.status par
+#     tuple et rien d'autre dans out/, le plan de Williams (successions
+#     ordonnees, pas seulement les positions), tout champ unique (META,
+#     statut, plan, profil), la grammaire 64-hex de chaque hash, dix lignes
+#     K, toutes les fenetres finies (jamais un zero substitue) et rend 1
+#     sinon ; agregateur, generation de SHA256SUMS, INVENTAIRE EXACT du reçu
+#     (les entrees du manifeste doivent etre exactement l'ensemble attendu :
+#     fichiers fixes + triplets de out/ [+ diff de worktree]) puis
+#     `sha256sum -c --strict` finale sont FATALS (3). Le manifeste couvre
+#     TOUT fichier regulier sauf le seul ./SHA256SUMS racine (un
+#     out/SHA256SUMS ou tout intrus est hache, donc visible, puis refuse par
+#     l'inventaire). Le manifeste est le DERNIER fichier ecrit : apres sa
+#     verification la seule operation restante est le `mv` de publication.
+#     Un reçu INVALIDE reste en `<OUT>.partial`, jamais publie.
 #   - Worktree : commit et nombre de fichiers modifies graves ; si non nul,
 #     `git diff HEAD` embarque dans worktree_diff.patch (+ statut porcelain et
 #     `git diff HEAD --summary --stat` dans worktree_diff_summary.txt), sinon
 #     worktree_diff=aucun.
-# Porte : tests/sonde_ablation_gate.py (faux binaire rapide, neuf scenes).
+# Porte : tests/sonde_ablation_gate.py (faux binaire rapide, onze scenes,
+# cas (a)–(n)).
 # Usage : sonde_ablation_reduce.sh OUT_DIR BIN_SONDE [N_LIST="8000 16000 32000"] [REPS=4]
 #   (un troisieme argument VIDE est une liste vide, donc un refus — pas le defaut)
+#   ou  : sonde_ablation_reduce.sh --inventaire DIR
+#   (lecture seule : liste, telle que le manifeste la couvrirait, des fichiers
+#   reguliers de DIR — seul ./SHA256SUMS racine exclu ; sert a la porte)
 set -u
+
+# Inventaire du manifeste : tout fichier regulier, seul ./SHA256SUMS racine
+# exclu (JAMAIS `! -name SHA256SUMS`, qui rendrait un out/SHA256SUMS invisible).
+lister_fichiers() {
+  find . -type f ! -path ./SHA256SUMS -printf '%P\n' | LC_ALL=C sort
+}
+if [ "${1-}" = "--inventaire" ]; then
+  [ -d "${2-}" ] || { echo "REFUS : --inventaire exige un dossier existant" >&2; exit 2; }
+  ( cd "$2" && lister_fichiers )
+  exit $?
+fi
+
 OUT="${1:?dossier de reçu requis}"
 BIN_SRC="${2:?binaire mhgp6_profile_sonde requis}"
 N_LIST="${3-8000 16000 32000}"
@@ -67,6 +96,14 @@ bras_de() {
     *) refus "lettre de plan inconnue ($1)" ;;
   esac
 }
+# Primitive de hash FATALE : imprime le sha256 (64 hexadecimaux) ou rend 1.
+# Jamais une chaine vide : un sha256sum muet, absent ou tronque est un echec.
+hash_de() {
+  local h
+  h="$(sha256sum "$1" 2>/dev/null | awk '{print $1}')"
+  [[ "${h}" =~ ^[0-9a-f]{64}$ ]] || return 1
+  printf '%s\n' "${h}"
+}
 
 # --- Refus avant toute ecriture ------------------------------------------
 if [ -e "${OUT}" ] || [ -e "${OUT}.partial" ]; then
@@ -76,11 +113,19 @@ fi
 N_LIST="$(printf '%s\n' ${N_LIST} | tr '\n' ' ' | sed 's/ *$//')"
 [ -n "${N_LIST}" ] || refus "liste de tailles vide (N_LIST) — un reçu vide n'est pas un reçu"
 NN=0
+N_NORM=""
 for n in ${N_LIST}; do
   case "${n}" in ''|*[!0-9]*) refus "taille non entiere (${n})" ;; esac
+  [ "${#n}" -le 12 ] || refus "taille trop longue (${n})"
+  n=$((10#${n}))   # forme canonique : 064 et 64 sont la meme taille (meme tag)
   [ "${n}" -gt 0 ] || refus "taille nulle"
+  case " ${N_NORM} " in
+    *" ${n} "*) refus "taille dupliquee dans N_LIST (${n}) — deux tuples porteraient le meme tag <bras>_n${n}_r<bloc> et s'ecraseraient" ;;
+  esac
+  N_NORM="${N_NORM}${N_NORM:+ }${n}"
   NN=$((NN + 1))
 done
+N_LIST="${N_NORM}"
 case "${REPS}" in ''|*[!0-9]*) refus "REPS non entier (${REPS})" ;; esac
 REPS=$((10#${REPS}))
 [ "${REPS}" -gt 0 ] || refus "REPS <= 0 — un reçu vide n'est pas un reçu"
@@ -100,8 +145,8 @@ WORKD="${OUT}.partial"
 mkdir -p "${WORKD}/out" "${WORKD}/bin" || refus "creation de ${WORKD} impossible"
 BIN="${WORKD}/bin/mhgp6_profile_sonde"
 cp "${BIN_SRC}" "${BIN}" && chmod 555 "${BIN}" || { rm -rf "${WORKD}"; refus "copie privee impossible"; }
-H="$(sha256sum "${BIN}" | awk '{print $1}')"
-H_SRC="$(sha256sum "${BIN_SRC}" | awk '{print $1}')"
+H="$(hash_de "${BIN}")" || { rm -rf "${WORKD}"; refus "sha256 de la copie privee illisible (sha256sum muet ou hors grammaire 64-hex) — aucun hash vide n'est grave"; }
+H_SRC="$(hash_de "${BIN_SRC}")" || { rm -rf "${WORKD}"; refus "sha256 de la source illisible (sha256sum muet ou hors grammaire 64-hex)"; }
 [ "${H}" = "${H_SRC}" ] || { rm -rf "${WORKD}"; refus "copie privee (${H}) != source relue (${H_SRC}) — copie concurrente ou dechiree"; }
 # Cible de sonde : accepte un nom d'ablation CONNU (un binaire produit refuse
 # --inject= tout court, code 2) ET refuse un nom INCONNU (code 2 exact).
@@ -121,7 +166,7 @@ invalide() {
   echo "INVALIDE : $1 — reçu laisse en ${WORKD}, jamais publie" >&2
   exit 3
 }
-H2="$(sha256sum "${BIN}" | awk '{print $1}')"
+H2="$(hash_de "${BIN}")" || invalide "sha256 de la copie privee illisible apres les sondes d'identite (sha256sum muet ou hors grammaire 64-hex)"
 [ "${H2}" = "${H}" ] || invalide "copie privee alteree par les sondes d'identite (${H2} != ${H})"
 
 # --- Plan equilibre grave AVANT le premier run ----------------------------
@@ -139,6 +184,8 @@ H2="$(sha256sum "${BIN}" | awk '{print $1}')"
 
 cp "${HERE}/sonde_ablation_reduce.sh" "${WORKD}/protocole_lanceur.sh" || invalide "archivage du lanceur impossible"
 cp "${HERE}/sonde_ablation_reduce.py" "${WORKD}/protocole_agregateur.py" || invalide "archivage de l'agregateur impossible"
+H_LANCEUR="$(hash_de "${WORKD}/protocole_lanceur.sh")" || invalide "sha256 du lanceur archive illisible (hors grammaire 64-hex)"
+H_AGREGATEUR="$(hash_de "${WORKD}/protocole_agregateur.py")" || invalide "sha256 de l'agregateur archive illisible (hors grammaire 64-hex)"
 lscpu > "${WORKD}/lscpu.txt" 2>&1 || true
 
 WT_DIFF="aucun"
@@ -172,8 +219,8 @@ fi
   echo "ablations=${ABLATIONS}"
   echo "plan=williams_4x4 blocs=${REPS} (plan.txt grave avant le premier run ; appariement par bloc dans l'agregateur)"
   echo "etiquette_ablation-post-cle-factice=borne composite (lecture keys[] + tri de cles egales) — jamais « lecture seule »"
-  echo "sha256_lanceur=$(sha256sum "${WORKD}/protocole_lanceur.sh" | awk '{print $1}')"
-  echo "sha256_agregateur=$(sha256sum "${WORKD}/protocole_agregateur.py" | awk '{print $1}')"
+  echo "sha256_lanceur=${H_LANCEUR}"
+  echo "sha256_agregateur=${H_AGREGATEUR}"
   echo "libstdcxx=$(readlink -f /usr/lib/x86_64-linux-gnu/libstdc++.so.6 2>/dev/null || echo inconnu)"
   echo "gcc=$(gcc -dumpfullversion 2>/dev/null || echo inconnu)"
   echo "hote=$(uname -srm)"
@@ -187,7 +234,7 @@ run_one() { # $1 = ablation, $2 = n, $3 = bloc (repetition), $4 = position dans 
   local inj=()
   [ "${abl}" = "aucune" ] || inj=("--inject=${abl}")
   local load_before load_after t0 t1 hb ha rc=0
-  hb="$(sha256sum "${BIN}" | awk '{print $1}')"
+  hb="$(hash_de "${BIN}")" || invalide "hash AVANT ${tag} illisible (sha256sum muet ou hors grammaire 64-hex) — jamais un hash vide"
   [ "${hb}" = "${H}" ] || invalide "hash AVANT ${tag} : ${hb} != ${H} (copie privee alteree)"
   load_before="$(cut -d' ' -f1-3 /proc/loadavg)"
   t0="$(date +%s.%N)"
@@ -196,7 +243,7 @@ run_one() { # $1 = ablation, $2 = n, $3 = bloc (repetition), $4 = position dans 
     > "${WORKD}/out/${tag}.txt" 2> "${WORKD}/out/${tag}.err" || rc=$?
   t1="$(date +%s.%N)"
   load_after="$(cut -d' ' -f1-3 /proc/loadavg)"
-  ha="$(sha256sum "${BIN}" | awk '{print $1}')"
+  ha="$(hash_de "${BIN}")" || invalide "hash APRES ${tag} illisible (sha256sum muet ou hors grammaire 64-hex) — jamais un hash vide"
   {
     echo "ablation=${abl} n=${n} rep=${rep} position=${pos} code=${rc}"
     echo "commande=taskset -c ${CPUS} bin/mhgp6_profile_sonde --family=${FAMILY} --n=${n} --s=8 --smax=11 --seed=3 --threads=${THREADS} --fold-inflight=2 --fold-join=1 ${inj[*]:-}"
@@ -237,12 +284,33 @@ python3 "${WORKD}/protocole_agregateur.py" "${WORKD}" > "${WORKD}/resume.txt" 2>
 [ -s "${WORKD}/resume.txt" ] || invalide "resume.txt vide"
 SPECIAUX="$(cd "${WORKD}" && find . ! -type f ! -type d | wc -l)"
 [ "${SPECIAUX}" -eq 0 ] || invalide "${SPECIAUX} entree(s) non reguliere(s) (lien ou special) dans le reçu"
-( cd "${WORKD}" && set -o pipefail \
-  && find . -type f ! -name SHA256SUMS -printf '%P\n' | LC_ALL=C sort | xargs -d '\n' sha256sum > SHA256SUMS ) \
+( cd "${WORKD}" && set -o pipefail && lister_fichiers | xargs -d '\n' sha256sum > SHA256SUMS ) \
   || invalide "generation de SHA256SUMS en echec"
-NFICHIERS="$(cd "${WORKD}" && find . -type f ! -name SHA256SUMS | wc -l)"
+NFICHIERS="$(cd "${WORKD}" && lister_fichiers | wc -l)"
 NSOMMES="$(wc -l < "${WORKD}/SHA256SUMS")"
 [ "${NSOMMES}" -gt 0 ] && [ "${NFICHIERS}" -eq "${NSOMMES}" ] || invalide "manifeste incomplet (${NSOMMES} entrees pour ${NFICHIERS} fichiers)"
+# Inventaire EXACT : les entrees du manifeste (ce qui a ete hache) doivent etre
+# exactement l'ensemble attendu — tout fichier apparu entre l'agregateur et le
+# manifeste (a la racine, dans out/, un out/SHA256SUMS...) est refuse ici.
+inventaire_attendu() {
+  local n rep abl ext
+  printf '%s\n' HASHES.txt META.txt bin/mhgp6_profile_sonde lscpu.txt plan.txt \
+    protocole_agregateur.py protocole_lanceur.sh resume.err resume.txt
+  [ "${DIRTY}" -eq 0 ] || printf '%s\n' worktree_diff.patch worktree_diff_summary.txt
+  for n in ${N_LIST}; do
+    for rep in $(seq 1 "${REPS}"); do
+      for abl in ${ABLATIONS}; do
+        for ext in txt err status; do
+          printf 'out/%s_n%s_r%s.%s\n' "${abl}" "${n}" "${rep}" "${ext}"
+        done
+      done
+    done
+  done
+}
+ECART="$(LC_ALL=C diff <(inventaire_attendu | LC_ALL=C sort) \
+                       <(sed -n 's/^[0-9a-f]\{64\}  //p' "${WORKD}/SHA256SUMS" | LC_ALL=C sort) \
+         | grep '^[<>]' | head -6 | tr '\n' ' ')"
+[ -z "${ECART}" ] || invalide "inventaire du reçu != ensemble attendu (< attendu absent, > fichier inattendu hache) : ${ECART}"
 ( cd "${WORKD}" && sha256sum -c --quiet --strict SHA256SUMS ) >/dev/null 2>&1 \
   || invalide "verification finale sha256sum -c en echec"
 mv "${WORKD}" "${OUT}" || invalide "publication (mv) impossible"
