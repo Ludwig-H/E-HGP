@@ -39,10 +39,14 @@ if [ -n "$(cd "${RECU}" && find . -mindepth 1 -name "$(printf '*\n*')" -print -q
 fi
 IRREGULIERS="$(cd "${RECU}" && find . -mindepth 1 ! -type f ! -type d -printf '%y %P\n')"
 [ -z "${IRREGULIERS}" ] || { echo "REFUS : entree non reguliere dans le recu (lien ou type special) : ${IRREGULIERS}" >&2; exit 2; }
-REPERTOIRES="$(cd "${RECU}" && find . -mindepth 1 -type d -printf '%P\n' | sort)"
-for d in ${REPERTOIRES}; do
-  case "${d}" in out|marques) ;; *) echo "REFUS : repertoire inattendu dans le recu (${d})" >&2; exit 2 ;; esac
-done
+( cd "${RECU}" && find . -mindepth 1 -type d -print0 ) | python3 -c '
+import sys
+names = [n for n in sys.stdin.buffer.read().split(b"\0") if n]
+bad = [n for n in names if n not in (b"./out", b"./marques")]
+if bad:
+    sys.stderr.write("REFUS : repertoire inattendu dans le recu (%r)\n" % bad[0])
+    sys.exit(2)
+' || exit 2
 inventaire_sha() { # empreinte NUL-separee (type, mode, nom) de toutes les entrees hors ./SHA256SUMS
   ( cd "${RECU}" && find . -mindepth 1 ! -path ./SHA256SUMS -printf '%y %m %P\0' | sort -z | sha256sum | awk '{print $1}' )
 }
@@ -103,7 +107,7 @@ echo "validateur (${VALIDATOR}) : rc=${rc}"
 # § 5.22 : chaque resume attendu (present au recu) doit avoir ete RE-PRODUIT
 # par le validateur et est compare — un validateur muet ou arbitraire qui
 # rend 0 sans ecrire les resumes est refuse (rc 3), jamais « recu intact ».
-RESUMES_ABSENTS=""
+RESUMES_ABSENTS=""; RESUMES_DIFFERENTS=""
 for r in bench queue sweep gpu frontier matrice gpuv6; do
   [ -f "${RECU}/${r}_resume.txt" ] || continue
   if [ ! -f "${WORK}/${r}_resume.txt" ]; then RESUMES_ABSENTS="${RESUMES_ABSENTS} ${r}"; continue; fi
@@ -111,6 +115,7 @@ for r in bench queue sweep gpu frontier matrice gpuv6; do
     echo "resume ${r} : identique au recu"
   else
     echo "resume ${r} : DIFFERENT du recu (le recu reste intact)"
+    RESUMES_DIFFERENTS="${RESUMES_DIFFERENTS} ${r}"
     { diff "${RECU}/${r}_resume.txt" "${WORK}/${r}_resume.txt" || true; } | head -5  # affichage seul, jamais un court-circuit
   fi
 done
@@ -130,6 +135,12 @@ if [ "$(sha256sum "${RECU}/SHA256SUMS" | awk '{print $1}')" = "${MANIFESTE_INITI
   echo "recu intact apres re-validation (manifeste initial identique, SHA256SUMS verifie, inventaire types/modes/noms inchange)"
 else
   echo "RECU ALTERE PENDANT LA RE-VALIDATION (manifeste, hashes ou inventaire types/modes/noms) — verdict rejete" >&2
+  exit 3
+fi
+# § 5.22 : un resume re-produit DIFFERENT du recu est un desaccord (rc 3),
+# jamais un simple affichage suivi de « recu intact ».
+if [ -n "${RESUMES_DIFFERENTS}" ]; then
+  echo "RESUME DIFFERENT du recu (${RESUMES_DIFFERENTS# }) — verdict rejete (rc 3)" >&2
   exit 3
 fi
 exit "${rc}"

@@ -181,4 +181,13 @@ scp assert en R1). Revalidateur : validateur canonique authentifié (sha256
 gravé ; autre chemin seulement sous `EHGP_REVALIDATE_SELFTEST=1`), résumés
 attendus exigés après l'appel (juge muet ⇒ rc 3), inventaire NUL injectif
 (type, mode, nom ; nom à saut de ligne refusé), « intact » = noms, types,
-modes et octets — `selftest_revalidate_v6.sh` (20 scènes).
+modes et octets — `selftest_revalidate_v6.sh` (22 scènes : un résumé
+re-produit différent d'un octet ⇒ rc 3 ; répertoire racine « out marques »
+refusé par l'allowlist NUL en Python). Retour des auditeurs sur le WIP § 5.22 :
+funnel armé dès la génération résolue (sous `errtrace`, hérité par les
+fonctions), garde d'arrêt exécutée D'ABORD et tout en best effort autour
+(registre, journal), 70 domine 74 ; marqueur `out.promotion` lié à un
+identifiant de TENTATIVE (D13 précharge un marqueur valide d'une tentative
+antérieure : aucun validateur) ; dents D14 (panne de journal dès la génération
+connue ⇒ un STOP, rc 74) et D15 (panne de `publish_state` ⇒ garde exécutée
+exactement une fois, code non nul, aucun témoin).

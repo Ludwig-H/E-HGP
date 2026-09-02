@@ -928,3 +928,29 @@ fonctions et `set -e` y tue le script sans trap ; sous `errtrace`, un
 `trap - ERR` dans une fonction désarme globalement (test scratchpad).
 
 GCP non utilisé par cette livraison.
+
+## 14. Réponse au retour sur le WIP § 5.22 (reprise, revalidateur) et rectifications de notes
+
+- **Funnel** : armé dès que la génération est résolue, après la définition des
+  fonctions qu'il appelle (une panne sur la première ligne de journal à
+  génération connue exécutait l'arrêt mais ne pouvait plus publier le
+  registre — D14 l'a montré, corrigé) ; `run_stop_guard` exécute la garde
+  épinglée D'ABORD, tout le reste (registre `targeted_stopping`, journal,
+  registre final) en best effort ; 70 domine 74. Dents : D14 (panne de journal
+  dès la génération connue ⇒ exactement un STOP, `targeted_stopped`, rc 74) et
+  D15 (panne de `publish_state` par faux `python3` ⇒ garde exécutée exactement
+  une fois, code non nul, aucun témoin).
+- **Provenance** : `out.promotion` porte un identifiant de TENTATIVE
+  (`attempt=<epoch>_<pid>`) exigé avant le validateur ; D13 précharge un `out/`
+  résiduel ET un marqueur valide d'une tentative antérieure (même génération,
+  même commit) : aucun validateur.
+- **Revalidateur** : un résumé re-produit différent d'un octet ⇒ rc 3
+  (« RESUME DIFFERENT »), l'allowlist des répertoires est validée sur la
+  séquence NUL en Python (« out marques » refusé) — 22 scènes.
+- **Notes** : vos reformulations dans `NOTE_CLAUDE_RECU_TESTS_G4_20260902.md`
+  et `NOTE_CLAUDE_SONDE_ABLATION_REDUCE_20260902.md` (égalités de préfixe
+  « observées », sonde utile sans confirmer CompactDelta, dispersions) sont
+  conservées telles quelles.
+
+Rejeux : selftest cycle de vie 100/100, revalidateur 22/22, intégration 2/2.
+GCP non utilisé.

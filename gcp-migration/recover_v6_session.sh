@@ -140,6 +140,7 @@ export GCP_SSH_KEY_EXPIRATION_UTC
 STATE_FILE="${WORK}/etat_cycle_vie"; HANDOFF="${WORK}/handoff.json"; MARKS_DIR="${WORK}/marques"
 PID_FILE="${WORK}/superviseur.pid"; LOCK_FILE="${WORK}/reprise.lock"; LOCK_DIAG="${WORK}/reprise.pid"; RLOG="${WORK}/reprise.log"
 rlog() { printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" | tee -a "${RLOG}"; }
+ATTEMPT_ID="$(date +%s)_$$"   # § 5.22 : la promotion de out/ est liee a CETTE tentative, jamais a une anterieure
 
 # ---- VERROU NOYAU (contre-audit, point 1) : flock -n sur un descripteur du
 # WORK, tenu jusqu'a la sortie du processus ; deux reprises simultanees —
@@ -302,7 +303,42 @@ for g in "${snap_gen}" "${hand_gen}" "${m1_gen}" "${m2_gen}"; do
     echo "BLOCAGE : generations discordantes entre registre/handoff/marques (${snap_gen:-∅} ${hand_gen:-∅} ${m1_gen:-∅} ${m2_gen:-∅}) — aucun appel" >&2; exit 71
   fi
 done
-rlog "registre=${snap_state} generation=${GENERATION:-inconnue} marques=$(ls "${MARKS_DIR}" 2>/dev/null | tr '\n' ' ')"
+# ---- FUNNEL D'ARRET (§ 5.22) : des que la generation est connue, une erreur
+# LOCALE (set -e + errtrace : rm, mv, date, tee, mkdir, rlog...) ne peut plus
+# court-circuiter l'arret cible — le trap ERR execute exactement UN
+# stop_and_verify epingle si aucun n'a encore ete tente, publie le registre
+# et un temoin minimal en best effort, et rend 74 (erreur locale, arret
+# certifie) ou 70 (erreur locale ET arret non certifie : 70 domine).
+STOP_ATTEMPTED=0; STOP_RC=na
+run_stop_guard() { # une seule tentative par rejeu ; TOUT non fatal, la garde D'ABORD
+  [ "${STOP_ATTEMPTED}" -eq 0 ] || return 0
+  STOP_ATTEMPTED=1
+  trap - ERR
+  set +e
+  publish_state targeted_stopping 2>/dev/null || echo "avertissement : registre targeted_stopping non publie (best effort)" >&2
+  rlog "arret cible : ${STOP_GUARD} --yes --expected-last-start-timestamp ${GENERATION}" 2>/dev/null || true
+  "${STOP_GUARD}" --yes --expected-last-start-timestamp "${GENERATION}" 2>&1 | tee -a "${RLOG}"
+  STOP_RC="${PIPESTATUS[0]}"
+  [[ "${STOP_RC}" =~ ^[0-9]+$ ]] || STOP_RC=1
+  if [ "${STOP_RC}" -eq 0 ]; then publish_state targeted_stopped 2>/dev/null || echo "avertissement : registre targeted_stopped non publie (best effort)" >&2
+  else publish_state targeted_stop_failed 2>/dev/null || echo "avertissement : registre targeted_stop_failed non publie (best effort)" >&2; fi
+  rlog "stop_rc=${STOP_RC}" 2>/dev/null || true
+  set -e
+}
+funnel_stop() {
+  local where="$1"
+  trap - ERR
+  set +e
+  echo "ERREUR LOCALE (ligne ${where}) : funnel d'arret inconditionnel" >&2
+  rlog "ERREUR LOCALE (ligne ${where}) avant/pendant la reprise : funnel d'arret inconditionnel" 2>/dev/null || true
+  run_stop_guard
+  local code=74
+  [ "${STOP_RC}" = "0" ] || code=70
+  finalize_receipt reprise_erreur_locale "${STOP_RC}" "${code}" aucune "${SCP_RC:-na}" na 1 2>/dev/null || true
+  echo "ERREUR LOCALE : arret cible tente par le funnel (stop_rc=${STOP_RC}) — rc ${code}" >&2
+  exit "${code}"
+}
+
 
 # ---- RECU (patron du cycle de vie, champs de reprise en plus). Jamais une
 # decision. Purge des credentials VERIFIEE puis temoin recu_publie, seulement
@@ -423,41 +459,11 @@ describe_ro() { # lecture seule, bornee ; tuple "STATUS<TAB>GENERATION" ou descr
 tuple_status() { printf '%s' "${1%%$'\t'*}"; }
 tuple_gen() { case "$1" in *$'\t'*) printf '%s' "${1#*$'\t'}" ;; *) printf '' ;; esac; }
 
-# ---- FUNNEL D'ARRET (§ 5.22) : des que la generation est connue, une erreur
-# LOCALE (set -e : rm, mv, date, tee, mkdir...) ne peut plus court-circuiter
-# l'arret cible — le trap ERR execute exactement UN stop_and_verify epingle
-# si aucun n'a encore ete tente, publie le registre, ecrit un temoin minimal
-# et rend 74 (erreur locale, arret tente par le funnel).
-STOP_ATTEMPTED=0; STOP_RC=na
-# NOTE bash 5.2 : sous errtrace, le trap ERR est herite par les fonctions (une
-# panne de rlog/tee dans une fonction declenche le funnel) et un `trap - ERR`
-# dans une fonction desarme le trap global (verifie empiriquement, scratchpad
-# trap_test.sh). La garde d'arret desarme donc le funnel a son entree : son
-# echec est lu et publie explicitement (targeted_stop_failed), jamais un funnel,
-# et apres la tentative d'arret le funnel n'a plus d'objet.
-run_stop_guard() { # une seule tentative par rejeu ; STOP_RC lu sur le pipeline
-  [ "${STOP_ATTEMPTED}" -eq 0 ] || return 0
-  STOP_ATTEMPTED=1
-  trap - ERR
-  publish_state targeted_stopping
-  rlog "arret cible : ${STOP_GUARD} --yes --expected-last-start-timestamp ${GENERATION}"
-  set +e
-  "${STOP_GUARD}" --yes --expected-last-start-timestamp "${GENERATION}" 2>&1 | tee -a "${RLOG}"
-  STOP_RC="${PIPESTATUS[0]}"
-  set -e
-  if [ "${STOP_RC}" -eq 0 ]; then publish_state targeted_stopped; else publish_state targeted_stop_failed; fi
-  rlog "stop_rc=${STOP_RC}"
-}
-funnel_stop() {
-  local where="$1"
-  trap - ERR
-  set +e
-  rlog "ERREUR LOCALE (ligne ${where}) avant/pendant la reprise : funnel d'arret inconditionnel"
-  run_stop_guard
-  finalize_receipt reprise_erreur_locale "${STOP_RC}" 74 aucune "${SCP_RC:-na}" na 1 || true
-  echo "ERREUR LOCALE : arret cible tente par le funnel (stop_rc=${STOP_RC}) — rc 74" >&2
-  exit 74
-}
+# ---- ARMEMENT du funnel des la generation connue, APRES la definition de
+# toutes les fonctions qu'il appelle (publish_state, finalize_receipt) ; la
+# premiere ligne de journal a generation connue est ecrite SOUS le funnel.
+if [ -n "${GENERATION}" ]; then trap 'funnel_stop "${LINENO}"' ERR; fi
+rlog "registre=${snap_state} generation=${GENERATION:-inconnue} marques=$(ls "${MARKS_DIR}" 2>/dev/null | tr '\n' ' ')"
 # ---- CAS 1 : aucune generation => jamais un arret aveugle (BLOCAGE 71).
 if [ -z "${GENERATION}" ]; then
   obs="$(describe_ro)"
@@ -474,7 +480,6 @@ if [ -n "${REMOTE_DIR}" ] && [ "${REMOTE_DIR}" != "v6camp_${SOURCE_COMMIT:0:12}_
   exit 71
 fi
 
-trap 'funnel_stop "${LINENO}"' ERR
 # ---- CAS 2 : registre deja targeted_stopped sur cette generation => aucun
 # appel GCP ; purge (re-jouable) puis temoin.
 if [ "${snap_state}" = "targeted_stopped" ]; then
@@ -560,20 +565,19 @@ fi
 # AVANT toute promotion ou sauvegarde locale. Code lu sur le PIPELINE : un
 # arret en echec ne doit JAMAIS etre publie targeted_stopped.
 run_stop_guard
-trap - ERR
 # ---- PROMOTION / SAUVEGARDE (apres l'arret ; best effort, jamais bloquant) :
 # marqueur ATOMIQUE de provenance out.promotion (generation, commit, scp_rc,
 # epoque) — le validateur ne court que sur un out/ promu par CE rapatriement.
 set +e
 if [ "${PROMOTE:-0}" -eq 1 ]; then
   rm -rf "${WORK}/out" && mv -T "${STAGING}/out" "${WORK}/out" \
-    && python3 - "${WORK}/out.promotion" "${GENERATION}" "${SOURCE_COMMIT}" "${SCP_RC}" <<'PY'
+    && python3 - "${WORK}/out.promotion" "${GENERATION}" "${SOURCE_COMMIT}" "${SCP_RC}" "${ATTEMPT_ID}" <<'PY'
 import os, sys, tempfile, time
-path, gen, commit, scp_rc = sys.argv[1:5]
+path, gen, commit, scp_rc, attempt = sys.argv[1:6]
 d = os.path.dirname(path)
 fd, tmp = tempfile.mkstemp(prefix=".out.promotion.", suffix=".partial", dir=d)
 try:
-    os.write(fd, f"schema=e-hgp.out-promotion.v1\ngeneration={gen}\nsource_commit={commit}\nscp_rc={scp_rc}\nepoch={int(time.time())}\n".encode())
+    os.write(fd, f"schema=e-hgp.out-promotion.v1\ngeneration={gen}\nsource_commit={commit}\nscp_rc={scp_rc}\nattempt={attempt}\nepoch={int(time.time())}\n".encode())
     os.fsync(fd); os.close(fd); os.replace(tmp, path)
 except Exception:
     try: os.close(fd)
@@ -599,8 +603,11 @@ if [ -n "${m2_gen}" ]; then
   # Validateur SEULEMENT sur un out/ promu et non vide (un out/ vide cree par
   # le cycle de vie n'est pas un rapatriement).
   promoted=0
+  # Le marqueur doit porter l'identifiant de CETTE tentative (un marqueur
+  # d'une tentative anterieure de meme generation/commit ne suffit pas).
   if [ -f "${WORK}/out.promotion" ] && grep -qx "generation=${GENERATION}" "${WORK}/out.promotion" \
-     && grep -qx "source_commit=${SOURCE_COMMIT}" "${WORK}/out.promotion" && grep -qx "scp_rc=0" "${WORK}/out.promotion"; then promoted=1; fi
+     && grep -qx "source_commit=${SOURCE_COMMIT}" "${WORK}/out.promotion" && grep -qx "scp_rc=0" "${WORK}/out.promotion" \
+     && grep -qx "attempt=${ATTEMPT_ID}" "${WORK}/out.promotion"; then promoted=1; fi
   if [ "${STOP_RC}" -eq 0 ] && [ "${promoted}" -eq 1 ] && [ -n "$(ls -A "${WORK}/out" 2>/dev/null)" ] && [ -f "${WORK}/profil_campagne.txt" ]; then
     canon="${WORK}/pinned/gcp-migration/profils/${CAMPAIGN_PROFILE}.env"
     VALIDATE_RC=0
@@ -611,7 +618,7 @@ if [ -n "${m2_gen}" ]; then
   elif [ "${STOP_RC}" -ne 0 ]; then
     VALIDATE_RC=na; rlog "arret non certifie : aucun validateur, aucune copie (temoin minimal)"
   else
-    VALIDATE_RC=na; rlog "aucun out/ promu par CE rapatriement (marqueur out.promotion absent ou d'une autre generation) : classification ${classification}, aucun validateur"
+    VALIDATE_RC=na; rlog "aucun out/ promu par CE rapatriement (marqueur out.promotion absent, d'une autre generation ou d'une tentative anterieure) : classification ${classification}, aucun validateur"
   fi
   issue=reprise_apres_perte_superviseur
 else

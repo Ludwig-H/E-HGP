@@ -46,18 +46,19 @@ reste la seule voie de décision.
   taille : ces quatre `digest_all` deviennent les **premiers témoins K=5 à
   32000**, à graver comme fixture (`GPUV6_OBJET_DIGESTS`-like) avant toute
   réutilisation.
-- **Propriété de préfixe, vérifiée à la main sur ce reçu** : pour chaque
+- **Égalités de préfixe observées à la main sur ce reçu** : pour chaque
   famille, `digest_forest_K1..K5` **et** `cardinalites K=1..5` du run
   `smax=6` sont égaux à ceux du run `smax=11` du même passage — le K=5 est
-  bien le préfixe exact de l'objet complet, comme l'affirme la ligne
-  `tower_scope`. Le validateur ne vérifiait pas encore cette égalité
-  croisée entre jumeaux `smax` d'un même reçu ; elle est ajoutée au
-  validateur avec sa falsification (voir § 5).
+  donc un préfixe observé pour ces cardinalités et ces digests de forêt. Ce
+  reçu à une graine ne compare pas l'objet complet champ par champ. Le
+  validateur v1 ne vérifiait pas encore cette égalité croisée entre jumeaux
+  `smax`; sa lecture reste post hoc. Le canon v2 porte désormais la porte et
+  ses mutants prospectivement, sans autorité rétroactive (voir § 5).
 
 ## 3. Murs CPU, K=10 contre K=5 (48 fils, inflight 2, join 0, sans digest)
 
-Moyenne des deux passages ; dispersion entre passages au plus 1,621 %
-(2,838 % sur les murs sub-seconde). Mémoire = `rss_max_kb` maximal des
+Moyenne des deux passages ; dispersion entre passages au plus 1,621 % hors
+murs sub-seconde, et au plus 2,838 % sur ces derniers. Mémoire = `rss_max_kb` maximal des
 deux passages.
 
 | famille | n | mur K=10 (ms) | mur K=5 (ms) | ratio | rss K=10 (Mo) | rss K=5 (Mo) | ratio |
@@ -110,8 +111,10 @@ Lecture factuelle :
   6 314 ms = **34,6 % du cumul reduce**, puis `pre` 3 384, `touch` 3 096,
   `post_remplissage` 2 330, `partition` 1 615, `unite` 761.
   `attrib_eight_clusters_n32000` : cumul reduce 16 059 ms,
-  `materialisation_tri_copie` 5 604 ms (34,9 %). Mêmes proportions qu'au reçu série C (31–36 %) : la cible
-  CompactDelta du § 5.10 est confirmée à cette taille, sur deux familles.
+  `materialisation_tri_copie` 5 604 ms (34,9 %). Ces proportions, voisines du
+  reçu série C (31–36 %), confirment qu'une sonde de cette fenêtre est utile à
+  cette taille sur deux familles ; elles ne confirment ni CompactDelta comme
+  palier, ni un goulot exclusif.
 - Uniform K=10 à binaire identique, même réglage : 16000 → série C
   13 642 / 13 580 / 13 560 ms, tests 13 234 / 13 450 ms ; 50000 → série C
   48 050 / 48 056 / 48 216 ms, tests 47 382 / 47 972 ms. Écart entre

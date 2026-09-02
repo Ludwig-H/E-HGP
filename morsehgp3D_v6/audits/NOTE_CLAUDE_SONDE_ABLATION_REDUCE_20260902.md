@@ -25,7 +25,7 @@ sonde.
   constante `false` hors `MHGP6_TESTING`, chacun **change l'objet** et est
   tué (code 4) par la conformité `eight_clusters` 400 :
   `ablation-mat-sans-copie` (la copie profonde `r.deltas.push_back(cd)` et
-  ses deux allocations par delta sont retirées ; tout le reste de la fenêtre
+  ses zéro, une ou deux allocations par delta — une par liste non vide — sont retirées ; tout le reste de la fenêtre
   est exécuté), `ablation-mat-sans-tris` (les deux `std::sort` de `FacetKey`
   44 o par racine sont retirés), `ablation-post-cle-factice` (la lecture
   aléatoire `keys[fid]` / `keys[pre_canon]` du remplissage est remplacée par
@@ -93,9 +93,11 @@ copie (−1754), 2042 sans tris (−837), 2327 à clé factice (−552) ;
 - Le poste réellement dominant est la **représentation de `r.deltas`**
   (un `std::vector<FacetKey>` par delta pour `parents` et pour `born`). Une
   représentation CSR par K (une arène de clés + offsets, une allocation
-  amortie, mêmes clés, même ordre) supprime les 2 allocations par delta et
-  la copie élément par élément — l'ablation « sans copie » en est la borne
-  haute : jusqu'à −59 % de la fenêtre, ≈ −22 % du reduce Σ_K. Cela change
+  amortie, mêmes clés, même ordre) remplace les zéro, une ou deux allocations
+  de listes par delta. Elle conserve toutefois l'append et la copie des clés
+  vers l'arène ; l'ablation destructive « sans copie », qui retire aussi la
+  sortie, n'en est qu'une borne haute : jusqu'à −59 % de la fenêtre, ≈ −22 %
+  du reduce Σ_K. Cela change
   la **forme** du payload `ForestResult` (le digest et `on_forest` lisent
   `r.deltas` ; le rendu, lui, se reconstruit depuis les événements et n'est
   pas un consommateur — rectification des auditeurs), pas l'objet : c'est
@@ -109,20 +111,22 @@ copie (−1754), 2042 sans tris (−837), 2327 à clé factice (−552) ;
 ## 6. Réception par l'auditeur (`ALERTE_SONDE_ABLATION_REDUCE_20260902`)
 
 Le reçu est classé **`exploratory_noncausal_upper_bounds`** : bornes
-exploratoires non causales, jamais un benchmark ni un choix de palier. Trois
-coutures, toutes intégrées au lanceur avant toute seconde mesure : plan à
+exploratoires non causales, jamais un benchmark ni un choix de palier. Les
+trois coutures initiales ont été intégrées au lanceur avant la seconde mesure : plan à
 trois répétitions non équilibré (→ carré de Williams, différences appariées
 par bloc — à 16000 la différence des médianes du bras sans copie sur le mur
 instrumenté disait `+669 ms` là où les trois différences appariées valent
 `−847`, `+669`, `−3634 ms`) ; le bras clé factice est une **borne
 composite** (lecture `keys[]` + tri de clés égales), pas « lecture seule » ;
-reçu fail-open (binaire partagé mutable, `REPS=0` publiable, zéros
+reçu initialement fail-open (binaire partagé mutable, `REPS=0` publiable, zéros
 substitués) → copie privée hachée avant/après chaque tuple, refus des
-matrices vides, agrégateur et manifeste fatals. Les parts de fenêtre du § 3
+matrices vides, agrégateur et manifeste fatals. Cinq contre-fixtures génériques
+supplémentaires n'ont été fermées qu'ensuite, à `1cb60655`; le reçu concret
+`b79e29a5` a été contrôlé indépendamment et n'en contient aucune. Les parts de fenêtre du § 3
 restent des bornes hautes ; la section 5 n'est qu'une hypothèse à
 falsifier avec différences appariées et égalité complète du `ForestResult`.
 
-## 7. Seconde mesure sous le lanceur fail-closed (plan de Williams, 4 blocs)
+## 7. Seconde mesure sous le lanceur équilibré (plan de Williams, 4 blocs)
 
 Reçu `receipts/sonde_ablation_reduce_20260902b/` (commit `2aaa4a53`,
 worktree propre, copie privée du binaire `74a46046…` hachée avant/après
@@ -146,8 +150,9 @@ Parts retirées de la fenêtre du témoin, appariées (médiane [min ; max]) :
 sans copie 53,6 [52,3 ; 54,0] / 57,9 [56,8 ; 58,4] / 59,3 [59,2 ; 59,6] % de
 `materialisation_tri_copie` ; sans tris 27,0 / 25,4 / 25,2 % ; clé factice
 17,1 / 16,1 / 15,7 % de la fenêtre de matérialisation **et** 74,4 / 74,1 /
-75,1 % de `post_remplissage`. Les intervalles des fenêtres dominantes sont
-étroits (≤ 2 points) ; ceux des fenêtres de trafic (`touch`, `pre`) et du
+75,1 % de `post_remplissage`. Les intervalles des fenêtres directement
+ablatées sont généralement étroits, mais atteignent environ 2,3 points pour
+le bras sans tris à 32k et 2,8 points pour la clé factice à 8k ; ceux des fenêtres de trafic (`touch`, `pre`) et du
 mur instrumenté restent larges (dérive de charge), ce qui confirme la
 lecture de l'auditeur : seules les fenêtres directement ablatées portent un
 signal, et ce signal reste une borne haute non causale. Le premier reçu

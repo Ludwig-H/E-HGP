@@ -84,9 +84,28 @@ make_fake_bin() { # $1 = dossier
 # Echoue UNE fois (premier tee apres la scp locale) : l'erreur locale est
 # injectee, puis le journal de reprise redevient lisible pour le diagnostic.
 if [ "${FAKE_TEE_FAIL_AFTER_SCP:-0}" = "1" ] && [ -e "${FAKE_CALLS}.scp_local" ] && [ ! -e "${FAKE_CALLS}.tee_failed" ]; then : > "${FAKE_CALLS}.tee_failed"; cat >/dev/null; exit 1; fi
+# FAKE_TEE_FAIL_ON=<motif> : echoue UNE fois sur la premiere entree contenant le motif.
+if [ -n "${FAKE_TEE_FAIL_ON:-}" ] && [ ! -e "${FAKE_CALLS}.tee_failed" ]; then
+  buf="$(cat)"
+  case "${buf}" in *"${FAKE_TEE_FAIL_ON}"*) : > "${FAKE_CALLS}.tee_failed"; exit 1 ;; esac
+  printf '%s\n' "${buf}" | exec /usr/bin/tee "$@"
+fi
 exec /usr/bin/tee "$@"
 EOF
   chmod +x "$1/tee"
+  # Faux python3 : FAKE_PY_STATE_FAIL=1 => echoue sur le script de publication du
+  # registre (lifecycle-state) SEULEMENT ; tout autre script passe au vrai python3.
+  cat > "$1/python3" <<'EOF'
+#!/usr/bin/env bash
+REAL="$(command -v -p python3 2>/dev/null || echo /usr/bin/python3)"
+if [ "${FAKE_PY_STATE_FAIL:-0}" = "1" ] && [ "${1:-}" = "-" ]; then
+  script="$(cat)"
+  case "${script}" in *"lifecycle-state.v1"*"state="*) echo "faux python3 : publication du registre en echec" >&2; exit 1 ;; esac
+  printf '%s\n' "${script}" | exec "${REAL}" "$@"
+fi
+exec "${REAL}" "$@"
+EOF
+  chmod +x "$1/python3"
   cat > "$1/gcloud" <<'EOF'
 #!/usr/bin/env bash
 echo "GCLOUD $*" >> "${FAKE_CALLS}"
@@ -1069,14 +1088,36 @@ unset FAKE_TEE_FAIL_AFTER_SCP FAKE_SCP_MODE_REPRISE
 # validateur, classification forcee ; le partiel n'est pas promu.
 new_killed_session || true
 mkdir -p "${SCEN_W}/out"; echo "ancien" > "${SCEN_W}/out/bench_resume.txt"
+printf 'schema=e-hgp.out-promotion.v1\ngeneration=%s\nsource_commit=%s\nscp_rc=0\nattempt=1000000000_1\nepoch=1000000000\n' "${FAKE_GEN}" "${SCEN_COMMIT}" > "${SCEN_W}/out.promotion"
 export FAKE_SCP_MODE_REPRISE=echec
 N0="$(wc -l < "${FAKE_CALLS}")"
 rc=0; run_recovery || rc=$?
-check_true "D13 : out/ non vide d'une tentative anterieure + scp en echec => aucun out.promotion, aucun validateur (validation.txt absent), un STOP, rc 0" \
-  bash -c "[ '${rc}' -eq 0 ] && [ ! -e '${SCEN_W}/out.promotion' ] && [ ! -f '${SCEN_W}/validation.txt' ] \
+check_true "D13 : out/ non vide + marqueur out.promotion VALIDE d'une tentative anterieure + scp en echec => aucun validateur (validation.txt absent), un STOP, rc 0" \
+  bash -c "[ '${rc}' -eq 0 ] && [ ! -f '${SCEN_W}/validation.txt' ] \
     && grep -q 'aucun out/ promu par CE rapatriement' '${SCEN_W}/reprise.log' \
     && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ]"
 unset FAKE_SCP_MODE_REPRISE
+# D14 (§ 5.22 retour WIP) : panne locale des la PREMIERE ligne apres la
+# resolution de la generation (faux tee sur « registre= ») => funnel : un STOP,
+# registre targeted_stopped, rc 74.
+new_killed_session || true
+export FAKE_TEE_FAIL_ON="registre="
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D14 : panne de rlog des la generation connue (avant scp) => funnel : exactement un STOP, targeted_stopped, rc 74" \
+  bash -c "[ '${rc}' -eq 74 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ] \
+    && grep -q '^state=targeted_stopped' '${SCEN_W}/etat_cycle_vie' && grep -q 'ERREUR LOCALE' '${SCENARIO_DIR}/reprise_stderr.log'"
+unset FAKE_TEE_FAIL_ON
+# D15 : panne de publish_state (faux python3 sur le registre) => la garde
+# tourne quand meme exactement une fois (best effort autour), code non nul,
+# jamais un second STOP.
+new_killed_session || true
+export FAKE_PY_STATE_FAIL=1
+N0="$(wc -l < "${FAKE_CALLS}")"
+rc=0; run_recovery || rc=$?
+check_true "D15 : publish_state en echec => garde epinglee executee exactement une fois (best effort), code non nul (${rc}), aucun temoin" \
+  bash -c "[ '${rc}' -ne 0 ] && [ \"\$(tail -n +$((N0 + 1)) '${FAKE_CALLS}' | grep -c 'compute instances stop')\" -eq 1 ] && [ ! -e '${SCEN_W}/recu_publie' ]"
+unset FAKE_PY_STATE_FAIL
 # D11 (§ 5.21) : cycle NOMINAL, temoin non publiable (recu_publie est un
 # repertoire cree apres le handshake) => code 68 dedie, marqueur
 # temoin_non_publie, purge faite ; la reprise publie ensuite le temoin.

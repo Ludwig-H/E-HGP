@@ -239,6 +239,29 @@ D="$(fresh_copy validateur_chmod)"; run_reval "${D}" "${FAKEV6}"
 check_true "validateur changeant un mode de fichier puis rc=0 (resumes recopies) : inventaire types/modes/noms different (rc 3)" \
   bash -c "[ \"\$1\" -eq 3 ] && printf '%s' \"\$2\" | grep -q 'RECU ALTERE PENDANT LA RE-VALIDATION'" _ "${REVAL_RC}" "${REVAL_OUT}"
 
+# ---- § 5.22 (retour WIP) : resume re-produit DIFFERENT (un octet) => rc 3.
+FAKEV7="${WORK}/faux_validateur_resume_altere.py"
+cat > "${FAKEV7}" <<'EOF'
+import os, shutil, sys
+recu = os.path.dirname(sys.argv[7])
+work = os.environ["V6_RESUMES_DIR"]
+for r in ("bench", "queue", "sweep", "gpu", "frontier", "matrice", "gpuv6"):
+    src = os.path.join(recu, r + "_resume.txt")
+    if os.path.exists(src):
+        shutil.copyfile(src, os.path.join(work, r + "_resume.txt"))
+p = os.path.join(work, "matrice_resume.txt")
+b = bytearray(open(p, "rb").read()); b[-2] ^= 1
+open(p, "wb").write(bytes(b))
+sys.exit(0)
+EOF
+D="$(fresh_copy resume_altere)"; run_reval "${D}" "${FAKEV7}"
+check_true "validateur recopiant les resumes puis alterant un octet de l'un d'eux : RESUME DIFFERENT => rc 3" \
+  bash -c "[ \"\$1\" -eq 3 ] && printf '%s' \"\$2\" | grep -q 'RESUME DIFFERENT'" _ "${REVAL_RC}" "${REVAL_OUT}"
+# ---- Repertoire racine nomme « out marques » (espace) : l'allowlist NUL en Python le refuse.
+D="$(fresh_copy nom_espace)"; mkdir "${D}/out marques"; run_reval "${D}"
+check_true "repertoire racine « out marques » (espace) : REFUS repertoire inattendu (sequence NUL, jamais un for sur du texte)" \
+  bash -c "[ \"\$1\" -eq 2 ] && printf '%s' \"\$2\" | grep -q 'repertoire inattendu'" _ "${REVAL_RC}" "${REVAL_OUT}"
+
 # ---- Recu de reprise : jamais requalifie.
 D="$(fresh_copy reprise)"; sed -i 's/^issue=.*/issue=reprise_partielle/' "${D}/RECU_SESSION.txt"; rehash "${D}"; run_reval "${D}"
 check_true "recu de reprise (issue=reprise_*) : REFUS" \
