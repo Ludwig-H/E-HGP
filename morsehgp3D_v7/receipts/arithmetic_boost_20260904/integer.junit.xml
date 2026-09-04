@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="8"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="0"
+	timestamp="2026-09-04T23:21:15"
+	>
+	<testcase name="mhgp7_arithmetic_integer" classname="mhgp7_arithmetic_integer" time="0.0196624" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>arithmetic_integer_gate=passed case=all mutant=none divergence=none boost=1_83 authority=obig_literals_and_boost public_status=not_claimed
+integer_counts oracle_literal=1 overflow_refused=1 conversions=6 u192_calls=19 u192_high=4 u320_calls=31 u320_w4=2 first_bit_256=1 sums=1 sum_carries=2 comparisons=45 gcd_zero=1 gcd_one=188 gcd_wide=3 gcd_cases=192 fibonacci=185 abs=4 keys=4 rationals=4 floors=6 fixture_reject_product=1 fixture_reject_sum=1 fixture_reject_den=4 fixture_reject_num=1 fixture_reject_cross=1 fixture_reject_floor=2 fixture_reject_key=2
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_integer_u320" classname="mhgp7_arithmetic_integer_u320" time="0.0173193" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>arithmetic_integer_gate=passed case=u320-only mutant=none divergence=none boost=1_83 authority=obig_literals_and_boost public_status=not_claimed
+integer_counts oracle_literal=1 overflow_refused=1 conversions=6 u192_calls=0 u192_high=0 u320_calls=9 u320_w4=2 first_bit_256=1 sums=0 sum_carries=0 comparisons=4 gcd_zero=0 gcd_one=0 gcd_wide=0 gcd_cases=0 fibonacci=0 abs=0 keys=0 rationals=0 floors=0 fixture_reject_product=0 fixture_reject_sum=0 fixture_reject_den=0 fixture_reject_num=0 fixture_reject_cross=0 fixture_reject_floor=0 fixture_reject_key=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_integer_oracle" classname="mhgp7_arithmetic_integer_oracle" time="0.0173388" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>arithmetic_integer_gate=passed case=oracle-only mutant=none divergence=none boost=1_83 authority=obig_literals_and_boost public_status=not_claimed
+integer_counts oracle_literal=1 overflow_refused=1 conversions=6 u192_calls=0 u192_high=0 u320_calls=0 u320_w4=0 first_bit_256=0 sums=0 sum_carries=0 comparisons=0 gcd_zero=0 gcd_one=0 gcd_wide=0 gcd_cases=0 fibonacci=0 abs=0 keys=0 rationals=0 floors=0 fixture_reject_product=0 fixture_reject_sum=0 fixture_reject_den=0 fixture_reject_num=0 fixture_reject_cross=0 fixture_reject_floor=0 fixture_reject_key=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_u320_word4" classname="mhgp7_arithmetic_u320_word4" time="0.0173012" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>arithmetic_integer_gate=mutant_killed case=u320-only mutant=level-trunc-hi divergence=W2.u320_word4 boost=1_83 authority=obig_literals_and_boost public_status=not_claimed
+integer_counts oracle_literal=1 overflow_refused=1 conversions=6 u192_calls=0 u192_high=0 u320_calls=9 u320_w4=2 first_bit_256=1 sums=0 sum_carries=0 comparisons=4 gcd_zero=0 gcd_one=0 gcd_wide=0 gcd_cases=0 fibonacci=0 abs=0 keys=0 rationals=0 floors=0 fixture_reject_product=0 fixture_reject_sum=0 fixture_reject_den=0 fixture_reject_num=0 fixture_reject_cross=0 fixture_reject_floor=0 fixture_reject_key=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_integer_oracle_carry" classname="mhgp7_arithmetic_integer_oracle_carry" time="0.0171891" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>arithmetic_integer_gate=mutant_killed case=oracle-only mutant=obig-carry-lost divergence=oracle.W2_carry boost=1_83 authority=obig_literals_and_boost public_status=not_claimed
+integer_counts oracle_literal=1 overflow_refused=0 conversions=0 u192_calls=0 u192_high=0 u320_calls=0 u320_w4=0 first_bit_256=0 sums=0 sum_carries=0 comparisons=0 gcd_zero=0 gcd_one=0 gcd_wide=0 gcd_cases=0 fibonacci=0 abs=0 keys=0 rationals=0 floors=0 fixture_reject_product=0 fixture_reject_sum=0 fixture_reject_den=0 fixture_reject_num=0 fixture_reject_cross=0 fixture_reject_floor=0 fixture_reject_key=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_integer_bad_case" classname="mhgp7_arithmetic_integer_bad_case" time="0.017455" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_integer_bad_mutant" classname="mhgp7_arithmetic_integer_bad_mutant" time="0.0171835" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_integer_case_mismatch" classname="mhgp7_arithmetic_integer_case_mismatch" time="0.0158583" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+</testsuite>

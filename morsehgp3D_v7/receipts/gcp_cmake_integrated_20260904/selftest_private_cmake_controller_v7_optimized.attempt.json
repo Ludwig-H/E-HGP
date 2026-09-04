@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/gcp-migration/selftest_private_cmake_controller_v7.py"
+  ],
+  "started_utc": "2026-09-04T22:25:35Z",
+  "status": "running",
+  "timeout_seconds": 45
+}

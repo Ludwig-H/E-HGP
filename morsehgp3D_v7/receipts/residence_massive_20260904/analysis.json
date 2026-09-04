@@ -1,0 +1,87 @@
+{
+  "schema": "mhgp7.massive-residency-analysis.v1",
+  "observed_at": "2026-09-04 22:33:33 UTC",
+  "status": "documented_static_analysis",
+  "public_status": "not_claimed",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "gcp": "not_used",
+  "compilation": "not_performed",
+  "benchmark": "not_performed",
+  "cpu_source_modified": false,
+  "documentation_sha256": [
+    {
+      "path": "morsehgp3D_v7/docs/RESIDENCE_MASSIVE.md",
+      "sha256": "cf3de00ef4eaf83f01cfa1be34c6959d0ffc41f7474616f722faf645754757ae"
+    },
+    {
+      "path": "build/v7_massive_residency/README.md",
+      "sha256": "09d7616f3300663718a30ee6af5dcb78398d342c55baab6b54e2ffafff145263"
+    }
+  ],
+  "source_manifest": "source_snapshot.json",
+  "source_stability": "Exact SHA-256 equality across two captures of the selected files.",
+  "guard_literals": [
+    {
+      "path": "morsehgp3D_v7/src/forest/fold.hpp",
+      "line": 375,
+      "literal": "inline u64 fold_events_cap() { return (u64)UINT32_MAX / 11; }"
+    },
+    {
+      "path": "morsehgp3D_v7/src/forest/fold.hpp",
+      "line": 382,
+      "literal": "  if (!MHGP7_MUTANT(\"caps-fold-guard-skip\") && events >= fold_events_cap()) { *why = \"resource_exhausted/requires_tiling : evenements >= (2^32-1)/11 (positions d'incidence u32)\"; return false; }"
+    },
+    {
+      "path": "morsehgp3D_v7/src/forest/fold.hpp",
+      "line": 383,
+      "literal": "  if (!MHGP7_MUTANT(\"caps-fold-guard-skip\") && incidences > fold_incidences_cap()) { *why = \"resource_exhausted/requires_tiling : incidences > 2^31-1\"; return false; }"
+    },
+    {
+      "path": "morsehgp3D_v7/src/forest/fold.hpp",
+      "line": 535,
+      "literal": "  fp.ev_fid.assign(ne * 11, 0);"
+    },
+    {
+      "path": "morsehgp3D_v7/src/forest/fold.hpp",
+      "line": 537,
+      "literal": "  std::vector<u8> ev_part(ne * 11, 0);  // partition de chaque enregistrement (temporaire de prepare_fold)"
+    },
+    {
+      "path": "morsehgp3D_v7/src/forest/fold.hpp",
+      "line": 608,
+      "literal": "        ev_fid[rc.pos] = in.intern_hashed(f, rc.h);"
+    },
+    {
+      "path": "morsehgp3D_v7/src/forest/fold.hpp",
+      "line": 609,
+      "literal": "        ev_part[rc.pos] = (u8)p;"
+    },
+    {
+      "path": "morsehgp3D_v7/src/forest/fold.hpp",
+      "line": 878,
+      "literal": "  for (size_t i = 0; i < nfid; ++i) st[i] = FidState{(i32)i, (u32)i, UINT32_MAX, UINT32_MAX, UINT32_MAX, 0, 0, 0, 0, {0, 0}};"
+    }
+  ],
+  "integer_derivations": {
+    "UINT32_MAX": "4294967295",
+    "INT32_MAX": "2147483647",
+    "event_cap_exclusive": "390451572",
+    "event_max_accepted": "390451571",
+    "slot_array_length_at_general_max": "4294967281",
+    "last_slot_at_general_max": "4294967280",
+    "max_facet_id_under_incidence_bound": "2147483646",
+    "max_events_K5": "357913941",
+    "max_events_K10": "195225786",
+    "input_count_cap": "1073741823"
+  },
+  "qualification_limits": [
+    "Literal code checks and arithmetic calculations accompany, but do not replace, the derivations in the document.",
+    "No allocator/RSS/VRAM or sizeof measurement performed.",
+    "No 10M or 50M execution or end-to-end capacity claim.",
+    "No v6 receipt, type-size measurement, or performance ratio promoted into v7.",
+    "CPU source C retained; candidate D remains a separate nonintegrated overlay."
+  ]
+}

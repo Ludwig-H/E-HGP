@@ -1,0 +1,7 @@
+{
+  "chunk_id": "2dc779",
+  "wall_time_seconds": 0.08249291,
+  "exit_code": 0,
+  "original_token_count": 14,
+  "output": "full_release_junit_selftest positive=1 rejected=7 PASS\n"
+}

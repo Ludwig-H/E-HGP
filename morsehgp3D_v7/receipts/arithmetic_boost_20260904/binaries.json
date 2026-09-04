@@ -1,0 +1,10 @@
+{
+  "mhgp7_arithmetic_integer_gate": {
+    "bytes": 128368,
+    "sha256": "49419fc37f03397165ab54bff42b3d4b5821cde65b4cda273eca186f05a5e745"
+  },
+  "mhgp7_arithmetic_lanes_gate": {
+    "bytes": 135160,
+    "sha256": "bf3160bf38797b15b298154ec629b4b0d98d477b927428a8e0947b308d95ff31"
+  }
+}

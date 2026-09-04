@@ -1,0 +1,15 @@
+{
+  "build_kind": "incremental_existing_release_tree",
+  "configuration": {
+    "build/v7_c_qualification/CMakeCache.txt": "ee85c394e36ed1e40abea7c413299a2aebc9c81b335570c570472793d9db135e",
+    "build/v7_c_qualification/CTestTestfile.cmake": "4b37f9b6fd8f6a91b1295aae4aeeed2f4533c9fc97097a87aa4a0260b0643698",
+    "build/v7_c_qualification/compile_commands.json": "6208c8e2c4382e25658f4cc7d73ebfce16d04fe9ffeecda0bac833185cc1fe9e"
+  },
+  "product_command": {
+    "command": "/usr/bin/c++   -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+    "directory": "/workspaces/E-HGP/build/v7_c_qualification",
+    "file": "/workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+    "output": "CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o"
+  },
+  "qualification": "fresh test executions; build is explicitly not fresh or hermetic"
+}

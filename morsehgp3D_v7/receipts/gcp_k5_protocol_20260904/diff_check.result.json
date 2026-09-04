@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "git",
+    "diff",
+    "--check",
+    "--",
+    "gcp-migration"
+  ],
+  "elapsed_seconds": 0.010373801998866838,
+  "exit_code": 0,
+  "started_utc": "2026-09-04T22:44:19Z",
+  "status": "completed",
+  "timeout_seconds": 30
+}

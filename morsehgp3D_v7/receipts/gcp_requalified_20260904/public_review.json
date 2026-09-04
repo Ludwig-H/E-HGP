@@ -1,0 +1,617 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "name": "published exporter hash",
+      "passed": true
+    },
+    {
+      "name": "published exact file inventory",
+      "passed": true
+    },
+    {
+      "name": "published hash and size receipt.json",
+      "passed": true
+    },
+    {
+      "name": "published hash and size source_pins.json",
+      "passed": true
+    },
+    {
+      "name": "exact replay from controller-certified private inputs receipt.json",
+      "passed": true
+    },
+    {
+      "name": "exact replay from controller-certified private inputs source_pins.json",
+      "passed": true
+    },
+    {
+      "name": "public/environment same certified raw manifest",
+      "passed": true
+    },
+    {
+      "name": "eight completed CPU observations",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/10 status",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/10 n",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/10 seed",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/10 kmax",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/10 s",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/10 threads",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/10 process_wall_seconds",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/10 pipeline_ms",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/10 max_rss_kb",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/10 digests",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/10 cardinalities",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/10 counts",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/10 status",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/10 n",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/10 seed",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/10 kmax",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/10 s",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/10 threads",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/10 process_wall_seconds",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/10 pipeline_ms",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/10 max_rss_kb",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/10 digests",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/10 cardinalities",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/10 counts",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/5 status",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/5 n",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/5 seed",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/5 kmax",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/5 s",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/5 threads",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/5 process_wall_seconds",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/5 pipeline_ms",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/5 max_rss_kb",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/5 digests",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/5 cardinalities",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/uniform/5 counts",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/5 status",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/5 n",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/5 seed",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/5 kmax",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/5 s",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/5 threads",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/5 process_wall_seconds",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/5 pipeline_ms",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/5 max_rss_kb",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/5 digests",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/5 cardinalities",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/uniform/5 counts",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/10 status",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/10 n",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/10 seed",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/10 kmax",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/10 s",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/10 threads",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/10 process_wall_seconds",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/10 pipeline_ms",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/10 max_rss_kb",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/10 digests",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/10 cardinalities",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/10 counts",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/10 status",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/10 n",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/10 seed",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/10 kmax",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/10 s",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/10 threads",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/10 process_wall_seconds",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/10 pipeline_ms",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/10 max_rss_kb",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/10 digests",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/10 cardinalities",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/10 counts",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/5 status",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/5 n",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/5 seed",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/5 kmax",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/5 s",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/5 threads",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/5 process_wall_seconds",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/5 pipeline_ms",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/5 max_rss_kb",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/5 digests",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/5 cardinalities",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v6/terrain/5 counts",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/5 status",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/5 n",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/5 seed",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/5 kmax",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/5 s",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/5 threads",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/5 process_wall_seconds",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/5 pipeline_ms",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/5 max_rss_kb",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/5 digests",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/5 cardinalities",
+      "passed": true
+    },
+    {
+      "name": "CPU raw/projected v7/terrain/5 counts",
+      "passed": true
+    },
+    {
+      "name": "four pairs genuinely equal",
+      "passed": true
+    },
+    {
+      "name": "corrected document default coordinates by family",
+      "passed": true
+    },
+    {
+      "name": "document table uniform K10",
+      "passed": true
+    },
+    {
+      "name": "document table terrain K10",
+      "passed": true
+    },
+    {
+      "name": "document table uniform K5",
+      "passed": true
+    },
+    {
+      "name": "document table terrain K5",
+      "passed": true
+    },
+    {
+      "name": "document uniform stage metrics rounded to milliseconds",
+      "passed": true
+    },
+    {
+      "name": "document uniform fold wall and pipeline",
+      "passed": true
+    },
+    {
+      "name": "document cumulative facet count",
+      "passed": true
+    },
+    {
+      "name": "document terrain generation",
+      "passed": true
+    },
+    {
+      "name": "candidate raw/projected status",
+      "passed": true
+    },
+    {
+      "name": "candidate raw/projected pipeline_ms",
+      "passed": true
+    },
+    {
+      "name": "candidate raw/projected max_rss_kb",
+      "passed": true
+    },
+    {
+      "name": "candidate raw/projected counts",
+      "passed": true
+    },
+    {
+      "name": "candidate raw/projected silent",
+      "passed": true
+    },
+    {
+      "name": "candidate raw/projected digests",
+      "passed": true
+    },
+    {
+      "name": "candidate raw/projected cardinalities",
+      "passed": true
+    },
+    {
+      "name": "document candidate completion and costs",
+      "passed": true
+    },
+    {
+      "name": "document silent aggregate costs",
+      "passed": true
+    },
+    {
+      "name": "document default candidate is mathematical refusal",
+      "passed": true
+    },
+    {
+      "name": "selected raw source hash gpu_primitives.stdout",
+      "passed": true
+    },
+    {
+      "name": "document twelve GPU gates and duration",
+      "passed": true
+    },
+    {
+      "name": "selected raw source hash machine.stdout",
+      "passed": true
+    },
+    {
+      "name": "selected raw source hash gpu_hardware.stdout",
+      "passed": true
+    },
+    {
+      "name": "selected raw source hash cpu_compiler_version.stdout",
+      "passed": true
+    },
+    {
+      "name": "environment selected source pin machine",
+      "passed": true
+    },
+    {
+      "name": "environment selected source pin gpu",
+      "passed": true
+    },
+    {
+      "name": "environment selected source pin compiler",
+      "passed": true
+    },
+    {
+      "name": "environment exact machine logical_cpus",
+      "passed": true
+    },
+    {
+      "name": "environment exact machine threads_per_core",
+      "passed": true
+    },
+    {
+      "name": "environment exact machine cores_per_socket",
+      "passed": true
+    },
+    {
+      "name": "environment exact machine sockets",
+      "passed": true
+    },
+    {
+      "name": "environment exact machine reported_mem_total_bytes",
+      "passed": true
+    },
+    {
+      "name": "environment CPU model",
+      "passed": true
+    },
+    {
+      "name": "environment exact GPU fields",
+      "passed": true
+    },
+    {
+      "name": "environment exact compiler line",
+      "passed": true
+    },
+    {
+      "name": "document build/tooling identity",
+      "passed": true
+    },
+    {
+      "name": "G4 engine source pins equal fresh local C qualification",
+      "passed": true
+    },
+    {
+      "name": "document exact target and terminal closure",
+      "passed": true
+    },
+    {
+      "name": "document UTC session interval",
+      "passed": true
+    },
+    {
+      "name": "no selected private account/network/worker path exposed",
+      "passed": true
+    },
+    {
+      "name": "no email or private home path in data/documentation",
+      "passed": true
+    },
+    {
+      "name": "document claims remain expressly bounded",
+      "passed": true
+    },
+    {
+      "name": "all public reviewed bytes unchanged",
+      "passed": true
+    }
+  ],
+  "findings": [],
+  "gcp": "not_used",
+  "private_raw_values_in_output": false,
+  "public_files_sha256": {
+    "morsehgp3D_v7/receipts/gcp_requalified_20260904/published/manifest.json": "8e8c7e45c0eeffb2951e27efb95bdf9f1168fdf1dda9bb1a0b463c3ddb6ed442",
+    "morsehgp3D_v7/receipts/gcp_requalified_20260904/published/source_pins.json": "0c36c8ac394a0a662c52f668e6fe1d444beaaf7e2cd9bf56189e56be2a497185",
+    "morsehgp3D_v7/receipts/gcp_requalified_20260904/published/receipt.json": "c29b887c6da8bc9597b261390772015797f86b7ba1d9a66e83b7fe9ce64b6708",
+    "morsehgp3D_v7/receipts/gcp_requalified_20260904/environment_selected.json": "8cff196da4fad0a17bfa0df2be449f1de87341426bf389cd0edc4c1aadc4d7f0",
+    "morsehgp3D_v7/receipts/gcp_requalified_20260904/export_public.py": "8c72e1740edfcf4074544cb9164096fd18508cd94dffbdd4089dffb74c2eb6c4",
+    "morsehgp3D_v7/receipts/gcp_requalified_20260904/selftest.py": "ebb07f5dbe1c0b20c00e1622c07490706e07d91a3ecf47100ddd27bea9eae042",
+    "morsehgp3D_v7/receipts/gcp_requalified_20260904/README.md": "bed26dccff40bd0253fbf4882efed811ff9b07d58ca8e54206e8858553a3e2f4",
+    "morsehgp3D_v7/docs/RESULTATS_G4_20260904.md": "57ede6293a5832d7078b5217351f1dfd677a500f2e3c6612e968c864559b5414"
+  },
+  "corrected_documentary_finding": {
+    "path": "morsehgp3D_v7/docs/RESULTATS_G4_20260904.md",
+    "issue": "Original text stated coord=368 globally; actual uniform=368 and terrain=1118.",
+    "resolution": "Root corrected the document during review. Published projection and private receipts were already correct and unchanged.",
+    "corrected_sha256": "57ede6293a5832d7078b5217351f1dfd677a500f2e3c6612e968c864559b5414"
+  },
+  "scope_limit": "No independent GCP query was issued. Root's separate post-session inventory claim is based on parent attestation, not re-queried here."
+}

@@ -39,10 +39,12 @@ def fixture(base: Path) -> Path:
     source = session / "source"
     source.mkdir(parents=True)
     records = []
-    for relative in [M.SELF, M.WRAPPER, *M.GUARDS]:
+    for relative in [M.SELF, M.WRAPPER, M.PRIVATE_CMAKE, *M.GUARDS]:
         path = source / relative
         path.parent.mkdir(parents=True, exist_ok=True)
-        data = Path(M.__file__).read_bytes() if relative == M.SELF else b"mock guard, never executed\n"
+        data = (Path(M.__file__).read_bytes() if relative == M.SELF else
+                (HERE.parent / M.PRIVATE_CMAKE).read_bytes() if relative == M.PRIVATE_CMAKE else
+                b"mock guard, never executed\n")
         path.write_bytes(data)
         records.append({"path": relative, "size": len(data), "sha256": M.sha(data)})
     M.write_json(source / "source_manifest.json", {"schema": M.SCHEMA, "files": records})
@@ -169,11 +171,7 @@ class SessionTests(unittest.TestCase):
                     M.candidate_observation(out, root, wide=wide)
                 record.update(exit_code=124, status="censored")
                 M.write_json(out / f"{label}.json", record)
-                if wide:
-                    self.assertEqual(M.candidate_observation(out, root, wide=True)['status'], 'censored')
-                else:
-                    with self.assertRaises(ValueError):
-                        M.candidate_observation(out, root, wide=False)
+                self.assertEqual(M.candidate_observation(out, root, wide=wide)['status'], 'censored')
 
     def test_bounded_process_and_missing_binary(self) -> None:
         with tempfile.TemporaryDirectory() as name:
@@ -229,6 +227,13 @@ class SessionTests(unittest.TestCase):
             session = fixture(base)
             expected = json.loads((session / "prepared.json").read_text())["manifest_sha256"]
             M.verify_source(session / "source", expected)
+            self.assertIn(HERE.parent / M.PRIVATE_CMAKE, M.source_paths(HERE.parent))
+            helper = session / "source" / M.PRIVATE_CMAKE
+            helper_bytes = helper.read_bytes()
+            helper.write_bytes(helper_bytes + b"\n# mutated helper\n")
+            with self.assertRaises(ValueError):
+                M.verify_source(session / "source", expected)
+            helper.write_bytes(helper_bytes)
             extra = session / "source" / "unexpected.hpp"
             extra.write_text("not pinned")
             with self.assertRaises(ValueError):
@@ -275,13 +280,14 @@ class SessionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as name:
             base = Path(name)
             root = HERE.parent
-            with mock.patch.object(M, "source_paths", return_value=[root / p for p in M.GUARDS + [M.SELF, M.WRAPPER]]):
+            with mock.patch.object(M, "source_paths", return_value=[root / p for p in M.GUARDS + [M.SELF, M.WRAPPER, M.PRIVATE_CMAKE]]):
                 session = M.prepare(root, base / "sessions")
             source = session / "source"
             expected = json.loads((session / "prepared.json").read_text())["manifest_sha256"]
             M.verify_source(source, expected)
             for relative in M.GUARDS + [M.WRAPPER]:
                 self.assertEqual((source / relative).stat().st_mode & 0o777, 0o555)
+            self.assertEqual((source / M.PRIVATE_CMAKE).stat().st_mode & 0o777, 0o444)
             fakebin = base / "fakebin"
             fakebin.mkdir()
             fake = fakebin / "gcloud"

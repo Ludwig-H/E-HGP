@@ -1,0 +1,150 @@
+{
+  "integer": [
+    [
+      "mhgp7_arithmetic_integer",
+      0,
+      "",
+      "arithmetic_integer_gate=passed case=all mutant=none"
+    ],
+    [
+      "mhgp7_arithmetic_integer_u320",
+      0,
+      "--case=u320-only",
+      "arithmetic_integer_gate=passed case=u320-only mutant=none"
+    ],
+    [
+      "mhgp7_arithmetic_integer_oracle",
+      0,
+      "--case=oracle-only",
+      "arithmetic_integer_gate=passed case=oracle-only mutant=none"
+    ],
+    [
+      "mhgp7_arithmetic_u320_word4",
+      4,
+      "--case=u320-only --mutant=level-trunc-hi",
+      "arithmetic_integer_gate=mutant_killed case=u320-only mutant=level-trunc-hi divergence=W2.u320_word4"
+    ],
+    [
+      "mhgp7_arithmetic_integer_oracle_carry",
+      4,
+      "--case=oracle-only --mutant=obig-carry-lost",
+      "arithmetic_integer_gate=mutant_killed case=oracle-only mutant=obig-carry-lost divergence=oracle.W2_carry"
+    ],
+    [
+      "mhgp7_arithmetic_integer_bad_case",
+      2,
+      "--case=unknown",
+      ""
+    ],
+    [
+      "mhgp7_arithmetic_integer_bad_mutant",
+      2,
+      "--case=u320-only --mutant=missing",
+      ""
+    ],
+    [
+      "mhgp7_arithmetic_integer_case_mismatch",
+      2,
+      "--case=all --mutant=level-trunc-hi",
+      ""
+    ]
+  ],
+  "lanes": [
+    [
+      "mhgp7_arithmetic_lanes",
+      0,
+      "",
+      "arithmetic_lanes_gate PASS"
+    ],
+    [
+      "mhgp7_arithmetic_lanes_q4_level",
+      0,
+      "--case=q4-level-only",
+      "arithmetic_lanes_gate PASS"
+    ],
+    [
+      "mhgp7_arithmetic_lanes_oracle",
+      0,
+      "--case=oracle-only",
+      "arithmetic_lanes_gate PASS"
+    ],
+    [
+      "mhgp7_arithmetic_lanes_oracle_overflow",
+      3,
+      "--case=oracle-overflow",
+      "first_divergence=oracle.overflow inject="
+    ],
+    [
+      "mhgp7_arithmetic_q3_factor",
+      4,
+      "--inject=q3-level-4g",
+      "first_divergence=q3.level inject=q3-level-4g"
+    ],
+    [
+      "mhgp7_arithmetic_q4_parity",
+      4,
+      "--inject=q4-center-parity",
+      "first_divergence=q4.center inject=q4-center-parity"
+    ],
+    [
+      "mhgp7_arithmetic_q4_face_boundary",
+      4,
+      "--inject=q4-eq-nonstrict",
+      "first_divergence=q4.face_power inject=q4-eq-nonstrict"
+    ],
+    [
+      "mhgp7_arithmetic_q4_u192_word2",
+      4,
+      "--case=q4-level-only --inject=level-trunc-hi",
+      "first_divergence=q4.level.num inject=level-trunc-hi"
+    ],
+    [
+      "mhgp7_arithmetic_lanes_oracle_carry",
+      4,
+      "--case=oracle-only --inject=obig-carry-lost",
+      "first_divergence=oracle.literal-carry inject=obig-carry-lost"
+    ],
+    [
+      "mhgp7_arithmetic_lanes_bad_case",
+      2,
+      "--case=unknown",
+      ""
+    ],
+    [
+      "mhgp7_arithmetic_lanes_bad_inject",
+      2,
+      "--inject=missing",
+      ""
+    ],
+    [
+      "mhgp7_arithmetic_lanes_duplicate_case",
+      2,
+      "--case=all --case=all",
+      ""
+    ],
+    [
+      "mhgp7_arithmetic_lanes_duplicate_inject",
+      2,
+      "--inject=q3-level-4g --inject=q3-level-4g",
+      ""
+    ],
+    [
+      "mhgp7_arithmetic_lanes_empty_inject",
+      2,
+      "--inject=",
+      ""
+    ],
+    [
+      "mhgp7_arithmetic_lanes_u192_case_mismatch",
+      2,
+      "--case=all --inject=level-trunc-hi",
+      ""
+    ],
+    [
+      "mhgp7_arithmetic_lanes_oracle_case_mismatch",
+      2,
+      "--case=all --inject=obig-carry-lost",
+      ""
+    ]
+  ]
+}

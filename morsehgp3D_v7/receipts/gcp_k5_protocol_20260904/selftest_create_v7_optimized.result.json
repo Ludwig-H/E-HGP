@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/gcp-migration/selftest_create_v7.py"
+  ],
+  "elapsed_seconds": 0.41772322399992845,
+  "exit_code": 0,
+  "started_utc": "2026-09-04T22:44:14Z",
+  "status": "completed",
+  "timeout_seconds": 45
+}

@@ -1,0 +1,120 @@
+--- a/gcp-migration/v7_g4_session.py
++++ b/gcp-migration/v7_g4_session.py
+@@ -28,6 +28,7 @@
+     "gcp-migration/stop_and_verify.sh",
+ ]
+ WRAPPER = "gcp-migration/session_campagne_v7_g4.sh"
++PRIVATE_CMAKE = "gcp-migration/private_cmake_v7.py"
+ CPU_PACKAGES = ("build-essential", "cmake", "libboost-dev", "time")
+ CPU_PROBE = """#include <bit>
+ #include <span>
+@@ -229,7 +230,7 @@
+                          if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc")
+         fixture = root / line / "receipts" / "conformite_v5"
+         paths.extend(p for p in fixture.rglob("*") if p.is_file())
+-    paths.extend(root / p for p in GUARDS + [SELF, WRAPPER])
++    paths.extend(root / p for p in GUARDS + [SELF, WRAPPER, PRIVATE_CMAKE])
+     provenance = root / "morsehgp3D_v7/docs/V6_SOURCE_SNAPSHOT.json"
+     if provenance.exists():
+         paths.append(provenance)
+@@ -340,6 +341,15 @@
+         raise ValueError("result inventory mismatch or empty")
+ 
+ 
++def private_cmake_module(root: Path):
++    spec = importlib.util.spec_from_file_location("private_cmake_v7", root / PRIVATE_CMAKE)
++    if spec is None or spec.loader is None:
++        raise ValueError("private CMake helper unavailable")
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++
++
+ def compare_module(root: Path) -> Any:
+     sys.dont_write_bytecode = True
+     spec = importlib.util.spec_from_file_location("v7_compare", root / "morsehgp3D_v7/bench/compare_v6_v7.py")
+@@ -447,6 +457,7 @@
+     if json.loads((directory / "gpu_status.json").read_text()).get("status") not in \
+             ("completed", "unavailable", "not_requested"):
+         raise ValueError("GPU outcome missing or invalid")
++    private_cmake_module(source).validate_selection(directory)
+ 
+ 
+ def read_fields(path: Path) -> dict[str, str]:
+@@ -534,7 +545,7 @@
+         verify_source(root, manifest_hash)
+         deadline = min(time.time() + 2100, guest_deadline(Path("/run/systemd/shutdown/scheduled")) - 180)
+         write_json(out / "identity.json", {"schema": SCHEMA, "source_manifest_sha256": manifest_hash,
+-                                          "guest_guard_deadline": deadline, "public_status": "not_claimed"})
++                                          "guest_guard_deadline": deadline, "worker_root": str(root), "public_status": "not_claimed"})
+ 
+         worker_env = dict(os.environ, LC_ALL="C", LANG="C")
+         nvcc = shutil.which("nvcc")
+@@ -634,26 +645,56 @@
+         else:
+             write_json(out / "candidate_wide_status.json", {
+                 "status": "not_attempted", "reason": "insufficient_worker_budget", "public_status": "not_claimed"})
+-        if gpu and nvcc and shutil.which("nvidia-smi") and deadline - time.time() >= 780:
++        # Optional GPU-only tooling; CPU stays on the recorded system CMake.
++        # The outer process-group watchdog is mandatory: socket inactivity
++        # timeouts and cooperative Budget checks are not total OS deadlines.
++        cmake_tool = private_cmake_module(root)
++        gpu_cmake, gpu_ctest = "cmake", "ctest"
++        tooling_failure = None
++        private_installation = None
++        raw_system_cmake = (out / "cpu_cmake_version.stdout").read_text()
++        if gpu and nvcc and shutil.which("nvidia-smi") and cmake_tool.system_version(raw_system_cmake) < (3, 26, 0):
++            if not cmake_tool.installation_needed(raw_system_cmake, gpu_requested=True, nvcc_present=True,
++                                                  remaining_seconds=deadline - time.time()):
++                tooling_failure = "private_cmake_120s_plus_gpu780s_and_drain20s_budget_unavailable"
++            else:
++                guest_deadline(Path("/run/systemd/shutdown/scheduled"))
++                install_command = [sys.executable, PRIVATE_CMAKE, "--install", "--root", str(root),
++                                   "--seconds", str(cmake_tool.INSTALL_BUDGET), "--deadline-epoch",
++                                   str(deadline - cmake_tool.GPU_RESERVE - cmake_tool.DRAIN_MARGIN)]
++                install_rc = run_logged(out, "gpu_cmake_install", install_command, cmake_tool.INSTALL_BUDGET,
++                                        cwd=root, env=worker_env)
++                if install_rc:
++                    tooling_failure = "private_cmake_install_failed_or_censored"
++                else:
++                    private_installation = json.loads((out / "gpu_cmake_install.stdout").read_text())
++                    cmake_tool.validate_receipt(private_installation)
++                    gpu_cmake = "./" + private_installation["paths"]["cmake"]
++                    gpu_ctest = "./" + private_installation["paths"]["ctest"]
++        write_json(out / "gpu_cmake_toolchain.json", {"schema": "ehgp.v7.gpu-cmake.v1",
++                   "source": "private" if private_installation is not None else "system",
++                   "system_version": raw_system_cmake, "installation": private_installation,
++                   "cmake": gpu_cmake, "ctest": gpu_ctest})
++        if gpu and nvcc and shutil.which("nvidia-smi") and not tooling_failure and deadline - time.time() >= 780:
+             run("gpu_inventory", ["nvidia-smi", "-q"], 30)
+             run("gpu_build", ["bash", "-e", "-c",
+-                "cmake -S morsehgp3D_v7 -B build-v7-cuda -DCMAKE_BUILD_TYPE=Release "
++                f"{shlex.quote(gpu_cmake)} -S morsehgp3D_v7 -B build-v7-cuda -DCMAKE_BUILD_TYPE=Release "
+                 "-DMHGP7_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=120 "
+                 f"-DCMAKE_CUDA_COMPILER={shlex.quote(nvcc)} && "
+-                "cmake --build build-v7-cuda --parallel 12 --target "
++                f"{shlex.quote(gpu_cmake)} --build build-v7-cuda --parallel 12 --target "
+                 "mhgp7_device_witness mhgp7_census_device_gate"], 420)
+             write_json(out / "gpu_binaries.json", {
+                 binary: {"path": f"build-v7-cuda/{binary}",
+                          "sha256": sha((root / f"build-v7-cuda/{binary}").read_bytes())}
+                 for binary in ("mhgp7_device_witness", "mhgp7_census_device_gate")})
+-            run("gpu_primitives", ["ctest", "--test-dir", "build-v7-cuda", "--output-on-failure", "--no-tests=error",
++            run("gpu_primitives", [gpu_ctest, "--test-dir", "build-v7-cuda", "--output-on-failure", "--no-tests=error",
+                                   "-R", "^mhgp7_(device_witness|census_device)(_|$)", "-L", "gpu"], 300)
+             write_json(out / "gpu_status.json", {"status": "completed", "scope": "device_primitives_only"})
+         else:
+             write_json(out / "gpu_status.json", {"status": "unavailable" if gpu else "not_requested",
+                                                  "nvcc": nvcc, "checked_cuda_paths": cuda_paths,
+                                                  "remaining_seconds": max(0, int(deadline - time.time())),
+-                                                 "reason": "tools_or_780_second_budget_unavailable" if gpu else "disabled"})
++                                                 "reason": tooling_failure or ("tools_or_780_second_budget_unavailable" if gpu else "disabled")})
+         code = 0
+     except BaseException as error:
+         write_json(out / "failure.json", {"type": type(error).__name__, "message": str(error)})
+@@ -873,3 +914,4 @@
+     except Exception as error:
+         print(f"REFUS: {error}", file=sys.stderr)
+         raise SystemExit(2)
++
+

@@ -78,6 +78,14 @@ def active_markdown() -> list[Path]:
         for p in sorted((v6 / "audits").rglob("*.md"))
         if p.name.startswith(("REPONSE_CLAUDE_", "NOTE_CLAUDE_", "QUESTION_CLAUDE_", "NOTE_SOLUTION_"))
     )
+    # V7 explicitement ouverte hors registre : ne pas laisser ses documents
+    # constructeur hors du controle canonique. Les rapports independants et
+    # le dialogue partage restent des sources que ce script ne reformate pas.
+    v7 = ROOT / "morsehgp3D_v7"
+    paths.extend(p for p in (v7 / "README.md", v7 / "PASSATION.md") if p.is_file())
+    paths.extend(sorted((v7 / "docs").rglob("*.md")))
+    paths.extend(sorted((v7 / "receipts").rglob("*.md")))
+    paths.extend(sorted((v7 / "bench").rglob("*.md")))
     return list(dict.fromkeys(paths))
 
 

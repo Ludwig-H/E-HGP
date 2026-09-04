@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_c_qualification",
+    "--output-on-failure",
+    "--no-tests=error",
+    "-L",
+    "^gate$",
+    "--parallel",
+    "2",
+    "--output-junit",
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/arithmetic_gates_20260904/full_release/ctest.junit.xml"
+  ],
+  "elapsed_seconds": 558.5576564929997,
+  "exit_code": 0,
+  "started_utc": "2026-09-04T23:20:05Z",
+  "status": "completed",
+  "timeout_seconds": 7200
+}

@@ -1,0 +1,101 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7_boost_gate/build
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v7_boost_gate/build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v7_boost_gate/build/DartConfiguration.tcl
+Test project /workspaces/E-HGP/build/v7_boost_gate/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 339
+    Start 339: mhgp7_arithmetic_integer
+
+339: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_boost_gate/build/v7/mhgp7_arithmetic_integer_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=arithmetic_integer_gate=passed case=all mutant=none" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+339: Working Directory: /workspaces/E-HGP/build/v7_boost_gate/build/v7
+339: Test timeout computed to be: 30
+339: arithmetic_integer_gate=passed case=all mutant=none divergence=none boost=1_83 authority=obig_literals_and_boost public_status=not_claimed
+339: integer_counts oracle_literal=1 overflow_refused=1 conversions=6 u192_calls=19 u192_high=4 u320_calls=31 u320_w4=2 first_bit_256=1 sums=1 sum_carries=2 comparisons=45 gcd_zero=1 gcd_one=188 gcd_wide=3 gcd_cases=192 fibonacci=185 abs=4 keys=4 rationals=4 floors=6 fixture_reject_product=1 fixture_reject_sum=1 fixture_reject_den=4 fixture_reject_num=1 fixture_reject_cross=1 fixture_reject_floor=2 fixture_reject_key=2
+339: 
+1/8 Test #339: mhgp7_arithmetic_integer .................   Passed    0.02 sec
+test 340
+    Start 340: mhgp7_arithmetic_integer_u320
+
+340: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_boost_gate/build/v7/mhgp7_arithmetic_integer_gate" "-DARGS=--case=u320-only" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=arithmetic_integer_gate=passed case=u320-only mutant=none" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+340: Working Directory: /workspaces/E-HGP/build/v7_boost_gate/build/v7
+340: Test timeout computed to be: 30
+340: arithmetic_integer_gate=passed case=u320-only mutant=none divergence=none boost=1_83 authority=obig_literals_and_boost public_status=not_claimed
+340: integer_counts oracle_literal=1 overflow_refused=1 conversions=6 u192_calls=0 u192_high=0 u320_calls=9 u320_w4=2 first_bit_256=1 sums=0 sum_carries=0 comparisons=4 gcd_zero=0 gcd_one=0 gcd_wide=0 gcd_cases=0 fibonacci=0 abs=0 keys=0 rationals=0 floors=0 fixture_reject_product=0 fixture_reject_sum=0 fixture_reject_den=0 fixture_reject_num=0 fixture_reject_cross=0 fixture_reject_floor=0 fixture_reject_key=0
+340: 
+2/8 Test #340: mhgp7_arithmetic_integer_u320 ............   Passed    0.02 sec
+test 341
+    Start 341: mhgp7_arithmetic_integer_oracle
+
+341: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_boost_gate/build/v7/mhgp7_arithmetic_integer_gate" "-DARGS=--case=oracle-only" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=arithmetic_integer_gate=passed case=oracle-only mutant=none" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+341: Working Directory: /workspaces/E-HGP/build/v7_boost_gate/build/v7
+341: Test timeout computed to be: 30
+341: arithmetic_integer_gate=passed case=oracle-only mutant=none divergence=none boost=1_83 authority=obig_literals_and_boost public_status=not_claimed
+341: integer_counts oracle_literal=1 overflow_refused=1 conversions=6 u192_calls=0 u192_high=0 u320_calls=0 u320_w4=0 first_bit_256=0 sums=0 sum_carries=0 comparisons=0 gcd_zero=0 gcd_one=0 gcd_wide=0 gcd_cases=0 fibonacci=0 abs=0 keys=0 rationals=0 floors=0 fixture_reject_product=0 fixture_reject_sum=0 fixture_reject_den=0 fixture_reject_num=0 fixture_reject_cross=0 fixture_reject_floor=0 fixture_reject_key=0
+341: 
+3/8 Test #341: mhgp7_arithmetic_integer_oracle ..........   Passed    0.02 sec
+test 342
+    Start 342: mhgp7_arithmetic_u320_word4
+
+342: Test command: /usr/bin/cmake "-DEXPECTED=4" "-DCMD=/workspaces/E-HGP/build/v7_boost_gate/build/v7/mhgp7_arithmetic_integer_gate" "-DARGS=--case=u320-only --mutant=level-trunc-hi" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=arithmetic_integer_gate=mutant_killed case=u320-only mutant=level-trunc-hi divergence=W2.u320_word4" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+342: Working Directory: /workspaces/E-HGP/build/v7_boost_gate/build/v7
+342: Test timeout computed to be: 30
+342: arithmetic_integer_gate=mutant_killed case=u320-only mutant=level-trunc-hi divergence=W2.u320_word4 boost=1_83 authority=obig_literals_and_boost public_status=not_claimed
+342: integer_counts oracle_literal=1 overflow_refused=1 conversions=6 u192_calls=0 u192_high=0 u320_calls=9 u320_w4=2 first_bit_256=1 sums=0 sum_carries=0 comparisons=4 gcd_zero=0 gcd_one=0 gcd_wide=0 gcd_cases=0 fibonacci=0 abs=0 keys=0 rationals=0 floors=0 fixture_reject_product=0 fixture_reject_sum=0 fixture_reject_den=0 fixture_reject_num=0 fixture_reject_cross=0 fixture_reject_floor=0 fixture_reject_key=0
+342: 
+4/8 Test #342: mhgp7_arithmetic_u320_word4 ..............   Passed    0.02 sec
+test 343
+    Start 343: mhgp7_arithmetic_integer_oracle_carry
+
+343: Test command: /usr/bin/cmake "-DEXPECTED=4" "-DCMD=/workspaces/E-HGP/build/v7_boost_gate/build/v7/mhgp7_arithmetic_integer_gate" "-DARGS=--case=oracle-only --mutant=obig-carry-lost" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=arithmetic_integer_gate=mutant_killed case=oracle-only mutant=obig-carry-lost divergence=oracle.W2_carry" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+343: Working Directory: /workspaces/E-HGP/build/v7_boost_gate/build/v7
+343: Test timeout computed to be: 30
+343: arithmetic_integer_gate=mutant_killed case=oracle-only mutant=obig-carry-lost divergence=oracle.W2_carry boost=1_83 authority=obig_literals_and_boost public_status=not_claimed
+343: integer_counts oracle_literal=1 overflow_refused=0 conversions=0 u192_calls=0 u192_high=0 u320_calls=0 u320_w4=0 first_bit_256=0 sums=0 sum_carries=0 comparisons=0 gcd_zero=0 gcd_one=0 gcd_wide=0 gcd_cases=0 fibonacci=0 abs=0 keys=0 rationals=0 floors=0 fixture_reject_product=0 fixture_reject_sum=0 fixture_reject_den=0 fixture_reject_num=0 fixture_reject_cross=0 fixture_reject_floor=0 fixture_reject_key=0
+343: 
+5/8 Test #343: mhgp7_arithmetic_integer_oracle_carry ....   Passed    0.02 sec
+test 344
+    Start 344: mhgp7_arithmetic_integer_bad_case
+
+344: Test command: /usr/bin/cmake "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_boost_gate/build/v7/mhgp7_arithmetic_integer_gate" "-DARGS=--case=unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+344: Working Directory: /workspaces/E-HGP/build/v7_boost_gate/build/v7
+344: Test timeout computed to be: 30
+344: 
+6/8 Test #344: mhgp7_arithmetic_integer_bad_case ........   Passed    0.02 sec
+test 345
+    Start 345: mhgp7_arithmetic_integer_bad_mutant
+
+345: Test command: /usr/bin/cmake "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_boost_gate/build/v7/mhgp7_arithmetic_integer_gate" "-DARGS=--case=u320-only --mutant=missing" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+345: Working Directory: /workspaces/E-HGP/build/v7_boost_gate/build/v7
+345: Test timeout computed to be: 30
+345: 
+7/8 Test #345: mhgp7_arithmetic_integer_bad_mutant ......   Passed    0.02 sec
+test 346
+    Start 346: mhgp7_arithmetic_integer_case_mismatch
+
+346: Test command: /usr/bin/cmake "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_boost_gate/build/v7/mhgp7_arithmetic_integer_gate" "-DARGS=--case=all --mutant=level-trunc-hi" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+346: Working Directory: /workspaces/E-HGP/build/v7_boost_gate/build/v7
+346: Test timeout computed to be: 30
+346: 
+8/8 Test #346: mhgp7_arithmetic_integer_case_mismatch ...   Passed    0.02 sec
+
+The following tests passed:
+	mhgp7_arithmetic_integer
+	mhgp7_arithmetic_integer_u320
+	mhgp7_arithmetic_integer_oracle
+	mhgp7_arithmetic_u320_word4
+	mhgp7_arithmetic_integer_oracle_carry
+	mhgp7_arithmetic_integer_bad_case
+	mhgp7_arithmetic_integer_bad_mutant
+	mhgp7_arithmetic_integer_case_mismatch
+
+100% tests passed, 0 tests failed out of 8
+
+Label Time Summary:
+gate    =   0.14 sec*proc (8 tests)
+
+Total Test time (real) =   0.16 sec

@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""Bounded apt download/extraction and private-include arithmetic gate build."""
+from __future__ import annotations
+
+import importlib.util
+import json
+from pathlib import Path
+import re
+import sys
+import xml.etree.ElementTree as ET
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+OUT = HERE / "receipts"
+PACKAGE = "libboost1.83-dev"
+VERSION = "1.83.0-2.1ubuntu3.2"
+PACKAGE_SHA = "519ecf2c64308527e15b6582955681d192a832250baa4bc424967aaf7d02d68f"
+PACKAGE_SIZE = 10745362
+DEB = HERE / "download" / f"{PACKAGE}_{VERSION}_amd64.deb"
+BUILD = HERE / "build"
+INCLUDE = HERE / "extracted/usr/include"
+INTEGER_PATTERN = "^mhgp7_arithmetic_(integer($|_)|u320_word4$)"
+
+
+def require(value, message):
+    if not value:
+        raise RuntimeError(message)
+
+
+def main():
+    OUT.mkdir()
+    (HERE / "download").mkdir()
+    spec = importlib.util.spec_from_file_location("bounded_receipts", ROOT / "morsehgp3D_v7/receipts/release_20260904/run_release.py")
+    require(spec is not None and spec.loader is not None, "receipt helper unavailable")
+    H = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(H)
+    H.OUT = OUT
+    sources = H.source_inventory()
+    product = H.digest(ROOT / "build/v7/mhgp7")
+    H.save("sources_before.json", sources)
+    H.save("scope.json", {"public_status": "not_claimed", "gcp": "not_used", "system_package_installation": False,
+        "purpose": "optional_integer_Boost_branch_private_headers_not_pipeline_qualification",
+        "package": PACKAGE, "version": VERSION, "sha256": PACKAGE_SHA, "bytes": PACKAGE_SIZE,
+        "include_scope": "two_isolated_arithmetic_targets_only", "system_boost_header_present_before": Path("/usr/include/boost/multiprecision/cpp_int.hpp").exists(),
+        "protected_product_sha256": product, "runner_sha256": H.digest(Path(__file__)),
+        "overlay_cmake_sha256": H.digest(HERE / "CMakeLists.txt")})
+    results, failure, authority, junit = {}, None, None, None
+
+    def run(name, command, timeout=60, cwd=None):
+        old = H.ROOT
+        H.ROOT = cwd or ROOT
+        try:
+            result = H.run(name, command, timeout)
+        finally:
+            H.ROOT = old
+        results[name] = result
+        require(result["exit_code"] == 0, name + " failed or censored")
+        return (OUT / (name + ".stdout")).read_text()
+
+    try:
+        run("apt_policy", ["apt-cache", "policy", "libboost-dev", PACKAGE])
+        metadata = run("apt_package_metadata", ["apt-cache", "show", PACKAGE + "=" + VERSION])
+        require(f"SHA256: {PACKAGE_SHA}\n" in metadata and f"Size: {PACKAGE_SIZE}\n" in metadata and
+                f"Version: {VERSION}\n" in metadata and "Origin: Ubuntu\n" in metadata, "APT metadata pin mismatch")
+        run("apt_uri", ["apt-get", "--print-uris", "download", PACKAGE + "=" + VERSION], cwd=HERE / "download")
+        run("apt_download", ["apt-get", "-o", "Acquire::Retries=0", "-o", "Acquire::http::Timeout=30",
+                             "download", PACKAGE + "=" + VERSION], 120, cwd=HERE / "download")
+        require(DEB.is_file() and DEB.stat().st_size == PACKAGE_SIZE and H.digest(DEB) == PACKAGE_SHA, "downloaded DEB pin mismatch")
+        run("deb_metadata", ["dpkg-deb", "--field", str(DEB), "Package", "Version", "Architecture"])
+        run("extract_headers", ["dpkg-deb", "--extract", str(DEB), str(HERE / "extracted")], 120)
+        require((INCLUDE / "boost/multiprecision/cpp_int.hpp").is_file(), "private cpp_int header absent")
+        header = (INCLUDE / "boost/version.hpp").read_text()
+        require(re.search(r"^#define BOOST_VERSION 108300$", header, re.M), "private Boost version mismatch")
+        H.save("package.json", {"package": PACKAGE, "version": VERSION, "sha256": H.digest(DEB), "bytes": DEB.stat().st_size,
+            "cpp_int_header_sha256": H.digest(INCLUDE / "boost/multiprecision/cpp_int.hpp"),
+            "version_header_sha256": H.digest(INCLUDE / "boost/version.hpp"), "boost_version": 108300})
+        run("compiler_version", ["c++", "--version"])
+        run("configure", ["cmake", "-S", str(HERE), "-B", str(BUILD), "-DCMAKE_BUILD_TYPE=Release",
+                          "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON", "-DMHGP7_ENABLE_CUDA=OFF"], 60)
+        run("build_two_targets", ["cmake", "--build", str(BUILD), "--parallel", "1", "--target",
+                                 "mhgp7_arithmetic_integer_gate", "mhgp7_arithmetic_lanes_gate"], 180)
+        commands = json.loads((BUILD / "compile_commands.json").read_text())
+        private = [entry for entry in commands if str(INCLUDE) in entry["command"]]
+        require(len(private) == 2 and {Path(entry["file"]).name for entry in private} ==
+                {"arithmetic_integer_gate.cpp", "arithmetic_lanes_gate.cpp"}, "private include leaked to other targets")
+        for entry in private:
+            require(all(flag in entry["command"] for flag in ("-O3", "-DNDEBUG", "-std=c++20", "-Wall", "-Wextra", "-Wpedantic", "-Werror", "-DMHGP7_TESTING=1")),
+                    "strict Release/testing flags missing")
+            require("-isystem " + str(INCLUDE) in entry["command"], "private Boost include is not system-equivalent")
+        H.save("compile_binding.json", {"compile_commands_sha256": H.digest(BUILD / "compile_commands.json"), "targets": private})
+        macros = run("compiled_authority_macros", ["c++", "-std=c++20", "-DMHGP7_TESTING=1", "-isystem", str(INCLUDE),
+            "-I", str(ROOT / "morsehgp3D_v7"), "-dM", "-E", str(ROOT / "morsehgp3D_v7/tests/arithmetic_integer_gate.cpp")])
+        require("#define INTEGER_GATE_BOOST 1\n" in macros and "#define BOOST_VERSION 108300\n" in macros, "Boost branch not preprocessed")
+        deps = (BUILD / "v7/CMakeFiles/mhgp7_arithmetic_integer_gate.dir/tests/arithmetic_integer_gate.cpp.o.d").read_text()
+        require(str(INCLUDE / "boost/multiprecision/cpp_int.hpp") in deps and str(INCLUDE / "boost/version.hpp") in deps,
+                "actual integer object dependencies do not include private Boost")
+        inventory = json.loads(run("integer_inventory", ["ctest", "--test-dir", str(BUILD), "--show-only=json-v1", "-R", INTEGER_PATTERN]))
+        require(len(inventory["tests"]) == 8, "integer inventory not exactly eight")
+        run("integer_ctest", ["ctest", "--test-dir", str(BUILD), "--no-tests=error", "--verbose", "-R", INTEGER_PATTERN,
+                              "--output-junit", str(OUT / "integer.junit.xml")], 180)
+        cases = ET.parse(OUT / "integer.junit.xml").getroot().findall(".//testcase")
+        require(len(cases) == 8 and not any(case.find("failure") is not None or case.find("error") is not None or
+                                           case.find("skipped") is not None for case in cases), "integer JUnit incomplete/failed")
+        junit = {"tests": len(cases), "names": [case.get("name") for case in cases], "failed": [], "skipped": []}
+        runtime = run("integer_authority", [str(BUILD / "v7/mhgp7_arithmetic_integer_gate")], 30)
+        lines = runtime.splitlines()
+        require(lines[0] == "arithmetic_integer_gate=passed case=all mutant=none divergence=none boost=1_83 authority=obig_literals_and_boost public_status=not_claimed", "runtime Boost authority absent")
+        counts = dict(re.findall(r"([a-z0-9_]+)=([0-9]+)", lines[1]))
+        require(int(counts["fibonacci"]) > 180 and int(counts["u192_high"]) == 4 and int(counts["u320_w4"]) == 2 and
+                int(counts["first_bit_256"]) == 1 and int(counts["sum_carries"]) == 2 and int(counts["keys"]) == 4,
+                "runtime nonvacuity floor missing")
+        authority = {"integer": "obig_literals_and_boost", "boost": "1_83", "counters": {key: int(value) for key, value in counts.items()},
+                     "lanes": "obig_and_literals_boost_not_used_by_its_source"}
+        run("lanes_ctest", ["ctest", "--test-dir", str(BUILD), "--no-tests=error", "--output-on-failure",
+                             "-R", "^mhgp7_arithmetic_(lanes($|_)|q[34]_)", "--output-junit", str(OUT / "lanes.junit.xml")], 180)
+        H.save("binaries.json", {name: {"sha256": H.digest(BUILD / "v7" / name), "bytes": (BUILD / "v7" / name).stat().st_size}
+                                 for name in ("mhgp7_arithmetic_integer_gate", "mhgp7_arithmetic_lanes_gate")})
+    except BaseException as error:
+        failure = f"{type(error).__name__}: {error}"
+    after = H.source_inventory()
+    H.save("sources_after.json", after)
+    unchanged = product == H.digest(ROOT / "build/v7/mhgp7")
+    summary = {"status": "passed" if failure is None and sources == after and unchanged else "failed_or_invalid",
+               "failure": failure, "sources_stable": sources == after, "protected_product_unchanged": unchanged,
+               "system_boost_header_present_after": Path("/usr/include/boost/multiprecision/cpp_int.hpp").exists(),
+               "system_package_installation": False, "gcp": "not_used", "public_status": "not_claimed",
+               "compiled_authority": authority, "integer_junit": junit, "results": results}
+    H.save("summary.json", summary)
+    H.save("receipt_manifest.json", [{"path": path.name, "sha256": H.digest(path), "bytes": path.stat().st_size}
+           for path in sorted(OUT.iterdir()) if path.is_file() and path.name != "receipt_manifest.json"])
+    print(json.dumps({key: value for key, value in summary.items() if key not in ("results", "compiled_authority")}), flush=True)
+    return 0 if summary["status"] == "passed" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

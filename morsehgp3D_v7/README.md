@@ -54,8 +54,8 @@ matérielle propre ; les tests `stub` ne sont jamais des mesures GPU.
 
 Le [workflow CPU v7](../.github/workflows/morsehgp3d-v7.yml) reprend ces
 portes et les tests des runners. Il n'a ni identifiants cloud ni permission
-d'écriture. Son enregistrement n'est pas un résultat CI : les reçus locaux
-et une éventuelle exécution GitHub restent deux preuves distinctes.
+d'écriture. Les reçus locaux et les exécutions GitHub restent deux preuves
+distinctes ; leurs résultats courants sont dans [la passation](PASSATION.md).
 
 ## Entrée réelle et archive transactionnelle
 
@@ -110,7 +110,11 @@ Lire [l'état de livraison](PASSATION.md),
 [Incidences silencieuses](docs/INCIDENCES_SILENCIEUSES.md),
 [Composition horizontale conditionnelle](docs/PREUVE_HORIZONTALE_COMPOSITION.md),
 [Qualification des primitives S1](docs/QUALIFICATION_S1_PRIMITIVES.md),
+[les portes arithmétiques intégrées](receipts/arithmetic_gates_20260904/README.md),
 [le mode mono](docs/MODE_MONO.md),
+[la première comparaison s=8/10/12](docs/RESULTATS_MONO_20260904.md),
+[les résultats G4 à 50k et les primitives GPU](docs/RESULTATS_G4_20260904.md),
+[les limites de résidence et la voie massive](docs/RESIDENCE_MASSIVE.md),
 [l'état courant](audits/ETAT_COURANT.md) et
 [la réponse aux audits indépendants](audits/REPONSE_CONSTRUCTEUR_20260904.md).
 Les mesures et les refus futurs doivent être liés à leurs sources et

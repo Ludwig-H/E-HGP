@@ -120,6 +120,14 @@ des formes q2/q3/q4, pas une normalisation supplémentaire cachée dans le PGCD.
 
 ## 4. Largeurs entières : bornes séparées des portes
 
+Le [grand-livre détaillé](ARITHMETIQUE_PRIMITIVES.md) complète maintenant
+ce tableau pour q2/q3/q4, Cramer, PGCD et comparaisons larges : chaque
+intermédiaire écrit et chaque conversion y ont leur précondition.
+Il réconcilie les bornes q3 86/104 et 87/105, et distingue le domaine
+géométrique du mot haut U320 générique. Le [plan des portes indépendantes](PLAN_PORTES_ARITHMETIQUES.md)
+reste une proposition non exécutée ; cette lecture statique n'ajoute
+aucun succès expérimental aux reçus cités ici.
+
 Poser $M=65535<2^{16}$. Les bornes suivantes, volontairement larges,
 sont déduites des expressions des lanes sur positions u16, pas de leurs
 valeurs observées dans les tests. Elles supposent que la promotion indiquée

@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import hashlib
 import importlib.util
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -28,7 +29,12 @@ GUARDS = [
     "gcp-migration/stop_and_verify.sh",
 ]
 WRAPPER = "gcp-migration/session_campagne_v7_g4.sh"
+PRIVATE_CMAKE = "gcp-migration/private_cmake_v7.py"
 CPU_PACKAGES = ("build-essential", "cmake", "libboost-dev", "time")
+CPU_RUN_LIMIT = 120
+PROCESS_DRAIN_MARGIN = 20
+GPU_DIAGNOSTIC_RESERVE = 920
+K10_PROCESS_TARGET_MS = 1000
 CPU_PROBE = """#include <bit>
 #include <span>
 #include <cstdio>
@@ -229,7 +235,7 @@ def source_paths(root: Path) -> list[Path]:
                          if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc")
         fixture = root / line / "receipts" / "conformite_v5"
         paths.extend(p for p in fixture.rglob("*") if p.is_file())
-    paths.extend(root / p for p in GUARDS + [SELF, WRAPPER])
+    paths.extend(root / p for p in GUARDS + [SELF, WRAPPER, PRIVATE_CMAKE])
     provenance = root / "morsehgp3D_v7/docs/V6_SOURCE_SNAPSHOT.json"
     if provenance.exists():
         paths.append(provenance)
@@ -340,6 +346,15 @@ def verify_results(directory: Path, expected: str) -> None:
         raise ValueError("result inventory mismatch or empty")
 
 
+def private_cmake_module(root: Path):
+    spec = importlib.util.spec_from_file_location("private_cmake_v7", root / PRIVATE_CMAKE)
+    if spec is None or spec.loader is None:
+        raise ValueError("private CMake helper unavailable")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def compare_module(root: Path) -> Any:
     sys.dont_write_bytecode = True
     spec = importlib.util.spec_from_file_location("v7_compare", root / "morsehgp3D_v7/bench/compare_v6_v7.py")
@@ -373,6 +388,137 @@ def candidate_command(wide: bool) -> list[str]:
             "--mem-budget=17179869184", "--silent-meb-supports=1000000000"] + (["--coord=65536"] if wide else [])
 
 
+def cpu_name(line: int, family: str, kmax: int) -> str:
+    if line not in (6, 7) or family not in ("uniform", "terrain") or kmax not in (5, 10):
+        raise ValueError("CPU observation identity outside protocol")
+    return f"cpu_v{line}_{family}" + ("_k5" if kmax == 5 else "")
+
+
+def cpu_command(line: int, family: str, kmax: int) -> list[str]:
+    cpu_name(line, family, kmax)
+    return [f"./build-v{line}/mhgp{line}", f"--family={family}", "--n=50000", "--seed=3",
+            "--threads=48", f"--smax={kmax + 1}", "--fold-inflight=2", "--layout=csr", "--digest"]
+
+
+def cpu_observation(directory: Path, root: Path, line: int, family: str, kmax: int) -> dict[str, Any]:
+    """Reconstruct one outcome; censures/refusals never carry scientific objects."""
+    name = cpu_name(line, family, kmax)
+    record = json.loads((directory / f"{name}.json").read_text())
+    identity = json.loads((directory / "identity.json").read_text())
+    expected = ["/usr/bin/time", "-v", "-o", str(Path(identity["worker_root"]) / "out" / f"{name}.usage"),
+                *cpu_command(line, family, kmax)]
+    elapsed = record.get("elapsed_seconds")
+    if record.get("argv") != expected or type(elapsed) not in (int, float) or not math.isfinite(elapsed) or elapsed < 0:
+        raise ValueError("CPU command/time identity mismatch")
+    gpu = json.loads((directory / "gpu_tools.json").read_text()).get("requested")
+    if type(gpu) is not bool:
+        raise ValueError("CPU reservation request absent")
+    budget = json.loads((directory / f"{name}_budget.json").read_text())
+    if budget != diagnostic_plan(budget.get("remaining_seconds"), CPU_RUN_LIMIT,
+                                 GPU_DIAGNOSTIC_RESERVE if gpu and kmax == 5 else 0):
+        raise ValueError("CPU run reservation mismatch")
+    result = {"name": name, "version": f"v{line}", "family": family, "n": 50000, "seed": 3,
+              "kmax": kmax, "s": 8, "threads": 48, "exit_code": record.get("exit_code"),
+              "process_wall_seconds": elapsed, "timing_scope": "process_including_generation_and_digest",
+              "public_status": "not_claimed"}
+    if record.get("status") == "not_attempted":
+        if record.get("exit_code") is not None or record.get("timeout_seconds") != 0 or elapsed != 0 or \
+                record.get("reason") != "budget_insufficient":
+            raise ValueError("invalid unattempted CPU observation")
+        if budget["status"] != "not_attempted" or any((directory / f"{name}{suffix}").exists()
+                                                        for suffix in (".stdout", ".stderr", ".usage")):
+            raise ValueError("unattempted CPU run has evidence of execution or sufficient budget")
+        return dict(result, status="not_attempted", reason="budget_insufficient")
+    timeout = record.get("timeout_seconds")
+    if type(timeout) is not int or timeout != CPU_RUN_LIMIT or budget["status"] != "planned":
+        raise ValueError("CPU process bound/reservation mismatch")
+    output, error = (directory / f"{name}.stdout").read_text(), (directory / f"{name}.stderr").read_text()
+    if record.get("status") == "censored" and record.get("exit_code") == 124:
+        if elapsed + 0.05 < timeout:
+            raise ValueError("CPU censure predates its watchdog")
+        return dict(result, status="censored", reason="process_watchdog", timeout_seconds=timeout)
+    if record.get("exit_code") == 0 and record.get("status") == "completed":
+        try:
+            parsed = compare_module(root).parse_success(output, error, (directory / f"{name}.usage").read_text(),
+                label=f"v{line}", family=family, n=50000, seed=3, threads=48, wall_seconds=elapsed, kmax=kmax)
+        except (ValueError, RuntimeError) as failure:
+            return dict(result, status="invalid", reason="success_parse_failed: " + str(failure))
+        return json.loads(json.dumps(dict(result, status="engine_completed", **parsed)))
+    if record.get("status") != "failed" or type(record.get("exit_code")) is not int or record["exit_code"] == 0:
+        raise ValueError("CPU process outcome inconsistent")
+    if record["exit_code"] == 2:
+        lines = error.splitlines()
+        typed = re.fullmatch(r"REFUS (unsupported_degeneracy|resource_exhausted) : [^\x00-\x1f\x7f]+", lines[0]) if lines else None
+        stage = re.fullmatch(r"refus_etage=(entree|generation|rle|prefiltre|census|fold|publication) "
+            r"rss_mb apres_generation=[0-9]+ apres_rle=[0-9]+ apres_prefiltre=[0-9]+ apres_census=[0-9]+ "
+            r"max_fold=[0-9]+ \(frontiere de completion : dernier etage atteint\)", lines[1]) if len(lines) == 2 else None
+        if not output and typed and stage:
+            return dict(result, status="engine_refused", reason=lines[0], refusal_status=typed[1],
+                        mathematical_refusal=typed[1] == "unsupported_degeneracy")
+        return dict(result, status="invalid", reason="unqualified_refusal_or_published_prefix")
+    return dict(result, status="failed", reason="unqualified_process_exit")
+
+
+def cpu_pair(reference: dict[str, Any], candidate: dict[str, Any]) -> dict[str, Any]:
+    if reference["status"] != "engine_completed" or candidate["status"] != "engine_completed":
+        return {"status": "not_comparable", "reference_status": reference["status"], "v7_status": candidate["status"]}
+    a, b = ({key: item[key] for key in ("digests", "cardinalities")} for item in (reference, candidate))
+    return {"status": "completed" if a == b else "diverged", "equal": a == b, "reference": a, "v7": b}
+
+
+def fallback_plan(k10: dict[str, Any], remaining: float, gpu: bool) -> dict[str, Any]:
+    if type(remaining) not in (int, float) or not math.isfinite(remaining):
+        raise ValueError("invalid K5 planning budget")
+    reason = ("k10_process_over_1000ms" if k10["status"] == "engine_completed" and
+              k10["process_wall_seconds"] * 1000 > K10_PROCESS_TARGET_MS else
+              "k10_censored" if k10["status"] == "censored" else
+              "k10_engine_refused" if k10["status"] == "engine_refused" else "not_required_or_invalid_k10")
+    requested = reason != "not_required_or_invalid_k10"
+    reserve = GPU_DIAGNOSTIC_RESERVE if gpu else 0
+    required = reserve + 2 * (CPU_RUN_LIMIT + PROCESS_DRAIN_MARGIN)
+    return {"schema": "ehgp.v7.k5-fallback.v1", "trigger": reason, "requested": requested,
+            "status": "planned" if requested and remaining >= required else "not_attempted",
+            "reason": "budget_insufficient" if requested and remaining < required else reason,
+            "remaining_seconds": remaining, "required_seconds": required, "gpu_reserved_seconds": reserve,
+            "process_target_ms": K10_PROCESS_TARGET_MS, "n": 50000, "kmax": 5, "public_status": "not_claimed"}
+
+
+def cpu_campaign_receipt(directory: Path, root: Path) -> dict[str, Any]:
+    gpu = json.loads((directory / "gpu_tools.json").read_text()).get("requested")
+    if type(gpu) is not bool:
+        raise ValueError("GPU reservation request missing")
+    observations, pairs = [], {}
+    for family in ("uniform", "terrain"):
+        k10 = [cpu_observation(directory, root, line, family, 10) for line in (6, 7)]
+        observations.extend(k10)
+        pairs[family + "_k10"] = cpu_pair(*k10)
+        plan = json.loads((directory / f"k5_{family}_plan.json").read_text())
+        if plan != fallback_plan(k10[1], plan.get("remaining_seconds"), gpu):
+            raise ValueError("K5 plan does not follow observed K10 and bounded budget")
+        if plan["status"] == "planned":
+            k5 = [cpu_observation(directory, root, line, family, 5) for line in (6, 7)]
+            observations.extend(k5)
+            pairs[family + "_k5"] = cpu_pair(*k5)
+        else:
+            pairs[family + "_k5"] = {"status": "not_attempted", "reason": plan["reason"], "requested": plan["requested"]}
+            if any((directory / (cpu_name(line, family, 5) + suffix)).exists()
+                   for line in (6, 7) for suffix in (".json", ".stdout", ".stderr", ".usage", "_observation.json", "_budget.json")):
+                raise ValueError("unplanned K5 run has execution evidence")
+        for kmax in (10, 5):
+            pair_name = f"pair_{family}" + ("_k5" if kmax == 5 else "") + ".json"
+            if json.loads((directory / pair_name).read_text()) != pairs[f"{family}_k{kmax}"]:
+                raise ValueError("CPU pair projection differs from raw outcomes")
+    for observation in observations:
+        if json.loads((directory / (observation["name"] + "_observation.json")).read_text()) != observation:
+            raise ValueError("CPU observation projection differs from raw evidence")
+    successful = all(pair["status"] == "completed" or pair["status"] == "not_attempted" and not pair["requested"]
+                     for pair in pairs.values())
+    return {"schema": "ehgp.v7.cpu-towers.v1", "status": "completed" if successful else "failed_or_incomplete",
+            "observations": observations, "pairs": pairs, "gpu_reserved_seconds": GPU_DIAGNOSTIC_RESERVE if gpu else 0,
+            "public_status": "not_claimed", "semantics": "verified_events_only",
+            "timing_scope": "process_including_generation_and_digest", "performance_claim": False}
+
+
 def candidate_observation(directory: Path, root: Path, *, wide: bool) -> dict[str, Any]:
     name = "candidate_wide" if wide else "candidate_uniform"
     record = json.loads((directory / f"{name}.json").read_text())
@@ -381,7 +527,7 @@ def candidate_observation(directory: Path, root: Path, *, wide: bool) -> dict[st
     result = {"exit_code": record["exit_code"], "public_status": "not_claimed",
               "semantics": "normalized_horizontal_h0_candidate", "mathematical_refusal": False}
     output, error = (directory / f"{name}.stdout").read_text(), (directory / f"{name}.stderr").read_text()
-    if record["exit_code"] == 124 and record["status"] == "censored" and wide:
+    if record["exit_code"] == 124 and record["status"] == "censored":
         return dict(result, status="censored")
     if record["exit_code"] == 0 and record["status"] == "completed":
         parsed = incidence_module(root).parse_completion(
@@ -389,17 +535,16 @@ def candidate_observation(directory: Path, root: Path, *, wide: bool) -> dict[st
             n=8000 if wide else 50000, coord=65536 if wide else 0, seed=3, threads=48,
             meb_supports=1000000000, wall_seconds=record["elapsed_seconds"])
         return json.loads(json.dumps(dict(result, status="engine_completed", **parsed)))
-    lines = error.splitlines()
-    mathematical = bool(lines and re.fullmatch(
-        r"REFUS (unsupported_degeneracy : incidence completion requires no rank-relevant extra-shell|"
-        r"silent incidence K=[0-9]+ : silent_(local_nonessential_shell|external_shell|nonregular_direct_catalogue))", lines[0]))
-    resource = bool(lines and re.fullmatch(
-        r"REFUS silent incidence K=[0-9]+ : silent_(core_record_budget|chain_step_budget|added_coface_budget|"
-        r"query_node_budget|meb_support_budget|direct_catalogue_budget|allocation_failure)", lines[0]))
-    if record["exit_code"] == 2 and record["status"] == "failed" and not output and (mathematical or wide and resource):
-        if len(lines) < 3 or not lines[1].startswith("refus_etage=") or not lines[2].startswith("silent_refusal_work "):
-            raise ValueError("candidate refusal diagnostics missing")
-        return dict(result, status="engine_refused", mathematical_refusal=mathematical, reason=lines[0])
+    if record["exit_code"] == 2 and record["status"] == "failed":
+        refusal = {"timed_out": False, "returncode": 2, "wall_seconds": record["elapsed_seconds"]}
+        try:
+            incidence_module(root).classify(refusal, directory / f"{name}.stdout", directory / f"{name}.stderr",
+                                           directory / f"{name}.usage")
+        except RuntimeError as failure:
+            raise ValueError("candidate refusal validation: " + str(failure)) from failure
+        return dict(result, status="engine_refused", reason=refusal["reason"],
+                    mathematical_refusal=refusal["refusal_status"] == "unsupported_degeneracy",
+                    refusal_status=refusal["refusal_status"], refusal_order=refusal["refusal_order"])
     raise ValueError("candidate failed outside a qualified observation outcome")
 
 
@@ -407,7 +552,11 @@ def validate_receipt(directory: Path, source: Path, manifest_hash: str, remote_r
     terminal = json.loads((directory / "worker_terminal.json").read_text())
     if terminal.get("exit_code") != remote_rc or terminal.get("public_status") != "not_claimed":
         raise ValueError("remote terminal status mismatch")
-    if remote_rc:
+    if remote_rc == 0 and terminal.get("diagnostics_completed") is not True:
+        raise ValueError("successful worker lacks diagnostic completion")
+    if terminal.get("diagnostics_completed") is True and (directory / "failure.json").exists():
+        raise ValueError("completed worker has contradictory failure evidence")
+    if remote_rc and terminal.get("diagnostics_completed") is not True:
         return  # Preserve failure evidence; no successful campaign is published.
     identity = json.loads((directory / "identity.json").read_text())
     if identity.get("source_manifest_sha256") != manifest_hash or identity.get("public_status") != "not_claimed":
@@ -420,33 +569,41 @@ def validate_receipt(directory: Path, source: Path, manifest_hash: str, remote_r
             not re.fullmatch(r"[0-9a-f]{64}", binaries[f"v{line}"].get("sha256", ""))
             for line in (6, 7)):
         raise ValueError("CPU binary identity missing")
-    comparison = compare_module(source)
-    for family in ("uniform", "terrain"):
-        parsed = {}
-        for line in (6, 7):
-            name = f"cpu_v{line}_{family}"
-            record = json.loads((directory / f"{name}.json").read_text())
-            expected = [f"./build-v{line}/mhgp{line}", f"--family={family}", "--n=50000",
-                        "--seed=3", "--threads=48", "--smax=11", "--fold-inflight=2",
-                        "--layout=csr", "--digest"]
-            if record.get("exit_code") != 0 or record.get("status") != "completed" or \
-                    record.get("argv", [])[4:] != expected:
-                raise ValueError("CPU command/status mismatch")
-            parsed[line] = comparison.parse_success(
-                (directory / f"{name}.stdout").read_text(), (directory / f"{name}.stderr").read_text(),
-                (directory / f"{name}.usage").read_text(), label=f"v{line}", family=family,
-                n=50000, seed=3, threads=48, wall_seconds=record["elapsed_seconds"])
-        if any(parsed[6][key] != parsed[7][key] for key in ("digests", "cardinalities")):
-            raise ValueError("received CPU pair diverges")
+    cpu = cpu_campaign_receipt(directory, source)
+    if json.loads((directory / "cpu_campaign.json").read_text()) != cpu:
+        raise ValueError("received CPU tower observations mismatch")
+    if remote_rc != (0 if cpu["status"] == "completed" else 1):
+        raise ValueError("CPU scientific failure was hidden by terminal outcome")
     for wide, filename in ((False, "candidate_status.json"), (True, "candidate_wide_status.json")):
         candidate = json.loads((directory / filename).read_text())
-        if wide and candidate == {"status": "not_attempted", "reason": "insufficient_worker_budget", "public_status": "not_claimed"}:
+        plan = json.loads((directory / ("candidate_wide_budget.json" if wide else "candidate_uniform_budget.json")).read_text())
+        gpu = json.loads((directory / "gpu_tools.json").read_text())["requested"]
+        if plan != diagnostic_plan(plan.get("remaining_seconds"), 240 if wide else 120,
+                                   GPU_DIAGNOSTIC_RESERVE if gpu else 0):
+            raise ValueError("candidate budget reservation mismatch")
+        if plan["status"] == "not_attempted":
+            if candidate != {"status": "not_attempted", "reason": "budget_insufficient", "public_status": "not_claimed"}:
+                raise ValueError("unattempted candidate falsely published an outcome")
+            label = "candidate_wide" if wide else "candidate_uniform"
+            if any((directory / f"{label}{suffix}").exists() for suffix in (".json", ".stdout", ".stderr", ".usage")):
+                raise ValueError("unattempted candidate has execution evidence")
             continue
+        label = "candidate_wide" if wide else "candidate_uniform"
+        launch = json.loads((directory / f"{label}.json").read_text())
+        expected = ["/usr/bin/time", "-v", "-o", str(Path(identity["worker_root"]) / "out" / f"{label}.usage"),
+                    *candidate_command(wide)]
+        elapsed = launch.get("elapsed_seconds")
+        if launch.get("argv") != expected or launch.get("timeout_seconds") != (240 if wide else 120) or \
+                type(elapsed) not in (int, float) or not math.isfinite(elapsed) or elapsed < 0:
+            raise ValueError("candidate exact command/watchdog mismatch")
+        if launch.get("status") == "censored" and elapsed + 0.05 < launch["timeout_seconds"]:
+            raise ValueError("candidate censure predates watchdog")
         if candidate != candidate_observation(directory, source, wide=wide):
             raise ValueError("candidate outcome inconsistent with raw evidence")
     if json.loads((directory / "gpu_status.json").read_text()).get("status") not in \
             ("completed", "unavailable", "not_requested"):
         raise ValueError("GPU outcome missing or invalid")
+    private_cmake_module(source).validate_selection(directory)
 
 
 def read_fields(path: Path) -> dict[str, str]:
@@ -522,11 +679,22 @@ def guest_deadline(path: Path) -> int:
     return deadline
 
 
+def diagnostic_plan(remaining: float, limit: int, reserve: int) -> dict[str, Any]:
+    if type(remaining) not in (int, float) or not math.isfinite(remaining) or \
+            limit not in (120, 240) or reserve not in (0, GPU_DIAGNOSTIC_RESERVE):
+        raise ValueError("invalid diagnostic reservation")
+    return {"status": "planned" if remaining >= limit + reserve + PROCESS_DRAIN_MARGIN else "not_attempted",
+            "remaining_seconds": remaining, "run_limit_seconds": limit, "reserved_seconds": reserve,
+            "drain_margin_seconds": PROCESS_DRAIN_MARGIN, "reason": "budget_insufficient" if
+            remaining < limit + reserve + PROCESS_DRAIN_MARGIN else "within_guarded_worker_budget"}
+
+
 def worker(root: Path, manifest_hash: str, gpu: bool) -> int:
     root = root.resolve()
     out = root / "out"
     out.mkdir()
     code = 1
+    diagnostics_completed = False
     def interrupted(signum: int, _frame: Any) -> None:
         raise SessionInterrupted(f"worker signal {signum}")
     previous_handlers = {sig: signal.signal(sig, interrupted) for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP)}
@@ -534,7 +702,7 @@ def worker(root: Path, manifest_hash: str, gpu: bool) -> int:
         verify_source(root, manifest_hash)
         deadline = min(time.time() + 2100, guest_deadline(Path("/run/systemd/shutdown/scheduled")) - 180)
         write_json(out / "identity.json", {"schema": SCHEMA, "source_manifest_sha256": manifest_hash,
-                                          "guest_guard_deadline": deadline, "public_status": "not_claimed"})
+                                          "guest_guard_deadline": deadline, "worker_root": str(root), "public_status": "not_claimed"})
 
         worker_env = dict(os.environ, LC_ALL="C", LANG="C")
         nvcc = shutil.which("nvcc")
@@ -544,7 +712,6 @@ def worker(root: Path, manifest_hash: str, gpu: bool) -> int:
             nvcc = next((p for p in cuda_paths if Path(p).is_file() and os.access(p, os.X_OK)), None)
         if nvcc:
             worker_env["PATH"] = str(Path(nvcc).parent) + os.pathsep + worker_env.get("PATH", "")
-        comparison = compare_module(root)
 
         def run(name: str, command: list[str], limit: int) -> None:
             guest_deadline(Path("/run/systemd/shutdown/scheduled"))
@@ -599,68 +766,115 @@ def worker(root: Path, manifest_hash: str, gpu: bool) -> int:
             f"v{line}": {"path": f"build-v{line}/mhgp{line}",
                          "sha256": sha((root / f"build-v{line}/mhgp{line}").read_bytes())}
             for line in (6, 7)})
-        for family in ("uniform", "terrain"):
-            parsed = {}
-            for line, binary in ((6, "mhgp6"), (7, "mhgp7")):
-                name = f"cpu_v{line}_{family}"
-                command = [f"./build-v{line}/{binary}", f"--family={family}", "--n=50000",
-                           "--seed=3", "--threads=48", "--smax=11", "--fold-inflight=2",
-                           "--layout=csr", "--digest"]
-                run(name, ["/usr/bin/time", "-v", "-o", str(out / f"{name}.usage"), *command], 120)
-                parsed[line] = comparison.parse_success(
-                    (out / f"{name}.stdout").read_text(), (out / f"{name}.stderr").read_text(),
-                    (out / f"{name}.usage").read_text(), label=f"v{line}", family=family,
-                    n=50000, seed=3, threads=48,
-                    wall_seconds=json.loads((out / f"{name}.json").read_text())["elapsed_seconds"])
-            a = {k: parsed[6][k] for k in ("digests", "cardinalities")}
-            b = {k: parsed[7][k] for k in ("digests", "cardinalities")}
-            write_json(out / f"pair_{family}.json", {"equal": a == b, "reference": a, "v7": b})
-            if a != b:
-                raise ValueError(f"v6/v7 CPU object mismatch on {family}")
-
-        candidate_name = "candidate_uniform"
-        guest_deadline(Path("/run/systemd/shutdown/scheduled"))
-        candidate_limit = min(120, int(deadline - time.time()))
-        if candidate_limit < 1:
-            raise TimeoutError("no candidate budget left")
-        run_logged(out, candidate_name, ["/usr/bin/time", "-v", "-o", str(out / f"{candidate_name}.usage"),
-                                       *candidate_command(False)], candidate_limit, cwd=root, env=worker_env)
-        write_json(out / "candidate_status.json", candidate_observation(out, root, wide=False))
-        if deadline - time.time() >= 300:
+        def observe_cpu(line: int, family: str, kmax: int) -> dict[str, Any]:
+            name = cpu_name(line, family, kmax)
+            command = ["/usr/bin/time", "-v", "-o", str(out / f"{name}.usage"), *cpu_command(line, family, kmax)]
             guest_deadline(Path("/run/systemd/shutdown/scheduled"))
-            run_logged(out, "candidate_wide", ["/usr/bin/time", "-v", "-o", str(out / "candidate_wide.usage"),
-                                             *candidate_command(True)], 240, cwd=root, env=worker_env)
-            write_json(out / "candidate_wide_status.json", candidate_observation(out, root, wide=True))
-        else:
-            write_json(out / "candidate_wide_status.json", {
-                "status": "not_attempted", "reason": "insufficient_worker_budget", "public_status": "not_claimed"})
-        if gpu and nvcc and shutil.which("nvidia-smi") and deadline - time.time() >= 780:
+            plan = diagnostic_plan(deadline - time.time(), CPU_RUN_LIMIT,
+                                   GPU_DIAGNOSTIC_RESERVE if gpu and kmax == 5 else 0)
+            write_json(out / f"{name}_budget.json", plan)
+            if plan["status"] == "planned":
+                run_logged(out, name, command, CPU_RUN_LIMIT, cwd=root, env=worker_env)
+            else:
+                write_json(out / f"{name}.json", {"argv": command, "status": "not_attempted",
+                    "reason": "budget_insufficient", "timeout_seconds": 0, "elapsed_seconds": 0, "exit_code": None})
+            observation = cpu_observation(out, root, line, family, kmax)
+            write_json(out / f"{name}_observation.json", observation)
+            return observation
+
+        # Scientific failures do not erase attempts or prevent independent
+        # guarded diagnostics. They still force a nonzero terminal outcome.
+        k10_observations = {}
+        for family in ("uniform", "terrain"):
+            k10 = [observe_cpu(line, family, 10) for line in (6, 7)]
+            k10_observations[family] = k10
+            write_json(out / f"pair_{family}.json", cpu_pair(*k10))
+        for family in ("uniform", "terrain"):
+            plan = fallback_plan(k10_observations[family][1], deadline - time.time(), gpu)
+            write_json(out / f"k5_{family}_plan.json", plan)
+            if plan["status"] == "planned":
+                k5 = [observe_cpu(line, family, 5) for line in (6, 7)]
+                write_json(out / f"pair_{family}_k5.json", cpu_pair(*k5))
+            else:
+                write_json(out / f"pair_{family}_k5.json", {"status": "not_attempted", "reason": plan["reason"],
+                                                           "requested": plan["requested"]})
+        cpu_receipt = cpu_campaign_receipt(out, root)
+        write_json(out / "cpu_campaign.json", cpu_receipt)
+
+        for wide in (False, True):
+            name = "candidate_wide" if wide else "candidate_uniform"
+            status_name = "candidate_wide_status.json" if wide else "candidate_status.json"
+            limit = 240 if wide else 120
+            guest_deadline(Path("/run/systemd/shutdown/scheduled"))
+            plan = diagnostic_plan(deadline - time.time(), limit, GPU_DIAGNOSTIC_RESERVE if gpu else 0)
+            write_json(out / f"{name}_budget.json", plan)
+            if plan["status"] == "planned":
+                run_logged(out, name, ["/usr/bin/time", "-v", "-o", str(out / f"{name}.usage"),
+                                      *candidate_command(wide)], limit, cwd=root, env=worker_env)
+                write_json(out / status_name, candidate_observation(out, root, wide=wide))
+            else:
+                write_json(out / status_name, {"status": "not_attempted", "reason": "budget_insufficient",
+                                               "public_status": "not_claimed"})
+        # Optional GPU-only tooling; CPU stays on the recorded system CMake.
+        # The outer process-group watchdog is mandatory: socket inactivity
+        # timeouts and cooperative Budget checks are not total OS deadlines.
+        cmake_tool = private_cmake_module(root)
+        gpu_cmake, gpu_ctest = "cmake", "ctest"
+        tooling_failure = None
+        private_installation = None
+        raw_system_cmake = (out / "cpu_cmake_version.stdout").read_text()
+        if gpu and nvcc and shutil.which("nvidia-smi") and cmake_tool.system_version(raw_system_cmake) < (3, 26, 0):
+            if not cmake_tool.installation_needed(raw_system_cmake, gpu_requested=True, nvcc_present=True,
+                                                  remaining_seconds=deadline - time.time()):
+                tooling_failure = "private_cmake_120s_plus_gpu780s_and_drain20s_budget_unavailable"
+            else:
+                guest_deadline(Path("/run/systemd/shutdown/scheduled"))
+                install_command = [sys.executable, PRIVATE_CMAKE, "--install", "--root", str(root),
+                                   "--seconds", str(cmake_tool.INSTALL_BUDGET), "--deadline-epoch",
+                                   str(deadline - cmake_tool.GPU_RESERVE - cmake_tool.DRAIN_MARGIN)]
+                install_rc = run_logged(out, "gpu_cmake_install", install_command, cmake_tool.INSTALL_BUDGET,
+                                        cwd=root, env=worker_env)
+                if install_rc:
+                    tooling_failure = "private_cmake_install_failed_or_censored"
+                else:
+                    private_installation = json.loads((out / "gpu_cmake_install.stdout").read_text())
+                    cmake_tool.validate_receipt(private_installation)
+                    gpu_cmake = "./" + private_installation["paths"]["cmake"]
+                    gpu_ctest = "./" + private_installation["paths"]["ctest"]
+        write_json(out / "gpu_cmake_toolchain.json", {"schema": "ehgp.v7.gpu-cmake.v1",
+                   "source": "private" if private_installation is not None else "system",
+                   "system_version": raw_system_cmake, "installation": private_installation,
+                   "cmake": gpu_cmake, "ctest": gpu_ctest})
+        if gpu and nvcc and shutil.which("nvidia-smi") and not tooling_failure and deadline - time.time() >= 780:
             run("gpu_inventory", ["nvidia-smi", "-q"], 30)
             run("gpu_build", ["bash", "-e", "-c",
-                "cmake -S morsehgp3D_v7 -B build-v7-cuda -DCMAKE_BUILD_TYPE=Release "
+                f"{shlex.quote(gpu_cmake)} -S morsehgp3D_v7 -B build-v7-cuda -DCMAKE_BUILD_TYPE=Release "
                 "-DMHGP7_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=120 "
                 f"-DCMAKE_CUDA_COMPILER={shlex.quote(nvcc)} && "
-                "cmake --build build-v7-cuda --parallel 12 --target "
+                f"{shlex.quote(gpu_cmake)} --build build-v7-cuda --parallel 12 --target "
                 "mhgp7_device_witness mhgp7_census_device_gate"], 420)
             write_json(out / "gpu_binaries.json", {
                 binary: {"path": f"build-v7-cuda/{binary}",
                          "sha256": sha((root / f"build-v7-cuda/{binary}").read_bytes())}
                 for binary in ("mhgp7_device_witness", "mhgp7_census_device_gate")})
-            run("gpu_primitives", ["ctest", "--test-dir", "build-v7-cuda", "--output-on-failure", "--no-tests=error",
+            run("gpu_primitives", [gpu_ctest, "--test-dir", "build-v7-cuda", "--output-on-failure", "--no-tests=error",
                                   "-R", "^mhgp7_(device_witness|census_device)(_|$)", "-L", "gpu"], 300)
             write_json(out / "gpu_status.json", {"status": "completed", "scope": "device_primitives_only"})
         else:
             write_json(out / "gpu_status.json", {"status": "unavailable" if gpu else "not_requested",
                                                  "nvcc": nvcc, "checked_cuda_paths": cuda_paths,
                                                  "remaining_seconds": max(0, int(deadline - time.time())),
-                                                 "reason": "tools_or_780_second_budget_unavailable" if gpu else "disabled"})
-        code = 0
+                                                 "reason": tooling_failure or ("tools_or_780_second_budget_unavailable" if gpu else "disabled")})
+        code = 0 if cpu_receipt["status"] == "completed" else 1
+        diagnostics_completed = True
     except BaseException as error:
+        code = 1
+        diagnostics_completed = False
         write_json(out / "failure.json", {"type": type(error).__name__, "message": str(error)})
     finally:
         for sig in previous_handlers:
             signal.signal(sig, signal.SIG_IGN)
-        write_json(out / "worker_terminal.json", {"exit_code": code, "ended": utc(),
+        write_json(out / "worker_terminal.json", {"exit_code": code, "ended": utc(), "diagnostics_completed": diagnostics_completed,
                                                  "public_status": "not_claimed"})
         print("RESULT_MANIFEST_SHA256=" + seal(out), flush=True)
         for sig, handler in previous_handlers.items():

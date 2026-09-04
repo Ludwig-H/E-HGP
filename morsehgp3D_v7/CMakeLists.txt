@@ -918,3 +918,69 @@ if(MHGP7_ENABLE_CUDA)
   target_link_libraries(mhgp7_cuda_test PRIVATE Threads::Threads)
   mhgp7_gate(mhgp7_pilote_mutant_base 4 mhgp7_cuda_test ARGS --family=uniform --n=400 --seed=3 --threads=8 --lot=17 --min-lots=2 --inject=gpu-lot-base-reset LABELS gpu TIMEOUT 600)
 endif()
+
+# Two bounded primitive gates, never a pipeline or performance qualification.
+mhgp7_executable(mhgp7_arithmetic_integer_gate tests/arithmetic_integer_gate.cpp)
+target_include_directories(mhgp7_arithmetic_integer_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+mhgp7_gate(mhgp7_arithmetic_integer 0 mhgp7_arithmetic_integer_gate
+  EXPECT_PREFIX "arithmetic_integer_gate=passed case=all mutant=none" TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_integer_u320 0 mhgp7_arithmetic_integer_gate
+  ARGS --case=u320-only
+  EXPECT_PREFIX "arithmetic_integer_gate=passed case=u320-only mutant=none" TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_integer_oracle 0 mhgp7_arithmetic_integer_gate
+  ARGS --case=oracle-only
+  EXPECT_PREFIX "arithmetic_integer_gate=passed case=oracle-only mutant=none" TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_u320_word4 4 mhgp7_arithmetic_integer_gate
+  ARGS --case=u320-only --mutant=level-trunc-hi
+  EXPECT_PREFIX "arithmetic_integer_gate=mutant_killed case=u320-only mutant=level-trunc-hi divergence=W2.u320_word4" TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_integer_oracle_carry 4 mhgp7_arithmetic_integer_gate
+  ARGS --case=oracle-only --mutant=obig-carry-lost
+  EXPECT_PREFIX "arithmetic_integer_gate=mutant_killed case=oracle-only mutant=obig-carry-lost divergence=oracle.W2_carry" TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_integer_bad_case 2 mhgp7_arithmetic_integer_gate
+  ARGS --case=unknown TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_integer_bad_mutant 2 mhgp7_arithmetic_integer_gate
+  ARGS --case=u320-only --mutant=missing TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_integer_case_mismatch 2 mhgp7_arithmetic_integer_gate
+  ARGS --case=all --mutant=level-trunc-hi TIMEOUT 30)
+mhgp7_executable(mhgp7_arithmetic_lanes_gate tests/arithmetic_lanes_gate.cpp)
+target_include_directories(mhgp7_arithmetic_lanes_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+mhgp7_gate(mhgp7_arithmetic_lanes 0 mhgp7_arithmetic_lanes_gate
+  EXPECT_PREFIX "arithmetic_lanes_gate PASS" TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_lanes_q4_level 0 mhgp7_arithmetic_lanes_gate
+  ARGS --case=q4-level-only
+  EXPECT_PREFIX "arithmetic_lanes_gate PASS" TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_lanes_oracle 0 mhgp7_arithmetic_lanes_gate
+  ARGS --case=oracle-only
+  EXPECT_PREFIX "arithmetic_lanes_gate PASS" TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_lanes_oracle_overflow 3 mhgp7_arithmetic_lanes_gate
+  ARGS --case=oracle-overflow
+  EXPECT_PREFIX "first_divergence=oracle.overflow inject=" TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_q3_factor 4 mhgp7_arithmetic_lanes_gate
+  ARGS --inject=q3-level-4g
+  EXPECT_PREFIX "first_divergence=q3.level inject=q3-level-4g" TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_q4_parity 4 mhgp7_arithmetic_lanes_gate
+  ARGS --inject=q4-center-parity
+  EXPECT_PREFIX "first_divergence=q4.center inject=q4-center-parity" TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_q4_face_boundary 4 mhgp7_arithmetic_lanes_gate
+  ARGS --inject=q4-eq-nonstrict
+  EXPECT_PREFIX "first_divergence=q4.face_power inject=q4-eq-nonstrict" TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_q4_u192_word2 4 mhgp7_arithmetic_lanes_gate
+  ARGS --case=q4-level-only --inject=level-trunc-hi
+  EXPECT_PREFIX "first_divergence=q4.level.num inject=level-trunc-hi" TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_lanes_oracle_carry 4 mhgp7_arithmetic_lanes_gate
+  ARGS --case=oracle-only --inject=obig-carry-lost
+  EXPECT_PREFIX "first_divergence=oracle.literal-carry inject=obig-carry-lost" TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_lanes_bad_case 2 mhgp7_arithmetic_lanes_gate
+  ARGS --case=unknown TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_lanes_bad_inject 2 mhgp7_arithmetic_lanes_gate
+  ARGS --inject=missing TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_lanes_duplicate_case 2 mhgp7_arithmetic_lanes_gate
+  ARGS --case=all --case=all TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_lanes_duplicate_inject 2 mhgp7_arithmetic_lanes_gate
+  ARGS --inject=q3-level-4g --inject=q3-level-4g TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_lanes_empty_inject 2 mhgp7_arithmetic_lanes_gate
+  ARGS --inject= TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_lanes_u192_case_mismatch 2 mhgp7_arithmetic_lanes_gate
+  ARGS --case=all --inject=level-trunc-hi TIMEOUT 30)
+mhgp7_gate(mhgp7_arithmetic_lanes_oracle_case_mismatch 2 mhgp7_arithmetic_lanes_gate
+  ARGS --case=all --inject=obig-carry-lost TIMEOUT 30)

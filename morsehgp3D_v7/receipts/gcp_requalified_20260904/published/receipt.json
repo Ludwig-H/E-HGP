@@ -1,0 +1,2229 @@
+{
+  "authority": "sanitized_projection_not_a_replacement_for_private_controller_receipt",
+  "controller_exit_code": 0,
+  "controller_sha256": "a07d271456705c5277c1bd898e93d3aa79faddd81f45d3ba7310807175bbc4a8",
+  "controller_status": "completed",
+  "ended": "2026-09-04T22:55:26.256591+00:00",
+  "performance_claim": false,
+  "public_status": "not_claimed",
+  "redactions": [
+    "private_paths",
+    "accounts",
+    "emails",
+    "network_addresses",
+    "raw_commands_and_logs",
+    "free_diagnostic_messages",
+    "worktree_status"
+  ],
+  "results": {
+    "candidate_default": {
+      "exit_code": 2,
+      "mathematical_refusal": true,
+      "reason_sha256": "053d3e360ea05a0c04369563f03ab19147913e6ad2719d686f823cf8e05afa9d",
+      "refusal_status": "unsupported_degeneracy",
+      "semantic_validation": "controller_revalidated",
+      "semantics": "normalized_horizontal_h0_candidate",
+      "status": "engine_refused"
+    },
+    "candidate_wide": {
+      "cardinalities": {
+        "1": {
+          "attachements": 0,
+          "deltas": 7999,
+          "evenements": 29875,
+          "facettes": 8000,
+          "fusions": 7999,
+          "noeuds": 7999
+        },
+        "10": {
+          "attachements": 8127546,
+          "deltas": 1005622,
+          "evenements": 1088869,
+          "facettes": 8918681,
+          "fusions": 8918680,
+          "noeuds": 15514
+        },
+        "2": {
+          "attachements": 32713,
+          "deltas": 51121,
+          "evenements": 67539,
+          "facettes": 62910,
+          "fusions": 62909,
+          "noeuds": 2122
+        },
+        "3": {
+          "attachements": 147239,
+          "deltas": 120877,
+          "evenements": 124135,
+          "facettes": 213686,
+          "fusions": 213685,
+          "noeuds": 2929
+        },
+        "4": {
+          "attachements": 399983,
+          "deltas": 197242,
+          "evenements": 201156,
+          "facettes": 517876,
+          "fusions": 517875,
+          "noeuds": 4068
+        },
+        "5": {
+          "attachements": 850158,
+          "deltas": 289705,
+          "evenements": 298870,
+          "facettes": 1036109,
+          "fusions": 1036108,
+          "noeuds": 5419
+        },
+        "6": {
+          "attachements": 1552470,
+          "deltas": 398776,
+          "evenements": 415933,
+          "facettes": 1824039,
+          "fusions": 1824038,
+          "noeuds": 7004
+        },
+        "7": {
+          "attachements": 2573565,
+          "deltas": 525699,
+          "evenements": 554022,
+          "facettes": 2947215,
+          "fusions": 2947214,
+          "noeuds": 8780
+        },
+        "8": {
+          "attachements": 3969114,
+          "deltas": 668888,
+          "evenements": 712109,
+          "facettes": 4463468,
+          "fusions": 4463467,
+          "noeuds": 10954
+        },
+        "9": {
+          "attachements": 5809858,
+          "deltas": 829864,
+          "evenements": 891721,
+          "facettes": 6443014,
+          "fusions": 6443013,
+          "noeuds": 13150
+        }
+      },
+      "counts": {
+        "boules_uniques": 3144017,
+        "census_int": 16102722,
+        "census_shell": 10456312,
+        "coord": 65536,
+        "deltas": 4095793,
+        "emis": 3144017,
+        "evenements": 4384229,
+        "facettes": 26434998,
+        "fusions": 26434988,
+        "mortes_profondeur": 30636,
+        "n": 8000,
+        "noeuds": 77939,
+        "s": 8,
+        "seed": 3,
+        "smax": 11,
+        "survivantes": 3113381,
+        "threads": 48
+      },
+      "digests": {
+        "digest_all": "4c3ceb0498990bafa41a9e43d0bffe25a3fee579b12b5d34365f3578f526a0e7",
+        "digest_forest_K1": "fff29fb38092c02dd43271de33b9aee28a03408fbb70153385c3fc1e69e3573a",
+        "digest_forest_K10": "a44af66ade1a06ad1be19a512642b65a87f8d3b75c102b4850a719b68a3b77bb",
+        "digest_forest_K2": "dd657928d626854e23bc1ff59327eb6c834d4ff94fbb0f1913156e251f14b213",
+        "digest_forest_K3": "ba8973abbad9fc0aa1008589f0f3a669389f6406350501bdda97aa879dedcf0a",
+        "digest_forest_K4": "69b328c5a690c5b63d607018de6e28ae7f3f8f82f4320989cccec6379b0ad358",
+        "digest_forest_K5": "0598690dcf3a59d3cee0a7447d06d6773ed3b4d6d733c35d801dd3924e14ba6a",
+        "digest_forest_K6": "45014ce7ef7d17c8baeb1f5df32d90f6643cbc913cdc3817d10af1db88be363a",
+        "digest_forest_K7": "e8dc58ed4133f76f6541c474f9dedfb3c8d8880d1463bc49f32e8a36cbc62c80",
+        "digest_forest_K8": "aa7bcd6f453905566e423de55991caedb3afed38e4164d2cf5c295c85975e318",
+        "digest_forest_K9": "7b6c460d6df9631d0ef3851b5e939b161fdc559ecddb0396a94991ca970e1bb3"
+      },
+      "exit_code": 0,
+      "mathematical_refusal": false,
+      "max_rss_kb": 3492804,
+      "pipeline_ms": 85348.4,
+      "semantic_validation": "controller_revalidated",
+      "semantics": "normalized_horizontal_h0_candidate",
+      "silent": {
+        "10": {
+          "added": 372134,
+          "core": 1347437,
+          "max_chain": 18,
+          "meb_supports": 394768070,
+          "query_nodes": 173869231,
+          "steps": 372134,
+          "with_two_intruders": 258492
+        },
+        "2": {
+          "added": 4186,
+          "core": 46136,
+          "max_chain": 6,
+          "meb_supports": 64585,
+          "query_nodes": 2463142,
+          "steps": 4186,
+          "with_two_intruders": 3297
+        },
+        "3": {
+          "added": 16018,
+          "core": 114555,
+          "max_chain": 10,
+          "meb_supports": 531378,
+          "query_nodes": 7718685,
+          "steps": 16018,
+          "with_two_intruders": 12296
+        },
+        "4": {
+          "added": 36961,
+          "core": 211968,
+          "max_chain": 9,
+          "meb_supports": 2424881,
+          "query_nodes": 16702777,
+          "steps": 36961,
+          "with_two_intruders": 27790
+        },
+        "5": {
+          "added": 67207,
+          "core": 337252,
+          "max_chain": 11,
+          "meb_supports": 7998813,
+          "query_nodes": 29915877,
+          "steps": 67207,
+          "with_two_intruders": 49535
+        },
+        "6": {
+          "added": 107108,
+          "core": 488952,
+          "max_chain": 12,
+          "meb_supports": 21673996,
+          "query_nodes": 47778692,
+          "steps": 107108,
+          "with_two_intruders": 77752
+        },
+        "7": {
+          "added": 157598,
+          "core": 666230,
+          "max_chain": 15,
+          "meb_supports": 51210694,
+          "query_nodes": 70749430,
+          "steps": 157598,
+          "with_two_intruders": 112803
+        },
+        "8": {
+          "added": 218721,
+          "core": 868194,
+          "max_chain": 14,
+          "meb_supports": 109017683,
+          "query_nodes": 99153075,
+          "steps": 218721,
+          "with_two_intruders": 154705
+        },
+        "9": {
+          "added": 290915,
+          "core": 1096161,
+          "max_chain": 17,
+          "meb_supports": 214435228,
+          "query_nodes": 133553348,
+          "steps": 290915,
+          "with_two_intruders": 203197
+        }
+      },
+      "stages": {
+        "census_counters": {
+          "census_leaf_tests": 26559034,
+          "census_nodes": 284536613,
+          "prefilter_leaf_tests": 0,
+          "prefilter_nodes": 279817429,
+          "range_add": 16415118
+        },
+        "fold_wall": {
+          "inflight": 2,
+          "join": 0,
+          "measured_inflight_peak": 1,
+          "milliseconds": 81888.5
+        },
+        "historical_hwm_mb": {
+          "after_census": 2012,
+          "after_generation": 1327,
+          "after_prefilter": 1355,
+          "after_rle": 1327,
+          "end": 3411,
+          "max_fold": 3411
+        },
+        "memory_caveat": "RSS_is_instantaneous_HWM_is_process_historical_not_stage_peak",
+        "rss_mb": {
+          "after_census": 1973,
+          "after_generation": 1295,
+          "after_prefilter": 1355,
+          "after_rle": 1307,
+          "end": 1267,
+          "max_fold": 3010
+        },
+        "stage_times_ms": {
+          "census": 375.1,
+          "count": 3.3,
+          "digest_cumulative": 3369.9,
+          "expansion": 151.4,
+          "fold_cumulative": 5730.2,
+          "fold_intern": 1205.3,
+          "fold_merge": 431.3,
+          "fold_reduce": 3830.6,
+          "fold_sort": 262.6,
+          "generation": 1765.2,
+          "index": 1.2,
+          "prefilter": 325.3,
+          "rectangles": 658.5,
+          "rle": 234.3,
+          "wspd": 1105.9
+        },
+        "timing_caveat": "fold_and_digest_are_cumulative_stage_timers_not_additive_pipeline_wall",
+        "workers": {
+          "census": 48,
+          "expansion": 48,
+          "fold": 48,
+          "prefilter": 48,
+          "rectangles": 48,
+          "rle": 48,
+          "wspd": 48
+        }
+      },
+      "status": "engine_completed"
+    },
+    "cpu": {
+      "observations": [
+        {
+          "cardinalities": {
+            "1": {
+              "attachements": 0,
+              "deltas": 40517,
+              "evenements": 196923,
+              "facettes": 50000,
+              "fusions": 49999,
+              "noeuds": 40517
+            },
+            "10": {
+              "attachements": 37580548,
+              "deltas": 4447560,
+              "evenements": 5035028,
+              "facettes": 43563526,
+              "fusions": 43560322,
+              "noeuds": 3406331
+            },
+            "2": {
+              "attachements": 200712,
+              "deltas": 148828,
+              "evenements": 424300,
+              "facettes": 409954,
+              "fusions": 409922,
+              "noeuds": 133675
+            },
+            "3": {
+              "attachements": 846326,
+              "deltas": 446607,
+              "evenements": 730835,
+              "facettes": 1339688,
+              "fusions": 1339591,
+              "noeuds": 299009
+            },
+            "4": {
+              "attachements": 2181113,
+              "deltas": 782932,
+              "evenements": 1115929,
+              "facettes": 3081691,
+              "fusions": 3081455,
+              "noeuds": 535470
+            },
+            "5": {
+              "attachements": 4437853,
+              "deltas": 1194430,
+              "evenements": 1578512,
+              "facettes": 5872957,
+              "fusions": 5872515,
+              "noeuds": 843468
+            },
+            "6": {
+              "attachements": 7850117,
+              "deltas": 1687112,
+              "evenements": 2118281,
+              "facettes": 9944497,
+              "fusions": 9943706,
+              "noeuds": 1219901
+            },
+            "7": {
+              "attachements": 12649544,
+              "deltas": 2260847,
+              "evenements": 2735118,
+              "facettes": 15528919,
+              "fusions": 15527678,
+              "noeuds": 1665093
+            },
+            "8": {
+              "attachements": 19056456,
+              "deltas": 2909909,
+              "evenements": 3427378,
+              "facettes": 22845539,
+              "fusions": 22843673,
+              "noeuds": 2177998
+            },
+            "9": {
+              "attachements": 27304959,
+              "deltas": 3643310,
+              "evenements": 4195747,
+              "facettes": 32129813,
+              "fusions": 32127412,
+              "noeuds": 2760902
+            }
+          },
+          "counts": {
+            "boules_uniques": 21622341,
+            "census_int": 111265869,
+            "census_shell": 72267726,
+            "coord": 368,
+            "deltas": 17562052,
+            "emis": 21627009,
+            "evenements": 21558051,
+            "facettes": 134766584,
+            "fusions": 134756273,
+            "mortes_profondeur": 216378,
+            "n": 50000,
+            "noeuds": 13082364,
+            "s": 8,
+            "seed": 3,
+            "smax": 11,
+            "survivantes": 21405963,
+            "threads": 48
+          },
+          "digests": {
+            "digest_all": "5fc1fdef4f439028b2f956dfcba22a5f9736a94e83d05e13e0eb362918cda2c0",
+            "digest_forest_K1": "11b7f4629d2f2a14038d306d5f69f6ab598da4f4e3b00d4bab2e65f13e0648e1",
+            "digest_forest_K10": "9fc68195372654089b9dfe677e18922eb398ca5e50ed4adf30a04eb4c98273b3",
+            "digest_forest_K2": "01867f7663b4d72b8b692ddd16ee7bedb5fe476a65652ab8417fc5127ed845b7",
+            "digest_forest_K3": "7d62325b261455b64d145d8ce931747608ad5db8ddda957582779b489f6316a2",
+            "digest_forest_K4": "52bce5f77cbcc6797c87b54e4477693cdd2fc81491c0cc286ad642fdeee2adea",
+            "digest_forest_K5": "fae0edc7fc2e9b7af160797824f7fbea2f8c2ec3dcf4ea18c3a4b23f596b3954",
+            "digest_forest_K6": "0c3e98f32643491f20f365d7d3d3555a312dc1193ec9211d614caac582bad7be",
+            "digest_forest_K7": "90c1d9dc2ce676a6b378192616b6574c96fc08c9368be96c1cb7b42ce3a5a530",
+            "digest_forest_K8": "a6230d03cab6bb9648188044af4119e380f4072ce6960a3f6ecb733ff2558bb3",
+            "digest_forest_K9": "37dbc1d8c1e1f375469d989de006f6f94926ce5e1eee1d4b7f507444bc5b034d"
+          },
+          "exit_code": 0,
+          "family": "uniform",
+          "kmax": 10,
+          "max_rss_kb": 19463260,
+          "n": 50000,
+          "pipeline_ms": 54520.6,
+          "process_wall_seconds": 54.624107459000015,
+          "s": 8,
+          "seed": 3,
+          "semantic_validation": "controller_revalidated",
+          "stages": {
+            "census_counters": {
+              "census_leaf_tests": 183533595,
+              "census_nodes": 2195870289,
+              "prefilter_leaf_tests": 0,
+              "prefilter_nodes": 2152416837,
+              "range_add": 113471232
+            },
+            "fold_wall": {
+              "inflight": 2,
+              "join": 0,
+              "measured_inflight_peak": 2,
+              "milliseconds": 23855.9
+            },
+            "historical_hwm_mb": {
+              "after_census": 12717,
+              "after_generation": 4967,
+              "after_prefilter": 5040,
+              "after_rle": 4967,
+              "end": 19007,
+              "max_fold": 19007
+            },
+            "memory_caveat": "RSS_is_instantaneous_HWM_is_process_historical_not_stage_peak",
+            "rss_mb": {
+              "after_census": 7564,
+              "after_generation": 4713,
+              "after_prefilter": 5040,
+              "after_rle": 4713,
+              "end": 2265,
+              "max_fold": 17166
+            },
+            "stage_times_ms": {
+              "census": 5420.4,
+              "count": 14.1,
+              "digest_cumulative": 18471.2,
+              "expansion": 907.3,
+              "fold_cumulative": 35877.7,
+              "fold_intern": 6475.8,
+              "fold_merge": 1842.6,
+              "fold_reduce": 25966.1,
+              "fold_sort": 1574.6,
+              "generation": 11586.6,
+              "index": 7.9,
+              "prefilter": 5257.7,
+              "rectangles": 4559.9,
+              "rle": 3213.5,
+              "wspd": 7022.6
+            },
+            "timing_caveat": "fold_and_digest_are_cumulative_stage_timers_not_additive_pipeline_wall",
+            "workers": {
+              "census": 48,
+              "expansion": 48,
+              "fold": 48,
+              "prefilter": 48,
+              "rectangles": 48,
+              "rle": 48,
+              "wspd": 48
+            }
+          },
+          "status": "engine_completed",
+          "threads": 48,
+          "timing_scope": "process_including_generation_and_digest",
+          "version": "v6"
+        },
+        {
+          "cardinalities": {
+            "1": {
+              "attachements": 0,
+              "deltas": 40517,
+              "evenements": 196923,
+              "facettes": 50000,
+              "fusions": 49999,
+              "noeuds": 40517
+            },
+            "10": {
+              "attachements": 37580548,
+              "deltas": 4447560,
+              "evenements": 5035028,
+              "facettes": 43563526,
+              "fusions": 43560322,
+              "noeuds": 3406331
+            },
+            "2": {
+              "attachements": 200712,
+              "deltas": 148828,
+              "evenements": 424300,
+              "facettes": 409954,
+              "fusions": 409922,
+              "noeuds": 133675
+            },
+            "3": {
+              "attachements": 846326,
+              "deltas": 446607,
+              "evenements": 730835,
+              "facettes": 1339688,
+              "fusions": 1339591,
+              "noeuds": 299009
+            },
+            "4": {
+              "attachements": 2181113,
+              "deltas": 782932,
+              "evenements": 1115929,
+              "facettes": 3081691,
+              "fusions": 3081455,
+              "noeuds": 535470
+            },
+            "5": {
+              "attachements": 4437853,
+              "deltas": 1194430,
+              "evenements": 1578512,
+              "facettes": 5872957,
+              "fusions": 5872515,
+              "noeuds": 843468
+            },
+            "6": {
+              "attachements": 7850117,
+              "deltas": 1687112,
+              "evenements": 2118281,
+              "facettes": 9944497,
+              "fusions": 9943706,
+              "noeuds": 1219901
+            },
+            "7": {
+              "attachements": 12649544,
+              "deltas": 2260847,
+              "evenements": 2735118,
+              "facettes": 15528919,
+              "fusions": 15527678,
+              "noeuds": 1665093
+            },
+            "8": {
+              "attachements": 19056456,
+              "deltas": 2909909,
+              "evenements": 3427378,
+              "facettes": 22845539,
+              "fusions": 22843673,
+              "noeuds": 2177998
+            },
+            "9": {
+              "attachements": 27304959,
+              "deltas": 3643310,
+              "evenements": 4195747,
+              "facettes": 32129813,
+              "fusions": 32127412,
+              "noeuds": 2760902
+            }
+          },
+          "counts": {
+            "boules_uniques": 21622341,
+            "census_int": 111265869,
+            "census_shell": 72267726,
+            "coord": 368,
+            "deltas": 17562052,
+            "emis": 21627009,
+            "evenements": 21558051,
+            "facettes": 134766584,
+            "fusions": 134756273,
+            "mortes_profondeur": 216378,
+            "n": 50000,
+            "noeuds": 13082364,
+            "s": 8,
+            "seed": 3,
+            "smax": 11,
+            "survivantes": 21405963,
+            "threads": 48
+          },
+          "digests": {
+            "digest_all": "5fc1fdef4f439028b2f956dfcba22a5f9736a94e83d05e13e0eb362918cda2c0",
+            "digest_forest_K1": "11b7f4629d2f2a14038d306d5f69f6ab598da4f4e3b00d4bab2e65f13e0648e1",
+            "digest_forest_K10": "9fc68195372654089b9dfe677e18922eb398ca5e50ed4adf30a04eb4c98273b3",
+            "digest_forest_K2": "01867f7663b4d72b8b692ddd16ee7bedb5fe476a65652ab8417fc5127ed845b7",
+            "digest_forest_K3": "7d62325b261455b64d145d8ce931747608ad5db8ddda957582779b489f6316a2",
+            "digest_forest_K4": "52bce5f77cbcc6797c87b54e4477693cdd2fc81491c0cc286ad642fdeee2adea",
+            "digest_forest_K5": "fae0edc7fc2e9b7af160797824f7fbea2f8c2ec3dcf4ea18c3a4b23f596b3954",
+            "digest_forest_K6": "0c3e98f32643491f20f365d7d3d3555a312dc1193ec9211d614caac582bad7be",
+            "digest_forest_K7": "90c1d9dc2ce676a6b378192616b6574c96fc08c9368be96c1cb7b42ce3a5a530",
+            "digest_forest_K8": "a6230d03cab6bb9648188044af4119e380f4072ce6960a3f6ecb733ff2558bb3",
+            "digest_forest_K9": "37dbc1d8c1e1f375469d989de006f6f94926ce5e1eee1d4b7f507444bc5b034d"
+          },
+          "exit_code": 0,
+          "family": "uniform",
+          "kmax": 10,
+          "max_rss_kb": 19801492,
+          "n": 50000,
+          "pipeline_ms": 50023.0,
+          "process_wall_seconds": 50.120466924,
+          "s": 8,
+          "seed": 3,
+          "semantic_validation": "controller_revalidated",
+          "stages": {
+            "census_counters": {
+              "census_leaf_tests": 183533595,
+              "census_nodes": 2195870289,
+              "prefilter_leaf_tests": 0,
+              "prefilter_nodes": 2152416837,
+              "range_add": 113471232
+            },
+            "fold_wall": {
+              "inflight": 2,
+              "join": 0,
+              "measured_inflight_peak": 2,
+              "milliseconds": 23760.1
+            },
+            "historical_hwm_mb": {
+              "after_census": 9604,
+              "after_generation": 4970,
+              "after_prefilter": 5040,
+              "after_rle": 4970,
+              "end": 19337,
+              "max_fold": 19337
+            },
+            "memory_caveat": "RSS_is_instantaneous_HWM_is_process_historical_not_stage_peak",
+            "rss_mb": {
+              "after_census": 9287,
+              "after_generation": 4714,
+              "after_prefilter": 5040,
+              "after_rle": 4714,
+              "end": 2174,
+              "max_fold": 17423
+            },
+            "stage_times_ms": {
+              "census": 2730.8,
+              "count": 17.1,
+              "digest_cumulative": 18223.3,
+              "expansion": 965.6,
+              "fold_cumulative": 36232.6,
+              "fold_intern": 6622.3,
+              "fold_merge": 2025.4,
+              "fold_reduce": 25722.9,
+              "fold_sort": 1841.4,
+              "generation": 12479.2,
+              "index": 7.9,
+              "prefilter": 2838.7,
+              "rectangles": 4582.9,
+              "rle": 3069.4,
+              "wspd": 7891.2
+            },
+            "timing_caveat": "fold_and_digest_are_cumulative_stage_timers_not_additive_pipeline_wall",
+            "workers": {
+              "census": 48,
+              "expansion": 48,
+              "fold": 48,
+              "prefilter": 48,
+              "rectangles": 48,
+              "rle": 48,
+              "wspd": 48
+            }
+          },
+          "status": "engine_completed",
+          "threads": 48,
+          "timing_scope": "process_including_generation_and_digest",
+          "version": "v7"
+        },
+        {
+          "cardinalities": {
+            "1": {
+              "attachements": 0,
+              "deltas": 40517,
+              "evenements": 196923,
+              "facettes": 50000,
+              "fusions": 49999,
+              "noeuds": 40517
+            },
+            "2": {
+              "attachements": 200712,
+              "deltas": 148828,
+              "evenements": 424300,
+              "facettes": 409954,
+              "fusions": 409922,
+              "noeuds": 133675
+            },
+            "3": {
+              "attachements": 846326,
+              "deltas": 446607,
+              "evenements": 730835,
+              "facettes": 1339688,
+              "fusions": 1339591,
+              "noeuds": 299009
+            },
+            "4": {
+              "attachements": 2181113,
+              "deltas": 782932,
+              "evenements": 1115929,
+              "facettes": 3081691,
+              "fusions": 3081455,
+              "noeuds": 535470
+            },
+            "5": {
+              "attachements": 4437853,
+              "deltas": 1194430,
+              "evenements": 1578512,
+              "facettes": 5872957,
+              "fusions": 5872515,
+              "noeuds": 843468
+            }
+          },
+          "counts": {
+            "boules_uniques": 4060560,
+            "census_int": 7531563,
+            "census_shell": 11935076,
+            "coord": 368,
+            "deltas": 2613314,
+            "emis": 4061159,
+            "evenements": 4046499,
+            "facettes": 10754290,
+            "fusions": 10753482,
+            "mortes_profondeur": 64459,
+            "n": 50000,
+            "noeuds": 1852139,
+            "s": 8,
+            "seed": 3,
+            "smax": 6,
+            "survivantes": 3996101,
+            "threads": 48
+          },
+          "digests": {
+            "digest_all": "5d2bda8b5ac9d839d4fd63e0872df689c378830e454a7a56555d0ef45cdd9e31",
+            "digest_forest_K1": "11b7f4629d2f2a14038d306d5f69f6ab598da4f4e3b00d4bab2e65f13e0648e1",
+            "digest_forest_K2": "01867f7663b4d72b8b692ddd16ee7bedb5fe476a65652ab8417fc5127ed845b7",
+            "digest_forest_K3": "7d62325b261455b64d145d8ce931747608ad5db8ddda957582779b489f6316a2",
+            "digest_forest_K4": "52bce5f77cbcc6797c87b54e4477693cdd2fc81491c0cc286ad642fdeee2adea",
+            "digest_forest_K5": "fae0edc7fc2e9b7af160797824f7fbea2f8c2ec3dcf4ea18c3a4b23f596b3954"
+          },
+          "exit_code": 0,
+          "family": "uniform",
+          "kmax": 5,
+          "max_rss_kb": 4219812,
+          "n": 50000,
+          "pipeline_ms": 9885.2,
+          "process_wall_seconds": 9.952562895,
+          "s": 8,
+          "seed": 3,
+          "semantic_validation": "controller_revalidated",
+          "stages": {
+            "census_counters": {
+              "census_leaf_tests": 19466639,
+              "census_nodes": 314272597,
+              "prefilter_leaf_tests": 0,
+              "prefilter_nodes": 312127796,
+              "range_add": 7858778
+            },
+            "fold_wall": {
+              "inflight": 2,
+              "join": 0,
+              "measured_inflight_peak": 2,
+              "milliseconds": 3061.9
+            },
+            "historical_hwm_mb": {
+              "after_census": 2993,
+              "after_generation": 2126,
+              "after_prefilter": 2126,
+              "after_rle": 2126,
+              "end": 4121,
+              "max_fold": 4121
+            },
+            "memory_caveat": "RSS_is_instantaneous_HWM_is_process_historical_not_stage_peak",
+            "rss_mb": {
+              "after_census": 2941,
+              "after_generation": 2041,
+              "after_prefilter": 2102,
+              "after_rle": 2041,
+              "end": 1600,
+              "max_fold": 4080
+            },
+            "stage_times_ms": {
+              "census": 849.9,
+              "count": 4.9,
+              "digest_cumulative": 2146.1,
+              "expansion": 153.3,
+              "fold_cumulative": 3475.8,
+              "fold_intern": 740.7,
+              "fold_merge": 146.8,
+              "fold_reduce": 2389.3,
+              "fold_sort": 198.3,
+              "generation": 3916.6,
+              "index": 8.1,
+              "prefilter": 767.8,
+              "rectangles": 777.8,
+              "rle": 317.3,
+              "wspd": 3137.0
+            },
+            "timing_caveat": "fold_and_digest_are_cumulative_stage_timers_not_additive_pipeline_wall",
+            "workers": {
+              "census": 48,
+              "expansion": 48,
+              "fold": 48,
+              "prefilter": 48,
+              "rectangles": 48,
+              "rle": 48,
+              "wspd": 48
+            }
+          },
+          "status": "engine_completed",
+          "threads": 48,
+          "timing_scope": "process_including_generation_and_digest",
+          "version": "v6"
+        },
+        {
+          "cardinalities": {
+            "1": {
+              "attachements": 0,
+              "deltas": 40517,
+              "evenements": 196923,
+              "facettes": 50000,
+              "fusions": 49999,
+              "noeuds": 40517
+            },
+            "2": {
+              "attachements": 200712,
+              "deltas": 148828,
+              "evenements": 424300,
+              "facettes": 409954,
+              "fusions": 409922,
+              "noeuds": 133675
+            },
+            "3": {
+              "attachements": 846326,
+              "deltas": 446607,
+              "evenements": 730835,
+              "facettes": 1339688,
+              "fusions": 1339591,
+              "noeuds": 299009
+            },
+            "4": {
+              "attachements": 2181113,
+              "deltas": 782932,
+              "evenements": 1115929,
+              "facettes": 3081691,
+              "fusions": 3081455,
+              "noeuds": 535470
+            },
+            "5": {
+              "attachements": 4437853,
+              "deltas": 1194430,
+              "evenements": 1578512,
+              "facettes": 5872957,
+              "fusions": 5872515,
+              "noeuds": 843468
+            }
+          },
+          "counts": {
+            "boules_uniques": 4060560,
+            "census_int": 7531563,
+            "census_shell": 11935076,
+            "coord": 368,
+            "deltas": 2613314,
+            "emis": 4061159,
+            "evenements": 4046499,
+            "facettes": 10754290,
+            "fusions": 10753482,
+            "mortes_profondeur": 64459,
+            "n": 50000,
+            "noeuds": 1852139,
+            "s": 8,
+            "seed": 3,
+            "smax": 6,
+            "survivantes": 3996101,
+            "threads": 48
+          },
+          "digests": {
+            "digest_all": "5d2bda8b5ac9d839d4fd63e0872df689c378830e454a7a56555d0ef45cdd9e31",
+            "digest_forest_K1": "11b7f4629d2f2a14038d306d5f69f6ab598da4f4e3b00d4bab2e65f13e0648e1",
+            "digest_forest_K2": "01867f7663b4d72b8b692ddd16ee7bedb5fe476a65652ab8417fc5127ed845b7",
+            "digest_forest_K3": "7d62325b261455b64d145d8ce931747608ad5db8ddda957582779b489f6316a2",
+            "digest_forest_K4": "52bce5f77cbcc6797c87b54e4477693cdd2fc81491c0cc286ad642fdeee2adea",
+            "digest_forest_K5": "fae0edc7fc2e9b7af160797824f7fbea2f8c2ec3dcf4ea18c3a4b23f596b3954"
+          },
+          "exit_code": 0,
+          "family": "uniform",
+          "kmax": 5,
+          "max_rss_kb": 3997828,
+          "n": 50000,
+          "pipeline_ms": 10027.3,
+          "process_wall_seconds": 10.117255704999991,
+          "s": 8,
+          "seed": 3,
+          "semantic_validation": "controller_revalidated",
+          "stages": {
+            "census_counters": {
+              "census_leaf_tests": 19466639,
+              "census_nodes": 314272597,
+              "prefilter_leaf_tests": 0,
+              "prefilter_nodes": 312127796,
+              "range_add": 7858778
+            },
+            "fold_wall": {
+              "inflight": 2,
+              "join": 0,
+              "measured_inflight_peak": 2,
+              "milliseconds": 3306.1
+            },
+            "historical_hwm_mb": {
+              "after_census": 2920,
+              "after_generation": 2100,
+              "after_prefilter": 2100,
+              "after_rle": 2100,
+              "end": 3904,
+              "max_fold": 3913
+            },
+            "memory_caveat": "RSS_is_instantaneous_HWM_is_process_historical_not_stage_peak",
+            "rss_mb": {
+              "after_census": 2868,
+              "after_generation": 2014,
+              "after_prefilter": 2075,
+              "after_rle": 2014,
+              "end": 1555,
+              "max_fold": 3913
+            },
+            "stage_times_ms": {
+              "census": 435.4,
+              "count": 4.7,
+              "digest_cumulative": 2137.4,
+              "expansion": 172.4,
+              "fold_cumulative": 3601.4,
+              "fold_intern": 842.6,
+              "fold_merge": 203.1,
+              "fold_reduce": 2288.4,
+              "fold_sort": 266.6,
+              "generation": 4633.0,
+              "index": 8.3,
+              "prefilter": 369.9,
+              "rectangles": 813.9,
+              "rle": 312.1,
+              "wspd": 3816.2
+            },
+            "timing_caveat": "fold_and_digest_are_cumulative_stage_timers_not_additive_pipeline_wall",
+            "workers": {
+              "census": 48,
+              "expansion": 48,
+              "fold": 48,
+              "prefilter": 48,
+              "rectangles": 48,
+              "rle": 48,
+              "wspd": 48
+            }
+          },
+          "status": "engine_completed",
+          "threads": 48,
+          "timing_scope": "process_including_generation_and_digest",
+          "version": "v7"
+        },
+        {
+          "cardinalities": {
+            "1": {
+              "attachements": 0,
+              "deltas": 40406,
+              "evenements": 115711,
+              "facettes": 50000,
+              "fusions": 49999,
+              "noeuds": 40406
+            },
+            "10": {
+              "attachements": 5585607,
+              "deltas": 560040,
+              "evenements": 695030,
+              "facettes": 6442612,
+              "fusions": 6431956,
+              "noeuds": 462163
+            },
+            "2": {
+              "attachements": 115698,
+              "deltas": 91172,
+              "evenements": 174643,
+              "facettes": 227991,
+              "fusions": 227955,
+              "noeuds": 72698
+            },
+            "3": {
+              "attachements": 345202,
+              "deltas": 145543,
+              "evenements": 233803,
+              "facettes": 529683,
+              "fusions": 529279,
+              "noeuds": 110017
+            },
+            "4": {
+              "attachements": 696024,
+              "deltas": 197156,
+              "evenements": 295255,
+              "facettes": 959888,
+              "fusions": 958903,
+              "noeuds": 152109
+            },
+            "5": {
+              "attachements": 1171054,
+              "deltas": 252033,
+              "evenements": 358134,
+              "facettes": 1520175,
+              "fusions": 1518228,
+              "noeuds": 197915
+            },
+            "6": {
+              "attachements": 1775510,
+              "deltas": 309235,
+              "evenements": 422333,
+              "facettes": 2216366,
+              "fusions": 2213240,
+              "noeuds": 246504
+            },
+            "7": {
+              "attachements": 2516812,
+              "deltas": 367425,
+              "evenements": 488618,
+              "facettes": 3054346,
+              "fusions": 3049744,
+              "noeuds": 296519
+            },
+            "8": {
+              "attachements": 3395990,
+              "deltas": 429870,
+              "evenements": 556142,
+              "facettes": 4034998,
+              "fusions": 4028759,
+              "noeuds": 349848
+            },
+            "9": {
+              "attachements": 4416220,
+              "deltas": 493752,
+              "evenements": 624758,
+              "facettes": 5162191,
+              "fusions": 5153956,
+              "noeuds": 405040
+            }
+          },
+          "counts": {
+            "boules_uniques": 3978611,
+            "census_int": 19206740,
+            "census_shell": 10882043,
+            "coord": 1118,
+            "deltas": 2886632,
+            "emis": 3981858,
+            "evenements": 3964427,
+            "facettes": 24198250,
+            "fusions": 24162019,
+            "mortes_profondeur": 173059,
+            "n": 50000,
+            "noeuds": 2333219,
+            "s": 8,
+            "seed": 3,
+            "smax": 11,
+            "survivantes": 3805552,
+            "threads": 48
+          },
+          "digests": {
+            "digest_all": "700dbbc067bbebce48173d9cc1d1b79cf10274a0773ef4075abf014976e8bbb5",
+            "digest_forest_K1": "e7689a2c742f824781798b94108cba62bcda167f3f8ef81dda264b0d05dc69cf",
+            "digest_forest_K10": "d2741f2971ac7617d7d0a535ab44da50d1d402593ce56c1e2edf1a564082fe87",
+            "digest_forest_K2": "909ddc9f45a49621eaac30afd82aebcbd19052695d9e07cca81efcb1f508c809",
+            "digest_forest_K3": "866fd675a6baca8f9111e4bbc90731d9bcdce89849d38bf8626555958a935416",
+            "digest_forest_K4": "82d9072832217c6c461c6e251138629853d4f9faa5d2209cbea4ae2ccb962eb7",
+            "digest_forest_K5": "cd802d6652175370dcd41d83aba31590156c22b3a0981701d3ca96e3cfe31628",
+            "digest_forest_K6": "a93c7d2568ba1a05fccfc35b2a4149f013d8bb4b3059ea733dfbe17f1668e9d1",
+            "digest_forest_K7": "55709def54c70fe1aa7d0a0ce5f9266c490fe262c0a04c387df7c5edaf71b012",
+            "digest_forest_K8": "3e19f0b565fb05ae59d3c2aee2b42cf6546c671a216f2b1fe77fd19b42eb434e",
+            "digest_forest_K9": "5d21efaf8ee7ff69d4689e9dbb96b2500991a94edc27b924d1cb648fa9778811"
+          },
+          "exit_code": 0,
+          "family": "terrain",
+          "kmax": 10,
+          "max_rss_kb": 4281472,
+          "n": 50000,
+          "pipeline_ms": 18259.4,
+          "process_wall_seconds": 18.357154796999993,
+          "s": 8,
+          "seed": 3,
+          "semantic_validation": "controller_revalidated",
+          "stages": {
+            "census_counters": {
+              "census_leaf_tests": 30088783,
+              "census_nodes": 300811706,
+              "prefilter_leaf_tests": 0,
+              "prefilter_nodes": 295825666,
+              "range_add": 20998107
+            },
+            "fold_wall": {
+              "inflight": 2,
+              "join": 0,
+              "measured_inflight_peak": 2,
+              "milliseconds": 3558.6
+            },
+            "historical_hwm_mb": {
+              "after_census": 2920,
+              "after_generation": 1979,
+              "after_prefilter": 2001,
+              "after_rle": 1979,
+              "end": 4181,
+              "max_fold": 4181
+            },
+            "memory_caveat": "RSS_is_instantaneous_HWM_is_process_historical_not_stage_peak",
+            "rss_mb": {
+              "after_census": 2871,
+              "after_generation": 1933,
+              "after_prefilter": 2001,
+              "after_rle": 1943,
+              "end": 1778,
+              "max_fold": 4116
+            },
+            "stage_times_ms": {
+              "census": 785.1,
+              "count": 6.4,
+              "digest_cumulative": 3272.0,
+              "expansion": 198.2,
+              "fold_cumulative": 5022.8,
+              "fold_intern": 845.6,
+              "fold_merge": 327.7,
+              "fold_reduce": 3616.9,
+              "fold_sort": 229.7,
+              "generation": 11916.3,
+              "index": 8.4,
+              "prefilter": 733.6,
+              "rectangles": 10791.9,
+              "rle": 321.1,
+              "wspd": 1122.8
+            },
+            "timing_caveat": "fold_and_digest_are_cumulative_stage_timers_not_additive_pipeline_wall",
+            "workers": {
+              "census": 48,
+              "expansion": 48,
+              "fold": 48,
+              "prefilter": 48,
+              "rectangles": 48,
+              "rle": 48,
+              "wspd": 48
+            }
+          },
+          "status": "engine_completed",
+          "threads": 48,
+          "timing_scope": "process_including_generation_and_digest",
+          "version": "v6"
+        },
+        {
+          "cardinalities": {
+            "1": {
+              "attachements": 0,
+              "deltas": 40406,
+              "evenements": 115711,
+              "facettes": 50000,
+              "fusions": 49999,
+              "noeuds": 40406
+            },
+            "10": {
+              "attachements": 5585607,
+              "deltas": 560040,
+              "evenements": 695030,
+              "facettes": 6442612,
+              "fusions": 6431956,
+              "noeuds": 462163
+            },
+            "2": {
+              "attachements": 115698,
+              "deltas": 91172,
+              "evenements": 174643,
+              "facettes": 227991,
+              "fusions": 227955,
+              "noeuds": 72698
+            },
+            "3": {
+              "attachements": 345202,
+              "deltas": 145543,
+              "evenements": 233803,
+              "facettes": 529683,
+              "fusions": 529279,
+              "noeuds": 110017
+            },
+            "4": {
+              "attachements": 696024,
+              "deltas": 197156,
+              "evenements": 295255,
+              "facettes": 959888,
+              "fusions": 958903,
+              "noeuds": 152109
+            },
+            "5": {
+              "attachements": 1171054,
+              "deltas": 252033,
+              "evenements": 358134,
+              "facettes": 1520175,
+              "fusions": 1518228,
+              "noeuds": 197915
+            },
+            "6": {
+              "attachements": 1775510,
+              "deltas": 309235,
+              "evenements": 422333,
+              "facettes": 2216366,
+              "fusions": 2213240,
+              "noeuds": 246504
+            },
+            "7": {
+              "attachements": 2516812,
+              "deltas": 367425,
+              "evenements": 488618,
+              "facettes": 3054346,
+              "fusions": 3049744,
+              "noeuds": 296519
+            },
+            "8": {
+              "attachements": 3395990,
+              "deltas": 429870,
+              "evenements": 556142,
+              "facettes": 4034998,
+              "fusions": 4028759,
+              "noeuds": 349848
+            },
+            "9": {
+              "attachements": 4416220,
+              "deltas": 493752,
+              "evenements": 624758,
+              "facettes": 5162191,
+              "fusions": 5153956,
+              "noeuds": 405040
+            }
+          },
+          "counts": {
+            "boules_uniques": 3978611,
+            "census_int": 19206740,
+            "census_shell": 10882043,
+            "coord": 1118,
+            "deltas": 2886632,
+            "emis": 3981858,
+            "evenements": 3964427,
+            "facettes": 24198250,
+            "fusions": 24162019,
+            "mortes_profondeur": 173059,
+            "n": 50000,
+            "noeuds": 2333219,
+            "s": 8,
+            "seed": 3,
+            "smax": 11,
+            "survivantes": 3805552,
+            "threads": 48
+          },
+          "digests": {
+            "digest_all": "700dbbc067bbebce48173d9cc1d1b79cf10274a0773ef4075abf014976e8bbb5",
+            "digest_forest_K1": "e7689a2c742f824781798b94108cba62bcda167f3f8ef81dda264b0d05dc69cf",
+            "digest_forest_K10": "d2741f2971ac7617d7d0a535ab44da50d1d402593ce56c1e2edf1a564082fe87",
+            "digest_forest_K2": "909ddc9f45a49621eaac30afd82aebcbd19052695d9e07cca81efcb1f508c809",
+            "digest_forest_K3": "866fd675a6baca8f9111e4bbc90731d9bcdce89849d38bf8626555958a935416",
+            "digest_forest_K4": "82d9072832217c6c461c6e251138629853d4f9faa5d2209cbea4ae2ccb962eb7",
+            "digest_forest_K5": "cd802d6652175370dcd41d83aba31590156c22b3a0981701d3ca96e3cfe31628",
+            "digest_forest_K6": "a93c7d2568ba1a05fccfc35b2a4149f013d8bb4b3059ea733dfbe17f1668e9d1",
+            "digest_forest_K7": "55709def54c70fe1aa7d0a0ce5f9266c490fe262c0a04c387df7c5edaf71b012",
+            "digest_forest_K8": "3e19f0b565fb05ae59d3c2aee2b42cf6546c671a216f2b1fe77fd19b42eb434e",
+            "digest_forest_K9": "5d21efaf8ee7ff69d4689e9dbb96b2500991a94edc27b924d1cb648fa9778811"
+          },
+          "exit_code": 0,
+          "family": "terrain",
+          "kmax": 10,
+          "max_rss_kb": 4280308,
+          "n": 50000,
+          "pipeline_ms": 18192.0,
+          "process_wall_seconds": 18.283114033000004,
+          "s": 8,
+          "seed": 3,
+          "semantic_validation": "controller_revalidated",
+          "stages": {
+            "census_counters": {
+              "census_leaf_tests": 30088783,
+              "census_nodes": 300811706,
+              "prefilter_leaf_tests": 0,
+              "prefilter_nodes": 295825666,
+              "range_add": 20998107
+            },
+            "fold_wall": {
+              "inflight": 2,
+              "join": 0,
+              "measured_inflight_peak": 2,
+              "milliseconds": 3692.2
+            },
+            "historical_hwm_mb": {
+              "after_census": 2835,
+              "after_generation": 2008,
+              "after_prefilter": 2030,
+              "after_rle": 2008,
+              "end": 4180,
+              "max_fold": 4180
+            },
+            "memory_caveat": "RSS_is_instantaneous_HWM_is_process_historical_not_stage_peak",
+            "rss_mb": {
+              "after_census": 2785,
+              "after_generation": 1962,
+              "after_prefilter": 2030,
+              "after_rle": 1972,
+              "end": 1614,
+              "max_fold": 4136
+            },
+            "stage_times_ms": {
+              "census": 405.9,
+              "count": 8.5,
+              "digest_cumulative": 3240.8,
+              "expansion": 249.1,
+              "fold_cumulative": 5331.8,
+              "fold_intern": 1042.2,
+              "fold_merge": 424.0,
+              "fold_reduce": 3580.0,
+              "fold_sort": 282.6,
+              "generation": 12426.8,
+              "index": 8.4,
+              "prefilter": 407.8,
+              "rectangles": 10861.0,
+              "rle": 311.4,
+              "wspd": 1564.2
+            },
+            "timing_caveat": "fold_and_digest_are_cumulative_stage_timers_not_additive_pipeline_wall",
+            "workers": {
+              "census": 48,
+              "expansion": 48,
+              "fold": 48,
+              "prefilter": 48,
+              "rectangles": 48,
+              "rle": 48,
+              "wspd": 48
+            }
+          },
+          "status": "engine_completed",
+          "threads": 48,
+          "timing_scope": "process_including_generation_and_digest",
+          "version": "v7"
+        },
+        {
+          "cardinalities": {
+            "1": {
+              "attachements": 0,
+              "deltas": 40406,
+              "evenements": 115711,
+              "facettes": 50000,
+              "fusions": 49999,
+              "noeuds": 40406
+            },
+            "2": {
+              "attachements": 115698,
+              "deltas": 91172,
+              "evenements": 174643,
+              "facettes": 227991,
+              "fusions": 227955,
+              "noeuds": 72698
+            },
+            "3": {
+              "attachements": 345202,
+              "deltas": 145543,
+              "evenements": 233803,
+              "facettes": 529683,
+              "fusions": 529279,
+              "noeuds": 110017
+            },
+            "4": {
+              "attachements": 696024,
+              "deltas": 197156,
+              "evenements": 295255,
+              "facettes": 959888,
+              "fusions": 958903,
+              "noeuds": 152109
+            },
+            "5": {
+              "attachements": 1171054,
+              "deltas": 252033,
+              "evenements": 358134,
+              "facettes": 1520175,
+              "fusions": 1518228,
+              "noeuds": 197915
+            }
+          },
+          "counts": {
+            "boules_uniques": 1171103,
+            "census_int": 2167873,
+            "census_shell": 2927847,
+            "coord": 1118,
+            "deltas": 726310,
+            "emis": 1172029,
+            "evenements": 1177546,
+            "facettes": 3287737,
+            "fusions": 3284364,
+            "mortes_profondeur": 57815,
+            "n": 50000,
+            "noeuds": 573145,
+            "s": 8,
+            "seed": 3,
+            "smax": 6,
+            "survivantes": 1113288,
+            "threads": 48
+          },
+          "digests": {
+            "digest_all": "32c5bbc572affcb8b797e6bbf20f82e829fe8105d64223090fabe8ac737828e3",
+            "digest_forest_K1": "e7689a2c742f824781798b94108cba62bcda167f3f8ef81dda264b0d05dc69cf",
+            "digest_forest_K2": "909ddc9f45a49621eaac30afd82aebcbd19052695d9e07cca81efcb1f508c809",
+            "digest_forest_K3": "866fd675a6baca8f9111e4bbc90731d9bcdce89849d38bf8626555958a935416",
+            "digest_forest_K4": "82d9072832217c6c461c6e251138629853d4f9faa5d2209cbea4ae2ccb962eb7",
+            "digest_forest_K5": "cd802d6652175370dcd41d83aba31590156c22b3a0981701d3ca96e3cfe31628"
+          },
+          "exit_code": 0,
+          "family": "terrain",
+          "kmax": 5,
+          "max_rss_kb": 1376892,
+          "n": 50000,
+          "pipeline_ms": 5136.2,
+          "process_wall_seconds": 5.1778881609999985,
+          "s": 8,
+          "seed": 3,
+          "semantic_validation": "controller_revalidated",
+          "stages": {
+            "census_counters": {
+              "census_leaf_tests": 5095720,
+              "census_nodes": 70688758,
+              "prefilter_leaf_tests": 0,
+              "prefilter_nodes": 70955536,
+              "range_add": 2467122
+            },
+            "fold_wall": {
+              "inflight": 2,
+              "join": 0,
+              "measured_inflight_peak": 2,
+              "milliseconds": 696.7
+            },
+            "historical_hwm_mb": {
+              "after_census": 819,
+              "after_generation": 581,
+              "after_prefilter": 581,
+              "after_rle": 581,
+              "end": 1345,
+              "max_fold": 1350
+            },
+            "memory_caveat": "RSS_is_instantaneous_HWM_is_process_historical_not_stage_peak",
+            "rss_mb": {
+              "after_census": 819,
+              "after_generation": 559,
+              "after_prefilter": 569,
+              "after_rle": 561,
+              "end": 629,
+              "max_fold": 1350
+            },
+            "stage_times_ms": {
+              "census": 204.0,
+              "count": 3.5,
+              "digest_cumulative": 627.6,
+              "expansion": 55.9,
+              "fold_cumulative": 839.3,
+              "fold_intern": 136.2,
+              "fold_merge": 52.2,
+              "fold_reduce": 584.8,
+              "fold_sort": 64.6,
+              "generation": 3683.0,
+              "index": 8.1,
+              "prefilter": 190.2,
+              "rectangles": 3023.1,
+              "rle": 70.8,
+              "wspd": 658.8
+            },
+            "timing_caveat": "fold_and_digest_are_cumulative_stage_timers_not_additive_pipeline_wall",
+            "workers": {
+              "census": 48,
+              "expansion": 48,
+              "fold": 48,
+              "prefilter": 48,
+              "rectangles": 48,
+              "rle": 48,
+              "wspd": 48
+            }
+          },
+          "status": "engine_completed",
+          "threads": 48,
+          "timing_scope": "process_including_generation_and_digest",
+          "version": "v6"
+        },
+        {
+          "cardinalities": {
+            "1": {
+              "attachements": 0,
+              "deltas": 40406,
+              "evenements": 115711,
+              "facettes": 50000,
+              "fusions": 49999,
+              "noeuds": 40406
+            },
+            "2": {
+              "attachements": 115698,
+              "deltas": 91172,
+              "evenements": 174643,
+              "facettes": 227991,
+              "fusions": 227955,
+              "noeuds": 72698
+            },
+            "3": {
+              "attachements": 345202,
+              "deltas": 145543,
+              "evenements": 233803,
+              "facettes": 529683,
+              "fusions": 529279,
+              "noeuds": 110017
+            },
+            "4": {
+              "attachements": 696024,
+              "deltas": 197156,
+              "evenements": 295255,
+              "facettes": 959888,
+              "fusions": 958903,
+              "noeuds": 152109
+            },
+            "5": {
+              "attachements": 1171054,
+              "deltas": 252033,
+              "evenements": 358134,
+              "facettes": 1520175,
+              "fusions": 1518228,
+              "noeuds": 197915
+            }
+          },
+          "counts": {
+            "boules_uniques": 1171103,
+            "census_int": 2167873,
+            "census_shell": 2927847,
+            "coord": 1118,
+            "deltas": 726310,
+            "emis": 1172029,
+            "evenements": 1177546,
+            "facettes": 3287737,
+            "fusions": 3284364,
+            "mortes_profondeur": 57815,
+            "n": 50000,
+            "noeuds": 573145,
+            "s": 8,
+            "seed": 3,
+            "smax": 6,
+            "survivantes": 1113288,
+            "threads": 48
+          },
+          "digests": {
+            "digest_all": "32c5bbc572affcb8b797e6bbf20f82e829fe8105d64223090fabe8ac737828e3",
+            "digest_forest_K1": "e7689a2c742f824781798b94108cba62bcda167f3f8ef81dda264b0d05dc69cf",
+            "digest_forest_K2": "909ddc9f45a49621eaac30afd82aebcbd19052695d9e07cca81efcb1f508c809",
+            "digest_forest_K3": "866fd675a6baca8f9111e4bbc90731d9bcdce89849d38bf8626555958a935416",
+            "digest_forest_K4": "82d9072832217c6c461c6e251138629853d4f9faa5d2209cbea4ae2ccb962eb7",
+            "digest_forest_K5": "cd802d6652175370dcd41d83aba31590156c22b3a0981701d3ca96e3cfe31628"
+          },
+          "exit_code": 0,
+          "family": "terrain",
+          "kmax": 5,
+          "max_rss_kb": 1247012,
+          "n": 50000,
+          "pipeline_ms": 5372.5,
+          "process_wall_seconds": 5.431758425999988,
+          "s": 8,
+          "seed": 3,
+          "semantic_validation": "controller_revalidated",
+          "stages": {
+            "census_counters": {
+              "census_leaf_tests": 5095720,
+              "census_nodes": 70688758,
+              "prefilter_leaf_tests": 0,
+              "prefilter_nodes": 70955536,
+              "range_add": 2467122
+            },
+            "fold_wall": {
+              "inflight": 2,
+              "join": 0,
+              "measured_inflight_peak": 2,
+              "milliseconds": 768.1
+            },
+            "historical_hwm_mb": {
+              "after_census": 815,
+              "after_generation": 588,
+              "after_prefilter": 588,
+              "after_rle": 588,
+              "end": 1218,
+              "max_fold": 1225
+            },
+            "memory_caveat": "RSS_is_instantaneous_HWM_is_process_historical_not_stage_peak",
+            "rss_mb": {
+              "after_census": 815,
+              "after_generation": 566,
+              "after_prefilter": 577,
+              "after_rle": 568,
+              "end": 543,
+              "max_fold": 1225
+            },
+            "stage_times_ms": {
+              "census": 123.0,
+              "count": 4.1,
+              "digest_cumulative": 623.5,
+              "expansion": 62.9,
+              "fold_cumulative": 872.9,
+              "fold_intern": 165.6,
+              "fold_merge": 74.3,
+              "fold_reduce": 563.2,
+              "fold_sort": 67.8,
+              "generation": 4015.4,
+              "index": 8.2,
+              "prefilter": 92.2,
+              "rectangles": 3044.5,
+              "rle": 83.0,
+              "wspd": 969.8
+            },
+            "timing_caveat": "fold_and_digest_are_cumulative_stage_timers_not_additive_pipeline_wall",
+            "workers": {
+              "census": 48,
+              "expansion": 48,
+              "fold": 48,
+              "prefilter": 48,
+              "rectangles": 48,
+              "rle": 48,
+              "wspd": 48
+            }
+          },
+          "status": "engine_completed",
+          "threads": 48,
+          "timing_scope": "process_including_generation_and_digest",
+          "version": "v7"
+        }
+      ],
+      "pairs": {
+        "terrain_k10": {
+          "equal": true,
+          "status": "completed"
+        },
+        "terrain_k5": {
+          "equal": true,
+          "status": "completed"
+        },
+        "uniform_k10": {
+          "equal": true,
+          "status": "completed"
+        },
+        "uniform_k5": {
+          "equal": true,
+          "status": "completed"
+        }
+      },
+      "public_status": "not_claimed",
+      "semantics": "verified_events_only",
+      "status": "completed"
+    },
+    "cpu_binary_sha256": {
+      "v6": "92cbeec72fe48f316ccd1bdd7feaa699a73c5ea6becafb6be0f3ebc2956cd519",
+      "v7": "f7ec55a4e427c768910b1f299b153acdab2826ebec0abfebbd57255553eecf1f"
+    },
+    "cpu_language_probe": {
+      "boost": 107400,
+      "cplusplus": 202002
+    },
+    "cpu_package_versions": {
+      "build-essential": "12.9ubuntu3",
+      "cmake": "3.22.1-1ubuntu1.22.04.2",
+      "libboost-dev": "1.74.0.3ubuntu7",
+      "time": "1.9-0.1build2"
+    },
+    "cuda_version": {
+      "build": "12.9.41",
+      "release": "12.9"
+    },
+    "gpu": {
+      "ctest": {
+        "cases": [
+          {
+            "name": "mhgp7_device_witness",
+            "seconds": 0.31
+          },
+          {
+            "name": "mhgp7_device_witness_mutant_carry",
+            "seconds": 0.22
+          },
+          {
+            "name": "mhgp7_device_witness_mutant_skip_write",
+            "seconds": 0.22
+          },
+          {
+            "name": "mhgp7_device_witness_mutant_skip_native",
+            "seconds": 0.23
+          },
+          {
+            "name": "mhgp7_census_device",
+            "seconds": 1.25
+          },
+          {
+            "name": "mhgp7_census_device_mutant_range_le",
+            "seconds": 1.18
+          },
+          {
+            "name": "mhgp7_census_device_mutant_stack",
+            "seconds": 1.19
+          },
+          {
+            "name": "mhgp7_census_device_mutant_swap",
+            "seconds": 1.26
+          },
+          {
+            "name": "mhgp7_census_device_mutant_nonstrict",
+            "seconds": 1.25
+          },
+          {
+            "name": "mhgp7_census_device_mutant_skip_write",
+            "seconds": 1.25
+          },
+          {
+            "name": "mhgp7_census_device_mutant_nshell",
+            "seconds": 1.25
+          },
+          {
+            "name": "mhgp7_census_device_mutant_skip_count",
+            "seconds": 1.25
+          }
+        ],
+        "failed": 0,
+        "passed": 12,
+        "scope": "device_primitives_only_not_full_gpu_pipeline",
+        "tests": 12
+      },
+      "scope": "device_primitives_only",
+      "semantic_validation": "controller_revalidated",
+      "status": "completed"
+    },
+    "gpu_binary_sha256": {
+      "mhgp7_census_device_gate": "13357ac1c0b7ac1ad3deb562654eebfebad37c533667f1f7bb4e21ed315523c6",
+      "mhgp7_device_witness": "1c5904dc9f5e7d94ad16f095d378aa92925a5e1489ea7b263bfa4771e5cf1fe2"
+    },
+    "gpu_cmake": {
+      "executable_sha256": {
+        "cmake": "57452fa01ed0f69552c06d3e25edd0d9375347b982dfb709393526cb45396d6b",
+        "ctest": "4757644d13a4460c2d46f591ff0693d7c66e73f01b92519850ef4b00cd21554e"
+      },
+      "helper_sha256": "a49321f6a4f7cfc53eb0792890574c8a0f4bd39d959fe1440cf10e723b2f8e12",
+      "source": "private",
+      "version": "3.31.6",
+      "wheel_bytes": 27800904,
+      "wheel_sha256": "1c8b05df0602365da91ee6a3336fe57525b137706c4ab5675498f662ae1dbcec"
+    },
+    "gpu_requested": true,
+    "manifest_sha256": "34304748b8823ce2fd9ddd6db4a64f8f73d31d6a2f6118557128a7322a557470",
+    "semantic_validation": "controller_revalidated",
+    "timelines": [
+      {
+        "elapsed_seconds": 17.092695858000006,
+        "exit_code": 0,
+        "name": "cpu_bootstrap",
+        "status": "completed",
+        "stderr_sha256": "a04c126f64b4db2b974af9684ba7de064b5d163c63522bc4933866f53217a1fa",
+        "stdout_sha256": "3faf7dd475e6da5230efcc629424082829294254d134a094e24247a0b66b0b39",
+        "timeout_seconds": 320
+      },
+      {
+        "elapsed_seconds": 0.009956379000001903,
+        "exit_code": 0,
+        "name": "cpu_cmake_version",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "6c08f840b67782da73a6fe113b64712615441722b15cd2723062dd4cc00a10d8",
+        "timeout_seconds": 15
+      },
+      {
+        "elapsed_seconds": 0.004755480000000034,
+        "exit_code": 0,
+        "name": "cpu_compiler_version",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "8d6e704227c739386853b14c98257428d8ffbffd817517db0b2e088d28c773f6",
+        "timeout_seconds": 15
+      },
+      {
+        "elapsed_seconds": 0.003471089999990795,
+        "exit_code": 0,
+        "name": "cpu_make_version",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "8ee498ee2fc27e8dcdf99191b454077df95e3840d841ec94321748b6d7f36819",
+        "timeout_seconds": 15
+      },
+      {
+        "elapsed_seconds": 0.0046872399999955405,
+        "exit_code": 0,
+        "name": "cpu_time_version",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "a3b64288a651d40a18a243c43c871f7ae2886baa58b7e3c64a1061bfd651245f",
+        "timeout_seconds": 15
+      },
+      {
+        "elapsed_seconds": 0.005684488999989412,
+        "exit_code": 0,
+        "name": "cpu_package_versions",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "71057fe390917c563ad349d16db8fede1c6c68b5e48c97ac59eb3e2c08714fa0",
+        "timeout_seconds": 15
+      },
+      {
+        "elapsed_seconds": 0.9671386659999968,
+        "exit_code": 0,
+        "name": "cpu_cpp20_compile",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "timeout_seconds": 45
+      },
+      {
+        "elapsed_seconds": 0.0036906699999974535,
+        "exit_code": 0,
+        "name": "cpu_cpp20_probe",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "95c0f282030475468893012387fd902bb0034bb26ece5a13424318293aed29dc",
+        "timeout_seconds": 5
+      },
+      {
+        "elapsed_seconds": 19.94224001699999,
+        "exit_code": 0,
+        "name": "cpu_build",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "f75167d8906bcf0f57b2a0bf701afb95ffcff1264795f61fd3005d50ddc013ac",
+        "timeout_seconds": 420
+      },
+      {
+        "elapsed_seconds": 0.034437156999999274,
+        "exit_code": 0,
+        "name": "nvcc_version",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "28acf7c60a358550618607525561537e387a326bd4e453cb9cc6c261b96ec3b7",
+        "timeout_seconds": 15
+      },
+      {
+        "elapsed_seconds": 0.01781039200000123,
+        "exit_code": 0,
+        "name": "gpu_hardware",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "07c72475af8e86f01c33b25bc04ae7a54b2a24c1391a49b290f1fa39b1762495",
+        "timeout_seconds": 30
+      },
+      {
+        "elapsed_seconds": 23.905762399000025,
+        "exit_code": 2,
+        "name": "candidate_uniform",
+        "status": "failed",
+        "stderr_sha256": "bfd2032db298d3c4337f54535de2ae8640da711572411baf17556c70c8b07a65",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "timeout_seconds": 120
+      },
+      {
+        "elapsed_seconds": 85.39602800699998,
+        "exit_code": 0,
+        "name": "candidate_wide",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "e1ae3caf58d731d7ffacdb674d71b637c4f2b1c614215a26fc8f5de995bd4e0c",
+        "timeout_seconds": 240
+      },
+      {
+        "elapsed_seconds": 0.7696524809999801,
+        "exit_code": 0,
+        "name": "gpu_cmake_install",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "b50ff79110954fa3676f6bf2fc2117bdcb1d1eb5a8756906ff565993983c4232",
+        "timeout_seconds": 120
+      },
+      {
+        "elapsed_seconds": 0.11602517599999373,
+        "exit_code": 0,
+        "name": "gpu_inventory",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "5f060133295fc1d16c9e3a421a2720070d83e5304b7f7e0309e101a99b456f22",
+        "timeout_seconds": 30
+      },
+      {
+        "elapsed_seconds": 11.58288309400001,
+        "exit_code": 0,
+        "name": "gpu_build",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "61629987d9d16c108713f6ea859d06aba0fcca3a01ee5fcbcd8fcffa147735ac",
+        "timeout_seconds": 420
+      },
+      {
+        "elapsed_seconds": 10.88157626200001,
+        "exit_code": 0,
+        "name": "gpu_primitives",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "cc18b5e05d65ceabf9a994fe11725406acd5d3bd7a85ec39b0f2e5b3294bef18",
+        "timeout_seconds": 300
+      },
+      {
+        "elapsed_seconds": 54.624107459000015,
+        "exit_code": 0,
+        "name": "cpu_v6_uniform",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "3140f6764a7e5e30433def13f4d5918ce411916aaa7e67e8b8886064928668f8",
+        "timeout_seconds": 120
+      },
+      {
+        "elapsed_seconds": 9.952562895,
+        "exit_code": 0,
+        "name": "cpu_v6_uniform_k5",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "6e2515d735e7499830d5208aa75352c5de053f9ac7c9fc86561161584d3c5934",
+        "timeout_seconds": 120
+      },
+      {
+        "elapsed_seconds": 18.357154796999993,
+        "exit_code": 0,
+        "name": "cpu_v6_terrain",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "edb49578b927fcd7f796110690e49f04c3b2c5b48be228acf69a97bec50cfdb4",
+        "timeout_seconds": 120
+      },
+      {
+        "elapsed_seconds": 5.1778881609999985,
+        "exit_code": 0,
+        "name": "cpu_v6_terrain_k5",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "e36fd8329a73a8fc4784696978e7f6e98dee6dfbf6d4fbdd93c4b92a5234dd95",
+        "timeout_seconds": 120
+      },
+      {
+        "elapsed_seconds": 50.120466924,
+        "exit_code": 0,
+        "name": "cpu_v7_uniform",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "43ad15cc2275f01a9473d1847dcd8d44da27123659a86a5273fcaa6be12b7f69",
+        "timeout_seconds": 120
+      },
+      {
+        "elapsed_seconds": 10.117255704999991,
+        "exit_code": 0,
+        "name": "cpu_v7_uniform_k5",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "0e5cc4477cd674240cbd6e901811f88751caa5099ae144e2c27473f9f1a4b208",
+        "timeout_seconds": 120
+      },
+      {
+        "elapsed_seconds": 18.283114033000004,
+        "exit_code": 0,
+        "name": "cpu_v7_terrain",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "90032f4db5634d788d3acf95f960921556ba967b7eb52482da3fc837344f426f",
+        "timeout_seconds": 120
+      },
+      {
+        "elapsed_seconds": 5.431758425999988,
+        "exit_code": 0,
+        "name": "cpu_v7_terrain_k5",
+        "status": "completed",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "eb09465e7cca873e33acba8919c09448e37da45c1b14613ad89b9212105941b7",
+        "timeout_seconds": 120
+      }
+    ],
+    "worker_ended": "2026-09-04T22:52:38.488608+00:00",
+    "worker_exit_code": 0
+  },
+  "schema": "ehgp.v7.gcp-public-receipt.v1",
+  "selected_private_inputs": {
+    "control/post_stop.json": {
+      "bytes": 312,
+      "sha256": "104dabe4c6341469faebaf107f73c129a2d5187918da037986d87ef292229ca5"
+    },
+    "control/post_stop.stdout": {
+      "bytes": 6869,
+      "sha256": "6b91f98f100122d89342f41210db7607619576bfd460b06a832610dd1be51c1f"
+    },
+    "control/stop.json": {
+      "bytes": 338,
+      "sha256": "44209542c1a4989eb44483f9ff2a6034fd560e93ceca43f35eb13779c64aecd6"
+    },
+    "guard-marks/double_guard_verified": {
+      "bytes": 264,
+      "sha256": "4734dcf7cab027b57d3a4326121e04fe649b12019fa4b3cabc7efa5ad37e4110"
+    },
+    "prepared.json": {
+      "bytes": 321,
+      "sha256": "f7c895bef64792fd44315f4663983a041a026eb7491e5e1d410ce3b7b81a3e90"
+    },
+    "received/out/candidate_status.json": {
+      "bytes": 346,
+      "sha256": "f86d79f48f7dc8a979723794361b91da07dfd7737279f95fc67d67d10e6e9b92"
+    },
+    "received/out/candidate_uniform.json": {
+      "bytes": 613,
+      "sha256": "6dd427d5eae98c93fa768b2a929cd53a957468df746a9456e882fe05b7c8e4ae"
+    },
+    "received/out/candidate_wide.json": {
+      "bytes": 632,
+      "sha256": "3bb64d3f90e62751abbcc998826460a6cacbbdce3ade2683caf81e4d7998b499"
+    },
+    "received/out/candidate_wide.stdout": {
+      "bytes": 11045,
+      "sha256": "e1ae3caf58d731d7ffacdb674d71b637c4f2b1c614215a26fc8f5de995bd4e0c"
+    },
+    "received/out/candidate_wide_status.json": {
+      "bytes": 5269,
+      "sha256": "be0ba340e6cf2606ca46a897240e0e7278d4b855a40d7f16802f986fbe67a658"
+    },
+    "received/out/cpu_binaries.json": {
+      "bytes": 255,
+      "sha256": "e75d41015a6c6c6b9cbb11468c62a125febc636d2e6d4e83cf40b3ab9042eb4f"
+    },
+    "received/out/cpu_bootstrap.json": {
+      "bytes": 1228,
+      "sha256": "75caec5ff713fed02c0cc1b9d39ca52e7f03f40386fa0d337239a2c3439be5ca"
+    },
+    "received/out/cpu_build.json": {
+      "bytes": 500,
+      "sha256": "c0e868bd16bd1ed78fd55102cfc4738bf6a94153151c26413a08ae26f082994d"
+    },
+    "received/out/cpu_campaign.json": {
+      "bytes": 48296,
+      "sha256": "245dcdd6b8d39b68c4d6a5445566eccdcef6453223781ba489f72ebb416021f7"
+    },
+    "received/out/cpu_cmake_version.json": {
+      "bytes": 256,
+      "sha256": "6656c7dedede6a024083077abdfcc4c19cc34d0598af6931bb12373bb0339dd4"
+    },
+    "received/out/cpu_compiler_version.json": {
+      "bytes": 254,
+      "sha256": "f16926a7d9cbcd397b184eba30eba0e12b11f64a4100cf427a20735d03e7c37b"
+    },
+    "received/out/cpu_cpp20_compile.json": {
+      "bytes": 382,
+      "sha256": "ad041d90c8b1fc5f64ec373ff956d1f83b3f6979b306fc405114480b7865ae3e"
+    },
+    "received/out/cpu_cpp20_probe.json": {
+      "bytes": 255,
+      "sha256": "4597db3f41e7a41438dc7905becd7ac2e63f81eaf7fbf7196aa41f7d5a653e60"
+    },
+    "received/out/cpu_make_version.json": {
+      "bytes": 255,
+      "sha256": "1cacd9f8c390386f4d42f2a93a785bfee5d7116afa2ba454bb02dfad64eefafe"
+    },
+    "received/out/cpu_package_versions.json": {
+      "bytes": 381,
+      "sha256": "a734b53be4aa1c9ca2717eb6d7f606b1b68eab6442865a988be9d696ef9e8e06"
+    },
+    "received/out/cpu_time_version.json": {
+      "bytes": 265,
+      "sha256": "ab69f9ad51215437d377cdffd24aa09091390d761ac6ed7c50b86cfe1a9b3f65"
+    },
+    "received/out/cpu_toolchain.json": {
+      "bytes": 1607,
+      "sha256": "ab698e25f3902ce11d3345e20ea06bdc3719ff387d0e0792fa82817e062caceb"
+    },
+    "received/out/cpu_v6_terrain.json": {
+      "bytes": 537,
+      "sha256": "35fcf8451215e742f5e10dda972981ff7934388ba2e1342ba0e60914c37c3b12"
+    },
+    "received/out/cpu_v6_terrain.stdout": {
+      "bytes": 9626,
+      "sha256": "edb49578b927fcd7f796110690e49f04c3b2c5b48be228acf69a97bec50cfdb4"
+    },
+    "received/out/cpu_v6_terrain_k5.json": {
+      "bytes": 539,
+      "sha256": "7ff3fd9a97a572c78dc732f13b2b4d8673a2f9f5da9352b49a5698d909b67b5f"
+    },
+    "received/out/cpu_v6_terrain_k5.stdout": {
+      "bytes": 7004,
+      "sha256": "e36fd8329a73a8fc4784696978e7f6e98dee6dfbf6d4fbdd93c4b92a5234dd95"
+    },
+    "received/out/cpu_v6_uniform.json": {
+      "bytes": 537,
+      "sha256": "f9752eb2cc4b8e0c2e4091a28e733596d93e871f10daad62382a4e939dd0b2ac"
+    },
+    "received/out/cpu_v6_uniform.stdout": {
+      "bytes": 9572,
+      "sha256": "3140f6764a7e5e30433def13f4d5918ce411916aaa7e67e8b8886064928668f8"
+    },
+    "received/out/cpu_v6_uniform_k5.json": {
+      "bytes": 532,
+      "sha256": "c075fc67963fac27dfa41981ca2bcf7b9a1557690d105286d45957e8fee5aab2"
+    },
+    "received/out/cpu_v6_uniform_k5.stdout": {
+      "bytes": 6878,
+      "sha256": "6e2515d735e7499830d5208aa75352c5de053f9ac7c9fc86561161584d3c5934"
+    },
+    "received/out/cpu_v7_terrain.json": {
+      "bytes": 537,
+      "sha256": "4db6fe874163227c979403a3d1710f9d50d310cc01b6b19604626d705f12f2f9"
+    },
+    "received/out/cpu_v7_terrain.stdout": {
+      "bytes": 9877,
+      "sha256": "90032f4db5634d788d3acf95f960921556ba967b7eb52482da3fc837344f426f"
+    },
+    "received/out/cpu_v7_terrain_k5.json": {
+      "bytes": 538,
+      "sha256": "a1eea18d2369edcaaa871bfeca45bf98df4a4cd3f77969b3922f00fe5ddf7cbb"
+    },
+    "received/out/cpu_v7_terrain_k5.stdout": {
+      "bytes": 7252,
+      "sha256": "eb09465e7cca873e33acba8919c09448e37da45c1b14613ad89b9212105941b7"
+    },
+    "received/out/cpu_v7_uniform.json": {
+      "bytes": 531,
+      "sha256": "9b5ffc5e2e7423c622cc1e1949c1bd2727a0ad99ae9ca0f3021339b83408532b"
+    },
+    "received/out/cpu_v7_uniform.stdout": {
+      "bytes": 9821,
+      "sha256": "43ad15cc2275f01a9473d1847dcd8d44da27123659a86a5273fcaa6be12b7f69"
+    },
+    "received/out/cpu_v7_uniform_k5.json": {
+      "bytes": 539,
+      "sha256": "1a04101ad6ac72ff8e49b698a1a528bd708d6c11b72792352fdb012d9a4d4513"
+    },
+    "received/out/cpu_v7_uniform_k5.stdout": {
+      "bytes": 7128,
+      "sha256": "0e5cc4477cd674240cbd6e901811f88751caa5099ae144e2c27473f9f1a4b208"
+    },
+    "received/out/gpu_binaries.json": {
+      "bytes": 339,
+      "sha256": "b8d0b3200ba12a2024650258aa65fb4d5f5b568f3e0f298305f93bba77f72789"
+    },
+    "received/out/gpu_build.json": {
+      "bytes": 607,
+      "sha256": "448f5b823c824f93fa6acc9c9dfc6de8cad7d8f5ce480d55ca519027782e362a"
+    },
+    "received/out/gpu_cmake_install.json": {
+      "bytes": 466,
+      "sha256": "aa7b8c082b89cc919ac0eb0ef20a59f9f352096712c52b1631bde35e3b11c7c2"
+    },
+    "received/out/gpu_cmake_toolchain.json": {
+      "bytes": 2009,
+      "sha256": "259fc7d0faca76b8b8df4f15bed637c5ed403f7eb91cf0796f61d0d46209f99f"
+    },
+    "received/out/gpu_hardware.json": {
+      "bytes": 324,
+      "sha256": "3ffbbd92b7f53f6ccb4e9049af8d4f70f63f382daeae8b2c331553dfa97f0015"
+    },
+    "received/out/gpu_inventory.json": {
+      "bytes": 253,
+      "sha256": "06a5bca8f4a1a63344796bb3e659f908cdc766728f4cafbd70e1651b04c6df08"
+    },
+    "received/out/gpu_primitives.json": {
+      "bytes": 446,
+      "sha256": "deea7a8206f8feb2ec51038ef925eded22718e5c158a340ed9e0441a1329a8ed"
+    },
+    "received/out/gpu_primitives.stdout": {
+      "bytes": 1930,
+      "sha256": "cc18b5e05d65ceabf9a994fe11725406acd5d3bd7a85ec39b0f2e5b3294bef18"
+    },
+    "received/out/gpu_status.json": {
+      "bytes": 65,
+      "sha256": "79a2935d431438c37c858820934936431646a0e7a4237b14589dd106d6f29879"
+    },
+    "received/out/gpu_tools.json": {
+      "bytes": 489,
+      "sha256": "c8c5951e43001c7d3f05d3e4db883bd6d2f4b7f9aedcee13c2167b395d54d33e"
+    },
+    "received/out/nvcc_version.json": {
+      "bytes": 275,
+      "sha256": "3fd6392fc40165fe0d8e5869e6ba135202cb74d280f52990842cd017bffb86f2"
+    },
+    "received/out/result_manifest.json": {
+      "bytes": 19406,
+      "sha256": "34304748b8823ce2fd9ddd6db4a64f8f73d31d6a2f6118557128a7322a557470"
+    },
+    "received/out/worker_terminal.json": {
+      "bytes": 135,
+      "sha256": "3c8e91165d6e3c6eb98f093ccdc0843d3deae1ae22370f9cc6011e6b02c7d973"
+    },
+    "session.json": {
+      "bytes": 614,
+      "sha256": "b340c0180694f2bf6c6b44daa571fdd5f88f45d64c180e1505a938a2bb21592a"
+    },
+    "source/source_manifest.json": {
+      "bytes": 52856,
+      "sha256": "42c100dd6fb7018cc1da88b177799da77d3db53b1dc2f4398ef783636e63308e"
+    }
+  },
+  "session_elapsed_seconds": 604.934285,
+  "source_archive_sha256": "029f154d6ca98750d939f687bc3bcd194d56fbe27a37000185bbfd09cf528dd5",
+  "source_manifest_sha256": "42c100dd6fb7018cc1da88b177799da77d3db53b1dc2f4398ef783636e63308e",
+  "started": "2026-09-04T22:45:21.322306+00:00",
+  "stop": {
+    "authority": "reviewed_guarded_controller_terminal_state_and_selected_stop_fields",
+    "check_ended": "2026-09-04T22:55:26.253297+00:00",
+    "double_guard_marker": {
+      "generation": "2026-09-04T15:45:50.919-07:00",
+      "guest_shutdown_minutes": "45",
+      "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+      "mark": "double_guard_verified",
+      "max_run_seconds": "3600",
+      "project": "devpod-gpu-exploration",
+      "schema": "e-hgp.guard-mark.v1",
+      "zone": "us-central1-b"
+    },
+    "gce_seconds": 3600,
+    "generation": "2026-09-04T15:45:50.919-07:00",
+    "guest_minutes": 45,
+    "machine_type": "g4-standard-48",
+    "provisioning": "SPOT",
+    "status": "TERMINATED",
+    "stop_and_check_seconds": 68.80720562799979,
+    "stop_ended": "2026-09-04T22:55:26.248829+00:00",
+    "target": {
+      "id": "4526841274685623561",
+      "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+      "project": "devpod-gpu-exploration",
+      "zone": "us-central1-b"
+    },
+    "target_generation_sha256": "74ea19194c4fa167dcc191197bf9229ef1774d58e5102e4067d75f3dcc38954a",
+    "target_sha256": "5f0e7de64a5847de0090a2a9e4ae8d8d113f2095dfedb12857cf0bd55f36897e",
+    "termination_action": "STOP",
+    "verified": true,
+    "zone": "us-central1-b"
+  }
+}

@@ -1,0 +1,14 @@
+# Commands executed from /workspaces/E-HGP. Generated build trees and binaries are not versioned.
+# Two fresh, true-CMake target-only builds; no CLI rebuilt in these two trees.
+cmake -S morsehgp3D_v7 -B build/v7_arithmetic_integrated_release -DCMAKE_BUILD_TYPE=Release -DMHGP7_ENABLE_CUDA=OFF
+cmake --build build/v7_arithmetic_integrated_release --target mhgp7_arithmetic_integer_gate mhgp7_arithmetic_lanes_gate --parallel 2
+ctest --test-dir build/v7_arithmetic_integrated_release -V --output-on-failure --no-tests=error -R '^mhgp7_arithmetic_' --parallel 1 --output-junit /workspaces/E-HGP/morsehgp3D_v7/receipts/arithmetic_gates_20260904/targeted.release.junit.xml
+cmake -S morsehgp3D_v7 -B build/v7_arithmetic_integrated_sanitized -DCMAKE_BUILD_TYPE=Release -DMHGP7_ENABLE_CUDA=OFF '-DCMAKE_CXX_FLAGS_RELEASE=-O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer' '-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined'
+cmake --build build/v7_arithmetic_integrated_sanitized --target mhgp7_arithmetic_integer_gate mhgp7_arithmetic_lanes_gate --parallel 2
+env ASAN_OPTIONS=detect_leaks=1:abort_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 ctest --test-dir build/v7_arithmetic_integrated_sanitized -V --output-on-failure --no-tests=error -R '^mhgp7_arithmetic_' --parallel 1 --output-junit /workspaces/E-HGP/morsehgp3D_v7/receipts/arithmetic_gates_20260904/targeted.sanitized.junit.xml
+ctest --test-dir build/v7_arithmetic_integrated_release --show-only=json-v1 -R '^mhgp7_arithmetic_'
+# Fresh execution of all 316 gates, after an explicitly incremental build.
+# The runner refuses an existing full_release output directory and is not safe to replay in-place over this receipt.
+env PYTHONDONTWRITEBYTECODE=1 python3 morsehgp3D_v7/receipts/arithmetic_gates_20260904/run_full_release.py --selftest
+env PYTHONDONTWRITEBYTECODE=1 python3 -O morsehgp3D_v7/receipts/arithmetic_gates_20260904/run_full_release.py --selftest
+env PYTHONDONTWRITEBYTECODE=1 python3 morsehgp3D_v7/receipts/arithmetic_gates_20260904/run_full_release.py --execute

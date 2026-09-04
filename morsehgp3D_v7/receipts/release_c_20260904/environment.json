@@ -1,0 +1,33 @@
+{
+  "affinity_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "gcp": "not_used",
+  "head": "d9e4ee0152435d4394bedfe1dc5134d5125a65a8",
+  "helper_sha256": "582922e64fcd2927be3e63c7156fefa839fd1f8c055f92a75c97514cad7a0ee5",
+  "options": {
+    "after_campaign": "morsehgp3D_v7/receipts/mono_bc_20260904",
+    "build_jobs": 2,
+    "execute": true,
+    "test_jobs": 2
+  },
+  "public_status": "not_claimed",
+  "runner_sha256": "142049be81f742756d56dd73d361db3fc60d86e6c1a6b329b99b40ad84187982",
+  "schema": "mhgp7.local.release-c-fresh.v1",
+  "scope": "fresh_cpu_release_gates_not_performance_not_cuda",
+  "uname": [
+    "Linux",
+    "codespaces-0bcb78",
+    "6.8.0-1052-azure",
+    "#58~22.04.1-Ubuntu SMP Thu Mar 26 05:02:21 UTC 2026",
+    "x86_64"
+  ],
+  "worktree": " M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/\n?? morsehgp3D_v7/receipts/mono_bc_20260904/\n?? morsehgp3D_v7/receipts/release_c_20260904/\n"
+}

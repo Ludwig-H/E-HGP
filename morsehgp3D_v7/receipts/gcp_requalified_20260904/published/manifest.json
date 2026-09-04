@@ -1,0 +1,16 @@
+{
+  "exporter_sha256": "8c72e1740edfcf4074544cb9164096fd18508cd94dffbdd4089dffb74c2eb6c4",
+  "files": [
+    {
+      "bytes": 77377,
+      "path": "receipt.json",
+      "sha256": "c29b887c6da8bc9597b261390772015797f86b7ba1d9a66e83b7fe9ce64b6708"
+    },
+    {
+      "bytes": 51519,
+      "path": "source_pins.json",
+      "sha256": "0c36c8ac394a0a662c52f668e6fe1d444beaaf7e2cd9bf56189e56be2a497185"
+    }
+  ],
+  "schema": "ehgp.v7.public-export.v1"
+}

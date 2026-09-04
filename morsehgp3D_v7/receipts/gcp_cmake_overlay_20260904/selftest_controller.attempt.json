@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/selftest_controller.py"
+  ],
+  "started_utc": "2026-09-04T22:18:02Z",
+  "status": "running",
+  "timeout_seconds": 30
+}

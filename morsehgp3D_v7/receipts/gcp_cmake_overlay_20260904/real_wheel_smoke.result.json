@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/private_cmake_v7.py",
+    "--install",
+    "--root",
+    "/workspaces/E-HGP/build/v7-cmake-wheel-smoke-2t1vhpkv",
+    "--seconds",
+    "120",
+    "--deadline-epoch",
+    "1788560405.5381095"
+  ],
+  "elapsed_seconds": 1.991865099998904,
+  "exit_code": 0,
+  "started_utc": "2026-09-04T22:18:05Z",
+  "status": "completed",
+  "timeout_seconds": 120
+}

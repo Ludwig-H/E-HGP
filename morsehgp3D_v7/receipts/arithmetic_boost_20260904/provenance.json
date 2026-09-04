@@ -1,0 +1,503 @@
+{
+  "schema": "mhgp7-private-boost-qualification-public-v1",
+  "status": "passed",
+  "public_status": "not_claimed",
+  "gcp": "not_used",
+  "scope": "optional_integer_Boost_authority_and_24_arithmetic_gates_only",
+  "original_overlay": "build/v7_boost_gate",
+  "original_receipts": "build/v7_boost_gate/receipts",
+  "original_manifest_sha256": "725302d6b8ac362c1971e6595ea066a7a1af196778143726605f59eb218374d8",
+  "authority": {
+    "integer": "obig_literals_and_boost",
+    "integer_boost": "1_83",
+    "lanes": "obig_and_literals",
+    "lanes_boost": "not_used_by_source",
+    "full_pipeline_qualification": false
+  },
+  "junit_independent_review": {
+    "integer": {
+      "all_status_run": true,
+      "exact_pinned_cmake_set": true,
+      "expected_exit_codes": {
+        "mhgp7_arithmetic_integer": 0,
+        "mhgp7_arithmetic_integer_bad_case": 2,
+        "mhgp7_arithmetic_integer_bad_mutant": 2,
+        "mhgp7_arithmetic_integer_case_mismatch": 2,
+        "mhgp7_arithmetic_integer_oracle": 0,
+        "mhgp7_arithmetic_integer_oracle_carry": 4,
+        "mhgp7_arithmetic_integer_u320": 0,
+        "mhgp7_arithmetic_u320_word4": 4
+      },
+      "failure_error_skipped_absent": true,
+      "names": [
+        "mhgp7_arithmetic_integer",
+        "mhgp7_arithmetic_integer_bad_case",
+        "mhgp7_arithmetic_integer_bad_mutant",
+        "mhgp7_arithmetic_integer_case_mismatch",
+        "mhgp7_arithmetic_integer_oracle",
+        "mhgp7_arithmetic_integer_oracle_carry",
+        "mhgp7_arithmetic_integer_u320",
+        "mhgp7_arithmetic_u320_word4"
+      ],
+      "names_unique": true,
+      "tests": 8
+    },
+    "lanes": {
+      "all_status_run": true,
+      "exact_pinned_cmake_set": true,
+      "expected_exit_codes": {
+        "mhgp7_arithmetic_lanes": 0,
+        "mhgp7_arithmetic_lanes_bad_case": 2,
+        "mhgp7_arithmetic_lanes_bad_inject": 2,
+        "mhgp7_arithmetic_lanes_duplicate_case": 2,
+        "mhgp7_arithmetic_lanes_duplicate_inject": 2,
+        "mhgp7_arithmetic_lanes_empty_inject": 2,
+        "mhgp7_arithmetic_lanes_oracle": 0,
+        "mhgp7_arithmetic_lanes_oracle_carry": 4,
+        "mhgp7_arithmetic_lanes_oracle_case_mismatch": 2,
+        "mhgp7_arithmetic_lanes_oracle_overflow": 3,
+        "mhgp7_arithmetic_lanes_q4_level": 0,
+        "mhgp7_arithmetic_lanes_u192_case_mismatch": 2,
+        "mhgp7_arithmetic_q3_factor": 4,
+        "mhgp7_arithmetic_q4_face_boundary": 4,
+        "mhgp7_arithmetic_q4_parity": 4,
+        "mhgp7_arithmetic_q4_u192_word2": 4
+      },
+      "failure_error_skipped_absent": true,
+      "names": [
+        "mhgp7_arithmetic_lanes",
+        "mhgp7_arithmetic_lanes_bad_case",
+        "mhgp7_arithmetic_lanes_bad_inject",
+        "mhgp7_arithmetic_lanes_duplicate_case",
+        "mhgp7_arithmetic_lanes_duplicate_inject",
+        "mhgp7_arithmetic_lanes_empty_inject",
+        "mhgp7_arithmetic_lanes_oracle",
+        "mhgp7_arithmetic_lanes_oracle_carry",
+        "mhgp7_arithmetic_lanes_oracle_case_mismatch",
+        "mhgp7_arithmetic_lanes_oracle_overflow",
+        "mhgp7_arithmetic_lanes_q4_level",
+        "mhgp7_arithmetic_lanes_u192_case_mismatch",
+        "mhgp7_arithmetic_q3_factor",
+        "mhgp7_arithmetic_q4_face_boundary",
+        "mhgp7_arithmetic_q4_parity",
+        "mhgp7_arithmetic_q4_u192_word2"
+      ],
+      "names_unique": true,
+      "tests": 16
+    }
+  },
+  "compiled_branch": {
+    "INTEGER_GATE_BOOST": 1,
+    "BOOST_VERSION": 108300,
+    "macro_dump": {
+      "original_path": "build/v7_boost_gate/receipts/compiled_authority_macros.stdout",
+      "sha256": "82ccb6d8caf7a70f04179b9fe675d412b995da6ec2dfa8b6481b7ab53b2907bf",
+      "published": false,
+      "selection": "INTEGER_GATE_BOOST and BOOST_VERSION only"
+    },
+    "actual_object_dependencies": {
+      "original_path": "build/v7_boost_gate/build/v7/CMakeFiles/mhgp7_arithmetic_integer_gate.dir/tests/arithmetic_integer_gate.cpp.o.d",
+      "sha256": "29f037fa5b3aa3b594281975fce840fffdc9cb72ab15602efbd68385c41c4385",
+      "published": false,
+      "required_private_headers": [
+        "boost/multiprecision/cpp_int.hpp",
+        "boost/version.hpp"
+      ]
+    },
+    "nonvacuity": "integer_authority.stdout"
+  },
+  "package_acquisition": {
+    "package": "libboost1.83-dev",
+    "version": "1.83.0-2.1ubuntu3.2",
+    "architecture": "amd64",
+    "official_apt_uri": "http://archive.ubuntu.com/ubuntu/pool/main/b/boost1.83/libboost1.83-dev_1.83.0-2.1ubuntu3.2_amd64.deb",
+    "sha256": "519ecf2c64308527e15b6582955681d192a832250baa4bc424967aaf7d02d68f",
+    "bytes": 10745362,
+    "apt_update": false,
+    "system_install": false,
+    "private_extraction": true,
+    "system_cpp_int_header_present_before": false,
+    "system_cpp_int_header_present_after": false
+  },
+  "source_binding": {
+    "sources_before_sha256": "e89d08fea34758b4e0339347e616cafedbc9f6cdc4b45f7729bd55b5e17f7bb0",
+    "sources_after_sha256": "e89d08fea34758b4e0339347e616cafedbc9f6cdc4b45f7729bd55b5e17f7bb0",
+    "sources_stable": true,
+    "source_inventory_public": "sources_before.json",
+    "product_rebuilt": false,
+    "protected_product_sha256_before_and_after": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+    "private_include_scope_exactly": [
+      "mhgp7_arithmetic_integer_gate",
+      "mhgp7_arithmetic_lanes_gate"
+    ]
+  },
+  "frozen_text_snapshots": {
+    "execution_from_public_directory": "not_supported_inert_text_snapshots",
+    "runner": {
+      "public_path": "qualify.py.snapshot.txt",
+      "original_path": "build/v7_boost_gate/qualify.py",
+      "sha256": "865af789032e0bd39e7ddd6e484711c42efb7bc6d67d5ab6783fe6b1663012c9"
+    },
+    "cmake": {
+      "public_path": "CMakeLists.txt.snapshot",
+      "original_path": "build/v7_boost_gate/CMakeLists.txt",
+      "sha256": "28f0d4bfc2186fce38c08b0fa0a3fc41df7c0dfc4789dc47b8ca16af4c7ff682"
+    },
+    "receipt_helper": {
+      "path": "morsehgp3D_v7/receipts/release_20260904/run_release.py",
+      "sha256": "582922e64fcd2927be3e63c7156fefa839fd1f8c055f92a75c97514cad7a0ee5",
+      "read_in_full_during_public_review": true
+    }
+  },
+  "timing_scope": "diagnostic_shared_host_not_performance_claim",
+  "copies": [
+    {
+      "public_path": "summary.json",
+      "original_path": "build/v7_boost_gate/receipts/summary.json",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "scope.json",
+      "original_path": "build/v7_boost_gate/receipts/scope.json",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "package.json",
+      "original_path": "build/v7_boost_gate/receipts/package.json",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "compile_binding.json",
+      "original_path": "build/v7_boost_gate/receipts/compile_binding.json",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "integer_inventory.stdout",
+      "original_path": "build/v7_boost_gate/receipts/integer_inventory.stdout",
+      "copy": "terminal_LF_added_JSON_value_unchanged"
+    },
+    {
+      "public_path": "integer.junit.xml",
+      "original_path": "build/v7_boost_gate/receipts/integer.junit.xml",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "lanes.junit.xml",
+      "original_path": "build/v7_boost_gate/receipts/lanes.junit.xml",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "integer_ctest.stdout",
+      "original_path": "build/v7_boost_gate/receipts/integer_ctest.stdout",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "integer_authority.stdout",
+      "original_path": "build/v7_boost_gate/receipts/integer_authority.stdout",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "lanes_ctest.stdout",
+      "original_path": "build/v7_boost_gate/receipts/lanes_ctest.stdout",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "build_two_targets.stdout",
+      "original_path": "build/v7_boost_gate/receipts/build_two_targets.stdout",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "configure.stdout",
+      "original_path": "build/v7_boost_gate/receipts/configure.stdout",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "compiler_version.stdout",
+      "original_path": "build/v7_boost_gate/receipts/compiler_version.stdout",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "apt_uri.stdout",
+      "original_path": "build/v7_boost_gate/receipts/apt_uri.stdout",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "apt_policy.stdout",
+      "original_path": "build/v7_boost_gate/receipts/apt_policy.stdout",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "deb_metadata.stdout",
+      "original_path": "build/v7_boost_gate/receipts/deb_metadata.stdout",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "binaries.json",
+      "original_path": "build/v7_boost_gate/receipts/binaries.json",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "sources_before.json",
+      "original_path": "build/v7_boost_gate/receipts/sources_before.json",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "LOCAL_RECEIPT_MANIFEST.json",
+      "original_path": "build/v7_boost_gate/receipts/receipt_manifest.json",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "CMakeLists.txt.snapshot",
+      "original_path": "build/v7_boost_gate/CMakeLists.txt",
+      "copy": "byte_identical"
+    },
+    {
+      "public_path": "qualify.py.snapshot.txt",
+      "original_path": "build/v7_boost_gate/qualify.py",
+      "copy": "byte_identical"
+    }
+  ],
+  "omitted_local_receipt_files": [
+    {
+      "bytes": 263,
+      "path": "apt_download.attempt.json",
+      "sha256": "e49c716addc4c190a6592830085bfe5925bd5286fcde26dc8993c6a3828edf3a"
+    },
+    {
+      "bytes": 324,
+      "path": "apt_download.result.json",
+      "sha256": "2d7a1a7f4a3a2c15bad2edb49a3de15aab6c8e7705b5c49c5409eefb1faede39"
+    },
+    {
+      "bytes": 0,
+      "path": "apt_download.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 151,
+      "path": "apt_download.stdout",
+      "sha256": "f98ca3db18a5bf95021fb545d1f90e88fa80325a803b882b09a0c3d64c3eefaf"
+    },
+    {
+      "bytes": 181,
+      "path": "apt_package_metadata.attempt.json",
+      "sha256": "d6f8688f6bf6f54512adcfd6293610bccdd909f2b91356dfa78cb68736bcfd21"
+    },
+    {
+      "bytes": 242,
+      "path": "apt_package_metadata.result.json",
+      "sha256": "fb55a1eaa41770ad63bbf8b151b2fda513fc231000a0f1324ff1b783006f1c59"
+    },
+    {
+      "bytes": 0,
+      "path": "apt_package_metadata.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2418,
+      "path": "apt_package_metadata.stdout",
+      "sha256": "b460e9d3f76b32ccfa2b81e64cb1a85526e67d24f22f4c8aab257e82cf9bcaa8"
+    },
+    {
+      "bytes": 183,
+      "path": "apt_policy.attempt.json",
+      "sha256": "e894a90d0ac99c2bfdfd560bfc8011e619c3242c36fe3662071c127bbbadeff7"
+    },
+    {
+      "bytes": 244,
+      "path": "apt_policy.result.json",
+      "sha256": "5e63e64a676d083b214182fc5815f9f44221ae45835f5098b62bcd2cb4f3a676"
+    },
+    {
+      "bytes": 0,
+      "path": "apt_policy.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 203,
+      "path": "apt_uri.attempt.json",
+      "sha256": "e9d35adf3b701bc6b98c2c4c39e7b7655e61d1d621f9f763057926ff46981996"
+    },
+    {
+      "bytes": 264,
+      "path": "apt_uri.result.json",
+      "sha256": "b0f59431d8880c4d8fe4e87c047a4d1f0affb14b6cfa55a669b63c21c4728a69"
+    },
+    {
+      "bytes": 0,
+      "path": "apt_uri.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 303,
+      "path": "build_two_targets.attempt.json",
+      "sha256": "1f48e2026ae76eb5b2c35b078c840a373d3326baa1b0c1bc4d286f4fd0ecb6a6"
+    },
+    {
+      "bytes": 363,
+      "path": "build_two_targets.result.json",
+      "sha256": "d185bda7d3ccaa0c1c39d74834cd1ff86158d57203e75c2300d492ef6dd3ecf1"
+    },
+    {
+      "bytes": 0,
+      "path": "build_two_targets.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 388,
+      "path": "compiled_authority_macros.attempt.json",
+      "sha256": "2c9279e5dc83e323091a7790ba5f171fd69c8c101fbd50657e6ca13fdcad523b"
+    },
+    {
+      "bytes": 450,
+      "path": "compiled_authority_macros.result.json",
+      "sha256": "562aa636368c68e85aac2291aca92d3418ca239d5d3386874ec1e9524632a87b"
+    },
+    {
+      "bytes": 0,
+      "path": "compiled_authority_macros.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1152352,
+      "path": "compiled_authority_macros.stdout",
+      "sha256": "82ccb6d8caf7a70f04179b9fe675d412b995da6ec2dfa8b6481b7ab53b2907bf"
+    },
+    {
+      "bytes": 136,
+      "path": "compiler_version.attempt.json",
+      "sha256": "e8ef001033c12ac82bc7a237bd11eb4029122351b40bcee74970cd6e9de7257d"
+    },
+    {
+      "bytes": 199,
+      "path": "compiler_version.result.json",
+      "sha256": "ec9ff06942bdfc50bae6a0b71e3c158e00eae3c9aa514784960262028b2e8c06"
+    },
+    {
+      "bytes": 0,
+      "path": "compiler_version.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 344,
+      "path": "configure.attempt.json",
+      "sha256": "23148f4d0aff29a1542a7cf64ad6a0017cc56ed23879d851740325a66cc4ffae"
+    },
+    {
+      "bytes": 405,
+      "path": "configure.result.json",
+      "sha256": "0244fa2d50360fcc87fc266058a16c65a2407e4b2fd91f6d4629dd02b05f7d52"
+    },
+    {
+      "bytes": 0,
+      "path": "configure.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 290,
+      "path": "deb_metadata.attempt.json",
+      "sha256": "8ed1a5bfe628641e2139900718c643bff4a07d02baf605590a045caca9e8754e"
+    },
+    {
+      "bytes": 353,
+      "path": "deb_metadata.result.json",
+      "sha256": "b48dfa004c332cd5a8a5e51cfe882dcc80d2d76266156c54127568f9176c3e03"
+    },
+    {
+      "bytes": 0,
+      "path": "deb_metadata.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 298,
+      "path": "extract_headers.attempt.json",
+      "sha256": "238938d786fd6214ae828189cf910506103910dd7a8bf1b5cf3e2a89d7207c99"
+    },
+    {
+      "bytes": 358,
+      "path": "extract_headers.result.json",
+      "sha256": "1d75dc0ff978761805742d219705fed0968546df748f1d2befaa82b3eb6b71e3"
+    },
+    {
+      "bytes": 0,
+      "path": "extract_headers.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "extract_headers.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 192,
+      "path": "integer_authority.attempt.json",
+      "sha256": "2b912a41346281b89e629f53a7df7c17cc126b3b31b9db0468ad58caa8680147"
+    },
+    {
+      "bytes": 255,
+      "path": "integer_authority.result.json",
+      "sha256": "a9e2d4ffef87cbd4ee15a62bf85e14df7b5aae67a304d4cdf32a5513f3bbc5e0"
+    },
+    {
+      "bytes": 0,
+      "path": "integer_authority.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 388,
+      "path": "integer_ctest.attempt.json",
+      "sha256": "d65855d1adf06fa5ebd0e8a9a002b39a452a945b590efa6be0f6ca6bc1390f1f"
+    },
+    {
+      "bytes": 450,
+      "path": "integer_ctest.result.json",
+      "sha256": "abe2d504401b2cfd1a29ee9dcb14b7100a83020346b07847a70f020ac4ac1c28"
+    },
+    {
+      "bytes": 0,
+      "path": "integer_ctest.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 279,
+      "path": "integer_inventory.attempt.json",
+      "sha256": "473113bd70b32f39429b766b2b26c5f9d3d353cd893ef48eb362229042fdb739"
+    },
+    {
+      "bytes": 341,
+      "path": "integer_inventory.result.json",
+      "sha256": "50d1b2b678a9a3cca84a34858f8768d2f9aab021f2e380e29caeb025ad59e1eb"
+    },
+    {
+      "bytes": 0,
+      "path": "integer_inventory.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 389,
+      "path": "lanes_ctest.attempt.json",
+      "sha256": "bb99d97bef4d559dd7238694602b5d9c354ffcdc3a4274102b41607302bf3232"
+    },
+    {
+      "bytes": 450,
+      "path": "lanes_ctest.result.json",
+      "sha256": "1e7c51af2aea2ad89d7193cf8f4366de905c665613477739837419e2df3aedce"
+    },
+    {
+      "bytes": 0,
+      "path": "lanes_ctest.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 23085,
+      "path": "sources_after.json",
+      "sha256": "e89d08fea34758b4e0339347e616cafedbc9f6cdc4b45f7729bd55b5e17f7bb0"
+    }
+  ],
+  "excluded_artifact_kinds": [
+    "deb_package",
+    "extracted_headers",
+    "objects",
+    "executables"
+  ]
+}

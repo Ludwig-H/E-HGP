@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_c_qualification",
+    "--show-only=json-v1",
+    "-L",
+    "^gate$"
+  ],
+  "elapsed_seconds": 0.06685773000026529,
+  "exit_code": 0,
+  "started_utc": "2026-09-04T22:17:28Z",
+  "status": "completed",
+  "timeout_seconds": 60
+}

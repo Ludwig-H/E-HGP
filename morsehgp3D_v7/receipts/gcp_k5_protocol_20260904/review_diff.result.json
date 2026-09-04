@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "git",
+    "diff",
+    "--",
+    "gcp-migration/v7_g4_session.py",
+    "gcp-migration/selftest_session_v7.py",
+    "gcp-migration/README_v7.md"
+  ],
+  "elapsed_seconds": 0.00997487000131514,
+  "exit_code": 0,
+  "started_utc": "2026-09-04T22:44:19Z",
+  "status": "completed",
+  "timeout_seconds": 30
+}

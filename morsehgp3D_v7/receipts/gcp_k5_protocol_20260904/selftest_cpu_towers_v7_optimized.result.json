@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/gcp-migration/selftest_cpu_towers_v7.py"
+  ],
+  "elapsed_seconds": 1.9706610279990855,
+  "exit_code": 0,
+  "started_utc": "2026-09-04T22:44:17Z",
+  "status": "completed",
+  "timeout_seconds": 45
+}

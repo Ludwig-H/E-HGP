@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v7_c_qualification",
+    "--parallel",
+    "2"
+  ],
+  "started_utc": "2026-09-04T22:13:22Z",
+  "status": "running",
+  "timeout_seconds": 3600
+}

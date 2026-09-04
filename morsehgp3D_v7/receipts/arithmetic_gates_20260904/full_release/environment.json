@@ -1,0 +1,28 @@
+{
+  "affinity_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "all_gate_executions": "fresh",
+  "build_kind": "incremental",
+  "expected_names_sha256": "63d781d479e87006163ea7431aa1d95cb82d7eafce5d6ab263726592b3dd1cbe",
+  "gcp": "not_used",
+  "head": "d2b270580605d742d42b66930d628ccac52771b4",
+  "helper_sha256": "582922e64fcd2927be3e63c7156fefa839fd1f8c055f92a75c97514cad7a0ee5",
+  "public_status": "not_claimed",
+  "runner_sha256": "a55b9dbe8607e5b8127754e1e8563c1048a18669f0cb00f290e403bb7f6f5b71",
+  "uname": [
+    "Linux",
+    "codespaces-0bcb78",
+    "6.8.0-1052-azure",
+    "#58~22.04.1-Ubuntu SMP Thu Mar 26 05:02:21 UTC 2026",
+    "x86_64"
+  ],
+  "worktree": " M .github/workflows/morsehgp3d-v7.yml\n M gcp-migration/README_v7.md\n M gcp-migration/selftest_session_v7.py\n M gcp-migration/v7_g4_session.py\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/PASSATION.md\n M morsehgp3D_v7/README.md\n M morsehgp3D_v7/audits/DIALOGUE_COURANT.md\n M morsehgp3D_v7/docs/QUALIFICATION_S1_PRIMITIVES.md\n M morsehgp3D_v7/tests/sonde_ablation_gate.py\n M tools/check_docs.py\n?? gcp-migration/private_cmake_v7.py\n?? gcp-migration/selftest_cpu_towers_v7.py\n?? gcp-migration/selftest_private_cmake_controller_v7.py\n?? gcp-migration/selftest_private_cmake_v7.py\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/docs/ARITHMETIQUE_PRIMITIVES.md\n?? morsehgp3D_v7/docs/PLAN_PORTES_ARITHMETIQUES.md\n?? morsehgp3D_v7/docs/RESIDENCE_MASSIVE.md\n?? morsehgp3D_v7/docs/RESULTATS_G4_20260904.md\n?? morsehgp3D_v7/docs/RESULTATS_MONO_20260904.md\n?? morsehgp3D_v7/receipts/arithmetic_gates_20260904/\n?? morsehgp3D_v7/receipts/arithmetic_review_20260904/\n?? morsehgp3D_v7/receipts/ci_sonde_environment_20260904/\n?? morsehgp3D_v7/receipts/gcp_cmake_integrated_20260904/\n?? morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/\n?? morsehgp3D_v7/receipts/gcp_k5_protocol_20260904/\n?? morsehgp3D_v7/receipts/gcp_requalified_20260904/\n?? morsehgp3D_v7/receipts/mono_bc_20260904/\n?? morsehgp3D_v7/receipts/release_c_20260904/\n?? morsehgp3D_v7/receipts/residence_massive_20260904/\n?? morsehgp3D_v7/tests/arithmetic_integer_gate.cpp\n?? morsehgp3D_v7/tests/arithmetic_lanes_gate.cpp\n"
+}

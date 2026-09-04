@@ -1,0 +1,67 @@
+{
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "status": "passed",
+  "scope": "two integrated bounded arithmetic primitives gates, not the complete pipeline",
+  "compiler": "GCC 13.3.0",
+  "cmake": "3.28.3",
+  "builds": {
+    "release": {
+      "kind": "fresh_target_only_true_project_cmake",
+      "ctest_exit_code": 0,
+      "tests": 24,
+      "ctest_reported_real_seconds": 0.36
+    },
+    "sanitized": {
+      "kind": "fresh_target_only_true_project_cmake",
+      "ctest_exit_code": 0,
+      "tests": 24,
+      "ctest_reported_real_seconds": 0.61,
+      "sanitizers": [
+        "address",
+        "undefined",
+        "leaks"
+      ],
+      "diagnostics_observed": 0
+    }
+  },
+  "registration_classes": {
+    "nominal": 6,
+    "targeted_mutant": 7,
+    "expected_oracle_overflow_refusal": 1,
+    "usage_refusal": 10
+  },
+  "actual_source_hashes": {
+    "morsehgp3D_v7/CMakeLists.txt": "a875192ec280e89f1bb2a7d887a974aeae5071445a7067afae13a8746393ded3",
+    "morsehgp3D_v7/tests/arithmetic_integer_gate.cpp": "85ddb30a767edb77b3b6066bc965e49ed2fb702c51683cfc0fbb1eac248e7eef",
+    "morsehgp3D_v7/tests/arithmetic_lanes_gate.cpp": "f6baee8f72a9becbbd3e291d87f22cbab953eff031560b96bdd7e5251154406c"
+  },
+  "overlay_equal": {
+    "arithmetic_integer_gate.cpp": true,
+    "arithmetic_lanes_gate.cpp": true
+  },
+  "real_cmake_source_root": "${CMAKE_CURRENT_SOURCE_DIR}",
+  "provenance_override_in_real_cmake": false,
+  "authority": {
+    "integer": "OBig and explicit literals; optional Boost branch not compiled locally",
+    "lanes": "OBig and explicit literals; Boost not used",
+    "fixture_precondition_refusals": "test validators only, not product low-level refusal API"
+  },
+  "truncation_causality": {
+    "u192": "actual q4 numerator high word; divergence before U320",
+    "u320": "literal generic levels, no U192 construction upstream, bits256 and316, not a geometric u16 claim"
+  },
+  "limits": [
+    "No numerical-test promotion of universal arithmetic bounds",
+    "No full horizontal or vertical exactness certificate",
+    "No performance result",
+    "No GPU or cloud result",
+    "No local qualification of optional Boost branch"
+  ],
+  "gcp": "not_used",
+  "raw_result_wall_time_semantics": "Tool result wall_time_seconds is per-call observation, not a general total-process timer; CTest reported real time is recorded separately.",
+  "full_release_status": "not_in_scope_of_this_targeted_summary_see_full_release_summary"
+}

@@ -1,0 +1,60 @@
+diff --git a/morsehgp3D_v7/tests/sonde_ablation_gate.py b/morsehgp3D_v7/tests/sonde_ablation_gate.py
+index 91b0c5c4..d9daac62 100644
+--- a/morsehgp3D_v7/tests/sonde_ablation_gate.py
++++ b/morsehgp3D_v7/tests/sonde_ablation_gate.py
+@@ -59,7 +59,9 @@ Scenes :
+       out/SHA256SUMS pendant un tuple => INVALIDE 3 par l'agregateur ; faux
+       python3 ajoutant intrus_racine.txt et out/SHA256SUMS APRES l'agregateur
+       et AVANT le manifeste => INVALIDE 3 par l'inventaire, les deux intrus
+-      figurant dans le SHA256SUMS du .partial (haches, donc visibles).
++      figurant dans le SHA256SUMS du .partial (haches, donc visibles) ;
++      LD_LIBRARY_PATH herite (setup-python CI) => inventaire brut refuse 2,
++      inventaires nominaux nettoyes acceptes 0, sans affaiblir le lanceur.
+   Dents du 2 septembre (ETAT_COURANT, ligne « sonde equilibree … harnais »,
+   et fin du § 5.22 ; memes regles : un mutant, un code, un motif) :
+   (o) runs_effectues / runs_attendus OBLIGATOIRES : META sans l'un des deux
+@@ -169,6 +171,7 @@ import subprocess
+ import sys
+ import tempfile
+ from pathlib import Path
++from unittest.mock import patch
+ 
+ BRAS = ("aucune", "ablation-mat-sans-copie", "ablation-mat-sans-tris",
+         "ablation-post-cle-factice")
+@@ -1031,15 +1034,27 @@ def scene_inventaire(p, base, faux, nominal):
+     # exclu) liste les deux intrus imbriques ; sur le nominal il coincide
+     # exactement avec les entrees du manifeste publie.
+     (recu / "out" / "SHA256SUMS").write_text("", encoding="utf-8")
+-    inv = subprocess.run(["bash", str(p.lanceur), "--inventaire", str(recu)],
+-                         capture_output=True, text=True)
++    # Rejouer aussi hors CI l'environnement de setup-python : la variable
++    # heritee reste interdite au lanceur. Comme Porte.lancer, ces deux appels
++    # NOMINAUX doivent la retirer, sans neutraliser le temoin brut de refus.
++    env = {key: value for key, value in os.environ.items() if key not in VARIABLES_REFUSEES}
++    env_setup_python = dict(env, LD_LIBRARY_PATH=str(base / "setup_python_lib"))
++    with patch.dict(os.environ, env_setup_python, clear=True):
++        brut = subprocess.run(["bash", str(p.lanceur), "--inventaire", str(recu)],
++                              capture_output=True, text=True)
++        p.check("--inventaire : LD_LIBRARY_PATH herite refuse rc=2 avant nettoyage",
++                brut.returncode == 2 and not brut.stdout
++                and "REFUS : variable LD_LIBRARY_PATH definie" in brut.stderr,
++                f"rc={brut.returncode} {brut.stderr[-200:]!r}")
++        inv = subprocess.run(["bash", str(p.lanceur), "--inventaire", str(recu)],
++                             capture_output=True, text=True, env=env)
++        inv_nom = subprocess.run(["bash", str(p.lanceur), "--inventaire", str(nominal)],
++                                 capture_output=True, text=True, env=env)
+     lignes = set(inv.stdout.splitlines())
+     p.check("--inventaire : rc=0", inv.returncode == 0, f"rc={inv.returncode} {inv.stderr[-200:]!r}")
+     p.check("--inventaire : out/intrus.txt et out/SHA256SUMS listes, ./SHA256SUMS racine exclu",
+             {"out/intrus.txt", "out/SHA256SUMS", "META.txt"} <= lignes and "SHA256SUMS" not in lignes,
+             f"{sorted(l for l in lignes if 'SHA256SUMS' in l or 'intrus' in l)}")
+-    inv_nom = subprocess.run(["bash", str(p.lanceur), "--inventaire", str(nominal)],
+-                             capture_output=True, text=True)
+     entrees = {l.split("  ", 1)[1]
+                for l in (nominal / "SHA256SUMS").read_text(encoding="utf-8").splitlines()}
+     p.check("--inventaire du nominal == entrees du manifeste publie",
+@@ -1936,4 +1951,3 @@ def main():
+ 
+ if __name__ == "__main__":
+     sys.exit(main())
+-

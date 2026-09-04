@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "bash",
+    "-n",
+    "gcp-migration/session_campagne_v7_g4.sh"
+  ],
+  "elapsed_seconds": 0.006496558999060653,
+  "exit_code": 0,
+  "started_utc": "2026-09-04T22:44:19Z",
+  "status": "completed",
+  "timeout_seconds": 30
+}

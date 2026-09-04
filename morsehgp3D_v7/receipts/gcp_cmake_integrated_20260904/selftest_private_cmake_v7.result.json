@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/gcp-migration/selftest_private_cmake_v7.py"
+  ],
+  "elapsed_seconds": 0.16676706100042793,
+  "exit_code": 0,
+  "started_utc": "2026-09-04T22:25:34Z",
+  "status": "completed",
+  "timeout_seconds": 45
+}

@@ -1,0 +1,14 @@
+libboost-dev:
+  Installed: (none)
+  Candidate: 1.83.0.1ubuntu2
+  Version table:
+     1.83.0.1ubuntu2 500
+        500 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages
+libboost1.83-dev:
+  Installed: (none)
+  Candidate: 1.83.0-2.1ubuntu3.2
+  Version table:
+     1.83.0-2.1ubuntu3.2 500
+        500 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages
+     1.83.0-2.1ubuntu3 500
+        500 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages

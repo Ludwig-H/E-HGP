@@ -1,0 +1,1178 @@
+{
+  "backtraceGraph" : 
+  {
+    "commands" : 
+    [
+      "add_test",
+      "mhgp7_gate"
+    ],
+    "files" : 
+    [
+      "/workspaces/E-HGP/morsehgp3D_v7/CMakeLists.txt"
+    ],
+    "nodes" : 
+    [
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 925,
+        "parent" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 1
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 927,
+        "parent" : 3
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 4
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 930,
+        "parent" : 6
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 7
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 933,
+        "parent" : 9
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 10
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 936,
+        "parent" : 12
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 13
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 939,
+        "parent" : 15
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 16
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 941,
+        "parent" : 18
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 19
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 943,
+        "parent" : 21
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 22
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 947,
+        "parent" : 24
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 25
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 949,
+        "parent" : 27
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 28
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 952,
+        "parent" : 30
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 31
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 955,
+        "parent" : 33
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 34
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 958,
+        "parent" : 36
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 37
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 961,
+        "parent" : 39
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 40
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 964,
+        "parent" : 42
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 43
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 967,
+        "parent" : 45
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 46
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 970,
+        "parent" : 48
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 49
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 973,
+        "parent" : 51
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 52
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 975,
+        "parent" : 54
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 55
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 977,
+        "parent" : 57
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 58
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 979,
+        "parent" : 60
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 61
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 981,
+        "parent" : 63
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 64
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 983,
+        "parent" : 66
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 67
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 985,
+        "parent" : 69
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 70
+      }
+    ]
+  },
+  "kind" : "ctestInfo",
+  "tests" : 
+  [
+    {
+      "backtrace" : 2,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_integer_gate",
+        "-DARGS=",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=arithmetic_integer_gate=passed case=all mutant=none",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_integer",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 5,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_integer_gate",
+        "-DARGS=--case=u320-only",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=arithmetic_integer_gate=passed case=u320-only mutant=none",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_integer_u320",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 8,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_integer_gate",
+        "-DARGS=--case=oracle-only",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=arithmetic_integer_gate=passed case=oracle-only mutant=none",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_integer_oracle",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 11,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=4",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_integer_gate",
+        "-DARGS=--case=u320-only --mutant=level-trunc-hi",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=arithmetic_integer_gate=mutant_killed case=u320-only mutant=level-trunc-hi divergence=W2.u320_word4",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_u320_word4",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 14,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=4",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_integer_gate",
+        "-DARGS=--case=oracle-only --mutant=obig-carry-lost",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=arithmetic_integer_gate=mutant_killed case=oracle-only mutant=obig-carry-lost divergence=oracle.W2_carry",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_integer_oracle_carry",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 17,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_integer_gate",
+        "-DARGS=--case=unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_integer_bad_case",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 20,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_integer_gate",
+        "-DARGS=--case=u320-only --mutant=missing",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_integer_bad_mutant",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 23,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_integer_gate",
+        "-DARGS=--case=all --mutant=level-trunc-hi",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_integer_case_mismatch",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 26,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=arithmetic_lanes_gate PASS",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_lanes",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 29,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--case=q4-level-only",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=arithmetic_lanes_gate PASS",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_lanes_q4_level",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 32,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--case=oracle-only",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=arithmetic_lanes_gate PASS",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_lanes_oracle",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 35,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=3",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--case=oracle-overflow",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=first_divergence=oracle.overflow inject=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_lanes_oracle_overflow",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 38,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=4",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--inject=q3-level-4g",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=first_divergence=q3.level inject=q3-level-4g",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_q3_factor",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 41,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=4",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--inject=q4-center-parity",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=first_divergence=q4.center inject=q4-center-parity",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_q4_parity",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 44,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=4",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--inject=q4-eq-nonstrict",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=first_divergence=q4.face_power inject=q4-eq-nonstrict",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_q4_face_boundary",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 47,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=4",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--case=q4-level-only --inject=level-trunc-hi",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=first_divergence=q4.level.num inject=level-trunc-hi",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_q4_u192_word2",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 50,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=4",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--case=oracle-only --inject=obig-carry-lost",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=first_divergence=oracle.literal-carry inject=obig-carry-lost",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_lanes_oracle_carry",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 53,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--case=unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_lanes_bad_case",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 56,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--inject=missing",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_lanes_bad_inject",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 59,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--case=all --case=all",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_lanes_duplicate_case",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 62,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--inject=q3-level-4g --inject=q3-level-4g",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_lanes_duplicate_inject",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 65,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--inject=",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_lanes_empty_inject",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 68,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--case=all --inject=level-trunc-hi",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_lanes_u192_case_mismatch",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 71,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_arithmetic_integrated_release/mhgp7_arithmetic_lanes_gate",
+        "-DARGS=--case=all --inject=obig-carry-lost",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_arithmetic_lanes_oracle_case_mismatch",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_arithmetic_integrated_release"
+        }
+      ]
+    }
+  ],
+  "version" : 
+  {
+    "major" : 1,
+    "minor" : 0
+  }
+}

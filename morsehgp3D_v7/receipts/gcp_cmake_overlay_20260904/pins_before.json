@@ -1,0 +1,8 @@
+{
+  "gcp-migration/v7_g4_session.py": "ec6fa6dd943514f01eb00c23ff296c6e7796d7d5fd55d5ed55ccfbdd6e0b0c60",
+  "morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/controller.overlay.py": "1e82719de2f054299c261d4103674057b8d44a842c81dafe5dfc1e0dd9e1ef0c",
+  "morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/controller.patch": "0568ad7979e851c6f9eaf33c61c237ce7e8eca1218e74e7df5da4f9400507634",
+  "morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/private_cmake_v7.py": "a49321f6a4f7cfc53eb0792890574c8a0f4bd39d959fe1440cf10e723b2f8e12",
+  "morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/selftest.py": "cf6db15db87677411e6d252c7da99dbeee448044f157f97e2369ccd9615ebf9b",
+  "morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/selftest_controller.py": "14a52135aada16950392ea036b970fa33edea73237ec5c1aeb56c01a87e07433"
+}

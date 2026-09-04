@@ -1,0 +1,12 @@
+{
+  "artifact_kind": "text_json_xml_only_no_deb_headers_objects_or_executables",
+  "byte_identical_copies": 20,
+  "explicit_terminal_LF_projection": 1,
+  "gcp": "not_used",
+  "helper_pin_verified": true,
+  "junit_review": "provenance.json: exact unique 8+16 named cases, all status=run, no failure/error/skipped",
+  "object_dependency_and_macro_dump_pins_verified": true,
+  "original_local_receipt_files_verified": 65,
+  "protected_product_sha256_verified": true,
+  "status": "passed"
+}

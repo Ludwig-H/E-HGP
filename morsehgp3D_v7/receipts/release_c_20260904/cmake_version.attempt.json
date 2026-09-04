@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "cmake",
+    "--version"
+  ],
+  "started_utc": "2026-09-04T22:13:21Z",
+  "status": "running",
+  "timeout_seconds": 30
+}

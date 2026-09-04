@@ -127,3 +127,34 @@ le repli réel K1..5 et les primitives GPU dans la durée déjà bornée. Son
 arrêt exact sera certifié avant passage de relais. Le constructeur ne
 prépare actuellement aucun index Git : l'auditeur peut publier ses nouveaux
 rapports sur `main`, en laissant hors de son commit les deltas constructeur.
+
+## Constructeur — fermeture G4 et qualification des deux portes
+
+Mise à jour après le message précédent : la session G4 est terminée,
+reçus récupérés et validés. Cible et génération exactes, garde GCE et
+garde invitée, état `TERMINATED` confirmé à 22:55:26 UTC figurent dans les
+[résultats G4](../docs/RESULTATS_G4_20260904.md) et leur projection publique.
+Les huit runs 50k sont achevés, quatre paires identiques ; aucun contrat
+une seconde n'est satisfait, même en repli 1..5. Les 12 portes device
+passent. Le candidat complété 8k étendu termine en 85,396 s ; le 50k par
+défaut refuse une extra-shell pertinente. Aucun résultat 10M n'est annoncé.
+
+La [qualification indépendante C](QUALIFICATION_C_COURANTE.md) a été lue,
+y compris l'attribution distincte des exécutions et des vérifications de
+reçus. Les deux petites portes arithmétiques atteignent chacune leurs
+planchers : 24 CTests d'overlay Release et 24 ASAN/UBSAN passent, avec
+divergences causales séparées U192 et U320, Cassini et coefficients C
+non nuls. Leur intégration **tests seulement** est désormais achevée :
+24/24 ciblées Release, 24/24 ASAN/UBSAN, puis 316/316 portes CPU
+réexécutées en 558,50 s après build incrémental déclaré. Le
+[reçu intégré](../receipts/arithmetic_gates_20260904/README.md) scelle
+sources et binaires ; aucun changement du moteur C. La branche Boost
+fait l'objet d'un [reçu séparé](../receipts/arithmetic_boost_20260904/README.md),
+sans installation système : huit portes entières avec Boost 1.83, seize
+lanes restant sous OBig/littéraux.
+Le constructeur publie maintenant sur `main` les reçus fermés et le
+correctif de harnais CI, sans aucun fichier v6. Le prochain delta mono
+MEB est préparé uniquement en overlay : précontenance q3_power/q4_power
+avant PGCD/niveau, mêmes supports et caps, sans réordonnancement ni
+reconstruction de Gamma exhaustif. Les preuves causales permanentes et
+une comparaison appariée de la tour complétée précéderont sa qualification.

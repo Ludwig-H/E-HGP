@@ -1,0 +1,46 @@
+{
+  "public_status": "not_claimed",
+  "kind": "static_review_documentation_port",
+  "source_profile": "quantized_u16_input_only",
+  "new_compilations": 0,
+  "new_test_executions": 0,
+  "gcp_used": false,
+  "markdown_validation": {
+    "files": 4,
+    "exit_code": 0
+  },
+  "source_pins_validation": {
+    "files": 17,
+    "exit_code": 0
+  },
+  "files": [
+    {
+      "path": "morsehgp3D_v7/docs/ARITHMETIQUE_PRIMITIVES.md",
+      "sha256": "59ba7b6cd91f65701c3ae7205087820985979308df5d944f75ff3ab9224e95ff"
+    },
+    {
+      "path": "morsehgp3D_v7/docs/PLAN_PORTES_ARITHMETIQUES.md",
+      "sha256": "40e267f19fab415a1d0b626550371eed6392f0e8b765974b009ef6161edb4ba0"
+    },
+    {
+      "path": "morsehgp3D_v7/docs/QUALIFICATION_S1_PRIMITIVES.md",
+      "sha256": "6eb57ab1173862c1d1a0950cc47101d9729250d4f299a046ea21d8ec58c3366a"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/arithmetic_review_20260904/README.md",
+      "sha256": "e1c4fd24b2f2e635d15cad22d8a124f54026f1f32c14d420eab8c909bbf0929a"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/arithmetic_review_20260904/sources.sha256",
+      "sha256": "58d74adcd60a32187741fa9c4513e6404b7815132e0cede9fe220afbb0dbd3b6"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/arithmetic_review_20260904/sources.overlay.sha256",
+      "sha256": "eceb07bdface33834a985f4c1cbdb34658e1e9b20a3c9f2df22e6747acf8acc1"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/arithmetic_review_20260904/QUALIFICATION_S1_PRIMITIVES.before.txt",
+      "sha256": "3432411df7cd4b7d97d824e5d42fb7877538059aa40359beb23a34098970b303"
+    }
+  ]
+}

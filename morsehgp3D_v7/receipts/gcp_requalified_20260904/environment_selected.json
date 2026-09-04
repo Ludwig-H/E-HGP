@@ -1,0 +1,29 @@
+{
+  "schema": "ehgp.v7.selected-g4-environment.v1",
+  "authority": "manual_allowlisted_projection_of_controller_certified_raw_outputs",
+  "public_status": "not_claimed",
+  "result_manifest_sha256": "34304748b8823ce2fd9ddd6db4a64f8f73d31d6a2f6118557128a7322a557470",
+  "machine": {
+    "source": "machine.stdout",
+    "sha256": "c97ca9a3b896b1ee75025b5d21b5afbe08958b3d1c0103242e50bcc3809eb2ae",
+    "cpu_model": "AMD EPYC 9B45",
+    "logical_cpus": 48,
+    "threads_per_core": 2,
+    "cores_per_socket": 24,
+    "sockets": 1,
+    "reported_mem_total_bytes": 189915037696
+  },
+  "gpu": {
+    "source": "gpu_hardware.stdout",
+    "sha256": "07c72475af8e86f01c33b25bc04ae7a54b2a24c1391a49b290f1fa39b1762495",
+    "model": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "driver": "580.173.02",
+    "reported_memory_mib": 97887
+  },
+  "compiler": {
+    "source": "cpu_compiler_version.stdout",
+    "sha256": "8d6e704227c739386853b14c98257428d8ffbffd817517db0b2e088d28c773f6",
+    "version_line": "c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0"
+  },
+  "omitted": ["hostname", "accounts", "emails", "addresses", "keys", "hardware_uuids"]
+}

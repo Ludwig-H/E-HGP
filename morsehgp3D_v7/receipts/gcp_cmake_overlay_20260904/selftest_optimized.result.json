@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/selftest.py"
+  ],
+  "elapsed_seconds": 0.2207375559992215,
+  "exit_code": 0,
+  "started_utc": "2026-09-04T22:18:01Z",
+  "status": "completed",
+  "timeout_seconds": 30
+}

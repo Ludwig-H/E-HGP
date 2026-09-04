@@ -1,0 +1,14 @@
+# cwd: /workspaces/E-HGP
+# before_dirty_normal_exact (expected rc=1, three inventory failures)
+env LD_LIBRARY_PATH=/tmp/mhgp7_setup_python_ci_lib PYTHONDONTWRITEBYTECODE=1 /usr/bin/time -p python3 morsehgp3D_v7/receipts/ci_sonde_environment_20260904/sonde_ablation_gate.before.py morsehgp3D_v7/bench
+# after_dirty_normal (expected rc=0)
+env LD_LIBRARY_PATH=/tmp/mhgp7_setup_python_ci_lib PYTHONDONTWRITEBYTECODE=1 /usr/bin/time -p python3 morsehgp3D_v7/tests/sonde_ablation_gate.py morsehgp3D_v7/bench
+# after_dirty_optimized (expected rc=0)
+env LD_LIBRARY_PATH=/tmp/mhgp7_setup_python_ci_lib PYTHONDONTWRITEBYTECODE=1 /usr/bin/time -p python3 -O morsehgp3D_v7/tests/sonde_ablation_gate.py morsehgp3D_v7/bench
+# after_clean_normal (expected rc=0)
+env -u LD_LIBRARY_PATH PYTHONDONTWRITEBYTECODE=1 /usr/bin/time -p python3 morsehgp3D_v7/tests/sonde_ablation_gate.py morsehgp3D_v7/bench
+# after_clean_optimized (expected rc=0)
+env -u LD_LIBRARY_PATH PYTHONDONTWRITEBYTECODE=1 /usr/bin/time -p python3 -O morsehgp3D_v7/tests/sonde_ablation_gate.py morsehgp3D_v7/bench
+# Read-only GitHub metadata and exact excerpt selector
+gh run view 33924177970 --repo Ludwig-H/E-HGP --json headSha,name,event,status,conclusion,jobs,url
+gh run view 33924177970 --repo Ludwig-H/E-HGP --log-failed | grep -A 40 -B 6 -E 'mhgp7_sonde_ablation_gate|LD_LIBRARY_PATH:|291/292|292/292|tests passed|tests FAILED'

@@ -1,0 +1,23 @@
+[
+  "mhgp7_archive",
+  "mhgp7_archive_api",
+  "mhgp7_archive_cleanup",
+  "mhgp7_archive_optimized",
+  "mhgp7_axis_bounds",
+  "mhgp7_axis_bounds_axis-argmin-ceil-always",
+  "mhgp7_axis_bounds_axis-argmin-floor-only",
+  "mhgp7_axis_bounds_axis-argmin-max-min",
+  "mhgp7_axis_bounds_axis-argmin-narrow-coefficient",
+  "mhgp7_axis_bounds_axis-argmin-no-clip",
+  "mhgp7_census_direct",
+  "mhgp7_compare_campaign",
+  "mhgp7_compare_campaign_optimized",
+  "mhgp7_incidence_campaign",
+  "mhgp7_incidence_campaign_optimized",
+  "mhgp7_mono_inline",
+  "mhgp7_mono_inline_early_alloc",
+  "mhgp7_mono_inline_late_a",
+  "mhgp7_mono_inline_late_b",
+  "mhgp7_silent_incidence",
+  "mhgp7_thread_failure"
+]

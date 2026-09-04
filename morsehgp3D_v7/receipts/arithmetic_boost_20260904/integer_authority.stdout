@@ -1,0 +1,2 @@
+arithmetic_integer_gate=passed case=all mutant=none divergence=none boost=1_83 authority=obig_literals_and_boost public_status=not_claimed
+integer_counts oracle_literal=1 overflow_refused=1 conversions=6 u192_calls=19 u192_high=4 u320_calls=31 u320_w4=2 first_bit_256=1 sums=1 sum_carries=2 comparisons=45 gcd_zero=1 gcd_one=188 gcd_wide=3 gcd_cases=192 fibonacci=185 abs=4 keys=4 rationals=4 floors=6 fixture_reject_product=1 fixture_reject_sum=1 fixture_reject_den=4 fixture_reject_num=1 fixture_reject_cross=1 fixture_reject_floor=2 fixture_reject_key=2

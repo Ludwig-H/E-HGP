@@ -1,0 +1,79 @@
+{
+  "failure": null,
+  "gcp": "not_used",
+  "pins_stable": true,
+  "private_smoke_directory": "/workspaces/E-HGP/build/v7-cmake-wheel-smoke-2t1vhpkv",
+  "public_status": "not_claimed",
+  "results": {
+    "real_wheel_smoke": {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/private_cmake_v7.py",
+        "--install",
+        "--root",
+        "/workspaces/E-HGP/build/v7-cmake-wheel-smoke-2t1vhpkv",
+        "--seconds",
+        "120",
+        "--deadline-epoch",
+        "1788560405.5381095"
+      ],
+      "elapsed_seconds": 1.991865099998904,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T22:18:05Z",
+      "status": "completed",
+      "timeout_seconds": 120
+    },
+    "selftest": {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/selftest.py"
+      ],
+      "elapsed_seconds": 0.2207837500009191,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T22:18:01Z",
+      "status": "completed",
+      "timeout_seconds": 30
+    },
+    "selftest_controller": {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/selftest_controller.py"
+      ],
+      "elapsed_seconds": 1.686191263001092,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T22:18:02Z",
+      "status": "completed",
+      "timeout_seconds": 30
+    },
+    "selftest_controller_optimized": {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/selftest_controller.py"
+      ],
+      "elapsed_seconds": 1.696996331000264,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T22:18:03Z",
+      "status": "completed",
+      "timeout_seconds": 30
+    },
+    "selftest_optimized": {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/gcp_cmake_overlay_20260904/selftest.py"
+      ],
+      "elapsed_seconds": 0.2207375559992215,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T22:18:01Z",
+      "status": "completed",
+      "timeout_seconds": 30
+    }
+  },
+  "status": "passed"
+}

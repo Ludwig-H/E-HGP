@@ -1,0 +1,182 @@
+[
+  {
+    "path": "build/v7_c_qualification/mhgp7",
+    "sha256": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+    "size": 688032
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_archive_api_gate",
+    "sha256": "534645fd2ba950e707f1d5a554b2101499f1478c5edb1496ca2118ab5797ee8b",
+    "size": 115096
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_archive_cleanup_gate",
+    "sha256": "3676adf30e4dae0c719c407d18bbea62bba97819be4b3b42da7315499560c3b7",
+    "size": 758424
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_arithmetic_integer_gate",
+    "sha256": "eed2a67490107061c473d5534b0690d849ab68eaf14e8a40d92e82736b51bdc6",
+    "size": 79032
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_arithmetic_lanes_gate",
+    "sha256": "bf3160bf38797b15b298154ec629b4b0d98d477b927428a8e0947b308d95ff31",
+    "size": 135160
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_axis_bounds_gate",
+    "sha256": "6814ecbddbb63087865994e7c8e0a17ce1c29dff1334a1d582e03fee4f93d50b",
+    "size": 79976
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_bad_alloc_gate",
+    "sha256": "ea3f30d450f991996bf096f191353e52d8c6268831bef1e2f9e19be0cadd53ec",
+    "size": 739152
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_cell_grid_oracle",
+    "sha256": "02c87f17879dc029703000df1164795cd8485495a7bd1e888f4897a651c46c49",
+    "size": 172136
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_census_device_stub_gate",
+    "sha256": "2be2f1502ffaaf567d4604eb5c6c0b931049572f72a7f768a04cd714e794fa79",
+    "size": 397992
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_census_direct_gate",
+    "sha256": "10dfdf3c281ada872109aaa253603c6e6dd8e229e7d51af8659a303ae26d3fb8",
+    "size": 194160
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_conformity",
+    "sha256": "83f83ed3c08595461f7705d0a719498fd4ca684be35f6ef97a617f6d4c90f4f1",
+    "size": 790144
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_cover_fixture",
+    "sha256": "904fab4f6c832bf09eb8c352002ae5de2494fda7dcca5d2507d1750d3dd17824",
+    "size": 326784
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_device_witness_stub",
+    "sha256": "308956be53488ef207ec969ef4770c81b558c522ff6ca09aa338a8965748b66a",
+    "size": 43856
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_executor_pool_gate",
+    "sha256": "4b931816e7202297e29c5a4d2c6c68ce6b75a2deba41a520d3ad4f2af47ceda2",
+    "size": 160104
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_fold_caps_gate",
+    "sha256": "735e7fb96f52049b5691e96abf1af259a900cc4837ef9ac9c2bfc775dbb06854",
+    "size": 735008
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_fold_csr_gate",
+    "sha256": "e4c5200b026b518324a1f32af6593d3f6147efa4a58a0f9a35bae27a38fb5a1c",
+    "size": 864424
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_linked_arcs",
+    "sha256": "1b80d1d97ddbe72c377c580ce0c7d409cecc6dff3c7d1095e95116bd81a4e024",
+    "size": 435216
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_lot_ring_gate",
+    "sha256": "80e18819d28b9a9ea9f2c1b756581d7f7bcb422172184371f763663d84bb2343",
+    "size": 144664
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_mono_inline_gate",
+    "sha256": "b0601ca499a6a71823b792068b0fb8d14129680de2930062bed4de5a8ee2ae62",
+    "size": 736344
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_perm_residence_gate",
+    "sha256": "afea83ce3dd27c6c9971b02d48403b681b3ad27f3955c0d045f7dc2ede4942fe",
+    "size": 170192
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_perm_sort_gate",
+    "sha256": "ee9bb7947be9b2cc62b23e689b0b72fa5f23d76830353a3f7cae36fa04629df3",
+    "size": 470904
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_pilot_stub_gate",
+    "sha256": "26528fabafc9a9c892e342893b3f697faa03fd563a9bbd6e8d138c35db8c5aa4",
+    "size": 776544
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_pilote_stub_check",
+    "sha256": "ba93668fbf977733d468eb2a4945a5f42a1042bfd93be5619d717f40e34e16fa",
+    "size": 685168
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_pilote_stub_check_test",
+    "sha256": "e99e3da4c0d2495db74a795d261b972e2614fea13e646aa04837c7455b56f72b",
+    "size": 790136
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_profil_contrat",
+    "sha256": "b9e97bdbb00335d7c2168acdbcbb5143a0a04ab25778db0eb01dd0b3107982e6",
+    "size": 729736
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_profile",
+    "sha256": "7f7ddb5f43235c9423315ca4bb6aa65b05b214a57b001beea999c99289fe0916",
+    "size": 692360
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_profile_liveness",
+    "sha256": "6edccdfa68b5d37a120a3cbc332d03435ee8b9dab514d4c26121173cfd4055f5",
+    "size": 696312
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_profile_sonde",
+    "sha256": "99abd0909de2f5b47a057d0d24eea27e94f9dc1a8b7b230fa09c1dd5cd2d117f",
+    "size": 803200
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_residence_gate",
+    "sha256": "21ee21256571f37514ab9a63156ef281276e7d8d5cea13412be4546728dffe77",
+    "size": 748840
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_route_c6_gate",
+    "sha256": "649b7b8e80ab422e80149ea933d2ab3d30d98125b3e238441500fadccf7f26e4",
+    "size": 859936
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_selftest",
+    "sha256": "d5e6579ce7014054c3289e6362ed393be75bea9521257e96787705e92b0dd601",
+    "size": 829720
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_silent_incidence_gate",
+    "sha256": "bd92cc569c9ed43d860d58ab13b2624c952b13c4d5d4a43cb719f15017fc5a78",
+    "size": 820872
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_sweep_fixtures",
+    "sha256": "06882992bca51646d45c77bc64ce23ae7a2ebf7d7c9f427ae1c7a18b81072184",
+    "size": 363808
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_thread_failure_gate",
+    "sha256": "0e959436aeb7be7c4b5750032b73f626d0b5f3ce090a87535349a6070e34a03e",
+    "size": 841104
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_wire_gate",
+    "sha256": "79e2eaa47358f0c802d48b4d04a2743af3e9d36d0335e48e28b7346e708113e9",
+    "size": 96504
+  },
+  {
+    "path": "build/v7_c_qualification/mhgp7_wire_pack_gate",
+    "sha256": "d75f596924251c2226c6bce3a631e71adad5a7b049fc02e155c16a76256e934a",
+    "size": 356856
+  }
+]

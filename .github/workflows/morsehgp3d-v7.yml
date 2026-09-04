@@ -6,11 +6,13 @@ on:
     paths:
       - 'morsehgp3D_v7/**'
       - 'gcp-migration/**'
+      - 'tools/check_docs.py'
       - '.github/workflows/morsehgp3d-v7.yml'
   pull_request:
     paths:
       - 'morsehgp3D_v7/**'
       - 'gcp-migration/**'
+      - 'tools/check_docs.py'
       - '.github/workflows/morsehgp3d-v7.yml'
 
 permissions:
@@ -42,6 +44,9 @@ jobs:
           cmake -S morsehgp3D_v7 -B build/v7 -DCMAKE_BUILD_TYPE=Release -DMHGP7_ENABLE_CUDA=OFF
           cmake --build build/v7 --parallel 2
 
+      - name: Validate documented contracts
+        run: python3 tools/check_docs.py
+
       - name: Run bounded contracts and causal mutants
         run: |
           ctest --test-dir build/v7 --output-on-failure --no-tests=error -L '^gate$' --parallel 2 --output-junit contracts.xml
@@ -57,6 +62,14 @@ jobs:
           python3 -O gcp-migration/selftest_session_v7.py
           python3 gcp-migration/selftest_create_v7.py
           python3 -O gcp-migration/selftest_create_v7.py
+          python3 -B gcp-migration/selftest_private_cmake_v7.py
+          python3 -B -O gcp-migration/selftest_private_cmake_v7.py
+          python3 -B gcp-migration/selftest_private_cmake_controller_v7.py
+          python3 -B -O gcp-migration/selftest_private_cmake_controller_v7.py
+          python3 -B gcp-migration/selftest_cpu_towers_v7.py
+          python3 -B -O gcp-migration/selftest_cpu_towers_v7.py
+          python3 -B morsehgp3D_v7/receipts/gcp_requalified_20260904/selftest.py
+          python3 -B -O morsehgp3D_v7/receipts/gcp_requalified_20260904/selftest.py
           python3 tools/check_gcp_workflows.py
 
       - name: State the qualification boundary

@@ -1,0 +1,77 @@
+{
+  "status": "passed",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "change_scope": [
+    "tests/arithmetic_integer_gate.cpp",
+    "tests/arithmetic_lanes_gate.cpp",
+    "CMakeLists.txt: two real targets and 24 gates, direct source root"
+  ],
+  "integrated_sources_identical_to_sealed_overlay": true,
+  "overlay_historical_manifest_sha256": "da7dfa34de8ba4bcf3d464cb5d86134a22361b2f905ad2aeb119de798046f999",
+  "engine_source_files_unchanged": 47,
+  "full_source_inventory_files_unchanged": 139,
+  "full_binary_inventory_files_unchanged": 36,
+  "protected_cli_sha256": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+  "targeted_release": {
+    "tests": 24,
+    "exit_code": 0,
+    "ctest_real_seconds": 0.36,
+    "build_kind": "fresh_true_cmake_target_only"
+  },
+  "targeted_sanitized": {
+    "tests": 24,
+    "exit_code": 0,
+    "ctest_real_seconds": 0.61,
+    "build_kind": "fresh_true_cmake_target_only",
+    "diagnostics_observed": 0
+  },
+  "full_release": {
+    "tests": 316,
+    "exit_code": 0,
+    "ctest_real_seconds": 558.5,
+    "runner_elapsed_seconds": 558.5576564929997,
+    "parallel": 2,
+    "timeout_seconds": 7200,
+    "censored": false,
+    "build_kind": "incremental_existing_release_tree",
+    "test_executions": "all_fresh",
+    "results_reused": false,
+    "source_stable": true,
+    "protected_cli_unchanged": true,
+    "tested_binaries_stable": true
+  },
+  "history": {
+    "old_C_receipt_files_unchanged_against_own_seal": 46,
+    "overlay_files_preserved": 22,
+    "expected_names": "old inventory name list only plus 24 new registrations; no old result read as a verdict",
+    "old_inventory_sha256": "c6c1a4860fb758f9363b0a77075bc5a17f1d1684e8009e34385bcecf55dbc074",
+    "execution_helper_sha256": "582922e64fcd2927be3e63c7156fefa839fd1f8c055f92a75c97514cad7a0ee5",
+    "full_runner_sha256": "a55b9dbe8607e5b8127754e1e8563c1048a18669f0cb00f290e403bb7f6f5b71"
+  },
+  "runner_selftest": {
+    "normal": {
+      "exit_code": 0,
+      "positive": 1,
+      "rejected": 7
+    },
+    "optimized": {
+      "exit_code": 0,
+      "positive": 1,
+      "rejected": 7
+    }
+  },
+  "authority": "bounded OBig and literal-based arithmetic gates, in addition to existing full CPU gate suite",
+  "limits": [
+    "Not a clean/hermetic full rebuild",
+    "Not a universal arithmetic or whole HGP exactness certificate",
+    "Not a performance benchmark",
+    "Optional Boost test branch not compiled locally",
+    "No CUDA build or GPU run"
+  ],
+  "gcp": "not_used",
+  "committed_by_this_subtask": false
+}

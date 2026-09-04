@@ -1,0 +1,15 @@
+{
+  "bytes": 10745362,
+  "gcp": "not_used",
+  "include_scope": "two_isolated_arithmetic_targets_only",
+  "overlay_cmake_sha256": "28f0d4bfc2186fce38c08b0fa0a3fc41df7c0dfc4789dc47b8ca16af4c7ff682",
+  "package": "libboost1.83-dev",
+  "protected_product_sha256": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+  "public_status": "not_claimed",
+  "purpose": "optional_integer_Boost_branch_private_headers_not_pipeline_qualification",
+  "runner_sha256": "865af789032e0bd39e7ddd6e484711c42efb7bc6d67d5ab6783fe6b1663012c9",
+  "sha256": "519ecf2c64308527e15b6582955681d192a832250baa4bc424967aaf7d02d68f",
+  "system_boost_header_present_before": false,
+  "system_package_installation": false,
+  "version": "1.83.0-2.1ubuntu3.2"
+}

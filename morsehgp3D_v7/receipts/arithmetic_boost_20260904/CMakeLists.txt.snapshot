@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.20)
+project(v7_boost_gate_overlay CXX)
+enable_testing()
+get_filename_component(V7_REPO_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+add_subdirectory("${V7_REPO_ROOT}/morsehgp3D_v7" "${CMAKE_CURRENT_BINARY_DIR}/v7" EXCLUDE_FROM_ALL)
+# CI's /usr/include/boost is a system include. Only these two isolated
+# targets see the privately extracted package; no product target is built.
+foreach(target mhgp7_arithmetic_integer_gate mhgp7_arithmetic_lanes_gate)
+  target_include_directories(${target} SYSTEM PRIVATE "${CMAKE_CURRENT_LIST_DIR}/extracted/usr/include")
+endforeach()

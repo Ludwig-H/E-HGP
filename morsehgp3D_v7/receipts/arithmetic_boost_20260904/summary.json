@@ -1,0 +1,268 @@
+{
+  "compiled_authority": {
+    "boost": "1_83",
+    "counters": {
+      "abs": 4,
+      "comparisons": 45,
+      "conversions": 6,
+      "fibonacci": 185,
+      "first_bit_256": 1,
+      "fixture_reject_cross": 1,
+      "fixture_reject_den": 4,
+      "fixture_reject_floor": 2,
+      "fixture_reject_key": 2,
+      "fixture_reject_num": 1,
+      "fixture_reject_product": 1,
+      "fixture_reject_sum": 1,
+      "floors": 6,
+      "gcd_cases": 192,
+      "gcd_one": 188,
+      "gcd_wide": 3,
+      "gcd_zero": 1,
+      "keys": 4,
+      "oracle_literal": 1,
+      "overflow_refused": 1,
+      "rationals": 4,
+      "sum_carries": 2,
+      "sums": 1,
+      "u192_calls": 19,
+      "u192_high": 4,
+      "u320_calls": 31,
+      "u320_w4": 2
+    },
+    "integer": "obig_literals_and_boost",
+    "lanes": "obig_and_literals_boost_not_used_by_its_source"
+  },
+  "failure": null,
+  "gcp": "not_used",
+  "integer_junit": {
+    "failed": [],
+    "names": [
+      "mhgp7_arithmetic_integer",
+      "mhgp7_arithmetic_integer_u320",
+      "mhgp7_arithmetic_integer_oracle",
+      "mhgp7_arithmetic_u320_word4",
+      "mhgp7_arithmetic_integer_oracle_carry",
+      "mhgp7_arithmetic_integer_bad_case",
+      "mhgp7_arithmetic_integer_bad_mutant",
+      "mhgp7_arithmetic_integer_case_mismatch"
+    ],
+    "skipped": [],
+    "tests": 8
+  },
+  "protected_product_unchanged": true,
+  "public_status": "not_claimed",
+  "results": {
+    "apt_download": {
+      "argv": [
+        "apt-get",
+        "-o",
+        "Acquire::Retries=0",
+        "-o",
+        "Acquire::http::Timeout=30",
+        "download",
+        "libboost1.83-dev=1.83.0-2.1ubuntu3.2"
+      ],
+      "elapsed_seconds": 1.4717743839992181,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T23:21:02Z",
+      "status": "completed",
+      "timeout_seconds": 120
+    },
+    "apt_package_metadata": {
+      "argv": [
+        "apt-cache",
+        "show",
+        "libboost1.83-dev=1.83.0-2.1ubuntu3.2"
+      ],
+      "elapsed_seconds": 0.8715884270004608,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T23:21:00Z",
+      "status": "completed",
+      "timeout_seconds": 60
+    },
+    "apt_policy": {
+      "argv": [
+        "apt-cache",
+        "policy",
+        "libboost-dev",
+        "libboost1.83-dev"
+      ],
+      "elapsed_seconds": 0.8693703150001966,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T23:20:59Z",
+      "status": "completed",
+      "timeout_seconds": 60
+    },
+    "apt_uri": {
+      "argv": [
+        "apt-get",
+        "--print-uris",
+        "download",
+        "libboost1.83-dev=1.83.0-2.1ubuntu3.2"
+      ],
+      "elapsed_seconds": 1.1748082200010685,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T23:21:01Z",
+      "status": "completed",
+      "timeout_seconds": 60
+    },
+    "build_two_targets": {
+      "argv": [
+        "cmake",
+        "--build",
+        "/workspaces/E-HGP/build/v7_boost_gate/build",
+        "--parallel",
+        "1",
+        "--target",
+        "mhgp7_arithmetic_integer_gate",
+        "mhgp7_arithmetic_lanes_gate"
+      ],
+      "elapsed_seconds": 8.453773115999866,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T23:21:06Z",
+      "status": "completed",
+      "timeout_seconds": 180
+    },
+    "compiled_authority_macros": {
+      "argv": [
+        "c++",
+        "-std=c++20",
+        "-DMHGP7_TESTING=1",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v7",
+        "-dM",
+        "-E",
+        "/workspaces/E-HGP/morsehgp3D_v7/tests/arithmetic_integer_gate.cpp"
+      ],
+      "elapsed_seconds": 0.31763397400027316,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T23:21:15Z",
+      "status": "completed",
+      "timeout_seconds": 60
+    },
+    "compiler_version": {
+      "argv": [
+        "c++",
+        "--version"
+      ],
+      "elapsed_seconds": 0.008137662000081036,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T23:21:06Z",
+      "status": "completed",
+      "timeout_seconds": 60
+    },
+    "configure": {
+      "argv": [
+        "cmake",
+        "-S",
+        "/workspaces/E-HGP/build/v7_boost_gate",
+        "-B",
+        "/workspaces/E-HGP/build/v7_boost_gate/build",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+        "-DMHGP7_ENABLE_CUDA=OFF"
+      ],
+      "elapsed_seconds": 0.5738029240001197,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T23:21:06Z",
+      "status": "completed",
+      "timeout_seconds": 60
+    },
+    "deb_metadata": {
+      "argv": [
+        "dpkg-deb",
+        "--field",
+        "/workspaces/E-HGP/build/v7_boost_gate/download/libboost1.83-dev_1.83.0-2.1ubuntu3.2_amd64.deb",
+        "Package",
+        "Version",
+        "Architecture"
+      ],
+      "elapsed_seconds": 0.035489255000356934,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T23:21:04Z",
+      "status": "completed",
+      "timeout_seconds": 60
+    },
+    "extract_headers": {
+      "argv": [
+        "dpkg-deb",
+        "--extract",
+        "/workspaces/E-HGP/build/v7_boost_gate/download/libboost1.83-dev_1.83.0-2.1ubuntu3.2_amd64.deb",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted"
+      ],
+      "elapsed_seconds": 1.724776622999343,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T23:21:04Z",
+      "status": "completed",
+      "timeout_seconds": 120
+    },
+    "integer_authority": {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_boost_gate/build/v7/mhgp7_arithmetic_integer_gate"
+      ],
+      "elapsed_seconds": 0.006844641999123269,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T23:21:15Z",
+      "status": "completed",
+      "timeout_seconds": 30
+    },
+    "integer_ctest": {
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7_boost_gate/build",
+        "--no-tests=error",
+        "--verbose",
+        "-R",
+        "^mhgp7_arithmetic_(integer($|_)|u320_word4$)",
+        "--output-junit",
+        "/workspaces/E-HGP/build/v7_boost_gate/receipts/integer.junit.xml"
+      ],
+      "elapsed_seconds": 0.21961275200010277,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T23:21:15Z",
+      "status": "completed",
+      "timeout_seconds": 180
+    },
+    "integer_inventory": {
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7_boost_gate/build",
+        "--show-only=json-v1",
+        "-R",
+        "^mhgp7_arithmetic_(integer($|_)|u320_word4$)"
+      ],
+      "elapsed_seconds": 0.03499858699979086,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T23:21:15Z",
+      "status": "completed",
+      "timeout_seconds": 60
+    },
+    "lanes_ctest": {
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7_boost_gate/build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^mhgp7_arithmetic_(lanes($|_)|q[34]_)",
+        "--output-junit",
+        "/workspaces/E-HGP/build/v7_boost_gate/receipts/lanes.junit.xml"
+      ],
+      "elapsed_seconds": 0.3193273559991212,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T23:21:15Z",
+      "status": "completed",
+      "timeout_seconds": 180
+    }
+  },
+  "sources_stable": true,
+  "status": "passed",
+  "system_boost_header_present_after": false,
+  "system_package_installation": false
+}

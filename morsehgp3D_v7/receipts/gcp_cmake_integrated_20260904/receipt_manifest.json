@@ -1,0 +1,182 @@
+[
+  {
+    "path": "pins_after.json",
+    "sha256": "3aa4d9d21622c71257db8db86c0bea9a1d803d5a731c2dd62e0431cd5ce1bbac",
+    "size": 1071
+  },
+  {
+    "path": "pins_before.json",
+    "sha256": "3aa4d9d21622c71257db8db86c0bea9a1d803d5a731c2dd62e0431cd5ce1bbac",
+    "size": 1071
+  },
+  {
+    "path": "qualify.py",
+    "sha256": "842fd7841250c0b78bbad4823d24d6de744dc369a5620c39451eeed04834490b",
+    "size": 3052
+  },
+  {
+    "path": "selftest_create_v7.attempt.json",
+    "sha256": "6c131093321b438d8dce925df9269b4534e320571f231cbcd8fefc0c8563057e",
+    "size": 230
+  },
+  {
+    "path": "selftest_create_v7.result.json",
+    "sha256": "dddc5597bdf27411ee4725d9a9aad89837b6c1499c55391eadaeac50102ad7ae",
+    "size": 292
+  },
+  {
+    "path": "selftest_create_v7.stderr",
+    "sha256": "34f735ceb440c2533c14766f530ddf65b6381310d70f2485e7702ee7fe9ad130",
+    "size": 102
+  },
+  {
+    "path": "selftest_create_v7.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "path": "selftest_create_v7_optimized.attempt.json",
+    "sha256": "e542f4c744285a0f21f6689943208e4444b60b0dcec499c99cf4536a13205ce0",
+    "size": 240
+  },
+  {
+    "path": "selftest_create_v7_optimized.result.json",
+    "sha256": "aa1821278d02023cd64bdf21c6be3102d77a63be7b8b163f9707d9e6e1e8d0a3",
+    "size": 302
+  },
+  {
+    "path": "selftest_create_v7_optimized.stderr",
+    "sha256": "9605905bed40b25d2b1407f21be3394c6372dd8e877fd58bec8dfae842f51d68",
+    "size": 102
+  },
+  {
+    "path": "selftest_create_v7_optimized.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "path": "selftest_private_cmake_controller_v7.attempt.json",
+    "sha256": "efc3b4053319fd71b71980b4849433da1045a24c77d99929549a9624b9b8ab6b",
+    "size": 248
+  },
+  {
+    "path": "selftest_private_cmake_controller_v7.result.json",
+    "sha256": "76d4e7b2c5001d15ee70de2af36367ee3601681879a9261c8b562ffb0ce48f3d",
+    "size": 309
+  },
+  {
+    "path": "selftest_private_cmake_controller_v7.stderr",
+    "sha256": "4e0f64ef21c3391ad5e5d44532f7e24d581781c62051064c94414fab28b094ba",
+    "size": 100
+  },
+  {
+    "path": "selftest_private_cmake_controller_v7.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "path": "selftest_private_cmake_controller_v7_optimized.attempt.json",
+    "sha256": "8a77d6539737faee0405e0fe262a87b11d5ef3a5101b0c407555056d73cd45fa",
+    "size": 258
+  },
+  {
+    "path": "selftest_private_cmake_controller_v7_optimized.result.json",
+    "sha256": "d4b9348370ecc60e47966f070c9e01c06378ec60268b55e848848ec16932d117",
+    "size": 319
+  },
+  {
+    "path": "selftest_private_cmake_controller_v7_optimized.stderr",
+    "sha256": "cbc05345e1232b0ff34e108b6aab877021cb7541722d5f9ab86a7c89a8ab95b9",
+    "size": 100
+  },
+  {
+    "path": "selftest_private_cmake_controller_v7_optimized.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "path": "selftest_private_cmake_v7.attempt.json",
+    "sha256": "53f743849da6baee0e82b34f4a2b2dc99179fea846b1cfe318026c22b7675786",
+    "size": 237
+  },
+  {
+    "path": "selftest_private_cmake_v7.result.json",
+    "sha256": "ba4220ac44b8fe443ccf663200b4da1d02d0b149323cb25d7e882f5040e6050f",
+    "size": 299
+  },
+  {
+    "path": "selftest_private_cmake_v7.stderr",
+    "sha256": "0292b91377e3f5de5fc72b83a91ddacbecbc2c226b761793f9b4babe85f7ad63",
+    "size": 102
+  },
+  {
+    "path": "selftest_private_cmake_v7.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "path": "selftest_private_cmake_v7_optimized.attempt.json",
+    "sha256": "7386f9c9c2116f4d77e079ed52725c0ef1f0b04c0a3e20e3a646e3e70e3dcf10",
+    "size": 247
+  },
+  {
+    "path": "selftest_private_cmake_v7_optimized.result.json",
+    "sha256": "25ca85a3a84e61ef98ac18984b2f67de41f791a5b33bc9fa2f498b36c2a2c2cd",
+    "size": 309
+  },
+  {
+    "path": "selftest_private_cmake_v7_optimized.stderr",
+    "sha256": "3b0dbb90387b342ccecc50446a0fb5e4385d86a3f467e5b97d63f8924fc08aff",
+    "size": 102
+  },
+  {
+    "path": "selftest_private_cmake_v7_optimized.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "path": "selftest_session_v7.attempt.json",
+    "sha256": "496c5f284eb8feaac51fabc9d6ac84a71a165560af0fac7f4b6dbb78e861cdc6",
+    "size": 231
+  },
+  {
+    "path": "selftest_session_v7.result.json",
+    "sha256": "94df41bf3153e3ffb4dd2ad8283276d21049e0eaf9fbed6d117eaad8162344db",
+    "size": 291
+  },
+  {
+    "path": "selftest_session_v7.stderr",
+    "sha256": "4f12a6f6bd9edd3ff8f83924788d91bde7efa0672911ecc8ed47fe6aeec3ed4d",
+    "size": 111
+  },
+  {
+    "path": "selftest_session_v7.stdout",
+    "sha256": "c006dc5e4049313a5abbee92159ad7ec396c2d200cd5527ed4077bf783d3c25f",
+    "size": 3771
+  },
+  {
+    "path": "selftest_session_v7_optimized.attempt.json",
+    "sha256": "c814881910bf3336fd0bc39a9ab3d965fbb85acf96048059b186f5dcf8ffeecc",
+    "size": 241
+  },
+  {
+    "path": "selftest_session_v7_optimized.result.json",
+    "sha256": "02c507bfe4dfbe1814a64d1b12e8e9a930f48a3ea3812e2b9c48022304440966",
+    "size": 301
+  },
+  {
+    "path": "selftest_session_v7_optimized.stderr",
+    "sha256": "571cb73361b48c1a30000a85dda4d431cdd484bcbcfa6dcbe92d72d027b78894",
+    "size": 111
+  },
+  {
+    "path": "selftest_session_v7_optimized.stdout",
+    "sha256": "88d3565e7a640c20b4eb60eae04d9d8b62c28f1511d6f101a17f4445bd4dd7bc",
+    "size": 3771
+  },
+  {
+    "path": "summary.json",
+    "sha256": "4bf6232e1ecb4cbd7a99dfbee0e0bbb851049bc9fd7cef8e547de1f892e8130f",
+    "size": 3493
+  }
+]

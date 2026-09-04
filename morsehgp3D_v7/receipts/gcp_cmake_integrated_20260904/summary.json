@@ -1,0 +1,114 @@
+{
+  "failure": null,
+  "gcp": "not_used",
+  "official_wheel_smoke": {
+    "receipt": "../gcp_cmake_overlay_20260904/receipt_manifest.json",
+    "sha256": "1a149414d29b16bee1799a026d3c278df7d80a2addd30cd33665240a12feece5"
+  },
+  "pins_stable": true,
+  "public_status": "not_claimed",
+  "results": {
+    "selftest_create_v7": {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/gcp-migration/selftest_create_v7.py"
+      ],
+      "elapsed_seconds": 0.36807148799925926,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T22:25:37Z",
+      "status": "completed",
+      "timeout_seconds": 45
+    },
+    "selftest_create_v7_optimized": {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/gcp-migration/selftest_create_v7.py"
+      ],
+      "elapsed_seconds": 0.36737029300093127,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T22:25:37Z",
+      "status": "completed",
+      "timeout_seconds": 45
+    },
+    "selftest_private_cmake_controller_v7": {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/gcp-migration/selftest_private_cmake_controller_v7.py"
+      ],
+      "elapsed_seconds": 1.5696123889993032,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T22:25:34Z",
+      "status": "completed",
+      "timeout_seconds": 45
+    },
+    "selftest_private_cmake_controller_v7_optimized": {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/gcp-migration/selftest_private_cmake_controller_v7.py"
+      ],
+      "elapsed_seconds": 1.5201541589995031,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T22:25:35Z",
+      "status": "completed",
+      "timeout_seconds": 45
+    },
+    "selftest_private_cmake_v7": {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/gcp-migration/selftest_private_cmake_v7.py"
+      ],
+      "elapsed_seconds": 0.16676706100042793,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T22:25:34Z",
+      "status": "completed",
+      "timeout_seconds": 45
+    },
+    "selftest_private_cmake_v7_optimized": {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/gcp-migration/selftest_private_cmake_v7.py"
+      ],
+      "elapsed_seconds": 0.16678690499975346,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T22:25:34Z",
+      "status": "completed",
+      "timeout_seconds": 45
+    },
+    "selftest_session_v7": {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/gcp-migration/selftest_session_v7.py"
+      ],
+      "elapsed_seconds": 4.178574698000375,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T22:25:25Z",
+      "status": "completed",
+      "timeout_seconds": 45
+    },
+    "selftest_session_v7_optimized": {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/gcp-migration/selftest_session_v7.py"
+      ],
+      "elapsed_seconds": 4.129002898998806,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T22:25:29Z",
+      "status": "completed",
+      "timeout_seconds": 45
+    }
+  },
+  "scope": "integrated_tooling_controller_mock_tests_not_gpu_engine",
+  "status": "passed"
+}

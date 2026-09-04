@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "cmake",
+    "--version"
+  ],
+  "elapsed_seconds": 0.019061699000303634,
+  "exit_code": 0,
+  "started_utc": "2026-09-04T22:13:21Z",
+  "status": "completed",
+  "timeout_seconds": 30
+}

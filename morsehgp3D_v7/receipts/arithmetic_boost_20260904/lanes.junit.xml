@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="16"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="0"
+	timestamp="2026-09-04T23:21:15"
+	>
+	<testcase name="mhgp7_arithmetic_lanes" classname="mhgp7_arithmetic_lanes" time="0.0233764" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>authority=obig_and_literals boost=not_used public_status=not_claimed oracle_carry=1 q2=2 q3=81 q4=51 q3_rank_zero=1 q4_rank_zero=1 det_positive=25 det_negative=25 inside=25 outside=1 boundary=24 power_negative=303 power_zero=858 power_positive=599 q3_acute=74 q3_rejected=7 diam_negative=4 diam_zero=3 diam_positive=74 fixture_domain_rejected=2 q4_num_high=24 q4_cross_w4_zero=50 q4_cross_w3_nonzero=25 interlane_equal=24 cassini_large_center=2 cassini_axis_calls=9 face_power_zero=6 max_g_bits=66 max_w_bits=82 max_b3_bits=82 max_c3_bits=96 max_det4_bits=52 max_np4_bits=67 max_num4_bits=136 max_cross4_bits=240 c3_negative=1 c3_positive=1 c4_nonzero=1
+arithmetic_lanes_gate PASS
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_lanes_q4_level" classname="mhgp7_arithmetic_lanes_q4_level" time="0.01606" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>authority=obig_and_literals boost=not_used public_status=not_claimed oracle_carry=1 q2=0 q3=0 q4=1 q3_rank_zero=0 q4_rank_zero=0 det_positive=0 det_negative=1 inside=1 outside=0 boundary=0 power_negative=2 power_zero=12 power_positive=0 q3_acute=0 q3_rejected=0 diam_negative=0 diam_zero=0 diam_positive=0 fixture_domain_rejected=0 q4_num_high=1 q4_cross_w4_zero=1 q4_cross_w3_nonzero=1 interlane_equal=1 cassini_large_center=0 cassini_axis_calls=0 face_power_zero=0 max_g_bits=0 max_w_bits=0 max_b3_bits=0 max_c3_bits=0 max_det4_bits=52 max_np4_bits=67 max_num4_bits=136 max_cross4_bits=240 c3_negative=0 c3_positive=0 c4_nonzero=0
+arithmetic_lanes_gate PASS
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_lanes_oracle" classname="mhgp7_arithmetic_lanes_oracle" time="0.0159752" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>authority=obig_and_literals boost=not_used public_status=not_claimed oracle_carry=1 q2=0 q3=0 q4=0 q3_rank_zero=0 q4_rank_zero=0 det_positive=0 det_negative=0 inside=0 outside=0 boundary=0 power_negative=0 power_zero=0 power_positive=0 q3_acute=0 q3_rejected=0 diam_negative=0 diam_zero=0 diam_positive=0 fixture_domain_rejected=0 q4_num_high=0 q4_cross_w4_zero=0 q4_cross_w3_nonzero=0 interlane_equal=0 cassini_large_center=0 cassini_axis_calls=0 face_power_zero=0 max_g_bits=0 max_w_bits=0 max_b3_bits=0 max_c3_bits=0 max_det4_bits=0 max_np4_bits=0 max_num4_bits=0 max_cross4_bits=0 c3_negative=0 c3_positive=0 c4_nonzero=0
+arithmetic_lanes_gate PASS
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_lanes_oracle_overflow" classname="mhgp7_arithmetic_lanes_oracle_overflow" time="0.0171208" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>obig: debordement de largeur (add) — echec ferme
+authority=obig_and_literals boost=not_used public_status=not_claimed oracle_carry=1 q2=0 q3=0 q4=0 q3_rank_zero=0 q4_rank_zero=0 det_positive=0 det_negative=0 inside=0 outside=0 boundary=0 power_negative=0 power_zero=0 power_positive=0 q3_acute=0 q3_rejected=0 diam_negative=0 diam_zero=0 diam_positive=0 fixture_domain_rejected=0 q4_num_high=0 q4_cross_w4_zero=0 q4_cross_w3_nonzero=0 interlane_equal=0 cassini_large_center=0 cassini_axis_calls=0 face_power_zero=0 max_g_bits=0 max_w_bits=0 max_b3_bits=0 max_c3_bits=0 max_det4_bits=0 max_np4_bits=0 max_num4_bits=0 max_cross4_bits=0 c3_negative=0 c3_positive=0 c4_nonzero=0
+first_divergence=oracle.overflow inject=
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_q3_factor" classname="mhgp7_arithmetic_q3_factor" time="0.0183829" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>authority=obig_and_literals boost=not_used public_status=not_claimed oracle_carry=1 q2=2 q3=1 q4=0 q3_rank_zero=0 q4_rank_zero=0 det_positive=0 det_negative=0 inside=0 outside=0 boundary=0 power_negative=2 power_zero=9 power_positive=9 q3_acute=1 q3_rejected=0 diam_negative=0 diam_zero=0 diam_positive=1 fixture_domain_rejected=2 q4_num_high=0 q4_cross_w4_zero=0 q4_cross_w3_nonzero=0 interlane_equal=0 cassini_large_center=0 cassini_axis_calls=0 face_power_zero=0 max_g_bits=66 max_w_bits=82 max_b3_bits=82 max_c3_bits=0 max_det4_bits=0 max_np4_bits=0 max_num4_bits=0 max_cross4_bits=0 c3_negative=0 c3_positive=0 c4_nonzero=0
+first_divergence=q3.level inject=q3-level-4g
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_q4_parity" classname="mhgp7_arithmetic_q4_parity" time="0.0217686" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>authority=obig_and_literals boost=not_used public_status=not_claimed oracle_carry=1 q2=2 q3=81 q4=1 q3_rank_zero=1 q4_rank_zero=0 det_positive=0 det_negative=1 inside=1 outside=0 boundary=0 power_negative=230 power_zero=439 power_positive=391 q3_acute=74 q3_rejected=7 diam_negative=4 diam_zero=3 diam_positive=74 fixture_domain_rejected=2 q4_num_high=0 q4_cross_w4_zero=0 q4_cross_w3_nonzero=0 interlane_equal=0 cassini_large_center=2 cassini_axis_calls=9 face_power_zero=0 max_g_bits=66 max_w_bits=82 max_b3_bits=82 max_c3_bits=96 max_det4_bits=52 max_np4_bits=67 max_num4_bits=0 max_cross4_bits=0 c3_negative=1 c3_positive=1 c4_nonzero=0
+first_divergence=q4.center inject=q4-center-parity
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_q4_face_boundary" classname="mhgp7_arithmetic_q4_face_boundary" time="0.01594" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>authority=obig_and_literals boost=not_used public_status=not_claimed oracle_carry=1 q2=2 q3=81 q4=2 q3_rank_zero=1 q4_rank_zero=0 det_positive=1 det_negative=1 inside=1 outside=0 boundary=1 power_negative=233 power_zero=456 power_positive=399 q3_acute=74 q3_rejected=7 diam_negative=4 diam_zero=3 diam_positive=74 fixture_domain_rejected=2 q4_num_high=1 q4_cross_w4_zero=2 q4_cross_w3_nonzero=1 interlane_equal=1 cassini_large_center=2 cassini_axis_calls=9 face_power_zero=1 max_g_bits=66 max_w_bits=82 max_b3_bits=82 max_c3_bits=96 max_det4_bits=52 max_np4_bits=67 max_num4_bits=136 max_cross4_bits=240 c3_negative=1 c3_positive=1 c4_nonzero=0
+first_divergence=q4.face_power inject=q4-eq-nonstrict
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_q4_u192_word2" classname="mhgp7_arithmetic_q4_u192_word2" time="0.0117471" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>authority=obig_and_literals boost=not_used public_status=not_claimed oracle_carry=1 q2=0 q3=0 q4=1 q3_rank_zero=0 q4_rank_zero=0 det_positive=0 det_negative=1 inside=1 outside=0 boundary=0 power_negative=0 power_zero=0 power_positive=0 q3_acute=0 q3_rejected=0 diam_negative=0 diam_zero=0 diam_positive=0 fixture_domain_rejected=0 q4_num_high=1 q4_cross_w4_zero=0 q4_cross_w3_nonzero=0 interlane_equal=0 cassini_large_center=0 cassini_axis_calls=0 face_power_zero=0 max_g_bits=0 max_w_bits=0 max_b3_bits=0 max_c3_bits=0 max_det4_bits=52 max_np4_bits=67 max_num4_bits=136 max_cross4_bits=0 c3_negative=0 c3_positive=0 c4_nonzero=0
+first_divergence=q4.level.num inject=level-trunc-hi
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_lanes_oracle_carry" classname="mhgp7_arithmetic_lanes_oracle_carry" time="0.0116679" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>authority=obig_and_literals boost=not_used public_status=not_claimed oracle_carry=1 q2=0 q3=0 q4=0 q3_rank_zero=0 q4_rank_zero=0 det_positive=0 det_negative=0 inside=0 outside=0 boundary=0 power_negative=0 power_zero=0 power_positive=0 q3_acute=0 q3_rejected=0 diam_negative=0 diam_zero=0 diam_positive=0 fixture_domain_rejected=0 q4_num_high=0 q4_cross_w4_zero=0 q4_cross_w3_nonzero=0 interlane_equal=0 cassini_large_center=0 cassini_axis_calls=0 face_power_zero=0 max_g_bits=0 max_w_bits=0 max_b3_bits=0 max_c3_bits=0 max_det4_bits=0 max_np4_bits=0 max_num4_bits=0 max_cross4_bits=0 c3_negative=0 c3_positive=0 c4_nonzero=0
+first_divergence=oracle.literal-carry inject=obig-carry-lost
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_lanes_bad_case" classname="mhgp7_arithmetic_lanes_bad_case" time="0.0116094" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_lanes_bad_inject" classname="mhgp7_arithmetic_lanes_bad_inject" time="0.0151222" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_lanes_duplicate_case" classname="mhgp7_arithmetic_lanes_duplicate_case" time="0.0132483" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_lanes_duplicate_inject" classname="mhgp7_arithmetic_lanes_duplicate_inject" time="0.0129165" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_lanes_empty_inject" classname="mhgp7_arithmetic_lanes_empty_inject" time="0.0149228" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_lanes_u192_case_mismatch" classname="mhgp7_arithmetic_lanes_u192_case_mismatch" time="0.0157729" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_arithmetic_lanes_oracle_case_mismatch" classname="mhgp7_arithmetic_lanes_oracle_case_mismatch" time="0.015536" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+</testsuite>
