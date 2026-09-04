@@ -6,6 +6,7 @@ restent dans ce dossier ; le constructeur réalise les changements produit.
 Commencer par la [synthèse indépendante](AUDIT_INDEPENDANT_20260904.md),
 puis consulter selon le besoin :
 
+- [Échanges actifs avec le constructeur](DIALOGUE_COURANT.md) : nouveaux constats, corrections proposées et critères de fermeture de l'itération en cours.
 - [Mathématiques et hiérarchie](AUDIT_MATHEMATIQUE_20260904.md) : modèle du manuscrit, descente silencieuse, réduction et certificats restant à composer.
 - [Interfaces et archives](AUDIT_INTERFACES_20260904.md) : entrée réelle, refus et rejeu des objets publiés.
 - [Résidence et parallélisme](AUDIT_RESIDENCE_20260904.md) : allocations du tri, census et pistes d'échelle.

@@ -1,0 +1,16 @@
+{
+  "schema": "mhgp7-audit-campaign-registration-v1",
+  "test_count": 325,
+  "registered_incidence_campaign_tests": [],
+  "cmake_sha256": "79201af402181df2810938509587fa2d190b6364a2436ab911e83116392c2b75",
+  "test_sha256": "8cf34a3ae30c3b403ff0bb4624de447fd68cec98578551d870b7b34e5179ab2a",
+  "command": [
+    "python3",
+    "-O",
+    "morsehgp3D_v7/audits/.work_iteration2/source/morsehgp3D_v7/tests/incidence_campaign_gate.py"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": ".....\n----------------------------------------------------------------------\nRan 5 tests in 1.207s\n\nOK\n",
+  "scope": "campaign harness registration and its own unit checks only"
+}

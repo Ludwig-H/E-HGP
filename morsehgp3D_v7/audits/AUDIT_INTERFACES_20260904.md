@@ -8,7 +8,7 @@ mode=audit_independant_math_and_architecture
 public_status=not_claimed
 ```
 
-**Les 26 scènes CLI et les six rejets structurels d'archives passent sur le binaire et le lecteur courants épinglés, y compris pour `normalized_horizontal_h0_candidate`.** La porte indépendante avec `--require-product-rejections`, exécutée sous `python3 -O`, rend `0`. Aucun défaut ouvert n'est constaté sur ce périmètre borné.
+**Les 26 scènes CLI et les six rejets structurels d'archives passent sur le binaire et le lecteur courants épinglés, y compris pour `normalized_horizontal_h0_candidate`.** La porte indépendante avec `--require-product-rejections`, exécutée sous `python3 -O`, rend `0`. Un contrôle supplémentaire révèle toutefois un défaut de nettoyage sous panne d'allocation : le [retour courant au constructeur](RETOUR_ARCHIVE_COURANT.md) contient la reproduction de la terminaison et du provisoire restant.
 
 ## Sources et résultat reproductible
 

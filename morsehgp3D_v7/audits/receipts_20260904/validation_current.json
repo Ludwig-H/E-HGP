@@ -121,7 +121,8 @@
     "tests/sweep_fixtures.cpp": "2199e5531b6c1cd2972bb1ce3f1933575f281c1b4eddf58608b2c248bd09e53d",
     "tests/thread_failure_gate.cpp": "94c9a2f9a1a954fb64196e43f7c3344813f451c35c560a5f3bc0c2856808d96c",
     "tests/wire_gate.cpp": "3fe78d9a81f4cc0d0e9bd8c0c33f49233fbee9f4a78ee61b81a052127a710887",
-    "tests/wire_pack_gate.cpp": "16fce689d21091e4a9b7591ebf1753746bb56a49f03eaa6db14f66979447e822"
+    "tests/wire_pack_gate.cpp": "16fce689d21091e4a9b7591ebf1753746bb56a49f03eaa6db14f66979447e822",
+    "audits/archive_cleanup_probe.cpp": "f94bc8032d4a55f4afccf43a56497866f803eb3e42f2d96b05dc9420b964a63d"
   },
   "checks": [
     {
@@ -196,9 +197,17 @@
       "name": "documentation_and_freshness",
       "receipt": "checks_current.json",
       "scope": "global docs, implementation registry, all active audit Markdown, freshness and three rejection cases under python -O"
+    },
+    {
+      "name": "archive_cleanup_allocation_failure",
+      "receipt": "iteration2/archive_cleanup.json",
+      "result": "issue_confirmed",
+      "nominal_exit_code": 0,
+      "injected_termination_witness": 97,
+      "scope": "archive API destructor after input; no final publication and provisional file remains under injected allocation failure"
     }
   ],
-  "full_final_release_suite": "not_executed_by_this_audit",
+  "full_final_release_suite": "running_on_iteration2_frozen_snapshot",
   "scale_campaigns": "not_executed_by_this_audit",
   "gpu": "not_executed",
   "gcp": "not_used",
@@ -216,8 +225,10 @@
     "release_current_ctest.log": "f79398f632eddcd3d87df40741849e9156718f09b956da1769d11c2028ea1211",
     "release_current_ctest.xml": "48efe5a783790a5a1b4e603d7a3e4130be0689a8e0f9e72041a459bd0e32a277",
     "release_current_source_snapshot.json": "10d395a51641ff2802ead3e281a8d8619dcdf6c36faa94698a20fec588f381e8",
-    "residence_current.json": "f01081cc5b72315e285efed4f014e4ea579b51d70464e168b69c123b9e5dedd3"
+    "residence_current.json": "f01081cc5b72315e285efed4f014e4ea579b51d70464e168b69c123b9e5dedd3",
+    "iteration2/archive_cleanup.json": "a981a992a81777fd633d21b9d66cde7f7b01e59c98d77301400bda3e3d0829a9"
   },
   "last_freshness_check_utc": "2026-09-04T20:41:38.662722+00:00",
-  "documentation_scope_note": "tools/check_docs.py excludes v7 audits; all active audit Markdown validated explicitly"
+  "documentation_scope_note": "tools/check_docs.py excludes v7 audits; all active audit Markdown validated explicitly",
+  "updated_utc": "2026-09-04T20:55:11.545810+00:00"
 }

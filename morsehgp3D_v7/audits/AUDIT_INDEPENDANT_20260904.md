@@ -26,6 +26,12 @@ les coûts de bout en bout. Une campagne bornée ne suffit pas à ces trois
 conclusions. Le statut `not_claimed` et le refus de `--require-exact` restent
 cohérents avec les preuves disponibles.
 
+Un défaut transactionnel est actuellement ouvert : sous panne d'allocation
+au nettoyage, le destructeur de l'archive peut provoquer `std::terminate`
+et laisser son provisoire. La [contre-fixture et la correction proposée](RETOUR_ARCHIVE_COURANT.md)
+sont transmises au constructeur via les [échanges actifs](DIALOGUE_COURANT.md).
+Cette issue ne publie pas d'archive finale ; elle rompt le refus contrôlé.
+
 ## Modèle lu et objet effectivement audité
 
 Les parties I, pages PDF 35–76, puis II, pages PDF 77–134, du
