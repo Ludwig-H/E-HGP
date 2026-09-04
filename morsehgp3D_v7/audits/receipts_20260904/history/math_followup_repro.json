@@ -1,0 +1,71 @@
+{
+  "scope": "followup_math_audit_not_product_qualification",
+  "source_snapshot_sha256": "5371d9a358964bb0dd1ab93096d2cbfc2093b7bf4b1c22609dddb56237502695",
+  "reproducer_sha256": "dd9de65fe912ae403c4f8c33318c41377d167514af7489ae82da4bd246daac99",
+  "binary_sha256": "536f84163527631365af9224607986ed7bdc0c31223b1a30b2f1472f23ef303a",
+  "compile": {
+    "exit_code": 0,
+    "flags": [
+      "-std=c++20",
+      "-O3",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-DMHGP7_TESTING=1",
+      "-pthread"
+    ],
+    "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
+  },
+  "runs": [
+    {
+      "argument": "--gate-control",
+      "expected_exit_code": 0,
+      "exit_code": 0,
+      "stdout": "silent_incidence cases=24 cuts=1488 core_pairs=1543668 silent=8 longest_chain=2 cache_hits=1 failures=0\n",
+      "stderr": ""
+    },
+    {
+      "argument": "--gate-drop-nonmerge",
+      "expected_exit_code": 1,
+      "exit_code": 1,
+      "stdout": "silent_incidence cases=24 cuts=1488 core_pairs=1543668 silent=8 longest_chain=2 cache_hits=1 failures=51\n",
+      "stderr": "ECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : API pipeline q_R Gamma E5\nECHEC : API pipeline q_R Gamma E5\nECHEC : mode normalise corrige le q_R legacy\n"
+    },
+    {
+      "argument": "--triangle",
+      "expected_exit_code": 0,
+      "exit_code": 0,
+      "stdout": "triangle normalized=1 parents=0 born=3 nodes=0 level=325/36\n",
+      "stderr": ""
+    },
+    {
+      "argument": "--erase-born",
+      "expected_exit_code": 4,
+      "exit_code": 4,
+      "stdout": "E5 mode=--erase-born removed=10 deltas_before=6 deltas_after=6 born_before=10 born_after=0 judge_accepts=1 unresolved_parents=0\n",
+      "stderr": ""
+    },
+    {
+      "argument": "--drop-silent-continuation",
+      "expected_exit_code": 4,
+      "exit_code": 4,
+      "stdout": "E5 mode=--drop-silent-continuation removed=1 deltas_before=6 deltas_after=5 born_before=10 born_after=9 judge_accepts=1 unresolved_parents=1\n",
+      "stderr": ""
+    },
+    {
+      "argument": "--mutant=reduced-latent-parent",
+      "expected_exit_code": 4,
+      "exit_code": 4,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argument": "--mutant=reduced-drop-materialization",
+      "expected_exit_code": 4,
+      "exit_code": 4,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

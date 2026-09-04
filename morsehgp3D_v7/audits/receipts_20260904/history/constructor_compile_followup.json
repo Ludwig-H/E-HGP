@@ -1,0 +1,58 @@
+{
+  "source_manifest": "math_followup_source_snapshot.json",
+  "source_manifest_sha256": "5371d9a358964bb0dd1ab93096d2cbfc2093b7bf4b1c22609dddb56237502695",
+  "compile_flags": [
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-DMHGP7_TESTING=1",
+    "-pthread"
+  ],
+  "compile_returncodes": {
+    "selftest": 0,
+    "bad_alloc_gate": 0
+  },
+  "runs": [
+    {
+      "command": [
+        "morsehgp3D_v7/audits/.work_root/bad_alloc_followup",
+        "--n=64",
+        "--threads=4"
+      ],
+      "binary_sha256": "ca6ff234f0bf704440f011ccc24c794c9d76c7e6122b978cfb918cbca2d5619e",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "stdout": "temoin : run complet, etage_atteint=publication, 10 callbacks (kmax_eff=10) \u2014 conforme\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "morsehgp3D_v7/audits/.work_root/bad_alloc_followup",
+        "--n=64",
+        "--threads=4",
+        "--inject=caps-throw-bad-alloc-census",
+        "--etage=census"
+      ],
+      "binary_sha256": "ca6ff234f0bf704440f011ccc24c794c9d76c7e6122b978cfb918cbca2d5619e",
+      "returncode": 2,
+      "expected_returncode": 2,
+      "stdout": "caps-throw-bad-alloc-census inflight=1 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=7 apres_rle=7 apres_prefiltre=7 apres_census=0 max_fold=0)\ncaps-throw-bad-alloc-census inflight=2 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=9 apres_rle=9 apres_prefiltre=9 apres_census=0 max_fold=0)\ncaps-throw-bad-alloc-census inflight=8 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=9 apres_rle=9 apres_prefiltre=9 apres_census=0 max_fold=0)\nbad_alloc a l'etage census : refus transactionnel conforme (statut, curseur, zero callback, aucun provisoire) sur inflight 1/2/8 \u2014 jamais un abort\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "morsehgp3D_v7/audits/.work_root/selftest_followup",
+        "--sweep-oracle"
+      ],
+      "binary_sha256": "9b5827ec47bdb460d1adddda7469997fcaed0373d1cae166697ffde428c68626",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "stdout": "selftest --sweep-oracle : conforme\n",
+      "stderr": ""
+    }
+  ]
+}

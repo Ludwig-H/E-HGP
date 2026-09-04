@@ -1,0 +1,54 @@
+[  1%] Building CXX object CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o
+[  3%] Building CXX object CMakeFiles/mhgp7_selftest.dir/tests/selftest.cpp.o
+In file included from /usr/include/c++/13/bits/stl_algo.h:61,
+                 from /usr/include/c++/13/algorithm:61,
+                 from /workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/tests/selftest.cpp:16:
+In function ‘constexpr void std::__adjust_heap(_RandomAccessIterator, _Distance, _Distance, _Tp, _Compare) [with _RandomAccessIterator = unsigned int*; _Distance = long int; _Tp = unsigned int; _Compare = __gnu_cxx::__ops::_Iter_less_iter]’,
+    inlined from ‘constexpr void std::__make_heap(_RandomAccessIterator, _RandomAccessIterator, _Compare&) [with _RandomAccessIterator = unsigned int*; _Compare = __gnu_cxx::__ops::_Iter_less_iter]’ at /usr/include/c++/13/bits/stl_heap.h:356:22,
+    inlined from ‘constexpr void std::__heap_select(_RandomAccessIterator, _RandomAccessIterator, _RandomAccessIterator, _Compare) [with _RandomAccessIterator = unsigned int*; _Compare = __gnu_cxx::__ops::_Iter_less_iter]’ at /usr/include/c++/13/bits/stl_algo.h:1635:23,
+    inlined from ‘constexpr void std::__partial_sort(_RandomAccessIterator, _RandomAccessIterator, _RandomAccessIterator, _Compare) [with _RandomAccessIterator = unsigned int*; _Compare = __gnu_cxx::__ops::_Iter_less_iter]’ at /usr/include/c++/13/bits/stl_algo.h:1910:25,
+    inlined from ‘constexpr void std::__introsort_loop(_RandomAccessIterator, _RandomAccessIterator, _Size, _Compare) [with _RandomAccessIterator = unsigned int*; _Size = long int; _Compare = __gnu_cxx::__ops::_Iter_less_iter]’ at /usr/include/c++/13/bits/stl_algo.h:1926:27,
+    inlined from ‘constexpr void std::__sort(_RandomAccessIterator, _RandomAccessIterator, _Compare) [with _RandomAccessIterator = unsigned int*; _Compare = __gnu_cxx::__ops::_Iter_less_iter]’ at /usr/include/c++/13/bits/stl_algo.h:1947:25,
+    inlined from ‘constexpr void std::sort(_RAIter, _RAIter) [with _RAIter = unsigned int*]’ at /usr/include/c++/13/bits/stl_algo.h:4861:18,
+    inlined from ‘mhgp7::silent_detail::CofaceKey mhgp7::silent_detail::event_key(const mhgp7::ForestEvent&)’ at /workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/tests/../src/pipeline/../forest/silent_incidence.hpp:93:12:
+/usr/include/c++/13/bits/stl_heap.h:241:36: error: array subscript [16, 2305843009213693950] is outside array bounds of ‘mhgp7::silent_detail::CofaceKey [1]’ [-Werror=array-bounds=]
+  241 |           *(__first + __holeIndex) = _GLIBCXX_MOVE(*(__first
+      |                                    ^
+In file included from /workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/tests/../src/pipeline/run.hpp:48,
+                 from /workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/tests/selftest.cpp:32:
+/workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/tests/../src/pipeline/../forest/silent_incidence.hpp: In function ‘mhgp7::silent_detail::CofaceKey mhgp7::silent_detail::event_key(const mhgp7::ForestEvent&)’:
+/workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/tests/../src/pipeline/../forest/silent_incidence.hpp:88:8: note: at offset [64, 9223372036854775800] into object ‘‘result_decl’ not supported by dump_expr<expression error>’ of size 48
+   88 | inline CofaceKey event_key(const ForestEvent& e) {
+      |        ^~~~~~~~~
+[  5%] Linking CXX executable mhgp7
+[  5%] Built target mhgp7
+[  6%] Building CXX object CMakeFiles/mhgp7_bad_alloc_gate.dir/tests/bad_alloc_gate.cpp.o
+cc1plus: all warnings being treated as errors
+gmake[2]: *** [CMakeFiles/mhgp7_selftest.dir/build.make:76: CMakeFiles/mhgp7_selftest.dir/tests/selftest.cpp.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:165: CMakeFiles/mhgp7_selftest.dir/all] Error 2
+gmake[1]: *** Waiting for unfinished jobs....
+In file included from /usr/include/c++/13/bits/stl_algo.h:61,
+                 from /usr/include/c++/13/algorithm:61,
+                 from /workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/tests/../src/cloud/families.hpp:30,
+                 from /workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/tests/bad_alloc_gate.cpp:47:
+In function ‘constexpr void std::__adjust_heap(_RandomAccessIterator, _Distance, _Distance, _Tp, _Compare) [with _RandomAccessIterator = unsigned int*; _Distance = long int; _Tp = unsigned int; _Compare = __gnu_cxx::__ops::_Iter_less_iter]’,
+    inlined from ‘constexpr void std::__make_heap(_RandomAccessIterator, _RandomAccessIterator, _Compare&) [with _RandomAccessIterator = unsigned int*; _Compare = __gnu_cxx::__ops::_Iter_less_iter]’ at /usr/include/c++/13/bits/stl_heap.h:356:22,
+    inlined from ‘constexpr void std::__heap_select(_RandomAccessIterator, _RandomAccessIterator, _RandomAccessIterator, _Compare) [with _RandomAccessIterator = unsigned int*; _Compare = __gnu_cxx::__ops::_Iter_less_iter]’ at /usr/include/c++/13/bits/stl_algo.h:1635:23,
+    inlined from ‘constexpr void std::__partial_sort(_RandomAccessIterator, _RandomAccessIterator, _RandomAccessIterator, _Compare) [with _RandomAccessIterator = unsigned int*; _Compare = __gnu_cxx::__ops::_Iter_less_iter]’ at /usr/include/c++/13/bits/stl_algo.h:1910:25,
+    inlined from ‘constexpr void std::__introsort_loop(_RandomAccessIterator, _RandomAccessIterator, _Size, _Compare) [with _RandomAccessIterator = unsigned int*; _Size = long int; _Compare = __gnu_cxx::__ops::_Iter_less_iter]’ at /usr/include/c++/13/bits/stl_algo.h:1926:27,
+    inlined from ‘constexpr void std::__sort(_RandomAccessIterator, _RandomAccessIterator, _Compare) [with _RandomAccessIterator = unsigned int*; _Compare = __gnu_cxx::__ops::_Iter_less_iter]’ at /usr/include/c++/13/bits/stl_algo.h:1947:25,
+    inlined from ‘constexpr void std::sort(_RAIter, _RAIter) [with _RAIter = unsigned int*]’ at /usr/include/c++/13/bits/stl_algo.h:4861:18,
+    inlined from ‘mhgp7::silent_detail::CofaceKey mhgp7::silent_detail::event_key(const mhgp7::ForestEvent&)’ at /workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/tests/../src/pipeline/../forest/silent_incidence.hpp:93:12:
+/usr/include/c++/13/bits/stl_heap.h:241:36: error: array subscript [16, 2305843009213693950] is outside array bounds of ‘mhgp7::silent_detail::CofaceKey [1]’ [-Werror=array-bounds=]
+  241 |           *(__first + __holeIndex) = _GLIBCXX_MOVE(*(__first
+      |                                    ^
+In file included from /workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/tests/../src/pipeline/run.hpp:48,
+                 from /workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/tests/bad_alloc_gate.cpp:49:
+/workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/tests/../src/pipeline/../forest/silent_incidence.hpp: In function ‘mhgp7::silent_detail::CofaceKey mhgp7::silent_detail::event_key(const mhgp7::ForestEvent&)’:
+/workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/tests/../src/pipeline/../forest/silent_incidence.hpp:88:8: note: at offset [64, 9223372036854775800] into object ‘‘result_decl’ not supported by dump_expr<expression error>’ of size 48
+   88 | inline CofaceKey event_key(const ForestEvent& e) {
+      |        ^~~~~~~~~
+cc1plus: all warnings being treated as errors
+gmake[2]: *** [CMakeFiles/mhgp7_bad_alloc_gate.dir/build.make:76: CMakeFiles/mhgp7_bad_alloc_gate.dir/tests/bad_alloc_gate.cpp.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:191: CMakeFiles/mhgp7_bad_alloc_gate.dir/all] Error 2
+gmake: *** [Makefile:101: all] Error 2

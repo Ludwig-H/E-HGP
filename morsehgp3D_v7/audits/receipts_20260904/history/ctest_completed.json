@@ -1,0 +1,34 @@
+{
+  "schema": "mhgp7-audit-historical-ctest-v1",
+  "completed_observed_utc": "2026-09-04T20:40:57.440534+00:00",
+  "source_manifest": "source_snapshot.json",
+  "optimization": "-O2 -DNDEBUG",
+  "compiler": "GCC 13.3.0",
+  "warnings": "-Wall -Wextra -Wpedantic -Werror",
+  "command": [
+    "ctest",
+    "--test-dir",
+    "morsehgp3D_v7/audits/.work_root/build_o2",
+    "--output-on-failure",
+    "-L",
+    "^gate$",
+    "--parallel",
+    "2"
+  ],
+  "exit_code": 8,
+  "tests": 268,
+  "passed": 264,
+  "failed": 4,
+  "failed_names": [
+    "mhgp7_bad_alloc_etage_provision",
+    "mhgp7_bad_alloc_etage_census",
+    "mhgp7_bad_alloc_etage_fold",
+    "mhgp7_plan_keycsr_gate"
+  ],
+  "wall_seconds": 1281.91,
+  "current_source_qualification": false,
+  "logs": [
+    "ctest_gate_o2.log",
+    "ctest_gate_o2.xml"
+  ]
+}

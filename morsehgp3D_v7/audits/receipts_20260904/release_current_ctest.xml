@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="5"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="9"
+	timestamp="2026-09-04T20:31:03"
+	>
+	<testcase name="mhgp7_bad_alloc_temoin" classname="mhgp7_bad_alloc_temoin" time="3.34013" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>temoin : run complet, etage_atteint=publication, 10 callbacks (kmax_eff=10) — conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_bad_alloc_etage_provision" classname="mhgp7_bad_alloc_etage_provision" time="0.0456176" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>caps-throw-bad-alloc-provision inflight=1 : resource_exhausted : allocation impossible a l'etage entree (rss_mb apres_generation=0 apres_rle=0 apres_prefiltre=0 apres_census=0 max_fold=0)
+caps-throw-bad-alloc-provision inflight=2 : resource_exhausted : allocation impossible a l'etage entree (rss_mb apres_generation=0 apres_rle=0 apres_prefiltre=0 apres_census=0 max_fold=0)
+caps-throw-bad-alloc-provision inflight=8 : resource_exhausted : allocation impossible a l'etage entree (rss_mb apres_generation=0 apres_rle=0 apres_prefiltre=0 apres_census=0 max_fold=0)
+bad_alloc a l'etage entree : refus transactionnel conforme (statut, curseur, zero callback, aucun provisoire) sur inflight 1/2/8 — jamais un abort
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_bad_alloc_etage_census" classname="mhgp7_bad_alloc_etage_census" time="5.36728" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>caps-throw-bad-alloc-census inflight=1 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=24 apres_rle=24 apres_prefiltre=25 apres_census=0 max_fold=0)
+caps-throw-bad-alloc-census inflight=2 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=55 apres_rle=55 apres_prefiltre=55 apres_census=0 max_fold=0)
+caps-throw-bad-alloc-census inflight=8 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=56 apres_rle=56 apres_prefiltre=56 apres_census=0 max_fold=0)
+bad_alloc a l'etage census : refus transactionnel conforme (statut, curseur, zero callback, aucun provisoire) sur inflight 1/2/8 — jamais un abort
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_bad_alloc_etage_fold" classname="mhgp7_bad_alloc_etage_fold" time="6.56644" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>caps-throw-bad-alloc-fold inflight=1 : resource_exhausted : allocation impossible a l'etage fold (rss_mb apres_generation=26 apres_rle=27 apres_prefiltre=27 apres_census=50 max_fold=0)
+caps-throw-bad-alloc-fold inflight=2 : resource_exhausted : allocation impossible a l'etage fold (rss_mb apres_generation=55 apres_rle=55 apres_prefiltre=55 apres_census=77 max_fold=0)
+caps-throw-bad-alloc-fold inflight=8 : resource_exhausted : allocation impossible a l'etage fold (rss_mb apres_generation=77 apres_rle=77 apres_prefiltre=77 apres_census=77 max_fold=0)
+bad_alloc a l'etage fold : refus transactionnel conforme (statut, curseur, zero callback, aucun provisoire) sur inflight 1/2/8 — jamais un abort
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_plan_keycsr_gate" classname="mhgp7_plan_keycsr_gate" time="1.58735" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>graine=0xa2ffb4db2884ddc4 orientations_strate_1=BA,AB,AB,AB,BA,BA sha256_plan(sans extension)=2f7666631f01bac5180b208914455dcb45c3621180e0ee035f327f5032ac5807
+plan_keycsr_gate : conforme (scenes a-j, 210 + 280 runs)
+
+</system-out>
+	</testcase>
+</testsuite>

@@ -1,0 +1,53 @@
+{
+  "scope": "audit_witness_not_product_qualification",
+  "source_snapshot_sha256": "3cb814c5101b6741fbf7793f013a07b05720fa281ad39ebd72c04a5aab09c802",
+  "reproducer_sha256": "198edd116a3b006426ef2a7ae35a4efa5c45de0e741dde7f78722e3070e73e3f",
+  "binary_sha256": "e842225011a4e9a7abd91cddcb9dea8ce71c232eb54ba869c8a44db2ee0c3060",
+  "compile_flags": [
+    "-std=c++20",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-DMHGP7_TESTING=1",
+    "-pthread"
+  ],
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+  "runs": [
+    {
+      "arguments": [],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout": "E5 mutant=0 gate_accepts=1 deltas=6 continuation_with_attachment=3 violations=0/0/0\ntriangle gamma_reduced_prior_components=0 fold_parents=3 fold_nodes=1 level=325/36\n",
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "--drop-nonmerge"
+      ],
+      "exit_code": 4,
+      "expected_exit_code": 4,
+      "stdout": "E5 mutant=1 gate_accepts=1 deltas=3 continuation_with_attachment=0 violations=0/0/0\n",
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "--gate-control"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout": "silent_incidence cases=22 cuts=944 core_pairs=392312 silent=4 failures=0\n",
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "--gate-drop-nonmerge"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout": "silent_incidence cases=22 cuts=944 core_pairs=392312 silent=4 failures=0\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "command": [
+      "cmake",
+      "-DEXPECTED=2",
+      "-DCMD=/workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/build_o2/mhgp7_bad_alloc_gate",
+      "-DARGS=--n=64 --threads=4 --inject=caps-throw-bad-alloc-provision --etage=entree",
+      "-DEXPECT_PREFIX=caps-throw-bad-alloc-provision inflight=1 : resource_exhausted : allocation impossible a l'etage entree (rss_mb apres_generation=",
+      "-P",
+      "morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/cmake/run_expect.cmake"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "",
+    "stderr": "caps-throw-bad-alloc-provision inflight=1 : resource_exhausted : allocation impossible a l'etage entree (rss_mb apres_generation=0 apres_rle=0 apres_prefiltre=0 apres_census=0 max_fold=0)\ncaps-throw-bad-alloc-provision inflight=2 : resource_exhausted : allocation impossible a l'etage entree (rss_mb apres_generation=0 apres_rle=0 apres_prefiltre=0 apres_census=0 max_fold=0)\ncaps-throw-bad-alloc-provision inflight=8 : resource_exhausted : allocation impossible a l'etage entree (rss_mb apres_generation=0 apres_rle=0 apres_prefiltre=0 apres_census=0 max_fold=0)\nbad_alloc a l'etage entree : refus transactionnel conforme (statut, curseur, zero callback, aucun provisoire) sur inflight 1/2/8 \u2014 jamais un abort\n\n"
+  },
+  {
+    "command": [
+      "cmake",
+      "-DEXPECTED=2",
+      "-DCMD=/workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/build_o2/mhgp7_bad_alloc_gate",
+      "-DARGS=--n=64 --threads=4 --inject=caps-throw-bad-alloc-census --etage=census",
+      "-DEXPECT_PREFIX=caps-throw-bad-alloc-census inflight=1 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=",
+      "-P",
+      "morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/cmake/run_expect.cmake"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "",
+    "stderr": "caps-throw-bad-alloc-census inflight=1 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=7 apres_rle=7 apres_prefiltre=7 apres_census=0 max_fold=0)\ncaps-throw-bad-alloc-census inflight=2 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=9 apres_rle=9 apres_prefiltre=9 apres_census=0 max_fold=0)\ncaps-throw-bad-alloc-census inflight=8 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=10 apres_rle=10 apres_prefiltre=10 apres_census=0 max_fold=0)\nbad_alloc a l'etage census : refus transactionnel conforme (statut, curseur, zero callback, aucun provisoire) sur inflight 1/2/8 \u2014 jamais un abort\n\n"
+  },
+  {
+    "command": [
+      "cmake",
+      "-DEXPECTED=2",
+      "-DCMD=/workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/build_o2/mhgp7_bad_alloc_gate",
+      "-DARGS=--n=64 --threads=4 --inject=caps-throw-bad-alloc-fold --etage=fold",
+      "-DEXPECT_PREFIX=caps-throw-bad-alloc-fold inflight=1 : resource_exhausted : allocation impossible a l'etage fold (rss_mb apres_generation=",
+      "-P",
+      "morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7/cmake/run_expect.cmake"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "",
+    "stderr": "caps-throw-bad-alloc-fold inflight=1 : resource_exhausted : allocation impossible a l'etage fold (rss_mb apres_generation=7 apres_rle=7 apres_prefiltre=7 apres_census=8 max_fold=0)\ncaps-throw-bad-alloc-fold inflight=2 : resource_exhausted : allocation impossible a l'etage fold (rss_mb apres_generation=9 apres_rle=9 apres_prefiltre=9 apres_census=11 max_fold=0)\ncaps-throw-bad-alloc-fold inflight=8 : resource_exhausted : allocation impossible a l'etage fold (rss_mb apres_generation=12 apres_rle=12 apres_prefiltre=12 apres_census=12 max_fold=0)\nbad_alloc a l'etage fold : refus transactionnel conforme (statut, curseur, zero callback, aucun provisoire) sur inflight 1/2/8 \u2014 jamais un abort\n\n"
+  }
+]

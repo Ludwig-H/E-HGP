@@ -1,0 +1,121 @@
+{
+  "schema": "mhgp7-audit-interfaces-v1",
+  "public_status": "not_claimed",
+  "binary_sha256": "98eb923a6ed0ebdbea04e3d5372171a70594748677b98d7635cffc94013dbb1b",
+  "validator_sha256": "ce014602c1f310d8175fdd92dbdc20dc8dd5f50dcb724e38526e3a91905d24c3",
+  "cli_cases": [
+    {
+      "case": "valid_classic",
+      "exit_code": 0
+    },
+    {
+      "case": "valid_csr_parallel_wide_s",
+      "exit_code": 0
+    },
+    {
+      "case": "create_only",
+      "exit_code": 2
+    },
+    {
+      "case": "exact_unqualified",
+      "exit_code": 2
+    },
+    {
+      "case": "input_generation_exclusive",
+      "exit_code": 2
+    },
+    {
+      "case": "budget_below_candidate",
+      "exit_code": 2
+    },
+    {
+      "case": "invalid_s",
+      "exit_code": 2
+    },
+    {
+      "case": "invalid_s_suffix",
+      "exit_code": 2
+    },
+    {
+      "case": "invalid_thread_count",
+      "exit_code": 2
+    },
+    {
+      "case": "unknown_layout",
+      "exit_code": 2
+    },
+    {
+      "case": "product_mutant_rejected",
+      "exit_code": 2
+    },
+    {
+      "case": "duplicate_id",
+      "exit_code": 2
+    },
+    {
+      "case": "duplicate_position",
+      "exit_code": 2
+    },
+    {
+      "case": "id_overflow",
+      "exit_code": 2
+    },
+    {
+      "case": "coordinate_overflow",
+      "exit_code": 2
+    },
+    {
+      "case": "negative_coordinate",
+      "exit_code": 2
+    },
+    {
+      "case": "signed_id",
+      "exit_code": 2
+    },
+    {
+      "case": "decimal_coordinate",
+      "exit_code": 2
+    },
+    {
+      "case": "exponent_coordinate",
+      "exit_code": 2
+    },
+    {
+      "case": "missing_field",
+      "exit_code": 2
+    },
+    {
+      "case": "extra_field",
+      "exit_code": 2
+    },
+    {
+      "case": "nul_byte",
+      "exit_code": 2
+    },
+    {
+      "case": "line_limit",
+      "exit_code": 2
+    },
+    {
+      "case": "one_point",
+      "exit_code": 2
+    }
+  ],
+  "mutants": [
+    {
+      "name": "reset_final_partition",
+      "product_reader_rejected": false,
+      "independent_rejection": "terminal partition differs from delta replay"
+    },
+    {
+      "name": "collapse_batches",
+      "product_reader_rejected": false,
+      "independent_rejection": "one batch has different exact levels"
+    },
+    {
+      "name": "wrong_delta_output",
+      "product_reader_rejected": false,
+      "independent_rejection": "delta output is not the canonical component"
+    }
+  ]
+}

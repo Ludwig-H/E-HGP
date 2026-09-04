@@ -1,0 +1,99 @@
+[
+  {
+    "name": "docs",
+    "command": [
+      "python3",
+      "tools/check_docs.py"
+    ],
+    "exit_code": 0,
+    "stdout": "Validated 259 active Markdown files.\n",
+    "stderr": ""
+  },
+  {
+    "name": "implementation_status",
+    "command": [
+      "python3",
+      "tools/check_implementation_status.py"
+    ],
+    "exit_code": 0,
+    "stdout": "Validated 20 implementation phases and their gates.\n",
+    "stderr": ""
+  },
+  {
+    "name": "audit_markdown",
+    "files": [
+      "morsehgp3D_v7/audits/ARCHIVE_TRANSACTION_20260904.md",
+      "morsehgp3D_v7/audits/AUDIT_INDEPENDANT_20260904.md",
+      "morsehgp3D_v7/audits/AUDIT_INTERFACES_20260904.md",
+      "morsehgp3D_v7/audits/AUDIT_MATHEMATIQUE_20260904.md",
+      "morsehgp3D_v7/audits/AUDIT_RESIDENCE_20260904.md",
+      "morsehgp3D_v7/audits/CAMPAGNE_APPARIEE_20260904.md",
+      "morsehgp3D_v7/audits/CENSUS_DIRECT_20260904.md",
+      "morsehgp3D_v7/audits/ETAT_COURANT.md",
+      "morsehgp3D_v7/audits/PROTOCOLE_G4_V7_20260904.md",
+      "morsehgp3D_v7/audits/README.md",
+      "morsehgp3D_v7/audits/REPONSE_CONSTRUCTEUR_20260904.md",
+      "morsehgp3D_v7/audits/REPONSE_INCIDENCES_ET_DELTAS_20260904.md",
+      "morsehgp3D_v7/audits/SORT_LOCAL_INDICES_20260904.md",
+      "morsehgp3D_v7/audits/THREADS_ET_PORTES_20260904.md"
+    ],
+    "errors": [],
+    "exit_code": 0
+  },
+  {
+    "name": "freshness_current",
+    "command": [
+      "python3",
+      "-O",
+      "morsehgp3D_v7/audits/verify_current.py",
+      "--manifest",
+      "morsehgp3D_v7/audits/receipts_20260904/validation_current.json"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "Audit courant : 100 fichiers conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+    "stderr": ""
+  },
+  {
+    "name": "freshness_empty",
+    "command": [
+      "python3",
+      "-O",
+      "morsehgp3D_v7/audits/verify_current.py",
+      "--manifest",
+      "morsehgp3D_v7/audits/.work_root/manifest_checks/empty.json"
+    ],
+    "exit_code": 2,
+    "expected_exit_code": 2,
+    "stdout": "",
+    "stderr": "Manifest d'audit invalide : pinned_sources must be a nonempty object\n"
+  },
+  {
+    "name": "freshness_stale",
+    "command": [
+      "python3",
+      "-O",
+      "morsehgp3D_v7/audits/verify_current.py",
+      "--manifest",
+      "morsehgp3D_v7/audits/.work_root/manifest_checks/stale.json"
+    ],
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "stdout": "",
+    "stderr": "Audit à actualiser :\nCMakeLists.txt\n"
+  },
+  {
+    "name": "freshness_escape",
+    "command": [
+      "python3",
+      "-O",
+      "morsehgp3D_v7/audits/verify_current.py",
+      "--manifest",
+      "morsehgp3D_v7/audits/.work_root/manifest_checks/escape.json"
+    ],
+    "exit_code": 2,
+    "expected_exit_code": 2,
+    "stdout": "",
+    "stderr": "Manifest d'audit invalide : invalid source path: ../outside\n"
+  }
+]

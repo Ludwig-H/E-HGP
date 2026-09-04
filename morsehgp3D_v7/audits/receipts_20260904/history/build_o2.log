@@ -1,0 +1,87 @@
+[  1%] Building CXX object CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o
+[  3%] Building CXX object CMakeFiles/mhgp7_selftest.dir/tests/selftest.cpp.o
+[  5%] Linking CXX executable mhgp7
+[  5%] Built target mhgp7
+[  6%] Building CXX object CMakeFiles/mhgp7_bad_alloc_gate.dir/tests/bad_alloc_gate.cpp.o
+[  8%] Linking CXX executable mhgp7_selftest
+[  8%] Built target mhgp7_selftest
+[ 10%] Building CXX object CMakeFiles/mhgp7_executor_pool_gate.dir/tests/executor_pool_gate.cpp.o
+[ 12%] Linking CXX executable mhgp7_executor_pool_gate
+[ 12%] Built target mhgp7_executor_pool_gate
+[ 13%] Building CXX object CMakeFiles/mhgp7_wire_gate.dir/tests/wire_gate.cpp.o
+[ 15%] Linking CXX executable mhgp7_wire_gate
+[ 15%] Built target mhgp7_wire_gate
+[ 17%] Building CXX object CMakeFiles/mhgp7_census_device_stub_gate.dir/tests/census_device_stub_gate.cpp.o
+[ 18%] Linking CXX executable mhgp7_bad_alloc_gate
+[ 18%] Built target mhgp7_bad_alloc_gate
+[ 20%] Building CXX object CMakeFiles/mhgp7_pilot_stub_gate.dir/tests/pilot_stub_gate.cpp.o
+[ 22%] Linking CXX executable mhgp7_census_device_stub_gate
+[ 22%] Built target mhgp7_census_device_stub_gate
+[ 24%] Building CXX object CMakeFiles/mhgp7_pilote_stub_check.dir/tests/pilot_cuda_stub_check.cpp.o
+[ 25%] Linking CXX executable mhgp7_pilot_stub_gate
+[ 25%] Built target mhgp7_pilot_stub_gate
+[ 27%] Building CXX object CMakeFiles/mhgp7_pilote_stub_check_test.dir/tests/pilot_cuda_stub_check.cpp.o
+[ 29%] Linking CXX executable mhgp7_pilote_stub_check
+[ 29%] Built target mhgp7_pilote_stub_check
+[ 31%] Building CXX object CMakeFiles/mhgp7_device_witness_stub.dir/tests/device_witness_stub.cpp.o
+[ 32%] Linking CXX executable mhgp7_device_witness_stub
+[ 32%] Built target mhgp7_device_witness_stub
+[ 34%] Building CXX object CMakeFiles/mhgp7_conformity.dir/tests/conformity_v5.cpp.o
+[ 36%] Linking CXX executable mhgp7_pilote_stub_check_test
+[ 36%] Built target mhgp7_pilote_stub_check_test
+[ 37%] Building CXX object CMakeFiles/mhgp7_residence_gate.dir/tests/residence_gate.cpp.o
+[ 39%] Linking CXX executable mhgp7_conformity
+[ 39%] Built target mhgp7_conformity
+[ 41%] Building CXX object CMakeFiles/mhgp7_linked_arcs.dir/tests/linked_arcs_gate.cpp.o
+[ 43%] Linking CXX executable mhgp7_linked_arcs
+[ 43%] Built target mhgp7_linked_arcs
+[ 44%] Building CXX object CMakeFiles/mhgp7_cell_grid_oracle.dir/tests/cell_grid_oracle.cpp.o
+[ 46%] Linking CXX executable mhgp7_residence_gate
+[ 46%] Built target mhgp7_residence_gate
+[ 48%] Building CXX object CMakeFiles/mhgp7_sweep_fixtures.dir/tests/sweep_fixtures.cpp.o
+[ 50%] Linking CXX executable mhgp7_cell_grid_oracle
+[ 50%] Built target mhgp7_cell_grid_oracle
+[ 51%] Building CXX object CMakeFiles/mhgp7_cover_fixture.dir/tests/cover_fixture.cpp.o
+[ 53%] Linking CXX executable mhgp7_sweep_fixtures
+[ 53%] Built target mhgp7_sweep_fixtures
+[ 55%] Building CXX object CMakeFiles/mhgp7_profile.dir/cli/mhgp7.cpp.o
+[ 56%] Linking CXX executable mhgp7_cover_fixture
+[ 56%] Built target mhgp7_cover_fixture
+[ 58%] Building CXX object CMakeFiles/mhgp7_profile_liveness.dir/cli/mhgp7.cpp.o
+[ 60%] Linking CXX executable mhgp7_profile_liveness
+[ 62%] Linking CXX executable mhgp7_profile
+[ 62%] Built target mhgp7_profile_liveness
+[ 62%] Built target mhgp7_profile
+[ 63%] Building CXX object CMakeFiles/mhgp7_wire_pack_gate.dir/tests/wire_pack_gate.cpp.o
+[ 65%] Building CXX object CMakeFiles/mhgp7_lot_ring_gate.dir/tests/lot_ring_gate.cpp.o
+[ 67%] Linking CXX executable mhgp7_lot_ring_gate
+[ 67%] Built target mhgp7_lot_ring_gate
+[ 68%] Building CXX object CMakeFiles/mhgp7_fold_caps_gate.dir/tests/fold_caps_gate.cpp.o
+[ 70%] Linking CXX executable mhgp7_wire_pack_gate
+[ 70%] Built target mhgp7_wire_pack_gate
+[ 72%] Building CXX object CMakeFiles/mhgp7_profile_sonde.dir/cli/mhgp7.cpp.o
+[ 74%] Linking CXX executable mhgp7_fold_caps_gate
+[ 74%] Built target mhgp7_fold_caps_gate
+[ 75%] Building CXX object CMakeFiles/mhgp7_profil_contrat.dir/tests/profil_contrat_echec.cpp.o
+[ 77%] Linking CXX executable mhgp7_profile_sonde
+[ 77%] Built target mhgp7_profile_sonde
+[ 79%] Building CXX object CMakeFiles/mhgp7_fold_csr_gate.dir/tests/fold_csr_gate.cpp.o
+[ 81%] Linking CXX executable mhgp7_profil_contrat
+[ 81%] Built target mhgp7_profil_contrat
+[ 82%] Building CXX object CMakeFiles/mhgp7_perm_sort_gate.dir/tests/perm_sort_gate.cpp.o
+[ 84%] Linking CXX executable mhgp7_fold_csr_gate
+[ 84%] Built target mhgp7_fold_csr_gate
+[ 86%] Building CXX object CMakeFiles/mhgp7_route_c6_gate.dir/tests/route_c6_gate.cpp.o
+[ 87%] Linking CXX executable mhgp7_perm_sort_gate
+[ 87%] Built target mhgp7_perm_sort_gate
+[ 89%] Building CXX object CMakeFiles/mhgp7_thread_failure_gate.dir/tests/thread_failure_gate.cpp.o
+[ 91%] Linking CXX executable mhgp7_route_c6_gate
+[ 91%] Built target mhgp7_route_c6_gate
+[ 93%] Building CXX object CMakeFiles/mhgp7_census_direct_gate.dir/tests/census_direct_gate.cpp.o
+[ 94%] Linking CXX executable mhgp7_thread_failure_gate
+[ 94%] Built target mhgp7_thread_failure_gate
+[ 96%] Building CXX object CMakeFiles/mhgp7_silent_incidence_gate.dir/tests/silent_incidence_gate.cpp.o
+[ 98%] Linking CXX executable mhgp7_census_direct_gate
+[ 98%] Built target mhgp7_census_direct_gate
+[100%] Linking CXX executable mhgp7_silent_incidence_gate
+[100%] Built target mhgp7_silent_incidence_gate

@@ -1,0 +1,46 @@
+{
+  "schema": "mhgp7-historical-binary-replay-v1",
+  "created_at_utc": "2026-09-04T20:32:13.739135+00:00",
+  "original_receipt": "deleted; exact JSON bytes and original unprinted timestamp unavailable; not reconstructed",
+  "purpose": "new execution receipt preserving a negative memory-bound fixture; not a current-product verdict",
+  "binary_path": "morsehgp3D_v7/audits/.work_residence/sort_residence_probe",
+  "binary_sha256_before": "4ee123a4ec908be3499d34c128ee7eb66598e9c7d3c24bd22fe10acb58d6599f",
+  "binary_sha256_after": "4ee123a4ec908be3499d34c128ee7eb66598e9c7d3c24bd22fe10acb58d6599f",
+  "source_root_used_by_original_compile": "morsehgp3D_v7/audits/.work_root/source/morsehgp3D_v7",
+  "source_sha256_before": {
+    "src/parallel/sort.hpp": "4b4f259688f1c54f895be15b6269503c802ecc7470c0e7469c0114adbdc687e1",
+    "src/parallel/pool.hpp": "5c20aabbe673e2baa1018bea893185592bc3b394d025eadd9be07542453befc6",
+    "src/core/mutants.hpp": "8b57648fec40f35b6f1cbfcc78f0e43d8220a131657e91a700127a43514e47a5",
+    "src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca"
+  },
+  "source_sha256_after": {
+    "src/parallel/sort.hpp": "4b4f259688f1c54f895be15b6269503c802ecc7470c0e7469c0114adbdc687e1",
+    "src/parallel/pool.hpp": "5c20aabbe673e2baa1018bea893185592bc3b394d025eadd9be07542453befc6",
+    "src/core/mutants.hpp": "8b57648fec40f35b6f1cbfcc78f0e43d8220a131657e91a700127a43514e47a5",
+    "src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca"
+  },
+  "harness_source": "original compile command and harness patch are in the audit tool transcript; the active harness has since changed and is not used to claim source identity for this binary",
+  "runs": [
+    {
+      "started_at_utc": "2026-09-04T20:32:13.684090+00:00",
+      "command": [
+        "morsehgp3D_v7/audits/.work_residence/sort_residence_probe"
+      ],
+      "returncode": 0,
+      "stdout": "n=32768 record_bytes=72 workers=2 stable=1 slice_buffers=2 simultaneous_buffers=2 additional_peak_bytes=328272 eight_n_plus_record=262216 live_after=0 timeout=0 exceeded=1\n",
+      "stderr": ""
+    },
+    {
+      "started_at_utc": "2026-09-04T20:32:13.710458+00:00",
+      "command": [
+        "morsehgp3D_v7/audits/.work_residence/sort_residence_probe",
+        "--enforce-eight-n"
+      ],
+      "returncode": 4,
+      "stdout": "n=32768 record_bytes=72 workers=2 stable=1 slice_buffers=2 simultaneous_buffers=2 additional_peak_bytes=328272 eight_n_plus_record=262216 live_after=0 timeout=0 exceeded=1\n",
+      "stderr": ""
+    }
+  ],
+  "gcp": "not_used",
+  "stable": true
+}

@@ -1,0 +1,4 @@
+caps-throw-bad-alloc-census inflight=1 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=7 apres_rle=7 apres_prefiltre=7 apres_census=0 max_fold=0)
+caps-throw-bad-alloc-census inflight=2 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=9 apres_rle=9 apres_prefiltre=9 apres_census=0 max_fold=0)
+caps-throw-bad-alloc-census inflight=8 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=10 apres_rle=10 apres_prefiltre=10 apres_census=0 max_fold=0)
+bad_alloc a l'etage census : refus transactionnel conforme (statut, curseur, zero callback, aucun provisoire) sur inflight 1/2/8 — jamais un abort

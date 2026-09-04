@@ -1,0 +1,29 @@
+{
+  "scope": "additional_diagnostic_global_mutant_in_nominal_test_branch_not_supported_mutant_entrypoint",
+  "source_snapshot_sha256": "d9ad8aced923759a826f040979b5d61f17aaa997169d190d18234e79087e9e05",
+  "reproducer_sha256": "cdb56d88aa27ff818648598f8991fa837f5a977ef670d51ca322abcd03e978a4",
+  "binary_sha256": "251b49d57a6a655b2d24fbb2c72ef44e7f3d204fee9b9672a7533120f4051f35",
+  "compile": {
+    "exit_code": 0,
+    "flags": [
+      "-std=c++20",
+      "-O3",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-DMHGP7_TESTING=1",
+      "-pthread"
+    ],
+    "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
+  },
+  "runs": [
+    {
+      "argument": "--gate-drop-nonmerge",
+      "expected_exit_code": 1,
+      "exit_code": -11,
+      "stdout": "",
+      "stderr": "ECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : q_R et transitions normalises contre Gamma\nECHEC : deltas classic seuls, coupes Gamma\nECHEC : q_R normalise CSR contre Gamma\nECHEC : deltas CSR seuls, coupes Gamma\nECHEC : API pipeline q_R Gamma E5\nECHEC : API pipeline deltas seuls contre Gamma E5\nECHEC : API pipeline q_R Gamma E5\nECHEC : API pipeline deltas seuls contre Gamma E5\nECHEC : mode normalise corrige le q_R legacy\n"
+    }
+  ]
+}

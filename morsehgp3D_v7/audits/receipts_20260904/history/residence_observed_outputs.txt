@@ -1,0 +1,14 @@
+Evidence recovery: the following commands, exit codes and stdout were observed
+in the actual tool outputs during this audit. The original receipt JSON was
+deleted and its exact bytes, including its unprinted timestamp, are unavailable.
+No timestamp or missing metadata from that JSON is reconstructed here.
+
+command: morsehgp3D_v7/audits/.work_residence/sort_residence_probe
+exit_code: 0
+stdout:
+n=32768 record_bytes=72 workers=2 stable=1 slice_buffers=2 simultaneous_buffers=2 additional_peak_bytes=328272 eight_n_plus_record=262216 live_after=0 timeout=0 exceeded=1
+
+command: morsehgp3D_v7/audits/.work_residence/sort_residence_probe --enforce-eight-n
+exit_code: 4
+stdout:
+n=32768 record_bytes=72 workers=2 stable=1 slice_buffers=2 simultaneous_buffers=2 additional_peak_bytes=328272 eight_n_plus_record=262216 live_after=0 timeout=0 exceeded=1

@@ -1,0 +1,48 @@
+{
+  "source_manifest": "release_current_source_snapshot.json",
+  "scope": "current_release_two_targets_and_five_gates",
+  "runs": [
+    {
+      "command": [
+        "cmake",
+        "-S",
+        "morsehgp3D_v7/audits/.work_root/current/source/morsehgp3D_v7",
+        "-B",
+        "morsehgp3D_v7/audits/.work_root/current/build",
+        "-DCMAKE_BUILD_TYPE=Release"
+      ],
+      "exit_code": 0,
+      "log": "release_current_configure.log"
+    },
+    {
+      "command": [
+        "cmake",
+        "--build",
+        "morsehgp3D_v7/audits/.work_root/current/build",
+        "--target",
+        "mhgp7_selftest",
+        "mhgp7_bad_alloc_gate",
+        "--parallel",
+        "2"
+      ],
+      "exit_code": 0,
+      "log": "release_current_build.log"
+    },
+    {
+      "command": [
+        "ctest",
+        "--test-dir",
+        "morsehgp3D_v7/audits/.work_root/current/build",
+        "--output-on-failure",
+        "-R",
+        "^mhgp7_(bad_alloc_(temoin|etage_provision|etage_census|etage_fold)|plan_keycsr_gate)$",
+        "--parallel",
+        "2",
+        "--output-junit",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_20260904/release_current_ctest.xml"
+      ],
+      "exit_code": 0,
+      "log": "release_current_ctest.log"
+    }
+  ]
+}

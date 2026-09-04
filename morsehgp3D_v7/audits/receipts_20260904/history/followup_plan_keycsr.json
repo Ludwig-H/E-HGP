@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-09-04T20:22:23.898832+00:00",
+  "source_sha256": {
+    "bench/plan_keycsr.py": "e6dc359738a3636d2b0172749106ad7666b7a499d93a2d37556a61d0072d227a",
+    "tests/plan_keycsr_gate.py": "d74421dc7ed44003f8d97d3f1a91ba382b4f974e24a071046a9b1762b78a6e05"
+  },
+  "command": [
+    "python3",
+    "morsehgp3D_v7/audits/.work_root/plan_followup/tests/plan_keycsr_gate.py"
+  ],
+  "returncode": 0,
+  "stdout": "graine=0xa2ffb4db2884ddc4 orientations_strate_1=BA,AB,AB,AB,BA,BA sha256_plan(sans extension)=2f7666631f01bac5180b208914455dcb45c3621180e0ee035f327f5032ac5807\nplan_keycsr_gate : conforme (scenes a-j, 210 + 280 runs)\n",
+  "stderr": "",
+  "stable_after": true,
+  "setup_failure": "Previous attempt used a C++-only snapshot without bench/plan_keycsr.py; not a product failure."
+}

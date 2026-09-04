@@ -1,0 +1,6 @@
+[ 50%] Building CXX object CMakeFiles/mhgp7_selftest.dir/tests/selftest.cpp.o
+[100%] Linking CXX executable mhgp7_selftest
+[100%] Built target mhgp7_selftest
+[ 50%] Building CXX object CMakeFiles/mhgp7_bad_alloc_gate.dir/tests/bad_alloc_gate.cpp.o
+[100%] Linking CXX executable mhgp7_bad_alloc_gate
+[100%] Built target mhgp7_bad_alloc_gate

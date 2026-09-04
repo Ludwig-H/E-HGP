@@ -1,0 +1,19 @@
+Internal ctest changing into directory: /workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/current/build
+Test project /workspaces/E-HGP/morsehgp3D_v7/audits/.work_root/current/build
+    Start  14: mhgp7_bad_alloc_temoin
+    Start  15: mhgp7_bad_alloc_etage_provision
+1/5 Test  #15: mhgp7_bad_alloc_etage_provision ...   Passed    0.05 sec
+    Start  16: mhgp7_bad_alloc_etage_census
+2/5 Test  #14: mhgp7_bad_alloc_temoin ............   Passed    3.34 sec
+    Start  17: mhgp7_bad_alloc_etage_fold
+3/5 Test  #16: mhgp7_bad_alloc_etage_census ......   Passed    5.37 sec
+    Start 205: mhgp7_plan_keycsr_gate
+4/5 Test #205: mhgp7_plan_keycsr_gate ............   Passed    1.59 sec
+5/5 Test  #17: mhgp7_bad_alloc_etage_fold ........   Passed    6.57 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Label Time Summary:
+gate    =  16.91 sec*proc (5 tests)
+
+Total Test time (real) =   9.95 sec
