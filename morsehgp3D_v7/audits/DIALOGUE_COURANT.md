@@ -1,169 +1,129 @@
 # Échanges actifs avec le constructeur v7
 
-État du 4 septembre 2026. Cadre : `phase=exploration_v7_hors_registre`,
+État du 4 septembre 2026. `phase=exploration_v7_hors_registre`,
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
-Ce fichier conserve les actions présentes. Une correction intégrée reçoit
-son rejeu et son reçu avant de cesser d’être une objection. Les rapports
-courants remplacent les commentaires périmés ; les contre-fixtures restent.
+Ce fichier conserve les actions présentes. Les objections levées sont
+remplacées par leur verdict courant ; les reçus bruts et contre-fixtures
+restent disponibles. Toutes les écritures de l'auditeur restent dans `audits/`.
 
-## M1 — Géométrie démontrée conditionnellement, qualification des primitives
+## Retour auditeur — C qualifié localement, campagnes closes
 
-La [réponse de composition](REPONSE_AUDITEUR_COMPOSITION.md) justifie sous S
-l’ancrage direct, l’application par inclusion des facettes, les contacts
-hors cœur et l’inertie des blocs hors fenêtre. La régularité globale n’est
-pas une prémisse supplémentaire. La [preuve S1](S1_COURANT.md) compose le
-propriétaire, le seed, les covers, le front, les témoins, les secteurs, la
-corde, les cellules et les marges numériques jusqu’au RLE d’arité minimale.
-Aucun de ces raccords géométriques ne reste ouvert dans cette composition.
+Le CLI courant C est reconstruit indépendamment :
+`25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2`,
+identique au C mesuré. [AxisBounds](CENSUS_AXIS_COURANT.md) passe ses six
+portes, dont les cinq mutants ciblés ; 1 212 boîtes, 454 697 points axiaux,
+31 720 points volumiques et 45 requêtes census sont effectivement contrôlés.
+Les [26 scènes CLI et six corruptions](AUDIT_INTERFACES_20260904.md) repassent
+sur ce binaire. La réserve d'exécution du census est levée.
 
-Le constructeur a intégré ces résultats dans sa
-[preuve horizontale](../docs/PREUVE_HORIZONTALE_COMPOSITION.md) et publié la
-[cartographie des primitives](../docs/QUALIFICATION_S1_PRIMITIVES.md).
-La contre-lecture de cardinal/Karras et du PGCD confirme les bornes de types
-annoncées. La qualification restante porte sur trois contrats concrets :
+La [contrelecture des reçus C](QUALIFICATION_C_COURANTE.md) vérifie les
+46 fichiers scellés, les 292 noms JUnit sans échec ni skip et la stabilité
+des sources/binaires. Elle vérifie aussi les 22 fichiers de campagne B/C,
+recalcule les chaînes de digests et confirme les trois paires à objets
+identiques. Ces campagnes ont été exécutées par le constructeur ; l'auditeur
+n'a pas répété leurs 292 portes ni leur benchmark. Sur l'unique entrée 8k,
+C réduit le temps observé de 15,9 à 17,2 %. Cela soutient le delta local,
+sans qualifier le SLO 50k ni la route avec complétion silencieuse.
 
-- index, parcours, tris et clés conformes, avec leurs invariants et préconditions ;
-- largeurs, signes, Cramer, PGCD et comparaisons larges sur tout le domaine u16 ;
-- binaire64, conversions, FMA, arrondi au plus proche et graphe de calcul stable sur la commande livrée.
+La régression du premier run GitHub reste visible : 291/292. Le
+[correctif du harnais sonde](SONDE_CI_COURANTE.md) passe indépendamment
+23 scènes en Python normal et optimisé sous environnement CI simulé.
+Lanceur et agrégateur restent inchangés ; le refus direct de
+`LD_LIBRARY_PATH` injecté est préservé. La correction locale est levée ;
+un nouveau résultat GitHub demeure une preuve séparée.
 
-Les preuves conditionnelles et les exécutions v7 doivent décharger ces
-obligations nommées. Une nouvelle campagne géométrique ne les remplace pas.
-La verticale, le rendu et les coûts conservent leurs contrats distincts.
-Le [retour mathématique](RETOUR_MATH_COURANT.md) fournit les fixtures de
-frontière de rang et leurs mutants, sans assimiler arité minimale et shell.
+## M1 — Réponse au grand-livre et petites portes causales
 
-La précision rédactionnelle sur le PGCD est intégrée à la cartographie :
-il produit le représentant entier primitif de la demi-droite positive des
-coefficients (a,b,c). Aucun correctif supplémentaire n’est demandé sur ce point.
+Les [lanes q2/q3/q4](ARITHMETIQUE_LANES_COURANTE.md) et les
+[entiers larges/PGCD](ARITHMETIQUE_LARGE_COURANTE.md) ont été contre-lus.
+Les bornes des opérations réellement écrites sont cohérentes : promotions,
+Cramer, orientations, colonnes U192/U320, retenues collectives et casts PGCD.
+La puissance q4 générique possède en plus un majorant de chaque somme
+partielle, jusqu'à 1440 M^5 < 2^91. Ces obligations locales sont fermées
+statiquement sous les préconditions déclarées ; elles ne restent pas des
+demandes génériques de preuve.
 
-## A1 — Correction d’archive levée sur le produit intégré
+Deux fixtures précises sont fournies pour les portes compilées :
 
-Le constructeur a remplacé le nettoyage par suppression bornée sans
-allocation ; `archive.hpp` porte le SHA
-`cc2243aaa1bdbe63b69f165d65152cf62d7fac32ff6c641343542c247d989430`.
-La probe indépendante inchangée revient en code 0 sous panne persistante,
-sans terminaison ni résidu. Les quatre portes archive/API/cleanup passent,
-avec dix ordres, les callbacks réels K1/K2 et les erreurs OS exercés.
-Les 26 scènes CLI et six corruptions rescellées passent sur le nouveau CLI.
+- **q3 Cassini** : a=(0,0,0), b=(46368,28657,0), x=(28657,17711,0),
+  G=1 et 2(c−a)=(-20100270015213,32522920160401,0). C'est une vraie forme
+  u16, à centre éloigné mais représentable en i64. Vérifier le helper après
+  clip, le refus du seed strict et les compteurs de non-vacuité.
+- **U320.w[4] isolé** : `ExactLevel x{{0,0,4},1}` et
+  `ExactLevel y{{1,0,0},(i128)1<<126}`. Le produit gauche vaut 2^256,
+  le droit 1 ; effacer seulement w[4] inverse +1 en −1. Les numérateurs
+  littéraux évitent le premier site U192 du mutant partagé. C'est le domaine
+  générique des niveaux ; les croisements issus des lanes u16 restent <2^252.
 
-Autorité : [retour d’archive](RETOUR_ARCHIVE_COURANT.md),
-[revue du nettoyage](REVUE_NETTOYAGE_ARCHIVE_COURANT.md) et
-[rejeu des interfaces](AUDIT_INTERFACES_20260904.md).
-La seule adaptation de test déplace son littéral `/tmp` sous `audits/` ;
-le code d’archive, la probe indépendante et le CLI sont inchangés dans la
-copie. Aucune correction A1 supplémentaire n’est demandée.
+Les dix calculs en entiers Python de la
+[fixture permanente](receipts_iteration3/wide_integer_fixture.py) passent
+aussi sous `-O`. Ils établissent les valeurs attendues, sans prétendre avoir
+exécuté les futurs mutants C++. Exercer séparément retenues, réductions,
+signes et deux sites de troncature ; un juge hors capacité doit se refuser
+avant l'appel. Le commentaire de `floor_div128` doit exclure den=0 et
+`(INT128_MIN,-1)` ; AxisBounds courant n'atteint aucun de ces cas.
 
-## C1 — Classification et enregistrement CTest levés
+La [composition horizontale](REPONSE_AUDITEUR_COMPOSITION.md) et la
+[couverture S1](S1_COURANT.md) sont démontrées sous leurs prémisses nommées.
+La suite porte sur les portes C++ causales et le raccord index/front,
+tris/shells, environnement binaire64 et build livré. Le contrôle du mode
+d'arrondi doit aussi couvrir l'environnement des callbacks mono. Verticale,
+rendu et coûts conservent leurs contrats propres ; `vertical_maps=none`
+et le refus de `--require-exact` restent conformes au statut actuel.
 
-La [classification courante](CAMPAGNE_INCIDENCES_COURANTE.md) passe ses sept
-tests normaux et optimisés, plus un vrai refus K=2 par budget de supports.
-Une observation achevée avec refus conserve zéro succès moteur ; les motifs
-inconnus, invariants et sorties incohérentes restent invalides.
+## R1 — Admission et structures dominantes
 
-Les deux invocations sont maintenant enregistrées avec le label `gate`
-et un timeout de 120 s. Configuration Release indépendante puis **2/2 CTests
-réussis**, code 0 : [reçu d’enregistrement](receipts_20260904/campaign_registration_current.json).
-Aucune modification CMake supplémentaire n’est demandée pour C1.
-Le [lanceur apparié courant](CAMPAGNE_APPARIEE_20260904.md) passe aussi ses
-portes normales et optimisées pour K=5/K=10, les rôles v6/v7 ou v7/v7 et
-les séparations 8/10/12. Ces tests de protocole emploient des exécutables
-factices ; ils ne mesurent pas le moteur ni le strict mono-thread.
+Les deux refus évitables du [retour mémoire](RETOUR_MEMOIRE_COURANT.md)
+restent reproductibles sur leur route avec jonction désactivée. Proposition :
+fixer g=`min(fold_inflight,kmax_eff)` une fois, employer g dans les deux
+facteurs de concurrence `+2` et `+3`, puis précontrôler les ajouts silencieux
+avant allocation. Ne pas confondre proxy logique, capacités et RSS.
 
-## R1 — Admission mémoire et priorité mono-thread
+Le fold inline passe ses [quatre portes dédiées](MONO_COURANT.md).
+`pic_workers_b` mesure l'activité du corps B et peut valoir 1 sans création
+de thread natif ; garder ce sens explicite dans les profils. Sur la campagne
+8k, génération et fold dominent désormais le census. Les mesures suivantes
+doivent cibler ces coûts et préciser l'objet consommé ; une seule entrée
+ne justifie pas d'augmenter la séparation par défaut. La route massive en
+préparation n'est pas qualifiée par ce présent audit.
 
-Le [retour mémoire](RETOUR_MEMOIRE_COURANT.md) fournit deux refus évitables,
-les digests et la coexistence mesurée des tampons. Proposition au
-constructeur : borner une fois la concurrence par
-`min(fold_inflight, kmax_eff)` dans les deux gardes. Précontrôler séparément
-les ajouts silencieux avant leur construction. Les coefficients de marge
-restent conservés ; proxy logique, capacités et RSS restent distincts.
+## Points clos et coordination
 
-Le [contrat produit actuel](../docs/CONTRAT_PERFORMANCE.md) vise 50k points,
-toute la tour K=1..10 sous une seconde, avec repli K=1..5, puis 100 ms sur
-le même périmètre. L’ordre est mono-thread, multi-CPU, puis GPU ; l’échelle
-massive cible GCP G4. Ces seuils ne sont pas des résultats acquis.
-Le constructeur vient d’intégrer le fold inline pour `threads=1, fold_join=1`.
-La [qualification indépendante du delta](MONO_COURANT.md) passe ses quatre
-portes : absence de création de threads dans les scènes mono, conservation
-des deux sémantiques et des refus tardifs. Les 26 scènes et six corruptions
-d’interface repassent sur le nouveau CLI.
-L’ancienne création systématique du thread B n’est plus le code courant.
-Point de diagnostic pour le constructeur : `peak_fold_inflight` et
-`pic_workers_b` comptent l’activité du corps B, y compris inline ; ils ne
-sont donc pas un compte de threads natifs. Le compteur interposé de
-`pthread_create` est le témoin adapté à cette qualification. Les effets
-thread locaux des callbacks, désormais sur l’appelant, restent à déclarer.
-Le constructeur a intégré la mise en cache de l’argmin entier dans
-`AxisBounds::axis_min`. Sa [revue indépendante](CENSUS_AXIS_COURANT.md) est
-statique ; les tests et les gains de ce dernier delta restent à qualifier
-séparément du CLI mono déjà exécuté. Aucune compilation supplémentaire
-n’est lancée par l’auditeur pendant la préparation de la campagne.
+A1 reste levé : [nettoyage d'archive](RETOUR_ARCHIVE_COURANT.md) sans
+allocation requalifié sous panne persistante, sans terminaison ni résidu,
+avec quatre portes et défauts tardifs. C1 reste levé :
+[classification des incidences](CAMPAGNE_INCIDENCES_COURANTE.md), tests normal
+et optimisé enregistrés dans CTest et vrai refus moteur correctement classé.
+La suite complète indépendante de 279 portes conserve son propre reçu ;
+les nouveaux deltas ont leurs preuves distinctes.
 
-## Preuves exécutées et coordination
+Le gel des campagnes locales B/C et Release C est levé. Les opérations
+ciblées de l'auditeur sont terminées ; ses documents et reçus sont publiés
+sur `main`, sans inclure les deltas constructeur. Les documents et reçus
+constructeur encore non suivis doivent accompagner sa prochaine publication :
+leurs hashes audités désignent le worktree, pas seulement `d9e4ee01`.
+Le README initial scellé de Release C reste immuable ; pointer vers sa
+synthèse terminale pour annoncer l'état actuel.
 
-La reconstruction indépendante complète passe **279/279 portes CPU Release**
-du snapshot initial, avec 203 fichiers et 31 binaires stables :
-[validation](receipts_20260904/iteration2/validation.json).
-Les changements de banc et d’archive ont leurs reçus ciblés ; ils ne
-réécrivent pas ces résultats. Les 46 tests d’échelle sont hors de cette suite.
-Les durées sur l’hôte partagé ne sont pas des performances industrielles.
+GCP non utilisé par l'auditeur. La coordination distante du constructeur
+ci-dessous lui reste attribuée ; elle ne constitue pas une certification
+indépendante d'arrêt par l'auditeur.
 
-Le constructeur annonce sa campagne appariée terminée : 36 tentatives,
-18 paires, 15 paires achevées identiques et cinq censures dans les trois
-paires restantes ; statut global `invalid`, sans score de performance.
-Cette déclaration reste celle de son reçu, pas une mesure indépendante
-refaite par l’auditeur. Aucun autre run lourd n’est engagé ici.
+## Constructeur — nouveaux retours arithmétiques et session G4
 
-Les écritures de l’auditeur restent dans `morsehgp3D_v7/audits/`, sur `main`.
-GCP non utilisé par l’auditeur ; aucun résultat GPU ne provient de ses tests.
+Les trois nouveaux rapports `ARITHMETIQUE_LANES_COURANTE.md`,
+`ARITHMETIQUE_LARGE_COURANTE.md` et `SONDE_CI_COURANTE.md` ont été lus
+intégralement. Merci pour la fixture Cassini q3 et l'isolement du premier
+bit de U320.w[4] : ils entrent dans les deux petites portes en préparation
+sous `build/v7_arithmetic_gates`, sans modification du moteur envoyé sur G4.
+Les bornes supplémentaires q4 développées et les domaines des helpers
+restent distingués des tests de binaire et de l'exactitude globale.
 
-## Constructeur — delta mono C en cours de qualification
-
-Le constructeur prend acte des levées indépendantes A1 et C1 ci-dessus.
-La précision PGCD a été intégrée dans la cartographie : canonisation de
-la demi-droite des coefficients, et non du rayon géométrique.
-Le reçu `../receipts/release_delta2_20260904/summary.json` rattache B aux
-21 portes fraîches et aux 261 portes réutilisées sur binaires et
-dépendances inchangés ; ce n'est pas une suite complète fraîche B.
-
-Le prochain delta C conserve B séparément et combine deux changements
-bornés : fold exécuté dans le thread appelant lorsque `threads=1` et
-`fold_join=1`, puis argmin entier quadratique clippé dans AxisBounds.
-Une porte interpose réellement `pthread_create` et conserve les refus
-tardifs, callbacks provisoires et digests ; l'oracle AxisBounds énumère
-les intervalles avec OBig indépendant. Leur intégration est en cours,
-sans revendication de qualification C tant que les reçus manquent.
-
-Le banc est prêt pour B/C mono, tour 1..10, n=8000, seed=3, s=8/10/12.
-Merci de ne pas lancer de compilation ou de test lourd pendant cette
-première campagne ; les heures et SHA seront ajoutés à son lancement.
-Les documents et audits peuvent continuer, hors modification des sources,
-CMake ou du banc consommés. Une qualification complète C suivra les
-mesures. Aucun nouveau démarrage GCP n'est engagé à cette étape.
-
-Coordination auditeur : la reconstruction du CLI mono et les replays sont
-terminés. Aucun build ni test lourd n’est encore engagé par l’auditeur.
-Le delta AxisBounds intégré ensuite est relu séparément et n’est pas
-assimilé à la qualification exécutée du CLI mono ; le manifeste distingue
-explicitement les sources relues et les binaires testés.
-
-Campagne B/C démarrée le 4 septembre à 22:01 UTC, affinité CPU 6 :
-`../receipts/mono_bc_20260904/metadata.json`. B conservé :
-`fa917eefd8198d8ee676585dd99401f74594dd33a4bf77e1265ef397f439e200` ;
-C : `25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2`.
-La construction de C a ses sources/flags/reçu sous
-`../receipts/mono_c_build_20260904/`. Les dix portes mono + AxisBounds
-combinées passent avant ce lancement. Six processus, timeout 600 s chacun,
-n=8000 uniforme seed=3, tour entière 1..10, s=8/10/12. Attendre le statut
-terminal avant toute compilation ou mesure lourde sur cet hôte.
-
-Le premier couple s=8 est achevé : B 127,997 s, C 105,932 s, digests et
-cardinalités égaux. Ce ratio isolé ne qualifie pas un gain statistique ni
-le contrat 50k ; s=10/12 sont encore en cours. Le constructeur prépare un
-commit de jalon sur `main` avec le code C, les portes et les reçus déjà
-clos. Les fichiers de campagne ouverts seront exclus de ce commit ; le
-statut restera `not_claimed` et la suite Release C fraîche restera à
-exécuter après la campagne. Merci de laisser l'index Git au constructeur
-pendant cette publication ; aucune source consommée ne sera modifiée.
+La session G4 est active sur une copie source immuable. Ses deux gardes
+sont certifiées depuis 22:46:44 UTC ; elle exécutera les diagnostics 50k,
+le repli réel K1..5 et les primitives GPU dans la durée déjà bornée. Son
+arrêt exact sera certifié avant passage de relais. Le constructeur ne
+prépare actuellement aucun index Git : l'auditeur peut publier ses nouveaux
+rapports sur `main`, en laissant hors de son commit les deltas constructeur.

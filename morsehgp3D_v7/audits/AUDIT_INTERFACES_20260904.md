@@ -8,20 +8,20 @@ mode=audit_independant_math_and_architecture
 public_status=not_claimed
 ```
 
-**Les 26 scènes CLI et les six rejets structurels d’archives passent sur le binaire mono et le lecteur épinglés, y compris pour `normalized_horizontal_h0_candidate`.** La porte indépendante avec `--require-product-rejections`, exécutée sous `python3 -O`, rend `0`. Le correctif de nettoyage sous panne d’allocation est requalifié séparément dans le [retour courant au constructeur](RETOUR_ARCHIVE_COURANT.md) ; la présente porte est rejouée sur le nouveau binaire.
+**Les 26 scènes CLI et les six rejets structurels d’archives passent sur le CLI courant C, incluant AxisBounds, et le lecteur épinglés, y compris pour `normalized_horizontal_h0_candidate`.** La porte indépendante avec `--require-product-rejections`, exécutée sous `python3 -O`, rend `0`. Le correctif de nettoyage sous panne d’allocation est requalifié séparément dans le [retour courant au constructeur](RETOUR_ARCHIVE_COURANT.md) ; la présente porte est rejouée sur le CLI courant.
 
 ## Sources et résultat reproductible
 
 Lecture préalable des parties I, pages PDF 35–76, et II, pages PDF 77–134, de `docs/references/MANUSCRIT_THESE_HAUSEUX.pdf`, puis des documents d'entrée v7. Le § 9.1 impose de distinguer la hiérarchie sur les facettes, sa projection sur les points et les poids d'incidence ; un contrôle d'archive ne confond pas ces objets.
 
-[Le reçu courant](receipts_20260904/interfaces_delta_current.json) porte les résultats du delta d’archive intégré. Le CLI et le lecteur proviennent de la copie de sources dédiée sous `audits/.work_mono/`. Le [reçu d’exécution](receipts_20260904/interfaces_delta_validation.json) conserve la commande exacte et les hashes avant/après du binaire, du lecteur, de la contre-fixture et d’`archive.hpp` : ils sont stables. Le [reçu de construction du delta](receipts_20260904/mono_current.json) raccorde le nouveau CLI aux sources compilées.
+[Le reçu courant](receipts_iteration3/interfaces_current.json) porte les résultats du CLI C. Le CLI et le lecteur proviennent de la copie de sources dédiée sous `audits/.work_iteration3/`. Le [reçu d’exécution](receipts_iteration3/interfaces_execution.json) conserve la commande exacte et les hashes avant/après du binaire, du lecteur et de la contre-fixture : ils sont stables. Le [reçu de construction indépendant](receipts_iteration3/axis_execution.json) raccorde ce CLI aux sources compilées, incluant AxisBounds ; la copie est stable et aucun changement des sources suivies n’est relevé pendant cette construction.
 
 | Élément exécuté | SHA-256 |
 | --- | --- |
-| Binaire v7 | `c7da95a3a83c1e31fdfd95db852fed86f43208e6b1b051dfb36e78baf45e5175` |
+| Binaire v7, CLI C | `25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2` |
 | Lecteur d'archive | `73f686a31c0ac6cf39f26f938e26c67bfc5fa112deb4c99eadb3656b54d610f5` |
 
-Exécution indépendante terminée à `2026-09-04T21:57:39.521493+00:00`, code 0, sous Python optimisé. Les 26 scènes et six corruptions sont qualifiées sur le CLI reconstruit après le delta mono, sans réattribuer les résultats d’un ancien binaire. Le changement AxisBounds intégré ensuite possède une [revue distincte](CENSUS_AXIS_COURANT.md) ; ce CLI n’est pas présenté comme sa compilation.
+Exécution indépendante terminée à `2026-09-04T22:45:03.482898+00:00`, code 0, sous Python optimisé. Les 26 scènes et six corruptions sont qualifiées sur ce CLI reconstruit avec AxisBounds. La [revue propre à AxisBounds](CENSUS_AXIS_COURANT.md) complète ces contrôles d’interface.
 
 ## Contrôles acquis
 
@@ -59,6 +59,8 @@ Le lecteur reconstruit les composantes uniquement depuis les deltas exportés. I
 **Provenance des campagnes.** Le manifeste lie l'entrée, l'ordre maximal effectif, la sémantique et les hashes. Pour reproduire une campagne et ses coûts, un reçu externe doit aussi conserver commande, options demandées/effectives, identité du binaire, configuration et mesures brutes. Le reçu courant fournit les preuves de ce sous-audit ; il n'attribue aucune performance industrielle aux cinq points utilisés.
 
 La [classification du banc d'incidences](CAMPAGNE_INCIDENCES_COURANTE.md) est vérifiée séparément sur sa correction courante : sept tests en Python normal et optimisé, plus un refus réel K=2. Une observation terminée avec refus conserve zéro succès moteur ; les motifs inconnus et invariants restent invalides.
+
+La [correction du harnais de sonde CI](SONDE_CI_COURANTE.md) passe séparément ses 23 scènes en Python normal et sous `-O`, avec `LD_LIBRARY_PATH` hérité simulé. Le rejet brut de code 2 est conservé et les inventaires nominaux utilisent un environnement nettoyé. Il s’agit d’un résultat local sur faux binaires de porte ; aucun nouveau succès global GitHub n’est revendiqué.
 
 ## Reproduction
 

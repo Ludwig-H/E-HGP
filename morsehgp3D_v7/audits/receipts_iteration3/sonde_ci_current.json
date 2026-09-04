@@ -1,0 +1,304 @@
+{
+  "schema": "mhgp7-sonde-ci-audit-v1",
+  "started_utc": "2026-09-04T22:42:30.893936+00:00",
+  "sources_before": {
+    "tests/sonde_ablation_gate.py": "acca76c18306b6161651f55b292365232c20baa983ba278c37def75e3b22d3bc",
+    "bench/sonde_ablation_reduce.sh": "6312dc32ae6dca057b184e1b29da39cdfbc8116fd47f501b5e341c56200e3927",
+    "bench/sonde_ablation_reduce.py": "901ba9ee87939aed0ff9f113dff7ea4c024a75f15a8c4717e12511f8d8fbbecb"
+  },
+  "frozen_sources_before": {
+    "tests/sonde_ablation_gate.py": "acca76c18306b6161651f55b292365232c20baa983ba278c37def75e3b22d3bc",
+    "bench/sonde_ablation_reduce.sh": "6312dc32ae6dca057b184e1b29da39cdfbc8116fd47f501b5e341c56200e3927",
+    "bench/sonde_ablation_reduce.py": "901ba9ee87939aed0ff9f113dff7ea4c024a75f15a8c4717e12511f8d8fbbecb"
+  },
+  "baseline_head": "d9e4ee0152435d4394bedfe1dc5134d5125a65a8",
+  "baseline_sources": {
+    "tests/sonde_ablation_gate.py": "77b47261b5403f2ddbe69c50226679eb42fcaf2bf3a4ca16e3db1c4520662d7d",
+    "bench/sonde_ablation_reduce.sh": "6312dc32ae6dca057b184e1b29da39cdfbc8116fd47f501b5e341c56200e3927",
+    "bench/sonde_ablation_reduce.py": "901ba9ee87939aed0ff9f113dff7ea4c024a75f15a8c4717e12511f8d8fbbecb"
+  },
+  "baseline_launcher_unchanged": true,
+  "baseline_aggregator_unchanged": true,
+  "patch": "--- CI d9e4ee01 tests/sonde_ablation_gate.py\n+++ current tests/sonde_ablation_gate.py\n@@ -59,7 +59,9 @@\n       out/SHA256SUMS pendant un tuple => INVALIDE 3 par l'agregateur ; faux\n       python3 ajoutant intrus_racine.txt et out/SHA256SUMS APRES l'agregateur\n       et AVANT le manifeste => INVALIDE 3 par l'inventaire, les deux intrus\n-      figurant dans le SHA256SUMS du .partial (haches, donc visibles).\n+      figurant dans le SHA256SUMS du .partial (haches, donc visibles) ;\n+      LD_LIBRARY_PATH herite (setup-python CI) => inventaire brut refuse 2,\n+      inventaires nominaux nettoyes acceptes 0, sans affaiblir le lanceur.\n   Dents du 2 septembre (ETAT_COURANT, ligne « sonde equilibree … harnais »,\n   et fin du § 5.22 ; memes regles : un mutant, un code, un motif) :\n   (o) runs_effectues / runs_attendus OBLIGATOIRES : META sans l'un des deux\n@@ -169,6 +171,7 @@\n import sys\n import tempfile\n from pathlib import Path\n+from unittest.mock import patch\n \n BRAS = (\"aucune\", \"ablation-mat-sans-copie\", \"ablation-mat-sans-tris\",\n         \"ablation-post-cle-factice\")\n@@ -1031,15 +1034,27 @@\n     # exclu) liste les deux intrus imbriques ; sur le nominal il coincide\n     # exactement avec les entrees du manifeste publie.\n     (recu / \"out\" / \"SHA256SUMS\").write_text(\"\", encoding=\"utf-8\")\n-    inv = subprocess.run([\"bash\", str(p.lanceur), \"--inventaire\", str(recu)],\n-                         capture_output=True, text=True)\n+    # Rejouer aussi hors CI l'environnement de setup-python : la variable\n+    # heritee reste interdite au lanceur. Comme Porte.lancer, ces deux appels\n+    # NOMINAUX doivent la retirer, sans neutraliser le temoin brut de refus.\n+    env = {key: value for key, value in os.environ.items() if key not in VARIABLES_REFUSEES}\n+    env_setup_python = dict(env, LD_LIBRARY_PATH=str(base / \"setup_python_lib\"))\n+    with patch.dict(os.environ, env_setup_python, clear=True):\n+        brut = subprocess.run([\"bash\", str(p.lanceur), \"--inventaire\", str(recu)],\n+                              capture_output=True, text=True)\n+        p.check(\"--inventaire : LD_LIBRARY_PATH herite refuse rc=2 avant nettoyage\",\n+                brut.returncode == 2 and not brut.stdout\n+                and \"REFUS : variable LD_LIBRARY_PATH definie\" in brut.stderr,\n+                f\"rc={brut.returncode} {brut.stderr[-200:]!r}\")\n+        inv = subprocess.run([\"bash\", str(p.lanceur), \"--inventaire\", str(recu)],\n+                             capture_output=True, text=True, env=env)\n+        inv_nom = subprocess.run([\"bash\", str(p.lanceur), \"--inventaire\", str(nominal)],\n+                                 capture_output=True, text=True, env=env)\n     lignes = set(inv.stdout.splitlines())\n     p.check(\"--inventaire : rc=0\", inv.returncode == 0, f\"rc={inv.returncode} {inv.stderr[-200:]!r}\")\n     p.check(\"--inventaire : out/intrus.txt et out/SHA256SUMS listes, ./SHA256SUMS racine exclu\",\n             {\"out/intrus.txt\", \"out/SHA256SUMS\", \"META.txt\"} <= lignes and \"SHA256SUMS\" not in lignes,\n             f\"{sorted(l for l in lignes if 'SHA256SUMS' in l or 'intrus' in l)}\")\n-    inv_nom = subprocess.run([\"bash\", str(p.lanceur), \"--inventaire\", str(nominal)],\n-                             capture_output=True, text=True)\n     entrees = {l.split(\"  \", 1)[1]\n                for l in (nominal / \"SHA256SUMS\").read_text(encoding=\"utf-8\").splitlines()}\n     p.check(\"--inventaire du nominal == entrees du manifeste publie\",\n@@ -1936,4 +1951,3 @@\n \n if __name__ == \"__main__\":\n     sys.exit(main())\n-\n",
+  "patch_sha256": "17972a44f6ce475b6a29672366cc934c4eaa9abcb3c832cf2f24da34871227ff",
+  "adaptation": "none",
+  "local_ci_evidence": {
+    "github_run_json": {
+      "conclusion": "failure",
+      "event": "push",
+      "headSha": "d9e4ee0152435d4394bedfe1dc5134d5125a65a8",
+      "jobs": [
+        {
+          "completedAt": "2026-09-04T22:25:11Z",
+          "conclusion": "failure",
+          "databaseId": 101188938152,
+          "name": "cpu-contracts",
+          "startedAt": "2026-09-04T22:07:56Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-09-04T22:07:58Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-09-04T22:07:57Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-04T22:08:02Z",
+              "conclusion": "success",
+              "name": "Check out repository",
+              "number": 2,
+              "startedAt": "2026-09-04T22:07:58Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-04T22:08:02Z",
+              "conclusion": "success",
+              "name": "Set up Python",
+              "number": 3,
+              "startedAt": "2026-09-04T22:08:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-04T22:08:18Z",
+              "conclusion": "success",
+              "name": "Install CPU dependencies",
+              "number": 4,
+              "startedAt": "2026-09-04T22:08:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-04T22:12:09Z",
+              "conclusion": "success",
+              "name": "Build the v7 CPU reference",
+              "number": 5,
+              "startedAt": "2026-09-04T22:08:18Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-04T22:25:08Z",
+              "conclusion": "failure",
+              "name": "Run bounded contracts and causal mutants",
+              "number": 6,
+              "startedAt": "2026-09-04T22:12:09Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-04T22:25:08Z",
+              "conclusion": "skipped",
+              "name": "Test the incidence observation runner",
+              "number": 7,
+              "startedAt": "2026-09-04T22:25:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-04T22:25:08Z",
+              "conclusion": "skipped",
+              "name": "Test session safety without cloud access",
+              "number": 8,
+              "startedAt": "2026-09-04T22:25:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-04T22:25:08Z",
+              "conclusion": "skipped",
+              "name": "State the qualification boundary",
+              "number": 9,
+              "startedAt": "2026-09-04T22:25:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-04T22:25:08Z",
+              "conclusion": "skipped",
+              "name": "Post Set up Python",
+              "number": 17,
+              "startedAt": "2026-09-04T22:25:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-04T22:25:08Z",
+              "conclusion": "success",
+              "name": "Post Check out repository",
+              "number": 18,
+              "startedAt": "2026-09-04T22:25:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-09-04T22:25:08Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 19,
+              "startedAt": "2026-09-04T22:25:08Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/Ludwig-H/E-HGP/actions/runs/33924177970/job/101188938152"
+        }
+      ],
+      "name": "MorseHGP3D v7 CPU contracts",
+      "status": "completed",
+      "url": "https://github.com/Ludwig-H/E-HGP/actions/runs/33924177970"
+    },
+    "run_json_sha256": "751d25121d64c194d4023994f666dc7aa4b5185c12ede6cb9801f5a6947640bc",
+    "failed_excerpt_sha256": "4034de55d427e4407357f312570c646a17d3efd14b3e38d2ba14fc777feb12b7",
+    "source_directory": "receipts/ci_sonde_environment_20260904",
+    "reading": "local files only; no GitHub action or workflow triggered",
+    "source_trace_stable": true,
+    "relevant_excerpt": [
+      "cpu-contracts\tRun bounded contracts and causal mutants\t2026-09-04T22:12:09.9471630Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib",
+      "cpu-contracts\tRun bounded contracts and causal mutants\t2026-09-04T22:18:52.4543113Z ECHEC porte : --inventaire : rc=0 rc=2 \"toolcache/Python/3.12.14/x64/lib) : un code etranger peut se charger avant la premiere ligne du lanceur, dans chaque outil ELF ou dans l'agregateur — jamais grave (lancer sous env -u LD_LIBRARY_PATH)\\n\"",
+      "cpu-contracts\tRun bounded contracts and causal mutants\t2026-09-04T22:18:52.4545238Z ECHEC porte : --inventaire : out/intrus.txt et out/SHA256SUMS listes, ./SHA256SUMS racine exclu []",
+      "cpu-contracts\tRun bounded contracts and causal mutants\t2026-09-04T22:18:52.4546145Z ECHEC porte : --inventaire du nominal == entrees du manifeste publie ",
+      "cpu-contracts\tRun bounded contracts and causal mutants\t2026-09-04T22:18:52.4584070Z   code de sortie 1, attendu 0",
+      "cpu-contracts\tRun bounded contracts and causal mutants\t2026-09-04T22:25:08.4799001Z 99% tests passed, 1 tests failed out of 292",
+      "cpu-contracts\tRun bounded contracts and causal mutants\t2026-09-04T22:25:08.4807011Z \t206 - mhgp7_sonde_ablation_gate (Failed)                gate"
+    ]
+  },
+  "sources_after": {
+    "tests/sonde_ablation_gate.py": "acca76c18306b6161651f55b292365232c20baa983ba278c37def75e3b22d3bc",
+    "bench/sonde_ablation_reduce.sh": "6312dc32ae6dca057b184e1b29da39cdfbc8116fd47f501b5e341c56200e3927",
+    "bench/sonde_ablation_reduce.py": "901ba9ee87939aed0ff9f113dff7ea4c024a75f15a8c4717e12511f8d8fbbecb"
+  },
+  "frozen_sources_after": {
+    "tests/sonde_ablation_gate.py": "acca76c18306b6161651f55b292365232c20baa983ba278c37def75e3b22d3bc",
+    "bench/sonde_ablation_reduce.sh": "6312dc32ae6dca057b184e1b29da39cdfbc8116fd47f501b5e341c56200e3927",
+    "bench/sonde_ablation_reduce.py": "901ba9ee87939aed0ff9f113dff7ea4c024a75f15a8c4717e12511f8d8fbbecb"
+  },
+  "source_stable": true,
+  "gate_replays": {
+    "normal": {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/source/morsehgp3D_v7/tests/sonde_ablation_gate.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/source/morsehgp3D_v7/bench"
+      ],
+      "cwd": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci",
+      "environment_overrides": {
+        "TMPDIR": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/tmp",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "LD_LIBRARY_PATH": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/tmp/setup_python_lib"
+      },
+      "returncode": 0,
+      "stdout": "scene 1 : (a) nominal REPS=4 N_LIST='64 128' : reçu publie et fail-closed verifie\nscene 2 : (b)(c)(d) REPS=3, N_LIST vide, REPS=0/-4/abc : refus 2 sans trace\nscene 3 : (e) copie privee alteree pendant le troisieme tuple : INVALIDE 3, reste en .partial\nscene 4 : (f)(g) ligne K=7 omise / touch=nan sur un run : INVALIDE 3 par l'agregateur\nscene 5 : (h) alteration entre generation et verification de SHA256SUMS : INVALIDE 3\nscene 6 : (i) binaire PRODUIT (refuse --inject=) : refus 2, aucun .partial\nscene 7 : (j) taille dupliquee : lanceur refus 2 avant tout run ; META n_list duplique : agregateur 1\nscene 8 : (k) hash vide ou hors grammaire 64-hex : agregateur 1 ; sha256sum muet : lanceur refus 2\nscene 9 : (l) champ duplique a valeurs differentes (.status code=, META reps=, plan position=, profil touch=) : agregateur 1\nscene 10 : (m) carre latin cyclique (equilibre par position, non Williams) : agregateur 1 ; Williams permute : 0\nscene 11 : (n) out/intrus.txt, out/SHA256SUMS, out/sub/, .err retire : agregateur 1 ; le lanceur les hache et refuse\nscene 12 : (o) runs_effectues/runs_attendus obligatoires (v3 et v2) : agregateur 1 ; schema v2 sans identite : 0 + claim borne ; v1 : 1\nscene 13 : (p) ligne profil_reduce malformee (touch=abc, jeton sans =, K non entier, tronquee, exposant, mur/rss dupliques) : agregateur 1\nscene 14 : (q) repertoire vide/ ou inattendu, lien, bin/ pollue, intrus racine : agregateur 1 ; vide/ cree apres l'agregateur : INVALIDE 3\nscene 15 : (r) protocoles archives alteres/retires : agregateur 1 (hash recalcule != META) ; copie du lanceur alteree apres le manifeste : INVALIDE 3\nscene 16 : (s) identite de cible (claim borne) : mutant produit dans un .status/META => 1 ; lanceur a bras hors sonde => 2 ; plan altere en campagne => 3\n  (build/v6/mhgp7_profile_sonde absent : claim P2 borne non re-verifie sur la cible reelle)\nscene 17 : (t) TOCTOU avant scellement : sortie modifiee apres l'agregateur (manifeste scelle le mute) ou apres le manifeste : INVALIDE 3\nscene 18 : (u) diff fail-open : faux diff muet rendant 2 (erreur) ou 1 (different) : INVALIDE 3, jamais « identique »\nscene 19 : (v) TOCTOU semantique apres agregation : META statut promu => 3 ; resume forge => 3 par reagregation hors PATH ; interpreteur menteur / relais => refus 2\nscene 20 : (w) contrat META exact : statut promu (aussi sous -O) / prefixe etendu / glose reformulee / jeton nu, bras manquant / renomme / permute, injections permutees, sha256 protocoles = 64 zeros, interpreteur relatif / absent : agregateur 1 ; v3 explicite : 0 + claim borne\nscene 21 : (x) ligne profil_kind verrouillee : fold_join=0, layout=csr, reduce_v1, +liveness, jeton absent / malforme / duplique, ligne absente / dupliquee : agregateur 1 ; layout=classic : 0 bit-identique\nscene 22 : (y) outils hors PATH : faux outils deposes apres la resolution / presents avant / fonctions exportees => jamais executes, publie ; LD_PRELOAD, BASH_ENV, PYTHONPATH => refus 2 ; outil inexistant ou non ELF => refus 2 ; CPUS hors machine => refus 2\nscene 23 : (z) liaison commande / META / sortie : argv exact, ligne d'identite, profil_kind, coord ; v5 outils/topologie/cpuset/affinite : agregateur 1 ; v4 explicite : 0 + claim borne\nsonde_ablation_gate : 23 scenes vertes (nominal apparie, refus de parametres, copie alteree, agregateur fail-closed, manifeste fatal, binaire produit, taille dupliquee, hash vide, champ duplique, plan non Williams, inventaire exact, compteurs obligatoires, profil malforme, repertoire inattendu, protocoles recalcules, identite de cible bornee, TOCTOU avant scellement, diff fail-open, TOCTOU semantique et reagregation hors PATH, contrat META exact, profil_kind verrouille, outils hors PATH et topologie attestee, liaison commande/META/sortie)\n",
+      "stderr": "",
+      "elapsed_seconds": 36.34347726099986
+    },
+    "optimized": {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/source/morsehgp3D_v7/tests/sonde_ablation_gate.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/source/morsehgp3D_v7/bench"
+      ],
+      "cwd": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci",
+      "environment_overrides": {
+        "TMPDIR": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/tmp",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "LD_LIBRARY_PATH": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/tmp/setup_python_lib"
+      },
+      "returncode": 0,
+      "stdout": "scene 1 : (a) nominal REPS=4 N_LIST='64 128' : reçu publie et fail-closed verifie\nscene 2 : (b)(c)(d) REPS=3, N_LIST vide, REPS=0/-4/abc : refus 2 sans trace\nscene 3 : (e) copie privee alteree pendant le troisieme tuple : INVALIDE 3, reste en .partial\nscene 4 : (f)(g) ligne K=7 omise / touch=nan sur un run : INVALIDE 3 par l'agregateur\nscene 5 : (h) alteration entre generation et verification de SHA256SUMS : INVALIDE 3\nscene 6 : (i) binaire PRODUIT (refuse --inject=) : refus 2, aucun .partial\nscene 7 : (j) taille dupliquee : lanceur refus 2 avant tout run ; META n_list duplique : agregateur 1\nscene 8 : (k) hash vide ou hors grammaire 64-hex : agregateur 1 ; sha256sum muet : lanceur refus 2\nscene 9 : (l) champ duplique a valeurs differentes (.status code=, META reps=, plan position=, profil touch=) : agregateur 1\nscene 10 : (m) carre latin cyclique (equilibre par position, non Williams) : agregateur 1 ; Williams permute : 0\nscene 11 : (n) out/intrus.txt, out/SHA256SUMS, out/sub/, .err retire : agregateur 1 ; le lanceur les hache et refuse\nscene 12 : (o) runs_effectues/runs_attendus obligatoires (v3 et v2) : agregateur 1 ; schema v2 sans identite : 0 + claim borne ; v1 : 1\nscene 13 : (p) ligne profil_reduce malformee (touch=abc, jeton sans =, K non entier, tronquee, exposant, mur/rss dupliques) : agregateur 1\nscene 14 : (q) repertoire vide/ ou inattendu, lien, bin/ pollue, intrus racine : agregateur 1 ; vide/ cree apres l'agregateur : INVALIDE 3\nscene 15 : (r) protocoles archives alteres/retires : agregateur 1 (hash recalcule != META) ; copie du lanceur alteree apres le manifeste : INVALIDE 3\nscene 16 : (s) identite de cible (claim borne) : mutant produit dans un .status/META => 1 ; lanceur a bras hors sonde => 2 ; plan altere en campagne => 3\n  (build/v6/mhgp7_profile_sonde absent : claim P2 borne non re-verifie sur la cible reelle)\nscene 17 : (t) TOCTOU avant scellement : sortie modifiee apres l'agregateur (manifeste scelle le mute) ou apres le manifeste : INVALIDE 3\nscene 18 : (u) diff fail-open : faux diff muet rendant 2 (erreur) ou 1 (different) : INVALIDE 3, jamais « identique »\nscene 19 : (v) TOCTOU semantique apres agregation : META statut promu => 3 ; resume forge => 3 par reagregation hors PATH ; interpreteur menteur / relais => refus 2\nscene 20 : (w) contrat META exact : statut promu (aussi sous -O) / prefixe etendu / glose reformulee / jeton nu, bras manquant / renomme / permute, injections permutees, sha256 protocoles = 64 zeros, interpreteur relatif / absent : agregateur 1 ; v3 explicite : 0 + claim borne\nscene 21 : (x) ligne profil_kind verrouillee : fold_join=0, layout=csr, reduce_v1, +liveness, jeton absent / malforme / duplique, ligne absente / dupliquee : agregateur 1 ; layout=classic : 0 bit-identique\nscene 22 : (y) outils hors PATH : faux outils deposes apres la resolution / presents avant / fonctions exportees => jamais executes, publie ; LD_PRELOAD, BASH_ENV, PYTHONPATH => refus 2 ; outil inexistant ou non ELF => refus 2 ; CPUS hors machine => refus 2\nscene 23 : (z) liaison commande / META / sortie : argv exact, ligne d'identite, profil_kind, coord ; v5 outils/topologie/cpuset/affinite : agregateur 1 ; v4 explicite : 0 + claim borne\nsonde_ablation_gate : 23 scenes vertes (nominal apparie, refus de parametres, copie alteree, agregateur fail-closed, manifeste fatal, binaire produit, taille dupliquee, hash vide, champ duplique, plan non Williams, inventaire exact, compteurs obligatoires, profil malforme, repertoire inattendu, protocoles recalcules, identite de cible bornee, TOCTOU avant scellement, diff fail-open, TOCTOU semantique et reagregation hors PATH, contrat META exact, profil_kind verrouille, outils hors PATH et topologie attestee, liaison commande/META/sortie)\n",
+      "stderr": "",
+      "elapsed_seconds": 36.18600668600084
+    }
+  },
+  "inventory_replay": {
+    "results": [
+      {
+        "label": "raw_inherited",
+        "command": [
+          "bash",
+          "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/source/morsehgp3D_v7/bench/sonde_ablation_reduce.sh",
+          "--inventaire",
+          "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/inventory"
+        ],
+        "LD_LIBRARY_PATH": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/tmp/setup_python_lib",
+        "returncode": 2,
+        "stdout": "",
+        "stderr": "REFUS : variable LD_LIBRARY_PATH definie dans l'environnement (/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/tmp/setup_python_lib) : un code etranger peut se charger avant la premiere ligne du lanceur, dans chaque outil ELF ou dans l'agregateur — jamais grave (lancer sous env -u LD_LIBRARY_PATH)\n"
+      },
+      {
+        "label": "nominal_clean",
+        "command": [
+          "bash",
+          "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/source/morsehgp3D_v7/bench/sonde_ablation_reduce.sh",
+          "--inventaire",
+          "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/inventory"
+        ],
+        "LD_LIBRARY_PATH": null,
+        "returncode": 0,
+        "stdout": "META.txt\nout/SHA256SUMS\nout/intrus.txt\n",
+        "stderr": ""
+      }
+    ],
+    "inventory_before": {
+      "META.txt": "0a0b77d5e75d0c15283bfd2f75dc493c0b7b3469fff1d720f388154c4ea4f345",
+      "SHA256SUMS": "0a0b77d5e75d0c15283bfd2f75dc493c0b7b3469fff1d720f388154c4ea4f345",
+      "out/intrus.txt": "0a0b77d5e75d0c15283bfd2f75dc493c0b7b3469fff1d720f388154c4ea4f345",
+      "out/SHA256SUMS": "0a0b77d5e75d0c15283bfd2f75dc493c0b7b3469fff1d720f388154c4ea4f345"
+    },
+    "inventory_after": {
+      "META.txt": "0a0b77d5e75d0c15283bfd2f75dc493c0b7b3469fff1d720f388154c4ea4f345",
+      "SHA256SUMS": "0a0b77d5e75d0c15283bfd2f75dc493c0b7b3469fff1d720f388154c4ea4f345",
+      "out/intrus.txt": "0a0b77d5e75d0c15283bfd2f75dc493c0b7b3469fff1d720f388154c4ea4f345",
+      "out/SHA256SUMS": "0a0b77d5e75d0c15283bfd2f75dc493c0b7b3469fff1d720f388154c4ea4f345"
+    },
+    "checks": {
+      "raw_code_2": true,
+      "raw_no_stdout": true,
+      "raw_reason_exact": true,
+      "nominal_code_0": true,
+      "nominal_exact_inventory": true,
+      "inventory_unchanged": true
+    },
+    "status": "completed"
+  },
+  "runtime_pins": {
+    "/usr/local/python/3.12.1/bin/python3.12": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+    "/usr/bin/bash": "bc5945feb8bd26203ebfafea5ce1878bb2e32cb8fb50ab7ae395cfb1e1aaaef1"
+  },
+  "real_engine_binaries_present_in_isolated_tree": [],
+  "tmp_after_tests": [
+    "setup_python_lib"
+  ],
+  "raw_hashes": {
+    "change.patch": "17972a44f6ce475b6a29672366cc934c4eaa9abcb3c832cf2f24da34871227ff",
+    "normal.json": "e46500709224af3d16296dc4fe205f1ea8c8a8e1f6092ede7c1b8fc4aa9bf42d",
+    "optimized.json": "ad6074b8f27548616a9c55fca5c863bc19e804b53f0590602c469a928340187a",
+    "start.json": "c7f2e3819bf599dc9134ef3ab7d35e7deb95daa5c718ace0d9f5af0cdfa4dc16",
+    "inventory_replay.json": "474829a129e347301e0efc60aa57adcb2fbdd476bea6d3b6d99d1e4a640ab57b"
+  },
+  "finished_utc": "2026-09-04T22:44:58.780036+00:00",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "purpose": "test_harness_environment_delta_only_no_engine_campaign_no_ci_run",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "environment": {
+    "TMPDIR": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "LD_LIBRARY_PATH": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_sonde_ci/tmp/setup_python_lib"
+  },
+  "gcp": "not_used",
+  "github_workflow_actions": "none",
+  "source_stability_scope": [
+    "tests/sonde_ablation_gate.py",
+    "bench/sonde_ablation_reduce.sh",
+    "bench/sonde_ablation_reduce.py"
+  ],
+  "checks": {
+    "source_stable": true,
+    "launcher_unchanged_from_failing_ci": true,
+    "aggregator_unchanged_from_failing_ci": true,
+    "normal_23_scenes_pass": true,
+    "optimized_23_scenes_pass": true,
+    "raw_2_clean_0_exact_inventory": true,
+    "no_real_engine_available": true,
+    "no_test_source_adaptation": true,
+    "local_ci_trace_stable": true
+  },
+  "status": "completed"
+}

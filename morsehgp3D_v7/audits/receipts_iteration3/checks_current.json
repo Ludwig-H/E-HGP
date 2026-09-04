@@ -1,0 +1,52 @@
+{
+  "captured_utc": "2026-09-04T22:57:42.613747+00:00",
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "tools/check_docs.py"
+      ],
+      "returncode": 0,
+      "stdout": "Validated 285 active Markdown files.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "tools/check_implementation_status.py"
+      ],
+      "returncode": 0,
+      "stdout": "Validated 20 implementation phases and their gates.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-O",
+        "morsehgp3D_v7/audits/verify_current.py"
+      ],
+      "returncode": 0,
+      "stdout": "Audit courant : 125 fichiers conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "morsehgp3D_v7/audits",
+        ":!morsehgp3D_v7/audits/receipts_20260904",
+        ":!morsehgp3D_v7/audits/receipts_iteration3"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "audit_markdown_receipt": "audit_markdown_current.json",
+  "audit_markdown_errors": 0,
+  "checker_sha256": "9e6ca321878eff7d7cf4bd36d5e73b2f449b4cd58cf76d5221c27e75748674fe",
+  "gcp": "not_used",
+  "passed": true
+}

@@ -2,7 +2,7 @@
 
 Cadre : `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
-Le delta `AxisBounds` est correct par lecture sous les préconditions ci-dessous. **Aucune compilation ni exécution indépendante de ce delta n'a été réalisée.** Le [reçu](receipts_20260904/census_axis_review_current.json) est `reviewed_not_executed` ; il conserve les hashes avant/après, stables, et le [diff](receipts_20260904/census_axis_review_current.diff) contre la copie mono figée. Aucun résultat antérieur n'est transféré au produit modifié.
+Le delta `AxisBounds` est justifié sous les préconditions ci-dessous et passe désormais ses **six portes indépendantes Release**. La [construction et les exécutions](receipts_iteration3/axis_execution.json), le [snapshot stable](receipts_iteration3/axis_source.json) et le [JUnit](receipts_iteration3/axis_ctest.xml) rattachent ces résultats aux sources courantes. Le CLI reconstruit a le SHA-256 `25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2`, identique au C mesuré par le constructeur. Ses [interfaces](AUDIT_INTERFACES_20260904.md) ont également été rejouées. La preuve ne vaut que sur le domaine déclaré ; ce résultat ne qualifie pas à lui seul la hiérarchie entière.
 
 ## Preuve du calcul
 
@@ -20,12 +20,20 @@ Les préconditions consommées sont $0<A<2^{68}$, $|B_i|<2^{87}$, $|C|<2^{105}$ 
 
 On a $2A<2^{69}$ et $|2Aq|\leq|B|+2A<2^{88}$ ; division, reste et ajout de 1 tiennent en i128. Pour une coordonnée u16, $At^2<2^{100}$ et $|Bt|<2^{103}$, donc $|f(t)|<2^{104}$. Le module de chaque somme partielle utilisée dans `bounds` est inférieur à $2^{105}+3(2^{100}+2^{103})=59\cdot2^{100}<2^{106}$. Aucun calcul du polynôme au centre rationnel potentiellement éloigné n'est nécessaire. Les boîtes et coefficients arbitraires hors de ce domaine ne sont pas couverts ; `AxisBounds` conserve des préconditions internes, sans ajouter une API de validation d'entrée.
 
-## Porte prête à exécuter
+## Qualification exécutée
 
 [axis_bounds_gate.cpp](../tests/axis_bounds_gate.cpp) énumère chaque axe en OBig512 sans réutiliser la division ni l'argmin du produit, et recoupe certaines petites boîtes par volume entier. La source prévoit égalités, centres éloignés, frontières u16, coefficients larges, 1 200 boîtes déterministes et 45 requêtes de profondeur. Les dix rejets concernent le validateur de fixtures, pas une nouvelle garde produit.
 
-CMake enregistre un nominal attendu en code 0 et cinq mutants attendus en code 4 **avec** préfixe `DIVERGENCE axis_bounds` : plancher seul, plafond systématique, absence de clip par boîte, coefficient réduit à i64 et minimum substitué au maximum. Cette combinaison code/préfixe impose une divergence observable plutôt qu'un échec quelconque. Il s'agit du protocole lu, pas de résultats exécutés ici.
+Le nominal rend 0 : `boxes=1212 axis_points=454697 volume_points=31720 census_queries=45 max_bits=106 rejected_fixtures=10 extended_profile_boxes=4`. Les cinq mutants rendent chacun 4 avec le préfixe `DIVERGENCE axis_bounds` attendu : plancher seul et plafond systématique divergent sur la boîte 1, absence de clip sur la boîte 7, coefficient réduit à i64 sur la boîte 8, minimum substitué au maximum sur la boîte 1. Les quatre premiers altèrent le minimum, le dernier le maximum. Les dix rejets de fixtures ne sont pas comptés comme des refus produit.
 
-La qualification suivante doit compiler et exécuter ces six portes sur les sources épinglées, puis requalifier le binaire produit consommant ce census. Le microbenchmark facultatif est synthétique, exclu de `ALL`, et ne qualifie ni l'exactitude ni le coût de bout en bout. Aucun gain de performance n'est déduit de la preuve.
+Construction avec GCC 13.3.0, Release, CUDA désactivé, sur copie isolée sous `audits/.work_iteration3`. Les commandes exactes, flags et hashes avant/après sont dans le reçu ; aucun fichier source consommé n'a changé pendant l'exécution. Reproduction après vérification des hashes :
+
+```bash
+cmake -S morsehgp3D_v7 -B morsehgp3D_v7/audits/.work_axis_replay -DCMAKE_BUILD_TYPE=Release -DMHGP7_ENABLE_CUDA=OFF
+cmake --build morsehgp3D_v7/audits/.work_axis_replay --target mhgp7 mhgp7_axis_bounds_gate --parallel 2
+ctest --test-dir morsehgp3D_v7/audits/.work_axis_replay --output-on-failure --no-tests=error -R '^mhgp7_axis_bounds'
+```
+
+Le microbenchmark synthétique facultatif n'a pas été exécuté par l'auditeur. La [contrelecture des reçus B/C](QUALIFICATION_C_COURANTE.md) rapporte séparément les observations du constructeur, sans déduire un gain de performance de la preuve.
 
 GCP non utilisé.

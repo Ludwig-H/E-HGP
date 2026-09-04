@@ -1,0 +1,132 @@
+{
+  "schema": "mhgp7-audit-lanes-static-v1",
+  "started_utc": "2026-09-04T22:40:53.652022+00:00",
+  "completed_utc": "2026-09-04T22:46:12.917695+00:00",
+  "source_root": "/workspaces/E-HGP/morsehgp3D_v7",
+  "snapshot_root": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_iteration3_lanes/source",
+  "status": "reviewed_not_executed",
+  "source_hashes_before": {
+    "docs/ARITHMETIQUE_PRIMITIVES.md": "59ba7b6cd91f65701c3ae7205087820985979308df5d944f75ff3ab9224e95ff",
+    "docs/PLAN_PORTES_ARITHMETIQUES.md": "40e267f19fab415a1d0b626550371eed6392f0e8b765974b009ef6161edb4ba0",
+    "src/lanes/q2.hpp": "11049293b7ad2f7139e1699c11b2506e8af2c11a04f22dc951f33ba10406c52f",
+    "src/lanes/q3.hpp": "4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe",
+    "src/lanes/q4.hpp": "58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a",
+    "src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+    "src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "src/pipeline/generate.hpp": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59",
+    "src/forest/silent_incidence.hpp": "fddde6e233eea8e80d23af4d42b50952e7c49a50ed84357e973279ff14d555e8",
+    "src/forest/render.hpp": "b1f0537319328d79fe54717fc85f3cbe9abe0f479a34ee5f72153cec148f6589"
+  },
+  "snapshot_hashes": {
+    "docs/ARITHMETIQUE_PRIMITIVES.md": "59ba7b6cd91f65701c3ae7205087820985979308df5d944f75ff3ab9224e95ff",
+    "docs/PLAN_PORTES_ARITHMETIQUES.md": "40e267f19fab415a1d0b626550371eed6392f0e8b765974b009ef6161edb4ba0",
+    "src/lanes/q2.hpp": "11049293b7ad2f7139e1699c11b2506e8af2c11a04f22dc951f33ba10406c52f",
+    "src/lanes/q3.hpp": "4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe",
+    "src/lanes/q4.hpp": "58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a",
+    "src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+    "src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "src/pipeline/generate.hpp": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59",
+    "src/forest/silent_incidence.hpp": "fddde6e233eea8e80d23af4d42b50952e7c49a50ed84357e973279ff14d555e8",
+    "src/forest/render.hpp": "b1f0537319328d79fe54717fc85f3cbe9abe0f479a34ee5f72153cec148f6589"
+  },
+  "source_hashes_after": {
+    "docs/ARITHMETIQUE_PRIMITIVES.md": "59ba7b6cd91f65701c3ae7205087820985979308df5d944f75ff3ab9224e95ff",
+    "docs/PLAN_PORTES_ARITHMETIQUES.md": "40e267f19fab415a1d0b626550371eed6392f0e8b765974b009ef6161edb4ba0",
+    "src/lanes/q2.hpp": "11049293b7ad2f7139e1699c11b2506e8af2c11a04f22dc951f33ba10406c52f",
+    "src/lanes/q3.hpp": "4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe",
+    "src/lanes/q4.hpp": "58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a",
+    "src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+    "src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "src/pipeline/generate.hpp": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59",
+    "src/forest/silent_incidence.hpp": "fddde6e233eea8e80d23af4d42b50952e7c49a50ed84357e973279ff14d555e8",
+    "src/forest/render.hpp": "b1f0537319328d79fe54717fc85f3cbe9abe0f479a34ee5f72153cec148f6589"
+  },
+  "source_drifts": {},
+  "source_stable": true,
+  "reviewed_ranges": {
+    "docs/ARITHMETIQUE_PRIMITIVES.md": [
+      "sections 2-4 only"
+    ],
+    "docs/PLAN_PORTES_ARITHMETIQUES.md": [
+      "sections 1-2 and geometry gate criteria"
+    ],
+    "src/core/types.hpp": [
+      "20-53"
+    ],
+    "src/lanes/q2.hpp": [
+      "16-26"
+    ],
+    "src/lanes/q3.hpp": [
+      "37-129",
+      "140-192: helper identity/call status"
+    ],
+    "src/lanes/q4.hpp": [
+      "43-155"
+    ],
+    "src/lanes/keys.hpp": [
+      "79-95"
+    ],
+    "src/pipeline/generate.hpp": [
+      "780-835",
+      "900-920",
+      "1140-1170"
+    ],
+    "src/forest/silent_incidence.hpp": [
+      "160-195"
+    ],
+    "src/forest/render.hpp": [
+      "128-156"
+    ]
+  },
+  "independent_product_compilation": false,
+  "independent_product_execution": false,
+  "prior_results_transferred": false,
+  "scope": "mathematical_and_static_source_review_of_lanes_not_limbs_pgcd_front_or_complete_hgp",
+  "public_status": "not_claimed",
+  "findings": {
+    "blocking_arithmetic_defect_observed": false,
+    "q2_bounds_and_identity": "confirmed_under_u16_inputs",
+    "q3_intermediates_and_86_104_bounds": "confirmed",
+    "q3_center_narrowing": "confirmed_for_true_nondegenerate_triangle_forms_abs_centre_relative_less_than_2_pow_50",
+    "q4_cramer_and_face_parity": "confirmed",
+    "q4_generic_ballkey_power_additional_bound": "all partial sums bounded by 1440*M^5 < 2^91",
+    "producer_rank_guards": "confirmed_on_generate_silent_incidence_render_calls"
+  },
+  "future_scalar_fixture": {
+    "a": [
+      0,
+      0,
+      0
+    ],
+    "b": [
+      46368,
+      28657,
+      0
+    ],
+    "x": [
+      28657,
+      17711,
+      0
+    ],
+    "D": 2971215073,
+    "E": 1134903170,
+    "planar_det": -1,
+    "G": 1,
+    "twice_relative_centre": [
+      -20100270015213,
+      32522920160401,
+      0
+    ],
+    "authority": "Cassini identity and two linear circumcentre equations; literals cross-checked by standalone Python integer arithmetic only, no product function called",
+    "criteria": [
+      "centre component magnitude exceeds 2^40",
+      "q3 acute seed rejects",
+      "true Q3Form helper extrema match independent enumeration after clipping to small integral boxes",
+      "never call helper on G=0"
+    ]
+  },
+  "notes": [
+    "lane bounds consume exact reduction and wide-integer contracts reviewed by another agent; this receipt does not requalify those implementations",
+    "no runtime correctness or performance claim follows from this source review"
+  ]
+}

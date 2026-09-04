@@ -1,0 +1,619 @@
+{
+  "captured_utc": "2026-09-04T22:46:32.867595+00:00",
+  "scope": "independent read/recalculation of constructor sealed receipts; no full CTest or benchmark repeated",
+  "release": {
+    "manifest_sha256": "17b94a1e3d92e6e8a490943c0b2a11600ccb8d71c180820525c1029692c21931",
+    "files_verified": 46,
+    "bad_files": [],
+    "junit_tests": 292,
+    "unique_names": 292,
+    "failed": [],
+    "skipped": [],
+    "names_match_summary": true,
+    "sources_before_after_equal": true,
+    "binaries_before_after_equal": true,
+    "summary_status": "passed",
+    "independent_cli_sha256": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+    "measured_cli_sha256": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2"
+  },
+  "mono_bc": {
+    "hash_manifest_sha256": "63c0963fa891c9b1e4af362614cf8b9418e44cdf001640e946cdb36f0c08e6c8",
+    "raw_files_verified": 22,
+    "bad_files": [],
+    "runs_manifest_sha256": "dd79318c6635c7fd3cb9be190b8f3d50e5cbda8e7d2662832b6c1490c9605dd0",
+    "runs": [
+      {
+        "s": 8,
+        "role": "reference",
+        "status": "completed",
+        "returncode": 0,
+        "seconds": 127.99736701999973,
+        "rss_kb": 1938876,
+        "digest_all": "f57157901b2a20282f5c418e48a376f3e33dab0047328020eb3f9846408974c7",
+        "cardinalities": {
+          "1": {
+            "evenements": 30581,
+            "facettes": 8000,
+            "deltas": 6521,
+            "attachements": 0,
+            "fusions": 7999,
+            "noeuds": 6521
+          },
+          "2": {
+            "evenements": 64097,
+            "facettes": 62699,
+            "deltas": 25826,
+            "attachements": 30291,
+            "fusions": 62692,
+            "noeuds": 23238
+          },
+          "3": {
+            "evenements": 109455,
+            "facettes": 202080,
+            "deltas": 79451,
+            "attachements": 127721,
+            "fusions": 202065,
+            "noeuds": 49332
+          },
+          "4": {
+            "evenements": 165548,
+            "facettes": 459261,
+            "deltas": 134649,
+            "attachements": 324724,
+            "fusions": 459229,
+            "noeuds": 85855
+          },
+          "5": {
+            "evenements": 232523,
+            "facettes": 867751,
+            "deltas": 199988,
+            "attachements": 655550,
+            "fusions": 867685,
+            "noeuds": 131937
+          },
+          "6": {
+            "evenements": 310254,
+            "facettes": 1459519,
+            "deltas": 276619,
+            "attachements": 1151950,
+            "fusions": 1459373,
+            "noeuds": 188149
+          },
+          "7": {
+            "evenements": 397786,
+            "facettes": 2262017,
+            "deltas": 362637,
+            "attachements": 1841978,
+            "fusions": 2261838,
+            "noeuds": 252750
+          },
+          "8": {
+            "evenements": 495262,
+            "facettes": 3305510,
+            "deltas": 459151,
+            "attachements": 2756825,
+            "fusions": 3305192,
+            "noeuds": 326155
+          },
+          "9": {
+            "evenements": 602212,
+            "facettes": 4616847,
+            "deltas": 565470,
+            "attachements": 3922424,
+            "fusions": 4616421,
+            "noeuds": 409298
+          },
+          "10": {
+            "evenements": 718440,
+            "facettes": 6223223,
+            "deltas": 680836,
+            "attachements": 5366384,
+            "fusions": 6222646,
+            "noeuds": 500851
+          }
+        }
+      },
+      {
+        "s": 8,
+        "role": "candidate",
+        "status": "completed",
+        "returncode": 0,
+        "seconds": 105.93154499800039,
+        "rss_kb": 1897064,
+        "digest_all": "f57157901b2a20282f5c418e48a376f3e33dab0047328020eb3f9846408974c7",
+        "cardinalities": {
+          "1": {
+            "evenements": 30581,
+            "facettes": 8000,
+            "deltas": 6521,
+            "attachements": 0,
+            "fusions": 7999,
+            "noeuds": 6521
+          },
+          "2": {
+            "evenements": 64097,
+            "facettes": 62699,
+            "deltas": 25826,
+            "attachements": 30291,
+            "fusions": 62692,
+            "noeuds": 23238
+          },
+          "3": {
+            "evenements": 109455,
+            "facettes": 202080,
+            "deltas": 79451,
+            "attachements": 127721,
+            "fusions": 202065,
+            "noeuds": 49332
+          },
+          "4": {
+            "evenements": 165548,
+            "facettes": 459261,
+            "deltas": 134649,
+            "attachements": 324724,
+            "fusions": 459229,
+            "noeuds": 85855
+          },
+          "5": {
+            "evenements": 232523,
+            "facettes": 867751,
+            "deltas": 199988,
+            "attachements": 655550,
+            "fusions": 867685,
+            "noeuds": 131937
+          },
+          "6": {
+            "evenements": 310254,
+            "facettes": 1459519,
+            "deltas": 276619,
+            "attachements": 1151950,
+            "fusions": 1459373,
+            "noeuds": 188149
+          },
+          "7": {
+            "evenements": 397786,
+            "facettes": 2262017,
+            "deltas": 362637,
+            "attachements": 1841978,
+            "fusions": 2261838,
+            "noeuds": 252750
+          },
+          "8": {
+            "evenements": 495262,
+            "facettes": 3305510,
+            "deltas": 459151,
+            "attachements": 2756825,
+            "fusions": 3305192,
+            "noeuds": 326155
+          },
+          "9": {
+            "evenements": 602212,
+            "facettes": 4616847,
+            "deltas": 565470,
+            "attachements": 3922424,
+            "fusions": 4616421,
+            "noeuds": 409298
+          },
+          "10": {
+            "evenements": 718440,
+            "facettes": 6223223,
+            "deltas": 680836,
+            "attachements": 5366384,
+            "fusions": 6222646,
+            "noeuds": 500851
+          }
+        }
+      },
+      {
+        "s": 10,
+        "role": "candidate",
+        "status": "completed",
+        "returncode": 0,
+        "seconds": 105.59399430600024,
+        "rss_kb": 1895608,
+        "digest_all": "f57157901b2a20282f5c418e48a376f3e33dab0047328020eb3f9846408974c7",
+        "cardinalities": {
+          "1": {
+            "evenements": 30581,
+            "facettes": 8000,
+            "deltas": 6521,
+            "attachements": 0,
+            "fusions": 7999,
+            "noeuds": 6521
+          },
+          "2": {
+            "evenements": 64097,
+            "facettes": 62699,
+            "deltas": 25826,
+            "attachements": 30291,
+            "fusions": 62692,
+            "noeuds": 23238
+          },
+          "3": {
+            "evenements": 109455,
+            "facettes": 202080,
+            "deltas": 79451,
+            "attachements": 127721,
+            "fusions": 202065,
+            "noeuds": 49332
+          },
+          "4": {
+            "evenements": 165548,
+            "facettes": 459261,
+            "deltas": 134649,
+            "attachements": 324724,
+            "fusions": 459229,
+            "noeuds": 85855
+          },
+          "5": {
+            "evenements": 232523,
+            "facettes": 867751,
+            "deltas": 199988,
+            "attachements": 655550,
+            "fusions": 867685,
+            "noeuds": 131937
+          },
+          "6": {
+            "evenements": 310254,
+            "facettes": 1459519,
+            "deltas": 276619,
+            "attachements": 1151950,
+            "fusions": 1459373,
+            "noeuds": 188149
+          },
+          "7": {
+            "evenements": 397786,
+            "facettes": 2262017,
+            "deltas": 362637,
+            "attachements": 1841978,
+            "fusions": 2261838,
+            "noeuds": 252750
+          },
+          "8": {
+            "evenements": 495262,
+            "facettes": 3305510,
+            "deltas": 459151,
+            "attachements": 2756825,
+            "fusions": 3305192,
+            "noeuds": 326155
+          },
+          "9": {
+            "evenements": 602212,
+            "facettes": 4616847,
+            "deltas": 565470,
+            "attachements": 3922424,
+            "fusions": 4616421,
+            "noeuds": 409298
+          },
+          "10": {
+            "evenements": 718440,
+            "facettes": 6223223,
+            "deltas": 680836,
+            "attachements": 5366384,
+            "fusions": 6222646,
+            "noeuds": 500851
+          }
+        }
+      },
+      {
+        "s": 10,
+        "role": "reference",
+        "status": "completed",
+        "returncode": 0,
+        "seconds": 125.52419659099905,
+        "rss_kb": 1939640,
+        "digest_all": "f57157901b2a20282f5c418e48a376f3e33dab0047328020eb3f9846408974c7",
+        "cardinalities": {
+          "1": {
+            "evenements": 30581,
+            "facettes": 8000,
+            "deltas": 6521,
+            "attachements": 0,
+            "fusions": 7999,
+            "noeuds": 6521
+          },
+          "2": {
+            "evenements": 64097,
+            "facettes": 62699,
+            "deltas": 25826,
+            "attachements": 30291,
+            "fusions": 62692,
+            "noeuds": 23238
+          },
+          "3": {
+            "evenements": 109455,
+            "facettes": 202080,
+            "deltas": 79451,
+            "attachements": 127721,
+            "fusions": 202065,
+            "noeuds": 49332
+          },
+          "4": {
+            "evenements": 165548,
+            "facettes": 459261,
+            "deltas": 134649,
+            "attachements": 324724,
+            "fusions": 459229,
+            "noeuds": 85855
+          },
+          "5": {
+            "evenements": 232523,
+            "facettes": 867751,
+            "deltas": 199988,
+            "attachements": 655550,
+            "fusions": 867685,
+            "noeuds": 131937
+          },
+          "6": {
+            "evenements": 310254,
+            "facettes": 1459519,
+            "deltas": 276619,
+            "attachements": 1151950,
+            "fusions": 1459373,
+            "noeuds": 188149
+          },
+          "7": {
+            "evenements": 397786,
+            "facettes": 2262017,
+            "deltas": 362637,
+            "attachements": 1841978,
+            "fusions": 2261838,
+            "noeuds": 252750
+          },
+          "8": {
+            "evenements": 495262,
+            "facettes": 3305510,
+            "deltas": 459151,
+            "attachements": 2756825,
+            "fusions": 3305192,
+            "noeuds": 326155
+          },
+          "9": {
+            "evenements": 602212,
+            "facettes": 4616847,
+            "deltas": 565470,
+            "attachements": 3922424,
+            "fusions": 4616421,
+            "noeuds": 409298
+          },
+          "10": {
+            "evenements": 718440,
+            "facettes": 6223223,
+            "deltas": 680836,
+            "attachements": 5366384,
+            "fusions": 6222646,
+            "noeuds": 500851
+          }
+        }
+      },
+      {
+        "s": 12,
+        "role": "reference",
+        "status": "completed",
+        "returncode": 0,
+        "seconds": 126.52680338699975,
+        "rss_kb": 1938948,
+        "digest_all": "f57157901b2a20282f5c418e48a376f3e33dab0047328020eb3f9846408974c7",
+        "cardinalities": {
+          "1": {
+            "evenements": 30581,
+            "facettes": 8000,
+            "deltas": 6521,
+            "attachements": 0,
+            "fusions": 7999,
+            "noeuds": 6521
+          },
+          "2": {
+            "evenements": 64097,
+            "facettes": 62699,
+            "deltas": 25826,
+            "attachements": 30291,
+            "fusions": 62692,
+            "noeuds": 23238
+          },
+          "3": {
+            "evenements": 109455,
+            "facettes": 202080,
+            "deltas": 79451,
+            "attachements": 127721,
+            "fusions": 202065,
+            "noeuds": 49332
+          },
+          "4": {
+            "evenements": 165548,
+            "facettes": 459261,
+            "deltas": 134649,
+            "attachements": 324724,
+            "fusions": 459229,
+            "noeuds": 85855
+          },
+          "5": {
+            "evenements": 232523,
+            "facettes": 867751,
+            "deltas": 199988,
+            "attachements": 655550,
+            "fusions": 867685,
+            "noeuds": 131937
+          },
+          "6": {
+            "evenements": 310254,
+            "facettes": 1459519,
+            "deltas": 276619,
+            "attachements": 1151950,
+            "fusions": 1459373,
+            "noeuds": 188149
+          },
+          "7": {
+            "evenements": 397786,
+            "facettes": 2262017,
+            "deltas": 362637,
+            "attachements": 1841978,
+            "fusions": 2261838,
+            "noeuds": 252750
+          },
+          "8": {
+            "evenements": 495262,
+            "facettes": 3305510,
+            "deltas": 459151,
+            "attachements": 2756825,
+            "fusions": 3305192,
+            "noeuds": 326155
+          },
+          "9": {
+            "evenements": 602212,
+            "facettes": 4616847,
+            "deltas": 565470,
+            "attachements": 3922424,
+            "fusions": 4616421,
+            "noeuds": 409298
+          },
+          "10": {
+            "evenements": 718440,
+            "facettes": 6223223,
+            "deltas": 680836,
+            "attachements": 5366384,
+            "fusions": 6222646,
+            "noeuds": 500851
+          }
+        }
+      },
+      {
+        "s": 12,
+        "role": "candidate",
+        "status": "completed",
+        "returncode": 0,
+        "seconds": 105.11175653400096,
+        "rss_kb": 1895872,
+        "digest_all": "f57157901b2a20282f5c418e48a376f3e33dab0047328020eb3f9846408974c7",
+        "cardinalities": {
+          "1": {
+            "evenements": 30581,
+            "facettes": 8000,
+            "deltas": 6521,
+            "attachements": 0,
+            "fusions": 7999,
+            "noeuds": 6521
+          },
+          "2": {
+            "evenements": 64097,
+            "facettes": 62699,
+            "deltas": 25826,
+            "attachements": 30291,
+            "fusions": 62692,
+            "noeuds": 23238
+          },
+          "3": {
+            "evenements": 109455,
+            "facettes": 202080,
+            "deltas": 79451,
+            "attachements": 127721,
+            "fusions": 202065,
+            "noeuds": 49332
+          },
+          "4": {
+            "evenements": 165548,
+            "facettes": 459261,
+            "deltas": 134649,
+            "attachements": 324724,
+            "fusions": 459229,
+            "noeuds": 85855
+          },
+          "5": {
+            "evenements": 232523,
+            "facettes": 867751,
+            "deltas": 199988,
+            "attachements": 655550,
+            "fusions": 867685,
+            "noeuds": 131937
+          },
+          "6": {
+            "evenements": 310254,
+            "facettes": 1459519,
+            "deltas": 276619,
+            "attachements": 1151950,
+            "fusions": 1459373,
+            "noeuds": 188149
+          },
+          "7": {
+            "evenements": 397786,
+            "facettes": 2262017,
+            "deltas": 362637,
+            "attachements": 1841978,
+            "fusions": 2261838,
+            "noeuds": 252750
+          },
+          "8": {
+            "evenements": 495262,
+            "facettes": 3305510,
+            "deltas": 459151,
+            "attachements": 2756825,
+            "fusions": 3305192,
+            "noeuds": 326155
+          },
+          "9": {
+            "evenements": 602212,
+            "facettes": 4616847,
+            "deltas": 565470,
+            "attachements": 3922424,
+            "fusions": 4616421,
+            "noeuds": 409298
+          },
+          "10": {
+            "evenements": 718440,
+            "facettes": 6223223,
+            "deltas": 680836,
+            "attachements": 5366384,
+            "fusions": 6222646,
+            "noeuds": 500851
+          }
+        }
+      }
+    ],
+    "pairs": [
+      {
+        "s": 8,
+        "b_seconds": 127.99736701999973,
+        "c_seconds": 105.93154499800039,
+        "observed_reduction_percent": 17.239278069330545,
+        "same_objects": true
+      },
+      {
+        "s": 10,
+        "b_seconds": 125.52419659099905,
+        "c_seconds": 105.59399430600024,
+        "observed_reduction_percent": 15.877578049703246,
+        "same_objects": true
+      },
+      {
+        "s": 12,
+        "b_seconds": 126.52680338699975,
+        "c_seconds": 105.11175653400096,
+        "observed_reduction_percent": 16.925304583486465,
+        "same_objects": true
+      }
+    ],
+    "all_digests_equal": true,
+    "summary": {
+      "status": "completed",
+      "source_stable": true,
+      "kmax": 10,
+      "serial_stages_requested": true,
+      "strict_single_thread_qualification": "not_claimed",
+      "separations": [
+        8,
+        10,
+        12
+      ],
+      "cross_separation_comparisons": 2,
+      "cross_separation_objects_equal": true,
+      "runs": 6,
+      "pairs": 3,
+      "expected_pairs": 3,
+      "error": null,
+      "all_objects_equal": true,
+      "performance_qualification": "not_claimed",
+      "exact_hgp_qualification": "not_claimed"
+    }
+  },
+  "passed": true
+}

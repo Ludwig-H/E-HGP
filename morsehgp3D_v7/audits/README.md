@@ -11,6 +11,10 @@ puis consulter selon le besoin :
 - [Couverture du générateur](S1_COURANT.md) : matrice des clauses, preuves des filtres et théorème jusqu'au RLE.
 - [Interfaces et archives](AUDIT_INTERFACES_20260904.md) : entrée réelle, refus et rejeu des objets publiés.
 - [Mode mono](MONO_COURANT.md) : fold inline, créations de threads réellement comptées et refus tardifs.
+- [Census AxisBounds](CENSUS_AXIS_COURANT.md) : preuve sur le domaine u16 et six portes indépendantes exécutées.
+- [Qualification C et mesures mono](QUALIFICATION_C_COURANTE.md) : CLI reconstruit, reçus 292/292 vérifiés et portée du gain observé à 8k.
+- [Arithmétique des lanes](ARITHMETIQUE_LANES_COURANTE.md) et [entiers larges](ARITHMETIQUE_LARGE_COURANTE.md) : bornes locales fermées, fixtures causales pour les petites portes.
+- [Sonde CI](SONDE_CI_COURANTE.md) : correction du harnais vérifiée localement, refus d'environnement conservé.
 - [Résidence et parallélisme](AUDIT_RESIDENCE_20260904.md) : allocations du tri, census et pistes d'échelle.
 - [Validation courante](receipts_20260904/validation_current.json) : résultats exécutés et identité des sources contrôlées.
 

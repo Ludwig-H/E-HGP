@@ -70,13 +70,16 @@ des contrats distincts de cet export horizontal.
 | Tri | Objet stable conservé, zéro tampon local observé ; pic supplémentaire de heap de 262 736 octets pour 32 768 enregistrements et deux ouvriers. | [Audit de résidence](AUDIT_RESIDENCE_20260904.md) |
 | Admission mémoire | Deux refus conservatifs évitables reproduits ; concurrence bornable par le nombre d'ordres ; coexistence A2/B1 mesurée sans assimiler proxy et RSS. | [Retour mémoire](RETOUR_MEMOIRE_COURANT.md) |
 | Construction indépendante | Snapshot initial : toutes les cibles Release construites, 279/279 portes CPU, 203 fichiers et 31 binaires inchangés. Delta archive qualifié séparément. | [Reçu Release courant](receipts_20260904/iteration2/validation.json) |
-| Mode mono | Quatre portes passent avec interposition réelle de `pthread_create` ; le nouveau CLI repasse les 26 scènes et six corruptions d’interface. | [Qualification mono](MONO_COURANT.md) |
+| Mode mono | Quatre portes passent avec interposition réelle de `pthread_create`, objets conservés et refus tardifs. | [Qualification mono](MONO_COURANT.md) |
+| Census courant | Six portes AxisBounds passent, dont cinq mutants ; CLI C reconstruit identique au binaire mesuré, interfaces rejouées. | [Qualification census](CENSUS_AXIS_COURANT.md) |
+| Arithmétique | Bornes et signes des lanes, colonnes U192/U320, casts PGCD fermés statiquement sous préconditions ; fixtures causales proposées. | [Lanes](ARITHMETIQUE_LANES_COURANTE.md), [entiers larges](ARITHMETIQUE_LARGE_COURANTE.md) |
+| Reçus C et mesure mono | Reçus constructeur 292/292 contrôlés ; six processus B/C à 8k, digests identiques et réduction observée de 15,9 à 17,2 %. Aucune répétition indépendante du benchmark. | [Qualification C](QUALIFICATION_C_COURANTE.md) |
+| Harnais CI | Correction locale : 23 scènes normales et optimisées réussies, refus de l'environnement injecté conservé. Aucun nouveau vert GitHub attesté. | [Sonde CI](SONDE_CI_COURANTE.md) |
 | Banc d'incidences | Sept tests passent normalement et sous Python optimisé ; un vrai refus K=2 est classé sans succès moteur. Les deux CTests sont enregistrés et passent. | [Classification courante](CAMPAGNE_INCIDENCES_COURANTE.md) |
 
-Chaque rapport identifie les octets réellement exécutés. Le HEAD de départ
-`de69851e3820781145f859a08a993f15f2f9e738` ne représentait pas les sources v7
-non suivies. Les manifestes et hashes restent indispensables pendant le
-travail concurrent du constructeur. Le [reçu de validation](receipts_20260904/validation_current.json)
+Chaque rapport identifie les octets réellement exécutés. Le HEAD et les
+sources non commitées sont distingués : les manifestes et hashes restent
+indispensables pendant le travail concurrent du constructeur. Le [reçu de validation](receipts_20260904/validation_current.json)
 centralise les portées, les commandes et le dernier contrôle de fraîcheur.
 
 ## Verrous à lever et critères de fermeture
@@ -103,15 +106,20 @@ après RLE. Les preuves séparées couvrent les témoins, secteurs, cordes,
 cellules et marges flottantes, arrondis des bornes finales compris.
 
 Le constructeur a intégré ces lemmes au théorème horizontal et publié la
-[cartographie des primitives](../docs/QUALIFICATION_S1_PRIMITIVES.md). Les bornes
-de cardinal/Karras et de PGCD y sont cohérentes avec la lecture indépendante.
+[cartographie des primitives](../docs/QUALIFICATION_S1_PRIMITIVES.md). La
+contrelecture des [lanes q2/q3/q4](ARITHMETIQUE_LANES_COURANTE.md) ferme leurs
+identités, signes, bornes d'intermédiaires et conversions sur formes u16
+valides, y compris Cramer et la puissance q4 développée. Celle des
+[entiers larges et PGCD](ARITHMETIQUE_LARGE_COURANTE.md) ferme les colonnes,
+retenues, casts et divisions sous leurs préconditions explicites.
 
-**Critère de qualification produit :** rattacher la validité de l'index,
-des tris, PGCD, Cramer,
-produits larges et contrôles de shells aux octets exécutés. Le domaine
-binaire64, l'arrondi et la séquence de calcul doivent être ceux qualifiés
-par le build. Les fixtures de rang onze/douze en apportent des réfutations
-ciblées ; elles ne remplacent pas la qualification universelle des primitives.
+**Critère de qualification produit :** porter les petites portes causales
+sur le code compilé, puis achever les contrats de l'index/front, des tris
+et des shells. Les fixtures Cassini et U320.w[4] sont fournies avec valeurs
+indépendantes ; leurs exécutions C++ ne sont pas encore attribuées à cet audit.
+Le domaine binaire64, l'arrondi et la séquence de calcul doivent être ceux
+qualifiés par le build. La preuve des bornes arithmétiques locales est acquise ;
+le raccord de toutes les primitives au binaire livré reste à qualifier.
 
 ### 2. Déclarer la verticale et le rendu
 
@@ -158,16 +166,19 @@ de ces seuils.
 
 ## Limites de validation
 
-La suite indépendante couvre les 279 portes `gate` du CMake figé, avec
-46 tests d'échelle exclus. Les 203 fichiers copiés et 31 binaires sont
-inchangés après exécution. Les modifications du banc, d’archive et du fold mono sont qualifiées par
-leurs propres reçus ciblés. Le CLI mono n’est pas assimilé au binaire du snapshot
-initial ; ses interfaces ont été rejouées. Le dernier delta
-[AxisBounds](CENSUS_AXIS_COURANT.md) est relu statiquement : ses portes et
-son CLI n’ont pas été exécutés indépendamment dans cet audit. Les durées sur l'hôte partagé ne
-sont pas des mesures de performance industrielle. Les résultats antérieurs
-restent des reçus bruts séparés, jamais un verdict courant.
-Le contrôle documentaire global exclut ces audits ; leur Markdown et leurs
-liens sont donc contrôlés explicitement en complément.
+La suite complète indépendante couvre 279 portes du snapshot figé, avec
+46 tests d'échelle exclus. Archive, mono, AxisBounds et harnais Python ont
+leurs reçus ciblés. Le CLI courant C est reconstruit indépendamment et
+repasse les interfaces. La suite constructeur C de 292 portes a fait
+l'objet d'une vérification indépendante de reçus, sans répétition complète
+par l'auditeur. Les mesures B/C sont également attribuées au constructeur,
+avec recalcul des digests et comparaison des objets ; elles ne qualifient
+ni la complétion silencieuse ni les seuils industriels.
 
-GCP non utilisé. Aucun résultat CUDA matériel ni mesure GPU dans cet audit.
+Les résultats détaillés conservent leurs hashes propres ; les objections
+corrigées ne restent pas ouvertes. Le contrôle documentaire global couvre
+maintenant la documentation v7, mais exclut encore `audits/` ; le Markdown
+et les liens de ce dossier sont contrôlés explicitement en complément.
+
+GCP non utilisé par l'auditeur. Aucun résultat CUDA matériel ni mesure GPU
+n'est attribué à ses tests.

@@ -1,0 +1,104 @@
+{
+  "schema": "mhgp7-wide-static-audit-v1",
+  "started_at_utc": "2026-09-04T22:42:52.030539+00:00",
+  "source_before": {
+    "docs/ARITHMETIQUE_PRIMITIVES.md": "59ba7b6cd91f65701c3ae7205087820985979308df5d944f75ff3ab9224e95ff",
+    "docs/PLAN_PORTES_ARITHMETIQUES.md": "40e267f19fab415a1d0b626550371eed6392f0e8b765974b009ef6161edb4ba0",
+    "src/core/wide.hpp": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85",
+    "src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+    "src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "src/core/mutants.hpp": "479cf2761107696d7ec89d8651003a9f0d5c0f47bd0fbda8732bf9449e2df5cd",
+    "src/lanes/level.hpp": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c",
+    "src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+    "src/lanes/q4.hpp": "58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a",
+    "src/pipeline/census.hpp": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be",
+    "tests/selftest.cpp": "a9d3dc956f57f297605e86eecb1644a753ff0cd7e2cf5ef0281161fa2136be2d",
+    "tests/linked_arcs_gate.cpp": "cb11c5e16ba613ee87b2c27848adaa25d5722373f4d16ab5aa151cacfc047614",
+    "CMakeLists.txt": "5fe0a8d61436ef8e7b4cd6e93ef8592bded3d44bbe5b06e23969ed9f0801fda4"
+  },
+  "frame": "exploration_v7_hors_registre/cpu_reference/quantized_u16_input_only/audit_independant_math_and_architecture/not_claimed",
+  "method": "static mathematical review and independent Python integer fixture evaluation; no C++ build or product test",
+  "gcp": "not_used",
+  "python_calculation": {
+    "command": [
+      "python3",
+      "morsehgp3D_v7/audits/receipts_iteration3/wide_integer_fixture.py"
+    ],
+    "environment": {
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "returncode": 0,
+    "stdout": "{\n  \"status\": \"fixture_arithmetic_verified\",\n  \"records\": [\n    {\n      \"name\": \"first_bit_u320_exact_level\",\n      \"domain\": \"generic_numeric_not_geometric\",\n      \"x_num_words\": [\n        0,\n        0,\n        4\n      ],\n      \"x_den\": 1,\n      \"y_num_words\": [\n        1,\n        0,\n        0\n      ],\n      \"y_den\": 85070591730234615865843651857942052864,\n      \"left_words\": [\n        0,\n        0,\n        0,\n        0,\n        1\n      ],\n      \"right_words\": [\n        1,\n        0,\n        0,\n        0,\n        0\n      ],\n      \"nominal_order\": 1,\n      \"python_modeled_drop_w4_order\": -1\n    },\n    {\n      \"name\": \"u320_full_carry\",\n      \"words\": [\n        1,\n        0,\n        18446744073709551615,\n        18446744073709551614,\n        18446744073709551615\n      ]\n    },\n    {\n      \"name\": \"first_bit_u192\",\n      \"words\": [\n        0,\n        0,\n        1\n      ],\n      \"python_modeled_drop_w2_value\": 0\n    },\n    {\n      \"name\": \"u192_valid_product\",\n      \"x\": 79228162514264337593543950335,\n      \"y\": 79228162514264337593543950335,\n      \"words\": [\n        1,\n        18446744065119617024,\n        18446744073709551615\n      ]\n    },\n    {\n      \"name\": \"u192_valid_product\",\n      \"x\": 170141183460469231731687303715884105727,\n      \"y\": 18446744073709551617,\n      \"words\": [\n        18446744073709551615,\n        9223372036854775806,\n        9223372036854775808\n      ]\n    },\n    {\n      \"name\": \"three_squares_valid\",\n      \"one_square_words\": [\n        1,\n        18446744069414584320,\n        4611686018427387903\n      ],\n      \"sum_words\": [\n        3,\n        18446744060824649728,\n        13835058055282163711\n      ],\n      \"second_add_middle_carry\": 1\n    },\n    {\n      \"name\": \"rejected_fixture_domains\",\n      \"u192_boundary_product\": 6277101735386680763835789423207666416102355444464034512896,\n      \"each_square_valid\": true,\n      \"sum_of_two_squares\": 7061739452310015859315263101108624718115149875022038827008,\n      \"rational_crossing\": 1606938044258990275541962092341162602522202993782792835301376,\n      \"cpp_calls\": 0\n    },\n    {\n      \"name\": \"gcd_literals\",\n      \"cases\": [\n        [\n          0,\n          0,\n          0\n        ],\n        [\n          0,\n          340282366920938463463374607431768211455,\n          340282366920938463463374607431768211455\n        ],\n        [\n          340282366920938463463374607431768211455,\n          0,\n          340282366920938463463374607431768211455\n        ],\n        [\n          18446744073709551617,\n          18446744073709551615,\n          1\n        ],\n        [\n          18446744073709551615,\n          18446744073709551617,\n          1\n        ],\n        [\n          170141183460469231731687303715884105728,\n          18446744073709551616,\n          18446744073709551616\n        ],\n        [\n          170141183460469231731687303715884105729,\n          18446744073709551616,\n          1\n        ]\n      ],\n      \"abs_i128_min\": 170141183460469231731687303715884105728\n    },\n    {\n      \"name\": \"floor_literals\",\n      \"cases\": [\n        [\n          -5,\n          2,\n          -3\n        ],\n        [\n          5,\n          -2,\n          -3\n        ],\n        [\n          -4,\n          2,\n          -2\n        ],\n        [\n          -170141183460469231731687303715884105728,\n          1,\n          -170141183460469231731687303715884105728\n        ]\n      ],\n      \"rejected_without_cpp_call\": [\n        [\n          1,\n          0\n        ],\n        [\n          -170141183460469231731687303715884105728,\n          -1\n        ]\n      ]\n    },\n    {\n      \"name\": \"existing_selftest_range\",\n      \"bit_length\": 192,\n      \"words\": [\n        251430615,\n        1402094959460352,\n        13835058055282163712,\n        0,\n        0\n      ]\n    }\n  ],\n  \"product_execution\": false,\n  \"mutant_execution\": false,\n  \"gcp\": \"not_used\"\n}\n",
+    "stderr": "",
+    "script_sha256": "a2e00adfd322672ff787e63d062718ca7aac9c8ac3ceef7c098bd88b32a9a90e"
+  },
+  "source_after": {
+    "docs/ARITHMETIQUE_PRIMITIVES.md": "59ba7b6cd91f65701c3ae7205087820985979308df5d944f75ff3ab9224e95ff",
+    "docs/PLAN_PORTES_ARITHMETIQUES.md": "40e267f19fab415a1d0b626550371eed6392f0e8b765974b009ef6161edb4ba0",
+    "src/core/wide.hpp": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85",
+    "src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+    "src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "src/core/mutants.hpp": "479cf2761107696d7ec89d8651003a9f0d5c0f47bd0fbda8732bf9449e2df5cd",
+    "src/lanes/level.hpp": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c",
+    "src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+    "src/lanes/q4.hpp": "58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a",
+    "src/pipeline/census.hpp": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be",
+    "tests/selftest.cpp": "a9d3dc956f57f297605e86eecb1644a753ff0cd7e2cf5ef0281161fa2136be2d",
+    "tests/linked_arcs_gate.cpp": "cb11c5e16ba613ee87b2c27848adaa25d5722373f4d16ab5aa151cacfc047614",
+    "CMakeLists.txt": "5fe0a8d61436ef8e7b4cd6e93ef8592bded3d44bbe5b06e23969ed9f0801fda4"
+  },
+  "stable_sources": true,
+  "finished_at_utc": "2026-09-04T22:44:16.663573+00:00",
+  "source_after_note": {
+    "docs/ARITHMETIQUE_PRIMITIVES.md": "59ba7b6cd91f65701c3ae7205087820985979308df5d944f75ff3ab9224e95ff",
+    "docs/PLAN_PORTES_ARITHMETIQUES.md": "40e267f19fab415a1d0b626550371eed6392f0e8b765974b009ef6161edb4ba0",
+    "src/core/wide.hpp": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85",
+    "src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+    "src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "src/core/mutants.hpp": "479cf2761107696d7ec89d8651003a9f0d5c0f47bd0fbda8732bf9449e2df5cd",
+    "src/lanes/level.hpp": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c",
+    "src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+    "src/lanes/q4.hpp": "58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a",
+    "src/pipeline/census.hpp": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be",
+    "tests/selftest.cpp": "a9d3dc956f57f297605e86eecb1644a753ff0cd7e2cf5ef0281161fa2136be2d",
+    "tests/linked_arcs_gate.cpp": "cb11c5e16ba613ee87b2c27848adaa25d5722373f4d16ab5aa151cacfc047614",
+    "CMakeLists.txt": "5fe0a8d61436ef8e7b4cd6e93ef8592bded3d44bbe5b06e23969ed9f0801fda4"
+  },
+  "stable_through_note": true,
+  "note_sha256": "156e14174f49f7dc4245c3e4830d0c8ef588e6be08026770faa33c9039030b64",
+  "completed_at_utc": "2026-09-04T22:47:35.708465+00:00",
+  "static_conclusions": {
+    "column_proofs": "confirmed under named capacities",
+    "generic_exact_level_crossing_bound": "less than 2^319 for positive signed i128 denominators",
+    "direct_u16_lane_w4": "zero conditional on reviewed num<2^144 and den<2^108 lane bounds",
+    "u320_minimal_literal_fixture": {
+      "x_num_words": [
+        0,
+        0,
+        4
+      ],
+      "x_den": "1",
+      "y_num_words": [
+        1,
+        0,
+        0
+      ],
+      "y_den": "2^126",
+      "left_crossing": "2^256",
+      "right_crossing": "1",
+      "expected_order": 1,
+      "modeled_drop_w4_order": -1,
+      "geometric_claim": false
+    },
+    "existing_mutant_sites": [
+      "src/core/wide.hpp:39 U192.w[2]",
+      "src/core/wide.hpp:61 U320.w[4]"
+    ],
+    "existing_cmake_gate_for_level_trunc_hi": "none found in pinned CMake",
+    "floor_div128_domain_exclusions": [
+      "den=0",
+      "num=INT128_MIN and den=-1"
+    ],
+    "product_execution": false
+  }
+}

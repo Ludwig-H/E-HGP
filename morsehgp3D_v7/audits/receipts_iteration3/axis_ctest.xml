@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="6"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="0"
+	timestamp="2026-09-04T22:43:22"
+	>
+	<testcase name="mhgp7_axis_bounds" classname="mhgp7_axis_bounds" time="0.0576098" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>OK axis_bounds boxes=1212 axis_points=454697 volume_points=31720 census_queries=45 max_bits=106 rejected_fixtures=10 extended_profile_boxes=4
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_axis_bounds_axis-argmin-floor-only" classname="mhgp7_axis_bounds_axis-argmin-floor-only" time="0.01567" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>DIVERGENCE axis_bounds box=1 min_equal=0 max_equal=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_axis_bounds_axis-argmin-ceil-always" classname="mhgp7_axis_bounds_axis-argmin-ceil-always" time="0.0131409" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>DIVERGENCE axis_bounds box=1 min_equal=0 max_equal=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_axis_bounds_axis-argmin-no-clip" classname="mhgp7_axis_bounds_axis-argmin-no-clip" time="0.0151719" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>DIVERGENCE axis_bounds box=7 min_equal=0 max_equal=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_axis_bounds_axis-argmin-narrow-coefficient" classname="mhgp7_axis_bounds_axis-argmin-narrow-coefficient" time="0.0158627" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>DIVERGENCE axis_bounds box=8 min_equal=0 max_equal=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_axis_bounds_axis-argmin-max-min" classname="mhgp7_axis_bounds_axis-argmin-max-min" time="0.0150631" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>DIVERGENCE axis_bounds box=1 min_equal=1 max_equal=0
+
+</system-out>
+	</testcase>
+</testsuite>
