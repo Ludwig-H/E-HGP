@@ -1,0 +1,134 @@
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:09.9469166Z   PYTHONDONTWRITEBYTECODE: 1
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:09.9469496Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:09.9469952Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:09.9470413Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:09.9470815Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:09.9471226Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:09.9471630Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:09.9472293Z ##[endgroup]
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:10.7042235Z Internal ctest changing into directory: /home/runner/work/E-HGP/E-HGP/build/v7
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:10.8538539Z Test project /home/runner/work/E-HGP/E-HGP/build/v7
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:10.9669378Z         Start   1: mhgp7_arith_selftest
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.0020577Z         Start   2: mhgp7_sha256_selftest
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.0059370Z   1/292 Test   #1: mhgp7_arith_selftest ...............................   Passed    0.01 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.0060563Z         Start   3: mhgp7_families_fixture
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.0154508Z   2/292 Test   #2: mhgp7_sha256_selftest ..............................   Passed    0.01 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.0155434Z         Start   4: mhgp7_families_mutant_overshoot
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.0188437Z   3/292 Test   #3: mhgp7_families_fixture .............................   Passed    0.01 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.0189582Z         Start   5: mhgp7_tree_selftest
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.0233097Z   4/292 Test   #4: mhgp7_families_mutant_overshoot ....................   Passed    0.01 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.0234178Z         Start   6: mhgp7_wspd_ledger
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.0286813Z   5/292 Test   #5: mhgp7_tree_selftest ................................   Passed    0.01 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.0287989Z         Start   7: mhgp7_wspd_ownership
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.0371063Z   6/292 Test   #6: mhgp7_wspd_ledger ..................................   Passed    0.01 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.0372485Z         Start   8: mhgp7_wspd_mutant_cap
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.2902675Z   7/292 Test   #8: mhgp7_wspd_mutant_cap ..............................   Passed    0.25 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.2907553Z         Start   9: mhgp7_wspd_mutant_split
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.5643133Z   8/292 Test   #7: mhgp7_wspd_ownership ...............................   Passed    0.53 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:11.5644315Z         Start  10: mhgp7_contrat_echec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:12.1789676Z   9/292 Test   #9: mhgp7_wspd_mutant_split ............................   Passed    0.89 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:12.1790938Z         Start  11: mhgp7_contrat_echec_census
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:13.5776769Z  10/292 Test  #10: mhgp7_contrat_echec ................................   Passed    2.01 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:13.5777876Z         Start  12: mhgp7_contrat_echec_fold_k2
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:15.8309793Z  11/292 Test  #11: mhgp7_contrat_echec_census .........................   Passed    3.65 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:15.8310946Z         Start  13: mhgp7_contrat_echec_fuite_sum_parents
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:17.7803409Z  12/292 Test  #12: mhgp7_contrat_echec_fold_k2 ........................   Passed    4.20 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:17.7804687Z         Start  14: mhgp7_bad_alloc_temoin
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:19.3488179Z  13/292 Test  #14: mhgp7_bad_alloc_temoin .............................   Passed    1.57 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:19.3489270Z         Start  15: mhgp7_bad_alloc_etage_provision
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:19.3537507Z  14/292 Test  #15: mhgp7_bad_alloc_etage_provision ....................   Passed    0.00 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:19.3542238Z         Start  16: mhgp7_bad_alloc_etage_census
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:20.4887684Z  15/292 Test  #13: mhgp7_contrat_echec_fuite_sum_parents ..............   Passed    4.66 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:20.4915891Z         Start  17: mhgp7_bad_alloc_etage_fold
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:22.7732693Z  16/292 Test  #16: mhgp7_bad_alloc_etage_census .......................   Passed    3.42 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:22.7772185Z         Start  18: mhgp7_e6_grille_objet
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:24.4946900Z  17/292 Test  #17: mhgp7_bad_alloc_etage_fold .........................   Passed    4.01 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:24.4952100Z         Start  19: mhgp7_fused_descent
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:12:28.2288003Z  18/292 Test  #19: mhgp7_fused_descent ................................   Passed    3.73 sec
+--
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:22.6163423Z         Start 203: mhgp7_profil_identite
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:22.7152760Z 172/292 Test #195: mhgp7_fold_cap_mutant_incidences ...................   Passed    3.44 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:22.7173373Z         Start 204: mhgp7_profil_contre_fixture
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:22.7647199Z 173/292 Test #204: mhgp7_profil_contre_fixture ........................   Passed    0.05 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:22.7682850Z         Start 205: mhgp7_plan_keycsr_gate
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:23.4583416Z 174/292 Test #205: mhgp7_plan_keycsr_gate .............................   Passed    0.69 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:23.4584730Z         Start 206: mhgp7_sonde_ablation_gate
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:37.1157418Z 175/292 Test #203: mhgp7_profil_identite ..............................   Passed   14.50 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:37.1158343Z         Start 207: mhgp7_profil_contrat_echec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:38.3917798Z 176/292 Test #207: mhgp7_profil_contrat_echec .........................   Passed    1.28 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:38.3920713Z         Start 208: mhgp7_profil_contrat_echec_k2
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:39.3064935Z 177/292 Test #208: mhgp7_profil_contrat_echec_k2 ......................   Passed    0.91 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:39.3065862Z         Start 209: mhgp7_fold_csr_fixtures
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:39.3294837Z 178/292 Test #209: mhgp7_fold_csr_fixtures ............................   Passed    0.02 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:39.3295615Z         Start 210: mhgp7_fold_csr_offsets
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:39.3341531Z 179/292 Test #210: mhgp7_fold_csr_offsets .............................   Passed    0.00 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:39.3344987Z         Start 211: mhgp7_fold_csr_overflow
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:40.3133495Z 180/292 Test #211: mhgp7_fold_csr_overflow ............................   Passed    0.98 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:40.3134387Z         Start 212: mhgp7_fold_csr_copie
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:42.0551036Z 181/292 Test #212: mhgp7_fold_csr_copie ...............................   Passed    1.74 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:42.0551999Z         Start 213: mhgp7_fold_csr_pipeline
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4540362Z 182/292 Test #206: mhgp7_sonde_ablation_gate ..........................***Failed   29.00 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4543113Z ECHEC porte : --inventaire : rc=0 rc=2 "toolcache/Python/3.12.14/x64/lib) : un code etranger peut se charger avant la premiere ligne du lanceur, dans chaque outil ELF ou dans l'agregateur — jamais grave (lancer sous env -u LD_LIBRARY_PATH)\n"
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4545238Z ECHEC porte : --inventaire : out/intrus.txt et out/SHA256SUMS listes, ./SHA256SUMS racine exclu []
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4546145Z ECHEC porte : --inventaire du nominal == entrees du manifeste publie 
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4547221Z scene 1 : (a) nominal REPS=4 N_LIST='64 128' : reçu publie et fail-closed verifie
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4548082Z scene 2 : (b)(c)(d) REPS=3, N_LIST vide, REPS=0/-4/abc : refus 2 sans trace
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4549117Z scene 3 : (e) copie privee alteree pendant le troisieme tuple : INVALIDE 3, reste en .partial
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4550246Z scene 4 : (f)(g) ligne K=7 omise / touch=nan sur un run : INVALIDE 3 par l'agregateur
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4551224Z scene 5 : (h) alteration entre generation et verification de SHA256SUMS : INVALIDE 3
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4552395Z scene 6 : (i) binaire PRODUIT (refuse --inject=) : refus 2, aucun .partial
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4553414Z scene 7 : (j) taille dupliquee : lanceur refus 2 avant tout run ; META n_list duplique : agregateur 1
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4554848Z scene 8 : (k) hash vide ou hors grammaire 64-hex : agregateur 1 ; sha256sum muet : lanceur refus 2
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4556113Z scene 9 : (l) champ duplique a valeurs differentes (.status code=, META reps=, plan position=, profil touch=) : agregateur 1
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4557477Z scene 10 : (m) carre latin cyclique (equilibre par position, non Williams) : agregateur 1 ; Williams permute : 0
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4558778Z scene 11 : (n) out/intrus.txt, out/SHA256SUMS, out/sub/, .err retire : agregateur 1 ; le lanceur les hache et refuse
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4560197Z scene 12 : (o) runs_effectues/runs_attendus obligatoires (v3 et v2) : agregateur 1 ; schema v2 sans identite : 0 + claim borne ; v1 : 1
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4562038Z scene 13 : (p) ligne profil_reduce malformee (touch=abc, jeton sans =, K non entier, tronquee, exposant, mur/rss dupliques) : agregateur 1
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4563645Z scene 14 : (q) repertoire vide/ ou inattendu, lien, bin/ pollue, intrus racine : agregateur 1 ; vide/ cree apres l'agregateur : INVALIDE 3
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4565347Z scene 15 : (r) protocoles archives alteres/retires : agregateur 1 (hash recalcule != META) ; copie du lanceur alteree apres le manifeste : INVALIDE 3
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4567100Z scene 16 : (s) identite de cible (claim borne) : mutant produit dans un .status/META => 1 ; lanceur a bras hors sonde => 2 ; plan altere en campagne => 3
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4568529Z   (build/v6/mhgp7_profile_sonde absent : claim P2 borne non re-verifie sur la cible reelle)
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4569927Z scene 17 : (t) TOCTOU avant scellement : sortie modifiee apres l'agregateur (manifeste scelle le mute) ou apres le manifeste : INVALIDE 3
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4571656Z scene 18 : (u) diff fail-open : faux diff muet rendant 2 (erreur) ou 1 (different) : INVALIDE 3, jamais « identique »
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4573447Z scene 19 : (v) TOCTOU semantique apres agregation : META statut promu => 3 ; resume forge => 3 par reagregation hors PATH ; interpreteur menteur / relais => refus 2
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4576285Z scene 20 : (w) contrat META exact : statut promu (aussi sous -O) / prefixe etendu / glose reformulee / jeton nu, bras manquant / renomme / permute, injections permutees, sha256 protocoles = 64 zeros, interpreteur relatif / absent : agregateur 1 ; v3 explicite : 0 + claim borne
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4578772Z scene 21 : (x) ligne profil_kind verrouillee : fold_join=0, layout=csr, reduce_v1, +liveness, jeton absent / malforme / duplique, ligne absente / dupliquee : agregateur 1 ; layout=classic : 0 bit-identique
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4580328Z scene 22 : (y) outils hors PATH : faux outils deposes apres la resolution / presents avant / fonctions exportees => jamais executes, publie ; LD_PRELOAD, BASH_ENV, PYTHONPATH => refus 2 ; outil inexistant ou non ELF => refus 2 ; CPUS hors machine => refus 2
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4582141Z scene 23 : (z) liaison commande / META / sortie : argv exact, ligne d'identite, profil_kind, coord ; v5 outils/topologie/cpuset/affinite : agregateur 1 ; v4 explicite : 0 + claim borne
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4583029Z sonde_ablation_gate : 3 controle(s) en echec sur 23 scenes
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4583295Z 
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4583580Z CMake Error at /home/runner/work/E-HGP/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4584070Z   code de sortie 1, attendu 0
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4584245Z 
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4584249Z 
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4584254Z 
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4584403Z         Start 215: mhgp7_fold_csr_refus_inject_vide
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4596753Z 183/292 Test #215: mhgp7_fold_csr_refus_inject_vide ...................   Passed    0.01 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4597645Z         Start 216: mhgp7_fold_csr_refus_mutant_inconnu
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4639594Z 184/292 Test #216: mhgp7_fold_csr_refus_mutant_inconnu ................   Passed    0.00 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4640469Z         Start 217: mhgp7_fold_csr_refus_mutant_hors_cible
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:18:52.4680559Z 185/292 Test #217: mhgp7_fold_csr_refus_mutant_hors_cible .............   Passed    0.00 sec
+--
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:23:16.8854062Z 288/292 Test #335: mhgp7_axis_bounds_axis-argmin-ceil-always ..........   Passed    0.00 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:23:16.8854982Z         Start 336: mhgp7_axis_bounds_axis-argmin-no-clip
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:23:16.8903956Z 289/292 Test #336: mhgp7_axis_bounds_axis-argmin-no-clip ..............   Passed    0.00 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:23:16.8904940Z         Start 337: mhgp7_axis_bounds_axis-argmin-narrow-coefficient
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:23:16.8955505Z 290/292 Test #337: mhgp7_axis_bounds_axis-argmin-narrow-coefficient ...   Passed    0.00 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:23:16.8956521Z         Start 338: mhgp7_axis_bounds_axis-argmin-max-min
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:23:16.8997939Z 291/292 Test #338: mhgp7_axis_bounds_axis-argmin-max-min ..............   Passed    0.00 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.4792314Z 292/292 Test #213: mhgp7_fold_csr_pipeline ............................   Passed  386.42 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.4798600Z 
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.4799001Z 99% tests passed, 1 tests failed out of 292
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.4800163Z 
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.4800359Z Label Time Summary:
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.4800796Z gate         = 1443.27 sec*proc (292 tests)
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.4801374Z oracle       =  16.65 sec*proc (3 tests)
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.4802152Z residence    =  90.99 sec*proc (8 tests)
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.4802486Z 
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.4802656Z Total Test time (real) = 777.63 sec
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.4802954Z 
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.4803119Z The following tests FAILED:
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.4807011Z 	206 - mhgp7_sonde_ablation_gate (Failed)                gate
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.4990137Z Errors while running CTest
+cpu-contracts	Run bounded contracts and causal mutants	2026-09-04T22:25:08.6472460Z ##[error]Process completed with exit code 8.
+

@@ -91,6 +91,12 @@ général des plateaux gardent également leurs contrats propres ouverts.
 
 ## Cloud et CI
 
+L'[erratum de publication](docs/ERRATA_PUBLICATION_20260904.md) documente
+les journaux exclus du premier push par `*.log`, l'échec documentaire CI
+correspondant et une trace smoke mono historique incomplète. Les reçus
+bruts ne sont pas réécrits ; leurs manifestes sont désormais contrôlés
+contre les octets réellement présents dans l'index Git.
+
 Le [reçu GCP initial](receipts/gcp_20260904/created_then_missing_toolchain.json)
 conserve un démarrage gardé G4 SPOT, l'échec avant compilation faute de
 toolchain CPU et l'arrêt certifié de cette génération. Aucun benchmark

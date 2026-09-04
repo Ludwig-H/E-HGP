@@ -1,0 +1,28 @@
+scene 1 : (a) nominal REPS=4 N_LIST='64 128' : reçu publie et fail-closed verifie
+scene 2 : (b)(c)(d) REPS=3, N_LIST vide, REPS=0/-4/abc : refus 2 sans trace
+scene 3 : (e) copie privee alteree pendant le troisieme tuple : INVALIDE 3, reste en .partial
+scene 4 : (f)(g) ligne K=7 omise / touch=nan sur un run : INVALIDE 3 par l'agregateur
+scene 5 : (h) alteration entre generation et verification de SHA256SUMS : INVALIDE 3
+scene 6 : (i) binaire PRODUIT (refuse --inject=) : refus 2, aucun .partial
+scene 7 : (j) taille dupliquee : lanceur refus 2 avant tout run ; META n_list duplique : agregateur 1
+scene 8 : (k) hash vide ou hors grammaire 64-hex : agregateur 1 ; sha256sum muet : lanceur refus 2
+scene 9 : (l) champ duplique a valeurs differentes (.status code=, META reps=, plan position=, profil touch=) : agregateur 1
+scene 10 : (m) carre latin cyclique (equilibre par position, non Williams) : agregateur 1 ; Williams permute : 0
+scene 11 : (n) out/intrus.txt, out/SHA256SUMS, out/sub/, .err retire : agregateur 1 ; le lanceur les hache et refuse
+scene 12 : (o) runs_effectues/runs_attendus obligatoires (v3 et v2) : agregateur 1 ; schema v2 sans identite : 0 + claim borne ; v1 : 1
+scene 13 : (p) ligne profil_reduce malformee (touch=abc, jeton sans =, K non entier, tronquee, exposant, mur/rss dupliques) : agregateur 1
+scene 14 : (q) repertoire vide/ ou inattendu, lien, bin/ pollue, intrus racine : agregateur 1 ; vide/ cree apres l'agregateur : INVALIDE 3
+scene 15 : (r) protocoles archives alteres/retires : agregateur 1 (hash recalcule != META) ; copie du lanceur alteree apres le manifeste : INVALIDE 3
+scene 16 : (s) identite de cible (claim borne) : mutant produit dans un .status/META => 1 ; lanceur a bras hors sonde => 2 ; plan altere en campagne => 3
+  (build/v6/mhgp7_profile_sonde absent : claim P2 borne non re-verifie sur la cible reelle)
+scene 17 : (t) TOCTOU avant scellement : sortie modifiee apres l'agregateur (manifeste scelle le mute) ou apres le manifeste : INVALIDE 3
+scene 18 : (u) diff fail-open : faux diff muet rendant 2 (erreur) ou 1 (different) : INVALIDE 3, jamais « identique »
+scene 19 : (v) TOCTOU semantique apres agregation : META statut promu => 3 ; resume forge => 3 par reagregation hors PATH ; interpreteur menteur / relais => refus 2
+scene 20 : (w) contrat META exact : statut promu (aussi sous -O) / prefixe etendu / glose reformulee / jeton nu, bras manquant / renomme / permute, injections permutees, sha256 protocoles = 64 zeros, interpreteur relatif / absent : agregateur 1 ; v3 explicite : 0 + claim borne
+scene 21 : (x) ligne profil_kind verrouillee : fold_join=0, layout=csr, reduce_v1, +liveness, jeton absent / malforme / duplique, ligne absente / dupliquee : agregateur 1 ; layout=classic : 0 bit-identique
+scene 22 : (y) outils hors PATH : faux outils deposes apres la resolution / presents avant / fonctions exportees => jamais executes, publie ; LD_PRELOAD, BASH_ENV, PYTHONPATH => refus 2 ; outil inexistant ou non ELF => refus 2 ; CPUS hors machine => refus 2
+scene 23 : (z) liaison commande / META / sortie : argv exact, ligne d'identite, profil_kind, coord ; v5 outils/topologie/cpuset/affinite : agregateur 1 ; v4 explicite : 0 + claim borne
+sonde_ablation_gate : 23 scenes vertes (nominal apparie, refus de parametres, copie alteree, agregateur fail-closed, manifeste fatal, binaire produit, taille dupliquee, hash vide, champ duplique, plan non Williams, inventaire exact, compteurs obligatoires, profil malforme, repertoire inattendu, protocoles recalcules, identite de cible bornee, TOCTOU avant scellement, diff fail-open, TOCTOU semantique et reagregation hors PATH, contrat META exact, profil_kind verrouille, outils hors PATH et topologie attestee, liaison commande/META/sortie)
+real 29.40
+user 14.88
+sys 16.31

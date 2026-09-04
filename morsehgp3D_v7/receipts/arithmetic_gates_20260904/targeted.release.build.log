@@ -1,0 +1,6 @@
+[ 50%] Building CXX object CMakeFiles/mhgp7_arithmetic_integer_gate.dir/tests/arithmetic_integer_gate.cpp.o
+[100%] Linking CXX executable mhgp7_arithmetic_integer_gate
+[100%] Built target mhgp7_arithmetic_integer_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_arithmetic_lanes_gate.dir/tests/arithmetic_lanes_gate.cpp.o
+[100%] Linking CXX executable mhgp7_arithmetic_lanes_gate
+[100%] Built target mhgp7_arithmetic_lanes_gate

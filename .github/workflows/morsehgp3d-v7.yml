@@ -7,12 +7,14 @@ on:
       - 'morsehgp3D_v7/**'
       - 'gcp-migration/**'
       - 'tools/check_docs.py'
+      - 'tools/check_v7_receipt_publication.py'
       - '.github/workflows/morsehgp3d-v7.yml'
   pull_request:
     paths:
       - 'morsehgp3D_v7/**'
       - 'gcp-migration/**'
       - 'tools/check_docs.py'
+      - 'tools/check_v7_receipt_publication.py'
       - '.github/workflows/morsehgp3d-v7.yml'
 
 permissions:
@@ -45,7 +47,11 @@ jobs:
           cmake --build build/v7 --parallel 2
 
       - name: Validate documented contracts
-        run: python3 tools/check_docs.py
+        run: |
+          python3 tools/check_docs.py
+          python3 tools/check_v7_receipt_publication.py --selftest
+          python3 -O tools/check_v7_receipt_publication.py --selftest
+          python3 tools/check_v7_receipt_publication.py
 
       - name: Run bounded contracts and causal mutants
         run: |
