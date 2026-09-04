@@ -1,0 +1,65 @@
+{
+  "scope": "read-only checks",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "TMPDIR": "morsehgp3D_v7/audits/.work_iteration2/tmp for global validators"
+  },
+  "checks": [
+    {
+      "name": "docs",
+      "command": [
+        "python3",
+        "tools/check_docs.py"
+      ],
+      "exit_code": 0,
+      "output": "Validated 259 active Markdown files.\n"
+    },
+    {
+      "name": "implementation_status",
+      "command": [
+        "python3",
+        "tools/check_implementation_status.py"
+      ],
+      "exit_code": 0,
+      "output": "Validated 20 implementation phases and their gates.\n"
+    },
+    {
+      "name": "freshness_before_edit",
+      "command": [
+        "python3",
+        "-O",
+        "morsehgp3D_v7/audits/verify_current.py"
+      ],
+      "exit_code": 0,
+      "output": "Audit courant : 116 fichiers conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n"
+    },
+    {
+      "name": "freshness_during_constructor_gate_edit",
+      "command": [
+        "python3",
+        "-O",
+        "morsehgp3D_v7/audits/verify_current.py"
+      ],
+      "exit_code": 1,
+      "output": "Audit à actualiser :\ntests/incidence_campaign_gate.py\n",
+      "interpretation": "source drift detected; pending requalification of updated campaign gate"
+    },
+    {
+      "name": "final_freshness",
+      "command": [
+        "python3",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py"
+      ],
+      "exit_code": 0,
+      "output": "Audit courant : 119 fichiers conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "captured_utc": "2026-09-04T22:03:13.984801+00:00"
+    },
+    {
+      "name": "active_audit_markdown",
+      "receipt": "audit_markdown_iteration2.json",
+      "count": 29,
+      "exit_code": 0
+    }
+  ]
+}

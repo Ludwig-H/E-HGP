@@ -1,0 +1,10 @@
+{
+  "captured_utc": "2026-09-04T21:29:15.697677+00:00",
+  "result": "identical_binary_rebuilt",
+  "binary_sha256": "8a99b5cf5dc2c0622947f6b34880803e4ed347608ea61d56f3e080137bfc4a6b",
+  "earlier_interface_receipt": "interfaces_current.json",
+  "build_source_manifest": "iteration2/source.json",
+  "build_validation": "iteration2/validation.json",
+  "binary_manifest": "iteration2/binaries.json",
+  "scope": "independent Release rebuild matches bytes used by earlier interface audit; no interface run repeated"
+}

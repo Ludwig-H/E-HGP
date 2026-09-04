@@ -1,0 +1,16 @@
+{
+  "captured_utc": "2026-09-04T21:48:05.668304+00:00",
+  "previous_pins": {
+    "docs/PREUVE_HORIZONTALE_COMPOSITION.md": "64a3e7f36cfdb55aa2110908f63536ac321d64410abfdc60ac2d94db4a2c0386",
+    "docs/LECTURE_ET_CONTRATS.md": "d5602b4b3452a2bed3e66a2f78929e3cbcf3dae4f6a489ecca9f58ec2645a848",
+    "docs/CONTRAT_PERFORMANCE.md": null
+  },
+  "reviewed_sources": {
+    "docs/PREUVE_HORIZONTALE_COMPOSITION.md": "5aba4f18a90e4fabf05503ee2e420afbb079b72956ef7ec6bfdafd6ea3422e70",
+    "docs/LECTURE_ET_CONTRATS.md": "d378b3d58bb6f75f7b081085088b0681efce813d3231dec8a9ea8015530a9694",
+    "docs/CONTRAT_PERFORMANCE.md": "d35bab63cfa30de6450794254ad3b12bc49ad3df8488c8f2154f8b688d783834",
+    "docs/QUALIFICATION_S1_PRIMITIVES.md": "3432411df7cd4b7d97d824e5d42fb7877538059aa40359beb23a34098970b303"
+  },
+  "review": "composition document integrates the completed conditional S1 proofs and corrected incidence classification, without changing its geometric premises; performance contract declares whole tower K1..10 at 50k below one second, fallback K1..5, mono-thread first; no performance result claimed; current performance target then proceeds to 100ms with the same scope and massive GCP G4; new primitive qualification separates proof, executed gates and missing obligations. Independent review confirms index/cardinality and GCD type bounds; coefficient-ray wording correction requested in current dialogue.; comparison across s=8,10,12 added to product performance contract, distinct from smax/order; updated primitive qualification reread without reopening conditional geometry.; requested GCD wording correction integrated and checked: primitive coefficient ray, not geometric radius.",
+  "method": "read full performance contract and diffs of previously reviewed composition/entry documents"
+}

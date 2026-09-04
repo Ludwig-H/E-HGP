@@ -1,0 +1,1 @@
+compare_campaign_gate=passed parser_rejections=24 extended_rejections=228 argument_rejections=5 campaigns=16 descendants=1 fake_metrics_only=true

@@ -1,0 +1,225 @@
+{
+  "schema": "mhgp7-audit-interfaces-v1",
+  "public_status": "not_claimed",
+  "binary_sha256": "c7da95a3a83c1e31fdfd95db852fed86f43208e6b1b051dfb36e78baf45e5175",
+  "validator_sha256": "73f686a31c0ac6cf39f26f938e26c67bfc5fa112deb4c99eadb3656b54d610f5",
+  "cli_cases": [
+    {
+      "case": "valid_classic",
+      "exit_code": 0
+    },
+    {
+      "case": "valid_csr_parallel_wide_s",
+      "exit_code": 0
+    },
+    {
+      "case": "valid_normalized_classic_1_threads",
+      "exit_code": 0
+    },
+    {
+      "case": "valid_normalized_csr_4_threads",
+      "exit_code": 0
+    },
+    {
+      "case": "create_only",
+      "exit_code": 2
+    },
+    {
+      "case": "exact_unqualified",
+      "exit_code": 2
+    },
+    {
+      "case": "input_generation_exclusive",
+      "exit_code": 2
+    },
+    {
+      "case": "budget_below_candidate",
+      "exit_code": 2
+    },
+    {
+      "case": "invalid_s",
+      "exit_code": 2
+    },
+    {
+      "case": "invalid_s_suffix",
+      "exit_code": 2
+    },
+    {
+      "case": "invalid_thread_count",
+      "exit_code": 2
+    },
+    {
+      "case": "unknown_layout",
+      "exit_code": 2
+    },
+    {
+      "case": "product_mutant_rejected",
+      "exit_code": 2
+    },
+    {
+      "case": "duplicate_id",
+      "exit_code": 2
+    },
+    {
+      "case": "duplicate_position",
+      "exit_code": 2
+    },
+    {
+      "case": "id_overflow",
+      "exit_code": 2
+    },
+    {
+      "case": "coordinate_overflow",
+      "exit_code": 2
+    },
+    {
+      "case": "negative_coordinate",
+      "exit_code": 2
+    },
+    {
+      "case": "signed_id",
+      "exit_code": 2
+    },
+    {
+      "case": "decimal_coordinate",
+      "exit_code": 2
+    },
+    {
+      "case": "exponent_coordinate",
+      "exit_code": 2
+    },
+    {
+      "case": "missing_field",
+      "exit_code": 2
+    },
+    {
+      "case": "extra_field",
+      "exit_code": 2
+    },
+    {
+      "case": "nul_byte",
+      "exit_code": 2
+    },
+    {
+      "case": "line_limit",
+      "exit_code": 2
+    },
+    {
+      "case": "one_point",
+      "exit_code": 2
+    }
+  ],
+  "mutants": [
+    {
+      "name": "reset_final_partition",
+      "forest_semantics": "verified_events_only",
+      "k": 1,
+      "product_reader_rejected": true,
+      "independent_rejection": "terminal partition differs from delta replay"
+    },
+    {
+      "name": "collapse_batches",
+      "forest_semantics": "verified_events_only",
+      "k": 1,
+      "product_reader_rejected": true,
+      "independent_rejection": "one batch has different exact levels"
+    },
+    {
+      "name": "wrong_delta_output",
+      "forest_semantics": "verified_events_only",
+      "k": 1,
+      "product_reader_rejected": true,
+      "independent_rejection": "delta output is not the canonical component"
+    },
+    {
+      "name": "reset_final_partition",
+      "forest_semantics": "normalized_horizontal_h0_candidate",
+      "k": 2,
+      "product_reader_rejected": true,
+      "independent_rejection": "terminal partition differs from delta replay"
+    },
+    {
+      "name": "collapse_batches",
+      "forest_semantics": "normalized_horizontal_h0_candidate",
+      "k": 2,
+      "product_reader_rejected": true,
+      "independent_rejection": "one batch has different exact levels"
+    },
+    {
+      "name": "wrong_delta_output",
+      "forest_semantics": "normalized_horizontal_h0_candidate",
+      "k": 2,
+      "product_reader_rejected": true,
+      "independent_rejection": "delta output is not the canonical component"
+    }
+  ],
+  "normalized_archives": [
+    {
+      "layout": "classic",
+      "threads": 1,
+      "forest_semantics": "normalized_horizontal_h0_candidate",
+      "digests": [
+        "a32442435537747b5c48e679f87f95addceaf8f1e6c0908aa16f2306a9725469",
+        "fd17cdfb01a7b683b7a7c81a4cd7dabe0881c40f62b7ff9d60c9982a83724163",
+        "dc921c3b36635221637de120375b5a93daea56c4a6f9b7332b7bfba812cad8e7"
+      ],
+      "stats": [
+        {
+          "k": 1,
+          "facets": 5,
+          "deltas": 3,
+          "parents": 7,
+          "born": 0
+        },
+        {
+          "k": 2,
+          "facets": 10,
+          "deltas": 6,
+          "parents": 5,
+          "born": 10
+        },
+        {
+          "k": 3,
+          "facets": 10,
+          "deltas": 4,
+          "parents": 3,
+          "born": 10
+        }
+      ]
+    },
+    {
+      "layout": "csr",
+      "threads": 4,
+      "forest_semantics": "normalized_horizontal_h0_candidate",
+      "digests": [
+        "a32442435537747b5c48e679f87f95addceaf8f1e6c0908aa16f2306a9725469",
+        "fd17cdfb01a7b683b7a7c81a4cd7dabe0881c40f62b7ff9d60c9982a83724163",
+        "dc921c3b36635221637de120375b5a93daea56c4a6f9b7332b7bfba812cad8e7"
+      ],
+      "stats": [
+        {
+          "k": 1,
+          "facets": 5,
+          "deltas": 3,
+          "parents": 7,
+          "born": 0
+        },
+        {
+          "k": 2,
+          "facets": 10,
+          "deltas": 6,
+          "parents": 5,
+          "born": 10
+        },
+        {
+          "k": 3,
+          "facets": 10,
+          "deltas": 4,
+          "parents": 3,
+          "born": 10
+        }
+      ]
+    }
+  ],
+  "normalized_wire_equal": true
+}

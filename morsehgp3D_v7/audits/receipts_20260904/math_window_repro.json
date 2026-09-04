@@ -1,0 +1,102 @@
+{
+  "timestamp": "2026-09-04T21:02:37.711741+00:00",
+  "source_snapshot": "math_window_source_snapshot.json",
+  "fixture_sha256": "993917f5653d7fdcdccd5cb8809d07892e136e5017109d40431e748fb127e593",
+  "binary_sha256": "2a438ac1fd1d287f63773f897ced256aa385abcd178ac89bab6af492d6e39abb",
+  "compile_exit_code": 0,
+  "compile_flags": "-std=c++20 -O3 -Wall -Wextra -Wpedantic -Werror -DMHGP7_TESTING=1 -pthread",
+  "runs": [
+    {
+      "args": [
+        "--boundary-inside"
+      ],
+      "exit_code": 0,
+      "stdout": "window n=12 smax=11 reverse=0 supports=138 unique=138 relevant=138 omitted=0 boundary_q2=1 boundary_q3=2 boundary_q4=0 beyond_q2=0 beyond_q3=0 beyond_q4=0 plateau_relevant=1 plateau_omitted=0 actual=138 source_ok=1\npipeline status=1 expected=1 callbacks=0 direct=0 silent_judged=0 core_contacts=0 cuts=0 delta_cuts=0 failure_total=0 reason=unsupported_degeneracy : incidence completion requires no rank-relevant extra-shell\nwindow_verdict failures=0 overflow=0 mutant=0\n",
+      "stderr": "",
+      "seconds": 0.05340094499933912
+    },
+    {
+      "args": [
+        "--boundary-outside"
+      ],
+      "exit_code": 0,
+      "stdout": "window n=13 smax=11 reverse=0 supports=182 unique=182 relevant=179 omitted=3 boundary_q2=1 boundary_q3=3 boundary_q4=1 beyond_q2=1 beyond_q3=2 beyond_q4=0 plateau_relevant=0 plateau_omitted=1 actual=179 source_ok=1\npipeline status=0 expected=0 callbacks=10 direct=179 silent_judged=1 core_contacts=88 cuts=728 delta_cuts=302 failure_total=0 reason=\nwindow_verdict failures=0 overflow=0 mutant=0\n",
+      "stderr": "",
+      "seconds": 0.9090822879998086
+    },
+    {
+      "args": [
+        "--mutant=depth-threshold-minus-one"
+      ],
+      "exit_code": 4,
+      "stdout": "window n=13 smax=11 reverse=0 supports=243 unique=243 relevant=239 omitted=4 boundary_q2=0 boundary_q3=5 boundary_q4=1 beyond_q2=1 beyond_q3=2 beyond_q4=1 plateau_relevant=0 plateau_omitted=0 actual=233 source_ok=0\nwindow_verdict failures=0 overflow=0 mutant=1\n",
+      "stderr": "",
+      "seconds": 0.08678009899995232
+    },
+    {
+      "args": [
+        "--mutant=shell-rank"
+      ],
+      "exit_code": 4,
+      "stdout": "audit_mutation=shell_cardinality_as_support_arity removed=1 callbacks=10 observed_status=0 required_nominal_status=1 failures=0\nwindow_verdict failures=0 overflow=0 mutant=1\n",
+      "stderr": "",
+      "seconds": 0.03259301799971581
+    },
+    {
+      "args": [
+        "--random",
+        "13",
+        "132741"
+      ],
+      "exit_code": 0,
+      "stdout": "window n=13 smax=11 reverse=0 supports=243 unique=243 relevant=239 omitted=4 boundary_q2=0 boundary_q3=5 boundary_q4=1 beyond_q2=1 beyond_q3=2 beyond_q4=1 plateau_relevant=0 plateau_omitted=0 actual=239 source_ok=1\npipeline status=0 expected=0 callbacks=10 direct=239 silent_judged=0 core_contacts=0 cuts=728 delta_cuts=368 failure_total=0 reason=\nwindow_verdict failures=0 overflow=0 mutant=0\n",
+      "stderr": "",
+      "seconds": 1.0052830269996775
+    },
+    {
+      "args": [
+        "--random",
+        "13",
+        "132741",
+        "reverse"
+      ],
+      "exit_code": 0,
+      "stdout": "window n=13 smax=11 reverse=1 supports=243 unique=243 relevant=239 omitted=4 boundary_q2=0 boundary_q3=5 boundary_q4=1 beyond_q2=1 beyond_q3=2 beyond_q4=1 plateau_relevant=0 plateau_omitted=0 actual=239 source_ok=1\npipeline status=0 expected=0 callbacks=10 direct=239 silent_judged=0 core_contacts=0 cuts=728 delta_cuts=368 failure_total=0 reason=\nwindow_verdict failures=0 overflow=0 mutant=0\n",
+      "stderr": "",
+      "seconds": 1.3298625689994878
+    },
+    {
+      "args": [
+        "--random",
+        "13",
+        "712391"
+      ],
+      "exit_code": 0,
+      "stdout": "window n=13 smax=11 reverse=0 supports=256 unique=256 relevant=251 omitted=5 boundary_q2=0 boundary_q3=4 boundary_q4=3 beyond_q2=0 beyond_q3=3 beyond_q4=2 plateau_relevant=0 plateau_omitted=0 actual=251 source_ok=1\npipeline status=0 expected=0 callbacks=10 direct=251 silent_judged=0 core_contacts=0 cuts=728 delta_cuts=384 failure_total=0 reason=\nwindow_verdict failures=0 overflow=0 mutant=0\n",
+      "stderr": "",
+      "seconds": 1.0593802109997341
+    },
+    {
+      "args": [
+        "--random",
+        "16",
+        "391749"
+      ],
+      "exit_code": 0,
+      "stdout": "window n=16 smax=11 reverse=0 supports=515 unique=515 relevant=464 omitted=51 boundary_q2=2 boundary_q3=16 boundary_q4=7 beyond_q2=1 beyond_q3=29 beyond_q4=21 plateau_relevant=0 plateau_omitted=0 actual=464 source_ok=1\nwindow_verdict failures=0 overflow=0 mutant=0\n",
+      "stderr": "",
+      "seconds": 0.14838703400073427
+    },
+    {
+      "args": [
+        "--random",
+        "24",
+        "777931"
+      ],
+      "exit_code": 0,
+      "stdout": "window n=24 smax=11 reverse=0 supports=1601 unique=1601 relevant=1079 omitted=522 boundary_q2=6 boundary_q3=59 boundary_q4=46 beyond_q2=39 beyond_q3=246 beyond_q4=237 plateau_relevant=0 plateau_omitted=0 actual=1079 source_ok=1\nwindow_verdict failures=0 overflow=0 mutant=0\n",
+      "stderr": "",
+      "seconds": 0.6983459450002556
+    }
+  ]
+}

@@ -1,0 +1,658 @@
+--- mono_snapshot/src/pipeline/census.hpp
++++ review_snapshot/src/pipeline/census.hpp
+@@ -60,19 +60,37 @@
+ 
+ struct AxisBounds {
+   const BallKey& k;
++  i64 integer_min[3];
++  // Conservative u16 lane bounds (QUALIFICATION_S1_PRIMITIVES, section 4):
++  // 0 < A < 2^68, |B_i| < 2^87, |C| < 2^105. These deliberately include
++  // more than the narrower historical comment in lanes/keys.hpp.
++  // q=floor(-B_i/(2A)), r=-B_i-2Aq: f(q+1)-f(q)=A-r.
++  // Cache a global INTEGER minimizer (ties choose q), clipped to u16 before
++  // narrowing. Further clipping to any index box gives its exact minimum.
++  // No polynomial evaluation at the potentially distant rational centre.
++  // |2Aq| <= |B_i| + 2A < 2^88, so computing the remainder is safe in i128.
++  explicit AxisBounds(const BallKey& key) : k(key) {
++    const i128 twice_a = 2 * k.a;
++    for (int i = 0; i < 3; ++i) {
++      const i128 b = MHGP7_MUTANT("axis-argmin-narrow-coefficient") ? (i128)(i64)k.b[i] : k.b[i];
++      const i128 q = floor_div128(-b, twice_a);
++      const i128 r = -b - twice_a * q;
++      i128 m = q + (r > k.a ? 1 : 0);
++      if (MHGP7_MUTANT("axis-argmin-floor-only")) m = q;
++      if (MHGP7_MUTANT("axis-argmin-ceil-always")) m = q + 1;
++      integer_min[i] = (i64)std::min(std::max(m, (i128)0), (i128)65535);
++    }
++  }
+   i128 axis_val(int i, i64 t) const { return k.a * ((i128)t * t) + k.b[i] * t; }
+   i128 axis_min(int i, i64 lo, i64 hi) const {
+-    const i64 t1 = (i64)floor_div128(-k.b[i], 2 * k.a);
+-    i128 best = 0;
+-    bool first = true;
+-    for (const i64 cand : {t1, t1 + 1, lo, hi}) {
+-      const i64 c = std::min(std::max(cand, lo), hi);
+-      const i128 v = axis_val(i, c);
+-      if (first || v < best) { best = v; first = false; }
+-    }
+-    return best;
+-  }
+-  i128 axis_max(int i, i64 lo, i64 hi) const { return std::max(axis_val(i, lo), axis_val(i, hi)); }
++    const i64 t = MHGP7_MUTANT("axis-argmin-no-clip") ? integer_min[i]
++                  : std::min(std::max(integer_min[i], lo), hi);
++    return axis_val(i, t);
++  }
++  i128 axis_max(int i, i64 lo, i64 hi) const {
++    if (MHGP7_MUTANT("axis-argmin-max-min")) return std::min(axis_val(i, lo), axis_val(i, hi));
++    return std::max(axis_val(i, lo), axis_val(i, hi));
++  }
+   void bounds(const AxisBox& bz, i128* mn, i128* mx) const {
+     *mn = k.c;
+     *mx = k.c;
+@@ -189,4 +207,3 @@
+ }
+ 
+ }  // namespace mhgp7
+-
+--- mono_snapshot/src/core/mutants.hpp
++++ review_snapshot/src/core/mutants.hpp
+@@ -131,6 +131,8 @@
+     "parallel-admit-partial-launch", "census-direct-offset", "census-direct-publish-prefix",
+     "silent-drop-coface",
+     "reduced-latent-parent", "reduced-drop-materialization",
++    "axis-argmin-floor-only", "axis-argmin-ceil-always", "axis-argmin-no-clip",
++    "axis-argmin-narrow-coefficient", "axis-argmin-max-min",
+ };
+ 
+ inline std::vector<std::string>& mutant_registry() {
+--- mono_snapshot/CMakeLists.txt
++++ review_snapshot/CMakeLists.txt
+@@ -835,6 +835,20 @@
+ mhgp7_gate(mhgp7_mono_inline_early_alloc 0 mhgp7_mono_inline_gate TIMEOUT 120
+            ARGS --inject=caps-throw-bad-alloc-fold EXPECT_PREFIX "mono_inline_injected=passed cases=2 failures=0")
+ 
++# Census : argmin entier global puis clip par boite, oracle OBig exhaustif
++# borne et mutants a divergence explicite (pas n'importe quel echec).
++mhgp7_executable(mhgp7_axis_bounds_gate tests/axis_bounds_gate.cpp)
++mhgp7_gate(mhgp7_axis_bounds 0 mhgp7_axis_bounds_gate TIMEOUT 30
++           EXPECT_PREFIX "OK axis_bounds boxes=")
++foreach(mut IN ITEMS axis-argmin-floor-only axis-argmin-ceil-always axis-argmin-no-clip
++                     axis-argmin-narrow-coefficient axis-argmin-max-min)
++  mhgp7_gate(mhgp7_axis_bounds_${mut} 4 mhgp7_axis_bounds_gate TIMEOUT 30
++             ARGS ${mut} EXPECT_PREFIX "DIVERGENCE axis_bounds")
++endforeach()
++# Mesure synthetique facultative : hors ALL, sans mutant et sans seuil CTest.
++add_executable(mhgp7_axis_bounds_microbench EXCLUDE_FROM_ALL bench/axis_bounds_microbench.cpp)
++target_link_libraries(mhgp7_axis_bounds_microbench PRIVATE Threads::Threads)
++
+ # ---- CUDA (serie C, docs/GPU.md) : OFF par defaut, JAMAIS construit en CI.
+ # Les portes `gpu` ne s'executent qu'en session G4 (sm_120, RTX PRO 6000
+ # Blackwell). -fmad=false : aucune contraction implicite ; le socle serie C
+--- mono_snapshot/tests/axis_bounds_gate.cpp
++++ review_snapshot/tests/axis_bounds_gate.cpp
+@@ -0,0 +1,189 @@
++// Standalone overlay qualification. OBig enumeration, no shared argmin/division.
++#include <algorithm>
++#include <cstdio>
++#include <random>
++#include <string>
++#include <vector>
++
++#include "../src/pipeline/census.hpp"
++#include "../oracle/obig.hpp"
++
++namespace {
++using namespace mhgp7;
++using Big = mhgp7_oracle::OBig<8>;
++u64 boxes_seen = 0, axis_points = 0, volume_points = 0, census_queries = 0;
++u64 extended_profile_boxes = 0;
++int max_bits = 0;
++
++Big axis_value(const BallKey& k, int axis, i64 t) {
++  const Big x = Big::from_i64(t);
++  return Big::from_i128(k.a) * x * x + Big::from_i128(k.b[axis]) * x;
++}
++Big point_value(const BallKey& k, i64 x, i64 y, i64 z) {
++  return Big::from_i128(k.c) + axis_value(k, 0, x) + axis_value(k, 1, y) + axis_value(k, 2, z);
++}
++
++// This is a FIXTURE domain check, not a new product validation API. Invalid
++// polynomial/box inputs never reach AxisBounds (which has preconditions).
++bool fixture_in_profile(const BallKey& k, const AxisBox& b) {
++  if (k.a <= 0 || k.a >= ((i128)1 << 68)) return false;
++  if (k.c <= -((i128)1 << 105) || k.c >= ((i128)1 << 105)) return false;
++  for (int i = 0; i < 3; ++i) {
++    if (k.b[i] <= -((i128)1 << 87) || k.b[i] >= ((i128)1 << 87)) return false;
++    if (b.lo[i] < 0 || b.hi[i] > kCoordMax || b.lo[i] > b.hi[i]) return false;
++  }
++  return true;
++}
++
++bool check_box(const BallKey& k, const AxisBox& b, bool full_volume = false) {
++  if (!fixture_in_profile(k, b)) return false;
++  bool beyond_old_b = false;
++  for (int i = 0; i < 3; ++i)
++    beyond_old_b = beyond_old_b || k.b[i] <= -((i128)1 << 86) || k.b[i] >= ((i128)1 << 86);
++  const bool beyond_old_c = k.c <= -((i128)1 << 104) || k.c >= ((i128)1 << 104);
++  if (beyond_old_b && beyond_old_c) ++extended_profile_boxes;
++  Big mn = Big::from_i128(k.c), mx = mn;
++  for (int i = 0; i < 3; ++i) {
++    Big low = axis_value(k, i, b.lo[i]), high = low;
++    for (i64 t = b.lo[i]; t <= b.hi[i]; ++t) {
++      const Big v = axis_value(k, i, t);
++      low = std::min(low, v);
++      high = std::max(high, v);
++      ++axis_points;
++    }
++    mn = mn + low;
++    mx = mx + high;
++  }
++  max_bits = std::max({max_bits, mn.bit_length(), mx.bit_length()});
++  if (full_volume) {
++    Big vmin = point_value(k, b.lo[0], b.lo[1], b.lo[2]), vmax = vmin;
++    for (i64 x = b.lo[0]; x <= b.hi[0]; ++x)
++      for (i64 y = b.lo[1]; y <= b.hi[1]; ++y)
++        for (i64 z = b.lo[2]; z <= b.hi[2]; ++z) {
++          const Big v = point_value(k, x, y, z);
++          vmin = std::min(vmin, v);
++          vmax = std::max(vmax, v);
++          ++volume_points;
++        }
++    if (mn != vmin || mx != vmax) return false;
++  }
++  i128 actual_min = 0, actual_max = 0;
++  census_detail::AxisBounds(k).bounds(b, &actual_min, &actual_max);
++  ++boxes_seen;
++  if (Big::from_i128(actual_min) != mn || Big::from_i128(actual_max) != mx) {
++    std::printf("DIVERGENCE axis_bounds box=%llu min_equal=%d max_equal=%d\n",
++                (unsigned long long)boxes_seen, Big::from_i128(actual_min) == mn,
++                Big::from_i128(actual_max) == mx);
++    return false;
++  }
++  return !mhgp7_oracle::overflow_seen();
++}
++
++bool check_census() {
++  std::vector<P3> points;
++  for (i64 x = 0; x <= 8; ++x)
++    for (i64 y = 0; y <= 8; ++y)
++      for (i64 z = 0; z <= 8; ++z) points.push_back({x, y, z});
++  const CloudIndex index = build_cloud_index(points);
++  if (!index.valid || index.has_duplicate_positions()) return false;
++  std::vector<NodeRef> scratch;
++  for (i64 radius_squared : {0, 1, 2, 5, 9, 16, 25, 48, 49}) {
++    const BallKey k{1, {-8, -8, -8}, 48 - radius_squared};
++    std::vector<i32> expected_interior, expected_shell, interior, shell;
++    for (i32 i = 0; i < index.unique_count(); ++i) {
++      const P3& p = index.upos[(size_t)i];
++      const Big v = point_value(k, p.x, p.y, p.z);
++      if (v < Big{}) expected_interior.push_back(i);
++      else if (v == Big{}) expected_shell.push_back(i);
++    }
++    if (ball_census(index, k, points.size(), points.size(), &interior, &shell, nullptr, &scratch)
++        != CensusStatus::kOk) return false;
++    std::sort(interior.begin(), interior.end());
++    std::sort(shell.begin(), shell.end());
++    if (interior != expected_interior || shell != expected_shell) return false;
++    for (u64 threshold : {1ull, 2ull, 10ull, 729ull, 730ull}) {
++      u64 count = 0;
++      const bool got = ball_depth_at_least(index, k, threshold, &count, nullptr, &scratch);
++      if (got != (expected_interior.size() >= threshold)) return false;
++      if (!got && count != expected_interior.size()) return false;
++      ++census_queries;
++    }
++    if (!expected_interior.empty() && ball_census(index, k, expected_interior.size() - 1,
++        points.size(), &interior, &shell) != CensusStatus::kInteriorOverflow) return false;
++    if (!expected_shell.empty() && ball_census(index, k, points.size(), expected_shell.size() - 1,
++        &interior, &shell) != CensusStatus::kShellOverflow) return false;
++  }
++  const std::vector<P3> invalid_points{{-1, 0, 0}, {0, 0, 0}};
++  return !build_cloud_index(invalid_points).valid;
++}
++
++bool run_gate() {
++  const AxisBox small{{0, 0, 0}, {8, 8, 8}};
++  // r>A, r<A, r=A, integer centre; all axes and clamping boundaries.
++  for (i128 b : {-15, -13, -14, -16, 7, -31})
++    if (!check_box(BallKey{2, {b, b + 1, b - 1}, 43}, small, true)) return false;
++  if (!check_box(BallKey{2, {-15, -15, -15}, 0}, AxisBox{{6, 0, 2}, {8, 1, 3}}, true)) return false;
++  const i128 wide_a = ((i128)1 << 67) + 17;
++  if (!check_box(BallKey{wide_a, {-7 * wide_a, -9 * wide_a, -11 * wide_a}, -((i128)1 << 103)}, small, true)) return false;
++  // Near profile limits, with centres far beyond u16 or i64. No distant
++  // polynomial is evaluated; the gate's enumeration stays in u16.
++  const AxisBox entire{{0, 0, 0}, {65535, 65535, 65535}};
++  if (!check_box(BallKey{1, {-(((i128)1 << 87) - 1), ((i128)1 << 87) - 1, 0},
++                        ((i128)1 << 105) - 1}, entire)) return false;
++  if (!check_box(BallKey{((i128)1 << 68) - 1,
++                        {-(((i128)1 << 87) - 1), ((i128)1 << 87) - 1, -2},
++                        -(((i128)1 << 105) - 1)}, entire)) return false;
++  // The historical keys.hpp limits themselves are VALID, not rejections,
++  // in the conservative S1 domain. Exercise both signs at these cutoffs.
++  if (!check_box(BallKey{wide_a, {(i128)1 << 86, -((i128)1 << 86), 0},
++                        (i128)1 << 104}, small, true)) return false;
++  if (!check_box(BallKey{wide_a, {-((i128)1 << 86), (i128)1 << 86, 0},
++                        -((i128)1 << 104)}, small, true)) return false;
++  std::mt19937_64 random(0xa815b0);
++  for (int n = 0; n < 1200; ++n) {
++    BallKey k{(i128)(1 + random() % 10000), {}, (i128)(random() % 1000000)};
++    AxisBox box{};
++    for (int i = 0; i < 3; ++i) {
++      box.lo[i] = (i64)(random() % 65536);
++      box.hi[i] = std::min((i64)65535, box.lo[i] + (i64)(random() % 33));
++      const i64 centre = box.lo[i] + (i64)(random() % 65) - 16;
++      k.b[i] = -2 * k.a * centre + (i128)(random() % (u64)(2 * k.a));
++    }
++    if (!check_box(k, box, n < 8)) return false;
++  }
++  BallKey invalid{1, {0, 0, 0}, 0};
++  AxisBox invalid_box = small;
++  int rejected = 0;
++  invalid.a = 0; rejected += !fixture_in_profile(invalid, small);
++  invalid.a = -1; rejected += !fixture_in_profile(invalid, small);
++  invalid.a = (i128)1 << 68; rejected += !fixture_in_profile(invalid, small);
++  invalid.a = 1; invalid.b[1] = (i128)1 << 87; rejected += !fixture_in_profile(invalid, small);
++  invalid.b[1] = -((i128)1 << 87); rejected += !fixture_in_profile(invalid, small);
++  invalid.b[1] = 0; invalid.c = -((i128)1 << 105); rejected += !fixture_in_profile(invalid, small);
++  invalid.c = (i128)1 << 105; rejected += !fixture_in_profile(invalid, small);
++  invalid.c = 0; invalid_box.lo[0] = -1; rejected += !fixture_in_profile(invalid, invalid_box);
++  invalid_box = small; invalid_box.hi[1] = 65536; rejected += !fixture_in_profile(invalid, invalid_box);
++  invalid_box = small; invalid_box.lo[2] = 9; rejected += !fixture_in_profile(invalid, invalid_box);
++  if (rejected != 10 || !check_census()) return false;
++  return boxes_seen >= 1212 && axis_points >= 400000 && volume_points >= 5000
++         && census_queries == 45 && max_bits >= 106 && extended_profile_boxes >= 4
++         && !mhgp7_oracle::overflow_seen();
++}
++}  // namespace
++
++int main(int argc, char** argv) {
++  if (argc > 2 || (argc == 2 && !mhgp7::mutants_enable(argv[1]))) return 2;
++  mhgp7_oracle::clear_overflow();
++  const bool ok = run_gate();
++  if (mhgp7_oracle::overflow_seen()) return 3;
++  if (!ok) return mhgp7::mutants_any() ? 4 : 1;
++  if (mhgp7::mutants_any()) {
++    std::puts("SURVIVED axis_bounds mutant");
++    return 1;
++  }
++  std::printf("OK axis_bounds boxes=%llu axis_points=%llu volume_points=%llu census_queries=%llu max_bits=%d rejected_fixtures=10 extended_profile_boxes=%llu\n",
++              (unsigned long long)boxes_seen, (unsigned long long)axis_points,
++              (unsigned long long)volume_points, (unsigned long long)census_queries, max_bits,
++              (unsigned long long)extended_profile_boxes);
++  return 0;
++}
+--- mono_snapshot/bench/axis_bounds_microbench.cpp
++++ review_snapshot/bench/axis_bounds_microbench.cpp
+@@ -0,0 +1,141 @@
++// Bounded scalar microbenchmark, not an end-to-end performance receipt.
++#include <chrono>
++#include <cstdio>
++#include <cstdlib>
++#include <random>
++#include <vector>
++
++#include "../src/pipeline/census.hpp"
++
++namespace {
++using namespace mhgp7;
++
++// Frozen pre-optimization AxisBounds body, renamed only. This differential
++// comparator is NOT the correctness oracle (see OBig enumeration gate).
++struct BaselineAxis {
++  const BallKey& k;
++  i128 axis_val(int i, i64 t) const { return k.a * ((i128)t * t) + k.b[i] * t; }
++  i128 axis_min(int i, i64 lo, i64 hi) const {
++    const i64 t1 = (i64)floor_div128(-k.b[i], 2 * k.a);
++    i128 best = 0;
++    bool first = true;
++    for (const i64 cand : {t1, t1 + 1, lo, hi}) {
++      const i64 c = std::min(std::max(cand, lo), hi);
++      const i128 v = axis_val(i, c);
++      if (first || v < best) { best = v; first = false; }
++    }
++    return best;
++  }
++  i128 axis_max(int i, i64 lo, i64 hi) const { return std::max(axis_val(i, lo), axis_val(i, hi)); }
++  void bounds(const AxisBox& bz, i128* mn, i128* mx) const {
++    *mn = k.c;
++    *mx = k.c;
++    for (int i = 0; i < 3; ++i) {
++      *mn += axis_min(i, bz.lo[i], bz.hi[i]);
++      *mx += axis_max(i, bz.lo[i], bz.hi[i]);
++    }
++  }
++};
++
++struct FloorCacheAxis : BaselineAxis {
++  i64 floor_vertex[3];
++  explicit FloorCacheAxis(const BallKey& key) : BaselineAxis{key} {
++    for (int i = 0; i < 3; ++i) floor_vertex[i] = (i64)floor_div128(-k.b[i], 2 * k.a);
++  }
++  i128 axis_min(int i, i64 lo, i64 hi) const {
++    i128 best = 0;
++    bool first = true;
++    for (const i64 cand : {floor_vertex[i], floor_vertex[i] + 1, lo, hi}) {
++      const i64 c = std::min(std::max(cand, lo), hi);
++      const i128 v = axis_val(i, c);
++      if (first || v < best) { best = v; first = false; }
++    }
++    return best;
++  }
++  void bounds(const AxisBox& box, i128* mn, i128* mx) const {
++    *mn = k.c; *mx = k.c;
++    for (int i = 0; i < 3; ++i) {
++      *mn += axis_min(i, box.lo[i], box.hi[i]);
++      *mx += axis_max(i, box.lo[i], box.hi[i]);
++    }
++  }
++};
++
++struct Input {
++  std::vector<BallKey> keys;
++  std::vector<AxisBox> boxes;
++  int boxes_per_ball = 0;
++};
++
++template <class Bounds, bool MinOnly>
++__attribute__((noinline)) u64 evaluate(Input* input, int passes) {
++  u64 digest = 0;
++  for (int p = 0; p < passes; ++p) {
++    // Observable changing input prevents loop-invariant elimination of the
++    // repeated workload. Every variant starts from its own identical copy.
++    input->keys[(size_t)p % input->keys.size()].c += 1;
++    for (size_t i = 0; i < input->keys.size(); ++i) {
++      const Bounds bounds{input->keys[i]};
++      for (int j = 0; j < input->boxes_per_ball; ++j) {
++        i128 mn = 0, mx = 0;
++        bounds.bounds(input->boxes[i * (size_t)input->boxes_per_ball + (size_t)j], &mn, &mx);
++        const u128 low = (u128)mn;
++        const u128 high = MinOnly ? 0 : (u128)mx;
++        digest += (u64)low ^ (u64)(low >> 64) ^ (u64)high ^ (u64)(high >> 64);
++      }
++    }
++  }
++  return digest;
++}
++
++template <bool MinOnly>
++bool measure(const Input& original, int passes) {
++  u64 expected = 0;
++  for (int trial = 0; trial < 5; ++trial) {
++    for (int slot = 0; slot < 3; ++slot) {
++      const int variant = (slot + trial) % 3;
++      Input input = original;  // allocations/copies outside the timed region
++      const auto begin = std::chrono::steady_clock::now();
++      const u64 digest = variant == 0 ? evaluate<BaselineAxis, MinOnly>(&input, passes)
++                         : variant == 1 ? evaluate<FloorCacheAxis, MinOnly>(&input, passes)
++                         : evaluate<census_detail::AxisBounds, MinOnly>(&input, passes);
++      const double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - begin).count();
++      if (trial == 0 && slot == 0) expected = digest;
++      if (digest != expected) return false;
++      std::printf("{\"kind\":\"micro_only\",\"mode\":\"%s\",\"variant\":\"%s\",\"trial\":%d,\"balls\":%zu,\"boxes_per_ball\":%d,\"passes\":%d,\"queries\":%zu,\"ms\":%.6f,\"digest\":\"%016llx\"}\n",
++                  MinOnly ? "min_only" : "min_max", variant == 0 ? "baseline" : variant == 1 ? "floor_cache" : "argmin",
++                  trial, input.keys.size(), input.boxes_per_ball, passes,
++                  input.boxes.size() * (size_t)passes, ms, (unsigned long long)digest);
++    }
++  }
++  return true;
++}
++}  // namespace
++
++int main(int argc, char** argv) {
++  const int per_ball = argc > 1 ? std::atoi(argv[1]) : 64;
++  const int passes = argc > 2 ? std::atoi(argv[2]) : 32;
++  if (argc > 3 || per_ball < 1 || per_ball > 128 || passes < 1 || passes > 256) return 2;
++  Input input;
++  input.boxes_per_ball = per_ball;
++  std::mt19937_64 random(0x41584953);
++  for (int n = 0; n < 256; ++n) {
++    const i128 a = n % 2 == 0 ? (i128)(1 + random() % 10000) : ((i128)1 << 66) + (i128)(random() % 10000);
++    BallKey k{a, {}, 0};
++    i64 centre[3]{};
++    for (int i = 0; i < 3; ++i) {
++      centre[i] = 32 + (i64)(random() % 65472);
++      k.b[i] = -2 * a * centre[i] + (i128)(random() % 10000);
++    }
++    input.keys.push_back(k);
++    for (int j = 0; j < per_ball; ++j) {
++      AxisBox box{};
++      for (int i = 0; i < 3; ++i) {
++        box.lo[i] = std::max((i64)0, centre[i] + (i64)(random() % 257) - 128);
++        box.hi[i] = std::min((i64)65535, box.lo[i] + (i64)(random() % 257));
++      }
++      input.boxes.push_back(box);
++    }
++  }
++  return measure<false>(input, passes) && measure<true>(input, passes) ? 0 : 1;
++}
+--- mono_snapshot/docs/QUALIFICATION_S1_PRIMITIVES.md
++++ review_snapshot/docs/QUALIFICATION_S1_PRIMITIVES.md
+@@ -0,0 +1,229 @@
++# Qualification des primitives de S1 — état au 4 septembre 2026
++
++`phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
++`profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
++`public_status=not_claimed`.
++
++## 1. Conclusion et périmètre
++
++Le [théorème S1, § 6](../audits/S1_COURANT.md#6-théorème-géométrique-conditionnel-et-rle)
++est désormais **démontré conditionnellement** : toute boule minimale pertinente
++atteint le catalogue RLE avec sa bonne arité, sous les contrats primitifs nommés.
++L'existence du propriétaire et du seed, les covers, le front, les secteurs,
++la corde et les cellules ne constituent plus des lemmes géométriques ouverts.
++Cette note ne les rouvre pas et ne modifie aucun rapport indépendant.
++
++Trois niveaux de justification sont distingués :
++
++- **Démontré** : argument de domaine ou invariant explicitement donné, sous ses
++  préconditions ; ce n'est pas une preuve de conformité de tout compilateur.
++- **Couvert par portes** : exécutions et mutants identifiés dans un reçu v7 ;
++  jamais une preuve universelle obtenue par échantillonnage.
++- **Manquant** : raccord précis non établi par les pièces examinées, à fermer
++  avant une qualification industrielle universelle.
++
++Les primitives CPU sont la cible de cette note. Aucun test lourd, compilation
++nouvelle, modification de code ou appel GCP n'a été réalisé pour la rédiger.
++Les priorités d'optimisation sont désormais mono-CPU, puis multi-CPU, puis GPU.
++Le [contrat de performance](CONTRAT_PERFORMANCE.md) demandé est **50k points,
++toute la tour K=1..10 en moins d'une seconde** ; le repli vers toute la tour
++K=1..5 n'intervient que si l'objectif 1..10 échoue, puis viennent plusieurs dizaines de millions de
++points. Ce sont des objectifs à mesurer, pas une conséquence de S1 ni un
++résultat du reçu Release sur hôte partagé.
++
++## 2. Autorité des preuves et des exécutions
++
++Les autorités mathématiques courantes sont [S1](../audits/S1_COURANT.md),
++les [filtres flottants](../audits/FILTRES_FLOTTANTS_COURANTS.md) et les
++[cellules](../audits/CELLULES_COURANT.md). Leurs manifestes propres sont
++[s1_sources.json](../audits/receipts_20260904/s1_sources.json),
++[float_sources.json](../audits/receipts_20260904/float_sources.json) et
++[cell_sources.json](../audits/receipts_20260904/cell_sources.json).
++L'autorité des exécutions ici citées est le
++[reçu Release](../receipts/release_20260904/summary.json), pas un résultat v6.
++
++Ce reçu rapporte 279 portes `gate`, zéro échec et zéro saut, plus deux
++invocations autonomes du banc d'incidences, normales et optimisées. Les
++sources sont stables et les 31 binaires testés sont inchangés. Le produit
++avant/après a le SHA-256
++`8a99b5cf5dc2c0622947f6b34880803e4ed347608ea61d56f3e080137bfc4a6b`.
++La commande réellement enregistrée est :
++
++```bash
++ctest --test-dir /workspaces/E-HGP/build/v7 --output-on-failure --no-tests=error -L '^gate$' --parallel 2 --output-junit /workspaces/E-HGP/morsehgp3D_v7/receipts/release_20260904/ctest.junit.xml
++```
++
++Elle a rendu 0 en 1929,494 s sur hôte partagé : durée de qualification, pas
++mesure de performance du moteur. Le
++[JUnit](../receipts/release_20260904/ctest.junit.xml) et
++[l'inventaire](../receipts/release_20260904/inventory.stdout) donnent les
++noms exécutés. La configuration est Release ; le reçu ne prétend pas à une
++reconstruction hermétique de toutes les cibles : son étape `build_missing`
++construit seulement la nouvelle cible `mhgp7_perm_residence_gate` et conserve
++les autres binaires déjà construits.
++
++À la rédaction, deux contrôles de lecture ont rendu 0 : vérification de
++tous les fichiers du `receipt_manifest.json`, puis comparaison de toutes
++les sources `src/`, CMake et des cinq tests primitifs ci-dessous au manifeste
++`sources_before.json`. Ces constats ne s'étendent pas automatiquement à un
++delta ultérieur. Commande reproductible de contrôle du reçu, depuis son dossier :
++
++```bash
++jq -r '.[] | "\(.sha256)  \(.path)"' receipt_manifest.json | sha256sum -c --quiet
++```
++
++Les cinq tests relus sont `selftest.cpp`, `linked_arcs_gate.cpp`,
++`cell_grid_oracle.cpp`, `perm_sort_gate.cpp`, `perm_residence_gate.cpp`.
++Les fixtures `receipts/conformite_v5/` restent un différentiel historique
++explicitement importé, jamais la preuve autonome des primitives v7.
++
++## 3. Index, parcours, tris et clé primitive
++
++| Contrat concret | Démontré / source | Couverture v7 du reçu Release | Raccord restant |
++|---|---|---|---|
++| Profil des positions et identités | `p3_in_profile` impose 0..65535 ; `build_cloud_index` refuse les PointId dupliqués ; le pipeline refuse ensuite les positions dupliquées | `mhgp7_tree_selftest`, `mhgp7_contrat_echec`, portes d'entrée/archive | L'appel bas niveau direct à l'index doit annoncer ses préconditions de cardinal, distinctes de celles déjà imposées par le pipeline |
++| Cardinal admissible aux indices | `run_pipeline_into` impose `kMaxTreePositions=2^30-1` avant l'index ; argument de largeur ci-dessous | Portes caps et arithmétique sur frontières sans allocation géante ; pas de run d'un milliard de points | Une porte de cette garde précise et de chaque conversion bas niveau n'est pas identifiée ici ; ne pas confondre avec la garde des candidats `2^32-1` |
++| Morton bijectif, buckets sans perte, arbre radix | `morton.hpp`, `cloud_index.hpp` : interlacement de 16 bits, tri `(Morton, PointId)`, CSR puis Karras | `mhgp7_tree_selftest` : 3000 points, seeds 3/4, boîtes contenant leurs plages et permutation d'entrée | Formaliser l'invariant complet de partition parent/enfants, atteignabilité unique, racine et précondition non-zéro de `clzll` ; les tests actuels ne le prouvent pas universellement |
++| Parcours des rectangles/covers, pas de double crédit | La preuve géométrique du front et S1 composent les populations ; `edge_cover.hpp` utilise des handles d'antichaîne | `mhgp7_wspd_ledger`, `mhgp7_wspd_ownership`, mutants cap/split, `mhgp7_fused_descent`, `mhgp7_cover_coef4` et mutant coefficient | Relier les invariants de chaque pile/plage à ceux de l'index, sans supposer qu'un accord de masse seul exclut une omission compensée par un doublon |
++| Tri stable et permutation in situ | Théorème explicite dans `parallel/sort.hpp` : ordre total `(classe less, rang original)`, ramassage par cycles ; fusion gauche avant droite | `mhgp7_perm_sort`, plancher, mutants scatter/partial/tie-desc/unstable ; `mhgp7_perm_residence` et ses trois mutants ; `mhgp7_thread_failure` | La conformité de `std::sort`, de la bibliothèque, de la concurrence et du comparateur reste liée à l'implémentation/ABI exécutée, pas à toute bibliothèque possible |
++| PGCD et clé de boule primitive | Argument ci-dessous ; `keys.hpp:101`, `intmath.hpp:66` ; clé lexicographique, coefficient quadratique positif | `mhgp7_linked_arcs_u16` reconstruit les clés avec PGCD/division indépendants OBig384 ; son mutant d'oracle i64 rend le dépassement observable | Pas de porte autonome `ugcd128` couvrant systématiquement zéros, transitions 64/128 bits et cas limites identifiée dans les 279 |
++| RLE conserve l'arité minimale | S1 § 6 + `candidates.hpp:28` : clé puis arité puis représentation du niveau ; `std::unique` garde le premier | `mhgp7_sweep_oracle`, `mhgp7_linked_arcs_u16`, mutants RLE/composition | La conclusion dépend de S1 et du tri conformes ; elle ne requiert pas d'énumérer tous les supports alternatifs |
++
++### Cardinal de l'arbre : la garde produit existe
++
++Dans [caps.hpp](../src/core/caps.hpp) et
++[run.hpp:412](../src/pipeline/run.hpp#L412), $n\leq2^{30}-1$ implique
++$m\leq n$ pour les positions uniques. Les casts de buckets en u32 et des
++indices en i32 sont alors représentables. Dans la recherche exponentielle
++de Karras, `lmax` ne dépasse pas $2^{30}$ : à cette valeur le voisin est
++nécessairement hors domaine et le test s'arrête avant le prochain décalage.
++Même `i+lmax` reste inférieur à $2^{31}$ ; les références `-1-u` sont également
++représentables. Les poids cumulés sont au plus n et les masses de paires
++inférieures à $2^{60}$, donc tiennent en u64. Cet argument suppose les types
++usuels de l'ABI CPU qualifiée et ne prouve pas à lui seul la topologie Karras.
++50k et 100M satisfont cette borne ; cela ne garantit ni RAM ni temps viable.
++
++### PGCD et canonisation : invariant, non simple test
++
++À chaque étape d'Euclide, `gcd(x,y)=gcd(y,x%y)` ; le reste non nul diminue
++strictement. `ugcd128` applique cet invariant jusqu'à ce que y tienne en
++u64, puis reprend exactement `gcd(y,x%y)` dans `ugcd64`. Les deux cas zéro
++sont traités avant division. `uabs128` évite la négation directe du minimum
++signé grâce à `-(v+1)+1` en non signé. Dans `ball_key_reduce`, le coefficient
++initial a est strictement positif ; le PGCD reste positif et ne dépasse
++pas a, donc sa conversion en i128 est sûre sous les bornes suivantes.
++Le PGCD égal à 1 autorise la sortie anticipée. Diviser tous les coefficients
++par leur PGCD conserve la forme et donne l'unique représentant entier
++primitif de la demi-droite rationnelle positive des coefficients (a,b,c).
++Le signe a>0 est une précondition
++des formes q2/q3/q4, pas une normalisation supplémentaire cachée dans le PGCD.
++
++## 4. Largeurs entières : bornes séparées des portes
++
++Poser $M=65535<2^{16}$. Les bornes suivantes, volontairement larges,
++sont déduites des expressions des lanes sur positions u16, pas de leurs
++valeurs observées dans les tests. Elles supposent que la promotion indiquée
++dans le code précède chaque multiplication ; elles ne constituent pas
++l'inventaire exhaustif de tous les intermédiaires du front.
++
++| Expression / domaine | Borne suffisante et type | Justification / limite |
++|---|---|---|
++| Différence d'une coordonnée, distance carrée et produit scalaire de deltas | $|d_i|<2^{16}$ ; $|d\cdot e|\leq3M^2<2^{34}$, i64 | Trois produits de deltas ; une composante de croix est au plus $2M^2<2^{33}$ |
++| Coordonnées affines du cover | $|2z_i-a_i-b_i|<2^{17}$ ; $|q|<2^{36}$, i64 et conversion binaire64 exacte | Somme de trois carrés puis soustraction d'une distance carrée ; moins de 53 bits |
++| Gram q3 | $0<G<2^{68}$ ; coefficients $E(D-F),D(E-F)$ de module $<2^{69}$ ; $|W_i|<2^{86}$ | $G=DE-F^2\leq DE$, positif sur seed aigu ; somme de deux produits pour W |
++| Forme et puissance q3 | $|N_i|=|W_i-Gd_i|<2^{87}$ ; $|B_i|<2^{87}$ ; $|C|<2^{105}$ ; puissance développée $<2^{107}$, i128 | Ces bornes plus lâches que certains commentaires suffisent : trois produits par somme, coordonnées $<2^{16}$ |
++| Affine/Jung/corde | $|L|<2^{108}$ ; $|J|<2^{105}$ ; $|B_z|<2^{51}$ ; $\widehat\mu<2^{53}$ ; $|L-c\widehat\mu B_z|<2^{110}$, i128 | $J=D^2(3G-2AX^2BX^2)$ ; $|c|\leq4$ ; les carrés/comparaisons de Jung peuvent dépasser i128 et passent par U320 |
++| Cramer q4 | Entrées de M $<2^{17}$, cofactors $<2^{35}$, $|\det|<2^{54}$, $|N'_i|<2^{71}$, i128 | Trois termes pour det et chacun des numérateurs ; les bornes publiées plus larges $2^{57}$ et $2^{72}$ restent valides |
++| Signe de centre q4 | Volume orienté de module $<2^{51}$ en i64 ; `rc=N'-det*dp` puis déterminant de face de module $<2^{107}$ en i128 | `rc` a module $<2^{72}$, le cofacteur de deux deltas $<2^{33}$ et la somme contient trois termes ; aucun produit géant n'est ramené en i64 |
++| Niveaux | q3 : num $<2^{102}$, den $<2^{70}$ ; croisement $<2^{172}$ en U192. q4 : num $<2^{146}$, den $<2^{114}$ ; croisement $<2^{260}$ en U320 | q3 multiplie trois distances ; q4 additionne trois carrés des numérateurs et utilise det² ; bornes q4 volontairement celles, plus larges, du contrat |
++| Base des secteurs et grille | Facteurs de base bornés par la boucle de 128 itérations, donc $|u_i|,|v_i|<2^{24}$ ; Gram de base $<2^{50}$ et déterminant $<2^{100}$ | Avec $|N_i|<2^{87}$, produits seed/base et extrémités restent sous $2^{114}$ ; le localisateur multiplie ensuite en binaire64, pas en i128 |
++
++Les valeurs non nulles des dénominateurs sont positives par les gardes de
++support ; `det==0` n'est jamais une émission q4. Les signes d'orientation
++sont canonisés ensemble dans [q4_form](../src/lanes/q4.hpp#L48).
++La positivité géométrique et l'identité de Cramer sont traitées par les
++preuves S1 ; le tableau traite leur réalisation arithmétique bornée.
++
++Les produits à limbs ont également une obligation algorithmique :
++`mul_128x128_192` exige que le produit tienne sur 192 bits, contrairement
++à un produit général 128×128. Les accumulations de ses colonnes et de
++`mul_192x128_320` additionnent un nombre fixe de mots de 64 bits dans u128
++avant propagation des retenues ; aucune colonne n'approche 128 bits.
++La troncature finale n'est sûre que sous la borne du résultat. Pour la
++somme de trois carrés, la borne $2^{146}$ exclut aussi le débordement du
++dernier mot de U192. Les tests doivent réfuter une retenue erronée ; ils ne
++peuvent remplacer cette précondition pour chaque appel.
++
++**Couverture existante, avec limites.** `mhgp7_arith_selftest` vérifie des
++racines aux frontières, quelques produits U192/U320 et 20 000 produits DI128
++contre `__int128` : il ne fournit pas une preuve exhaustive des produits
++larges. `mhgp7_linked_arcs_u16` utilise un oracle OBig384 indépendant pour
++des clés et puissances, avec un témoin explicite dépassant i64.
++`mhgp7_sweep_oracle` énumère des supports mais réutilise q3/q4/PGCD du produit :
++il juge la couverture du générateur, pas indépendamment ces primitives.
++
++**Manquant pour fermer l'inventaire entier.** Établir un grand-livre exhaustif
++des expressions du front, de chaque changement d'échelle et conversion,
++de la division plancher et des racines `floor_sqrt`/`isqrt128_floor`, avec
++préconditions et borne de chaque intermédiaire ; rattacher les comparaisons
++larges et Cramer à des portes autonomes d'oracle indépendant avec retenues
++et signes adverses. Les racines à graine flottante sont corrigées par des
++comparaisons entières, mais exigent notamment une graine finie convertible
++et des carrés de correction représentables.
++
++Deux noms de portes cités dans les commentaires hérités,
++`mhgp7_level_cmp` et `mhgp7_q3_affine`, **ne figurent pas dans CMake ni les
++tests v7 relus**. Aucun des 279 succès ne doit leur être attribué. Ne pas
++importer tacitement une qualification v4/v5/v6 pour combler ce manque.
++
++## 5. Binaire64, FMA et compilation effective
++
++Les [filtres](../audits/FILTRES_FLOTTANTS_COURANTS.md) prouvent leurs marges
++affine/Jung/corde avec les arrondis réellement comptés, y compris `lh±E` ;
++les [cellules](../audits/CELLULES_COURANT.md) prouvent la surcouverture du
++localisateur, y compris ses bornes finales. Les bornes de magnitude et de
++granularité de ces preuves excluent débordement et sous-normaux dans leurs
++domaines. Leur validité géométrique et numérique conditionnelle est acquise.
++
++| Hypothèse d'exécution | Réalisation observée | Qualification restant attachée au binaire |
++|---|---|---|
++| RN binaire64, conversions correctement arrondies | `float_filter_runtime_enabled` teste `FE_TONEAREST` ; `__FAST_MATH__` désactive le filtre | Attestation ABI/binary64 et conversions i128→double ; pas de porte autonome de tous les modes d'arrondi identifiée |
++| FMA correctement arrondie | `std::fma` explicite dans `float_filter.hpp:43` et la borne | Épingler compilateur, bibliothèque mathématique, cible matérielle et options ; un simple résultat plausible n'est pas une preuve FMA |
++| Pas d'évaluation élargie pour le localisateur | `kCellLocateEvalOk=(FLT_EVAL_METHOD==0)` ; environnement refusé ⇒ grille non construite | Relier la macro effective au binaire, ne pas déduire sa valeur du seul nom « x86_64 » |
++| Graphe sans réassociation, environnement stable | Contrat explicite des preuves ; `float_on` capturé à l'entrée de la génération | Interdire les options incompatibles, documenter les obligations des callbacks/threads et conserver les options effectives ; `__FAST_MATH__` seul ne couvre pas toutes les options partielles dangereuses |
++| Repli exact sans perte | Borne infinie ou décision indécidable ⇒ voie entière ; `grid.built` garde les localisations | Portes directes on/off, égalités et changements d'environnement encore à identifier/compléter ; la grille possède déjà son oracle rationnel et trois mutants |
++
++La configuration locale relue contient CMake 3.28.3, GNU C++ 13.3.0,
++`/usr/bin/c++`, CUDA désactivé. `flags.make` affiche :
++
++```text
++-O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror
++```
++
++Il n'y a dans cette ligne ni fast-math ni réassociation explicitement
++demandée. Cela ne constitue pas une attestation complète des valeurs par
++défaut, de la contraction, du graphe machine ou de l'environnement flottant.
++Le reçu scelle les hashes de CMakeCache/CTest/Makefile, pas un audit universel
++du compilateur. La prochaine qualification doit archiver les commandes
++complètes de compilation/édition de liens, versions et macros pertinentes,
++la bibliothèque et l'architecture, puis les relier au SHA du binaire livré.
++Une compilation GCC 11, Clang ou CUDA est un nouveau domaine à qualifier ;
++le bootstrap d'outillage GCP et sa sonde C++20 ne transfèrent pas le reçu CPU.
++
++## 6. Fermeture suivante, sans relancer la géométrie
++
++1. Figer une matrice de préconditions des primitives, avec grand-livre des
++   largeurs et preuve des invariants d'index/parcours qui ne sont aujourd'hui
++   que testés ; conserver la borne produit de cardinal déjà en place.
++2. Donner des portes v7 autonomes aux produits larges, PGCD/Cramer et filtres,
++   avec juges réellement indépendants et planchers de non-vacuité. Une porte
++   supplémentaire qualifie des exécutions ; elle n'établit pas une borne.
++3. Qualifier d'abord une commande mono-CPU précise et son environnement
++   numérique ; étendre ensuite aux commandes multi-CPU, puis au GPU, chacune
++   avec son binaire et ses propres reçus. Ne pas attribuer les stubs au device.
++4. Réutiliser S1 comme théorème conditionnel fermé et décharger explicitement
++   chacune de ses préconditions pour ce domaine d'exécution. L'archive,
++   l'exactitude horizontale complète, la verticale et les coûts gardent leurs
++   contrats distincts ; ils ne sont pas de nouveaux verrous géométriques S1.
++
++Aucun statut public n'est promu par cette cartographie. GCP non utilisé.

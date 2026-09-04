@@ -1,0 +1,53 @@
+{
+  "captured_utc": "2026-09-04T21:42:23.590231+00:00",
+  "source_copy": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_registration/source",
+  "pinned_sources": {
+    "CMakeLists.txt": "2bec6a08336513dba3de1ecbc600c4b54183e7489594eec7735b40e97ee5bdb9",
+    "bench/incidence_campaign.py": "6ca21d8b1c89e6baea99ecc3dd414b35d06581df50833e76bac9bdc1d5d1c20a",
+    "bench/compare_v6_v7.py": "cfe40fd2b00508ec7887970b961482a87839afdf9a7e2539728855feec69ffcb",
+    "tests/incidence_campaign_gate.py": "d74bca5257bd307b5956a946ca188a217f519ec2dc49e6b0de3ebf33a0ccca0a",
+    "tests/archive_cleanup_gate.cpp": "22874ff740c6092fcd9148fe20200e4a3303728ede59053d4fc3718911c42972",
+    "src/io/archive.hpp": "cc2243aaa1bdbe63b69f165d65152cf62d7fac32ff6c641343542c247d989430"
+  },
+  "checks": [
+    {
+      "command": [
+        "cmake",
+        "-S",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_registration/source",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_registration/build",
+        "-DCMAKE_BUILD_TYPE=Release"
+      ],
+      "exit_code": 0,
+      "output": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n-- Found Threads: TRUE  \n-- Configuring done (0.4s)\n-- Generating done (0.1s)\n-- Build files have been written to: /workspaces/E-HGP/morsehgp3D_v7/audits/.work_registration/build\n"
+    },
+    {
+      "command": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_registration/build",
+        "--show-only=json-v1",
+        "-R",
+        "^mhgp7_incidence_campaign"
+      ],
+      "exit_code": 0,
+      "output": "{\n  \"backtraceGraph\" : \n  {\n    \"commands\" : \n    [\n      \"add_test\"\n    ],\n    \"files\" : \n    [\n      \"/workspaces/E-HGP/morsehgp3D_v7/audits/.work_registration/source/CMakeLists.txt\"\n    ],\n    \"nodes\" : \n    [\n      {\n        \"file\" : 0\n      },\n      {\n        \"command\" : 0,\n        \"file\" : 0,\n        \"line\" : 814,\n        \"parent\" : 0\n      },\n      {\n        \"file\" : 0\n      },\n      {\n        \"command\" : 0,\n        \"file\" : 0,\n        \"line\" : 816,\n        \"parent\" : 2\n      }\n    ]\n  },\n  \"kind\" : \"ctestInfo\",\n  \"tests\" : \n  [\n    {\n      \"backtrace\" : 1,\n      \"command\" : \n      [\n        \"/home/codespace/.python/current/bin/python3\",\n        \"/workspaces/E-HGP/morsehgp3D_v7/audits/.work_registration/source/tests/incidence_campaign_gate.py\"\n      ],\n      \"name\" : \"mhgp7_incidence_campaign\",\n      \"properties\" : \n      [\n        {\n          \"name\" : \"LABELS\",\n          \"value\" : \n          [\n            \"gate\"\n          ]\n        },\n        {\n          \"name\" : \"TIMEOUT\",\n          \"value\" : 120.0\n        },\n        {\n          \"name\" : \"WORKING_DIRECTORY\",\n          \"value\" : \"/workspaces/E-HGP/morsehgp3D_v7/audits/.work_registration/build\"\n        }\n      ]\n    },\n    {\n      \"backtrace\" : 3,\n      \"command\" : \n      [\n        \"/home/codespace/.python/current/bin/python3\",\n        \"-O\",\n        \"/workspaces/E-HGP/morsehgp3D_v7/audits/.work_registration/source/tests/incidence_campaign_gate.py\"\n      ],\n      \"name\" : \"mhgp7_incidence_campaign_optimized\",\n      \"properties\" : \n      [\n        {\n          \"name\" : \"LABELS\",\n          \"value\" : \n          [\n            \"gate\"\n          ]\n        },\n        {\n          \"name\" : \"TIMEOUT\",\n          \"value\" : 120.0\n        },\n        {\n          \"name\" : \"WORKING_DIRECTORY\",\n          \"value\" : \"/workspaces/E-HGP/morsehgp3D_v7/audits/.work_registration/build\"\n        }\n      ]\n    }\n  ],\n  \"version\" : \n  {\n    \"major\" : 1,\n    \"minor\" : 0\n  }\n}"
+    },
+    {
+      "command": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_registration/build",
+        "--output-on-failure",
+        "--no-tests=error",
+        "-R",
+        "^mhgp7_incidence_campaign"
+      ],
+      "exit_code": 0,
+      "output": "Internal ctest changing into directory: /workspaces/E-HGP/morsehgp3D_v7/audits/.work_registration/build\nTest project /workspaces/E-HGP/morsehgp3D_v7/audits/.work_registration/build\n    Start 326: mhgp7_incidence_campaign\n1/2 Test #326: mhgp7_incidence_campaign .............   Passed    1.21 sec\n    Start 327: mhgp7_incidence_campaign_optimized\n2/2 Test #327: mhgp7_incidence_campaign_optimized ...   Passed    1.15 sec\n\n100% tests passed, 0 tests failed out of 2\n\nLabel Time Summary:\ngate    =   2.36 sec*proc (2 tests)\n\nTotal Test time (real) =   2.37 sec\n"
+    }
+  ],
+  "sources_unchanged": true,
+  "copy_matches": true
+}

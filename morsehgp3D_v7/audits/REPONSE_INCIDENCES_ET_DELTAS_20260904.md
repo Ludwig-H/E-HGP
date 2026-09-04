@@ -16,9 +16,11 @@ transition absente. Les suppressions de matérialisation ou de continuation,
 ainsi que le remplacement d'une sortie par une facette non canonique de
 la même composante, sont rejetés par les contre-fixtures actuelles.
 
-La confluence des premières incidences fournit un argument conditionnel
-pour la sélection d'une chaîne. La preuve globale doit encore composer
-les prémisses de catalogue, régularité et rang avec la réduction. La
+La confluence des premières incidences et les suffixes décroissants
+justifient la sélection d'une chaîne dans la
+[composition horizontale conditionnelle](REPONSE_AUDITEUR_COMPOSITION.md).
+La [couverture S1](S1_COURANT.md) possède elle aussi une preuve conditionnelle
+complète ; les hypothèses de primitives et d'exécution restent à qualifier. La
 verticale, les identités publiques et la résidence industrielle possèdent
 leurs contrats distincts.
 

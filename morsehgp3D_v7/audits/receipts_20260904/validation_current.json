@@ -22,7 +22,7 @@
     ]
   },
   "pinned_sources": {
-    "CMakeLists.txt": "79201af402181df2810938509587fa2d190b6364a2436ab911e83116392c2b75",
+    "CMakeLists.txt": "5fe0a8d61436ef8e7b4cd6e93ef8592bded3d44bbe5b06e23969ed9f0801fda4",
     "audits/contre_fixture_archive_20260904.py": "6533fbf41c6e67fa76c5c146ff61aa382b6c08c719c5313f5322246044653fdd",
     "audits/math_followup_repro_20260904.cpp": "95698ea0d4728957badb343d84b4a0656ddb6820bb6908fb8c1b4b41ddc33553",
     "audits/sort_residence_probe.cpp": "dea7e6b153e35c13b04f36030ed914ade96e839282606bcf043840a4674e2643",
@@ -37,7 +37,7 @@
     "src/core/dint.hpp": "936ddf3304e5237c233f25db4cdc168e57a12dc32761dfa8d06d9ca9209721ad",
     "src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
     "src/core/morton.hpp": "67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e",
-    "src/core/mutants.hpp": "11d4dd1057262c7eedf782b7261552c88961ddfc0b09612f9419ce7efa5c6ed0",
+    "src/core/mutants.hpp": "479cf2761107696d7ec89d8651003a9f0d5c0f47bd0fbda8732bf9449e2df5cd",
     "src/core/parse.hpp": "f576762564648c91a8e0106d4d35fada559dfe4fbf03214405debe061b77f4b9",
     "src/core/sha256.hpp": "b675835e9bd05a0ca1fb63dfeaa6fa99d3521b761c35c50b1b51f0aac259798d",
     "src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
@@ -54,7 +54,7 @@
     "src/gpu/pilot.hpp": "d4a8de7c56be93b29fbb9b9f4be1d3500fa2c81ae665417774cc4ff0f0310c33",
     "src/gpu/route_c6.hpp": "9d8ec293b5898e42eb9c0947dcd793ccf62cd69894b8af9f7bb6ee9aec9efa18",
     "src/gpu/wire.hpp": "1ab6a35d4e685d7a15513ef3f082bfd07a872da9fa78bdbfea6c0b52f100c5d1",
-    "src/io/archive.hpp": "e7f056ce909527f668f0239e416bb22175cf3676900f2cd459d36a25e895c9c5",
+    "src/io/archive.hpp": "cc2243aaa1bdbe63b69f165d65152cf62d7fac32ff6c641343542c247d989430",
     "src/lanes/cell_grid.hpp": "f888539647e4dfd2e5f89d578f5f850cbad4a30b827d0bd5bef9142b5fc4c588",
     "src/lanes/chord_kill.hpp": "f5a4ca9b6e2fbc0ea94e8adf92f64322ab2ef5c461c588efcedf1bc9e4faa039",
     "src/lanes/edge_cover.hpp": "3186e5b67002a2d29a50e090bc465c86690224f78eab30088c5f33595d2e4836",
@@ -67,12 +67,12 @@
     "src/parallel/pool.hpp": "5c20aabbe673e2baa1018bea893185592bc3b394d025eadd9be07542453befc6",
     "src/parallel/sort.hpp": "ceb89f8ba42fbc3f44351f4dcbf5e347e7d66a4c85bce08f346e66a9b11f20bd",
     "src/pipeline/candidates.hpp": "33e908458110861d4182ed915eebf312ffb67dc848744c417a5f2ddc719e793b",
-    "src/pipeline/census.hpp": "3583680d947a5b28f8a38028bc55f37f12040143fea88d4aecc77a7baf653690",
+    "src/pipeline/census.hpp": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be",
     "src/pipeline/digest.hpp": "d0def105ebb969c9e95b10f68e0dd480ca9fa05b2553c4a6307a0c460893e668",
     "src/pipeline/expand.hpp": "7cafb0341344fbc7d1584001e4685e2e5bf0122fe3b7e37277f5468d5c5e1cf0",
     "src/pipeline/float_filter.hpp": "52e07b4e4dfb1ca66e2a6218fc9c31afc9586e0a81ca5a4a846ed7727e44b7d9",
     "src/pipeline/generate.hpp": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59",
-    "src/pipeline/run.hpp": "885348a92f48658642e3783027cb7c4f239f1c8e1a0b91c66a698f3be6b29762",
+    "src/pipeline/run.hpp": "1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c",
     "src/spindle/spindle.hpp": "f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577",
     "src/spindle/witness_count.hpp": "fce9510ee21cbe025283a9ce777b120e4173ce62eee736e1c48dc772afb67a42",
     "src/tree/cloud_index.hpp": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95",
@@ -86,7 +86,7 @@
     "tests/census_device_gate.cu": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
     "tests/census_device_stub_gate.cpp": "e725a7fea5c14bc657e12f669fcba21b81d5b6bf1e331ca91c426accd6224e18",
     "tests/census_direct_gate.cpp": "f396dd20bcad88210692795422079cccb32bcc6543273a2e1135c1690d577258",
-    "tests/compare_campaign_gate.py": "c0a329475cd4fa6a4138a57172faee1e1ecc95a18e5f2df7c14cab638a89f356",
+    "tests/compare_campaign_gate.py": "23cca7c5355a8aba26ba0676ed558a0a25c500b4171e2a2811fb514db9b6fcb5",
     "tests/conformity_v5.cpp": "d782484b088f141fa98aaa9ca5f6158535d613f2213c87f2929f274642abd37f",
     "tests/cover_fixture.cpp": "63b34d7a99b4dfa7d8765b62bdfaebf902166a60b7f88eadca1fb677045eeb55",
     "tests/cuda_stub.hpp": "3b2fcff9bb6ca4cf10ffb54cf0655ec232844f9e7bcfe27b36ce984972eab473",
@@ -122,7 +122,25 @@
     "tests/thread_failure_gate.cpp": "94c9a2f9a1a954fb64196e43f7c3344813f451c35c560a5f3bc0c2856808d96c",
     "tests/wire_gate.cpp": "3fe78d9a81f4cc0d0e9bd8c0c33f49233fbee9f4a78ee61b81a052127a710887",
     "tests/wire_pack_gate.cpp": "16fce689d21091e4a9b7591ebf1753746bb56a49f03eaa6db14f66979447e822",
-    "audits/archive_cleanup_probe.cpp": "f94bc8032d4a55f4afccf43a56497866f803eb3e42f2d96b05dc9420b964a63d"
+    "audits/archive_cleanup_probe.cpp": "f94bc8032d4a55f4afccf43a56497866f803eb3e42f2d96b05dc9420b964a63d",
+    "tests/incidence_campaign_gate.py": "d74bca5257bd307b5956a946ca188a217f519ec2dc49e6b0de3ebf33a0ccca0a",
+    "docs/LECTURE_ET_CONTRATS.md": "d378b3d58bb6f75f7b081085088b0681efce813d3231dec8a9ea8015530a9694",
+    "docs/V6_SOURCE_SNAPSHOT.json": "19dd459b9b6ea94c542cd887e55b498ad12bbac3326b21f8614e11efbaa57cff",
+    "docs/PREUVE_HORIZONTALE_COMPOSITION.md": "5aba4f18a90e4fabf05503ee2e420afbb079b72956ef7ec6bfdafd6ea3422e70",
+    "audits/QUESTION_COMPOSITION_CONSTRUCTEUR_20260904.md": "5e92a0ae4761cd9fc15113021630a9ef721a0f3eefb7a271bd19457f822951c7",
+    "audits/math_window_repro_20260904.cpp": "993917f5653d7fdcdccd5cb8809d07892e136e5017109d40431e748fb127e593",
+    "audits/receipts_20260904/memory_budget_gate.cpp": "0c691660bb07ac371a6b4cd6be885db8072d73165117af88c6ffd05b7af32826",
+    "audits/receipts_20260904/memory_budget_proxy_probe.cpp": "b7d3b42a2baebd0866fda7b63f23ba743d6e315d47f529ff0c05fbf52b7ecd43",
+    "audits/receipts_20260904/memory_budget_instrumentation.patch": "a64cc14a321e206be680727f37f1b46fa82d0ce31de7b46e59aba9c7b3687df6",
+    "audits/receipts_20260904/replay_memory_budget.py": "0a0429a50cba70b8aea3f9308e5db799be98ac70599e28a9ce90e4442d13a5e0",
+    "bench/incidence_campaign.py": "6ca21d8b1c89e6baea99ecc3dd414b35d06581df50833e76bac9bdc1d5d1c20a",
+    "bench/compare_v6_v7.py": "fe22493fcb7494813e79fea9826873cce8cf14918097ce500b44018f1a64f2ef",
+    "docs/CONTRAT_PERFORMANCE.md": "d35bab63cfa30de6450794254ad3b12bc49ad3df8488c8f2154f8b688d783834",
+    "docs/QUALIFICATION_S1_PRIMITIVES.md": "3432411df7cd4b7d97d824e5d42fb7877538059aa40359beb23a34098970b303",
+    "tests/archive_cleanup_gate.cpp": "22874ff740c6092fcd9148fe20200e4a3303728ede59053d4fc3718911c42972",
+    "tests/mono_inline_gate.cpp": "84a910f4b61c56161ef712bacc1d84497aa735cfb31e6cc3f76f56b174b534db",
+    "tests/axis_bounds_gate.cpp": "5974dd9093438e839599415b7dc4af90a6b5c267eea77728215b9b3993a24e5a",
+    "bench/axis_bounds_microbench.cpp": "3a44861833fd261433decb9753014e3c81caa7e3c5af38f7a4f39770089ba041"
   },
   "checks": [
     {
@@ -133,10 +151,12 @@
     },
     {
       "name": "interfaces",
-      "receipt": "interfaces_current.json",
+      "receipt": "interfaces_delta_current.json",
       "scope": "26 CLI cases, six resealed archive corruptions, verified and normalized horizontal semantics",
       "exit_code": 0,
-      "source_binary_binding": "executed frozen binary; observed source hashes do not independently attest its build"
+      "source_binary_binding": "current CLI rebuilt with mono delta; 26 CLI cases and six corruptions rerun on the new binary",
+      "binding_receipt": "mono_current.json",
+      "execution_receipt": "interfaces_delta_validation.json"
     },
     {
       "name": "residence",
@@ -145,69 +165,99 @@
     },
     {
       "name": "release",
-      "receipt": "release_current.json",
-      "scope": "two Release targets and five CTests, not full final suite",
-      "runs": [
-        {
-          "command": [
-            "cmake",
-            "-S",
-            "morsehgp3D_v7/audits/.work_root/current/source/morsehgp3D_v7",
-            "-B",
-            "morsehgp3D_v7/audits/.work_root/current/build",
-            "-DCMAKE_BUILD_TYPE=Release"
-          ],
-          "exit_code": 0,
-          "log": "release_current_configure.log"
-        },
-        {
-          "command": [
-            "cmake",
-            "--build",
-            "morsehgp3D_v7/audits/.work_root/current/build",
-            "--target",
-            "mhgp7_selftest",
-            "mhgp7_bad_alloc_gate",
-            "--parallel",
-            "2"
-          ],
-          "exit_code": 0,
-          "log": "release_current_build.log"
-        },
-        {
-          "command": [
-            "ctest",
-            "--test-dir",
-            "morsehgp3D_v7/audits/.work_root/current/build",
-            "--output-on-failure",
-            "-R",
-            "^mhgp7_(bad_alloc_(temoin|etage_provision|etage_census|etage_fold)|plan_keycsr_gate)$",
-            "--parallel",
-            "2",
-            "--output-junit",
-            "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_20260904/release_current_ctest.xml"
-          ],
-          "exit_code": 0,
-          "log": "release_current_ctest.log"
-        }
-      ],
-      "cmake_change_after_copy": "only additional perm_residence target and its four gates; tested target definitions unchanged"
+      "receipt": "iteration2/validation.json",
+      "source_manifest": "iteration2/source.json",
+      "postcheck": "iteration2/after_validation.json",
+      "scope": "all 279 CPU gate CTests of frozen CMake inventory; 46 scale tests excluded; no GPU execution",
+      "exit_code": 0,
+      "passed": 279,
+      "failed": 0
     },
     {
       "name": "documentation_and_freshness",
-      "receipt": "checks_current.json",
-      "scope": "global docs, implementation registry, all active audit Markdown, freshness and three rejection cases under python -O"
+      "receipt": "checks_iteration2.json",
+      "scope": "global docs and registry; explicit active audit Markdown validation; final pinned source freshness under python -O",
+      "verifier_rejection_contract_receipt": "checks_current.json"
     },
     {
       "name": "archive_cleanup_allocation_failure",
-      "receipt": "iteration2/archive_cleanup.json",
-      "result": "issue_confirmed",
+      "receipt": "archive_delta_current.json",
+      "result": "closed",
       "nominal_exit_code": 0,
-      "injected_termination_witness": 97,
-      "scope": "archive API destructor after input; no final publication and provisional file remains under injected allocation failure"
+      "scope": "unchanged independent probe under persistent allocation failure returns without residue; four archive gates pass, including K1/K2 late refusal; test-only temp-root adaptation recorded",
+      "injected_failure_exit_code": 0
+    },
+    {
+      "name": "math_window",
+      "receipt": "math_window_repro.json",
+      "source_manifest": "math_window_source_snapshot.json",
+      "scope": "independent q2/q3/q4 catalogue up to n24; four pipeline runs at n13 with Gamma/delta comparison K2,K10; seven nominal exits0 and two targeted mutants4",
+      "result": "passed"
+    },
+    {
+      "name": "composition_and_s1_static_review",
+      "receipts": [
+        "math_window_review_sources.json",
+        "s1_sources.json",
+        "front_sources.json",
+        "float_sources.json",
+        "cell_sources.json",
+        "documents_current.json"
+      ],
+      "scope": "complete conditional geometric S1 proof through minimum-arity RLE; composition, universal witnesses, sectors/chords, cells and numerical margins; effective primitive and execution contracts remain separately qualified",
+      "result": "conditional_geometric_theorem_established"
+    },
+    {
+      "name": "memory_budget",
+      "receipt": "memory_budget_current.json",
+      "reproduction": "replay_memory_budget.py",
+      "scope": "two conservative avoidable refusals, logical proxy and named-capacity coexistence, proposed constant effective concurrency; no RSS guarantee",
+      "result": "constructive_improvement_proposed",
+      "optimized_preparation": {
+        "receipt": "memory_budget_replay_optimized.json",
+        "exit_code": 0,
+        "scope": "permanent inputs verified and instrumentation prepared under python -O; no compilation or measurement repeated"
+      }
+    },
+    {
+      "name": "campaign_registration",
+      "receipt": "campaign_registration_current.json",
+      "scope": "current CMake independently configured; both normal and optimized incidence campaign CTests registered with gate label and 120s timeout, both passed",
+      "result": "closed",
+      "current_gate_receipt": "campaign_current.json",
+      "exit_code": 0
+    },
+    {
+      "name": "incidence_classification",
+      "receipt": "campaign_current.json",
+      "scope": "seven unittest tests normal and optimized; one real K2 support-budget refusal classified without engine success",
+      "result": "passed"
+    },
+    {
+      "name": "paired_runner_delta",
+      "receipt": "paired_runner_delta_current.json",
+      "scope": "current kmax5/10, serial stages, reference roles and separations8/10/12; compare and incidence gates normal and optimized on fake binaries; no engine performance campaign",
+      "result": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "mono_inline",
+      "receipt": "mono_current.json",
+      "junit": "mono_ctest_current.xml",
+      "scope": "four targeted CTests with real pthread_create interception, both semantics, K5/K10 and late refusals; current CLI independently built; preceding later AxisBounds census change",
+      "result": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "census_axis_static_review",
+      "receipt": "census_axis_review_current.json",
+      "diff": "census_axis_review_current.diff",
+      "scope": "integer quadratic minimizer, clipping, maxima and i128 domain proof; current six gate definitions read; no independent compilation/execution",
+      "result": "reviewed_not_executed",
+      "independent_execution_pending": true
     }
   ],
-  "full_final_release_suite": "running_on_iteration2_frozen_snapshot",
+  "full_final_release_suite": "279_of_279_frozen_CPU_gates_passed; archive, mono and Python deltas qualified separately; later AxisBounds is static review only, independent execution pending",
   "scale_campaigns": "not_executed_by_this_audit",
   "gpu": "not_executed",
   "gcp": "not_used",
@@ -219,16 +269,47 @@
     "interfaces_current.json": "ec4581e6910447a190bc2b14c28cb0776f1249e66cf92423255948f2f3230d74",
     "math_current_repro.json": "2c87285876b4f9d3952979514e7743a567a4572f502515a4281bb647e24261aa",
     "math_current_source_snapshot.json": "d9ad8aced923759a826f040979b5d61f17aaa997169d190d18234e79087e9e05",
-    "release_current.json": "19bcbae752f8c00497b397927419a304e7cbdbe69481d61bb597a63da51be6ed",
-    "release_current_build.log": "f15c90dfd7128b0d5b3fe23dca21056af001d76e61ba79274e54574812168cb9",
-    "release_current_configure.log": "4a0ac6ef2fe28cb49a3f8957a7e43adaa6120df279f7ebb637b6d39e6857194d",
-    "release_current_ctest.log": "f79398f632eddcd3d87df40741849e9156718f09b956da1769d11c2028ea1211",
-    "release_current_ctest.xml": "48efe5a783790a5a1b4e603d7a3e4130be0689a8e0f9e72041a459bd0e32a277",
-    "release_current_source_snapshot.json": "10d395a51641ff2802ead3e281a8d8619dcdf6c36faa94698a20fec588f381e8",
     "residence_current.json": "f01081cc5b72315e285efed4f014e4ea579b51d70464e168b69c123b9e5dedd3",
-    "iteration2/archive_cleanup.json": "a981a992a81777fd633d21b9d66cde7f7b01e59c98d77301400bda3e3d0829a9"
+    "iteration2/archive_cleanup.json": "a981a992a81777fd633d21b9d66cde7f7b01e59c98d77301400bda3e3d0829a9",
+    "math_window_repro.json": "6e4c42df5a9988ea7f1eae046ac630e1b530c1db157ff7802694aff3cdcd8b88",
+    "math_window_source_snapshot.json": "cd0ba0178d934eebe9728e95cf94c0c91a344112f1c1a8ce82463a0fa64e9e4d",
+    "math_window_review_sources.json": "5864e59a20a10c81a22401dc856d0d350923cf79d2822b17ae93af8e2699e9bf",
+    "memory_budget_current.json": "af44c6298e66b70afda3b59e034452b8cb41b4b49dd51a014c5bd35257e40f17",
+    "memory_budget_replay_assets.json": "e67df43efdcf59b8a8ce7bedc8900fcc616bd89dbe9c1364ca7bd5835b80994c",
+    "memory_budget_replay_preparation.json": "d991fb6e034c177ca14bb982432122ee5faf3c01359519900b83f2ec8cbfbb75",
+    "s1_sources.json": "eb59b237098917c09a64c93567220d827ff3001caea789e12f6ed8c617a9b233",
+    "front_sources.json": "e279f69d7a2d175830814607911c8cca2d8fcb092e17802e8f77cde1fd975a54",
+    "iteration2/campaign_registration.json": "360219b2339b4661c89f93155ef2f840b7b5d74da27ba6988cbd76a83fbb2720",
+    "float_sources.json": "a025121f4f40bb81051bbd621acf4550dbcc7873f79064f67aeb9bed3f4ec920",
+    "cell_sources.json": "8ffee4face2c26abbf64fc4986074c4b41d3b236cba82bd3cdd10b3f09cc64c2",
+    "memory_budget_replay_optimized.json": "9b3fd1784ec9e6c00274ca0198c8ebc3be3cc48e0a2fa7a842b2c7e7eb002d7f",
+    "interfaces_build_binding.json": "28f0dceef07cff294fd025d6cf407b6f8de18db1c10ec9860a0fbb4656d52183",
+    "checks_iteration2.json": "41351501ff949288133ef520cdfd1ea790c0a2d85f90bbfc87081405484e22a7",
+    "audit_markdown_iteration2.json": "50dd4c3a8a807a41e4ddd8f243a26254470e54710e4870aaaf0ebd736249d92d",
+    "campaign_current.json": "6af21aa4d2790c169f53464cca16f50cd9310d025d6a205d94b03e84e557d8aa",
+    "iteration2/source.json": "301bcaa24731c971ba26ac001a49c6c1b5c8d95a27350c27651f7e728de78b4d",
+    "iteration2/validation.json": "0f7ac3f1dbcf1a0dd9c6b26af117be71315d96eac9ac419acdf6a9d3eb41830d",
+    "iteration2/binaries.json": "2c3d73532b46d17fc3f3e3f1c0dbb75913a91e51c9daf9dca1a4fc78a429957e",
+    "iteration2/after_validation.json": "c819647ee66fe7cd73826dcdf8bfd7b36d1f916eff90fdc277018b087f26564b",
+    "iteration2/build.log": "9ec6aac64ff8fa9272460dce3d24704ef8e79fb7ea0decbc44b67ec8d4c92466",
+    "iteration2/configure.log": "4fe993efe359862cc47a419247e93502f1e456e0431f8f17afcf754033333a7c",
+    "iteration2/ctest.log": "79017942ad4f31808c5916122d27f272ca9f385087d990563befa1581d03cc53",
+    "iteration2/ctest.xml": "d036b02196a0eb80ff0d9c9caa057d0865d73dc4c03470e2ce5aed42125b91b4",
+    "documents_current.json": "0b76b5bf7503e6f1c9ad73a647a34663f7e9b9d47f9a1b103bbb416f4b865133",
+    "campaign_registration_current.json": "933b4f97780395b96f07279b5634c36333c5699e6d874f6eb4fe598ac62b4f00",
+    "interfaces_delta_current.json": "0a32d8751642cfd8c6ccbd273502fe51ee5c7eef21485d14e8164e923f302dfb",
+    "interfaces_delta_validation.json": "9e849c2e8980383f06db19ca5169bf87b16e77c1be85722c3e6a2b741c1368a0",
+    "archive_delta_current.json": "e14ee800778b3c412dc82d143b9f9678216108b528e9aeb2d34a16167dc1b09f",
+    "paired_runner_delta_current.json": "e4122dd92bb3ea2dbf3fca197819993a7f42e921dc8ceb679c4b23ffb9f5138b",
+    "mono_current.json": "1549d108191b9a53eb786e2443e5fd009a7a629e7bb48021a4f4efdab73e4f23",
+    "mono_ctest_current.xml": "1a42bd3126bd4b9561a8eeea7bf384be0aeea5eb59945ce65a3f50a6bc85620d",
+    "census_axis_review_current.json": "ffc8ce79b86b222a6bae4b78399381a520c764d7b2eb3356b51a209f1b077bf5",
+    "census_axis_review_current.diff": "46c1c4080a1161d92a7ea7d685d69873676cdae1ab4209c5649c99625f11767c"
   },
-  "last_freshness_check_utc": "2026-09-04T20:41:38.662722+00:00",
+  "last_freshness_check_utc": "2026-09-04T22:03:13.985874+00:00",
   "documentation_scope_note": "tools/check_docs.py excludes v7 audits; all active audit Markdown validated explicitly",
-  "updated_utc": "2026-09-04T20:55:11.545810+00:00"
+  "updated_utc": "2026-09-04T22:03:13.985874+00:00",
+  "generated_cache_note": "Previously observed Python caches are not source authorities and are excluded from the current freshness gate; immutable raw snapshots preserve their original inventories.",
+  "last_observed_git_head": "529785b53fd6edd33616875cf1680a25ac198480",
+  "current_build_scope": "latest independently rebuilt CLI is the mono snapshot; later AxisBounds census source is reviewed statically and is not attributed to that CLI"
 }

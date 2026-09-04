@@ -1,0 +1,80 @@
+{
+  "timestamp": "2026-09-04T20:57:02.566097+00:00",
+  "fixture_sha256": "ccbfb1dce3a9d296d072914270686528c0decad84f61df3acb7ceb8788bd6407",
+  "binary_sha256": "aae68f79cf9527a659e7da57a4e111d2139507c909f4cb592684effa02d8f9ba",
+  "compile_exit_code": 0,
+  "runs": [
+    {
+      "args": [
+        "--boundary-inside"
+      ],
+      "exit_code": 0,
+      "stdout": "window n=12 smax=11 reverse=0 supports=138 unique=138 relevant=138 omitted=0 boundary_q2=1 boundary_q3=2 boundary_q4=0 beyond_q2=0 beyond_q3=0 beyond_q4=0 plateau_relevant=1 plateau_omitted=0 actual=138 source_ok=1\npipeline status=1 expected=1 callbacks=0 direct=0 silent_judged=0 cuts=0 delta_cuts=0 failure_total=0 reason=unsupported_degeneracy : incidence completion requires no rank-relevant extra-shell\nwindow_verdict failures=0 overflow=0 mutant=0\n",
+      "stderr": "",
+      "seconds": 0.06316878600046039
+    },
+    {
+      "args": [
+        "--boundary-outside"
+      ],
+      "exit_code": 0,
+      "stdout": "window n=13 smax=11 reverse=0 supports=182 unique=182 relevant=179 omitted=3 boundary_q2=1 boundary_q3=3 boundary_q4=1 beyond_q2=1 beyond_q3=2 beyond_q4=0 plateau_relevant=0 plateau_omitted=1 actual=179 source_ok=1\npipeline status=0 expected=0 callbacks=10 direct=179 silent_judged=1 cuts=728 delta_cuts=302 failure_total=0 reason=\nwindow_verdict failures=0 overflow=0 mutant=0\n",
+      "stderr": "",
+      "seconds": 0.5664552930002174
+    },
+    {
+      "args": [
+        "--mutant=depth-threshold-minus-one"
+      ],
+      "exit_code": 4,
+      "stdout": "window n=13 smax=11 reverse=0 supports=243 unique=243 relevant=239 omitted=4 boundary_q2=0 boundary_q3=5 boundary_q4=1 beyond_q2=1 beyond_q3=2 beyond_q4=1 plateau_relevant=0 plateau_omitted=0 actual=233 source_ok=0\nwindow_verdict failures=0 overflow=0 mutant=1\n",
+      "stderr": "",
+      "seconds": 0.05650530499951856
+    },
+    {
+      "args": [
+        "--random",
+        "13",
+        "132741"
+      ],
+      "exit_code": 0,
+      "stdout": "window n=13 smax=11 reverse=0 supports=243 unique=243 relevant=239 omitted=4 boundary_q2=0 boundary_q3=5 boundary_q4=1 beyond_q2=1 beyond_q3=2 beyond_q4=1 plateau_relevant=0 plateau_omitted=0 actual=239 source_ok=1\npipeline status=0 expected=0 callbacks=10 direct=239 silent_judged=0 cuts=728 delta_cuts=368 failure_total=0 reason=\nwindow_verdict failures=0 overflow=0 mutant=0\n",
+      "stderr": "",
+      "seconds": 1.3706710809992728
+    },
+    {
+      "args": [
+        "--random",
+        "13",
+        "132741",
+        "reverse"
+      ],
+      "exit_code": 0,
+      "stdout": "window n=13 smax=11 reverse=1 supports=243 unique=243 relevant=239 omitted=4 boundary_q2=0 boundary_q3=5 boundary_q4=1 beyond_q2=1 beyond_q3=2 beyond_q4=1 plateau_relevant=0 plateau_omitted=0 actual=239 source_ok=1\npipeline status=0 expected=0 callbacks=10 direct=239 silent_judged=0 cuts=728 delta_cuts=368 failure_total=0 reason=\nwindow_verdict failures=0 overflow=0 mutant=0\n",
+      "stderr": "",
+      "seconds": 0.9967801889997645
+    },
+    {
+      "args": [
+        "--random",
+        "16",
+        "391749"
+      ],
+      "exit_code": 0,
+      "stdout": "window n=16 smax=11 reverse=0 supports=515 unique=515 relevant=464 omitted=51 boundary_q2=2 boundary_q3=16 boundary_q4=7 beyond_q2=1 beyond_q3=29 beyond_q4=21 plateau_relevant=0 plateau_omitted=0 actual=464 source_ok=1\nwindow_verdict failures=0 overflow=0 mutant=0\n",
+      "stderr": "",
+      "seconds": 0.18278808500053856
+    },
+    {
+      "args": [
+        "--random",
+        "24",
+        "777931"
+      ],
+      "exit_code": 0,
+      "stdout": "window n=24 smax=11 reverse=0 supports=1601 unique=1601 relevant=1079 omitted=522 boundary_q2=6 boundary_q3=59 boundary_q4=46 beyond_q2=39 beyond_q3=246 beyond_q4=237 plateau_relevant=0 plateau_omitted=0 actual=1079 source_ok=1\nwindow_verdict failures=0 overflow=0 mutant=0\n",
+      "stderr": "",
+      "seconds": 0.5646981660001984
+    }
+  ]
+}

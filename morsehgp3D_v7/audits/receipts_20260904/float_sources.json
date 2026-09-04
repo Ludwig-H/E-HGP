@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-09-04T21:20:35.761457+00:00",
+  "files": [
+    {
+      "path": "src/pipeline/float_filter.hpp",
+      "sha256": "52e07b4e4dfb1ca66e2a6218fc9c31afc9586e0a81ca5a4a846ed7727e44b7d9",
+      "source_after_copy_sha256": "52e07b4e4dfb1ca66e2a6218fc9c31afc9586e0a81ca5a4a846ed7727e44b7d9"
+    },
+    {
+      "path": "src/pipeline/generate.hpp",
+      "sha256": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59",
+      "source_after_copy_sha256": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59"
+    },
+    {
+      "path": "src/lanes/chord_kill.hpp",
+      "sha256": "f5a4ca9b6e2fbc0ea94e8adf92f64322ab2ef5c461c588efcedf1bc9e4faa039",
+      "source_after_copy_sha256": "f5a4ca9b6e2fbc0ea94e8adf92f64322ab2ef5c461c588efcedf1bc9e4faa039"
+    }
+  ],
+  "scope": "preuve_statique_conditionnelle_binary64_RN_FMA_sans_reassociation"
+}

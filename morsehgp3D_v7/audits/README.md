@@ -7,8 +7,10 @@ Commencer par la [synthèse indépendante](AUDIT_INDEPENDANT_20260904.md),
 puis consulter selon le besoin :
 
 - [Échanges actifs avec le constructeur](DIALOGUE_COURANT.md) : nouveaux constats, corrections proposées et critères de fermeture de l'itération en cours.
-- [Mathématiques et hiérarchie](AUDIT_MATHEMATIQUE_20260904.md) : modèle du manuscrit, descente silencieuse, réduction et certificats restant à composer.
+- [Mathématiques et hiérarchie](AUDIT_MATHEMATIQUE_20260904.md) : composition horizontale et couverture S1 conditionnelles ; qualifications des primitives restant à rattacher au produit.
+- [Couverture du générateur](S1_COURANT.md) : matrice des clauses, preuves des filtres et théorème jusqu'au RLE.
 - [Interfaces et archives](AUDIT_INTERFACES_20260904.md) : entrée réelle, refus et rejeu des objets publiés.
+- [Mode mono](MONO_COURANT.md) : fold inline, créations de threads réellement comptées et refus tardifs.
 - [Résidence et parallélisme](AUDIT_RESIDENCE_20260904.md) : allocations du tri, census et pistes d'échelle.
 - [Validation courante](receipts_20260904/validation_current.json) : résultats exécutés et identité des sources contrôlées.
 
@@ -17,7 +19,7 @@ cessent d'être des objections ouvertes ; leurs contre-fixtures demeurent
 exécutables. Il n'y a pas d'addendum contradictoire ni de proposition de
 correctif périmée à appliquer.
 
-Les fichiers `*_current*` de `receipts_20260904/` portent les preuves actives.
+Les reçus liés par la validation courante portent les preuves actives.
 Le sous-dossier `history/` conserve uniquement les preuves brutes nécessaires
 à la traçabilité des essais, y compris leurs échecs. Les copies de sources,
 binaires et temporaires de travail restent sous `.work*`, ignorés par Git.

@@ -1,0 +1,23 @@
+{
+  "captured_utc": "2026-09-04T21:32:44.244618+00:00",
+  "copy_files_verified": 203,
+  "copy_changed": [],
+  "binaries_verified": 31,
+  "binaries_changed": [],
+  "ctest_passed": 279,
+  "ctest_failures": [],
+  "ctest_skipped": [],
+  "live_changed_relative_to_copy": [
+    "README.md",
+    "bench/incidence_campaign.py",
+    "docs/LECTURE_ET_CONTRATS.md",
+    "receipts/local_paired_20260904/005_uniform_32000_s17_v7.out",
+    "receipts/local_paired_20260904/005_uniform_32000_s17_v7.time",
+    "receipts/local_paired_20260904/runs.json",
+    "receipts/release_20260904/ctest.stdout",
+    "tests/incidence_campaign_gate.py"
+  ],
+  "scope": "frozen Release CPU gate suite; live benchmark/test changes qualified separately; constructor receipts and README are outside binary semantics",
+  "scale_tests_excluded": 46,
+  "gcp": "not_used"
+}

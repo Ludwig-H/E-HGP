@@ -1,0 +1,281 @@
+{
+  "started_utc": "2026-09-04T21:28:18.297374+00:00",
+  "sources_before": {
+    "bench/incidence_campaign.py": "6ca21d8b1c89e6baea99ecc3dd414b35d06581df50833e76bac9bdc1d5d1c20a",
+    "bench/compare_v6_v7.py": "cfe40fd2b00508ec7887970b961482a87839afdf9a7e2539728855feec69ffcb",
+    "tests/incidence_campaign_gate.py": "d74bca5257bd307b5956a946ca188a217f519ec2dc49e6b0de3ebf33a0ccca0a",
+    "src/forest/silent_incidence.hpp": "fddde6e233eea8e80d23af4d42b50952e7c49a50ed84357e973279ff14d555e8",
+    "src/pipeline/run.hpp": "885348a92f48658642e3783027cb7c4f239f1c8e1a0b91c66a698f3be6b29762",
+    "CMakeLists.txt": "79201af402181df2810938509587fa2d190b6364a2436ab911e83116392c2b75"
+  },
+  "frozen_sources_before": {
+    "bench/incidence_campaign.py": "6ca21d8b1c89e6baea99ecc3dd414b35d06581df50833e76bac9bdc1d5d1c20a",
+    "bench/compare_v6_v7.py": "cfe40fd2b00508ec7887970b961482a87839afdf9a7e2539728855feec69ffcb",
+    "tests/incidence_campaign_gate.py": "d74bca5257bd307b5956a946ca188a217f519ec2dc49e6b0de3ebf33a0ccca0a",
+    "src/forest/silent_incidence.hpp": "fddde6e233eea8e80d23af4d42b50952e7c49a50ed84357e973279ff14d555e8",
+    "src/pipeline/run.hpp": "885348a92f48658642e3783027cb7c4f239f1c8e1a0b91c66a698f3be6b29762",
+    "CMakeLists.txt": "79201af402181df2810938509587fa2d190b6364a2436ab911e83116392c2b75"
+  },
+  "baseline_sources": {
+    "bench/incidence_campaign.py": "0b154161e9178fb7f279977fb300bc60b4e2478c99cfbfef531f5a74722b5d89",
+    "bench/compare_v6_v7.py": "cfe40fd2b00508ec7887970b961482a87839afdf9a7e2539728855feec69ffcb",
+    "tests/incidence_campaign_gate.py": "8cf34a3ae30c3b403ff0bb4624de447fd68cec98578551d870b7b34e5179ab2a",
+    "src/forest/silent_incidence.hpp": "fddde6e233eea8e80d23af4d42b50952e7c49a50ed84357e973279ff14d555e8",
+    "src/pipeline/run.hpp": "885348a92f48658642e3783027cb7c4f239f1c8e1a0b91c66a698f3be6b29762",
+    "CMakeLists.txt": "79201af402181df2810938509587fa2d190b6364a2436ab911e83116392c2b75"
+  },
+  "binary_original": "audits/.work_iteration2/build/mhgp7",
+  "binary_original_before": "8a99b5cf5dc2c0622947f6b34880803e4ed347608ea61d56f3e080137bfc4a6b",
+  "binary_frozen_before": "8a99b5cf5dc2c0622947f6b34880803e4ed347608ea61d56f3e080137bfc4a6b",
+  "source_binary_binding": "separately_recorded_hashes_not_build_attestation",
+  "python_gates": {
+    "normal": {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_campaign_current/source/morsehgp3D_v7/tests/incidence_campaign_gate.py",
+        "-v"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "test_closed_silent_refusal_vocabulary (__main__.IncidenceCampaignGate.test_closed_silent_refusal_vocabulary) ... ok\ntest_identity_and_payload_corruptions (__main__.IncidenceCampaignGate.test_identity_and_payload_corruptions) ... ok\ntest_invariant_unknown_and_malformed_silent_refusals_stay_invalid (__main__.IncidenceCampaignGate.test_invariant_unknown_and_malformed_silent_refusals_stay_invalid) ... ok\ntest_main_retains_failed_and_interrupted_attempts (__main__.IncidenceCampaignGate.test_main_retains_failed_and_interrupted_attempts) ... ok\ntest_partial_or_invalid_summary_never_completed (__main__.IncidenceCampaignGate.test_partial_or_invalid_summary_never_completed) ... ok\ntest_positive_is_only_engine_completion (__main__.IncidenceCampaignGate.test_positive_is_only_engine_completion) ... ok\ntest_refusal_and_censor_are_not_payloads (__main__.IncidenceCampaignGate.test_refusal_and_censor_are_not_payloads) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 2.181s\n\nOK\n",
+      "elapsed_seconds": 2.6120274139993853
+    },
+    "optimized": {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_campaign_current/source/morsehgp3D_v7/tests/incidence_campaign_gate.py",
+        "-v"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "test_closed_silent_refusal_vocabulary (__main__.IncidenceCampaignGate.test_closed_silent_refusal_vocabulary) ... ok\ntest_identity_and_payload_corruptions (__main__.IncidenceCampaignGate.test_identity_and_payload_corruptions) ... ok\ntest_invariant_unknown_and_malformed_silent_refusals_stay_invalid (__main__.IncidenceCampaignGate.test_invariant_unknown_and_malformed_silent_refusals_stay_invalid) ... ok\ntest_main_retains_failed_and_interrupted_attempts (__main__.IncidenceCampaignGate.test_main_retains_failed_and_interrupted_attempts) ... ok\ntest_partial_or_invalid_summary_never_completed (__main__.IncidenceCampaignGate.test_partial_or_invalid_summary_never_completed) ... ok\ntest_positive_is_only_engine_completion (__main__.IncidenceCampaignGate.test_positive_is_only_engine_completion) ... ok\ntest_refusal_and_censor_are_not_payloads (__main__.IncidenceCampaignGate.test_refusal_and_censor_are_not_payloads) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 2.390s\n\nOK\n",
+      "elapsed_seconds": 2.7817233870000564
+    }
+  },
+  "schema": "mhgp7-incidence-classification-audit-v1",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "purpose": "bounded_classifier_delta_and_real_refusal_not_engine_qualification",
+  "finished_utc": "2026-09-04T21:30:18.733471+00:00",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "python_executable": "/home/codespace/.python/current/bin/python3",
+  "environment": {
+    "TMPDIR": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_campaign_current/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "gcp": "not_used",
+  "sources_after": {
+    "bench/incidence_campaign.py": "6ca21d8b1c89e6baea99ecc3dd414b35d06581df50833e76bac9bdc1d5d1c20a",
+    "bench/compare_v6_v7.py": "cfe40fd2b00508ec7887970b961482a87839afdf9a7e2539728855feec69ffcb",
+    "tests/incidence_campaign_gate.py": "d74bca5257bd307b5956a946ca188a217f519ec2dc49e6b0de3ebf33a0ccca0a",
+    "src/forest/silent_incidence.hpp": "fddde6e233eea8e80d23af4d42b50952e7c49a50ed84357e973279ff14d555e8",
+    "src/pipeline/run.hpp": "885348a92f48658642e3783027cb7c4f239f1c8e1a0b91c66a698f3be6b29762",
+    "CMakeLists.txt": "79201af402181df2810938509587fa2d190b6364a2436ab911e83116392c2b75"
+  },
+  "frozen_sources_after": {
+    "bench/incidence_campaign.py": "6ca21d8b1c89e6baea99ecc3dd414b35d06581df50833e76bac9bdc1d5d1c20a",
+    "bench/compare_v6_v7.py": "cfe40fd2b00508ec7887970b961482a87839afdf9a7e2539728855feec69ffcb",
+    "tests/incidence_campaign_gate.py": "d74bca5257bd307b5956a946ca188a217f519ec2dc49e6b0de3ebf33a0ccca0a",
+    "src/forest/silent_incidence.hpp": "fddde6e233eea8e80d23af4d42b50952e7c49a50ed84357e973279ff14d555e8",
+    "src/pipeline/run.hpp": "885348a92f48658642e3783027cb7c4f239f1c8e1a0b91c66a698f3be6b29762",
+    "CMakeLists.txt": "79201af402181df2810938509587fa2d190b6364a2436ab911e83116392c2b75"
+  },
+  "baseline_sources_after": {
+    "bench/incidence_campaign.py": "0b154161e9178fb7f279977fb300bc60b4e2478c99cfbfef531f5a74722b5d89",
+    "bench/compare_v6_v7.py": "cfe40fd2b00508ec7887970b961482a87839afdf9a7e2539728855feec69ffcb",
+    "tests/incidence_campaign_gate.py": "8cf34a3ae30c3b403ff0bb4624de447fd68cec98578551d870b7b34e5179ab2a",
+    "src/forest/silent_incidence.hpp": "fddde6e233eea8e80d23af4d42b50952e7c49a50ed84357e973279ff14d555e8",
+    "src/pipeline/run.hpp": "885348a92f48658642e3783027cb7c4f239f1c8e1a0b91c66a698f3be6b29762",
+    "CMakeLists.txt": "79201af402181df2810938509587fa2d190b6364a2436ab911e83116392c2b75"
+  },
+  "binary_original_after": "8a99b5cf5dc2c0622947f6b34880803e4ed347608ea61d56f3e080137bfc4a6b",
+  "binary_frozen_after": "8a99b5cf5dc2c0622947f6b34880803e4ed347608ea61d56f3e080137bfc4a6b",
+  "source_stable": true,
+  "baseline_stable": true,
+  "binary_stable": true,
+  "real_cli": {
+    "command": [
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_campaign_current/mhgp7",
+      "--family=uniform",
+      "--n=11",
+      "--coord=65536",
+      "--seed=3",
+      "--threads=2",
+      "--smax=11",
+      "--layout=csr",
+      "--digest",
+      "--complete-incidences",
+      "--mem-budget=17179869184",
+      "--silent-meb-supports=1"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_campaign_current/real.time",
+      "--",
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_campaign_current/mhgp7",
+      "--family=uniform",
+      "--n=11",
+      "--coord=65536",
+      "--seed=3",
+      "--threads=2",
+      "--smax=11",
+      "--layout=csr",
+      "--digest",
+      "--complete-incidences",
+      "--mem-budget=17179869184",
+      "--silent-meb-supports=1"
+    ],
+    "returncode": 2,
+    "stdout": "",
+    "stderr": "REFUS silent incidence K=2 : silent_meb_support_budget\nrefus_etage=fold rss_mb apres_generation=4 apres_rle=4 apres_prefiltre=4 apres_census=4 max_fold=4 (frontiere de completion : dernier etage atteint)\nsilent_refusal_work census_balls=172 plateau_balls=0 total_ms=50.623 completion_ms=0.027\nsilent_refusal_K2 core=24 steps=0 added_provisional=0 query_nodes=5 meb_supports=1\n",
+    "usage": "Command exited with non-zero status 2\n\tCommand being timed: \"/workspaces/E-HGP/morsehgp3D_v7/audits/.work_campaign_current/mhgp7 --family=uniform --n=11 --coord=65536 --seed=3 --threads=2 --smax=11 --layout=csr --digest --complete-incidences --mem-budget=17179869184 --silent-meb-supports=1\"\n\tUser time (seconds): 0.00\n\tSystem time (seconds): 0.00\n\tPercent of CPU this job got: 9%\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:00.05\n\tAverage shared text size (kbytes): 0\n\tAverage unshared data size (kbytes): 0\n\tAverage stack size (kbytes): 0\n\tAverage total size (kbytes): 0\n\tMaximum resident set size (kbytes): 4608\n\tAverage resident set size (kbytes): 0\n\tMajor (requiring I/O) page faults: 0\n\tMinor (reclaiming a frame) page faults: 251\n\tVoluntary context switches: 17\n\tInvoluntary context switches: 3\n\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 0\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 2\n",
+    "wall_seconds": 0.06630956499975582,
+    "timed_out": false
+  },
+  "classification_replays": {
+    "normal": {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_campaign_current/classify_replay.py"
+      ],
+      "returncode": 0,
+      "result": {
+        "current": {
+          "record": {
+            "returncode": 2,
+            "timed_out": false,
+            "wall_seconds": 0.06630956499975582,
+            "status": "engine_refused",
+            "reason": "REFUS silent incidence K=2 : silent_meb_support_budget",
+            "refusal_status": "resource_exhausted",
+            "refusal_order": 2
+          },
+          "error": null,
+          "summary": {
+            "status": "observations_completed",
+            "error": null,
+            "runs": 1,
+            "expected_runs": 1,
+            "source_stable": true,
+            "engine_successes": 0,
+            "engine_refusals": 1,
+            "censored": 0,
+            "invalid": 0,
+            "public_status": "not_claimed"
+          }
+        },
+        "baseline": {
+          "record": {
+            "returncode": 2,
+            "timed_out": false,
+            "wall_seconds": 0.06630956499975582,
+            "status": "invalid"
+          },
+          "error": "unexpected refusal cause",
+          "summary": {
+            "status": "invalid",
+            "error": "unexpected refusal cause",
+            "runs": 1,
+            "expected_runs": 1,
+            "source_stable": true,
+            "engine_successes": 0,
+            "engine_refusals": 0,
+            "censored": 0,
+            "invalid": 1,
+            "public_status": "not_claimed"
+          }
+        }
+      },
+      "stderr": ""
+    },
+    "optimized": {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_campaign_current/classify_replay.py"
+      ],
+      "returncode": 0,
+      "result": {
+        "current": {
+          "record": {
+            "returncode": 2,
+            "timed_out": false,
+            "wall_seconds": 0.06630956499975582,
+            "status": "engine_refused",
+            "reason": "REFUS silent incidence K=2 : silent_meb_support_budget",
+            "refusal_status": "resource_exhausted",
+            "refusal_order": 2
+          },
+          "error": null,
+          "summary": {
+            "status": "observations_completed",
+            "error": null,
+            "runs": 1,
+            "expected_runs": 1,
+            "source_stable": true,
+            "engine_successes": 0,
+            "engine_refusals": 1,
+            "censored": 0,
+            "invalid": 0,
+            "public_status": "not_claimed"
+          }
+        },
+        "baseline": {
+          "record": {
+            "returncode": 2,
+            "timed_out": false,
+            "wall_seconds": 0.06630956499975582,
+            "status": "invalid"
+          },
+          "error": "unexpected refusal cause",
+          "summary": {
+            "status": "invalid",
+            "error": "unexpected refusal cause",
+            "runs": 1,
+            "expected_runs": 1,
+            "source_stable": true,
+            "engine_successes": 0,
+            "engine_refusals": 0,
+            "censored": 0,
+            "invalid": 1,
+            "public_status": "not_claimed"
+          }
+        }
+      },
+      "stderr": ""
+    }
+  },
+  "raw_hashes": {
+    "classification_normal.json": "78151da4f7dc60806dad542fd43f2fde2a3e171fe4ae909b21a2ead876543fd5",
+    "classification_optimized.json": "089d6aee389e5bfded7a8635fa271ef340358772c9d24dce14006b2f21de176e",
+    "classify_replay.py": "f3dbae835568453018f0fa9da8b6d476b01b7b9c77e9cc39b8439e4937a35e05",
+    "normal.json": "39f4bcdf92a95d24bf2e509644a6e83af4173c92d27be70461d9ca44d8a55c12",
+    "optimized.json": "5a22c0d5768c85137a3253b1fbbbb037526f513127d62bf79a9cef6340108c9e",
+    "real.err": "470124572fc61b413b13228e6588a2ecbe3d423931c18054fd8238a785e88b6c",
+    "real.json": "079fbc42477e636de9737470aeba10674d71041c06a75ed713aabff283d1abcf",
+    "real.out": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "real.time": "6ba078590d99a20cb43920d87eba1bd0deb39663a01f20dd947b45556e7eb9ab",
+    "start.json": "62aa4f9449bba622907ebad3aee9a6cf600076d5be4dcc28337252fa15412af8"
+  },
+  "cmake_gate_registered_in_pinned_source": false,
+  "reviewed_delta": {
+    "silent_resource_reasons": 7,
+    "silent_unsupported_reasons": 3,
+    "supported_silent_orders": "2..10",
+    "required_silent_stage": "fold",
+    "refusal_code": 2,
+    "stdout_must_be_empty": true,
+    "diagnostic_orders": "strictly increasing and at most terminal refusal order",
+    "unknown_and_invariant_reasons": "invalid",
+    "timeout": "censored",
+    "refused_attempt_summary": "observations_completed is allowed; engine_successes remains zero",
+    "tests": "seven unittest methods pass normally and under -O; twenty listed silent reason/order positive subcases; malformed/unknown/invariant/output/summary mutants rejected"
+  },
+  "status": "completed"
+}

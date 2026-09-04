@@ -1,0 +1,10 @@
+{
+  "schema": "mhgp7-memory-audit-permanent-replay-inputs-v1",
+  "permanent_inputs_sha256": {
+    "memory_budget_current.json": "af44c6298e66b70afda3b59e034452b8cb41b4b49dd51a014c5bd35257e40f17",
+    "memory_budget_gate.cpp": "0c691660bb07ac371a6b4cd6be885db8072d73165117af88c6ffd05b7af32826",
+    "memory_budget_proxy_probe.cpp": "b7d3b42a2baebd0866fda7b63f23ba743d6e315d47f529ff0c05fbf52b7ecd43",
+    "memory_budget_instrumentation.patch": "a64cc14a321e206be680727f37f1b46fa82d0ce31de7b46e59aba9c7b3687df6",
+    "replay_memory_budget.py": "0a0429a50cba70b8aea3f9308e5db799be98ac70599e28a9ce90e4442d13a5e0"
+  }
+}

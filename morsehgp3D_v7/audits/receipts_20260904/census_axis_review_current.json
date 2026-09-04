@@ -1,0 +1,118 @@
+{
+  "timestamp_utc": "2026-09-04T21:59:21.141046+00:00",
+  "source_root": "/workspaces/E-HGP/morsehgp3D_v7",
+  "comparison_root": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_mono/source/morsehgp3D_v7",
+  "snapshot_root": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_census_axis/source",
+  "source_hashes_before": {
+    "src/pipeline/census.hpp": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be",
+    "src/core/mutants.hpp": "479cf2761107696d7ec89d8651003a9f0d5c0f47bd0fbda8732bf9449e2df5cd",
+    "CMakeLists.txt": "5fe0a8d61436ef8e7b4cd6e93ef8592bded3d44bbe5b06e23969ed9f0801fda4",
+    "tests/census_axis_gate.cpp": null,
+    "tests/axis_bounds_gate.cpp": "5974dd9093438e839599415b7dc4af90a6b5c267eea77728215b9b3993a24e5a",
+    "bench/axis_bounds_microbench.cpp": "3a44861833fd261433decb9753014e3c81caa7e3c5af38f7a4f39770089ba041",
+    "src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+    "src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+    "src/tree/cloud_index.hpp": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95",
+    "docs/QUALIFICATION_S1_PRIMITIVES.md": "3432411df7cd4b7d97d824e5d42fb7877538059aa40359beb23a34098970b303",
+    "oracle/obig.hpp": "0e3e9241503e7979fb7da06e97a0a0006362cf4da381c7ce2c66d86acdabf8d5"
+  },
+  "baseline_hashes": {
+    "src/pipeline/census.hpp": "3583680d947a5b28f8a38028bc55f37f12040143fea88d4aecc77a7baf653690",
+    "src/core/mutants.hpp": "11d4dd1057262c7eedf782b7261552c88961ddfc0b09612f9419ce7efa5c6ed0",
+    "CMakeLists.txt": "25030fb015309b44685101057f9259fc6b39847681777775119cf2905308bf73",
+    "tests/axis_bounds_gate.cpp": null,
+    "bench/axis_bounds_microbench.cpp": null,
+    "src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+    "src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+    "src/tree/cloud_index.hpp": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95",
+    "docs/QUALIFICATION_S1_PRIMITIVES.md": null,
+    "oracle/obig.hpp": "0e3e9241503e7979fb7da06e97a0a0006362cf4da381c7ce2c66d86acdabf8d5"
+  },
+  "files": [
+    "src/pipeline/census.hpp",
+    "src/core/mutants.hpp",
+    "CMakeLists.txt",
+    "tests/census_axis_gate.cpp",
+    "tests/axis_bounds_gate.cpp",
+    "bench/axis_bounds_microbench.cpp",
+    "src/core/intmath.hpp",
+    "src/lanes/keys.hpp",
+    "src/tree/cloud_index.hpp",
+    "docs/QUALIFICATION_S1_PRIMITIVES.md",
+    "oracle/obig.hpp"
+  ],
+  "schema": "mhgp7-audit-census-axis-static-review-v1",
+  "review_completed_utc": "2026-09-04T22:00:53.374634+00:00",
+  "source_hashes_after": {
+    "src/pipeline/census.hpp": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be",
+    "src/core/mutants.hpp": "479cf2761107696d7ec89d8651003a9f0d5c0f47bd0fbda8732bf9449e2df5cd",
+    "CMakeLists.txt": "5fe0a8d61436ef8e7b4cd6e93ef8592bded3d44bbe5b06e23969ed9f0801fda4",
+    "tests/census_axis_gate.cpp": null,
+    "tests/axis_bounds_gate.cpp": "5974dd9093438e839599415b7dc4af90a6b5c267eea77728215b9b3993a24e5a",
+    "bench/axis_bounds_microbench.cpp": "3a44861833fd261433decb9753014e3c81caa7e3c5af38f7a4f39770089ba041",
+    "src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+    "src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+    "src/tree/cloud_index.hpp": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95",
+    "docs/QUALIFICATION_S1_PRIMITIVES.md": "3432411df7cd4b7d97d824e5d42fb7877538059aa40359beb23a34098970b303",
+    "oracle/obig.hpp": "0e3e9241503e7979fb7da06e97a0a0006362cf4da381c7ce2c66d86acdabf8d5"
+  },
+  "source_drifts": {},
+  "source_stable": true,
+  "status": "reviewed_not_executed",
+  "review_kind": "static_source_and_mathematical_proof_only",
+  "independent_delta_compilation": false,
+  "independent_delta_test_execution": false,
+  "prior_test_results_transferred": false,
+  "product_exactness": "not_claimed",
+  "performance_qualification": "not_claimed",
+  "diff_path": "receipts_20260904/census_axis_review_current.diff",
+  "diff_sha256": "46c1c4080a1161d92a7ea7d685d69873676cdae1ab4209c5649c99625f11767c",
+  "proof_preconditions": [
+    "mutants disabled",
+    "0 < A < 2^68; abs(B_i) < 2^87; abs(C) < 2^105",
+    "axis box integral with 0 <= lo_i <= hi_i <= 65535",
+    "integer types satisfy the documented CPU ABI and key reference remains unchanged during queries"
+  ],
+  "reviewed_ranges": {
+    "src/pipeline/census.hpp": [
+      "61-101",
+      "131-206"
+    ],
+    "src/core/intmath.hpp": [
+      "76-81"
+    ],
+    "src/lanes/keys.hpp": [
+      "79-105"
+    ],
+    "src/tree/cloud_index.hpp": [
+      "45-75"
+    ],
+    "src/core/mutants.hpp": [
+      "129-139"
+    ],
+    "tests/axis_bounds_gate.cpp": [
+      "1-189"
+    ],
+    "CMakeLists.txt": [
+      "835-853"
+    ],
+    "docs/QUALIFICATION_S1_PRIMITIVES.md": [
+      "section 4 coefficient bounds"
+    ],
+    "bench/axis_bounds_microbench.cpp": [
+      "scope: synthetic scalar comparator, excluded from ALL, not a correctness oracle or end-to-end measurement"
+    ],
+    "oracle/obig.hpp": [
+      "dependency identity only; implementation was reviewed earlier, not requalified here"
+    ]
+  },
+  "findings": [
+    "q=floor(-B/(2A)), r=-B-2Aq and m=q+(r>A) give an exact integer minimizer with ties toward q",
+    "successive clipping to u16 then any contained integral box preserves a minimizer",
+    "axis maxima occur at endpoints; separability gives exact extrema on the integer box and conservative bounds on node points",
+    "all new argmin intermediates fit signed i128 under explicit coefficient bounds; clipping precedes narrowing to i64",
+    "registered gate requests nominal exit0 and five targeted mutants exit4 plus DIVERGENCE prefix; outcomes not executed independently"
+  ],
+  "blocking_defect_observed": false,
+  "next_validation": "Build the six mhgp7_axis_bounds gates from these pinned sources, then requalify the actual product binary; preserve exact exit codes, prefixes and source/binary hashes."
+}

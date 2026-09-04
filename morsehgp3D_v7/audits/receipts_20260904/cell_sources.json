@@ -1,0 +1,40 @@
+{
+  "schema": "mhgp7-cell-certificate-static-read-v1",
+  "timestamp_utc": "2026-09-04T21:20:57.027896+00:00",
+  "before": {
+    "src/lanes/cell_grid.hpp": "f888539647e4dfd2e5f89d578f5f850cbad4a30b827d0bd5bef9142b5fc4c588",
+    "src/lanes/sector_kill.hpp": "4742ccccbcfdec847ea2e6bdded9f73b78d62e32585058b09d4b45b5951b7e06",
+    "src/pipeline/generate.hpp": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59",
+    "src/lanes/q3.hpp": "4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe",
+    "src/lanes/edge_cover.hpp": "3186e5b67002a2d29a50e090bc465c86690224f78eab30088c5f33595d2e4836"
+  },
+  "after": {
+    "src/lanes/cell_grid.hpp": "f888539647e4dfd2e5f89d578f5f850cbad4a30b827d0bd5bef9142b5fc4c588",
+    "src/lanes/sector_kill.hpp": "4742ccccbcfdec847ea2e6bdded9f73b78d62e32585058b09d4b45b5951b7e06",
+    "src/pipeline/generate.hpp": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59",
+    "src/lanes/q3.hpp": "4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe",
+    "src/lanes/edge_cover.hpp": "3186e5b67002a2d29a50e090bc465c86690224f78eab30088c5f33595d2e4836"
+  },
+  "stable": true,
+  "method": "static source and mathematical composition; no new execution",
+  "prerequisites": [
+    "unique cover",
+    "positive owner support",
+    "u16 arithmetic widths",
+    "certified locator coverage for per-seed kills"
+  ],
+  "closed_without_float_locator": "anchor all_dead over all needed cells",
+  "gcp": "not_used",
+  "locator_derivation": "independent sufficient bounds 16u*S and computed_eps>120u*S+8000u, including final endpoint rounding",
+  "evaluation_contract": [
+    "binary64 normal arithmetic",
+    "round-to-nearest conversions and operations",
+    "no reassociation",
+    "stable evaluation environment"
+  ],
+  "auxiliary_reads_sha256": {
+    "src/pipeline/float_filter.hpp": "52e07b4e4dfb1ca66e2a6218fc9c31afc9586e0a81ca5a4a846ed7727e44b7d9",
+    "src/parallel/pool.hpp": "5c20aabbe673e2baa1018bea893185592bc3b394d025eadd9be07542453befc6",
+    "tests/cell_grid_oracle.cpp": "37630069c54b6aa7810f079b45675b823db8604b886bd27bb10d73fd6f85e8df"
+  }
+}

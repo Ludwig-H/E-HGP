@@ -8,20 +8,20 @@ mode=audit_independant_math_and_architecture
 public_status=not_claimed
 ```
 
-**Les 26 scènes CLI et les six rejets structurels d'archives passent sur le binaire et le lecteur courants épinglés, y compris pour `normalized_horizontal_h0_candidate`.** La porte indépendante avec `--require-product-rejections`, exécutée sous `python3 -O`, rend `0`. Un contrôle supplémentaire révèle toutefois un défaut de nettoyage sous panne d'allocation : le [retour courant au constructeur](RETOUR_ARCHIVE_COURANT.md) contient la reproduction de la terminaison et du provisoire restant.
+**Les 26 scènes CLI et les six rejets structurels d’archives passent sur le binaire mono et le lecteur épinglés, y compris pour `normalized_horizontal_h0_candidate`.** La porte indépendante avec `--require-product-rejections`, exécutée sous `python3 -O`, rend `0`. Le correctif de nettoyage sous panne d’allocation est requalifié séparément dans le [retour courant au constructeur](RETOUR_ARCHIVE_COURANT.md) ; la présente porte est rejouée sur le nouveau binaire.
 
 ## Sources et résultat reproductible
 
 Lecture préalable des parties I, pages PDF 35–76, et II, pages PDF 77–134, de `docs/references/MANUSCRIT_THESE_HAUSEUX.pdf`, puis des documents d'entrée v7. Le § 9.1 impose de distinguer la hiérarchie sur les facettes, sa projection sur les points et les poids d'incidence ; un contrôle d'archive ne confond pas ces objets.
 
-[Le reçu courant](receipts_20260904/interfaces_current.json) épingle le binaire, le lecteur, la contre-fixture et les sources présentes lors de l'exécution. Le binaire `build/v7/mhgp7` et le lecteur `tests/archive_gate.py` ont été copiés dans un répertoire de travail de l'audit avant le test. Les hashes des sources et du binaire ont été contrôlés avant et après copie, puis immédiatement après exécution : aucune modification n'est intervenue pendant ces vérifications.
+[Le reçu courant](receipts_20260904/interfaces_delta_current.json) porte les résultats du delta d’archive intégré. Le CLI et le lecteur proviennent de la copie de sources dédiée sous `audits/.work_mono/`. Le [reçu d’exécution](receipts_20260904/interfaces_delta_validation.json) conserve la commande exacte et les hashes avant/après du binaire, du lecteur, de la contre-fixture et d’`archive.hpp` : ils sont stables. Le [reçu de construction du delta](receipts_20260904/mono_current.json) raccorde le nouveau CLI aux sources compilées.
 
 | Élément exécuté | SHA-256 |
 | --- | --- |
-| Binaire v7 | `8a99b5cf5dc2c0622947f6b34880803e4ed347608ea61d56f3e080137bfc4a6b` |
+| Binaire v7 | `c7da95a3a83c1e31fdfd95db852fed86f43208e6b1b051dfb36e78baf45e5175` |
 | Lecteur d'archive | `73f686a31c0ac6cf39f26f938e26c67bfc5fa112deb4c99eadb3656b54d610f5` |
 
-Exécution terminée à `2026-09-04T20:32:39.581022+00:00`. Cette vérification qualifie les cibles exécutées ; elle ne constitue pas à elle seule un certificat de compilation de tout le worktree.
+Exécution indépendante terminée à `2026-09-04T21:57:39.521493+00:00`, code 0, sous Python optimisé. Les 26 scènes et six corruptions sont qualifiées sur le CLI reconstruit après le delta mono, sans réattribuer les résultats d’un ancien binaire. Le changement AxisBounds intégré ensuite possède une [revue distincte](CENSUS_AXIS_COURANT.md) ; ce CLI n’est pas présenté comme sa compilation.
 
 ## Contrôles acquis
 
@@ -54,9 +54,11 @@ Le lecteur reconstruit les composantes uniquement depuis les deltas exportés. I
 
 **Lecture de coupes et rendu pondéré.** L'archive donne des facettes et des deltas. Elle ne fournit pas les multiplicités par coface nécessaires aux scores du § 9.1. Dans la route normalisée, `born` désigne la première matérialisation dans le sous-flot ; il ne doit pas être interprété comme la naissance géométrique de la facette. Un consommateur ayant besoin de cette naissance peut la recalculer depuis l'entrée canonique et la facette, ou demander son export explicite. Un export de rendu pondéré constitue un contrat distinct.
 
-**Exploitation et ressources.** Les refus exercés se produisent avant le premier callback de forêt. Ils vérifient notamment la suppression du provisoire déjà ouvert et contenant l'entrée ; ils ne remplacent pas une injection d'erreur après plusieurs callbacks. Le format n'annonce pas de reprise après interruption ni de garantie après coupure électrique. Le budget `partial_named_payload_proxy_v1` borne des tampons déclarés et ne constitue pas un plafond RSS global : lecture de l'entrée, calcul et export doivent rester mesurés ensemble dans une campagne d'échelle.
+**Exploitation et ressources.** Les refus de cette porte se produisent avant le premier callback de forêt. La [porte de nettoyage](RETOUR_ARCHIVE_COURANT.md) couvre séparément les refus tardifs après callbacks ; les deux portées restent distinguées. Le format n'annonce pas de reprise après interruption ni de garantie après coupure électrique. Le budget `partial_named_payload_proxy_v1` borne des tampons déclarés et ne constitue pas un plafond RSS global : lecture de l'entrée, calcul et export doivent rester mesurés ensemble dans une campagne d'échelle.
 
 **Provenance des campagnes.** Le manifeste lie l'entrée, l'ordre maximal effectif, la sémantique et les hashes. Pour reproduire une campagne et ses coûts, un reçu externe doit aussi conserver commande, options demandées/effectives, identité du binaire, configuration et mesures brutes. Le reçu courant fournit les preuves de ce sous-audit ; il n'attribue aucune performance industrielle aux cinq points utilisés.
+
+La [classification du banc d'incidences](CAMPAGNE_INCIDENCES_COURANTE.md) est vérifiée séparément sur sa correction courante : sept tests en Python normal et optimisé, plus un refus réel K=2. Une observation terminée avec refus conserve zéro succès moteur ; les motifs inconnus et invariants restent invalides.
 
 ## Reproduction
 

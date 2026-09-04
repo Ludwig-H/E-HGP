@@ -1,34 +1,23 @@
-# Retour constructeur — nettoyage de l'archive sous épuisement mémoire
+# Nettoyage d'archive — verdict courant
 
-Cadre : `exploration_v7_hors_registre`, `cpu_reference`, `quantized_u16_input_only`, `audit_independant_math_and_architecture`, `public_status=not_claimed`.
+**A1 fermé sur la source examinée : le nettoyage conserve un retour contrôlé sous refus persistant d'allocation, y compris après les callbacks K1 et K2.** Vérification indépendante du 4 septembre 2026 sur `src/io/archive.hpp`, SHA-256 `cc2243aaa1bdbe63b69f165d65152cf62d7fac32ff6c641343542c247d989430`.
 
-**Défaut reproduit : le destructeur d'une archive provisoire peut appeler `std::terminate` lorsque le nettoyage rencontre `std::bad_alloc`.** La sortie finale n'est pas publiée, mais le processus perd son chemin de refus contrôlé et le provisoire contenant l'entrée reste présent.
+Cadre : `exploration_v7_hors_registre` / `cpu_reference` / `quantized_u16_input_only` / `audit_independant_math_and_architecture` / `public_status=not_claimed`. [Reçu courant : sources, binaires, compilation, commandes et sorties complètes](receipts_20260904/archive_delta_current.json).
 
-La cause est `src/io/archive.hpp:154` : le destructeur, implicitement `noexcept`, appelle `std::filesystem::remove_all(staging_, ec)`. Le paramètre `error_code` n'interdit pas les allocations internes ; sur GCC/libstdc++ 13.3.0, cette opération alloue effectivement dans la scène exercée.
+Le destructeur s'appuie désormais sur des descripteurs conservés, douze noms constants et des tampons de pile. Il supprime le provisoire sans allocation C++, possède aussi le répertoire lors d'un échec de construction et conserve l'archive après publication. Une erreur OS de suppression produit un diagnostic borné sans construire de chaîne dynamique. [Revue statique des chemins et limites](REVUE_NETTOYAGE_ARCHIVE_COURANT.md).
 
-## Reproduction minimale confirmée
+| Vérification indépendante | Résultat |
+| --- | --- |
+| [Probe minimale inchangée](archive_cleanup_probe.cpp), allocations disponibles | Code **0**, `destructor_returned`, aucun résidu |
+| Même probe, allocations impossibles pendant tout le nettoyage | Code **0**, `destructor_returned`, aucun résidu |
+| Nouvelle porte `mhgp7_archive_cleanup` | Code **0**, faute persistante exercée ; dix fichiers de forêt supprimés ; 9 défauts de construction, 1 après création du répertoire, 10 de commit ; 24 allocations effectivement refusées |
+| Refus tardif inclus dans cette porte | Callbacks K1/K2 atteints (`callback_mask=6`) ; statut `resource_exhausted`, étage `fold`, payload provisoire invalidé, aucun fichier final ni provisoire restant |
+| Publication et panne OS incluses dans cette porte | Échec de synchronisation du parent après publication sans retrait de l'archive ; échec de suppression diagnostiqué sans allocation ni terminaison |
+| Porte `mhgp7_archive_api` | Code **0** : cycle de vie, abandon après suffixe échoué, synchronisations et sémantiques vérifiés |
+| Porte Python `archive_gate.py`, normale puis `-O` | **24 scènes réussies par invocation**, relecture des digests/deltas et rejet des corruptions |
 
-Le programme [destructor_probe.cpp](.work_boundary2/destructor_probe.cpp) construit une archive, y écrit deux points valides, puis laisse son destructeur s'exécuter. Le bras adverse remplace les allocations suivantes par `throw std::bad_alloc()`, sans épuiser physiquement la RAM. Un gestionnaire `std::terminate` appelle `_Exit(97)` pour rendre l'issue observable sans produire de core dump ; **97 est le code témoin de l'instrumentation**, pas un code revendiqué par le produit.
+La configuration et la compilation Release ciblées réussissent avec GCC 13.3.0 et `-Wall -Wextra -Wpedantic -Werror`. Les quatre CTests sélectionnés passent. Le CLI reconstruit porte le SHA-256 `fa917eefd8198d8ee676585dd99401f74594dd33a4bf77e1265ef397f439e200` ; le reçu lie les commandes à la copie figée des sources.
 
-```bash
-TMPDIR=/workspaces/E-HGP/morsehgp3D_v7/audits/.work_boundary2/tmp g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror -pthread morsehgp3D_v7/audits/.work_boundary2/destructor_probe.cpp -o morsehgp3D_v7/audits/.work_boundary2/destructor_probe
-morsehgp3D_v7/audits/.work_boundary2/destructor_probe morsehgp3D_v7/audits/.work_boundary2/normal/output normal
-morsehgp3D_v7/audits/.work_boundary2/destructor_probe morsehgp3D_v7/audits/.work_boundary2/fail/output fail
-```
+Toutes les écritures sont confinées à `audits/.work_archive_delta/`. La nouvelle porte constructeur emploie `/tmp` en dur : **seul ce littéral a été remplacé dans sa copie d'audit** par un chemin sous `audits/`. Le patch et les deux hashes de cette porte figurent au reçu. La probe indépendante et `archive.hpp` sont inchangés. Les autres portes utilisent `TMPDIR` dans `audits/` et Python n'écrit pas de bytecode.
 
-Les deux répertoires parents doivent exister avant l'appel. [Le résultat brut](.work_boundary2/destructor_probe_result.json) donne :
-
-| Bras | Code | Résidu après le processus |
-| --- | --- | --- |
-| Allocations disponibles | `0`, `destructor_returned` | Aucun |
-| Allocations refusées au nettoyage | `97`, gestionnaire de terminaison atteint | `.work_boundary2/fail/.mhgp7-provisional-xgwgPF/input.u16` |
-
-Source `src/io/archive.hpp` examinée : SHA-256 `e7f056ce909527f668f0239e416bb22175cf3676900f2cd459d36a25e895c9c5`. Probe : source `fbf1424c5d385e656d791f028a7e5026d4bbe70ed2e80648bb483921d1f8b21a`, binaire `00bffdfde054974847fd233383d26df80209fc87ffbc694f1c61071c6c2d80c6`. La reproduction minimale ne prétend pas encore injecter la panne après un callback du pipeline.
-
-## Correction proposée et fermeture
-
-Préparer pendant la construction les descripteurs et noms nécessaires au nettoyage, puis supprimer sans allocation les seuls fichiers de ce format : `input.u16`, `forest_K1.bin` à `forest_K10.bin`, `manifest.json`, puis le répertoire provisoire. Des descripteurs conservés et `unlinkat`/suppression du répertoire permettent un chemin POSIX borné, sans reconstruction de chemins au destructeur. Les noms de forêts peuvent être formés dans un tampon de pile. Ne pas remplacer le problème par une capture silencieuse laissant systématiquement les gros provisoires après un refus mémoire.
-
-Critères de fermeture : témoin nominal conservé ; branche d'allocation impossible réellement atteinte ; aucune terminaison ; aucun fichier final publié ; suppression des fichiers et du provisoire dans la scène injectée ; et maintien du refus mémoire contrôlé quand la panne survient après plusieurs callbacks. Une panne OS empêchant la suppression doit être signalée sans nouvelle allocation et sans prétendre que le nettoyage a réussi.
-
-Toutes les écritures de cette reproduction sont dans `morsehgp3D_v7/audits/`. Aucun code produit modifié. GCP non utilisé.
+Le code, les portes effectivement consommées et les binaires sont stables avant/après. Un changement concurrent de `bench/compare_v6_v7.py`, non consommé par cette qualification, est conservé explicitement dans le reçu ; la stabilité du worktree entier n'est pas revendiquée. Les erreurs OS restent possibles et le nombre borné d'appels ne constitue pas une borne de latence ni une garantie après coupure électrique. Aucun claim géométrique ou GPU supplémentaire. GCP non utilisé.

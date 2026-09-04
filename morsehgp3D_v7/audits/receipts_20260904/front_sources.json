@@ -1,0 +1,11 @@
+{
+  "scope": "static mathematical review, no new execution",
+  "captured_utc": "2026-09-04T21:13:53.281474+00:00",
+  "files": {
+    "src/pipeline/generate.hpp": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59",
+    "src/pipeline/run.hpp": "885348a92f48658642e3783027cb7c4f239f1c8e1a0b91c66a698f3be6b29762",
+    "src/wspd/wavefront.hpp": "481a0d05da0631c71d74b52d90ea84233ad9c7624221a3783f322554fdb32063",
+    "src/spindle/spindle.hpp": "f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577",
+    "src/spindle/witness_count.hpp": "fce9510ee21cbe025283a9ce777b120e4173ce62eee736e1c48dc772afb67a42"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "source_manifest": "source.json",
+  "source_sha256": "301bcaa24731c971ba26ac001a49c6c1b5c8d95a27350c27651f7e728de78b4d",
+  "runs": [
+    {
+      "name": "configure",
+      "command": [
+        "cmake",
+        "-S",
+        "morsehgp3D_v7/audits/.work_iteration2/source/morsehgp3D_v7",
+        "-B",
+        "morsehgp3D_v7/audits/.work_iteration2/build",
+        "-DCMAKE_BUILD_TYPE=Release"
+      ],
+      "started_utc": "2026-09-04T20:48:23.791760+00:00",
+      "finished_utc": "2026-09-04T20:48:24.689524+00:00",
+      "exit_code": 0,
+      "log": "configure.log"
+    },
+    {
+      "name": "build",
+      "command": [
+        "cmake",
+        "--build",
+        "morsehgp3D_v7/audits/.work_iteration2/build",
+        "--parallel",
+        "2"
+      ],
+      "started_utc": "2026-09-04T20:48:24.697975+00:00",
+      "finished_utc": "2026-09-04T21:02:39.150926+00:00",
+      "exit_code": 0,
+      "log": "build.log"
+    },
+    {
+      "name": "ctest",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "morsehgp3D_v7/audits/.work_iteration2/build",
+        "--output-on-failure",
+        "-L",
+        "^gate$",
+        "--parallel",
+        "2",
+        "--output-junit",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_20260904/iteration2/ctest.xml"
+      ],
+      "started_utc": "2026-09-04T21:02:39.193899+00:00",
+      "finished_utc": "2026-09-04T21:30:46.559363+00:00",
+      "exit_code": 0,
+      "log": "ctest.log"
+    }
+  ],
+  "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+}

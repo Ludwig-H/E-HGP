@@ -1,0 +1,18 @@
+{
+  "status": "prepared",
+  "scratch": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_residence2/replay_81cft6oj",
+  "source_files_verified": 46,
+  "patch_command": [
+    "patch",
+    "--batch",
+    "--forward",
+    "-p1",
+    "-d",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_residence2/replay_81cft6oj/instrumented",
+    "-i",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_20260904/memory_budget_instrumentation.patch"
+  ],
+  "patch_stdout": "patching file src/pipeline/expand.hpp\n",
+  "patch_stderr": "",
+  "runs": []
+}

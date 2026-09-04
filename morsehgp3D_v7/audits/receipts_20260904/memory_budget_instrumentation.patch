@@ -1,0 +1,29 @@
+--- source/src/pipeline/expand.hpp
++++ instrumented/src/pipeline/expand.hpp
+@@ -30,6 +30,8 @@
+ #include "census.hpp"
+ 
+ namespace mhgp7 {
++void audit_census_arrays(size_t, size_t, size_t, size_t, size_t);
++void audit_expansion_arrays(size_t, size_t, size_t, size_t);
+ 
+ struct Survivor {
+   u32 idx;
+@@ -191,6 +193,7 @@
+   std::vector<int> lrc(nchunks, 0);
+   std::vector<DepthStats> lcs(nchunks);
+   std::vector<BallData> staged(survivors.size());
++  audit_census_arrays(cands.size(), cands.capacity(), survivors.size(), survivors.capacity(), staged.capacity());
+   st->census_merge_peak_bytes = (u64)staged.capacity() * (u64)sizeof(BallData);
+   const size_t created = expand_detail::chunked(survivors.size(), threads, &nchunks, [&](size_t c, size_t b, size_t e) {
+     std::vector<i32> in, sh;    // tampons de l'ouvrier, copies dans les tableaux inline
+@@ -371,6 +374,9 @@
+   size_t n_ev = 0;
+   for (size_t c = 0; c < nchunks; ++c) n_ev += lev[c].size();
+   out->reserve(n_ev);  // total de l'ordre K connu AVANT la fusion (= kc[K].events, revalide par l'appelant)
++  size_t audit_shard_capacity = 0;
++  for (const auto& audit_shard : lev) audit_shard_capacity += audit_shard.capacity();
++  audit_expansion_arrays((size_t)K, n_ev, audit_shard_capacity, out->capacity());
+   for (size_t c = 0; c < nchunks; ++c) {
+     out->insert(out->end(), lev[c].begin(), lev[c].end());
+     if (!m_keep_chunks) std::vector<ForestEvent>().swap(lev[c]);  // meme motif : la tranche meurt des sa consommation

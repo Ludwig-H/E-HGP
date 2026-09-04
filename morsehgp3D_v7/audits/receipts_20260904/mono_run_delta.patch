@@ -1,0 +1,43 @@
+--- audited_baseline/src/pipeline/run.hpp
++++ current/src/pipeline/run.hpp
+@@ -97,11 +97,12 @@
+   // Diagnostic opt-in : signe le multiensemble trie AVANT RLE.
+   bool diagnostic_raw_candidates_digest = false;
+   int fold_inflight = 2;
+-  // MODE DIAGNOSTIC (§ 5.10) : joindre B(K) AVANT de preparer A(K+1) —
+-  // fold_inflight=1 n'isole PAS B (la preparation suivante co-tourne) ; ce
+-  // mode isole vraiment l'etage B pour le profil. L'OBJET est identique
+-  // (meme ordre de publication) ; seul l'ordonnancement change. Jamais un
+-  // mode de mesure du mur nominal.
++  // Joindre B(K) AVANT de preparer A(K+1) (§ 5.10). fold_inflight=1 seul
++  // n'isole PAS B : la preparation suivante peut co-tourner. Avec threads=1,
++  // B est appele inline et ses callbacks s'executent sur le thread appelant.
++  // Sinon B conserve son thread. Objet, ordre de publication et autorite
++  // provisoire des callbacks sont inchanges ; declarer cet ordonnancement
++  // dans toute mesure (le mode avec recouvrement reste le defaut).
+   bool fold_join_before_next_k = false;
+   // ROUTE DE STOCKAGE des deltas (palier KeyCSR) : classic (defaut) | csr —
+   // meme objet, meme digest ; AUCUNE route de repli (un echec csr est un refus
+@@ -826,7 +827,7 @@
+       slots.push_back(std::make_unique<BSlot>());
+       BSlot* sp = slots.back().get();
+       sp->K = K;
+-      sp->t = std::thread([&rr, &opt, &dg_all, &pub_mutex, &pub_cv, &next_publish, &pub_failed, &b_inflight, &b_peak,
++      auto fold_b = [&rr, &opt, &dg_all, &pub_mutex, &pub_cv, &next_publish, &pub_failed, &b_inflight, &b_peak,
+ #ifdef MHGP7_PROFILE_REDUCE
+                            &reduce_active, &reduce_peak,
+ #endif
+@@ -1018,7 +1019,12 @@
+         next_publish = K + 1;
+         lk.unlock();
+         pub_cv.notify_all();
+-      });
++      };
++      // Genuine mono execution: with join-before-next-K no earlier B slot
++      // can still own next_publish, so this identical body cannot wait for
++      // a predecessor that only the current thread could finish.
++      if (opt.threads == 1 && join_b_now) fold_b();
++      else sp->t = std::thread(std::move(fold_b));
+       if (join_b_now && !reap_front()) break;  // § 5.10 : B(K) au bout avant A(K+1)
+     }
+   } catch (...) {

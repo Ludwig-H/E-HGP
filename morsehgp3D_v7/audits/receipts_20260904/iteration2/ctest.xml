@@ -1,0 +1,3007 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="279"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="1687"
+	timestamp="2026-09-04T21:02:39"
+	>
+	<testcase name="mhgp7_arith_selftest" classname="mhgp7_arith_selftest" time="0.0569436" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>selftest --arith : conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_sha256_selftest" classname="mhgp7_sha256_selftest" time="0.103534" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>sha256 : SHA-NI ACTIF (comparaison inter-chemins effective) ; 1 Mo auto=723e637049bb54d4... portable=723e637049bb54d4...
+selftest --sha256 : conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_families_fixture" classname="mhgp7_families_fixture" time="0.0705069" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>selftest --families : conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_families_mutant_overshoot" classname="mhgp7_families_mutant_overshoot" time="0.0656684" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant uniform                      digest identique
+mutant terrain                      digest identique
+mutant scanline_single_pass         digest identique
+mutant scanline_overlap_multiecho   digest DIVERGE
+mutant eight_clusters               digest identique
+mutant two_lines                    digest identique
+mutant collinear_seven              digest identique
+mutant terrain_stationnaire         digest identique
+mutant scanline_stationnaire        digest identique
+families : mutant TUE (1 famille(s) divergente(s))
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_tree_selftest" classname="mhgp7_tree_selftest" time="0.0725683" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>selftest --tree : conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_wspd_ledger" classname="mhgp7_wspd_ledger" time="0.0725047" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>selftest --wspd-ledger : conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_wspd_ownership" classname="mhgp7_wspd_ownership" time="2.1612" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>selftest --wspd-ownership : conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_wspd_mutant_cap" classname="mhgp7_wspd_mutant_cap" time="0.907068" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>uniform : 7769 rectangles vivants != fixture 23586
+uniform : rectangle NON separe emis
+eight_clusters : 5989 rectangles vivants != fixture 12520
+eight_clusters : rectangle NON separe emis
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_wspd_mutant_split" classname="mhgp7_wspd_mutant_split" time="3.3567" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>uniform : 31570 rectangles vivants != fixture 23586
+eight_clusters : 22144 rectangles vivants != fixture 12520
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_contrat_echec" classname="mhgp7_contrat_echec" time="5.52853" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>selftest --failure-contract : conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_contrat_echec_census" classname="mhgp7_contrat_echec_census" time="6.83182" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_contrat_echec_fold_k2" classname="mhgp7_contrat_echec_fold_k2" time="9.11375" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_contrat_echec_fuite_sum_parents" classname="mhgp7_contrat_echec_fuite_sum_parents" time="11.341" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>echec sous mutant (inflight=1) : champ provisoire NON vide apres echec
+echec sous mutant (inflight=2) : champ provisoire NON vide apres echec
+echec sous mutant (inflight=8) : champ provisoire NON vide apres echec
+mutant provisional-keep-sum-parents : contrat des provisoires VIOLE — tue
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_bad_alloc_temoin" classname="mhgp7_bad_alloc_temoin" time="3.36484" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>temoin : run complet, etage_atteint=publication, 10 callbacks (kmax_eff=10) — conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_bad_alloc_etage_provision" classname="mhgp7_bad_alloc_etage_provision" time="0.0227535" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>caps-throw-bad-alloc-provision inflight=1 : resource_exhausted : allocation impossible a l'etage entree (rss_mb apres_generation=0 apres_rle=0 apres_prefiltre=0 apres_census=0 max_fold=0)
+caps-throw-bad-alloc-provision inflight=2 : resource_exhausted : allocation impossible a l'etage entree (rss_mb apres_generation=0 apres_rle=0 apres_prefiltre=0 apres_census=0 max_fold=0)
+caps-throw-bad-alloc-provision inflight=8 : resource_exhausted : allocation impossible a l'etage entree (rss_mb apres_generation=0 apres_rle=0 apres_prefiltre=0 apres_census=0 max_fold=0)
+bad_alloc a l'etage entree : refus transactionnel conforme (statut, curseur, zero callback, aucun provisoire) sur inflight 1/2/8 — jamais un abort
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_bad_alloc_etage_census" classname="mhgp7_bad_alloc_etage_census" time="6.80413" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>caps-throw-bad-alloc-census inflight=1 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=24 apres_rle=24 apres_prefiltre=25 apres_census=0 max_fold=0)
+caps-throw-bad-alloc-census inflight=2 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=54 apres_rle=54 apres_prefiltre=54 apres_census=0 max_fold=0)
+caps-throw-bad-alloc-census inflight=8 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=56 apres_rle=56 apres_prefiltre=56 apres_census=0 max_fold=0)
+bad_alloc a l'etage census : refus transactionnel conforme (statut, curseur, zero callback, aucun provisoire) sur inflight 1/2/8 — jamais un abort
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_bad_alloc_etage_fold" classname="mhgp7_bad_alloc_etage_fold" time="9.16182" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>caps-throw-bad-alloc-fold inflight=1 : resource_exhausted : allocation impossible a l'etage fold (rss_mb apres_generation=24 apres_rle=24 apres_prefiltre=25 apres_census=47 max_fold=0)
+caps-throw-bad-alloc-fold inflight=2 : resource_exhausted : allocation impossible a l'etage fold (rss_mb apres_generation=55 apres_rle=55 apres_prefiltre=55 apres_census=77 max_fold=0)
+caps-throw-bad-alloc-fold inflight=8 : resource_exhausted : allocation impossible a l'etage fold (rss_mb apres_generation=85 apres_rle=85 apres_prefiltre=85 apres_census=85 max_fold=0)
+bad_alloc a l'etage fold : refus transactionnel conforme (statut, curseur, zero callback, aucun provisoire) sur inflight 1/2/8 — jamais un abort
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_e6_grille_objet" classname="mhgp7_e6_grille_objet" time="453.697" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>selftest --e6-equal : conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fused_descent" classname="mhgp7_fused_descent" time="9.33967" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>selftest --fused-descent : conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_sweep_oracle" classname="mhgp7_sweep_oracle" time="0.781961" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;oracle"/>
+		</properties>
+		<system-out>selftest --sweep-oracle : conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_caps_refus" classname="mhgp7_caps_refus" time="107.524" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>selftest --caps-refus : conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_caps_mutant_emission" classname="mhgp7_caps_mutant_emission" time="33.479" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant caps-drop-emission TUE : plafond d'emission ignore detecte
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_caps_mutant_late_wave" classname="mhgp7_caps_mutant_late_wave" time="26.695" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant caps-late-wave-check TUE : pic 2518 &gt; cap 2048 (controle apres insertion detecte)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_caps_mutant_prefusion" classname="mhgp7_caps_mutant_prefusion" time="41.6392" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant caps-skip-prefusion-budget TUE : refus retombe sur le tri, payload 2E materialise atteste (emitted=684491 capacite=684491)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_executor_pool" classname="mhgp7_executor_pool" time="0.344108" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : N=1 : pic d'activite 1 == N (latch)
+ok : N=1 : 1 executeurs construits
+ok : N=2 : pic d'activite 2 == N (latch)
+ok : N=2 : 2 executeurs construits
+ok : N=4 : pic d'activite 4 == N (latch)
+ok : N=4 : 4 executeurs construits
+ok : N=8 : pic d'activite 8 == N (latch)
+ok : N=8 : 8 executeurs construits
+ok : 0 executeur : REFUS (jamais un clamp)
+ok : 9 executeurs : REFUS (jamais un clamp)
+ok : 3 executeurs : accepte (le domaine est tout entier de 1 a 8)
+ok : soumission reentrante depuis un travail du meme pool : REFUS immediat
+ok : soumission emboitee vers un AUTRE pool : REFUS immediat
+ok : queue_cap=1 : pic de file 1 &lt;= 1, capacite annoncee 1
+ok : erreur fatale : les deux travaux retenus attestes demarres
+ok : erreur fatale : file remplie (4) attestee avant fermeture
+ok : erreur fatale : soumis=6 reussis=2 echoues=0 annules=4 actifs=0 en_file=0 (solde)
+ok : erreur fatale : admission fermee
+ok : erreur fatale : toute soumission ulterieure est refusee
+ok : erreur fatale : aucun producteur laisse en attente
+ok ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_executor_pool_mutant_serial" classname="mhgp7_executor_pool_mutant_serial" time="0.0434715" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant pool-serial TUE : N=2 demande, actif=1 file=1 g_built=1 pic=1 attestes
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_executor_pool_mutant_drop_exception" classname="mhgp7_executor_pool_mutant_drop_exception" time="0.0385939" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant pool-drop-exception TUE : exception d'un travail avalee (retour normal)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_executor_pool_mutant_worker_resume" classname="mhgp7_executor_pool_mutant_worker_resume" time="0.0423829" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant pool-worker-resume-after-fatal TUE : travail poste-fatal execute
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_executor_pool_mutant_activate_late" classname="mhgp7_executor_pool_mutant_activate_late" time="0.0395996" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant pool-activate-after-unlock TUE : ticket manque a la fermeture (ni actif ni en file)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_wire" classname="mhgp7_wire" time="0.0314533" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : quotient hors i64 : candidats satures a 65535 (jamais un wrap)
+ok : b = INT128_MIN : candidats satures, aucun debordement signe
+ok : reparse champ par champ == cle appendue (a, b, c, h)
+ok : axis_min par candidats == balayage exhaustif (fixtures graves)
+ok : serialisation sans refus sur l'index reel
+ok : aller-retour bit-exact (nœuds, boites, positions, prefixes)
+ok : host_wire_digest == valeur gravee
+ok : refus : boite hors u16
+ok : refus : position hors u16
+ok : refus : prefixe au-dela de u32
+ok : framing : 112 octets par boule
+ok : refus transactionnel : cle non canonisee, tout vide
+ok : refus : seuil h nul
+ok : valide -&gt; invalide -&gt; valide : plus rien ne s'ecrit apres la premiere erreur
+ok : refus d'index transactionnel : aucun prefixe consommable
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_wire_mutant_drop_node" classname="mhgp7_wire_mutant_drop_node" time="0.0293121" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : quotient hors i64 : candidats satures a 65535 (jamais un wrap)
+ok : b = INT128_MIN : candidats satures, aucun debordement signe
+ok : reparse champ par champ == cle appendue (a, b, c, h)
+ok : axis_min par candidats == balayage exhaustif (fixtures graves)
+mutant gpu-index-drop-node TUE : 1592 octets de nœuds pour n_nodes=399, digest divergent
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_wire_mutant_t1" classname="mhgp7_wire_mutant_t1" time="0.0324166" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : quotient hors i64 : candidats satures a 65535 (jamais un wrap)
+mutant wire-t1-plus-one TUE : 7 minima d'axe divergents sur 203 cas exhaustifs (chemin append-&gt;octets-&gt;reparse)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_device_stub" classname="mhgp7_census_device_stub" time="11.0739" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>bilan boules=172153 tuees=3441 coquille4=68016 masse_range_add=877420 div_prefiltre=0 div_census=0 div_ordre=0 overflow=0
+validateur_refus=0 (statut_omis=0 count_omis=0 comptes_profil=0 autre=0)
+ok : validateur D2H : aucune sentinelle ni valeur hors profil au nominal
+ok : prefiltre bit-identique au scalaire (statut et compte exact)
+ok : census bit-identique (statut, comptes, listes EN ORDRE)
+ok : aucun stack_overflow au nominal (pile legitime &lt;= 49)
+ok : plancher : &gt;= 20 000 boules jugees
+ok : plancher : &gt;= 100 boules tuees au prefiltre
+ok : plancher : &gt;= 100 survivants a coquille &gt;= 4
+ok : plancher : chemin d'ajout de sous-arbre exerce
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_stub_mutant_range_le" classname="mhgp7_census_stub_mutant_range_le" time="12.5326" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>bilan boules=172153 tuees=3441 coquille4=50565 masse_range_add=877420 div_prefiltre=37570 div_census=0 div_ordre=0 overflow=0
+validateur_refus=0 (statut_omis=0 count_omis=0 comptes_profil=0 autre=0)
+mutant gpu-range-add-le TUE : 37570 divergences de prefiltre
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_stub_mutant_stack" classname="mhgp7_census_stub_mutant_stack" time="12.8518" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>bilan boules=172153 tuees=2526 coquille4=53668 masse_range_add=877420 div_prefiltre=0 div_census=0 div_ordre=0 overflow=36472
+validateur_refus=0 (statut_omis=0 count_omis=0 comptes_profil=0 autre=0)
+mutant gpu-stack-shallow TUE : 36472 stack_overflow sur arbre legitime
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_stub_mutant_swap_push" classname="mhgp7_census_stub_mutant_swap_push" time="13.3745" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>bilan boules=172153 tuees=3441 coquille4=68016 masse_range_add=877420 div_prefiltre=0 div_census=0 div_ordre=168712 overflow=0
+validateur_refus=0 (statut_omis=0 count_omis=0 comptes_profil=0 autre=0)
+mutant gpu-swap-push-order TUE : 168712 divergences d'ORDRE a multiset egal
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_stub_mutant_nonstrict" classname="mhgp7_census_stub_mutant_nonstrict" time="12.9937" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>bilan boules=172153 tuees=3441 coquille4=13178 masse_range_add=877420 div_prefiltre=0 div_census=168712 div_ordre=0 overflow=0
+validateur_refus=0 (statut_omis=0 count_omis=0 comptes_profil=0 autre=0)
+mutant gpu-census-nonstrict TUE : 168712 divergences de census
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_stub_mutant_skip_write" classname="mhgp7_census_stub_mutant_skip_write" time="12.0626" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>bilan boules=172153 tuees=3441 coquille4=67998 masse_range_add=877225 div_prefiltre=0 div_census=0 div_ordre=0 overflow=0
+validateur_refus=43 (statut_omis=43 count_omis=0 comptes_profil=0 autre=0)
+mutant gpu-skip-ball-write TUE : 43 statuts omis (dent de statut, jamais celle du count)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_stub_mutant_nshell" classname="mhgp7_census_stub_mutant_nshell" time="11.649" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>bilan boules=172153 tuees=3440 coquille4=68001 masse_range_add=877213 div_prefiltre=0 div_census=0 div_ordre=0 overflow=0
+validateur_refus=43 (statut_omis=0 count_omis=0 comptes_profil=43 autre=0)
+mutant gpu-nshell-overdomain TUE : 43 comptes hors profil refuses
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_stub_mutant_skip_count" classname="mhgp7_census_stub_mutant_skip_count" time="9.67164" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>bilan boules=172153 tuees=3441 coquille4=68001 masse_range_add=877203 div_prefiltre=0 div_census=0 div_ordre=0 overflow=0
+validateur_refus=43 (statut_omis=0 count_omis=43 comptes_profil=0 autre=0)
+mutant gpu-skip-count-write TUE : 43 counts jamais ecrits (motif exact)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_pilot_stub" classname="mhgp7_pilot_stub" time="116.197" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : route directe : la faute tardive forcee refuse
+ok : route directe : sorties et stats CANARISEES identiques apres refus (commit local transactionnel)
+ok : route directe : nb=0 publie des sorties VIDES
+ok : objet identique CPU vs route serie C : uniform n=400
+ok : objet identique CPU vs route serie C : uniform n=2000
+ok : objet identique CPU vs route serie C : eight_clusters n=400
+ok : objet identique CPU vs route serie C : eight_clusters n=2000
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_pilote_stub_refus_n" classname="mhgp7_pilote_stub_refus_n" time="0.0677899" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : parametre hors domaine ou mal forme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_pilote_stub_parite_200" classname="mhgp7_pilote_stub_parite_200" time="13.8096" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>pilote_serie_c device=stub-hote sm=0.0 arch_compilees=non_signees famille=uniform n=200 graine=3 fils=4 lot=2097152
+repetition=0 retenue=NON ordre=cpu-device parite=OUI mur_cpu_ms=1288.9 mur_route_device_ms=1217.8 prefiltre_census_cpu_ms=347.4 route_device_etage_ms=388.2 wire_ms=33.8 setup_alloc_ms=0.0 h2d_ms=1.7 kernels_ms=330.8 d2h_ms=3.4 rebuild_ms=7.6 nb_total=42109 lot_effectif=42109 h2d_octets_index=7576 h2d_octets_boules=4716208 h2d_octets_sentinelles=4210900 d2h_octets=4210900 lots=1 digest_all=ba6c220dcb922202837dde19007da6ec5e3587a0654f53ceff6c20ddb9764f45 signature_cpu=155d5c66d175998989c4295082c3ee8eb530dd6275021c6f44d2d23b9ea670e3 signature_device=155d5c66d175998989c4295082c3ee8eb530dd6275021c6f44d2d23b9ea670e3
+repetition=1 retenue=OUI ordre=cpu-device parite=OUI mur_cpu_ms=1260.5 mur_route_device_ms=1501.9 prefiltre_census_cpu_ms=393.3 route_device_etage_ms=576.1 wire_ms=18.1 setup_alloc_ms=0.0 h2d_ms=1.7 kernels_ms=526.2 d2h_ms=0.3 rebuild_ms=17.7 nb_total=42109 lot_effectif=42109 h2d_octets_in...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_pilote_stub_lot17" classname="mhgp7_pilote_stub_lot17" time="14.4427" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>pilote_serie_c device=stub-hote sm=0.0 arch_compilees=non_signees famille=uniform n=200 graine=3 fils=4 lot=17
+repetition=0 retenue=NON ordre=cpu-device parite=OUI mur_cpu_ms=1549.6 mur_route_device_ms=1448.6 prefiltre_census_cpu_ms=437.8 route_device_etage_ms=599.3 wire_ms=37.9 setup_alloc_ms=0.0 h2d_ms=6.9 kernels_ms=540.5 d2h_ms=0.7 rebuild_ms=12.2 nb_total=42109 lot_effectif=17 h2d_octets_index=7576 h2d_octets_boules=4716208 h2d_octets_sentinelles=4210900 d2h_octets=4210900 lots=2477 digest_all=ba6c220dcb922202837dde19007da6ec5e3587a0654f53ceff6c20ddb9764f45 signature_cpu=155d5c66d175998989c4295082c3ee8eb530dd6275021c6f44d2d23b9ea670e3 signature_device=155d5c66d175998989c4295082c3ee8eb530dd6275021c6f44d2d23b9ea670e3
+repetition=1 retenue=OUI ordre=cpu-device parite=OUI mur_cpu_ms=1313.1 mur_route_device_ms=1225.8 prefiltre_census_cpu_ms=362.1 route_device_etage_ms=423.0 wire_ms=12.3 setup_alloc_ms=0.0 h2d_ms=1.0 kernels_ms=399.5 d2h_ms=0.8 rebuild_ms=9.0 nb_total=42109 lot_effectif=17 h2d_octets_index=7576...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_pilote_stub_mutant_base" classname="mhgp7_pilote_stub_mutant_base" time="2.23431" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>pilote_serie_c device=stub-hote sm=0.0 arch_compilees=non_signees famille=uniform n=200 graine=3 fils=4 lot=17
+mutant gpu-lot-base-reset TUE : cand_idx refuse au second lot (lots=2477)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_pilote_juge_contre_fixtures" classname="mhgp7_pilote_juge_contre_fixtures" time="0.151345" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>contre-fixture tuee : record manquant (4 records au lieu de 5)
+contre-fixture tuee : echauffement retenu (record 0 : retenue=OUI (attendu NON))
+contre-fixture tuee : ordre hors ABBA (record 2 : ordre=cpu-device hors sequence ABBA (attendu device-cpu))
+contre-fixture tuee : signatures divergentes (record 0 : signatures CPU/device divergentes)
+contre-fixture tuee : octets boules falsifies (record 0 : h2d_octets_boules=11201 != 112*nb_total)
+contre-fixture tuee : octets d2h falsifies (record 0 : d2h_octets=9999 != 100*nb_total)
+contre-fixture tuee : lots incoherents (record 0 : lots=5 != ceil(nb_total/lot_effectif))
+contre-fixture tuee : chrono non fini (champ mur_route_device_ms non fini ou negatif : 'nan')
+contre-fixture tuee : mur nul (record 0 : mur nul (chrono non termine ?))
+contre-fixture tuee : plancher lots (record 0 : lots=6 &lt; min_lots=7)
+contre-fixture tuee : digest instable (record 4 : digest_all differe de l'echauffement (instabilite))
+contre-fixture tuee : champ manquant (champ manquant lots)
+contr...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_pilote_stub_juge" classname="mhgp7_pilote_stub_juge" time="14.2348" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>pilote juge conforme (5 records, ordre_base=cpu-device)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_pilote_stub_juge_ordre_inverse" classname="mhgp7_pilote_stub_juge_ordre_inverse" time="12.1487" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>pilote juge conforme (5 records, ordre_base=device-cpu)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_pilot_stub_mutant_stack" classname="mhgp7_pilot_stub_mutant_stack" time="4.54063" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant gpu-stack-shallow TUE : refus transactionnel du run entier (uniform 400)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_pilot_stub_mutant_nonstrict" classname="mhgp7_pilot_stub_mutant_nonstrict" time="4.25136" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant gpu-census-nonstrict TUE : refus transactionnel du run entier (uniform 400)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_pilot_stub_mutant_skip_write" classname="mhgp7_pilot_stub_mutant_skip_write" time="4.71175" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant gpu-skip-ball-write TUE : refus transactionnel du run entier (uniform 400)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_pilot_stub_mutant_nshell" classname="mhgp7_pilot_stub_mutant_nshell" time="5.71743" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant gpu-nshell-overdomain TUE : refus transactionnel du run entier (uniform 400)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_pilot_stub_mutant_skip_count" classname="mhgp7_pilot_stub_mutant_skip_count" time="6.66538" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant gpu-skip-count-write TUE : refus transactionnel du run entier (uniform 400)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_device_witness_stub" classname="mhgp7_device_witness_stub" time="0.19491" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>device=stub-hote sm=0.0
+ecritures_arith=262144/262144 ecritures_native=262144/262144 mulhi_branche_attendue=2 hors_branche_ecrites=0
+arith cas=262144 desaccords=0
+arith_detail sum=0 dif=0 mul64=0 mulx=0 shl=0 div4=0 cmp=0 retenues_attendues=130902
+arith_native cas=262144 desaccords=0 (sum=0 mul=0 mulx=0 divrem=0 cmp=0)
+device_witness OK
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_device_witness_stub_mutant_carry" classname="mhgp7_device_witness_stub_mutant_carry" time="0.109841" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>device=stub-hote sm=0.0
+ecritures_arith=262144/262144 ecritures_native=262144/262144 mulhi_branche_attendue=2 hors_branche_ecrites=0
+arith cas=262144 desaccords=130902
+arith_detail sum=130902 dif=0 mul64=0 mulx=0 shl=0 div4=0 cmp=0 retenues_attendues=130902
+arith_native cas=262144 desaccords=0 (sum=0 mul=0 mulx=0 divrem=0 cmp=0)
+mutant witness-di128-lost-carry TUE : 130902 desaccords de somme = retenues attendues, ssi par cas (0 violation)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_device_witness_stub_mutant_skip_write" classname="mhgp7_device_witness_stub_mutant_skip_write" time="0.194305" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>device=stub-hote sm=0.0
+ecritures_arith=262080/262144 ecritures_native=262144/262144 mulhi_branche_attendue=2 hors_branche_ecrites=0
+arith cas=262144 desaccords=0
+arith_detail sum=0 dif=0 mul64=0 mulx=0 shl=0 div4=0 cmp=0 retenues_attendues=130902
+arith_native cas=262144 desaccords=0 (sum=0 mul=0 mulx=0 divrem=0 cmp=0)
+mutant witness-skip-write TUE : 64 sentinelles aux indices exacts, natif complet, oracles conformes
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_device_witness_stub_mutant_skip_native" classname="mhgp7_device_witness_stub_mutant_skip_native" time="0.18462" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>device=stub-hote sm=0.0
+ecritures_arith=262144/262144 ecritures_native=262080/262144 mulhi_branche_attendue=2 hors_branche_ecrites=0
+arith cas=262144 desaccords=0
+arith_detail sum=0 dif=0 mul64=0 mulx=0 shl=0 div4=0 cmp=0 retenues_attendues=130902
+arith_native cas=262144 desaccords=0 (sum=0 mul=0 mulx=0 divrem=0 cmp=0)
+mutant witness-skip-native-write TUE : 64 sentinelles natives aux indices exacts, arith complet, oracles conformes
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_device_witness_stub_contre_double" classname="mhgp7_device_witness_stub_contre_double" time="0.160779" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>device=stub-hote sm=0.0
+ecritures_arith=262080/262144 ecritures_native=262144/262144 mulhi_branche_attendue=2 hors_branche_ecrites=0
+arith cas=262144 desaccords=130878
+arith_detail sum=130878 dif=0 mul64=0 mulx=0 shl=0 div4=0 cmp=0 retenues_attendues=130902
+arith_native cas=262144 desaccords=0 (sum=0 mul=0 mulx=0 divrem=0 cmp=0)
+MUTANT NON TUE OU DIVERGENCE PARASITE (di=130878 natif=0)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_sweep_mutant_depth" classname="mhgp7_sweep_mutant_depth" time="0.892326" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>oracle uniform n=44 seed=3 : v6=4113 boules, oracle=4456
+  MANQUANTE arite=4 (perte de completude)
+oracle uniform n=44 seed=4 : v6=3644 boules, oracle=3925
+  MANQUANTE arite=4 (perte de completude)
+oracle eight_clusters n=48 seed=3 : v6=4229 boules, oracle=4712
+  MANQUANTE arite=4 (perte de completude)
+oracle terrain n=44 seed=3 : v6=1544 boules, oracle=1559
+  MANQUANTE arite=4 (perte de completude)
+oracle scanline_single_pass n=44 seed=3 : v6=1494 boules, oracle=1510
+  MANQUANTE arite=4 (perte de completude)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fused_mutant_mask" classname="mhgp7_fused_mutant_mask" time="18.1546" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis avec cœur &gt;= h (uniform)
+lane 2 : rectangle emis ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_uniform_400" classname="mhgp7_conformity_uniform_400" time="3.59515" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=classic csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : uniform n=400 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_terrain_400" classname="mhgp7_conformity_terrain_400" time="1.27271" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=classic csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : terrain n=400 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_eight_clusters_400" classname="mhgp7_conformity_eight_clusters_400" time="3.57777" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=classic csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : eight_clusters n=400 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_scanline_single_pass_400" classname="mhgp7_conformity_scanline_single_pass_400" time="1.04982" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=classic csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : scanline_single_pass n=400 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_collinear_seven_600" classname="mhgp7_conformity_collinear_seven_600" time="0.218593" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=classic csr_fallback=0 ordres_storage_conformes=8
+conformite v5=v6 : collinear_seven n=600 : 8 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_two_lines_200" classname="mhgp7_conformity_two_lines_200" time="1.21052" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=classic csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : two_lines n=200 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_uniform_2000" classname="mhgp7_conformity_uniform_2000" time="33.7018" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=9a906c53fa09b949... v6=da5bca802cd68b89...)
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : uniform n=2000 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_terrain_2000" classname="mhgp7_conformity_terrain_2000" time="6.01794" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=classic csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : terrain n=2000 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_sweep_mutant_exit" classname="mhgp7_sweep_mutant_exit" time="2.14573" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=5d21fd8c0cd02339... v6=1945ddea2d44736c...)
+digest_forest_K3 : v5=307ef0f9080c9b6f227c3bc04bed36c609a1e1b3e798611034745fb4c6adddcf v6=e9eb2c391ec9677e2001515fc6bb63d56d7b66aca8383ff86b5cb3a7523b0624
+digest_forest_K4 : v5=6589be6b01f8a1213207c7521ce3638f17d5c69e0fc7efecca159a60ca4462c2 v6=49c5a1ead73184107c81a15be997918a7b81481263cdf700a92d611b7217a625
+digest_forest_K5 : v5=0b0288b9b2f5b1f087301219d0954f9d14f28642fcf0720ca86d8fa2e25edce0 v6=d509941606689e642b98eb818f204ae3dd2373adcac3793db13e781ce06937b8
+digest_forest_K6 : v5=f61e3f6d8d972005319ca20e0871e496e03d44e18bc5e83bbc2be7f656738361 v6=d630eeb5f67d771cde5645f429af2f6426d198cc94a16aef7aeb799b3edac69e
+digest_forest_K7 : v5=a96d984cf71a26bb076affd2f028d085d70993f83e349d6ed952d2d776cdfadd v6=42a6f3cc804fbb5c2aa449842c2d55ae4d6b76b0e98aeb990348b766d21e5048
+digest_forest_K8 : v5=c6e917c3de43036591595e408c44a8d254e9eb9b4eda70a6e4934c3f05e79028 v6=1a9030fd87a67a7e2da922a85c3db647758f4dfe7d1e1e...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_mutant_rle" classname="mhgp7_conformity_mutant_rle" time="14.1041" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2b50f878e2ddb641... v6=d58de36b0629517f...)
+digest_postprefilter : golden=97be65b6e0c66e3b3b2262510bd7274f8e557ae4bdb78024467c1f9ee05c4d72 v6=81f99ac59e05a683d764e9eda44d57a9b8c8b977dfeeeda4a82b23c9d2ff902c
+mutant rle-drop : 1 divergence(s) — tue
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=10
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_refus_s7" classname="mhgp7_cli_refus_s7" time="0.0478932" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_refus_s_suffix" classname="mhgp7_cli_refus_s_suffix" time="0.070899" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_refus_n_suffix" classname="mhgp7_cli_refus_n_suffix" time="0.0355641" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_ok_s8" classname="mhgp7_cli_ok_s8" time="4.33028" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>payload=mhgp7-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+forest_layout=classic forest_storage_kind=vector_component_delta_v1 csr_fallback=0 ordres_publies=10 ordres_storage_conformes=10
+backend=cpu_reference
+forest_semantics=verified_events_only public_status=not_claimed require_exact=false
+census_storage=mhgp7-census-direct-v1 census_payload_peak_scope=owned_balldata_capacities
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=uniform n=200 coord=58 s=8 smax=11 seed=3 threads=1 emis=42129 boules_uniques=42109 mortes_profondeur=492 survivantes=41617 census_int=206628 census_shell=137477 evenements=42018 facettes=252460 fusions=252417 deltas=39392 noeuds=26828
+generation rect_alive=4343/8233/8705 rect_visites_fusionnes=24179 ancres=5416/12149/13155 candidats=5273/19843/17013 tues_profondeur=0/98488/25398 ancres_w4=2023 ancres_w3=1736 ancres_secteurs=854/1718 ancres_cellules=0/0 seeds_cellules=0/0 grilles=0/0 seeds=118331/114004 completion...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_budget_signature" classname="mhgp7_cli_budget_signature" time="3.56793" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>memory_budget_scope=partial_named_payload_proxy_v1 budget=1073741824 cap_brut_demande=4294967295 cap_brut_effectif=7456540 cap_fusion_budgetaire=3728270
+payload=mhgp7-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+forest_layout=classic forest_storage_kind=vector_component_delta_v1 csr_fallback=0 ordres_publies=10 ordres_storage_conformes=10
+backend=cpu_reference
+forest_semantics=verified_events_only public_status=not_claimed require_exact=false
+census_storage=mhgp7-census-direct-v1 census_payload_peak_scope=owned_balldata_capacities
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=uniform n=200 coord=58 s=8 smax=11 seed=3 threads=1 emis=42129 boules_uniques=42109 mortes_profondeur=492 survivantes=41617 census_int=206628 census_shell=137477 evenements=42018 facettes=252460 fusions=252417 deltas=39392 noeuds=26828
+generation rect_alive=4343/8233/8705 rect_visites_fusionnes=24179 ancres=5416/12149/13155 candidats=5273/19843/17013 tues_profonde...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_uniform_400" classname="mhgp7_prefix_uniform_400" time="1.32666" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2b50f878e2ddb641... v6=424557841d9204c5...) — attendue en mode prefixe : l'elagage de generation depend de smax
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+prefixe exact : uniform n=400 smax=6 : 5 ordre(s) sur 10 de la reference (digests + cardinalites), deltas=18405 facettes=60224 evenements=22737
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_terrain_400" classname="mhgp7_prefix_terrain_400" time="0.630139" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=5d21fd8c0cd02339... v6=a528f619646934d7...) — attendue en mode prefixe : l'elagage de generation depend de smax
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+prefixe exact : terrain n=400 smax=6 : 5 ordre(s) sur 10 de la reference (digests + cardinalites), deltas=6105 facettes=22696 evenements=8310
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_eight_clusters_400" classname="mhgp7_prefix_eight_clusters_400" time="1.27154" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2be6cc9b76a4b205... v6=c4df241a498f26d7...) — attendue en mode prefixe : l'elagage de generation depend de smax
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+prefixe exact : eight_clusters n=400 smax=6 : 5 ordre(s) sur 10 de la reference (digests + cardinalites), deltas=14826 facettes=43912 evenements=16401
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_scanline_single_pass_400" classname="mhgp7_prefix_scanline_single_pass_400" time="0.572234" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=33cc30fb577831f7... v6=b3e74ad86404cd4c...) — attendue en mode prefixe : l'elagage de generation depend de smax
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+prefixe exact : scanline_single_pass n=400 smax=6 : 5 ordre(s) sur 10 de la reference (digests + cardinalites), deltas=3939 facettes=24615 evenements=9362
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_collinear_seven_600" classname="mhgp7_prefix_collinear_seven_600" time="0.16762" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=e21c98bb2233cfe1... v6=7c6c6d2147295faa...) — attendue en mode prefixe : l'elagage de generation depend de smax
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+prefixe exact : collinear_seven n=600 smax=6 : 5 ordre(s) sur 8 de la reference (digests + cardinalites), deltas=10 facettes=85 evenements=30
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_two_lines_200" classname="mhgp7_prefix_two_lines_200" time="0.795179" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=44d2eecf8d92ac2c... v6=b379680faa1ad514...) — attendue en mode prefixe : l'elagage de generation depend de smax
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+prefixe exact : two_lines n=200 smax=6 : 5 ordre(s) sur 10 de la reference (digests + cardinalites), deltas=19 facettes=2950 evenements=985
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_uniform_2000" classname="mhgp7_prefix_uniform_2000" time="8.66756" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=9a906c53fa09b949... v6=4d5f10b5d2d901af...) — attendue en mode prefixe : l'elagage de generation depend de smax
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+prefixe exact : uniform n=2000 smax=6 : 5 ordre(s) sur 10 de la reference (digests + cardinalites), deltas=104965 facettes=362566 evenements=137060
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_terrain_2000" classname="mhgp7_prefix_terrain_2000" time="2.2106" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=00275339e8d19a5a... v6=20ea0f474bc73a66...) — attendue en mode prefixe : l'elagage de generation depend de smax
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+prefixe exact : terrain n=2000 smax=6 : 5 ordre(s) sur 10 de la reference (digests + cardinalites), deltas=30587 facettes=121996 evenements=44404
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_temoin_evenements" classname="mhgp7_prefix_temoin_evenements" time="6.52935" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2b50f878e2ddb641... v6=424557841d9204c5...) — attendue en mode prefixe : l'elagage de generation depend de smax
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+temoin_evenements ordres=5 evenements_observes=22737 divergences=0
+prefixe exact : uniform n=400 smax=6 : 5 ordre(s) sur 10 de la reference (digests + cardinalites), deltas=18405 facettes=60224 evenements=22737
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_mutant_event_order" classname="mhgp7_prefix_mutant_event_order" time="6.3285" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2b50f878e2ddb641... v6=424557841d9204c5...) — attendue en mode prefixe : l'elagage de generation depend de smax
+multiensemble canonique des evenements : K5 : evenement canonique 0 different (support/interieur/masque/niveau)
+mutant prefix-tamper-event-order : 1 divergence(s) — tue
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+temoin_evenements ordres=5 evenements_observes=22737 divergences=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_contre_event_order_sans_temoin" classname="mhgp7_prefix_contre_event_order_sans_temoin" time="1.474" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2b50f878e2ddb641... v6=424557841d9204c5...) — attendue en mode prefixe : l'elagage de generation depend de smax
+mutant prefix-tamper-event-order : AUCUNE divergence — survivant
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_mutant_batch_levels" classname="mhgp7_prefix_mutant_batch_levels" time="1.40236" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2b50f878e2ddb641... v6=424557841d9204c5...) — attendue en mode prefixe : l'elagage de generation depend de smax
+invariant de lot : batch_levels.size() != batches sur 1 foret(s) recue(s)
+mutant prefix-tamper-batch-levels : 1 divergence(s) — tue
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_mutant_depth_smax6" classname="mhgp7_prefix_mutant_depth_smax6" time="1.33043" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2b50f878e2ddb641... v6=424557841d9204c5...) — attendue en mode prefixe : l'elagage de generation depend de smax
+digest_forest_K5 : v5=ea5e9b4e3af0ace6129a6b5eeaaaff5d8b9c6f9f169a286080951402f30a72ec v6=4181b40019fa6334253b5ba545b14d1b43357e25cd8747a7707235d58bf92f11
+cardinalites K=5 : v5(smax=11) ev=8428 fa=31715 de=7692 at=24044 fu=31712 no=4955 | v6(smax=6) ev=99 fa=583 de=95 at=393 fu=495 no=95
+mutant depth-threshold-minus-one : 2 divergence(s) — tue
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_refus_smax11" classname="mhgp7_prefix_refus_smax11" time="0.0585921" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>--prefix exige --smax &lt; 11 (recu 11)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_refus_sans_reference" classname="mhgp7_prefix_refus_sans_reference" time="0.0683305" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>--prefix exige --expected=&lt;reference gravee des dix ordres&gt;
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_refus_reference_courte" classname="mhgp7_prefix_refus_reference_courte" time="1.22078" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>reference non prefixable : 5 foret(s) / 5 cardinalite(s) pour kmax_eff=5 (une reference strictement plus longue est exigee)
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_prefix_plancher_cable" classname="mhgp7_prefix_plancher_cable" time="1.50319" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2b50f878e2ddb641... v6=424557841d9204c5...) — attendue en mode prefixe : l'elagage de generation depend de smax
+plancher de couverture viole : ordres=5 (&gt;=99) deltas=18405 (&gt;=0) facettes=60224 (&gt;=0) evenements=22737 (&gt;=0)
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=5
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_residence_jalons" classname="mhgp7_residence_jalons" time="36.4652" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;residence"/>
+		</properties>
+		<system-out>residence_jalons famille=uniform n=2000 smax=11 threads=4 tolerance_mb=2.000
+  jalon apres_generation rss_mb=    139 hwm_mb=    180 increment_mb=    180
+  jalon apres_rle        rss_mb=    140 hwm_mb=    180 increment_mb=      0
+  jalon apres_prefiltre  rss_mb=    145 hwm_mb=    180 increment_mb=      0
+  jalon apres_census     rss_mb=    290 hwm_mb=    290 increment_mb=    109
+  jalon max_fold         rss_mb=    540 hwm_mb=    540 increment_mb=    250
+  jalon fin              rss_mb=     69 hwm_mb=    539 increment_mb=      0
+residence_sonde mb_demande=256 mb_effectif=727 avant_hwm=539.2 avant_rss=68.6 apres_hwm=795.2 apres_rss=68.6 ecart=726.5
+residence_census_version=mhgp7-census-direct-v1
+residence_synthese jalons_juges=6 coexistence_census_pct=100.0 coexistence_census_octets=151366656 increment_census_mb=109 hwm_fin_mb=539 rss_fin_mb=69 max_rss_mb=540 ru_maxrss_mb=539.2 retard_vmhwm_max_mb=0.000
+residence_compteurs boules_census=675744 boules_plateau=5276 plateau_pct=0.781 somme_parents_total=1336783
+res...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_residence_mutant_hwm_instantane" classname="mhgp7_residence_mutant_hwm_instantane" time="34.5648" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;residence"/>
+		</properties>
+		<system-out>jalon fin : hwm_mb=66.430 &lt; jalon precedent 551.785 (VmHWM est monotone)
+hwm_mb[fin]=66.430 &lt; max des rss_mb=551.785 (le pic historique domine tout instantane)
+sonde d'instrumentation : apres munmap de 257 Mo, hwm=66.2 rss=66.2 ecart=0.0 &lt; 257 — la ligne hwm rend un INSTANTANE, pas un PIC
+mutant hwm-instant-rss : 3 violation(s) de residence — tue
+residence_jalons famille=uniform n=2000 smax=11 threads=4 tolerance_mb=2.000
+  jalon apres_generation rss_mb=    139 hwm_mb=    139 increment_mb=    139
+  jalon apres_rle        rss_mb=    140 hwm_mb=    140 increment_mb=      2
+  jalon apres_prefiltre  rss_mb=    145 hwm_mb=    145 increment_mb=      5
+  jalon apres_census     rss_mb=    289 hwm_mb=    289 increment_mb=    144
+  jalon max_fold         rss_mb=    552 hwm_mb=    552 increment_mb=    262
+  jalon fin              rss_mb=     66 hwm_mb=     66 increment_mb=      0
+residence_sonde mb_demande=256 mb_effectif=257 avant_hwm=66.2 avant_rss=66.2 apres_hwm=66.2 apres_rss=66.2 ecart=0.0
+residence_census_vers...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_residence_mutant_jalon_manquant" classname="mhgp7_residence_mutant_jalon_manquant" time="33.9287" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;residence"/>
+		</properties>
+		<system-out>jalons juges=5 &lt; --min-jalons=6 (un jalon a disparu de l'instrumentation)
+mutant drop-stage-milestone : 1 violation(s) de residence — tue
+residence_jalons famille=uniform n=2000 smax=11 threads=4 tolerance_mb=2.000
+  jalon apres_generation rss_mb=    139 hwm_mb=    176 increment_mb=    176
+  jalon apres_rle        rss_mb=      0 hwm_mb=      0 increment_mb=      0
+  jalon apres_prefiltre  rss_mb=    145 hwm_mb=    176 increment_mb=      0
+  jalon apres_census     rss_mb=    290 hwm_mb=    290 increment_mb=    113
+  jalon max_fold         rss_mb=    471 hwm_mb=    512 increment_mb=    222
+  jalon fin              rss_mb=     65 hwm_mb=    512 increment_mb=      0
+residence_sonde mb_demande=256 mb_effectif=703 avant_hwm=511.5 avant_rss=64.7 apres_hwm=767.3 apres_rss=64.7 ecart=702.6
+residence_census_version=mhgp7-census-direct-v1
+residence_synthese jalons_juges=5 coexistence_census_pct=100.0 coexistence_census_octets=151366656 increment_census_mb=113 hwm_fin_mb=512 rss_fin_mb=65 max_rss_mb=471 ru_maxrss_mb=51...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_residence_mutant_tranches_gardees" classname="mhgp7_residence_mutant_tranches_gardees" time="34.6474" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;residence"/>
+		</properties>
+		<system-out>PLAFOND de residence viole : capacites du census direct = 200.0 % de survivants x sizeof(BallData) (&lt;= 110 %)
+mutant keep-ball-chunks : 1 violation(s) de residence — tue
+residence_jalons famille=uniform n=2000 smax=11 threads=4 tolerance_mb=2.000
+  jalon apres_generation rss_mb=    139 hwm_mb=    177 increment_mb=    177
+  jalon apres_rle        rss_mb=    140 hwm_mb=    177 increment_mb=      0
+  jalon apres_prefiltre  rss_mb=    145 hwm_mb=    177 increment_mb=      0
+  jalon apres_census     rss_mb=    289 hwm_mb=    434 increment_mb=    256
+  jalon max_fold         rss_mb=    472 hwm_mb=    512 increment_mb=     79
+  jalon fin              rss_mb=     65 hwm_mb=    512 increment_mb=      0
+residence_sonde mb_demande=256 mb_effectif=704 avant_hwm=512.2 avant_rss=64.9 apres_hwm=768.6 apres_rss=64.9 ecart=703.7
+residence_census_version=mhgp7-census-direct-v1
+residence_synthese jalons_juges=6 coexistence_census_pct=200.0 coexistence_census_octets=302733312 increment_census_mb=256 hwm_fin_mb=512 rss_fin_mb=6...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_residence_plafond_cable" classname="mhgp7_residence_plafond_cable" time="32.2655" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;residence"/>
+		</properties>
+		<system-out>PLAFOND de residence viole : capacites du census direct = 100.0 % de survivants x sizeof(BallData) (&lt;= 0 %)
+residence_jalons famille=uniform n=2000 smax=11 threads=4 tolerance_mb=2.000
+  jalon apres_generation rss_mb=    139 hwm_mb=    176 increment_mb=    176
+  jalon apres_rle        rss_mb=    140 hwm_mb=    176 increment_mb=      0
+  jalon apres_prefiltre  rss_mb=    145 hwm_mb=    176 increment_mb=      0
+  jalon apres_census     rss_mb=    289 hwm_mb=    289 increment_mb=    113
+  jalon max_fold         rss_mb=    470 hwm_mb=    509 increment_mb=    220
+  jalon fin              rss_mb=     63 hwm_mb=    509 increment_mb=      0
+residence_sonde mb_demande=256 mb_effectif=703 avant_hwm=509.5 avant_rss=62.6 apres_hwm=765.2 apres_rss=62.6 ecart=702.6
+residence_census_version=mhgp7-census-direct-v1
+residence_synthese jalons_juges=6 coexistence_census_pct=100.0 coexistence_census_octets=151366656 increment_census_mb=113 hwm_fin_mb=509 rss_fin_mb=63 max_rss_mb=470 ru_maxrss_mb=509.5 retard_vmhwm_max_mb=0.000
+re...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_residence_plancher_cable" classname="mhgp7_residence_plancher_cable" time="32.3548" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;residence"/>
+		</properties>
+		<system-out>plancher de couverture viole : boules_census=675744 (&gt;=999999999) boules_plateau=5276 (&gt;=0) somme_parents=1336783 (&gt;=0)
+residence_jalons famille=uniform n=2000 smax=11 threads=4 tolerance_mb=2.000
+  jalon apres_generation rss_mb=    139 hwm_mb=    174 increment_mb=    174
+  jalon apres_rle        rss_mb=    140 hwm_mb=    174 increment_mb=      0
+  jalon apres_prefiltre  rss_mb=    145 hwm_mb=    174 increment_mb=      0
+  jalon apres_census     rss_mb=    290 hwm_mb=    290 increment_mb=    115
+  jalon max_fold         rss_mb=    542 hwm_mb=    542 increment_mb=    252
+  jalon fin              rss_mb=     70 hwm_mb=    541 increment_mb=      0
+residence_sonde mb_demande=256 mb_effectif=728 avant_hwm=541.2 avant_rss=69.6 apres_hwm=797.2 apres_rss=69.6 ecart=727.6
+residence_census_version=mhgp7-census-direct-v1
+residence_synthese jalons_juges=6 coexistence_census_pct=100.0 coexistence_census_octets=151366656 increment_census_mb=115 hwm_fin_mb=541 rss_fin_mb=70 max_rss_mb=542 ru_maxrss_mb=541.2 retard_vmhwm_max...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_residence_refus_smax" classname="mhgp7_residence_refus_smax" time="0.039766" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;residence"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_residence_jalons_prefixe" classname="mhgp7_residence_jalons_prefixe" time="5.9939" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;residence"/>
+		</properties>
+		<system-out>residence_jalons famille=uniform n=2000 smax=6 threads=4 tolerance_mb=2.000
+  jalon apres_generation rss_mb=     50 hwm_mb=     61 increment_mb=     61
+  jalon apres_rle        rss_mb=     50 hwm_mb=     61 increment_mb=      0
+  jalon apres_prefiltre  rss_mb=     51 hwm_mb=     61 increment_mb=      0
+  jalon apres_census     rss_mb=     80 hwm_mb=     80 increment_mb=     19
+  jalon max_fold         rss_mb=    134 hwm_mb=    134 increment_mb=     54
+  jalon fin              rss_mb=     73 hwm_mb=    134 increment_mb=      0
+residence_sonde mb_demande=256 mb_effectif=318 avant_hwm=134.0 avant_rss=72.3 apres_hwm=390.0 apres_rss=72.3 ecart=317.6
+residence_census_version=mhgp7-census-direct-v1
+residence_synthese jalons_juges=6 coexistence_census_pct=100.0 coexistence_census_octets=30302944 increment_census_mb=19 hwm_fin_mb=134 rss_fin_mb=73 max_rss_mb=134 ru_maxrss_mb=134.0 retard_vmhwm_max_mb=0.000
+residence_compteurs boules_census=135281 boules_plateau=2193 plateau_pct=1.621 somme_parents_total=210550
+residen...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_linked_arcs_u16" classname="mhgp7_linked_arcs_u16" time="1.78" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;oracle"/>
+		</properties>
+		<system-out>n=2 oracle  : q3=12 q4=4 (attendus 12 / 4)
+n=2 census  : cles q3/q4 profondeur zero = 16 (oracle 16)
+n=2 produit : pre-RLE q2=15 q3=18 q4=9 ; attendues trouvees exact-once q3=12 q4=4
+n=4 oracle  : q3=40 q4=16 (attendus 40 / 16)
+n=4 census  : cles q3/q4 profondeur zero = 56 (oracle 56)
+n=4 produit : pre-RLE q2=45 q3=100 q4=100 ; attendues trouvees exact-once q3=40 q4=16
+n=8 oracle  : q3=144 q4=64 (attendus 144 / 64)
+n=8 census  : cles q3/q4 profondeur zero = 208 (oracle 208)
+n=8 produit : pre-RLE q2=153 q3=648 q4=1086 ; attendues trouvees exact-once q3=144 q4=64
+n=16 oracle  : q3=544 q4=256 (attendus 544 / 256)
+n=16 marges : acuite=58928 pow3=9505372644204968192 pow4=2588950695868800
+n=16 census  : cles q3/q4 profondeur zero = 800 (oracle 800)
+n=16 produit : pre-RLE q2=519 q3=3672 q4=6654 ; attendues trouvees exact-once q3=544 q4=256
+linked_arcs_u16 : conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_linked_arcs_oracle_i64" classname="mhgp7_linked_arcs_oracle_i64" time="1.31303" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>oracle-i64 n=16 : OBig q3=544 q4=256 ; i64 tronque q3=0 q4=256
+oracle-i64 : verdict different — mutant TUE
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cell_grid_oracle" classname="mhgp7_cell_grid_oracle" time="63.9822" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;oracle"/>
+		</properties>
+		<system-out>cell_grid_oracle G=8 grilles=18748 sites=894818 paires=4799488 desaccords_cnt=0 desaccords_meta=0 egalites=54802 log2max=38/37 primitifs=894818 desaccords_prim=0 synth=4000 desaccords_synth=0 localises=324171 cordes=108057 sur_arete=447 hors_domaine=0 violations=0
+cell_grid_oracle G=16 grilles=18748 sites=894818 paires=19197952 desaccords_cnt=0 desaccords_meta=0 egalites=114162 log2max=39/38 primitifs=894818 desaccords_prim=0 synth=4000 desaccords_synth=0 localises=324171 cordes=108057 sur_arete=480 hors_domaine=0 violations=0
+cell_grid_oracle OK (G=8 et G=16)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cell_grid_oracle_mutant_ns" classname="mhgp7_cell_grid_oracle_mutant_ns" time="64.8798" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>cell_grid_oracle G=8 grilles=18748 sites=894818 paires=4799488 desaccords_cnt=46872 desaccords_meta=1065 egalites=54802 log2max=38/37 primitifs=894818 desaccords_prim=0 synth=4000 desaccords_synth=0 localises=324171 cordes=108057 sur_arete=447 hors_domaine=0 violations=0
+cell_grid_oracle G=16 grilles=18748 sites=894818 paires=19197952 desaccords_cnt=103460 desaccords_meta=1546 egalites=114162 log2max=39/38 primitifs=894818 desaccords_prim=0 synth=4000 desaccords_synth=0 localises=324171 cordes=108057 sur_arete=480 hors_domaine=0 violations=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cell_grid_oracle_mutant_eps" classname="mhgp7_cell_grid_oracle_mutant_eps" time="47.65" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>cell_grid_oracle G=8 grilles=18748 sites=894818 paires=4799488 desaccords_cnt=0 desaccords_meta=0 egalites=54802 log2max=38/37 primitifs=894818 desaccords_prim=0 synth=4000 desaccords_synth=0 localises=324171 cordes=108057 sur_arete=447 hors_domaine=0 violations=444
+cell_grid_oracle G=16 grilles=18748 sites=894818 paires=19197952 desaccords_cnt=0 desaccords_meta=0 egalites=114162 log2max=39/38 primitifs=894818 desaccords_prim=0 synth=4000 desaccords_synth=0 localises=324171 cordes=108057 sur_arete=480 hors_domaine=0 violations=476
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cell_grid_oracle_mutant_h1" classname="mhgp7_cell_grid_oracle_mutant_h1" time="49.0477" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>cell_grid_oracle G=8 grilles=18748 sites=894818 paires=4799488 desaccords_cnt=0 desaccords_meta=9478 egalites=54802 log2max=38/37 primitifs=894818 desaccords_prim=0 synth=4000 desaccords_synth=0 localises=324171 cordes=108057 sur_arete=447 hors_domaine=0 violations=0
+cell_grid_oracle G=16 grilles=18748 sites=894818 paires=19197952 desaccords_cnt=0 desaccords_meta=9121 egalites=114162 log2max=39/38 primitifs=894818 desaccords_prim=0 synth=4000 desaccords_synth=0 localises=324171 cordes=108057 sur_arete=480 hors_domaine=0 violations=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_sweep_frontieres" classname="mhgp7_sweep_frontieres" time="0.0406151" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>sweep_fixtures : F1-F5 conformes
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_sweep_frontieres_mutant_depth" classname="mhgp7_sweep_frontieres_mutant_depth" time="0.0291804" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_sweep_frontieres_mutant_exit" classname="mhgp7_sweep_frontieres_mutant_exit" time="0.0374399" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cover_coef4" classname="mhgp7_cover_coef4" time="0.0455517" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>cover_fixture raw=0 rle=0 survivantes=0
+cover_fixture : coefficient 4 tue a la generation ; frontiere conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cover_coef3_mutant" classname="mhgp7_cover_coef3_mutant" time="0.0438289" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>cover_fixture raw=1 rle=1 survivantes=0
+mutant q4-cover-coef3 : boule fautive emise puis masquee — tue
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_postprefilter_uniform_400" classname="mhgp7_postprefilter_uniform_400" time="3.16243" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=classic csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : uniform n=400 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_wspd-drop-rect" classname="mhgp7_mutant_wspd-drop-rect" time="1.30684" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant wspd-drop-rect : statut invariant : grand-livre des masses de paires du front fusionne viole (3 lane(s)) — tue
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_census-nonstrict" classname="mhgp7_mutant_census-nonstrict" time="1.54901" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant census-nonstrict : statut invariant : census contredit la passe count-only — tue
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_genfilter-nonstrict" classname="mhgp7_mutant_genfilter-nonstrict" time="2.5102" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2be6cc9b76a4b205... v6=d102d3b226596ec5...)
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=c6ce8e99fbf5628857419e63b21b5c449a088e3c4e509bb5e060fec587c494d2
+digest_forest_K8 : v5=1d74d3d31750369abdcc1e126e072c0c4807516e09a2adca498bff071c2cda75 v6=c3b6e8d0a76597c1e97722f2203389eadb5ca45bf12848fb90a65843efe90e73
+digest_forest_K9 : v5=64f8a3e45aabc3e42b163b5f4107fde070e28b83ac7531bbfa9d35da621a755d v6=385bedbe0862d988e6453200b64e77fc9ba782f7f79a91d03af7cb45f6c43464
+digest_forest_K10 : v5=39442f69752708ad98eacc3a185f3843174ed16350cbceb93a5623dac3d83e72 v6=79f10a6699711cd1ea06561482b9272fe9d276220633b0ac1f3dd161e5dcdb27
+digest_all : v5=f64eeb006397eeadc3b650f06f56a42a343dad1af7a56bd8bc0f302596404f2b v6=87171ef750eb3a8c4f1e813dff47c6548ac3a01b491864368f53637225a4d4d2
+mutant genfilter-nonstrict : 5 divergence(s) — tue
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=10
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_depth-threshold-minus-one" classname="mhgp7_mutant_depth-threshold-minus-one" time="2.51456" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K10 : v5=39442f69752708ad98eacc3a185f3843174ed16350cbceb93a5623dac3d83e72 v6=e23dc8d91e0d3eb8357f6d21b045aaecdcd3a433808894331f4baf44322fd8ad
+digest_all : v5=f64eeb006397eeadc3b650f06f56a42a343dad1af7a56bd8bc0f302596404f2b v6=16be6467ca24aac639e27c8b061b3775f7232792ef8758af6152dd8661caadfc
+mutant depth-threshold-minus-one : 2 divergence(s) — tue
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=10
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_range-add-max-le-zero" classname="mhgp7_mutant_range-add-max-le-zero" time="1.68484" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant range-add-max-le-zero : statut invariant : census contredit la passe count-only — tue
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_skip-full-census" classname="mhgp7_mutant_skip-full-census" time="1.71091" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=726fbd697d80a1917b9b85c6f772969429bbb12f85f88b5df64ce1b2f4306319
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=ebd687a292db3ccd033f050a94e8679f0740fb7c2567108a9a85d0fc4e9770e2
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=d9e3d9aeabfe8368a8582a9b4c12dc4be8a609b4aa870b024db8bc7b746b032b
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=b92d682dae68b86678b545f40231c33be790ce727fe425f9ad527fb8d3eaaa33
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=b3e1d1c48bef4612e4285125cb0f81b1b4577f06c3e87197daf8ccf63070369b
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=eacb6f1a6490cf4471f947fa8c26193e019f861dc9c986af243596dc79d50af6
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=9b61...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_binary-ties" classname="mhgp7_mutant_binary-ties" time="2.45137" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant binary-ties : statut invariant : violations de roles, de partition ou de stockage (K=2) — tue
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_repr-ties" classname="mhgp7_mutant_repr-ties" time="2.71188" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=d6011288284e58d9386ed031dc38ea51a51c47b86d4cb4c67d460296bd847960
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=a3e735298def4d996e46c5652ecf3879bd7d595c014d5dff1bee7ddf52ec085f
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=6e311612d9ecf95cf6abb2118724de0b1444f6b4e7acffa31f8522cdc8a9af05
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=89c1fa2a554a288be70660c4828490255f13c5dc8ee54ce211547afaf7b478e5
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=e274a8060c57656bba0b325fbfa18c1282597c333dbee7ee7250c6cf32130959
+digest_forest_K8 : v5=1d74d3d31750369abdcc1e126e072c0c4807516e09a2adca498bff071c2cda75 v6=2f2dc6ecb0499ee3e3678428a02b1baa2ee1003a83d6ad11fb9a8a639c861470
+digest_forest_K9 : v5=64f8a3e45aabc3e42b163b5f4107fde070e28b83ac7531bbfa9d35da621a755d v6=07b6...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_attach-prebatch" classname="mhgp7_mutant_attach-prebatch" time="2.6849" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=70d53acabe20448e0bf542a9755e492951d8df5538db9e120b7deaae7c2f792a
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=a5e0e2932a8860c994aadeed11d4cc100d70dfeb62d5c99288aee7dfa4830322
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=a27dddfd128552a4583474554007a87d70c95479f5a245d9b73aebf17285d536
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=33bc3728ad6979332ba331dd50670f297ace4dbee0a92b20c7c318bf20fcbd9f
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=c753c7a142ae528b95bf37c8dc00064fff71e8a90f41500450927443de8e01ec
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=106457c32787fef8442e03a92e0f0bf36205251283be0822ea3b71c26ce829e4
+digest_forest_K8 : v5=1d74d3d31750369abdcc1e126e072c0c4807516e09a2adca498bff071c2cda75 v6=f600...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_drop-nonmerge" classname="mhgp7_mutant_drop-nonmerge" time="2.74196" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=4129c92ed65bf7d6040caef223015f40406041e48a10426d6bf9e093bc37c6ce
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=73e5a887e2e1fcb4d2e0b233de907c8e6eac9587e4d58231129100d4ab141935
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=ecf5745ea5c5d8844d372c785746cc3f9a6424d2f97e8f472734220acbec5c27
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=bde951a00667273fadde9516783afd4c0d861dc00a240bcf342af87356ced2ab
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=8c1fc5fccb95ecb708203274d63e3e0e1d72ee1252571895a2306821e10b402d
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=57f80c27e4d5e81155562a359b57c3dc1bda5a4bba410eb5055d0daa22fe8158
+digest_forest_K8 : v5=1d74d3d31750369abdcc1e126e072c0c4807516e09a2adca498bff071c2cda75 v6=9f68...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_dense-pointid" classname="mhgp7_mutant_dense-pointid" time="2.95726" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=8f4487b1e1802bde65f40e5e953f776077b849f16bbac8e05d76e47c85898637
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=f183f5dda90c8fb89f6a53a2385dcaba80f953a4cc32ea0f3b8b0b40be060761
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=4ed4efce41f4b9f81cfb66096401288b4314194d2ecca9fc8fd4dea9d5379123
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=7801c0b26d9dbbb633b6a5338307af838abe735e3f37ad96a3ab2bdd18bdd908
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=80a2a9469fd2e6107992c000f125e075ff14f8c8b6b9bab0a05d2e2a69656ca1
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=a00a5267770fdeb3c2b114e167a8f92ac96306ec53984861ff6842e309212783
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=a38b...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_canonical-is-uf-root" classname="mhgp7_mutant_canonical-is-uf-root" time="2.48647" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant canonical-is-uf-root : statut invariant : violations de roles, de partition ou de stockage (K=1) — tue
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_q3-level-4g" classname="mhgp7_mutant_q3-level-4g" time="2.58722" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant q3-level-4g : statut invariant : violations de roles, de partition ou de stockage (K=3) — tue
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_q4-center-parity" classname="mhgp7_mutant_q4-center-parity" time="2.24582" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2be6cc9b76a4b205... v6=6dcb671bd004f0b6...)
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=ea8543a61e0e29cef1a69846f3d11ea3d73241562367de1324659aa6362963ad
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=568272f0aaefa29b79d4fec46b04a61048ac3e04493e109bd17befeae79a54b7
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=ff9d6a9168784694395be060a1d33f4ad24a88fe70af38cb0342748d106fb5f9
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=52d9f6f80eb6ec55874faa98980860b5bb00c259251eec997640c52354209d63
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=ec1c524123cdeaa467783a188563e5a1450bd52e55b137dcee45c90f1f47ac9c
+digest_forest_K8 : v5=1d74d3d31750369abdcc1e126e072c0c4807516e09a2adca498bff071c2cda75 v6=7ab278d77d1068d87f55f58b9164db788637b3b861309f...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_q4-eq-sign" classname="mhgp7_mutant_q4-eq-sign" time="2.37127" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2be6cc9b76a4b205... v6=6dcb671bd004f0b6...)
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=ea8543a61e0e29cef1a69846f3d11ea3d73241562367de1324659aa6362963ad
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=568272f0aaefa29b79d4fec46b04a61048ac3e04493e109bd17befeae79a54b7
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=ff9d6a9168784694395be060a1d33f4ad24a88fe70af38cb0342748d106fb5f9
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=52d9f6f80eb6ec55874faa98980860b5bb00c259251eec997640c52354209d63
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=ec1c524123cdeaa467783a188563e5a1450bd52e55b137dcee45c90f1f47ac9c
+digest_forest_K8 : v5=1d74d3d31750369abdcc1e126e072c0c4807516e09a2adca498bff071c2cda75 v6=7ab278d77d1068d87f55f58b9164db788637b3b861309f...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_q4-i64-drop-factor" classname="mhgp7_mutant_q4-i64-drop-factor" time="2.16114" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2be6cc9b76a4b205... v6=6dcb671bd004f0b6...)
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=ea8543a61e0e29cef1a69846f3d11ea3d73241562367de1324659aa6362963ad
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=568272f0aaefa29b79d4fec46b04a61048ac3e04493e109bd17befeae79a54b7
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=ff9d6a9168784694395be060a1d33f4ad24a88fe70af38cb0342748d106fb5f9
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=52d9f6f80eb6ec55874faa98980860b5bb00c259251eec997640c52354209d63
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=ec1c524123cdeaa467783a188563e5a1450bd52e55b137dcee45c90f1f47ac9c
+digest_forest_K8 : v5=1d74d3d31750369abdcc1e126e072c0c4807516e09a2adca498bff071c2cda75 v6=7ab278d77d1068d87f55f58b9164db788637b3b861309f...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_q4-i64-pair-min" classname="mhgp7_mutant_q4-i64-pair-min" time="2.17273" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2be6cc9b76a4b205... v6=b16aa3bf90c15f0f...)
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=c419ae936c4dde990038608f26b33e0684ddc6c7276719b1f53f179de2eb75e1
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=7ec4989fdb41f2d52a6fe710e3cf4b48253c818050fb62daea171ef0f6af9cac
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=17c3481f8a52cf08e5bc91b3c72955cd92a8920e7a026fdb5225d346c1697bdd
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=69c059d7c0c286e892a4cc0679c86f6e07e4a4507bc097ea3717ac5db03be982
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=c7407721be76b856379a35483e261eed4e9c26ee18401aed8bfd7c74ca7a1ae7
+digest_forest_K8 : v5=1d74d3d31750369abdcc1e126e072c0c4807516e09a2adca498bff071c2cda75 v6=921a373540b74001adce382344a2fc62f9a044f81df63d...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_witness-no-lane-mask" classname="mhgp7_mutant_witness-no-lane-mask" time="2.3205" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2be6cc9b76a4b205... v6=504a495dd3b7bb76...)
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=368ac08a28c57f63660aa747b92d86d20269f3bc6abe2f0b9a0d35adc2b56a0a
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=7059f479f8f797b71805b6ceca7baad3b9b0013db3d7420e3a4c702ec8c5ebd4
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=0efea898f9391715b88e771c7407bd59bc49a9f20ec18cd919d4cb685bec6aac
+digest_forest_K8 : v5=1d74d3d31750369abdcc1e126e072c0c4807516e09a2adca498bff071c2cda75 v6=9a2e245ff62f43fc87739249affb42a685991bfafd0fa04ee2cc20c8a8cd9a7c
+digest_forest_K9 : v5=64f8a3e45aabc3e42b163b5f4107fde070e28b83ac7531bbfa9d35da621a755d v6=72e96691f52ae7c9b40e1d4a5f4b3375ebe45d60d6b781bde66b32f1eec8058a
+digest_forest_K10 : v5=39442f69752708ad98eacc3a185f3843174ed16350cbceb93a5623dac3d83e72 v6=fd35bf06b35b1f80fe10534fd22f83f8bc6cc510645d4...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_par-drop-shard" classname="mhgp7_mutant_par-drop-shard" time="2.00315" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=2be6cc9b76a4b205... v6=fb07f5db9318e0d5...)
+digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=5a65dcd2fb79b9a9ac52ddd3fcd04ce44231be3585398232008d20d9bb067a11
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=9ce65e1aeb02f2beb6f4168770aa3823b1161e6487d903ff4f995710bce45353
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=732e277fe35a1edfbcdf4485809fff145b2db284f20659a32c7c93c5ff8e8ba6
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=2c29a9161ffe97ad1c3fabd4fa353deba9eeeb1cb4440afab8c8b35b143c5fad
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=59431241e367c7722ab585b89ddcbac4256dc0f151bf8ec6916994c8e197f369
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=76559caba45447f3229f7f820dad9397747e554f5589ef...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_par-drop-ball-chunk" classname="mhgp7_mutant_par-drop-ball-chunk" time="1.9843" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=d0a1e36e38b8222d8ad5c707ac9ecab67d0a73c6c9bcac79d6e3f09f47e3c6db
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=c42ffba731f068b0d433299e90fd8b59faea38de49c1783abe7e2f30bb046d02
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=083696a5bc21b046ee956f1f162897850aa5d914bb125f2f7eda69d059095b6d
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=a1d9fa196cdcbe997264dbf7c8e0a94ca0fa45fc5f899eb0abdddbcfc09bf90f
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=987f1377ef7996ef5ca413364ce9b58f31342af1f4e1af5dab5f6d1aef439b96
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=efc5bf04a452e1a33a58d56e2c3f35a0243ae3aa5ff2039238674ca29771dbd0
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=e6d7...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_fold-inject-a-failure-k2" classname="mhgp7_mutant_fold-inject-a-failure-k2" time="1.88024" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant fold-inject-a-failure-k2 : statut invariant : comptage par K != expansion (K=2) — tue
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_ablation-mat-sans-copie" classname="mhgp7_mutant_ablation-mat-sans-copie" time="2.35503" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=fee4d518998db901257ba9f00b8f42326cd72dbf579e4c155f9c4116062ccad1
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=2e904b94227560d1b6f6b6a8ede5d308de1a507524f678f99a141d556c3c7f56
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=0480b49a10d40e6352d1b32e83c3b00df8e846630eecb03a2068617bea6fd3eb
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=3f92f8979e591ef56907fdc16ea5a23fd172f4f43bf564c7b00f0d58ed9c554c
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=073aa7f981644cd45279d6d8e753cee38bca9fbc7d86c1e0f0d385520ad8fe6e
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=3170fadb2dc61594a8586ba781da3bd49ecb92bfa16462aa7df3e66842bcc0cd
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=d06b...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_ablation-mat-sans-tris" classname="mhgp7_mutant_ablation-mat-sans-tris" time="2.51776" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=ea98b3a36afdb32c1a2263921d130a033b15ea1054b8f5ef2e08ef5474e65407
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=ffcb50ad8fdbea60d2c5caec34e04d9cf38b8620fbb30b20e6f4949b0f3d0cad
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=b3c65834fc635c565c01a116bbfc7bf4ebc716c6143421a1c524054c09a098d7
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=998bbd86a571cb320e2e7b9ac7e4a51c4bede06a17621ea16ad130f3763cc606
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=6307ebb6bfe0d8b080a1ac61236394bfbc867efdc9a7ef50e5f8e73a03060c2e
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=02c54afb7c622d9329204e7931047010fa93a293c0fcb137e3fd836caf854b34
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=05ed...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_ablation-post-cle-factice" classname="mhgp7_mutant_ablation-post-cle-factice" time="2.80647" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=f8ce59b38b4a0417b4c88195de8be499fa6ac48ec7a1c555b2de4d3e05bb3440
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=d9f92e755f9cce0d5311bfce4c84aeedad238b5f79682e5c39f928e73735f314
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=90b8b6fe5ebd55e4109fb57068a7d9af3e952bb0039a810e4f3f91a6824d07ef
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=dd240cc2b53c04f6c517baa4b8a9756f4791c8b2dec31c7561c0cd75aca71784
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=3a4ead7b4a7469ef38ba75f72d561d15312ce5162b2888f670fbfffa11e74cc8
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=3101695dbdd4cdb2e597f2c4a2fd0d9add0609f3abb5ece44b5a646243f2f482
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=9c78...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_juge_refus_narrowing" classname="mhgp7_juge_refus_narrowing" time="0.0446945" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_juge_refus_reference_tronquee" classname="mhgp7_juge_refus_reference_tronquee" time="3.61226" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>reference incomplete : digest_forest_K1 absent
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=10
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_juge_refus_k_en_trop" classname="mhgp7_juge_refus_k_en_trop" time="0.0633903" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>reference avec forets hors profil : 2 clef(s) pour kmax_eff=1 (ensemble exact exige)
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_juge_refus_k11" classname="mhgp7_juge_refus_k11" time="3.70623" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>reference illisible : /workspaces/E-HGP/morsehgp3D_v7/audits/.work_iteration2/source/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt
+forest_layout=classic csr_fallback=0 ordres_storage_conformes=10
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cover_refus_mutant_hors_cible" classname="mhgp7_cover_refus_mutant_hors_cible" time="0.037815" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant hors cible de cette porte : rle-drop
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_sweep_refus_inject_vide" classname="mhgp7_sweep_refus_inject_vide" time="0.0410657" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>--inject= vide
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fused_mutant_droprect" classname="mhgp7_fused_mutant_droprect" time="7.95698" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>grand-livre lane 2 non ferme (uniform)
+grand-livre lane 3 non ferme (uniform)
+grand-livre lane 4 non ferme (uniform)
+grand-livre lane 2 non ferme (terrain)
+grand-livre lane 3 non ferme (terrain)
+grand-livre lane 4 non ferme (terrain)
+grand-livre lane 2 non ferme (eight_clusters)
+grand-livre lane 3 non ferme (eight_clusters)
+grand-livre lane 4 non ferme (eight_clusters)
+grand-livre lane 2 non ferme (collinear_seven)
+grand-livre lane 3 non ferme (collinear_seven)
+grand-livre lane 4 non ferme (collinear_seven)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_pentes_validateur" classname="mhgp7_pentes_validateur" time="4.46613" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>pentes_gate : validateur fail-closed conforme (nominal + 36 falsifications dont provenance et liaison du protocole + zero legitime avec `-`)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_campagne_provenance" classname="mhgp7_campagne_provenance" time="1.4173" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>campagne_gate : provenance d'executable prouvee (nominal, tamper prive, VRAIE reconstruction concurrente de la source, copie discordante refusee, profil obligatoire)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_agregateur_intergraines" classname="mhgp7_agregateur_intergraines" time="2.49177" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>agregateur_gate : porte E6 bornée conforme (nominal, refus+suppression, majorités 1/3 et 2/3, seuil exact, émergence indéterminée, périmètre pas2)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_wire_pack" classname="mhgp7_wire_pack" time="3.30809" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : contrat : 112 octets par boule en entree
+ok : contrat : 9 + 91 = 100 octets par boule en sortie
+ok : reference append : 112 octets par boule
+ok : prevalidation : nb*112 en entree et nb*100 en sortie
+ok : pack d'une plage unique : accepte
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack multi-fils : chaque plage acceptee
+ok : pack multi-fils : chaque plage acceptee
+ok : pack multi-fils : chaque plage acceptee
+ok : pack multi-fils : chaque plage acceptee
+ok : bord : plage de 0 boule acceptee et AUCUN octet ecrit
+ok : bord : plage vide sur tampon nul acceptee
+ok : bord : plage de 1 boule acceptee
+ok : pack_ball_in : ecriture a l'offset fixe 1*112
+ok : pack_ball_in : rien n'est ecrit hors de l'enregistrement ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_wire_pack_mutant_stride" classname="mhgp7_wire_pack_mutant_stride" time="3.13224" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : contrat : 112 octets par boule en entree
+ok : contrat : 9 + 91 = 100 octets par boule en sortie
+ok : reference append : 112 octets par boule
+ok : prevalidation : nb*112 en entree et nb*100 en sortie
+ok : pack d'une plage unique : accepte
+DIVERGENCE (plage unique) : premier octet a l'offset 104 (boule 0, champ +104) : 01 != 0a
+ok : pack par lots : chaque plage acceptee
+DIVERGENCE (lots) : premier octet a l'offset 104 (boule 0, champ +104) : 01 != 0a
+ok : pack par lots : chaque plage acceptee
+DIVERGENCE (lots) : premier octet a l'offset 104 (boule 0, champ +104) : 01 != 0a
+ok : pack par lots : chaque plage acceptee
+DIVERGENCE (lots) : premier octet a l'offset 104 (boule 0, champ +104) : 01 != 0a
+ok : pack par lots : chaque plage acceptee
+DIVERGENCE (lots) : premier octet a l'offset 104 (boule 0, champ +104) : 01 != 0a
+ok : pack par lots : chaque plage acceptee
+DIVERGENCE (lots) : premier octet a l'offset 104 (boule 0, champ +104) : 01 != 0a
+ok : pack par lots : chaque plage acceptee
+DIVERGENCE (lots) : pre...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_wire_pack_mutant_slack" classname="mhgp7_wire_pack_mutant_slack" time="3.72215" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : contrat : 112 octets par boule en entree
+ok : contrat : 9 + 91 = 100 octets par boule en sortie
+ok : reference append : 112 octets par boule
+ok : prevalidation : nb*112 en entree et nb*100 en sortie
+ok : pack d'une plage unique : accepte
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack multi-fils : chaque plage acceptee
+ok : pack multi-fils : chaque plage acceptee
+ok : pack multi-fils : chaque plage acceptee
+ok : pack multi-fils : chaque plage acceptee
+ok : bord : plage de 0 boule acceptee et AUCUN octet ecrit
+ok : bord : plage vide sur tampon nul acceptee
+ok : bord : plage de 1 boule acceptee
+ok : pack_ball_in : ecriture a l'offset fixe 1*112
+ok : pack_ball_in : rien n'est ecrit hors de l'enregistrement ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_wire_pack_contre_double" classname="mhgp7_wire_pack_contre_double" time="3.04234" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : contrat : 112 octets par boule en entree
+ok : contrat : 9 + 91 = 100 octets par boule en sortie
+ok : reference append : 112 octets par boule
+ok : prevalidation : nb*112 en entree et nb*100 en sortie
+ok : pack d'une plage unique : accepte
+DIVERGENCE (plage unique) : premier octet a l'offset 104 (boule 0, champ +104) : 01 != 0a
+ok : pack par lots : chaque plage acceptee
+DIVERGENCE (lots) : premier octet a l'offset 104 (boule 0, champ +104) : 01 != 0a
+ok : pack par lots : chaque plage acceptee
+DIVERGENCE (lots) : premier octet a l'offset 104 (boule 0, champ +104) : 01 != 0a
+ok : pack par lots : chaque plage acceptee
+DIVERGENCE (lots) : premier octet a l'offset 104 (boule 0, champ +104) : 01 != 0a
+ok : pack par lots : chaque plage acceptee
+DIVERGENCE (lots) : premier octet a l'offset 104 (boule 0, champ +104) : 01 != 0a
+ok : pack par lots : chaque plage acceptee
+DIVERGENCE (lots) : premier octet a l'offset 104 (boule 0, champ +104) : 01 != 0a
+ok : pack par lots : chaque plage acceptee
+DIVERGENCE (lots) : pre...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_wire_pack_refus_arg" classname="mhgp7_wire_pack_refus_arg" time="0.0485302" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_wire_pack_plancher" classname="mhgp7_wire_pack_plancher" time="3.84505" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : contrat : 112 octets par boule en entree
+ok : contrat : 9 + 91 = 100 octets par boule en sortie
+ok : reference append : 112 octets par boule
+ok : prevalidation : nb*112 en entree et nb*100 en sortie
+ok : pack d'une plage unique : accepte
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack par lots : chaque plage acceptee
+ok : pack multi-fils : chaque plage acceptee
+ok : pack multi-fils : chaque plage acceptee
+ok : pack multi-fils : chaque plage acceptee
+ok : pack multi-fils : chaque plage acceptee
+ok : bord : plage de 0 boule acceptee et AUCUN octet ecrit
+ok : bord : plage vide sur tampon nul acceptee
+ok : bord : plage de 1 boule acceptee
+ok : pack_ball_in : ecriture a l'offset fixe 1*112
+ok : pack_ball_in : rien n'est ecrit hors de l'enregistrement ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_lot_ring" classname="mhgp7_lot_ring" time="0.0462619" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : chaine FREE-&gt;PACKING-&gt;READY-&gt;H2D-&gt;KERNELS-&gt;D2H-&gt;READY_HOST-&gt;VALIDATED-&gt;REBUILT-&gt;FREE
+ok : epoques et bases globales par ressource : compteurs distincts, bouclage au lot 2
+ok : queue : dernier lot incomplet (nb=1)
+ok : echange terminal : objet complet et ordonne
+ok : aucun bail pendu, aucune lecture de sentinelle, aucune fusion hors ordre
+ok : recouvrement : rebuild(k-1), device(k) et pack(k+1) coexistent (3 tickets)
+ok : transfert vers une sortie reutilisee : BLOQUE tant que rebuild_done manque
+ok : rebuild_done du lot 0 : bail OUT rendu, lot retire
+ok : la montee du lot 2 passe des que le bail OUT est rendu
+ok : recouvrement : objet publie complet et dans l'ordre global
+ok : pic de tickets logiques &gt;= 3 (la profondeur deux porte sur IN et OUT, pas sur un slot unique)
+ok : bouclage (sentinelles hote) : objet complet
+ok : bouclage : au moins trois reutilisations d'emplacement par ressource
+ok : bouclage : la reutilisation d'une sortie a ete ATTENDUE, pas volee
+ok : bouclage : aucune lecture de sentinelle ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_lot_ring_plancher" classname="mhgp7_lot_ring_plancher" time="0.0488901" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : chaine FREE-&gt;PACKING-&gt;READY-&gt;H2D-&gt;KERNELS-&gt;D2H-&gt;READY_HOST-&gt;VALIDATED-&gt;REBUILT-&gt;FREE
+ok : epoques et bases globales par ressource : compteurs distincts, bouclage au lot 2
+ok : queue : dernier lot incomplet (nb=1)
+ok : echange terminal : objet complet et ordonne
+ok : aucun bail pendu, aucune lecture de sentinelle, aucune fusion hors ordre
+ok : recouvrement : rebuild(k-1), device(k) et pack(k+1) coexistent (3 tickets)
+ok : transfert vers une sortie reutilisee : BLOQUE tant que rebuild_done manque
+ok : rebuild_done du lot 0 : bail OUT rendu, lot retire
+ok : la montee du lot 2 passe des que le bail OUT est rendu
+ok : recouvrement : objet publie complet et dans l'ordre global
+ok : pic de tickets logiques &gt;= 3 (la profondeur deux porte sur IN et OUT, pas sur un slot unique)
+ok : bouclage (sentinelles hote) : objet complet
+ok : bouclage : au moins trois reutilisations d'emplacement par ressource
+ok : bouclage : la reutilisation d'une sortie a ete ATTENDUE, pas volee
+ok : bouclage : aucune lecture de sentinelle ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_lot_ring_refus_arg" classname="mhgp7_lot_ring_refus_arg" time="0.0524877" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : parametre mal forme ou hors domaine
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_lot_ring_refus_mutant" classname="mhgp7_lot_ring_refus_mutant" time="0.0522927" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : mutant inconnu c6-inconnu
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_lot_ring_mutant_reuse" classname="mhgp7_lot_ring_mutant_reuse" time="0.0514253" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant c6-reuse-before-lease TUE : doubles_occupations=1 sentinelles_lues=2
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_lot_ring_mutant_merge" classname="mhgp7_lot_ring_mutant_merge" time="0.0463261" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant c6-merge-by-completion TUE : fusion=[2,3,0,1] hors_ordre=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_lot_ring_mutant_epoch" classname="mhgp7_lot_ring_mutant_epoch" time="0.0510668" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant c6-wrong-epoch TUE : epoque=1 base_bail=0 refus=oui
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_lot_ring_mutant_prefixe" classname="mhgp7_lot_ring_mutant_prefixe" time="0.0556423" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant c6-publish-prefix TUE : prefixe publie (4 enregistrements, publish=vrai)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_lot_ring_mutant_rebuild_tot" classname="mhgp7_lot_ring_mutant_rebuild_tot" time="0.0562531" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant c6-rebuild-before-validate TUE : lectures_hors_domaine=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_cap_evenements" classname="mhgp7_fold_cap_evenements" time="11.2646" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>temoin : complet, callbacks=10, max_evenements=22333, minorant_incidences=361549
+garde evenements inflight=1 : fold K=10 : resource_exhausted/requires_tiling : evenements &gt;= (2^32-1)/11 (positions d'incidence u32)
+garde evenements inflight=2 : fold K=10 : resource_exhausted/requires_tiling : evenements &gt;= (2^32-1)/11 (positions d'incidence u32)
+garde evenements inflight=8 : fold K=10 : resource_exhausted/requires_tiling : evenements &gt;= (2^32-1)/11 (positions d'incidence u32)
+fold_caps_gate garde=evenements refus=3 temoin=complet — conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_cap_incidences" classname="mhgp7_fold_cap_incidences" time="11.7702" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>temoin : complet, callbacks=10, max_evenements=22333, minorant_incidences=361549
+garde incidences inflight=1 : fold K=1 : resource_exhausted/requires_tiling : incidences &gt; 2^31-1
+garde incidences inflight=2 : fold K=1 : resource_exhausted/requires_tiling : incidences &gt; 2^31-1
+garde incidences inflight=8 : fold K=1 : resource_exhausted/requires_tiling : incidences &gt; 2^31-1
+fold_caps_gate garde=incidences refus=3 temoin=complet — conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_cap_mutant_evenements" classname="mhgp7_fold_cap_mutant_evenements" time="6.43609" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>temoin : complet, callbacks=10, max_evenements=22333, minorant_incidences=361549
+garde evenements inflight=1 : refus ATTENDU absent (statut 0, message '')
+MUTANT TUE : la garde sautee laisse passer un ordre au-dela du plafond
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_cap_mutant_incidences" classname="mhgp7_fold_cap_mutant_incidences" time="6.57394" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>temoin : complet, callbacks=10, max_evenements=22333, minorant_incidences=361549
+garde incidences inflight=1 : refus ATTENDU absent (statut 0, message '')
+MUTANT TUE : la garde sautee laisse passer un ordre au-dela du plafond
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_cap_plancher" classname="mhgp7_fold_cap_plancher" time="3.17131" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>temoin : complet, callbacks=10, max_evenements=22333, minorant_incidences=361549
+PLANCHER : max_evenements=22333 &lt; 99999999 — scene trop maigre pour exercer la garde
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_cap_refus_arg" classname="mhgp7_fold_cap_refus_arg" time="0.0554313" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : --garde=evenements|incidences attendu
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profile_refuse_inject" classname="mhgp7_profile_refuse_inject" time="0.0393625" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>argument inconnu : --inject=ablation-mat-sans-copie
+REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profile_sonde_refuse_inconnu" classname="mhgp7_profile_sonde_refuse_inconnu" time="0.0362852" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profile_sonde_refuse_inject_vide" classname="mhgp7_profile_sonde_refuse_inject_vide" time="0.0349127" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profile_sonde_refuse_inject_virgule" classname="mhgp7_profile_sonde_refuse_inject_virgule" time="0.0397368" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profile_sonde_refuse_mutant_production" classname="mhgp7_profile_sonde_refuse_mutant_production" time="0.0377164" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profil_identite" classname="mhgp7_profil_identite" time="42.4345" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>porte du profil : projection deterministe nommee (digest_all + digest_forest_K* + cardinalites K=*) identique (normal/profil/vivacite x join 0/1 x layout classic/csr), builds discrimines, structure/planchers/causalite fold_join valides
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profil_contre_fixture" classname="mhgp7_profil_contre_fixture" time="0.143031" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>DESACCORD : somme imprimee != somme des neuf composantes (profil_reduce K=1 init=0.000 touch=0.000 pre=0.000 unite=0.000 post_remplissage=0.000 materialisation_tri_copie=0.000 liveness=0.000 partition=0.000 liberation=0.000 somme=0.008 mur_reduce_interne=0.020 residuel=0.012 reduce_interne_debut=0.000 reduce_interne_fin=0.020 a_debut=0.000 a_fin=0.000 duree_digest_foret_k_ms=0.000)
+contre-fixture tuee : enveloppe a composantes nulles (somme)
+DESACCORD : fermeture somme_recalculee+residuel != mur_reduce_interne (profil_reduce K=1 init=0.000 touch=0.000 pre=0.000 unite=0.009 post_remplissage=0.000 materialisation_tri_copie=0.000 liveness=0.000 partition=0.000 liberation=0.000 somme=0.009 mur_reduce_interne=0.030 residuel=0.012 reduce_interne_debut=0.000 reduce_interne_fin=0.030 a_debut=0.000 a_fin=0.000 duree_digest_foret_k_ms=0.000)
+contre-fixture tuee : fermeture somme+residuel != mur
+contre-fixture tuee par la dent somme seule (derive 0.008, fermeture exacte)
+contre-fixture tuee par la dent fermeture seule (...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_plan_keycsr_gate" classname="mhgp7_plan_keycsr_gate" time="1.42805" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>graine=0xa2ffb4db2884ddc4 orientations_strate_1=BA,AB,AB,AB,BA,BA sha256_plan(sans extension)=2f7666631f01bac5180b208914455dcb45c3621180e0ee035f327f5032ac5807
+plan_keycsr_gate : conforme (scenes a-j, 210 + 280 runs)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_sonde_ablation_gate" classname="mhgp7_sonde_ablation_gate" time="115.242" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>scene 1 : (a) nominal REPS=4 N_LIST='64 128' : reçu publie et fail-closed verifie
+scene 2 : (b)(c)(d) REPS=3, N_LIST vide, REPS=0/-4/abc : refus 2 sans trace
+scene 3 : (e) copie privee alteree pendant le troisieme tuple : INVALIDE 3, reste en .partial
+scene 4 : (f)(g) ligne K=7 omise / touch=nan sur un run : INVALIDE 3 par l'agregateur
+scene 5 : (h) alteration entre generation et verification de SHA256SUMS : INVALIDE 3
+scene 6 : (i) binaire PRODUIT (refuse --inject=) : refus 2, aucun .partial
+scene 7 : (j) taille dupliquee : lanceur refus 2 avant tout run ; META n_list duplique : agregateur 1
+scene 8 : (k) hash vide ou hors grammaire 64-hex : agregateur 1 ; sha256sum muet : lanceur refus 2
+scene 9 : (l) champ duplique a valeurs differentes (.status code=, META reps=, plan position=, profil touch=) : agregateur 1
+scene 10 : (m) carre latin cyclique (equilibre par position, non Williams) : agregateur 1 ; Williams permute : 0
+scene 11 : (n) out/intrus.txt, out/SHA256SUMS, out/sub/, .err retire : agregateur 1 ; ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profil_contrat_echec" classname="mhgp7_profil_contrat_echec" time="2.97751" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : succes : un record par K (taille kmax_eff + 1)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profil_contrat_echec_k2" classname="mhgp7_profil_contrat_echec_k2" time="2.53046" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>scene injectee conforme : K1 publie (profil K1 non vide, jonction active) puis panne A K=2, profils et pic EFFACES au terminal
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_fixtures" classname="mhgp7_fold_csr_fixtures" time="0.244303" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --fixtures fixtures=13 deltas=26 continuations=1 multi_root=5 vides=1 refus=1 desaccords=0
+fold_csr_gate --fixtures OK
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_offsets" classname="mhgp7_fold_csr_offsets" time="0.0223433" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --offsets scenes=7 desaccords=0
+fold_csr_gate --offsets OK
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_overflow" classname="mhgp7_fold_csr_overflow" time="3.08067" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --overflow scenes=3 desaccords=0
+fold_csr_gate --overflow OK
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_copie" classname="mhgp7_fold_csr_copie" time="5.72774" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --copy-alias deltas_copies=97236 desaccords=0
+fold_csr_gate --copy-alias OK
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_pipeline" classname="mhgp7_fold_csr_pipeline" time="761.941" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --pipeline cellules=112 ordres=68 deltas=818069 cles=6395137 desaccords=0
+fold_csr_gate --pipeline OK
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_refus_inject_vide" classname="mhgp7_fold_csr_refus_inject_vide" time="0.0338558" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : --inject= vide
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_refus_mutant_inconnu" classname="mhgp7_fold_csr_refus_mutant_inconnu" time="0.0341768" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : mutant inconnu csr-inconnu
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_refus_mutant_hors_cible" classname="mhgp7_fold_csr_refus_mutant_hors_cible" time="0.0400765" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : mutant drop-nonmerge hors cible du mode --fixtures
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_refus_pipeline_sans_inject" classname="mhgp7_fold_csr_refus_pipeline_sans_inject" time="0.0394772" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : --pipeline-refus exige --inject=csr-offset-*
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-order-by-output" classname="mhgp7_fold_csr_mutant_csr-order-by-output" time="0.192634" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --fixtures fixtures=13 deltas=26 continuations=1 multi_root=5 vides=1 refus=0 desaccords=0
+mutant csr-order-by-output sur F5 : premiere divergence = 'delta[0].output' (annonce 'delta[0].output')
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-keep-continuation" classname="mhgp7_fold_csr_mutant_csr-keep-continuation" time="0.210407" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --fixtures fixtures=13 deltas=26 continuations=1 multi_root=5 vides=1 refus=0 desaccords=0
+mutant csr-keep-continuation sur F3 : premiere divergence = 'delta_count' (annonce 'delta_count')
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-stale-level" classname="mhgp7_fold_csr_mutant_csr-stale-level" time="0.191192" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --fixtures fixtures=13 deltas=26 continuations=1 multi_root=5 vides=1 refus=0 desaccords=0
+mutant csr-stale-level sur F2 : premiere divergence = 'delta[2].level' (annonce 'delta[2].level')
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-stale-output" classname="mhgp7_fold_csr_mutant_csr-stale-output" time="0.151558" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --fixtures fixtures=13 deltas=26 continuations=1 multi_root=5 vides=1 refus=0 desaccords=0
+mutant csr-stale-output sur S1 : premiere divergence = 'delta[0].output' (annonce 'delta[0].output')
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-unsorted-born" classname="mhgp7_fold_csr_mutant_csr-unsorted-born" time="0.177432" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --fixtures fixtures=13 deltas=26 continuations=1 multi_root=5 vides=1 refus=0 desaccords=0
+mutant csr-unsorted-born sur F1 : premiere divergence = 'delta[0].born[0]' (annonce 'delta[0].born[0]')
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-unsorted-parents" classname="mhgp7_fold_csr_mutant_csr-unsorted-parents" time="0.127194" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --fixtures fixtures=13 deltas=26 continuations=1 multi_root=5 vides=1 refus=0 desaccords=0
+mutant csr-unsorted-parents sur F2 : premiere divergence = 'delta[2].parents[0]' (annonce 'delta[2].parents[0]')
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-drop-delta" classname="mhgp7_fold_csr_mutant_csr-drop-delta" time="0.160622" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --fixtures fixtures=13 deltas=26 continuations=1 multi_root=5 vides=1 refus=0 desaccords=0
+mutant csr-drop-delta sur F2 : premiere divergence = 'delta_count' (annonce 'delta_count')
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-dup-delta" classname="mhgp7_fold_csr_mutant_csr-dup-delta" time="0.192603" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --fixtures fixtures=13 deltas=26 continuations=1 multi_root=5 vides=1 refus=0 desaccords=0
+mutant csr-dup-delta sur F2 : premiere divergence = 'delta_count' (annonce 'delta_count')
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-shift-offset" classname="mhgp7_fold_csr_mutant_csr-shift-offset" time="0.236505" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --fixtures fixtures=13 deltas=26 continuations=1 multi_root=5 vides=1 refus=0 desaccords=0
+mutant csr-shift-offset sur F2 : premiere divergence = 'delta[0].born.size' (annonce 'delta[0].born.size')
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-offset-hole" classname="mhgp7_fold_csr_mutant_csr-offset-hole" time="0.241693" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --fixtures fixtures=13 deltas=26 continuations=1 multi_root=5 vides=1 refus=0 desaccords=0
+mutant csr-offset-hole sur F2 : premiere divergence = 'storage_violations' (annonce 'storage_violations')
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-offset-overlap" classname="mhgp7_fold_csr_mutant_csr-offset-overlap" time="0.226531" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --fixtures fixtures=13 deltas=26 continuations=1 multi_root=5 vides=1 refus=0 desaccords=0
+mutant csr-offset-overlap sur F2 : premiere divergence = 'storage_violations' (annonce 'storage_violations')
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-offset-end" classname="mhgp7_fold_csr_mutant_csr-offset-end" time="0.232042" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --fixtures fixtures=13 deltas=26 continuations=1 multi_root=5 vides=1 refus=0 desaccords=0
+mutant csr-offset-end sur F2 : premiere divergence = 'storage_violations' (annonce 'storage_violations')
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-offset-domain" classname="mhgp7_fold_csr_mutant_csr-offset-domain" time="0.213435" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --fixtures fixtures=13 deltas=26 continuations=1 multi_root=5 vides=1 refus=0 desaccords=0
+mutant csr-offset-domain sur F2 : premiere divergence = 'storage_violations' (annonce 'storage_violations')
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_refus_csr-offset-hole" classname="mhgp7_fold_csr_refus_csr-offset-hole" time="2.84638" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --pipeline-refus mutant=csr-offset-hole statut=invariant : violations de roles, de partition ou de stockage (K=1) : invariant stockage csr : parents : premier offset non nul (trou en tete d'arene) callbacks=0 desaccords=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_refus_csr-offset-overlap" classname="mhgp7_fold_csr_refus_csr-offset-overlap" time="3.25763" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --pipeline-refus mutant=csr-offset-overlap statut=invariant : violations de roles, de partition ou de stockage (K=1) : invariant stockage csr : parents : offsets non monotones (chevauchement) callbacks=0 desaccords=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_refus_csr-offset-end" classname="mhgp7_fold_csr_refus_csr-offset-end" time="2.70968" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --pipeline-refus mutant=csr-offset-end statut=invariant : violations de roles, de partition ou de stockage (K=1) : invariant stockage csr : parents : dernier offset != taille d'arene (fin inexacte, queue orpheline) callbacks=0 desaccords=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_refus_csr-offset-domain" classname="mhgp7_fold_csr_refus_csr-offset-domain" time="3.12949" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>fold_csr_gate --pipeline-refus mutant=csr-offset-domain statut=invariant : violations de roles, de partition ou de stockage (K=1) : invariant stockage csr : parents : offset hors domaine (&gt; taille d'arene) callbacks=0 desaccords=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-guard-skip" classname="mhgp7_fold_csr_mutant_csr-guard-skip" time="0.0377766" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant csr-guard-skip sur F4 : refus attendu ABSENT sous cap 5 (F4 complete, 9 cles), champ 'storage_message' — tue
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_fold_csr_mutant_csr-inject-bad-alloc" classname="mhgp7_fold_csr_mutant_csr-inject-bad-alloc" time="3.23161" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant csr-inject-bad-alloc sur F4 : premiere divergence = 'storage_message' (annonce 'storage_message')
+mutant csr-inject-bad-alloc : bad_alloc capture dans le fold (statut='fold K=1 : resource_exhausted : allocation d'arene CSR refusee (bad_alloc)', callbacks=0) — tue
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_csr_uniform_400" classname="mhgp7_conformity_csr_uniform_400" time="3.77143" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=csr csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : uniform n=400 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_csr_terrain_400" classname="mhgp7_conformity_csr_terrain_400" time="0.851194" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=csr csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : terrain n=400 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_csr_eight_clusters_400" classname="mhgp7_conformity_csr_eight_clusters_400" time="3.01337" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=csr csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : eight_clusters n=400 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_csr_scanline_single_pass_400" classname="mhgp7_conformity_csr_scanline_single_pass_400" time="1.04941" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=csr csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : scanline_single_pass n=400 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_csr_collinear_seven_600" classname="mhgp7_conformity_csr_collinear_seven_600" time="0.166968" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=csr csr_fallback=0 ordres_storage_conformes=8
+conformite v5=v6 : collinear_seven n=600 : 8 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_csr_two_lines_200" classname="mhgp7_conformity_csr_two_lines_200" time="1.11527" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=csr csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : two_lines n=200 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_csr_uniform_2000" classname="mhgp7_conformity_csr_uniform_2000" time="21.3363" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>note : divergence diagnostique NON JUGEE des candidats v5-compat (v5=9a906c53fa09b949... v6=da5bca802cd68b89...)
+forest_layout=csr csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : uniform n=2000 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_csr_terrain_2000" classname="mhgp7_conformity_csr_terrain_2000" time="2.08063" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>forest_layout=csr csr_fallback=0 ordres_storage_conformes=10
+conformite v5=v6 : terrain n=2000 : 10 forets + digest_all identiques (objet)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_conformity_refus_layout_inconnu" classname="mhgp7_conformity_refus_layout_inconnu" time="0.0323719" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_csr-order-by-output" classname="mhgp7_mutant_csr_csr-order-by-output" time="1.83904" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=0a594b4feab61f51f925070a4490ef91fad8bd6b79afce031ab5e92bfcd33ce1
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=3f8ee8bc29ac82160d03a286b0d63a5644cb2bfdecb999fa6414165170e41271
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=88bd9216c64bfc2394a66f97e9a830abcf11d5d15418a790bcf45e04b74ad893
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=4cfc4c9178ed0d5a0dbac1e255ae2ab3f819c1ead585282d3d43b24deb369519
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=b4ebbe6cbec644b8e643bf8663569b7200c4a200badf265795c11125e5f529ab
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=00896a8ba3e0498299be464784c6bb4c91fbced186067986b2ede058ff2ae385
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=c866...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_csr-keep-continuation" classname="mhgp7_mutant_csr_csr-keep-continuation" time="1.98912" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=26c2bba05edddc31ed2e9dd5cd3696b8cd24b3732e45780612625bd2104e9124
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=15df4a2c990c714f225b51133543ccf4b9f3852651d3a73dc7afc45b34392624
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=2c41038d755cc1e6d506833c8a2d0d17a71f4a9188002666a5768ece3de55fb5
+digest_all : v5=f64eeb006397eeadc3b650f06f56a42a343dad1af7a56bd8bc0f302596404f2b v6=298f3a924ca0e0869c3a559db5f530344c0453f71244633e9449123d4b8d75b0
+mutant csr-keep-continuation : 4 divergence(s) — tue
+forest_layout=csr csr_fallback=0 ordres_storage_conformes=10
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_csr-stale-level" classname="mhgp7_mutant_csr_csr-stale-level" time="1.90126" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=92197c95f6c2500d9ec264674b0d1385e5c51394e41812ab09222b5765658a35
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=06ec0a97ef50e71bf9dba4d84b4d19f155d8d9b6798ac8fea7176361186bd699
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=7cb4595865cfde38efb065fb6181865922ab5605eef44653b0899490620abdc0
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=9441f96fb3409e3b15e0f80b1efd4297b75f8fe08236ba31f56c6acdc8c4c23a
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=174152a5fcea284b50ad4c6746f8d7ad4307a8dda77b3903549599496c95a2ea
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=91d19c7f3622989f63ba4525ea5ab2315c6dc5068401a1187362f094e70aaf09
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=1a29...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_csr-stale-output" classname="mhgp7_mutant_csr_csr-stale-output" time="1.84373" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=4021a3f71094701d976c7358206b1ad0b133db72988eb52ed8a3fea3736459b3
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=25a2ca4ea145440b5f45a6544b885cb79b7f2e82f48cdfe7b26ae982bf45c818
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=d19ab06ef213f26d86a3bc123583604e9ad3d096fd1cda0390f1f1fd8e4a6772
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=7ec337ce0c96b864d98444b1967f55fd4efd12d81e8c41eab68ac16773ee6108
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=748339ea951c4179873a5d15d8cab231ac3871a96dce86073de8d484adc05b78
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=c24d1e9d9bc14ea96591127c6fdd61b5a4e09cae6f35733c5c400a0006bd7e13
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=64f9...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_csr-unsorted-born" classname="mhgp7_mutant_csr_csr-unsorted-born" time="2.25401" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=0f6fdc9b245d07daa4d9e6a3e218fc2d82ca314abaa0151acfd4724acb9f3e89
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=ac061fe84949dec7241761a793169756f02b74614202ec95bc64b0c1e88f1859
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=9c175532ac0511ab8a08b6d1f70832cb0c47d41400be58f12140ba80a2aaf4a2
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=be5900b3666f2e6f6754f48d6200bf471a34328d24b4f56e7f3ea1ea8ca38a06
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=f4a9263453c974a068a07c18f90707023eb767866dc551d33c0d3f1c972cef90
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=2b77a9b90474b873dfc55d986d3b62f628e53522fffc6218df4edf038fc0fd2d
+digest_forest_K8 : v5=1d74d3d31750369abdcc1e126e072c0c4807516e09a2adca498bff071c2cda75 v6=5aae...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_csr-unsorted-parents" classname="mhgp7_mutant_csr_csr-unsorted-parents" time="2.14067" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=63d8c116e75ece4a5460acbcbe38ed33c38aa3a781b799223ad78bc47cdd93c9
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=f1b587fdb3bcf195de8dd94361f5100a4de467fd241826a6cd017a3a6a196921
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=9028b56c91212f532dad88c86bd5234c60ca47a7a530cf324474edb4df043fa8
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=223a7eacd3d8bfa8dca33a299769a173c78347b582884432e77226b1963fb675
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=466e1ec21bde46e793c15e6ef4dfd2b5bfb087fab59ab0ce546139c1e0e7d343
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=2e2b6d93a5acf965b5a0736e3da0a0c768ba393a4d247cb2d5ff829343ff9d1d
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=8a7a...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_csr-drop-delta" classname="mhgp7_mutant_csr_csr-drop-delta" time="2.10386" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=8524a7201956f038ea299339096502c6d09addaedadcb7895722293962e9689d
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=bddbde7d6fc675e4c5d75da07a482611f9fe479dd582ed2c732b8cd5d1236738
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=0ce63ff46b6d3ae2fd14ed5f8ccb80fb1cb56dc106a2867a295a25f5ec032f65
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=6da055acbe87be199d036282372af2e0b2359140b4a91917f43058725fb986b5
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=8e8849aa8a6eb4f75cc1d3da112e7b39d542a8e77e8f3e29589072ffb0e3d7b9
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=075dd832fb98005850b10e76f4237f5615fd46863aff1213d50f1e71b176262b
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=d85c...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_csr-dup-delta" classname="mhgp7_mutant_csr_csr-dup-delta" time="2.08088" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=2f686e04f02e9a4a7ee14a240c5d239fb706e26240b14393ebbb79e2edd45b51
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=7080cde698e4ee3b72013a8fead088e0401a1352592780204ef861a1f6447f24
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=459884c5b382083801270aa59fbb075416ad3557feebf02240d46777e4b17a04
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=711d33c1c3d6df2fd40aa34195b596a30dd0725f354de6a5a329714ba6375ca5
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=e1bc740afaf3f76a498f951d863cb34aaae5cf6a3750360776f7f65f16b3bf13
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=8ecde42347ef4f034288168a5c7b3a23c509fcf78a68d800e642be4665745f87
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=0b0a...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_csr-shift-offset" classname="mhgp7_mutant_csr_csr-shift-offset" time="2.12103" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=3162b7e3bb3b76361715fa968305f8bf2a7666ca9b6c077fe1fda9ae8a827a49
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=1cc389a3afd33e7601c039005689cbab97e1be6674960bf372a2dd37ea48f96f
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=37eff6891f4d898f923a200e6fe1e9dd2f30e61d30b16e7b503b5c9ef3b9c84b
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=8e4aaaf4eebdbbc4603797628c2e11825859e6f5ff3572eec97e4cbb5d52fdd3
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=b77ca6cc77dce3415dce2af3ab6fb60f2db52b22a7c347de81d3147c0624f0f9
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=2ec3dc77195ca0619a747cf68b0742100bfe2601345a96c26cb3d4eda0d4843b
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=6b48...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_ablation-mat-sans-copie" classname="mhgp7_mutant_csr_ablation-mat-sans-copie" time="2.05872" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=fee4d518998db901257ba9f00b8f42326cd72dbf579e4c155f9c4116062ccad1
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=2e904b94227560d1b6f6b6a8ede5d308de1a507524f678f99a141d556c3c7f56
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=0480b49a10d40e6352d1b32e83c3b00df8e846630eecb03a2068617bea6fd3eb
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=3f92f8979e591ef56907fdc16ea5a23fd172f4f43bf564c7b00f0d58ed9c554c
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=073aa7f981644cd45279d6d8e753cee38bca9fbc7d86c1e0f0d385520ad8fe6e
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=3170fadb2dc61594a8586ba781da3bd49ecb92bfa16462aa7df3e66842bcc0cd
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=d06b...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_ablation-mat-sans-tris" classname="mhgp7_mutant_csr_ablation-mat-sans-tris" time="2.03586" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=ea98b3a36afdb32c1a2263921d130a033b15ea1054b8f5ef2e08ef5474e65407
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=ffcb50ad8fdbea60d2c5caec34e04d9cf38b8620fbb30b20e6f4949b0f3d0cad
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=b3c65834fc635c565c01a116bbfc7bf4ebc716c6143421a1c524054c09a098d7
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=998bbd86a571cb320e2e7b9ac7e4a51c4bede06a17621ea16ad130f3763cc606
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=6307ebb6bfe0d8b080a1ac61236394bfbc867efdc9a7ef50e5f8e73a03060c2e
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=02c54afb7c622d9329204e7931047010fa93a293c0fcb137e3fd836caf854b34
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=05ed...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_ablation-post-cle-factice" classname="mhgp7_mutant_csr_ablation-post-cle-factice" time="2.02703" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K1 : v5=57c1e7bb279bf07063d99b9ebca0bf7e5ec066f64c8fb0bd32a51b8e53da07cf v6=f8ce59b38b4a0417b4c88195de8be499fa6ac48ec7a1c555b2de4d3e05bb3440
+digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=d9f92e755f9cce0d5311bfce4c84aeedad238b5f79682e5c39f928e73735f314
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=90b8b6fe5ebd55e4109fb57068a7d9af3e952bb0039a810e4f3f91a6824d07ef
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=dd240cc2b53c04f6c517baa4b8a9756f4791c8b2dec31c7561c0cd75aca71784
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=3a4ead7b4a7469ef38ba75f72d561d15312ce5162b2888f670fbfffa11e74cc8
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=3101695dbdd4cdb2e597f2c4a2fd0d9add0609f3abb5ece44b5a646243f2f482
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=9c78...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_binary-ties" classname="mhgp7_mutant_csr_binary-ties" time="1.51673" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant binary-ties : statut invariant : violations de roles, de partition ou de stockage (K=2) — tue
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_repr-ties" classname="mhgp7_mutant_csr_repr-ties" time="2.15472" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=d6011288284e58d9386ed031dc38ea51a51c47b86d4cb4c67d460296bd847960
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=a3e735298def4d996e46c5652ecf3879bd7d595c014d5dff1bee7ddf52ec085f
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=6e311612d9ecf95cf6abb2118724de0b1444f6b4e7acffa31f8522cdc8a9af05
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=89c1fa2a554a288be70660c4828490255f13c5dc8ee54ce211547afaf7b478e5
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=e274a8060c57656bba0b325fbfa18c1282597c333dbee7ee7250c6cf32130959
+digest_forest_K8 : v5=1d74d3d31750369abdcc1e126e072c0c4807516e09a2adca498bff071c2cda75 v6=2f2dc6ecb0499ee3e3678428a02b1baa2ee1003a83d6ad11fb9a8a639c861470
+digest_forest_K9 : v5=64f8a3e45aabc3e42b163b5f4107fde070e28b83ac7531bbfa9d35da621a755d v6=07b6...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_attach-prebatch" classname="mhgp7_mutant_csr_attach-prebatch" time="2.08427" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=70d53acabe20448e0bf542a9755e492951d8df5538db9e120b7deaae7c2f792a
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=a5e0e2932a8860c994aadeed11d4cc100d70dfeb62d5c99288aee7dfa4830322
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=a27dddfd128552a4583474554007a87d70c95479f5a245d9b73aebf17285d536
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=33bc3728ad6979332ba331dd50670f297ace4dbee0a92b20c7c318bf20fcbd9f
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=c753c7a142ae528b95bf37c8dc00064fff71e8a90f41500450927443de8e01ec
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=106457c32787fef8442e03a92e0f0bf36205251283be0822ea3b71c26ce829e4
+digest_forest_K8 : v5=1d74d3d31750369abdcc1e126e072c0c4807516e09a2adca498bff071c2cda75 v6=f600...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_drop-nonmerge" classname="mhgp7_mutant_csr_drop-nonmerge" time="2.21254" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>digest_forest_K2 : v5=7577d308f129c1247b38c8e67b8d4225cba914cf65e3fccea006c2a91150750c v6=4129c92ed65bf7d6040caef223015f40406041e48a10426d6bf9e093bc37c6ce
+digest_forest_K3 : v5=dad6fbb55c6bb5412779d560d19a8b4e596a4a8bc346dd2f62253d0932ea5b85 v6=73e5a887e2e1fcb4d2e0b233de907c8e6eac9587e4d58231129100d4ab141935
+digest_forest_K4 : v5=d0d3b87aaa81b969819cfe12bda9d643d13b617a97a8700eb421f2aa8976cbfe v6=ecf5745ea5c5d8844d372c785746cc3f9a6424d2f97e8f472734220acbec5c27
+digest_forest_K5 : v5=90ebf3bde167729c78f4998f96ee0b6bfea9ab9330326d2f6badeb16ce66098c v6=bde951a00667273fadde9516783afd4c0d861dc00a240bcf342af87356ced2ab
+digest_forest_K6 : v5=bb3c4a7f49f2e0ad6ace58aa859460cc1118c575714785c0a7894945c13da2a8 v6=8c1fc5fccb95ecb708203274d63e3e0e1d72ee1252571895a2306821e10b402d
+digest_forest_K7 : v5=23d839ede1b43c0623a50aef7c69e34ea4a11260d2b89ac6ccb0ef2bb4efa833 v6=57f80c27e4d5e81155562a359b57c3dc1bda5a4bba410eb5055d0daa22fe8158
+digest_forest_K8 : v5=1d74d3d31750369abdcc1e126e072c0c4807516e09a2adca498bff071c2cda75 v6=9f68...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mutant_csr_canonical-is-uf-root" classname="mhgp7_mutant_csr_canonical-is-uf-root" time="1.58258" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant canonical-is-uf-root : statut invariant : violations de roles, de partition ou de stockage (K=1) — tue
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_layout_classic_signature" classname="mhgp7_cli_layout_classic_signature" time="1.76698" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>payload=mhgp7-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+forest_layout=classic forest_storage_kind=vector_component_delta_v1 csr_fallback=0 ordres_publies=10 ordres_storage_conformes=10
+backend=cpu_reference
+forest_semantics=verified_events_only public_status=not_claimed require_exact=false
+census_storage=mhgp7-census-direct-v1 census_payload_peak_scope=owned_balldata_capacities
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=uniform n=200 coord=58 s=8 smax=11 seed=3 threads=1 emis=42129 boules_uniques=42109 mortes_profondeur=492 survivantes=41617 census_int=206628 census_shell=137477 evenements=42018 facettes=252460 fusions=252417 deltas=39392 noeuds=26828
+generation rect_alive=4343/8233/8705 rect_visites_fusionnes=24179 ancres=5416/12149/13155 candidats=5273/19843/17013 tues_profondeur=0/98488/25398 ancres_w4=2023 ancres_w3=1736 ancres_secteurs=854/1718 ancres_cellules=0/0 seeds_cellules=0/0 grilles=0/0 seeds=118331/114004 completion...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_layout_csr_signature" classname="mhgp7_cli_layout_csr_signature" time="2.04846" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>payload=mhgp7-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+forest_layout=csr forest_storage_kind=csr_facet_keys_v1 csr_fallback=0 ordres_publies=10 ordres_storage_conformes=10
+backend=cpu_reference
+forest_semantics=verified_events_only public_status=not_claimed require_exact=false
+census_storage=mhgp7-census-direct-v1 census_payload_peak_scope=owned_balldata_capacities
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=uniform n=200 coord=58 s=8 smax=11 seed=3 threads=1 emis=42129 boules_uniques=42109 mortes_profondeur=492 survivantes=41617 census_int=206628 census_shell=137477 evenements=42018 facettes=252460 fusions=252417 deltas=39392 noeuds=26828
+generation rect_alive=4343/8233/8705 rect_visites_fusionnes=24179 ancres=5416/12149/13155 candidats=5273/19843/17013 tues_profondeur=0/98488/25398 ancres_w4=2023 ancres_w3=1736 ancres_secteurs=854/1718 ancres_cellules=0/0 seeds_cellules=0/0 grilles=0/0 seeds=118331/114004 completions_q4=447472 ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_refus_layout_inconnu" classname="mhgp7_cli_refus_layout_inconnu" time="0.0446607" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_refus_layout_vide" classname="mhgp7_cli_refus_layout_vide" time="0.0442039" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_perm_residence" classname="mhgp7_perm_residence" time="0.368882" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>perm_residence cases=12 ties=99211 sequential_peak=131072 parallel_peak=262736 legacy_peak=328272 legacy_simultaneous=2 allocation_failures=15 comparator_failures=5 launch_failures=1 failures=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_perm_residence_perm-apply-scatter" classname="mhgp7_perm_residence_perm-apply-scatter" time="0.149953" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>perm_residence mutant=perm-apply-scatter cases=12 differences=12 unsorted=12 failures=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_perm_residence_perm-apply-partial" classname="mhgp7_perm_residence_perm-apply-partial" time="0.184742" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>perm_residence mutant=perm-apply-partial cases=12 differences=12 unsorted=12 failures=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_perm_residence_perm-tie-desc" classname="mhgp7_perm_residence_perm-tie-desc" time="0.191429" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>perm_residence mutant=perm-tie-desc cases=12 differences=12 unsorted=0 failures=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_perm_sort" classname="mhgp7_perm_sort" time="7.79466" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : route permutation == std::stable_sort (etiquettes comprises, 1/2/4/8 fils)
+ok : route directe == std::stable_sort sur la meme scene
+monnaie famille=0 digest_raw_candidates=199123c37677ed095f0c603283216a4c382b4ffac8e30aac7ce61a8dd3b567d0 digest_balls=2b50f878e2ddb641f07358dc82c9d52e9db7482ae55a94d0e033b13c71f1e6f4
+monnaie famille=4 digest_raw_candidates=55ddbb66fdf161bc631eab2eb19d0848a806c9e2ffd91a259295fe67bc0e4752 digest_balls=2be6cc9b76a4b205dcd6cc988d03e3a15fbd364dcd6da9afd0eacd659c472691
+ok : scene reelle : digest_raw_candidates conforme aux monnaies gravees
+ok : scene reelle : digest_balls conforme aux monnaies gravees
+ok : candidats reels : les deux routes rendent std::stable_sort octet pour octet
+ok : candidats reels : sortie identique a 2, 4 et 8 fils
+ok : census : pile hissee et pile possedee rendent le meme I_B / U_B
+ok : census : aucune pile possedee sur la voie produit
+perm_sort_gate elements_synthetiques=241000 ex_aequo=210882 classes_ex_aequo=30037 candidats=172199 ex_aequo_reels=22 boules...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_perm_sort_plancher" classname="mhgp7_perm_sort_plancher" time="7.41748" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : route permutation == std::stable_sort (etiquettes comprises, 1/2/4/8 fils)
+ok : route directe == std::stable_sort sur la meme scene
+monnaie famille=0 digest_raw_candidates=199123c37677ed095f0c603283216a4c382b4ffac8e30aac7ce61a8dd3b567d0 digest_balls=2b50f878e2ddb641f07358dc82c9d52e9db7482ae55a94d0e033b13c71f1e6f4
+monnaie famille=4 digest_raw_candidates=55ddbb66fdf161bc631eab2eb19d0848a806c9e2ffd91a259295fe67bc0e4752 digest_balls=2be6cc9b76a4b205dcd6cc988d03e3a15fbd364dcd6da9afd0eacd659c472691
+ok : scene reelle : digest_raw_candidates conforme aux monnaies gravees
+ok : scene reelle : digest_balls conforme aux monnaies gravees
+ok : candidats reels : les deux routes rendent std::stable_sort octet pour octet
+ok : candidats reels : sortie identique a 2, 4 et 8 fils
+ok : census : pile hissee et pile possedee rendent le meme I_B / U_B
+ok : census : aucune pile possedee sur la voie produit
+perm_sort_gate elements_synthetiques=241000 ex_aequo=210882 classes_ex_aequo=30037 candidats=172199 ex_aequo_reels=22 boules...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_perm_sort_refus_arg" classname="mhgp7_perm_sort_refus_arg" time="0.0337257" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_perm_sort_mutant_perm-apply-scatter" classname="mhgp7_perm_sort_mutant_perm-apply-scatter" time="7.43601" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>monnaie famille=0 digest_raw_candidates=7b51e3d7d6fc0eb18444a7f6b0fc05cd6d01383a66c5c6c06f1b41fba2a1d56b digest_balls=27501321ca8849f076539c14a5c6cef14636487fdc53b5c197a093a2cd02954b
+monnaie famille=4 digest_raw_candidates=64f2aa3c79fd515df230eeb515b9718b6f1e4f451a040da06ce2cdb2aec2566d digest_balls=edeac0ea183bb9694eaf0cb63277da71f737b0e1e3b709c50eba583297e60342
+perm_sort_gate mutant=perm-apply-scatter divergences=12 desordre=12 digest_raw=2 digest_balls=2
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_perm_sort_mutant_perm-apply-partial" classname="mhgp7_perm_sort_mutant_perm-apply-partial" time="6.24925" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>monnaie famille=0 digest_raw_candidates=f17072bd6ab6dede5e9d35417ea55fbdad3a767bbcd82970e2cfe4e5960be96a digest_balls=7789069a1608be714ebf93ee5c10844ace806a0e9bccfab37317e045a36497e6
+monnaie famille=4 digest_raw_candidates=ca7212367344267dce3720f873f5c8098e0971021edb154ee2670f84fb265855 digest_balls=598821f50a88a378d02df9cda3733ef805fc73de400f5555bfeaf7929f668144
+perm_sort_gate mutant=perm-apply-partial divergences=12 desordre=12 digest_raw=2 digest_balls=2
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_perm_sort_mutant_perm-tie-desc" classname="mhgp7_perm_sort_mutant_perm-tie-desc" time="0.950776" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>perm_sort_gate mutant=perm-tie-desc divergences=12 ex_aequo_permutes=12 desordre=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_perm_sort_mutant_census-stack-per-ball" classname="mhgp7_perm_sort_mutant_census-stack-per-ball" time="6.5336" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : route permutation == std::stable_sort (etiquettes comprises, 1/2/4/8 fils)
+ok : route directe == std::stable_sort sur la meme scene
+monnaie famille=0 digest_raw_candidates=199123c37677ed095f0c603283216a4c382b4ffac8e30aac7ce61a8dd3b567d0 digest_balls=2b50f878e2ddb641f07358dc82c9d52e9db7482ae55a94d0e033b13c71f1e6f4
+monnaie famille=4 digest_raw_candidates=55ddbb66fdf161bc631eab2eb19d0848a806c9e2ffd91a259295fe67bc0e4752 digest_balls=2be6cc9b76a4b205dcd6cc988d03e3a15fbd364dcd6da9afd0eacd659c472691
+ok : scene reelle : digest_raw_candidates conforme aux monnaies gravees
+ok : scene reelle : digest_balls conforme aux monnaies gravees
+perm_sort_gate mutant=census-stack-per-ball piles_possedees=340865 allocations_census=1432726 octets_census=71724316
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_perm_sort_mutant_parallel-sort-unstable" classname="mhgp7_perm_sort_mutant_parallel-sort-unstable" time="0.508631" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>perm_sort_gate mutant=parallel-sort-unstable route_directe=6 route_permutation=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_route_c6_stub" classname="mhgp7_route_c6_stub" time="138.184" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : route C5 verte : uniform
+scene uniform n=400 : nb_total=105076 survivants=103942
+ok : uniform / lot unique : objet C6 == objet C5 (lots=1 queues=0 rot=0/0/0 triples=1 blocages=0)
+ok : uniform / lots de 7 (rotation, queue) : objet C6 == objet C5 (lots=15011 queues=1 rot=15009/15010/15009 triples=3 blocages=0)
+ok : uniform / lots de 997 : objet C6 == objet C5 (lots=106 queues=1 rot=104/105/104 triples=3 blocages=0)
+ok : index globaux strictement croissants et dans le domaine : uniform
+ok : uniform / lots de 997 sans temoin : objet C6 == objet C5 (lots=106 queues=1 rot=104/105/104 triples=3 blocages=0)
+ok : uniform / une seule sortie (contre-pression) : objet C6 == objet C5 (lots=106 queues=1 rot=104/105/105 triples=3 blocages=105)
+ok : uniform / anneau degenere in=out=1 : objet C6 == objet C5 (lots=106 queues=1 rot=105/105/105 triples=2 blocages=105)
+ok : uniform / queue d'UNE boule : objet C6 == objet C5 (lots=2 queues=1 rot=0/1/0 triples=2 blocages=0)
+ok : route C5 verte : eight_clusters
+scene eight_clus...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_route_c6_stub_plancher" classname="mhgp7_route_c6_stub_plancher" time="142.959" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>ok : route C5 verte : uniform
+scene uniform n=400 : nb_total=105076 survivants=103942
+ok : uniform / lot unique : objet C6 == objet C5 (lots=1 queues=0 rot=0/0/0 triples=1 blocages=0)
+ok : uniform / lots de 7 (rotation, queue) : objet C6 == objet C5 (lots=15011 queues=1 rot=15009/15010/15009 triples=3 blocages=0)
+ok : uniform / lots de 997 : objet C6 == objet C5 (lots=106 queues=1 rot=104/105/104 triples=3 blocages=0)
+ok : index globaux strictement croissants et dans le domaine : uniform
+ok : uniform / lots de 997 sans temoin : objet C6 == objet C5 (lots=106 queues=1 rot=104/105/104 triples=3 blocages=0)
+ok : uniform / une seule sortie (contre-pression) : objet C6 == objet C5 (lots=106 queues=1 rot=104/105/105 triples=3 blocages=105)
+ok : uniform / anneau degenere in=out=1 : objet C6 == objet C5 (lots=106 queues=1 rot=105/105/105 triples=2 blocages=105)
+ok : uniform / queue d'UNE boule : objet C6 == objet C5 (lots=2 queues=1 rot=0/1/0 triples=2 blocages=0)
+ok : route C5 verte : eight_clusters
+scene eight_clus...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_route_c6_stub_refus_arg" classname="mhgp7_route_c6_stub_refus_arg" time="0.0329436" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : parametre hors domaine ou mal forme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_route_c6_stub_mutant_gpu-lot-base-reset" classname="mhgp7_route_c6_stub_mutant_gpu-lot-base-reset" time="2.2944" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant gpu-lot-base-reset TUE : refus du lot 7 (in=2 out=2 temoin=1, lots=15011) — invariant : cand_idx inattendu au retour device
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_route_c6_stub_mutant_c6-wrong-epoch" classname="mhgp7_route_c6_stub_mutant_c6-wrong-epoch" time="2.39375" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant c6-wrong-epoch TUE : refus du lot 7 (in=2 out=2 temoin=1, lots=15011) — valeur inattendue : base globale ou bail rompu (lot 2, index global 14)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_route_c6_stub_mutant_c6-reuse-before-lease" classname="mhgp7_route_c6_stub_mutant_c6-reuse-before-lease" time="7.34122" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant c6-reuse-before-lease TUE : refus du lot 997 (in=2 out=1 temoin=1, lots=106) — invariant : ecriture device omise (sentinelle survivante)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_route_c6_stub_mutant_c6-publish-prefix" classname="mhgp7_route_c6_stub_mutant_c6-publish-prefix" time="8.93244" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant c6-publish-prefix TUE : un refus au milieu a publie (canaris detruits, lots=106)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_route_c6_stub_mutant_gpu-stack-shallow" classname="mhgp7_route_c6_stub_mutant_gpu-stack-shallow" time="1.94296" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant gpu-stack-shallow TUE : refus du lot 7 (in=2 out=2 temoin=1, lots=15011) — invariant : pile DFS au-dela du profil (49) sur la route device
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_route_c6_stub_mutant_gpu-census-nonstrict" classname="mhgp7_route_c6_stub_mutant_gpu-census-nonstrict" time="2.03788" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant gpu-census-nonstrict TUE : refus du lot 7 (in=2 out=2 temoin=1, lots=15011) — invariant : census contredit la passe count-only (route device)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_route_c6_stub_mutant_gpu-skip-ball-write" classname="mhgp7_route_c6_stub_mutant_gpu-skip-ball-write" time="4.09371" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant gpu-skip-ball-write TUE : refus du lot 61 (in=2 out=2 temoin=1, lots=1723) — invariant : ecriture device omise (sentinelle survivante)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_route_c6_stub_mutant_gpu-nshell-overdomain" classname="mhgp7_route_c6_stub_mutant_gpu-nshell-overdomain" time="1.91743" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant gpu-nshell-overdomain TUE : refus du lot 7 (in=2 out=2 temoin=1, lots=15011) — invariant : comptes hors profil au retour device
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_route_c6_stub_mutant_gpu-skip-count-write" classname="mhgp7_route_c6_stub_mutant_gpu-skip-count-write" time="1.78192" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>mutant gpu-skip-count-write TUE : refus du lot 7 (in=2 out=2 temoin=1, lots=15011) — invariant : count jamais ecrit (sentinelle survivante)
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_thread_failure" classname="mhgp7_thread_failure" time="0.0470553" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>thread_failure partial=4 runtime=4 workers=4 failures=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_thread_failure_mutant_admission" classname="mhgp7_thread_failure_mutant_admission" time="0.0169674" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>partial_launch cases=2 admitted=65568 active=0 failures=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_thread_failure_refus_arg" classname="mhgp7_thread_failure_refus_arg" time="0.0124679" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_direct" classname="mhgp7_census_direct" time="0.0903627" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>census_direct version=mhgp7-census-direct-v1 balls=5562 regular=5547 plateau=15 events=5787 refusals=14 object_errors=0 publish_errors=0 residence_errors=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_direct_offset" classname="mhgp7_census_direct_offset" time="0.0788748" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>census_direct version=mhgp7-census-direct-v1 balls=5562 regular=5547 plateau=15 events=5787 refusals=14 object_errors=6594 publish_errors=0 residence_errors=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_direct_transaction" classname="mhgp7_census_direct_transaction" time="0.145136" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>census_direct version=mhgp7-census-direct-v1 balls=5562 regular=5547 plateau=15 events=5787 refusals=14 object_errors=0 publish_errors=14 residence_errors=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_direct_residence" classname="mhgp7_census_direct_residence" time="0.168129" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>census_direct version=mhgp7-census-direct-v1 balls=5562 regular=5547 plateau=15 events=5787 refusals=14 object_errors=0 publish_errors=0 residence_errors=12
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_silent_incidence" classname="mhgp7_silent_incidence" time="1.11701" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>silent_incidence cases=26 cuts=1492 core_pairs=1543928 silent=8 longest_chain=2 cache_hits=1 delta_cuts=1354 delta_records=330 normalized_transitions=371 failures=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_silent_incidence_mutant" classname="mhgp7_silent_incidence_mutant" time="0.0163669" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_reduced_latent_parent_mutant" classname="mhgp7_reduced_latent_parent_mutant" time="0.0562103" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_reduced_drop_materialization_mutant" classname="mhgp7_reduced_drop_materialization_mutant" time="0.0497011" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_silent_drop_nonmerge_mutant" classname="mhgp7_silent_drop_nonmerge_mutant" time="0.0465908" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_silent_csr_stale_level_mutant" classname="mhgp7_silent_csr_stale_level_mutant" time="0.0392633" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_archive" classname="mhgp7_archive" time="0.514562" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>archive_gate=passed scenes=24 digest_replay=independent delta_replay=independent corruption=rejected
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_archive_optimized" classname="mhgp7_archive_optimized" time="0.330728" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>archive_gate=passed scenes=24 digest_replay=independent delta_replay=independent corruption=rejected
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_compare_campaign" classname="mhgp7_compare_campaign" time="2.9568" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>compare_campaign_gate=passed parser_rejections=24 campaigns=8 descendants=1 fake_metrics_only=true
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_compare_campaign_optimized" classname="mhgp7_compare_campaign_optimized" time="4.05089" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>compare_campaign_gate=passed parser_rejections=24 campaigns=8 descendants=1 fake_metrics_only=true
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_archive_api" classname="mhgp7_archive_api" time="0.0917425" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>archive_api_gate=passed completed=2 parent_sync_fault=1 file_sync_fault=1 closed_lifecycle=6 invalid_inputs=3 semantics_refusals=3
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_expect_line" classname="mhgp7_expect_line" time="0.429517" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>exact_line_cases=6
+</system-out>
+	</testcase>
+</testsuite>
