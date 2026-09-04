@@ -1,0 +1,101 @@
+{
+  "schema": "mhgp7-gcp-stockout-observations-v1",
+  "public_status": "not_claimed",
+  "checked_utc": "2026-09-04 21:03:53 UTC",
+  "reason": "ZONE_RESOURCE_POOL_EXHAUSTED_WITH_DETAILS",
+  "observations": [
+    {
+      "zone": "europe-west4-a",
+      "instance": "ehgp-blackwell-spot",
+      "session": "v7session.xxj7i384",
+      "state": {
+        "ended": "2026-09-04T20:45:23.030758+00:00",
+        "exit_code": 1,
+        "failure": "guarded start failed",
+        "failure_type": "RuntimeError",
+        "no_session_created": true,
+        "schema": "ehgp.v7.g4.snapshot.v1",
+        "source_manifest_sha256": "ca43d5b278226420680e796c8537ef7b82c9f992ea1a2978e088ab8d87c75935",
+        "started": "2026-09-04T20:44:51.603100+00:00",
+        "status": "failed",
+        "stopped_verified": true,
+        "target": {
+          "instance": "ehgp-blackwell-spot",
+          "project": "devpod-gpu-exploration",
+          "zone": "europe-west4-a"
+        }
+      },
+      "post_read": {
+        "id": "6138498692773983463",
+        "labels": {
+          "managed-by": "manual-script",
+          "project": "e-hgp",
+          "role": "gpu-benchmark"
+        },
+        "lastStartTimestamp": "2026-08-18T05:04:59.881-07:00",
+        "name": "ehgp-blackwell-spot",
+        "scheduling": {
+          "automaticRestart": false,
+          "instanceTerminationAction": "STOP",
+          "maxRunDuration": {
+            "nanos": 0,
+            "seconds": "3600"
+          },
+          "onHostMaintenance": "TERMINATE",
+          "preemptible": true,
+          "provisioningModel": "SPOT"
+        },
+        "status": "TERMINATED"
+      }
+    },
+    {
+      "zone": "europe-west4-ai1a",
+      "instance": "ehgp-blackwell-spot-ai1a",
+      "session": "v7session.dtphnxfx",
+      "state": {
+        "ended": "2026-09-04T20:48:07.311700+00:00",
+        "exit_code": 1,
+        "failure": "guarded start failed",
+        "failure_type": "RuntimeError",
+        "no_session_created": true,
+        "schema": "ehgp.v7.g4.snapshot.v1",
+        "source_manifest_sha256": "8ee89506e380b8c1c388761d9f5386d5a32ef80bf2036b3d6ff0b2c6f60f82ad",
+        "started": "2026-09-04T20:47:29.631196+00:00",
+        "status": "failed",
+        "stopped_verified": true,
+        "target": {
+          "instance": "ehgp-blackwell-spot-ai1a",
+          "project": "devpod-gpu-exploration",
+          "zone": "europe-west4-ai1a"
+        }
+      },
+      "post_read": {
+        "id": "6118353088541925230",
+        "labels": {
+          "managed-by": "manual-script",
+          "project": "e-hgp",
+          "role": "gpu-benchmark"
+        },
+        "lastStartTimestamp": "2026-09-01T18:34:33.420-07:00",
+        "name": "ehgp-blackwell-spot-ai1a",
+        "scheduling": {
+          "automaticRestart": false,
+          "instanceTerminationAction": "STOP",
+          "maxRunDuration": {
+            "nanos": 0,
+            "seconds": "3600"
+          },
+          "onHostMaintenance": "TERMINATE",
+          "preemptible": true,
+          "provisioningModel": "SPOT"
+        },
+        "status": "TERMINATED"
+      }
+    }
+  ],
+  "notes": [
+    "No new VM generation was started in these two attempts.",
+    "The ai1a GCE duration was shortened from 18000 to 3600 seconds using set_max_run_duration_and_verify.sh, with the VM remaining TERMINATED.",
+    "No GPU workload result is claimed by these failed attempts."
+  ]
+}

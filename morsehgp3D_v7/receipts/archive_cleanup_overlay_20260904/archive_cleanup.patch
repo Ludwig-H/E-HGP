@@ -1,0 +1,246 @@
+--- a/morsehgp3D_v7/src/io/archive.hpp
++++ b/morsehgp3D_v7/src/io/archive.hpp
+@@ -16,6 +16,7 @@
+ #include <string_view>
+ #include <vector>
+ #include <fcntl.h>
++#include <sys/stat.h>
+ #include <sys/syscall.h>
+ #include <unistd.h>
+ 
+@@ -70,10 +71,116 @@
+ 
+ namespace archive_detail {
+ 
++// Own the namespace before any temporary-directory mutation. Member teardown
++// runs even if ForestArchive's constructor throws. Cleanup uses only retained
++// descriptors, fixed filenames and stack storage, including its diagnostic:
++// std::filesystem::remove_all(error_code) can allocate and is not suitable in
++// a noexcept destructor during a persistent std::bad_alloc.
++class StagingDirectory {
++ public:
++  StagingDirectory() = default;
++  StagingDirectory(const StagingDirectory&) = delete;
++  StagingDirectory& operator=(const StagingDirectory&) = delete;
++  ~StagingDirectory() noexcept {
++    if (name_[0] != '\0' && !published_) cleanup();
++    if (staging_fd_ >= 0) ::close(staging_fd_);
++    if (parent_fd_ >= 0) ::close(parent_fd_);
++  }
++  void create(const std::filesystem::path& parent, const char* destination) {
++    parent_fd_ = ::open(parent.c_str(), O_RDONLY | O_DIRECTORY | O_CLOEXEC);
++    if (parent_fd_ < 0) throw std::runtime_error("archive_open_directory_failed");
++    struct stat info{};
++    if (::fstatat(parent_fd_, destination, &info, AT_SYMLINK_NOFOLLOW) == 0)
++      throw std::runtime_error("archive_destination_exists");
++    if (errno != ENOENT) throw std::runtime_error("archive_destination_check_failed");
++    // Linux /proc binds mkdtemp to the already-open parent, even if its path
++    // changes. Everything after mkdir succeeds is non-allocating until the
++    // directory is owned by this member (also on the openat failure path).
++    char pattern[96] = "/proc/self/fd/";
++    char* end = std::to_chars(pattern + 14, pattern + 35, parent_fd_).ptr;
++    constexpr char suffix[] = "/.mhgp7-provisional-XXXXXX";
++    std::memcpy(end, suffix, sizeof(suffix));
++    char* created = ::mkdtemp(pattern);
++    if (!created) throw std::runtime_error("archive_create_directory_failed");
++    std::memcpy(name_.data(), end + 1, sizeof(suffix) - 1);
++    staging_fd_ = ::openat(parent_fd_, name_.data(), O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
++    if (staging_fd_ < 0) throw std::runtime_error("archive_open_directory_failed");
++  }
++  int fd() const noexcept { return staging_fd_; }
++  bool open() const noexcept { return name_[0] != '\0' && !published_; }
++  void sync() {
++    if (::fsync(staging_fd_) != 0) throw std::runtime_error("archive_sync_directory_failed");
++  }
++  bool publish(const char* destination) {
++    if (::syscall(SYS_renameat2, parent_fd_, name_.data(), parent_fd_, destination, 1U) != 0)
++      throw std::runtime_error("archive_commit_create_only_failed");
++    // Publication has happened. No allocation or throwing operation follows.
++    published_ = true;
++    return ::fsync(parent_fd_) == 0;
++  }
++ private:
++  void cleanup() noexcept {
++    unsigned errors = 0;
++    int first_errno = 0;
++    const auto failure = [&]() noexcept {
++      if (errors++ == 0) first_errno = errno;
++    };
++    if (staging_fd_ >= 0) {
++      static constexpr const char* files[] = {
++          "input.u16", "forest_K1.bin", "forest_K2.bin", "forest_K3.bin",
++          "forest_K4.bin", "forest_K5.bin", "forest_K6.bin", "forest_K7.bin",
++          "forest_K8.bin", "forest_K9.bin", "forest_K10.bin", "manifest.json"};
++      for (const char* file : files)
++        if (::unlinkat(staging_fd_, file, 0) != 0 && errno != ENOENT) failure();
++      // Do not remove a different directory substituted at the temporary name.
++      struct stat owned{}, named{};
++      if (::fstat(staging_fd_, &owned) != 0) failure();
++      else if (::fstatat(parent_fd_, name_.data(), &named, AT_SYMLINK_NOFOLLOW) != 0) {
++        if (errno != ENOENT) failure();
++      } else if (owned.st_dev != named.st_dev || owned.st_ino != named.st_ino) {
++        errno = ESTALE;
++        failure();
++      } else if (::unlinkat(parent_fd_, name_.data(), AT_REMOVEDIR) != 0 && errno != ENOENT) failure();
++    } else if (::unlinkat(parent_fd_, name_.data(), AT_REMOVEDIR) != 0 && errno != ENOENT) failure();
++    if (errors != 0) warn(errors, first_errno);
++  }
++  void warn(unsigned errors, int first_errno) const noexcept {
++    char message[192];
++    char* out = message;
++    const auto append = [&](const char* value) noexcept {
++      while (*value != '\0' && out < message + sizeof(message) - 1) *out++ = *value++;
++    };
++    const auto number = [&](int value) noexcept {
++      char digits[32]{};
++      const auto result = std::to_chars(digits, digits + sizeof(digits) - 1, value);
++      if (result.ec == std::errc{}) append(digits);
++      else append("?");
++    };
++    append("archive_cleanup=failed provisional=");
++    append(name_.data());
++    append(" operations_failed=");
++    number(static_cast<int>(errors));
++    append(" first_errno=");
++    number(first_errno);
++    *out++ = '\n';
++    const char* cursor = message;
++    // Bounded best effort, including EINTR/partial writes. No recursive cleanup
++    // or allocation retry can mask an OS refusal or prevent stack unwinding.
++    for (unsigned attempt = 0; cursor < out && attempt < 3; ++attempt) {
++      const ssize_t written = ::write(STDERR_FILENO, cursor, static_cast<size_t>(out - cursor));
++      if (written > 0) cursor += written;
++      else if (written < 0 && errno != EINTR) break;
++    }
++  }
++  int parent_fd_ = -1, staging_fd_ = -1;
++  std::array<char, 32> name_{};
++  bool published_ = false;
++};
++
+ class File {
+  public:
+-  explicit File(const std::filesystem::path& path) {
+-    const int fd = ::open(path.c_str(), O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, 0600);
++  File(int directory_fd, const char* name) {
++    const int fd = ::openat(directory_fd, name, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, 0600);
+     if (fd < 0) throw std::runtime_error("archive_create_file_failed");
+     f_ = ::fdopen(fd, "wb");
+     if (!f_) { ::close(fd); throw std::runtime_error("archive_fdopen_failed"); }
+@@ -115,51 +222,27 @@
+   u64 bytes_ = 0;
+ };
+ 
+-inline void sync_directory(const std::filesystem::path& path) {
+-  const int fd = ::open(path.c_str(), O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+-  if (fd < 0) throw std::runtime_error("archive_open_directory_failed");
+-  const int rc = ::fsync(fd);
+-  ::close(fd);
+-  if (rc != 0) throw std::runtime_error("archive_sync_directory_failed");
+-}
+-
+ }  // namespace archive_detail
+ 
+ class ForestArchive {
+  public:
+-  explicit ForestArchive(const std::filesystem::path& destination) : destination_(destination) {
+-    if (destination_.empty() || destination_.filename().empty() || destination_.filename() == "." || destination_.filename() == "..")
++  explicit ForestArchive(const std::filesystem::path& destination) {
++    if (destination.empty() || destination.filename().empty() || destination.filename() == "." || destination.filename() == "..")
+       throw std::runtime_error("archive_invalid_destination");
+-    parent_ = destination_.parent_path();
+-    if (parent_.empty()) parent_ = ".";
+-    if (std::filesystem::exists(destination_)) throw std::runtime_error("archive_destination_exists");
+-    const std::string pattern = (parent_ / ".mhgp7-provisional-XXXXXX").string();
+-    std::vector<char> name(pattern.begin(), pattern.end());
+-    name.push_back('\0');
+-    char* created = ::mkdtemp(name.data());
+-    if (!created) throw std::runtime_error("archive_create_directory_failed");
+-    try {
+-      staging_ = created;
+-    } catch (...) {
+-      // Constructor failure does not run this object's destructor.
+-      ::rmdir(created);  // This newly created directory is still empty.
+-      throw;
+-    }
++    auto parent = destination.parent_path();
++    if (parent.empty()) parent = ".";
++    destination_name_ = destination.filename().string();
++    directory_.create(parent, destination_name_.c_str());
+   }
+   ForestArchive(const ForestArchive&) = delete;
+   ForestArchive& operator=(const ForestArchive&) = delete;
+-  ~ForestArchive() {
+-    if (!staging_.empty()) {
+-      std::error_code ec;
+-      std::filesystem::remove_all(staging_, ec);  // Only this object's mkdtemp directory.
+-    }
+-  }
++  ~ForestArchive() = default;
+   void input(const std::vector<InputPoint>& points) {
+     require_open();
+     WriteGuard guard{failed_};
+     if (points.empty() || points.size() > kMaxTreePositions)
+       throw std::runtime_error("archive_input_point_count");
+-    archive_detail::File f(staging_ / "input.u16");
++    archive_detail::File f(directory_.fd(), "input.u16");
+     f.text("mhgp7-input-u16-v1\n");
+     f.uint(points.size(), 8);
+     for (const auto& point : points) {
+@@ -183,7 +266,7 @@
+     else if (normalized_reduced_ != r.normalized_reduced)
+       throw std::runtime_error("archive_mixed_forest_semantics");
+     const std::string name = "forest_K" + std::to_string(k) + ".bin";
+-    archive_detail::File f(staging_ / name);
++    archive_detail::File f(directory_.fd(), name.c_str());
+     f.text("mhgp7-forest-file-v1\n");
+     f.uint(k, 4);
+     f.uint(r.facet_keys.size(), 8);
+@@ -216,7 +299,7 @@
+       throw std::runtime_error("archive_forest_semantics_mismatch");
+     if (digest_all.size() != 64 || digest_all.find_first_not_of("0123456789abcdef") != std::string_view::npos)
+       throw std::runtime_error("archive_invalid_digest");
+-    archive_detail::File manifest(staging_ / "manifest.json");
++    archive_detail::File manifest(directory_.fd(), "manifest.json");
+     manifest.text("{\n  \"schema\": \"mhgp7-archive-v1\",\n  \"status\": \"completed\",\n  \"public_status\": \"not_claimed\",\n  \"require_exact\": false,\n  \"vertical_maps\": \"none\",\n  \"forest_semantics\": \"");
+     manifest.text(semantics);
+     manifest.text("\",\n  \"points\": " + std::to_string(input_count_) + ",\n  \"kmax\": " + std::to_string(kmax) + ",\n  \"digest_all\": \"");
+@@ -229,21 +312,13 @@
+     }
+     manifest.text("  ]\n}\n");
+     manifest.finish();
+-    archive_detail::sync_directory(staging_);
++    directory_.sync();
+     // RENAME_NOREPLACE closes the race after the initial destination check.
+-    if (::syscall(SYS_renameat2, AT_FDCWD, staging_.c_str(), AT_FDCWD, destination_.c_str(), 1U) != 0)
+-      throw std::runtime_error("archive_commit_create_only_failed");
++    parent_sync_confirmed_ = directory_.publish(destination_name_.c_str());
+     // Rename is the publication point. No later failure may report an abort
+     // while leaving a completed archive visible. Parent fsync concerns crash
+     // durability only; its outcome is an explicit, non-throwing diagnostic.
+     committed_ = true;
+-    staging_.clear();
+-    try {
+-      archive_detail::sync_directory(parent_);
+-      parent_sync_confirmed_ = true;
+-    } catch (...) {
+-      parent_sync_confirmed_ = false;
+-    }
+     guard.done = true;
+   }
+   bool parent_sync_confirmed() const noexcept { return parent_sync_confirmed_; }
+@@ -254,11 +329,12 @@
+     ~WriteGuard() { if (!done) failed = true; }
+   };
+   void require_open() const {
+-    if (committed_ || staging_.empty()) throw std::runtime_error("archive_already_committed");
++    if (committed_ || !directory_.open()) throw std::runtime_error("archive_already_committed");
+     if (failed_) throw std::runtime_error("archive_abandoned");
+   }
+   struct Entry { std::string name, sha256; u64 bytes; };
+-  std::filesystem::path destination_, parent_, staging_;
++  archive_detail::StagingDirectory directory_;
++  std::string destination_name_;
+   std::vector<Entry> entries_;
+   std::string input_hash_;
+   u64 input_count_ = 0, next_k_ = 1;

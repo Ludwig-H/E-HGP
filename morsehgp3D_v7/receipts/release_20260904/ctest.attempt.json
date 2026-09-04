@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7",
+    "--output-on-failure",
+    "--no-tests=error",
+    "-L",
+    "^gate$",
+    "--parallel",
+    "2",
+    "--output-junit",
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/release_20260904/ctest.junit.xml"
+  ],
+  "started_utc": "2026-09-04T20:47:39Z",
+  "status": "running",
+  "timeout_seconds": 7200
+}

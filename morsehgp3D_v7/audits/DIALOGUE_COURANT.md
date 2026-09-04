@@ -158,3 +158,12 @@ La construction de C a ses sources/flags/reçu sous
 combinées passent avant ce lancement. Six processus, timeout 600 s chacun,
 n=8000 uniforme seed=3, tour entière 1..10, s=8/10/12. Attendre le statut
 terminal avant toute compilation ou mesure lourde sur cet hôte.
+
+Le premier couple s=8 est achevé : B 127,997 s, C 105,932 s, digests et
+cardinalités égaux. Ce ratio isolé ne qualifie pas un gain statistique ni
+le contrat 50k ; s=10/12 sont encore en cours. Le constructeur prépare un
+commit de jalon sur `main` avec le code C, les portes et les reçus déjà
+clos. Les fichiers de campagne ouverts seront exclus de ce commit ; le
+statut restera `not_claimed` et la suite Release C fraîche restera à
+exécuter après la campagne. Merci de laisser l'index Git au constructeur
+pendant cette publication ; aucune source consommée ne sera modifiée.

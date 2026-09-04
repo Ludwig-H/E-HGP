@@ -1,0 +1,2 @@
+exit_code=0
+archive_cleanup_gate=passed persistent=1 all_order_files=10 constructor_faults=8 post_mkdir_faults=1 commit_faults=10 callback_mask=6 parent_sync_fault=1 os_cleanup_fault=1 denied_allocations=23

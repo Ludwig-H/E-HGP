@@ -1,0 +1,56 @@
+payload=mhgp6-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+forest_layout=csr forest_storage_kind=csr_facet_keys_v1 csr_fallback=0 ordres_publies=10 ordres_storage_conformes=10
+backend=cpu_reference
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=terrain n=8000 coord=447 s=8 smax=11 seed=29 threads=8 emis=583249 boules_uniques=582861 mortes_profondeur=20024 survivantes=562837 census_int=2824810 census_shell=1587174 evenements=585512 facettes=3519867 fusions=3517195 deltas=467028 noeuds=363474
+generation rect_alive=129066/207255/214626 rect_visites_fusionnes=1106855 ancres=192293/655747/879751 candidats=180176/367106/35967 tues_profondeur=0/3120194/675479 ancres_w4=407879 ancres_w3=263130 ancres_secteurs=3100/8602 ancres_cellules=0/4012 seeds_cellules=282/1962753 grilles=3/20417 seeds=3487582/6279472 completions_q4=12902989 seeds_core_tues=3616022 seeds_corde_tues=264657 float_cert=593115307/58171058 repli=1556584 ancres_hist=12117/99722/161204 hist_lignes=6269/57531/97269 hist_seuil=5848/42191/63935 hist_survivants=180176/556025/718547 jung=32330101/530760568/78
+sweep tests_coeur=613717841 tests_prof_q3=39125108 tests_passe2=39042889 tri_comparaisons=116996154 seeds_passe2=436040 racines_corde=12902989 groupes=12894627 racines_hors_corde=25993150 temoins_constants=1746553 rejets=lens:3522507/owner:11030/once:1934903/i64:829571/face:4761353/det:0/centre:1132179
+vwspd nœuds_temoins=98204652 coins=50157498 h_rect=0/32073695/47806808 h_scan=0/58602943/105262968 m_anchor=0/21807613/52831171 entrees_ancres=0/363388/388810 iters_coeur=615829997 iters_passe2=40351009
+octaves_q4 ancres=0,7805,15703,31036,62402,112302,107000,28841,7916,2759,7146,5718,182,0,0,0 seeds=0,517,7749,41561,190118,656195,603734,355036,591778,365943,1787155,1558944,120742,0,0,0 w1=0,0,22359,374799,3668980,10288412,7242587,9929935,8866220,6401828,249605507,303578168,13739046,0,0,0 (octave = log2 de la taille du cover de l'ancre)
+octaves_q4_seeds cellules=0,0,0,0,0,0,0,0,402213,233729,583545,716649,26617,0,0,0 coeur=0,0,0,12,23227,475490,550226,248644,118634,108219,1185091,812377,94102,0,0,0 corde=0,0,0,6,3497,37916,31530,75162,55001,19709,16350,25475,11,0,0,0 passe2=0,517,7749,41543,163394,142789,21978,31230,15930,4286,2169,4443,12,0,0,0
+vcensus prefiltre_nœuds=35199269 prefiltre_feuilles=0 range_add=3030801 census_nœuds=36651875 census_feuilles=4411984
+p_factor=126980/1070618/1654102 (evaluations d'auto-produits des histogrammes)
+ledger_paires emis=192293/655747/879751 tues=31803707/31340253/31116249
+ouvriers wspd=8 rects=8 rle=8 prefiltre=8 census=8 expansion=8 fold=8
+temps_ms index=2.2 gen=10997.4 (wspd 2092.1 rects 8905.2) rle=132.0 prefiltre=781.1 census=750.7 comptage=11.9 expansion=168.6 fold=2113.8 (tri 251.6 intern 553.3 fusion 245.4 reduce 1062.8) digest=691.8
+temps_mur_ms=14423.3 (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, pas le mur)
+temps_fold_mur_ms=1524.2 (etages A et B, fold_inflight=2, fold_join=0, pic_mesure_en_vol=2)
+rss_mb apres_generation=171 apres_rle=172 apres_prefiltre=176 apres_census=420 max_fold=701 fin=391 (telemetrie active : DEUX lectures par jalon — /proc/self/statm (instantane, ~57 us) et /proc/self/status (VmHWM, ~109 us) — dont une paire par K sous le verrou de publication ; a desarmer ou signer pour un run de debit)
+etage_atteint=publication (curseur d'etage ; un refus le nomme dans son message)
+residence_hwm_mb apres_generation=199 apres_rle=199 apres_prefiltre=199 apres_census=420 max_fold=701 fin=700 (VmHWM de /proc/self/status, maximum HISTORIQUE depuis le debut du processus — non decroissant a quelques centaines de kio pres, VmHWM valant max(hiwater enregistre, resident courant) ; l'ecart avec le rss_mb du meme jalon est un majorant global, pas une mesure d'etage)
+residence_increment_mb apres_generation=199 apres_rle=0 apres_prefiltre=0 apres_census=221 max_fold=281 fin=0 (increments du pic historique : ce que CHAQUE etage a ajoute au maximum)
+residence_compteurs boules_census=562837 boules_plateau=21132 plateau_pct=3.755 somme_parents_total=1043688 somme_parents_par_K=14562,32438,53184,72793,92710,113016,133857,155186,177005,198937
+cardinalites K=1 evenements=18040 facettes=8000 deltas=6563 attachements=0 fusions=7999 noeuds=6563
+cardinalites K=2 evenements=27035 facettes=35659 deltas=14976 attachements=18178 fusions=35640 noeuds=12100
+cardinalites K=3 evenements=36115 facettes=81965 deltas=24977 attachements=53668 fusions=81875 noeuds=18432
+cardinalites K=4 evenements=44759 facettes=145627 deltas=33210 attachements=105876 fusions=145459 noeuds=25069
+cardinalites K=5 evenements=53766 facettes=227941 deltas=41996 attachements=176968 fusions=227682 noeuds=32059
+cardinalites K=6 evenements=62641 facettes=327735 deltas=50672 attachements=265081 fusions=327425 noeuds=39122
+cardinalites K=7 evenements=71962 facettes=447695 deltas=59858 attachements=373312 fusions=447311 noeuds=46367
+cardinalites K=8 evenements=81125 facettes=585250 deltas=68877 attachements=498520 fusions=584829 noeuds=53778
+cardinalites K=9 evenements=90335 facettes=741776 deltas=78190 attachements=642471 fusions=741286 noeuds=61170
+cardinalites K=10 evenements=99734 facettes=918219 deltas=87709 attachements=806461 fusions=917689 noeuds=68814
+stockage_foret K=1 kind=csr_facet_keys_v1 deltas=6563 cles_parents=14562 cles_nes=0 meta=6563/9744 offsets=13128/19520 parents=14562/15648 nes=0/0 csr_capacity_growths=29 octets_possedes=1702016 exact=1 offset_dernier_parents=14562 offset_dernier_nes=0
+stockage_foret K=2 kind=csr_facet_keys_v1 deltas=14976 cles_parents=32438 cles_nes=18178 meta=14976/24044 offsets=29954/48096 parents=32438/56246 nes=18178/32748 csr_capacity_growths=41 octets_possedes=6416344 exact=1 offset_dernier_parents=32438 offset_dernier_nes=18178
+stockage_foret K=3 kind=csr_facet_keys_v1 deltas=24977 cles_parents=53184 cles_nes=53668 meta=24977/26314 offsets=49956/52632 parents=53184/60248 nes=53668/58302 csr_capacity_growths=38 octets_possedes=7952872 exact=1 offset_dernier_parents=53184 offset_dernier_nes=53668
+stockage_foret K=4 kind=csr_facet_keys_v1 deltas=33210 cles_parents=72793 cles_nes=105876 meta=33210/42544 offsets=66422/85092 parents=72793/77660 nes=105876/185474 csr_capacity_growths=40 octets_possedes=16002488 exact=1 offset_dernier_parents=72793 offset_dernier_nes=105876
+stockage_foret K=5 kind=csr_facet_keys_v1 deltas=41996 cles_parents=92710 cles_nes=176968 meta=41996/59502 offsets=83994/119008 parents=92710/160154 nes=176968/259844 csr_capacity_growths=40 octets_possedes=24668136 exact=1 offset_dernier_parents=92710 offset_dernier_nes=176968
+stockage_foret K=6 kind=csr_facet_keys_v1 deltas=50672 cles_parents=113016 cles_nes=265081 meta=50672/76894 offsets=101346/153792 parents=113016/160344 nes=265081/385812 csr_capacity_growths=41 octets_possedes=32027856 exact=1 offset_dernier_parents=113016 offset_dernier_nes=265081
+stockage_foret K=7 kind=csr_facet_keys_v1 deltas=59858 cles_parents=133857 cles_nes=373312 meta=59858/95206 offsets=119718/190416 parents=133857/150670 nes=373312/595476 csr_capacity_growths=41 octets_possedes=42731864 exact=1 offset_dernier_parents=133857 offset_dernier_nes=373312
+stockage_foret K=8 kind=csr_facet_keys_v1 deltas=68877 cles_parents=155186 cles_nes=498520 meta=68877/113802 offsets=137756/227608 parents=155186/276896 nes=498520/527162 csr_capacity_growths=42 octets_possedes=47213976 exact=1 offset_dernier_parents=155186 offset_dernier_nes=498520
+stockage_foret K=9 kind=csr_facet_keys_v1 deltas=78190 cles_parents=177005 cles_nes=642471 meta=78190/132252 offsets=156382/264508 parents=177005/178488 nes=642471/885242 csr_capacity_growths=41 octets_possedes=60558344 exact=1 offset_dernier_parents=177005 offset_dernier_nes=642471
+stockage_foret K=10 kind=csr_facet_keys_v1 deltas=87709 cles_parents=198937 cles_nes=806461 meta=87709/151340 offsets=175420/302684 parents=198937/388210 nes=806461/1083218 csr_capacity_growths=43 octets_possedes=80482208 exact=1 offset_dernier_parents=198937 offset_dernier_nes=806461
+digest_candidates_v5_compat=3d308618a7a886c536f7be7eea377bab19720b82778563ab5ac8edff60e2a12b
+digest_postprefilter=809f70fdab4498947a66f7de9b1ebb4148a9a15a26f58ad9ed05f7e6a8410de6
+digest_forest_K1=84f7506fa5d74838da373cc471cbdb26069875c713d25c0a808d8c9f300b3429
+digest_forest_K2=6225ad6bfc127826d00fbe693d2ccd20e660165b7fe1410255f1e0347696aa93
+digest_forest_K3=1cf551b722023094430fcdf756dc808489010066727222e8c213787bef17fbf0
+digest_forest_K4=4c77c3f2a4fd1a939ebced9211b813a0fb69856cbea030ff5ab22b4278223c27
+digest_forest_K5=2d74557c1c5047c112e48d49d0681dd87bbcb018c0cebf45d8440af7b65ad7fd
+digest_forest_K6=bedd9aff64f1c26b8d57d2c9d684e32e28e3623d5ab9bb745987ef64a03b7822
+digest_forest_K7=5d115d6663da56ca61bf89f3ac453fedab7a91e15d72b4713f2c9a4fd563b039
+digest_forest_K8=7e072181f820d700be798c53494026b916daa14f6908975b677237f50b5e937f
+digest_forest_K9=876aaa86aff8877884d8d5c760cfdda1416d42431bb7ceeaaf7b3a976c7d348d
+digest_forest_K10=95b2332ffc85bb10a8fd116a8de29ac0245a7f6bff4a169c52401d248406b4b7
+digest_all=ac4e940bd27addadd74255b38538a30010ef2c084ffb6a24d18b9167f4465b72
+rss_max_kb=717068

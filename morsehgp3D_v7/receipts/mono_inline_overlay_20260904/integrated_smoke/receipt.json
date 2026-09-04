@@ -1,0 +1,76 @@
+{
+  "date": "2026-09-04",
+  "scope": "integrated_mono_target_only_not_full_release",
+  "status": "passed",
+  "public_status": "not_claimed",
+  "gcp": "not_used",
+  "artifact": "build/v7_mono_integrated/mhgp7_mono_inline_gate",
+  "artifact_sha256": "090c268a51a223119823397c25a7dd97cd8777f2a57f262f0232eece1290fd58",
+  "source_sha256": {
+    "src/pipeline/run.hpp": "1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c",
+    "tests/mono_inline_gate.cpp": "84a910f4b61c56161ef712bacc1d84497aa735cfb31e6cc3f76f56b174b534db"
+  },
+  "configured_cmake_sha256": "313605ca148a114db1c10265833a5b0e2bbbb223e28f5f646e1f0d4f93ca2df5",
+  "handoff_cmake_sha256": "25030fb015309b44685101057f9259fc6b39847681777775119cf2905308bf73",
+  "post_test_cmake_delta": "first comment only: v6 -> v7",
+  "source_closure": "Not captured: this smoke receipt is not a complete source/toolchain qualification.",
+  "commands": [
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "morsehgp3D_v7",
+        "-B",
+        "build/v7_mono_integrated",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP7_ENABLE_CUDA=OFF"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "build/v7_mono_integrated",
+        "--target",
+        "mhgp7_mono_inline_gate",
+        "--parallel",
+        "2"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "build/v7_mono_integrated",
+        "--output-on-failure",
+        "-R",
+        "^mhgp7_mono_inline($|_)",
+        "--output-junit",
+        "mono_inline_ctest.xml"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "gates": [
+    "mhgp7_mono_inline",
+    "mhgp7_mono_inline_late_a",
+    "mhgp7_mono_inline_late_b",
+    "mhgp7_mono_inline_early_alloc"
+  ],
+  "passed": 4,
+  "failed": 0,
+  "floors": {
+    "successful_towers": 4,
+    "callback_failure_cases": 8,
+    "async_threads_observed": 30,
+    "injected_cases_per_gate": 2,
+    "mono_threads_created": 0
+  },
+  "notes": [
+    "CTest XML truncates nominal stdout; ctest.log preserves complete raw stdout.",
+    "No CLI or global build executed; no SLO inferred from these eleven-point fixtures.",
+    "Historical overlay and integrated maintained test are distinct qualifications."
+  ]
+}

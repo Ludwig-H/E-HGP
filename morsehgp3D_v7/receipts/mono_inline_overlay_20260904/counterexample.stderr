@@ -1,0 +1,17 @@
+FAIL mono pthread creation count
+FAIL mono callback caller thread
+FAIL mono pthread creation count
+FAIL mono callback caller thread
+FAIL mono pthread creation count
+FAIL mono callback caller thread
+FAIL mono pthread creation count
+FAIL mono callback caller thread
+FAIL failure also creates zero threads
+FAIL failure also creates zero threads
+FAIL failure also creates zero threads
+FAIL failure also creates zero threads
+FAIL failure also creates zero threads
+FAIL failure also creates zero threads
+FAIL failure also creates zero threads
+FAIL failure also creates zero threads
+mono_inline_gate successful=4 rejected=8 reference_threads=30 failures=16 require_zero=1

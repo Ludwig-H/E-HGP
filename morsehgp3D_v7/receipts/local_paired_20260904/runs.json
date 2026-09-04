@@ -1,0 +1,5110 @@
+[
+  {
+    "sequence": 0,
+    "family": "uniform",
+    "n": 8000,
+    "seed": 3,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=8000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/000_uniform_8000_s3_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=8000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 56.45993268400025,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "368525b27263b8c99058a66d8509e6d8ef58c1364c50913cf50072aabf6396f7",
+      "digest_forest_K2": "7750521646d1e8323ca816e85077e6698db76ab3fd1d8d4ef3a23b055482aeba",
+      "digest_forest_K3": "5bab92f4471eabc79a8850111bd24aedfc37fe1cad68dfa53dca490c902c4e75",
+      "digest_forest_K4": "772a5a2136199cbd1abd8231229675bafc84dab25c6716c6d14a6125b300cba7",
+      "digest_forest_K5": "869c63e9c250ea33f6f09337c15ebf29e84b7ca9c22a20647716fa2bafe8c542",
+      "digest_forest_K6": "5d022137a660371ab40aec869e640bb2848ee9be0463188cda0a5f087b604883",
+      "digest_forest_K7": "3f5a54913fecfac8a23ad1d5c1854433f8bd84a1b955df34b226725032746d0a",
+      "digest_forest_K8": "4dbd550dde81b2838b6ae6bd0db9924ffc91498900b081f3c33005394458b2e5",
+      "digest_forest_K9": "f42fc73fc39f4c3dc1612b30ca04db37ca09656e594003bfbdad764286a95874",
+      "digest_forest_K10": "57d7be6c1cb527c6fd74ae23b561e4b666146e35d60c659ddc12ec1c24d6fc72",
+      "digest_all": "f57157901b2a20282f5c418e48a376f3e33dab0047328020eb3f9846408974c7"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 30581,
+        "facettes": 8000,
+        "deltas": 6521,
+        "attachements": 0,
+        "fusions": 7999,
+        "noeuds": 6521
+      },
+      "2": {
+        "evenements": 64097,
+        "facettes": 62699,
+        "deltas": 25826,
+        "attachements": 30291,
+        "fusions": 62692,
+        "noeuds": 23238
+      },
+      "3": {
+        "evenements": 109455,
+        "facettes": 202080,
+        "deltas": 79451,
+        "attachements": 127721,
+        "fusions": 202065,
+        "noeuds": 49332
+      },
+      "4": {
+        "evenements": 165548,
+        "facettes": 459261,
+        "deltas": 134649,
+        "attachements": 324724,
+        "fusions": 459229,
+        "noeuds": 85855
+      },
+      "5": {
+        "evenements": 232523,
+        "facettes": 867751,
+        "deltas": 199988,
+        "attachements": 655550,
+        "fusions": 867685,
+        "noeuds": 131937
+      },
+      "6": {
+        "evenements": 310254,
+        "facettes": 1459519,
+        "deltas": 276619,
+        "attachements": 1151950,
+        "fusions": 1459373,
+        "noeuds": 188149
+      },
+      "7": {
+        "evenements": 397786,
+        "facettes": 2262017,
+        "deltas": 362637,
+        "attachements": 1841978,
+        "fusions": 2261838,
+        "noeuds": 252750
+      },
+      "8": {
+        "evenements": 495262,
+        "facettes": 3305510,
+        "deltas": 459151,
+        "attachements": 2756825,
+        "fusions": 3305192,
+        "noeuds": 326155
+      },
+      "9": {
+        "evenements": 602212,
+        "facettes": 4616847,
+        "deltas": 565470,
+        "attachements": 3922424,
+        "fusions": 4616421,
+        "noeuds": 409298
+      },
+      "10": {
+        "evenements": 718440,
+        "facettes": 6223223,
+        "deltas": 680836,
+        "attachements": 5366384,
+        "fusions": 6222646,
+        "noeuds": 500851
+      }
+    },
+    "counts": {
+      "n": 8000,
+      "coord": 200,
+      "s": 8,
+      "smax": 11,
+      "seed": 3,
+      "threads": 8,
+      "emis": 3135204,
+      "boules_uniques": 3134404,
+      "mortes_profondeur": 31153,
+      "survivantes": 3103251,
+      "census_int": 16052179,
+      "census_shell": 10447608,
+      "evenements": 3126158,
+      "facettes": 19466907,
+      "fusions": 19465140,
+      "deltas": 2791148,
+      "noeuds": 1974086
+    },
+    "pipeline_ms": 56396.8,
+    "max_rss_kb": 2584232
+  },
+  {
+    "sequence": 0,
+    "family": "uniform",
+    "n": 8000,
+    "seed": 3,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=8000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/000_uniform_8000_s3_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=8000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 53.21465862800005,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "368525b27263b8c99058a66d8509e6d8ef58c1364c50913cf50072aabf6396f7",
+      "digest_forest_K2": "7750521646d1e8323ca816e85077e6698db76ab3fd1d8d4ef3a23b055482aeba",
+      "digest_forest_K3": "5bab92f4471eabc79a8850111bd24aedfc37fe1cad68dfa53dca490c902c4e75",
+      "digest_forest_K4": "772a5a2136199cbd1abd8231229675bafc84dab25c6716c6d14a6125b300cba7",
+      "digest_forest_K5": "869c63e9c250ea33f6f09337c15ebf29e84b7ca9c22a20647716fa2bafe8c542",
+      "digest_forest_K6": "5d022137a660371ab40aec869e640bb2848ee9be0463188cda0a5f087b604883",
+      "digest_forest_K7": "3f5a54913fecfac8a23ad1d5c1854433f8bd84a1b955df34b226725032746d0a",
+      "digest_forest_K8": "4dbd550dde81b2838b6ae6bd0db9924ffc91498900b081f3c33005394458b2e5",
+      "digest_forest_K9": "f42fc73fc39f4c3dc1612b30ca04db37ca09656e594003bfbdad764286a95874",
+      "digest_forest_K10": "57d7be6c1cb527c6fd74ae23b561e4b666146e35d60c659ddc12ec1c24d6fc72",
+      "digest_all": "f57157901b2a20282f5c418e48a376f3e33dab0047328020eb3f9846408974c7"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 30581,
+        "facettes": 8000,
+        "deltas": 6521,
+        "attachements": 0,
+        "fusions": 7999,
+        "noeuds": 6521
+      },
+      "2": {
+        "evenements": 64097,
+        "facettes": 62699,
+        "deltas": 25826,
+        "attachements": 30291,
+        "fusions": 62692,
+        "noeuds": 23238
+      },
+      "3": {
+        "evenements": 109455,
+        "facettes": 202080,
+        "deltas": 79451,
+        "attachements": 127721,
+        "fusions": 202065,
+        "noeuds": 49332
+      },
+      "4": {
+        "evenements": 165548,
+        "facettes": 459261,
+        "deltas": 134649,
+        "attachements": 324724,
+        "fusions": 459229,
+        "noeuds": 85855
+      },
+      "5": {
+        "evenements": 232523,
+        "facettes": 867751,
+        "deltas": 199988,
+        "attachements": 655550,
+        "fusions": 867685,
+        "noeuds": 131937
+      },
+      "6": {
+        "evenements": 310254,
+        "facettes": 1459519,
+        "deltas": 276619,
+        "attachements": 1151950,
+        "fusions": 1459373,
+        "noeuds": 188149
+      },
+      "7": {
+        "evenements": 397786,
+        "facettes": 2262017,
+        "deltas": 362637,
+        "attachements": 1841978,
+        "fusions": 2261838,
+        "noeuds": 252750
+      },
+      "8": {
+        "evenements": 495262,
+        "facettes": 3305510,
+        "deltas": 459151,
+        "attachements": 2756825,
+        "fusions": 3305192,
+        "noeuds": 326155
+      },
+      "9": {
+        "evenements": 602212,
+        "facettes": 4616847,
+        "deltas": 565470,
+        "attachements": 3922424,
+        "fusions": 4616421,
+        "noeuds": 409298
+      },
+      "10": {
+        "evenements": 718440,
+        "facettes": 6223223,
+        "deltas": 680836,
+        "attachements": 5366384,
+        "fusions": 6222646,
+        "noeuds": 500851
+      }
+    },
+    "counts": {
+      "n": 8000,
+      "coord": 200,
+      "s": 8,
+      "smax": 11,
+      "seed": 3,
+      "threads": 8,
+      "emis": 3135204,
+      "boules_uniques": 3134404,
+      "mortes_profondeur": 31153,
+      "survivantes": 3103251,
+      "census_int": 16052179,
+      "census_shell": 10447608,
+      "evenements": 3126158,
+      "facettes": 19466907,
+      "fusions": 19465140,
+      "deltas": 2791148,
+      "noeuds": 1974086
+    },
+    "pipeline_ms": 53115.0,
+    "max_rss_kb": 2481824
+  },
+  {
+    "sequence": 1,
+    "family": "uniform",
+    "n": 16000,
+    "seed": 3,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=16000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/001_uniform_16000_s3_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=16000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 82.98420424999995,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "4bd58e1715436bd672e285672d82e7b054d5f07325d0a874e10aaf83cb50e4d6",
+      "digest_forest_K2": "4d8c24437ef983a785c339de2bb87a56320cabdaa7b4d13402628201907962aa",
+      "digest_forest_K3": "0fe453e3a1e007db712957046c2b54877837a795000dc556cb5fd921ea794c4b",
+      "digest_forest_K4": "29a83a94e0f4cfb3b02d647c1338415b9161ffcf1df00c19a2ae0f0e90385aff",
+      "digest_forest_K5": "730af6052c2cf61834856ce015557c765916116344bd22feb503d16be246f1c2",
+      "digest_forest_K6": "cc062b10f56c5faf976b7b525bc36b895812bb241e72560b41fa1b552daf0a02",
+      "digest_forest_K7": "5df9f73cbeec6aa0f51c7ea33ba4c95017060c54656a776ecdbacf5302ddd4b1",
+      "digest_forest_K8": "10446f1ac0bce58bd81d885194c2427c862dc7c6902495b7713e33d0feeadd40",
+      "digest_forest_K9": "e877f23646a61d849aa694b2b31dbc3687f41b1fbc1649d257e27b756cfbc22b",
+      "digest_forest_K10": "d1cf5b2cd9d36f9b4c5d6944292b359abd8410c0ed696fc55379841d7e3a42b9",
+      "digest_all": "a35efb4cbe0f2978c6d907aede72fe7daefbbd0bf947bfad08e9cf2a7da3aaa9"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 61771,
+        "facettes": 16000,
+        "deltas": 12951,
+        "attachements": 0,
+        "fusions": 15999,
+        "noeuds": 12951
+      },
+      "2": {
+        "evenements": 131526,
+        "facettes": 128103,
+        "deltas": 50911,
+        "attachements": 62471,
+        "fusions": 128095,
+        "noeuds": 45719
+      },
+      "3": {
+        "evenements": 225431,
+        "facettes": 414894,
+        "deltas": 157051,
+        "attachements": 262197,
+        "fusions": 414871,
+        "noeuds": 99313
+      },
+      "4": {
+        "evenements": 343070,
+        "facettes": 949794,
+        "deltas": 269344,
+        "attachements": 672434,
+        "fusions": 949707,
+        "noeuds": 174082
+      },
+      "5": {
+        "evenements": 483902,
+        "facettes": 1803092,
+        "deltas": 404089,
+        "attachements": 1363005,
+        "fusions": 1802922,
+        "noeuds": 270440
+      },
+      "6": {
+        "evenements": 647302,
+        "facettes": 3041223,
+        "deltas": 562258,
+        "attachements": 2401235,
+        "fusions": 3040980,
+        "noeuds": 386727
+      },
+      "7": {
+        "evenements": 832534,
+        "facettes": 4729809,
+        "deltas": 742567,
+        "attachements": 3852706,
+        "fusions": 4729398,
+        "noeuds": 523710
+      },
+      "8": {
+        "evenements": 1039564,
+        "facettes": 6933477,
+        "deltas": 944864,
+        "attachements": 5783398,
+        "fusions": 6932890,
+        "noeuds": 679166
+      },
+      "9": {
+        "evenements": 1268964,
+        "facettes": 9722463,
+        "deltas": 1170692,
+        "attachements": 8262275,
+        "fusions": 9721594,
+        "noeuds": 855291
+      },
+      "10": {
+        "evenements": 1520660,
+        "facettes": 13161257,
+        "deltas": 1418022,
+        "attachements": 11356431,
+        "fusions": 13160132,
+        "noeuds": 1050066
+      }
+    },
+    "counts": {
+      "n": 16000,
+      "coord": 251,
+      "s": 8,
+      "smax": 11,
+      "seed": 3,
+      "threads": 8,
+      "emis": 6572930,
+      "boules_uniques": 6571496,
+      "mortes_profondeur": 63796,
+      "survivantes": 6507700,
+      "census_int": 33756420,
+      "census_shell": 21936338,
+      "evenements": 6554724,
+      "facettes": 40900112,
+      "fusions": 40896588,
+      "deltas": 5732749,
+      "noeuds": 4097465
+    },
+    "pipeline_ms": 82902.9,
+    "max_rss_kb": 5203728
+  },
+  {
+    "sequence": 1,
+    "family": "uniform",
+    "n": 16000,
+    "seed": 3,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=16000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/001_uniform_16000_s3_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=16000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 72.55561048399977,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "4bd58e1715436bd672e285672d82e7b054d5f07325d0a874e10aaf83cb50e4d6",
+      "digest_forest_K2": "4d8c24437ef983a785c339de2bb87a56320cabdaa7b4d13402628201907962aa",
+      "digest_forest_K3": "0fe453e3a1e007db712957046c2b54877837a795000dc556cb5fd921ea794c4b",
+      "digest_forest_K4": "29a83a94e0f4cfb3b02d647c1338415b9161ffcf1df00c19a2ae0f0e90385aff",
+      "digest_forest_K5": "730af6052c2cf61834856ce015557c765916116344bd22feb503d16be246f1c2",
+      "digest_forest_K6": "cc062b10f56c5faf976b7b525bc36b895812bb241e72560b41fa1b552daf0a02",
+      "digest_forest_K7": "5df9f73cbeec6aa0f51c7ea33ba4c95017060c54656a776ecdbacf5302ddd4b1",
+      "digest_forest_K8": "10446f1ac0bce58bd81d885194c2427c862dc7c6902495b7713e33d0feeadd40",
+      "digest_forest_K9": "e877f23646a61d849aa694b2b31dbc3687f41b1fbc1649d257e27b756cfbc22b",
+      "digest_forest_K10": "d1cf5b2cd9d36f9b4c5d6944292b359abd8410c0ed696fc55379841d7e3a42b9",
+      "digest_all": "a35efb4cbe0f2978c6d907aede72fe7daefbbd0bf947bfad08e9cf2a7da3aaa9"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 61771,
+        "facettes": 16000,
+        "deltas": 12951,
+        "attachements": 0,
+        "fusions": 15999,
+        "noeuds": 12951
+      },
+      "2": {
+        "evenements": 131526,
+        "facettes": 128103,
+        "deltas": 50911,
+        "attachements": 62471,
+        "fusions": 128095,
+        "noeuds": 45719
+      },
+      "3": {
+        "evenements": 225431,
+        "facettes": 414894,
+        "deltas": 157051,
+        "attachements": 262197,
+        "fusions": 414871,
+        "noeuds": 99313
+      },
+      "4": {
+        "evenements": 343070,
+        "facettes": 949794,
+        "deltas": 269344,
+        "attachements": 672434,
+        "fusions": 949707,
+        "noeuds": 174082
+      },
+      "5": {
+        "evenements": 483902,
+        "facettes": 1803092,
+        "deltas": 404089,
+        "attachements": 1363005,
+        "fusions": 1802922,
+        "noeuds": 270440
+      },
+      "6": {
+        "evenements": 647302,
+        "facettes": 3041223,
+        "deltas": 562258,
+        "attachements": 2401235,
+        "fusions": 3040980,
+        "noeuds": 386727
+      },
+      "7": {
+        "evenements": 832534,
+        "facettes": 4729809,
+        "deltas": 742567,
+        "attachements": 3852706,
+        "fusions": 4729398,
+        "noeuds": 523710
+      },
+      "8": {
+        "evenements": 1039564,
+        "facettes": 6933477,
+        "deltas": 944864,
+        "attachements": 5783398,
+        "fusions": 6932890,
+        "noeuds": 679166
+      },
+      "9": {
+        "evenements": 1268964,
+        "facettes": 9722463,
+        "deltas": 1170692,
+        "attachements": 8262275,
+        "fusions": 9721594,
+        "noeuds": 855291
+      },
+      "10": {
+        "evenements": 1520660,
+        "facettes": 13161257,
+        "deltas": 1418022,
+        "attachements": 11356431,
+        "fusions": 13160132,
+        "noeuds": 1050066
+      }
+    },
+    "counts": {
+      "n": 16000,
+      "coord": 251,
+      "s": 8,
+      "smax": 11,
+      "seed": 3,
+      "threads": 8,
+      "emis": 6572930,
+      "boules_uniques": 6571496,
+      "mortes_profondeur": 63796,
+      "survivantes": 6507700,
+      "census_int": 33756420,
+      "census_shell": 21936338,
+      "evenements": 6554724,
+      "facettes": 40900112,
+      "fusions": 40896588,
+      "deltas": 5732749,
+      "noeuds": 4097465
+    },
+    "pipeline_ms": 72495.1,
+    "max_rss_kb": 4968488
+  },
+  {
+    "sequence": 2,
+    "family": "uniform",
+    "n": 32000,
+    "seed": 3,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=32000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/002_uniform_32000_s3_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=32000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 165.20164802099953,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "62ac98ee453848eba6268a0fb9d211458caff8090e9f210c16bba7b1bda30828",
+      "digest_forest_K2": "6527e540976d171049aaf5ebaaae4d1ce8e165b378d229dd91fdd0325d16eca9",
+      "digest_forest_K3": "97f748c064e836f9c3c6c1b54b201a432ae44c862234dd2fb950a65624deed35",
+      "digest_forest_K4": "84ac64bef12349ec8e463efe93b88e9e750b13e28db1ff5a223d01ba1764d768",
+      "digest_forest_K5": "b4506702eced918eef7257bce5f4b2d52e6516e8c0fb769f912ae1f03d04080e",
+      "digest_forest_K6": "c68af140b96e5315fd268badcd6d927debaa563337c9cded2608fdd7d69a0ecd",
+      "digest_forest_K7": "cb0ccd6c6af1c55cf5da275483f14258ff7edb574f6ca2349de9417b38cfe370",
+      "digest_forest_K8": "593a6f9d52416f52f3d9eca37bfc0f0ef8f69d5a627495cb7d10f36156f867d7",
+      "digest_forest_K9": "12388016556319eabbdf5e380406d4c3a341b2f9b68851ccd4a086e7985950ba",
+      "digest_forest_K10": "2b5382dc6c63114d9071d87a55c56f821007ec11568ea616adb7ca1900f2d3d8",
+      "digest_all": "c3bb0ce9fce63c2bbde42ca5897713f427be88c464014a75a3441eb62d2dec57"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 125201,
+        "facettes": 32000,
+        "deltas": 25949,
+        "attachements": 0,
+        "fusions": 31999,
+        "noeuds": 25949
+      },
+      "2": {
+        "evenements": 268027,
+        "facettes": 259741,
+        "deltas": 98880,
+        "attachements": 126754,
+        "fusions": 259723,
+        "noeuds": 88849
+      },
+      "3": {
+        "evenements": 460488,
+        "facettes": 845562,
+        "deltas": 299801,
+        "attachements": 533834,
+        "fusions": 845506,
+        "noeuds": 195562
+      },
+      "4": {
+        "evenements": 703116,
+        "facettes": 1943993,
+        "deltas": 520704,
+        "attachements": 1376189,
+        "fusions": 1943856,
+        "noeuds": 346716
+      },
+      "5": {
+        "evenements": 994023,
+        "facettes": 3701131,
+        "deltas": 788305,
+        "attachements": 2796379,
+        "fusions": 3700813,
+        "noeuds": 543478
+      },
+      "6": {
+        "evenements": 1333360,
+        "facettes": 6263044,
+        "deltas": 1106582,
+        "attachements": 4943675,
+        "fusions": 6262533,
+        "noeuds": 782323
+      },
+      "7": {
+        "evenements": 1720922,
+        "facettes": 9774049,
+        "deltas": 1475594,
+        "attachements": 7961942,
+        "fusions": 9773223,
+        "noeuds": 1064280
+      },
+      "8": {
+        "evenements": 2155606,
+        "facettes": 14372556,
+        "deltas": 1892550,
+        "attachements": 11988763,
+        "fusions": 14371389,
+        "noeuds": 1389760
+      },
+      "9": {
+        "evenements": 2636575,
+        "facettes": 20191290,
+        "deltas": 2357241,
+        "attachements": 17160651,
+        "fusions": 20189672,
+        "noeuds": 1754997
+      },
+      "10": {
+        "evenements": 3162530,
+        "facettes": 27361881,
+        "deltas": 2869388,
+        "attachements": 23608690,
+        "fusions": 27359737,
+        "noeuds": 2161506
+      }
+    },
+    "counts": {
+      "n": 32000,
+      "coord": 317,
+      "s": 8,
+      "smax": 11,
+      "seed": 3,
+      "threads": 8,
+      "emis": 13606420,
+      "boules_uniques": 13603488,
+      "mortes_profondeur": 139396,
+      "survivantes": 13464092,
+      "census_int": 69967626,
+      "census_shell": 45431356,
+      "evenements": 13559848,
+      "facettes": 84745247,
+      "fusions": 84738451,
+      "deltas": 11434994,
+      "noeuds": 8353420
+    },
+    "pipeline_ms": 165141.2,
+    "max_rss_kb": 10192460
+  },
+  {
+    "sequence": 2,
+    "family": "uniform",
+    "n": 32000,
+    "seed": 3,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=32000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/002_uniform_32000_s3_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=32000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 182.34455852199972,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "62ac98ee453848eba6268a0fb9d211458caff8090e9f210c16bba7b1bda30828",
+      "digest_forest_K2": "6527e540976d171049aaf5ebaaae4d1ce8e165b378d229dd91fdd0325d16eca9",
+      "digest_forest_K3": "97f748c064e836f9c3c6c1b54b201a432ae44c862234dd2fb950a65624deed35",
+      "digest_forest_K4": "84ac64bef12349ec8e463efe93b88e9e750b13e28db1ff5a223d01ba1764d768",
+      "digest_forest_K5": "b4506702eced918eef7257bce5f4b2d52e6516e8c0fb769f912ae1f03d04080e",
+      "digest_forest_K6": "c68af140b96e5315fd268badcd6d927debaa563337c9cded2608fdd7d69a0ecd",
+      "digest_forest_K7": "cb0ccd6c6af1c55cf5da275483f14258ff7edb574f6ca2349de9417b38cfe370",
+      "digest_forest_K8": "593a6f9d52416f52f3d9eca37bfc0f0ef8f69d5a627495cb7d10f36156f867d7",
+      "digest_forest_K9": "12388016556319eabbdf5e380406d4c3a341b2f9b68851ccd4a086e7985950ba",
+      "digest_forest_K10": "2b5382dc6c63114d9071d87a55c56f821007ec11568ea616adb7ca1900f2d3d8",
+      "digest_all": "c3bb0ce9fce63c2bbde42ca5897713f427be88c464014a75a3441eb62d2dec57"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 125201,
+        "facettes": 32000,
+        "deltas": 25949,
+        "attachements": 0,
+        "fusions": 31999,
+        "noeuds": 25949
+      },
+      "2": {
+        "evenements": 268027,
+        "facettes": 259741,
+        "deltas": 98880,
+        "attachements": 126754,
+        "fusions": 259723,
+        "noeuds": 88849
+      },
+      "3": {
+        "evenements": 460488,
+        "facettes": 845562,
+        "deltas": 299801,
+        "attachements": 533834,
+        "fusions": 845506,
+        "noeuds": 195562
+      },
+      "4": {
+        "evenements": 703116,
+        "facettes": 1943993,
+        "deltas": 520704,
+        "attachements": 1376189,
+        "fusions": 1943856,
+        "noeuds": 346716
+      },
+      "5": {
+        "evenements": 994023,
+        "facettes": 3701131,
+        "deltas": 788305,
+        "attachements": 2796379,
+        "fusions": 3700813,
+        "noeuds": 543478
+      },
+      "6": {
+        "evenements": 1333360,
+        "facettes": 6263044,
+        "deltas": 1106582,
+        "attachements": 4943675,
+        "fusions": 6262533,
+        "noeuds": 782323
+      },
+      "7": {
+        "evenements": 1720922,
+        "facettes": 9774049,
+        "deltas": 1475594,
+        "attachements": 7961942,
+        "fusions": 9773223,
+        "noeuds": 1064280
+      },
+      "8": {
+        "evenements": 2155606,
+        "facettes": 14372556,
+        "deltas": 1892550,
+        "attachements": 11988763,
+        "fusions": 14371389,
+        "noeuds": 1389760
+      },
+      "9": {
+        "evenements": 2636575,
+        "facettes": 20191290,
+        "deltas": 2357241,
+        "attachements": 17160651,
+        "fusions": 20189672,
+        "noeuds": 1754997
+      },
+      "10": {
+        "evenements": 3162530,
+        "facettes": 27361881,
+        "deltas": 2869388,
+        "attachements": 23608690,
+        "fusions": 27359737,
+        "noeuds": 2161506
+      }
+    },
+    "counts": {
+      "n": 32000,
+      "coord": 317,
+      "s": 8,
+      "smax": 11,
+      "seed": 3,
+      "threads": 8,
+      "emis": 13606420,
+      "boules_uniques": 13603488,
+      "mortes_profondeur": 139396,
+      "survivantes": 13464092,
+      "census_int": 69967626,
+      "census_shell": 45431356,
+      "evenements": 13559848,
+      "facettes": 84745247,
+      "fusions": 84738451,
+      "deltas": 11434994,
+      "noeuds": 8353420
+    },
+    "pipeline_ms": 182277.1,
+    "max_rss_kb": 10147688
+  },
+  {
+    "sequence": 3,
+    "family": "uniform",
+    "n": 8000,
+    "seed": 17,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=8000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/003_uniform_8000_s17_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=8000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 34.1463498209996,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "de554388797451d99843e147c84d5b8c0707fb84dceda3abce75eec32878fad4",
+      "digest_forest_K2": "2dea28078cf3623a52a9a0f8277b0c1547827504952e259f7b0c26e9972a7670",
+      "digest_forest_K3": "52e28f6d5fdc5959ef523bbf81744852d09455569f4c9bd263e4d2b21b8406b3",
+      "digest_forest_K4": "83bea8c74b19fbb24b872e6af11546d07bd0a48091c872e6f3122a917a37728c",
+      "digest_forest_K5": "61b9c820a68c599618722cf73edeb65cf99c85ab314050b01b28db5e235e09b4",
+      "digest_forest_K6": "f3b2b724cf94f4bcd63bff858be025de7b3d72056140ab2a9a3116ac0cf56b2f",
+      "digest_forest_K7": "a70e9c0789ba0c59c4ef4c373cf7a6c231a56da60369bbd40ceead81729283c2",
+      "digest_forest_K8": "ca7af51b88b71f4436f538f690200470df4bf06218d2abe72d3b7cbc67e02e9c",
+      "digest_forest_K9": "5e31c380451f9694d43f7f6c8ae516c83686ea57dcbe212f05c3563e53fe1899",
+      "digest_forest_K10": "6ec8f620bffe52827476c4995d8ed53524f2e7a3db9863173b6173513513b548",
+      "digest_all": "f6c099087ed5cffb90ea9285b5fa24ad2a46946ec7b0fe9f7652b818eae36f76"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 30661,
+        "facettes": 8000,
+        "deltas": 6480,
+        "attachements": 0,
+        "fusions": 7999,
+        "noeuds": 6480
+      },
+      "2": {
+        "evenements": 64586,
+        "facettes": 62961,
+        "deltas": 25772,
+        "attachements": 30417,
+        "fusions": 62957,
+        "noeuds": 23172
+      },
+      "3": {
+        "evenements": 109604,
+        "facettes": 202281,
+        "deltas": 80113,
+        "attachements": 127324,
+        "fusions": 202267,
+        "noeuds": 49661
+      },
+      "4": {
+        "evenements": 165910,
+        "facettes": 459823,
+        "deltas": 135080,
+        "attachements": 325444,
+        "fusions": 459785,
+        "noeuds": 85968
+      },
+      "5": {
+        "evenements": 232502,
+        "facettes": 867786,
+        "deltas": 200120,
+        "attachements": 655145,
+        "fusions": 867706,
+        "noeuds": 132426
+      },
+      "6": {
+        "evenements": 309924,
+        "facettes": 1458598,
+        "deltas": 275857,
+        "attachements": 1151032,
+        "fusions": 1458463,
+        "noeuds": 187639
+      },
+      "7": {
+        "evenements": 398641,
+        "facettes": 2266460,
+        "deltas": 363617,
+        "attachements": 1846740,
+        "fusions": 2266265,
+        "noeuds": 252689
+      },
+      "8": {
+        "evenements": 496414,
+        "facettes": 3312716,
+        "deltas": 460533,
+        "attachements": 2762927,
+        "fusions": 3312410,
+        "noeuds": 327329
+      },
+      "9": {
+        "evenements": 604356,
+        "facettes": 4632208,
+        "deltas": 567353,
+        "attachements": 3936740,
+        "fusions": 4631785,
+        "noeuds": 409845
+      },
+      "10": {
+        "evenements": 721557,
+        "facettes": 6247567,
+        "deltas": 684333,
+        "attachements": 5389854,
+        "fusions": 6247039,
+        "noeuds": 502072
+      }
+    },
+    "counts": {
+      "n": 8000,
+      "coord": 200,
+      "s": 8,
+      "smax": 11,
+      "seed": 17,
+      "threads": 8,
+      "emis": 3143280,
+      "boules_uniques": 3142624,
+      "mortes_profondeur": 30546,
+      "survivantes": 3112078,
+      "census_int": 16103584,
+      "census_shell": 10475705,
+      "evenements": 3134155,
+      "facettes": 19518400,
+      "fusions": 19516676,
+      "deltas": 2799258,
+      "noeuds": 1977281
+    },
+    "pipeline_ms": 34111.8,
+    "max_rss_kb": 2582204
+  },
+  {
+    "sequence": 3,
+    "family": "uniform",
+    "n": 8000,
+    "seed": 17,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=8000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/003_uniform_8000_s17_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=8000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 29.975215405999734,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "de554388797451d99843e147c84d5b8c0707fb84dceda3abce75eec32878fad4",
+      "digest_forest_K2": "2dea28078cf3623a52a9a0f8277b0c1547827504952e259f7b0c26e9972a7670",
+      "digest_forest_K3": "52e28f6d5fdc5959ef523bbf81744852d09455569f4c9bd263e4d2b21b8406b3",
+      "digest_forest_K4": "83bea8c74b19fbb24b872e6af11546d07bd0a48091c872e6f3122a917a37728c",
+      "digest_forest_K5": "61b9c820a68c599618722cf73edeb65cf99c85ab314050b01b28db5e235e09b4",
+      "digest_forest_K6": "f3b2b724cf94f4bcd63bff858be025de7b3d72056140ab2a9a3116ac0cf56b2f",
+      "digest_forest_K7": "a70e9c0789ba0c59c4ef4c373cf7a6c231a56da60369bbd40ceead81729283c2",
+      "digest_forest_K8": "ca7af51b88b71f4436f538f690200470df4bf06218d2abe72d3b7cbc67e02e9c",
+      "digest_forest_K9": "5e31c380451f9694d43f7f6c8ae516c83686ea57dcbe212f05c3563e53fe1899",
+      "digest_forest_K10": "6ec8f620bffe52827476c4995d8ed53524f2e7a3db9863173b6173513513b548",
+      "digest_all": "f6c099087ed5cffb90ea9285b5fa24ad2a46946ec7b0fe9f7652b818eae36f76"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 30661,
+        "facettes": 8000,
+        "deltas": 6480,
+        "attachements": 0,
+        "fusions": 7999,
+        "noeuds": 6480
+      },
+      "2": {
+        "evenements": 64586,
+        "facettes": 62961,
+        "deltas": 25772,
+        "attachements": 30417,
+        "fusions": 62957,
+        "noeuds": 23172
+      },
+      "3": {
+        "evenements": 109604,
+        "facettes": 202281,
+        "deltas": 80113,
+        "attachements": 127324,
+        "fusions": 202267,
+        "noeuds": 49661
+      },
+      "4": {
+        "evenements": 165910,
+        "facettes": 459823,
+        "deltas": 135080,
+        "attachements": 325444,
+        "fusions": 459785,
+        "noeuds": 85968
+      },
+      "5": {
+        "evenements": 232502,
+        "facettes": 867786,
+        "deltas": 200120,
+        "attachements": 655145,
+        "fusions": 867706,
+        "noeuds": 132426
+      },
+      "6": {
+        "evenements": 309924,
+        "facettes": 1458598,
+        "deltas": 275857,
+        "attachements": 1151032,
+        "fusions": 1458463,
+        "noeuds": 187639
+      },
+      "7": {
+        "evenements": 398641,
+        "facettes": 2266460,
+        "deltas": 363617,
+        "attachements": 1846740,
+        "fusions": 2266265,
+        "noeuds": 252689
+      },
+      "8": {
+        "evenements": 496414,
+        "facettes": 3312716,
+        "deltas": 460533,
+        "attachements": 2762927,
+        "fusions": 3312410,
+        "noeuds": 327329
+      },
+      "9": {
+        "evenements": 604356,
+        "facettes": 4632208,
+        "deltas": 567353,
+        "attachements": 3936740,
+        "fusions": 4631785,
+        "noeuds": 409845
+      },
+      "10": {
+        "evenements": 721557,
+        "facettes": 6247567,
+        "deltas": 684333,
+        "attachements": 5389854,
+        "fusions": 6247039,
+        "noeuds": 502072
+      }
+    },
+    "counts": {
+      "n": 8000,
+      "coord": 200,
+      "s": 8,
+      "smax": 11,
+      "seed": 17,
+      "threads": 8,
+      "emis": 3143280,
+      "boules_uniques": 3142624,
+      "mortes_profondeur": 30546,
+      "survivantes": 3112078,
+      "census_int": 16103584,
+      "census_shell": 10475705,
+      "evenements": 3134155,
+      "facettes": 19518400,
+      "fusions": 19516676,
+      "deltas": 2799258,
+      "noeuds": 1977281
+    },
+    "pipeline_ms": 29899.6,
+    "max_rss_kb": 2620960
+  },
+  {
+    "sequence": 4,
+    "family": "uniform",
+    "n": 16000,
+    "seed": 17,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=16000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/004_uniform_16000_s17_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=16000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 69.04186532200038,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "fa1fb2fb6a8937c1e94de4f159de1a18c122ad9e152b35c30301f42c0b59a13f",
+      "digest_forest_K2": "49e6d938901a1d03f3418878b7097be73d6d348121d9fe1fea9f6844dde22b1b",
+      "digest_forest_K3": "a636f0921d8fbde029787ec434d52f3a714791c1deaddc5b5d0a4e551d7dca6e",
+      "digest_forest_K4": "a51d1f2d16d50800f4ea8aef863e23b60aa66f23738d5df62dccaa4cb979bf8e",
+      "digest_forest_K5": "5bc37a563f1ddc55ab69e2e1faee42281e9526d41ff44169493fcefce610428d",
+      "digest_forest_K6": "986891abd909a3113e60998b7d4f10fd54eac9030d113e1a99322bb9441dfb67",
+      "digest_forest_K7": "09359adb53cbcae5f0bfec65131c7488173dbe148d34dc0af338310b5c38f3be",
+      "digest_forest_K8": "e3914747fdf9ddd793dfcfd6f95b14f557533fd7324033672f9736e7927d061f",
+      "digest_forest_K9": "97f0f91947c500c7418afc8fcee26ff152356b41d38074483ffa0c6b6774d1f2",
+      "digest_forest_K10": "4ae337df99f7fc81d8163668f77fe54bea8fdae71e06c7271d2345f1d5bcf1e2",
+      "digest_all": "86222dc758a232d87066b89c15bc89ef2415c02fbb1a2e6624dc8e25ea961dc8"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 62245,
+        "facettes": 16000,
+        "deltas": 12864,
+        "attachements": 0,
+        "fusions": 15999,
+        "noeuds": 12864
+      },
+      "2": {
+        "evenements": 132027,
+        "facettes": 128217,
+        "deltas": 50912,
+        "attachements": 62225,
+        "fusions": 128209,
+        "noeuds": 45958
+      },
+      "3": {
+        "evenements": 225815,
+        "facettes": 415153,
+        "deltas": 156490,
+        "attachements": 262339,
+        "fusions": 415122,
+        "noeuds": 98952
+      },
+      "4": {
+        "evenements": 343034,
+        "facettes": 949854,
+        "deltas": 268293,
+        "attachements": 671864,
+        "fusions": 949765,
+        "noeuds": 174085
+      },
+      "5": {
+        "evenements": 484740,
+        "facettes": 1806227,
+        "deltas": 403525,
+        "attachements": 1365770,
+        "fusions": 1806071,
+        "noeuds": 270403
+      },
+      "6": {
+        "evenements": 648349,
+        "facettes": 3046350,
+        "deltas": 561843,
+        "attachements": 2404968,
+        "fusions": 3046111,
+        "noeuds": 387484
+      },
+      "7": {
+        "evenements": 833903,
+        "facettes": 4737160,
+        "deltas": 742644,
+        "attachements": 3858731,
+        "fusions": 4736732,
+        "noeuds": 524004
+      },
+      "8": {
+        "evenements": 1041442,
+        "facettes": 6944519,
+        "deltas": 945967,
+        "attachements": 5793224,
+        "fusions": 6943921,
+        "noeuds": 679605
+      },
+      "9": {
+        "evenements": 1269970,
+        "facettes": 9729424,
+        "deltas": 1170157,
+        "attachements": 8267872,
+        "fusions": 9728638,
+        "noeuds": 856032
+      },
+      "10": {
+        "evenements": 1521169,
+        "facettes": 13165834,
+        "deltas": 1417042,
+        "attachements": 11359597,
+        "fusions": 13164720,
+        "noeuds": 1049626
+      }
+    },
+    "counts": {
+      "n": 16000,
+      "coord": 251,
+      "s": 8,
+      "smax": 11,
+      "seed": 17,
+      "threads": 8,
+      "emis": 6582787,
+      "boules_uniques": 6581291,
+      "mortes_profondeur": 64938,
+      "survivantes": 6516353,
+      "census_int": 33790452,
+      "census_shell": 21965979,
+      "evenements": 6562694,
+      "facettes": 40938738,
+      "fusions": 40935288,
+      "deltas": 5729737,
+      "noeuds": 4099013
+    },
+    "pipeline_ms": 68984.1,
+    "max_rss_kb": 4991620
+  },
+  {
+    "sequence": 4,
+    "family": "uniform",
+    "n": 16000,
+    "seed": 17,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=16000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/004_uniform_16000_s17_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=16000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 73.43543351100016,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "fa1fb2fb6a8937c1e94de4f159de1a18c122ad9e152b35c30301f42c0b59a13f",
+      "digest_forest_K2": "49e6d938901a1d03f3418878b7097be73d6d348121d9fe1fea9f6844dde22b1b",
+      "digest_forest_K3": "a636f0921d8fbde029787ec434d52f3a714791c1deaddc5b5d0a4e551d7dca6e",
+      "digest_forest_K4": "a51d1f2d16d50800f4ea8aef863e23b60aa66f23738d5df62dccaa4cb979bf8e",
+      "digest_forest_K5": "5bc37a563f1ddc55ab69e2e1faee42281e9526d41ff44169493fcefce610428d",
+      "digest_forest_K6": "986891abd909a3113e60998b7d4f10fd54eac9030d113e1a99322bb9441dfb67",
+      "digest_forest_K7": "09359adb53cbcae5f0bfec65131c7488173dbe148d34dc0af338310b5c38f3be",
+      "digest_forest_K8": "e3914747fdf9ddd793dfcfd6f95b14f557533fd7324033672f9736e7927d061f",
+      "digest_forest_K9": "97f0f91947c500c7418afc8fcee26ff152356b41d38074483ffa0c6b6774d1f2",
+      "digest_forest_K10": "4ae337df99f7fc81d8163668f77fe54bea8fdae71e06c7271d2345f1d5bcf1e2",
+      "digest_all": "86222dc758a232d87066b89c15bc89ef2415c02fbb1a2e6624dc8e25ea961dc8"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 62245,
+        "facettes": 16000,
+        "deltas": 12864,
+        "attachements": 0,
+        "fusions": 15999,
+        "noeuds": 12864
+      },
+      "2": {
+        "evenements": 132027,
+        "facettes": 128217,
+        "deltas": 50912,
+        "attachements": 62225,
+        "fusions": 128209,
+        "noeuds": 45958
+      },
+      "3": {
+        "evenements": 225815,
+        "facettes": 415153,
+        "deltas": 156490,
+        "attachements": 262339,
+        "fusions": 415122,
+        "noeuds": 98952
+      },
+      "4": {
+        "evenements": 343034,
+        "facettes": 949854,
+        "deltas": 268293,
+        "attachements": 671864,
+        "fusions": 949765,
+        "noeuds": 174085
+      },
+      "5": {
+        "evenements": 484740,
+        "facettes": 1806227,
+        "deltas": 403525,
+        "attachements": 1365770,
+        "fusions": 1806071,
+        "noeuds": 270403
+      },
+      "6": {
+        "evenements": 648349,
+        "facettes": 3046350,
+        "deltas": 561843,
+        "attachements": 2404968,
+        "fusions": 3046111,
+        "noeuds": 387484
+      },
+      "7": {
+        "evenements": 833903,
+        "facettes": 4737160,
+        "deltas": 742644,
+        "attachements": 3858731,
+        "fusions": 4736732,
+        "noeuds": 524004
+      },
+      "8": {
+        "evenements": 1041442,
+        "facettes": 6944519,
+        "deltas": 945967,
+        "attachements": 5793224,
+        "fusions": 6943921,
+        "noeuds": 679605
+      },
+      "9": {
+        "evenements": 1269970,
+        "facettes": 9729424,
+        "deltas": 1170157,
+        "attachements": 8267872,
+        "fusions": 9728638,
+        "noeuds": 856032
+      },
+      "10": {
+        "evenements": 1521169,
+        "facettes": 13165834,
+        "deltas": 1417042,
+        "attachements": 11359597,
+        "fusions": 13164720,
+        "noeuds": 1049626
+      }
+    },
+    "counts": {
+      "n": 16000,
+      "coord": 251,
+      "s": 8,
+      "smax": 11,
+      "seed": 17,
+      "threads": 8,
+      "emis": 6582787,
+      "boules_uniques": 6581291,
+      "mortes_profondeur": 64938,
+      "survivantes": 6516353,
+      "census_int": 33790452,
+      "census_shell": 21965979,
+      "evenements": 6562694,
+      "facettes": 40938738,
+      "fusions": 40935288,
+      "deltas": 5729737,
+      "noeuds": 4099013
+    },
+    "pipeline_ms": 73399.2,
+    "max_rss_kb": 4986372
+  },
+  {
+    "sequence": 5,
+    "family": "uniform",
+    "n": 32000,
+    "seed": 17,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=32000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/005_uniform_32000_s17_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=32000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 286.75389700600044,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "0a20c76f604b102850c4e6fb0ade85bd00b8376abd4e59ee2d5bfec234181fc7",
+      "digest_forest_K2": "25c836c154d13ef0d334d8bc7d16ceaf77c6226e3a93f2c77d8083e526db9f2e",
+      "digest_forest_K3": "9d8e9b86808fd508f6aa0b5687ef46f2e0697984ca3bc808b8abadf4127f282c",
+      "digest_forest_K4": "544dd40ae7c565645a22a582bcf8758e604c95a7d9fef9e36d55e97e14bf0892",
+      "digest_forest_K5": "4a4d932bf60402a37f3c6bdcb9e096d69a22efab6bacc9f3a9790993f39a5fc1",
+      "digest_forest_K6": "0bfc0cb8e4722d109c42413fbc3e8cea2905782f1cacd6abfc0101aa49c90c53",
+      "digest_forest_K7": "5c20fd2c133dcd0a74208132254673ccd34aa9d848dfefb73b65e9fa350c64ff",
+      "digest_forest_K8": "e2ea1d4664ae59ae162a50406175586d913ac880e26bb748867dfdde7a8fdafa",
+      "digest_forest_K9": "6e570de94bcd2bb6ac474bd483a6248281df7d5396e88f9047aae38992874068",
+      "digest_forest_K10": "30602eb71056338a255588bf980f6fc8ed65dfc3487d8a1134dc8f744f3e0216",
+      "digest_all": "cf2c19eec5d79b627803f5bd97de1c85734326017da58983cdc351d557837c1a"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 124995,
+        "facettes": 32000,
+        "deltas": 25934,
+        "attachements": 0,
+        "fusions": 31999,
+        "noeuds": 25934
+      },
+      "2": {
+        "evenements": 268521,
+        "facettes": 260304,
+        "deltas": 98279,
+        "attachements": 127425,
+        "fusions": 260284,
+        "noeuds": 88623
+      },
+      "3": {
+        "evenements": 461570,
+        "facettes": 847461,
+        "deltas": 299314,
+        "attachements": 535676,
+        "fusions": 847404,
+        "noeuds": 195365
+      },
+      "4": {
+        "evenements": 703682,
+        "facettes": 1945867,
+        "deltas": 518969,
+        "attachements": 1376590,
+        "fusions": 1945720,
+        "noeuds": 347108
+      },
+      "5": {
+        "evenements": 995365,
+        "facettes": 3705641,
+        "deltas": 786665,
+        "attachements": 2800790,
+        "fusions": 3705309,
+        "noeuds": 542254
+      },
+      "6": {
+        "evenements": 1334849,
+        "facettes": 6270574,
+        "deltas": 1105881,
+        "attachements": 4949067,
+        "fusions": 6270047,
+        "noeuds": 782985
+      },
+      "7": {
+        "evenements": 1722692,
+        "facettes": 9783803,
+        "deltas": 1475260,
+        "attachements": 7969787,
+        "fusions": 9783007,
+        "noeuds": 1065327
+      },
+      "8": {
+        "evenements": 2156841,
+        "facettes": 14380249,
+        "deltas": 1892195,
+        "attachements": 11994723,
+        "fusions": 14379168,
+        "noeuds": 1389868
+      },
+      "9": {
+        "evenements": 2637317,
+        "facettes": 20198883,
+        "deltas": 2355807,
+        "attachements": 17165310,
+        "fusions": 20197255,
+        "noeuds": 1756030
+      },
+      "10": {
+        "evenements": 3162958,
+        "facettes": 27368219,
+        "deltas": 2867321,
+        "attachements": 23611674,
+        "fusions": 27366100,
+        "noeuds": 2161850
+      }
+    },
+    "counts": {
+      "n": 32000,
+      "coord": 317,
+      "s": 8,
+      "smax": 11,
+      "seed": 17,
+      "threads": 8,
+      "emis": 13612434,
+      "boules_uniques": 13609558,
+      "mortes_profondeur": 135720,
+      "survivantes": 13473838,
+      "census_int": 70005819,
+      "census_shell": 45462507,
+      "evenements": 13568790,
+      "facettes": 84793001,
+      "fusions": 84786293,
+      "deltas": 11425625,
+      "noeuds": 8355344
+    },
+    "pipeline_ms": 286675.8,
+    "max_rss_kb": 10182168
+  },
+  {
+    "sequence": 5,
+    "family": "uniform",
+    "n": 32000,
+    "seed": 17,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=32000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/005_uniform_32000_s17_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=32000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": -9,
+    "timed_out": true,
+    "wall_seconds": 300.0167144469997,
+    "status": "failed"
+  },
+  {
+    "sequence": 6,
+    "family": "uniform",
+    "n": 8000,
+    "seed": 29,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=8000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/006_uniform_8000_s29_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=8000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 85.77092240099955,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "76a62e5901c09443ba917ac9e1876f749b204d0e31a2ae9b754195a8c9d69367",
+      "digest_forest_K2": "944da8eeb507062b5f70e2c1daa59214168e663a821601d61c6d8928ea3874c7",
+      "digest_forest_K3": "f22859f9c54d76d5fccbf28d011eb5bda3019c20b960d03f67476bc4843a678a",
+      "digest_forest_K4": "20cada5b5b78efe69f53ea32268c6e433e050ff836197c28ed5f6a53b627524c",
+      "digest_forest_K5": "40e8008055d5c4f676c7e30fc12e0fbc3aa262f5f05fe97700722aa9aae46f83",
+      "digest_forest_K6": "4c9ea8a49fd7d81195919b878e20a14fe726821040f82404cad4de4cf7beb443",
+      "digest_forest_K7": "63bcbf2cee8048ae58f70ef6d7cea6f1f5fd6b2b88e53e23a7a4c5094e1647ed",
+      "digest_forest_K8": "2099ba75fb37956f3597ade7651432a1b05b00a247b7b6c1ab5b6a80d3addd9d",
+      "digest_forest_K9": "bceeb76bcf8ed2976b3b8b25bf18e26d946a24588711e8bb1ac409ae243375c9",
+      "digest_forest_K10": "c43c4b49d20730ff67db0b5f1c7804f5707c3d6576dd79c5f2465ffd69bd766e",
+      "digest_all": "838fc93056cbc3fdd61b72d6543b5e77f4da74211863b116dc00ee823adb60b1"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 30495,
+        "facettes": 8000,
+        "deltas": 6465,
+        "attachements": 0,
+        "fusions": 7999,
+        "noeuds": 6465
+      },
+      "2": {
+        "evenements": 64578,
+        "facettes": 63163,
+        "deltas": 25925,
+        "attachements": 30843,
+        "fusions": 63158,
+        "noeuds": 23152
+      },
+      "3": {
+        "evenements": 110117,
+        "facettes": 202736,
+        "deltas": 80591,
+        "attachements": 128038,
+        "fusions": 202721,
+        "noeuds": 49721
+      },
+      "4": {
+        "evenements": 166113,
+        "facettes": 460236,
+        "deltas": 135278,
+        "attachements": 325503,
+        "fusions": 460201,
+        "noeuds": 85865
+      },
+      "5": {
+        "evenements": 233417,
+        "facettes": 870412,
+        "deltas": 201112,
+        "attachements": 657850,
+        "fusions": 870320,
+        "noeuds": 132244
+      },
+      "6": {
+        "evenements": 310161,
+        "facettes": 1458381,
+        "deltas": 277018,
+        "attachements": 1150612,
+        "fusions": 1458244,
+        "noeuds": 187880
+      },
+      "7": {
+        "evenements": 397199,
+        "facettes": 2258661,
+        "deltas": 362548,
+        "attachements": 1838961,
+        "fusions": 2258445,
+        "noeuds": 252325
+      },
+      "8": {
+        "evenements": 494485,
+        "facettes": 3300581,
+        "deltas": 458929,
+        "attachements": 2752415,
+        "fusions": 3300269,
+        "noeuds": 326182
+      },
+      "9": {
+        "evenements": 601019,
+        "facettes": 4607968,
+        "deltas": 564492,
+        "attachements": 3914502,
+        "fusions": 4607537,
+        "noeuds": 408655
+      },
+      "10": {
+        "evenements": 717673,
+        "facettes": 6216682,
+        "deltas": 680077,
+        "attachements": 5361491,
+        "fusions": 6216149,
+        "noeuds": 499354
+      }
+    },
+    "counts": {
+      "n": 8000,
+      "coord": 200,
+      "s": 8,
+      "smax": 11,
+      "seed": 29,
+      "threads": 8,
+      "emis": 3134436,
+      "boules_uniques": 3133686,
+      "mortes_profondeur": 30706,
+      "survivantes": 3102980,
+      "census_int": 16037966,
+      "census_shell": 10445736,
+      "evenements": 3125257,
+      "facettes": 19446820,
+      "fusions": 19445043,
+      "deltas": 2792435,
+      "noeuds": 1971843
+    },
+    "pipeline_ms": 85627.7,
+    "max_rss_kb": 2654016
+  },
+  {
+    "sequence": 6,
+    "family": "uniform",
+    "n": 8000,
+    "seed": 29,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=8000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/006_uniform_8000_s29_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=8000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 80.92102317599984,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "76a62e5901c09443ba917ac9e1876f749b204d0e31a2ae9b754195a8c9d69367",
+      "digest_forest_K2": "944da8eeb507062b5f70e2c1daa59214168e663a821601d61c6d8928ea3874c7",
+      "digest_forest_K3": "f22859f9c54d76d5fccbf28d011eb5bda3019c20b960d03f67476bc4843a678a",
+      "digest_forest_K4": "20cada5b5b78efe69f53ea32268c6e433e050ff836197c28ed5f6a53b627524c",
+      "digest_forest_K5": "40e8008055d5c4f676c7e30fc12e0fbc3aa262f5f05fe97700722aa9aae46f83",
+      "digest_forest_K6": "4c9ea8a49fd7d81195919b878e20a14fe726821040f82404cad4de4cf7beb443",
+      "digest_forest_K7": "63bcbf2cee8048ae58f70ef6d7cea6f1f5fd6b2b88e53e23a7a4c5094e1647ed",
+      "digest_forest_K8": "2099ba75fb37956f3597ade7651432a1b05b00a247b7b6c1ab5b6a80d3addd9d",
+      "digest_forest_K9": "bceeb76bcf8ed2976b3b8b25bf18e26d946a24588711e8bb1ac409ae243375c9",
+      "digest_forest_K10": "c43c4b49d20730ff67db0b5f1c7804f5707c3d6576dd79c5f2465ffd69bd766e",
+      "digest_all": "838fc93056cbc3fdd61b72d6543b5e77f4da74211863b116dc00ee823adb60b1"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 30495,
+        "facettes": 8000,
+        "deltas": 6465,
+        "attachements": 0,
+        "fusions": 7999,
+        "noeuds": 6465
+      },
+      "2": {
+        "evenements": 64578,
+        "facettes": 63163,
+        "deltas": 25925,
+        "attachements": 30843,
+        "fusions": 63158,
+        "noeuds": 23152
+      },
+      "3": {
+        "evenements": 110117,
+        "facettes": 202736,
+        "deltas": 80591,
+        "attachements": 128038,
+        "fusions": 202721,
+        "noeuds": 49721
+      },
+      "4": {
+        "evenements": 166113,
+        "facettes": 460236,
+        "deltas": 135278,
+        "attachements": 325503,
+        "fusions": 460201,
+        "noeuds": 85865
+      },
+      "5": {
+        "evenements": 233417,
+        "facettes": 870412,
+        "deltas": 201112,
+        "attachements": 657850,
+        "fusions": 870320,
+        "noeuds": 132244
+      },
+      "6": {
+        "evenements": 310161,
+        "facettes": 1458381,
+        "deltas": 277018,
+        "attachements": 1150612,
+        "fusions": 1458244,
+        "noeuds": 187880
+      },
+      "7": {
+        "evenements": 397199,
+        "facettes": 2258661,
+        "deltas": 362548,
+        "attachements": 1838961,
+        "fusions": 2258445,
+        "noeuds": 252325
+      },
+      "8": {
+        "evenements": 494485,
+        "facettes": 3300581,
+        "deltas": 458929,
+        "attachements": 2752415,
+        "fusions": 3300269,
+        "noeuds": 326182
+      },
+      "9": {
+        "evenements": 601019,
+        "facettes": 4607968,
+        "deltas": 564492,
+        "attachements": 3914502,
+        "fusions": 4607537,
+        "noeuds": 408655
+      },
+      "10": {
+        "evenements": 717673,
+        "facettes": 6216682,
+        "deltas": 680077,
+        "attachements": 5361491,
+        "fusions": 6216149,
+        "noeuds": 499354
+      }
+    },
+    "counts": {
+      "n": 8000,
+      "coord": 200,
+      "s": 8,
+      "smax": 11,
+      "seed": 29,
+      "threads": 8,
+      "emis": 3134436,
+      "boules_uniques": 3133686,
+      "mortes_profondeur": 30706,
+      "survivantes": 3102980,
+      "census_int": 16037966,
+      "census_shell": 10445736,
+      "evenements": 3125257,
+      "facettes": 19446820,
+      "fusions": 19445043,
+      "deltas": 2792435,
+      "noeuds": 1971843
+    },
+    "pipeline_ms": 80818.1,
+    "max_rss_kb": 2548396
+  },
+  {
+    "sequence": 7,
+    "family": "uniform",
+    "n": 16000,
+    "seed": 29,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=16000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/007_uniform_16000_s29_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=16000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 174.55014936000043,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "4ca8b225e37fc45bd9e2e3a8f734fb4d25bb528f737dbf903ca4e22c8a3bc9d1",
+      "digest_forest_K2": "d4ab1e7635e53590c6032d976e0b482f13503863ea0e5d9954968d2f39abd5d4",
+      "digest_forest_K3": "f9bd9da7df460d5ea0f7f9c2b75af47a65a77dc190b4b3d0b389ebfda4971f44",
+      "digest_forest_K4": "c8038fad5ab62b836efed2b51707d62b9d53c27d7670d5e97c212831c4ba7412",
+      "digest_forest_K5": "2cd6754a9e6654f036fce75536ef653cbea6585418094ef9e7f6a273faa50bac",
+      "digest_forest_K6": "ed92955ed10541e45ab90f6734240102864de62cbe6e30f11241383ebc0aec8e",
+      "digest_forest_K7": "e1e9897cec0a67afcd02ff498435dc6b9fb653456805f78b8effeadaf73d9161",
+      "digest_forest_K8": "0ef5d5c3de66eba73c52c382bef388a664a8616c64d2bbc7d5492690060c635b",
+      "digest_forest_K9": "861480e8dcccbbc5bc7b0b8c57ebb591f52d6377cb0a662f150ef2c5e71bba24",
+      "digest_forest_K10": "1da7baa5525fabcaef48620b69535c3fa8c1e3b8e24f6e72fa49662f6272cea5",
+      "digest_all": "411e0bf60c6d4cbd62a386d1d9ea769a3cd02dddf1d9bb025b463d1c1f3ca76d"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 61754,
+        "facettes": 16000,
+        "deltas": 12930,
+        "attachements": 0,
+        "fusions": 15999,
+        "noeuds": 12930
+      },
+      "2": {
+        "evenements": 131719,
+        "facettes": 128413,
+        "deltas": 50790,
+        "attachements": 62807,
+        "fusions": 128401,
+        "noeuds": 45757
+      },
+      "3": {
+        "evenements": 226361,
+        "facettes": 416387,
+        "deltas": 157684,
+        "attachements": 263481,
+        "fusions": 416353,
+        "noeuds": 99614
+      },
+      "4": {
+        "evenements": 343370,
+        "facettes": 950124,
+        "deltas": 270063,
+        "attachements": 672002,
+        "fusions": 950040,
+        "noeuds": 174587
+      },
+      "5": {
+        "evenements": 483455,
+        "facettes": 1801286,
+        "deltas": 403924,
+        "attachements": 1360718,
+        "fusions": 1801116,
+        "noeuds": 270290
+      },
+      "6": {
+        "evenements": 646208,
+        "facettes": 3036183,
+        "deltas": 561750,
+        "attachements": 2396702,
+        "fusions": 3035927,
+        "noeuds": 386765
+      },
+      "7": {
+        "evenements": 830815,
+        "facettes": 4721061,
+        "deltas": 741415,
+        "attachements": 3844907,
+        "fusions": 4720629,
+        "noeuds": 521976
+      },
+      "8": {
+        "evenements": 1038410,
+        "facettes": 6926523,
+        "deltas": 944256,
+        "attachements": 5777664,
+        "fusions": 6925910,
+        "noeuds": 679177
+      },
+      "9": {
+        "evenements": 1266450,
+        "facettes": 9703153,
+        "deltas": 1169082,
+        "attachements": 8245076,
+        "fusions": 9702380,
+        "noeuds": 854190
+      },
+      "10": {
+        "evenements": 1515715,
+        "facettes": 13120964,
+        "deltas": 1413777,
+        "attachements": 11318336,
+        "fusions": 13119818,
+        "noeuds": 1048157
+      }
+    },
+    "counts": {
+      "n": 16000,
+      "coord": 251,
+      "s": 8,
+      "smax": 11,
+      "seed": 29,
+      "threads": 8,
+      "emis": 6566280,
+      "boules_uniques": 6564934,
+      "mortes_profondeur": 66702,
+      "survivantes": 6498232,
+      "census_int": 33688640,
+      "census_shell": 21903834,
+      "evenements": 6544257,
+      "facettes": 40820094,
+      "fusions": 40816573,
+      "deltas": 5725671,
+      "noeuds": 4093443
+    },
+    "pipeline_ms": 174462.7,
+    "max_rss_kb": 4986036
+  },
+  {
+    "sequence": 7,
+    "family": "uniform",
+    "n": 16000,
+    "seed": 29,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=16000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/007_uniform_16000_s29_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=16000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 162.6358329499999,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "4ca8b225e37fc45bd9e2e3a8f734fb4d25bb528f737dbf903ca4e22c8a3bc9d1",
+      "digest_forest_K2": "d4ab1e7635e53590c6032d976e0b482f13503863ea0e5d9954968d2f39abd5d4",
+      "digest_forest_K3": "f9bd9da7df460d5ea0f7f9c2b75af47a65a77dc190b4b3d0b389ebfda4971f44",
+      "digest_forest_K4": "c8038fad5ab62b836efed2b51707d62b9d53c27d7670d5e97c212831c4ba7412",
+      "digest_forest_K5": "2cd6754a9e6654f036fce75536ef653cbea6585418094ef9e7f6a273faa50bac",
+      "digest_forest_K6": "ed92955ed10541e45ab90f6734240102864de62cbe6e30f11241383ebc0aec8e",
+      "digest_forest_K7": "e1e9897cec0a67afcd02ff498435dc6b9fb653456805f78b8effeadaf73d9161",
+      "digest_forest_K8": "0ef5d5c3de66eba73c52c382bef388a664a8616c64d2bbc7d5492690060c635b",
+      "digest_forest_K9": "861480e8dcccbbc5bc7b0b8c57ebb591f52d6377cb0a662f150ef2c5e71bba24",
+      "digest_forest_K10": "1da7baa5525fabcaef48620b69535c3fa8c1e3b8e24f6e72fa49662f6272cea5",
+      "digest_all": "411e0bf60c6d4cbd62a386d1d9ea769a3cd02dddf1d9bb025b463d1c1f3ca76d"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 61754,
+        "facettes": 16000,
+        "deltas": 12930,
+        "attachements": 0,
+        "fusions": 15999,
+        "noeuds": 12930
+      },
+      "2": {
+        "evenements": 131719,
+        "facettes": 128413,
+        "deltas": 50790,
+        "attachements": 62807,
+        "fusions": 128401,
+        "noeuds": 45757
+      },
+      "3": {
+        "evenements": 226361,
+        "facettes": 416387,
+        "deltas": 157684,
+        "attachements": 263481,
+        "fusions": 416353,
+        "noeuds": 99614
+      },
+      "4": {
+        "evenements": 343370,
+        "facettes": 950124,
+        "deltas": 270063,
+        "attachements": 672002,
+        "fusions": 950040,
+        "noeuds": 174587
+      },
+      "5": {
+        "evenements": 483455,
+        "facettes": 1801286,
+        "deltas": 403924,
+        "attachements": 1360718,
+        "fusions": 1801116,
+        "noeuds": 270290
+      },
+      "6": {
+        "evenements": 646208,
+        "facettes": 3036183,
+        "deltas": 561750,
+        "attachements": 2396702,
+        "fusions": 3035927,
+        "noeuds": 386765
+      },
+      "7": {
+        "evenements": 830815,
+        "facettes": 4721061,
+        "deltas": 741415,
+        "attachements": 3844907,
+        "fusions": 4720629,
+        "noeuds": 521976
+      },
+      "8": {
+        "evenements": 1038410,
+        "facettes": 6926523,
+        "deltas": 944256,
+        "attachements": 5777664,
+        "fusions": 6925910,
+        "noeuds": 679177
+      },
+      "9": {
+        "evenements": 1266450,
+        "facettes": 9703153,
+        "deltas": 1169082,
+        "attachements": 8245076,
+        "fusions": 9702380,
+        "noeuds": 854190
+      },
+      "10": {
+        "evenements": 1515715,
+        "facettes": 13120964,
+        "deltas": 1413777,
+        "attachements": 11318336,
+        "fusions": 13119818,
+        "noeuds": 1048157
+      }
+    },
+    "counts": {
+      "n": 16000,
+      "coord": 251,
+      "s": 8,
+      "smax": 11,
+      "seed": 29,
+      "threads": 8,
+      "emis": 6566280,
+      "boules_uniques": 6564934,
+      "mortes_profondeur": 66702,
+      "survivantes": 6498232,
+      "census_int": 33688640,
+      "census_shell": 21903834,
+      "evenements": 6544257,
+      "facettes": 40820094,
+      "fusions": 40816573,
+      "deltas": 5725671,
+      "noeuds": 4093443
+    },
+    "pipeline_ms": 162550.9,
+    "max_rss_kb": 4598984
+  },
+  {
+    "sequence": 8,
+    "family": "uniform",
+    "n": 32000,
+    "seed": 29,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=32000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/008_uniform_32000_s29_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=uniform",
+      "--n=32000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": -9,
+    "timed_out": true,
+    "wall_seconds": 300.0038071529998,
+    "status": "failed"
+  },
+  {
+    "sequence": 8,
+    "family": "uniform",
+    "n": 32000,
+    "seed": 29,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=32000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/008_uniform_32000_s29_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=32000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": -9,
+    "timed_out": true,
+    "wall_seconds": 300.0082633030006,
+    "status": "failed"
+  },
+  {
+    "sequence": 9,
+    "family": "terrain",
+    "n": 8000,
+    "seed": 3,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=8000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/009_terrain_8000_s3_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=8000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 14.271256689000438,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "50c1800310ba64743dba6dedab64eff2a0f0d24165b1bcae577ece2e94d2e87f",
+      "digest_forest_K2": "22c562bf1fe70ac7506df3658338a5b5f5e0f4886a5e1f81647d2dee8147a997",
+      "digest_forest_K3": "b83d2ca36c66341a284c2ab1a9125aad856b9ff9ea0f82b90072b9e28c4e00a2",
+      "digest_forest_K4": "039fe58f8edd5da25c6214f0e52ad8e5c63f1c08297403abae2fdec5c3de1c2c",
+      "digest_forest_K5": "795a0774ea31f33694039934c907a6d950e093e50085574171ae609183e66dbd",
+      "digest_forest_K6": "798dddf14861ce18948519a245c9b250423ba797c26178e5829f5b51c2a4ffd3",
+      "digest_forest_K7": "d2a629ddcb5e03ef1b6ab4a010d16c7548377fabfaf7c3d3ecc12bee88735695",
+      "digest_forest_K8": "4f05572baf6b215268e9dc6d01748083551cbb353b540cfd1a304debdc17711f",
+      "digest_forest_K9": "ffa96e8a88e45314c379efafbad9bc6578db349a9a8763354257e939bf4e31c9",
+      "digest_forest_K10": "ceaf9609cd86e07bb2e33abb7f233315aa5a182eb9a8d4f168fcfbd6aa5f1e71",
+      "digest_all": "7edc25dd80efc10334ba0a4a48def573fadad0b429fe424bd4194283f9282db3"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 18376,
+        "facettes": 8000,
+        "deltas": 6594,
+        "attachements": 0,
+        "fusions": 7999,
+        "noeuds": 6594
+      },
+      "2": {
+        "evenements": 27539,
+        "facettes": 36173,
+        "deltas": 15184,
+        "attachements": 18313,
+        "fusions": 36158,
+        "noeuds": 12158
+      },
+      "3": {
+        "evenements": 36689,
+        "facettes": 83425,
+        "deltas": 25060,
+        "attachements": 54285,
+        "fusions": 83340,
+        "noeuds": 18765
+      },
+      "4": {
+        "evenements": 46139,
+        "facettes": 150010,
+        "deltas": 33795,
+        "attachements": 109170,
+        "fusions": 149794,
+        "noeuds": 25558
+      },
+      "5": {
+        "evenements": 55419,
+        "facettes": 234824,
+        "deltas": 42556,
+        "attachements": 181622,
+        "fusions": 234480,
+        "noeuds": 32751
+      },
+      "6": {
+        "evenements": 64764,
+        "facettes": 339048,
+        "deltas": 51638,
+        "attachements": 272937,
+        "fusions": 338586,
+        "noeuds": 40192
+      },
+      "7": {
+        "evenements": 74621,
+        "facettes": 464626,
+        "deltas": 61292,
+        "attachements": 385594,
+        "fusions": 464053,
+        "noeuds": 47836
+      },
+      "8": {
+        "evenements": 84084,
+        "facettes": 607180,
+        "deltas": 70922,
+        "attachements": 514783,
+        "fusions": 606508,
+        "noeuds": 55654
+      },
+      "9": {
+        "evenements": 94012,
+        "facettes": 772654,
+        "deltas": 80536,
+        "attachements": 666529,
+        "fusions": 771906,
+        "noeuds": 63643
+      },
+      "10": {
+        "evenements": 104227,
+        "facettes": 960043,
+        "deltas": 90269,
+        "attachements": 840172,
+        "fusions": 959201,
+        "noeuds": 71452
+      }
+    },
+    "counts": {
+      "n": 8000,
+      "coord": 447,
+      "s": 8,
+      "smax": 11,
+      "seed": 3,
+      "threads": 8,
+      "emis": 602219,
+      "boules_uniques": 601714,
+      "mortes_profondeur": 21065,
+      "survivantes": 580649,
+      "census_int": 2914949,
+      "census_shell": 1651356,
+      "evenements": 605870,
+      "facettes": 3655983,
+      "fusions": 3652025,
+      "deltas": 477846,
+      "noeuds": 374603
+    },
+    "pipeline_ms": 14175.4,
+    "max_rss_kb": 561052
+  },
+  {
+    "sequence": 9,
+    "family": "terrain",
+    "n": 8000,
+    "seed": 3,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=8000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/009_terrain_8000_s3_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=8000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 12.896431252999719,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "50c1800310ba64743dba6dedab64eff2a0f0d24165b1bcae577ece2e94d2e87f",
+      "digest_forest_K2": "22c562bf1fe70ac7506df3658338a5b5f5e0f4886a5e1f81647d2dee8147a997",
+      "digest_forest_K3": "b83d2ca36c66341a284c2ab1a9125aad856b9ff9ea0f82b90072b9e28c4e00a2",
+      "digest_forest_K4": "039fe58f8edd5da25c6214f0e52ad8e5c63f1c08297403abae2fdec5c3de1c2c",
+      "digest_forest_K5": "795a0774ea31f33694039934c907a6d950e093e50085574171ae609183e66dbd",
+      "digest_forest_K6": "798dddf14861ce18948519a245c9b250423ba797c26178e5829f5b51c2a4ffd3",
+      "digest_forest_K7": "d2a629ddcb5e03ef1b6ab4a010d16c7548377fabfaf7c3d3ecc12bee88735695",
+      "digest_forest_K8": "4f05572baf6b215268e9dc6d01748083551cbb353b540cfd1a304debdc17711f",
+      "digest_forest_K9": "ffa96e8a88e45314c379efafbad9bc6578db349a9a8763354257e939bf4e31c9",
+      "digest_forest_K10": "ceaf9609cd86e07bb2e33abb7f233315aa5a182eb9a8d4f168fcfbd6aa5f1e71",
+      "digest_all": "7edc25dd80efc10334ba0a4a48def573fadad0b429fe424bd4194283f9282db3"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 18376,
+        "facettes": 8000,
+        "deltas": 6594,
+        "attachements": 0,
+        "fusions": 7999,
+        "noeuds": 6594
+      },
+      "2": {
+        "evenements": 27539,
+        "facettes": 36173,
+        "deltas": 15184,
+        "attachements": 18313,
+        "fusions": 36158,
+        "noeuds": 12158
+      },
+      "3": {
+        "evenements": 36689,
+        "facettes": 83425,
+        "deltas": 25060,
+        "attachements": 54285,
+        "fusions": 83340,
+        "noeuds": 18765
+      },
+      "4": {
+        "evenements": 46139,
+        "facettes": 150010,
+        "deltas": 33795,
+        "attachements": 109170,
+        "fusions": 149794,
+        "noeuds": 25558
+      },
+      "5": {
+        "evenements": 55419,
+        "facettes": 234824,
+        "deltas": 42556,
+        "attachements": 181622,
+        "fusions": 234480,
+        "noeuds": 32751
+      },
+      "6": {
+        "evenements": 64764,
+        "facettes": 339048,
+        "deltas": 51638,
+        "attachements": 272937,
+        "fusions": 338586,
+        "noeuds": 40192
+      },
+      "7": {
+        "evenements": 74621,
+        "facettes": 464626,
+        "deltas": 61292,
+        "attachements": 385594,
+        "fusions": 464053,
+        "noeuds": 47836
+      },
+      "8": {
+        "evenements": 84084,
+        "facettes": 607180,
+        "deltas": 70922,
+        "attachements": 514783,
+        "fusions": 606508,
+        "noeuds": 55654
+      },
+      "9": {
+        "evenements": 94012,
+        "facettes": 772654,
+        "deltas": 80536,
+        "attachements": 666529,
+        "fusions": 771906,
+        "noeuds": 63643
+      },
+      "10": {
+        "evenements": 104227,
+        "facettes": 960043,
+        "deltas": 90269,
+        "attachements": 840172,
+        "fusions": 959201,
+        "noeuds": 71452
+      }
+    },
+    "counts": {
+      "n": 8000,
+      "coord": 447,
+      "s": 8,
+      "smax": 11,
+      "seed": 3,
+      "threads": 8,
+      "emis": 602219,
+      "boules_uniques": 601714,
+      "mortes_profondeur": 21065,
+      "survivantes": 580649,
+      "census_int": 2914949,
+      "census_shell": 1651356,
+      "evenements": 605870,
+      "facettes": 3655983,
+      "fusions": 3652025,
+      "deltas": 477846,
+      "noeuds": 374603
+    },
+    "pipeline_ms": 12781.0,
+    "max_rss_kb": 670192
+  },
+  {
+    "sequence": 10,
+    "family": "terrain",
+    "n": 16000,
+    "seed": 3,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=16000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/010_terrain_16000_s3_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=16000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 39.89156133800043,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "a8ccebc606080fca35a844f1f6592ca754640edd05cd82364c2120c1f4278474",
+      "digest_forest_K2": "8267be4bf844266b81e142935dd8debf8a7f8d2a28f4abdc9d31b0e60e01b1ec",
+      "digest_forest_K3": "56a2a763ac28f161d651035c31f42d7d48af10a69f0ee08645b7a4bc74755d5a",
+      "digest_forest_K4": "e251f350faf7366958b5930776fd4e8b384023fea5a51e9e775bf86ffe0c0911",
+      "digest_forest_K5": "92aed8b6cf4262ad6a7197ea060f24fb0b800bff50bf82b04b55dd6e0b18c468",
+      "digest_forest_K6": "56594de06b8062ca787de3cbbc0136a4c4b570a5748d86aaaf5ecf58c2afa0cd",
+      "digest_forest_K7": "3fc382282e1e00e6be3360a301b73fc5b7f410fb6d1098128a55c9447d42c3cc",
+      "digest_forest_K8": "e41891ddf8d9a730db4b928fbefbbb7b03793377b74f09bfe269f62118aab191",
+      "digest_forest_K9": "41ae9ade160223f55f38affa855989161941af47d605659826dc7f75c0d82acb",
+      "digest_forest_K10": "821b4f6227bf3b66ccfc75139600075c5883ffee3cf0b27606dcf444f01f6055",
+      "digest_all": "d3884a36cee16fd0702a58a1358433b41d3b08fa7587ff85eb38f5ad68986c7f"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 36999,
+        "facettes": 16000,
+        "deltas": 12953,
+        "attachements": 0,
+        "fusions": 15999,
+        "noeuds": 12953
+      },
+      "2": {
+        "evenements": 55775,
+        "facettes": 72931,
+        "deltas": 30013,
+        "attachements": 36922,
+        "fusions": 72911,
+        "noeuds": 24043
+      },
+      "3": {
+        "evenements": 74653,
+        "facettes": 169502,
+        "deltas": 49298,
+        "attachements": 110303,
+        "fusions": 169359,
+        "noeuds": 37074
+      },
+      "4": {
+        "evenements": 93608,
+        "facettes": 305096,
+        "deltas": 66992,
+        "attachements": 220581,
+        "fusions": 304727,
+        "noeuds": 51546
+      },
+      "5": {
+        "evenements": 113027,
+        "facettes": 480768,
+        "deltas": 85051,
+        "attachements": 369884,
+        "fusions": 480073,
+        "noeuds": 66340
+      },
+      "6": {
+        "evenements": 132763,
+        "facettes": 697254,
+        "deltas": 103884,
+        "attachements": 558722,
+        "fusions": 696155,
+        "noeuds": 81933
+      },
+      "7": {
+        "evenements": 152632,
+        "facettes": 954259,
+        "deltas": 123113,
+        "attachements": 786879,
+        "fusions": 952664,
+        "noeuds": 97978
+      },
+      "8": {
+        "evenements": 172813,
+        "facettes": 1253184,
+        "deltas": 142350,
+        "attachements": 1056694,
+        "fusions": 1251072,
+        "noeuds": 114026
+      },
+      "9": {
+        "evenements": 192974,
+        "facettes": 1592200,
+        "deltas": 161943,
+        "attachements": 1366263,
+        "fusions": 1589594,
+        "noeuds": 130488
+      },
+      "10": {
+        "evenements": 213513,
+        "facettes": 1975025,
+        "deltas": 182073,
+        "attachements": 1718801,
+        "fusions": 1971913,
+        "noeuds": 147070
+      }
+    },
+    "counts": {
+      "n": 16000,
+      "coord": 632,
+      "s": 8,
+      "smax": 11,
+      "seed": 3,
+      "threads": 8,
+      "emis": 1236334,
+      "boules_uniques": 1235242,
+      "mortes_profondeur": 47488,
+      "survivantes": 1187754,
+      "census_int": 5965429,
+      "census_shell": 3387642,
+      "evenements": 1238757,
+      "facettes": 7516219,
+      "fusions": 7504467,
+      "deltas": 957670,
+      "noeuds": 763451
+    },
+    "pipeline_ms": 39828.0,
+    "max_rss_kb": 1030324
+  },
+  {
+    "sequence": 10,
+    "family": "terrain",
+    "n": 16000,
+    "seed": 3,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=16000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/010_terrain_16000_s3_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=16000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 38.490786909000235,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "a8ccebc606080fca35a844f1f6592ca754640edd05cd82364c2120c1f4278474",
+      "digest_forest_K2": "8267be4bf844266b81e142935dd8debf8a7f8d2a28f4abdc9d31b0e60e01b1ec",
+      "digest_forest_K3": "56a2a763ac28f161d651035c31f42d7d48af10a69f0ee08645b7a4bc74755d5a",
+      "digest_forest_K4": "e251f350faf7366958b5930776fd4e8b384023fea5a51e9e775bf86ffe0c0911",
+      "digest_forest_K5": "92aed8b6cf4262ad6a7197ea060f24fb0b800bff50bf82b04b55dd6e0b18c468",
+      "digest_forest_K6": "56594de06b8062ca787de3cbbc0136a4c4b570a5748d86aaaf5ecf58c2afa0cd",
+      "digest_forest_K7": "3fc382282e1e00e6be3360a301b73fc5b7f410fb6d1098128a55c9447d42c3cc",
+      "digest_forest_K8": "e41891ddf8d9a730db4b928fbefbbb7b03793377b74f09bfe269f62118aab191",
+      "digest_forest_K9": "41ae9ade160223f55f38affa855989161941af47d605659826dc7f75c0d82acb",
+      "digest_forest_K10": "821b4f6227bf3b66ccfc75139600075c5883ffee3cf0b27606dcf444f01f6055",
+      "digest_all": "d3884a36cee16fd0702a58a1358433b41d3b08fa7587ff85eb38f5ad68986c7f"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 36999,
+        "facettes": 16000,
+        "deltas": 12953,
+        "attachements": 0,
+        "fusions": 15999,
+        "noeuds": 12953
+      },
+      "2": {
+        "evenements": 55775,
+        "facettes": 72931,
+        "deltas": 30013,
+        "attachements": 36922,
+        "fusions": 72911,
+        "noeuds": 24043
+      },
+      "3": {
+        "evenements": 74653,
+        "facettes": 169502,
+        "deltas": 49298,
+        "attachements": 110303,
+        "fusions": 169359,
+        "noeuds": 37074
+      },
+      "4": {
+        "evenements": 93608,
+        "facettes": 305096,
+        "deltas": 66992,
+        "attachements": 220581,
+        "fusions": 304727,
+        "noeuds": 51546
+      },
+      "5": {
+        "evenements": 113027,
+        "facettes": 480768,
+        "deltas": 85051,
+        "attachements": 369884,
+        "fusions": 480073,
+        "noeuds": 66340
+      },
+      "6": {
+        "evenements": 132763,
+        "facettes": 697254,
+        "deltas": 103884,
+        "attachements": 558722,
+        "fusions": 696155,
+        "noeuds": 81933
+      },
+      "7": {
+        "evenements": 152632,
+        "facettes": 954259,
+        "deltas": 123113,
+        "attachements": 786879,
+        "fusions": 952664,
+        "noeuds": 97978
+      },
+      "8": {
+        "evenements": 172813,
+        "facettes": 1253184,
+        "deltas": 142350,
+        "attachements": 1056694,
+        "fusions": 1251072,
+        "noeuds": 114026
+      },
+      "9": {
+        "evenements": 192974,
+        "facettes": 1592200,
+        "deltas": 161943,
+        "attachements": 1366263,
+        "fusions": 1589594,
+        "noeuds": 130488
+      },
+      "10": {
+        "evenements": 213513,
+        "facettes": 1975025,
+        "deltas": 182073,
+        "attachements": 1718801,
+        "fusions": 1971913,
+        "noeuds": 147070
+      }
+    },
+    "counts": {
+      "n": 16000,
+      "coord": 632,
+      "s": 8,
+      "smax": 11,
+      "seed": 3,
+      "threads": 8,
+      "emis": 1236334,
+      "boules_uniques": 1235242,
+      "mortes_profondeur": 47488,
+      "survivantes": 1187754,
+      "census_int": 5965429,
+      "census_shell": 3387642,
+      "evenements": 1238757,
+      "facettes": 7516219,
+      "fusions": 7504467,
+      "deltas": 957670,
+      "noeuds": 763451
+    },
+    "pipeline_ms": 38380.5,
+    "max_rss_kb": 1034624
+  },
+  {
+    "sequence": 11,
+    "family": "terrain",
+    "n": 32000,
+    "seed": 3,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=32000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/011_terrain_32000_s3_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=32000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 120.81314979800027,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "83ab31651d04f8c46fb0ca6fe0a556d6c764a8888755838768d93770994f13f3",
+      "digest_forest_K2": "3dfa2361fd85b23c41113549e13cdf5d8753af559f910d53f5e186599480f89b",
+      "digest_forest_K3": "30da9b921523011bcafd2252892a7d2759007e9c9de854f8b6de67f0c906bdff",
+      "digest_forest_K4": "a3d799d7a7d18a75ca8fb42d32c66b2ed6280be49c34c9c132e657e983481cc9",
+      "digest_forest_K5": "b8507901583d8fc05583ee64bd8f18546b6a4741d8a8724c036ff89d3ada60a6",
+      "digest_forest_K6": "dbb919a987ab3655cffb67a45228cec74aaa534099dd1673947447fdda65f240",
+      "digest_forest_K7": "57297c3c3a5d1a964fde1ec2a55a3269f5ad175a3a94520ee1db80b7db4dde23",
+      "digest_forest_K8": "8bc6db69753354eca76b8856b7adfe0ae102f71a875fdbb89580f581c95afc3c",
+      "digest_forest_K9": "9444b0664108e32b95aa20aa3de867d8a4493de969ea29e9a1c837a0dacc7397",
+      "digest_forest_K10": "51160849c2a496fd8624f8ea025dc3fa4802a41a8c134011a48a1bcecf8093b0",
+      "digest_all": "67a088549d762aa92dd7c0e0cc0ecd4a20befbd2915cbb707af9706831bb078b"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 73823,
+        "facettes": 32000,
+        "deltas": 25847,
+        "attachements": 0,
+        "fusions": 31999,
+        "noeuds": 25847
+      },
+      "2": {
+        "evenements": 111553,
+        "facettes": 145760,
+        "deltas": 58910,
+        "attachements": 74092,
+        "fusions": 145736,
+        "noeuds": 47122
+      },
+      "3": {
+        "evenements": 149466,
+        "facettes": 338733,
+        "deltas": 95752,
+        "attachements": 220737,
+        "fusions": 338490,
+        "noeuds": 72187
+      },
+      "4": {
+        "evenements": 188158,
+        "facettes": 612526,
+        "deltas": 130205,
+        "attachements": 443626,
+        "fusions": 611880,
+        "noeuds": 100331
+      },
+      "5": {
+        "evenements": 227883,
+        "facettes": 968837,
+        "deltas": 166044,
+        "attachements": 745390,
+        "fusions": 967570,
+        "noeuds": 130208
+      },
+      "6": {
+        "evenements": 268645,
+        "facettes": 1410932,
+        "deltas": 203802,
+        "attachements": 1129685,
+        "fusions": 1408836,
+        "noeuds": 161982
+      },
+      "7": {
+        "evenements": 309790,
+        "facettes": 1937933,
+        "deltas": 241016,
+        "attachements": 1596056,
+        "fusions": 1934902,
+        "noeuds": 193475
+      },
+      "8": {
+        "evenements": 352251,
+        "facettes": 2557203,
+        "deltas": 281471,
+        "attachements": 2151965,
+        "fusions": 2553013,
+        "noeuds": 227869
+      },
+      "9": {
+        "evenements": 394263,
+        "facettes": 3258269,
+        "deltas": 322006,
+        "attachements": 2787853,
+        "fusions": 3252803,
+        "noeuds": 262465
+      },
+      "10": {
+        "evenements": 437406,
+        "facettes": 4054976,
+        "deltas": 363339,
+        "attachements": 3517518,
+        "fusions": 4048042,
+        "noeuds": 297835
+      }
+    },
+    "counts": {
+      "n": 32000,
+      "coord": 894,
+      "s": 8,
+      "smax": 11,
+      "seed": 3,
+      "threads": 8,
+      "emis": 2517508,
+      "boules_uniques": 2515408,
+      "mortes_profondeur": 103102,
+      "survivantes": 2412306,
+      "census_int": 12154849,
+      "census_shell": 6891083,
+      "evenements": 2513238,
+      "facettes": 15317169,
+      "fusions": 15293271,
+      "deltas": 1888392,
+      "noeuds": 1519321
+    },
+    "pipeline_ms": 120751.7,
+    "max_rss_kb": 1820048
+  },
+  {
+    "sequence": 11,
+    "family": "terrain",
+    "n": 32000,
+    "seed": 3,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=32000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/011_terrain_32000_s3_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=32000",
+      "--seed=3",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 83.36955352099994,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "83ab31651d04f8c46fb0ca6fe0a556d6c764a8888755838768d93770994f13f3",
+      "digest_forest_K2": "3dfa2361fd85b23c41113549e13cdf5d8753af559f910d53f5e186599480f89b",
+      "digest_forest_K3": "30da9b921523011bcafd2252892a7d2759007e9c9de854f8b6de67f0c906bdff",
+      "digest_forest_K4": "a3d799d7a7d18a75ca8fb42d32c66b2ed6280be49c34c9c132e657e983481cc9",
+      "digest_forest_K5": "b8507901583d8fc05583ee64bd8f18546b6a4741d8a8724c036ff89d3ada60a6",
+      "digest_forest_K6": "dbb919a987ab3655cffb67a45228cec74aaa534099dd1673947447fdda65f240",
+      "digest_forest_K7": "57297c3c3a5d1a964fde1ec2a55a3269f5ad175a3a94520ee1db80b7db4dde23",
+      "digest_forest_K8": "8bc6db69753354eca76b8856b7adfe0ae102f71a875fdbb89580f581c95afc3c",
+      "digest_forest_K9": "9444b0664108e32b95aa20aa3de867d8a4493de969ea29e9a1c837a0dacc7397",
+      "digest_forest_K10": "51160849c2a496fd8624f8ea025dc3fa4802a41a8c134011a48a1bcecf8093b0",
+      "digest_all": "67a088549d762aa92dd7c0e0cc0ecd4a20befbd2915cbb707af9706831bb078b"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 73823,
+        "facettes": 32000,
+        "deltas": 25847,
+        "attachements": 0,
+        "fusions": 31999,
+        "noeuds": 25847
+      },
+      "2": {
+        "evenements": 111553,
+        "facettes": 145760,
+        "deltas": 58910,
+        "attachements": 74092,
+        "fusions": 145736,
+        "noeuds": 47122
+      },
+      "3": {
+        "evenements": 149466,
+        "facettes": 338733,
+        "deltas": 95752,
+        "attachements": 220737,
+        "fusions": 338490,
+        "noeuds": 72187
+      },
+      "4": {
+        "evenements": 188158,
+        "facettes": 612526,
+        "deltas": 130205,
+        "attachements": 443626,
+        "fusions": 611880,
+        "noeuds": 100331
+      },
+      "5": {
+        "evenements": 227883,
+        "facettes": 968837,
+        "deltas": 166044,
+        "attachements": 745390,
+        "fusions": 967570,
+        "noeuds": 130208
+      },
+      "6": {
+        "evenements": 268645,
+        "facettes": 1410932,
+        "deltas": 203802,
+        "attachements": 1129685,
+        "fusions": 1408836,
+        "noeuds": 161982
+      },
+      "7": {
+        "evenements": 309790,
+        "facettes": 1937933,
+        "deltas": 241016,
+        "attachements": 1596056,
+        "fusions": 1934902,
+        "noeuds": 193475
+      },
+      "8": {
+        "evenements": 352251,
+        "facettes": 2557203,
+        "deltas": 281471,
+        "attachements": 2151965,
+        "fusions": 2553013,
+        "noeuds": 227869
+      },
+      "9": {
+        "evenements": 394263,
+        "facettes": 3258269,
+        "deltas": 322006,
+        "attachements": 2787853,
+        "fusions": 3252803,
+        "noeuds": 262465
+      },
+      "10": {
+        "evenements": 437406,
+        "facettes": 4054976,
+        "deltas": 363339,
+        "attachements": 3517518,
+        "fusions": 4048042,
+        "noeuds": 297835
+      }
+    },
+    "counts": {
+      "n": 32000,
+      "coord": 894,
+      "s": 8,
+      "smax": 11,
+      "seed": 3,
+      "threads": 8,
+      "emis": 2517508,
+      "boules_uniques": 2515408,
+      "mortes_profondeur": 103102,
+      "survivantes": 2412306,
+      "census_int": 12154849,
+      "census_shell": 6891083,
+      "evenements": 2513238,
+      "facettes": 15317169,
+      "fusions": 15293271,
+      "deltas": 1888392,
+      "noeuds": 1519321
+    },
+    "pipeline_ms": 83299.5,
+    "max_rss_kb": 1873888
+  },
+  {
+    "sequence": 12,
+    "family": "terrain",
+    "n": 8000,
+    "seed": 17,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=8000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/012_terrain_8000_s17_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=8000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 8.289140476000284,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "d71c8ed1a43041261065a621171dca08e68d8239ea26f91027c94bc9e7a8f91a",
+      "digest_forest_K2": "b0095d970a53003231d0557237d24d6b7ae600ca5d301d69ebbb9fd6ae61bd35",
+      "digest_forest_K3": "5b3a4c2f18a38bd4d5b1de45a8de36fdb879f7dd5645e70fe0472c4162456064",
+      "digest_forest_K4": "a27ae41dbc440063c30ec66bc23e789b5307a8dfa41e2398e5aa2978008b0840",
+      "digest_forest_K5": "502ab4fd660e58ce91eabad739f8e7056b341ebbfbdfb1ea1d4f33fd59195e0a",
+      "digest_forest_K6": "01b01d6437392b6d3e0e7c9c26a5345563c4e7216c7b668b8f4d23602c26f1a1",
+      "digest_forest_K7": "6b8b7565542895f8a05e2cae42d84f21a76ff78558637050a2f01a1039359e49",
+      "digest_forest_K8": "d9ed73cadff7a19a5588704527f6922397f78a5bd823b85850825e3782cc971e",
+      "digest_forest_K9": "fa5c0e94d67847bb0e92f30d2c11d6f0c5bbba348a6d5d28b9ffa7dfeb415410",
+      "digest_forest_K10": "2229e347bd2cfe53e5f8b2a8a932d093a353a28ed804213c3cb60821a6ae2693",
+      "digest_all": "a2ffbaf70ad25f31798655a5484a67b8ed8cca80b3d48a4c34f2d752d0809734"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 18416,
+        "facettes": 8000,
+        "deltas": 6469,
+        "attachements": 0,
+        "fusions": 7999,
+        "noeuds": 6469
+      },
+      "2": {
+        "evenements": 27607,
+        "facettes": 36200,
+        "deltas": 15377,
+        "attachements": 18333,
+        "fusions": 36184,
+        "noeuds": 12263
+      },
+      "3": {
+        "evenements": 36726,
+        "facettes": 83317,
+        "deltas": 25391,
+        "attachements": 54282,
+        "fusions": 83206,
+        "noeuds": 18806
+      },
+      "4": {
+        "evenements": 45962,
+        "facettes": 149349,
+        "deltas": 34219,
+        "attachements": 108471,
+        "fusions": 149157,
+        "noeuds": 25924
+      },
+      "5": {
+        "evenements": 55260,
+        "facettes": 234265,
+        "deltas": 43397,
+        "attachements": 181125,
+        "fusions": 233996,
+        "noeuds": 33127
+      },
+      "6": {
+        "evenements": 64525,
+        "facettes": 337659,
+        "deltas": 52467,
+        "attachements": 271829,
+        "fusions": 337294,
+        "noeuds": 40662
+      },
+      "7": {
+        "evenements": 74204,
+        "facettes": 461830,
+        "deltas": 62054,
+        "attachements": 383403,
+        "fusions": 461385,
+        "noeuds": 48219
+      },
+      "8": {
+        "evenements": 84152,
+        "facettes": 607412,
+        "deltas": 71697,
+        "attachements": 515474,
+        "fusions": 606877,
+        "noeuds": 56183
+      },
+      "9": {
+        "evenements": 93919,
+        "facettes": 771261,
+        "deltas": 81772,
+        "attachements": 665683,
+        "fusions": 770664,
+        "noeuds": 64369
+      },
+      "10": {
+        "evenements": 103992,
+        "facettes": 957502,
+        "deltas": 91675,
+        "attachements": 838006,
+        "fusions": 956803,
+        "noeuds": 72313
+      }
+    },
+    "counts": {
+      "n": 8000,
+      "coord": 447,
+      "s": 8,
+      "smax": 11,
+      "seed": 17,
+      "threads": 8,
+      "emis": 602615,
+      "boules_uniques": 602167,
+      "mortes_profondeur": 21099,
+      "survivantes": 581068,
+      "census_int": 2917463,
+      "census_shell": 1650679,
+      "evenements": 604763,
+      "facettes": 3646795,
+      "fusions": 3643565,
+      "deltas": 484518,
+      "noeuds": 378335
+    },
+    "pipeline_ms": 8244.9,
+    "max_rss_kb": 676568
+  },
+  {
+    "sequence": 12,
+    "family": "terrain",
+    "n": 8000,
+    "seed": 17,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=8000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/012_terrain_8000_s17_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=8000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 8.548308141000234,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "d71c8ed1a43041261065a621171dca08e68d8239ea26f91027c94bc9e7a8f91a",
+      "digest_forest_K2": "b0095d970a53003231d0557237d24d6b7ae600ca5d301d69ebbb9fd6ae61bd35",
+      "digest_forest_K3": "5b3a4c2f18a38bd4d5b1de45a8de36fdb879f7dd5645e70fe0472c4162456064",
+      "digest_forest_K4": "a27ae41dbc440063c30ec66bc23e789b5307a8dfa41e2398e5aa2978008b0840",
+      "digest_forest_K5": "502ab4fd660e58ce91eabad739f8e7056b341ebbfbdfb1ea1d4f33fd59195e0a",
+      "digest_forest_K6": "01b01d6437392b6d3e0e7c9c26a5345563c4e7216c7b668b8f4d23602c26f1a1",
+      "digest_forest_K7": "6b8b7565542895f8a05e2cae42d84f21a76ff78558637050a2f01a1039359e49",
+      "digest_forest_K8": "d9ed73cadff7a19a5588704527f6922397f78a5bd823b85850825e3782cc971e",
+      "digest_forest_K9": "fa5c0e94d67847bb0e92f30d2c11d6f0c5bbba348a6d5d28b9ffa7dfeb415410",
+      "digest_forest_K10": "2229e347bd2cfe53e5f8b2a8a932d093a353a28ed804213c3cb60821a6ae2693",
+      "digest_all": "a2ffbaf70ad25f31798655a5484a67b8ed8cca80b3d48a4c34f2d752d0809734"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 18416,
+        "facettes": 8000,
+        "deltas": 6469,
+        "attachements": 0,
+        "fusions": 7999,
+        "noeuds": 6469
+      },
+      "2": {
+        "evenements": 27607,
+        "facettes": 36200,
+        "deltas": 15377,
+        "attachements": 18333,
+        "fusions": 36184,
+        "noeuds": 12263
+      },
+      "3": {
+        "evenements": 36726,
+        "facettes": 83317,
+        "deltas": 25391,
+        "attachements": 54282,
+        "fusions": 83206,
+        "noeuds": 18806
+      },
+      "4": {
+        "evenements": 45962,
+        "facettes": 149349,
+        "deltas": 34219,
+        "attachements": 108471,
+        "fusions": 149157,
+        "noeuds": 25924
+      },
+      "5": {
+        "evenements": 55260,
+        "facettes": 234265,
+        "deltas": 43397,
+        "attachements": 181125,
+        "fusions": 233996,
+        "noeuds": 33127
+      },
+      "6": {
+        "evenements": 64525,
+        "facettes": 337659,
+        "deltas": 52467,
+        "attachements": 271829,
+        "fusions": 337294,
+        "noeuds": 40662
+      },
+      "7": {
+        "evenements": 74204,
+        "facettes": 461830,
+        "deltas": 62054,
+        "attachements": 383403,
+        "fusions": 461385,
+        "noeuds": 48219
+      },
+      "8": {
+        "evenements": 84152,
+        "facettes": 607412,
+        "deltas": 71697,
+        "attachements": 515474,
+        "fusions": 606877,
+        "noeuds": 56183
+      },
+      "9": {
+        "evenements": 93919,
+        "facettes": 771261,
+        "deltas": 81772,
+        "attachements": 665683,
+        "fusions": 770664,
+        "noeuds": 64369
+      },
+      "10": {
+        "evenements": 103992,
+        "facettes": 957502,
+        "deltas": 91675,
+        "attachements": 838006,
+        "fusions": 956803,
+        "noeuds": 72313
+      }
+    },
+    "counts": {
+      "n": 8000,
+      "coord": 447,
+      "s": 8,
+      "smax": 11,
+      "seed": 17,
+      "threads": 8,
+      "emis": 602615,
+      "boules_uniques": 602167,
+      "mortes_profondeur": 21099,
+      "survivantes": 581068,
+      "census_int": 2917463,
+      "census_shell": 1650679,
+      "evenements": 604763,
+      "facettes": 3646795,
+      "fusions": 3643565,
+      "deltas": 484518,
+      "noeuds": 378335
+    },
+    "pipeline_ms": 8490.3,
+    "max_rss_kb": 556196
+  },
+  {
+    "sequence": 13,
+    "family": "terrain",
+    "n": 16000,
+    "seed": 17,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=16000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/013_terrain_16000_s17_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=16000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 24.952379015000588,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "0d4a1e8e07df6755f62b217122c0bf0d1e3c32b447e0802ae24bcfe184876d6f",
+      "digest_forest_K2": "5e0ada6663b95bc3a8e85fa07e430ef81dc01b028bdbc2d858281f3522682b6f",
+      "digest_forest_K3": "30e4ef1926e151a8ff5982d1add83e10bd37dcdd2088cbe41d239c473b38da52",
+      "digest_forest_K4": "cf4e2f978bca5a341297c6a00a06af7b0cbc3903d15bf437413de011be5157a6",
+      "digest_forest_K5": "f2fc0c9d2e1bb8a72b5902113a62a0f3136e070eece4b689bd386a813b24051f",
+      "digest_forest_K6": "10f942fc1fe81dc7e4cd7f9534187b88551fc84c3888e5c96f4b715cfb5fadef",
+      "digest_forest_K7": "4fd77c6c7d3d76509f033a0377b957e30cfb93202455a88b160454acfb92a2b4",
+      "digest_forest_K8": "a981a56a0911ffa710122254e4f642a46c21e1fc1236143982d5ba80aa514e86",
+      "digest_forest_K9": "a34e0fb5c0f92eef73cb343ffb52b94c88db45bf5867f247f3ac7c2464933bc5",
+      "digest_forest_K10": "e7077cbf567515e0cecf1ca0484f97bae6f3bcabbe0e5b84d13c880513d8d471",
+      "digest_all": "6584d37264564ff56c289b31c9e75a7d007e7f4624649e5bfc354a07e62504db"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 36794,
+        "facettes": 16000,
+        "deltas": 13100,
+        "attachements": 0,
+        "fusions": 15999,
+        "noeuds": 13100
+      },
+      "2": {
+        "evenements": 55444,
+        "facettes": 72735,
+        "deltas": 30497,
+        "attachements": 36703,
+        "fusions": 72717,
+        "noeuds": 24502
+      },
+      "3": {
+        "evenements": 73929,
+        "facettes": 168266,
+        "deltas": 49893,
+        "attachements": 109083,
+        "fusions": 168117,
+        "noeuds": 37516
+      },
+      "4": {
+        "evenements": 92834,
+        "facettes": 302803,
+        "deltas": 67920,
+        "attachements": 218818,
+        "fusions": 302412,
+        "noeuds": 51922
+      },
+      "5": {
+        "evenements": 111971,
+        "facettes": 476889,
+        "deltas": 86247,
+        "attachements": 366387,
+        "fusions": 476222,
+        "noeuds": 66943
+      },
+      "6": {
+        "evenements": 131619,
+        "facettes": 691424,
+        "deltas": 105203,
+        "attachements": 554153,
+        "fusions": 690428,
+        "noeuds": 82517
+      },
+      "7": {
+        "evenements": 151480,
+        "facettes": 947041,
+        "deltas": 124681,
+        "attachements": 781619,
+        "fusions": 945659,
+        "noeuds": 98786
+      },
+      "8": {
+        "evenements": 171933,
+        "facettes": 1246133,
+        "deltas": 144512,
+        "attachements": 1051999,
+        "fusions": 1244360,
+        "noeuds": 114986
+      },
+      "9": {
+        "evenements": 192108,
+        "facettes": 1584468,
+        "deltas": 164635,
+        "attachements": 1360262,
+        "fusions": 1582281,
+        "noeuds": 131840
+      },
+      "10": {
+        "evenements": 213064,
+        "facettes": 1970073,
+        "deltas": 185072,
+        "attachements": 1715476,
+        "fusions": 1967520,
+        "noeuds": 148943
+      }
+    },
+    "counts": {
+      "n": 16000,
+      "coord": 632,
+      "s": 8,
+      "smax": 11,
+      "seed": 17,
+      "threads": 8,
+      "emis": 1231352,
+      "boules_uniques": 1230398,
+      "mortes_profondeur": 46696,
+      "survivantes": 1183702,
+      "census_int": 5953223,
+      "census_shell": 3369765,
+      "evenements": 1231176,
+      "facettes": 7475832,
+      "fusions": 7465715,
+      "deltas": 971760,
+      "noeuds": 771055
+    },
+    "pipeline_ms": 24894.1,
+    "max_rss_kb": 1129684
+  },
+  {
+    "sequence": 13,
+    "family": "terrain",
+    "n": 16000,
+    "seed": 17,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=16000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/013_terrain_16000_s17_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=16000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 22.45673140999952,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "0d4a1e8e07df6755f62b217122c0bf0d1e3c32b447e0802ae24bcfe184876d6f",
+      "digest_forest_K2": "5e0ada6663b95bc3a8e85fa07e430ef81dc01b028bdbc2d858281f3522682b6f",
+      "digest_forest_K3": "30e4ef1926e151a8ff5982d1add83e10bd37dcdd2088cbe41d239c473b38da52",
+      "digest_forest_K4": "cf4e2f978bca5a341297c6a00a06af7b0cbc3903d15bf437413de011be5157a6",
+      "digest_forest_K5": "f2fc0c9d2e1bb8a72b5902113a62a0f3136e070eece4b689bd386a813b24051f",
+      "digest_forest_K6": "10f942fc1fe81dc7e4cd7f9534187b88551fc84c3888e5c96f4b715cfb5fadef",
+      "digest_forest_K7": "4fd77c6c7d3d76509f033a0377b957e30cfb93202455a88b160454acfb92a2b4",
+      "digest_forest_K8": "a981a56a0911ffa710122254e4f642a46c21e1fc1236143982d5ba80aa514e86",
+      "digest_forest_K9": "a34e0fb5c0f92eef73cb343ffb52b94c88db45bf5867f247f3ac7c2464933bc5",
+      "digest_forest_K10": "e7077cbf567515e0cecf1ca0484f97bae6f3bcabbe0e5b84d13c880513d8d471",
+      "digest_all": "6584d37264564ff56c289b31c9e75a7d007e7f4624649e5bfc354a07e62504db"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 36794,
+        "facettes": 16000,
+        "deltas": 13100,
+        "attachements": 0,
+        "fusions": 15999,
+        "noeuds": 13100
+      },
+      "2": {
+        "evenements": 55444,
+        "facettes": 72735,
+        "deltas": 30497,
+        "attachements": 36703,
+        "fusions": 72717,
+        "noeuds": 24502
+      },
+      "3": {
+        "evenements": 73929,
+        "facettes": 168266,
+        "deltas": 49893,
+        "attachements": 109083,
+        "fusions": 168117,
+        "noeuds": 37516
+      },
+      "4": {
+        "evenements": 92834,
+        "facettes": 302803,
+        "deltas": 67920,
+        "attachements": 218818,
+        "fusions": 302412,
+        "noeuds": 51922
+      },
+      "5": {
+        "evenements": 111971,
+        "facettes": 476889,
+        "deltas": 86247,
+        "attachements": 366387,
+        "fusions": 476222,
+        "noeuds": 66943
+      },
+      "6": {
+        "evenements": 131619,
+        "facettes": 691424,
+        "deltas": 105203,
+        "attachements": 554153,
+        "fusions": 690428,
+        "noeuds": 82517
+      },
+      "7": {
+        "evenements": 151480,
+        "facettes": 947041,
+        "deltas": 124681,
+        "attachements": 781619,
+        "fusions": 945659,
+        "noeuds": 98786
+      },
+      "8": {
+        "evenements": 171933,
+        "facettes": 1246133,
+        "deltas": 144512,
+        "attachements": 1051999,
+        "fusions": 1244360,
+        "noeuds": 114986
+      },
+      "9": {
+        "evenements": 192108,
+        "facettes": 1584468,
+        "deltas": 164635,
+        "attachements": 1360262,
+        "fusions": 1582281,
+        "noeuds": 131840
+      },
+      "10": {
+        "evenements": 213064,
+        "facettes": 1970073,
+        "deltas": 185072,
+        "attachements": 1715476,
+        "fusions": 1967520,
+        "noeuds": 148943
+      }
+    },
+    "counts": {
+      "n": 16000,
+      "coord": 632,
+      "s": 8,
+      "smax": 11,
+      "seed": 17,
+      "threads": 8,
+      "emis": 1231352,
+      "boules_uniques": 1230398,
+      "mortes_profondeur": 46696,
+      "survivantes": 1183702,
+      "census_int": 5953223,
+      "census_shell": 3369765,
+      "evenements": 1231176,
+      "facettes": 7475832,
+      "fusions": 7465715,
+      "deltas": 971760,
+      "noeuds": 771055
+    },
+    "pipeline_ms": 22425.8,
+    "max_rss_kb": 1079780
+  },
+  {
+    "sequence": 14,
+    "family": "terrain",
+    "n": 32000,
+    "seed": 17,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=32000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/014_terrain_32000_s17_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=32000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 71.6607268859998,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "028735ee576b20ae696413e92902860ff7103f6e2078da19994635558bb8c957",
+      "digest_forest_K2": "543919adb2420b4a556e0a767519d800dbb5eaf1b9d49e379a6259d04c0f4136",
+      "digest_forest_K3": "160580f9e91d9d947aab27dcc1db063d62345a9e25e536f73363700cc5ab54d4",
+      "digest_forest_K4": "3010af50d0f4aa224f1211c1512a7b9ee1f9f8409a1c1926d46a6f3ab6f2edaa",
+      "digest_forest_K5": "f64c90d5e70fe7aaeadd6ceec1f60de19811fa7bb25e0da42df7c05e7fb32880",
+      "digest_forest_K6": "379ce2c510d7a35faf832f84fff1537111d7469d77e79fe4b5ba2cdab3c15497",
+      "digest_forest_K7": "805e4cd8cbaa472e43de509eb7e3f4e235b6689e6690090129bf0ac72f8c463a",
+      "digest_forest_K8": "af634cf12a269b7d1fafddceb436dc82e119538dba5aadc04e872b4532b3aeb9",
+      "digest_forest_K9": "8830bcad4d2903858dadf20575453e215e845b32d74d0e68c5588845b86c4588",
+      "digest_forest_K10": "27bf57b64654c623ba97ba57c327090dc4a4bc20b392ceeca076607df9f2d032",
+      "digest_all": "a555afbd4790037546f1d38cd2503bc2332679161a77e0ac721777897baf3bed"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 73734,
+        "facettes": 32000,
+        "deltas": 26056,
+        "attachements": 0,
+        "fusions": 31999,
+        "noeuds": 26056
+      },
+      "2": {
+        "evenements": 111292,
+        "facettes": 145936,
+        "deltas": 59667,
+        "attachements": 73743,
+        "fusions": 145913,
+        "noeuds": 47885
+      },
+      "3": {
+        "evenements": 149096,
+        "facettes": 338967,
+        "deltas": 97788,
+        "attachements": 220048,
+        "fusions": 338698,
+        "noeuds": 73832
+      },
+      "4": {
+        "evenements": 188000,
+        "facettes": 612962,
+        "deltas": 132977,
+        "attachements": 443074,
+        "fusions": 612266,
+        "noeuds": 102336
+      },
+      "5": {
+        "evenements": 227726,
+        "facettes": 969448,
+        "deltas": 170223,
+        "attachements": 744343,
+        "fusions": 968100,
+        "noeuds": 133233
+      },
+      "6": {
+        "evenements": 268234,
+        "facettes": 1410137,
+        "deltas": 208380,
+        "attachements": 1127611,
+        "fusions": 1408011,
+        "noeuds": 164768
+      },
+      "7": {
+        "evenements": 309422,
+        "facettes": 1937516,
+        "deltas": 247299,
+        "attachements": 1593962,
+        "fusions": 1934403,
+        "noeuds": 198169
+      },
+      "8": {
+        "evenements": 351786,
+        "facettes": 2555013,
+        "deltas": 288172,
+        "attachements": 2149112,
+        "fusions": 2550816,
+        "noeuds": 232334
+      },
+      "9": {
+        "evenements": 394483,
+        "facettes": 3262264,
+        "deltas": 330782,
+        "attachements": 2789666,
+        "fusions": 3256802,
+        "noeuds": 269161
+      },
+      "10": {
+        "evenements": 437568,
+        "facettes": 4057457,
+        "deltas": 372423,
+        "attachements": 3518214,
+        "fusions": 4050532,
+        "noeuds": 304557
+      }
+    },
+    "counts": {
+      "n": 32000,
+      "coord": 894,
+      "s": 8,
+      "smax": 11,
+      "seed": 17,
+      "threads": 8,
+      "emis": 2528241,
+      "boules_uniques": 2526533,
+      "mortes_profondeur": 109090,
+      "survivantes": 2417443,
+      "census_int": 12182038,
+      "census_shell": 6897653,
+      "evenements": 2511341,
+      "facettes": 15321700,
+      "fusions": 15297540,
+      "deltas": 1933767,
+      "noeuds": 1552331
+    },
+    "pipeline_ms": 71589.7,
+    "max_rss_kb": 1930584
+  },
+  {
+    "sequence": 14,
+    "family": "terrain",
+    "n": 32000,
+    "seed": 17,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=32000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/014_terrain_32000_s17_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=32000",
+      "--seed=17",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 69.55221228600021,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "028735ee576b20ae696413e92902860ff7103f6e2078da19994635558bb8c957",
+      "digest_forest_K2": "543919adb2420b4a556e0a767519d800dbb5eaf1b9d49e379a6259d04c0f4136",
+      "digest_forest_K3": "160580f9e91d9d947aab27dcc1db063d62345a9e25e536f73363700cc5ab54d4",
+      "digest_forest_K4": "3010af50d0f4aa224f1211c1512a7b9ee1f9f8409a1c1926d46a6f3ab6f2edaa",
+      "digest_forest_K5": "f64c90d5e70fe7aaeadd6ceec1f60de19811fa7bb25e0da42df7c05e7fb32880",
+      "digest_forest_K6": "379ce2c510d7a35faf832f84fff1537111d7469d77e79fe4b5ba2cdab3c15497",
+      "digest_forest_K7": "805e4cd8cbaa472e43de509eb7e3f4e235b6689e6690090129bf0ac72f8c463a",
+      "digest_forest_K8": "af634cf12a269b7d1fafddceb436dc82e119538dba5aadc04e872b4532b3aeb9",
+      "digest_forest_K9": "8830bcad4d2903858dadf20575453e215e845b32d74d0e68c5588845b86c4588",
+      "digest_forest_K10": "27bf57b64654c623ba97ba57c327090dc4a4bc20b392ceeca076607df9f2d032",
+      "digest_all": "a555afbd4790037546f1d38cd2503bc2332679161a77e0ac721777897baf3bed"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 73734,
+        "facettes": 32000,
+        "deltas": 26056,
+        "attachements": 0,
+        "fusions": 31999,
+        "noeuds": 26056
+      },
+      "2": {
+        "evenements": 111292,
+        "facettes": 145936,
+        "deltas": 59667,
+        "attachements": 73743,
+        "fusions": 145913,
+        "noeuds": 47885
+      },
+      "3": {
+        "evenements": 149096,
+        "facettes": 338967,
+        "deltas": 97788,
+        "attachements": 220048,
+        "fusions": 338698,
+        "noeuds": 73832
+      },
+      "4": {
+        "evenements": 188000,
+        "facettes": 612962,
+        "deltas": 132977,
+        "attachements": 443074,
+        "fusions": 612266,
+        "noeuds": 102336
+      },
+      "5": {
+        "evenements": 227726,
+        "facettes": 969448,
+        "deltas": 170223,
+        "attachements": 744343,
+        "fusions": 968100,
+        "noeuds": 133233
+      },
+      "6": {
+        "evenements": 268234,
+        "facettes": 1410137,
+        "deltas": 208380,
+        "attachements": 1127611,
+        "fusions": 1408011,
+        "noeuds": 164768
+      },
+      "7": {
+        "evenements": 309422,
+        "facettes": 1937516,
+        "deltas": 247299,
+        "attachements": 1593962,
+        "fusions": 1934403,
+        "noeuds": 198169
+      },
+      "8": {
+        "evenements": 351786,
+        "facettes": 2555013,
+        "deltas": 288172,
+        "attachements": 2149112,
+        "fusions": 2550816,
+        "noeuds": 232334
+      },
+      "9": {
+        "evenements": 394483,
+        "facettes": 3262264,
+        "deltas": 330782,
+        "attachements": 2789666,
+        "fusions": 3256802,
+        "noeuds": 269161
+      },
+      "10": {
+        "evenements": 437568,
+        "facettes": 4057457,
+        "deltas": 372423,
+        "attachements": 3518214,
+        "fusions": 4050532,
+        "noeuds": 304557
+      }
+    },
+    "counts": {
+      "n": 32000,
+      "coord": 894,
+      "s": 8,
+      "smax": 11,
+      "seed": 17,
+      "threads": 8,
+      "emis": 2528241,
+      "boules_uniques": 2526533,
+      "mortes_profondeur": 109090,
+      "survivantes": 2417443,
+      "census_int": 12182038,
+      "census_shell": 6897653,
+      "evenements": 2511341,
+      "facettes": 15321700,
+      "fusions": 15297540,
+      "deltas": 1933767,
+      "noeuds": 1552331
+    },
+    "pipeline_ms": 69478.5,
+    "max_rss_kb": 1892088
+  },
+  {
+    "sequence": 15,
+    "family": "terrain",
+    "n": 8000,
+    "seed": 29,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=8000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/015_terrain_8000_s29_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=8000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 13.017738353000823,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "84f7506fa5d74838da373cc471cbdb26069875c713d25c0a808d8c9f300b3429",
+      "digest_forest_K2": "6225ad6bfc127826d00fbe693d2ccd20e660165b7fe1410255f1e0347696aa93",
+      "digest_forest_K3": "1cf551b722023094430fcdf756dc808489010066727222e8c213787bef17fbf0",
+      "digest_forest_K4": "4c77c3f2a4fd1a939ebced9211b813a0fb69856cbea030ff5ab22b4278223c27",
+      "digest_forest_K5": "2d74557c1c5047c112e48d49d0681dd87bbcb018c0cebf45d8440af7b65ad7fd",
+      "digest_forest_K6": "bedd9aff64f1c26b8d57d2c9d684e32e28e3623d5ab9bb745987ef64a03b7822",
+      "digest_forest_K7": "5d115d6663da56ca61bf89f3ac453fedab7a91e15d72b4713f2c9a4fd563b039",
+      "digest_forest_K8": "7e072181f820d700be798c53494026b916daa14f6908975b677237f50b5e937f",
+      "digest_forest_K9": "876aaa86aff8877884d8d5c760cfdda1416d42431bb7ceeaaf7b3a976c7d348d",
+      "digest_forest_K10": "95b2332ffc85bb10a8fd116a8de29ac0245a7f6bff4a169c52401d248406b4b7",
+      "digest_all": "ac4e940bd27addadd74255b38538a30010ef2c084ffb6a24d18b9167f4465b72"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 18040,
+        "facettes": 8000,
+        "deltas": 6563,
+        "attachements": 0,
+        "fusions": 7999,
+        "noeuds": 6563
+      },
+      "2": {
+        "evenements": 27035,
+        "facettes": 35659,
+        "deltas": 14976,
+        "attachements": 18178,
+        "fusions": 35640,
+        "noeuds": 12100
+      },
+      "3": {
+        "evenements": 36115,
+        "facettes": 81965,
+        "deltas": 24977,
+        "attachements": 53668,
+        "fusions": 81875,
+        "noeuds": 18432
+      },
+      "4": {
+        "evenements": 44759,
+        "facettes": 145627,
+        "deltas": 33210,
+        "attachements": 105876,
+        "fusions": 145459,
+        "noeuds": 25069
+      },
+      "5": {
+        "evenements": 53766,
+        "facettes": 227941,
+        "deltas": 41996,
+        "attachements": 176968,
+        "fusions": 227682,
+        "noeuds": 32059
+      },
+      "6": {
+        "evenements": 62641,
+        "facettes": 327735,
+        "deltas": 50672,
+        "attachements": 265081,
+        "fusions": 327425,
+        "noeuds": 39122
+      },
+      "7": {
+        "evenements": 71962,
+        "facettes": 447695,
+        "deltas": 59858,
+        "attachements": 373312,
+        "fusions": 447311,
+        "noeuds": 46367
+      },
+      "8": {
+        "evenements": 81125,
+        "facettes": 585250,
+        "deltas": 68877,
+        "attachements": 498520,
+        "fusions": 584829,
+        "noeuds": 53778
+      },
+      "9": {
+        "evenements": 90335,
+        "facettes": 741776,
+        "deltas": 78190,
+        "attachements": 642471,
+        "fusions": 741286,
+        "noeuds": 61170
+      },
+      "10": {
+        "evenements": 99734,
+        "facettes": 918219,
+        "deltas": 87709,
+        "attachements": 806461,
+        "fusions": 917689,
+        "noeuds": 68814
+      }
+    },
+    "counts": {
+      "n": 8000,
+      "coord": 447,
+      "s": 8,
+      "smax": 11,
+      "seed": 29,
+      "threads": 8,
+      "emis": 583249,
+      "boules_uniques": 582861,
+      "mortes_profondeur": 20024,
+      "survivantes": 562837,
+      "census_int": 2824810,
+      "census_shell": 1587174,
+      "evenements": 585512,
+      "facettes": 3519867,
+      "fusions": 3517195,
+      "deltas": 467028,
+      "noeuds": 363474
+    },
+    "pipeline_ms": 12950.8,
+    "max_rss_kb": 559208
+  },
+  {
+    "sequence": 15,
+    "family": "terrain",
+    "n": 8000,
+    "seed": 29,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=8000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/015_terrain_8000_s29_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=8000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 14.475784759999442,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "84f7506fa5d74838da373cc471cbdb26069875c713d25c0a808d8c9f300b3429",
+      "digest_forest_K2": "6225ad6bfc127826d00fbe693d2ccd20e660165b7fe1410255f1e0347696aa93",
+      "digest_forest_K3": "1cf551b722023094430fcdf756dc808489010066727222e8c213787bef17fbf0",
+      "digest_forest_K4": "4c77c3f2a4fd1a939ebced9211b813a0fb69856cbea030ff5ab22b4278223c27",
+      "digest_forest_K5": "2d74557c1c5047c112e48d49d0681dd87bbcb018c0cebf45d8440af7b65ad7fd",
+      "digest_forest_K6": "bedd9aff64f1c26b8d57d2c9d684e32e28e3623d5ab9bb745987ef64a03b7822",
+      "digest_forest_K7": "5d115d6663da56ca61bf89f3ac453fedab7a91e15d72b4713f2c9a4fd563b039",
+      "digest_forest_K8": "7e072181f820d700be798c53494026b916daa14f6908975b677237f50b5e937f",
+      "digest_forest_K9": "876aaa86aff8877884d8d5c760cfdda1416d42431bb7ceeaaf7b3a976c7d348d",
+      "digest_forest_K10": "95b2332ffc85bb10a8fd116a8de29ac0245a7f6bff4a169c52401d248406b4b7",
+      "digest_all": "ac4e940bd27addadd74255b38538a30010ef2c084ffb6a24d18b9167f4465b72"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 18040,
+        "facettes": 8000,
+        "deltas": 6563,
+        "attachements": 0,
+        "fusions": 7999,
+        "noeuds": 6563
+      },
+      "2": {
+        "evenements": 27035,
+        "facettes": 35659,
+        "deltas": 14976,
+        "attachements": 18178,
+        "fusions": 35640,
+        "noeuds": 12100
+      },
+      "3": {
+        "evenements": 36115,
+        "facettes": 81965,
+        "deltas": 24977,
+        "attachements": 53668,
+        "fusions": 81875,
+        "noeuds": 18432
+      },
+      "4": {
+        "evenements": 44759,
+        "facettes": 145627,
+        "deltas": 33210,
+        "attachements": 105876,
+        "fusions": 145459,
+        "noeuds": 25069
+      },
+      "5": {
+        "evenements": 53766,
+        "facettes": 227941,
+        "deltas": 41996,
+        "attachements": 176968,
+        "fusions": 227682,
+        "noeuds": 32059
+      },
+      "6": {
+        "evenements": 62641,
+        "facettes": 327735,
+        "deltas": 50672,
+        "attachements": 265081,
+        "fusions": 327425,
+        "noeuds": 39122
+      },
+      "7": {
+        "evenements": 71962,
+        "facettes": 447695,
+        "deltas": 59858,
+        "attachements": 373312,
+        "fusions": 447311,
+        "noeuds": 46367
+      },
+      "8": {
+        "evenements": 81125,
+        "facettes": 585250,
+        "deltas": 68877,
+        "attachements": 498520,
+        "fusions": 584829,
+        "noeuds": 53778
+      },
+      "9": {
+        "evenements": 90335,
+        "facettes": 741776,
+        "deltas": 78190,
+        "attachements": 642471,
+        "fusions": 741286,
+        "noeuds": 61170
+      },
+      "10": {
+        "evenements": 99734,
+        "facettes": 918219,
+        "deltas": 87709,
+        "attachements": 806461,
+        "fusions": 917689,
+        "noeuds": 68814
+      }
+    },
+    "counts": {
+      "n": 8000,
+      "coord": 447,
+      "s": 8,
+      "smax": 11,
+      "seed": 29,
+      "threads": 8,
+      "emis": 583249,
+      "boules_uniques": 582861,
+      "mortes_profondeur": 20024,
+      "survivantes": 562837,
+      "census_int": 2824810,
+      "census_shell": 1587174,
+      "evenements": 585512,
+      "facettes": 3519867,
+      "fusions": 3517195,
+      "deltas": 467028,
+      "noeuds": 363474
+    },
+    "pipeline_ms": 14423.3,
+    "max_rss_kb": 717068
+  },
+  {
+    "sequence": 16,
+    "family": "terrain",
+    "n": 16000,
+    "seed": 29,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=16000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/016_terrain_16000_s29_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=16000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 76.90840567099985,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "198ca52d7d27c146fd770e9cf460f5821ad5fc7167c13d33b7ec50888d9f354c",
+      "digest_forest_K2": "e89b2c902aa8ef32b78f9f6de61c558142c01d293bc42af9c0a7f2ed1cc73c9c",
+      "digest_forest_K3": "034aa27e85f7b44d8188cac9861ede879aa2d9842d9f012cb47d72da2d063eed",
+      "digest_forest_K4": "5d4022310ba10dc0fa1c3f202106ed14c64ed6eba2daf1f72fc7a1ed7cbcc91b",
+      "digest_forest_K5": "fc7ebf923e4f890034717c18c2af9e3da3b15fdeeb1cf1ca01160b3c594dcb92",
+      "digest_forest_K6": "701efe9e822aa43d58027ac61efc157f868a1bf1476cf7ba6fc88c65e5588f60",
+      "digest_forest_K7": "985d41ef5b7fc09055ea331a08b4a871d6bad0f7ebbf9034a283912ca2f63522",
+      "digest_forest_K8": "461a4c41bacce6dc7a1dedcc8cadb7181c1d0b684710c3b3a1ba5ed1f66ef868",
+      "digest_forest_K9": "29bd8a6ae5f1528f155668b4dad077599120004a0cc8613573a5de5e388650c6",
+      "digest_forest_K10": "d35cc3b7d8c0533c9a91af4f22d8d8ca36e68462977768c6bfb657a3dc2fc692",
+      "digest_all": "0950dddfe98ca978c77e8b07be8ec274b56eccd0e9c1ca5da245f0c0342f5e86"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 36722,
+        "facettes": 16000,
+        "deltas": 13044,
+        "attachements": 0,
+        "fusions": 15999,
+        "noeuds": 13044
+      },
+      "2": {
+        "evenements": 55108,
+        "facettes": 72437,
+        "deltas": 30314,
+        "attachements": 36490,
+        "fusions": 72418,
+        "noeuds": 24414
+      },
+      "3": {
+        "evenements": 73576,
+        "facettes": 167356,
+        "deltas": 49936,
+        "attachements": 108799,
+        "fusions": 167202,
+        "noeuds": 37333
+      },
+      "4": {
+        "evenements": 92008,
+        "facettes": 300096,
+        "deltas": 67627,
+        "attachements": 217047,
+        "fusions": 299720,
+        "noeuds": 51597
+      },
+      "5": {
+        "evenements": 110893,
+        "facettes": 471659,
+        "deltas": 85736,
+        "attachements": 363674,
+        "fusions": 471016,
+        "noeuds": 66100
+      },
+      "6": {
+        "evenements": 130072,
+        "facettes": 682685,
+        "deltas": 104155,
+        "attachements": 548473,
+        "fusions": 681654,
+        "noeuds": 81503
+      },
+      "7": {
+        "evenements": 149234,
+        "facettes": 932002,
+        "deltas": 122918,
+        "attachements": 771079,
+        "fusions": 930634,
+        "noeuds": 96814
+      },
+      "8": {
+        "evenements": 168775,
+        "facettes": 1222359,
+        "deltas": 142507,
+        "attachements": 1034351,
+        "fusions": 1220675,
+        "noeuds": 112866
+      },
+      "9": {
+        "evenements": 188283,
+        "facettes": 1551386,
+        "deltas": 162021,
+        "attachements": 1335667,
+        "fusions": 1549377,
+        "noeuds": 128998
+      },
+      "10": {
+        "evenements": 208364,
+        "facettes": 1924310,
+        "deltas": 181808,
+        "attachements": 1681005,
+        "fusions": 1921993,
+        "noeuds": 145003
+      }
+    },
+    "counts": {
+      "n": 16000,
+      "coord": 632,
+      "s": 8,
+      "smax": 11,
+      "seed": 29,
+      "threads": 8,
+      "emis": 1213550,
+      "boules_uniques": 1212718,
+      "mortes_profondeur": 45021,
+      "survivantes": 1167697,
+      "census_int": 5867141,
+      "census_shell": 3310187,
+      "evenements": 1213035,
+      "facettes": 7340290,
+      "fusions": 7330688,
+      "deltas": 960066,
+      "noeuds": 757672
+    },
+    "pipeline_ms": 76864.2,
+    "max_rss_kb": 1152712
+  },
+  {
+    "sequence": 16,
+    "family": "terrain",
+    "n": 16000,
+    "seed": 29,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=16000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/016_terrain_16000_s29_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=16000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 80.81540125100037,
+    "status": "completed",
+    "digests": {
+      "digest_forest_K1": "198ca52d7d27c146fd770e9cf460f5821ad5fc7167c13d33b7ec50888d9f354c",
+      "digest_forest_K2": "e89b2c902aa8ef32b78f9f6de61c558142c01d293bc42af9c0a7f2ed1cc73c9c",
+      "digest_forest_K3": "034aa27e85f7b44d8188cac9861ede879aa2d9842d9f012cb47d72da2d063eed",
+      "digest_forest_K4": "5d4022310ba10dc0fa1c3f202106ed14c64ed6eba2daf1f72fc7a1ed7cbcc91b",
+      "digest_forest_K5": "fc7ebf923e4f890034717c18c2af9e3da3b15fdeeb1cf1ca01160b3c594dcb92",
+      "digest_forest_K6": "701efe9e822aa43d58027ac61efc157f868a1bf1476cf7ba6fc88c65e5588f60",
+      "digest_forest_K7": "985d41ef5b7fc09055ea331a08b4a871d6bad0f7ebbf9034a283912ca2f63522",
+      "digest_forest_K8": "461a4c41bacce6dc7a1dedcc8cadb7181c1d0b684710c3b3a1ba5ed1f66ef868",
+      "digest_forest_K9": "29bd8a6ae5f1528f155668b4dad077599120004a0cc8613573a5de5e388650c6",
+      "digest_forest_K10": "d35cc3b7d8c0533c9a91af4f22d8d8ca36e68462977768c6bfb657a3dc2fc692",
+      "digest_all": "0950dddfe98ca978c77e8b07be8ec274b56eccd0e9c1ca5da245f0c0342f5e86"
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 36722,
+        "facettes": 16000,
+        "deltas": 13044,
+        "attachements": 0,
+        "fusions": 15999,
+        "noeuds": 13044
+      },
+      "2": {
+        "evenements": 55108,
+        "facettes": 72437,
+        "deltas": 30314,
+        "attachements": 36490,
+        "fusions": 72418,
+        "noeuds": 24414
+      },
+      "3": {
+        "evenements": 73576,
+        "facettes": 167356,
+        "deltas": 49936,
+        "attachements": 108799,
+        "fusions": 167202,
+        "noeuds": 37333
+      },
+      "4": {
+        "evenements": 92008,
+        "facettes": 300096,
+        "deltas": 67627,
+        "attachements": 217047,
+        "fusions": 299720,
+        "noeuds": 51597
+      },
+      "5": {
+        "evenements": 110893,
+        "facettes": 471659,
+        "deltas": 85736,
+        "attachements": 363674,
+        "fusions": 471016,
+        "noeuds": 66100
+      },
+      "6": {
+        "evenements": 130072,
+        "facettes": 682685,
+        "deltas": 104155,
+        "attachements": 548473,
+        "fusions": 681654,
+        "noeuds": 81503
+      },
+      "7": {
+        "evenements": 149234,
+        "facettes": 932002,
+        "deltas": 122918,
+        "attachements": 771079,
+        "fusions": 930634,
+        "noeuds": 96814
+      },
+      "8": {
+        "evenements": 168775,
+        "facettes": 1222359,
+        "deltas": 142507,
+        "attachements": 1034351,
+        "fusions": 1220675,
+        "noeuds": 112866
+      },
+      "9": {
+        "evenements": 188283,
+        "facettes": 1551386,
+        "deltas": 162021,
+        "attachements": 1335667,
+        "fusions": 1549377,
+        "noeuds": 128998
+      },
+      "10": {
+        "evenements": 208364,
+        "facettes": 1924310,
+        "deltas": 181808,
+        "attachements": 1681005,
+        "fusions": 1921993,
+        "noeuds": 145003
+      }
+    },
+    "counts": {
+      "n": 16000,
+      "coord": 632,
+      "s": 8,
+      "smax": 11,
+      "seed": 29,
+      "threads": 8,
+      "emis": 1213550,
+      "boules_uniques": 1212718,
+      "mortes_profondeur": 45021,
+      "survivantes": 1167697,
+      "census_int": 5867141,
+      "census_shell": 3310187,
+      "evenements": 1213035,
+      "facettes": 7340290,
+      "fusions": 7330688,
+      "deltas": 960066,
+      "noeuds": 757672
+    },
+    "pipeline_ms": 80750.5,
+    "max_rss_kb": 1023232
+  },
+  {
+    "sequence": 17,
+    "family": "terrain",
+    "n": 32000,
+    "seed": 29,
+    "version": "v7",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=32000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/017_terrain_32000_s29_v7.time",
+      "--",
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=terrain",
+      "--n=32000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": -9,
+    "timed_out": true,
+    "wall_seconds": 300.0026255969997,
+    "status": "failed"
+  },
+  {
+    "sequence": 17,
+    "family": "terrain",
+    "n": 32000,
+    "seed": 29,
+    "version": "v6",
+    "command": [
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=32000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "wrapped_command": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/local_paired_20260904/017_terrain_32000_s29_v6.time",
+      "--",
+      "/workspaces/E-HGP/build/v6_reference/mhgp6",
+      "--family=terrain",
+      "--n=32000",
+      "--seed=29",
+      "--threads=8",
+      "--s=8",
+      "--smax=11",
+      "--layout=csr",
+      "--fold-inflight=2",
+      "--fold-join=0",
+      "--digest"
+    ],
+    "returncode": -9,
+    "timed_out": true,
+    "wall_seconds": 300.0024807910004,
+    "status": "failed"
+  }
+]

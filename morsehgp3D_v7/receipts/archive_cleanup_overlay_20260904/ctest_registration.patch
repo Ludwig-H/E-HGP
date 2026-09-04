@@ -1,0 +1,18 @@
+--- a/morsehgp3D_v7/CMakeLists.txt
++++ b/morsehgp3D_v7/CMakeLists.txt
+@@ -808,6 +808,15 @@
+ mhgp7_executable(mhgp7_archive_api_gate tests/archive_api_gate.cpp)
+ target_link_options(mhgp7_archive_api_gate PRIVATE -Wl,--wrap=fsync)
+ mhgp7_gate(mhgp7_archive_api 0 mhgp7_archive_api_gate TIMEOUT 120)
++mhgp7_executable(mhgp7_archive_cleanup_gate tests/archive_cleanup_gate.cpp)
++target_link_options(mhgp7_archive_cleanup_gate PRIVATE -Wl,--wrap=openat -Wl,--wrap=fsync)
++mhgp7_gate(mhgp7_archive_cleanup 0 mhgp7_archive_cleanup_gate TIMEOUT 120 EXPECT_PREFIX "archive_cleanup_gate=passed persistent=1 all_order_files=10 ")
++add_test(NAME mhgp7_incidence_campaign
++         COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/tests/incidence_campaign_gate.py)
++add_test(NAME mhgp7_incidence_campaign_optimized
++         COMMAND python3 -O ${CMAKE_CURRENT_SOURCE_DIR}/tests/incidence_campaign_gate.py)
++set_tests_properties(mhgp7_incidence_campaign mhgp7_incidence_campaign_optimized
++                     PROPERTIES LABELS gate TIMEOUT 120)
+ add_test(NAME mhgp7_expect_line
+          COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_line_gate.py
+                  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)

@@ -1,0 +1,12 @@
+[100%] Built target mhgp7
+[100%] Built target mhgp7_archive_api_gate
+[100%] Built target mhgp7_archive_cleanup_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_profile.dir/cli/mhgp7.cpp.o
+[100%] Linking CXX executable mhgp7_profile
+[100%] Built target mhgp7_profile
+[ 50%] Building CXX object CMakeFiles/mhgp7_profile_liveness.dir/cli/mhgp7.cpp.o
+[100%] Linking CXX executable mhgp7_profile_liveness
+[100%] Built target mhgp7_profile_liveness
+[ 50%] Building CXX object CMakeFiles/mhgp7_profile_sonde.dir/cli/mhgp7.cpp.o
+[100%] Linking CXX executable mhgp7_profile_sonde
+[100%] Built target mhgp7_profile_sonde

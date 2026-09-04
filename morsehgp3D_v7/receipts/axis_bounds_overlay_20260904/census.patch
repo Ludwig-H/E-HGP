@@ -1,0 +1,55 @@
+--- a/morsehgp3D_v7/src/pipeline/census.hpp
++++ b/morsehgp3D_v7/src/pipeline/census.hpp
+@@ -60,19 +60,37 @@
+ 
+ struct AxisBounds {
+   const BallKey& k;
++  i64 integer_min[3];
++  // Conservative u16 lane bounds (QUALIFICATION_S1_PRIMITIVES, section 4):
++  // 0 < A < 2^68, |B_i| < 2^87, |C| < 2^105. These deliberately include
++  // more than the narrower historical comment in lanes/keys.hpp.
++  // q=floor(-B_i/(2A)), r=-B_i-2Aq: f(q+1)-f(q)=A-r.
++  // Cache a global INTEGER minimizer (ties choose q), clipped to u16 before
++  // narrowing. Further clipping to any index box gives its exact minimum.
++  // No polynomial evaluation at the potentially distant rational centre.
++  // |2Aq| <= |B_i| + 2A < 2^88, so computing the remainder is safe in i128.
++  explicit AxisBounds(const BallKey& key) : k(key) {
++    const i128 twice_a = 2 * k.a;
++    for (int i = 0; i < 3; ++i) {
++      const i128 b = MHGP7_MUTANT("axis-argmin-narrow-coefficient") ? (i128)(i64)k.b[i] : k.b[i];
++      const i128 q = floor_div128(-b, twice_a);
++      const i128 r = -b - twice_a * q;
++      i128 m = q + (r > k.a ? 1 : 0);
++      if (MHGP7_MUTANT("axis-argmin-floor-only")) m = q;
++      if (MHGP7_MUTANT("axis-argmin-ceil-always")) m = q + 1;
++      integer_min[i] = (i64)std::min(std::max(m, (i128)0), (i128)65535);
++    }
++  }
+   i128 axis_val(int i, i64 t) const { return k.a * ((i128)t * t) + k.b[i] * t; }
+   i128 axis_min(int i, i64 lo, i64 hi) const {
+-    const i64 t1 = (i64)floor_div128(-k.b[i], 2 * k.a);
+-    i128 best = 0;
+-    bool first = true;
+-    for (const i64 cand : {t1, t1 + 1, lo, hi}) {
+-      const i64 c = std::min(std::max(cand, lo), hi);
+-      const i128 v = axis_val(i, c);
+-      if (first || v < best) { best = v; first = false; }
+-    }
+-    return best;
++    const i64 t = MHGP7_MUTANT("axis-argmin-no-clip") ? integer_min[i]
++                  : std::min(std::max(integer_min[i], lo), hi);
++    return axis_val(i, t);
++  }
++  i128 axis_max(int i, i64 lo, i64 hi) const {
++    if (MHGP7_MUTANT("axis-argmin-max-min")) return std::min(axis_val(i, lo), axis_val(i, hi));
++    return std::max(axis_val(i, lo), axis_val(i, hi));
+   }
+-  i128 axis_max(int i, i64 lo, i64 hi) const { return std::max(axis_val(i, lo), axis_val(i, hi)); }
+   void bounds(const AxisBox& bz, i128* mn, i128* mx) const {
+     *mn = k.c;
+     *mx = k.c;
+@@ -189,4 +207,3 @@
+ }
+ 
+ }  // namespace mhgp7
+-

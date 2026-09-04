@@ -1,0 +1,7 @@
+{
+  "binary_source_authority": "release_delta2_20260904, not the current changing C sources",
+  "gcp": "not_used",
+  "public_status": "not_claimed",
+  "release_b2_manifest_sha256": "cfac82628f97ed59253519e513897f82955661182c0331c5ab95d625acdaa5ac",
+  "scope": "runner_negative_tests_and_two_real_wire_smokes_not_performance"
+}

@@ -1,0 +1,84 @@
+{
+  "schema": "mhgp7.local.gcp-guard-regression.v1",
+  "recorded_utc": "2026-09-04T21:23:07Z",
+  "public_status": "not_claimed",
+  "scope": "historical_gcp_guard_and_docker_simulations_not_v7_guest_provisioning",
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "tests.gcp.test_gcp_safety",
+    "tests.gcp.test_phase3_docker_provision"
+  ],
+  "authority": {
+    "execution": "parent tool session 44925",
+    "terminal_summary": "reported by root after session termination",
+    "inspection": "read-only process-tree and source inspection by audit_gcp_build",
+    "raw_traceback_in_this_file": false,
+    "rerun_performed": false
+  },
+  "status": "failed",
+  "exit_code": 1,
+  "elapsed_seconds": 1893.400,
+  "tests_run": 94,
+  "passed": 91,
+  "failures": 0,
+  "errors": 3,
+  "error_details": [
+    {
+      "test": "tests.gcp.test_phase3_docker_provision.Phase3DockerProvisionerTests.test_idempotent_ready_host_performs_no_mutation",
+      "context": "mismatched run",
+      "caller_line": 1039,
+      "exception": "subprocess.TimeoutExpired",
+      "timeout_seconds": 120
+    },
+    {
+      "test": "tests.gcp.test_phase3_docker_provision.Phase3DockerProvisionerTests.test_installs_exact_pins_in_order_and_configures_successfully",
+      "caller_line": 1158,
+      "exception": "subprocess.TimeoutExpired",
+      "timeout_seconds": 120
+    },
+    {
+      "test": "tests.gcp.test_phase3_docker_provision.Phase3DockerProvisionerTests.test_rejects_ambiguous_daemon_json_and_bounds_systemd_failure_diagnostics",
+      "context": "failed run",
+      "caller_line": 1268,
+      "exception": "subprocess.TimeoutExpired",
+      "timeout_seconds": 120
+    }
+  ],
+  "diagnosis": {
+    "confirmed": "Three subprocesses exceeded the Docker simulation harness timeout at test_phase3_docker_provision.py:984; these are retained as errors, not passes.",
+    "host_contention_observed": true,
+    "contention_causality_isolated": false,
+    "observation": "PID 502020 progressed between temporary Phase3DockerProvisionerTests fixtures; observed descendants ran fake tools under /tmp/phase3-docker-provision-test-*/tools. Paired local benchmarks and an independent audit build/test campaign concurrently consumed CPU.",
+    "no_suite_hang_inferred": true,
+    "production_regression_excluded": false,
+    "next_step_if_needed": "Replay only the three named cases on an otherwise quiet host, retaining this failed run and unchanged timeout policy."
+  },
+  "sources_unchanged_against_head_at_inspection": true,
+  "post_run_descendant_check": {
+    "checked_utc": "2026-09-04T21:24:17Z",
+    "former_runner_pid_and_pgid": 502020,
+    "exact_fixture_roots": [
+      "/tmp/phase3-docker-provision-test-yd_dctun",
+      "/tmp/phase3-docker-provision-test-w7ih0caa",
+      "/tmp/phase3-docker-provision-test-x508_vyg"
+    ],
+    "method": "Read-only /proc command-argument prefix scan plus FAKE_TEST_ROOT checks restricted to the former run process group.",
+    "matching_processes": [],
+    "remaining_processes_in_former_run_group": [],
+    "signals_sent": 0,
+    "cleanup_needed": false
+  },
+  "source_sha256": {
+    "tests/gcp/test_gcp_safety.py": "a08e2d64ef86ada402900d261e2e02d1e50c1d5a5a6d7fa80c3eb971bd376122",
+    "tests/gcp/test_phase3_docker_provision.py": "a9520c57cb71974fbc030418a5a8b4f624b77cd8342e28a64ed2af68fb30cd23",
+    "gcp-migration/phase3_remote_docker_provision.sh": "6ede98cd9736c9d0eb648a57ef9faf0cd12b3898ff595987b08938082c24066f"
+  },
+  "safety": {
+    "real_cloud_calls_by_this_diagnostic": 0,
+    "processes_stopped_by_this_diagnostic": 0,
+    "production_files_modified_by_this_diagnostic": 0,
+    "test_timeouts_modified": false
+  }
+}

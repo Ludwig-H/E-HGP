@@ -1,0 +1,65 @@
+name: MorseHGP3D v7 CPU contracts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'morsehgp3D_v7/**'
+      - 'gcp-migration/**'
+      - '.github/workflows/morsehgp3d-v7.yml'
+  pull_request:
+    paths:
+      - 'morsehgp3D_v7/**'
+      - 'gcp-migration/**'
+      - '.github/workflows/morsehgp3d-v7.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  cpu-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      LC_ALL: C
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install CPU dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes libboost-dev
+
+      - name: Build the v7 CPU reference
+        run: |
+          cmake -S morsehgp3D_v7 -B build/v7 -DCMAKE_BUILD_TYPE=Release -DMHGP7_ENABLE_CUDA=OFF
+          cmake --build build/v7 --parallel 2
+
+      - name: Run bounded contracts and causal mutants
+        run: |
+          ctest --test-dir build/v7 --output-on-failure --no-tests=error -L '^gate$' --parallel 2 --output-junit contracts.xml
+
+      - name: Test the incidence observation runner
+        run: |
+          python3 morsehgp3D_v7/tests/incidence_campaign_gate.py
+          python3 -O morsehgp3D_v7/tests/incidence_campaign_gate.py
+
+      - name: Test session safety without cloud access
+        run: |
+          python3 gcp-migration/selftest_session_v7.py
+          python3 -O gcp-migration/selftest_session_v7.py
+          python3 gcp-migration/selftest_create_v7.py
+          python3 -O gcp-migration/selftest_create_v7.py
+          python3 tools/check_gcp_workflows.py
+
+      - name: State the qualification boundary
+        run: |
+          echo 'CPU contracts only; public_status=not_claimed.'
+          echo 'No cloud credentials, VM mutation, GPU measurement or scale-contract promotion.'

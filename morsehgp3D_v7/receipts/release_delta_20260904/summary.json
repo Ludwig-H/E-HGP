@@ -1,0 +1,66 @@
+{
+  "claim": "selective delta qualification with byte-identical unaffected consumers; not a fresh full suite",
+  "ctest_inventory_count": 0,
+  "failure": "RuntimeError: reused binary depends on a changed source: mhgp7_profile:morsehgp3D_v7/src/io/archive.hpp",
+  "gcp": "not_used",
+  "product_a_sha256": "8a99b5cf5dc2c0622947f6b34880803e4ed347608ea61d56f3e080137bfc4a6b",
+  "product_b_sha256": "fa917eefd8198d8ee676585dd99401f74594dd33a4bf77e1265ef397f439e200",
+  "public_status": "not_claimed",
+  "release_a_tests_executed_on_snapshot_a": 279,
+  "results": {
+    "build_delta": {
+      "argv": [
+        "cmake",
+        "--build",
+        "/workspaces/E-HGP/build/v7",
+        "--parallel",
+        "2",
+        "--target",
+        "mhgp7",
+        "mhgp7_archive_api_gate",
+        "mhgp7_archive_cleanup_gate"
+      ],
+      "elapsed_seconds": 41.91485377200024,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T21:38:24Z",
+      "status": "completed",
+      "timeout_seconds": 600
+    },
+    "configure": {
+      "argv": [
+        "cmake",
+        "-S",
+        "/workspaces/E-HGP/morsehgp3D_v7",
+        "-B",
+        "/workspaces/E-HGP/build/v7",
+        "-DCMAKE_BUILD_TYPE=Release"
+      ],
+      "elapsed_seconds": 0.11675009800001135,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T21:38:24Z",
+      "status": "completed",
+      "timeout_seconds": 120
+    },
+    "inventory": {
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7",
+        "--show-only=json-v1",
+        "-L",
+        "^gate$"
+      ],
+      "elapsed_seconds": 0.06657864800035895,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T21:39:06Z",
+      "status": "completed",
+      "timeout_seconds": 60
+    }
+  },
+  "snapshot_b_fresh_ctest": null,
+  "snapshot_b_reused_binary_count": 0,
+  "snapshot_b_reused_tests_without_rerun": 0,
+  "source_stable": true,
+  "status": "invalid_or_failed",
+  "tested_binaries_stable": true
+}

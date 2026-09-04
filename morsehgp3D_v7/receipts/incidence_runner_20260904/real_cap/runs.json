@@ -1,0 +1,29 @@
+[
+  {
+    "case": "uniform_11_coord65536",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=11",
+      "--seed=3",
+      "--threads=2",
+      "--smax=11",
+      "--layout=csr",
+      "--digest",
+      "--complete-incidences",
+      "--mem-budget=17179869184",
+      "--silent-meb-supports=1",
+      "--coord=65536"
+    ],
+    "returncode": 2,
+    "timed_out": false,
+    "wall_seconds": 0.07108287400023983,
+    "status": "engine_refused",
+    "stdout": "uniform_11_coord65536.out",
+    "stderr": "uniform_11_coord65536.err",
+    "usage": "uniform_11_coord65536.time",
+    "reason": "REFUS silent incidence K=2 : silent_meb_support_budget",
+    "refusal_status": "resource_exhausted",
+    "refusal_order": 2
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "-o",
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/compare_runner_mono_20260904/wire_b_k10_s12.usage",
+    "--",
+    "/workspaces/E-HGP/build/v7_mono_baseline/mhgp7_B",
+    "--family=uniform",
+    "--n=200",
+    "--seed=3",
+    "--threads=1",
+    "--s=12",
+    "--smax=11",
+    "--layout=csr",
+    "--fold-inflight=1",
+    "--fold-join=1",
+    "--digest"
+  ],
+  "started_utc": "2026-09-04T21:51:32Z",
+  "status": "running",
+  "timeout_seconds": 30
+}

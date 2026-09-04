@@ -1,0 +1,82 @@
+{
+  "status": "historical_overlay_qualification_before_integration",
+  "source_before_sha256": "3583680d947a5b28f8a38028bc55f37f12040143fea88d4aecc77a7baf653690",
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "release": {
+    "exit_code": 0,
+    "stdout": "OK axis_bounds boxes=1212 axis_points=454697 volume_points=31720 census_queries=45 max_bits=106 rejected_fixtures=10 extended_profile_boxes=4\n"
+  },
+  "asan_ubsan_leaks": {
+    "exit_code": 0,
+    "stdout": "OK axis_bounds boxes=1212 axis_points=454697 volume_points=31720 census_queries=45 max_bits=106 rejected_fixtures=10 extended_profile_boxes=4\n"
+  },
+  "mutants": [
+    {
+      "name": "axis-argmin-floor-only",
+      "exit_code": 4,
+      "first_divergence_box": 1,
+      "field": "min"
+    },
+    {
+      "name": "axis-argmin-ceil-always",
+      "exit_code": 4,
+      "first_divergence_box": 1,
+      "field": "min"
+    },
+    {
+      "name": "axis-argmin-no-clip",
+      "exit_code": 4,
+      "first_divergence_box": 7,
+      "field": "min"
+    },
+    {
+      "name": "axis-argmin-narrow-coefficient",
+      "exit_code": 4,
+      "first_divergence_box": 8,
+      "field": "min"
+    },
+    {
+      "name": "axis-argmin-max-min",
+      "exit_code": 4,
+      "first_divergence_box": 1,
+      "field": "max"
+    }
+  ],
+  "apply_check_exit_code": 0,
+  "microbench": {
+    "status": "bounded_synthetic_micro_only",
+    "rows": 90,
+    "all_arm_digests_equal": true,
+    "global_performance_claim": false,
+    "source_census_sha256_at_execution": "a152e17fd4e2c378b348340a2a1396b86f46e3cdf1ac0bddb5bdcdede7ec191a",
+    "note": "Before domain-comment revision; exact source reconstructible from census.before.hpp and census.microbench.patch. No repeat performance run is claimed."
+  },
+  "files": {
+    "build/v7_axis_bounds_fix/src/pipeline/census.hpp": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be",
+    "build/v7_axis_bounds_fix/src/core/mutants.hpp": "479cf2761107696d7ec89d8651003a9f0d5c0f47bd0fbda8732bf9449e2df5cd",
+    "build/v7_axis_bounds_fix/oracle/obig.hpp": "0e3e9241503e7979fb7da06e97a0a0006362cf4da381c7ce2c66d86acdabf8d5",
+    "build/v7_axis_bounds_fix/tests/axis_bounds_gate.cpp": "5974dd9093438e839599415b7dc4af90a6b5c267eea77728215b9b3993a24e5a",
+    "build/v7_axis_bounds_fix/bench/axis_bounds_microbench.cpp": "3a44861833fd261433decb9753014e3c81caa7e3c5af38f7a4f39770089ba041",
+    "build/v7_axis_bounds_fix/census.patch": "a8461e0bae866ecdaa56fa19b760a7cdaa52c71209bcc833b1fccf7dae66c89c",
+    "build/v7_axis_bounds_fix/mutants.patch": "45b3c9d9f8c00fe904d0be5b7fcb31aaec18c6e76338e302400dd2ce5a8807c2",
+    "build/v7_axis_bounds_fix/gate.patch": "f03a986da27d4fe1bfdabdc86f017186e89689cacb22355372ff4f610b3929a1",
+    "build/v7_axis_bounds_fix/microbench.patch": "3f1745dd62247bb92595df45e03587a9cb7dbfa2c0e738e4f836b98b37b0b483",
+    "build/v7_axis_bounds_fix/census.microbench.patch": "a31107b2e2be937cdb7682c5dae647023e386aa963d097b12169cd6b3a53f8ee",
+    "build/v7_axis_bounds_fix/microbench.jsonl": "2801e08ea33a09cf5644f46086b115f47bea51a0461f61f0ee891dfc84df80cc",
+    "build/v7_axis_bounds_fix/README.md": "5df0c125aa653c22eb6282865173418e034fe5d41aa228e9248c64c0e20f7ec3",
+    "build/v7_axis_bounds_fix/axis_bounds_gate": "6814ecbddbb63087865994e7c8e0a17ce1c29dff1334a1d582e03fee4f93d50b",
+    "build/v7_axis_bounds_fix/axis_bounds_gate_san": "2a0ec6b69b45dbaae2ac3379b08bbd0e7acc9752d2c9c4d712d2445f045bbfac",
+    "build/v7_axis_bounds_fix/axis_bounds_microbench": "771c6f630c7095494aba91b133a129be41e7e8b1ecf97da8c5c8798da2e4f893"
+  },
+  "public_status": "not_claimed",
+  "domain": {
+    "a_exponent_exclusive": 68,
+    "b_abs_exponent_exclusive": 87,
+    "c_abs_exponent_exclusive": 105,
+    "coordinate_range": [
+      0,
+      65535
+    ],
+    "basis": "QUALIFICATION_S1_PRIMITIVES.md section 4 conservative lane bounds"
+  }
+}

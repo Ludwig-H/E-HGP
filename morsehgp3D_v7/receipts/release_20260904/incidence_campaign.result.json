@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v7/tests/incidence_campaign_gate.py"
+  ],
+  "elapsed_seconds": 1.2408367470006851,
+  "exit_code": 0,
+  "started_utc": "2026-09-04T21:19:48Z",
+  "status": "completed",
+  "timeout_seconds": 180
+}

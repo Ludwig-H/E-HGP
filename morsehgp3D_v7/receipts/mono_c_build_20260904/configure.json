@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "morsehgp3D_v7",
+    "-B",
+    "/workspaces/E-HGP/build/v7",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP7_ENABLE_CUDA=OFF"
+  ],
+  "elapsed_seconds": 0.11509600700082956,
+  "exit_code": 0,
+  "name": "configure",
+  "started_utc": "2026-09-04T21:57:23Z",
+  "timeout_seconds": 120
+}

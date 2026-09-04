@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v7/tests/compare_campaign_gate.py"
+  ],
+  "elapsed_seconds": 3.926934529999926,
+  "exit_code": 0,
+  "started_utc": "2026-09-04T21:51:24Z",
+  "status": "completed",
+  "timeout_seconds": 120
+}

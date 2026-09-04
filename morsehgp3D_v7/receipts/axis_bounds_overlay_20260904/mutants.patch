@@ -1,0 +1,11 @@
+--- a/morsehgp3D_v7/src/core/mutants.hpp
++++ b/morsehgp3D_v7/src/core/mutants.hpp
+@@ -131,6 +131,8 @@
+     "parallel-admit-partial-launch", "census-direct-offset", "census-direct-publish-prefix",
+     "silent-drop-coface",
+     "reduced-latent-parent", "reduced-drop-materialization",
++    "axis-argmin-floor-only", "axis-argmin-ceil-always", "axis-argmin-no-clip",
++    "axis-argmin-narrow-coefficient", "axis-argmin-max-min",
+ };
+ 
+ inline std::vector<std::string>& mutant_registry() {

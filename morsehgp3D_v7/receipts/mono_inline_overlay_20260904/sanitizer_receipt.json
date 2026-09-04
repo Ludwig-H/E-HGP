@@ -1,0 +1,50 @@
+{
+  "asan_options": "detect_leaks=1:halt_on_error=1",
+  "binary_sha256": "e250c0cec86449d4347e64b2482eeb9e0771b14c7ff84182ecbc569e280a5bd1",
+  "gcp": "not_used",
+  "public_status": "not_claimed",
+  "records": [
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_mono_inline_fix/mono_inline_gate_asan"
+      ],
+      "exit_code": 0,
+      "name": "nominal",
+      "same_objects_and_phases": true,
+      "sanitizer_diagnostic_absent": true
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_mono_inline_fix/mono_inline_gate_asan",
+        "--inject=fold-inject-a-failure-k2"
+      ],
+      "exit_code": 0,
+      "name": "late_a",
+      "same_objects_and_phases": true,
+      "sanitizer_diagnostic_absent": true
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_mono_inline_fix/mono_inline_gate_asan",
+        "--inject=fold-inject-b-exception-k3"
+      ],
+      "exit_code": 0,
+      "name": "late_b",
+      "same_objects_and_phases": true,
+      "sanitizer_diagnostic_absent": true
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_mono_inline_fix/mono_inline_gate_asan",
+        "--inject=caps-throw-bad-alloc-fold"
+      ],
+      "exit_code": 0,
+      "name": "early_alloc",
+      "same_objects_and_phases": true,
+      "sanitizer_diagnostic_absent": true
+    }
+  ],
+  "scope": "overlay_only",
+  "status": "passed",
+  "ubsan_options": "halt_on_error=1:print_stacktrace=1"
+}

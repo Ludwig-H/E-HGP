@@ -1,0 +1,4 @@
+object=--inject=caps-throw-bad-alloc-fold kmax=10 complete=0 exception= status=2 callbacks= digest=
+phases=1:0,1:2,1:4,1:6,
+object=--inject=caps-throw-bad-alloc-fold kmax=10 complete=1 exception= status=2 callbacks= digest=
+phases=1:0,1:2,1:4,1:6,

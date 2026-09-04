@@ -1,0 +1,193 @@
+{
+  "wire_b_k10_s12": {
+    "cardinalities": {
+      "1": {
+        "attachements": 0,
+        "deltas": 183,
+        "evenements": 629,
+        "facettes": 200,
+        "fusions": 199,
+        "noeuds": 183
+      },
+      "2": {
+        "attachements": 590,
+        "deltas": 703,
+        "evenements": 1181,
+        "facettes": 1247,
+        "fusions": 1246,
+        "noeuds": 487
+      },
+      "3": {
+        "attachements": 2236,
+        "deltas": 1592,
+        "evenements": 1858,
+        "facettes": 3568,
+        "fusions": 3566,
+        "noeuds": 926
+      },
+      "4": {
+        "attachements": 5257,
+        "deltas": 2385,
+        "evenements": 2631,
+        "facettes": 7459,
+        "fusions": 7458,
+        "noeuds": 1458
+      },
+      "5": {
+        "attachements": 10100,
+        "deltas": 3276,
+        "evenements": 3525,
+        "facettes": 13361,
+        "fusions": 13360,
+        "noeuds": 2086
+      },
+      "6": {
+        "attachements": 16677,
+        "deltas": 4256,
+        "evenements": 4453,
+        "facettes": 21093,
+        "fusions": 21089,
+        "noeuds": 2753
+      },
+      "7": {
+        "attachements": 25165,
+        "deltas": 5193,
+        "evenements": 5396,
+        "facettes": 30917,
+        "fusions": 30914,
+        "noeuds": 3494
+      },
+      "8": {
+        "attachements": 35612,
+        "deltas": 6205,
+        "evenements": 6367,
+        "facettes": 42792,
+        "fusions": 42787,
+        "noeuds": 4284
+      },
+      "9": {
+        "attachements": 48562,
+        "deltas": 7197,
+        "evenements": 7411,
+        "facettes": 57177,
+        "fusions": 57168,
+        "noeuds": 5073
+      },
+      "10": {
+        "attachements": 64383,
+        "deltas": 8402,
+        "evenements": 8567,
+        "facettes": 74646,
+        "fusions": 74630,
+        "noeuds": 6084
+      }
+    },
+    "counts": {
+      "boules_uniques": 41749,
+      "census_int": 206628,
+      "census_shell": 137477,
+      "coord": 58,
+      "deltas": 39392,
+      "emis": 41769,
+      "evenements": 42018,
+      "facettes": 252460,
+      "fusions": 252417,
+      "mortes_profondeur": 132,
+      "n": 200,
+      "noeuds": 26828,
+      "s": 12,
+      "seed": 3,
+      "smax": 11,
+      "survivantes": 41617,
+      "threads": 1
+    },
+    "digests": {
+      "digest_all": "ba6c220dcb922202837dde19007da6ec5e3587a0654f53ceff6c20ddb9764f45",
+      "digest_forest_K1": "06096f3fd729e1b13bd2547597f9a7c1e3aab3374e8e1d9ec4ee9e58ea8811d3",
+      "digest_forest_K10": "ce83520b7c77d9ec48b872d0cc2a07938516a70838e6016f5eccbcb2370e09ab",
+      "digest_forest_K2": "288e560e0763098409a4561c6ee45cad85ea991981ee94ca7725de92b922a680",
+      "digest_forest_K3": "20ab0d982eddf2750d08df23ce6c0d54767b9460b55f2509bfb832b76c0f1b63",
+      "digest_forest_K4": "5037b5560f29a6fe7489491ca409d835103cf12ba2af3117c473cc50993e99a2",
+      "digest_forest_K5": "5b53e038ed15eadb2c11748670c85142510a93fd254eb45eaba8f05a02f0c728",
+      "digest_forest_K6": "dc40f52c010813e5ffab6a6569e4fda6fb9729010029ac0db96e5d5f15b83db6",
+      "digest_forest_K7": "aeeaa0f6ddaac805f0854046ee1c8228389fc86bd670d0e228213c7b7ff735d6",
+      "digest_forest_K8": "7e7248f0325ce64da1a54a509e398ae2fc209f56878b97a9af21e536aabbf3a7",
+      "digest_forest_K9": "035aa8059b4916ce5b464435f7b3ae232eecff591356ad9a6cb47ebe108df893"
+    },
+    "max_rss_kb": 35536,
+    "pipeline_ms": 962.3
+  },
+  "wire_b_k5_s10": {
+    "cardinalities": {
+      "1": {
+        "attachements": 0,
+        "deltas": 183,
+        "evenements": 629,
+        "facettes": 200,
+        "fusions": 199,
+        "noeuds": 183
+      },
+      "2": {
+        "attachements": 590,
+        "deltas": 703,
+        "evenements": 1181,
+        "facettes": 1247,
+        "fusions": 1246,
+        "noeuds": 487
+      },
+      "3": {
+        "attachements": 2236,
+        "deltas": 1592,
+        "evenements": 1858,
+        "facettes": 3568,
+        "fusions": 3566,
+        "noeuds": 926
+      },
+      "4": {
+        "attachements": 5257,
+        "deltas": 2385,
+        "evenements": 2631,
+        "facettes": 7459,
+        "fusions": 7458,
+        "noeuds": 1458
+      },
+      "5": {
+        "attachements": 10100,
+        "deltas": 3276,
+        "evenements": 3525,
+        "facettes": 13361,
+        "fusions": 13360,
+        "noeuds": 2086
+      }
+    },
+    "counts": {
+      "boules_uniques": 9733,
+      "census_int": 17761,
+      "census_shell": 28199,
+      "coord": 58,
+      "deltas": 8139,
+      "emis": 9741,
+      "evenements": 9824,
+      "facettes": 25835,
+      "fusions": 25829,
+      "mortes_profondeur": 79,
+      "n": 200,
+      "noeuds": 5140,
+      "s": 10,
+      "seed": 3,
+      "smax": 6,
+      "survivantes": 9654,
+      "threads": 1
+    },
+    "digests": {
+      "digest_all": "bfad4ac19cc01e61cea31d90fbe9be9f74c59d9205af68304a634089fb819530",
+      "digest_forest_K1": "06096f3fd729e1b13bd2547597f9a7c1e3aab3374e8e1d9ec4ee9e58ea8811d3",
+      "digest_forest_K2": "288e560e0763098409a4561c6ee45cad85ea991981ee94ca7725de92b922a680",
+      "digest_forest_K3": "20ab0d982eddf2750d08df23ce6c0d54767b9460b55f2509bfb832b76c0f1b63",
+      "digest_forest_K4": "5037b5560f29a6fe7489491ca409d835103cf12ba2af3117c473cc50993e99a2",
+      "digest_forest_K5": "5b53e038ed15eadb2c11748670c85142510a93fd254eb45eaba8f05a02f0c728"
+    },
+    "max_rss_kb": 12252,
+    "pipeline_ms": 214.8
+  }
+}

@@ -1,0 +1,54 @@
+object=nominal kmax=5 complete=0 exception= status=0 callbacks=1,2,3,4,5, digest=7e2ced67b1eb1da5c59bdc0c2c39960bf964ae308ae90c1a964dce082d3b136a
+K=1 digest=413e1d8eab0c14098a735bcf09ede1d41f540601721565b6fd69e171a955c69c events=19 facets=11 deltas=10 attachments=0 fusions=10 nodes=10
+K=2 digest=3de6c56f391fbde20a5bb19bdebd1dd3125824c645d5549409d9c686b3042cf3 events=24 facets=33 deltas=23 attachments=14 fusions=32 nodes=13
+K=3 digest=57b9c36421da716a8aaa08bf6ec549ce1f051ddbbe66b4b5855de0ee4c50d13d events=23 facets=52 deltas=23 attachments=27 fusions=51 nodes=15
+K=4 digest=4e1a943013148ad13774b9ba7d14cec2aa0bd36c80c95263a091bca678d0f747 events=23 facets=76 deltas=23 attachments=50 fusions=75 nodes=18
+K=5 digest=5568a15469dde617e8b831948b1f3d75fe37da754676ba6d0063a8f09d61c2af events=23 facets=97 deltas=23 attachments=71 fusions=96 nodes=15
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:3,2:5,3:0,3:2,3:3,3:5,4:0,4:2,4:3,4:5,5:0,5:2,5:3,5:5,
+object=nominal kmax=10 complete=0 exception= status=0 callbacks=1,2,3,4,5,6,7,8,9,10, digest=5413672add57ef2b2eaf335d25c6b2a47db5a72a1dc8cfb9565fd2d9fe8ad3a6
+K=1 digest=413e1d8eab0c14098a735bcf09ede1d41f540601721565b6fd69e171a955c69c events=19 facets=11 deltas=10 attachments=0 fusions=10 nodes=10
+K=2 digest=3de6c56f391fbde20a5bb19bdebd1dd3125824c645d5549409d9c686b3042cf3 events=24 facets=33 deltas=23 attachments=14 fusions=32 nodes=13
+K=3 digest=57b9c36421da716a8aaa08bf6ec549ce1f051ddbbe66b4b5855de0ee4c50d13d events=23 facets=52 deltas=23 attachments=27 fusions=51 nodes=15
+K=4 digest=4e1a943013148ad13774b9ba7d14cec2aa0bd36c80c95263a091bca678d0f747 events=23 facets=76 deltas=23 attachments=50 fusions=75 nodes=18
+K=5 digest=5568a15469dde617e8b831948b1f3d75fe37da754676ba6d0063a8f09d61c2af events=23 facets=97 deltas=23 attachments=71 fusions=96 nodes=15
+K=6 digest=ad5b54fd9e412422f33e12b65396a430ed9f09d7c02bfb3a5c11e659390f9333 events=19 facets=96 deltas=19 attachments=72 fusions=95 nodes=17
+K=7 digest=c56f35961d8c8fe0d9bbb128a37441f21fdd6d19117cd0048687449e2e26e681 events=11 facets=69 deltas=11 attachments=49 fusions=68 nodes=10
+K=8 digest=868c9ef53dfa669955c012706c062e785ddf0262baf343734f9ce57e26d7e91d events=5 facets=39 deltas=5 attachments=28 fusions=38 nodes=4
+K=9 digest=c222a54fe69597aed5b316d704767463441c8a13a88876c5a1100ba6e01c67c0 events=3 facets=27 deltas=3 attachments=22 fusions=26 nodes=2
+K=10 digest=e6bf5d387bea2359fd86c4a4c9781698b29f0ded464468b9e800b59027a52762 events=1 facets=11 deltas=1 attachments=8 fusions=10 nodes=1
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:3,2:5,3:0,3:2,3:3,3:5,4:0,4:2,4:3,4:5,5:0,5:2,5:3,5:5,6:0,6:2,6:3,6:5,7:0,7:2,7:3,7:5,8:0,8:2,8:3,8:5,9:0,9:2,9:3,9:5,10:0,10:2,10:3,10:5,
+object=nominal kmax=5 complete=1 exception= status=0 callbacks=1,2,3,4,5, digest=e4e208fbcb64b4c54fa9892ea2b3b0d67f1a490c0a185bd52d678baf0ff4afd4
+K=1 digest=413e1d8eab0c14098a735bcf09ede1d41f540601721565b6fd69e171a955c69c events=19 facets=11 deltas=10 attachments=0 fusions=10 nodes=10
+K=2 digest=a4d39f6557a6a21a9465b8700b4d09b49a1021d5ff187c59623b2ad2dc80e650 events=24 facets=33 deltas=23 attachments=14 fusions=32 nodes=2
+K=3 digest=c15d81acea5ff6939dac19ddf4e636363fdd33ad09663450a2484cdb71a59148 events=24 facets=53 deltas=24 attachments=29 fusions=52 nodes=1
+K=4 digest=c502da6ca3961a2bfb5d980c8417d3afa688d9ec38c8cac028fe778940095d49 events=27 facets=84 deltas=27 attachments=60 fusions=83 nodes=0
+K=5 digest=4f2caa208edcb9c852a6904f6657c4b8d778f883b5e4e0c7af977417f8ad2b41 events=28 facets=109 deltas=27 attachments=86 fusions=108 nodes=0
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:3,2:5,3:0,3:2,3:3,3:5,4:0,4:2,4:3,4:5,5:0,5:2,5:3,5:5,
+object=nominal kmax=10 complete=1 exception= status=0 callbacks=1,2,3,4,5,6,7,8,9,10, digest=206e644a921a48e1c74231f4bbc344e43885e2b687f9fea9d8a035034e5ff9d4
+K=1 digest=413e1d8eab0c14098a735bcf09ede1d41f540601721565b6fd69e171a955c69c events=19 facets=11 deltas=10 attachments=0 fusions=10 nodes=10
+K=2 digest=a4d39f6557a6a21a9465b8700b4d09b49a1021d5ff187c59623b2ad2dc80e650 events=24 facets=33 deltas=23 attachments=14 fusions=32 nodes=2
+K=3 digest=c15d81acea5ff6939dac19ddf4e636363fdd33ad09663450a2484cdb71a59148 events=24 facets=53 deltas=24 attachments=29 fusions=52 nodes=1
+K=4 digest=c502da6ca3961a2bfb5d980c8417d3afa688d9ec38c8cac028fe778940095d49 events=27 facets=84 deltas=27 attachments=60 fusions=83 nodes=0
+K=5 digest=4f2caa208edcb9c852a6904f6657c4b8d778f883b5e4e0c7af977417f8ad2b41 events=28 facets=109 deltas=27 attachments=86 fusions=108 nodes=0
+K=6 digest=21dcb657d51c1ca095353afa095761375d232219e79855ac0d13b3a39ac3f3a8 events=21 facets=102 deltas=21 attachments=79 fusions=101 nodes=0
+K=7 digest=ccb28717633010467db3f98fa0e426c0a400bd50fbebb39976c1e0a15996bc4a events=12 facets=73 deltas=12 attachments=54 fusions=72 nodes=0
+K=8 digest=5294f3c666965646cf51becb28afb080fd520e1e8e6917d8b1d0c8bd964d4528 events=5 facets=39 deltas=5 attachments=28 fusions=38 nodes=0
+K=9 digest=cd376fabd691d5583dae7a499d70d4d6d8db59c2ab3c1666e1c930006c69b4ce events=3 facets=27 deltas=3 attachments=22 fusions=26 nodes=0
+K=10 digest=39cc98f710099254dcaad7e00b88674100ebc0846e08041b5fdf05d6eae8a674 events=1 facets=11 deltas=1 attachments=8 fusions=10 nodes=0
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:3,2:5,3:0,3:2,3:3,3:5,4:0,4:2,4:3,4:5,5:0,5:2,5:3,5:5,6:0,6:2,6:3,6:5,7:0,7:2,7:3,7:5,8:0,8:2,8:3,8:5,9:0,9:2,9:3,9:5,10:0,10:2,10:3,10:5,
+object=forest2 kmax=10 complete=0 exception=fixture forest2 status=0 callbacks=1,2, digest=
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:3,2:6,
+object=begin2 kmax=10 complete=0 exception=fixture begin2 status=0 callbacks=1, digest=
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:4,2:6,
+object=published2 kmax=10 complete=0 exception=fixture published2 status=0 callbacks=1,2, digest=
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:3,2:5,
+object=late_alloc3 kmax=10 complete=0 exception= status=2 callbacks=1,2,3, digest=
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:3,2:5,3:0,3:2,3:3,3:6,
+object=forest2 kmax=10 complete=1 exception=fixture forest2 status=0 callbacks=1,2, digest=
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:3,2:6,
+object=begin2 kmax=10 complete=1 exception=fixture begin2 status=0 callbacks=1, digest=
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:4,2:6,
+object=published2 kmax=10 complete=1 exception=fixture published2 status=0 callbacks=1,2, digest=
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:3,2:5,
+object=late_alloc3 kmax=10 complete=1 exception= status=2 callbacks=1,2,3, digest=
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:3,2:5,3:0,3:2,3:3,3:6,

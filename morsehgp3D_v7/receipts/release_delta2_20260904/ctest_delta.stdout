@@ -1,0 +1,51 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7
+Test project /workspaces/E-HGP/build/v7
+      Start 203: mhgp7_profil_identite
+      Start  74: mhgp7_cli_ok_s8
+ 1/21 Test  #74: mhgp7_cli_ok_s8 ................................   Passed    1.15 sec
+      Start  75: mhgp7_cli_budget_signature
+ 2/21 Test  #75: mhgp7_cli_budget_signature .....................   Passed    1.19 sec
+      Start 280: mhgp7_cli_layout_csr_signature
+ 3/21 Test #280: mhgp7_cli_layout_csr_signature .................   Passed    1.10 sec
+      Start 279: mhgp7_cli_layout_classic_signature
+ 4/21 Test #279: mhgp7_cli_layout_classic_signature .............   Passed    1.16 sec
+      Start 321: mhgp7_archive_optimized
+ 5/21 Test #321: mhgp7_archive_optimized ........................   Passed    0.18 sec
+      Start 320: mhgp7_archive
+ 6/21 Test #320: mhgp7_archive ..................................   Passed    0.18 sec
+      Start 324: mhgp7_archive_api
+ 7/21 Test #324: mhgp7_archive_api ..............................   Passed    0.03 sec
+      Start 282: mhgp7_cli_refus_layout_vide
+ 8/21 Test #282: mhgp7_cli_refus_layout_vide ....................   Passed    0.01 sec
+      Start 200: mhgp7_profile_sonde_refuse_inject_vide
+ 9/21 Test #200: mhgp7_profile_sonde_refuse_inject_vide .........   Passed    0.01 sec
+      Start 281: mhgp7_cli_refus_layout_inconnu
+10/21 Test #281: mhgp7_cli_refus_layout_inconnu .................   Passed    0.02 sec
+      Start 201: mhgp7_profile_sonde_refuse_inject_virgule
+11/21 Test #201: mhgp7_profile_sonde_refuse_inject_virgule ......   Passed    0.01 sec
+      Start 202: mhgp7_profile_sonde_refuse_mutant_production
+12/21 Test #202: mhgp7_profile_sonde_refuse_mutant_production ...   Passed    0.01 sec
+      Start 198: mhgp7_profile_refuse_inject
+13/21 Test #198: mhgp7_profile_refuse_inject ....................   Passed    0.02 sec
+      Start  72: mhgp7_cli_refus_s_suffix
+14/21 Test  #72: mhgp7_cli_refus_s_suffix .......................   Passed    0.02 sec
+      Start 199: mhgp7_profile_sonde_refuse_inconnu
+15/21 Test #199: mhgp7_profile_sonde_refuse_inconnu .............   Passed    0.02 sec
+      Start  73: mhgp7_cli_refus_n_suffix
+16/21 Test  #73: mhgp7_cli_refus_n_suffix .......................   Passed    0.02 sec
+      Start  71: mhgp7_cli_refus_s7
+17/21 Test  #71: mhgp7_cli_refus_s7 .............................   Passed    0.02 sec
+      Start 325: mhgp7_archive_cleanup
+18/21 Test #325: mhgp7_archive_cleanup ..........................   Passed    0.05 sec
+      Start 326: mhgp7_incidence_campaign
+19/21 Test #326: mhgp7_incidence_campaign .......................   Passed    1.09 sec
+      Start 327: mhgp7_incidence_campaign_optimized
+20/21 Test #327: mhgp7_incidence_campaign_optimized .............   Passed    1.20 sec
+21/21 Test #203: mhgp7_profil_identite ..........................   Passed   15.01 sec
+
+100% tests passed, 0 tests failed out of 21
+
+Label Time Summary:
+gate    =  22.50 sec*proc (21 tests)
+
+Total Test time (real) =  15.02 sec

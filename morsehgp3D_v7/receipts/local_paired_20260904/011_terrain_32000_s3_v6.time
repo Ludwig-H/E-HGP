@@ -1,0 +1,23 @@
+	Command being timed: "/workspaces/E-HGP/build/v6_reference/mhgp6 --family=terrain --n=32000 --seed=3 --threads=8 --s=8 --smax=11 --layout=csr --fold-inflight=2 --fold-join=0 --digest"
+	User time (seconds): 396.65
+	System time (seconds): 1.55
+	Percent of CPU this job got: 477%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:23.33
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 1873888
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 118400
+	Voluntary context switches: 516
+	Involuntary context switches: 148896
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 24
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

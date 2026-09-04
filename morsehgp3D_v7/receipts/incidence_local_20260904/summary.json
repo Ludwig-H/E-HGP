@@ -1,0 +1,12 @@
+{
+  "status": "observations_completed",
+  "error": null,
+  "runs": 6,
+  "expected_runs": 6,
+  "source_stable": true,
+  "engine_successes": 0,
+  "engine_refusals": 6,
+  "censored": 0,
+  "invalid": 0,
+  "public_status": "not_claimed"
+}

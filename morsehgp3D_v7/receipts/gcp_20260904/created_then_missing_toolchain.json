@@ -1,0 +1,129 @@
+{
+  "schema": "mhgp7-gcp-attempt-selected-v1",
+  "public_status": "not_claimed",
+  "session": "v7session.0u2vcl7s",
+  "creation": {
+    "conservative_cutoff": 1788559558,
+    "disks_retained": true,
+    "ended": "2026-09-04T21:13:54.631505+00:00",
+    "exit_code": 0,
+    "gce_verified": true,
+    "generation": "2026-09-04T14:11:15.336-07:00",
+    "guard_sources_sha256": {
+      "/workspaces/E-HGP/gcp-migration/check_quotas.sh": "3193ff82c270b38ca30bd108c38a58ec2054921402b7d3e8b8b68ecb5d49d2f2",
+      "/workspaces/E-HGP/gcp-migration/create_v7_g4.py": "b8b6ed82e9a8162a279efaf2a14b4a6984d32543ef9d746890310d9a3fc3d755",
+      "/workspaces/E-HGP/gcp-migration/start_and_verify.sh": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+      "/workspaces/E-HGP/gcp-migration/stop_and_verify.sh": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c",
+      "/workspaces/E-HGP/gcp-migration/v7_g4_session.py": "fd538cd26d55ed5262afdc8aedf4c85408b7a57bb04ea1479b73386f66567c7d"
+    },
+    "guest_verified": true,
+    "image": "common-cu129-ubuntu-2204-nvidia-580-v20260831",
+    "intent_epoch": 1788556258,
+    "no_session_created": false,
+    "nonce": "4fa0e0789a7d5bb06b787d35",
+    "operation": {
+      "endTime": "2026-09-04T14:11:15.425-07:00",
+      "id": "1116037208960568583",
+      "insertTime": "2026-09-04T14:11:04.479-07:00",
+      "kind": "compute#operation",
+      "name": "operation-1788556262394-65aaeb4ae49da-5116b67f-5235f644",
+      "operationType": "insert",
+      "progress": 100,
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/operations/operation-1788556262394-65aaeb4ae49da-5116b67f-5235f644",
+      "startTime": "2026-09-04T14:11:05.244-07:00",
+      "status": "DONE",
+      "targetId": "4526841274685623561",
+      "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35",
+      "warnings": [
+        {
+          "code": "DISK_SIZE_LARGER_THAN_IMAGE_SIZE",
+          "data": [
+            {
+              "key": "disk_size_gb",
+              "value": "100"
+            },
+            {
+              "key": "image_size_gb",
+              "value": "50"
+            }
+          ],
+          "message": "Disk size: '100 GB' is larger than image size: '50 GB'. You might need to resize the root repartition manually if the operating system does not support automatic resizing. See https://cloud.google.com/compute/docs/disks/add-persistent-disk#resize_pd for details."
+        }
+      ],
+      "zone": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b"
+    },
+    "public_status": "not_claimed",
+    "resource_id": "4526841274685623561",
+    "schema": "ehgp.v7.g4.creation.v1",
+    "ssh_key_expiration": "2026-09-04T22:19:51.678178Z",
+    "startup_sha256": "6d1f61deaa58c4e4f22226b470f58ae1a8229c3c47b15ea1cf1af59223b0baac",
+    "status": "completed_stopped",
+    "stopped_verified": true,
+    "target": {
+      "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+      "project": "devpod-gpu-exploration",
+      "zone": "us-central1-b"
+    }
+  },
+  "session_state": {
+    "ended": "2026-09-04T21:19:27.007920+00:00",
+    "exit_code": 1,
+    "generation": "2026-09-04T14:15:19.195-07:00",
+    "remote_exit_code": 1,
+    "result_manifest_sha256": "c9f717ebba3daff4d20a077628402a0d02a765d8b099ede4947bd6579fb6b548",
+    "schema": "ehgp.v7.g4.snapshot.v1",
+    "source_manifest_sha256": "993e415b9dd08ce1af83f06365d7e8a64ee9dbb54fd0ab4e08d2514fcbd0f099",
+    "started": "2026-09-04T21:14:12.549032+00:00",
+    "status": "failed",
+    "stopped_verified": true,
+    "target": {
+      "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+      "project": "devpod-gpu-exploration",
+      "zone": "us-central1-b"
+    }
+  },
+  "post_stop": {
+    "id": "4526841274685623561",
+    "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "status": "TERMINATED",
+    "lastStartTimestamp": "2026-09-04T14:15:19.195-07:00",
+    "labels": {
+      "ehgp-create": "4fa0e0789a7d5bb06b787d35",
+      "project": "e-hgp",
+      "role": "gpu-benchmark"
+    },
+    "scheduling": {
+      "automaticRestart": false,
+      "instanceTerminationAction": "STOP",
+      "maxRunDuration": {
+        "nanos": 0,
+        "seconds": "3600"
+      },
+      "onHostMaintenance": "TERMINATE",
+      "preemptible": true,
+      "provisioningModel": "SPOT"
+    }
+  },
+  "failure": {
+    "message": "machine failed with code 127",
+    "type": "RuntimeError"
+  },
+  "machine_attempt": {
+    "argv": [
+      "bash",
+      "-c",
+      "uname -a; lscpu; free -b; cmake --version; c++ --version"
+    ],
+    "elapsed_seconds": 0.023703675999996676,
+    "ended": "2026-09-04T21:17:38.639866+00:00",
+    "exit_code": 127,
+    "started": "2026-09-04T21:17:38.616162+00:00",
+    "status": "failed",
+    "timeout_seconds": 30
+  },
+  "notes": [
+    "Selected evidence; private SSH material, account email and network addresses omitted.",
+    "The remote worker failed before building: cmake and c++ were absent (exit 127). No CPU or GPU benchmark ran.",
+    "The same VM was stopped after creation and after the failed worker generation; the retained boot disk is 100 GB and remains billable."
+  ]
+}

@@ -1,0 +1,1041 @@
+[
+  {
+    "binary": "build/v7/mhgp7_bad_alloc_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_bad_alloc_gate.dir/tests/bad_alloc_gate.cpp.o.d",
+        "sha256": "bc742f8c9d23fa127be3b59397a380ea3037aaf844c07d405a7ab29b05b48b7c"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/parse.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/pipeline/run.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/bad_alloc_gate.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_cell_grid_oracle",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_cell_grid_oracle.dir/tests/cell_grid_oracle.cpp.o.d",
+        "sha256": "ec6970e3d4f0aab7f63e352f84d411b2b61953412d73e531ed5d978eed3208c4"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/cell_grid_oracle.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_census_device_stub_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_census_device_stub_gate.dir/tests/census_device_stub_gate.cpp.o.d",
+        "sha256": "0d75b228cff4d0ca9f876f98f375819a53bd25fa12e3cab6fe381a096f546d8d"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/gpu/census_kernels.cuh",
+      "morsehgp3D_v7/src/gpu/wire.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/census_device_stub_gate.cpp",
+      "morsehgp3D_v7/tests/cuda_stub.hpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_census_direct_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_census_direct_gate.dir/tests/census_direct_gate.cpp.o.d",
+        "sha256": "1ccb9d112552f223f299f1bebeac7fe7fc6c5e3d354e5ea7e5ff9e5a171c2884"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/tests/census_direct_gate.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_conformity",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_conformity.dir/tests/conformity_v5.cpp.o.d",
+        "sha256": "575eaa82b864e228fd07191f4f6b53254ed7705ff972f57c7268e26ed14a8242"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/parse.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/pipeline/run.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/conformity_v5.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_cover_fixture",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_cover_fixture.dir/tests/cover_fixture.cpp.o.d",
+        "sha256": "76c45820b65d7a7e072510e0b91fa13c56274d7970f4a2965b558e0c35869fcb"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/cover_fixture.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_device_witness_stub",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_device_witness_stub.dir/tests/device_witness_stub.cpp.o.d",
+        "sha256": "c403ba8109d19e8e607a0ff770af3bc1afc091f0107f8c1e6b3a907ecf2aa039"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/dint.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/gpu/device_witness.cu",
+      "morsehgp3D_v7/tests/cuda_stub.hpp",
+      "morsehgp3D_v7/tests/device_witness_stub.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_executor_pool_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_executor_pool_gate.dir/tests/executor_pool_gate.cpp.o.d",
+        "sha256": "ab5c0ba39c5cb3a89843b114855cfcfd3abc504699860a40f40947611fd5c039"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/gpu/executor_pool.hpp",
+      "morsehgp3D_v7/tests/executor_pool_gate.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_fold_caps_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_fold_caps_gate.dir/tests/fold_caps_gate.cpp.o.d",
+        "sha256": "d048b04ba21f848f1dd00b778a1d2f9f61e3b461fe88ac2a03785c608c45f17f"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/parse.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/pipeline/run.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/fold_caps_gate.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_fold_csr_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_fold_csr_gate.dir/tests/fold_csr_gate.cpp.o.d",
+        "sha256": "98844290a8b88366c75b32ea6e39a255dde0448ad8a78a7c52e155eeae9cd8eb"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/parse.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/pipeline/run.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/fold_csr_gate.cpp",
+      "morsehgp3D_v7/tests/forest_witness.hpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_linked_arcs",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_linked_arcs.dir/tests/linked_arcs_gate.cpp.o.d",
+        "sha256": "47d1b59ade206b12661ec3d9b2e8864494c4e3f16c9d46bdae074c15ac59a2e4"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/oracle/obig.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/linked_arcs_gate.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_lot_ring_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_lot_ring_gate.dir/tests/lot_ring_gate.cpp.o.d",
+        "sha256": "08ec0b83dc5b1463b2f02ba80897150fa46cb0c4f0e36593a81e3893025f8589"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/parse.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/gpu/lot_ring.hpp",
+      "morsehgp3D_v7/tests/lot_ring_gate.cpp",
+      "morsehgp3D_v7/tests/lot_ring_modele_differe.hpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_perm_residence_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_perm_residence_gate.dir/tests/perm_residence_gate.cpp.o.d",
+        "sha256": "435cea63a9ca198d5cd70422ae86a4b739b3714a7673d4b858c95a0a6cf3a8f1"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/tests/perm_residence_gate.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_perm_sort_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_perm_sort_gate.dir/tests/perm_sort_gate.cpp.o.d",
+        "sha256": "59c8cbbcd02a9406b897ad9b712b1dce641ba58e64eb29da43a47e44994b8b2d"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/parse.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/perm_sort_gate.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_pilot_stub_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_pilot_stub_gate.dir/tests/pilot_stub_gate.cpp.o.d",
+        "sha256": "7fb6cdf5141cfac6db9eddfa075befc57a9b5bc80e13ae43fa59a1294fc1e07f"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "morsehgp3D_v7/src/gpu/census_kernels.cuh",
+      "morsehgp3D_v7/src/gpu/pilot.hpp",
+      "morsehgp3D_v7/src/gpu/wire.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/pipeline/run.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/cuda_stub.hpp",
+      "morsehgp3D_v7/tests/pilot_stub_gate.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_pilote_stub_check",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_pilote_stub_check.dir/tests/pilot_cuda_stub_check.cpp.o.d",
+        "sha256": "47f9e6f6bbeaff69c832a9ac79928a903c866a2c284080f6138ce5632377d965"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/cli/mhgp7_cuda.cu",
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/parse.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "morsehgp3D_v7/src/gpu/census_kernels.cuh",
+      "morsehgp3D_v7/src/gpu/wire.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/pipeline/run.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/cuda_stub.hpp",
+      "morsehgp3D_v7/tests/pilot_cuda_stub_check.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_pilote_stub_check_test",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_pilote_stub_check_test.dir/tests/pilot_cuda_stub_check.cpp.o.d",
+        "sha256": "64d4c205f99965b461b5f281ab3d8806914d432808e498c8efe5db4029e0599c"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/cli/mhgp7_cuda.cu",
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/parse.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "morsehgp3D_v7/src/gpu/census_kernels.cuh",
+      "morsehgp3D_v7/src/gpu/wire.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/pipeline/run.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/cuda_stub.hpp",
+      "morsehgp3D_v7/tests/pilot_cuda_stub_check.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_profil_contrat",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_profil_contrat.dir/tests/profil_contrat_echec.cpp.o.d",
+        "sha256": "9de756c91b6466690f36344b02e88d9d8e5d25d23f8b0b7f987d9434d9761a1e"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/pipeline/run.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/profil_contrat_echec.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_residence_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_residence_gate.dir/tests/residence_gate.cpp.o.d",
+        "sha256": "704fb5354de4e2e473ef5a24baaa0719fbd644dbf270f254aeda17d3744d8856"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/parse.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/pipeline/run.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/residence_gate.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_route_c6_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_route_c6_gate.dir/tests/route_c6_gate.cpp.o.d",
+        "sha256": "943ad25a488a7c089e4a8f0c245958cebba784a773bde3042abd873c77540af8"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/parse.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "morsehgp3D_v7/src/gpu/census_kernels.cuh",
+      "morsehgp3D_v7/src/gpu/lot_ring.hpp",
+      "morsehgp3D_v7/src/gpu/pack.hpp",
+      "morsehgp3D_v7/src/gpu/pilot.hpp",
+      "morsehgp3D_v7/src/gpu/route_c6.hpp",
+      "morsehgp3D_v7/src/gpu/wire.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/pipeline/run.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/cuda_stub.hpp",
+      "morsehgp3D_v7/tests/route_c6_gate.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_selftest",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_selftest.dir/tests/selftest.cpp.o.d",
+        "sha256": "840f637108154da78014b31401e6399cac3ba972299b9fa8ce14f94d9e6bfbcc"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/dint.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/pipeline/run.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/forest_witness.hpp",
+      "morsehgp3D_v7/tests/selftest.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_silent_incidence_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_silent_incidence_gate.dir/tests/silent_incidence_gate.cpp.o.d",
+        "sha256": "8d328416a43532faa2043c44ea5c85a78fbd4d9cf12b0828639931715d592344"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/oracle/obig.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/pipeline/run.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/silent_incidence_gate.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_sweep_fixtures",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_sweep_fixtures.dir/tests/sweep_fixtures.cpp.o.d",
+        "sha256": "04735d0ffb353e3402aafc1cc7fd1eb042f5d7bb72f02dd08ba4ae6d7225c6a1"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/sweep_fixtures.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_thread_failure_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_thread_failure_gate.dir/tests/thread_failure_gate.cpp.o.d",
+        "sha256": "50784ac77e33406a53e865ce59087a03e1847020b7191c67aefd8cd7d5946b4c"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/forest/fold.hpp",
+      "morsehgp3D_v7/src/forest/plateau.hpp",
+      "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/census.hpp",
+      "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/pipeline/run.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/thread_failure_gate.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_wire_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_wire_gate.dir/tests/wire_gate.cpp.o.d",
+        "sha256": "bf7d54b849e8b4f46cd916b5c7268be749848aa6b5604e8fdd643cefcafc8aec"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/gpu/wire.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/tests/wire_gate.cpp"
+    ]
+  },
+  {
+    "binary": "build/v7/mhgp7_wire_pack_gate",
+    "compiler_depfiles": [
+      {
+        "path": "build/v7/CMakeFiles/mhgp7_wire_pack_gate.dir/tests/wire_pack_gate.cpp.o.d",
+        "sha256": "9e177902f435209e1fd16548ca8ad50350093c1756e403d39628363d94dde6d3"
+      }
+    ],
+    "v7_dependencies_unchanged": [
+      "morsehgp3D_v7/src/cloud/families.hpp",
+      "morsehgp3D_v7/src/core/caps.hpp",
+      "morsehgp3D_v7/src/core/device.hpp",
+      "morsehgp3D_v7/src/core/intmath.hpp",
+      "morsehgp3D_v7/src/core/morton.hpp",
+      "morsehgp3D_v7/src/core/mutants.hpp",
+      "morsehgp3D_v7/src/core/parse.hpp",
+      "morsehgp3D_v7/src/core/sha256.hpp",
+      "morsehgp3D_v7/src/core/types.hpp",
+      "morsehgp3D_v7/src/core/wide.hpp",
+      "morsehgp3D_v7/src/gpu/pack.hpp",
+      "morsehgp3D_v7/src/gpu/wire.hpp",
+      "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "morsehgp3D_v7/src/lanes/keys.hpp",
+      "morsehgp3D_v7/src/lanes/level.hpp",
+      "morsehgp3D_v7/src/lanes/q2.hpp",
+      "morsehgp3D_v7/src/lanes/q3.hpp",
+      "morsehgp3D_v7/src/lanes/q4.hpp",
+      "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "morsehgp3D_v7/src/parallel/pool.hpp",
+      "morsehgp3D_v7/src/parallel/sort.hpp",
+      "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "morsehgp3D_v7/tests/wire_pack_gate.cpp"
+    ]
+  }
+]

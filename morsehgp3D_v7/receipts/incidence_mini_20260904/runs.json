@@ -1,0 +1,249 @@
+[
+  {
+    "case": "uniform_200_coord0",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=200",
+      "--seed=3",
+      "--threads=4",
+      "--smax=11",
+      "--layout=csr",
+      "--digest",
+      "--complete-incidences",
+      "--mem-budget=17179869184",
+      "--silent-meb-supports=25000000"
+    ],
+    "returncode": 2,
+    "timed_out": false,
+    "wall_seconds": 0.8311672170002566,
+    "status": "engine_refused",
+    "stdout": "uniform_200_coord0.out",
+    "stderr": "uniform_200_coord0.err",
+    "usage": "uniform_200_coord0.time",
+    "reason": "REFUS unsupported_degeneracy : incidence completion requires no rank-relevant extra-shell"
+  },
+  {
+    "case": "uniform_200_coord65536",
+    "command": [
+      "/workspaces/E-HGP/build/v7/mhgp7",
+      "--family=uniform",
+      "--n=200",
+      "--seed=3",
+      "--threads=4",
+      "--smax=11",
+      "--layout=csr",
+      "--digest",
+      "--complete-incidences",
+      "--mem-budget=17179869184",
+      "--silent-meb-supports=25000000",
+      "--coord=65536"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 4.747445286999664,
+    "status": "engine_completed",
+    "stdout": "uniform_200_coord65536.out",
+    "stderr": "uniform_200_coord65536.err",
+    "usage": "uniform_200_coord65536.time",
+    "digests": {
+      "digest_forest_K1": "42a47daa541e8a2c687d76a7401160b936623ee66e5b2c37a0bf96203e90e087",
+      "digest_forest_K2": "257040a2d4cc75a0e5f40609f902c5fdc0dde0dcc6834ed29c1ca07dd61c5018",
+      "digest_forest_K3": "cef44f411dd7c0ed58a6868ade9f235f18357431267eec17e282d30ac2a72894",
+      "digest_forest_K4": "7efbc32fde418b1c97533ded45ad717707a9a03b335b96f38687fd43ec4a4669",
+      "digest_forest_K5": "24fe02461674fa7fb2dd440ccbfebf6ee25201095a1ab565ca197aa08f682219",
+      "digest_forest_K6": "d80dc55d937b794aaaef5f6b0d23d1c4ffde56a3360ba88b4029ba5bed7afa84",
+      "digest_forest_K7": "945c0e5d7625e5957206f20f061d180e63e2875d49a87cf8204b1bd2b157c148",
+      "digest_forest_K8": "d62dd0ff08fa721062f35beb76b5235c5662e0189f2856cd0dd5d11bcdaeb061",
+      "digest_forest_K9": "dcf8bc148d331c0b3e05e1fdfd3ba8d0377d14d05b5d8cce67810c8b7a293083",
+      "digest_forest_K10": "63ced41256b67c9f4f80dbf8e3b6619ebd4c3a9b82bc9dc9e3809b22ba45f08a",
+      "digest_all": "1788fd23e2d723fbed23de0661f763c6d6ea27eb7543ef00759bff9141f5f910"
+    },
+    "counts": {
+      "n": 200,
+      "coord": 65536,
+      "s": 8,
+      "smax": 11,
+      "seed": 3,
+      "threads": 4,
+      "emis": 42041,
+      "boules_uniques": 42041,
+      "mortes_profondeur": 482,
+      "survivantes": 41559,
+      "census_int": 206280,
+      "census_shell": 136757,
+      "evenements": 57341,
+      "facettes": 336836,
+      "fusions": 336826,
+      "deltas": 53639,
+      "noeuds": 1233
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 614,
+        "facettes": 200,
+        "deltas": 199,
+        "attachements": 0,
+        "fusions": 199,
+        "noeuds": 199
+      },
+      "2": {
+        "evenements": 1257,
+        "facettes": 1247,
+        "deltas": 981,
+        "attachements": 624,
+        "fusions": 1246,
+        "noeuds": 46
+      },
+      "3": {
+        "evenements": 2089,
+        "facettes": 3777,
+        "deltas": 2049,
+        "attachements": 2557,
+        "fusions": 3776,
+        "noeuds": 57
+      },
+      "4": {
+        "evenements": 3101,
+        "facettes": 8204,
+        "deltas": 3048,
+        "attachements": 6234,
+        "fusions": 8203,
+        "noeuds": 69
+      },
+      "5": {
+        "evenements": 4424,
+        "facettes": 15607,
+        "deltas": 4292,
+        "attachements": 12739,
+        "fusions": 15606,
+        "noeuds": 82
+      },
+      "6": {
+        "evenements": 5790,
+        "facettes": 25751,
+        "deltas": 5594,
+        "attachements": 21771,
+        "fusions": 25750,
+        "noeuds": 126
+      },
+      "7": {
+        "evenements": 7306,
+        "facettes": 39334,
+        "deltas": 6971,
+        "attachements": 34104,
+        "fusions": 39333,
+        "noeuds": 127
+      },
+      "8": {
+        "evenements": 8995,
+        "facettes": 56931,
+        "deltas": 8462,
+        "attachements": 50413,
+        "fusions": 56930,
+        "noeuds": 154
+      },
+      "9": {
+        "evenements": 10914,
+        "facettes": 79614,
+        "deltas": 10180,
+        "attachements": 71560,
+        "fusions": 79613,
+        "noeuds": 181
+      },
+      "10": {
+        "evenements": 12851,
+        "facettes": 106171,
+        "deltas": 11863,
+        "attachements": 96465,
+        "fusions": 106170,
+        "noeuds": 192
+      }
+    },
+    "silent": {
+      "2": {
+        "core": 915,
+        "with_two_intruders": 70,
+        "steps": 89,
+        "added": 89,
+        "max_chain": 3,
+        "query_nodes": 31058,
+        "meb_supports": 1290
+      },
+      "3": {
+        "core": 1994,
+        "with_two_intruders": 192,
+        "steps": 254,
+        "added": 254,
+        "max_chain": 4,
+        "query_nodes": 86614,
+        "meb_supports": 8805
+      },
+      "4": {
+        "core": 3351,
+        "with_two_intruders": 396,
+        "steps": 523,
+        "added": 523,
+        "max_chain": 6,
+        "query_nodes": 171778,
+        "meb_supports": 36457
+      },
+      "5": {
+        "core": 5004,
+        "with_two_intruders": 691,
+        "steps": 965,
+        "added": 965,
+        "max_chain": 7,
+        "query_nodes": 296153,
+        "meb_supports": 117039
+      },
+      "6": {
+        "core": 6937,
+        "with_two_intruders": 982,
+        "steps": 1372,
+        "added": 1372,
+        "max_chain": 10,
+        "query_nodes": 451339,
+        "meb_supports": 295419
+      },
+      "7": {
+        "core": 8900,
+        "with_two_intruders": 1421,
+        "steps": 1983,
+        "added": 1983,
+        "max_chain": 7,
+        "query_nodes": 641311,
+        "meb_supports": 673760
+      },
+      "8": {
+        "core": 10994,
+        "with_two_intruders": 1868,
+        "steps": 2684,
+        "added": 2684,
+        "max_chain": 9,
+        "query_nodes": 864296,
+        "meb_supports": 1363039
+      },
+      "9": {
+        "core": 13289,
+        "with_two_intruders": 2437,
+        "steps": 3543,
+        "added": 3543,
+        "max_chain": 10,
+        "query_nodes": 1132466,
+        "meb_supports": 2570943
+      },
+      "10": {
+        "core": 15837,
+        "with_two_intruders": 2949,
+        "steps": 4369,
+        "added": 4369,
+        "max_chain": 9,
+        "query_nodes": 1438716,
+        "meb_supports": 4524816
+      }
+    },
+    "pipeline_ms": 4720.6,
+    "max_rss_kb": 56404
+  }
+]

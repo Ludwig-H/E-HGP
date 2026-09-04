@@ -1,0 +1,30 @@
+[
+  {
+    "path": "build_pins.txt",
+    "sha256": "d42240c40b36bcf286f2ee211b1bcdc30815fad10f911c1e0c7d68016b9da0f8"
+  },
+  {
+    "path": "ctest.stdout",
+    "sha256": "ee1e8b777482cd38db8061d89697a02e749a9999f780f9a37fc99c7dd800b7c5"
+  },
+  {
+    "path": "inventory.json",
+    "sha256": "7fdb20d8d89b960a9a48876e7b7447d9b014395c2186e462ed8ae0afc424c939"
+  },
+  {
+    "path": "README.md",
+    "sha256": "311e24bb8f0635ef02677d936f98912243520bf3305da00d4f9be94c4653d6a4"
+  },
+  {
+    "path": "sources.after.json",
+    "sha256": "6cd423bbc849913a592722cf56012bff2b29e434e4e88984cb06b266a99f728b"
+  },
+  {
+    "path": "sources.before.json",
+    "sha256": "6cd423bbc849913a592722cf56012bff2b29e434e4e88984cb06b266a99f728b"
+  },
+  {
+    "path": "summary.json",
+    "sha256": "5f447b99742aeba789475eeb79fdda46b61194cbbd2208224d64735f67dbcbc0"
+  }
+]

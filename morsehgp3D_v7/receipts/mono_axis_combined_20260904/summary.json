@@ -1,0 +1,37 @@
+{
+  "public_status": "not_claimed",
+  "status": "completed_targeted_qualification",
+  "scope": "combined mono-inline and AxisBounds only; not full C qualification or CLI performance",
+  "build_dir": "build/v7_axis_integrated",
+  "compiler": "GNU C++ 13.3.0",
+  "configuration": "Release",
+  "built_targets": [
+    "mhgp7_axis_bounds_gate",
+    "mhgp7_mono_inline_gate"
+  ],
+  "test_command": "ctest --test-dir build/v7_axis_integrated --output-on-failure --no-tests=error -R '^mhgp7_(axis_bounds($|_)|mono_inline($|_))'",
+  "expected_tests": 10,
+  "observed_tests": [
+    "mhgp7_mono_inline",
+    "mhgp7_mono_inline_late_a",
+    "mhgp7_mono_inline_late_b",
+    "mhgp7_mono_inline_early_alloc",
+    "mhgp7_axis_bounds",
+    "mhgp7_axis_bounds_axis-argmin-floor-only",
+    "mhgp7_axis_bounds_axis-argmin-ceil-always",
+    "mhgp7_axis_bounds_axis-argmin-no-clip",
+    "mhgp7_axis_bounds_axis-argmin-narrow-coefficient",
+    "mhgp7_axis_bounds_axis-argmin-max-min"
+  ],
+  "exit_code": 0,
+  "passed": 10,
+  "failed": 0,
+  "ctest_wall_seconds": 0.23,
+  "source_stable": true,
+  "source_count": 112,
+  "source_inventory": "src/cli/oracle/tests/bench files excluding __pycache__, plus CMakeLists.txt and cmake/run_expect.cmake",
+  "binary_hash_observation": "at completion (not an independently sampled before/after binary pair)",
+  "no_cli_built_or_run": true,
+  "no_global_build_or_suite_run": true,
+  "gcp_used": false
+}

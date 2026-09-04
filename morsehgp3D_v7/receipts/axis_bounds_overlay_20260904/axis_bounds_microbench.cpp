@@ -1,0 +1,141 @@
+// Bounded scalar microbenchmark, not an end-to-end performance receipt.
+#include <chrono>
+#include <cstdio>
+#include <cstdlib>
+#include <random>
+#include <vector>
+
+#include "../src/pipeline/census.hpp"
+
+namespace {
+using namespace mhgp7;
+
+// Frozen pre-optimization AxisBounds body, renamed only. This differential
+// comparator is NOT the correctness oracle (see OBig enumeration gate).
+struct BaselineAxis {
+  const BallKey& k;
+  i128 axis_val(int i, i64 t) const { return k.a * ((i128)t * t) + k.b[i] * t; }
+  i128 axis_min(int i, i64 lo, i64 hi) const {
+    const i64 t1 = (i64)floor_div128(-k.b[i], 2 * k.a);
+    i128 best = 0;
+    bool first = true;
+    for (const i64 cand : {t1, t1 + 1, lo, hi}) {
+      const i64 c = std::min(std::max(cand, lo), hi);
+      const i128 v = axis_val(i, c);
+      if (first || v < best) { best = v; first = false; }
+    }
+    return best;
+  }
+  i128 axis_max(int i, i64 lo, i64 hi) const { return std::max(axis_val(i, lo), axis_val(i, hi)); }
+  void bounds(const AxisBox& bz, i128* mn, i128* mx) const {
+    *mn = k.c;
+    *mx = k.c;
+    for (int i = 0; i < 3; ++i) {
+      *mn += axis_min(i, bz.lo[i], bz.hi[i]);
+      *mx += axis_max(i, bz.lo[i], bz.hi[i]);
+    }
+  }
+};
+
+struct FloorCacheAxis : BaselineAxis {
+  i64 floor_vertex[3];
+  explicit FloorCacheAxis(const BallKey& key) : BaselineAxis{key} {
+    for (int i = 0; i < 3; ++i) floor_vertex[i] = (i64)floor_div128(-k.b[i], 2 * k.a);
+  }
+  i128 axis_min(int i, i64 lo, i64 hi) const {
+    i128 best = 0;
+    bool first = true;
+    for (const i64 cand : {floor_vertex[i], floor_vertex[i] + 1, lo, hi}) {
+      const i64 c = std::min(std::max(cand, lo), hi);
+      const i128 v = axis_val(i, c);
+      if (first || v < best) { best = v; first = false; }
+    }
+    return best;
+  }
+  void bounds(const AxisBox& box, i128* mn, i128* mx) const {
+    *mn = k.c; *mx = k.c;
+    for (int i = 0; i < 3; ++i) {
+      *mn += axis_min(i, box.lo[i], box.hi[i]);
+      *mx += axis_max(i, box.lo[i], box.hi[i]);
+    }
+  }
+};
+
+struct Input {
+  std::vector<BallKey> keys;
+  std::vector<AxisBox> boxes;
+  int boxes_per_ball = 0;
+};
+
+template <class Bounds, bool MinOnly>
+__attribute__((noinline)) u64 evaluate(Input* input, int passes) {
+  u64 digest = 0;
+  for (int p = 0; p < passes; ++p) {
+    // Observable changing input prevents loop-invariant elimination of the
+    // repeated workload. Every variant starts from its own identical copy.
+    input->keys[(size_t)p % input->keys.size()].c += 1;
+    for (size_t i = 0; i < input->keys.size(); ++i) {
+      const Bounds bounds{input->keys[i]};
+      for (int j = 0; j < input->boxes_per_ball; ++j) {
+        i128 mn = 0, mx = 0;
+        bounds.bounds(input->boxes[i * (size_t)input->boxes_per_ball + (size_t)j], &mn, &mx);
+        const u128 low = (u128)mn;
+        const u128 high = MinOnly ? 0 : (u128)mx;
+        digest += (u64)low ^ (u64)(low >> 64) ^ (u64)high ^ (u64)(high >> 64);
+      }
+    }
+  }
+  return digest;
+}
+
+template <bool MinOnly>
+bool measure(const Input& original, int passes) {
+  u64 expected = 0;
+  for (int trial = 0; trial < 5; ++trial) {
+    for (int slot = 0; slot < 3; ++slot) {
+      const int variant = (slot + trial) % 3;
+      Input input = original;  // allocations/copies outside the timed region
+      const auto begin = std::chrono::steady_clock::now();
+      const u64 digest = variant == 0 ? evaluate<BaselineAxis, MinOnly>(&input, passes)
+                         : variant == 1 ? evaluate<FloorCacheAxis, MinOnly>(&input, passes)
+                         : evaluate<census_detail::AxisBounds, MinOnly>(&input, passes);
+      const double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - begin).count();
+      if (trial == 0 && slot == 0) expected = digest;
+      if (digest != expected) return false;
+      std::printf("{\"kind\":\"micro_only\",\"mode\":\"%s\",\"variant\":\"%s\",\"trial\":%d,\"balls\":%zu,\"boxes_per_ball\":%d,\"passes\":%d,\"queries\":%zu,\"ms\":%.6f,\"digest\":\"%016llx\"}\n",
+                  MinOnly ? "min_only" : "min_max", variant == 0 ? "baseline" : variant == 1 ? "floor_cache" : "argmin",
+                  trial, input.keys.size(), input.boxes_per_ball, passes,
+                  input.boxes.size() * (size_t)passes, ms, (unsigned long long)digest);
+    }
+  }
+  return true;
+}
+}  // namespace
+
+int main(int argc, char** argv) {
+  const int per_ball = argc > 1 ? std::atoi(argv[1]) : 64;
+  const int passes = argc > 2 ? std::atoi(argv[2]) : 32;
+  if (argc > 3 || per_ball < 1 || per_ball > 128 || passes < 1 || passes > 256) return 2;
+  Input input;
+  input.boxes_per_ball = per_ball;
+  std::mt19937_64 random(0x41584953);
+  for (int n = 0; n < 256; ++n) {
+    const i128 a = n % 2 == 0 ? (i128)(1 + random() % 10000) : ((i128)1 << 66) + (i128)(random() % 10000);
+    BallKey k{a, {}, 0};
+    i64 centre[3]{};
+    for (int i = 0; i < 3; ++i) {
+      centre[i] = 32 + (i64)(random() % 65472);
+      k.b[i] = -2 * a * centre[i] + (i128)(random() % 10000);
+    }
+    input.keys.push_back(k);
+    for (int j = 0; j < per_ball; ++j) {
+      AxisBox box{};
+      for (int i = 0; i < 3; ++i) {
+        box.lo[i] = std::max((i64)0, centre[i] + (i64)(random() % 257) - 128);
+        box.hi[i] = std::min((i64)65535, box.lo[i] + (i64)(random() % 257));
+      }
+      input.boxes.push_back(box);
+    }
+  }
+  return measure<false>(input, passes) && measure<true>(input, passes) ? 0 : 1;
+}

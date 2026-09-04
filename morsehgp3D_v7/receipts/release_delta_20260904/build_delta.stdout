@@ -1,0 +1,9 @@
+[ 50%] Building CXX object CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o
+[100%] Linking CXX executable mhgp7
+[100%] Built target mhgp7
+[ 50%] Building CXX object CMakeFiles/mhgp7_archive_api_gate.dir/tests/archive_api_gate.cpp.o
+[100%] Linking CXX executable mhgp7_archive_api_gate
+[100%] Built target mhgp7_archive_api_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_archive_cleanup_gate.dir/tests/archive_cleanup_gate.cpp.o
+[100%] Linking CXX executable mhgp7_archive_cleanup_gate
+[100%] Built target mhgp7_archive_cleanup_gate

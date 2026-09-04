@@ -1,0 +1,25 @@
+{
+  "affinity_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "gcp": "not_used",
+  "public_status": "not_claimed",
+  "release_a_manifest_sha256": "4c1f0b93825a7b417a4ba2402a24e3b8a89698680c1b8b775ee3f483e6a2518b",
+  "runner_sha256": "f687a96e62f4f8ba8a732a818228a36028f472a34d14b868c14a273721d79edb",
+  "schema": "mhgp7.local.release-delta.v1",
+  "scope": "cpu_release_archive_interface_delta_not_fresh_full_suite_not_slo",
+  "uname": [
+    "Linux",
+    "codespaces-0bcb78",
+    "6.8.0-1052-azure",
+    "#58~22.04.1-Ubuntu SMP Thu Mar 26 05:02:21 UTC 2026",
+    "x86_64"
+  ]
+}

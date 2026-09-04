@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v7",
+    "--parallel",
+    "2",
+    "--target",
+    "mhgp7_perm_residence_gate"
+  ],
+  "started_utc": "2026-09-04T20:47:33Z",
+  "status": "running",
+  "timeout_seconds": 600
+}

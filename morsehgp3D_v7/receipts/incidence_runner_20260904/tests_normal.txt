@@ -1,0 +1,7 @@
+command=python3 -B morsehgp3D_v7/tests/incidence_campaign_gate.py
+exit_code=0
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 1.720s
+
+OK

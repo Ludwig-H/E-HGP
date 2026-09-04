@@ -1,0 +1,11 @@
+{
+  "status": "invalid",
+  "source_stable": true,
+  "runs": 36,
+  "pairs": 18,
+  "expected_pairs": 18,
+  "error": null,
+  "all_objects_equal": false,
+  "performance_qualification": "not_claimed",
+  "exact_hgp_qualification": "not_claimed"
+}

@@ -1,0 +1,12 @@
+{
+  "added": [
+    "morsehgp3D_v7/tests/archive_cleanup_gate.cpp"
+  ],
+  "changed": [
+    "morsehgp3D_v7/CMakeLists.txt",
+    "morsehgp3D_v7/bench/incidence_campaign.py",
+    "morsehgp3D_v7/src/io/archive.hpp",
+    "morsehgp3D_v7/tests/incidence_campaign_gate.py"
+  ],
+  "removed": []
+}

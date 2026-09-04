@@ -1,0 +1,116 @@
+{
+  "files_sha256": {
+    "mono_inline_gate": "7ecb16df9e61487019d05e0718c56b043938cc1794804b402af52bcfb60eef44",
+    "mono_reference_gate": "537548d6a7065c493998ef84e31967042b8e0829350cb0411a809c60d765b945",
+    "src/pipeline/run.hpp": "6b9526d896850b94e6455c040ca8bcd038c292c003b1138407e1d57f4fd9f441",
+    "tests/mono_inline_gate.cpp": "cb427753568aafe7ec61f392a0b373b5ebe7c129818d27ce749bb21cebad7eee"
+  },
+  "gcp": "not_used",
+  "public_status": "not_claimed",
+  "records": [
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_mono_inline_fix/mono_reference_gate"
+      ],
+      "elapsed_seconds": 0.04680049500075256,
+      "exit_code": 0,
+      "name": "nominal_reference",
+      "stdout_sha256": "860ec443121fc8fc2d7d6dbe88c8e0017c19c7a2cd548014ac72e1f8707466c6"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_mono_inline_fix/mono_inline_gate"
+      ],
+      "elapsed_seconds": 0.03810869399967487,
+      "exit_code": 0,
+      "name": "nominal_inline",
+      "stdout_sha256": "860ec443121fc8fc2d7d6dbe88c8e0017c19c7a2cd548014ac72e1f8707466c6"
+    },
+    {
+      "comparison": "nominal",
+      "exact_stdout_equal": true
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_mono_inline_fix/mono_reference_gate",
+        "--inject=fold-inject-a-failure-k2"
+      ],
+      "elapsed_seconds": 0.005319804999999178,
+      "exit_code": 0,
+      "name": "late_a_reference",
+      "stdout_sha256": "da2328d61181338f68244ca2f20a6841c94f61c3337dce8ec953e55400b5748e"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_mono_inline_fix/mono_inline_gate",
+        "--inject=fold-inject-a-failure-k2"
+      ],
+      "elapsed_seconds": 0.004661439999836148,
+      "exit_code": 0,
+      "name": "late_a_inline",
+      "stdout_sha256": "da2328d61181338f68244ca2f20a6841c94f61c3337dce8ec953e55400b5748e"
+    },
+    {
+      "comparison": "late_a",
+      "exact_stdout_equal": true
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_mono_inline_fix/mono_reference_gate",
+        "--inject=fold-inject-b-exception-k3"
+      ],
+      "elapsed_seconds": 0.005754312000135542,
+      "exit_code": 0,
+      "name": "late_b_reference",
+      "stdout_sha256": "f5ca471002bba3bbdc9b6771f19fe4e944bb05823b92174ef3b02c16dcfd75b7"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_mono_inline_fix/mono_inline_gate",
+        "--inject=fold-inject-b-exception-k3"
+      ],
+      "elapsed_seconds": 0.005098325999824738,
+      "exit_code": 0,
+      "name": "late_b_inline",
+      "stdout_sha256": "f5ca471002bba3bbdc9b6771f19fe4e944bb05823b92174ef3b02c16dcfd75b7"
+    },
+    {
+      "comparison": "late_b",
+      "exact_stdout_equal": true
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_mono_inline_fix/mono_reference_gate",
+        "--inject=caps-throw-bad-alloc-fold"
+      ],
+      "elapsed_seconds": 0.004838480999751482,
+      "exit_code": 0,
+      "name": "early_alloc_reference",
+      "stdout_sha256": "52f227318a7a41a5a99e4ac7fab5d1137e0ab2791883c3ed4a1fd7f38d87701c"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_mono_inline_fix/mono_inline_gate",
+        "--inject=caps-throw-bad-alloc-fold"
+      ],
+      "elapsed_seconds": 0.004588644000250497,
+      "exit_code": 0,
+      "name": "early_alloc_inline",
+      "stdout_sha256": "52f227318a7a41a5a99e4ac7fab5d1137e0ab2791883c3ed4a1fd7f38d87701c"
+    },
+    {
+      "comparison": "early_alloc",
+      "exact_stdout_equal": true
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_mono_inline_fix/mono_reference_gate",
+        "--require-zero"
+      ],
+      "exit_code": 1,
+      "name": "counterexample"
+    }
+  ],
+  "scope": "overlay_local_not_integrated",
+  "status": "passed"
+}

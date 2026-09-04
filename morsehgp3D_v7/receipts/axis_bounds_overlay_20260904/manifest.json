@@ -1,0 +1,66 @@
+[
+  {
+    "path": "axis_bounds_gate.cpp",
+    "sha256": "5974dd9093438e839599415b7dc4af90a6b5c267eea77728215b9b3993a24e5a"
+  },
+  {
+    "path": "axis_bounds_microbench.cpp",
+    "sha256": "3a44861833fd261433decb9753014e3c81caa7e3c5af38f7a4f39770089ba041"
+  },
+  {
+    "path": "census.before.hpp",
+    "sha256": "3583680d947a5b28f8a38028bc55f37f12040143fea88d4aecc77a7baf653690"
+  },
+  {
+    "path": "census.microbench.patch",
+    "sha256": "a31107b2e2be937cdb7682c5dae647023e386aa963d097b12169cd6b3a53f8ee"
+  },
+  {
+    "path": "census.overlay.hpp",
+    "sha256": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be"
+  },
+  {
+    "path": "census.patch",
+    "sha256": "a8461e0bae866ecdaa56fa19b760a7cdaa52c71209bcc833b1fccf7dae66c89c"
+  },
+  {
+    "path": "gate.patch",
+    "sha256": "f03a986da27d4fe1bfdabdc86f017186e89689cacb22355372ff4f610b3929a1"
+  },
+  {
+    "path": "integrated.ctest.stdout",
+    "sha256": "567f891a5ad87e9b5b3709f65f3623f486f5f7ccea21ef02d8811526fe8d4247"
+  },
+  {
+    "path": "microbench.jsonl",
+    "sha256": "2801e08ea33a09cf5644f46086b115f47bea51a0461f61f0ee891dfc84df80cc"
+  },
+  {
+    "path": "microbench.patch",
+    "sha256": "3f1745dd62247bb92595df45e03587a9cb7dbfa2c0e738e4f836b98b37b0b483"
+  },
+  {
+    "path": "mutants.overlay.hpp",
+    "sha256": "479cf2761107696d7ec89d8651003a9f0d5c0f47bd0fbda8732bf9449e2df5cd"
+  },
+  {
+    "path": "mutants.patch",
+    "sha256": "45b3c9d9f8c00fe904d0be5b7fcb31aaec18c6e76338e302400dd2ce5a8807c2"
+  },
+  {
+    "path": "obig.hpp",
+    "sha256": "0e3e9241503e7979fb7da06e97a0a0006362cf4da381c7ce2c66d86acdabf8d5"
+  },
+  {
+    "path": "qualification.json",
+    "sha256": "6ed855af23f1fc0ed14c8b4b4e2fe96e426a2092a5eaf585497d5515da379edc"
+  },
+  {
+    "path": "README.md",
+    "sha256": "09dc139c69d60c5a1c4ef3a61d9be7d3cba0a0704befcd0bca8a0e930eefed3f"
+  },
+  {
+    "path": "README.overlay.md",
+    "sha256": "5df0c125aa653c22eb6282865173418e034fe5d41aa228e9248c64c0e20f7ec3"
+  }
+]

@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="21"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="15"
+	timestamp="2026-09-04T21:42:34"
+	>
+	<testcase name="mhgp7_cli_refus_s7" classname="mhgp7_cli_refus_s7" time="0.0179609" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_refus_s_suffix" classname="mhgp7_cli_refus_s_suffix" time="0.015754" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_refus_n_suffix" classname="mhgp7_cli_refus_n_suffix" time="0.0162733" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_ok_s8" classname="mhgp7_cli_ok_s8" time="1.15321" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>payload=mhgp7-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+forest_layout=classic forest_storage_kind=vector_component_delta_v1 csr_fallback=0 ordres_publies=10 ordres_storage_conformes=10
+backend=cpu_reference
+forest_semantics=verified_events_only public_status=not_claimed require_exact=false
+census_storage=mhgp7-census-direct-v1 census_payload_peak_scope=owned_balldata_capacities
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=uniform n=200 coord=58 s=8 smax=11 seed=3 threads=1 emis=42129 boules_uniques=42109 mortes_profondeur=492 survivantes=41617 census_int=206628 census_shell=137477 evenements=42018 facettes=252460 fusions=252417 deltas=39392 noeuds=26828
+generation rect_alive=4343/8233/8705 rect_visites_fusionnes=24179 ancres=5416/12149/13155 candidats=5273/19843/17013 tues_profondeur=0/98488/25398 ancres_w4=2023 ancres_w3=1736 ancres_secteurs=854/1718 ancres_cellules=0/0 seeds_cellules=0/0 grilles=0/0 seeds=118331/114004 completion...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_budget_signature" classname="mhgp7_cli_budget_signature" time="1.19221" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>memory_budget_scope=partial_named_payload_proxy_v1 budget=1073741824 cap_brut_demande=4294967295 cap_brut_effectif=7456540 cap_fusion_budgetaire=3728270
+payload=mhgp7-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+forest_layout=classic forest_storage_kind=vector_component_delta_v1 csr_fallback=0 ordres_publies=10 ordres_storage_conformes=10
+backend=cpu_reference
+forest_semantics=verified_events_only public_status=not_claimed require_exact=false
+census_storage=mhgp7-census-direct-v1 census_payload_peak_scope=owned_balldata_capacities
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=uniform n=200 coord=58 s=8 smax=11 seed=3 threads=1 emis=42129 boules_uniques=42109 mortes_profondeur=492 survivantes=41617 census_int=206628 census_shell=137477 evenements=42018 facettes=252460 fusions=252417 deltas=39392 noeuds=26828
+generation rect_alive=4343/8233/8705 rect_visites_fusionnes=24179 ancres=5416/12149/13155 candidats=5273/19843/17013 tues_profonde...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profile_refuse_inject" classname="mhgp7_profile_refuse_inject" time="0.0160326" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>argument inconnu : --inject=ablation-mat-sans-copie
+REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profile_sonde_refuse_inconnu" classname="mhgp7_profile_sonde_refuse_inconnu" time="0.0162445" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profile_sonde_refuse_inject_vide" classname="mhgp7_profile_sonde_refuse_inject_vide" time="0.0139503" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profile_sonde_refuse_inject_virgule" classname="mhgp7_profile_sonde_refuse_inject_virgule" time="0.0143764" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profile_sonde_refuse_mutant_production" classname="mhgp7_profile_sonde_refuse_mutant_production" time="0.0130893" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_profil_identite" classname="mhgp7_profil_identite" time="15.0133" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>porte du profil : projection deterministe nommee (digest_all + digest_forest_K* + cardinalites K=*) identique (normal/profil/vivacite x join 0/1 x layout classic/csr), builds discrimines, structure/planchers/causalite fold_join valides
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_layout_classic_signature" classname="mhgp7_cli_layout_classic_signature" time="1.16483" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>payload=mhgp7-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+forest_layout=classic forest_storage_kind=vector_component_delta_v1 csr_fallback=0 ordres_publies=10 ordres_storage_conformes=10
+backend=cpu_reference
+forest_semantics=verified_events_only public_status=not_claimed require_exact=false
+census_storage=mhgp7-census-direct-v1 census_payload_peak_scope=owned_balldata_capacities
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=uniform n=200 coord=58 s=8 smax=11 seed=3 threads=1 emis=42129 boules_uniques=42109 mortes_profondeur=492 survivantes=41617 census_int=206628 census_shell=137477 evenements=42018 facettes=252460 fusions=252417 deltas=39392 noeuds=26828
+generation rect_alive=4343/8233/8705 rect_visites_fusionnes=24179 ancres=5416/12149/13155 candidats=5273/19843/17013 tues_profondeur=0/98488/25398 ancres_w4=2023 ancres_w3=1736 ancres_secteurs=854/1718 ancres_cellules=0/0 seeds_cellules=0/0 grilles=0/0 seeds=118331/114004 completion...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_layout_csr_signature" classname="mhgp7_cli_layout_csr_signature" time="1.097" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>payload=mhgp7-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+forest_layout=csr forest_storage_kind=csr_facet_keys_v1 csr_fallback=0 ordres_publies=10 ordres_storage_conformes=10
+backend=cpu_reference
+forest_semantics=verified_events_only public_status=not_claimed require_exact=false
+census_storage=mhgp7-census-direct-v1 census_payload_peak_scope=owned_balldata_capacities
+tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11
+famille=uniform n=200 coord=58 s=8 smax=11 seed=3 threads=1 emis=42129 boules_uniques=42109 mortes_profondeur=492 survivantes=41617 census_int=206628 census_shell=137477 evenements=42018 facettes=252460 fusions=252417 deltas=39392 noeuds=26828
+generation rect_alive=4343/8233/8705 rect_visites_fusionnes=24179 ancres=5416/12149/13155 candidats=5273/19843/17013 tues_profondeur=0/98488/25398 ancres_w4=2023 ancres_w3=1736 ancres_secteurs=854/1718 ancres_cellules=0/0 seeds_cellules=0/0 grilles=0/0 seeds=118331/114004 completions_q4=447472 ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_refus_layout_inconnu" classname="mhgp7_cli_refus_layout_inconnu" time="0.0152102" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_cli_refus_layout_vide" classname="mhgp7_cli_refus_layout_vide" time="0.0134194" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>REFUS : arguments (parsing exact ; profil s &gt;= 8, smax dans [2, 11])
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_archive" classname="mhgp7_archive" time="0.175636" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>archive_gate=passed scenes=24 digest_replay=independent delta_replay=independent corruption=rejected
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_archive_optimized" classname="mhgp7_archive_optimized" time="0.175702" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>archive_gate=passed scenes=24 digest_replay=independent delta_replay=independent corruption=rejected
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_archive_api" classname="mhgp7_archive_api" time="0.0277144" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>archive_api_gate=passed completed=2 parent_sync_fault=1 file_sync_fault=1 closed_lifecycle=6 invalid_inputs=3 semantics_refusals=3
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_archive_cleanup" classname="mhgp7_archive_cleanup" time="0.0455388" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>archive_cleanup_gate=passed persistent=1 all_order_files=10 constructor_faults=8 post_mkdir_faults=1 commit_faults=10 callback_mask=6 parent_sync_fault=1 os_cleanup_fault=1 denied_allocations=23
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_incidence_campaign" classname="mhgp7_incidence_campaign" time="1.09328" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.942s
+
+OK
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_incidence_campaign_optimized" classname="mhgp7_incidence_campaign_optimized" time="1.20429" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>.......
+----------------------------------------------------------------------
+Ran 7 tests in 1.038s
+
+OK
+</system-out>
+	</testcase>
+</testsuite>

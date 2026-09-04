@@ -1,0 +1,4 @@
+REFUS silent incidence K=2 : silent_meb_support_budget
+refus_etage=fold rss_mb apres_generation=4 apres_rle=4 apres_prefiltre=4 apres_census=5 max_fold=5 (frontiere de completion : dernier etage atteint)
+silent_refusal_work census_balls=172 plateau_balls=0 total_ms=27.370 completion_ms=0.049
+silent_refusal_K2 core=24 steps=0 added_provisional=0 query_nodes=5 meb_supports=1

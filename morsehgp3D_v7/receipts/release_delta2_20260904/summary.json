@@ -1,0 +1,120 @@
+{
+  "claim": "selective delta qualification with byte-identical unaffected consumers; not a fresh full suite",
+  "ctest_inventory_count": 282,
+  "failed_b1_retained": true,
+  "failure": null,
+  "gcp": "not_used",
+  "product_a_sha256": "8a99b5cf5dc2c0622947f6b34880803e4ed347608ea61d56f3e080137bfc4a6b",
+  "product_b_sha256": "fa917eefd8198d8ee676585dd99401f74594dd33a4bf77e1265ef397f439e200",
+  "product_b_unchanged_since_b1": true,
+  "public_status": "not_claimed",
+  "release_a_tests_executed_on_snapshot_a": 279,
+  "results": {
+    "build_delta": {
+      "argv": [
+        "cmake",
+        "--build",
+        "/workspaces/E-HGP/build/v7",
+        "--parallel",
+        "2",
+        "--target",
+        "mhgp7",
+        "mhgp7_archive_api_gate",
+        "mhgp7_archive_cleanup_gate",
+        "mhgp7_profile",
+        "mhgp7_profile_liveness",
+        "mhgp7_profile_sonde"
+      ],
+      "elapsed_seconds": 60.62243290799961,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T21:41:33Z",
+      "status": "completed",
+      "timeout_seconds": 600
+    },
+    "configure": {
+      "argv": [
+        "cmake",
+        "-S",
+        "/workspaces/E-HGP/morsehgp3D_v7",
+        "-B",
+        "/workspaces/E-HGP/build/v7",
+        "-DCMAKE_BUILD_TYPE=Release"
+      ],
+      "elapsed_seconds": 0.11671270200076833,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T21:41:33Z",
+      "status": "completed",
+      "timeout_seconds": 120
+    },
+    "ctest_delta": {
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7",
+        "--output-on-failure",
+        "--no-tests=error",
+        "-L",
+        "^gate$",
+        "-R",
+        "^(mhgp7_archive|mhgp7_archive_api|mhgp7_archive_cleanup|mhgp7_archive_optimized|mhgp7_cli_budget_signature|mhgp7_cli_layout_classic_signature|mhgp7_cli_layout_csr_signature|mhgp7_cli_ok_s8|mhgp7_cli_refus_layout_inconnu|mhgp7_cli_refus_layout_vide|mhgp7_cli_refus_n_suffix|mhgp7_cli_refus_s7|mhgp7_cli_refus_s_suffix|mhgp7_incidence_campaign|mhgp7_incidence_campaign_optimized|mhgp7_profil_identite|mhgp7_profile_refuse_inject|mhgp7_profile_sonde_refuse_inconnu|mhgp7_profile_sonde_refuse_inject_vide|mhgp7_profile_sonde_refuse_inject_virgule|mhgp7_profile_sonde_refuse_mutant_production)$",
+        "--parallel",
+        "2",
+        "--output-junit",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/release_delta2_20260904/ctest_delta.junit.xml"
+      ],
+      "elapsed_seconds": 15.062416323999969,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T21:42:34Z",
+      "status": "completed",
+      "timeout_seconds": 1800
+    },
+    "inventory": {
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7",
+        "--show-only=json-v1",
+        "-L",
+        "^gate$"
+      ],
+      "elapsed_seconds": 0.06727377700008219,
+      "exit_code": 0,
+      "started_utc": "2026-09-04T21:42:34Z",
+      "status": "completed",
+      "timeout_seconds": 60
+    }
+  },
+  "snapshot_b_fresh_ctest": {
+    "failed": [],
+    "names": [
+      "mhgp7_archive",
+      "mhgp7_archive_api",
+      "mhgp7_archive_cleanup",
+      "mhgp7_archive_optimized",
+      "mhgp7_cli_budget_signature",
+      "mhgp7_cli_layout_classic_signature",
+      "mhgp7_cli_layout_csr_signature",
+      "mhgp7_cli_ok_s8",
+      "mhgp7_cli_refus_layout_inconnu",
+      "mhgp7_cli_refus_layout_vide",
+      "mhgp7_cli_refus_n_suffix",
+      "mhgp7_cli_refus_s7",
+      "mhgp7_cli_refus_s_suffix",
+      "mhgp7_incidence_campaign",
+      "mhgp7_incidence_campaign_optimized",
+      "mhgp7_profil_identite",
+      "mhgp7_profile_refuse_inject",
+      "mhgp7_profile_sonde_refuse_inconnu",
+      "mhgp7_profile_sonde_refuse_inject_vide",
+      "mhgp7_profile_sonde_refuse_inject_virgule",
+      "mhgp7_profile_sonde_refuse_mutant_production"
+    ],
+    "skipped": [],
+    "tests": 21
+  },
+  "snapshot_b_reused_binary_count": 26,
+  "snapshot_b_reused_tests_without_rerun": 261,
+  "source_stable": true,
+  "status": "passed",
+  "tested_binaries_stable": true
+}

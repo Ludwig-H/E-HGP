@@ -1,0 +1,13 @@
+pin=3bad233d
+945c9a7ffa8ced62d83e360c730ea680f77ed4e83bff58822956ea7ad2c0c40a  /workspaces/E-HGP/build/v5/mhgp5
+statut=baseline_v5_capture (nommage demande par l'audit v6 du 31 aout : ces
+champs completent la capture initiale)
+commande=./build/v5/mhgp5 --family=<fam> --n=<n> --seed=3 --s=8 --smax=11 --threads=8 --digest (tailles 8000/16000/32000) ; --threads=4 (petites tailles 200/400/600/2000)
+toolchain=g++ (Ubuntu) $(g++ --version obtenu a la capture : voir ci-dessous)
+date_capture=2026-08-31 (UTC, codespace 8 vCPU)
+worktree_a_la_capture=HEAD 3bad233d propre pour morsehgp3D_v5/ (les ajouts non suivis de morsehgp3D_v7/ n'affectent pas le build v5)
+stderr=vides pour les 15 runs de tailles d'interet et les 8 petits runs (codes 0 : STATUS.txt)
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+qualification=les champs commande/toolchain/date/worktree ci-dessus sont reconstruits_a_posteriori (audit du 31 aout) : ils decrivent fidelement la capture mais n'ont pas ete enregistres par elle
+correction=STATUS.txt ne contient que les 15 runs des tailles d'interet ; les codes des 8 petits runs ont ete verifies a la capture (tous 0) mais pas enregistres — not_recorded
+

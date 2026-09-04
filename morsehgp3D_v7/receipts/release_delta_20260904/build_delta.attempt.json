@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v7",
+    "--parallel",
+    "2",
+    "--target",
+    "mhgp7",
+    "mhgp7_archive_api_gate",
+    "mhgp7_archive_cleanup_gate"
+  ],
+  "started_utc": "2026-09-04T21:38:24Z",
+  "status": "running",
+  "timeout_seconds": 600
+}

@@ -1,0 +1,3 @@
+REFUS unsupported_degeneracy : incidence completion requires no rank-relevant extra-shell
+refus_etage=census rss_mb apres_generation=13 apres_rle=13 apres_prefiltre=13 apres_census=22 max_fold=0 (frontiere de completion : dernier etage atteint)
+silent_refusal_work census_balls=41617 plateau_balls=393 total_ms=765.924 completion_ms=0.000

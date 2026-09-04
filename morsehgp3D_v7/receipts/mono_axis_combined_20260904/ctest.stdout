@@ -1,0 +1,29 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7_axis_integrated
+Test project /workspaces/E-HGP/build/v7_axis_integrated
+      Start 329: mhgp7_mono_inline
+ 1/10 Test #329: mhgp7_mono_inline ..................................   Passed    0.04 sec
+      Start 330: mhgp7_mono_inline_late_a
+ 2/10 Test #330: mhgp7_mono_inline_late_a ...........................   Passed    0.02 sec
+      Start 331: mhgp7_mono_inline_late_b
+ 3/10 Test #331: mhgp7_mono_inline_late_b ...........................   Passed    0.02 sec
+      Start 332: mhgp7_mono_inline_early_alloc
+ 4/10 Test #332: mhgp7_mono_inline_early_alloc ......................   Passed    0.01 sec
+      Start 333: mhgp7_axis_bounds
+ 5/10 Test #333: mhgp7_axis_bounds ..................................   Passed    0.05 sec
+      Start 334: mhgp7_axis_bounds_axis-argmin-floor-only
+ 6/10 Test #334: mhgp7_axis_bounds_axis-argmin-floor-only ...........   Passed    0.01 sec
+      Start 335: mhgp7_axis_bounds_axis-argmin-ceil-always
+ 7/10 Test #335: mhgp7_axis_bounds_axis-argmin-ceil-always ..........   Passed    0.01 sec
+      Start 336: mhgp7_axis_bounds_axis-argmin-no-clip
+ 8/10 Test #336: mhgp7_axis_bounds_axis-argmin-no-clip ..............   Passed    0.01 sec
+      Start 337: mhgp7_axis_bounds_axis-argmin-narrow-coefficient
+ 9/10 Test #337: mhgp7_axis_bounds_axis-argmin-narrow-coefficient ...   Passed    0.02 sec
+      Start 338: mhgp7_axis_bounds_axis-argmin-max-min
+10/10 Test #338: mhgp7_axis_bounds_axis-argmin-max-min ..............   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 10
+
+Label Time Summary:
+gate    =   0.22 sec*proc (10 tests)
+
+Total Test time (real) =   0.23 sec

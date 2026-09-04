@@ -1,0 +1,27 @@
+diff --git a/morsehgp3D_v7/src/pipeline/run.hpp b/morsehgp3D_v7/src/pipeline/run.hpp
+index 4b81f0d7..284354a7 100644
+--- a/morsehgp3D_v7/src/pipeline/run.hpp
++++ b/morsehgp3D_v7/src/pipeline/run.hpp
+@@ -826,7 +826,7 @@ inline void run_pipeline_into(const std::vector<InputPoint>& in, const RunOption
+       slots.push_back(std::make_unique<BSlot>());
+       BSlot* sp = slots.back().get();
+       sp->K = K;
+-      sp->t = std::thread([&rr, &opt, &dg_all, &pub_mutex, &pub_cv, &next_publish, &pub_failed, &b_inflight, &b_peak,
++      auto fold_b = [&rr, &opt, &dg_all, &pub_mutex, &pub_cv, &next_publish, &pub_failed, &b_inflight, &b_peak,
+ #ifdef MHGP7_PROFILE_REDUCE
+                            &reduce_active, &reduce_peak,
+ #endif
+@@ -1018,7 +1018,12 @@ inline void run_pipeline_into(const std::vector<InputPoint>& in, const RunOption
+         next_publish = K + 1;
+         lk.unlock();
+         pub_cv.notify_all();
+-      });
++      };
++      // Genuine mono execution: with join-before-next-K no earlier B slot
++      // can still own next_publish, so this identical body cannot wait for
++      // a predecessor that only the current thread could finish.
++      if (opt.threads == 1 && join_b_now) fold_b();
++      else sp->t = std::thread(std::move(fold_b));
+       if (join_b_now && !reap_front()) break;  // § 5.10 : B(K) au bout avant A(K+1)
+     }
+   } catch (...) {

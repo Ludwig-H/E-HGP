@@ -1,0 +1,21 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7_axis_integrated
+Test project /workspaces/E-HGP/build/v7_axis_integrated
+    Start 333: mhgp7_axis_bounds
+1/6 Test #333: mhgp7_axis_bounds ..................................   Passed    0.06 sec
+    Start 334: mhgp7_axis_bounds_axis-argmin-floor-only
+2/6 Test #334: mhgp7_axis_bounds_axis-argmin-floor-only ...........   Passed    0.01 sec
+    Start 335: mhgp7_axis_bounds_axis-argmin-ceil-always
+3/6 Test #335: mhgp7_axis_bounds_axis-argmin-ceil-always ..........   Passed    0.01 sec
+    Start 336: mhgp7_axis_bounds_axis-argmin-no-clip
+4/6 Test #336: mhgp7_axis_bounds_axis-argmin-no-clip ..............   Passed    0.01 sec
+    Start 337: mhgp7_axis_bounds_axis-argmin-narrow-coefficient
+5/6 Test #337: mhgp7_axis_bounds_axis-argmin-narrow-coefficient ...   Passed    0.01 sec
+    Start 338: mhgp7_axis_bounds_axis-argmin-max-min
+6/6 Test #338: mhgp7_axis_bounds_axis-argmin-max-min ..............   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Label Time Summary:
+gate    =   0.12 sec*proc (6 tests)
+
+Total Test time (real) =   0.13 sec

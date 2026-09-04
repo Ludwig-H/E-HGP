@@ -1,0 +1,604 @@
+{
+  "schema": "mhgp7-v6-source-snapshot-v1",
+  "head": "de69851e3820781145f859a08a993f15f2f9e738",
+  "date": "2026-09-04",
+  "source_state": "worktree_with_four_tracked_changes_and_three_untracked_files",
+  "entries": [
+    {
+      "source": "morsehgp3D_v6/CMakeLists.txt",
+      "destination": "morsehgp3D_v7/CMakeLists.txt",
+      "sha256": "92e356abef324bc3148e314dddb8987dcd797f8950dae4db045478c77b91ae24"
+    },
+    {
+      "source": "morsehgp3D_v6/src/cloud/families.hpp",
+      "destination": "morsehgp3D_v7/src/cloud/families.hpp",
+      "sha256": "b1c6e95513a61df6ae0cefadfed6b6d02cd54acc9fa653b85d959150f30472bb"
+    },
+    {
+      "source": "morsehgp3D_v6/src/core/caps.hpp",
+      "destination": "morsehgp3D_v7/src/core/caps.hpp",
+      "sha256": "f857d45d69c27409f861c88d4efbbd5ccdd278f81abf5946dacf44c02499bac6"
+    },
+    {
+      "source": "morsehgp3D_v6/src/core/device.hpp",
+      "destination": "morsehgp3D_v7/src/core/device.hpp",
+      "sha256": "141b0f0179f9ee1feb287c806c5722f5f47c0ee24b8983e956a556981324a7f0"
+    },
+    {
+      "source": "morsehgp3D_v6/src/core/dint.hpp",
+      "destination": "morsehgp3D_v7/src/core/dint.hpp",
+      "sha256": "a205473c904b25b0f1d7dd6e413d3f78949f677ca99b738de9071ca846b10834"
+    },
+    {
+      "source": "morsehgp3D_v6/src/core/intmath.hpp",
+      "destination": "morsehgp3D_v7/src/core/intmath.hpp",
+      "sha256": "8695671428ae2ec9b6c0a9d9c55d308be2eb0daf9fb60e3d170662890a4be17a"
+    },
+    {
+      "source": "morsehgp3D_v6/src/core/morton.hpp",
+      "destination": "morsehgp3D_v7/src/core/morton.hpp",
+      "sha256": "0bb9033c315fdc7dd74d3aed96b57eb01861fd7776127fbcf6fd228520ae0851"
+    },
+    {
+      "source": "morsehgp3D_v6/src/core/mutants.hpp",
+      "destination": "morsehgp3D_v7/src/core/mutants.hpp",
+      "sha256": "2594c8d1dbb00ef181440145861a33c9746361741b9a9ec5f8922add00cd2f10"
+    },
+    {
+      "source": "morsehgp3D_v6/src/core/parse.hpp",
+      "destination": "morsehgp3D_v7/src/core/parse.hpp",
+      "sha256": "524da6331d4d517978d08358abb28a106f27832986ba83acdb62571f0e04f44f"
+    },
+    {
+      "source": "morsehgp3D_v6/src/core/sha256.hpp",
+      "destination": "morsehgp3D_v7/src/core/sha256.hpp",
+      "sha256": "8b60b97f88639ce7e956a536baf644f5602b037dc509f636084d55bd06916fa9"
+    },
+    {
+      "source": "morsehgp3D_v6/src/core/types.hpp",
+      "destination": "morsehgp3D_v7/src/core/types.hpp",
+      "sha256": "5477a39522a58a0ba4cea845012080eaf06fc64b91f3e6a3ec69eb919caa55e0"
+    },
+    {
+      "source": "morsehgp3D_v6/src/core/wide.hpp",
+      "destination": "morsehgp3D_v7/src/core/wide.hpp",
+      "sha256": "9eb217603d0ebb3f5470175381939ddd672632d25ef54b180307a7dbc1501b30"
+    },
+    {
+      "source": "morsehgp3D_v6/src/forest/fold.hpp",
+      "destination": "morsehgp3D_v7/src/forest/fold.hpp",
+      "sha256": "b2f5171c3348d31644458c267e7e90fc876aa6bf93f0ec985fe5dfe4b9d04c76"
+    },
+    {
+      "source": "morsehgp3D_v6/src/forest/plateau.hpp",
+      "destination": "morsehgp3D_v7/src/forest/plateau.hpp",
+      "sha256": "3615a789b6713a06872c1db64565778665d913645b175e1f555f206756b21956"
+    },
+    {
+      "source": "morsehgp3D_v6/src/forest/render.hpp",
+      "destination": "morsehgp3D_v7/src/forest/render.hpp",
+      "sha256": "13de711f708435dc2786d14c049424d16add55c361387d35bd000c432a07a600"
+    },
+    {
+      "source": "morsehgp3D_v6/src/gpu/census_kernels.cuh",
+      "destination": "morsehgp3D_v7/src/gpu/census_kernels.cuh",
+      "sha256": "330c7602e6fdd87f96516671a06977ff81b19fabd976c0fcc536ddb6705f63e9"
+    },
+    {
+      "source": "morsehgp3D_v6/src/gpu/device_witness.cu",
+      "destination": "morsehgp3D_v7/src/gpu/device_witness.cu",
+      "sha256": "ce869c21ad8522d8fcc4e41bccd2d473c2b2f7c8aa0e16ff77f10ae389850e0a"
+    },
+    {
+      "source": "morsehgp3D_v6/src/gpu/executor_pool.hpp",
+      "destination": "morsehgp3D_v7/src/gpu/executor_pool.hpp",
+      "sha256": "e629a0c61c92c7b45558742dd04e41eed7f67ffb648ec9b39e0a4eb34406821e"
+    },
+    {
+      "source": "morsehgp3D_v6/src/gpu/lot_ring.hpp",
+      "destination": "morsehgp3D_v7/src/gpu/lot_ring.hpp",
+      "sha256": "a64902752127b82537512f0de80b2a2e1a7b5c8aab771fd8a84cab413f6ed0c3"
+    },
+    {
+      "source": "morsehgp3D_v6/src/gpu/pack.hpp",
+      "destination": "morsehgp3D_v7/src/gpu/pack.hpp",
+      "sha256": "3da9f9540e753a8a163e921462f8194c8dd038d22e484c9fe2aaea8073f41b22"
+    },
+    {
+      "source": "morsehgp3D_v6/src/gpu/pilot.hpp",
+      "destination": "morsehgp3D_v7/src/gpu/pilot.hpp",
+      "sha256": "f9831d05b94c8eafafe514806446936b30e38e14bbaa6ad3f7819c4614980295"
+    },
+    {
+      "source": "morsehgp3D_v6/src/gpu/route_c6.hpp",
+      "destination": "morsehgp3D_v7/src/gpu/route_c6.hpp",
+      "sha256": "eaf85e6f1755e23e327ac501378b6b1ae7b9c5ebe5ff31348dd2e6e6871f9e24"
+    },
+    {
+      "source": "morsehgp3D_v6/src/gpu/wire.hpp",
+      "destination": "morsehgp3D_v7/src/gpu/wire.hpp",
+      "sha256": "24c26d5db50fdf1fac5f20e17a46222044a7512410dad5167cd61e88f9e49006"
+    },
+    {
+      "source": "morsehgp3D_v6/src/lanes/cell_grid.hpp",
+      "destination": "morsehgp3D_v7/src/lanes/cell_grid.hpp",
+      "sha256": "e179a1e806c2fac52fb22c757150ed220469213b427c31dd5b3738daf1841cf1"
+    },
+    {
+      "source": "morsehgp3D_v6/src/lanes/chord_kill.hpp",
+      "destination": "morsehgp3D_v7/src/lanes/chord_kill.hpp",
+      "sha256": "fa3928b4a187bf57a82e47bbeaec40e7d66501862989f3997cb2b5afe3c8dd1a"
+    },
+    {
+      "source": "morsehgp3D_v6/src/lanes/edge_cover.hpp",
+      "destination": "morsehgp3D_v7/src/lanes/edge_cover.hpp",
+      "sha256": "0d92023896d80a8e1d055d0d1bc65067324db3b244e19ac95623ca358784274d"
+    },
+    {
+      "source": "morsehgp3D_v6/src/lanes/keys.hpp",
+      "destination": "morsehgp3D_v7/src/lanes/keys.hpp",
+      "sha256": "5a7238bee1cd8b3b82b35a504bf7e9c5d8ca29be88ef3266edd1f70582c5799a"
+    },
+    {
+      "source": "morsehgp3D_v6/src/lanes/level.hpp",
+      "destination": "morsehgp3D_v7/src/lanes/level.hpp",
+      "sha256": "cae42394b3eef9549f9fcfd3dffd5afdd7756f40989f09eb8c98b7a0f8d48f82"
+    },
+    {
+      "source": "morsehgp3D_v6/src/lanes/q2.hpp",
+      "destination": "morsehgp3D_v7/src/lanes/q2.hpp",
+      "sha256": "a7bffb233c11d76b26b796c91b4297733d5e7d65d3f673f31eccb83837906c69"
+    },
+    {
+      "source": "morsehgp3D_v6/src/lanes/q3.hpp",
+      "destination": "morsehgp3D_v7/src/lanes/q3.hpp",
+      "sha256": "332b04859d07e3293314120943a382da29aa729679175e9c1667cd3da7a35d56"
+    },
+    {
+      "source": "morsehgp3D_v6/src/lanes/q4.hpp",
+      "destination": "morsehgp3D_v7/src/lanes/q4.hpp",
+      "sha256": "65721450348f705a5a37c231bc5013436bc846b7ee5cc90d276d2b3bc435ba49"
+    },
+    {
+      "source": "morsehgp3D_v6/src/lanes/sector_kill.hpp",
+      "destination": "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "sha256": "2f9466217a3d8c432be524bc4dc39f933b19da4e194546ada6eece23689479c3"
+    },
+    {
+      "source": "morsehgp3D_v6/src/parallel/pool.hpp",
+      "destination": "morsehgp3D_v7/src/parallel/pool.hpp",
+      "sha256": "261b7c7702a6a0ab18d0a171ee34ec12eed977a135c9a200eb9583262f06fd01"
+    },
+    {
+      "source": "morsehgp3D_v6/src/parallel/sort.hpp",
+      "destination": "morsehgp3D_v7/src/parallel/sort.hpp",
+      "sha256": "da118e8354d634b4ad139359cfe175725c187e5694a3148f156399f1425b00e0"
+    },
+    {
+      "source": "morsehgp3D_v6/src/pipeline/candidates.hpp",
+      "destination": "morsehgp3D_v7/src/pipeline/candidates.hpp",
+      "sha256": "403eb9078e782a479803fc8a830420c6a59dac7d40d74d6bfcade7f98062de99"
+    },
+    {
+      "source": "morsehgp3D_v6/src/pipeline/census.hpp",
+      "destination": "morsehgp3D_v7/src/pipeline/census.hpp",
+      "sha256": "8f0a2de4e4a37508c50fe2fabceabdae34bf01fdf94e4536b63ee09dadfba83a"
+    },
+    {
+      "source": "morsehgp3D_v6/src/pipeline/digest.hpp",
+      "destination": "morsehgp3D_v7/src/pipeline/digest.hpp",
+      "sha256": "eb389757614a476677824456802a5075a48fc923be722333267570f1cc279d6c"
+    },
+    {
+      "source": "morsehgp3D_v6/src/pipeline/expand.hpp",
+      "destination": "morsehgp3D_v7/src/pipeline/expand.hpp",
+      "sha256": "bdd00df6151d9571e900e59ca800eeca06facbd004b2ba7562284dc246a3502e"
+    },
+    {
+      "source": "morsehgp3D_v6/src/pipeline/float_filter.hpp",
+      "destination": "morsehgp3D_v7/src/pipeline/float_filter.hpp",
+      "sha256": "26de0e1b8427ae5b02c8bbf1237dc68bc6921f87675e78e3b707ae6f1e563e11"
+    },
+    {
+      "source": "morsehgp3D_v6/src/pipeline/generate.hpp",
+      "destination": "morsehgp3D_v7/src/pipeline/generate.hpp",
+      "sha256": "f2f7b5bab4635a5317617b8b9d6d7f8138aa733da6845478a6e64258dc070ec0"
+    },
+    {
+      "source": "morsehgp3D_v6/src/pipeline/run.hpp",
+      "destination": "morsehgp3D_v7/src/pipeline/run.hpp",
+      "sha256": "0a7e47b376f76cae2b8cf9134f73635e85980b5987380b5b728e44fbc9d2a01b"
+    },
+    {
+      "source": "morsehgp3D_v6/src/spindle/spindle.hpp",
+      "destination": "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "sha256": "9abe6f84a14d741b47f2601f93a29108f978aaca660f76675dd18f3418ddb245"
+    },
+    {
+      "source": "morsehgp3D_v6/src/spindle/witness_count.hpp",
+      "destination": "morsehgp3D_v7/src/spindle/witness_count.hpp",
+      "sha256": "963e21496f08e5d6e8c57e8b707492b5005c28dd122d3a26565fe19738975f70"
+    },
+    {
+      "source": "morsehgp3D_v6/src/tree/cloud_index.hpp",
+      "destination": "morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "sha256": "94c59e0678c32ea3df18e56791f06a39699623bd4bce655a9b78916b2e3fa57c"
+    },
+    {
+      "source": "morsehgp3D_v6/src/wspd/wavefront.hpp",
+      "destination": "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "sha256": "c18a902cbf2d96a63d7b0a23562c0cb59f171c59665e9f9a06e4c4c1e0d05686"
+    },
+    {
+      "source": "morsehgp3D_v6/oracle/obig.hpp",
+      "destination": "morsehgp3D_v7/oracle/obig.hpp",
+      "sha256": "2409f46770838caf74f6a45a7fb23e5a72147fb0905cbb3329e270be895927d5"
+    },
+    {
+      "source": "morsehgp3D_v6/cli/mhgp6.cpp",
+      "destination": "morsehgp3D_v7/cli/mhgp7.cpp",
+      "sha256": "4ba831ef4e80d451fca66b73b4eafa3b4d60792cf1719f0c7fa4e57de0cbc71e"
+    },
+    {
+      "source": "morsehgp3D_v6/cli/mhgp6_cuda.cu",
+      "destination": "morsehgp3D_v7/cli/mhgp7_cuda.cu",
+      "sha256": "a565bfdd7e6b635014b6d40485399d451098e4a25bf8eb39b7522062aa0632f8"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/agregateur_gate.py",
+      "destination": "morsehgp3D_v7/tests/agregateur_gate.py",
+      "sha256": "9412d06ac10bef8053604426ac45c90bca9a8206bda60c1cc58ad40033b42e82"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/bad_alloc_gate.cpp",
+      "destination": "morsehgp3D_v7/tests/bad_alloc_gate.cpp",
+      "sha256": "43b93debfa05e339ccd6d5efeb686ca0a39bab4207f668b2bdf43c8a7c69c23b"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/campagne_gate.py",
+      "destination": "morsehgp3D_v7/tests/campagne_gate.py",
+      "sha256": "4bc5354f5dad07a9240b06075cbae6d73583a0da740b654479fe1aff776e12ea"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/cell_grid_oracle.cpp",
+      "destination": "morsehgp3D_v7/tests/cell_grid_oracle.cpp",
+      "sha256": "726558d52cdc45f210d2e0cca8d085ac2664bff153fef1e3ee6629094d5d56ae"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/census_device_gate.cu",
+      "destination": "morsehgp3D_v7/tests/census_device_gate.cu",
+      "sha256": "5dad381decea86ba66b1818ee02d3706f273a26a40f1d071a2f4c09b23fb4d07"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/census_device_stub_gate.cpp",
+      "destination": "morsehgp3D_v7/tests/census_device_stub_gate.cpp",
+      "sha256": "c3c022b453c697abded78aa92205ca7a0fdac0727135c7262d13893dcab1a004"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/conformity_v5.cpp",
+      "destination": "morsehgp3D_v7/tests/conformity_v5.cpp",
+      "sha256": "32534c9b5dad9187a771c08736d34c061618d8cfb8d2cac2b54e794cbd985f53"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/cover_fixture.cpp",
+      "destination": "morsehgp3D_v7/tests/cover_fixture.cpp",
+      "sha256": "9ba5ce764778f563caf14b7dcc459bb345d897fd3c7e3618515a096a38c94ad4"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/cuda_stub.hpp",
+      "destination": "morsehgp3D_v7/tests/cuda_stub.hpp",
+      "sha256": "501ec551b67aecf525094181a0575011366c631464da13cebc6b1beab7da0204"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/device_witness_stub.cpp",
+      "destination": "morsehgp3D_v7/tests/device_witness_stub.cpp",
+      "sha256": "8358150a0a52d92aec69945ef810ab26e895f18f005ea54a2b37674955fa4d2b"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/executor_pool_gate.cpp",
+      "destination": "morsehgp3D_v7/tests/executor_pool_gate.cpp",
+      "sha256": "1796240dc824873adddbfb5adc179bac4a9a846a4dbb043f865ca575e9c44531"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/fold_caps_gate.cpp",
+      "destination": "morsehgp3D_v7/tests/fold_caps_gate.cpp",
+      "sha256": "b6a29f8e25ad8299b1db169edd602bb0a3c65ceb2e01dfdb195e12a760184202"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/fold_csr_gate.cpp",
+      "destination": "morsehgp3D_v7/tests/fold_csr_gate.cpp",
+      "sha256": "a9a1f3f050f0337e3230534926c57c195742e5a0bf64e378f2b19e2d75aa1691"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/forest_witness.hpp",
+      "destination": "morsehgp3D_v7/tests/forest_witness.hpp",
+      "sha256": "b38f5c9ac145040173875bded7026b95fe7135f93bdd5ce7239ee44882c401be"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/linked_arcs_gate.cpp",
+      "destination": "morsehgp3D_v7/tests/linked_arcs_gate.cpp",
+      "sha256": "88445f69daf84d98aad17aaeb50884e40889d77c457228f82431095f00466a0e"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/lot_ring_gate.cpp",
+      "destination": "morsehgp3D_v7/tests/lot_ring_gate.cpp",
+      "sha256": "dee8fe80461d8adf2345d2da3a663c2d07046cecac9af681278b718ea8adffa5"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/lot_ring_modele_differe.hpp",
+      "destination": "morsehgp3D_v7/tests/lot_ring_modele_differe.hpp",
+      "sha256": "c363322d57679edfe0e4cdecf0753870aadf09c0a6a0ca1cc2704e1c8b96d33c"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/pentes_gate.py",
+      "destination": "morsehgp3D_v7/tests/pentes_gate.py",
+      "sha256": "400f3ac5398a98e0fed356d758869eb4888e7a82e324cef765395720d004b11a"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/perm_sort_gate.cpp",
+      "destination": "morsehgp3D_v7/tests/perm_sort_gate.cpp",
+      "sha256": "69a0244a06520c162c5e9b373564a968118078948793f23f8330a49f812d2b26"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/pilot_cuda_stub_check.cpp",
+      "destination": "morsehgp3D_v7/tests/pilot_cuda_stub_check.cpp",
+      "sha256": "3d525adc12346110d8240ccfeefc45e270ac50fced613d65546bb6868d44dae7"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/pilot_stub_gate.cpp",
+      "destination": "morsehgp3D_v7/tests/pilot_stub_gate.cpp",
+      "sha256": "45bff9c1495c083fafbd2ccc6c4ac609335f7d430d09510d1837bc048ee30b66"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/pilote_juge.py",
+      "destination": "morsehgp3D_v7/tests/pilote_juge.py",
+      "sha256": "ea571aa0bd851856568337d776171084c755a5a18234566620f316289efa78f5"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/plan_keycsr_gate.py",
+      "destination": "morsehgp3D_v7/tests/plan_keycsr_gate.py",
+      "sha256": "735fce6c08de6b2adf41f638b2454891968c28da90bcd6840b6efa6f7e08f60d"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/profil_contrat_echec.cpp",
+      "destination": "morsehgp3D_v7/tests/profil_contrat_echec.cpp",
+      "sha256": "2522dbfc13d584bba8fc4174bb07db2c9208f99d24f3d91a300ccb5455a6a127"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/profil_contre_fixture.py",
+      "destination": "morsehgp3D_v7/tests/profil_contre_fixture.py",
+      "sha256": "9c8fa61a78c1eeda2177bf33eecb0cfb71421ac56877927efd742cc15bf62c01"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/profil_gate.py",
+      "destination": "morsehgp3D_v7/tests/profil_gate.py",
+      "sha256": "cb4f380fd7ef3ed84df1945fa63b7f62f63c49a80e32a8d00ab357a786ef0e49"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/refs/uniform_2_k10_en_trop.txt",
+      "destination": "morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt",
+      "sha256": "6920e4f026241733c5c23c192356ddac19a7e32ef5571e8da759a7ba4bb1f5b8"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/refs/uniform_400_cinq_ordres.txt",
+      "destination": "morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt",
+      "sha256": "14ffd788d2421e85fd14570e2c6020cafb2ac3abc83642de79b6e018a50da282"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/refs/uniform_400_k11_en_trop.txt",
+      "destination": "morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt",
+      "sha256": "72999a698e9b3e39e17aa0d91d6c2e5353b12ea0c9a2668fc70a35bc4fce7a78"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/refs/uniform_400_tronque_k1_absent.txt",
+      "destination": "morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt",
+      "sha256": "ec2664bc8f6db10a2d4437935eb05ec3c7be51097b82d612df8e2a0bec742529"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/residence_gate.cpp",
+      "destination": "morsehgp3D_v7/tests/residence_gate.cpp",
+      "sha256": "1015c6fe3a9195a593e51b296f1f9bae1d51c542a860b3362416c3a6fe44c997"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/route_c6_gate.cpp",
+      "destination": "morsehgp3D_v7/tests/route_c6_gate.cpp",
+      "sha256": "5b299505236529badc8daa56cea6dbc1b68a4ebebf2af6bb4400baefb0a3164d"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/selftest.cpp",
+      "destination": "morsehgp3D_v7/tests/selftest.cpp",
+      "sha256": "0457d7c396a9b90ca9f246b70cad7c1608e726453e4e99ff49ea2b69b8a7f92b"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/sonde_ablation_gate.py",
+      "destination": "morsehgp3D_v7/tests/sonde_ablation_gate.py",
+      "sha256": "992433c6203fc563149aa75769dbc6a6682e68b006c2302b12c89b934c6dbe6f"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/sweep_fixtures.cpp",
+      "destination": "morsehgp3D_v7/tests/sweep_fixtures.cpp",
+      "sha256": "563e25517e15b4a4096433b8e1481762013fc5818a783a941f8ee4b76f1205ae"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/wire_gate.cpp",
+      "destination": "morsehgp3D_v7/tests/wire_gate.cpp",
+      "sha256": "a4e26559a62e4b0a9951d911a679e543dfc821f388b78f8ddf89e2634ed97274"
+    },
+    {
+      "source": "morsehgp3D_v6/tests/wire_pack_gate.cpp",
+      "destination": "morsehgp3D_v7/tests/wire_pack_gate.cpp",
+      "sha256": "3b7b04a7177cc48438871e1d9a9e8bb67b61bf583cdc392b73f9e6ae24107ccd"
+    },
+    {
+      "source": "morsehgp3D_v6/cmake/run_expect.cmake",
+      "destination": "morsehgp3D_v7/cmake/run_expect.cmake",
+      "sha256": "3a96018d3056aa6aeda1305b5102ea1f5ef1e737f62a24488d5360d612c4e611"
+    },
+    {
+      "source": "morsehgp3D_v6/bench/agregateur.py",
+      "destination": "morsehgp3D_v7/bench/agregateur.py",
+      "sha256": "b7b010301e3fc642ef0ff9d2421d69e17d83261410921d1c851df576a58777c1"
+    },
+    {
+      "source": "morsehgp3D_v6/bench/campagne_locale.sh",
+      "destination": "morsehgp3D_v7/bench/campagne_locale.sh",
+      "sha256": "584cd8de6e55a390c4d39dcec74465e0a11814374779b7c8cbf4417cd59df425"
+    },
+    {
+      "source": "morsehgp3D_v6/bench/pentes.py",
+      "destination": "morsehgp3D_v7/bench/pentes.py",
+      "sha256": "18eadb18d85b3546494de16c6fdbf688e62a93a11d9c91979917614b3587deb4"
+    },
+    {
+      "source": "morsehgp3D_v6/bench/plan_keycsr.py",
+      "destination": "morsehgp3D_v7/bench/plan_keycsr.py",
+      "sha256": "7fb4d125fc72063057f644ac39278517e810e39a292fc91805e9a911feb5a82b"
+    },
+    {
+      "source": "morsehgp3D_v6/bench/profils/locale_confirmation_v1.txt",
+      "destination": "morsehgp3D_v7/bench/profils/locale_confirmation_v1.txt",
+      "sha256": "a5d7f46075e8cd09c72c8bf4fcfda0cf135feaa841c388bd606bc85fab73a756"
+    },
+    {
+      "source": "morsehgp3D_v6/bench/profils/locale_decision_v1.txt",
+      "destination": "morsehgp3D_v7/bench/profils/locale_decision_v1.txt",
+      "sha256": "adc582365c79b7f89a2a232291d3717c94c9aca3cf380f00ef07300c3f1f9a19"
+    },
+    {
+      "source": "morsehgp3D_v6/bench/sonde_ablation_reduce.py",
+      "destination": "morsehgp3D_v7/bench/sonde_ablation_reduce.py",
+      "sha256": "6e5965354b73792f6b60f0a5a037a35bfa1eb2e800449da66be65c0b33b0f4cf"
+    },
+    {
+      "source": "morsehgp3D_v6/bench/sonde_ablation_reduce.sh",
+      "destination": "morsehgp3D_v7/bench/sonde_ablation_reduce.sh",
+      "sha256": "8d58d46b317293dc3fc1ac57c4e08e19436a9fe18bd4e93675372d91a8ebaf8a"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/META.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/META.txt",
+      "sha256": "672b713a6bf9f8e9191d68dcf290d6dc649f16ba0e12d009084af31f2176a672"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/STATUS.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/STATUS.txt",
+      "sha256": "c1a57d96af3f7fd87878fdf29b57853b2ea484a28f66bb1a90bf096a3245ccee"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/collinear_seven_600.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/collinear_seven_600.txt",
+      "sha256": "7843315c8e5e4dda21999224c7324eb6d867b3553fde71c4a6748606caee604e"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/eight_clusters_16000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/eight_clusters_16000.txt",
+      "sha256": "d28608267cd843b0e6d1a6e6f11bd1d10e2f2176add9d455fa074db43d5b852e"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/eight_clusters_32000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/eight_clusters_32000.txt",
+      "sha256": "6ea43f112b3a7ce59513dde66f710ee76293fe57243c3f3d290159b62f1cf6ac"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/eight_clusters_400.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/eight_clusters_400.txt",
+      "sha256": "79279da02b77f940abb4391656ca97e2b604de9a3dbb24d047ede448e12409a5"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/eight_clusters_8000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/eight_clusters_8000.txt",
+      "sha256": "17f414804b53008ff09cf35716ef75790cd49e546daab7477e6082fb971557a2"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/scanline_overlap_multiecho_16000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/scanline_overlap_multiecho_16000.txt",
+      "sha256": "03143648d680f1e4168f985c66c436891559e52c4a3892646c265bb1c7c7bc1b"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/scanline_overlap_multiecho_32000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/scanline_overlap_multiecho_32000.txt",
+      "sha256": "76aed05b4e04d21809cd60bd186e7da776f6c84f38cbe4a59aa73a4f86e07c0b"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/scanline_overlap_multiecho_8000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/scanline_overlap_multiecho_8000.txt",
+      "sha256": "e08349bee4bf2a0058f73587d9272d1912f0cec99dec947f2ece1ad56737dda4"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/scanline_single_pass_16000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/scanline_single_pass_16000.txt",
+      "sha256": "88acb6089bd130bbf4f00f1908a9b3a20c91e3362051e2eb8a4eed60be73f6f3"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/scanline_single_pass_32000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/scanline_single_pass_32000.txt",
+      "sha256": "461e70da0c492ef7a9a872fdfaa4a252e09ed2f7d25ca50fdbc03ca4d8daa68c"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/scanline_single_pass_400.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/scanline_single_pass_400.txt",
+      "sha256": "f576bbfd6a0ba2f3ff0f611657ddbac789bfbc4f1b42ba0522600da38e540163"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/scanline_single_pass_8000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/scanline_single_pass_8000.txt",
+      "sha256": "ccb7d60cbea43f125065cc00b674e8a7eed06c947164a5e29dc01efbf69174b7"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/terrain_16000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/terrain_16000.txt",
+      "sha256": "27c380ea56ae37518b6aa75b428de0564fdbdca80d9ca586a7b1e94e19fdb8fb"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/terrain_2000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/terrain_2000.txt",
+      "sha256": "d4ec4ce2d599013d746d54f4c1d7f1912ab57e34b7c8de7d7a5ebcba29447f57"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/terrain_32000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/terrain_32000.txt",
+      "sha256": "661cbbb9bacdf3cc227243d8988c3a1be11cdb60e7d6e7b6725ad3f8ca5f1fe6"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/terrain_400.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/terrain_400.txt",
+      "sha256": "ac2558f0b3dfba48192c07abbf0c7c014e44ef544a9d98836c925addb02a7473"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/terrain_8000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/terrain_8000.txt",
+      "sha256": "529dbf426deb418a9d82fe189ad5a5d9dc2c50aef127b0f37a7c1664e4c940dd"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/two_lines_200.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/two_lines_200.txt",
+      "sha256": "efe6383928aed20d5cbca49ba031ed0fabf597e109ed97c061d481519841cad0"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/uniform_16000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/uniform_16000.txt",
+      "sha256": "a96836c5e44d2007115379832855500a38433e415445ff6c15a85a86c177ccb7"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/uniform_2000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/uniform_2000.txt",
+      "sha256": "5aff81cde7792a7f9bb838a38918bd3b85de3958752033f452c13a2c39360aa9"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/uniform_32000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/uniform_32000.txt",
+      "sha256": "630fe6bbab6d1da6a44378fdd2087bbb569d90a790d09e91f738efa095eb45a4"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/uniform_400.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/uniform_400.txt",
+      "sha256": "d7169ad0a5f6c88f6338afb4e175ac8e63a8a025e62de804cb4e600069223a32"
+    },
+    {
+      "source": "morsehgp3D_v6/receipts/conformite_v5/uniform_8000.txt",
+      "destination": "morsehgp3D_v7/receipts/conformite_v5/uniform_8000.txt",
+      "sha256": "17fdf64438a07b81f96a2b86140c7cae4bf23dfe9669a385ff2a3c162d1f98a2"
+    }
+  ]
+}
+

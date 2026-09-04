@@ -1,0 +1,470 @@
+{
+  "backtraceGraph": {
+    "commands": [
+      "add_test",
+      "mhgp7_gate"
+    ],
+    "files": [
+      "/workspaces/E-HGP/morsehgp3D_v7/CMakeLists.txt"
+    ],
+    "nodes": [
+      {
+        "file": 0
+      },
+      {
+        "command": 1,
+        "file": 0,
+        "line": 829,
+        "parent": 0
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 34,
+        "parent": 1
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 1,
+        "file": 0,
+        "line": 831,
+        "parent": 3
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 34,
+        "parent": 4
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 1,
+        "file": 0,
+        "line": 833,
+        "parent": 6
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 34,
+        "parent": 7
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 1,
+        "file": 0,
+        "line": 835,
+        "parent": 9
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 34,
+        "parent": 10
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 1,
+        "file": 0,
+        "line": 841,
+        "parent": 12
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 34,
+        "parent": 13
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 1,
+        "file": 0,
+        "line": 845,
+        "parent": 15
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 34,
+        "parent": 16
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 1,
+        "file": 0,
+        "line": 845,
+        "parent": 18
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 34,
+        "parent": 19
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 1,
+        "file": 0,
+        "line": 845,
+        "parent": 21
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 34,
+        "parent": 22
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 1,
+        "file": 0,
+        "line": 845,
+        "parent": 24
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 34,
+        "parent": 25
+      },
+      {
+        "file": 0
+      },
+      {
+        "command": 1,
+        "file": 0,
+        "line": 845,
+        "parent": 27
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 34,
+        "parent": 28
+      }
+    ]
+  },
+  "kind": "ctestInfo",
+  "tests": [
+    {
+      "backtrace": 2,
+      "command": [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_axis_integrated/mhgp7_mono_inline_gate",
+        "-DARGS=",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=mono_inline_gate=passed successful=4 rejected=8 reference_threads=30 failures=0",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name": "mhgp7_mono_inline",
+      "properties": [
+        {
+          "name": "LABELS",
+          "value": [
+            "gate"
+          ]
+        },
+        {
+          "name": "TIMEOUT",
+          "value": 120
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "/workspaces/E-HGP/build/v7_axis_integrated"
+        }
+      ]
+    },
+    {
+      "backtrace": 5,
+      "command": [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_axis_integrated/mhgp7_mono_inline_gate",
+        "-DARGS=--inject=fold-inject-a-failure-k2",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=mono_inline_injected=passed cases=2 failures=0",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name": "mhgp7_mono_inline_late_a",
+      "properties": [
+        {
+          "name": "LABELS",
+          "value": [
+            "gate"
+          ]
+        },
+        {
+          "name": "TIMEOUT",
+          "value": 120
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "/workspaces/E-HGP/build/v7_axis_integrated"
+        }
+      ]
+    },
+    {
+      "backtrace": 8,
+      "command": [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_axis_integrated/mhgp7_mono_inline_gate",
+        "-DARGS=--inject=fold-inject-b-exception-k3",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=mono_inline_injected=passed cases=2 failures=0",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name": "mhgp7_mono_inline_late_b",
+      "properties": [
+        {
+          "name": "LABELS",
+          "value": [
+            "gate"
+          ]
+        },
+        {
+          "name": "TIMEOUT",
+          "value": 120
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "/workspaces/E-HGP/build/v7_axis_integrated"
+        }
+      ]
+    },
+    {
+      "backtrace": 11,
+      "command": [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_axis_integrated/mhgp7_mono_inline_gate",
+        "-DARGS=--inject=caps-throw-bad-alloc-fold",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=mono_inline_injected=passed cases=2 failures=0",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name": "mhgp7_mono_inline_early_alloc",
+      "properties": [
+        {
+          "name": "LABELS",
+          "value": [
+            "gate"
+          ]
+        },
+        {
+          "name": "TIMEOUT",
+          "value": 120
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "/workspaces/E-HGP/build/v7_axis_integrated"
+        }
+      ]
+    },
+    {
+      "backtrace": 14,
+      "command": [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_axis_integrated/mhgp7_axis_bounds_gate",
+        "-DARGS=",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=OK axis_bounds boxes=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name": "mhgp7_axis_bounds",
+      "properties": [
+        {
+          "name": "LABELS",
+          "value": [
+            "gate"
+          ]
+        },
+        {
+          "name": "TIMEOUT",
+          "value": 30
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "/workspaces/E-HGP/build/v7_axis_integrated"
+        }
+      ]
+    },
+    {
+      "backtrace": 17,
+      "command": [
+        "/usr/bin/cmake",
+        "-DEXPECTED=4",
+        "-DCMD=/workspaces/E-HGP/build/v7_axis_integrated/mhgp7_axis_bounds_gate",
+        "-DARGS=axis-argmin-floor-only",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=DIVERGENCE axis_bounds",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name": "mhgp7_axis_bounds_axis-argmin-floor-only",
+      "properties": [
+        {
+          "name": "LABELS",
+          "value": [
+            "gate"
+          ]
+        },
+        {
+          "name": "TIMEOUT",
+          "value": 30
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "/workspaces/E-HGP/build/v7_axis_integrated"
+        }
+      ]
+    },
+    {
+      "backtrace": 20,
+      "command": [
+        "/usr/bin/cmake",
+        "-DEXPECTED=4",
+        "-DCMD=/workspaces/E-HGP/build/v7_axis_integrated/mhgp7_axis_bounds_gate",
+        "-DARGS=axis-argmin-ceil-always",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=DIVERGENCE axis_bounds",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name": "mhgp7_axis_bounds_axis-argmin-ceil-always",
+      "properties": [
+        {
+          "name": "LABELS",
+          "value": [
+            "gate"
+          ]
+        },
+        {
+          "name": "TIMEOUT",
+          "value": 30
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "/workspaces/E-HGP/build/v7_axis_integrated"
+        }
+      ]
+    },
+    {
+      "backtrace": 23,
+      "command": [
+        "/usr/bin/cmake",
+        "-DEXPECTED=4",
+        "-DCMD=/workspaces/E-HGP/build/v7_axis_integrated/mhgp7_axis_bounds_gate",
+        "-DARGS=axis-argmin-no-clip",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=DIVERGENCE axis_bounds",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name": "mhgp7_axis_bounds_axis-argmin-no-clip",
+      "properties": [
+        {
+          "name": "LABELS",
+          "value": [
+            "gate"
+          ]
+        },
+        {
+          "name": "TIMEOUT",
+          "value": 30
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "/workspaces/E-HGP/build/v7_axis_integrated"
+        }
+      ]
+    },
+    {
+      "backtrace": 26,
+      "command": [
+        "/usr/bin/cmake",
+        "-DEXPECTED=4",
+        "-DCMD=/workspaces/E-HGP/build/v7_axis_integrated/mhgp7_axis_bounds_gate",
+        "-DARGS=axis-argmin-narrow-coefficient",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=DIVERGENCE axis_bounds",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name": "mhgp7_axis_bounds_axis-argmin-narrow-coefficient",
+      "properties": [
+        {
+          "name": "LABELS",
+          "value": [
+            "gate"
+          ]
+        },
+        {
+          "name": "TIMEOUT",
+          "value": 30
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "/workspaces/E-HGP/build/v7_axis_integrated"
+        }
+      ]
+    },
+    {
+      "backtrace": 29,
+      "command": [
+        "/usr/bin/cmake",
+        "-DEXPECTED=4",
+        "-DCMD=/workspaces/E-HGP/build/v7_axis_integrated/mhgp7_axis_bounds_gate",
+        "-DARGS=axis-argmin-max-min",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=DIVERGENCE axis_bounds",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name": "mhgp7_axis_bounds_axis-argmin-max-min",
+      "properties": [
+        {
+          "name": "LABELS",
+          "value": [
+            "gate"
+          ]
+        },
+        {
+          "name": "TIMEOUT",
+          "value": 30
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "/workspaces/E-HGP/build/v7_axis_integrated"
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 1,
+    "minor": 0
+  }
+}

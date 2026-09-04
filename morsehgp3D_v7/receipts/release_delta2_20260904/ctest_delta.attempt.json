@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7",
+    "--output-on-failure",
+    "--no-tests=error",
+    "-L",
+    "^gate$",
+    "-R",
+    "^(mhgp7_archive|mhgp7_archive_api|mhgp7_archive_cleanup|mhgp7_archive_optimized|mhgp7_cli_budget_signature|mhgp7_cli_layout_classic_signature|mhgp7_cli_layout_csr_signature|mhgp7_cli_ok_s8|mhgp7_cli_refus_layout_inconnu|mhgp7_cli_refus_layout_vide|mhgp7_cli_refus_n_suffix|mhgp7_cli_refus_s7|mhgp7_cli_refus_s_suffix|mhgp7_incidence_campaign|mhgp7_incidence_campaign_optimized|mhgp7_profil_identite|mhgp7_profile_refuse_inject|mhgp7_profile_sonde_refuse_inconnu|mhgp7_profile_sonde_refuse_inject_vide|mhgp7_profile_sonde_refuse_inject_virgule|mhgp7_profile_sonde_refuse_mutant_production)$",
+    "--parallel",
+    "2",
+    "--output-junit",
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/release_delta2_20260904/ctest_delta.junit.xml"
+  ],
+  "started_utc": "2026-09-04T21:42:34Z",
+  "status": "running",
+  "timeout_seconds": 1800
+}
