@@ -40,6 +40,14 @@ ferme leur composition sur le domaine CPU régulier déclaré, sans couvrir
 les plateaux généraux, la verticale ni le passage à grande échelle.
 La conservation du delta F et sa qualification propre restent distinctes.
 
+L'[audit des niveaux et du certificat suffisant](docs/AUDIT_NIVEAUX_GABRIEL_20260905.md)
+distingue désormais cette insuffisance du graphe brut de la suffisance des
+niveaux Gabriel. Sous régularité, HGP complet peut se représenter par les
+minima Gabriel de cardinal K et les vraies fusions de cardinal K+1, avec
+leurs parents correctement résolus. Ce certificat n'exige pas Gamma
+exhaustif ; son constructeur, ses plateaux et son supplément pondéré restent
+à qualifier. Aucun changement du moteur ni succès 50k n'en est déduit.
+
 ## Construire et tester
 
 ```bash

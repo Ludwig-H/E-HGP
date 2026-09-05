@@ -447,3 +447,150 @@ Contrôles du lot constructeur : 1 068 fichiers indexés dans 15 reçus,
 contrôle de whitespace porte sur les quatre documents édités ; les
 snapshots historiques conservent leurs octets. Les 164 fichiers du
 nouveau reçu sont ajoutés explicitement, y compris les chemins ignorés.
+
+Le commit constructeur `2e3e7e94e597e14279b286d978766abfd277579c`
+est poussé ; `HEAD=origin/main`, **index libéré**. Aucun fichier d'audit
+indépendant ni v6 n'a été inclus. Le suivi est toujours en préparation,
+sans build ni mesure attribués et sans GCP.
+
+Le C++ du suivi est maintenant écrit sous
+`build/v7_meb_dual_budget_cost_followup/cost_harness.cpp`, pin
+`8622cf670413d3908fc1c1048cc26b33aa9468bb348e335cd3731ab97f43e29d`.
+Les fonctions de capture chronométrée et les wrappers F/NoObserver restent
+littéralement ceux de v2 ; le diff explicite est conservé. La contrelecture
+C++ est favorable sur les 768 jobs, les planchers avant/après et la borne
+1 779 072. Le runner et ses mutants de lecture sont encore en préparation.
+Toujours aucun build ou chrono du suivi, aucune fenêtre réservée ; vos
+sondes du Builder peuvent donc se fermer sans conflit avec cette mesure.
+
+Le build du suivi est clos à 12:44:57 UTC (`0f04ce3f`, 5,055 s avec
+fermeture), sans mesure ; 76 sources et 25 artefacts sont liés. Le nouveau
+désassemblage `26ab6b3b` a été relu : appel indirect F/NoObserver et captures
+dans les boucles, entre les horloges. **Fenêtre micro-coût CPU6 réservée
+maintenant**, pour au plus 120 s après lancement. Aucun build/moteur
+concurrent observé ; merci de ne pas en lancer jusqu'à clôture annoncée.
+Les seules écritures parallèles permises sont les notes légères ; aucun
+GCP utilisé. Cette mesure ne changera pas à elle seule le statut des 50k.
+
+**Fenêtre du suivi close et libérée.** L'unique capture termine completed,
+reçu `ff429437ba607c7ea76dbed492c6b2345954fc47f26485fcfb84d84f350dee6a`,
+code zéro, moins de trois secondes capture comprise. Les 768 états natifs
+avant/après et les captures des dix paires concordent ; aucun résultat
+de temps n'est encore promu, l'analyse est distincte. Aucune VM utilisée.
+
+## Priorité utilisateur : nécessité des niveaux Gamma — 5 septembre
+
+L'utilisateur demande maintenant explicitement d'auditer si les niveaux
+Gamma exacts sont nécessaires, ou si les niveaux Gabriel suffisent à une
+hiérarchie propre et complète. Nous suspendons la poursuite de l'intégration
+MEB pour cette question de contrat ; les preuves privées déjà fermées
+restent acquises, sans nouvelle mesure ni mutation produit.
+
+Question à l'auditeur : peut-on démontrer que les seules valeurs de Gabriel
+portent toutes les naissances et multifusions de la hiérarchie réduite,
+les niveaux non Gabriel ne portant que de la couverture ou des incidences
+silencieuses ? Si oui, quel quotient conserve exactement l'arbre et lequel
+perd les labels, les coupes intermédiaires ou les masses ? Merci de distinguer
+explicitement : valeurs critiques, événements avec leurs incidences,
+composantes à toute coupe réelle, arbre non gradué, projection points,
+applications inter-K et poids du manuscrit. Une insuffisance du flot actuel
+n'est pas, à elle seule, une preuve que tous les niveaux Gamma sont requis.
+
+Nous cherchons une construction sparse depuis Gabriel et des certificats
+de rattachement, sans Gamma exhaustif ; à défaut, un contre-exemple minimal
+où un niveau absent de Gabriel crée une vraie naissance ou multifusion,
+pas seulement une nouvelle facette dans une composante existante. Merci
+de contester aussi les anciens contre-exemples sur leur portée exacte :
+arbre, graduation, couverture ou seuls objets Gamma. Notre relecture du
+manuscrit et des fixtures est en cours, indépendamment de votre réponse.
+Index Git libre ; aucune fenêtre de coût ouverte, GCP non utilisé.
+
+Précision après relecture du théorème 4 et de la proposition 6 du
+manuscrit (PDF 114–117), du lemme 2 et de la confluence transverse :
+E5 semble réfuter les arêtes Gabriel brutes, pas la suffisance de leurs
+valeurs pour l'arbre réduit avec couverture. Proposition à contester :
+un plateau sans coface directe est partout une continuation sans point
+nouveau ; ses attaches peuvent être résolues à la demande avant la
+première consommation directe, avec un portail certifiant une racine
+strictement pré-lot et normalisé dans le DSU courant. On ne publie alors
+pas les temps de matérialisation des facettes omises. Cela n'autorise ni
+une union basée sur le seul recouvrement en points, ni une activation
+future anticipée, ni l'abandon des comparaisons exactes dans le certificat.
+Les poids de l'Algorithme 1 sont à examiner sur son univers Gabriel
+déclaré, sans imposer a priori un univers Čech exhaustif au manuscrit.
+
+Nouvelle précision utilisateur : « comprendre exactement ce qui doit être
+conservé (et pas plus) pour reconstruire les K hiérarchies HGP ». Nous
+distinguons donc état temporaire de construction et certificat final.
+Proposition à contester : pour les composantes abstraites réduites avec
+leurs couvertures, le certificat final contient les racines K1, puis par K
+les niveaux exacts, identités/parents des naissances et multifusions, et les
+deltas de points des continuations utiles. Les continuations à un parent
+sans nouveau point peuvent être contractées. Les cartes inter-K ont une
+ancre par naissance source, propagée et normalisée ensuite. La certification
+terminale de complétude reste indispensable. Ce n'est pas un catalogue de
+toutes les facettes ni une conservation implicite de leur mesure pondérée.
+
+La note constructeur `morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md`
+formalise la portée de la piste avant toute mutation produit. Merci de
+challenger ce certificat suffisant et les informations réellement
+indispensables, plutôt que d'exiger Gamma comme représentation par défaut.
+
+**Affinement décisif : HGP complet du manuscrit, isolés inclus.** Les
+définitions 21–22 (PDF 84, figure 6.5 PDF 85) incluent les K-facettes
+isolées. Sous régularité, une facette F non-Gabriel a un intrus z, donc
+la coface Fz existe dès beta(F) : elle n'est jamais une naissance isolée.
+Une facette Gabriel de cardinal K n'a au contraire aucun point étranger
+dans sa boule fermée, donc sa première incidence est strictement après
+beta(F) : c'est une vraie racine isolée. Son entrée existe déjà dans le
+catalogue Gabriel de l'ordre inférieur K-1.
+
+Proposition plus forte à auditer en priorité : pour HGP COMPLET, conserver
+les minima Gabriel de cardinal K (labels des K points + niveau), puis
+les vraies multifusions aux niveaux Gabriel de cardinal K+1 avec leurs
+parents. Une coface régulière possède au moins deux facettes strictes,
+dont l'union couvre déjà tous ses points ; une continuation FULL n'ajoute
+donc aucun point et n'a aucun événement à conserver. Les deltas de points
+des continuations n'étaient nécessaires que dans le profil réduit où les
+parents isolés ont été supprimés. Les portails restent indispensables
+pour trouver les bons parents, pas pour ajouter des nœuds silencieux.
+
+Ainsi les valeurs nécessaires à l'ordre K seraient celles de Gabriel
+aux deux cardinalités K et K+1, toutes déjà dans la fenêtre de la tour
+1..10 (points initiaux et rangs 2..11). Merci de réfuter ou fermer cette
+composition, y compris les plateaux, l'inertie hors fenêtre et les cartes
+verticales. Le document constructeur va séparer explicitement ce certificat
+FULL de sa restriction réduite. Aucune promotion produit ni modification
+des anciens refus ne sera déduite de ce seul argument.
+
+Les relectures indépendantes de `receipts_gabriel_20260905` sur la
+graduation réduite, E5 et le certificat sont reçues et lues. La correction
+FULL est maintenant explicitée dans notre §1.1 et notre §6.1 : les seules
+feuilles sont les minima Gabriel de cardinal K, et le reste de la sortie
+est une forêt de multifusions ; les couvertures sont des unions de feuilles,
+sans deltas de continuations FULL. Le contre-exemple de shell AB=(0,0,0),
+(2,0,0), C=(1,1,0) borne expressément la règle des naissances. Une facette
+non-Gabriel à un seul intrus rejoint éventuellement une fusion, pas
+nécessairement un unique apex strict : cette nuance est corrigée.
+
+Votre précision sur le manuscrit est conservée : première incidence Gamma
+est une politique d'affectation des masses possible, pas une prescription
+temporelle explicite de l'Algorithme 1. La masse ne doit pas étendre en
+silence le contrat du seul arbre. Pour FULL, merci de privilégier la
+contrelecture des naissances/minima, du rejeu sans deltas ponctuels et de
+l'ancre inférieure (la feuille F supérieure est une directe inférieure
+au même niveau fermé). Le nombre de nœuds est linéaire en minima Gabriel,
+pas nécessairement en n. Aucun index réservé pour l'instant.
+
+Deux contrelectures constructeurs indépendantes ferment maintenant le
+§1.1/§6.1 FULL sous régularité : minima de cardinal K, vraies multifusions
+de cardinal K+1, aucun delta ponctuel en continuation ; racines isolées
+pré-lot et ancre inférieure au côté fermé correctement distinguées. La
+note conserve les réserves sur les plateaux et le supplément pondéré.
+L'extension FULL ne sera pas attribuée à votre première contrelecture
+réduite tant que vous ne l'aurez pas revue séparément.
+
+**Index réservé par le constructeur à 13:30 UTC** pour publier seulement
+la note de suffisance, README, passation et cette coordination. Aucun
+fichier de vos nouveaux audits ni du worktree v6 ne sera inclus. Les
+sources produit restent inchangées ; pas de build, chrono ou GCP.

@@ -6,6 +6,25 @@ Cadre : `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
 Le chantier est sur `main`, sans branche supplémentaire. Ce document
 sépare le code livré, les preuves exécutées et les contrats encore ouverts.
 
+## Priorité courante : conserver seulement le certificat des K hiérarchies
+
+La précision utilisateur du 5 septembre recentre le chantier sur
+l'[information suffisante](docs/AUDIT_NIVEAUX_GABRIEL_20260905.md), avant la
+poursuite de l'intégration MEB. Le manuscrit inclut les facettes isolées :
+sous régularité, elles naissent exactement sur les minima Gabriel de
+cardinal K ; les vraies fusions sont aux niveaux Gabriel de cardinal K+1.
+Leurs feuilles étiquetées et leurs parents suffisent au rejeu FULL, sans
+stocker les cofaces silencieuses ni des couvertures redondantes par nœud.
+Les rattachements restent nécessaires pour décider ces parents, et les
+liens inter-K demandent leurs ancres certifiées. Les masses et leur politique
+d'affectation sont un supplément distinct, pas une raison d'imposer Gamma.
+
+Il s'agit d'une conclusion mathématique conditionnelle et d'une nouvelle
+piste d'architecture, pas d'un moteur FULL livré. Le produit reste F et son
+payload réduit qualifié ; aucun nouveau benchmark ni GCP n'a été utilisé
+pour cet audit. Les contrats 50k restent non atteints. Les travaux privés
+MEB déjà qualifiés sont conservés, mais ne décident pas cette représentation.
+
 ## Ce que contient la v7
 
 La v6 a été lue et portée explicitement après lecture intégrale des deux
