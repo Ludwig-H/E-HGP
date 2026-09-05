@@ -1,0 +1,77 @@
+{
+  "status": "rejected",
+  "reason": "lazy.first_c_admission",
+  "output_sha256": "a62c4ed33d5b478940dab79f024092a1829af0c99a344155e6d437eef79498df",
+  "python_optimized": true,
+  "causal_witness": {
+    "unchanged_eager_representations": 218,
+    "witness_count": 58,
+    "first_witnesses": [
+      {
+        "id": 9,
+        "case": "E5",
+        "order": 2,
+        "capacity": 0,
+        "status": 0,
+        "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues"
+      },
+      {
+        "id": 13,
+        "case": "E5",
+        "order": 2,
+        "capacity": 0,
+        "status": 0,
+        "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues"
+      },
+      {
+        "id": 17,
+        "case": "E5",
+        "order": 3,
+        "capacity": 0,
+        "status": 0,
+        "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues"
+      },
+      {
+        "id": 18,
+        "case": "E5",
+        "order": 3,
+        "capacity": 1,
+        "status": 0,
+        "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues"
+      },
+      {
+        "id": 21,
+        "case": "E5",
+        "order": 3,
+        "capacity": 0,
+        "status": 0,
+        "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues"
+      },
+      {
+        "id": 22,
+        "case": "E5",
+        "order": 3,
+        "capacity": 1,
+        "status": 0,
+        "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues"
+      },
+      {
+        "id": 49,
+        "case": "E5",
+        "order": 2,
+        "capacity": 0,
+        "status": 0,
+        "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues"
+      },
+      {
+        "id": 53,
+        "case": "E5",
+        "order": 2,
+        "capacity": 0,
+        "status": 0,
+        "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues"
+      }
+    ]
+  },
+  "checker_sha256": "a530583dea7a59658786a765396b840a519499da8abb799f2c02047793c0c6d1"
+}

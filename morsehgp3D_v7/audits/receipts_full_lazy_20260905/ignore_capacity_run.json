@@ -1,0 +1,18 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "0",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_lazy_20260905/ignore_capacity.bin"
+  ],
+  "exit_code": 0,
+  "started_utc": "2026-09-05T17:42:44.763174+00:00",
+  "finished_utc": "2026-09-05T17:42:45.078805+00:00",
+  "environment_override": {},
+  "stdout": "ignore_capacity_output.json",
+  "stdout_sha256": "a62c4ed33d5b478940dab79f024092a1829af0c99a344155e6d437eef79498df",
+  "stderr": "ignore_capacity_stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "binary_sha256": "b3d6acfb7e85f92682692d3f538c8943e5cf67d64e2e0991dd241508ee4da67e",
+  "input_sha256": "8b66b099da5ee1196166620cab1fbbc25e96b109534e47419de76c098f6fe1c5"
+}

@@ -1,0 +1,192 @@
+{
+  "artifacts_sha256": {
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/digest_probe_review.md": "89ea0c84343a86fae0264443fd588e3ed11817474707e1aeb45b3bd22426e6d1",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/digest_review/normal.json": "206ecaf15d3b6ab9b6ebc8ba64fc160f0dbe853d125cf6a57d76810e26754e1b",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/digest_review/optimized.json": "a3c3d7bdd52bd2036707ef6d5ff7ff4e324b765d1c82eef2e0c127c21c43ec26",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/digest_review/replay_helpers.py": "bea57e6f314b4c4b850fa2fddd6baa0ae5a3cc07fcec2dcc7199ac6af7717fb7",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/digest_review/sources_as_read.json": "179dd0ffe8b8cf6d70044f6ba84c43582afca7f9735f2c75e94beb6ee1c3813a"
+  },
+  "captures_as_read": [
+    {
+      "bytes": 12451,
+      "capture": "morsehgp3D_v7/audits/receipts_full_lazy_20260905/digest_review/full_gabriel_semantic_digest.hpp",
+      "sha256": "671b2dfb51f1385ee7301bd6b03ef64e62c0d768c92534a6f09589726ce9adc3",
+      "source": "morsehgp3D_v7/bench/full_gabriel_semantic_digest.hpp"
+    },
+    {
+      "bytes": 4684,
+      "capture": "morsehgp3D_v7/audits/receipts_full_lazy_20260905/digest_review/full_gabriel_digest_gate.cpp",
+      "sha256": "673a5749fd9c35abcca610567554ecfed585298c86cbe7f640f25aa24d718c03",
+      "source": "morsehgp3D_v7/tests/full_gabriel_digest_gate.cpp"
+    },
+    {
+      "bytes": 35192,
+      "capture": "morsehgp3D_v7/audits/receipts_full_lazy_20260905/digest_review/full_gabriel_lazy_probe.cpp",
+      "sha256": "f21e3c70bda4cc9adaa0960ed19c9a6a8aa6b09413f6c6d63bae884c98e9486a",
+      "source": "morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp"
+    },
+    {
+      "bytes": 32008,
+      "capture": "morsehgp3D_v7/audits/receipts_full_lazy_20260905/digest_review/full_gabriel_lazy_probe_audit.py",
+      "sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+      "source": "morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py"
+    },
+    {
+      "bytes": 12991,
+      "capture": "morsehgp3D_v7/audits/receipts_full_lazy_20260905/digest_review/full_certificate.hpp",
+      "sha256": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+      "source": "morsehgp3D_v7/src/forest/full_certificate.hpp"
+    },
+    {
+      "bytes": 26765,
+      "capture": "morsehgp3D_v7/audits/receipts_full_lazy_20260905/digest_review/full_gabriel.hpp",
+      "sha256": "13c6cc72ab5065d498827bf89c6bc2a321b5e896c93a60263de52b9d800a2627",
+      "source": "morsehgp3D_v7/src/forest/full_gabriel.hpp"
+    },
+    {
+      "bytes": 13460,
+      "capture": "morsehgp3D_v7/audits/receipts_full_lazy_20260905/digest_review/sha256.hpp",
+      "sha256": "b675835e9bd05a0ca1fb63dfeaa6fa99d3521b761c35c50b1b51f0aac259798d",
+      "source": "morsehgp3D_v7/src/core/sha256.hpp"
+    }
+  ],
+  "context_head_as_communicated": "after_6f4b4de5",
+  "date": "2026-09-05",
+  "domain": "valid factory-issued labelled FULL forests with unique minima; internally generated hex digests",
+  "framework": {
+    "backend": "cpu_reference",
+    "mode": "audit_independant_math_and_architecture",
+    "phase": "exploration_v7_hors_registre",
+    "profile": "quantized_u16_input_only",
+    "public_status": "not_claimed"
+  },
+  "limitations": [
+    "No C++ serializer execution by this audit.",
+    "No whole receipt CLI invocation on the helper counter models.",
+    "No probe admission, performance result, RSS prediction, new Gamma oracle or K10 geometric qualification.",
+    "Factory domain excludes hostile Views, unused arena data and NUL-containing binding strings.",
+    "Declared per-order hashes are not recomputed from forest bytes by the Python judge.",
+    "Input digest is not independently regenerated from seed by the Python judge.",
+    "Package source/binary provenance is a separate qualification."
+  ],
+  "live_source_comparison_at_review_end": [
+    {
+      "matches_capture": true,
+      "sha256_current": "671b2dfb51f1385ee7301bd6b03ef64e62c0d768c92534a6f09589726ce9adc3",
+      "source": "morsehgp3D_v7/bench/full_gabriel_semantic_digest.hpp"
+    },
+    {
+      "matches_capture": true,
+      "sha256_current": "673a5749fd9c35abcca610567554ecfed585298c86cbe7f640f25aa24d718c03",
+      "source": "morsehgp3D_v7/tests/full_gabriel_digest_gate.cpp"
+    },
+    {
+      "matches_capture": true,
+      "sha256_current": "f21e3c70bda4cc9adaa0960ed19c9a6a8aa6b09413f6c6d63bae884c98e9486a",
+      "source": "morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp"
+    },
+    {
+      "matches_capture": true,
+      "sha256_current": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+      "source": "morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py"
+    },
+    {
+      "matches_capture": true,
+      "sha256_current": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+      "source": "morsehgp3D_v7/src/forest/full_certificate.hpp"
+    },
+    {
+      "matches_capture": true,
+      "sha256_current": "13c6cc72ab5065d498827bf89c6bc2a321b5e896c93a60263de52b9d800a2627",
+      "source": "morsehgp3D_v7/src/forest/full_gabriel.hpp"
+    },
+    {
+      "matches_capture": true,
+      "sha256_current": "b675835e9bd05a0ca1fb63dfeaa6fa99d3521b761c35c50b1b51f0aac259798d",
+      "source": "morsehgp3D_v7/src/core/sha256.hpp"
+    }
+  ],
+  "peer_review": {
+    "agent": "/root/meb_math",
+    "scope": "wire injectivity before hashing and U192/u128 arithmetic; valid forest domain",
+    "verdict": "favorable; no concrete defect identified"
+  },
+  "recommended_success_identity": "cache_inserts == min(cache_entries, portal_requests)",
+  "remaining_gap": {
+    "capacity": 1,
+    "captured_helper_verdict": "accepted",
+    "changed_row": {
+      "alias_hits": 0,
+      "aliases": 0,
+      "cache_hits": 0,
+      "cache_inserts": 0,
+      "cache_lookups": 1,
+      "cache_skips": 1,
+      "certificate_minima": 2,
+      "chain_steps": 0,
+      "connection_catalogue_records": 1,
+      "direct_lookups": 1,
+      "face_visits": 2,
+      "geometry_meb_calls": 1,
+      "input_records": 0,
+      "k": 2,
+      "max_chain_length": 0,
+      "meb_calls": 1,
+      "meb_supports": 0,
+      "minimum_hits": 1,
+      "minimum_lookups": 2,
+      "no_op_connections": 0,
+      "normalized_anchors": 0,
+      "portal_requests": 1,
+      "query_leaves": 0,
+      "query_nodes": 0,
+      "query_range_skips": 0,
+      "singleton_intruder_resolutions": 1,
+      "successor_steps": 0,
+      "terminal_direct": 1
+    },
+    "expected_inserts": 1,
+    "kind": "audit_counter_data_corruption_not_product_mutant",
+    "observed_corrupted_inserts": 0,
+    "policy": "lazy_first_c_strict_resolutions_v1",
+    "scope": "work_policy_and_success_identities_not_whole_receipt_judge",
+    "violated_necessary_success_identity": "cache_inserts=min(capacity,portal_requests)"
+  },
+  "schema": "mhgp7-full-lazy-digest-probe-review-v1",
+  "static_conclusions": [
+    "No non-hash format collision found on the declared domain: fixed widths, length-prefixed tags, preorder kind/arity and unique leaf labels are decodable.",
+    "Internal allocation IDs and parent/minima arena order are canonicalized; external PointId names intentionally remain semantic.",
+    "U192/u128 rational reduction is justified by bounded remainder recurrence and gcd(n mod d,d)=gcd(n,d).",
+    "SHA256 equality remains fingerprint equality, not a mathematical injectivity theorem or catalogue-completeness oracle.",
+    "The four historical mono judge gaps have explicit source-level checks in the captured v2 judge.",
+    "Lazy per-success lookup/cache/portal/direct identities are correct on the captured producer schedule.",
+    "Digest timing is included in both policy arms; scratch25N+8P is logical storage, not an RSS bound."
+  ],
+  "test_evidence": {
+    "canonical_receipt_selftests_read_not_executed": 19,
+    "counts_per_python_mode": {
+      "data_mutations_rejected": 4,
+      "first_c_corruptions_accepted_by_captured_helpers": 1,
+      "independent_aggregate_preimages": 3,
+      "positive_counter_models": 3
+    },
+    "cpp_gate_read_not_executed": {
+      "programmed_divisions": 672,
+      "programmed_reductions": 672,
+      "programmed_rejections": 6,
+      "semantic_helper_checks": 24
+    },
+    "normal_optimized_agree": true,
+    "reason_no_canonical_receipt_replay": "No complete development capture of the new lazy probe found in the consulted locations; no probe receipt synthesized.",
+    "scope": "counter_data_models_and_python_aggregate_wire_only"
+  },
+  "validation": {
+    "build_invoked": false,
+    "check_docs_validate_errors": [],
+    "engine_invoked": false,
+    "gcp_used": false,
+    "git_mutation": false,
+    "product_modified": false
+  },
+  "verdict": "favorable_with_first_c_success_identity_to_add"
+}

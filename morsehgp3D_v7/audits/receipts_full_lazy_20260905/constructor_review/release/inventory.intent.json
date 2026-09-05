@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_release",
+    "--show-only=json-v1",
+    "-R",
+    "^mhgp7_full_(certificate|gabriel)"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_code": 0,
+  "label": "inventory",
+  "started_utc": "2026-09-05T17:26:38.439944+00:00",
+  "timeout_seconds": 60
+}

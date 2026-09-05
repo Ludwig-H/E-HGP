@@ -1,0 +1,56 @@
+{
+  "mhgp7_full_certificate_gate": {
+    "bytes": 2948768,
+    "ctime_ns": 1788629210078247287,
+    "device": 1796,
+    "inode": 1747169,
+    "mtime_ns": 1788629210078247287,
+    "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_san/mhgp7_full_certificate_gate",
+    "sha256": "073af92a9553865e7f3c9defe5ee55e552f5de8f9a4bc763de20264871ddefd4"
+  },
+  "mhgp7_full_gabriel_allocation_gate": {
+    "bytes": 13034488,
+    "ctime_ns": 1788629286858247715,
+    "device": 1796,
+    "inode": 1747175,
+    "mtime_ns": 1788629286858247715,
+    "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_san/mhgp7_full_gabriel_allocation_gate",
+    "sha256": "7f6bbebb4fdc839aaea0717c2c766bcde5ce93a700420a1484d9e8e301eec53c"
+  },
+  "mhgp7_full_gabriel_digest_gate": {
+    "bytes": 3470256,
+    "ctime_ns": 1788629374061248202,
+    "device": 1796,
+    "inode": 1747184,
+    "mtime_ns": 1788629374061248202,
+    "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_san/mhgp7_full_gabriel_digest_gate",
+    "sha256": "7c91953df663d95b65d64fbe73a50fa6a94177f253183d6e884314954f47695c"
+  },
+  "mhgp7_full_gabriel_gate": {
+    "bytes": 16052696,
+    "ctime_ns": 1788629250713247514,
+    "device": 1796,
+    "inode": 1747172,
+    "mtime_ns": 1788629250713247514,
+    "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_san/mhgp7_full_gabriel_gate",
+    "sha256": "7f167f999ef4cf88800eb871531f58e9a57ddaa72d3e82d70a261292a5271c9c"
+  },
+  "mhgp7_full_gabriel_lazy_allocation_gate": {
+    "bytes": 13425184,
+    "ctime_ns": 1788629363973248145,
+    "device": 1796,
+    "inode": 1747181,
+    "mtime_ns": 1788629363973248145,
+    "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_san/mhgp7_full_gabriel_lazy_allocation_gate",
+    "sha256": "dc765c80317cce94f83b1dec478623dd982840004e0b4db389e8d403dd1591a1"
+  },
+  "mhgp7_full_gabriel_lazy_gate": {
+    "bytes": 15521792,
+    "ctime_ns": 1788629328285247946,
+    "device": 1796,
+    "inode": 1747178,
+    "mtime_ns": 1788629328285247946,
+    "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_san/mhgp7_full_gabriel_lazy_gate",
+    "sha256": "edd5b84c521dad43fcb6584289a2a1b63de8642f93337274069567363f83f42a"
+  }
+}

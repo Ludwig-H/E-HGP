@@ -1,0 +1,77 @@
+{
+  "status": "rejected",
+  "reason": "lazy.identity",
+  "output_sha256": "7bb1c66b459bbdaab0f3191657b2ad557dd04b0519b74d0333d3aa1a98dad5fc",
+  "python_optimized": false,
+  "causal_witness": {
+    "unchanged_eager_representations": 218,
+    "witness_count": 96,
+    "first_witnesses": [
+      {
+        "id": 17,
+        "case": "E5",
+        "order": 3,
+        "capacity": 0,
+        "status": 4,
+        "reason": "audit_mutant_missing_j1"
+      },
+      {
+        "id": 18,
+        "case": "E5",
+        "order": 3,
+        "capacity": 1,
+        "status": 4,
+        "reason": "audit_mutant_missing_j1"
+      },
+      {
+        "id": 19,
+        "case": "E5",
+        "order": 3,
+        "capacity": 100000,
+        "status": 4,
+        "reason": "audit_mutant_missing_j1"
+      },
+      {
+        "id": 21,
+        "case": "E5",
+        "order": 3,
+        "capacity": 0,
+        "status": 4,
+        "reason": "audit_mutant_missing_j1"
+      },
+      {
+        "id": 22,
+        "case": "E5",
+        "order": 3,
+        "capacity": 1,
+        "status": 4,
+        "reason": "audit_mutant_missing_j1"
+      },
+      {
+        "id": 23,
+        "case": "E5",
+        "order": 3,
+        "capacity": 100000,
+        "status": 4,
+        "reason": "audit_mutant_missing_j1"
+      },
+      {
+        "id": 57,
+        "case": "E5",
+        "order": 3,
+        "capacity": 0,
+        "status": 4,
+        "reason": "audit_mutant_missing_j1"
+      },
+      {
+        "id": 58,
+        "case": "E5",
+        "order": 3,
+        "capacity": 1,
+        "status": 4,
+        "reason": "audit_mutant_missing_j1"
+      }
+    ]
+  },
+  "checker_sha256": "a530583dea7a59658786a765396b840a519499da8abb799f2c02047793c0c6d1"
+}

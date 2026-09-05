@@ -1,0 +1,733 @@
+{
+  "authority": "frozen_v2_judge_AND_first_c_supplement",
+  "closed_counterfixture": {
+    "frozen_v2_accepts": true,
+    "joint_acceptance": false,
+    "source": {
+      "changed_raw_sha256": "e0779db6e0978b6979f8a33be6b9a7336070d327417fe890339c944dca4e71b2",
+      "historical_package_hashes_preserved": false,
+      "judge_result": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 1000000,
+        "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 8,
+        "outcome": "complete_relative",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      },
+      "kind": "joint_raw_receipt_data_corruption_not_product_mutant",
+      "necessary_identity_refutes": true,
+      "new_values": {
+        "cache_inserts": 1,
+        "cache_skips": 1,
+        "portal_requests": 2
+      },
+      "old_values": {
+        "cache_inserts": 2,
+        "cache_skips": 0,
+        "portal_requests": 2
+      },
+      "source_receipt": "morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_lazy_c1000000.receipt.json",
+      "zero_based_raw_row": 2
+    },
+    "supplement_refuses_with": "first_c_success"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s10_k10_eager_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "eager",
+        "attempt_success": true,
+        "cache_entries": 0,
+        "raw_sha256": "5afc711c9109543fe9510b82e83f2f6a4a1ff5b7c546a501919cb964e68cc4f5",
+        "receipt_sha256": "1bc19f897ecbc04879d351f9fcd9a1a4fe47e5644cd27a4ea8a12c7003c631ba",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 0,
+        "successful_orders_diagnostic": 8,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s10_k10_lazy_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 0,
+        "raw_sha256": "1b9a55d60b797f1a6f60ca6c0f81fa524da549ea27784892241f20be5921cdbb",
+        "receipt_sha256": "e95da5bc7ccfafc0c6dece906ec2dc2d92d89466e22383ecc6ac640833234d83",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 8,
+        "successful_orders_diagnostic": 8,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s10_k10_lazy_c1.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 1,
+        "raw_sha256": "8a6d3c64c2523d6eb4e5643e2ba01f76b9f4ce8c9db733d400b3c18ddf32cec9",
+        "receipt_sha256": "08b80190e1810a3b0c63aec47ed110255a6c976472bca5d99a62a74cf1551832",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 8,
+        "successful_orders_diagnostic": 8,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s10_k10_lazy_c1000000.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 1000000,
+        "raw_sha256": "5e0001e528d41486079b7262565e6651f124c7806853e7c77ab0d87555933654",
+        "receipt_sha256": "91c619b197b73f32cb04fce75d63ffcbfc8c5ee190df4a17bf202e371d993c27",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 8,
+        "successful_orders_diagnostic": 8,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s12_k10_eager_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "eager",
+        "attempt_success": true,
+        "cache_entries": 0,
+        "raw_sha256": "97cf772d163b978a27b7c74c349d2f5d588a49ed8c24dede75832326c2b6c40a",
+        "receipt_sha256": "8b96d3dedb21deec811fb180a145fd68cd4733069328ac081770b842fa293ce5",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 0,
+        "successful_orders_diagnostic": 8,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s12_k10_lazy_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 0,
+        "raw_sha256": "4bd9789953071a57d632c4adf0d5fd7b6f6a14a1aaed2d370e17cb6285a4db49",
+        "receipt_sha256": "d255eab194a9236c2de093ebd274f7cc72bd57033200f9b6d37ee71212f7e21a",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 8,
+        "successful_orders_diagnostic": 8,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s12_k10_lazy_c1.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 1,
+        "raw_sha256": "6d5179b8e0eea946a5607b309dc9491b287d0121ae6c0281fc14eefc90cb6d86",
+        "receipt_sha256": "c8144b351f640b4605284d947e2e8d1fff5a425df9f8bd3b8ffd682bb31bb013",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 8,
+        "successful_orders_diagnostic": 8,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s12_k10_lazy_c1000000.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 1000000,
+        "raw_sha256": "5a4a3b742201de0ec17290428bb95dfe417d23af8780e0daff1bec0944c0d2d1",
+        "receipt_sha256": "7b6fcbe38990be6ee5e4527e14366177a3301e9e8b34025340ec69e7c7e04dc9",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 8,
+        "successful_orders_diagnostic": 8,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_eager_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "eager",
+        "attempt_success": true,
+        "cache_entries": 0,
+        "raw_sha256": "7383d8a27c68c1b135512b71d878de7d0c5692b5031aeb16f151233074a9c937",
+        "receipt_sha256": "2f95676dae0c9601d867455e060440f4612eecbcc0dcadb3481f689bacb01329",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 0,
+        "successful_orders_diagnostic": 8,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_lazy_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 0,
+        "raw_sha256": "5d1183dbe17718c79be852f4461d5704cac7484e44ddbd87c9a208dbae0b7fbb",
+        "receipt_sha256": "fe7a72a5d4e1df6f05cc8f9d66a52c6a609bdb6690e83aacc3558bc3601a4f18",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 8,
+        "successful_orders_diagnostic": 8,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_lazy_c1.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 1,
+        "raw_sha256": "564de74542d4737616472b24b48858af5957ddffe48243565b716f6b997e83cc",
+        "receipt_sha256": "2775a66aa40d7362aa092912109b88734c6cf30c0a16f5cb9190d3953b444996",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 8,
+        "successful_orders_diagnostic": 8,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_lazy_c1000000.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 1000000,
+        "raw_sha256": "b6fb034c199db2b3108e415887a73e591ab4751b651924701ce4fbd419b68cf2",
+        "receipt_sha256": "b9ce8232bcbdc0339ecae31b7815a774c03432bd99c27f4010b3ad882fc82e50",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 8,
+        "successful_orders_diagnostic": 8,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s10_k5_eager_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "eager",
+        "attempt_success": true,
+        "cache_entries": 0,
+        "raw_sha256": "13b54a3b1b147a4b61eaca0d258be3bb0377909f561fdb1df6711a70ca369514",
+        "receipt_sha256": "f236d0b54c5959b637453ce93e1f7f85b0e5b98b40a245cab1c284253e04cb07",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 0,
+        "successful_orders_diagnostic": 5,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s10_k5_lazy_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 0,
+        "raw_sha256": "611c22cad3d179fb6870cd68a20906a500ee5d3bb2c8f1549b6eaf15b9fa2dd8",
+        "receipt_sha256": "a37848ee170129b2c0b54954bcee4c4c4e9d38b0a0d1ec1e4cf43c8612e20b7d",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 5,
+        "successful_orders_diagnostic": 5,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s10_k5_lazy_c1.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 1,
+        "raw_sha256": "f09f1d248e82f360bd154be48ac8bc0781f95a0262d157aa22f9bb521a41f90f",
+        "receipt_sha256": "6a4b65935cd6b4b5b8090a40898fad12106ba367442aef0c102f368f16d55fe6",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 5,
+        "successful_orders_diagnostic": 5,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s10_k5_lazy_c1000000.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 1000000,
+        "raw_sha256": "c7dab32176be1f8527205a442934193da47999b8e825e34a33de5b7210c0c4cc",
+        "receipt_sha256": "a582fd4c31e174f632dc173f18cd7448391d17d17be1eeebe4906b10f6283475",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 5,
+        "successful_orders_diagnostic": 5,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s12_k5_eager_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "eager",
+        "attempt_success": true,
+        "cache_entries": 0,
+        "raw_sha256": "39be67ed8bee88d032f4430e74f6a14f640640b73d562cdf210f5e3f81aa598f",
+        "receipt_sha256": "b29cbd7849b64d0b324fed0ee4e460c677ad2b17a00d68c79f1cc82540f61290",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 0,
+        "successful_orders_diagnostic": 5,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s12_k5_lazy_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 0,
+        "raw_sha256": "d43a22f003999f7bf840edcff73819d12f9dea671bf78430efa3962902846909",
+        "receipt_sha256": "39e65cc8e1fa0d1e48374b79c4f6397c54f9c0481a992940bf9ac700616cb01c",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 5,
+        "successful_orders_diagnostic": 5,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s12_k5_lazy_c1.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 1,
+        "raw_sha256": "3c7027e82446a8e6947c37f994ab8aed457b7129e5a5be98460499437bc693cd",
+        "receipt_sha256": "f0c3ecbf093db00b9ae960c4f53638c566226695963fe1aa896a64e220381629",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 5,
+        "successful_orders_diagnostic": 5,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s12_k5_lazy_c1000000.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 1000000,
+        "raw_sha256": "6321d6e37b40fce924532cc3737508ab085a99cb2d6d3a248bfda41083a43284",
+        "receipt_sha256": "f4401203a0ef6e4e54b01adda1a7340b5ea3dbbdc9fc80d04f19d1c46e2f8825",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 5,
+        "successful_orders_diagnostic": 5,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s8_k5_eager_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "eager",
+        "attempt_success": true,
+        "cache_entries": 0,
+        "raw_sha256": "95ee45989013a037bfc5797c6dd6bedb3cffb4fa5c36836c60c56fc2a69cfc1a",
+        "receipt_sha256": "dacf2f893e91de28f96234aae3c50535a24f8bea276a49d0fcb5ee71556833cd",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 0,
+        "successful_orders_diagnostic": 5,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s8_k5_lazy_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 0,
+        "raw_sha256": "d55b281500b6564d0663c379122687c6cd3f955b2ad61c6227470c564998e03f",
+        "receipt_sha256": "7b7ea4077ac0d350255a0345f6fa85c3dc11f244824985a6b122f32ce7e32f27",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 5,
+        "successful_orders_diagnostic": 5,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s8_k5_lazy_c1.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 1,
+        "raw_sha256": "b0e028f35b1db1ade89591b2196fb2c449c3d893b8445a4bad19f3741a04560c",
+        "receipt_sha256": "e0feeea998eb0f02c77d918dca09f4cfa68949f97f8edcb7cc532f4d6045207c",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 5,
+        "successful_orders_diagnostic": 5,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s8_k5_lazy_c1000000.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "cache_entries": 1000000,
+        "raw_sha256": "47e237da9b9f4a9f0aee865a63fe18a5f92f3cb9c63646cab675051ebd24b0f1",
+        "receipt_sha256": "df0826ea5f8d505d20fa9b9a081213285b660a89b219cd507a139fd5d75a4313",
+        "refused_lazy_orders_bounded": 0,
+        "requires_frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "successful_lazy_orders_checked": 5,
+        "successful_orders_diagnostic": 5,
+        "supplement_status": "valid"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "--selftest",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_eager_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "models_are_engine_receipts": false,
+        "mutants_killed": [
+          "C1_P1_I0_S1",
+          "underfill",
+          "all_skipped",
+          "insert_with_C0",
+          "double_resolution",
+          "negative_insert",
+          "float_portals",
+          "boolean_insert",
+          "capacity_over_limit",
+          "historical_alias",
+          "mirror",
+          "policy"
+        ],
+        "raw_sha256": "7383d8a27c68c1b135512b71d878de7d0c5692b5031aeb16f151233074a9c937",
+        "real_positive": 1,
+        "receipt_sha256": "2f95676dae0c9601d867455e060440f4612eecbcc0dcadb3481f689bacb01329",
+        "scalar_refusal_prefix_models": 3,
+        "scalar_success_models": 9,
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "supplement_status": "selftests_passed"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py",
+        "--selftest",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_lazy_c1.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "models_are_engine_receipts": false,
+        "mutants_killed": [
+          "C1_P1_I0_S1",
+          "underfill",
+          "all_skipped",
+          "insert_with_C0",
+          "double_resolution",
+          "negative_insert",
+          "float_portals",
+          "boolean_insert",
+          "capacity_over_limit",
+          "historical_alias",
+          "mirror",
+          "policy"
+        ],
+        "raw_sha256": "564de74542d4737616472b24b48858af5957ddffe48243565b716f6b997e83cc",
+        "real_positive": 1,
+        "receipt_sha256": "2775a66aa40d7362aa092912109b88734c6cf30c0a16f5cb9190d3953b444996",
+        "scalar_refusal_prefix_models": 3,
+        "scalar_success_models": 9,
+        "scope": "first_C_counter_supplement_not_v2_replacement_or_oracle",
+        "supplement_status": "selftests_passed"
+      }
+    }
+  ],
+  "companion_sha256": "8f8aed03755d9c92775566b21d4fdd9dcba31f171adf4b83e9802a988a450370",
+  "counts": {
+    "distinct_supplement_mutations_per_fixture": 12,
+    "real_receipt_corruption_refused": 1,
+    "refusal_prefix_models_per_fixture": 3,
+    "selftest_fixtures": 2,
+    "success_scalar_models_per_fixture": 9,
+    "successful_lazy_rows_checked": 117,
+    "supplement_receipts_passed": 24
+  },
+  "engine_or_build_reexecuted": false,
+  "heavy_campaign_followed": false,
+  "package": {
+    "binary_omission": [
+      {
+        "bytes": 506856,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/build_admission/full_gabriel_lazy_probe",
+        "reason": "executable_not_exported_pin_retained_in_original_receipt",
+        "sha256": "1d5a38cea99555fd2db474ee43aff6ba1ee708208508cfa97c540774d0bb7e78"
+      }
+    ],
+    "binary_reexecuted": false,
+    "binary_sha256_declared": "1d5a38cea99555fd2db474ee43aff6ba1ee708208508cfa97c540774d0bb7e78",
+    "build_ended": "2026-09-05T17:35:56.011897+00:00",
+    "checksum_entries": 468,
+    "dependency_map_entries": 40,
+    "envelope_pins": {
+      "SHA256SUMS": "9b197a96819c6b39f756d5eaf7e6c777b918501fbaa81d4db76e89c9fa7f72eb",
+      "build/receipt.json": "da11c743e63fb63acd00c25ce02080671a34a43fa2fa9cd473bb3068df2712a3",
+      "manifest.json": "509c064fc596528b651299ddefc8287296fc7d042dbc5a7eb0253b25bf36b5fd",
+      "micro/receipt.json": "9ce369e2d6085e1e7ac0b95c03a84f1793f42d0107a2b2a15474644d880ce1b2",
+      "publication.json": "de38c14bd2bb218c92e77f6a960e1f03d573959c9344403f7b3eaf59d43e9b6a"
+    },
+    "manifest_entries": 467,
+    "micro_ended": "2026-09-05T17:36:55.295111+00:00",
+    "published_files": 469,
+    "source_map_entries": 54
+  },
+  "public_status": "not_claimed",
+  "python_optimized": true,
+  "schema": "mhgp7-first-c-companion-admission-replay-v1",
+  "script_sha256": "b7103b1ae09717ea26dc0d6fb6b99cc43df19e99ff6cd14e9da58f3af7892d5d",
+  "status": "passed",
+  "supplement_replaces_v2": false,
+  "v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+  "v2_replay_sha256": "d53425acba824834ee7a16e7e959c6ea4090c9a268006ebfc73ff6e60a462633"
+}

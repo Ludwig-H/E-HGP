@@ -1,0 +1,53 @@
+# Digest sémantique et sonde FULL lazy : contrelecture avant admission
+
+5 septembre 2026, contexte communiqué après `6f4b4de5`. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+
+La sérialisation est canonique sur son domaine déclaré : une forêt FULL valide à minima globalement uniques, issue de la factory opaque, et des empreintes d'entrée calculées en interne. Aucun défaut de format n'a été trouvé sur ce domaine. Le nouveau juge corrige les quatre lacunes du précédent reçu mono et contrôle des identités propres à la politique lazy. Une relation supplémentaire permettrait de qualifier complètement le remplissage déclaré du cache `first_C` : sur succès, `cache_inserts = min(cache_entries, portal_requests)`.
+
+Les [captures littérales et leurs pins](digest_review/sources_as_read.json) fixent cette lecture : digest `671b2dfb`, gate `673a5749`, sonde `f21e3c70`, juge `8d8a612a`, producteur `13c6cc72`. Cette note ne qualifie aucune admission du probe, aucun benchmark ni nouvel oracle géométrique. Aucun moteur ou build n'a été lancé. Les petits tests Python décrits plus bas sont des modèles de compteurs, sans reçu moteur fabriqué.
+
+## Sérialisation : ce qui est canonique
+
+L'entrée est triée par PointId externe, puis sérialisée avec le nombre de points et quatre entiers u64 little-endian par point : identifiant et coordonnées u16. Les identifiants dupliqués et les coordonnées hors profil sont rejetés. Une permutation physique des enregistrements ne change pas le wire ; un renommage des PointId externes le change volontairement. L'objet comparé est étiqueté, pas quotienté par les renommages ou les transformations géométriques.
+
+Chaque niveau non négatif est ramené à sa fraction irréductible : numérateur sur trois limbs u64 et dénominateur positif sur u128. Pour la division binaire de 192 bits, l'invariant `r < d ≤ 2^127 − 1` implique `2r + bit ≤ 2^128 − 3`, donc aucun dépassement de u128. Le PGCD du reste et du dénominateur est celui du numérateur entier et du dénominateur. La seconde division est exacte ; zéro devient 0/1. L'égalité de représentations rationnelles ne dépend ainsi pas de la forme historique d'ExactLevel.
+
+Le wire de forêt encode le domaine, l'empreinte d'entrée, K, le nombre de nœuds, le nombre de racines, puis un préordre. Chaque nœud porte son genre et son niveau ; une feuille porte son label ordonné, une fusion son arité. Les enfants et les racines sont triés par leur plus petite feuille lexicographique descendante. Dans une forêt valide, leurs ensembles de feuilles sont disjoints et chaque minimum est unique : ces clés de tri sont distinctes, même lorsque deux racines ont exactement la même couverture ponctuelle.
+
+Le genre, l'arité et les labels rendent ce préordre décodable ; les largeurs fixes et les longueurs des tags éliminent l'ambiguïté de concaténation. Les IDs d'allocation, l'ordre des arènes, l'ordre des parents et le padding ne sont pas une partie du wire. Des renumérotations qui conservent un ordre topologique valide donnent la même sérialisation. Une modification de la hiérarchie, des labels ou des niveaux modifie les octets canoniques.
+
+Ce raisonnement porte sur les octets avant hachage. SHA-256 reste une empreinte : son égalité n'est pas une injection mathématique démontrée sur l'ensemble des forêts possibles. Le helper `View` n'est pas un parseur de forêts hostiles. Il ne promet pas de traiter des minima dupliqués, des arènes inutilisées ou des chaînes contenant NUL comme une nouvelle API sérialisable. La factory et les chaînes hexadécimales produites en interne excluent ces cas dans la sonde. La contrelecture mathématique indépendante de `/root/meb_math` confirme ce domaine et la division binaire.
+
+## Gate et limites de ses observations
+
+Le gate C++ compare les quotients, restes, numérateurs réduits et dénominateurs aux entiers arbitraires de Boost, avec comparaison des limbs eux-mêmes : une comparaison rationnelle permissive ne peut masquer une réduction non canonique. Son inventaire programmé est 160 couples frontière, 512 couples déterministes supplémentaires, 672 divisions, 672 réductions et six rejets. Les plafonds de non-vacuité et les retours utilisent des contrôles explicites, indépendants de NDEBUG.
+
+Les 24 contrôles sémantiques du helper couvrent fractions équivalentes et valeurs distinctes, haut numérateur/dénominateur, entrée permutée ou modifiée, ordre des parents, IDs internes et arène des minima permutés, label/niveau modifié, hiérarchie croisée à mêmes comptes et couverture, liaison à l'entrée, séparation du digest agrégé, plusieurs racines et accord avec une forêt construite par la vraie factory. Cela ne constitue pas une campagne Gamma, ni une preuve de complétude du fournisseur de catalogues. Cette contrelecture lit ce gate ; elle ne le relance pas et ne s'attribue pas les résultats de la qualification constructeur.
+
+## Raccord dans la sonde
+
+La même sonde appelle EAGER ou lazy selon une politique explicite, avec `max_aliases=0` en lazy. Elle calcule l'empreinte d'entrée après sa génération, puis chaque empreinte de forêt après les lectures sentinelles et avant destruction de la forêt. Elle conserve seulement ces chaînes pour l'agrégation ordonnée finale. Un échec laisse le digest global vide ; les éventuelles lignes précédentes restent provisoires. Une erreur de parsing ou de configuration antérieure à la première ligne de configuration doit rester dans son admission dédiée : elle ne devient pas un reçu de mesure complet pour ce juge.
+
+Le digest agrégé lie l'empreinte d'entrée, le nombre d'ordres, leurs indices 1..K et leurs empreintes. Le juge Python recalcule cet agrégat ; il vérifie le format des empreintes individuelles sans relire leurs forêts, qui ne sont pas conservées. Il ne régénère pas non plus l'entrée à partir du seed. La provenance du binaire et les captures demeurent donc une autorité séparée, comme pour le juge historique.
+
+La comparaison recevable porte sur des tentatives réussies ayant la même entrée étiquetée, les mêmes ordres et le même format FULLv1. La politique d'alias et l'ordre d'allocation peuvent différer sans entrer dans le digest sémantique. Une égalité d'empreintes ne vérifie ni la complétude des catalogues, ni les portails intermédiaires, ni une carte inter-K. Le probe ne crée aucune autorité géométrique supplémentaire à K10.
+
+Les treize chronomètres d'étape sont disjoints dans le code relu. Le digest de l'entrée, les digests des forêts et l'agrégat final sont inclus dans `stage_ms.digest` et dans le temps avant terminal. Le coût du digest n'est pas soustrait ; les deux bras doivent être mesurés avec cet instrument. Les anciennes mesures sans digest ne deviennent pas un bras apparié.
+
+Le scratch logique du digest est borné par `25N + 8P` octets : minimum descendant, consommé, racines, pile et copie des parents. Aux plafonds déclarés, cela donne 164 000 000 octets ; le tri de l'entrée ajoute séparément `sizeof(size_t) × n`. Ce sont des tailles logiques supplémentaires, pas une limite de capacité d'allocateur ou de RSS. Le plafond du cache de cette sonde est un million de clés ; la borne mathématique antérieure à huit millions ne constitue pas un paramétrage déjà admis ici. Aucun temps ou gain de résidence n'est déduit de cette lecture.
+
+## Anciennes lacunes et identités du nouveau juge
+
+Le port annoncé du juge historique est explicite. Sur une ligne réussie, le nouveau juge vérifie les minima K1=n, sinon le cardinal du catalogue de minima, puis `N ≤ 2L − 1`. Il exige aussi `meb_calls = geometry_meb_calls = portal_requests + chain_steps`. L'identité des alias EAGER est appliquée seulement au succès, avec l'identité des hits stricts. La somme des durées d'étape est bornée par le temps total et le diagnostic soustrait est contrôlé avec sa marge d'impression à six décimales. Les quatre défauts historiques sont donc fermés statiquement sur ce port.
+
+Pour lazy, les alias historiques sont nuls. Sur succès, le juge exige que chaque visite passe par les minima, puis que les hits de minima, hits de cache et nouvelles requêtes de portail partitionnent les visites ; les consultations du cache valent hits plus requêtes, et les requêtes valent insertions plus skips. Dans les deux politiques, les terminaisons directes valent les requêtes et les consultations des directes valent résolutions J1 plus étapes de descente. Les bornes plus faibles restent applicables aux préfixes refusés ; les égalités de succès ne leur sont pas imposées.
+
+Le code du selftest programme 19 mutations de données, dont les nouvelles portes de politique, cache, digests, minima, arité, compteurs et temps, ainsi qu'un refus qui tenterait de conserver son digest global. Ce sont des tests du juge, pas des mutants moteur. Aucun reçu de développement complet du nouveau probe n'était disponible dans les emplacements consultés ; cette note ne rapporte donc pas l'exécution de ces 19 selftests CLI.
+
+## Une dent restante : respecter les premières C insertions
+
+Le producteur relu ne saute une insertion que lorsque `aliases.size() >= cache.max_entries`. Il n'évince rien. Chaque nouvelle requête terminée fournit exactement une nouvelle facette à ce cache ; tant que sa capacité n'est pas atteinte, l'insertion a lieu. Sur un ordre réussi, on obtient donc `cache_inserts = min(cache_entries, portal_requests)` et `cache_skips = max(0, portal_requests − cache_entries)`. L'identité se limite au succès : le compteur d'insertion est payé avant l'allocation, qui peut ensuite échouer.
+
+Le juge actuel impose seulement `cache_inserts ≤ cache_entries` et `cache_inserts + cache_skips = portal_requests`. Les [tests de helpers](digest_review/replay_helpers.py) conservent une contre-fixture minimale : capacité 1, une requête J1 réussie, zéro insertion et un skip. Les autres compteurs sont cohérents ; `work_policy` et `success_identities` acceptent ce modèle, alors que la politique `first_C` exige une insertion. C'est une corruption de compteurs d'audit, pas un défaut observé de `put_alias`, qui respecte la règle. Ajouter l'identité et cette mutation au selftest ferme la lacune sans exécution moteur.
+
+Les [reçus normal](digest_review/normal.json) et [optimisé](digest_review/optimized.json) conservent chacun trois modèles de compteurs acceptés, quatre mutations rejetées, cette corruption de `first_C` acceptée par les helpers capturés et trois préimages d'agrégation assemblées indépendamment en Python. Ils ne sont ni des reçus de sonde, ni une admission, ni une comparaison des forêts C++. Les sources historiques capturées restent inchangées si le constructeur corrige ensuite son juge. GCP non utilisé.

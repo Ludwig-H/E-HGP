@@ -1,6 +1,6 @@
 # État courant de l’audit v7
 
-Actualisé le 5 septembre 2026 depuis la publication constructeur `98bb6578` : le producteur horizontal FULL `e02d163c` garde sa qualification indépendante, et ses cinq tentatives mono scellées sont contre-vérifiées. Le nouveau cache paresseux en préparation dans le worktree reste hors de cette qualification. Les écritures restent exclusivement dans ce dossier, sur `main` sans nouvelle branche.
+Actualisé le 5 septembre 2026 sur les sources lazy capturées `13c6cc72`, dans le worktree après `6f4b4de5` : la qualification indépendante du cache, les propres 14+14 CTests constructeur et l’admission de la sonde à n=8 sont closes. Les anciennes mesures EAGER restent attachées à `98bb6578`. Les écritures restent exclusivement dans ce dossier, sur `main` sans nouvelle branche.
 
 ```text
 phase=exploration_v7_hors_registre
@@ -22,7 +22,9 @@ Les [modèles indépendants d’audit](receipts_gabriel_20260905/README.md) pass
 
 **Le [mono FULL publié](MONO_FULL_COURANT.md) clôt trois réussites relatives à 8k et deux refus d’alias à 16k/K9 et 32k/K7.** Les 44 lignes réussies passent les nouvelles identités, normalement et sous `-O`. Quatre lacunes du juge sont étayées par des corruptions de données ; les observations réelles restent cohérentes. Aucun nouveau moteur n’est exécuté ici, aucun digest sémantique n’est présent dans cette sonde.
 
-**Le [cache d’alias peut devenir facultatif](receipts_full_producer_20260905/lazy_alias_next_step_review.md), avec une borne maintenant chiffrée.** À 8k/K10, 5 349 726 des 6 209 024 alias sont des facettes égales. Minima et cache des seules demandes strictes nécessitent au plus 3 135 165 clés. Avec minima séparés, huit millions d’entrées suffisent pour les demandes strictes des deux premiers ordres refusés. Ces bornes de cardinalité ne sont ni une mesure de RAM ni une promesse d’admission des autres budgets ; le port paresseux reste à qualifier.
+**Le [cache d’alias peut devenir facultatif](receipts_full_producer_20260905/lazy_alias_next_step_review.md), avec une borne maintenant chiffrée.** À 8k/K10, 5 349 726 des 6 209 024 alias sont des facettes égales. Minima et cache des seules demandes strictes nécessitent au plus 3 135 165 clés. Avec minima séparés, huit millions d’entrées suffisent pour les demandes strictes des deux premiers ordres refusés. Ces bornes de cardinalité ne sont ni une mesure de RAM ni une promesse d’admission des autres budgets.
+
+**Le [port paresseux est désormais qualifié](CACHE_FULL_COURANT.md)** sur 109 ordres indépendants, deux représentations et quatre politiques : 67 920 coupes par build O2/ASan-UBSan, 654 comparaisons de forêts et 218 égalités de travail sans skip. Les 16 plafonds exacts, 180 refus cap−1, douze conflits d’API et trois mutants causaux passent. Les 14+14 CTests et les 24 reçus n=8 ont leurs contre-vérifications distinctes. Le digest et le supplément first-C ferment leurs demandes respectives ; aucun temps lazy massif n’est qualifié ici.
 
 | Source reconnue | Qualification réellement acquise |
 | --- | --- |
@@ -31,7 +33,8 @@ Les [modèles indépendants d’audit](receipts_gabriel_20260905/README.md) pass
 | F, sources constructeur épinglées | Conservation statique LIFO/masques/comptes et campagnes propres 339/339 Release, 48/48 ciblées Release, 48/48 ASan/UBSan contre-vérifiées ; aucun transfert des tests E |
 | G, premier composant FULL autonome | Snapshot historique de 145 fichiers ; pont C++ indépendant O2/ASan-UBSan et propres reçus 2+2 CTests contre-vérifiés ; autorité `structural_only`, aucun transfert de F339 |
 | H, producteur FULL relatif capturé | 19 en-têtes capturés et compilés ; 100 ordres/200 représentations face à Gamma rationnel, budgets et trois mutants ; propres reçus 7+7 contre-vérifiés |
-| I, publication FULL mono `98bb6578` | Même code produit et probe que H, deux textes actualisés ; juge et campagne scellée contre-vérifiés : trois réussites 8k, deux refus explicites. Aucun digest, aucune qualification du nouveau cache paresseux |
+| I, publication FULL mono `98bb6578` | Même code produit et probe que H, deux textes actualisés ; trois réussites 8k et deux refus scellés contre-vérifiés. Son autorité reste EAGER sans digest |
+| J, sources lazy capturées après `6f4b4de5` | Header `13c6cc72` qualifié indépendamment, budgets et trois mutants ; propres 14+14 CTests, 24 reçus de sonde n=8 et supplément first-C contre-vérifiés. Ni benchmark massif, ni transfert des temps I |
 
 **Le registre arithmétique et son raccord compilé sont fermés** pour les [fuseaux](ARITHMETIQUE_SPINDLE_COURANTE.md), [secteurs/cordes](ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md) et [cellules](ARITHMETIQUE_CELLULES_COURANTE.md). Trois sondes indépendantes passent chacune en O2 et O1 UBSan ; six vrais mutants produit sont détectés, avec une faute de paramètre d'audit séparée. La base des secteurs réussit dès A=B=1 ; les grilles sont confrontées à 38 400 cellules par build, avec des coordonnées atteignant 98 bits.
 

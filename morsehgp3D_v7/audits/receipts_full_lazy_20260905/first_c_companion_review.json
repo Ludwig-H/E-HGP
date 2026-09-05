@@ -1,0 +1,138 @@
+{
+  "artifacts_sha256": {
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/first_c_companion_review.md": "a40b57d1ca517aafde8b23f6ed4f5937ca4542bfd885135ba9743b48ae816a18",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_at_review.py": "8f8aed03755d9c92775566b21d4fdd9dcba31f171adf4b83e9802a988a450370",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_normal.json": "21fae532c97dc2ab067b4759e1d18e6a87466f42a7e7d8b91beb7eac74d90fa8",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_optimized.json": "b8d7f7fa7f53fd53681690593e01704644ab816eff939c6f1b06853dd37b99ec",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/public_files_sha256.json": "1092b0813dfa4c9ce786b39af0cdf5bea2f30f7e55375f73ffcd6183f9526bc6",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/replay_companion.py": "b7103b1ae09717ea26dc0d6fb6b99cc43df19e99ff6cd14e9da58f3af7892d5d"
+  },
+  "authority": "frozen_v2_judge_AND_first_c_supplement",
+  "closed_counterfixture": {
+    "frozen_v2_accepts": true,
+    "joint_acceptance": false,
+    "source": {
+      "changed_raw_sha256": "e0779db6e0978b6979f8a33be6b9a7336070d327417fe890339c944dca4e71b2",
+      "historical_package_hashes_preserved": false,
+      "judge_result": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 1000000,
+        "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 8,
+        "outcome": "complete_relative",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      },
+      "kind": "joint_raw_receipt_data_corruption_not_product_mutant",
+      "necessary_identity_refutes": true,
+      "new_values": {
+        "cache_inserts": 1,
+        "cache_skips": 1,
+        "portal_requests": 2
+      },
+      "old_values": {
+        "cache_inserts": 2,
+        "cache_skips": 0,
+        "portal_requests": 2
+      },
+      "source_receipt": "morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_lazy_c1000000.receipt.json",
+      "zero_based_raw_row": 2
+    },
+    "supplement_refuses_with": "first_c_success"
+  },
+  "commands": [
+    [
+      "taskset",
+      "-c",
+      "0",
+      "python3",
+      "-B",
+      "morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/replay_companion.py",
+      "--result",
+      "morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_normal.json"
+    ],
+    [
+      "taskset",
+      "-c",
+      "0",
+      "python3",
+      "-B",
+      "-O",
+      "morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/replay_companion.py",
+      "--result",
+      "morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/companion_optimized.json"
+    ]
+  ],
+  "companion_sha256": "8f8aed03755d9c92775566b21d4fdd9dcba31f171adf4b83e9802a988a450370",
+  "counts_per_python_mode": {
+    "distinct_supplement_mutations_per_fixture": 12,
+    "real_receipt_corruption_refused": 1,
+    "refusal_prefix_models_per_fixture": 3,
+    "selftest_fixtures": 2,
+    "success_scalar_models_per_fixture": 9,
+    "successful_lazy_rows_checked": 117,
+    "supplement_receipts_passed": 24
+  },
+  "date": "2026-09-05",
+  "frozen_v2_judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+  "historical_report_pins_unchanged": {
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/digest_probe_review.json": "024ad9ef6ccde302eac3a1f4938fd38f99a44b41fc6c7445e4a4315f3331dfb7",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/digest_probe_review.md": "89ea0c84343a86fae0264443fd588e3ed11817474707e1aeb45b3bd22426e6d1",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission_review.json": "b69e05d571d5cdc3398ab7f7d60cb56ea8ecdcc1ea262878756a349048512c45",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission_review.md": "4305a8bf9c2e5885293aef96caf767c47819429fb6799e912b73d2be08ccd065"
+  },
+  "live_companion_sha256_at_close": "8f8aed03755d9c92775566b21d4fdd9dcba31f171adf4b83e9802a988a450370",
+  "normal_optimized_agree": true,
+  "package": {
+    "binary_omission": [
+      {
+        "bytes": 506856,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/build_admission/full_gabriel_lazy_probe",
+        "reason": "executable_not_exported_pin_retained_in_original_receipt",
+        "sha256": "1d5a38cea99555fd2db474ee43aff6ba1ee708208508cfa97c540774d0bb7e78"
+      }
+    ],
+    "binary_reexecuted": false,
+    "binary_sha256_declared": "1d5a38cea99555fd2db474ee43aff6ba1ee708208508cfa97c540774d0bb7e78",
+    "build_ended": "2026-09-05T17:35:56.011897+00:00",
+    "checksum_entries": 468,
+    "dependency_map_entries": 40,
+    "envelope_pins": {
+      "SHA256SUMS": "9b197a96819c6b39f756d5eaf7e6c777b918501fbaa81d4db76e89c9fa7f72eb",
+      "build/receipt.json": "da11c743e63fb63acd00c25ce02080671a34a43fa2fa9cd473bb3068df2712a3",
+      "manifest.json": "509c064fc596528b651299ddefc8287296fc7d042dbc5a7eb0253b25bf36b5fd",
+      "micro/receipt.json": "9ce369e2d6085e1e7ac0b95c03a84f1793f42d0107a2b2a15474644d880ce1b2",
+      "publication.json": "de38c14bd2bb218c92e77f6a960e1f03d573959c9344403f7b3eaf59d43e9b6a"
+    },
+    "manifest_entries": 467,
+    "micro_ended": "2026-09-05T17:36:55.295111+00:00",
+    "published_files": 469,
+    "source_map_entries": 54
+  },
+  "public_files_sha256_map": {
+    "entries": 469,
+    "path": "morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/public_files_sha256.json",
+    "sha256": "1092b0813dfa4c9ce786b39af0cdf5bea2f30f7e55375f73ffcd6183f9526bc6"
+  },
+  "public_status": "not_claimed",
+  "schema": "mhgp7-first-c-companion-independent-review-v1",
+  "supplement_replaces_v2": false,
+  "v2_replay_links": {
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/normal.json": "e8c97e3e204c399c8b33fbbe4e7cd0e492975c5dc0d3fc7d38b6cae0ba1819e0",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/probe_admission/optimized.json": "d53425acba824834ee7a16e7e959c6ea4090c9a268006ebfc73ff6e60a462633"
+  },
+  "validation": {
+    "build_reexecuted": false,
+    "engine_reexecuted": false,
+    "gcp_used": false,
+    "git_mutation": false,
+    "heavy_campaign_consumed": false,
+    "python_cpu_affinity": [
+      0
+    ],
+    "targeted_check_docs_errors": []
+  },
+  "verdict": "first_c_request_closed_under_composed_authority"
+}

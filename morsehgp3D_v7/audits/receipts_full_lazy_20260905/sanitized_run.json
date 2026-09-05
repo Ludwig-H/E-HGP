@@ -1,0 +1,21 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "0",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_lazy_20260905/sanitized.bin"
+  ],
+  "exit_code": 0,
+  "started_utc": "2026-09-05T17:42:28.736175+00:00",
+  "finished_utc": "2026-09-05T17:42:29.463937+00:00",
+  "environment_override": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "stdout": "sanitized_output.json",
+  "stdout_sha256": "0124f8dd670da10287156ad30edc498ec06c29f34aef1512c8f2d0e3e2d23bc3",
+  "stderr": "sanitized_stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "binary_sha256": "da3d0804207a8b9deee605e2dd77d6f039bc6c3c113af1d4c9429d1acaad90c4",
+  "input_sha256": "8b66b099da5ee1196166620cab1fbbc25e96b109534e47419de76c098f6fe1c5"
+}

@@ -1,0 +1,1111 @@
+{
+  "schema": "mhgp7-full-lazy-constructor-static-capture-v1",
+  "created_utc": "2026-09-05T17:36:58.490216+00:00",
+  "files": {
+    "build/v7_full_lazy_20260905_controller/runs/release/configure.stdout": {
+      "capture_path": "constructor_review/release/configure.stdout",
+      "uncompressed_sha256": "b42249461f2c41cce750ef4aa22d72b7831ffe378339f96e35087ab607eb2095",
+      "uncompressed_bytes": 524,
+      "encoding": "literal_bytes",
+      "stored_sha256": "b42249461f2c41cce750ef4aa22d72b7831ffe378339f96e35087ab607eb2095",
+      "stored_bytes": 524
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/configure.stderr": {
+      "capture_path": "constructor_review/release/configure.stderr",
+      "uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uncompressed_bytes": 0,
+      "encoding": "literal_bytes",
+      "stored_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stored_bytes": 0
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/configure.command.json": {
+      "capture_path": "constructor_review/release/configure.command.json",
+      "uncompressed_sha256": "382aa57bd7fc5fad6c84def6b248ccdfb0d27c5c3fae9f1aeae0e3b9adbf83ac",
+      "uncompressed_bytes": 1787,
+      "encoding": "literal_bytes",
+      "stored_sha256": "382aa57bd7fc5fad6c84def6b248ccdfb0d27c5c3fae9f1aeae0e3b9adbf83ac",
+      "stored_bytes": 1787
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/configure.intent.json": {
+      "capture_path": "constructor_review/release/configure.intent.json",
+      "uncompressed_sha256": "605e863b1d23bbb82eb362cf40fb8fb38afef11e7ebf3bad7770f811e50c6835",
+      "uncompressed_bytes": 914,
+      "encoding": "literal_bytes",
+      "stored_sha256": "605e863b1d23bbb82eb362cf40fb8fb38afef11e7ebf3bad7770f811e50c6835",
+      "stored_bytes": 914
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build.stdout": {
+      "capture_path": "constructor_review/release/build.stdout",
+      "uncompressed_sha256": "929ec629531b9ec6b5dd46ad4c4cf86e326e8cefda7a63ee8fd7acc58fc502d7",
+      "uncompressed_bytes": 1336,
+      "encoding": "literal_bytes",
+      "stored_sha256": "929ec629531b9ec6b5dd46ad4c4cf86e326e8cefda7a63ee8fd7acc58fc502d7",
+      "stored_bytes": 1336
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build.stderr": {
+      "capture_path": "constructor_review/release/build.stderr",
+      "uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uncompressed_bytes": 0,
+      "encoding": "literal_bytes",
+      "stored_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stored_bytes": 0
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build.command.json": {
+      "capture_path": "constructor_review/release/build.command.json",
+      "uncompressed_sha256": "ae8242730ee0b817f97a7d64d7de2fd1ad8a225ec5ed5e4707426e4cfe1fc43f",
+      "uncompressed_bytes": 1573,
+      "encoding": "literal_bytes",
+      "stored_sha256": "ae8242730ee0b817f97a7d64d7de2fd1ad8a225ec5ed5e4707426e4cfe1fc43f",
+      "stored_bytes": 1573
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build.intent.json": {
+      "capture_path": "constructor_review/release/build.intent.json",
+      "uncompressed_sha256": "0a7f4786674504a5e450272e55df0dea1c40932392f9521b871fcdc3597daa2c",
+      "uncompressed_bytes": 707,
+      "encoding": "literal_bytes",
+      "stored_sha256": "0a7f4786674504a5e450272e55df0dea1c40932392f9521b871fcdc3597daa2c",
+      "stored_bytes": 707
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/inventory.stdout": {
+      "capture_path": "constructor_review/release/inventory.stdout",
+      "uncompressed_sha256": "0e184394863f1f5b64de2b48fa403f5f7ff83c23a43ef788b18b3dae1544578c",
+      "uncompressed_bytes": 15415,
+      "encoding": "literal_bytes",
+      "stored_sha256": "0e184394863f1f5b64de2b48fa403f5f7ff83c23a43ef788b18b3dae1544578c",
+      "stored_bytes": 15415
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/inventory.stderr": {
+      "capture_path": "constructor_review/release/inventory.stderr",
+      "uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uncompressed_bytes": 0,
+      "encoding": "literal_bytes",
+      "stored_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stored_bytes": 0
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/inventory.command.json": {
+      "capture_path": "constructor_review/release/inventory.command.json",
+      "uncompressed_sha256": "b6e709b1aed27d04df05d1c2636eb08fb8e0b3fa0a0f073ce955d1864ba7bb9f",
+      "uncompressed_bytes": 1395,
+      "encoding": "literal_bytes",
+      "stored_sha256": "b6e709b1aed27d04df05d1c2636eb08fb8e0b3fa0a0f073ce955d1864ba7bb9f",
+      "stored_bytes": 1395
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/inventory.intent.json": {
+      "capture_path": "constructor_review/release/inventory.intent.json",
+      "uncompressed_sha256": "23d62a44351b58be679c0c9721417eaad86057bd0ab70e824bd0af3ae5e95578",
+      "uncompressed_bytes": 519,
+      "encoding": "literal_bytes",
+      "stored_sha256": "23d62a44351b58be679c0c9721417eaad86057bd0ab70e824bd0af3ae5e95578",
+      "stored_bytes": 519
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/ctest.stdout": {
+      "capture_path": "constructor_review/release/ctest.stdout",
+      "uncompressed_sha256": "4019c07e57ca04f51c613707894bd937fe96b304bfacc9fb40eb6f7b320ecbe5",
+      "uncompressed_bytes": 11666,
+      "encoding": "literal_bytes",
+      "stored_sha256": "4019c07e57ca04f51c613707894bd937fe96b304bfacc9fb40eb6f7b320ecbe5",
+      "stored_bytes": 11666
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/ctest.stderr": {
+      "capture_path": "constructor_review/release/ctest.stderr",
+      "uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uncompressed_bytes": 0,
+      "encoding": "literal_bytes",
+      "stored_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stored_bytes": 0
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/ctest.command.json": {
+      "capture_path": "constructor_review/release/ctest.command.json",
+      "uncompressed_sha256": "db8b986e0d0f63a5f546b6a4521ed4e0a857bdbcb1d1adb889189fa193aebc5f",
+      "uncompressed_bytes": 1570,
+      "encoding": "literal_bytes",
+      "stored_sha256": "db8b986e0d0f63a5f546b6a4521ed4e0a857bdbcb1d1adb889189fa193aebc5f",
+      "stored_bytes": 1570
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/ctest.intent.json": {
+      "capture_path": "constructor_review/release/ctest.intent.json",
+      "uncompressed_sha256": "d618252cbdb2de4020c86650fd6285dd4949085bd7f8523287e90d78fc7efea2",
+      "uncompressed_bytes": 703,
+      "encoding": "literal_bytes",
+      "stored_sha256": "d618252cbdb2de4020c86650fd6285dd4949085bd7f8523287e90d78fc7efea2",
+      "stored_bytes": 703
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeCache.txt": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeCache.txt",
+      "uncompressed_sha256": "2de043de8c0cdfb7d27de12623f1f9a82d379c5b936eb8cd844c3393949aa352",
+      "uncompressed_bytes": 12928,
+      "encoding": "literal_bytes",
+      "stored_sha256": "2de043de8c0cdfb7d27de12623f1f9a82d379c5b936eb8cd844c3393949aa352",
+      "stored_bytes": 12928
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__build.make": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__build.make",
+      "uncompressed_sha256": "e6daf13d2ea69b12c5becec8c0ee8625977efe33488bfb11ac2443f569579e4c",
+      "uncompressed_bytes": 5743,
+      "encoding": "literal_bytes",
+      "stored_sha256": "e6daf13d2ea69b12c5becec8c0ee8625977efe33488bfb11ac2443f569579e4c",
+      "stored_bytes": 5743
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__flags.make": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__flags.make",
+      "uncompressed_sha256": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+      "uncompressed_bytes": 235,
+      "encoding": "literal_bytes",
+      "stored_sha256": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+      "stored_bytes": 235
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__link.txt": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__link.txt",
+      "uncompressed_sha256": "28f4650f642b0f7542f0831a4b79f589327f710284c20f73028968ccbec539b2",
+      "uncompressed_bytes": 135,
+      "encoding": "literal_bytes",
+      "stored_sha256": "28f4650f642b0f7542f0831a4b79f589327f710284c20f73028968ccbec539b2",
+      "stored_bytes": 135
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__tests__full_certificate_gate.cpp.o.d": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__tests__full_certificate_gate.cpp.o.d",
+      "uncompressed_sha256": "29f928d98fd57f8aafe05af0efc8b20ea6450bbb9e099918454efd8cb1952d70",
+      "uncompressed_bytes": 10130,
+      "encoding": "literal_bytes",
+      "stored_sha256": "29f928d98fd57f8aafe05af0efc8b20ea6450bbb9e099918454efd8cb1952d70",
+      "stored_bytes": 10130
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__build.make": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__build.make",
+      "uncompressed_sha256": "8531c517b3b3281e1836396449bd1bca65f977c4727402f43c6412afd0f0f599",
+      "uncompressed_bytes": 6163,
+      "encoding": "literal_bytes",
+      "stored_sha256": "8531c517b3b3281e1836396449bd1bca65f977c4727402f43c6412afd0f0f599",
+      "stored_bytes": 6163
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__flags.make": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__flags.make",
+      "uncompressed_sha256": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+      "uncompressed_bytes": 235,
+      "encoding": "literal_bytes",
+      "stored_sha256": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+      "stored_bytes": 235
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__link.txt": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__link.txt",
+      "uncompressed_sha256": "39440237a01cf647001dcde70fc10dc17a353b29193af7323b167d76f44ed8e5",
+      "uncompressed_bytes": 156,
+      "encoding": "literal_bytes",
+      "stored_sha256": "39440237a01cf647001dcde70fc10dc17a353b29193af7323b167d76f44ed8e5",
+      "stored_bytes": 156
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__tests__full_gabriel_allocation_gate.cpp.o.d": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__tests__full_gabriel_allocation_gate.cpp.o.d",
+      "uncompressed_sha256": "12a686983504d5dd00cf384f54bef57956f2a11b17944bbd076b6af55d775064",
+      "uncompressed_bytes": 17663,
+      "encoding": "literal_bytes",
+      "stored_sha256": "12a686983504d5dd00cf384f54bef57956f2a11b17944bbd076b6af55d775064",
+      "stored_bytes": 17663
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__build.make": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__build.make",
+      "uncompressed_sha256": "489e84ac96d18e4ca383ef2647f0ae55632f181c10b49a525eadba103865b1c7",
+      "uncompressed_bytes": 5923,
+      "encoding": "literal_bytes",
+      "stored_sha256": "489e84ac96d18e4ca383ef2647f0ae55632f181c10b49a525eadba103865b1c7",
+      "stored_bytes": 5923
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__flags.make": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__flags.make",
+      "uncompressed_sha256": "77bcd3ad1dc163c35112739e78c9787030afb59bbf8472a82daac110cd332efa",
+      "uncompressed_bytes": 303,
+      "encoding": "literal_bytes",
+      "stored_sha256": "77bcd3ad1dc163c35112739e78c9787030afb59bbf8472a82daac110cd332efa",
+      "stored_bytes": 303
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__link.txt": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__link.txt",
+      "uncompressed_sha256": "0a631e1115a0e8a895c8b342fca1c6671dcea01546f89ee68e6c289e651f805f",
+      "uncompressed_bytes": 144,
+      "encoding": "literal_bytes",
+      "stored_sha256": "0a631e1115a0e8a895c8b342fca1c6671dcea01546f89ee68e6c289e651f805f",
+      "stored_bytes": 144
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__tests__full_gabriel_digest_gate.cpp.o.d": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__tests__full_gabriel_digest_gate.cpp.o.d",
+      "uncompressed_sha256": "ec9abb0b435d292607f40e7fc163f6dec7e38c900830492505faddddd8a9dc89",
+      "uncompressed_bytes": 71843,
+      "encoding": "literal_bytes",
+      "stored_sha256": "ec9abb0b435d292607f40e7fc163f6dec7e38c900830492505faddddd8a9dc89",
+      "stored_bytes": 71843
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__build.make": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__build.make",
+      "uncompressed_sha256": "248011bddffe57d3dcae4e6714a8ffc48563acd9683638e56a7b069fdbe9117c",
+      "uncompressed_bytes": 5503,
+      "encoding": "literal_bytes",
+      "stored_sha256": "248011bddffe57d3dcae4e6714a8ffc48563acd9683638e56a7b069fdbe9117c",
+      "stored_bytes": 5503
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__flags.make": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__flags.make",
+      "uncompressed_sha256": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+      "uncompressed_bytes": 235,
+      "encoding": "literal_bytes",
+      "stored_sha256": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+      "stored_bytes": 235
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__link.txt": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__link.txt",
+      "uncompressed_sha256": "ded6574334e999ccd14b5c7f05a0e8420fba4c344fcd2f173731ac66111ed098",
+      "uncompressed_bytes": 123,
+      "encoding": "literal_bytes",
+      "stored_sha256": "ded6574334e999ccd14b5c7f05a0e8420fba4c344fcd2f173731ac66111ed098",
+      "stored_bytes": 123
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__tests__full_gabriel_gate.cpp.o.d": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__tests__full_gabriel_gate.cpp.o.d",
+      "uncompressed_sha256": "88aae30c5ef9809b4303d6ba96dd40f8eea67e7944f9f9d644ef7e77ed7b5afc",
+      "uncompressed_bytes": 17987,
+      "encoding": "literal_bytes",
+      "stored_sha256": "88aae30c5ef9809b4303d6ba96dd40f8eea67e7944f9f9d644ef7e77ed7b5afc",
+      "stored_bytes": 17987
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__build.make": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__build.make",
+      "uncompressed_sha256": "620e6d3519bc6e63d01ce33049eb20a7ffe5f3aff0e4d28121fb03158ebe20bc",
+      "uncompressed_bytes": 6463,
+      "encoding": "literal_bytes",
+      "stored_sha256": "620e6d3519bc6e63d01ce33049eb20a7ffe5f3aff0e4d28121fb03158ebe20bc",
+      "stored_bytes": 6463
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__flags.make": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__flags.make",
+      "uncompressed_sha256": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+      "uncompressed_bytes": 235,
+      "encoding": "literal_bytes",
+      "stored_sha256": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+      "stored_bytes": 235
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__link.txt": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__link.txt",
+      "uncompressed_sha256": "bde7c4b29033340b9bd7e6d06fb268a2d0f6ff8ae02e337b4187c6c93a94783f",
+      "uncompressed_bytes": 171,
+      "encoding": "literal_bytes",
+      "stored_sha256": "bde7c4b29033340b9bd7e6d06fb268a2d0f6ff8ae02e337b4187c6c93a94783f",
+      "stored_bytes": 171
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__tests__full_gabriel_lazy_allocation_gate.cpp.o.d": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__tests__full_gabriel_lazy_allocation_gate.cpp.o.d",
+      "uncompressed_sha256": "e0dd2a1d2531b1005464c3515b99b6e3045e8b7dc344683ae6b958b0cc4f16a1",
+      "uncompressed_bytes": 17678,
+      "encoding": "literal_bytes",
+      "stored_sha256": "e0dd2a1d2531b1005464c3515b99b6e3045e8b7dc344683ae6b958b0cc4f16a1",
+      "stored_bytes": 17678
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__build.make": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__build.make",
+      "uncompressed_sha256": "fd3cbbf17e4af0fcdd3729aa30a2173d76b77e3a71f361ebf3cfaa05072ec10d",
+      "uncompressed_bytes": 5803,
+      "encoding": "literal_bytes",
+      "stored_sha256": "fd3cbbf17e4af0fcdd3729aa30a2173d76b77e3a71f361ebf3cfaa05072ec10d",
+      "stored_bytes": 5803
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__flags.make": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__flags.make",
+      "uncompressed_sha256": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+      "uncompressed_bytes": 235,
+      "encoding": "literal_bytes",
+      "stored_sha256": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+      "stored_bytes": 235
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__link.txt": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__link.txt",
+      "uncompressed_sha256": "c3e1b73526f418ba4de2af09321c36fb08ef93466f97bcc5e0b6bfa41c9b6070",
+      "uncompressed_bytes": 138,
+      "encoding": "literal_bytes",
+      "stored_sha256": "c3e1b73526f418ba4de2af09321c36fb08ef93466f97bcc5e0b6bfa41c9b6070",
+      "stored_bytes": 138
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__tests__full_gabriel_lazy_gate.cpp.o.d": {
+      "capture_path": "constructor_review/release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__tests__full_gabriel_lazy_gate.cpp.o.d",
+      "uncompressed_sha256": "11daf52f2e2ad7b47135861ee11753300d576e3c0f1282e7a3d21bf702d5d767",
+      "uncompressed_bytes": 17897,
+      "encoding": "literal_bytes",
+      "stored_sha256": "11daf52f2e2ad7b47135861ee11753300d576e3c0f1282e7a3d21bf702d5d767",
+      "stored_bytes": 17897
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/CTestTestfile.cmake": {
+      "capture_path": "constructor_review/release/build_artifacts/CTestTestfile.cmake.gz",
+      "uncompressed_sha256": "f6efda10dc7c1f44a02eeb07b41ee4ca94438ba4bbc88a9b2b9b380a10eed268",
+      "uncompressed_bytes": 254771,
+      "encoding": "gzip_mtime0",
+      "stored_sha256": "2dca02930b577cb660d779217219a17a8a32165b5508ed7a7d0dd92ede52768d",
+      "stored_bytes": 11900
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifacts/compile_commands.json": {
+      "capture_path": "constructor_review/release/build_artifacts/compile_commands.json",
+      "uncompressed_sha256": "2a57019745c9e192c21317a8ccb2431e41d59aa1e0fdf81d422800b7765539aa",
+      "uncompressed_bytes": 21757,
+      "encoding": "literal_bytes",
+      "stored_sha256": "2a57019745c9e192c21317a8ccb2431e41d59aa1e0fdf81d422800b7765539aa",
+      "stored_bytes": 21757
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/LastTest.stdout": {
+      "capture_path": "constructor_review/release/LastTest.stdout",
+      "uncompressed_sha256": "d7efa5260b95cc87cec2f14edd609baace4e97b33cff1d58631da83cf7faf201",
+      "uncompressed_bytes": 14763,
+      "encoding": "literal_bytes",
+      "stored_sha256": "d7efa5260b95cc87cec2f14edd609baace4e97b33cff1d58631da83cf7faf201",
+      "stored_bytes": 14763
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/JUnit.stdout": {
+      "capture_path": "constructor_review/release/JUnit.stdout",
+      "uncompressed_sha256": "7e69ba28994453b2ca92d55f66fc6645d17cbdf7a6a8140ad0c5594cb6eb3c4f",
+      "uncompressed_bytes": 6658,
+      "encoding": "literal_bytes",
+      "stored_sha256": "7e69ba28994453b2ca92d55f66fc6645d17cbdf7a6a8140ad0c5594cb6eb3c4f",
+      "stored_bytes": 6658
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/LastTest.preexisting.stdout": {
+      "capture_path": "constructor_review/release/LastTest.preexisting.stdout",
+      "uncompressed_sha256": "779e2963c72dec32e419fcf2fb955289a49b0f8a6513c58a2a0465b62984c4b4",
+      "uncompressed_bytes": 121,
+      "encoding": "literal_bytes",
+      "stored_sha256": "779e2963c72dec32e419fcf2fb955289a49b0f8a6513c58a2a0465b62984c4b4",
+      "stored_bytes": 121
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/LastTest.prestate.json": {
+      "capture_path": "constructor_review/release/LastTest.prestate.json",
+      "uncompressed_sha256": "4eeef934eca53e5625be88b594e864f9f1a89966cc0f389c14aad820c09b1450",
+      "uncompressed_bytes": 759,
+      "encoding": "literal_bytes",
+      "stored_sha256": "4eeef934eca53e5625be88b594e864f9f1a89966cc0f389c14aad820c09b1450",
+      "stored_bytes": 759
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/ctest.fence": {
+      "capture_path": "constructor_review/release/ctest.fence",
+      "uncompressed_sha256": "e0492e74f392b8bc6d998dafc559ca959042b650d7f118afb31f88b7122b8123",
+      "uncompressed_bytes": 146,
+      "encoding": "literal_bytes",
+      "stored_sha256": "e0492e74f392b8bc6d998dafc559ca959042b650d7f118afb31f88b7122b8123",
+      "stored_bytes": 146
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/ctest.fence.json": {
+      "capture_path": "constructor_review/release/ctest.fence.json",
+      "uncompressed_sha256": "d1680c55bafd315bc126d244acf1a65942b903e3c37242740d6176536f305e11",
+      "uncompressed_bytes": 685,
+      "encoding": "literal_bytes",
+      "stored_sha256": "d1680c55bafd315bc126d244acf1a65942b903e3c37242740d6176536f305e11",
+      "stored_bytes": 685
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/test_output_copies.json": {
+      "capture_path": "constructor_review/release/test_output_copies.json",
+      "uncompressed_sha256": "7a4ee52930f419d50164dd490e1da99a0a9b69fa9d3ef2edf26ca5bd24d832cb",
+      "uncompressed_bytes": 1584,
+      "encoding": "literal_bytes",
+      "stored_sha256": "7a4ee52930f419d50164dd490e1da99a0a9b69fa9d3ef2edf26ca5bd24d832cb",
+      "stored_bytes": 1584
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/compile_binding.json": {
+      "capture_path": "constructor_review/release/compile_binding.json.gz",
+      "uncompressed_sha256": "214fb5c8515e62b1e127c29467ebf3c098a41accf691418622c60d6a8a1d42ba",
+      "uncompressed_bytes": 221008,
+      "encoding": "gzip_mtime0",
+      "stored_sha256": "211a267d5d3d2353ca2c4dd1d3dda7db2009d9515f8a2097317880b99a935b7e",
+      "stored_bytes": 38976
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/binaries_before_ctest.json": {
+      "capture_path": "constructor_review/release/binaries_before_ctest.json",
+      "uncompressed_sha256": "fd40dbcb7ec5b8f2a6cba381d82f50a5d700da99d5829bf08d2777de7223b644",
+      "uncompressed_bytes": 2171,
+      "encoding": "literal_bytes",
+      "stored_sha256": "fd40dbcb7ec5b8f2a6cba381d82f50a5d700da99d5829bf08d2777de7223b644",
+      "stored_bytes": 2171
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/binaries_after.json": {
+      "capture_path": "constructor_review/release/binaries_after.json",
+      "uncompressed_sha256": "fd40dbcb7ec5b8f2a6cba381d82f50a5d700da99d5829bf08d2777de7223b644",
+      "uncompressed_bytes": 2171,
+      "encoding": "literal_bytes",
+      "stored_sha256": "fd40dbcb7ec5b8f2a6cba381d82f50a5d700da99d5829bf08d2777de7223b644",
+      "stored_bytes": 2171
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/environment.json": {
+      "capture_path": "constructor_review/release/environment.json",
+      "uncompressed_sha256": "7488a611e838100c16b4cab9e588e171ad62cb1f985cf53b335bdc2afee5764a",
+      "uncompressed_bytes": 96,
+      "encoding": "literal_bytes",
+      "stored_sha256": "7488a611e838100c16b4cab9e588e171ad62cb1f985cf53b335bdc2afee5764a",
+      "stored_bytes": 96
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/host_before.json": {
+      "capture_path": "constructor_review/release/host_before.json",
+      "uncompressed_sha256": "b513d95997e326128d144baa8912f029ea045631e9496e66420a2055666ee855",
+      "uncompressed_bytes": 1057,
+      "encoding": "literal_bytes",
+      "stored_sha256": "b513d95997e326128d144baa8912f029ea045631e9496e66420a2055666ee855",
+      "stored_bytes": 1057
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/host_after.json": {
+      "capture_path": "constructor_review/release/host_after.json",
+      "uncompressed_sha256": "25e04f906d274afe478bbbd6f3779151729cf40e3ea7dbaa68b6b99dc37789fc",
+      "uncompressed_bytes": 1057,
+      "encoding": "literal_bytes",
+      "stored_sha256": "25e04f906d274afe478bbbd6f3779151729cf40e3ea7dbaa68b6b99dc37789fc",
+      "stored_bytes": 1057
+    },
+    "build/v7_full_lazy_20260905_controller/runs/release/build_artifact_copies.json": {
+      "capture_path": "constructor_review/release/build_artifact_copies.json",
+      "uncompressed_sha256": "d045b589ac3b9908f9fbc1e4f9d6b79ff933986d2b76935f623807b822152adf",
+      "uncompressed_bytes": 23387,
+      "encoding": "literal_bytes",
+      "stored_sha256": "d045b589ac3b9908f9fbc1e4f9d6b79ff933986d2b76935f623807b822152adf",
+      "stored_bytes": 23387
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/configure.stdout": {
+      "capture_path": "constructor_review/san/configure.stdout",
+      "uncompressed_sha256": "c50fbfff18ef5eb8a71f2dca3480069cc2e5296f1179ae4d62adb98587c4f4d7",
+      "uncompressed_bytes": 520,
+      "encoding": "literal_bytes",
+      "stored_sha256": "c50fbfff18ef5eb8a71f2dca3480069cc2e5296f1179ae4d62adb98587c4f4d7",
+      "stored_bytes": 520
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/configure.stderr": {
+      "capture_path": "constructor_review/san/configure.stderr",
+      "uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uncompressed_bytes": 0,
+      "encoding": "literal_bytes",
+      "stored_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stored_bytes": 0
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/configure.command.json": {
+      "capture_path": "constructor_review/san/configure.command.json",
+      "uncompressed_sha256": "2cee11bfcc533c25ff44536709ccea2af99a842728be0e19dc2453e930065bb5",
+      "uncompressed_bytes": 2009,
+      "encoding": "literal_bytes",
+      "stored_sha256": "2cee11bfcc533c25ff44536709ccea2af99a842728be0e19dc2453e930065bb5",
+      "stored_bytes": 2009
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/configure.intent.json": {
+      "capture_path": "constructor_review/san/configure.intent.json",
+      "uncompressed_sha256": "4c4abc54ce47377cf7e704e64053a90420ec1fb67f3aafd70bf4363d3ab35735",
+      "uncompressed_bytes": 1144,
+      "encoding": "literal_bytes",
+      "stored_sha256": "4c4abc54ce47377cf7e704e64053a90420ec1fb67f3aafd70bf4363d3ab35735",
+      "stored_bytes": 1144
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build.stdout": {
+      "capture_path": "constructor_review/san/build.stdout",
+      "uncompressed_sha256": "929ec629531b9ec6b5dd46ad4c4cf86e326e8cefda7a63ee8fd7acc58fc502d7",
+      "uncompressed_bytes": 1336,
+      "encoding": "literal_bytes",
+      "stored_sha256": "929ec629531b9ec6b5dd46ad4c4cf86e326e8cefda7a63ee8fd7acc58fc502d7",
+      "stored_bytes": 1336
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build.stderr": {
+      "capture_path": "constructor_review/san/build.stderr",
+      "uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uncompressed_bytes": 0,
+      "encoding": "literal_bytes",
+      "stored_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stored_bytes": 0
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build.command.json": {
+      "capture_path": "constructor_review/san/build.command.json",
+      "uncompressed_sha256": "0bad3675cd262112e20591955a8c176cede0bd25597abfa34f915c6f4638924d",
+      "uncompressed_bytes": 1674,
+      "encoding": "literal_bytes",
+      "stored_sha256": "0bad3675cd262112e20591955a8c176cede0bd25597abfa34f915c6f4638924d",
+      "stored_bytes": 1674
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build.intent.json": {
+      "capture_path": "constructor_review/san/build.intent.json",
+      "uncompressed_sha256": "6b62cdda747c73f8fb435d47e050562d03b918a7a8a493973a4be9d06b0dfd03",
+      "uncompressed_bytes": 816,
+      "encoding": "literal_bytes",
+      "stored_sha256": "6b62cdda747c73f8fb435d47e050562d03b918a7a8a493973a4be9d06b0dfd03",
+      "stored_bytes": 816
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/inventory.stdout": {
+      "capture_path": "constructor_review/san/inventory.stdout",
+      "uncompressed_sha256": "470bac42f93805b07080ab05b6df82c1545bb924589d78b9ddb738d5c2476fe1",
+      "uncompressed_bytes": 15303,
+      "encoding": "literal_bytes",
+      "stored_sha256": "470bac42f93805b07080ab05b6df82c1545bb924589d78b9ddb738d5c2476fe1",
+      "stored_bytes": 15303
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/inventory.stderr": {
+      "capture_path": "constructor_review/san/inventory.stderr",
+      "uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uncompressed_bytes": 0,
+      "encoding": "literal_bytes",
+      "stored_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stored_bytes": 0
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/inventory.command.json": {
+      "capture_path": "constructor_review/san/inventory.command.json",
+      "uncompressed_sha256": "cfa58ad710107f81ca05fcc9a0258b78d047977e3615660443412b4c242d2ac9",
+      "uncompressed_bytes": 1496,
+      "encoding": "literal_bytes",
+      "stored_sha256": "cfa58ad710107f81ca05fcc9a0258b78d047977e3615660443412b4c242d2ac9",
+      "stored_bytes": 1496
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/inventory.intent.json": {
+      "capture_path": "constructor_review/san/inventory.intent.json",
+      "uncompressed_sha256": "a42a907caa671ba5f9c95bd639f66f4f1130de737346cbbf35f6a8e34e75cba8",
+      "uncompressed_bytes": 628,
+      "encoding": "literal_bytes",
+      "stored_sha256": "a42a907caa671ba5f9c95bd639f66f4f1130de737346cbbf35f6a8e34e75cba8",
+      "stored_bytes": 628
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/ctest.stdout": {
+      "capture_path": "constructor_review/san/ctest.stdout",
+      "uncompressed_sha256": "613c019392720511c55afc7ad26f9f1f21c07362c0bb0622d6a4ec9c485c123d",
+      "uncompressed_bytes": 11538,
+      "encoding": "literal_bytes",
+      "stored_sha256": "613c019392720511c55afc7ad26f9f1f21c07362c0bb0622d6a4ec9c485c123d",
+      "stored_bytes": 11538
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/ctest.stderr": {
+      "capture_path": "constructor_review/san/ctest.stderr",
+      "uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uncompressed_bytes": 0,
+      "encoding": "literal_bytes",
+      "stored_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stored_bytes": 0
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/ctest.command.json": {
+      "capture_path": "constructor_review/san/ctest.command.json",
+      "uncompressed_sha256": "fcc5069be5f0e5c51b60c67c99c2be842eaa69af2c6e03fd64ac655918d76f8d",
+      "uncompressed_bytes": 1667,
+      "encoding": "literal_bytes",
+      "stored_sha256": "fcc5069be5f0e5c51b60c67c99c2be842eaa69af2c6e03fd64ac655918d76f8d",
+      "stored_bytes": 1667
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/ctest.intent.json": {
+      "capture_path": "constructor_review/san/ctest.intent.json",
+      "uncompressed_sha256": "10cf99361b5a693b59c8bb4affc202b8521668ea9b98de891aee840a36b3aeda",
+      "uncompressed_bytes": 808,
+      "encoding": "literal_bytes",
+      "stored_sha256": "10cf99361b5a693b59c8bb4affc202b8521668ea9b98de891aee840a36b3aeda",
+      "stored_bytes": 808
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeCache.txt": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeCache.txt",
+      "uncompressed_sha256": "baaf646010b4299e161e8c05c87814a633aade52350ceb1fb1cd23b0ad9676a0",
+      "uncompressed_bytes": 13016,
+      "encoding": "literal_bytes",
+      "stored_sha256": "baaf646010b4299e161e8c05c87814a633aade52350ceb1fb1cd23b0ad9676a0",
+      "stored_bytes": 13016
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__build.make": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__build.make",
+      "uncompressed_sha256": "385f52850aac766e411ab968fae45097d4585b90cd7a63b810a1aaa2740ed2e5",
+      "uncompressed_bytes": 5715,
+      "encoding": "literal_bytes",
+      "stored_sha256": "385f52850aac766e411ab968fae45097d4585b90cd7a63b810a1aaa2740ed2e5",
+      "stored_bytes": 5715
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__flags.make": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__flags.make",
+      "uncompressed_sha256": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+      "uncompressed_bytes": 300,
+      "encoding": "literal_bytes",
+      "stored_sha256": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+      "stored_bytes": 300
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__link.txt": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__link.txt",
+      "uncompressed_sha256": "ab21a8086ccf95e3c62c1b32f06f4e86428c2bd58f53a5b6d2e95354214edd6b",
+      "uncompressed_bytes": 237,
+      "encoding": "literal_bytes",
+      "stored_sha256": "ab21a8086ccf95e3c62c1b32f06f4e86428c2bd58f53a5b6d2e95354214edd6b",
+      "stored_bytes": 237
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__tests__full_certificate_gate.cpp.o.d": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__tests__full_certificate_gate.cpp.o.d",
+      "uncompressed_sha256": "29f928d98fd57f8aafe05af0efc8b20ea6450bbb9e099918454efd8cb1952d70",
+      "uncompressed_bytes": 10130,
+      "encoding": "literal_bytes",
+      "stored_sha256": "29f928d98fd57f8aafe05af0efc8b20ea6450bbb9e099918454efd8cb1952d70",
+      "stored_bytes": 10130
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__build.make": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__build.make",
+      "uncompressed_sha256": "e2dfb82d27449b196b1342c12121a9523e1866cf726e8d28f4f0e959a32d9901",
+      "uncompressed_bytes": 6135,
+      "encoding": "literal_bytes",
+      "stored_sha256": "e2dfb82d27449b196b1342c12121a9523e1866cf726e8d28f4f0e959a32d9901",
+      "stored_bytes": 6135
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__flags.make": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__flags.make",
+      "uncompressed_sha256": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+      "uncompressed_bytes": 300,
+      "encoding": "literal_bytes",
+      "stored_sha256": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+      "stored_bytes": 300
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__link.txt": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__link.txt",
+      "uncompressed_sha256": "f7c5e251fe940e57582051f6d2bf6e5b50375a5069bb8e230ee71b6833cdd0c0",
+      "uncompressed_bytes": 258,
+      "encoding": "literal_bytes",
+      "stored_sha256": "f7c5e251fe940e57582051f6d2bf6e5b50375a5069bb8e230ee71b6833cdd0c0",
+      "stored_bytes": 258
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__tests__full_gabriel_allocation_gate.cpp.o.d": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__tests__full_gabriel_allocation_gate.cpp.o.d",
+      "uncompressed_sha256": "12a686983504d5dd00cf384f54bef57956f2a11b17944bbd076b6af55d775064",
+      "uncompressed_bytes": 17663,
+      "encoding": "literal_bytes",
+      "stored_sha256": "12a686983504d5dd00cf384f54bef57956f2a11b17944bbd076b6af55d775064",
+      "stored_bytes": 17663
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__build.make": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__build.make",
+      "uncompressed_sha256": "4ab0e975e78037cf4c1546860ef45fe33802294456e96d4248decb52355138f1",
+      "uncompressed_bytes": 5895,
+      "encoding": "literal_bytes",
+      "stored_sha256": "4ab0e975e78037cf4c1546860ef45fe33802294456e96d4248decb52355138f1",
+      "stored_bytes": 5895
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__flags.make": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__flags.make",
+      "uncompressed_sha256": "cc28ab3a170d449aa69f99d9378ea9a3cfb61baf4ce80ec6b7a59f0902c069a9",
+      "uncompressed_bytes": 368,
+      "encoding": "literal_bytes",
+      "stored_sha256": "cc28ab3a170d449aa69f99d9378ea9a3cfb61baf4ce80ec6b7a59f0902c069a9",
+      "stored_bytes": 368
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__link.txt": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__link.txt",
+      "uncompressed_sha256": "b1e3ca7067ba51f969f2663701294a8ef545572a8458e9093fc20dcd7bb1e581",
+      "uncompressed_bytes": 246,
+      "encoding": "literal_bytes",
+      "stored_sha256": "b1e3ca7067ba51f969f2663701294a8ef545572a8458e9093fc20dcd7bb1e581",
+      "stored_bytes": 246
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__tests__full_gabriel_digest_gate.cpp.o.d": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__tests__full_gabriel_digest_gate.cpp.o.d",
+      "uncompressed_sha256": "ec9abb0b435d292607f40e7fc163f6dec7e38c900830492505faddddd8a9dc89",
+      "uncompressed_bytes": 71843,
+      "encoding": "literal_bytes",
+      "stored_sha256": "ec9abb0b435d292607f40e7fc163f6dec7e38c900830492505faddddd8a9dc89",
+      "stored_bytes": 71843
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__build.make": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__build.make",
+      "uncompressed_sha256": "34ac6df548e641436af0d9d3b455c80fe7a6f2dfdf1259166248267fd2adee1c",
+      "uncompressed_bytes": 5475,
+      "encoding": "literal_bytes",
+      "stored_sha256": "34ac6df548e641436af0d9d3b455c80fe7a6f2dfdf1259166248267fd2adee1c",
+      "stored_bytes": 5475
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__flags.make": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__flags.make",
+      "uncompressed_sha256": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+      "uncompressed_bytes": 300,
+      "encoding": "literal_bytes",
+      "stored_sha256": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+      "stored_bytes": 300
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__link.txt": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__link.txt",
+      "uncompressed_sha256": "766bec7a6c311450eaa602971b921720168694186478540cf706d0802aaf9038",
+      "uncompressed_bytes": 225,
+      "encoding": "literal_bytes",
+      "stored_sha256": "766bec7a6c311450eaa602971b921720168694186478540cf706d0802aaf9038",
+      "stored_bytes": 225
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__tests__full_gabriel_gate.cpp.o.d": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__tests__full_gabriel_gate.cpp.o.d",
+      "uncompressed_sha256": "88aae30c5ef9809b4303d6ba96dd40f8eea67e7944f9f9d644ef7e77ed7b5afc",
+      "uncompressed_bytes": 17987,
+      "encoding": "literal_bytes",
+      "stored_sha256": "88aae30c5ef9809b4303d6ba96dd40f8eea67e7944f9f9d644ef7e77ed7b5afc",
+      "stored_bytes": 17987
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__build.make": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__build.make",
+      "uncompressed_sha256": "38ec6cfa02bb9382b6049f91c48964aefd8fd7f5978519bcc58ef7e7eb4204d6",
+      "uncompressed_bytes": 6435,
+      "encoding": "literal_bytes",
+      "stored_sha256": "38ec6cfa02bb9382b6049f91c48964aefd8fd7f5978519bcc58ef7e7eb4204d6",
+      "stored_bytes": 6435
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__flags.make": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__flags.make",
+      "uncompressed_sha256": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+      "uncompressed_bytes": 300,
+      "encoding": "literal_bytes",
+      "stored_sha256": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+      "stored_bytes": 300
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__link.txt": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__link.txt",
+      "uncompressed_sha256": "1e4c8418c1845a21cdda4c68ab3f260aa8ea8a864857e6274e3f32cade20b977",
+      "uncompressed_bytes": 273,
+      "encoding": "literal_bytes",
+      "stored_sha256": "1e4c8418c1845a21cdda4c68ab3f260aa8ea8a864857e6274e3f32cade20b977",
+      "stored_bytes": 273
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__tests__full_gabriel_lazy_allocation_gate.cpp.o.d": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__tests__full_gabriel_lazy_allocation_gate.cpp.o.d",
+      "uncompressed_sha256": "e0dd2a1d2531b1005464c3515b99b6e3045e8b7dc344683ae6b958b0cc4f16a1",
+      "uncompressed_bytes": 17678,
+      "encoding": "literal_bytes",
+      "stored_sha256": "e0dd2a1d2531b1005464c3515b99b6e3045e8b7dc344683ae6b958b0cc4f16a1",
+      "stored_bytes": 17678
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__build.make": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__build.make",
+      "uncompressed_sha256": "4087e00a0bc22bc4a11cf202084b4b08fe2f8dfa1b0d3ea93381317495a65a7b",
+      "uncompressed_bytes": 5775,
+      "encoding": "literal_bytes",
+      "stored_sha256": "4087e00a0bc22bc4a11cf202084b4b08fe2f8dfa1b0d3ea93381317495a65a7b",
+      "stored_bytes": 5775
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__flags.make": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__flags.make",
+      "uncompressed_sha256": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+      "uncompressed_bytes": 300,
+      "encoding": "literal_bytes",
+      "stored_sha256": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+      "stored_bytes": 300
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__link.txt": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__link.txt",
+      "uncompressed_sha256": "bd487cb0fd730bb1572635af1b56cfc0f14c2b1059eb43df62087e6ac7daf5ad",
+      "uncompressed_bytes": 240,
+      "encoding": "literal_bytes",
+      "stored_sha256": "bd487cb0fd730bb1572635af1b56cfc0f14c2b1059eb43df62087e6ac7daf5ad",
+      "stored_bytes": 240
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__tests__full_gabriel_lazy_gate.cpp.o.d": {
+      "capture_path": "constructor_review/san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__tests__full_gabriel_lazy_gate.cpp.o.d",
+      "uncompressed_sha256": "11daf52f2e2ad7b47135861ee11753300d576e3c0f1282e7a3d21bf702d5d767",
+      "uncompressed_bytes": 17897,
+      "encoding": "literal_bytes",
+      "stored_sha256": "11daf52f2e2ad7b47135861ee11753300d576e3c0f1282e7a3d21bf702d5d767",
+      "stored_bytes": 17897
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/CTestTestfile.cmake": {
+      "capture_path": "constructor_review/san/build_artifacts/CTestTestfile.cmake.gz",
+      "uncompressed_sha256": "b9ba7efa71beb625c25cabfeb3301d7176a6204b3400dcaeef20feff6a5088d3",
+      "uncompressed_bytes": 253211,
+      "encoding": "gzip_mtime0",
+      "stored_sha256": "7e8240b4ba75348e3f688cc4d5cf3269aebbb84b3d1f60cce9786cbe204474f2",
+      "stored_bytes": 11892
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifacts/compile_commands.json": {
+      "capture_path": "constructor_review/san/build_artifacts/compile_commands.json",
+      "uncompressed_sha256": "70e3503a3d053cb514bcbe4e135c11203195adb3d45959fa49c4352c78293342",
+      "uncompressed_bytes": 24563,
+      "encoding": "literal_bytes",
+      "stored_sha256": "70e3503a3d053cb514bcbe4e135c11203195adb3d45959fa49c4352c78293342",
+      "stored_bytes": 24563
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/LastTest.stdout": {
+      "capture_path": "constructor_review/san/LastTest.stdout",
+      "uncompressed_sha256": "b89a5d32cad5f4ac35b5ae593c6878ebf44ed5afd2d48551fb64f6dd82df48fe",
+      "uncompressed_bytes": 14651,
+      "encoding": "literal_bytes",
+      "stored_sha256": "b89a5d32cad5f4ac35b5ae593c6878ebf44ed5afd2d48551fb64f6dd82df48fe",
+      "stored_bytes": 14651
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/JUnit.stdout": {
+      "capture_path": "constructor_review/san/JUnit.stdout",
+      "uncompressed_sha256": "6875a42872d243ff19d9ceae8738f0ea0f24004bf351ddf3541d575eb54a6968",
+      "uncompressed_bytes": 6656,
+      "encoding": "literal_bytes",
+      "stored_sha256": "6875a42872d243ff19d9ceae8738f0ea0f24004bf351ddf3541d575eb54a6968",
+      "stored_bytes": 6656
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/LastTest.preexisting.stdout": {
+      "capture_path": "constructor_review/san/LastTest.preexisting.stdout",
+      "uncompressed_sha256": "1a2b56dab962097c3c78879bba915c1461c31ee7366f477fb22685c03234312c",
+      "uncompressed_bytes": 121,
+      "encoding": "literal_bytes",
+      "stored_sha256": "1a2b56dab962097c3c78879bba915c1461c31ee7366f477fb22685c03234312c",
+      "stored_bytes": 121
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/LastTest.prestate.json": {
+      "capture_path": "constructor_review/san/LastTest.prestate.json",
+      "uncompressed_sha256": "a66dc5497add90cf85122ed034192f38ebfe75f9c8b26660ef942c54a164a8aa",
+      "uncompressed_bytes": 751,
+      "encoding": "literal_bytes",
+      "stored_sha256": "a66dc5497add90cf85122ed034192f38ebfe75f9c8b26660ef942c54a164a8aa",
+      "stored_bytes": 751
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/ctest.fence": {
+      "capture_path": "constructor_review/san/ctest.fence",
+      "uncompressed_sha256": "8ec8da3bf7589794b6c10148eb015f0eeae002da04fd623c749f870a677631b8",
+      "uncompressed_bytes": 142,
+      "encoding": "literal_bytes",
+      "stored_sha256": "8ec8da3bf7589794b6c10148eb015f0eeae002da04fd623c749f870a677631b8",
+      "stored_bytes": 142
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/ctest.fence.json": {
+      "capture_path": "constructor_review/san/ctest.fence.json",
+      "uncompressed_sha256": "c7c76876509adb397a5be455019ffff0f737f34b4776a01697bf02e819a899fa",
+      "uncompressed_bytes": 677,
+      "encoding": "literal_bytes",
+      "stored_sha256": "c7c76876509adb397a5be455019ffff0f737f34b4776a01697bf02e819a899fa",
+      "stored_bytes": 677
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/test_output_copies.json": {
+      "capture_path": "constructor_review/san/test_output_copies.json",
+      "uncompressed_sha256": "6ce027d6b3822e14df6d5cc7ff8914db42b407a4e70b8211a33ec97034e18c5c",
+      "uncompressed_bytes": 1568,
+      "encoding": "literal_bytes",
+      "stored_sha256": "6ce027d6b3822e14df6d5cc7ff8914db42b407a4e70b8211a33ec97034e18c5c",
+      "stored_bytes": 1568
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/compile_binding.json": {
+      "capture_path": "constructor_review/san/compile_binding.json.gz",
+      "uncompressed_sha256": "7e7d5a0dd5592e646e5bb1203f543aebe42d0fb3a1bfd88516fb2e74679610f2",
+      "uncompressed_bytes": 222308,
+      "encoding": "gzip_mtime0",
+      "stored_sha256": "dff44c53ed11ca53cd55700066b4b7889953758d1919c15a0663d0f4fd09edc2",
+      "stored_bytes": 39134
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/binaries_before_ctest.json": {
+      "capture_path": "constructor_review/san/binaries_before_ctest.json",
+      "uncompressed_sha256": "b6df07e573194f436b019ddea05197059a1bdf295c0cb752b5b822b306423fff",
+      "uncompressed_bytes": 2157,
+      "encoding": "literal_bytes",
+      "stored_sha256": "b6df07e573194f436b019ddea05197059a1bdf295c0cb752b5b822b306423fff",
+      "stored_bytes": 2157
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/binaries_after.json": {
+      "capture_path": "constructor_review/san/binaries_after.json",
+      "uncompressed_sha256": "b6df07e573194f436b019ddea05197059a1bdf295c0cb752b5b822b306423fff",
+      "uncompressed_bytes": 2157,
+      "encoding": "literal_bytes",
+      "stored_sha256": "b6df07e573194f436b019ddea05197059a1bdf295c0cb752b5b822b306423fff",
+      "stored_bytes": 2157
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/environment.json": {
+      "capture_path": "constructor_review/san/environment.json",
+      "uncompressed_sha256": "535dee2af5a569978164227adaef34ab0ae39f0c27cd858da4ca85ef5832885f",
+      "uncompressed_bytes": 205,
+      "encoding": "literal_bytes",
+      "stored_sha256": "535dee2af5a569978164227adaef34ab0ae39f0c27cd858da4ca85ef5832885f",
+      "stored_bytes": 205
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/host_before.json": {
+      "capture_path": "constructor_review/san/host_before.json",
+      "uncompressed_sha256": "8170bd958197f749b60aaa1416405ea94c9fcc7efeade414a244a6e6911bc511",
+      "uncompressed_bytes": 1057,
+      "encoding": "literal_bytes",
+      "stored_sha256": "8170bd958197f749b60aaa1416405ea94c9fcc7efeade414a244a6e6911bc511",
+      "stored_bytes": 1057
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/host_after.json": {
+      "capture_path": "constructor_review/san/host_after.json",
+      "uncompressed_sha256": "d2113a1bfea1bf81e22f157bca559ae138fb02d77a3484de5fb761ea339813ad",
+      "uncompressed_bytes": 1057,
+      "encoding": "literal_bytes",
+      "stored_sha256": "d2113a1bfea1bf81e22f157bca559ae138fb02d77a3484de5fb761ea339813ad",
+      "stored_bytes": 1057
+    },
+    "build/v7_full_lazy_20260905_controller/runs/san/build_artifact_copies.json": {
+      "capture_path": "constructor_review/san/build_artifact_copies.json",
+      "uncompressed_sha256": "9f1546b3d661c72d0b6b1f7b0fb57d16a26a53febe4b8e41d19cda5fbf37ad2b",
+      "uncompressed_bytes": 23171,
+      "encoding": "literal_bytes",
+      "stored_sha256": "9f1546b3d661c72d0b6b1f7b0fb57d16a26a53febe4b8e41d19cda5fbf37ad2b",
+      "stored_bytes": 23171
+    },
+    "morsehgp3D_v7/receipts/full_lazy_development_20260905/README.md": {
+      "capture_path": "constructor_review/development/README.md",
+      "uncompressed_sha256": "28859d033b1a4737f352d4d7c494d6cd49d66733500b4f2aefa5b46850ba9e30",
+      "uncompressed_bytes": 1030,
+      "encoding": "literal_bytes",
+      "stored_sha256": "28859d033b1a4737f352d4d7c494d6cd49d66733500b4f2aefa5b46850ba9e30",
+      "stored_bytes": 1030
+    },
+    "morsehgp3D_v7/receipts/full_lazy_development_20260905/commands.json": {
+      "capture_path": "constructor_review/development/commands.json",
+      "uncompressed_sha256": "6ea6946596cb9e4e39e4b49d490336506402237c05a535557c4df39992ae1186",
+      "uncompressed_bytes": 23592,
+      "encoding": "literal_bytes",
+      "stored_sha256": "6ea6946596cb9e4e39e4b49d490336506402237c05a535557c4df39992ae1186",
+      "stored_bytes": 23592
+    },
+    "morsehgp3D_v7/receipts/full_lazy_development_20260905/full_gabriel_lazy_gate.failed.cpp": {
+      "capture_path": "constructor_review/development/full_gabriel_lazy_gate.failed.cpp",
+      "uncompressed_sha256": "3c9b74bf2e33dce27fdd95e899be2dba022de6e659d9f1fe609b1dc1e04691ac",
+      "uncompressed_bytes": 29180,
+      "encoding": "literal_bytes",
+      "stored_sha256": "3c9b74bf2e33dce27fdd95e899be2dba022de6e659d9f1fe609b1dc1e04691ac",
+      "stored_bytes": 29180
+    },
+    "morsehgp3D_v7/src/forest/full_gabriel.hpp": {
+      "capture_path": "constructor_review/source/morsehgp3D_v7/src/forest/full_gabriel.hpp",
+      "uncompressed_sha256": "13c6cc72ab5065d498827bf89c6bc2a321b5e896c93a60263de52b9d800a2627",
+      "uncompressed_bytes": 26765,
+      "encoding": "literal_bytes",
+      "stored_sha256": "13c6cc72ab5065d498827bf89c6bc2a321b5e896c93a60263de52b9d800a2627",
+      "stored_bytes": 26765
+    },
+    "morsehgp3D_v7/tests/full_gabriel_lazy_gate.cpp": {
+      "capture_path": "constructor_review/source/morsehgp3D_v7/tests/full_gabriel_lazy_gate.cpp",
+      "uncompressed_sha256": "6c325c8ba63dd8f2182085e1b3c539842ebbf4849322835b0dd585215a8048b6",
+      "uncompressed_bytes": 30479,
+      "encoding": "literal_bytes",
+      "stored_sha256": "6c325c8ba63dd8f2182085e1b3c539842ebbf4849322835b0dd585215a8048b6",
+      "stored_bytes": 30479
+    },
+    "morsehgp3D_v7/tests/full_gabriel_lazy_allocation_gate.cpp": {
+      "capture_path": "constructor_review/source/morsehgp3D_v7/tests/full_gabriel_lazy_allocation_gate.cpp",
+      "uncompressed_sha256": "352b9e423dd290d29f531a030a5353bc2796fa8641ed6c83ed81272b9dfb1de3",
+      "uncompressed_bytes": 26262,
+      "encoding": "literal_bytes",
+      "stored_sha256": "352b9e423dd290d29f531a030a5353bc2796fa8641ed6c83ed81272b9dfb1de3",
+      "stored_bytes": 26262
+    },
+    "morsehgp3D_v7/tests/full_gabriel_digest_gate.cpp": {
+      "capture_path": "constructor_review/source/morsehgp3D_v7/tests/full_gabriel_digest_gate.cpp",
+      "uncompressed_sha256": "673a5749fd9c35abcca610567554ecfed585298c86cbe7f640f25aa24d718c03",
+      "uncompressed_bytes": 4684,
+      "encoding": "literal_bytes",
+      "stored_sha256": "673a5749fd9c35abcca610567554ecfed585298c86cbe7f640f25aa24d718c03",
+      "stored_bytes": 4684
+    },
+    "morsehgp3D_v7/bench/full_gabriel_semantic_digest.hpp": {
+      "capture_path": "constructor_review/source/morsehgp3D_v7/bench/full_gabriel_semantic_digest.hpp",
+      "uncompressed_sha256": "671b2dfb51f1385ee7301bd6b03ef64e62c0d768c92534a6f09589726ce9adc3",
+      "uncompressed_bytes": 12451,
+      "encoding": "literal_bytes",
+      "stored_sha256": "671b2dfb51f1385ee7301bd6b03ef64e62c0d768c92534a6f09589726ce9adc3",
+      "stored_bytes": 12451
+    },
+    "morsehgp3D_v7/CMakeLists.txt": {
+      "capture_path": "constructor_review/source/morsehgp3D_v7/CMakeLists.txt",
+      "uncompressed_sha256": "53f122566fa18281a39d2d83615af18799ccae0ccbb9e62395f2c67ae824cd0d",
+      "uncompressed_bytes": 78516,
+      "encoding": "literal_bytes",
+      "stored_sha256": "53f122566fa18281a39d2d83615af18799ccae0ccbb9e62395f2c67ae824cd0d",
+      "stored_bytes": 78516
+    },
+    "morsehgp3D_v7/cmake/run_expect.cmake": {
+      "capture_path": "constructor_review/source/morsehgp3D_v7/cmake/run_expect.cmake",
+      "uncompressed_sha256": "7bb9af4eddbea7e7a66619c92491dc11c22a49d7b3b46bddd6b2c25b20b2d605",
+      "uncompressed_bytes": 1624,
+      "encoding": "literal_bytes",
+      "stored_sha256": "7bb9af4eddbea7e7a66619c92491dc11c22a49d7b3b46bddd6b2c25b20b2d605",
+      "stored_bytes": 1624
+    },
+    "build/v7_full_lazy_20260905_controller/capture.py": {
+      "capture_path": "constructor_review/controller_at_capture.py.txt",
+      "uncompressed_sha256": "528175a4fae239aa62630c32c27355be34db1092bef7f8cdb98e589022663bb4",
+      "uncompressed_bytes": 39656,
+      "encoding": "literal_bytes",
+      "stored_sha256": "528175a4fae239aa62630c32c27355be34db1092bef7f8cdb98e589022663bb4",
+      "stored_bytes": 39656
+    },
+    "build/v7_full_lazy_20260905_controller/runs/sources_before.json": {
+      "capture_path": "constructor_review/closed_runs/sources_before.json",
+      "uncompressed_sha256": "08dda37e9d9cd5d37ecb3fbda3ca2305d95858f68c742836a5559afdffc5e70e",
+      "uncompressed_bytes": 85601,
+      "encoding": "literal_bytes",
+      "stored_sha256": "08dda37e9d9cd5d37ecb3fbda3ca2305d95858f68c742836a5559afdffc5e70e",
+      "stored_bytes": 85601
+    },
+    "build/v7_full_lazy_20260905_controller/runs/sources_after.json": {
+      "capture_path": "constructor_review/closed_runs/sources_after.json",
+      "uncompressed_sha256": "08dda37e9d9cd5d37ecb3fbda3ca2305d95858f68c742836a5559afdffc5e70e",
+      "uncompressed_bytes": 85601,
+      "encoding": "literal_bytes",
+      "stored_sha256": "08dda37e9d9cd5d37ecb3fbda3ca2305d95858f68c742836a5559afdffc5e70e",
+      "stored_bytes": 85601
+    },
+    "build/v7_full_lazy_20260905_controller/runs/controller_binding.json": {
+      "capture_path": "constructor_review/closed_runs/controller_binding.json",
+      "uncompressed_sha256": "741c2bb51f9ddcf7cd84841438dccbdce3e954876bc02c09ae44865d15f615e5",
+      "uncompressed_bytes": 2291,
+      "encoding": "literal_bytes",
+      "stored_sha256": "741c2bb51f9ddcf7cd84841438dccbdce3e954876bc02c09ae44865d15f615e5",
+      "stored_bytes": 2291
+    },
+    "build/v7_full_lazy_20260905_controller/runs/boost_dependency_binding.json": {
+      "capture_path": "constructor_review/closed_runs/boost_dependency_binding.json",
+      "uncompressed_sha256": "1fdf2df749e4d42c61b88a450478b0d053d99426950186a8f5067c9235b77980",
+      "uncompressed_bytes": 1005,
+      "encoding": "literal_bytes",
+      "stored_sha256": "1fdf2df749e4d42c61b88a450478b0d053d99426950186a8f5067c9235b77980",
+      "stored_bytes": 1005
+    },
+    "build/v7_full_lazy_20260905_controller/runs/boost_precheck_dependencies.stdout": {
+      "capture_path": "constructor_review/closed_runs/boost_precheck_dependencies.stdout",
+      "uncompressed_sha256": "ec9abb0b435d292607f40e7fc163f6dec7e38c900830492505faddddd8a9dc89",
+      "uncompressed_bytes": 71843,
+      "encoding": "literal_bytes",
+      "stored_sha256": "ec9abb0b435d292607f40e7fc163f6dec7e38c900830492505faddddd8a9dc89",
+      "stored_bytes": 71843
+    },
+    "build/v7_full_lazy_20260905_controller/runs/toolchain_before.json": {
+      "capture_path": "constructor_review/closed_runs/toolchain_before.json",
+      "uncompressed_sha256": "b8896980ad377a87d745ba10fa57ff15d453028a2a6d12c134c95de879589b6c",
+      "uncompressed_bytes": 1533,
+      "encoding": "literal_bytes",
+      "stored_sha256": "b8896980ad377a87d745ba10fa57ff15d453028a2a6d12c134c95de879589b6c",
+      "stored_bytes": 1533
+    },
+    "build/v7_full_lazy_20260905_controller/runs/toolchain_after.json": {
+      "capture_path": "constructor_review/closed_runs/toolchain_after.json",
+      "uncompressed_sha256": "b8896980ad377a87d745ba10fa57ff15d453028a2a6d12c134c95de879589b6c",
+      "uncompressed_bytes": 1533,
+      "encoding": "literal_bytes",
+      "stored_sha256": "b8896980ad377a87d745ba10fa57ff15d453028a2a6d12c134c95de879589b6c",
+      "stored_bytes": 1533
+    },
+    "build/v7_full_lazy_20260905_controller/runs/host_before.json": {
+      "capture_path": "constructor_review/closed_runs/host_before.json",
+      "uncompressed_sha256": "4b616c0f353fc63706b40f05ca1e6a6876b99e4783f8123a913554ec4666eef1",
+      "uncompressed_bytes": 1057,
+      "encoding": "literal_bytes",
+      "stored_sha256": "4b616c0f353fc63706b40f05ca1e6a6876b99e4783f8123a913554ec4666eef1",
+      "stored_bytes": 1057
+    },
+    "build/v7_full_lazy_20260905_controller/runs/host_after.json": {
+      "capture_path": "constructor_review/closed_runs/host_after.json",
+      "uncompressed_sha256": "c2d4078b544e18f413fef9c60581e972e78996ce8ba6c5b3e30e234a788df73a",
+      "uncompressed_bytes": 1057,
+      "encoding": "literal_bytes",
+      "stored_sha256": "c2d4078b544e18f413fef9c60581e972e78996ce8ba6c5b3e30e234a788df73a",
+      "stored_bytes": 1057
+    },
+    "build/v7_full_lazy_20260905_controller/runs/receipt.json": {
+      "capture_path": "constructor_review/closed_runs/receipt.json.gz",
+      "uncompressed_sha256": "28a203ea7f46699e9845252bc02f46c9719c2380cef3e4e95d1f5d935a0abdc8",
+      "uncompressed_bytes": 748880,
+      "encoding": "gzip_mtime0",
+      "stored_sha256": "49ae1ed1dbe48c94ebcb7388a3f11575f84e39bd3360536dce81378b91b4a3f1",
+      "stored_bytes": 147338
+    },
+    "build/v7_full_lazy_20260905_controller/runs/manifest.json": {
+      "capture_path": "constructor_review/closed_runs/manifest.json",
+      "uncompressed_sha256": "52edd66083037e12985f7b2048e25d32bdcfe5e97e48f19dadb2a1b8c141ea7a",
+      "uncompressed_bytes": 72983,
+      "encoding": "literal_bytes",
+      "stored_sha256": "52edd66083037e12985f7b2048e25d32bdcfe5e97e48f19dadb2a1b8c141ea7a",
+      "stored_bytes": 72983
+    },
+    "build/v7_full_lazy_20260905_controller/runs/SHA256SUMS": {
+      "capture_path": "constructor_review/closed_runs/SHA256SUMS",
+      "uncompressed_sha256": "fbf8ec1c430fa77ed06fb8b4cd44a908a9aa4642176f8b8d1bd19de7772397e6",
+      "uncompressed_bytes": 20341,
+      "encoding": "literal_bytes",
+      "stored_sha256": "fbf8ec1c430fa77ed06fb8b4cd44a908a9aa4642176f8b8d1bd19de7772397e6",
+      "stored_bytes": 20341
+    },
+    "build/v7_full_lazy_20260905_controller/runs/repository_observation.json": {
+      "capture_path": "constructor_review/closed_runs/repository_observation.json",
+      "uncompressed_sha256": "2f8b82fa8db40f41f3581525ffa470662cbb34cbafb81b754da0d163be9a54da",
+      "uncompressed_bytes": 3334,
+      "encoding": "literal_bytes",
+      "stored_sha256": "2f8b82fa8db40f41f3581525ffa470662cbb34cbafb81b754da0d163be9a54da",
+      "stored_bytes": 3334
+    }
+  },
+  "scope": "static evidence only; no ELF, object files, Boost header copies or engine execution"
+}

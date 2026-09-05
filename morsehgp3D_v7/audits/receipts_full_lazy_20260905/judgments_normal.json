@@ -1,0 +1,90 @@
+{
+  "outcomes": [
+    {
+      "name": "O2",
+      "code": 0,
+      "expected_code": 0,
+      "reason": null,
+      "counts": {
+        "historical_eager_representations_equal": 200,
+        "minimum_hits": 6042,
+        "portal_requests": 238,
+        "cache_skips": 122,
+        "direct_lookups": 246,
+        "singleton_intruder_resolutions": 198,
+        "minimum_lookups": 6288,
+        "cache_inserts": 106,
+        "cache_hits": 18,
+        "cache_lookups": 246,
+        "chain_steps": 48,
+        "meb_calls": 286,
+        "records": 872,
+        "cuts": 67920,
+        "nodes": 6792,
+        "minima": 4336,
+        "parent_refs": 5920,
+        "exact_budget_successes": 16,
+        "budget_refusals": 180,
+        "api_conflict_refusals": 12,
+        "cross_policy_forest_comparisons": 654,
+        "no_skip_work_comparisons": 218
+      }
+    },
+    {
+      "name": "sanitized",
+      "code": 0,
+      "expected_code": 0,
+      "reason": null,
+      "counts": {
+        "historical_eager_representations_equal": 200,
+        "minimum_hits": 6042,
+        "portal_requests": 238,
+        "cache_skips": 122,
+        "direct_lookups": 246,
+        "singleton_intruder_resolutions": 198,
+        "minimum_lookups": 6288,
+        "cache_inserts": 106,
+        "cache_hits": 18,
+        "cache_lookups": 246,
+        "chain_steps": 48,
+        "meb_calls": 286,
+        "records": 872,
+        "cuts": 67920,
+        "nodes": 6792,
+        "minima": 4336,
+        "parent_refs": 5920,
+        "exact_budget_successes": 16,
+        "budget_refusals": 180,
+        "api_conflict_refusals": 12,
+        "cross_policy_forest_comparisons": 654,
+        "no_skip_work_comparisons": 218
+      }
+    },
+    {
+      "name": "reject_j1",
+      "code": 1,
+      "expected_code": 1,
+      "reason": "lazy.identity",
+      "counts": null
+    },
+    {
+      "name": "collapse_minima",
+      "code": 1,
+      "expected_code": 1,
+      "reason": "lazy.node_structure",
+      "counts": null
+    },
+    {
+      "name": "ignore_capacity",
+      "code": 1,
+      "expected_code": 1,
+      "reason": "lazy.first_c_admission",
+      "counts": null
+    }
+  ],
+  "python_optimized": false,
+  "runner_sha256": "b32ed7c28f4539870f4a6368867d450e1d050e5458047a84407b21ec691fbb57",
+  "shared_runner_sha256": "24f5111676ef234280af05d4a2f28deedad9da12e52b6d620b3a3bb8e4e37447",
+  "checker_sha256": "a530583dea7a59658786a765396b840a519499da8abb799f2c02047793c0c6d1",
+  "public_status": "not_claimed"
+}

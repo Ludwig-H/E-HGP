@@ -1,0 +1,61 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/cmake",
+    "-S",
+    "/workspaces/E-HGP/morsehgp3D_v7",
+    "-B",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_san",
+    "-G",
+    "Unix Makefiles",
+    "-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+    "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+    "-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer -fno-pie",
+    "-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-O1 -g -DNDEBUG",
+    "-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined -no-pie",
+    "-DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO=",
+    "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR:PATH=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-DMHGP7_ENABLE_CUDA=OFF",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.6153722520029987,
+  "ended_utc": "2026-09-05T17:26:42.568414+00:00",
+  "environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "configure",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788629201952247242,
+      "device": 1796,
+      "inode": 1746628,
+      "mtime_ns": 1788629201952247242,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/san/configure.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 520,
+      "ctime_ns": 1788629202532247245,
+      "device": 1796,
+      "inode": 1746627,
+      "mtime_ns": 1788629202532247245,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/san/configure.stdout",
+      "sha256": "c50fbfff18ef5eb8a71f2dca3480069cc2e5296f1179ae4d62adb98587c4f4d7"
+    }
+  },
+  "started_utc": "2026-09-05T17:26:41.950931+00:00",
+  "status": "completed",
+  "timeout_seconds": 120
+}

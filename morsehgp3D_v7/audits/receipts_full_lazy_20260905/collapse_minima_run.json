@@ -1,0 +1,18 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "0",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_lazy_20260905/collapse_minima.bin"
+  ],
+  "exit_code": 0,
+  "started_utc": "2026-09-05T17:42:39.571407+00:00",
+  "finished_utc": "2026-09-05T17:42:39.815396+00:00",
+  "environment_override": {},
+  "stdout": "collapse_minima_output.json",
+  "stdout_sha256": "3423abf196f5686733f7f89c5b6ef87e0615327e1ec69e9622c0b83106d86021",
+  "stderr": "collapse_minima_stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "binary_sha256": "29645d4981b97c9e04ecad41777fae852dbce16deefabd88e0070cd5cbfaba61",
+  "input_sha256": "8b66b099da5ee1196166620cab1fbbc25e96b109534e47419de76c098f6fe1c5"
+}

@@ -1,0 +1,764 @@
+{
+  "canonical_commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s10_k10_eager_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "eager",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 0,
+        "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 8,
+        "outcome": "complete_relative",
+        "raw_sha256": "5afc711c9109543fe9510b82e83f2f6a4a1ff5b7c546a501919cb964e68cc4f5",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s10_k10_lazy_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 0,
+        "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 8,
+        "outcome": "complete_relative",
+        "raw_sha256": "1b9a55d60b797f1a6f60ca6c0f81fa524da549ea27784892241f20be5921cdbb",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s10_k10_lazy_c1.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 1,
+        "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 8,
+        "outcome": "complete_relative",
+        "raw_sha256": "8a6d3c64c2523d6eb4e5643e2ba01f76b9f4ce8c9db733d400b3c18ddf32cec9",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s10_k10_lazy_c1000000.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 1000000,
+        "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 8,
+        "outcome": "complete_relative",
+        "raw_sha256": "5e0001e528d41486079b7262565e6651f124c7806853e7c77ab0d87555933654",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s12_k10_eager_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "eager",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 0,
+        "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 8,
+        "outcome": "complete_relative",
+        "raw_sha256": "97cf772d163b978a27b7c74c349d2f5d588a49ed8c24dede75832326c2b6c40a",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s12_k10_lazy_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 0,
+        "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 8,
+        "outcome": "complete_relative",
+        "raw_sha256": "4bd9789953071a57d632c4adf0d5fd7b6f6a14a1aaed2d370e17cb6285a4db49",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s12_k10_lazy_c1.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 1,
+        "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 8,
+        "outcome": "complete_relative",
+        "raw_sha256": "6d5179b8e0eea946a5607b309dc9491b287d0121ae6c0281fc14eefc90cb6d86",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s12_k10_lazy_c1000000.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 1000000,
+        "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 8,
+        "outcome": "complete_relative",
+        "raw_sha256": "5a4a3b742201de0ec17290428bb95dfe417d23af8780e0daff1bec0944c0d2d1",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_eager_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "eager",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 0,
+        "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 8,
+        "outcome": "complete_relative",
+        "raw_sha256": "7383d8a27c68c1b135512b71d878de7d0c5692b5031aeb16f151233074a9c937",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_lazy_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 0,
+        "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 8,
+        "outcome": "complete_relative",
+        "raw_sha256": "5d1183dbe17718c79be852f4461d5704cac7484e44ddbd87c9a208dbae0b7fbb",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_lazy_c1.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 1,
+        "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 8,
+        "outcome": "complete_relative",
+        "raw_sha256": "564de74542d4737616472b24b48858af5957ddffe48243565b716f6b997e83cc",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_lazy_c1000000.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 1000000,
+        "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 8,
+        "outcome": "complete_relative",
+        "raw_sha256": "b6fb034c199db2b3108e415887a73e591ab4751b651924701ce4fbd419b68cf2",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s10_k5_eager_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "eager",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 0,
+        "certificate_digest": "a0ce5f69e7aa9ca7dbf6738778c7296c2adf23c5461bfcaf4c93d6e61ba635c3",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 5,
+        "outcome": "complete_relative",
+        "raw_sha256": "13b54a3b1b147a4b61eaca0d258be3bb0377909f561fdb1df6711a70ca369514",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s10_k5_lazy_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 0,
+        "certificate_digest": "a0ce5f69e7aa9ca7dbf6738778c7296c2adf23c5461bfcaf4c93d6e61ba635c3",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 5,
+        "outcome": "complete_relative",
+        "raw_sha256": "611c22cad3d179fb6870cd68a20906a500ee5d3bb2c8f1549b6eaf15b9fa2dd8",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s10_k5_lazy_c1.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 1,
+        "certificate_digest": "a0ce5f69e7aa9ca7dbf6738778c7296c2adf23c5461bfcaf4c93d6e61ba635c3",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 5,
+        "outcome": "complete_relative",
+        "raw_sha256": "f09f1d248e82f360bd154be48ac8bc0781f95a0262d157aa22f9bb521a41f90f",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s10_k5_lazy_c1000000.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 1000000,
+        "certificate_digest": "a0ce5f69e7aa9ca7dbf6738778c7296c2adf23c5461bfcaf4c93d6e61ba635c3",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 5,
+        "outcome": "complete_relative",
+        "raw_sha256": "c7dab32176be1f8527205a442934193da47999b8e825e34a33de5b7210c0c4cc",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s12_k5_eager_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "eager",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 0,
+        "certificate_digest": "a0ce5f69e7aa9ca7dbf6738778c7296c2adf23c5461bfcaf4c93d6e61ba635c3",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 5,
+        "outcome": "complete_relative",
+        "raw_sha256": "39be67ed8bee88d032f4430e74f6a14f640640b73d562cdf210f5e3f81aa598f",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s12_k5_lazy_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 0,
+        "certificate_digest": "a0ce5f69e7aa9ca7dbf6738778c7296c2adf23c5461bfcaf4c93d6e61ba635c3",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 5,
+        "outcome": "complete_relative",
+        "raw_sha256": "d43a22f003999f7bf840edcff73819d12f9dea671bf78430efa3962902846909",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s12_k5_lazy_c1.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 1,
+        "certificate_digest": "a0ce5f69e7aa9ca7dbf6738778c7296c2adf23c5461bfcaf4c93d6e61ba635c3",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 5,
+        "outcome": "complete_relative",
+        "raw_sha256": "3c7027e82446a8e6947c37f994ab8aed457b7129e5a5be98460499437bc693cd",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s12_k5_lazy_c1000000.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 1000000,
+        "certificate_digest": "a0ce5f69e7aa9ca7dbf6738778c7296c2adf23c5461bfcaf4c93d6e61ba635c3",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 5,
+        "outcome": "complete_relative",
+        "raw_sha256": "6321d6e37b40fce924532cc3737508ab085a99cb2d6d3a248bfda41083a43284",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s8_k5_eager_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "eager",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 0,
+        "certificate_digest": "a0ce5f69e7aa9ca7dbf6738778c7296c2adf23c5461bfcaf4c93d6e61ba635c3",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 5,
+        "outcome": "complete_relative",
+        "raw_sha256": "95ee45989013a037bfc5797c6dd6bedb3cffb4fa5c36836c60c56fc2a69cfc1a",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s8_k5_lazy_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 0,
+        "certificate_digest": "a0ce5f69e7aa9ca7dbf6738778c7296c2adf23c5461bfcaf4c93d6e61ba635c3",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 5,
+        "outcome": "complete_relative",
+        "raw_sha256": "d55b281500b6564d0663c379122687c6cd3f955b2ad61c6227470c564998e03f",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s8_k5_lazy_c1.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 1,
+        "certificate_digest": "a0ce5f69e7aa9ca7dbf6738778c7296c2adf23c5461bfcaf4c93d6e61ba635c3",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 5,
+        "outcome": "complete_relative",
+        "raw_sha256": "b0e028f35b1db1ade89591b2196fb2c449c3d893b8445a4bad19f3741a04560c",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k5/n8_s8_k5_lazy_c1000000.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "alias_policy": "lazy",
+        "attempt_success": true,
+        "audit_status": "valid",
+        "cache_entries": 1000000,
+        "certificate_digest": "a0ce5f69e7aa9ca7dbf6738778c7296c2adf23c5461bfcaf4c93d6e61ba635c3",
+        "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+        "orders_complete": 5,
+        "outcome": "complete_relative",
+        "raw_sha256": "47e237da9b9f4a9f0aee865a63fe18a5f92f3cb9c63646cab675051ebd24b0f1",
+        "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "--selftest",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_eager_c0.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "audit_status": "selftests_passed",
+        "mutants_killed": [
+          "missing_terminal",
+          "promoted_status",
+          "cap_exceeded",
+          "skipped_k",
+          "timing_nan",
+          "altered_receipt",
+          "protocol_kmax",
+          "missing_worker",
+          "last_work_disagreement",
+          "policy_mismatch",
+          "cache_capacity",
+          "order_digest",
+          "global_digest",
+          "success_identity",
+          "minimum_count",
+          "non_multifusion_node_count",
+          "elapsed_zero",
+          "subtracted_time",
+          "refusal_global_digest"
+        ],
+        "raw_sha256": "7383d8a27c68c1b135512b71d878de7d0c5692b5031aeb16f151233074a9c937",
+        "real_positive": 1,
+        "synthetic_refusal": 1,
+        "synthetic_unemitted_read_refusal": 1
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/protocol/probe_audit.py",
+        "--selftest",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_lazy_c1.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "audit_status": "selftests_passed",
+        "mutants_killed": [
+          "missing_terminal",
+          "promoted_status",
+          "cap_exceeded",
+          "skipped_k",
+          "timing_nan",
+          "altered_receipt",
+          "protocol_kmax",
+          "missing_worker",
+          "last_work_disagreement",
+          "policy_mismatch",
+          "cache_capacity",
+          "order_digest",
+          "global_digest",
+          "success_identity",
+          "minimum_count",
+          "non_multifusion_node_count",
+          "elapsed_zero",
+          "subtracted_time",
+          "refusal_global_digest"
+        ],
+        "raw_sha256": "564de74542d4737616472b24b48858af5957ddffe48243565b716f6b997e83cc",
+        "real_positive": 1,
+        "synthetic_refusal": 1,
+        "synthetic_unemitted_read_refusal": 1
+      }
+    }
+  ],
+  "counts": {
+    "aggregate_groups_of_twelve": 2,
+    "canonical_python_cli_calls": 26,
+    "completed_order_rows": 156,
+    "digest_selftest_checks_read": 24,
+    "distinct_selftest_mutations_per_fixture": 19,
+    "eager_order_rows": 39,
+    "lazy_order_rows_first_c_checked": 117,
+    "lazy_rows_with_positive_portals": 81,
+    "parser_refusals_read": 11,
+    "selftest_fixtures": 2,
+    "successful_receipts": 24
+  },
+  "engine_or_build_reexecuted": false,
+  "first_c_counterfixture": {
+    "changed_raw_sha256": "e0779db6e0978b6979f8a33be6b9a7336070d327417fe890339c944dca4e71b2",
+    "historical_package_hashes_preserved": false,
+    "judge_result": {
+      "alias_policy": "lazy",
+      "attempt_success": true,
+      "audit_status": "valid",
+      "cache_entries": 1000000,
+      "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+      "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+      "orders_complete": 8,
+      "outcome": "complete_relative",
+      "scope": "receipt_and_digest_binding_not_geometry_or_completeness"
+    },
+    "kind": "joint_raw_receipt_data_corruption_not_product_mutant",
+    "necessary_identity_refutes": true,
+    "new_values": {
+      "cache_inserts": 1,
+      "cache_skips": 1,
+      "portal_requests": 2
+    },
+    "old_values": {
+      "cache_inserts": 2,
+      "cache_skips": 0,
+      "portal_requests": 2
+    },
+    "source_receipt": "morsehgp3D_v7/receipts/full_gabriel_lazy_probe_20260905/micro/k10/n8_s8_k10_lazy_c1000000.receipt.json",
+    "zero_based_raw_row": 2
+  },
+  "judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+  "package": {
+    "binary_omission": [
+      {
+        "bytes": 506856,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/build_admission/full_gabriel_lazy_probe",
+        "reason": "executable_not_exported_pin_retained_in_original_receipt",
+        "sha256": "1d5a38cea99555fd2db474ee43aff6ba1ee708208508cfa97c540774d0bb7e78"
+      }
+    ],
+    "binary_reexecuted": false,
+    "binary_sha256_declared": "1d5a38cea99555fd2db474ee43aff6ba1ee708208508cfa97c540774d0bb7e78",
+    "build_ended": "2026-09-05T17:35:56.011897+00:00",
+    "checksum_entries": 468,
+    "dependency_map_entries": 40,
+    "envelope_pins": {
+      "SHA256SUMS": "9b197a96819c6b39f756d5eaf7e6c777b918501fbaa81d4db76e89c9fa7f72eb",
+      "build/receipt.json": "da11c743e63fb63acd00c25ce02080671a34a43fa2fa9cd473bb3068df2712a3",
+      "manifest.json": "509c064fc596528b651299ddefc8287296fc7d042dbc5a7eb0253b25bf36b5fd",
+      "micro/receipt.json": "9ce369e2d6085e1e7ac0b95c03a84f1793f42d0107a2b2a15474644d880ce1b2",
+      "publication.json": "de38c14bd2bb218c92e77f6a960e1f03d573959c9344403f7b3eaf59d43e9b6a"
+    },
+    "manifest_entries": 467,
+    "micro_ended": "2026-09-05T17:36:55.295111+00:00",
+    "published_files": 469,
+    "source_map_entries": 54
+  },
+  "parser_rejections_read": [
+    "reject_cache_eager",
+    "reject_cache_overflow",
+    "reject_duplicate",
+    "reject_k0",
+    "reject_lazy_no_cache",
+    "reject_missing",
+    "reject_n9",
+    "reject_policy_duplicate",
+    "reject_policy_missing",
+    "reject_s9",
+    "reject_unknown"
+  ],
+  "public_status": "not_claimed",
+  "python_optimized": true,
+  "recorded_cpp_digest_selftest": {
+    "checks": 24,
+    "expected_checks": 24,
+    "failures": 0,
+    "passed": true,
+    "schema": "mhgp7-full-gabriel-probe-v2",
+    "scope": "bench_serializer_only_no_geometry_or_catalogue_oracle",
+    "type": "digest_selftest"
+  },
+  "running_or_heavy_campaign_followed": false,
+  "schema": "mhgp7-lazy-probe-admission-independent-replay-v1",
+  "scope": "published_closed_n8_admission_only",
+  "script_sha256": "9d4c46aa28a87d4d162b7a1780db1a87b66376642974b815653b25f296cbd2b7",
+  "semantic_digest_groups": {
+    "10": {
+      "aggregate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+      "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+      "order_digests": [
+        "fa06362383cce1fd1d47a88425ba2314f49b383e5561f9c787f91322b01d4c50",
+        "8d62beb50e423670001ddad21d2d7e8dbc281199b2ab82bc30358d5213d8b2af",
+        "e31434b8ef629c05acce8872bd530f747613579e8178c3c49214e588bb1dc200",
+        "df8b061127049427114ec0ddd04aaa5b8bb9422279ac12a1c3af1d5d09f02d32",
+        "2f8872555c0665845fecfe1f8cf8db0b38b7fd4fde068446b6e3fa5d16d1423c",
+        "c788cac07ec261699deb92e1f3ab04108c7b0816bfd6bc21a466393880295b5c",
+        "8235a2b42015ec1e0ca8d59c4ad286629b1fa7db15d52ec9fa4598ed7fa16d70",
+        "0a809d9f586f3be8275e7d0da119397941bf2a0697632d6bff8ece1efb1c1a6b"
+      ],
+      "records": 12
+    },
+    "5": {
+      "aggregate_digest": "a0ce5f69e7aa9ca7dbf6738778c7296c2adf23c5461bfcaf4c93d6e61ba635c3",
+      "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+      "order_digests": [
+        "fa06362383cce1fd1d47a88425ba2314f49b383e5561f9c787f91322b01d4c50",
+        "8d62beb50e423670001ddad21d2d7e8dbc281199b2ab82bc30358d5213d8b2af",
+        "e31434b8ef629c05acce8872bd530f747613579e8178c3c49214e588bb1dc200",
+        "df8b061127049427114ec0ddd04aaa5b8bb9422279ac12a1c3af1d5d09f02d32",
+        "2f8872555c0665845fecfe1f8cf8db0b38b7fd4fde068446b6e3fa5d16d1423c"
+      ],
+      "records": 12
+    }
+  },
+  "status": "passed"
+}

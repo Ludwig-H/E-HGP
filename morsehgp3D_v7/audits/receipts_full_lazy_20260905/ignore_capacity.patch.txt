@@ -1,0 +1,11 @@
+--- morsehgp3D_v7/src/forest/full_gabriel.hpp
++++ private/ignore_capacity/morsehgp3D_v7/src/forest/full_gabriel.hpp
+@@ -292,7 +292,7 @@
+       return current == token || invariant("full_gabriel_inconsistent_alias");
+     }
+     if (cache_caps) {
+-      if (aliases.size() >= cache_caps->max_entries) {
++      if (false && aliases.size() >= cache_caps->max_entries) {  // Private mutant.
+         ++out.stats.cache_skips;  // Bounded by charged portal requests.
+         return true;
+       }

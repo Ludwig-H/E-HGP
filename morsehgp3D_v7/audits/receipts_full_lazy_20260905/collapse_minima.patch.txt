@@ -1,0 +1,11 @@
+--- morsehgp3D_v7/src/forest/full_gabriel.hpp
++++ private/collapse_minima/morsehgp3D_v7/src/forest/full_gabriel.hpp
+@@ -528,7 +528,7 @@
+         !node_room(batch.merges.size())) return false;
+     if (cache_caps)
+       for (size_t i = mb; i < me; ++i)
+-        minima[minimum_order[i]].token = prior_count + static_cast<FullNodeId>(i - mb);
++        minima[minimum_order[i]].token = prior_count;  // Private mutant.
+     for (const auto& group : batch.merges) {
+       const FullNodeId id = successor.size();
+       successor.push_back(id);

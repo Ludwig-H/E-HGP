@@ -1,0 +1,10 @@
+--- morsehgp3D_v7/src/forest/full_gabriel.hpp
++++ private/reject_j1/morsehgp3D_v7/src/forest/full_gabriel.hpp
+@@ -425,6 +425,7 @@
+     // the exact catalogue premise it would have been found before the MEB.
+     if (count == 0) return invariant("full_gabriel_minimum_missing");
+ 
++    if (count == 1) return invariant("audit_mutant_missing_j1");
+     if (count == 1) {
+       key.p[key.n++] = ix.point_id(foreign[0]);
+       silent_detail::sort_key(&key);

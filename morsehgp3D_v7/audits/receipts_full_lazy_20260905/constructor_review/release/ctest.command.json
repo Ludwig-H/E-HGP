@@ -1,0 +1,56 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "6",
+    "/usr/bin/ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_release",
+    "-j1",
+    "-V",
+    "--output-on-failure",
+    "--no-tests=error",
+    "--timeout",
+    "60",
+    "-R",
+    "^mhgp7_full_(certificate|gabriel)",
+    "--output-junit",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/release/ctest.junit.xml"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.7656948090007063,
+  "ended_utc": "2026-09-05T17:26:40.637702+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "ctest",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788629199871247230,
+      "device": 1796,
+      "inode": 1746578,
+      "mtime_ns": 1788629199871247230,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/release/ctest.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 11666,
+      "ctime_ns": 1788629200585247234,
+      "device": 1796,
+      "inode": 1746577,
+      "mtime_ns": 1788629200585247234,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/release/ctest.stdout",
+      "sha256": "4019c07e57ca04f51c613707894bd937fe96b304bfacc9fb40eb6f7b320ecbe5"
+    }
+  },
+  "started_utc": "2026-09-05T17:26:39.870429+00:00",
+  "status": "completed",
+  "timeout_seconds": 120
+}

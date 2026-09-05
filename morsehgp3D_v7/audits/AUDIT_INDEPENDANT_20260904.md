@@ -1,6 +1,6 @@
 # Audit indépendant courant de MorseHGP3D v7
 
-Actualisé le 5 septembre 2026 depuis `98bb6578`, producteur FULL relatif `e02d163c` publié et qualifié indépendamment, campagne mono scellée contre-vérifiée ; le nouveau port paresseux reste hors qualification. Stockage structurel, modèles Python, produit F réduit et acquis MEB/verticaux/p3 conservent leurs attributions.
+Actualisé le 5 septembre 2026 : le port FULL paresseux `13c6cc72` capturé après `6f4b4de5` possède sa qualification indépendante ; ses CTests, son digest et son admission micro sont contre-vérifiés. La campagne mono EAGER reste attachée à `98bb6578`. Stockage structurel, modèles Python, produit F réduit et acquis MEB/verticaux/p3 conservent leurs attributions.
 Toutes les écritures restent dans `morsehgp3D_v7/audits/`.
 
 La suite **D** de 323 portes a été reconstruite et exécutée par l'auditeur.
@@ -8,7 +8,7 @@ Le delta q2 **E** du constructeur dispose maintenant de ses propres
 324 portes Release et de deux campagnes ciblées de 33 portes, Release
 et ASan/UBSan, dont les preuves brutes sont contre-vérifiées ici.
 Les quatre fichiers produit E restent sous la responsabilité du constructeur.
-Les 339 portes Release F et deux campagnes ciblées de 48 portes sont également contre-vérifiées depuis leurs propres reçus. Le [manifeste courant](validation_current.json) reconnaît séparément les octets D/E/F/G/H/I et affiche leur portée ; leur mélange est refusé. I relie le code H à la publication `98bb6578` et aux observations mono, sans qualifier le worktree paresseux en avance.
+Les 339 portes Release F et deux campagnes ciblées de 48 portes sont également contre-vérifiées depuis leurs propres reçus. Le [manifeste courant](validation_current.json) reconnaît séparément les octets D/E/F/G/H/I/J et affiche leur portée ; leur mélange est refusé. I relie le code H à la publication `98bb6578` et aux observations mono. J qualifie séparément les sources lazy capturées, sans reprendre les temps I.
 
 ```text
 phase=exploration_v7_hors_registre
@@ -24,7 +24,7 @@ public_status=not_claimed
 
 La [qualification des modèles Python](receipts_gabriel_20260905/README.md) retrouve Gamma sur 2 265 coupes FULL de 50 ordres. Un lecteur séparé des seuls journaux retrouve les 100 événements réduits sur les 36 ordres communs. Normal et `-O` concordent ; les mutants restent ceux des modèles d’audit. Ces résultats Python gardent leur portée. Le [lecteur C++ structurel](CERTIFICAT_FULL_CPP_COURANT.md) a maintenant sa propre qualification O2/ASan-UBSan : 4 608 coupes, 616 couvertures, 1 338 refus budgétaires et trois mutants privés. Ses 2+2 CTests constructeur sont contre-vérifiés séparément. Le [producteur par portails](PRODUCTEUR_FULL_GABRIEL_COURANT.md) possède désormais sa propre qualification : 100 ordres/200 représentations, 16 506 coupes et 1 606 couvertures par build O2/ASan-UBSan, 26 refus budgétaires et trois mutants. La deuxième étape de descente est exercée. Les reçus propres 7+7 CTests sont contre-vérifiés en conservant l’échec LSan initial. La génération industrielle des catalogues, le manifeste terminal, la verticale, les masses et les coûts restent à raccorder.
 
-La [résolution des alias à la demande](receipts_full_producer_20260905/lazy_alias_next_step_review.md) est également justifiée : minima et ancres directes permanents suffisent, avec une branche explicite à un intrus. La fixture ABC/ABW est vérifiée rationnellement. Le [mono FULL](MONO_FULL_COURANT.md) apporte maintenant la mesure du verrou : trois réussites 8k, refus d’alias à 16k/K9 et 32k/K7. À 8k/K10, minima et cache strict sont bornés par 3 135 165 clés contre 6 209 024 alias EAGER ; huit millions d’entrées de cache séparé suffisent pour chacun des deux premiers ordres refusés. Aucun gain de RAM n’en est déduit. Quatre lacunes du juge sont accompagnées de contre-fixtures, tandis que les 44 lignes réussies nominales passent les nouvelles identités. Le port et sa comparaison sémantique restent à qualifier.
+La [résolution des alias à la demande](receipts_full_producer_20260905/lazy_alias_next_step_review.md) est également justifiée : minima et ancres directes permanents suffisent, avec une branche explicite à un intrus. La fixture ABC/ABW est vérifiée rationnellement. Le [mono FULL](MONO_FULL_COURANT.md) apporte maintenant la mesure du verrou : trois réussites 8k, refus d’alias à 16k/K9 et 32k/K7. À 8k/K10, minima et cache strict sont bornés par 3 135 165 clés contre 6 209 024 alias EAGER ; huit millions d’entrées de cache séparé suffisent pour chacun des deux premiers ordres refusés. Aucun gain de RAM n’en est déduit. Quatre lacunes du juge sont accompagnées de contre-fixtures, tandis que les 44 lignes réussies nominales passent les nouvelles identités. Le [port qualifié](CACHE_FULL_COURANT.md) passe désormais 109 ordres, 67 920 coupes par build O2/ASan-UBSan, quatre politiques, les budgets et trois mutants ciblés. Les 14+14 CTests propres et les 24 reçus n=8 de la nouvelle sonde sont contre-vérifiés. Les quatre lacunes historiques puis l’identité first-C sont fermées, cette dernière par une porte supplémentaire obligatoire. La comparaison de coût massif reste distincte.
 
 **Le [certificat horizontal réduit](CERTIFICAT_HORIZONTAL_COURANT.md) est fermé sur E dans son domaine CPU explicite.** La preuve relie la fenêtre de boules, le catalogue direct, les suffixes d'ancrage, le fold et les seuls deltas exportés. La bijection par inclusion des facettes conserve les points et commute entre coupes ; la régularité géométrique globale n'est pas exigée.
 
@@ -109,10 +109,9 @@ Leurs reçus bruts ne sont pas réécrits.
 
 ## Prochaines fermetures utiles
 
-1. **Construire le certificat FULL et son supplément déclaré.**
-   Le stockage et le lecteur structurels sont maintenant qualifiés sur leurs lots fournis.
-   Raccorder les minima dès leur naissance et les parents stricts des multifusions,
-   en conservant K=n ; qualifier le producteur par portails, ses alias et ses plafonds,
+1. **Exporter le certificat FULL et son supplément déclaré.**
+   Le stockage, le lecteur, les portails et le cache ont leurs qualifications propres.
+   Raccorder l’export des arènes à l’entrée, aux ordres et au succès terminal,
    puis les ancres inférieures au côté fermé. L’archive actuelle déclare
    `vertical_maps=none` ; le scan `born` déjà qualifié appartient au profil réduit.
    Les facettes pondérées, les scores, les dates d’affectation et la condensation
