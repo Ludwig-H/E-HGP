@@ -37,11 +37,12 @@ ni la résidence du générateur WSPD ; elle ne démontre aucun palier massif.
 
 Le [premier jalon livré](CONTRAT_CERTIFICAT_FULL.md),
 `src/forest/full_certificate.hpp`, qualifie uniquement un certificat
-structurel et son lecteur. Il ne livre ni constructeur FULL,
-ni format de checkpoint durable, ni reprise du moteur. Le raccord au
-catalogue direct, les ancres pré-lot et inter-K ainsi que les budgets de
-travail demandent leurs propres preuves. Les limites et mesures C ci-dessous
-restent historiques ; elles ne se transfèrent pas à ce nouveau schéma.
+structurel et son lecteur. Le [producteur horizontal suivant](CONTRAT_PRODUCTEUR_FULL_GABRIEL.md)
+raccorde désormais les catalogues Gabriel fournis aux minima et parents,
+sous autorité relative et budgets propres. Il ne livre ni format de
+checkpoint durable, ni reprise du moteur, ni ancres inter-K publiées.
+Les limites et mesures C ci-dessous restent historiques ; elles ne se
+transfèrent pas à ce nouveau schéma.
 
 Pour les masses et le vote, déclarer un supplément avec son univers de
 feuilles et sa politique d'affectation. Les feuilles pondérées du catalogue
@@ -49,6 +50,29 @@ Gabriel ne sont pas les seuls minima FULL ; leur information utile peut
 demander un journal distinct, sans imposer toutes les facettes Gamma.
 Les frontières externes proposées aux §§4–5 restent des pistes relatives
 au snapshot C, pas des étapes obligatoires avant le certificat FULL.
+
+### Première observation de résidence FULL horizontale
+
+La sonde indépendante de la CLI F partage les boules censusees entre
+ordres et ne garde que deux catalogues Gabriel adjacents. Elle détruit
+chaque certificat après sa lecture sentinelle : ce n'est pas la mémoire
+d'une tour dont toutes les forêts seraient simultanément conservées.
+Sur uniforme/seed3/u16, n=8000, s=8, K1..10, le premier reçu mono compte
+3 113 381 boules et 6 209 024 alias à K10 ; le pic RSS du processus est
+1 837 632 KiB. À n=16000, le plafond inchangé de huit millions d'alias
+refuse K9, après huit ordres diagnostiques. Ces nouvelles observations
+sont conservées dans les [reçus FULL mono](../receipts/full_gabriel_mono_20260905/README.md),
+distincts du snapshot C et sans qualification G4.
+
+La prochaine piste est de séparer les autorités obligatoires — minima,
+ancres de toutes les directes, successeurs — du cache de facettes résolues.
+Une facette non mémorisée pourrait rejoindre sa directe antérieure par le
+cas à un intrus, sans matérialiser tous les alias égaux dès chaque coface.
+Cette piste a reçu une [contrelecture favorable](../audits/receipts_full_producer_20260905/lazy_alias_next_step_review.md)
+sur le domaine régulier ; elle n'est pas intégrée aux octets mesurés.
+Elle peut réduire la résidence tout en augmentant les MEB
+et census sur les absences du cache. Aucun gain de temps ni palier massif
+n'est déduit de cet échange.
 
 ## 1. Notation et nature des conclusions
 

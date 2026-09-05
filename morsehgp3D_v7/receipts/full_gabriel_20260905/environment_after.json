@@ -1,0 +1,20 @@
+{
+  "affinity": [
+    0
+  ],
+  "captured_utc": "2026-09-05T16:02:28.706667+00:00",
+  "tools": {
+    "c++": {
+      "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+      "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769"
+    },
+    "cmake": {
+      "path": "/usr/bin/cmake",
+      "sha256": "1c5227af4edd22d8d689def545e18ee458260c0fd579eba2187967f38817e638"
+    },
+    "ctest": {
+      "path": "/usr/bin/ctest",
+      "sha256": "45c60ab2448411a4f49a0bdb6cf5800fedbf0293048e3c82710a34190c7d1ef4"
+    }
+  }
+}

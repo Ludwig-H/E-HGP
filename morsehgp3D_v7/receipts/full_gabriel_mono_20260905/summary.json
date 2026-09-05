@@ -1,0 +1,59 @@
+{
+  "campaign_status": "all_five_attempts_closed",
+  "successful_horizontal_attempts": 3,
+  "refused_attempts": 2,
+  "integrated_tower_claim": false,
+  "public_status": "not_claimed",
+  "attempts": [
+    {
+      "id": "n8000_s8_k10",
+      "exit_code": 0,
+      "outcome": "complete_relative",
+      "completed_orders": 10,
+      "last_order": 10,
+      "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues",
+      "elapsed_ms": 150776.472014,
+      "hwm_mib": 1794.5625
+    },
+    {
+      "id": "n16000_s8_k10",
+      "exit_code": 2,
+      "outcome": "resource_exhausted",
+      "completed_orders": 8,
+      "last_order": 9,
+      "reason": "full_gabriel_alias_budget",
+      "elapsed_ms": 275497.460215,
+      "hwm_mib": 2825.445312
+    },
+    {
+      "id": "n32000_s8_k10",
+      "exit_code": 2,
+      "outcome": "resource_exhausted",
+      "completed_orders": 6,
+      "last_order": 7,
+      "reason": "full_gabriel_alias_budget",
+      "elapsed_ms": 464273.326311,
+      "hwm_mib": 5009.882812
+    },
+    {
+      "id": "n8000_s10_k10",
+      "exit_code": 0,
+      "outcome": "complete_relative",
+      "completed_orders": 10,
+      "last_order": 10,
+      "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues",
+      "elapsed_ms": 150879.29097,
+      "hwm_mib": 1789.050781
+    },
+    {
+      "id": "n8000_s12_k10",
+      "exit_code": 0,
+      "outcome": "complete_relative",
+      "completed_orders": 10,
+      "last_order": 10,
+      "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues",
+      "elapsed_ms": 151794.939221,
+      "hwm_mib": 1790.164062
+    }
+  ]
+}

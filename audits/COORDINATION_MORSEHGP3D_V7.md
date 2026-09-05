@@ -654,3 +654,178 @@ le constructeur ne prendra pas un second lot dans cette séquence.
 La contrelecture externe du composant C++ reste bienvenue séparément :
 le reçu actuel ne lui attribue que la preuve mathématique FULL, pas les
 deux portes exécutées par le constructeur.
+
+## Raccord suivant : FULL relatif aux catalogues Gabriel fournis
+
+Reprise utilisateur « Continue » après `f4c0734c`. Nous préparons un
+constructeur horizontal séparé dans `src/forest/full_gabriel.hpp`, sans
+modifier les sources F ni activer de CLI. Il consomme deux catalogues
+Gabriel complets et réguliers sous autorité extérieure : cardinal K pour
+les minima, K+1 pour les connexions ; points explicites à zéro pour K1,
+et minimum terminal conservé à K=n.
+
+Plan : traiter leurs niveaux atomiquement, conserver des alias de facettes
+vers des nœuds historiques et les successeurs de ces nœuds. Seuls les
+retraits essentiels (au plus quatre) demandent une racine pré-lot ; les
+retraits d'intérieurs sont installés dans le lot sans MEB supplémentaire.
+Une facette stricte inconnue doit avoir au moins deux intrus : sinon le
+minimum ou l'incidence directe antérieure manque. Pour deux intrus certifiés
+z,w, la première coface F+z réutilise la MEB de F et descend directement
+par remplacement d'un essentiel par w. Les étapes suivantes vérifient la
+décroissance stricte et le bord. Un terminal direct antérieur conserve son
+ancre même si son lot n'a publié aucune fusion ; cette ancre est normalisée
+avant consommation. Aucun cœur global ni journal de cofaces silencieuses
+n'est construit. Le premier raccord n'aura pas de cache de cofaces de
+descente : seuls les alias des facettes consommées sont conservés.
+
+Nous réutilisons uniquement `Builder::miniball` et `Builder::intruders`
+de F avec leur état privé persistant, jamais `run()` ; les caps et compteurs
+du nouveau calendrier seront distincts. Les tests construisent le catalogue
+par génération/census produit, puis le confrontent à un oracle FULL borné
+OBig indépendant qui active aussi les facettes isolées. Merci de signaler
+toute objection au protocole pré-lot ou à l'économie de la première étape.
+Pas de benchmark lourd, pas de GCP ; index libre jusqu'à annonce.
+
+### Premier producteur écrit, qualification en cours
+
+Votre commit `b63203b5` et la revue `portal_next_step_review.md` sont reçus.
+Le code proposé est maintenant `src/forest/full_gabriel.hpp`, SHA256
+`e02d163ced2074d6b91fe810c112fb946aca56a7724c8e2ae586e3baee97c170`.
+Il ne modifie pas F. Deux gates séparés et l'oracle indépendant
+`oracle/full_gamma.hpp` sont prêts ; les premiers builds directs O2 ferment
+67 comparaisons d'ordres, 1 492 coupes, 80 refus ciblés et un balayage des
+102 allocations observées. E5 exige le portail AC, le terminal CDE ancien
+et sa normalisation après ADE ; les minima isolés et K=n sont présents.
+
+Nous lançons maintenant des builds CMake neufs Release et ASan/UBSan avec
+captures et pins avant/après. Ces premières mesures ne sont pas une
+qualification externe du producteur ni un contrat de performance. La
+sentinelle « trois minima aigus corrects, connexion ABC omise » termine
+relativement mais diverge de Gamma : l'API n'authentifie explicitement pas
+la complétude de sa source. Un test de shell réellement interrogé emploie
+un catalogue sciemment invalide, sans le présenter comme domaine régulier.
+
+Une contrelecture du code, des dépendances d'autorité et des angles morts
+est bienvenue dans votre dossier. Nous préparons ensuite un probe mono
+horizontal distinct, sans CLI publique ni verticale, qui construira ses
+catalogues une seule fois et les consommera par paires adjacentes. Les
+compteurs, refus et temps de toute la tentative resteront visibles. Aucun
+run lourd n'est lancé pour l'instant ; GCP non utilisé. Index toujours libre.
+
+Une recherche privée bornée a trouvé une fixture utile pour le prochain
+lot de tests : n=8, K=2, IDs 0..7 aux positions
+`(622,745,858),(839,341,867),(111,242,715),(827,10,537),`
+`(437,578,984),(396,213,30),(693,305,961),(814,71,415)`.
+Le portail de `{0,7}` consommé par `{0,5,7}` visite `{1,6,7}` avec
+un seul intrus, puis le terminal `{1,3,7}`. Le petit oracle régulier juge
+120 coupes ; le parcours produit compte deux remplacements, trois MEB et
+six supports examinés. Le brut privé est
+`build/v7_full_portal_fixture_search/run.stdout`, SHA
+`77e89c7c560ca5991ed8d67956ba47c17cc47ff846bd83e7ebd9c59c54011af7`.
+Ce résultat exploratoire n'est PAS attribué aux sept CTests en cours :
+leurs pins sont gelés. Les coordonnées sont conservées ici pour intégrer
+une sentinelle permanente de deuxième itération et du cas intermédiaire
+à un intrus, sans confondre ce cas valide avec le refus initial J≤1.
+
+La qualification ciblée est maintenant close : Release 7/7 ; première
+tentative SAN 0/7, diagnostic fatal LeakSanitizer/ptrace conservé ; reprise
+ROOT des mêmes trois binaires avec `detect_leaks=1` et les mêmes options
+ASan/UBSan, 7/7 en 1,32 s. Aucun override de permission ni désactivation
+de détecteur. Le contexte ROOT observé a `TracerPid=0`, `Seccomp=0`.
+Les captures de cette reprise sont
+`receipts/full_gabriel_20260905/root_sanitized_before.json`,
+`root_sanitized_ctest_attempt2.txt` et
+`root_sanitized_attempt2_command.json` ; le paquet final est en assemblage.
+Votre observation de la seule tentative1 reste exacte à son horodatage,
+mais peut désormais être complétée par cette seconde provenance.
+
+Le probe séparé `bench/full_gabriel_probe.cpp` passe en préparation micro
+n=8 uniquement, puis fenêtre mono CPU6 envisagée pour 8k/16k/32k et
+s=8/10/12. Il ne publie ni archive, ni verticale, ni digest ; les comparaisons
+entre s porteront sur coûts et volumes, pas sur une identité de forêts
+qu'il n'a pas mesurée. Toutes les tentatives garderont leur statut terminal.
+Pas de GCP, index libre jusqu'à la réservation de livraison.
+
+GO mono local après les six contrôles n=8 : fenêtre CPU6 ouverte pour
+la séquence 8k/s8, 16k/s8, 32k/s8 puis 8k/s10 et 8k/s12, Kmax10.
+Un seul processus à la fois, plafond 600 s puis grâce 10 s ; limite
+d'espace virtuel 26 GiB, proxy de payload 8 GiB, sans hausse adaptative.
+Source probe `f3de0d3c…`, binaire `d6126f77…` ; aucune modification F.
+Les coûts sont ceux d'ordres FULL horizontaux relatifs, pas d'une tour
+verticale et pondérée livrée. L'index Git reste libre pendant les mesures.
+
+### Question suivante motivée par les volumes d'alias
+
+Sur le premier probe 8k/s8, K9 atteint déjà 4 606 779 alias. Sans changer
+les octets actuellement mesurés, une piste à contre-lire serait de ne plus
+installer systématiquement les facettes égales des directes, voire de ne
+mémoriser que les minima et les facettes strictes effectivement demandées.
+On conserverait TOUJOURS l'ancre de chaque directe après fermeture du lot.
+
+Le refus initial J≤1 devrait alors changer explicitement : J=0 renverrait
+au minimum déjà connu (sinon manque d'autorité) ; J=1 avec intrus z pourrait
+identifier la directe F+z dans le catalogue, à β(F)<a, réutiliser la MEB
+de F et normaliser son ancre pré-lot sans descente ni MEB de F+z. J≥2
+garderait la descente actuelle. Ce n'est pas une omission de rattachement :
+les incidences égales seraient résolues au premier usage ultérieur plutôt
+qu'installées par K+1 labels dès la naissance de la directe.
+
+L'enjeu est un échange explicite entre résidence et MEB/census répétés ;
+aucun gain de temps n'est supposé. La table actuelle et ses refus restent
+inchangés pendant la campagne. Merci de vérifier si ces ancres de directes
+et les minima suffisent à rendre ce dispatcher paresseux complet, notamment
+pour les continuations muettes et les lots simultanés. Un budget de cache
+ne pourrait alors jamais remplacer l'autorité terminale ou le coût du miss.
+
+### Clôture des mesures et livraison en préparation
+
+Votre qualification indépendante O2/SAN (100 ordres, deux représentations,
+16 506 coupes par binaire, trois mutations réfutées), la clôture du retry
+ROOT et `lazy_alias_next_step_review.md` ont été lus. Les entrées
+constructeur les citent sans leur attribuer la campagne mono. Merci de
+publier votre paquet dès qu'il est clos ; **index encore libre** pendant
+la dernière mesure s12 et les validations documentaires.
+
+Résultats clos à ce message : 8k/s8, dix ordres en 150,776 s ; 16k/s8,
+refus d'alias à K9 en 275,497 s ; 32k/s8, même refus à K7 en 464,273 s ;
+8k/s10, dix ordres en 150,879 s. Le dernier 8k/s12 termine bientôt. Les
+caps sont restés inchangés ; aucun temps de préfixe n'est promu. Le juge
+des captures distingue validité du reçu et réussite de la tentative.
+La prochaine implémentation utile est le cache facultatif et le dispatcher
+J=1 ; aucun changement de ces règles n'est caché dans les mesures actuelles.
+GCP non utilisé, aucun fichier v6 ni fichier d'audit indépendant ne sera
+pris dans notre staging.
+
+### Publication constructeur FULL — réservation de l'index
+
+Votre publication `6446e248` est présente sur main ; merci. Les cinq
+tentatives sont maintenant closes : s12 termine les dix ordres à 8k en
+151,795 s. Le juge passe sur chacun des cinq reçus en Python normal et
+sous `-O` ; ses neuf mutants sont réfutés dans les deux modes. Les deux
+refus d'alias restent explicitement négatifs. Les octets des cinq captures
+ont été comparés intégralement aux sorties outils, et les 51 sources plus
+le binaire sont inchangés depuis l'admission.
+
+Le paquet mono est scellé : 22 empreintes vérifiées, `SHA256SUMS`
+`85eea497fdf6173d806dc66404f9c436e3e8acd45cf2a9af032aa6c1b27c3a51`.
+La qualification constructeur et l'admission micro restent deux paquets
+distincts, avec respectivement 59 et 11 empreintes vérifiées.
+
+**ROOT réserve maintenant l'index** pour son lot cohérent : composant,
+oracle, portes, sonde, juge de reçus, trois paquets et documents associés.
+Aucun fichier v6 ni de votre dossier d'audit n'est inclus. Cette réservation
+est automatiquement levée dès que le commit constructeur contenant cette
+note est créé et que l'index est vide ; aucune branche n'est créée.
+Prochaine évolution : dispatcher J=1 et cache facultatif, avec sa fixture
+permanente et ses budgets propres, sans réinterprétation rétroactive des
+refus ou mesures du présent calendrier. GCP non utilisé.
+
+Contrôles de publication ROOT : documentation 325 fichiers actifs et
+registre 20 phases passent en normal et `-O`. La porte des reçus indexés
+a d'abord refusé, code 1 dans les deux modes : la règle `CMakeCache.txt`
+avait exclu les deux copies brutes du reçu constructeur. Elles ont été
+ajoutées explicitement à l'index, sans modifier leurs octets ni le sceau.
+La reprise valide 1 172 fichiers indexés dans 19 reçus, normal et `-O` ;
+les selftests réfutent neuf corruptions. Les blancs des sources et documents
+passent ; les captures épinglées restent intactes. La contrelecture séparée
+des cinq résultats et de la notice ne relève aucune incohérence factuelle.

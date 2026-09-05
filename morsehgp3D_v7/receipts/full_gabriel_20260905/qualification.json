@@ -1,0 +1,197 @@
+{
+  "schema": "mhgp7-full-gabriel-targeted-qualification-v1",
+  "status": "completed",
+  "qualified_scope": "seven_named_local_CTests_only",
+  "frame": {
+    "phase": "exploration_v7_hors_registre",
+    "backend": "cpu_reference",
+    "profile": "quantized_u16_input_only",
+    "mode": "audit_independant_math_and_architecture",
+    "public_status": "not_claimed"
+  },
+  "authority": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues",
+  "completed_utc": "2026-09-05 16:02:28 UTC",
+  "attempts": {
+    "release": {
+      "JUnit_exact_names": true,
+      "LastTest_closed": true,
+      "ctest_reported_seconds": 0.27,
+      "failed": 0,
+      "passed": 7,
+      "tests": 7
+    },
+    "root_sanitized_attempt2": {
+      "JUnit_exact_names": true,
+      "LastTest_closed": true,
+      "ctest_reported_seconds": 1.32,
+      "failed": 0,
+      "passed": 7,
+      "tests": 7
+    },
+    "sanitized_attempt1": {
+      "JUnit_exact_names": true,
+      "LastTest_closed": true,
+      "ctest_reported_seconds": 1.26,
+      "failed": 7,
+      "passed": 0,
+      "tests": 7
+    }
+  },
+  "source_superset_before_after_identical": 56,
+  "binaries_before_after_identical": 6,
+  "tool_binaries_before_after_identical": 3,
+  "source_highlights": {
+    "morsehgp3D_v7/CMakeLists.txt": {
+      "bytes": 76597,
+      "sha256": "7274e9be3ba42f391c06d66d5ab0caa451849fac36685630a43af0f32b5edf95"
+    },
+    "morsehgp3D_v7/cmake/run_expect.cmake": {
+      "bytes": 1624,
+      "sha256": "7bb9af4eddbea7e7a66619c92491dc11c22a49d7b3b46bddd6b2c25b20b2d605"
+    },
+    "morsehgp3D_v7/src/forest/full_certificate.hpp": {
+      "bytes": 12991,
+      "sha256": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2"
+    },
+    "morsehgp3D_v7/src/forest/full_gabriel.hpp": {
+      "bytes": 21054,
+      "sha256": "e02d163ced2074d6b91fe810c112fb946aca56a7724c8e2ae586e3baee97c170"
+    },
+    "morsehgp3D_v7/oracle/full_gamma.hpp": {
+      "bytes": 11325,
+      "sha256": "a17732d2bd7861a3e7e3f76d029da3b2078ce4ebf0b64f7d7571e5060de24f0c"
+    },
+    "morsehgp3D_v7/tests/full_certificate_gate.cpp": {
+      "bytes": 25751,
+      "sha256": "17f5e2bafecc66556bcc1cfbfc51ed20e47cca82716ad0f2e34b1e5994a266a7"
+    },
+    "morsehgp3D_v7/tests/full_gabriel_gate.cpp": {
+      "bytes": 37108,
+      "sha256": "577a689b729a55039609b64873cd5a9bd006969305824f7b3eebac2708501b1f"
+    },
+    "morsehgp3D_v7/tests/full_gabriel_allocation_gate.cpp": {
+      "bytes": 14617,
+      "sha256": "5d3f8e86c2ab2e89bdc7e532d6d85921d4c894c3ff3a026e1a52d809042de8a4"
+    }
+  },
+  "tests": [
+    {
+      "name": "mhgp7_full_certificate",
+      "expected_engine_exit_code": 0,
+      "exit_code_verified_by": "pinned_run_expect.cmake_and_passed_CTest",
+      "timeout_seconds": 60
+    },
+    {
+      "name": "mhgp7_full_certificate_rejects",
+      "expected_engine_exit_code": 0,
+      "exit_code_verified_by": "pinned_run_expect.cmake_and_passed_CTest",
+      "timeout_seconds": 60
+    },
+    {
+      "name": "mhgp7_full_gabriel",
+      "expected_engine_exit_code": 0,
+      "exit_code_verified_by": "pinned_run_expect.cmake_and_passed_CTest",
+      "timeout_seconds": 60
+    },
+    {
+      "name": "mhgp7_full_gabriel_rejects",
+      "expected_engine_exit_code": 0,
+      "exit_code_verified_by": "pinned_run_expect.cmake_and_passed_CTest",
+      "timeout_seconds": 60
+    },
+    {
+      "name": "mhgp7_full_gabriel_bad_argument",
+      "expected_engine_exit_code": 2,
+      "exit_code_verified_by": "pinned_run_expect.cmake_and_passed_CTest",
+      "timeout_seconds": 60
+    },
+    {
+      "name": "mhgp7_full_gabriel_allocation",
+      "expected_engine_exit_code": 0,
+      "exit_code_verified_by": "pinned_run_expect.cmake_and_passed_CTest",
+      "timeout_seconds": 60
+    },
+    {
+      "name": "mhgp7_full_gabriel_allocation_bad_argument",
+      "expected_engine_exit_code": 2,
+      "exit_code_verified_by": "pinned_run_expect.cmake_and_passed_CTest",
+      "timeout_seconds": 60
+    }
+  ],
+  "semantic_outputs_equal_release_and_sanitized": true,
+  "full_gabriel_selftest": {
+    "cloud_configurations": 10,
+    "catalogues": 30,
+    "catalogue_records": 136,
+    "order_executions": 67,
+    "open_closed_gamma_cuts": 1492,
+    "isolated_component_observations": 1379,
+    "permutation_executions": 27,
+    "named_checks": 24,
+    "checks": 43701,
+    "failures": 0,
+    "floor": 1
+  },
+  "full_gabriel_rejects": {
+    "order_executions": 68,
+    "open_closed_gamma_cuts": 1524,
+    "refusals": 80,
+    "real_external_shell_refusal": 1,
+    "incomplete_catalogue_authority_refutation": 1,
+    "checks": 44982,
+    "failures": 0,
+    "floor": 1
+  },
+  "allocation_gate": {
+    "allocations_observed": 102,
+    "persistent_fault_runs": 102,
+    "denied": 102,
+    "escaped": 0,
+    "checks": 786,
+    "failures": 0,
+    "floor": 1
+  },
+  "structural_gate": {
+    "selftest_checks": 68,
+    "reject_checks": 218,
+    "build_refusals": 45,
+    "read_refusals": 19,
+    "allocation_failures": 15
+  },
+  "provenance": {
+    "commands": "commands.json",
+    "compile_binding": "compile_bindings.json",
+    "raw_copy_provenance": "raw_copy_provenance.json",
+    "verification": "verification.json",
+    "source_before": "source_before.json",
+    "source_after": "source_after.json",
+    "binary_before": [
+      "release_binaries_before_ctest.txt",
+      "sanitized_binaries_before_ctest.txt"
+    ],
+    "binary_after": "binaries_after.txt",
+    "sanitizer_context_transfer": "execution_amendment.json"
+  },
+  "historical_agent_trials": {
+    "authority": "preparatory_only_not_used_as_fresh_qualification",
+    "binary_v1": {
+      "path": "build/v7_full_gabriel_gate_agent",
+      "sha256": "67428755ea1b0bacef905e211efb9ae96bd41cab37a2bdc3f11a19dae313c6af"
+    },
+    "binary_v2": {
+      "path": "build/v7_full_gabriel_gate_agent_v2",
+      "sha256": "11021ec9640b357ea480baa809dc8b91f58d1bff78ff93760ed999efaf8d2f80"
+    },
+    "compile_profile": "direct_g++_O2_CPU0_not_CMake_Release_or_instrumented"
+  },
+  "limitations": [
+    "not_full_F_regression_suite",
+    "not_a_CLI_or_vertical_FULL_integration",
+    "no_global_catalogue_completeness_authentication",
+    "not_a_hermetic_toolchain_proof_system_headers_not_pre_pinned",
+    "no_named_two_iteration_or_intermediate_one_intruder_gate_yet",
+    "no_RSS_or_runtime_contract_certification",
+    "no_50k_1s_100ms_or_massive_G4_claim",
+    "GCP_not_used"
+  ]
+}

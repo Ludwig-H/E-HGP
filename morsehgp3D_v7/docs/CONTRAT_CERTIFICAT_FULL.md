@@ -120,9 +120,10 @@ conteneurs irréalisables sur cet hôte 64 bits ne sont pas déclarés exercés.
 Les fixtures géométriques sont des entrées exactes épinglées, pas une
 nouvelle qualification de générateur ou un oracle géométrique indépendant.
 
-Prochaine étape : produire ces lots depuis le catalogue Gabriel complet,
-avec naissance des minima et résolution des portails dans l'état FULL
-strict pré-lot, sous budgets de travail propres. Requalifier ensuite les
-coupes contre Gamma sur de petites entrées, puis les ancres verticales au
-plateau inférieur fermé. Aucun seuil de performance, palier massif ou
-statut public exact ne découle de ce premier composant.
+Le [producteur horizontal suivant](CONTRAT_PRODUCTEUR_FULL_GABRIEL.md)
+produit désormais ces lots depuis deux catalogues Gabriel fournis, sous
+prémisses de complétude, exactitude et régularité extérieures. Il possède
+ses propres portails, budgets et comparaison bornée à Gamma ; ses résultats
+ne sont pas hérités de ce certificat structurel. Les ancres verticales au
+plateau inférieur fermé restent à raccorder. Aucun seuil de performance,
+palier massif ou statut public exact ne découle de ce premier composant.

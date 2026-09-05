@@ -1,0 +1,129 @@
+Start testing: Sep 05 15:47 UTC
+----------------------------------------------------------
+1/392 Testing: mhgp7_full_certificate
+1/392 Test: mhgp7_full_certificate
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+"mhgp7_full_certificate" start time: Sep 05 15:47 UTC
+Output:
+----------------------------------------------------------
+full_certificate mode=--selftest authority=structural_only positives=11 build_refusals=0 read_refusals=3 allocation_failures=0 checks=68 failures=0 floor=1
+
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_certificate" end time: Sep 05 15:47 UTC
+"mhgp7_full_certificate" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/392 Testing: mhgp7_full_certificate_rejects
+2/392 Test: mhgp7_full_certificate_rejects
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate" "-DARGS=--rejects" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+"mhgp7_full_certificate_rejects" start time: Sep 05 15:47 UTC
+Output:
+----------------------------------------------------------
+full_certificate mode=--rejects authority=structural_only positives=13 build_refusals=45 read_refusals=19 allocation_failures=15 checks=218 failures=0 floor=1
+
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_certificate_rejects" end time: Sep 05 15:47 UTC
+"mhgp7_full_certificate_rejects" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/392 Testing: mhgp7_full_gabriel
+3/392 Test: mhgp7_full_gabriel
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+"mhgp7_full_gabriel" start time: Sep 05 15:47 UTC
+Output:
+----------------------------------------------------------
+full_gabriel mode=--selftest authority=relative_supplied_catalogues oracle=OBig_FULL clouds=10 catalogues=30 records=136 orders=67 cuts=1492 isolated_cuts=1379 permutations=27 named=24 rejections=0 shell_refusals=0 authority_refutations=0 checks=43701 failures=0 floor=1
+
+<end of output>
+Test time =   0.59 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_gabriel" end time: Sep 05 15:47 UTC
+"mhgp7_full_gabriel" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/392 Testing: mhgp7_full_gabriel_rejects
+4/392 Test: mhgp7_full_gabriel_rejects
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate" "-DARGS=--rejects" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+"mhgp7_full_gabriel_rejects" start time: Sep 05 15:47 UTC
+Output:
+----------------------------------------------------------
+full_gabriel mode=--rejects authority=relative_supplied_catalogues oracle=OBig_FULL clouds=13 catalogues=36 records=157 orders=68 cuts=1524 isolated_cuts=1403 permutations=27 named=24 rejections=80 shell_refusals=1 authority_refutations=1 checks=44982 failures=0 floor=1
+
+<end of output>
+Test time =   0.57 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_gabriel_rejects" end time: Sep 05 15:47 UTC
+"mhgp7_full_gabriel_rejects" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/392 Testing: mhgp7_full_gabriel_bad_argument
+5/392 Test: mhgp7_full_gabriel_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+"mhgp7_full_gabriel_bad_argument" start time: Sep 05 15:47 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_gabriel_bad_argument" end time: Sep 05 15:47 UTC
+"mhgp7_full_gabriel_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/392 Testing: mhgp7_full_gabriel_allocation
+6/392 Test: mhgp7_full_gabriel_allocation
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+"mhgp7_full_gabriel_allocation" start time: Sep 05 15:47 UTC
+Output:
+----------------------------------------------------------
+full_gabriel_allocation positives=3 portal_positives=3 allocations=102 fault_runs=102 denied=102 escaped=0 checks=786 failures=0 floor=1
+
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_gabriel_allocation" end time: Sep 05 15:47 UTC
+"mhgp7_full_gabriel_allocation" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/392 Testing: mhgp7_full_gabriel_allocation_bad_argument
+7/392 Test: mhgp7_full_gabriel_allocation_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+"mhgp7_full_gabriel_allocation_bad_argument" start time: Sep 05 15:47 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_gabriel_allocation_bad_argument" end time: Sep 05 15:47 UTC
+"mhgp7_full_gabriel_allocation_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 05 15:47 UTC
+
+full_certificate =   0.06 sec*proc
+
+full_gabriel =   1.25 sec*proc
+
+gate =   1.30 sec*proc
+
+oracle =   1.16 sec*proc
+

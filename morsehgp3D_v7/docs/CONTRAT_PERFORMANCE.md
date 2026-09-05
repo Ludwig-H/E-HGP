@@ -31,6 +31,11 @@ K+1 et parents certifiés. Leurs unions descendantes restituent les couvertures,
 isolés inclus. Le [lecteur structurel livré](CONTRAT_CERTIFICAT_FULL.md)
 `src/forest/full_certificate.hpp` n'est pas, à lui seul, un constructeur
 complet ni une porte de performance.
+Le [producteur FULL horizontal](CONTRAT_PRODUCTEUR_FULL_GABRIEL.md)
+calcule ensuite les parents relativement aux catalogues Gabriel fournis.
+Même une exécution des ordres 1..K de ce composant ne qualifie pas la tour
+intégrée : la verticale, l'autorité terminale, le profil pondéré déclaré
+et la publication ne sont pas encore raccordés.
 Le produit F et ses mesures réduites ou `verified_events_only` conservent
 leur portée historique ; aucune de ces mesures ne qualifie ce nouveau payload.
 

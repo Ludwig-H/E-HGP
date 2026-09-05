@@ -1,0 +1,17 @@
+{
+  "command": "taskset -c 0 env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 ctest --test-dir build/v7_full_gabriel_20260905_san -j 1 -V --output-on-failure -R '^mhgp7_full_(certificate|gabriel)($|_)' --output-junit /workspaces/E-HGP/build/v7_full_gabriel_20260905_san/full_gabriel_root_attempt2.xml",
+  "started_utc": {
+    "current_time": "2026-09-05 15:47:57 UTC"
+  },
+  "ended_utc": {
+    "current_time": "2026-09-05 15:48:12 UTC"
+  },
+  "exit_code": 0,
+  "permission_override": "none",
+  "sanitizers_disabled": false,
+  "process_context_observed_before": {
+    "TracerPid": 0,
+    "NoNewPrivs": 0,
+    "Seccomp": 0
+  }
+}

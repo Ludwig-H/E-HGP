@@ -1,0 +1,72 @@
+{
+  "schema": "mhgp7-full-gabriel-targeted-qualification-protocol-v1",
+  "prepared_utc": "2026-09-05 15:33:20 UTC",
+  "status": "preparation_not_a_qualification",
+  "scope": "only_seven_named_CTests_no_full_F_suite_no_CLI_GPU_or_performance_claim",
+  "expected_tests": [
+    {
+      "name": "mhgp7_full_certificate",
+      "engine_exit_code": 0,
+      "ctest_timeout_seconds": 60
+    },
+    {
+      "name": "mhgp7_full_certificate_rejects",
+      "engine_exit_code": 0,
+      "ctest_timeout_seconds": 60
+    },
+    {
+      "name": "mhgp7_full_gabriel",
+      "engine_exit_code": 0,
+      "ctest_timeout_seconds": 60
+    },
+    {
+      "name": "mhgp7_full_gabriel_rejects",
+      "engine_exit_code": 0,
+      "ctest_timeout_seconds": 60
+    },
+    {
+      "name": "mhgp7_full_gabriel_bad_argument",
+      "engine_exit_code": 2,
+      "ctest_timeout_seconds": 60
+    },
+    {
+      "name": "mhgp7_full_gabriel_allocation",
+      "engine_exit_code": 0,
+      "ctest_timeout_seconds": 60
+    },
+    {
+      "name": "mhgp7_full_gabriel_allocation_bad_argument",
+      "engine_exit_code": 2,
+      "ctest_timeout_seconds": 60
+    }
+  ],
+  "build_directories": {
+    "release": "build/v7_full_gabriel_20260905",
+    "sanitized": "build/v7_full_gabriel_20260905_san"
+  },
+  "freshness": "both_build_directories_and_receipt_directory_observed_absent_before_preparation",
+  "build_targets": [
+    "mhgp7_full_certificate_gate",
+    "mhgp7_full_gabriel_gate",
+    "mhgp7_full_gabriel_allocation_gate"
+  ],
+  "cpu_affinity": [
+    0
+  ],
+  "parallel_build_jobs": 2,
+  "release": {
+    "type": "Release",
+    "optimization": "CMake_default_O3_NDEBUG"
+  },
+  "sanitized": {
+    "type": "RelWithDebInfo",
+    "configuration_flags": "-O1 -g -DNDEBUG",
+    "compiler_flags": "-fsanitize=address,undefined -fno-omit-frame-pointer -fno-pie",
+    "linker_flags": "-fsanitize=address,undefined -no-pie",
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "pins": "source superset before configure and after campaign; exact project transitive dependencies extracted from compiler .o.d files and bound to that superset; binaries before and after CTest",
+  "captures": "complete merged stdout/stderr for configure/build/CTest -V; exact LastTest/JUnit/compile_flags/link/dependency bytes; no reinterpretation of historical direct agent runs as fresh evidence",
+  "failure_policy": "preserve failure, notify parent immediately; no sanitizer option neutralization; an escalation retry if required is a distinct preserved attempt"
+}

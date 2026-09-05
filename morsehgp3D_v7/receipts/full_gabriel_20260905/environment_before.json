@@ -1,0 +1,38 @@
+{
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "captured_utc": "2026-09-05T15:32:13.822542+00:00",
+  "tools": {
+    "c++": {
+      "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+      "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+      "version": "x86_64-linux-gnu-g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
+    },
+    "cmake": {
+      "path": "/usr/bin/cmake",
+      "sha256": "1c5227af4edd22d8d689def545e18ee458260c0fd579eba2187967f38817e638",
+      "version": "cmake version 3.28.3\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).\n"
+    },
+    "ctest": {
+      "path": "/usr/bin/ctest",
+      "sha256": "45c60ab2448411a4f49a0bdb6cf5800fedbf0293048e3c82710a34190c7d1ef4",
+      "version": "ctest version 3.28.3\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).\n"
+    }
+  },
+  "uname": [
+    "Linux",
+    "codespaces-0bcb78",
+    "6.8.0-1052-azure",
+    "#58~22.04.1-Ubuntu SMP Thu Mar 26 05:02:21 UTC 2026",
+    "x86_64",
+    "x86_64"
+  ]
+}

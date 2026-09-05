@@ -1,0 +1,34 @@
+{
+  "schema": "mhgp7-full-gabriel-qualification-execution-amendment-v1",
+  "original_protocol_preserved": "protocol.json",
+  "reason": "LeakSanitizer failed under the child execution context; a requested escalation yielded no execution result and was interrupted. No successful escalated run is claimed.",
+  "authorized_continuation": "ROOT performed a separate normal exec attempt with no permission override and no sanitizer deactivation; no child test was rerun.",
+  "original_sanitized_attempt": {
+    "ctest_exit_code": 8,
+    "passed": 0,
+    "failed": 7,
+    "classification": "failed_environment_LeakSanitizer_ptrace",
+    "capture": "sanitized_ctest_attempt1.txt",
+    "LastTest": "sanitized_attempt1/LastTest.txt",
+    "JUnit": "sanitized_attempt1/junit.xml"
+  },
+  "replacement_execution": {
+    "executor": "ROOT",
+    "command_record": "root_sanitized_attempt2_command.json",
+    "ctest_exit_code": 0,
+    "passed": 7,
+    "failed": 0,
+    "LastTest": "sanitized_attempt2/LastTest.txt",
+    "JUnit": "sanitized_attempt2/junit.xml",
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1",
+    "permission_override": "none",
+    "process_context": {
+      "TracerPid": 0,
+      "NoNewPrivs": 0,
+      "Seccomp": 0
+    }
+  },
+  "differences": "ROOT used the equivalent full_(certificate|gabriel) name filter, --output-on-failure, and a distinct absolute JUnit destination. The observed seven names and per-test TIMEOUT=60 are identical. ROOT did not use the child's outer timeout wrapper.",
+  "historical_boundary": "sanitized_attempt2_source_before_ctest.json is the child's pre-transfer source snapshot, not proof of a child second execution; root_sanitized_before.json binds the actual ROOT execution."
+}

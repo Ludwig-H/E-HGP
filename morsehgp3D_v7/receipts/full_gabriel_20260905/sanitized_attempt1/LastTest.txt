@@ -1,0 +1,173 @@
+Start testing: Sep 05 15:40 UTC
+----------------------------------------------------------
+1/392 Testing: mhgp7_full_certificate
+1/392 Test: mhgp7_full_certificate
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+"mhgp7_full_certificate" start time: Sep 05 15:40 UTC
+Output:
+----------------------------------------------------------
+==82==LeakSanitizer has encountered a fatal error.
+==82==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==82==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+  code de sortie 1, attendu 0
+
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp7_full_certificate" end time: Sep 05 15:40 UTC
+"mhgp7_full_certificate" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/392 Testing: mhgp7_full_certificate_rejects
+2/392 Test: mhgp7_full_certificate_rejects
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate" "-DARGS=--rejects" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+"mhgp7_full_certificate_rejects" start time: Sep 05 15:40 UTC
+Output:
+----------------------------------------------------------
+==85==LeakSanitizer has encountered a fatal error.
+==85==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==85==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+  code de sortie 1, attendu 0
+
+
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp7_full_certificate_rejects" end time: Sep 05 15:40 UTC
+"mhgp7_full_certificate_rejects" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/392 Testing: mhgp7_full_gabriel
+3/392 Test: mhgp7_full_gabriel
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+"mhgp7_full_gabriel" start time: Sep 05 15:40 UTC
+Output:
+----------------------------------------------------------
+==88==LeakSanitizer has encountered a fatal error.
+==88==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==88==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+  code de sortie 1, attendu 0
+
+
+<end of output>
+Test time =   0.53 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp7_full_gabriel" end time: Sep 05 15:40 UTC
+"mhgp7_full_gabriel" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/392 Testing: mhgp7_full_gabriel_rejects
+4/392 Test: mhgp7_full_gabriel_rejects
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate" "-DARGS=--rejects" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+"mhgp7_full_gabriel_rejects" start time: Sep 05 15:40 UTC
+Output:
+----------------------------------------------------------
+==91==LeakSanitizer has encountered a fatal error.
+==91==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==91==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+  code de sortie 1, attendu 0
+
+
+<end of output>
+Test time =   0.58 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp7_full_gabriel_rejects" end time: Sep 05 15:40 UTC
+"mhgp7_full_gabriel_rejects" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/392 Testing: mhgp7_full_gabriel_bad_argument
+5/392 Test: mhgp7_full_gabriel_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+"mhgp7_full_gabriel_bad_argument" start time: Sep 05 15:40 UTC
+Output:
+----------------------------------------------------------
+==94==LeakSanitizer has encountered a fatal error.
+==94==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==94==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+  code de sortie 1, attendu 2
+
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp7_full_gabriel_bad_argument" end time: Sep 05 15:40 UTC
+"mhgp7_full_gabriel_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/392 Testing: mhgp7_full_gabriel_allocation
+6/392 Test: mhgp7_full_gabriel_allocation
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+"mhgp7_full_gabriel_allocation" start time: Sep 05 15:40 UTC
+Output:
+----------------------------------------------------------
+==97==LeakSanitizer has encountered a fatal error.
+==97==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==97==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+  code de sortie 1, attendu 0
+
+
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp7_full_gabriel_allocation" end time: Sep 05 15:40 UTC
+"mhgp7_full_gabriel_allocation" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/392 Testing: mhgp7_full_gabriel_allocation_bad_argument
+7/392 Test: mhgp7_full_gabriel_allocation_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+"mhgp7_full_gabriel_allocation_bad_argument" start time: Sep 05 15:40 UTC
+Output:
+----------------------------------------------------------
+==100==LeakSanitizer has encountered a fatal error.
+==100==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==100==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+  code de sortie 1, attendu 2
+
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp7_full_gabriel_allocation_bad_argument" end time: Sep 05 15:40 UTC
+"mhgp7_full_gabriel_allocation_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 05 15:40 UTC
+
+full_certificate =   0.05 sec*proc
+
+full_gabriel =   1.20 sec*proc
+
+gate =   1.24 sec*proc
+
+oracle =   1.12 sec*proc
+

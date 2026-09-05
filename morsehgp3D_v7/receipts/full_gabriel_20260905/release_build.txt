@@ -1,0 +1,71 @@
+Change Dir: '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+
+Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile -j2 mhgp7_full_certificate_gate mhgp7_full_gabriel_gate mhgp7_full_gabriel_allocation_gate
+/usr/bin/cmake -S/workspaces/E-HGP/morsehgp3D_v7 -B/workspaces/E-HGP/build/v7_full_gabriel_20260905 --check-build-system CMakeFiles/Makefile.cmake 0
+/usr/bin/gmake  -f CMakeFiles/Makefile2 mhgp7_full_certificate_gate
+gmake[1]: Entering directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+/usr/bin/cmake -S/workspaces/E-HGP/morsehgp3D_v7 -B/workspaces/E-HGP/build/v7_full_gabriel_20260905 --check-build-system CMakeFiles/Makefile.cmake 0
+/usr/bin/cmake -E cmake_progress_start /workspaces/E-HGP/build/v7_full_gabriel_20260905/CMakeFiles 2
+/usr/bin/gmake  -f CMakeFiles/Makefile2 CMakeFiles/mhgp7_full_certificate_gate.dir/all
+gmake[2]: Entering directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+/usr/bin/gmake  -f CMakeFiles/mhgp7_full_certificate_gate.dir/build.make CMakeFiles/mhgp7_full_certificate_gate.dir/depend
+gmake[3]: Entering directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+cd /workspaces/E-HGP/build/v7_full_gabriel_20260905 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /workspaces/E-HGP/morsehgp3D_v7 /workspaces/E-HGP/morsehgp3D_v7 /workspaces/E-HGP/build/v7_full_gabriel_20260905 /workspaces/E-HGP/build/v7_full_gabriel_20260905 /workspaces/E-HGP/build/v7_full_gabriel_20260905/CMakeFiles/mhgp7_full_certificate_gate.dir/DependInfo.cmake "--color="
+gmake[3]: Leaving directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+/usr/bin/gmake  -f CMakeFiles/mhgp7_full_certificate_gate.dir/build.make CMakeFiles/mhgp7_full_certificate_gate.dir/build
+gmake[3]: Entering directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+[ 50%] Building CXX object CMakeFiles/mhgp7_full_certificate_gate.dir/tests/full_certificate_gate.cpp.o
+/usr/bin/c++   -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/mhgp7_full_certificate_gate.dir/tests/full_certificate_gate.cpp.o -MF CMakeFiles/mhgp7_full_certificate_gate.dir/tests/full_certificate_gate.cpp.o.d -o CMakeFiles/mhgp7_full_certificate_gate.dir/tests/full_certificate_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/full_certificate_gate.cpp
+[100%] Linking CXX executable mhgp7_full_certificate_gate
+/usr/bin/cmake -E cmake_link_script CMakeFiles/mhgp7_full_certificate_gate.dir/link.txt --verbose=1
+/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/mhgp7_full_certificate_gate.dir/tests/full_certificate_gate.cpp.o -o mhgp7_full_certificate_gate 
+gmake[3]: Leaving directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+[100%] Built target mhgp7_full_certificate_gate
+gmake[2]: Leaving directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+/usr/bin/cmake -E cmake_progress_start /workspaces/E-HGP/build/v7_full_gabriel_20260905/CMakeFiles 0
+gmake[1]: Leaving directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+/usr/bin/gmake  -f CMakeFiles/Makefile2 mhgp7_full_gabriel_gate
+gmake[1]: Entering directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+/usr/bin/cmake -S/workspaces/E-HGP/morsehgp3D_v7 -B/workspaces/E-HGP/build/v7_full_gabriel_20260905 --check-build-system CMakeFiles/Makefile.cmake 0
+/usr/bin/cmake -E cmake_progress_start /workspaces/E-HGP/build/v7_full_gabriel_20260905/CMakeFiles 2
+/usr/bin/gmake  -f CMakeFiles/Makefile2 CMakeFiles/mhgp7_full_gabriel_gate.dir/all
+gmake[2]: Entering directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+/usr/bin/gmake  -f CMakeFiles/mhgp7_full_gabriel_gate.dir/build.make CMakeFiles/mhgp7_full_gabriel_gate.dir/depend
+gmake[3]: Entering directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+cd /workspaces/E-HGP/build/v7_full_gabriel_20260905 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /workspaces/E-HGP/morsehgp3D_v7 /workspaces/E-HGP/morsehgp3D_v7 /workspaces/E-HGP/build/v7_full_gabriel_20260905 /workspaces/E-HGP/build/v7_full_gabriel_20260905 /workspaces/E-HGP/build/v7_full_gabriel_20260905/CMakeFiles/mhgp7_full_gabriel_gate.dir/DependInfo.cmake "--color="
+gmake[3]: Leaving directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+/usr/bin/gmake  -f CMakeFiles/mhgp7_full_gabriel_gate.dir/build.make CMakeFiles/mhgp7_full_gabriel_gate.dir/build
+gmake[3]: Entering directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+[ 50%] Building CXX object CMakeFiles/mhgp7_full_gabriel_gate.dir/tests/full_gabriel_gate.cpp.o
+/usr/bin/c++   -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/mhgp7_full_gabriel_gate.dir/tests/full_gabriel_gate.cpp.o -MF CMakeFiles/mhgp7_full_gabriel_gate.dir/tests/full_gabriel_gate.cpp.o.d -o CMakeFiles/mhgp7_full_gabriel_gate.dir/tests/full_gabriel_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_gate.cpp
+[100%] Linking CXX executable mhgp7_full_gabriel_gate
+/usr/bin/cmake -E cmake_link_script CMakeFiles/mhgp7_full_gabriel_gate.dir/link.txt --verbose=1
+/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/mhgp7_full_gabriel_gate.dir/tests/full_gabriel_gate.cpp.o -o mhgp7_full_gabriel_gate 
+gmake[3]: Leaving directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+[100%] Built target mhgp7_full_gabriel_gate
+gmake[2]: Leaving directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+/usr/bin/cmake -E cmake_progress_start /workspaces/E-HGP/build/v7_full_gabriel_20260905/CMakeFiles 0
+gmake[1]: Leaving directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+/usr/bin/gmake  -f CMakeFiles/Makefile2 mhgp7_full_gabriel_allocation_gate
+gmake[1]: Entering directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+/usr/bin/cmake -S/workspaces/E-HGP/morsehgp3D_v7 -B/workspaces/E-HGP/build/v7_full_gabriel_20260905 --check-build-system CMakeFiles/Makefile.cmake 0
+/usr/bin/cmake -E cmake_progress_start /workspaces/E-HGP/build/v7_full_gabriel_20260905/CMakeFiles 2
+/usr/bin/gmake  -f CMakeFiles/Makefile2 CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/all
+gmake[2]: Entering directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+/usr/bin/gmake  -f CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/build.make CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/depend
+gmake[3]: Entering directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+cd /workspaces/E-HGP/build/v7_full_gabriel_20260905 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /workspaces/E-HGP/morsehgp3D_v7 /workspaces/E-HGP/morsehgp3D_v7 /workspaces/E-HGP/build/v7_full_gabriel_20260905 /workspaces/E-HGP/build/v7_full_gabriel_20260905 /workspaces/E-HGP/build/v7_full_gabriel_20260905/CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/DependInfo.cmake "--color="
+gmake[3]: Leaving directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+/usr/bin/gmake  -f CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/build.make CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/build
+gmake[3]: Entering directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+[ 50%] Building CXX object CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/tests/full_gabriel_allocation_gate.cpp.o
+/usr/bin/c++   -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/tests/full_gabriel_allocation_gate.cpp.o -MF CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/tests/full_gabriel_allocation_gate.cpp.o.d -o CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/tests/full_gabriel_allocation_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_allocation_gate.cpp
+[100%] Linking CXX executable mhgp7_full_gabriel_allocation_gate
+/usr/bin/cmake -E cmake_link_script CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/link.txt --verbose=1
+/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/tests/full_gabriel_allocation_gate.cpp.o -o mhgp7_full_gabriel_allocation_gate 
+gmake[3]: Leaving directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+[100%] Built target mhgp7_full_gabriel_allocation_gate
+gmake[2]: Leaving directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+/usr/bin/cmake -E cmake_progress_start /workspaces/E-HGP/build/v7_full_gabriel_20260905/CMakeFiles 0
+gmake[1]: Leaving directory '/workspaces/E-HGP/build/v7_full_gabriel_20260905'
+

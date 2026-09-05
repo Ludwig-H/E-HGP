@@ -1,0 +1,48 @@
+{
+  "attempts": {
+    "release": {
+      "JUnit_exact_names": true,
+      "LastTest_closed": true,
+      "ctest_reported_seconds": 0.27,
+      "failed": 0,
+      "passed": 7,
+      "tests": 7
+    },
+    "root_sanitized_attempt2": {
+      "JUnit_exact_names": true,
+      "LastTest_closed": true,
+      "ctest_reported_seconds": 1.32,
+      "failed": 0,
+      "passed": 7,
+      "tests": 7
+    },
+    "sanitized_attempt1": {
+      "JUnit_exact_names": true,
+      "LastTest_closed": true,
+      "ctest_reported_seconds": 1.26,
+      "failed": 7,
+      "passed": 0,
+      "tests": 7
+    }
+  },
+  "binaries_before_after": 6,
+  "byte_exact_copies": 28,
+  "captured_utc": "2026-09-05T15:59:36.372075+00:00",
+  "new_product_tests_executed_by_this_verification": false,
+  "project_dependency_counts": {
+    "release": {
+      "mhgp7_full_certificate_gate": 9,
+      "mhgp7_full_gabriel_allocation_gate": 34,
+      "mhgp7_full_gabriel_gate": 36
+    },
+    "sanitized": {
+      "mhgp7_full_certificate_gate": 9,
+      "mhgp7_full_gabriel_allocation_gate": 34,
+      "mhgp7_full_gabriel_gate": 36
+    }
+  },
+  "release_sanitized_gate_lines_equal": true,
+  "schema": "mhgp7-full-gabriel-readonly-packaging-verification-v1",
+  "source_pins": 56,
+  "status": "passed"
+}

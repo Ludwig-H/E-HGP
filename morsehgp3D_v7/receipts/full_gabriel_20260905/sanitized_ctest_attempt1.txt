@@ -1,0 +1,137 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/DartConfiguration.tcl
+Test project /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+    Start 1: mhgp7_full_certificate
+
+1: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+1: Working Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+1: Test timeout computed to be: 60
+1: ==82==LeakSanitizer has encountered a fatal error.
+1: ==82==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+1: ==82==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+1: 
+1: CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+1:   code de sortie 1, attendu 0
+1: 
+1: 
+1/7 Test #1: mhgp7_full_certificate .......................***Failed    0.02 sec
+test 2
+    Start 2: mhgp7_full_certificate_rejects
+
+2: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate" "-DARGS=--rejects" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+2: Working Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+2: Test timeout computed to be: 60
+2: ==85==LeakSanitizer has encountered a fatal error.
+2: ==85==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+2: ==85==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+2: 
+2: CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+2:   code de sortie 1, attendu 0
+2: 
+2: 
+2/7 Test #2: mhgp7_full_certificate_rejects ...............***Failed    0.03 sec
+test 3
+    Start 3: mhgp7_full_gabriel
+
+3: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+3: Working Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+3: Test timeout computed to be: 60
+3: ==88==LeakSanitizer has encountered a fatal error.
+3: ==88==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+3: ==88==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+3: 
+3: CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+3:   code de sortie 1, attendu 0
+3: 
+3: 
+3/7 Test #3: mhgp7_full_gabriel ...........................***Failed    0.53 sec
+test 4
+    Start 4: mhgp7_full_gabriel_rejects
+
+4: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate" "-DARGS=--rejects" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+4: Working Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+4: Test timeout computed to be: 60
+4: ==91==LeakSanitizer has encountered a fatal error.
+4: ==91==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+4: ==91==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+4: 
+4: CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+4:   code de sortie 1, attendu 0
+4: 
+4: 
+4/7 Test #4: mhgp7_full_gabriel_rejects ...................***Failed    0.58 sec
+test 5
+    Start 5: mhgp7_full_gabriel_bad_argument
+
+5: Test command: /usr/bin/cmake "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+5: Working Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+5: Test timeout computed to be: 60
+5: ==94==LeakSanitizer has encountered a fatal error.
+5: ==94==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+5: ==94==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+5: 
+5: CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+5:   code de sortie 1, attendu 2
+5: 
+5: 
+5/7 Test #5: mhgp7_full_gabriel_bad_argument ..............***Failed    0.02 sec
+test 6
+    Start 6: mhgp7_full_gabriel_allocation
+
+6: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+6: Working Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+6: Test timeout computed to be: 60
+6: ==97==LeakSanitizer has encountered a fatal error.
+6: ==97==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+6: ==97==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+6: 
+6: CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+6:   code de sortie 1, attendu 0
+6: 
+6: 
+6/7 Test #6: mhgp7_full_gabriel_allocation ................***Failed    0.04 sec
+test 7
+    Start 7: mhgp7_full_gabriel_allocation_bad_argument
+
+7: Test command: /usr/bin/cmake "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+7: Working Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san
+7: Test timeout computed to be: 60
+7: ==100==LeakSanitizer has encountered a fatal error.
+7: ==100==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+7: ==100==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+7: 
+7: CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+7:   code de sortie 1, attendu 2
+7: 
+7: 
+7/7 Test #7: mhgp7_full_gabriel_allocation_bad_argument ...***Failed    0.02 sec
+
+0% tests passed, 7 tests failed out of 7
+
+Label Time Summary:
+full_certificate    =   0.05 sec*proc (2 tests)
+full_gabriel        =   1.20 sec*proc (5 tests)
+gate                =   1.24 sec*proc (7 tests)
+oracle              =   1.12 sec*proc (2 tests)
+
+Total Test time (real) =   1.26 sec
+
+The following tests FAILED:
+	  1 - mhgp7_full_certificate (Failed)
+	  2 - mhgp7_full_certificate_rejects (Failed)
+	  3 - mhgp7_full_gabriel (Failed)
+	  4 - mhgp7_full_gabriel_rejects (Failed)
+	  5 - mhgp7_full_gabriel_bad_argument (Failed)
+	  6 - mhgp7_full_gabriel_allocation (Failed)
+	  7 - mhgp7_full_gabriel_allocation_bad_argument (Failed)
+Errors while running CTest
+Output from these tests are in: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.

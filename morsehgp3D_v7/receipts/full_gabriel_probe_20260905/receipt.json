@@ -1,0 +1,420 @@
+{
+  "binary_sha256": "d6126f7778d7d7bb370cc59d356eb927bffa57f4cefeb72f8719a77ef6720204",
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "0",
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-O3",
+        "-DNDEBUG",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_full_gabriel_probe_20260905/micro/full_gabriel_probe.d",
+        "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_probe.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_full_gabriel_probe_20260905/micro/full_gabriel_probe"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 14.99724392400094,
+      "error": null,
+      "expected_rc": 0,
+      "label": "compile",
+      "rc": 0,
+      "status": "completed",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "6",
+        "/workspaces/E-HGP/build/v7_full_gabriel_probe_20260905/micro/full_gabriel_probe",
+        "--n=8",
+        "--s=8",
+        "--kmax=5"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.009032656998897437,
+      "error": null,
+      "expected_rc": 0,
+      "label": "n8_s8_k5",
+      "rc": 0,
+      "status": "completed",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 8687,
+      "stdout_sha256": "d83f486d292c902c8cde6a50ed7b1aba5fc93ae8a81ca808bdba0b84d104e9de",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "6",
+        "/workspaces/E-HGP/build/v7_full_gabriel_probe_20260905/micro/full_gabriel_probe",
+        "--n=8",
+        "--s=8",
+        "--kmax=10"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.008833871004753746,
+      "error": null,
+      "expected_rc": 0,
+      "label": "n8_s8_k10",
+      "rc": 0,
+      "status": "completed",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 11276,
+      "stdout_sha256": "b873a5a38be844c42a8738b8c71555147815b5e87aa45883b39312b842c41300",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "6",
+        "/workspaces/E-HGP/build/v7_full_gabriel_probe_20260905/micro/full_gabriel_probe",
+        "--n=8",
+        "--s=10",
+        "--kmax=5"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.008896164996258449,
+      "error": null,
+      "expected_rc": 0,
+      "label": "n8_s10_k5",
+      "rc": 0,
+      "status": "completed",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 8689,
+      "stdout_sha256": "c21641e7e584fb5d59ad95a6e0e5e2189f5ae2f48f7fde79f6866b4ec446576b",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "6",
+        "/workspaces/E-HGP/build/v7_full_gabriel_probe_20260905/micro/full_gabriel_probe",
+        "--n=8",
+        "--s=10",
+        "--kmax=10"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.008926328999223188,
+      "error": null,
+      "expected_rc": 0,
+      "label": "n8_s10_k10",
+      "rc": 0,
+      "status": "completed",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 11278,
+      "stdout_sha256": "6238ed8e9f67645537a0967a6272bd8fb575b0f7c15661b8d252eb5d4086ac6a",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "6",
+        "/workspaces/E-HGP/build/v7_full_gabriel_probe_20260905/micro/full_gabriel_probe",
+        "--n=8",
+        "--s=12",
+        "--kmax=5"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.004775389003043529,
+      "error": null,
+      "expected_rc": 0,
+      "label": "n8_s12_k5",
+      "rc": 0,
+      "status": "completed",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 8689,
+      "stdout_sha256": "7502bb95bb2bacc1198f702ee03dcce7726de515f41703b72bfeb35f1df33949",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "6",
+        "/workspaces/E-HGP/build/v7_full_gabriel_probe_20260905/micro/full_gabriel_probe",
+        "--n=8",
+        "--s=12",
+        "--kmax=10"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.008854402003635187,
+      "error": null,
+      "expected_rc": 0,
+      "label": "n8_s12_k10",
+      "rc": 0,
+      "status": "completed",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 11278,
+      "stdout_sha256": "289e32d58dd00c6dce84e41155f56ccbf547f7bf3518c9ee40587c71cec711db",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "6",
+        "/workspaces/E-HGP/build/v7_full_gabriel_probe_20260905/micro/full_gabriel_probe",
+        "--n=8",
+        "--s=8"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.004771253006765619,
+      "error": null,
+      "expected_rc": 2,
+      "label": "reject_missing",
+      "rc": 2,
+      "status": "completed",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 2266,
+      "stdout_sha256": "eeb337c7fd2de722d2e68a8f958516dd86a364ffbd5ff5e1c4f596e275249650",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "6",
+        "/workspaces/E-HGP/build/v7_full_gabriel_probe_20260905/micro/full_gabriel_probe",
+        "--n=8",
+        "--n=8",
+        "--s=8",
+        "--kmax=10"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.004784682998433709,
+      "error": null,
+      "expected_rc": 2,
+      "label": "reject_duplicate",
+      "rc": 2,
+      "status": "completed",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 2266,
+      "stdout_sha256": "bc8d9d16de5cb6c81e35058ad439b00f89bbbcf69852895bc16e20de7d0d69f7",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "6",
+        "/workspaces/E-HGP/build/v7_full_gabriel_probe_20260905/micro/full_gabriel_probe",
+        "--n=9",
+        "--s=8",
+        "--kmax=10"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.004765012999996543,
+      "error": null,
+      "expected_rc": 2,
+      "label": "reject_n9",
+      "rc": 2,
+      "status": "completed",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 2267,
+      "stdout_sha256": "ea673199118b452d53b471d1ebc996bc1163acb970ce55f91c4754e7c7c3f8f0",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "6",
+        "/workspaces/E-HGP/build/v7_full_gabriel_probe_20260905/micro/full_gabriel_probe",
+        "--n=8",
+        "--s=9",
+        "--kmax=10"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.004729189997306094,
+      "error": null,
+      "expected_rc": 2,
+      "label": "reject_s9",
+      "rc": 2,
+      "status": "completed",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 2267,
+      "stdout_sha256": "234e45ff922b8ae814ab39e5c97342fb20e1836c1dc72f24dca8f5dc1caac5a4",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "6",
+        "/workspaces/E-HGP/build/v7_full_gabriel_probe_20260905/micro/full_gabriel_probe",
+        "--n=8",
+        "--s=8",
+        "--kmax=0"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.004698644996096846,
+      "error": null,
+      "expected_rc": 2,
+      "label": "reject_k0",
+      "rc": 2,
+      "status": "completed",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 2266,
+      "stdout_sha256": "8c31e1f8fe8aa9e53cacf7e7352141560e3266393bff6e5a13556eb5940018b7",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "6",
+        "/workspaces/E-HGP/build/v7_full_gabriel_probe_20260905/micro/full_gabriel_probe",
+        "--n=8",
+        "--s=8",
+        "--kmax=10",
+        "--unknown"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.0046896969943190925,
+      "error": null,
+      "expected_rc": 2,
+      "label": "reject_unknown",
+      "rc": 2,
+      "status": "completed",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 2267,
+      "stdout_sha256": "195681b44795b6b81259fbf67a92166782c60b13ac9581ca7cb383611f102ec5",
+      "timeout_seconds": 60
+    }
+  ],
+  "micro_summaries": [
+    {
+      "census_balls": 66,
+      "elapsed_before_terminal_ms": 0.970723,
+      "kmax_requested": 5,
+      "nodes_by_k": [
+        15,
+        22,
+        26,
+        23,
+        19
+      ],
+      "orders": 5,
+      "raw_candidates": 66,
+      "s": 8
+    },
+    {
+      "census_balls": 71,
+      "elapsed_before_terminal_ms": 1.225893,
+      "kmax_requested": 10,
+      "nodes_by_k": [
+        15,
+        22,
+        26,
+        23,
+        19,
+        12,
+        5,
+        1
+      ],
+      "orders": 8,
+      "raw_candidates": 71,
+      "s": 8
+    },
+    {
+      "census_balls": 66,
+      "elapsed_before_terminal_ms": 0.954889,
+      "kmax_requested": 5,
+      "nodes_by_k": [
+        15,
+        22,
+        26,
+        23,
+        19
+      ],
+      "orders": 5,
+      "raw_candidates": 66,
+      "s": 10
+    },
+    {
+      "census_balls": 71,
+      "elapsed_before_terminal_ms": 1.196138,
+      "kmax_requested": 10,
+      "nodes_by_k": [
+        15,
+        22,
+        26,
+        23,
+        19,
+        12,
+        5,
+        1
+      ],
+      "orders": 8,
+      "raw_candidates": 71,
+      "s": 10
+    },
+    {
+      "census_balls": 66,
+      "elapsed_before_terminal_ms": 0.921701,
+      "kmax_requested": 5,
+      "nodes_by_k": [
+        15,
+        22,
+        26,
+        23,
+        19
+      ],
+      "orders": 5,
+      "raw_candidates": 66,
+      "s": 12
+    },
+    {
+      "census_balls": 71,
+      "elapsed_before_terminal_ms": 1.232222,
+      "kmax_requested": 10,
+      "nodes_by_k": [
+        15,
+        22,
+        26,
+        23,
+        19,
+        12,
+        5,
+        1
+      ],
+      "orders": 8,
+      "raw_candidates": 71,
+      "s": 12
+    }
+  ],
+  "reason": "six_n8_and_six_parser_rejects",
+  "sources_stable": true,
+  "status": "completed"
+}

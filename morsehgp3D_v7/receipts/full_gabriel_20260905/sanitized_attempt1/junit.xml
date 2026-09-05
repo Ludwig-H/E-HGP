@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="7"
+	failures="7"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="1"
+	timestamp="2026-09-05T15:40:46"
+	>
+	<testcase name="mhgp7_full_certificate" classname="mhgp7_full_certificate" time="0.0222242" status="fail">
+		<failure message="Failed"/>
+		<properties>
+			<property name="cmake_labels" value="full_certificate;gate"/>
+		</properties>
+		<system-out>==82==LeakSanitizer has encountered a fatal error.
+==82==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==82==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+  code de sortie 1, attendu 0
+
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_certificate_rejects" classname="mhgp7_full_certificate_rejects" time="0.0255183" status="fail">
+		<failure message="Failed"/>
+		<properties>
+			<property name="cmake_labels" value="full_certificate;gate"/>
+		</properties>
+		<system-out>==85==LeakSanitizer has encountered a fatal error.
+==85==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==85==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+  code de sortie 1, attendu 0
+
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel" classname="mhgp7_full_gabriel" time="0.531994" status="fail">
+		<failure message="Failed"/>
+		<properties>
+			<property name="cmake_labels" value="full_gabriel;gate;oracle"/>
+		</properties>
+		<system-out>==88==LeakSanitizer has encountered a fatal error.
+==88==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==88==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+  code de sortie 1, attendu 0
+
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_rejects" classname="mhgp7_full_gabriel_rejects" time="0.583381" status="fail">
+		<failure message="Failed"/>
+		<properties>
+			<property name="cmake_labels" value="full_gabriel;gate;oracle"/>
+		</properties>
+		<system-out>==91==LeakSanitizer has encountered a fatal error.
+==91==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==91==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+  code de sortie 1, attendu 0
+
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_bad_argument" classname="mhgp7_full_gabriel_bad_argument" time="0.0207052" status="fail">
+		<failure message="Failed"/>
+		<properties>
+			<property name="cmake_labels" value="full_gabriel;gate"/>
+		</properties>
+		<system-out>==94==LeakSanitizer has encountered a fatal error.
+==94==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==94==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+  code de sortie 1, attendu 2
+
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_allocation" classname="mhgp7_full_gabriel_allocation" time="0.0408539" status="fail">
+		<failure message="Failed"/>
+		<properties>
+			<property name="cmake_labels" value="full_gabriel;gate"/>
+		</properties>
+		<system-out>==97==LeakSanitizer has encountered a fatal error.
+==97==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==97==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+  code de sortie 1, attendu 0
+
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_allocation_bad_argument" classname="mhgp7_full_gabriel_allocation_bad_argument" time="0.0199228" status="fail">
+		<failure message="Failed"/>
+		<properties>
+			<property name="cmake_labels" value="full_gabriel;gate"/>
+		</properties>
+		<system-out>==100==LeakSanitizer has encountered a fatal error.
+==100==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==100==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+CMake Error at /workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake:19 (message):
+  code de sortie 1, attendu 2
+
+
+</system-out>
+	</testcase>
+</testsuite>

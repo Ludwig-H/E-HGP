@@ -45,8 +45,9 @@ distingue désormais cette insuffisance du graphe brut de la suffisance des
 niveaux Gabriel. Sous régularité, HGP complet peut se représenter par les
 minima Gabriel de cardinal K et les vraies fusions de cardinal K+1, avec
 leurs parents correctement résolus. Ce certificat n'exige pas Gamma
-exhaustif ; son constructeur, ses plateaux et son supplément pondéré restent
-à qualifier. Aucun changement du moteur ni succès 50k n'en est déduit.
+exhaustif. La qualification générale du constructeur, les plateaux hors
+domaine régulier et le supplément pondéré restent ouverts. Aucun succès
+50k n'en est déduit ; le premier composant régulier est décrit ci-dessous.
 
 Le premier [composant FULL compact](docs/CONTRAT_CERTIFICAT_FULL.md) est
 maintenant implémenté séparément : validation transactionnelle de minima
@@ -55,6 +56,23 @@ feuilles sous plafonds. Ses [deux portes dédiées](receipts/full_certificate_20
 passent en Release et sous ASan/UBSan. Son autorité reste strictement
 structurelle : aucun portail calculé, aucune complétude géométrique
 certifiée, aucune activation dans la CLI ou le pipeline F.
+
+Le [producteur horizontal FULL](docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md)
+ajoute maintenant la décision des parents depuis deux catalogues Gabriel
+fournis, avec portails paresseux et normalisation des anciennes ancres.
+Il conserve les minima isolés et K=n, sans construire le cœur Gamma F.
+Son succès est **relatif à des catalogues complets, exacts et réguliers**,
+pas une authentification de leur complétude. Les nouvelles portes confrontent
+les coupes à un oracle Gamma indépendant borné, avec refus et pannes mémoire.
+Les [sept CTests ciblés](receipts/full_gabriel_20260905/README.md) passent
+en Release puis sous ASan/UBSan ; la première tentative SAN échouée pour
+LeakSanitizer/ptrace reste archivée, sans désactivation du détecteur.
+La verticale, l'archive et la CLI FULL restent à raccorder ; aucune mesure
+de ce seul composant ne vaut contrat 50k pour toute la tour.
+Le [pont indépendant](audits/PRODUCTEUR_FULL_GABRIEL_COURANT.md) qualifie
+ensuite les mêmes octets sur ses propres catalogues rationnels bornés.
+Les [mesures mono FULL](docs/RESULTATS_MONO_FULL_20260905.md) séparent
+les dix ordres terminés à 8k des refus de budget d'alias à 16k et 32k.
 
 ## Construire et tester
 

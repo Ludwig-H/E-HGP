@@ -1,0 +1,73 @@
+{
+  "schema": "mhgp7-full-gabriel-command-captures-v1",
+  "time_note": "UTC close observations may include reporting delay; do not infer benchmark durations from these spans.",
+  "commands": [
+    {
+      "label": "release_configure",
+      "command": "taskset -c 0 timeout 120s cmake -S morsehgp3D_v7 -B build/v7_full_gabriel_20260905 -DCMAKE_BUILD_TYPE=Release -DMHGP7_ENABLE_CUDA=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+      "started_utc": "2026-09-05 15:33:48 UTC",
+      "observed_closed_utc": "2026-09-05 15:34:07 UTC",
+      "exit_code": 0,
+      "capture": "morsehgp3D_v7/receipts/full_gabriel_20260905/release_configure.txt",
+      "complete_untruncated": true
+    },
+    {
+      "label": "release_build",
+      "command": "taskset -c 0 timeout 240s cmake --build build/v7_full_gabriel_20260905 --parallel 2 --verbose --target mhgp7_full_certificate_gate mhgp7_full_gabriel_gate mhgp7_full_gabriel_allocation_gate",
+      "started_utc": "2026-09-05 15:34:07 UTC",
+      "observed_closed_utc": "2026-09-05 15:36:48 UTC",
+      "exit_code": 0,
+      "capture": "morsehgp3D_v7/receipts/full_gabriel_20260905/release_build.txt",
+      "complete_untruncated": true
+    },
+    {
+      "label": "release_ctest",
+      "command": "taskset -c 0 timeout 480s ctest --test-dir build/v7_full_gabriel_20260905 -V -j 1 --timeout 60 --output-junit qualification.xml -R '^(mhgp7_full_certificate|mhgp7_full_certificate_rejects|mhgp7_full_gabriel|mhgp7_full_gabriel_rejects|mhgp7_full_gabriel_bad_argument|mhgp7_full_gabriel_allocation|mhgp7_full_gabriel_allocation_bad_argument)$'",
+      "started_utc": "2026-09-05 15:36:49 UTC",
+      "observed_closed_utc": "2026-09-05 15:37:29 UTC",
+      "exit_code": 0,
+      "capture": "morsehgp3D_v7/receipts/full_gabriel_20260905/release_ctest.txt",
+      "complete_untruncated": true
+    },
+    {
+      "label": "sanitized_configure",
+      "command": "taskset -c 0 timeout 120s cmake -S morsehgp3D_v7 -B build/v7_full_gabriel_20260905_san -DCMAKE_BUILD_TYPE=RelWithDebInfo '-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-O1 -g -DNDEBUG' '-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer -fno-pie' '-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined -no-pie' -DMHGP7_ENABLE_CUDA=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+      "started_utc": "2026-09-05 15:37:29 UTC",
+      "observed_closed_utc": "2026-09-05 15:38:07 UTC",
+      "exit_code": 0,
+      "capture": "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized_configure.txt",
+      "complete_untruncated": true
+    },
+    {
+      "label": "sanitized_build",
+      "command": "taskset -c 0 timeout 360s cmake --build build/v7_full_gabriel_20260905_san --parallel 2 --verbose --target mhgp7_full_certificate_gate mhgp7_full_gabriel_gate mhgp7_full_gabriel_allocation_gate",
+      "started_utc": "2026-09-05 15:38:07 UTC",
+      "observed_closed_utc": "2026-09-05 15:40:45 UTC",
+      "exit_code": 0,
+      "capture": "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized_build.txt",
+      "complete_untruncated": true
+    },
+    {
+      "label": "sanitized_ctest_attempt1",
+      "command": "env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 taskset -c 0 timeout 480s ctest --test-dir build/v7_full_gabriel_20260905_san -V -j 1 --timeout 60 --output-junit qualification.xml -R '^(mhgp7_full_certificate|mhgp7_full_certificate_rejects|mhgp7_full_gabriel|mhgp7_full_gabriel_rejects|mhgp7_full_gabriel_bad_argument|mhgp7_full_gabriel_allocation|mhgp7_full_gabriel_allocation_bad_argument)$'",
+      "started_utc": "2026-09-05 15:40:46 UTC",
+      "observed_closed_utc": "2026-09-05 15:42:23 UTC",
+      "exit_code": 8,
+      "capture": "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized_ctest_attempt1.txt",
+      "complete_untruncated": true,
+      "classification": "failed_LeakSanitizer_ptrace_environment_no_pass_claim"
+    },
+    {
+      "label": "root_sanitized_ctest_attempt2",
+      "command": "taskset -c 0 env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 ctest --test-dir build/v7_full_gabriel_20260905_san -j 1 -V --output-on-failure -R '^mhgp7_full_(certificate|gabriel)($|_)' --output-junit /workspaces/E-HGP/build/v7_full_gabriel_20260905_san/full_gabriel_root_attempt2.xml",
+      "started_utc": "2026-09-05 15:47:57 UTC",
+      "observed_closed_utc": "2026-09-05 15:48:12 UTC",
+      "exit_code": 0,
+      "capture": "morsehgp3D_v7/receipts/full_gabriel_20260905/root_sanitized_ctest_attempt2.txt",
+      "command_metadata": "morsehgp3D_v7/receipts/full_gabriel_20260905/root_sanitized_attempt2_command.json",
+      "executor": "root_normal_exec",
+      "permission_override": "none",
+      "classification": "passed_7_of_7_LSAN_enabled"
+    }
+  ]
+}

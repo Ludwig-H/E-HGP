@@ -19,11 +19,12 @@ Les rattachements restent nécessaires pour décider ces parents, et les
 liens inter-K demandent leurs ancres certifiées. Les masses et leur politique
 d'affectation sont un supplément distinct, pas une raison d'imposer Gamma.
 
-Il s'agit d'une conclusion mathématique conditionnelle et d'une nouvelle
-piste d'architecture, pas d'un moteur FULL livré. Le produit reste F et son
-payload réduit qualifié ; aucun nouveau benchmark ni GCP n'a été utilisé
-pour cet audit. Les contrats 50k restent non atteints. Les travaux privés
-MEB déjà qualifiés sont conservés, mais ne décident pas cette représentation.
+Il s'agit d'une conclusion mathématique conditionnelle désormais suivie
+de composants FULL séparés, pas d'un moteur FULL intégré livré. La CLI
+reste F et son payload réduit qualifié ; aucun benchmark ni GCP n'a été
+utilisé pour la preuve mathématique. Les contrats 50k restent non atteints.
+Les travaux privés MEB déjà qualifiés sont conservés, mais ne décident pas
+cette représentation.
 
 Le premier [certificat FULL structurel](docs/CONTRAT_CERTIFICAT_FULL.md)
 est désormais livré comme composant autonome, sans raccord au moteur F.
@@ -36,10 +37,54 @@ Les [reçus dédiés](receipts/full_certificate_20260905/README.md) ferment
 incluant 45 refus de construction, 19 refus de lecture et 15 pannes
 d'allocation. Le premier essai du gate, refusé pour un plancher non atteint,
 reste déclaré. La suite F complète n'est pas réattribuée à ce nouveau module.
-Prochain raccord : minima issus du catalogue direct et portails vers les
-racines FULL strictement antérieures ; la verticale suit le plateau
-inférieur fermé. Le composant seul ne certifie aucune géométrie ni
-complétude et ne livre pas encore cette construction. GCP non utilisé.
+Ce composant seul ne certifie aucune géométrie ni complétude. Son
+[audit C++ indépendant](audits/CERTIFICAT_FULL_CPP_COURANT.md), publié
+séparément dans `b63203b5`, le confronte ensuite à des journaux Gamma
+indépendants ; il ne qualifie pas le futur producteur par héritage.
+
+Le raccord suivant est maintenant écrit dans
+[full_gabriel.hpp](src/forest/full_gabriel.hpp) : minima issus du catalogue
+direct, portails vers les racines FULL strictement antérieures et vrais
+parents décidés par lots atomiques. Le
+[contrat propre](docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md) distingue
+explicitement le succès relatif de l'authentification des catalogues.
+Les helpers géométriques F sont réutilisés sans appeler leur constructeur
+de cœur. Les cofaces silencieuses ne sont pas matérialisées ; leurs effets
+utiles sont résolus paresseusement, et les ancres des connexions sans
+fusion restent disponibles. La verticale au plateau inférieur fermé,
+l'archive et la CLI FULL ne sont pas encore raccordées. GCP non utilisé.
+
+La qualification ciblée fraîche ferme 7/7 CTests Release et 7/7
+ASan/UBSan, dont les deux portes du lecteur structurel réexécutées.
+Le positif FULL compare 67 exécutions d'ordres et 1 492 coupes ; le mode
+avec rejets ajoute 80 refus, dont le shell réel et la sentinelle de source
+incomplète réfutée. La porte mémoire balaie 102 allocations, toutes refusées
+transactionnellement sous panne persistante. La première tentative SAN
+échoue 7/7 sur le diagnostic LeakSanitizer/ptrace ; elle reste conservée.
+Les mêmes binaires et options passent ensuite dans le contexte ROOT
+non tracé, sans désactiver LeakSanitizer ni demander d'override de permission.
+Les [reçus du producteur](receipts/full_gabriel_20260905/README.md)
+séparent ces deux tentatives et ne réattribuent pas la suite F complète.
+
+L'[auditeur indépendant](audits/PRODUCTEUR_FULL_GABRIEL_COURANT.md)
+ferme ensuite son propre pont rationnel vers les octets `e02d163c…` :
+100 ordres en deux représentations, 16 506 coupes et 1 606 couvertures
+par build O2 et ASan/UBSan, sorties identiques ; trois mutations privées
+sont réfutées. Son corpus n≤7 et sa deuxième itération de portail nommée
+restent distincts de nos sept CTests et de nos mesures de coût.
+
+Les [premières mesures FULL mono](docs/RESULTATS_MONO_FULL_20260905.md)
+terminent les dix ordres à 8k en 150,776 / 150,879 / 151,795 s pour
+s=8/10/12, mais refusent 16k à K9 et 32k à K7 sur le plafond de huit
+millions d'alias. Les cinq captures passent le juge de cohérence normal
+et `-O` ; les deux refus restent des échecs de tentative, sans promotion.
+Elles ne construisent pas la verticale et ne gardent pas les certificats
+en sortie. La piste
+suivante sépare les autorités obligatoires — minima, ancres des directes
+et successeurs — du cache facultatif de facettes déjà résolues. La
+[contrelecture de ce dispatcher](audits/receipts_full_producer_20260905/lazy_alias_next_step_review.md)
+est favorable ; le changement de politique de cache et du cas J=1 reste
+à implémenter et mesurer. Aucun relèvement de plafond ne masque les refus.
 
 ## Ce que contient la v7
 

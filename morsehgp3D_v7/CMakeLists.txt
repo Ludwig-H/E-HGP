@@ -58,6 +58,21 @@ mhgp7_gate(mhgp7_full_certificate 0 mhgp7_full_certificate_gate
 mhgp7_gate(mhgp7_full_certificate_rejects 0 mhgp7_full_certificate_gate
            ARGS --rejects LABELS "gate;full_certificate" TIMEOUT 60)
 
+# ---- Producteur FULL horizontal relatif aux catalogues Gabriel fournis.
+# L'oracle Gamma exhaustif borne reste dans la cible de test exclusivement.
+mhgp7_product_executable(mhgp7_full_gabriel_gate tests/full_gabriel_gate.cpp)
+mhgp7_gate(mhgp7_full_gabriel 0 mhgp7_full_gabriel_gate
+           ARGS --selftest LABELS "gate;full_gabriel;oracle" TIMEOUT 60)
+mhgp7_gate(mhgp7_full_gabriel_rejects 0 mhgp7_full_gabriel_gate
+           ARGS --rejects LABELS "gate;full_gabriel;oracle" TIMEOUT 60)
+mhgp7_gate(mhgp7_full_gabriel_bad_argument 2 mhgp7_full_gabriel_gate
+           ARGS --unknown LABELS "gate;full_gabriel" TIMEOUT 60)
+mhgp7_product_executable(mhgp7_full_gabriel_allocation_gate tests/full_gabriel_allocation_gate.cpp)
+mhgp7_gate(mhgp7_full_gabriel_allocation 0 mhgp7_full_gabriel_allocation_gate
+           ARGS --selftest LABELS "gate;full_gabriel" TIMEOUT 60)
+mhgp7_gate(mhgp7_full_gabriel_allocation_bad_argument 2 mhgp7_full_gabriel_allocation_gate
+           ARGS --unknown LABELS "gate;full_gabriel" TIMEOUT 60)
+
 # ---- Selftests du cœur (etablis en premier ; chaque porte a son code exact).
 mhgp7_executable(mhgp7_selftest tests/selftest.cpp)
 mhgp7_gate(mhgp7_arith_selftest 0 mhgp7_selftest ARGS --arith)

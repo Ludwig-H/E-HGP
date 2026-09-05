@@ -1,0 +1,16 @@
+{
+  "observation_scope": "after_closed_micro_only_not_pre_run_environment_capture",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "platform": "Linux-6.8.0-1052-azure-x86_64-with-glibc2.39",
+  "compiler_path": "/usr/bin/g++",
+  "compiler_resolved": "/usr/bin/x86_64-linux-gnu-g++-13",
+  "compiler_sha256_observed_after": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+  "capture_command": [
+    "python3",
+    "-B",
+    "build/v7_full_gabriel_probe_20260905/capture.py"
+  ],
+  "capture_rc": 0,
+  "gcp_used": false,
+  "sanitizers_used": false
+}
