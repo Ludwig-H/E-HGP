@@ -126,6 +126,7 @@ Lire [l'état de livraison](PASSATION.md),
 [la pile locale F et ses invariants](docs/OPTIMISATION_PILE_TEMOINS.md),
 [la qualification F : 48/48/339 portes](receipts/witness_stack_integrated_20260905/README.md),
 [les trois paires E/F et les paliers 16k/32k](docs/RESULTATS_MONO_F_20260905.md),
+[la qualification locale du MEB à double budget](docs/RESULTATS_MEB_DOUBLE_BUDGET_20260905.md),
 [les résultats G4 à 50k et les primitives GPU](docs/RESULTATS_G4_20260904.md),
 [les limites de résidence et la voie massive](docs/RESIDENCE_MASSIVE.md),
 [l'état courant](audits/ETAT_COURANT.md) et

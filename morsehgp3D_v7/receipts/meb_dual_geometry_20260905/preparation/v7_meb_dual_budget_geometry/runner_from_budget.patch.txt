@@ -1,0 +1,235 @@
+--- build/v7_meb_dual_budget_prototype/run_dual_budget.py	2026-09-05 10:08:41.137100668 +0000
++++ build/v7_meb_dual_budget_geometry/run_geometry.py	2026-09-05 11:20:38.579124747 +0000
+@@ -1,9 +1,8 @@
+ #!/usr/bin/env python3
+-"""Private create-only dual-budget gate; preview never starts a subprocess."""
++"""Private local geometric differential; preview never starts a subprocess."""
+ from __future__ import annotations
+ 
+ import argparse
+-from collections import Counter
+ from datetime import datetime, timezone
+ import hashlib
+ import json
+@@ -17,6 +16,8 @@
+ 
+ BASE = Path(__file__).resolve().parent
+ ROOT = BASE.parents[1]
++PRIOR = ROOT / "build/v7_meb_dual_budget_prototype"
++SCENES = PRIOR / "geometry_plan/additional_scenes.json"
+ PRODUCT = ROOT / "morsehgp3D_v7"
+ OUTPUT = BASE / "run_20260905"
+ COMPILER = Path("/usr/bin/c++").resolve()
+@@ -24,8 +25,13 @@
+ F_RECEIPT = ROOT / "build/v7_f_build_20260905/build_D.json"
+ F_BINARY = ROOT / "build/v7_f_qualification/mhgp7"
+ PINS = {
+-    BASE / "pivot.hpp": "0645aa00add4d4cb387861b8f6dbd4fa0734ba5b4f3ad712caad8886b3541c2d",
+-    BASE / "dual_budget_gate.cpp": "6f748dc8dda7a6b0410e0c1eac31584f044fc58e891add3532c0f79d25993dda",
++    BASE / "additional_scenes.inc": "6ced272e70bb3527a8b53728442b774508c1a9e7e49413bf2739e2774e6c0d51",
++    SCENES: "f66008d3a2dc80532d3380cf490d8e87412b66ca2be8ae68066fb88cf604eed4",
++    PRIOR / "geometry_plan/PROTOCOL.md": "3e21a2066934923732375a65329b61d2f3bde73dd0ac5b546f4becb516de6f03",
++    PRIOR / "run_dual_budget.py": "329ef731ed48002501999b1013edfeb2645091526d0a2cb7e15f3e28ad956c99",
++    ROOT / "build/v7_meb_pivot_prototype/probe.cpp": "42f5cde4a168bcf2931064f5a727ac010afa9e68a1854b119624a2da430ea221",
++    PRIOR / "pivot.hpp": "0645aa00add4d4cb387861b8f6dbd4fa0734ba5b4f3ad712caad8886b3541c2d",
++    BASE / "geometry_gate.cpp": "c9971f8c340fe37eea2be824897110d436a38345e1d66d1834c9eb7f489bb1a9",
+     ROOT / "build/v7_meb_pivot_prototype/pivot.hpp": "d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5",
+     PRODUCT / "docs/PROPOSITION_MEB_ET_BUDGETS.md": "365e7a5dcde5a6d6fcd7d43e00d2f58f86efbf42279a779c62c7eaac7b54ec25",
+     F_RECEIPT: "522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4",
+@@ -78,8 +84,27 @@
+         stream.write("\n")
+ 
+ 
++def scene_projection() -> bytes:
++    value = load_json(SCENES)
++    rows = value["additional_scenes"]
++    require(value["status"] == "planned_not_executed" and len(rows) == 8 and
++            len({row["name"] for row in rows}) == 8 and
++            value["expected_scene_count"] == 176 and value["expected_scene_orders"] == 384 and
++            value["main_differential_comparisons"] == 9216 and
++            value["proposal_caps"] == [0, 1, 4, 5, 15, 16, 25, 401], "scene_plan_shape")
++    result = []
++    for row in rows:
++        points = row["points"]
++        require(2 <= len(points) <= 11 and all(len(point) == 3 for point in points) and
++                all(type(x) is int and 0 <= x <= 65535 for point in points for x in point) and
++                len({tuple(point) for point in points}) == len(points), "scene_point_domain")
++        result.append("  {" + ",".join("{" + ",".join(str(x) for x in point) + "}"
++                                      for point in points) + "},\n")
++    return "".join(result).encode("ascii")
++
++
+ def source_snapshot(expected_runner: str) -> dict[str, str]:
+-    require(digest(BASE / "run_dual_budget.py") == expected_runner, "runner_pin_mismatch")
++    require(digest(BASE / "run_geometry.py") == expected_runner, "runner_pin_mismatch")
+     for path, pin in PINS.items():
+         require(digest(path) == pin, "authority_pin_mismatch: " + str(path))
+     record = load_json(F_RECEIPT)
+@@ -96,19 +121,20 @@
+     require(actual == expected, "live_sources_differ_from_closed_F")
+     result = {str(PRODUCT / name): pin for name, pin in actual.items()}
+     result.update({str(path): digest(path) for path in PINS})
+-    for name in ("run_dual_budget.py", "selftest.py", "README.md"):
++    for name in ("run_geometry.py", "selftest.py", "README.md"):
+         result[str(BASE / name)] = digest(BASE / name)
++    require(read_bytes(BASE / "additional_scenes.inc") == scene_projection(), "scene_projection_mismatch")
+     return result
+ 
+ 
+ def commands() -> list[tuple[str, list[str], int]]:
+-    binary = OUTPUT / "dual_budget_gate"
++    binary = OUTPUT / "geometry_gate"
+     return [
+         ("compiler", [str(COMPILER), "--version"], 0),
+         ("compile", [str(COMPILER), "-std=c++20", "-O2", "-Wall", "-Wextra",
+                      "-Wpedantic", "-Werror", "-pthread", "-I", str(PRODUCT),
+                      "-MMD", "-MF", str(OUTPUT / "dependencies.d"),
+-                     str(BASE / "dual_budget_gate.cpp"), "-o", str(binary)], 0),
++                     str(BASE / "geometry_gate.cpp"), "-o", str(binary)], 0),
+         ("nominal", [str(binary)], 0),
+         ("charge_after_mutant", [str(binary), "--mutant=charge-after"], 4),
+         ("unknown_argument", [str(binary), "--unknown"], 2),
+@@ -120,10 +146,11 @@
+     text = data.decode("utf-8").replace("\\\n", " ")
+     require(text.count(":") == 1 and "$" not in text, "unsupported_depfile_syntax")
+     target, body = text.split(":", 1)
+-    require(shlex.split(target) == [str(OUTPUT / "dual_budget_gate")], "wrong_depfile_target")
++    require(shlex.split(target) == [str(OUTPUT / "geometry_gate")], "wrong_depfile_target")
+     dependencies = [str((ROOT / name).resolve()) for name in shlex.split(body)]
+     require(dependencies and len(set(dependencies)) == len(dependencies), "empty_or_duplicate_dependencies")
+-    mandatory = {str(BASE / "dual_budget_gate.cpp"), str(BASE / "pivot.hpp"),
++    mandatory = {str(BASE / "geometry_gate.cpp"), str(BASE / "additional_scenes.inc"),
++                 str(PRIOR / "pivot.hpp"),
+                  str(ROOT / "build/v7_meb_pivot_prototype/pivot.hpp"),
+                  str(PRODUCT / "src/forest/silent_incidence.hpp")}
+     require(mandatory <= set(dependencies) <= set(admitted), "unexpected_or_missing_dependency")
+@@ -132,6 +159,44 @@
+     return result
+ 
+ 
++METRICS = {
++    "ordinals", "scenes", "orders", "main_comparisons", "boundary_comparisons",
++    "reference_rank_calls", "prospective_violations", "proposal_forms", "pair_selections",
++    "legacy_charges", "actual_fallback_candidates", "certified", "fallback", "complete",
++    "degenerate", "capped", "fast_q2", "fast_q3", "fast_q4", "named_fast_q2",
++    "named_fast_q3", "named_fast_q4", "q4_two_pivots", "q4_high_limb",
++    "exhausted_fallback", "initial_p_fallback", "shell_fallback", "forced_fallback",
++    "direct_form_checks", "direct_form_rejected",
++}
++
++
++def geometric_record(data: bytes) -> dict:
++    require(data.endswith(b"\n"), "geometric_output_no_terminal_newline")
++    value = json.loads(data, object_pairs_hook=unique_object)
++    require(set(value) == METRICS | {"schema", "status", "cause", "public_status"} and
++            value["schema"] == "mhgp7-private-dual-budget-geometry-v1" and
++            value["public_status"] == "not_claimed", "geometric_output_schema")
++    require(all(type(value[name]) is int and value[name] >= 0 for name in METRICS),
++            "geometric_noninteger_or_negative_metric")
++    fixed = {"ordinals": 1507, "scenes": 176, "orders": 384, "main_comparisons": 9216,
++             "boundary_comparisons": 123, "reference_rank_calls": 384,
++             "direct_form_checks": 6, "direct_form_rejected": 4,
++             "named_fast_q2": 8, "named_fast_q3": 16, "named_fast_q4": 52}
++    require(all(value[name] == count for name, count in fixed.items()), "geometric_fixed_counts")
++    positive = ("complete", "degenerate", "capped", "fast_q2", "fast_q3", "fast_q4",
++                "q4_two_pivots", "q4_high_limb", "exhausted_fallback",
++                "initial_p_fallback", "shell_fallback", "forced_fallback")
++    require(all(value[name] > 0 for name in positive), "geometric_nonvacuity")
++    require(value["complete"] + value["degenerate"] + value["capped"] == 9339 and
++            value["certified"] + value["fallback"] <= 9339 and
++            value["actual_fallback_candidates"] <= value["legacy_charges"] and
++            value["proposal_forms"] <= 9339 * 401, "geometric_count_consistency")
++    require(all(value["fast_q" + str(q)] >= value["named_fast_q" + str(q)] for q in (2, 3, 4)) and
++            value["q4_two_pivots"] >= value["named_fast_q4"] and
++            value["q4_high_limb"] >= value["named_fast_q4"], "named_geometry_not_in_totals")
++    return value
++
++
+ def judge_output(label: str, stdout: bytes, stderr: bytes) -> None:
+     if label in ("compiler", "compile"):
+         return
+@@ -140,18 +205,22 @@
+         require(stdout == b"", "argument_refusal_stdout")
+         return
+     require(label in ("nominal", "charge_after_mutant"), "unknown_result_label")
+-    mutant = label == "charge_after_mutant"
+-    expected = []
+-    for p in (0, 1, 4, 5):
+-        for l in (1, 4):
+-            expected.append(f"triangle P={p} L={l} proposal_forms={p} legacy={l} "
+-                            f"fallback={int(p < 5)} terminal_equal=1 prospective_violations={p if mutant else 0}")
+-    expected += ["cumulative calls=4 P=7 L=12 proposal_forms=7 F_fallback_candidates=8 legacy=12",
+-                 "near_max proposal_increment=1 legacy_increment=4 overflow=0",
+-                 "dual_budget accounting=reference_ordinal_plus_proposal_v1 "
+-                 f"prospective_violations={28 if mutant else 0} public_status=not_claimed"]
+-    require(stdout.endswith(b"\n") and Counter(stdout.decode("utf-8").splitlines()) == Counter(expected),
+-            "missing_duplicate_or_wrong_causal_output")
++    value = geometric_record(stdout)
++    if label == "nominal":
++        require(value["status"] == "passed" and value["cause"] == "none" and
++                value["prospective_violations"] == 0, "nominal_causal_violation")
++    else:
++        require(value["status"] == "causal_violation" and value["cause"] == "charge_not_prospective" and
++                value["prospective_violations"] == value["proposal_forms"] + value["direct_form_checks"] and
++                value["prospective_violations"] > 0, "mutant_not_killed_causally")
++
++
++def paired_judge(nominal: bytes, mutant: bytes) -> None:
++    before, after = geometric_record(nominal), geometric_record(mutant)
++    for name in ("status", "cause", "prospective_violations"):
++        before.pop(name)
++        after.pop(name)
++    require(before == after, "mutant_changed_geometric_or_work_results")
+ 
+ 
+ def group_present(pid: int) -> bool:
+@@ -244,17 +313,20 @@
+              "locale": {name: environment[name] for name in ("LC_ALL", "LANG", "TZ")}})
+         for label, argv, expected_rc in commands():
+             if binary_pin is not None:
+-                require(digest(OUTPUT / "dual_budget_gate") == binary_pin, "binary_changed_before_execution")
++                require(digest(OUTPUT / "geometry_gate") == binary_pin, "binary_changed_before_execution")
+             record = run_command(label, argv, expected_rc, deadline, environment)
+             records[label] = record
+             require(record["status"] == "completed" and record["returncode"] == expected_rc,
+                     "unexpected_command_terminal: " + label)
+             judge_output(label, read_bytes(OUTPUT / (label + ".stdout")),
+                          read_bytes(OUTPUT / (label + ".stderr")))
++            if label == "charge_after_mutant":
++                paired_judge(read_bytes(OUTPUT / "nominal.stdout"),
++                             read_bytes(OUTPUT / "charge_after_mutant.stdout"))
+             if label == "compile":
+                 binding = dependency_binding(read_bytes(OUTPUT / "dependencies.d"), before)
+                 save(OUTPUT / "dependency_binding.json", binding)
+-                binary_pin = digest(OUTPUT / "dual_budget_gate")
++                binary_pin = digest(OUTPUT / "geometry_gate")
+                 save(OUTPUT / "binary_before.json", {"sha256": binary_pin})
+         require(len(records) == 6 and binding and binary_pin, "missing_command_or_compile_evidence")
+     except BaseException as exception:
+@@ -268,7 +340,7 @@
+                 require(dependency_binding(read_bytes(OUTPUT / "dependencies.d"), after) == binding,
+                         "dependency_binding_changed")
+             if binary_pin is not None:
+-                terminal_pin = digest(OUTPUT / "dual_budget_gate")
++                terminal_pin = digest(OUTPUT / "geometry_gate")
+                 save(OUTPUT / "binary_after.json", {"sha256": terminal_pin})
+                 require(terminal_pin == binary_pin, "tested_binary_changed")
+             require(time.monotonic() <= deadline, "combined_60s_deadline_exceeded")
+@@ -280,14 +352,15 @@
+                  for path in sorted(OUTPUT.iterdir()) if path.is_file()}
+     if time.monotonic() > deadline:
+         errors.append("combined_60s_deadline_exceeded_at_closure")
+-    receipt = {"schema": "mhgp7-private-meb-dual-budget-gate-v1",
++    receipt = {"schema": "mhgp7-private-meb-dual-budget-geometry-capture-v1",
+                "status": "completed" if not errors else "failed", "errors": errors,
+                "started_at": started, "finished_at": datetime.now(timezone.utc).isoformat(),
+                "combined_deadline_seconds": DEADLINE_SECONDS, "commands": records,
+                "source_before": before, "source_after": after,
+                "sources_stable": before is not None and before == after,
+                "artifacts": artifacts, "meb_work_accounting": "reference_ordinal_plus_proposal_v1",
+-               "scope": "private_triangle_budget_fixture_not_global_q3_q4_or_pipeline_qualification",
++               "scope": "private_local_differential_to_F_not_independent_arithmetic_or_pipeline_proof",
++               "observer_route": "Trace_only_NoObserver_not_qualified",
+                "testing_macro": False, "sanitizers": False, "gcp_used": False,
+                "public_status": "not_claimed"}
+     save(OUTPUT / "receipt.json", receipt)

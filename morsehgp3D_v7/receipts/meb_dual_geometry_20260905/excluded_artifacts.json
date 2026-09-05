@@ -1,0 +1,22 @@
+[
+  {
+    "path": "/workspaces/E-HGP/build/v7_meb_dual_budget_prototype/run_20260905/dual_budget_gate",
+    "reason": "tested_local_ELF_not_distributed",
+    "sha256": "6a96390fac144fd8f02f7316f7e8d20e515ca61d8711bd66a7692a2c41beccd6"
+  },
+  {
+    "path": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/geometry_gate",
+    "reason": "tested_local_ELF_not_distributed",
+    "sha256": "bccde6fee8d8c57cd6768208d6989d8460f4e4428aec60dce557e38b97bc9844"
+  },
+  {
+    "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+    "reason": "compiler_or_protected_F_ELF_not_distributed",
+    "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769"
+  },
+  {
+    "path": "/workspaces/E-HGP/build/v7_f_qualification/mhgp7",
+    "reason": "compiler_or_protected_F_ELF_not_distributed",
+    "sha256": "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85"
+  }
+]

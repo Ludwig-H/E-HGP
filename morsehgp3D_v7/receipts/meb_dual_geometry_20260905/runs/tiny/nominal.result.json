@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_prototype/run_20260905/dual_budget_gate"
+  ],
+  "elapsed_seconds": 0.002432907000184059,
+  "error": null,
+  "expected_rc": 0,
+  "returncode": 0,
+  "status": "completed",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "6a5842e1cd9230976e8d2c59a762e78cd09ced82bd02bbcf7728fc337d7f037d",
+  "timed_out": false
+}

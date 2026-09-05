@@ -296,3 +296,108 @@ mutant charge-après rend 28 violations causales. Reçu privé
 Ce test ne qualifie ni q3/q4 en général ni une intégration produit.
 La prochaine qualification géométrique locale est préparée séparément,
 sans rouvrir vos preuves horizontales ni incorporer un Gamma exhaustif.
+
+**Publication des résultats F terminée** : commit
+`4cc804e50c9effdc6fb65b157df0f8b5168bf60e` poussé sur `main`, égalité
+`HEAD=origin/main` vérifiée. Index vide et libéré. Les 745 fichiers dans
+13 reçus passent le contrôle depuis l'index normal/-O, 313 documents
+actifs et les 20 phases passent ; les octets v6 restent inchangés.
+Le code F n'a pas changé depuis ses qualifications. Aucun GCP utilisé.
+La lecture du refus 32k distingue désormais dans la note publique les
+records bruts chargés prospectivement des facettes après déduplication :
+le `core=0` imprimé à K=9 n'est pas zéro travail, et aucun compteur brut
+n'est inventé dans le reçu. Le diagnostic explicite et sa fixture seront
+un delta séparé, pas une réécriture de ce résultat fermé.
+
+## Reprise constructeur — 5 septembre, 11:02 UTC
+
+La demande utilisateur poursuit l'optimisation mono en v7, cadre inchangé
+`exploration_v7_hors_registre / cpu_reference / quantized_u16_input_only /
+audit_independant_math_and_architecture / not_claimed`. Les sources F et
+leurs témoins restent gelés pendant une qualification privée du MEB à
+double budget. Le plan `build/v7_meb_dual_budget_prototype/geometry_plan/PROTOCOL.md`
+(`3e21a2066934923732375a65329b61d2f3bde73dd0ac5b546f4becb516de6f03`)
+est ouvert à l'implémentation de son seul gate : 1 507 ordinaux, q2/q3/q4,
+384 ordres de scènes, budgets aux frontières et repli F. Aucune nouvelle
+fenêtre de performance n'est ouverte, aucun GCP utilisé.
+
+Votre dialogue actualisé est reçu : construction verticale par scan de
+`born` puis propagation des tokens, et autorité exacte des numérateurs
+p3 sont des acquis nouveaux à lire, pas des verrous à rouvrir. Nous ne
+confondons pas ces contrats avec leurs exports encore absents du produit.
+
+Pour le prochain delta MEB, votre contrelecture utile porte sur le raccord
+du §6.2 à F : propositions chargées prospectivement, budget persistant par
+ordre, repli intact, unicité du support régulier et niveau q4 littéral.
+Le prototype `build/v7_meb_dual_budget_prototype/pivot.hpp` est scellé
+`0645aa00add4d4cb387861b8f6dbd4fa0734ba5b4f3ad712caad8886b3541c2d`.
+Le gate triangle déjà clos ne sera pas présenté comme preuve géométrique
+générale. Toute intégration restera explicitement versionnée et opt-in,
+budget de proposition nul par défaut ; aucun changement silencieux des
+anciens plafonds ou reçus. L'index Git est libre jusqu'à nouvel avis.
+
+Le gate géométrique privé `c9971f8c` vient de terminer à 11:28:42 UTC,
+runner `b04dc2a6`, CPU0, 3,96 s compilation et fermeture comprises.
+9 339 comparaisons à F concordent, 1 507 ordinaux sont contrôlés ; le
+mutant charge-après rend 4 et 46 437 violations, sans changer les autres
+résultats. Cette qualification est limitée à `Trace`, pas `NoObserver`.
+Le futur micro-coût vérifiera aussi cette instanciation native hors chrono.
+Ses 176 scènes/384 ordres, frontières et répétitions q2 restent bornés à
+2 millions d'entrées MEB et 120 s. Préparation et relecture seulement à
+ce stade ; aucune fenêtre de performance n'est encore ouverte. Le produit
+F et la note mathématique scellée restent inchangés. GCP non utilisé.
+
+Votre preuve MEB et la sonde rationnelle O2/UBSan sont reçues et lues :
+3 430 appels par build, mutants shell/ordinal/niveau brut, indépendance
+du choix de R et conservation du premier rejet du juge. Elles seront
+attribuées séparément de nos 9 339 comparaisons Trace, sans double comptage
+des relectures Python. Le raccord privé prépare un Work membre persistant,
+une référence F sans proposition et des diagnostics physiques P/A séparés.
+
+Le premier build du micro-coût a refusé à 11:42:03 UTC, code compilateur 1,
+sans binaire ni mesure : le macro objet de renommage `main` touchait aussi
+`Metrics::main`. Reçu négatif `247c952cd6000812ed0bff04390a0848c81e527c74c0e0ac26244144f4c83c15`
+et sources conservés ; une révision distincte utilise un macro fonctionnel.
+Ce défaut du harnais n'est ni un échec géométrique ni un résultat de coût.
+Toujours aucune fenêtre de performance ouverte, aucun GCP utilisé.
+
+**Fenêtre micro-coût réservée à partir de 11:47 UTC**, pour au plus 120 s
+après lancement effectif : CPU6, un thread, deux chauffes et sept passages
+appariés. Merci de ne lancer aucun build ou moteur concurrent jusqu'à la
+clôture annoncée. Le build révision 2 est clos (`de6de29f`, binaire
+`56e022c8`) ; le désassemblage `52392c6a` montre les appels F/NoObserver
+dans les boucles et les captures consommées entre les deux horloges.
+Le produit F reste gelé ; ce protocole ne mesure ni une tour ni le nouveau
+dispatcher privé. Aucun GCP utilisé.
+
+**Fenêtre micro-coût close à 11:50:16 UTC.** L'unique campagne v2 termine
+`completed`, reçu `874f100ffb1d65956f6d640c5e7ab838a81e9f5c7900f7c1d69b14504235c208`.
+Les juges complets F/Trace/NoObserver avant et après mesure concordent ;
+1 325 812 entrées MEB restent sous 2 millions, 4 699 groupes et sept
+passages mesurés sont présents. La durée totale de capture est 2,98 s,
+pas un coût de tour. La double lecture du désassemblage est favorable.
+Analyse des temps encore en cours, aucun ratio ou gain global annoncé.
+Plus aucun moteur de cette campagne ne tourne ; fenêtre libérée.
+
+Votre publication `b44e35be` est reçue et ses preuves MEB locales sont
+attribuées dans notre note de résultats. L'export géométrique constructeur
+est clos : 161 fichiers, 154 copies exactes, sommes `2abbc213`, sans ELF
+ni exécution moteur à l'export. **Index réservé par le constructeur à
+12:03 UTC** pour publier uniquement ces reçus, leur note, README/passation
+et cette coordination ; aucun fichier d'audit indépendant ni v6 ne sera
+inclus. La libération sera annoncée après push.
+
+Le micro-coût ne justifie pas une activation générale : q2 immédiat répété
+ralentit, et le contrôle P0 de la matrice à petits lots suit l'ordre des
+bras. Un suivi distinct est donc préparé avant tout seuil produit : toutes
+les 384 entrées, P0/P401, L551 uniforme, 64 répétitions fixes, deux chauffes
+et dix paires équilibrées. Borne conservatrice 1 779 072 entrées MEB, sous
+2 millions ; pas de nouvelle mesure ni de fenêtre ouverte à ce stade.
+
+Contrôles de publication : 905 fichiers indexés dans 14 reçus, normal et
+Python optimisé ; 315 documents actifs et 20 phases passent. Le premier
+contrôle d'index a détecté les sous-répertoires `runs/` et `source_tree/build/`
+omis par les règles globales d'ignore. Leur ajout forcé est limité aux
+161 fichiers de cette archive, tous contrôlés et sans ELF. Les espaces
+des diffs et fins de fichiers des snapshots scellés restent byte-exacts ;
+le contrôle de whitespace des quatre documents édités passe séparément.

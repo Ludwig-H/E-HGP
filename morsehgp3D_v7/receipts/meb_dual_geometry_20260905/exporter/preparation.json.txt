@@ -1,0 +1,146 @@
+{
+  "schema": "mhgp7-private-meb-dual-export-preparation-v1",
+  "status": "prepared_selftests_passed_public_export_not_run",
+  "public_writes": 0,
+  "compilations": 0,
+  "engine_executions": 0,
+  "gcp_used": false,
+  "public_status": "not_claimed",
+  "pins": {
+    "export.py": "5739bc57d77848950d1169cb150a532153ef2f75c4a40229a87b5cedecdd0530",
+    "restore_sources.py": "1cf22c1f57effb1c9e21dc39db9f4f3d1991674afa8be548647fc5620b01f5a3",
+    "selftest.py": "5596447920f056e35ae02d3e209c4b88be08bb654aa0fb981df9748e006786b2",
+    "README.md": "a7f39811a6015c0bfb2129ab96c90caec8884638b7ebabe38f3432d9dbf3266c"
+  },
+  "input_receipts": {
+    "tiny": "a7dc00201920a678c42e75436cb09ecf8a95b63dd660e587b814cdc0b4a1ea0a",
+    "geometry": "b81d8e480b158710874de230c3485f79d0a42f1cb228e321c750de0f58bed49e"
+  },
+  "projection": {
+    "closed_capture_copies": 76,
+    "inert_source_copies": 67,
+    "closed_preparation_copies": 6,
+    "input_copies": 149,
+    "exporter_snapshots": 5,
+    "total_copies": 154,
+    "generated_files": 7,
+    "expected_public_files": 161,
+    "excluded_ELF": 4
+  },
+  "negative_history": {
+    "static_review_before_tests": {
+      "defect": "Copied bytes were checked immediately but not all checked against the original pins before closure. A late target mutation could have entered a newly computed manifest.",
+      "correction": "Final copy-to-original-pin checks, then archive manifest/inventory/provenance/SHA replay. Synthetic causal late-mutation test preserves EXPORT_FAILURE and produces no completed manifest."
+    },
+    "first_normal": {
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "timeout",
+        "30s",
+        "python3",
+        "-B",
+        "build/v7_meb_dual_export/selftest.py"
+      ],
+      "chunk_id": "2feda2",
+      "wall_time_seconds": 0.207950002,
+      "exit_code": 1,
+      "original_token_count": 485,
+      "output": "test_byte_exact_create_only_elf_and_pin_guards (__main__.ExportTests.test_byte_exact_create_only_elf_and_pin_guards) ... ok\ntest_closed_receipt_pin_before_loading_runner (__main__.ExportTests.test_closed_receipt_pin_before_loading_runner) ... ok\ntest_duplicate_json_and_unsafe_paths (__main__.ExportTests.test_duplicate_json_and_unsafe_paths) ... ok\ntest_late_copy_mutation_kept_as_failed_not_resealed (__main__.ExportTests.test_late_copy_mutation_kept_as_failed_not_resealed) ... ok\ntest_missing_and_stale_raw_inventory (__main__.ExportTests.test_missing_and_stale_raw_inventory) ... ok\ntest_mock_export_closure_and_existing_destination (__main__.ExportTests.test_mock_export_closure_and_existing_destination) ... ok\ntest_preview_and_required_pin (__main__.ExportTests.test_preview_and_required_pin) ... ok\ntest_projection_149_sources_67_exclusions_4 (__main__.ExportTests.test_projection_149_sources_67_exclusions_4) ... FAIL\ntest_restore_byte_exact_and_no_merge (__main__.ExportTests.test_restore_byte_exact_and_no_merge) ... ok\ntest_restore_rejects_changed_source_before_first_write (__main__.ExportTests.test_restore_rejects_changed_source_before_first_write) ... ok\ntest_restore_rejects_elf_before_first_write (__main__.ExportTests.test_restore_rejects_elf_before_first_write) ... ok\n\n======================================================================\nFAIL: test_projection_149_sources_67_exclusions_4 (__main__.ExportTests.test_projection_149_sources_67_exclusions_4)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspaces/E-HGP/build/v7_meb_dual_export/selftest.py\", line 104, in test_projection_149_sources_67_exclusions_4\n    with self.assertRaisesRegex(RuntimeError, \"conflicting_source_pins\"):\nAssertionError: RuntimeError not raised\n\n----------------------------------------------------------------------\nRan 11 tests in 0.046s\n\nFAILED (failures=1)\n"
+    },
+    "first_optimized": {
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "timeout",
+        "30s",
+        "python3",
+        "-B",
+        "-O",
+        "build/v7_meb_dual_export/selftest.py"
+      ],
+      "chunk_id": "7674be",
+      "wall_time_seconds": 0.195548171,
+      "exit_code": 1,
+      "original_token_count": 485,
+      "output": "test_byte_exact_create_only_elf_and_pin_guards (__main__.ExportTests.test_byte_exact_create_only_elf_and_pin_guards) ... ok\ntest_closed_receipt_pin_before_loading_runner (__main__.ExportTests.test_closed_receipt_pin_before_loading_runner) ... ok\ntest_duplicate_json_and_unsafe_paths (__main__.ExportTests.test_duplicate_json_and_unsafe_paths) ... ok\ntest_late_copy_mutation_kept_as_failed_not_resealed (__main__.ExportTests.test_late_copy_mutation_kept_as_failed_not_resealed) ... ok\ntest_missing_and_stale_raw_inventory (__main__.ExportTests.test_missing_and_stale_raw_inventory) ... ok\ntest_mock_export_closure_and_existing_destination (__main__.ExportTests.test_mock_export_closure_and_existing_destination) ... ok\ntest_preview_and_required_pin (__main__.ExportTests.test_preview_and_required_pin) ... ok\ntest_projection_149_sources_67_exclusions_4 (__main__.ExportTests.test_projection_149_sources_67_exclusions_4) ... FAIL\ntest_restore_byte_exact_and_no_merge (__main__.ExportTests.test_restore_byte_exact_and_no_merge) ... ok\ntest_restore_rejects_changed_source_before_first_write (__main__.ExportTests.test_restore_rejects_changed_source_before_first_write) ... ok\ntest_restore_rejects_elf_before_first_write (__main__.ExportTests.test_restore_rejects_elf_before_first_write) ... ok\n\n======================================================================\nFAIL: test_projection_149_sources_67_exclusions_4 (__main__.ExportTests.test_projection_149_sources_67_exclusions_4)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspaces/E-HGP/build/v7_meb_dual_export/selftest.py\", line 104, in test_projection_149_sources_67_exclusions_4\n    with self.assertRaisesRegex(RuntimeError, \"conflicting_source_pins\"):\nAssertionError: RuntimeError not raised\n\n----------------------------------------------------------------------\nRan 11 tests in 0.049s\n\nFAILED (failures=1)\n"
+    },
+    "defect": "The two synthetic reviews shared one Python source-pin dict. deepcopy preserved that alias, so the intended one-arm mutation changed both arms and did not constitute a conflict.",
+    "correction": "Only synthetic fixture construction changed from sources=pins to sources=dict(pins). Actual separate JSON receipts never share this object alias."
+  },
+  "normal": {
+    "argv": [
+      "taskset",
+      "-c",
+      "0",
+      "timeout",
+      "30s",
+      "python3",
+      "-B",
+      "build/v7_meb_dual_export/selftest.py"
+    ],
+    "chunk_id": "0b9f5f",
+    "wall_time_seconds": 0.19500925,
+    "exit_code": 0,
+    "original_token_count": 347,
+    "output": "test_byte_exact_create_only_elf_and_pin_guards (__main__.ExportTests.test_byte_exact_create_only_elf_and_pin_guards) ... ok\ntest_closed_receipt_pin_before_loading_runner (__main__.ExportTests.test_closed_receipt_pin_before_loading_runner) ... ok\ntest_duplicate_json_and_unsafe_paths (__main__.ExportTests.test_duplicate_json_and_unsafe_paths) ... ok\ntest_late_copy_mutation_kept_as_failed_not_resealed (__main__.ExportTests.test_late_copy_mutation_kept_as_failed_not_resealed) ... ok\ntest_missing_and_stale_raw_inventory (__main__.ExportTests.test_missing_and_stale_raw_inventory) ... ok\ntest_mock_export_closure_and_existing_destination (__main__.ExportTests.test_mock_export_closure_and_existing_destination) ... ok\ntest_preview_and_required_pin (__main__.ExportTests.test_preview_and_required_pin) ... ok\ntest_projection_149_sources_67_exclusions_4 (__main__.ExportTests.test_projection_149_sources_67_exclusions_4) ... ok\ntest_restore_byte_exact_and_no_merge (__main__.ExportTests.test_restore_byte_exact_and_no_merge) ... ok\ntest_restore_rejects_changed_source_before_first_write (__main__.ExportTests.test_restore_rejects_changed_source_before_first_write) ... ok\ntest_restore_rejects_elf_before_first_write (__main__.ExportTests.test_restore_rejects_elf_before_first_write) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.043s\n\nOK\n"
+  },
+  "optimized": {
+    "argv": [
+      "taskset",
+      "-c",
+      "0",
+      "timeout",
+      "30s",
+      "python3",
+      "-B",
+      "-O",
+      "build/v7_meb_dual_export/selftest.py"
+    ],
+    "chunk_id": "7e7ecf",
+    "wall_time_seconds": 0.19489509,
+    "exit_code": 0,
+    "original_token_count": 347,
+    "output": "test_byte_exact_create_only_elf_and_pin_guards (__main__.ExportTests.test_byte_exact_create_only_elf_and_pin_guards) ... ok\ntest_closed_receipt_pin_before_loading_runner (__main__.ExportTests.test_closed_receipt_pin_before_loading_runner) ... ok\ntest_duplicate_json_and_unsafe_paths (__main__.ExportTests.test_duplicate_json_and_unsafe_paths) ... ok\ntest_late_copy_mutation_kept_as_failed_not_resealed (__main__.ExportTests.test_late_copy_mutation_kept_as_failed_not_resealed) ... ok\ntest_missing_and_stale_raw_inventory (__main__.ExportTests.test_missing_and_stale_raw_inventory) ... ok\ntest_mock_export_closure_and_existing_destination (__main__.ExportTests.test_mock_export_closure_and_existing_destination) ... ok\ntest_preview_and_required_pin (__main__.ExportTests.test_preview_and_required_pin) ... ok\ntest_projection_149_sources_67_exclusions_4 (__main__.ExportTests.test_projection_149_sources_67_exclusions_4) ... ok\ntest_restore_byte_exact_and_no_merge (__main__.ExportTests.test_restore_byte_exact_and_no_merge) ... ok\ntest_restore_rejects_changed_source_before_first_write (__main__.ExportTests.test_restore_rejects_changed_source_before_first_write) ... ok\ntest_restore_rejects_elf_before_first_write (__main__.ExportTests.test_restore_rejects_elf_before_first_write) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.044s\n\nOK\n"
+  },
+  "preview": {
+    "argv": [
+      "taskset",
+      "-c",
+      "0",
+      "timeout",
+      "30s",
+      "python3",
+      "-B",
+      "build/v7_meb_dual_export/export.py"
+    ],
+    "chunk_id": "9db37e",
+    "wall_time_seconds": 0.074191665,
+    "exit_code": 0,
+    "original_token_count": 83,
+    "output": "{\n  \"status\": \"prepared_not_executed\",\n  \"writes\": false,\n  \"engine_runs\": 0,\n  \"destination\": \"/workspaces/E-HGP/morsehgp3D_v7/receipts/meb_dual_geometry_20260905\",\n  \"planned_input_copies\": 149,\n  \"planned_source_snapshots\": 67,\n  \"planned_excluded_ELF\": 4,\n  \"exporter_snapshots_additional\": 5,\n  \"requires_separate_GO\": true\n}\n"
+  },
+  "read_only_review": {
+    "shell_command": "taskset -c 0 python3 -B -c 'import runpy,json; m=runpy.run_path(\"build/v7_meb_dual_export/export.py\"); r=[m[\"validate_run\"](s) for s in m[\"STAGES\"]]; p,e=m[\"build_plan\"](r); print(json.dumps({\"status\":\"read_only_review_passed\",\"stages\":[{\"name\":x[\"name\"],\"dependencies\":x[\"dependency_count\"],\"sources\":len(x[\"sources\"]),\"payloads\":len(x[\"payload\"])} for x in r],\"input_copies\":len(p),\"excluded_ELF\":len(e),\"engine_runs\":0}))'",
+    "chunk_id": "e09a5a",
+    "wall_time_seconds": 0.133191685,
+    "exit_code": 0,
+    "original_token_count": 63,
+    "output": "{\"status\": \"read_only_review_passed\", \"stages\": [{\"name\": \"tiny\", \"dependencies\": 20, \"sources\": 61, \"payloads\": 38}, {\"name\": \"geometry\", \"dependencies\": 21, \"sources\": 66, \"payloads\": 38}], \"input_copies\": 149, \"excluded_ELF\": 4, \"engine_runs\": 0}\n"
+  },
+  "limitations": [
+    "Public export requires separate root GO and the exact exporter pin.",
+    "No compiler or engine process is started by this preparation; mock tests forbid subprocess entry points.",
+    "No cost receipt is included.",
+    "Historical absolute paths, runner pins and output directories are preserved; archived runners are not relocatable or hermetic.",
+    "The declared restoration tool restores sources into a new directory only. Manual reconstructed C++ commands have not been executed.",
+    "Geometric qualification is the instrumented Trace route, not native NoObserver; shared F predicates do not form an independent oracle.",
+    "A/P/legacy counts are not time gains. No pipeline, SLO, massive or GPU result is claimed."
+  ],
+  "exclusions": [
+    "Future public destination and public export outputs are not part of this preparation seal.",
+    "SHA256SUMS is generated after this manifest and does not include itself."
+  ]
+}

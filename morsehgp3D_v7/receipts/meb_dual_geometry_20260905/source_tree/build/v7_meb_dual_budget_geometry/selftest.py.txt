@@ -1,0 +1,219 @@
+#!/usr/bin/env python3
+"""Synthetic runner guards only: no compiler, C++ gate, pipeline or cloud."""
+import contextlib
+import importlib.util
+import io
+import json
+from pathlib import Path
+import signal
+import subprocess
+import tempfile
+import time
+import unittest
+from unittest.mock import patch
+
+SPEC = importlib.util.spec_from_file_location("dual_budget_runner", Path(__file__).with_name("run_geometry.py"))
+R = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(R)
+
+
+class Guards(unittest.TestCase):
+    def test_preview_has_no_side_effects_or_subprocess(self):
+        with tempfile.TemporaryDirectory() as name:
+            output = Path(name) / "absent"
+            with patch.object(R, "OUTPUT", output), patch.object(R, "execute") as execute:
+                with patch.object(R.subprocess, "Popen", side_effect=RuntimeError("forbidden")):
+                    stream = io.StringIO()
+                    with contextlib.redirect_stdout(stream):
+                        self.assertEqual(R.main([]), 0)
+            value = json.loads(stream.getvalue())
+            self.assertFalse(value["writes"])
+            self.assertEqual(value["subprocesses"], 0)
+            self.assertEqual(value["cpu_affinity"], [0])
+            self.assertFalse(output.exists())
+            execute.assert_not_called()
+            with self.assertRaisesRegex(RuntimeError, "explicit_runner_pin"):
+                R.main(["--execute"])
+
+    def test_literal_compile_and_exit_contracts(self):
+        rows = R.commands()
+        self.assertEqual([name for name, _, _ in rows],
+                         ["compiler", "compile", "nominal", "charge_after_mutant", "unknown_argument", "extra_argument"])
+        self.assertEqual([rc for _, _, rc in rows], [0, 0, 0, 4, 2, 2])
+        command = rows[1][1]
+        self.assertEqual(command[:9], [str(R.COMPILER), "-std=c++20", "-O2", "-Wall", "-Wextra",
+                                       "-Wpedantic", "-Werror", "-pthread", "-I"])
+        self.assertEqual(command[9], str(R.PRODUCT))
+        self.assertFalse(any("MHGP7_TESTING" in item or "sanitize" in item for item in command))
+        self.assertEqual(command.count("-MF"), 1)
+        self.assertEqual(rows[3][1][1:], ["--mutant=charge-after"])
+        self.assertEqual(R.DEADLINE_SECONDS, 60)
+
+    def test_create_only_and_duplicate_json(self):
+        with tempfile.TemporaryDirectory() as name:
+            folder = Path(name)
+            with patch.object(R, "OUTPUT", folder), patch.object(R.subprocess, "Popen") as popen:
+                with self.assertRaisesRegex(RuntimeError, "create_only"):
+                    R.execute("0" * 64)
+                popen.assert_not_called()
+            path = folder / "duplicate.json"
+            path.write_bytes(b'{"status":"failed","status":"completed"}')
+            with self.assertRaisesRegex(RuntimeError, "duplicate_json_key"):
+                R.load_json(path)
+            with self.assertRaises(FileExistsError):
+                R.save(path, {})
+
+    def test_closed_F_and_fixed_pins_read_only(self):
+        with patch.object(R.subprocess, "Popen", side_effect=RuntimeError("forbidden")):
+            pins = R.source_snapshot(R.digest(R.BASE / "run_geometry.py"))
+            self.assertEqual(pins[str(R.F_BINARY)], R.PINS[R.F_BINARY])
+            self.assertIn(str(R.PRODUCT / "src/core/inline_stack.hpp"), pins)
+            with patch.dict(R.PINS, {R.F_BINARY: "0" * 64}):
+                with self.assertRaisesRegex(RuntimeError, "authority_pin_mismatch"):
+                    R.source_snapshot(R.digest(R.BASE / "run_geometry.py"))
+
+    def test_depfile_closure_and_mutations(self):
+        paths = [R.BASE / "geometry_gate.cpp", R.BASE / "additional_scenes.inc",
+                 R.PRIOR / "pivot.hpp",
+                 R.ROOT / "build/v7_meb_pivot_prototype/pivot.hpp",
+                 R.PRODUCT / "src/forest/silent_incidence.hpp"]
+        admitted = {str(path): R.digest(path) for path in paths}
+        target = str(R.OUTPUT / "geometry_gate") + ": "
+        separator = " " + chr(92) + "\n "
+        text = target + separator.join(str(path) for path in paths) + "\n"
+        self.assertEqual(R.dependency_binding(text.encode(), admitted), dict(sorted(admitted.items())))
+        bad = [target + " ".join(str(path) for path in paths[:-1]),
+               text + " " + str(paths[0]), text.replace("geometry_gate:", "other:"),
+               text + " /tmp/unadmitted.hpp", text + " $OTHER"]
+        for value in bad:
+            with self.subTest(value=value):
+                with self.assertRaises(RuntimeError):
+                    R.dependency_binding(value.encode(), admitted)
+        changed = dict(admitted)
+        changed[str(paths[0])] = "0" * 64
+        with self.assertRaisesRegex(RuntimeError, "dependency_source_drift"):
+            R.dependency_binding(text.encode(), changed)
+
+    @staticmethod
+    def value(mutant=False):
+        value = {name: 1 for name in (
+            "ordinals", "scenes", "orders", "main_comparisons", "boundary_comparisons",
+            "reference_rank_calls", "prospective_violations", "proposal_forms", "pair_selections",
+            "legacy_charges", "actual_fallback_candidates", "certified", "fallback", "complete",
+            "degenerate", "capped", "fast_q2", "fast_q3", "fast_q4", "named_fast_q2",
+            "named_fast_q3", "named_fast_q4", "q4_two_pivots", "q4_high_limb",
+            "exhausted_fallback", "initial_p_fallback", "shell_fallback", "forced_fallback",
+            "direct_form_checks", "direct_form_rejected")}
+        value.update(schema="mhgp7-private-dual-budget-geometry-v1",
+                     status="causal_violation" if mutant else "passed",
+                     cause="charge_not_prospective" if mutant else "none",
+                     public_status="not_claimed", ordinals=1507, scenes=176, orders=384,
+                     main_comparisons=9216, boundary_comparisons=123, reference_rank_calls=384,
+                     direct_form_checks=6, direct_form_rejected=4, named_fast_q2=8,
+                     named_fast_q3=16, named_fast_q4=52, fast_q2=8, fast_q3=16, fast_q4=52,
+                     q4_two_pivots=52, q4_high_limb=52, complete=5000, capped=4338,
+                     certified=1000, fallback=3000, proposal_forms=1000,
+                     legacy_charges=10000, actual_fallback_candidates=10000,
+                     prospective_violations=1006 if mutant else 0)
+        return value
+
+    @staticmethod
+    def encoded(value):
+        return (json.dumps(value) + "\n").encode()
+
+    def test_geometric_output_strict_fields_types_and_cause(self):
+        for label, mutated in (("nominal", False), ("charge_after_mutant", True)):
+            good = self.value(mutated)
+            data = self.encoded(good)
+            R.judge_output(label, data, b"")
+            for key, changed in (("ordinals", 1506), ("main_comparisons", 9215),
+                                 ("boundary_comparisons", 129), ("named_fast_q4", 51),
+                                 ("fast_q4", 1), ("proposal_forms", True), ("fallback", -1),
+                                 ("q4_two_pivots", 0), ("public_status", "exact"),
+                                 ("prospective_violations", 1), ("cause", "wrong")):
+                bad = dict(good, **{key: changed})
+                with self.subTest(label=label, key=key):
+                    with self.assertRaises(RuntimeError):
+                        R.judge_output(label, self.encoded(bad), b"")
+            missing, extra = dict(good), dict(good, unused=0)
+            missing.pop("ordinals")
+            for bad in (self.encoded(missing), self.encoded(extra), data[:-1],
+                        b'{"ordinals":1507,' + data[1:], b""):
+                with self.assertRaises(RuntimeError):
+                    R.judge_output(label, bad, b"")
+            with self.assertRaises(RuntimeError):
+                R.judge_output(label, data, b"warning")
+        R.judge_output("unknown_argument", b"", b"")
+        with self.assertRaises(RuntimeError):
+            R.judge_output("unknown_argument", b"unexpected", b"")
+
+    def test_paired_judge_retains_all_noncausal_metrics(self):
+        nominal, mutant = self.value(False), self.value(True)
+        R.paired_judge(self.encoded(nominal), self.encoded(mutant))
+        changed = dict(mutant, fast_q2=9)
+        with self.assertRaisesRegex(RuntimeError, "mutant_changed"):
+            R.paired_judge(self.encoded(nominal), self.encoded(changed))
+
+    def test_scene_projection_matches_pinned_data_and_refuses_bad_domain(self):
+        self.assertEqual(R.scene_projection(), R.read_bytes(R.BASE / "additional_scenes.inc"))
+        value = R.load_json(R.SCENES)
+        for mode in ("duplicate", "boolean", "outside", "missing"):
+            bad = json.loads(json.dumps(value))
+            if mode == "duplicate":
+                bad["additional_scenes"][0]["points"][1] = bad["additional_scenes"][0]["points"][0]
+            elif mode == "boolean":
+                bad["additional_scenes"][0]["points"][0][0] = True
+            elif mode == "outside":
+                bad["additional_scenes"][0]["points"][0][0] = 65536
+            else:
+                bad["additional_scenes"].pop()
+            with self.subTest(mode=mode), patch.object(R, "load_json", return_value=bad):
+                with self.assertRaises(RuntimeError):
+                    R.scene_projection()
+
+    def test_fake_timeout_and_interrupt_capture_and_drain(self):
+        for exception in (subprocess.TimeoutExpired(["fake"], 1), InterruptedError("synthetic")):
+            with self.subTest(exception=type(exception).__name__), tempfile.TemporaryDirectory() as name:
+                output = Path(name)
+
+                class FakeProcess:
+                    pid = 987654321
+                    returncode = None
+                    waits = 0
+
+                    def wait(self, timeout):
+                        self.waits += 1
+                        if self.waits == 1:
+                            raise exception
+                        self.returncode = -9
+                        return self.returncode
+
+                process = FakeProcess()
+                signals = []
+
+                def killpg(pid, sig):
+                    self.assertEqual(pid, process.pid)
+                    signals.append(sig)
+                    if sig == 0:
+                        raise ProcessLookupError()
+
+                def start(*_args, **kwargs):
+                    self.assertTrue((output / "fake.attempt.json").exists())
+                    self.assertTrue(kwargs["start_new_session"])
+                    return process
+
+                with patch.object(R, "OUTPUT", output), patch.object(R.subprocess, "Popen", side_effect=start):
+                    with patch.object(R.os, "killpg", side_effect=killpg):
+                        result = R.run_command("fake", ["never_executed"], 0, time.monotonic() + 10, {})
+                self.assertEqual(result["status"], "failed")
+                self.assertEqual(result["timed_out"], isinstance(exception, subprocess.TimeoutExpired))
+                self.assertEqual(result["returncode"], -9)
+                self.assertIn(signal.SIGTERM, signals)
+                self.assertIn(signal.SIGKILL, signals)
+                self.assertEqual(process.waits, 2)
+                self.assertEqual(R.load_json(output / "fake.spawned.json")["pgid"], process.pid)
+                self.assertEqual(R.load_json(output / "fake.result.json"), result)
+
+
+if __name__ == "__main__":
+    unittest.main()

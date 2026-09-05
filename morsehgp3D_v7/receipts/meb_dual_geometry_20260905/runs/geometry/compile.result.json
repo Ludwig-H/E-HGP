@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v7",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/dependencies.d",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/geometry_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/geometry_gate"
+  ],
+  "elapsed_seconds": 3.7787263430000166,
+  "error": null,
+  "expected_rc": 0,
+  "returncode": 0,
+  "status": "completed",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timed_out": false
+}

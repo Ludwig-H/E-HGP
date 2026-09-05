@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v7",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_prototype/run_20260905/dependencies.d",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_prototype/dual_budget_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_prototype/run_20260905/dual_budget_gate"
+  ],
+  "elapsed_seconds": 3.025866814001347,
+  "error": null,
+  "expected_rc": 0,
+  "returncode": 0,
+  "status": "completed",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timed_out": false
+}

@@ -1,0 +1,28 @@
+{
+  "compiler": "/usr/bin/x86_64-linux-gnu-g++-13",
+  "compiler_sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+  "cpu_affinity": [
+    0
+  ],
+  "denied_overrides": {
+    "ASAN_OPTIONS": null,
+    "COMPILER_PATH": null,
+    "CPATH": null,
+    "CPLUS_INCLUDE_PATH": null,
+    "CPPFLAGS": null,
+    "CXXFLAGS": null,
+    "C_INCLUDE_PATH": null,
+    "GCC_EXEC_PREFIX": null,
+    "LD_AUDIT": null,
+    "LD_LIBRARY_PATH": null,
+    "LD_PRELOAD": null,
+    "LIBRARY_PATH": null,
+    "LSAN_OPTIONS": null,
+    "UBSAN_OPTIONS": null
+  },
+  "locale": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "TZ": "UTC"
+  }
+}

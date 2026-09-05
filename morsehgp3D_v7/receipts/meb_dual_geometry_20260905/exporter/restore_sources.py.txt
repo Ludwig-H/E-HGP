@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+"""Declared restoration tool: validate source snapshots into a fresh tree only."""
+import argparse
+import hashlib
+import json
+from pathlib import Path, PurePosixPath
+import stat
+
+
+def require(value, reason):
+    if not value:
+        raise RuntimeError(reason)
+
+
+def relative(name):
+    require(isinstance(name, str) and bool(name), "invalid_relative_path_type")
+    path = PurePosixPath(name)
+    require(not path.is_absolute() and str(path) == name and
+            all(part not in (".", "..") for part in path.parts), "unsafe_relative_path")
+    return Path(name)
+
+
+def unique(pairs):
+    result = {}
+    for key, value in pairs:
+        require(key not in result, "duplicate_json_key")
+        result[key] = value
+    return result
+
+
+def restore(archive, destination):
+    archive, destination = archive.resolve(), destination.resolve()
+    require(not destination.exists() and destination.parent.is_dir(), "destination_must_be_new")
+    rows = json.loads((archive / "reconstruction_manifest.json").read_bytes(), object_pairs_hook=unique)
+    require(isinstance(rows, list) and bool(rows), "empty_restoration_manifest")
+    copies, names = [], set()
+    for row in rows:
+        source = archive / relative(row["archived_path"])
+        target = relative(row["restored_path"])
+        require(source.resolve() == source and stat.S_ISREG(source.lstat().st_mode), "source_symlink_or_not_regular")
+        require(row["archived_path"] == "source_tree/" + str(target) + ".txt" and str(target) not in names,
+                "restoration_projection_or_duplicate")
+        names.add(str(target))
+        data = source.read_bytes()
+        require(hashlib.sha256(data).hexdigest() == row["sha256"] and not data.startswith(b"\x7fELF"),
+                "source_hash_mismatch_or_ELF")
+        copies.append((target, data))
+    # All validation precedes the first destination write; no existing tree is
+    # merged. A filesystem failure may leave a partial tree, never overwritten.
+    destination.mkdir(exist_ok=False)
+    for name, data in copies:
+        target = destination / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with target.open("xb") as stream:
+            stream.write(data)
+        require(target.read_bytes() == data, "restored_copy_changed")
+    return {"status": "restored_sources_only", "files": len(copies), "destination": str(destination),
+            "compilations": 0, "executions": 0, "historical_runners_relocated": False}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--archive", type=Path, required=True)
+    parser.add_argument("--destination", type=Path, required=True)
+    args = parser.parse_args()
+    print(json.dumps(restore(args.archive, args.destination)))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

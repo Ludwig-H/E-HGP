@@ -67,9 +67,14 @@ horodatage UTC. Les premiers faux rejets du harnais restent publiés.
 
 La [proposition MEB par pivots et ses budgets](docs/PROPOSITION_MEB_ET_BUDGETS.md)
 reste hors produit. Un contre-exemple compilé montre que l'ordinal de la
-référence ne borne pas le travail physique d'une proposition ; une future
-route devra charger ce travail séparément et prospectivement. Le candidat
-de pile inline des témoins reste également séparé du binaire E mesuré.
+référence ne borne pas le travail physique d'une proposition. Le nouveau
+prototype possède une charge séparée et prospective, qualifiée localement
+dans [deux reçus archivés](receipts/meb_dual_geometry_20260905/README.md) :
+triangle causal puis 9 339 comparaisons géométriques à F et 1 507 ordinaux.
+La [note de résultats](docs/RESULTATS_MEB_DOUBLE_BUDGET_20260905.md) distingue
+ces observations Trace de la preuve et de l'oracle rationnel indépendants
+de l'auditeur. Le raccord par ordre et ses schémas publics ne sont pas
+encore livrés ; aucun gain de tour ne découle de cette qualification locale.
 
 Le delta F porte maintenant cette [pile locale de témoins](docs/OPTIMISATION_PILE_TEMOINS.md) :
 64 entrées inline, puis un vector de secours sans troncature, dans le seul
@@ -148,12 +153,17 @@ revue épinglée propre, sans transformer les tests E en exécutions F.
 La [cartographie de qualification](docs/QUALIFICATION_S1_PRIMITIVES.md)
 reste l'entrée des obligations et de leurs autorités successives.
 Les [applications verticales](audits/CONTRAT_VERTICAL_COURANT.md) ont aussi
-leur contrat mathématique : une ancre certifiée par composante suffit,
-mais le resolver sur les faces non matérialisées et son export restent
-à construire. Le [contrat des masses et du vote](audits/CONTRAT_MASSES_VOTE_COURANT.md)
+leur construction totale : scanner `born` à une vraie naissance fournit
+une ancre inférieure ; `parents` et les successeurs propagent ensuite les
+cartes aux coupes exactes. Aucun resolver géométrique général n'est requis
+par cette route. Son port produit et son export restent à construire.
+Le [contrat des masses et du vote](audits/CONTRAT_MASSES_VOTE_COURANT.md)
 précise l'univers des incidences et le rayon utilisé ; les seuls deltas
 horizontaux ne déterminent pas ces poids. Ces contrats ne sont pas des
-champs déjà livrés dans l'archive F.
+champs déjà livrés dans l'archive F. L'[autorité p3](audits/AUTORITE_VOTE_P3_COURANTE.md)
+compare exactement les numérateurs de vote par classes de carrés et
+intervalles rationnels, avec indécision explicite au plafond ; elle ne
+qualifie pas encore les quotients de masses ni la condensation.
 La [preuve arithmétique des primitives](docs/ARITHMETIQUE_PRIMITIVES.md)
 distingue les domaines réellement produits des domaines génériques des
 types. Le [plan statique épinglé](docs/PLAN_PORTES_ARITHMETIQUES.md)
@@ -258,6 +268,11 @@ confirme 339/339 portes CPU, zéro échec, les contrôles documentaires et
 633 fichiers épinglés dans 11 reçus, puis les tests des runners et de
 sécurité sans accès cloud. Il ne remplace pas les 48/48/339 qualifications
 locales et ne qualifie pas les temps des campagnes mono ou de taille.
+
+Le [run des résultats F 4cc804e5](https://github.com/Ludwig-H/E-HGP/actions/runs/33961625862)
+est également terminé avec succès, le 5 septembre à 11:04:14 UTC : build,
+documentation, contrats CPU, runners et sécurité sans accès cloud passent.
+Cette CI est distincte des observations de latence déjà scellées.
 
 Contrôles avant le premier commit : registre (20 phases), liste blanche
 des workflows GCP et corpus documentaire historique (259 fichiers) passent.

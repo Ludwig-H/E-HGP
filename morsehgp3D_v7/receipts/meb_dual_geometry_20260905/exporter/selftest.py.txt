@@ -1,0 +1,207 @@
+#!/usr/bin/env python3
+"""Synthetic filesystem tests only; forbid every subprocess entry point."""
+from contextlib import ExitStack, redirect_stdout
+import copy
+import importlib.util
+import io
+import json
+from pathlib import Path
+import tempfile
+import unittest
+from unittest.mock import patch
+
+BASE = Path(__file__).resolve().parent
+
+
+def module(name, filename):
+    spec = importlib.util.spec_from_file_location(name, BASE / filename)
+    value = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(value)
+    return value
+
+
+E = module("private_dual_export", "export.py")
+R = module("private_dual_restore", "restore_sources.py")
+
+
+class ExportTests(unittest.TestCase):
+    def setUp(self):
+        self.context = ExitStack()
+        self.addCleanup(self.context.close)
+        self.root = Path(self.context.enter_context(tempfile.TemporaryDirectory(prefix="dual-export-mock-")))
+        for name in ("Popen", "run", "call", "check_call", "check_output"):
+            self.context.enter_context(patch("subprocess." + name, side_effect=RuntimeError("subprocess_forbidden")))
+
+    def write(self, name, data):
+        path = self.root / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("xb") as stream:
+            stream.write(data)
+        return path
+
+    def test_preview_and_required_pin(self):
+        output = io.StringIO()
+        with patch.object(E, "execute", side_effect=RuntimeError("execution_forbidden")), redirect_stdout(output):
+            self.assertEqual(E.main([]), 0)
+            for argv in (["--execute"], ["--execute", "--expected-exporter-sha256", "A" * 64]):
+                with self.assertRaisesRegex(RuntimeError, "explicit_exporter_pin_required"):
+                    E.main(argv)
+        self.assertEqual(json.loads(output.getvalue())["planned_input_copies"], 149)
+        self.assertFalse(json.loads(output.getvalue())["writes"])
+        self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_duplicate_json_and_unsafe_paths(self):
+        path = self.write("duplicate.json", b'{"status": 0, "status": 1}')
+        with self.assertRaisesRegex(RuntimeError, "duplicate_json_key"):
+            E.read_json(path)
+        for name in ("/absolute", "../outside", "x/../y", "a//b", "./a", "", True):
+            for judge in (E.safe_relative, R.relative):
+                with self.assertRaises(RuntimeError):
+                    judge(name)
+
+    def test_closed_receipt_pin_before_loading_runner(self):
+        self.write("stage/run_20260905/receipt.json", b"changed")
+        stage = {"base": self.root / "stage", "receipt_sha256": "0" * 64}
+        with patch.object(E, "load_runner", side_effect=RuntimeError("runner_not_admitted")):
+            with self.assertRaisesRegex(RuntimeError, "closed_receipt_pin_mismatch"):
+                E.validate_run(stage)
+
+    def test_missing_and_stale_raw_inventory(self):
+        folder = self.root / "stage/run_20260905"
+        self.write("stage/run_20260905/receipt.json", b"synthetic")
+        receipt = {"schema": "synthetic", "status": "completed", "errors": [], "sources_stable": True,
+                   "testing_macro": False, "sanitizers": False, "gcp_used": False,
+                   "public_status": "not_claimed", "combined_deadline_seconds": 60,
+                   "started_at": "2026-09-05T00:00:00+00:00", "finished_at": "2026-09-05T00:00:01+00:00",
+                   "artifacts": {str(i): {"sha256": E.sha(b"fresh"), "bytes": 5} for i in range(38)}}
+        stage = {"base": self.root / "stage", "receipt_sha256": E.digest(folder / "receipt.json"),
+                 "schema": "synthetic"}
+        with patch.object(E, "read_json", return_value=receipt), patch.object(E, "load_runner", side_effect=RuntimeError("runner_forbidden")):
+            with self.assertRaisesRegex(RuntimeError, "receipt_artifact_inventory"):
+                E.validate_run(stage)
+            for i in range(38):
+                self.write("stage/run_20260905/" + str(i), b"stale")
+            with self.assertRaisesRegex(RuntimeError, "raw_artifact_changed"):
+                E.validate_run(stage)
+
+    def test_projection_149_sources_67_exclusions_4(self):
+        paths = [self.root / ("source" + str(i)) for i in range(69)]
+        for path in paths[:2]:
+            self.write(path.name, b"\x7fELFmock")
+        pins = {str(path): E.sha(b"\x7fELFmock") if i < 2 else "0" * 64 for i, path in enumerate(paths)}
+        reviews = [{"name": name, "sources": dict(pins),
+                    "payload": {str(self.root / name / str(i)): "1" * 64 for i in range(38)},
+                    "excluded_binary": {"path": name + "/binary", "sha256": "2" * 64}}
+                   for name in ("tiny", "geometry")]
+        prep = {self.write("prep/p" + str(i), b"preparation"): E.sha(b"preparation") for i in range(6)}
+        with patch.object(E, "ROOT", self.root), patch.object(E, "EXCLUDED_AUTHORITIES", {path: pins[str(path)] for path in paths[:2]}), patch.object(E, "PREPARATION", prep):
+            rows, excluded = E.build_plan(reviews)
+            self.assertEqual(len(rows), 149)
+            self.assertEqual(sum(row["kind"] == "inert_source_snapshot" for row in rows), 67)
+            self.assertEqual(len(excluded), 4)
+            broken = copy.deepcopy(reviews)
+            broken[1]["sources"][str(paths[3])] = "9" * 64
+            with self.assertRaisesRegex(RuntimeError, "conflicting_source_pins"):
+                E.build_plan(broken)
+            broken = copy.deepcopy(reviews)
+            del broken[0]["sources"][str(paths[3])]
+            del broken[1]["sources"][str(paths[3])]
+            with self.assertRaisesRegex(RuntimeError, "unexpected_source_or_run_projection"):
+                E.build_plan(broken)
+
+    def test_byte_exact_create_only_elf_and_pin_guards(self):
+        data = b"line1\r\nline2\r\n\x00"
+        source = self.write("source", data)
+        row = {"source": str(source), "target": "nested/source.txt", "sha256": E.sha(data)}
+        target = self.root / "output"
+        copied = E.copy_artifact(row, target)
+        self.assertEqual((target / row["target"]).read_bytes(), data)
+        self.assertEqual(copied["bytes"], len(data))
+        with self.assertRaises(FileExistsError):
+            E.copy_artifact(row, target)
+        for payload in (b"\x7fELFfake", b"changed"):
+            source = self.write("bad" + str(len(payload)), payload)
+            bad = dict(row, source=str(source), target="absent.txt",
+                       sha256=E.sha(payload) if payload.startswith(b"\x7fELF") else "0" * 64)
+            with self.assertRaisesRegex(RuntimeError, "source_changed_or_unexpected_ELF"):
+                E.copy_artifact(bad, target)
+            self.assertFalse((target / "absent.txt").exists())
+
+    def prepare_publication(self):
+        exporter = self.root / "exporter"
+        for name in E.EXPORTER_FILES:
+            self.write("exporter/" + name, (name + "\n").encode())
+        source = self.write("input.cpp", b"// source\r\n")
+        row = {"source": str(source), "target": "source_tree/input.cpp.txt", "restore_path": "input.cpp",
+               "sha256": E.digest(source), "kind": "inert_source_snapshot"}
+        self.context.enter_context(patch.object(E, "BASE", exporter))
+        self.context.enter_context(patch.object(E, "DESTINATION", self.root / "public"))
+        self.context.enter_context(patch.object(E, "validate_run", return_value={"status": "synthetic"}))
+        self.context.enter_context(patch.object(E, "build_plan", return_value=([row], [])))
+        return E.digest(exporter / "export.py"), row
+
+    def test_mock_export_closure_and_existing_destination(self):
+        pin, row = self.prepare_publication()
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(E.execute(pin), 0)
+        closed = E.verify_archive(E.DESTINATION)
+        self.assertEqual(closed["files"], 13)  # Six mock copies, seven generated files.
+        self.assertEqual(closed["copied_artifacts"], 6)
+        with self.assertRaisesRegex(RuntimeError, "public_destination_already_exists"):
+            E.execute(pin)
+        with (E.DESTINATION / row["target"]).open("ab") as stream:
+            stream.write(b"tamper")
+        with self.assertRaisesRegex(RuntimeError, "sealed_artifact_drift_or_ELF"):
+            E.verify_archive(E.DESTINATION)
+
+    def test_late_copy_mutation_kept_as_failed_not_resealed(self):
+        pin, row = self.prepare_publication()
+        original = E.copy_artifact
+
+        def late_change(copy_row, destination):
+            result = original(copy_row, destination)
+            if copy_row["target"].endswith("preparation.json.txt"):
+                with (destination / row["target"]).open("ab") as stream:
+                    stream.write(b"late mutation")
+            return result
+
+        with patch.object(E, "copy_artifact", side_effect=late_change):
+            with self.assertRaisesRegex(RuntimeError, "public_copy_changed_before_seal"):
+                E.execute(pin)
+        self.assertTrue((E.DESTINATION / "EXPORT_FAILURE.json").is_file())
+        self.assertFalse((E.DESTINATION / "manifest.json").exists())
+        with self.assertRaisesRegex(RuntimeError, "failed_archive_not_closed"):
+            E.verify_archive(E.DESTINATION)
+
+    def prepare_restoration(self, data=b"// C++\r\n"):
+        self.write("archive/source_tree/src/x.hpp.txt", data)
+        rows = [{"archived_path": "source_tree/src/x.hpp.txt", "restored_path": "src/x.hpp", "sha256": E.sha(data)}]
+        self.write("archive/reconstruction_manifest.json", json.dumps(rows).encode())
+        return self.root / "archive", self.root / "fresh"
+
+    def test_restore_byte_exact_and_no_merge(self):
+        archive, target = self.prepare_restoration()
+        result = R.restore(archive, target)
+        self.assertEqual((target / "src/x.hpp").read_bytes(), b"// C++\r\n")
+        self.assertFalse(result["historical_runners_relocated"])
+        self.assertEqual(result["executions"], 0)
+        with self.assertRaisesRegex(RuntimeError, "destination_must_be_new"):
+            R.restore(archive, target)
+
+    def test_restore_rejects_elf_before_first_write(self):
+        archive, target = self.prepare_restoration(b"\x7fELFfake")
+        with self.assertRaisesRegex(RuntimeError, "source_hash_mismatch_or_ELF"):
+            R.restore(archive, target)
+        self.assertFalse(target.exists())
+
+    def test_restore_rejects_changed_source_before_first_write(self):
+        archive, target = self.prepare_restoration()
+        with (archive / "source_tree/src/x.hpp.txt").open("ab") as stream:
+            stream.write(b"changed")
+        with self.assertRaisesRegex(RuntimeError, "source_hash_mismatch_or_ELF"):
+            R.restore(archive, target)
+        self.assertFalse(target.exists())
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

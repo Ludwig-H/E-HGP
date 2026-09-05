@@ -1,0 +1,11 @@
+triangle P=0 L=1 proposal_forms=0 legacy=1 fallback=1 terminal_equal=1 prospective_violations=0
+triangle P=0 L=4 proposal_forms=0 legacy=4 fallback=1 terminal_equal=1 prospective_violations=0
+triangle P=1 L=1 proposal_forms=1 legacy=1 fallback=1 terminal_equal=1 prospective_violations=1
+triangle P=1 L=4 proposal_forms=1 legacy=4 fallback=1 terminal_equal=1 prospective_violations=1
+triangle P=4 L=1 proposal_forms=4 legacy=1 fallback=1 terminal_equal=1 prospective_violations=4
+triangle P=4 L=4 proposal_forms=4 legacy=4 fallback=1 terminal_equal=1 prospective_violations=4
+triangle P=5 L=1 proposal_forms=5 legacy=1 fallback=0 terminal_equal=1 prospective_violations=5
+triangle P=5 L=4 proposal_forms=5 legacy=4 fallback=0 terminal_equal=1 prospective_violations=5
+cumulative calls=4 P=7 L=12 proposal_forms=7 F_fallback_candidates=8 legacy=12
+near_max proposal_increment=1 legacy_increment=4 overflow=0
+dual_budget accounting=reference_ordinal_plus_proposal_v1 prospective_violations=28 public_status=not_claimed

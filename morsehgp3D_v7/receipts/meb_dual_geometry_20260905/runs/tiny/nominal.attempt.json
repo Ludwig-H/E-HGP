@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_prototype/run_20260905/dual_budget_gate"
+  ],
+  "cpu_affinity": [
+    0
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "expected_rc": 0,
+  "timeout_seconds": 54.95534400500037
+}
