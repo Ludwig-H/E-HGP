@@ -2,7 +2,7 @@
 
 5 septembre 2026. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
-**Verdict local favorable : le prétest q2 conserve l'objet, le support, le niveau et les refus de la MEB dans le domaine u16.** La preuve d'identité est directe et le même oracle rationnel indépendant que pour D retrouve exactement les objets et diagnostics D sur son corpus. Aucun défaut reproductible trouvé dans ce delta. **La suite complète 323/323 exécutée sur D ne qualifie pas E, dont la liste compte désormais 324 tests.** Ce rejeu est ciblé ; il ne constitue ni une suite E complète ni une mesure de vitesse.
+**Verdict local favorable : le prétest q2 conserve l'objet, le support, le niveau et les refus de la MEB dans le domaine u16.** La preuve d'identité est directe et le même oracle rationnel indépendant que pour D retrouve exactement les objets et diagnostics D sur son corpus. Aucun défaut reproductible trouvé dans ce delta. Le rejeu décrit ici reste ciblé. La [qualification E ultérieure](AUDIT_QUALIFICATION_20260905.md) dispose maintenant de ses propres 324/324 portes Release, 33/33 ciblées Release et 33/33 ASan/UBSan, contre-vérifiées depuis les preuves constructeur ; les 323 tests D ne lui sont pas transférés.
 
 ## Delta effectivement relu
 
@@ -43,6 +43,6 @@ Preuves : [reçu du juge E](receipts_20260905/e_q2/meb_rational_optimized.json),
 
 ## Portée pour le constructeur
 
-L'obligation mathématique locale q2 est satisfaite. Il reste à requalifier les portes intégrées E avant d'attribuer à E un verdict complet, puis à mesurer sa paire D/E sur les mêmes objets, compteurs et plafonds. Le prétest ajoute une passe sur le candidat accepté et évite des clés/niveaux sur les candidats rejetés ; cette balance relève de la mesure. Aucun gain pipeline, aucun SLO et aucun résultat GPU ne sont déduits de cette conservation locale.
+L'obligation mathématique locale q2 est satisfaite, et la qualification intégrée E est désormais close sur ses reçus propres. Les trois paires D/E à s=8/10/12 conservent les objets de la tour candidate complétée, également entre séparations. Le [rapport de qualification](AUDIT_QUALIFICATION_20260905.md) distingue les compteurs avant préfiltre, qui varient avec s, des survivants et objets conservés. Chaque séparation ne comporte qu'une paire sur hôte partagé ; aucun gain statistique, SLO ou résultat GPU n'en est déduit. Le prétest ajoute une passe sur le candidat accepté et évite des clés/niveaux sur les candidats rejetés ; cette balance garde son protocole de mesure.
 
 L'auditeur n'a écrit que dans `morsehgp3D_v7/audits/`, sans modifier les quatre fichiers constructeur. **GCP non utilisé.**

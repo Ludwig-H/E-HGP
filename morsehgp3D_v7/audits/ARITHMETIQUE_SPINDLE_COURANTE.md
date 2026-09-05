@@ -2,7 +2,7 @@
 
 5 septembre 2026. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
-**Verdict : les expressions entières de `spindle.hpp` et les comptes locaux de `witness_count.hpp` sont bornés sur leur domaine d'appel produit.** Le produit `2*cq*s2`, pourtant écrit en i64 avant division, tient sur 57 bits de magnitude avec l'ajout du plafond. Les racines corrigées, les conversions de leurs résultats et les différences à centres quadruplés sont sûres sous la précondition numérique explicitée au § 4. L'absence de double crédit ferme aussi le risque de wrap des comptes locaux avant leur écrêtage. Ces points ne restent donc pas des objections arithmétiques générales contre S1.
+**Verdict : les expressions entières de `spindle.hpp` et les comptes locaux de `witness_count.hpp` sont bornés sur leur domaine d'appel produit, avec raccord désormais exécuté aux vrais helpers C++ en O2 et UBSan.** Le produit `2*cq*s2`, pourtant écrit en i64 avant division, tient sur 57 bits de magnitude avec l'ajout du plafond. Les racines corrigées, les conversions de leurs résultats et les différences à centres quadruplés sont sûres sous la précondition numérique explicitée au § 4. L'absence de double crédit ferme aussi le risque de wrap des comptes locaux avant leur écrêtage. Ces points ne restent donc pas des objections arithmétiques générales contre S1. Les deux injections produit de mauvais arrondi et de double crédit sont détectées par la porte compilée (§ 7).
 
 Deux frontières sont conservées précisément : la validité de la graine de `std::sqrt` appartient au domaine d'exécution qualifié ; les primitives directes supposent les plages disjointes et les indices valides que le front leur fournit. Un commentaire d'un juge sans appel trouvé dans le produit promet en outre un écrêtage qu'il n'effectue pas (§ 6). Cette dérive locale ne touche pas le compteur utilisé par le front.
 
@@ -14,7 +14,9 @@ Les préconditions sont : positions u16, boîtes fermées ordonnées avec extré
 
 **La séparation s n'apparaît dans aucune formule des deux fichiers.** Elle ne multiplie ni les rayons ni les comptes de témoins. Les bornes ci-dessous valent pour toutes les boîtes u16, séparées ou non, donc aussi pour les rectangles intermédiaires visités avant le test WSPD. Le pipeline fournit `s>=8` ; les valeurs supérieures ne changent pas ce domaine arithmétique local. La comparaison de séparation à grands paramètres relève de [wavefront.hpp](../src/wspd/wavefront.hpp), qui possède sa voie large distincte.
 
-Le [reçu léger](receipts_front_20260905/spindle_bounds.json) épingle les sources avant/après au HEAD `35dda097f75a66f8264002c58b9ccc4888c46d2e`, l'état du worktree et les calculs entiers. Elles sont restées stables durant l'exécution. La [sonde Python](spindle_arithmetic_probe.py) vérifie les constantes, le registre de bornes et des modèles mathématiques ; **elle n'exécute pas le C++**. Aucune compilation ni sonde lourde n'a été lancée pendant la fenêtre de chronométrage réservée au constructeur. Ce rapport ne remplace pas les reçus compilés existants et n'en invente pas de nouveaux.
+Le [reçu léger](receipts_front_20260905/spindle_bounds.json) épingle les sources avant/après au HEAD `35dda097f75a66f8264002c58b9ccc4888c46d2e`, l'état du worktree et les calculs entiers. La [sonde Python mathématique](spindle_arithmetic_probe.py) vérifie les constantes, le registre de bornes et des modèles ; elle n'exécute pas le C++. Le [nouveau reçu compilé](receipts_front_compiled_20260905/spindle/summary.json), au HEAD `a32dc78fa3f0c526a11bd21fafdcded8db687973`, exécute les helpers et scelle les deux binaires. Ses cinq sources communes au registre statique — fuseaux, compteurs, racines, types et index — sont **identiques**, notamment les déclarations D/E et leurs coefficients. Toutes les dépendances projet relevées à la compilation sont scellées ; aucune n'est omise silencieusement.
+
+Les compilations ont eu lieu après la clôture annoncée à 06:51:49 UTC de la fenêtre de chronométrage du constructeur. Le registre de bornes, la preuve statique et les nouveaux résultats compilés gardent leurs autorités distinctes. Aucun accord sur les fixtures ne remplace une borne universelle ni une qualification globale du compilateur.
 
 ## 2. Prédicats H, Xi et extrema de boîtes
 
@@ -80,13 +82,13 @@ Pour `box_vs_ball` et `point_in_ball`, chaque différence `4*x-center4` est dans
 
 Les trois classes d'appel à `floor_sqrt`/`ceil_sqrt` dans la boule de cœur ont des arguments entiers dans 0..103 076 160 800, donc sous $2^{37}$. Sous une conversion binaire64 conforme, **tous ces arguments sont exactement représentables** : aucune perte entière ne précède l'appel à la racine.
 
-La précondition minimale pour la preuve de la boucle est que `std::sqrt` fournisse une graine finie, non négative, dont la troncature est représentable en i64. Le domaine usuel de `sqrt` sur ces entrées positives satisfait cette précondition et fournit une graine proche de la racine, très éloignée du plafond i64. Cette obligation reste attachée à la bibliothèque et au binaire qualifiés ; le présent calcul Python ne certifie pas la libm C++.
+La précondition minimale pour la preuve de la boucle est que `std::sqrt` fournisse une graine finie, non négative, dont la troncature est représentable en i64. Le domaine usuel de `sqrt` sur ces entrées positives satisfait cette précondition et fournit une graine proche de la racine, très éloignée du plafond i64. La porte C++ vérifie désormais cette propriété sur les 4 116 valeurs frontières et petites valeurs retenues, puis compare les deux racines produit à une dichotomie entière indépendante. L'obligation générale reste attachée à la bibliothèque et au binaire qualifiés ; ces cas bornés ne certifient pas à eux seuls toute la libm.
 
 Sous cette précondition, la correction est exacte même si la graine n'est pas arrondie au plus proche. Dans la première boucle, tout carré de r tient en i128, y compris pour une graine i64 positive arbitrairement grande. Chaque décrément diminue strictement r jusqu'à obtenir $r^2\leq x$. Avant la seconde boucle, r est donc au plus la racine plancher de x ; `r+1` est représentable, ici au plus 321055. Les incréments s'arrêtent exactement lorsque $(r+1)^2>x$. L'encadrement final est $r^2\leq x<(r+1)^2$, qui caractérise la racine plancher. Le plafond ajoute un uniquement lorsque $r^2<x$ ; cette addition est sûre et traite les carrés parfaits sans ajout artificiel.
 
 Ainsi, une dépendance à la **justesse finale de l'arrondi flottant** n'est pas un verrou : les boucles la corrigent. Une graine NaN, infinie ou non convertible ne satisfait en revanche pas le contrat, et aucune correction entière postérieure ne pourrait réparer un cast déjà invalide. Il faut conserver cette distinction dans la qualification d'exécution. La routine pure `isqrt64_pure` n'est pas appelée par ces deux fichiers ; elle n'est pas revendiquée comme remplacement implicite.
 
-Une contre-fixture mathématique permanente dans le reçu protège le sens de l'arrondi : A=(0,0,0), B=(1,1,0), z=(0,1,0), en q2. La distance quadruplée au centre de z a son carré égal à 8 et H=0 : z est sur le shell diamétral. Le rayon correct vaut `floor_sqrt(8)=2`, alors que le mutant de distance plafond donne 3 et créditerait faussement z puisque 8<9. C'est une réfutation par équations du mauvais sens d'arrondi, **pas un nouveau run du mutant C++**.
+Une contre-fixture permanente protège le sens de l'arrondi : A=(0,0,0), B=(1,1,0), z=(0,1,0), en q2. La distance quadruplée au centre de z a son carré égal à 8 et H=0 : z est sur le shell diamétral. Le rayon correct vaut `floor_sqrt(8)=2`, alors que le mutant de distance plafond donne 3 et crédite faussement z puisque 8<9. La réfutation par équations est désormais raccordée au **vrai** point d'injection `core-ball-ceil-distance` du produit compilé avec `MHGP7_TESTING` : les deux binaires observent le rayon 3 et le faux intérieur, puis rendent 4.
 
 ## 5. Comptes locaux, masques et capacités
 
@@ -108,11 +110,11 @@ Chaque nœud est dépilé au plus une fois par appel. `nodes_visited<=2m-1<2^31`
 
 Le commentaire de `true_spindle_count` annonce un compte « écrêté à h ». La fonction arrête le parcours quand `count>=h` mais retourne directement `count`. Un crédit de sous-arbre peut dépasser h. Aucun appel de ce helper n'a été trouvé hors de sa définition dans les sources et tests v7 examinés ; le front utilise `count_universal_witnesses`, qui possède bien son `min` terminal.
 
-Fixture minimale de contrat : cinq points sur l'axe x, aux positions `{0,4,5,6,10}`, avec ancre 0/10, lane q2 et h=1. Dans le trie Morton, `{4,5,6}` est un sous-arbre. Sa boîte est strictement dans la boule diamétrale, car `min(z*(10-z))=24>0` sur [4,6]. Son crédit vaut 3. La pile visite ce sous-arbre avant la feuille 0 ; l'arrêt au seuil rend donc **3**, pas 1. Il s'agit ici d'une trace statique reproductible, pas d'une exécution C++ revendiquée.
+Fixture minimale de contrat : cinq points sur l'axe x, aux positions `{0,4,5,6,10}`, avec ancre 0/10, lane q2 et h=1. Dans le trie Morton, `{4,5,6}` est un sous-arbre. Sa boîte est strictement dans la boule diamétrale, car `min(z*(10-z))=24>0` sur [4,6]. Son crédit vaut 3. La pile visite ce sous-arbre avant la feuille 0 ; l'arrêt au seuil rend donc **3**, pas 1. Les deux exécutions C++ confirment maintenant cette trace et l'impriment dans leurs stdout. La porte normale vérifie le comportement actuel ; elle ne le présente pas comme une conformité au commentaire erroné.
 
 Le constructeur peut corriger le commentaire en « arrêt dès atteinte du seuil, dépassement possible », ce qui décrit le comportement présent, ou rendre `min(count,h)` s'il veut réellement exposer un contrat d'écrêtage. Ce choix ne bloque pas la fermeture arithmétique du compteur produit. Il ne faut plus lister ce helper comme preuve d'un écrêtage exact tant que ce raccord documentaire n'est pas explicite.
 
-## 7. Contrôles légers et suite bornée
+## 7. Contrôles mathématiques et raccord compilé
 
 Commande exécutée :
 
@@ -122,6 +124,44 @@ python3 -O morsehgp3D_v7/audits/spindle_arithmetic_probe.py
 
 Elle rend **0** en environ 0,028 s au reçu, avec 92 cas de correction de racine dans un **modèle entier Python**, 125 identités axiales, les bornes du tableau et la contre-fixture d'arrondi. Les planchers restent effectifs sous `python3 -O`. Les sources avant/après sont identiques. Ces contrôles complètent la preuve de domaine ; ils ne doivent pas être additionnés aux CTests compilés.
 
-La prochaine qualification compilée utile est un raccord direct de ces mêmes valeurs frontières aux helpers C++, avec la graine, les casts et les comparaisons strictes sous le binaire visé. Elle devra attendre la fermeture de la fenêtre réservée aux mesures du constructeur. Il n'est pas nécessaire de relancer une recherche géométrique sur les rayons ni d'élargir les types par précaution : les bornes entières ci-dessus suffisent déjà pour ces deux fichiers.
+Ce raccord aux helpers est désormais réalisé par la [sonde C++ permanente](spindle_compiled_probe.cpp) et son [pilote](spindle_compiled_probe.py) :
+
+```bash
+python3 -O morsehgp3D_v7/audits/spindle_compiled_probe.py
+```
+
+Les deux compilations emploient GNU C++ 13.3.0, `-std=c++20 -Wall -Wextra -Wpedantic -Werror -DMHGP7_TESTING`, avec `-O2` puis `-O1 -g -fsanitize=undefined -fno-sanitize-recover=all -D_GLIBCXX_ASSERTIONS`. Les valeurs effectives contrôlées sont `FE_TONEAREST`, binaire64 à 53 bits et `FLT_EVAL_METHOD=0`. Les commandes intégrales, dépendances projet, liens dynamiques, hashes des sources et SHA-256 des binaires sont enregistrés. Les sources avant/après sont identiques.
+
+L'oracle des racines utilise une **dichotomie pure en entiers**, sans `sqrt` ni helper entier produit. Il contrôle les petites valeurs 0..4096, des carrés exacts et leurs voisins autour des limites de rayons, ainsi que les trois derniers entiers jusqu'à `sub2=103076160800`. Les puissances H sont reconstruites depuis trois distances carrées ; Xi est obtenu par un **déterminant de Gram**, sans le produit vectoriel du code jugé. Les cas `H=0`, `Xi=3H²`, `Xi=2H²` et Xi dépassant i64 avec H positif sont effectivement présents.
+
+Pour la boule de cœur, le juge calcule en i128 la recette contractuelle avec divisions et plafonds rationnels explicites, sa propre racine et les constantes littérales vérifiées. Il n'emploie pas `core_ball` pour produire la référence. Les comparaisons de boîtes utilisent tous leurs coins et la projection du centre sur la boîte. Les identités des points collectés et les comptes attendus sont obtenus par énumération directe des points, sans parcours du compteur jugé. Le registre statique justifie le sens géométrique de cette recette ; le nouveau juge vérifie son raccord aux octets compilés.
+
+| Contrôle | Résultat identique par binaire |
+|---|---:|
+| Entrées de racines plancher/plafond | 4 116 |
+| Classifications ponctuelles de fuseau | 5 184 |
+| Triplets à H nul | 338 |
+| Égalités positives q3 / q4 | 4 / 8 |
+| Xi dépassant i64 avec H positif | 28 |
+| Boules de cœur, dont positives / nulles | 432, dont 194 / 238 |
+| Réflexions d'axe et permutations cycliques des centres quadruplés | 864 |
+| Comparaisons boîte/boule | 5 184 |
+| Autorités de coins par lane | 5 184 |
+| Comptages fusionnés, tous masques 1..7 et seuils 0/1/2/10 | 560 |
+| Collectes vérifiant cardinal, identités uniques et sentinelles de tampon | 90 |
+| Contacts intérieur/shell/extérieur explicitement attendus | 6 |
+
+Les cas de boules incluent la boîte u16 entière, les boîtes réduites à un point, les boîtes plates, les centres à quarts impairs et les extrémités inversées. Le compteur avec coins est comparé au nombre exact de témoins ponctuels pour les ancres singletons ; sans coins, q3/q4 sont comparés aux seuls points de la boule de cœur, et q2 à son compte exact. Les collectes à capacité 0, 1 et 5 contrôlent aussi les limites d'écriture. Les planchers exécutables imposent tous les compteurs du tableau.
+
+Deux **mutants réels du code produit**, activés avant le premier appel par `mutants_enable`, sont exécutés chacun dans un processus distinct :
+
+| Injection | Observation causale | Code attendu et obtenu, O2 / UBSan |
+|---|---|---|
+| `core-ball-ceil-distance` | Rayon quadruple 3 contre 2 ; faux intérieur sur le shell de carré de distance 8 | 4 / 4 |
+| `witness-no-lane-mask` | Sur la fixture `{0,4,5,6,10}`, ancre 0/10, seuil 10 : 8 crédits pour 3 identités intérieures | 4 / 4 |
+
+Les normales rendent **0**, sans alerte UBSan, en environ 0,010 s et 0,012 s au reçu. Ce sont des durées de porte bornée, pas des mesures de débit produit. Les 11 commandes enregistrées comprennent l'identification du compilateur, deux compilations, deux inventaires de liens, deux normales et quatre injections. Une injection non détectée rendrait 3 ; un nom ou une CLI hors domaine rendrait 2 ; les échecs de contrôle normaux rendent 1. Aucune faute de résultat artificiellement corrompu n'est comptée parmi ces deux mutants.
+
+Le raccord compilé demandé pour ces deux fichiers est donc **exercé et conforme sur ce domaine borné**. Les prémisses globales d'ABI/libm, la télémétrie agrégée du front et les autres primitives restent attachées à leurs qualifications propres. Il n'est pas nécessaire de relancer une recherche géométrique sur les rayons ni d'élargir les types par précaution : les bornes entières ci-dessus suffisent déjà pour ces deux fichiers.
 
 Aucune source produit ni navigation d'audit modifiée. Aucun statut public promu. **GCP non utilisé.**

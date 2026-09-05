@@ -1,0 +1,16 @@
+{
+  "exitcode": 0,
+  "positive": 1,
+  "rejections": [
+    "duplicate_expected_name",
+    "empty_log",
+    "failed_block",
+    "failure_node",
+    "missing_footer",
+    "skipped_node",
+    "wrong_q2_exit",
+    "wrong_status",
+    "zero_tests"
+  ],
+  "status": "passed"
+}

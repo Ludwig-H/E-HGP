@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""Only synthetic selftests and inert previews, never a build or engine."""
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+import runner as N
+
+
+def tracked() -> dict:
+    files = [N.HERE / name for name in ("README.md", "runner.py", "selftest.py", "prepare.py")]
+    files += [N.LEGACY, N.ROOT / "build/v7_meb_paired/selftest.py",
+              N.ROOT / "build/v7_meb_paired/build_cli.py", N.ROOT / "build/v7_meb_paired/build_cli_selftest.py",
+              N.ROOT / "morsehgp3D_v7/tests/incidence_campaign_gate.py"]
+    files += [N.ROOT / "morsehgp3D_v7/bench" / name for name in N.R.HELPER_PINS]
+    return {"files": {str(path): N.R.digest(path) for path in files}, "baseline": N.baseline_binding()}
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    output = args.output.resolve()
+    if output.exists():
+        raise FileExistsError(output)
+    N.R.environment_guard()
+    common, incidence = N.helpers()
+    before = tracked()
+    output.mkdir(parents=True, exist_ok=False)
+    commands = [("selftest.normal", [sys.executable, "-B", str(N.HERE / "selftest.py")]),
+                ("selftest.optimized", [sys.executable, "-B", "-O", str(N.HERE / "selftest.py")])]
+    for separation in N.SEPARATIONS:
+        commands.append((f"preview.s{separation}", [sys.executable, "-B", str(N.HERE / "runner.py"),
+            "--candidate", str(N.ROOT / "build/v7_next_q2_qualification/mhgp7"),
+            "--separation", str(separation), "--output", str(output / f"must_remain_absent_s{separation}")]))
+    attempts = []
+    for name, command in commands:
+        attempt = {"name": name, "argv": command, "started_utc": N.R.utc_now(), "returncode": None}
+        attempts.append(attempt)
+        common.atomic_json(output / "attempts.json", attempts)
+        result = subprocess.run(command, cwd=N.ROOT, capture_output=True, timeout=30, check=False)
+        (output / f"{name}.stdout").write_bytes(result.stdout)
+        (output / f"{name}.stderr").write_bytes(result.stderr)
+        attempt.update(returncode=result.returncode, ended_utc=N.R.utc_now())
+        common.atomic_json(output / "attempts.json", attempts)
+    after = tracked()
+    status = "prepared_and_selftests_passed" if before == after and all(row["returncode"] == 0 for row in attempts) else "failed_or_invalid"
+    N.R.require(not any((output / f"must_remain_absent_s{s}").exists() for s in N.SEPARATIONS), "preview created a directory")
+    common.atomic_json(output / "summary.json", {"status": status, "pins_stable": before == after,
+        "before": before, "after": after, "engine_runs": 0, "builds": 0, "gcp": "not_used",
+        "selftest_methods_each": 21, "synthetic_lifecycle_scenarios_each": 24,
+        "incidence_adapted_source_sha256": incidence.adapted_source_sha256,
+        "public_status": "not_claimed", "runner_requires_separate_review_and_GO": True})
+    common.atomic_json(output / "manifest.json", {path.name: N.R.digest(path) for path in sorted(output.iterdir()) if path.is_file()})
+    print(json.dumps({"status": status, "commands": len(attempts), "engine_runs": 0, "builds": 0,
+                      "output": str(output), "pins_stable": before == after}), flush=True)
+    return 0 if status == "prepared_and_selftests_passed" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

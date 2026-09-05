@@ -1,0 +1,149 @@
+{
+  "GCP": "not_used",
+  "all_exitcodes_zero": true,
+  "runs": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/verify_q2_receipt.py",
+        "--self-test"
+      ],
+      "exitcode": 0,
+      "script_sha256": "6d155edd2cc55340ee4ff30c6dd6116884044be49e3a76bcf4c04ce945e213ec",
+      "started_utc": "2026-09-05T07:19:20.864180+00:00",
+      "stderr": "verify_q2_receipt_selftest_normal.stderr",
+      "stdout": "verify_q2_receipt_selftest_normal.json",
+      "stdout_sha256": "d72f23fef8b32af47413b556e94b6135f55e97b9cef3a224d52d5cdfd74a821e"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/verify_q2_receipt.py"
+      ],
+      "exitcode": 0,
+      "script_sha256": "6d155edd2cc55340ee4ff30c6dd6116884044be49e3a76bcf4c04ce945e213ec",
+      "started_utc": "2026-09-05T07:19:20.924965+00:00",
+      "stderr": "verify_q2_receipt_portable_normal.stderr",
+      "stdout": "verify_q2_receipt_portable_normal.json",
+      "stdout_sha256": "043410985c18c52ae38b4e4def2a93bb7b8acf682f0f5dd15451d45bb2a46388"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/verify_q2_receipt.py",
+        "--self-test"
+      ],
+      "exitcode": 0,
+      "script_sha256": "6d155edd2cc55340ee4ff30c6dd6116884044be49e3a76bcf4c04ce945e213ec",
+      "started_utc": "2026-09-05T07:19:21.050747+00:00",
+      "stderr": "verify_q2_receipt_selftest_optimized.stderr",
+      "stdout": "verify_q2_receipt_selftest_optimized.json",
+      "stdout_sha256": "d72f23fef8b32af47413b556e94b6135f55e97b9cef3a224d52d5cdfd74a821e"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/verify_q2_receipt.py"
+      ],
+      "exitcode": 0,
+      "script_sha256": "6d155edd2cc55340ee4ff30c6dd6116884044be49e3a76bcf4c04ce945e213ec",
+      "started_utc": "2026-09-05T07:19:21.111193+00:00",
+      "stderr": "verify_q2_receipt_portable_optimized.stderr",
+      "stdout": "verify_q2_receipt_portable_optimized.json",
+      "stdout_sha256": "043410985c18c52ae38b4e4def2a93bb7b8acf682f0f5dd15451d45bb2a46388"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/verify_e_tests.py",
+        "--self-test"
+      ],
+      "exitcode": 0,
+      "script_sha256": "6d947620a7e9e9e4b7ed11f4b3b012e64dde77cf36d27b28d12824e3b52e6902",
+      "started_utc": "2026-09-05T07:19:21.235217+00:00",
+      "stderr": "verify_e_tests_selftest_normal.stderr",
+      "stdout": "verify_e_tests_selftest_normal.json",
+      "stdout_sha256": "c51803903a09c23145fcfd336cb2d6eb103cbf273944d0081426eeb3f505815d"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/verify_e_tests.py"
+      ],
+      "exitcode": 0,
+      "script_sha256": "6d947620a7e9e9e4b7ed11f4b3b012e64dde77cf36d27b28d12824e3b52e6902",
+      "started_utc": "2026-09-05T07:19:21.305747+00:00",
+      "stderr": "verify_e_tests_portable_normal.stderr",
+      "stdout": "verify_e_tests_portable_normal.json",
+      "stdout_sha256": "dcaf626d8896915971599b263bcdcdddcc8b436c6056d2ea5448a6adb4867f77"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/verify_e_tests.py",
+        "--self-test"
+      ],
+      "exitcode": 0,
+      "script_sha256": "6d947620a7e9e9e4b7ed11f4b3b012e64dde77cf36d27b28d12824e3b52e6902",
+      "started_utc": "2026-09-05T07:19:21.787512+00:00",
+      "stderr": "verify_e_tests_selftest_optimized.stderr",
+      "stdout": "verify_e_tests_selftest_optimized.json",
+      "stdout_sha256": "c51803903a09c23145fcfd336cb2d6eb103cbf273944d0081426eeb3f505815d"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/verify_e_tests.py"
+      ],
+      "exitcode": 0,
+      "script_sha256": "6d947620a7e9e9e4b7ed11f4b3b012e64dde77cf36d27b28d12824e3b52e6902",
+      "started_utc": "2026-09-05T07:19:21.858860+00:00",
+      "stderr": "verify_e_tests_portable_optimized.stderr",
+      "stdout": "verify_e_tests_portable_optimized.json",
+      "stdout_sha256": "dcaf626d8896915971599b263bcdcdddcc8b436c6056d2ea5448a6adb4867f77"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/verify_q2_receipt.py",
+        "--live"
+      ],
+      "exitcode": 0,
+      "script_sha256": "6d155edd2cc55340ee4ff30c6dd6116884044be49e3a76bcf4c04ce945e213ec",
+      "started_utc": "2026-09-05T07:19:22.325701+00:00",
+      "stderr": "replay_live.stderr",
+      "stdout": "replay_live.json",
+      "stdout_sha256": "b9c5700d5e910f2442941c3e6e4cc6c478724f68d4f697fc3518e3f7aef4e99b"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/verify_e_tests.py",
+        "--live"
+      ],
+      "exitcode": 0,
+      "script_sha256": "6d947620a7e9e9e4b7ed11f4b3b012e64dde77cf36d27b28d12824e3b52e6902",
+      "started_utc": "2026-09-05T07:19:22.596147+00:00",
+      "stderr": "e_tests_live.stderr",
+      "stdout": "e_tests_live.json",
+      "stdout_sha256": "5039dc5db30c1f038ab76e305e52d57ef9836d33134750536abf8530c04ac03a"
+    }
+  ],
+  "schema": "mhgp7-independent-inspector-checks-v1"
+}

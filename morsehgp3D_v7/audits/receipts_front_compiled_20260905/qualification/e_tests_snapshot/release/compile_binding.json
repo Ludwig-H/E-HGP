@@ -1,0 +1,64 @@
+{
+  "binary_role": "pinned_E_Release",
+  "commands": [
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1 -I/workspaces/E-HGP/morsehgp3D_v7 -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_meb_lazy_gate.dir/tests/meb_lazy_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/meb_lazy_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/meb_lazy_gate.cpp",
+      "output": "CMakeFiles/mhgp7_meb_lazy_gate.dir/tests/meb_lazy_gate.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_silent_incidence_gate.dir/tests/silent_incidence_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/silent_incidence_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/silent_incidence_gate.cpp",
+      "output": "CMakeFiles/mhgp7_silent_incidence_gate.dir/tests/silent_incidence_gate.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++   -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+      "output": "CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_archive_api_gate.dir/tests/archive_api_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/archive_api_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/archive_api_gate.cpp",
+      "output": "CMakeFiles/mhgp7_archive_api_gate.dir/tests/archive_api_gate.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_archive_cleanup_gate.dir/tests/archive_cleanup_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/archive_cleanup_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/archive_cleanup_gate.cpp",
+      "output": "CMakeFiles/mhgp7_archive_cleanup_gate.dir/tests/archive_cleanup_gate.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_mono_inline_gate.dir/tests/mono_inline_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/mono_inline_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/mono_inline_gate.cpp",
+      "output": "CMakeFiles/mhgp7_mono_inline_gate.dir/tests/mono_inline_gate.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_census_direct_gate.dir/tests/census_direct_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/census_direct_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/census_direct_gate.cpp",
+      "output": "CMakeFiles/mhgp7_census_direct_gate.dir/tests/census_direct_gate.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_bad_alloc_gate.dir/tests/bad_alloc_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/bad_alloc_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/bad_alloc_gate.cpp",
+      "output": "CMakeFiles/mhgp7_bad_alloc_gate.dir/tests/bad_alloc_gate.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_thread_failure_gate.dir/tests/thread_failure_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/thread_failure_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/thread_failure_gate.cpp",
+      "output": "CMakeFiles/mhgp7_thread_failure_gate.dir/tests/thread_failure_gate.cpp.o"
+    }
+  ],
+  "configuration": {
+    "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release/CMakeCache.txt": "1e39736fa50a2bfd477b930e8354ed0f67f2d8ddd05f985e8a6cddd8b60b1b39",
+    "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release/CTestTestfile.cmake": "2d55f96519da14785366f9580392050d58f24142689ded3eb1f67c0318cadb8f",
+    "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release/compile_commands.json": "d1889be774aba3edc6f5075bacf35a9c7a574e692c7e5c0bd2d7536cc907e27b"
+  }
+}

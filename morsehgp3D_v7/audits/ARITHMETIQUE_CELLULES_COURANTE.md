@@ -48,6 +48,28 @@ PYTHONDONTWRITEBYTECODE=1 python3 morsehgp3D_v7/audits/cell_width_certificate.py
 PYTHONDONTWRITEBYTECODE=1 python3 -O morsehgp3D_v7/audits/cell_width_certificate.py
 ```
 
-Le [certificat entier](cell_width_certificate.py) vérifie les majorants, huit frontières du chemin i64, 17 frontières de racine et trois variantes fautives de largeur/majoration. Ses [reçus normal](receipts_front_20260905/cell_width.json) et [optimisé](receipts_front_20260905/cell_width_optimized.json) épinglent les sources. Il ne compile ni n'exécute le moteur. Les portes CTest des cellules ont leur autorité d'exécution dans la [suite D](receipts_20260905/release/summary.json) ; aucune nouvelle suite complète E n'est déduite de cette preuve.
+Le [certificat entier](cell_width_certificate.py) vérifie les majorants, huit frontières du chemin i64, 17 frontières de racine et trois variantes fautives de largeur/majoration. Ses [reçus normal](receipts_front_20260905/cell_width.json) et [optimisé](receipts_front_20260905/cell_width_optimized.json) épinglent les sources. Il ne compile ni n'exécute le moteur. Les portes CTest des cellules ont leur autorité d'exécution dans la [suite D](receipts_20260905/release/summary.json).
+
+## Raccord aux helpers compilés : fermé
+
+Le [pont C++](cell_compiled_bridge.cpp) appelle les vrais `CellGridT<8/16>`, `count_site`, `seed_center_coords` et `seed_chord_coords`. Le [juge Python](cell_compiled_oracle.py) compare les distances carrées aux quatre sommets de chaque cellule ; il ne reprend pas la formule produit `du/dv/rhs` pour les nuages géométriques. Le centre est obtenu par élimination de Gram en `Fraction`, indépendamment des formes q3. La longueur de corde est déduite du rayon rationnel et de la distance au plan, puis arrondie strictement vers l'extérieur en entier Python.
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 morsehgp3D_v7/audits/cell_compiled_oracle.py
+```
+
+Les [reçus](receipts_front_compiled_20260905/cell/summary.json) conservent les entrées, sorties, commandes, hashes des sources et des binaires. Deux builds C++20 passent : O2 et O1 UBSan, avec `-Wall -Wextra -Wpedantic -Werror`, sans diagnostic. Les options numériques sont celles par défaut de GCC 13.3, comme pour la porte d'arrondi D ; la localisation n'est appelée qu'au plus proche, puis la garde est contrôlée sous les trois autres modes.
+
+| Contrôle par build | Résultat |
+| --- | --- |
+| Nuages u16, G=8/16, dénominateurs 8/12 et seuils 1/3 | 32 grilles ; 10 940 cellules nécessaires mortes et 1 476 vivantes |
+| Compteurs géométriques et frontières synthétiques i64/i128 | 60 cas, dont 28 synthétiques explicitement hors profil ; 38 400 cellules comparées |
+| Égalités strictes aux sommets | 20 180 contacts de coquille rencontrés dans le juge |
+| Centres q3 et cordes | 32 de chaque, coordonnées exactes atteignant 98 bits ; toutes les boîtes contiennent les cellules fermées attendues |
+| Gardes effectives | 96 refus d'environnement ; 192 refus de domaine, dont NaN, infinis et intervalles inversés |
+
+Les trois vrais mutants produit sont détectés sur chacun des deux binaires : `cell-kill-nonstrict` par les comptes, `cell-kill-h-minus-one` par les seuils, `cell-locate-eps-zero` par le centre exactement sur un coin. Le [rejeu renforcé](replay_compiled_front.py), normal et sous `-O`, exige aussi huit vrais changements de décisions de mort pour le mutant de seuil, dont 61 vers 113 cellules mortes au cas 17 ; la détection ne repose donc pas seulement sur le seuil stocké. Il contrôle les 32 bases de chaque binaire par orthogonalité, Gram positif et distance rationnelle aux droites d'arêtes, en complément du [juge sectoriel](ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md). Pour le mutant de localisation, contenir la cellule de droite ne suffit pas : la cellule de gauche est aussi requise au contact entier. Le pont rend 0 après transport ; le juge rend 0 seulement après avoir constaté chaque divergence causale. Ce ne sont pas des codes 4 de CTest.
+
+Les entrées synthétiques sollicitent directement `count_site<i64/i128>` dans leur domaine de représentation, sans prétendre rendre la voie i128 atteignable sous u16. Les points du cover sont uniques ; prendre le petit nuage entier comme cover conserve le contrat local de comptage. Les quatre fichiers du delta E sont inchangés pendant ces exécutions ; les helpers du front sont communs à D et E. Cette fermeture locale ne se substitue pas à une suite intégrée E.
 
 GCP non utilisé. Aucun fichier produit modifié.

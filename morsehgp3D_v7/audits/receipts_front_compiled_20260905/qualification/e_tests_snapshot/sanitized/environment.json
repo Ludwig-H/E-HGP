@@ -1,0 +1,58 @@
+{
+  "all_test_executions": "fresh",
+  "build_kind": "fresh_isolated",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "locale": {
+      "LANG": "C",
+      "LC_ALL": "C"
+    },
+    "mode": "sanitized",
+    "sanitizer_options": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "LSAN_OPTIONS": "",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    }
+  },
+  "expected_E_build_receipt_sha256": "30f133d6c052e1d53c8c539457b5b553267d202c11b043188feb6c0f30af1e16",
+  "expected_E_sha256": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6",
+  "gate_results_reused": false,
+  "gcp": "not_used",
+  "host_before": {
+    "affinity_cpus": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "architecture": "x86_64",
+    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "host_shared": true,
+    "kernel_release": "6.8.0-1052-azure",
+    "loadavg_1_5_15": [
+      0.8212890625,
+      1.06103515625,
+      1.51708984375
+    ],
+    "logical_cpus": 8,
+    "mem_total_bytes": 33657716736,
+    "observed_utc": "2026-09-05T06:59:35.823690Z"
+  },
+  "mode": "sanitized",
+  "protected_C_C_D_historical": {
+    "/workspaces/E-HGP/build/v7/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+    "/workspaces/E-HGP/build/v7_c_qualification/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+    "/workspaces/E-HGP/build/v7_meb_qualification/mhgp7": "127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f"
+  },
+  "public_status": "not_claimed",
+  "repository_before": {
+    "head": "a32dc78fa3f0c526a11bd21fafdcded8db687973",
+    "observed_utc": "2026-09-05T06:59:35.799903Z",
+    "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/PASSATION.md\n M morsehgp3D_v7/docs/ERRATA_PUBLICATION_20260904.md\n M morsehgp3D_v7/src/core/mutants.hpp\n M morsehgp3D_v7/src/forest/silent_incidence.hpp\n M morsehgp3D_v7/tests/meb_lazy_gate.cpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/docs/OPTIMISATION_MEB_Q2.md\n?? morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md\n?? morsehgp3D_v7/receipts/meb_pivot_budget_counterexample_20260905/\n?? morsehgp3D_v7/receipts/meb_q2_review_20260905/\n"
+  },
+  "schema": "mhgp7.q2-E-qualification.v1"
+}

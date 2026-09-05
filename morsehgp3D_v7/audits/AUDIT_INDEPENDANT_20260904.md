@@ -1,13 +1,13 @@
 # Audit indépendant courant de MorseHGP3D v7
 
-Actualisé le 5 septembre 2026 depuis `35dda097f75a66f8264002c58b9ccc4888c46d2e` ; qualification complète D et delta local E distingués.
+Actualisé le 5 septembre 2026 depuis `a32dc78f`, à la suite de la publication constructeur E `2b94abddfde08101607f4639d42149156fb39e6c` ; qualifications propres D et E distinguées.
 Toutes les écritures restent dans `morsehgp3D_v7/audits/`.
 
-La qualification complète vise le snapshot **D**. Après la clôture de son
-run, le constructeur a modifié quatre fichiers produit pour le prétest q2
-**E** : CMake, `mutants.hpp`, `silent_incidence.hpp` et `meb_lazy_gate.cpp`.
-Leurs changements locaux ne sont pas inclus dans cette publication d'audit.
-Les 323 résultats et la stabilité avant/après ne leur sont pas transférés.
+La suite **D** de 323 portes a été reconstruite et exécutée par l'auditeur.
+Le delta q2 **E** du constructeur dispose maintenant de ses propres
+324 portes Release et de deux campagnes ciblées de 33 portes, Release
+et ASan/UBSan, dont les preuves brutes sont contre-vérifiées ici.
+Les quatre fichiers produit E restent sous la responsabilité du constructeur.
 Le [manifeste courant](validation_current.json) reconnaît séparément les octets D et E et affiche la portée correspondante ; leur mélange est refusé.
 
 ```text
@@ -20,17 +20,16 @@ public_status=not_claimed
 
 ## Avis pour le constructeur
 
-**La MEB différée est justifiée et le verrou topologique de l'index est
-levé sous les préconditions du pipeline.** Les deux conclusions associent
-un argument statique et un juge indépendant du calcul produit. La garde
-d'arrondi et ses replis ont aussi été exercés dans le pipeline. Aucun
-nouveau défaut produit n'a été trouvé dans ces trois sous-audits.
-Le constructeur peut s'appuyer sur ces acquis pour achever la qualification
-horizontale ; ils ne restent pas des demandes de preuve génériques.
+**Les bornes des témoins sont raccordées au code compilé, et la
+qualification intégrée E est close sur ses preuves propres.** Les trois
+sondes du front passent en O2 et O1 UBSan, avec six vrais mutants produit
+détectés. Aucun nouveau défaut produit n'a été trouvé. Les acquis MEB,
+index/front et garde d'arrondi restent fermés ; le constructeur peut
+s'appuyer dessus pour achever le certificat horizontal.
 
 La composition S1 et la réduction horizontale disposent déjà de preuves
 conditionnelles. La partition du front et les antichaînes de cover sont maintenant
-[raccordées à l'index](AUDIT_RACCORD_INDEX_FRONT_20260905.md). Les bornes opérationnelles des témoins sont maintenant fermées pour les fuseaux, secteurs, cordes et cellules ; le [domaine CPU](DOMAINE_CPU_COURANT.md) est nommé. Leurs nouvelles frontières restent à raccorder aux helpers compilés. Le domaine des plateaux, la verticale, le vote et les coûts gardent
+[raccordées à l'index](AUDIT_RACCORD_INDEX_FRONT_20260905.md). Les bornes opérationnelles des témoins sont fermées pour les fuseaux, secteurs, cordes et cellules ; le [domaine CPU](DOMAINE_CPU_COURANT.md) et les [frontières compilées](receipts_front_compiled_20260905/README.md) sont documentés. Le domaine des plateaux, la verticale, le vote et les coûts gardent
 leurs propres contrats. Le refus de `--require-exact` reste cohérent avec
 cet état ; aucune promotion n'est faite par cet audit.
 
@@ -70,12 +69,14 @@ sont contenus implicitement dans cet export.
 | Domaine | Conclusion vérifiée | Preuves |
 | --- | --- | --- |
 | MEB différée q3/q4 | Signes, zéros, premier support, niveau et budgets conservés ; 89 ensembles, 431 appels et 6 176 puissances, deux mutants détectés | [Preuve et oracle rationnel indépendant](AUDIT_MEB_DIFFEREE_20260905.md) |
-| Prétest q2 E postérieur | Identité et borne i64 ; oracle rejoué, 431 appels identiques à D et nouveau mutant q2 détecté ; qualification locale seulement | [Addendum E](ADDENDUM_MEB_Q2_E_20260905.md) |
+| Prétest q2 E | Identité et borne i64 ; oracle indépendant, 431 appels identiques à D et nouveau mutant q2 détecté | [Addendum E](ADDENDUM_MEB_Q2_E_20260905.md) |
 | Morton, buckets et Karras | Partition, références, racine, couverture unique et boîtes justifiées ; 237 212 nuages par binaire, sept mutants structurels rejetés sous O2 et UBSan | [Preuve et oracle de trie](AUDIT_INDEX_20260905.md) |
 | Domaine d'arrondi local | 40 appels aux quatre modes, un/deux threads ; filtres actifs au plus proche, replis entiers ailleurs, objets identiques | [Garde et replis exécutés](AUDIT_ARRONDI_20260905.md) |
-| Témoins du front | Bornes, échelles, racines et comptes locaux démontrés ; base des secteurs certifiée dès A=B=1 | [Fuseaux](ARITHMETIQUE_SPINDLE_COURANTE.md), [secteurs/cordes](ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md), [cellules](ARITHMETIQUE_CELLULES_COURANTE.md) |
+| Témoins du front | Bornes et raccord compilé fermés : trois sondes O2/UBSan ; base A=B=1, racines, contacts stricts, 38 400 cellules par build et coordonnées sur 98 bits | [Fuseaux](ARITHMETIQUE_SPINDLE_COURANTE.md), [secteurs/cordes](ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md), [cellules](ARITHMETIQUE_CELLULES_COURANTE.md) |
 | Reçus D et arithmétique | Intégrité des huit XML, sceaux, sources et binaires ; Boost réellement compilé pour sa porte entière | [Contrelecture de qualification](AUDIT_QUALIFICATION_20260905.md) |
 | Reconstruction indépendante D | Construction neuve Release et 323/323 portes CPU, zéro échec/skip ; sources et 37 binaires stables | [Reçu du présent audit](receipts_20260905/release/summary.json) |
+| Qualification intégrée E du constructeur | 324/324 Release, 33/33 ciblés Release et 33/33 ASan/UBSan ; XML, journaux complets, inventaires, 140 sources et binaires contre-vérifiés | [Qualification E](AUDIT_QUALIFICATION_20260905.md) |
+| Paires D/E avec complétion | Trois paires s=8/10/12 égales, objets aussi égaux entre séparations ; compteurs avant préfiltre distincts ; une paire par s, sans conclusion statistique | [Pièces brutes et contrelecture](AUDIT_QUALIFICATION_20260905.md) |
 
 Les 323 exécutions D rapportées par le constructeur sont confirmées par
 ses reçus, indépendamment de la nouvelle exécution de l'auditeur. Les
@@ -97,26 +98,19 @@ Leurs reçus bruts ne sont pas réécrits.
 
 ## Prochaines fermetures utiles
 
-1. **Raccorder les frontières nouvelles au code compilé et qualifier E.**
-   Les bornes des témoins sont démontrées, en plus de l’index/front, des
-   lanes et des entiers larges. Reprendre les valeurs précises des nouveaux
-   certificats dans les helpers C++ et la prochaine qualification intégrée.
-   La base des secteurs peut être simplifiée à A=B=1 dans son domaine,
-   après comparaison des objets et des plafonds ; aucune réécriture produit
-   n’est incluse dans cet audit.
-2. **Assembler le certificat horizontal réduit dans son domaine CPU.**
+1. **Assembler le certificat horizontal réduit dans son domaine CPU.**
    Les commandes et préconditions numériques sont [déclarées](DOMAINE_CPU_COURANT.md).
    Garder les refus d’extra-shell pertinents et nommer le domaine de
    régularité. Une extension aux plateaux demande ses propres fixtures de
    contacts égaux et de lots atomiques ; un refus déclaré n’est pas une
    erreur de MEB. Les API internes conservent leurs préconditions.
-3. **Compléter l'objet demandé par le contrat industriel.**
+2. **Compléter l'objet demandé par le contrat industriel.**
    L'archive déclare `vertical_maps=none`. Définir et certifier les
    applications entre ordres, puis les contributions d'incidence du
    vote du § 9.1, sans les reconstruire depuis les seuls deltas H0.
    Préserver les facettes comme feuilles ; le recouvrement apparaît dans
    la projection et ne nécessite pas de laminarisation arbitraire.
-4. **Réduire puis mesurer le coût global de la route complétée.**
+3. **Réduire puis mesurer le coût global de la route complétée.**
    Les 550 supports possibles d'une MEB locale ne bornent ni les chaînes
    ni le catalogue de facettes. Mesurer leurs distributions et les
    reparcours de l'index. Les propositions précises du
@@ -125,6 +119,11 @@ Leurs reçus bruts ne sont pas réécrits.
    coexistence et envisager une destination directe de l'expansion.
    Le proxy `--mem-budget` reste distinct du RSS ; l'archive atomique
    n'est pas un checkpoint moteur.
+
+La base des secteurs peut être simplifiée à A=B=1 dans son domaine,
+après comparaison des objets et des plafonds ; cette optimisation reste
+facultative. Ni la demande de frontières compilées ni la qualification E
+ne sont conservées comme verrous ouverts.
 
 Ces étapes n'exigent ni Gamma exhaustif ni la mosaïque de Delaunay
 supérieure dans le produit. Les oracles bornés restent dans les audits
@@ -140,10 +139,10 @@ audit ne satisfait ce contrat. Les paliers massifs restent distincts.
 
 ## Portée et traçabilité
 
-Les sources v7 examinées appartiennent au HEAD indiqué, sans delta produit
-local à l'ouverture. Quatre fichiers v6 modifiés et trois fichiers v6
-nouveaux étaient déjà présents ; ils ne sont pas utilisés ou inclus dans
-cette publication. Le travail est effectué sur `main`, sans nouvelle
+Les sources E exécutées sont le delta q2 épinglé sur D ; leurs inventaires
+sont stables pendant les campagnes. Les travaux concurrents v6 et les
+documents/reçus du constructeur restent hors des écritures de cet audit.
+Le travail est effectué sur `main`, sans nouvelle
 branche et sans modification du registre officiel.
 
 La [validation courante](validation_current.json)

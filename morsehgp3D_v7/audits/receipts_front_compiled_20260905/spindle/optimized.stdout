@@ -1,0 +1,2 @@
+helper_true_spindle_count anchor=0/10 h=1 observed=3 clipped_contract=1 actual_contract=threshold_stop
+roots=4116 spindle=5184 H_zero=338 q3_equal=4 q4_equal=8 wide_Xi_positive_H=28 cores=432 positive_cores=194 empty_cores=238 boxes=5184 corners=5184 masks=560 collections=90 contacts=6 orientations=864 FLT_EVAL_METHOD=0 RN=1

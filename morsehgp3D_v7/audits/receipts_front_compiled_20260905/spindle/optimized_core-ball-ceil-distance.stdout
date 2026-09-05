@@ -1,0 +1,1 @@
+mutant=core-ball-ceil-distance killed actual_radius4=3 oracle_radius4=2 shell_distance4_squared=8 false_strict_inclusion=1

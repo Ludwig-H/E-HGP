@@ -1,0 +1,585 @@
+#!/usr/bin/env python3
+"""Prepare/review/export CLOSED E build and s8/10/12 pairs; no subprocess.
+
+No action, import of authorities, receipt read or write without --execute.
+Execution requires a separate root GO and explicit E/build-receipt pins.
+All source material is read-only; generated publication is create-only.
+"""
+from __future__ import annotations
+
+import argparse
+import copy
+from datetime import datetime, timezone
+import hashlib
+import json
+import math
+import os
+from pathlib import Path, PurePosixPath
+import re
+import stat
+import sys
+import types
+
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+SOURCE = ROOT / "morsehgp3D_v7"
+BUILD_OUT = ROOT / "build/v7_next_q2_build_20260905"
+E_BUILD = ROOT / "build/v7_next_q2_qualification"
+PUBLIC_REL = "morsehgp3D_v7/receipts/meb_q2_mono_20260905"
+PUBLIC = ROOT / PUBLIC_REL
+SEPARATIONS = (8, 10, 12)
+PAIR_DIRS = {s: ROOT / f"build/v7_next_q2_s{s}_pair_20260905" for s in SEPARATIONS}
+NEXT = "build/v7_next_pair_20260905/runner.py"
+NEXT_SHA = "ae95c0cb65a1564edb2d45ae83671e204d70994d00356aea87aba147ed8ad3ba"
+BUILDER = "build/v7_meb_paired/build_cli.py"
+BUILDER_SHA = "428714891c4a5741988f3255593d9727637f876e1a07544137453f16899b150d"
+PROTOCOL_COPIES = {
+    NEXT: (NEXT_SHA, "protocol/next_pair_runner.py.snapshot.txt"),
+    "build/v7_next_pair_20260905/selftest.py": (
+        "57ec5c558179c8258d6389666745cddae622922a4d01c86829718848591cdc1e", "protocol/next_pair_selftest.py.snapshot.txt"),
+    "build/v7_next_pair_20260905/prepare.py": (
+        "324bdd9b39ba55c730a936f391ce67276f41890fe8142519c7c4e2e6efc03196", "protocol/next_pair_prepare.py.snapshot.txt"),
+    "build/v7_next_pair_20260905/README.md": (
+        "81c39e49f763188fa6ea09a5a7306950fefb3b7685ceb4b62d50385092c55634", "protocol/README_PREPARATION.md"),
+    BUILDER: (BUILDER_SHA, "protocol/build_cli.py.snapshot.txt"),
+}
+EXISTING_DEPENDENCIES = {
+    "morsehgp3D_v7/receipts/meb_mono_20260905/protocol/runner.py.snapshot.txt":
+        "3abe27f8a10173867a0395430ff56392bb82b5cbee3eb766fb293ffa65cc2645",
+    "morsehgp3D_v7/receipts/meb_mono_20260905/protocol/selftest.py.snapshot.txt":
+        "f192a95f013e0b1df56a9324d8f18034949cd51410fcc6d41e8ee87af9048348",
+    "morsehgp3D_v7/receipts/meb_mono_20260905/protocol/build_cli_selftest.py.snapshot.txt":
+        "5697fac2ad584b7f50bcdf0e4536aa96f08ee8e13a6f3521e1d31cd47ffb9d3d",
+    "morsehgp3D_v7/receipts/meb_mono_20260905/protocol/incidence_campaign_gate.py.snapshot.txt":
+        "d74bca5257bd307b5956a946ca188a217f519ec2dc49e6b0de3ebf33a0ccca0a",
+    "morsehgp3D_v7/receipts/meb_mono_20260905/protocol/compare_v6_v7.py.snapshot.txt":
+        "fe22493fcb7494813e79fea9826873cce8cf14918097ce500b44018f1a64f2ef",
+    "morsehgp3D_v7/receipts/meb_mono_20260905/protocol/incidence_campaign.py.snapshot.txt":
+        "6ca21d8b1c89e6baea99ecc3dd414b35d06581df50833e76bac9bdc1d5d1c20a",
+}
+RUN_BASE_FIELDS = {
+    "role", "separation", "status", "command", "wrapped_command", "started_utc", "ended_utc",
+    "returncode", "timed_out", "wall_seconds", "stdout", "stderr", "usage",
+}
+BUILD_NAMES = {"metadata.json", "runs.json", "build_record.provisional.json", "build_D.json",
+               "tracking_after.json", "repository_after.json", "summary.json", "hashes.json"}
+BUILD_NAMES |= {name + suffix for name in ("compiler_version", "cmake_version", "configure", "build")
+                for suffix in (".out", ".err")}
+PAIR_NAMES = {"metadata.json", "runs.json", "repository_after.json", "snapshot_after.json",
+              "summary.json", "hashes.json"}
+PAIR_NAMES |= {role + suffix for role in ("D", "E") for suffix in (".out", ".err", ".time")}
+
+
+def require(value: bool, reason: str) -> None:
+    if not value:
+        raise RuntimeError(reason)
+
+
+def sha(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def no_duplicates(pairs: list[tuple]) -> dict:
+    value = {}
+    for key, item in pairs:
+        require(key not in value, "duplicate JSON member: " + str(key))
+        value[key] = item
+    return value
+
+
+def json_value(data: bytes):
+    return json.loads(data, object_pairs_hook=no_duplicates,
+                      parse_constant=lambda value: (_ for _ in ()).throw(ValueError("nonfinite JSON " + value)))
+
+
+def canonical(value):
+    return json_value(json.dumps(value, sort_keys=True, allow_nan=False).encode())
+
+
+def json_bytes(value) -> bytes:
+    return (json.dumps(value, sort_keys=True, indent=2, allow_nan=False) + "\n").encode()
+
+
+def utc(value: str) -> datetime:
+    require(isinstance(value, str), "UTC timestamp missing")
+    result = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    require(result.tzinfo is not None and result.utcoffset().total_seconds() == 0, "timestamp not UTC")
+    return result
+
+
+def relative(path: Path) -> str:
+    return str(path.relative_to(ROOT))
+
+
+class Reader:
+    """Caches original bytes and catches source changes before publication."""
+    def __init__(self):
+        self.data: dict[Path, bytes] = {}
+        self.external_pins: dict[Path, str] = {}
+
+    def read(self, path: Path) -> bytes:
+        require(path.is_absolute() and path.is_relative_to(ROOT), "read outside repository")
+        require(not path.is_symlink() and stat.S_ISREG(path.stat().st_mode), "non-regular source: " + str(path))
+        require(path.resolve(strict=True) == path, "source path has alias/symlink: " + str(path))
+        data = path.read_bytes()
+        if path in self.data:
+            require(data == self.data[path], "source drift during review: " + relative(path))
+        else:
+            self.data[path] = data
+        return data
+
+    def json(self, path: Path):
+        return json_value(self.read(path))
+
+    def pinned(self, path: Path, expected: str) -> bytes:
+        data = self.read(path)
+        require(sha(data) == expected, "source pin mismatch: " + relative(path))
+        return data
+
+    def watch(self, path: Path, expected: str, digest) -> None:
+        require(path.is_file() and not path.is_symlink(), "missing bound artifact: " + str(path))
+        require(digest(path) == expected, "bound artifact changed: " + str(path))
+        if path in self.external_pins:
+            require(self.external_pins[path] == expected, "conflicting artifact authority")
+        self.external_pins[path] = expected
+
+    def terminal(self, digest) -> None:
+        for path, expected in self.data.items():
+            require(self.read(path) == expected, "changed original source")
+        for path, expected in self.external_pins.items():
+            require(digest(path) == expected, "late bound artifact drift: " + str(path))
+
+
+def load_authority(reader: Reader, path: str, expected: str, name: str):
+    data = reader.pinned(ROOT / path, expected)
+    module = types.ModuleType(name)
+    module.__file__ = str(ROOT / path)
+    exec(compile(data, module.__file__, "exec"), module.__dict__)
+    return module
+
+
+def closed_directory(reader: Reader, directory: Path, required: set[str]) -> dict[str, bytes]:
+    require(directory.is_dir() and not directory.is_symlink(), "closed receipt directory absent")
+    actual = {path.name for path in directory.iterdir()}
+    require(actual == required, "closed receipt inventory differs: " + relative(directory))
+    # Producer writes hashes.json last. Never inspect an active run without it.
+    hashes = reader.json(directory / "hashes.json")
+    require(isinstance(hashes, dict) and set(hashes) == required - {"hashes.json"}, "manifest is not exact")
+    result = {"hashes.json": reader.read(directory / "hashes.json")}
+    for name, expected in hashes.items():
+        require(PurePosixPath(name).name == name and re.fullmatch("[0-9a-f]{64}", expected) is not None,
+                "manifest name/hash is malformed")
+        result[name] = reader.pinned(directory / name, expected)
+    return result
+
+
+def verify_snapshot(reader: Reader, value: dict, N, common) -> None:
+    require(value["candidate_sources"] == N.R.candidate_sources(SOURCE), "candidate source snapshot drift")
+    require(value["repository_sources"] == common.source_snapshot(ROOT), "repository source snapshot drift")
+    require(value["loader_injection_nonempty"] == {name: False for name in N.R.INJECTION_VARIABLES}, "loader injection snapshot")
+    for name, expected in value["files"].items():
+        reader.watch(Path(name), expected, N.R.digest)
+
+
+def verify_build(reader: Reader, N, B, common, expected_e: str, expected_receipt: str) -> tuple[dict, dict, dict[str, bytes]]:
+    raw = closed_directory(reader, BUILD_OUT, BUILD_NAMES)
+    values = {name: json_value(data) for name, data in raw.items() if name.endswith(".json")}
+    summary, metadata = values["summary.json"], values["metadata.json"]
+    before, after, record = metadata["tracking_before"], values["tracking_after.json"], values["build_D.json"]
+    require(summary["status"] == "completed" and summary["error"] is None and
+            summary["binding_validated"] is True and summary["sources_helpers_C_stable"] is True and
+            summary["build_receipt"] == "build_D.json", "E build is not terminal completed")
+    require(summary["engine_runs"] == 0 and summary["gcp"] == "not_used" and
+            summary["public_status"] == "not_claimed", "build scope changed")
+    require(before == after, "E build tracking changed")
+    require(metadata["build_directory_was_absent"] is True and metadata["build_directory"] == str(E_BUILD), "not the fresh E build")
+    require(raw["build_D.json"] == raw["build_record.provisional.json"], "accepted record differs from validated draft")
+    require(sha(raw["build_D.json"]) == expected_receipt, "explicit E receipt pin mismatch")
+    require(record["binary"]["sha256"] == expected_e and record["binary"]["path"] == str(E_BUILD / "mhgp7"), "explicit E target pin mismatch")
+    binding = N.R.candidate_binding(E_BUILD / "mhgp7", SOURCE, BUILD_OUT / "build_D.json")
+    require(binding["record"] == record and binding["receipt_sha256"] == expected_receipt, "candidate binding mismatch")
+    require(before == B.tracking(common), "build tracking does not match current frozen sources")
+    require(record["sources_before"] == record["sources_after"] == before["sources"], "build source lineage mismatch")
+    for name, expected in before["files"].items():
+        reader.watch(Path(name), expected, N.R.digest)
+    expected_commands = B.commands(E_BUILD)
+    require(canonical(metadata["commands"]) == canonical(expected_commands), "build plan differs from executed protocol")
+    runs = values["runs.json"]
+    require(len(runs) == len(expected_commands) == 4, "build must have four command records")
+    previous = utc(summary["started_utc"])
+    for run, (name, argv, limit) in zip(runs, expected_commands):
+        require(run["name"] == name and run["argv"] == argv and run["timeout_seconds"] == limit,
+                "build command identity mismatch")
+        require(run["status"] == "completed" and run["returncode"] == 0 and not run["timed_out"], "build command not completed")
+        start, end = utc(run["started_utc"]), utc(run["ended_utc"])
+        require(previous <= start <= end and math.isfinite(run["wall_seconds"]) and
+                0 <= run["wall_seconds"] <= limit, "build chronology/cost invalid")
+        previous = end
+    require(previous <= utc(summary["ended_utc"]), "build terminal timestamp precedes command")
+    for key in ("binary", "compile_database", "cmake_cache"):
+        reader.watch(Path(record[key]["path"]), record[key]["sha256"], N.R.digest)
+    return ({"status": "passed", "scope": "read_only_E_build_binding_not_new_build",
+             "source_manifest_sha256": sha(raw["hashes.json"]), "E_sha256": expected_e,
+             "E_build_receipt_sha256": expected_receipt, "sources_helpers_C_stable": True,
+             "all_four_command_records_revalidated": True, "started_utc": summary["started_utc"],
+             "ended_utc": summary["ended_utc"], "build_seconds_diagnostic": runs[-1]["wall_seconds"]}, binding, raw)
+
+
+def verify_pair(reader: Reader, N, common, incidence, separation: int, baseline: dict,
+                binding: dict, build_review: dict) -> tuple[dict, list[dict], dict[str, bytes]]:
+    directory = PAIR_DIRS[separation]
+    raw = closed_directory(reader, directory, PAIR_NAMES)
+    metadata, runs, summary, after = [json_value(raw[name]) for name in
+                                     ("metadata.json", "runs.json", "summary.json", "snapshot_after.json")]
+    require(summary["status"] in ("paired_equal", "divergent", "pair_incomplete") and
+            summary["error"] is None and summary["source_stable"] is True, "pair lacks a stable terminal decision")
+    require(metadata["baseline"] == baseline and metadata["candidate"] == binding, "pair binary lineage differs")
+    require(metadata["schema"] == "mhgp7-mono-next-pair-v1" and metadata["s"] == separation and
+            metadata["identity"] == N.R.IDENTITY and metadata["smax"] == 11 and
+            metadata["silent_limits"] == N.R.CAPS and metadata["run_order"] == ["D", "E"], "pair identity/caps mismatch")
+    require(metadata["fresh_observations_required"] is True and metadata["historical_timing_reuse"] is False and
+            metadata["cpu_affinity_requested"] == [N.R.CPU] and
+            metadata["timeout_per_run_seconds"] == N.R.TIMEOUT and
+            metadata["rlimit_as_gib"] == N.R.ADDRESS_LIMIT_GIB and
+            metadata["payload_proxy_bytes"] == N.R.MEMORY_PROXY and
+            metadata["digest"] is True and metadata["archive"] is False, "pair run envelope differs")
+    require(metadata["incidence_adapted_source_sha256"] == incidence.adapted_source_sha256,
+            "recorded separation classifier differs from pinned adaptation")
+    require(metadata["host_before"]["host_shared"] is True and metadata["gcp"] == "not_used" and
+            metadata["public_status"] == "not_claimed", "scope metadata differs")
+    before = metadata["snapshot_before"]
+    require(before == after, "pair terminal source/helper/binary snapshot drift")
+    verify_snapshot(reader, before, N, common)
+    N.binding_matches_snapshot(before, baseline, binding, E_BUILD / "mhgp7", BUILD_OUT / "build_D.json")
+    require(len(runs) == 2 and [run["role"] for run in runs] == ["D", "E"], "fresh D/E observations missing")
+    pair_start, pair_end = utc(summary["started_utc"]), utc(summary["ended_utc"])
+    require(metadata["started_utc"] == summary["started_utc"] and utc(build_review["ended_utc"]) <= pair_start,
+            "pair predates its build or metadata")
+    previous, replayed = pair_start, []
+    for run, role, binary in zip(runs, ("D", "E"), (N.BASELINE, E_BUILD / "mhgp7")):
+        require(RUN_BASE_FIELDS <= set(run), "incomplete attempt record")
+        start, end = utc(run["started_utc"]), utc(run["ended_utc"])
+        require(previous <= start <= end <= pair_end, "D/E temporal order mismatch")
+        require(run["separation"] == separation and run["command"] == N.command(binary, separation), "executed command identity differs")
+        for field, suffix in (("stdout", ".out"), ("stderr", ".err"), ("usage", ".time")):
+            require(run[field] == role + suffix, "raw file binding differs")
+        expected_wrapped = ["/usr/bin/taskset", "--cpu-list", str(N.R.CPU), "/usr/bin/time", "-v", "-o",
+                            str(directory / (role + ".time")), "--", *run["command"]]
+        require(run["wrapped_command"] == expected_wrapped, "fresh run does not target this receipt directory")
+        require(type(run["returncode"]) is int and type(run["timed_out"]) is bool and
+                isinstance(run["wall_seconds"], (int, float)) and math.isfinite(run["wall_seconds"]) and
+                run["wall_seconds"] >= 0, "unterminated/nonfinite run")
+        replay = {key: copy.deepcopy(run[key]) for key in RUN_BASE_FIELDS}
+        replay["status"] = "invalid"
+        N.classify(replay, directory / replay["stdout"], directory / replay["stderr"],
+                   directory / replay["usage"], separation, common, incidence)
+        require(canonical(replay) == canonical(run), "raw reclassification differs from recorded fields")
+        if replay["status"] == "engine_completed":
+            require(run["wall_seconds"] > 0 and run["wall_seconds"] <= N.R.TIMEOUT + 30,
+                    "completed process outside bounded envelope")
+            usage = raw[role + ".time"].decode()
+            timed = re.findall(r'^\s*Command being timed: "(.*)"$', usage, re.M)
+            require(timed == [" ".join(run["command"])], "GNU time command does not bind this fresh observation")
+        replayed.append(replay)
+        previous = end
+    decided = N.decision(replayed, True, separation)
+    fields = set(summary) - {"started_utc", "ended_utc", "repository_change_policy"}
+    require(canonical({key: summary[key] for key in fields}) == canonical(decided), "terminal decision differs from raw replay")
+    require(summary["repository_change_policy"] == "HEAD_or_worktree_changes_recorded_source_snapshot_stability_required",
+            "repository change policy differs")
+    if decided["status"] != "paired_equal":
+        require("times" not in decided and "ratio_D_over_E" not in decided, "incomplete/divergent pair received comparative times")
+    review = {"status": "passed", "scope": "read_only_raw_reclassification_not_new_observation",
+              "separation": separation, "source_manifest_sha256": sha(raw["hashes.json"]),
+              "classification_and_all_record_fields_match": True, "terminal_decision_matches": True,
+              "fresh_D_then_E_bound_to_distinct_current_receipt": True,
+              "replayed_statuses": [run["status"] for run in replayed], "decision": decided,
+              "started_utc": summary["started_utc"], "ended_utc": summary["ended_utc"],
+              "repository_change": {
+                  "head_before": metadata["repository_before"]["head"],
+                  "head_after": json_value(raw["repository_after.json"])["head"],
+                  "head_changed": metadata["repository_before"]["head"] != json_value(raw["repository_after.json"])["head"],
+                  "policy": summary["repository_change_policy"],
+                  "source_and_binary_snapshots_still_identical": True,
+                  "commit_contents_not_inferred_or_reaudited_by_exporter": True,
+              },
+              "run_intervals": [{"role": run["role"], "started_utc": run["started_utc"], "ended_utc": run["ended_utc"]}
+                                for run in replayed]}
+    return review, replayed, raw
+
+
+def cross_separations(pairs: dict[int, tuple]) -> dict:
+    previous = None
+    starts = set()
+    for separation in SEPARATIONS:
+        review, rows, _raw = pairs[separation]
+        start, end = utc(review["started_utc"]), utc(review["ended_utc"])
+        require(previous is None or previous <= start, "separation pairs overlap or are reordered")
+        for row in rows:
+            require(row["started_utc"] not in starts, "observation timestamp reused across pairs")
+            starts.add(row["started_utc"])
+        previous = end
+    complete = all(row["status"] == "engine_completed" for _, rows, _ in pairs.values() for row in rows)
+    result = {"all_three_terminal_attempts_present": True, "six_fresh_ordered_observations_bound": True,
+              "all_six_engine_completed": complete,
+              "compared_fields": ["digests", "cardinalities"],
+              "work_counts_not_required_equal_across_separations": True,
+              "slo": "not_evaluated", "statistical_gain": "not_claimed"}
+    if complete:
+        reference = canonical(pairs[8][1][0])
+        result["equality"] = {field: all(canonical(row[field]) == reference[field]
+                                  for _, rows, _ in pairs.values() for row in rows)
+                              for field in ("digests", "cardinalities")}
+        result["status"] = "objects_equal" if all(result["equality"].values()) else "objects_divergent"
+        result["reference_digests"] = reference["digests"]
+        result["reference_cardinalities"] = reference["cardinalities"]
+    else:
+        result["status"] = "not_comparable_incomplete"
+    return result
+
+
+def result_document(build_review: dict, pairs: dict[int, tuple], cross: dict) -> dict:
+    observations = []
+    for separation in SEPARATIONS:
+        review, rows, _ = pairs[separation]
+        item = {"separation": separation, "pair_status": review["decision"]["status"],
+                "run_statuses": [row["status"] for row in rows]}
+        if item["pair_status"] == "paired_equal":
+            item["costs"] = review["decision"]["times"]
+            item["observed_process_reduction_percent_one_pair"] = 100 * (1 - rows[1]["wall_seconds"] / rows[0]["wall_seconds"])
+            item["equality"] = review["decision"]["equality"]
+        observations.append(item)
+    return {"schema": "mhgp7-q2-mono-three-separations-results-v1",
+            "status": "all_pairs_equal" if all(item["pair_status"] == "paired_equal" for item in observations) else "terminal_attempts_not_all_equal",
+            "build": build_review, "observations": observations, "cross_separations": cross,
+            "public_status": "not_claimed", "slo": "not_evaluated", "gcp": "not_used",
+            "scope": "one_cold_D_then_E_pair_per_s_shared_host_candidate_horizontal_K1_to_10_no_archive",
+            "no_estimate_50k_or_massive_or_GPU": True}
+
+
+def readme(results: dict, pairs: dict[int, tuple], copied: int) -> bytes:
+    lines = ["# Trois paires mono D/E q2 — WSPD s=8,10,12", "",
+             "`phase=exploration_v7_hors_registre`, `backend=cpu_reference`,",
+             "`profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,",
+             "`public_status=not_claimed`.", "",
+             "E est uniquement le delta de précontenance MEB q2. La proposition par pivots",
+             "et le candidat de pile inline F ne sont pas inclus dans ces mesures.", "",
+             "Une nouvelle observation D puis E est conservée à chaque séparation :",
+             "uniforme n=8000, coord=65536, seed=3, **tour candidate complétée K1..10**",
+             "(`smax=11`, `--complete-incidences`), CSR, digest inclus, aucune archive.",
+             "CPU logique 6, threads=1, fold-inflight=1 et fold-join=1. Le contrôle",
+             "d'absence réelle de création de threads appartient aux portes produit dédiées.", "",
+             "| s | Statut D/E | D processus (s) | E processus (s) | Baisse observée |",
+             "|---|---|---:|---:|---:|"]
+    for item in results["observations"]:
+        if "costs" in item:
+            times = item["costs"]
+            lines.append(f"| {item['separation']} | paired_equal | {times['D']['wall_seconds']:.9f} | "
+                         f"{times['E']['wall_seconds']:.9f} | {item['observed_process_reduction_percent_one_pair']:.2f} % |")
+        else:
+            lines.append(f"| {item['separation']} | {item['pair_status']} | — | — | — |")
+    lines += ["", "Les ratios ne sont calculés que pour des paires achevées avec toutes les",
+              "projections strictement égales à s fixé. Aucun temps comparatif n'est",
+              "attribué à une paire censurée, refusée ou divergente ; ses fichiers bruts",
+              "restent conservés, avec leurs diagnostics historiques non réécrits.", "",
+              f"Comparaison géométrique inter-s : `{results['cross_separations']['status']}`.",
+              "Les dix digests chaînés et toutes les cardinalités sont les critères inter-s ;",
+              "les compteurs de travail et le champ s n'ont pas à être identiques entre s.",
+              "Les résultats complets, étages en millisecondes, RSS en KiB et égalités sont",
+              "dans [results.json](results.json), les observations originales dans `pairs/s*/runs.json`.", "",
+              "Il s'agit d'une seule paire froide ordonnée par s sur un hôte partagé, pas",
+              "d'un gain statistiquement qualifié ni d'un classement robuste des séparations.",
+              "Aucun SLO 50k/1 s/100 ms, résultat de dizaines de millions de points, GPU",
+              "ou exactitude industrielle globale ne découle de cette campagne.", "",
+              "## Autorités et bornes", "",
+              "D est lié à son build et à sa qualification historiques scellés, jamais aux",
+              "sources E. Les deux C historiques et D restent protégés. E est lié à son",
+              "build réel Release CPU, cache/base de compilation, source et SHA explicitement",
+              "vérifiés. Le filename `build_E/build_D.json` est hérité du builder ; son",
+              "contenu désigne E. C'est une liaison enregistrée, pas une attestation hermétique.", "",
+              "Chaque processus est borné à 600 s et RLIMIT_AS=26 GiB d'espace virtuel,",
+              "pas de RSS physique. Proxy partiel de payload=16 GiB. Caps silent par ordre :",
+              "8M core, 2M chain, 2M cofaces, 1 milliard de visites et de supports MEB.",
+              "HEAD/porcelain, caractéristiques et charge de l'hôte, intervalles UTC et",
+              "commandes restent dans les métadonnées originales de chaque paire.", "",
+              "Un changement documentaire de HEAD pendant une paire est enregistré, pas",
+              "assimilé à un changement de moteur : le critère reste l'identité stricte",
+              "des snapshots de sources/helpers/binaires. `review.json` rapporte les HEAD",
+              "avant/après ; l'exporteur ne prétend pas refaire l'audit des commits.", "",
+              "## Revue et conservation", "",
+              "[review.json](review.json) est une revue en lecture seule : intégrité des",
+              "manifestes, reclassification de chaque sortie brute par les helpers épinglés,",
+              "égalité de tous les champs extraits, redécision des paires, contrôle inter-s",
+              "et stabilité terminale. Aucun moteur, build, selftest, Git ou GCP n'est",
+              "lancé par l'exporteur. Les temps historiques D ne sont pas réutilisés.", "",
+              f"Les {copied} fichiers sources copiés sont identiques octet pour octet :",
+              "aucun LF ajouté, aucune normalisation de sortie. [provenance.json](provenance.json)",
+              "donne chaque origine, destination, hash, taille et transformation nulle.",
+              "Aucun binaire, objet ou archive exécutable n'est publié. Les hashes de binaires",
+              "privés restent des références historiques, pas des fichiers manquants à livrer.", "",
+              "`SOURCE_HASHES.json` désigne les noms privés d'origine, pas ceux de cette",
+              "projection. Les scripts `protocol/*.snapshot.txt` sont inertes ; leurs",
+              "chemins/imports d'origine sont inchangés et ne sont pas directement rejouables",
+              "depuis l'archive. [dependencies.json](dependencies.json) épingle les snapshots",
+              "et reçus déjà publics nécessaires ; aucune dépendance n'est implicitement héritée.",
+              "Les notes de préparation conservées décrivent leur état historique préparatoire,",
+              "pas une absence des exécutions fermées maintenant publiées.", "",
+              "Depuis ce dossier : `sha256sum --check SHA256SUMS`. Depuis la racine :",
+              "`sha256sum --check morsehgp3D_v7/receipts/meb_q2_mono_20260905/SHA256SUMS.root`.",
+              "Les deux listes couvrent les mêmes fichiers et s'excluent elles-mêmes ainsi",
+              "que l'une l'autre. `manifest.json` énumère les fichiers publics avant ces listes.", "",
+              "Une publication n'est fermée que si les deux listes existent et se vérifient.",
+              "Un dossier partiel après exception n'est pas un reçu publiable et n'est",
+              "jamais repris ni écrasé automatiquement.", "",
+              "GCP non utilisé par cette campagne locale et son export.", ""]
+    return "\n".join(lines).encode()
+
+
+def execute(expected_e: str, expected_receipt: str) -> int:
+    require(re.fullmatch("[0-9a-f]{64}", expected_e) is not None and
+            re.fullmatch("[0-9a-f]{64}", expected_receipt) is not None, "two explicit complete lowercase pins required")
+    require(not PUBLIC.exists(), "publication target already exists; never overwrite or resume it")
+    reader = Reader()
+    exporter_bytes = reader.read(Path(__file__).resolve())
+    N = load_authority(reader, NEXT, NEXT_SHA, "q2_export_next_authority")
+    B = load_authority(reader, BUILDER, BUILDER_SHA, "q2_export_builder_authority")
+    N.R.environment_guard()
+    common, incidence = N.helpers()
+    for name, expected in N.R.HELPER_PINS.items():
+        reader.pinned(ROOT / "morsehgp3D_v7/bench" / name, expected)
+    reader.pinned(N.LEGACY, N.LEGACY_SHA)
+    baseline = N.baseline_binding()
+    require(expected_e != N.BASELINE_SHA, "E pin aliases historical D; review this build explicitly")
+    for name, expected in N.RECEIPTS.items():
+        reader.pinned(ROOT / name, expected)
+    dependencies = dict(EXISTING_DEPENDENCIES)
+    dependencies.update(N.RECEIPTS)
+    dependencies.update({relative(N.R.RELEASE / name): expected for name, expected in N.R.RELEASE_PINS.items()})
+    for name, expected in dependencies.items():
+        reader.pinned(ROOT / name, expected)
+    build_review, binding, build_raw = verify_build(reader, N, B, common, expected_e, expected_receipt)
+    pairs = {s: verify_pair(reader, N, common, incidence, s, baseline, binding, build_review) for s in SEPARATIONS}
+    cross = cross_separations(pairs)
+    results = result_document(build_review, pairs, cross)
+    payload: dict[str, bytes] = {}
+    mappings = []
+
+    def copy_original(source: Path, destination: str, data: bytes) -> None:
+        require(destination not in payload and not PurePosixPath(destination).is_absolute() and
+                ".." not in PurePosixPath(destination).parts, "unsafe or duplicate public path")
+        require(reader.read(source) == data, "source changed before mapping")
+        payload[destination] = data
+        mappings.append({"source_path": relative(source), "public_path": destination,
+                         "source_sha256": sha(data), "public_sha256": sha(data),
+                         "source_bytes": len(data), "public_bytes": len(data), "transform": "none_byte_exact"})
+
+    for name, data in build_raw.items():
+        copy_original(BUILD_OUT / name, "build_E/" + ("SOURCE_HASHES.json" if name == "hashes.json" else name), data)
+    for separation, (_review, _rows, raw) in pairs.items():
+        for name, data in raw.items():
+            copy_original(PAIR_DIRS[separation] / name,
+                          f"pairs/s{separation}/" + ("SOURCE_HASHES.json" if name == "hashes.json" else name), data)
+    for source, (expected, destination) in PROTOCOL_COPIES.items():
+        copy_original(ROOT / source, destination, reader.pinned(ROOT / source, expected))
+    copy_original(Path(__file__).resolve(), "protocol/export_closed.py.snapshot.txt", exporter_bytes)
+    generated = {
+        "review.json": "read_only_replay_and_source_integrity_checks_from_original_receipts",
+        "results.json": "derived_complete_results_with_no_comparative_times_for_non_equal_pairs",
+        "README.md": "generated_scope_limits_and_observed_comparison_table",
+        "dependencies.json": "explicit_pins_to_already_public_protocol_and_baseline_dependencies",
+        "provenance.json": "origin_map_for_every_copied_file_and_descriptions_for_generated_files",
+        "manifest.json": "public_integrity_inventory_excluding_itself_and_the_two_sum_lists",
+        "SHA256SUMS": "receipt_local_hash_list_excluding_both_sum_lists",
+        "SHA256SUMS.root": "same_hashes_root_relative_excluding_both_sum_lists",
+    }
+    payload["results.json"] = json_bytes(results)
+    payload["README.md"] = readme(results, pairs, len(mappings))
+    payload["dependencies.json"] = json_bytes({"schema": "mhgp7-q2-publication-dependencies-v1",
+        "existing_public_files": [{"repository_relative_path": name, "sha256": expected}
+                                  for name, expected in sorted(dependencies.items())],
+        "snapshots_are_inert": True, "restore_original_layout_and_verify_all_pins_before_any_future_replay": True,
+        "baseline_qualification_not_reexecuted_or_transferred": True})
+    payload["provenance.json"] = json_bytes({"schema": "mhgp7-q2-mono-publication-v1", "mappings": mappings,
+        "generated_files": generated, "copied_files": len(mappings), "byte_exact_files": len(mappings),
+        "line_ending_rewrites": 0, "exporter_sha256": sha(exporter_bytes),
+        "private_repository_root": str(ROOT), "no_binaries_published": True,
+        "repository_changes": {str(s): pairs[s][0]["repository_change"] for s in SEPARATIONS},
+        "source_manifests_describe_original_private_names": True, "public_status": "not_claimed"})
+    reader.terminal(N.R.digest)
+    # Repeat semantic source/binary binding checks after raw replay, before writes.
+    require(N.baseline_binding() == baseline, "historical lineage drift after replay")
+    require(N.R.candidate_binding(E_BUILD / "mhgp7", SOURCE, BUILD_OUT / "build_D.json") == binding,
+            "E binding drift after replay")
+    require(B.tracking(common) == json_value(build_raw["tracking_after.json"]), "build sources drift after replay")
+    for s in SEPARATIONS:
+        verify_snapshot(reader, json_value(pairs[s][2]["snapshot_after.json"]), N, common)
+    review = {"schema": "mhgp7-q2-three-pairs-read-only-review-v1", "status": "passed",
+              "reviewed_utc": datetime.now(timezone.utc).isoformat(),
+              "scope": "raw_parsing_hash_binding_review_only_no_new_build_engine_selftest_git_or_cloud",
+              "build": build_review, "pairs": {str(s): pairs[s][0] for s in SEPARATIONS},
+              "cross_separations": cross, "all_copied_bytes_verified": True,
+              "copied_files": len(mappings), "source_files_read_and_pinned": len(reader.data),
+              "additional_bound_artifacts_watched": len(reader.external_pins),
+              "baseline_C_C_D_protected": baseline["protected_binaries"],
+              "helpers": N.R.HELPER_PINS, "separation_adapter_sha256": incidence.adapted_source_sha256,
+              "runner_sha256": NEXT_SHA, "builder_sha256": BUILDER_SHA, "exporter_sha256": sha(exporter_bytes),
+              "engine_runs": 0, "builds": 0, "public_status": "not_claimed", "slo": "not_evaluated", "gcp": "not_used"}
+    payload["review.json"] = json_bytes(review)
+    payload["manifest.json"] = json_bytes({name: {"sha256": sha(data), "bytes": len(data)} for name, data in sorted(payload.items())})
+    # Everything above is read-only. Only now is the create-only public tree opened.
+    PUBLIC.mkdir(mode=0o755, exist_ok=False)
+    for name, data in sorted(payload.items()):
+        path = PUBLIC / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("xb") as output:
+            output.write(data)
+            output.flush()
+            os.fsync(output.fileno())
+        require(path.read_bytes() == data, "public copy differs from verified bytes")
+    reader.terminal(N.R.digest)
+    require(B.tracking(common) == json_value(build_raw["tracking_after.json"]), "late source drift during copy")
+    for s in SEPARATIONS:
+        verify_snapshot(reader, json_value(pairs[s][2]["snapshot_after.json"]), N, common)
+    # Sum lists are the final closure. Earlier failure leaves an unclosed partial tree.
+    sums = {name: sha(data) for name, data in sorted(payload.items())}
+    require(all(sha((PUBLIC / name).read_bytes()) == expected for name, expected in sums.items()),
+            "public payload changed before final closure")
+    for name, prefix in (("SHA256SUMS", ""), ("SHA256SUMS.root", PUBLIC_REL + "/")):
+        data = "".join(f"{expected}  {prefix}{path}\n" for path, expected in sums.items()).encode()
+        with (PUBLIC / name).open("xb") as output:
+            output.write(data)
+            output.flush()
+            os.fsync(output.fileno())
+    require({str(path.relative_to(PUBLIC)) for path in PUBLIC.rglob("*") if path.is_file()} ==
+            set(payload) | {"SHA256SUMS", "SHA256SUMS.root"}, "unexpected file in completed publication")
+    require(all(sha((PUBLIC / name).read_bytes()) == expected for name, expected in sums.items()),
+            "public payload changed during final closure")
+    print(json.dumps({"status": "published_closed", "public_path": PUBLIC_REL,
+                      "copied_files": len(mappings), "sum_covered_files": len(sums),
+                      "SHA256SUMS_sha256": sha((PUBLIC / "SHA256SUMS").read_bytes()),
+                      "review_sha256": sha(payload["review.json"]), "result_status": results["status"],
+                      "cross_s_status": cross["status"], "public_status": "not_claimed"}, sort_keys=True))
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--expected-e-sha256")
+    parser.add_argument("--expected-build-receipt-sha256")
+    parser.add_argument("--execute", action="store_true")
+    args = parser.parse_args(argv)
+    if not args.execute:
+        print(json.dumps({"status": "prepared_not_executed", "writes": False, "receipt_reads": False,
+                          "build_directory": relative(BUILD_OUT),
+                          "pair_directories": [relative(PAIR_DIRS[s]) for s in SEPARATIONS],
+                          "public_target": PUBLIC_REL, "requires_root_GO_and_three_terminal_pairs": True,
+                          "engine_runs": 0, "gcp": "not_used"}, sort_keys=True))
+        return 0
+    require(args.expected_e_sha256 is not None and args.expected_build_receipt_sha256 is not None,
+            "two explicit E/build receipt pins are required after root GO")
+    return execute(args.expected_e_sha256, args.expected_build_receipt_sha256)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

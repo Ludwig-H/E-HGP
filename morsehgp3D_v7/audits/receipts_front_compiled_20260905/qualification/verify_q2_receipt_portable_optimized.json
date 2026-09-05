@@ -1,0 +1,1736 @@
+{
+  "backend": "cpu_reference",
+  "capture_sha256": "706bcfc4850f95f6eac8f3f8f191da5466677639914f2c74f9181c3119da6189",
+  "each_checksum_list_files": 64,
+  "engine_runs_executed_by_this_audit": 0,
+  "gcp": "not_used",
+  "inter_separation_differences": [
+    "s",
+    "candidate_digest",
+    "emis",
+    "boules_uniques",
+    "mortes_profondeur"
+  ],
+  "inter_separation_equal_fields": [
+    "digests",
+    "cardinalities",
+    "silent",
+    "silent_limits",
+    "payload_caps",
+    "postprefilter_digest",
+    "counts_after_prefilter_and_input_identity"
+  ],
+  "limits": [
+    "One D_then_E pair per separation on one shared host and one uniform cloud; no statistical gain or SLO.",
+    "Candidate completed horizontal K1..10 tower, not a vertical map or a certification of full HGP.",
+    "Only printed cardinalities and digests agree; no archive was exported, so no bytewise forest comparison or independent full object reconstruction.",
+    "Worker flags and affinity observed; actual thread creation not measured by this runner.",
+    "Mono E executions do not transfer D's 323-test full qualification to E.",
+    "GNU time RSS and partial payload proxy are distinct; RLIMIT_AS is not a physical RSS budget."
+  ],
+  "live_checks": null,
+  "mode": "audit_independant_math_and_architecture",
+  "pairs": [
+    {
+      "host": {
+        "affinity_cpus": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "architecture": "x86_64",
+        "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+        "host_shared": true,
+        "kernel_release": "6.8.0-1052-azure",
+        "loadavg_1_5_15": [
+          0.88134765625,
+          1.36962890625,
+          2.076171875
+        ],
+        "logical_cpus": 8,
+        "mem_total_bytes": 33657716736,
+        "observed_utc": "2026-09-05T06:30:41.020347Z"
+      },
+      "observed_wall_reduction_percent": 2.551389237655277,
+      "repository_after": {
+        "head": "e6d33698e62ebecf74dff01c16d7de17149d7a4e",
+        "observed_utc": "2026-09-05T06:36:54.313275Z",
+        "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/PASSATION.md\nA  morsehgp3D_v7/audits/ADDENDUM_MEB_Q2_E_20260905.md\nM  morsehgp3D_v7/audits/ARITHMETIQUE_LANES_COURANTE.md\nM  morsehgp3D_v7/audits/ARITHMETIQUE_LARGE_COURANTE.md\nA  morsehgp3D_v7/audits/AUDIT_ARRONDI_20260905.md\nM  morsehgp3D_v7/audits/AUDIT_INDEPENDANT_20260904.md\nA  morsehgp3D_v7/audits/AUDIT_INDEX_20260905.md\nM  morsehgp3D_v7/audits/AUDIT_MATHEMATIQUE_20260904.md\nA  morsehgp3D_v7/audits/AUDIT_MEB_DIFFEREE_20260905.md\nA  morsehgp3D_v7/audits/AUDIT_QUALIFICATION_20260905.md\nA  morsehgp3D_v7/audits/AUDIT_RACCORD_INDEX_FRONT_20260905.md\nM  morsehgp3D_v7/audits/DIALOGUE_COURANT.md\nM  morsehgp3D_v7/audits/ETAT_COURANT.md\nM  morsehgp3D_v7/audits/README.md\nM  morsehgp3D_v7/audits/S1_COURANT.md\nA  morsehgp3D_v7/audits/index_probe_20260905.cpp\nA  morsehgp3D_v7/audits/index_probe_20260905.py\nA  morsehgp3D_v7/audits/meb_oracle_bridge_20260905.cpp\nA  morsehgp3D_v7/audits/meb_q2_replay_20260905.py\nA  morsehgp3D_v7/audits/meb_rational_oracle_20260905.py\nA  morsehgp3D_v7/audits/receipts_20260905/README.md\nA  morsehgp3D_v7/audits/receipts_20260905/audit_markdown.json\nA  morsehgp3D_v7/audits/receipts_20260905/audit_markdown_before_manifest.json\nA  morsehgp3D_v7/audits/receipts_20260905/documentation_checks.json\nA  morsehgp3D_v7/audits/receipts_20260905/e_q2/meb_rational_optimized.json\nA  morsehgp3D_v7/audits/receipts_20260905/e_q2/meb_rational_raw.json\nA  morsehgp3D_v7/audits/receipts_20260905/e_q2/product_delta.json\nA  morsehgp3D_v7/audits/receipts_20260905/e_q2/product_delta.patch\nA  morsehgp3D_v7/audits/receipts_20260905/e_q2/q2_addendum.json\nA  morsehgp3D_v7/audits/receipts_20260905/index_build_optimized.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_build_optimized.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_build_ubsan.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_build_ubsan.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_compiler.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_compiler.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_alias-child.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_alias-child.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_csr-boundary.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_csr-boundary.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_identity-swap.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_identity-swap.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_morton-key.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_morton-key.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_omit-leaf.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_omit-leaf.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_parent-link.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_parent-link.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_tight-box.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_tight-box.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_summary.json\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_alias-child.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_alias-child.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_csr-boundary.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_csr-boundary.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_identity-swap.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_identity-swap.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_morton-key.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_morton-key.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_omit-leaf.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_omit-leaf.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_parent-link.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_parent-link.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_tight-box.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_tight-box.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/meb_rational.json\nA  morsehgp3D_v7/audits/receipts_20260905/meb_rational_optimized.json\nA  morsehgp3D_v7/audits/receipts_20260905/meb_rational_raw.json\nA  morsehgp3D_v7/audits/receipts_20260905/qualification_independent.json\nA  morsehgp3D_v7/audits/receipts_20260905/qualification_selftest_normal.json\nA  morsehgp3D_v7/audits/receipts_20260905/qualification_selftest_optimized.json\nA  morsehgp3D_v7/audits/receipts_20260905/release/CMakeCache.txt\nA  morsehgp3D_v7/audits/receipts_20260905/release/binaries_after.json\nA  morsehgp3D_v7/audits/receipts_20260905/release/binaries_before.json\nA  morsehgp3D_v7/audits/receipts_20260905/release/build.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/release/compile_commands.txt\nA  morsehgp3D_v7/audits/receipts_20260905/release/configure.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/release/ctest.junit.xml\nA  morsehgp3D_v7/audits/receipts_20260905/release/ctest.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/release/inventory.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/release/last_test.log.gz\nA  morsehgp3D_v7/audits/receipts_20260905/release/last_test_raw.json\nA  morsehgp3D_v7/audits/receipts_20260905/release/receipt_manifest.json\nA  morsehgp3D_v7/audits/receipts_20260905/release/sources_after.json\nA  morsehgp3D_v7/audits/receipts_20260905/release/sources_before.json\nA  morsehgp3D_v7/audits/receipts_20260905/release/summary.json\nA  morsehgp3D_v7/audits/receipts_20260905/rounding.json\nA  morsehgp3D_v7/audits/receipts_20260905/rounding.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/rounding.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/rounding_environment_0.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/rounding_environment_1.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/rounding_environment_2.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/rounding_environment_3.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/rounding_environment_4.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/validation_current.json\nA  morsehgp3D_v7/audits/receipts_20260905/worktree_freshness.json\nA  morsehgp3D_v7/audits/replay_release_20260905.py\nA  morsehgp3D_v7/audits/rounding_probe_20260905.cpp\nM  morsehgp3D_v7/audits/verify_current.py\nA  morsehgp3D_v7/audits/verify_qualification_20260905.py\n M morsehgp3D_v7/docs/ERRATA_PUBLICATION_20260904.md\n M morsehgp3D_v7/src/core/mutants.hpp\n M morsehgp3D_v7/src/forest/silent_incidence.hpp\n M morsehgp3D_v7/tests/meb_lazy_gate.cpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/receipts_20260905/publication_index_check.json\n?? morsehgp3D_v7/docs/OPTIMISATION_MEB_Q2.md\n?? morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md\n?? morsehgp3D_v7/receipts/meb_pivot_budget_counterexample_20260905/\n?? morsehgp3D_v7/receipts/meb_q2_review_20260905/\n"
+      },
+      "repository_before": {
+        "head": "e6d33698e62ebecf74dff01c16d7de17149d7a4e",
+        "observed_utc": "2026-09-05T06:30:40.659050Z",
+        "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/PASSATION.md\n M morsehgp3D_v7/audits/ARITHMETIQUE_LANES_COURANTE.md\n M morsehgp3D_v7/audits/ARITHMETIQUE_LARGE_COURANTE.md\n M morsehgp3D_v7/audits/AUDIT_INDEPENDANT_20260904.md\n M morsehgp3D_v7/audits/AUDIT_MATHEMATIQUE_20260904.md\n M morsehgp3D_v7/audits/DIALOGUE_COURANT.md\n M morsehgp3D_v7/audits/ETAT_COURANT.md\n M morsehgp3D_v7/audits/README.md\n M morsehgp3D_v7/audits/S1_COURANT.md\n M morsehgp3D_v7/audits/verify_current.py\n M morsehgp3D_v7/docs/ERRATA_PUBLICATION_20260904.md\n M morsehgp3D_v7/src/core/mutants.hpp\n M morsehgp3D_v7/src/forest/silent_incidence.hpp\n M morsehgp3D_v7/tests/meb_lazy_gate.cpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/AUDIT_ARRONDI_20260905.md\n?? morsehgp3D_v7/audits/AUDIT_INDEX_20260905.md\n?? morsehgp3D_v7/audits/AUDIT_MEB_DIFFEREE_20260905.md\n?? morsehgp3D_v7/audits/AUDIT_QUALIFICATION_20260905.md\n?? morsehgp3D_v7/audits/AUDIT_RACCORD_INDEX_FRONT_20260905.md\n?? morsehgp3D_v7/audits/index_probe_20260905.cpp\n?? morsehgp3D_v7/audits/index_probe_20260905.py\n?? morsehgp3D_v7/audits/meb_oracle_bridge_20260905.cpp\n?? morsehgp3D_v7/audits/meb_q2_replay_20260905.py\n?? morsehgp3D_v7/audits/meb_rational_oracle_20260905.py\n?? morsehgp3D_v7/audits/receipts_20260905/\n?? morsehgp3D_v7/audits/replay_release_20260905.py\n?? morsehgp3D_v7/audits/rounding_probe_20260905.cpp\n?? morsehgp3D_v7/audits/verify_qualification_20260905.py\n?? morsehgp3D_v7/docs/OPTIMISATION_MEB_Q2.md\n?? morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md\n?? morsehgp3D_v7/receipts/meb_pivot_budget_counterexample_20260905/\n?? morsehgp3D_v7/receipts/meb_q2_review_20260905/\n"
+      },
+      "runs": [
+        {
+          "binary": {
+            "bytes": 692296,
+            "path": "/workspaces/E-HGP/build/v7_meb_qualification/mhgp7",
+            "sha256": "127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f"
+          },
+          "candidate_digest": "005ee35c91b37c4c944fc644778dd06e5959404821a3d3a1750437e150c6c3a5",
+          "cardinalities": {
+            "1": {
+              "attachements": 0,
+              "deltas": 7999,
+              "evenements": 29875,
+              "facettes": 8000,
+              "fusions": 7999,
+              "noeuds": 7999
+            },
+            "10": {
+              "attachements": 8127546,
+              "deltas": 1005622,
+              "evenements": 1088869,
+              "facettes": 8918681,
+              "fusions": 8918680,
+              "noeuds": 15514
+            },
+            "2": {
+              "attachements": 32713,
+              "deltas": 51121,
+              "evenements": 67539,
+              "facettes": 62910,
+              "fusions": 62909,
+              "noeuds": 2122
+            },
+            "3": {
+              "attachements": 147239,
+              "deltas": 120877,
+              "evenements": 124135,
+              "facettes": 213686,
+              "fusions": 213685,
+              "noeuds": 2929
+            },
+            "4": {
+              "attachements": 399983,
+              "deltas": 197242,
+              "evenements": 201156,
+              "facettes": 517876,
+              "fusions": 517875,
+              "noeuds": 4068
+            },
+            "5": {
+              "attachements": 850158,
+              "deltas": 289705,
+              "evenements": 298870,
+              "facettes": 1036109,
+              "fusions": 1036108,
+              "noeuds": 5419
+            },
+            "6": {
+              "attachements": 1552470,
+              "deltas": 398776,
+              "evenements": 415933,
+              "facettes": 1824039,
+              "fusions": 1824038,
+              "noeuds": 7004
+            },
+            "7": {
+              "attachements": 2573565,
+              "deltas": 525699,
+              "evenements": 554022,
+              "facettes": 2947215,
+              "fusions": 2947214,
+              "noeuds": 8780
+            },
+            "8": {
+              "attachements": 3969114,
+              "deltas": 668888,
+              "evenements": 712109,
+              "facettes": 4463468,
+              "fusions": 4463467,
+              "noeuds": 10954
+            },
+            "9": {
+              "attachements": 5809858,
+              "deltas": 829864,
+              "evenements": 891721,
+              "facettes": 6443014,
+              "fusions": 6443013,
+              "noeuds": 13150
+            }
+          },
+          "counts": {
+            "boules_uniques": 3144017,
+            "census_int": 16102722,
+            "census_shell": 10456312,
+            "coord": 65536,
+            "deltas": 4095793,
+            "emis": 3144017,
+            "evenements": 4384229,
+            "facettes": 26434998,
+            "fusions": 26434988,
+            "mortes_profondeur": 30636,
+            "n": 8000,
+            "noeuds": 77939,
+            "s": 8,
+            "seed": 3,
+            "smax": 11,
+            "survivantes": 3113381,
+            "threads": 1
+          },
+          "digests": {
+            "digest_all": "4c3ceb0498990bafa41a9e43d0bffe25a3fee579b12b5d34365f3578f526a0e7",
+            "digest_forest_K1": "fff29fb38092c02dd43271de33b9aee28a03408fbb70153385c3fc1e69e3573a",
+            "digest_forest_K10": "a44af66ade1a06ad1be19a512642b65a87f8d3b75c102b4850a719b68a3b77bb",
+            "digest_forest_K2": "dd657928d626854e23bc1ff59327eb6c834d4ff94fbb0f1913156e251f14b213",
+            "digest_forest_K3": "ba8973abbad9fc0aa1008589f0f3a669389f6406350501bdda97aa879dedcf0a",
+            "digest_forest_K4": "69b328c5a690c5b63d607018de6e28ae7f3f8f82f4320989cccec6379b0ad358",
+            "digest_forest_K5": "0598690dcf3a59d3cee0a7447d06d6773ed3b4d6d733c35d801dd3924e14ba6a",
+            "digest_forest_K6": "45014ce7ef7d17c8baeb1f5df32d90f6643cbc913cdc3817d10af1db88be363a",
+            "digest_forest_K7": "e8dc58ed4133f76f6541c474f9dedfb3c8d8880d1463bc49f32e8a36cbc62c80",
+            "digest_forest_K8": "aa7bcd6f453905566e423de55991caedb3afed38e4164d2cf5c295c85975e318",
+            "digest_forest_K9": "7b6c460d6df9631d0ef3851b5e939b161fdc559ecddb0396a94991ca970e1bb3"
+          },
+          "ended_utc": "2026-09-05T06:33:50.050892Z",
+          "gnu_wall_seconds": 188.97,
+          "max_rss_kb": 2304088,
+          "outer_wall_seconds": 189.00030586600042,
+          "payload_caps": {
+            "budget": 17179869184,
+            "cap_brut_demande": 4294967295,
+            "cap_brut_effectif": 119304647,
+            "cap_fusion_budgetaire": 59652323
+          },
+          "pipeline_ms": 188965.3,
+          "postprefilter_digest": "36ee202aefe3f81caa91ec7c250f53ccf94585b519ecc8249189ef611d27b28b",
+          "returncode": 0,
+          "role": "D",
+          "separation": 8,
+          "silent": {
+            "10": {
+              "added": 372134,
+              "core": 1347437,
+              "max_chain": 18,
+              "meb_supports": 394768070,
+              "query_nodes": 173869231,
+              "steps": 372134,
+              "with_two_intruders": 258492
+            },
+            "2": {
+              "added": 4186,
+              "core": 46136,
+              "max_chain": 6,
+              "meb_supports": 64585,
+              "query_nodes": 2463142,
+              "steps": 4186,
+              "with_two_intruders": 3297
+            },
+            "3": {
+              "added": 16018,
+              "core": 114555,
+              "max_chain": 10,
+              "meb_supports": 531378,
+              "query_nodes": 7718685,
+              "steps": 16018,
+              "with_two_intruders": 12296
+            },
+            "4": {
+              "added": 36961,
+              "core": 211968,
+              "max_chain": 9,
+              "meb_supports": 2424881,
+              "query_nodes": 16702777,
+              "steps": 36961,
+              "with_two_intruders": 27790
+            },
+            "5": {
+              "added": 67207,
+              "core": 337252,
+              "max_chain": 11,
+              "meb_supports": 7998813,
+              "query_nodes": 29915877,
+              "steps": 67207,
+              "with_two_intruders": 49535
+            },
+            "6": {
+              "added": 107108,
+              "core": 488952,
+              "max_chain": 12,
+              "meb_supports": 21673996,
+              "query_nodes": 47778692,
+              "steps": 107108,
+              "with_two_intruders": 77752
+            },
+            "7": {
+              "added": 157598,
+              "core": 666230,
+              "max_chain": 15,
+              "meb_supports": 51210694,
+              "query_nodes": 70749430,
+              "steps": 157598,
+              "with_two_intruders": 112803
+            },
+            "8": {
+              "added": 218721,
+              "core": 868194,
+              "max_chain": 14,
+              "meb_supports": 109017683,
+              "query_nodes": 99153075,
+              "steps": 218721,
+              "with_two_intruders": 154705
+            },
+            "9": {
+              "added": 290915,
+              "core": 1096161,
+              "max_chain": 17,
+              "meb_supports": 214435228,
+              "query_nodes": 133553348,
+              "steps": 290915,
+              "with_two_intruders": 203197
+            }
+          },
+          "silent_limits": {
+            "chain_steps": 2000000,
+            "cofaces": 2000000,
+            "core_records": 8000000,
+            "meb_supports": 1000000000,
+            "query_nodes": 1000000000
+          },
+          "stage_ms": {
+            "census": 7795.9,
+            "cli_e2e": 188967.35,
+            "comptage": 33.1,
+            "digest": 3931.0,
+            "expansion": 636.4,
+            "fold": 32300.0,
+            "fold_wall": 108691.2,
+            "fusion": 5855.9,
+            "gen": 59798.7,
+            "index": 2.1,
+            "intern": 16986.9,
+            "prefiltre": 10098.1,
+            "rects": 30382.4,
+            "reduce": 4885.9,
+            "rle": 1629.9,
+            "silent_incidence": 72600.941,
+            "tri": 4544.9,
+            "wspd": 29416.1
+          },
+          "stage_workers": {
+            "census": 1,
+            "expansion": 1,
+            "fold": 1,
+            "prefiltre": 1,
+            "rects": 1,
+            "rle": 1,
+            "wspd": 1
+          },
+          "started_utc": "2026-09-05T06:30:41.045477Z"
+        },
+        {
+          "binary": {
+            "bytes": 692296,
+            "path": "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+            "sha256": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6"
+          },
+          "candidate_digest": "005ee35c91b37c4c944fc644778dd06e5959404821a3d3a1750437e150c6c3a5",
+          "cardinalities": {
+            "1": {
+              "attachements": 0,
+              "deltas": 7999,
+              "evenements": 29875,
+              "facettes": 8000,
+              "fusions": 7999,
+              "noeuds": 7999
+            },
+            "10": {
+              "attachements": 8127546,
+              "deltas": 1005622,
+              "evenements": 1088869,
+              "facettes": 8918681,
+              "fusions": 8918680,
+              "noeuds": 15514
+            },
+            "2": {
+              "attachements": 32713,
+              "deltas": 51121,
+              "evenements": 67539,
+              "facettes": 62910,
+              "fusions": 62909,
+              "noeuds": 2122
+            },
+            "3": {
+              "attachements": 147239,
+              "deltas": 120877,
+              "evenements": 124135,
+              "facettes": 213686,
+              "fusions": 213685,
+              "noeuds": 2929
+            },
+            "4": {
+              "attachements": 399983,
+              "deltas": 197242,
+              "evenements": 201156,
+              "facettes": 517876,
+              "fusions": 517875,
+              "noeuds": 4068
+            },
+            "5": {
+              "attachements": 850158,
+              "deltas": 289705,
+              "evenements": 298870,
+              "facettes": 1036109,
+              "fusions": 1036108,
+              "noeuds": 5419
+            },
+            "6": {
+              "attachements": 1552470,
+              "deltas": 398776,
+              "evenements": 415933,
+              "facettes": 1824039,
+              "fusions": 1824038,
+              "noeuds": 7004
+            },
+            "7": {
+              "attachements": 2573565,
+              "deltas": 525699,
+              "evenements": 554022,
+              "facettes": 2947215,
+              "fusions": 2947214,
+              "noeuds": 8780
+            },
+            "8": {
+              "attachements": 3969114,
+              "deltas": 668888,
+              "evenements": 712109,
+              "facettes": 4463468,
+              "fusions": 4463467,
+              "noeuds": 10954
+            },
+            "9": {
+              "attachements": 5809858,
+              "deltas": 829864,
+              "evenements": 891721,
+              "facettes": 6443014,
+              "fusions": 6443013,
+              "noeuds": 13150
+            }
+          },
+          "counts": {
+            "boules_uniques": 3144017,
+            "census_int": 16102722,
+            "census_shell": 10456312,
+            "coord": 65536,
+            "deltas": 4095793,
+            "emis": 3144017,
+            "evenements": 4384229,
+            "facettes": 26434998,
+            "fusions": 26434988,
+            "mortes_profondeur": 30636,
+            "n": 8000,
+            "noeuds": 77939,
+            "s": 8,
+            "seed": 3,
+            "smax": 11,
+            "survivantes": 3113381,
+            "threads": 1
+          },
+          "digests": {
+            "digest_all": "4c3ceb0498990bafa41a9e43d0bffe25a3fee579b12b5d34365f3578f526a0e7",
+            "digest_forest_K1": "fff29fb38092c02dd43271de33b9aee28a03408fbb70153385c3fc1e69e3573a",
+            "digest_forest_K10": "a44af66ade1a06ad1be19a512642b65a87f8d3b75c102b4850a719b68a3b77bb",
+            "digest_forest_K2": "dd657928d626854e23bc1ff59327eb6c834d4ff94fbb0f1913156e251f14b213",
+            "digest_forest_K3": "ba8973abbad9fc0aa1008589f0f3a669389f6406350501bdda97aa879dedcf0a",
+            "digest_forest_K4": "69b328c5a690c5b63d607018de6e28ae7f3f8f82f4320989cccec6379b0ad358",
+            "digest_forest_K5": "0598690dcf3a59d3cee0a7447d06d6773ed3b4d6d733c35d801dd3924e14ba6a",
+            "digest_forest_K6": "45014ce7ef7d17c8baeb1f5df32d90f6643cbc913cdc3817d10af1db88be363a",
+            "digest_forest_K7": "e8dc58ed4133f76f6541c474f9dedfb3c8d8880d1463bc49f32e8a36cbc62c80",
+            "digest_forest_K8": "aa7bcd6f453905566e423de55991caedb3afed38e4164d2cf5c295c85975e318",
+            "digest_forest_K9": "7b6c460d6df9631d0ef3851b5e939b161fdc559ecddb0396a94991ca970e1bb3"
+          },
+          "ended_utc": "2026-09-05T06:36:54.272123Z",
+          "gnu_wall_seconds": 184.16,
+          "max_rss_kb": 2301028,
+          "outer_wall_seconds": 184.17817240299973,
+          "payload_caps": {
+            "budget": 17179869184,
+            "cap_brut_demande": 4294967295,
+            "cap_brut_effectif": 119304647,
+            "cap_fusion_budgetaire": 59652323
+          },
+          "pipeline_ms": 184162.1,
+          "postprefilter_digest": "36ee202aefe3f81caa91ec7c250f53ccf94585b519ecc8249189ef611d27b28b",
+          "returncode": 0,
+          "role": "E",
+          "separation": 8,
+          "silent": {
+            "10": {
+              "added": 372134,
+              "core": 1347437,
+              "max_chain": 18,
+              "meb_supports": 394768070,
+              "query_nodes": 173869231,
+              "steps": 372134,
+              "with_two_intruders": 258492
+            },
+            "2": {
+              "added": 4186,
+              "core": 46136,
+              "max_chain": 6,
+              "meb_supports": 64585,
+              "query_nodes": 2463142,
+              "steps": 4186,
+              "with_two_intruders": 3297
+            },
+            "3": {
+              "added": 16018,
+              "core": 114555,
+              "max_chain": 10,
+              "meb_supports": 531378,
+              "query_nodes": 7718685,
+              "steps": 16018,
+              "with_two_intruders": 12296
+            },
+            "4": {
+              "added": 36961,
+              "core": 211968,
+              "max_chain": 9,
+              "meb_supports": 2424881,
+              "query_nodes": 16702777,
+              "steps": 36961,
+              "with_two_intruders": 27790
+            },
+            "5": {
+              "added": 67207,
+              "core": 337252,
+              "max_chain": 11,
+              "meb_supports": 7998813,
+              "query_nodes": 29915877,
+              "steps": 67207,
+              "with_two_intruders": 49535
+            },
+            "6": {
+              "added": 107108,
+              "core": 488952,
+              "max_chain": 12,
+              "meb_supports": 21673996,
+              "query_nodes": 47778692,
+              "steps": 107108,
+              "with_two_intruders": 77752
+            },
+            "7": {
+              "added": 157598,
+              "core": 666230,
+              "max_chain": 15,
+              "meb_supports": 51210694,
+              "query_nodes": 70749430,
+              "steps": 157598,
+              "with_two_intruders": 112803
+            },
+            "8": {
+              "added": 218721,
+              "core": 868194,
+              "max_chain": 14,
+              "meb_supports": 109017683,
+              "query_nodes": 99153075,
+              "steps": 218721,
+              "with_two_intruders": 154705
+            },
+            "9": {
+              "added": 290915,
+              "core": 1096161,
+              "max_chain": 17,
+              "meb_supports": 214435228,
+              "query_nodes": 133553348,
+              "steps": 290915,
+              "with_two_intruders": 203197
+            }
+          },
+          "silent_limits": {
+            "chain_steps": 2000000,
+            "cofaces": 2000000,
+            "core_records": 8000000,
+            "meb_supports": 1000000000,
+            "query_nodes": 1000000000
+          },
+          "stage_ms": {
+            "census": 7596.8,
+            "cli_e2e": 184164.144,
+            "comptage": 32.8,
+            "digest": 3942.9,
+            "expansion": 625.1,
+            "fold": 32067.5,
+            "fold_wall": 103270.2,
+            "fusion": 5763.2,
+            "gen": 60609.7,
+            "index": 2.2,
+            "intern": 16927.9,
+            "prefiltre": 10166.6,
+            "rects": 30699.0,
+            "reduce": 4845.8,
+            "rle": 1566.6,
+            "silent_incidence": 67410.935,
+            "tri": 4504.0,
+            "wspd": 29910.4
+          },
+          "stage_workers": {
+            "census": 1,
+            "expansion": 1,
+            "fold": 1,
+            "prefiltre": 1,
+            "rects": 1,
+            "rle": 1,
+            "wspd": 1
+          },
+          "started_utc": "2026-09-05T06:33:50.089951Z"
+        }
+      ],
+      "separation": 8,
+      "within_pair_equal_fields": [
+        "digests",
+        "cardinalities",
+        "counts",
+        "silent",
+        "silent_limits",
+        "payload_caps",
+        "candidate_digest",
+        "postprefilter_digest"
+      ]
+    },
+    {
+      "host": {
+        "affinity_cpus": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "architecture": "x86_64",
+        "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+        "host_shared": true,
+        "kernel_release": "6.8.0-1052-azure",
+        "loadavg_1_5_15": [
+          1.2705078125,
+          1.6025390625,
+          1.94091796875
+        ],
+        "logical_cpus": 8,
+        "mem_total_bytes": 33657716736,
+        "observed_utc": "2026-09-05T06:37:20.995590Z"
+      },
+      "observed_wall_reduction_percent": 0.04089265516923346,
+      "repository_after": {
+        "head": "35dda097f75a66f8264002c58b9ccc4888c46d2e",
+        "observed_utc": "2026-09-05T06:43:46.155155Z",
+        "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/PASSATION.md\n M morsehgp3D_v7/docs/ERRATA_PUBLICATION_20260904.md\n M morsehgp3D_v7/src/core/mutants.hpp\n M morsehgp3D_v7/src/forest/silent_incidence.hpp\n M morsehgp3D_v7/tests/meb_lazy_gate.cpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/docs/OPTIMISATION_MEB_Q2.md\n?? morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md\n?? morsehgp3D_v7/receipts/meb_pivot_budget_counterexample_20260905/\n?? morsehgp3D_v7/receipts/meb_q2_review_20260905/\n"
+      },
+      "repository_before": {
+        "head": "e6d33698e62ebecf74dff01c16d7de17149d7a4e",
+        "observed_utc": "2026-09-05T06:37:20.620666Z",
+        "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/PASSATION.md\nA  morsehgp3D_v7/audits/ADDENDUM_MEB_Q2_E_20260905.md\nM  morsehgp3D_v7/audits/ARITHMETIQUE_LANES_COURANTE.md\nM  morsehgp3D_v7/audits/ARITHMETIQUE_LARGE_COURANTE.md\nA  morsehgp3D_v7/audits/AUDIT_ARRONDI_20260905.md\nM  morsehgp3D_v7/audits/AUDIT_INDEPENDANT_20260904.md\nA  morsehgp3D_v7/audits/AUDIT_INDEX_20260905.md\nM  morsehgp3D_v7/audits/AUDIT_MATHEMATIQUE_20260904.md\nA  morsehgp3D_v7/audits/AUDIT_MEB_DIFFEREE_20260905.md\nA  morsehgp3D_v7/audits/AUDIT_QUALIFICATION_20260905.md\nA  morsehgp3D_v7/audits/AUDIT_RACCORD_INDEX_FRONT_20260905.md\nM  morsehgp3D_v7/audits/DIALOGUE_COURANT.md\nM  morsehgp3D_v7/audits/ETAT_COURANT.md\nM  morsehgp3D_v7/audits/README.md\nM  morsehgp3D_v7/audits/S1_COURANT.md\nA  morsehgp3D_v7/audits/index_probe_20260905.cpp\nA  morsehgp3D_v7/audits/index_probe_20260905.py\nA  morsehgp3D_v7/audits/meb_oracle_bridge_20260905.cpp\nA  morsehgp3D_v7/audits/meb_q2_replay_20260905.py\nA  morsehgp3D_v7/audits/meb_rational_oracle_20260905.py\nA  morsehgp3D_v7/audits/receipts_20260905/README.md\nA  morsehgp3D_v7/audits/receipts_20260905/audit_markdown.json\nA  morsehgp3D_v7/audits/receipts_20260905/audit_markdown_before_manifest.json\nA  morsehgp3D_v7/audits/receipts_20260905/documentation_checks.json\nA  morsehgp3D_v7/audits/receipts_20260905/e_q2/meb_rational_optimized.json\nA  morsehgp3D_v7/audits/receipts_20260905/e_q2/meb_rational_raw.json\nA  morsehgp3D_v7/audits/receipts_20260905/e_q2/product_delta.json\nA  morsehgp3D_v7/audits/receipts_20260905/e_q2/product_delta.patch\nA  morsehgp3D_v7/audits/receipts_20260905/e_q2/q2_addendum.json\nA  morsehgp3D_v7/audits/receipts_20260905/index_build_optimized.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_build_optimized.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_build_ubsan.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_build_ubsan.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_compiler.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_compiler.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_alias-child.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_alias-child.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_csr-boundary.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_csr-boundary.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_identity-swap.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_identity-swap.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_morton-key.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_morton-key.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_omit-leaf.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_omit-leaf.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_parent-link.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_parent-link.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_tight-box.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_optimized_tight-box.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_summary.json\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_alias-child.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_alias-child.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_csr-boundary.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_csr-boundary.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_identity-swap.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_identity-swap.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_morton-key.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_morton-key.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_omit-leaf.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_omit-leaf.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_parent-link.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_parent-link.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_tight-box.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/index_ubsan_tight-box.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/meb_rational.json\nA  morsehgp3D_v7/audits/receipts_20260905/meb_rational_optimized.json\nA  morsehgp3D_v7/audits/receipts_20260905/meb_rational_raw.json\nA  morsehgp3D_v7/audits/receipts_20260905/qualification_independent.json\nA  morsehgp3D_v7/audits/receipts_20260905/qualification_selftest_normal.json\nA  morsehgp3D_v7/audits/receipts_20260905/qualification_selftest_optimized.json\nA  morsehgp3D_v7/audits/receipts_20260905/release/CMakeCache.txt\nA  morsehgp3D_v7/audits/receipts_20260905/release/binaries_after.json\nA  morsehgp3D_v7/audits/receipts_20260905/release/binaries_before.json\nA  morsehgp3D_v7/audits/receipts_20260905/release/build.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/release/compile_commands.txt\nA  morsehgp3D_v7/audits/receipts_20260905/release/configure.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/release/ctest.junit.xml\nA  morsehgp3D_v7/audits/receipts_20260905/release/ctest.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/release/inventory.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/release/last_test.log.gz\nA  morsehgp3D_v7/audits/receipts_20260905/release/last_test_raw.json\nA  morsehgp3D_v7/audits/receipts_20260905/release/receipt_manifest.json\nA  morsehgp3D_v7/audits/receipts_20260905/release/sources_after.json\nA  morsehgp3D_v7/audits/receipts_20260905/release/sources_before.json\nA  morsehgp3D_v7/audits/receipts_20260905/release/summary.json\nA  morsehgp3D_v7/audits/receipts_20260905/rounding.json\nA  morsehgp3D_v7/audits/receipts_20260905/rounding.stderr\nA  morsehgp3D_v7/audits/receipts_20260905/rounding.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/rounding_environment_0.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/rounding_environment_1.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/rounding_environment_2.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/rounding_environment_3.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/rounding_environment_4.stdout\nA  morsehgp3D_v7/audits/receipts_20260905/validation_current.json\nA  morsehgp3D_v7/audits/receipts_20260905/worktree_freshness.json\nA  morsehgp3D_v7/audits/replay_release_20260905.py\nA  morsehgp3D_v7/audits/rounding_probe_20260905.cpp\nM  morsehgp3D_v7/audits/verify_current.py\nA  morsehgp3D_v7/audits/verify_qualification_20260905.py\n M morsehgp3D_v7/docs/ERRATA_PUBLICATION_20260904.md\n M morsehgp3D_v7/src/core/mutants.hpp\n M morsehgp3D_v7/src/forest/silent_incidence.hpp\n M morsehgp3D_v7/tests/meb_lazy_gate.cpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/receipts_20260905/publication_index_check.json\n?? morsehgp3D_v7/docs/OPTIMISATION_MEB_Q2.md\n?? morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md\n?? morsehgp3D_v7/receipts/meb_pivot_budget_counterexample_20260905/\n?? morsehgp3D_v7/receipts/meb_q2_review_20260905/\n"
+      },
+      "runs": [
+        {
+          "binary": {
+            "bytes": 692296,
+            "path": "/workspaces/E-HGP/build/v7_meb_qualification/mhgp7",
+            "sha256": "127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f"
+          },
+          "candidate_digest": "fa9a6b5c08532457c319f375d1d8f58b875cca71f7dd2f4548e4c9a84167b469",
+          "cardinalities": {
+            "1": {
+              "attachements": 0,
+              "deltas": 7999,
+              "evenements": 29875,
+              "facettes": 8000,
+              "fusions": 7999,
+              "noeuds": 7999
+            },
+            "10": {
+              "attachements": 8127546,
+              "deltas": 1005622,
+              "evenements": 1088869,
+              "facettes": 8918681,
+              "fusions": 8918680,
+              "noeuds": 15514
+            },
+            "2": {
+              "attachements": 32713,
+              "deltas": 51121,
+              "evenements": 67539,
+              "facettes": 62910,
+              "fusions": 62909,
+              "noeuds": 2122
+            },
+            "3": {
+              "attachements": 147239,
+              "deltas": 120877,
+              "evenements": 124135,
+              "facettes": 213686,
+              "fusions": 213685,
+              "noeuds": 2929
+            },
+            "4": {
+              "attachements": 399983,
+              "deltas": 197242,
+              "evenements": 201156,
+              "facettes": 517876,
+              "fusions": 517875,
+              "noeuds": 4068
+            },
+            "5": {
+              "attachements": 850158,
+              "deltas": 289705,
+              "evenements": 298870,
+              "facettes": 1036109,
+              "fusions": 1036108,
+              "noeuds": 5419
+            },
+            "6": {
+              "attachements": 1552470,
+              "deltas": 398776,
+              "evenements": 415933,
+              "facettes": 1824039,
+              "fusions": 1824038,
+              "noeuds": 7004
+            },
+            "7": {
+              "attachements": 2573565,
+              "deltas": 525699,
+              "evenements": 554022,
+              "facettes": 2947215,
+              "fusions": 2947214,
+              "noeuds": 8780
+            },
+            "8": {
+              "attachements": 3969114,
+              "deltas": 668888,
+              "evenements": 712109,
+              "facettes": 4463468,
+              "fusions": 4463467,
+              "noeuds": 10954
+            },
+            "9": {
+              "attachements": 5809858,
+              "deltas": 829864,
+              "evenements": 891721,
+              "facettes": 6443014,
+              "fusions": 6443013,
+              "noeuds": 13150
+            }
+          },
+          "counts": {
+            "boules_uniques": 3129992,
+            "census_int": 16102722,
+            "census_shell": 10456312,
+            "coord": 65536,
+            "deltas": 4095793,
+            "emis": 3129992,
+            "evenements": 4384229,
+            "facettes": 26434998,
+            "fusions": 26434988,
+            "mortes_profondeur": 16611,
+            "n": 8000,
+            "noeuds": 77939,
+            "s": 10,
+            "seed": 3,
+            "smax": 11,
+            "survivantes": 3113381,
+            "threads": 1
+          },
+          "digests": {
+            "digest_all": "4c3ceb0498990bafa41a9e43d0bffe25a3fee579b12b5d34365f3578f526a0e7",
+            "digest_forest_K1": "fff29fb38092c02dd43271de33b9aee28a03408fbb70153385c3fc1e69e3573a",
+            "digest_forest_K10": "a44af66ade1a06ad1be19a512642b65a87f8d3b75c102b4850a719b68a3b77bb",
+            "digest_forest_K2": "dd657928d626854e23bc1ff59327eb6c834d4ff94fbb0f1913156e251f14b213",
+            "digest_forest_K3": "ba8973abbad9fc0aa1008589f0f3a669389f6406350501bdda97aa879dedcf0a",
+            "digest_forest_K4": "69b328c5a690c5b63d607018de6e28ae7f3f8f82f4320989cccec6379b0ad358",
+            "digest_forest_K5": "0598690dcf3a59d3cee0a7447d06d6773ed3b4d6d733c35d801dd3924e14ba6a",
+            "digest_forest_K6": "45014ce7ef7d17c8baeb1f5df32d90f6643cbc913cdc3817d10af1db88be363a",
+            "digest_forest_K7": "e8dc58ed4133f76f6541c474f9dedfb3c8d8880d1463bc49f32e8a36cbc62c80",
+            "digest_forest_K8": "aa7bcd6f453905566e423de55991caedb3afed38e4164d2cf5c295c85975e318",
+            "digest_forest_K9": "7b6c460d6df9631d0ef3851b5e939b161fdc559ecddb0396a94991ca970e1bb3"
+          },
+          "ended_utc": "2026-09-05T06:40:33.586797Z",
+          "gnu_wall_seconds": 192.5,
+          "max_rss_kb": 2303660,
+          "outer_wall_seconds": 192.55602913099983,
+          "payload_caps": {
+            "budget": 17179869184,
+            "cap_brut_demande": 4294967295,
+            "cap_brut_effectif": 119304647,
+            "cap_fusion_budgetaire": 59652323
+          },
+          "pipeline_ms": 192498.8,
+          "postprefilter_digest": "36ee202aefe3f81caa91ec7c250f53ccf94585b519ecc8249189ef611d27b28b",
+          "returncode": 0,
+          "role": "D",
+          "separation": 10,
+          "silent": {
+            "10": {
+              "added": 372134,
+              "core": 1347437,
+              "max_chain": 18,
+              "meb_supports": 394768070,
+              "query_nodes": 173869231,
+              "steps": 372134,
+              "with_two_intruders": 258492
+            },
+            "2": {
+              "added": 4186,
+              "core": 46136,
+              "max_chain": 6,
+              "meb_supports": 64585,
+              "query_nodes": 2463142,
+              "steps": 4186,
+              "with_two_intruders": 3297
+            },
+            "3": {
+              "added": 16018,
+              "core": 114555,
+              "max_chain": 10,
+              "meb_supports": 531378,
+              "query_nodes": 7718685,
+              "steps": 16018,
+              "with_two_intruders": 12296
+            },
+            "4": {
+              "added": 36961,
+              "core": 211968,
+              "max_chain": 9,
+              "meb_supports": 2424881,
+              "query_nodes": 16702777,
+              "steps": 36961,
+              "with_two_intruders": 27790
+            },
+            "5": {
+              "added": 67207,
+              "core": 337252,
+              "max_chain": 11,
+              "meb_supports": 7998813,
+              "query_nodes": 29915877,
+              "steps": 67207,
+              "with_two_intruders": 49535
+            },
+            "6": {
+              "added": 107108,
+              "core": 488952,
+              "max_chain": 12,
+              "meb_supports": 21673996,
+              "query_nodes": 47778692,
+              "steps": 107108,
+              "with_two_intruders": 77752
+            },
+            "7": {
+              "added": 157598,
+              "core": 666230,
+              "max_chain": 15,
+              "meb_supports": 51210694,
+              "query_nodes": 70749430,
+              "steps": 157598,
+              "with_two_intruders": 112803
+            },
+            "8": {
+              "added": 218721,
+              "core": 868194,
+              "max_chain": 14,
+              "meb_supports": 109017683,
+              "query_nodes": 99153075,
+              "steps": 218721,
+              "with_two_intruders": 154705
+            },
+            "9": {
+              "added": 290915,
+              "core": 1096161,
+              "max_chain": 17,
+              "meb_supports": 214435228,
+              "query_nodes": 133553348,
+              "steps": 290915,
+              "with_two_intruders": 203197
+            }
+          },
+          "silent_limits": {
+            "chain_steps": 2000000,
+            "cofaces": 2000000,
+            "core_records": 8000000,
+            "meb_supports": 1000000000,
+            "query_nodes": 1000000000
+          },
+          "stage_ms": {
+            "census": 7878.4,
+            "cli_e2e": 192501.479,
+            "comptage": 33.1,
+            "digest": 3944.6,
+            "expansion": 643.7,
+            "fold": 32912.0,
+            "fold_wall": 110609.2,
+            "fusion": 5793.6,
+            "gen": 61372.7,
+            "index": 2.6,
+            "intern": 17197.3,
+            "prefiltre": 10179.4,
+            "rects": 29338.6,
+            "reduce": 5016.2,
+            "rle": 1505.3,
+            "silent_incidence": 73894.283,
+            "tri": 4878.6,
+            "wspd": 32033.8
+          },
+          "stage_workers": {
+            "census": 1,
+            "expansion": 1,
+            "fold": 1,
+            "prefiltre": 1,
+            "rects": 1,
+            "rle": 1,
+            "wspd": 1
+          },
+          "started_utc": "2026-09-05T06:37:21.024838Z"
+        },
+        {
+          "binary": {
+            "bytes": 692296,
+            "path": "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+            "sha256": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6"
+          },
+          "candidate_digest": "fa9a6b5c08532457c319f375d1d8f58b875cca71f7dd2f4548e4c9a84167b469",
+          "cardinalities": {
+            "1": {
+              "attachements": 0,
+              "deltas": 7999,
+              "evenements": 29875,
+              "facettes": 8000,
+              "fusions": 7999,
+              "noeuds": 7999
+            },
+            "10": {
+              "attachements": 8127546,
+              "deltas": 1005622,
+              "evenements": 1088869,
+              "facettes": 8918681,
+              "fusions": 8918680,
+              "noeuds": 15514
+            },
+            "2": {
+              "attachements": 32713,
+              "deltas": 51121,
+              "evenements": 67539,
+              "facettes": 62910,
+              "fusions": 62909,
+              "noeuds": 2122
+            },
+            "3": {
+              "attachements": 147239,
+              "deltas": 120877,
+              "evenements": 124135,
+              "facettes": 213686,
+              "fusions": 213685,
+              "noeuds": 2929
+            },
+            "4": {
+              "attachements": 399983,
+              "deltas": 197242,
+              "evenements": 201156,
+              "facettes": 517876,
+              "fusions": 517875,
+              "noeuds": 4068
+            },
+            "5": {
+              "attachements": 850158,
+              "deltas": 289705,
+              "evenements": 298870,
+              "facettes": 1036109,
+              "fusions": 1036108,
+              "noeuds": 5419
+            },
+            "6": {
+              "attachements": 1552470,
+              "deltas": 398776,
+              "evenements": 415933,
+              "facettes": 1824039,
+              "fusions": 1824038,
+              "noeuds": 7004
+            },
+            "7": {
+              "attachements": 2573565,
+              "deltas": 525699,
+              "evenements": 554022,
+              "facettes": 2947215,
+              "fusions": 2947214,
+              "noeuds": 8780
+            },
+            "8": {
+              "attachements": 3969114,
+              "deltas": 668888,
+              "evenements": 712109,
+              "facettes": 4463468,
+              "fusions": 4463467,
+              "noeuds": 10954
+            },
+            "9": {
+              "attachements": 5809858,
+              "deltas": 829864,
+              "evenements": 891721,
+              "facettes": 6443014,
+              "fusions": 6443013,
+              "noeuds": 13150
+            }
+          },
+          "counts": {
+            "boules_uniques": 3129992,
+            "census_int": 16102722,
+            "census_shell": 10456312,
+            "coord": 65536,
+            "deltas": 4095793,
+            "emis": 3129992,
+            "evenements": 4384229,
+            "facettes": 26434998,
+            "fusions": 26434988,
+            "mortes_profondeur": 16611,
+            "n": 8000,
+            "noeuds": 77939,
+            "s": 10,
+            "seed": 3,
+            "smax": 11,
+            "survivantes": 3113381,
+            "threads": 1
+          },
+          "digests": {
+            "digest_all": "4c3ceb0498990bafa41a9e43d0bffe25a3fee579b12b5d34365f3578f526a0e7",
+            "digest_forest_K1": "fff29fb38092c02dd43271de33b9aee28a03408fbb70153385c3fc1e69e3573a",
+            "digest_forest_K10": "a44af66ade1a06ad1be19a512642b65a87f8d3b75c102b4850a719b68a3b77bb",
+            "digest_forest_K2": "dd657928d626854e23bc1ff59327eb6c834d4ff94fbb0f1913156e251f14b213",
+            "digest_forest_K3": "ba8973abbad9fc0aa1008589f0f3a669389f6406350501bdda97aa879dedcf0a",
+            "digest_forest_K4": "69b328c5a690c5b63d607018de6e28ae7f3f8f82f4320989cccec6379b0ad358",
+            "digest_forest_K5": "0598690dcf3a59d3cee0a7447d06d6773ed3b4d6d733c35d801dd3924e14ba6a",
+            "digest_forest_K6": "45014ce7ef7d17c8baeb1f5df32d90f6643cbc913cdc3817d10af1db88be363a",
+            "digest_forest_K7": "e8dc58ed4133f76f6541c474f9dedfb3c8d8880d1463bc49f32e8a36cbc62c80",
+            "digest_forest_K8": "aa7bcd6f453905566e423de55991caedb3afed38e4164d2cf5c295c85975e318",
+            "digest_forest_K9": "7b6c460d6df9631d0ef3851b5e939b161fdc559ecddb0396a94991ca970e1bb3"
+          },
+          "ended_utc": "2026-09-05T06:43:46.116313Z",
+          "gnu_wall_seconds": 192.46,
+          "max_rss_kb": 2305132,
+          "outer_wall_seconds": 192.47728785799973,
+          "payload_caps": {
+            "budget": 17179869184,
+            "cap_brut_demande": 4294967295,
+            "cap_brut_effectif": 119304647,
+            "cap_fusion_budgetaire": 59652323
+          },
+          "pipeline_ms": 192462.9,
+          "postprefilter_digest": "36ee202aefe3f81caa91ec7c250f53ccf94585b519ecc8249189ef611d27b28b",
+          "returncode": 0,
+          "role": "E",
+          "separation": 10,
+          "silent": {
+            "10": {
+              "added": 372134,
+              "core": 1347437,
+              "max_chain": 18,
+              "meb_supports": 394768070,
+              "query_nodes": 173869231,
+              "steps": 372134,
+              "with_two_intruders": 258492
+            },
+            "2": {
+              "added": 4186,
+              "core": 46136,
+              "max_chain": 6,
+              "meb_supports": 64585,
+              "query_nodes": 2463142,
+              "steps": 4186,
+              "with_two_intruders": 3297
+            },
+            "3": {
+              "added": 16018,
+              "core": 114555,
+              "max_chain": 10,
+              "meb_supports": 531378,
+              "query_nodes": 7718685,
+              "steps": 16018,
+              "with_two_intruders": 12296
+            },
+            "4": {
+              "added": 36961,
+              "core": 211968,
+              "max_chain": 9,
+              "meb_supports": 2424881,
+              "query_nodes": 16702777,
+              "steps": 36961,
+              "with_two_intruders": 27790
+            },
+            "5": {
+              "added": 67207,
+              "core": 337252,
+              "max_chain": 11,
+              "meb_supports": 7998813,
+              "query_nodes": 29915877,
+              "steps": 67207,
+              "with_two_intruders": 49535
+            },
+            "6": {
+              "added": 107108,
+              "core": 488952,
+              "max_chain": 12,
+              "meb_supports": 21673996,
+              "query_nodes": 47778692,
+              "steps": 107108,
+              "with_two_intruders": 77752
+            },
+            "7": {
+              "added": 157598,
+              "core": 666230,
+              "max_chain": 15,
+              "meb_supports": 51210694,
+              "query_nodes": 70749430,
+              "steps": 157598,
+              "with_two_intruders": 112803
+            },
+            "8": {
+              "added": 218721,
+              "core": 868194,
+              "max_chain": 14,
+              "meb_supports": 109017683,
+              "query_nodes": 99153075,
+              "steps": 218721,
+              "with_two_intruders": 154705
+            },
+            "9": {
+              "added": 290915,
+              "core": 1096161,
+              "max_chain": 17,
+              "meb_supports": 214435228,
+              "query_nodes": 133553348,
+              "steps": 290915,
+              "with_two_intruders": 203197
+            }
+          },
+          "silent_limits": {
+            "chain_steps": 2000000,
+            "cofaces": 2000000,
+            "core_records": 8000000,
+            "meb_supports": 1000000000,
+            "query_nodes": 1000000000
+          },
+          "stage_ms": {
+            "census": 7914.2,
+            "cli_e2e": 192464.854,
+            "comptage": 32.3,
+            "digest": 3978.9,
+            "expansion": 665.8,
+            "fold": 33957.1,
+            "fold_wall": 107050.3,
+            "fusion": 5998.3,
+            "gen": 64483.3,
+            "index": 2.2,
+            "intern": 17288.8,
+            "prefiltre": 10419.2,
+            "rects": 30556.6,
+            "reduce": 5497.9,
+            "rle": 1642.0,
+            "silent_incidence": 69183.678,
+            "tri": 5144.2,
+            "wspd": 33926.3
+          },
+          "stage_workers": {
+            "census": 1,
+            "expansion": 1,
+            "fold": 1,
+            "prefiltre": 1,
+            "rects": 1,
+            "rle": 1,
+            "wspd": 1
+          },
+          "started_utc": "2026-09-05T06:40:33.633766Z"
+        }
+      ],
+      "separation": 10,
+      "within_pair_equal_fields": [
+        "digests",
+        "cardinalities",
+        "counts",
+        "silent",
+        "silent_limits",
+        "payload_caps",
+        "candidate_digest",
+        "postprefilter_digest"
+      ]
+    },
+    {
+      "host": {
+        "affinity_cpus": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "architecture": "x86_64",
+        "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+        "host_shared": true,
+        "kernel_release": "6.8.0-1052-azure",
+        "loadavg_1_5_15": [
+          1.00830078125,
+          1.74072265625,
+          1.908203125
+        ],
+        "logical_cpus": 8,
+        "mem_total_bytes": 33657716736,
+        "observed_utc": "2026-09-05T06:45:17.402651Z"
+      },
+      "observed_wall_reduction_percent": 2.9761049670866346,
+      "repository_after": {
+        "head": "35dda097f75a66f8264002c58b9ccc4888c46d2e",
+        "observed_utc": "2026-09-05T06:51:48.893026Z",
+        "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/PASSATION.md\n D morsehgp3D_v7/audits/ARCHIVE_TRANSACTION_20260904.md\n M morsehgp3D_v7/audits/AUDIT_INDEPENDANT_20260904.md\n M morsehgp3D_v7/audits/AUDIT_INTERFACES_20260904.md\n M morsehgp3D_v7/audits/AUDIT_QUALIFICATION_20260905.md\n M morsehgp3D_v7/audits/AUDIT_RESIDENCE_20260904.md\n D morsehgp3D_v7/audits/CAMPAGNE_APPARIEE_20260904.md\n D morsehgp3D_v7/audits/CAMPAGNE_INCIDENCES_COURANTE.md\n M morsehgp3D_v7/audits/CELLULES_COURANT.md\n M morsehgp3D_v7/audits/CENSUS_AXIS_COURANT.md\n D morsehgp3D_v7/audits/CENSUS_DIRECT_20260904.md\n M morsehgp3D_v7/audits/FILTRES_FLOTTANTS_COURANTS.md\n M morsehgp3D_v7/audits/FRONT_ET_TEMOINS_COURANT.md\n M morsehgp3D_v7/audits/MONO_COURANT.md\n D morsehgp3D_v7/audits/PROTOCOLE_G4_V7_20260904.md\n D morsehgp3D_v7/audits/QUALIFICATION_C_COURANTE.md\n M morsehgp3D_v7/audits/REPONSE_CONSTRUCTEUR_20260904.md\n D morsehgp3D_v7/audits/REPONSE_INCIDENCES_ET_DELTAS_20260904.md\n D morsehgp3D_v7/audits/RETOUR_ARCHIVE_COURANT.md\n M morsehgp3D_v7/audits/RETOUR_MATH_COURANT.md\n D morsehgp3D_v7/audits/REVUE_NETTOYAGE_ARCHIVE_COURANT.md\n M morsehgp3D_v7/audits/S1_COURANT.md\n D morsehgp3D_v7/audits/SONDE_CI_COURANTE.md\n D morsehgp3D_v7/audits/SORT_LOCAL_INDICES_20260904.md\n D morsehgp3D_v7/audits/THREADS_ET_PORTES_20260904.md\n M morsehgp3D_v7/audits/verify_current.py\n M morsehgp3D_v7/docs/ERRATA_PUBLICATION_20260904.md\n M morsehgp3D_v7/src/core/mutants.hpp\n M morsehgp3D_v7/src/forest/silent_incidence.hpp\n M morsehgp3D_v7/tests/meb_lazy_gate.cpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/ARITHMETIQUE_CELLULES_COURANTE.md\n?? morsehgp3D_v7/audits/ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md\n?? morsehgp3D_v7/audits/ARITHMETIQUE_SPINDLE_COURANTE.md\n?? morsehgp3D_v7/audits/DOMAINE_CPU_COURANT.md\n?? morsehgp3D_v7/audits/cell_width_certificate.py\n?? morsehgp3D_v7/audits/receipts_front_20260905/\n?? morsehgp3D_v7/audits/secteur_corde_arithmetic_20260905.py\n?? morsehgp3D_v7/audits/spindle_arithmetic_probe.py\n?? morsehgp3D_v7/audits/test_verify_current.py\n?? morsehgp3D_v7/docs/OPTIMISATION_MEB_Q2.md\n?? morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md\n?? morsehgp3D_v7/receipts/meb_pivot_budget_counterexample_20260905/\n?? morsehgp3D_v7/receipts/meb_q2_review_20260905/\n"
+      },
+      "repository_before": {
+        "head": "35dda097f75a66f8264002c58b9ccc4888c46d2e",
+        "observed_utc": "2026-09-05T06:45:17.006420Z",
+        "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/PASSATION.md\n M morsehgp3D_v7/docs/ERRATA_PUBLICATION_20260904.md\n M morsehgp3D_v7/src/core/mutants.hpp\n M morsehgp3D_v7/src/forest/silent_incidence.hpp\n M morsehgp3D_v7/tests/meb_lazy_gate.cpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/receipts_front_20260905/\n?? morsehgp3D_v7/audits/secteur_corde_arithmetic_20260905.py\n?? morsehgp3D_v7/audits/spindle_arithmetic_probe.py\n?? morsehgp3D_v7/docs/OPTIMISATION_MEB_Q2.md\n?? morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md\n?? morsehgp3D_v7/receipts/meb_pivot_budget_counterexample_20260905/\n?? morsehgp3D_v7/receipts/meb_q2_review_20260905/\n"
+      },
+      "runs": [
+        {
+          "binary": {
+            "bytes": 692296,
+            "path": "/workspaces/E-HGP/build/v7_meb_qualification/mhgp7",
+            "sha256": "127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f"
+          },
+          "candidate_digest": "9aeddd1d739f1b99ddc17e953a7347125ac6d6b31c36307205eab75d620b2b9e",
+          "cardinalities": {
+            "1": {
+              "attachements": 0,
+              "deltas": 7999,
+              "evenements": 29875,
+              "facettes": 8000,
+              "fusions": 7999,
+              "noeuds": 7999
+            },
+            "10": {
+              "attachements": 8127546,
+              "deltas": 1005622,
+              "evenements": 1088869,
+              "facettes": 8918681,
+              "fusions": 8918680,
+              "noeuds": 15514
+            },
+            "2": {
+              "attachements": 32713,
+              "deltas": 51121,
+              "evenements": 67539,
+              "facettes": 62910,
+              "fusions": 62909,
+              "noeuds": 2122
+            },
+            "3": {
+              "attachements": 147239,
+              "deltas": 120877,
+              "evenements": 124135,
+              "facettes": 213686,
+              "fusions": 213685,
+              "noeuds": 2929
+            },
+            "4": {
+              "attachements": 399983,
+              "deltas": 197242,
+              "evenements": 201156,
+              "facettes": 517876,
+              "fusions": 517875,
+              "noeuds": 4068
+            },
+            "5": {
+              "attachements": 850158,
+              "deltas": 289705,
+              "evenements": 298870,
+              "facettes": 1036109,
+              "fusions": 1036108,
+              "noeuds": 5419
+            },
+            "6": {
+              "attachements": 1552470,
+              "deltas": 398776,
+              "evenements": 415933,
+              "facettes": 1824039,
+              "fusions": 1824038,
+              "noeuds": 7004
+            },
+            "7": {
+              "attachements": 2573565,
+              "deltas": 525699,
+              "evenements": 554022,
+              "facettes": 2947215,
+              "fusions": 2947214,
+              "noeuds": 8780
+            },
+            "8": {
+              "attachements": 3969114,
+              "deltas": 668888,
+              "evenements": 712109,
+              "facettes": 4463468,
+              "fusions": 4463467,
+              "noeuds": 10954
+            },
+            "9": {
+              "attachements": 5809858,
+              "deltas": 829864,
+              "evenements": 891721,
+              "facettes": 6443014,
+              "fusions": 6443013,
+              "noeuds": 13150
+            }
+          },
+          "counts": {
+            "boules_uniques": 3123497,
+            "census_int": 16102722,
+            "census_shell": 10456312,
+            "coord": 65536,
+            "deltas": 4095793,
+            "emis": 3123497,
+            "evenements": 4384229,
+            "facettes": 26434998,
+            "fusions": 26434988,
+            "mortes_profondeur": 10116,
+            "n": 8000,
+            "noeuds": 77939,
+            "s": 12,
+            "seed": 3,
+            "smax": 11,
+            "survivantes": 3113381,
+            "threads": 1
+          },
+          "digests": {
+            "digest_all": "4c3ceb0498990bafa41a9e43d0bffe25a3fee579b12b5d34365f3578f526a0e7",
+            "digest_forest_K1": "fff29fb38092c02dd43271de33b9aee28a03408fbb70153385c3fc1e69e3573a",
+            "digest_forest_K10": "a44af66ade1a06ad1be19a512642b65a87f8d3b75c102b4850a719b68a3b77bb",
+            "digest_forest_K2": "dd657928d626854e23bc1ff59327eb6c834d4ff94fbb0f1913156e251f14b213",
+            "digest_forest_K3": "ba8973abbad9fc0aa1008589f0f3a669389f6406350501bdda97aa879dedcf0a",
+            "digest_forest_K4": "69b328c5a690c5b63d607018de6e28ae7f3f8f82f4320989cccec6379b0ad358",
+            "digest_forest_K5": "0598690dcf3a59d3cee0a7447d06d6773ed3b4d6d733c35d801dd3924e14ba6a",
+            "digest_forest_K6": "45014ce7ef7d17c8baeb1f5df32d90f6643cbc913cdc3817d10af1db88be363a",
+            "digest_forest_K7": "e8dc58ed4133f76f6541c474f9dedfb3c8d8880d1463bc49f32e8a36cbc62c80",
+            "digest_forest_K8": "aa7bcd6f453905566e423de55991caedb3afed38e4164d2cf5c295c85975e318",
+            "digest_forest_K9": "7b6c460d6df9631d0ef3851b5e939b161fdc559ecddb0396a94991ca970e1bb3"
+          },
+          "ended_utc": "2026-09-05T06:48:36.075571Z",
+          "gnu_wall_seconds": 198.62,
+          "max_rss_kb": 2304292,
+          "outer_wall_seconds": 198.64194446700003,
+          "payload_caps": {
+            "budget": 17179869184,
+            "cap_brut_demande": 4294967295,
+            "cap_brut_effectif": 119304647,
+            "cap_fusion_budgetaire": 59652323
+          },
+          "pipeline_ms": 198616.6,
+          "postprefilter_digest": "36ee202aefe3f81caa91ec7c250f53ccf94585b519ecc8249189ef611d27b28b",
+          "returncode": 0,
+          "role": "D",
+          "separation": 12,
+          "silent": {
+            "10": {
+              "added": 372134,
+              "core": 1347437,
+              "max_chain": 18,
+              "meb_supports": 394768070,
+              "query_nodes": 173869231,
+              "steps": 372134,
+              "with_two_intruders": 258492
+            },
+            "2": {
+              "added": 4186,
+              "core": 46136,
+              "max_chain": 6,
+              "meb_supports": 64585,
+              "query_nodes": 2463142,
+              "steps": 4186,
+              "with_two_intruders": 3297
+            },
+            "3": {
+              "added": 16018,
+              "core": 114555,
+              "max_chain": 10,
+              "meb_supports": 531378,
+              "query_nodes": 7718685,
+              "steps": 16018,
+              "with_two_intruders": 12296
+            },
+            "4": {
+              "added": 36961,
+              "core": 211968,
+              "max_chain": 9,
+              "meb_supports": 2424881,
+              "query_nodes": 16702777,
+              "steps": 36961,
+              "with_two_intruders": 27790
+            },
+            "5": {
+              "added": 67207,
+              "core": 337252,
+              "max_chain": 11,
+              "meb_supports": 7998813,
+              "query_nodes": 29915877,
+              "steps": 67207,
+              "with_two_intruders": 49535
+            },
+            "6": {
+              "added": 107108,
+              "core": 488952,
+              "max_chain": 12,
+              "meb_supports": 21673996,
+              "query_nodes": 47778692,
+              "steps": 107108,
+              "with_two_intruders": 77752
+            },
+            "7": {
+              "added": 157598,
+              "core": 666230,
+              "max_chain": 15,
+              "meb_supports": 51210694,
+              "query_nodes": 70749430,
+              "steps": 157598,
+              "with_two_intruders": 112803
+            },
+            "8": {
+              "added": 218721,
+              "core": 868194,
+              "max_chain": 14,
+              "meb_supports": 109017683,
+              "query_nodes": 99153075,
+              "steps": 218721,
+              "with_two_intruders": 154705
+            },
+            "9": {
+              "added": 290915,
+              "core": 1096161,
+              "max_chain": 17,
+              "meb_supports": 214435228,
+              "query_nodes": 133553348,
+              "steps": 290915,
+              "with_two_intruders": 203197
+            }
+          },
+          "silent_limits": {
+            "chain_steps": 2000000,
+            "cofaces": 2000000,
+            "core_records": 8000000,
+            "meb_supports": 1000000000,
+            "query_nodes": 1000000000
+          },
+          "stage_ms": {
+            "census": 8015.5,
+            "cli_e2e": 198618.544,
+            "comptage": 34.2,
+            "digest": 3990.3,
+            "expansion": 650.2,
+            "fold": 33530.7,
+            "fold_wall": 112194.2,
+            "fusion": 5977.1,
+            "gen": 65352.7,
+            "index": 2.1,
+            "intern": 17205.3,
+            "prefiltre": 10452.8,
+            "rects": 30353.4,
+            "reduce": 5357.2,
+            "rle": 1615.7,
+            "silent_incidence": 74812.637,
+            "tri": 4962.7,
+            "wspd": 34999.1
+          },
+          "stage_workers": {
+            "census": 1,
+            "expansion": 1,
+            "fold": 1,
+            "prefiltre": 1,
+            "rects": 1,
+            "rle": 1,
+            "wspd": 1
+          },
+          "started_utc": "2026-09-05T06:45:17.428017Z"
+        },
+        {
+          "binary": {
+            "bytes": 692296,
+            "path": "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+            "sha256": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6"
+          },
+          "candidate_digest": "9aeddd1d739f1b99ddc17e953a7347125ac6d6b31c36307205eab75d620b2b9e",
+          "cardinalities": {
+            "1": {
+              "attachements": 0,
+              "deltas": 7999,
+              "evenements": 29875,
+              "facettes": 8000,
+              "fusions": 7999,
+              "noeuds": 7999
+            },
+            "10": {
+              "attachements": 8127546,
+              "deltas": 1005622,
+              "evenements": 1088869,
+              "facettes": 8918681,
+              "fusions": 8918680,
+              "noeuds": 15514
+            },
+            "2": {
+              "attachements": 32713,
+              "deltas": 51121,
+              "evenements": 67539,
+              "facettes": 62910,
+              "fusions": 62909,
+              "noeuds": 2122
+            },
+            "3": {
+              "attachements": 147239,
+              "deltas": 120877,
+              "evenements": 124135,
+              "facettes": 213686,
+              "fusions": 213685,
+              "noeuds": 2929
+            },
+            "4": {
+              "attachements": 399983,
+              "deltas": 197242,
+              "evenements": 201156,
+              "facettes": 517876,
+              "fusions": 517875,
+              "noeuds": 4068
+            },
+            "5": {
+              "attachements": 850158,
+              "deltas": 289705,
+              "evenements": 298870,
+              "facettes": 1036109,
+              "fusions": 1036108,
+              "noeuds": 5419
+            },
+            "6": {
+              "attachements": 1552470,
+              "deltas": 398776,
+              "evenements": 415933,
+              "facettes": 1824039,
+              "fusions": 1824038,
+              "noeuds": 7004
+            },
+            "7": {
+              "attachements": 2573565,
+              "deltas": 525699,
+              "evenements": 554022,
+              "facettes": 2947215,
+              "fusions": 2947214,
+              "noeuds": 8780
+            },
+            "8": {
+              "attachements": 3969114,
+              "deltas": 668888,
+              "evenements": 712109,
+              "facettes": 4463468,
+              "fusions": 4463467,
+              "noeuds": 10954
+            },
+            "9": {
+              "attachements": 5809858,
+              "deltas": 829864,
+              "evenements": 891721,
+              "facettes": 6443014,
+              "fusions": 6443013,
+              "noeuds": 13150
+            }
+          },
+          "counts": {
+            "boules_uniques": 3123497,
+            "census_int": 16102722,
+            "census_shell": 10456312,
+            "coord": 65536,
+            "deltas": 4095793,
+            "emis": 3123497,
+            "evenements": 4384229,
+            "facettes": 26434998,
+            "fusions": 26434988,
+            "mortes_profondeur": 10116,
+            "n": 8000,
+            "noeuds": 77939,
+            "s": 12,
+            "seed": 3,
+            "smax": 11,
+            "survivantes": 3113381,
+            "threads": 1
+          },
+          "digests": {
+            "digest_all": "4c3ceb0498990bafa41a9e43d0bffe25a3fee579b12b5d34365f3578f526a0e7",
+            "digest_forest_K1": "fff29fb38092c02dd43271de33b9aee28a03408fbb70153385c3fc1e69e3573a",
+            "digest_forest_K10": "a44af66ade1a06ad1be19a512642b65a87f8d3b75c102b4850a719b68a3b77bb",
+            "digest_forest_K2": "dd657928d626854e23bc1ff59327eb6c834d4ff94fbb0f1913156e251f14b213",
+            "digest_forest_K3": "ba8973abbad9fc0aa1008589f0f3a669389f6406350501bdda97aa879dedcf0a",
+            "digest_forest_K4": "69b328c5a690c5b63d607018de6e28ae7f3f8f82f4320989cccec6379b0ad358",
+            "digest_forest_K5": "0598690dcf3a59d3cee0a7447d06d6773ed3b4d6d733c35d801dd3924e14ba6a",
+            "digest_forest_K6": "45014ce7ef7d17c8baeb1f5df32d90f6643cbc913cdc3817d10af1db88be363a",
+            "digest_forest_K7": "e8dc58ed4133f76f6541c474f9dedfb3c8d8880d1463bc49f32e8a36cbc62c80",
+            "digest_forest_K8": "aa7bcd6f453905566e423de55991caedb3afed38e4164d2cf5c295c85975e318",
+            "digest_forest_K9": "7b6c460d6df9631d0ef3851b5e939b161fdc559ecddb0396a94991ca970e1bb3"
+          },
+          "ended_utc": "2026-09-05T06:51:48.848480Z",
+          "gnu_wall_seconds": 192.69,
+          "max_rss_kb": 2302764,
+          "outer_wall_seconds": 192.73015169100017,
+          "payload_caps": {
+            "budget": 17179869184,
+            "cap_brut_demande": 4294967295,
+            "cap_brut_effectif": 119304647,
+            "cap_fusion_budgetaire": 59652323
+          },
+          "pipeline_ms": 192687.8,
+          "postprefilter_digest": "36ee202aefe3f81caa91ec7c250f53ccf94585b519ecc8249189ef611d27b28b",
+          "returncode": 0,
+          "role": "E",
+          "separation": 12,
+          "silent": {
+            "10": {
+              "added": 372134,
+              "core": 1347437,
+              "max_chain": 18,
+              "meb_supports": 394768070,
+              "query_nodes": 173869231,
+              "steps": 372134,
+              "with_two_intruders": 258492
+            },
+            "2": {
+              "added": 4186,
+              "core": 46136,
+              "max_chain": 6,
+              "meb_supports": 64585,
+              "query_nodes": 2463142,
+              "steps": 4186,
+              "with_two_intruders": 3297
+            },
+            "3": {
+              "added": 16018,
+              "core": 114555,
+              "max_chain": 10,
+              "meb_supports": 531378,
+              "query_nodes": 7718685,
+              "steps": 16018,
+              "with_two_intruders": 12296
+            },
+            "4": {
+              "added": 36961,
+              "core": 211968,
+              "max_chain": 9,
+              "meb_supports": 2424881,
+              "query_nodes": 16702777,
+              "steps": 36961,
+              "with_two_intruders": 27790
+            },
+            "5": {
+              "added": 67207,
+              "core": 337252,
+              "max_chain": 11,
+              "meb_supports": 7998813,
+              "query_nodes": 29915877,
+              "steps": 67207,
+              "with_two_intruders": 49535
+            },
+            "6": {
+              "added": 107108,
+              "core": 488952,
+              "max_chain": 12,
+              "meb_supports": 21673996,
+              "query_nodes": 47778692,
+              "steps": 107108,
+              "with_two_intruders": 77752
+            },
+            "7": {
+              "added": 157598,
+              "core": 666230,
+              "max_chain": 15,
+              "meb_supports": 51210694,
+              "query_nodes": 70749430,
+              "steps": 157598,
+              "with_two_intruders": 112803
+            },
+            "8": {
+              "added": 218721,
+              "core": 868194,
+              "max_chain": 14,
+              "meb_supports": 109017683,
+              "query_nodes": 99153075,
+              "steps": 218721,
+              "with_two_intruders": 154705
+            },
+            "9": {
+              "added": 290915,
+              "core": 1096161,
+              "max_chain": 17,
+              "meb_supports": 214435228,
+              "query_nodes": 133553348,
+              "steps": 290915,
+              "with_two_intruders": 203197
+            }
+          },
+          "silent_limits": {
+            "chain_steps": 2000000,
+            "cofaces": 2000000,
+            "core_records": 8000000,
+            "meb_supports": 1000000000,
+            "query_nodes": 1000000000
+          },
+          "stage_ms": {
+            "census": 7945.9,
+            "cli_e2e": 192689.808,
+            "comptage": 34.0,
+            "digest": 3964.5,
+            "expansion": 656.5,
+            "fold": 33396.2,
+            "fold_wall": 106374.7,
+            "fusion": 5763.7,
+            "gen": 65413.9,
+            "index": 2.1,
+            "intern": 17209.5,
+            "prefiltre": 10367.1,
+            "rects": 30368.6,
+            "reduce": 5226.4,
+            "rle": 1626.7,
+            "silent_incidence": 69138.346,
+            "tri": 5167.4,
+            "wspd": 35045.2
+          },
+          "stage_workers": {
+            "census": 1,
+            "expansion": 1,
+            "fold": 1,
+            "prefiltre": 1,
+            "rects": 1,
+            "rle": 1,
+            "wspd": 1
+          },
+          "started_utc": "2026-09-05T06:48:36.113941Z"
+        }
+      ],
+      "separation": 12,
+      "within_pair_equal_fields": [
+        "digests",
+        "cardinalities",
+        "counts",
+        "silent",
+        "silent_limits",
+        "payload_caps",
+        "candidate_digest",
+        "postprefilter_digest"
+      ]
+    }
+  ],
+  "phase": "exploration_v7_hors_registre",
+  "profile": "quantized_u16_input_only",
+  "public_status": "not_claimed",
+  "raw_engine_logs": 6,
+  "schema": "mhgp7-q2-independent-replay-v1",
+  "source_files_captured": 66,
+  "source_manifest_files": 63,
+  "source_origin_byte_exact_files": 58,
+  "status": "verified_bounded_raw_projections"
+}

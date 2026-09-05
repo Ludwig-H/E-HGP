@@ -18,12 +18,12 @@ Entrée actualisée le 5 septembre 2026. Commencer par l’[état courant](ETAT_
 PYTHONDONTWRITEBYTECODE=1 python3 -O morsehgp3D_v7/audits/verify_current.py
 ```
 
-Le [manifeste courant](validation_current.json) épingle les preuves communes et les variantes complètes D/E. Le code 0 affiche la variante reconnue **et sa portée** : suite D de 323 portes, ou qualification locale q2 E. Il ne transfère aucun résultat entre variantes et ne réexécute aucun test. Le code 1 demande une actualisation de sources ; le code 2 rejette un manifeste invalide. La compatibilité `--manifest` conserve l’accès aux anciens formats. Les 30 [tests de ce contrôleur](test_verify_current.py) passent normalement et sous `-O`.
+Le [manifeste courant](validation_current.json) épingle les preuves communes et les variantes complètes D/E. Le code 0 affiche la variante reconnue **et sa portée** : 323 portes D exécutées indépendamment, ou 324 portes E du constructeur contre-vérifiées et sondes locales propres. Il ne transfère aucun résultat entre variantes et ne réexécute aucun test. Le code 1 demande une actualisation de sources ; le code 2 rejette un manifeste invalide. La compatibilité `--manifest` conserve l’accès aux anciens formats. Les 30 [tests de ce contrôleur](test_verify_current.py) passent normalement et sous `-O`.
 
 ## Entretien du dossier
 
 Une conclusion active a un rapport de référence. Douze notes transitoires ou dépassées ont été fusionnées et retirées ; le [registre de consolidation](receipts_front_20260905/documentation_retirement.json) donne pour chacune son remplacement, le commit historique et son hash. Les fixtures permanentes et reçus bruts, y compris échecs et refus, restent à leur emplacement reproductible. Les répertoires `.work*` sont des temporaires ignorés, pas des autorités publiques.
 
-Les [reçus D/E](receipts_20260905/README.md) conservent leurs attributions historiques. Les [certificats du front](receipts_front_20260905/README.md) sont de nouveaux calculs légers, sans exécution produit. Les contrôles CTest locaux, CI et campagnes du constructeur restent distincts.
+Les [reçus D/E](receipts_20260905/README.md) conservent leurs attributions historiques. Les [certificats entiers du front](receipts_front_20260905/README.md) sont complétés par le [raccord C++ exécuté](receipts_front_compiled_20260905/README.md). Les contrôles CTest locaux, CI et campagnes du constructeur restent distincts. Les demandes désormais fermées sont retirées des entrées courantes.
 
 Statut public : `not_claimed`. Aucun registre officiel modifié. GCP non utilisé.

@@ -1,0 +1,16 @@
+{
+  "exitcode": 0,
+  "json_duplicate_rejection": true,
+  "positive": 1,
+  "raw_rejections": [
+    "bad_chain",
+    "duplicate_digest",
+    "empty",
+    "missing_k10",
+    "workers",
+    "wrong_scope",
+    "wrong_total",
+    "zero_facets"
+  ],
+  "status": "passed"
+}

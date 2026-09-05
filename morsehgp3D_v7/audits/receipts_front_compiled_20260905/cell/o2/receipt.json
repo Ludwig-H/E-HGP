@@ -1,0 +1,417 @@
+{
+  "command": [
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-DMHGP7_TESTING",
+    "-O2",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/cell_compiled_bridge.cpp",
+    "-pthread",
+    "-o",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_cell_compiled_20260905/cell_o2"
+  ],
+  "runs": [
+    {
+      "mutant": "",
+      "bridge_exit": 0,
+      "totals": {
+        "cells": 38400,
+        "shell_contacts": 20180,
+        "seeds": 32,
+        "center_boxes": 32,
+        "chord_boxes": 32,
+        "environment_rejects": 96,
+        "domain_rejects": 192,
+        "live_cells": 1476,
+        "dead_cells": 10940,
+        "max_coordinate_bits": 98
+      },
+      "divergences": [],
+      "verdict": "pass"
+    },
+    {
+      "mutant": "cell-kill-nonstrict",
+      "bridge_exit": 0,
+      "totals": {
+        "cells": 17920,
+        "shell_contacts": 11380,
+        "seeds": 0,
+        "center_boxes": 0,
+        "chord_boxes": 0,
+        "environment_rejects": 0,
+        "domain_rejects": 0,
+        "live_cells": 0,
+        "dead_cells": 0,
+        "max_coordinate_bits": 0
+      },
+      "divergences": [
+        {
+          "case": 0,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 1,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 2,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 3,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 4,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 5,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 6,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 7,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 8,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 9,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 10,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 11,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 12,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 13,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 14,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 15,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 16,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 17,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 18,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 19,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 20,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 21,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 22,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 23,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 24,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 25,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 26,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 27,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 28,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 29,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 30,
+          "reason": "grid.counts"
+        },
+        {
+          "case": 31,
+          "reason": "grid.counts"
+        }
+      ],
+      "verdict": "detected"
+    },
+    {
+      "mutant": "cell-kill-h-minus-one",
+      "bridge_exit": 0,
+      "totals": {
+        "cells": 28160,
+        "shell_contacts": 15780,
+        "seeds": 16,
+        "center_boxes": 16,
+        "chord_boxes": 16,
+        "environment_rejects": 48,
+        "domain_rejects": 96,
+        "live_cells": 32,
+        "dead_cells": 6176,
+        "max_coordinate_bits": 98
+      },
+      "divergences": [
+        {
+          "case": 1,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 3,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 5,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 7,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 9,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 11,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 13,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 15,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 17,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 19,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 21,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 23,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 25,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 27,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 29,
+          "reason": "grid.metadata"
+        },
+        {
+          "case": 31,
+          "reason": "grid.metadata"
+        }
+      ],
+      "verdict": "detected"
+    },
+    {
+      "mutant": "cell-locate-eps-zero",
+      "bridge_exit": 0,
+      "totals": {
+        "cells": 17920,
+        "shell_contacts": 11380,
+        "seeds": 0,
+        "center_boxes": 0,
+        "chord_boxes": 0,
+        "environment_rejects": 0,
+        "domain_rejects": 0,
+        "live_cells": 0,
+        "dead_cells": 0,
+        "max_coordinate_bits": 0
+      },
+      "divergences": [
+        {
+          "case": 0,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 1,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 2,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 3,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 4,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 5,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 6,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 7,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 8,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 9,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 10,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 11,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 12,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 13,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 14,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 15,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 16,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 17,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 18,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 19,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 20,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 21,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 22,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 23,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 24,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 25,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 26,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 27,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 28,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 29,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 30,
+          "reason": "locate.origin_closed"
+        },
+        {
+          "case": 31,
+          "reason": "locate.origin_closed"
+        }
+      ],
+      "verdict": "detected"
+    }
+  ],
+  "started_utc": "2026-09-05T07:12:21.830963+00:00",
+  "compile_exit": 0,
+  "binary_sha256": "fa771289fc73142504ffdaaf52fb7507e9beb0c416ef0a23f98c226d2f08fab0",
+  "ended_utc": "2026-09-05T07:12:36.213168+00:00"
+}

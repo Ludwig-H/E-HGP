@@ -114,6 +114,41 @@ La [fixture arithmétique](secteur_corde_arithmetic_20260905.py) conserve les de
 python3 -O morsehgp3D_v7/audits/secteur_corde_arithmetic_20260905.py
 ```
 
-Le [reçu](receipts_front_20260905/secteur_corde_arithmetic.json) rapporte 368 directions, la borne 1/6 effectivement atteinte, 53 valeurs de racine dont 13 requièrent une correction, et toutes les inégalités de largeur satisfaites. Le calcul utilise les entiers Python et des fractions exactes. Il contrôle un modèle arithmétique et les constantes de la preuve ; **il n'exécute aucun binaire C++ produit** et ne remplace pas ses portes existantes. Aucune compilation ni charge lourde n'a été lancée pendant la fenêtre de chronométrage du constructeur.
+Le [reçu](receipts_front_20260905/secteur_corde_arithmetic.json) rapporte 368 directions, la borne 1/6 effectivement atteinte, 53 valeurs de racine dont 13 requièrent une correction, et toutes les inégalités de largeur satisfaites. Le calcul utilise les entiers Python et des fractions exactes. Il contrôle un modèle arithmétique et les constantes de la preuve ; **il n'exécute aucun binaire C++ produit**. Aucune compilation ni charge lourde n'a été lancée pendant la fenêtre de chronométrage du constructeur. Le raccord compilé réalisé après sa clôture est décrit séparément ci-dessous.
 
-Cette fermeture établit les opérations et certificats locaux dans les domaines d'appel nommés, sans ajouter de structure globale au moteur : huit secteurs et quatre morceaux de corde restent des filtres locaux de témoins. La qualification des chemins compilés, du localisateur de cellules et des compteurs globaux appartient à leurs reçus propres. Aucun code produit modifié. **GCP non utilisé.**
+## 8. Raccord effectif aux helpers C++
+
+Après la clôture de la fenêtre constructeur à 06:51:49 UTC, le [pont C++ permanent](secteur_corde_compiled_probe.cpp) appelle directement `bisector_basis`, `isqrt128_floor`, `anchor_sector_kill`, `AnchorScratch::fill_affine_sites`, `AffineSeed::l_exact/l_hat` et `ChordPieces`. Il inclut les vrais headers, dont `generate.hpp`, sans recopier leurs implémentations. Le [pilote](secteur_corde_compiled_runner.py) compile puis juge leurs résultats avec des entiers arbitraires et des fractions Python :
+
+```bash
+python3 -O morsehgp3D_v7/audits/secteur_corde_compiled_runner.py
+```
+
+La commande a rendu **0**. Les deux builds C++20 utilisent `-Wall -Wextra -Wpedantic -Werror -frounding-math -ffp-contract=off -DMHGP7_TESTING -pthread`, respectivement avec `-O2` et `-O1 -g -fsanitize=undefined -fno-sanitize-recover=all`. Les compilations et les exécutions ont rendu 0, sans diagnostic. Ces options nomment le domaine des helpers effectivement exécutés ; elles ne sont pas réattribuées à un autre binaire du pipeline.
+
+| Contrat exercé dans chaque build | Résultat |
+| --- | --- |
+| Base entière réelle, 368 directions × dénominateurs 8 et 12 | 736 bases ; vecteurs non dilatés A=B=1, indépendants et de normes maximales |
+| Racine réelle, 53 entrées × quatre modes d'arrondi | 212 racines identiques à `math.isqrt`, jusqu'à `v=2^120-1` |
+| Affine réel et raccord de corde depuis de vraies graines | 96 cas jugés par centres rationnels issus d'élimination de Gram |
+| Corde, frontières littérales et grandes valeurs entières | 156 cas, dont valeurs exactement nulles aux extrémités |
+| Secteurs, site intérieur / shell / extérieur | 3 cas contre distances exactes aux boules des sommets |
+| Mises à jour de corde avec appel exact / entièrement certifiées | 197 / 55 ; au plus un appel exact par mise à jour |
+| Extrémités strictement négatives / nulles / positives | 448 / 300 / 512 |
+| Décisions flottantes négatives / non négatives / indécidables | 197 / 214 / 849 ; toutes conformes au signe exact |
+| Mises à jour sous modes dirigés avec repli affine vérifié | 72 ; filtre coupé, cinq signes indécidables, un appel exact |
+
+Les modes exécutés sont `FE_TONEAREST`, `FE_DOWNWARD`, `FE_UPWARD` et `FE_TOWARDZERO`. Les retours de `fesetround` sont contrôlés. Les frontières de racine comprennent des carrés et leurs deux voisins, le haut du domaine générique et la borne de J/2 utilisée par la preuve. Les sorties sont identiques entre O2 et UBSan, hash d'objets comparé par le pilote.
+
+Le juge des bases calcule la distance de l'origine à chaque **droite d'arête** en minimisant la quadratique `|u+t*(±v-u)|²` sur le rationnel t. Il ne reprend donc pas le test de produit vectoriel du helper comme unique autorité. La positivité du déterminant de Gram donne indépendance et aire non nulle. Les vecteurs retournés sont des candidats d×axe non dilatés ; comme les facteurs de la boucle ne peuvent que croître, ce constat vérifie aussi le raccord A=B=1 au code réel. Les égalités d'axes, d=(1,1,0), d=(1,1,1), les axes purs et les extrêmes u16 sont présents.
+
+Pour l'affine, la référence calcule un centre et un rayon rationnels par élimination de Gram, puis juge `L=4G*(distance²-rayon²)`. Elle retrouve J depuis la différence entre la borne de Jung et ce rayon, et B par déterminant à élimination. Elle ne prend pas l'égalité entre deux formules produit comme seule preuve. Les cas géométriques transmettent le vrai `AffineSeed::bound` à `ChordPieces`. Les cas littéraux de corde déclarent séparément leur intervalle d'entrée valide, ou le forcent à l'infini pour exercer le repli ; leurs paramètres arithmétiques larges ne sont pas présentés comme une nouvelle fixture géométrique u16.
+
+Deux défauts sont distingués explicitement :
+
+- Le mutant **produit** `sector-kill-nonstrict` est activé par le registre réel et exécuté au site existant de `anchor_sector_kill`. Sur a=(0,0,0), b=(2,0,0), z=(1,1,0), les huit comptes nominaux sont nuls puisque z est sur la boule diamétrale. Le mutant crée des crédits sectoriels indus. La divergence est jugée sur ces comptes exacts, sans prétendre observer une suppression d'ancre entière sur cette fixture.
+- La faute d'audit **`chord-nonstrict-parameter`** injecte explicitement `true` dans le paramètre `nonstrict` du vrai `ChordPieces::init`. Elle n'est pas annoncée comme une traversée du site mutant de `generate.hpp`. Pour J=8, B=1, L=−12, la valeur nominale des comptes est `[0,1,1,1]`; la faute produit `[1,1,1,1]` et transforme `dead(1)` en vrai. Cette égalité au premier sommet donne une dent minimale du contrat strict du helper.
+
+Le pilote rend 0 quand il constate ces divergences attendues ; aucun code processus 4 n'est inventé pour le pont. Le [reçu commun](receipts_front_compiled_20260905/secteur_corde/receipt.json) épingle les sources et vérifie leur stabilité pendant l'exécution. Les reçus [O2](receipts_front_compiled_20260905/secteur_corde/o2.json) et [UBSan](receipts_front_compiled_20260905/secteur_corde/ubsan.json) conservent les commandes, entrées, sorties brutes, codes et hashes des binaires. Les gardes du pilote restent actives sous `python -O`.
+
+Le raccord compilé local demandé est ainsi satisfait, sans ajouter de structure globale au moteur : huit secteurs et quatre morceaux de corde restent des filtres locaux de témoins. Le localisateur de cellules et les compteurs globaux gardent leurs reçus propres ; aucune suite complète ni mesure de performance n'est déduite de ces sondes. Aucun code produit modifié. **GCP non utilisé.**

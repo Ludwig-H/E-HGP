@@ -3,23 +3,27 @@
 Cadre : `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
-Audit de traçabilité CPU au HEAD
-`e6d33698e62ebecf74dff01c16d7de17149d7a4e`, le 5 septembre 2026 à
-06:19:38 UTC. Les écritures de cette inspection restent dans `audits/`.
-GCP non utilisé ; aucun changement des sources produit ou de la v6.
+**La qualification constructeur E est désormais contre-vérifiée : 324/324
+portes Release complètes, 33/33 ciblées Release et 33/33 ASan/UBSan.** Les
+six sorties mono D/E concordent sur les cardinalités et digests de la tour
+horizontale candidate K1–10 avec complétion des incidences. Cet audit relit
+les exécutions closes du constructeur ; il n'a relancé ni moteur, ni CTest,
+ni benchmark. Ces résultats ne certifient ni HGP complet ni une performance
+industrielle. Le cadre public reste `not_claimed`.
 
-Actualisation de portée après clôture : le constructeur a commencé E q2
-dans le worktree. Les mentions « courant » ci-dessous désignent l'inspection
-datée de D, et non ces quatre sources E ultérieures. Un rejeu de cet
-inspecteur sur E refuse la liaison D ; il n'invalide pas les reçus historiques.
+Actualisation du 5 septembre 2026 à 07:20 UTC, après la clôture du full E.
+Les preuves nécessaires sont copiées sous `audits/`, y compris lorsque
+leur origine constructeur était encore privée ou non suivie par Git.
+Les sources E du worktree et les binaires observés sont vérifiés contre
+leurs propres reçus. D conserve sa qualification historique 323 ; aucune
+exécution D n'est comptée dans les 324 E. Les écritures restent dans
+`audits/` ; GCP non utilisé, aucun changement produit ou v6.
 
-**Les reçus du delta D sont intègres et liés aux sources et binaires encore
-présents. Le défaut de fraîcheur de l'ancien audit ne constitue donc plus
-une objection à la qualification CPU bornée du delta D.** L'inspection
-confirme les 323 exécutions rapportées par le constructeur ; elle ne les
-a pas relancées. Elle ne certifie ni l'objet HGP complet, ni une performance
-industrielle. La fermeture mathématique du delta MEB relève de sa revue
-séparée.
+L'inspection initiale D était datée de 06:19:38 UTC au HEAD
+`e6d33698e62ebecf74dff01c16d7de17149d7a4e`. Les identités « courantes »
+des tableaux et paragraphes historiques ci-dessous se rapportent à cet
+instant D. La contrelecture nouvelle et sa portée E sont détaillées dans
+la section D/E ci-dessous.
 
 La [preuve indépendante structurée](receipts_20260905/qualification_independent.json)
 conserve les listes exactes de tests, les commandes historiques, leurs
@@ -94,21 +98,19 @@ du pipeline ni une autorité Boost aux tests géométriques lanes.
 
 ## Fraîcheur et suite constructive
 
-À l'ouverture de cette inspection, `verify_current.py` retourne **1** en
-Python normal et `-O` pour trois fichiers : `CMakeLists.txt`,
-`src/core/mutants.hpp` et `src/forest/silent_incidence.hpp`.
-Ce sont aussi les seuls écarts entre les 139 pins de Release C arithmétique
-et les fichiers courants. Les 140 pins des trois campagnes D correspondent
-intégralement. La bonne fermeture consiste donc à actualiser l'entrée
-d'audit avec les conclusions D et leurs preuves, en conservant l'attribution
-historique des 316 portes C. Il n'est pas nécessaire de réclamer une
-nouvelle suite complète pour un défaut d'intégrité qui n'a pas été observé.
+Le défaut de fraîcheur C/D relevé à 06:19 est **clos**. À cet instant,
+l'ancien manifeste C refusait avec le code 1 les trois sources modifiées
+par D, tandis que les 140 pins D correspondaient. L'entrée d'audit a depuis
+été actualisée puis consolidée : ces observations restent historiques,
+aucune actualisation D supplémentaire n'est demandée.
 
-Le contrôleur de fraîcheur existant remplit sa fonction : il distingue
-octets périmés (code 1) et manifeste invalide (code 2), vérifie les chemins
-et SHA-256 et ne repose pas sur `assert`. Son code 0 ne vérifierait pas,
-à lui seul, les reçus, les binaires ou la portée d'un verdict. L'inspection
-présente ajoute précisément ces liaisons pour le delta D.
+Le contrôleur [actuel](verify_current.py) utilise le manifeste v2 à
+variantes entières D/E : il distingue octets périmés (code 1) et manifeste
+invalide (code 2), sans union de sources D/E ni `assert`. Son code 0
+identifie une variante et sa portée ; il ne qualifie pas à lui seul les
+reçus ou les binaires. Les contrelectures ci-dessous établissent les
+liaisons des campagnes E effectivement closes. Les anciens pins bruts
+et leurs domaines demeurent inchangés.
 
 La prochaine qualification doit être déclenchée par un changement réel
 des sources, du graphe compilé, du domaine ou des tests requis. Pour lever
@@ -133,6 +135,90 @@ et [optimisé](receipts_20260905/qualification_selftest_optimized.json)
 sont identiques. Le rejeu complet demande les artefacts locaux sous build
 explicitement nommés ; leur absence fait échouer cette inspection locale
 et ne rend pas rétroactivement invalide le reçu public historique.
+
+## D/E : nouvelle contrelecture des campagnes closes
+
+Les [preuves mono conservées](receipts_front_compiled_20260905/qualification/capture_manifest.json)
+couvrent les 66 fichiers du reçu constructeur `meb_q2_mono_20260905`,
+soit 581 074 octets copiés sans modification. Les deux fichiers Markdown
+historiques portent seulement un suffixe `.snapshot.txt` pour rester des
+pièces brutes. Le [rejeu indépendant](receipts_front_compiled_20260905/qualification/replay_live.json)
+recalcule les chaînes de digests et parse directement stdout, stderr et
+GNU time, sans importer le parseur constructeur. Il vérifie les 63 entrées
+du manifeste, les deux listes de 64 hashes, 58 copies d'origine exactes,
+14 dépendances et 189 pins locaux distincts. Les 50 sources D de construction
+correspondent aux octets Git de `a32dc78f` ; les 50 E correspondent au
+worktree observé. Les commandes et frontières source/binaire fournissent
+une liaison de construction enregistrée, sans attestation hermétique.
+
+| Séparation | D, mur externe | E, mur externe | Réduction observée |
+| --- | ---: | ---: | ---: |
+| 8 | 189,0003 s | 184,1782 s | 2,5514 % |
+| 10 | 192,5560 s | 192,4773 s | 0,0409 % |
+| 12 | 198,6419 s | 192,7302 s | 2,9761 % |
+
+Chaque processus termine avec le code 0, stderr vide, GNU time code 0 et
+un ordre chronologique cohérent entre 06:30:41 et 06:51:49 UTC. Chaque bras
+utilise le même uniforme 8k, coord=65536, seed=3, `smax=11`,
+`--complete-incidences`, CSR et digest, sans archive, avec affinité CPU 6
+et les trois réglages de sérialisation à 1. L'hôte partagé est un EPYC
+9V74, 8 processeurs logiques disponibles et 33 657 716 736 octets de RAM.
+Les options et nombres d'ouvriers sont observés ; la création effective
+de threads n'est pas mesurée par ce lanceur. Une seule paire D puis E par
+séparation ne démontre ni gain statistique, ni p95, ni SLO.
+
+L'égalité D/E puis entre séparations porte sur les dix cardinalités par K,
+les dix digests forêt et leur chaîne `digest_all`, ainsi que les compteurs
+de complétion et les objets après préfiltre. Les sorties communes comptent
+3 113 381 survivants, 4 384 229 événements, 26 434 998 facettes,
+26 434 988 fusions, 4 095 793 deltas et 77 939 nœuds. Le digest global est
+`4c3ceb0498990bafa41a9e43d0bffe25a3fee579b12b5d34365f3578f526a0e7`.
+**Avant préfiltre, les nombres émis, les morts de profondeur et le digest
+des candidats changent avec la séparation** : respectivement 3 144 017,
+3 129 992 et 3 123 497 émis ; 30 636, 16 611 et 10 116 morts. Leur
+variation conserve exactement les mêmes survivants. Sans archive exportée,
+l'audit constate l'égalité de ces projections imprimées, pas une comparaison
+d'octets des forêts complètes. `normalized_horizontal_h0_candidate`,
+`profile_complete_k10` et `vertical_maps=none` restent les types observés.
+
+Les [pièces de qualification E](receipts_front_compiled_20260905/qualification/e_tests_capture.json)
+préservent aussi les trois campagnes privées closes, 32 fichiers chacune,
+et le [rejeu structuré](receipts_front_compiled_20260905/qualification/e_tests_live.json)
+contrôle indépendamment inventaires, XML, blocs LastTest, commandes,
+frontières de fraîcheur, sources et binaires locaux. Le LastTest complet
+E de 7 683 944 octets est conservé compressé sans perte.
+
+| Campagne E | XML et blocs LastTest passés | Sources stables | Binaires stables | CTest, mur externe |
+| --- | ---: | ---: | ---: | ---: |
+| Ciblée Release | 33/33 | 140 | 9 | 3,9438 s |
+| Ciblée ASan/UBSan | 33/33 | 140 | 9 | 45,7919 s |
+| Complète Release | 324/324 | 140 | 37 | 627,8657 s |
+
+Les noms attendus sont uniques et identiques aux inventaires et journaux ;
+aucun `failure`, `error`, `skipped` ou statut non exécuté n'est accepté.
+La liste complète E est exactement celle des 323 noms D augmentée de
+`mhgp7_meb_lazy_q2_reject_shell`. Cette porte tue le mutant avec le code
+de sortie attendu 4 et le message `divergence=differential.status_reason` ;
+le wrapper CTest réussit avec le code 0. Les quatre commandes de chaque
+campagne terminent avec 0. Les builds ciblés sont isolés ; le full E
+construit **incrémentalement** dans `build/v7_next_q2_qualification`, puis
+lance CTest à 07:04:57 UTC. Le CLI E garde le SHA-256
+`df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6`.
+Les flags et options ASan/UBSan correspondent aux reçus, sans promotion
+d'un résultat instrumenté vers le binaire Release.
+
+Les deux inspecteurs
+[mono](receipts_front_compiled_20260905/qualification/verify_q2_receipt.py)
+et [CTest](receipts_front_compiled_20260905/qualification/verify_e_tests.py)
+se rejouent sans exécuter le produit. Par défaut, ils lisent les snapshots
+portables ; `--live` vérifie aussi les artefacts locaux nommés, dont
+l'absence ou la dérive fait refuser cette inspection locale. Leurs
+[contrôles normal et optimisé](receipts_front_compiled_20260905/qualification/inspector_checks.json)
+comprennent les rejeux complets et, pour chacun, un positif et neuf rejets
+ciblés. Toutes les commandes conservées ont le code 0. Les constats clos
+remplacent l'ancienne attente de qualification E ; les verrous de couverture,
+composition, verticale, poids et coût HGP complet restent des contrats
+séparés.
 
 ## Harnais et classification des campagnes
 

@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+    "--show-only=json-v1",
+    "-R",
+    "^(mhgp7_archive|mhgp7_archive_api|mhgp7_archive_cleanup|mhgp7_archive_optimized|mhgp7_bad_alloc_etage_census|mhgp7_bad_alloc_etage_fold|mhgp7_bad_alloc_etage_provision|mhgp7_bad_alloc_temoin|mhgp7_census_direct|mhgp7_census_direct_offset|mhgp7_census_direct_residence|mhgp7_census_direct_transaction|mhgp7_meb_lazy|mhgp7_meb_lazy_duplicate_mutant|mhgp7_meb_lazy_eager_materialization|mhgp7_meb_lazy_empty_mutant|mhgp7_meb_lazy_q2_reject_shell|mhgp7_meb_lazy_q3_reject_shell|mhgp7_meb_lazy_q4_reject_shell|mhgp7_meb_lazy_unknown_mutant|mhgp7_mono_inline|mhgp7_mono_inline_early_alloc|mhgp7_mono_inline_late_a|mhgp7_mono_inline_late_b|mhgp7_reduced_drop_materialization_mutant|mhgp7_reduced_latent_parent_mutant|mhgp7_silent_csr_stale_level_mutant|mhgp7_silent_drop_nonmerge_mutant|mhgp7_silent_incidence|mhgp7_silent_incidence_mutant|mhgp7_thread_failure|mhgp7_thread_failure_mutant_admission|mhgp7_thread_failure_refus_arg)$"
+  ],
+  "elapsed_seconds": 0.03432820099988021,
+  "exit_code": 0,
+  "started_utc": "2026-09-05T06:54:59Z",
+  "status": "completed",
+  "timeout_seconds": 60
+}

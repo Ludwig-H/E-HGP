@@ -1,0 +1,79 @@
+{
+  "status": "paired_equal",
+  "runs": 2,
+  "expected_runs": 2,
+  "source_stable": true,
+  "error": null,
+  "public_status": "not_claimed",
+  "slo": "not_evaluated",
+  "gcp": "not_used",
+  "equality": {
+    "digests": true,
+    "cardinalities": true,
+    "counts": true,
+    "silent": true,
+    "silent_limits": true,
+    "payload_caps": true
+  },
+  "times": {
+    "D": {
+      "wall_seconds": 192.55602913099983,
+      "pipeline_ms": 192498.8,
+      "stage_ms": {
+        "index": 2.6,
+        "gen": 61372.7,
+        "wspd": 32033.8,
+        "rects": 29338.6,
+        "rle": 1505.3,
+        "prefiltre": 10179.4,
+        "census": 7878.4,
+        "comptage": 33.1,
+        "expansion": 643.7,
+        "fold": 32912.0,
+        "tri": 4878.6,
+        "intern": 17197.3,
+        "fusion": 5793.6,
+        "reduce": 5016.2,
+        "digest": 3944.6,
+        "silent_incidence": 73894.283,
+        "fold_wall": 110609.2,
+        "cli_e2e": 192501.479
+      },
+      "max_rss_kb": 2303660
+    },
+    "E": {
+      "wall_seconds": 192.47728785799973,
+      "pipeline_ms": 192462.9,
+      "stage_ms": {
+        "index": 2.2,
+        "gen": 64483.3,
+        "wspd": 33926.3,
+        "rects": 30556.6,
+        "rle": 1642.0,
+        "prefiltre": 10419.2,
+        "census": 7914.2,
+        "comptage": 32.3,
+        "expansion": 665.8,
+        "fold": 33957.1,
+        "tri": 5144.2,
+        "intern": 17288.8,
+        "fusion": 5998.3,
+        "reduce": 5497.9,
+        "digest": 3978.9,
+        "silent_incidence": 69183.678,
+        "fold_wall": 107050.3,
+        "cli_e2e": 192464.854
+      },
+      "max_rss_kb": 2305132
+    }
+  },
+  "time_scope": "one_fresh_cold_D_then_E_pair_including_digest_no_archive_shared_host_not_SLO_or_statistical_gain",
+  "separation": 10,
+  "ratio_D_over_E": {
+    "process": 1.000409093841026,
+    "pipeline": 1.0001865294558068
+  },
+  "started_utc": "2026-09-05T06:37:20.995658Z",
+  "ended_utc": "2026-09-05T06:43:46.557689Z",
+  "repository_change_policy": "HEAD_or_worktree_changes_recorded_source_snapshot_stability_required"
+}

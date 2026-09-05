@@ -1,0 +1,58 @@
+{
+  "schema": "mhgp7-audit-source-variants-check-v1",
+  "common_pins_checked": 399,
+  "source_pins_per_variant": 115,
+  "scope": "read-only freshness check; no product test or compiler execution",
+  "results": [
+    {
+      "snapshot": "worktree_E",
+      "optimized": false,
+      "command": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=E_qualified\nqualification_scope=431-call independent q2 oracle; compiled front helpers; constructor E receipts independently inspected: 324/324 Release, 33/33 targeted Release, 33/33 ASan/UBSan, three paired D/E projections and inter-s digests equal; no statistical gain or exactness claim\n399 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "snapshot": "worktree_E",
+      "optimized": true,
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=E_qualified\nqualification_scope=431-call independent q2 oracle; compiled front helpers; constructor E receipts independently inspected: 324/324 Release, 33/33 targeted Release, 33/33 ASan/UBSan, three paired D/E projections and inter-s digests equal; no statistical gain or exactness claim\n399 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "snapshot": "publication_D",
+      "optimized": false,
+      "command": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_front_compiled_20260905/publication_D/morsehgp3D_v7/audits/verify_current.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=D\nqualification_scope=323/323 CTests CPU Release independently executed; local MEB/index/rounding oracles; front arithmetic proofs and compiled helpers; no product exactness claim\n399 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "snapshot": "publication_D",
+      "optimized": true,
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_front_compiled_20260905/publication_D/morsehgp3D_v7/audits/verify_current.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=D\nqualification_scope=323/323 CTests CPU Release independently executed; local MEB/index/rounding oracles; front arithmetic proofs and compiled helpers; no product exactness claim\n399 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    }
+  ]
+}

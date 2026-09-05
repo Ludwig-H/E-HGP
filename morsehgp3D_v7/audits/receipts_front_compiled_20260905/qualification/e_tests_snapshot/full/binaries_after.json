@@ -1,0 +1,187 @@
+[
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7",
+    "sha256": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6",
+    "size": 692296
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_archive_api_gate",
+    "sha256": "534645fd2ba950e707f1d5a554b2101499f1478c5edb1496ca2118ab5797ee8b",
+    "size": 115096
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_archive_cleanup_gate",
+    "sha256": "d830417bdd329ac219b28fd6333175599bd4f2ce19ed0713bb04e59d7293820f",
+    "size": 764936
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_arithmetic_integer_gate",
+    "sha256": "543aafaa01f5ef7775591b53ac431c408f22fb2a3660dc3df21183283716d5fe",
+    "size": 79032
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_arithmetic_lanes_gate",
+    "sha256": "361d65fd5fcd491066d6985ee54eaef8e822b4878ebdec4cd432d95f70da83b9",
+    "size": 135160
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_axis_bounds_gate",
+    "sha256": "8293129d78939d25218dbb5d4cd276f32828310ef7bc9cbfb2d0d78fe532e945",
+    "size": 79976
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_bad_alloc_gate",
+    "sha256": "1dc4c759f65e3e51af24791295e94d69b297ec335ad2a0809c5a818e0cb44ca3",
+    "size": 745576
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_cell_grid_oracle",
+    "sha256": "fe8c9038a7a941f75cbb701ef42d4229de8dec8956c6cc15944a7ed9d2cffbce",
+    "size": 176232
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_census_device_stub_gate",
+    "sha256": "2d22c2a31dd6e13f45ab35800e2a4a4cbafd9f68e20206e571399011f2f5cfa3",
+    "size": 397992
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_census_direct_gate",
+    "sha256": "5c9e964410a640b8b35098621c49e54752cd396965578d39de806caf1440328c",
+    "size": 194160
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_conformity",
+    "sha256": "6c3134662b993e8e36cef4c8b62849c43f18a031a900748b9537c4d321d78327",
+    "size": 796568
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_cover_fixture",
+    "sha256": "49de44a78f63b88b4a6d932f9c5a7f265858e12e499ace26d31d16ffe18101cd",
+    "size": 326784
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_device_witness_stub",
+    "sha256": "a6108b7f6ebf314cdc4e80de3ef46b4839797ae806621d7dab5c045b2e70a9b4",
+    "size": 43856
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_executor_pool_gate",
+    "sha256": "8c957751c2c55740f099028c130933ff9717cbb443ad5332c17ccbdd431fd345",
+    "size": 160104
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_fold_caps_gate",
+    "sha256": "0a2315a5ec44a2bdef1ad4cf7194fd39b4ec7bdb1d2ad0143f8c0ca95437b7dd",
+    "size": 741416
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_fold_csr_gate",
+    "sha256": "8fc846c23b8258db6059cd206ae06fbc85731573924ed8bdd78623397b66b104",
+    "size": 870864
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_linked_arcs",
+    "sha256": "1b80d1d97ddbe72c377c580ce0c7d409cecc6dff3c7d1095e95116bd81a4e024",
+    "size": 435216
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_lot_ring_gate",
+    "sha256": "6f54cbc0811073116f4442eeffe9ae3b2000f2e477782d01984e5ff5b03bbd2d",
+    "size": 144664
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_meb_lazy_gate",
+    "sha256": "87fd501774b53091392ceab79ffe35e4cef14a062b91c2d79cf9c53cf6c2e577",
+    "size": 107640
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_mono_inline_gate",
+    "sha256": "7f40157b70ec3ac3738f8a460bfbd4ac963e5795c13696d1868a3dff2548115d",
+    "size": 742920
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_perm_residence_gate",
+    "sha256": "d5de8b884f69f27300a8c34b8fb6dbf5d6f658c49599e73cb71e8c3032eb54c6",
+    "size": 170192
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_perm_sort_gate",
+    "sha256": "af7e0a2ca3973cc3220f159e86dd2cb2f67216bade1b0f72b245a5727a2ccc9d",
+    "size": 470904
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_pilot_stub_gate",
+    "sha256": "684c4b620ff2d52c856edd67bccf154aaed1373faea046207c1104b6fd10cde9",
+    "size": 782936
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_pilote_stub_check",
+    "sha256": "d80631a3bdaed2d7138e12978216c5f717bf4c31dca23e463a32e99cf858edea",
+    "size": 685344
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_pilote_stub_check_test",
+    "sha256": "d1d4020bcf75c6dae54b39596a8d33e9f86c404555e46ae0ff63029d706477db",
+    "size": 796520
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_profil_contrat",
+    "sha256": "a27c6d5527c7a5ebe3d2fc3fa0bd56adbc7c7591e17e3787dfd30fc44171d5a3",
+    "size": 736248
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_profile",
+    "sha256": "27c0f94994fba2cb2f18cedc9f1750112505b36a640aa76ae270b51e4037caa7",
+    "size": 696624
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_profile_liveness",
+    "sha256": "826e6bc38b23e168b52879255dd07ec13b109e086a4e7e221604b45fa68e0618",
+    "size": 696488
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_profile_sonde",
+    "sha256": "403e1c7a94b0ccea41e69187da7d89b51730cfff21a7fa7f2388b3ad2aa955f4",
+    "size": 809712
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_residence_gate",
+    "sha256": "de5dbd70f58c053a5351bb20da9531f2ab9e2c023efcfa98f479797772b3b436",
+    "size": 755416
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_route_c6_gate",
+    "sha256": "e3d51b3d030f2464c997096496679f84943a0c1b417465d13b9d39833cd04638",
+    "size": 866328
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_selftest",
+    "sha256": "97d6b897b001825675663a0a12e11cfcc873170362f2efcf621d9ae63345b091",
+    "size": 836160
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_silent_incidence_gate",
+    "sha256": "d1b8fd53bbb349cc07dfbe907f69ae592007a0cd4073b09bf39e25fb940281e8",
+    "size": 835640
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_sweep_fixtures",
+    "sha256": "2d880de47a9a1e8fd30999a4c491ece8e0171175803e646a6d9c9f1f2f91a11c",
+    "size": 363808
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_thread_failure_gate",
+    "sha256": "0156b8863137472bea3fed982695aba1b2410008842b1694cf5da1d0c2859169",
+    "size": 847760
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_wire_gate",
+    "sha256": "8893b9d5e25e13be364d69cf72df037bab3d620234e695cc12a3dfbba8ce90bd",
+    "size": 96504
+  },
+  {
+    "path": "build/v7_next_q2_qualification/mhgp7_wire_pack_gate",
+    "sha256": "e319b09286951bf77c09cc6d854597e5f8bcfcee7a284a0d6e24d13179cd1728",
+    "size": 356856
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_next_q2_qualification",
+    "--show-only=json-v1",
+    "-L",
+    "^gate$"
+  ],
+  "started_utc": "2026-09-05T07:04:57Z",
+  "status": "running",
+  "timeout_seconds": 60
+}

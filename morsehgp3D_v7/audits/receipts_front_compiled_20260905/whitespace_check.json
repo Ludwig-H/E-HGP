@@ -1,0 +1,59 @@
+{
+  "schema": "mhgp7-audit-raw-whitespace-v1",
+  "raw_check_exit": 2,
+  "authored_check_exit": 0,
+  "scope_files": 265,
+  "policy": "Preserve original stdout bytes and hashes; whitespace exists only in copied tool outputs, not authored code or prose.",
+  "files": [
+    {
+      "path": "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/constructor_snapshot/build_E/compiler_version.out",
+      "diagnostics": 1,
+      "sha256": "88b7c4b67564a146863224148116065fee418539f0a408f3636a68f3bde51805"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/constructor_snapshot/build_E/configure.out",
+      "diagnostics": 1,
+      "sha256": "40fb1d3c92a61db9b5dd3791d7509ffab85b619e61b5dbec8cb73d1b4570417d"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/e_tests_snapshot/full/inventory.stdout",
+      "diagnostics": 978,
+      "sha256": "675f083f5d960fa213dee81141107d4c42add2a3dcc2dbb2bef30e496f89ab15"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/e_tests_snapshot/release/LastTest.stdout",
+      "diagnostics": 1,
+      "sha256": "99a69b82b18aa9d4342f0f35822b82cf80b6d8680a417bb9ceea6d0ae2ad617f"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/e_tests_snapshot/release/configure.stdout",
+      "diagnostics": 1,
+      "sha256": "c34bf6a9256a6402f7337e482b7ebbc6d6748839c0e516bdbafe888f31c41fdc"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/e_tests_snapshot/release/inventory.stdout",
+      "diagnostics": 105,
+      "sha256": "b37e9596ca362ff66ae4fdbb99eaceed916409ede7fca7d2c87818972cb83098"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/e_tests_snapshot/sanitized/LastTest.stdout",
+      "diagnostics": 1,
+      "sha256": "d434141336958afa3081632e41f9e64187ffef6392edbbf555fa0bd29034ba80"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/e_tests_snapshot/sanitized/configure.stdout",
+      "diagnostics": 1,
+      "sha256": "7d1e6a90841105b2d1c28fe717b3f0886f21d6fda87bfac619b6c000291bc034"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/receipts_front_compiled_20260905/qualification/e_tests_snapshot/sanitized/inventory.stdout",
+      "diagnostics": 105,
+      "sha256": "142488600df9342c20036bf8a7f80616fc241b49916cf8c2cad9ca76edc0110e"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/receipts_front_compiled_20260905/spindle/compiler.stdout",
+      "diagnostics": 1,
+      "sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8"
+    }
+  ]
+}

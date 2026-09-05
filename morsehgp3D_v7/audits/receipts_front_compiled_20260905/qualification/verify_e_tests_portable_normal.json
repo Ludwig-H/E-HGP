@@ -1,0 +1,1121 @@
+{
+  "backend": "cpu_reference",
+  "campaigns": {
+    "full": {
+      "LastTest_sha256": "7265c7783be8e7b0b12aacf0f6a43efb99b975f4f441fdcdbd73f55a065d44d2",
+      "binaries": [
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7",
+          "sha256": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6",
+          "size": 692296
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_archive_api_gate",
+          "sha256": "534645fd2ba950e707f1d5a554b2101499f1478c5edb1496ca2118ab5797ee8b",
+          "size": 115096
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_archive_cleanup_gate",
+          "sha256": "d830417bdd329ac219b28fd6333175599bd4f2ce19ed0713bb04e59d7293820f",
+          "size": 764936
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_arithmetic_integer_gate",
+          "sha256": "543aafaa01f5ef7775591b53ac431c408f22fb2a3660dc3df21183283716d5fe",
+          "size": 79032
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_arithmetic_lanes_gate",
+          "sha256": "361d65fd5fcd491066d6985ee54eaef8e822b4878ebdec4cd432d95f70da83b9",
+          "size": 135160
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_axis_bounds_gate",
+          "sha256": "8293129d78939d25218dbb5d4cd276f32828310ef7bc9cbfb2d0d78fe532e945",
+          "size": 79976
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_bad_alloc_gate",
+          "sha256": "1dc4c759f65e3e51af24791295e94d69b297ec335ad2a0809c5a818e0cb44ca3",
+          "size": 745576
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_cell_grid_oracle",
+          "sha256": "fe8c9038a7a941f75cbb701ef42d4229de8dec8956c6cc15944a7ed9d2cffbce",
+          "size": 176232
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_census_device_stub_gate",
+          "sha256": "2d22c2a31dd6e13f45ab35800e2a4a4cbafd9f68e20206e571399011f2f5cfa3",
+          "size": 397992
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_census_direct_gate",
+          "sha256": "5c9e964410a640b8b35098621c49e54752cd396965578d39de806caf1440328c",
+          "size": 194160
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_conformity",
+          "sha256": "6c3134662b993e8e36cef4c8b62849c43f18a031a900748b9537c4d321d78327",
+          "size": 796568
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_cover_fixture",
+          "sha256": "49de44a78f63b88b4a6d932f9c5a7f265858e12e499ace26d31d16ffe18101cd",
+          "size": 326784
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_device_witness_stub",
+          "sha256": "a6108b7f6ebf314cdc4e80de3ef46b4839797ae806621d7dab5c045b2e70a9b4",
+          "size": 43856
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_executor_pool_gate",
+          "sha256": "8c957751c2c55740f099028c130933ff9717cbb443ad5332c17ccbdd431fd345",
+          "size": 160104
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_fold_caps_gate",
+          "sha256": "0a2315a5ec44a2bdef1ad4cf7194fd39b4ec7bdb1d2ad0143f8c0ca95437b7dd",
+          "size": 741416
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_fold_csr_gate",
+          "sha256": "8fc846c23b8258db6059cd206ae06fbc85731573924ed8bdd78623397b66b104",
+          "size": 870864
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_linked_arcs",
+          "sha256": "1b80d1d97ddbe72c377c580ce0c7d409cecc6dff3c7d1095e95116bd81a4e024",
+          "size": 435216
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_lot_ring_gate",
+          "sha256": "6f54cbc0811073116f4442eeffe9ae3b2000f2e477782d01984e5ff5b03bbd2d",
+          "size": 144664
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_meb_lazy_gate",
+          "sha256": "87fd501774b53091392ceab79ffe35e4cef14a062b91c2d79cf9c53cf6c2e577",
+          "size": 107640
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_mono_inline_gate",
+          "sha256": "7f40157b70ec3ac3738f8a460bfbd4ac963e5795c13696d1868a3dff2548115d",
+          "size": 742920
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_perm_residence_gate",
+          "sha256": "d5de8b884f69f27300a8c34b8fb6dbf5d6f658c49599e73cb71e8c3032eb54c6",
+          "size": 170192
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_perm_sort_gate",
+          "sha256": "af7e0a2ca3973cc3220f159e86dd2cb2f67216bade1b0f72b245a5727a2ccc9d",
+          "size": 470904
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_pilot_stub_gate",
+          "sha256": "684c4b620ff2d52c856edd67bccf154aaed1373faea046207c1104b6fd10cde9",
+          "size": 782936
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_pilote_stub_check",
+          "sha256": "d80631a3bdaed2d7138e12978216c5f717bf4c31dca23e463a32e99cf858edea",
+          "size": 685344
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_pilote_stub_check_test",
+          "sha256": "d1d4020bcf75c6dae54b39596a8d33e9f86c404555e46ae0ff63029d706477db",
+          "size": 796520
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_profil_contrat",
+          "sha256": "a27c6d5527c7a5ebe3d2fc3fa0bd56adbc7c7591e17e3787dfd30fc44171d5a3",
+          "size": 736248
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_profile",
+          "sha256": "27c0f94994fba2cb2f18cedc9f1750112505b36a640aa76ae270b51e4037caa7",
+          "size": 696624
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_profile_liveness",
+          "sha256": "826e6bc38b23e168b52879255dd07ec13b109e086a4e7e221604b45fa68e0618",
+          "size": 696488
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_profile_sonde",
+          "sha256": "403e1c7a94b0ccea41e69187da7d89b51730cfff21a7fa7f2388b3ad2aa955f4",
+          "size": 809712
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_residence_gate",
+          "sha256": "de5dbd70f58c053a5351bb20da9531f2ab9e2c023efcfa98f479797772b3b436",
+          "size": 755416
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_route_c6_gate",
+          "sha256": "e3d51b3d030f2464c997096496679f84943a0c1b417465d13b9d39833cd04638",
+          "size": 866328
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_selftest",
+          "sha256": "97d6b897b001825675663a0a12e11cfcc873170362f2efcf621d9ae63345b091",
+          "size": 836160
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_silent_incidence_gate",
+          "sha256": "d1b8fd53bbb349cc07dfbe907f69ae592007a0cd4073b09bf39e25fb940281e8",
+          "size": 835640
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_sweep_fixtures",
+          "sha256": "2d880de47a9a1e8fd30999a4c491ece8e0171175803e646a6d9c9f1f2f91a11c",
+          "size": 363808
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_thread_failure_gate",
+          "sha256": "0156b8863137472bea3fed982695aba1b2410008842b1694cf5da1d0c2859169",
+          "size": 847760
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_wire_gate",
+          "sha256": "8893b9d5e25e13be364d69cf72df037bab3d620234e695cc12a3dfbba8ce90bd",
+          "size": 96504
+        },
+        {
+          "path": "build/v7_next_q2_qualification/mhgp7_wire_pack_gate",
+          "sha256": "e319b09286951bf77c09cc6d854597e5f8bcfcee7a284a0d6e24d13179cd1728",
+          "size": 356856
+        }
+      ],
+      "commands": {
+        "build_incremental": {
+          "argv": [
+            "cmake",
+            "--build",
+            "/workspaces/E-HGP/build/v7_next_q2_qualification",
+            "--parallel",
+            "2"
+          ],
+          "elapsed_seconds": 235.3604630460004,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T07:01:02Z",
+          "status": "completed",
+          "timeout_seconds": 3600
+        },
+        "configure": {
+          "argv": [
+            "cmake",
+            "-S",
+            "/workspaces/E-HGP/morsehgp3D_v7",
+            "-B",
+            "/workspaces/E-HGP/build/v7_next_q2_qualification",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP7_ENABLE_CUDA=OFF",
+            "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+          ],
+          "elapsed_seconds": 0.16715952999948058,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T07:01:02Z",
+          "status": "completed",
+          "timeout_seconds": 120
+        },
+        "ctest": {
+          "argv": [
+            "ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_next_q2_qualification",
+            "--output-on-failure",
+            "--no-tests=error",
+            "-L",
+            "^gate$",
+            "--parallel",
+            "2",
+            "--output-junit",
+            "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/full_receipts/ctest.junit.xml"
+          ],
+          "elapsed_seconds": 627.8656910300006,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T07:04:57Z",
+          "status": "completed",
+          "timeout_seconds": 7200
+        },
+        "inventory": {
+          "argv": [
+            "ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_next_q2_qualification",
+            "--show-only=json-v1",
+            "-L",
+            "^gate$"
+          ],
+          "elapsed_seconds": 0.06687295000028826,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T07:04:57Z",
+          "status": "completed",
+          "timeout_seconds": 60
+        }
+      },
+      "environment": {
+        "all_test_executions": "fresh",
+        "build_kind": "incremental_existing_E_Release",
+        "environment": {
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "locale": {
+            "LANG": "C",
+            "LC_ALL": "C"
+          },
+          "mode": "full",
+          "sanitizer_options": "not_required_for_uninstrumented_Release"
+        },
+        "expected_E_build_receipt_sha256": "30f133d6c052e1d53c8c539457b5b553267d202c11b043188feb6c0f30af1e16",
+        "expected_E_sha256": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6",
+        "gate_results_reused": false,
+        "gcp": "not_used",
+        "host_before": {
+          "affinity_cpus": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "architecture": "x86_64",
+          "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+          "host_shared": true,
+          "kernel_release": "6.8.0-1052-azure",
+          "loadavg_1_5_15": [
+            1.3544921875,
+            1.16357421875,
+            1.5126953125
+          ],
+          "logical_cpus": 8,
+          "mem_total_bytes": 33657716736,
+          "observed_utc": "2026-09-05T07:01:01.968258Z"
+        },
+        "mode": "full",
+        "protected_C_C_D_historical": {
+          "/workspaces/E-HGP/build/v7/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+          "/workspaces/E-HGP/build/v7_c_qualification/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+          "/workspaces/E-HGP/build/v7_meb_qualification/mhgp7": "127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f"
+        },
+        "public_status": "not_claimed",
+        "repository_before": {
+          "head": "a32dc78fa3f0c526a11bd21fafdcded8db687973",
+          "observed_utc": "2026-09-05T07:01:01.567034Z",
+          "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/PASSATION.md\n M morsehgp3D_v7/docs/ERRATA_PUBLICATION_20260904.md\n M morsehgp3D_v7/src/core/mutants.hpp\n M morsehgp3D_v7/src/forest/silent_incidence.hpp\n M morsehgp3D_v7/tests/meb_lazy_gate.cpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/docs/OPTIMISATION_MEB_Q2.md\n?? morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md\n?? morsehgp3D_v7/receipts/meb_pivot_budget_counterexample_20260905/\n?? morsehgp3D_v7/receipts/meb_q2_mono_20260905/\n?? morsehgp3D_v7/receipts/meb_q2_review_20260905/\n"
+        },
+        "schema": "mhgp7.q2-E-qualification.v1"
+      },
+      "failure_error_skip_nodes": 0,
+      "last_test_passed_blocks": 324,
+      "local_pins_verified": 0,
+      "mode": "full",
+      "names": [
+        "mhgp7_agregateur_intergraines",
+        "mhgp7_archive",
+        "mhgp7_archive_api",
+        "mhgp7_archive_cleanup",
+        "mhgp7_archive_optimized",
+        "mhgp7_arith_selftest",
+        "mhgp7_arithmetic_integer",
+        "mhgp7_arithmetic_integer_bad_case",
+        "mhgp7_arithmetic_integer_bad_mutant",
+        "mhgp7_arithmetic_integer_case_mismatch",
+        "mhgp7_arithmetic_integer_oracle",
+        "mhgp7_arithmetic_integer_oracle_carry",
+        "mhgp7_arithmetic_integer_u320",
+        "mhgp7_arithmetic_lanes",
+        "mhgp7_arithmetic_lanes_bad_case",
+        "mhgp7_arithmetic_lanes_bad_inject",
+        "mhgp7_arithmetic_lanes_duplicate_case",
+        "mhgp7_arithmetic_lanes_duplicate_inject",
+        "mhgp7_arithmetic_lanes_empty_inject",
+        "mhgp7_arithmetic_lanes_oracle",
+        "mhgp7_arithmetic_lanes_oracle_carry",
+        "mhgp7_arithmetic_lanes_oracle_case_mismatch",
+        "mhgp7_arithmetic_lanes_oracle_overflow",
+        "mhgp7_arithmetic_lanes_q4_level",
+        "mhgp7_arithmetic_lanes_u192_case_mismatch",
+        "mhgp7_arithmetic_q3_factor",
+        "mhgp7_arithmetic_q4_face_boundary",
+        "mhgp7_arithmetic_q4_parity",
+        "mhgp7_arithmetic_q4_u192_word2",
+        "mhgp7_arithmetic_u320_word4",
+        "mhgp7_axis_bounds",
+        "mhgp7_axis_bounds_axis-argmin-ceil-always",
+        "mhgp7_axis_bounds_axis-argmin-floor-only",
+        "mhgp7_axis_bounds_axis-argmin-max-min",
+        "mhgp7_axis_bounds_axis-argmin-narrow-coefficient",
+        "mhgp7_axis_bounds_axis-argmin-no-clip",
+        "mhgp7_bad_alloc_etage_census",
+        "mhgp7_bad_alloc_etage_fold",
+        "mhgp7_bad_alloc_etage_provision",
+        "mhgp7_bad_alloc_temoin",
+        "mhgp7_campagne_provenance",
+        "mhgp7_caps_mutant_emission",
+        "mhgp7_caps_mutant_late_wave",
+        "mhgp7_caps_mutant_prefusion",
+        "mhgp7_caps_refus",
+        "mhgp7_cell_grid_oracle",
+        "mhgp7_cell_grid_oracle_mutant_eps",
+        "mhgp7_cell_grid_oracle_mutant_h1",
+        "mhgp7_cell_grid_oracle_mutant_ns",
+        "mhgp7_census_device_stub",
+        "mhgp7_census_direct",
+        "mhgp7_census_direct_offset",
+        "mhgp7_census_direct_residence",
+        "mhgp7_census_direct_transaction",
+        "mhgp7_census_stub_mutant_nonstrict",
+        "mhgp7_census_stub_mutant_nshell",
+        "mhgp7_census_stub_mutant_range_le",
+        "mhgp7_census_stub_mutant_skip_count",
+        "mhgp7_census_stub_mutant_skip_write",
+        "mhgp7_census_stub_mutant_stack",
+        "mhgp7_census_stub_mutant_swap_push",
+        "mhgp7_cli_budget_signature",
+        "mhgp7_cli_layout_classic_signature",
+        "mhgp7_cli_layout_csr_signature",
+        "mhgp7_cli_ok_s8",
+        "mhgp7_cli_refus_layout_inconnu",
+        "mhgp7_cli_refus_layout_vide",
+        "mhgp7_cli_refus_n_suffix",
+        "mhgp7_cli_refus_s7",
+        "mhgp7_cli_refus_s_suffix",
+        "mhgp7_compare_campaign",
+        "mhgp7_compare_campaign_optimized",
+        "mhgp7_conformity_collinear_seven_600",
+        "mhgp7_conformity_csr_collinear_seven_600",
+        "mhgp7_conformity_csr_eight_clusters_400",
+        "mhgp7_conformity_csr_scanline_single_pass_400",
+        "mhgp7_conformity_csr_terrain_2000",
+        "mhgp7_conformity_csr_terrain_400",
+        "mhgp7_conformity_csr_two_lines_200",
+        "mhgp7_conformity_csr_uniform_2000",
+        "mhgp7_conformity_csr_uniform_400",
+        "mhgp7_conformity_eight_clusters_400",
+        "mhgp7_conformity_mutant_rle",
+        "mhgp7_conformity_refus_layout_inconnu",
+        "mhgp7_conformity_scanline_single_pass_400",
+        "mhgp7_conformity_terrain_2000",
+        "mhgp7_conformity_terrain_400",
+        "mhgp7_conformity_two_lines_200",
+        "mhgp7_conformity_uniform_2000",
+        "mhgp7_conformity_uniform_400",
+        "mhgp7_contrat_echec",
+        "mhgp7_contrat_echec_census",
+        "mhgp7_contrat_echec_fold_k2",
+        "mhgp7_contrat_echec_fuite_sum_parents",
+        "mhgp7_cover_coef3_mutant",
+        "mhgp7_cover_coef4",
+        "mhgp7_cover_refus_mutant_hors_cible",
+        "mhgp7_device_witness_stub",
+        "mhgp7_device_witness_stub_contre_double",
+        "mhgp7_device_witness_stub_mutant_carry",
+        "mhgp7_device_witness_stub_mutant_skip_native",
+        "mhgp7_device_witness_stub_mutant_skip_write",
+        "mhgp7_e6_grille_objet",
+        "mhgp7_executor_pool",
+        "mhgp7_executor_pool_mutant_activate_late",
+        "mhgp7_executor_pool_mutant_drop_exception",
+        "mhgp7_executor_pool_mutant_serial",
+        "mhgp7_executor_pool_mutant_worker_resume",
+        "mhgp7_expect_line",
+        "mhgp7_families_fixture",
+        "mhgp7_families_mutant_overshoot",
+        "mhgp7_fold_cap_evenements",
+        "mhgp7_fold_cap_incidences",
+        "mhgp7_fold_cap_mutant_evenements",
+        "mhgp7_fold_cap_mutant_incidences",
+        "mhgp7_fold_cap_plancher",
+        "mhgp7_fold_cap_refus_arg",
+        "mhgp7_fold_csr_copie",
+        "mhgp7_fold_csr_fixtures",
+        "mhgp7_fold_csr_mutant_csr-drop-delta",
+        "mhgp7_fold_csr_mutant_csr-dup-delta",
+        "mhgp7_fold_csr_mutant_csr-guard-skip",
+        "mhgp7_fold_csr_mutant_csr-inject-bad-alloc",
+        "mhgp7_fold_csr_mutant_csr-keep-continuation",
+        "mhgp7_fold_csr_mutant_csr-offset-domain",
+        "mhgp7_fold_csr_mutant_csr-offset-end",
+        "mhgp7_fold_csr_mutant_csr-offset-hole",
+        "mhgp7_fold_csr_mutant_csr-offset-overlap",
+        "mhgp7_fold_csr_mutant_csr-order-by-output",
+        "mhgp7_fold_csr_mutant_csr-shift-offset",
+        "mhgp7_fold_csr_mutant_csr-stale-level",
+        "mhgp7_fold_csr_mutant_csr-stale-output",
+        "mhgp7_fold_csr_mutant_csr-unsorted-born",
+        "mhgp7_fold_csr_mutant_csr-unsorted-parents",
+        "mhgp7_fold_csr_offsets",
+        "mhgp7_fold_csr_overflow",
+        "mhgp7_fold_csr_pipeline",
+        "mhgp7_fold_csr_refus_csr-offset-domain",
+        "mhgp7_fold_csr_refus_csr-offset-end",
+        "mhgp7_fold_csr_refus_csr-offset-hole",
+        "mhgp7_fold_csr_refus_csr-offset-overlap",
+        "mhgp7_fold_csr_refus_inject_vide",
+        "mhgp7_fold_csr_refus_mutant_hors_cible",
+        "mhgp7_fold_csr_refus_mutant_inconnu",
+        "mhgp7_fold_csr_refus_pipeline_sans_inject",
+        "mhgp7_fused_descent",
+        "mhgp7_fused_mutant_droprect",
+        "mhgp7_fused_mutant_mask",
+        "mhgp7_incidence_campaign",
+        "mhgp7_incidence_campaign_optimized",
+        "mhgp7_juge_refus_k11",
+        "mhgp7_juge_refus_k_en_trop",
+        "mhgp7_juge_refus_narrowing",
+        "mhgp7_juge_refus_reference_tronquee",
+        "mhgp7_linked_arcs_oracle_i64",
+        "mhgp7_linked_arcs_u16",
+        "mhgp7_lot_ring",
+        "mhgp7_lot_ring_mutant_epoch",
+        "mhgp7_lot_ring_mutant_merge",
+        "mhgp7_lot_ring_mutant_prefixe",
+        "mhgp7_lot_ring_mutant_rebuild_tot",
+        "mhgp7_lot_ring_mutant_reuse",
+        "mhgp7_lot_ring_plancher",
+        "mhgp7_lot_ring_refus_arg",
+        "mhgp7_lot_ring_refus_mutant",
+        "mhgp7_meb_lazy",
+        "mhgp7_meb_lazy_duplicate_mutant",
+        "mhgp7_meb_lazy_eager_materialization",
+        "mhgp7_meb_lazy_empty_mutant",
+        "mhgp7_meb_lazy_q2_reject_shell",
+        "mhgp7_meb_lazy_q3_reject_shell",
+        "mhgp7_meb_lazy_q4_reject_shell",
+        "mhgp7_meb_lazy_unknown_mutant",
+        "mhgp7_mono_inline",
+        "mhgp7_mono_inline_early_alloc",
+        "mhgp7_mono_inline_late_a",
+        "mhgp7_mono_inline_late_b",
+        "mhgp7_mutant_ablation-mat-sans-copie",
+        "mhgp7_mutant_ablation-mat-sans-tris",
+        "mhgp7_mutant_ablation-post-cle-factice",
+        "mhgp7_mutant_attach-prebatch",
+        "mhgp7_mutant_binary-ties",
+        "mhgp7_mutant_canonical-is-uf-root",
+        "mhgp7_mutant_census-nonstrict",
+        "mhgp7_mutant_csr_ablation-mat-sans-copie",
+        "mhgp7_mutant_csr_ablation-mat-sans-tris",
+        "mhgp7_mutant_csr_ablation-post-cle-factice",
+        "mhgp7_mutant_csr_attach-prebatch",
+        "mhgp7_mutant_csr_binary-ties",
+        "mhgp7_mutant_csr_canonical-is-uf-root",
+        "mhgp7_mutant_csr_csr-drop-delta",
+        "mhgp7_mutant_csr_csr-dup-delta",
+        "mhgp7_mutant_csr_csr-keep-continuation",
+        "mhgp7_mutant_csr_csr-order-by-output",
+        "mhgp7_mutant_csr_csr-shift-offset",
+        "mhgp7_mutant_csr_csr-stale-level",
+        "mhgp7_mutant_csr_csr-stale-output",
+        "mhgp7_mutant_csr_csr-unsorted-born",
+        "mhgp7_mutant_csr_csr-unsorted-parents",
+        "mhgp7_mutant_csr_drop-nonmerge",
+        "mhgp7_mutant_csr_repr-ties",
+        "mhgp7_mutant_dense-pointid",
+        "mhgp7_mutant_depth-threshold-minus-one",
+        "mhgp7_mutant_drop-nonmerge",
+        "mhgp7_mutant_fold-inject-a-failure-k2",
+        "mhgp7_mutant_genfilter-nonstrict",
+        "mhgp7_mutant_par-drop-ball-chunk",
+        "mhgp7_mutant_par-drop-shard",
+        "mhgp7_mutant_q3-level-4g",
+        "mhgp7_mutant_q4-center-parity",
+        "mhgp7_mutant_q4-eq-sign",
+        "mhgp7_mutant_q4-i64-drop-factor",
+        "mhgp7_mutant_q4-i64-pair-min",
+        "mhgp7_mutant_range-add-max-le-zero",
+        "mhgp7_mutant_repr-ties",
+        "mhgp7_mutant_skip-full-census",
+        "mhgp7_mutant_witness-no-lane-mask",
+        "mhgp7_mutant_wspd-drop-rect",
+        "mhgp7_pentes_validateur",
+        "mhgp7_perm_residence",
+        "mhgp7_perm_residence_perm-apply-partial",
+        "mhgp7_perm_residence_perm-apply-scatter",
+        "mhgp7_perm_residence_perm-tie-desc",
+        "mhgp7_perm_sort",
+        "mhgp7_perm_sort_mutant_census-stack-per-ball",
+        "mhgp7_perm_sort_mutant_parallel-sort-unstable",
+        "mhgp7_perm_sort_mutant_perm-apply-partial",
+        "mhgp7_perm_sort_mutant_perm-apply-scatter",
+        "mhgp7_perm_sort_mutant_perm-tie-desc",
+        "mhgp7_perm_sort_plancher",
+        "mhgp7_perm_sort_refus_arg",
+        "mhgp7_pilot_stub",
+        "mhgp7_pilot_stub_mutant_nonstrict",
+        "mhgp7_pilot_stub_mutant_nshell",
+        "mhgp7_pilot_stub_mutant_skip_count",
+        "mhgp7_pilot_stub_mutant_skip_write",
+        "mhgp7_pilot_stub_mutant_stack",
+        "mhgp7_pilote_juge_contre_fixtures",
+        "mhgp7_pilote_stub_juge",
+        "mhgp7_pilote_stub_juge_ordre_inverse",
+        "mhgp7_pilote_stub_lot17",
+        "mhgp7_pilote_stub_mutant_base",
+        "mhgp7_pilote_stub_parite_200",
+        "mhgp7_pilote_stub_refus_n",
+        "mhgp7_plan_keycsr_gate",
+        "mhgp7_postprefilter_uniform_400",
+        "mhgp7_prefix_collinear_seven_600",
+        "mhgp7_prefix_contre_event_order_sans_temoin",
+        "mhgp7_prefix_eight_clusters_400",
+        "mhgp7_prefix_mutant_batch_levels",
+        "mhgp7_prefix_mutant_depth_smax6",
+        "mhgp7_prefix_mutant_event_order",
+        "mhgp7_prefix_plancher_cable",
+        "mhgp7_prefix_refus_reference_courte",
+        "mhgp7_prefix_refus_sans_reference",
+        "mhgp7_prefix_refus_smax11",
+        "mhgp7_prefix_scanline_single_pass_400",
+        "mhgp7_prefix_temoin_evenements",
+        "mhgp7_prefix_terrain_2000",
+        "mhgp7_prefix_terrain_400",
+        "mhgp7_prefix_two_lines_200",
+        "mhgp7_prefix_uniform_2000",
+        "mhgp7_prefix_uniform_400",
+        "mhgp7_profil_contrat_echec",
+        "mhgp7_profil_contrat_echec_k2",
+        "mhgp7_profil_contre_fixture",
+        "mhgp7_profil_identite",
+        "mhgp7_profile_refuse_inject",
+        "mhgp7_profile_sonde_refuse_inconnu",
+        "mhgp7_profile_sonde_refuse_inject_vide",
+        "mhgp7_profile_sonde_refuse_inject_virgule",
+        "mhgp7_profile_sonde_refuse_mutant_production",
+        "mhgp7_reduced_drop_materialization_mutant",
+        "mhgp7_reduced_latent_parent_mutant",
+        "mhgp7_residence_jalons",
+        "mhgp7_residence_jalons_prefixe",
+        "mhgp7_residence_mutant_hwm_instantane",
+        "mhgp7_residence_mutant_jalon_manquant",
+        "mhgp7_residence_mutant_tranches_gardees",
+        "mhgp7_residence_plafond_cable",
+        "mhgp7_residence_plancher_cable",
+        "mhgp7_residence_refus_smax",
+        "mhgp7_route_c6_stub",
+        "mhgp7_route_c6_stub_mutant_c6-publish-prefix",
+        "mhgp7_route_c6_stub_mutant_c6-reuse-before-lease",
+        "mhgp7_route_c6_stub_mutant_c6-wrong-epoch",
+        "mhgp7_route_c6_stub_mutant_gpu-census-nonstrict",
+        "mhgp7_route_c6_stub_mutant_gpu-lot-base-reset",
+        "mhgp7_route_c6_stub_mutant_gpu-nshell-overdomain",
+        "mhgp7_route_c6_stub_mutant_gpu-skip-ball-write",
+        "mhgp7_route_c6_stub_mutant_gpu-skip-count-write",
+        "mhgp7_route_c6_stub_mutant_gpu-stack-shallow",
+        "mhgp7_route_c6_stub_plancher",
+        "mhgp7_route_c6_stub_refus_arg",
+        "mhgp7_sha256_selftest",
+        "mhgp7_silent_csr_stale_level_mutant",
+        "mhgp7_silent_drop_nonmerge_mutant",
+        "mhgp7_silent_incidence",
+        "mhgp7_silent_incidence_mutant",
+        "mhgp7_sonde_ablation_gate",
+        "mhgp7_sweep_frontieres",
+        "mhgp7_sweep_frontieres_mutant_depth",
+        "mhgp7_sweep_frontieres_mutant_exit",
+        "mhgp7_sweep_mutant_depth",
+        "mhgp7_sweep_mutant_exit",
+        "mhgp7_sweep_oracle",
+        "mhgp7_sweep_refus_inject_vide",
+        "mhgp7_thread_failure",
+        "mhgp7_thread_failure_mutant_admission",
+        "mhgp7_thread_failure_refus_arg",
+        "mhgp7_tree_selftest",
+        "mhgp7_wire",
+        "mhgp7_wire_mutant_drop_node",
+        "mhgp7_wire_mutant_t1",
+        "mhgp7_wire_pack",
+        "mhgp7_wire_pack_contre_double",
+        "mhgp7_wire_pack_mutant_slack",
+        "mhgp7_wire_pack_mutant_stride",
+        "mhgp7_wire_pack_plancher",
+        "mhgp7_wire_pack_refus_arg",
+        "mhgp7_wspd_ledger",
+        "mhgp7_wspd_mutant_cap",
+        "mhgp7_wspd_mutant_split",
+        "mhgp7_wspd_ownership"
+      ],
+      "q2_rejection_raw_block": "364/370 Test: mhgp7_meb_lazy_q2_reject_shell\nCommand: \"/usr/bin/cmake\" \"-DEXPECTED=4\" \"-DCMD=/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7_meb_lazy_gate\" \"-DARGS=--mutant=silent-meb-q2-reject-shell\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=meb_lazy_gate=mutant_killed mutant=silent-meb-q2-reject-shell divergence=differential.status_reason\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\nDirectory: /workspaces/E-HGP/build/v7_next_q2_qualification\n\"mhgp7_meb_lazy_q2_reject_shell\" start time: Sep 05 07:14 UTC\nOutput:\n----------------------------------------------------------\nmeb_lazy_gate=mutant_killed mutant=silent-meb-q2-reject-shell divergence=differential.status_reason public_status=not_claimed\nmeb_lazy_counts cases=0 success=0 degenerate=0 capped=0 q2=0 q3=0 q4=0 logical_reject3=0 logical_reject4=0 materialized3=0 materialized4=0 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=2 reference_complete=1\nmeb_lazy_q2 logical_reject2=1 materialized2=0 rejected_materialized2=0 identities=514 positive=297 negative=1 zero=216 foreign_zero=96 profile_refusals=2\n\n<end of output>\nTest time =   0.04 sec\n----------------------------------------------------------\nTest Passed.\n\"mhgp7_meb_lazy_q2_reject_shell\" end time: Sep 05 07:14 UTC\n\"mhgp7_meb_lazy_q2_reject_shell\" time elapsed: 00:00:00\n----------------------------------------------------------\n\n",
+      "receipt_manifest_sha256": "8244fb5185fea53d6d29bd9acebe887d41ec5845667d99e545769dfe912740c9",
+      "source_files": 140,
+      "tests": 324
+    },
+    "release": {
+      "LastTest_sha256": "99a69b82b18aa9d4342f0f35822b82cf80b6d8680a417bb9ceea6d0ae2ad617f",
+      "binaries": [
+        {
+          "path": "build/v7_next_q2_tests_20260905/release/mhgp7",
+          "sha256": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6",
+          "size": 692296
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/release/mhgp7_archive_api_gate",
+          "sha256": "534645fd2ba950e707f1d5a554b2101499f1478c5edb1496ca2118ab5797ee8b",
+          "size": 115096
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/release/mhgp7_archive_cleanup_gate",
+          "sha256": "d830417bdd329ac219b28fd6333175599bd4f2ce19ed0713bb04e59d7293820f",
+          "size": 764936
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/release/mhgp7_bad_alloc_gate",
+          "sha256": "1dc4c759f65e3e51af24791295e94d69b297ec335ad2a0809c5a818e0cb44ca3",
+          "size": 745576
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/release/mhgp7_census_direct_gate",
+          "sha256": "5c9e964410a640b8b35098621c49e54752cd396965578d39de806caf1440328c",
+          "size": 194160
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/release/mhgp7_meb_lazy_gate",
+          "sha256": "87fd501774b53091392ceab79ffe35e4cef14a062b91c2d79cf9c53cf6c2e577",
+          "size": 107640
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/release/mhgp7_mono_inline_gate",
+          "sha256": "7f40157b70ec3ac3738f8a460bfbd4ac963e5795c13696d1868a3dff2548115d",
+          "size": 742920
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/release/mhgp7_silent_incidence_gate",
+          "sha256": "d1b8fd53bbb349cc07dfbe907f69ae592007a0cd4073b09bf39e25fb940281e8",
+          "size": 835640
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/release/mhgp7_thread_failure_gate",
+          "sha256": "0156b8863137472bea3fed982695aba1b2410008842b1694cf5da1d0c2859169",
+          "size": 847760
+        }
+      ],
+      "commands": {
+        "build_targets": {
+          "argv": [
+            "cmake",
+            "--build",
+            "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+            "--parallel",
+            "2",
+            "--target",
+            "mhgp7_meb_lazy_gate",
+            "mhgp7_silent_incidence_gate",
+            "mhgp7",
+            "mhgp7_archive_api_gate",
+            "mhgp7_archive_cleanup_gate",
+            "mhgp7_mono_inline_gate",
+            "mhgp7_census_direct_gate",
+            "mhgp7_bad_alloc_gate",
+            "mhgp7_thread_failure_gate"
+          ],
+          "elapsed_seconds": 126.66709378199994,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T06:52:52Z",
+          "status": "completed",
+          "timeout_seconds": 1200
+        },
+        "configure": {
+          "argv": [
+            "cmake",
+            "-S",
+            "/workspaces/E-HGP/morsehgp3D_v7",
+            "-B",
+            "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP7_ENABLE_CUDA=OFF",
+            "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+          ],
+          "elapsed_seconds": 0.4673052300004201,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T06:52:52Z",
+          "status": "completed",
+          "timeout_seconds": 120
+        },
+        "ctest": {
+          "argv": [
+            "ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+            "--output-on-failure",
+            "--no-tests=error",
+            "-R",
+            "^(mhgp7_archive|mhgp7_archive_api|mhgp7_archive_cleanup|mhgp7_archive_optimized|mhgp7_bad_alloc_etage_census|mhgp7_bad_alloc_etage_fold|mhgp7_bad_alloc_etage_provision|mhgp7_bad_alloc_temoin|mhgp7_census_direct|mhgp7_census_direct_offset|mhgp7_census_direct_residence|mhgp7_census_direct_transaction|mhgp7_meb_lazy|mhgp7_meb_lazy_duplicate_mutant|mhgp7_meb_lazy_eager_materialization|mhgp7_meb_lazy_empty_mutant|mhgp7_meb_lazy_q2_reject_shell|mhgp7_meb_lazy_q3_reject_shell|mhgp7_meb_lazy_q4_reject_shell|mhgp7_meb_lazy_unknown_mutant|mhgp7_mono_inline|mhgp7_mono_inline_early_alloc|mhgp7_mono_inline_late_a|mhgp7_mono_inline_late_b|mhgp7_reduced_drop_materialization_mutant|mhgp7_reduced_latent_parent_mutant|mhgp7_silent_csr_stale_level_mutant|mhgp7_silent_drop_nonmerge_mutant|mhgp7_silent_incidence|mhgp7_silent_incidence_mutant|mhgp7_thread_failure|mhgp7_thread_failure_mutant_admission|mhgp7_thread_failure_refus_arg)$",
+            "--parallel",
+            "2",
+            "--output-junit",
+            "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release_receipts/ctest.junit.xml"
+          ],
+          "elapsed_seconds": 3.9437595680001323,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T06:54:59Z",
+          "status": "completed",
+          "timeout_seconds": 1200
+        },
+        "inventory": {
+          "argv": [
+            "ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+            "--show-only=json-v1",
+            "-R",
+            "^(mhgp7_archive|mhgp7_archive_api|mhgp7_archive_cleanup|mhgp7_archive_optimized|mhgp7_bad_alloc_etage_census|mhgp7_bad_alloc_etage_fold|mhgp7_bad_alloc_etage_provision|mhgp7_bad_alloc_temoin|mhgp7_census_direct|mhgp7_census_direct_offset|mhgp7_census_direct_residence|mhgp7_census_direct_transaction|mhgp7_meb_lazy|mhgp7_meb_lazy_duplicate_mutant|mhgp7_meb_lazy_eager_materialization|mhgp7_meb_lazy_empty_mutant|mhgp7_meb_lazy_q2_reject_shell|mhgp7_meb_lazy_q3_reject_shell|mhgp7_meb_lazy_q4_reject_shell|mhgp7_meb_lazy_unknown_mutant|mhgp7_mono_inline|mhgp7_mono_inline_early_alloc|mhgp7_mono_inline_late_a|mhgp7_mono_inline_late_b|mhgp7_reduced_drop_materialization_mutant|mhgp7_reduced_latent_parent_mutant|mhgp7_silent_csr_stale_level_mutant|mhgp7_silent_drop_nonmerge_mutant|mhgp7_silent_incidence|mhgp7_silent_incidence_mutant|mhgp7_thread_failure|mhgp7_thread_failure_mutant_admission|mhgp7_thread_failure_refus_arg)$"
+          ],
+          "elapsed_seconds": 0.03432820099988021,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T06:54:59Z",
+          "status": "completed",
+          "timeout_seconds": 60
+        }
+      },
+      "environment": {
+        "all_test_executions": "fresh",
+        "build_kind": "fresh_isolated",
+        "environment": {
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "locale": {
+            "LANG": "C",
+            "LC_ALL": "C"
+          },
+          "mode": "release",
+          "sanitizer_options": "not_required_for_uninstrumented_Release"
+        },
+        "expected_E_build_receipt_sha256": "30f133d6c052e1d53c8c539457b5b553267d202c11b043188feb6c0f30af1e16",
+        "expected_E_sha256": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6",
+        "gate_results_reused": false,
+        "gcp": "not_used",
+        "host_before": {
+          "affinity_cpus": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "architecture": "x86_64",
+          "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+          "host_shared": true,
+          "kernel_release": "6.8.0-1052-azure",
+          "loadavg_1_5_15": [
+            1.06103515625,
+            1.57666015625,
+            1.82470703125
+          ],
+          "logical_cpus": 8,
+          "mem_total_bytes": 33657716736,
+          "observed_utc": "2026-09-05T06:52:52.068939Z"
+        },
+        "mode": "release",
+        "protected_C_C_D_historical": {
+          "/workspaces/E-HGP/build/v7/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+          "/workspaces/E-HGP/build/v7_c_qualification/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+          "/workspaces/E-HGP/build/v7_meb_qualification/mhgp7": "127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f"
+        },
+        "public_status": "not_claimed",
+        "repository_before": {
+          "head": "35dda097f75a66f8264002c58b9ccc4888c46d2e",
+          "observed_utc": "2026-09-05T06:52:51.694250Z",
+          "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/PASSATION.md\n D morsehgp3D_v7/audits/ARCHIVE_TRANSACTION_20260904.md\n M morsehgp3D_v7/audits/AUDIT_INDEPENDANT_20260904.md\n M morsehgp3D_v7/audits/AUDIT_INTERFACES_20260904.md\n M morsehgp3D_v7/audits/AUDIT_QUALIFICATION_20260905.md\n M morsehgp3D_v7/audits/AUDIT_RESIDENCE_20260904.md\n D morsehgp3D_v7/audits/CAMPAGNE_APPARIEE_20260904.md\n D morsehgp3D_v7/audits/CAMPAGNE_INCIDENCES_COURANTE.md\n M morsehgp3D_v7/audits/CELLULES_COURANT.md\n M morsehgp3D_v7/audits/CENSUS_AXIS_COURANT.md\n D morsehgp3D_v7/audits/CENSUS_DIRECT_20260904.md\n M morsehgp3D_v7/audits/FILTRES_FLOTTANTS_COURANTS.md\n M morsehgp3D_v7/audits/FRONT_ET_TEMOINS_COURANT.md\n M morsehgp3D_v7/audits/MONO_COURANT.md\n D morsehgp3D_v7/audits/PROTOCOLE_G4_V7_20260904.md\n D morsehgp3D_v7/audits/QUALIFICATION_C_COURANTE.md\n M morsehgp3D_v7/audits/REPONSE_CONSTRUCTEUR_20260904.md\n D morsehgp3D_v7/audits/REPONSE_INCIDENCES_ET_DELTAS_20260904.md\n D morsehgp3D_v7/audits/RETOUR_ARCHIVE_COURANT.md\n M morsehgp3D_v7/audits/RETOUR_MATH_COURANT.md\n D morsehgp3D_v7/audits/REVUE_NETTOYAGE_ARCHIVE_COURANT.md\n M morsehgp3D_v7/audits/S1_COURANT.md\n D morsehgp3D_v7/audits/SONDE_CI_COURANTE.md\n D morsehgp3D_v7/audits/SORT_LOCAL_INDICES_20260904.md\n D morsehgp3D_v7/audits/THREADS_ET_PORTES_20260904.md\n M morsehgp3D_v7/audits/verify_current.py\n M morsehgp3D_v7/docs/ERRATA_PUBLICATION_20260904.md\n M morsehgp3D_v7/src/core/mutants.hpp\n M morsehgp3D_v7/src/forest/silent_incidence.hpp\n M morsehgp3D_v7/tests/meb_lazy_gate.cpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/ARITHMETIQUE_CELLULES_COURANTE.md\n?? morsehgp3D_v7/audits/ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md\n?? morsehgp3D_v7/audits/ARITHMETIQUE_SPINDLE_COURANTE.md\n?? morsehgp3D_v7/audits/DOMAINE_CPU_COURANT.md\n?? morsehgp3D_v7/audits/cell_width_certificate.py\n?? morsehgp3D_v7/audits/receipts_front_20260905/\n?? morsehgp3D_v7/audits/secteur_corde_arithmetic_20260905.py\n?? morsehgp3D_v7/audits/spindle_arithmetic_probe.py\n?? morsehgp3D_v7/audits/test_verify_current.py\n?? morsehgp3D_v7/docs/OPTIMISATION_MEB_Q2.md\n?? morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md\n?? morsehgp3D_v7/receipts/meb_pivot_budget_counterexample_20260905/\n?? morsehgp3D_v7/receipts/meb_q2_review_20260905/\n"
+        },
+        "schema": "mhgp7.q2-E-qualification.v1"
+      },
+      "failure_error_skip_nodes": 0,
+      "last_test_passed_blocks": 33,
+      "local_pins_verified": 0,
+      "mode": "release",
+      "names": [
+        "mhgp7_archive",
+        "mhgp7_archive_api",
+        "mhgp7_archive_cleanup",
+        "mhgp7_archive_optimized",
+        "mhgp7_bad_alloc_etage_census",
+        "mhgp7_bad_alloc_etage_fold",
+        "mhgp7_bad_alloc_etage_provision",
+        "mhgp7_bad_alloc_temoin",
+        "mhgp7_census_direct",
+        "mhgp7_census_direct_offset",
+        "mhgp7_census_direct_residence",
+        "mhgp7_census_direct_transaction",
+        "mhgp7_meb_lazy",
+        "mhgp7_meb_lazy_duplicate_mutant",
+        "mhgp7_meb_lazy_eager_materialization",
+        "mhgp7_meb_lazy_empty_mutant",
+        "mhgp7_meb_lazy_q2_reject_shell",
+        "mhgp7_meb_lazy_q3_reject_shell",
+        "mhgp7_meb_lazy_q4_reject_shell",
+        "mhgp7_meb_lazy_unknown_mutant",
+        "mhgp7_mono_inline",
+        "mhgp7_mono_inline_early_alloc",
+        "mhgp7_mono_inline_late_a",
+        "mhgp7_mono_inline_late_b",
+        "mhgp7_reduced_drop_materialization_mutant",
+        "mhgp7_reduced_latent_parent_mutant",
+        "mhgp7_silent_csr_stale_level_mutant",
+        "mhgp7_silent_drop_nonmerge_mutant",
+        "mhgp7_silent_incidence",
+        "mhgp7_silent_incidence_mutant",
+        "mhgp7_thread_failure",
+        "mhgp7_thread_failure_mutant_admission",
+        "mhgp7_thread_failure_refus_arg"
+      ],
+      "q2_rejection_raw_block": "364/370 Test: mhgp7_meb_lazy_q2_reject_shell\nCommand: \"/usr/bin/cmake\" \"-DEXPECTED=4\" \"-DCMD=/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release/mhgp7_meb_lazy_gate\" \"-DARGS=--mutant=silent-meb-q2-reject-shell\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=meb_lazy_gate=mutant_killed mutant=silent-meb-q2-reject-shell divergence=differential.status_reason\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\nDirectory: /workspaces/E-HGP/build/v7_next_q2_tests_20260905/release\n\"mhgp7_meb_lazy_q2_reject_shell\" start time: Sep 05 06:55 UTC\nOutput:\n----------------------------------------------------------\nmeb_lazy_gate=mutant_killed mutant=silent-meb-q2-reject-shell divergence=differential.status_reason public_status=not_claimed\nmeb_lazy_counts cases=0 success=0 degenerate=0 capped=0 q2=0 q3=0 q4=0 logical_reject3=0 logical_reject4=0 materialized3=0 materialized4=0 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=2 reference_complete=1\nmeb_lazy_q2 logical_reject2=1 materialized2=0 rejected_materialized2=0 identities=514 positive=297 negative=1 zero=216 foreign_zero=96 profile_refusals=2\n\n<end of output>\nTest time =   0.01 sec\n----------------------------------------------------------\nTest Passed.\n\"mhgp7_meb_lazy_q2_reject_shell\" end time: Sep 05 06:55 UTC\n\"mhgp7_meb_lazy_q2_reject_shell\" time elapsed: 00:00:00\n----------------------------------------------------------\n\n",
+      "receipt_manifest_sha256": "204727a36946385f1cfc39e320813ae3c9f6cfc47b3f111d20adc7e4e8841a59",
+      "source_files": 140,
+      "tests": 33
+    },
+    "sanitized": {
+      "LastTest_sha256": "d434141336958afa3081632e41f9e64187ffef6392edbbf555fa0bd29034ba80",
+      "binaries": [
+        {
+          "path": "build/v7_next_q2_tests_20260905/sanitized/mhgp7",
+          "sha256": "bb251efe3e1e8006152cd955cb682f9a428ac5389bf9008bea657eba58cb3edd",
+          "size": 24829840
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/sanitized/mhgp7_archive_api_gate",
+          "sha256": "a7d8f070b7800ad73d7445197e1a3df9f89d1b0cffb63096bf64a53e3b2d622f",
+          "size": 2961872
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/sanitized/mhgp7_archive_cleanup_gate",
+          "sha256": "133b42d97efa835163cfedb2d9dac59b63f541d5835db9d1cfce190e222725c2",
+          "size": 24778352
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/sanitized/mhgp7_bad_alloc_gate",
+          "sha256": "d522770cd03717c484c1ce47da2ef9a2bdf3243762cdb46bd9d361a167e85942",
+          "size": 24984952
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/sanitized/mhgp7_census_direct_gate",
+          "sha256": "20dd8fb312d802a1ff4c25e79ae0b76dd760ea05466bddad65a16e63f5bd0197",
+          "size": 7093024
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/sanitized/mhgp7_meb_lazy_gate",
+          "sha256": "2e5ca868ce4ceba17c720b49fce43d9e2acf3ddc779f5cec2e245870c2991b41",
+          "size": 3635272
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/sanitized/mhgp7_mono_inline_gate",
+          "sha256": "d318260a4bebfe729f5fac24cb726a260cc42e0c63099ac1145054ed4fee71ec",
+          "size": 24254496
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/sanitized/mhgp7_silent_incidence_gate",
+          "sha256": "ecb99bbe0e29befa9cfdfbf27521d1766e53a92ebf18b176ffc9bcf59745d4c2",
+          "size": 27228120
+        },
+        {
+          "path": "build/v7_next_q2_tests_20260905/sanitized/mhgp7_thread_failure_gate",
+          "sha256": "94b251d28ed8c975901ae34aa8d6bf0b2daef7c47d1cd161aad6f32c0497e1d9",
+          "size": 26749504
+        }
+      ],
+      "commands": {
+        "build_targets": {
+          "argv": [
+            "cmake",
+            "--build",
+            "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized",
+            "--parallel",
+            "2",
+            "--target",
+            "mhgp7_meb_lazy_gate",
+            "mhgp7_silent_incidence_gate",
+            "mhgp7",
+            "mhgp7_archive_api_gate",
+            "mhgp7_archive_cleanup_gate",
+            "mhgp7_mono_inline_gate",
+            "mhgp7_census_direct_gate",
+            "mhgp7_bad_alloc_gate",
+            "mhgp7_thread_failure_gate"
+          ],
+          "elapsed_seconds": 347.01244576999943,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T06:59:36Z",
+          "status": "completed",
+          "timeout_seconds": 1200
+        },
+        "configure": {
+          "argv": [
+            "cmake",
+            "-S",
+            "/workspaces/E-HGP/morsehgp3D_v7",
+            "-B",
+            "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP7_ENABLE_CUDA=OFF",
+            "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+            "-DCMAKE_CXX_FLAGS_RELEASE=-O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer",
+            "-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined"
+          ],
+          "elapsed_seconds": 0.5179259300002741,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T06:59:35Z",
+          "status": "completed",
+          "timeout_seconds": 120
+        },
+        "ctest": {
+          "argv": [
+            "ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized",
+            "--output-on-failure",
+            "--no-tests=error",
+            "-R",
+            "^(mhgp7_archive|mhgp7_archive_api|mhgp7_archive_cleanup|mhgp7_archive_optimized|mhgp7_bad_alloc_etage_census|mhgp7_bad_alloc_etage_fold|mhgp7_bad_alloc_etage_provision|mhgp7_bad_alloc_temoin|mhgp7_census_direct|mhgp7_census_direct_offset|mhgp7_census_direct_residence|mhgp7_census_direct_transaction|mhgp7_meb_lazy|mhgp7_meb_lazy_duplicate_mutant|mhgp7_meb_lazy_eager_materialization|mhgp7_meb_lazy_empty_mutant|mhgp7_meb_lazy_q2_reject_shell|mhgp7_meb_lazy_q3_reject_shell|mhgp7_meb_lazy_q4_reject_shell|mhgp7_meb_lazy_unknown_mutant|mhgp7_mono_inline|mhgp7_mono_inline_early_alloc|mhgp7_mono_inline_late_a|mhgp7_mono_inline_late_b|mhgp7_reduced_drop_materialization_mutant|mhgp7_reduced_latent_parent_mutant|mhgp7_silent_csr_stale_level_mutant|mhgp7_silent_drop_nonmerge_mutant|mhgp7_silent_incidence|mhgp7_silent_incidence_mutant|mhgp7_thread_failure|mhgp7_thread_failure_mutant_admission|mhgp7_thread_failure_refus_arg)$",
+            "--parallel",
+            "2",
+            "--output-junit",
+            "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized_receipts/ctest.junit.xml"
+          ],
+          "elapsed_seconds": 45.79188755700034,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T07:05:23Z",
+          "status": "completed",
+          "timeout_seconds": 1200
+        },
+        "inventory": {
+          "argv": [
+            "ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized",
+            "--show-only=json-v1",
+            "-R",
+            "^(mhgp7_archive|mhgp7_archive_api|mhgp7_archive_cleanup|mhgp7_archive_optimized|mhgp7_bad_alloc_etage_census|mhgp7_bad_alloc_etage_fold|mhgp7_bad_alloc_etage_provision|mhgp7_bad_alloc_temoin|mhgp7_census_direct|mhgp7_census_direct_offset|mhgp7_census_direct_residence|mhgp7_census_direct_transaction|mhgp7_meb_lazy|mhgp7_meb_lazy_duplicate_mutant|mhgp7_meb_lazy_eager_materialization|mhgp7_meb_lazy_empty_mutant|mhgp7_meb_lazy_q2_reject_shell|mhgp7_meb_lazy_q3_reject_shell|mhgp7_meb_lazy_q4_reject_shell|mhgp7_meb_lazy_unknown_mutant|mhgp7_mono_inline|mhgp7_mono_inline_early_alloc|mhgp7_mono_inline_late_a|mhgp7_mono_inline_late_b|mhgp7_reduced_drop_materialization_mutant|mhgp7_reduced_latent_parent_mutant|mhgp7_silent_csr_stale_level_mutant|mhgp7_silent_drop_nonmerge_mutant|mhgp7_silent_incidence|mhgp7_silent_incidence_mutant|mhgp7_thread_failure|mhgp7_thread_failure_mutant_admission|mhgp7_thread_failure_refus_arg)$"
+          ],
+          "elapsed_seconds": 0.03894104800019704,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T07:05:23Z",
+          "status": "completed",
+          "timeout_seconds": 60
+        }
+      },
+      "environment": {
+        "all_test_executions": "fresh",
+        "build_kind": "fresh_isolated",
+        "environment": {
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "locale": {
+            "LANG": "C",
+            "LC_ALL": "C"
+          },
+          "mode": "sanitized",
+          "sanitizer_options": {
+            "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+            "LSAN_OPTIONS": "",
+            "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+          }
+        },
+        "expected_E_build_receipt_sha256": "30f133d6c052e1d53c8c539457b5b553267d202c11b043188feb6c0f30af1e16",
+        "expected_E_sha256": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6",
+        "gate_results_reused": false,
+        "gcp": "not_used",
+        "host_before": {
+          "affinity_cpus": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "architecture": "x86_64",
+          "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+          "host_shared": true,
+          "kernel_release": "6.8.0-1052-azure",
+          "loadavg_1_5_15": [
+            0.8212890625,
+            1.06103515625,
+            1.51708984375
+          ],
+          "logical_cpus": 8,
+          "mem_total_bytes": 33657716736,
+          "observed_utc": "2026-09-05T06:59:35.823690Z"
+        },
+        "mode": "sanitized",
+        "protected_C_C_D_historical": {
+          "/workspaces/E-HGP/build/v7/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+          "/workspaces/E-HGP/build/v7_c_qualification/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+          "/workspaces/E-HGP/build/v7_meb_qualification/mhgp7": "127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f"
+        },
+        "public_status": "not_claimed",
+        "repository_before": {
+          "head": "a32dc78fa3f0c526a11bd21fafdcded8db687973",
+          "observed_utc": "2026-09-05T06:59:35.799903Z",
+          "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/PASSATION.md\n M morsehgp3D_v7/docs/ERRATA_PUBLICATION_20260904.md\n M morsehgp3D_v7/src/core/mutants.hpp\n M morsehgp3D_v7/src/forest/silent_incidence.hpp\n M morsehgp3D_v7/tests/meb_lazy_gate.cpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/docs/OPTIMISATION_MEB_Q2.md\n?? morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md\n?? morsehgp3D_v7/receipts/meb_pivot_budget_counterexample_20260905/\n?? morsehgp3D_v7/receipts/meb_q2_review_20260905/\n"
+        },
+        "schema": "mhgp7.q2-E-qualification.v1"
+      },
+      "failure_error_skip_nodes": 0,
+      "last_test_passed_blocks": 33,
+      "local_pins_verified": 0,
+      "mode": "sanitized",
+      "names": [
+        "mhgp7_archive",
+        "mhgp7_archive_api",
+        "mhgp7_archive_cleanup",
+        "mhgp7_archive_optimized",
+        "mhgp7_bad_alloc_etage_census",
+        "mhgp7_bad_alloc_etage_fold",
+        "mhgp7_bad_alloc_etage_provision",
+        "mhgp7_bad_alloc_temoin",
+        "mhgp7_census_direct",
+        "mhgp7_census_direct_offset",
+        "mhgp7_census_direct_residence",
+        "mhgp7_census_direct_transaction",
+        "mhgp7_meb_lazy",
+        "mhgp7_meb_lazy_duplicate_mutant",
+        "mhgp7_meb_lazy_eager_materialization",
+        "mhgp7_meb_lazy_empty_mutant",
+        "mhgp7_meb_lazy_q2_reject_shell",
+        "mhgp7_meb_lazy_q3_reject_shell",
+        "mhgp7_meb_lazy_q4_reject_shell",
+        "mhgp7_meb_lazy_unknown_mutant",
+        "mhgp7_mono_inline",
+        "mhgp7_mono_inline_early_alloc",
+        "mhgp7_mono_inline_late_a",
+        "mhgp7_mono_inline_late_b",
+        "mhgp7_reduced_drop_materialization_mutant",
+        "mhgp7_reduced_latent_parent_mutant",
+        "mhgp7_silent_csr_stale_level_mutant",
+        "mhgp7_silent_drop_nonmerge_mutant",
+        "mhgp7_silent_incidence",
+        "mhgp7_silent_incidence_mutant",
+        "mhgp7_thread_failure",
+        "mhgp7_thread_failure_mutant_admission",
+        "mhgp7_thread_failure_refus_arg"
+      ],
+      "q2_rejection_raw_block": "364/370 Test: mhgp7_meb_lazy_q2_reject_shell\nCommand: \"/usr/bin/cmake\" \"-DEXPECTED=4\" \"-DCMD=/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized/mhgp7_meb_lazy_gate\" \"-DARGS=--mutant=silent-meb-q2-reject-shell\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=meb_lazy_gate=mutant_killed mutant=silent-meb-q2-reject-shell divergence=differential.status_reason\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\nDirectory: /workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized\n\"mhgp7_meb_lazy_q2_reject_shell\" start time: Sep 05 07:06 UTC\nOutput:\n----------------------------------------------------------\nmeb_lazy_gate=mutant_killed mutant=silent-meb-q2-reject-shell divergence=differential.status_reason public_status=not_claimed\nmeb_lazy_counts cases=0 success=0 degenerate=0 capped=0 q2=0 q3=0 q4=0 logical_reject3=0 logical_reject4=0 materialized3=0 materialized4=0 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=2 reference_complete=1\nmeb_lazy_q2 logical_reject2=1 materialized2=0 rejected_materialized2=0 identities=514 positive=297 negative=1 zero=216 foreign_zero=96 profile_refusals=2\n\n<end of output>\nTest time =   0.03 sec\n----------------------------------------------------------\nTest Passed.\n\"mhgp7_meb_lazy_q2_reject_shell\" end time: Sep 05 07:06 UTC\n\"mhgp7_meb_lazy_q2_reject_shell\" time elapsed: 00:00:00\n----------------------------------------------------------\n\n",
+      "receipt_manifest_sha256": "42a1cec30ec080231beae3ad158161fa87d980bdc36b2c9c620de26795668691",
+      "source_files": 140,
+      "tests": 33
+    }
+  },
+  "capture_sha256": "2ae3cd09d30eb0c9f033085c240f90b839ed2865c2b9f261b686978fe8c1a154",
+  "engine_runs_executed_by_this_audit": 0,
+  "gcp": "not_used",
+  "limits": [
+    "Read-only replay of constructor executions; no independent engine execution.",
+    "Compiled source and binary boundary records are not a hermetic build attestation.",
+    "CTest mutant passes preserve their expected rejections; no global HGP exactness or industrial performance claim."
+  ],
+  "mode": "audit_independant_math_and_architecture",
+  "phase": "exploration_v7_hors_registre",
+  "profile": "quantized_u16_input_only",
+  "public_status": "not_claimed",
+  "schema": "mhgp7-E-independent-tests-replay-v1",
+  "status": "verified_closed_receipts"
+}
