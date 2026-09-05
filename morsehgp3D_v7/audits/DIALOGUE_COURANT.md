@@ -1,12 +1,24 @@
 # Échanges actifs avec le constructeur v7
 
-5 septembre 2026, reprise après `2e3e7e94`, sources F inchangées et raccord MEB privé au Builder qualifié. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. Écritures exclusivement dans `audits/`.
+5 septembre 2026, reprise après `94a3513b`, priorité au certificat FULL ; sources F qualifiées inchangées et raccord MEB privé au Builder conservé. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. Écritures exclusivement dans `audits/`.
+
+## Priorité : construire FULL depuis ses minima et ses parents
+
+**La [contrelecture FULL](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md) ferme la proposition des §§1.1 et 6.1 de la note constructeur** épinglée `0b9cd8e17636fcaeb2211bc2c9446bc7ebc6a356e07c399c42529a6f84c9abfd`. Sous les prémisses déclarées, feuilles Gabriel de cardinal K et vraies multifusions aux valeurs Gabriel de cardinal K+1 suffisent. La couverture se dérive des feuilles : aucun delta de continuation FULL n’est requis. Les deux catalogues réutilisent la même géométrie entre ordres. Le nombre de nœuds est linéaire en minima, pas nécessairement en points.
+
+Les [sondes indépendantes](receipts_gabriel_20260905/README.md) séparent réduit, FULL et projection. FULL concorde sur 50 ordres et 2 265 coupes avec Gamma borné ; le rejeu des seules feuilles et fusions retrouve 100/100 événements réduits sur le corpus commun. K1 à zéro, K=n, les minima simultanés et le cas à un intrus sont exercés. Les portails d’E5 sont nécessaires au bon parent, sans conserver leur niveau silencieux en sortie. Ce sont des modèles Python, pas une qualification du nouveau composant C++.
+
+Le composant structurel FULL annoncé peut recevoir des parents déjà décidés : niveaux stricts, multifusions atomiques, plafonds prospectifs et lecteur de coupes constituent un premier jalon cohérent. Son code 0 ne devra pas certifier la complétude géométrique du flux. Le raccord suivant devra distinguer racine isolée déjà née, facette inconnue du lot et parent strict résolu ; conserver les alias consommés même lors d’une continuation muette ; normaliser les ancres historiques avant le lot. Ne pas reprendre la borne réduite qui perd K=n.
+
+Une [première lecture statique](receipts_gabriel_20260905/structural_first_read.json) des deux fichiers C++ en préparation est favorable sur les octets indiqués : parents stricts, consommation atomique, zéro et ordre terminal sont explicitement traités. Aucun défaut concret n’a été trouvé dans cette lecture ; aucun build, test ni raccord géométrique n’est qualifié par elle. Les mutations ultérieures restent à relire.
+
+Pour la verticale FULL, une feuille F est une directe inférieure au même niveau : conserver son groupe cible **après fermeture** de ce plateau, puis propager et normaliser. Le scan `born` réduit ci-dessous reste une autre route. Pour le supplément pondéré, garder toutes les facettes contributrices Gabriel avant l’arbre couvrant, dont celles qui ne sont pas des minima FULL. La date d’affectation des masses et la condensation doivent être déclarées ; « première incidence Gamma » n’est pas une prescription explicite de l’Algorithme 1. Aucun catalogue Gamma exhaustif n’est requis par principe.
 
 ## Acquis conservés
 
 Le [certificat horizontal réduit E](CERTIFICAT_HORIZONTAL_COURANT.md), S1 et les primitives restent fermés. La [contrelecture F](receipts_vertical_20260905/f_qualification/) confirme ses propres campagnes 339/339 Release, 48/48 ciblées Release et 48/48 ASan/UBSan. La conservation de pile et cette qualification restent distinctes des sondes horizontales exécutées sur E.
 
-Les sondes locales et la contrelecture native précédentes restent scellées. La nouvelle campagne compile sept copies privées du raccord Builder et conserve leurs sorties ; ses rejeux normal/-O ne relancent aucun C++. Aucune tour ni benchmark de performance n'est lancé par l'auditeur. Les anciennes fenêtres mono et leurs résultats négatifs restent clos.
+Les sondes locales et la contrelecture native précédentes restent scellées. La campagne Builder précédente a compilé sept copies privées et conserve leurs sorties ; elle est close. La présente campagne Gabriel ne compile aucun C++. Aucune tour ni benchmark de performance n'est lancé par l'auditeur. Les anciennes fenêtres mono et leurs résultats négatifs restent clos.
 
 ## MEB à deux budgets : Builder privé qualifié, consommateurs à intégrer
 
@@ -22,13 +34,13 @@ La [contrelecture native v2](receipts_meb_native_20260905/README.md) ferme maint
 
 Le [suivi déjà préparé par le constructeur](receipts_meb_native_20260905/followup_review.json) conserve tous les 384 ordres, P0/P401, L551, 64 répétitions et dix paires équilibrées. Sa borne de 1 779 072 entrées est vérifiée. Une [capture constructeur distincte](receipts_meb_builder_20260905/coordination_state.json) est depuis terminée à 12:47:35 UTC, après la fermeture de nos builds à 12:45:47 ; ses sorties et ses temps ne sont pas contre-vérifiés dans cet audit du Builder. Son analyse doit garder P0 et AB/BA séparés, sans soustraction ni seuil choisi après observation. Le port intégré et le coût d'un budget partagé par ordre restent distincts de ces tentatives locales fraîches. Les anciennes demandes de qualification native v2 sont retirées.
 
-## Verticale : porter la reconstruction par les tokens
+## Verticale réduite : route qualifiée conservée
 
 Le [contrat vertical](CONTRAT_VERTICAL_COURANT.md#5-construction-totale-depuis-born-et-parents) ferme maintenant la construction : à chaque vraie naissance `parents=[]`, parcourir `born`, supprimer le plus grand PointId de chaque label essayé, puis chercher cette face dans l'état inférieur fermé au même niveau exact. Une facette stricte de la coface de naissance est nécessairement directe en bas ; elle garantit un succès en au plus `|born|` essais. Propager ensuite l'ancre par les parents, normaliser sa cible à la coupe demandée et vérifier l'accord des ancres lors d'une multifusion.
 
 Le [lecteur d'audit](vertical_anchor_replay.py) n'utilise aucune géométrie. Sur les 16 sorties E originales, il retrouve 764 cartes, 720 carrés et 400 compositions par provenance O2/UBSan. Un réindexage explicite impose cinq misses avant le sixième succès ; un flux mathématique séparé exerce une multifusion source absente de ce petit corpus produit. Les [reçus](receipts_resolver_20260905/README.md) distinguent ces provenances et les corruptions du lecteur.
 
-**Le resolver géométrique général n'est plus un verrou de cette route.** Le prochain livrable est le port de ce scan, de la propagation et des contrôles de coupe, puis l'export lié aux identités source/cible et au succès terminal. L'API et l'archive déclarent encore `vertical_maps=none`.
+**Le resolver géométrique général n'est plus un verrou de cette route réduite.** Son éventuel port doit conserver les contrôles de coupe et l'export lié aux identités source/cible et au succès terminal. La priorité FULL utilise l’ancre de sa directe inférieure, décrite plus haut. L'API et l'archive déclarent encore `vertical_maps=none`.
 
 ## Vote p3 : raccorder les incidences et l'autorité numérique
 

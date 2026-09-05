@@ -1,0 +1,30 @@
+{
+  "schema": "mhgp7-gabriel-concurrent-document-review-v1",
+  "reviewed_utc": "2026-09-05T14:06:04.877678+00:00",
+  "previous_source_commit": "94a3513b081bd61a8276c3e73e7d91ca5aa42abe",
+  "documents": [
+    {
+      "source": "morsehgp3D_v7/docs/CONTRAT_PERFORMANCE.md",
+      "qualified_previous_sha256": "d35bab63cfa30de6450794254ad3b12bc49ad3df8488c8f2154f8b688d783834",
+      "observed_worktree_sha256": "e6ec322886bd70c75f7af520946084bc182d7c8bab277fa341518d5df5e48c6f",
+      "capture": "constructor_documents/CONTRAT_PERFORMANCE.md.txt",
+      "review": "FULL scope clarification, no retrospective product promotion; internal portal construction and weighted timing remain separate; no executable source changed by this document delta"
+    },
+    {
+      "source": "morsehgp3D_v7/docs/INCIDENCES_SILENCIEUSES.md",
+      "qualified_previous_sha256": "ffbd0dc65e383b4685a864fbadb9b9bb802b53ff01fcde9c27ee0f48bd32c78f",
+      "observed_worktree_sha256": "853f08a656b4f7f5ea2e8db64748e700c6415b47f199e7e7df3110ed58a92d0e",
+      "capture": "constructor_documents/INCIDENCES_SILENCIEUSES.md.txt",
+      "review": "FULL scope clarification, no retrospective product promotion; internal portal construction and weighted timing remain separate; no executable source changed by this document delta"
+    },
+    {
+      "source": "morsehgp3D_v7/docs/LECTURE_ET_CONTRATS.md",
+      "qualified_previous_sha256": "d378b3d58bb6f75f7b081085088b0681efce813d3231dec8a9ea8015530a9694",
+      "observed_worktree_sha256": "d39508c431b5f1de1f6ae871815b47380c005ac9d79bcdad71abd030f34b7fa4",
+      "capture": "constructor_documents/LECTURE_ET_CONTRATS.md.txt",
+      "review": "FULL scope clarification, no retrospective product promotion; internal portal construction and weighted timing remain separate; no executable source changed by this document delta"
+    }
+  ],
+  "policy": "Retain historical proof and execution receipts byte-for-byte. Current common documentation pins follow only reviewed committed bytes; uncommitted constructor changes are reported as freshness drift, never silently promoted. New files outside F allowlist are not qualified.",
+  "public_status": "not_claimed"
+}

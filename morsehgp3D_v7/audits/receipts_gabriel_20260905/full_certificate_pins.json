@@ -1,0 +1,115 @@
+{
+  "schema": "mhgp7-full-certificate-source-review-pins-v1",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "observed_before_utc": "2026-09-05T13:46:37.440145+00:00",
+  "observed_after_utc": "2026-09-05T13:46:37.503650+00:00",
+  "source_before": {
+    "morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md": {
+      "sha256": "0b9cd8e17636fcaeb2211bc2c9446bc7ebc6a356e07c399c42529a6f84c9abfd",
+      "bytes": 24868
+    },
+    "audits/COORDINATION_MORSEHGP3D_V7.md": {
+      "sha256": "473d8fd41141ace2e06103a698eed1d4637232a59d4b86b9f238b419a8ac6cdc",
+      "bytes": 38951
+    },
+    "morsehgp3D_v7/audits/CONTRAT_VERTICAL_COURANT.md": {
+      "sha256": "711bd2d979e2c985c4b70c9c78c4297f2ecfadabe0270d2ffe5e0c80c38525cb",
+      "bytes": 33863
+    },
+    "morsehgp3D_v7/audits/CONTRAT_MASSES_VOTE_COURANT.md": {
+      "sha256": "095af1800dedb4df24a983fa8f76975453633c118bd550201fbeecd65af7088d",
+      "bytes": 21895
+    },
+    "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf": {
+      "sha256": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef",
+      "bytes": 14529297
+    }
+  },
+  "source_after": {
+    "morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md": {
+      "sha256": "0b9cd8e17636fcaeb2211bc2c9446bc7ebc6a356e07c399c42529a6f84c9abfd",
+      "bytes": 24868
+    },
+    "audits/COORDINATION_MORSEHGP3D_V7.md": {
+      "sha256": "473d8fd41141ace2e06103a698eed1d4637232a59d4b86b9f238b419a8ac6cdc",
+      "bytes": 38951
+    },
+    "morsehgp3D_v7/audits/CONTRAT_VERTICAL_COURANT.md": {
+      "sha256": "711bd2d979e2c985c4b70c9c78c4297f2ecfadabe0270d2ffe5e0c80c38525cb",
+      "bytes": 33863
+    },
+    "morsehgp3D_v7/audits/CONTRAT_MASSES_VOTE_COURANT.md": {
+      "sha256": "095af1800dedb4df24a983fa8f76975453633c118bd550201fbeecd65af7088d",
+      "bytes": 21895
+    },
+    "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf": {
+      "sha256": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef",
+      "bytes": 14529297
+    }
+  },
+  "sources_stable": true,
+  "thesis_pages_read": {
+    "pdf": [
+      84,
+      85
+    ],
+    "printed": [
+      58,
+      59
+    ],
+    "sections": [
+      "Definitions 21-22",
+      "Figure 6.5"
+    ]
+  },
+  "extract": {
+    "path": "full_certificate_manuscript_pdf84_85.txt",
+    "sha256": "625439a0205ee325942733b43b7e1f3d6475a58e59dfefa792e24be9f1d2c00b",
+    "bytes": 5579,
+    "command": [
+      "pdftotext",
+      "-f",
+      "84",
+      "-l",
+      "85",
+      "-layout",
+      "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf",
+      "-"
+    ],
+    "exit_code": 0
+  },
+  "review": {
+    "path": "full_certificate_review.md",
+    "sha256": "845e5612539410a65f83dedc58776defc710f3993bbe93c3df38f7171b6311bd",
+    "bytes": 8640
+  },
+  "scope": {
+    "method": "static source and original manuscript review; conditional mathematical derivation",
+    "regular_full": "births at Gabriel cardinal K, merges at Gabriel cardinal K+1, no point-growth continuation",
+    "reduced_reconstruction": "classify FULL parents by internal-node status; no extra first-nontrivial bit/date under regularity",
+    "vertical": "certified lower closed-plateau anchor for each FULL birth; natural transport",
+    "masses": "FULL minimum leaves differ from all facets of Gabriel contributing cofaces",
+    "outside_window": "separate full_proof_review.md authority; no implementation qualification inherited",
+    "runtime_tests_executed": false,
+    "triangle": "analytical illustration only; existing and parallel fixture authorities remain separate",
+    "gcp_used": false
+  },
+  "prior_review_unchanged": {
+    "minimal_certificate_review.md": {
+      "sha256": "16d1a0597e8199401be62e0ef6337d5df64b1c9d70506448a1caa35a6330a411",
+      "bytes": 7925
+    },
+    "minimal_certificate_pins.json": {
+      "sha256": "d8de0abccf1646253c4205c07591fdf2880b32f7d82c844ab825f828a7acd9ba",
+      "bytes": 3007
+    },
+    "minimal_certificate_manuscript_pdf122_126.txt": {
+      "sha256": "e34828fac374ee9cc5db1294ac17b798c82ddfa34537de84f56e12b9caf9c02a",
+      "bytes": 13456
+    }
+  }
+}

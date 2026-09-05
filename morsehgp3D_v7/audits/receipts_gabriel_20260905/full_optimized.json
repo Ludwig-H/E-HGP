@@ -1,0 +1,4727 @@
+{
+  "status": "completed_bounded_full_audit",
+  "public_status": "not_claimed",
+  "python_optimized": true,
+  "cases": [
+    {
+      "name": "E5",
+      "points": [
+        [
+          0,
+          0,
+          7
+        ],
+        [
+          0,
+          9,
+          6
+        ],
+        [
+          1,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          4,
+          1,
+          2
+        ]
+      ],
+      "ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reversed_ids": false
+    },
+    {
+      "name": "E5",
+      "points": [
+        [
+          0,
+          0,
+          7
+        ],
+        [
+          0,
+          9,
+          6
+        ],
+        [
+          1,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          4,
+          1,
+          2
+        ]
+      ],
+      "ids": [
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "reversed_ids": true
+    },
+    {
+      "name": "ACDE",
+      "points": [
+        [
+          0,
+          0,
+          7
+        ],
+        [
+          1,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          4,
+          1,
+          2
+        ]
+      ],
+      "ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reversed_ids": false
+    },
+    {
+      "name": "ACDE",
+      "points": [
+        [
+          0,
+          0,
+          7
+        ],
+        [
+          1,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          4,
+          1,
+          2
+        ]
+      ],
+      "ids": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "reversed_ids": true
+    },
+    {
+      "name": "moment7",
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          1
+        ],
+        [
+          2,
+          4,
+          8
+        ],
+        [
+          3,
+          9,
+          27
+        ],
+        [
+          4,
+          16,
+          64
+        ],
+        [
+          5,
+          25,
+          125
+        ],
+        [
+          6,
+          36,
+          216
+        ]
+      ],
+      "ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "reversed_ids": false
+    },
+    {
+      "name": "moment7",
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          1
+        ],
+        [
+          2,
+          4,
+          8
+        ],
+        [
+          3,
+          9,
+          27
+        ],
+        [
+          4,
+          16,
+          64
+        ],
+        [
+          5,
+          25,
+          125
+        ],
+        [
+          6,
+          36,
+          216
+        ]
+      ],
+      "ids": [
+        6,
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "reversed_ids": true
+    },
+    {
+      "name": "two_triangles",
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          1
+        ],
+        [
+          2,
+          4,
+          8
+        ],
+        [
+          10,
+          100,
+          1000
+        ],
+        [
+          11,
+          121,
+          1331
+        ],
+        [
+          12,
+          144,
+          1728
+        ]
+      ],
+      "ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "reversed_ids": false
+    },
+    {
+      "name": "two_triangles",
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          1
+        ],
+        [
+          2,
+          4,
+          8
+        ],
+        [
+          10,
+          100,
+          1000
+        ],
+        [
+          11,
+          121,
+          1331
+        ],
+        [
+          12,
+          144,
+          1728
+        ]
+      ],
+      "ids": [
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "reversed_ids": true
+    },
+    {
+      "name": "obtuse_J1",
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          0
+        ]
+      ],
+      "ids": [
+        0,
+        1,
+        2
+      ],
+      "reversed_ids": false
+    },
+    {
+      "name": "symmetric_obtuse_J1",
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          0
+        ],
+        [
+          2,
+          1,
+          0
+        ]
+      ],
+      "ids": [
+        0,
+        1,
+        2
+      ],
+      "reversed_ids": false
+    }
+  ],
+  "counts": {
+    "processed_levels": 256,
+    "direct_batches": 123,
+    "direct_cofaces": 128,
+    "multiple_direct_batches": 5,
+    "multiple_minima_batches": 15,
+    "isolated_births": 178,
+    "historical_token_normalizations": 226,
+    "coface_groups_with_prior_parents_and_zero_growth": 123,
+    "multifusions": 107,
+    "omitted_continuations": 16,
+    "orders": 50,
+    "cuts": 2265,
+    "isolated_gamma_component_observations": 1250,
+    "omitted_gamma_facets": 1572,
+    "zero_cut_checks": 100,
+    "naturality_squares": 2225,
+    "journal_events": 285,
+    "visited_meb_labels": 266,
+    "point_power_comparisons": 1588,
+    "strict_descent_steps": 2,
+    "portals": 2,
+    "single_intruder_simultaneous_incidence": 132,
+    "terminal_order_unique_leaf_checks": 10
+  },
+  "records": [
+    {
+      "case": "E5",
+      "reversed_ids": false,
+      "K": 1,
+      "counts": {
+        "processed_levels": 7,
+        "direct_batches": 6,
+        "direct_cofaces": 7,
+        "multiple_direct_batches": 1,
+        "multiple_minima_batches": 1,
+        "isolated_births": 5,
+        "historical_token_normalizations": 15,
+        "coface_groups_with_prior_parents_and_zero_growth": 6,
+        "multifusions": 3,
+        "omitted_continuations": 3
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 51,
+        "isolated_gamma_component_observations": 42,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 88,
+        "journal_events": 8
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 0,
+          "label": [
+            0
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 1,
+          "label": [
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 2,
+          "label": [
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 3,
+          "label": [
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 4,
+          "label": [
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "9/2",
+          "output": 5,
+          "parents": [
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "9",
+          "output": 6,
+          "parents": [
+            0,
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "31/2",
+          "output": 7,
+          "parents": [
+            1,
+            6
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "E5",
+      "reversed_ids": false,
+      "K": 2,
+      "counts": {
+        "processed_levels": 11,
+        "direct_batches": 5,
+        "direct_cofaces": 5,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 1,
+        "visited_meb_labels": 12,
+        "point_power_comparisons": 60,
+        "isolated_births": 7,
+        "historical_token_normalizations": 11,
+        "coface_groups_with_prior_parents_and_zero_growth": 5,
+        "multifusions": 3,
+        "strict_descent_steps": 1,
+        "portals": 1,
+        "single_intruder_simultaneous_incidence": 2,
+        "omitted_continuations": 2
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 51,
+        "isolated_gamma_component_observations": 36,
+        "omitted_gamma_facets": 6,
+        "zero_cut_checks": 2,
+        "naturality_squares": 76,
+        "journal_events": 10
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "9/2",
+          "output": 0,
+          "label": [
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "9/2",
+          "output": 1,
+          "label": [
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "11/2",
+          "output": 2,
+          "label": [
+            2,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "162/25",
+          "output": 3,
+          "parents": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "9",
+          "output": 4,
+          "label": [
+            0,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "21/2",
+          "output": 5,
+          "label": [
+            0,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "189/17",
+          "output": 6,
+          "parents": [
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "31/2",
+          "output": 7,
+          "label": [
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "41/2",
+          "output": 8,
+          "label": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "83886/3563",
+          "output": 9,
+          "parents": [
+            6,
+            7,
+            8
+          ]
+        }
+      ],
+      "portals": [
+        {
+          "facet": [
+            0,
+            2
+          ],
+          "consumer_level": "83886/3563",
+          "first_incidence": "33/2",
+          "chain": [
+            [
+              0,
+              2,
+              3
+            ],
+            [
+              2,
+              3,
+              4
+            ]
+          ],
+          "levels": [
+            "33/2",
+            "162/25"
+          ],
+          "terminal_token": 6
+        }
+      ]
+    },
+    {
+      "case": "E5",
+      "reversed_ids": false,
+      "K": 3,
+      "counts": {
+        "processed_levels": 9,
+        "direct_batches": 4,
+        "direct_cofaces": 4,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 10,
+        "point_power_comparisons": 50,
+        "isolated_births": 5,
+        "single_intruder_simultaneous_incidence": 5,
+        "historical_token_normalizations": 9,
+        "coface_groups_with_prior_parents_and_zero_growth": 4,
+        "multifusions": 3,
+        "omitted_continuations": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 51,
+        "isolated_gamma_component_observations": 33,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 58,
+        "journal_events": 8
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "162/25",
+          "output": 0,
+          "label": [
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "189/17",
+          "output": 1,
+          "label": [
+            0,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "33/2",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "83886/3563",
+          "output": 3,
+          "label": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "24",
+          "output": 4,
+          "label": [
+            1,
+            2,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "738/29",
+          "output": 5,
+          "parents": [
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "53/2",
+          "output": 6,
+          "label": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "2862/107",
+          "output": 7,
+          "parents": [
+            5,
+            6
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "E5",
+      "reversed_ids": false,
+      "K": 4,
+      "counts": {
+        "processed_levels": 5,
+        "direct_batches": 1,
+        "direct_cofaces": 1,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 5,
+        "point_power_comparisons": 25,
+        "isolated_births": 4,
+        "historical_token_normalizations": 1,
+        "single_intruder_simultaneous_incidence": 1,
+        "coface_groups_with_prior_parents_and_zero_growth": 1,
+        "multifusions": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 51,
+        "isolated_gamma_component_observations": 45,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 46,
+        "journal_events": 5
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "33/2",
+          "output": 0,
+          "label": [
+            0,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "738/29",
+          "output": 1,
+          "label": [
+            0,
+            1,
+            2,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "2862/107",
+          "output": 2,
+          "label": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "2173/81",
+          "output": 3,
+          "label": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "2189/81",
+          "output": 4,
+          "parents": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "E5",
+      "reversed_ids": false,
+      "K": 5,
+      "counts": {
+        "processed_levels": 1,
+        "direct_batches": 0,
+        "direct_cofaces": 0,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 1,
+        "point_power_comparisons": 5,
+        "isolated_births": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 51,
+        "isolated_gamma_component_observations": 2,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 1,
+        "journal_events": 1,
+        "terminal_order_unique_leaf_checks": 1
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "2189/81",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "E5",
+      "reversed_ids": true,
+      "K": 1,
+      "counts": {
+        "processed_levels": 7,
+        "direct_batches": 6,
+        "direct_cofaces": 7,
+        "multiple_direct_batches": 1,
+        "multiple_minima_batches": 1,
+        "isolated_births": 5,
+        "historical_token_normalizations": 15,
+        "coface_groups_with_prior_parents_and_zero_growth": 6,
+        "multifusions": 3,
+        "omitted_continuations": 3
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 51,
+        "isolated_gamma_component_observations": 42,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 88,
+        "journal_events": 8
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 0,
+          "label": [
+            0
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 1,
+          "label": [
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 2,
+          "label": [
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 3,
+          "label": [
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 4,
+          "label": [
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "9/2",
+          "output": 5,
+          "parents": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "9",
+          "output": 6,
+          "parents": [
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "31/2",
+          "output": 7,
+          "parents": [
+            3,
+            6
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "E5",
+      "reversed_ids": true,
+      "K": 2,
+      "counts": {
+        "processed_levels": 11,
+        "direct_batches": 5,
+        "direct_cofaces": 5,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 1,
+        "visited_meb_labels": 12,
+        "point_power_comparisons": 60,
+        "isolated_births": 7,
+        "historical_token_normalizations": 10,
+        "coface_groups_with_prior_parents_and_zero_growth": 5,
+        "multifusions": 3,
+        "strict_descent_steps": 1,
+        "portals": 1,
+        "single_intruder_simultaneous_incidence": 2,
+        "omitted_continuations": 2
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 51,
+        "isolated_gamma_component_observations": 36,
+        "omitted_gamma_facets": 6,
+        "zero_cut_checks": 2,
+        "naturality_squares": 76,
+        "journal_events": 10
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "9/2",
+          "output": 0,
+          "label": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "9/2",
+          "output": 1,
+          "label": [
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "11/2",
+          "output": 2,
+          "label": [
+            0,
+            2
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "162/25",
+          "output": 3,
+          "parents": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "9",
+          "output": 4,
+          "label": [
+            1,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "21/2",
+          "output": 5,
+          "label": [
+            0,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "189/17",
+          "output": 6,
+          "parents": [
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "31/2",
+          "output": 7,
+          "label": [
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "41/2",
+          "output": 8,
+          "label": [
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "83886/3563",
+          "output": 9,
+          "parents": [
+            6,
+            7,
+            8
+          ]
+        }
+      ],
+      "portals": [
+        {
+          "facet": [
+            2,
+            4
+          ],
+          "consumer_level": "83886/3563",
+          "first_incidence": "33/2",
+          "chain": [
+            [
+              0,
+              2,
+              4
+            ],
+            [
+              0,
+              1,
+              4
+            ]
+          ],
+          "levels": [
+            "33/2",
+            "189/17"
+          ],
+          "terminal_token": 6
+        }
+      ]
+    },
+    {
+      "case": "E5",
+      "reversed_ids": true,
+      "K": 3,
+      "counts": {
+        "processed_levels": 9,
+        "direct_batches": 4,
+        "direct_cofaces": 4,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 10,
+        "point_power_comparisons": 50,
+        "isolated_births": 5,
+        "historical_token_normalizations": 8,
+        "single_intruder_simultaneous_incidence": 5,
+        "coface_groups_with_prior_parents_and_zero_growth": 4,
+        "multifusions": 3,
+        "omitted_continuations": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 51,
+        "isolated_gamma_component_observations": 33,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 58,
+        "journal_events": 8
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "162/25",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "189/17",
+          "output": 1,
+          "label": [
+            0,
+            1,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "33/2",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "83886/3563",
+          "output": 3,
+          "label": [
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "24",
+          "output": 4,
+          "label": [
+            0,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "738/29",
+          "output": 5,
+          "parents": [
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "53/2",
+          "output": 6,
+          "label": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "2862/107",
+          "output": 7,
+          "parents": [
+            5,
+            6
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "E5",
+      "reversed_ids": true,
+      "K": 4,
+      "counts": {
+        "processed_levels": 5,
+        "direct_batches": 1,
+        "direct_cofaces": 1,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 5,
+        "point_power_comparisons": 25,
+        "isolated_births": 4,
+        "historical_token_normalizations": 1,
+        "single_intruder_simultaneous_incidence": 1,
+        "coface_groups_with_prior_parents_and_zero_growth": 1,
+        "multifusions": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 51,
+        "isolated_gamma_component_observations": 45,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 46,
+        "journal_events": 5
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "33/2",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "738/29",
+          "output": 1,
+          "label": [
+            0,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "2862/107",
+          "output": 2,
+          "label": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "2173/81",
+          "output": 3,
+          "label": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "2189/81",
+          "output": 4,
+          "parents": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "E5",
+      "reversed_ids": true,
+      "K": 5,
+      "counts": {
+        "processed_levels": 1,
+        "direct_batches": 0,
+        "direct_cofaces": 0,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 1,
+        "point_power_comparisons": 5,
+        "isolated_births": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 51,
+        "isolated_gamma_component_observations": 2,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 1,
+        "journal_events": 1,
+        "terminal_order_unique_leaf_checks": 1
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "2189/81",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": false,
+      "K": 1,
+      "counts": {
+        "processed_levels": 5,
+        "direct_batches": 4,
+        "direct_cofaces": 5,
+        "multiple_direct_batches": 1,
+        "multiple_minima_batches": 1,
+        "isolated_births": 4,
+        "historical_token_normalizations": 10,
+        "coface_groups_with_prior_parents_and_zero_growth": 4,
+        "multifusions": 2,
+        "omitted_continuations": 2
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 24,
+        "isolated_gamma_component_observations": 21,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 40,
+        "journal_events": 6
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 0,
+          "label": [
+            0
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 1,
+          "label": [
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 2,
+          "label": [
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 3,
+          "label": [
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "9/2",
+          "output": 4,
+          "parents": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "9",
+          "output": 5,
+          "parents": [
+            0,
+            4
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": false,
+      "K": 2,
+      "counts": {
+        "processed_levels": 6,
+        "direct_batches": 2,
+        "direct_cofaces": 2,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 1,
+        "visited_meb_labels": 5,
+        "point_power_comparisons": 20,
+        "isolated_births": 5,
+        "historical_token_normalizations": 3,
+        "coface_groups_with_prior_parents_and_zero_growth": 2,
+        "multifusions": 2
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 24,
+        "isolated_gamma_component_observations": 24,
+        "omitted_gamma_facets": 2,
+        "zero_cut_checks": 2,
+        "naturality_squares": 37,
+        "journal_events": 7
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "9/2",
+          "output": 0,
+          "label": [
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "9/2",
+          "output": 1,
+          "label": [
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "11/2",
+          "output": 2,
+          "label": [
+            1,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "162/25",
+          "output": 3,
+          "parents": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "9",
+          "output": 4,
+          "label": [
+            0,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "21/2",
+          "output": 5,
+          "label": [
+            0,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "189/17",
+          "output": 6,
+          "parents": [
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": false,
+      "K": 3,
+      "counts": {
+        "processed_levels": 3,
+        "direct_batches": 1,
+        "direct_cofaces": 1,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 4,
+        "point_power_comparisons": 16,
+        "isolated_births": 2,
+        "single_intruder_simultaneous_incidence": 2,
+        "historical_token_normalizations": 1,
+        "coface_groups_with_prior_parents_and_zero_growth": 1,
+        "multifusions": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 24,
+        "isolated_gamma_component_observations": 15,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 16,
+        "journal_events": 3
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "162/25",
+          "output": 0,
+          "label": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "189/17",
+          "output": 1,
+          "label": [
+            0,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "33/2",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": false,
+      "K": 4,
+      "counts": {
+        "processed_levels": 1,
+        "direct_batches": 0,
+        "direct_cofaces": 0,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 1,
+        "point_power_comparisons": 4,
+        "isolated_births": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 24,
+        "isolated_gamma_component_observations": 2,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 1,
+        "journal_events": 1,
+        "terminal_order_unique_leaf_checks": 1
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "33/2",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": true,
+      "K": 1,
+      "counts": {
+        "processed_levels": 5,
+        "direct_batches": 4,
+        "direct_cofaces": 5,
+        "multiple_direct_batches": 1,
+        "multiple_minima_batches": 1,
+        "isolated_births": 4,
+        "historical_token_normalizations": 10,
+        "coface_groups_with_prior_parents_and_zero_growth": 4,
+        "multifusions": 2,
+        "omitted_continuations": 2
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 24,
+        "isolated_gamma_component_observations": 21,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 40,
+        "journal_events": 6
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 0,
+          "label": [
+            0
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 1,
+          "label": [
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 2,
+          "label": [
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 3,
+          "label": [
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "9/2",
+          "output": 4,
+          "parents": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "9",
+          "output": 5,
+          "parents": [
+            3,
+            4
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": true,
+      "K": 2,
+      "counts": {
+        "processed_levels": 6,
+        "direct_batches": 2,
+        "direct_cofaces": 2,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 1,
+        "visited_meb_labels": 5,
+        "point_power_comparisons": 20,
+        "isolated_births": 5,
+        "historical_token_normalizations": 3,
+        "coface_groups_with_prior_parents_and_zero_growth": 2,
+        "multifusions": 2
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 24,
+        "isolated_gamma_component_observations": 24,
+        "omitted_gamma_facets": 2,
+        "zero_cut_checks": 2,
+        "naturality_squares": 37,
+        "journal_events": 7
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "9/2",
+          "output": 0,
+          "label": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "9/2",
+          "output": 1,
+          "label": [
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "11/2",
+          "output": 2,
+          "label": [
+            0,
+            2
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "162/25",
+          "output": 3,
+          "parents": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "9",
+          "output": 4,
+          "label": [
+            1,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "21/2",
+          "output": 5,
+          "label": [
+            0,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "189/17",
+          "output": 6,
+          "parents": [
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": true,
+      "K": 3,
+      "counts": {
+        "processed_levels": 3,
+        "direct_batches": 1,
+        "direct_cofaces": 1,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 4,
+        "point_power_comparisons": 16,
+        "isolated_births": 2,
+        "historical_token_normalizations": 0,
+        "single_intruder_simultaneous_incidence": 2,
+        "coface_groups_with_prior_parents_and_zero_growth": 1,
+        "multifusions": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 24,
+        "isolated_gamma_component_observations": 15,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 16,
+        "journal_events": 3
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "162/25",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "189/17",
+          "output": 1,
+          "label": [
+            0,
+            1,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "33/2",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": true,
+      "K": 4,
+      "counts": {
+        "processed_levels": 1,
+        "direct_batches": 0,
+        "direct_cofaces": 0,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 1,
+        "point_power_comparisons": 4,
+        "isolated_births": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 24,
+        "isolated_gamma_component_observations": 2,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 1,
+        "journal_events": 1,
+        "terminal_order_unique_leaf_checks": 1
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "33/2",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": false,
+      "K": 1,
+      "counts": {
+        "processed_levels": 7,
+        "direct_batches": 6,
+        "direct_cofaces": 6,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 1,
+        "isolated_births": 7,
+        "historical_token_normalizations": 11,
+        "coface_groups_with_prior_parents_and_zero_growth": 6,
+        "multifusions": 6
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 66,
+        "isolated_gamma_component_observations": 108,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 169,
+        "journal_events": 13
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 0,
+          "label": [
+            0
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 1,
+          "label": [
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 2,
+          "label": [
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 3,
+          "label": [
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 4,
+          "label": [
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 5,
+          "label": [
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 6,
+          "label": [
+            6
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "3/4",
+          "output": 7,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "59/4",
+          "output": 8,
+          "parents": [
+            2,
+            7
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "387/4",
+          "output": 9,
+          "parents": [
+            3,
+            8
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "1419/4",
+          "output": 10,
+          "parents": [
+            4,
+            9
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "3803/4",
+          "output": 11,
+          "parents": [
+            5,
+            10
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "8403/4",
+          "output": 12,
+          "parents": [
+            6,
+            11
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": false,
+      "K": 2,
+      "counts": {
+        "processed_levels": 11,
+        "direct_batches": 5,
+        "direct_cofaces": 5,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 11,
+        "point_power_comparisons": 77,
+        "isolated_births": 6,
+        "historical_token_normalizations": 9,
+        "single_intruder_simultaneous_incidence": 5,
+        "coface_groups_with_prior_parents_and_zero_growth": 5,
+        "multifusions": 5
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 66,
+        "isolated_gamma_component_observations": 42,
+        "omitted_gamma_facets": 200,
+        "zero_cut_checks": 2,
+        "naturality_squares": 97,
+        "journal_events": 11
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "3/4",
+          "output": 0,
+          "label": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "59/4",
+          "output": 1,
+          "label": [
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "21",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "387/4",
+          "output": 3,
+          "label": [
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "186",
+          "output": 4,
+          "parents": [
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "1419/4",
+          "output": 5,
+          "label": [
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "821",
+          "output": 6,
+          "parents": [
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "3803/4",
+          "output": 7,
+          "label": [
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "8403/4",
+          "output": 8,
+          "label": [
+            5,
+            6
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "2466",
+          "output": 9,
+          "parents": [
+            6,
+            7
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "5877",
+          "output": 10,
+          "parents": [
+            8,
+            9
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": false,
+      "K": 3,
+      "counts": {
+        "processed_levels": 9,
+        "direct_batches": 4,
+        "direct_cofaces": 4,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 13,
+        "point_power_comparisons": 91,
+        "isolated_births": 5,
+        "historical_token_normalizations": 7,
+        "single_intruder_simultaneous_incidence": 8,
+        "coface_groups_with_prior_parents_and_zero_growth": 4,
+        "multifusions": 4
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 66,
+        "isolated_gamma_component_observations": 24,
+        "omitted_gamma_facets": 278,
+        "zero_cut_checks": 2,
+        "naturality_squares": 70,
+        "journal_events": 9
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "21",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "186",
+          "output": 1,
+          "label": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "819/4",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "821",
+          "output": 3,
+          "label": [
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "4203/4",
+          "output": 4,
+          "parents": [
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "2466",
+          "output": 5,
+          "label": [
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "14139/4",
+          "output": 6,
+          "parents": [
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "5877",
+          "output": 7,
+          "label": [
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "36459/4",
+          "output": 8,
+          "parents": [
+            6,
+            7
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": false,
+      "K": 4,
+      "counts": {
+        "processed_levels": 7,
+        "direct_batches": 3,
+        "direct_cofaces": 3,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 13,
+        "point_power_comparisons": 91,
+        "isolated_births": 4,
+        "historical_token_normalizations": 5,
+        "single_intruder_simultaneous_incidence": 9,
+        "coface_groups_with_prior_parents_and_zero_growth": 3,
+        "multifusions": 3
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 66,
+        "isolated_gamma_component_observations": 24,
+        "omitted_gamma_facets": 152,
+        "zero_cut_checks": 2,
+        "naturality_squares": 55,
+        "journal_events": 7
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "819/4",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "4203/4",
+          "output": 1,
+          "label": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "1092",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "14139/4",
+          "output": 3,
+          "label": [
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "3992",
+          "output": 4,
+          "parents": [
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "36459/4",
+          "output": 5,
+          "label": [
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "11076",
+          "output": 6,
+          "parents": [
+            4,
+            5
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": false,
+      "K": 5,
+      "counts": {
+        "processed_levels": 5,
+        "direct_batches": 2,
+        "direct_cofaces": 2,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 11,
+        "point_power_comparisons": 77,
+        "isolated_births": 3,
+        "historical_token_normalizations": 3,
+        "single_intruder_simultaneous_incidence": 8,
+        "coface_groups_with_prior_parents_and_zero_growth": 2,
+        "multifusions": 2
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 66,
+        "isolated_gamma_component_observations": 21,
+        "omitted_gamma_facets": 20,
+        "zero_cut_checks": 2,
+        "naturality_squares": 37,
+        "journal_events": 5
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "1092",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "3992",
+          "output": 1,
+          "label": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "16275/4",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "11076",
+          "output": 3,
+          "label": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "47475/4",
+          "output": 4,
+          "parents": [
+            2,
+            3
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": false,
+      "K": 6,
+      "counts": {
+        "processed_levels": 3,
+        "direct_batches": 1,
+        "direct_cofaces": 1,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 7,
+        "point_power_comparisons": 49,
+        "isolated_births": 2,
+        "historical_token_normalizations": 1,
+        "single_intruder_simultaneous_incidence": 5,
+        "coface_groups_with_prior_parents_and_zero_growth": 1,
+        "multifusions": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 66,
+        "isolated_gamma_component_observations": 18,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 19,
+        "journal_events": 3
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "16275/4",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "47475/4",
+          "output": 1,
+          "label": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "11997",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": false,
+      "K": 7,
+      "counts": {
+        "processed_levels": 1,
+        "direct_batches": 0,
+        "direct_cofaces": 0,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 1,
+        "point_power_comparisons": 7,
+        "isolated_births": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 66,
+        "isolated_gamma_component_observations": 2,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 1,
+        "journal_events": 1,
+        "terminal_order_unique_leaf_checks": 1
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "11997",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": true,
+      "K": 1,
+      "counts": {
+        "processed_levels": 7,
+        "direct_batches": 6,
+        "direct_cofaces": 6,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 1,
+        "isolated_births": 7,
+        "historical_token_normalizations": 11,
+        "coface_groups_with_prior_parents_and_zero_growth": 6,
+        "multifusions": 6
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 66,
+        "isolated_gamma_component_observations": 108,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 169,
+        "journal_events": 13
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 0,
+          "label": [
+            0
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 1,
+          "label": [
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 2,
+          "label": [
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 3,
+          "label": [
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 4,
+          "label": [
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 5,
+          "label": [
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 6,
+          "label": [
+            6
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "3/4",
+          "output": 7,
+          "parents": [
+            5,
+            6
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "59/4",
+          "output": 8,
+          "parents": [
+            4,
+            7
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "387/4",
+          "output": 9,
+          "parents": [
+            3,
+            8
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "1419/4",
+          "output": 10,
+          "parents": [
+            2,
+            9
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "3803/4",
+          "output": 11,
+          "parents": [
+            1,
+            10
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "8403/4",
+          "output": 12,
+          "parents": [
+            0,
+            11
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": true,
+      "K": 2,
+      "counts": {
+        "processed_levels": 11,
+        "direct_batches": 5,
+        "direct_cofaces": 5,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 11,
+        "point_power_comparisons": 77,
+        "isolated_births": 6,
+        "historical_token_normalizations": 9,
+        "single_intruder_simultaneous_incidence": 5,
+        "coface_groups_with_prior_parents_and_zero_growth": 5,
+        "multifusions": 5
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 66,
+        "isolated_gamma_component_observations": 42,
+        "omitted_gamma_facets": 200,
+        "zero_cut_checks": 2,
+        "naturality_squares": 97,
+        "journal_events": 11
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "3/4",
+          "output": 0,
+          "label": [
+            5,
+            6
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "59/4",
+          "output": 1,
+          "label": [
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "21",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "387/4",
+          "output": 3,
+          "label": [
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "186",
+          "output": 4,
+          "parents": [
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "1419/4",
+          "output": 5,
+          "label": [
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "821",
+          "output": 6,
+          "parents": [
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "3803/4",
+          "output": 7,
+          "label": [
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "8403/4",
+          "output": 8,
+          "label": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "2466",
+          "output": 9,
+          "parents": [
+            6,
+            7
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "5877",
+          "output": 10,
+          "parents": [
+            8,
+            9
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": true,
+      "K": 3,
+      "counts": {
+        "processed_levels": 9,
+        "direct_batches": 4,
+        "direct_cofaces": 4,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 13,
+        "point_power_comparisons": 91,
+        "isolated_births": 5,
+        "historical_token_normalizations": 7,
+        "single_intruder_simultaneous_incidence": 8,
+        "coface_groups_with_prior_parents_and_zero_growth": 4,
+        "multifusions": 4
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 66,
+        "isolated_gamma_component_observations": 24,
+        "omitted_gamma_facets": 278,
+        "zero_cut_checks": 2,
+        "naturality_squares": 70,
+        "journal_events": 9
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "21",
+          "output": 0,
+          "label": [
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "186",
+          "output": 1,
+          "label": [
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "819/4",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "821",
+          "output": 3,
+          "label": [
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "4203/4",
+          "output": 4,
+          "parents": [
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "2466",
+          "output": 5,
+          "label": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "14139/4",
+          "output": 6,
+          "parents": [
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "5877",
+          "output": 7,
+          "label": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "36459/4",
+          "output": 8,
+          "parents": [
+            6,
+            7
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": true,
+      "K": 4,
+      "counts": {
+        "processed_levels": 7,
+        "direct_batches": 3,
+        "direct_cofaces": 3,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 13,
+        "point_power_comparisons": 91,
+        "isolated_births": 4,
+        "historical_token_normalizations": 5,
+        "single_intruder_simultaneous_incidence": 9,
+        "coface_groups_with_prior_parents_and_zero_growth": 3,
+        "multifusions": 3
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 66,
+        "isolated_gamma_component_observations": 24,
+        "omitted_gamma_facets": 152,
+        "zero_cut_checks": 2,
+        "naturality_squares": 55,
+        "journal_events": 7
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "819/4",
+          "output": 0,
+          "label": [
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "4203/4",
+          "output": 1,
+          "label": [
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "1092",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "14139/4",
+          "output": 3,
+          "label": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "3992",
+          "output": 4,
+          "parents": [
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "36459/4",
+          "output": 5,
+          "label": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "11076",
+          "output": 6,
+          "parents": [
+            4,
+            5
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": true,
+      "K": 5,
+      "counts": {
+        "processed_levels": 5,
+        "direct_batches": 2,
+        "direct_cofaces": 2,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 11,
+        "point_power_comparisons": 77,
+        "isolated_births": 3,
+        "historical_token_normalizations": 3,
+        "single_intruder_simultaneous_incidence": 8,
+        "coface_groups_with_prior_parents_and_zero_growth": 2,
+        "multifusions": 2
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 66,
+        "isolated_gamma_component_observations": 21,
+        "omitted_gamma_facets": 20,
+        "zero_cut_checks": 2,
+        "naturality_squares": 37,
+        "journal_events": 5
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "1092",
+          "output": 0,
+          "label": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "3992",
+          "output": 1,
+          "label": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "16275/4",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "11076",
+          "output": 3,
+          "label": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "47475/4",
+          "output": 4,
+          "parents": [
+            2,
+            3
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": true,
+      "K": 6,
+      "counts": {
+        "processed_levels": 3,
+        "direct_batches": 1,
+        "direct_cofaces": 1,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 7,
+        "point_power_comparisons": 49,
+        "isolated_births": 2,
+        "historical_token_normalizations": 1,
+        "single_intruder_simultaneous_incidence": 5,
+        "coface_groups_with_prior_parents_and_zero_growth": 1,
+        "multifusions": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 66,
+        "isolated_gamma_component_observations": 18,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 19,
+        "journal_events": 3
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "16275/4",
+          "output": 0,
+          "label": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "47475/4",
+          "output": 1,
+          "label": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "11997",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": true,
+      "K": 7,
+      "counts": {
+        "processed_levels": 1,
+        "direct_batches": 0,
+        "direct_cofaces": 0,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 1,
+        "point_power_comparisons": 7,
+        "isolated_births": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 66,
+        "isolated_gamma_component_observations": 2,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 1,
+        "journal_events": 1,
+        "terminal_order_unique_leaf_checks": 1
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "11997",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": false,
+      "K": 1,
+      "counts": {
+        "processed_levels": 6,
+        "direct_batches": 5,
+        "direct_cofaces": 5,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 1,
+        "isolated_births": 6,
+        "historical_token_normalizations": 9,
+        "coface_groups_with_prior_parents_and_zero_growth": 5,
+        "multifusions": 5
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 48,
+        "isolated_gamma_component_observations": 51,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 103,
+        "journal_events": 11
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 0,
+          "label": [
+            0
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 1,
+          "label": [
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 2,
+          "label": [
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 3,
+          "label": [
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 4,
+          "label": [
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 5,
+          "label": [
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "3/4",
+          "output": 6,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "59/4",
+          "output": 7,
+          "parents": [
+            2,
+            6
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "110003/4",
+          "output": 8,
+          "parents": [
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "158139/4",
+          "output": 9,
+          "parents": [
+            5,
+            8
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "248336",
+          "output": 10,
+          "parents": [
+            7,
+            9
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": false,
+      "K": 2,
+      "counts": {
+        "processed_levels": 9,
+        "direct_batches": 4,
+        "direct_cofaces": 4,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 9,
+        "point_power_comparisons": 54,
+        "isolated_births": 5,
+        "historical_token_normalizations": 7,
+        "single_intruder_simultaneous_incidence": 4,
+        "coface_groups_with_prior_parents_and_zero_growth": 4,
+        "multifusions": 4
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 48,
+        "isolated_gamma_component_observations": 21,
+        "omitted_gamma_facets": 60,
+        "zero_cut_checks": 2,
+        "naturality_squares": 70,
+        "journal_events": 9
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "3/4",
+          "output": 0,
+          "label": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "59/4",
+          "output": 1,
+          "label": [
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "21",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "110003/4",
+          "output": 3,
+          "label": [
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "158139/4",
+          "output": 4,
+          "label": [
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "132981",
+          "output": 5,
+          "parents": [
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "248336",
+          "output": 6,
+          "label": [
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "1007883/4",
+          "output": 7,
+          "parents": [
+            2,
+            6
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "1764099/4",
+          "output": 8,
+          "parents": [
+            5,
+            7
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": false,
+      "K": 3,
+      "counts": {
+        "processed_levels": 7,
+        "direct_batches": 3,
+        "direct_cofaces": 3,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 10,
+        "point_power_comparisons": 60,
+        "isolated_births": 4,
+        "historical_token_normalizations": 5,
+        "single_intruder_simultaneous_incidence": 6,
+        "coface_groups_with_prior_parents_and_zero_growth": 3,
+        "multifusions": 3
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 48,
+        "isolated_gamma_component_observations": 45,
+        "omitted_gamma_facets": 56,
+        "zero_cut_checks": 2,
+        "naturality_squares": 64,
+        "journal_events": 7
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "21",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "132981",
+          "output": 1,
+          "label": [
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "1007883/4",
+          "output": 2,
+          "label": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "252525",
+          "output": 3,
+          "parents": [
+            0,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "1764099/4",
+          "output": 4,
+          "label": [
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "445850",
+          "output": 5,
+          "parents": [
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "744525",
+          "output": 6,
+          "parents": [
+            1,
+            5
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": false,
+      "K": 4,
+      "counts": {
+        "processed_levels": 5,
+        "direct_batches": 2,
+        "direct_cofaces": 2,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 9,
+        "point_power_comparisons": 54,
+        "isolated_births": 3,
+        "historical_token_normalizations": 3,
+        "single_intruder_simultaneous_incidence": 6,
+        "coface_groups_with_prior_parents_and_zero_growth": 2,
+        "multifusions": 2
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 48,
+        "isolated_gamma_component_observations": 15,
+        "omitted_gamma_facets": 12,
+        "zero_cut_checks": 2,
+        "naturality_squares": 25,
+        "journal_events": 5
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "252525",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "445850",
+          "output": 1,
+          "label": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "1786323/4",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "744525",
+          "output": 3,
+          "label": [
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "3003099/4",
+          "output": 4,
+          "parents": [
+            2,
+            3
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": false,
+      "K": 5,
+      "counts": {
+        "processed_levels": 3,
+        "direct_batches": 1,
+        "direct_cofaces": 1,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 6,
+        "point_power_comparisons": 36,
+        "isolated_births": 2,
+        "historical_token_normalizations": 1,
+        "single_intruder_simultaneous_incidence": 4,
+        "coface_groups_with_prior_parents_and_zero_growth": 1,
+        "multifusions": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 48,
+        "isolated_gamma_component_observations": 12,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 13,
+        "journal_events": 3
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "1786323/4",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "3003099/4",
+          "output": 1,
+          "label": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "751716",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": false,
+      "K": 6,
+      "counts": {
+        "processed_levels": 1,
+        "direct_batches": 0,
+        "direct_cofaces": 0,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 1,
+        "point_power_comparisons": 6,
+        "isolated_births": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 48,
+        "isolated_gamma_component_observations": 2,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 1,
+        "journal_events": 1,
+        "terminal_order_unique_leaf_checks": 1
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "751716",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": true,
+      "K": 1,
+      "counts": {
+        "processed_levels": 6,
+        "direct_batches": 5,
+        "direct_cofaces": 5,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 1,
+        "isolated_births": 6,
+        "historical_token_normalizations": 9,
+        "coface_groups_with_prior_parents_and_zero_growth": 5,
+        "multifusions": 5
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 48,
+        "isolated_gamma_component_observations": 51,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 103,
+        "journal_events": 11
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 0,
+          "label": [
+            0
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 1,
+          "label": [
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 2,
+          "label": [
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 3,
+          "label": [
+            3
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 4,
+          "label": [
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 5,
+          "label": [
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "3/4",
+          "output": 6,
+          "parents": [
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "59/4",
+          "output": 7,
+          "parents": [
+            3,
+            6
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "110003/4",
+          "output": 8,
+          "parents": [
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "158139/4",
+          "output": 9,
+          "parents": [
+            0,
+            8
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "248336",
+          "output": 10,
+          "parents": [
+            7,
+            9
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": true,
+      "K": 2,
+      "counts": {
+        "processed_levels": 9,
+        "direct_batches": 4,
+        "direct_cofaces": 4,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 9,
+        "point_power_comparisons": 54,
+        "isolated_births": 5,
+        "historical_token_normalizations": 7,
+        "single_intruder_simultaneous_incidence": 4,
+        "coface_groups_with_prior_parents_and_zero_growth": 4,
+        "multifusions": 4
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 48,
+        "isolated_gamma_component_observations": 21,
+        "omitted_gamma_facets": 60,
+        "zero_cut_checks": 2,
+        "naturality_squares": 70,
+        "journal_events": 9
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "3/4",
+          "output": 0,
+          "label": [
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "59/4",
+          "output": 1,
+          "label": [
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "21",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "110003/4",
+          "output": 3,
+          "label": [
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "158139/4",
+          "output": 4,
+          "label": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "132981",
+          "output": 5,
+          "parents": [
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "248336",
+          "output": 6,
+          "label": [
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "1007883/4",
+          "output": 7,
+          "parents": [
+            2,
+            6
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "1764099/4",
+          "output": 8,
+          "parents": [
+            5,
+            7
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": true,
+      "K": 3,
+      "counts": {
+        "processed_levels": 7,
+        "direct_batches": 3,
+        "direct_cofaces": 3,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 10,
+        "point_power_comparisons": 60,
+        "isolated_births": 4,
+        "historical_token_normalizations": 5,
+        "single_intruder_simultaneous_incidence": 6,
+        "coface_groups_with_prior_parents_and_zero_growth": 3,
+        "multifusions": 3
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 48,
+        "isolated_gamma_component_observations": 45,
+        "omitted_gamma_facets": 56,
+        "zero_cut_checks": 2,
+        "naturality_squares": 64,
+        "journal_events": 7
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "21",
+          "output": 0,
+          "label": [
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "132981",
+          "output": 1,
+          "label": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "1007883/4",
+          "output": 2,
+          "label": [
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "252525",
+          "output": 3,
+          "parents": [
+            0,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "1764099/4",
+          "output": 4,
+          "label": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "445850",
+          "output": 5,
+          "parents": [
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "744525",
+          "output": 6,
+          "parents": [
+            1,
+            5
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": true,
+      "K": 4,
+      "counts": {
+        "processed_levels": 5,
+        "direct_batches": 2,
+        "direct_cofaces": 2,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 9,
+        "point_power_comparisons": 54,
+        "isolated_births": 3,
+        "historical_token_normalizations": 3,
+        "single_intruder_simultaneous_incidence": 6,
+        "coface_groups_with_prior_parents_and_zero_growth": 2,
+        "multifusions": 2
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 48,
+        "isolated_gamma_component_observations": 15,
+        "omitted_gamma_facets": 12,
+        "zero_cut_checks": 2,
+        "naturality_squares": 25,
+        "journal_events": 5
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "252525",
+          "output": 0,
+          "label": [
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "445850",
+          "output": 1,
+          "label": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "1786323/4",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "744525",
+          "output": 3,
+          "label": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "3003099/4",
+          "output": 4,
+          "parents": [
+            2,
+            3
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": true,
+      "K": 5,
+      "counts": {
+        "processed_levels": 3,
+        "direct_batches": 1,
+        "direct_cofaces": 1,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 6,
+        "point_power_comparisons": 36,
+        "isolated_births": 2,
+        "historical_token_normalizations": 1,
+        "single_intruder_simultaneous_incidence": 4,
+        "coface_groups_with_prior_parents_and_zero_growth": 1,
+        "multifusions": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 48,
+        "isolated_gamma_component_observations": 12,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 13,
+        "journal_events": 3
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "1786323/4",
+          "output": 0,
+          "label": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "3003099/4",
+          "output": 1,
+          "label": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "751716",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": true,
+      "K": 6,
+      "counts": {
+        "processed_levels": 1,
+        "direct_batches": 0,
+        "direct_cofaces": 0,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 1,
+        "point_power_comparisons": 6,
+        "isolated_births": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 48,
+        "isolated_gamma_component_observations": 2,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 1,
+        "journal_events": 1,
+        "terminal_order_unique_leaf_checks": 1
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "751716",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "obtuse_J1",
+      "reversed_ids": false,
+      "K": 1,
+      "counts": {
+        "processed_levels": 3,
+        "direct_batches": 2,
+        "direct_cofaces": 2,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 1,
+        "isolated_births": 3,
+        "historical_token_normalizations": 3,
+        "coface_groups_with_prior_parents_and_zero_growth": 2,
+        "multifusions": 2
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 12,
+        "isolated_gamma_component_observations": 12,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 19,
+        "journal_events": 5
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 0,
+          "label": [
+            0
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 1,
+          "label": [
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 2,
+          "label": [
+            2
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "1/2",
+          "output": 3,
+          "parents": [
+            0,
+            2
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "5/2",
+          "output": 4,
+          "parents": [
+            1,
+            3
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "obtuse_J1",
+      "reversed_ids": false,
+      "K": 2,
+      "counts": {
+        "processed_levels": 3,
+        "direct_batches": 1,
+        "direct_cofaces": 1,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 3,
+        "point_power_comparisons": 9,
+        "isolated_births": 2,
+        "single_intruder_simultaneous_incidence": 1,
+        "historical_token_normalizations": 1,
+        "coface_groups_with_prior_parents_and_zero_growth": 1,
+        "multifusions": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 12,
+        "isolated_gamma_component_observations": 9,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 10,
+        "journal_events": 3
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "1/2",
+          "output": 0,
+          "label": [
+            0,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "5/2",
+          "output": 1,
+          "label": [
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "4",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "obtuse_J1",
+      "reversed_ids": false,
+      "K": 3,
+      "counts": {
+        "processed_levels": 1,
+        "direct_batches": 0,
+        "direct_cofaces": 0,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 1,
+        "point_power_comparisons": 3,
+        "isolated_births": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 12,
+        "isolated_gamma_component_observations": 2,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 1,
+        "journal_events": 1,
+        "terminal_order_unique_leaf_checks": 1
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "4",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "symmetric_obtuse_J1",
+      "reversed_ids": false,
+      "K": 1,
+      "counts": {
+        "processed_levels": 2,
+        "direct_batches": 1,
+        "direct_cofaces": 2,
+        "multiple_direct_batches": 1,
+        "multiple_minima_batches": 1,
+        "isolated_births": 3,
+        "historical_token_normalizations": 2,
+        "coface_groups_with_prior_parents_and_zero_growth": 1,
+        "multifusions": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 9,
+        "isolated_gamma_component_observations": 9,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 13,
+        "journal_events": 4
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 0,
+          "label": [
+            0
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 1,
+          "label": [
+            1
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "0",
+          "output": 2,
+          "label": [
+            2
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "5/4",
+          "output": 3,
+          "parents": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "symmetric_obtuse_J1",
+      "reversed_ids": false,
+      "K": 2,
+      "counts": {
+        "processed_levels": 2,
+        "direct_batches": 1,
+        "direct_cofaces": 1,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 1,
+        "visited_meb_labels": 3,
+        "point_power_comparisons": 9,
+        "isolated_births": 2,
+        "single_intruder_simultaneous_incidence": 1,
+        "historical_token_normalizations": 1,
+        "coface_groups_with_prior_parents_and_zero_growth": 1,
+        "multifusions": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 9,
+        "isolated_gamma_component_observations": 6,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 7,
+        "journal_events": 3
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "5/4",
+          "output": 0,
+          "label": [
+            0,
+            2
+          ]
+        },
+        {
+          "kind": "birth",
+          "level": "5/4",
+          "output": 1,
+          "label": [
+            1,
+            2
+          ]
+        },
+        {
+          "kind": "merge",
+          "level": "4",
+          "output": 2,
+          "parents": [
+            0,
+            1
+          ]
+        }
+      ],
+      "portals": []
+    },
+    {
+      "case": "symmetric_obtuse_J1",
+      "reversed_ids": false,
+      "K": 3,
+      "counts": {
+        "processed_levels": 1,
+        "direct_batches": 0,
+        "direct_cofaces": 0,
+        "multiple_direct_batches": 0,
+        "multiple_minima_batches": 0,
+        "visited_meb_labels": 1,
+        "point_power_comparisons": 3,
+        "isolated_births": 1
+      },
+      "checks": {
+        "orders": 1,
+        "cuts": 9,
+        "isolated_gamma_component_observations": 2,
+        "omitted_gamma_facets": 0,
+        "zero_cut_checks": 2,
+        "naturality_squares": 1,
+        "journal_events": 1,
+        "terminal_order_unique_leaf_checks": 1
+      },
+      "journal": [
+        {
+          "kind": "birth",
+          "level": "4",
+          "output": 0,
+          "label": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "portals": []
+    }
+  ],
+  "mutants": [
+    {
+      "name": "omit_minima",
+      "kind": "audit_algorithm_mutant",
+      "rejection": "full.judge_surjective"
+    },
+    {
+      "name": "false_single_intruder_as_isolated_birth",
+      "kind": "audit_algorithm_mutant",
+      "rejection": "full.gabriel_birth_incident_same_lot"
+    }
+  ],
+  "extra_shell": {
+    "points": {
+      "0": [
+        0,
+        0,
+        0
+      ],
+      "1": [
+        2,
+        0,
+        0
+      ],
+      "2": [
+        1,
+        1,
+        0
+      ]
+    },
+    "squared_level": "1",
+    "strict_components": [
+      [
+        [
+          0,
+          2
+        ]
+      ],
+      [
+        [
+          1,
+          2
+        ]
+      ]
+    ],
+    "closed_components": [
+      [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ]
+      ]
+    ],
+    "model_rejection": "full.gabriel_birth_incident_same_lot",
+    "geometric_rejection": "portal.unsupported_extra_shell",
+    "scope": "Valid FULL Gamma fixture outside regular portal domain"
+  },
+  "sources_sha256": {
+    "morsehgp3D_v7/audits/gabriel_full_probe.py": "d1e1786df0f69a52f4e9c9ea1dfe56ba573d0d3bfbb1344c8df927d8d2899d9f",
+    "morsehgp3D_v7/audits/gabriel_portal_probe.py": "3e9e889a5b2e70ef2de680bc02e3bf16b1c07438d833341d744e3d9fe87e9d75",
+    "morsehgp3D_v7/audits/horizontal_rational_oracle.py": "fdff23d640ce692ef459f41eea6b9863bae0a5daa1d6a6c35edc60a8712fe83d",
+    "morsehgp3D_v7/audits/meb_rational_oracle_20260905.py": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b"
+  },
+  "scope": "FULL components and point coverage, isolated minima included, all K=1..n. Journal stores only Gabriel leaf labels/levels and true merges. Gamma exhaustive catalogue is bounded fixture authority; constructor sees only points and Gabriel catalogues of cardinal K and K+1. No mass-timing, weighted leaves, vertical-map, scalability or product claim.",
+  "gcp": "not_used"
+}

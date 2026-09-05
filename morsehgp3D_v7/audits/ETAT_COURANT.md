@@ -1,6 +1,6 @@
 # État courant de l’audit v7
 
-Actualisé le 5 septembre 2026 depuis `2e3e7e94e597e14279b286d978766abfd277579c` (publication constructeur, sources F inchangées) : raccord privé MEB au Builder qualifié ; acquis horizontaux, verticaux et p3 conservés. Les écritures restent exclusivement dans ce dossier, sur `main` sans nouvelle branche.
+Actualisé le 5 septembre 2026 après `94a3513b081bd61a8276c3e73e7d91ca5aa42abe` : certificat mathématique FULL fermé et modèles par portails vérifiés ; sources F qualifiées inchangées. Le composant structurel FULL en préparation chez le constructeur n’est pas encore qualifié ici. Les écritures restent exclusivement dans ce dossier, sur `main` sans nouvelle branche.
 
 ```text
 phase=exploration_v7_hors_registre
@@ -11,6 +11,10 @@ public_status=not_claimed
 ```
 
 La porte exploratoire est satisfaite : demande v7 explicite, lecture intégrale des parties I et II du manuscrit, sources et limites déclarées. Le [manifeste courant](validation_current.json) distingue les snapshots entiers et leur portée ; son code 0 affiche celui qui correspond et sa portée, sans promotion publique.
+
+**La question prioritaire sur [HGP complet, isolés inclus](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md), est fermée mathématiquement dans le domaine déclaré.** Les minima Gabriel de cardinal K, avec leurs points et niveaux, puis les vraies multifusions aux niveaux Gabriel de cardinal K+1, avec leurs parents, suffisent. Les couvertures sont des unions de feuilles, sans croissance ponctuelle FULL. L’extension de fenêtre, les lots égaux, K1 à zéro, K=n et les ancres verticales au côté fermé sont traités. Les portails restent à certifier pendant la construction ; les facettes pondérées sont un supplément distinct.
+
+Les [modèles indépendants d’audit](receipts_gabriel_20260905/README.md) passent normalement et sous `-O` : FULL sur 50 ordres et 2 265 coupes ; la projection depuis les seuls journaux retrouve les 100 événements réduits sur les 36 ordres communs. Ce sont des sondes Python bornées, sans intégration C++ ni mesure de coût. Le produit qualifié ci-dessous reste réduit ; aucun résultat E/F n’est réattribué à FULL.
 
 | Source reconnue | Qualification réellement acquise |
 | --- | --- |
@@ -26,4 +30,4 @@ La porte exploratoire est satisfaite : demande v7 explicite, lecture intégrale 
 
 Les constats A1/C1 et les demandes d’intégration Cassini/U320 sont fermés. Douze notes transitoires sont [consolidées](receipts_front_20260905/documentation_retirement.json) ; leurs preuves brutes et fixtures sont conservées. Aucun chantier déjà fermé n’est rouvert par le nettoyage.
 
-Consulter la [synthèse](AUDIT_INDEPENDANT_20260904.md) et le [dialogue actif](DIALOGUE_COURANT.md). Les anciennes compilations horizontales sont closes à 09:21:33 UTC ; les [sondes MEB locales](receipts_meb_dual_20260905/README.md) restent scellées. La contrelecture native conserve ses sorties closes. La nouvelle campagne Builder compile et exécute seulement ses copies privées sous `audits/`, sans tour ni benchmark. Les [nouveaux reçus](receipts_resolver_20260905/README.md) relisent les 16 sorties E scellées : 764 cartes, 720 carrés et 400 compositions par provenance. Le réindexage et la multifusion synthétique sont comptés séparément. Les 27 cas p3 passent normalement et sous Python optimisé. Ces rejeux verticaux et p3 ne relancent aucun moteur ni build. Les trois paires E/F 8k ont des objets égaux ; F16k termine en 413,816 s et F32k refuse à K9 sur les occurrences temporaires, sans tour complète. Ces mesures uniques sur hôte partagé ne constituent ni un gain statistique ni un SLO. GCP non utilisé ; aucun résultat GPU attribué à cet audit.
+Consulter la [synthèse](AUDIT_INDEPENDANT_20260904.md) et le [dialogue actif](DIALOGUE_COURANT.md). Les anciennes compilations horizontales sont closes à 09:21:33 UTC ; les [sondes MEB locales](receipts_meb_dual_20260905/README.md) restent scellées. La contrelecture native conserve ses sorties closes. La campagne Builder précédente est close et ses copies privées restent ses seules sources exécutées. La présente qualification Gabriel exécute seulement les modèles Python bornés et les rejeux de journaux, sans build, tour produit ni benchmark. Les [nouveaux reçus](receipts_resolver_20260905/README.md) relisent les 16 sorties E scellées : 764 cartes, 720 carrés et 400 compositions par provenance. Le réindexage et la multifusion synthétique sont comptés séparément. Les 27 cas p3 passent normalement et sous Python optimisé. Ces rejeux verticaux et p3 ne relancent aucun moteur ni build. Les trois paires E/F 8k ont des objets égaux ; F16k termine en 413,816 s et F32k refuse à K9 sur les occurrences temporaires, sans tour complète. Ces mesures uniques sur hôte partagé ne constituent ni un gain statistique ni un SLO. GCP non utilisé ; aucun résultat GPU attribué à cet audit.

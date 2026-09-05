@@ -1,0 +1,95 @@
+        Chapitre 6 — HGP-Clusterer : la généralisation du Single-Linkage dans l’espace
+58                                                                          euclidien
+
+
+6.2.2     Les K-polyèdres
+  Définition 21 : Graphe des (K − 1)-simplexes et K-polyèdres
+
+  Soit K ∈ [[1, |X |]] et r ≥ 0. On note ČK−1 (X , r) l’ensemble des simplexes de dimen-
+  sion K − 1 du complexe de Čech Č(X , r).
+  On leur associe le graphe
+                                          ΓK (X , r)
+  dont les sommets sont les éléments de ČK−1 (X , r), deux sommets σ et τ étant reliés
+  dès que σ ∪ τ est encore un simplexe de Č(X , r).
+  Un K-polyèdre de Č(X , r) est alors l’ensemble des points de X apparaissant dans
+  une composante connexe de ΓK (X , r).
+
+Remarque Cette définition prolonge la notion usuelle de composante connexe, qu’on
+retrouve pour K = 1 : les sommets de Γ1 (X , r) sont les points de X et ses arêtes sont celles
+telles que kx − x0 k ≤ 2r ; les 1-polyèdres sont donc les composantes connexes ordinaires
+du graphe géométrique G(X , r) = Γ1 (X , r). Pour K = 2, les sommets de Γ2 (X , r) sont
+les arêtes de Č(X , r) et deux arêtes partageant un sommet deviennent adjacentes dès que
+le triangle qu’elles forment apparaît. Cette façon de connecter entre eux des simplexes
+(vus comme des cliques sur un graphe) au moyen d’une clique plus grande est appelée
+clique percolation [66]. Pour le cas plus général des complexes simpliciaux, Atkin avait
+déjà défini en 1972 ce qu’il nommait la q-connectivity [67]. Aujourd’hui, l’usage serait
+plutôt d’employer le terme (up) face percolation [68].
+
+  Définition 22 : HGP-Clusterer (HGP pour Hypergraphe-Percol’)
+  Pour K ∈ [[1, |X |]], on définit Hypergraphe-Percol’ (acronyme : HGP) par
+                        ¶                        ©
+               HGP
+              θK   (r) , K-polyèdres de Č(X , r) ,           pour tout r ≥ 0.
+
+ Autrement dit, HGP-Clusterer observe l’évolution des K-polyèdres au fil de la filtra-
+ tion du complexe de Čech.
+
+
+Remarque La filtration r 7→ Č(X , r) est croissante, donc le graphe ΓK (X , r) l’est
+aussi. Les K-polyèdres ne peuvent ainsi que croître et fusionner lorsque r augmente.
+Pour K = 1, on retrouve exactement le Single-Linkage de la partie I.
+    La Fig. 6.5 illustre la différence de nature entre la connexité ordinaire et la connexité
+d’ordre supérieur. Dans le cas K = 2, ce ne sont plus les points qui percolent directement,
+mais les arêtes, recollées entre elles par des triangles.
+6.3 – 6.3 K-polyèdres de Čech et amas discrets de forte densité acronymes]K-NN@K-NN
+– K plus proches voisinsK-NN                                                      59
+
+
+     ABC                                DEF
+     A                                    E
+                       CD                                          AC                                          DF
+               C                   D                                                    CD
+      B                                        F              AB         BC                             DE          EF
+
+                                                               {A, B, C}              {C, D}                {D, E, F }
+           (a) Complexe de Čech pour K = 2                               (b) Le graphe Γ2 (X , r) associé
+
+Figure
+ √
+         6.5 : Exemple de 2-polyèdres sur la configuration à six points de l’exemple en § 6.1. Au rayon r0 =
+ 3 r, le complexe de Čech contient deux triangles ABC et DEF ainsi que l’arête CD. Les composantes
+2 3
+
+connexes du graphe Γ2 (X , r0 ) donnent alors trois 2-polyèdres, à savoir {A, B, C}, {C, D} et {D, E, F }.
+On voit déjà apparaître le phénomène essentiel : pour K ≥ 2, les polyèdres peuvent se recouvrir.
+
+
+
+6.3       K-polyèdres de Čech et amas discrets de forte den-
+          sité K-NN
+   Au cours de la première partie, nous avons introduit l’estimateur K-NN de densité
+des K plus proches voisins (Def. 7, p. 19) et les amas discrets de forte densité qui lui sont
+associés (Def. 8, p. 21). Rappelons qu’à rayon r > 0 fixé, le niveau supérieur s’écrit
+
+                         LK (r) , y ∈ Rp |B(y, r) ∩ X | ≥ K ,
+                                  
+
+et que les clusters (continus) sont les composantes connexes de LK (r). Les clusters discrets
+sont les ensembles de points couverts (c’est-à-dire à moins de r) par ces clusters continus
+(ils participent via K-NN à l’existence du cluster continu).
+     Le résultat central de ce chapitre (Théorème 2 ci-dessous) est le suivant : les K-
+polyèdres du complexe de Čech identifient exactement les amas discrets de forte densité
+K-NN.
+
+6.3.1      Les régions témoins d’un simplexe
+    Pour tout (K − 1)-simplexe σ ∈ ČK−1 (X , r), introduisons l’ensemble
+                                                        \
+                                             Tr (σ) ,         B(x, r).
+                                                        x∈σ
+
+Nous l’appellerons la région témoin du simplexe σ au niveau r. Par construction, Tr (σ) est
+une intersection finie de boules fermées : c’est donc un compact convexe, en particulier
+connexe. L’idée de la preuve du Théorème 2 est simple : le niveau supérieur LK (r) est
+exactement l’union de ces régions témoins pour tous les (K − 1)-simplexes de Č(X , r),
+et le graphe ΓK (X , r) n’est rien d’autre que leur graphe d’intersection.
+

@@ -1,0 +1,223 @@
+# Complétion des incidences du cœur direct v7
+
+Statut au 4 septembre 2026 : brique CPU nouvelle, profil u16 à positions
+distinctes, portée horizontale relative au catalogue direct fourni.
+`public_status=not_claimed`. Le fichier
+[`silent_incidence.hpp`](../src/forest/silent_incidence.hpp) n'est ni une
+source Gabriel complète autonome, ni le reducer normalisé, ni une
+implémentation de l'identité publique v2.
+
+**Portée mise à jour le 5 septembre.** Les preuves et les portes ci-dessous
+décrivent le constructeur de sous-flot et le fold **réduit** existants.
+L'[audit des niveaux utiles](AUDIT_NIVEAUX_GABRIEL_20260905.md) et l'[audit
+indépendant FULL](../audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md) établissent
+un certificat de sortie plus petit pour HGP complet : minima Gabriel de
+cardinal K, vraies multifusions aux niveaux Gabriel de cardinal K+1,
+niveaux exacts et parents. La nécessité de résoudre une attache ne signifie
+pas que sa coface silencieuse doit être émise, triée et conservée en sortie.
+Cette nouvelle voie reste à raccorder et qualifier ; elle ne change pas
+rétroactivement le payload, les digests ou les budgets du moteur F.
+
+## 1. Obstruction et autorité mathématique
+
+La proposition 6 et le théorème 5 du manuscrit oublient les facettes
+attachées sans changement immédiat de l'union de points. Dans la fixture
+à cinq points, la facette `AC` s'attache au niveau carré `33/2`, puis `ABC`
+la réutilise au niveau `83886/3563`. Le flot brut crée alors une seconde
+composante et retarde sa connexion jusqu'à `24`.
+
+L'autorité de cette correction est le
+[corollaire 4.1 sur les premières incidences](../../docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md#53-réduction-conditionnelle-aux-premières-incidences-du-cœur).
+Il s'applique au cœur global des facettes des cofaces Gabriel, y compris
+celles qu'une coface future réutilise. Il est conditionnel à ses hypothèses
+de régularité, de complétude et de quotient atomique des niveaux égaux.
+L'inertie des blocs saturés de haut rang du théorème 4.2 constitue une
+autorité distincte; elle ne prouve pas leur régularité géométrique.
+
+## 2. Une chaîne certifiée par facette suffit
+
+Fixons un ordre $2\leq K\leq10$ et une facette $F$ du cœur direct. Notons
+ses intrus étrangers stricts
+
+$$J_F=\left(X\cap B_F^{\circ}\right)\setminus F.$$
+
+Avec zéro intrus, toutes les premières incidences sont déjà Gabriel. Avec
+un seul intrus $z$, la première coface est $F\cup\lbrace z\rbrace$ et est
+également Gabriel. Aucun ajout n'est donc nécessaire dans ces deux cas.
+
+Avec au moins deux intrus, choisissons un premier intrus $z$ et posons
+
+$$Q_0=F\cup\lbrace z\rbrace,\qquad\beta(Q_0)=\beta(F).$$
+
+Cette coface est non-Gabriel. Pour une coface non-Gabriel régulière $Q_i$,
+choisissons un intrus strict $w_i$ extérieur à $Q_i$ et un sommet essentiel
+$u_i$ de son support minimal. Posons
+
+$$Q_{i+1}=\left(Q_i\setminus\lbrace u_i\rbrace\right)\cup\lbrace w_i\rbrace.$$
+
+La positivité et l'essentialité du support donnent une diminution stricte
+de la miniball. Les deux cofaces partagent la facette $Q_i\setminus\lbrace u_i\rbrace$.
+Le code vérifie à chaque transition
+
+$$\beta(Q_{i+1})<\beta(Q_i).$$
+
+Une chaîne finit lorsqu'elle atteint une coface du catalogue Gabriel fourni,
+avec vérification du niveau exact, ou une chaîne précédemment terminée et
+certifiée. Une coface sans intrus mais absente du catalogue constitue une
+contradiction, jamais une émission implicite du terminal manquant.
+
+Les cofaces ajoutées sont toutes de vraies cofaces Gamma à leur vrai niveau.
+Elles donnent un chemin de $F$ à son apex strict. Tous les co-minimiseurs de
+$F$ ont le même apex par la confluence régulière du corollaire 4.1. Dans
+l'induction par niveaux, remplacer leur famille par ce chemin ne change
+donc aucune connexion du cœur. Les autres facettes du cœur qu'ils touchent
+strictement sont déjà reliées à cet apex par l'hypothèse d'induction.
+Cette sélection d'une chaîne ne préserve pas la liste exhaustive des
+facettes et cofaces comme payload public.
+
+La diminution stricte implique la terminaison sur un nuage fini, mais ne
+donne aucune borne pratique sur la longueur. Le code impose un plafond
+prospectif de pas et refuse atomiquement lorsqu'il est atteint.
+
+## 3. Ce qui est calculé et ce qui est supposé
+
+`build_silent_cofaces` reçoit le catalogue direct complet et régulier d'un
+seul ordre. La complétude et la provenance de ce catalogue sont des
+prémisses externes : cette API ne les invente pas à partir d'une liste
+plausible. Elle vérifie les structures d'événements, les identifiants et
+l'absence de cofaces directes dupliquées.
+
+Seules les suppressions de sommets du support sont examinées : au plus
+quatre par événement. Supprimer un point intérieur d'une coface directe
+laisse exactement ce point comme intrus étranger; la première incidence
+est donc déjà cette coface directe. Les facettes candidates sont triées
+et dédupliquées avant les requêtes.
+
+Chaque miniball locale contient au plus onze points. Le moteur cherche
+un support positif de taille deux, trois ou quatre dont la boule contient
+tous ces points. Les conditions d'optimalité rendent cette boule minimale;
+l'unicité de la miniball permet de s'arrêter au premier tel support. Cette
+énumération locale porte au plus 550 supports, indépendamment de la taille
+du nuage. Elle n'énumère pas les supports du nuage global.
+
+Une requête de l'arbre spatial cherche deux intrus et termine le parcours
+du bord de la boule. Les sous-arbres strictement intérieurs peuvent être
+sautés dès que les deux intrus sont connus. Un point étranger exactement
+sur la sphère provoque `kUnsupportedDegeneracy`; un shell local plus grand
+que le support essentiel provoque le même refus. Ce domaine local est
+plus restrictif qu'une prise en charge générale des plateaux. Aucune
+perturbation des coordonnées n'est introduite.
+
+Les ajouts conservent le format `ForestEvent` : sommets du support
+essentiel, points intérieurs et masque des suppressions strictes. Leur
+compatibilité structurelle avec le fold historique ne certifie pas sa
+normalisation. Celui-ci compte aussi des facettes actives isolées comme
+parents. La route opt-in `normalize_reduced=true` distingue maintenant
+ces facettes latentes des composantes déjà incidentes. Avant chaque lot,
+elle fige seulement les racines déjà incidentes comme parents pour
+$K\geq2$; les singletons normatifs de $K=1$ restent inchangés. Après les
+unions atomiques, `born` contient les premières matérialisations dans le
+sous-flot, même lorsque leur naissance géométrique est antérieure.
+Une naissance réduite possède zéro parent, une continuation un parent,
+une multifusion au moins deux. Le drapeau `normalized_reduced` sépare
+explicitement ce sens du payload historique. Ce changement ne fournit
+pas les identités publiques v2 ni un journal exhaustif de facettes Gamma.
+
+## 4. Coût, refus et structures évitées
+
+Avec $D$ cofaces directes, $F\leq4D$ records de facettes candidates et $S$
+pas de chaînes effectivement produits, les structures auxiliaires portent
+les identifiants du nuage, le catalogue direct indexé, les facettes du
+cœur et les cofaces des chaînes. Aucun catalogue global de facettes Gamma,
+cellule de Voronoï, coface exhaustive ou mosaïque de Delaunay n'est construit.
+
+La résidence auxiliaire est $O(n+D+F+S)$; elle ne constitue pas un plafond
+RSS. Les plafonds séparés couvrent records, supports locaux essayés,
+visites de nœuds, pas de chaîne et cofaces ajoutées. Les refus ont un motif
+stable et rendent une liste d'ajouts vide. Les compteurs restent des
+diagnostics d'une tentative, sans autorité de complétude lors d'un refus.
+
+La longueur des chaînes, les requêtes de bord et le coût cumulé des
+miniballs doivent être mesurés à 8k, 16k, 32k et 50k. Aucune extrapolation
+à plusieurs dizaines de millions de points ne découle des portes bornées.
+
+## 5. Falsification indépendante
+
+[`silent_incidence_gate.cpp`](../tests/silent_incidence_gate.cpp) construit
+un oracle Gamma borné avec centres obtenus par Gram/Cramer en entiers
+signés de 640 bits, sur des limbes de 32 bits. Ses décisions n'appellent
+ni les lanes de production, ni `BallKey::power`, ni le DSU du fold.
+Le drapeau d'overflow de l'oracle est vérifié avant tout succès.
+
+Le juge recalcule le catalogue Gabriel complet et ses niveaux, puis compare
+la couverture et toutes les connexions du cœur à chaque coupe ouverte et
+fermée. Une seconde comparaison reconstruit ces états depuis les seuls
+deltas livrés, sous stockages classic et CSR : le lecteur ne crée aucune
+union depuis les cofaces candidates. Il vérifie les parents dans un état
+pré-lot figé, les premières matérialisations, les niveaux exacts et les
+classes du cœur. Un parent doit être le jeton d'une racine encore publiée,
+consommé une seule fois dans le lot; une facette active de la même classe
+ne peut pas remplacer ce jeton. `output` doit être la facette canonique
+des seules facettes effectivement matérialisées dans le sous-flot.
+Un juge séparé compare le nombre de vraies racines
+antérieures $q_R$ et les transitions réduites obligatoires de Gamma.
+
+Les fixtures comprennent le contre-exemple à cinq points, ses
+extensions par points intérieurs aux ordres trois à cinq, des nuages u16
+et une chaîne exigeant deux remplacements stricts ainsi qu'un terminal
+de chaîne déjà certifié réutilisé. Une fixture de onze sites couvre aussi
+l'ordre maximal $K=10$. Le triangle aigu scalène de sommets
+`(0,0,0)`, `(6,0,0)`, `(2,3,0)` impose une naissance réduite à zéro parent
+et trois premières matérialisations, contre trois parents en mode legacy.
+Le mutant
+`silent-drop-coface` supprime les ajouts dans le code de production et
+doit être réfuté par le contre-exemple à cinq points avec code 4. Les
+mutants `reduced-latent-parent`, `reduced-drop-materialization` et
+`drop-nonmerge` doivent être réfutés par le lecteur de deltas sous les
+deux stockages; `csr-stale-level` vise le niveau CSR. Des corruptions
+ciblées d'une seule continuation avec attache, omise ou avancée, testent
+aussi chaque stockage sans supprimer les naissances. L'effacement des
+seuls champs `born` et le remplacement d'un `output` par une autre facette
+de sa composante sont également refusés sous les deux stockages.
+
+Les refus couvrent les limites de records, requêtes, supports locaux,
+pas et cofaces, les identifiants inconnus, un terminal direct manquant,
+les cofaces directes dupliquées et les extra-shells. Les permutations
+physiques de l'entrée et de l'ordre du catalogue sont rejouées. Cette porte
+est une falsification bornée de la nouvelle brique, pas une qualification
+globale du produit.
+
+L'API intégrée est jugée sur E5, classic mono-thread et CSR multithread.
+Un refus de budget antérieur au fold ou un extra-shell pertinent ne
+publient aucun callback. Un refus de complétion tardif peut suivre le
+callback provisoire d'un ordre précédent : la porte impose ce préfixe
+déclaré et l'invalidation des digests et compteurs publics du résultat
+final. Le consommateur doit donc attendre le succès global pour valider
+une archive; les callbacks seuls ne constituent pas une transaction.
+
+## 6. Prochain raccord : portails internes et certificat FULL
+
+Le jalon structurel prévu dans `src/forest/full_certificate.hpp` porte sur
+le rejeu de feuilles étiquetées et de multifusions atomiques, pas encore
+sur leur découverte géométrique. Une couverture FULL se dérive des feuilles
+descendantes ; les continuations sans fusion n'ont pas à devenir des records.
+À K=1 les points naissent à zéro ; à K=n l'unique minimum X doit subsister
+même sans coface de cardinal n+1. La restriction réduite demeure une
+projection distincte, pas un mode FULL obtenu en renommant `born`.
+
+Le constructeur futur doit distinguer facette absente, racine FULL déjà
+née mais isolée, parent antérieur résolu et première incidence dans le lot.
+Le prédicat actuel « déjà incidente » ne reconnaît pas toutes les racines
+FULL. Un portail doit retrouver une ancre certifiée puis son successeur
+dans le snapshot strict pré-lot ; une clé créée pendant le lot ne constitue
+pas un parent antérieur. Descente stricte, shell, contacts et budgets restent
+à contrôler, sans appel à un oracle Gamma global. Le certificat vertical
+demande en outre les ancres après fermeture du plateau inférieur simultané.
+
+Ce changement de représentation ne promet pas les mêmes masses à toute
+coupe. L'univers pondéré des facettes du catalogue Gabriel, sa politique
+d'affectation et le vote doivent être déclarés séparément. Les cofaces de
+descente ne deviennent pas des contributions supplémentaires aux scores.
+Si le profil retient la première incidence Gamma comme date de transfert,
+cette information utile doit être conservée, explicitement ou implicitement ;
+elle n'impose pas de reconstruire Gamma exhaustif.

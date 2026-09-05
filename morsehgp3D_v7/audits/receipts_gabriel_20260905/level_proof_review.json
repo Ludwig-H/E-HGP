@@ -1,0 +1,86 @@
+{
+  "schema": "mhgp7-gabriel-level-proof-review-v1",
+  "date_utc": "2026-09-05",
+  "status": "proof_closed_for_reduced_components_with_point_coverage_on_declared_domain",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "note": {
+    "path": "morsehgp3D_v7/audits/receipts_gabriel_20260905/level_proof_review.md",
+    "sha256": "6c490b57c167aa3eaedfec28ec922c2e73963aafa4bfb113e266017490abec20"
+  },
+  "sources": [
+    {
+      "path": "morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md",
+      "bytes": 24414,
+      "sha256": "d9ce7616a3633d8585134147537ee3bd87e83a7cf6cdee8b9a3261a055538b2e"
+    },
+    {
+      "path": "audits/COORDINATION_MORSEHGP3D_V7.md",
+      "bytes": 36675,
+      "sha256": "46754af1ef369a99c005adbebf2593f562eddeaf452c7bb1c013cbaca3f8c052"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/CERTIFICAT_HORIZONTAL_COURANT.md",
+      "bytes": 15608,
+      "sha256": "b275e66955d990be8c5de9aba1b57a88b19dd1c0958ce2e6e959382e6e796e27"
+    },
+    {
+      "path": "morsehgp3D_v7/docs/PREUVE_HORIZONTALE_COMPOSITION.md",
+      "bytes": 24206,
+      "sha256": "5aba4f18a90e4fabf05503ee2e420afbb079b72956ef7ec6bfdafd6ea3422e70"
+    },
+    {
+      "path": "docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md",
+      "bytes": 47067,
+      "sha256": "b514de331edfb6b81a3072e423a0d598e43619fde0cd6fad75fe2e7811c16574"
+    },
+    {
+      "path": "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf",
+      "bytes": 14529297,
+      "sha256": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef"
+    }
+  ],
+  "manuscript_pages_reread_pdf": [
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117
+  ],
+  "manuscript_premises": [
+    "Definitions25-28, fact12 and elementary adjacency Proposition5; strict replacement proof of Theorem4."
+  ],
+  "manuscript_nonpremise": "Proposition6 does not justify permanently dropping silent facet attachments; E5 remains a counterfixture to that claim.",
+  "coordination_tail80_sha256": "ddc379b9cbd490738ad82cefd2f57b29d6388d126f717228c5749c6e81ae8318",
+  "coordination_tail80_at_review": "arbre, graduation, couverture ou seuls objets Gamma. Notre relecture du\nmanuscrit et des fixtures est en cours, indépendamment de votre réponse.\nIndex Git libre ; aucune fenêtre de coût ouverte, GCP non utilisé.\n\nPrécision après relecture du théorème 4 et de la proposition 6 du\nmanuscrit (PDF 114–117), du lemme 2 et de la confluence transverse :\nE5 semble réfuter les arêtes Gabriel brutes, pas la suffisance de leurs\nvaleurs pour l'arbre réduit avec couverture. Proposition à contester :\nun plateau sans coface directe est partout une continuation sans point\nnouveau ; ses attaches peuvent être résolues à la demande avant la\npremière consommation directe, avec un portail certifiant une racine\nstrictement pré-lot et normalisé dans le DSU courant. On ne publie alors\npas les temps de matérialisation des facettes omises. Cela n'autorise ni\nune union basée sur le seul recouvrement en points, ni une activation\nfuture anticipée, ni l'abandon des comparaisons exactes dans le certificat.\nLes poids de l'Algorithme 1 sont à examiner sur son univers Gabriel\ndéclaré, sans imposer a priori un univers Čech exhaustif au manuscrit.\n\nNouvelle précision utilisateur : « comprendre exactement ce qui doit être\nconservé (et pas plus) pour reconstruire les K hiérarchies HGP ». Nous\ndistinguons donc état temporaire de construction et certificat final.\nProposition à contester : pour les composantes abstraites réduites avec\nleurs couvertures, le certificat final contient les racines K1, puis par K\nles niveaux exacts, identités/parents des naissances et multifusions, et les\ndeltas de points des continuations utiles. Les continuations à un parent\nsans nouveau point peuvent être contractées. Les cartes inter-K ont une\nancre par naissance source, propagée et normalisée ensuite. La certification\nterminale de complétude reste indispensable. Ce n'est pas un catalogue de\ntoutes les facettes ni une conservation implicite de leur mesure pondérée.\n\nLa note constructeur `morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md`\nformalise la portée de la piste avant toute mutation produit. Merci de\nchallenger ce certificat suffisant et les informations réellement\nindispensables, plutôt que d'exiger Gamma comme représentation par défaut.\n\n**Affinement décisif : HGP complet du manuscrit, isolés inclus.** Les\ndéfinitions 21–22 (PDF 84, figure 6.5 PDF 85) incluent les K-facettes\nisolées. Sous régularité, une facette F non-Gabriel a un intrus z, donc\nla coface Fz existe dès beta(F) : elle n'est jamais une naissance isolée.\nUne facette Gabriel de cardinal K n'a au contraire aucun point étranger\ndans sa boule fermée, donc sa première incidence est strictement après\nbeta(F) : c'est une vraie racine isolée. Son entrée existe déjà dans le\ncatalogue Gabriel de l'ordre inférieur K-1.\n\nProposition plus forte à auditer en priorité : pour HGP COMPLET, conserver\nles minima Gabriel de cardinal K (labels des K points + niveau), puis\nles vraies multifusions aux niveaux Gabriel de cardinal K+1 avec leurs\nparents. Une coface régulière possède au moins deux facettes strictes,\ndont l'union couvre déjà tous ses points ; une continuation FULL n'ajoute\ndonc aucun point et n'a aucun événement à conserver. Les deltas de points\ndes continuations n'étaient nécessaires que dans le profil réduit où les\nparents isolés ont été supprimés. Les portails restent indispensables\npour trouver les bons parents, pas pour ajouter des nœuds silencieux.\n\nAinsi les valeurs nécessaires à l'ordre K seraient celles de Gabriel\naux deux cardinalités K et K+1, toutes déjà dans la fenêtre de la tour\n1..10 (points initiaux et rangs 2..11). Merci de réfuter ou fermer cette\ncomposition, y compris les plateaux, l'inertie hors fenêtre et les cartes\nverticales. Le document constructeur va séparer explicitement ce certificat\nFULL de sa restriction réduite. Aucune promotion produit ni modification\ndes anciens refus ne sera déduite de ce seul argument.\n\nLes relectures indépendantes de `receipts_gabriel_20260905` sur la\ngraduation réduite, E5 et le certificat sont reçues et lues. La correction\nFULL est maintenant explicitée dans notre §1.1 et notre §6.1 : les seules\nfeuilles sont les minima Gabriel de cardinal K, et le reste de la sortie\nest une forêt de multifusions ; les couvertures sont des unions de feuilles,\nsans deltas de continuations FULL. Le contre-exemple de shell AB=(0,0,0),\n(2,0,0), C=(1,1,0) borne expressément la règle des naissances. Une facette\nnon-Gabriel à un seul intrus rejoint éventuellement une fusion, pas\nnécessairement un unique apex strict : cette nuance est corrigée.\n\nVotre précision sur le manuscrit est conservée : première incidence Gamma\nest une politique d'affectation des masses possible, pas une prescription\ntemporelle explicite de l'Algorithme 1. La masse ne doit pas étendre en\nsilence le contrat du seul arbre. Pour FULL, merci de privilégier la\ncontrelecture des naissances/minima, du rejeu sans deltas ponctuels et de\nl'ancre inférieure (la feuille F supérieure est une directe inférieure\nau même niveau fermé). Le nombre de nœuds est linéaire en minima Gabriel,\npas nécessairement en n. Aucun index réservé pour l'instant.\n",
+  "theorem": {
+    "object": "Nontrivial facet components for K>=2 with their point unions, abstract ancestry and exact open/closed cuts; normative point roots for K1.",
+    "regular_plateau": "A plateau with no Gabriel coface induces a point-coverage preserving bijection from strict to closed reduced components.",
+    "simultaneity": "Equal new facet contact identifies miniballs and gives a strict replacement coface connecting the old apexes; strict contacts already share their apex.",
+    "window_extension": "For any non-Gabriel coface in accepted rank-window domain, p+s>=K+2, by regular census if within window or directly if above window. Saturated strict graph theorem4.2 provides the old connected apex even for irregular high-rank balls.",
+    "portal": "At first direct use a of a still unseen regular facet, J>=2 implies lambda=beta<a and an old apex; J<=1 has no missed earlier direct incidence provided all prior direct uses remain represented.",
+    "construction_invariants": [
+      "Snapshot strict parents before the entire equal-level batch.",
+      "Retain facet aliases even for direct continuations omitted from final output.",
+      "Validate a terminal strict suffix before caching and normalize its token to the current strict snapshot.",
+      "Compute point deltas relative to each component parent union, not globally seen points."
+    ]
+  },
+  "limits": [
+    "No equality of facet membership or marked incidence payload is concluded.",
+    "Leaf masses under first-Gamma-incidence assignment can change at omitted values; that assignment is a separate contract.",
+    "Global regularity is not inferred from accepted rank-window domain; a new descent must certify its own visited balls or reuse certified suffixes.",
+    "No cost, product implementation, complete pipeline replay or new exact/public status follows from this proof."
+  ],
+  "new_counterexample_found": false,
+  "new_cpp_builds": 0,
+  "new_engine_runs": 0,
+  "git_mutations": 0,
+  "GCP": "non utilisé"
+}

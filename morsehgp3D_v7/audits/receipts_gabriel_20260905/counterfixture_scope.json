@@ -1,0 +1,182 @@
+{
+  "status": "completed_bounded_mathematical_check",
+  "public_status": "not_claimed",
+  "fixture_id": "E5_minus_B_contractible_silent_level",
+  "points": {
+    "A": [
+      0,
+      0,
+      7
+    ],
+    "C": [
+      1,
+      4,
+      0
+    ],
+    "D": [
+      0,
+      0,
+      1
+    ],
+    "E": [
+      4,
+      1,
+      2
+    ]
+  },
+  "order": 2,
+  "method": "Quatre certificats de MEB rationnels contrôlés par convexité positive, égalités sur support et enclosure. Aucun moteur, énumération géométrique exhaustive ou benchmark. Les tables de composantes ci-dessous résultent des quatre cofaces explicitement listées.",
+  "minimality": "Quatre points sont nécessaires à une coface non-Gabriel de cardinal trois ayant un intrus strict extérieur. Ce n’est pas une assertion de minimalité globale pour toutes les notions de contre-exemple HGP.",
+  "certificates": [
+    {
+      "coface": "CDE",
+      "center": [
+        "9/5",
+        "9/5",
+        "1"
+      ],
+      "squared_radius": "162/25",
+      "positive_support_barycentrics": {
+        "C": "9/25",
+        "D": "7/25",
+        "E": "9/25"
+      },
+      "powers": {
+        "A": "36",
+        "C": "0",
+        "D": "0",
+        "E": "0"
+      },
+      "gabriel": true
+    },
+    {
+      "coface": "ADE",
+      "center": [
+        "24/17",
+        "6/17",
+        "4"
+      ],
+      "squared_radius": "189/17",
+      "positive_support_barycentrics": {
+        "A": "15/34",
+        "D": "7/34",
+        "E": "6/17"
+      },
+      "powers": {
+        "A": "0",
+        "C": "312/17",
+        "D": "0",
+        "E": "0"
+      },
+      "gabriel": true
+    },
+    {
+      "coface": "ACD",
+      "center": [
+        "1/2",
+        "2",
+        "7/2"
+      ],
+      "squared_radius": "33/2",
+      "positive_support_barycentrics": {
+        "A": "1/2",
+        "C": "1/2"
+      },
+      "powers": {
+        "A": "0",
+        "C": "0",
+        "D": "-6",
+        "E": "-1"
+      },
+      "gabriel": false
+    },
+    {
+      "coface": "ACE",
+      "center": [
+        "1/2",
+        "2",
+        "7/2"
+      ],
+      "squared_radius": "33/2",
+      "positive_support_barycentrics": {
+        "A": "1/2",
+        "C": "1/2"
+      },
+      "powers": {
+        "A": "0",
+        "C": "0",
+        "D": "-6",
+        "E": "-1"
+      },
+      "gabriel": false
+    }
+  ],
+  "closed_reduced_states": [
+    {
+      "level": "162/25",
+      "facets": [
+        "CD",
+        "CE",
+        "DE"
+      ],
+      "points": [
+        "C",
+        "D",
+        "E"
+      ],
+      "old_parents": 0,
+      "event": "birth"
+    },
+    {
+      "level": "189/17",
+      "facets": [
+        "AD",
+        "AE",
+        "CD",
+        "CE",
+        "DE"
+      ],
+      "points": [
+        "A",
+        "C",
+        "D",
+        "E"
+      ],
+      "old_parents": 1,
+      "added_points": [
+        "A"
+      ],
+      "event": "continuation_with_point_growth"
+    },
+    {
+      "level": "33/2",
+      "facets": [
+        "AC",
+        "AD",
+        "AE",
+        "CD",
+        "CE",
+        "DE"
+      ],
+      "points": [
+        "A",
+        "C",
+        "D",
+        "E"
+      ],
+      "old_parents": 1,
+      "added_points": [],
+      "event": "contractible_for_abstract_components_and_points_only"
+    }
+  ],
+  "source_sha256": {
+    "morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md": "2793de827ff58717d9f784cfe0c5d58ba5b2fc9bc8f9a6b4641592ef82374b18",
+    "docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md": "b514de331edfb6b81a3072e423a0d598e43619fde0cd6fad75fe2e7811c16574",
+    "tests/fixtures/regressions/gabriel_point_set_counterexample.json": "0c74c429f9cec309adab21d83c133d635743c63858de19d287e303d675733d82",
+    "morsehgp3D_v7/audits/CERTIFICAT_HORIZONTAL_COURANT.md": "b275e66955d990be8c5de9aba1b57a88b19dd1c0958ce2e6e959382e6e796e27",
+    "morsehgp3D_v7/audits/CONTRAT_VERTICAL_COURANT.md": "711bd2d979e2c985c4b70c9c78c4297f2ecfadabe0270d2ffe5e0c80c38525cb",
+    "morsehgp3D_v7/audits/CONTRAT_MASSES_VOTE_COURANT.md": "095af1800dedb4df24a983fa8f76975453633c118bd550201fbeecd65af7088d",
+    "audits/COORDINATION_MORSEHGP3D_V7.md": "0c0029ddc4901400f0723daa5dd66b1eaab10d33be7bd065fdaff97ed0651ca1"
+  },
+  "gcp": "not_used"
+}

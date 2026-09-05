@@ -1,0 +1,260 @@
+{
+  "schema": "mhgp7-gabriel-full-proof-review-v1",
+  "date_utc": "2026-09-05",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "status": "full_hgp_leaf_and_merge_certificate_proved_on_declared_regular_or_rank_window_domain",
+  "note": {
+    "path": "morsehgp3D_v7/audits/receipts_gabriel_20260905/full_proof_review.md",
+    "sha256": "921b438f06ae5e6599536c01c27c1574c8c115d046fcf0defbe3124323fecf3d"
+  },
+  "sources": [
+    {
+      "path": "morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md",
+      "bytes": 24868,
+      "sha256": "0b9cd8e17636fcaeb2211bc2c9446bc7ebc6a356e07c399c42529a6f84c9abfd"
+    },
+    {
+      "path": "audits/COORDINATION_MORSEHGP3D_V7.md",
+      "bytes": 38951,
+      "sha256": "473d8fd41141ace2e06103a698eed1d4637232a59d4b86b9f238b419a8ac6cdc"
+    },
+    {
+      "path": "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf",
+      "bytes": 14529297,
+      "sha256": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef"
+    },
+    {
+      "path": "docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md",
+      "bytes": 47067,
+      "sha256": "b514de331edfb6b81a3072e423a0d598e43619fde0cd6fad75fe2e7811c16574"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/CERTIFICAT_HORIZONTAL_COURANT.md",
+      "bytes": 15608,
+      "sha256": "b275e66955d990be8c5de9aba1b57a88b19dd1c0958ce2e6e959382e6e796e27"
+    },
+    {
+      "path": "morsehgp3D_v7/docs/PREUVE_HORIZONTALE_COMPOSITION.md",
+      "bytes": 24206,
+      "sha256": "5aba4f18a90e4fabf05503ee2e420afbb079b72956ef7ec6bfdafd6ea3422e70"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/receipts_gabriel_20260905/level_proof_review.md",
+      "bytes": 19286,
+      "sha256": "6c490b57c167aa3eaedfec28ec922c2e73963aafa4bfb113e266017490abec20"
+    }
+  ],
+  "pdf_pages_directly_reread_this_continuation": [
+    84,
+    85
+  ],
+  "pdf_pages_also_reread_in_preceding_reduced_review": [
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117
+  ],
+  "object": "All connected components of the elementary Gamma_K including isolated K-facets, their abstract ancestry, exact strict/closed cuts and point unions.",
+  "theorem": {
+    "births": "Exactly Gabriel facets of cardinal K, born at their minimum enclosing ball squared radius; no coface is incident at that same birth level on regular input.",
+    "no_coface_birth": "Every regular coface has at least two strict pre-existing facets whose union is its entire point set.",
+    "point_conservation": "Every full post-batch component formed by cofaces covers exactly the union of its strict parents. Full one-parent continuations have zero new points.",
+    "merges": "A multi-parent batch contains a Gabriel coface of cardinal K+1; pure non-Gabriel groups have a single strict apex by confluence.",
+    "window": "For requested orders1..M use rank cutoff min(M+1,n). All Gabriel K-facet births are within rank K. Irregular above-window blocks are inert via saturated strict connectivity.",
+    "terminal_order": "K=n has the single Gabriel facet X born at beta(X), no coface, and one persistent full leaf. It is not the empty reduced hierarchy.",
+    "vertical": "For K>=2, a source leaf F is a Gabriel coface at orderK-1. Its target is the lower component after the entire equal-level closed batch; subsequent maps follow horizontal normalization and naturality.",
+    "certificate": "Leaf IDs with K PointIds and exact birth levels, plus merge IDs, strict parent sets and exact levels, suffice for full abstract ancestry and point unions. No continuation point deltas required."
+  },
+  "analytic_fixtures": [
+    {
+      "name": "regular_single_intruder_full_merge_and_terminal_leaf",
+      "kind": "analytic_exact_derivation_no_product_execution",
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          0
+        ],
+        [
+          2,
+          1,
+          0
+        ]
+      ],
+      "point_ids": [
+        0,
+        1,
+        2
+      ],
+      "global_regularity": true,
+      "squared_distances": {
+        "AZ": 5,
+        "BZ": 5,
+        "AB": 16
+      },
+      "AB_power_at_Z": -3,
+      "small_pair_power_at_foreign_endpoint": 8,
+      "K1": {
+        "leaves_at_0": [
+          [
+            0
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ],
+        "strict_cut_0_roots": [],
+        "closed_cut_0_root_points": [
+          [
+            0
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ],
+        "multifusion_level": "5/4",
+        "parent_point_sets": [
+          [
+            0
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ],
+        "output_points": [
+          0,
+          1,
+          2
+        ]
+      },
+      "K2": {
+        "gabriel_births": [
+          {
+            "label": [
+              0,
+              2
+            ],
+            "level": "5/4"
+          },
+          {
+            "label": [
+              1,
+              2
+            ],
+            "level": "5/4"
+          }
+        ],
+        "non_gabriel_facet": [
+          0,
+          1
+        ],
+        "foreign_strict_intruders": [
+          2
+        ],
+        "gabriel_coface": [
+          0,
+          1,
+          2
+        ],
+        "fusion_level": "4",
+        "strict_parent_points": [
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "output_points": [
+          0,
+          1,
+          2
+        ],
+        "points_added_beyond_parent_union": [],
+        "reduced_same_level_behavior": "birth, because both full strict parents are isolated and omitted by reduced"
+      },
+      "K3": {
+        "only_leaf": [
+          0,
+          1,
+          2
+        ],
+        "birth_level": "4",
+        "cofaces": [],
+        "strict_cut_4_roots": [],
+        "closed_cut_4_root_points": [
+          [
+            0,
+            1,
+            2
+          ]
+        ]
+      },
+      "vertical_boundary": "The two K2 leaves map to the same K1 component at the closed5/4 batch. The K3 leaf maps after the closed K2 fusion at4."
+    },
+    {
+      "name": "gabriel_extra_shell_is_not_an_isolated_full_birth",
+      "kind": "constructor_boundary_counterfixture_rederived_analytically_no_product_execution",
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          0
+        ]
+      ],
+      "AB_is_Gabriel_by_strict_interior": true,
+      "AB_has_external_shell_point": 2,
+      "beta_AB": "1",
+      "beta_ABC": "1",
+      "beta_AC": "1/2",
+      "beta_BC": "1/2",
+      "AB_is_a_new_isolated_component": false,
+      "rank_window_status": "excluded: minimal support size2, p0, shell size3 within relevant rank cutoff"
+    }
+  ],
+  "implementation_limits": [
+    "Product E/F still publishes the reduced object; its tests and portal model are not attributed to full HGP.",
+    "Full construction must record isolated Gabriel facets before first coface use, including K=n without cofaces.",
+    "New portal descents must retain their own regularity checks or certified suffixes on accepted rank-window input.",
+    "The birth-minima leaf universe is not automatically the weighted facet universe of manuscript section9.1.",
+    "No runtime, memory gain, hostile schema validator, full implementation or public exact status is claimed."
+  ],
+  "new_cpp_builds": 0,
+  "new_engine_runs": 0,
+  "git_mutations": 0,
+  "GCP": "non utilisé"
+}

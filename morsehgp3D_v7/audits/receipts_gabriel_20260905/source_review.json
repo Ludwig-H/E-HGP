@@ -1,0 +1,15 @@
+{
+  "schema": "mhgp7-gabriel-source-review-v1",
+  "reviewed_utc": "2026-09-05T13:27:41.603086+00:00",
+  "inputs": {
+    "morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md": "d9ce7616a3633d8585134147537ee3bd87e83a7cf6cdee8b9a3261a055538b2e",
+    "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef",
+    "docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md": "b514de331edfb6b81a3072e423a0d598e43619fde0cd6fad75fe2e7811c16574",
+    "docs/math/TOUR_BOULES_SATUREES.md": "40f67fb11cf4b8ee1f107560e8a5c4b0320c1d8407bbf99ad237187e2c51f982",
+    "morsehgp3D_v7/docs/PREUVE_HORIZONTALE_COMPOSITION.md": "5aba4f18a90e4fabf05503ee2e420afbb079b72956ef7ec6bfdafd6ea3422e70"
+  },
+  "constructor_capture": "constructor_note_at_review.md.txt",
+  "scope": "Mathematical sufficiency for reduced component genealogy with point coverage; conditional portal construction; weighted policies kept separate",
+  "public_status": "not_claimed",
+  "gcp": "not_used"
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "mhgp7-gabriel-full-source-review-v1",
+  "reviewed_utc": "2026-09-05T14:01:57.797725+00:00",
+  "constructor_commit": "94a3513b081bd61a8276c3e73e7d91ca5aa42abe",
+  "constructor_capture": "constructor_full_note_at_review.md.txt",
+  "constructor_sha256": "0b9cd8e17636fcaeb2211bc2c9446bc7ebc6a356e07c399c42529a6f84c9abfd",
+  "separate_previous_reduced_review": "source_review.json",
+  "scope": "FULL mathematical sufficiency, window extension, vertical anchors, independent bounded audit models and journal projection; no C++ integration",
+  "public_status": "not_claimed",
+  "gcp": "not_used"
+}

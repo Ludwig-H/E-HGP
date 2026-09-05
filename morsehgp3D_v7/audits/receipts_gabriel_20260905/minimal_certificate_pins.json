@@ -1,0 +1,99 @@
+{
+  "schema": "mhgp7-minimal-certificate-source-review-pins-v1",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "observed_before_utc": "2026-09-05T13:18:32.909959+00:00",
+  "observed_after_utc": "2026-09-05T13:18:32.975707+00:00",
+  "source_before": {
+    "morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md": {
+      "sha256": "2793de827ff58717d9f784cfe0c5d58ba5b2fc9bc8f9a6b4641592ef82374b18",
+      "bytes": 17789
+    },
+    "audits/COORDINATION_MORSEHGP3D_V7.md": {
+      "sha256": "0c0029ddc4901400f0723daa5dd66b1eaab10d33be7bd065fdaff97ed0651ca1",
+      "bytes": 35427
+    },
+    "morsehgp3D_v7/audits/CONTRAT_VERTICAL_COURANT.md": {
+      "sha256": "711bd2d979e2c985c4b70c9c78c4297f2ecfadabe0270d2ffe5e0c80c38525cb",
+      "bytes": 33863
+    },
+    "morsehgp3D_v7/audits/CONTRAT_MASSES_VOTE_COURANT.md": {
+      "sha256": "095af1800dedb4df24a983fa8f76975453633c118bd550201fbeecd65af7088d",
+      "bytes": 21895
+    },
+    "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf": {
+      "sha256": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef",
+      "bytes": 14529297
+    }
+  },
+  "source_after": {
+    "morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md": {
+      "sha256": "2793de827ff58717d9f784cfe0c5d58ba5b2fc9bc8f9a6b4641592ef82374b18",
+      "bytes": 17789
+    },
+    "audits/COORDINATION_MORSEHGP3D_V7.md": {
+      "sha256": "0c0029ddc4901400f0723daa5dd66b1eaab10d33be7bd065fdaff97ed0651ca1",
+      "bytes": 35427
+    },
+    "morsehgp3D_v7/audits/CONTRAT_VERTICAL_COURANT.md": {
+      "sha256": "711bd2d979e2c985c4b70c9c78c4297f2ecfadabe0270d2ffe5e0c80c38525cb",
+      "bytes": 33863
+    },
+    "morsehgp3D_v7/audits/CONTRAT_MASSES_VOTE_COURANT.md": {
+      "sha256": "095af1800dedb4df24a983fa8f76975453633c118bd550201fbeecd65af7088d",
+      "bytes": 21895
+    },
+    "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf": {
+      "sha256": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef",
+      "bytes": 14529297
+    }
+  },
+  "sources_stable": true,
+  "thesis_pages_read": {
+    "pdf": [
+      122,
+      123,
+      124,
+      125,
+      126
+    ],
+    "printed": [
+      96,
+      97,
+      98,
+      99,
+      100
+    ],
+    "sections": [
+      "9.1",
+      "Algorithm 1"
+    ]
+  },
+  "extract": {
+    "path": "minimal_certificate_manuscript_pdf122_126.txt",
+    "sha256": "e34828fac374ee9cc5db1294ac17b798c82ddfa34537de84f56e12b9caf9c02a",
+    "bytes": 13456,
+    "command": [
+      "pdftotext",
+      "-f",
+      "122",
+      "-l",
+      "126",
+      "-layout",
+      "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf",
+      "-"
+    ],
+    "exit_code": 0
+  },
+  "auditor_engine_or_build_runs": 0,
+  "git_mutations": 0,
+  "GCP": "non utilisé",
+  "review": {
+    "path": "minimal_certificate_review.md",
+    "sha256": "16d1a0597e8199401be62e0ef6337d5df64b1c9d70506448a1caa35a6330a411",
+    "bytes": 7925
+  }
+}

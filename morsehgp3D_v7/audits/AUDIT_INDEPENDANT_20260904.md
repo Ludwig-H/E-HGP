@@ -1,6 +1,6 @@
 # Audit indépendant courant de MorseHGP3D v7
 
-Actualisé le 5 septembre 2026 depuis `2e3e7e94e597e14279b286d978766abfd277579c` (publication constructeur, sources F inchangées) ; raccord privé MEB au Builder qualifié, acquis verticaux/p3 et paliers F conservés.
+Actualisé le 5 septembre 2026 après `94a3513b081bd61a8276c3e73e7d91ca5aa42abe` ; suffisance FULL et modèles de portails fermés, produit F réduit et acquis MEB/verticaux/p3 conservés.
 Toutes les écritures restent dans `morsehgp3D_v7/audits/`.
 
 La suite **D** de 323 portes a été reconstruite et exécutée par l'auditeur.
@@ -19,6 +19,10 @@ public_status=not_claimed
 ```
 
 ## Avis pour le constructeur
+
+**Le [certificat FULL du manuscrit](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md), isolés inclus, peut être beaucoup plus petit que Gamma.** Il suffit, dans le domaine déclaré, des minima Gabriel de cardinal K avec labels et niveaux, puis des vraies multifusions aux niveaux Gabriel de cardinal K+1 avec leurs parents. Les couvertures sont les unions des feuilles ; aucune croissance ponctuelle FULL n’est à publier. Les rattachements restent à certifier pendant la construction. K=n conserve sa feuille terminale ; la verticale exige les ancres inférieures fermées ; les minima ne remplacent pas l’univers pondéré de l’Algorithme 1.
+
+La [qualification des modèles Python](receipts_gabriel_20260905/README.md) retrouve Gamma sur 2 265 coupes FULL de 50 ordres. Un lecteur séparé des seuls journaux retrouve les 100 événements réduits sur les 36 ordres communs. Normal et `-O` concordent ; les mutants restent ceux des modèles d’audit. Le futur lecteur C++ structurel, la découverte industrielle des portails et leurs coûts ne sont pas qualifiés par ces résultats.
 
 **Le [certificat horizontal réduit](CERTIFICAT_HORIZONTAL_COURANT.md) est fermé sur E dans son domaine CPU explicite.** La preuve relie la fenêtre de boules, le catalogue direct, les suffixes d'ancrage, le fold et les seuls deltas exportés. La bijection par inclusion des facettes conserve les points et commute entre coupes ; la régularité géométrique globale n'est pas exigée.
 
@@ -45,7 +49,7 @@ masses normalisées et le vote comme traitement aval.
 La suppression Gabriel brute de la proposition 6 et du théorème 5 ne
 peut pas servir de certificat : la
 [contre-fixture E5](../../docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md)
-démontre une attache silencieuse nécessaire à une fusion ultérieure.
+démontre une attache silencieuse nécessaire pour éviter une fausse naissance puis une fausse fusion dans le fold brut. Elle ne réfute pas les niveaux Gabriel munis des bons parents.
 La [composition corrigée](../docs/PREUVE_HORIZONTALE_COMPOSITION.md)
 est donc l'autorité conditionnelle utile. Les observations de percolation
 et les expériences historiques de la thèse ne sont ni une borne de coût
@@ -63,6 +67,7 @@ sont contenus implicitement dans cet export.
 
 | Domaine | Conclusion vérifiée | Preuves |
 | --- | --- | --- |
+| HGP FULL et projection réduite | Preuves de minima, absence de croissance FULL, fenêtre et ancres ; modèles bornés sur 2 265 coupes FULL et 100 événements réduits retrouvés | [Décision et reçus](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md) |
 | Composition horizontale réduite E | Preuve assemblée ; pipeline et lecteur seuls contre Gamma rationnel, fold et niveaux égaux, domaine CLI | [Certificat et reçus](CERTIFICAT_HORIZONTAL_COURANT.md) |
 | Qualification F | Conservation LIFO/masques/comptes ; 339/339 Release et 48/48 ciblées Release/ASan-UBSan contre-vérifiées | [Reçus propres F](receipts_vertical_20260905/f_qualification/) |
 | Reconstruction verticale | Lecture sans géométrie : 764 cartes, 720 carrés et 400 compositions sur les seules sorties E par provenance ; réindexage à cinq misses et multifusion mathématique séparés | [Preuve, lecteur et reçus](receipts_resolver_20260905/README.md) |
@@ -100,13 +105,16 @@ Leurs reçus bruts ne sont pas réécrits.
 
 ## Prochaines fermetures utiles
 
-1. **Compléter l'objet demandé par le contrat industriel.**
-   L'archive déclare `vertical_maps=none`. Porter le scan total de `born`, la propagation des ancres et
-   leur export selon le contrat vertical désormais démontré, puis
-   sérialiser les contributions d’incidence du vote du § 9.1 selon
-   leur univers déclaré ; les seuls deltas H0 ne les déterminent pas.
-   Préserver les facettes comme feuilles ; le recouvrement apparaît dans
-   la projection et ne nécessite pas de laminarisation arbitraire.
+1. **Construire le certificat FULL et son supplément déclaré.**
+   Le lecteur structurel doit conserver les minima dès leur naissance,
+   les parents stricts des multifusions atomiques et la feuille terminale K=n.
+   Qualifier ensuite le constructeur par portails, ses alias et ses plafonds,
+   puis les ancres inférieures au côté fermé. L’archive actuelle déclare
+   `vertical_maps=none` ; le scan `born` déjà qualifié appartient au profil réduit.
+   Les facettes pondérées, les scores, les dates d’affectation et la condensation
+   sont un contrat séparé : les minima FULL ne remplacent pas ces feuilles.
+   La partition des facettes et la projection vers les points conservent
+   le recouvrement sans laminarisation arbitraire.
 2. **Intégrer le Builder privé qualifié et ses consommateurs.**
    La persistance du budget, le repli sans proposition et les miroirs
    sont qualifiés dans l’overlay privé. Porter ces octets sous le contrôle

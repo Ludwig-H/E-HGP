@@ -1,0 +1,2449 @@
+{
+  "schema": "mhgp7-full-to-reduced-journal-replay-v1",
+  "status": "completed_bounded_journal_comparison",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "python_optimized": true,
+  "inputs": [
+    {
+      "path": "full_normal.json",
+      "sha256": "00911669a9045b0bd466ee991d9972e764c46a0fa941d7ab79cfeca3082e627f",
+      "bytes": 96915
+    },
+    {
+      "path": "portal_normal.json",
+      "sha256": "327965e3aaa9cf5d5993c9048f0a556239c80d682d135105a9bb8515b194d5f9",
+      "bytes": 48230
+    }
+  ],
+  "inspector_sha256": "81f459f293baa9173b7ed2296a0a18fd73a9229097870de0515aeeb85ca4dc43",
+  "counts": {
+    "common_orders": 36,
+    "reference_events": 100,
+    "matched_events": 100,
+    "full_orders": 50,
+    "full_events": 285,
+    "projected_events": 105,
+    "omitted_pointless_continuations": 2,
+    "full_projection_cuts": 1610,
+    "paired_reference_cuts": 1288,
+    "k1_zero_boundaries": 20,
+    "full_minimum_leaves": 178,
+    "full_merges": 107,
+    "terminal_empty_orders": 10
+  },
+  "records": [
+    {
+      "case": "E5",
+      "reversed_ids": false,
+      "K": 1,
+      "comparison": "paired_reduced_journal",
+      "cuts": 36,
+      "root_PointIds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "projected_journal": [
+        {
+          "level": "9/2",
+          "output": 100005,
+          "parents": [
+            100002,
+            100003,
+            100004
+          ],
+          "added_points": []
+        },
+        {
+          "level": "9",
+          "output": 100006,
+          "parents": [
+            100000,
+            100005
+          ],
+          "added_points": []
+        },
+        {
+          "level": "31/2",
+          "output": 100007,
+          "parents": [
+            100001,
+            100006
+          ],
+          "added_points": []
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ],
+        [
+          100001,
+          1
+        ],
+        [
+          100002,
+          2
+        ],
+        [
+          100003,
+          3
+        ],
+        [
+          100004,
+          4
+        ],
+        [
+          100005,
+          5
+        ],
+        [
+          100006,
+          6
+        ],
+        [
+          100007,
+          7
+        ]
+      ],
+      "full_leaves": 5,
+      "full_merges": 3,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "E5",
+      "reversed_ids": false,
+      "K": 2,
+      "comparison": "paired_reduced_journal",
+      "cuts": 36,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "162/25",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "level": "189/17",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            0
+          ]
+        },
+        {
+          "level": "83886/3563",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            1
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 7,
+      "full_merges": 3,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "E5",
+      "reversed_ids": false,
+      "K": 3,
+      "comparison": "paired_reduced_journal",
+      "cuts": 36,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "33/2",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "level": "738/29",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            1
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 5,
+      "full_merges": 3,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 1
+    },
+    {
+      "case": "E5",
+      "reversed_ids": false,
+      "K": 4,
+      "comparison": "paired_reduced_journal",
+      "cuts": 36,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "2189/81",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 4,
+      "full_merges": 1,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "E5",
+      "reversed_ids": false,
+      "K": 5,
+      "comparison": "terminal_empty",
+      "cuts": 36,
+      "root_PointIds": [],
+      "projected_journal": [],
+      "history_mapping_to_reference": null,
+      "full_leaves": 1,
+      "full_merges": 0,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "E5",
+      "reversed_ids": true,
+      "K": 1,
+      "comparison": "paired_reduced_journal",
+      "cuts": 36,
+      "root_PointIds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "projected_journal": [
+        {
+          "level": "9/2",
+          "output": 100005,
+          "parents": [
+            100000,
+            100001,
+            100002
+          ],
+          "added_points": []
+        },
+        {
+          "level": "9",
+          "output": 100006,
+          "parents": [
+            100004,
+            100005
+          ],
+          "added_points": []
+        },
+        {
+          "level": "31/2",
+          "output": 100007,
+          "parents": [
+            100003,
+            100006
+          ],
+          "added_points": []
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ],
+        [
+          100001,
+          1
+        ],
+        [
+          100002,
+          2
+        ],
+        [
+          100003,
+          3
+        ],
+        [
+          100004,
+          4
+        ],
+        [
+          100005,
+          5
+        ],
+        [
+          100006,
+          6
+        ],
+        [
+          100007,
+          7
+        ]
+      ],
+      "full_leaves": 5,
+      "full_merges": 3,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "E5",
+      "reversed_ids": true,
+      "K": 2,
+      "comparison": "paired_reduced_journal",
+      "cuts": 36,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "162/25",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "level": "189/17",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            4
+          ]
+        },
+        {
+          "level": "83886/3563",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            3
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 7,
+      "full_merges": 3,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "E5",
+      "reversed_ids": true,
+      "K": 3,
+      "comparison": "paired_reduced_journal",
+      "cuts": 36,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "33/2",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2,
+            4
+          ]
+        },
+        {
+          "level": "738/29",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            3
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 5,
+      "full_merges": 3,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 1
+    },
+    {
+      "case": "E5",
+      "reversed_ids": true,
+      "K": 4,
+      "comparison": "paired_reduced_journal",
+      "cuts": 36,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "2189/81",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 4,
+      "full_merges": 1,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "E5",
+      "reversed_ids": true,
+      "K": 5,
+      "comparison": "terminal_empty",
+      "cuts": 36,
+      "root_PointIds": [],
+      "projected_journal": [],
+      "history_mapping_to_reference": null,
+      "full_leaves": 1,
+      "full_merges": 0,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": false,
+      "K": 1,
+      "comparison": "paired_reduced_journal",
+      "cuts": 18,
+      "root_PointIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "projected_journal": [
+        {
+          "level": "9/2",
+          "output": 100004,
+          "parents": [
+            100001,
+            100002,
+            100003
+          ],
+          "added_points": []
+        },
+        {
+          "level": "9",
+          "output": 100005,
+          "parents": [
+            100000,
+            100004
+          ],
+          "added_points": []
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ],
+        [
+          100001,
+          1
+        ],
+        [
+          100002,
+          2
+        ],
+        [
+          100003,
+          3
+        ],
+        [
+          100004,
+          4
+        ],
+        [
+          100005,
+          5
+        ]
+      ],
+      "full_leaves": 4,
+      "full_merges": 2,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": false,
+      "K": 2,
+      "comparison": "paired_reduced_journal",
+      "cuts": 18,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "162/25",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "level": "189/17",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            0
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 5,
+      "full_merges": 2,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": false,
+      "K": 3,
+      "comparison": "paired_reduced_journal",
+      "cuts": 18,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "33/2",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 2,
+      "full_merges": 1,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": false,
+      "K": 4,
+      "comparison": "terminal_empty",
+      "cuts": 18,
+      "root_PointIds": [],
+      "projected_journal": [],
+      "history_mapping_to_reference": null,
+      "full_leaves": 1,
+      "full_merges": 0,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": true,
+      "K": 1,
+      "comparison": "paired_reduced_journal",
+      "cuts": 18,
+      "root_PointIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "projected_journal": [
+        {
+          "level": "9/2",
+          "output": 100004,
+          "parents": [
+            100000,
+            100001,
+            100002
+          ],
+          "added_points": []
+        },
+        {
+          "level": "9",
+          "output": 100005,
+          "parents": [
+            100003,
+            100004
+          ],
+          "added_points": []
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ],
+        [
+          100001,
+          1
+        ],
+        [
+          100002,
+          2
+        ],
+        [
+          100003,
+          3
+        ],
+        [
+          100004,
+          4
+        ],
+        [
+          100005,
+          5
+        ]
+      ],
+      "full_leaves": 4,
+      "full_merges": 2,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": true,
+      "K": 2,
+      "comparison": "paired_reduced_journal",
+      "cuts": 18,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "162/25",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "level": "189/17",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            3
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 5,
+      "full_merges": 2,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": true,
+      "K": 3,
+      "comparison": "paired_reduced_journal",
+      "cuts": 18,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "33/2",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 2,
+      "full_merges": 1,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "ACDE",
+      "reversed_ids": true,
+      "K": 4,
+      "comparison": "terminal_empty",
+      "cuts": 18,
+      "root_PointIds": [],
+      "projected_journal": [],
+      "history_mapping_to_reference": null,
+      "full_leaves": 1,
+      "full_merges": 0,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": false,
+      "K": 1,
+      "comparison": "paired_reduced_journal",
+      "cuts": 46,
+      "root_PointIds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "projected_journal": [
+        {
+          "level": "3/4",
+          "output": 100007,
+          "parents": [
+            100000,
+            100001
+          ],
+          "added_points": []
+        },
+        {
+          "level": "59/4",
+          "output": 100008,
+          "parents": [
+            100002,
+            100007
+          ],
+          "added_points": []
+        },
+        {
+          "level": "387/4",
+          "output": 100009,
+          "parents": [
+            100003,
+            100008
+          ],
+          "added_points": []
+        },
+        {
+          "level": "1419/4",
+          "output": 100010,
+          "parents": [
+            100004,
+            100009
+          ],
+          "added_points": []
+        },
+        {
+          "level": "3803/4",
+          "output": 100011,
+          "parents": [
+            100005,
+            100010
+          ],
+          "added_points": []
+        },
+        {
+          "level": "8403/4",
+          "output": 100012,
+          "parents": [
+            100006,
+            100011
+          ],
+          "added_points": []
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ],
+        [
+          100001,
+          1
+        ],
+        [
+          100002,
+          2
+        ],
+        [
+          100003,
+          3
+        ],
+        [
+          100004,
+          4
+        ],
+        [
+          100005,
+          5
+        ],
+        [
+          100006,
+          6
+        ],
+        [
+          100007,
+          7
+        ],
+        [
+          100008,
+          8
+        ],
+        [
+          100009,
+          9
+        ],
+        [
+          100010,
+          10
+        ],
+        [
+          100011,
+          11
+        ],
+        [
+          100012,
+          12
+        ]
+      ],
+      "full_leaves": 7,
+      "full_merges": 6,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": false,
+      "K": 2,
+      "comparison": "paired_reduced_journal",
+      "cuts": 46,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "21",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "level": "186",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            3
+          ]
+        },
+        {
+          "level": "821",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            4
+          ]
+        },
+        {
+          "level": "2466",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            5
+          ]
+        },
+        {
+          "level": "5877",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            6
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 6,
+      "full_merges": 5,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": false,
+      "K": 3,
+      "comparison": "paired_reduced_journal",
+      "cuts": 46,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "819/4",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "level": "4203/4",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            4
+          ]
+        },
+        {
+          "level": "14139/4",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            5
+          ]
+        },
+        {
+          "level": "36459/4",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            6
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 5,
+      "full_merges": 4,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": false,
+      "K": 4,
+      "comparison": "paired_reduced_journal",
+      "cuts": 46,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "1092",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "level": "3992",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            5
+          ]
+        },
+        {
+          "level": "11076",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            6
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 4,
+      "full_merges": 3,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": false,
+      "K": 5,
+      "comparison": "paired_reduced_journal",
+      "cuts": 46,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "16275/4",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "level": "47475/4",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            6
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 3,
+      "full_merges": 2,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": false,
+      "K": 6,
+      "comparison": "paired_reduced_journal",
+      "cuts": 46,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "11997",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 2,
+      "full_merges": 1,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": false,
+      "K": 7,
+      "comparison": "terminal_empty",
+      "cuts": 46,
+      "root_PointIds": [],
+      "projected_journal": [],
+      "history_mapping_to_reference": null,
+      "full_leaves": 1,
+      "full_merges": 0,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": true,
+      "K": 1,
+      "comparison": "paired_reduced_journal",
+      "cuts": 46,
+      "root_PointIds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "projected_journal": [
+        {
+          "level": "3/4",
+          "output": 100007,
+          "parents": [
+            100005,
+            100006
+          ],
+          "added_points": []
+        },
+        {
+          "level": "59/4",
+          "output": 100008,
+          "parents": [
+            100004,
+            100007
+          ],
+          "added_points": []
+        },
+        {
+          "level": "387/4",
+          "output": 100009,
+          "parents": [
+            100003,
+            100008
+          ],
+          "added_points": []
+        },
+        {
+          "level": "1419/4",
+          "output": 100010,
+          "parents": [
+            100002,
+            100009
+          ],
+          "added_points": []
+        },
+        {
+          "level": "3803/4",
+          "output": 100011,
+          "parents": [
+            100001,
+            100010
+          ],
+          "added_points": []
+        },
+        {
+          "level": "8403/4",
+          "output": 100012,
+          "parents": [
+            100000,
+            100011
+          ],
+          "added_points": []
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ],
+        [
+          100001,
+          1
+        ],
+        [
+          100002,
+          2
+        ],
+        [
+          100003,
+          3
+        ],
+        [
+          100004,
+          4
+        ],
+        [
+          100005,
+          5
+        ],
+        [
+          100006,
+          6
+        ],
+        [
+          100007,
+          7
+        ],
+        [
+          100008,
+          8
+        ],
+        [
+          100009,
+          9
+        ],
+        [
+          100010,
+          10
+        ],
+        [
+          100011,
+          11
+        ],
+        [
+          100012,
+          12
+        ]
+      ],
+      "full_leaves": 7,
+      "full_merges": 6,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": true,
+      "K": 2,
+      "comparison": "paired_reduced_journal",
+      "cuts": 46,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "21",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "level": "186",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            3
+          ]
+        },
+        {
+          "level": "821",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            2
+          ]
+        },
+        {
+          "level": "2466",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            1
+          ]
+        },
+        {
+          "level": "5877",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            0
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 6,
+      "full_merges": 5,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": true,
+      "K": 3,
+      "comparison": "paired_reduced_journal",
+      "cuts": 46,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "819/4",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "level": "4203/4",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            2
+          ]
+        },
+        {
+          "level": "14139/4",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            1
+          ]
+        },
+        {
+          "level": "36459/4",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            0
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 5,
+      "full_merges": 4,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": true,
+      "K": 4,
+      "comparison": "paired_reduced_journal",
+      "cuts": 46,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "1092",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "level": "3992",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            1
+          ]
+        },
+        {
+          "level": "11076",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            0
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 4,
+      "full_merges": 3,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": true,
+      "K": 5,
+      "comparison": "paired_reduced_journal",
+      "cuts": 46,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "16275/4",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "level": "47475/4",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            0
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 3,
+      "full_merges": 2,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": true,
+      "K": 6,
+      "comparison": "paired_reduced_journal",
+      "cuts": 46,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "11997",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 2,
+      "full_merges": 1,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "moment7",
+      "reversed_ids": true,
+      "K": 7,
+      "comparison": "terminal_empty",
+      "cuts": 46,
+      "root_PointIds": [],
+      "projected_journal": [],
+      "history_mapping_to_reference": null,
+      "full_leaves": 1,
+      "full_merges": 0,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": false,
+      "K": 1,
+      "comparison": "paired_reduced_journal",
+      "cuts": 34,
+      "root_PointIds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "projected_journal": [
+        {
+          "level": "3/4",
+          "output": 100006,
+          "parents": [
+            100000,
+            100001
+          ],
+          "added_points": []
+        },
+        {
+          "level": "59/4",
+          "output": 100007,
+          "parents": [
+            100002,
+            100006
+          ],
+          "added_points": []
+        },
+        {
+          "level": "110003/4",
+          "output": 100008,
+          "parents": [
+            100003,
+            100004
+          ],
+          "added_points": []
+        },
+        {
+          "level": "158139/4",
+          "output": 100009,
+          "parents": [
+            100005,
+            100008
+          ],
+          "added_points": []
+        },
+        {
+          "level": "248336",
+          "output": 100010,
+          "parents": [
+            100007,
+            100009
+          ],
+          "added_points": []
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ],
+        [
+          100001,
+          1
+        ],
+        [
+          100002,
+          2
+        ],
+        [
+          100003,
+          3
+        ],
+        [
+          100004,
+          4
+        ],
+        [
+          100005,
+          5
+        ],
+        [
+          100006,
+          6
+        ],
+        [
+          100007,
+          7
+        ],
+        [
+          100008,
+          8
+        ],
+        [
+          100009,
+          9
+        ],
+        [
+          100010,
+          10
+        ]
+      ],
+      "full_leaves": 6,
+      "full_merges": 5,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": false,
+      "K": 2,
+      "comparison": "paired_reduced_journal",
+      "cuts": 34,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "21",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "level": "132981",
+          "output": 100001,
+          "parents": [],
+          "added_points": [
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "level": "1007883/4",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            3
+          ]
+        },
+        {
+          "level": "1764099/4",
+          "output": 100002,
+          "parents": [
+            100000,
+            100001
+          ],
+          "added_points": []
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ],
+        [
+          100001,
+          1
+        ],
+        [
+          100002,
+          2
+        ]
+      ],
+      "full_leaves": 5,
+      "full_merges": 4,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": false,
+      "K": 3,
+      "comparison": "paired_reduced_journal",
+      "cuts": 34,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "252525",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "level": "445850",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            4
+          ]
+        },
+        {
+          "level": "744525",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            5
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 4,
+      "full_merges": 3,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": false,
+      "K": 4,
+      "comparison": "paired_reduced_journal",
+      "cuts": 34,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "1786323/4",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "level": "3003099/4",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            5
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 3,
+      "full_merges": 2,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": false,
+      "K": 5,
+      "comparison": "paired_reduced_journal",
+      "cuts": 34,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "751716",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 2,
+      "full_merges": 1,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": false,
+      "K": 6,
+      "comparison": "terminal_empty",
+      "cuts": 34,
+      "root_PointIds": [],
+      "projected_journal": [],
+      "history_mapping_to_reference": null,
+      "full_leaves": 1,
+      "full_merges": 0,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": true,
+      "K": 1,
+      "comparison": "paired_reduced_journal",
+      "cuts": 34,
+      "root_PointIds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "projected_journal": [
+        {
+          "level": "3/4",
+          "output": 100006,
+          "parents": [
+            100004,
+            100005
+          ],
+          "added_points": []
+        },
+        {
+          "level": "59/4",
+          "output": 100007,
+          "parents": [
+            100003,
+            100006
+          ],
+          "added_points": []
+        },
+        {
+          "level": "110003/4",
+          "output": 100008,
+          "parents": [
+            100001,
+            100002
+          ],
+          "added_points": []
+        },
+        {
+          "level": "158139/4",
+          "output": 100009,
+          "parents": [
+            100000,
+            100008
+          ],
+          "added_points": []
+        },
+        {
+          "level": "248336",
+          "output": 100010,
+          "parents": [
+            100007,
+            100009
+          ],
+          "added_points": []
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ],
+        [
+          100001,
+          1
+        ],
+        [
+          100002,
+          2
+        ],
+        [
+          100003,
+          3
+        ],
+        [
+          100004,
+          4
+        ],
+        [
+          100005,
+          5
+        ],
+        [
+          100006,
+          6
+        ],
+        [
+          100007,
+          7
+        ],
+        [
+          100008,
+          8
+        ],
+        [
+          100009,
+          9
+        ],
+        [
+          100010,
+          10
+        ]
+      ],
+      "full_leaves": 6,
+      "full_merges": 5,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": true,
+      "K": 2,
+      "comparison": "paired_reduced_journal",
+      "cuts": 34,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "21",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "level": "132981",
+          "output": 100001,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "level": "1007883/4",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            2
+          ]
+        },
+        {
+          "level": "1764099/4",
+          "output": 100002,
+          "parents": [
+            100000,
+            100001
+          ],
+          "added_points": []
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ],
+        [
+          100001,
+          1
+        ],
+        [
+          100002,
+          2
+        ]
+      ],
+      "full_leaves": 5,
+      "full_merges": 4,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": true,
+      "K": 3,
+      "comparison": "paired_reduced_journal",
+      "cuts": 34,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "252525",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "level": "445850",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            1
+          ]
+        },
+        {
+          "level": "744525",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            0
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 4,
+      "full_merges": 3,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": true,
+      "K": 4,
+      "comparison": "paired_reduced_journal",
+      "cuts": 34,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "1786323/4",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "level": "3003099/4",
+          "output": 100000,
+          "parents": [
+            100000
+          ],
+          "added_points": [
+            0
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 3,
+      "full_merges": 2,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": true,
+      "K": 5,
+      "comparison": "paired_reduced_journal",
+      "cuts": 34,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "751716",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "history_mapping_to_reference": [
+        [
+          100000,
+          0
+        ]
+      ],
+      "full_leaves": 2,
+      "full_merges": 1,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "two_triangles",
+      "reversed_ids": true,
+      "K": 6,
+      "comparison": "terminal_empty",
+      "cuts": 34,
+      "root_PointIds": [],
+      "projected_journal": [],
+      "history_mapping_to_reference": null,
+      "full_leaves": 1,
+      "full_merges": 0,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "obtuse_J1",
+      "reversed_ids": false,
+      "K": 1,
+      "comparison": "FULL_projection_only",
+      "cuts": 10,
+      "root_PointIds": [
+        0,
+        1,
+        2
+      ],
+      "projected_journal": [
+        {
+          "level": "1/2",
+          "output": 100003,
+          "parents": [
+            100000,
+            100002
+          ],
+          "added_points": []
+        },
+        {
+          "level": "5/2",
+          "output": 100004,
+          "parents": [
+            100001,
+            100003
+          ],
+          "added_points": []
+        }
+      ],
+      "history_mapping_to_reference": null,
+      "full_leaves": 3,
+      "full_merges": 2,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "obtuse_J1",
+      "reversed_ids": false,
+      "K": 2,
+      "comparison": "FULL_projection_only",
+      "cuts": 10,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "4",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "history_mapping_to_reference": null,
+      "full_leaves": 2,
+      "full_merges": 1,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "obtuse_J1",
+      "reversed_ids": false,
+      "K": 3,
+      "comparison": "terminal_empty",
+      "cuts": 10,
+      "root_PointIds": [],
+      "projected_journal": [],
+      "history_mapping_to_reference": null,
+      "full_leaves": 1,
+      "full_merges": 0,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "symmetric_obtuse_J1",
+      "reversed_ids": false,
+      "K": 1,
+      "comparison": "FULL_projection_only",
+      "cuts": 8,
+      "root_PointIds": [
+        0,
+        1,
+        2
+      ],
+      "projected_journal": [
+        {
+          "level": "5/4",
+          "output": 100003,
+          "parents": [
+            100000,
+            100001,
+            100002
+          ],
+          "added_points": []
+        }
+      ],
+      "history_mapping_to_reference": null,
+      "full_leaves": 3,
+      "full_merges": 1,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "symmetric_obtuse_J1",
+      "reversed_ids": false,
+      "K": 2,
+      "comparison": "FULL_projection_only",
+      "cuts": 8,
+      "root_PointIds": [],
+      "projected_journal": [
+        {
+          "level": "4",
+          "output": 100000,
+          "parents": [],
+          "added_points": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "history_mapping_to_reference": null,
+      "full_leaves": 2,
+      "full_merges": 1,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    },
+    {
+      "case": "symmetric_obtuse_J1",
+      "reversed_ids": false,
+      "K": 3,
+      "comparison": "terminal_empty",
+      "cuts": 8,
+      "root_PointIds": [],
+      "projected_journal": [],
+      "history_mapping_to_reference": null,
+      "full_leaves": 1,
+      "full_merges": 0,
+      "full_final_roots": 1,
+      "omitted_pointless_continuations": 0
+    }
+  ],
+  "mutants": [
+    {
+      "name": "drop_single_leaf_parent_growth",
+      "kind": "audit_projection_mutant",
+      "rejection": "projection.cut_state",
+      "first_difference": {
+        "level": "189/17",
+        "side": "closed",
+        "expected": [
+          {
+            "token": 100000,
+            "points": [
+              0,
+              2,
+              3,
+              4
+            ]
+          }
+        ],
+        "actual": [
+          {
+            "token": 100000,
+            "points": [
+              2,
+              3,
+              4
+            ]
+          }
+        ]
+      },
+      "witnesses": [
+        {
+          "level": "189/17",
+          "missing_PointId": [
+            0
+          ]
+        },
+        {
+          "level": "83886/3563",
+          "missing_PointId": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "full_leaf_as_reduced_root",
+      "kind": "audit_projection_mutant",
+      "rejection": "projection.cut_state",
+      "first_difference": {
+        "level": "9/2",
+        "side": "closed",
+        "expected": [],
+        "actual": [
+          {
+            "token": 100000,
+            "points": [
+              2,
+              3
+            ]
+          },
+          {
+            "token": 100001,
+            "points": [
+              3,
+              4
+            ]
+          }
+        ]
+      },
+      "witnesses": []
+    }
+  ],
+  "scope": {
+    "authority": "Two pinned audit journals, inspected as data; no source oracle imported or executed.",
+    "comparison": "8 common cases, K1..n-1; exact levels, unique event isomorphism preserving parents, deltas and multiplicity; ambiguous matching rejected.",
+    "cuts": "Union of FULL and reduced journal levels across all orders of each case, both sides, plus zero and one terminal level; omitted Gamma levels are not newly enumerated.",
+    "k1_zero": "Implicit reference singleton roots are assigned birth zero: open zero empty, closed zero all PointIds. This declares the replay boundary, not a new check of the original oracle's zero-cut code.",
+    "unpaired": "10 terminal K=n projections empty; 4 other orders from the 2 obtuse FULL-only cases have no independent reduced journal comparison.",
+    "limits": "No new geometry, general theorem, product run, high-rank enumeration, mass or vertical-map qualification; runtime cost of a future constructor is unmeasured."
+  },
+  "gcp": "not_used"
+}

@@ -1,0 +1,25 @@
+{
+  "status": "preliminary_read_only_review",
+  "sources": [
+    {
+      "path": "morsehgp3D_v7/src/forest/full_certificate.hpp",
+      "read_sha256": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+      "still_matches_at_capture": true
+    },
+    {
+      "path": "morsehgp3D_v7/tests/full_certificate_gate.cpp",
+      "read_sha256": "17f5e2bafecc66556bcc1cfbfc51ed20e47cca82716ad0f2e34b1e5994a266a7",
+      "still_matches_at_capture": true
+    }
+  ],
+  "findings": [
+    "No concrete defect identified in the read bytes; this is not a proof of absence of defects.",
+    "prior_count is captured before lot outputs; parents must be live and strictly earlier; shared consumed parents are rejected.",
+    "K1 roots are all required at zero; open/closed zero are distinct. K=n permits one leaf without any coface, including n=1, within the declared order limit.",
+    "Caps are prospective; the traversal bounds pending plus visited by max_nodes; failure clears output arenas/values.",
+    "The structural_only scope is explicit: no Gabriel discovery, portal geometry or completeness certification."
+  ],
+  "limits": "No build, execution, mutation or general product qualification. Constructor files are concurrent and were uncommitted at read time. This review does not add a FULL source variant to validation_current.json.",
+  "public_status": "not_claimed",
+  "gcp": "not_used"
+}

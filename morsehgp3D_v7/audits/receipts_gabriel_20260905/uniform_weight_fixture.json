@@ -1,0 +1,45 @@
+{
+  "status": "completed_analytic_fraction_check",
+  "points": {
+    "A": [
+      0,
+      0,
+      0
+    ],
+    "B": [
+      4,
+      0,
+      0
+    ],
+    "C": [
+      1,
+      1,
+      0
+    ]
+  },
+  "psi": "1",
+  "Gabriel_cofaces": [
+    "ABC"
+  ],
+  "topological_minima": [
+    "AC",
+    "BC"
+  ],
+  "weighted_facets": [
+    "AB",
+    "AC",
+    "BC"
+  ],
+  "correct_facet_masses": {
+    "AB": "1",
+    "AC": "1",
+    "BC": "1"
+  },
+  "omitting_AB_without_renormalization_loses_mass": "1",
+  "renormalizing_on_minima_changes_profile": {
+    "AC": "3/2",
+    "BC": "3/2"
+  },
+  "scope": "Exact arithmetic check of score normalization only; topology is verified by the separate FULL probe; no temporal mass policy or condensation test",
+  "gcp": "not_used"
+}
