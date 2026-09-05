@@ -1,0 +1,5 @@
+{
+  "observed_utc": "2026-09-05T09:17:15.052868Z",
+  "head": "61f72a6805e27f1bc216b5d7444164b31fc970b6",
+  "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/src/spindle/witness_count.hpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/horizontal_fold_probe.cpp\n?? morsehgp3D_v7/audits/horizontal_pipeline_bridge.cpp\n?? morsehgp3D_v7/audits/horizontal_rational_oracle.py\n?? morsehgp3D_v7/audits/receipts_horizontal_20260905/\n?? morsehgp3D_v7/docs/OPTIMISATION_PILE_TEMOINS.md\n?? morsehgp3D_v7/src/core/inline_stack.hpp\n?? morsehgp3D_v7/tests/reference/\n?? morsehgp3D_v7/tests/witness_stack_gate.cpp\n"
+}

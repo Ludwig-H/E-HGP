@@ -1,0 +1,62 @@
+{
+  "schema": "mhgp7-F-scale-plan-selftests-v1",
+  "status": "completed",
+  "closed_utc": "2026-09-05 09:29:42 UTC",
+  "scope": "synthetic_protocol_selftests_only",
+  "cpu_affinity_requested": [
+    0
+  ],
+  "timeout_seconds_per_command": 30,
+  "commands": [
+    {
+      "argv": [
+        "taskset",
+        "--cpu-list",
+        "0",
+        "timeout",
+        "30s",
+        "python3",
+        "-B",
+        "build/v7_f_scale_20260905/selftest.py"
+      ],
+      "result": {
+        "chunk_id": "bfc9a0",
+        "wall_time_seconds": 0.850678496,
+        "exit_code": 0,
+        "original_token_count": 27,
+        "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.261s\n\nOK\n"
+      },
+      "reported_tests": 8
+    },
+    {
+      "argv": [
+        "taskset",
+        "--cpu-list",
+        "0",
+        "timeout",
+        "30s",
+        "python3",
+        "-B",
+        "-O",
+        "build/v7_f_scale_20260905/selftest.py"
+      ],
+      "result": {
+        "chunk_id": "2af201",
+        "wall_time_seconds": 0.361620725,
+        "exit_code": 0,
+        "original_token_count": 27,
+        "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.147s\n\nOK\n"
+      },
+      "reported_tests": 8
+    }
+  ],
+  "transcript_authority": "Exact UTF-8 combined exec_command output supplied by tool; stdout/stderr channel distinction unavailable and not reconstructed",
+  "sources_stable": true,
+  "fixture_status": "synthetic_only_not_engine_raw",
+  "engine_runs": 0,
+  "builds": 0,
+  "ctest_runs": 0,
+  "git_commands": 0,
+  "gcp": "not_used",
+  "public_status": "not_claimed"
+}

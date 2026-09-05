@@ -1,0 +1,404 @@
+"""Small parser/lifecycle fixtures; never launches a MorseHGP executable."""
+from __future__ import annotations
+
+import contextlib
+import copy
+import hashlib
+import importlib.util
+import io
+import json
+import os
+from pathlib import Path
+import sys
+import tempfile
+import time
+import unittest
+from unittest.mock import patch
+
+import runner as R
+
+COMMON, INCIDENCE = R.helpers()
+spec = importlib.util.spec_from_file_location("fixture_gate", R.ROOT / "morsehgp3D_v7/tests/incidence_campaign_gate.py")
+FIXTURE = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(FIXTURE)
+
+
+def complete_text() -> str:
+    text = FIXTURE.completed_text()
+    text = text.replace("n=11 coord=", "n=8000 coord=").replace("threads=2", "threads=1")
+    text = text.replace("facettes=74", "facettes=8063").replace(
+        "cardinalites K=1 evenements=10 facettes=11 ", "cardinalites K=1 evenements=10 facettes=8000 ")
+    text = text.replace("meb_supports=25000000", "meb_supports=1000000000")
+    return text + (
+        "temps_fold_mur_ms=0.5 (etages A et B, fold_inflight=1, fold_join=1, pic_mesure_en_vol=1)\n"
+        "ouvriers wspd=1 rects=1 rle=1 prefiltre=1 census=1 expansion=1 fold=1\n"
+        "silent_incidence_ms=0.4 regularity=rank_window_and_local_descent vertical_maps=none\n"
+        "temps_ms index=0.1 gen=0.1 (wspd 0.1 rects 0.0) rle=0.1 prefiltre=0.1 census=0.1 "
+        "comptage=0.1 expansion=0.1 fold=0.1 (tri 0.1 intern 0.0 fusion 0.0 reduce 0.0) digest=0.1\n"
+        "cli_e2e_ms=1.100 includes_input_and_export=true archive_committed=false\n"
+    )
+
+
+def parsed(mode: str = "completed", role: str = "C", text: str | None = None) -> dict:
+    with tempfile.TemporaryDirectory(prefix="mhgp7-meb-parser-") as tmp:
+        out, err, usage = (Path(tmp) / name for name in ("out", "err", "time"))
+        out.write_text((complete_text() if text is None else text) if mode == "completed" else "partial" if mode == "censored" else "")
+        err.write_text(FIXTURE.silent_refusal() if mode == "refused" else "")
+        usage.write_text(FIXTURE.USAGE)
+        record = {"role": role, "status": "invalid", "returncode": 0 if mode == "completed" else 2 if mode == "refused" else -9,
+                  "timed_out": mode == "censored", "wall_seconds": 1.0}
+        R.classify(record, out, err, usage, COMMON, INCIDENCE)
+        return record
+
+
+class PairedGate(unittest.TestCase):
+    def test_prepared_is_inert_with_missing_D(self):
+        with tempfile.TemporaryDirectory(prefix="mhgp7-meb-prepare-") as tmp:
+            base = Path(tmp)
+            with patch.object(R, "helpers", side_effect=RuntimeError("must not import or run")), contextlib.redirect_stdout(io.StringIO()) as output:
+                rc = R.main(["--candidate", str(base / "absent_D"), "--output", str(base / "not_created")])
+            self.assertEqual(rc, 0)
+            self.assertEqual(list(base.iterdir()), [])
+            self.assertEqual(json.loads(output.getvalue())["status"], "prepared_not_executed")
+
+    def test_positive_comparison_exact_counters_and_times(self):
+        left, right = parsed(), parsed(role="D")
+        right["pipeline_ms"] = 0.5
+        right["wall_seconds"] = 0.8
+        value = R.decision([left, right], True)
+        self.assertEqual(value["status"], "paired_equal")
+        self.assertTrue(all(value["equality"].values()))
+        self.assertEqual(value["ratio_C_over_D"], {"pipeline": 2.0, "process": 1.25})
+        for key in ("digests", "cardinalities", "counts", "silent", "silent_limits", "payload_caps"):
+            damaged = copy.deepcopy(right)
+            damaged[key] = {}
+            verdict = R.decision([left, damaged], True)
+            self.assertEqual(verdict["status"], "divergent", key)
+            self.assertFalse(verdict["equality"][key])
+            self.assertNotIn("ratio_C_over_D", verdict)
+
+    def test_mono_caps_and_archive_rejections_revoke_completion(self):
+        text = complete_text()
+        changes = [("fold_inflight=1", "fold_inflight=2"), ("pic_mesure_en_vol=1", "pic_mesure_en_vol=2"),
+                   ("ouvriers wspd=1", "ouvriers wspd=2"), ("core_records=8000000", "core_records=8000001"),
+                   ("query_nodes=1000000000", "query_nodes=4"), ("archive_committed=false", "archive_committed=true"),
+                   ("cap_brut_effectif=90", "cap_brut_effectif=101"), ("silent_incidence_ms=0.4", "silent_incidence_ms=nan"),
+                   ("temps_ms index=0.1", "temps_ms index=nan"), ("threads=1", "threads=2")]
+        for before, after in changes:
+            with self.subTest(before=before), self.assertRaises(RuntimeError):
+                parsed(text=text.replace(before, after))
+        # Effective raw cap and fusion cap are independent guards, not the same minimum.
+        self.assertEqual(parsed(text=text.replace("cap_fusion_budgetaire=90", "cap_fusion_budgetaire=45"))["status"], "engine_completed")
+
+    def test_refusal_censure_and_drift_never_emit_equality(self):
+        for mode in ("refused", "censored"):
+            record = parsed(mode, role="D")
+            self.assertEqual(record["status"], "engine_refused" if mode == "refused" else "censored")
+            self.assertNotIn("digests", record)
+            verdict = R.decision([parsed(), record], True)
+            self.assertEqual(verdict["status"], "pair_incomplete")
+            self.assertNotIn("equality", verdict)
+            self.assertNotIn("ratio_C_over_D", verdict)
+        for records, stable, error in [([parsed()], True, None), ([parsed(), parsed(role="D")], False, None),
+                                       ([parsed(), parsed(role="D")], True, "interrupted"),
+                                       ([parsed(role="D"), parsed()], True, None)]:
+            verdict = R.decision(records, stable, error)
+            self.assertEqual(verdict["status"], "invalid")
+            self.assertNotIn("equality", verdict)
+
+    def test_execute_keeps_attempts_and_source_drift(self):
+        for mode in ("completed", "refused", "censored", "drift", "interrupted", "malformed"):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory(prefix="mhgp7-meb-loop-") as tmp:
+                base = Path(tmp)
+                candidate = base / "D"
+                candidate.write_text("not an executed engine")
+                candidate.chmod(0o700)
+                output = base / "receipt"
+                calls = []
+                snapshots = 0
+
+                def current(*_args):
+                    nonlocal snapshots
+                    snapshots += 1
+                    return {"pin": "changed" if mode == "drift" and snapshots >= 3 else "fixed"}
+
+                def run(command, out, err, **kwargs):
+                    calls.append(command)
+                    self.assertEqual(kwargs, {"timeout": 600, "address_limit_gib": 26})
+                    self.assertEqual(command[:3], ["/usr/bin/taskset", "--cpu-list", "6"])
+                    self.assertIn("--fold-inflight=1", command)
+                    self.assertIn("--fold-join=1", command)
+                    self.assertNotIn("--output", command)
+                    out.write_text(complete_text() if mode not in ("refused", "malformed") else "bad" if mode == "malformed" else "")
+                    err.write_text(FIXTURE.silent_refusal() if mode == "refused" else "")
+                    out.with_suffix(".time").write_text(FIXTURE.USAGE)
+                    if mode == "interrupted":
+                        raise KeyboardInterrupt("fixture")
+                    return (2 if mode == "refused" else -9 if mode == "censored" else 0, mode == "censored", 1.0)
+
+                with patch.object(R, "baseline_binding", return_value={}), \
+                        patch.object(R, "candidate_binding", return_value={"record": {"binary": {"sha256": "fixed"}}}), \
+                        patch.object(R, "binding_matches_snapshot"), \
+                        patch.object(R, "snapshot", side_effect=current), patch.object(R.os, "sched_getaffinity", return_value={6}), \
+                        patch.object(R, "repository_state", side_effect=[
+                            {"head": "fixture-head", "worktree_porcelain": " M docs/before.md\n"},
+                            {"head": "fixture-head", "worktree_porcelain": " M docs/after.md\n"}]), \
+                        patch.object(R, "host_observation", return_value={"host_shared": True, "cpu_model": "fixture-model"}), \
+                        patch.object(COMMON, "run_process", side_effect=run), contextlib.redirect_stdout(io.StringIO()):
+                    rc = R.execute(candidate, base, output, None, COMMON, INCIDENCE)
+                    with self.assertRaises(FileExistsError):
+                        R.execute(candidate, base, output, None, COMMON, INCIDENCE)
+                records = json.loads((output / "runs.json").read_text())
+                summary = json.loads((output / "summary.json").read_text())
+                metadata = json.loads((output / "metadata.json").read_text())
+                after = json.loads((output / "repository_after.json").read_text())
+                self.assertEqual(metadata["repository_before"]["head"], "fixture-head")
+                self.assertEqual(after["worktree_porcelain"], " M docs/after.md\n")
+                self.assertTrue(metadata["host_before"]["host_shared"])
+                self.assertEqual(metadata["effective_locale"], {"LC_ALL": "C", "LANG": "C"})
+                self.assertTrue(all(row["started_utc"].endswith("Z") and row["ended_utc"].endswith("Z") for row in records))
+                self.assertTrue((output / "hashes.json").is_file())
+                self.assertEqual(len(calls), 1 if mode in ("drift", "interrupted", "malformed") else 2)
+                self.assertEqual(len(records), len(calls))
+                self.assertEqual(rc, 0 if mode == "completed" else 2 if mode in ("refused", "censored") else 1)
+                if mode != "completed":
+                    self.assertNotIn("equality", summary)
+                    self.assertNotIn("ratio_C_over_D", summary)
+
+    def test_D_binding_rejects_before_process_and_accepts_pinned_build(self):
+        with self.assertRaisesRegex(RuntimeError, "mandatory"):
+            R.candidate_binding(Path("D"), Path("source"), None)
+        with tempfile.TemporaryDirectory(prefix="mhgp7-meb-no-binding-") as tmp:
+            base = Path(tmp)
+            candidate = base / "D"
+            candidate.write_text("not executed")
+            candidate.chmod(0o700)
+            with patch.object(R, "baseline_binding", return_value={}), patch.object(COMMON, "run_process") as run:
+                with self.assertRaisesRegex(RuntimeError, "mandatory"):
+                    R.execute(candidate, base, base / "receipt", None, COMMON, INCIDENCE)
+                run.assert_not_called()
+            self.assertFalse((base / "receipt").exists())
+        with tempfile.TemporaryDirectory(prefix="mhgp7-meb-binding-") as tmp:
+            base = Path(tmp)
+            source, build = base / "source", base / "build"
+            for folder in (source / "src", source / "cli", source / "oracle", build):
+                folder.mkdir(parents=True)
+            (source / "CMakeLists.txt").write_text("fixture")
+            cli = source / "cli/mhgp7.cpp"
+            cli.write_text("int main(){}")
+            binary = build / "mhgp7"
+            binary.write_bytes(b"fixture binary bytes, never executed")
+            binary.chmod(0o700)
+            cache = build / "CMakeCache.txt"
+            cache.write_text("CMAKE_BUILD_TYPE:STRING=Release\nMHGP7_ENABLE_CUDA:BOOL=OFF\n"
+                             "CMAKE_HOME_DIRECTORY:INTERNAL=" + str(source) + "\n")
+            database = build / "compile_commands.json"
+            command = {"directory": str(build), "file": str(cli), "command": "/usr/bin/c++ -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o -c " + str(cli)}
+            database.write_text(json.dumps([command]))
+            value = {"schema": "mhgp7-mono-meb-build-v1", "status": "completed", "source_root": str(source),
+                     "sources_before": R.candidate_sources(source), "sources_after": R.candidate_sources(source),
+                     "binary": {"path": str(binary), "sha256": R.digest(binary), "bytes": binary.stat().st_size},
+                     "compile_database": {"path": str(database), "sha256": R.digest(database)},
+                     "cmake_cache": {"path": str(cache), "sha256": R.digest(cache)}, "compile_command": command,
+                     "build_exit_code": 0, "build_command": ["cmake", "--build", str(build), "--parallel", "2", "--target", "mhgp7"]}
+            receipt = base / "build_receipt.json"
+            receipt.write_text(json.dumps(value))
+            self.assertEqual(R.candidate_binding(binary, source, receipt)["record"], value)
+            unrelated = base / "unrelated/mhgp7"
+            unrelated.parent.mkdir()
+            unrelated.write_bytes(b"different executable bytes outside the configured target")
+            unrelated.chmod(0o700)
+            crosswire = copy.deepcopy(value)
+            crosswire["binary"] = {"path": str(unrelated), "sha256": R.digest(unrelated), "bytes": unrelated.stat().st_size}
+            receipt.write_text(json.dumps(crosswire))
+            with self.assertRaisesRegex(RuntimeError, "not the CLI output"):
+                R.candidate_binding(unrelated, source, receipt)
+            # A same-byte copy outside the target also is not the configured output.
+            unrelated.write_bytes(binary.read_bytes())
+            crosswire["binary"].update(sha256=R.digest(unrelated), bytes=unrelated.stat().st_size)
+            receipt.write_text(json.dumps(crosswire))
+            with self.assertRaisesRegex(RuntimeError, "not the CLI output"):
+                R.candidate_binding(unrelated, source, receipt)
+            receipt.write_text(json.dumps(value))
+            binary.chmod(0o600)
+            with self.assertRaisesRegex(RuntimeError, "not executable"):
+                R.candidate_binding(binary, source, receipt)
+            binary.chmod(0o700)
+            foreign_database = unrelated.parent / "compile_commands.json"
+            foreign_database.write_bytes(database.read_bytes())
+            damaged = copy.deepcopy(value)
+            damaged["compile_database"] = {"path": str(foreign_database), "sha256": R.digest(foreign_database)}
+            receipt.write_text(json.dumps(damaged))
+            with self.assertRaisesRegex(RuntimeError, "database is outside"):
+                R.candidate_binding(binary, source, receipt)
+            old_cache = cache.read_text()
+            cache.write_text(old_cache.replace("CMAKE_HOME_DIRECTORY:INTERNAL=" + str(source),
+                                               "CMAKE_HOME_DIRECTORY:INTERNAL=" + str(unrelated.parent)))
+            damaged = copy.deepcopy(value)
+            damaged["cmake_cache"]["sha256"] = R.digest(cache)
+            receipt.write_text(json.dumps(damaged))
+            with self.assertRaisesRegex(RuntimeError, "different source tree"):
+                R.candidate_binding(binary, source, receipt)
+            cache.write_text(old_cache)
+            for field in ("sources_before", "sources_after", "binary", "compile_command", "build_exit_code"):
+                damaged = copy.deepcopy(value)
+                if field in ("sources_before", "sources_after"):
+                    damaged[field]["CMakeLists.txt"] = "0" * 64
+                elif field == "binary":
+                    damaged[field]["sha256"] = "0" * 64
+                elif field == "compile_command":
+                    damaged[field]["command"] += " -DMHGP7_TESTING=1"
+                else:
+                    damaged[field] = 1
+                receipt.write_text(json.dumps(damaged))
+                with self.subTest(field=field), self.assertRaises(RuntimeError):
+                    R.candidate_binding(binary, source, receipt)
+            # Even a repinned database cannot smuggle an instrumented or non-Release CLI.
+            for flag in (" -DMHGP7_TESTING=1", " -DMHGP7_PROFILE_REDUCE=1", " @flags.rsp", " -O0"):
+                damaged = copy.deepcopy(value)
+                damaged["compile_command"]["command"] += flag
+                database.write_text(json.dumps([damaged["compile_command"]]))
+                damaged["compile_database"]["sha256"] = R.digest(database)
+                receipt.write_text(json.dumps(damaged))
+                with self.subTest(flag=flag), self.assertRaises(RuntimeError):
+                    R.candidate_binding(binary, source, receipt)
+
+    def test_snapshot_observes_actual_file_and_source_changes(self):
+        with tempfile.TemporaryDirectory(prefix="mhgp7-meb-drift-") as tmp:
+            root = Path(tmp)
+            release = root / "release"
+            release.mkdir()
+            for name in R.RELEASE_PINS:
+                (release / name).write_text("receipt fixture")
+            for version in ("morsehgp3D_v6", "morsehgp3D_v7"):
+                source = root / version
+                for part in ("src", "cli", "oracle", "bench"):
+                    (source / part).mkdir(parents=True)
+                (source / "CMakeLists.txt").write_text("cmake fixture")
+                (source / "src/one.hpp").write_text("source fixture")
+            source = root / "morsehgp3D_v7"
+            for name in R.HELPER_PINS:
+                (source / "bench" / name).write_text("helper fixture")
+            baseline, candidate = root / "C", root / "D"
+            baseline.write_text("C binary fixture")
+            candidate.write_text("D binary fixture")
+            baseline.chmod(0o700)
+            candidate.chmod(0o700)
+            with patch.object(R, "ROOT", root), patch.object(R, "RELEASE", release), patch.object(R, "BASELINE", baseline):
+                before = R.snapshot(candidate, source, None, COMMON)
+                for path in (candidate, baseline, source / "src/one.hpp", source / "bench/compare_v6_v7.py",
+                             source / "bench/incidence_campaign.py", release / "summary.json"):
+                    old = path.read_bytes()
+                    path.write_bytes(old + b"changed")
+                    self.assertNotEqual(before, R.snapshot(candidate, source, None, COMMON), str(path))
+                    path.write_bytes(old)
+                (source / "src/new.hpp").write_text("added source")
+                self.assertNotEqual(before, R.snapshot(candidate, source, None, COMMON))
+                candidate.chmod(0o600)
+                with self.assertRaisesRegex(RuntimeError, "permission changed"):
+                    R.snapshot(candidate, source, None, COMMON)
+
+    def test_helpers_execute_the_single_read_hashed_bytes(self):
+        with tempfile.TemporaryDirectory(prefix="mhgp7-meb-import-") as tmp:
+            root = Path(tmp)
+            folder = root / "morsehgp3D_v7/bench"
+            folder.mkdir(parents=True)
+            texts = {"compare_v6_v7.py": b"marker = 'hashed_compare'\n",
+                     "incidence_campaign.py": b"import compare_v6_v7\nmarker = compare_v6_v7.marker + '_incidence'\n"}
+            pins, reads = {}, {}
+            for name, data in texts.items():
+                (folder / name).write_bytes(data)
+                pins[name] = hashlib.sha256(data).hexdigest()
+            original_read = Path.read_bytes
+
+            def read_once(path):
+                if path.parent == folder:
+                    reads[path.name] = reads.get(path.name, 0) + 1
+                    if reads[path.name] > 1:
+                        raise RuntimeError("second source read would allow TOCTOU")
+                return original_read(path)
+
+            with patch.object(R, "ROOT", root), patch.object(R, "HELPER_PINS", pins), \
+                    patch.object(Path, "read_bytes", read_once), patch.dict(sys.modules):
+                common, incidence = R.helpers()
+                self.assertEqual(common.marker, "hashed_compare")
+                self.assertEqual(incidence.marker, "hashed_compare_incidence")
+            self.assertEqual(reads, {name: 1 for name in texts})
+
+    def test_initial_snapshot_must_match_every_preflight_binding(self):
+        candidate, receipt = Path("/fixture/D/mhgp7"), Path("/fixture/build.json")
+        value = {"binary": {"sha256": "d"}, "sources_after": {"src/a.hpp": "s"},
+                 "compile_database": {"path": "/fixture/D/compile_commands.json", "sha256": "db"},
+                 "cmake_cache": {"path": "/fixture/D/CMakeCache.txt", "sha256": "cache"}}
+        binding = {"record": value, "receipt_sha256": "receipt"}
+        files = {str(candidate): "d", str(receipt): "receipt", str(R.BASELINE): R.BASELINE_SHA}
+        files.update({str(R.RELEASE / name): pin for name, pin in R.RELEASE_PINS.items()})
+        files.update({str(R.ROOT / "morsehgp3D_v7/bench" / name): pin for name, pin in R.HELPER_PINS.items()})
+        files.update({value[key]["path"]: value[key]["sha256"] for key in ("compile_database", "cmake_cache")})
+        before = {"files": files, "candidate_sources": value["sources_after"]}
+        R.binding_matches_snapshot(before, binding, candidate, receipt)
+        for name in files:
+            damaged = copy.deepcopy(before)
+            damaged["files"][name] = "changed"
+            with self.subTest(name=name), self.assertRaises(RuntimeError):
+                R.binding_matches_snapshot(damaged, binding, candidate, receipt)
+        damaged = copy.deepcopy(before)
+        damaged["candidate_sources"]["src/a.hpp"] = "changed"
+        with self.assertRaises(RuntimeError):
+            R.binding_matches_snapshot(damaged, binding, candidate, receipt)
+
+    def test_loader_injection_is_refused_without_values_or_process(self):
+        for name in R.INJECTION_VARIABLES:
+            with self.subTest(name=name), tempfile.TemporaryDirectory(prefix="mhgp7-meb-environment-") as tmp:
+                base = Path(tmp)
+                environment = {key: "" for key in R.INJECTION_VARIABLES}
+                environment[name] = "fixture-secret-never-printed"
+                with patch.dict(os.environ, environment), patch.object(R, "baseline_binding") as baseline, \
+                        patch.object(COMMON, "run_process") as process:
+                    with self.assertRaises(RuntimeError) as error:
+                        R.execute(base / "D", base, base / "receipt", None, COMMON, INCIDENCE)
+                    self.assertIn(name, str(error.exception))
+                    self.assertNotIn("fixture-secret-never-printed", str(error.exception))
+                    baseline.assert_not_called()
+                    process.assert_not_called()
+                self.assertFalse((base / "receipt").exists())
+        with patch.dict(os.environ, {name: "" for name in R.INJECTION_VARIABLES}):
+            self.assertEqual(R.environment_guard(), {name: False for name in R.INJECTION_VARIABLES})
+
+    def test_host_metadata_is_allowlisted(self):
+        value = R.host_observation()
+        self.assertEqual(set(value), {"observed_utc", "cpu_model", "logical_cpus", "affinity_cpus",
+                                     "mem_total_bytes", "kernel_release", "architecture", "host_shared", "loadavg_1_5_15"})
+        self.assertTrue(value["host_shared"])
+        self.assertGreater(value["mem_total_bytes"], 0)
+        self.assertGreater(value["logical_cpus"], 0)
+        self.assertEqual(len(value["loadavg_1_5_15"]), 3)
+
+    def test_existing_process_helper_drains_ignoring_descendant(self):
+        # Real, tiny local process group; no engine or cloud. The descendant
+        # ignores TERM, so merely waiting for its leader would not suffice.
+        with tempfile.TemporaryDirectory(prefix="mhgp7-meb-drain-") as tmp:
+            base = Path(tmp)
+            pidfile = base / "child.pid"
+            code = ("import os,signal,time; p=os.fork(); "
+                    "signal.signal(signal.SIGTERM,signal.SIG_IGN); "
+                    "open(" + repr(str(pidfile)) + ", 'w').write(str(os.getpid())) if p==0 else None; "
+                    "time.sleep(30)")
+            rc, censored, elapsed = COMMON.run_process([sys.executable, "-c", code], base / "out", base / "err",
+                                                       timeout=1, address_limit_gib=26)
+            self.assertTrue(censored)
+            self.assertLess(rc, 0)
+            self.assertLess(elapsed, 5)
+            self.assertTrue(pidfile.is_file())
+            pid = int(pidfile.read_text())
+            for _ in range(50):
+                stat = Path(f"/proc/{pid}/stat")
+                if not stat.exists() or stat.read_text().split(") ", 1)[1][0] == "Z":
+                    break
+                time.sleep(0.01)
+            else:
+                self.fail("owned child remains active after run_process returned")
+
+
+if __name__ == "__main__":
+    unittest.main()

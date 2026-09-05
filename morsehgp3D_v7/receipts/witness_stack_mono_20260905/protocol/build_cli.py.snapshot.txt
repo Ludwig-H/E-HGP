@@ -1,0 +1,160 @@
+#!/usr/bin/env python3
+"""Prepare/build one fresh Release D CLI; no subprocess without --execute."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import types
+
+HERE = Path(__file__).resolve().parent
+RUNNER_SHA = "3abe27f8a10173867a0395430ff56392bb82b5cbee3eb766fb293ffa65cc2645"
+data = (HERE / "runner.py").read_bytes()
+if hashlib.sha256(data).hexdigest() != RUNNER_SHA:
+    raise RuntimeError("paired runner pin changed")
+R = types.ModuleType("meb_paired_runner")
+R.__file__ = str(HERE / "runner.py")
+exec(compile(data, R.__file__, "exec"), R.__dict__)
+SOURCE = R.ROOT / "morsehgp3D_v7"
+BUILD = R.ROOT / "build/v7_meb_qualification"
+
+
+def commands(build: Path) -> list[tuple[str, list[str], int]]:
+    return [
+        ("compiler_version", ["c++", "--version"], 30),
+        ("cmake_version", ["cmake", "--version"], 30),
+        ("configure", ["cmake", "-S", str(SOURCE), "-B", str(build), "-DCMAKE_BUILD_TYPE=Release",
+                       "-DMHGP7_ENABLE_CUDA=OFF", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"], 300),
+        ("build", ["cmake", "--build", str(build), "--parallel", "2", "--target", "mhgp7"], 300),
+    ]
+
+
+def tracking(common) -> dict:
+    paths = [Path(__file__), HERE / "runner.py", R.BASELINE,
+             *[R.ROOT / "morsehgp3D_v7/bench" / name for name in R.HELPER_PINS],
+             *[R.RELEASE / name for name in R.RELEASE_PINS]]
+    R.require(os.access(R.BASELINE, os.X_OK), "protected C is not executable")
+    return {"files": {str(path): R.digest(path) for path in paths},
+            "sources": R.candidate_sources(SOURCE), "repository_sources": common.source_snapshot(R.ROOT),
+            "loader_injection_nonempty": R.environment_guard()}
+
+
+def build_record(build: Path, before: dict, after: dict) -> dict:
+    binary, database, cache = build / "mhgp7", build / "compile_commands.json", build / "CMakeCache.txt"
+    entries = json.loads(database.read_text())
+    cli = [entry for entry in entries if Path(entry["file"]).resolve() == SOURCE / "cli/mhgp7.cpp"
+           and "-o CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o " in entry["command"]]
+    R.require(len(cli) == 1, "unique product CLI compile entry missing")
+    R.require(binary.is_file() and os.access(binary, os.X_OK), "built D CLI unavailable")
+    return {"schema": "mhgp7-mono-meb-build-v1", "status": "completed", "source_root": str(SOURCE),
+            "sources_before": before["sources"], "sources_after": after["sources"],
+            "binary": {"path": str(binary), "sha256": R.digest(binary), "bytes": binary.stat().st_size},
+            "compile_database": {"path": str(database), "sha256": R.digest(database)},
+            "cmake_cache": {"path": str(cache), "sha256": R.digest(cache)}, "compile_command": cli[0],
+            "build_command": commands(build)[-1][1], "build_exit_code": 0}
+
+
+def execute(build: Path, output: Path) -> int:
+    R.environment_guard()
+    allowed = (R.ROOT / "build").resolve()
+    R.require(build.is_relative_to(allowed) and build != allowed, "build must be a new child of repository build/")
+    R.require(not output.is_relative_to(build) and not build.is_relative_to(output), "build and receipt must not overlap")
+    if build.exists() or output.exists():
+        raise FileExistsError("build and receipt directories must both be new")
+    common, _incidence = R.helpers()
+    baseline = R.baseline_binding()
+    before = tracking(common)
+    R.require(before["files"][str(R.BASELINE)] == R.BASELINE_SHA and before["files"][str(HERE / "runner.py")] == RUNNER_SHA,
+              "C or runner changed during build preflight")
+    started, repository_before, host = R.utc_now(), R.repository_state(), R.host_observation()
+    output.mkdir(parents=True, exist_ok=False)
+    common.atomic_json(output / "metadata.json", {"status": "build_attempt", "started_utc": started,
+        "build_directory_was_absent": True, "build_directory": str(build), "baseline": baseline,
+        "tracking_before": before, "repository_before": repository_before, "host": host,
+        "commands": commands(build), "address_limit_gib": 26, "engine_runs": 0, "gcp": "not_used"})
+    records, failure, after, binding, value = [], None, None, None, None
+    common.atomic_json(output / "runs.json", records)
+    try:
+        for name, command, deadline in commands(build):
+            R.require(tracking(common) == before, "source/helper/C changed before " + name)
+            record = {"name": name, "argv": command, "timeout_seconds": deadline, "started_utc": R.utc_now(),
+                      "ended_utc": None, "status": "attempted", "returncode": None,
+                      "timed_out": False, "wall_seconds": None}
+            records.append(record)
+            common.atomic_json(output / "runs.json", records)
+            try:
+                code, censored, elapsed = common.run_process(command, output / (name + ".out"), output / (name + ".err"),
+                                                           timeout=deadline, address_limit_gib=26)
+                record.update(returncode=code, timed_out=censored, wall_seconds=elapsed,
+                              status="censored" if censored else "completed" if code == 0 else "failed")
+                R.require(code == 0 and not censored, name + " failed or censored")
+            finally:
+                record["ended_utc"] = R.utc_now()
+                common.atomic_json(output / "runs.json", records)
+            R.require(tracking(common) == before, "source/helper/C changed during " + name)
+        after = tracking(common)
+        R.require(before == after, "source/helper/C changed after build")
+        value = build_record(build, before, after)
+        # This draft records the completed compiler, not an accepted provenance
+        # binding. Only publish build_D.json after the same runner validator passes.
+        draft = output / "build_record.provisional.json"
+        common.atomic_json(draft, value)
+        binding = R.candidate_binding(build / "mhgp7", SOURCE, draft)
+        R.require(tracking(common) == before, "source/helper/C changed during final validation")
+        R.require(value["binary"]["sha256"] == R.digest(build / "mhgp7"), "D CLI changed after final validation")
+    except BaseException as error:
+        failure = f"{type(error).__name__}: {error}"
+    try:
+        after = tracking(common)
+    except BaseException as error:
+        failure = failure or f"{type(error).__name__}: tracking unavailable"
+    repository_after = None
+    try:
+        repository_after = R.repository_state()
+    except BaseException as error:
+        failure = failure or f"{type(error).__name__}: repository state unavailable"
+    if failure is None and before == after and binding is not None and value is not None:
+        try:
+            for key in ("binary", "compile_database", "cmake_cache"):
+                R.require(R.digest(Path(value[key]["path"])) == value[key]["sha256"], "terminal build artifact changed: " + key)
+            R.candidate_binding(build / "mhgp7", SOURCE, output / "build_record.provisional.json")
+            R.require(tracking(common) == before, "source/helper/C changed at terminal publication")
+            common.atomic_json(output / "build_D.json", value)
+        except BaseException as error:
+            failure = f"{type(error).__name__}: {error}"
+    summary = {"status": "completed" if failure is None and before == after and binding is not None else "failed_or_invalid",
+               "error": failure, "sources_helpers_C_stable": before == after, "started_utc": started,
+               "ended_utc": R.utc_now(), "build_receipt": "build_D.json" if (output / "build_D.json").exists() else None,
+               "binding_validated": binding is not None, "engine_runs": 0, "gcp": "not_used", "public_status": "not_claimed"}
+    common.atomic_json(output / "tracking_after.json", after)
+    common.atomic_json(output / "repository_after.json", repository_after)
+    common.atomic_json(output / "summary.json", summary)
+    common.atomic_json(output / "hashes.json", {path.name: common.sha256(path) for path in sorted(output.iterdir()) if path.is_file()})
+    print(json.dumps(summary), flush=True)
+    return 0 if summary["status"] == "completed" else 1
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--build-dir", type=Path, default=BUILD)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--execute", action="store_true")
+    args = parser.parse_args(argv)
+    build, output = args.build_dir.resolve(), args.output.resolve()
+    if not args.execute:
+        print(json.dumps({"status": "prepared_not_executed", "writes": False, "engine_runs": 0,
+                          "build_dir_exists": build.exists(), "commands": commands(build),
+                          "output_would_be": str(output), "runner_sha256": RUNNER_SHA, "gcp": "not_used"}, indent=2))
+        return 0
+    return execute(build, output)
+
+
+if __name__ == "__main__":
+    def interrupted(signum, _frame):
+        raise InterruptedError(f"signal {signum}")
+    for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+        signal.signal(sig, interrupted)
+    raise SystemExit(main())

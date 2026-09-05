@@ -1,0 +1,230 @@
+"""Synthetic runner gates; no build and no MorseHGP process."""
+from __future__ import annotations
+
+import contextlib
+import copy
+import io
+import json
+import os
+from pathlib import Path
+import sys
+import tempfile
+import unittest
+from unittest.mock import patch
+
+import runner as N
+
+R = N.R
+COMMON, INCIDENCE = N.helpers()
+with patch.dict(sys.modules, {"runner": R}):
+    F = N.load_pinned(N.ROOT / "build/v7_meb_paired/selftest.py",
+        "f192a95f013e0b1df56a9324d8f18034949cd51410fcc6d41e8ee87af9048348", "legacy_paired_selftest")
+
+
+def text(separation: int) -> str:
+    original = F.complete_text()
+    if original.count(" s=8 ") != 1:
+        raise RuntimeError("fixture identity anchor changed")
+    return original.replace(" s=8 ", f" s={separation} ")
+
+
+def parsed(separation: int, role: str = "E", mode: str = "completed", raw: str | None = None) -> dict:
+    with tempfile.TemporaryDirectory(prefix="mhgp7-f-parser-") as tmp:
+        out, err, usage = (Path(tmp) / name for name in ("out", "err", "time"))
+        out.write_text((text(separation) if raw is None else raw) if mode == "completed" else "partial" if mode == "censored" else "")
+        err.write_text(F.FIXTURE.silent_refusal() if mode == "refused" else "")
+        usage.write_text(F.FIXTURE.USAGE)
+        record = {"role": role, "separation": separation, "status": "invalid",
+                  "returncode": 0 if mode == "completed" else 2 if mode == "refused" else -9,
+                  "timed_out": mode == "censored", "wall_seconds": 1.0}
+        N.classify(record, out, err, usage, separation, COMMON, INCIDENCE)
+        return record
+
+
+class LegacyGate(F.PairedGate):
+    """Replay all 12 unchanged parser/lifecycle gates, including tiny group drain."""
+
+
+class NextPairGate(unittest.TestCase):
+    def test_preparation_inert_and_all_commands_bounded(self):
+        for separation in N.SEPARATIONS:
+            with tempfile.TemporaryDirectory(prefix="mhgp7-f-inert-") as tmp:
+                base = Path(tmp)
+                with patch.object(N, "helpers", side_effect=RuntimeError("no execution")), contextlib.redirect_stdout(io.StringIO()) as stdout:
+                    self.assertEqual(N.main(["--candidate", str(base / "missing"), "--separation", str(separation),
+                                             "--output", str(base / "absent")]), 0)
+                self.assertEqual(list(base.iterdir()), [])
+                value = json.loads(stdout.getvalue())
+                self.assertEqual(value["engine_runs"], 0)
+                self.assertEqual(value["run_order"], ["E", "F"])
+                self.assertEqual(value["timeout_per_run_seconds"], 600)
+                self.assertEqual(value["rlimit_as_gib"], 26)
+                for command in value["commands"]:
+                    self.assertIn(f"--s={separation}", command)
+                    self.assertIn("--smax=11", command)
+                    self.assertIn("--complete-incidences", command)
+                    self.assertEqual(sum(arg.startswith("--s=") for arg in command), 1)
+        for separation in (0, 7, 9, 11, 13):
+            with self.assertRaisesRegex(RuntimeError, "unreviewed"):
+                N.command(Path("unused"), separation)
+
+    def test_three_separations_parsed_from_unmodified_bytes(self):
+        for separation in N.SEPARATIONS:
+            value = parsed(separation)
+            self.assertEqual(value["counts"]["s"], separation)
+            self.assertEqual(value["status"], "engine_completed")
+            for wrong in N.SEPARATIONS:
+                if wrong != separation:
+                    with self.subTest(requested=separation, actual=wrong), self.assertRaisesRegex(RuntimeError, "identity"):
+                        parsed(separation, raw=text(wrong))
+        for damaged in (text(10) + "famille=uniform s=10\n", text(10).replace(" s=10 ", " s=10.0 "),
+                        text(10).replace("fold_inflight=1", "fold_inflight=2"),
+                        text(12).replace("archive_committed=false", "archive_committed=true")):
+            with self.assertRaises(RuntimeError):
+                parsed(10 if " s=10" in damaged else 12, raw=damaged)
+
+    def test_exact_pair_and_each_field_divergence(self):
+        for separation in N.SEPARATIONS:
+            left, right = parsed(separation), parsed(separation, "F")
+            right["wall_seconds"] = 0.8
+            value = N.decision([left, right], True, separation)
+            self.assertEqual(value["status"], "paired_equal")
+            self.assertEqual(value["ratio_E_over_F"]["process"], 1.25)
+            self.assertEqual(set(value["times"]), {"E", "F"})
+            self.assertNotIn("ratio_C_over_D", value)
+            for key in ("digests", "cardinalities", "counts", "silent", "silent_limits", "payload_caps"):
+                damaged = copy.deepcopy(right)
+                damaged[key] = {}
+                verdict = N.decision([left, damaged], True, separation)
+                self.assertEqual(verdict["status"], "divergent")
+                self.assertNotIn("ratio_E_over_F", verdict)
+
+    def test_incomplete_identity_and_censures_never_equal(self):
+        for separation in N.SEPARATIONS:
+            left, right = parsed(separation), parsed(separation, "F")
+            for mode in ("refused", "censored"):
+                value = N.decision([left, parsed(separation, "F", mode)], True, separation)
+                self.assertEqual(value["status"], "pair_incomplete")
+                self.assertNotIn("equality", value)
+                self.assertNotIn("ratio_E_over_F", value)
+            other = 10 if separation == 8 else 8
+            for rows, stable, error in (([right, left], True, None), ([left], True, None),
+                    ([left, parsed(other, "F")], True, None), ([left, right], False, None),
+                    ([left, right], True, "late failure")):
+                value = N.decision(rows, stable, separation, error)
+                self.assertEqual(value["status"], "invalid")
+                self.assertNotIn("equality", value)
+
+    def test_real_historical_E_binding_read_only(self):
+        value = N.baseline_binding()
+        self.assertEqual(value["sha256"], N.BASELINE_SHA)
+        self.assertEqual(len(value["protected_binaries"]), 4)
+        with patch.object(R, "candidate_sources", side_effect=RuntimeError("never relabel historical E as live F")):
+            self.assertEqual(N.baseline_binding(), value)
+        with patch.object(N, "BASELINE_SHA", "0" * 64), self.assertRaisesRegex(RuntimeError, "mismatch"):
+            N.baseline_binding()
+
+    def test_initial_snapshot_binds_all_new_authorities(self):
+        candidate, receipt = Path("/fixture/E/mhgp7"), Path("/fixture/build.json")
+        record = {"binary": {"sha256": "F"}, "sources_after": {"src/a": "source"},
+                  "cmake_cache": {"path": "/fixture/E/cache", "sha256": "ecache"},
+                  "compile_database": {"path": "/fixture/E/db", "sha256": "edb"}}
+        old = {"cmake_cache": {"path": "/fixture/D/cache", "sha256": "dcache"},
+               "compile_database": {"path": "/fixture/D/db", "sha256": "ddb"}}
+        baseline = {"record": old, "protected_binaries": {"/fixture/C": "C", "/fixture/D": "E"}}
+        binding = {"record": record, "receipt_sha256": "receipt"}
+        files = {str(candidate): "F", str(receipt): "receipt", str(N.LEGACY): N.LEGACY_SHA,
+                 **baseline["protected_binaries"]}
+        files.update({str(N.ROOT / name): pin for name, pin in N.RECEIPTS.items()})
+        files.update({str(N.ROOT / "morsehgp3D_v7/bench" / name): pin for name, pin in R.HELPER_PINS.items()})
+        for value in (record, old):
+            files.update({value[key]["path"]: value[key]["sha256"] for key in ("cmake_cache", "compile_database")})
+        before = {"files": files, "candidate_sources": record["sources_after"]}
+        N.binding_matches_snapshot(before, baseline, binding, candidate, receipt)
+        for name in files:
+            damaged = copy.deepcopy(before)
+            damaged["files"][name] = "changed"
+            with self.subTest(name=name), self.assertRaises(RuntimeError):
+                N.binding_matches_snapshot(damaged, baseline, binding, candidate, receipt)
+        damaged = copy.deepcopy(before)
+        damaged["candidate_sources"]["src/a"] = "changed"
+        with self.assertRaises(RuntimeError):
+            N.binding_matches_snapshot(damaged, baseline, binding, candidate, receipt)
+
+    def test_missing_candidate_binding_and_protected_path_prevent_process(self):
+        with patch.object(COMMON, "run_process") as process:
+            with tempfile.TemporaryDirectory(prefix="mhgp7-f-preflight-") as tmp:
+                base = Path(tmp)
+                with self.assertRaisesRegex(RuntimeError, "mandatory"):
+                    N.execute(base / "F", base, base / "new", None, 8, COMMON, INCIDENCE)
+                self.assertFalse((base / "new").exists())
+                with self.assertRaisesRegex(RuntimeError, "protected historical"):
+                    N.execute(N.BASELINE, base, base / "new", None, 8, COMMON, INCIDENCE)
+            process.assert_not_called()
+
+    def test_loader_injection_rejected_before_any_side_effect(self):
+        for name in R.INJECTION_VARIABLES:
+            with tempfile.TemporaryDirectory(prefix="mhgp7-f-ld-") as tmp:
+                base = Path(tmp)
+                environment = {key: "" for key in R.INJECTION_VARIABLES}
+                environment[name] = "fixture-private-value"
+                with patch.dict(os.environ, environment), patch.object(N, "baseline_binding") as baseline, \
+                        patch.object(COMMON, "run_process") as process:
+                    with self.assertRaises(RuntimeError) as caught:
+                        N.execute(base / "F", base, base / "new", None, 8, COMMON, INCIDENCE)
+                    self.assertIn(name, str(caught.exception))
+                    self.assertNotIn("fixture-private-value", str(caught.exception))
+                    baseline.assert_not_called()
+                    process.assert_not_called()
+                self.assertEqual(list(base.iterdir()), [])
+
+    def test_fresh_lifecycle_three_separations_retains_every_attempt(self):
+        for separation in N.SEPARATIONS:
+            for mode in ("completed", "refused", "censored", "drift", "interrupted", "malformed", "late_repository", "late_drift"):
+                with self.subTest(separation=separation, mode=mode), tempfile.TemporaryDirectory(prefix="mhgp7-f-loop-") as tmp:
+                    base = Path(tmp)
+                    calls, snapshots, late_drift = [], [0], [False]
+                    def current(*_args):
+                        snapshots[0] += 1
+                        return {"pin": "changed" if late_drift[0] or (mode == "drift" and snapshots[0] >= 3) else "fixed"}
+                    def run(command, out, err, **kwargs):
+                        calls.append(command)
+                        self.assertEqual(kwargs, {"timeout": 600, "address_limit_gib": 26})
+                        self.assertIn(f"--s={separation}", command)
+                        out.write_text(text(separation) if mode not in ("refused", "malformed") else "bad" if mode == "malformed" else "")
+                        err.write_text(F.FIXTURE.silent_refusal() if mode == "refused" else "")
+                        out.with_suffix(".time").write_text(F.FIXTURE.USAGE)
+                        if mode == "interrupted":
+                            raise KeyboardInterrupt("fixture")
+                        return (2 if mode == "refused" else -9 if mode == "censored" else 0, mode == "censored", 1.0)
+                    repository_calls = [0]
+                    def repository():
+                        repository_calls[0] += 1
+                        if repository_calls[0] == 2:
+                            if mode == "late_repository":
+                                raise RuntimeError("late repository fixture")
+                            late_drift[0] = mode == "late_drift"
+                        return {"head": "fixture", "worktree_porcelain": " M docs/new.md" if repository_calls[0] == 2 else ""}
+                    with patch.object(N, "baseline_binding", return_value={"protected_binaries": {}}), \
+                            patch.object(R, "candidate_binding", return_value={}), patch.object(N, "snapshot", side_effect=current), \
+                            patch.object(N, "binding_matches_snapshot"), patch.object(os, "sched_getaffinity", return_value={6}), \
+                            patch.object(R, "repository_state", side_effect=repository), \
+                            patch.object(R, "host_observation", return_value={"host_shared": True}), \
+                            patch.object(COMMON, "run_process", side_effect=run), contextlib.redirect_stdout(io.StringIO()):
+                        rc = N.execute(base / "F", base, base / "receipt", None, separation, COMMON, INCIDENCE)
+                        with self.assertRaises(FileExistsError):
+                            N.execute(base / "F", base, base / "receipt", None, separation, COMMON, INCIDENCE)
+                    records = json.loads((base / "receipt/runs.json").read_text())
+                    summary = json.loads((base / "receipt/summary.json").read_text())
+                    self.assertEqual(len(records), len(calls))
+                    self.assertEqual(len(calls), 1 if mode in ("drift", "interrupted", "malformed") else 2)
+                    self.assertEqual([row["role"] for row in records], ["E", "F"][:len(records)])
+                    self.assertTrue(all(row["ended_utc"].endswith("Z") for row in records))
+                    self.assertEqual(rc, 0 if mode == "completed" else 2 if mode in ("refused", "censored") else 1)
+                    if mode != "completed":
+                        self.assertNotIn("equality", summary)
+                        self.assertNotIn("ratio_E_over_F", summary)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,331 @@
+#!/usr/bin/env python3
+"""Create-only export of two CLOSED F scale observations; no engine or subprocess.
+
+Inert without --execute: no authority import, receipt read or write.
+Execution requires a separate root GO and explicit fixed F/build-receipt pins.
+"""
+from __future__ import annotations
+
+import argparse
+import copy
+from datetime import datetime, timezone
+import hashlib
+import json
+import math
+import os
+from pathlib import Path
+import re
+import types
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+PROTOCOL = ROOT / "build/v7_f_scale_20260905"
+PUBLIC_REL = "morsehgp3D_v7/receipts/witness_stack_scale_20260905"
+PUBLIC = ROOT / PUBLIC_REL
+SIZES = (16000, 32000)
+MONO = ROOT / "build/v7_f_export_20260905/export_mono.py"
+MONO_SHA = "5f7717af38a18ecf772a3d5b384a3b040907589ac91c1a6c07f1be06e6ea95eb"
+PROTOCOL_PINS = {
+    "runner.py": "4e1b8ac0d69e03de8cb3a1acb56ca4d4cbd2d754755dd18b68bc86f2fc0e6d92",
+    "selftest.py": "930a7151d6e64b79b2f51ff8ae405a1a22be2be446c465e67fcd718121b8ddda",
+    "README.md": "5477107351205ffe2d8d3041317803f4c0f0a17f1fcd7a886f5c911e2f1ba89f",
+}
+PREPARATION = PROTOCOL / "protocol_selftests_20260905"
+PREPARATION_PINS = {
+    "normal.combined-tool-output.txt": "9bd4153f903a1b5634858a282bc1dbf19a51367e03bedfd365c5645e8fbf05b2",
+    "optimized.combined-tool-output.txt": "edb3227ee4a9203d836f7303a942639a9f4b3a48b319fd17dd0998652e928d01",
+    "sources_before.sha256": "5886ca798b1e04a4a47919c50543c08449301a0503b805b593a5a2e44387df4e",
+    "sources_after.sha256": "5886ca798b1e04a4a47919c50543c08449301a0503b805b593a5a2e44387df4e",
+    "summary.json": "3daf94de0baa3d45b54c704d680999e9c8e8a2e3a3ab0fe8432fcbbef0bb7014",
+    "SHA256SUMS": "4bd1a95682c554469205fa6f76661409288582f9872f3d7f65d66b6a42fbf500",
+}
+REQUIRED_RUN_FILES = {"metadata.json", "runs.json", "repository_after.json", "snapshot_after.json",
+                      "summary.json", "hashes.json", "F.out", "F.err"}
+RUN_FIELDS = {"role", "n", "status", "command", "wrapped_command", "started_utc", "ended_utc",
+              "returncode", "timed_out", "wall_seconds", "stdout", "stderr", "usage"}
+EXPORTER_FILES = ("export.py", "selftest.py", "PLAN.md", "preparation.json")
+
+
+def require(value: bool, reason: str) -> None:
+    if not value:
+        raise RuntimeError(reason)
+
+
+def sha(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def load_mono():
+    data = MONO.read_bytes()
+    require(sha(data) == MONO_SHA, "closed export helper authority changed")
+    module = types.ModuleType("F_scale_export_closed_mono_authority")
+    module.__file__ = str(MONO)
+    exec(compile(data, str(MONO), "exec"), module.__dict__)
+    return module
+
+
+def protocol_files(reader, M) -> dict[Path, bytes]:
+    require({p.name for p in PREPARATION.iterdir()} == set(PREPARATION_PINS), "preparation inventory changed")
+    result = {PROTOCOL / name: reader.pinned(PROTOCOL / name, pin) for name, pin in PROTOCOL_PINS.items()}
+    result.update({PREPARATION / name: reader.pinned(PREPARATION / name, pin) for name, pin in PREPARATION_PINS.items()})
+    summary = M.json_value(result[PREPARATION / "summary.json"])
+    require(summary["status"] == "completed" and summary["scope"] == "synthetic_protocol_selftests_only" and
+            summary["sources_stable"] is True and summary["fixture_status"] == "synthetic_only_not_engine_raw" and
+            all(summary[name] == 0 for name in ("engine_runs", "builds", "ctest_runs", "git_commands")),
+            "preparation is not synthetic-only closed evidence")
+    require(len(summary["commands"]) == 2 and all(row["reported_tests"] == 8 and row["result"]["exit_code"] == 0
+            for row in summary["commands"]), "preparation selftests incomplete")
+    return result
+
+
+def verify_observation(reader, M, S, common, incidence, n: int, baseline: dict, admitted: dict) -> tuple[dict, dict, dict]:
+    require(n in SIZES, "unreviewed observation size")
+    folder = PROTOCOL / f"n{n}_receipts"
+    actual = {p.name for p in folder.iterdir()}
+    require(REQUIRED_RUN_FILES <= actual <= REQUIRED_RUN_FILES | {"F.time"}, "closed scale receipt inventory differs")
+    raw = M.closed_directory(reader, folder, actual)
+    metadata, records, summary, after = [M.json_value(raw[name]) for name in
+        ("metadata.json", "runs.json", "summary.json", "snapshot_after.json")]
+    require(summary["status"] == "observations_completed" and summary["error"] is None and
+            summary["source_stable"] is True, "scale observation invalid, unclosed or changed")
+    require(metadata["candidate"] == admitted["binding"] and metadata["protected_historical"] == baseline,
+            "scale build/historical lineage mismatch")
+    before = metadata["snapshot_before"]
+    require(before == after == admitted["before"] == S.snapshot(baseline, common), "scale terminal snapshot drift")
+    for name, pin in before["files"].items():
+        reader.watch(Path(name), pin, S.R.digest)
+    require(metadata["schema"] == "mhgp7-F-scale-observation-v1" and metadata["identity"] == dict(S.R.IDENTITY, n=n) and
+            metadata["s"] == 8 and metadata["smax"] == 11 and metadata["silent_limits"] == S.R.CAPS,
+            "scale identity or caps mismatch")
+    require(metadata["timeout_seconds"] == S.R.TIMEOUT and metadata["rlimit_as_gib"] == S.R.ADDRESS_LIMIT_GIB and
+            metadata["rlimit_as_is_not_physical_RSS_limit"] is True and metadata["cpu_affinity_requested"] == [S.R.CPU] and
+            metadata["payload_proxy_bytes"] == S.R.MEMORY_PROXY and metadata["archive"] is False and metadata["digest"] is True,
+            "scale bounded envelope mismatch")
+    require(metadata["classification_source_adaptations"] == 0 and metadata["argv_adaptation"] == "one --n=8000 token" and
+            metadata["comparison"] == "none_F_only" and metadata["public_status"] == "not_claimed" and
+            metadata["gcp"] == "not_used" and metadata["host_before"]["host_shared"] is True and
+            metadata["strict_thread_creation_measurement"] == "not_performed_by_runner" and
+            metadata["effective_locale"] == {"LC_ALL": "C", "LANG": "C"} and
+            metadata["incomplete_usage_policy"] == "keep_raw_time_without_inventing_RSS_for_refusal_or_censure",
+            "scale scope metadata mismatch")
+    require(len(records) == 1, "scale must have exactly one fresh attempt")
+    record = records[0]
+    require(RUN_FIELDS <= set(record) and record["role"] == "F" and record["n"] == n and
+            record["command"] == S.command(n), "scale attempt command/identity mismatch")
+    require(all(record[field] == "F" + suffix for field, suffix in
+                (("stdout", ".out"), ("stderr", ".err"), ("usage", ".time"))), "raw file binding mismatch")
+    wrapped = ["/usr/bin/taskset", "--cpu-list", str(S.R.CPU), "/usr/bin/time", "-v", "-o", str(folder / "F.time"),
+               "--", *record["command"]]
+    require(record["wrapped_command"] == wrapped, "observation wrapper does not bind this receipt")
+    require(metadata["started_utc"] == summary["started_utc"] and
+            M.utc(summary["started_utc"]) <= M.utc(record["started_utc"]) <= M.utc(record["ended_utc"]) <= M.utc(summary["ended_utc"]),
+            "scale UTC chronology mismatch")
+    require(type(record["returncode"]) is int and type(record["timed_out"]) is bool and
+            isinstance(record["wall_seconds"], (int, float)) and math.isfinite(record["wall_seconds"]) and
+            record["wall_seconds"] >= 0, "unterminated or nonfinite attempt")
+    replay = {key: copy.deepcopy(record[key]) for key in RUN_FIELDS}
+    replay["status"] = "invalid"
+    S.classify(replay, folder / "F.out", folder / "F.err", folder / "F.time", n, common, incidence)
+    require(M.canonical(replay) == M.canonical(record), "raw reclassification differs from all recorded fields")
+    if replay["status"] == "engine_completed":
+        require("F.time" in raw and 0 < record["wall_seconds"] <= S.R.TIMEOUT + 30, "completion missing bounded usage")
+        require(re.findall(r'^\s*Command being timed: "(.*)"$', raw["F.time"].decode(), re.M) == [" ".join(record["command"])],
+                "GNU time command does not bind this observation")
+    # Non-success records cannot inherit digests, pipeline costs or RSS: exact
+    # record replay above rejects every field the closed classifier did not emit.
+    decision = S.decision([replay], n, True, None, incidence)
+    fields = set(summary) - {"started_utc", "ended_utc", "repository_change_policy"}
+    require(M.canonical({key: summary[key] for key in fields}) == M.canonical(decision), "scale terminal decision differs from raw replay")
+    require(summary["repository_change_policy"] == "HEAD_or_worktree_changes_recorded_source_snapshot_stability_required",
+            "repository change policy differs")
+    repository_after = M.json_value(raw["repository_after.json"])
+    require(isinstance(repository_after, dict), "terminal repository observation missing")
+    review = {"n": n, "status": "passed_read_only_replay_not_new_observation", "engine_status": replay["status"],
+              "decision": decision, "source_manifest_sha256": sha(raw["hashes.json"]),
+              "all_record_fields_revalidated": True, "usage_file_present": "F.time" in raw,
+              "started_utc": summary["started_utc"], "ended_utc": summary["ended_utc"],
+              "attempt_started_utc": record["started_utc"],
+              "repository_change": {"head_before": metadata["repository_before"]["head"],
+                                    "head_after": repository_after["head"], "policy": summary["repository_change_policy"]},
+              "public_status": "not_claimed"}
+    return review, replay, raw
+
+
+def result_document(observations: dict, M) -> dict:
+    require(set(observations) == set(SIZES), "two independent scale observations required")
+    previous, starts, rows = None, set(), []
+    for n in SIZES:
+        review, record, _raw = observations[n]
+        start, end = M.utc(review["started_utc"]), M.utc(review["ended_utc"])
+        require(previous is None or previous <= start, "scale observations overlap or are reordered")
+        require(review["attempt_started_utc"] not in starts, "scale observation timestamp reused")
+        starts.add(review["attempt_started_utc"])
+        previous = end
+        row = {"n": n, "engine_status": record["status"], "observation_closed": True}
+        if record["status"] == "engine_completed":
+            row["completed_tower"] = {key: record[key] for key in
+                ("wall_seconds", "pipeline_ms", "max_rss_kb", "digests", "cardinalities", "counts", "silent", "stage_ms")}
+        elif record["status"] == "engine_refused":
+            row["refusal"] = {key: record[key] for key in ("reason", "refusal_status", "refusal_order")}
+        else:
+            require(record["status"] == "censored", "invalid observation cannot be published as closed")
+            row["partial_outputs_not_promoted"] = True
+        rows.append(row)
+    return {"schema": "mhgp7-F-scale-results-v1", "status": "two_scale_observations_closed",
+            "observations": rows, "engine_successes": sum(row["engine_status"] == "engine_completed" for row in rows),
+            "comparison": "none_F_only_distinct_sizes_no_ratio_or_object_equality_claim", "slo": "not_evaluated",
+            "public_status": "not_claimed", "gcp": "not_used"}
+
+
+def readme(results: dict) -> bytes:
+    lines = ["# Observations F seules — 16 000 et 32 000 points", "",
+             "Cadre : phase=exploration_v7_hors_registre, backend=cpu_reference,",
+             "profile=quantized_u16_input_only, mode=bounded_F_scale_observation, public_status=not_claimed.", "",
+             "Deux observations indépendantes de F, uniforme u16 étendu coord=65536, seed=3, s=8,",
+             "tour candidate complétée K1..10 demandée, digest et incidences complètes, sans archive.",
+             "CPU6, un thread demandé, fold-inflight=1 et fold-join=1. Le runner ne mesure pas les créations de threads.", "",
+             "| n | État moteur | Processus achevé (s) | Pipeline achevé (ms) | RSS achevé (KiB) |",
+             "|---|---|---:|---:|---:|"]
+    for row in results["observations"]:
+        cost = row.get("completed_tower")
+        values = f"{cost['wall_seconds']:.9f} | {cost['pipeline_ms']} | {cost['max_rss_kb']}" if cost else "— | — | —"
+        lines.append(f"| {row['n']} | {row['engine_status']} | {values} |")
+    lines += ["", "Une observation close n'est pas nécessairement un succès moteur. Refus reconnus et censures",
+              "conservent leurs sorties exactes, sans digests de succès, coûts de tour achevée ni RSS inventé.",
+              "Un fichier GNU time absent ou incomplet sous refus/censure est déclaré tel quel ; aucun octet n'est fabriqué.",
+              "Les durées brutes des tentatives restent des diagnostics, pas des temps de complétion.", "",
+              "Chaque processus est borné à 600 s et RLIMIT_AS=26 GiB, qui n'est pas un plafond de RSS physique.",
+              "Proxy payload partiel=16 GiB ; caps par ordre : core8M, chain2M, cofaces2M, queries1B, MEB1B.",
+              "Hôte partagé, une observation froide par taille : aucun ratio, moyenne avec les paires 8k,",
+              "gain statistique, comparaison de digests entre tailles ou extrapolation vers 50k et au-delà.", "",
+              "Le préflight et la frontière finale relisent les sources, helpers, CLI/build F et historiques C/C/D/E.",
+              "Toutes les sorties et tous les champs de runs.json sont reclassifiés par les autorités épinglées ;",
+              "aucun moteur, build, test, Git ou GCP n'est exécuté par l'exporteur. Un changement de HEAD documentaire",
+              "reste enregistré ; il ne remplace pas le contrôle strict des snapshots de sources et binaires.", "",
+              "Les copies sont byte-exactes, sans LF ajouté, réécriture ni troncature. provenance.json donne chaque",
+              "origine, destination, hash et taille. SOURCE_HASHES.json désigne les noms privés, pas leur projection.",
+              "Les snapshots de protocoles sont inertes, les dépendances historiques référencées avec leurs pins.",
+              "La préparation conserve les huit tests synthétiques normal/-O ; elle n'est pas un résultat moteur.",
+              "build_F/build_D.json conserve un nom hérité du builder mais son contenu est F. Aucun binaire n'est livré.", "",
+              "SHA256SUMS et SHA256SUMS.root ferment les mêmes fichiers et s'excluent mutuellement.",
+              "Un arbre partiel dépourvu des deux listes valides n'est pas publiable et n'est jamais repris ou écrasé.",
+              "Aucun SLO 50k/1 s/100 ms, résultat massif/GPU ou exactitude industrielle globale n'est démontré.",
+              "GCP non utilisé.", ""]
+    return "\n".join(lines).encode()
+
+
+def publish_payload(payload: dict[str, bytes], terminal) -> dict[str, str]:
+    require(not PUBLIC.exists(), "publication target already exists; never overwrite or resume")
+    PUBLIC.mkdir(mode=0o755, exist_ok=False)
+    for name, data in sorted(payload.items()):
+        require(not Path(name).is_absolute() and ".." not in Path(name).parts and name not in ("SHA256SUMS", "SHA256SUMS.root"),
+                "unsafe or reserved public payload path")
+        path = PUBLIC / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("xb") as output:
+            output.write(data)
+            output.flush()
+            os.fsync(output.fileno())
+        require(path.read_bytes() == data, "public copy altered original bytes")
+    terminal()
+    sums = {name: sha(data) for name, data in sorted(payload.items())}
+    require(all(sha((PUBLIC / name).read_bytes()) == pin for name, pin in sums.items()), "public bytes changed before closure")
+    for name, prefix in (("SHA256SUMS", ""), ("SHA256SUMS.root", PUBLIC_REL + "/")):
+        with (PUBLIC / name).open("xb") as output:
+            output.write("".join(f"{pin}  {prefix}{path}\n" for path, pin in sums.items()).encode())
+            output.flush()
+            os.fsync(output.fileno())
+    require({str(path.relative_to(PUBLIC)) for path in PUBLIC.rglob("*") if path.is_file()} == set(payload) | {"SHA256SUMS", "SHA256SUMS.root"},
+            "unexpected file in completed publication")
+    require(all(sha((PUBLIC / name).read_bytes()) == pin for name, pin in sums.items()), "public bytes changed during closure")
+    return sums
+
+
+def execute(expected_f: str, expected_receipt: str) -> int:
+    require(re.fullmatch("[0-9a-f]{64}", expected_f) is not None and re.fullmatch("[0-9a-f]{64}", expected_receipt) is not None,
+            "two explicit complete lowercase pins required")
+    require(not PUBLIC.exists(), "publication target already exists; never overwrite or resume")
+    M = load_mono()
+    reader = M.Reader()
+    reader.pinned(MONO, MONO_SHA)
+    protocol = protocol_files(reader, M)
+    S = M.load_authority(reader, str((PROTOCOL / "runner.py").relative_to(ROOT)), PROTOCOL_PINS["runner.py"], "F_scale_export_runner")
+    require(expected_f == S.CANDIDATE_SHA and expected_receipt == S.RECEIPT_SHA, "explicit pins are not the fixed F scale pins")
+    S.R.environment_guard()
+    common, incidence = S.R.helpers()
+    baseline = S.N.baseline_binding()
+    admitted = S.admission(baseline, common)
+    observations = {n: verify_observation(reader, M, S, common, incidence, n, baseline, admitted) for n in SIZES}
+    results = result_document(observations, M)
+    dependencies = {S.PAIRED: S.PAIRED_SHA, S.N.LEGACY: S.N.LEGACY_SHA, MONO: MONO_SHA}
+    # Exactly the two transitive synthetic fixture sources used by the saved
+    # scale selftests; not executed or promoted to engine outputs during export.
+    dependencies.update({
+        ROOT / "build/v7_meb_paired/selftest.py": "f192a95f013e0b1df56a9324d8f18034949cd51410fcc6d41e8ee87af9048348",
+        ROOT / "morsehgp3D_v7/tests/incidence_campaign_gate.py": "d74bca5257bd307b5956a946ca188a217f519ec2dc49e6b0de3ebf33a0ccca0a",
+    })
+    dependencies.update({ROOT / "morsehgp3D_v7/bench" / name: pin for name, pin in S.R.HELPER_PINS.items()})
+    public_dependencies = {ROOT / name: pin for name, pin in S.N.RECEIPTS.items()}
+    public_dependencies.update({S.R.RELEASE / name: pin for name, pin in S.R.RELEASE_PINS.items()})
+    for path, pin in {**dependencies, **public_dependencies}.items():
+        reader.pinned(path, pin)
+    payload, provenance = {}, []
+    def copy_original(source: Path, target: str, data: bytes) -> None:
+        require(target not in payload and not Path(target).is_absolute() and ".." not in Path(target).parts, "unsafe/duplicate public path")
+        require(reader.read(source) == data, "source changed before mapping")
+        payload[target] = data
+        provenance.append({"source_path": str(source.relative_to(ROOT)), "public_path": target,
+                           "source_sha256": sha(data), "public_sha256": sha(data), "source_bytes": len(data),
+                           "public_bytes": len(data), "transform": "none_byte_exact"})
+    for n, (_review, _record, raw) in observations.items():
+        for name, data in raw.items():
+            copy_original(PROTOCOL / f"n{n}_receipts" / name, f"n{n}_receipts/" + ("SOURCE_HASHES.json" if name == "hashes.json" else name), data)
+    for path, data in protocol.items():
+        name = str(path.relative_to(PROTOCOL))
+        suffix = ".snapshot.txt" if path.suffix in (".py", ".md") else ".source.txt" if path.name == "SHA256SUMS" else ""
+        copy_original(path, "protocol/scale/" + name + suffix, data)
+    copy_original(S.RECEIPT, "build_F/build_D.json", reader.pinned(S.RECEIPT, S.RECEIPT_SHA))
+    for path, pin in dependencies.items():
+        copy_original(path, "protocol/dependencies/" + path.parent.name + "__" + path.name + ".snapshot.txt", reader.pinned(path, pin))
+    for name in EXPORTER_FILES:
+        copy_original(BASE / name, "protocol/exporter/" + name + ".snapshot.txt", reader.read(BASE / name))
+    payload["results.json"] = M.json_bytes(results)
+    payload["README.md"] = readme(results)
+    payload["provenance.json"] = M.json_bytes({"mappings": provenance, "copied_files": len(provenance),
+        "all_byte_exact": True, "line_ending_rewrites": 0, "engine_runs": 0, "builds": 0, "public_status": "not_claimed"})
+    payload["dependencies.json"] = M.json_bytes({"snapshotted_files": {str(path.relative_to(ROOT)): pin for path, pin in dependencies.items()},
+        "existing_public_files": {str(path.relative_to(ROOT)): pin for path, pin in public_dependencies.items()},
+        "historical_results_not_reused_or_transferred": True, "snapshots_are_inert": True})
+    payload["review.json"] = M.json_bytes({"status": "two_terminal_observations_replayed_read_only", "reviewed_utc": datetime.now(timezone.utc).isoformat(),
+        "observations": {str(n): observations[n][0] for n in SIZES}, "fixed_F_sha256": expected_f,
+        "fixed_F_build_receipt_sha256": expected_receipt, "protected_C_C_D_E": baseline["protected_binaries"],
+        "engine_runs_during_export": 0, "builds_during_export": 0, "public_status": "not_claimed"})
+    def terminal() -> None:
+        reader.terminal(S.R.digest)
+        require(S.N.baseline_binding() == baseline and S.admission(baseline, common) == admitted, "source/build lineage drift at export boundary")
+    terminal()
+    payload["manifest.json"] = M.json_bytes({name: {"sha256": sha(data), "bytes": len(data)} for name, data in sorted(payload.items())})
+    sums = publish_payload(payload, terminal)
+    print(json.dumps({"status": "published_closed_observations_not_exactness", "public_path": PUBLIC_REL,
+                      "copied_files": len(provenance), "sum_covered_files": len(sums), "engine_successes": results["engine_successes"],
+                      "SHA256SUMS_sha256": sha((PUBLIC / "SHA256SUMS").read_bytes()), "public_status": "not_claimed"}, sort_keys=True))
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--expected-f-sha256")
+    parser.add_argument("--build-receipt-sha256")
+    args = parser.parse_args(argv)
+    if not args.execute:
+        print(json.dumps({"status": "prepared_not_executed", "writes": False, "receipt_reads": False,
+            "sizes": SIZES, "public_target": PUBLIC_REL, "requires_root_GO_and_two_terminal_observations": True,
+            "engine_runs": 0, "builds": 0, "gcp": "not_used"}, sort_keys=True))
+        return 0
+    require(args.expected_f_sha256 is not None and args.build_receipt_sha256 is not None, "two explicit F pins required after root GO")
+    return execute(args.expected_f_sha256, args.build_receipt_sha256)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

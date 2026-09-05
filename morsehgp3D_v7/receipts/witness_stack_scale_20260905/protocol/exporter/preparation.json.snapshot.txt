@@ -1,0 +1,83 @@
+{
+  "status": "prepared_selftests_passed_not_executed",
+  "script_sha256": "4c5895d29342d497cf1cd27b60b2cd519134d0f9e8241c9177cb7c6145202687",
+  "selftest_sha256": "40c8d6482ea6015a2a33120ea3bde73bf83105a8bf3552f9ae4775227bc1db84",
+  "plan_sha256": "bb2abcf4fff1b0266dac0e2e40ea9cee2d2833c6da0b4798dcb1b039e7144ea5",
+  "sources": {
+    "scale_runner": "4e1b8ac0d69e03de8cb3a1acb56ca4d4cbd2d754755dd18b68bc86f2fc0e6d92",
+    "closed_export_helpers": "5f7717af38a18ecf772a3d5b384a3b040907589ac91c1a6c07f1be06e6ea95eb",
+    "scale_preparation_summary": "3daf94de0baa3d45b54c704d680999e9c8e8a2e3a3ab0fe8432fcbbef0bb7014",
+    "scale_preparation_sums": "4bd1a95682c554469205fa6f76661409288582f9872f3d7f65d66b6a42fbf500"
+  },
+  "normal": {
+    "argv": [
+      "taskset",
+      "--cpu-list",
+      "0",
+      "timeout",
+      "30s",
+      "python3",
+      "-B",
+      "build/v7_f_scale_export_20260905/selftest.py"
+    ],
+    "chunk_id": "5c5041",
+    "wall_time_seconds": 0.387093767,
+    "exit_code": 0,
+    "original_token_count": 27,
+    "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.182s\n\nOK\n"
+  },
+  "optimized": {
+    "argv": [
+      "taskset",
+      "--cpu-list",
+      "0",
+      "timeout",
+      "30s",
+      "python3",
+      "-B",
+      "-O",
+      "build/v7_f_scale_export_20260905/selftest.py"
+    ],
+    "chunk_id": "b5dad4",
+    "wall_time_seconds": 0.406046586,
+    "exit_code": 0,
+    "original_token_count": 27,
+    "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.187s\n\nOK\n"
+  },
+  "preview": {
+    "argv": [
+      "taskset",
+      "--cpu-list",
+      "0",
+      "python3",
+      "-B",
+      "build/v7_f_scale_export_20260905/export.py"
+    ],
+    "chunk_id": "97edde",
+    "wall_time_seconds": 0.108920004,
+    "exit_code": 0,
+    "original_token_count": 70,
+    "output": "{\"builds\": 0, \"engine_runs\": 0, \"gcp\": \"not_used\", \"public_target\": \"morsehgp3D_v7/receipts/witness_stack_scale_20260905\", \"receipt_reads\": false, \"requires_root_GO_and_two_terminal_observations\": true, \"sizes\": [16000, 32000], \"status\": \"prepared_not_executed\", \"writes\": false}\n"
+  },
+  "protocol_readonly_check": {
+    "scope": "nine explicit protocol/preparation files only, performed before the final addition of two inert synthetic dependency references; protocol_files function unchanged",
+    "chunk_id": "7d75b6",
+    "wall_time_seconds": 0.098136144,
+    "exit_code": 0,
+    "original_token_count": 5,
+    "output": "prepared_files=9\n"
+  },
+  "output_authority": "Exact combined text returned by the execution tool; no invented stdout/stderr split. Selftest durations are not engine times.",
+  "selftest_methods_each": 8,
+  "synthetic_publication_paths": "Temporary fixtures inside build/v7_f_scale_export_20260905 only; real public target never opened",
+  "real_campaign_receipt_reads": 0,
+  "real_public_writes": 0,
+  "engine_runs": 0,
+  "builds": 0,
+  "ctest_runs": 0,
+  "git_commands": 0,
+  "gcp": "not_used",
+  "public_status": "not_claimed",
+  "execution_requires_root_GO_after_two_scale_observations_closed": true,
+  "independent_review": "requested separately from q2_qualification; no positive review inferred in this preparation"
+}

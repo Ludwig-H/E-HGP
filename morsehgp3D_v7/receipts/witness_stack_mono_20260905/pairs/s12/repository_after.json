@@ -1,0 +1,5 @@
+{
+  "observed_utc": "2026-09-05T10:00:52.592797Z",
+  "head": "71895104c7d750fdd6ef0a313cfb09e9ac161204",
+  "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/audits/AUDIT_INDEPENDANT_20260904.md\n M morsehgp3D_v7/audits/AUDIT_INTERFACES_20260904.md\n M morsehgp3D_v7/audits/AUDIT_QUALIFICATION_20260905.md\n M morsehgp3D_v7/audits/CERTIFICAT_HORIZONTAL_COURANT.md\n M morsehgp3D_v7/audits/DIALOGUE_COURANT.md\n M morsehgp3D_v7/audits/ETAT_COURANT.md\n M morsehgp3D_v7/audits/README.md\n M morsehgp3D_v7/audits/validation_current.json\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/masses_vote_probe.py\n?? morsehgp3D_v7/audits/receipts_vertical_20260905/\n?? morsehgp3D_v7/audits/vertical_replay.py\n"
+}

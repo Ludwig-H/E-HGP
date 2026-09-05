@@ -1,0 +1,203 @@
+"""Synthetic exporter fixtures only; no engine, Git, cloud or real campaign reads."""
+from __future__ import annotations
+
+import contextlib
+import copy
+import io
+import json
+from pathlib import Path
+import sys
+import tempfile
+import unittest
+from unittest.mock import patch
+
+import export as E
+
+M = E.load_mono()
+S = M.load_authority(M.Reader(), str((E.PROTOCOL / "runner.py").relative_to(E.ROOT)),
+                     E.PROTOCOL_PINS["runner.py"], "F_scale_export_synthetic_runner")
+with patch.dict(sys.modules, {"runner": S}):
+    F = S.load_pinned(E.PROTOCOL / "selftest.py", E.PROTOCOL_PINS["selftest.py"], "F_scale_export_fixture_authority")
+COMMON, INCIDENCE = F.COMMON, F.INCIDENCE
+BEFORE = {"files": {}, "scale_protocol_files": E.PROTOCOL_PINS}
+ADMITTED = {"binding": {"synthetic": True}, "before": BEFORE}
+
+
+def seal(folder: Path) -> None:
+    (folder / "hashes.json").write_bytes(M.json_bytes({path.name: E.sha(path.read_bytes()) for path in folder.iterdir()
+                                                     if path.name != "hashes.json"}))
+
+
+def fixture(base: Path, n: int, mode: str = "completed", usage_kind: str = "present") -> Path:
+    folder = base / f"n{n}_receipts"
+    folder.mkdir()
+    prefix = "2026-09-05T00:" + ("00:" if n == 16000 else "01:")
+    argv = S.command(n)
+    record = {"role": "F", "n": n, "status": "invalid", "command": argv,
+              "wrapped_command": ["/usr/bin/taskset", "--cpu-list", "6", "/usr/bin/time", "-v", "-o", str(folder / "F.time"), "--", *argv],
+              "started_utc": prefix + "01Z", "ended_utc": prefix + "02Z", "wall_seconds": 1.0,
+              "returncode": 0 if mode == "completed" else 2 if mode == "refused" else -9,
+              "timed_out": mode == "censored", "stdout": "F.out", "stderr": "F.err", "usage": "F.time"}
+    (folder / "F.out").write_bytes(F.text(n).encode() if mode == "completed" else b"" if mode == "refused" else b"\x00partial\r\nno-final-LF")
+    (folder / "F.err").write_text(F.F.FIXTURE.silent_refusal() if mode == "refused" else "")
+    if usage_kind != "absent":
+        (folder / "F.time").write_text("partial GNU time" if usage_kind == "partial" else
+            'Command being timed: "' + " ".join(argv) + '"\n' + F.F.FIXTURE.USAGE)
+    S.classify(record, folder / "F.out", folder / "F.err", folder / "F.time", n, COMMON, INCIDENCE)
+    metadata = {"schema": "mhgp7-F-scale-observation-v1", "candidate": ADMITTED["binding"], "protected_historical": {},
+                "snapshot_before": BEFORE, "repository_before": {"head": "synthetic"}, "host_before": {"host_shared": True},
+                "identity": dict(S.R.IDENTITY, n=n), "s": 8, "smax": 11, "silent_limits": S.R.CAPS,
+                "timeout_seconds": 600, "rlimit_as_gib": 26, "rlimit_as_is_not_physical_RSS_limit": True,
+                "cpu_affinity_requested": [6], "payload_proxy_bytes": S.R.MEMORY_PROXY, "archive": False, "digest": True,
+                "classification_source_adaptations": 0, "argv_adaptation": "one --n=8000 token",
+                "started_utc": prefix + "00Z", "public_status": "not_claimed", "gcp": "not_used", "comparison": "none_F_only",
+                "strict_thread_creation_measurement": "not_performed_by_runner", "effective_locale": {"LC_ALL": "C", "LANG": "C"},
+                "incomplete_usage_policy": "keep_raw_time_without_inventing_RSS_for_refusal_or_censure"}
+    summary = S.decision([record], n, True, None, INCIDENCE)
+    summary.update(started_utc=prefix + "00Z", ended_utc=prefix + "03Z",
+                   repository_change_policy="HEAD_or_worktree_changes_recorded_source_snapshot_stability_required")
+    for name, value in (("metadata.json", metadata), ("runs.json", [record]), ("summary.json", summary),
+                        ("snapshot_after.json", BEFORE), ("repository_after.json", {"head": "synthetic documentary update"})):
+        (folder / name).write_bytes(M.json_bytes(value))
+    seal(folder)
+    return folder
+
+
+def verify(base: Path, n: int, reader=None):
+    with patch.object(E, "PROTOCOL", base), patch.object(S, "snapshot", return_value=BEFORE):
+        return E.verify_observation(reader or M.Reader(), M, S, COMMON, INCIDENCE, n, {}, ADMITTED)
+
+
+class ExportScaleGate(unittest.TestCase):
+    def test_preview_and_existing_target_never_load_authorities(self):
+        with patch.object(E, "load_mono", side_effect=RuntimeError("must not load")), contextlib.redirect_stdout(io.StringIO()) as output:
+            self.assertEqual(E.main([]), 0)
+        value = json.loads(output.getvalue())
+        self.assertEqual(value["sizes"], [16000, 32000])
+        self.assertFalse(value["writes"])
+        self.assertFalse(value["receipt_reads"])
+        with patch.object(E, "PUBLIC", E.BASE), patch.object(E, "load_mono") as load:
+            with self.assertRaisesRegex(RuntimeError, "already exists"):
+                E.execute("a" * 64, "b" * 64)
+            load.assert_not_called()
+
+    def test_completed_towers_replay_all_fields_both_sizes(self):
+        with tempfile.TemporaryDirectory(prefix="scale-export-complete-", dir=E.BASE) as tmp:
+            base = Path(tmp)
+            observations = {}
+            for n in E.SIZES:
+                fixture(base, n)
+                observations[n] = verify(base, n)
+                self.assertEqual(observations[n][1]["counts"]["n"], n)
+            result = E.result_document(observations, M)
+            self.assertEqual(result["engine_successes"], 2)
+            self.assertIn("stage_ms", result["observations"][0]["completed_tower"])
+            self.assertNotIn("ratio", result)
+            self.assertIn(b"engine_completed", E.readme(result))
+
+    def test_refusals_censures_missing_partial_usage_and_no_promotion(self):
+        for mode in ("refused", "censored"):
+            for usage_kind in ("present", "absent", "partial"):
+                with self.subTest(mode=mode, usage=usage_kind), tempfile.TemporaryDirectory(prefix="scale-export-negative-", dir=E.BASE) as tmp:
+                    base, observations = Path(tmp), {}
+                    for n in E.SIZES:
+                        fixture(base, n, mode, usage_kind)
+                        observations[n] = verify(base, n)
+                    result = E.result_document(observations, M)
+                    self.assertEqual(result["engine_successes"], 0)
+                    for row in result["observations"]:
+                        self.assertNotIn("completed_tower", row)
+                        self.assertNotIn("max_rss_kb", row)
+                    self.assertEqual(observations[16000][0]["usage_file_present"], usage_kind != "absent")
+                    self.assertEqual(observations[16000][2]["F.out"], b"" if mode == "refused" else b"\x00partial\r\nno-final-LF")
+
+    def test_record_metadata_summary_and_inventory_mutations_rejected(self):
+        cases = [("runs.json", lambda value: value[0].update(max_rss_kb=1001)),
+                 ("runs.json", lambda value: value[0].update(command=["not the command"])),
+                 ("metadata.json", lambda value: value["identity"].update(n=32000)),
+                 ("metadata.json", lambda value: value.update(timeout_seconds=601)),
+                 ("summary.json", lambda value: value.update(engine_successes=0)),
+                 ("summary.json", lambda value: value.update(status="invalid"))]
+        for name, change in cases:
+            with self.subTest(name=name), tempfile.TemporaryDirectory(prefix="scale-export-mutant-", dir=E.BASE) as tmp:
+                base = Path(tmp)
+                folder = fixture(base, 16000)
+                value = M.json_value((folder / name).read_bytes())
+                change(value)
+                (folder / name).write_bytes(M.json_bytes(value))
+                seal(folder)
+                with self.assertRaises(RuntimeError):
+                    verify(base, 16000)
+        with tempfile.TemporaryDirectory(prefix="scale-export-extra-", dir=E.BASE) as tmp:
+            base = Path(tmp)
+            folder = fixture(base, 16000)
+            (folder / "unreviewed").write_bytes(b"unexpected")
+            seal(folder)
+            with self.assertRaisesRegex(RuntimeError, "inventory differs"):
+                verify(base, 16000)
+
+    def test_negative_record_cannot_retain_success_fields(self):
+        for mode in ("refused", "censored"):
+            with tempfile.TemporaryDirectory(prefix="scale-export-false-success-", dir=E.BASE) as tmp:
+                base = Path(tmp)
+                folder = fixture(base, 16000, mode)
+                rows = M.json_value((folder / "runs.json").read_bytes())
+                rows[0].update(pipeline_ms=1.0, max_rss_kb=1000, digests={"fabricated": True})
+                (folder / "runs.json").write_bytes(M.json_bytes(rows))
+                seal(folder)
+                with self.assertRaisesRegex(RuntimeError, "all recorded fields"):
+                    verify(base, 16000)
+
+    def test_source_hash_mismatch_and_terminal_drift_fail_closed(self):
+        with tempfile.TemporaryDirectory(prefix="scale-export-drift-", dir=E.BASE) as tmp:
+            base = Path(tmp)
+            folder = fixture(base, 16000)
+            reader = M.Reader()
+            verify(base, 16000, reader)
+            (folder / "F.out").write_bytes(b"changed")
+            with self.assertRaisesRegex(RuntimeError, "source pin mismatch"):
+                verify(base, 16000)
+            with self.assertRaisesRegex(RuntimeError, "source drift"):
+                reader.terminal(S.R.digest)
+
+    def test_distinct_size_chronology_without_cross_size_equality(self):
+        with tempfile.TemporaryDirectory(prefix="scale-export-order-", dir=E.BASE) as tmp:
+            base, observations = Path(tmp), {}
+            for n in E.SIZES:
+                fixture(base, n)
+                observations[n] = verify(base, n)
+            changed = copy.deepcopy(observations)
+            changed[32000][0]["started_utc"] = changed[16000][0]["started_utc"]
+            with self.assertRaisesRegex(RuntimeError, "overlap or are reordered"):
+                E.result_document(changed, M)
+            changed = copy.deepcopy(observations)
+            changed[32000][0]["attempt_started_utc"] = changed[16000][0]["attempt_started_utc"]
+            with self.assertRaisesRegex(RuntimeError, "timestamp reused"):
+                E.result_document(changed, M)
+            with self.assertRaisesRegex(RuntimeError, "two independent"):
+                E.result_document({16000: observations[16000]}, M)
+
+    def test_byte_exact_create_only_and_failure_never_closes_partial_tree(self):
+        with tempfile.TemporaryDirectory(prefix="scale-export-copy-", dir=E.BASE) as tmp:
+            base = Path(tmp)
+            payload = {"nested/raw.out": b"\x00original\r\nno-final-newline\xff", "manifest.json": b"{}\n"}
+            with patch.object(E, "PUBLIC", base / "good"):
+                sums = E.publish_payload(payload, lambda: None)
+                self.assertEqual(set(sums), set(payload))
+                for name, raw in payload.items():
+                    self.assertEqual((E.PUBLIC / name).read_bytes(), raw)
+                self.assertTrue((E.PUBLIC / "SHA256SUMS").is_file())
+                with self.assertRaisesRegex(RuntimeError, "already exists"):
+                    E.publish_payload(payload, lambda: None)
+            with patch.object(E, "PUBLIC", base / "partial"):
+                def changed():
+                    raise RuntimeError("late source drift")
+                with self.assertRaisesRegex(RuntimeError, "late source drift"):
+                    E.publish_payload(payload, changed)
+                self.assertEqual((E.PUBLIC / "nested/raw.out").read_bytes(), payload["nested/raw.out"])
+                self.assertFalse((E.PUBLIC / "SHA256SUMS").exists())
+                self.assertFalse((E.PUBLIC / "SHA256SUMS.root").exists())
+
+
+if __name__ == "__main__":
+    unittest.main()

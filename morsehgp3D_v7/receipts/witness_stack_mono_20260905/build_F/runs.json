@@ -1,0 +1,69 @@
+[
+  {
+    "name": "compiler_version",
+    "argv": [
+      "c++",
+      "--version"
+    ],
+    "timeout_seconds": 30,
+    "started_utc": "2026-09-05T09:16:53.540937Z",
+    "ended_utc": "2026-09-05T09:16:53.549881Z",
+    "status": "completed",
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 0.006005978999382933
+  },
+  {
+    "name": "cmake_version",
+    "argv": [
+      "cmake",
+      "--version"
+    ],
+    "timeout_seconds": 30,
+    "started_utc": "2026-09-05T09:16:53.586628Z",
+    "ended_utc": "2026-09-05T09:16:53.607064Z",
+    "status": "completed",
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 0.017805393999879016
+  },
+  {
+    "name": "configure",
+    "argv": [
+      "cmake",
+      "-S",
+      "/workspaces/E-HGP/morsehgp3D_v7",
+      "-B",
+      "/workspaces/E-HGP/build/v7_f_qualification",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DMHGP7_ENABLE_CUDA=OFF",
+      "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+    ],
+    "timeout_seconds": 300,
+    "started_utc": "2026-09-05T09:16:53.644142Z",
+    "ended_utc": "2026-09-05T09:16:54.164233Z",
+    "status": "completed",
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 0.5173189420002018
+  },
+  {
+    "name": "build",
+    "argv": [
+      "cmake",
+      "--build",
+      "/workspaces/E-HGP/build/v7_f_qualification",
+      "--parallel",
+      "2",
+      "--target",
+      "mhgp7"
+    ],
+    "timeout_seconds": 300,
+    "started_utc": "2026-09-05T09:16:54.222568Z",
+    "ended_utc": "2026-09-05T09:17:14.240659Z",
+    "status": "completed",
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 20.015631869000572
+  }
+]

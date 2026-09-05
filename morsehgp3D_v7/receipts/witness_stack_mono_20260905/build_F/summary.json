@@ -1,0 +1,12 @@
+{
+  "status": "completed",
+  "error": null,
+  "sources_helpers_C_stable": true,
+  "started_utc": "2026-09-05T09:16:53.471279Z",
+  "ended_utc": "2026-09-05T09:17:15.103807Z",
+  "build_receipt": "build_D.json",
+  "binding_validated": true,
+  "engine_runs": 0,
+  "gcp": "not_used",
+  "public_status": "not_claimed"
+}

@@ -1,0 +1,11 @@
+REFUS silent incidence K=9 : silent_core_record_budget
+refus_etage=fold rss_mb apres_generation=1920 apres_rle=1920 apres_prefiltre=2126 apres_census=4804 max_fold=5723 (frontiere de completion : dernier etage atteint)
+silent_refusal_work census_balls=13502432 plateau_balls=0 total_ms=569822.087 completion_ms=108089.183
+silent_refusal_K2 core=190896 steps=17582 added_provisional=17582 query_nodes=11436856 meb_supports=268581
+silent_refusal_K3 core=481846 steps=68359 added_provisional=68359 query_nodes=36053369 meb_supports=2249017
+silent_refusal_K4 core=898402 steps=158466 added_provisional=158466 query_nodes=78032338 meb_supports=10343038
+silent_refusal_K5 core=1437986 steps=290564 added_provisional=290564 query_nodes=140033300 meb_supports=34402624
+silent_refusal_K6 core=2099890 steps=465081 added_provisional=465081 query_nodes=224391733 meb_supports=93687898
+silent_refusal_K7 core=2882912 steps=685143 added_provisional=685143 query_nodes=333462371 meb_supports=222331270
+silent_refusal_K8 core=3784220 steps=950640 added_provisional=950640 query_nodes=468887374 meb_supports=476011588
+silent_refusal_K9 core=0 steps=0 added_provisional=0 query_nodes=0 meb_supports=0

@@ -1,0 +1,65 @@
+{
+  "status": "prepared_not_executed",
+  "script": "export_mono.py",
+  "sha256": "5f7717af38a18ecf772a3d5b384a3b040907589ac91c1a6c07f1be06e6ea95eb",
+  "selftest_sha256": "072bfd3fd00d424b39235b1cecc61ad7d1144d360b5100d116759c46753ffd3d",
+  "plan_sha256": "af9699d4f9105cdc3138dd2688d4053911606024696282c3c31e6a968fa89db8",
+  "original_exporter": {
+    "path": "build/v7_q2_publication_20260905/export_closed.py",
+    "sha256": "58e85c694bab37a7e44b188b2a869c24e3867f5a436bdfff68d8f97016b4a551"
+  },
+  "tests": {
+    "normal": {
+      "command": [
+        "taskset",
+        "--cpu-list",
+        "0",
+        "python3",
+        "-B",
+        "build/v7_f_export_20260905/selftest_mono.py"
+      ],
+      "chunk_id": "efc675",
+      "wall_time_seconds": 0.117979596,
+      "exit_code": 0,
+      "original_token_count": 102,
+      "output": "{\"engine_runs\": 0, \"gcp\": \"not_used\", \"group_count\": 6, \"groups\": [\"inert_preview\", \"json_duplicates_and_nonfinite\", \"existing_public_refused_before_authority_loading\", \"missing_manifest_stale_bytes_and_terminal_drift\", \"inter_s_equal_divergent_overlap_and_reuse\", \"censored_pair_has_no_object_or_timing_promotion\"], \"public_writes\": 0, \"real_receipt_reads\": 0, \"status\": \"passed\", \"synthetic_only\": true}\n"
+    },
+    "optimized": {
+      "command": [
+        "taskset",
+        "--cpu-list",
+        "0",
+        "python3",
+        "-B",
+        "-O",
+        "build/v7_f_export_20260905/selftest_mono.py"
+      ],
+      "chunk_id": "71e0cd",
+      "wall_time_seconds": 0.10672375,
+      "exit_code": 0,
+      "original_token_count": 102,
+      "output": "{\"engine_runs\": 0, \"gcp\": \"not_used\", \"group_count\": 6, \"groups\": [\"inert_preview\", \"json_duplicates_and_nonfinite\", \"existing_public_refused_before_authority_loading\", \"missing_manifest_stale_bytes_and_terminal_drift\", \"inter_s_equal_divergent_overlap_and_reuse\", \"censored_pair_has_no_object_or_timing_promotion\"], \"public_writes\": 0, \"real_receipt_reads\": 0, \"status\": \"passed\", \"synthetic_only\": true}\n"
+    }
+  },
+  "preview": {
+    "command": [
+      "taskset",
+      "--cpu-list",
+      "0",
+      "python3",
+      "-B",
+      "build/v7_f_export_20260905/export_mono.py"
+    ],
+    "chunk_id": "664c75",
+    "wall_time_seconds": 0.096007024,
+    "exit_code": 0,
+    "original_token_count": 101,
+    "output": "{\"build_directory\": \"build/v7_f_build_20260905\", \"engine_runs\": 0, \"gcp\": \"not_used\", \"pair_directories\": [\"build/v7_f_pair_s8_20260905\", \"build/v7_f_pair_s10_20260905\", \"build/v7_f_pair_s12_20260905\"], \"public_target\": \"morsehgp3D_v7/receipts/witness_stack_mono_20260905\", \"receipt_reads\": false, \"requires_root_GO_and_three_terminal_pairs\": true, \"status\": \"prepared_not_executed\", \"writes\": false}\n"
+  },
+  "test_group_count_each": 6,
+  "engine_runs": 0,
+  "builds": 0,
+  "public_writes": 0,
+  "gcp": "not_used",
+  "public_status": "not_claimed"
+}

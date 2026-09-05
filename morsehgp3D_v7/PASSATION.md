@@ -82,8 +82,23 @@ ferme **48/48 portes Release ciblées, 48/48 ASan/UBSan et 339/339 Release
 complètes**, sans échec ni saut. Le build complet est incrémental (257,16 s),
 suivi de 620,68 s CTest ; 143 sources et 39 binaires restent stables.
 Les deux cibles de la nouvelle porte distinguent l'observateur d'allocations
-et la vérification sémantique sous allocateur natif. Les paires mono sont
-en cours, sans réattribution des résultats historiques E ni gain annoncé.
+et la vérification sémantique sous allocateur natif. Les
+[trois paires mono fraîches E/F](docs/RESULTATS_MONO_F_20260905.md)
+sont closes : s=8 187,677/188,969 s ; s=10 190,077/185,660 s ;
+s=12 184,878/190,039 s. Les six comparaisons d'objets et de comptes
+passent dans chaque paire, ainsi que les objets entre s ; deux régressions
+et une amélioration ne démontrent aucun gain robuste. Le défaut s=8 reste
+inchangé. Aucun ancien temps E n'est utilisé dans ces ratios.
+
+Les [observations F séparées à 16k/32k](receipts/witness_stack_scale_20260905/README.md)
+sont également closes, s=8 et tour candidate 1..10 demandée. 16k termine
+en 413,816 s, pic RSS 5 361 880 KiB. 32k refuse à K=9 avec
+`resource_exhausted`, raison `silent_core_record_budget`, code 2 après
+569,876 s de tentative ; aucun timeout, digest de succès ni temps de tour
+achevée ne lui est attribué. Les plafonds initiaux restent inchangés.
+Les 55 397 230 facettes de la tour 16k sont un cumul entre ordres, pas
+une mesure de résidence simultanée. Aucun de ces résultats ne ferme les
+contrats 50k/1 s, 100 ms ou plusieurs dizaines de millions de points.
 
 `verified_events_only` reste le payload par défaut. La route
 `--complete-incidences` porte `normalized_horizontal_h0_candidate` et refuse
@@ -109,6 +124,8 @@ qualifié exact derrière cette option.
 | [Mono D/E q2 s=8/10/12](receipts/meb_q2_mono_20260905/README.md) | Six runs achevés, trois paires égales ; digests et cardinalités identiques entre s | n=8000 étendu, tour candidate 1..10 ; baisse totale observée 0,04–2,98 %, pas de gain statistique ni de SLO |
 | [Qualification E intégrée](receipts/meb_q2_integrated_20260905/README.md) | 33/33 ciblées Release, 33/33 ASan/UBSan, 324/324 complètes ; zéro échec/skip | Tests frais, build complet incrémental, 140 sources et 37 binaires stables ; aucun résultat D réattribué |
 | [Qualification F intégrée](receipts/witness_stack_integrated_20260905/README.md) | 48/48 ciblées Release, 48/48 ASan/UBSan, 339/339 complètes ; zéro échec/skip | Tests frais, build complet incrémental, 143 sources et 39 binaires stables ; aucun résultat E réattribué |
+| [Mono E/F s=8/10/12](receipts/witness_stack_mono_20260905/README.md) | Six runs achevés, trois paires égales ; objets identiques entre s | n=8000 étendu, tour candidate 1..10 ; aucun gain robuste, ni meilleur s qualifié |
+| [Paliers F 16k/32k](receipts/witness_stack_scale_20260905/README.md) | 16k : tour 1..10 achevée en 413,816 s ; 32k : refus de ressources à K=9 | s=8, mono, sources stables ; tentative 32k de 569,876 s, pas un temps de complétion |
 | [Mono B/C s=8/10/12](docs/RESULTATS_MONO_20260904.md) | Six runs achevés, mêmes objets ; C 105,1–105,9 s contre B 125,5–128,0 s | n=8000 uniforme, tour entière 1..10, objet Gabriel ; un seul couple par s, pas de SLO |
 | [Campagne locale v6/v7 A](receipts/local_paired_20260904/summary.json) | 15 paires achevées identiques ; cinq censures dans trois autres paires | 36 tentatives à 8 threads, n=8k/16k/32k ; campagne globale `invalid`, aucun SLO |
 | [Complétion locale](receipts/incidence_local_20260904/summary.json) | Six refus de domaine, zéro succès moteur | Observations achevées, pas capacité exacte à 8k/16k/32k |
@@ -130,6 +147,13 @@ Ces obligations sur E ne sont plus ouvertes. La conservation F reçoit sa
 revue épinglée propre, sans transformer les tests E en exécutions F.
 La [cartographie de qualification](docs/QUALIFICATION_S1_PRIMITIVES.md)
 reste l'entrée des obligations et de leurs autorités successives.
+Les [applications verticales](audits/CONTRAT_VERTICAL_COURANT.md) ont aussi
+leur contrat mathématique : une ancre certifiée par composante suffit,
+mais le resolver sur les faces non matérialisées et son export restent
+à construire. Le [contrat des masses et du vote](audits/CONTRAT_MASSES_VOTE_COURANT.md)
+précise l'univers des incidences et le rayon utilisé ; les seuls deltas
+horizontaux ne déterminent pas ces poids. Ces contrats ne sont pas des
+champs déjà livrés dans l'archive F.
 La [preuve arithmétique des primitives](docs/ARITHMETIQUE_PRIMITIVES.md)
 distingue les domaines réellement produits des domaines génériques des
 types. Le [plan statique épinglé](docs/PLAN_PORTES_ARITHMETIQUES.md)
@@ -227,6 +251,13 @@ est terminé avec succès le 5 septembre à 07:40:29 UTC : construction,
 documentation, contrats bornés et mutants causaux, banc d'incidences et
 garde-fous sans accès cloud passent. Cette CI qualifie le commit E ;
 les 33/33/324 exécutions locales conservent leurs propres reçus.
+
+Le [run F 71895104](https://github.com/Ludwig-H/E-HGP/actions/runs/33959177436)
+est terminé avec succès le 5 septembre à 10:11:36 UTC. Son journal
+confirme 339/339 portes CPU, zéro échec, les contrôles documentaires et
+633 fichiers épinglés dans 11 reçus, puis les tests des runners et de
+sécurité sans accès cloud. Il ne remplace pas les 48/48/339 qualifications
+locales et ne qualifie pas les temps des campagnes mono ou de taille.
 
 Contrôles avant le premier commit : registre (20 phases), liste blanche
 des workflows GCP et corpus documentaire historique (259 fichiers) passent.

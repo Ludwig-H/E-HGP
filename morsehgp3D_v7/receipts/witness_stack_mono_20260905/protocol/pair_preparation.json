@@ -1,0 +1,41 @@
+{
+  "status": "prepared_E_F_selftests_and_previews_passed",
+  "observed_time": {
+    "current_time": "2026-09-05 09:13:11 UTC"
+  },
+  "baseline_E_sha256": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6",
+  "candidate_F_sha256": null,
+  "engine_runs": 0,
+  "builds": 0,
+  "gcp": "not_used",
+  "public_status": "not_claimed",
+  "selftest_methods_each": 21,
+  "source_pins_after_tests": "20f956612c598da256e24f8de893e7df5132f6dff0221dbc2edcdd7fe2ecce3d  build/v7_f_pair_20260905/runner.py\n64418345375b8b769c8edb854393d8c517dc3dda657d1d39104302d943dc6234  build/v7_f_pair_20260905/selftest.py\nabac6e5c09d3b83fb1f28b19309117ed1ec342802601b3e3c39f159cae56f9ea  build/v7_f_pair_20260905/PLAN.md\nae95c0cb65a1564edb2d45ae83671e204d70994d00356aea87aba147ed8ad3ba  build/v7_next_pair_20260905/runner.py\n57ec5c558179c8258d6389666745cddae622922a4d01c86829718848591cdc1e  build/v7_next_pair_20260905/selftest.py\n",
+  "runs": [
+    {
+      "command": "taskset --cpu-list 0 python3 -B build/v7_f_pair_20260905/selftest.py",
+      "exit_code": 0,
+      "combined_tool_output": ".....................\n----------------------------------------------------------------------\nRan 21 tests in 1.402s\n\nOK\n"
+    },
+    {
+      "command": "taskset --cpu-list 0 python3 -B -O build/v7_f_pair_20260905/selftest.py",
+      "exit_code": 0,
+      "combined_tool_output": ".....................\n----------------------------------------------------------------------\nRan 21 tests in 1.428s\n\nOK\n"
+    },
+    {
+      "command": "taskset --cpu-list 0 python3 -B build/v7_f_pair_20260905/runner.py --candidate build/v7_f_qualification/mhgp7 --separation 8 --output build/v7_f_pair_s8_20260905",
+      "exit_code": 0,
+      "combined_tool_output": "{\n  \"status\": \"prepared_not_executed\",\n  \"writes\": false,\n  \"engine_runs\": 0,\n  \"commands\": [\n    [\n      \"/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7\",\n      \"--family=uniform\",\n      \"--n=8000\",\n      \"--coord=65536\",\n      \"--seed=3\",\n      \"--s=8\",\n      \"--smax=11\",\n      \"--threads=1\",\n      \"--fold-inflight=1\",\n      \"--fold-join=1\",\n      \"--layout=csr\",\n      \"--digest\",\n      \"--complete-incidences\",\n      \"--mem-budget=17179869184\",\n      \"--silent-core-records=8000000\",\n      \"--silent-chain-steps=2000000\",\n      \"--silent-cofaces=2000000\",\n      \"--silent-query-nodes=1000000000\",\n      \"--silent-meb-supports=1000000000\"\n    ],\n    [\n      \"build/v7_f_qualification/mhgp7\",\n      \"--family=uniform\",\n      \"--n=8000\",\n      \"--coord=65536\",\n      \"--seed=3\",\n      \"--s=8\",\n      \"--smax=11\",\n      \"--threads=1\",\n      \"--fold-inflight=1\",\n      \"--fold-join=1\",\n      \"--layout=csr\",\n      \"--digest\",\n      \"--complete-incidences\",\n      \"--mem-budget=17179869184\",\n      \"--silent-core-records=8000000\",\n      \"--silent-chain-steps=2000000\",\n      \"--silent-cofaces=2000000\",\n      \"--silent-query-nodes=1000000000\",\n      \"--silent-meb-supports=1000000000\"\n    ]\n  ],\n  \"run_order\": [\n    \"E\",\n    \"F\"\n  ],\n  \"timeout_per_run_seconds\": 600,\n  \"rlimit_as_gib\": 26,\n  \"cpu\": 6,\n  \"output_would_be\": \"build/v7_f_pair_s8_20260905\",\n  \"fresh_baseline_required\": true,\n  \"public_status\": \"not_claimed\",\n  \"gcp\": \"not_used\"\n}\n"
+    },
+    {
+      "command": "taskset --cpu-list 0 python3 -B build/v7_f_pair_20260905/runner.py --candidate build/v7_f_qualification/mhgp7 --separation 10 --output build/v7_f_pair_s10_20260905",
+      "exit_code": 0,
+      "combined_tool_output": "{\n  \"status\": \"prepared_not_executed\",\n  \"writes\": false,\n  \"engine_runs\": 0,\n  \"commands\": [\n    [\n      \"/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7\",\n      \"--family=uniform\",\n      \"--n=8000\",\n      \"--coord=65536\",\n      \"--seed=3\",\n      \"--s=10\",\n      \"--smax=11\",\n      \"--threads=1\",\n      \"--fold-inflight=1\",\n      \"--fold-join=1\",\n      \"--layout=csr\",\n      \"--digest\",\n      \"--complete-incidences\",\n      \"--mem-budget=17179869184\",\n      \"--silent-core-records=8000000\",\n      \"--silent-chain-steps=2000000\",\n      \"--silent-cofaces=2000000\",\n      \"--silent-query-nodes=1000000000\",\n      \"--silent-meb-supports=1000000000\"\n    ],\n    [\n      \"build/v7_f_qualification/mhgp7\",\n      \"--family=uniform\",\n      \"--n=8000\",\n      \"--coord=65536\",\n      \"--seed=3\",\n      \"--s=10\",\n      \"--smax=11\",\n      \"--threads=1\",\n      \"--fold-inflight=1\",\n      \"--fold-join=1\",\n      \"--layout=csr\",\n      \"--digest\",\n      \"--complete-incidences\",\n      \"--mem-budget=17179869184\",\n      \"--silent-core-records=8000000\",\n      \"--silent-chain-steps=2000000\",\n      \"--silent-cofaces=2000000\",\n      \"--silent-query-nodes=1000000000\",\n      \"--silent-meb-supports=1000000000\"\n    ]\n  ],\n  \"run_order\": [\n    \"E\",\n    \"F\"\n  ],\n  \"timeout_per_run_seconds\": 600,\n  \"rlimit_as_gib\": 26,\n  \"cpu\": 6,\n  \"output_would_be\": \"build/v7_f_pair_s10_20260905\",\n  \"fresh_baseline_required\": true,\n  \"public_status\": \"not_claimed\",\n  \"gcp\": \"not_used\"\n}\n"
+    },
+    {
+      "command": "taskset --cpu-list 0 python3 -B build/v7_f_pair_20260905/runner.py --candidate build/v7_f_qualification/mhgp7 --separation 12 --output build/v7_f_pair_s12_20260905",
+      "exit_code": 0,
+      "combined_tool_output": "{\n  \"status\": \"prepared_not_executed\",\n  \"writes\": false,\n  \"engine_runs\": 0,\n  \"commands\": [\n    [\n      \"/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7\",\n      \"--family=uniform\",\n      \"--n=8000\",\n      \"--coord=65536\",\n      \"--seed=3\",\n      \"--s=12\",\n      \"--smax=11\",\n      \"--threads=1\",\n      \"--fold-inflight=1\",\n      \"--fold-join=1\",\n      \"--layout=csr\",\n      \"--digest\",\n      \"--complete-incidences\",\n      \"--mem-budget=17179869184\",\n      \"--silent-core-records=8000000\",\n      \"--silent-chain-steps=2000000\",\n      \"--silent-cofaces=2000000\",\n      \"--silent-query-nodes=1000000000\",\n      \"--silent-meb-supports=1000000000\"\n    ],\n    [\n      \"build/v7_f_qualification/mhgp7\",\n      \"--family=uniform\",\n      \"--n=8000\",\n      \"--coord=65536\",\n      \"--seed=3\",\n      \"--s=12\",\n      \"--smax=11\",\n      \"--threads=1\",\n      \"--fold-inflight=1\",\n      \"--fold-join=1\",\n      \"--layout=csr\",\n      \"--digest\",\n      \"--complete-incidences\",\n      \"--mem-budget=17179869184\",\n      \"--silent-core-records=8000000\",\n      \"--silent-chain-steps=2000000\",\n      \"--silent-cofaces=2000000\",\n      \"--silent-query-nodes=1000000000\",\n      \"--silent-meb-supports=1000000000\"\n    ]\n  ],\n  \"run_order\": [\n    \"E\",\n    \"F\"\n  ],\n  \"timeout_per_run_seconds\": 600,\n  \"rlimit_as_gib\": 26,\n  \"cpu\": 6,\n  \"output_would_be\": \"build/v7_f_pair_s12_20260905\",\n  \"fresh_baseline_required\": true,\n  \"public_status\": \"not_claimed\",\n  \"gcp\": \"not_used\"\n}\n"
+    }
+  ]
+}

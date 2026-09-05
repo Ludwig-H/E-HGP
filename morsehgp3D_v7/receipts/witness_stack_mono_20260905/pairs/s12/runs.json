@@ -1,0 +1,614 @@
+[
+  {
+    "role": "E",
+    "separation": 12,
+    "status": "engine_completed",
+    "command": [
+      "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+      "--family=uniform",
+      "--n=8000",
+      "--coord=65536",
+      "--seed=3",
+      "--s=12",
+      "--smax=11",
+      "--threads=1",
+      "--fold-inflight=1",
+      "--fold-join=1",
+      "--layout=csr",
+      "--digest",
+      "--complete-incidences",
+      "--mem-budget=17179869184",
+      "--silent-core-records=8000000",
+      "--silent-chain-steps=2000000",
+      "--silent-cofaces=2000000",
+      "--silent-query-nodes=1000000000",
+      "--silent-meb-supports=1000000000"
+    ],
+    "wrapped_command": [
+      "/usr/bin/taskset",
+      "--cpu-list",
+      "6",
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/build/v7_f_pair_s12_20260905/E.time",
+      "--",
+      "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+      "--family=uniform",
+      "--n=8000",
+      "--coord=65536",
+      "--seed=3",
+      "--s=12",
+      "--smax=11",
+      "--threads=1",
+      "--fold-inflight=1",
+      "--fold-join=1",
+      "--layout=csr",
+      "--digest",
+      "--complete-incidences",
+      "--mem-budget=17179869184",
+      "--silent-core-records=8000000",
+      "--silent-chain-steps=2000000",
+      "--silent-cofaces=2000000",
+      "--silent-query-nodes=1000000000",
+      "--silent-meb-supports=1000000000"
+    ],
+    "started_utc": "2026-09-05T09:54:37.579550Z",
+    "ended_utc": "2026-09-05T09:57:42.463003Z",
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 184.87840329699975,
+    "stdout": "E.out",
+    "stderr": "E.err",
+    "usage": "E.time",
+    "digests": {
+      "digest_forest_K1": "fff29fb38092c02dd43271de33b9aee28a03408fbb70153385c3fc1e69e3573a",
+      "digest_forest_K2": "dd657928d626854e23bc1ff59327eb6c834d4ff94fbb0f1913156e251f14b213",
+      "digest_forest_K3": "ba8973abbad9fc0aa1008589f0f3a669389f6406350501bdda97aa879dedcf0a",
+      "digest_forest_K4": "69b328c5a690c5b63d607018de6e28ae7f3f8f82f4320989cccec6379b0ad358",
+      "digest_forest_K5": "0598690dcf3a59d3cee0a7447d06d6773ed3b4d6d733c35d801dd3924e14ba6a",
+      "digest_forest_K6": "45014ce7ef7d17c8baeb1f5df32d90f6643cbc913cdc3817d10af1db88be363a",
+      "digest_forest_K7": "e8dc58ed4133f76f6541c474f9dedfb3c8d8880d1463bc49f32e8a36cbc62c80",
+      "digest_forest_K8": "aa7bcd6f453905566e423de55991caedb3afed38e4164d2cf5c295c85975e318",
+      "digest_forest_K9": "7b6c460d6df9631d0ef3851b5e939b161fdc559ecddb0396a94991ca970e1bb3",
+      "digest_forest_K10": "a44af66ade1a06ad1be19a512642b65a87f8d3b75c102b4850a719b68a3b77bb",
+      "digest_all": "4c3ceb0498990bafa41a9e43d0bffe25a3fee579b12b5d34365f3578f526a0e7"
+    },
+    "counts": {
+      "n": 8000,
+      "coord": 65536,
+      "s": 12,
+      "smax": 11,
+      "seed": 3,
+      "threads": 1,
+      "emis": 3123497,
+      "boules_uniques": 3123497,
+      "mortes_profondeur": 10116,
+      "survivantes": 3113381,
+      "census_int": 16102722,
+      "census_shell": 10456312,
+      "evenements": 4384229,
+      "facettes": 26434998,
+      "fusions": 26434988,
+      "deltas": 4095793,
+      "noeuds": 77939
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 29875,
+        "facettes": 8000,
+        "deltas": 7999,
+        "attachements": 0,
+        "fusions": 7999,
+        "noeuds": 7999
+      },
+      "2": {
+        "evenements": 67539,
+        "facettes": 62910,
+        "deltas": 51121,
+        "attachements": 32713,
+        "fusions": 62909,
+        "noeuds": 2122
+      },
+      "3": {
+        "evenements": 124135,
+        "facettes": 213686,
+        "deltas": 120877,
+        "attachements": 147239,
+        "fusions": 213685,
+        "noeuds": 2929
+      },
+      "4": {
+        "evenements": 201156,
+        "facettes": 517876,
+        "deltas": 197242,
+        "attachements": 399983,
+        "fusions": 517875,
+        "noeuds": 4068
+      },
+      "5": {
+        "evenements": 298870,
+        "facettes": 1036109,
+        "deltas": 289705,
+        "attachements": 850158,
+        "fusions": 1036108,
+        "noeuds": 5419
+      },
+      "6": {
+        "evenements": 415933,
+        "facettes": 1824039,
+        "deltas": 398776,
+        "attachements": 1552470,
+        "fusions": 1824038,
+        "noeuds": 7004
+      },
+      "7": {
+        "evenements": 554022,
+        "facettes": 2947215,
+        "deltas": 525699,
+        "attachements": 2573565,
+        "fusions": 2947214,
+        "noeuds": 8780
+      },
+      "8": {
+        "evenements": 712109,
+        "facettes": 4463468,
+        "deltas": 668888,
+        "attachements": 3969114,
+        "fusions": 4463467,
+        "noeuds": 10954
+      },
+      "9": {
+        "evenements": 891721,
+        "facettes": 6443014,
+        "deltas": 829864,
+        "attachements": 5809858,
+        "fusions": 6443013,
+        "noeuds": 13150
+      },
+      "10": {
+        "evenements": 1088869,
+        "facettes": 8918681,
+        "deltas": 1005622,
+        "attachements": 8127546,
+        "fusions": 8918680,
+        "noeuds": 15514
+      }
+    },
+    "silent": {
+      "2": {
+        "core": 46136,
+        "with_two_intruders": 3297,
+        "steps": 4186,
+        "added": 4186,
+        "max_chain": 6,
+        "query_nodes": 2463142,
+        "meb_supports": 64585
+      },
+      "3": {
+        "core": 114555,
+        "with_two_intruders": 12296,
+        "steps": 16018,
+        "added": 16018,
+        "max_chain": 10,
+        "query_nodes": 7718685,
+        "meb_supports": 531378
+      },
+      "4": {
+        "core": 211968,
+        "with_two_intruders": 27790,
+        "steps": 36961,
+        "added": 36961,
+        "max_chain": 9,
+        "query_nodes": 16702777,
+        "meb_supports": 2424881
+      },
+      "5": {
+        "core": 337252,
+        "with_two_intruders": 49535,
+        "steps": 67207,
+        "added": 67207,
+        "max_chain": 11,
+        "query_nodes": 29915877,
+        "meb_supports": 7998813
+      },
+      "6": {
+        "core": 488952,
+        "with_two_intruders": 77752,
+        "steps": 107108,
+        "added": 107108,
+        "max_chain": 12,
+        "query_nodes": 47778692,
+        "meb_supports": 21673996
+      },
+      "7": {
+        "core": 666230,
+        "with_two_intruders": 112803,
+        "steps": 157598,
+        "added": 157598,
+        "max_chain": 15,
+        "query_nodes": 70749430,
+        "meb_supports": 51210694
+      },
+      "8": {
+        "core": 868194,
+        "with_two_intruders": 154705,
+        "steps": 218721,
+        "added": 218721,
+        "max_chain": 14,
+        "query_nodes": 99153075,
+        "meb_supports": 109017683
+      },
+      "9": {
+        "core": 1096161,
+        "with_two_intruders": 203197,
+        "steps": 290915,
+        "added": 290915,
+        "max_chain": 17,
+        "query_nodes": 133553348,
+        "meb_supports": 214435228
+      },
+      "10": {
+        "core": 1347437,
+        "with_two_intruders": 258492,
+        "steps": 372134,
+        "added": 372134,
+        "max_chain": 18,
+        "query_nodes": 173869231,
+        "meb_supports": 394768070
+      }
+    },
+    "pipeline_ms": 184847.1,
+    "max_rss_kb": 2300976,
+    "silent_limits": {
+      "core_records": 8000000,
+      "chain_steps": 2000000,
+      "cofaces": 2000000,
+      "query_nodes": 1000000000,
+      "meb_supports": 1000000000
+    },
+    "payload_caps": {
+      "budget": 17179869184,
+      "cap_brut_demande": 4294967295,
+      "cap_brut_effectif": 119304647,
+      "cap_fusion_budgetaire": 59652323
+    },
+    "stage_ms": {
+      "index": 2.2,
+      "gen": 61792.6,
+      "wspd": 33158.4,
+      "rects": 28633.9,
+      "rle": 1600.7,
+      "prefiltre": 10104.4,
+      "census": 7701.9,
+      "comptage": 33.4,
+      "expansion": 628.9,
+      "fold": 32517.4,
+      "tri": 4835.3,
+      "intern": 16888.3,
+      "fusion": 5772.5,
+      "reduce": 4994.1,
+      "digest": 3932.0,
+      "silent_incidence": 66389.393,
+      "fold_wall": 102698.6,
+      "cli_e2e": 184849.089
+    },
+    "stage_workers": {
+      "wspd": 1,
+      "rects": 1,
+      "rle": 1,
+      "prefiltre": 1,
+      "census": 1,
+      "expansion": 1,
+      "fold": 1
+    },
+    "serialized_stage_flags_verified": true,
+    "strict_thread_creation_measurement": "not_performed_by_runner"
+  },
+  {
+    "role": "F",
+    "separation": 12,
+    "status": "engine_completed",
+    "command": [
+      "/workspaces/E-HGP/build/v7_f_qualification/mhgp7",
+      "--family=uniform",
+      "--n=8000",
+      "--coord=65536",
+      "--seed=3",
+      "--s=12",
+      "--smax=11",
+      "--threads=1",
+      "--fold-inflight=1",
+      "--fold-join=1",
+      "--layout=csr",
+      "--digest",
+      "--complete-incidences",
+      "--mem-budget=17179869184",
+      "--silent-core-records=8000000",
+      "--silent-chain-steps=2000000",
+      "--silent-cofaces=2000000",
+      "--silent-query-nodes=1000000000",
+      "--silent-meb-supports=1000000000"
+    ],
+    "wrapped_command": [
+      "/usr/bin/taskset",
+      "--cpu-list",
+      "6",
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/build/v7_f_pair_s12_20260905/F.time",
+      "--",
+      "/workspaces/E-HGP/build/v7_f_qualification/mhgp7",
+      "--family=uniform",
+      "--n=8000",
+      "--coord=65536",
+      "--seed=3",
+      "--s=12",
+      "--smax=11",
+      "--threads=1",
+      "--fold-inflight=1",
+      "--fold-join=1",
+      "--layout=csr",
+      "--digest",
+      "--complete-incidences",
+      "--mem-budget=17179869184",
+      "--silent-core-records=8000000",
+      "--silent-chain-steps=2000000",
+      "--silent-cofaces=2000000",
+      "--silent-query-nodes=1000000000",
+      "--silent-meb-supports=1000000000"
+    ],
+    "started_utc": "2026-09-05T09:57:42.502062Z",
+    "ended_utc": "2026-09-05T10:00:52.545581Z",
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 190.03904867299934,
+    "stdout": "F.out",
+    "stderr": "F.err",
+    "usage": "F.time",
+    "digests": {
+      "digest_forest_K1": "fff29fb38092c02dd43271de33b9aee28a03408fbb70153385c3fc1e69e3573a",
+      "digest_forest_K2": "dd657928d626854e23bc1ff59327eb6c834d4ff94fbb0f1913156e251f14b213",
+      "digest_forest_K3": "ba8973abbad9fc0aa1008589f0f3a669389f6406350501bdda97aa879dedcf0a",
+      "digest_forest_K4": "69b328c5a690c5b63d607018de6e28ae7f3f8f82f4320989cccec6379b0ad358",
+      "digest_forest_K5": "0598690dcf3a59d3cee0a7447d06d6773ed3b4d6d733c35d801dd3924e14ba6a",
+      "digest_forest_K6": "45014ce7ef7d17c8baeb1f5df32d90f6643cbc913cdc3817d10af1db88be363a",
+      "digest_forest_K7": "e8dc58ed4133f76f6541c474f9dedfb3c8d8880d1463bc49f32e8a36cbc62c80",
+      "digest_forest_K8": "aa7bcd6f453905566e423de55991caedb3afed38e4164d2cf5c295c85975e318",
+      "digest_forest_K9": "7b6c460d6df9631d0ef3851b5e939b161fdc559ecddb0396a94991ca970e1bb3",
+      "digest_forest_K10": "a44af66ade1a06ad1be19a512642b65a87f8d3b75c102b4850a719b68a3b77bb",
+      "digest_all": "4c3ceb0498990bafa41a9e43d0bffe25a3fee579b12b5d34365f3578f526a0e7"
+    },
+    "counts": {
+      "n": 8000,
+      "coord": 65536,
+      "s": 12,
+      "smax": 11,
+      "seed": 3,
+      "threads": 1,
+      "emis": 3123497,
+      "boules_uniques": 3123497,
+      "mortes_profondeur": 10116,
+      "survivantes": 3113381,
+      "census_int": 16102722,
+      "census_shell": 10456312,
+      "evenements": 4384229,
+      "facettes": 26434998,
+      "fusions": 26434988,
+      "deltas": 4095793,
+      "noeuds": 77939
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 29875,
+        "facettes": 8000,
+        "deltas": 7999,
+        "attachements": 0,
+        "fusions": 7999,
+        "noeuds": 7999
+      },
+      "2": {
+        "evenements": 67539,
+        "facettes": 62910,
+        "deltas": 51121,
+        "attachements": 32713,
+        "fusions": 62909,
+        "noeuds": 2122
+      },
+      "3": {
+        "evenements": 124135,
+        "facettes": 213686,
+        "deltas": 120877,
+        "attachements": 147239,
+        "fusions": 213685,
+        "noeuds": 2929
+      },
+      "4": {
+        "evenements": 201156,
+        "facettes": 517876,
+        "deltas": 197242,
+        "attachements": 399983,
+        "fusions": 517875,
+        "noeuds": 4068
+      },
+      "5": {
+        "evenements": 298870,
+        "facettes": 1036109,
+        "deltas": 289705,
+        "attachements": 850158,
+        "fusions": 1036108,
+        "noeuds": 5419
+      },
+      "6": {
+        "evenements": 415933,
+        "facettes": 1824039,
+        "deltas": 398776,
+        "attachements": 1552470,
+        "fusions": 1824038,
+        "noeuds": 7004
+      },
+      "7": {
+        "evenements": 554022,
+        "facettes": 2947215,
+        "deltas": 525699,
+        "attachements": 2573565,
+        "fusions": 2947214,
+        "noeuds": 8780
+      },
+      "8": {
+        "evenements": 712109,
+        "facettes": 4463468,
+        "deltas": 668888,
+        "attachements": 3969114,
+        "fusions": 4463467,
+        "noeuds": 10954
+      },
+      "9": {
+        "evenements": 891721,
+        "facettes": 6443014,
+        "deltas": 829864,
+        "attachements": 5809858,
+        "fusions": 6443013,
+        "noeuds": 13150
+      },
+      "10": {
+        "evenements": 1088869,
+        "facettes": 8918681,
+        "deltas": 1005622,
+        "attachements": 8127546,
+        "fusions": 8918680,
+        "noeuds": 15514
+      }
+    },
+    "silent": {
+      "2": {
+        "core": 46136,
+        "with_two_intruders": 3297,
+        "steps": 4186,
+        "added": 4186,
+        "max_chain": 6,
+        "query_nodes": 2463142,
+        "meb_supports": 64585
+      },
+      "3": {
+        "core": 114555,
+        "with_two_intruders": 12296,
+        "steps": 16018,
+        "added": 16018,
+        "max_chain": 10,
+        "query_nodes": 7718685,
+        "meb_supports": 531378
+      },
+      "4": {
+        "core": 211968,
+        "with_two_intruders": 27790,
+        "steps": 36961,
+        "added": 36961,
+        "max_chain": 9,
+        "query_nodes": 16702777,
+        "meb_supports": 2424881
+      },
+      "5": {
+        "core": 337252,
+        "with_two_intruders": 49535,
+        "steps": 67207,
+        "added": 67207,
+        "max_chain": 11,
+        "query_nodes": 29915877,
+        "meb_supports": 7998813
+      },
+      "6": {
+        "core": 488952,
+        "with_two_intruders": 77752,
+        "steps": 107108,
+        "added": 107108,
+        "max_chain": 12,
+        "query_nodes": 47778692,
+        "meb_supports": 21673996
+      },
+      "7": {
+        "core": 666230,
+        "with_two_intruders": 112803,
+        "steps": 157598,
+        "added": 157598,
+        "max_chain": 15,
+        "query_nodes": 70749430,
+        "meb_supports": 51210694
+      },
+      "8": {
+        "core": 868194,
+        "with_two_intruders": 154705,
+        "steps": 218721,
+        "added": 218721,
+        "max_chain": 14,
+        "query_nodes": 99153075,
+        "meb_supports": 109017683
+      },
+      "9": {
+        "core": 1096161,
+        "with_two_intruders": 203197,
+        "steps": 290915,
+        "added": 290915,
+        "max_chain": 17,
+        "query_nodes": 133553348,
+        "meb_supports": 214435228
+      },
+      "10": {
+        "core": 1347437,
+        "with_two_intruders": 258492,
+        "steps": 372134,
+        "added": 372134,
+        "max_chain": 18,
+        "query_nodes": 173869231,
+        "meb_supports": 394768070
+      }
+    },
+    "pipeline_ms": 190026.1,
+    "max_rss_kb": 2302616,
+    "silent_limits": {
+      "core_records": 8000000,
+      "chain_steps": 2000000,
+      "cofaces": 2000000,
+      "query_nodes": 1000000000,
+      "meb_supports": 1000000000
+    },
+    "payload_caps": {
+      "budget": 17179869184,
+      "cap_brut_demande": 4294967295,
+      "cap_brut_effectif": 119304647,
+      "cap_fusion_budgetaire": 59652323
+    },
+    "stage_ms": {
+      "index": 2.5,
+      "gen": 63078.2,
+      "wspd": 33146.1,
+      "rects": 29932.0,
+      "rle": 1701.7,
+      "prefiltre": 10296.1,
+      "census": 7906.5,
+      "comptage": 35.3,
+      "expansion": 652.0,
+      "fold": 33331.4,
+      "tri": 5149.1,
+      "intern": 17185.2,
+      "fusion": 5833.8,
+      "reduce": 5137.7,
+      "digest": 3944.4,
+      "silent_incidence": 68924.642,
+      "fold_wall": 106089.9,
+      "cli_e2e": 190028.137
+    },
+    "stage_workers": {
+      "wspd": 1,
+      "rects": 1,
+      "rle": 1,
+      "prefiltre": 1,
+      "census": 1,
+      "expansion": 1,
+      "fold": 1
+    },
+    "serialized_stage_flags_verified": true,
+    "strict_thread_creation_measurement": "not_performed_by_runner"
+  }
+]

@@ -125,6 +125,7 @@ Lire [l'état de livraison](PASSATION.md),
 [la qualification E : 33/33/324 portes](receipts/meb_q2_integrated_20260905/README.md),
 [la pile locale F et ses invariants](docs/OPTIMISATION_PILE_TEMOINS.md),
 [la qualification F : 48/48/339 portes](receipts/witness_stack_integrated_20260905/README.md),
+[les trois paires E/F et les paliers 16k/32k](docs/RESULTATS_MONO_F_20260905.md),
 [les résultats G4 à 50k et les primitives GPU](docs/RESULTATS_G4_20260904.md),
 [les limites de résidence et la voie massive](docs/RESIDENCE_MASSIVE.md),
 [l'état courant](audits/ETAT_COURANT.md) et
@@ -136,3 +137,9 @@ Les campagnes `bench/compare_v6_v7.py` et `bench/incidence_campaign.py`
 séparent la compatibilité avec la v6 des observations de la nouvelle route,
 refus compris. Un succès de campagne n'est pas une qualification exacte,
 un p95 industriel ou un contrat satisfait à plusieurs millions de points.
+
+Dernière campagne F close : les trois paires 8k à s=8/10/12 conservent les
+objets et comptes, sans gain de temps robuste. La tour candidate 1..10
+termine à 16k en 413,82 s ; à 32k elle refuse à K=9 sur le plafond de
+records du cœur. Ce refus n'est ni un timeout ni un succès partiel publié.
+Les contrats 50k/1 s puis 100 ms et la cible massive G4 restent ouverts.

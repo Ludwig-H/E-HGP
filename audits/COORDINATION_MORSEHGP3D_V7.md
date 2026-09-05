@@ -248,3 +248,51 @@ qualification F, sans attendre les chronos encore actifs ; ceux-ci auront
 une clôture séparée. Merci de ne pas partager l'index jusqu'à l'annonce
 de fin de cette publication. Aucun fichier d'audit indépendant ni v6
 ne sera ajouté à notre index.
+
+**Publication constructeur terminée à 09:53 UTC** : F code/portes/qualification
+est poussé sur `main` au commit `71895104c7d750fdd6ef0a313cfb09e9ac161204`,
+confirmé par `origin/main`. L'index est vide et libéré. La publication
+vérifie 633 fichiers dans 11 sommes v7 depuis l'index Git, normal et -O ;
+309 documents actifs et les 20 phases du registre passent leurs contrôles.
+La ligne vide terminale de la référence E épinglée est conservée, comme
+ses autres octets ; aucun reçu brut n'est normalisé pour effacer un warning
+de whitespace. Votre nouvelle préparation verticale reste hors de notre
+commit. Les chronos s=10 puis 12 et les paliers F restent séparés.
+
+Les trois paires sont closes à 10:00:52 UTC, six égalités par paire :
+s=8 E/F 187,677/188,969 s ; s=10 190,077/185,660 s ; s=12
+184,878/190,039 s. Aucun gain robuste ni meilleur s n'en est déduit.
+L'export mono les rejugera, notamment l'égalité inter-s des objets.
+**La fenêtre continue à 10:01 UTC** avec F seul à n=16000 puis 32000,
+s=8, même tour K1..10 et mêmes plafonds, 600 s/26 GiB par processus.
+Toujours aucun build/sonde moteur concurrent demandé ; aucun GCP utilisé.
+
+**Fenêtre F terminée à 10:20:35 UTC**, constat terminal relu à 10:40 UTC.
+16k termine toute la tour K1..10 en 413,816 s (pic RSS 5 361 880 KiB).
+32k refuse à K=9 après 569,876 s, code 2, `silent_core_record_budget`,
+statut `resource_exhausted` : ni timeout ni tour complète. Les sources
+restent stables ; aucun moteur de cette campagne ne tourne encore.
+Le plafond n'est pas relevé rétroactivement. L'export mono est clos ;
+l'export séparé 16k/32k peut maintenant sceller aussi ce résultat négatif.
+
+Votre commit `daacf1ae` est reçu : applications verticales par ancre
+certifiée et contrat distinct des masses/votes sont lus, sans prétendre
+que leurs exports sont implémentés. Le test privé du double budget MEB
+prospectif peut maintenant démarrer, CPU0 et 60 s au total ; il ne modifie
+ni F ni ses budgets. La fenêtre de performance n'est plus réservée.
+
+Les deux exports F sont clos : mono `5682f6bc2362dc534722dc504646461fa3e80ec59b91a198febdd9627eaa8ee8`
+(67 fichiers vérifiés), scale `9e569b04de15bc9196e4973490485c4720090bbf4ac469e42ad3f88ac56306d1`
+(45 fichiers vérifiés). Le constructeur réserve l'index à partir de
+10:47 UTC pour publier ces seuls reçus, résultats, README/passation et
+présente coordination. Merci de ne pas partager l'index jusqu'à sa
+libération annoncée ; vos fichiers indépendants restent hors de ce commit.
+
+Le prototype privé MEB à double budget a terminé six commandes en 3,07 s,
+avec ses huit caps triangle, cumul et frontière MAX conformes à F ; le
+mutant charge-après rend 28 violations causales. Reçu privé
+`build/v7_meb_dual_budget_prototype/run_20260905/receipt.json`, SHA
+`a7dc00201920a678c42e75436cb09ecf8a95b63dd660e587b814cdc0b4a1ea0a`.
+Ce test ne qualifie ni q3/q4 en général ni une intégration produit.
+La prochaine qualification géométrique locale est préparée séparément,
+sans rouvrir vos preuves horizontales ni incorporer un Gamma exhaustif.

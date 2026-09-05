@@ -1,0 +1,248 @@
+{
+  "comparison": "none_F_only_distinct_sizes_no_ratio_or_object_equality_claim",
+  "engine_successes": 1,
+  "gcp": "not_used",
+  "observations": [
+    {
+      "completed_tower": {
+        "cardinalities": {
+          "1": {
+            "attachements": 0,
+            "deltas": 15998,
+            "evenements": 60552,
+            "facettes": 16000,
+            "fusions": 15999,
+            "noeuds": 15998
+          },
+          "2": {
+            "attachements": 67050,
+            "deltas": 104413,
+            "evenements": 138218,
+            "facettes": 128228,
+            "fusions": 128227,
+            "noeuds": 4281
+          },
+          "3": {
+            "attachements": 304265,
+            "deltas": 249772,
+            "evenements": 256626,
+            "facettes": 440306,
+            "fusions": 440305,
+            "noeuds": 5986
+          },
+          "4": {
+            "attachements": 828257,
+            "deltas": 409011,
+            "evenements": 417437,
+            "facettes": 1071830,
+            "fusions": 1071829,
+            "noeuds": 8257
+          },
+          "5": {
+            "attachements": 1761810,
+            "deltas": 600957,
+            "evenements": 620400,
+            "facettes": 2147235,
+            "fusions": 2147234,
+            "noeuds": 11124
+          },
+          "6": {
+            "attachements": 3235973,
+            "deltas": 831013,
+            "evenements": 867457,
+            "facettes": 3798168,
+            "fusions": 3798167,
+            "noeuds": 14463
+          },
+          "7": {
+            "attachements": 5377715,
+            "deltas": 1098475,
+            "evenements": 1158286,
+            "facettes": 6156130,
+            "fusions": 6156129,
+            "noeuds": 18366
+          },
+          "8": {
+            "attachements": 8320996,
+            "deltas": 1402264,
+            "evenements": 1493209,
+            "facettes": 9351090,
+            "fusions": 9351089,
+            "noeuds": 22933
+          },
+          "9": {
+            "attachements": 12189788,
+            "deltas": 1742579,
+            "evenements": 1871641,
+            "facettes": 13511952,
+            "fusions": 13511951,
+            "noeuds": 27787
+          },
+          "10": {
+            "attachements": 17120462,
+            "deltas": 2120263,
+            "evenements": 2294397,
+            "facettes": 18776291,
+            "fusions": 18776290,
+            "noeuds": 33194
+          }
+        },
+        "counts": {
+          "boules_uniques": 6590753,
+          "census_int": 33849711,
+          "census_shell": 21948186,
+          "coord": 65536,
+          "deltas": 8574745,
+          "emis": 6590753,
+          "evenements": 9178223,
+          "facettes": 55397230,
+          "fusions": 55397220,
+          "mortes_profondeur": 64037,
+          "n": 16000,
+          "noeuds": 162389,
+          "s": 8,
+          "seed": 3,
+          "smax": 11,
+          "survivantes": 6526716,
+          "threads": 1
+        },
+        "digests": {
+          "digest_all": "097c04195eeedbe26603582a0ccd2ea0695419d80253cb726daab2b8076d98db",
+          "digest_forest_K1": "dcff0a571e14af6c514b8cd3c76ac3b3203e98aa6f85b818289f9b882bdff0c6",
+          "digest_forest_K10": "a975285f4c8a61d99856e59d65d1466106227a3ef6a353b6e3abd47a5aa23891",
+          "digest_forest_K2": "ec8905dece0bc8b5678d7926925d5e4f4343d13a51c9ecc6a59fc781ddfcbbc1",
+          "digest_forest_K3": "f6d22297a822a84269850b77eb9dce9bc65300c2eed9694c7bc4ab4eccdecd89",
+          "digest_forest_K4": "5a2ad53511f23f14d59b9dbb1492cc30c8e6f1ed2f603b8442dfce428da97447",
+          "digest_forest_K5": "be95e3b3c217a8fe5afeed4f85f20d4993cc4709dcb4529edcef2cd0368753e2",
+          "digest_forest_K6": "69ceeb3e47cf65577ac181a5207739d0a5337c79ec27627d527432d705890641",
+          "digest_forest_K7": "e1a49f569c2a4b1d14302703232778efc66652965656e69d5c5174c40a8bf752",
+          "digest_forest_K8": "20933d1ff4f39732baf165ff059532a904bd7a922bcd1dfc7ba340a5c9080eb3",
+          "digest_forest_K9": "9b2ec461d1c3efeecc0db121534281c953257d5fb7f467e6f56536311d45412e"
+        },
+        "max_rss_kb": 5361880,
+        "pipeline_ms": 413790.2,
+        "silent": {
+          "2": {
+            "added": 8690,
+            "core": 93953,
+            "max_chain": 8,
+            "meb_supports": 132167,
+            "query_nodes": 5340469,
+            "steps": 8690,
+            "with_two_intruders": 6819
+          },
+          "3": {
+            "added": 33352,
+            "core": 235946,
+            "max_chain": 8,
+            "meb_supports": 1095319,
+            "query_nodes": 16839076,
+            "steps": 33352,
+            "with_two_intruders": 25412
+          },
+          "4": {
+            "added": 76520,
+            "core": 438545,
+            "max_chain": 9,
+            "meb_supports": 5022921,
+            "query_nodes": 36426405,
+            "steps": 76520,
+            "with_two_intruders": 57171
+          },
+          "5": {
+            "added": 139719,
+            "core": 699792,
+            "max_chain": 15,
+            "meb_supports": 16663106,
+            "query_nodes": 65286547,
+            "steps": 139719,
+            "with_two_intruders": 102898
+          },
+          "6": {
+            "added": 223040,
+            "core": 1018704,
+            "max_chain": 15,
+            "meb_supports": 45266593,
+            "query_nodes": 104458824,
+            "steps": 223040,
+            "with_two_intruders": 162847
+          },
+          "7": {
+            "added": 329172,
+            "core": 1393255,
+            "max_chain": 14,
+            "meb_supports": 107145317,
+            "query_nodes": 155005003,
+            "steps": 329172,
+            "with_two_intruders": 236910
+          },
+          "8": {
+            "added": 457176,
+            "core": 1823694,
+            "max_chain": 16,
+            "meb_supports": 229044124,
+            "query_nodes": 217751694,
+            "steps": 457176,
+            "with_two_intruders": 325722
+          },
+          "9": {
+            "added": 605755,
+            "core": 2310649,
+            "max_chain": 18,
+            "meb_supports": 451261735,
+            "query_nodes": 293578244,
+            "steps": 605755,
+            "with_two_intruders": 427342
+          },
+          "10": {
+            "added": 778083,
+            "core": 2848194,
+            "max_chain": 17,
+            "meb_supports": 833506587,
+            "query_nodes": 382961561,
+            "steps": 778083,
+            "with_two_intruders": 544079
+          }
+        },
+        "stage_ms": {
+          "census": 18590.7,
+          "cli_e2e": 413794.438,
+          "comptage": 71.3,
+          "digest": 8329.3,
+          "expansion": 1411.2,
+          "fold": 74605.4,
+          "fold_wall": 227647.3,
+          "fusion": 12826.4,
+          "gen": 137616.8,
+          "index": 4.3,
+          "intern": 36205.5,
+          "prefiltre": 23859.8,
+          "rects": 66187.3,
+          "reduce": 13101.5,
+          "rle": 3994.9,
+          "silent_incidence": 144834.171,
+          "tri": 12429.1,
+          "wspd": 71429.1
+        },
+        "wall_seconds": 413.81637407000017
+      },
+      "engine_status": "engine_completed",
+      "n": 16000,
+      "observation_closed": true
+    },
+    {
+      "engine_status": "engine_refused",
+      "n": 32000,
+      "observation_closed": true,
+      "refusal": {
+        "reason": "REFUS silent incidence K=9 : silent_core_record_budget",
+        "refusal_order": 9,
+        "refusal_status": "resource_exhausted"
+      }
+    }
+  ],
+  "public_status": "not_claimed",
+  "schema": "mhgp7-F-scale-results-v1",
+  "slo": "not_evaluated",
+  "status": "two_scale_observations_closed"
+}
