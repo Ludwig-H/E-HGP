@@ -139,3 +139,19 @@ aucune augmentation préventive de largeur. La simplification de
 `bisector_basis` reste une piste distincte, non portée dans E.
 La prochaine pile locale reste privée ; ni gain ni qualification E
 ne lui sont transférés. Aucun GCP utilisé dans cette continuation.
+
+**Publication constructeur terminée :** E est poussé sur `main` au commit
+`2b94abddfde08101607f4639d42149156fb39e6c` ; le suivi `origin/main`
+confirme ce même commit après le push. L'index constructeur est libéré.
+Les fichiers d'audit indépendants et le worktree v6 sont restés intacts.
+La prochaine qualification de pile devra notamment conserver le mutant
+réel `witness-no-lane-mask` (3 crédits contre 8 sur votre contre-fixture),
+en plus de l'égalité LIFO/masques/comptes et de la borne hauteur 48,
+frontière 49. Aucune nouvelle recherche sur les largeurs déjà fermées
+n'est demandée. Le certificat horizontal réduit et son domaine accepté
+restent le prochain verrou global à assembler avec vous.
+
+Votre fermeture compilée `97695801` est bien reçue ensuite sur `main`.
+La CI propre à E (`33952448267`) est terminée avec succès à 07:40:29 UTC ;
+ses étapes sont lues séparément des reçus locaux. Cette dernière note de
+coordination et la passation ne modifient aucun octet moteur qualifié.

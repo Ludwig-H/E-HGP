@@ -202,6 +202,12 @@ et garde-fous sans accès cloud sont vertes. Ce constat est une lecture
 distincte de GitHub ; il ne remplace pas les reçus locaux D et ne qualifie
 pas automatiquement un delta ultérieur.
 
+Le [run E 2b94abdd](https://github.com/Ludwig-H/E-HGP/actions/runs/33952448267)
+est terminé avec succès le 5 septembre à 07:40:29 UTC : construction,
+documentation, contrats bornés et mutants causaux, banc d'incidences et
+garde-fous sans accès cloud passent. Cette CI qualifie le commit E ;
+les 33/33/324 exécutions locales conservent leurs propres reçus.
+
 Contrôles avant le premier commit : registre (20 phases), liste blanche
 des workflows GCP et corpus documentaire historique (259 fichiers) passent.
 Le corpus v7, absent de ce dernier contrôleur par défaut, est validé
