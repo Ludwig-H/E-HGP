@@ -1,0 +1,75 @@
+{
+  "kind": "paired",
+  "micro_argument": "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/admission_admission/receipt.json=f143ee0d50606e8233e6d069c19a49c5345c25182688d5ee975e7cda9dca6d37",
+  "no_engine_launched": true,
+  "order_measure_exclusions": [
+    "build_ms",
+    "digest_ms",
+    "expand_ms",
+    "hwm_mib_sample",
+    "read_ms",
+    "release_ms",
+    "rss_mib_sample"
+  ],
+  "qualification": {
+    "controller_sha256": "c829ab897fa962766e6e71773a9b11d4389e9f419660f35e0885a5b00dd4116e",
+    "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/receipt.json",
+    "producer_sha256": "21b77d29a4ba2bca453b602a8faa4564a978f4ba71af5167c164faae4ef0e1a5",
+    "sha256": "e3b64a03bbeeac6dfd773d9c54c2c559d6fc7e0d1630b7557a4a32734a91ea97",
+    "source_sha256": "07e8634da3ba2df44eeb570cb9fb730f09d9bc68ae1d9fde172c05045625b280",
+    "tests_per_mode": 17
+  },
+  "qualification_argument": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/receipt.json=e3b64a03bbeeac6dfd773d9c54c2c559d6fc7e0d1630b7557a4a32734a91ea97",
+  "reference_scope": "reported_horizontal_orders_not_integrated_inter_K_tower",
+  "schema": "mhgp7-singleton-mono-adapter-v1",
+  "sequence": [
+    {
+      "arm": "old",
+      "binary_sha256": "1d5a38cea99555fd2db474ee43aff6ba1ee708208508cfa97c540774d0bb7e78",
+      "label": "00_old_s8",
+      "s": 8
+    },
+    {
+      "arm": "new",
+      "binary_sha256": "57c598bfea861166bd8a58311addc5d120d684081e80dbac295b4f4a653aa5b8",
+      "label": "01_new_s8",
+      "s": 8
+    },
+    {
+      "arm": "new",
+      "binary_sha256": "57c598bfea861166bd8a58311addc5d120d684081e80dbac295b4f4a653aa5b8",
+      "label": "02_new_s10",
+      "s": 10
+    },
+    {
+      "arm": "old",
+      "binary_sha256": "1d5a38cea99555fd2db474ee43aff6ba1ee708208508cfa97c540774d0bb7e78",
+      "label": "03_old_s10",
+      "s": 10
+    },
+    {
+      "arm": "old",
+      "binary_sha256": "1d5a38cea99555fd2db474ee43aff6ba1ee708208508cfa97c540774d0bb7e78",
+      "label": "04_old_s12",
+      "s": 12
+    },
+    {
+      "arm": "new",
+      "binary_sha256": "57c598bfea861166bd8a58311addc5d120d684081e80dbac295b4f4a653aa5b8",
+      "label": "05_new_s12",
+      "s": 12
+    }
+  ],
+  "started": "2026-09-05T20:13:53.949401+00:00",
+  "terminal_measure_exclusions": [
+    "compute_read_release_ms_subtracted_diagnostic",
+    "digest_ms",
+    "elapsed_before_terminal_ms",
+    "generation_rects_ms",
+    "generation_wspd_ms",
+    "hwm_mib_sample",
+    "provisional_output_ms",
+    "rss_mib_sample",
+    "stage_ms"
+  ]
+}

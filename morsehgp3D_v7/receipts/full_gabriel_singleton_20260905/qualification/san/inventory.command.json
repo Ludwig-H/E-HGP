@@ -1,0 +1,51 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_san",
+    "--show-only=json-v1",
+    "-L",
+    "^(full_certificate|full_gabriel|full_gabriel_lazy|full_gabriel_digest|full_gabriel_singleton)$"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.03209104899997328,
+  "ended_utc": "2026-09-05T19:53:31.675904+00:00",
+  "environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "inventory",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788638011643112558,
+      "device": 1796,
+      "inode": 1838021,
+      "mtime_ns": 1788638011643112558,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/inventory.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 18586,
+      "ctime_ns": 1788638011664112559,
+      "device": 1796,
+      "inode": 1838020,
+      "mtime_ns": 1788638011664112559,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/inventory.stdout",
+      "sha256": "5a47f12adb9a46428c34ae9c6d0886749b147467a508fb52311b4ef60709d2f7"
+    }
+  },
+  "started_utc": "2026-09-05T19:53:31.641471+00:00",
+  "status": "completed",
+  "timeout_seconds": 60
+}

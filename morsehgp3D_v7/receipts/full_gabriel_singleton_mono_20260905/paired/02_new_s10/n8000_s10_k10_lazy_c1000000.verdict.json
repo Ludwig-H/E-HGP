@@ -1,0 +1,11 @@
+{
+  "attempt_id": "n8000_s10_k10_lazy_c1000000",
+  "attempt_success": true,
+  "capture_valid": true,
+  "certificate_digest": "e6e3fa51140fa9e39904c63dfaff18636ea7f10e058bfafdf1dc7b70b51fa625",
+  "ended": "2026-09-05T20:28:07.014691+00:00",
+  "input_digest": "b73744755477b18a5853084851075bb4e3e468ae7d1353c98d0991576a099639",
+  "outcome": "complete_relative",
+  "started": "2026-09-05T20:28:06.875432+00:00",
+  "status": "completed"
+}

@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/ctest",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.01602798800013261,
+  "ended_utc": "2026-09-05T19:48:33.357746+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "ctest_version",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788637713340107187,
+      "device": 1796,
+      "inode": 1836786,
+      "mtime_ns": 1788637713340107187,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/ctest_version.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 91,
+      "ctime_ns": 1788637713350107187,
+      "device": 1796,
+      "inode": 1836785,
+      "mtime_ns": 1788637713350107187,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/ctest_version.stdout",
+      "sha256": "fd61d05e1e746f5652d87e0b6c9bafa334e95b89d1e53b1bfeb7d2af3ab208dc"
+    }
+  },
+  "started_utc": "2026-09-05T19:48:33.339082+00:00",
+  "status": "completed",
+  "timeout_seconds": 15
+}

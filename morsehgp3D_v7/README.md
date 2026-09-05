@@ -33,13 +33,17 @@ distingués ; les minima FULL ne sont pas tout l'univers des poids.
 | [Certificat FULL et lecteur](docs/CONTRAT_CERTIFICAT_FULL.md) | Validation structurelle transactionnelle ; aucune certification géométrique |
 | [Producteur horizontal FULL](docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md) | Parents calculés, minima isolés et K=n conservés ; succès relatif à des catalogues complets, exacts et réguliers fournis |
 | [Cache FULL facultatif](docs/CONTRAT_CACHE_FULL_PARESSEUX.md) | API lazy distincte, capacité nulle permise, dispatcher J=1 ; minima et ancres restent obligatoires |
+| [Lots unitaires](docs/CONTRAT_LOT_UNITAIRE_FULL.md) | Tableau de quatre racines au lieu de la DSU locale ; mêmes demandes, compteurs, parents et ancres |
 | CLI et archive | Route historique F séparée ; ni export FULL ni verticale FULL intégrée |
 
-Le delta lazy passe [14/14 CTests Release et 14/14 ASan/UBSan](receipts/full_gabriel_lazy_20260905/README.md),
-avec LeakSanitizer actif, oracle Gamma borné, rejets et 434 pannes
-d'allocation. Le [précontrôle négatif](receipts/full_lazy_development_20260905/README.md)
-reste conservé. La [comparaison mono courante](docs/RESULTATS_MONO_FULL_LAZY_20260905.md)
-emploie une sonde commune avec digest sémantique, coût inclus.
+Le delta courant passe [17/17 CTests Release et 17/17 ASan/UBSan](receipts/full_gabriel_singleton_20260905/README.md),
+avec LeakSanitizer actif, oracle Gamma borné, 181 paires positives et
+357 refus du différentiel singleton. Les balayages frais injectent
+49 pannes d'allocation eager et 209 lazy. Le [précontrôle négatif lazy](receipts/full_lazy_development_20260905/README.md)
+reste conservé. La [comparaison mono singleton](docs/RESULTATS_MONO_FULL_SINGLETON_20260905.md)
+emploie la même sonde avec digest sémantique, coût inclus ; la
+[campagne lazy antérieure](docs/RESULTATS_MONO_FULL_LAZY_20260905.md)
+reste attribuée au header `13c6cc72…`.
 
 Priorités : mono-thread, puis multi-CPU, puis GPU. Le
 [contrat 50k](docs/CONTRAT_PERFORMANCE.md) porte sur **toute la tour K=1..10

@@ -1,0 +1,277 @@
+[
+  {
+    "argv": [
+      "/usr/bin/taskset",
+      "-c",
+      "0",
+      "/usr/bin/cmake",
+      "--version"
+    ],
+    "cwd": "/workspaces/E-HGP",
+    "elapsed_seconds": 0.8663229919993682,
+    "ended_utc": "2026-09-05T19:48:33.334796+00:00",
+    "environment": {
+      "LANG": "C",
+      "LC_ALL": "C",
+      "PATH": "/usr/bin:/bin",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "error": null,
+    "exit_code": 0,
+    "expected_code": 0,
+    "label": "cmake_version",
+    "raw": {
+      "stderr": {
+        "bytes": 0,
+        "ctime_ns": 1788637712467107171,
+        "device": 1796,
+        "inode": 1836782,
+        "mtime_ns": 1788637712467107171,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/cmake_version.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 91,
+        "ctime_ns": 1788637713298107186,
+        "device": 1796,
+        "inode": 1836781,
+        "mtime_ns": 1788637713298107186,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/cmake_version.stdout",
+        "sha256": "d3d5b682f3f5ef5b24a79ed8cf4b8c5868fc950dad48cab1be0e3c060a77f8ee"
+      }
+    },
+    "started_utc": "2026-09-05T19:48:32.466426+00:00",
+    "status": "completed",
+    "timeout_seconds": 15
+  },
+  {
+    "argv": [
+      "/usr/bin/taskset",
+      "-c",
+      "0",
+      "/usr/bin/ctest",
+      "--version"
+    ],
+    "cwd": "/workspaces/E-HGP",
+    "elapsed_seconds": 0.01602798800013261,
+    "ended_utc": "2026-09-05T19:48:33.357746+00:00",
+    "environment": {
+      "LANG": "C",
+      "LC_ALL": "C",
+      "PATH": "/usr/bin:/bin",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "error": null,
+    "exit_code": 0,
+    "expected_code": 0,
+    "label": "ctest_version",
+    "raw": {
+      "stderr": {
+        "bytes": 0,
+        "ctime_ns": 1788637713340107187,
+        "device": 1796,
+        "inode": 1836786,
+        "mtime_ns": 1788637713340107187,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/ctest_version.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 91,
+        "ctime_ns": 1788637713350107187,
+        "device": 1796,
+        "inode": 1836785,
+        "mtime_ns": 1788637713350107187,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/ctest_version.stdout",
+        "sha256": "fd61d05e1e746f5652d87e0b6c9bafa334e95b89d1e53b1bfeb7d2af3ab208dc"
+      }
+    },
+    "started_utc": "2026-09-05T19:48:33.339082+00:00",
+    "status": "completed",
+    "timeout_seconds": 15
+  },
+  {
+    "argv": [
+      "/usr/bin/taskset",
+      "-c",
+      "0",
+      "/usr/bin/g++",
+      "--version"
+    ],
+    "cwd": "/workspaces/E-HGP",
+    "elapsed_seconds": 0.0038532219996341155,
+    "ended_utc": "2026-09-05T19:48:33.366505+00:00",
+    "environment": {
+      "LANG": "C",
+      "LC_ALL": "C",
+      "PATH": "/usr/bin:/bin",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "error": null,
+    "exit_code": 0,
+    "expected_code": 0,
+    "label": "compiler_version",
+    "raw": {
+      "stderr": {
+        "bytes": 0,
+        "ctime_ns": 1788637713361107187,
+        "device": 1796,
+        "inode": 1836790,
+        "mtime_ns": 1788637713361107187,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/compiler_version.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 246,
+        "ctime_ns": 1788637713363107187,
+        "device": 1796,
+        "inode": 1836789,
+        "mtime_ns": 1788637713363107187,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/compiler_version.stdout",
+        "sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8"
+      }
+    },
+    "started_utc": "2026-09-05T19:48:33.360664+00:00",
+    "status": "completed",
+    "timeout_seconds": 15
+  },
+  {
+    "argv": [
+      "/usr/bin/taskset",
+      "-c",
+      "0",
+      "/usr/bin/g++",
+      "-dumpmachine"
+    ],
+    "cwd": "/workspaces/E-HGP",
+    "elapsed_seconds": 0.00377269199998409,
+    "ended_utc": "2026-09-05T19:48:33.374380+00:00",
+    "environment": {
+      "LANG": "C",
+      "LC_ALL": "C",
+      "PATH": "/usr/bin:/bin",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "error": null,
+    "exit_code": 0,
+    "expected_code": 0,
+    "label": "compiler_target",
+    "raw": {
+      "stderr": {
+        "bytes": 0,
+        "ctime_ns": 1788637713369107187,
+        "device": 1796,
+        "inode": 1836794,
+        "mtime_ns": 1788637713369107187,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/compiler_target.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 17,
+        "ctime_ns": 1788637713371107187,
+        "device": 1796,
+        "inode": 1836793,
+        "mtime_ns": 1788637713371107187,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/compiler_target.stdout",
+        "sha256": "08cababdf891ccbf96eb376f1e84f279f70302fb13d84e5f98637becdfc6d989"
+      }
+    },
+    "started_utc": "2026-09-05T19:48:33.368901+00:00",
+    "status": "completed",
+    "timeout_seconds": 15
+  },
+  {
+    "argv": [
+      "/usr/bin/taskset",
+      "-c",
+      "0",
+      "/usr/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v7_singleton_20260905_controller/capture.py",
+      "--selftest"
+    ],
+    "cwd": "/workspaces/E-HGP",
+    "elapsed_seconds": 0.11439577199962514,
+    "ended_utc": "2026-09-05T19:48:33.493069+00:00",
+    "environment": {
+      "LANG": "C",
+      "LC_ALL": "C",
+      "PATH": "/usr/bin:/bin",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "error": null,
+    "exit_code": 0,
+    "expected_code": 0,
+    "label": "metadata_selftest_normal",
+    "raw": {
+      "stderr": {
+        "bytes": 0,
+        "ctime_ns": 1788637713377107187,
+        "device": 1796,
+        "inode": 1836798,
+        "mtime_ns": 1788637713377107187,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/metadata_selftest_normal.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 437,
+        "ctime_ns": 1788637713449107189,
+        "device": 1796,
+        "inode": 1836797,
+        "mtime_ns": 1788637713449107189,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/metadata_selftest_normal.stdout",
+        "sha256": "f256474c52790891e368216db985aa9610f0ace52d645f2fccc1ea6e99d7745e"
+      }
+    },
+    "started_utc": "2026-09-05T19:48:33.376664+00:00",
+    "status": "completed",
+    "timeout_seconds": 15
+  },
+  {
+    "argv": [
+      "/usr/bin/taskset",
+      "-c",
+      "0",
+      "/usr/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v7_singleton_20260905_controller/capture.py",
+      "--selftest"
+    ],
+    "cwd": "/workspaces/E-HGP",
+    "elapsed_seconds": 0.3149307019994012,
+    "ended_utc": "2026-09-05T19:48:33.814582+00:00",
+    "environment": {
+      "LANG": "C",
+      "LC_ALL": "C",
+      "PATH": "/usr/bin:/bin",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "error": null,
+    "exit_code": 0,
+    "expected_code": 0,
+    "label": "metadata_selftest_optimized",
+    "raw": {
+      "stderr": {
+        "bytes": 0,
+        "ctime_ns": 1788637713498107189,
+        "device": 1796,
+        "inode": 1836802,
+        "mtime_ns": 1788637713498107189,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/metadata_selftest_optimized.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 437,
+        "ctime_ns": 1788637713787107195,
+        "device": 1796,
+        "inode": 1836801,
+        "mtime_ns": 1788637713787107195,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/metadata_selftest_optimized.stdout",
+        "sha256": "f256474c52790891e368216db985aa9610f0ace52d645f2fccc1ea6e99d7745e"
+      }
+    },
+    "started_utc": "2026-09-05T19:48:33.497253+00:00",
+    "status": "completed",
+    "timeout_seconds": 15
+  }
+]

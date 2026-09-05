@@ -13,6 +13,11 @@ La nouvelle API séparée et ses différences de calendrier, de cache et de
 traitement J=1 sont spécifiées dans le
 [contrat du cache facultatif](CONTRAT_CACHE_FULL_PARESSEUX.md) ; ses preuves
 et mesures ne sont pas héritées des reçus historiques cités ici.
+La [spécialisation du lot à une seule directe](CONTRAT_LOT_UNITAIRE_FULL.md)
+s'applique aux deux politiques : elle remplace seulement le regroupement
+local par tri/déduplication d'au plus quatre racines. Elle conserve les
+demandes, les budgets et le suffixe de fermeture ; sa qualification
+fraîche est distincte des reçus historiques de ce document.
 
 ## 1. Autorité et domaine exacts
 

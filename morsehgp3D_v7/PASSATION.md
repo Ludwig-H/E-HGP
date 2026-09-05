@@ -25,7 +25,7 @@ complétude géométrique d'un fournisseur de catalogues.
 
 ## Code courant et preuves du delta
 
-Le [producteur FULL](src/forest/full_gabriel.hpp), pin `13c6cc72…`, est
+Le [producteur FULL](src/forest/full_gabriel.hpp), pin `21b77d29…`, est
 un composant horizontal autonome. Son succès reste relatif à des
 catalogues fournis complets, exacts et réguliers. La CLI, l'archive et les reçus F
 restent des témoins séparés, jamais requalifiés FULL par héritage.
@@ -38,32 +38,45 @@ directes restent obligatoires, y compris les connexions sans fusion.
 J=1 retrouve l'ancre F+z sans recalculer sa MEB. Le
 [contrat du cache](docs/CONTRAT_CACHE_FULL_PARESSEUX.md) détaille ses limites.
 
+Le [lot à une seule directe](docs/CONTRAT_LOT_UNITAIRE_FULL.md) emploie
+désormais un tableau de quatre racines au lieu de la DSU locale. Les q
+demandes restent dans le même ordre, même avec racines répétées ; les
+minima simultanés, ancres no-op, budgets et 33 compteurs sont conservés.
+Les lots multi-directes gardent le chemin général. Aucun changement q4
+ou de normalisation des successeurs n'est mêlé à ce delta.
+
 | Preuve exécutée | Résultat et portée |
 | --- | --- |
-| [Qualification fraîche FULL/lazy/digest](receipts/full_gabriel_lazy_20260905/README.md) | 14/14 Release et 14/14 ASan/UBSan, LeakSanitizer actif ; six binaires par build et 582 pins stables |
-| Portes lazy incluses | 81 appels, 3 192 coupes, 127 rejets et 434 pannes persistantes d'allocation par build ; aucune forêt partielle |
+| [Qualification fraîche FULL/lazy/singleton/digest](receipts/full_gabriel_singleton_20260905/README.md) | 17/17 Release et 17/17 ASan/UBSan, LeakSanitizer actif ; sept binaires par build et 584 pins stables |
+| Différentiel singleton inclus | 181 paires positives, 3 320 coupes ; mode budgets : 357 refus identiques, q2/q3/q4 et no-op consommé réellement exercés |
+| Portes mémoire réexécutées | 49 pannes eager et 209 lazy, toutes refusées sans échappement ; ordinaux propres au nouveau programme |
 | [Admission de la sonde v2](receipts/full_gabriel_lazy_probe_20260905/README.md) | 24 micros, 156 ordres, 11 rejets parser ; juge normal/-O et 19 mutants par mode |
 | [Supplément first-C](receipts/full_gabriel_first_c_qualification_20260905/README.md) | 58 commandes : 48 contrôles, 2 selftests de 12 mutants, 8 rejets argv ; 117 ordres lazy par mode |
-| [Audit indépendant lazy](audits/CACHE_FULL_COURANT.md), commit `e7fa5da7` | 109 ordres, quatre politiques, 67 920 coupes par build ; trois mutations ciblées réfutées, hors qualification des temps lourds |
+| [Audit indépendant du nouveau header](audits/receipts_full_singleton_20260905/README.md) | 114 ordres, 912 sorties et 69 120 coupes par build O2/ASan-UBSan ; mutant du quatrième token réfuté, hors qualification des temps lourds |
 
 Le [précontrôle 12/14](receipts/full_lazy_development_20260905/README.md)
 reste un échec conservé : une fixture partagée n'était pas globalement
 régulière. Sa contradiction devient un négatif permanent, pas un
-relâchement du domaine. Les sept anciennes portes eager/lecteur sont
-réexécutées dans les 14 tests ; la suite F complète ne l'est pas ici.
+relâchement du domaine. Les 14 anciennes portes sont réexécutées dans
+les 17 tests ; la suite F complète ne l'est pas ici. Les trois anciens
+mutants lazy restent attachés à leur pin historique ; ils ne sont pas
+présentés comme rejoués par le nouvel audit singleton.
 
 ## Mesures courantes et contrats ouverts
 
-La [campagne mono lazy](docs/RESULTATS_MONO_FULL_LAZY_20260905.md) compare
-eager et lazy sur le même instrument, avec digest de chaque forêt et
-lecture inclus dans le temps. Elle conserve séparément la
-[première tentative interrompue](receipts/full_gabriel_lazy_interrupted_20260905/README.md),
-sans lui inventer de terminal. La paire neuve répète aussi eager.
-Les huit nouvelles captures sont closes : six réussites appariées à 8k,
-une réussite à 16k et un refus terminal à 32k, aucun timeout. À 8k le pic
-diminue d'environ 28 %, mais aucun gain de temps n'est observé. 16k termine
-dix ordres en 319,305 s ; 32k refuse à K9 sur les 128 millions d'opérations
-de successeurs, sans relever les caps ni publier une tour partielle.
+La [campagne singleton courante](docs/RESULTATS_MONO_FULL_SINGLETON_20260905.md)
+compare les deux headers avec la même sonde, lazy C1M, à s=8/10/12.
+Ses six passages sont clos, 30 ordres appariés identiques. Les temps
+du nouveau code sont 144,337 / 145,201 / 145,544 s, avec des variations
+avant/après de −0,83 % / +2,36 % / +0,07 % : aucune accélération robuste
+établie malgré l'économie d'allocations sur les fixtures.
+La [campagne lazy antérieure](docs/RESULTATS_MONO_FULL_LAZY_20260905.md),
+header `13c6cc72…`, conserve ses propres six réussites appariées 8k,
+son succès 16k (319,305 s) et son refus 32k/K9 sur 128 millions
+d'opérations de successeurs. Le gain de pic d'environ 28 % opposait
+eager à lazy, pas les deux headers de la campagne singleton. Son
+[interruption initiale](receipts/full_gabriel_lazy_interrupted_20260905/README.md)
+reste conservée sans terminal inventé.
 
 Ces sondes détruisent chaque forêt après lecture : ni archive FULL, ni
 verticale intégrée, ni mémoire de toute la tour retenue ne sont mesurées.
@@ -71,8 +84,9 @@ Les contrats **50k/tour 1..10 sous 1 s**, repli tour 1..5, puis 100 ms et
 dizaines de millions sur G4 sont **non atteints**. Les plafonds de sortie,
 catalogues, RAM/VRAM et reprise ne se résolvent pas par le seul cache.
 
-Suite mono : cibler la normalisation des ancres, les allocations des
-lots unitaires et le coût de génération sur leurs preuves propres.
+Suite mono : cibler la normalisation des ancres et le rejet précoce des
+blocs q4 sur leurs preuves propres. Le coût MEB doit aussi être mesuré
+sur les appels FULL réels avant un éventuel dispatch de proposition.
 L'export FULL transactionnel avec son autorité terminale et ses ancres
 inter-K reste à raccorder avant qualification de la tour. Multi-CPU et
 GPU viennent après la réduction du coût mono, avec leurs reçus séparés.

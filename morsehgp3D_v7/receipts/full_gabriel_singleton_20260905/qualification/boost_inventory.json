@@ -1,0 +1,25 @@
+{
+  "authority": "dependency_identities_only_no_old_test_result",
+  "canonical_header_map_sha256": "409cccaa1709a6aecf93caac66303835b804da78b315160e76ce14a5352b18b7",
+  "depfile_copy": {
+    "archive": {
+      "bytes": 71843,
+      "ctime_ns": 1788637712460107171,
+      "device": 1796,
+      "inode": 1836778,
+      "mtime_ns": 1788637712460107171,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/boost_dependency_identities.stdout",
+      "sha256": "ec9abb0b435d292607f40e7fc163f6dec7e38c900830492505faddddd8a9dc89"
+    },
+    "source": {
+      "bytes": 71843,
+      "ctime_ns": 1788628368581242594,
+      "device": 1796,
+      "inode": 1745748,
+      "mtime_ns": 1788628368581242594,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_precheck/CMakeFiles/mhgp7_full_gabriel_digest_gate.dir/tests/full_gabriel_digest_gate.cpp.o.d",
+      "sha256": "ec9abb0b435d292607f40e7fc163f6dec7e38c900830492505faddddd8a9dc89"
+    }
+  },
+  "header_count": 521
+}

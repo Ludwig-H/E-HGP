@@ -1,0 +1,57 @@
+{
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "cpu_models": {
+    "0": {
+      "cpu family": "25",
+      "model": "1",
+      "model name": "AMD EPYC 7763 64-Core Processor",
+      "stepping": "1",
+      "vendor_id": "AuthenticAMD"
+    },
+    "6": {
+      "cpu family": "25",
+      "model": "1",
+      "model name": "AMD EPYC 7763 64-Core Processor",
+      "stepping": "1",
+      "vendor_id": "AuthenticAMD"
+    }
+  },
+  "cpus_online": "0-7",
+  "gcp": "not_used",
+  "permission_override": "none",
+  "process_status": {
+    "Cpus_allowed_list": "0-7",
+    "NoNewPrivs": "0",
+    "Seccomp": "0",
+    "TracerPid": "0",
+    "VmHWM": "55892 kB",
+    "VmRSS": "25140 kB"
+  },
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "rlimit_as": [
+    -1,
+    -1
+  ],
+  "rlimit_cpu": [
+    -1,
+    -1
+  ],
+  "uname": [
+    "Linux",
+    "codespaces-0bcb78",
+    "6.8.0-1052-azure",
+    "#58~22.04.1-Ubuntu SMP Thu Mar 26 05:02:21 UTC 2026",
+    "x86_64",
+    "x86_64"
+  ],
+  "utc": "2026-09-05T19:48:33.821300+00:00"
+}

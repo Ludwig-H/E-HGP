@@ -1,0 +1,65 @@
+{
+  "mhgp7_full_certificate_gate": {
+    "bytes": 2948768,
+    "ctime_ns": 1788637810474108936,
+    "device": 1796,
+    "inode": 1838000,
+    "mtime_ns": 1788637810473108936,
+    "path": "/workspaces/E-HGP/build/v7_singleton_20260905_san/mhgp7_full_certificate_gate",
+    "sha256": "16f54ec8682efa6c7645ec39161c2a856ff2caf4fffaac33193f87460c32df44"
+  },
+  "mhgp7_full_gabriel_allocation_gate": {
+    "bytes": 13183480,
+    "ctime_ns": 1788637884715110273,
+    "device": 1796,
+    "inode": 1838007,
+    "mtime_ns": 1788637884715110273,
+    "path": "/workspaces/E-HGP/build/v7_singleton_20260905_san/mhgp7_full_gabriel_allocation_gate",
+    "sha256": "4cf0aee2e30830e595413f38284851fa8a451f566800751b9ed11751e01f8903"
+  },
+  "mhgp7_full_gabriel_digest_gate": {
+    "bytes": 3470256,
+    "ctime_ns": 1788637968008111773,
+    "device": 1796,
+    "inode": 1838016,
+    "mtime_ns": 1788637968008111773,
+    "path": "/workspaces/E-HGP/build/v7_singleton_20260905_san/mhgp7_full_gabriel_digest_gate",
+    "sha256": "bb32b3e4ed8566aa755309a241fb4768cd9e3fd42ae6b51620fe79e8d917d8e2"
+  },
+  "mhgp7_full_gabriel_gate": {
+    "bytes": 16200344,
+    "ctime_ns": 1788637851195109669,
+    "device": 1796,
+    "inode": 1838004,
+    "mtime_ns": 1788637851195109669,
+    "path": "/workspaces/E-HGP/build/v7_singleton_20260905_san/mhgp7_full_gabriel_gate",
+    "sha256": "bdb86119e26660635f1cee8a63f56c46adf2882b6058c24d0f18d367a1b7d043"
+  },
+  "mhgp7_full_gabriel_lazy_allocation_gate": {
+    "bytes": 13574072,
+    "ctime_ns": 1788637958141111595,
+    "device": 1796,
+    "inode": 1838013,
+    "mtime_ns": 1788637958141111595,
+    "path": "/workspaces/E-HGP/build/v7_singleton_20260905_san/mhgp7_full_gabriel_lazy_allocation_gate",
+    "sha256": "93da07e938adeeb162426531510ac99b77b0cc1cc0e0099cf508f0438527466f"
+  },
+  "mhgp7_full_gabriel_lazy_gate": {
+    "bytes": 15670608,
+    "ctime_ns": 1788637923827110977,
+    "device": 1796,
+    "inode": 1838010,
+    "mtime_ns": 1788637923827110977,
+    "path": "/workspaces/E-HGP/build/v7_singleton_20260905_san/mhgp7_full_gabriel_lazy_gate",
+    "sha256": "ba0f8cd83ea910727ec089da8af9be7e326a25a36a08e144fb18187d3de798d5"
+  },
+  "mhgp7_full_gabriel_singleton_gate": {
+    "bytes": 16943856,
+    "ctime_ns": 1788638010495112538,
+    "device": 1796,
+    "inode": 1838019,
+    "mtime_ns": 1788638010495112538,
+    "path": "/workspaces/E-HGP/build/v7_singleton_20260905_san/mhgp7_full_gabriel_singleton_gate",
+    "sha256": "3fe6e16138b0f065e4d0683e656356524b4be0865a0cf701a379069eb6822188"
+  }
+}

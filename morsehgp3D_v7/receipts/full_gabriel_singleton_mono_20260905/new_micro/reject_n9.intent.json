@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/build_admission/full_gabriel_lazy_probe",
+    "--n=9",
+    "--s=8",
+    "--kmax=10",
+    "--alias-policy=eager"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/taskset -c 0 /workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/build_admission/full_gabriel_lazy_probe --n=9 --s=8 --kmax=10 --alias-policy=eager",
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "expected_rc": [
+    2
+  ],
+  "id": "reject_n9",
+  "outer_timeout_seconds": 30,
+  "process_vm_max_bytes": 27917287424,
+  "started": "2026-09-05T20:12:11.896335+00:00"
+}

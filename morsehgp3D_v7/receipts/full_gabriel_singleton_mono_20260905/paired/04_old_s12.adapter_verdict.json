@@ -1,0 +1,22 @@
+{
+  "arm": "old",
+  "attempt_receipt": "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/paired_mono/04_old_s12/n8000_s12_k10_lazy_c1000000.receipt.json",
+  "attempt_success": true,
+  "base_verdict": {
+    "attempt_id": "n8000_s12_k10_lazy_c1000000",
+    "attempt_success": true,
+    "capture_valid": true,
+    "certificate_digest": "e6e3fa51140fa9e39904c63dfaff18636ea7f10e058bfafdf1dc7b70b51fa625",
+    "ended": "2026-09-05T20:33:52.213778+00:00",
+    "input_digest": "b73744755477b18a5853084851075bb4e3e468ae7d1353c98d0991576a099639",
+    "outcome": "complete_relative",
+    "started": "2026-09-05T20:33:52.074164+00:00",
+    "status": "completed"
+  },
+  "ended": "2026-09-05T20:33:52.348413+00:00",
+  "index": 4,
+  "receipt_sha256": "ec85ed34fb8d840dac679f884a0f02e9c9959f370e1eaad406596f0fef6d8c59",
+  "s": 12,
+  "started": "2026-09-05T20:31:26.595434+00:00",
+  "status": "completed"
+}

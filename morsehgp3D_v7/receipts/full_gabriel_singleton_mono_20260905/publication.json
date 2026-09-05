@@ -1,0 +1,76 @@
+{
+  "admission_argument": "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/admission_admission/receipt.json=f143ee0d50606e8233e6d069c19a49c5345c25182688d5ee975e7cda9dca6d37",
+  "all_planned_heavy_attempts_successful": true,
+  "allocations_measured": false,
+  "build_argument": "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/build_admission/receipt.json=c87be79e6effc7a6b58b74421c4038ac6e10f34218bed0b3502711b000129112",
+  "engine_reexecuted": false,
+  "gcp_used": false,
+  "hermetic": false,
+  "judge_reexecuted": false,
+  "micro_receipts": 48,
+  "omissions": [
+    {
+      "bytes": 511552,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/build_admission/full_gabriel_lazy_probe",
+      "reason": "only_exact_new_build_ELF_omitted_no_receipt_repair",
+      "sha256": "57c598bfea861166bd8a58311addc5d120d684081e80dbac295b4f4a653aa5b8"
+    }
+  ],
+  "paired_argument": "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/paired_mono/receipt.json=eabece59138edbcece04f8d532a6b40fe529cbaa65fc0c8d0853acdc61a7ad7a",
+  "paired_comparisons": [
+    {
+      "all_non_measure_fields_equal": true,
+      "certificate_digest": "e6e3fa51140fa9e39904c63dfaff18636ea7f10e058bfafdf1dc7b70b51fa625",
+      "input_digest": "b73744755477b18a5853084851075bb4e3e468ae7d1353c98d0991576a099639",
+      "new_elapsed_ms": 144336.972703,
+      "new_full_ms": 65381.071714,
+      "new_receipt_sha256": "ab09e1891e9ca833f79b8deef511cdf70cc35a708cfe64eb16e80366954f2955",
+      "old_elapsed_ms": 145539.553507,
+      "old_full_ms": 66801.976765,
+      "old_receipt_sha256": "97cae69139fb989397a76393c15f115b9a0924df63165e8206ed13cddfe18f48",
+      "orders_equal": 10,
+      "scope": "same_policy_same_caps_all_reported_algorithm_fields_not_geometry_proof"
+    },
+    {
+      "all_non_measure_fields_equal": true,
+      "certificate_digest": "e6e3fa51140fa9e39904c63dfaff18636ea7f10e058bfafdf1dc7b70b51fa625",
+      "input_digest": "b73744755477b18a5853084851075bb4e3e468ae7d1353c98d0991576a099639",
+      "new_elapsed_ms": 145200.785631,
+      "new_full_ms": 64986.103349,
+      "new_receipt_sha256": "26d4687ab3d98e57d49f0b63c6040b50a0379058deaae0e659b4c4a160c0dcb4",
+      "old_elapsed_ms": 141857.30378,
+      "old_full_ms": 64841.603022,
+      "old_receipt_sha256": "9fe41b64d368937f3f962aa09ba6e65a5c3f1a9475ed41858e80863d8c33ac87",
+      "orders_equal": 10,
+      "scope": "same_policy_same_caps_all_reported_algorithm_fields_not_geometry_proof"
+    },
+    {
+      "all_non_measure_fields_equal": true,
+      "certificate_digest": "e6e3fa51140fa9e39904c63dfaff18636ea7f10e058bfafdf1dc7b70b51fa625",
+      "input_digest": "b73744755477b18a5853084851075bb4e3e468ae7d1353c98d0991576a099639",
+      "new_elapsed_ms": 145544.497606,
+      "new_full_ms": 64021.158312,
+      "new_receipt_sha256": "793f34db11b9d4bceed67994d3c191f11aedd11b8e46d5575f87aa9683a5e4c7",
+      "old_elapsed_ms": 145436.411458,
+      "old_full_ms": 65405.78284,
+      "old_receipt_sha256": "ec85ed34fb8d840dac679f884a0f02e9c9959f370e1eaad406596f0fef6d8c59",
+      "orders_equal": 10,
+      "scope": "same_policy_same_caps_all_reported_algorithm_fields_not_geometry_proof"
+    }
+  ],
+  "paired_micro_orders": 156,
+  "paired_reason": "closed_captures_not_SLO_or_allocation_measurement",
+  "paired_status": "completed",
+  "public_status": "not_claimed",
+  "pure_comparisons_rechecked": 27,
+  "qualification": {
+    "controller_sha256": "c829ab897fa962766e6e71773a9b11d4389e9f419660f35e0885a5b00dd4116e",
+    "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/receipt.json",
+    "producer_sha256": "21b77d29a4ba2bca453b602a8faa4564a978f4ba71af5167c164faae4ef0e1a5",
+    "sha256": "e3b64a03bbeeac6dfd773d9c54c2c559d6fc7e0d1630b7557a4a32734a91ea97",
+    "source_sha256": "07e8634da3ba2df44eeb570cb9fb730f09d9bc68ae1d9fde172c05045625b280",
+    "tests_per_mode": 17
+  },
+  "schema": "mhgp7-singleton-mono-publication-v1",
+  "scope": "horizontal_relative_orders_not_integrated_inter_K_tower"
+}

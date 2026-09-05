@@ -1,0 +1,5 @@
+ M morsehgp3D_v7/CMakeLists.txt
+ M morsehgp3D_v7/src/forest/full_gabriel.hpp
+?? morsehgp3D_v7/docs/CONTRAT_LOT_UNITAIRE_FULL.md
+?? morsehgp3D_v7/tests/full_gabriel_singleton_fixtures.hpp
+?? morsehgp3D_v7/tests/full_gabriel_singleton_gate.cpp

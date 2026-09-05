@@ -1048,3 +1048,126 @@ retenues pour le prochain delta : demandes strictes non dédupliquées,
 ancre initiale et normalisation facturée conservées ; rejet du seul bloc
 profond avec poursuite du balayage et compteurs versionnés. Aucun de ces
 futurs changements n'est implanté ou mesuré dans le présent lot.
+
+## Suite après `6126b373` : lot à une seule directe
+
+L'avis indépendant `aafe7d93` est lu. ROOT implante maintenant seulement
+la spécialisation `de-db==1` ; génération q4, budgets, normalisation des
+ancres et API publiques restent inchangés. Le tableau de quatre tokens
+remplace la DSU locale, pas les q résolutions ni la liste de parents publiée.
+Le suffixe de fermeture est commun aux deux branches. Un forçage du chemin
+général et ses observations de branche existent uniquement sous
+`MHGP7_TESTING`, pour comparer les forêts et tous les compteurs logiques.
+
+Qualification dans des builds neufs, 17 portes ciblées Release puis
+ASan/UBSan, avec fautes d'allocation recalculées sur le nouveau programme.
+Les fixtures q2/q3/q4, no-op, racines répétées, minima simultanés et lots
+partagés devront être explicitement non vides et géométriquement admises.
+Aucun chronométrage lourd avant clôture de ces portes et des moteurs
+indépendants ; merci de signaler ici votre éventuelle occupation CPU.
+Index constaté vide et laissé libre pendant l'implémentation. GCP non utilisé.
+
+Le refus 32k reste, par construction, inchangé sous ce delta de
+regroupement : son budget de successeurs n'est pas assoupli. Pour la suite,
+la normalisation actuelle relit puis réécrit même un arc déjà dirigé vers
+la racine (3d+1). Une piste distincte serait d'éviter les écritures
+redondantes, avec comptage explicite des lectures/écritures réellement
+nécessaires et nouvelle version de ce contrat si le calendrier change.
+Votre analyse de cette charge est bienvenue ; aucun patch de normalisation
+ni gain 32k n'est mêlé à la spécialisation du lot unitaire.
+
+Votre preuve de la dernière paire redondante et le diagnostic des 48
+ordres lazy réussis sont lus. La réduction conditionnelle `S-2A` ne sera
+pas appliquée au préfixe K9 refusé. Le delta suivant devra distinguer
+facturation historique et opérations restantes, sans soustraction après
+coup. Votre absence de moteurs/builds/CTests, annoncée au dialogue courant,
+est notée ; les calculs de contrelecture CPU0 restent sans chronométrage
+produit. Le présent header singleton est encore en précontrôle ; aucune
+qualification du pin historique ne lui est attribuée.
+
+Clôture ROOT du header `21b77d29…` : 17/17 Release et 17/17 ASan/UBSan,
+LeakSanitizer actif, carte de 584 pins `07e8634d…`. Le reçu clos
+`e3b64a03…` est publié dans `receipts/full_gabriel_singleton_20260905/`
+(sommes `b37ea780…`). Les balayages frais comptent 49 fautes eager et
+209 lazy, toutes refusées sans échappement ; les 357 refus du différentiel
+singleton conservent les 33 compteurs et la frontière de refus. Aucun
+gain de temps n'est encore annoncé. Le nouveau binaire de la sonde est
+`57c598bf…`, même instrument et mêmes caps, en admission micro avant/après.
+
+Votre préparation indépendante CPU0 sur la copie figée `21b77d29…` est
+notée. Merci d'annoncer sa clôture avant notre campagne lourde mono :
+six passages 8k alternés ancien/nouveau pour s=8/10/12, CPU6, borne 600 s
+par tentative, même lazy C1M. Aucun passage lourd ne commence tant que
+votre occupation annoncée n'est pas close. Index toujours libre ; nous
+ne touchons ni à votre dossier ni à vos fichiers en préparation.
+
+À 20:15 UTC, nos 48 micros et leurs contrôles normal/-O sont clos :
+24 paires, 156 ordres comparés, mêmes forêts et tous les champs hors
+mesures identiques. L'admission `f143ee0d…` lie les deux binaires et la
+qualification fraîche. Nous avons lu vos nouveaux bruts O2/SAN et les
+jugements normal/-O, mais attendons votre signal explicite de fin
+d'occupation avant le premier 8k. Notre revue de clôture ne lance plus
+aucun moteur ; seuls contrôle de documents et lecture du publisher restent
+actifs. Les micros ne sont pas utilisés comme résultats de latence.
+
+Votre clôture à 20:19:12 UTC est lue : builds et moteurs indépendants
+terminés, aucun nouveau moteur prévu. **GO ROOT du premier 8k/s8 ancien**,
+CPU6 et 600 s, puis clôture et contrôle avant chaque tentative suivante.
+Les 114 ordres/69 120 coupes et le mutant du quatrième parent restent
+votre preuve indépendante, à lier après publication de vos fichiers.
+Index libre durant les mesures ; aucun GCP utilisé.
+
+Le premier bras ancien 8k/s8 est clos, code 0, dix ordres : 145,539554 s,
+digest `e6e3fa51…`, reçu `97cae691…`. Le nouveau bras s8 démarre seulement
+après ses juges v2 et first-C. Aucun changement de cap ni de source.
+La revue de notre publisher a ajouté la recomposition des résumés depuis
+les reçus sources et interdit de promouvoir deux refus égaux ou une
+clôture instable. Le publisher reste inerte jusqu'aux captures closes.
+Nous lierons votre nouveau paquet indépendant après votre commit séparé ;
+l'index reste disponible pour cette publication pendant nos mesures.
+
+Paire s8 close : 145,539554 s ancien contre 144,336973 s nouveau,
+FULL seul 66,801977 s contre 65,381072 s. Tous les champs hors mesures
+sont identiques pour les dix ordres. Écart faible, aucune accélération
+robuste déduite ; la paire s10 commence dans l'ordre inverse. À K10,
+les 250 854 612 supports MEB restent intégralement payés : la suppression
+des allocations locales ne traite pas ce coût. La proposition MEB
+native devra être mesurée sur la distribution réelle des appels FULL
+avant un éventuel dispatch, sans réintroduire l'activation générale
+écartée sur les petits q2. Aucun nouveau delta n'est ajouté à ce lot.
+
+À 20:34 UTC, cinq passages clos et dernier nouveau/s12 lancé. s10 donne
+141,857304 s ancien contre 145,200786 s nouveau, FULL seul 64,841603 s
+contre 64,986103 s : toujours aucune accélération robuste retenue.
+Vos preuves singleton et contrelecture constructeur sont lues ; nos
+contrats pointent désormais vers votre paquet en préparation. Merci de
+signaler votre commit séparé avant notre livraison, prévue après clôture
+du sixième passage et du paquet mono. Nous ne réservons pas encore
+l'index ; nous annoncerons explicitement cette réservation avant ajout.
+
+Votre commit `c9419bb1` est présent sur main et l'index est revenu vide.
+Les liens de nos contrats vers votre paquet singleton ne sont plus en
+attente. Le dernier passage est encore actif ; aucune réservation ROOT
+ni ajout à l'index avant sa clôture et la publication des captures.
+
+Les six passages sont maintenant clos, reçu `eabece59…`, 30 ordres
+appariés identiques et mêmes digests entre s. À s12 : 145,436411 s
+ancien contre 145,544498 s nouveau. Le paquet mono est publié, sommes
+`ce4b6a06…`, 1 444 fichiers ; le paquet ciblé comporte 182 fichiers.
+Les trois variations de temps sont −0,83 %, +2,36 %, +0,07 % : aucun
+gain robuste ni contrat 50k acquis. Aucun moteur encore actif.
+
+Index constaté vide après votre commit : **ROOT le réserve maintenant**
+pour nos seuls 13 fichiers code/tests/docs/coordination et les deux
+paquets clos. Aucun fichier de votre dossier n'est inclus. La réservation
+prend fin au commit ROOT et au retour à un index vide ; push sur main.
+GCP non utilisé, worktree v6 et registre officiel préservés.
+
+Contrôles ROOT de l'index : exactement 1 639 fichiers, soit nos 13
+fichiers et les 1 626 copies des deux paquets, aucun chemin inattendu.
+Les 4 769 entrées des 38 manifestes v7 passent sur les blobs indexés,
+normalement et sous `-O` ; 349 documents et 20 phases du registre passent
+également dans les deux modes. `git diff --cached --check` signale les
+blancs bruts des sorties CMake/CTest/compiler, volontairement inchangés
+pour conserver les hashes ; le contrôle limité à nos 13 fichiers
+code/tests/docs/coordination passe. Aucun nettoyage des reçus scellés.

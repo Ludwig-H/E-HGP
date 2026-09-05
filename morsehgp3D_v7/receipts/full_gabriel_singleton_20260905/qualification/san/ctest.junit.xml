@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="17"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="6"
+	timestamp="2026-09-05T19:53:32"
+	>
+	<testcase name="mhgp7_full_certificate" classname="mhgp7_full_certificate" time="0.162209" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_certificate;gate"/>
+		</properties>
+		<system-out>full_certificate mode=--selftest authority=structural_only positives=11 build_refusals=0 read_refusals=3 allocation_failures=0 checks=68 failures=0 floor=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_certificate_rejects" classname="mhgp7_full_certificate_rejects" time="0.0256067" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_certificate;gate"/>
+		</properties>
+		<system-out>full_certificate mode=--rejects authority=structural_only positives=13 build_refusals=45 read_refusals=19 allocation_failures=15 checks=218 failures=0 floor=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel" classname="mhgp7_full_gabriel" time="0.555756" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel;gate;oracle"/>
+		</properties>
+		<system-out>full_gabriel mode=--selftest authority=relative_supplied_catalogues oracle=OBig_FULL clouds=10 catalogues=30 records=136 orders=67 cuts=1492 isolated_cuts=1379 permutations=27 named=24 rejections=0 shell_refusals=0 authority_refutations=0 checks=43701 failures=0 floor=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_rejects" classname="mhgp7_full_gabriel_rejects" time="0.549219" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel;gate;oracle"/>
+		</properties>
+		<system-out>full_gabriel mode=--rejects authority=relative_supplied_catalogues oracle=OBig_FULL clouds=13 catalogues=36 records=157 orders=68 cuts=1524 isolated_cuts=1403 permutations=27 named=24 rejections=80 shell_refusals=1 authority_refutations=1 checks=44982 failures=0 floor=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_bad_argument" classname="mhgp7_full_gabriel_bad_argument" time="0.0214301" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_allocation" classname="mhgp7_full_gabriel_allocation" time="0.0313806" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel;gate"/>
+		</properties>
+		<system-out>full_gabriel_allocation positives=3 portal_positives=3 allocations=49 fault_runs=49 denied=49 escaped=0 checks=415 failures=0 floor=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_allocation_bad_argument" classname="mhgp7_full_gabriel_allocation_bad_argument" time="0.021681" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_lazy" classname="mhgp7_full_gabriel_lazy" time="1.12081" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel_lazy;gate;oracle"/>
+		</properties>
+		<system-out>full_gabriel_lazy mode=--selftest clouds=6 orders=27 lazy_runs=81 cuts=3192 records=114 permutations=9 terminal_orders=18 named_J1=6 named_two_step=3 named_cache_hit=2 cache_hits=4 cache_skips=65 negative_global=1 rejections=0 checks=99137 failures=0 floor=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_lazy_rejects" classname="mhgp7_full_gabriel_lazy_rejects" time="1.18861" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel_lazy;gate;oracle"/>
+		</properties>
+		<system-out>full_gabriel_lazy mode=--rejects clouds=6 orders=27 lazy_runs=81 cuts=3192 records=114 permutations=9 terminal_orders=18 named_J1=6 named_two_step=3 named_cache_hit=2 cache_hits=4 cache_skips=65 negative_global=1 rejections=127 checks=99834 failures=0 floor=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_lazy_bad_argument" classname="mhgp7_full_gabriel_lazy_bad_argument" time="0.0221275" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel_lazy;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_lazy_allocation" classname="mhgp7_full_gabriel_lazy_allocation" time="0.0494938" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel_lazy;gate"/>
+		</properties>
+		<system-out>lazy_allocation_cell scene=E5 cache=0 allocations=38 fault_runs=38 retained_work=12 admitted_failures=0 late_stats=1 portals=1 singleton=0 inserts=0 skips=1
+lazy_allocation_cell scene=E5 cache=1 allocations=40 fault_runs=40 retained_work=14 admitted_failures=10 late_stats=1 portals=1 singleton=0 inserts=1 skips=0
+lazy_allocation_cell scene=E5 cache=1000000 allocations=40 fault_runs=40 retained_work=14 admitted_failures=10 late_stats=1 portals=1 singleton=0 inserts=1 skips=0
+lazy_allocation_cell scene=J1 cache=0 allocations=29 fault_runs=29 retained_work=10 admitted_failures=0 late_stats=1 portals=1 singleton=1 inserts=0 skips=1
+lazy_allocation_cell scene=J1 cache=1 allocations=31 fault_runs=31 retained_work=12 admitted_failures=9 late_stats=1 portals=1 singleton=1 inserts=1 skips=0
+lazy_allocation_cell scene=J1 cache=1000000 allocations=31 fault_runs=31 retained_work=12 admitted_failures=9 late_stats=1 portals=1 singleton=1 inserts=1 skips=0
+full_gabriel_lazy_allocation cells=6 positives=18 portal_positives=1...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_lazy_allocation_bad_argument" classname="mhgp7_full_gabriel_lazy_allocation_bad_argument" time="0.0226055" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel_lazy;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_singleton" classname="mhgp7_full_gabriel_singleton" time="1.1725" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel_singleton;gate;oracle"/>
+		</properties>
+		<system-out>named_proper_repeated scene=E5 K=3 T=30 q=3 U=2
+full_gabriel_singleton mode=--selftest clouds=9 orders=39 pairs=181 positives=181 refused=0 cuts=3320 records=148 permutations=24 terminals=36 q2=232 q3=192 q4=48 U1=140 U4=24 repeated=216 mixed_births=4 multi_direct=44 noop_future=1 proper_repeated=1 specialized=472 general_singleton=0 exact_caps=0 short_caps=0 partial_faces=0 repeated_parent_caps=0 checks=82295 failures=0 floor=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_singleton_rejects" classname="mhgp7_full_gabriel_singleton_rejects" time="1.21128" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel_singleton;gate;oracle"/>
+		</properties>
+		<system-out>named_proper_repeated scene=E5 K=3 T=30 q=3 U=2
+full_gabriel_singleton mode=--rejects clouds=9 orders=39 pairs=766 positives=409 refused=357 cuts=3320 records=148 permutations=24 terminals=36 q2=232 q3=192 q4=48 U1=140 U4=24 repeated=216 mixed_births=4 multi_direct=44 noop_future=1 proper_repeated=1 specialized=472 general_singleton=0 exact_caps=208 short_caps=312 partial_faces=36 repeated_parent_caps=4 checks=87609 failures=0 floor=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_singleton_bad_argument" classname="mhgp7_full_gabriel_singleton_bad_argument" time="0.0216142" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel_singleton;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_digest" classname="mhgp7_full_gabriel_digest" time="0.0416304" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel_digest;gate"/>
+		</properties>
+		<system-out>full_gabriel_digest authority=bench_serializer_only oracle=Boost_cpp_int divisions=672 reductions=672 rejections=6 checks=2695 failures=0 floor=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_digest_bad_argument" classname="mhgp7_full_gabriel_digest_bad_argument" time="0.020776" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel_digest;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+</testsuite>

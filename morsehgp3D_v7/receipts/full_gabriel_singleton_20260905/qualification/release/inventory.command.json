@@ -1,0 +1,49 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_release",
+    "--show-only=json-v1",
+    "-L",
+    "^(full_certificate|full_gabriel|full_gabriel_lazy|full_gabriel_digest|full_gabriel_singleton)$"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.03202283200062084,
+  "ended_utc": "2026-09-05T19:49:58.594530+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "inventory",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788637798561108721,
+      "device": 1796,
+      "inode": 1837382,
+      "mtime_ns": 1788637798561108721,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/inventory.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 18722,
+      "ctime_ns": 1788637798582108722,
+      "device": 1796,
+      "inode": 1837381,
+      "mtime_ns": 1788637798582108722,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/inventory.stdout",
+      "sha256": "621aa54d00397d7b34255d134382bd3fc7b4b81dd1dcc925f4745ebef6943a21"
+    }
+  },
+  "started_utc": "2026-09-05T19:49:58.559548+00:00",
+  "status": "completed",
+  "timeout_seconds": 60
+}

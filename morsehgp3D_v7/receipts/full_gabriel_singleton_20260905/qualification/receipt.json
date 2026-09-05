@@ -1,0 +1,1000 @@
+{
+  "artifacts": {
+    "boost_dependency_identities.stdout": "ec9abb0b435d292607f40e7fc163f6dec7e38c900830492505faddddd8a9dc89",
+    "boost_inventory.json": "326bdd0ccc524666c8551636547c01d8684b7b46d7253f3c5cef5ad8e4fd2f57",
+    "cmake_version.command.json": "dfdc98500f37082df6674b8bf89b7dd9eccaa6fffd4886dbf74f30c91558e041",
+    "cmake_version.intent.json": "c48cba7d0ed29d932f435e91f8864f32a0d2ab2bfe93023048aec22b32454b3d",
+    "cmake_version.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cmake_version.stdout": "d3d5b682f3f5ef5b24a79ed8cf4b8c5868fc950dad48cab1be0e3c060a77f8ee",
+    "compiler_target.command.json": "ae08a4962aa6131ce29eb78fc092e16124a8ec09b88210df5e9d16b820c5e51f",
+    "compiler_target.intent.json": "18960bca078156105e716f7e844aa00e035e33043973e5e9125d92c852c362b2",
+    "compiler_target.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_target.stdout": "08cababdf891ccbf96eb376f1e84f279f70302fb13d84e5f98637becdfc6d989",
+    "compiler_version.command.json": "51842093a4f9503c1ef2525457b2c079e1f7ecc44fdc43f3de3c7d9a4b0246f2",
+    "compiler_version.intent.json": "fb701ab21478503f94344714536fe81c18e420005223eb713dcae0132220bf53",
+    "compiler_version.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_version.stdout": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8",
+    "ctest_version.command.json": "5875b72b211bd8570b9d92824dba70bd67692437066e002ba05b130d64d16237",
+    "ctest_version.intent.json": "a04f482039bde7ca057442e8faf828a8a05994babd5f196fb928d2f735f59ef4",
+    "ctest_version.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ctest_version.stdout": "fd61d05e1e746f5652d87e0b6c9bafa334e95b89d1e53b1bfeb7d2af3ab208dc",
+    "freshness.json": "aeaa87670b1f85958cf602a6b5f7e637aa9b4edc587c4730e805429fa82074a5",
+    "host_after.json": "bae5d8d47b37c044fa983aac2a6da33465fac0ed58e8074f6ab9ca5d15d3abc5",
+    "host_before.json": "cde4f0af2ef94b5fc8f1fe66c0a323fb2aa56dc010772bffd1bf17912e3e1de7",
+    "metadata_selftest_normal.command.json": "29df4c4dffd149e24492b59c66e0437598e96e560308b8ed48b77c93792ce85d",
+    "metadata_selftest_normal.intent.json": "d35e1de2ebc673b51a9e81bc44cbd9726f25d1200397a302fb9283fa71fbfa95",
+    "metadata_selftest_normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "metadata_selftest_normal.stdout": "f256474c52790891e368216db985aa9610f0ace52d645f2fccc1ea6e99d7745e",
+    "metadata_selftest_optimized.command.json": "3e8201971e6db910d80ca3cfeaec37202954bdd746c549a7c2b77add01e9fd02",
+    "metadata_selftest_optimized.intent.json": "05e8d47119354192772102baa05a3dedf9aabd508ca1abbd105758fdfdde3081",
+    "metadata_selftest_optimized.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "metadata_selftest_optimized.stdout": "f256474c52790891e368216db985aa9610f0ace52d645f2fccc1ea6e99d7745e",
+    "protocol/capture.py": "c829ab897fa962766e6e71773a9b11d4389e9f419660f35e0885a5b00dd4116e",
+    "protocol/check_v7_receipt_publication.py": "32420385f487260e0706b3e649befca25cc95a9d45f17d22472c333870729580",
+    "protocol/legacy_capture.py": "528175a4fae239aa62630c32c27355be34db1092bef7f8cdb98e589022663bb4",
+    "protocol/publication_common.py": "5c7f18a2577ee388a8f9652c3596ffe9ab9ade6bbc3101ae45f18fc91da6dfba",
+    "release/JUnit.stdout": "d2969891cde1dc4e97dbc9bee2cee6ffffb5bfaefc29d47a00bf1a94bdabbea0",
+    "release/LastTest.preexisting.stdout": "fb631776ec6151d2b908c4ff1746b0aad9be0cec99d6f8c63caacd2aed601c46",
+    "release/LastTest.prestate.json": "38e3f53b945abfa6cceebc3b3f399d918f571f8aab5e6d5d5758f5bfc11a926d",
+    "release/LastTest.stdout": "2b1719512d502b0fa5b27d499a0f3183dcb723ce003b848c3d4713c98e6396f3",
+    "release/binaries.json": "844a2571940ffe00269c840b4067e3e2277f35a9994a6229b1c889c5764fa55a",
+    "release/binaries_after.json": "844a2571940ffe00269c840b4067e3e2277f35a9994a6229b1c889c5764fa55a",
+    "release/build.command.json": "8417713d47b7e9d80e92ab48e3c7feacd55e23d8d20223d08b6e61e7b5dd485c",
+    "release/build.intent.json": "1a92d7f53d24b33bf43506bad73d3112497264a129cf7076be0222d2a9283822",
+    "release/build.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "release/build.stdout": "0601b02ac08d6cb4d4478d6a7c6f6bb0cfd0b45d4e8862a9ee8faedf0913e6df",
+    "release/build_artifact_copies.json": "7701f75ff7f1c774dae426f6e4e7d7ac433349186096de6aec0309d0b56b0f40",
+    "release/build_artifacts.json": "7701f75ff7f1c774dae426f6e4e7d7ac433349186096de6aec0309d0b56b0f40",
+    "release/build_artifacts/CMakeCache.txt": "e470500dad427545c838722b7fe25d36d85b02b21ddb7e7a25bd5e631b416144",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__build.make": "79313e886452adadf6e630172df0b0beb2e5a472be334682aeaea9544f9cc83d",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__flags.make": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__link.txt": "28f4650f642b0f7542f0831a4b79f589327f710284c20f73028968ccbec539b2",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__tests__full_certificate_gate.cpp.o.d": "29f928d98fd57f8aafe05af0efc8b20ea6450bbb9e099918454efd8cb1952d70",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__build.make": "c311a2e38d8b1b5612c4cc26b22dba9371673e579bfc7800858f3eabcb6fc163",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__flags.make": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__link.txt": "39440237a01cf647001dcde70fc10dc17a353b29193af7323b167d76f44ed8e5",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__tests__full_gabriel_allocation_gate.cpp.o.d": "12a686983504d5dd00cf384f54bef57956f2a11b17944bbd076b6af55d775064",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__build.make": "1002a7806a670632bec192975de061c11be383fe0121a226e2a6f3e5675ae1df",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__flags.make": "77bcd3ad1dc163c35112739e78c9787030afb59bbf8472a82daac110cd332efa",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__link.txt": "0a631e1115a0e8a895c8b342fca1c6671dcea01546f89ee68e6c289e651f805f",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__tests__full_gabriel_digest_gate.cpp.o.d": "ec9abb0b435d292607f40e7fc163f6dec7e38c900830492505faddddd8a9dc89",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__build.make": "cc65d058a88344c4f42850a603ee481a9574683cde2380551a03901fe15547fe",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__flags.make": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__link.txt": "ded6574334e999ccd14b5c7f05a0e8420fba4c344fcd2f173731ac66111ed098",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__tests__full_gabriel_gate.cpp.o.d": "88aae30c5ef9809b4303d6ba96dd40f8eea67e7944f9f9d644ef7e77ed7b5afc",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__build.make": "a7313b5d57d9334ca05f05862e645ea421280c74b572677c889957697c69d957",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__flags.make": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__link.txt": "bde7c4b29033340b9bd7e6d06fb268a2d0f6ff8ae02e337b4187c6c93a94783f",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__tests__full_gabriel_lazy_allocation_gate.cpp.o.d": "e0dd2a1d2531b1005464c3515b99b6e3045e8b7dc344683ae6b958b0cc4f16a1",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__build.make": "c4d2cfbc279c48b71651346718c75cfc0934399b31e24c9e75ae17ec8fdaa6c6",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__flags.make": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__link.txt": "c3e1b73526f418ba4de2af09321c36fb08ef93466f97bcc5e0b6bfa41c9b6070",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__tests__full_gabriel_lazy_gate.cpp.o.d": "11daf52f2e2ad7b47135861ee11753300d576e3c0f1282e7a3d21bf702d5d767",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_singleton_gate.dir__build.make": "a51c606921fc599c7dc8be847ca8c9966934b5c869a574691652bc38bf9e8bbe",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_singleton_gate.dir__flags.make": "e0ff813e7ef2cfcde76fe70977f08581aa73bd2b45926efd2e01ecd6fb4e5062",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_singleton_gate.dir__link.txt": "937d72be48087f91d29965a23def3aa02553efd913cf68a21d4ba4bfee852a34",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_singleton_gate.dir__tests__full_gabriel_singleton_gate.cpp.o.d": "c6a11277f9dc813293979b8128de1b4a0bed51a6b0f7df10b04d409d6062aafa",
+    "release/build_artifacts/CTestTestfile.cmake": "9f779fe1109df32fb4df98761f43045a7cbd11c7bc5a45b13b2a36fed9885580",
+    "release/build_artifacts/compile_commands.json": "d9ae12470c055af23458de8b934192bc3f3e2a1d686b47e54a0ccaa02b2e2a43",
+    "release/compile_binding.json": "7bc202a1c4874a0652982ee1010eb78a3b9b8116de97a7710c6904fff9cf7252",
+    "release/compile_binding_after_sha256.json": "28f9b41e7609e938ab20d873f6cf8bad4fed93acb45b65c798ca0c175c7aa7ba",
+    "release/configure.command.json": "a3b7ca53528b7c87ee8759924cad43c5cb6ef485a0fce72ec05f3c9a3f8d8a39",
+    "release/configure.intent.json": "2b5f816e5623be260a52217d13e826b1d96b3136fbc7c44478a51161192f7aa7",
+    "release/configure.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "release/configure.stdout": "0d0211d2b5d49b2a34c7f6a8383c2fedb989e56dfe57c164b0c5bdd9278a9b34",
+    "release/ctest.command.json": "5d71378bd7496846faa6c1a821d436bd8c13a362519afaa9efaeb8a515eaff3d",
+    "release/ctest.fence": "1ffd3921e6569ab15dc2039ed8625d1415a06b2c5aea8a0eb3000bbce55d7935",
+    "release/ctest.fence.json": "6ed25af093da7a886072f73d3aa254bed84a6a44c481ae3ea5b8956238f834ee",
+    "release/ctest.intent.json": "6be3b405ddc4cace93231dde18dd644167211d4a0ca402b6d9a39ab0bcb85097",
+    "release/ctest.junit.xml": "d2969891cde1dc4e97dbc9bee2cee6ffffb5bfaefc29d47a00bf1a94bdabbea0",
+    "release/ctest.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "release/ctest.stdout": "385ae01a6317694953a5c4a9c2be94ddc4b20dc5e96e1ee2753f4d16fc6c1529",
+    "release/environment.json": "7488a611e838100c16b4cab9e588e171ad62cb1f985cf53b335bdc2afee5764a",
+    "release/host_after.json": "90ab7d7dda8ae2e1452b7ceb4bd7366a66db4276b0f0800cfb7599357f8e2c2f",
+    "release/host_before.json": "f41389583f4129ee4ad93151f95505e28392755b6bbec8d0575ab872922ddb98",
+    "release/inventory.command.json": "85234ce9a3db7b8caa8a768888b0b60f09dd5747e017bbe24f90bf6eba84f809",
+    "release/inventory.intent.json": "1db88a64089295eacf8cc2836efd1cb4db5085e3738bd6a491c1e9b0b8773f5a",
+    "release/inventory.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "release/inventory.stdout": "621aa54d00397d7b34255d134382bd3fc7b4b81dd1dcc925f4745ebef6943a21",
+    "release/pre_ctest_binding.json": "f058a2125d672c10eadfa0da1268a583f76d816d57124f0911e426b78416af74",
+    "release/sources_after.json": "07e8634da3ba2df44eeb570cb9fb730f09d9bc68ae1d9fde172c05045625b280",
+    "release/summary.json": "7f75b4f3f3ebcaae4506419dbfbe9b218e6af47338e0406f36e8743caf3880f4",
+    "release/test_output_copies.json": "a184e2c81c72368dfcf4d7fd1b85372f2ae90b0cee9ff5761bdc9c0fb90d2b1b",
+    "release/test_outputs.json": "82cf5cc07338105d11f5866399b8d53d00eb1e3e405ef61722de026d6ed9467d",
+    "release/toolchain_after.json": "3437145b9a54374a27bd332ec9da5455cd15ddf6acd4bdb846cd29eca1d1fc81",
+    "san/JUnit.stdout": "96d5dca3ff26316e20f5bb04d4ec823d4be9c6cbb75c9c23fe6ae53c24a9f327",
+    "san/LastTest.preexisting.stdout": "117a20bcfe7bef454291c3f81b1948fda34b7ba13d6988e187474246903fcba8",
+    "san/LastTest.prestate.json": "65e709da7234b3c4d5ccee211c33c65f7eb23f75688db63da80c7b0912134b61",
+    "san/LastTest.stdout": "2bcfbe7d1116833c97c2e3b97d561a314796181981bf518a2b5b2b1ce7325156",
+    "san/binaries.json": "4353ffb98f68f608730cf9f076a3a4cc690eddc8de71fad59339a566d133f4fc",
+    "san/binaries_after.json": "4353ffb98f68f608730cf9f076a3a4cc690eddc8de71fad59339a566d133f4fc",
+    "san/build.command.json": "05bef7b00b46f623592bcdc1110f541b18788c96712a4ffe11d08de72a0a4322",
+    "san/build.intent.json": "8a8348e8319fb563ac590a3f026c35016f2f8c03b3d6bcdc1839865ba7bbb216",
+    "san/build.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "san/build.stdout": "0601b02ac08d6cb4d4478d6a7c6f6bb0cfd0b45d4e8862a9ee8faedf0913e6df",
+    "san/build_artifact_copies.json": "7ed2b956f12695af26404f235e29d5b5b2962596e6519db2efa7e99df4a8bfc9",
+    "san/build_artifacts.json": "7ed2b956f12695af26404f235e29d5b5b2962596e6519db2efa7e99df4a8bfc9",
+    "san/build_artifacts/CMakeCache.txt": "a66f0b2e6fc816dd5a806a9edc286188655b5dc2cc61fb8eaa7b02b0cfcecd54",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__build.make": "502fff8dbb9537d5c6f9f6de61a9edd7516522cb0d690b5355b0f2b54a3986ca",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__flags.make": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__link.txt": "ab21a8086ccf95e3c62c1b32f06f4e86428c2bd58f53a5b6d2e95354214edd6b",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__tests__full_certificate_gate.cpp.o.d": "29f928d98fd57f8aafe05af0efc8b20ea6450bbb9e099918454efd8cb1952d70",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__build.make": "34b9027fd30a93a54dc9742aeb56dcb7dcceda3152b281e24698c7cbd3b18765",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__flags.make": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__link.txt": "f7c5e251fe940e57582051f6d2bf6e5b50375a5069bb8e230ee71b6833cdd0c0",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__tests__full_gabriel_allocation_gate.cpp.o.d": "12a686983504d5dd00cf384f54bef57956f2a11b17944bbd076b6af55d775064",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__build.make": "877493b8a2df2e9f10cad23aff1cd9e8d1ac7727b229ca604a89b3955b22bf89",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__flags.make": "cc28ab3a170d449aa69f99d9378ea9a3cfb61baf4ce80ec6b7a59f0902c069a9",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__link.txt": "b1e3ca7067ba51f969f2663701294a8ef545572a8458e9093fc20dcd7bb1e581",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__tests__full_gabriel_digest_gate.cpp.o.d": "ec9abb0b435d292607f40e7fc163f6dec7e38c900830492505faddddd8a9dc89",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__build.make": "fcc5190242cc73542552fdb2f8fb17a5e81f7de11edbbd97365043704c7b1e04",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__flags.make": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__link.txt": "766bec7a6c311450eaa602971b921720168694186478540cf706d0802aaf9038",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__tests__full_gabriel_gate.cpp.o.d": "88aae30c5ef9809b4303d6ba96dd40f8eea67e7944f9f9d644ef7e77ed7b5afc",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__build.make": "b01f537fcbd6e61093cbc8f3f63823848b371a636d66142efa99944d2662e1a0",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__flags.make": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__link.txt": "1e4c8418c1845a21cdda4c68ab3f260aa8ea8a864857e6274e3f32cade20b977",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__tests__full_gabriel_lazy_allocation_gate.cpp.o.d": "e0dd2a1d2531b1005464c3515b99b6e3045e8b7dc344683ae6b958b0cc4f16a1",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__build.make": "f060ccae6a649608d857d2048cd5e9b84e91763205d0bd827485dc622caca3d9",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__flags.make": "b3f8817877eb299cbae7698e5c95851d9c559042c517135bcc49aaddb462d340",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__link.txt": "bd487cb0fd730bb1572635af1b56cfc0f14c2b1059eb43df62087e6ac7daf5ad",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__tests__full_gabriel_lazy_gate.cpp.o.d": "11daf52f2e2ad7b47135861ee11753300d576e3c0f1282e7a3d21bf702d5d767",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_singleton_gate.dir__build.make": "97f342a191f396b896f0ce37e216efe058f6e81819be895484ea71e7d0dfc574",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_singleton_gate.dir__flags.make": "8079d619b9d669787a3f6138a21df1eabe783be5f4c898755d70809dd3a77851",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_singleton_gate.dir__link.txt": "f7d0851e2988e9a135016508826e777f12954308fc5ce605a37270f2dc913859",
+    "san/build_artifacts/CMakeFiles__mhgp7_full_gabriel_singleton_gate.dir__tests__full_gabriel_singleton_gate.cpp.o.d": "c6a11277f9dc813293979b8128de1b4a0bed51a6b0f7df10b04d409d6062aafa",
+    "san/build_artifacts/CTestTestfile.cmake": "aeb5d22a0b35d679005e4cfa28ee682c9971d609be5af2d82f0680a4b9b4156d",
+    "san/build_artifacts/compile_commands.json": "22a89aa266cadb7b1e86bd17e8f03cf1c139aec4f59ab429770edd350bc0b322",
+    "san/compile_binding.json": "9115f1e440d5222d0869abf74556f73d9453a3c06f3d8d9c8430b6495e27cddc",
+    "san/compile_binding_after_sha256.json": "ba83a91acd1969cc5cc3999d1af7c35f1360351507627b01db8448bec2cc2d8b",
+    "san/configure.command.json": "6dbab00dc89659c526ba76da6ca5221e61a306500cc2fd729d14de70905c9ff3",
+    "san/configure.intent.json": "1d4422798b1c0be967a04b99c81ffb62c20ffa88d4644c0b0645a714d062c679",
+    "san/configure.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "san/configure.stdout": "142b2f209f4800c16dc1b187b98fa767f0b40705b198b8f2671a7eabfef27ffd",
+    "san/ctest.command.json": "869489b4bbacaa4754d44a3542126ed5cfbbb9c71275bba4d79f8fd82a45963b",
+    "san/ctest.fence": "da1f4cb33d61c937d4735727c596ca164e84bc549658e560269c05a663b538e4",
+    "san/ctest.fence.json": "73ec880f1d3787758424195244601523c7a76b79cb938fe795279b262396b4b6",
+    "san/ctest.intent.json": "c612685d7935526d791014d36676dd7daa16d674a3d171905fedcaaed9ea6a68",
+    "san/ctest.junit.xml": "96d5dca3ff26316e20f5bb04d4ec823d4be9c6cbb75c9c23fe6ae53c24a9f327",
+    "san/ctest.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "san/ctest.stdout": "42d3860f39751516e90efa1ad37f0127c5c547e591a4f5a1dc091051b52f4c30",
+    "san/environment.json": "535dee2af5a569978164227adaef34ab0ae39f0c27cd858da4ca85ef5832885f",
+    "san/host_after.json": "645b487b88b13eeb759d9273e6487d9b4b087072bcbe2330f350712fd3043121",
+    "san/host_before.json": "87cb0d931a7db74873f8c841e15d79f07517a6a7015ca55c4fc37c69a92e07f7",
+    "san/inventory.command.json": "e9009b3eebee6904befa8a7a4f3722aac12e06463e470a7e67fa362b1d3334f7",
+    "san/inventory.intent.json": "816c6c1b89c7fb12b067af5338ece3a3f05aa95175bae69fc6a236ac96eb235e",
+    "san/inventory.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "san/inventory.stdout": "5a47f12adb9a46428c34ae9c6d0886749b147467a508fb52311b4ef60709d2f7",
+    "san/pre_ctest_binding.json": "16962739b9f1bae5e1790b8a3836aaac588ecc153ba953336586e149d4385711",
+    "san/sources_after.json": "07e8634da3ba2df44eeb570cb9fb730f09d9bc68ae1d9fde172c05045625b280",
+    "san/summary.json": "bfc593afcddd8e7415b88db837a54d9839d6a3bd186a51e63a4a1abd939027b1",
+    "san/test_output_copies.json": "3860c75931c02d266e3dd85376316ea1d399a179166ad3048e6d7f7078530c3b",
+    "san/test_outputs.json": "c3aab90220801f18a8dd4be64f1806c69d4558e9ca1dbf06b012863089ea6f86",
+    "san/toolchain_after.json": "3437145b9a54374a27bd332ec9da5455cd15ddf6acd4bdb846cd29eca1d1fc81",
+    "sources_after.json": "07e8634da3ba2df44eeb570cb9fb730f09d9bc68ae1d9fde172c05045625b280",
+    "sources_before.json": "07e8634da3ba2df44eeb570cb9fb730f09d9bc68ae1d9fde172c05045625b280",
+    "toolchain_after.json": "3437145b9a54374a27bd332ec9da5455cd15ddf6acd4bdb846cd29eca1d1fc81",
+    "toolchain_before.json": "3437145b9a54374a27bd332ec9da5455cd15ddf6acd4bdb846cd29eca1d1fc81",
+    "toolchain_commands.json": "3d084340c2ae6077dcc14564f73465979f186d984dd4ed8ff9cf98c302348162"
+  },
+  "build_tag": "",
+  "controller_sha256": "c829ab897fa962766e6e71773a9b11d4389e9f419660f35e0885a5b00dd4116e",
+  "development": false,
+  "ended_utc": "2026-09-05T19:53:41.287536+00:00",
+  "errors": [],
+  "gcp_used": false,
+  "hermetic": false,
+  "historical_results_reused": false,
+  "kind": "qualification",
+  "permission_override": "none",
+  "phases": [
+    {
+      "binaries_stable": true,
+      "commands": [
+        {
+          "argv": [
+            "/usr/bin/taskset",
+            "-c",
+            "0",
+            "/usr/bin/cmake",
+            "-S",
+            "/workspaces/E-HGP/morsehgp3D_v7",
+            "-B",
+            "/workspaces/E-HGP/build/v7_singleton_20260905_release",
+            "-G",
+            "Unix Makefiles",
+            "-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DCMAKE_CXX_FLAGS=",
+            "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG",
+            "-DCMAKE_EXE_LINKER_FLAGS=",
+            "-DCMAKE_EXE_LINKER_FLAGS_RELEASE=",
+            "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR:PATH=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+            "-DMHGP7_ENABLE_CUDA=OFF",
+            "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+          ],
+          "cwd": "/workspaces/E-HGP",
+          "elapsed_seconds": 0.6155910039997252,
+          "ended_utc": "2026-09-05T19:48:34.688923+00:00",
+          "environment": {
+            "LANG": "C",
+            "LC_ALL": "C",
+            "PATH": "/usr/bin:/bin",
+            "PYTHONDONTWRITEBYTECODE": "1"
+          },
+          "error": null,
+          "exit_code": 0,
+          "expected_code": 0,
+          "label": "configure",
+          "raw": {
+            "stderr": {
+              "bytes": 0,
+              "ctime_ns": 1788637714072107200,
+              "device": 1796,
+              "inode": 1836810,
+              "mtime_ns": 1788637714072107200,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/configure.stderr",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 524,
+              "ctime_ns": 1788637714680107211,
+              "device": 1796,
+              "inode": 1836809,
+              "mtime_ns": 1788637714680107211,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/configure.stdout",
+              "sha256": "0d0211d2b5d49b2a34c7f6a8383c2fedb989e56dfe57c164b0c5bdd9278a9b34"
+            }
+          },
+          "started_utc": "2026-09-05T19:48:34.070787+00:00",
+          "status": "completed",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "/usr/bin/taskset",
+            "-c",
+            "0",
+            "/usr/bin/cmake",
+            "--build",
+            "/workspaces/E-HGP/build/v7_singleton_20260905_release",
+            "--parallel",
+            "2",
+            "--target",
+            "mhgp7_full_certificate_gate",
+            "mhgp7_full_gabriel_gate",
+            "mhgp7_full_gabriel_allocation_gate",
+            "mhgp7_full_gabriel_lazy_gate",
+            "mhgp7_full_gabriel_lazy_allocation_gate",
+            "mhgp7_full_gabriel_digest_gate",
+            "mhgp7_full_gabriel_singleton_gate"
+          ],
+          "cwd": "/workspaces/E-HGP",
+          "elapsed_seconds": 82.42477947400039,
+          "ended_utc": "2026-09-05T19:49:57.625918+00:00",
+          "environment": {
+            "LANG": "C",
+            "LC_ALL": "C",
+            "PATH": "/usr/bin:/bin",
+            "PYTHONDONTWRITEBYTECODE": "1"
+          },
+          "error": null,
+          "exit_code": 0,
+          "expected_code": 0,
+          "label": "build",
+          "raw": {
+            "stderr": {
+              "bytes": 0,
+              "ctime_ns": 1788637715200107220,
+              "device": 1796,
+              "inode": 1837355,
+              "mtime_ns": 1788637715200107220,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/build.stderr",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 1570,
+              "ctime_ns": 1788637797587108704,
+              "device": 1796,
+              "inode": 1837354,
+              "mtime_ns": 1788637797587108704,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/build.stdout",
+              "sha256": "0601b02ac08d6cb4d4478d6a7c6f6bb0cfd0b45d4e8862a9ee8faedf0913e6df"
+            }
+          },
+          "started_utc": "2026-09-05T19:48:35.197226+00:00",
+          "status": "completed",
+          "timeout_seconds": 600
+        },
+        {
+          "argv": [
+            "/usr/bin/taskset",
+            "-c",
+            "0",
+            "/usr/bin/ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_singleton_20260905_release",
+            "--show-only=json-v1",
+            "-L",
+            "^(full_certificate|full_gabriel|full_gabriel_lazy|full_gabriel_digest|full_gabriel_singleton)$"
+          ],
+          "cwd": "/workspaces/E-HGP",
+          "elapsed_seconds": 0.03202283200062084,
+          "ended_utc": "2026-09-05T19:49:58.594530+00:00",
+          "environment": {
+            "LANG": "C",
+            "LC_ALL": "C",
+            "PATH": "/usr/bin:/bin",
+            "PYTHONDONTWRITEBYTECODE": "1"
+          },
+          "error": null,
+          "exit_code": 0,
+          "expected_code": 0,
+          "label": "inventory",
+          "raw": {
+            "stderr": {
+              "bytes": 0,
+              "ctime_ns": 1788637798561108721,
+              "device": 1796,
+              "inode": 1837382,
+              "mtime_ns": 1788637798561108721,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/inventory.stderr",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 18722,
+              "ctime_ns": 1788637798582108722,
+              "device": 1796,
+              "inode": 1837381,
+              "mtime_ns": 1788637798582108722,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/inventory.stdout",
+              "sha256": "621aa54d00397d7b34255d134382bd3fc7b4b81dd1dcc925f4745ebef6943a21"
+            }
+          },
+          "started_utc": "2026-09-05T19:49:58.559548+00:00",
+          "status": "completed",
+          "timeout_seconds": 60
+        },
+        {
+          "argv": [
+            "/usr/bin/taskset",
+            "-c",
+            "6",
+            "/usr/bin/ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_singleton_20260905_release",
+            "-j1",
+            "-V",
+            "--output-on-failure",
+            "--no-tests=error",
+            "--timeout",
+            "60",
+            "-L",
+            "^(full_certificate|full_gabriel|full_gabriel_lazy|full_gabriel_digest|full_gabriel_singleton)$",
+            "--output-junit",
+            "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/ctest.junit.xml"
+          ],
+          "cwd": "/workspaces/E-HGP",
+          "elapsed_seconds": 1.1669004220002535,
+          "ended_utc": "2026-09-05T19:50:00.674327+00:00",
+          "environment": {
+            "LANG": "C",
+            "LC_ALL": "C",
+            "PATH": "/usr/bin:/bin",
+            "PYTHONDONTWRITEBYTECODE": "1"
+          },
+          "error": null,
+          "exit_code": 0,
+          "expected_code": 0,
+          "label": "ctest",
+          "raw": {
+            "stderr": {
+              "bytes": 0,
+              "ctime_ns": 1788637799506108738,
+              "device": 1796,
+              "inode": 1837395,
+              "mtime_ns": 1788637799506108738,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/ctest.stderr",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 13720,
+              "ctime_ns": 1788637800653108759,
+              "device": 1796,
+              "inode": 1837394,
+              "mtime_ns": 1788637800653108759,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/ctest.stdout",
+              "sha256": "385ae01a6317694953a5c4a9c2be94ddc4b20dc5e96e1ee2753f4d16fc6c1529"
+            }
+          },
+          "started_utc": "2026-09-05T19:49:59.505152+00:00",
+          "status": "completed",
+          "timeout_seconds": 180
+        }
+      ],
+      "compile_binding_stable": true,
+      "errors": [],
+      "inventory": {
+        "commands_codes_and_timeouts_exact": true,
+        "label_filter": "^(full_certificate|full_gabriel|full_gabriel_lazy|full_gabriel_digest|full_gabriel_singleton)$",
+        "names": [
+          "mhgp7_full_certificate",
+          "mhgp7_full_certificate_rejects",
+          "mhgp7_full_gabriel",
+          "mhgp7_full_gabriel_allocation",
+          "mhgp7_full_gabriel_allocation_bad_argument",
+          "mhgp7_full_gabriel_bad_argument",
+          "mhgp7_full_gabriel_digest",
+          "mhgp7_full_gabriel_digest_bad_argument",
+          "mhgp7_full_gabriel_lazy",
+          "mhgp7_full_gabriel_lazy_allocation",
+          "mhgp7_full_gabriel_lazy_allocation_bad_argument",
+          "mhgp7_full_gabriel_lazy_bad_argument",
+          "mhgp7_full_gabriel_lazy_rejects",
+          "mhgp7_full_gabriel_rejects",
+          "mhgp7_full_gabriel_singleton",
+          "mhgp7_full_gabriel_singleton_bad_argument",
+          "mhgp7_full_gabriel_singleton_rejects"
+        ],
+        "tests": 17
+      },
+      "mode": "release",
+      "source_sha256": "07e8634da3ba2df44eeb570cb9fb730f09d9bc68ae1d9fde172c05045625b280",
+      "sources_stable": true,
+      "status": "completed",
+      "test_outputs": {
+        "copies": {
+          "JUnit.stdout": {
+            "archive": {
+              "bytes": 8368,
+              "ctime_ns": 1788637801734108778,
+              "device": 1796,
+              "inode": 1837439,
+              "mtime_ns": 1788637801734108778,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/JUnit.stdout",
+              "sha256": "d2969891cde1dc4e97dbc9bee2cee6ffffb5bfaefc29d47a00bf1a94bdabbea0"
+            },
+            "source": {
+              "bytes": 8368,
+              "ctime_ns": 1788637800653108759,
+              "device": 1796,
+              "inode": 1837398,
+              "mtime_ns": 1788637800653108759,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/ctest.junit.xml",
+              "sha256": "d2969891cde1dc4e97dbc9bee2cee6ffffb5bfaefc29d47a00bf1a94bdabbea0"
+            }
+          },
+          "LastTest.stdout": {
+            "archive": {
+              "bytes": 18229,
+              "ctime_ns": 1788637801731108778,
+              "device": 1796,
+              "inode": 1837438,
+              "mtime_ns": 1788637801731108778,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/LastTest.stdout",
+              "sha256": "2b1719512d502b0fa5b27d499a0f3183dcb723ce003b848c3d4713c98e6396f3"
+            },
+            "source": {
+              "bytes": 18229,
+              "ctime_ns": 1788637800653108759,
+              "device": 1796,
+              "inode": 1837396,
+              "mtime_ns": 1788637800653108759,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_release/Testing/Temporary/LastTest.log",
+              "sha256": "2b1719512d502b0fa5b27d499a0f3183dcb723ce003b848c3d4713c98e6396f3"
+            }
+          }
+        },
+        "fresh": true,
+        "junit": {
+          "all_run": true,
+          "names": [
+            "mhgp7_full_certificate",
+            "mhgp7_full_certificate_rejects",
+            "mhgp7_full_gabriel",
+            "mhgp7_full_gabriel_allocation",
+            "mhgp7_full_gabriel_allocation_bad_argument",
+            "mhgp7_full_gabriel_bad_argument",
+            "mhgp7_full_gabriel_digest",
+            "mhgp7_full_gabriel_digest_bad_argument",
+            "mhgp7_full_gabriel_lazy",
+            "mhgp7_full_gabriel_lazy_allocation",
+            "mhgp7_full_gabriel_lazy_allocation_bad_argument",
+            "mhgp7_full_gabriel_lazy_bad_argument",
+            "mhgp7_full_gabriel_lazy_rejects",
+            "mhgp7_full_gabriel_rejects",
+            "mhgp7_full_gabriel_singleton",
+            "mhgp7_full_gabriel_singleton_bad_argument",
+            "mhgp7_full_gabriel_singleton_rejects"
+          ],
+          "tests": 17
+        },
+        "last_test": {
+          "all_blocks_passed": true,
+          "names": [
+            "mhgp7_full_certificate",
+            "mhgp7_full_certificate_rejects",
+            "mhgp7_full_gabriel",
+            "mhgp7_full_gabriel_allocation",
+            "mhgp7_full_gabriel_allocation_bad_argument",
+            "mhgp7_full_gabriel_bad_argument",
+            "mhgp7_full_gabriel_digest",
+            "mhgp7_full_gabriel_digest_bad_argument",
+            "mhgp7_full_gabriel_lazy",
+            "mhgp7_full_gabriel_lazy_allocation",
+            "mhgp7_full_gabriel_lazy_allocation_bad_argument",
+            "mhgp7_full_gabriel_lazy_bad_argument",
+            "mhgp7_full_gabriel_lazy_rejects",
+            "mhgp7_full_gabriel_rejects",
+            "mhgp7_full_gabriel_singleton",
+            "mhgp7_full_gabriel_singleton_bad_argument",
+            "mhgp7_full_gabriel_singleton_rejects"
+          ],
+          "terminal_footer": true,
+          "tests": 17
+        }
+      },
+      "toolchain_stable": true
+    },
+    {
+      "binaries_stable": true,
+      "commands": [
+        {
+          "argv": [
+            "/usr/bin/taskset",
+            "-c",
+            "0",
+            "/usr/bin/cmake",
+            "-S",
+            "/workspaces/E-HGP/morsehgp3D_v7",
+            "-B",
+            "/workspaces/E-HGP/build/v7_singleton_20260905_san",
+            "-G",
+            "Unix Makefiles",
+            "-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+            "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+            "-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer -fno-pie",
+            "-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-O1 -g -DNDEBUG",
+            "-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined -no-pie",
+            "-DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO=",
+            "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR:PATH=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+            "-DMHGP7_ENABLE_CUDA=OFF",
+            "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+          ],
+          "cwd": "/workspaces/E-HGP",
+          "elapsed_seconds": 0.9161316139998235,
+          "ended_utc": "2026-09-05T19:50:02.918553+00:00",
+          "environment": {
+            "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+            "LANG": "C",
+            "LC_ALL": "C",
+            "PATH": "/usr/bin:/bin",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+          },
+          "error": null,
+          "exit_code": 0,
+          "expected_code": 0,
+          "label": "configure",
+          "raw": {
+            "stderr": {
+              "bytes": 0,
+              "ctime_ns": 1788637802001108783,
+              "device": 1796,
+              "inode": 1837448,
+              "mtime_ns": 1788637802001108783,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/configure.stderr",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 520,
+              "ctime_ns": 1788637802870108799,
+              "device": 1796,
+              "inode": 1837447,
+              "mtime_ns": 1788637802870108799,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/configure.stdout",
+              "sha256": "142b2f209f4800c16dc1b187b98fa767f0b40705b198b8f2671a7eabfef27ffd"
+            }
+          },
+          "started_utc": "2026-09-05T19:50:02.000015+00:00",
+          "status": "completed",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "/usr/bin/taskset",
+            "-c",
+            "0",
+            "/usr/bin/cmake",
+            "--build",
+            "/workspaces/E-HGP/build/v7_singleton_20260905_san",
+            "--parallel",
+            "2",
+            "--target",
+            "mhgp7_full_certificate_gate",
+            "mhgp7_full_gabriel_gate",
+            "mhgp7_full_gabriel_allocation_gate",
+            "mhgp7_full_gabriel_lazy_gate",
+            "mhgp7_full_gabriel_lazy_allocation_gate",
+            "mhgp7_full_gabriel_digest_gate",
+            "mhgp7_full_gabriel_singleton_gate"
+          ],
+          "cwd": "/workspaces/E-HGP",
+          "elapsed_seconds": 207.18333535199963,
+          "ended_utc": "2026-09-05T19:53:30.565829+00:00",
+          "environment": {
+            "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+            "LANG": "C",
+            "LC_ALL": "C",
+            "PATH": "/usr/bin:/bin",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+          },
+          "error": null,
+          "exit_code": 0,
+          "expected_code": 0,
+          "label": "build",
+          "raw": {
+            "stderr": {
+              "bytes": 0,
+              "ctime_ns": 1788637803381108808,
+              "device": 1796,
+              "inode": 1837993,
+              "mtime_ns": 1788637803381108808,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/build.stderr",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 1570,
+              "ctime_ns": 1788638010508112538,
+              "device": 1796,
+              "inode": 1837992,
+              "mtime_ns": 1788638010508112538,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/build.stdout",
+              "sha256": "0601b02ac08d6cb4d4478d6a7c6f6bb0cfd0b45d4e8862a9ee8faedf0913e6df"
+            }
+          },
+          "started_utc": "2026-09-05T19:50:03.379721+00:00",
+          "status": "completed",
+          "timeout_seconds": 600
+        },
+        {
+          "argv": [
+            "/usr/bin/taskset",
+            "-c",
+            "0",
+            "/usr/bin/ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_singleton_20260905_san",
+            "--show-only=json-v1",
+            "-L",
+            "^(full_certificate|full_gabriel|full_gabriel_lazy|full_gabriel_digest|full_gabriel_singleton)$"
+          ],
+          "cwd": "/workspaces/E-HGP",
+          "elapsed_seconds": 0.03209104899997328,
+          "ended_utc": "2026-09-05T19:53:31.675904+00:00",
+          "environment": {
+            "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+            "LANG": "C",
+            "LC_ALL": "C",
+            "PATH": "/usr/bin:/bin",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+          },
+          "error": null,
+          "exit_code": 0,
+          "expected_code": 0,
+          "label": "inventory",
+          "raw": {
+            "stderr": {
+              "bytes": 0,
+              "ctime_ns": 1788638011643112558,
+              "device": 1796,
+              "inode": 1838021,
+              "mtime_ns": 1788638011643112558,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/inventory.stderr",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 18586,
+              "ctime_ns": 1788638011664112559,
+              "device": 1796,
+              "inode": 1838020,
+              "mtime_ns": 1788638011664112559,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/inventory.stdout",
+              "sha256": "5a47f12adb9a46428c34ae9c6d0886749b147467a508fb52311b4ef60709d2f7"
+            }
+          },
+          "started_utc": "2026-09-05T19:53:31.641471+00:00",
+          "status": "completed",
+          "timeout_seconds": 60
+        },
+        {
+          "argv": [
+            "/usr/bin/taskset",
+            "-c",
+            "6",
+            "/usr/bin/ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_singleton_20260905_san",
+            "-j1",
+            "-V",
+            "--output-on-failure",
+            "--no-tests=error",
+            "--timeout",
+            "60",
+            "-L",
+            "^(full_certificate|full_gabriel|full_gabriel_lazy|full_gabriel_digest|full_gabriel_singleton)$",
+            "--output-junit",
+            "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/ctest.junit.xml"
+          ],
+          "cwd": "/workspaces/E-HGP",
+          "elapsed_seconds": 6.2790222180001365,
+          "ended_utc": "2026-09-05T19:53:39.034688+00:00",
+          "environment": {
+            "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+            "LANG": "C",
+            "LC_ALL": "C",
+            "PATH": "/usr/bin:/bin",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+          },
+          "error": null,
+          "exit_code": 0,
+          "expected_code": 0,
+          "label": "ctest",
+          "raw": {
+            "stderr": {
+              "bytes": 0,
+              "ctime_ns": 1788638012754112578,
+              "device": 1796,
+              "inode": 1838034,
+              "mtime_ns": 1788638012754112578,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/ctest.stderr",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 13568,
+              "ctime_ns": 1788638019026112691,
+              "device": 1796,
+              "inode": 1838033,
+              "mtime_ns": 1788638019026112691,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/ctest.stdout",
+              "sha256": "42d3860f39751516e90efa1ad37f0127c5c547e591a4f5a1dc091051b52f4c30"
+            }
+          },
+          "started_utc": "2026-09-05T19:53:32.753331+00:00",
+          "status": "completed",
+          "timeout_seconds": 180
+        }
+      ],
+      "compile_binding_stable": true,
+      "errors": [],
+      "inventory": {
+        "commands_codes_and_timeouts_exact": true,
+        "label_filter": "^(full_certificate|full_gabriel|full_gabriel_lazy|full_gabriel_digest|full_gabriel_singleton)$",
+        "names": [
+          "mhgp7_full_certificate",
+          "mhgp7_full_certificate_rejects",
+          "mhgp7_full_gabriel",
+          "mhgp7_full_gabriel_allocation",
+          "mhgp7_full_gabriel_allocation_bad_argument",
+          "mhgp7_full_gabriel_bad_argument",
+          "mhgp7_full_gabriel_digest",
+          "mhgp7_full_gabriel_digest_bad_argument",
+          "mhgp7_full_gabriel_lazy",
+          "mhgp7_full_gabriel_lazy_allocation",
+          "mhgp7_full_gabriel_lazy_allocation_bad_argument",
+          "mhgp7_full_gabriel_lazy_bad_argument",
+          "mhgp7_full_gabriel_lazy_rejects",
+          "mhgp7_full_gabriel_rejects",
+          "mhgp7_full_gabriel_singleton",
+          "mhgp7_full_gabriel_singleton_bad_argument",
+          "mhgp7_full_gabriel_singleton_rejects"
+        ],
+        "tests": 17
+      },
+      "mode": "san",
+      "source_sha256": "07e8634da3ba2df44eeb570cb9fb730f09d9bc68ae1d9fde172c05045625b280",
+      "sources_stable": true,
+      "status": "completed",
+      "test_outputs": {
+        "copies": {
+          "JUnit.stdout": {
+            "archive": {
+              "bytes": 8362,
+              "ctime_ns": 1788638020796112723,
+              "device": 1796,
+              "inode": 1838078,
+              "mtime_ns": 1788638020796112723,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/JUnit.stdout",
+              "sha256": "96d5dca3ff26316e20f5bb04d4ec823d4be9c6cbb75c9c23fe6ae53c24a9f327"
+            },
+            "source": {
+              "bytes": 8362,
+              "ctime_ns": 1788638019026112691,
+              "device": 1796,
+              "inode": 1838037,
+              "mtime_ns": 1788638019026112691,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/ctest.junit.xml",
+              "sha256": "96d5dca3ff26316e20f5bb04d4ec823d4be9c6cbb75c9c23fe6ae53c24a9f327"
+            }
+          },
+          "LastTest.stdout": {
+            "archive": {
+              "bytes": 18093,
+              "ctime_ns": 1788638020794112723,
+              "device": 1796,
+              "inode": 1838077,
+              "mtime_ns": 1788638020794112723,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/LastTest.stdout",
+              "sha256": "2bcfbe7d1116833c97c2e3b97d561a314796181981bf518a2b5b2b1ce7325156"
+            },
+            "source": {
+              "bytes": 18093,
+              "ctime_ns": 1788638019026112691,
+              "device": 1796,
+              "inode": 1838035,
+              "mtime_ns": 1788638019026112691,
+              "path": "/workspaces/E-HGP/build/v7_singleton_20260905_san/Testing/Temporary/LastTest.log",
+              "sha256": "2bcfbe7d1116833c97c2e3b97d561a314796181981bf518a2b5b2b1ce7325156"
+            }
+          }
+        },
+        "fresh": true,
+        "junit": {
+          "all_run": true,
+          "names": [
+            "mhgp7_full_certificate",
+            "mhgp7_full_certificate_rejects",
+            "mhgp7_full_gabriel",
+            "mhgp7_full_gabriel_allocation",
+            "mhgp7_full_gabriel_allocation_bad_argument",
+            "mhgp7_full_gabriel_bad_argument",
+            "mhgp7_full_gabriel_digest",
+            "mhgp7_full_gabriel_digest_bad_argument",
+            "mhgp7_full_gabriel_lazy",
+            "mhgp7_full_gabriel_lazy_allocation",
+            "mhgp7_full_gabriel_lazy_allocation_bad_argument",
+            "mhgp7_full_gabriel_lazy_bad_argument",
+            "mhgp7_full_gabriel_lazy_rejects",
+            "mhgp7_full_gabriel_rejects",
+            "mhgp7_full_gabriel_singleton",
+            "mhgp7_full_gabriel_singleton_bad_argument",
+            "mhgp7_full_gabriel_singleton_rejects"
+          ],
+          "tests": 17
+        },
+        "last_test": {
+          "all_blocks_passed": true,
+          "names": [
+            "mhgp7_full_certificate",
+            "mhgp7_full_certificate_rejects",
+            "mhgp7_full_gabriel",
+            "mhgp7_full_gabriel_allocation",
+            "mhgp7_full_gabriel_allocation_bad_argument",
+            "mhgp7_full_gabriel_bad_argument",
+            "mhgp7_full_gabriel_digest",
+            "mhgp7_full_gabriel_digest_bad_argument",
+            "mhgp7_full_gabriel_lazy",
+            "mhgp7_full_gabriel_lazy_allocation",
+            "mhgp7_full_gabriel_lazy_allocation_bad_argument",
+            "mhgp7_full_gabriel_lazy_bad_argument",
+            "mhgp7_full_gabriel_lazy_rejects",
+            "mhgp7_full_gabriel_rejects",
+            "mhgp7_full_gabriel_singleton",
+            "mhgp7_full_gabriel_singleton_bad_argument",
+            "mhgp7_full_gabriel_singleton_rejects"
+          ],
+          "terminal_footer": true,
+          "tests": 17
+        }
+      },
+      "toolchain_stable": true
+    }
+  ],
+  "producer_sha256": "21b77d29a4ba2bca453b602a8faa4564a978f4ba71af5167c164faae4ef0e1a5",
+  "public_status": "not_claimed",
+  "repository_head_declared_by_ROOT": "764c80b995268cebfc7a38c9d4bb4fb31605d7aa",
+  "schema": "mhgp7-singleton-qualification-v1",
+  "scope": "17 targeted CTests per fresh Release/SAN build; not F or whole suite",
+  "source_sha256": "07e8634da3ba2df44eeb570cb9fb730f09d9bc68ae1d9fde172c05045625b280",
+  "started_utc": "2026-09-05T19:48:30.504675+00:00",
+  "status": "completed",
+  "targets": {
+    "mhgp7_full_certificate_gate": "tests/full_certificate_gate.cpp",
+    "mhgp7_full_gabriel_allocation_gate": "tests/full_gabriel_allocation_gate.cpp",
+    "mhgp7_full_gabriel_digest_gate": "tests/full_gabriel_digest_gate.cpp",
+    "mhgp7_full_gabriel_gate": "tests/full_gabriel_gate.cpp",
+    "mhgp7_full_gabriel_lazy_allocation_gate": "tests/full_gabriel_lazy_allocation_gate.cpp",
+    "mhgp7_full_gabriel_lazy_gate": "tests/full_gabriel_lazy_gate.cpp",
+    "mhgp7_full_gabriel_singleton_gate": "tests/full_gabriel_singleton_gate.cpp"
+  },
+  "tests": {
+    "mhgp7_full_certificate": [
+      "mhgp7_full_certificate_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_certificate_rejects": [
+      "mhgp7_full_certificate_gate",
+      "--rejects",
+      0
+    ],
+    "mhgp7_full_gabriel": [
+      "mhgp7_full_gabriel_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_allocation": [
+      "mhgp7_full_gabriel_allocation_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_allocation_bad_argument": [
+      "mhgp7_full_gabriel_allocation_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_bad_argument": [
+      "mhgp7_full_gabriel_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_digest": [
+      "mhgp7_full_gabriel_digest_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_digest_bad_argument": [
+      "mhgp7_full_gabriel_digest_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_lazy": [
+      "mhgp7_full_gabriel_lazy_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_lazy_allocation": [
+      "mhgp7_full_gabriel_lazy_allocation_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_lazy_allocation_bad_argument": [
+      "mhgp7_full_gabriel_lazy_allocation_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_lazy_bad_argument": [
+      "mhgp7_full_gabriel_lazy_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_lazy_rejects": [
+      "mhgp7_full_gabriel_lazy_gate",
+      "--rejects",
+      0
+    ],
+    "mhgp7_full_gabriel_rejects": [
+      "mhgp7_full_gabriel_gate",
+      "--rejects",
+      0
+    ],
+    "mhgp7_full_gabriel_singleton": [
+      "mhgp7_full_gabriel_singleton_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_singleton_bad_argument": [
+      "mhgp7_full_gabriel_singleton_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_singleton_rejects": [
+      "mhgp7_full_gabriel_singleton_gate",
+      "--rejects",
+      0
+    ]
+  }
+}

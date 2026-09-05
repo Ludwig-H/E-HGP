@@ -88,6 +88,16 @@ mhgp7_gate(mhgp7_full_gabriel_lazy_allocation 0 mhgp7_full_gabriel_lazy_allocati
 mhgp7_gate(mhgp7_full_gabriel_lazy_allocation_bad_argument 2 mhgp7_full_gabriel_lazy_allocation_gate
            ARGS --unknown LABELS "gate;full_gabriel_lazy" TIMEOUT 60)
 
+# Singleton-lot grouping: the general path remains a TEST-only differential,
+# not an oracle or a product option. Geometry is judged independently.
+mhgp7_executable(mhgp7_full_gabriel_singleton_gate tests/full_gabriel_singleton_gate.cpp)
+mhgp7_gate(mhgp7_full_gabriel_singleton 0 mhgp7_full_gabriel_singleton_gate
+           ARGS --selftest LABELS "gate;full_gabriel_singleton;oracle" TIMEOUT 60)
+mhgp7_gate(mhgp7_full_gabriel_singleton_rejects 0 mhgp7_full_gabriel_singleton_gate
+           ARGS --rejects LABELS "gate;full_gabriel_singleton;oracle" TIMEOUT 60)
+mhgp7_gate(mhgp7_full_gabriel_singleton_bad_argument 2 mhgp7_full_gabriel_singleton_gate
+           ARGS --unknown LABELS "gate;full_gabriel_singleton" TIMEOUT 60)
+
 # Le digest est un outil de comparaison bench, pas une autorite scientifique.
 find_path(MHGP7_DIGEST_BOOST_INCLUDE_DIR boost/multiprecision/cpp_int.hpp)
 if(NOT MHGP7_DIGEST_BOOST_INCLUDE_DIR)

@@ -67,6 +67,18 @@ using CofaceKey = silent_detail::CofaceKey;
 using LocalBall = silent_detail::LocalBall;
 inline constexpr FullNodeId kAbsent = std::numeric_limits<FullNodeId>::max();
 
+#ifdef MHGP7_TESTING
+// Private branch observations and differential control. Absent from product
+// builds; never a caller option or an alternate scientific authority.
+struct SingletonLotTestState {
+  bool force_general = false;
+  u64 eligible[5]{}, unique_roots[5]{};
+  u64 repeated_roots = 0, simultaneous_births = 0, multi_direct_lots = 0;
+  u64 specialized_lots = 0, general_singleton_lots = 0;
+};
+inline thread_local SingletonLotTestState* singleton_lot_test_state = nullptr;
+#endif
+
 struct FacetHash {
   size_t operator()(const FacetKey& key) const {
     u64 h = 1469598103934665603ull ^ key.k;
@@ -472,41 +484,62 @@ class Builder {
 
   bool lot(const ExactLevel& level, size_t mb, size_t me, size_t db, size_t de) {
     const FullNodeId prior_count = successor.size();
-    // Local DSU joins DIRECT connections through their strict old roots.
-    // Distinct regular Gabriel cofaces at one level cannot share an equal
-    // facet: uniqueness of the MEB would leave a foreign point in one ball.
-    std::unordered_map<FullNodeId, size_t> local_ids;
-    std::vector<FullNodeId> old_roots;
-    std::vector<size_t> parent;
-    const auto find = [&](size_t u) {
-      size_t r = u;
-      while (parent[r] != r) r = parent[r];
-      while (parent[u] != u) { const size_t next = parent[u]; parent[u] = r; u = next; }
-      return r;
-    };
-    const auto intern = [&](FullNodeId root) {
-      const auto [it, fresh] = local_ids.emplace(root, old_roots.size());
-      if (fresh) { old_roots.push_back(root); parent.push_back(parent.size()); }
-      return it->second;
-    };
-    for (size_t t = db; t < de; ++t) {
-      Record& r = direct[direct_order[t]];
-      size_t first = 0;
+    bool single = de - db == 1;
+#ifdef MHGP7_TESTING
+    if (singleton_lot_test_state && singleton_lot_test_state->force_general) single = false;
+#endif
+    std::array<FullNodeId, 4> single_roots{};
+    size_t single_count = 0;
+    std::vector<std::vector<FullNodeId>> groups;
+    if (single) {
+      // read_catalogue already checked 2<=q<=4. All requests stay in support
+      // order, even when they resolve to the same root: first-C and charges
+      // depend on this sequence. Keep the first token before any sorting.
+      Record& r = direct[direct_order[db]];
+      single_count = r.event->q;
       for (size_t drop = 0; drop < r.event->q; ++drop) {
         if (!charge(out.stats.face_visits, caps.max_face_visits, "full_gabriel_face_budget")) return false;
         const FacetKey f = facet_without(r.key, r.event->support[drop]);
-        FullNodeId root = kAbsent;
-        if (!locate(f, level, prior_count, root)) return false;
-        const size_t local = intern(root);
-        if (drop == 0) { first = local; r.token = root; }
-        else {
-          const size_t a = find(first), b = find(local);
-          if (a != b) parent[std::max(a, b)] = std::min(a, b);
+        if (!locate(f, level, prior_count, single_roots[drop])) return false;
+        if (drop == 0) r.token = single_roots[drop];
+      }
+    } else {
+      // General local DSU joins DIRECT connections through strict old roots.
+      // Distinct regular Gabriel cofaces at one level cannot share an equal
+      // facet: uniqueness of the MEB would leave a foreign point in one ball.
+      std::unordered_map<FullNodeId, size_t> local_ids;
+      std::vector<FullNodeId> old_roots;
+      std::vector<size_t> parent;
+      const auto find = [&](size_t u) {
+        size_t r = u;
+        while (parent[r] != r) r = parent[r];
+        while (parent[u] != u) { const size_t next = parent[u]; parent[u] = r; u = next; }
+        return r;
+      };
+      const auto intern = [&](FullNodeId root) {
+        const auto [it, fresh] = local_ids.emplace(root, old_roots.size());
+        if (fresh) { old_roots.push_back(root); parent.push_back(parent.size()); }
+        return it->second;
+      };
+      for (size_t t = db; t < de; ++t) {
+        Record& r = direct[direct_order[t]];
+        size_t first = 0;
+        for (size_t drop = 0; drop < r.event->q; ++drop) {
+          if (!charge(out.stats.face_visits, caps.max_face_visits, "full_gabriel_face_budget")) return false;
+          const FacetKey f = facet_without(r.key, r.event->support[drop]);
+          FullNodeId root = kAbsent;
+          if (!locate(f, level, prior_count, root)) return false;
+          const size_t local = intern(root);
+          if (drop == 0) { first = local; r.token = root; }
+          else {
+            const size_t a = find(first), b = find(local);
+            if (a != b) parent[std::max(a, b)] = std::min(a, b);
+          }
         }
       }
+      groups.resize(old_roots.size());
+      for (size_t i = 0; i < old_roots.size(); ++i) groups[find(i)].push_back(old_roots[i]);
     }
-    std::vector<std::vector<FullNodeId>> groups(old_roots.size());
-    for (size_t i = 0; i < old_roots.size(); ++i) groups[find(i)].push_back(old_roots[i]);
     FullBatch batch;
     batch.level = level;
     for (size_t i = mb; i < me; ++i) {
@@ -516,12 +549,52 @@ class Builder {
       std::copy_n(key.p.begin(), k, f.p.begin());
       batch.births.push_back(f);
     }
-    for (auto& group : groups) {
-      if (group.size() < 2) continue;
-      std::sort(group.begin(), group.end());
-      if (!full_certificate_detail::add(parent_refs, group.size(), caps.certificate.max_parent_refs))
-        return resource("full_gabriel_parent_budget");
-      batch.merges.push_back(std::move(group));
+    if (single) {
+      // Insertion sort on at most four roots avoids any auxiliary allocation.
+      for (size_t i = 1; i < single_count; ++i) {
+        const FullNodeId value = single_roots[i];
+        size_t j = i;
+        while (j > 0 && single_roots[j - 1] > value) {
+          single_roots[j] = single_roots[j - 1];
+          --j;
+        }
+        single_roots[j] = value;
+      }
+      const auto end = std::unique(single_roots.begin(), single_roots.begin() + single_count);
+      single_count = static_cast<size_t>(end - single_roots.begin());
+    }
+#ifdef MHGP7_TESTING
+    if (singleton_lot_test_state) {
+      auto& test = *singleton_lot_test_state;
+      if (de - db == 1) {
+        if (single) ++test.specialized_lots;
+        else ++test.general_singleton_lots;
+        const size_t q = direct[direct_order[db]].event->q;
+        size_t unique_count = single_count;
+        if (!single) for (const auto& group : groups) unique_count += group.size();
+        ++test.eligible[q];
+        ++test.unique_roots[unique_count];
+        if (unique_count < q) ++test.repeated_roots;
+        if (mb < me) ++test.simultaneous_births;
+      } else if (de - db > 1) ++test.multi_direct_lots;
+    }
+#endif
+    if (single) {
+      // The sole local equivalence class is the set of returned old roots.
+      // A no-op still reaches the common closed-anchor suffix below.
+      if (single_count >= 2) {
+        if (!full_certificate_detail::add(parent_refs, single_count, caps.certificate.max_parent_refs))
+          return resource("full_gabriel_parent_budget");
+        batch.merges.emplace_back(single_roots.begin(), single_roots.begin() + single_count);
+      }
+    } else {
+      for (auto& group : groups) {
+        if (group.size() < 2) continue;
+        std::sort(group.begin(), group.end());
+        if (!full_certificate_detail::add(parent_refs, group.size(), caps.certificate.max_parent_refs))
+          return resource("full_gabriel_parent_budget");
+        batch.merges.push_back(std::move(group));
+      }
     }
     std::sort(batch.merges.begin(), batch.merges.end());
     if (!node_room(batch.births.size()) || !install_births(batch.births) ||

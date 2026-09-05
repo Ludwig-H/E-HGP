@@ -1,0 +1,45 @@
+{
+  "copies": {
+    "JUnit.stdout": {
+      "archive": {
+        "bytes": 8368,
+        "ctime_ns": 1788637801734108778,
+        "device": 1796,
+        "inode": 1837439,
+        "mtime_ns": 1788637801734108778,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/JUnit.stdout",
+        "sha256": "d2969891cde1dc4e97dbc9bee2cee6ffffb5bfaefc29d47a00bf1a94bdabbea0"
+      },
+      "source": {
+        "bytes": 8368,
+        "ctime_ns": 1788637800653108759,
+        "device": 1796,
+        "inode": 1837398,
+        "mtime_ns": 1788637800653108759,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/ctest.junit.xml",
+        "sha256": "d2969891cde1dc4e97dbc9bee2cee6ffffb5bfaefc29d47a00bf1a94bdabbea0"
+      }
+    },
+    "LastTest.stdout": {
+      "archive": {
+        "bytes": 18229,
+        "ctime_ns": 1788637801731108778,
+        "device": 1796,
+        "inode": 1837438,
+        "mtime_ns": 1788637801731108778,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/LastTest.stdout",
+        "sha256": "2b1719512d502b0fa5b27d499a0f3183dcb723ce003b848c3d4713c98e6396f3"
+      },
+      "source": {
+        "bytes": 18229,
+        "ctime_ns": 1788637800653108759,
+        "device": 1796,
+        "inode": 1837396,
+        "mtime_ns": 1788637800653108759,
+        "path": "/workspaces/E-HGP/build/v7_singleton_20260905_release/Testing/Temporary/LastTest.log",
+        "sha256": "2b1719512d502b0fa5b27d499a0f3183dcb723ce003b848c3d4713c98e6396f3"
+      }
+    }
+  },
+  "errors": []
+}

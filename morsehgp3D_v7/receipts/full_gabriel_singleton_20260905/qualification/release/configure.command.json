@@ -1,0 +1,59 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/cmake",
+    "-S",
+    "/workspaces/E-HGP/morsehgp3D_v7",
+    "-B",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_release",
+    "-G",
+    "Unix Makefiles",
+    "-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_CXX_FLAGS=",
+    "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG",
+    "-DCMAKE_EXE_LINKER_FLAGS=",
+    "-DCMAKE_EXE_LINKER_FLAGS_RELEASE=",
+    "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR:PATH=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-DMHGP7_ENABLE_CUDA=OFF",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.6155910039997252,
+  "ended_utc": "2026-09-05T19:48:34.688923+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "configure",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788637714072107200,
+      "device": 1796,
+      "inode": 1836810,
+      "mtime_ns": 1788637714072107200,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/configure.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 524,
+      "ctime_ns": 1788637714680107211,
+      "device": 1796,
+      "inode": 1836809,
+      "mtime_ns": 1788637714680107211,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/configure.stdout",
+      "sha256": "0d0211d2b5d49b2a34c7f6a8383c2fedb989e56dfe57c164b0c5bdd9278a9b34"
+    }
+  },
+  "started_utc": "2026-09-05T19:48:34.070787+00:00",
+  "status": "completed",
+  "timeout_seconds": 120
+}

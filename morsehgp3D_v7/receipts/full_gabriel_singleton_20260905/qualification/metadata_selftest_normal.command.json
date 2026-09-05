@@ -1,0 +1,47 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_controller/capture.py",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.11439577199962514,
+  "ended_utc": "2026-09-05T19:48:33.493069+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "metadata_selftest_normal",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788637713377107187,
+      "device": 1796,
+      "inode": 1836798,
+      "mtime_ns": 1788637713377107187,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/metadata_selftest_normal.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 437,
+      "ctime_ns": 1788637713449107189,
+      "device": 1796,
+      "inode": 1836797,
+      "mtime_ns": 1788637713449107189,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/metadata_selftest_normal.stdout",
+      "sha256": "f256474c52790891e368216db985aa9610f0ace52d645f2fccc1ea6e99d7745e"
+    }
+  },
+  "started_utc": "2026-09-05T19:48:33.376664+00:00",
+  "status": "completed",
+  "timeout_seconds": 15
+}

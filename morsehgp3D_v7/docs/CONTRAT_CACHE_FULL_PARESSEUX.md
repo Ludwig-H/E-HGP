@@ -25,6 +25,11 @@ en détaillent les pins et limites. Les
 rapportent séparément le gain de résidence, l'absence de gain de temps
 à 8k, le succès à 16k et le refus à 32k. L'ancienne
 qualification `e02d163c…` reste un reçu de la politique historique.
+Le [delta courant des lots unitaires](CONTRAT_LOT_UNITAIRE_FULL.md)
+conserve ce contrat de cache et repasse les portes lazy dans ses
+17 CTests ciblés par build. Ses balayages frais observent 209 allocations
+lazy sur les mêmes six cellules ; les 434 citées plus bas appartiennent
+au header historique `13c6cc72…`.
 
 ## Deux API et deux contrats distincts
 
@@ -59,7 +64,8 @@ autorités n'est une entrée du cache facultatif.
 
 Les demandes strictes seules entrent dans le dispatcher : retirer un
 essentiel de la directe au niveau a donne une facette F de niveau inférieur.
-Les racines sont lues avant toute fusion globale du lot a. La DSU locale
+Les racines sont lues avant toute fusion globale du lot a. Le regroupement
+local (DSU générale, tableau dédupliqué pour une seule directe)
 réunit ensuite ces anciennes racines ; minima et multifusions reçoivent
 leurs IDs, puis toutes les directes sont ancrées dans l'état fermé. La
 seconde passe d'installation des K+1 alias par directe est supprimée dans

@@ -1,0 +1,38 @@
+{
+  "/home/codespace/.python/current/bin/python3": {
+    "resolved": "/usr/local/python/3.12.1/bin/python3.12",
+    "sha256": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9"
+  },
+  "/usr/bin/as": {
+    "resolved": "/usr/bin/x86_64-linux-gnu-as",
+    "sha256": "7a2ef948033b05ad0c5dcb0d5be059bc68562b5d45713d91aee21df2b4bf4e92"
+  },
+  "/usr/bin/c++": {
+    "resolved": "/usr/bin/x86_64-linux-gnu-g++-13",
+    "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769"
+  },
+  "/usr/bin/cmake": {
+    "resolved": "/usr/bin/cmake",
+    "sha256": "1c5227af4edd22d8d689def545e18ee458260c0fd579eba2187967f38817e638"
+  },
+  "/usr/bin/ctest": {
+    "resolved": "/usr/bin/ctest",
+    "sha256": "45c60ab2448411a4f49a0bdb6cf5800fedbf0293048e3c82710a34190c7d1ef4"
+  },
+  "/usr/bin/g++": {
+    "resolved": "/usr/bin/x86_64-linux-gnu-g++-13",
+    "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769"
+  },
+  "/usr/bin/ld": {
+    "resolved": "/usr/bin/x86_64-linux-gnu-ld.bfd",
+    "sha256": "e46a122cc3a29feba3b1d0fc2a274b6e46538be016ebe381370c0801bb98b0b8"
+  },
+  "/usr/bin/make": {
+    "resolved": "/usr/bin/make",
+    "sha256": "d78b8f1d099fbcfb6f2f49ab87223b9b68fb3956642f92d6ec6de812e8afa965"
+  },
+  "/usr/bin/taskset": {
+    "resolved": "/usr/bin/taskset",
+    "sha256": "a979b51f72f025f35ea32c484b9c6befb87fe778ad8ae6a879c7f0c0ff2c534b"
+  }
+}

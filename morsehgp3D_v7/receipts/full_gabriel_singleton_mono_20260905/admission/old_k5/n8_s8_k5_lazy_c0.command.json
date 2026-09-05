@@ -1,0 +1,43 @@
+{
+  "argv": [
+    "timeout",
+    "--signal=TERM",
+    "--kill-after=10s",
+    "600s",
+    "taskset",
+    "-c",
+    "6",
+    "/usr/bin/time",
+    "-v",
+    "build/v7_full_lazy_20260905_probe_controller/build_admission/full_gabriel_lazy_probe",
+    "--n=8",
+    "--s=8",
+    "--kmax=5",
+    "--alias-policy=lazy",
+    "--cache-entries=0"
+  ],
+  "capture": "merged_exact_bytes",
+  "command": "timeout --signal=TERM --kill-after=10s 600s taskset -c 6 /usr/bin/time -v build/v7_full_lazy_20260905_probe_controller/build_admission/full_gabriel_lazy_probe --n=8 --s=8 --kmax=5 --alias-policy=lazy --cache-entries=0",
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.01752249600031064,
+  "ended": "2026-09-05T20:12:17.195340+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_rc": [
+    0,
+    2,
+    3
+  ],
+  "id": "n8_s8_k5_lazy_c0",
+  "outer_timeout_seconds": 620,
+  "process_vm_max_bytes": 27917287424,
+  "started": "2026-09-05T20:12:17.177592+00:00",
+  "status": "completed",
+  "streams": {
+    "n8_s8_k5_lazy_c0.raw.txt": {
+      "bytes": 12357,
+      "sha256": "9be07ff4c23ae5c19573cb64711b6eb896e79c02feedc2ef7b7f49de587a00bd"
+    }
+  }
+}

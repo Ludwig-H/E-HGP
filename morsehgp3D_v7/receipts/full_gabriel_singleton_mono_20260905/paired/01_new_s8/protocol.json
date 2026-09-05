@@ -1,0 +1,40 @@
+{
+  "authority": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues",
+  "binary": "build/v7_singleton_20260905_mono_controller/build_admission/full_gabriel_lazy_probe",
+  "binary_sha256": "57c598bfea861166bd8a58311addc5d120d684081e80dbac295b4f4a653aa5b8",
+  "comparison_kind": "single_header_delta_same_lazy_policy_and_all_caps",
+  "comparison_s": "semantic_horizontal_forest_digest_not_oracle",
+  "continuation_policy": "explicit reviewed next attempt; no cap change",
+  "coord": 65536,
+  "cpu_affinity": [
+    6
+  ],
+  "digest_header_sha256": "671b2dfb51f1385ee7301bd6b03ef64e62c0d768c92534a6f09589726ce9adc3",
+  "family": "uniform",
+  "gcp_used": false,
+  "judge_sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+  "kill_grace_seconds": 10,
+  "kmax": 10,
+  "named_payload_proxy_gib": 8,
+  "output_capture": "merged stdout/stderr exact bytes plus GNU time -v",
+  "paired_F_speedup_claim": false,
+  "planned_sequence": [
+    [
+      8000,
+      8,
+      "lazy",
+      1000000
+    ]
+  ],
+  "probe_sha256": "f21e3c70bda4cc9adaa0960ed19c9a6a8aa6b09413f6c6d63bae884c98e9486a",
+  "process_vm_soft_limit_max_gib": 26,
+  "producer_sha256": "21b77d29a4ba2bca453b602a8faa4564a978f4ba71af5167c164faae4ef0e1a5",
+  "public_status": "not_claimed",
+  "schema": "mhgp7-full-gabriel-mono-observation-v2",
+  "scope": "horizontal_relative_orders_not_integrated_inter_k_tower",
+  "seed": 3,
+  "slo_claim": false,
+  "threads": 1,
+  "timeout_seconds_each": 600,
+  "timing_reference": "elapsed includes digests and provisional output"
+}

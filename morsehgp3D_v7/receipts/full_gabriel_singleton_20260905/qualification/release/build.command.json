@@ -1,0 +1,56 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_release",
+    "--parallel",
+    "2",
+    "--target",
+    "mhgp7_full_certificate_gate",
+    "mhgp7_full_gabriel_gate",
+    "mhgp7_full_gabriel_allocation_gate",
+    "mhgp7_full_gabriel_lazy_gate",
+    "mhgp7_full_gabriel_lazy_allocation_gate",
+    "mhgp7_full_gabriel_digest_gate",
+    "mhgp7_full_gabriel_singleton_gate"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 82.42477947400039,
+  "ended_utc": "2026-09-05T19:49:57.625918+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "build",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788637715200107220,
+      "device": 1796,
+      "inode": 1837355,
+      "mtime_ns": 1788637715200107220,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/build.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 1570,
+      "ctime_ns": 1788637797587108704,
+      "device": 1796,
+      "inode": 1837354,
+      "mtime_ns": 1788637797587108704,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/release/build.stdout",
+      "sha256": "0601b02ac08d6cb4d4478d6a7c6f6bb0cfd0b45d4e8862a9ee8faedf0913e6df"
+    }
+  },
+  "started_utc": "2026-09-05T19:48:35.197226+00:00",
+  "status": "completed",
+  "timeout_seconds": 600
+}

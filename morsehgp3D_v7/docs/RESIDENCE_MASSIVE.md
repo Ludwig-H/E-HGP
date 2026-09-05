@@ -90,6 +90,25 @@ horizontaux, pic 2,590 GiB ; 32k refuse à K9 sur le budget de successeurs,
 pic 4,893 GiB de la tentative. Ces forêts sont détruites après lecture :
 aucune mémoire de tour intégrée conservée n'est qualifiée.
 
+Le [delta des lots unitaires](CONTRAT_LOT_UNITAIRE_FULL.md) supprime
+ensuite les allocations de la DSU locale dans cette seule branche.
+Il ne change ni le volume des catalogues ni les arènes de sortie, et
+ne lève pas le refus 32k du budget de successeurs. Les baisses d'allocations
+sur petites fixtures ne constituent pas une borne RSS massive.
+
+Le [reçu lazy 8k/s8 historique](../receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s8_k10_lazy_c1000000.receipt.json)
+permet aussi de sommer la **sortie**, distinctement du pic : 3 976 472
+nœuds, 2 404 646 minima et 3 976 462 références parentales sur K1..10.
+Avec les tailles d'ABI déclarées par cette capture (64 octets par nœud,
+44 par minimum), et les 8 octets du type épinglé `FullNodeId = u64`,
+les trois arènes représentent 392 110 328 octets logiques cumulés.
+Ce n'est ni une mesure d'arènes conservées simultanément, ni le format
+d'une archive, ni une borne des capacités de vecteurs. Aucune extrapolation
+linéaire à 50k ou G4 n'en découle. Les minima, niveaux et parents sont
+sémantiques ; leur stockage courant, ses copies et son padding ne sont
+pas des obligations mathématiques. Les compacter devra préserver ces
+identités et niveaux, avec un format et un lecteur qualifiés séparément.
+
 ## 1. Notation et nature des conclusions
 
 - **[B] Borne de code et argument d'entiers** : indépendante d'une mesure,

@@ -1,0 +1,58 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "6",
+    "/usr/bin/ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_san",
+    "-j1",
+    "-V",
+    "--output-on-failure",
+    "--no-tests=error",
+    "--timeout",
+    "60",
+    "-L",
+    "^(full_certificate|full_gabriel|full_gabriel_lazy|full_gabriel_digest|full_gabriel_singleton)$",
+    "--output-junit",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/ctest.junit.xml"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 6.2790222180001365,
+  "ended_utc": "2026-09-05T19:53:39.034688+00:00",
+  "environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "ctest",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788638012754112578,
+      "device": 1796,
+      "inode": 1838034,
+      "mtime_ns": 1788638012754112578,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/ctest.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 13568,
+      "ctime_ns": 1788638019026112691,
+      "device": 1796,
+      "inode": 1838033,
+      "mtime_ns": 1788638019026112691,
+      "path": "/workspaces/E-HGP/build/v7_singleton_20260905_controller/run_qualification/san/ctest.stdout",
+      "sha256": "42d3860f39751516e90efa1ad37f0127c5c547e591a4f5a1dc091051b52f4c30"
+    }
+  },
+  "started_utc": "2026-09-05T19:53:32.753331+00:00",
+  "status": "completed",
+  "timeout_seconds": 180
+}

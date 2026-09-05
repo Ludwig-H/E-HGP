@@ -1,0 +1,31 @@
+{
+  "capture_receipt_sha256": "e3b64a03bbeeac6dfd773d9c54c2c559d6fc7e0d1630b7557a4a32734a91ea97",
+  "controller_sha256": "c829ab897fa962766e6e71773a9b11d4389e9f419660f35e0885a5b00dd4116e",
+  "development": [],
+  "gcp_used": false,
+  "historical_results_reused": false,
+  "phases": [
+    {
+      "binaries": 7,
+      "build_seconds": 82.42477947400039,
+      "ctest_seconds": 1.1669004220002535,
+      "mode": "release",
+      "status": "revalidated_17_targeted_tests",
+      "tests": 17
+    },
+    {
+      "binaries": 7,
+      "build_seconds": 207.18333535199963,
+      "ctest_seconds": 6.2790222180001365,
+      "mode": "san",
+      "status": "revalidated_17_targeted_tests",
+      "tests": 17
+    }
+  ],
+  "producer_sha256": "21b77d29a4ba2bca453b602a8faa4564a978f4ba71af5167c164faae4ef0e1a5",
+  "public_status": "not_claimed",
+  "publisher_sha256": "cc55cf6cf906d0c7e012aa5f8eabef5d76d3963b2fb868def75f3eecfb8d47d5",
+  "schema": "mhgp7-singleton-publication-v1",
+  "status": "qualified_targeted",
+  "whole_suite_qualified": false
+}

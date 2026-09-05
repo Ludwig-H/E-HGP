@@ -1,0 +1,48 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/g++",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/build_admission/probe.d",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/build_admission/full_gabriel_lazy_probe"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/taskset -c 0 /usr/bin/g++ -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -pthread -MMD -MF /workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/build_admission/probe.d /workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp -o /workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/build_admission/full_gabriel_lazy_probe",
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 17.458348434000072,
+  "ended": "2026-09-05T20:11:22.481469+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_rc": [
+    0
+  ],
+  "id": "compile",
+  "outer_timeout_seconds": 600,
+  "process_vm_max_bytes": 27917287424,
+  "started": "2026-09-05T20:11:05.022891+00:00",
+  "status": "completed",
+  "streams": {
+    "compile.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "compile.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

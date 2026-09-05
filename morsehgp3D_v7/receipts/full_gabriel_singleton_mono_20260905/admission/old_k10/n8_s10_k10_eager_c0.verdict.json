@@ -1,0 +1,11 @@
+{
+  "attempt_id": "n8_s10_k10_eager_c0",
+  "attempt_success": true,
+  "capture_valid": true,
+  "certificate_digest": "57a878df41e087874ac64997933568a5aee35f002f463ee1eac6ae5df467d052",
+  "ended": "2026-09-05T20:12:24.203397+00:00",
+  "input_digest": "3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d",
+  "outcome": "complete_relative",
+  "started": "2026-09-05T20:12:24.063764+00:00",
+  "status": "completed"
+}

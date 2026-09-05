@@ -1,0 +1,37 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_cache_policy_audit.py",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/micro_admission_new/k10/n8_s10_k10_lazy_c0.receipt.json"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/taskset -c 0 /home/codespace/.python/current/bin/python3 -B /workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_cache_policy_audit.py /workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/micro_admission_new/k10/n8_s10_k10_lazy_c0.receipt.json",
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.06575244000032399,
+  "ended": "2026-09-05T20:12:24.843772+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_rc": [
+    0
+  ],
+  "id": "n8_s10_k10_lazy_c0_new.first_c_normal",
+  "outer_timeout_seconds": 30,
+  "process_vm_max_bytes": 27917287424,
+  "started": "2026-09-05T20:12:24.777766+00:00",
+  "status": "completed",
+  "streams": {
+    "n8_s10_k10_lazy_c0_new.first_c_normal.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "n8_s10_k10_lazy_c0_new.first_c_normal.stdout": {
+      "bytes": 545,
+      "sha256": "2b399b2b7c68ed57d3a84ac4d201a5c3b8a344d07b607b26be11ddc876aba355"
+    }
+  }
+}
