@@ -1,0 +1,28 @@
+{
+  "files": {
+    "build/v7_f_pair_20260905/runner.py": "20f956612c598da256e24f8de893e7df5132f6dff0221dbc2edcdd7fe2ecce3d",
+    "build/v7_meb_full_release/expected_test_names.json": "0c85da58fdc386a00effbc82ebd85ccf4f71ac9e9f2ee329aa99ae3270154223",
+    "build/v7_meb_full_release/run_full_release.py": "1ad9089c4542a0d6539376c0c67a723d204417b755a41c7f4953e7c70ee61a9f",
+    "build/v7_meb_integrated_tests/run_targeted.py": "24e9801fc03ae3c049496d0cd87567ff0edc769b94dd1ba441dc8b47f4cec3c3",
+    "build/v7_meb_paired/runner.py": "3abe27f8a10173867a0395430ff56392bb82b5cbee3eb766fb293ffa65cc2645",
+    "build/v7_next_q2_tests_20260905/expected_full_names.json": "ced66fa012578623ec3387a8a75b7a06b5fa80cfdec8d475a6c6a45edb59e50f",
+    "build/v7_next_q2_tests_20260905/qualification.py": "5f62b29d96895e9b46df591f0540dd5d4ecbd3fec4a8eb291e4e6d3c27fb7a60",
+    "morsehgp3D_v7/bench/compare_v6_v7.py": "fe22493fcb7494813e79fea9826873cce8cf14918097ce500b44018f1a64f2ef",
+    "morsehgp3D_v7/bench/incidence_campaign.py": "6ca21d8b1c89e6baea99ecc3dd414b35d06581df50833e76bac9bdc1d5d1c20a",
+    "morsehgp3D_v7/receipts/meb_q2_integrated_20260905/SHA256SUMS": "4e726925a5c7b30badf901cd209f230cf6871c668cb8fbb7d3a1976507d980ea",
+    "morsehgp3D_v7/receipts/meb_q2_integrated_20260905/full_receipts/inputs_before.json": "169874c2f25c7c3ab7056eb0482daaf12e35b51da2cac03e0a84e8c1352bfb4c",
+    "morsehgp3D_v7/receipts/meb_q2_integrated_20260905/full_receipts/summary.json": "3891ec3dcc4dfc351f9fb591bc005aedaaa5da04ee9c508ef9498bfb214cfeae",
+    "morsehgp3D_v7/receipts/meb_q2_integrated_20260905/manifest.json": "3c95812ec5afe8e21498290d7e4220f24526ea0b8cc609eb1267a4fa39ff4ffc",
+    "morsehgp3D_v7/receipts/meb_q2_mono_20260905/build_E/build_D.json": "30f133d6c052e1d53c8c539457b5b553267d202c11b043188feb6c0f30af1e16",
+    "morsehgp3D_v7/receipts/release_20260904/run_release.py": "582922e64fcd2927be3e63c7156fefa839fd1f8c055f92a75c97514cad7a0ee5"
+  },
+  "published_byte_identical_equivalents": {
+    "build/v7_meb_full_release/expected_test_names.json": "morsehgp3D_v7/receipts/meb_full_release_20260905/expected_test_names.json",
+    "build/v7_meb_full_release/run_full_release.py": "morsehgp3D_v7/receipts/meb_full_release_20260905/run_full_release.historical.py",
+    "build/v7_meb_integrated_tests/run_targeted.py": "morsehgp3D_v7/receipts/meb_lazy_integrated_20260905/run_targeted.original.py",
+    "build/v7_meb_paired/runner.py": "morsehgp3D_v7/receipts/meb_mono_20260905/protocol/runner.py.snapshot.txt",
+    "build/v7_next_q2_tests_20260905/expected_full_names.json": "morsehgp3D_v7/receipts/meb_q2_integrated_20260905/protocol/expected_full_names.json",
+    "build/v7_next_q2_tests_20260905/qualification.py": "morsehgp3D_v7/receipts/meb_q2_integrated_20260905/protocol/qualification.py.txt"
+  },
+  "scope": "referenced_historical_authorities_not_reused_test_results"
+}

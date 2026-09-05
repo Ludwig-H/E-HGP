@@ -1,0 +1,88 @@
+{
+  "status": "prepared_not_executed",
+  "original_exporter": {
+    "path": "build/v7_q2_export_20260905/export.py",
+    "sha256": "3714f15773c342f63405b27ee110ec22afb3a584ffca147c1fd6860096fb8e03"
+  },
+  "script_sha256": "4f9c345169275fbf2ab5a1d54515431a64a3b7b193f6a9a90e566581b47a96d8",
+  "selftest_sha256": "3bcd10f480ec5aed49459921aa5cd0892e9e0e9abee2eded366b6fcab8cf566a",
+  "plan_sha256": "f99738d0da1858e1d5487acef51394363ec55a42fa29b2420f3cb05b4e1ba1ee",
+  "qualification_sha256": "5c44bb6400a195749aae4e97e16777abd1909f708bfa0141b577c99e7667c24d",
+  "qualification_preparation_manifest_sha256": "3c24922377bc804dcd74f0dc844c25cfef2fe2706fa283d11bdbcaf3e07e6c20",
+  "qualification_preparation_sums_sha256": "bda4b48eafb2a605e2d240c5540ee848ab12638f17e2d688adb68d2463e8ec5f",
+  "required_qualification_counts": {
+    "release": 48,
+    "sanitized": 48,
+    "full": 339
+  },
+  "tests": {
+    "normal": {
+      "command": [
+        "taskset",
+        "--cpu-list",
+        "0",
+        "python3",
+        "-B",
+        "build/v7_f_export_20260905/selftest.py"
+      ],
+      "chunk_id": "6d8107",
+      "wall_time_seconds": 0.270080957,
+      "exit_code": 0,
+      "original_token_count": 26,
+      "output": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.017s\n\nOK\n"
+    },
+    "optimized": {
+      "command": [
+        "taskset",
+        "--cpu-list",
+        "0",
+        "python3",
+        "-B",
+        "-O",
+        "build/v7_f_export_20260905/selftest.py"
+      ],
+      "chunk_id": "f37365",
+      "wall_time_seconds": 0.266197884,
+      "exit_code": 0,
+      "original_token_count": 26,
+      "output": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.016s\n\nOK\n"
+    }
+  },
+  "preview": {
+    "command": [
+      "taskset",
+      "--cpu-list",
+      "0",
+      "python3",
+      "-B",
+      "build/v7_f_export_20260905/export.py"
+    ],
+    "chunk_id": "9c087b",
+    "wall_time_seconds": 0.169609472,
+    "exit_code": 0,
+    "original_token_count": 87,
+    "output": "{\n  \"status\": \"prepared_not_executed\",\n  \"writes\": false,\n  \"engine_runs\": 0,\n  \"builds\": 0,\n  \"destination\": \"/workspaces/E-HGP/morsehgp3D_v7/receipts/witness_stack_integrated_20260905\",\n  \"required_closed_qualifications\": {\n    \"release\": 48,\n    \"sanitized\": 48,\n    \"full\": 339\n  },\n  \"requires_separate_GO_after_qualifications_closed\": true\n}\n"
+  },
+  "preparation_only_readonly_review": {
+    "scope": "11 pinned preparation files only; no build or active receipt traversal",
+    "command": "taskset --cpu-list 0 python3 -B -c 'import runpy; value = runpy.run_path(\"build/v7_f_export_20260905/export.py\"); print(\"prepared_files=\" + str(len(value[\"preparation_files\"]())))'",
+    "chunk_id": "40a80e",
+    "wall_time_seconds": 0.199207135,
+    "exit_code": 0,
+    "original_token_count": 5,
+    "output": "prepared_files=11\n"
+  },
+  "output_authority": "Exact text returned by execution tool; combined capture, no separate stdout/stderr claim; synthetic durations are not engine timings.",
+  "selftests_each": 6,
+  "engine_runs": 0,
+  "builds": 0,
+  "qualification_receipt_reads": 0,
+  "public_writes": 0,
+  "gcp": "not_used",
+  "public_status": "not_claimed",
+  "later_explicit_pins": {
+    "F_sha256": "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85",
+    "build_receipt_sha256": "522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4",
+    "authority": "root message, not a qualification; separate GO required after all three close"
+  }
+}

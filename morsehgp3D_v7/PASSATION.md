@@ -71,6 +71,20 @@ référence ne borne pas le travail physique d'une proposition ; une future
 route devra charger ce travail séparément et prospectivement. Le candidat
 de pile inline des témoins reste également séparé du binaire E mesuré.
 
+Le delta F porte maintenant cette [pile locale de témoins](docs/OPTIMISATION_PILE_TEMOINS.md) :
+64 entrées inline, puis un vector de secours sans troncature, dans le seul
+`count_universal_witnesses`. LIFO, masques, seuils et statistiques restent
+inchangés ; aucun catalogue global n'est ajouté. Le calendrier de
+`bad_alloc` n'est pas promis identique à E, dont la pile alloue.
+Le CLI F neuf est `build/v7_f_qualification/mhgp7`, SHA `ee29d3d5…`.
+La [qualification intégrée F](receipts/witness_stack_integrated_20260905/README.md)
+ferme **48/48 portes Release ciblées, 48/48 ASan/UBSan et 339/339 Release
+complètes**, sans échec ni saut. Le build complet est incrémental (257,16 s),
+suivi de 620,68 s CTest ; 143 sources et 39 binaires restent stables.
+Les deux cibles de la nouvelle porte distinguent l'observateur d'allocations
+et la vérification sémantique sous allocateur natif. Les paires mono sont
+en cours, sans réattribution des résultats historiques E ni gain annoncé.
+
 `verified_events_only` reste le payload par défaut. La route
 `--complete-incidences` porte `normalized_horizontal_h0_candidate` et refuse
 les dégénérescences pertinentes non prises en charge. `--require-exact`
@@ -94,6 +108,7 @@ qualifié exact derrière cette option.
 | [Mono C/D complétée](docs/RESULTATS_MONO_MEB_20260905.md) | Deux runs achevés : 225,75 s puis 172,67 s, mêmes objets et comptes | n=8000 uniforme étendu, s=8, tour candidate entière 1..10 ; baisse observée 23,51 %, pas de SLO |
 | [Mono D/E q2 s=8/10/12](receipts/meb_q2_mono_20260905/README.md) | Six runs achevés, trois paires égales ; digests et cardinalités identiques entre s | n=8000 étendu, tour candidate 1..10 ; baisse totale observée 0,04–2,98 %, pas de gain statistique ni de SLO |
 | [Qualification E intégrée](receipts/meb_q2_integrated_20260905/README.md) | 33/33 ciblées Release, 33/33 ASan/UBSan, 324/324 complètes ; zéro échec/skip | Tests frais, build complet incrémental, 140 sources et 37 binaires stables ; aucun résultat D réattribué |
+| [Qualification F intégrée](receipts/witness_stack_integrated_20260905/README.md) | 48/48 ciblées Release, 48/48 ASan/UBSan, 339/339 complètes ; zéro échec/skip | Tests frais, build complet incrémental, 143 sources et 39 binaires stables ; aucun résultat E réattribué |
 | [Mono B/C s=8/10/12](docs/RESULTATS_MONO_20260904.md) | Six runs achevés, mêmes objets ; C 105,1–105,9 s contre B 125,5–128,0 s | n=8000 uniforme, tour entière 1..10, objet Gabriel ; un seul couple par s, pas de SLO |
 | [Campagne locale v6/v7 A](receipts/local_paired_20260904/summary.json) | 15 paires achevées identiques ; cinq censures dans trois autres paires | 36 tentatives à 8 threads, n=8k/16k/32k ; campagne globale `invalid`, aucun SLO |
 | [Complétion locale](receipts/incidence_local_20260904/summary.json) | Six refus de domaine, zéro succès moteur | Observations achevées, pas capacité exacte à 8k/16k/32k |
@@ -105,11 +120,16 @@ qualifié exact derrière cette option.
 Les rapports indépendants ont levé A1 (nettoyage d'archive sous panne
 persistante d'allocation) et C1 (classification et enregistrement des
 campagnes). Les sources et replays sont dans
-[le dialogue courant](audits/DIALOGUE_COURANT.md). La preuve géométrique
-[S1](audits/S1_COURANT.md) est composée conditionnellement ; les obligations
-restantes portent sur les primitives, leur domaine et le graphe de calcul
-effectivement compilé. Voir la
-[cartographie de qualification](docs/QUALIFICATION_S1_PRIMITIVES.md).
+[le dialogue courant](audits/DIALOGUE_COURANT.md). Le
+[certificat horizontal réduit sur E](audits/CERTIFICAT_HORIZONTAL_COURANT.md)
+raccorde désormais S1, les primitives qualifiées, le domaine CPU régulier,
+les suffixes d'ancrage et le lecteur des deltas. Il conserve les composantes
+non triviales, les points couverts et les applications entre coupes d'un
+même ordre ; ce n'est pas une application verticale entre ordres.
+Ces obligations sur E ne sont plus ouvertes. La conservation F reçoit sa
+revue épinglée propre, sans transformer les tests E en exécutions F.
+La [cartographie de qualification](docs/QUALIFICATION_S1_PRIMITIVES.md)
+reste l'entrée des obligations et de leurs autorités successives.
 La [preuve arithmétique des primitives](docs/ARITHMETIQUE_PRIMITIVES.md)
 distingue les domaines réellement produits des domaines génériques des
 types. Le [plan statique épinglé](docs/PLAN_PORTES_ARITHMETIQUES.md)

@@ -35,8 +35,10 @@ après validation du premier jalon. La cible massive est GCP G4.
 Attention : le flot Gabriel v6 est `verified_events_only`. La fixture
 `gabriel-point-set-counterexample-5-points-v1` démontre qu'il ne suffit pas
 à reconstruire Gamma. La complétion silencieuse et le fold réduit sont
-implémentés en option, mais leur qualification globale, les plateaux,
-la verticale et le passage à grande échelle restent ouverts.
+implémentés en option. Le [certificat horizontal réduit sur E](audits/CERTIFICAT_HORIZONTAL_COURANT.md)
+ferme leur composition sur le domaine CPU régulier déclaré, sans couvrir
+les plateaux généraux, la verticale ni le passage à grande échelle.
+La conservation du delta F et sa qualification propre restent distinctes.
 
 ## Construire et tester
 
@@ -45,6 +47,11 @@ cmake -S morsehgp3D_v7 -B build/v7 -DCMAKE_BUILD_TYPE=Release
 cmake --build build/v7 --parallel 2
 ctest --test-dir build/v7 --output-on-failure
 ```
+
+Dans l'atelier courant, `build/v7/mhgp7` est conservé comme témoin C
+historique. Le binaire F qualifié est `build/v7_f_qualification/mhgp7` ;
+pour une reconstruction indépendante, choisir un répertoire de build neuf
+au lieu d'écraser un témoin utilisé par les comparaisons.
 
 La suite de portes bornées se sélectionne avec `-L '^gate$'`. Les tests
 `scale8000`, `scale16000` et `scale32000` sont des campagnes plus longues,
@@ -116,6 +123,8 @@ Lire [l'état de livraison](PASSATION.md),
 [la comparaison mono de la MEB différée](docs/RESULTATS_MONO_MEB_20260905.md),
 [le prétest q2 et ses trois paires mono](docs/RESULTATS_MONO_Q2_20260905.md),
 [la qualification E : 33/33/324 portes](receipts/meb_q2_integrated_20260905/README.md),
+[la pile locale F et ses invariants](docs/OPTIMISATION_PILE_TEMOINS.md),
+[la qualification F : 48/48/339 portes](receipts/witness_stack_integrated_20260905/README.md),
 [les résultats G4 à 50k et les primitives GPU](docs/RESULTATS_G4_20260904.md),
 [les limites de résidence et la voie massive](docs/RESIDENCE_MASSIVE.md),
 [l'état courant](audits/ETAT_COURANT.md) et

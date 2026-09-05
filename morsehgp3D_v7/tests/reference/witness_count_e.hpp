@@ -1,3 +1,10 @@
+// Pinned nominal E snapshot adapted only for a permanent differential judge.
+// Original: build/v7_witness_stack_review/reference/witness_count.hpp
+// SHA256: fce9510ee21cbe025283a9ce777b120e4173ce62eee736e1c48dc772afb67a42
+// Explicit adaptations: relative include, namespace + using declaration, and
+// no_mask=false so a real product mutant cannot also mutate the reference.
+// Other dependencies remain the current product's: this is an E count-path
+// reference, not an independent geometry oracle or a frozen full E library.
 // MorseHGP3D v6 — comptage de temoins universels du cœur d'un rectangle.
 //
 // Minore |P ∩ W_q(a,b)| uniformement sur toutes les paires (a,b) de A×B par
@@ -15,10 +22,10 @@
 
 #include <vector>
 
-#include "spindle.hpp"
-#include "../core/inline_stack.hpp"
+#include "../../src/spindle/spindle.hpp"
 
-namespace mhgp7 {
+namespace witness_stack_reference {
+using namespace mhgp7;
 
 struct FusedCounts {
   u64 c[3] = {0, 0, 0};
@@ -56,7 +63,7 @@ inline FusedCounts count_universal_witnesses(const CloudIndex& ix, NodeRef a, No
   const AxisBox boxB = ix.box_of(b);
   const NodeRange ra = ix.range_of(a);
   const NodeRange rb = ix.range_of(b);
-  const bool no_mask = MHGP7_MUTANT("witness-no-lane-mask");
+  const bool no_mask = false;
   CoreBall balls[3];
   if (mask_in & 0b010) balls[1] = core_ball(Lane::kQ3, boxA, boxB);
   if (mask_in & 0b100) balls[2] = core_ball(Lane::kQ4, boxA, boxB);
@@ -70,8 +77,7 @@ inline FusedCounts count_universal_witnesses(const CloudIndex& ix, NodeRef a, No
     if ((mask_eff & 0b010) && balls[1].radius4 == 0) mask_eff &= (u8)~0b010;
     if ((mask_eff & 0b100) && balls[2].radius4 == 0) mask_eff &= (u8)~0b100;
   }
-  InlineStack<Entry, 64> stack;
-  stack.push_back(Entry{ix.root(), mask_eff});
+  std::vector<Entry> stack{{ix.root(), mask_eff}};
   const auto counting = [&]() {
     u8 m = 0;
     for (int li = 0; li < 3; ++li)
@@ -195,5 +201,5 @@ inline u64 true_spindle_count(Lane q, const CloudIndex& ix, i32 ua, i32 ub, u64 
   return count;
 }
 
-}  // namespace mhgp7
+}  // namespace witness_stack_reference
 

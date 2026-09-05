@@ -1,0 +1,433 @@
+--- build/v7_next_q2_tests_20260905/qualification.py	2026-09-05 06:36:51.503029784 +0000
++++ build/v7_f_tests_20260905/qualification.py	2026-09-05 09:17:26.055083518 +0000
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Prepared fresh E gates: full 324, targeted Release/ASAN-UBSAN 33."""
++"""Prepared fresh F gates: full 339, targeted Release/ASAN-UBSAN 48."""
+ from __future__ import annotations
+ 
+ import argparse
+@@ -18,11 +18,31 @@
+ BASE = Path(__file__).resolve().parent
+ ROOT = BASE.parents[1]
+ SOURCE = ROOT / "morsehgp3D_v7"
+-E_BUILD = ROOT / "build/v7_next_q2_qualification"
+-E_RECEIPT = ROOT / "build/v7_next_q2_build_20260905/build_D.json"
+-NEW_NAME = "mhgp7_meb_lazy_q2_reject_shell"
++F_BUILD = ROOT / "build/v7_f_qualification"
++F_RECEIPT = ROOT / "build/v7_f_build_20260905/build_D.json"
++E_Q2_NAME = "mhgp7_meb_lazy_q2_reject_shell"
++E_FULL_NAMES = "build/v7_next_q2_tests_20260905/expected_full_names.json"
++NEW_NAMES = [
++    "mhgp7_witness_stack",
++    "mhgp7_witness_stack_duplicate_case",
++    "mhgp7_witness_stack_duplicate_mutant",
++    "mhgp7_witness_stack_empty_case",
++    "mhgp7_witness_stack_empty_mutant",
++    "mhgp7_witness_stack_helper",
++    "mhgp7_witness_stack_lane_mask",
++    "mhgp7_witness_stack_lane_mask_mutant",
++    "mhgp7_witness_stack_mutant_case_mismatch",
++    "mhgp7_witness_stack_semantic",
++    "mhgp7_witness_stack_semantic_lane_mask_mutant",
++    "mhgp7_witness_stack_unknown_argument",
++    "mhgp7_witness_stack_unknown_case",
++    "mhgp7_witness_stack_unknown_mutant",
++    "mhgp7_witness_stack_witness"
++]
+ AUTHORITIES = {
+-    "build/v7_next_pair_20260905/runner.py": "ae95c0cb65a1564edb2d45ae83671e204d70994d00356aea87aba147ed8ad3ba",
++    "build/v7_next_q2_tests_20260905/qualification.py": "5f62b29d96895e9b46df591f0540dd5d4ecbd3fec4a8eb291e4e6d3c27fb7a60",
++    E_FULL_NAMES: "ced66fa012578623ec3387a8a75b7a06b5fa80cfdec8d475a6c6a45edb59e50f",
++    "build/v7_f_pair_20260905/runner.py": "20f956612c598da256e24f8de893e7df5132f6dff0221dbc2edcdd7fe2ecce3d",
+     "build/v7_meb_full_release/run_full_release.py": "1ad9089c4542a0d6539376c0c67a723d204417b755a41c7f4953e7c70ee61a9f",
+     "build/v7_meb_full_release/expected_test_names.json": "0c85da58fdc386a00effbc82ebd85ccf4f71ac9e9f2ee329aa99ae3270154223",
+     "build/v7_meb_integrated_tests/run_targeted.py": "24e9801fc03ae3c049496d0cd87567ff0edc769b94dd1ba441dc8b47f4cec3c3",
+@@ -47,25 +67,35 @@
+     return module
+ 
+ 
+-N = load("next_pair_authority", "build/v7_next_pair_20260905/runner.py")
+-F = load("full_D_authority", "build/v7_meb_full_release/run_full_release.py")
++N = load("f_pair_authority", "build/v7_f_pair_20260905/runner.py")
++D_FULL = load("full_D_authority", "build/v7_meb_full_release/run_full_release.py")
+ T = load("targeted_D_authority", "build/v7_meb_integrated_tests/run_targeted.py")
+-H = F.H
++H = D_FULL.H
++TARGETS = [*T.TARGETS, "mhgp7_witness_stack_gate", "mhgp7_witness_stack_semantic_gate"]
+ 
+ 
+ def names(mode: str) -> list[str]:
+     require(mode in ("full", "release", "sanitized"), "unknown qualification mode")
+-    old = F.expected_names() if mode == "full" else T.NAMES
+-    require(NEW_NAME not in old and len(old) == (323 if mode == "full" else 32), "historical inventory changed")
+-    expected = sorted([*old, NEW_NAME])
++    historical_D = D_FULL.expected_names() if mode == "full" else T.NAMES
++    require(E_Q2_NAME not in historical_D and len(historical_D) == (323 if mode == "full" else 32),
++            "historical D inventory changed")
++    historical_E = sorted([*historical_D, E_Q2_NAME])
+     if mode == "full":
+-        require(json.loads((BASE / "expected_full_names.json").read_text()) == expected, "324 inventory is not exact historical plus q2")
++        data = (ROOT / E_FULL_NAMES).read_bytes()
++        require(hashlib.sha256(data).hexdigest() == AUTHORITIES[E_FULL_NAMES], "closed E inventory pin changed")
++        require(json.loads(data) == historical_E, "closed E inventory is not exact D plus q2")
++    require(len(NEW_NAMES) == 15 and len(set(NEW_NAMES)) == 15 and not set(NEW_NAMES) & set(historical_E),
++            "F added names duplicate or overlap the E inventory")
++    expected = sorted([*historical_E, *NEW_NAMES])
++    if mode == "full":
++        require(json.loads((BASE / "expected_full_names.json").read_text()) == expected,
++                "339 inventory is not exact historical E plus witness stack")
+     require(len(set(expected)) == len(expected), "duplicate expected name")
+     return expected
+ 
+ 
+ def paths(mode: str) -> tuple[Path, Path]:
+-    return (E_BUILD if mode == "full" else BASE / mode, BASE / (mode + "_receipts"))
++    return (F_BUILD if mode == "full" else BASE / mode, BASE / (mode + "_receipts"))
+ 
+ 
+ def commands(mode: str) -> list[tuple[str, list[str], int]]:
+@@ -78,7 +108,7 @@
+         ("configure", ["cmake", "-S", str(SOURCE), "-B", str(build), "-DCMAKE_BUILD_TYPE=Release",
+                        "-DMHGP7_ENABLE_CUDA=OFF", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON", *flags], 120),
+         ("build_incremental" if mode == "full" else "build_targets",
+-         ["cmake", "--build", str(build), "--parallel", "2", *([] if mode == "full" else ["--target", *T.TARGETS])],
++         ["cmake", "--build", str(build), "--parallel", "2", *([] if mode == "full" else ["--target", *TARGETS])],
+          3600 if mode == "full" else 1200),
+         ("inventory", ["ctest", "--test-dir", str(build), "--show-only=json-v1", *selector], 60),
+         ("ctest", ["ctest", "--test-dir", str(build), "--output-on-failure", "--no-tests=error", *selector,
+@@ -97,24 +127,24 @@
+             "locale": {"LC_ALL": "C", "LANG": "C"}, "PYTHONDONTWRITEBYTECODE": "1"}
+ 
+ 
+-def candidate_binding(expected_e: str, expected_receipt: str) -> dict:
+-    require(bool(re.fullmatch("[0-9a-f]{64}", expected_e)) and bool(re.fullmatch("[0-9a-f]{64}", expected_receipt)),
+-            "explicit E binary and build receipt SHA256 pins are required")
+-    require(H.digest(E_RECEIPT) == expected_receipt, "E build receipt does not match supplied pin")
+-    binding = N.R.candidate_binding(E_BUILD / "mhgp7", SOURCE, E_RECEIPT)
+-    require(binding["receipt_sha256"] == expected_receipt and binding["record"]["binary"]["sha256"] == expected_e,
+-            "E build/CLI pin mismatch")
++def candidate_binding(expected_f: str, expected_receipt: str) -> dict:
++    require(bool(re.fullmatch("[0-9a-f]{64}", expected_f)) and bool(re.fullmatch("[0-9a-f]{64}", expected_receipt)),
++            "explicit F binary and build receipt SHA256 pins are required")
++    require(H.digest(F_RECEIPT) == expected_receipt, "F build receipt does not match supplied pin")
++    binding = N.R.candidate_binding(F_BUILD / "mhgp7", SOURCE, F_RECEIPT)
++    require(binding["receipt_sha256"] == expected_receipt and binding["record"]["binary"]["sha256"] == expected_f,
++            "F build/CLI pin mismatch")
+     return binding
+ 
+ 
+-def frozen_inputs(mode: str, protected: dict, expected_e: str, expected_receipt: str) -> dict:
++def frozen_inputs(mode: str, protected: dict, expected_f: str, expected_receipt: str) -> dict:
+     env = environment(mode)
+     for name, pin in AUTHORITIES.items():
+         require(H.digest(ROOT / name) == pin, "authority drift: " + name)
+-    binding = candidate_binding(expected_e, expected_receipt)
++    binding = candidate_binding(expected_f, expected_receipt)
+     historical = N.baseline_binding()
+     require(historical["protected_binaries"] == protected, "historical protected map changed")
+-    files = [Path(__file__), BASE / "expected_full_names.json", E_RECEIPT,
++    files = [Path(__file__), BASE / "expected_full_names.json", F_RECEIPT,
+              *[ROOT / name for name in AUTHORITIES]]
+     files += [Path(binding["record"][key]["path"]) for key in ("cmake_cache", "compile_database")]
+     return {"files": {str(path): H.digest(path) for path in files}, "candidate_binding": binding,
+@@ -122,7 +152,7 @@
+             "sources": H.source_inventory(), "environment": env}
+ 
+ 
+-def compile_binding(build: Path, mode: str, expected_e: str) -> dict:
++def compile_binding(build: Path, mode: str, expected_f: str) -> dict:
+     cache = (build / "CMakeCache.txt").read_text().splitlines()
+     require(all(line in cache for line in ("CMAKE_BUILD_TYPE:STRING=Release", "MHGP7_ENABLE_CUDA:BOOL=OFF",
+             "CMAKE_HOME_DIRECTORY:INTERNAL=" + str(SOURCE), "CMAKE_CXX_FLAGS:STRING=")), "configured source/mode mismatch")
+@@ -132,7 +162,7 @@
+             "CMAKE_EXE_LINKER_FLAGS:STRING=" + linker_flags in cache and
+             "CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=" in cache, "unreviewed cached compile/link flags")
+     records = json.loads((build / "compile_commands.json").read_text())
+-    targets = ["mhgp7"] if mode == "full" else T.TARGETS
++    targets = ["mhgp7"] if mode == "full" else TARGETS
+     chosen = []
+     for target in targets:
+         matches = [row for row in records if "CMakeFiles/" + target + ".dir/" in row.get("command", "")]
+@@ -147,6 +177,8 @@
+                               if mode == "sanitized" else {"-O3"})
+         if target != "mhgp7":
+             allowed.add("-DMHGP7_TESTING=1")
++        if target == "mhgp7_witness_stack_semantic_gate":
++            allowed.add("-DMHGP7_WITNESS_STACK_NO_ALLOC_OBSERVER=1")
+         if target == "mhgp7_meb_lazy_gate":
+             allowed.add("-I" + str(SOURCE))
+         require(all(argv.count(flag) == 1 for flag in allowed), "required flags absent/repeated")
+@@ -161,10 +193,10 @@
+         chosen.append(row)
+     require(os.access(build / "mhgp7", os.X_OK), "qualified CLI is not executable")
+     if mode != "sanitized":
+-        require(H.digest(build / "mhgp7") == expected_e, "Release qualification CLI differs from pinned E")
++        require(H.digest(build / "mhgp7") == expected_f, "Release qualification CLI differs from pinned F")
+     return {"commands": chosen, "configuration": {str(path): H.digest(path) for path in
+             (build / "CMakeCache.txt", build / "CTestTestfile.cmake", build / "compile_commands.json")},
+-            "binary_role": "independently_built_instrumented_E_not_same_bytes_as_Release" if mode == "sanitized" else "pinned_E_Release"}
++            "binary_role": "independently_built_instrumented_F_not_same_bytes_as_Release" if mode == "sanitized" else "pinned_F_Release"}
+ 
+ 
+ def read_log(path: Path) -> tuple[bytes, dict]:
+@@ -278,42 +310,42 @@
+             binding == binding_after and inventory is not None and junit is not None and last_log is not None)
+ 
+ 
+-def execute(mode: str, expected_e: str, expected_receipt: str) -> int:
++def execute(mode: str, expected_f: str, expected_receipt: str) -> int:
+     environment(mode)
+     build, out = paths(mode)
+     require(not out.exists(), "receipt already exists; use a separately reviewed fresh path")
+     require(build.is_dir() if mode == "full" else not build.exists(), "full build must exist; targeted builds must be fresh")
+     expected = names(mode)
+     protected = N.baseline_binding()["protected_binaries"]
+-    before = frozen_inputs(mode, protected, expected_e, expected_receipt)
++    before = frozen_inputs(mode, protected, expected_f, expected_receipt)
+     repository_before, host_before = N.R.repository_state(), N.R.host_observation()
+-    require(frozen_inputs(mode, protected, expected_e, expected_receipt) == before, "preflight metadata boundary drift")
++    require(frozen_inputs(mode, protected, expected_f, expected_receipt) == before, "preflight metadata boundary drift")
+     H.BUILD, H.OUT = build, out
+     out.mkdir(mode=0o700)
+     H.save("inputs_before.json", before)
+     H.save("expected_names.json", expected)
+     prior_log = previous_log(build, out)
+     H.save("LastTest.prestate.json", prior_log)
+-    H.save("environment.json", {"schema": "mhgp7.q2-E-qualification.v1", "mode": mode,
+-        "build_kind": "incremental_existing_E_Release" if mode == "full" else "fresh_isolated",
+-        "expected_E_sha256": expected_e, "expected_E_build_receipt_sha256": expected_receipt,
+-        "protected_C_C_D_historical": protected, "all_test_executions": "fresh", "gate_results_reused": False,
++    H.save("environment.json", {"schema": "mhgp7.witness-stack-F-qualification.v1", "mode": mode,
++        "build_kind": "incremental_existing_F_Release" if mode == "full" else "fresh_isolated",
++        "expected_F_sha256": expected_f, "expected_F_build_receipt_sha256": expected_receipt,
++        "protected_C_C_D_E_historical": protected, "all_test_executions": "fresh", "gate_results_reused": False,
+         "repository_before": repository_before, "host_before": host_before, "environment": environment(mode),
+         "public_status": "not_claimed", "gcp": "not_used"})
+     results, failure, tested, binding, inventory, junit, ctest_boundary = {}, None, None, None, None, None, None
+     try:
+         for label, argv, limit in commands(mode):
+-            require(frozen_inputs(mode, protected, expected_e, expected_receipt) == before, "inputs drift before " + label)
++            require(frozen_inputs(mode, protected, expected_f, expected_receipt) == before, "inputs drift before " + label)
+             if label == "ctest":
+                 ctest_boundary = log_boundary(build, out)
+                 H.save("LastTest.ctest_boundary.json", ctest_boundary)
+             results[label] = H.run(label, argv, limit)
+             require(results[label]["exit_code"] == 0 and results[label]["status"] == "completed", label + " failed/censored")
+-            require(frozen_inputs(mode, protected, expected_e, expected_receipt) == before, "inputs drift after " + label)
++            require(frozen_inputs(mode, protected, expected_f, expected_receipt) == before, "inputs drift after " + label)
+             if label.startswith("build_"):
+-                tested, binding = H.binaries(), compile_binding(build, mode, expected_e)
++                tested, binding = H.binaries(), compile_binding(build, mode, expected_f)
+                 if mode != "full":
+-                    require(sorted(Path(row["path"]).name for row in tested) == sorted(T.TARGETS), "targeted binary inventory mismatch")
++                    require(sorted(Path(row["path"]).name for row in tested) == sorted(TARGETS), "targeted binary inventory mismatch")
+                 H.save("binaries_tested.json", tested)
+                 H.save("compile_binding.json", binding)
+             elif label == "inventory":
+@@ -323,7 +355,7 @@
+                         "actual registered names differ from full required inventory")
+                 require(tested == H.binaries(), "tested binary drift before CTest")
+             elif label == "ctest":
+-                junit = F.judge_junit(ET.parse(out / "ctest.junit.xml").getroot(), expected)
++                junit = D_FULL.judge_junit(ET.parse(out / "ctest.junit.xml").getroot(), expected)
+     except BaseException as error:
+         failure = f"{type(error).__name__}: {error}"
+         print("FAILURE " + failure, flush=True)
+@@ -335,11 +367,11 @@
+             final_errors.append(f"{type(error).__name__}: {error}")
+             return None
+     repository_after = observe(N.R.repository_state)
+-    after = observe(lambda: frozen_inputs(mode, protected, expected_e, expected_receipt))
++    after = observe(lambda: frozen_inputs(mode, protected, expected_f, expected_receipt))
+     binaries_after = observe(H.binaries)
+-    binding_after = observe(lambda: compile_binding(build, mode, expected_e))
++    binding_after = observe(lambda: compile_binding(build, mode, expected_f))
+     # JUnit is judged again at the terminal boundary, never inferred from rc=0.
+-    junit = observe(lambda: F.judge_junit(ET.parse(out / "ctest.junit.xml").getroot(), expected))
++    junit = observe(lambda: D_FULL.judge_junit(ET.parse(out / "ctest.junit.xml").getroot(), expected))
+     last_log = observe(lambda: archive_current_log(build, out, expected, prior_log, ctest_boundary))
+     passed = terminal_pass(results, {label for label, _, _ in commands(mode)}, failure, final_errors,
+                            before, after, tested, binaries_after, binding, binding_after, inventory, junit, last_log)
+@@ -351,7 +383,7 @@
+         "last_test_log": last_log, "last_test_log_qualified": last_log is not None,
+         "inputs_stable": before == after, "tested_binaries_stable": tested is not None and tested == binaries_after,
+         "compile_binding_stable": binding is not None and binding == binding_after, "results": results,
+-        "expected_E_sha256": expected_e, "protected_C_C_D_historical": protected,
++        "expected_F_sha256": expected_f, "protected_C_C_D_E_historical": protected,
+         "gate_results_reused": False, "public_status": "not_claimed", "gcp": "not_used"}
+     H.save("summary.json", summary)
+     H.save("receipt_manifest.json", [{"path": path.name, "sha256": H.digest(path), "size": path.stat().st_size}
+@@ -363,20 +395,20 @@
+ def main(argv: list[str] | None = None) -> int:
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument("--mode", choices=("full", "release", "sanitized"), required=True)
+-    parser.add_argument("--expected-e-sha256")
++    parser.add_argument("--expected-f-sha256")
+     parser.add_argument("--build-receipt-sha256")
+     parser.add_argument("--execute", action="store_true")
+     args = parser.parse_args(argv)
+     if not args.execute:
+         print(json.dumps({"status": "prepared_not_executed", "commands": commands(args.mode),
+             "expected_tests": len(names(args.mode)), "mode": args.mode, "builds": 0, "test_engine_runs": 0,
+-            "expected_E_sha256": args.expected_e_sha256, "execution_requires_root_GO": True,
++            "expected_F_sha256": args.expected_f_sha256, "execution_requires_root_GO": True,
+             "required_ASAN_OPTIONS": ASAN if args.mode == "sanitized" else None,
+             "required_UBSAN_OPTIONS": UBSAN if args.mode == "sanitized" else None,
+             "public_status": "not_claimed", "gcp": "not_used"}, indent=2))
+         return 0
+-    require(args.expected_e_sha256 is not None and args.build_receipt_sha256 is not None, "two explicit E pins required at execution")
+-    return execute(args.mode, args.expected_e_sha256, args.build_receipt_sha256)
++    require(args.expected_f_sha256 is not None and args.build_receipt_sha256 is not None, "two explicit F pins required at execution")
++    return execute(args.mode, args.expected_f_sha256, args.build_receipt_sha256)
+ 
+ 
+ if __name__ == "__main__":
+--- build/v7_next_q2_tests_20260905/selftest.py	2026-09-05 06:39:07.203030541 +0000
++++ build/v7_f_tests_20260905/selftest.py	2026-09-05 09:17:26.173083518 +0000
+@@ -36,11 +36,12 @@
+ 
+ class QualificationGate(unittest.TestCase):
+     def test_precise_names_and_all_junit_rejections(self):
+-        for mode, count in (("full", 324), ("release", 33), ("sanitized", 33)):
++        for mode, count in (("full", 339), ("release", 48), ("sanitized", 48)):
+             expected = Q.names(mode)
+             self.assertEqual(len(expected), count)
+-            self.assertEqual(expected.count(Q.NEW_NAME), 1)
+-            self.assertEqual(Q.F.judge_junit(document(mode), expected)["tests"], count)
++            self.assertTrue(all(expected.count(name) == 1 for name in Q.NEW_NAMES))
++            self.assertEqual(expected.count(Q.E_Q2_NAME), 1)
++            self.assertEqual(Q.D_FULL.judge_junit(document(mode), expected)["tests"], count)
+             for mutant in ("empty", "missing", "duplicate", "unknown", "failure", "error", "skipped", "notrun"):
+                 doc = document(mode)
+                 if mutant == "empty":
+@@ -56,7 +57,7 @@
+                 else:
+                     ET.SubElement(doc[-1], mutant)
+                 with self.subTest(mode=mode, mutant=mutant), self.assertRaises(RuntimeError):
+-                    Q.F.judge_junit(doc, expected)
++                    Q.D_FULL.judge_junit(doc, expected)
+ 
+     def test_previews_inert_and_commands_match_requested_scope(self):
+         for mode in ("full", "release", "sanitized"):
+@@ -68,17 +69,18 @@
+             self.assertEqual(value["builds"], 0)
+             commands = value["commands"]
+             self.assertEqual(len(commands), 4)
++            self.assertIn("-DCMAKE_BUILD_TYPE=Release", commands[0][1])
+             self.assertTrue(all(0 < command[2] <= 7200 for command in commands))
+             self.assertIn("--no-tests=error", commands[-1][1])
+             self.assertIn("--output-junit", commands[-1][1])
+             if mode != "full":
+                 regex = commands[-1][1][commands[-1][1].index("-R") + 1]
+                 self.assertTrue(all(Q.re.fullmatch(regex, name) for name in Q.names(mode)))
+-                self.assertFalse(Q.re.fullmatch(regex, Q.NEW_NAME + "_suffix"))
+-                self.assertEqual(commands[1][1][commands[1][1].index("--target") + 1:], Q.T.TARGETS)
++                self.assertFalse(Q.re.fullmatch(regex, Q.NEW_NAMES[0] + "_suffix"))
++                self.assertEqual(commands[1][1][commands[1][1].index("--target") + 1:], Q.TARGETS)
+             self.assertEqual(any("fsanitize" in arg for arg in commands[0][1]), mode == "sanitized")
+         with patch.object(Q, "execute") as execute:
+-            with self.assertRaisesRegex(RuntimeError, "two explicit E pins"):
++            with self.assertRaisesRegex(RuntimeError, "two explicit F pins"):
+                 Q.main(["--mode", "full", "--execute"])
+             execute.assert_not_called()
+ 
+@@ -116,16 +118,26 @@
+     def test_explicit_candidate_pins_required_before_read(self):
+         with patch.object(Q.H, "digest") as digest:
+             for left, right in (("", ""), ("f" * 63, "0" * 64), ("A" * 64, "0" * 64), ("0" * 64, "g" * 64)):
+-                with self.assertRaisesRegex(RuntimeError, "explicit E"):
++                with self.assertRaisesRegex(RuntimeError, "explicit F"):
+                     Q.candidate_binding(left, right)
+             digest.assert_not_called()
+ 
+     def test_compilation_binding_flags_and_source_targets(self):
+         for mode in ("full", "release", "sanitized"):
+-            with tempfile.TemporaryDirectory(prefix="mhgp7-E-compile-binding-") as tmp:
++            with tempfile.TemporaryDirectory(prefix="mhgp7-F-compile-binding-") as tmp:
+                 build = Path(tmp)
+                 historic_mode = "sanitized" if mode == "sanitized" else "release"
+                 rows = json.loads((Q.ROOT / f"build/v7_meb_integrated_tests/{historic_mode}_receipts/compile_binding.json").read_text())
++                # Closed D rows remain fixtures, not historical results reused as F.
++                template = next(row for row in rows if "CMakeFiles/mhgp7_silent_incidence_gate.dir/" in row["command"])
++                for target in ("mhgp7_witness_stack_gate", "mhgp7_witness_stack_semantic_gate"):
++                    row = copy.deepcopy(template)
++                    row["file"] = str(Q.SOURCE / "tests/witness_stack_gate.cpp")
++                    row["command"] = row["command"].replace("mhgp7_silent_incidence_gate.dir/", target + ".dir/").replace(
++                        "silent_incidence_gate.cpp", "witness_stack_gate.cpp")
++                    if target.endswith("_semantic_gate"):
++                        row["command"] += " -DMHGP7_WITNESS_STACK_NO_ALLOC_OBSERVER=1"
++                    rows.append(row)
+                 for row in rows:
+                     row["directory"] = str(build)
+                 release_flags = "-O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer" if mode == "sanitized" else "-O3 -DNDEBUG"
+@@ -141,13 +153,25 @@
+                 cli.write_bytes(b"fixture bytes, never executed")
+                 cli.chmod(0o700)
+                 pin = Q.H.digest(cli)
+-                self.assertEqual(len(Q.compile_binding(build, mode, pin)["commands"]), 1 if mode == "full" else 9)
++                self.assertEqual(len(Q.compile_binding(build, mode, pin)["commands"]), 1 if mode == "full" else 11)
+                 for flag in (" -ffast-math", " -DMHGP7_PROFILE_REDUCE=1", " @flags.rsp", " -O0", " -DNDEBUG"):
+                     damaged = copy.deepcopy(rows)
+                     damaged[0]["command"] += flag
+                     (build / "compile_commands.json").write_text(json.dumps(damaged))
+                     with self.subTest(mode=mode, flag=flag), self.assertRaises(RuntimeError):
+                         Q.compile_binding(build, mode, pin)
++                if mode != "full":
++                    for target, before, after in (
++                        ("mhgp7_witness_stack_semantic_gate", " -DMHGP7_WITNESS_STACK_NO_ALLOC_OBSERVER=1", ""),
++                        ("mhgp7_witness_stack_gate", " -DMHGP7_TESTING=1", ""),
++                        ("mhgp7_witness_stack_gate", " -DMHGP7_TESTING=1", " -DMHGP7_TESTING=1 -DMHGP7_WITNESS_STACK_NO_ALLOC_OBSERVER=1")):
++                        damaged = copy.deepcopy(rows)
++                        selected = next(row for row in damaged if "CMakeFiles/" + target + ".dir/" in row["command"])
++                        self.assertIn(before, selected["command"])
++                        selected["command"] = selected["command"].replace(before, after)
++                        (build / "compile_commands.json").write_text(json.dumps(damaged))
++                        with self.subTest(mode=mode, target=target, before=before), self.assertRaises(RuntimeError):
++                            Q.compile_binding(build, mode, pin)
+                 damaged = copy.deepcopy(rows)
+                 damaged[0]["directory"] = str(build / "foreign")
+                 (build / "compile_commands.json").write_text(json.dumps(damaged))
+@@ -159,7 +183,7 @@
+                     Q.compile_binding(build, mode, pin)
+ 
+     def test_last_log_parser_real_data_and_all_structure_rejections(self):
+-        for path, expected, pin in ((Q.ROOT / "build/v7_meb_qualification/Testing/Temporary/LastTest.log", Q.F.expected_names(),
++        for path, expected, pin in ((Q.ROOT / "build/v7_meb_qualification/Testing/Temporary/LastTest.log", Q.D_FULL.expected_names(),
+                 "42007892ba39f3627f103002fbe19963f0051f2ba0ee8c6e05a7439b105f6f58"),
+                 (Q.ROOT / "build/v7_meb_integrated_tests/release/Testing/Temporary/LastTest.log", Q.T.NAMES,
+                  "395e438d25febc6c0818f1ee5110f5f2e0fc595524d7b152cfbaf3f41d186453")):
+@@ -227,7 +251,7 @@
+         for mode in ("full", "release", "sanitized"):
+             for scenario in ("completed", "failed", "censored", "interrupted", "inventory_missing", "junit_failed", "late_drift", "binary_drift",
+                              "log_absent", "log_stale", "log_truncated"):
+-                with self.subTest(mode=mode, scenario=scenario), tempfile.TemporaryDirectory(prefix="mhgp7-E-qualification-") as tmp:
++                with self.subTest(mode=mode, scenario=scenario), tempfile.TemporaryDirectory(prefix="mhgp7-F-qualification-") as tmp:
+                     base = Path(tmp)
+                     build, out = base / "build", base / "receipt"
+                     if mode == "full":
+@@ -236,7 +260,7 @@
+                         old_log.parent.mkdir(parents=True)
+                         old_log.write_bytes(log_bytes(Q.names(mode)) + b"preexisting full run\n")
+                     calls, repository_calls = [], [0]
+-                    bins = [{"path": "build/" + name, "sha256": "fixture", "size": 1} for name in Q.T.TARGETS]
++                    bins = [{"path": "build/" + name, "sha256": "fixture", "size": 1} for name in Q.TARGETS]
+                     def frozen(*_args):
+                         return {"pin": "changed" if scenario == "late_drift" and repository_calls[0] >= 2 else "fixed"}
+                     def repository():
+@@ -280,7 +304,7 @@
+                         return {"exit_code": 0, "status": "completed"}
+                     with patch.object(Q, "paths", return_value=(build, out)), \
+                             patch.object(Q, "environment", return_value={}), patch.object(Q, "frozen_inputs", side_effect=frozen), \
+-                            patch.object(Q.N, "baseline_binding", return_value={"protected_binaries": {"C1": "C", "C2": "C", "D": "D"}}), \
++                            patch.object(Q.N, "baseline_binding", return_value={"protected_binaries": {"C1": "C", "C2": "C", "D": "D", "E": "E"}}), \
+                             patch.object(Q.N.R, "repository_state", side_effect=repository), \
+                             patch.object(Q.N.R, "host_observation", return_value={"host_shared": True}), \
+                             patch.object(Q.H, "run", side_effect=run), patch.object(Q.H, "binaries", side_effect=binaries), \
+@@ -296,7 +320,7 @@
+                         ("failed", "censored", "interrupted", "inventory_missing", "log_absent", "log_stale", "log_truncated"))
+                     if mode == "full":
+                         self.assertTrue((out / "LastTest.preexisting.stdout").read_bytes().endswith(b"preexisting full run\n"))
+-                    self.assertEqual(summary["protected_C_C_D_historical"], {"C1": "C", "C2": "C", "D": "D"})
++                    self.assertEqual(summary["protected_C_C_D_E_historical"], {"C1": "C", "C2": "C", "D": "D", "E": "E"})
+                     self.assertEqual(len(calls), 2 if scenario in ("failed", "censored", "interrupted") else 3 if scenario == "inventory_missing" else 4)

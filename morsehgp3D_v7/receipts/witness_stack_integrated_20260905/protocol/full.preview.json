@@ -1,0 +1,69 @@
+{
+  "status": "prepared_not_executed",
+  "commands": [
+    [
+      "configure",
+      [
+        "cmake",
+        "-S",
+        "/workspaces/E-HGP/morsehgp3D_v7",
+        "-B",
+        "/workspaces/E-HGP/build/v7_f_qualification",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP7_ENABLE_CUDA=OFF",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+      ],
+      120
+    ],
+    [
+      "build_incremental",
+      [
+        "cmake",
+        "--build",
+        "/workspaces/E-HGP/build/v7_f_qualification",
+        "--parallel",
+        "2"
+      ],
+      3600
+    ],
+    [
+      "inventory",
+      [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7_f_qualification",
+        "--show-only=json-v1",
+        "-L",
+        "^gate$"
+      ],
+      60
+    ],
+    [
+      "ctest",
+      [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7_f_qualification",
+        "--output-on-failure",
+        "--no-tests=error",
+        "-L",
+        "^gate$",
+        "--parallel",
+        "2",
+        "--output-junit",
+        "/workspaces/E-HGP/build/v7_f_tests_20260905/full_receipts/ctest.junit.xml"
+      ],
+      7200
+    ]
+  ],
+  "expected_tests": 339,
+  "mode": "full",
+  "builds": 0,
+  "test_engine_runs": 0,
+  "expected_F_sha256": null,
+  "execution_requires_root_GO": true,
+  "required_ASAN_OPTIONS": null,
+  "required_UBSAN_OPTIONS": null,
+  "public_status": "not_claimed",
+  "gcp": "not_used"
+}

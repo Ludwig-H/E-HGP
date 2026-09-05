@@ -1,0 +1,112 @@
+"""Exporter-only synthetic data tests; no engine, build or public writes."""
+import contextlib
+import io
+import json
+from pathlib import Path
+import tempfile
+import unittest
+from unittest.mock import patch
+
+import export as E
+
+
+class ExportGate(unittest.TestCase):
+    def test_preview_never_exports_or_creates(self):
+        with patch.object(E, "execute", side_effect=RuntimeError("must not export")), contextlib.redirect_stdout(io.StringIO()) as stdout:
+            self.assertEqual(E.main([]), 0)
+        value = json.loads(stdout.getvalue())
+        self.assertEqual(value["status"], "prepared_not_executed")
+        self.assertEqual(value["required_closed_qualifications"], {"release": 48, "sanitized": 48, "full": 339})
+        self.assertFalse(value["writes"])
+
+    def test_missing_qualification_cannot_start_export(self):
+        with tempfile.TemporaryDirectory(prefix="mhgp7-export-missing-") as tmp:
+            root = Path(tmp)
+            with patch.object(E.Q, "paths", return_value=(root / "build", root / "absent")):
+                with self.assertRaisesRegex(RuntimeError, "not closed"):
+                    E.validate_receipt("full", "e" * 64, "f" * 64)
+            self.assertEqual(list(root.iterdir()), [])
+
+    def test_F_preparation_manifest_shape_and_status(self):
+        with tempfile.TemporaryDirectory(prefix="mhgp7-F-export-preparation-") as tmp:
+            folder = Path(tmp)
+            names = {"README.md", "changes_from_E.patch", "expected_full_names.json",
+                     "full.preview.json", "preparation.json", "qualification.py",
+                     "release.preview.json", "sanitized.preview.json", "selftest.py"}
+            for name in names:
+                (folder / name).write_bytes(b"synthetic preparation only")
+            preparation = {"status": "prepared_reviewed_selftests_passed_engine_campaigns_separate",
+                           "engine_runs": 0, "builds": 0}
+            (folder / "SHA256SUMS").write_bytes(b"synthetic pinned list")
+            def seal(selected):
+                (folder / "preparation.json").write_text(json.dumps(preparation))
+                manifest = {name: {"sha256": E.sha((folder / name).read_bytes()),
+                                   "bytes": (folder / name).stat().st_size} for name in selected}
+                (folder / "manifest.json").write_text(json.dumps(manifest))
+                return E.sha((folder / "manifest.json").read_bytes())
+            with patch.object(E, "PROTOCOL", folder), patch.object(E, "PREPARATION_SUMS_SHA", E.sha(b"synthetic pinned list")):
+                with patch.object(E, "PREPARATION_MANIFEST_SHA", seal(names)):
+                    self.assertEqual(set(E.preparation_files()), {folder / name for name in names | {"manifest.json", "SHA256SUMS"}})
+                with patch.object(E, "PREPARATION_MANIFEST_SHA", seal(names - {"full.preview.json"})):
+                    with self.assertRaisesRegex(RuntimeError, "unexpected F preparation inventory"):
+                        E.preparation_files()
+                for changed in ({"status": "passed"}, {"engine_runs": 1}, {"builds": 1}):
+                    original = dict(preparation)
+                    preparation.update(changed)
+                    with patch.object(E, "PREPARATION_MANIFEST_SHA", seal(names)):
+                        with self.assertRaisesRegex(RuntimeError, "must not be promoted"):
+                            E.preparation_files()
+                    preparation.clear()
+                    preparation.update(original)
+
+    def test_source_manifest_rejects_traversal_duplicates_hash_and_size(self):
+        with tempfile.TemporaryDirectory(prefix="mhgp7-export-manifest-") as tmp:
+            folder = Path(tmp)
+            (folder / "one").write_bytes(b"source data")
+            row = {"path": "one", "sha256": E.sha(b"source data"), "size": 11}
+            self.assertEqual(E.checked_entries(folder, [row], flat=True), {"one": row["sha256"]})
+            for damaged in ([row, row], [dict(row, path="../one")], [dict(row, path="/one")],
+                            [dict(row, sha256="0" * 64)], [dict(row, size=10)], []):
+                with self.assertRaises(RuntimeError):
+                    E.checked_entries(folder, damaged, flat=True)
+
+    def test_byte_exact_and_lossless_deterministic_gzip_create_only(self):
+        with tempfile.TemporaryDirectory(prefix="mhgp7-export-copy-") as tmp:
+            folder = Path(tmp)
+            source = folder / "raw"
+            source.write_bytes(b"\x00binary/no-final-newline\xff" * 100)
+            original = source.read_bytes()
+            with patch.object(E, "DESTINATION", folder):
+                plain = E.copy_artifact(source, folder / "plain", E.sha(original), compress=False)
+                first = E.copy_artifact(source, folder / "first.gz", E.sha(original), compress=True)
+                second = E.copy_artifact(source, folder / "second.gz", E.sha(original), compress=True)
+                self.assertEqual((folder / "plain").read_bytes(), original)
+                self.assertEqual((folder / "first.gz").read_bytes(), (folder / "second.gz").read_bytes())
+                self.assertEqual(first["decompressed_sha256"], plain["source_sha256"])
+                self.assertEqual(first["public_sha256"], second["public_sha256"])
+                with self.assertRaises(FileExistsError):
+                    E.copy_artifact(source, folder / "plain", E.sha(original), compress=False)
+                with self.assertRaisesRegex(RuntimeError, "source changed before"):
+                    E.copy_artifact(source, folder / "must_not_exist", "0" * 64, compress=True)
+                self.assertFalse((folder / "must_not_exist").exists())
+
+    def test_copied_source_drift_is_rejected(self):
+        with tempfile.TemporaryDirectory(prefix="mhgp7-export-drift-") as tmp:
+            folder = Path(tmp)
+            source = folder / "source"
+            source.write_bytes(b"before")
+            read, calls = E.Q.read_log, [0]
+            def changing(path):
+                if path == source:
+                    calls[0] += 1
+                    if calls[0] == 2:
+                        source.write_bytes(b"after")
+                return read(path)
+            with patch.object(E, "DESTINATION", folder), patch.object(E.Q, "read_log", side_effect=changing):
+                with self.assertRaisesRegex(RuntimeError, "source changed during"):
+                    E.copy_artifact(source, folder / "partial", E.sha(b"before"), compress=False)
+            self.assertEqual((folder / "partial").read_bytes(), b"before")
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,38 @@
+{
+  "README.md": {
+    "sha256": "bb397475dd37bcce1a3b80beceaccbd66f512d02d0c06251dbb8dc55743d3dd0",
+    "bytes": 5595
+  },
+  "changes_from_E.patch": {
+    "sha256": "d62d1d66dafd5cf27c16fa4d5602bd2b12786d644b8e403cf4c913d23f772825",
+    "bytes": 29321
+  },
+  "expected_full_names.json": {
+    "sha256": "ed9ed11ee826b3e65f21b3f978722009fa311bafc32b36b541bfdaeb3156f511",
+    "bytes": 12366
+  },
+  "full.preview.json": {
+    "sha256": "8a65d563216c7e6dd624966d6d045dd9349b8ec912b67339d565358d8308f8aa",
+    "bytes": 1441
+  },
+  "preparation.json": {
+    "sha256": "eb478aee088d79e479732785298c5c8292537a091f663a4e384e8e03ba5576c8",
+    "bytes": 6244
+  },
+  "qualification.py": {
+    "sha256": "5c44bb6400a195749aae4e97e16777abd1909f708bfa0141b577c99e7667c24d",
+    "bytes": 24916
+  },
+  "release.preview.json": {
+    "sha256": "14fa9f60d257559abe93b53c60a412ccbc6d9dc79685ff9240ee41953dea3ce9",
+    "bytes": 4711
+  },
+  "sanitized.preview.json": {
+    "sha256": "d53046487b2dd011b5003fb98a7331d8e5d9e23e7e205654c859a720f18c7f9a",
+    "bytes": 4954
+  },
+  "selftest.py": {
+    "sha256": "bd1b3426775ff72701e8289d80953b8c54ab25ed99964112985be1b39e6566d5",
+    "bytes": 21809
+  }
+}

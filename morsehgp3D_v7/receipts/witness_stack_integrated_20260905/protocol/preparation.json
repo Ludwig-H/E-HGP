@@ -1,0 +1,152 @@
+{
+  "schema": "mhgp7-witness-stack-F-qualification-preparation-v1",
+  "status": "prepared_reviewed_selftests_passed_engine_campaigns_separate",
+  "prepared_utc": "2026-09-05 09:23:45 UTC",
+  "scope": "protocol preparation and synthetic selftests; zero compiler/CMake/CTest/engine execution by this preparation",
+  "original_protocol": {
+    "path": "build/v7_next_q2_tests_20260905/qualification.py",
+    "sha256": "5f62b29d96895e9b46df591f0540dd5d4ecbd3fec4a8eb291e4e6d3c27fb7a60"
+  },
+  "original_selftest": {
+    "path": "build/v7_next_q2_tests_20260905/selftest.py",
+    "sha256": "2070774d6579c83fd847b6874c9805502edacdb73bea50d3ba5ef48e6866e213"
+  },
+  "protocol_sha256": "5c44bb6400a195749aae4e97e16777abd1909f708bfa0141b577c99e7667c24d",
+  "selftest_sha256": "bd1b3426775ff72701e8289d80953b8c54ab25ed99964112985be1b39e6566d5",
+  "expected_full_sha256": "ed9ed11ee826b3e65f21b3f978722009fa311bafc32b36b541bfdaeb3156f511",
+  "pair_runner_sha256": "20f956612c598da256e24f8de893e7df5132f6dff0221dbc2edcdd7fe2ecce3d",
+  "expected_inventory": {
+    "full": 339,
+    "release": 48,
+    "sanitized": 48,
+    "targeted_binaries": 11,
+    "added_names": [
+      "mhgp7_witness_stack",
+      "mhgp7_witness_stack_duplicate_case",
+      "mhgp7_witness_stack_duplicate_mutant",
+      "mhgp7_witness_stack_empty_case",
+      "mhgp7_witness_stack_empty_mutant",
+      "mhgp7_witness_stack_helper",
+      "mhgp7_witness_stack_lane_mask",
+      "mhgp7_witness_stack_lane_mask_mutant",
+      "mhgp7_witness_stack_mutant_case_mismatch",
+      "mhgp7_witness_stack_semantic",
+      "mhgp7_witness_stack_semantic_lane_mask_mutant",
+      "mhgp7_witness_stack_unknown_argument",
+      "mhgp7_witness_stack_unknown_case",
+      "mhgp7_witness_stack_unknown_mutant",
+      "mhgp7_witness_stack_witness"
+    ]
+  },
+  "selftests": [
+    {
+      "argv": [
+        "timeout",
+        "30s",
+        "python3",
+        "-B",
+        "build/v7_f_tests_20260905/selftest.py"
+      ],
+      "tool_chunk_id": "d4ae04",
+      "exit_code": 0,
+      "tool_wall_seconds": 0.965621298,
+      "output": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.775s\n\nOK\n"
+    },
+    {
+      "argv": [
+        "timeout",
+        "30s",
+        "python3",
+        "-O",
+        "-B",
+        "build/v7_f_tests_20260905/selftest.py"
+      ],
+      "tool_chunk_id": "12fdb1",
+      "exit_code": 0,
+      "tool_wall_seconds": 0.944947256,
+      "output": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.755s\n\nOK\n"
+    }
+  ],
+  "output_authority": "exact text returned by execution tool; combined capture, no separate stdout/stderr claim; tool durations not engine timings",
+  "previews": [
+    {
+      "mode": "full",
+      "command": "timeout 30s python3 -B build/v7_f_tests_20260905/qualification.py --mode full",
+      "exit_code": 0,
+      "tool_chunk_id": "480bb5",
+      "tool_wall_seconds": 0.130821888,
+      "raw_file": "full.preview.json"
+    },
+    {
+      "mode": "release",
+      "command": "timeout 30s python3 -B build/v7_f_tests_20260905/qualification.py --mode release",
+      "exit_code": 0,
+      "tool_chunk_id": "f3c826",
+      "tool_wall_seconds": 0.1318631,
+      "raw_file": "release.preview.json"
+    },
+    {
+      "mode": "sanitized",
+      "command": "timeout 30s python3 -B build/v7_f_tests_20260905/qualification.py --mode sanitized",
+      "exit_code": 0,
+      "tool_chunk_id": "9bd6da",
+      "tool_wall_seconds": 0.118116896,
+      "raw_file": "sanitized.preview.json"
+    }
+  ],
+  "historical_binding_read_only": {
+    "status": "passed",
+    "tool_chunk_id": "79d51d",
+    "exit_code": 0,
+    "tool_wall_seconds": 0.115687079,
+    "protected_C_C_D_E": {
+      "/workspaces/E-HGP/build/v7/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+      "/workspaces/E-HGP/build/v7_c_qualification/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+      "/workspaces/E-HGP/build/v7_meb_qualification/mhgp7": "127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f",
+      "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6"
+    },
+    "engine_runs": 0
+  },
+  "review": {
+    "root": "favorable final source pins; independently repeated nine selftests normal and optimized",
+    "q2_qualification": "favorable static delta/inventory/flags/protection/LastTest review; no execution by reviewer",
+    "pre_execution_defect": "An unbounded E_BUILD text substitution changed two CMAKE_BUILD_TYPE keys to CMAKF_BUILD_TYPE. Detected in static diff by author and root; corrected before any protocol/selftest execution; no CMake/CTest ever received that typo.",
+    "new_regression_guard": "Literal -DCMAKE_BUILD_TYPE=Release required by preview selftest, independent of generated fixture premises",
+    "three_macro_mutations_rejected": [
+      "NO_ALLOC absent semantic",
+      "TESTING absent observer",
+      "NO_ALLOC unexpectedly present observer"
+    ],
+    "unchanged_lasttest_functions": [
+      "read_log",
+      "copy_log",
+      "previous_log",
+      "judge_log",
+      "log_boundary",
+      "archive_current_log",
+      "terminal_pass"
+    ],
+    "full_compile_binding_scope": "CLI only, inherited from E; all eleven compile commands validated in each targeted mode"
+  },
+  "root_later_execution_pins": {
+    "F_sha256": "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85",
+    "build_receipt_sha256": "522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4",
+    "source": "explicit root message after final review; separate GO for engine campaigns; not inferred or executed by preparation"
+  },
+  "manifest_policy": {
+    "explicit_top_level_files_only": true,
+    "excluded": [
+      "release/",
+      "sanitized/",
+      "full_receipts/",
+      "release_receipts/",
+      "sanitized_receipts/",
+      "any future generated build or campaign directory"
+    ],
+    "reason": "Root may run independent qualifications concurrently. Preparation must never read or seal their active artifacts."
+  },
+  "public_status": "not_claimed",
+  "engine_runs": 0,
+  "builds": 0,
+  "gcp": "not_used"
+}

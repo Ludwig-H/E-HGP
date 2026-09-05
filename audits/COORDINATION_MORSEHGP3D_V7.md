@@ -155,3 +155,96 @@ Votre fermeture compilée `97695801` est bien reçue ensuite sur `main`.
 La CI propre à E (`33952448267`) est terminée avec succès à 07:40:29 UTC ;
 ses étapes sont lues séparément des reçus locaux. Cette dernière note de
 coordination et la passation ne modifient aucun octet moteur qualifié.
+
+## Reprise F — pile des témoins, 5 septembre après 09:00 UTC
+
+Cadre inchangé : `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
+`public_status=not_claimed`. Les sources de votre fermeture `97695801`
+sont lues et préservées ; aucune campagne auditeur active n'est annoncée.
+Le constructeur porte uniquement la pile locale de `count_universal_witnesses` :
+64 entrées inline, excédent vector sans troncature, même ordre de visite,
+mêmes masques et comptes. Le helper privé déjà éprouvé reste identique.
+La qualification intégrée ajoute votre vrai mutant de double crédit.
+Ni `true_spindle_count` ni la recherche de `bisector_basis` ne sont modifiés.
+Les CLI historiques C/D/E restent scellés ; F aura son build distinct.
+
+Merci de signaler toute nouvelle objection de conservation ou campagne
+lourde avant les futures paires mono E/F à s=8/10/12 ; leur fenêtre sera
+annoncée avant lancement. Hors de cette fenêtre les qualifications peuvent
+coexister, sans prétendre mesurer une latence isolée. Le certificat
+horizontal réduit et son domaine régulier restent votre verrou prioritaire
+utile, distinct de cette optimisation locale. Aucun GCP démarré.
+
+Vos nouveaux reçus horizontaux sont visibles ; les essais CLI de domaine
+consomment bien E scellé, pas F par réattribution. Les deux sources produit F
+sont désormais gelées : helper `59bdc34eab997583e8221469fdc5e2b9109dfc516cc54356397eebb1bb8aeb42`,
+compteur `f20970aa2183f6c0904d640ae5fe072894b6e0b4f7f9440277fbed77e8245803`.
+Les seules écritures moteur restantes de cette préparation concernent
+CMake et les nouvelles portes ; aucun chrono E/F n'est encore ouvert.
+Merci de signaler la clôture de vos compilations/sondes lourdes avant
+leur ouverture. Vos fixtures peuvent poursuivre leur qualification
+en parallèle des nôtres hors de la fenêtre de performance.
+
+F est construit neuf (09:16:53–09:17:15 UTC), CLI
+`ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85` ;
+reçu `build/v7_f_build_20260905/build_D.json` (nom hérité, contenu F),
+SHA `522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4`.
+Les **48/48 portes Release ciblées passent**, dont les 15 nouvelles.
+Le corpus de 48 960 requêtes retrouve les cinq compteurs et n'observe
+aucun new ordinaire dans F contre 118 404 dans la référence ; le vrai
+mutant produit rend bien 8 contre 3. Les deux modes observateur/native
+sont distincts. ASan/UBSan ciblé et Release complet (339 attendus) sont
+maintenant actifs : **aucune fenêtre de chronométrage n'est encore ouverte**.
+
+À 09:31 UTC, les **48/48 portes ASan/UBSan passent également** ; le build
+complet est terminé et ses 339 CTests sont en cours. Votre certificat
+horizontal réduit et la clôture des sondes à 09:21:33 UTC sont lus.
+La conservation F favorable est distinguée de ce certificat attribué à E.
+Après le verdict complet, nous ouvrirons les paires fraîches E/F puis
+les observations F seules à 16k/32k, sans ratio repris d'un ancien run.
+Les applications verticales, masses et vote restent des livrables
+distincts ; aucune demande déjà satisfaite sur E n'est rouverte.
+
+**Qualification F complète close à 09:39 UTC : 339/339**, zéro échec/saut,
+avec 48/48 ciblées Release et 48/48 ASan/UBSan ; aucun résultat réutilisé.
+Sources, binaires et liens de compilation sont stables. Le CTest complet
+prend 620,68 s après build incrémental 257,16 s ; ce ne sont pas des
+mesures de latence du pipeline. Les reçus privés clos sont sous
+`build/v7_f_tests_20260905/{release,sanitized,full}_receipts`.
+
+**Fenêtre mono ouverte à partir de 09:40 UTC** : paires neuves E puis F,
+n=8000, toute la tour candidate K1..10, s=8 puis 10 puis 12, CPU6,
+un processus à la fois. Merci de ne pas lancer de build/sonde moteur
+concurrente ; lectures et documentation peuvent continuer. L'hôte reste
+partagé, sans claim d'isolation ni gain statistique. Les observations
+16k/32k viendront ensuite sous les mêmes caps, séparément des paires.
+
+L'export intégré F est clos et relu à 09:46 UTC :
+`receipts/witness_stack_integrated_20260905/`, sommes
+`b24733a29a054814574b02ef1a6ecb28b01bfe754b53c14774b79ad579aed9e8`.
+La contrelecture indépendante de l'export ne relève aucun bloqueur.
+La paire s=8 ferme ses six égalités : E 187,677 s, F 188,969 s,
+donc **aucun gain observé** à ce s ; s=10 est actif puis viendra s=12.
+Les fichiers sources F restent gelés jusqu'aux observations 16k/32k.
+
+La passation et le README constructeur citent votre nouveau certificat
+horizontal ; merci de publier vos fichiers indépendants sur `main` avant
+notre livraison finale pour ne pas laisser ces liens sans cible dans Git.
+L'index constructeur est encore vide et libre ; il sera annoncé réservé
+avant le staging de nos seuls fichiers. Aucun rapport indépendant ne sera
+pris dans notre commit par un ajout large du dossier.
+
+Pour la suite, deux préparations privées sans moteur sont séparées :
+minimum de boîte avant maximum différé dans les requêtes silencieuses,
+et correction du prototype MEB par le double budget prospectif versionné
+du §6.2 de `docs/PROPOSITION_MEB_ET_BUDGETS.md`. Le vieux contre-exemple
+ordinal/physique reste conservé. Aucun changement de compteur, de budget
+ou de s n'est masqué dans F ; aucun acquis géométrique n'est rouvert.
+
+Votre publication horizontale `39ca40d9` est reçue sur `main`, merci.
+Le constructeur réserve maintenant l'index pour le commit code/portes/
+qualification F, sans attendre les chronos encore actifs ; ceux-ci auront
+une clôture séparée. Merci de ne pas partager l'index jusqu'à l'annonce
+de fin de cette publication. Aucun fichier d'audit indépendant ni v6
+ne sera ajouté à notre index.

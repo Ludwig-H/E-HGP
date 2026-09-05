@@ -1008,3 +1008,47 @@ mhgp7_gate(mhgp7_meb_lazy_empty_mutant 2 mhgp7_meb_lazy_gate
   ARGS --mutant= TIMEOUT 30)
 mhgp7_gate(mhgp7_meb_lazy_duplicate_mutant 2 mhgp7_meb_lazy_gate
   ARGS --mutant=silent-meb-q3-reject-shell --mutant=silent-meb-q3-reject-shell TIMEOUT 30)
+
+# F: same witness counts, DFS nodes/corners, inline stack and safe overflow.
+# The reference is an explicitly adapted E count-path snapshot, not an oracle.
+mhgp7_executable(mhgp7_witness_stack_gate tests/witness_stack_gate.cpp)
+mhgp7_gate(mhgp7_witness_stack 0 mhgp7_witness_stack_gate
+  EXPECT_PREFIX "witness_stack_gate=passed case=all reason=none mutant=none" TIMEOUT 30)
+mhgp7_gate(mhgp7_witness_stack_helper 0 mhgp7_witness_stack_gate
+  ARGS --case=helper
+  EXPECT_PREFIX "witness_stack_gate=passed case=helper reason=none mutant=none" TIMEOUT 30)
+mhgp7_gate(mhgp7_witness_stack_witness 0 mhgp7_witness_stack_gate
+  ARGS --case=witness
+  EXPECT_PREFIX "witness_stack_gate=passed case=witness reason=none mutant=none" TIMEOUT 30)
+mhgp7_gate(mhgp7_witness_stack_lane_mask 0 mhgp7_witness_stack_gate
+  ARGS --case=lane-mask
+  EXPECT_PREFIX "witness_stack_gate=passed case=lane-mask reason=none mutant=none" TIMEOUT 30)
+mhgp7_gate(mhgp7_witness_stack_lane_mask_mutant 4 mhgp7_witness_stack_gate
+  ARGS --case=lane-mask --mutant=witness-no-lane-mask
+  EXPECT_PREFIX "witness_stack_gate=mutant_killed case=lane-mask reason=witness.lane_mask_double_credit mutant=witness-no-lane-mask" TIMEOUT 30)
+mhgp7_gate(mhgp7_witness_stack_unknown_case 2 mhgp7_witness_stack_gate
+  ARGS --case=unknown TIMEOUT 30)
+mhgp7_gate(mhgp7_witness_stack_empty_case 2 mhgp7_witness_stack_gate
+  ARGS --case= TIMEOUT 30)
+mhgp7_gate(mhgp7_witness_stack_duplicate_case 2 mhgp7_witness_stack_gate
+  ARGS --case=all --case=all TIMEOUT 30)
+mhgp7_gate(mhgp7_witness_stack_unknown_argument 2 mhgp7_witness_stack_gate
+  ARGS --unknown TIMEOUT 30)
+mhgp7_gate(mhgp7_witness_stack_unknown_mutant 2 mhgp7_witness_stack_gate
+  ARGS --case=lane-mask --mutant=missing TIMEOUT 30)
+mhgp7_gate(mhgp7_witness_stack_empty_mutant 2 mhgp7_witness_stack_gate
+  ARGS --case=lane-mask --mutant= TIMEOUT 30)
+mhgp7_gate(mhgp7_witness_stack_duplicate_mutant 2 mhgp7_witness_stack_gate
+  ARGS --case=lane-mask --mutant=witness-no-lane-mask --mutant=witness-no-lane-mask TIMEOUT 30)
+mhgp7_gate(mhgp7_witness_stack_mutant_case_mismatch 2 mhgp7_witness_stack_gate
+  ARGS --case=witness --mutant=witness-no-lane-mask TIMEOUT 30)
+# Native sanitizer companion: no replaceable new/delete interception. It
+# qualifies semantics, never zero allocations or injected allocation failure.
+mhgp7_executable(mhgp7_witness_stack_semantic_gate tests/witness_stack_gate.cpp)
+target_compile_definitions(mhgp7_witness_stack_semantic_gate PRIVATE MHGP7_WITNESS_STACK_NO_ALLOC_OBSERVER=1)
+mhgp7_gate(mhgp7_witness_stack_semantic 0 mhgp7_witness_stack_semantic_gate
+  ARGS --case=witness
+  EXPECT_PREFIX "witness_stack_gate=passed case=witness reason=none mutant=none" TIMEOUT 30)
+mhgp7_gate(mhgp7_witness_stack_semantic_lane_mask_mutant 4 mhgp7_witness_stack_semantic_gate
+  ARGS --case=lane-mask --mutant=witness-no-lane-mask
+  EXPECT_PREFIX "witness_stack_gate=mutant_killed case=lane-mask reason=witness.lane_mask_double_credit mutant=witness-no-lane-mask" TIMEOUT 30)
