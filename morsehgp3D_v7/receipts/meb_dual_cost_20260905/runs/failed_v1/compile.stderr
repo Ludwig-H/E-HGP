@@ -1,0 +1,14 @@
+/workspaces/E-HGP/build/v7_meb_dual_budget_cost/cost_harness.cpp: In function 'void {anonymous}::cost::equal_metrics(const {anonymous}::Metrics&, const {anonymous}::Metrics&)':
+/workspaces/E-HGP/build/v7_meb_dual_budget_cost/cost_harness.cpp:229:11: error: 'const struct {anonymous}::Metrics' has no member named 'main'
+  229 |   check(a.main == b.main && a.boundary == b.boundary && a.pilots == b.pilots &&
+      |           ^~~~
+/workspaces/E-HGP/build/v7_meb_dual_budget_cost/cost_harness.cpp:229:21: error: 'const struct {anonymous}::Metrics' has no member named 'main'
+  229 |   check(a.main == b.main && a.boundary == b.boundary && a.pilots == b.pilots &&
+      |                     ^~~~
+/workspaces/E-HGP/build/v7_meb_dual_budget_cost/cost_harness.cpp: In function 'void {anonymous}::cost::qualify(std::vector<Job>*, const std::vector<{anonymous}::Fixture>&, const std::vector<{anonymous}::Order>&, const std::vector<long unsigned int>&, CallLedger*, bool)':
+/workspaces/E-HGP/build/v7_meb_dual_budget_cost/cost_harness.cpp:313:22: error: 'struct {anonymous}::Metrics' has no member named 'main'
+  313 |   check(main_metrics.main == 9216 && pair_metrics.main == 12 &&
+      |                      ^~~~
+/workspaces/E-HGP/build/v7_meb_dual_budget_cost/cost_harness.cpp:313:51: error: 'struct {anonymous}::Metrics' has no member named 'main'
+  313 |   check(main_metrics.main == 9216 && pair_metrics.main == 12 &&
+      |                                                   ^~~~

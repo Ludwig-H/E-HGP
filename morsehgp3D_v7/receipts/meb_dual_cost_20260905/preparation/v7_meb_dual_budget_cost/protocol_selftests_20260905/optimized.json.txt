@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_cost/selftest.py"
+  ],
+  "elapsed_seconds": 9.49199205399782,
+  "error": null,
+  "label": "optimized",
+  "returncode": 0,
+  "stderr_sha256": "a1a47be95bbbcbe9fb506b1004834ecf8d6e308902be0bd48dc55aed5c1e86fd",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

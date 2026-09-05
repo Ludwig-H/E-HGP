@@ -1,0 +1,185 @@
+#!/usr/bin/env python3
+"""Mock-only cost publication tests: no compiler, engine or subprocess."""
+from contextlib import ExitStack, redirect_stdout
+import gzip
+import importlib.util
+import io
+import json
+from pathlib import Path
+import tempfile
+import types
+import unittest
+from unittest.mock import patch
+
+BASE = Path(__file__).resolve().parent
+SPEC = importlib.util.spec_from_file_location("cost_export_under_test", BASE / "export.py")
+E = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(E)
+
+
+class Guards(unittest.TestCase):
+    def setUp(self):
+        self.context = ExitStack()
+        self.addCleanup(self.context.close)
+        self.root = Path(self.context.enter_context(tempfile.TemporaryDirectory(prefix="cost-export-mock-")))
+        for name in ("Popen", "run", "call", "check_call", "check_output"):
+            self.context.enter_context(patch("subprocess." + name, side_effect=RuntimeError("subprocess_forbidden")))
+
+    def write(self, name, data):
+        path = self.root / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("xb") as stream:
+            stream.write(data)
+        return path
+
+    def test_preview_and_pin_admission(self):
+        output = io.StringIO()
+        with patch.object(E, "execute", side_effect=RuntimeError("execution_forbidden")), redirect_stdout(output):
+            self.assertEqual(E.main([]), 0)
+            with self.assertRaisesRegex(RuntimeError, "explicit_exporter_pin_required"):
+                E.main(["--execute"])
+        value = json.loads(output.getvalue())
+        self.assertEqual((value["input_artifacts"], value["source_snapshots"], value["compressed_artifacts"]), (151, 73, 2))
+        self.assertFalse(value["writes"])
+        self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_deterministic_gzip_preserves_literal_bytes(self):
+        raw = b"CRLF\r\nLF\nNUL\x00" * 100
+        first, second = E.encoded(raw, True), E.encoded(raw, True)
+        self.assertEqual(first, second)
+        self.assertEqual(first[:10], b"\x1f\x8b\x08\x00\x00\x00\x00\x00\x02\xff")
+        self.assertEqual(gzip.decompress(first), raw)
+        self.assertEqual(E.encoded(raw, False), raw)
+        with self.assertRaises((EOFError, OSError)):
+            E.restored(first[:-4], True)
+
+    def test_compressed_copy_and_changed_header_rejected(self):
+        raw = b"one\r\ntwo\n" * 100
+        source = self.write("input", raw)
+        row = dict(source=str(source), target="raw.stdout.gz", sha256=E.sha(raw), compressed=True)
+        dest = self.root / "archive"
+        copied = E.copy_artifact(row, dest)
+        E.verify_copies(dest, [copied], True)
+        self.assertNotEqual(copied["raw_sha256"], copied["archived_sha256"])
+        self.assertEqual(copied["raw_bytes"], len(raw))
+        with self.assertRaises(FileExistsError):
+            E.copy_artifact(row, dest)
+        replacement = io.BytesIO()
+        with gzip.GzipFile(filename="leaked-name", mode="wb", fileobj=replacement, mtime=0, compresslevel=9) as stream:
+            stream.write(raw)
+        altered = replacement.getvalue()
+        with (dest / row["target"]).open("wb") as stream:
+            stream.write(altered)
+        changed = dict(copied, archived_sha256=E.sha(altered), archived_bytes=len(altered))
+        with self.assertRaisesRegex(RuntimeError, "gzip_header_or_transform"):
+            E.verify_copies(dest, [changed], False)
+
+    def test_raw_pin_and_ELF_refused_before_copy(self):
+        for i, raw in enumerate((b"\x7fELFfake", b"changed")):
+            source = self.write("input" + str(i), raw)
+            row = dict(source=str(source), target="never", sha256=E.sha(raw) if i == 0 else "0" * 64, compressed=True)
+            with self.assertRaisesRegex(RuntimeError, "raw_source_drift_or_ELF"):
+                E.copy_artifact(row, self.root / "archive")
+            self.assertFalse((self.root / "archive").exists())
+
+    def failed_fixture(self, compile_rc=1, status="failed"):
+        folder = self.root / "v1/build_20260905"
+        folder.mkdir(parents=True)
+        commands = [("compiler", ["compiler", "--version"], 0), ("compile", ["compiler", "input.cpp"], 0)]
+        artifacts, command_records = {}, {}
+
+        def emit(name, data):
+            self.write("v1/build_20260905/" + name, data)
+            artifacts[name] = dict(sha256=E.sha(data), bytes=len(data))
+
+        for label, argv, _ in commands:
+            stdout, stderr = (b"version", b"") if label == "compiler" else (b"", b"macro failure")
+            result = dict(argv=argv, expected_rc=0, returncode=compile_rc if label == "compile" else 0,
+                          status="completed", error=None, timed_out=False,
+                          stdout_sha256=E.sha(stdout), stderr_sha256=E.sha(stderr))
+            command_records[label] = result
+            emit(label + ".result.json", json.dumps(result).encode())
+            emit(label + ".attempt.json", json.dumps(dict(argv=argv, expected_rc=0, cwd=str(E.ROOT))).encode())
+            emit(label + ".spawned.json", b'{"pid": 123, "pgid": 123}')
+            emit(label + ".stdout", stdout)
+            emit(label + ".stderr", stderr)
+        for i in range(6):
+            emit("metadata" + str(i), b"metadata")
+        receipt = dict(status=status, errors=["RuntimeError: unexpected_command_terminal: compile"],
+                       binary_sha256=None, build=None, sources_stable=True, source_before={}, source_after={},
+                       commands=command_records, artifacts=artifacts)
+        path = self.write("v1/build_20260905/receipt.json", json.dumps(receipt).encode())
+        self.context.enter_context(patch.object(E, "V1", self.root / "v1"))
+        self.context.enter_context(patch.object(E, "FAILED_SHA", E.digest(path)))
+        return types.SimpleNamespace(build_commands=lambda: commands, json_bytes=json.loads)
+
+    def test_original_compile_failure_preserved(self):
+        receipt, data = E.failed_capture(self.failed_fixture())
+        self.assertEqual(receipt["status"], "failed")
+        self.assertEqual(receipt["commands"]["compile"]["expected_rc"], 0)
+        self.assertEqual(receipt["commands"]["compile"]["returncode"], 1)
+        self.assertEqual(len(data), 16)
+
+    def test_changed_compile_code_cannot_pass(self):
+        with self.assertRaisesRegex(RuntimeError, "failed_command_identity_changed"):
+            E.failed_capture(self.failed_fixture(compile_rc=0))
+
+    def test_failed_receipt_cannot_be_promoted(self):
+        with self.assertRaisesRegex(RuntimeError, "v1_failure_identity_changed"):
+            E.failed_capture(self.failed_fixture(status="completed"))
+
+    def prepare_export(self):
+        for name in ("export.py", "selftest.py", "README.md", "preparation.json"):
+            self.write("exporter/" + name, (name + "\n").encode())
+        helper = self.write("helper.py", b"# helper\n")
+        restore = self.write("restore.py", b"# restore\n")
+        source = self.write("source.cpp", b"// source\r\n")
+        stdout = self.write("measurement.stdout", b"raw\r\n" * 100)
+        rows = [dict(source=str(source), target="source_tree/source.cpp.txt", restore_path="source.cpp",
+                     sha256=E.digest(source), kind="inert_source_snapshot", compressed=False),
+                dict(source=str(stdout), target="runs/measurement.stdout.gz", sha256=E.digest(stdout), kind="closed_capture", compressed=True)]
+        replacements = dict(BASE=self.root / "exporter", DESTINATION=self.root / "public", HELPER=helper,
+                            HELPER_SHA=E.digest(helper), RESTORE=restore, RESTORE_SHA=E.digest(restore))
+        for key, value in replacements.items():
+            self.context.enter_context(patch.object(E, key, value))
+        self.context.enter_context(patch.object(E, "review_inputs", return_value=[{"synthetic": True}]))
+        self.context.enter_context(patch.object(E, "build_plan", return_value=(rows, [])))
+        return E.digest(E.BASE / "export.py"), stdout
+
+    def test_mock_export_closes_and_never_overwrites(self):
+        pin, _ = self.prepare_export()
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(E.execute(pin), 0)
+        closed = E.verify_archive(E.DESTINATION)
+        self.assertEqual((closed["files"], closed["copied_artifacts"]), (15, 8))
+        with self.assertRaisesRegex(RuntimeError, "public_destination_already_exists"):
+            E.execute(pin)
+        with (E.DESTINATION / "runs/measurement.stdout.gz").open("ab") as stream:
+            stream.write(b"late")
+        with self.assertRaisesRegex(RuntimeError, "sealed_artifact_drift"):
+            E.verify_archive(E.DESTINATION)
+
+    def test_late_source_drift_keeps_failed_archive(self):
+        pin, raw_source = self.prepare_export()
+        original = E.copy_artifact
+
+        def mutate(row, folder):
+            copied = original(row, folder)
+            if row["target"] == "exporter/restore_sources.py.txt":
+                with raw_source.open("ab") as stream:
+                    stream.write(b"late source mutation")
+            return copied
+
+        with patch.object(E, "copy_artifact", side_effect=mutate):
+            with self.assertRaisesRegex(RuntimeError, "source_changed_during_publication"):
+                E.execute(pin)
+        self.assertTrue((E.DESTINATION / "EXPORT_FAILURE.json").is_file())
+        self.assertFalse((E.DESTINATION / "manifest.json").exists())
+
+    def test_incomplete_projection_refused(self):
+        with self.assertRaisesRegex(RuntimeError, "cost_source_or_capture_projection"):
+            E.build_plan([])
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

@@ -1,0 +1,415 @@
+#!/usr/bin/env python3
+"""Create-only archive of failed cost v1 and closed build/measurement v2."""
+from __future__ import annotations
+
+import argparse
+from datetime import datetime
+import gzip
+import io
+import json
+from pathlib import Path
+import types
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+DESTINATION = ROOT / "morsehgp3D_v7/receipts/meb_dual_cost_20260905"
+HELPER = ROOT / "build/v7_meb_dual_export/export.py"
+HELPER_SHA = "5739bc57d77848950d1169cb150a532153ef2f75c4a40229a87b5cedecdd0530"
+RESTORE = ROOT / "build/v7_meb_dual_export/restore_sources.py"
+RESTORE_SHA = "1cf22c1f57effb1c9e21dc39db9f4f3d1991674afa8be548647fc5620b01f5a3"
+V1 = ROOT / "build/v7_meb_dual_budget_cost"
+V2 = ROOT / "build/v7_meb_dual_budget_cost_v2"
+RUNNER_PINS = {V1: "e71cfdb31d1d219d02590a3ef3fa650b84a058a7e30859688cdb59c6f23f7477",
+               V2: "8b9ae71ef0419acea000897c950860976da2e04c7efbadd123c8996e1fdb8032"}
+FAILED_SHA = "247c952cd6000812ed0bff04390a0848c81e527c74c0e0ac26244144f4c83c15"
+BUILD_SHA = "de6de29f55ab55d8edd64f9e3307d4748688635ca7338c36105555da39e0574f"
+MEASURE_SHA = "874f100ffb1d65956f6d640c5e7ab838a81e9f5c7900f7c1d69b14504235c208"
+BINARY_SHA = "56e022c817d2e726eb2e3b135e78e577bbdf344ebd0ff352d64d1121300fd976"
+DISASSEMBLY_SHA = "52392c6a8b9a8a230133113fdad0bfa9ca64b25291600349b9905be9f126c9c4"
+MEASUREMENT_SHA = "2c20ceaf7a8a4757af2ad78554becf2e584f1c397e92860800d6c746de24469f"
+REVIEW = V2 / "disassembly_review_root.md"
+REVIEW_SHA = "964d5ea703be17335e58307e6c22176778c12053f87273745cff6610890a6dd6"
+GEOMETRY = ROOT / "morsehgp3D_v7/receipts/meb_dual_geometry_20260905"
+GEOMETRY_MANIFEST_SHA = "571b565ebc51f40d361cf8ed2d20c1f0e14f704524cef8e407b245353d1b1a4d"
+GEOMETRY_SUMS_SHA = "2abbc2130bb3023122293afaa451dcb0bc3f4d367db5b1f179800fb4403d1605"
+PREP_SUMS = {V1: (13, "4451ca4da9525aca345abaf100e7288c1096cc57e7d0d829f72ea7c896517090"),
+             V2: (14, "b314e4881a8227f64f92819571c052b09b4315c481a551d3dd00224a5478da26")}
+EXCLUDED = {Path("/usr/bin/x86_64-linux-gnu-g++-13"):
+                "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+            Path("/usr/bin/x86_64-linux-gnu-objdump"):
+                "d0041e7511460b9ebfd95ce4f9d93c7ffea398ffc1cb2c316a220dd8e533db3d",
+            ROOT / "build/v7_f_qualification/mhgp7":
+                "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85"}
+COMPRESSED = {V2 / "build_20260905/disassembly.stdout": DISASSEMBLY_SHA,
+              V2 / "run_20260905/measurement.stdout": MEASUREMENT_SHA}
+
+
+def load_pinned(path, expected, name):
+    import hashlib
+    data = path.read_bytes()
+    if path.is_symlink() or hashlib.sha256(data).hexdigest() != expected:
+        raise RuntimeError("module_pin_mismatch: " + str(path))
+    module = types.ModuleType(name)
+    module.__file__ = str(path)
+    exec(compile(data, str(path), "exec"), module.__dict__)
+    return module
+
+
+E = load_pinned(HELPER, HELPER_SHA, "closed_geometry_export_helpers")
+require, read_bytes, digest, sha = E.require, E.read_bytes, E.digest, E.sha
+read_json, safe_relative, save = E.read_json, E.safe_relative, E.save
+
+
+def failed_capture(runner):
+    folder = V1 / "build_20260905"
+    require(digest(folder / "receipt.json") == FAILED_SHA, "failed_receipt_pin_mismatch")
+    receipt = read_json(folder / "receipt.json")
+    require(receipt["status"] == "failed" and
+            receipt["errors"] == ["RuntimeError: unexpected_command_terminal: compile"] and
+            receipt["binary_sha256"] is None and receipt["build"] is None and
+            receipt["sources_stable"] is True and receipt["source_before"] == receipt["source_after"],
+            "v1_failure_identity_changed")
+    require(len(receipt["artifacts"]) == 16 and
+            {p.name for p in folder.iterdir()} == set(receipt["artifacts"]) | {"receipt.json"},
+            "failed_capture_inventory")
+    data = {}
+    for name, row in receipt["artifacts"].items():
+        require(len(safe_relative(name).parts) == 1, "nonflat_failed_artifact")
+        data[name] = read_bytes(folder / name)
+        require(sha(data[name]) == row["sha256"] and len(data[name]) == row["bytes"], "failed_artifact_drift")
+    commands = runner.build_commands()[:2]
+    require(set(receipt["commands"]) == {"compiler", "compile"}, "failed_command_inventory")
+    for label, argv, expected in commands:
+        result, attempt = (runner.json_bytes(data[label + suffix]) for suffix in (".result.json", ".attempt.json"))
+        spawned = runner.json_bytes(data[label + ".spawned.json"])
+        require(result == receipt["commands"][label] and result["argv"] == attempt["argv"] == argv and
+                result["expected_rc"] == attempt["expected_rc"] == expected == 0 and
+                result["returncode"] == (1 if label == "compile" else 0) and
+                result["status"] == "completed" and result["error"] is None and result["timed_out"] is False and
+                attempt["cwd"] == str(ROOT) and type(spawned["pid"]) is int and spawned["pid"] > 0 and
+                spawned["pgid"] == spawned["pid"], "failed_command_identity_changed")
+        for stream in ("stdout", "stderr"):
+            require(sha(data[label + "." + stream]) == result[stream + "_sha256"], "failed_command_stream_drift")
+    require(data["compile.stdout"] == b"" and bool(data["compile.stderr"]), "failed_compile_evidence_missing")
+    return receipt, data
+
+
+def environment_and_scope(receipt, data, runner, cpu, seconds, stage):
+    require(receipt["schema"] == "mhgp7-private-dual-budget-cost-capture-v1" and
+            receipt["stage"] == stage and receipt["measurement_executed"] is (stage == "measure") and
+            receipt["deadline_seconds"] == seconds and receipt["gcp_used"] is False and
+            receipt["public_status"] == "not_claimed" and
+            receipt["scope"] == "private_local_O2_helper_plus_capture_not_CLI_or_tower",
+            "cost_capture_scope_changed")
+    elapsed = (datetime.fromisoformat(receipt["finished_at"]) - datetime.fromisoformat(receipt["started_at"])).total_seconds()
+    require(0 <= elapsed <= seconds, "recorded_deadline_exceeded")
+    before, after, restored = (runner.json_bytes(data[name]) for name in
+                              ("environment.json", "environment_after.json", "affinity_restored.json"))
+    require(before["cpu_affinity"] == after["cpu_affinity"] == [cpu] and
+            before["hardware"] == after["hardware"] and
+            before["hardware"]["selected_cpu"]["processor"] == str(cpu) and
+            restored["cpu_affinity"] == before["affinity_before"] and
+            before["thread_values_effective"] == {name: "1" for name in runner.THREAD_ENV} and
+            set(before["forbidden_overrides"]) == set(runner.G.FORBIDDEN_ENV) and
+            not any(before["forbidden_overrides"].values()), "recorded_environment_drift")
+    for label in receipt["commands"]:
+        attempt = runner.json_bytes(data[label + ".attempt.json"])
+        require(attempt["cpu_affinity"] == [cpu] and 0 < attempt["timeout_seconds"] <= seconds,
+                "recorded_command_cpu_or_deadline")
+
+
+def review_inputs():
+    require(digest(GEOMETRY / "manifest.json") == GEOMETRY_MANIFEST_SHA and
+            digest(GEOMETRY / "SHA256SUMS") == GEOMETRY_SUMS_SHA, "public_geometry_authority_drift")
+    E.verify_archive(GEOMETRY)
+    require(digest(REVIEW) == REVIEW_SHA, "root_disassembly_review_drift")
+    runners = {base: load_pinned(base / "run_cost.py", pin, "cost_" + base.name)
+               for base, pin in RUNNER_PINS.items()}
+    R = runners[V2]
+    geometry = R.admit_geometry(R.GEOMETRY_RECEIPT_SHA)
+    sources = {base: runner.source_snapshot(RUNNER_PINS[base]) for base, runner in runners.items()}
+    build = R.admit_build(BUILD_SHA, BINARY_SHA, DISASSEMBLY_SHA, R.GEOMETRY_RECEIPT_SHA, sources[V2])
+    results = []
+    for name, base, folder_name, pin, cpu, seconds, expected_count in (
+            ("failed_v1", V1, "build_20260905", FAILED_SHA, 0, 60, 16),
+            ("build_v2", V2, "build_20260905", BUILD_SHA, 0, 60, 25),
+            ("measure_v2", V2, "run_20260905", MEASURE_SHA, 6, 120, 13)):
+        runner, folder = runners[base], base / folder_name
+        receipt, data = failed_capture(runner) if name == "failed_v1" else runner.closed_capture(folder, pin)
+        stage = "measure" if name == "measure_v2" else "build"
+        environment_and_scope(receipt, data, runner, cpu, seconds, stage)
+        require(len(receipt["artifacts"]) == expected_count and
+                receipt["source_before"] == receipt["source_after"] == sources[base] and
+                runner.json_bytes(data["inputs_before.json"]) == runner.json_bytes(data["inputs_after.json"]) == sources[base] and
+                receipt["geometry"] == geometry, "capture_source_or_geometry_drift")
+        judgment = {"status": "failed_compile_preserved_not_promoted"} if name == "failed_v1" else {"status": "build_completed_not_measurement"}
+        if name == "build_v2":
+            require(receipt["build"] is None, "build_receipt_recursive_binding")
+        if name == "measure_v2":
+            require(receipt["build"] == build and receipt["binary_sha256"] == BINARY_SHA and
+                    runner.json_bytes(data["binary_before.json"]) == runner.json_bytes(data["binary_after.json"]) == {"sha256": BINARY_SHA},
+                    "measurement_build_or_binary_drift")
+            runner.command_evidence(receipt, data, [("measurement", [str(runner.BINARY), "--measure", runner.GEOMETRY_RECEIPT_SHA], 0)])
+            require(sha(data["measurement.stdout"]) == MEASUREMENT_SHA, "measurement_raw_pin")
+            judgment = runner.judge_measurement(data["measurement.stdout"], data["measurement.stderr"], runner.GEOMETRY_RECEIPT_SHA)
+            require(judgment == runner.json_bytes(data["judgment.json"]), "saved_measurement_judgment_drift")
+        dependencies = runner.dependency_binding(data["dependencies.d"], sources[base]) if stage == "build" else None
+        payload = {str(folder / n): item["sha256"] for n, item in receipt["artifacts"].items() if n != "cost_harness"}
+        payload[str(folder / "receipt.json")] = pin
+        results.append(dict(name=name, historical_status=receipt["status"], payload=payload, sources=sources[base],
+                            judgment=judgment, dependency_count=len(dependencies) if dependencies else None,
+                            failed_depfile_is_not_a_successful_compile=(name == "failed_v1")))
+    require(digest(R.BINARY) == BINARY_SHA and
+            all(runner.source_snapshot(RUNNER_PINS[base]) == sources[base] for base, runner in runners.items()),
+            "terminal_source_or_binary_drift")
+    return results
+
+
+def build_plan(reviews):
+    sources, rows = {}, []
+    for review in reviews:
+        for name, pin in review["sources"].items():
+            require(name not in sources or sources[name] == pin, "conflicting_source_pins")
+            sources[name] = pin
+        for name, pin in review["payload"].items():
+            path = Path(name)
+            compressed = path in COMPRESSED
+            require(not compressed or COMPRESSED[path] == pin, "compression_input_pin")
+            rows.append(dict(source=name, target="runs/" + review["name"] + "/" + path.name + (".gz" if compressed else ""),
+                             sha256=pin, kind="closed_capture", compressed=compressed))
+    require(len(sources) == 76 and len(rows) == 56, "cost_source_or_capture_projection")
+    exclusions = []
+    for name, pin in sorted(sources.items()):
+        path = Path(name)
+        if path in EXCLUDED:
+            require(pin == EXCLUDED[path] and digest(path) == pin and read_bytes(path).startswith(b"\x7fELF"), "excluded_ELF_drift")
+            exclusions.append(dict(path=name, sha256=pin))
+        else:
+            relative = str(path.relative_to(ROOT))
+            rows.append(dict(source=name, target="source_tree/" + relative + ".txt", restore_path=relative,
+                             sha256=pin, kind="inert_source_snapshot", compressed=False))
+    require(sum(row["kind"] == "inert_source_snapshot" for row in rows) == 73 and len(exclusions) == 3,
+            "cost_source_snapshot_count")
+    exclusions.append(dict(path=str(V2 / "build_20260905/cost_harness"), sha256=BINARY_SHA))
+    for base, (count, expected) in PREP_SUMS.items():
+        sums = base / "SHA256SUMS"
+        require(digest(sums) == expected, "preparation_sums_drift")
+        lines = read_bytes(sums).decode("utf-8").splitlines()
+        require(len(lines) == count, "preparation_inventory_count")
+        prepared = {}
+        for line in lines:
+            pin, name = line.split("  ", 1)
+            path = base / safe_relative(name)
+            require(path not in prepared and digest(path) == pin, "preparation_file_changed_or_duplicate")
+            prepared[path] = pin
+        prepared[sums] = expected
+        for path, pin in prepared.items():
+            if str(path) not in sources:
+                rows.append(dict(source=str(path), target="preparation/" + base.name + "/" + str(path.relative_to(base)) + ".txt",
+                                 sha256=pin, kind="closed_preparation", compressed=False))
+    rows.append(dict(source=str(REVIEW), target="review/disassembly_review_root.md.txt", sha256=REVIEW_SHA,
+                     kind="root_pre_measurement_review", compressed=False))
+    require(len(rows) == 151 and len({r["target"] for r in rows}) == 151 and sum(r["compressed"] for r in rows) == 2,
+            "cost_copy_projection_or_compression_count")
+    return rows, exclusions
+
+
+def encoded(data, compressed):
+    if not compressed:
+        return data
+    output = io.BytesIO()
+    with gzip.GzipFile(filename="", mode="wb", fileobj=output, compresslevel=9, mtime=0) as stream:
+        stream.write(data)
+    return output.getvalue()
+
+
+def restored(data, compressed):
+    return gzip.decompress(data) if compressed else data
+
+
+def copy_artifact(row, folder):
+    raw = read_bytes(Path(row["source"]))
+    require(sha(raw) == row["sha256"] and not raw.startswith(b"\x7fELF"), "raw_source_drift_or_ELF")
+    archive = encoded(raw, row["compressed"])
+    require(restored(archive, row["compressed"]) == raw, "compression_roundtrip_failure")
+    target = folder / safe_relative(row["target"])
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("xb") as stream:
+        stream.write(archive)
+    require(read_bytes(target) == archive and restored(read_bytes(target), row["compressed"]) == raw and
+            read_bytes(Path(row["source"])) == raw, "copy_or_raw_source_changed")
+    return dict(row, raw_bytes=len(raw), raw_sha256=sha(raw), archived_bytes=len(archive), archived_sha256=sha(archive),
+                transformation="gzip_level9_mtime0_filename_empty_no_LF_change" if row["compressed"] else "byte_exact_no_LF_change")
+
+
+def verify_copies(folder, provenance, check_sources):
+    for row in provenance:
+        archive = read_bytes(folder / safe_relative(row["target"]))
+        require(len(archive) == row["archived_bytes"] and sha(archive) == row["archived_sha256"], "archived_copy_drift")
+        raw = restored(archive, row["compressed"])
+        require(len(raw) == row["raw_bytes"] and sha(raw) == row["raw_sha256"] == row["sha256"] and
+                not raw.startswith(b"\x7fELF"), "decompressed_copy_or_raw_pin_drift")
+        if row["compressed"]:
+            require(archive[:10] == b"\x1f\x8b\x08\x00\x00\x00\x00\x00\x02\xff" and
+                    row["transformation"] == "gzip_level9_mtime0_filename_empty_no_LF_change", "gzip_header_or_transform")
+        else:
+            require(row["transformation"] == "byte_exact_no_LF_change", "unexpected_copy_transform")
+        if check_sources:
+            require(read_bytes(Path(row["source"])) == raw, "source_changed_during_publication")
+
+
+def verify_archive(folder):
+    require(not (folder / "EXPORT_FAILURE.json").exists(), "failed_archive_not_closed")
+    manifest = read_json(folder / "manifest.json")
+    require(manifest["schema"] == "mhgp7-private-cost-publication-v1" and
+            manifest["status"] == "completed_export_including_historical_failed_build" and
+            manifest["public_status"] == "not_claimed", "cost_archive_manifest_status")
+    entries = manifest["entries"]
+    names = [str(safe_relative(row["path"])) for row in entries]
+    files = list(folder.rglob("*"))
+    require(len(names) == len(set(names)) and not any(p.is_symlink() for p in files) and
+            {str(p.relative_to(folder)) for p in files if p.is_file()} == set(names) | {"manifest.json", "SHA256SUMS"},
+            "archive_inventory_mismatch")
+    for row in entries:
+        data = read_bytes(folder / row["path"])
+        require(sha(data) == row["sha256"] and len(data) == row["bytes"], "sealed_artifact_drift")
+    provenance = read_json(folder / "provenance.json")
+    require(len(provenance) == manifest["copied_artifacts"], "provenance_count_mismatch")
+    verify_copies(folder, provenance, False)
+    expected = "".join(digest(folder / n) + "  " + n + "\n" for n in sorted(names + ["manifest.json"]))
+    require(read_bytes(folder / "SHA256SUMS") == expected.encode(), "archive_sums_mismatch")
+    return dict(files=len(names) + 2, copied_artifacts=len(provenance), manifest_sha256=digest(folder / "manifest.json"),
+                SHA256SUMS_sha256=digest(folder / "SHA256SUMS"))
+
+
+def execute(expected):
+    require(not DESTINATION.exists(), "public_destination_already_exists")
+    require(digest(BASE / "export.py") == expected, "exporter_pin_mismatch")
+    reviews = review_inputs()
+    rows, exclusions = build_plan(reviews)
+    snapshots = {BASE / name: name for name in ("export.py", "selftest.py", "README.md", "preparation.json")}
+    snapshots.update({HELPER: "geometry_export.py", RESTORE: "restore_sources.py"})
+    require(digest(RESTORE) == RESTORE_SHA and digest(HELPER) == HELPER_SHA, "reused_helpers_drift")
+    for path, name in snapshots.items():
+        rows.append(dict(source=str(path), target="exporter/" + name + ".txt", sha256=digest(path),
+                         kind="inert_exporter_snapshot", compressed=False))
+    require(all(digest(Path(row["source"])) == row["sha256"] for row in rows), "prepublication_source_drift")
+    DESTINATION.mkdir(parents=True, exist_ok=False)
+    try:
+        provenance = [copy_artifact(row, DESTINATION) for row in rows]
+        save(DESTINATION / "provenance.json", provenance)
+        save(DESTINATION / "excluded_artifacts.json", exclusions)
+        save(DESTINATION / "validation.json", dict(status="historical_failed_and_completed_captures_replayed_read_only",
+             reviews=reviews, engine_runs=0, public_status="not_claimed", geometry_reference=dict(
+             path="../meb_dual_geometry_20260905", manifest_sha256=GEOMETRY_MANIFEST_SHA, SHA256SUMS_sha256=GEOMETRY_SUMS_SHA)))
+        save(DESTINATION / "reconstruction_manifest.json", [dict(archived_path=row["target"], restored_path=row["restore_path"], sha256=row["sha256"])
+             for row in rows if row["kind"] == "inert_source_snapshot"])
+        with (DESTINATION / "README.md").open("x", encoding="utf-8") as stream:
+            stream.write(PUBLIC_README)
+        require(review_inputs() == reviews, "qualification_changed_at_export_boundary")
+        verify_copies(DESTINATION, provenance, True)
+        entries = [dict(path=str(p.relative_to(DESTINATION)), sha256=digest(p), bytes=len(read_bytes(p)))
+                   for p in sorted(DESTINATION.rglob("*")) if p.is_file()]
+        save(DESTINATION / "manifest.json", dict(schema="mhgp7-private-cost-publication-v1",
+             status="completed_export_including_historical_failed_build", entries=entries, copied_artifacts=len(provenance),
+             source_snapshots=73, compressed_artifacts=2, excluded_ELF=4, engine_runs=0, public_status="not_claimed"))
+        with (DESTINATION / "SHA256SUMS").open("x", encoding="utf-8") as stream:
+            for path in sorted(DESTINATION.rglob("*")):
+                if path.is_file() and path.name != "SHA256SUMS":
+                    stream.write(digest(path) + "  " + str(path.relative_to(DESTINATION)) + "\n")
+        closure = verify_archive(DESTINATION)
+        verify_copies(DESTINATION, provenance, True)
+        print(json.dumps(dict(status="completed_export_including_historical_failed_build", destination=str(DESTINATION),
+                             closure=closure, engine_runs=0)))
+        return 0
+    except BaseException as error:
+        save(DESTINATION / "EXPORT_FAILURE.json", dict(status="failed_or_invalid", error=f"{type(error).__name__}: {error}",
+             partial_artifacts_preserved=True, never_resume=True))
+        raise
+
+
+PUBLIC_README = """# Coût local MEB à deux budgets : captures historiques distinctes
+
+L'export est clos ; cela ne transforme pas le premier build en succès.
+`runs/failed_v1` conserve l'échec de compilation rc1 (macro objet main).
+`runs/build_v2` conserve le build corrigé, sans mesure à ce stade.
+`runs/measure_v2` conserve la seule campagne autorisée ensuite : deux chauffes,
+sept passages, 9 347 jobs, 9 351 états, 58 491 appels top-level par bras/passage.
+Les égalités F/Trace/NoObserver avant/après et les captures chronométrées ont
+été rejugées depuis les bruts ; pas de nouvelle compilation ni mesure à l'export.
+Aucune future campagne de répétitions différentes n'est incluse.
+
+Deux fichiers seulement sont compressés : `disassembly.stdout.gz` et
+`measurement.stdout.gz`. Gzip level9, mtime0, filename vide ; aucun changement
+de ligne. `provenance.json` distingue hashes/tailles bruts et compressés.
+La décompression a été confrontée byte-exactement au brut d'origine et à
+son pin. Tous les autres fichiers copiés sont byte-exacts.
+
+La note `review/disassembly_review_root.md.txt` est la lecture root préalable
+du désassemblage, pas une preuve d'isolation du matériel. Le temps comprend
+resets, enveloppes, copies, barrières et captures : ce n'est pas le helper nu
+ni le CLI Release. Des lots sont trop courts selon le seuil du protocole ;
+tous les temps et strates restent archivés, sans sélection d'un meilleur P.
+Aucun gain global, SLO 50k/1 s/100 ms, résultat massif ou GPU n'est revendiqué.
+
+La qualification géométrique Trace est référencée dans l'archive sœur
+`../meb_dual_geometry_20260905` (manifeste 571b565e, sommes 2abbc213 ; pins
+complets dans validation.json), sans copier à nouveau ses 161 fichiers.
+La qualification native NoObserver appartient à la capture coût v2,
+pas rétroactivement à cette géométrie historique. `public_status=not_claimed`.
+
+## Reconstruction manuelle, non hermétique
+
+Les 73 snapshots inertes `source_tree/**/*.txt` conservent une fermeture
+locale autonome des sources F, prototypes, corpus et harnais v1/v2.
+Après contrôle de SHA256SUMS, l'outil déclaré restaure ces sources dans
+un répertoire entièrement neuf, sans exécuter les runners :
+
+```text
+python3 -B /absolute/archive/exporter/restore_sources.py.txt --archive /absolute/archive --destination /absolute/fresh-source-tree
+```
+
+Depuis ce nouvel arbre, commandes manuelles reconstructibles v2 :
+
+```text
+mkdir manual_build
+c++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror -pthread -fno-lto -I morsehgp3D_v7 build/v7_meb_dual_budget_cost_v2/cost_harness.cpp -o manual_build/cost_harness
+objdump -d -C manual_build/cost_harness
+```
+
+Le compilateur historique est GCC 13.3.0 sur Linux x86-64. Compilateur,
+objdump, CLI F protégé et binaire du harnais ne sont pas distribués ; leurs
+pins figurent dans excluded_artifacts.json. Les bibliothèques système ne
+sont pas livrées. Cette recompilation manuelle n'a pas été exécutée par
+l'exporteur et ne reproduit pas la capture historique.
+
+Les runners/depfiles/reçus gardent leurs chemins absolus `/workspaces/E-HGP`,
+sorties et pins originaux : ils ne sont PAS relocalisables ni hermétiques.
+Une nouvelle mesure exige un protocole réadmis, une revue du nouveau binaire
+et un GO distinct ; un appel brut du harnais n'est pas une capture certifiée.
+Les sorties gzip se lisent par décompression standard sans conversion LF.
+
+`manifest.json` inventorie le contenu hors lui-même et SHA256SUMS ; les
+sommes couvrent tout, manifeste inclus, hors elles-mêmes. EXPORT_FAILURE.json,
+inventaire divergent ou sommes invalides interdisent toute clôture.
+Le double budget n'est pas intégré au produit. GCP non utilisé.
+"""
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--expected-exporter-sha256")
+    args = parser.parse_args(argv)
+    if not args.execute:
+        print(json.dumps(dict(status="prepared_not_executed", writes=False, engine_runs=0, destination=str(DESTINATION),
+             input_artifacts=151, source_snapshots=73, compressed_artifacts=2, exporter_snapshots=6,
+             expected_public_files=164, requires_separate_GO=True), indent=2))
+        return 0
+    require(isinstance(args.expected_exporter_sha256, str) and len(args.expected_exporter_sha256) == 64 and
+            all(c in "0123456789abcdef" for c in args.expected_exporter_sha256), "explicit_exporter_pin_required")
+    return execute(args.expected_exporter_sha256)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

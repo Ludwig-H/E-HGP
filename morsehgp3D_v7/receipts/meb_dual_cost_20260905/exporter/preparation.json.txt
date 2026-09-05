@@ -1,0 +1,118 @@
+{
+  "schema": "mhgp7-private-cost-export-preparation-v1",
+  "status": "prepared_selftests_passed_public_export_not_run",
+  "public_writes": 0,
+  "compilations": 0,
+  "engine_executions": 0,
+  "gcp_used": false,
+  "public_status": "not_claimed",
+  "pins": {
+    "export.py": "dd47586578efad318a5ad71ff780bc545aeef134d0da0d9ee93cd0ac951da79d",
+    "selftest.py": "cf5bb58b9d1f3ec6433522749a849934eb817f316acec1ddab82f60ec5c2f108",
+    "README.md": "52b7736c4adfdb99c7e208c833343468a0ef5ba1019b078051cf91f90b07eaf9"
+  },
+  "reused_helpers": {
+    "../v7_meb_dual_export/export.py": "5739bc57d77848950d1169cb150a532153ef2f75c4a40229a87b5cedecdd0530",
+    "../v7_meb_dual_export/restore_sources.py": "1cf22c1f57effb1c9e21dc39db9f4f3d1991674afa8be548647fc5620b01f5a3"
+  },
+  "historical_captures": {
+    "failed_v1": "247c952cd6000812ed0bff04390a0848c81e527c74c0e0ac26244144f4c83c15",
+    "build_v2": "de6de29f55ab55d8edd64f9e3307d4748688635ca7338c36105555da39e0574f",
+    "measure_v2": "874f100ffb1d65956f6d640c5e7ab838a81e9f5c7900f7c1d69b14504235c208"
+  },
+  "geometry_public_reference": {
+    "path": "../../morsehgp3D_v7/receipts/meb_dual_geometry_20260905",
+    "manifest_sha256": "571b565ebc51f40d361cf8ed2d20c1f0e14f704524cef8e407b245353d1b1a4d",
+    "SHA256SUMS_sha256": "2abbc2130bb3023122293afaa451dcb0bc3f4d367db5b1f179800fb4403d1605"
+  },
+  "projection": {
+    "capture_artifacts": 56,
+    "source_snapshots": 73,
+    "additional_preparation_and_root_review": 22,
+    "input_artifacts": 151,
+    "exporter_snapshots": 6,
+    "archived_artifacts": 157,
+    "generated_documents": 7,
+    "expected_public_files": 164,
+    "ELF_excluded": 4,
+    "compressed_artifacts": 2
+  },
+  "gzip": {
+    "compresslevel": 9,
+    "mtime": 0,
+    "filename": "",
+    "no_LF_change": true,
+    "raw_and_compressed_sha256_and_bytes_separate": true,
+    "roundtrip_to_original_before_after_and_at_closure": true
+  },
+  "preparation_failures": [],
+  "normal": {
+    "argv": [
+      "taskset",
+      "-c",
+      "0",
+      "timeout",
+      "30s",
+      "python3",
+      "-B",
+      "build/v7_meb_dual_cost_export/selftest.py"
+    ],
+    "chunk_id": "045d45",
+    "wall_time_seconds": 0.192588381,
+    "exit_code": 0,
+    "original_token_count": 293,
+    "output": "test_changed_compile_code_cannot_pass (__main__.Guards.test_changed_compile_code_cannot_pass) ... ok\ntest_compressed_copy_and_changed_header_rejected (__main__.Guards.test_compressed_copy_and_changed_header_rejected) ... ok\ntest_deterministic_gzip_preserves_literal_bytes (__main__.Guards.test_deterministic_gzip_preserves_literal_bytes) ... ok\ntest_failed_receipt_cannot_be_promoted (__main__.Guards.test_failed_receipt_cannot_be_promoted) ... ok\ntest_incomplete_projection_refused (__main__.Guards.test_incomplete_projection_refused) ... ok\ntest_late_source_drift_keeps_failed_archive (__main__.Guards.test_late_source_drift_keeps_failed_archive) ... ok\ntest_mock_export_closes_and_never_overwrites (__main__.Guards.test_mock_export_closes_and_never_overwrites) ... ok\ntest_original_compile_failure_preserved (__main__.Guards.test_original_compile_failure_preserved) ... ok\ntest_preview_and_pin_admission (__main__.Guards.test_preview_and_pin_admission) ... ok\ntest_raw_pin_and_ELF_refused_before_copy (__main__.Guards.test_raw_pin_and_ELF_refused_before_copy) ... ok\n\n----------------------------------------------------------------------\nRan 10 tests in 0.041s\n\nOK\n"
+  },
+  "optimized": {
+    "argv": [
+      "taskset",
+      "-c",
+      "0",
+      "timeout",
+      "30s",
+      "python3",
+      "-B",
+      "-O",
+      "build/v7_meb_dual_cost_export/selftest.py"
+    ],
+    "chunk_id": "7d2fa0",
+    "wall_time_seconds": 0.192940535,
+    "exit_code": 0,
+    "original_token_count": 293,
+    "output": "test_changed_compile_code_cannot_pass (__main__.Guards.test_changed_compile_code_cannot_pass) ... ok\ntest_compressed_copy_and_changed_header_rejected (__main__.Guards.test_compressed_copy_and_changed_header_rejected) ... ok\ntest_deterministic_gzip_preserves_literal_bytes (__main__.Guards.test_deterministic_gzip_preserves_literal_bytes) ... ok\ntest_failed_receipt_cannot_be_promoted (__main__.Guards.test_failed_receipt_cannot_be_promoted) ... ok\ntest_incomplete_projection_refused (__main__.Guards.test_incomplete_projection_refused) ... ok\ntest_late_source_drift_keeps_failed_archive (__main__.Guards.test_late_source_drift_keeps_failed_archive) ... ok\ntest_mock_export_closes_and_never_overwrites (__main__.Guards.test_mock_export_closes_and_never_overwrites) ... ok\ntest_original_compile_failure_preserved (__main__.Guards.test_original_compile_failure_preserved) ... ok\ntest_preview_and_pin_admission (__main__.Guards.test_preview_and_pin_admission) ... ok\ntest_raw_pin_and_ELF_refused_before_copy (__main__.Guards.test_raw_pin_and_ELF_refused_before_copy) ... ok\n\n----------------------------------------------------------------------\nRan 10 tests in 0.041s\n\nOK\n"
+  },
+  "preview": {
+    "argv": [
+      "taskset",
+      "-c",
+      "0",
+      "timeout",
+      "30s",
+      "python3",
+      "-B",
+      "build/v7_meb_dual_cost_export/export.py"
+    ],
+    "chunk_id": "d08ea3",
+    "wall_time_seconds": 0.117650118,
+    "exit_code": 0,
+    "original_token_count": 84,
+    "output": "{\n  \"status\": \"prepared_not_executed\",\n  \"writes\": false,\n  \"engine_runs\": 0,\n  \"destination\": \"/workspaces/E-HGP/morsehgp3D_v7/receipts/meb_dual_cost_20260905\",\n  \"input_artifacts\": 151,\n  \"source_snapshots\": 73,\n  \"compressed_artifacts\": 2,\n  \"exporter_snapshots\": 6,\n  \"expected_public_files\": 164,\n  \"requires_separate_GO\": true\n}\n"
+  },
+  "read_only_review": {
+    "shell_command": "taskset -c 0 timeout 30s python3 -B -c 'import runpy,json; m=runpy.run_path(\"build/v7_meb_dual_cost_export/export.py\"); r=m[\"review_inputs\"](); p,e=m[\"build_plan\"](r); print(json.dumps({\"status\":\"read_only_review_passed\",\"reviews\":[{\"name\":x[\"name\"],\"historical_status\":x[\"historical_status\"],\"dependency_count\":x[\"dependency_count\"],\"judgment\":x[\"judgment\"]} for x in r],\"input_artifacts\":len(p),\"compressed\":sum(x[\"compressed\"] for x in p),\"ELF_excluded\":len(e),\"engine_runs\":0}))'",
+    "chunk_id": "3f7199",
+    "wall_time_seconds": 1.92433942,
+    "exit_code": 0,
+    "original_token_count": 191,
+    "output": "{\"status\": \"read_only_review_passed\", \"reviews\": [{\"name\": \"failed_v1\", \"historical_status\": \"failed\", \"dependency_count\": 22, \"judgment\": {\"status\": \"failed_compile_preserved_not_promoted\"}}, {\"name\": \"build_v2\", \"historical_status\": \"completed\", \"dependency_count\": 22, \"judgment\": {\"status\": \"build_completed_not_measurement\"}}, {\"name\": \"measure_v2\", \"historical_status\": \"completed\", \"dependency_count\": null, \"judgment\": {\"status\": \"completed\", \"jobs\": 9347, \"groups\": 4699, \"helper_entries\": 1325812, \"main_comparisons\": 9216, \"boundary_comparisons\": 123, \"immediate_q2_cases\": 12, \"measured_passes\": 7, \"warmups\": 2, \"claim\": \"local_O2_helper_plus_capture_not_CLI_tower\"}}], \"input_artifacts\": 151, \"compressed\": 2, \"ELF_excluded\": 4, \"engine_runs\": 0}\n"
+  },
+  "limitations": [
+    "No public export occurred; separate root GO and exact exporter pin required.",
+    "No compiler or engine process is started; Python mocks forbid subprocess entry points.",
+    "The failed v1 compilation remains failed with compile returncode 1 and historical expected_rc 0.",
+    "No future campaign or different repetition count is included.",
+    "Historical runners and captures are not relocatable or hermetic; system dependencies and all ELF are absent.",
+    "Local O2 helper-plus-capture costs are not a CLI/tower/SLO/massive/GPU result.",
+    "Public validation is a read-only replay of sealed judges; native NoObserver qualification belongs to v2 measurement, not the prior Trace-only geometry."
+  ]
+}

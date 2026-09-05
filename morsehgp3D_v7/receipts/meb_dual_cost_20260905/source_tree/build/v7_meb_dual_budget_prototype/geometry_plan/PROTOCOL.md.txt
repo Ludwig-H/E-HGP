@@ -1,0 +1,209 @@
+# Porte géométrique locale proposée — non exécutée
+
+5 septembre 2026. `phase=exploration_v7_hors_registre`,
+`backend=cpu_reference`, `profile=quantized_u16_input_only`,
+`mode=qualification_locale_privee_preparee`, `public_status=not_claimed`.
+
+Statut : **protocole et pins préparés seulement**. Aucun nouveau source C++,
+runner géométrique, build ou test n'est lancé ici. La préparation ne modifie
+ni le prototype/scellé de budget précédent ni le produit. Un GO de ce plan
+devra précéder son implémentation privée, puis un GO d'exécution distinct
+devra viser les octets finaux relus. GCP non utilisé.
+
+## 1. Point de départ réellement clos
+
+Le reçu privé `../run_20260905/receipt.json`, SHA256
+`a7dc00201920a678c42e75436cb09ecf8a95b63dd660e587b814cdc0b4a1ea0a`,
+est `completed` : six commandes conformes, compilation O2 stricte sans
+MHGP7_TESTING, nominal 0, charge-après 4, deux refus d'arguments 2.
+Huit caps sur le triangle, quatre appels cumulatifs et une frontière MAX
+conservent les terminaux F ; le juge causal observe 0 violation en nominal
+et 28 avec charge-après. Les 38 artefacts et 61 sources/autorités ont été
+rehashés après clôture. Ce reçu n'a jamais exécuté une scène q4.
+
+Les temps de capture sont 10:41:38.718271 à 10:41:41.788699 UTC ; le temps
+de compilation est 3.025866814 s. Ce sont des durées de diagnostic, pas une
+comparaison de performances ni une attribution du coût de la tour.
+
+## 2. Sources relues et réemploi autorisé
+
+Les pins exacts sont dans `pins.json`. Lecture complète pour ce plan :
+
+- `build/v7_meb_pivot_prototype/probe.cpp` (140 lignes) : corpus combinatoire
+  des 1 507 ordinaux, huit scènes explicites, générateur entier et comparaison
+  de tous les champs. Réemployer les données et boucles de contrôle, pas son
+  résultat historique ni sa route sans deuxième budget.
+- `morsehgp3D_v7/tests/meb_lazy_gate.cpp` (279 lignes) : les mêmes huit scènes,
+  160 scènes LCG et deux compléments q2. Sa référence copiée C, ses compteurs
+  de matérialisation et ses mutants MHGP7_TESTING ne sont PAS l'autorité F
+  de la nouvelle porte et ne doivent pas être importés comme tels.
+- `q2.hpp`, `q3.hpp`, `q4.hpp`, `keys.hpp`, `level.hpp` : formes exactes,
+  positivité, puissances et représentations. `ExactLevel::operator==`
+  compare bien les trois limbs et le dénominateur, pas seulement le rayon.
+- L'ancien `run_probe.py` est lu uniquement pour son contexte historique.
+  Ses subprocess et sa limite par commande ne sont pas repris ; le nouveau
+  runner devra être un port étroit du runner de budget fermé 329ef731.
+
+Le différentiel local cible exclusivement le `silent_detail::Builder` F
+effectivement inclus depuis `silent_incidence.hpp` f75a136a. Son corpus de
+sources doit égaler le reçu F 522c950c ; le CLI ee29d3d5 est protégé par hash,
+jamais lancé par cette porte. Les appels F sont frais, sans résultat récupéré
+du vieux probe ni du C/D/E historique.
+
+## 3. Corpus fixe et bornes
+
+### 3.1. Ordinal : exactement 1 507 supports
+
+Porter explicitement `all_ordinals()` depuis le probe épinglé : n de 2 à 11,
+paires puis triplets puis quadruplets, chaque boucle lexicographique.
+Le juge incrémente un entier `rank` à chaque tuple ; il n'appelle jamais
+`choose()` pour calculer son attendu. Appeler seulement le helper ordinal
+sur des positions valides et croissantes. Aucun prédicat de MEB n'est
+évalué sur ces Candidate combinatoires sans forme géométrique.
+
+Exiger le total exact 1 507, et les frontières n=11 : 1,55,56,220,221,550.
+Les slots sont les positions dans `sites[]`, jamais les PointId/Morton.
+Ce corpus sera réexécuté avec le futur helper inclus ; les 1 507 verts du
+prototype ancien ne lui sont pas transférés.
+
+### 3.2. Géométrie : 176 scènes, n2..11
+
+Conserver exactement les huit scènes explicites du probe. Ajouter les
+160 premières scènes de son générateur LCG, soit l'ancien corpus de 168
+scènes, avec graine `0x6d65622d76372d31`, multiplication
+6364136223846793005, incrément 1442695040888963407, arithmétique u64 modulo
+2^64 ; coordonnées `(next() >> 32) & 65535`, n=`2+k%10`. Ne pas remplacer
+ce flux par un générateur standard, un flottant ou un random_device.
+
+Ajouter les huit scènes explicites de `additional_scenes.json` :
+
+- shell q2 étranger et puissance q2 dépassant i32, déjà déclarés dans E ;
+- triangle obtus mais MEB régulière q2 ;
+- q4 dont le centre circonscrit est sur une face, pas strictement intérieur ;
+- q4 dont le centre est extérieur au tétraèdre ;
+- quatre sites coplanaires ;
+- onze sites dont le support q2 occupe les slots 9,10 (ordinal 55) ;
+- onze sites dont le support q4 occupe les slots 7,8,9,10 (ordinal 550).
+
+Chaque scène passe d'abord par `build_cloud_index`, exige index valide,
+positions uniques et récupération des indices à partir des PointId d'entrée.
+Une collision du flux déterministe est un échec de préparation du corpus,
+pas un resampling caché. Les entrées hors profil et les doublons ne sont
+jamais transmis directement à `propose`/`miniball` : leur validation relève
+de l'index/API, pas de ces helpers internes. Aucun tableau Candidate
+arbitraire ou indice hors domaine n'est injecté dans une forme.
+
+Pour chaque scène : ordre d'entrée puis renversement de `sites[]`, donc
+352 ordres locaux. Ajouter séparément toutes les permutations des trois
+scènes positives extrêmes q2/q3/q4 du probe : 2+6+24=32 ordres, même si
+certains doublonnent les deux ordres déjà présents. Total prévu : **384**
+ordres de scène. Les duplications sont explicites, pas un plancher gonflé
+par une boucle cachée ; les planchers d'arité reposent sur les trois scènes
+nommées, pas sur leur multiplicité.
+
+### 3.3. Matrice des caps : 9 216 comparaisons principales
+
+Pour chaque ordre, un appel F frais avec cap 551 mesure R, le nombre de
+candidats avant son terminal normal (succès ou shell non essentiel).
+Cet appel sert uniquement à choisir les caps de test, jamais à fournir
+un support, un ordre de recherche ou une forme à la proposition.
+Tout autre terminal que succès/shell déclaré invalide la scène.
+
+Croiser P dans {0,1,4,5,15,16,25,401} avec L dans {R-1,R,R+1} :
+384*8*3 = **9 216** comparaisons, en plus des 384 lectures locales F pour R.
+R est dans [1,550], donc les trois caps sont des entiers sûrs, au plus 551.
+Ne pas ouvrir une boucle allant jusqu'à UINT64_MAX. Le plafond des pivots
+reste 16 ; la borne de travail de proposition reste 1+25*16=401 par appel,
+et la charge cumulée P reste une autorité distincte.
+
+Ajouter un bloc nommé de frontières, au plus 128 comparaisons : états
+legacy c=7 avec L autour de c+R ; c=L, c>L ; c=MAX-1 avec L=MAX sur une
+paire et sur l'ordinal 550 ; c=MAX-4,L=MAX sur le triangle q3 ; proposition
+initialisée à MAX ou MAX-1 avec cap MAX. Inclure les appels cumulatifs P7/L12
+de la contre-fixture, et P0, afin de contrôler une exhaustion au milieu du
+deuxième appel puis le repli sans paire au troisième. Les sommes ne sont
+calculées qu'après gardes ; raisonner en incréments pour les compteurs injectés.
+
+Total borné annoncé : **au plus 9 344 comparaisons différentielles**,
+384 lectures F de R et 1 507 tuples d'ordinal, par invocation nominale.
+Les mêmes plafonds s'appliquent à l'invocation causale mutée ; une limite
+de temps atteinte ferme un échec conservé, sans réduire ensuite le corpus.
+
+## 4. Juges, non-vacuité et observations
+
+Chaque comparaison part des mêmes statistiques non nulles, statut/raison
+et boule sentinelle. Comparer booléen, statut, chaîne de raison, tous les
+champs de SilentIncidenceStats, clé entière, q, tableau de support complet,
+trois limbs du niveau et dénominateur. Vérifier les événements locaux
+inchangés. Le succès ne doit pas réinitialiser un statut artificiel fourni
+au helper ; les refus shell peuvent écrire une boule, les refus budget
+avant accept doivent préserver la sentinelle.
+
+Conserver l'observateur causal du budget fermé : avant chaque forme, charge
+déjà acquise, compteur effectif <=P et état legacy encore intact. L'absence
+de recherche de paire lorsque P est déjà épuisé est observée séparément.
+Sur repli, ne pas perdre le compteur Work, ne pas doubler meb_calls et
+comparer les terminaux comme sur la voie certifiée. Distinguer les appels
+F de mesure de R, les appels F de comparaison et les replis F réellement
+effectués par le prototype ; ne pas appeler leur somme « coût produit ».
+
+Planchers obligatoires à annoncer dans le futur reçu :
+
+- un certificat rapide non vide de chaque arité q2,q3,q4, sur les scènes
+  nommées et cap P401 ; q4 exige au moins deux pivots sur le tétraèdre régulier ;
+- ordinal final 55 et 550, avec refus juste avant et réussite à égalité ;
+- une forme q3 rejetée pour non-acuité, une q4 de rang nul et une q4 de
+  centre non strictement intérieur, depuis des sous-tuples valides ;
+- un intrus strict obligeant un pivot, une puissance nulle d'un support et
+  un shell étranger imposant le repli, jamais un succès accéléré ;
+- un repli par P épuisé au milieu de small_ball, un repli initial P0 et
+  un repli forcé par pivot_cap=0 ; ce dernier peut remplacer quelques cas
+  du bloc de 128 frontières, sans masquer la route nominale ;
+- refus legacy, dégénérescences shell, vrais succès, contrôle de tous les
+  n2..11 et niveaux q4 dont les champs bruts sont réellement comparés.
+
+Les compteurs ne devront pas assimiler `certified` à un succès public :
+un certificat peut être trouvé avec P suffisant mais L insuffisant.
+Les valeurs exactes nouvellement observées seront capturées, jamais
+prédites d'après les nombres historiques de 23 517 ou 11 816 cas.
+
+Le mutant `ChargeAfter=true` doit repasser les mêmes juges géométriques
+et de terminaux, puis être refusé uniquement pour au moins une observation
+prospective causale. Code attendu 4, nominal 0, toute divergence géométrique
+ou erreur de plancher 1, paramètres inconnus 2. Ne pas accepter n'importe
+quel code 4 : le reçu doit nommer la cause et son compteur non nul.
+Les mutants géométriques de shell/ordinal seront une porte privée suivante
+ou un ajout soumis à une nouvelle revue ; les mutants historiques C/D/E
+MHGP7_TESTING ne sont pas réutilisés comme preuve de cette voie rapide.
+
+## 5. Capture future et portée
+
+Port privé du runner 329ef731, nouvelle destination create-only distincte,
+aucune reprise du dossier `run_20260905`. Compilation C++20/O2 stricte sans
+MHGP7_TESTING, puis nominal, mutant prospectif et refus argv. CPU0 ;
+échéance cumulée proposée 60 s, nettoyage ciblé du groupe enfant inclus.
+Si la compilation/campagne dépasse cette borne, conserver failed et demander
+une décision explicite ; pas d'allongement silencieux ni de sous-corpus.
+
+Les sources proposées ci-dessous sont des autorités de conception et des
+données à réutiliser. Le gate et le runner géométriques n'existent pas encore :
+leurs futurs SHA, diff de port, constantes de corpus et planchers devront
+être relus avant le GO. Conserver depfile, fermeture F, compilateur, binaire,
+arguments, stdout/stderr complets, codes, pins avant/après et statut terminal.
+Pas de sanitizer dans cette première porte ; un rejeu UBSan/ASan serait une
+qualification distincte, après contrôle de son budget et de son environnement.
+
+Ce corpus peut établir une **conformité locale observée à F** des terminaux,
+représentations et budgets sur les scènes/caps recensés, et falsifier des
+erreurs précises de rang, coquille ou charge. Son exhaustivité combinatoire
+ne porte que sur les 1 507 ordinaux du domaine n2..11. Il ne constitue pas
+une énumération exhaustive des nuages u16 ni une preuve indépendante de
+tous les prédicats : F et le prototype partagent les formes arithmétiques.
+
+La preuve mathématique locale conditionnelle reste celle de la note § 2,
+pas un théorème produit déduit d'un vert. Restent distincts : injection de
+candidats hostiles avec validateur, mutants de certification, oracle entier
+indépendant, Gamma/catalogue complet, descente et transactions, source/index
+admis, composition de la tour, budgets par ordre/CLI/reçus versionnés,
+normalisation verticale et déploiement industriel. Aucun gain mono-thread,
+multi-CPU, GPU, SLO 50k/1 s/100 ms ou dizaines de millions n'est démontré.

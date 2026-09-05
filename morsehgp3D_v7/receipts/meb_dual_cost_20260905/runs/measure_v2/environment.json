@@ -1,0 +1,59 @@
+{
+  "affinity_before": [
+    6
+  ],
+  "cpu_affinity": [
+    6
+  ],
+  "forbidden_overrides": {
+    "ASAN_OPTIONS": null,
+    "COMPILER_PATH": null,
+    "CPATH": null,
+    "CPLUS_INCLUDE_PATH": null,
+    "CPPFLAGS": null,
+    "CXXFLAGS": null,
+    "C_INCLUDE_PATH": null,
+    "GCC_EXEC_PREFIX": null,
+    "LD_AUDIT": null,
+    "LD_LIBRARY_PATH": null,
+    "LD_PRELOAD": null,
+    "LIBRARY_PATH": null,
+    "LSAN_OPTIONS": null,
+    "UBSAN_OPTIONS": null
+  },
+  "hardware": {
+    "online": "0-7",
+    "selected_cpu": {
+      "core id": "3",
+      "cpu cores": "4",
+      "cpu family": "25",
+      "microcode": "0xffffffff",
+      "model": "17",
+      "model name": "AMD EPYC 9V74 80-Core Processor",
+      "physical id": "0",
+      "processor": "6",
+      "siblings": "8",
+      "stepping": "1",
+      "vendor_id": "AuthenticAMD"
+    }
+  },
+  "host": [
+    "Linux",
+    "codespaces-0bcb78",
+    "6.8.0-1052-azure",
+    "#58~22.04.1-Ubuntu SMP Thu Mar 26 05:02:21 UTC 2026",
+    "x86_64"
+  ],
+  "thread_values_before": {
+    "MKL_NUM_THREADS": null,
+    "NUMEXPR_NUM_THREADS": null,
+    "OMP_NUM_THREADS": null,
+    "OPENBLAS_NUM_THREADS": null
+  },
+  "thread_values_effective": {
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "boundary_comparisons": 123,
+  "claim": "local_O2_helper_plus_capture_not_CLI_tower",
+  "groups": 4699,
+  "helper_entries": 1325812,
+  "immediate_q2_cases": 12,
+  "jobs": 9347,
+  "main_comparisons": 9216,
+  "measured_passes": 7,
+  "status": "completed",
+  "warmups": 2
+}

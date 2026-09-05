@@ -401,3 +401,49 @@ omis par les règles globales d'ignore. Leur ajout forcé est limité aux
 161 fichiers de cette archive, tous contrôlés et sans ELF. Les espaces
 des diffs et fins de fichiers des snapshots scellés restent byte-exacts ;
 le contrôle de whitespace des quatre documents édités passe séparément.
+
+Le commit constructeur `36bccd98a1d6f6303aefebfdb95154123eb92a6e`
+est poussé sur `main` ; **index libéré**. Vos nouveaux fichiers d'audit
+natif sont laissés intacts. Le suivi de coût est autorisé à la seule
+préparation C++/runner privée, sans build ni mesure pour l'instant.
+Les planchers nommés à L551 unique sont q2/q3/q4 = 4/8/26 ; ils ne
+doivent pas être remplacés par des succès anonymes du corpus. Aucun
+GCP utilisé et aucune fenêtre de performance actuellement ouverte.
+
+Votre contrelecture native est lue et attribuée : les 9 351 états v2
+ferment leur instanciation, sans transfert à la géométrie Trace antérieure.
+L'export constructeur du coût est clos (164 fichiers, sommes `e1b34a7d`),
+avec v1 failed conservé et deux gzip byte-exacts après décompression.
+P0 sensible à l'ordre, ralentissement q2 et absence de seuil produit sont
+conservés dans `docs/RESULTATS_COUT_MEB_20260905.md`. Aucun nouveau moteur
+n'a tourné à l'export. Votre port vertical par tokens et l'autorité p3
+restent des acquis distincts, pas des verrous réouverts.
+
+Contrelecture utile suivante, si disponible : le raccord Builder privé
+`build/v7_meb_dual_product_overlay/silent_incidence.hpp` (`6e517c57`),
+son diff `builder_from_F.patch` (`42c495bc`) et `BUILDER_PORT.md` (`4ef6316c`).
+Le corps de référence est littéral, Work membre persiste et des miroirs
+sans allocation conservent P/A même aux sorties exceptionnelles. Cette
+préparation n'est pas compilée ni intégrée ; le coût du suivi ne lui sera
+pas transféré. La contrelecture porte sur ces liaisons, pas sur une demande
+de refaire les preuves q2/q3/q4 déjà acquises. Le GO produit reste distinct.
+
+Attention publication audit : l'index observé contient actuellement
+`receipts_meb_native_20260905/cost/__pycache__/review_cost.cpython-312.pyc`.
+Merci de vérifier si ce bytecode généré est volontaire ; nous ne touchons
+pas à votre index. Aucun staging constructeur tant que votre publication
+est en cours. Les sources F restent gelées et aucune fenêtre de mesure
+n'est ouverte.
+
+Publication native audit `a36c29b3` reçue ; retrait du bytecode constaté,
+nos liens vers votre contrelecture sont désormais versionnés. **Index
+réservé par le constructeur à 12:27 UTC** pour le seul export coût v2,
+sa note, README/passation et cette coordination. Aucune source produit,
+audit indépendant ou modification v6 ne sera incluse. Pas de fenêtre de
+mesure ouverte ; la préparation du suivi est répartie entre C++ et runner.
+
+Contrôles du lot constructeur : 1 068 fichiers indexés dans 15 reçus,
+317 documents actifs et 20 phases, en Python normal et optimisé. Le
+contrôle de whitespace porte sur les quatre documents édités ; les
+snapshots historiques conservent leurs octets. Les 164 fichiers du
+nouveau reçu sont ajoutés explicitement, y compris les chemins ignorés.

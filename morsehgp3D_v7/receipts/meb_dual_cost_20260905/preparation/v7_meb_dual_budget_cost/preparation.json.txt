@@ -1,0 +1,49 @@
+{
+  "schema": "mhgp7-private-meb-cost-preparation-v1",
+  "status": "prepared_not_compiled_or_measured",
+  "public_status": "not_claimed",
+  "cpp_built": false,
+  "meb_measured": false,
+  "gcp_used": false,
+  "prior_protocol_sha256": "4a76f875485f39a7b0c5707e53f82c635cc1dfdab73bf595bf8348681b8f9ea7",
+  "actual_closed_geometry": {
+    "receipt_path": "../v7_meb_dual_budget_geometry/run_20260905/receipt.json",
+    "receipt_sha256": "b81d8e480b158710874de230c3485f79d0a42f1cb228e321c750de0f58bed49e",
+    "route": "Trace_only_NoObserver_not_qualified",
+    "gate_sha256": "c9971f8c340fe37eea2be824897110d436a38345e1d66d1834c9eb7f489bb1a9",
+    "runner_sha256": "b04dc2a69aec60c6c5e41e83688588a3b963a0ba5f4e91260580e4d195bda727"
+  },
+  "synthetic_selftests": {
+    "normal": {
+      "methods": 11,
+      "status": "passed"
+    },
+    "optimized": {
+      "methods": 11,
+      "status": "passed"
+    },
+    "cpu": 0,
+    "source_before_equals_after": true,
+    "scope": "Python_synthetic_only_plus_closed_geometry_read_only_validation"
+  },
+  "required_next_steps": [
+    "root_review_final_runner",
+    "distinct_compile_only_GO_60s_no_harness_execution",
+    "root_disassembly_review_and_binary_pin",
+    "distinct_measurement_GO_120s_dedicated_CPU6"
+  ],
+  "artifacts": {
+    "README.md": "5e79ede6a748b4604a962455980cf7e20fed54b3a145cbe54239fbf6227f889c",
+    "capture_selftests.py": "706114a55057ead7a29762c21f761bf9b889ad9f4ee279c8c1c45799ffc14185",
+    "cost_harness.cpp": "c9b742287336b45082175569f58269ba91d82c49c8fb5651022468e1a81095ea",
+    "run_cost.py": "e71cfdb31d1d219d02590a3ef3fa650b84a058a7e30859688cdb59c6f23f7477",
+    "selftest.py": "6723678076c569074c346f0644a52202c096cc6d617506f81ef77ac6056f5be4",
+    "protocol_selftests_20260905/normal.json": "92fd89a9ab18866e816f75b42e614fa3f0eb629525fe394e495e6901860d40ce",
+    "protocol_selftests_20260905/normal.stderr": "9b3ae0567e4b746eeb8fbbb7174a3d344b705d40d89b448e67434c137b3e21a9",
+    "protocol_selftests_20260905/normal.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "protocol_selftests_20260905/optimized.json": "1021ecfddaaf588b955a1a2a827883216d76a0b431d7c6ed536e57d62150eb47",
+    "protocol_selftests_20260905/optimized.stderr": "a1a47be95bbbcbe9fb506b1004834ecf8d6e308902be0bd48dc55aed5c1e86fd",
+    "protocol_selftests_20260905/optimized.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "protocol_selftests_20260905/summary.json": "530e1eb1d8fa2be36a0062ca6a01a2a5d0b1d838aa6ac302ead45648c580f4c6"
+  }
+}

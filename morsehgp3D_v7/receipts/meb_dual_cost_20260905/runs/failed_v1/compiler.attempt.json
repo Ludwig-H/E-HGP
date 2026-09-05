@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "--version"
+  ],
+  "cpu_affinity": [
+    0
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "expected_rc": 0,
+  "timeout_seconds": 57.99864832100138
+}

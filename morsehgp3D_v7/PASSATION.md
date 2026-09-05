@@ -76,6 +76,17 @@ ces observations Trace de la preuve et de l'oracle rationnel indépendants
 de l'auditeur. Le raccord par ordre et ses schémas publics ne sont pas
 encore livrés ; aucun gain de tour ne découle de cette qualification locale.
 
+La [première mesure native](docs/RESULTATS_COUT_MEB_20260905.md) qualifie
+séparément 9 351 états F/Trace/NoObserver avant et après sept passages.
+Les 1 325 812 entrées MEB restent sous le plafond déclaré ; l'échec du
+premier build et toutes les mesures sont archivés. Le raccourci réduit
+le compte de candidats de la matrice P401, mais le q2 immédiat répété
+ralentit d'environ 39–40 %, et le contrôle P0 des petits lots dépend de
+l'ordre des bras. Aucun gain général ni seuil produit n'est établi.
+Un suivi distinct à 64 répétitions et dix paires équilibrées est préparé,
+sans mesure attribuée à ce stade ; les budgets y repartent à zéro par
+appel, pas par ordre de tour. F et son format public restent inchangés.
+
 Le delta F porte maintenant cette [pile locale de témoins](docs/OPTIMISATION_PILE_TEMOINS.md) :
 64 entrées inline, puis un vector de secours sans troncature, dans le seul
 `count_universal_witnesses`. LIFO, masques, seuils et statistiques restent
