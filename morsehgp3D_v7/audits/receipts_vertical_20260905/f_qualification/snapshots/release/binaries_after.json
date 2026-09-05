@@ -1,0 +1,57 @@
+[
+  {
+    "path": "build/v7_f_tests_20260905/release/mhgp7",
+    "sha256": "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85",
+    "size": 692296
+  },
+  {
+    "path": "build/v7_f_tests_20260905/release/mhgp7_archive_api_gate",
+    "sha256": "534645fd2ba950e707f1d5a554b2101499f1478c5edb1496ca2118ab5797ee8b",
+    "size": 115096
+  },
+  {
+    "path": "build/v7_f_tests_20260905/release/mhgp7_archive_cleanup_gate",
+    "sha256": "05142882b3cb077e9185bb0aadc0960eaa43ac98874bf3993bca3dd21a654d82",
+    "size": 764672
+  },
+  {
+    "path": "build/v7_f_tests_20260905/release/mhgp7_bad_alloc_gate",
+    "sha256": "00720260dd3c51bf8645e41a7cfab7ca24acab5d0bb3d9c4ef42fcb7ce54b240",
+    "size": 745576
+  },
+  {
+    "path": "build/v7_f_tests_20260905/release/mhgp7_census_direct_gate",
+    "sha256": "5c9e964410a640b8b35098621c49e54752cd396965578d39de806caf1440328c",
+    "size": 194160
+  },
+  {
+    "path": "build/v7_f_tests_20260905/release/mhgp7_meb_lazy_gate",
+    "sha256": "87fd501774b53091392ceab79ffe35e4cef14a062b91c2d79cf9c53cf6c2e577",
+    "size": 107640
+  },
+  {
+    "path": "build/v7_f_tests_20260905/release/mhgp7_mono_inline_gate",
+    "sha256": "ee26f7e98e7ead08c63fd92b8c9e993a9809c72d03a61f03095703e66071626d",
+    "size": 742920
+  },
+  {
+    "path": "build/v7_f_tests_20260905/release/mhgp7_silent_incidence_gate",
+    "sha256": "00c350c4f7499b8096c38c94c9283b0aeb63908b50d030a094a7a13ee09aed83",
+    "size": 835576
+  },
+  {
+    "path": "build/v7_f_tests_20260905/release/mhgp7_thread_failure_gate",
+    "sha256": "9cb51400cacdcbcf4e553039394065afbcb2d70ed284a1381fccd176081fddda",
+    "size": 847760
+  },
+  {
+    "path": "build/v7_f_tests_20260905/release/mhgp7_witness_stack_gate",
+    "sha256": "c7434d4d74799eb50e0051f5f7c7bba9ae5d7a5e6b22309c4688ad86e4f29569",
+    "size": 99760
+  },
+  {
+    "path": "build/v7_f_tests_20260905/release/mhgp7_witness_stack_semantic_gate",
+    "sha256": "7f33ae779934d0b19972da3d7c0815bb385c390089bd5dcd5389a3dd974f6d87",
+    "size": 90752
+  }
+]

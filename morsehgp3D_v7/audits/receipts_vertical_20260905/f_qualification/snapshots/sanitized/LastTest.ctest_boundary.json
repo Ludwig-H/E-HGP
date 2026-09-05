@@ -1,0 +1,23 @@
+{
+  "archive": {
+    "bytes": 83,
+    "ctime_ns": 1788600486675087091,
+    "device": 1796,
+    "inode": 1736368,
+    "mtime_ns": 1788600486675087091,
+    "path": "/workspaces/E-HGP/build/v7_f_tests_20260905/sanitized_receipts/LastTest.ctest_fence",
+    "sha256": "3ddff025193cfe6fd4bdf8b262578721dcca567da4b88e635cba8868849bb47e"
+  },
+  "fence": {
+    "bytes": 83,
+    "ctime_ns": 1788600486672087091,
+    "device": 1796,
+    "inode": 1736367,
+    "mtime_ns": 1788600486672087091,
+    "path": "/workspaces/E-HGP/build/v7_f_tests_20260905/sanitized/Testing/Temporary/.v7_f_tests_20260905-sanitized_receipts.ctest-fence",
+    "sha256": "3ddff025193cfe6fd4bdf8b262578721dcca567da4b88e635cba8868849bb47e"
+  },
+  "receipt_directory": "/workspaces/E-HGP/build/v7_f_tests_20260905/sanitized_receipts",
+  "scope": "new_same_filesystem_fence_immediately_before_owned_CTest",
+  "utc_ns_diagnostic_only": 1788600486672983397
+}

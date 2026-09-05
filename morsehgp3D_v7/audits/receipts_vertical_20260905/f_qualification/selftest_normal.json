@@ -1,0 +1,16 @@
+{
+  "positive": 1,
+  "rejections": [
+    "duplicate_expected_name",
+    "empty_log",
+    "failed_block",
+    "failure_node",
+    "forged_truncation_size",
+    "missing_footer",
+    "not_run",
+    "raw_XML_disagree",
+    "wrong_mutant_exit",
+    "zero_tests"
+  ],
+  "status": "passed"
+}

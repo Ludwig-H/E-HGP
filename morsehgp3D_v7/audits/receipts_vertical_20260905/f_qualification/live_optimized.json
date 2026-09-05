@@ -1,0 +1,1619 @@
+{
+  "backend": "cpu_reference",
+  "campaigns": {
+    "full": {
+      "CLI_build_sources_stable": 51,
+      "LastTest_bytes": 7697631,
+      "LastTest_sha256": "d9515b7db22c46fb4d59d12cc76412d16b2266f5f894bb127984e99c27364a87",
+      "XML_outputs_verified_against_LastTest": true,
+      "actual_witness_compile_commands": [
+        {
+          "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_witness_stack_gate.dir/tests/witness_stack_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+          "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+          "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+          "output": "CMakeFiles/mhgp7_witness_stack_gate.dir/tests/witness_stack_gate.cpp.o"
+        },
+        {
+          "command": "/usr/bin/c++ -DMHGP7_TESTING=1 -DMHGP7_WITNESS_STACK_NO_ALLOC_OBSERVER=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_witness_stack_semantic_gate.dir/tests/witness_stack_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+          "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+          "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+          "output": "CMakeFiles/mhgp7_witness_stack_semantic_gate.dir/tests/witness_stack_gate.cpp.o"
+        }
+      ],
+      "binaries_stable": [
+        {
+          "path": "build/v7_f_qualification/mhgp7",
+          "sha256": "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85",
+          "size": 692296
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_archive_api_gate",
+          "sha256": "534645fd2ba950e707f1d5a554b2101499f1478c5edb1496ca2118ab5797ee8b",
+          "size": 115096
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_archive_cleanup_gate",
+          "sha256": "05142882b3cb077e9185bb0aadc0960eaa43ac98874bf3993bca3dd21a654d82",
+          "size": 764672
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_arithmetic_integer_gate",
+          "sha256": "543aafaa01f5ef7775591b53ac431c408f22fb2a3660dc3df21183283716d5fe",
+          "size": 79032
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_arithmetic_lanes_gate",
+          "sha256": "361d65fd5fcd491066d6985ee54eaef8e822b4878ebdec4cd432d95f70da83b9",
+          "size": 135160
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_axis_bounds_gate",
+          "sha256": "8293129d78939d25218dbb5d4cd276f32828310ef7bc9cbfb2d0d78fe532e945",
+          "size": 79976
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_bad_alloc_gate",
+          "sha256": "00720260dd3c51bf8645e41a7cfab7ca24acab5d0bb3d9c4ef42fcb7ce54b240",
+          "size": 745576
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_cell_grid_oracle",
+          "sha256": "fe8c9038a7a941f75cbb701ef42d4229de8dec8956c6cc15944a7ed9d2cffbce",
+          "size": 176232
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_census_device_stub_gate",
+          "sha256": "9dd3f4bce38aa88c290f3f15876f2c6b50d578fbabb706dd9570537f1ebbdb38",
+          "size": 398136
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_census_direct_gate",
+          "sha256": "5c9e964410a640b8b35098621c49e54752cd396965578d39de806caf1440328c",
+          "size": 194160
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_conformity",
+          "sha256": "1df784ef428caa05d76255fad0875a5a1dc05c7991001c53268f71b6c1c1ad2f",
+          "size": 796568
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_cover_fixture",
+          "sha256": "7d3fb86b3f4e1c05cc6155a94b21d24fd53d486837ef2825b6f348e52cfcc93a",
+          "size": 326784
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_device_witness_stub",
+          "sha256": "a6108b7f6ebf314cdc4e80de3ef46b4839797ae806621d7dab5c045b2e70a9b4",
+          "size": 43856
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_executor_pool_gate",
+          "sha256": "8c957751c2c55740f099028c130933ff9717cbb443ad5332c17ccbdd431fd345",
+          "size": 160104
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_fold_caps_gate",
+          "sha256": "1cf8a46881b7fa72eceea1d4452ff0c48d0664a37833970c31540da1afb089d8",
+          "size": 741416
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_fold_csr_gate",
+          "sha256": "4be998e0f2ee31dd0fcd43fa97d8cd13bceef668ddc99d84d52cdda3e285a1b0",
+          "size": 870864
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_linked_arcs",
+          "sha256": "05f455560afa3655638bf36778ea3effbbcc8401d49d7c49d0d838578cd99e68",
+          "size": 435216
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_lot_ring_gate",
+          "sha256": "6f54cbc0811073116f4442eeffe9ae3b2000f2e477782d01984e5ff5b03bbd2d",
+          "size": 144664
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_meb_lazy_gate",
+          "sha256": "87fd501774b53091392ceab79ffe35e4cef14a062b91c2d79cf9c53cf6c2e577",
+          "size": 107640
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_mono_inline_gate",
+          "sha256": "ee26f7e98e7ead08c63fd92b8c9e993a9809c72d03a61f03095703e66071626d",
+          "size": 742920
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_perm_residence_gate",
+          "sha256": "d5de8b884f69f27300a8c34b8fb6dbf5d6f658c49599e73cb71e8c3032eb54c6",
+          "size": 170192
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_perm_sort_gate",
+          "sha256": "0a8faf40e1b8767dd1152b87b26a2bc3d05094d9cc5f94f699ea6d41f5fbe9e4",
+          "size": 470904
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_pilot_stub_gate",
+          "sha256": "40a829bdcfe4f8ef4d309ebf5a352e39da095e3a7c5794cd685f347882d671b0",
+          "size": 782936
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_pilote_stub_check",
+          "sha256": "9d9ee664aa6c226a7e26573420439f695d93ae67d49141552e0d4aa52f255af8",
+          "size": 685344
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_pilote_stub_check_test",
+          "sha256": "6736520f1d365b3f4d6c97e2d7f62ecf4788874e98de284ac8be6d28f61ac58c",
+          "size": 796632
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_profil_contrat",
+          "sha256": "a9fd1e1f790ef0bce91c5db3a9caaeff6a4a237e282f04f57e886c76e856fd83",
+          "size": 736248
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_profile",
+          "sha256": "b4e586663474299bee135329dab0457e1bd5dc699970dfa33dcc18892a289ac9",
+          "size": 696624
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_profile_liveness",
+          "sha256": "799c26428d9dacd0fb340f88513ca8b1a22c1c2f4f8405075c6684046b5a5511",
+          "size": 696488
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_profile_sonde",
+          "sha256": "c5f90111c9be1a440419a35f3910019f7ad3d03fb061f6fe6fec7cf706e5033b",
+          "size": 809712
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_residence_gate",
+          "sha256": "ccc05ddbb963dd9c93773323ba04f4159e2f93feb080a600192b60172f207bca",
+          "size": 755416
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_route_c6_gate",
+          "sha256": "f530be00ddfe71c49bde8a6d7e8bbcc1b4b65481efde324f58616fb8c17f8bb2",
+          "size": 866328
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_selftest",
+          "sha256": "875944cc498419dcdc7615d073bbfd700c389d354516ec8163993c2c5c51c8ba",
+          "size": 836160
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_silent_incidence_gate",
+          "sha256": "00c350c4f7499b8096c38c94c9283b0aeb63908b50d030a094a7a13ee09aed83",
+          "size": 835576
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_sweep_fixtures",
+          "sha256": "dfc65da7478dc6f14352f7ac8d5ea046812ed16a9e851b65ec3bf8ed8bbf4952",
+          "size": 363808
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_thread_failure_gate",
+          "sha256": "9cb51400cacdcbcf4e553039394065afbcb2d70ed284a1381fccd176081fddda",
+          "size": 847760
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_wire_gate",
+          "sha256": "8893b9d5e25e13be364d69cf72df037bab3d620234e695cc12a3dfbba8ce90bd",
+          "size": 96504
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_wire_pack_gate",
+          "sha256": "3f287287256d6f6266a66215da95d594c8255217e04bc045f68924adc89fd8a5",
+          "size": 356856
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_witness_stack_gate",
+          "sha256": "c7434d4d74799eb50e0051f5f7c7bba9ae5d7a5e6b22309c4688ad86e4f29569",
+          "size": 99760
+        },
+        {
+          "path": "build/v7_f_qualification/mhgp7_witness_stack_semantic_gate",
+          "sha256": "7f33ae779934d0b19972da3d7c0815bb385c390089bd5dcd5389a3dd974f6d87",
+          "size": 90752
+        }
+      ],
+      "commands": {
+        "build_incremental": {
+          "argv": [
+            "cmake",
+            "--build",
+            "/workspaces/E-HGP/build/v7_f_qualification",
+            "--parallel",
+            "2"
+          ],
+          "elapsed_seconds": 257.1643841950008,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T09:25:07Z",
+          "status": "completed",
+          "timeout_seconds": 3600
+        },
+        "configure": {
+          "argv": [
+            "cmake",
+            "-S",
+            "/workspaces/E-HGP/morsehgp3D_v7",
+            "-B",
+            "/workspaces/E-HGP/build/v7_f_qualification",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP7_ENABLE_CUDA=OFF",
+            "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+          ],
+          "elapsed_seconds": 0.16696408900133974,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T09:25:07Z",
+          "status": "completed",
+          "timeout_seconds": 120
+        },
+        "ctest": {
+          "argv": [
+            "ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_f_qualification",
+            "--output-on-failure",
+            "--no-tests=error",
+            "-L",
+            "^gate$",
+            "--parallel",
+            "2",
+            "--output-junit",
+            "/workspaces/E-HGP/build/v7_f_tests_20260905/full_receipts/ctest.junit.xml"
+          ],
+          "elapsed_seconds": 620.6819001839995,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T09:29:24Z",
+          "status": "completed",
+          "timeout_seconds": 7200
+        },
+        "inventory": {
+          "argv": [
+            "ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_f_qualification",
+            "--show-only=json-v1",
+            "-L",
+            "^gate$"
+          ],
+          "elapsed_seconds": 0.06644596499972977,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T09:29:24Z",
+          "status": "completed",
+          "timeout_seconds": 60
+        }
+      },
+      "entrypoint_pins_contained_in_sources": 118,
+      "environment": {
+        "all_test_executions": "fresh",
+        "build_kind": "incremental_existing_F_Release",
+        "environment": {
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "locale": {
+            "LANG": "C",
+            "LC_ALL": "C"
+          },
+          "mode": "full",
+          "sanitizer_options": "not_required_for_uninstrumented_Release"
+        },
+        "expected_F_build_receipt_sha256": "522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4",
+        "expected_F_sha256": "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85",
+        "gate_results_reused": false,
+        "gcp": "not_used",
+        "host_before": {
+          "affinity_cpus": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "architecture": "x86_64",
+          "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+          "host_shared": true,
+          "kernel_release": "6.8.0-1052-azure",
+          "loadavg_1_5_15": [
+            2.8046875,
+            2.26416015625,
+            1.47265625
+          ],
+          "logical_cpus": 8,
+          "mem_total_bytes": 33657716736,
+          "observed_utc": "2026-09-05T09:25:06.979865Z"
+        },
+        "mode": "full",
+        "protected_C_C_D_E_historical": {
+          "/workspaces/E-HGP/build/v7/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+          "/workspaces/E-HGP/build/v7_c_qualification/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+          "/workspaces/E-HGP/build/v7_meb_qualification/mhgp7": "127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f",
+          "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6"
+        },
+        "public_status": "not_claimed",
+        "repository_before": {
+          "head": "61f72a6805e27f1bc216b5d7444164b31fc970b6",
+          "observed_utc": "2026-09-05T09:25:06.953609Z",
+          "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/PASSATION.md\n M morsehgp3D_v7/README.md\n M morsehgp3D_v7/src/spindle/witness_count.hpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/CERTIFICAT_HORIZONTAL_COURANT.md\n?? morsehgp3D_v7/audits/horizontal_fold_probe.cpp\n?? morsehgp3D_v7/audits/horizontal_fold_probe.py\n?? morsehgp3D_v7/audits/horizontal_pipeline_bridge.cpp\n?? morsehgp3D_v7/audits/horizontal_rational_oracle.py\n?? morsehgp3D_v7/audits/receipts_horizontal_20260905/\n?? morsehgp3D_v7/docs/OPTIMISATION_PILE_TEMOINS.md\n?? morsehgp3D_v7/src/core/inline_stack.hpp\n?? morsehgp3D_v7/tests/reference/\n?? morsehgp3D_v7/tests/witness_stack_gate.cpp\n"
+        },
+        "schema": "mhgp7.witness-stack-F-qualification.v1"
+      },
+      "failure_error_skipped_nodes": 0,
+      "junit_truncated_outputs": [
+        {
+          "name": "mhgp7_executor_pool",
+          "raw_output_bytes": 2032,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_pilote_stub_parite_200",
+          "raw_output_bytes": 3187,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_pilote_stub_lot17",
+          "raw_output_bytes": 3181,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_pilote_juge_contre_fixtures",
+          "raw_output_bytes": 2692,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_fused_mutant_mask",
+          "raw_output_bytes": 7198331,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_sweep_mutant_exit",
+          "raw_output_bytes": 1622,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_cli_ok_s8",
+          "raw_output_bytes": 7542,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_cli_budget_signature",
+          "raw_output_bytes": 7694,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_residence_jalons",
+          "raw_output_bytes": 1153,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_residence_mutant_hwm_instantane",
+          "raw_output_bytes": 1369,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_residence_mutant_jalon_manquant",
+          "raw_output_bytes": 1161,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_residence_mutant_tranches_gardees",
+          "raw_output_bytes": 1193,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_residence_plafond_cable",
+          "raw_output_bytes": 1129,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_residence_plancher_cable",
+          "raw_output_bytes": 1141,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_residence_jalons_prefixe",
+          "raw_output_bytes": 1149,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_skip-full-census",
+          "raw_output_bytes": 1816,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_repr-ties",
+          "raw_output_bytes": 1498,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_attach-prebatch",
+          "raw_output_bytes": 1660,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_drop-nonmerge",
+          "raw_output_bytes": 1658,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_dense-pointid",
+          "raw_output_bytes": 1813,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_q4-center-parity",
+          "raw_output_bytes": 1618,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_q4-eq-sign",
+          "raw_output_bytes": 1612,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_q4-i64-drop-factor",
+          "raw_output_bytes": 1620,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_q4-i64-pair-min",
+          "raw_output_bytes": 1617,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_witness-no-lane-mask",
+          "raw_output_bytes": 1312,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_par-drop-shard",
+          "raw_output_bytes": 1927,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_par-drop-ball-chunk",
+          "raw_output_bytes": 1819,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_ablation-mat-sans-copie",
+          "raw_output_bytes": 1823,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_ablation-mat-sans-tris",
+          "raw_output_bytes": 1822,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_ablation-post-cle-factice",
+          "raw_output_bytes": 1825,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_wire_pack",
+          "raw_output_bytes": 2970,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_wire_pack_mutant_stride",
+          "raw_output_bytes": 4567,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_wire_pack_mutant_slack",
+          "raw_output_bytes": 3134,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_wire_pack_contre_double",
+          "raw_output_bytes": 4704,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_wire_pack_plancher",
+          "raw_output_bytes": 3069,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_lot_ring",
+          "raw_output_bytes": 3818,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_lot_ring_plancher",
+          "raw_output_bytes": 3886,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_profil_contre_fixture",
+          "raw_output_bytes": 1434,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_sonde_ablation_gate",
+          "raw_output_bytes": 3760,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_csr_csr-order-by-output",
+          "raw_output_bytes": 1815,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_csr_csr-stale-level",
+          "raw_output_bytes": 1811,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_csr_csr-stale-output",
+          "raw_output_bytes": 1812,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_csr_csr-unsorted-born",
+          "raw_output_bytes": 1658,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_csr_csr-unsorted-parents",
+          "raw_output_bytes": 1816,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_csr_csr-drop-delta",
+          "raw_output_bytes": 1810,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_csr_csr-dup-delta",
+          "raw_output_bytes": 1809,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_csr_csr-shift-offset",
+          "raw_output_bytes": 1812,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_csr_ablation-mat-sans-copie",
+          "raw_output_bytes": 1819,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_csr_ablation-mat-sans-tris",
+          "raw_output_bytes": 1818,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_csr_ablation-post-cle-factice",
+          "raw_output_bytes": 1821,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_csr_repr-ties",
+          "raw_output_bytes": 1494,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_csr_attach-prebatch",
+          "raw_output_bytes": 1656,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mutant_csr_drop-nonmerge",
+          "raw_output_bytes": 1654,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_cli_layout_classic_signature",
+          "raw_output_bytes": 7541,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_cli_layout_csr_signature",
+          "raw_output_bytes": 7718,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_perm_sort",
+          "raw_output_bytes": 1245,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_perm_sort_plancher",
+          "raw_output_bytes": 1394,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_route_c6_stub",
+          "raw_output_bytes": 3007,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_route_c6_stub_plancher",
+          "raw_output_bytes": 3148,
+          "verified_prefix_bytes": 1024
+        },
+        {
+          "name": "mhgp7_mono_inline",
+          "raw_output_bytes": 6486,
+          "verified_prefix_bytes": 1024
+        }
+      ],
+      "last_test_passed_blocks": 339,
+      "local_pins_verified": 201,
+      "mode": "full",
+      "names": [
+        "mhgp7_agregateur_intergraines",
+        "mhgp7_archive",
+        "mhgp7_archive_api",
+        "mhgp7_archive_cleanup",
+        "mhgp7_archive_optimized",
+        "mhgp7_arith_selftest",
+        "mhgp7_arithmetic_integer",
+        "mhgp7_arithmetic_integer_bad_case",
+        "mhgp7_arithmetic_integer_bad_mutant",
+        "mhgp7_arithmetic_integer_case_mismatch",
+        "mhgp7_arithmetic_integer_oracle",
+        "mhgp7_arithmetic_integer_oracle_carry",
+        "mhgp7_arithmetic_integer_u320",
+        "mhgp7_arithmetic_lanes",
+        "mhgp7_arithmetic_lanes_bad_case",
+        "mhgp7_arithmetic_lanes_bad_inject",
+        "mhgp7_arithmetic_lanes_duplicate_case",
+        "mhgp7_arithmetic_lanes_duplicate_inject",
+        "mhgp7_arithmetic_lanes_empty_inject",
+        "mhgp7_arithmetic_lanes_oracle",
+        "mhgp7_arithmetic_lanes_oracle_carry",
+        "mhgp7_arithmetic_lanes_oracle_case_mismatch",
+        "mhgp7_arithmetic_lanes_oracle_overflow",
+        "mhgp7_arithmetic_lanes_q4_level",
+        "mhgp7_arithmetic_lanes_u192_case_mismatch",
+        "mhgp7_arithmetic_q3_factor",
+        "mhgp7_arithmetic_q4_face_boundary",
+        "mhgp7_arithmetic_q4_parity",
+        "mhgp7_arithmetic_q4_u192_word2",
+        "mhgp7_arithmetic_u320_word4",
+        "mhgp7_axis_bounds",
+        "mhgp7_axis_bounds_axis-argmin-ceil-always",
+        "mhgp7_axis_bounds_axis-argmin-floor-only",
+        "mhgp7_axis_bounds_axis-argmin-max-min",
+        "mhgp7_axis_bounds_axis-argmin-narrow-coefficient",
+        "mhgp7_axis_bounds_axis-argmin-no-clip",
+        "mhgp7_bad_alloc_etage_census",
+        "mhgp7_bad_alloc_etage_fold",
+        "mhgp7_bad_alloc_etage_provision",
+        "mhgp7_bad_alloc_temoin",
+        "mhgp7_campagne_provenance",
+        "mhgp7_caps_mutant_emission",
+        "mhgp7_caps_mutant_late_wave",
+        "mhgp7_caps_mutant_prefusion",
+        "mhgp7_caps_refus",
+        "mhgp7_cell_grid_oracle",
+        "mhgp7_cell_grid_oracle_mutant_eps",
+        "mhgp7_cell_grid_oracle_mutant_h1",
+        "mhgp7_cell_grid_oracle_mutant_ns",
+        "mhgp7_census_device_stub",
+        "mhgp7_census_direct",
+        "mhgp7_census_direct_offset",
+        "mhgp7_census_direct_residence",
+        "mhgp7_census_direct_transaction",
+        "mhgp7_census_stub_mutant_nonstrict",
+        "mhgp7_census_stub_mutant_nshell",
+        "mhgp7_census_stub_mutant_range_le",
+        "mhgp7_census_stub_mutant_skip_count",
+        "mhgp7_census_stub_mutant_skip_write",
+        "mhgp7_census_stub_mutant_stack",
+        "mhgp7_census_stub_mutant_swap_push",
+        "mhgp7_cli_budget_signature",
+        "mhgp7_cli_layout_classic_signature",
+        "mhgp7_cli_layout_csr_signature",
+        "mhgp7_cli_ok_s8",
+        "mhgp7_cli_refus_layout_inconnu",
+        "mhgp7_cli_refus_layout_vide",
+        "mhgp7_cli_refus_n_suffix",
+        "mhgp7_cli_refus_s7",
+        "mhgp7_cli_refus_s_suffix",
+        "mhgp7_compare_campaign",
+        "mhgp7_compare_campaign_optimized",
+        "mhgp7_conformity_collinear_seven_600",
+        "mhgp7_conformity_csr_collinear_seven_600",
+        "mhgp7_conformity_csr_eight_clusters_400",
+        "mhgp7_conformity_csr_scanline_single_pass_400",
+        "mhgp7_conformity_csr_terrain_2000",
+        "mhgp7_conformity_csr_terrain_400",
+        "mhgp7_conformity_csr_two_lines_200",
+        "mhgp7_conformity_csr_uniform_2000",
+        "mhgp7_conformity_csr_uniform_400",
+        "mhgp7_conformity_eight_clusters_400",
+        "mhgp7_conformity_mutant_rle",
+        "mhgp7_conformity_refus_layout_inconnu",
+        "mhgp7_conformity_scanline_single_pass_400",
+        "mhgp7_conformity_terrain_2000",
+        "mhgp7_conformity_terrain_400",
+        "mhgp7_conformity_two_lines_200",
+        "mhgp7_conformity_uniform_2000",
+        "mhgp7_conformity_uniform_400",
+        "mhgp7_contrat_echec",
+        "mhgp7_contrat_echec_census",
+        "mhgp7_contrat_echec_fold_k2",
+        "mhgp7_contrat_echec_fuite_sum_parents",
+        "mhgp7_cover_coef3_mutant",
+        "mhgp7_cover_coef4",
+        "mhgp7_cover_refus_mutant_hors_cible",
+        "mhgp7_device_witness_stub",
+        "mhgp7_device_witness_stub_contre_double",
+        "mhgp7_device_witness_stub_mutant_carry",
+        "mhgp7_device_witness_stub_mutant_skip_native",
+        "mhgp7_device_witness_stub_mutant_skip_write",
+        "mhgp7_e6_grille_objet",
+        "mhgp7_executor_pool",
+        "mhgp7_executor_pool_mutant_activate_late",
+        "mhgp7_executor_pool_mutant_drop_exception",
+        "mhgp7_executor_pool_mutant_serial",
+        "mhgp7_executor_pool_mutant_worker_resume",
+        "mhgp7_expect_line",
+        "mhgp7_families_fixture",
+        "mhgp7_families_mutant_overshoot",
+        "mhgp7_fold_cap_evenements",
+        "mhgp7_fold_cap_incidences",
+        "mhgp7_fold_cap_mutant_evenements",
+        "mhgp7_fold_cap_mutant_incidences",
+        "mhgp7_fold_cap_plancher",
+        "mhgp7_fold_cap_refus_arg",
+        "mhgp7_fold_csr_copie",
+        "mhgp7_fold_csr_fixtures",
+        "mhgp7_fold_csr_mutant_csr-drop-delta",
+        "mhgp7_fold_csr_mutant_csr-dup-delta",
+        "mhgp7_fold_csr_mutant_csr-guard-skip",
+        "mhgp7_fold_csr_mutant_csr-inject-bad-alloc",
+        "mhgp7_fold_csr_mutant_csr-keep-continuation",
+        "mhgp7_fold_csr_mutant_csr-offset-domain",
+        "mhgp7_fold_csr_mutant_csr-offset-end",
+        "mhgp7_fold_csr_mutant_csr-offset-hole",
+        "mhgp7_fold_csr_mutant_csr-offset-overlap",
+        "mhgp7_fold_csr_mutant_csr-order-by-output",
+        "mhgp7_fold_csr_mutant_csr-shift-offset",
+        "mhgp7_fold_csr_mutant_csr-stale-level",
+        "mhgp7_fold_csr_mutant_csr-stale-output",
+        "mhgp7_fold_csr_mutant_csr-unsorted-born",
+        "mhgp7_fold_csr_mutant_csr-unsorted-parents",
+        "mhgp7_fold_csr_offsets",
+        "mhgp7_fold_csr_overflow",
+        "mhgp7_fold_csr_pipeline",
+        "mhgp7_fold_csr_refus_csr-offset-domain",
+        "mhgp7_fold_csr_refus_csr-offset-end",
+        "mhgp7_fold_csr_refus_csr-offset-hole",
+        "mhgp7_fold_csr_refus_csr-offset-overlap",
+        "mhgp7_fold_csr_refus_inject_vide",
+        "mhgp7_fold_csr_refus_mutant_hors_cible",
+        "mhgp7_fold_csr_refus_mutant_inconnu",
+        "mhgp7_fold_csr_refus_pipeline_sans_inject",
+        "mhgp7_fused_descent",
+        "mhgp7_fused_mutant_droprect",
+        "mhgp7_fused_mutant_mask",
+        "mhgp7_incidence_campaign",
+        "mhgp7_incidence_campaign_optimized",
+        "mhgp7_juge_refus_k11",
+        "mhgp7_juge_refus_k_en_trop",
+        "mhgp7_juge_refus_narrowing",
+        "mhgp7_juge_refus_reference_tronquee",
+        "mhgp7_linked_arcs_oracle_i64",
+        "mhgp7_linked_arcs_u16",
+        "mhgp7_lot_ring",
+        "mhgp7_lot_ring_mutant_epoch",
+        "mhgp7_lot_ring_mutant_merge",
+        "mhgp7_lot_ring_mutant_prefixe",
+        "mhgp7_lot_ring_mutant_rebuild_tot",
+        "mhgp7_lot_ring_mutant_reuse",
+        "mhgp7_lot_ring_plancher",
+        "mhgp7_lot_ring_refus_arg",
+        "mhgp7_lot_ring_refus_mutant",
+        "mhgp7_meb_lazy",
+        "mhgp7_meb_lazy_duplicate_mutant",
+        "mhgp7_meb_lazy_eager_materialization",
+        "mhgp7_meb_lazy_empty_mutant",
+        "mhgp7_meb_lazy_q2_reject_shell",
+        "mhgp7_meb_lazy_q3_reject_shell",
+        "mhgp7_meb_lazy_q4_reject_shell",
+        "mhgp7_meb_lazy_unknown_mutant",
+        "mhgp7_mono_inline",
+        "mhgp7_mono_inline_early_alloc",
+        "mhgp7_mono_inline_late_a",
+        "mhgp7_mono_inline_late_b",
+        "mhgp7_mutant_ablation-mat-sans-copie",
+        "mhgp7_mutant_ablation-mat-sans-tris",
+        "mhgp7_mutant_ablation-post-cle-factice",
+        "mhgp7_mutant_attach-prebatch",
+        "mhgp7_mutant_binary-ties",
+        "mhgp7_mutant_canonical-is-uf-root",
+        "mhgp7_mutant_census-nonstrict",
+        "mhgp7_mutant_csr_ablation-mat-sans-copie",
+        "mhgp7_mutant_csr_ablation-mat-sans-tris",
+        "mhgp7_mutant_csr_ablation-post-cle-factice",
+        "mhgp7_mutant_csr_attach-prebatch",
+        "mhgp7_mutant_csr_binary-ties",
+        "mhgp7_mutant_csr_canonical-is-uf-root",
+        "mhgp7_mutant_csr_csr-drop-delta",
+        "mhgp7_mutant_csr_csr-dup-delta",
+        "mhgp7_mutant_csr_csr-keep-continuation",
+        "mhgp7_mutant_csr_csr-order-by-output",
+        "mhgp7_mutant_csr_csr-shift-offset",
+        "mhgp7_mutant_csr_csr-stale-level",
+        "mhgp7_mutant_csr_csr-stale-output",
+        "mhgp7_mutant_csr_csr-unsorted-born",
+        "mhgp7_mutant_csr_csr-unsorted-parents",
+        "mhgp7_mutant_csr_drop-nonmerge",
+        "mhgp7_mutant_csr_repr-ties",
+        "mhgp7_mutant_dense-pointid",
+        "mhgp7_mutant_depth-threshold-minus-one",
+        "mhgp7_mutant_drop-nonmerge",
+        "mhgp7_mutant_fold-inject-a-failure-k2",
+        "mhgp7_mutant_genfilter-nonstrict",
+        "mhgp7_mutant_par-drop-ball-chunk",
+        "mhgp7_mutant_par-drop-shard",
+        "mhgp7_mutant_q3-level-4g",
+        "mhgp7_mutant_q4-center-parity",
+        "mhgp7_mutant_q4-eq-sign",
+        "mhgp7_mutant_q4-i64-drop-factor",
+        "mhgp7_mutant_q4-i64-pair-min",
+        "mhgp7_mutant_range-add-max-le-zero",
+        "mhgp7_mutant_repr-ties",
+        "mhgp7_mutant_skip-full-census",
+        "mhgp7_mutant_witness-no-lane-mask",
+        "mhgp7_mutant_wspd-drop-rect",
+        "mhgp7_pentes_validateur",
+        "mhgp7_perm_residence",
+        "mhgp7_perm_residence_perm-apply-partial",
+        "mhgp7_perm_residence_perm-apply-scatter",
+        "mhgp7_perm_residence_perm-tie-desc",
+        "mhgp7_perm_sort",
+        "mhgp7_perm_sort_mutant_census-stack-per-ball",
+        "mhgp7_perm_sort_mutant_parallel-sort-unstable",
+        "mhgp7_perm_sort_mutant_perm-apply-partial",
+        "mhgp7_perm_sort_mutant_perm-apply-scatter",
+        "mhgp7_perm_sort_mutant_perm-tie-desc",
+        "mhgp7_perm_sort_plancher",
+        "mhgp7_perm_sort_refus_arg",
+        "mhgp7_pilot_stub",
+        "mhgp7_pilot_stub_mutant_nonstrict",
+        "mhgp7_pilot_stub_mutant_nshell",
+        "mhgp7_pilot_stub_mutant_skip_count",
+        "mhgp7_pilot_stub_mutant_skip_write",
+        "mhgp7_pilot_stub_mutant_stack",
+        "mhgp7_pilote_juge_contre_fixtures",
+        "mhgp7_pilote_stub_juge",
+        "mhgp7_pilote_stub_juge_ordre_inverse",
+        "mhgp7_pilote_stub_lot17",
+        "mhgp7_pilote_stub_mutant_base",
+        "mhgp7_pilote_stub_parite_200",
+        "mhgp7_pilote_stub_refus_n",
+        "mhgp7_plan_keycsr_gate",
+        "mhgp7_postprefilter_uniform_400",
+        "mhgp7_prefix_collinear_seven_600",
+        "mhgp7_prefix_contre_event_order_sans_temoin",
+        "mhgp7_prefix_eight_clusters_400",
+        "mhgp7_prefix_mutant_batch_levels",
+        "mhgp7_prefix_mutant_depth_smax6",
+        "mhgp7_prefix_mutant_event_order",
+        "mhgp7_prefix_plancher_cable",
+        "mhgp7_prefix_refus_reference_courte",
+        "mhgp7_prefix_refus_sans_reference",
+        "mhgp7_prefix_refus_smax11",
+        "mhgp7_prefix_scanline_single_pass_400",
+        "mhgp7_prefix_temoin_evenements",
+        "mhgp7_prefix_terrain_2000",
+        "mhgp7_prefix_terrain_400",
+        "mhgp7_prefix_two_lines_200",
+        "mhgp7_prefix_uniform_2000",
+        "mhgp7_prefix_uniform_400",
+        "mhgp7_profil_contrat_echec",
+        "mhgp7_profil_contrat_echec_k2",
+        "mhgp7_profil_contre_fixture",
+        "mhgp7_profil_identite",
+        "mhgp7_profile_refuse_inject",
+        "mhgp7_profile_sonde_refuse_inconnu",
+        "mhgp7_profile_sonde_refuse_inject_vide",
+        "mhgp7_profile_sonde_refuse_inject_virgule",
+        "mhgp7_profile_sonde_refuse_mutant_production",
+        "mhgp7_reduced_drop_materialization_mutant",
+        "mhgp7_reduced_latent_parent_mutant",
+        "mhgp7_residence_jalons",
+        "mhgp7_residence_jalons_prefixe",
+        "mhgp7_residence_mutant_hwm_instantane",
+        "mhgp7_residence_mutant_jalon_manquant",
+        "mhgp7_residence_mutant_tranches_gardees",
+        "mhgp7_residence_plafond_cable",
+        "mhgp7_residence_plancher_cable",
+        "mhgp7_residence_refus_smax",
+        "mhgp7_route_c6_stub",
+        "mhgp7_route_c6_stub_mutant_c6-publish-prefix",
+        "mhgp7_route_c6_stub_mutant_c6-reuse-before-lease",
+        "mhgp7_route_c6_stub_mutant_c6-wrong-epoch",
+        "mhgp7_route_c6_stub_mutant_gpu-census-nonstrict",
+        "mhgp7_route_c6_stub_mutant_gpu-lot-base-reset",
+        "mhgp7_route_c6_stub_mutant_gpu-nshell-overdomain",
+        "mhgp7_route_c6_stub_mutant_gpu-skip-ball-write",
+        "mhgp7_route_c6_stub_mutant_gpu-skip-count-write",
+        "mhgp7_route_c6_stub_mutant_gpu-stack-shallow",
+        "mhgp7_route_c6_stub_plancher",
+        "mhgp7_route_c6_stub_refus_arg",
+        "mhgp7_sha256_selftest",
+        "mhgp7_silent_csr_stale_level_mutant",
+        "mhgp7_silent_drop_nonmerge_mutant",
+        "mhgp7_silent_incidence",
+        "mhgp7_silent_incidence_mutant",
+        "mhgp7_sonde_ablation_gate",
+        "mhgp7_sweep_frontieres",
+        "mhgp7_sweep_frontieres_mutant_depth",
+        "mhgp7_sweep_frontieres_mutant_exit",
+        "mhgp7_sweep_mutant_depth",
+        "mhgp7_sweep_mutant_exit",
+        "mhgp7_sweep_oracle",
+        "mhgp7_sweep_refus_inject_vide",
+        "mhgp7_thread_failure",
+        "mhgp7_thread_failure_mutant_admission",
+        "mhgp7_thread_failure_refus_arg",
+        "mhgp7_tree_selftest",
+        "mhgp7_wire",
+        "mhgp7_wire_mutant_drop_node",
+        "mhgp7_wire_mutant_t1",
+        "mhgp7_wire_pack",
+        "mhgp7_wire_pack_contre_double",
+        "mhgp7_wire_pack_mutant_slack",
+        "mhgp7_wire_pack_mutant_stride",
+        "mhgp7_wire_pack_plancher",
+        "mhgp7_wire_pack_refus_arg",
+        "mhgp7_witness_stack",
+        "mhgp7_witness_stack_duplicate_case",
+        "mhgp7_witness_stack_duplicate_mutant",
+        "mhgp7_witness_stack_empty_case",
+        "mhgp7_witness_stack_empty_mutant",
+        "mhgp7_witness_stack_helper",
+        "mhgp7_witness_stack_lane_mask",
+        "mhgp7_witness_stack_lane_mask_mutant",
+        "mhgp7_witness_stack_mutant_case_mismatch",
+        "mhgp7_witness_stack_semantic",
+        "mhgp7_witness_stack_semantic_lane_mask_mutant",
+        "mhgp7_witness_stack_unknown_argument",
+        "mhgp7_witness_stack_unknown_case",
+        "mhgp7_witness_stack_unknown_mutant",
+        "mhgp7_witness_stack_witness",
+        "mhgp7_wspd_ledger",
+        "mhgp7_wspd_mutant_cap",
+        "mhgp7_wspd_mutant_split",
+        "mhgp7_wspd_ownership"
+      ],
+      "sources_stable": 143,
+      "tests": 339,
+      "witness_outputs": {
+        "mhgp7_witness_stack": "witness_stack_gate=passed case=all reason=none mutant=none public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=1 lane_mask_nominal=3 lane_mask_product=3\nhelper_checks=8 overflow_allocations=9 allocation_failures=2\nclouds=24 permutations=16 queries=48960 guarded_queries=48960 permutation_comparisons=32640 topology_checks=24 max_height=48 max_topological_frontier=49 internal_anchor_pairs=150 duplicate_clouds=3\npositive_q2=10176 positive_q3=10320 positive_q4=10080 nodes=808908 corners=74172 reference_new_calls=118404 candidate_new_calls=0",
+        "mhgp7_witness_stack_duplicate_case": "",
+        "mhgp7_witness_stack_duplicate_mutant": "",
+        "mhgp7_witness_stack_empty_case": "",
+        "mhgp7_witness_stack_empty_mutant": "",
+        "mhgp7_witness_stack_helper": "witness_stack_gate=passed case=helper reason=none mutant=none public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=0 lane_mask_nominal=0 lane_mask_product=0\nhelper_checks=8 overflow_allocations=9 allocation_failures=2\nclouds=0 permutations=0 queries=0 guarded_queries=0 permutation_comparisons=0 topology_checks=0 max_height=0 max_topological_frontier=0 internal_anchor_pairs=0 duplicate_clouds=0\npositive_q2=0 positive_q3=0 positive_q4=0 nodes=0 corners=0 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_lane_mask": "witness_stack_gate=passed case=lane-mask reason=none mutant=none public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=1 lane_mask_nominal=3 lane_mask_product=3\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=0 permutations=0 queries=0 guarded_queries=0 permutation_comparisons=0 topology_checks=0 max_height=0 max_topological_frontier=0 internal_anchor_pairs=0 duplicate_clouds=0\npositive_q2=0 positive_q3=0 positive_q4=0 nodes=0 corners=0 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_lane_mask_mutant": "witness_stack_gate=mutant_killed case=lane-mask reason=witness.lane_mask_double_credit mutant=witness-no-lane-mask public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=1 lane_mask_nominal=3 lane_mask_product=8\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=0 permutations=0 queries=0 guarded_queries=0 permutation_comparisons=0 topology_checks=0 max_height=0 max_topological_frontier=0 internal_anchor_pairs=0 duplicate_clouds=0\npositive_q2=0 positive_q3=0 positive_q4=0 nodes=0 corners=0 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_mutant_case_mismatch": "",
+        "mhgp7_witness_stack_semantic": "witness_stack_gate=passed case=witness reason=none mutant=none public_status=not_claimed\nallocation_observer=disabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=0 lane_mask_nominal=0 lane_mask_product=0\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=24 permutations=16 queries=48960 guarded_queries=0 permutation_comparisons=32640 topology_checks=24 max_height=48 max_topological_frontier=49 internal_anchor_pairs=150 duplicate_clouds=3\npositive_q2=10176 positive_q3=10320 positive_q4=10080 nodes=808908 corners=74172 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_semantic_lane_mask_mutant": "witness_stack_gate=mutant_killed case=lane-mask reason=witness.lane_mask_double_credit mutant=witness-no-lane-mask public_status=not_claimed\nallocation_observer=disabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=1 lane_mask_nominal=3 lane_mask_product=8\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=0 permutations=0 queries=0 guarded_queries=0 permutation_comparisons=0 topology_checks=0 max_height=0 max_topological_frontier=0 internal_anchor_pairs=0 duplicate_clouds=0\npositive_q2=0 positive_q3=0 positive_q4=0 nodes=0 corners=0 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_unknown_argument": "",
+        "mhgp7_witness_stack_unknown_case": "",
+        "mhgp7_witness_stack_unknown_mutant": "",
+        "mhgp7_witness_stack_witness": "witness_stack_gate=passed case=witness reason=none mutant=none public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=0 lane_mask_nominal=0 lane_mask_product=0\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=24 permutations=16 queries=48960 guarded_queries=48960 permutation_comparisons=32640 topology_checks=24 max_height=48 max_topological_frontier=49 internal_anchor_pairs=150 duplicate_clouds=3\npositive_q2=10176 positive_q3=10320 positive_q4=10080 nodes=808908 corners=74172 reference_new_calls=118404 candidate_new_calls=0"
+      }
+    },
+    "release": {
+      "CLI_build_sources_stable": 51,
+      "LastTest_bytes": 59691,
+      "LastTest_sha256": "fe279aabbff98758fecfe7f6aad6c3f0a41b5b247ac72fb826ab1022c6da14ab",
+      "XML_outputs_verified_against_LastTest": true,
+      "actual_witness_compile_commands": [
+        {
+          "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_witness_stack_gate.dir/tests/witness_stack_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+          "directory": "/workspaces/E-HGP/build/v7_f_tests_20260905/release",
+          "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+          "output": "CMakeFiles/mhgp7_witness_stack_gate.dir/tests/witness_stack_gate.cpp.o"
+        },
+        {
+          "command": "/usr/bin/c++ -DMHGP7_TESTING=1 -DMHGP7_WITNESS_STACK_NO_ALLOC_OBSERVER=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_witness_stack_semantic_gate.dir/tests/witness_stack_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+          "directory": "/workspaces/E-HGP/build/v7_f_tests_20260905/release",
+          "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+          "output": "CMakeFiles/mhgp7_witness_stack_semantic_gate.dir/tests/witness_stack_gate.cpp.o"
+        }
+      ],
+      "binaries_stable": [
+        {
+          "path": "build/v7_f_tests_20260905/release/mhgp7",
+          "sha256": "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85",
+          "size": 692296
+        },
+        {
+          "path": "build/v7_f_tests_20260905/release/mhgp7_archive_api_gate",
+          "sha256": "534645fd2ba950e707f1d5a554b2101499f1478c5edb1496ca2118ab5797ee8b",
+          "size": 115096
+        },
+        {
+          "path": "build/v7_f_tests_20260905/release/mhgp7_archive_cleanup_gate",
+          "sha256": "05142882b3cb077e9185bb0aadc0960eaa43ac98874bf3993bca3dd21a654d82",
+          "size": 764672
+        },
+        {
+          "path": "build/v7_f_tests_20260905/release/mhgp7_bad_alloc_gate",
+          "sha256": "00720260dd3c51bf8645e41a7cfab7ca24acab5d0bb3d9c4ef42fcb7ce54b240",
+          "size": 745576
+        },
+        {
+          "path": "build/v7_f_tests_20260905/release/mhgp7_census_direct_gate",
+          "sha256": "5c9e964410a640b8b35098621c49e54752cd396965578d39de806caf1440328c",
+          "size": 194160
+        },
+        {
+          "path": "build/v7_f_tests_20260905/release/mhgp7_meb_lazy_gate",
+          "sha256": "87fd501774b53091392ceab79ffe35e4cef14a062b91c2d79cf9c53cf6c2e577",
+          "size": 107640
+        },
+        {
+          "path": "build/v7_f_tests_20260905/release/mhgp7_mono_inline_gate",
+          "sha256": "ee26f7e98e7ead08c63fd92b8c9e993a9809c72d03a61f03095703e66071626d",
+          "size": 742920
+        },
+        {
+          "path": "build/v7_f_tests_20260905/release/mhgp7_silent_incidence_gate",
+          "sha256": "00c350c4f7499b8096c38c94c9283b0aeb63908b50d030a094a7a13ee09aed83",
+          "size": 835576
+        },
+        {
+          "path": "build/v7_f_tests_20260905/release/mhgp7_thread_failure_gate",
+          "sha256": "9cb51400cacdcbcf4e553039394065afbcb2d70ed284a1381fccd176081fddda",
+          "size": 847760
+        },
+        {
+          "path": "build/v7_f_tests_20260905/release/mhgp7_witness_stack_gate",
+          "sha256": "c7434d4d74799eb50e0051f5f7c7bba9ae5d7a5e6b22309c4688ad86e4f29569",
+          "size": 99760
+        },
+        {
+          "path": "build/v7_f_tests_20260905/release/mhgp7_witness_stack_semantic_gate",
+          "sha256": "7f33ae779934d0b19972da3d7c0815bb385c390089bd5dcd5389a3dd974f6d87",
+          "size": 90752
+        }
+      ],
+      "commands": {
+        "build_targets": {
+          "argv": [
+            "cmake",
+            "--build",
+            "/workspaces/E-HGP/build/v7_f_tests_20260905/release",
+            "--parallel",
+            "2",
+            "--target",
+            "mhgp7_meb_lazy_gate",
+            "mhgp7_silent_incidence_gate",
+            "mhgp7",
+            "mhgp7_archive_api_gate",
+            "mhgp7_archive_cleanup_gate",
+            "mhgp7_mono_inline_gate",
+            "mhgp7_census_direct_gate",
+            "mhgp7_bad_alloc_gate",
+            "mhgp7_thread_failure_gate",
+            "mhgp7_witness_stack_gate",
+            "mhgp7_witness_stack_semantic_gate"
+          ],
+          "elapsed_seconds": 144.87006068400115,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T09:21:53Z",
+          "status": "completed",
+          "timeout_seconds": 1200
+        },
+        "configure": {
+          "argv": [
+            "cmake",
+            "-S",
+            "/workspaces/E-HGP/morsehgp3D_v7",
+            "-B",
+            "/workspaces/E-HGP/build/v7_f_tests_20260905/release",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP7_ENABLE_CUDA=OFF",
+            "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+          ],
+          "elapsed_seconds": 0.5178206430009595,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T09:21:53Z",
+          "status": "completed",
+          "timeout_seconds": 120
+        },
+        "ctest": {
+          "argv": [
+            "ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_f_tests_20260905/release",
+            "--output-on-failure",
+            "--no-tests=error",
+            "-R",
+            "^(mhgp7_archive|mhgp7_archive_api|mhgp7_archive_cleanup|mhgp7_archive_optimized|mhgp7_bad_alloc_etage_census|mhgp7_bad_alloc_etage_fold|mhgp7_bad_alloc_etage_provision|mhgp7_bad_alloc_temoin|mhgp7_census_direct|mhgp7_census_direct_offset|mhgp7_census_direct_residence|mhgp7_census_direct_transaction|mhgp7_meb_lazy|mhgp7_meb_lazy_duplicate_mutant|mhgp7_meb_lazy_eager_materialization|mhgp7_meb_lazy_empty_mutant|mhgp7_meb_lazy_q2_reject_shell|mhgp7_meb_lazy_q3_reject_shell|mhgp7_meb_lazy_q4_reject_shell|mhgp7_meb_lazy_unknown_mutant|mhgp7_mono_inline|mhgp7_mono_inline_early_alloc|mhgp7_mono_inline_late_a|mhgp7_mono_inline_late_b|mhgp7_reduced_drop_materialization_mutant|mhgp7_reduced_latent_parent_mutant|mhgp7_silent_csr_stale_level_mutant|mhgp7_silent_drop_nonmerge_mutant|mhgp7_silent_incidence|mhgp7_silent_incidence_mutant|mhgp7_thread_failure|mhgp7_thread_failure_mutant_admission|mhgp7_thread_failure_refus_arg|mhgp7_witness_stack|mhgp7_witness_stack_duplicate_case|mhgp7_witness_stack_duplicate_mutant|mhgp7_witness_stack_empty_case|mhgp7_witness_stack_empty_mutant|mhgp7_witness_stack_helper|mhgp7_witness_stack_lane_mask|mhgp7_witness_stack_lane_mask_mutant|mhgp7_witness_stack_mutant_case_mismatch|mhgp7_witness_stack_semantic|mhgp7_witness_stack_semantic_lane_mask_mutant|mhgp7_witness_stack_unknown_argument|mhgp7_witness_stack_unknown_case|mhgp7_witness_stack_unknown_mutant|mhgp7_witness_stack_witness)$",
+            "--parallel",
+            "2",
+            "--output-junit",
+            "/workspaces/E-HGP/build/v7_f_tests_20260905/release_receipts/ctest.junit.xml"
+          ],
+          "elapsed_seconds": 4.914851838999311,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T09:24:18Z",
+          "status": "completed",
+          "timeout_seconds": 1200
+        },
+        "inventory": {
+          "argv": [
+            "ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_f_tests_20260905/release",
+            "--show-only=json-v1",
+            "-R",
+            "^(mhgp7_archive|mhgp7_archive_api|mhgp7_archive_cleanup|mhgp7_archive_optimized|mhgp7_bad_alloc_etage_census|mhgp7_bad_alloc_etage_fold|mhgp7_bad_alloc_etage_provision|mhgp7_bad_alloc_temoin|mhgp7_census_direct|mhgp7_census_direct_offset|mhgp7_census_direct_residence|mhgp7_census_direct_transaction|mhgp7_meb_lazy|mhgp7_meb_lazy_duplicate_mutant|mhgp7_meb_lazy_eager_materialization|mhgp7_meb_lazy_empty_mutant|mhgp7_meb_lazy_q2_reject_shell|mhgp7_meb_lazy_q3_reject_shell|mhgp7_meb_lazy_q4_reject_shell|mhgp7_meb_lazy_unknown_mutant|mhgp7_mono_inline|mhgp7_mono_inline_early_alloc|mhgp7_mono_inline_late_a|mhgp7_mono_inline_late_b|mhgp7_reduced_drop_materialization_mutant|mhgp7_reduced_latent_parent_mutant|mhgp7_silent_csr_stale_level_mutant|mhgp7_silent_drop_nonmerge_mutant|mhgp7_silent_incidence|mhgp7_silent_incidence_mutant|mhgp7_thread_failure|mhgp7_thread_failure_mutant_admission|mhgp7_thread_failure_refus_arg|mhgp7_witness_stack|mhgp7_witness_stack_duplicate_case|mhgp7_witness_stack_duplicate_mutant|mhgp7_witness_stack_empty_case|mhgp7_witness_stack_empty_mutant|mhgp7_witness_stack_helper|mhgp7_witness_stack_lane_mask|mhgp7_witness_stack_lane_mask_mutant|mhgp7_witness_stack_mutant_case_mismatch|mhgp7_witness_stack_semantic|mhgp7_witness_stack_semantic_lane_mask_mutant|mhgp7_witness_stack_unknown_argument|mhgp7_witness_stack_unknown_case|mhgp7_witness_stack_unknown_mutant|mhgp7_witness_stack_witness)$"
+          ],
+          "elapsed_seconds": 0.03440472399961436,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T09:24:18Z",
+          "status": "completed",
+          "timeout_seconds": 60
+        }
+      },
+      "entrypoint_pins_contained_in_sources": 118,
+      "environment": {
+        "all_test_executions": "fresh",
+        "build_kind": "fresh_isolated",
+        "environment": {
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "locale": {
+            "LANG": "C",
+            "LC_ALL": "C"
+          },
+          "mode": "release",
+          "sanitizer_options": "not_required_for_uninstrumented_Release"
+        },
+        "expected_F_build_receipt_sha256": "522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4",
+        "expected_F_sha256": "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85",
+        "gate_results_reused": false,
+        "gcp": "not_used",
+        "host_before": {
+          "affinity_cpus": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "architecture": "x86_64",
+          "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+          "host_shared": true,
+          "kernel_release": "6.8.0-1052-azure",
+          "loadavg_1_5_15": [
+            1.08935546875,
+            1.22998046875,
+            0.998046875
+          ],
+          "logical_cpus": 8,
+          "mem_total_bytes": 33657716736,
+          "observed_utc": "2026-09-05T09:21:53.189475Z"
+        },
+        "mode": "release",
+        "protected_C_C_D_E_historical": {
+          "/workspaces/E-HGP/build/v7/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+          "/workspaces/E-HGP/build/v7_c_qualification/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+          "/workspaces/E-HGP/build/v7_meb_qualification/mhgp7": "127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f",
+          "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6"
+        },
+        "public_status": "not_claimed",
+        "repository_before": {
+          "head": "61f72a6805e27f1bc216b5d7444164b31fc970b6",
+          "observed_utc": "2026-09-05T09:21:53.162695Z",
+          "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/src/spindle/witness_count.hpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/horizontal_fold_probe.cpp\n?? morsehgp3D_v7/audits/horizontal_fold_probe.py\n?? morsehgp3D_v7/audits/horizontal_pipeline_bridge.cpp\n?? morsehgp3D_v7/audits/horizontal_rational_oracle.py\n?? morsehgp3D_v7/audits/receipts_horizontal_20260905/\n?? morsehgp3D_v7/docs/OPTIMISATION_PILE_TEMOINS.md\n?? morsehgp3D_v7/src/core/inline_stack.hpp\n?? morsehgp3D_v7/tests/reference/\n?? morsehgp3D_v7/tests/witness_stack_gate.cpp\n"
+        },
+        "schema": "mhgp7.witness-stack-F-qualification.v1"
+      },
+      "failure_error_skipped_nodes": 0,
+      "junit_truncated_outputs": [
+        {
+          "name": "mhgp7_mono_inline",
+          "raw_output_bytes": 6486,
+          "verified_prefix_bytes": 1024
+        }
+      ],
+      "last_test_passed_blocks": 48,
+      "local_pins_verified": 175,
+      "mode": "release",
+      "names": [
+        "mhgp7_archive",
+        "mhgp7_archive_api",
+        "mhgp7_archive_cleanup",
+        "mhgp7_archive_optimized",
+        "mhgp7_bad_alloc_etage_census",
+        "mhgp7_bad_alloc_etage_fold",
+        "mhgp7_bad_alloc_etage_provision",
+        "mhgp7_bad_alloc_temoin",
+        "mhgp7_census_direct",
+        "mhgp7_census_direct_offset",
+        "mhgp7_census_direct_residence",
+        "mhgp7_census_direct_transaction",
+        "mhgp7_meb_lazy",
+        "mhgp7_meb_lazy_duplicate_mutant",
+        "mhgp7_meb_lazy_eager_materialization",
+        "mhgp7_meb_lazy_empty_mutant",
+        "mhgp7_meb_lazy_q2_reject_shell",
+        "mhgp7_meb_lazy_q3_reject_shell",
+        "mhgp7_meb_lazy_q4_reject_shell",
+        "mhgp7_meb_lazy_unknown_mutant",
+        "mhgp7_mono_inline",
+        "mhgp7_mono_inline_early_alloc",
+        "mhgp7_mono_inline_late_a",
+        "mhgp7_mono_inline_late_b",
+        "mhgp7_reduced_drop_materialization_mutant",
+        "mhgp7_reduced_latent_parent_mutant",
+        "mhgp7_silent_csr_stale_level_mutant",
+        "mhgp7_silent_drop_nonmerge_mutant",
+        "mhgp7_silent_incidence",
+        "mhgp7_silent_incidence_mutant",
+        "mhgp7_thread_failure",
+        "mhgp7_thread_failure_mutant_admission",
+        "mhgp7_thread_failure_refus_arg",
+        "mhgp7_witness_stack",
+        "mhgp7_witness_stack_duplicate_case",
+        "mhgp7_witness_stack_duplicate_mutant",
+        "mhgp7_witness_stack_empty_case",
+        "mhgp7_witness_stack_empty_mutant",
+        "mhgp7_witness_stack_helper",
+        "mhgp7_witness_stack_lane_mask",
+        "mhgp7_witness_stack_lane_mask_mutant",
+        "mhgp7_witness_stack_mutant_case_mismatch",
+        "mhgp7_witness_stack_semantic",
+        "mhgp7_witness_stack_semantic_lane_mask_mutant",
+        "mhgp7_witness_stack_unknown_argument",
+        "mhgp7_witness_stack_unknown_case",
+        "mhgp7_witness_stack_unknown_mutant",
+        "mhgp7_witness_stack_witness"
+      ],
+      "sources_stable": 143,
+      "tests": 48,
+      "witness_outputs": {
+        "mhgp7_witness_stack": "witness_stack_gate=passed case=all reason=none mutant=none public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=1 lane_mask_nominal=3 lane_mask_product=3\nhelper_checks=8 overflow_allocations=9 allocation_failures=2\nclouds=24 permutations=16 queries=48960 guarded_queries=48960 permutation_comparisons=32640 topology_checks=24 max_height=48 max_topological_frontier=49 internal_anchor_pairs=150 duplicate_clouds=3\npositive_q2=10176 positive_q3=10320 positive_q4=10080 nodes=808908 corners=74172 reference_new_calls=118404 candidate_new_calls=0",
+        "mhgp7_witness_stack_duplicate_case": "",
+        "mhgp7_witness_stack_duplicate_mutant": "",
+        "mhgp7_witness_stack_empty_case": "",
+        "mhgp7_witness_stack_empty_mutant": "",
+        "mhgp7_witness_stack_helper": "witness_stack_gate=passed case=helper reason=none mutant=none public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=0 lane_mask_nominal=0 lane_mask_product=0\nhelper_checks=8 overflow_allocations=9 allocation_failures=2\nclouds=0 permutations=0 queries=0 guarded_queries=0 permutation_comparisons=0 topology_checks=0 max_height=0 max_topological_frontier=0 internal_anchor_pairs=0 duplicate_clouds=0\npositive_q2=0 positive_q3=0 positive_q4=0 nodes=0 corners=0 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_lane_mask": "witness_stack_gate=passed case=lane-mask reason=none mutant=none public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=1 lane_mask_nominal=3 lane_mask_product=3\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=0 permutations=0 queries=0 guarded_queries=0 permutation_comparisons=0 topology_checks=0 max_height=0 max_topological_frontier=0 internal_anchor_pairs=0 duplicate_clouds=0\npositive_q2=0 positive_q3=0 positive_q4=0 nodes=0 corners=0 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_lane_mask_mutant": "witness_stack_gate=mutant_killed case=lane-mask reason=witness.lane_mask_double_credit mutant=witness-no-lane-mask public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=1 lane_mask_nominal=3 lane_mask_product=8\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=0 permutations=0 queries=0 guarded_queries=0 permutation_comparisons=0 topology_checks=0 max_height=0 max_topological_frontier=0 internal_anchor_pairs=0 duplicate_clouds=0\npositive_q2=0 positive_q3=0 positive_q4=0 nodes=0 corners=0 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_mutant_case_mismatch": "",
+        "mhgp7_witness_stack_semantic": "witness_stack_gate=passed case=witness reason=none mutant=none public_status=not_claimed\nallocation_observer=disabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=0 lane_mask_nominal=0 lane_mask_product=0\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=24 permutations=16 queries=48960 guarded_queries=0 permutation_comparisons=32640 topology_checks=24 max_height=48 max_topological_frontier=49 internal_anchor_pairs=150 duplicate_clouds=3\npositive_q2=10176 positive_q3=10320 positive_q4=10080 nodes=808908 corners=74172 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_semantic_lane_mask_mutant": "witness_stack_gate=mutant_killed case=lane-mask reason=witness.lane_mask_double_credit mutant=witness-no-lane-mask public_status=not_claimed\nallocation_observer=disabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=1 lane_mask_nominal=3 lane_mask_product=8\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=0 permutations=0 queries=0 guarded_queries=0 permutation_comparisons=0 topology_checks=0 max_height=0 max_topological_frontier=0 internal_anchor_pairs=0 duplicate_clouds=0\npositive_q2=0 positive_q3=0 positive_q4=0 nodes=0 corners=0 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_unknown_argument": "",
+        "mhgp7_witness_stack_unknown_case": "",
+        "mhgp7_witness_stack_unknown_mutant": "",
+        "mhgp7_witness_stack_witness": "witness_stack_gate=passed case=witness reason=none mutant=none public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=0 lane_mask_nominal=0 lane_mask_product=0\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=24 permutations=16 queries=48960 guarded_queries=48960 permutation_comparisons=32640 topology_checks=24 max_height=48 max_topological_frontier=49 internal_anchor_pairs=150 duplicate_clouds=3\npositive_q2=10176 positive_q3=10320 positive_q4=10080 nodes=808908 corners=74172 reference_new_calls=118404 candidate_new_calls=0"
+      }
+    },
+    "sanitized": {
+      "CLI_build_sources_stable": 51,
+      "LastTest_bytes": 59904,
+      "LastTest_sha256": "455d4a376893a016989a5eb6ec08bfa2295e843d772fea07892c986b7ffef552",
+      "XML_outputs_verified_against_LastTest": true,
+      "actual_witness_compile_commands": [
+        {
+          "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_witness_stack_gate.dir/tests/witness_stack_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+          "directory": "/workspaces/E-HGP/build/v7_f_tests_20260905/sanitized",
+          "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+          "output": "CMakeFiles/mhgp7_witness_stack_gate.dir/tests/witness_stack_gate.cpp.o"
+        },
+        {
+          "command": "/usr/bin/c++ -DMHGP7_TESTING=1 -DMHGP7_WITNESS_STACK_NO_ALLOC_OBSERVER=1  -O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_witness_stack_semantic_gate.dir/tests/witness_stack_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+          "directory": "/workspaces/E-HGP/build/v7_f_tests_20260905/sanitized",
+          "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+          "output": "CMakeFiles/mhgp7_witness_stack_semantic_gate.dir/tests/witness_stack_gate.cpp.o"
+        }
+      ],
+      "binaries_stable": [
+        {
+          "path": "build/v7_f_tests_20260905/sanitized/mhgp7",
+          "sha256": "f8d0ab671ea39cde8527d2f87ca1ed34e4da9921be3794cf7d90cba48fc9f2b5",
+          "size": 24790176
+        },
+        {
+          "path": "build/v7_f_tests_20260905/sanitized/mhgp7_archive_api_gate",
+          "sha256": "56d99243395e303f24219aa86bab5c08fe818cb86b3c8ad6f5f10365045fcb0f",
+          "size": 2961872
+        },
+        {
+          "path": "build/v7_f_tests_20260905/sanitized/mhgp7_archive_cleanup_gate",
+          "sha256": "965de196dd1ab2e706b935e1c65da49ee84f6be8ff6b439bdd3aeb73ea3f4e2b",
+          "size": 24745920
+        },
+        {
+          "path": "build/v7_f_tests_20260905/sanitized/mhgp7_bad_alloc_gate",
+          "sha256": "416d21428fe5c6888a0758777271eec391ce1f1ade5b863ae42d588eb6dcfe95",
+          "size": 24953696
+        },
+        {
+          "path": "build/v7_f_tests_20260905/sanitized/mhgp7_census_direct_gate",
+          "sha256": "f32a5abd51072ab9dc56f90bacdacc342d2e61c842c5f10d3b4edb0d00b5d3a6",
+          "size": 7093016
+        },
+        {
+          "path": "build/v7_f_tests_20260905/sanitized/mhgp7_meb_lazy_gate",
+          "sha256": "f0cb174c5109335ce47248317f80611fe150daf8b947d47d214409cb39445953",
+          "size": 3635264
+        },
+        {
+          "path": "build/v7_f_tests_20260905/sanitized/mhgp7_mono_inline_gate",
+          "sha256": "d1caab2ee3dec068f521cd269e9bcb72ba8ca1d1a4f77c38dd788b1739958fea",
+          "size": 24224672
+        },
+        {
+          "path": "build/v7_f_tests_20260905/sanitized/mhgp7_silent_incidence_gate",
+          "sha256": "e70c7baf69e91535f4c37b6987deb75246dc54002648fb103b86a69fb5c6a842",
+          "size": 27206080
+        },
+        {
+          "path": "build/v7_f_tests_20260905/sanitized/mhgp7_thread_failure_gate",
+          "sha256": "f5d959d3f8aa1ca9a265485c33a6dd7801efb60731f63c183d3ed799a1cd448d",
+          "size": 26727872
+        },
+        {
+          "path": "build/v7_f_tests_20260905/sanitized/mhgp7_witness_stack_gate",
+          "sha256": "8f13e23cb7f8bcac583f9cf4fecb16410bd290c67277da62943e5a0520c84806",
+          "size": 3963872
+        },
+        {
+          "path": "build/v7_f_tests_20260905/sanitized/mhgp7_witness_stack_semantic_gate",
+          "sha256": "5298c4d01eba70bd851df6bdadeda7f9f127b4456d1539c976a43e67e977e2d5",
+          "size": 3963792
+        }
+      ],
+      "commands": {
+        "build_targets": {
+          "argv": [
+            "cmake",
+            "--build",
+            "/workspaces/E-HGP/build/v7_f_tests_20260905/sanitized",
+            "--parallel",
+            "2",
+            "--target",
+            "mhgp7_meb_lazy_gate",
+            "mhgp7_silent_incidence_gate",
+            "mhgp7",
+            "mhgp7_archive_api_gate",
+            "mhgp7_archive_cleanup_gate",
+            "mhgp7_mono_inline_gate",
+            "mhgp7_census_direct_gate",
+            "mhgp7_bad_alloc_gate",
+            "mhgp7_thread_failure_gate",
+            "mhgp7_witness_stack_gate",
+            "mhgp7_witness_stack_semantic_gate"
+          ],
+          "elapsed_seconds": 372.26148075200035,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T09:21:53Z",
+          "status": "completed",
+          "timeout_seconds": 1200
+        },
+        "configure": {
+          "argv": [
+            "cmake",
+            "-S",
+            "/workspaces/E-HGP/morsehgp3D_v7",
+            "-B",
+            "/workspaces/E-HGP/build/v7_f_tests_20260905/sanitized",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP7_ENABLE_CUDA=OFF",
+            "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+            "-DCMAKE_CXX_FLAGS_RELEASE=-O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer",
+            "-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined"
+          ],
+          "elapsed_seconds": 0.5679707189992769,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T09:21:53Z",
+          "status": "completed",
+          "timeout_seconds": 120
+        },
+        "ctest": {
+          "argv": [
+            "ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_f_tests_20260905/sanitized",
+            "--output-on-failure",
+            "--no-tests=error",
+            "-R",
+            "^(mhgp7_archive|mhgp7_archive_api|mhgp7_archive_cleanup|mhgp7_archive_optimized|mhgp7_bad_alloc_etage_census|mhgp7_bad_alloc_etage_fold|mhgp7_bad_alloc_etage_provision|mhgp7_bad_alloc_temoin|mhgp7_census_direct|mhgp7_census_direct_offset|mhgp7_census_direct_residence|mhgp7_census_direct_transaction|mhgp7_meb_lazy|mhgp7_meb_lazy_duplicate_mutant|mhgp7_meb_lazy_eager_materialization|mhgp7_meb_lazy_empty_mutant|mhgp7_meb_lazy_q2_reject_shell|mhgp7_meb_lazy_q3_reject_shell|mhgp7_meb_lazy_q4_reject_shell|mhgp7_meb_lazy_unknown_mutant|mhgp7_mono_inline|mhgp7_mono_inline_early_alloc|mhgp7_mono_inline_late_a|mhgp7_mono_inline_late_b|mhgp7_reduced_drop_materialization_mutant|mhgp7_reduced_latent_parent_mutant|mhgp7_silent_csr_stale_level_mutant|mhgp7_silent_drop_nonmerge_mutant|mhgp7_silent_incidence|mhgp7_silent_incidence_mutant|mhgp7_thread_failure|mhgp7_thread_failure_mutant_admission|mhgp7_thread_failure_refus_arg|mhgp7_witness_stack|mhgp7_witness_stack_duplicate_case|mhgp7_witness_stack_duplicate_mutant|mhgp7_witness_stack_empty_case|mhgp7_witness_stack_empty_mutant|mhgp7_witness_stack_helper|mhgp7_witness_stack_lane_mask|mhgp7_witness_stack_lane_mask_mutant|mhgp7_witness_stack_mutant_case_mismatch|mhgp7_witness_stack_semantic|mhgp7_witness_stack_semantic_lane_mask_mutant|mhgp7_witness_stack_unknown_argument|mhgp7_witness_stack_unknown_case|mhgp7_witness_stack_unknown_mutant|mhgp7_witness_stack_witness)$",
+            "--parallel",
+            "2",
+            "--output-junit",
+            "/workspaces/E-HGP/build/v7_f_tests_20260905/sanitized_receipts/ctest.junit.xml"
+          ],
+          "elapsed_seconds": 36.058506518000286,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T09:28:06Z",
+          "status": "completed",
+          "timeout_seconds": 1200
+        },
+        "inventory": {
+          "argv": [
+            "ctest",
+            "--test-dir",
+            "/workspaces/E-HGP/build/v7_f_tests_20260905/sanitized",
+            "--show-only=json-v1",
+            "-R",
+            "^(mhgp7_archive|mhgp7_archive_api|mhgp7_archive_cleanup|mhgp7_archive_optimized|mhgp7_bad_alloc_etage_census|mhgp7_bad_alloc_etage_fold|mhgp7_bad_alloc_etage_provision|mhgp7_bad_alloc_temoin|mhgp7_census_direct|mhgp7_census_direct_offset|mhgp7_census_direct_residence|mhgp7_census_direct_transaction|mhgp7_meb_lazy|mhgp7_meb_lazy_duplicate_mutant|mhgp7_meb_lazy_eager_materialization|mhgp7_meb_lazy_empty_mutant|mhgp7_meb_lazy_q2_reject_shell|mhgp7_meb_lazy_q3_reject_shell|mhgp7_meb_lazy_q4_reject_shell|mhgp7_meb_lazy_unknown_mutant|mhgp7_mono_inline|mhgp7_mono_inline_early_alloc|mhgp7_mono_inline_late_a|mhgp7_mono_inline_late_b|mhgp7_reduced_drop_materialization_mutant|mhgp7_reduced_latent_parent_mutant|mhgp7_silent_csr_stale_level_mutant|mhgp7_silent_drop_nonmerge_mutant|mhgp7_silent_incidence|mhgp7_silent_incidence_mutant|mhgp7_thread_failure|mhgp7_thread_failure_mutant_admission|mhgp7_thread_failure_refus_arg|mhgp7_witness_stack|mhgp7_witness_stack_duplicate_case|mhgp7_witness_stack_duplicate_mutant|mhgp7_witness_stack_empty_case|mhgp7_witness_stack_empty_mutant|mhgp7_witness_stack_helper|mhgp7_witness_stack_lane_mask|mhgp7_witness_stack_lane_mask_mutant|mhgp7_witness_stack_mutant_case_mismatch|mhgp7_witness_stack_semantic|mhgp7_witness_stack_semantic_lane_mask_mutant|mhgp7_witness_stack_unknown_argument|mhgp7_witness_stack_unknown_case|mhgp7_witness_stack_unknown_mutant|mhgp7_witness_stack_witness)$"
+          ],
+          "elapsed_seconds": 0.03480923499955679,
+          "exit_code": 0,
+          "started_utc": "2026-09-05T09:28:06Z",
+          "status": "completed",
+          "timeout_seconds": 60
+        }
+      },
+      "entrypoint_pins_contained_in_sources": 118,
+      "environment": {
+        "all_test_executions": "fresh",
+        "build_kind": "fresh_isolated",
+        "environment": {
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "locale": {
+            "LANG": "C",
+            "LC_ALL": "C"
+          },
+          "mode": "sanitized",
+          "sanitizer_options": {
+            "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+            "LSAN_OPTIONS": "",
+            "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+          }
+        },
+        "expected_F_build_receipt_sha256": "522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4",
+        "expected_F_sha256": "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85",
+        "gate_results_reused": false,
+        "gcp": "not_used",
+        "host_before": {
+          "affinity_cpus": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "architecture": "x86_64",
+          "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+          "host_shared": true,
+          "kernel_release": "6.8.0-1052-azure",
+          "loadavg_1_5_15": [
+            1.08935546875,
+            1.22998046875,
+            0.998046875
+          ],
+          "logical_cpus": 8,
+          "mem_total_bytes": 33657716736,
+          "observed_utc": "2026-09-05T09:21:53.212040Z"
+        },
+        "mode": "sanitized",
+        "protected_C_C_D_E_historical": {
+          "/workspaces/E-HGP/build/v7/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+          "/workspaces/E-HGP/build/v7_c_qualification/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+          "/workspaces/E-HGP/build/v7_meb_qualification/mhgp7": "127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f",
+          "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6"
+        },
+        "public_status": "not_claimed",
+        "repository_before": {
+          "head": "61f72a6805e27f1bc216b5d7444164b31fc970b6",
+          "observed_utc": "2026-09-05T09:21:53.186749Z",
+          "worktree_porcelain": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/src/spindle/witness_count.hpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/horizontal_fold_probe.cpp\n?? morsehgp3D_v7/audits/horizontal_fold_probe.py\n?? morsehgp3D_v7/audits/horizontal_pipeline_bridge.cpp\n?? morsehgp3D_v7/audits/horizontal_rational_oracle.py\n?? morsehgp3D_v7/audits/receipts_horizontal_20260905/\n?? morsehgp3D_v7/docs/OPTIMISATION_PILE_TEMOINS.md\n?? morsehgp3D_v7/src/core/inline_stack.hpp\n?? morsehgp3D_v7/tests/reference/\n?? morsehgp3D_v7/tests/witness_stack_gate.cpp\n"
+        },
+        "schema": "mhgp7.witness-stack-F-qualification.v1"
+      },
+      "failure_error_skipped_nodes": 0,
+      "junit_truncated_outputs": [
+        {
+          "name": "mhgp7_mono_inline",
+          "raw_output_bytes": 6486,
+          "verified_prefix_bytes": 1024
+        }
+      ],
+      "last_test_passed_blocks": 48,
+      "local_pins_verified": 175,
+      "mode": "sanitized",
+      "names": [
+        "mhgp7_archive",
+        "mhgp7_archive_api",
+        "mhgp7_archive_cleanup",
+        "mhgp7_archive_optimized",
+        "mhgp7_bad_alloc_etage_census",
+        "mhgp7_bad_alloc_etage_fold",
+        "mhgp7_bad_alloc_etage_provision",
+        "mhgp7_bad_alloc_temoin",
+        "mhgp7_census_direct",
+        "mhgp7_census_direct_offset",
+        "mhgp7_census_direct_residence",
+        "mhgp7_census_direct_transaction",
+        "mhgp7_meb_lazy",
+        "mhgp7_meb_lazy_duplicate_mutant",
+        "mhgp7_meb_lazy_eager_materialization",
+        "mhgp7_meb_lazy_empty_mutant",
+        "mhgp7_meb_lazy_q2_reject_shell",
+        "mhgp7_meb_lazy_q3_reject_shell",
+        "mhgp7_meb_lazy_q4_reject_shell",
+        "mhgp7_meb_lazy_unknown_mutant",
+        "mhgp7_mono_inline",
+        "mhgp7_mono_inline_early_alloc",
+        "mhgp7_mono_inline_late_a",
+        "mhgp7_mono_inline_late_b",
+        "mhgp7_reduced_drop_materialization_mutant",
+        "mhgp7_reduced_latent_parent_mutant",
+        "mhgp7_silent_csr_stale_level_mutant",
+        "mhgp7_silent_drop_nonmerge_mutant",
+        "mhgp7_silent_incidence",
+        "mhgp7_silent_incidence_mutant",
+        "mhgp7_thread_failure",
+        "mhgp7_thread_failure_mutant_admission",
+        "mhgp7_thread_failure_refus_arg",
+        "mhgp7_witness_stack",
+        "mhgp7_witness_stack_duplicate_case",
+        "mhgp7_witness_stack_duplicate_mutant",
+        "mhgp7_witness_stack_empty_case",
+        "mhgp7_witness_stack_empty_mutant",
+        "mhgp7_witness_stack_helper",
+        "mhgp7_witness_stack_lane_mask",
+        "mhgp7_witness_stack_lane_mask_mutant",
+        "mhgp7_witness_stack_mutant_case_mismatch",
+        "mhgp7_witness_stack_semantic",
+        "mhgp7_witness_stack_semantic_lane_mask_mutant",
+        "mhgp7_witness_stack_unknown_argument",
+        "mhgp7_witness_stack_unknown_case",
+        "mhgp7_witness_stack_unknown_mutant",
+        "mhgp7_witness_stack_witness"
+      ],
+      "sources_stable": 143,
+      "tests": 48,
+      "witness_outputs": {
+        "mhgp7_witness_stack": "witness_stack_gate=passed case=all reason=none mutant=none public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=1 lane_mask_nominal=3 lane_mask_product=3\nhelper_checks=8 overflow_allocations=9 allocation_failures=2\nclouds=24 permutations=16 queries=48960 guarded_queries=48960 permutation_comparisons=32640 topology_checks=24 max_height=48 max_topological_frontier=49 internal_anchor_pairs=150 duplicate_clouds=3\npositive_q2=10176 positive_q3=10320 positive_q4=10080 nodes=808908 corners=74172 reference_new_calls=118404 candidate_new_calls=0",
+        "mhgp7_witness_stack_duplicate_case": "",
+        "mhgp7_witness_stack_duplicate_mutant": "",
+        "mhgp7_witness_stack_empty_case": "",
+        "mhgp7_witness_stack_empty_mutant": "",
+        "mhgp7_witness_stack_helper": "witness_stack_gate=passed case=helper reason=none mutant=none public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=0 lane_mask_nominal=0 lane_mask_product=0\nhelper_checks=8 overflow_allocations=9 allocation_failures=2\nclouds=0 permutations=0 queries=0 guarded_queries=0 permutation_comparisons=0 topology_checks=0 max_height=0 max_topological_frontier=0 internal_anchor_pairs=0 duplicate_clouds=0\npositive_q2=0 positive_q3=0 positive_q4=0 nodes=0 corners=0 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_lane_mask": "witness_stack_gate=passed case=lane-mask reason=none mutant=none public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=1 lane_mask_nominal=3 lane_mask_product=3\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=0 permutations=0 queries=0 guarded_queries=0 permutation_comparisons=0 topology_checks=0 max_height=0 max_topological_frontier=0 internal_anchor_pairs=0 duplicate_clouds=0\npositive_q2=0 positive_q3=0 positive_q4=0 nodes=0 corners=0 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_lane_mask_mutant": "witness_stack_gate=mutant_killed case=lane-mask reason=witness.lane_mask_double_credit mutant=witness-no-lane-mask public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=1 lane_mask_nominal=3 lane_mask_product=8\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=0 permutations=0 queries=0 guarded_queries=0 permutation_comparisons=0 topology_checks=0 max_height=0 max_topological_frontier=0 internal_anchor_pairs=0 duplicate_clouds=0\npositive_q2=0 positive_q3=0 positive_q4=0 nodes=0 corners=0 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_mutant_case_mismatch": "",
+        "mhgp7_witness_stack_semantic": "witness_stack_gate=passed case=witness reason=none mutant=none public_status=not_claimed\nallocation_observer=disabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=0 lane_mask_nominal=0 lane_mask_product=0\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=24 permutations=16 queries=48960 guarded_queries=0 permutation_comparisons=32640 topology_checks=24 max_height=48 max_topological_frontier=49 internal_anchor_pairs=150 duplicate_clouds=3\npositive_q2=10176 positive_q3=10320 positive_q4=10080 nodes=808908 corners=74172 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_semantic_lane_mask_mutant": "witness_stack_gate=mutant_killed case=lane-mask reason=witness.lane_mask_double_credit mutant=witness-no-lane-mask public_status=not_claimed\nallocation_observer=disabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=1 lane_mask_nominal=3 lane_mask_product=8\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=0 permutations=0 queries=0 guarded_queries=0 permutation_comparisons=0 topology_checks=0 max_height=0 max_topological_frontier=0 internal_anchor_pairs=0 duplicate_clouds=0\npositive_q2=0 positive_q3=0 positive_q4=0 nodes=0 corners=0 reference_new_calls=0 candidate_new_calls=0",
+        "mhgp7_witness_stack_unknown_argument": "",
+        "mhgp7_witness_stack_unknown_case": "",
+        "mhgp7_witness_stack_unknown_mutant": "",
+        "mhgp7_witness_stack_witness": "witness_stack_gate=passed case=witness reason=none mutant=none public_status=not_claimed\nallocation_observer=enabled sizeof_entry=8 sizeof_array64=512 sizeof_vector=24 sizeof_stack=544 alignof_entry=4 alignof_stack=8\nlane_mask_fixtures=0 lane_mask_nominal=0 lane_mask_product=0\nhelper_checks=0 overflow_allocations=0 allocation_failures=0\nclouds=24 permutations=16 queries=48960 guarded_queries=48960 permutation_comparisons=32640 topology_checks=24 max_height=48 max_topological_frontier=49 internal_anchor_pairs=150 duplicate_clouds=3\npositive_q2=10176 positive_q3=10320 positive_q4=10080 nodes=808908 corners=74172 reference_new_calls=118404 candidate_new_calls=0"
+      }
+    }
+  },
+  "capture_sha256": "7d1f043d3d607d1f79e90620925d2b13d3f348ce37a6327739919517414d8920",
+  "engine_build_CTest_runs_by_auditor": 0,
+  "gcp": "not_used",
+  "limits": [
+    "These are independent readings of F constructor runs, not auditor engine reruns or transferred E test results.",
+    "Compilation commands and source boundaries provide recorded build binding, not hermetic attestation.",
+    "Allocation-disabled semantic target proves semantics under instrumentation, not zero allocations or allocation-failure injection.",
+    "No performance, CI, GPU or global HGP exactness qualification."
+  ],
+  "mode": "audit_independant_math_and_architecture",
+  "phase": "exploration_v7_hors_registre",
+  "profile": "quantized_u16_input_only",
+  "public_status": "not_claimed",
+  "schema": "mhgp7-F-independent-qualification-v1",
+  "status": "verified_F339_F48_F48_closed_receipts"
+}

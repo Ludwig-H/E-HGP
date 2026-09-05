@@ -1,0 +1,212 @@
+{
+  "schema": "mhgp7-vertical-combinatorial-math-counterexample-v1",
+  "status": "passed",
+  "scope": "combinatorial_only",
+  "labels": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "X",
+    "Y"
+  ],
+  "first_level_maximal": [
+    [
+      0,
+      4,
+      5
+    ],
+    [
+      1,
+      4,
+      5
+    ],
+    [
+      2,
+      4,
+      5
+    ],
+    [
+      3,
+      4,
+      5
+    ]
+  ],
+  "second_level_added": [
+    [
+      0,
+      1,
+      2,
+      3
+    ],
+    [
+      0,
+      1,
+      4
+    ]
+  ],
+  "retained_lower": [
+    [
+      0,
+      4
+    ],
+    [
+      0,
+      5
+    ],
+    [
+      1,
+      4
+    ],
+    [
+      1,
+      5
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      2,
+      5
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      3,
+      5
+    ],
+    [
+      4,
+      5
+    ]
+  ],
+  "full_lower": [
+    [
+      0,
+      1
+    ],
+    [
+      0,
+      2
+    ],
+    [
+      0,
+      3
+    ],
+    [
+      0,
+      4
+    ],
+    [
+      0,
+      5
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      1,
+      4
+    ],
+    [
+      1,
+      5
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      2,
+      5
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      3,
+      5
+    ],
+    [
+      4,
+      5
+    ]
+  ],
+  "source_component": [
+    [
+      0,
+      1,
+      2
+    ],
+    [
+      0,
+      1,
+      3
+    ],
+    [
+      0,
+      2,
+      3
+    ],
+    [
+      1,
+      2,
+      3
+    ]
+  ],
+  "missing_distinct_faces": [
+    [
+      0,
+      1
+    ],
+    [
+      0,
+      2
+    ],
+    [
+      0,
+      3
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      2,
+      3
+    ]
+  ],
+  "source_components": 1,
+  "full_lower_components": 1,
+  "retained_lower_components": 1,
+  "source_face_occurrences": 12,
+  "missing_face_occurrences": 12,
+  "nominal_full_face_lookup_successes": 12,
+  "rejected_shortcut": "shortcut.no_retained_anchor",
+  "no_bridge_point_containers": 2,
+  "no_bridge_facet_containers": 1,
+  "geometric_realizability_claimed": false,
+  "product_E_counterexample_claimed": false,
+  "product_executed": false,
+  "public_status": "not_claimed",
+  "gcp_used": false,
+  "python_optimized": false,
+  "script_sha256": "c5b5f034d3667d309cec7c8f0fdcc9952d9a8a7f55e7ed4d8f687db5fa9db63b"
+}

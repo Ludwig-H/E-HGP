@@ -1,0 +1,57 @@
+[
+  {
+    "path": "build/v7_f_tests_20260905/sanitized/mhgp7",
+    "sha256": "f8d0ab671ea39cde8527d2f87ca1ed34e4da9921be3794cf7d90cba48fc9f2b5",
+    "size": 24790176
+  },
+  {
+    "path": "build/v7_f_tests_20260905/sanitized/mhgp7_archive_api_gate",
+    "sha256": "56d99243395e303f24219aa86bab5c08fe818cb86b3c8ad6f5f10365045fcb0f",
+    "size": 2961872
+  },
+  {
+    "path": "build/v7_f_tests_20260905/sanitized/mhgp7_archive_cleanup_gate",
+    "sha256": "965de196dd1ab2e706b935e1c65da49ee84f6be8ff6b439bdd3aeb73ea3f4e2b",
+    "size": 24745920
+  },
+  {
+    "path": "build/v7_f_tests_20260905/sanitized/mhgp7_bad_alloc_gate",
+    "sha256": "416d21428fe5c6888a0758777271eec391ce1f1ade5b863ae42d588eb6dcfe95",
+    "size": 24953696
+  },
+  {
+    "path": "build/v7_f_tests_20260905/sanitized/mhgp7_census_direct_gate",
+    "sha256": "f32a5abd51072ab9dc56f90bacdacc342d2e61c842c5f10d3b4edb0d00b5d3a6",
+    "size": 7093016
+  },
+  {
+    "path": "build/v7_f_tests_20260905/sanitized/mhgp7_meb_lazy_gate",
+    "sha256": "f0cb174c5109335ce47248317f80611fe150daf8b947d47d214409cb39445953",
+    "size": 3635264
+  },
+  {
+    "path": "build/v7_f_tests_20260905/sanitized/mhgp7_mono_inline_gate",
+    "sha256": "d1caab2ee3dec068f521cd269e9bcb72ba8ca1d1a4f77c38dd788b1739958fea",
+    "size": 24224672
+  },
+  {
+    "path": "build/v7_f_tests_20260905/sanitized/mhgp7_silent_incidence_gate",
+    "sha256": "e70c7baf69e91535f4c37b6987deb75246dc54002648fb103b86a69fb5c6a842",
+    "size": 27206080
+  },
+  {
+    "path": "build/v7_f_tests_20260905/sanitized/mhgp7_thread_failure_gate",
+    "sha256": "f5d959d3f8aa1ca9a265485c33a6dd7801efb60731f63c183d3ed799a1cd448d",
+    "size": 26727872
+  },
+  {
+    "path": "build/v7_f_tests_20260905/sanitized/mhgp7_witness_stack_gate",
+    "sha256": "8f13e23cb7f8bcac583f9cf4fecb16410bd290c67277da62943e5a0520c84806",
+    "size": 3963872
+  },
+  {
+    "path": "build/v7_f_tests_20260905/sanitized/mhgp7_witness_stack_semantic_gate",
+    "sha256": "5298c4d01eba70bd851df6bdadeda7f9f127b4456d1539c976a43e67e977e2d5",
+    "size": 3963792
+  }
+]

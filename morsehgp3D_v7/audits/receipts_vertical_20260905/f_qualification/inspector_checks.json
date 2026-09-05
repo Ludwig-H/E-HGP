@@ -1,0 +1,87 @@
+{
+  "schema": "mhgp7-F-independent-inspector-checks-v1",
+  "observed_utc": "2026-09-05T09:55:47.292686+00:00",
+  "script_sha256": "10c41e58dd6993e9965f37cbbe6a61c321a7f9cfb22ba9ee0e4a95f2917dbe3b",
+  "runs": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_vertical_20260905/f_qualification/verify_receipts.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "result": "captured_normal.json",
+      "result_sha256": "8abaed8ff4d8e999c5c5f2fae1be6942aa58fd2dc169c0a1b3355909bd92ee80",
+      "status": "verified_F339_F48_F48_closed_receipts"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_vertical_20260905/f_qualification/verify_receipts.py",
+        "--self-test"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "result": "selftest_normal.json",
+      "result_sha256": "73d54e0b91360b99b20fb5819b3b38d875bfe057085eea1219232e4843c0b630",
+      "status": "passed"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_vertical_20260905/f_qualification/verify_receipts.py",
+        "--live"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "result": "live_normal.json",
+      "result_sha256": "c928a6af92a449798e263f44b80951d7ca4baaa3e8b3fa86953370e6ca886501",
+      "status": "verified_F339_F48_F48_closed_receipts"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_vertical_20260905/f_qualification/verify_receipts.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "result": "captured_optimized.json",
+      "result_sha256": "8abaed8ff4d8e999c5c5f2fae1be6942aa58fd2dc169c0a1b3355909bd92ee80",
+      "status": "verified_F339_F48_F48_closed_receipts"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_vertical_20260905/f_qualification/verify_receipts.py",
+        "--self-test"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "result": "selftest_optimized.json",
+      "result_sha256": "73d54e0b91360b99b20fb5819b3b38d875bfe057085eea1219232e4843c0b630",
+      "status": "passed"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_vertical_20260905/f_qualification/verify_receipts.py",
+        "--live"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "result": "live_optimized.json",
+      "result_sha256": "c928a6af92a449798e263f44b80951d7ca4baaa3e8b3fa86953370e6ca886501",
+      "status": "verified_F339_F48_F48_closed_receipts"
+    }
+  ],
+  "engine_runs": 0
+}

@@ -1,0 +1,83 @@
+{
+  "schema": "mhgp7-vertical-publication-check-v1",
+  "base_head": "71895104c7d750fdd6ef0a313cfb09e9ac161204",
+  "public_status": "not_claimed",
+  "gcp": "not_used",
+  "checks": [
+    {
+      "label": "docs",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 tools/check_docs.py",
+      "exit_code": 0,
+      "output": "Validated 309 active Markdown files.\n"
+    },
+    {
+      "label": "registry",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 tools/check_implementation_status.py",
+      "exit_code": 0,
+      "output": "Validated 20 implementation phases and their gates.\n"
+    },
+    {
+      "label": "verifier_normal",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 morsehgp3D_v7/audits/test_verify_current.py",
+      "exit_code": 0,
+      "output": "{\n  \"schema\": \"mhgp7-freshness-verifier-selftest-v1\",\n  \"status\": \"passed\",\n  \"public_status\": \"not_claimed\",\n  \"optimized\": false,\n  \"tests\": 30,\n  \"product_tests_executed\": 0,\n  \"results\": [\n    {\n      \"name\": \"complete_D\",\n      \"expected_code\": 0,\n      \"observed_code\": 0,\n      \"required_marker\": \"variante=D\"\n    },\n    {\n      \"name\": \"complete_E\",\n      \"expected_code\": 0,\n      \"observed_code\": 0,\n      \"required_marker\": \"fixture_targeted_E_only\"\n    },\n    {\n      \"name\": \"mixed_D_E_rejected\",\n      \"expected_code\": 1,\n      \"observed_code\": 1,\n      \"required_marker\": \"aucune variante complète\"\n    },\n    {\n      \"name\": \"mixed_E_D_rejected\",\n      \"expected_code\": 1,\n      \"observed_code\": 1,\n      \"required_marker\": \"aucune variante complète\"\n    },\n    {\n      \"name\": \"common_changed\",\n      \"expected_code\": 1,\n      \"observed_code\": 1,\n      \"required_marker\": \"pins communs modifiés\"\n    },\n    {\n      \"name\": \"source_missing\",\n      \"expected_code\": 1,\n      \"observed_code\": 1,\n      \"required_marker\": \"\"\n    },\n    {\n      \"name\": \"legacy_v1\",\n      \"expected_code\": 0,\n      \"observed_code\": 0,\n      \"required_marker\": \"Audit courant\"\n    },\n    {\n      \"name\": \"legacy_v1_stale\",\n      \"expected_code\": 1,\n      \"observed_code\": 1,\n      \"required_marker\": \"Audit à actualiser\"\n    },\n    {\n      \"name\": \"duplicate_variant_id\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"duplicate\"\n    },\n    {\n      \"name\": \"malformed_unmatched_E\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"invalid SHA-256\"\n    },\n    {\n      \"name\": \"empty_unmatched_variant\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"nonempty\"\n    },\n    {\n      \"name\": \"empty_common\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"nonempty\"\n    },\n    {\n      \"name\": \"empty_variants\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"nonempty\"\n    },\n    {\n      \"name\": \"nonobject_variant\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"object\"\n    },\n    {\n      \"name\": \"invalid_id_empty\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"identifier\"\n    },\n    {\n      \"name\": \"invalid_id_space\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"identifier\"\n    },\n    {\n      \"name\": \"invalid_scope_empty\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"scope\"\n    },\n    {\n      \"name\": \"invalid_scope_nonstring\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"scope\"\n    },\n    {\n      \"name\": \"invalid_path_traversal\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"source path\"\n    },\n    {\n      \"name\": \"invalid_path_absolute\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"source path\"\n    },\n    {\n      \"name\": \"invalid_path_alias\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"source path\"\n    },\n    {\n      \"name\": \"invalid_path_backslash\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"source path\"\n    },\n    {\n      \"name\": \"symlink_escape\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"outside v7\"\n    },\n    {\n      \"name\": \"common_variant_conflict\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"conflicting\"\n    },\n    {\n      \"name\": \"duplicate_root_json_key\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"duplicate\"\n    },\n    {\n      \"name\": \"duplicate_nested_pin\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"duplicate\"\n    },\n    {\n      \"name\": \"unsupported_schema\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"\"\n    },\n    {\n      \"name\": \"nonobject_manifest\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"object\"\n    },\n    {\n      \"name\": \"invalid_json\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"\"\n    },\n    {\n      \"name\": \"legacy_v1_empty\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"nonempty\"\n    }\n  ],\n  \"verifier_sha256\": \"b75e86a520193c55c08729ab41fa245a86c18add5e3d3213727587c65a378834\",\n  \"test_sha256\": \"bbffbb321d90d03da73e2a5063b3579535b13ce0b0e8e2be6101c7564cf11548\",\n  \"gcp\": \"not_used\"\n}\n"
+    },
+    {
+      "label": "verifier_optimized",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -O morsehgp3D_v7/audits/test_verify_current.py",
+      "exit_code": 0,
+      "output": "{\n  \"schema\": \"mhgp7-freshness-verifier-selftest-v1\",\n  \"status\": \"passed\",\n  \"public_status\": \"not_claimed\",\n  \"optimized\": true,\n  \"tests\": 30,\n  \"product_tests_executed\": 0,\n  \"results\": [\n    {\n      \"name\": \"complete_D\",\n      \"expected_code\": 0,\n      \"observed_code\": 0,\n      \"required_marker\": \"variante=D\"\n    },\n    {\n      \"name\": \"complete_E\",\n      \"expected_code\": 0,\n      \"observed_code\": 0,\n      \"required_marker\": \"fixture_targeted_E_only\"\n    },\n    {\n      \"name\": \"mixed_D_E_rejected\",\n      \"expected_code\": 1,\n      \"observed_code\": 1,\n      \"required_marker\": \"aucune variante complète\"\n    },\n    {\n      \"name\": \"mixed_E_D_rejected\",\n      \"expected_code\": 1,\n      \"observed_code\": 1,\n      \"required_marker\": \"aucune variante complète\"\n    },\n    {\n      \"name\": \"common_changed\",\n      \"expected_code\": 1,\n      \"observed_code\": 1,\n      \"required_marker\": \"pins communs modifiés\"\n    },\n    {\n      \"name\": \"source_missing\",\n      \"expected_code\": 1,\n      \"observed_code\": 1,\n      \"required_marker\": \"\"\n    },\n    {\n      \"name\": \"legacy_v1\",\n      \"expected_code\": 0,\n      \"observed_code\": 0,\n      \"required_marker\": \"Audit courant\"\n    },\n    {\n      \"name\": \"legacy_v1_stale\",\n      \"expected_code\": 1,\n      \"observed_code\": 1,\n      \"required_marker\": \"Audit à actualiser\"\n    },\n    {\n      \"name\": \"duplicate_variant_id\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"duplicate\"\n    },\n    {\n      \"name\": \"malformed_unmatched_E\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"invalid SHA-256\"\n    },\n    {\n      \"name\": \"empty_unmatched_variant\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"nonempty\"\n    },\n    {\n      \"name\": \"empty_common\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"nonempty\"\n    },\n    {\n      \"name\": \"empty_variants\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"nonempty\"\n    },\n    {\n      \"name\": \"nonobject_variant\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"object\"\n    },\n    {\n      \"name\": \"invalid_id_empty\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"identifier\"\n    },\n    {\n      \"name\": \"invalid_id_space\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"identifier\"\n    },\n    {\n      \"name\": \"invalid_scope_empty\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"scope\"\n    },\n    {\n      \"name\": \"invalid_scope_nonstring\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"scope\"\n    },\n    {\n      \"name\": \"invalid_path_traversal\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"source path\"\n    },\n    {\n      \"name\": \"invalid_path_absolute\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"source path\"\n    },\n    {\n      \"name\": \"invalid_path_alias\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"source path\"\n    },\n    {\n      \"name\": \"invalid_path_backslash\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"source path\"\n    },\n    {\n      \"name\": \"symlink_escape\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"outside v7\"\n    },\n    {\n      \"name\": \"common_variant_conflict\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"conflicting\"\n    },\n    {\n      \"name\": \"duplicate_root_json_key\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"duplicate\"\n    },\n    {\n      \"name\": \"duplicate_nested_pin\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"duplicate\"\n    },\n    {\n      \"name\": \"unsupported_schema\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"\"\n    },\n    {\n      \"name\": \"nonobject_manifest\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"object\"\n    },\n    {\n      \"name\": \"invalid_json\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"\"\n    },\n    {\n      \"name\": \"legacy_v1_empty\",\n      \"expected_code\": 2,\n      \"observed_code\": 2,\n      \"required_marker\": \"nonempty\"\n    }\n  ],\n  \"verifier_sha256\": \"b75e86a520193c55c08729ab41fa245a86c18add5e3d3213727587c65a378834\",\n  \"test_sha256\": \"bbffbb321d90d03da73e2a5063b3579535b13ce0b0e8e2be6101c7564cf11548\",\n  \"gcp\": \"not_used\"\n}\n"
+    },
+    {
+      "label": "all audit Markdown and local links",
+      "files": 39,
+      "local_links": 566,
+      "errors": []
+    }
+  ],
+  "checked_utc": "2026-09-05T10:06:32.569646+00:00",
+  "snapshot_freshness_checks": [
+    {
+      "variant": "D",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=D\nqualification_scope=323/323 CTests CPU Release independently executed; local MEB/index/rounding oracles; front arithmetic proofs and compiled helpers; no product exactness claim\n743 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n"
+    },
+    {
+      "variant": "D",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=D\nqualification_scope=323/323 CTests CPU Release independently executed; local MEB/index/rounding oracles; front arithmetic proofs and compiled helpers; no product exactness claim\n743 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n"
+    },
+    {
+      "variant": "E_qualified",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=E_qualified\nqualification_scope=horizontal reduced certificate on E, independent rational Gamma/delta reader (840 cuts per build), normalized fold (272 cuts per build), 18 CLI domain cases; own E324 and E33+33 receipts inspected; public_status=not_claimed\n743 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n"
+    },
+    {
+      "variant": "E_qualified",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=E_qualified\nqualification_scope=horizontal reduced certificate on E, independent rational Gamma/delta reader (840 cuts per build), normalized fold (272 cuts per build), 18 CLI domain cases; own E324 and E33+33 receipts inspected; public_status=not_claimed\n743 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n"
+    },
+    {
+      "variant": "F_qualified",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=F_qualified\nqualification_scope=F LIFO/masks/counts conservation proof; own F339 Release and F48+48 Release/ASan-UBSan receipts independently inspected, 143 source/reference pins; E horizontal/vertical replays not renamed F; public_status=not_claimed\n743 pins communs et 143 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n"
+    },
+    {
+      "variant": "F_qualified",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=F_qualified\nqualification_scope=F LIFO/masks/counts conservation proof; own F339 Release and F48+48 Release/ASan-UBSan receipts independently inspected, 143 source/reference pins; E horizontal/vertical replays not renamed F; public_status=not_claimed\n743 pins communs et 143 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n"
+    }
+  ],
+  "staged_scope_and_pins": {
+    "audit_files_only": 156,
+    "common_pins": 743,
+    "F_source_reference_pins": 143,
+    "all_match": true
+  }
+}

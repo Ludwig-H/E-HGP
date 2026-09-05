@@ -11,11 +11,14 @@ les exécutions closes du constructeur ; il n'a relancé ni moteur, ni CTest,
 ni benchmark. Ces résultats ne certifient ni HGP complet ni une performance
 industrielle. Le cadre public reste `not_claimed`. La nouvelle fermeture du
 [certificat horizontal réduit](CERTIFICAT_HORIZONTAL_COURANT.md) utilise un
-snapshot E figé ; la [préparation F](receipts_horizontal_20260905/f_delta/review.json)
-possède seulement sa revue de conservation distincte et son build CLI clos
-au reçu, sans transfert des suites E.
+snapshot E figé. F est maintenant publié dans `71895104` : sa revue de
+conservation est complétée par ses propres campagnes 339/339 Release,
+48/48 ciblées Release et 48/48 ASan/UBSan, contre-vérifiées dans le
+[dossier F](receipts_vertical_20260905/f_qualification/). Aucun test E ne
+leur est transféré.
 
-Actualisation du 5 septembre 2026 à 07:20 UTC, après la clôture du full E.
+La section E a été actualisée le 5 septembre à 07:20 UTC. La présente
+entrée intègre ensuite F, publié à 09:53 UTC après ses campagnes closes.
 Les preuves nécessaires sont copiées sous `audits/`, y compris lorsque
 leur origine constructeur était encore privée ou non suivie par Git.
 Les sources E du worktree et les binaires observés sont vérifiés contre
@@ -241,3 +244,25 @@ La contrelecture B/C historique reste dans son [reçu](receipts_iteration3/const
 La proposition initiale G4 n'est plus un plan à exécuter : le constructeur a publié ses [résultats G4](../docs/RESULTATS_G4_20260904.md), leurs [pièces de contrôle](../receipts/gcp_requalified_20260904/public_review.json) et son [constat de fermeture daté](../receipts/gcp_handoff_20260905.json). Ces fichiers ne sont pas un inventaire live. Cet audit n'utilise pas GCP, ne démarre aucune session et ne transforme pas ces observations GCC11/CUDA en preuve du binaire local GCC13. Les résultats CI publiés sont attribués séparément dans la [passation constructeur](../PASSATION.md#cloud-et-ci) ; les anciens échecs ne sont pas réécrits.
 
 Les notes transitoires regroupées ici sont retirées de l'entrée active. Leurs octets restent accessibles au commit indiqué dans le [registre de consolidation](receipts_front_20260905/documentation_retirement.json), avec leur hash et leur rapport de remplacement. Les preuves brutes et fixtures permanentes restent inchangées.
+
+## Qualification F désormais fermée
+
+La [contrelecture F](receipts_vertical_20260905/f_qualification/results_live.json)
+confirme 339/339 portes complètes et 48/48 dans chacun des deux bras
+ciblés, sans échec ni skip. Les listes de tests, commandes, XML et blocs
+LastTest concordent ; les sorties JUnit explicitement tronquées par
+CTest sont comparées comme préfixes aux journaux complets conservés.
+Les inventaires propres aux campagnes portent sur 143 fichiers de sources
+et de références, ainsi que 39/11/11 binaires stables. Les 51 dépendances du build CLI constituent
+une couverture distincte.
+
+Le mutant réel de double crédit retrouve trois témoins nominaux contre
+huit fautifs, avec son code de refus attendu 4. Le bras instrumenté sans
+observateur d’allocations confirme les sémantiques ; ses compteurs nuls
+ne prouvent pas une absence d’allocation. Les [rejeux de l’inspecteur](receipts_vertical_20260905/f_qualification/captured_optimized.json)
+restent effectifs sous Python optimisé. Ses dix corruptions sont rejetées.
+
+La preuve de conservation LIFO/masques/comptes demeure liée au delta F
+épinglé. Les tests horizontaux de l’auditeur restent attribués à E, et
+aucun export vertical ni pondéré n’est ajouté par cette qualification.
+L’auditeur ne relance ni moteur ni CTest pendant la fenêtre mono E/F.

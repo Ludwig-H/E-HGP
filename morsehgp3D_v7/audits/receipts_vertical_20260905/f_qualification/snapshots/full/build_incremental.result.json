@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v7_f_qualification",
+    "--parallel",
+    "2"
+  ],
+  "elapsed_seconds": 257.1643841950008,
+  "exit_code": 0,
+  "started_utc": "2026-09-05T09:25:07Z",
+  "status": "completed",
+  "timeout_seconds": 3600
+}

@@ -1,0 +1,184 @@
+{
+  "schema": "mhgp7-vertical-replay-audit-v1",
+  "status": "passed",
+  "started_utc": "2026-09-05T09:47:26.971807+00:00",
+  "ended_utc": "2026-09-05T09:47:27.185931+00:00",
+  "python_optimized": false,
+  "results": [
+    {
+      "build_of_sealed_input": "o2",
+      "cases": 16,
+      "totals": {
+        "cuts": 432,
+        "adjacent_order_cuts": 1608,
+        "component_maps": 764,
+        "label_face_queries": 15688,
+        "unmaterialized_face_occurrences": 2296,
+        "labels_with_no_retained_face": 0,
+        "naturality_squares": 720,
+        "two_step_squares": 400,
+        "strict_point_inclusions": 248,
+        "lower_target_changes": 144
+      },
+      "missing_face_example": {
+        "cloud": 2,
+        "lower_order": 2,
+        "cut": "819/4",
+        "side": "closed",
+        "source_output": [
+          3,
+          19,
+          211
+        ],
+        "source_label": [
+          3,
+          19,
+          65537
+        ],
+        "missing_face": [
+          3,
+          65537
+        ],
+        "correct_target": [
+          3,
+          19
+        ],
+        "rejection": "vertical.lower_label_unmaterialized",
+        "kind": "audit_lookup_shortcut_not_product_mutant"
+      },
+      "stale_target_example": {
+        "lower_order": 1,
+        "source_output": [
+          211,
+          65537
+        ],
+        "previous_cut": "9",
+        "previous_closed": false,
+        "cut": "9",
+        "closed": true,
+        "old_target_facets": [
+          [
+            211
+          ],
+          [
+            65537
+          ],
+          [
+            4000000000
+          ]
+        ],
+        "current_target_facets": [
+          [
+            3
+          ],
+          [
+            211
+          ],
+          [
+            65537
+          ],
+          [
+            4000000000
+          ]
+        ],
+        "kind": "stale_component_requires_horizontal_successor"
+      }
+    },
+    {
+      "build_of_sealed_input": "ubsan",
+      "cases": 16,
+      "totals": {
+        "cuts": 432,
+        "adjacent_order_cuts": 1608,
+        "component_maps": 764,
+        "label_face_queries": 15688,
+        "unmaterialized_face_occurrences": 2296,
+        "labels_with_no_retained_face": 0,
+        "naturality_squares": 720,
+        "two_step_squares": 400,
+        "strict_point_inclusions": 248,
+        "lower_target_changes": 144
+      },
+      "missing_face_example": {
+        "cloud": 2,
+        "lower_order": 2,
+        "cut": "819/4",
+        "side": "closed",
+        "source_output": [
+          3,
+          19,
+          211
+        ],
+        "source_label": [
+          3,
+          19,
+          65537
+        ],
+        "missing_face": [
+          3,
+          65537
+        ],
+        "correct_target": [
+          3,
+          19
+        ],
+        "rejection": "vertical.lower_label_unmaterialized",
+        "kind": "audit_lookup_shortcut_not_product_mutant"
+      },
+      "stale_target_example": {
+        "lower_order": 1,
+        "source_output": [
+          211,
+          65537
+        ],
+        "previous_cut": "9",
+        "previous_closed": false,
+        "cut": "9",
+        "closed": true,
+        "old_target_facets": [
+          [
+            211
+          ],
+          [
+            65537
+          ],
+          [
+            4000000000
+          ]
+        ],
+        "current_target_facets": [
+          [
+            3
+          ],
+          [
+            211
+          ],
+          [
+            65537
+          ],
+          [
+            4000000000
+          ]
+        ],
+        "kind": "stale_component_requires_horizontal_successor"
+      }
+    }
+  ],
+  "pins": {
+    "vertical_replay.py": "c8e43aee8a55835060e0ad9bfba3f832cae31c6a09741550e6640382946868a9",
+    "horizontal_rational_oracle.py": "fdff23d640ce692ef459f41eea6b9863bae0a5daa1d6a6c35edc60a8712fe83d",
+    "meb_rational_oracle_20260905.py": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b",
+    "receipts_horizontal_20260905/pipeline/o2/build.json": "8911768b95a8e0628fc06f8a3bc07cfba5942722bde086ab4dd543287ac9fa23",
+    "receipts_horizontal_20260905/pipeline/o2/nominal.stdout": "bc8546548666816cb02b185442b01e77d76bc62917d9a23cb407d5ea75beab2f",
+    "receipts_horizontal_20260905/pipeline/o2/nominal.run.json": "ef7175ab6c6f8441ad6c539d7d642985a97a0a05e01a97613a6622c916a6d919",
+    "receipts_horizontal_20260905/pipeline/ubsan/build.json": "82ebe43c83d5a659735246fe48690ee85dbab117599b293d98712d82a101f6cb",
+    "receipts_horizontal_20260905/pipeline/ubsan/nominal.stdout": "bc8546548666816cb02b185442b01e77d76bc62917d9a23cb407d5ea75beab2f",
+    "receipts_horizontal_20260905/pipeline/ubsan/nominal.run.json": "32731e3544d5088c6899e907ac4b665dc41313049cd866ed8096361911956568"
+  },
+  "source_authority": "E sealed horizontal pipeline receipts",
+  "product_executed": false,
+  "vertical_product_qualification": false,
+  "resolver_totality_proved_by_test": false,
+  "public_status": "not_claimed",
+  "gcp_used": false
+}

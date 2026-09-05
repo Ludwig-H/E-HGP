@@ -1,0 +1,105 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7_f_tests_20260905/sanitized
+Test project /workspaces/E-HGP/build/v7_f_tests_20260905/sanitized
+      Start  14: mhgp7_bad_alloc_temoin
+      Start  15: mhgp7_bad_alloc_etage_provision
+ 1/48 Test  #15: mhgp7_bad_alloc_etage_provision .................   Passed    0.04 sec
+      Start  16: mhgp7_bad_alloc_etage_census
+ 2/48 Test  #14: mhgp7_bad_alloc_temoin ..........................   Passed   11.12 sec
+      Start  17: mhgp7_bad_alloc_etage_fold
+ 3/48 Test  #16: mhgp7_bad_alloc_etage_census ....................   Passed   19.71 sec
+      Start 307: mhgp7_thread_failure
+ 4/48 Test #307: mhgp7_thread_failure ............................   Passed    0.52 sec
+      Start 308: mhgp7_thread_failure_mutant_admission
+ 5/48 Test #308: mhgp7_thread_failure_mutant_admission ...........   Passed    0.06 sec
+      Start 309: mhgp7_thread_failure_refus_arg
+ 6/48 Test #309: mhgp7_thread_failure_refus_arg ..................   Passed    0.04 sec
+      Start 310: mhgp7_census_direct
+ 7/48 Test #310: mhgp7_census_direct .............................   Passed    0.92 sec
+      Start 311: mhgp7_census_direct_offset
+ 8/48 Test #311: mhgp7_census_direct_offset ......................   Passed    0.95 sec
+      Start 312: mhgp7_census_direct_transaction
+ 9/48 Test #312: mhgp7_census_direct_transaction .................   Passed    0.95 sec
+      Start 313: mhgp7_census_direct_residence
+10/48 Test #313: mhgp7_census_direct_residence ...................   Passed    0.85 sec
+      Start 314: mhgp7_silent_incidence
+11/48 Test #314: mhgp7_silent_incidence ..........................   Passed    4.63 sec
+      Start 315: mhgp7_silent_incidence_mutant
+12/48 Test #315: mhgp7_silent_incidence_mutant ...................   Passed    0.06 sec
+      Start 316: mhgp7_reduced_latent_parent_mutant
+13/48 Test #316: mhgp7_reduced_latent_parent_mutant ..............   Passed    0.07 sec
+      Start 317: mhgp7_reduced_drop_materialization_mutant
+14/48 Test #317: mhgp7_reduced_drop_materialization_mutant .......   Passed    0.10 sec
+      Start 318: mhgp7_silent_drop_nonmerge_mutant
+15/48 Test #318: mhgp7_silent_drop_nonmerge_mutant ...............   Passed    0.07 sec
+      Start 319: mhgp7_silent_csr_stale_level_mutant
+16/48 Test #319: mhgp7_silent_csr_stale_level_mutant .............   Passed    0.07 sec
+      Start 320: mhgp7_archive
+17/48 Test #320: mhgp7_archive ...................................   Passed    1.29 sec
+      Start 321: mhgp7_archive_optimized
+18/48 Test #321: mhgp7_archive_optimized .........................   Passed    1.28 sec
+      Start 324: mhgp7_archive_api
+19/48 Test #324: mhgp7_archive_api ...............................   Passed    0.04 sec
+      Start 325: mhgp7_archive_cleanup
+20/48 Test #325: mhgp7_archive_cleanup ...........................   Passed    0.07 sec
+      Start 329: mhgp7_mono_inline
+21/48 Test  #17: mhgp7_bad_alloc_etage_fold ......................   Passed   20.86 sec
+      Start 330: mhgp7_mono_inline_late_a
+22/48 Test #330: mhgp7_mono_inline_late_a ........................   Passed    0.06 sec
+      Start 331: mhgp7_mono_inline_late_b
+23/48 Test #329: mhgp7_mono_inline ...............................   Passed    0.33 sec
+      Start 332: mhgp7_mono_inline_early_alloc
+24/48 Test #331: mhgp7_mono_inline_late_b ........................   Passed    0.06 sec
+      Start 363: mhgp7_meb_lazy
+25/48 Test #332: mhgp7_mono_inline_early_alloc ...................   Passed    0.05 sec
+      Start 364: mhgp7_meb_lazy_q2_reject_shell
+26/48 Test #364: mhgp7_meb_lazy_q2_reject_shell ..................   Passed    0.03 sec
+      Start 365: mhgp7_meb_lazy_q3_reject_shell
+27/48 Test #365: mhgp7_meb_lazy_q3_reject_shell ..................   Passed    0.03 sec
+      Start 366: mhgp7_meb_lazy_q4_reject_shell
+28/48 Test #366: mhgp7_meb_lazy_q4_reject_shell ..................   Passed    0.04 sec
+      Start 367: mhgp7_meb_lazy_eager_materialization
+29/48 Test #363: mhgp7_meb_lazy ..................................   Passed    0.90 sec
+      Start 368: mhgp7_meb_lazy_unknown_mutant
+30/48 Test #368: mhgp7_meb_lazy_unknown_mutant ...................   Passed    0.02 sec
+      Start 369: mhgp7_meb_lazy_empty_mutant
+31/48 Test #369: mhgp7_meb_lazy_empty_mutant .....................   Passed    0.02 sec
+      Start 370: mhgp7_meb_lazy_duplicate_mutant
+32/48 Test #370: mhgp7_meb_lazy_duplicate_mutant .................   Passed    0.03 sec
+      Start 371: mhgp7_witness_stack
+33/48 Test #367: mhgp7_meb_lazy_eager_materialization ............   Passed    1.20 sec
+      Start 372: mhgp7_witness_stack_helper
+34/48 Test #372: mhgp7_witness_stack_helper ......................   Passed    0.02 sec
+      Start 373: mhgp7_witness_stack_witness
+35/48 Test #371: mhgp7_witness_stack .............................   Passed    1.57 sec
+      Start 374: mhgp7_witness_stack_lane_mask
+36/48 Test #374: mhgp7_witness_stack_lane_mask ...................   Passed    0.03 sec
+      Start 375: mhgp7_witness_stack_lane_mask_mutant
+37/48 Test #375: mhgp7_witness_stack_lane_mask_mutant ............   Passed    0.03 sec
+      Start 376: mhgp7_witness_stack_unknown_case
+38/48 Test #376: mhgp7_witness_stack_unknown_case ................   Passed    0.02 sec
+      Start 377: mhgp7_witness_stack_empty_case
+39/48 Test #377: mhgp7_witness_stack_empty_case ..................   Passed    0.02 sec
+      Start 378: mhgp7_witness_stack_duplicate_case
+40/48 Test #378: mhgp7_witness_stack_duplicate_case ..............   Passed    0.02 sec
+      Start 379: mhgp7_witness_stack_unknown_argument
+41/48 Test #379: mhgp7_witness_stack_unknown_argument ............   Passed    0.03 sec
+      Start 380: mhgp7_witness_stack_unknown_mutant
+42/48 Test #380: mhgp7_witness_stack_unknown_mutant ..............   Passed    0.03 sec
+      Start 381: mhgp7_witness_stack_empty_mutant
+43/48 Test #381: mhgp7_witness_stack_empty_mutant ................   Passed    0.02 sec
+      Start 382: mhgp7_witness_stack_duplicate_mutant
+44/48 Test #382: mhgp7_witness_stack_duplicate_mutant ............   Passed    0.03 sec
+      Start 383: mhgp7_witness_stack_mutant_case_mismatch
+45/48 Test #383: mhgp7_witness_stack_mutant_case_mismatch ........   Passed    0.02 sec
+      Start 384: mhgp7_witness_stack_semantic
+46/48 Test #373: mhgp7_witness_stack_witness .....................   Passed    1.61 sec
+      Start 385: mhgp7_witness_stack_semantic_lane_mask_mutant
+47/48 Test #385: mhgp7_witness_stack_semantic_lane_mask_mutant ...   Passed    0.03 sec
+48/48 Test #384: mhgp7_witness_stack_semantic ....................   Passed    1.07 sec
+
+100% tests passed, 0 tests failed out of 48
+
+Label Time Summary:
+gate    =  71.01 sec*proc (48 tests)
+
+Total Test time (real) =  35.99 sec

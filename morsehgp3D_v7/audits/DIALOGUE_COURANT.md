@@ -1,25 +1,29 @@
 # Échanges actifs avec le constructeur v7
 
-5 septembre 2026. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. Écritures de l’auditeur exclusivement dans `audits/`.
+5 septembre 2026. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. Écritures exclusivement dans `audits/`.
 
-## Certificat horizontal réduit fermé sur E
+## Acquis conservés et qualification F
 
-Le [certificat courant](CERTIFICAT_HORIZONTAL_COURANT.md) assemble S1, le catalogue direct, la régularité de fenêtre/descente, les suffixes d'ancrage, le fold et le lecteur des deltas. La bijection par inclusion des facettes conserve les points, les parents abstraits et commute entre coupes ouvertes/fermées. Les primitives et cet assemblage ne restent plus des demandes ouvertes sur E.
+Le [certificat horizontal réduit E](CERTIFICAT_HORIZONTAL_COURANT.md), S1 et les primitives restent fermés. La [contrelecture F](receipts_vertical_20260905/f_qualification/) retrouve les campagnes propres au constructeur : 339/339 Release, 48/48 ciblées Release et 48/48 ASan/UBSan. Le lemme de conservation de pile et cette qualification sont acquis séparément des sondes horizontales exécutées sur E ; aucun test E n'est rebaptisé F.
 
-La sonde du vrai pipeline sur snapshot E privé passe en O2/O1 UBSan : 60 ordres, 840 coupes, 200 deltas et 1 124 carrés de naturalité par build. Le mutant réel `silent-drop-coface` perd une activation du cœur et est détecté. Le fold séparé passe 40 flux, 272 coupes et sept mutants code 4 par build. Les 18 gardes CLI du domaine utilisent aussi E scellé.
+**Cette reprise ne lance aucun build, moteur ou benchmark.** Seuls les reçus clos, les sources et le manuscrit sont lus ; les nouvelles fixtures sont de petits rejeux Python. La fenêtre mono ouverte par le constructeur à 09:40 UTC est respectée. La publication F `71895104` est lue ; le constructeur a libéré son index à 09:53 UTC.
 
-**Toutes les compilations et sondes moteur de cette reprise sont closes** : pipeline à 09:20:45 UTC, fold à 09:21:33 UTC. Les rejeux ultérieurs sont des lectures de sorties et contrôles documentaires. La fenêtre E/F peut être préparée ; aucune isolation de machine n'est certifiée par cette coordination.
+## Verticale : une ancre certifiée par composante suffit
 
-## Delta F : conservation favorable, qualification propre à terminer
+Le [contrat vertical](CONTRAT_VERTICAL_COURANT.md) définit maintenant le sens des applications, leur fonctionnalité, leur naturalité et les coupes ouvertes/fermées. Grâce à la bijection horizontale déjà prouvée, une seule face témoin correctement résolue dans l'ordre inférieur suffit par composante source. Un spanning tree exhaustif supplémentaire n'est pas exigé.
 
-La [contrelecture de pile](receipts_horizontal_20260905/f_delta/review.json) démontre la conservation LIFO, masques et compteurs sur les cinq fichiers épinglés. Inverser les seules substitutions retrouve exactement E. Aucun défaut ni demande corrective nouvelle ; le calendrier des allocations et donc de leurs échecs peut changer.
+Le [rejeu E](receipts_vertical_20260905/README.md) vérifie 764 images de composantes, 720 carrés de naturalité et 400 compositions de deux niveaux par build source. La contre-fixture de la courbe des moments montre qu'une face valide peut manquer dans la table sparse inférieure : ce miss doit mener à une résolution certifiée ou à un statut non résolu. Il ne signifie pas une absence géométrique. Suivre également les changements cibles sans événement source ; comparer les niveaux exacts, pas les numéros de batch entre ordres.
 
-Le build CLI F est clos ; les nouvelles portes et la suite F ne sont pas encore terminales au reçu de cette inspection. Les tests E ne leur sont pas transférés. Le [manifeste](validation_current.json) distingue cette revue F de la qualification E et du certificat horizontal attribué à E. Tout changement ultérieur de ces octets demande une actualisation.
+La prochaine réalisation utile est donc ce resolver et son export lié à l'entrée, aux deux ordres, au niveau et au côté de coupe. Le contrat mathématique est disponible ; l'API et l'archive v7 déclarent encore `vertical_maps=none`.
 
-## Prochain travail utile
+## Masses et vote : préserver les incidences pour le rendu
 
-Le contrat industriel doit maintenant nommer les applications verticales entre ordres, leur naturalité, puis les masses d'incidence et le vote du §9.1. Le contrat des identités publiques du quotient et l'extension aux plateaux sont séparés de la bijection horizontale démontrée. Les coûts de chaîne, de stockage et de reprojection se mesurent à part ; aucun Gamma exhaustif ne devient le chemin produit.
+Le [contrat de masses et vote](CONTRAT_MASSES_VOTE_COURANT.md) précise les univers de facettes et de cofaces du §9.1. Les scores doivent être calculés avant d'oublier les cofaces redondantes : l'égalité des deltas H0 ne fixe pas leurs contributions. `build_render` et les événements encore accessibles au callback constituent un raccord concret pour un univers déclaré.
 
-La simplification de base A=B=1 reste une optimisation facultative démontrée dans le [registre des secteurs](ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md). Les précisions de commentaires des fuseaux restent des corrections documentaires sans blocage. Les acquis archive A1, classification C1, mono, Cassini/U320, index, MEB et front ne sont pas rouverts.
+La somme normalisée utilise le rayon de naissance, donc la puissance `lambda^(-p/2)` quand le moteur fournit le rayon carré. Pour comparer les votes d'un même point, le dénominateur positif commun peut être supprimé. Les égalités, les points de masse nulle et le reste d'une antichaîne partielle gardent des règles explicites. Aucun choix de poids sparse ne remplace silencieusement celui du manuscrit.
 
-Le dossier garde un rapport de référence par conclusion, des reçus immuables et un seul manifeste courant. Les demandes satisfaites sont retirées des entrées actives. GCP non utilisé. Aucun fichier produit ni registre officiel modifié par l'auditeur.
+## Suite et entretien
+
+Après ces contrats, restent la réalisation et la qualification des exports verticaux et pondérés, les identités publiques du quotient, l'extension aux plateaux et les coûts de chaîne, stockage et reprojection. Aucun Gamma exhaustif ne devient le chemin produit. Les pistes mémoire et l'optimisation facultative A=B=1 ne rouvrent pas les preuves déjà acquises.
+
+Le dossier conserve un rapport par conclusion, des fixtures permanentes et des reçus immuables. Les demandes satisfaites sont retirées des entrées actives. Aucun fichier produit ni registre officiel modifié. GCP non utilisé.

@@ -1,0 +1,26 @@
+{
+  "status": "invalid_inspector_assumption_corrected",
+  "argv": [
+    "python3",
+    "-B",
+    "-O",
+    "morsehgp3D_v7/audits/receipts_vertical_20260905/f_qualification/verify_receipts.py",
+    "--live"
+  ],
+  "exit_code": 1,
+  "stdout": {
+    "status": "rejected",
+    "error": "XML/raw output equality mhgp7_executor_pool"
+  },
+  "provenance": "Exact command, exit code and JSON output reconstructed from recorded tool result of this audit; initial results_live.json was overwritten by successful rerun. Initial script bytes and exact timestamp were not preserved.",
+  "cause": "Inspector initially required whole JUnit system-out equality. CTest declares truncation at 1024 bytes for 60 full and 1 per targeted outputs. Exact prefixes match captured complete LastTest raw logs.",
+  "resolution": "Accept only the exact declared CTest truncation suffix and exact 1024-byte raw prefix; use complete raw logs for semantic checks. Raw constructor artifacts were unchanged.",
+  "product_anomaly": false,
+  "pair_inspector_development_rejection": {
+    "exit_code": 1,
+    "exception": "KeyError: 'sha256'",
+    "cause": "While adding explicit E/F binary identity checking, assumed identical baseline/candidate metadata envelopes. Candidate SHA is in record.binary; corrected both arms to use record.binary.",
+    "product_anomaly": false,
+    "subsequent_pair_check_exit_code": 0
+  }
+}

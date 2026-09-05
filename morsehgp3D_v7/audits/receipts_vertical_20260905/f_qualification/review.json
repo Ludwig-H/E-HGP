@@ -1,0 +1,111 @@
+{
+  "schema": "mhgp7-F-qualification-review-v1",
+  "observed_utc": "2026-09-05T09:55:47.292686+00:00",
+  "status": "F339_F48_F48_closed_independently_inspected",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "verdict_fr": "Les propres campagnes F complètes 339/339 et ciblées 48/48 Release + 48/48 ASan/UBSan sont closes et corroborées par les sorties brutes, inventaires, JUnit, journaux LastTest, commandes, sources et binaires. Aucun défaut produit identifié dans cette contre-vérification.",
+  "F_CLI_sha256": "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85",
+  "F_CLI_build_receipt_sha256": "522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4",
+  "campaigns": {
+    "full": {
+      "tests": 339,
+      "failed_error_skipped": 0,
+      "LastTest_passed_blocks": 339,
+      "binaries": 39,
+      "live_pins": 201,
+      "junit_truncated_outputs": 60,
+      "ctest_started_utc": "2026-09-05T09:29:24Z",
+      "ctest_exit_code": 0,
+      "LastTest_sha256": "d9515b7db22c46fb4d59d12cc76412d16b2266f5f894bb127984e99c27364a87"
+    },
+    "release": {
+      "tests": 48,
+      "failed_error_skipped": 0,
+      "LastTest_passed_blocks": 48,
+      "binaries": 11,
+      "live_pins": 175,
+      "junit_truncated_outputs": 1,
+      "ctest_started_utc": "2026-09-05T09:24:18Z",
+      "ctest_exit_code": 0,
+      "LastTest_sha256": "fe279aabbff98758fecfe7f6aad6c3f0a41b5b247ac72fb826ab1022c6da14ab"
+    },
+    "sanitized": {
+      "tests": 48,
+      "failed_error_skipped": 0,
+      "LastTest_passed_blocks": 48,
+      "binaries": 11,
+      "live_pins": 175,
+      "junit_truncated_outputs": 1,
+      "ctest_started_utc": "2026-09-05T09:28:06Z",
+      "ctest_exit_code": 0,
+      "LastTest_sha256": "455d4a376893a016989a5eb6ec08bfa2295e843d772fea07892c986b7ffef552"
+    }
+  },
+  "pins_scope": {
+    "CLI_build": 51,
+    "entrypoint_F_variant": 118,
+    "campaign_each": 143,
+    "entrypoint_all_inside_campaign": true,
+    "source_inputs_before_after_equal": true
+  },
+  "attribution": {
+    "constructor_head_before": "61f72a6805e27f1bc216b5d7444164b31fc970b6",
+    "worktree": "F delta present at run; HEAD alone is E and does not identify the F source bytes",
+    "full_build": "incremental_existing_F_Release; raw logs show both F witness targets actually compiled and linked",
+    "targeted_builds": "fresh_isolated Release and ASan/UBSan",
+    "inventory_relation": "F339 has E324 names plus 15 new F gates; all 339 F executions are fresh, no transfer of E executions",
+    "host": "shared AMD EPYC 9V74 x86_64, 8 logical CPUs, C locale; CPU CTests local only"
+  },
+  "mutant": {
+    "gates": [
+      "mhgp7_witness_stack_lane_mask_mutant",
+      "mhgp7_witness_stack_semantic_lane_mask_mutant"
+    ],
+    "reason": "witness.lane_mask_double_credit",
+    "nominal": 3,
+    "mutated_product": 8,
+    "expected_engine_exit": 4,
+    "ctest_wrapper_exit": 0,
+    "real_testing_macro_in_actual_compile_database": true
+  },
+  "nominal_nonvacuum": {
+    "clouds": 24,
+    "permutations": 16,
+    "queries": 48960,
+    "guarded_queries_observer": 48960,
+    "permutation_comparisons": 32640,
+    "nodes": 808908,
+    "corners": 74172,
+    "helper_checks": 8,
+    "overflow_allocations": 9,
+    "allocation_failures": 2,
+    "reference_new_calls_observer": 118404,
+    "candidate_new_calls_observer": 0
+  },
+  "native_companion_limit": "allocation_observer=disabled: 48960 semantic queries, guarded_queries=0; the printed reference_new_calls=0/candidate_new_calls=0 are not allocation measurements.",
+  "inspector_initial_invalid_attempt": "initial_inspector_rejection.json preserves exact rejected output and explains the overly strict whole-JUnit-output equality, corrected without changing constructor bytes.",
+  "junit_truncation": "Declared 1024-byte prefixes independently match complete raw LastTest outputs; raw logs remain authority beyond each prefix.",
+  "closed_pair_s8": "pair_s8_review.json: two fresh sequential constructor E/F arms, exit0, source snapshot stable, exact raw semantic equality including ten cardinalities and eleven forest/all digests; no performance claim. s10 and s12 not qualified here.",
+  "artifacts": {
+    "capture": "capture_manifest.json",
+    "portable_results": "captured_normal.json",
+    "live_results": "results_live.json",
+    "self_checks": "inspector_checks.json",
+    "initial_inspector_rejection": "initial_inspector_rejection.json",
+    "pair_s8": "pair_s8_review.json"
+  },
+  "limits": [
+    "Independent inspector of constructor runs; no auditor engine/build/CTest invocation.",
+    "Compilation database and before/after pins support recorded binding, not a hermetic source-to-binary attestation.",
+    "F qualification does not automatically transfer the E horizontal rational certificate or certify global Morse HGP exactness.",
+    "Allocation observations cover the test fixtures, not a global bound or performance gain.",
+    "No CI/GPU/SLO/vertical maps certification."
+  ],
+  "auditor_engine_build_CTest_runs": 0,
+  "git_operations": 0,
+  "GCP": "non utilisé"
+}

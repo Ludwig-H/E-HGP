@@ -1,6 +1,6 @@
 # Audit indépendant courant de MorseHGP3D v7
 
-Actualisé le 5 septembre 2026 depuis `61f72a6805e27f1bc216b5d7444164b31fc970b6` ; certificat horizontal réduit E et revue F distincte.
+Actualisé le 5 septembre 2026 depuis `71895104c7d750fdd6ef0a313cfb09e9ac161204` ; certificat horizontal réduit E, contrats verticaux/pondérés et qualification F distincte.
 Toutes les écritures restent dans `morsehgp3D_v7/audits/`.
 
 La suite **D** de 323 portes a été reconstruite et exécutée par l'auditeur.
@@ -8,7 +8,7 @@ Le delta q2 **E** du constructeur dispose maintenant de ses propres
 324 portes Release et de deux campagnes ciblées de 33 portes, Release
 et ASan/UBSan, dont les preuves brutes sont contre-vérifiées ici.
 Les quatre fichiers produit E restent sous la responsabilité du constructeur.
-Le [manifeste courant](validation_current.json) reconnaît séparément les octets D et E et affiche la portée correspondante ; leur mélange est refusé.
+Les 339 portes Release F et deux campagnes ciblées de 48 portes sont également contre-vérifiées depuis leurs propres reçus. Le [manifeste courant](validation_current.json) reconnaît séparément les octets D/E/F et affiche leur portée ; leur mélange est refusé.
 
 ```text
 phase=exploration_v7_hors_registre
@@ -24,7 +24,7 @@ public_status=not_claimed
 
 La nouvelle sonde du pipeline passe en O2/O1 UBSan : 60 ordres, 840 coupes et 1 124 carrés de naturalité par build, avec détection d'une attache supprimée. Le fold séparé passe 272 coupes et sept vrais mutants. Aucun nouveau défaut produit n'a été trouvé. Les [18 gardes de domaine](receipts_horizontal_20260905/domain/results.json) précisent notamment K1, les collinéaires acceptés et les refus d'extra-shell.
 
-La préparation F possède un [lemme de conservation de pile](receipts_horizontal_20260905/f_delta/review.json) favorable ; sa qualification intégrée reste distincte. Le certificat exécuté est attribué aux octets E figés. Verticale, poids/vote, identités publiques, plateaux à étendre et coûts gardent leurs propres contrats. Le statut demeure `not_claimed` et `--require-exact` refuse.
+F possède un [lemme de conservation de pile](receipts_horizontal_20260905/f_delta/review.json) favorable et sa [qualification intégrée propre](receipts_vertical_20260905/f_qualification/). Le certificat exécuté reste attribué aux octets E figés. Le [contrat vertical](CONTRAT_VERTICAL_COURANT.md) ferme la fonctionnalité et la naturalité mathématiques : une ancre certifiée par composante suffit, avec un resolver et un export à construire. Les [masses/vote](CONTRAT_MASSES_VOTE_COURANT.md) disposent d’un contrat d’incidence explicite et de contre-fixtures ; leur supplément pondéré reste à fournir. Identités publiques, plateaux à étendre et coûts gardent leurs obligations distinctes. Le statut demeure `not_claimed` et `--require-exact` refuse.
 
 ## Modèle lu et objet audité
 
@@ -62,7 +62,8 @@ sont contenus implicitement dans cet export.
 | Domaine | Conclusion vérifiée | Preuves |
 | --- | --- | --- |
 | Composition horizontale réduite E | Preuve assemblée ; pipeline et lecteur seuls contre Gamma rationnel, fold et niveaux égaux, domaine CLI | [Certificat et reçus](CERTIFICAT_HORIZONTAL_COURANT.md) |
-| Préparation F | Conservation LIFO/masques/comptes sur delta épinglé ; aucune suite E transférée | [Revue statique distincte](receipts_horizontal_20260905/f_delta/review.json) |
+| Qualification F | Conservation LIFO/masques/comptes ; 339/339 Release et 48/48 ciblées Release/ASan-UBSan contre-vérifiées | [Reçus propres F](receipts_vertical_20260905/f_qualification/) |
+| Verticale et masses | 764 images, 720 carrés de naturalité et 400 compositions par build E source ; familles d’incidences et projection pondérée distinguées | [Contrats et fixtures](receipts_vertical_20260905/README.md) |
 | MEB différée q3/q4 | Signes, zéros, premier support, niveau et budgets conservés ; 89 ensembles, 431 appels et 6 176 puissances, deux mutants détectés | [Preuve et oracle rationnel indépendant](AUDIT_MEB_DIFFEREE_20260905.md) |
 | Prétest q2 E | Identité et borne i64 ; oracle indépendant, 431 appels identiques à D et nouveau mutant q2 détecté | [Addendum E](ADDENDUM_MEB_Q2_E_20260905.md) |
 | Morton, buckets et Karras | Partition, références, racine, couverture unique et boîtes justifiées ; 237 212 nuages par binaire, sept mutants structurels rejetés sous O2 et UBSan | [Preuve et oracle de trie](AUDIT_INDEX_20260905.md) |
@@ -94,9 +95,10 @@ Leurs reçus bruts ne sont pas réécrits.
 ## Prochaines fermetures utiles
 
 1. **Compléter l'objet demandé par le contrat industriel.**
-   L'archive déclare `vertical_maps=none`. Définir et certifier les
-   applications entre ordres, puis les contributions d'incidence du
-   vote du § 9.1, sans les reconstruire depuis les seuls deltas H0.
+   L'archive déclare `vertical_maps=none`. Réaliser le resolver d’ancre
+   et son export selon le contrat vertical désormais démontré, puis
+   sérialiser les contributions d’incidence du vote du § 9.1 selon
+   leur univers déclaré ; les seuls deltas H0 ne les déterminent pas.
    Préserver les facettes comme feuilles ; le recouvrement apparaît dans
    la projection et ne nécessite pas de laminarisation arbitraire.
 2. **Réduire puis mesurer le coût global de la route complétée.**

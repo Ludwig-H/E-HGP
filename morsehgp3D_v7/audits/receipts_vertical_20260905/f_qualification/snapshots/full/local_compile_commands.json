@@ -1,0 +1,242 @@
+[
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++   -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+  "output": "CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_selftest.dir/tests/selftest.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/selftest.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/selftest.cpp",
+  "output": "CMakeFiles/mhgp7_selftest.dir/tests/selftest.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_bad_alloc_gate.dir/tests/bad_alloc_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/bad_alloc_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/bad_alloc_gate.cpp",
+  "output": "CMakeFiles/mhgp7_bad_alloc_gate.dir/tests/bad_alloc_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_executor_pool_gate.dir/tests/executor_pool_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/executor_pool_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/executor_pool_gate.cpp",
+  "output": "CMakeFiles/mhgp7_executor_pool_gate.dir/tests/executor_pool_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_wire_gate.dir/tests/wire_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/wire_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/wire_gate.cpp",
+  "output": "CMakeFiles/mhgp7_wire_gate.dir/tests/wire_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_census_device_stub_gate.dir/tests/census_device_stub_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/census_device_stub_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/census_device_stub_gate.cpp",
+  "output": "CMakeFiles/mhgp7_census_device_stub_gate.dir/tests/census_device_stub_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_pilot_stub_gate.dir/tests/pilot_stub_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/pilot_stub_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/pilot_stub_gate.cpp",
+  "output": "CMakeFiles/mhgp7_pilot_stub_gate.dir/tests/pilot_stub_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++   -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_pilote_stub_check.dir/tests/pilot_cuda_stub_check.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/pilot_cuda_stub_check.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/pilot_cuda_stub_check.cpp",
+  "output": "CMakeFiles/mhgp7_pilote_stub_check.dir/tests/pilot_cuda_stub_check.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_pilote_stub_check_test.dir/tests/pilot_cuda_stub_check.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/pilot_cuda_stub_check.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/pilot_cuda_stub_check.cpp",
+  "output": "CMakeFiles/mhgp7_pilote_stub_check_test.dir/tests/pilot_cuda_stub_check.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_device_witness_stub.dir/tests/device_witness_stub.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/device_witness_stub.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/device_witness_stub.cpp",
+  "output": "CMakeFiles/mhgp7_device_witness_stub.dir/tests/device_witness_stub.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_conformity.dir/tests/conformity_v5.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/conformity_v5.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/conformity_v5.cpp",
+  "output": "CMakeFiles/mhgp7_conformity.dir/tests/conformity_v5.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_residence_gate.dir/tests/residence_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/residence_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/residence_gate.cpp",
+  "output": "CMakeFiles/mhgp7_residence_gate.dir/tests/residence_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_linked_arcs.dir/tests/linked_arcs_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/linked_arcs_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/linked_arcs_gate.cpp",
+  "output": "CMakeFiles/mhgp7_linked_arcs.dir/tests/linked_arcs_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_cell_grid_oracle.dir/tests/cell_grid_oracle.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/cell_grid_oracle.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/cell_grid_oracle.cpp",
+  "output": "CMakeFiles/mhgp7_cell_grid_oracle.dir/tests/cell_grid_oracle.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_sweep_fixtures.dir/tests/sweep_fixtures.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/sweep_fixtures.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/sweep_fixtures.cpp",
+  "output": "CMakeFiles/mhgp7_sweep_fixtures.dir/tests/sweep_fixtures.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_cover_fixture.dir/tests/cover_fixture.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/cover_fixture.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/cover_fixture.cpp",
+  "output": "CMakeFiles/mhgp7_cover_fixture.dir/tests/cover_fixture.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_PROFILE_REDUCE=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_profile.dir/cli/mhgp7.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+  "output": "CMakeFiles/mhgp7_profile.dir/cli/mhgp7.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_PROFILE_LIVENESS=1 -DMHGP7_PROFILE_REDUCE=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_profile_liveness.dir/cli/mhgp7.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+  "output": "CMakeFiles/mhgp7_profile_liveness.dir/cli/mhgp7.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_wire_pack_gate.dir/tests/wire_pack_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/wire_pack_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/wire_pack_gate.cpp",
+  "output": "CMakeFiles/mhgp7_wire_pack_gate.dir/tests/wire_pack_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_lot_ring_gate.dir/tests/lot_ring_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/lot_ring_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/lot_ring_gate.cpp",
+  "output": "CMakeFiles/mhgp7_lot_ring_gate.dir/tests/lot_ring_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_fold_caps_gate.dir/tests/fold_caps_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/fold_caps_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/fold_caps_gate.cpp",
+  "output": "CMakeFiles/mhgp7_fold_caps_gate.dir/tests/fold_caps_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_PROFILE_REDUCE=1 -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_profile_sonde.dir/cli/mhgp7.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+  "output": "CMakeFiles/mhgp7_profile_sonde.dir/cli/mhgp7.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_PROFILE_REDUCE=1 -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_profil_contrat.dir/tests/profil_contrat_echec.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/profil_contrat_echec.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/profil_contrat_echec.cpp",
+  "output": "CMakeFiles/mhgp7_profil_contrat.dir/tests/profil_contrat_echec.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_fold_csr_gate.dir/tests/fold_csr_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/fold_csr_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/fold_csr_gate.cpp",
+  "output": "CMakeFiles/mhgp7_fold_csr_gate.dir/tests/fold_csr_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_perm_sort_gate.dir/tests/perm_sort_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/perm_sort_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/perm_sort_gate.cpp",
+  "output": "CMakeFiles/mhgp7_perm_sort_gate.dir/tests/perm_sort_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_perm_residence_gate.dir/tests/perm_residence_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/perm_residence_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/perm_residence_gate.cpp",
+  "output": "CMakeFiles/mhgp7_perm_residence_gate.dir/tests/perm_residence_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_route_c6_gate.dir/tests/route_c6_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/route_c6_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/route_c6_gate.cpp",
+  "output": "CMakeFiles/mhgp7_route_c6_gate.dir/tests/route_c6_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_thread_failure_gate.dir/tests/thread_failure_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/thread_failure_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/thread_failure_gate.cpp",
+  "output": "CMakeFiles/mhgp7_thread_failure_gate.dir/tests/thread_failure_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_census_direct_gate.dir/tests/census_direct_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/census_direct_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/census_direct_gate.cpp",
+  "output": "CMakeFiles/mhgp7_census_direct_gate.dir/tests/census_direct_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_silent_incidence_gate.dir/tests/silent_incidence_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/silent_incidence_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/silent_incidence_gate.cpp",
+  "output": "CMakeFiles/mhgp7_silent_incidence_gate.dir/tests/silent_incidence_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_archive_api_gate.dir/tests/archive_api_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/archive_api_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/archive_api_gate.cpp",
+  "output": "CMakeFiles/mhgp7_archive_api_gate.dir/tests/archive_api_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_archive_cleanup_gate.dir/tests/archive_cleanup_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/archive_cleanup_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/archive_cleanup_gate.cpp",
+  "output": "CMakeFiles/mhgp7_archive_cleanup_gate.dir/tests/archive_cleanup_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_mono_inline_gate.dir/tests/mono_inline_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/mono_inline_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/mono_inline_gate.cpp",
+  "output": "CMakeFiles/mhgp7_mono_inline_gate.dir/tests/mono_inline_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_axis_bounds_gate.dir/tests/axis_bounds_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/axis_bounds_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/axis_bounds_gate.cpp",
+  "output": "CMakeFiles/mhgp7_axis_bounds_gate.dir/tests/axis_bounds_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++   -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_axis_bounds_microbench.dir/bench/axis_bounds_microbench.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/bench/axis_bounds_microbench.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/bench/axis_bounds_microbench.cpp",
+  "output": "CMakeFiles/mhgp7_axis_bounds_microbench.dir/bench/axis_bounds_microbench.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1 -I/workspaces/E-HGP/morsehgp3D_v7 -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_arithmetic_integer_gate.dir/tests/arithmetic_integer_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/arithmetic_integer_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/arithmetic_integer_gate.cpp",
+  "output": "CMakeFiles/mhgp7_arithmetic_integer_gate.dir/tests/arithmetic_integer_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1 -I/workspaces/E-HGP/morsehgp3D_v7 -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_arithmetic_lanes_gate.dir/tests/arithmetic_lanes_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/arithmetic_lanes_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/arithmetic_lanes_gate.cpp",
+  "output": "CMakeFiles/mhgp7_arithmetic_lanes_gate.dir/tests/arithmetic_lanes_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1 -I/workspaces/E-HGP/morsehgp3D_v7 -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_meb_lazy_gate.dir/tests/meb_lazy_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/meb_lazy_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/meb_lazy_gate.cpp",
+  "output": "CMakeFiles/mhgp7_meb_lazy_gate.dir/tests/meb_lazy_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_witness_stack_gate.dir/tests/witness_stack_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+  "output": "CMakeFiles/mhgp7_witness_stack_gate.dir/tests/witness_stack_gate.cpp.o"
+},
+{
+  "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+  "command": "/usr/bin/c++ -DMHGP7_TESTING=1 -DMHGP7_WITNESS_STACK_NO_ALLOC_OBSERVER=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_witness_stack_semantic_gate.dir/tests/witness_stack_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+  "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/witness_stack_gate.cpp",
+  "output": "CMakeFiles/mhgp7_witness_stack_semantic_gate.dir/tests/witness_stack_gate.cpp.o"
+}
+]

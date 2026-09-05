@@ -1,0 +1,16 @@
+{
+  "binary_role": "pinned_F_Release",
+  "commands": [
+    {
+      "command": "/usr/bin/c++   -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_f_qualification",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+      "output": "CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o"
+    }
+  ],
+  "configuration": {
+    "/workspaces/E-HGP/build/v7_f_qualification/CMakeCache.txt": "504652c4d5da3383765d746846c1c77bd38880b547b9993efe3cec6690cbcca9",
+    "/workspaces/E-HGP/build/v7_f_qualification/CTestTestfile.cmake": "23cd2d8e6e295e7b6a0786e5e20c207b123b4ea711c0a42f53e8c2998e391e25",
+    "/workspaces/E-HGP/build/v7_f_qualification/compile_commands.json": "41f26c6b8dced16f84a86e411174d0c643b2979892e384f09328d4c70fcc68eb"
+  }
+}

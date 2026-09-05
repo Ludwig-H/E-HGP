@@ -1,0 +1,94 @@
+{
+  "auditor_engine_runs": 0,
+  "capture_sha256": "88aa1543b4955c329ad8c7eac8662e374fa2d7857a0b66e8db94d2495e0a004c",
+  "cardinalities": {
+    "1": {
+      "attachements": 0,
+      "deltas": 7999,
+      "evenements": 29875,
+      "facettes": 8000,
+      "fusions": 7999,
+      "noeuds": 7999
+    },
+    "10": {
+      "attachements": 8127546,
+      "deltas": 1005622,
+      "evenements": 1088869,
+      "facettes": 8918681,
+      "fusions": 8918680,
+      "noeuds": 15514
+    },
+    "2": {
+      "attachements": 32713,
+      "deltas": 51121,
+      "evenements": 67539,
+      "facettes": 62910,
+      "fusions": 62909,
+      "noeuds": 2122
+    },
+    "3": {
+      "attachements": 147239,
+      "deltas": 120877,
+      "evenements": 124135,
+      "facettes": 213686,
+      "fusions": 213685,
+      "noeuds": 2929
+    },
+    "4": {
+      "attachements": 399983,
+      "deltas": 197242,
+      "evenements": 201156,
+      "facettes": 517876,
+      "fusions": 517875,
+      "noeuds": 4068
+    },
+    "5": {
+      "attachements": 850158,
+      "deltas": 289705,
+      "evenements": 298870,
+      "facettes": 1036109,
+      "fusions": 1036108,
+      "noeuds": 5419
+    },
+    "6": {
+      "attachements": 1552470,
+      "deltas": 398776,
+      "evenements": 415933,
+      "facettes": 1824039,
+      "fusions": 1824038,
+      "noeuds": 7004
+    },
+    "7": {
+      "attachements": 2573565,
+      "deltas": 525699,
+      "evenements": 554022,
+      "facettes": 2947215,
+      "fusions": 2947214,
+      "noeuds": 8780
+    },
+    "8": {
+      "attachements": 3969114,
+      "deltas": 668888,
+      "evenements": 712109,
+      "facettes": 4463468,
+      "fusions": 4463467,
+      "noeuds": 10954
+    },
+    "9": {
+      "attachements": 5809858,
+      "deltas": 829864,
+      "evenements": 891721,
+      "facettes": 6443014,
+      "fusions": 6443013,
+      "noeuds": 13150
+    }
+  },
+  "digest_all": "4c3ceb0498990bafa41a9e43d0bffe25a3fee579b12b5d34365f3578f526a0e7",
+  "ended_utc": "2026-09-05T09:46:51.569712Z",
+  "orders": 10,
+  "public_status": "not_claimed",
+  "raw_semantic_lines_equal": 46,
+  "scope": "one completed E/F constructor pair read independently; no performance conclusion",
+  "started_utc": "2026-09-05T09:40:34.760110Z",
+  "status": "closed_s8_raw_semantics_equal"
+}

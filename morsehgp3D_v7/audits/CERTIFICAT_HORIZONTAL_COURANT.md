@@ -4,7 +4,7 @@
 
 **La composition horizontale réduite est fermée pour la route CPU E dans le domaine ci-dessous.** Les lemmes géométriques, les bornes de primitives, leur qualification compilée et le lecteur des deltas sont maintenant raccordés. Aucun resolver top-K, catalogue Gamma ou hypothèse de position générale globale supplémentaire n'est requis. Ce certificat est une preuve composée sous des préconditions explicites, accompagnée de falsifications exécutées ; il ne transforme pas leur nombre en preuve universelle du compilateur.
 
-Autorité produit : E, publié dans `2b94abddfde08101607f4639d42149156fb39e6c`, inchangé par `61f72a6805e27f1bc216b5d7444164b31fc970b6`. La préparation concurrente F n'est pas assimilée à ces octets. Le [manifeste courant](validation_current.json) et la [qualification](AUDIT_QUALIFICATION_20260905.md) identifient les sources, binaires et reçus auxquels chaque conclusion appartient.
+Autorité produit : E, publié dans `2b94abddfde08101607f4639d42149156fb39e6c`, inchangé par `61f72a6805e27f1bc216b5d7444164b31fc970b6`. La variante F, publiée ensuite dans `71895104`, conserve sa qualification propre ; les exécutions de ce certificat restent attribuées aux octets E. Le [manifeste courant](validation_current.json) et la [qualification](AUDIT_QUALIFICATION_20260905.md) identifient les sources, binaires et reçus auxquels chaque conclusion appartient.
 
 ## 1. Objet reconstructible et énoncé
 
@@ -89,6 +89,6 @@ Si deux fenêtres terminent dans ce domaine, les composantes abstraites de chaqu
 
 Le payload reste `normalized_horizontal_h0_candidate`, `born` une première matérialisation du sous-flot et l'archive `vertical_maps=none`. Un sérialiseur appelé sur des `ForestResult` fabriqués arbitrairement par l'utilisateur ne vérifie pas ce théorème ; l'autorité ici est la route CPU qualifiée et terminée.
 
-Restent des livrables distincts : domaine des plateaux à étendre, applications verticales et leurs carrés de naturalité, masses d'incidence et vote du §9.1, contrat des identités publiques du quotient, puis coûts de chaîne, de stockage et de bout en bout. Les facettes peuvent rester les feuilles d'un arbre ; le recouvrement apparaît dans la projection vers les points. Aucun oracle exhaustif du présent audit n'est proposé comme architecture produit.
+Le [contrat vertical](CONTRAT_VERTICAL_COURANT.md) ajoute maintenant la preuve des applications et de leur naturalité par conjugaison, sans nouveau spanning tree exhaustif. Le [contrat pondéré](CONTRAT_MASSES_VOTE_COURANT.md) précise les incidences du §9.1. Restent leurs réalisations produit : resolver d’ancre et export vertical, supplément d’incidences et vote certifié, domaine des plateaux à étendre, contrat des identités publiques du quotient, puis coûts de chaîne, de stockage et de bout en bout. Les facettes peuvent rester les feuilles d'un arbre ; le recouvrement apparaît dans la projection vers les points. Aucun oracle exhaustif du présent audit n'est proposé comme architecture produit.
 
 Le refus `--require-exact` et le statut public `not_claimed` restent en place. GCP non utilisé.
