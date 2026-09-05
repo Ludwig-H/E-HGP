@@ -1,0 +1,61 @@
+--- build/v7_meb_dual_budget_cost/cost_harness.cpp	2026-09-05 11:26:43.021126780 +0000
++++ build/v7_meb_dual_budget_cost_v2/cost_harness.cpp	2026-09-05 11:43:51.016132513 +0000
+@@ -2,7 +2,7 @@
+ // The runner must pin the final geometry donor, its completed receipt, every
+ // include, this file and the measured binary. This is not a standalone receipt.
+ // Explicit inert reuse: no call to the renamed donor main/run or its mutant.
+-#define main mhgp7_geometry_gate_uninvoked_main
++#define main(...) mhgp7_geometry_gate_uninvoked_main(__VA_ARGS__)
+ #include "../v7_meb_dual_budget_geometry/geometry_gate.cpp"
+ #undef main
+ 
+--- build/v7_meb_dual_budget_cost/run_cost.py	2026-09-05 11:39:32.285131070 +0000
++++ build/v7_meb_dual_budget_cost_v2/run_cost.py	2026-09-05 11:44:20.493132678 +0000
+@@ -31,7 +31,7 @@
+ BINARY = BUILD / "cost_harness"
+ OBJDUMP = Path("/usr/bin/objdump").resolve()
+ PINS = {
+-    BASE / "cost_harness.cpp": "c9b742287336b45082175569f58269ba91d82c49c8fb5651022468e1a81095ea",
++    BASE / "cost_harness.cpp": "5a0fd39703c26279d91796fba7c099df9d25829a6f84b7fae4ddf99ffa61f5d8",
+     ROOT / "build/v7_meb_dual_budget_cost_plan/PROTOCOL.md": "4a76f875485f39a7b0c5707e53f82c635cc1dfdab73bf595bf8348681b8f9ea7",
+     OBJDUMP: "d0041e7511460b9ebfd95ce4f9d93c7ffea398ffc1cb2c316a220dd8e533db3d",
+ }
+--- build/v7_meb_dual_budget_cost/selftest.py	2026-09-05 11:39:32.398131071 +0000
++++ build/v7_meb_dual_budget_cost_v2/selftest.py	2026-09-05 11:44:20.611132678 +0000
+@@ -130,6 +130,13 @@
+         with self.assertRaisesRegex(RuntimeError, "explicit_geometry_receipt_pin_required"):
+             R.main(["--execute", "--expected-runner-sha256", "0" * 64])
+ 
++    def test_entry_macro_does_not_rename_Metrics_main(self):
++        source = R.read_bytes(R.BASE / "cost_harness.cpp").decode("utf-8")
++        self.assertIn("#define main(...) mhgp7_geometry_gate_uninvoked_main(__VA_ARGS__)", source)
++        self.assertNotIn("#define main mhgp7_geometry_gate_uninvoked_main", source)
++        self.assertIn("a.main == b.main", source)
++        self.assertIn("#undef main", source)
++
+     def test_build_is_compile_and_disassembly_only(self):
+         rows = R.build_commands()
+         self.assertEqual([row[0] for row in rows], ["compiler", "compile", "disassembly"])
+--- build/v7_meb_dual_budget_cost/README.md	2026-09-05 11:39:32.509131072 +0000
++++ build/v7_meb_dual_budget_cost_v2/README.md	2026-09-05 11:44:20.726132679 +0000
+@@ -4,6 +4,20 @@
+ `profile=quantized_u16_input_only`, `mode=preparation_cout_local`, `public_status=not_claimed`.
+ Ce dossier n'est ni un résultat de performance ni une intégration produit. GCP non utilisé.
+ 
++Révision privée 2, issue d'un échec de compilation du harnais, **pas d'un défaut MEB**.
++L'ancienne préparation et son build échoué restent intacts dans
++`../v7_meb_dual_budget_cost/` ; reçu failed SHA256
++`247c952cd6000812ed0bff04390a0848c81e527c74c0e0ac26244144f4c83c15`.
++Le macro objet `main` avait aussi renommé le champ `Metrics::main` du donor :
++la contrelecture statique favorable n'avait pas identifié cette collision.
++Un unique changement C++ rend ce macro fonctionnel `main(...)`, ce qui
++laisse le champ intact. Aucun algorithme MEB, corpus, budget ou juge n'est changé.
++Le runner ne change que le pin du C++ ; ses chemins calculés depuis BASE
++désignent désormais ce dossier v2 et ses futures destinations create-only.
++Le selftest ajoute une contre-fixture textuelle permanente du macro ; elle
++ne remplace ni le compilateur ni la future revue du désassemblage.
++La révision 2 attend un **nouveau GO de compilation**, jamais une relance automatique.
++
+ Autorité de conception inchangée : `../v7_meb_dual_budget_cost_plan/PROTOCOL.md`
+ SHA256 `4a76f875485f39a7b0c5707e53f82c635cc1dfdab73bf595bf8348681b8f9ea7`.
+ Le gate géométrique c9971f8c et son runner b04dc2a6 sont réutilisés explicitement ;

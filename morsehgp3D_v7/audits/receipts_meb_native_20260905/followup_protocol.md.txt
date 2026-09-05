@@ -1,0 +1,100 @@
+# Suivi local MEB après observation 874f — préparation seulement
+
+5 septembre 2026, 12:01 UTC. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`, `mode=suivi_cout_local_prepare`, `public_status=not_claimed`.
+Note seulement : aucun code, build, test, chrono, produit, Git ou GCP modifié/lancé ici.
+
+## 1. Pourquoi une campagne distincte
+
+Le reçu coût v2 `../v7_meb_dual_budget_cost_v2/run_20260905/receipt.json`, SHA256
+`874f100ffb1d65956f6d640c5e7ab838a81e9f5c7900f7c1d69b14504235c208`, est clos et reste inchangé.
+Ses lots main souvent très courts montrent un contrôle P0 dont le signe dépend de l'ordre AB/BA ;
+le q2 immédiat répété ralentit avec la proposition active. Aucun gain général n'est promu.
+Ce suivi est **conçu après ces observations**, pas prétendument pré-déclaré avant leurs temps.
+Il ne remplace ni ne réinterprète les caps/sceaux/résultats de cette première campagne.
+
+Amendement root **avant code**, consigné le 5 septembre à 12:01 UTC : dix mesures équilibrées
+5 AB/5 BA remplacent les sept envisagées (4 AB/3 BA). Deux chauffes restent séparées.
+Sept mesures et la borne intermédiaire de 1 336 704 ne sont donc **pas** les paramètres actifs.
+Les 64 répétitions par job amortissent l'horloge et le premier appel, sans garantir à elles seules
+la disparition d'un effet d'ordre, d'un surcoût d'enveloppe ou d'une variation de fréquence.
+
+## 2. Autorités préservées et entrées fermées
+
+La base de port future est le C++ v2 `5a0fd39703c26279d91796fba7c099df9d25829a6f84b7fae4ddf99ffa61f5d8`
+et le runner v2 `8b9ae71ef0419acea000897c950860976da2e04c7efbadd123c8996e1fdb8032` ; leurs octets restent gelés.
+La préparation v2 conserve son SHA256SUMS `b314e4881a8227f64f92819571c052b09b4315c481a551d3dd00224a5478da26`.
+L'échec de compilation v1 est conservé : reçu `247c952cd6000812ed0bff04390a0848c81e527c74c0e0ac26244144f4c83c15`.
+Le prototype dual `0645aa00`, les formes historiques `d6dbba19`, F et leurs fermetures ne changent pas.
+La géométrie Trace reste liée au vrai reçu completed `b81d8e480b158710874de230c3485f79d0a42f1cb228e321c750de0f58bed49e`
+(gate `c9971f8c`, runner `b04dc2a6`) ; ce statut n'est pas transféré silencieusement au nouveau nominal.
+
+Réutiliser exactement ses 176 scènes : huit explicites, les 160 premières LCG fixées et huit compléments.
+Garder leurs 352 ordres initiaux/inverses et les 32 permutations nommées : **tous les 384 ordres**, n2..11.
+Aucun ajout/retrait de point, resampling, changement de seed/ordre ou exclusion des coquilles dégénérées.
+L'index et les PointId/slots doivent rester admis et identiques au corpus fermé.
+Une lecture F fraîche par ordre, hors chrono, conserve R comme annotation : exactement 384 lectures.
+Ne transmettre à la proposition ni R, ni support, ni certificat, ni ordre favorable fourni par cette lecture.
+
+## 3. Matrice uniforme et états
+
+Chaque ordre croise P dans **{0,401}** avec **L=551**, indépendamment de R : exactement **768 jobs**.
+Le plafond interne de pivots reste 16 ; meb_supports et meb_proposal_supports commencent à zéro.
+L dépasse les 550 candidats possibles sur n<=11 : le suivi conserve les succès et refus de coquille,
+mais n'exerce pas les refus legacy R−1/R/R+1. Un refus legacy dans cette matrice serait une anomalie.
+Toutes les autres statistiques non nulles, événements, statut/raison et boule sentinelles de v2 sont conservés.
+F et dual reçoivent le même état frais par répétition ; chaque répétition est une tentative locale indépendante.
+Les resets symétriques et compteurs Work restent dans le coût annoncé ; aucun reset à l'intérieur du helper/repli.
+Cette cohorte fraîche n'établit pas le coût d'un budget P partagé entre les MEB d'un ordre de tour.
+Pas de lot q2 supplémentaire à 4 096 répétitions, de triangle cumulatif ou de replay des 123 frontières.
+Leurs qualifications historiques restent distinctes ; le suivi n'en revendique aucune nouvelle exécution.
+
+## 4. Qualification nominale et mesure
+
+Avant et après les temps : qualifier intégralement chacun des 768 jobs, F/Trace/NoObserver,
+avec booléen, statut/raison, toutes statistiques legacy, événements, clé, support/q, niveau littéral et Work.
+Le Trace est hors chrono ; seul `miniball<false,NoObserver>` est mesuré contre le vrai Builder F.
+Récupérer q de référence depuis un résultat déjà qualifié ; aucune lecture MEB supplémentaire pour q.
+Déclarer les routes certificat/repli et tous les refus ; une cause non observée reste non attribuée.
+Conserver la comptabilité A=charges réellement essayées par les replis F, et ΔP=formes proposées,
+distincte des ordinaux legacy. A+ΔP ne borne ni les instructions ni les puissances/distances/copies.
+
+Chaque job a **64 répétitions fixes**, dans chaque bras et chaque passage. Pas d'adaptation aux temps.
+Constituer avant chrono les groupes fixes (P,n,q de référence,terminal,route) depuis ces qualifications ;
+tous les jobs restent présents, dans leur ordre d'identifiants, chacun répété 64 fois dans son groupe.
+Les tableaux publient les membres, appels et captures de chaque groupe ; aucune pondération par gain observé.
+Chauffes : AB puis BA. Mesures 1..10 : AB,BA,AB,BA,AB,BA,AB,BA,AB,BA ; A=F, B=dual.
+Pour chaque groupe, les deux bras sont adjacents ; pas de regroupement de tous les A avant tous les B.
+Garder données chargées à l'exécution, barrières, frontière GCC noinline/noipa, appels non éliminés
+et consommation de **chaque** résultat ; checksum/copies/enveloppe/reset restent inclus, sans soustraction.
+Le nouveau binaire et son désassemblage doivent être relus : la lecture du binaire v2 ne lui est pas transférée.
+CPU6, un thread, fenêtre réservée par root sans build/moteur concurrent ; modèle/online/affinités avant/après.
+
+## 5. Borne et capture future
+
+Par bras/passage : 384×2×64 = **49 152 appels top-level**. Une paire coûte au plus trois entrées
+par job/répétition : F, dual, et au plus un F imbriqué en repli. Sur 2+10 passages : **1 769 472**.
+Juges avant/après : 2×768×6 = **9 216** au plus, incluant F+Trace(+repli) et F+NoObserver(+repli).
+Ajouter exactement 384 lectures de R : total conservateur **1 779 072 < 2 000 000**, marge **220 928**.
+Il n'existe aucun autre replay MEB implicite dans cette borne ; l'inventaire doit le contrôler avant lancement.
+La réservation prospective inclut les replis ; les entrées réellement observées sont comptées et rejugées.
+Une invocation de mesure demeure bornée à **120 s cumulées**, juges/capture/clôture/nettoyage inclus.
+Un futur build indépendant reste <=60 s et ne lance pas le harnais ; chaque étape exige son GO explicite.
+Nouveaux chemins create-only et nouveaux pins seulement : jamais modifier/réutiliser les sorties v1/v2.
+Refus, dépassement ou dérive ferme un reçu échoué conservé ; aucune relance, rallonge ou réduction automatique.
+
+## 6. Critères d'analyse fixés avant tout nouveau temps
+
+Primaire : tous les jobs avec poids identique, séparément P0 et P401 ; par passage, sommer les temps
+des groupes puis diviser par le nombre d'appels. Rapporter les dix ratios/différences appariés et leur dispersion.
+Secondaires déclarés : mêmes calculs par n, q, terminal et route ; conserver les effectifs et short_batch.
+Publier aussi les cinq paires AB et les cinq BA séparément ; ne pas faire disparaître un biais par moyenne seule.
+P0 n'est pas un clone gratuit de F : un surcoût stable de l'enveloppe est possible. Examiner surtout
+sa dépendance à l'ordre et sa dispersion ; ne pas soustraire P0 de P401 pour « corriger » les temps.
+Un signe opposé entre les médianes AB et BA interdit un claim directionnel robuste pour la strate concernée.
+Tout ralentissement par n/q reste rapporté même si le global baisse ; un contrôle douteux n'est pas ignoré.
+**Aucun choix a posteriori du meilleur P, d'un sous-corpus ou d'un seuil n n'est autorisé par cette campagne.**
+Un seuil éventuel de port sera une nouvelle hypothèse explicitement déclarée et évaluée séparément,
+pas une promotion obtenue en choisissant les seules strates favorables de ces mêmes mesures.
+Résultat possible : coût local comparatif moins sensible au premier appel, jamais exactitude globale,
+coût du helper nu, accélération de la tour, SLO 50k/1 s/100 ms, multi-CPU/GPU ou dizaines de millions.

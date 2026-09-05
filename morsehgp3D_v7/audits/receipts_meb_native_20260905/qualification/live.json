@@ -1,0 +1,128 @@
+{
+  "GCP": "non utilis\u00e9",
+  "auditor_engine_or_build_runs": 0,
+  "backend": "cpu_reference",
+  "capture_manifest_sha256": "8522672495353a16e562c84712153c85d4de188171389d445e5965d679db5288",
+  "finished_at": "2026-09-05T11:50:16.210694+00:00",
+  "host": [
+    "Linux",
+    "codespaces-0bcb78",
+    "6.8.0-1052-azure",
+    "#58~22.04.1-Ubuntu SMP Thu Mar 26 05:02:21 UTC 2026",
+    "x86_64"
+  ],
+  "live": {
+    "performed": true,
+    "pins_verified": 75
+  },
+  "local_compile_dependencies": 22,
+  "measurement_environment": {
+    "affinity_before": [
+      6
+    ],
+    "cpu_affinity": [
+      6
+    ],
+    "forbidden_overrides": {
+      "ASAN_OPTIONS": null,
+      "COMPILER_PATH": null,
+      "CPATH": null,
+      "CPLUS_INCLUDE_PATH": null,
+      "CPPFLAGS": null,
+      "CXXFLAGS": null,
+      "C_INCLUDE_PATH": null,
+      "GCC_EXEC_PREFIX": null,
+      "LD_AUDIT": null,
+      "LD_LIBRARY_PATH": null,
+      "LD_PRELOAD": null,
+      "LIBRARY_PATH": null,
+      "LSAN_OPTIONS": null,
+      "UBSAN_OPTIONS": null
+    },
+    "hardware": {
+      "online": "0-7",
+      "selected_cpu": {
+        "core id": "3",
+        "cpu cores": "4",
+        "cpu family": "25",
+        "microcode": "0xffffffff",
+        "model": "17",
+        "model name": "AMD EPYC 9V74 80-Core Processor",
+        "physical id": "0",
+        "processor": "6",
+        "siblings": "8",
+        "stepping": "1",
+        "vendor_id": "AuthenticAMD"
+      }
+    },
+    "host": [
+      "Linux",
+      "codespaces-0bcb78",
+      "6.8.0-1052-azure",
+      "#58~22.04.1-Ubuntu SMP Thu Mar 26 05:02:21 UTC 2026",
+      "x86_64"
+    ],
+    "thread_values_before": {
+      "MKL_NUM_THREADS": null,
+      "NUMEXPR_NUM_THREADS": null,
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null
+    },
+    "thread_values_effective": {
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "measurement_process_seconds": 1.270555527000397,
+  "mode": "audit_independant_math_and_architecture",
+  "parsed": {
+    "boundary_comparisons": 123,
+    "calls_per_arm_pass": 58491,
+    "case_routes": {
+      "certificate_accepted": 3624,
+      "certificate_legacy_refused": 1465,
+      "fallback_unattributed": 2685,
+      "initial_P_fallback": 1143,
+      "legacy_guard": 434
+    },
+    "cases": 9351,
+    "clock_tick_ns": 30,
+    "groups": 4699,
+    "helper_entries": 1325812,
+    "immediate_q2_cases": 12,
+    "jobs": 9347,
+    "main_comparisons": 9216,
+    "measured_passes": 7,
+    "off_clock_entries": 91102,
+    "short_batch_counts": {
+      "measured/F": 18620,
+      "measured/dual": 18814,
+      "warmup/F": 5368,
+      "warmup/dual": 5382
+    },
+    "status": "completed",
+    "timed_entries": 1234710,
+    "timer_sums_ns": {
+      "measured/F": 261498971,
+      "measured/dual": 275873777,
+      "warmup/F": 74922938,
+      "warmup/dual": 79625329
+    },
+    "timing_rows": 84582,
+    "warmups": 2
+  },
+  "phase": "exploration_v7_hors_registre",
+  "profile": "quantized_u16_input_only",
+  "public_status": "not_claimed",
+  "receipt_sha256": "874f100ffb1d65956f6d640c5e7ab838a81e9f5c7900f7c1d69b14504235c208",
+  "scope": "Constructor native NoObserver/F/Trace comparisons and helper-plus-capture timings; bounded corpus, shared host, no CLI/tower/SLO promotion.",
+  "source_authorities": 72,
+  "stage_wall_seconds": {
+    "build": 5.20682,
+    "measure": 2.981146
+  },
+  "started_at": "2026-09-05T11:50:13.229548+00:00",
+  "status": "constructor_native_cost_receipt_verified"
+}

@@ -1,0 +1,856 @@
+{
+  "status": "completed",
+  "python_optimization": 1,
+  "scope": "replay of captured timings; no new MEB entry, compiler, benchmark, or global claim",
+  "public_status": "not_claimed",
+  "gcp_used": false,
+  "raw_sha256": "2c20ceaf7a8a4757af2ad78554becf2e584f1c397e92860800d6c746de24469f",
+  "script_sha256": "1ce9d7abbf910c3f15eb5c894ef17c0ad6ad9e2db16b3fdddc2c1eed0de279b8",
+  "records": {
+    "header": 1,
+    "case": 9351,
+    "group": 4699,
+    "timing": 84582,
+    "terminal": 1
+  },
+  "cohort_states": {
+    "main": 9216,
+    "boundary": 117,
+    "cumulative_P7": 4,
+    "cumulative_P0": 2,
+    "immediate_q2": 12
+  },
+  "helper_entry_accounting": {
+    "reference_rank_entries": 384,
+    "offclock_F_Trace_F_NoObserver_top_level": 74808,
+    "offclock_nested_reference_entries": 15312,
+    "offclock_donor_boundary_top_level": 492,
+    "offclock_donor_nested_reference_entries": 106,
+    "timed_and_warmup_top_level_and_nested": 1234710
+  },
+  "helper_entries_total": 1325812,
+  "calls_per_arm_pass": 58491,
+  "immediate_q2_calls_per_arm_pass": 49152,
+  "warmups": 2,
+  "measured_passes": 7,
+  "AB_passes": [
+    1,
+    3,
+    5,
+    7
+  ],
+  "BA_passes": [
+    2,
+    4,
+    6
+  ],
+  "clock_pair_min_ns": 30,
+  "protocol_short_batch_threshold_ns": 3000,
+  "groups_by_call_count": {
+    "1": 3561,
+    "2": 564,
+    "3": 216,
+    "4": 65,
+    "5": 40,
+    "6": 61,
+    "7": 36,
+    "8": 9,
+    "9": 30,
+    "10": 23,
+    "15": 16,
+    "24": 24,
+    "28": 24,
+    "36": 24,
+    "8192": 6
+  },
+  "groups_by_nonshort_pairs": {
+    "0": 2525,
+    "1": 237,
+    "2": 187,
+    "3": 178,
+    "4": 140,
+    "5": 85,
+    "6": 50,
+    "7": 1297
+  },
+  "physical_main_by_P": [
+    {
+      "P": 0,
+      "main_cases": 1152,
+      "F_candidate_attempts": 67884,
+      "dual_candidate_attempts_A_plus_delta_P": 67884,
+      "dual_over_F_attempts": "1",
+      "fewer": 0,
+      "equal": 1152,
+      "more": 0
+    },
+    {
+      "P": 1,
+      "main_cases": 1152,
+      "F_candidate_attempts": 67884,
+      "dual_candidate_attempts_A_plus_delta_P": 66781,
+      "dual_over_F_attempts": "66781/67884",
+      "fewer": 186,
+      "equal": 157,
+      "more": 809
+    },
+    {
+      "P": 4,
+      "main_cases": 1152,
+      "F_candidate_attempts": 67884,
+      "dual_candidate_attempts_A_plus_delta_P": 69157,
+      "dual_over_F_attempts": "69157/67884",
+      "fewer": 186,
+      "equal": 157,
+      "more": 809
+    },
+    {
+      "P": 5,
+      "main_cases": 1152,
+      "F_candidate_attempts": 67884,
+      "dual_candidate_attempts_A_plus_delta_P": 57872,
+      "dual_over_F_attempts": "14468/16971",
+      "fewer": 477,
+      "equal": 157,
+      "more": 518
+    },
+    {
+      "P": 15,
+      "main_cases": 1152,
+      "F_candidate_attempts": 67884,
+      "dual_candidate_attempts_A_plus_delta_P": 56295,
+      "dual_over_F_attempts": "18765/22628",
+      "fewer": 567,
+      "equal": 159,
+      "more": 426
+    },
+    {
+      "P": 16,
+      "main_cases": 1152,
+      "F_candidate_attempts": 67884,
+      "dual_candidate_attempts_A_plus_delta_P": 27902,
+      "dual_over_F_attempts": "13951/33942",
+      "fewer": 696,
+      "equal": 159,
+      "more": 297
+    },
+    {
+      "P": 25,
+      "main_cases": 1152,
+      "F_candidate_attempts": 67884,
+      "dual_candidate_attempts_A_plus_delta_P": 24684,
+      "dual_over_F_attempts": "2057/5657",
+      "fewer": 723,
+      "equal": 159,
+      "more": 270
+    },
+    {
+      "P": 401,
+      "main_cases": 1152,
+      "F_candidate_attempts": 67884,
+      "dual_candidate_attempts_A_plus_delta_P": 10722,
+      "dual_over_F_attempts": "1787/11314",
+      "fewer": 795,
+      "equal": 159,
+      "more": 198
+    }
+  ],
+  "P0_main_order_control": {
+    "selection": "All main P0 groups, distinct from immediate_q2 repeated jobs; descriptive AB/BA medians.",
+    "groups": 556,
+    "cases": 1152,
+    "AB_BA_classes": {
+      "AB_below_one_BA_above_one": 447,
+      "both_above_one": 66,
+      "BA_below_one_AB_above_one": 11,
+      "both_below_one": 28,
+      "at_least_one_exact_tie": 4
+    },
+    "groups_with_14_nonshort_batches": 207,
+    "AB_BA_classes_14_nonshort_batches": {
+      "AB_below_one_BA_above_one": 155,
+      "both_above_one": 27,
+      "both_below_one": 15,
+      "at_least_one_exact_tie": 2,
+      "BA_below_one_AB_above_one": 8
+    },
+    "example": {
+      "calls_per_arm_pass": 1,
+      "paired_elapsed_ns": [
+        [
+          14091,
+          16194
+        ],
+        [
+          10436,
+          14402
+        ],
+        [
+          14071,
+          10165
+        ],
+        [
+          10276,
+          13980
+        ],
+        [
+          18318,
+          15654
+        ],
+        [
+          10505,
+          17235
+        ],
+        [
+          18968,
+          15884
+        ]
+      ],
+      "F_ns_per_call": {
+        "median": "14071",
+        "q1": "10436",
+        "q3": "18318",
+        "minimum": "10276",
+        "maximum": "18968"
+      },
+      "dual_ns_per_call": {
+        "median": "15654",
+        "q1": "13980",
+        "q3": "16194",
+        "minimum": "10165",
+        "maximum": "17235"
+      },
+      "dual_minus_F_ns_per_call": {
+        "median": "2103",
+        "q1": "-3084",
+        "q3": "3966",
+        "minimum": "-3906",
+        "maximum": "6730"
+      },
+      "dual_over_F": {
+        "median": "5398/4697",
+        "q1": "3971/4742",
+        "q3": "7201/5218",
+        "minimum": "10165/14071",
+        "maximum": "3447/2101"
+      },
+      "AB_odd_passes_dual_over_F": {
+        "median": "24495341/28954652",
+        "q1": "104078371/133449364",
+        "q3": "28734567/28679882",
+        "minimum": "10165/14071",
+        "maximum": "5398/4697"
+      },
+      "BA_even_passes_dual_over_F": {
+        "median": "7201/5218",
+        "q1": "3495/2569",
+        "q3": "3447/2101",
+        "minimum": "3495/2569",
+        "maximum": "3447/2101"
+      },
+      "nonshort_pairs": 7,
+      "all_seven_dual_faster": false,
+      "all_seven_dual_slower": false,
+      "interpretation": "descriptive within one run; nonshort is only the protocol diagnostic",
+      "group": "main/n=9/qref=4/P=0/L=210/c=0/p=0/pivot=16/terminal=legacy_refused/route=initial_P_fallback",
+      "jobs": [
+        1704
+      ],
+      "nested_F_entries_per_dual_pass": 1
+    }
+  },
+  "immediate_q2": [
+    {
+      "calls_per_arm_pass": 8192,
+      "paired_elapsed_ns": [
+        [
+          1916940,
+          2051980
+        ],
+        [
+          1861097,
+          2033112
+        ],
+        [
+          1862619,
+          2133181
+        ],
+        [
+          1863570,
+          2038400
+        ],
+        [
+          1882909,
+          2100172
+        ],
+        [
+          1868938,
+          2030409
+        ],
+        [
+          1861077,
+          2068655
+        ]
+      ],
+      "F_ns_per_call": {
+        "median": "931785/4096",
+        "q1": "1861097/8192",
+        "q3": "1882909/8192",
+        "minimum": "1861077/8192",
+        "maximum": "479235/2048"
+      },
+      "dual_ns_per_call": {
+        "median": "512995/2048",
+        "q1": "254139/1024",
+        "q3": "525043/2048",
+        "minimum": "2030409/8192",
+        "maximum": "2133181/8192"
+      },
+      "dual_minus_F_ns_per_call": {
+        "median": "87415/4096",
+        "q1": "161471/8192",
+        "q3": "217263/8192",
+        "minimum": "1055/64",
+        "maximum": "135281/4096"
+      },
+      "dual_over_F": {
+        "median": "203840/186357",
+        "q1": "2030409/1868938",
+        "q3": "2100172/1882909",
+        "minimum": "102599/95847",
+        "maximum": "2133181/1862619"
+      },
+      "AB_odd_passes_dual_over_F": {
+        "median": "7803670922639/7008477265986",
+        "q1": "21623278606/19819849691",
+        "q3": "7928405973997/7014284157342",
+        "minimum": "102599/95847",
+        "maximum": "2133181/1862619"
+      },
+      "BA_even_passes_dual_over_F": {
+        "median": "2033112/1861097",
+        "q1": "2030409/1868938",
+        "q3": "203840/186357",
+        "minimum": "2030409/1868938",
+        "maximum": "203840/186357"
+      },
+      "nonshort_pairs": 7,
+      "all_seven_dual_faster": false,
+      "all_seven_dual_slower": true,
+      "interpretation": "descriptive within one run; nonshort is only the protocol diagnostic",
+      "group": "immediate_q2/n=2/qref=2/P=0/L=1/c=0/p=0/pivot=16/terminal=success/route=initial_P_fallback",
+      "jobs": [
+        9335,
+        9341
+      ],
+      "nested_F_entries_per_dual_pass": 8192
+    },
+    {
+      "calls_per_arm_pass": 8192,
+      "paired_elapsed_ns": [
+        [
+          1864181,
+          2064308
+        ],
+        [
+          1872894,
+          2057578
+        ],
+        [
+          1867957,
+          2036968
+        ],
+        [
+          1889359,
+          2033863
+        ],
+        [
+          1872083,
+          2037289
+        ],
+        [
+          2127222,
+          2131639
+        ],
+        [
+          1857221,
+          2043218
+        ]
+      ],
+      "F_ns_per_call": {
+        "median": "1872083/8192",
+        "q1": "1864181/8192",
+        "q3": "1889359/8192",
+        "minimum": "1857221/8192",
+        "maximum": "1063611/4096"
+      },
+      "dual_ns_per_call": {
+        "median": "1021609/4096",
+        "q1": "254621/1024",
+        "q3": "516077/2048",
+        "minimum": "2033863/8192",
+        "maximum": "2131639/8192"
+      },
+      "dual_minus_F_ns_per_call": {
+        "median": "169011/8192",
+        "q1": "18063/1024",
+        "q3": "185997/8192",
+        "minimum": "4417/8192",
+        "maximum": "200127/8192"
+      },
+      "dual_over_F": {
+        "median": "2036968/1867957",
+        "q1": "2033863/1889359",
+        "q3": "2043218/1857221",
+        "minimum": "2131639/2127222",
+        "maximum": "2064308/1864181"
+      },
+      "AB_odd_passes_dual_over_F": {
+        "median": "3799871555777/3469208967497",
+        "q1": "7618941412917/6993941088862",
+        "q3": "3821402171263/3462196101001",
+        "minimum": "2037289/1872083",
+        "maximum": "2064308/1864181"
+      },
+      "BA_even_passes_dual_over_F": {
+        "median": "2033863/1889359",
+        "q1": "2131639/2127222",
+        "q3": "1028789/936447",
+        "minimum": "2131639/2127222",
+        "maximum": "1028789/936447"
+      },
+      "nonshort_pairs": 7,
+      "all_seven_dual_faster": false,
+      "all_seven_dual_slower": true,
+      "interpretation": "descriptive within one run; nonshort is only the protocol diagnostic",
+      "group": "immediate_q2/n=2/qref=2/P=0/L=2/c=0/p=0/pivot=16/terminal=success/route=initial_P_fallback",
+      "jobs": [
+        9336,
+        9342
+      ],
+      "nested_F_entries_per_dual_pass": 8192
+    },
+    {
+      "calls_per_arm_pass": 8192,
+      "paired_elapsed_ns": [
+        [
+          1968666,
+          2818199
+        ],
+        [
+          1880075,
+          2605813
+        ],
+        [
+          1868398,
+          2668867
+        ],
+        [
+          1886895,
+          2680315
+        ],
+        [
+          1880615,
+          2977536
+        ],
+        [
+          1878382,
+          2603240
+        ],
+        [
+          1852393,
+          2644862
+        ]
+      ],
+      "F_ns_per_call": {
+        "median": "1880075/8192",
+        "q1": "934199/4096",
+        "q3": "1886895/8192",
+        "minimum": "1852393/8192",
+        "maximum": "984333/4096"
+      },
+      "dual_ns_per_call": {
+        "median": "2668867/8192",
+        "q1": "2605813/8192",
+        "q3": "2818199/8192",
+        "minimum": "325405/1024",
+        "maximum": "11631/32"
+      },
+      "dual_minus_F_ns_per_call": {
+        "median": "198355/2048",
+        "q1": "362869/4096",
+        "q3": "849533/8192",
+        "minimum": "362429/4096",
+        "maximum": "1096921/8192"
+      },
+      "dual_over_F": {
+        "median": "2644862/1852393",
+        "q1": "2605813/1880075",
+        "q3": "2818199/1968666",
+        "minimum": "1301620/939191",
+        "maximum": "2977536/1880615"
+      },
+      "AB_odd_passes_dual_over_F": {
+        "median": "187850448154/131366129181",
+        "q1": "9885445419807/6922014752828",
+        "q3": "11161721199361/7404605619180",
+        "minimum": "2644862/1852393",
+        "maximum": "2977536/1880615"
+      },
+      "BA_even_passes_dual_over_F": {
+        "median": "2605813/1880075",
+        "q1": "1301620/939191",
+        "q3": "536063/377379",
+        "minimum": "1301620/939191",
+        "maximum": "536063/377379"
+      },
+      "nonshort_pairs": 7,
+      "all_seven_dual_faster": false,
+      "all_seven_dual_slower": true,
+      "interpretation": "descriptive within one run; nonshort is only the protocol diagnostic",
+      "group": "immediate_q2/n=2/qref=2/P=1/L=1/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "jobs": [
+        9337,
+        9343
+      ],
+      "nested_F_entries_per_dual_pass": 0
+    },
+    {
+      "calls_per_arm_pass": 8192,
+      "paired_elapsed_ns": [
+        [
+          1871031,
+          2612624
+        ],
+        [
+          1874736,
+          2594637
+        ],
+        [
+          1961636,
+          2708075
+        ],
+        [
+          1877421,
+          2595499
+        ],
+        [
+          2330725,
+          3282930
+        ],
+        [
+          1868357,
+          2618693
+        ],
+        [
+          1882979,
+          2624652
+        ]
+      ],
+      "F_ns_per_call": {
+        "median": "1877421/8192",
+        "q1": "1871031/8192",
+        "q3": "490409/2048",
+        "minimum": "1868357/8192",
+        "maximum": "2330725/8192"
+      },
+      "dual_ns_per_call": {
+        "median": "2618693/8192",
+        "q1": "2595499/8192",
+        "q3": "2708075/8192",
+        "minimum": "2594637/8192",
+        "maximum": "1641465/4096"
+      },
+      "dual_minus_F_ns_per_call": {
+        "median": "741673/8192",
+        "q1": "719901/8192",
+        "q3": "2931/32",
+        "minimum": "359039/4096",
+        "maximum": "952205/8192"
+      },
+      "dual_over_F": {
+        "median": "2624652/1882979",
+        "q1": "2595499/1877421",
+        "q3": "2618693/1868357",
+        "minimum": "2708075/1961636",
+        "maximum": "656586/466145"
+      },
+      "AB_odd_passes_dual_over_F": {
+        "median": "4915160691554/3523112081349",
+        "q1": "10247860206097/7387438787288",
+        "q3": "1223177187323/872171745495",
+        "minimum": "2708075/1961636",
+        "maximum": "656586/466145"
+      },
+      "BA_even_passes_dual_over_F": {
+        "median": "288293/208304",
+        "q1": "2595499/1877421",
+        "q3": "2618693/1868357",
+        "minimum": "2595499/1877421",
+        "maximum": "2618693/1868357"
+      },
+      "nonshort_pairs": 7,
+      "all_seven_dual_faster": false,
+      "all_seven_dual_slower": true,
+      "interpretation": "descriptive within one run; nonshort is only the protocol diagnostic",
+      "group": "immediate_q2/n=2/qref=2/P=1/L=2/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "jobs": [
+        9338,
+        9344
+      ],
+      "nested_F_entries_per_dual_pass": 0
+    },
+    {
+      "calls_per_arm_pass": 8192,
+      "paired_elapsed_ns": [
+        [
+          1888628,
+          2595057
+        ],
+        [
+          1880616,
+          2716909
+        ],
+        [
+          1881988,
+          2628347
+        ],
+        [
+          1899033,
+          2634747
+        ],
+        [
+          2165759,
+          2737289
+        ],
+        [
+          1865353,
+          2631812
+        ],
+        [
+          1864672,
+          2601117
+        ]
+      ],
+      "F_ns_per_call": {
+        "median": "470497/2048",
+        "q1": "1865353/8192",
+        "q3": "1899033/8192",
+        "minimum": "58271/256",
+        "maximum": "2165759/8192"
+      },
+      "dual_ns_per_call": {
+        "median": "657953/2048",
+        "q1": "2601117/8192",
+        "q3": "2716909/8192",
+        "minimum": "2595057/8192",
+        "maximum": "2737289/8192"
+      },
+      "dual_minus_F_ns_per_call": {
+        "median": "736445/8192",
+        "q1": "706429/8192",
+        "q3": "766459/8192",
+        "minimum": "285765/4096",
+        "maximum": "836293/8192"
+      },
+      "dual_over_F": {
+        "median": "2601117/1864672",
+        "q1": "2595057/1888628",
+        "q3": "2631812/1865353",
+        "minimum": "2737289/2165759",
+        "maximum": "2716909/1880616"
+      },
+      "AB_odd_passes_dual_over_F": {
+        "median": "2437868130945/1760835875008",
+        "q1": "10789988702755/8180626177304",
+        "q3": "2449069009445/1754645163968",
+        "minimum": "2737289/2165759",
+        "maximum": "2628347/1881988"
+      },
+      "BA_even_passes_dual_over_F": {
+        "median": "2631812/1865353",
+        "q1": "878249/633011",
+        "q3": "2716909/1880616",
+        "minimum": "878249/633011",
+        "maximum": "2716909/1880616"
+      },
+      "nonshort_pairs": 7,
+      "all_seven_dual_faster": false,
+      "all_seven_dual_slower": true,
+      "interpretation": "descriptive within one run; nonshort is only the protocol diagnostic",
+      "group": "immediate_q2/n=2/qref=2/P=401/L=1/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "jobs": [
+        9339,
+        9345
+      ],
+      "nested_F_entries_per_dual_pass": 0
+    },
+    {
+      "calls_per_arm_pass": 8192,
+      "paired_elapsed_ns": [
+        [
+          1890910,
+          2600677
+        ],
+        [
+          1858483,
+          2651121
+        ],
+        [
+          1871081,
+          2620535
+        ],
+        [
+          1866003,
+          2644391
+        ],
+        [
+          2143457,
+          2693694
+        ],
+        [
+          1874286,
+          2701476
+        ],
+        [
+          1866264,
+          2610591
+        ]
+      ],
+      "F_ns_per_call": {
+        "median": "1871081/8192",
+        "q1": "1866003/8192",
+        "q3": "945455/4096",
+        "minimum": "1858483/8192",
+        "maximum": "2143457/8192"
+      },
+      "dual_ns_per_call": {
+        "median": "2644391/8192",
+        "q1": "2610591/8192",
+        "q3": "1346847/4096",
+        "minimum": "2600677/8192",
+        "maximum": "675369/2048"
+      },
+      "dual_minus_F_ns_per_call": {
+        "median": "374727/4096",
+        "q1": "709767/8192",
+        "q3": "396319/4096",
+        "minimum": "550237/8192",
+        "maximum": "413595/4096"
+      },
+      "dual_over_F": {
+        "median": "2620535/1871081",
+        "q1": "152981/111230",
+        "q3": "241011/168953",
+        "minimum": "2693694/2143457",
+        "maximum": "150082/104127"
+      },
+      "AB_odd_passes_dual_over_F": {
+        "median": "95979828319/69194848240",
+        "q1": "627527778937/476833444220",
+        "q3": "3258412450037/2327954074256",
+        "minimum": "2693694/2143457",
+        "maximum": "2620535/1871081"
+      },
+      "BA_even_passes_dual_over_F": {
+        "median": "241011/168953",
+        "q1": "2644391/1866003",
+        "q3": "150082/104127",
+        "minimum": "2644391/1866003",
+        "maximum": "150082/104127"
+      },
+      "nonshort_pairs": 7,
+      "all_seven_dual_faster": false,
+      "all_seven_dual_slower": true,
+      "interpretation": "descriptive within one run; nonshort is only the protocol diagnostic",
+      "group": "immediate_q2/n=2/qref=2/P=401/L=2/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "jobs": [
+        9340,
+        9346
+      ],
+      "nested_F_entries_per_dual_pass": 0
+    }
+  ],
+  "exploratory_n_ge_8_qref4_P401": {
+    "selection": "posthoc descriptive; all main groups with n>=8, reference q=4, P=401; not a production threshold",
+    "cases": 156,
+    "groups": 144,
+    "groups_with_14_nonshort_batches": 44,
+    "all_seven_dual_faster": 41,
+    "all_seven_dual_slower": 1,
+    "mixed": 2,
+    "distribution_of_group_median_ratios_nonshort": {
+      "median": "45003259/123200160",
+      "q1": "732144671/2528406826",
+      "q3": "8821997/18817296",
+      "minimum": "4457/54421",
+      "maximum": "7411/5709"
+    },
+    "nonshort_group_keys": [
+      "main/n=10/qref=4/P=401/L=171/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=10/qref=4/P=401/L=224/c=0/p=0/pivot=16/terminal=legacy_refused/route=certificate_legacy_refused",
+      "main/n=10/qref=4/P=401/L=225/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=10/qref=4/P=401/L=226/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=10/qref=4/P=401/L=229/c=0/p=0/pivot=16/terminal=legacy_refused/route=certificate_legacy_refused",
+      "main/n=10/qref=4/P=401/L=230/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=10/qref=4/P=401/L=231/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=10/qref=4/P=401/L=281/c=0/p=0/pivot=16/terminal=legacy_refused/route=certificate_legacy_refused",
+      "main/n=10/qref=4/P=401/L=282/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=10/qref=4/P=401/L=283/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=10/qref=4/P=401/L=305/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=10/qref=4/P=401/L=343/c=0/p=0/pivot=16/terminal=legacy_refused/route=certificate_legacy_refused",
+      "main/n=10/qref=4/P=401/L=344/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=10/qref=4/P=401/L=345/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=10/qref=4/P=401/L=368/c=0/p=0/pivot=16/terminal=legacy_refused/route=certificate_legacy_refused",
+      "main/n=10/qref=4/P=401/L=369/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=10/qref=4/P=401/L=370/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=11/qref=4/P=401/L=312/c=0/p=0/pivot=16/terminal=legacy_refused/route=certificate_legacy_refused",
+      "main/n=11/qref=4/P=401/L=313/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=11/qref=4/P=401/L=314/c=0/p=0/pivot=16/terminal=legacy_refused/route=certificate_legacy_refused",
+      "main/n=11/qref=4/P=401/L=314/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=11/qref=4/P=401/L=315/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=11/qref=4/P=401/L=316/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=11/qref=4/P=401/L=397/c=0/p=0/pivot=16/terminal=legacy_refused/route=certificate_legacy_refused",
+      "main/n=11/qref=4/P=401/L=398/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=11/qref=4/P=401/L=491/c=0/p=0/pivot=16/terminal=legacy_refused/route=certificate_legacy_refused",
+      "main/n=11/qref=4/P=401/L=492/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=11/qref=4/P=401/L=493/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=11/qref=4/P=401/L=495/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=8/qref=4/P=401/L=129/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=8/qref=4/P=401/L=150/c=0/p=0/pivot=16/terminal=legacy_refused/route=certificate_legacy_refused",
+      "main/n=8/qref=4/P=401/L=151/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=8/qref=4/P=401/L=152/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=9/qref=4/P=401/L=138/c=0/p=0/pivot=16/terminal=legacy_refused/route=certificate_legacy_refused",
+      "main/n=9/qref=4/P=401/L=139/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=9/qref=4/P=401/L=140/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=9/qref=4/P=401/L=162/c=0/p=0/pivot=16/terminal=legacy_refused/route=certificate_legacy_refused",
+      "main/n=9/qref=4/P=401/L=163/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=9/qref=4/P=401/L=164/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=9/qref=4/P=401/L=191/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=9/qref=4/P=401/L=192/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=9/qref=4/P=401/L=210/c=0/p=0/pivot=16/terminal=legacy_refused/route=certificate_legacy_refused",
+      "main/n=9/qref=4/P=401/L=211/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted",
+      "main/n=9/qref=4/P=401/L=212/c=0/p=0/pivot=16/terminal=success/route=certificate_accepted"
+    ]
+  },
+  "statistics": "Exact rational medians; Q1/Q3 are medians of sorted halves excluding the middle value for odd n. AB has four values, BA three. All seven paired differences/ratios remain descriptive; no independent-seed inference.",
+  "audit_faults": [
+    {
+      "name": "missing_seventh_pair",
+      "rejected_by": "pair.seven_passes_required",
+      "kind": "audit_data_corruption"
+    },
+    {
+      "name": "missing_dual_arm",
+      "rejected_by": "pair.two_arms_required",
+      "kind": "audit_data_corruption"
+    },
+    {
+      "name": "ratio_of_unpaired_medians",
+      "rejected_by": "exact counterfixture",
+      "kind": "audit_statistic_corruption"
+    }
+  ],
+  "selected_groups_sha256": "49397f9cb47a913a9ac8de9f4e81d39eb7ad0d226d14c102c1bd1a8d3cc1e123",
+  "retention": "All 4699 groups calculated from the unchanged raw log; detailed export keeps the six repeated q2 groups and all 44 exploratory nonshort q4 groups, including slower/mixed groups."
+}

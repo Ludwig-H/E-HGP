@@ -1,0 +1,68 @@
+{
+  "observed_utc": "2026-09-05T12:13:11.379400+00:00",
+  "script_sha256": "18bd61493bf418292c518b4638ecc924b8728bb8c0b79706c501f2b17fdfc164",
+  "runs": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_meb_native_20260905/qualification/verify_native_receipt.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "captured_normal.json",
+      "output_sha256": "d1ef00723461196d28ab2993679dc088e44db185a0f7d7a25c27cb41abf74f5a"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_meb_native_20260905/qualification/verify_native_receipt.py",
+        "--self-test"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "selftest_normal.json",
+      "output_sha256": "4fa101649b65ace49d452fefe62ce03a73a2be472b8bdca1bf86e50a84587051"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_meb_native_20260905/qualification/verify_native_receipt.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "captured_optimized.json",
+      "output_sha256": "d1ef00723461196d28ab2993679dc088e44db185a0f7d7a25c27cb41abf74f5a"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_meb_native_20260905/qualification/verify_native_receipt.py",
+        "--self-test"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "selftest_optimized.json",
+      "output_sha256": "4fa101649b65ace49d452fefe62ce03a73a2be472b8bdca1bf86e50a84587051"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_meb_native_20260905/qualification/verify_native_receipt.py",
+        "--live"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "live_optimized.json",
+      "output_sha256": "e17ee831ce64f0214956a20441e2ea11f77a7e99249bc99428520a656e240e66"
+    }
+  ],
+  "engine_or_build_runs": 0
+}

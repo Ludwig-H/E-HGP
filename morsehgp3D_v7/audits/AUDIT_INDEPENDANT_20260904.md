@@ -1,6 +1,6 @@
 # Audit indépendant courant de MorseHGP3D v7
 
-Actualisé le 5 septembre 2026 depuis `b9d8b467add564bbe8ef2d43c89e25aa7c0ca2f7` ; raccord MEB privé à deux budgets qualifié localement, acquis verticaux/p3 et paliers F conservés.
+Actualisé le 5 septembre 2026 depuis `36bccd98a1d6f6303aefebfdb95154123eb92a6e` (publication constructeur, sources F inchangées) ; qualification native MEB et contrelecture de coût ajoutées, acquis verticaux/p3 et paliers F conservés.
 Toutes les écritures restent dans `morsehgp3D_v7/audits/`.
 
 La suite **D** de 323 portes a été reconstruite et exécutée par l'auditeur.
@@ -26,7 +26,7 @@ La nouvelle sonde du pipeline passe en O2/O1 UBSan : 60 ordres, 840 coupes et 1 
 
 F possède un [lemme de conservation de pile](receipts_horizontal_20260905/f_delta/review.json) favorable et sa [qualification intégrée propre](receipts_vertical_20260905/f_qualification/). Le certificat exécuté reste attribué aux octets E figés. Le [contrat vertical](CONTRAT_VERTICAL_COURANT.md) ferme désormais la reconstruction depuis les tokens : une vraie naissance fournit une ancre en au plus `|born|` lookups inférieurs, puis les parents et successeurs propagent les cartes. Le lecteur d’audit est vérifié ; son port et l’export produit restent à réaliser. Les [masses/vote](CONTRAT_MASSES_VOTE_COURANT.md) disposent d’un contrat d’incidence et d’une [autorité exacte des comparaisons p3](AUTORITE_VOTE_P3_COURANTE.md), avec indécision explicite sur plafond. Leur supplément pondéré et les quotients de masses restent à traiter. Identités publiques, plateaux à étendre et coûts gardent leurs obligations distinctes. Le statut demeure `not_claimed` et `--require-exact` refuse.
 
-La [MEB privée à deux budgets](MEB_DOUBLE_BUDGET_COURANT.md) possède maintenant une preuve locale de conservation de F et un oracle rationnel exécuté en O2/UBSan : 3 430 appels et 1 507 ordinaux par build, trois corruptions de copies privées détectées. La version produit F reste inchangée. Le prochain port doit garder un budget de proposition persistant par ordre, un repli sans proposition et des champs publics versionnés.
+La [MEB privée à deux budgets](MEB_DOUBLE_BUDGET_COURANT.md) possède maintenant une preuve locale de conservation de F et un oracle rationnel exécuté en O2/UBSan : 3 430 appels et 1 507 ordinaux par build, trois corruptions de copies privées détectées. La version produit F reste inchangée. Le prochain port doit garder un budget de proposition persistant par ordre, un repli sans proposition et des champs publics versionnés. La [contrelecture native v2](receipts_meb_native_20260905/README.md) ferme désormais `NoObserver` sur son corpus. Elle constate un raccourci physique utile et un surcoût q2 immédiat ; le suivi de coût déjà préparé précède toute hypothèse de seuil.
 
 ## Modèle lu et objet audité
 
@@ -109,9 +109,11 @@ Leurs reçus bruts ne sont pas réécrits.
 2. **Raccorder le prototype MEB qualifié localement.**
    Porter le budget de proposition par ordre avec P=0 par défaut, une
    référence sans proposition et la version de comptabilité explicite.
-   Qualifier les consommateurs et contre-vérifier le reçu natif v2
-   déjà clos, avant d’attribuer un coût au chemin sans observateur. Les essais géométriques déjà clos
-   gardent leur preuve et ne sont pas redemandés comme verrous généraux.
+   Qualifier les consommateurs ; l'accord local de `NoObserver` est désormais
+   contre-vérifié dans son [reçu propre](receipts_meb_native_20260905/README.md).
+   Le surcoût q2 immédiat et le contrôle P0 sensible à l'ordre justifient
+   le suivi à lots fixes déjà préparé, sans activation générale ni seuil
+   choisi à partir des mêmes temps. Les essais clos ne sont pas redemandés.
 3. **Réduire puis mesurer le coût global de la route complétée.**
    Le refus F32k à K9 atteint le plafond de huit millions d’occurrences
    temporaires avant déduplication. Précompter ces occurrences, publier

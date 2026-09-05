@@ -1,0 +1,173 @@
+{
+  "schema": "mhgp7-independent-native-cost-review-v1",
+  "status": "closed_bounded_constructor_receipt_counterverification",
+  "observed_utc": "2026-09-05T12:16:27.966873+00:00",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "authorities": {
+    "measurement_receipt_sha256": "874f100ffb1d65956f6d640c5e7ab838a81e9f5c7900f7c1d69b14504235c208",
+    "build_receipt_sha256": "de6de29f55ab55d8edd64f9e3307d4748688635ca7338c36105555da39e0574f",
+    "binary_sha256": "56e022c817d2e726eb2e3b135e78e577bbdf344ebd0ff352d64d1121300fd976",
+    "harness_sha256": "5a0fd39703c26279d91796fba7c099df9d25829a6f84b7fae4ddf99ffa61f5d8",
+    "runner_sha256": "8b9ae71ef0419acea000897c950860976da2e04c7efbadd123c8996e1fdb8032",
+    "disassembly_sha256": "52392c6a8b9a8a230133113fdad0bfa9ca64b25291600349b9905be9f126c9c4",
+    "geometry_receipt_sha256": "b81d8e480b158710874de230c3485f79d0a42f1cb228e321c750de0f58bed49e",
+    "captured_source_authorities": 72,
+    "captured_local_compile_dependencies": 22,
+    "live_pins_verified": 75
+  },
+  "evidence": {
+    "reader": "verify_native_receipt.py",
+    "capture_manifest": "capture_manifest.json",
+    "captured_normal": "captured_normal.json",
+    "captured_optimized": "captured_optimized.json",
+    "live": "live.json",
+    "selftest_normal": "selftest_normal.json",
+    "selftest_optimized": "selftest_optimized.json",
+    "checks": "inspector_checks.json",
+    "first_invalid_inspector_attempt": "initial_inspector_rejection.json",
+    "raw_measurement_gzip": "snapshots/run/measurement.stdout.gz"
+  },
+  "capture": {
+    "entries": 176,
+    "preservation_counts": {
+      "reference_to_identical_audit_bytes": 89,
+      "hash_only_private_or_system_binary": 5,
+      "new_exact_byte_capture": 82
+    },
+    "manifest_sha256": "8522672495353a16e562c84712153c85d4de188171389d445e5965d679db5288",
+    "measurement_stdout_raw_bytes": 28972744,
+    "measurement_stdout_raw_sha256": "2c20ceaf7a8a4757af2ad78554becf2e584f1c397e92860800d6c746de24469f",
+    "measurement_stdout_gzip_bytes": 1094976,
+    "gzip": "deterministic compression with mtime=0; exact original bytes recovered; references preserve identical prior audit snapshots",
+    "private_or_system_binaries_copied": 0
+  },
+  "terminal_commands": {
+    "v2_compiler": 0,
+    "v2_compile": 0,
+    "v2_disassembly": 0,
+    "v2_measurement": 0,
+    "v1_compile_retained": 1,
+    "v1_measurement_executed": false
+  },
+  "native_comparison_scope": {
+    "prior_geometry": "The old sealed geometry run qualifies Trace only. Its source/data are explicitly included with donor main renamed and uninvoked.",
+    "new_observed_route": "The cost harness explicitly invokes miniball<false,NoObserver>. Before and after timing, fresh local F and native NoObserver outputs are compared by boolean, full ball/key/level/support, all legacy statistics, status/reason/events; Trace and NoObserver legacy state/Work are compared too.",
+    "new_counts": {
+      "boundary_comparisons": 123,
+      "calls_per_arm_pass": 58491,
+      "case_routes": {
+        "certificate_accepted": 3624,
+        "certificate_legacy_refused": 1465,
+        "fallback_unattributed": 2685,
+        "initial_P_fallback": 1143,
+        "legacy_guard": 434
+      },
+      "cases": 9351,
+      "clock_tick_ns": 30,
+      "groups": 4699,
+      "helper_entries": 1325812,
+      "immediate_q2_cases": 12,
+      "jobs": 9347,
+      "main_comparisons": 9216,
+      "measured_passes": 7,
+      "off_clock_entries": 91102,
+      "short_batch_counts": {
+        "measured/F": 18620,
+        "measured/dual": 18814,
+        "warmup/F": 5368,
+        "warmup/dual": 5382
+      },
+      "status": "completed",
+      "timed_entries": 1234710,
+      "timer_sums_ns": {
+        "measured/F": 261498971,
+        "measured/dual": 275873777,
+        "warmup/F": 74922938,
+        "warmup/dual": 79625329
+      },
+      "timing_rows": 84582,
+      "warmups": 2
+    },
+    "comparison_domain": "176 main scenes / 384 orders, 9216 principal cases, 123 boundary steps (including an additional triangle fixture), 12 immediate-q2 jobs. There are 9347 jobs and 9351 pre-timing printed states because two cumulative jobs contain 4 and 2 steps.",
+    "ledger": "Each arm/pass has 58491 top-level calls, with the 12 immediate-q2 jobs repeated 4096 times. The 2 warmups and 7 measured passes alternate F/dual order. Actual nested F fallback entries are counted separately. 1234710 timed entries + 91102 off-clock pilot/comparison entries = 1325812, below the prospective 2000000 cap.",
+    "no_promotion": "This is a new native local comparison, not a transfer from the old Trace-only run, a new full pipeline qualification or a universal mathematical proof."
+  },
+  "time_and_host": {
+    "build_started_at": "2026-09-05T11:45:41.102880+00:00",
+    "build_finished_at": "2026-09-05T11:45:46.309700+00:00",
+    "build_recorded_stage_seconds": 5.20682,
+    "build_deadline_seconds": 60,
+    "measurement_started_at": "2026-09-05T11:50:13.229548+00:00",
+    "measurement_finished_at": "2026-09-05T11:50:16.210694+00:00",
+    "measurement_recorded_stage_seconds": 2.981146,
+    "measurement_subprocess_seconds": 1.270555527000397,
+    "measurement_deadline_seconds": 120,
+    "sum_all_timed_intervals_seconds": 0.691921015,
+    "deadline_scope": "run_cost.py execute() starts its recorded stage/deadline only after source_snapshot(), admit_geometry() and, for measure, admit_build(). Preflight reading/hashing/admission is outside the recorded 120-second window. The command reserves two seconds of remaining time for cleanup; final source/binary/hardware checks, affinity restoration and closure are checked before the deadline. This receipt does not measure the entire runner invocation from process start.",
+    "timed_interval_scope": "steady_clock surrounds state resets/assignments, sentinel initialization, noinline/noipa/indirect wrappers, MEB work and result/Work capture. Fixture/job construction, fresh F rank pilots, full pre/post comparisons, expected digest construction, event capacity reserve, record formatting/writes and runner parsing are outside each timed group. The subprocess time includes the harness work and stdout; the receipt stage also includes runner judgments and closure.",
+    "clock": "Minimum positive difference over a fixed diagnostic of 128 pairs is 30 ns; short_batch means elapsed<100*30 ns=3000 ns. This is a local diagnostic, not a calibrated precision or uncertainty guarantee. Every raw short batch remains present.",
+    "host": [
+      "Linux",
+      "codespaces-0bcb78",
+      "6.8.0-1052-azure",
+      "#58~22.04.1-Ubuntu SMP Thu Mar 26 05:02:21 UTC 2026",
+      "x86_64"
+    ],
+    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "online_logical_cpus": "0-7",
+    "measurement_affinity": [
+      6
+    ],
+    "build_affinity": [
+      0
+    ],
+    "selected_measurement_core_id": "3",
+    "reported_cpu_cores": "4",
+    "reported_siblings": "8",
+    "thread_environment": "OMP/OPENBLAS/MKL/NUMEXPR set to 1; forbidden compiler/loader/sanitizer overrides empty; selected CPU metadata and affinity match before/after and original affinity restored.",
+    "shared_host_limit": "Logical CPU affinity and a coordinated measurement window do not establish exclusive physical-core/cache/SMT or VM-host access. No contemporaneous co-tenant load, frequency, migration/steal-time or isolation trace is captured. No dedicated-hardware or independent-run confidence claim follows from seven within-process passes. No RSS, GPU or whole-CLI/tower timing is supplied by this receipt."
+  },
+  "binary_static_review": {
+    "mode": "Read-only inspection of already captured disassembly; no objdump or engine execution by this auditor.",
+    "observations": [
+      "0x530c calls F Builder::miniball; 0x11ce9 calls miniball<false,NoObserver>.",
+      "0x16226/0x16234 select actual dual/F wrapper addresses before steady_clock at 0x1625b.",
+      "0x16507 retains the indirect invocation; 0x1651e consumes the returned terminal state into terminal_hash.",
+      "Step/repeat/job back edges at 0x165dc/0x16bcd/0x16be9 remain; steady_clock end is 0x16bef.",
+      "Two capture comparisons at 0x16c52/0x16c62 lead to check at 0x16c84."
+    ]
+  },
+  "important_limits": [
+    "During timing, equality uses deterministic 64-bit rolling terminal and Work captures. Those are checked against precomputed values and paired arms; they are not collision-free substitutes for full state comparison. Full named-field comparison occurs in the separate before/after runs.",
+    "The raw case q_result is null on resource refusal, while terminal hashing still includes the actual local ball sentinel/state. Printed ok/success denotes the helper boolean; the fixture deliberately seeds an invariant-violation status/reason and success preserves that seed. This is not a public product completion status.",
+    "actual_F_fallback_candidates is the legacy-charge delta when fallback is taken. fallback_unattributed deliberately avoids assigning causes not observable through these interfaces.",
+    "The F reference and proposal share arithmetic and fixtures. No independent full-u16 arithmetic proof, sanitizer campaign, CI/GPU/SLO or product performance gain is established.",
+    "The preparation README/header and preparation.json still describe their historical uncompiled/unmeasured stage. The later sealed build/measure receipts are the execution authority.",
+    "Elapsed group costs include capture overhead; no subtraction or reinterpretation as bare-helper cost is justified. Cost stratification and comparison analysis are maintained separately by the parent/index reviewer."
+  ],
+  "preserved_v1_failure": {
+    "receipt_sha256": "247c952cd6000812ed0bff04390a0848c81e527c74c0e0ac26244144f4c83c15",
+    "status": "failed",
+    "compile_exit_code": 1,
+    "measurement_executed": false,
+    "cause": "An object-like main macro also renamed Metrics::main in the included donor, causing compiler diagnostics. The v2 C++ bytes differ only by the function-like main(...) macro. This is a harness build failure, not a MEB semantic failure. Raw compiler stderr/result, old source/runner and explicit v1/v2 diff are preserved.",
+    "old_harness_sha256": "c9b742287336b45082175569f58269ba91d82c49c8fb5651022468e1a81095ea"
+  },
+  "inspector_validation": {
+    "recorded_final_checks": 5,
+    "all_exit_codes": 0,
+    "positives_each_normal_and_optimized": 4,
+    "targeted_rejections_each_normal_and_optimized": 19,
+    "normal_optimized_capture_outputs_equal": true,
+    "reader_sha256": "18bd61493bf418292c518b4638ecc924b8728bb8c0b79706c501f2b17fdfc164",
+    "initial_invalid_attempt": "The first reader required PID uniqueness across separate stages. PID 80 is present in each stage; per-stage PID/PGID records are the relevant unit. The overstrict reader condition was corrected, its rejection preserved, and no product anomaly inferred.",
+    "auditor_engine_or_build_runs": 0,
+    "Git_mutations": 0,
+    "GCP": "non utilisé"
+  },
+  "verdict": "The sealed v2 build and native measurement are terminal, source-bound and internally consistent with the complete raw case/timing stream. This closes a bounded native NoObserver comparison and helper-plus-capture cost observation on the recorded shared host. No new product defect is identified; no industrial-exact or performance promotion follows."
+}

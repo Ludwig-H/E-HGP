@@ -41,7 +41,7 @@ Le [lecteur du reçu géométrique](geometry_constructor/verify_geometry_receipt
 
 Les frontières de compteur près de MAX, les caps abaissés, cinq appels avec `pivot_cap=0` et la scène de support final d'ordinal 550 sont réellement appelés. La [note courante, §7](../MEB_DOUBLE_BUDGET_COURANT.md#7-reçus-privés-et-obligations-de-qualification-actualisées) distingue les observations agrégées des déductions sur la voie rapide à partir du code et des scènes. Elle retire les anciennes demandes satisfaites sans inventer de compteur par scène. Le [manifeste de capture](geometry_constructor/capture_manifest.json) et les [contrôles normal/-O](geometry_constructor/inspector_checks.json) rendent cette lecture portable.
 
-Le constructeur qualifie son instanciation `Trace`. Le bridge indépendant emploie un autre `Observer` passif. Aucune de ces campagnes n'est réattribuée à `NoObserver` : le [reçu natif v2 désormais clos](next_native_review.json) attend sa contrelecture propre. Il n'est pas demandé de refaire ce run. Aucun de ces résultats ne modifie le produit F.
+Le constructeur qualifie son instanciation `Trace`. Le bridge indépendant emploie un autre `Observer` passif. Aucune de ces campagnes n'est réattribuée à `NoObserver` : le [reçu natif v2 et sa contrelecture propre](../receipts_meb_native_20260905/README.md) ferment séparément cette instanciation. Le pointeur de préparation `next_native_review.json` est conservé comme trace historique ; sa demande est satisfaite. Aucun de ces résultats ne modifie le produit F.
 
 ## Modèle des transferts de budget
 

@@ -1,0 +1,282 @@
+#!/usr/bin/env python3
+"""Synthetic protocol checks only: never compile or execute a C++ helper."""
+import argparse
+import contextlib
+import copy
+import importlib.util
+import io
+import json
+from pathlib import Path
+import signal
+import subprocess
+import tempfile
+import time
+import unittest
+from unittest.mock import patch
+
+SPEC = importlib.util.spec_from_file_location("cost_runner", Path(__file__).with_name("run_cost.py"))
+R = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(R)
+
+
+def synthetic_capture():
+    # Invented protocol values, explicitly NOT MEB measurements or geometry.
+    ranks = [1] * 384
+    ranks[348], ranks[350] = 55, 550
+    fake_rank_rows = [{"R": 1} for _ in range(9216)]
+    for i, rank in enumerate(ranks):
+        fake_rank_rows[24 * i]["R"] = rank
+    jobs = R.expected_jobs(fake_rank_rows)
+    cases = []
+    for job in jobs:
+        c, p = job["c"], job["p"]
+        work = [p, 0, 0, 0]
+        job["rows"] = []
+        for step in range(job["steps"]):
+            dc = min(job["R"], max(0, job["L"] - c))
+            live = c < job["L"]
+            fallback = int(live and p >= job["P"])
+            certified = int(live and not fallback)
+            dp = certified
+            pivots = 0
+            if job["cohort"] == "cumulative_P7" and live:
+                dp = (5, 2, 0)[step]
+                fallback, certified = (int(step > 0), int(step == 0))
+                pivots = int(step < 2)
+            ok = int(live and dc == job["R"])
+            reason = "seed_local_state" if ok else "silent_meb_support_budget"
+            q = job["scene"] + 2 if job["scene"] < 3 else (3 if job["scene"] == 176 else 2)
+            route = "legacy_guard" if not live else (("certificate_accepted" if ok else "certificate_legacy_refused")
+                    if certified else ("initial_P_fallback" if p >= job["P"] else "fallback_unattributed"))
+            work = [p + dp, work[1] + pivots, work[2] + certified, work[3] + fallback]
+            row = dict(kind="case", id=job["id"], step=step, cohort=job["cohort"], scene=job["scene"],
+                order=job["order"], n=job["n"], q_result=q if ok else None, ok=ok, reason=reason, route=route,
+                R=job["R"], L=job["L"], P=job["P"], c0=c, p0=p, pivot_cap=job["pivot_cap"],
+                legacy_delta=dc, proposal_delta=dp, actual_F_fallback_candidates=dc if fallback else 0,
+                pivots_delta=pivots, certified_delta=certified, fallback_delta=fallback,
+                terminal_hash=100 + 7 * job["id"] + step, work_hash=R.work_hash(work))
+            cases.append(row)
+            job["rows"].append(row)
+            c, p = c + dc, p + dp
+    groups = {}
+    for job in jobs:
+        qref = 3 if job["order"] == 384 else cases[24 * job["order"] + 1]["q_result"]
+        terminal = "+".join("success" if row["ok"] else "legacy_refused" for row in job["rows"])
+        route = "+".join(row["route"] for row in job["rows"])
+        key = (f'{job["cohort"]}/n={job["n"]}/qref={qref}/P={job["P"]}/L={job["L"]}'
+               f'/c={job["c"]}/p={job["p"]}/pivot={job["pivot_cap"]}/terminal={terminal}/route={route}')
+        groups.setdefault(key, []).append(job["id"])
+    capture = {}
+    for key, ids in groups.items():
+        for arm in ("F", "dual"):
+            th, wh, calls, nested = R.HASH_SEED, R.HASH_SEED, 0, 0
+            for ident in ids:
+                job = jobs[ident]
+                for _ in range(job["repeats"]):
+                    for row in job["rows"]:
+                        th = R.mix(th, row["terminal_hash"])
+                        wh = R.mix(wh, row["work_hash"] if arm == "dual" else R.work_hash([job["p"], 0, 0, 0]))
+                        calls += 1
+                        nested += row["fallback_delta"] if arm == "dual" else 0
+            capture[key, arm] = dict(calls=calls, nested_F_calls=nested, terminal_hash=th, work_hash=wh)
+    timings = []
+    timed_entries = 0
+    for warmup, passes in ((True, 2), (False, 7)):
+        for passage in range(1, passes + 1):
+            for key in sorted(groups):
+                for arm in (("F", "dual") if passage % 2 else ("dual", "F")):
+                    row = dict(kind="timing", group=key, arm=arm, **capture[key, arm], pass_number=passage,
+                               warmup=warmup, elapsed_ns=0, short_batch=True)
+                    row["pass"] = row.pop("pass_number")
+                    timings.append(row)
+                    timed_entries += row["calls"] + row["nested_F_calls"]
+    total_fallback = sum(row["fallback_delta"] for row in cases)
+    boundary_fallback = sum(row["fallback_delta"] for row in cases if row["cohort"] not in ("main", "immediate_q2"))
+    entries = 384 + 2 * (4 * 9351 + 2 * total_fallback + 246 + boundary_fallback) + timed_entries
+    header = dict(kind="header", schema="mhgp7-private-dual-budget-cost-v1", geometry_receipt_sha256=R.GEOMETRY_RECEIPT_SHA,
+        public_status="not_claimed", scenes=176, orders=384, boundary_calls=123, jobs=9347,
+        NoObserver=True, capture_included=True, ordinals=1507, calls_per_arm_pass=58491)
+    terminal = dict(kind="terminal", status="completed", public_status="not_claimed", helper_entries=entries,
+        max_helper_entries=2000000, clock_tick_ns=100, groups=len(groups), warmups=2, measured_passes=7,
+        full_terminals_equal_before_after=True, timed_captures_equal=True)
+    return [header] + cases + [dict(kind="group", group=key, jobs=ids) for key, ids in sorted(groups.items())] + timings + [terminal]
+
+
+def encode(values):
+    return b"".join((json.dumps(value, separators=(",", ":")) + "\n").encode() for value in values)
+
+
+class Protocol(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.values = synthetic_capture()
+        cls.raw = encode(cls.values)
+
+    def setUp(self):
+        self.no_process = patch.object(R.subprocess, "Popen", side_effect=RuntimeError("subprocess_forbidden"))
+        self.no_process.start()
+        self.addCleanup(self.no_process.stop)
+
+    def test_preview_and_explicit_pins(self):
+        for stage in ("build", "measure"):
+            with patch.object(R, "execute") as execute, contextlib.redirect_stdout(io.StringIO()) as stream:
+                self.assertEqual(R.main(["--stage", stage]), 0)
+                value = json.loads(stream.getvalue())
+                self.assertFalse(value["writes"])
+                self.assertEqual(value["subprocesses"], 0)
+                execute.assert_not_called()
+        with self.assertRaisesRegex(RuntimeError, "explicit_runner_pin_required"):
+            R.main(["--execute"])
+        with self.assertRaisesRegex(RuntimeError, "explicit_geometry_receipt_pin_required"):
+            R.main(["--execute", "--expected-runner-sha256", "0" * 64])
+
+    def test_entry_macro_does_not_rename_Metrics_main(self):
+        source = R.read_bytes(R.BASE / "cost_harness.cpp").decode("utf-8")
+        self.assertIn("#define main(...) mhgp7_geometry_gate_uninvoked_main(__VA_ARGS__)", source)
+        self.assertNotIn("#define main mhgp7_geometry_gate_uninvoked_main", source)
+        self.assertIn("a.main == b.main", source)
+        self.assertIn("#undef main", source)
+
+    def test_build_is_compile_and_disassembly_only(self):
+        rows = R.build_commands()
+        self.assertEqual([row[0] for row in rows], ["compiler", "compile", "disassembly"])
+        self.assertTrue(all(row[1][0] != str(R.BINARY) for row in rows))
+        argv = rows[1][1]
+        for flag in ("-std=c++20", "-O2", "-fno-lto", "-Wall", "-Wextra", "-Wpedantic", "-Werror"):
+            self.assertIn(flag, argv)
+        self.assertFalse(any("MHGP7_TESTING" in x or "sanitize" in x for x in argv))
+
+    def test_CPU_metadata_read_only_and_scoped(self):
+        value = R.cpu_metadata(6)
+        self.assertEqual(value["selected_cpu"]["processor"], "6")
+        self.assertTrue(value["selected_cpu"]["model name"])
+        self.assertTrue(value["online"])
+        self.assertNotIn("cpu MHz", value["selected_cpu"])
+
+    def test_actual_closed_geometry_read_only(self):
+        binding = R.admit_geometry(R.GEOMETRY_RECEIPT_SHA)
+        self.assertEqual(binding["receipt_sha256"], R.GEOMETRY_RECEIPT_SHA)
+        self.assertEqual(binding["nominal"]["main_comparisons"], 9216)
+        self.assertEqual(binding["nominal"]["named_fast_q4"], 52)
+        with self.assertRaisesRegex(RuntimeError, "geometry_receipt_not_approved"):
+            R.admit_geometry("0" * 64)
+
+    def test_cost_snapshot_and_changed_pin(self):
+        runner_sha = R.digest(R.BASE / "run_cost.py")
+        value = R.source_snapshot(runner_sha)
+        self.assertIn(str(R.BASE / "cost_harness.cpp"), value)
+        with patch.dict(R.PINS, {R.BASE / "cost_harness.cpp": "0" * 64}):
+            with self.assertRaisesRegex(RuntimeError, "cost_authority_pin_mismatch"):
+                R.source_snapshot(runner_sha)
+
+    def test_preflight_failure_does_not_open_destination(self):
+        args = argparse.Namespace(stage="build", expected_runner_sha256="0" * 64,
+                                  expected_geometry_receipt_sha256="0" * 64)
+        with tempfile.TemporaryDirectory() as name:
+            output = Path(name) / "new"
+            with patch.object(R, "BUILD", output), patch.object(R, "source_snapshot", return_value={}):
+                with self.assertRaisesRegex(RuntimeError, "geometry_receipt_not_approved"):
+                    R.execute(args)
+                self.assertFalse(output.exists())
+            output.mkdir()
+            with patch.object(R, "BUILD", output):
+                with self.assertRaisesRegex(RuntimeError, "create_only"):
+                    R.execute(args)
+
+    def test_closed_capture_absence_status_inventory_and_hash(self):
+        with tempfile.TemporaryDirectory() as name:
+            directory = Path(name)
+            with self.assertRaises(FileNotFoundError):
+                R.closed_capture(directory, "0" * 64)
+            receipt = dict(status="failed", errors=[], sources_stable=True, source_before={}, source_after={},
+                           public_status="not_claimed", artifacts={})
+            R.save(directory / "receipt.json", receipt)
+            with self.assertRaisesRegex(RuntimeError, "capture_not_closed_completed"):
+                R.closed_capture(directory, R.digest(directory / "receipt.json"))
+        for mode in ("extra", "wrong_hash", "symlink"):
+            with tempfile.TemporaryDirectory() as name:
+                directory = Path(name)
+                artifact = directory / "data"
+                artifact.write_bytes(b"synthetic only")
+                expected = R.digest(artifact)
+                if mode == "symlink":
+                    artifact.rename(directory / "target")
+                    artifact.symlink_to(directory / "target")
+                receipt = dict(status="completed", errors=[], sources_stable=True, source_before={}, source_after={},
+                    public_status="not_claimed", artifacts={"data": dict(bytes=14, sha256="0" * 64 if mode == "wrong_hash" else expected)})
+                if mode == "extra":
+                    (directory / "extra").write_bytes(b"not admitted")
+                R.save(directory / "receipt.json", receipt)
+                with self.assertRaises(RuntimeError):
+                    R.closed_capture(directory, R.digest(directory / "receipt.json"))
+
+    def test_complete_synthetic_capture_zero_ns_is_not_rejected(self):
+        result = R.judge_measurement(self.raw, b"", R.GEOMETRY_RECEIPT_SHA)
+        self.assertEqual(result["status"], "completed")
+        self.assertEqual(result["jobs"], 9347)
+        self.assertLessEqual(result["helper_entries"], 2000000)
+
+    def test_closed_keys_types_and_missing_terminal(self):
+        timing_index = next(i for i, row in enumerate(self.values) if row["kind"] == "timing")
+        changes = [(0, "NoObserver", 1), (0, "jobs", 9347.0), (0, "extra", False),
+                   (-1, "groups", True), (-1, "timed_captures_equal", 1), (-1, "extra", False),
+                   (timing_index, "pass", True), (timing_index, "elapsed_ns", False),
+                   (timing_index, "terminal_hash", 1.0), (timing_index, "warmup", 1),
+                   (timing_index, "extra", False)]
+        for index, name, value in changes:
+            with self.subTest(index=index, name=name):
+                rows = list(self.values)
+                rows[index] = dict(rows[index], **{name: value})
+                with self.assertRaises(RuntimeError):
+                    R.judge_measurement(encode(rows), b"", R.GEOMETRY_RECEIPT_SHA)
+        for data in (b"", self.raw[:-1], encode(self.values[:-1])):
+            with self.assertRaises((RuntimeError, KeyError, IndexError)):
+                R.judge_measurement(data, b"", R.GEOMETRY_RECEIPT_SHA)
+
+    def test_schedule_caps_capture_and_timing_mutants(self):
+        timing_index = next(i for i, row in enumerate(self.values) if row["kind"] == "timing")
+        changes = [(1, "L", 777), (1, "n", 3), (1, "proposal_delta", 1),
+                   (1, "actual_F_fallback_candidates", 1), (2, "work_hash", 0),
+                   (timing_index, "calls", 0), (timing_index, "terminal_hash", 0),
+                   (timing_index, "arm", "dual"), (-1, "helper_entries", 2000001)]
+        for index, name, value in changes:
+            with self.subTest(index=index, name=name):
+                rows = list(self.values)
+                rows[index] = dict(rows[index], **{name: value})
+                with self.assertRaises(RuntimeError):
+                    R.judge_measurement(encode(rows), b"", R.GEOMETRY_RECEIPT_SHA)
+
+    def test_fake_timeout_and_owned_cleanup(self):
+        class Process:
+            pid = 987654321
+            returncode = None
+            waits = 0
+
+            def wait(self, timeout):
+                self.waits += 1
+                if self.waits == 1:
+                    raise subprocess.TimeoutExpired(["synthetic"], timeout)
+                self.returncode = -9
+                return -9
+
+        process, signals = Process(), []
+
+        def killpg(pid, sig):
+            self.assertEqual(pid, process.pid)
+            signals.append(sig)
+            if sig == 0:
+                raise ProcessLookupError()
+
+        with tempfile.TemporaryDirectory() as name:
+            output = Path(name)
+            with patch.object(R.subprocess, "Popen", return_value=process), patch.object(R.os, "killpg", side_effect=killpg):
+                result = R.run_command(output, "synthetic", ["never executed"], time.monotonic() + 10, {}, 0)
+            self.assertEqual(result["status"], "failed")
+            self.assertTrue(result["timed_out"])
+            self.assertEqual(result["returncode"], -9)
+            self.assertIn(signal.SIGKILL, signals)
+            self.assertEqual(R.load_json(output / "synthetic.spawned.json")["pgid"], process.pid)
+
+
+if __name__ == "__main__":
+    unittest.main()

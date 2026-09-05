@@ -1,0 +1,566 @@
+{
+  "auditor_engine_or_build_runs": 0,
+  "entries": {
+    "authority/F_build.json": {
+      "audit_path": "receipts_horizontal_20260905/f_delta/build_F_snapshot/build_D.json",
+      "bytes": 11156,
+      "origin": "/workspaces/E-HGP/build/v7_f_build_20260905/build_D.json",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4"
+    },
+    "dependencies/10_fold.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/9_fold.hpp",
+      "bytes": 62689,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/forest/fold.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "b11d02c86db5f8ae8cb12965f12e425548f9f049fb4626259790b32cd584928c"
+    },
+    "dependencies/11_silent_incidence.hpp": {
+      "audit_path": "receipts_resolver_20260905/qualification/snapshots/source/silent_incidence.hpp",
+      "bytes": 20111,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76"
+    },
+    "dependencies/12_keys.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/11_keys.hpp",
+      "bytes": 4282,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/lanes/keys.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0"
+    },
+    "dependencies/13_level.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/12_level.hpp",
+      "bytes": 2622,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/lanes/level.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c"
+    },
+    "dependencies/14_q2.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/13_q2.hpp",
+      "bytes": 953,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/lanes/q2.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "11049293b7ad2f7139e1699c11b2506e8af2c11a04f22dc951f33ba10406c52f"
+    },
+    "dependencies/15_q3.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/14_q3.hpp",
+      "bytes": 7352,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/lanes/q3.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe"
+    },
+    "dependencies/16_q4.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/15_q4.hpp",
+      "bytes": 7159,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/lanes/q4.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a"
+    },
+    "dependencies/17_pool.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/16_pool.hpp",
+      "bytes": 5058,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/parallel/pool.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "5c20aabbe673e2baa1018bea893185592bc3b394d025eadd9be07542453befc6"
+    },
+    "dependencies/18_sort.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/17_sort.hpp",
+      "bytes": 20137,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/parallel/sort.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "ceb89f8ba42fbc3f44351f4dcbf5e347e7d66a4c85bce08f346e66a9b11f20bd"
+    },
+    "dependencies/19_census.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/18_census.hpp",
+      "bytes": 9174,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/pipeline/census.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be"
+    },
+    "dependencies/20_cloud_index.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/19_cloud_index.hpp",
+      "bytes": 9612,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/tree/cloud_index.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95"
+    },
+    "dependencies/2_pivot.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/inputs/dual_pivot.hpp",
+      "bytes": 7868,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_prototype/pivot.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "0645aa00add4d4cb387861b8f6dbd4fa0734ba5b4f3ad712caad8886b3541c2d"
+    },
+    "dependencies/3_pivot.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/inputs/legacy_pivot.hpp",
+      "bytes": 7251,
+      "origin": "/workspaces/E-HGP/build/v7_meb_pivot_prototype/pivot.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5"
+    },
+    "dependencies/4_device.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/3_device.hpp",
+      "bytes": 484,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/core/device.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37"
+    },
+    "dependencies/5_intmath.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/4_intmath.hpp",
+      "bytes": 2238,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/core/intmath.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54"
+    },
+    "dependencies/6_morton.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/5_morton.hpp",
+      "bytes": 1377,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/core/morton.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e"
+    },
+    "dependencies/7_mutants.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/6_mutants.hpp",
+      "bytes": 11457,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/core/mutants.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5"
+    },
+    "dependencies/8_types.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/7_types.hpp",
+      "bytes": 2537,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/core/types.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca"
+    },
+    "dependencies/9_wide.hpp": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/dependencies/8_wide.hpp",
+      "bytes": 2954,
+      "origin": "/workspaces/E-HGP/morsehgp3D_v7/src/core/wide.hpp",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85"
+    },
+    "plan/PROTOCOL.md": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/geometry_plan/PROTOCOL.md.txt",
+      "bytes": 12365,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_prototype/geometry_plan/PROTOCOL.md",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "3e21a2066934923732375a65329b61d2f3bde73dd0ac5b546f4becb516de6f03"
+    },
+    "plan/additional_scenes.json": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/geometry_plan/additional_scenes.json",
+      "bytes": 2703,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_prototype/geometry_plan/additional_scenes.json",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "f66008d3a2dc80532d3380cf490d8e87412b66ca2be8ae68066fb88cf604eed4"
+    },
+    "protocol/README.md": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/protocol/README.md.txt",
+      "bytes": 6472,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/README.md",
+      "preservation": "byte_exact_copy",
+      "sha256": "0273317e4c1182b4eae3007f2215605cb311c92736cbe14dea3e2a4fa306b261"
+    },
+    "protocol/SHA256SUMS": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/protocol/SHA256SUMS",
+      "bytes": 675,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/SHA256SUMS",
+      "preservation": "byte_exact_copy",
+      "sha256": "0fa1db503bf8d9437fd48e06a0cf25a0c0cfa79c7290bfa489333adcc2a816c7"
+    },
+    "protocol/additional_scenes.inc": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/protocol/additional_scenes.inc",
+      "bytes": 411,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/additional_scenes.inc",
+      "preservation": "byte_exact_copy",
+      "sha256": "6ced272e70bb3527a8b53728442b774508c1a9e7e49413bf2739e2774e6c0d51"
+    },
+    "protocol/geometry_gate.cpp": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/protocol/geometry_gate.cpp",
+      "bytes": 23548,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/geometry_gate.cpp",
+      "preservation": "byte_exact_copy",
+      "sha256": "c9971f8c340fe37eea2be824897110d436a38345e1d66d1834c9eb7f489bb1a9"
+    },
+    "protocol/preparation.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/protocol/preparation.json",
+      "bytes": 4501,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/preparation.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "d561fd90b66d46b550c5ab3b83c2db0f8d1dcb779a175c8ae8ca718a36f342c6"
+    },
+    "protocol/run_geometry.py": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/protocol/run_geometry.py.txt",
+      "bytes": 20302,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_geometry.py",
+      "preservation": "byte_exact_copy",
+      "sha256": "b04dc2a69aec60c6c5e41e83688588a3b963a0ba5f4e91260580e4d195bda727"
+    },
+    "protocol/runner_from_budget.patch": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/protocol/runner_from_budget.patch",
+      "bytes": 14072,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/runner_from_budget.patch",
+      "preservation": "byte_exact_copy",
+      "sha256": "eea12e6bcebc408e54908e8a0742237cd42f38030f459f5811dee8477c41cdd3"
+    },
+    "protocol/selftest.py": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/protocol/selftest.py.txt",
+      "bytes": 11518,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/selftest.py",
+      "preservation": "byte_exact_copy",
+      "sha256": "4aef59a077ba74251fe3a2b998ce9b94b8c4b6d915f238eb26773bdd6807e15e"
+    },
+    "protocol/selftest_from_budget.patch": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/protocol/selftest_from_budget.patch",
+      "bytes": 8353,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/selftest_from_budget.patch",
+      "preservation": "byte_exact_copy",
+      "sha256": "53f41b58f15cc691e256fee2a26b66f17adaf4b79c30c707321c3e482ce5030b"
+    },
+    "run/binary_after.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/binary_after.json",
+      "bytes": 83,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/binary_after.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "1eeecdfac8bbf18a371e7b9e4f35ebdaed45e5fad137022b9dc176ff7beb66e7"
+    },
+    "run/binary_before.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/binary_after.json",
+      "bytes": 83,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/binary_before.json",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "1eeecdfac8bbf18a371e7b9e4f35ebdaed45e5fad137022b9dc176ff7beb66e7"
+    },
+    "run/charge_after_mutant.attempt.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/charge_after_mutant.attempt.json",
+      "bytes": 255,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/charge_after_mutant.attempt.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "8f30e4c0e17721caddb1f4c5555975f4b35afb2a0edf14356d45b3db8e53c8a8"
+    },
+    "run/charge_after_mutant.result.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/charge_after_mutant.result.json",
+      "bytes": 453,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/charge_after_mutant.result.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "40c7aca74ca4e1eb80f2da4a0e08af8a4f235af4327dfe04b07419c650981da8"
+    },
+    "run/charge_after_mutant.spawned.json": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/charge_after_mutant.spawned.json",
+      "bytes": 30,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/charge_after_mutant.spawned.json",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "9564362f8d6c94948ef72cc00399643ab0dcfd5bf40f39dc207bd07294bed70b"
+    },
+    "run/charge_after_mutant.stderr": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/charge_after_mutant.stderr",
+      "bytes": 0,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/charge_after_mutant.stderr",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "run/charge_after_mutant.stdout": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/charge_after_mutant.stdout",
+      "bytes": 759,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/charge_after_mutant.stdout",
+      "preservation": "byte_exact_copy",
+      "sha256": "98c49ac145eb0999c0f073368dbae1e5cb8c650d96c154a5b1c26440b37b0fb2"
+    },
+    "run/compile.attempt.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/compile.attempt.json",
+      "bytes": 618,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/compile.attempt.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "2e9d55dd1dcc05a2c2da7274fa6b832a46b4d2982db53c1d730882a2c6563ece"
+    },
+    "run/compile.result.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/compile.result.json",
+      "bytes": 815,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/compile.result.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "f2ca38f98c81d6bee31f2d4febe152c431e0edc0e45515155f7cd11b39a699f2"
+    },
+    "run/compile.spawned.json": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/compile.spawned.json",
+      "bytes": 30,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/compile.spawned.json",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "57cc48cda2c361491657a6b4e41e81f6e5181fda045bd2c8b95ba2d0147d84ac"
+    },
+    "run/compile.stderr": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/charge_after_mutant.stderr",
+      "bytes": 0,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/compile.stderr",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "run/compile.stdout": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/charge_after_mutant.stderr",
+      "bytes": 0,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/compile.stdout",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "run/compiler.attempt.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/compiler.attempt.json",
+      "bytes": 197,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/compiler.attempt.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "ffd6ed895da5d5bb3c66dcb478b491f4543961a69f8091dd3636af6a9d5d97a0"
+    },
+    "run/compiler.result.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/compiler.result.json",
+      "bytes": 397,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/compiler.result.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "ad4a9472ec3068176d00a03561a33960481aef467392baf7ad1b57384710198e"
+    },
+    "run/compiler.spawned.json": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/compiler.spawned.json",
+      "bytes": 30,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/compiler.spawned.json",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "987f35eae010c15fcbcceae2d76c789e7cf57ca017752dc3f937f80c85449644"
+    },
+    "run/compiler.stderr": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/charge_after_mutant.stderr",
+      "bytes": 0,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/compiler.stderr",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "run/compiler.stdout": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/compiler.stdout",
+      "bytes": 266,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/compiler.stdout",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "39553616934606f58b27c04bed0cdbbe5b00c92c831a9aaadebd7ceda61d1334"
+    },
+    "run/dependencies.d": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/dependencies.d",
+      "bytes": 1611,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/dependencies.d",
+      "preservation": "byte_exact_copy",
+      "sha256": "4cda7c337f8ce482724d0b0027877ba9f382cca1c6a4b183e6436ea574d1a2ad"
+    },
+    "run/dependency_binding.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/dependency_binding.json",
+      "bytes": 2698,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/dependency_binding.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "020fae71451c503f87c9b28996047eb031af8c09497e6e90c86ddcfb3ccce044"
+    },
+    "run/environment.json": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/environment.json",
+      "bytes": 631,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/environment.json",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "e0ec0da84082feba23e29257c73b3ec3a2c148f31e424a585538c2573c60f0e4"
+    },
+    "run/extra_argument.attempt.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/extra_argument.attempt.json",
+      "bytes": 269,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/extra_argument.attempt.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "504cf1e73bc96ed5cfd4a6551d062ec86647cb4ae7717aa8690e110557315078"
+    },
+    "run/extra_argument.result.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/extra_argument.result.json",
+      "bytes": 467,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/extra_argument.result.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "66a48576a47bf111be4741939cdbe40b39013fb8ad0d1a852cd10e8b3e146ffa"
+    },
+    "run/extra_argument.spawned.json": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/extra_argument.spawned.json",
+      "bytes": 30,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/extra_argument.spawned.json",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "e2a39e8dd176dc19a081f0fe6bb4adca71ccd23eafbba5fc7a7926887ca485cb"
+    },
+    "run/extra_argument.stderr": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/charge_after_mutant.stderr",
+      "bytes": 0,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/extra_argument.stderr",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "run/extra_argument.stdout": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/charge_after_mutant.stderr",
+      "bytes": 0,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/extra_argument.stdout",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "run/geometry_gate": {
+      "bytes": 118088,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/geometry_gate",
+      "preservation": "private_binary_hashed_not_copied",
+      "sha256": "bccde6fee8d8c57cd6768208d6989d8460f4e4428aec60dce557e38b97bc9844"
+    },
+    "run/inputs_after.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/inputs_after.json",
+      "bytes": 8523,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/inputs_after.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "6a70afd43d078ee3bc04dbfa03eaf4952783940ad1beaf4e58cf9c17ce5f4774"
+    },
+    "run/inputs_before.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/inputs_after.json",
+      "bytes": 8523,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/inputs_before.json",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "6a70afd43d078ee3bc04dbfa03eaf4952783940ad1beaf4e58cf9c17ce5f4774"
+    },
+    "run/nominal.attempt.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/nominal.attempt.json",
+      "bytes": 227,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/nominal.attempt.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "9aae76e406614d03a7250ca63f27359ffda3267aeaa5c20cd9cf84a8c368e903"
+    },
+    "run/nominal.result.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/nominal.result.json",
+      "bytes": 424,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/nominal.result.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "a0c2aa61ec723eca63824ff88beb8bb9ae112c061d04b343542b904e6780b7f5"
+    },
+    "run/nominal.spawned.json": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/nominal.spawned.json",
+      "bytes": 30,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/nominal.spawned.json",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "e3ac3162c4ccb90d5448c0349e116ce153ea83e79c45aa5deb0be293678f7d29"
+    },
+    "run/nominal.stderr": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/charge_after_mutant.stderr",
+      "bytes": 0,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/nominal.stderr",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "run/nominal.stdout": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/nominal.stdout",
+      "bytes": 727,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/nominal.stdout",
+      "preservation": "byte_exact_copy",
+      "sha256": "e584ff9b1fbee11baaee6456c62e3fea4df61dc516adbe30dbe6b939b2a3fd13"
+    },
+    "run/receipt.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/receipt.json",
+      "bytes": 26821,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/receipt.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "b81d8e480b158710874de230c3485f79d0a42f1cb228e321c750de0f58bed49e"
+    },
+    "run/unknown_argument.attempt.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/unknown_argument.attempt.json",
+      "bytes": 244,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/unknown_argument.attempt.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "43b07f58e8a9afa1ebbed3d9e84ce7dcdded3dce5097053240e6679d09e89cd6"
+    },
+    "run/unknown_argument.result.json": {
+      "audit_path": "receipts_meb_dual_20260905/geometry_constructor/snapshots/run/unknown_argument.result.json",
+      "bytes": 442,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/unknown_argument.result.json",
+      "preservation": "byte_exact_copy",
+      "sha256": "b583b1a48d5141dc7cca04d8f81462929d11eb87a80c1861acc25f287b693cdf"
+    },
+    "run/unknown_argument.spawned.json": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/unknown_argument.spawned.json",
+      "bytes": 30,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/unknown_argument.spawned.json",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "224876ea005cff34077e7a77852e96d995521c7c79c80852fefd002e83880cb8"
+    },
+    "run/unknown_argument.stderr": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/charge_after_mutant.stderr",
+      "bytes": 0,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/unknown_argument.stderr",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "run/unknown_argument.stdout": {
+      "audit_path": "receipts_meb_dual_20260905/qualification/snapshots/run/charge_after_mutant.stderr",
+      "bytes": 0,
+      "origin": "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/unknown_argument.stdout",
+      "preservation": "reference_to_identical_audit_bytes",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "observed_utc": "2026-09-05T11:41:28.460684+00:00",
+  "private_binaries_copied": 0,
+  "public_status": "not_claimed",
+  "schema": "mhgp7-geometry-constructor-independent-capture-v1",
+  "source_authorities_verified_live": {
+    "/usr/bin/x86_64-linux-gnu-g++-13": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+    "/workspaces/E-HGP/build/v7_f_build_20260905/build_D.json": "522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4",
+    "/workspaces/E-HGP/build/v7_f_qualification/mhgp7": "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/README.md": "0273317e4c1182b4eae3007f2215605cb311c92736cbe14dea3e2a4fa306b261",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/additional_scenes.inc": "6ced272e70bb3527a8b53728442b774508c1a9e7e49413bf2739e2774e6c0d51",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/geometry_gate.cpp": "c9971f8c340fe37eea2be824897110d436a38345e1d66d1834c9eb7f489bb1a9",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_geometry.py": "b04dc2a69aec60c6c5e41e83688588a3b963a0ba5f4e91260580e4d195bda727",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/selftest.py": "4aef59a077ba74251fe3a2b998ce9b94b8c4b6d915f238eb26773bdd6807e15e",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_prototype/geometry_plan/PROTOCOL.md": "3e21a2066934923732375a65329b61d2f3bde73dd0ac5b546f4becb516de6f03",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_prototype/geometry_plan/additional_scenes.json": "f66008d3a2dc80532d3380cf490d8e87412b66ca2be8ae68066fb88cf604eed4",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_prototype/pivot.hpp": "0645aa00add4d4cb387861b8f6dbd4fa0734ba5b4f3ad712caad8886b3541c2d",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_prototype/run_dual_budget.py": "329ef731ed48002501999b1013edfeb2645091526d0a2cb7e15f3e28ad956c99",
+    "/workspaces/E-HGP/build/v7_meb_pivot_prototype/pivot.hpp": "d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5",
+    "/workspaces/E-HGP/build/v7_meb_pivot_prototype/probe.cpp": "42f5cde4a168bcf2931064f5a727ac010afa9e68a1854b119624a2da430ea221",
+    "/workspaces/E-HGP/morsehgp3D_v7/CMakeLists.txt": "76d7d11303c227fc83e78973ad5e28353089bb743c2613f026b1b292e5bfc6ec",
+    "/workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp": "46280e1117d4455c894b513e045f66d25174037e1e20f94a6fe2051e7cbf2125",
+    "/workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7_cuda.cu": "aee8a3717b207f34d03587a249fd052a4c129e8aa2b17323035befec5bedfea8",
+    "/workspaces/E-HGP/morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md": "365e7a5dcde5a6d6fcd7d43e00d2f58f86efbf42279a779c62c7eaac7b54ec25",
+    "/workspaces/E-HGP/morsehgp3D_v7/oracle/obig.hpp": "0e3e9241503e7979fb7da06e97a0a0006362cf4da381c7ce2c66d86acdabf8d5",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/cloud/families.hpp": "bff4ff92368c3ced40b0367b426d4aff2e56371896b03603b72089ef5944ed11",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/core/caps.hpp": "d388c877bf4ca8c0fc164148f176959530a0ceff3052640402db3dcd3c256912",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/core/device.hpp": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/core/dint.hpp": "936ddf3304e5237c233f25db4cdc168e57a12dc32761dfa8d06d9ca9209721ad",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/core/inline_stack.hpp": "59bdc34eab997583e8221469fdc5e2b9109dfc516cc54356397eebb1bb8aeb42",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/core/morton.hpp": "67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/core/mutants.hpp": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/core/parse.hpp": "f576762564648c91a8e0106d4d35fada559dfe4fbf03214405debe061b77f4b9",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/core/sha256.hpp": "b675835e9bd05a0ca1fb63dfeaa6fa99d3521b761c35c50b1b51f0aac259798d",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/core/wide.hpp": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/forest/fold.hpp": "b11d02c86db5f8ae8cb12965f12e425548f9f049fb4626259790b32cd584928c",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/forest/plateau.hpp": "9d40af95f4429c02fb4201dfd12608e58c00c593c7c4905e2304e4b4ae37ac49",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/forest/render.hpp": "b1f0537319328d79fe54717fc85f3cbe9abe0f479a34ee5f72153cec148f6589",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/forest/silent_incidence.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/gpu/census_kernels.cuh": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/gpu/device_witness.cu": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/gpu/executor_pool.hpp": "57eb5417624f660cce219748708ef983d6b76fb0afa2c8e1c432e707a50f73aa",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/gpu/lot_ring.hpp": "d1b184b84558a9353ed52859132434bcc1f73d25ed42984d2a12a488e318ed3a",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/gpu/pack.hpp": "2d1aa40dbd4707588eb8e01be94eaea434a075d66f249206c4753ea273bda8f0",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/gpu/pilot.hpp": "d4a8de7c56be93b29fbb9b9f4be1d3500fa2c81ae665417774cc4ff0f0310c33",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/gpu/route_c6.hpp": "9d8ec293b5898e42eb9c0947dcd793ccf62cd69894b8af9f7bb6ee9aec9efa18",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/gpu/wire.hpp": "1ab6a35d4e685d7a15513ef3f082bfd07a872da9fa78bdbfea6c0b52f100c5d1",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/io/archive.hpp": "cc2243aaa1bdbe63b69f165d65152cf62d7fac32ff6c641343542c247d989430",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/lanes/cell_grid.hpp": "f888539647e4dfd2e5f89d578f5f850cbad4a30b827d0bd5bef9142b5fc4c588",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/lanes/chord_kill.hpp": "f5a4ca9b6e2fbc0ea94e8adf92f64322ab2ef5c461c588efcedf1bc9e4faa039",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/lanes/edge_cover.hpp": "3186e5b67002a2d29a50e090bc465c86690224f78eab30088c5f33595d2e4836",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/lanes/level.hpp": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/lanes/q2.hpp": "11049293b7ad2f7139e1699c11b2506e8af2c11a04f22dc951f33ba10406c52f",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/lanes/q3.hpp": "4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/lanes/q4.hpp": "58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/lanes/sector_kill.hpp": "4742ccccbcfdec847ea2e6bdded9f73b78d62e32585058b09d4b45b5951b7e06",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/parallel/pool.hpp": "5c20aabbe673e2baa1018bea893185592bc3b394d025eadd9be07542453befc6",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/parallel/sort.hpp": "ceb89f8ba42fbc3f44351f4dcbf5e347e7d66a4c85bce08f346e66a9b11f20bd",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/pipeline/candidates.hpp": "33e908458110861d4182ed915eebf312ffb67dc848744c417a5f2ddc719e793b",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/pipeline/census.hpp": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/pipeline/digest.hpp": "d0def105ebb969c9e95b10f68e0dd480ca9fa05b2553c4a6307a0c460893e668",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/pipeline/expand.hpp": "7cafb0341344fbc7d1584001e4685e2e5bf0122fe3b7e37277f5468d5c5e1cf0",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/pipeline/float_filter.hpp": "52e07b4e4dfb1ca66e2a6218fc9c31afc9586e0a81ca5a4a846ed7727e44b7d9",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/pipeline/generate.hpp": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/pipeline/run.hpp": "1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/spindle/spindle.hpp": "f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/spindle/witness_count.hpp": "f20970aa2183f6c0904d640ae5fe072894b6e0b4f7f9440277fbed77e8245803",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/tree/cloud_index.hpp": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95",
+    "/workspaces/E-HGP/morsehgp3D_v7/src/wspd/wavefront.hpp": "481a0d05da0631c71d74b52d90ea84233ad9c7624221a3783f322554fdb32063"
+  }
+}

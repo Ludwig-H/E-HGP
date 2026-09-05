@@ -1,0 +1,45 @@
+{
+  "schema": "mhgp7-native-cost-followup-plan-review-v1",
+  "reviewed_utc": "2026-09-05T12:05:53.195235+00:00",
+  "status": "source_plan_reviewed_not_executed",
+  "public_status": "not_claimed",
+  "source": "build/v7_meb_dual_budget_cost_followup_plan/PROTOCOL.md",
+  "source_sha256": "2a176c885d5c937fe9c6ed0e52cd34d2f82f0eb085e6729465bc9e290a6e0188",
+  "snapshot": "followup_protocol.md.txt",
+  "authority": "constructor plan prepared after native v2 observation; new source/binary qualification needed",
+  "arithmetic": {
+    "orders": 384,
+    "proposal_caps": [
+      0,
+      401
+    ],
+    "legacy_cap": 551,
+    "max_local_candidates": 550,
+    "jobs": 768,
+    "fixed_repeats": 64,
+    "warmups": 2,
+    "measured_passes": 10,
+    "AB_passes": 5,
+    "BA_passes": 5,
+    "calls_per_arm_pass": 49152,
+    "timed_entry_upper_bound": 1769472,
+    "qualification_entry_upper_bound": 9216,
+    "reference_rank_calls": 384,
+    "total_entry_upper_bound": 1779072,
+    "entry_cap": 2000000,
+    "entry_margin": 220928
+  },
+  "constructive_findings": [
+    "All 384 orders retained; uniform L551 separates cost study from refusal-boundary corpus.",
+    "Fixed 64 repeats and 5AB/5BA address small batches and imbalance without guaranteeing order-effect removal.",
+    "P0 control and AB/BA results must remain explicit; no P0 subtraction.",
+    "Primary aggregation equally weights orders within P, rather than selecting successful proposals or averaging group ratios.",
+    "Group strata may depend on qualified route; they describe the offline corpus and are not a dispatcher using future results.",
+    "A sign reversal between AB/BA medians rules out a robust directional claim for that stratum.",
+    "No posterior threshold or preferred P is promoted from this one corpus.",
+    "Fresh per-repetition Work means costs do not characterize an order-wide shared P in an integrated pipeline."
+  ],
+  "new_engine_calls": 0,
+  "new_builds": 0,
+  "gcp": "not_used"
+}

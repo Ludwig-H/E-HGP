@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_cost_v2/build_20260905/cost_harness",
+    "--measure",
+    "b81d8e480b158710874de230c3485f79d0a42f1cb228e321c750de0f58bed49e"
+  ],
+  "elapsed_seconds": 1.270555527000397,
+  "error": null,
+  "expected_rc": 0,
+  "returncode": 0,
+  "status": "completed",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "2c20ceaf7a8a4757af2ad78554becf2e584f1c397e92860800d6c746de24469f",
+  "timed_out": false
+}

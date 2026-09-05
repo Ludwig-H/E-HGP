@@ -1,0 +1,21 @@
+{
+  "cpu_affinity": [
+    0
+  ],
+  "hardware": {
+    "online": "0-7",
+    "selected_cpu": {
+      "core id": "0",
+      "cpu cores": "4",
+      "cpu family": "25",
+      "microcode": "0xffffffff",
+      "model": "17",
+      "model name": "AMD EPYC 9V74 80-Core Processor",
+      "physical id": "0",
+      "processor": "0",
+      "siblings": "8",
+      "stepping": "1",
+      "vendor_id": "AuthenticAMD"
+    }
+  }
+}

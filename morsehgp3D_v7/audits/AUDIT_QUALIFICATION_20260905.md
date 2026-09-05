@@ -349,3 +349,9 @@ temporaire et sortie. Une hausse des caps demande d'abord une facture
 prospective des capacités et des octets des structures concernées. Les
 [propositions mémoire sur la coexistence](RETOUR_MEMOIRE_COURANT.md)
 restent un chantier distinct de ce refus mono.
+
+## Qualification native MEB v2
+
+La [contrelecture propre du reçu natif](receipts_meb_native_20260905/README.md) ferme le chemin privé `NoObserver` : 9 351 états locaux confrontés à F et Trace avant puis après mesure, avec champs complets hors chrono et captures consommées dans les boucles mesurées. Le build strict O2, le désassemblage et le reçu de mesure ont leurs sceaux distincts. L'auditeur ne relance aucun binaire ; ses lecteurs réexaminent les octets conservés, y compris l'échec de compilation v1.
+
+Les 1 325 812 entrées comptent les appels supérieurs, juges et replis imbriqués. Les 4 699 groupes et sept passages mesurés ne forment pas une campagne de tour. La [revue du coût](receipts_meb_native_20260905/cost_review.md) sépare réduction des candidats, ralentissement du cas n=2 répété et contrôle P0 sensible à l'ordre dans les petits lots. Le suivi uniforme à 64 répétitions et dix paires est déjà préparé et contre-lu ; ses mesures restent à produire. Cette qualification native ne remplace ni l'oracle rationnel antérieur ni la qualification du port intégré.

@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_cost_v2/build_20260905/cost_harness",
+    "--measure",
+    "b81d8e480b158710874de230c3485f79d0a42f1cb228e321c750de0f58bed49e"
+  ],
+  "cpu_affinity": [
+    6
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "expected_rc": 0,
+  "timeout_seconds": 117.99836588100152
+}

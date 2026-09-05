@@ -1,0 +1,26 @@
+{
+  "engine_runs": 0,
+  "positives": 4,
+  "rejections": [
+    "NoObserver_absent",
+    "Work_capture_corruption",
+    "bool_integer",
+    "duplicate_JSON",
+    "exact_claim",
+    "legacy_overcharge",
+    "lost_helper_entry",
+    "nonfinite_JSON",
+    "paired_order_changed",
+    "pending_receipt",
+    "proposal_overcharge",
+    "qualification_incomplete",
+    "short_batch_hidden",
+    "source_drift",
+    "stream_seal_mismatch",
+    "tampered_stream",
+    "timed_capture_corruption",
+    "traversal",
+    "wrong_exit_code"
+  ],
+  "status": "passed"
+}

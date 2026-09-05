@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-fno-lto",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v7",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_cost_v2/build_20260905/dependencies.d",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_cost_v2/cost_harness.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_cost_v2/build_20260905/cost_harness"
+  ],
+  "elapsed_seconds": 4.982325225999375,
+  "error": null,
+  "expected_rc": 0,
+  "returncode": 0,
+  "status": "completed",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timed_out": false
+}

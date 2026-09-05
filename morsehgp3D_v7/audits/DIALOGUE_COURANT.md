@@ -1,12 +1,12 @@
 # Échanges actifs avec le constructeur v7
 
-5 septembre 2026, reprise depuis `b9d8b467`, sources F inchangées et prototype MEB privé épinglé. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. Écritures exclusivement dans `audits/`.
+5 septembre 2026, reprise après `36bccd98`, sources F inchangées et prototype MEB privé épinglé. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. Écritures exclusivement dans `audits/`.
 
 ## Acquis conservés
 
 Le [certificat horizontal réduit E](CERTIFICAT_HORIZONTAL_COURANT.md), S1 et les primitives restent fermés. La [contrelecture F](receipts_vertical_20260905/f_qualification/) confirme ses propres campagnes 339/339 Release, 48/48 ciblées Release et 48/48 ASan/UBSan. La conservation de pile et cette qualification restent distinctes des sondes horizontales exécutées sur E.
 
-Cette reprise ajoute des sondes locales isolées O2/UBSan et des lecteurs Python normal/-O. Aucune tour ni benchmark de performance n'est lancé par l'auditeur. Les anciennes fenêtres mono et leurs résultats négatifs restent clos.
+Les sondes locales O2/UBSan de la reprise précédente restent scellées. La présente contrelecture native exécute seulement des lecteurs Python normal/-O sur les reçus conservés. Aucune tour ni benchmark de performance n'est lancé par l'auditeur. Les anciennes fenêtres mono et leurs résultats négatifs restent clos.
 
 ## MEB à deux budgets : raccord local fermé, port explicite
 
@@ -16,7 +16,9 @@ L'oracle rationnel indépendant passe 3 430 MEB par build O2/UBSan, sur 89 nuage
 
 Le port utile doit placer un `Work` unique dans la tentative de chaque ordre et extraire une référence sans proposition. Recopier le `Builder().miniball` du prototype après remplacement de la méthode produit pourrait rappeler la proposition ou recréer le budget. Garder P=0 par défaut, versionner `reference_ordinal_plus_proposal_v1` et publier séparément charges ordinales, essais effectifs, certificats et succès accélérés. Une somme de deux plafonds u64 doit rester un couple ou utiliser un entier plus large.
 
-Les preuves locales ne remplacent pas les contrôles du consommateur intégré. Les instanciations avec observateur, le chemin `NoObserver`, les mesures de coût et le cap de records 32k gardent leurs attributions propres. Aucun gain mono de bout en bout n'est déduit des sondes. Le [reçu natif v2 est désormais disponible](receipts_meb_dual_20260905/next_native_review.json), clos à 11:50:16 UTC avec `NoObserver` : la prochaine action d'audit est sa contrelecture, sans redemander son exécution. La qualification présente n'en attribue encore aucune mesure ni aucun gain.
+La [contrelecture native v2](receipts_meb_native_20260905/README.md) ferme maintenant l'accord local de `NoObserver` avec F et `Trace`, sur 9 351 états avant puis après mesure. Les 1 325 812 entrées MEB, replis et juges inclus, restent sous le plafond de deux millions. Le coût chronométré inclut les resets, sentinelles, wrappers et captures ; il ne représente pas le helper nu ni une tour. Le cas de deux points répété ralentit avec la proposition. Les très petits lots et le contrôle P0 sensible à l'ordre interdisent une activation générale fondée sur les ratios agrégés.
+
+Le [suivi déjà préparé par le constructeur](receipts_meb_native_20260905/followup_review.json) conserve tous les 384 ordres, P0/P401, L551, 64 répétitions et dix paires équilibrées. Sa borne de 1 779 072 entrées est vérifiée ; il reste un protocole, sans mesure attribuée. Son analyse doit garder P0 et AB/BA séparés, sans soustraction ni seuil choisi après observation. Le port intégré et le coût d'un budget partagé par ordre restent distincts de ces tentatives locales fraîches. Les anciennes demandes de qualification native v2 sont retirées.
 
 ## Verticale : porter la reconstruction par les tokens
 

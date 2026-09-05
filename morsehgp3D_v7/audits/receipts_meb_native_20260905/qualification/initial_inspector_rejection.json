@@ -1,0 +1,10 @@
+{
+  "status": "invalid_inspector_attempt",
+  "auditor_engine_runs": 0,
+  "exit_code": 1,
+  "output": {
+    "status": "rejected",
+    "error": "host/process records"
+  },
+  "cause": "The first reader unnecessarily required PID uniqueness across separate build and measure invocations. Both record PID 80 in their own command context. PID identifiers can be reused or scoped by process namespace; uniqueness is only required within a single recorded stage. This is an inspector correction, not a product or constructor command failure."
+}

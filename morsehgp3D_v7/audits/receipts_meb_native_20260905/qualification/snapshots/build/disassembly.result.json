@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-objdump",
+    "-d",
+    "-C",
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_cost_v2/build_20260905/cost_harness"
+  ],
+  "elapsed_seconds": 0.16581321899866452,
+  "error": null,
+  "expected_rc": 0,
+  "returncode": 0,
+  "status": "completed",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "52392c6a8b9a8a230133113fdad0bfa9ca64b25291600349b9905be9f126c9c4",
+  "timed_out": false
+}
