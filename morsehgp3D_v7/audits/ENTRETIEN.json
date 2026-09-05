@@ -533,5 +533,60 @@
       "new_code_implemented": false,
       "coordination": "../../audits/COORDINATION_MORSEHGP3D_V7.md"
     }
+  },
+  "latest_normalization_review": {
+    "date": "2026-09-05T19:42:05.630832+00:00",
+    "base_head": "aafe7d93fdb21030a28c6171b26031a2c93af29c",
+    "source_premise": "13c6cc72ab5065d498827bf89c6bc2a321b5e896c93a60263de52b9d800a2627",
+    "scope": "Read-only successor-work identities from five closed lazy attempts; 48 successes, K9 refusal excluded. Proof of removing the redundant compression tail pair. No engine, timing or new C++ qualification.",
+    "proof": "successor_work_review.json",
+    "script": "successor_work_review.py",
+    "checks": {
+      "normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "data_mutations_refuted": 4
+      },
+      "canonical_docs": {
+        "exit_code": 0,
+        "files": 346
+      },
+      "registry": {
+        "exit_code": 0,
+        "phases": 20
+      },
+      "authored_markdown": {
+        "files": 6,
+        "links": 86,
+        "anchors": 5,
+        "errors": []
+      },
+      "freshness_normal_optimized": {
+        "exit_codes": [
+          1,
+          1
+        ],
+        "common_pins_stale": [],
+        "J_stale": [
+          "CMakeLists.txt",
+          "src/forest/full_gabriel.hpp"
+        ],
+        "classification": "expected: singleton implementation in progress, no silent promotion"
+      }
+    },
+    "qualification_variants_D_to_J_unchanged": true,
+    "constructor_delta_in_preparation": {
+      "path": "src/forest/full_gabriel.hpp",
+      "observed_sha256": "16441e9f92b1f23bfbae1c90b2f168ebd0162678e4121d406cd4824afc175647",
+      "qualification_transferred": false,
+      "description": "single-direct lot specialization; no normalization change requested in its current scope"
+    },
+    "maintenance": "25 root Markdown notes retained. Prior singleton/q4 advice shortened in current dialogue; stale planned comparison replaced by current source reference; balanced technical DSU option condensed in the existing secondary-questions table. No immutable receipt changed.",
+    "gcp": "not_used",
+    "engine_builds_or_ctests": 0,
+    "independent_reread": "Endpoint arithmetic and proof reviewed; four data-corruption guards precisely named, including non-success input rejection."
   }
 }

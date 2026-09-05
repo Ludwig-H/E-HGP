@@ -7,7 +7,7 @@ Lire l’[état courant](ETAT_COURANT.md), puis le [dialogue actif](DIALOGUE_COU
 | Modèle FULL | [Décision et domaine](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md) |
 | Cache lazy, digest, first-C | [Verdict](CACHE_FULL_COURANT.md), [preuves](receipts_full_lazy_20260905/README.md) |
 | EAGER et composant structurel | [Producteur relatif](PRODUCTEUR_FULL_GABRIEL_COURANT.md), [lecteur](CERTIFICAT_FULL_CPP_COURANT.md) |
-| Mesures EAGER closes | [Borne de cache et attribution](MONO_FULL_COURANT.md) |
+| Mono : EAGER clos et compteurs lazy | [Bornes, attribution et diagnostic des successeurs](MONO_FULL_COURANT.md) |
 | Intégrations différées | [Questions secondaires regroupées](QUESTIONS_SECONDAIRES.md) |
 
 ## Preuves conservées

@@ -1,6 +1,6 @@
 # État courant de l’audit v7
 
-Le producteur FULL lazy `13c6cc72` possède une qualification indépendante sur son corpus borné. Le nouvel avis ferme statiquement deux pistes d’optimisation demandées par le constructeur : regroupement d’un lot à une directe et rejet précoce d’un bloc q4 profond. Une contre-fixture rationnelle protège la poursuite du balayage et l’interprétation des compteurs. Aucun futur delta C++ ni nouveau benchmark n’est qualifié ici ; l’export industriel et les contrats de performance restent ouverts.
+La qualification indépendante FULL lazy reste attachée à `13c6cc72`. Le constructeur prépare la spécialisation du lot unitaire : ce nouveau code n’est pas encore qualifié ici. Le nouvel avis démontre comment supprimer deux opérations redondantes par normalisation non triviale ; ses effets sur le compteur sont recalculés sur 48 ordres clos, sans promettre une accélération ni l’admission du K9 refusé. L’export industriel et les contrats de performance restent ouverts.
 
 ```text
 phase=exploration_v7_hors_registre
@@ -19,8 +19,8 @@ La lecture intégrale des parties I et II du manuscrit, PDF 35–134, reste acqu
 | G, lecteur FULL | [Qualification structurelle](CERTIFICAT_FULL_CPP_COURANT.md), sans certification géométrique |
 | D/E/F, réduit et primitives | [Qualifications distinctes](AUDIT_QUALIFICATION_20260905.md) ; aucun reçu réduit réinterprété FULL |
 
-Les [documents du constructeur](../PASSATION.md) portent les campagnes ultérieures et leur progression. Les temps massifs lazy ne deviennent pas des résultats indépendamment audités par ce nettoyage. Le [manifeste courant](validation_current.json) précise les octets et documents reconnus ; son contrôle ne promeut pas le statut public.
+Les [documents du constructeur](../PASSATION.md) portent les campagnes ultérieures et leur progression. Le [diagnostic mono](MONO_FULL_COURANT.md) contrôle leurs seuls compteurs de normalisation, sans qualifier les latences massives. Le [manifeste](validation_current.json) conserve les sources qualifiées : il signale normalement une dérive sur le nouveau code en préparation, sans le réépingler silencieusement.
 
-Le [dialogue actif](DIALOGUE_COURANT.md) donne les conditions des deux transformations et les contrôles ciblés du prochain delta. Les questions différées sont [regroupées](QUESTIONS_SECONDAIRES.md) ; les demandes déjà satisfaites restent retirées.
+Le [dialogue actif](DIALOGUE_COURANT.md) donne la preuve du raccourci de normalisation, les avis antérieurs retenus et les contrôles ciblés des prochains deltas. Les questions différées sont [regroupées](QUESTIONS_SECONDAIRES.md) ; les demandes déjà satisfaites restent retirées.
 
 Les reçus bruts et échecs restent conservés ; les anciennes synthèses sont accessibles par le [registre d’entretien](ENTRETIEN.json). GCP non utilisé.

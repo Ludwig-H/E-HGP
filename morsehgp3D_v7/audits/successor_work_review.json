@@ -1,0 +1,102 @@
+{
+  "schema": "mhgp7-successor-work-diagnostic-v1",
+  "status": "passed",
+  "source_premise": "13c6cc72ab5065d498827bf89c6bc2a321b5e896c93a60263de52b9d800a2627",
+  "public_status": "not_claimed",
+  "scope": "normalization work identities on closed lazy orders only",
+  "engine_runs": 0,
+  "cpp_delta_qualified": false,
+  "timing_qualified": false,
+  "success_orders_checked": 48,
+  "paired_s_work_equal": true,
+  "selected_endpoints": {
+    "paired/n8000_s8_k10_lazy_c1000000": {
+      "k": 10,
+      "strict_requests": 2534359,
+      "directs": 716735,
+      "calls": 3251094,
+      "positive_depth_calls": 2316496,
+      "depth_sum": 11663235,
+      "successor_steps": 38240799,
+      "closure_steps": 1878128,
+      "prelot_depth_sum": 11276104,
+      "prelot_positive_depth_calls": 1929365,
+      "prelot_mean_depth": "11276104/2534359",
+      "remaining_steps_if_tail_pair_omitted": 33607807,
+      "omitted_fraction": "4632992/38240799"
+    },
+    "scale16/n16000_s8_k10_lazy_c1000000": {
+      "k": 10,
+      "strict_requests": 5364572,
+      "directs": 1516314,
+      "calls": 6880886,
+      "positive_depth_calls": 4905494,
+      "depth_sum": 26051336,
+      "successor_steps": 85034894,
+      "closure_steps": 3962379,
+      "prelot_depth_sum": 25235981,
+      "prelot_positive_depth_calls": 4090139,
+      "prelot_mean_depth": "25235981/5364572",
+      "remaining_steps_if_tail_pair_omitted": 75223906,
+      "omitted_fraction": "4905494/42517447"
+    },
+    "scale32/n32000_s8_k10_lazy_c1000000": {
+      "k": 8,
+      "strict_requests": 7404183,
+      "directs": 2149486,
+      "calls": 9553669,
+      "positive_depth_calls": 6788309,
+      "depth_sum": 36798965,
+      "successor_steps": 119950564,
+      "closure_steps": 5479618,
+      "prelot_depth_sum": 35688921,
+      "prelot_positive_depth_calls": 5678265,
+      "prelot_mean_depth": "11896307/2468061",
+      "remaining_steps_if_tail_pair_omitted": 106373946,
+      "omitted_fraction": "6788309/59975282"
+    }
+  },
+  "refused_orders_excluded": [
+    {
+      "attempt": "scale32/n32000_s8_k10_lazy_c1000000",
+      "k": 9,
+      "reason": "full_gabriel_successor_budget",
+      "successor_steps": 128000000,
+      "derived_success_identities_applied": false
+    }
+  ],
+  "data_mutations_refuted": [
+    "nonintegral_depth_sum",
+    "too_many_nonroot_calls",
+    "too_many_noops",
+    "non_success_input"
+  ],
+  "input_pins": {
+    "receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s8_k10_lazy_c1000000.receipt.json": "1ca08431789fe84eb5d61e057cd4a612210b022e0bf05835f98bd1743fdb8bcc",
+    "receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s8_k10_lazy_c1000000.raw.txt": "a827bd1946e0617e2f76d60f2f1758b1f07717aec9b5599987afb722e3cb9e57",
+    "receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s8_k10_lazy_c1000000.sources_before.json": "7667bbff5fe225ddc5e0d9bce0aaddeee8a6bac5a682b76e923e78b914a15018",
+    "receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s8_k10_lazy_c1000000.sources_after.json": "7667bbff5fe225ddc5e0d9bce0aaddeee8a6bac5a682b76e923e78b914a15018",
+    "receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s10_k10_lazy_c1000000.receipt.json": "47ed965bc98887b313f1baa183b4bed0ffcef38de6d92f3910962e5b81aec54f",
+    "receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s10_k10_lazy_c1000000.raw.txt": "8aaf78c7772001afecc649c582d04a3a82953cbcd8b981a79b52b65165f048c1",
+    "receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s10_k10_lazy_c1000000.sources_before.json": "7667bbff5fe225ddc5e0d9bce0aaddeee8a6bac5a682b76e923e78b914a15018",
+    "receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s10_k10_lazy_c1000000.sources_after.json": "7667bbff5fe225ddc5e0d9bce0aaddeee8a6bac5a682b76e923e78b914a15018",
+    "receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s12_k10_lazy_c1000000.receipt.json": "503f1df03488c860d0f85d4560c60cd4bc818d3db234fb4833e302b509796643",
+    "receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s12_k10_lazy_c1000000.raw.txt": "22f92758fdd3012ee7fe4d2f7b50690d3ad9de55f1c483ed54aa4f04f951aebc",
+    "receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s12_k10_lazy_c1000000.sources_before.json": "7667bbff5fe225ddc5e0d9bce0aaddeee8a6bac5a682b76e923e78b914a15018",
+    "receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s12_k10_lazy_c1000000.sources_after.json": "7667bbff5fe225ddc5e0d9bce0aaddeee8a6bac5a682b76e923e78b914a15018",
+    "receipts/full_gabriel_lazy_mono_20260905/scale16/n16000_s8_k10_lazy_c1000000.receipt.json": "3fa6dcb5f43de1672fe09761e37524b559681d06b6c080c571a2598cddb1439d",
+    "receipts/full_gabriel_lazy_mono_20260905/scale16/n16000_s8_k10_lazy_c1000000.raw.txt": "bb69d0f568f006400f16ed5261f978dc5b42432768b5aa5f2f6b0b53be6968c6",
+    "receipts/full_gabriel_lazy_mono_20260905/scale16/n16000_s8_k10_lazy_c1000000.sources_before.json": "7667bbff5fe225ddc5e0d9bce0aaddeee8a6bac5a682b76e923e78b914a15018",
+    "receipts/full_gabriel_lazy_mono_20260905/scale16/n16000_s8_k10_lazy_c1000000.sources_after.json": "7667bbff5fe225ddc5e0d9bce0aaddeee8a6bac5a682b76e923e78b914a15018",
+    "receipts/full_gabriel_lazy_mono_20260905/scale32/n32000_s8_k10_lazy_c1000000.receipt.json": "9f70b0c1fc6619062c5a1864632966d3905468e1f6c0e3a4778b810dbde1c167",
+    "receipts/full_gabriel_lazy_mono_20260905/scale32/n32000_s8_k10_lazy_c1000000.raw.txt": "6a0447f8f777fec17a90d2b109500628b71332457bb865f40a8586c30997813b",
+    "receipts/full_gabriel_lazy_mono_20260905/scale32/n32000_s8_k10_lazy_c1000000.sources_before.json": "7667bbff5fe225ddc5e0d9bce0aaddeee8a6bac5a682b76e923e78b914a15018",
+    "receipts/full_gabriel_lazy_mono_20260905/scale32/n32000_s8_k10_lazy_c1000000.sources_after.json": "7667bbff5fe225ddc5e0d9bce0aaddeee8a6bac5a682b76e923e78b914a15018"
+  },
+  "script_sha256": "2d025034220e28d7f4ca55a49d1c4b4f4d3e97aedcc7255f170969f699567388",
+  "limits": [
+    "not a maximum-depth measurement",
+    "not a K9 completion forecast",
+    "not a whole-tower speedup or geometric qualification"
+  ]
+}
