@@ -1,0 +1,12 @@
+{
+  "boost": "521 header hashes plus inert precheck dependency file; no Boost code",
+  "capture_receipt_sha256": "28a203ea7f46699e9845252bc02f46c9719c2380cef3e4e95d1f5d935a0abdc8",
+  "capture_sums_sha256": "fbf8ec1c430fa77ed06fb8b4cd44a908a9aa4642176f8b8d1bd19de7772397e6",
+  "checker_sha256": "32420385f487260e0706b3e649befca25cc95a9d45f17d22472c333870729580",
+  "controller_sha256": "528175a4fae239aa62630c32c27355be34db1092bef7f8cdb98e589022663bb4",
+  "copies_are_byte_exact": true,
+  "created_utc": "2026-09-05T17:38:03.532328+00:00",
+  "old_prechecks_or_other_campaign_results_imported": false,
+  "publisher_sha256": "5c7f18a2577ee388a8f9652c3596ffe9ab9ade6bbc3101ae45f18fc91da6dfba",
+  "sources_and_binaries": "before/after inventories only; no executable binary payload"
+}

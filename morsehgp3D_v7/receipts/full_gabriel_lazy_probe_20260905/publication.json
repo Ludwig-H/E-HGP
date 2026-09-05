@@ -1,0 +1,35 @@
+{
+  "build_receipt_sha256": "da11c743e63fb63acd00c25ce02080671a34a43fa2fa9cd473bb3068df2712a3",
+  "controller_sha256": "417ccc3b47bb7591405f3af99bf7591bf2019794aa4535077436ce4889c4adfa",
+  "engine_reexecuted": false,
+  "gcp_used": false,
+  "kind": "admission",
+  "micro_receipt_sha256": "9ce369e2d6085e1e7ac0b95c03a84f1793f42d0107a2b2a15474644d880ce1b2",
+  "observations": [
+    {
+      "binary_sha256": "1d5a38cea99555fd2db474ee43aff6ba1ee708208508cfa97c540774d0bb7e78",
+      "horizontal_orders": 156,
+      "kind": "micro",
+      "modes": [
+        "normal",
+        "optimized"
+      ],
+      "mutants_per_mode": 19,
+      "parser_rejects": 11,
+      "status": "completed",
+      "successful_attempts": 24
+    }
+  ],
+  "omissions": [
+    {
+      "bytes": 506856,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/build_admission/full_gabriel_lazy_probe",
+      "reason": "executable_not_exported_pin_retained_in_original_receipt",
+      "sha256": "1d5a38cea99555fd2db474ee43aff6ba1ee708208508cfa97c540774d0bb7e78"
+    }
+  ],
+  "public_status": "not_claimed",
+  "scope": "horizontal_relative_orders_not_integrated_inter_k_tower",
+  "semantic_digest_is_not_geometry_or_catalogue_completeness_proof": true,
+  "status": "closed_captures_published_not_SLO"
+}

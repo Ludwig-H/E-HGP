@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/git",
+    "--no-optional-locks",
+    "-C",
+    "/workspaces/E-HGP",
+    "rev-parse",
+    "HEAD"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_code": 0,
+  "label": "git_head_after",
+  "started_utc": "2026-09-05T17:29:42.041487+00:00",
+  "timeout_seconds": 15
+}

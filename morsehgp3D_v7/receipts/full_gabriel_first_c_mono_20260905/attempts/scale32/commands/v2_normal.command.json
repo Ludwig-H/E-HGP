@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale32_resume/n32000_s8_k10_lazy_c1000000.receipt.json"
+  ],
+  "command": "/usr/bin/taskset -c 0 /usr/bin/python3 -B /workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py /workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale32_resume/n32000_s8_k10_lazy_c1000000.receipt.json",
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.08164071999999578,
+  "ended": "2026-09-05T19:17:01.628237+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONHASHSEED": "0",
+    "TZ": "UTC"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "label": "v2_normal",
+  "passed": true,
+  "started": "2026-09-05T19:17:01.546601+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e73ca29f1f9c34342b274dd62970b209187473a010a4155df8814a99d2b821d6",
+  "timeout_seconds": 20
+}

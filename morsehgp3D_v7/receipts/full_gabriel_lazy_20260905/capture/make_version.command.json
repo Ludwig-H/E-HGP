@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/make",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.0036592690012184903,
+  "ended_utc": "2026-09-05T17:25:34.706300+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "make_version",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788629134702246867,
+      "device": 1796,
+      "inode": 1745795,
+      "mtime_ns": 1788629134702246867,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/make_version.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 297,
+      "ctime_ns": 1788629134703246867,
+      "device": 1796,
+      "inode": 1745794,
+      "mtime_ns": 1788629134703246867,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/make_version.stdout",
+      "sha256": "8ee498ee2fc27e8dcdf99191b454077df95e3840d841ec94321748b6d7f36819"
+    }
+  },
+  "started_utc": "2026-09-05T17:25:34.701352+00:00",
+  "status": "completed",
+  "timeout_seconds": 15
+}

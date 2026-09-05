@@ -1,0 +1,52 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/git",
+    "--no-optional-locks",
+    "-C",
+    "/workspaces/E-HGP",
+    "status",
+    "--porcelain=v1",
+    "--untracked-files=normal",
+    "--",
+    "morsehgp3D_v7"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.03189475299586775,
+  "ended_utc": "2026-09-05T17:25:34.748307+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "git_status_before",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788629134716246867,
+      "device": 1796,
+      "inode": 1745803,
+      "mtime_ns": 1788629134716246867,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/git_status_before.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 672,
+      "ctime_ns": 1788629134740246867,
+      "device": 1796,
+      "inode": 1745802,
+      "mtime_ns": 1788629134740246867,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/git_status_before.stdout",
+      "sha256": "06e4b969cd99cc238985d8b85f3cf6e27d2a7e3ca76792da2f105ff4a4ce3b42"
+    }
+  },
+  "started_utc": "2026-09-05T17:25:34.714883+00:00",
+  "status": "completed",
+  "timeout_seconds": 15
+}

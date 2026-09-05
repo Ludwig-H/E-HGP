@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_recovery/aggregate.py",
+    "--execute",
+    "--expected-script-sha256",
+    "3cfeead56198035ae3b8b0c0c9bef6248b6aeef960ffbbd0904875dd55a92550",
+    "--paired",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/receipt.json=50f22273e11f9e04cf9707a1bb7f6068ff98476ad3903972f40ebbbbcc6a1e4c",
+    "--scale",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale16_resume/receipt.json=d3656155eabab7771ebccb32d6e72474d43b0932aaa109de20b421a8f8358c43",
+    "--scale",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale32_resume/receipt.json=86e0f1b2739ef2b9e25305e6e515b17227e0bd34c7d79001671a8ed4f4e2afcf"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/taskset -c 0 /usr/bin/python3 -B -O /workspaces/E-HGP/build/v7_full_lazy_20260905_recovery/aggregate.py --execute --expected-script-sha256 3cfeead56198035ae3b8b0c0c9bef6248b6aeef960ffbbd0904875dd55a92550 --paired /workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/receipt.json=50f22273e11f9e04cf9707a1bb7f6068ff98476ad3903972f40ebbbbcc6a1e4c --scale /workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale16_resume/receipt.json=d3656155eabab7771ebccb32d6e72474d43b0932aaa109de20b421a8f8358c43 --scale /workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale32_resume/receipt.json=86e0f1b2739ef2b9e25305e6e515b17227e0bd34c7d79001671a8ed4f4e2afcf",
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "expected_rc": [
+    0
+  ],
+  "id": "optimized",
+  "outer_timeout_seconds": 30,
+  "process_vm_max_bytes": 27917287424,
+  "started": "2026-09-05T19:17:02.326277+00:00"
+}

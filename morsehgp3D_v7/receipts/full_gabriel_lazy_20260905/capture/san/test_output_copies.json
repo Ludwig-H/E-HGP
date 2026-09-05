@@ -1,0 +1,45 @@
+{
+  "copies": {
+    "JUnit.stdout": {
+      "archive": {
+        "bytes": 6656,
+        "ctime_ns": 1788629381795248245,
+        "device": 1796,
+        "inode": 1747241,
+        "mtime_ns": 1788629381795248245,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/san/JUnit.stdout",
+        "sha256": "6875a42872d243ff19d9ceae8738f0ea0f24004bf351ddf3541d575eb54a6968"
+      },
+      "source": {
+        "bytes": 6656,
+        "ctime_ns": 1788629380738248239,
+        "device": 1796,
+        "inode": 1747204,
+        "mtime_ns": 1788629380738248239,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/san/ctest.junit.xml",
+        "sha256": "6875a42872d243ff19d9ceae8738f0ea0f24004bf351ddf3541d575eb54a6968"
+      }
+    },
+    "LastTest.stdout": {
+      "archive": {
+        "bytes": 14651,
+        "ctime_ns": 1788629381792248245,
+        "device": 1796,
+        "inode": 1747240,
+        "mtime_ns": 1788629381792248245,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/san/LastTest.stdout",
+        "sha256": "b89a5d32cad5f4ac35b5ae593c6878ebf44ed5afd2d48551fb64f6dd82df48fe"
+      },
+      "source": {
+        "bytes": 14651,
+        "ctime_ns": 1788629380738248239,
+        "device": 1796,
+        "inode": 1747202,
+        "mtime_ns": 1788629380738248239,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_san/Testing/Temporary/LastTest.log",
+        "sha256": "b89a5d32cad5f4ac35b5ae593c6878ebf44ed5afd2d48551fb64f6dd82df48fe"
+      }
+    }
+  },
+  "errors": []
+}

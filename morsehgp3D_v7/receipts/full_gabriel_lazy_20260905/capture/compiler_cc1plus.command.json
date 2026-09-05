@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/g++",
+    "-print-prog-name=cc1plus"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.003714842001500074,
+  "ended_utc": "2026-09-05T17:25:34.699040+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "compiler_cc1plus",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788629134695246867,
+      "device": 1796,
+      "inode": 1745791,
+      "mtime_ns": 1788629134695246867,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/compiler_cc1plus.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 45,
+      "ctime_ns": 1788629134696246867,
+      "device": 1796,
+      "inode": 1745790,
+      "mtime_ns": 1788629134696246867,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/compiler_cc1plus.stdout",
+      "sha256": "3cf1bad0c4b2b5e0a6d569f800f949510f194bb594dcfaeddb1394fd3cc91758"
+    }
+  },
+  "started_utc": "2026-09-05T17:25:34.693678+00:00",
+  "status": "completed",
+  "timeout_seconds": 15
+}

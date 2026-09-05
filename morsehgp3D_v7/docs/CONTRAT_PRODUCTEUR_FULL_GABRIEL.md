@@ -8,6 +8,11 @@ produit le [certificat compact](CONTRAT_CERTIFICAT_FULL.md), sans appeler
 le constructeur de cœur F, sans catalogue Gamma exhaustif et sans journal
 des cofaces silencieuses. Il reste séparé du pipeline F et de sa CLI.
 Ce document décrit le contrat du composant, pas une promotion industrielle.
+Il décrit ci-dessous la politique historique eager, conservée par défaut.
+La nouvelle API séparée et ses différences de calendrier, de cache et de
+traitement J=1 sont spécifiées dans le
+[contrat du cache facultatif](CONTRAT_CACHE_FULL_PARESSEUX.md) ; ses preuves
+et mesures ne sont pas héritées des reçus historiques cités ici.
 
 ## 1. Autorité et domaine exacts
 

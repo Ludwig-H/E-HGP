@@ -1,0 +1,51 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_san",
+    "--show-only=json-v1",
+    "-R",
+    "^mhgp7_full_(certificate|gabriel)"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.03208487600204535,
+  "ended_utc": "2026-09-05T17:29:35.123254+00:00",
+  "environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "inventory",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788629375090248207,
+      "device": 1796,
+      "inode": 1747186,
+      "mtime_ns": 1788629375090248207,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/san/inventory.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 15303,
+      "ctime_ns": 1788629375112248207,
+      "device": 1796,
+      "inode": 1747185,
+      "mtime_ns": 1788629375112248207,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/san/inventory.stdout",
+      "sha256": "470bac42f93805b07080ab05b6df82c1545bb924589d78b9ddb738d5c2476fe1"
+    }
+  },
+  "started_utc": "2026-09-05T17:29:35.089084+00:00",
+  "status": "completed",
+  "timeout_seconds": 60
+}

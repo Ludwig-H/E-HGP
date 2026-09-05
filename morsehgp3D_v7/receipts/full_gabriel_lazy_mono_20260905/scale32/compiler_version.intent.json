@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/usr/bin/g++",
+    "--version"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/g++ --version",
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "expected_rc": [
+    0
+  ],
+  "id": "compiler_version",
+  "outer_timeout_seconds": 30,
+  "process_vm_max_bytes": 27917287424,
+  "started": "2026-09-05T19:06:54.689581+00:00"
+}

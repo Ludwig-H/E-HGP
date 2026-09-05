@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/git",
+    "--no-optional-locks",
+    "-C",
+    "/workspaces/E-HGP",
+    "status",
+    "--porcelain=v1",
+    "--untracked-files=normal",
+    "--",
+    "morsehgp3D_v7"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_code": 0,
+  "label": "git_status_after",
+  "started_utc": "2026-09-05T17:29:42.049301+00:00",
+  "timeout_seconds": 15
+}

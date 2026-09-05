@@ -1,0 +1,39 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/build_admission/full_gabriel_lazy_probe",
+    "--n=8",
+    "--s=8",
+    "--kmax=10",
+    "--alias-policy=eager",
+    "--unknown"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/taskset -c 0 /workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/build_admission/full_gabriel_lazy_probe --n=8 --s=8 --kmax=10 --alias-policy=eager --unknown",
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.004950079004629515,
+  "ended": "2026-09-05T17:36:50.859325+00:00",
+  "error": null,
+  "exit_code": 2,
+  "expected_rc": [
+    2
+  ],
+  "id": "reject_unknown",
+  "outer_timeout_seconds": 30,
+  "process_vm_max_bytes": 27917287424,
+  "started": "2026-09-05T17:36:50.854181+00:00",
+  "status": "completed",
+  "streams": {
+    "reject_unknown.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "reject_unknown.stdout": {
+      "bytes": 2709,
+      "sha256": "10fab8c53d699bc18ea483db87c05caadfa3f4e7ed1964b4103a70ded2086706"
+    }
+  }
+}

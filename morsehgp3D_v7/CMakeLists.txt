@@ -73,6 +73,33 @@ mhgp7_gate(mhgp7_full_gabriel_allocation 0 mhgp7_full_gabriel_allocation_gate
 mhgp7_gate(mhgp7_full_gabriel_allocation_bad_argument 2 mhgp7_full_gabriel_allocation_gate
            ARGS --unknown LABELS "gate;full_gabriel" TIMEOUT 60)
 
+# ---- Cache FULL facultatif : API distincte, cache zero et J=1 qualifies
+# sans reutiliser les recus du calendrier eager historique.
+mhgp7_product_executable(mhgp7_full_gabriel_lazy_gate tests/full_gabriel_lazy_gate.cpp)
+mhgp7_gate(mhgp7_full_gabriel_lazy 0 mhgp7_full_gabriel_lazy_gate
+           ARGS --selftest LABELS "gate;full_gabriel_lazy;oracle" TIMEOUT 60)
+mhgp7_gate(mhgp7_full_gabriel_lazy_rejects 0 mhgp7_full_gabriel_lazy_gate
+           ARGS --rejects LABELS "gate;full_gabriel_lazy;oracle" TIMEOUT 60)
+mhgp7_gate(mhgp7_full_gabriel_lazy_bad_argument 2 mhgp7_full_gabriel_lazy_gate
+           ARGS --unknown LABELS "gate;full_gabriel_lazy" TIMEOUT 60)
+mhgp7_product_executable(mhgp7_full_gabriel_lazy_allocation_gate tests/full_gabriel_lazy_allocation_gate.cpp)
+mhgp7_gate(mhgp7_full_gabriel_lazy_allocation 0 mhgp7_full_gabriel_lazy_allocation_gate
+           ARGS --selftest LABELS "gate;full_gabriel_lazy" TIMEOUT 60)
+mhgp7_gate(mhgp7_full_gabriel_lazy_allocation_bad_argument 2 mhgp7_full_gabriel_lazy_allocation_gate
+           ARGS --unknown LABELS "gate;full_gabriel_lazy" TIMEOUT 60)
+
+# Le digest est un outil de comparaison bench, pas une autorite scientifique.
+find_path(MHGP7_DIGEST_BOOST_INCLUDE_DIR boost/multiprecision/cpp_int.hpp)
+if(NOT MHGP7_DIGEST_BOOST_INCLUDE_DIR)
+  message(FATAL_ERROR "FULL digest oracle needs Boost headers (libboost-dev or MHGP7_DIGEST_BOOST_INCLUDE_DIR)")
+endif()
+mhgp7_product_executable(mhgp7_full_gabriel_digest_gate tests/full_gabriel_digest_gate.cpp)
+target_include_directories(mhgp7_full_gabriel_digest_gate SYSTEM PRIVATE ${MHGP7_DIGEST_BOOST_INCLUDE_DIR})
+mhgp7_gate(mhgp7_full_gabriel_digest 0 mhgp7_full_gabriel_digest_gate
+           ARGS --selftest LABELS "gate;full_gabriel_digest" TIMEOUT 60)
+mhgp7_gate(mhgp7_full_gabriel_digest_bad_argument 2 mhgp7_full_gabriel_digest_gate
+           ARGS --unknown LABELS "gate;full_gabriel_digest" TIMEOUT 60)
+
 # ---- Selftests du cœur (etablis en premier ; chaque porte a son code exact).
 mhgp7_executable(mhgp7_selftest tests/selftest.cpp)
 mhgp7_gate(mhgp7_arith_selftest 0 mhgp7_selftest ARGS --arith)

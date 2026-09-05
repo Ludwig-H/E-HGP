@@ -1,0 +1,12 @@
+{
+  "micro_receipt": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/micro_admission/receipt.json",
+  "micro_sha256": "9ce369e2d6085e1e7ac0b95c03a84f1793f42d0107a2b2a15474644d880ce1b2",
+  "no_probe_launched": true,
+  "paired": null,
+  "phase": "paired",
+  "qualification": {
+    "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/receipt.json",
+    "sha256": "28a203ea7f46699e9845252bc02f46c9719c2380cef3e4e95d1f5d935a0abdc8"
+  },
+  "started": "2026-09-05T17:39:52.136787+00:00"
+}

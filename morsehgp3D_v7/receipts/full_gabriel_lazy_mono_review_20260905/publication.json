@@ -1,0 +1,31 @@
+{
+  "aggregate_sha256": "3cfeead56198035ae3b8b0c0c9bef6248b6aeef960ffbbd0904875dd55a92550",
+  "capture_receipt_sha256": "443384fc27c7de4bab8fa91be3ba6d6525e02d577d764e5abd3cf22bbd38a651",
+  "engine_runs": 0,
+  "gcp_used": false,
+  "heavy_raw_files_copied": 0,
+  "public_status": "not_claimed",
+  "references": [
+    {
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/receipt.json",
+      "phase": "paired",
+      "public_reference": "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_mono_20260905/paired/receipt.json",
+      "sha256": "50f22273e11f9e04cf9707a1bb7f6068ff98476ad3903972f40ebbbbcc6a1e4c"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale16_resume/receipt.json",
+      "phase": "scale16",
+      "public_reference": "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_mono_20260905/scale16/receipt.json",
+      "sha256": "d3656155eabab7771ebccb32d6e72474d43b0932aaa109de20b421a8f8358c43"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale32_resume/receipt.json",
+      "phase": "scale32",
+      "public_reference": "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_mono_20260905/scale32/receipt.json",
+      "sha256": "86e0f1b2739ef2b9e25305e6e515b17227e0bd34c7d79001671a8ed4f4e2afcf"
+    }
+  ],
+  "review_script_sha256": "4bee087a7b5e5cc1f2d9950a027656e47ce8fccaf09255abf10e6ce2ec5ccd52",
+  "schema": "mhgp7-full-lazy-mono-review-publication-v1",
+  "status": "two_readonly_reviews_agree"
+}

@@ -1,0 +1,84 @@
+{
+  "controller_sha256": "528175a4fae239aa62630c32c27355be34db1092bef7f8cdb98e589022663bb4",
+  "expected_tests": {
+    "mhgp7_full_certificate": [
+      "mhgp7_full_certificate_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_certificate_rejects": [
+      "mhgp7_full_certificate_gate",
+      "--rejects",
+      0
+    ],
+    "mhgp7_full_gabriel": [
+      "mhgp7_full_gabriel_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_allocation": [
+      "mhgp7_full_gabriel_allocation_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_allocation_bad_argument": [
+      "mhgp7_full_gabriel_allocation_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_bad_argument": [
+      "mhgp7_full_gabriel_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_digest": [
+      "mhgp7_full_gabriel_digest_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_digest_bad_argument": [
+      "mhgp7_full_gabriel_digest_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_lazy": [
+      "mhgp7_full_gabriel_lazy_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_lazy_allocation": [
+      "mhgp7_full_gabriel_lazy_allocation_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_lazy_allocation_bad_argument": [
+      "mhgp7_full_gabriel_lazy_allocation_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_lazy_bad_argument": [
+      "mhgp7_full_gabriel_lazy_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_lazy_rejects": [
+      "mhgp7_full_gabriel_lazy_gate",
+      "--rejects",
+      0
+    ],
+    "mhgp7_full_gabriel_rejects": [
+      "mhgp7_full_gabriel_gate",
+      "--rejects",
+      0
+    ]
+  },
+  "source_sha256": "08dda37e9d9cd5d37ecb3fbda3ca2305d95858f68c742836a5559afdffc5e70e",
+  "targets": {
+    "mhgp7_full_certificate_gate": "tests/full_certificate_gate.cpp",
+    "mhgp7_full_gabriel_allocation_gate": "tests/full_gabriel_allocation_gate.cpp",
+    "mhgp7_full_gabriel_digest_gate": "tests/full_gabriel_digest_gate.cpp",
+    "mhgp7_full_gabriel_gate": "tests/full_gabriel_gate.cpp",
+    "mhgp7_full_gabriel_lazy_allocation_gate": "tests/full_gabriel_lazy_allocation_gate.cpp",
+    "mhgp7_full_gabriel_lazy_gate": "tests/full_gabriel_lazy_gate.cpp"
+  }
+}

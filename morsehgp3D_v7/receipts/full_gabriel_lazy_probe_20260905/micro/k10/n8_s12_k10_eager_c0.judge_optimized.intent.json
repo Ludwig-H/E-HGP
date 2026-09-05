@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/micro_admission/k10/n8_s12_k10_eager_c0.receipt.json"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/taskset -c 0 /home/codespace/.python/current/bin/python3 -B -O /workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py /workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/micro_admission/k10/n8_s12_k10_eager_c0.receipt.json",
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "expected_rc": [
+    0
+  ],
+  "id": "n8_s12_k10_eager_c0.judge_optimized",
+  "outer_timeout_seconds": 30,
+  "process_vm_max_bytes": 27917287424,
+  "started": "2026-09-05T17:36:54.700681+00:00"
+}

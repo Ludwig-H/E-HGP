@@ -1,0 +1,45 @@
+{
+  "aggregate_sha256": "3cfeead56198035ae3b8b0c0c9bef6248b6aeef960ffbbd0904875dd55a92550",
+  "child_environment": {
+    "GIT_CONFIG_GLOBAL": "/dev/null",
+    "GIT_CONFIG_NOSYSTEM": "1",
+    "GIT_OPTIONAL_LOCKS": "0",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "TZ": "UTC"
+  },
+  "cpu_affinity": [
+    0
+  ],
+  "paired": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/receipt.json=50f22273e11f9e04cf9707a1bb7f6068ff98476ad3903972f40ebbbbcc6a1e4c",
+  "references": [
+    {
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/receipt.json",
+      "phase": "paired",
+      "public_reference": "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_mono_20260905/paired/receipt.json",
+      "sha256": "50f22273e11f9e04cf9707a1bb7f6068ff98476ad3903972f40ebbbbcc6a1e4c"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale16_resume/receipt.json",
+      "phase": "scale16",
+      "public_reference": "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_mono_20260905/scale16/receipt.json",
+      "sha256": "d3656155eabab7771ebccb32d6e72474d43b0932aaa109de20b421a8f8358c43"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale32_resume/receipt.json",
+      "phase": "scale32",
+      "public_reference": "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_mono_20260905/scale32/receipt.json",
+      "sha256": "86e0f1b2739ef2b9e25305e6e515b17227e0bd34c7d79001671a8ed4f4e2afcf"
+    }
+  ],
+  "scales": [
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale16_resume/receipt.json=d3656155eabab7771ebccb32d6e72474d43b0932aaa109de20b421a8f8358c43",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale32_resume/receipt.json=86e0f1b2739ef2b9e25305e6e515b17227e0bd34c7d79001671a8ed4f4e2afcf"
+  ],
+  "timeout_seconds_each": 30
+}

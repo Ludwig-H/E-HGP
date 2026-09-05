@@ -1,0 +1,11 @@
+{
+  "attempt_id": "n16000_s8_k10_lazy_c1000000",
+  "attempt_success": true,
+  "capture_valid": true,
+  "certificate_digest": "e4ead0a425799162a14a978570b565d473bb26e3d9549e9266641aaa0926c80f",
+  "ended": "2026-09-05T19:06:06.266017+00:00",
+  "input_digest": "4acfbf3c6d6220b5d79d1e79dfd1fb3cf807482075d6a533f0a77d3112af0544",
+  "outcome": "complete_relative",
+  "started": "2026-09-05T19:06:06.125984+00:00",
+  "status": "completed"
+}

@@ -16,7 +16,7 @@ par K » n'est pas un calcul externe. L'étape 1 proposée s'arrête à un index
 immutable et un catalogue externe de candidats ; elle ne livre pas une
 tour exacte 10M complète.
 
-## Complément du 5 septembre : résidence du certificat FULL à concevoir
+## Complément du 5 septembre : certificat FULL compact, résidence massive ouverte
 
 L'[audit des niveaux utiles](AUDIT_NIVEAUX_GABRIEL_20260905.md) et sa
 [contrelecture indépendante](../audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md)
@@ -73,6 +73,22 @@ sur le domaine régulier ; elle n'est pas intégrée aux octets mesurés.
 Elle peut réduire la résidence tout en augmentant les MEB
 et census sur les absences du cache. Aucun gain de temps ni palier massif
 n'est déduit de cet échange.
+
+Le delta suivant implémente désormais cette séparation dans une
+[API lazy distincte](CONTRAT_CACHE_FULL_PARESSEUX.md), avec une
+[qualification ciblée close](../receipts/full_gabriel_lazy_20260905/README.md) :
+14/14 CTests Release et 14/14 ASan/UBSan. La capacité C borne seulement
+les entrées dérivées : les
+catalogues, tokens des minima, ancres des directes et successeurs restent
+obligatoires. La borne de résidence des alias ne garantit donc ni un
+plafond RSS ni le traitement de dizaines de millions de points. Les
+[mesures appariées closes](RESULTATS_MONO_FULL_LAZY_20260905.md) incluent
+le coût des nouveaux MEB/census et du digest, sans utiliser le chrono
+historique comme bras témoin. À 8k le pic du processus baisse d'environ
+28 %, sans gain de temps observé. Le palier 16k termine les dix ordres
+horizontaux, pic 2,590 GiB ; 32k refuse à K9 sur le budget de successeurs,
+pic 4,893 GiB de la tentative. Ces forêts sont détruites après lecture :
+aucune mémoire de tour intégrée conservée n'est qualifiée.
 
 ## 1. Notation et nature des conclusions
 

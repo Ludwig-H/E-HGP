@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "build/v7_first_c_20260905_controller/check.py",
+    "--execute",
+    "--expected-controller-sha256",
+    "662d648193f56fa4f2343ad4880aa06fe46840fadc4d629f0e492a114bf488be",
+    "attempt",
+    "--id",
+    "paired_s10_eager",
+    "--receipt",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/n8000_s10_k10_eager_c0.receipt.json",
+    "--receipt-sha256",
+    "be6c4ecc0de69f5ec0c92d0e4b7954e45f88f3c6d788027503d77c1f09fecdfd"
+  ],
+  "child_environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONHASHSEED": "0",
+    "TZ": "UTC"
+  },
+  "controller_sha256": "662d648193f56fa4f2343ad4880aa06fe46840fadc4d629f0e492a114bf488be",
+  "cwd": "/workspaces/E-HGP",
+  "engine_executed": false,
+  "gcp_used": false,
+  "public_status": "not_claimed",
+  "schema": "mhgp7-first-c-supplement-capture-v1",
+  "started": "2026-09-05T18:54:48.991040+00:00"
+}

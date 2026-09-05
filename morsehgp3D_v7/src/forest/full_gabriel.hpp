@@ -19,6 +19,8 @@ namespace mhgp7 {
 
 inline constexpr const char* kFullGabrielAuthority =
     "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues";
+inline constexpr const char* kFullGabrielEagerAliases = "eager_all_incident_facets_v1";
+inline constexpr const char* kFullGabrielLazyAliases = "lazy_first_c_strict_resolutions_v1";
 
 enum class FullGabrielStatus {
   kCompleteRelative, kInvalidInput, kUnsupportedDegeneracy,
@@ -33,17 +35,28 @@ struct FullGabrielLimits {
   u64 max_successor_steps = 0;
 };
 
+// A separate optional-cache contract, never a reinterpretation of max_aliases.
+// Retain the first C resolved non-minimum strict facets. When full (including
+// C=0), resolve without inserting; there is no eviction or budget reset.
+struct FullGabrielCacheLimits {
+  u64 max_entries = 0;
+};
+
 struct FullGabrielStats {
   u64 input_records = 0, face_visits = 0, aliases = 0, alias_hits = 0;
   u64 portal_requests = 0, chain_steps = 0, terminal_direct = 0;
   u64 max_chain_length = 0, normalized_anchors = 0, successor_steps = 0;
   u64 no_op_connections = 0, meb_calls = 0;
+  u64 minimum_lookups = 0, minimum_hits = 0;
+  u64 cache_lookups = 0, cache_hits = 0, cache_inserts = 0, cache_skips = 0;
+  u64 singleton_intruder_resolutions = 0, direct_lookups = 0;
   SilentIncidenceStats geometry{};
 };
 
 struct FullGabrielResult {
   FullGabrielStatus status = FullGabrielStatus::kInvalidInput;
   const char* reason = "full_gabriel_uninitialized";
+  const char* alias_policy = kFullGabrielEagerAliases;
   FullCertificate forest;
   FullGabrielStats stats;
 };
@@ -87,9 +100,10 @@ class Builder {
   Builder(const CloudIndex& index, unsigned order,
           const std::vector<ForestEvent>& minima,
           const std::vector<ForestEvent>& connections,
-          const FullGabrielLimits& limits, FullGabrielResult& result)
+          const FullGabrielLimits& limits, FullGabrielResult& result,
+          const FullGabrielCacheLimits* cache_limits = nullptr)
       : ix(index), k(order), minimum_source(minima), direct_source(connections),
-        caps(limits), out(result),
+        caps(limits), cache_caps(cache_limits), out(result),
         geometry_caps{0, 0, 0, limits.max_query_nodes, limits.max_meb_supports},
         geometry(index, empty_source, geometry_caps, &geometry_result) {}
   Builder(const Builder&) = delete;
@@ -97,6 +111,8 @@ class Builder {
   ~Builder() { out.stats.geometry = geometry_result.stats; }
 
   bool run() {
+    if (cache_caps && caps.max_aliases != 0)
+      return fail(FullGabrielStatus::kInvalidInput, "full_gabriel_lazy_alias_budget_conflict");
     // CloudIndex must come from the checked index constructor and remain
     // immutable. Its public internals are not an untrusted wire format.
     if (!ix.valid || ix.keys.empty() || ix.has_duplicate_positions() ||
@@ -175,6 +191,7 @@ class Builder {
   const std::vector<ForestEvent>& minimum_source;
   const std::vector<ForestEvent>& direct_source;
   const FullGabrielLimits& caps;
+  const FullGabrielCacheLimits* cache_caps;
   FullGabrielResult& out;
   std::vector<ForestEvent> empty_source;
   SilentIncidenceLimits geometry_caps;
@@ -274,17 +291,27 @@ class Builder {
       if (!normalize(it->second, current)) return false;
       return current == token || invariant("full_gabriel_inconsistent_alias");
     }
-    if (!charge(out.stats.aliases, caps.max_aliases, "full_gabriel_alias_budget")) return false;
+    if (cache_caps) {
+      if (aliases.size() >= cache_caps->max_entries) {
+        ++out.stats.cache_skips;  // Bounded by charged portal requests.
+        return true;
+      }
+      // Admission before allocation, retained even if emplace throws.
+      ++out.stats.cache_inserts;
+    } else if (!charge(out.stats.aliases, caps.max_aliases, "full_gabriel_alias_budget")) return false;
     aliases.emplace(f, token);
     return true;
   }
   bool install_births(const std::vector<FacetKey>& births) {
     if (!node_room(births.size())) return false;
     for (const FacetKey& f : births) {
-      if (aliases.find(f) != aliases.end()) return invariant("full_gabriel_late_minimum");
+      if (!cache_caps && aliases.find(f) != aliases.end())
+        return invariant("full_gabriel_late_minimum");
       const FullNodeId id = successor.size();
       successor.push_back(id);
-      if (!put_alias(f, id)) return false;
+      // Lazy minima are mandatory catalogue tokens, not optional cache entries.
+      // At K1 their IDs are exactly the offsets in the sorted points array.
+      if (!cache_caps && !put_alias(f, id)) return false;
     }
     return true;
   }
@@ -315,12 +342,67 @@ class Builder {
     return geometry.intruders(ball, sites, n, &foreign, &count) || geometry_failed();
   }
 
-  // Only an unknown STRICT facet enters here. With 0 or 1 intruder it
-  // should already have a minimum or an earlier direct-incidence alias.
+  bool minimum_anchor(const FacetKey& f, const ExactLevel& cut,
+                      FullNodeId prior_count, FullNodeId& root, bool& found) {
+    ++out.stats.minimum_lookups;  // At most the charged strict face visits.
+    found = false;
+    FullNodeId token = kAbsent;
+    if (k == 1) {
+      const auto it = std::lower_bound(points.begin(), points.end(), f.p[0]);
+      if (it == points.end() || *it != f.p[0])
+        return invariant("full_gabriel_missing_point_minimum");
+      token = static_cast<FullNodeId>(it - points.begin());
+    } else {
+      CofaceKey key;
+      key.n = f.k;
+      std::copy_n(f.p.begin(), f.k, key.p.begin());
+      const auto it = std::lower_bound(minima.begin(), minima.end(), key,
+          [](const Record& item, const CofaceKey& sought) { return item.key < sought; });
+      if (it == minima.end() || !(it->key == key)) return true;
+      if (compare_exact_level(it->event->level, cut) >= 0)
+        return invariant("full_gabriel_minimum_not_prior");
+      token = it->token;
+    }
+    if (token == kAbsent || token >= prior_count)
+      return invariant("full_gabriel_minimum_not_prior");
+    if (!normalize(token, root)) return false;
+    if (root >= prior_count) return invariant("full_gabriel_nonprior_anchor");
+    ++out.stats.minimum_hits;
+    found = true;
+    return true;
+  }
+
+  bool direct_anchor(const CofaceKey& key, const ExactLevel& level,
+                     const ExactLevel& cut, FullNodeId prior_count,
+                     FullNodeId& root, bool& found) {
+    ++out.stats.direct_lookups;  // At most one per charged MEB invocation.
+    const auto it = std::lower_bound(direct.begin(), direct.end(), key,
+        [](const Record& item, const CofaceKey& sought) { return item.key < sought; });
+    found = it != direct.end() && it->key == key;
+    if (!found) return true;
+    if (!same_exact_level(it->event->level, level))
+      return invariant("full_gabriel_terminal_level_mismatch");
+    if (compare_exact_level(it->event->level, cut) >= 0 || it->token == kAbsent ||
+        it->token >= prior_count)
+      return invariant("full_gabriel_terminal_not_prior");
+    if (!normalize(it->token, root)) return false;
+    return root < prior_count || invariant("full_gabriel_nonprior_anchor");
+  }
+
+  // Only STRICT facets enter. Eager requires a prior alias for J<=1.
+  // Lazy first checks mandatory minima, then its optional cache; a J=1 miss
+  // resolves through the closed anchor of F plus its unique global intruder.
   bool locate(const FacetKey& f, const ExactLevel& cut, FullNodeId prior_count, FullNodeId& root) {
+    if (cache_caps) {
+      bool found = false;
+      if (!minimum_anchor(f, cut, prior_count, root, found)) return false;
+      if (found) return true;
+      ++out.stats.cache_lookups;
+    }
     const auto known = aliases.find(f);
     if (known != aliases.end()) {
-      ++out.stats.alias_hits;  // At most the charged strict face visits.
+      if (cache_caps) ++out.stats.cache_hits;
+      else ++out.stats.alias_hits;  // At most the charged strict face visits.
       if (!normalize(known->second, root)) return false;
       return root < prior_count || invariant("full_gabriel_nonprior_anchor");
     }
@@ -338,7 +420,23 @@ class Builder {
     if (compare_exact_level(ball.level, cut) >= 0)
       return invariant("full_gabriel_facet_not_strict");
     if (!intruders(ball, sites, key.n, foreign, count)) return false;
-    if (count < 2) return invariant("full_gabriel_missing_prior_alias");
+    if (count < 2 && !cache_caps) return invariant("full_gabriel_missing_prior_alias");
+    // A missing minimum is an authority failure, never a late birth. Under
+    // the exact catalogue premise it would have been found before the MEB.
+    if (count == 0) return invariant("full_gabriel_minimum_missing");
+
+    if (count == 1) {
+      key.p[key.n++] = ix.point_id(foreign[0]);
+      silent_detail::sort_key(&key);
+      bool found = false;
+      if (!direct_anchor(key, ball.level, cut, prior_count, root, found)) return false;
+      if (!found) return invariant("full_gabriel_terminal_missing");
+      ++out.stats.singleton_intruder_resolutions;
+      ++out.stats.terminal_direct;
+      // The finished census of F proves the same ball/support for F+z.
+      // No second MEB, census, chain step, or same-lot parent is introduced.
+      return put_alias(f, root);
+    }
 
     // Q0 = F+z has exactly the certified ball/support of F. The other
     // certified intruder w remains foreign: no MEB or boundary rescan of Q0.
@@ -360,16 +458,9 @@ class Builder {
       if (!resolve(key, sites) || !miniball(sites, key.n, ball)) return false;
       if (compare_exact_level(ball.level, previous) >= 0)
         return invariant("full_gabriel_descent_not_strict");
-      const auto terminal = std::lower_bound(direct.begin(), direct.end(), key,
-          [](const Record& item, const CofaceKey& sought) { return item.key < sought; });
-      if (terminal != direct.end() && terminal->key == key) {
-        if (!same_exact_level(terminal->event->level, ball.level))
-          return invariant("full_gabriel_terminal_level_mismatch");
-        if (compare_exact_level(terminal->event->level, cut) >= 0 || terminal->token == kAbsent ||
-            terminal->token >= prior_count)
-          return invariant("full_gabriel_terminal_not_prior");
-        if (!normalize(terminal->token, root)) return false;
-        if (root >= prior_count) return invariant("full_gabriel_nonprior_anchor");
+      bool found = false;
+      if (!direct_anchor(key, ball.level, cut, prior_count, root, found)) return false;
+      if (found) {
         ++out.stats.terminal_direct;  // One terminal per charged request.
         return put_alias(f, root);
       }
@@ -435,6 +526,9 @@ class Builder {
     std::sort(batch.merges.begin(), batch.merges.end());
     if (!node_room(batch.births.size()) || !install_births(batch.births) ||
         !node_room(batch.merges.size())) return false;
+    if (cache_caps)
+      for (size_t i = mb; i < me; ++i)
+        minima[minimum_order[i]].token = prior_count + static_cast<FullNodeId>(i - mb);
     for (const auto& group : batch.merges) {
       const FullNodeId id = successor.size();
       successor.push_back(id);
@@ -448,6 +542,9 @@ class Builder {
       if (!normalize(r.token, root)) return false;
       r.token = root;
       if (root < prior_count) ++out.stats.no_op_connections;
+      // Lazy keeps this mandatory closed anchor, including no-op connections,
+      // but does not enumerate or install the direct coface's K+1 aliases.
+      if (cache_caps) continue;
       for (size_t drop = 0; drop < r.key.n; ++drop) {
         if (!charge(out.stats.face_visits, caps.max_face_visits, "full_gabriel_face_budget")) return false;
         if (!put_alias(facet_without(r.key, r.key.p[drop]), root)) return false;
@@ -468,6 +565,30 @@ inline FullGabrielResult build_full_gabriel_order(
   FullGabrielResult out;
   try {
     full_gabriel_detail::Builder builder(ix, k, minima, connections, limits, out);
+    if (!builder.run()) out.forest = FullCertificate{};
+  } catch (const std::bad_alloc&) {
+    out.forest = FullCertificate{};
+    out.status = FullGabrielStatus::kResourceExhausted;
+    out.reason = "full_gabriel_allocation_failed";
+  } catch (const std::length_error&) {
+    out.forest = FullCertificate{};
+    out.status = FullGabrielStatus::kResourceExhausted;
+    out.reason = "full_gabriel_size_overflow";
+  }
+  return out;
+}
+
+// Distinct optional-cache API. max_aliases MUST be zero: it is reserved for
+// the eager API above. Cache capacity zero is supported, not an error. All
+// other work limits and failure/authority semantics apply to the whole call.
+inline FullGabrielResult build_full_gabriel_order_lazy(
+    const CloudIndex& ix, unsigned k, const std::vector<ForestEvent>& minima,
+    const std::vector<ForestEvent>& connections, const FullGabrielLimits& limits,
+    const FullGabrielCacheLimits& cache_limits) {
+  FullGabrielResult out;
+  out.alias_policy = kFullGabrielLazyAliases;
+  try {
+    full_gabriel_detail::Builder builder(ix, k, minima, connections, limits, out, &cache_limits);
     if (!builder.run()) out.forest = FullCertificate{};
   } catch (const std::bad_alloc&) {
     out.forest = FullCertificate{};

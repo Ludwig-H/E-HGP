@@ -1,0 +1,148 @@
+{
+  "aggregate_sha256": "3cfeead56198035ae3b8b0c0c9bef6248b6aeef960ffbbd0904875dd55a92550",
+  "artifacts": {
+    "normal.command.json": "c3ede71d17a00663581d22af379c658f9da37736fbb8febca9b3baf5d1ddb7f8",
+    "normal.intent.json": "4113be666fd799e6d7f5001aae88873347076f1d2a8a3a4f4a776c50249f16ff",
+    "normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "normal.stdout": "f26ef485bf7aceecf9056b61bf3a348093841a93fa5fea8bfdf86a298f677dc5",
+    "optimized.command.json": "d2f14172e4a8f97aaf159894c93e3c4398af4140d682a0a0f5183eabe6660690",
+    "optimized.intent.json": "81db3c95f478ac3040b5057ad96f36d5c8e9f5418fec85f966f576d72580e491",
+    "optimized.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "optimized.stdout": "f26ef485bf7aceecf9056b61bf3a348093841a93fa5fea8bfdf86a298f677dc5",
+    "protocol/aggregate.py": "3cfeead56198035ae3b8b0c0c9bef6248b6aeef960ffbbd0904875dd55a92550",
+    "protocol/cache_policy_audit.py": "8f8aed03755d9c92775566b21d4fdd9dcba31f171adf4b83e9802a988a450370",
+    "protocol/capture_frozen.py": "417ccc3b47bb7591405f3af99bf7591bf2019794aa4535077436ce4889c4adfa",
+    "protocol/check_v7_receipt_publication.py": "32420385f487260e0706b3e649befca25cc95a9d45f17d22472c333870729580",
+    "protocol/probe_audit.py": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef",
+    "protocol/publication_common.py": "5c7f18a2577ee388a8f9652c3596ffe9ab9ade6bbc3101ae45f18fc91da6dfba",
+    "protocol/review.py": "4bee087a7b5e5cc1f2d9950a027656e47ce8fccaf09255abf10e6ce2ec5ccd52",
+    "request.json": "0ec1cda5c766f15c0eeafe9b066b29d9c4c1b983f94e00ae0420d0cf54d4e76e",
+    "tool_pins_after.json": "d61f7d0657220157952060573cce2ce45e6b0c4107c744ee098b595e2efe3426",
+    "tool_pins_before.json": "d61f7d0657220157952060573cce2ce45e6b0c4107c744ee098b595e2efe3426"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "0",
+        "/usr/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v7_full_lazy_20260905_recovery/aggregate.py",
+        "--execute",
+        "--expected-script-sha256",
+        "3cfeead56198035ae3b8b0c0c9bef6248b6aeef960ffbbd0904875dd55a92550",
+        "--paired",
+        "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/receipt.json=50f22273e11f9e04cf9707a1bb7f6068ff98476ad3903972f40ebbbbcc6a1e4c",
+        "--scale",
+        "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale16_resume/receipt.json=d3656155eabab7771ebccb32d6e72474d43b0932aaa109de20b421a8f8358c43",
+        "--scale",
+        "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale32_resume/receipt.json=86e0f1b2739ef2b9e25305e6e515b17227e0bd34c7d79001671a8ed4f4e2afcf"
+      ],
+      "capture": "separate_exact_bytes",
+      "command": "/usr/bin/taskset -c 0 /usr/bin/python3 -B /workspaces/E-HGP/build/v7_full_lazy_20260905_recovery/aggregate.py --execute --expected-script-sha256 3cfeead56198035ae3b8b0c0c9bef6248b6aeef960ffbbd0904875dd55a92550 --paired /workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/receipt.json=50f22273e11f9e04cf9707a1bb7f6068ff98476ad3903972f40ebbbbcc6a1e4c --scale /workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale16_resume/receipt.json=d3656155eabab7771ebccb32d6e72474d43b0932aaa109de20b421a8f8358c43 --scale /workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale32_resume/receipt.json=86e0f1b2739ef2b9e25305e6e515b17227e0bd34c7d79001671a8ed4f4e2afcf",
+      "cwd": "/workspaces/E-HGP",
+      "drain_term_grace_seconds": 10,
+      "elapsed_seconds": 0.9178550920000816,
+      "ended": "2026-09-05T19:17:02.325206+00:00",
+      "error": null,
+      "exit_code": 0,
+      "expected_rc": [
+        0
+      ],
+      "id": "normal",
+      "outer_timeout_seconds": 30,
+      "process_vm_max_bytes": 27917287424,
+      "started": "2026-09-05T19:17:01.407180+00:00",
+      "status": "completed",
+      "streams": {
+        "normal.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "normal.stdout": {
+          "bytes": 170678,
+          "sha256": "f26ef485bf7aceecf9056b61bf3a348093841a93fa5fea8bfdf86a298f677dc5"
+        }
+      }
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "0",
+        "/usr/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v7_full_lazy_20260905_recovery/aggregate.py",
+        "--execute",
+        "--expected-script-sha256",
+        "3cfeead56198035ae3b8b0c0c9bef6248b6aeef960ffbbd0904875dd55a92550",
+        "--paired",
+        "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/receipt.json=50f22273e11f9e04cf9707a1bb7f6068ff98476ad3903972f40ebbbbcc6a1e4c",
+        "--scale",
+        "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale16_resume/receipt.json=d3656155eabab7771ebccb32d6e72474d43b0932aaa109de20b421a8f8358c43",
+        "--scale",
+        "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale32_resume/receipt.json=86e0f1b2739ef2b9e25305e6e515b17227e0bd34c7d79001671a8ed4f4e2afcf"
+      ],
+      "capture": "separate_exact_bytes",
+      "command": "/usr/bin/taskset -c 0 /usr/bin/python3 -B -O /workspaces/E-HGP/build/v7_full_lazy_20260905_recovery/aggregate.py --execute --expected-script-sha256 3cfeead56198035ae3b8b0c0c9bef6248b6aeef960ffbbd0904875dd55a92550 --paired /workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/receipt.json=50f22273e11f9e04cf9707a1bb7f6068ff98476ad3903972f40ebbbbcc6a1e4c --scale /workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale16_resume/receipt.json=d3656155eabab7771ebccb32d6e72474d43b0932aaa109de20b421a8f8358c43 --scale /workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale32_resume/receipt.json=86e0f1b2739ef2b9e25305e6e515b17227e0bd34c7d79001671a8ed4f4e2afcf",
+      "cwd": "/workspaces/E-HGP",
+      "drain_term_grace_seconds": 10,
+      "elapsed_seconds": 0.7178670770003919,
+      "ended": "2026-09-05T19:17:03.044377+00:00",
+      "error": null,
+      "exit_code": 0,
+      "expected_rc": [
+        0
+      ],
+      "id": "optimized",
+      "outer_timeout_seconds": 30,
+      "process_vm_max_bytes": 27917287424,
+      "started": "2026-09-05T19:17:02.326277+00:00",
+      "status": "completed",
+      "streams": {
+        "optimized.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "optimized.stdout": {
+          "bytes": 170678,
+          "sha256": "f26ef485bf7aceecf9056b61bf3a348093841a93fa5fea8bfdf86a298f677dc5"
+        }
+      }
+    }
+  ],
+  "ended": "2026-09-05T19:17:03.056481+00:00",
+  "engine_runs": 0,
+  "gcp_used": false,
+  "json_equal": true,
+  "public_status": "not_claimed",
+  "reason": "two_readonly_reviews_agree_not_engine_qualification",
+  "references": [
+    {
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/receipt.json",
+      "phase": "paired",
+      "public_reference": "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_mono_20260905/paired/receipt.json",
+      "sha256": "50f22273e11f9e04cf9707a1bb7f6068ff98476ad3903972f40ebbbbcc6a1e4c"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale16_resume/receipt.json",
+      "phase": "scale16",
+      "public_reference": "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_mono_20260905/scale16/receipt.json",
+      "sha256": "d3656155eabab7771ebccb32d6e72474d43b0932aaa109de20b421a8f8358c43"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_scale32_resume/receipt.json",
+      "phase": "scale32",
+      "public_reference": "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_lazy_mono_20260905/scale32/receipt.json",
+      "sha256": "86e0f1b2739ef2b9e25305e6e515b17227e0bd34c7d79001671a8ed4f4e2afcf"
+    }
+  ],
+  "review_script_sha256": "4bee087a7b5e5cc1f2d9950a027656e47ce8fccaf09255abf10e6ce2ec5ccd52",
+  "schema": "mhgp7-full-lazy-readonly-review-capture-v1",
+  "sources_stable": true,
+  "started": "2026-09-05T19:17:01.407124+00:00",
+  "status": "completed",
+  "stdout_bytes_equal": true
+}

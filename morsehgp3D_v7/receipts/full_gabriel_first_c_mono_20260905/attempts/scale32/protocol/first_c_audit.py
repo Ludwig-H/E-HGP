@@ -1,0 +1,286 @@
+#!/usr/bin/env python3
+"""Read-only first-C supplement; the frozen FULLv2 judge remains mandatory.
+
+Usage: full_gabriel_cache_policy_audit.py [--selftest] PATH.receipt.json
+Exit 0: coherent supplement (a refused attempt remains refused).
+Exit 1: rejected data/selftest. Exit 2: invalid invocation.
+No engine, geometry oracle, benchmark, source mutation or external write.
+"""
+from __future__ import annotations
+
+import copy
+import hashlib
+import json
+from pathlib import Path
+import shlex
+import sys
+from typing import Any
+
+SCHEMA = 'mhgp7-full-gabriel-probe-v2'
+JUDGE_SHA = (
+    '8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef'
+)
+POLICIES = {
+    'eager': 'eager_all_incident_facets_v1',
+    'lazy': 'lazy_first_c_strict_resolutions_v1',
+}
+AUTHORITY = (
+    'full_horizontal_relative_to_supplied_complete_exact_regular_'
+    'gabriel_catalogues'
+)
+Json = dict[str, Any]
+
+
+def require(ok: bool, reason: str) -> None:
+    if not ok:
+        raise ValueError(reason)
+
+
+def unique(pairs: list[tuple[str, Any]]) -> Json:
+    output: Json = {}
+    for key, value in pairs:
+        require(key not in output, 'duplicate_key')
+        output[key] = value
+    return output
+
+
+def loads(text: str) -> Any:
+    return json.loads(
+        text, object_pairs_hook=unique,
+        parse_constant=lambda _: require(False, 'nonfinite'),
+    )
+
+
+def read(path: Path) -> bytes:
+    with path.open('rb') as stream:
+        data = stream.read(1048577)
+    require(len(data) <= 1048576, 'file_size_budget')
+    return data
+
+
+def capacity(value: Any) -> int:
+    require(type(value) is int and 0 <= value <= 1000000,
+            'capacity_domain')
+    return value
+
+
+def check_lazy(row: Json, cap: int, complete: bool) -> None:
+    """Only successful rows satisfy first-C; refusal counters are prefixes.
+
+    cache_inserts is charged before allocation. On a failed attempt it need
+    not equal residence, and an unfinished portal need not insert or skip.
+    """
+    capacity(cap)
+    for name in ('portal_requests', 'cache_inserts', 'cache_skips',
+                 'aliases', 'alias_hits'):
+        require(type(row[name]) is int and 0 <= row[name] <= 8000000,
+                'counter_domain')
+    portals = row['portal_requests']
+    inserted = row['cache_inserts']
+    skipped = row['cache_skips']
+    require(row['aliases'] == row['alias_hits'] == 0,
+            'lazy_historical_alias')
+    require(inserted <= cap, 'capacity_bound')
+    require(inserted + skipped <= portals, 'resolution_bound')
+    if complete:
+        require(inserted == min(cap, portals)
+                and skipped == max(0, portals - cap), 'first_c_success')
+
+
+def judge(raw: bytes, receipt: Json) -> Json:
+    lines = raw.decode('utf-8').splitlines()
+    end = next((i for i, line in enumerate(lines)
+                if not line.startswith('{')), len(lines))
+    rows = [loads(line) for line in lines[:end]]
+    require(len(rows) >= 2 and rows[0]['type'] == 'configuration'
+            and rows[-1]['type'] == 'terminal', 'terminal')
+    require([row['type'] for row in rows] == (
+        ['configuration'] + ['order'] * (len(rows) - 2) + ['terminal']
+    ), 'row_inventory')
+    config, terminal, orders = rows[0], rows[-1], rows[1:-1]
+    require(receipt['terminal'] == terminal and receipt['orders'] == orders,
+            'capture_binding')
+    for row in rows:
+        require(row['schema'] == SCHEMA, 'schema')
+    policy = next((key for key, value in POLICIES.items()
+                   if config['alias_policy'] == value), '')
+    require(policy in POLICIES, 'policy_domain')
+    cap = capacity(config['cache_entries'])
+    require(policy == 'lazy' or cap == 0, 'eager_capacity')
+    require(config['max_aliases_per_order'] == (
+        0 if policy == 'lazy' else 8000000
+    ) and config['cache_policy'] == (
+        'first_C_resolved_nonminimum_strict_facets'
+        if policy == 'lazy' else 'not_applicable'
+    ), 'policy_configuration')
+    for row in (config, terminal):
+        require(row['public_status'] == 'not_claimed'
+                and row['authority'] == AUTHORITY, 'scope')
+    for row in rows:
+        require(row['alias_policy'] == POLICIES[policy]
+                and type(row['cache_entries']) is int
+                and row['cache_entries'] == cap, 'policy_binding')
+    argv = shlex.split(receipt['command'])
+    require([v for v in argv if v.startswith('--alias-policy=')]
+            == [f'--alias-policy={policy}'], 'command_policy')
+    require([v for v in argv if v.startswith('--cache-entries=')]
+            == ([f'--cache-entries={cap}'] if policy == 'lazy' else []),
+            'command_capacity')
+    code = {
+        'complete_relative': 0, 'resource_exhausted': 2,
+        'unsupported_degeneracy': 2, 'invalid_input': 2,
+        'invariant_violated': 3,
+    }[terminal['outcome']]
+    require(type(receipt['exit_code']) is int
+            and receipt['exit_code'] == terminal['exit_code'] == code,
+            'exit_binding')
+    require(terminal['terminal_status'] == (
+        'completed' if code == 0 else 'failed'
+    ) and terminal['complete_requested_horizontal_orders'] is (code == 0),
+            'terminal_status')
+    require(code == 0 or terminal['certificate_digest'] == '',
+            'refusal_promotion')
+    require([row['k'] for row in orders] == list(range(1, len(orders) + 1)),
+            'order_sequence')
+    completed = checked = bounded = 0
+    for index, row in enumerate(orders):
+        require(row['provisional'] is True
+                and row['whole_tower_authority'] is False, 'provisional')
+        complete = row['outcome'] == 'complete_relative'
+        if complete:
+            completed += 1
+        else:
+            require(index == len(orders) - 1 and code != 0
+                    and row['outcome'] == terminal['outcome'],
+                    'refused_order_position')
+        if policy == 'lazy':
+            check_lazy(row, cap, complete)
+            checked += int(complete)
+            bounded += int(not complete)
+    require(terminal['completed_orders_diagnostic'] == completed,
+            'completed_prefix')
+    if code == 0:
+        require(completed == len(orders) == terminal['kmax_effective']
+                and completed > 0, 'success_prefix')
+    # This diagnostic may describe an unprinted failed order, e.g. a read
+    # allocation failure. It receives only prefix bounds, never first-C.
+    if policy == 'lazy':
+        check_lazy(terminal['last_order_work'], cap, False)
+    return {
+        'supplement_status': 'valid', 'attempt_success': code == 0,
+        'alias_policy': policy, 'cache_entries': cap,
+        'successful_lazy_orders_checked': checked,
+        'refused_lazy_orders_bounded': bounded,
+        'successful_orders_diagnostic': completed,
+        'requires_frozen_v2_judge_sha256': JUDGE_SHA,
+        'scope': 'first_C_counter_supplement_not_v2_replacement_or_oracle',
+    }
+
+
+def model(portals: Any, inserted: Any, skipped: Any) -> Json:
+    return {
+        'portal_requests': portals, 'cache_inserts': inserted,
+        'cache_skips': skipped, 'aliases': 0, 'alias_hits': 0,
+    }
+
+
+def selftest(raw: bytes, receipt: Json) -> Json:
+    real = judge(raw, receipt)
+    require(real['attempt_success'], 'selftest_requires_real_success')
+    positives = [
+        (0, 0, 0, 0), (0, 3, 0, 3), (1, 0, 0, 0),
+        (1, 1, 1, 0), (1, 3, 1, 2), (3, 2, 2, 0),
+        (3, 3, 3, 0), (3, 5, 3, 2), (1000000, 1000000, 1000000, 0),
+    ]
+    for cap, portals, inserted, skipped in positives:
+        check_lazy(model(portals, inserted, skipped), cap, True)
+    # Prefix before first allocation, admitted allocation then failure, and
+    # one completed resolution followed by an unfinished second portal.
+    for row in (model(1, 0, 0), model(1, 1, 0), model(2, 1, 0)):
+        check_lazy(row, 1, False)
+    mutations = [
+        ('C1_P1_I0_S1', 1, model(1, 0, 1), 'first_c_success'),
+        ('underfill', 3, model(2, 1, 1), 'first_c_success'),
+        ('all_skipped', 1, model(3, 0, 3), 'first_c_success'),
+        ('insert_with_C0', 0, model(1, 1, 0), 'capacity_bound'),
+        ('double_resolution', 1, model(1, 1, 1), 'resolution_bound'),
+        ('negative_insert', 1, model(1, -1, 2), 'counter_domain'),
+        ('float_portals', 1, model(1.0, 1, 0), 'counter_domain'),
+        ('boolean_insert', 1, model(1, True, 0), 'counter_domain'),
+        ('capacity_over_limit', 1000001, model(1, 1, 0), 'capacity_domain'),
+    ]
+    alias = model(1, 1, 0)
+    alias['aliases'] = 1
+    mutations.append(('historical_alias', 1, alias, 'lazy_historical_alias'))
+    killed = []
+    for name, cap, row, reason in mutations:
+        try:
+            check_lazy(row, cap, True)
+        except ValueError as error:
+            require(str(error) == reason, 'wrong_mutant_reason:' + name)
+            killed.append(name)
+    # Raw/mirror and policy binding mutations use the actual supplied bytes;
+    # the scalar models above are explicitly not fabricated engine receipts.
+    for name, reason in (('mirror', 'capture_binding'),
+                         ('policy', 'policy_binding')):
+        rec = copy.deepcopy(receipt)
+        rec['terminal']['cache_entries'] += 1
+        altered = raw
+        if name == 'policy':
+            altered = b'\n'.join(
+                json.dumps(rec['terminal']).encode()
+                if line.startswith(b'{') and loads(line.decode()).get('type')
+                == 'terminal' else line
+                for line in raw.splitlines()
+            ) + b'\n'
+        try:
+            judge(altered, rec)
+        except ValueError as error:
+            require(str(error) == reason, 'wrong_mutant_reason:' + name)
+            killed.append(name)
+    require(len(positives) == 9 and len(killed) == 12,
+            'selftest_nonvacuum')
+    return {
+        'supplement_status': 'selftests_passed', 'real_positive': 1,
+        'scalar_success_models': 9, 'scalar_refusal_prefix_models': 3,
+        'mutants_killed': killed,
+        'models_are_engine_receipts': False,
+        'scope': 'first_C_counter_supplement_not_v2_replacement_or_oracle',
+    }
+
+
+def main(argv: list[str]) -> int:
+    if (len(argv) not in (1, 2)
+            or (len(argv) == 2 and argv[0] != '--selftest')
+            or argv[-1].startswith('--')):
+        print(json.dumps({'supplement_status': 'invalid_arguments'}))
+        return 2
+    path = Path(argv[-1])
+    require(path.name.endswith('.receipt.json'), 'receipt_path')
+    raw_path = path.with_name(
+        path.name.removesuffix('.receipt.json') + '.raw.txt'
+    )
+    raw, metadata = read(raw_path), read(path)
+    receipt = loads(metadata.decode('utf-8'))
+    stream = receipt['streams'][raw_path.name]
+    raw_sha = hashlib.sha256(raw).hexdigest()
+    require(stream['bytes'] == len(raw) and stream['sha256'] == raw_sha,
+            'raw_stream_binding')
+    output = (selftest(raw, receipt) if len(argv) == 2
+              else judge(raw, receipt))
+    output.update(raw_sha256=raw_sha,
+                  receipt_sha256=hashlib.sha256(metadata).hexdigest())
+    print(json.dumps(output, sort_keys=True))
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except (ValueError, KeyError, TypeError, OSError, IndexError,
+            OverflowError, RecursionError) as error:
+        print(json.dumps(
+            {'supplement_status': 'invalid', 'reason': str(error)},
+            sort_keys=True,
+        ))
+        sys.exit(1)

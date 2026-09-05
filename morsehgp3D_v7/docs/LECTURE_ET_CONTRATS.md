@@ -54,8 +54,10 @@ Les rattachements silencieux restent à certifier pendant la construction,
 éventuellement par portails à la première consommation ; leurs cofaces et
 leurs niveaux ne sont pas nécessairement des événements à publier.
 Le premier [certificat structurel et son lecteur](CONTRAT_CERTIFICAT_FULL.md)
-sont livrés dans `src/forest/full_certificate.hpp`, avant le raccord d'un
-constructeur FULL ; leurs portes dédiées passent en Release et ASan/UBSan.
+sont livrés dans `src/forest/full_certificate.hpp`. Le
+[producteur horizontal FULL](CONTRAT_PRODUCTEUR_FULL_GABRIEL.md) et son
+[cache facultatif](CONTRAT_CACHE_FULL_PARESSEUX.md) sont désormais qualifiés
+séparément sur leur domaine relatif ; l'export intégré reste à raccorder.
 Un lecteur cohérent ne prouve pas la complétude géométrique de son producteur.
 Ce jalon ne promeut ni le moteur F ni l'ancien contrat public.
 

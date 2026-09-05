@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/n8000_s8_k10_eager_c0.receipt.json"
+  ],
+  "command": "/usr/bin/taskset -c 0 /usr/bin/python3 -B -O /workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py /workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/n8000_s8_k10_eager_c0.receipt.json",
+  "cwd": "/workspaces/E-HGP",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONHASHSEED": "0",
+    "TZ": "UTC"
+  },
+  "expected_exit_code": 0,
+  "started": "2026-09-05T18:44:51.608113+00:00",
+  "timeout_seconds": 20
+}

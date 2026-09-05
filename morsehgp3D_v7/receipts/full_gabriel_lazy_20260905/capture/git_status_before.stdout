@@ -1,0 +1,14 @@
+ M morsehgp3D_v7/CMakeLists.txt
+ M morsehgp3D_v7/PASSATION.md
+ M morsehgp3D_v7/README.md
+ M morsehgp3D_v7/docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md
+ M morsehgp3D_v7/docs/RESIDENCE_MASSIVE.md
+ M morsehgp3D_v7/src/forest/full_gabriel.hpp
+?? morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp
+?? morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py
+?? morsehgp3D_v7/bench/full_gabriel_semantic_digest.hpp
+?? morsehgp3D_v7/docs/CONTRAT_CACHE_FULL_PARESSEUX.md
+?? morsehgp3D_v7/receipts/full_lazy_development_20260905/
+?? morsehgp3D_v7/tests/full_gabriel_digest_gate.cpp
+?? morsehgp3D_v7/tests/full_gabriel_lazy_allocation_gate.cpp
+?? morsehgp3D_v7/tests/full_gabriel_lazy_gate.cpp

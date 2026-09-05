@@ -1,0 +1,35 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_cache_policy_audit.py",
+    "--selftest",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/micro_admission/k10/n8_s8_k10_lazy_c1.receipt.json"
+  ],
+  "command": "/usr/bin/taskset -c 0 /usr/bin/python3 -B -O /workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_cache_policy_audit.py --selftest /workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/micro_admission/k10/n8_s8_k10_lazy_c1.receipt.json",
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.16397661100018013,
+  "ended": "2026-09-05T18:44:50.486132+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONHASHSEED": "0",
+    "TZ": "UTC"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "label": "selftest_optimized",
+  "passed": true,
+  "started": "2026-09-05T18:44:50.322159+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "65d597ac08e8f19b59087e64557ad3ecafb4571edc8014691dc4189e2c5a4df8",
+  "timeout_seconds": 20
+}

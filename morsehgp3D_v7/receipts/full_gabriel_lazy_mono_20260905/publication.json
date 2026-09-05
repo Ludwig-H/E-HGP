@@ -1,0 +1,133 @@
+{
+  "build_receipt_sha256": "da11c743e63fb63acd00c25ce02080671a34a43fa2fa9cd473bb3068df2712a3",
+  "controller_sha256": "417ccc3b47bb7591405f3af99bf7591bf2019794aa4535077436ce4889c4adfa",
+  "engine_reexecuted": false,
+  "gcp_used": false,
+  "kind": "heavy",
+  "micro_receipt_sha256": "9ce369e2d6085e1e7ac0b95c03a84f1793f42d0107a2b2a15474644d880ce1b2",
+  "observations": [
+    {
+      "all_successful": true,
+      "attempts": [
+        {
+          "attempt_id": "n8000_s8_k10_eager_c0",
+          "attempt_success": true,
+          "capture_valid": true,
+          "certificate_digest": "e6e3fa51140fa9e39904c63dfaff18636ea7f10e058bfafdf1dc7b70b51fa625",
+          "ended": "2026-09-05T18:42:52.143695+00:00",
+          "input_digest": "b73744755477b18a5853084851075bb4e3e468ae7d1353c98d0991576a099639",
+          "outcome": "complete_relative",
+          "started": "2026-09-05T18:42:52.002408+00:00",
+          "status": "completed"
+        },
+        {
+          "attempt_id": "n8000_s8_k10_lazy_c1000000",
+          "attempt_success": true,
+          "capture_valid": true,
+          "certificate_digest": "e6e3fa51140fa9e39904c63dfaff18636ea7f10e058bfafdf1dc7b70b51fa625",
+          "ended": "2026-09-05T18:45:27.078153+00:00",
+          "input_digest": "b73744755477b18a5853084851075bb4e3e468ae7d1353c98d0991576a099639",
+          "outcome": "complete_relative",
+          "started": "2026-09-05T18:45:26.936219+00:00",
+          "status": "completed"
+        },
+        {
+          "attempt_id": "n8000_s10_k10_lazy_c1000000",
+          "attempt_success": true,
+          "capture_valid": true,
+          "certificate_digest": "e6e3fa51140fa9e39904c63dfaff18636ea7f10e058bfafdf1dc7b70b51fa625",
+          "ended": "2026-09-05T18:48:41.083208+00:00",
+          "input_digest": "b73744755477b18a5853084851075bb4e3e468ae7d1353c98d0991576a099639",
+          "outcome": "complete_relative",
+          "started": "2026-09-05T18:48:40.943186+00:00",
+          "status": "completed"
+        },
+        {
+          "attempt_id": "n8000_s10_k10_eager_c0",
+          "attempt_success": true,
+          "capture_valid": true,
+          "certificate_digest": "e6e3fa51140fa9e39904c63dfaff18636ea7f10e058bfafdf1dc7b70b51fa625",
+          "ended": "2026-09-05T18:53:52.456417+00:00",
+          "input_digest": "b73744755477b18a5853084851075bb4e3e468ae7d1353c98d0991576a099639",
+          "outcome": "complete_relative",
+          "started": "2026-09-05T18:53:52.310600+00:00",
+          "status": "completed"
+        },
+        {
+          "attempt_id": "n8000_s12_k10_eager_c0",
+          "attempt_success": true,
+          "capture_valid": true,
+          "certificate_digest": "e6e3fa51140fa9e39904c63dfaff18636ea7f10e058bfafdf1dc7b70b51fa625",
+          "ended": "2026-09-05T18:56:53.822406+00:00",
+          "input_digest": "b73744755477b18a5853084851075bb4e3e468ae7d1353c98d0991576a099639",
+          "outcome": "complete_relative",
+          "started": "2026-09-05T18:56:53.679100+00:00",
+          "status": "completed"
+        },
+        {
+          "attempt_id": "n8000_s12_k10_lazy_c1000000",
+          "attempt_success": true,
+          "capture_valid": true,
+          "certificate_digest": "e6e3fa51140fa9e39904c63dfaff18636ea7f10e058bfafdf1dc7b70b51fa625",
+          "ended": "2026-09-05T18:59:53.865061+00:00",
+          "input_digest": "b73744755477b18a5853084851075bb4e3e468ae7d1353c98d0991576a099639",
+          "outcome": "complete_relative",
+          "started": "2026-09-05T18:59:53.724222+00:00",
+          "status": "completed"
+        }
+      ],
+      "kind": "heavy",
+      "phase": "paired",
+      "reason": "closed_captures_not_SLO",
+      "semantic_digests_equal": true,
+      "status": "completed"
+    },
+    {
+      "all_successful": true,
+      "attempts": [
+        {
+          "attempt_id": "n16000_s8_k10_lazy_c1000000",
+          "attempt_success": true,
+          "capture_valid": true,
+          "certificate_digest": "e4ead0a425799162a14a978570b565d473bb26e3d9549e9266641aaa0926c80f",
+          "ended": "2026-09-05T19:06:06.266017+00:00",
+          "input_digest": "4acfbf3c6d6220b5d79d1e79dfd1fb3cf807482075d6a533f0a77d3112af0544",
+          "outcome": "complete_relative",
+          "started": "2026-09-05T19:06:06.125984+00:00",
+          "status": "completed"
+        }
+      ],
+      "kind": "heavy",
+      "phase": "scale16",
+      "reason": "closed_captures_not_SLO",
+      "semantic_digests_equal": true,
+      "status": "completed"
+    },
+    {
+      "all_successful": false,
+      "attempts": [
+        {
+          "attempt_id": "n32000_s8_k10_lazy_c1000000",
+          "attempt_success": false,
+          "capture_valid": true,
+          "certificate_digest": "",
+          "ended": "2026-09-05T19:16:04.059667+00:00",
+          "input_digest": "78b5dd1c4c244004dd801088efdb8a0d5ec638a6b37328ecb987939dde99805b",
+          "outcome": "resource_exhausted",
+          "started": "2026-09-05T19:16:03.918391+00:00",
+          "status": "completed"
+        }
+      ],
+      "kind": "heavy",
+      "phase": "scale32",
+      "reason": "closed_captures_not_SLO",
+      "semantic_digests_equal": false,
+      "status": "completed"
+    }
+  ],
+  "omissions": [],
+  "public_status": "not_claimed",
+  "scope": "horizontal_relative_orders_not_integrated_inter_k_tower",
+  "semantic_digest_is_not_geometry_or_catalogue_completeness_proof": true,
+  "status": "closed_captures_published_not_SLO"
+}

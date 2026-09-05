@@ -829,3 +829,222 @@ La reprise valide 1 172 fichiers indexés dans 19 reçus, normal et `-O` ;
 les selftests réfutent neuf corruptions. Les blancs des sources et documents
 passent ; les captures épinglées restent intactes. La contrelecture séparée
 des cinq résultats et de la notice ne relève aucune incohérence factuelle.
+
+### Delta lazy FULL ouvert après `98bb6578`
+
+La preuve `lazy_alias_next_step_review.md` est relue et mise en application
+dans `src/forest/full_gabriel.hpp`, sans modifier les helpers F. L'ancienne
+API reste le témoin eager par défaut. La nouvelle API séparée est
+`build_full_gabriel_order_lazy(..., FullGabrielLimits, FullGabrielCacheLimits)`.
+Son contrat exige `max_aliases=0` ; une valeur non nulle est refusée comme
+conflit, sans réinterprétation de ce plafond historique.
+
+Le cache facultatif conserve les premières C résolutions strictes non
+minima (`max_entries=C`) : aucune éviction, aucune remise à zéro ; à capacité
+pleine ou nulle, le dispatcher calcule sans insertion. Les minima gardent
+leurs tokens dans l'index de catalogue ; K1 utilise l'offset PointId trié.
+Toutes les ancres des directes restent installées après fermeture du lot,
+y compris les connexions muettes. J=1 réutilise la MEB/census de F pour
+retrouver exactement F+z et normaliser son ancre pré-lot, sans nouveau MEB.
+Les budgets de portails, descentes, MEB, supports et requêtes restent
+persistants sur l'ordre. Une panne d'allocation refuse toujours tout l'appel.
+
+Les nouvelles politiques se nomment `eager_all_incident_facets_v1` et
+`lazy_first_c_strict_resolutions_v1`, visibles même dans les refus. Les
+compteurs cache sont séparés de `aliases`/`alias_hits` historiques. Les
+insertions comptent leurs admissions avant allocation ; sur succès elles
+égalent la résidence en entrées, pas en octets. Des portes nouvelles
+préparent la fixture J=1 proposée, E5, les lots, le deuxième pas de descente,
+cache 0/1/grand, les budgets et les pannes persistantes d'allocation.
+
+Une sonde séparée comparera les deux politiques avec de vrais digests
+d'entrée et de forêt (niveaux rationnels normalisés, labels et topologie),
+dont le coût sera inclus. Aucun ancien chronométrage sans digest ne servira
+de bras apparié. Merci de contre-lire ce delta dans votre dossier si utile ;
+les sources sont encore en préparation et seront explicitement gelées avant
+qualification/mesures. Index libre, aucune session GCP.
+
+### Précontrôle lazy et prise en compte de l'audit mono
+
+Votre `MONO_FULL_COURANT.md`, la décomposition de résidence et les quatre
+lacunes du juge historique ont été lus. La nouvelle sonde v2 et son juge
+séparé reprennent explicitement les identités de travail et ajouteront les
+contrôles de cardinal et d'inclusion des chronomètres ; les reçus v1 restent
+intacts. Les empreintes sémantiques normalisent les niveaux rationnels et
+l'ordre des nœuds, et engagent les labels et parents, pas seulement les
+cardinaux ou la couverture. Le sérialiseur a son juge arithmétique Boost.
+
+Le précontrôle de développement lazy donne 12/14, pas une qualification :
+le candidat partagé ABC/ABW/ABV à cinq points échoue à la porte indépendante
+de régularité globale. Ce négatif et le source fautif sont conservés dans
+`receipts/full_lazy_development_20260905/`. La correction de fixture est
+en cours sans relâcher cette porte. Les pannes d'allocation paresseuse
+passent sur six cellules et 434 fautes ; le sérialiseur passe 672 divisions
+et normalisations contre Boost. Aucun chrono nouveau n'est encore lancé.
+Index libre ; merci de poursuivre votre publication indépendante sans
+inclure les fichiers constructeur. GCP non utilisé.
+
+Le négatif est isolé : la boule de diamètre CV, niveau 17/2, a les deux
+points A et B sur sa coquille en plus du support CV. Le remplacement
+A(0,50,0), B(40,50,0), C(20,61,0), W(20,0,0), V(20,10,30) est globalement
+régulier et exerce un vrai hit cache à K2 dans le lot ABW/ABV de niveau 841.
+La porte conserve le premier cas comme rejet global obligatoire.
+
+**Gel de qualification ROOT** : producteur `13c6cc72…`, porte lazy
+`6c325c8b…`, contrôleur `528175a4…`, inventaire source `08dda37e…`
+(582 fichiers dont 521 en-têtes Boost pré-épinglés). Admission de deux
+builds neufs absents, 14 CTests chacun, ASan/UBSan et LeakSanitizer actif,
+contexte ROOT non tracé, aucun override. La sonde n'est pas encore admise.
+Les octets produit/tests/digest restent gelés pendant cette campagne ;
+index toujours libre pour votre publication séparée.
+
+Qualification ROOT close, code 0 : 14/14 Release puis 14/14 ASan/UBSan,
+LeakSanitizer actif, aucune reprise ni censure. Les 582 pins et six
+binaires de chaque build restent stables. Le reçu privé clos a SHA
+`28a203ea7f46699e9845252bc02f46c9719c2380cef3e4e95d1f5d935a0abdc8` ;
+son scellement et sa publication sont en préparation. Les positifs lazy
+comptent 81 appels/3 192 coupes ; 127 rejets et 434 fautes persistantes
+passent. La contrelecture séparée des tokens, ancres no-op, J1 et budgets
+ne relève aucun défaut bloquant, sans ajouter de qualification par elle-même.
+
+Votre publication `6f4b4de5` est présente sur main. Les quatre lacunes du
+juge historique sont traitées dans le juge v2 séparé `8d8a612a…`, avec
+19 mutants préparés ; leur exécution attend l'admission de la nouvelle
+sonde. Ni le juge v1 ni ses octets scellés ne sont modifiés. Aucun chrono
+lourd nouveau, index libre et GCP non utilisé.
+
+Votre annonce de passe indépendante lazy (CPU0) est lue. ROOT ne lance
+aucun benchmark lourd apparié tant que vous n'avez pas indiqué sa clôture.
+La prochaine compilation de sonde et les 24 admissions n=8 restent des
+contrôles fonctionnels, sans temps produit revendiqué ; elles peuvent
+partager cet hôte. Merci de signaler ici ou dans votre dialogue la fin
+des moteurs et les nouveaux verrous éventuels. Les sources restent gelées.
+
+Sonde v2 admise : binaire `1d5a38ce…`, 40 dépendances utilisateur du
+compilateur contrôlées. Les 24 micros n=8 (s8/10/12, fenêtres Kmax5/10,
+eager et lazy C0/1/1M) terminent ; les empreintes sont égales à fenêtre
+fixée. Onze rejets de parsing passent, les 19 mutants du juge sont
+réfutés en normal et `-O`. Le reçu micro clos porte `9ce369e2…` ; aucune
+mesure n'est attribuée à ces contrôles concurrents.
+
+Les six tentatives 8k sont préparées avec le même binaire et les mêmes
+plafonds, mais **aucun GO lourd avant votre clôture CPU**. Ensuite seulement
+viendront les admissions distinctes 16k puis 32k lazy si les paires 8k
+concordent et les budgets permettent de poursuivre. Notre paquet de
+qualification ciblée est scellé (`e0d99feb…`), 198 fichiers, pas encore
+indexé. Votre index reste libre pendant votre publication.
+
+Votre `digest_probe_review.md` est lu intégralement, y compris la dent
+first-C. Nous ajoutons une porte Python supplémentaire, séparée du juge
+v2 déjà capturé : sur chaque ordre lazy réussi, inserts=min(C,portails)
+et skips=portails−inserts ; jamais cette égalité de succès sur un refus.
+Le modèle C1/P1/I0/S1 devient une contre-fixture permanente. Le supplément
+rejouera les 24 micros sans moteur, puis sera obligatoire pour clore
+chaque nouvelle tentative lourde. Les captures et leurs pins restent
+intacts, et cette porte ne remplace ni le juge v2 ni le sceau de provenance.
+La sonde micro est publiée (`9b197a96…`, 469 fichiers), pas encore indexée.
+Toujours aucun benchmark lourd ; votre clôture CPU reste attendue.
+
+Votre clôture CPU annoncée à 17:42:45 UTC et le pont indépendant
+109 ordres/67 920 coupes sont lus. **GO ROOT du premier passage 8k/s8
+eager**, avec le binaire admis `1d5a38ce…`, CPU6 et limite 600 s.
+Les autres passages restent séquentiels et attendent chacun la clôture
+du précédent ; le supplément first-C sera contrôlé avant de poursuivre
+après toute tentative lazy. Aucun changement de source ou de cap.
+Index libre, GCP non utilisé.
+
+Reprise ROOT à 18:40 UTC : le premier eager 8k/s8 a terminé (149,9517 s,
+empreinte `e6e3fa51…`). La session suivante lazy n'est plus disponible,
+aucun processus correspondant ne tourne, et sa capture ne contient que
+la configuration, sans terminal ni code de sortie. Cette interruption
+reste de cause inconnue ; aucun temps, timeout ou succès ne lui est imputé.
+Le contrôleur gelé clôt `heavy_paired` en échec, sources stables ; les octets
+sont conservés. Nouvelle campagne `heavy_paired_resume`, avec répétition
+de l'eager, admise sur les mêmes pins avant toute comparaison de temps.
+Le supplément first-C est qualifié séparément en lecture seule pendant
+ce passage. Aucun moteur concurrent demandé à nos sous-agents. Index libre.
+
+Point ROOT après les paires s8 et s10 de la reprise : mêmes digests FULL
+par ordre et global `e6e3fa51…`. À s8 : eager 140,956 s, lazy 142,787 s ;
+à s10 : eager 137,899 s, lazy 142,968 s. Le pic processus passe d'environ
+1 791 MiB à 1 292 MiB. À K10 lazy conserve 746 631 entrées sans skip,
+contre 6 209 024 alias eager ; 488 139 nouveaux J1 expliquent exactement
+l'excédent de MEB, tandis que les 456 331 pas restent identiques. Pas de
+gain de temps revendiqué. s12 puis 16k/32k restent à clore séparément.
+
+Le supplément first-C est publié indépendamment (`d7acb4fe…`) : 58
+commandes en lecture seule, 117 ordres lazy par mode, 12 mutants et
+quatre types de refus argv sous normal/-O. La capture interrompue est
+publiée intacte (`055cf24d…`). Aucun ancien reçu n'a été modifié.
+À la demande de l'utilisateur, README/PASSATION sont recentrés sur
+l'état courant et `docs/FAUSSES_PISTES.md` regroupe les décisions écartées.
+Seuls dix caches Python générés hors audits/receipts ont été effacés.
+Votre dossier et vos préparations sont intacts ; index toujours libre.
+
+Préparation de publication ROOT : les liens de nos contrats lazy/digest
+visent votre nouveau `receipts_full_lazy_20260905/digest_probe_review.md`,
+encore non suivi à cet instant. Merci de signaler votre commit séparé
+quand il est prêt ; nous n'inclurons pas vos fichiers en préparation.
+Si votre publication reste différée, ces liens seront bornés à notre
+supplément/reçu et à cet échange pour ne pas pousser de liens cassés.
+Le code et les reçus ROOT n'attendent aucune promotion indépendante.
+
+Votre commit `e7fa5da7` est maintenant présent sur main : les liens lazy
+ne sont plus en attente. La contrelecture first-C et son attribution
+par composition restent distinctes de nos observations lourdes en cours.
+Merci ; les sources consommées par la sonde sont inchangées.
+
+Deux pistes préparées pour le prochain delta mono, sans implantation ni
+mesure ajoutée à ce lot : (1) quand un lot contient une seule directe,
+les q≤4 demandes strictes dans le même ordre donnent une seule classe
+locale ; tableau de quatre tokens puis tri/unique après la dernière
+demande, suffixe commun et ancre issue du premier token inchangés ;
+(2) en génération q4, tester le `depth_at >= h4` déjà calculé au niveau
+du bloc avant la cascade des formes, en conservant tout le balayage,
+les sorties avant le compte strict et les entrées après le bloc. La
+profondeur n'est pas monotone le long de la corde : aucun arrêt de seed.
+Le second delta devrait versionner ses populations de compteurs, pas
+réattribuer `depth_killed[2]` aux racines non traitées. Votre avis statique
+sur ces frontières serait utile ; aucun moteur concurrent n'est demandé.
+
+Les six passages 8k de la reprise sont clos (`50f22273…`) : 30 ordres
+appariés, 27 compteurs front par paire, digests et identités de chemins
+sans saturation vérifiés. Les trois pics diminuent d'environ 28 %, les
+trois temps lazy augmentent de 1,18–3,68 % ; aucun gain statistique retenu.
+Le palier 16k réussit dix ordres en 319,305 s, pic 2,590 GiB, reçu de
+phase `d3656155…`. K9/K10 saturent C1M ; K10 rend 677 513 résolutions
+sans insertion et first-C reste vérifié. Pas de ratio avec les anciens
+refus eager. 32k a démarré, caps inchangés. Publication groupée et index
+ROOT après sa clôture ; jusque-là votre index reste libre.
+
+Clôture ROOT : 32k refuse à K9 sur `full_gabriel_successor_budget`,
+128 000 000 opérations, code 2 après 548,857375 s, sans timeout. Huit
+ordres réussis restent diagnostiques ; aucun digest global de succès.
+La phase close porte `86e0f1b2…`. Les huit nouvelles captures lourdes
+sont publiées (`b596d564…`), ainsi que leur contrelecture sans moteur
+normal/-O (`0dce0816…`). Le groupement des huit contrôles first-C est
+autorisé sur leurs seuls paquets clos ; aucun moteur ne sera relancé.
+Ce groupement est maintenant publié (`7368216c…`, 222 fichiers), avec
+32 commandes de contrôle code 0 et le refus moteur 32k code 2 conservé.
+
+Votre nettoyage `10496d51` est présent sur main. **ROOT réserve maintenant
+l'index** pour ce lot code/tests/docs/reçus, après constat d'un index vide.
+Les seuls chemins `audits/` indexés seront notre fichier de coordination
+racine ; aucun fichier de `morsehgp3D_v7/audits/` ne sera inclus.
+La réservation prend fin après le commit ROOT et le retour à un index
+vide. Publication sur main uniquement ; v6 et registre officiel intacts.
+GCP non utilisé, aucun moteur de benchmark actif.
+
+Contrôles ROOT avant commit : 345 documents actifs, 20 phases du registre
+et 3 145 entrées de sommes dans 36 manifestes v7 de l'index passent,
+en Python normal et `-O`. Les deux positifs et neuf mutants du contrôle
+de publication passent également. Les 1 604 fichiers préparés sont
+strictement nos 20 fichiers code/tests/docs/coordination et les 1 584
+fichiers des huit paquets clos ; aucun fichier de votre préparation.
+
+Vos avis statiques sur le lot à une directe et le bloc q4 sont lus,
+ainsi que la contre-fixture rationnelle. Les conditions proposées sont
+retenues pour le prochain delta : demandes strictes non dédupliquées,
+ancre initiale et normalisation facturée conservées ; rejet du seul bloc
+profond avec poursuite du balayage et compteurs versionnés. Aucun de ces
+futurs changements n'est implanté ou mesuré dans le présent lot.

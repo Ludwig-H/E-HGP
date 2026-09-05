@@ -1,0 +1,49 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_full_lazy_20260905_release",
+    "--show-only=json-v1",
+    "-R",
+    "^mhgp7_full_(certificate|gabriel)"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.03198968400101876,
+  "ended_utc": "2026-09-05T17:26:38.474138+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "inventory",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788629198441247222,
+      "device": 1796,
+      "inode": 1746563,
+      "mtime_ns": 1788629198441247222,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/release/inventory.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 15415,
+      "ctime_ns": 1788629198462247222,
+      "device": 1796,
+      "inode": 1746562,
+      "mtime_ns": 1788629198462247222,
+      "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/release/inventory.stdout",
+      "sha256": "0e184394863f1f5b64de2b48fa403f5f7ff83c23a43ef788b18b3dae1544578c"
+    }
+  },
+  "started_utc": "2026-09-05T17:26:38.439944+00:00",
+  "status": "completed",
+  "timeout_seconds": 60
+}

@@ -1,0 +1,57 @@
+{
+  "capture_bytes_modified": false,
+  "capture_receipt_sha256": "3b240de86626bc7824ba4d19c099304c25a1f57be97f8b95fc85efaf810a7a2a",
+  "capture_status": "failed",
+  "closure_timestamp_is_not_lazy_process_end": true,
+  "controller_closed_at": "2026-09-05T18:40:16.565220+00:00",
+  "eager": {
+    "attempt_id": "n8000_s8_k10_eager_c0",
+    "certificate_digest": "e6e3fa51140fa9e39904c63dfaff18636ea7f10e058bfafdf1dc7b70b51fa625",
+    "elapsed_before_terminal_ms": 149951.700395,
+    "exit_code": 0,
+    "input_digest": "b73744755477b18a5853084851075bb4e3e468ae7d1353c98d0991576a099639",
+    "max_rss_kib": 1833004,
+    "orders_complete_relative": 10,
+    "receipt_revalidated_readonly": true,
+    "status": "completed_unpaired_observation"
+  },
+  "engine_reexecuted": false,
+  "gcp_used": false,
+  "lazy": {
+    "attempt_id": "n8000_s8_k10_lazy_c1000000",
+    "captured_configuration_rows": 1,
+    "captured_order_rows": 0,
+    "captured_terminal_rows": 0,
+    "cause": "unknown",
+    "closure_snapshot_is_not_missing_attempt_after_snapshot": true,
+    "elapsed_seconds": null,
+    "ended": null,
+    "exit_code": null,
+    "missing_artifacts": [
+      "n8000_s8_k10_lazy_c1000000.command.json",
+      "n8000_s8_k10_lazy_c1000000.receipt.json",
+      "n8000_s8_k10_lazy_c1000000.verdict.json",
+      "n8000_s8_k10_lazy_c1000000.sources_after.json"
+    ],
+    "raw_bytes": 2378,
+    "raw_sha256": "ef33d314572e6f3bfd59bc3711d327fd2359c75ece78d3e3c4fc9213dbf1d512",
+    "started_from_intent": "2026-09-05T17:53:11.053777+00:00",
+    "status": "interrupted_capture_nonterminal",
+    "terminal_status": null,
+    "timeout_observed": null
+  },
+  "not_attempted": [
+    "n8000_s10_k10_lazy_c1000000",
+    "n8000_s10_k10_eager_c0",
+    "n8000_s12_k10_eager_c0",
+    "n8000_s12_k10_lazy_c1000000"
+  ],
+  "paired_comparison_available": false,
+  "public_status": "not_claimed",
+  "resume_policy": "new_campaign_repeat_eager_same_binary_and_source_pins_no_cross_campaign_ratio",
+  "schema": "mhgp7-full-lazy-interrupted-publication-v1",
+  "scope": "horizontal_relative_orders_not_integrated_inter_k_tower",
+  "slo_claim": false,
+  "speedup_ratio": null,
+  "status": "failed_paired_campaign_preserved_without_repair"
+}

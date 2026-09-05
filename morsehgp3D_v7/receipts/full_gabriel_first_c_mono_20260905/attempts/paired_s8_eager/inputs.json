@@ -1,0 +1,22 @@
+{
+  "/workspaces/E-HGP/build/v7_first_c_20260905_controller/check.py": {
+    "bytes": 17840,
+    "sha256": "662d648193f56fa4f2343ad4880aa06fe46840fadc4d629f0e492a114bf488be"
+  },
+  "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/n8000_s8_k10_eager_c0.raw.txt": {
+    "bytes": 19670,
+    "sha256": "bedfc9cc7eabd92518919a874ce187eab793bb017e6653d727f0edc12a0f4818"
+  },
+  "/workspaces/E-HGP/build/v7_full_lazy_20260905_probe_controller/heavy_paired_resume/n8000_s8_k10_eager_c0.receipt.json": {
+    "bytes": 22428,
+    "sha256": "493a675ae8449c92b4c7f9f1d8f85bf7092587eff093b99b1f806709688a2329"
+  },
+  "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_cache_policy_audit.py": {
+    "bytes": 11418,
+    "sha256": "8f8aed03755d9c92775566b21d4fdd9dcba31f171adf4b83e9802a988a450370"
+  },
+  "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py": {
+    "bytes": 32008,
+    "sha256": "8d8a612aa973cb79e60e97a6675f63684ddd8892cfc550716c20620c4d6930ef"
+  }
+}

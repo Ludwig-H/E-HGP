@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "git",
+    "rev-parse",
+    "HEAD"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "git rev-parse HEAD",
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.0052040160007891245,
+  "ended": "2026-09-05T17:35:39.890560+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_rc": [
+    0
+  ],
+  "id": "head",
+  "outer_timeout_seconds": 30,
+  "process_vm_max_bytes": 27917287424,
+  "started": "2026-09-05T17:35:39.885149+00:00",
+  "status": "completed",
+  "streams": {
+    "head.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "head.stdout": {
+      "bytes": 41,
+      "sha256": "6483a34a5bbd610c182db9310a7e9b5b8a91ed54e61698c288652a8f69d60163"
+    }
+  }
+}

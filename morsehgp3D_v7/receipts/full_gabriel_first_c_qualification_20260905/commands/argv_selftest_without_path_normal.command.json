@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_cache_policy_audit.py",
+    "--selftest"
+  ],
+  "command": "/usr/bin/taskset -c 0 /usr/bin/python3 -B /workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_cache_policy_audit.py --selftest",
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.04614364899998691,
+  "ended": "2026-09-05T18:44:50.231060+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONHASHSEED": "0",
+    "TZ": "UTC"
+  },
+  "error": null,
+  "exit_code": 2,
+  "expected_exit_code": 2,
+  "label": "argv_selftest_without_path_normal",
+  "passed": true,
+  "started": "2026-09-05T18:44:50.184928+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "683d40f10c9130b3e5e4676a11cf0bb9f84bc55e3b8aef065a45fe3909eac5af",
+  "timeout_seconds": 20
+}

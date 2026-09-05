@@ -1,0 +1,373 @@
+[
+  {
+    "argv": [
+      "/usr/bin/taskset",
+      "-c",
+      "0",
+      "/usr/bin/cmake",
+      "--version"
+    ],
+    "cwd": "/workspaces/E-HGP",
+    "elapsed_seconds": 0.01594933900196338,
+    "ended_utc": "2026-09-05T17:25:34.658277+00:00",
+    "environment": {
+      "LANG": "C",
+      "LC_ALL": "C",
+      "PATH": "/usr/bin:/bin",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "error": null,
+    "exit_code": 0,
+    "expected_code": 0,
+    "label": "cmake_version",
+    "raw": {
+      "stderr": {
+        "bytes": 0,
+        "ctime_ns": 1788629134642246866,
+        "device": 1796,
+        "inode": 1745775,
+        "mtime_ns": 1788629134642246866,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/cmake_version.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 91,
+        "ctime_ns": 1788629134651246866,
+        "device": 1796,
+        "inode": 1745774,
+        "mtime_ns": 1788629134651246866,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/cmake_version.stdout",
+        "sha256": "d3d5b682f3f5ef5b24a79ed8cf4b8c5868fc950dad48cab1be0e3c060a77f8ee"
+      }
+    },
+    "started_utc": "2026-09-05T17:25:34.640718+00:00",
+    "status": "completed",
+    "timeout_seconds": 15
+  },
+  {
+    "argv": [
+      "/usr/bin/taskset",
+      "-c",
+      "0",
+      "/usr/bin/ctest",
+      "--version"
+    ],
+    "cwd": "/workspaces/E-HGP",
+    "elapsed_seconds": 0.01584327199816471,
+    "ended_utc": "2026-09-05T17:25:34.677937+00:00",
+    "environment": {
+      "LANG": "C",
+      "LC_ALL": "C",
+      "PATH": "/usr/bin:/bin",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "error": null,
+    "exit_code": 0,
+    "expected_code": 0,
+    "label": "ctest_version",
+    "raw": {
+      "stderr": {
+        "bytes": 0,
+        "ctime_ns": 1788629134661246866,
+        "device": 1796,
+        "inode": 1745779,
+        "mtime_ns": 1788629134661246866,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/ctest_version.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 91,
+        "ctime_ns": 1788629134670246866,
+        "device": 1796,
+        "inode": 1745778,
+        "mtime_ns": 1788629134670246866,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/ctest_version.stdout",
+        "sha256": "fd61d05e1e746f5652d87e0b6c9bafa334e95b89d1e53b1bfeb7d2af3ab208dc"
+      }
+    },
+    "started_utc": "2026-09-05T17:25:34.660397+00:00",
+    "status": "completed",
+    "timeout_seconds": 15
+  },
+  {
+    "argv": [
+      "/usr/bin/taskset",
+      "-c",
+      "0",
+      "/usr/bin/g++",
+      "--version"
+    ],
+    "cwd": "/workspaces/E-HGP",
+    "elapsed_seconds": 0.0037007409991929308,
+    "ended_utc": "2026-09-05T17:25:34.684958+00:00",
+    "environment": {
+      "LANG": "C",
+      "LC_ALL": "C",
+      "PATH": "/usr/bin:/bin",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "error": null,
+    "exit_code": 0,
+    "expected_code": 0,
+    "label": "compiler_version",
+    "raw": {
+      "stderr": {
+        "bytes": 0,
+        "ctime_ns": 1788629134680246867,
+        "device": 1796,
+        "inode": 1745783,
+        "mtime_ns": 1788629134680246867,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/compiler_version.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 246,
+        "ctime_ns": 1788629134682246867,
+        "device": 1796,
+        "inode": 1745782,
+        "mtime_ns": 1788629134682246867,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/compiler_version.stdout",
+        "sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8"
+      }
+    },
+    "started_utc": "2026-09-05T17:25:34.679794+00:00",
+    "status": "completed",
+    "timeout_seconds": 15
+  },
+  {
+    "argv": [
+      "/usr/bin/taskset",
+      "-c",
+      "0",
+      "/usr/bin/g++",
+      "-dumpmachine"
+    ],
+    "cwd": "/workspaces/E-HGP",
+    "elapsed_seconds": 0.0036835149949183688,
+    "ended_utc": "2026-09-05T17:25:34.691903+00:00",
+    "environment": {
+      "LANG": "C",
+      "LC_ALL": "C",
+      "PATH": "/usr/bin:/bin",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "error": null,
+    "exit_code": 0,
+    "expected_code": 0,
+    "label": "compiler_target",
+    "raw": {
+      "stderr": {
+        "bytes": 0,
+        "ctime_ns": 1788629134687246867,
+        "device": 1796,
+        "inode": 1745787,
+        "mtime_ns": 1788629134687246867,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/compiler_target.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 17,
+        "ctime_ns": 1788629134689246867,
+        "device": 1796,
+        "inode": 1745786,
+        "mtime_ns": 1788629134689246867,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/compiler_target.stdout",
+        "sha256": "08cababdf891ccbf96eb376f1e84f279f70302fb13d84e5f98637becdfc6d989"
+      }
+    },
+    "started_utc": "2026-09-05T17:25:34.686756+00:00",
+    "status": "completed",
+    "timeout_seconds": 15
+  },
+  {
+    "argv": [
+      "/usr/bin/taskset",
+      "-c",
+      "0",
+      "/usr/bin/g++",
+      "-print-prog-name=cc1plus"
+    ],
+    "cwd": "/workspaces/E-HGP",
+    "elapsed_seconds": 0.003714842001500074,
+    "ended_utc": "2026-09-05T17:25:34.699040+00:00",
+    "environment": {
+      "LANG": "C",
+      "LC_ALL": "C",
+      "PATH": "/usr/bin:/bin",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "error": null,
+    "exit_code": 0,
+    "expected_code": 0,
+    "label": "compiler_cc1plus",
+    "raw": {
+      "stderr": {
+        "bytes": 0,
+        "ctime_ns": 1788629134695246867,
+        "device": 1796,
+        "inode": 1745791,
+        "mtime_ns": 1788629134695246867,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/compiler_cc1plus.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 45,
+        "ctime_ns": 1788629134696246867,
+        "device": 1796,
+        "inode": 1745790,
+        "mtime_ns": 1788629134696246867,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/compiler_cc1plus.stdout",
+        "sha256": "3cf1bad0c4b2b5e0a6d569f800f949510f194bb594dcfaeddb1394fd3cc91758"
+      }
+    },
+    "started_utc": "2026-09-05T17:25:34.693678+00:00",
+    "status": "completed",
+    "timeout_seconds": 15
+  },
+  {
+    "argv": [
+      "/usr/bin/taskset",
+      "-c",
+      "0",
+      "/usr/bin/make",
+      "--version"
+    ],
+    "cwd": "/workspaces/E-HGP",
+    "elapsed_seconds": 0.0036592690012184903,
+    "ended_utc": "2026-09-05T17:25:34.706300+00:00",
+    "environment": {
+      "LANG": "C",
+      "LC_ALL": "C",
+      "PATH": "/usr/bin:/bin",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "error": null,
+    "exit_code": 0,
+    "expected_code": 0,
+    "label": "make_version",
+    "raw": {
+      "stderr": {
+        "bytes": 0,
+        "ctime_ns": 1788629134702246867,
+        "device": 1796,
+        "inode": 1745795,
+        "mtime_ns": 1788629134702246867,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/make_version.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 297,
+        "ctime_ns": 1788629134703246867,
+        "device": 1796,
+        "inode": 1745794,
+        "mtime_ns": 1788629134703246867,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/make_version.stdout",
+        "sha256": "8ee498ee2fc27e8dcdf99191b454077df95e3840d841ec94321748b6d7f36819"
+      }
+    },
+    "started_utc": "2026-09-05T17:25:34.701352+00:00",
+    "status": "completed",
+    "timeout_seconds": 15
+  },
+  {
+    "argv": [
+      "/usr/bin/taskset",
+      "-c",
+      "0",
+      "/usr/bin/git",
+      "--no-optional-locks",
+      "-C",
+      "/workspaces/E-HGP",
+      "rev-parse",
+      "HEAD"
+    ],
+    "cwd": "/workspaces/E-HGP",
+    "elapsed_seconds": 0.0036881729974993505,
+    "ended_utc": "2026-09-05T17:25:34.713171+00:00",
+    "environment": {
+      "LANG": "C",
+      "LC_ALL": "C",
+      "PATH": "/usr/bin:/bin",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "error": null,
+    "exit_code": 0,
+    "expected_code": 0,
+    "label": "git_head_before",
+    "raw": {
+      "stderr": {
+        "bytes": 0,
+        "ctime_ns": 1788629134709246867,
+        "device": 1796,
+        "inode": 1745799,
+        "mtime_ns": 1788629134709246867,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/git_head_before.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 41,
+        "ctime_ns": 1788629134711246867,
+        "device": 1796,
+        "inode": 1745798,
+        "mtime_ns": 1788629134711246867,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/git_head_before.stdout",
+        "sha256": "6483a34a5bbd610c182db9310a7e9b5b8a91ed54e61698c288652a8f69d60163"
+      }
+    },
+    "started_utc": "2026-09-05T17:25:34.708269+00:00",
+    "status": "completed",
+    "timeout_seconds": 15
+  },
+  {
+    "argv": [
+      "/usr/bin/taskset",
+      "-c",
+      "0",
+      "/usr/bin/git",
+      "--no-optional-locks",
+      "-C",
+      "/workspaces/E-HGP",
+      "status",
+      "--porcelain=v1",
+      "--untracked-files=normal",
+      "--",
+      "morsehgp3D_v7"
+    ],
+    "cwd": "/workspaces/E-HGP",
+    "elapsed_seconds": 0.03189475299586775,
+    "ended_utc": "2026-09-05T17:25:34.748307+00:00",
+    "environment": {
+      "LANG": "C",
+      "LC_ALL": "C",
+      "PATH": "/usr/bin:/bin",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "error": null,
+    "exit_code": 0,
+    "expected_code": 0,
+    "label": "git_status_before",
+    "raw": {
+      "stderr": {
+        "bytes": 0,
+        "ctime_ns": 1788629134716246867,
+        "device": 1796,
+        "inode": 1745803,
+        "mtime_ns": 1788629134716246867,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/git_status_before.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 672,
+        "ctime_ns": 1788629134740246867,
+        "device": 1796,
+        "inode": 1745802,
+        "mtime_ns": 1788629134740246867,
+        "path": "/workspaces/E-HGP/build/v7_full_lazy_20260905_controller/runs/git_status_before.stdout",
+        "sha256": "06e4b969cd99cc238985d8b85f3cf6e27d2a7e3ca76792da2f105ff4a4ce3b42"
+      }
+    },
+    "started_utc": "2026-09-05T17:25:34.714883+00:00",
+    "status": "completed",
+    "timeout_seconds": 15
+  }
+]
