@@ -1,0 +1,20 @@
+{
+  "schema": "mhgp7-full-mono-analysis-source-pins-v1",
+  "source_head": "98bb657835c66f729dc69c33b34d99311348c345",
+  "captured_utc": "2026-09-05T17:00:39.555415+00:00",
+  "pins": {
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n16000_s8_k10.raw.txt": "c4f0920761ce0241dfbac3b49d4e20e2c73f2841daae770e09a4b1e1fd7cf575",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s12_k10.raw.txt": "9e1e71e4643bc51c6db0d85d99ffcc9a39ce5066c6c49ab86b0a038e33571ffd",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s8_k10.raw.txt": "91dc953778f3a92beedfc10433e0ae96b6cdc3cfad432c99e949b1f1668c1a9b",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n32000_s8_k10.raw.txt": "c90ade04126bc13b9a9b176885aa4e7d7eed280bbab42e7b99d3e17a19f485c1",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s10_k10.raw.txt": "65c5a25542af5b4a812360ac5001a169693b59f99777827fd5e30496922a5723",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n16000_s8_k10.receipt.json": "31d7b5646b971518f60cc84357afc5916fef3f9033848ab37b51b7e722657ff7",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s8_k10.receipt.json": "aa1ca87d89cbb2e8a401642c01ddc0e64710d69433e087ed3d973b8d88d7a4f6",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s12_k10.receipt.json": "11d35a65e9b115f377690d1e5a0cdbfd7d6fbab133fd8e678d490845fc1d7f98",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n32000_s8_k10.receipt.json": "a4f9c5dacad1fc9460c9259230bae15fe4ae52058b2348da188df4ca4f2cfd5d",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s10_k10.receipt.json": "05adb5c29ccc13cac85f809edd9e56f53eb546cfc4ebf9cc7848a5761b19dcd3",
+    "morsehgp3D_v7/audits/receipts_full_producer_20260905/source/morsehgp3D_v7/src/forest/full_gabriel.hpp": "e02d163ced2074d6b91fe810c112fb946aca56a7724c8e2ae586e3baee97c170",
+    "morsehgp3D_v7/bench/full_gabriel_probe.cpp": "f3de0d3ca850611f328cb41b251ec66c914afe473eed8e55f89eb889898f1849"
+  },
+  "note": "Historical producer source from sealed literal capture, because current worktree has a new lazy delta. Input observations belong to e02d only."
+}

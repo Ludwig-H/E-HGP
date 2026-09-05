@@ -1,0 +1,275 @@
+{
+  "additional_corruptions": [
+    {
+      "captured_judge_result": {
+        "attempt_success": true,
+        "audit_status": "valid",
+        "orders_complete": 10,
+        "outcome": "complete_relative",
+        "scope": "receipt_consistency_only_not_geometry_or_forest_equality"
+      },
+      "changed_raw_sha256": "4fab97a0b9f34d586cee34e3ed46cad8651ad01eb215ddcfa4e9db9cd9f22d57",
+      "independent_failures": [
+        "k1:minimum_catalogue_binding",
+        "k1:merge_arity_forest_bound",
+        "k1:eager_alias_decomposition"
+      ],
+      "kind": "audit_data_corruption_not_product_mutant",
+      "name": "impossible_minima",
+      "old_values": {
+        "certificate_minima": 8000
+      },
+      "raw_and_receipt_changed_together": true,
+      "replacement_values": {
+        "certificate_minima": 1
+      },
+      "zero_based_raw_row": 1
+    },
+    {
+      "captured_judge_result": {
+        "attempt_success": true,
+        "audit_status": "valid",
+        "orders_complete": 10,
+        "outcome": "complete_relative",
+        "scope": "receipt_consistency_only_not_geometry_or_forest_equality"
+      },
+      "changed_raw_sha256": "044340e15273f796a20b2649f72ab4c8a500c81e12bf7e5257d876b7de89f6bf",
+      "independent_failures": [
+        "k2:physical_meb_decomposition"
+      ],
+      "kind": "audit_data_corruption_not_product_mutant",
+      "name": "erased_mirrored_meb_work",
+      "old_values": {
+        "geometry_meb_calls": 7622,
+        "meb_calls": 7622
+      },
+      "raw_and_receipt_changed_together": true,
+      "replacement_values": {
+        "geometry_meb_calls": 0,
+        "meb_calls": 0
+      },
+      "zero_based_raw_row": 2
+    },
+    {
+      "captured_judge_result": {
+        "attempt_success": true,
+        "audit_status": "valid",
+        "orders_complete": 10,
+        "outcome": "complete_relative",
+        "scope": "receipt_consistency_only_not_geometry_or_forest_equality"
+      },
+      "changed_raw_sha256": "70e97d3b4d6fb6b9da17526252ffa67bdefbc8eea6d7611982b798344b22fed5",
+      "independent_failures": [
+        "k1:eager_alias_decomposition"
+      ],
+      "kind": "audit_data_corruption_not_product_mutant",
+      "name": "aliases_plus_one_below_cap",
+      "old_values": {
+        "aliases": 8000
+      },
+      "raw_and_receipt_changed_together": true,
+      "replacement_values": {
+        "aliases": 8001
+      },
+      "zero_based_raw_row": 1
+    },
+    {
+      "captured_judge_result": {
+        "attempt_success": true,
+        "audit_status": "valid",
+        "orders_complete": 10,
+        "outcome": "complete_relative",
+        "scope": "receipt_consistency_only_not_geometry_or_forest_equality"
+      },
+      "changed_raw_sha256": "81110b26fe5e2a35567cdedee5fce403a0aef2df16a14d988f26240bcde03095",
+      "independent_failures": [
+        "terminal:stage_exceeds_elapsed",
+        "terminal:subtracted_diagnostic"
+      ],
+      "kind": "audit_data_corruption_not_product_mutant",
+      "name": "erased_elapsed",
+      "old_values": {
+        "elapsed_before_terminal_ms": 150776.472014
+      },
+      "raw_and_receipt_changed_together": true,
+      "replacement_values": {
+        "elapsed_before_terminal_ms": 0
+      },
+      "zero_based_raw_row": 11
+    }
+  ],
+  "additional_identities": {
+    "failures_on_nominal_receipts": 0,
+    "not_a_forest_or_geometry_oracle": true,
+    "refused_order_rows_excluded_from_success_identities": 2,
+    "successful_order_rows_checked": 44,
+    "terminal_rows_checked": 5,
+    "timing_print_tolerance_ms": "0.000003"
+  },
+  "canonical_commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_mono_20260905/judge_runs/judge_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s8_k10.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "attempt_success": true,
+        "audit_status": "valid",
+        "orders_complete": 10,
+        "outcome": "complete_relative",
+        "raw_sha256": "91dc953778f3a92beedfc10433e0ae96b6cdc3cfad432c99e949b1f1668c1a9b",
+        "scope": "receipt_consistency_only_not_geometry_or_forest_equality"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_mono_20260905/judge_runs/judge_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n16000_s8_k10.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "attempt_success": false,
+        "audit_status": "valid",
+        "orders_complete": 8,
+        "outcome": "resource_exhausted",
+        "raw_sha256": "c4f0920761ce0241dfbac3b49d4e20e2c73f2841daae770e09a4b1e1fd7cf575",
+        "scope": "receipt_consistency_only_not_geometry_or_forest_equality"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_mono_20260905/judge_runs/judge_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n32000_s8_k10.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "attempt_success": false,
+        "audit_status": "valid",
+        "orders_complete": 6,
+        "outcome": "resource_exhausted",
+        "raw_sha256": "c90ade04126bc13b9a9b176885aa4e7d7eed280bbab42e7b99d3e17a19f485c1",
+        "scope": "receipt_consistency_only_not_geometry_or_forest_equality"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_mono_20260905/judge_runs/judge_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s10_k10.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "attempt_success": true,
+        "audit_status": "valid",
+        "orders_complete": 10,
+        "outcome": "complete_relative",
+        "raw_sha256": "65c5a25542af5b4a812360ac5001a169693b59f99777827fd5e30496922a5723",
+        "scope": "receipt_consistency_only_not_geometry_or_forest_equality"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_mono_20260905/judge_runs/judge_at_review.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s12_k10.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "attempt_success": true,
+        "audit_status": "valid",
+        "orders_complete": 10,
+        "outcome": "complete_relative",
+        "raw_sha256": "9e1e71e4643bc51c6db0d85d99ffcc9a39ce5066c6c49ab86b0a038e33571ffd",
+        "scope": "receipt_consistency_only_not_geometry_or_forest_equality"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_mono_20260905/judge_runs/judge_at_review.py",
+        "--selftest",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s8_k10.receipt.json"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": {
+        "audit_status": "selftests_passed",
+        "mutants_killed": [
+          "missing_terminal",
+          "promoted_status",
+          "cap_exceeded",
+          "skipped_k",
+          "timing_nan",
+          "altered_receipt",
+          "protocol_kmax",
+          "missing_worker",
+          "last_work_disagreement"
+        ],
+        "raw_sha256": "91dc953778f3a92beedfc10433e0ae96b6cdc3cfad432c99e949b1f1668c1a9b",
+        "real_positive": 1,
+        "synthetic_refusal": 1,
+        "synthetic_unemitted_read_refusal": 1
+      }
+    }
+  ],
+  "counts": {
+    "additional_data_corruptions_accepted_by_captured_judge": 4,
+    "additional_data_corruptions_rejected_by_necessary_identities": 4,
+    "completed_orders": 44,
+    "printed_orders": 46,
+    "receipts": 5,
+    "selftest_data_mutations_rejected": 9,
+    "valid_refused_attempts": 2,
+    "valid_successful_attempts": 3
+  },
+  "engine_invoked": false,
+  "judge_snapshot_sha256": "24e789459ee7adb8b48819dddc8bef8832b2b152ad9418c1a1d281038315e2c7",
+  "pins_as_read": {
+    "morsehgp3D_v7/bench/full_gabriel_probe.cpp": "f3de0d3ca850611f328cb41b251ec66c914afe473eed8e55f89eb889898f1849",
+    "morsehgp3D_v7/bench/full_gabriel_probe_audit.py": "24e789459ee7adb8b48819dddc8bef8832b2b152ad9418c1a1d281038315e2c7",
+    "morsehgp3D_v7/docs/RESULTATS_MONO_FULL_20260905.md": "f767a8ef170dcd5286368908375b959e11d213b2a310d51bed9f4c0d87e10f14",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/README.md": "398b4bfbdb38411576a4ea5d9f3e7be19da09f4fb4c0187c1241b8bfecaca4d0",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n16000_s8_k10.intent.json": "d2c3ffc03b4ba2d925a28a4192e3e7160b32bdef35467db02c474f864d28e759",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n16000_s8_k10.raw.txt": "c4f0920761ce0241dfbac3b49d4e20e2c73f2841daae770e09a4b1e1fd7cf575",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n16000_s8_k10.receipt.json": "31d7b5646b971518f60cc84357afc5916fef3f9033848ab37b51b7e722657ff7",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n32000_s8_k10.intent.json": "e291fb34d0260ce9227fb5ebed5b1b09cfab46cba5bd1ba3193173adec33d4ac",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n32000_s8_k10.raw.txt": "c90ade04126bc13b9a9b176885aa4e7d7eed280bbab42e7b99d3e17a19f485c1",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n32000_s8_k10.receipt.json": "a4f9c5dacad1fc9460c9259230bae15fe4ae52058b2348da188df4ca4f2cfd5d",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s10_k10.intent.json": "85f6cd29f5dc818c69327e3416e2e8d410c60111b9420c71067ab3593d31d836",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s10_k10.raw.txt": "65c5a25542af5b4a812360ac5001a169693b59f99777827fd5e30496922a5723",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s10_k10.receipt.json": "05adb5c29ccc13cac85f809edd9e56f53eb546cfc4ebf9cc7848a5761b19dcd3",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s12_k10.intent.json": "7a78672c23132d30cd41f18eb544f28172e8ff41307443b825756ea8f8ebf968",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s12_k10.raw.txt": "9e1e71e4643bc51c6db0d85d99ffcc9a39ce5066c6c49ab86b0a038e33571ffd",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s12_k10.receipt.json": "11d35a65e9b115f377690d1e5a0cdbfd7d6fbab133fd8e678d490845fc1d7f98",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s8_k10.intent.json": "6f0526adfd25920521154fc5862ab931928d32c9799f490c9f934e080e406242",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s8_k10.raw.txt": "91dc953778f3a92beedfc10433e0ae96b6cdc3cfad432c99e949b1f1668c1a9b",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/n8000_s8_k10.receipt.json": "aa1ca87d89cbb2e8a401642c01ddc0e64710d69433e087ed3d973b8d88d7a4f6",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/protocol.json": "9c725f71edaa095dd4adc0e262c181b43388e9d2ff57fd6e38a97b9d2bc593df",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/sources_after.json": "7858632574dc544fe0d1da2f3fafc5dcce81129a52e24444e51b3b8e828d93a9",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/sources_before.json": "800a5d7608c4acdee5010dd69052f4b26cfb17a0d92e7cad3c5932f027bf1a66",
+    "morsehgp3D_v7/receipts/full_gabriel_mono_20260905/verification.json": "d4afeaa9a3cd26ec50ff4218f94d4ca54f1ca87026f260b2299c0b3bcda9c3dc",
+    "morsehgp3D_v7/src/pipeline/run.hpp": "1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c"
+  },
+  "public_status": "not_claimed",
+  "python_optimized": false,
+  "review_script_sha256": "10a4923fb82a45fb182d0ad2fd9336993bf324eb64ee83a33076c43f1ae62586",
+  "schema": "mhgp7-audit-mono-judge-review-v1",
+  "scope": "receipt_judge_replay_and_necessary_identities",
+  "source_bytes_stable_during_replay": true,
+  "status": "passed"
+}

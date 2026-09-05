@@ -4,7 +4,7 @@
 
 **Le producteur horizontal FULL concorde avec Gamma sur les 100 ordres du corpus indépendant, encodés en 200 représentations.** Les deux builds nominaux O2 et ASan/UBSan passent chacun 16 506 coupes et 1 606 couvertures ; trois mutations privées sont réfutées. Aucun défaut produit n'a été trouvé. Ce résultat ferme le raccord des portails aux parents FULL sur ce corpus et sous l'autorité extérieure annoncée des catalogues.
 
-Le composant examiné est `src/forest/full_gabriel.hpp`, SHA256 `e02d163ced2074d6b91fe810c112fb946aca56a7724c8e2ae586e3baee97c170`. Les [sources capturées](receipts_full_producer_20260905/source_pins.json) distinguent ces octets du HEAD et des changements simultanés du constructeur. La [revue sémantique](receipts_full_producer_20260905/semantic_review.md) et la qualification exécutée ont leurs [reçus propres](receipts_full_producer_20260905/README.md).
+Le composant examiné est `src/forest/full_gabriel.hpp`, SHA256 `e02d163ced2074d6b91fe810c112fb946aca56a7724c8e2ae586e3baee97c170`, désormais publié dans `98bb6578`. Les [sources capturées](receipts_full_producer_20260905/source_pins.json) gardent leur provenance d’origine. La [revue sémantique](receipts_full_producer_20260905/semantic_review.md) et la qualification exécutée ont leurs [reçus propres](receipts_full_producer_20260905/README.md). La [campagne mono scellée](MONO_FULL_COURANT.md) bénéficie d’une contre-vérification séparée ; le nouveau cache paresseux du worktree reste exclu.
 
 ## Confrontation indépendante exécutée
 
@@ -48,6 +48,6 @@ La politique de cache et la facturation des misses doivent être versionnées : 
 
 ## Prochain raccord utile
 
-Le prochain jalon est une tentative horizontale multi-ordre dont les catalogues adjacents sont partagés et dont les résultats sont liés à l'entrée, à l'ordre, à l'horizon et au succès terminal. Le coût doit inclure génération, census, portails et stockage effectivement conservé. Un simple nombre de nœuds ou l'existence d'une racine finale ne constitue pas un digest sémantique.
+La sonde publiée partage désormais les catalogues adjacents et ferme les tentatives par un terminal : trois réussites relatives 8k, deux refus d’alias à 16k/K9 et 32k/K7. Sa [contrelecture et ses bornes mémoire](MONO_FULL_COURANT.md) sont closes. Elle détruit les forêts successivement et ne les lie pas par un digest à l’entrée. Le prochain jalon conserve donc cette obligation sémantique, avec les quatre identités nécessaires du juge et une comparaison du nouveau cache à instrumentation commune. Le coût doit inclure génération, census, portails et stockage effectivement conservé.
 
 Pour la verticale FULL, conserver l'ancre de chaque minimum dans sa directe inférieure après fermeture du plateau, puis propager et normaliser. Pour les masses, conserver séparément toutes les incidences contributrices de l'univers déclaré ; les minima topologiques ne suffisent pas à l'Algorithme 1. CLI, archive, identité publique, horizon, verticale, masses et coût massif restent des raccords distincts. Aucun résultat D/E/F ou G structurel n'est renommé résultat de ce producteur. GCP non utilisé.
