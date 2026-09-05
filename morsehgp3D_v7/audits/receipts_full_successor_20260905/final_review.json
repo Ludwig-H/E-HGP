@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "reviewed_utc": "2026-09-05T22:03:12.926541+00:00",
+  "authored_markdown": {
+    "files": 7,
+    "links": 113,
+    "anchors": 2,
+    "errors": []
+  },
+  "root_markdown_files": 25,
+  "json_unique_key_files": 83,
+  "source_bindings": "19 product headers and all Gamma/primitive compiled user dependencies checked before owned build cleanup",
+  "constructor_acknowledgement_sha256": "0ea733e777a079cb41bf033ca5644893b7b202b0b494282bd3c822269b84b1c7",
+  "scope": "Read-only/document checks; no new engine, build, CTest or performance qualification",
+  "gcp": "not_used"
+}

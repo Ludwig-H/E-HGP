@@ -1,19 +1,18 @@
-# Cache et lots FULL : qualification indépendante
+# Cache, lots et normalisation FULL : qualification indépendante
+
+## Normalisation v2 qualifiée : 85c27ab9
+
+**Les nouveaux rejeux indépendants conservent les forêts et les 32 autres compteurs ; seule la charge des successeurs change comme démontré.** Sur le header `85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad`, O2 et ASan/UBSan exécutent chacun 114 ordres, 912 sorties et 69 120 coupes. Les quatre politiques et les deux représentations rationnelles passent. Les 17 808 opérations supprimées sur ce corpus valent exactement deux fois `normalized_anchors` ; cette identité porte uniquement sur les sorties réussies. Les [preuves nouvelles](receipts_full_successor_20260905/README.md) restent distinctes des témoins singleton et lazy.
+
+Le helper réel, compilé sans `MHGP7_TESTING`, passe aussi 3 851 appels par build : tableau entier, racine partielle, charges prospectives et incrément après lecture terminale. Les préfixes incluent 466 refus avant écriture de compression et 700 refus après une compression partielle. Deux mutants causaux sont réfutés : ancienne dernière paire et écriture avant sa charge. Les compteurs synthétiques proches de MAX vérifient une condition nécessaire de charge ; ils ne prouvent pas un historique global atteignable du Builder.
+
+Les 16 plafonds exacts, 180 refus cap−1 et douze conflits d’API passent avec le marqueur effectif `full_successor_reads_writes_no_last_pair_v2`, y compris sur refus. Les caps exacts sont recalculés dans cette unité. Les captures constructeur 20+20 CTests sont contre-vérifiées séparément, avec leurs 49 pannes eager et 209 lazy toutes refusées sans échappement ; elles ne sont pas présentées comme des CTests relancés par l’auditeur. Le [contrat principal](../docs/CONTRAT_NORMALISATION_FULL.md) documente désormais le calendrier et le verrou de l’ancienne sonde.
+
+Aucun défaut trouvé dans ce périmètre relatif aux catalogues fournis complets, exacts et réguliers. Aucune structure géométrique globale supplémentaire ; aucune qualification des temps, de la sonde v3 ou de la réussite du précédent K9/32k refusé. `public_status=not_claimed`.
 
 ## Lot unitaire qualifié : 21b77d29
 
-**La spécialisation du lot à une directe conserve les forêts et les compteurs sur le corpus indépendant.** Le header `21b77d29a4ba2bca453b602a8faa4564a978f4ba71af5167c164faae4ef0e1a5` est capturé avec ses 19 dépendances produit. Deux builds neufs, O2 et ASan/UBSan avec détection des fuites, exécutent chacun **114 ordres, 912 sorties et 69 120 coupes**. Aucun défaut nominal trouvé ; qualification relative aux catalogues complets, exacts et réguliers fournis. `public_status=not_claimed`.
-
-Les [preuves propres à ce delta](receipts_full_singleton_20260905/README.md) distinguent :
-
-- 109 ordres historiques réexécutés : les 872 sorties sont identiques octet pour octet à `13c6`, y compris compteurs et préfixes refusés ; 16 plafonds exacts, 180 refus cap−1 et douze conflits d’API.
-- Le calendrier déduit de Gamma, sans observation de branche : 247 lots q2, 134 q3, 22 q4 ; 19 lots à quatre parents, 42 avec 1<U<q, 14 multi-directes et cinq consommations ultérieures d’ancres sans fusion.
-- Un supplément nécessaire : le corpus précédent n’avait aucune naissance simultanée à une directe unique. Un nuage de cinq points, proposé par le constructeur, est recalculé rationnellement sur ses 26 sous-ensembles non triviaux. Au niveau 25 et K=2, la naissance précède bien la fusion à trois parents. Ses cinq ordres ajoutent 40 sorties et 1 200 coupes par build.
-- Une mutation privée conserve les q résolutions mais perd le quatrième token au regroupement : 136 sorties changent sur 872, le juge rejette ; build et transport restent réussis. Les trois mutants historiques lazy ne sont pas réexécutés dans ce nouveau paquet.
-
-Les captures constructeur sont contre-vérifiées séparément : **17/17 Release et 17/17 ASan/UBSan**, sept binaires dont seul le différentiel singleton porte `MHGP7_TESTING`. Les nouveaux balayages comptent 49 fautes eager et 209 lazy, toutes refusées sans échappement ; les 357 paires refusées du différentiel passent. Ce sont des captures inspectées, pas des CTests relancés par l’auditeur.
-
-La relecture du delta retrouve les conditions démontrées ci-dessous : demandes dans l’ordre, premier token conservé, déduplication après résolution, naissances avant fusion et suffixe commun fermant aussi les no-op. Aucune cellule, coface ou incidence géométrique supplémentaire n’est nécessaire. La génération q4 et la normalisation ne changent pas. Les campagnes mono ultérieures, la réduction du compteur des successeurs et le SLO restent hors de cette qualification.
+La [qualification singleton historique](receipts_full_singleton_20260905/README.md) conserve ses 114 ordres, 912 sorties et 69 120 coupes par build. Les 872 sorties antérieures sont identiques à `13c6`, compteurs et refus compris. Le supplément rationnel de cinq points exerce une naissance avant fusion au niveau 25 et K=2, absente de l’ancien corpus ; le mutant perdant le quatrième parent est réfuté sur 136 sorties. Les captures constructeur 17+17, avec 49 fautes eager et 209 lazy refusées sans échappement, y restent contre-vérifiées séparément. Le [contrat principal](../docs/CONTRAT_LOT_UNITAIRE_FULL.md) porte les obligations désormais satisfaites ; ses mesures mono ne sont pas transférées à la normalisation v2.
 
 ## Témoin lazy antérieur : 13c6cc72
 
@@ -25,7 +24,7 @@ L’avis antérieur à l’implémentation repose sur une identité simple : la 
 
 ## Normalisation : supprimer la dernière paire redondante
 
-Le [contrat actuel](../docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md) facture déjà 3d+1 opérations pour un appel terminé de profondeur d. **On peut conserver exactement le tableau final avec deux opérations de moins lorsque d>0**, sans allocation supplémentaire : retenir pendant la recherche le dernier nœud avant la racine, puis arrêter la compression avant ce nœud. Son successeur vaut déjà la racine ; le relire et réécrire la même valeur est inutile. Pour d=0, garder la lecture terminale ; pour d=1, aucune écriture ne reste nécessaire. Ne pas supprimer l’incrément de `normalized_anchors` dans ce dernier cas.
+Le calendrier historique v1 facture 3d+1 opérations pour un appel terminé de profondeur d. **Le calendrier v2 conserve exactement le tableau final avec deux opérations de moins lorsque d>0**, sans allocation supplémentaire : retenir pendant la recherche le dernier nœud avant la racine, puis arrêter la compression avant ce nœud. Son successeur vaut déjà la racine ; le relire et réécrire la même valeur est inutile. Pour d=0, garder la lecture terminale ; pour d=1, aucune écriture ne reste nécessaire. L’incrément de `normalized_anchors` reste obligatoire dans ce dernier cas.
 
 Preuve par appel : tous les nœuds antérieurs au dernier reçoivent la même racine ; le dernier et la racine restent identiques. Le tableau entier après succès est donc celui de `13c6`. Par induction, les normalisations suivantes ont les mêmes profondeurs, racines, demandes géométriques et effets first-C, tant qu’aucun refus n’interrompt la comparaison.
 
@@ -37,4 +36,4 @@ H est la somme des profondeurs, A le nombre d’appels de profondeur positive. L
 
 **Changer 3d+1 en 3d−1 pour d>0 change le contrat de charge.** Versionner explicitement les unités/calendriers et leurs lecteurs ; facturer prospectivement les opérations restantes, jamais soustraire des dépenses après coup. Conserver virtuellement 3d+1 permettrait une optimisation machine mais conserverait l’ancien refus budgétaire. Les plafonds numériques peuvent rester identiques ; leurs admissions ne sont alors plus des comparaisons à charge identique.
 
-Le K9 refusé n’entre dans aucune de ces égalités de succès : une demande peut être inachevée, des directes pas encore fermées et A déjà incrémenté avant un refus de compression. Les données ne permettent pas d’affirmer sa réussite sous 128 millions. Pour le futur delta, comparer l’état complet après d=0/1/2/longue, les appels répétés, puis les forêts et autres compteurs existants. Les charges restantes d=0/1/2/3 sont 1/2/5/8 ; exercer leurs budgets exacts et cap−1, les refus au milieu des deux passes et les arènes vides. Aucun changement de normalisation n’est qualifié ici.
+Le K9 refusé n’entre dans aucune de ces égalités de succès : une demande peut être inachevée, des directes pas encore fermées et A déjà incrémenté avant un refus de compression. Les données anciennes ne permettent pas d’affirmer sa réussite sous 128 millions. Les charges d=0/1/2/3 deviennent 1/2/5/8 ; la qualification v2 ci-dessus ferme les tests de préfixes et de forêts demandés par cette preuve. Les latences restent une question expérimentale distincte.

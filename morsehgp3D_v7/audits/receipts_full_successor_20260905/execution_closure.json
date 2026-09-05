@@ -1,0 +1,24 @@
+{
+  "status": "closed",
+  "closed_utc": "2026-09-05T22:00:57.996244+00:00",
+  "last_engine_utc": "2026-09-05T21:54:34.770106+00:00",
+  "cpu": 0,
+  "all_builds_and_engines_finished": true,
+  "source_drift": [],
+  "unique_orders": 114,
+  "records_per_Gamma_build": 912,
+  "cuts_per_Gamma_build": 69120,
+  "primitive_calls_per_build": 3851,
+  "public_status": "not_claimed",
+  "gcp": "not_used",
+  "initial_release_superseded": "initial_execution_closure.json",
+  "coordination_deviation": "primitive/coordination_note.json",
+  "constructor_acknowledgement": {
+    "source": "audits/COORDINATION_MORSEHGP3D_V7.md",
+    "affected_run": "n8000/s8",
+    "duration_s_excluded": 142.456,
+    "functional_capture_retained": true,
+    "separate_rerun_planned": true,
+    "s10_started_after_utc": "2026-09-05T21:56:01+00:00"
+  }
+}

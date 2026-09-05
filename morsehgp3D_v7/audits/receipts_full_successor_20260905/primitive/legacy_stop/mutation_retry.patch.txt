@@ -1,0 +1,11 @@
+--- nominal/full_gabriel.hpp
++++ legacy_stop/full_gabriel.hpp
+@@ -109,7 +109,7 @@
+     root = next;
+   }
+   if (root != token) ++normalized_anchors;  // Bounded by charged reads.
+-  FullNodeId stop = last;
++  FullNodeId stop = (static_cast<void>(last), root);
+ #ifdef MHGP7_TESTING
+   // Differential witness only; no old-calendar switch in product builds.
+   if (force_legacy_successor) stop = root;

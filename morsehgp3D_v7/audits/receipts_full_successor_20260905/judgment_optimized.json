@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "source_header": "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad",
+  "results": [
+    {
+      "build": "O2",
+      "counts": {
+        "positive_depth_outputs": 744,
+        "successor_operations_omitted": 17808,
+        "records": 912,
+        "cuts": 69120,
+        "exact_budget_successes": 16,
+        "budget_refusals": 180,
+        "successor_budget_refusals": 16,
+        "api_conflict_refusals": 12
+      }
+    },
+    {
+      "build": "sanitized",
+      "counts": {
+        "positive_depth_outputs": 744,
+        "successor_operations_omitted": 17808,
+        "records": 912,
+        "cuts": 69120,
+        "exact_budget_successes": 16,
+        "budget_refusals": 180,
+        "successor_budget_refusals": 16,
+        "api_conflict_refusals": 12
+      }
+    }
+  ],
+  "unique_orders": 114,
+  "accounting": "full_successor_reads_writes_no_last_pair_v2",
+  "script_sha256": "194ca6e6d5aafa5ce33dae06de1699d2bd5c3d0777bf59d16e8a96f502b81bc2",
+  "public_status": "not_claimed",
+  "scope": "Fresh Gamma, successful accounting identity and v2 budget boundaries; no formula applied to refused prefixes, no performance or allocation campaign"
+}

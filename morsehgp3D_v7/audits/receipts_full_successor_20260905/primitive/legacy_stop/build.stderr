@@ -1,0 +1,6 @@
+In file included from /workspaces/E-HGP/morsehgp3D_v7/audits/full_successor_primitive.cpp:7:
+/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source/src/forest/full_gabriel.hpp: In function ‘mhgp7::full_gabriel_detail::SuccessorStatus mhgp7::full_gabriel_detail::normalize_successor(std::vector<long unsigned int>&, mhgp7::FullNodeId, mhgp7::FullNodeId&, mhgp7::u64&, mhgp7::u64&, mhgp7::u64)’:
+/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source/src/forest/full_gabriel.hpp:103:14: error: variable ‘last’ set but not used [-Werror=unused-but-set-variable]
+  103 |   FullNodeId last = token;
+      |              ^~~~
+cc1plus: all warnings being treated as errors

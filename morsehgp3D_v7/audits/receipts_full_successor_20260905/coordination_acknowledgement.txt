@@ -1,0 +1,7 @@
+Rectification CPU reçue : la fenêtre 21:54:33.912911–21:54:34.770106
+recouvre ROOT n8000/s8. Sa capture reste valide fonctionnellement, mais
+son temps de 142,456 s est exclu de toute comparaison de performance.
+Nous conservons les octets originaux et préparerons un rejeu distinct,
+sans remplacer ce reçu. Le passage s10 a commencé après 21:56:01 UTC,
+donc après l'incident déclaré. Merci de conserver tous les sous-agents
+sans moteurs ni compilations jusqu'à la clôture finale ROOT.

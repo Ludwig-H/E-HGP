@@ -1,0 +1,5 @@
+{
+  "status": "superseded_fixture_domain",
+  "reason": "Near-MAX initial normalized counters satisfied normalized<=steps but not the stronger reachable-state bound 2*normalized<=steps. Preserved unchanged; the corrected current campaign uses the stronger bound. No product defect.",
+  "engine_outputs_preserved": true
+}

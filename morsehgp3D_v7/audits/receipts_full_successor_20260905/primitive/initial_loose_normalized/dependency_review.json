@@ -1,0 +1,354 @@
+{
+  "modes": {
+    "O2": {
+      "dependencies": [
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/full_successor_primitive.cpp",
+          "sha256": "148d593485b8203fda257d1a7c51950edd3058082752b2d7582c7f8ee21f73d2"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/full_gabriel.hpp",
+          "sha256": "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/full_certificate.hpp",
+          "sha256": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/keys.hpp",
+          "sha256": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/../core/device.hpp",
+          "sha256": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/../core/intmath.hpp",
+          "sha256": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/../core/types.hpp",
+          "sha256": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/level.hpp",
+          "sha256": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/../core/wide.hpp",
+          "sha256": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/../core/mutants.hpp",
+          "sha256": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/silent_incidence.hpp",
+          "sha256": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/fold.hpp",
+          "sha256": "b11d02c86db5f8ae8cb12965f12e425548f9f049fb4626259790b32cd584928c"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../parallel/pool.hpp",
+          "sha256": "5c20aabbe673e2baa1018bea893185592bc3b394d025eadd9be07542453befc6"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../parallel/sort.hpp",
+          "sha256": "ceb89f8ba42fbc3f44351f4dcbf5e347e7d66a4c85bce08f346e66a9b11f20bd"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/q2.hpp",
+          "sha256": "11049293b7ad2f7139e1699c11b2506e8af2c11a04f22dc951f33ba10406c52f"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/q3.hpp",
+          "sha256": "4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/../tree/cloud_index.hpp",
+          "sha256": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/../tree/../core/morton.hpp",
+          "sha256": "67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/q4.hpp",
+          "sha256": "58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../pipeline/census.hpp",
+          "sha256": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be"
+        }
+      ],
+      "dependency_count": 20,
+      "engine_stderr_empty": true,
+      "normal_optimized_same_verdict": true
+    },
+    "legacy_stop": {
+      "dependencies": [
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/full_successor_primitive.cpp",
+          "sha256": "148d593485b8203fda257d1a7c51950edd3058082752b2d7582c7f8ee21f73d2"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/full_gabriel.hpp",
+          "sha256": "37505a337acdb4335700abae17d49c192d4ff269b90f38a837a51f5b1d689e7a"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/full_certificate.hpp",
+          "sha256": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../lanes/keys.hpp",
+          "sha256": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../lanes/../core/device.hpp",
+          "sha256": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../lanes/../core/intmath.hpp",
+          "sha256": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../lanes/../core/types.hpp",
+          "sha256": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../lanes/level.hpp",
+          "sha256": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../lanes/../core/wide.hpp",
+          "sha256": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../lanes/../core/mutants.hpp",
+          "sha256": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/silent_incidence.hpp",
+          "sha256": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/fold.hpp",
+          "sha256": "b11d02c86db5f8ae8cb12965f12e425548f9f049fb4626259790b32cd584928c"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../parallel/pool.hpp",
+          "sha256": "5c20aabbe673e2baa1018bea893185592bc3b394d025eadd9be07542453befc6"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../parallel/sort.hpp",
+          "sha256": "ceb89f8ba42fbc3f44351f4dcbf5e347e7d66a4c85bce08f346e66a9b11f20bd"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../lanes/q2.hpp",
+          "sha256": "11049293b7ad2f7139e1699c11b2506e8af2c11a04f22dc951f33ba10406c52f"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../lanes/q3.hpp",
+          "sha256": "4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../lanes/../tree/cloud_index.hpp",
+          "sha256": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../lanes/../tree/../core/morton.hpp",
+          "sha256": "67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../lanes/q4.hpp",
+          "sha256": "58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source_retry/src/forest/../pipeline/census.hpp",
+          "sha256": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be"
+        }
+      ],
+      "dependency_count": 20,
+      "engine_stderr_empty": true,
+      "normal_optimized_same_verdict": true
+    },
+    "san": {
+      "dependencies": [
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/full_successor_primitive.cpp",
+          "sha256": "148d593485b8203fda257d1a7c51950edd3058082752b2d7582c7f8ee21f73d2"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/full_gabriel.hpp",
+          "sha256": "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/full_certificate.hpp",
+          "sha256": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/keys.hpp",
+          "sha256": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/../core/device.hpp",
+          "sha256": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/../core/intmath.hpp",
+          "sha256": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/../core/types.hpp",
+          "sha256": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/level.hpp",
+          "sha256": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/../core/wide.hpp",
+          "sha256": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/../core/mutants.hpp",
+          "sha256": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/silent_incidence.hpp",
+          "sha256": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/fold.hpp",
+          "sha256": "b11d02c86db5f8ae8cb12965f12e425548f9f049fb4626259790b32cd584928c"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../parallel/pool.hpp",
+          "sha256": "5c20aabbe673e2baa1018bea893185592bc3b394d025eadd9be07542453befc6"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../parallel/sort.hpp",
+          "sha256": "ceb89f8ba42fbc3f44351f4dcbf5e347e7d66a4c85bce08f346e66a9b11f20bd"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/q2.hpp",
+          "sha256": "11049293b7ad2f7139e1699c11b2506e8af2c11a04f22dc951f33ba10406c52f"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/q3.hpp",
+          "sha256": "4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/../tree/cloud_index.hpp",
+          "sha256": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/../tree/../core/morton.hpp",
+          "sha256": "67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../lanes/q4.hpp",
+          "sha256": "58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/source/morsehgp3D_v7/src/forest/../pipeline/census.hpp",
+          "sha256": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be"
+        }
+      ],
+      "dependency_count": 20,
+      "engine_stderr_empty": true,
+      "normal_optimized_same_verdict": true
+    },
+    "write_before_charge": {
+      "dependencies": [
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/full_successor_primitive.cpp",
+          "sha256": "148d593485b8203fda257d1a7c51950edd3058082752b2d7582c7f8ee21f73d2"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/full_gabriel.hpp",
+          "sha256": "84066337187b0912d34632206e0093a446429cdd07472e764b7bf43e246e4af6"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/full_certificate.hpp",
+          "sha256": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../lanes/keys.hpp",
+          "sha256": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../lanes/../core/device.hpp",
+          "sha256": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../lanes/../core/intmath.hpp",
+          "sha256": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../lanes/../core/types.hpp",
+          "sha256": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../lanes/level.hpp",
+          "sha256": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../lanes/../core/wide.hpp",
+          "sha256": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../lanes/../core/mutants.hpp",
+          "sha256": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/silent_incidence.hpp",
+          "sha256": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/fold.hpp",
+          "sha256": "b11d02c86db5f8ae8cb12965f12e425548f9f049fb4626259790b32cd584928c"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../parallel/pool.hpp",
+          "sha256": "5c20aabbe673e2baa1018bea893185592bc3b394d025eadd9be07542453befc6"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../parallel/sort.hpp",
+          "sha256": "ceb89f8ba42fbc3f44351f4dcbf5e347e7d66a4c85bce08f346e66a9b11f20bd"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../lanes/q2.hpp",
+          "sha256": "11049293b7ad2f7139e1699c11b2506e8af2c11a04f22dc951f33ba10406c52f"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../lanes/q3.hpp",
+          "sha256": "4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../lanes/../tree/cloud_index.hpp",
+          "sha256": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../lanes/../tree/../core/morton.hpp",
+          "sha256": "67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../lanes/q4.hpp",
+          "sha256": "58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a"
+        },
+        {
+          "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/source/src/forest/../pipeline/census.hpp",
+          "sha256": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be"
+        }
+      ],
+      "dependency_count": 20,
+      "engine_stderr_empty": true,
+      "normal_optimized_same_verdict": true
+    }
+  },
+  "nominal_outputs_byte_identical": true,
+  "scope": "MMD user header closure, not a hermetic build"
+}

@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "morsehgp3D_v7/audits/full_successor_primitive.py",
+    "judge-mutant",
+    "--mode",
+    "legacy_stop",
+    "--report",
+    "morsehgp3D_v7/audits/receipts_full_successor_20260905/primitive/legacy_stop/judge_normal.json"
+  ],
+  "returncode": 0,
+  "timeout_seconds": 15
+}

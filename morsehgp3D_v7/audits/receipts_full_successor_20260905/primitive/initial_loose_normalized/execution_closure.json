@@ -1,0 +1,20 @@
+{
+  "status": "closed",
+  "all_builds_and_engines_finished": true,
+  "cpu": 0,
+  "last_engine_or_build_finished_utc": "2026-09-05T21:50:40.753939+00:00",
+  "closure_utc": "2026-09-05T21:50:42.582228+00:00",
+  "header_sha256": "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad",
+  "bridge_sha256": "148d593485b8203fda257d1a7c51950edd3058082752b2d7582c7f8ee21f73d2",
+  "oracle_sha256": "b1f466f48a148c78636dbd9faa0430c85b533eb0a21df090158436eab811d0f0",
+  "nominal_modes": [
+    "O2",
+    "san"
+  ],
+  "mutants": [
+    "legacy_stop",
+    "write_before_charge"
+  ],
+  "initial_failed_mutant_build_retained": true,
+  "gcp": "not_used"
+}

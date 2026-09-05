@@ -1,0 +1,382 @@
+#!/usr/bin/env python3
+"""Bounded independent trace oracle; no C++ action is implicit in preparation."""
+
+from __future__ import annotations
+
+import argparse
+import difflib
+import hashlib
+import itertools
+import json
+import os
+from pathlib import Path
+import signal
+import shutil
+import subprocess
+import sys
+import time
+
+
+AUDIT = Path(__file__).resolve().parent
+RECEIPT = AUDIT / "receipts_full_successor_20260905" / "primitive"
+SOURCE = RECEIPT.parent / "source" / "morsehgp3D_v7"
+BRIDGE = AUDIT / "full_successor_primitive.cpp"
+WORK = AUDIT / ".work_full_successor_primitive_20260905"
+EXPECTED_HEADER = "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad"
+ACCOUNTING = "full_successor_reads_writes_no_last_pair_v2"
+MAX = (1 << 64) - 1
+
+
+def require(condition: bool, message: str) -> None:
+    if not condition:
+        raise ValueError(message)
+
+
+def digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write_json(path: Path, value: object) -> None:
+    path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+
+
+def path_nodes(successors: list[int], token: int) -> list[int]:
+    """Mathematical path in the immutable input, independent of compression."""
+    if token >= len(successors):
+        return []
+    result = [token]
+    while successors[result[-1]] != result[-1]:
+        require(len(result) <= len(successors), "cycle in oracle fixture")
+        result.append(successors[result[-1]])
+    return result
+
+
+def oracle_call(successors: list[int], steps: int, normalized: int,
+                command: dict[str, int]) -> tuple[dict, dict]:
+    original = list(successors)
+    token, cap, root = (command[x] for x in ("token", "cap", "root"))
+    nodes = path_nodes(original, token)
+    # A trace is fully determined before considering the available budget.
+    # The final walk event carries the uncharged normalized-marker effect.
+    events = []
+    for position, node in enumerate(nodes):
+        events.append({"kind": "walk_read", "root": original[node],
+                       "mark": position == len(nodes) - 1 and len(nodes) > 1})
+    for node in nodes[:-2]:
+        events.append({"kind": "compression_read", "node": node})
+        events.append({"kind": "compression_write", "node": node,
+                       "value": nodes[-1]})
+    allowance = max(0, cap - steps)
+    admitted = min(allowance, len(events))
+    changed = list(original)
+    if nodes:
+        root = token  # Assignment precedes admission of the first read.
+    for event in events[:admitted]:
+        if event["kind"] == "walk_read":
+            root = event["root"]
+            normalized += int(event["mark"])
+        elif event["kind"] == "compression_write":
+            changed[event["node"]] = event["value"]
+    status = "unknown" if not nodes else "ok" if admitted == len(events) else "budget"
+    result = {"status": status, "root": root, "steps": steps + admitted,
+              "normalized": normalized, "successors": changed,
+              "accounting": ACCOUNTING}
+    meta = {"depth": max(0, len(nodes) - 1), "unknown": not nodes,
+            "required": len(events), "admitted": admitted,
+            "refused_event": None if status != "budget" else events[admitted]["kind"],
+            "committed_writes": sum(e["kind"] == "compression_write"
+                                    for e in events[:admitted]),
+            "terminal_read_admitted": bool(nodes) and admitted >= len(nodes)}
+    return result, meta
+
+
+def make_fixtures() -> list[dict]:
+    cases: list[dict] = []
+
+    def add(label: str, forest: list[int], initial: int, normalized: int,
+            commands: list[tuple[int, int, int]]) -> None:
+        require(0 <= normalized <= initial // 2 and initial <= MAX,
+                "initial normalized count needs at least two charged reads each")
+        require(all(0 <= cap <= MAX and 0 <= token <= MAX and 0 <= root <= MAX
+                    for token, cap, root in commands), "command outside u64")
+        cases.append({"case": len(cases), "label": label, "successors": forest,
+                      "steps": initial, "normalized": normalized,
+                      "commands": [dict(zip(("token", "cap", "root"), command))
+                                   for command in commands]})
+
+    forests: list[tuple[str, list[int]]] = [("empty", [])]
+    for count in range(1, 5):
+        for number, forest in enumerate(itertools.product(
+                *(range(node, count) for node in range(count)))):
+            forests.append((f"all_monotone_n{count}_{number}", list(forest)))
+    forests += [
+        ("noncontiguous_multiroot", [3, 1, 8, 6, 4, 10, 9, 7, 11, 11, 10, 11]),
+        ("long_depth_16", list(range(1, 17)) + [16]),
+        ("several_branches", [4, 6, 4, 8, 9, 6, 11, 7, 11, 11, 10, 11]),
+    ]
+    for label, forest in forests:
+        for token in range(len(forest)):
+            nodes = path_nodes(forest, token)
+            required = 1 if len(nodes) == 1 else 3 * (len(nodes) - 1) - 1
+            for initial, normalized in ((0, 0), (7, 3),
+                                        (MAX - required - 1, (MAX - required - 1) // 2)):
+                for room in range(required + 2):
+                    add(f"{label}_token{token}_prefix{room}", forest, initial, normalized,
+                        [(token, initial + room, MAX - 17)])
+            # Initial steps may already exceed this call's cap, but remain
+            # authentic work from earlier calls made under larger caps.
+            add(f"{label}_lower_cap", forest, 11, 4, [(token, 3, MAX - 17)])
+        for token in (len(forest), MAX):
+            for initial, normalized, cap in ((0, 0, 0), (7, 3, 10), (MAX, MAX // 2, MAX)):
+                add(f"{label}_unknown", forest, initial, normalized, [(token, cap, 23)])
+
+    for label, forest in forests[-3:]:
+        token = 0
+        required = 3 * (len(path_nodes(forest, token)) - 1) - 1
+        for room in range(required + 2):
+            add(f"{label}_persistent_after_prefix{room}", forest, 5, 2,
+                [(token, 5 + room, MAX - 17), (token, 5 + room, 19),
+                 (token, MAX, MAX - 17), (token, MAX, 22),
+                 (len(forest) - 1, MAX, MAX - 17), (MAX, MAX, 29)])
+    add("near_max_persistent", [2, 1, 3, 3], MAX - 8, (MAX - 8) // 2,
+        [(0, MAX - 4, 100), (0, MAX, 101), (0, MAX, 102),
+         (3, MAX, 103), (MAX, MAX, 104)])
+    add("max_already_spent", [0], MAX, MAX // 2, [(0, MAX, 33), (MAX, MAX, 34)])
+    return cases
+
+
+def expected_records(cases: list[dict]) -> tuple[list[dict], dict]:
+    records = []
+    coverage = {"cases": len(cases), "calls": 0, "ok": 0, "budget": 0,
+                "unknown": 0, "refused_walk_read": 0,
+                "refused_compression_read": 0, "refused_compression_write": 0,
+                "partial_compression_refusals": 0, "persistent_calls": 0,
+                "normalized_before_refusal": 0, "max_depth": 0,
+                "near_max_calls": 0}
+    for case in cases:
+        forest, steps, normalized = list(case["successors"]), case["steps"], case["normalized"]
+        for call, command in enumerate(case["commands"]):
+            before = normalized
+            result, meta = oracle_call(forest, steps, normalized, command)
+            record = {"case": case["case"], "call": call, **result}
+            records.append(record)
+            forest, steps, normalized = result["successors"], result["steps"], result["normalized"]
+            coverage["calls"] += 1
+            coverage[result["status"]] += 1
+            coverage["persistent_calls"] += int(call > 0)
+            coverage["near_max_calls"] += int(steps >= MAX - 100)
+            coverage["max_depth"] = max(coverage["max_depth"], meta["depth"])
+            if result["status"] == "budget":
+                coverage["refused_" + meta["refused_event"]] += 1
+                coverage["partial_compression_refusals"] += int(meta["committed_writes"] > 0)
+                coverage["normalized_before_refusal"] += int(normalized > before)
+    for key in ("ok", "budget", "unknown", "refused_walk_read",
+                "refused_compression_read", "refused_compression_write",
+                "partial_compression_refusals", "persistent_calls",
+                "normalized_before_refusal", "near_max_calls"):
+        require(coverage[key] > 0, "vacuous coverage: " + key)
+    require(coverage["max_depth"] == 16, "long chain not exercised")
+    return records, coverage
+
+
+def prepare() -> None:
+    RECEIPT.mkdir(parents=True, exist_ok=True)
+    require(not (RECEIPT / "fixtures.json").exists(), "fixture destination already exists")
+    cases = make_fixtures()
+    expected, coverage = expected_records(cases)
+    lines = [str(len(cases))]
+    for case in cases:
+        lines.append(" ".join(map(str, (case["case"], len(case["successors"]),
+                                          len(case["commands"]), case["steps"], case["normalized"]))))
+        lines.append(" ".join(map(str, case["successors"])))
+        lines.extend(" ".join(str(command[key]) for key in ("token", "cap", "root"))
+                     for command in case["commands"])
+    write_json(RECEIPT / "fixtures.json", cases)
+    (RECEIPT / "fixtures.txt").write_text("\n".join(lines) + "\n")
+    write_json(RECEIPT / "expected.json", expected)
+    write_json(RECEIPT / "coverage.json", coverage)
+    print(json.dumps(coverage, sort_keys=True))
+
+
+def execute(argv: list[str], prefix: Path, timeout: int,
+            input_path: Path | None = None, environment: dict | None = None) -> None:
+    prefix.parent.mkdir(parents=True, exist_ok=True)
+    require(not prefix.with_suffix(".command.json").exists(), "execution prefix already exists")
+    started = time.time()
+    env = os.environ.copy()
+    env.update(environment or {})
+    timed_out = False
+    with prefix.with_suffix(".stdout").open("wb") as stdout, \
+            prefix.with_suffix(".stderr").open("wb") as stderr:
+        input_handle = input_path.open("rb") if input_path else subprocess.DEVNULL
+        try:
+            process = subprocess.Popen(argv, cwd=AUDIT, stdin=input_handle,
+                                       stdout=stdout, stderr=stderr, env=env,
+                                       start_new_session=True)
+            try:
+                code = process.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                timed_out = True
+                os.killpg(process.pid, signal.SIGKILL)
+                code = process.wait()
+        finally:
+            if input_path:
+                input_handle.close()
+    write_json(prefix.with_suffix(".command.json"), {
+        "argv": argv, "cwd": str(AUDIT), "timeout_seconds": timeout,
+        "cpu": 0, "started_unix": started, "finished_unix": time.time(),
+        "returncode": code, "timed_out": timed_out,
+        "environment_delta": environment or {},
+        "stdin_sha256": digest(input_path) if input_path else None,
+        "stdout_sha256": digest(prefix.with_suffix(".stdout")),
+        "stderr_sha256": digest(prefix.with_suffix(".stderr")),
+    })
+    require(code == 0 and not timed_out, f"command failed: {prefix.name} rc={code}")
+
+
+def build(mode: str) -> None:
+    header = SOURCE / "src/forest/full_gabriel.hpp"
+    require(digest(header) == EXPECTED_HEADER, "captured header drift")
+    directory = RECEIPT / mode
+    directory.mkdir(exist_ok=True)
+    retry = (directory / "build.command.json").exists()
+    if retry:
+        previous = json.loads((directory / "build.command.json").read_text())
+        require(previous["returncode"] != 0, "successful build already exists")
+    suffix = "_retry" if retry else ""
+    private = WORK / mode
+    private.mkdir(parents=True, exist_ok=True)
+    binary = private / "bridge"
+    include = SOURCE
+    if mode in ("legacy_stop", "write_before_charge"):
+        include = private / ("source" + suffix)
+        shutil.copytree(SOURCE, include)
+        changed_header = include / "src/forest/full_gabriel.hpp"
+        before = changed_header.read_text()
+        if mode == "legacy_stop":
+            old = "FullNodeId stop = last;"
+            # Keep strict warnings enabled: the intentional old stop otherwise
+            # leaves the retained last-node calculation unused in this mutant.
+            new = "FullNodeId stop = (static_cast<void>(last), root);"
+        else:
+            old = ("    if (!charge()) return SuccessorStatus::kBudget;\n"
+                   "    successor[static_cast<size_t>(token)] = root;")
+            new = ("    successor[static_cast<size_t>(token)] = root;\n"
+                   "    if (!charge()) return SuccessorStatus::kBudget;")
+        require(before.count(old) == 1, "mutant target not unique")
+        after = before.replace(old, new)
+        changed_header.write_text(after)
+        (directory / ("mutation" + suffix + ".patch.txt")).write_text("".join(difflib.unified_diff(
+            before.splitlines(keepends=True), after.splitlines(keepends=True),
+            fromfile="nominal/full_gabriel.hpp", tofile=mode + "/full_gabriel.hpp")))
+        write_json(directory / ("mutation" + suffix + ".json"), {"nominal_sha256": digest(header),
+                   "mutated_sha256": digest(changed_header), "mutation": mode})
+    flags = ["-O2"] if mode != "san" else ["-O1", "-g", "-fsanitize=address,undefined",
+                                            "-fno-omit-frame-pointer", "-fno-pie", "-no-pie"]
+    argv = ["taskset", "-c", "0", "g++", "-std=c++20", "-Wall", "-Wextra", "-Wpedantic",
+            "-Werror", *flags, "-I", str(include), "-MMD", "-MF", str(directory / "dependencies.d"),
+            str(BRIDGE), "-o", str(binary)]
+    execute(argv, directory / ("build" + suffix), 60)
+    write_json(directory / "binary.json", {"sha256": digest(binary), "bytes": binary.stat().st_size,
+               "header_sha256": digest(include / "src/forest/full_gabriel.hpp"),
+               "bridge_sha256": digest(BRIDGE),
+               "dependency_sha256": digest(directory / "dependencies.d")})
+
+
+def run(mode: str) -> None:
+    directory = RECEIPT / mode
+    binary = WORK / mode / "bridge"
+    binding = json.loads((directory / "binary.json").read_text())
+    require(digest(binary) == binding["sha256"], "binary drift")
+    environment = ({"ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+                    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"}
+                   if mode == "san" else {})
+    execute(["taskset", "-c", "0", str(binary)], directory / "run", 20,
+            RECEIPT / "fixtures.txt", environment)
+
+
+def judge(output: Path) -> dict:
+    cases = json.loads((RECEIPT / "fixtures.json").read_text())
+    require(cases == make_fixtures(), "fixture generation drift")
+    expected, coverage = expected_records(cases)
+    require(expected == json.loads((RECEIPT / "expected.json").read_text()), "stored oracle drift")
+    actual = [json.loads(line) for line in output.read_text().splitlines()]
+    require(len(actual) == len(expected), "record count")
+    for observed, wanted in zip(actual, expected):
+        if observed != wanted:
+            difference = {key: {"expected": wanted.get(key), "actual": observed.get(key)}
+                          for key in set(wanted) | set(observed) if wanted.get(key) != observed.get(key)}
+            raise ValueError(json.dumps({"reason": "successor.prefix", "case": wanted["case"],
+                                        "call": wanted["call"], "difference": difference}, sort_keys=True))
+    return {"status": "passed", "public_status": "not_claimed", "coverage": coverage,
+            "output_sha256": digest(output), "fixtures_sha256": digest(RECEIPT / "fixtures.json"),
+            "oracle_script_sha256": digest(Path(__file__)), "gcp": "not_used"}
+
+
+def judge_mutant(mode: str) -> dict:
+    require(mode in ("legacy_stop", "write_before_charge"), "not a mutant")
+    output = RECEIPT / mode / "run.stdout"
+    cases = json.loads((RECEIPT / "fixtures.json").read_text())
+    expected, _ = expected_records(cases)
+    actual = [json.loads(line) for line in output.read_text().splitlines()]
+    require(len(actual) == len(expected), "mutant record count")
+    try:
+        judge(output)
+    except ValueError as error:
+        rejection = str(error)
+    else:
+        raise ValueError("mutant escaped the ordinary prefix judge")
+    changed = [(observed, wanted) for observed, wanted in zip(actual, expected)
+               if observed != wanted]
+    witnesses = []
+    for observed, wanted in changed:
+        if mode == "legacy_stop":
+            causal = (wanted["call"] == 0 and wanted["status"] == "ok"
+                      and observed["status"] == "budget"
+                      and wanted["successors"] == observed["successors"]
+                      and wanted["root"] == observed["root"])
+        else:
+            causal = (wanted["call"] == 0 and wanted["status"] == "budget"
+                      and observed["status"] == "budget"
+                      and all(wanted[key] == observed[key]
+                              for key in ("root", "steps", "normalized"))
+                      and wanted["successors"] != observed["successors"])
+        if causal and len(witnesses) < 3:
+            witnesses.append({"fixture": cases[wanted["case"]],
+                              "expected": wanted, "actual": observed})
+    require(bool(witnesses), "mutant rejection lacks the required causal witness")
+    return {"status": "refuted", "mutation": mode, "records": len(expected),
+            "changed": len(changed), "unchanged": len(expected) - len(changed),
+            "ordinary_judge_rejection": rejection, "causal_witnesses": witnesses,
+            "output_sha256": digest(output), "oracle_script_sha256": digest(Path(__file__)),
+            "gcp": "not_used"}
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("action", choices=("prepare", "build", "run", "judge", "judge-mutant"))
+    parser.add_argument("--mode", choices=("O2", "san", "legacy_stop", "write_before_charge"), default="O2")
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--report", type=Path)
+    arguments = parser.parse_args()
+    try:
+        if arguments.action == "prepare":
+            prepare()
+        elif arguments.action == "build":
+            build(arguments.mode)
+        elif arguments.action == "run":
+            run(arguments.mode)
+        else:
+            report = (judge_mutant(arguments.mode) if arguments.action == "judge-mutant"
+                      else judge(arguments.output or RECEIPT / arguments.mode / "run.stdout"))
+            if arguments.report:
+                write_json(arguments.report, report)
+            print(json.dumps(report, sort_keys=True))
+        return 0
+    except (ValueError, OSError, json.JSONDecodeError) as error:
+        print(str(error), file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

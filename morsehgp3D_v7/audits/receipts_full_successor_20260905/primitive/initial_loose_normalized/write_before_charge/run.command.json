@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "taskset",
+    "-c",
+    "0",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/write_before_charge/bridge"
+  ],
+  "cpu": 0,
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v7/audits",
+  "environment_delta": {},
+  "finished_unix": 1788645040.7539394,
+  "returncode": 0,
+  "started_unix": 1788645040.6390426,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "2e40d1d5e1eaad7c562ec91f1c720c07a61f8a633e86b54375de3620275f2f30",
+  "stdout_sha256": "36bc910de80e80866b3f6ca0b5e2950c2b7d98853d5f43d4be446bcba2e47138",
+  "timed_out": false,
+  "timeout_seconds": 20
+}

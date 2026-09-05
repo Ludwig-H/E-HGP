@@ -699,5 +699,63 @@
     "variants_D_to_K_unchanged": true,
     "gcp": "not_used",
     "historical_probe_resolution": "Constructor added an unconditional obsolete-calendar #error before includes after our report; statically verified, fresh compilation rejection left to its planned admission."
+  },
+  "latest_successor_qualification": {
+    "date": "2026-09-05T22:02:23.826853+00:00",
+    "base_head": "04fd4c899a429dcabe5e2197047ef502c1af3719",
+    "source_header": "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad",
+    "new_variant": "L_full_successor_v2",
+    "variants_D_to_K_unchanged": true,
+    "receipt": "receipts_full_successor_20260905/README.md",
+    "scope": "Fresh Gamma: 114 orders, 912 outputs, 69120 cuts per build; primitive: 3851 calls per O2/SAN, two causal mutants. Constructor 20+20 captures inspected separately. No timing or public promotion.",
+    "maintenance": "Still 25 root Markdown notes. Pending normalization review closed; older singleton narrative shortened; one existing MEB proof section answers stable-first-support question. No sealed old receipt changed. Only two owned temporary build directories removed.",
+    "coordination_deviation": {
+      "record": "receipts_full_successor_20260905/primitive/coordination_note.json",
+      "last_engine_utc": "2026-09-05T21:54:34.770106+00:00",
+      "constructor_affected_run": "n8000/s8",
+      "constructor_time_excluded_s": 142.456,
+      "separate_rerun_planned": true
+    },
+    "checks": {
+      "docs_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "active_documents": 352
+      },
+      "registry": {
+        "exit_code": 0,
+        "phases": 20
+      },
+      "engine_replays": "Closed; no further engines or builds. Gamma, primitive and constructor reader normal/-O judgments passed.",
+      "source_and_oracle_bindings": {
+        "status": "passed",
+        "product_headers": 19,
+        "constructor_v7_sources": 63
+      },
+      "authored_markdown": {
+        "files": 7,
+        "links": 113,
+        "anchors": 2,
+        "errors": []
+      },
+      "freshness_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "variant": "L_full_successor_v2",
+        "common_pins": 1943,
+        "variant_pins": 347
+      },
+      "whitespace": {
+        "authored_exit_code": 0,
+        "captured_source_exit_code": 2,
+        "preserved_source_eof_blank_lines": 11,
+        "reason": "Byte-exact scientific source captures retain source whitespace; no captured header was reformatted."
+      }
+    },
+    "gcp": "not_used"
   }
 }

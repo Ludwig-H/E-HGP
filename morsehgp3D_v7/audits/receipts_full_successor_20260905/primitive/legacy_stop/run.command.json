@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "taskset",
+    "-c",
+    "0",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/bridge"
+  ],
+  "cpu": 0,
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v7/audits",
+  "environment_delta": {},
+  "finished_unix": 1788645274.558881,
+  "returncode": 0,
+  "started_unix": 1788645274.3935091,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "b28c10806b0fe87a9a5ecbbdb6702ddb46f8d0505145d77c0f4268ce3b3a3895",
+  "stdout_sha256": "b78b67a09c46e1e7b5665c3b64c3a1a0f12620067923db17e724af91cc01daa9",
+  "timed_out": false,
+  "timeout_seconds": 20
+}

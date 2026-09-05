@@ -1,0 +1,12 @@
+--- nominal/full_gabriel.hpp
++++ write_before_charge/full_gabriel.hpp
+@@ -119,8 +119,8 @@
+   while (token != stop) {
+     if (!charge()) return SuccessorStatus::kBudget;
+     const FullNodeId next = successor[static_cast<size_t>(token)];
++    successor[static_cast<size_t>(token)] = root;
+     if (!charge()) return SuccessorStatus::kBudget;
+-    successor[static_cast<size_t>(token)] = root;
+     token = next;
+   }
+   return SuccessorStatus::kOk;

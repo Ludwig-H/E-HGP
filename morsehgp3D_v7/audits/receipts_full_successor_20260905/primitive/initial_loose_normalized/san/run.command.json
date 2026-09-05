@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "taskset",
+    "-c",
+    "0",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/san/bridge"
+  ],
+  "cpu": 0,
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v7/audits",
+  "environment_delta": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "finished_unix": 1788644936.1643176,
+  "returncode": 0,
+  "started_unix": 1788644935.9991868,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "2e40d1d5e1eaad7c562ec91f1c720c07a61f8a633e86b54375de3620275f2f30",
+  "stdout_sha256": "77bf761afc6729ff14350a3131d265f35027ca04011da0c8f8b464300942ede0",
+  "timed_out": false,
+  "timeout_seconds": 20
+}

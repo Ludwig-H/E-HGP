@@ -1,0 +1,14 @@
+{
+  "status": "closed",
+  "closed_utc": "2026-09-05T21:51:59.614123+00:00",
+  "last_engine_utc": "2026-09-05T21:50:40.753939+00:00",
+  "cpu": 0,
+  "all_builds_and_engines_finished": true,
+  "source_drift": [],
+  "unique_orders": 114,
+  "records_per_Gamma_build": 912,
+  "cuts_per_Gamma_build": 69120,
+  "primitive_calls_per_build": 3851,
+  "public_status": "not_claimed",
+  "gcp": "not_used"
+}

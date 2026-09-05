@@ -1,0 +1,148 @@
+{
+  "causal_witnesses": [
+    {
+      "actual": {
+        "accounting": "full_successor_reads_writes_no_last_pair_v2",
+        "call": 0,
+        "case": 50,
+        "normalized": 1,
+        "root": 1,
+        "status": "budget",
+        "steps": 2,
+        "successors": [
+          1,
+          1
+        ]
+      },
+      "expected": {
+        "accounting": "full_successor_reads_writes_no_last_pair_v2",
+        "call": 0,
+        "case": 50,
+        "normalized": 1,
+        "root": 1,
+        "status": "ok",
+        "steps": 2,
+        "successors": [
+          1,
+          1
+        ]
+      },
+      "fixture": {
+        "case": 50,
+        "commands": [
+          {
+            "cap": 2,
+            "root": 18446744073709551598,
+            "token": 0
+          }
+        ],
+        "label": "all_monotone_n2_1_token0_prefix2",
+        "normalized": 0,
+        "steps": 0,
+        "successors": [
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "actual": {
+        "accounting": "full_successor_reads_writes_no_last_pair_v2",
+        "call": 0,
+        "case": 51,
+        "normalized": 1,
+        "root": 1,
+        "status": "budget",
+        "steps": 3,
+        "successors": [
+          1,
+          1
+        ]
+      },
+      "expected": {
+        "accounting": "full_successor_reads_writes_no_last_pair_v2",
+        "call": 0,
+        "case": 51,
+        "normalized": 1,
+        "root": 1,
+        "status": "ok",
+        "steps": 2,
+        "successors": [
+          1,
+          1
+        ]
+      },
+      "fixture": {
+        "case": 51,
+        "commands": [
+          {
+            "cap": 3,
+            "root": 18446744073709551598,
+            "token": 0
+          }
+        ],
+        "label": "all_monotone_n2_1_token0_prefix3",
+        "normalized": 0,
+        "steps": 0,
+        "successors": [
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "actual": {
+        "accounting": "full_successor_reads_writes_no_last_pair_v2",
+        "call": 0,
+        "case": 54,
+        "normalized": 4,
+        "root": 1,
+        "status": "budget",
+        "steps": 9,
+        "successors": [
+          1,
+          1
+        ]
+      },
+      "expected": {
+        "accounting": "full_successor_reads_writes_no_last_pair_v2",
+        "call": 0,
+        "case": 54,
+        "normalized": 4,
+        "root": 1,
+        "status": "ok",
+        "steps": 9,
+        "successors": [
+          1,
+          1
+        ]
+      },
+      "fixture": {
+        "case": 54,
+        "commands": [
+          {
+            "cap": 9,
+            "root": 18446744073709551598,
+            "token": 0
+          }
+        ],
+        "label": "all_monotone_n2_1_token0_prefix2",
+        "normalized": 3,
+        "steps": 7,
+        "successors": [
+          1,
+          1
+        ]
+      }
+    }
+  ],
+  "changed": 813,
+  "gcp": "not_used",
+  "mutation": "legacy_stop",
+  "oracle_script_sha256": "b1f466f48a148c78636dbd9faa0430c85b533eb0a21df090158436eab811d0f0",
+  "ordinary_judge_rejection": "{\"call\": 0, \"case\": 50, \"difference\": {\"status\": {\"actual\": \"budget\", \"expected\": \"ok\"}}, \"reason\": \"successor.prefix\"}",
+  "output_sha256": "2ae531d57544952efd891cfcec556d507064fc4553d49aec4ae7dd6c4a0615f6",
+  "records": 3851,
+  "status": "refuted",
+  "unchanged": 3038
+}

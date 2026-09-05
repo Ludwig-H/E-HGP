@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "taskset",
+    "-c",
+    "0",
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-O2",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/source",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_successor_20260905/primitive/legacy_stop/dependencies.d",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/full_successor_primitive.cpp",
+    "-o",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_successor_primitive_20260905/legacy_stop/bridge"
+  ],
+  "cpu": 0,
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v7/audits",
+  "environment_delta": {},
+  "finished_unix": 1788644938.6941657,
+  "returncode": 1,
+  "started_unix": 1788644936.4242165,
+  "stderr_sha256": "c3536d71a46f7ff038b047cac85ea4da5eec2f66dd6e1765314a534ac448687e",
+  "stdin_sha256": null,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timed_out": false,
+  "timeout_seconds": 60
+}

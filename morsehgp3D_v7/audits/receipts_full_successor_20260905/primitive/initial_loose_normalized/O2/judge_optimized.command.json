@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-O",
+    "morsehgp3D_v7/audits/full_successor_primitive.py",
+    "judge",
+    "--mode",
+    "O2",
+    "--report",
+    "morsehgp3D_v7/audits/receipts_full_successor_20260905/primitive/O2/judge_optimized.json"
+  ],
+  "returncode": 0,
+  "timeout_seconds": 15
+}

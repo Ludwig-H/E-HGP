@@ -1,0 +1,5 @@
+{
+  "mutated_sha256": "84066337187b0912d34632206e0093a446429cdd07472e764b7bf43e246e4af6",
+  "mutation": "write_before_charge",
+  "nominal_sha256": "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad"
+}

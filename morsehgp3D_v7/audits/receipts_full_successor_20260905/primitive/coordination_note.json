@@ -1,0 +1,34 @@
+{
+  "status": "coordination_deviation_reported",
+  "cpu": 0,
+  "reported_to_root": true,
+  "external_measurement_overlap": "unknown_to_subagent",
+  "no_more_engine_or_build_runs": true,
+  "initial_engines_finished_utc": "2026-09-05T21:50:40.753939+00:00",
+  "rerun_intervals": [
+    {
+      "mode": "O2",
+      "started_utc": "2026-09-05T21:54:33.912911+00:00",
+      "finished_utc": "2026-09-05T21:54:34.027991+00:00",
+      "returncode": 0
+    },
+    {
+      "mode": "san",
+      "started_utc": "2026-09-05T21:54:34.125607+00:00",
+      "finished_utc": "2026-09-05T21:54:34.290704+00:00",
+      "returncode": 0
+    },
+    {
+      "mode": "legacy_stop",
+      "started_utc": "2026-09-05T21:54:34.393509+00:00",
+      "finished_utc": "2026-09-05T21:54:34.558881+00:00",
+      "returncode": 0
+    },
+    {
+      "mode": "write_before_charge",
+      "started_utc": "2026-09-05T21:54:34.655022+00:00",
+      "finished_utc": "2026-09-05T21:54:34.770106+00:00",
+      "returncode": 0
+    }
+  ]
+}

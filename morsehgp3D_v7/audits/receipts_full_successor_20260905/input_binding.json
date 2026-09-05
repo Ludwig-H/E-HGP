@@ -1,0 +1,17 @@
+{
+  "source_header": "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad",
+  "inputs": {
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/fixtures.json": "c13d09188ac4165572c59e0286520029a972d6a740da8b502f70c7adffa3d881",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/fixtures.txt": "8b66b099da5ee1196166620cab1fbbc25e96b109534e47419de76c098f6fe1c5",
+    "morsehgp3D_v7/audits/receipts_full_singleton_20260905/target_fixtures.json": "20c788fde630d2966149e18c58155c0f66e04b1b3ec40e778b7fb9687b32e564",
+    "morsehgp3D_v7/audits/receipts_full_singleton_20260905/target_fixtures.txt": "dc99339d5ee44826ebaccc54245f891ac01a9adee9880e1c4eafe91bf9851fc9",
+    "morsehgp3D_v7/audits/receipts_full_singleton_20260905/O2_output.json": "0124f8dd670da10287156ad30edc498ec06c29f34aef1512c8f2d0e3e2d23bc3",
+    "morsehgp3D_v7/audits/receipts_full_singleton_20260905/target_O2_output.json": "01c8479f7011f88b467b059e0f9f07f21a6cf41567029ce4b8b1bcb66d1ececb",
+    "morsehgp3D_v7/audits/full_lazy_bridge.cpp": "ca00a653ca3bd9887d9bd2d2ea62704547c8b9f3fce3137afb1cc90f65316c9d",
+    "morsehgp3D_v7/audits/full_lazy_audit.py": "a530583dea7a59658786a765396b840a519499da8abb799f2c02047793c0c6d1",
+    "morsehgp3D_v7/audits/full_producer_run.py": "24f5111676ef234280af05d4a2f28deedad9da12e52b6d620b3a3bb8e4e37447",
+    "morsehgp3D_v7/audits/full_singleton_target.py": "003dd0ced131c52d4d25a56ddbcab40d50343602e8f040727a64ddc59bd24165"
+  },
+  "scope": "114 prior orders reused only as fixtures; new v2 engines and budgets",
+  "public_status": "not_claimed"
+}
