@@ -1,0 +1,26 @@
+{
+  "status": "expected_E_drift",
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py"
+      ],
+      "returncode": 1,
+      "expected_returncode": 1,
+      "stdout": "",
+      "stderr": "Audit à actualiser :\nCMakeLists.txt\nsrc/core/mutants.hpp\nsrc/forest/silent_incidence.hpp\ntests/meb_lazy_gate.cpp\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py"
+      ],
+      "returncode": 1,
+      "expected_returncode": 1,
+      "stdout": "",
+      "stderr": "Audit à actualiser :\nCMakeLists.txt\nsrc/core/mutants.hpp\nsrc/forest/silent_incidence.hpp\ntests/meb_lazy_gate.cpp\n"
+    }
+  ]
+}

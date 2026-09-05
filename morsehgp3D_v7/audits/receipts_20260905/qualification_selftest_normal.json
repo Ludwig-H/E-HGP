@@ -1,0 +1,15 @@
+{
+  "positive": 1,
+  "rejected": [
+    "count",
+    "duplicate",
+    "empty",
+    "error",
+    "failure",
+    "missing_name",
+    "skipped",
+    "status",
+    "summary_failure"
+  ],
+  "assert_used": false
+}

@@ -1,0 +1,363 @@
+{
+  "scope": "bounded_independent_index_audit",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "gcp": "not_used",
+  "head_before": "e6d33698e62ebecf74dff01c16d7de17149d7a4e",
+  "worktree_before": "M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/audits/DIALOGUE_COURANT.md\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/index_probe_20260905.cpp\n?? morsehgp3D_v7/audits/index_probe_20260905.py\n?? morsehgp3D_v7/audits/meb_oracle_bridge_20260905.cpp\n?? morsehgp3D_v7/audits/meb_rational_oracle_20260905.py\n?? morsehgp3D_v7/audits/receipts_20260905/\n?? morsehgp3D_v7/audits/replay_release_20260905.py\n?? morsehgp3D_v7/audits/rounding_probe_20260905.cpp\n?? morsehgp3D_v7/audits/verify_qualification_20260905.py",
+  "sources_before": {
+    "morsehgp3D_v7/audits/index_probe_20260905.cpp": "535a88f8141eadba977cccd524aaa9c703c4ab2274b4ffd9c83d684a082c2fe5",
+    "morsehgp3D_v7/audits/index_probe_20260905.py": "fcf1ce60c87e4fd5686a6daac1094eb29d8fb4b874051cb3c0c59468679b2f4f",
+    "morsehgp3D_v7/src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "morsehgp3D_v7/src/core/morton.hpp": "67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e",
+    "morsehgp3D_v7/src/core/caps.hpp": "d388c877bf4ca8c0fc164148f176959530a0ceff3052640402db3dcd3c256912",
+    "morsehgp3D_v7/src/tree/cloud_index.hpp": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95",
+    "morsehgp3D_v7/src/pipeline/run.hpp": "1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c"
+  },
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "platform": "Linux-6.8.0-1052-azure-x86_64-with-glibc2.39",
+  "commands": [
+    {
+      "name": "compiler",
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "seconds": 0.0024168120003196236,
+      "stdout": "receipts_20260905/index_compiler.stdout",
+      "stdout_sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8",
+      "stderr": "receipts_20260905/index_compiler.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "build_optimized",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/index_probe_20260905.cpp",
+        "-o",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_optimized"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "seconds": 2.0160481339999023,
+      "stdout": "receipts_20260905/index_build_optimized.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "receipts_20260905/index_build_optimized.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "optimized",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_optimized"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "seconds": 1.0032994030002556,
+      "stdout": "receipts_20260905/index_optimized.stdout",
+      "stdout_sha256": "6fc2f84d9989dddd3c9285ac43deeec5143a27cdee29f105d8b8f7d195357891",
+      "stderr": "receipts_20260905/index_optimized.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "optimized_alias-child",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_optimized",
+        "--mutant",
+        "alias-child"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 3,
+      "expected_exit_code": 3,
+      "seconds": 0.0028759159999935946,
+      "stdout": "receipts_20260905/index_optimized_alias-child.stdout",
+      "stdout_sha256": "6040a36513aee987a98368ed18e3f3bad0a5acfcd5c139366aaf89ef27cc9a78",
+      "stderr": "receipts_20260905/index_optimized_alias-child.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "optimized_parent-link",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_optimized",
+        "--mutant",
+        "parent-link"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 3,
+      "expected_exit_code": 3,
+      "seconds": 0.0023857060000409547,
+      "stdout": "receipts_20260905/index_optimized_parent-link.stdout",
+      "stdout_sha256": "0255ce1f69c3f79874a401cc44c6b56e30913c8dc5a67200711033071b888b60",
+      "stderr": "receipts_20260905/index_optimized_parent-link.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "optimized_omit-leaf",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_optimized",
+        "--mutant",
+        "omit-leaf"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 3,
+      "expected_exit_code": 3,
+      "seconds": 0.002512715000193566,
+      "stdout": "receipts_20260905/index_optimized_omit-leaf.stdout",
+      "stdout_sha256": "443904bd890672c3fea0b2a0b429768dc7dc52f14543b184ef46e5686d045a14",
+      "stderr": "receipts_20260905/index_optimized_omit-leaf.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "optimized_tight-box",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_optimized",
+        "--mutant",
+        "tight-box"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 3,
+      "expected_exit_code": 3,
+      "seconds": 0.0023181709998425504,
+      "stdout": "receipts_20260905/index_optimized_tight-box.stdout",
+      "stdout_sha256": "63aad9920828e3bce97b34a4d811f87d5ca7154f3c7e903408578716aed9ac04",
+      "stderr": "receipts_20260905/index_optimized_tight-box.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "optimized_morton-key",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_optimized",
+        "--mutant",
+        "morton-key"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 3,
+      "expected_exit_code": 3,
+      "seconds": 0.0021514239997486584,
+      "stdout": "receipts_20260905/index_optimized_morton-key.stdout",
+      "stdout_sha256": "50d0080a7cb916b2bff30e2008b1b70a08ae04f02135b780953705f4e1d0d340",
+      "stderr": "receipts_20260905/index_optimized_morton-key.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "optimized_identity-swap",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_optimized",
+        "--mutant",
+        "identity-swap"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 3,
+      "expected_exit_code": 3,
+      "seconds": 0.0020841479999944568,
+      "stdout": "receipts_20260905/index_optimized_identity-swap.stdout",
+      "stdout_sha256": "54544898cd16964f15720bb164abba6097e9cafc79d56717393e5ad05b6057a0",
+      "stderr": "receipts_20260905/index_optimized_identity-swap.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "optimized_csr-boundary",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_optimized",
+        "--mutant",
+        "csr-boundary"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 3,
+      "expected_exit_code": 3,
+      "seconds": 0.001971900999706122,
+      "stdout": "receipts_20260905/index_optimized_csr-boundary.stdout",
+      "stdout_sha256": "d22fbc613f2297b72acafad0ad7956cb3833b78b50d4708d155b5d9116be08bb",
+      "stderr": "receipts_20260905/index_optimized_csr-boundary.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "build_ubsan",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O1",
+        "-g",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-D_GLIBCXX_ASSERTIONS",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/index_probe_20260905.cpp",
+        "-o",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_ubsan"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "seconds": 2.9193260160000136,
+      "stdout": "receipts_20260905/index_build_ubsan.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "receipts_20260905/index_build_ubsan.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ubsan",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_ubsan"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "seconds": 2.136424027999965,
+      "stdout": "receipts_20260905/index_ubsan.stdout",
+      "stdout_sha256": "6fc2f84d9989dddd3c9285ac43deeec5143a27cdee29f105d8b8f7d195357891",
+      "stderr": "receipts_20260905/index_ubsan.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ubsan_alias-child",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_ubsan",
+        "--mutant",
+        "alias-child"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 3,
+      "expected_exit_code": 3,
+      "seconds": 0.002460698000049888,
+      "stdout": "receipts_20260905/index_ubsan_alias-child.stdout",
+      "stdout_sha256": "6040a36513aee987a98368ed18e3f3bad0a5acfcd5c139366aaf89ef27cc9a78",
+      "stderr": "receipts_20260905/index_ubsan_alias-child.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ubsan_parent-link",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_ubsan",
+        "--mutant",
+        "parent-link"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 3,
+      "expected_exit_code": 3,
+      "seconds": 0.0020416649999788206,
+      "stdout": "receipts_20260905/index_ubsan_parent-link.stdout",
+      "stdout_sha256": "0255ce1f69c3f79874a401cc44c6b56e30913c8dc5a67200711033071b888b60",
+      "stderr": "receipts_20260905/index_ubsan_parent-link.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ubsan_omit-leaf",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_ubsan",
+        "--mutant",
+        "omit-leaf"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 3,
+      "expected_exit_code": 3,
+      "seconds": 0.0018770910000966978,
+      "stdout": "receipts_20260905/index_ubsan_omit-leaf.stdout",
+      "stdout_sha256": "443904bd890672c3fea0b2a0b429768dc7dc52f14543b184ef46e5686d045a14",
+      "stderr": "receipts_20260905/index_ubsan_omit-leaf.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ubsan_tight-box",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_ubsan",
+        "--mutant",
+        "tight-box"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 3,
+      "expected_exit_code": 3,
+      "seconds": 0.0018975810003212246,
+      "stdout": "receipts_20260905/index_ubsan_tight-box.stdout",
+      "stdout_sha256": "63aad9920828e3bce97b34a4d811f87d5ca7154f3c7e903408578716aed9ac04",
+      "stderr": "receipts_20260905/index_ubsan_tight-box.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ubsan_morton-key",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_ubsan",
+        "--mutant",
+        "morton-key"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 3,
+      "expected_exit_code": 3,
+      "seconds": 0.0018929240000034042,
+      "stdout": "receipts_20260905/index_ubsan_morton-key.stdout",
+      "stdout_sha256": "50d0080a7cb916b2bff30e2008b1b70a08ae04f02135b780953705f4e1d0d340",
+      "stderr": "receipts_20260905/index_ubsan_morton-key.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ubsan_identity-swap",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_ubsan",
+        "--mutant",
+        "identity-swap"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 3,
+      "expected_exit_code": 3,
+      "seconds": 0.001987974999792641,
+      "stdout": "receipts_20260905/index_ubsan_identity-swap.stdout",
+      "stdout_sha256": "54544898cd16964f15720bb164abba6097e9cafc79d56717393e5ad05b6057a0",
+      "stderr": "receipts_20260905/index_ubsan_identity-swap.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ubsan_csr-boundary",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_20260905_index/index_ubsan",
+        "--mutant",
+        "csr-boundary"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 3,
+      "expected_exit_code": 3,
+      "seconds": 0.0021159350003472355,
+      "stdout": "receipts_20260905/index_ubsan_csr-boundary.stdout",
+      "stdout_sha256": "d22fbc613f2297b72acafad0ad7956cb3833b78b50d4708d155b5d9116be08bb",
+      "stderr": "receipts_20260905/index_ubsan_csr-boundary.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "binaries": {
+    "optimized": {
+      "path": ".work_20260905_index/index_optimized",
+      "sha256": "d324b3067f4afe42d120a40db3fbf86c85f90253cc7191b94fbd7fb04b3a577c"
+    },
+    "ubsan": {
+      "path": ".work_20260905_index/index_ubsan",
+      "sha256": "3266760fc7f6090d56f3a9aa2e70087fc9eb1e95061efb3b4871897fa400b0b6"
+    }
+  },
+  "sources_after": {
+    "morsehgp3D_v7/audits/index_probe_20260905.cpp": "535a88f8141eadba977cccd524aaa9c703c4ab2274b4ffd9c83d684a082c2fe5",
+    "morsehgp3D_v7/audits/index_probe_20260905.py": "fcf1ce60c87e4fd5686a6daac1094eb29d8fb4b874051cb3c0c59468679b2f4f",
+    "morsehgp3D_v7/src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "morsehgp3D_v7/src/core/morton.hpp": "67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e",
+    "morsehgp3D_v7/src/core/caps.hpp": "d388c877bf4ca8c0fc164148f176959530a0ceff3052640402db3dcd3c256912",
+    "morsehgp3D_v7/src/tree/cloud_index.hpp": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95",
+    "morsehgp3D_v7/src/pipeline/run.hpp": "1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c"
+  },
+  "status": "completed",
+  "head_after": "e6d33698e62ebecf74dff01c16d7de17149d7a4e",
+  "worktree_after": "M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/audits/DIALOGUE_COURANT.md\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/index_probe_20260905.cpp\n?? morsehgp3D_v7/audits/index_probe_20260905.py\n?? morsehgp3D_v7/audits/meb_oracle_bridge_20260905.cpp\n?? morsehgp3D_v7/audits/meb_rational_oracle_20260905.py\n?? morsehgp3D_v7/audits/receipts_20260905/\n?? morsehgp3D_v7/audits/replay_release_20260905.py\n?? morsehgp3D_v7/audits/rounding_probe_20260905.cpp\n?? morsehgp3D_v7/audits/verify_qualification_20260905.py"
+}

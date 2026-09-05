@@ -12,7 +12,7 @@ import sys
 
 LINEAGE = Path(__file__).resolve().parent.parent
 DEFAULT_MANIFEST = (
-    LINEAGE / "audits/receipts_20260904/validation_current.json"
+    LINEAGE / "audits/receipts_20260905/validation_current.json"
 )
 
 

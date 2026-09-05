@@ -1,0 +1,11 @@
+{
+  "base_head": "e6d33698e62ebecf74dff01c16d7de17149d7a4e",
+  "delta_sha256": "d292db985006b9ce183e7161a45df2d87f01972a2ec1d94149ae7c0ad90bb627",
+  "scope": "observed constructor E delta, not staged as product by auditor",
+  "sources": {
+    "CMakeLists.txt": "098a764e63c235f3028136b7cf8ee35771b99541291c898a1ed0ae06703be5f9",
+    "src/core/mutants.hpp": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5",
+    "src/forest/silent_incidence.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76",
+    "tests/meb_lazy_gate.cpp": "242513ee8d5d3a0d531fad7cfcc9a01556da24633da07a1d0cbee706f43efdc5"
+  }
+}

@@ -1,6 +1,14 @@
 # Audit indépendant courant de MorseHGP3D v7
 
-Date : 4 septembre 2026. Écritures limitées à `morsehgp3D_v7/audits/`.
+Actualisé le 5 septembre 2026 sur `e6d33698e62ebecf74dff01c16d7de17149d7a4e`.
+Toutes les écritures restent dans `morsehgp3D_v7/audits/`.
+
+La qualification complète vise le snapshot **D**. Après la clôture de son
+run, le constructeur a modifié quatre fichiers produit pour le prétest q2
+**E** : CMake, `mutants.hpp`, `silent_incidence.hpp` et `meb_lazy_gate.cpp`.
+Leurs changements locaux ne sont pas inclus dans cette publication d'audit.
+Les 323 résultats et la stabilité avant/après ne leur sont pas transférés.
+Les pins D conservés signalent ce décalage par le code de fraîcheur 1.
 
 ```text
 phase=exploration_v7_hors_registre
@@ -12,173 +20,141 @@ public_status=not_claimed
 
 ## Avis pour le constructeur
 
-La v7 dispose d'une voie concrète vers une hiérarchie horizontale exacte :
-catalogue direct, complétion des incidences silencieuses par descente stricte,
-fold normalisé, puis rejeu des deltas. Les contre-fixtures permanentes
-contrôlent les matérialisations, les continuations et les identités publiées.
-La destination directe du census et le tri par permutation réduisent les
-copies sans construire la mosaïque de Delaunay d'ordre supérieur.
+**La MEB différée est justifiée et le verrou topologique de l'index est
+levé sous les préconditions du pipeline.** Les deux conclusions associent
+un argument statique et un juge indépendant du calcul produit. La garde
+d'arrondi et ses replis ont aussi été exercés dans le pipeline. Aucun
+nouveau défaut produit n'a été trouvé dans ces trois sous-audits.
+Le constructeur peut s'appuyer sur ces acquis pour achever la qualification
+horizontale ; ils ne restent pas des demandes de preuve génériques.
 
-La composition horizontale possède maintenant une justification sous les
-prémisses S explicites du constructeur. La contre-lecture ferme les raccords
-d'ancrage au cœur et d'inertie sans exiger une régularité géométrique globale.
-La couverture S1 possède aussi un théorème géométrique conditionnel complet,
-jusqu'au représentant d'arité minimale après RLE. La qualification
-industrielle exacte demande encore de vérifier ses hypothèses sur les
-primitives et le domaine d'exécution du produit, de
-certifier la verticale si elle fait partie de l'objet livré et de mesurer
-les coûts de bout en bout. Une campagne bornée ne suffit pas à ces trois
-conclusions. Le statut `not_claimed` et le refus de `--require-exact` restent
-cohérents avec les preuves disponibles.
+La composition S1 et la réduction horizontale disposent déjà de preuves
+conditionnelles. La partition du front et les antichaînes de cover sont maintenant
+[raccordées à l'index](AUDIT_RACCORD_INDEX_FRONT_20260905.md). Il reste
+l'inventaire arithmétique des témoins du front et le domaine de compilation
+retenu. Le domaine des plateaux, la verticale, le vote et les coûts gardent
+leurs propres contrats. Le refus de `--require-exact` reste cohérent avec
+cet état ; aucune promotion n'est faite par cet audit.
 
-Le défaut de nettoyage d’archive est **corrigé et requalifié** : la probe
-indépendante conserve son refus d’allocation et revient sans terminaison
-ni résidu. Les quatre portes archive/API passent, y compris les refus
-tardifs K1/K2 et les diagnostics OS. Les 26 scènes CLI et six corruptions
-sont aussi rejouées avec succès sur le nouveau binaire. Les
-[preuves du delta](RETOUR_ARCHIVE_COURANT.md) lèvent A1 ; l’enregistrement
-CTest du banc d’incidences lève C1 dans les [échanges courants](DIALOGUE_COURANT.md).
-
-## Modèle lu et objet effectivement audité
+## Modèle lu et objet audité
 
 Les parties I, pages PDF 35–76, puis II, pages PDF 77–134, du
 [manuscrit](../../docs/references/MANUSCRIT_THESE_HAUSEUX.pdf) ont été lues
-intégralement. SHA-256 :
+intégralement au début de cette session. SHA-256 :
 `579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef`.
 
-Le théorème 2 relie les composantes des régions témoins, celles de Gamma et
-les ensembles de points couverts. La proposition 5 permet les cofaces
-élémentaires pour préserver les composantes, sans identifier les adjacences.
-Le théorème 4 fournit la descente par remplacement d'un sommet essentiel.
-Le § 9.1 distingue la partition des facettes et le recouvrement des points.
+Le théorème 2 identifie les composantes des régions témoins et les
+K-polyèdres. La proposition 5 autorise les cofaces élémentaires pour
+préserver H0, sans identifier leurs adjacences à celles du graphe complet.
+Le fait 12 caractérise la MEB et ses supports. Le § 9.1 conserve une
+partition des facettes et un recouvrement des points, puis définit les
+masses normalisées et le vote comme traitement aval.
 
-L'option `--complete-incidences` sélectionne
-`forest_semantics=normalized_horizontal_h0_candidate`. Au-dessus de l'ordre
-un, les facettes latentes ne sont pas des parents enracinés. `born` signifie
-première matérialisation dans le sous-flot retenu ; ce champ ne donne pas la
-naissance géométrique exhaustive dans Gamma. Les singletons de l'ordre un
-restent normatifs. Le rendu pondéré et les applications entre ordres sont
-des contrats distincts de cet export horizontal.
+La suppression Gabriel brute de la proposition 6 et du théorème 5 ne
+peut pas servir de certificat : la
+[contre-fixture E5](../../docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md)
+démontre une attache silencieuse nécessaire à une fusion ultérieure.
+La [composition corrigée](../docs/PREUVE_HORIZONTALE_COMPOSITION.md)
+est donc l'autorité conditionnelle utile. Les observations de percolation
+et les expériences historiques de la thèse ne sont ni une borne de coût
+ni des résultats d'exécution v7.
 
-## Acquis et preuves exécutables
+Le payload par défaut reste `verified_events_only`. L'option
+`--complete-incidences` produit `normalized_horizontal_h0_candidate` :
+composantes non triviales pour K supérieur à un, facettes latentes avant
+leur première incidence retenue, et `born` comme première matérialisation
+dans ce sous-flot. Les singletons restent normatifs à K=1. Ni une naissance
+exhaustive dans Gamma, ni les cartes verticales, ni les poids du vote ne
+sont contenus implicitement dans cet export.
 
-| Domaine | Résultat vérifié | Autorité détaillée |
+## Preuves nouvelles et autorité de chaque résultat
+
+| Domaine | Conclusion vérifiée | Preuves |
 | --- | --- | --- |
-| Géométrie et réduction | Le triangle aigu donne zéro parent et trois matérialisations à la naissance ; E5 conserve ses continuations. Les contre-fixtures distinguent connexité, matérialisation et identité. | [Audit mathématique](AUDIT_MATHEMATIQUE_20260904.md) |
-| Fenêtre de rang | Catalogue indépendant jusqu'à 24 points ; Gamma et deltas à K=2 et K=10 sur quatre exécutions à 13 points ; 88 contacts stricts et deux mutants ciblés. | [Retour mathématique](RETOUR_MATH_COURANT.md) |
-| Entrée et archive | L'ordre des points, les refus, la cohérence des lots et le rejeu structurel sont testés, y compris après corruption et recalcul des hashes. | [Audit des interfaces](AUDIT_INTERFACES_20260904.md) |
-| Tri | Objet stable conservé, zéro tampon local observé ; pic supplémentaire de heap de 262 736 octets pour 32 768 enregistrements et deux ouvriers. | [Audit de résidence](AUDIT_RESIDENCE_20260904.md) |
-| Admission mémoire | Deux refus conservatifs évitables reproduits ; concurrence bornable par le nombre d'ordres ; coexistence A2/B1 mesurée sans assimiler proxy et RSS. | [Retour mémoire](RETOUR_MEMOIRE_COURANT.md) |
-| Construction indépendante | Snapshot initial : toutes les cibles Release construites, 279/279 portes CPU, 203 fichiers et 31 binaires inchangés. Delta archive qualifié séparément. | [Reçu Release courant](receipts_20260904/iteration2/validation.json) |
-| Mode mono | Quatre portes passent avec interposition réelle de `pthread_create`, objets conservés et refus tardifs. | [Qualification mono](MONO_COURANT.md) |
-| Census courant | Six portes AxisBounds passent, dont cinq mutants ; CLI C reconstruit identique au binaire mesuré, interfaces rejouées. | [Qualification census](CENSUS_AXIS_COURANT.md) |
-| Arithmétique | Bornes et signes des lanes, colonnes U192/U320, casts PGCD fermés statiquement sous préconditions ; fixtures causales proposées. | [Lanes](ARITHMETIQUE_LANES_COURANTE.md), [entiers larges](ARITHMETIQUE_LARGE_COURANTE.md) |
-| Reçus C et mesure mono | Reçus constructeur 292/292 contrôlés ; six processus B/C à 8k, digests identiques et réduction observée de 15,9 à 17,2 %. Aucune répétition indépendante du benchmark. | [Qualification C](QUALIFICATION_C_COURANTE.md) |
-| Harnais CI | Correction locale : 23 scènes normales et optimisées réussies, refus de l'environnement injecté conservé. Aucun nouveau vert GitHub attesté. | [Sonde CI](SONDE_CI_COURANTE.md) |
-| Banc d'incidences | Sept tests passent normalement et sous Python optimisé ; un vrai refus K=2 est classé sans succès moteur. Les deux CTests sont enregistrés et passent. | [Classification courante](CAMPAGNE_INCIDENCES_COURANTE.md) |
+| MEB différée q3/q4 | Signes, zéros, premier support, niveau et budgets conservés ; 89 ensembles, 431 appels et 6 176 puissances, deux mutants détectés | [Preuve et oracle rationnel indépendant](AUDIT_MEB_DIFFEREE_20260905.md) |
+| Prétest q2 E postérieur | Identité et borne i64 ; oracle rejoué, 431 appels identiques à D et nouveau mutant q2 détecté ; qualification locale seulement | [Addendum E](ADDENDUM_MEB_Q2_E_20260905.md) |
+| Morton, buckets et Karras | Partition, références, racine, couverture unique et boîtes justifiées ; 237 212 nuages par binaire, sept mutants structurels rejetés sous O2 et UBSan | [Preuve et oracle de trie](AUDIT_INDEX_20260905.md) |
+| Domaine d'arrondi local | 40 appels aux quatre modes, un/deux threads ; filtres actifs au plus proche, replis entiers ailleurs, objets identiques | [Garde et replis exécutés](AUDIT_ARRONDI_20260905.md) |
+| Reçus D et arithmétique | Intégrité des huit XML, sceaux, sources et binaires ; Boost réellement compilé pour sa porte entière | [Contrelecture de qualification](AUDIT_QUALIFICATION_20260905.md) |
+| Reconstruction indépendante D | Construction neuve Release et 323/323 portes CPU, zéro échec/skip ; sources et 37 binaires stables | [Reçu du présent audit](receipts_20260905/release/summary.json) |
 
-Chaque rapport identifie les octets réellement exécutés. Le HEAD et les
-sources non commitées sont distingués : les manifestes et hashes restent
-indispensables pendant le travail concurrent du constructeur. Le [reçu de validation](receipts_20260904/validation_current.json)
-centralise les portées, les commandes et le dernier contrôle de fraîcheur.
+Les 323 exécutions D rapportées par le constructeur sont confirmées par
+ses reçus, indépendamment de la nouvelle exécution de l'auditeur. Les
+316 portes C conservent leur attribution historique. Les nouvelles
+portes de MEB et d'index utilisent UBSan ; cela ne doit pas être appelé
+une reconstruction ASan de toute la v7.
 
-## Verrous à lever et critères de fermeture
+Les acquis précédents sont conservés :
+[composition horizontale](REPONSE_AUDITEUR_COMPOSITION.md),
+[couverture S1](S1_COURANT.md),
+[interfaces](AUDIT_INTERFACES_20260904.md),
+[archive corrigée A1](RETOUR_ARCHIVE_COURANT.md),
+[mode mono](MONO_COURANT.md),
+[census](CENSUS_AXIS_COURANT.md),
+[lanes](ARITHMETIQUE_LANES_COURANTE.md),
+[entiers larges](ARITHMETIQUE_LARGE_COURANTE.md) et
+[classification des campagnes C1](CAMPAGNE_INCIDENCES_COURANTE.md).
+Leurs reçus bruts ne sont pas réécrits.
 
-### 1. Rattacher la preuve S1 aux qualifications du produit
+## Prochaines fermetures utiles
 
-La preuve locale détaillée dans l'audit mathématique montre pourquoi une
-seule première incidence peut suffire : les co-minimiseurs non-Gabriel ont
-un apex antérieur commun sous les hypothèses de support et de régularité.
-La décroissance exacte et le terminal direct donnent un certificat de
-localisation. C'est un argument constructif pour le choix actuel.
+1. **Assembler le certificat horizontal sur les sources courantes.**
+   Réutiliser la preuve d'index et le raccord des piles WSPD et handles
+   d'antichaîne désormais démontré ; conserver les contrôles par paire.
+   Achever le grand-livre des expressions des témoins du front,
+   notamment les changements d'échelle et racines corrigées de
+   `spindle.hpp`, `sector_kill.hpp` et `chord_kill.hpp`. La borne de
+   cardinal du pipeline existe ; la preuve de MEB et les portes
+   Cassini/U320 déjà intégrées ne sont plus des obstacles ouverts.
+2. **Fixer le domaine CPU et le domaine géométrique de la qualification.**
+   Épingler une commande mono, ses options effectives et son environnement
+   numérique, en réutilisant les marges prouvées et la garde exercée ici.
+   Les fonctions internes de l'index restent préconditionnées ; le
+   constructeur doit annoncer ou garder ces préconditions s'il les rend
+   publiques. Les extra-shells pertinents sont encore refusés par la route
+   complétée. Une extension aux plateaux demande ses propres fixtures de
+   contacts égaux et de lots atomiques ; un refus déclaré n'est pas une
+   erreur de MEB.
+3. **Compléter l'objet demandé par le contrat industriel.**
+   L'archive déclare `vertical_maps=none`. Définir et certifier les
+   applications entre ordres, puis les contributions d'incidence du
+   vote du § 9.1, sans les reconstruire depuis les seuls deltas H0.
+   Préserver les facettes comme feuilles ; le recouvrement apparaît dans
+   la projection et ne nécessite pas de laminarisation arbitraire.
+4. **Réduire puis mesurer le coût global de la route complétée.**
+   Les 550 supports possibles d'une MEB locale ne bornent ni les chaînes
+   ni le catalogue de facettes. Mesurer leurs distributions et les
+   reparcours de l'index. Les propositions précises du
+   [retour mémoire](RETOUR_MEMOIRE_COURANT.md) restent applicables : borner
+   la concurrence par les ordres effectifs, précontrôler les facteurs de
+   coexistence et envisager une destination directe de l'expansion.
+   Le proxy `--mem-budget` reste distinct du RSS ; l'archive atomique
+   n'est pas un checkpoint moteur.
 
-La [composition conditionnelle](REPONSE_AUDITEUR_COMPOSITION.md) raccorde
-les chaînes retenues, l'activation du cœur, l'inertie hors fenêtre et les
-composantes par inclusion des facettes. Chaque composante possède un
-ancrage direct ; identifier ces composantes par les seuls points couverts
-serait incorrect à ordre supérieur. Les contrôles locaux suffisent à
-écarter les contacts égaux avec les blocs irréguliers omis.
+Ces étapes n'exigent ni Gamma exhaustif ni la mosaïque de Delaunay
+supérieure dans le produit. Les oracles bornés restent dans les audits
+et tests. La preuve de l'index ne change pas son coût linéaire ; la MEB
+différée supprime des matérialisations locales sans ajouter de structure
+globale. La résidence des candidats et incidences reste à qualifier.
 
-La [matrice S1](S1_COURANT.md) prouve ce parcours sous les contrats explicites
-des primitives : toute boule pertinente atteint son propriétaire, son seed
-et sa complétion, survit aux prunes stricts et conserve son arité minimale
-après RLE. Les preuves séparées couvrent les témoins, secteurs, cordes,
-cellules et marges flottantes, arrondis des bornes finales compris.
+Le [contrat de performance](../docs/CONTRAT_PERFORMANCE.md) porte sur
+50 000 points et toute la tour K=1..10 sous une seconde, avec repli
+K=1..5, puis 100 ms. Il impose d'abord le mono, ensuite le multi-CPU,
+puis le GPU. Aucun temps de compilation, de CTest ou de sonde de cet
+audit ne satisfait ce contrat. Les paliers massifs restent distincts.
 
-Le constructeur a intégré ces lemmes au théorème horizontal et publié la
-[cartographie des primitives](../docs/QUALIFICATION_S1_PRIMITIVES.md). La
-contrelecture des [lanes q2/q3/q4](ARITHMETIQUE_LANES_COURANTE.md) ferme leurs
-identités, signes, bornes d'intermédiaires et conversions sur formes u16
-valides, y compris Cramer et la puissance q4 développée. Celle des
-[entiers larges et PGCD](ARITHMETIQUE_LARGE_COURANTE.md) ferme les colonnes,
-retenues, casts et divisions sous leurs préconditions explicites.
+## Portée et traçabilité
 
-**Critère de qualification produit :** porter les petites portes causales
-sur le code compilé, puis achever les contrats de l'index/front, des tris
-et des shells. Les fixtures Cassini et U320.w[4] sont fournies avec valeurs
-indépendantes ; leurs exécutions C++ ne sont pas encore attribuées à cet audit.
-Le domaine binaire64, l'arrondi et la séquence de calcul doivent être ceux
-qualifiés par le build. La preuve des bornes arithmétiques locales est acquise ;
-le raccord de toutes les primitives au binaire livré reste à qualifier.
+Les sources v7 examinées appartiennent au HEAD indiqué, sans delta produit
+local à l'ouverture. Quatre fichiers v6 modifiés et trois fichiers v6
+nouveaux étaient déjà présents ; ils ne sont pas utilisés ou inclus dans
+cette publication. Le travail est effectué sur `main`, sans nouvelle
+branche et sans modification du registre officiel.
 
-### 2. Déclarer la verticale et le rendu
-
-L'archive annonce `vertical_maps=none`. Une collection de forêts par ordre
-ne constitue pas à elle seule une hiérarchie multi-ordre certifiée.
-**Critère de fermeture si cet objet est requis :** définir les applications
-entre ordres, leurs domaines et leurs carrés de naturalité, puis vérifier
-leurs certificats séparément de l'égalité horizontale à chaque coupe.
-
-Pour le rendu du § 9.1, conserver les incidences et les contributions
-nécessaires aux poids de vote. Les seules feuilles et leurs deltas ne
-donnent pas ces multiplicités. Le carrier, la politique de coupe et le sens
-du niveau doivent être déclarés par le consommateur.
-
-### 3. Qualifier la mémoire et le coût de la complétion
-
-La miniball locale examine au plus onze sites, donc au plus 550 supports
-de tailles deux à quatre. Ce plafond local ne borne ni le nombre de
-facettes du cœur ni la longueur totale des chaînes. Le tableau `BallData`
-reste global pendant les folds, et l'expansion conserve des sorties par
-tranche avant fusion.
-
-**Prochaines actions mesurables :** appliquer le plafond constant
-`min(fold_inflight, kmax_eff)` aux deux gardes de concurrence et précontrôler
-le facteur silencieux `+3`, selon les fixtures du [retour mémoire](RETOUR_MEMOIRE_COURANT.md).
-Le proxy déclaré reste distinct des capacités observées et du RSS.
-Essayer ensuite une destination directe
-d'expansion par comptes et sommes préfixes ; mesurer les distributions de
-longueur des chaînes et les reparcours spatiaux. Conserver les objets et
-refus appariés à chaque optimisation. Une libération par lots doit expliquer
-comment une incidence ultérieure retrouve son représentant certifié.
-
-Les campagnes 8k/16k/32k, 50k et grande échelle devront épingler entrée,
-source, binaire, options, statuts, RAM, latence et compteurs de travail sur
-la route avec complétion activée. Un budget sur des tampons nommés ne vaut
-pas plafond RSS ; un refus borné ne vaut pas résultat d'échelle.
-
-Le [contrat de performance v7 actuel](../docs/CONTRAT_PERFORMANCE.md)
-vise 50 000 points et toute la tour K=1 à 10 sous une seconde, avec repli
-sur toute la tour K=1 à 5. Il demande d'abord une qualification mono-thread,
-puis multi-CPU et GPU ; le jalon suivant est 100 ms sur le même périmètre,
-et la cible massive est GCP G4. Les présentes mesures ne qualifient aucun
-de ces seuils.
-
-## Limites de validation
-
-La suite complète indépendante couvre 279 portes du snapshot figé, avec
-46 tests d'échelle exclus. Archive, mono, AxisBounds et harnais Python ont
-leurs reçus ciblés. Le CLI courant C est reconstruit indépendamment et
-repasse les interfaces. La suite constructeur C de 292 portes a fait
-l'objet d'une vérification indépendante de reçus, sans répétition complète
-par l'auditeur. Les mesures B/C sont également attribuées au constructeur,
-avec recalcul des digests et comparaison des objets ; elles ne qualifient
-ni la complétion silencieuse ni les seuils industriels.
-
-Les résultats détaillés conservent leurs hashes propres ; les objections
-corrigées ne restent pas ouvertes. Le contrôle documentaire global couvre
-maintenant la documentation v7, mais exclut encore `audits/` ; le Markdown
-et les liens de ce dossier sont contrôlés explicitement en complément.
-
-GCP non utilisé par l'auditeur. Aucun résultat CUDA matériel ni mesure GPU
-n'est attribué à ses tests.
+La [validation courante](receipts_20260905/validation_current.json)
+sépare les contrôles nouvellement exécutés et les reçus historiques
+contre-vérifiés. Le contrôleur de fraîcheur ne qualifie que les octets
+épinglés de D ; l'absence de delta produit à l'ouverture ne décrit pas le
+worktree après le début de E. Les résultats locaux CTest restent distincts
+des runs GitHub.
+GCP non utilisé ; aucun résultat GPU attribué à cet audit.

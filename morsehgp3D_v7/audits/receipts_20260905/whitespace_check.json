@@ -1,0 +1,20 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--cached",
+    "--check"
+  ],
+  "returncode": 2,
+  "diagnostic_sha256": "d34d6aeebecafd135a407775f0bbc316103df30e93b67034807e631d0d4f3c5b",
+  "raw_files_with_whitespace": [
+    "morsehgp3D_v7/audits/receipts_20260905/index_compiler.stdout",
+    "morsehgp3D_v7/audits/receipts_20260905/release/CMakeCache.txt",
+    "morsehgp3D_v7/audits/receipts_20260905/release/configure.stdout",
+    "morsehgp3D_v7/audits/receipts_20260905/release/inventory.stdout",
+    "morsehgp3D_v7/audits/receipts_20260905/rounding_environment_0.stdout",
+    "morsehgp3D_v7/audits/receipts_20260905/rounding_environment_4.stdout"
+  ],
+  "authored_files_returncode": 0,
+  "decision": "preserve exact CMake/GCC raw bytes and hashes; all authored text/code passes whitespace check"
+}

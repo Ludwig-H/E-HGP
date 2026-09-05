@@ -1,0 +1,20 @@
+[
+  {
+    "command": [
+      "python3",
+      "tools/check_docs.py"
+    ],
+    "returncode": 0,
+    "stdout": "Validated 303 active Markdown files.\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python3",
+      "tools/check_implementation_status.py"
+    ],
+    "returncode": 0,
+    "stdout": "Validated 20 implementation phases and their gates.\n",
+    "stderr": ""
+  }
+]

@@ -1,10 +1,10 @@
 # Produits larges, niveaux et réductions : contrelecture courante
 
-4 septembre 2026. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+Lecture statique du 4 septembre, qualification actualisée le 5 septembre 2026. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
-Les preuves des §§ 5–7 de [ARITHMETIQUE_PRIMITIVES.md](../docs/ARITHMETIQUE_PRIMITIVES.md#5-produits-larges--preuve-des-colonnes-écrites) concordent avec les expressions écrites : aucune erreur de borne des colonnes, de cast PGCD ou de correction de quotient n'a été trouvée dans leur domaine déclaré. Le [plan de portes](../docs/PLAN_PORTES_ARITHMETIQUES.md#4-u192u320-et-comparateurs--séparer-les-domaines) distingue correctement les limites de capacité génériques et les niveaux issus des lanes u16. Les exécutions C++ et mutants restent à qualifier séparément.
+Les preuves des §§ 5–7 de [ARITHMETIQUE_PRIMITIVES.md](../docs/ARITHMETIQUE_PRIMITIVES.md#5-produits-larges--preuve-des-colonnes-écrites) concordent avec les expressions écrites : aucune erreur de borne des colonnes, de cast PGCD ou de correction de quotient n'a été trouvée dans leur domaine déclaré. Le [plan de portes](../docs/PLAN_PORTES_ARITHMETIQUES.md#4-u192u320-et-comparateurs--séparer-les-domaines) distingue correctement les limites de capacité génériques et les niveaux issus des lanes u16. Les exécutions C++ et mutants ont depuis été intégrés et qualifiés séparément : 24/24 portes ciblées Release et ASan/UBSan, puis 316/316 sur C et 323/323 sur D. La [contrelecture indépendante des reçus](AUDIT_QUALIFICATION_20260905.md) vérifie ces comptes et leurs liaisons ; elle ne réattribue aucune exécution au reçu statique initial.
 
-Cette contrelecture ajoute une comparaison minimale de deux niveaux numériques, avec le **premier bit de U320.w[4] non nul**, qui isole le second site de `level-trunc-hi`. Le [reçu](receipts_iteration3/wide_static_current.json) contient les 13 hashes stables et les calculs reproductibles en entiers Python. Aucun compilateur, programme C++ ni mutant produit n'a été exécuté pour cette note.
+La contrelecture initiale ajoute une comparaison minimale de deux niveaux numériques, avec le **premier bit de U320.w[4] non nul**, qui isole le second site de `level-trunc-hi`. Son [reçu statique historique](receipts_iteration3/wide_static_current.json) conserve les 13 hashes et les calculs reproductibles en entiers Python. Aucune compilation ni exécution produit n'appartient à ce reçu ; les campagnes d'intégration décrites ci-dessous portent leur propre autorité.
 
 ## 1. Colonnes : tous les intermédiaires sont bornés
 
@@ -29,7 +29,7 @@ La [somme de trois carrés](../src/core/wide.hpp#L78) requiert $a^2+b^2+c^2<R^3$
 
 Le point délicat est `r.w[2] += sq.w[2] + carry`, où l'addition de droite s'effectue en u64. Si cette addition atteignait R, ou si son ajout à `r.w[2]` atteignait R, la somme partielle complète atteindrait déjà $R^3$. La précondition collective exclut donc les deux wraps. Vérifier seulement chaque carré ne suffit pas : pour $a=b=3\times2^{94}$ et $c=0$, chacun vaut $9\times2^{188}<2^{192}$, mais leur somme vaut $18\times2^{188}>2^{192}$.
 
-Le cas valide proposé, trois fois $(2^{95}-1)^2$, comporte effectivement un report non nul entre mots milieu et haut. Le calcul Python donne les mots de somme `[3, 18446744060824649728, 13835058055282163711]`. Ces calculs qualifient les valeurs attendues de la future fixture, pas l'exécution de la primitive C++.
+Le cas valide proposé, trois fois $(2^{95}-1)^2$, comporte effectivement un report non nul entre mots milieu et haut. Le calcul Python donne les mots de somme `[3, 18446744060824649728, 13835058055282163711]`. Ce calcul qualifie les valeurs attendues. L'exécution C++ appartient désormais à `mhgp7_arithmetic_integer` : son reçu intégré observe `sums=1`, `sum_carries=2` et `fixture_reject_sum=1`.
 
 ## 3. Comparateurs : trois domaines distincts
 
@@ -47,7 +47,7 @@ La troisième ligne est conditionnée aux bornes des formes u16 relues séparém
 
 ## 4. Deux sites de mutant, deux fixtures causales
 
-Le nom `level-trunc-hi` efface [U192.w[2]](../src/core/wide.hpp#L39) **et** [U320.w[4]](../src/core/wide.hpp#L61). Une future porte doit publier séparément la non-vacuité de chacun. Les numérateurs du test U320 ci-dessous sont des littéraux : aucune multiplication U192 ni somme de carrés ne les construit, donc le premier site n'intervient pas.
+Le nom `level-trunc-hi` efface [U192.w[2]](../src/core/wide.hpp#L39) **et** [U320.w[4]](../src/core/wide.hpp#L61). Les portes intégrées publient séparément la non-vacuité de chacun. Les numérateurs du test U320 ci-dessous sont des littéraux : aucune multiplication U192 ni somme de carrés ne les construit, donc le premier site n'intervient pas.
 
 ```cpp
 const ExactLevel x{{0, 0, 4}, 1};
@@ -61,11 +61,13 @@ Ces deux niveaux représentent $x=2^{130}/1$ et $y=1/2^{126}$. Leurs dénominate
 | Gauche | $2^{256}$ | `[0,0,0,0,1]` |
 | Droit | 1 | `[1,0,0,0,0]` |
 
-Le verdict exact est +1. Effacer seulement le cinquième mot transforme le produit gauche en zéro et impose −1. C'est une fixture de deux enregistrements atteignant le premier bit du mot recherché ; elle ne prétend pas minimiser toutes les valeurs d'entrée, ni représenter des boules u16. Le calcul Python confirme ces littéraux et cette inversion **modélisée**, sans prétendre avoir tué le mutant C++.
+Le verdict exact est +1. Effacer seulement le cinquième mot transforme le produit gauche en zéro et impose −1. C'est une fixture de deux enregistrements atteignant le premier bit du mot recherché ; elle ne prétend pas minimiser toutes les valeurs d'entrée, ni représenter des boules u16. Le calcul Python confirme ces littéraux et cette inversion **modélisée**. La preuve d'exécution du mutant C++ est distincte et décrite ci-dessous.
 
 Pour le premier site, $2^{64}\times2^{64}=2^{128}$ donne directement U192 `[0,0,1]`. Pour les retenues complètes U320, le plan propose utilement $(R^3-1)(R^2-1)=R^5-R^3-R^2+1$, soit `[1,0,R-1,R-2,R-1]`, confirmé par le juge Python. Ces cas complètent le test de simple inversion ; ils ne s'y substituent pas.
 
-La lecture du CMake courant ne trouve ni inscription de `level-trunc-hi`, ni cible `mhgp7_level_cmp`. Les produits du [selftest arithmétique](../tests/selftest.cpp#L54) sont jugés par commutativité et monotonie. Son produit U320 maximal dans cette séquence a 192 bits et `w[4]=0` ; il ne qualifie donc pas le second site. Une réussite d'un oracle géométrique qui construit d'abord un carré U192 ne comblerait pas non plus cette obligation.
+Le CMake courant inscrit désormais deux portes causales pour `level-trunc-hi` dans [la matrice des codes et préfixes](../receipts/arithmetic_gates_20260904/targeted.registration_cases.json). `mhgp7_arithmetic_q4_u192_word2` impose le code 4 et `first_divergence=q4.level.num` : un vrai q4 produit un numérateur de 136 bits, avec `q4_num_high=1` et aucun croisement U320. `mhgp7_arithmetic_u320_word4` impose le code 4 et `divergence=W2.u320_word4` : `u192_calls=0`, `u320_w4=2` et `first_bit_256=1` isolent le second site. Les portes nominales associées sont `mhgp7_arithmetic_lanes_q4_level` et `mhgp7_arithmetic_integer_u320`.
+
+Ces observations figurent dans les [JUnit intégrés Release](../receipts/arithmetic_gates_20260904/targeted.release.junit.xml) et [ASan/UBSan](../receipts/arithmetic_gates_20260904/targeted.sanitized.junit.xml), puis les suites C et D les réexécutent. L'[inspection indépendante courante](AUDIT_QUALIFICATION_20260905.md) confirme les noms, statuts et octets. L'ancienne insuffisance du seul `mhgp7_arith_selftest`, dont le produit U320 maximal de la séquence relue avait `w[4]=0`, est donc levée par ces portes dédiées ; aucune cible nommée `mhgp7_level_cmp` n'est nécessaire à cette fermeture.
 
 ## 5. PGCD et division : clôture sous les préconditions nommées
 
@@ -83,4 +85,6 @@ PYTHONDONTWRITEBYTECODE=1 python3 morsehgp3D_v7/audits/receipts_iteration3/wide_
 
 Cette [fixture indépendante](receipts_iteration3/wide_integer_fixture.py) utilise multiplication, découpage en mots, PGCD et division d'entiers Python de taille arbitraire ; elle ne recopie pas les produits par colonnes du C++. Le reçu conserve stdout, code 0 et hash du script. Les dix calculs ont aussi été rejoués avec succès sous [Python optimisé](receipts_iteration3/wide_fixture_optimized.json). Les contrôles utilisent des exceptions explicites, aucun `assert`.
 
-La prochaine petite porte peut reprendre les littéraux, appeler les primitives réellement compilées, puis exercer chaque site de mutant avec son plancher propre. Les rejets de domaines doivent rester attribués au validateur de fixture tant que les helpers ne rendent pas eux-mêmes de statut. Une campagne exhaustive ou aléatoire ne remplace pas les preuves universelles d'intermédiaires ci-dessus ; une preuve sur le code source ne certifie pas à elle seule le binaire, le compilateur ou toutes les chaînes de publication. Aucun code produit modifié. GCP non utilisé.
+Les littéraux ont été repris explicitement dans les portes intégrées avec attribution, appels aux primitives réelles et planchers séparés. La porte nominale entière observe aussi 192 PGCD, dont 185 couples de Fibonacci. `mhgp7_arithmetic_integer_oracle_carry` et `mhgp7_arithmetic_lanes_oracle_carry` réfutent la perte de retenue du juge par une identité littérale avant l'appel produit ; `mhgp7_arithmetic_lanes_oracle_overflow` impose le code 3 sur son cas autonome. La [qualification Boost](../receipts/arithmetic_boost_20260904/README.md), contre-vérifiée dans [l'audit courant](AUDIT_QUALIFICATION_20260905.md), ajoute `cpp_int` réellement compilé aux huit portes entières ; elle ne transforme pas l'autorité des lanes.
+
+Les rejets de domaines restent attribués au validateur de fixture tant que les helpers ne rendent pas eux-mêmes de statut. L'obligation suivante est de maintenir ces portes et leurs liaisons lors des changements de domaine ou de code, puis de composer les contrats locaux avec le front et la hiérarchie. Une campagne exhaustive ou aléatoire ne remplace pas les preuves universelles d'intermédiaires ci-dessus ; une preuve sur le code source ne certifie pas à elle seule le binaire, le compilateur ou toutes les chaînes de publication. Aucun code produit modifié par cet audit. GCP non utilisé.

@@ -1,0 +1,71 @@
+{
+  "D_full323_does_not_qualify_E324": true,
+  "D_receipt_sha256": "aec8b9263c948eadb04b534e6afe666286bf153a539dcbe7ef8374a5f1e9a8a6",
+  "E_receipt_sha256": "29568e61941457d72b0e36164b94dc3598c6ee685b57a281a26c8db4f1df22e3",
+  "driver_sha256": "7bce7df38b65f868f305a7a6c571d93dabc3944e4ccd23f67f6c533c8bf0f380",
+  "gcp": "not_used",
+  "mutant": "silent-meb-q2-reject-shell",
+  "mutated": {
+    "calls": 1,
+    "den": 37,
+    "key": [
+      7,
+      11,
+      13,
+      17,
+      19
+    ],
+    "num": [
+      23,
+      29,
+      31
+    ],
+    "ok": false,
+    "q": 9,
+    "reason": "silent_no_local_miniball",
+    "status": 4,
+    "support": [
+      -1,
+      -2,
+      -3,
+      -4
+    ],
+    "supports": 1
+  },
+  "nominal": {
+    "calls": 1,
+    "den": 4,
+    "key": [
+      1,
+      -65535,
+      -65535,
+      -65535,
+      0
+    ],
+    "num": [
+      12884508675,
+      0,
+      0
+    ],
+    "ok": true,
+    "q": 2,
+    "reason": "complete_relative_to_supplied_regular_direct_catalogue",
+    "status": 0,
+    "support": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "supports": 1
+  },
+  "public_status": "not_claimed",
+  "same_D_E_fields": [
+    "counts",
+    "corpus_sha256",
+    "meb_output_sha256",
+    "powers_output_sha256"
+  ],
+  "scope": "E_q2_local_only",
+  "status": "passed"
+}
