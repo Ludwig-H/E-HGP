@@ -1,0 +1,10 @@
+[
+  {
+    "cmd": "timeout 30s c++ -std=c++20 -O3 -Wall -Wextra -Wpedantic -Werror -DMHGP7_TESTING -I build/v7_q2_next_20260905/morsehgp3D_v7 -MMD -MF build/v7_q2_next_20260905/dependencies.d build/v7_q2_next_20260905/morsehgp3D_v7/tests/meb_lazy_gate.cpp -pthread -o build/v7_q2_next_20260905/meb_lazy_gate",
+    "chunk_id": "8416e9",
+    "wall_time_seconds": 7.186838772,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  }
+]

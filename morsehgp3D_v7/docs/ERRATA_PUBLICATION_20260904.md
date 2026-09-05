@@ -42,3 +42,16 @@ mais ce journal ne prouve pas le stdout détaillé annoncé. La qualification
 actuelle des portes mono repose séparément sur les replays ultérieurs,
 notamment les [316 portes CPU fraîches](../receipts/arithmetic_gates_20260904/README.md),
 et non sur une promotion de cette trace incomplète.
+
+## Microprobe q2 privée sans reçu de run
+
+La petite probe q2 privée de fin de session du 5 septembre conserve son
+source, son binaire et ses hashes avant/après, mais aucun stdout/stderr,
+code de sortie ni reçu terminal du chronométrage. Les observations orales
+de gain ou de régression de cette probe sont donc **non attribuables** et
+ne fondent aucune décision de performance. Aucune sortie n'est reconstituée.
+
+Ce manque ne concerne ni les reçus scellés de correction locale q2, ni la
+paire C/D du delta q3/q4 publiée avec `e6d33698`. Les futurs temps q2
+doivent provenir de nouvelles exécutions appariées avec leurs bruts, et
+non d'une validation rétroactive de la microprobe.

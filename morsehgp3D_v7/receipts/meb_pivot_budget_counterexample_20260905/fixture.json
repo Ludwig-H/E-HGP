@@ -1,0 +1,52 @@
+{
+  "schema": "mhgp7_meb_pivot_budget_counterexample_v1",
+  "scope": "negative_bounded_fixture_not_product_qualification",
+  "reference": "D",
+  "reference_header_sha256": "5214a9a7f2b6f53b1c59c803d414e109c9a660f15ab9448d88aec90300160c71",
+  "prototype_header_sha256": "d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5",
+  "profile": "quantized_u16_input_only",
+  "points_in_local_order": [
+    {"id": 0, "position": [0, 0, 0]},
+    {"id": 1, "position": [2, 2, 0]},
+    {"id": 2, "position": [2, 0, 2]}
+  ],
+  "pivot_cap": 16,
+  "uncapped_reference_ordinal": 4,
+  "proposal_candidates": 5,
+  "proposal_pivots": 1,
+  "proposal_support_q": 3,
+  "cases": [
+    {
+      "max_meb_supports": 4,
+      "expected_success": true,
+      "expected_reference_supports": 4,
+      "expected_proposal_candidates": 5,
+      "expected_reason": "complete_relative_to_supplied_regular_direct_catalogue",
+      "expected_support_q": 3,
+      "expected_sentinel_preserved": false
+    },
+    {
+      "max_meb_supports": 1,
+      "expected_success": false,
+      "expected_reference_supports": 1,
+      "expected_proposal_candidates": 5,
+      "expected_reason": "silent_meb_support_budget",
+      "expected_sentinel_preserved": true
+    }
+  ],
+  "expected_terminal_equality": [
+    "boolean",
+    "status",
+    "reason",
+    "all_existing_silent_incidence_stats",
+    "ball_key_fields",
+    "exact_level_literal_fields",
+    "support_order_and_unused_slots",
+    "q"
+  ],
+  "expected_executable_exit_code": 0,
+  "expected_marker": "counter_budget=counterexample_confirmed cases=2 proposition_candidates=5 reference_ordinal=4 public_status=not_claimed",
+  "future_two_budget_variant_implemented": false,
+  "included_in_delta_e_q2": false,
+  "public_status": "not_claimed"
+}

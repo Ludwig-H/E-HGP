@@ -1,0 +1,47 @@
+[
+  {
+    "path": "build/v7_next_q2_tests_20260905/release/mhgp7",
+    "sha256": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6",
+    "size": 692296
+  },
+  {
+    "path": "build/v7_next_q2_tests_20260905/release/mhgp7_archive_api_gate",
+    "sha256": "534645fd2ba950e707f1d5a554b2101499f1478c5edb1496ca2118ab5797ee8b",
+    "size": 115096
+  },
+  {
+    "path": "build/v7_next_q2_tests_20260905/release/mhgp7_archive_cleanup_gate",
+    "sha256": "d830417bdd329ac219b28fd6333175599bd4f2ce19ed0713bb04e59d7293820f",
+    "size": 764936
+  },
+  {
+    "path": "build/v7_next_q2_tests_20260905/release/mhgp7_bad_alloc_gate",
+    "sha256": "1dc4c759f65e3e51af24791295e94d69b297ec335ad2a0809c5a818e0cb44ca3",
+    "size": 745576
+  },
+  {
+    "path": "build/v7_next_q2_tests_20260905/release/mhgp7_census_direct_gate",
+    "sha256": "5c9e964410a640b8b35098621c49e54752cd396965578d39de806caf1440328c",
+    "size": 194160
+  },
+  {
+    "path": "build/v7_next_q2_tests_20260905/release/mhgp7_meb_lazy_gate",
+    "sha256": "87fd501774b53091392ceab79ffe35e4cef14a062b91c2d79cf9c53cf6c2e577",
+    "size": 107640
+  },
+  {
+    "path": "build/v7_next_q2_tests_20260905/release/mhgp7_mono_inline_gate",
+    "sha256": "7f40157b70ec3ac3738f8a460bfbd4ac963e5795c13696d1868a3dff2548115d",
+    "size": 742920
+  },
+  {
+    "path": "build/v7_next_q2_tests_20260905/release/mhgp7_silent_incidence_gate",
+    "sha256": "d1b8fd53bbb349cc07dfbe907f69ae592007a0cd4073b09bf39e25fb940281e8",
+    "size": 835640
+  },
+  {
+    "path": "build/v7_next_q2_tests_20260905/release/mhgp7_thread_failure_gate",
+    "sha256": "0156b8863137472bea3fed982695aba1b2410008842b1694cf5da1d0c2859169",
+    "size": 847760
+  }
+]

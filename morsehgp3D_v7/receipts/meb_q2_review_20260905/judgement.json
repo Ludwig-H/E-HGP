@@ -1,0 +1,55 @@
+{
+  "schema": "mhgp7.q2-overlay.review.v1",
+  "status": "passed_bounded_correctness",
+  "public_status": "not_claimed",
+  "direct_argv_judged": [
+    {
+      "file": "test_runs.json",
+      "argv": 8,
+      "codes": [
+        0,
+        4,
+        4,
+        4,
+        4,
+        2,
+        2,
+        2
+      ],
+      "passed": true
+    },
+    {
+      "file": "sanitized_unsandboxed_runs.json",
+      "argv": 8,
+      "codes": [
+        0,
+        4,
+        4,
+        4,
+        4,
+        2,
+        2,
+        2
+      ],
+      "passed": true
+    }
+  ],
+  "sandbox_failed_attempts_retained": 8,
+  "dependency_snapshots": 15,
+  "dependency_trailing_blank_lines_normalized": [
+    "src/lanes/keys.hpp",
+    "src/core/device.hpp",
+    "src/core/intmath.hpp",
+    "src/core/types.hpp",
+    "src/lanes/level.hpp",
+    "src/core/wide.hpp",
+    "src/lanes/q2.hpp",
+    "src/lanes/q3.hpp",
+    "src/tree/cloud_index.hpp",
+    "src/core/morton.hpp",
+    "src/lanes/q4.hpp"
+  ],
+  "production_variant_differential": "11816 production-branch comparisons, separately compiled without MHGP7_TESTING",
+  "old_microprobe_status": "binary/source/before-after pins present; stdout/stderr/status/command receipt missing; no timing claim",
+  "gcp": "not_used"
+}

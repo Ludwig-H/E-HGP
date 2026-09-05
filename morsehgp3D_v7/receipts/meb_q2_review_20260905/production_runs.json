@@ -1,0 +1,18 @@
+[
+  {
+    "cmd": "timeout 30s c++ -std=c++20 -O3 -Wall -Wextra -Wpedantic -Werror -I morsehgp3D_v7 -I morsehgp3D_v7/src/forest -MMD -MF build/v7_q2_next_20260905/production_dependencies.d build/v7_q2_next_20260905/meb_q2_production_gate.cpp -pthread -o build/v7_q2_next_20260905/meb_q2_production_gate",
+    "chunk_id": "f03e32",
+    "wall_time_seconds": 3.693505854,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "cmd": "timeout 30s build/v7_q2_next_20260905/meb_q2_production_gate",
+    "chunk_id": "01b608",
+    "wall_time_seconds": 0.149471936,
+    "exit_code": 0,
+    "original_token_count": 131,
+    "output": "meb_q2_differential=passed divergence=none public_status=not_claimed\ncases=11816 success=668 degenerate=12 capped=11136 q2=54 q3=79 q4=34 predicate_identities=675164 positive=421756 negative=115872 zero=137536 foreign_zero=109 profile_refusals=2 extreme_positive=1 extreme_negative=1\nlogical_q2_eager_pairs=421683 rejected_pairs=421459 deferred_pairs=224 predicate_checks=674650 extra_accept_checks=992 reference_complete=1 reference_q=2\nuncapped_original_order_pairs=3332 rejected=3276 deferred=56 predicate_checks=5541\n"
+  }
+]

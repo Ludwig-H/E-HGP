@@ -1,0 +1,143 @@
+{
+  "schema": "mhgp7_meb_pivot_budget_counterexample_export_v1",
+  "public_status": "not_claimed",
+  "original_repository_root": "/workspaces/E-HGP",
+  "source_reference_head": "e6d33698e62ebecf74dff01c16d7de17149d7a4e",
+  "source_records": [
+    {
+      "source_private_relative_to_repository": "build/v7_meb_fast_design/counter_budget.cpp",
+      "public_relative_path": "counter_budget.historical.cpp",
+      "source_sha256": "03d8468d8ee6e5e10e9b167034e1e7f20361d3bfb754e32a7b06e32334ad1124",
+      "public_sha256": "03d8468d8ee6e5e10e9b167034e1e7f20361d3bfb754e32a7b06e32334ad1124",
+      "source_bytes": 5063,
+      "public_bytes": 5063,
+      "transform": "none_exact_bytes"
+    },
+    {
+      "source_private_relative_to_repository": "build/v7_meb_pivot_prototype/pivot.hpp",
+      "public_relative_path": "pivot.historical.hpp",
+      "source_sha256": "d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5",
+      "public_sha256": "d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5",
+      "source_bytes": 7251,
+      "public_bytes": 7251,
+      "transform": "none_exact_bytes"
+    },
+    {
+      "source_private_relative_to_repository": "build/v7_meb_fast_design/run_counter_budget.py",
+      "public_relative_path": "run_counter_budget.historical.py",
+      "source_sha256": "a26f1b5ca18be0406e5a2f9db7c25c0613f66b0a73fdc4c0477d81331d829ca0",
+      "public_sha256": "a26f1b5ca18be0406e5a2f9db7c25c0613f66b0a73fdc4c0477d81331d829ca0",
+      "source_bytes": 5648,
+      "public_bytes": 5648,
+      "transform": "none_exact_bytes"
+    },
+    {
+      "source_private_relative_to_repository": "build/v7_meb_fast_design/counter_budget_run_20260905/receipt.json",
+      "public_relative_path": "receipt.json",
+      "source_sha256": "4d3f5de9147ac2135d54975f9ab0943ee0e9d77547d9b81a9ec326cb13f2ac4d",
+      "public_sha256": "4d3f5de9147ac2135d54975f9ab0943ee0e9d77547d9b81a9ec326cb13f2ac4d",
+      "source_bytes": 13827,
+      "public_bytes": 13827,
+      "transform": "none_exact_bytes"
+    },
+    {
+      "source_private_relative_to_repository": "build/v7_meb_fast_design/counter_budget_run_20260905/compiler.stdout",
+      "public_relative_path": "compiler.stdout",
+      "source_sha256": "88b7c4b67564a146863224148116065fee418539f0a408f3636a68f3bde51805",
+      "public_sha256": "88b7c4b67564a146863224148116065fee418539f0a408f3636a68f3bde51805",
+      "source_bytes": 246,
+      "public_bytes": 246,
+      "transform": "none_exact_bytes"
+    },
+    {
+      "source_private_relative_to_repository": "build/v7_meb_fast_design/counter_budget_run_20260905/compiler.stderr",
+      "public_relative_path": "compiler.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "public_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_bytes": 0,
+      "public_bytes": 0,
+      "transform": "none_exact_bytes"
+    },
+    {
+      "source_private_relative_to_repository": "build/v7_meb_fast_design/counter_budget_run_20260905/compile.stdout",
+      "public_relative_path": "compile.stdout",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "public_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_bytes": 0,
+      "public_bytes": 0,
+      "transform": "none_exact_bytes"
+    },
+    {
+      "source_private_relative_to_repository": "build/v7_meb_fast_design/counter_budget_run_20260905/compile.stderr",
+      "public_relative_path": "compile.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "public_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_bytes": 0,
+      "public_bytes": 0,
+      "transform": "none_exact_bytes"
+    },
+    {
+      "source_private_relative_to_repository": "build/v7_meb_fast_design/counter_budget_run_20260905/execute.stdout",
+      "public_relative_path": "execute.stdout",
+      "source_sha256": "876f7933970a74f2a0f0315c6c1bced7c592daa21ffde34222f5dfdb3abc26fb",
+      "public_sha256": "876f7933970a74f2a0f0315c6c1bced7c592daa21ffde34222f5dfdb3abc26fb",
+      "source_bytes": 462,
+      "public_bytes": 462,
+      "transform": "none_exact_bytes"
+    },
+    {
+      "source_private_relative_to_repository": "build/v7_meb_fast_design/counter_budget_run_20260905/execute.stderr",
+      "public_relative_path": "execute.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "public_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_bytes": 0,
+      "public_bytes": 0,
+      "transform": "none_exact_bytes"
+    },
+    {
+      "source_private_relative_to_repository": "build/v7_meb_fast_design/counter_budget_run_20260905/dependencies.d",
+      "public_relative_path": "dependencies.historical.d",
+      "source_sha256": "9403c30f64a1665e75ff3479a2e330257b6840a073612c8a4ab7f52622969bac",
+      "public_sha256": "9403c30f64a1665e75ff3479a2e330257b6840a073612c8a4ab7f52622969bac",
+      "source_bytes": 1395,
+      "public_bytes": 1395,
+      "transform": "none_exact_bytes"
+    }
+  ],
+  "source_pin_verification": {
+    "original_receipt_source_count": 47,
+    "original_receipt_source_count_verified_against_current_bytes": 47,
+    "additional_private_note_count": 1,
+    "total_source_pins_checked": 48,
+    "original_before_after_inventories_equal": true,
+    "all_checked_pins_match": true,
+    "qualification_scope": "export_integrity_read_only_not_new_execution"
+  },
+  "document": {
+    "private_source_relative_path": "build/v7_meb_fast_design/PREUVE_CERTIFICAT_ORDINAL.md",
+    "private_source_sha256": "df37582fe78d30154a2c77474466008fb09e35c237ceacb807e9d06de1804162",
+    "private_source_bytes": 29503,
+    "public_relative_to_repository": "morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md",
+    "public_sha256": "365e7a5dcde5a6d6fcd7d43e00d2f58f86efbf42279a779c62c7eaac7b54ec25",
+    "public_bytes": 30105,
+    "transform": "explicit_public_framing_and_archive_link_added_final_private_only_paragraph_replaced",
+    "meaning": "proposition_not_integrated_two_budget_variant_future_delta_e_is_q2_only"
+  },
+  "omitted_binary": {
+    "private_source_relative_to_repository": "build/v7_meb_fast_design/counter_budget_run_20260905/counter_budget",
+    "sha256": "7ab9a69271570aea12d9b36dc75cb7a900afeac0bb9ecf1aaa305b5b25c6979a",
+    "bytes": 196656,
+    "included_in_public_archive": false,
+    "qualification_not_transferred_to_new_binary": true
+  },
+  "archival_replay": {
+    "directly_executable_from_archive": false,
+    "restore_exact_historical_relative_paths_and_pinned_product_headers": true,
+    "original_output_directory_must_not_exist": true,
+    "no_new_execution_for_export": true
+  },
+  "new_benchmark": false,
+  "product_sources_modified": false,
+  "tests_cmake_modified": false,
+  "gcp_used": false
+}

@@ -1,0 +1,64 @@
+{
+  "binary_role": "independently_built_instrumented_E_not_same_bytes_as_Release",
+  "commands": [
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1 -I/workspaces/E-HGP/morsehgp3D_v7 -O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_meb_lazy_gate.dir/tests/meb_lazy_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/meb_lazy_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/meb_lazy_gate.cpp",
+      "output": "CMakeFiles/mhgp7_meb_lazy_gate.dir/tests/meb_lazy_gate.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_silent_incidence_gate.dir/tests/silent_incidence_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/silent_incidence_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/silent_incidence_gate.cpp",
+      "output": "CMakeFiles/mhgp7_silent_incidence_gate.dir/tests/silent_incidence_gate.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++   -O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/cli/mhgp7.cpp",
+      "output": "CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_archive_api_gate.dir/tests/archive_api_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/archive_api_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/archive_api_gate.cpp",
+      "output": "CMakeFiles/mhgp7_archive_api_gate.dir/tests/archive_api_gate.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_archive_cleanup_gate.dir/tests/archive_cleanup_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/archive_cleanup_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/archive_cleanup_gate.cpp",
+      "output": "CMakeFiles/mhgp7_archive_cleanup_gate.dir/tests/archive_cleanup_gate.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_mono_inline_gate.dir/tests/mono_inline_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/mono_inline_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/mono_inline_gate.cpp",
+      "output": "CMakeFiles/mhgp7_mono_inline_gate.dir/tests/mono_inline_gate.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_census_direct_gate.dir/tests/census_direct_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/census_direct_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/census_direct_gate.cpp",
+      "output": "CMakeFiles/mhgp7_census_direct_gate.dir/tests/census_direct_gate.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_bad_alloc_gate.dir/tests/bad_alloc_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/bad_alloc_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/bad_alloc_gate.cpp",
+      "output": "CMakeFiles/mhgp7_bad_alloc_gate.dir/tests/bad_alloc_gate.cpp.o"
+    },
+    {
+      "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_thread_failure_gate.dir/tests/thread_failure_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/thread_failure_gate.cpp",
+      "directory": "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized",
+      "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/thread_failure_gate.cpp",
+      "output": "CMakeFiles/mhgp7_thread_failure_gate.dir/tests/thread_failure_gate.cpp.o"
+    }
+  ],
+  "configuration": {
+    "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized/CMakeCache.txt": "39c7f4f087f535d60bf8f7d26f05e7153dcc9f55acd164a3415c975c55775738",
+    "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized/CTestTestfile.cmake": "9a44b4374da5fe10257faa6d71f7a839bec8907c9270b1224a201a4595b8ba85",
+    "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/sanitized/compile_commands.json": "9d10d7eb0cf56e0a06c95b5f692d6345855051cd7280e8bf87c5843b108120fc"
+  }
+}

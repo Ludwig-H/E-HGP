@@ -1,0 +1,8 @@
+{
+  "cmd": "timeout 30s c++ -std=c++20 -O1 -g -Wall -Wextra -Wpedantic -Werror -DMHGP7_TESTING -fsanitize=address,undefined -fno-omit-frame-pointer -I build/v7_q2_next_20260905/morsehgp3D_v7 build/v7_q2_next_20260905/morsehgp3D_v7/tests/meb_lazy_gate.cpp -pthread -o build/v7_q2_next_20260905/meb_lazy_gate_sanitized",
+  "chunk_id": "bd00ab",
+  "wall_time_seconds": 9.08638346,
+  "exit_code": 0,
+  "original_token_count": 0,
+  "output": ""
+}

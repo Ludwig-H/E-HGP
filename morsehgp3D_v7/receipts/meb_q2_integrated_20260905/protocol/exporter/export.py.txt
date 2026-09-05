@@ -1,0 +1,307 @@
+#!/usr/bin/env python3
+"""Prepare/export closed E qualifications; never build, test or invoke engines."""
+from __future__ import annotations
+
+import argparse
+import gzip
+import hashlib
+import json
+from pathlib import Path, PurePosixPath
+import sys
+import types
+import xml.etree.ElementTree as ET
+import zlib
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+PROTOCOL = ROOT / "build/v7_next_q2_tests_20260905"
+DESTINATION = ROOT / "morsehgp3D_v7/receipts/meb_q2_integrated_20260905"
+QUALIFICATION_SHA = "5f62b29d96895e9b46df591f0540dd5d4ecbd3fec4a8eb291e4e6d3c27fb7a60"
+PREPARATION_MANIFEST_SHA = "9f7401a04036baa57d22fff2b5eab88112d8c26542528e0cc4bad2dba8e38d14"
+PREPARATION_SUMS_SHA = "0d8376a3d85c30c76cc2f4a8a1fbea782c4f94e436615b8cd553b16f2de5ef5e"
+MODES = ("release", "sanitized", "full")
+EXPORTER_FILES = ("export.py", "selftest.py", "PLAN.md", "preparation.json")
+
+
+def require(value: bool, message: str) -> None:
+    if not value:
+        raise RuntimeError(message)
+
+
+def sha(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def load_qualification():
+    path = PROTOCOL / "qualification.py"
+    data = path.read_bytes()
+    require(sha(data) == QUALIFICATION_SHA, "qualification authority changed")
+    module = types.ModuleType("closed_q2_qualification_authority")
+    module.__file__ = str(path)
+    exec(compile(data, str(path), "exec"), module.__dict__)
+    return module
+
+
+Q = load_qualification()
+
+
+def safe_relative(name: str) -> Path:
+    value = PurePosixPath(name)
+    require(isinstance(name, str) and name and not value.is_absolute() and str(value) == name and
+            all(part not in (".", "..") for part in value.parts), "unsafe manifest-relative path")
+    return Path(name)
+
+
+def read_json(path: Path):
+    data, _record = Q.read_log(path)
+    return json.loads(data)
+
+
+def checked_entries(folder: Path, rows: list[dict], *, flat: bool) -> dict[str, str]:
+    require(isinstance(rows, list) and rows, "empty source manifest")
+    result = {}
+    for row in rows:
+        name = row["path"]
+        relative = safe_relative(name)
+        require(not flat or len(relative.parts) == 1, "qualification manifest must remain flat")
+        require(name not in result, "duplicate source manifest entry")
+        data, record = Q.read_log(folder / relative)
+        require(record["sha256"] == row["sha256"] and ("size" not in row or len(data) == row["size"]),
+                "source manifest hash/size mismatch: " + name)
+        result[name] = record["sha256"]
+    return result
+
+
+def preparation_files() -> dict[Path, str]:
+    path = PROTOCOL / "manifest_revision3.json"
+    require(Q.H.digest(path) == PREPARATION_MANIFEST_SHA, "preparation manifest changed")
+    require(Q.H.digest(PROTOCOL / "SHA256SUMS") == PREPARATION_SUMS_SHA, "preparation checksum list changed")
+    manifest = read_json(path)
+    require(manifest["status"] == "prepared_not_qualified" and manifest["engine_runs"] == manifest["builds"] == 0,
+            "preparation must not be promoted to qualification")
+    rows = checked_entries(PROTOCOL, manifest["entries"], flat=False)
+    files = {PROTOCOL / name: pin for name, pin in rows.items()}
+    files[path] = PREPARATION_MANIFEST_SHA
+    files[PROTOCOL / "SHA256SUMS"] = PREPARATION_SUMS_SHA
+    return files
+
+
+def validate_receipt(mode: str, expected_e: str, expected_receipt: str) -> dict:
+    build, folder = Q.paths(mode)
+    require(folder.is_dir(), "qualification receipt not closed: " + mode)
+    manifest_path = folder / "receipt_manifest.json"
+    covered = checked_entries(folder, read_json(manifest_path), flat=True)
+    require(set(covered) == {path.name for path in folder.iterdir() if path.is_file() and path.name != "receipt_manifest.json"},
+            "qualification manifest does not cover every file")
+    require(not any(path.is_dir() or path.is_symlink() for path in folder.iterdir()), "unexpected directory/symlink in receipt")
+    required = {"summary.json", "inputs_before.json", "inputs_after.json", "expected_names.json", "environment.json",
+                "binaries_tested.json", "binaries_after.json", "compile_binding.json", "compile_binding_after.json",
+                "ctest.junit.xml", "LastTest.stdout", "LastTest.prestate.json", "LastTest.ctest_boundary.json", "LastTest.ctest_fence"}
+    require(required <= set(covered), "mandatory qualification evidence missing")
+    summary = read_json(folder / "summary.json")
+    expected = Q.names(mode)
+    require(summary["status"] == "passed" and summary["failure"] is None and not summary["final_errors"] and
+            summary["mode"] == mode and summary["required_tests"] == len(expected) and
+            summary["gate_results_reused"] is False and summary["public_status"] == "not_claimed" and
+            summary["inputs_stable"] and summary["tested_binaries_stable"] and summary["compile_binding_stable"] and
+            summary["last_test_log_qualified"], "qualification is not completely passed: " + mode)
+    require(read_json(folder / "expected_names.json") == expected, "expected inventory mismatch")
+    before, after = (read_json(folder / name) for name in ("inputs_before.json", "inputs_after.json"))
+    require(before == after and before["sources"] == Q.H.source_inventory(), "qualification sources no longer match terminal pins")
+    candidate = Q.candidate_binding(expected_e, expected_receipt)
+    require(before["candidate_binding"] == candidate and summary["expected_E_sha256"] == expected_e,
+            "qualification bound to a different E build")
+    protected = Q.N.baseline_binding()["protected_binaries"]
+    require(before["protected_historical"] == summary["protected_C_C_D_historical"] == protected,
+            "historical C/C/D qualification pins mismatch")
+    expected_inputs = {str(PROTOCOL / "qualification.py"), str(PROTOCOL / "expected_full_names.json"), str(Q.E_RECEIPT),
+                       *[str(ROOT / name) for name in Q.AUTHORITIES],
+                       *[candidate["record"][key]["path"] for key in ("cmake_cache", "compile_database")]}
+    require(set(before["files"]) == expected_inputs, "unexpected qualification authority file")
+    require(all(Q.H.digest(Path(name)) == pin for name, pin in before["files"].items()), "qualification authority drift")
+    environment = read_json(folder / "environment.json")
+    require(environment["expected_E_sha256"] == expected_e and environment["expected_E_build_receipt_sha256"] == expected_receipt and
+            environment["gate_results_reused"] is False and environment["all_test_executions"] == "fresh",
+            "qualification environment/build identity mismatch")
+    if mode == "sanitized":
+        required_options = {"ASAN_OPTIONS": Q.ASAN, "UBSAN_OPTIONS": Q.UBSAN, "LSAN_OPTIONS": ""}
+        require(before["environment"]["sanitizer_options"] == environment["environment"]["sanitizer_options"] == required_options,
+                "sanitizer leak/undefined-behavior controls were not retained")
+    for label, command, limit in Q.commands(mode):
+        result = read_json(folder / (label + ".result.json"))
+        attempt = read_json(folder / (label + ".attempt.json"))
+        require(summary["results"].get(label) == result and result["exit_code"] == 0 and result["status"] == "completed" and
+                result["argv"] == attempt["argv"] == command and result["timeout_seconds"] == attempt["timeout_seconds"] == limit,
+                "command result/attempt mismatch: " + label)
+        require(label + ".stdout" in covered and label + ".stderr" in covered, "raw command outputs missing")
+    require(set(summary["results"]) == {label for label, _, _ in Q.commands(mode)}, "unexpected/missing command result")
+    actual_inventory = read_json(folder / "inventory.stdout")
+    actual_names = [row["name"] for row in actual_inventory["tests"]]
+    require(len(actual_names) == len(expected) and len(set(actual_names)) == len(expected) and sorted(actual_names) == expected,
+            "CTest registered-name coverage mismatch")
+    junit = Q.F.judge_junit(ET.parse(folder / "ctest.junit.xml").getroot(), expected)
+    require(junit == summary["junit"], "JUnit replay differs from summary")
+    binaries = read_json(folder / "binaries_tested.json")
+    Q.H.BUILD = build
+    require(binaries == read_json(folder / "binaries_after.json") == Q.H.binaries() and binaries,
+            "tested binaries changed or absent")
+    if mode != "full":
+        require(sorted(Path(row["path"]).name for row in binaries) == sorted(Q.T.TARGETS), "targeted binary inventory mismatch")
+    binding = Q.compile_binding(build, mode, expected_e)
+    require(binding == read_json(folder / "compile_binding.json") == read_json(folder / "compile_binding_after.json"),
+            "compilation binding replay differs")
+    log = summary["last_test_log"]
+    require(log["fresh"] is True and log["source"]["path"] == str(build / "Testing/Temporary/LastTest.log") and
+            log["archive"]["path"] == str(folder / "LastTest.stdout"), "LastTest source/archive target mismatch")
+    data, archive = Q.read_log(folder / "LastTest.stdout")
+    source_data, source = Q.read_log(build / "Testing/Temporary/LastTest.log")
+    require(source_data == data and source == log["source"] and archive == log["archive"], "LastTest changed since qualification")
+    require(Q.judge_log(data, expected) == log["judge"], "LastTest structural replay differs")
+    boundary = read_json(folder / "LastTest.ctest_boundary.json")
+    require(boundary == log["boundary"] and boundary["receipt_directory"] == str(folder), "LastTest fence receipt mismatch")
+    fence_path = build / "Testing/Temporary" / ("." + folder.parent.name + "-" + folder.name + ".ctest-fence")
+    require(boundary["fence"]["path"] == str(fence_path) and boundary["archive"]["path"] == str(folder / "LastTest.ctest_fence"),
+            "LastTest fence path mismatch")
+    fence_data, fence = Q.read_log(fence_path)
+    fence_copy, fence_archive = Q.read_log(folder / "LastTest.ctest_fence")
+    require(fence == boundary["fence"] and fence_archive == boundary["archive"] and fence_data == fence_copy,
+            "LastTest fence changed since qualification")
+    require(source["device"] == fence["device"] and source["mtime_ns"] >= fence["mtime_ns"] and
+            source["ctime_ns"] >= fence["ctime_ns"], "LastTest no longer has the recorded freshness proof")
+    prior = read_json(folder / "LastTest.prestate.json")
+    if prior["present"]:
+        old_data, old_copy = Q.read_log(folder / "LastTest.preexisting.stdout")
+        require(old_copy == prior["archive"] and sha(old_data) == prior["source"]["sha256"] and sha(data) != sha(old_data),
+                "LastTest preexisting evidence lost or unchanged")
+    covered["receipt_manifest.json"] = Q.H.digest(manifest_path)
+    return {"mode": mode, "tests": len(expected), "status": "passed_replayed_read_only", "summary_sha256": covered["summary.json"],
+            "files": {str(folder / name): pin for name, pin in covered.items()}, "public_status": "not_claimed"}
+
+
+def copy_artifact(source: Path, target: Path, expected_sha: str, *, compress: bool) -> dict:
+    data, original = Q.read_log(source)
+    require(original["sha256"] == expected_sha, "source changed before export: " + str(source))
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("xb") as stream:
+        if compress:
+            with gzip.GzipFile(filename="", mode="wb", fileobj=stream, compresslevel=9, mtime=0) as archive:
+                archive.write(data)
+        else:
+            stream.write(data)
+    published = target.read_bytes()
+    decoded = gzip.decompress(published) if compress else published
+    require(decoded == data, "export copy/compression altered bytes")
+    reread, after = Q.read_log(source)
+    require(original == after and reread == data, "source changed during export")
+    return {"source": str(source), "public": str(target.relative_to(DESTINATION)), "source_sha256": expected_sha,
+            "source_bytes": len(data), "public_sha256": sha(published), "public_bytes": len(published),
+            "transformation": "deterministic_gzip_lossless" if compress else "byte_exact_copy",
+            "decompressed_sha256": sha(decoded), "decompressed_bytes": len(decoded),
+            "gzip": {"level": 9, "mtime": 0, "filename": "", "python": sys.version,
+                     "zlib_runtime": zlib.ZLIB_RUNTIME_VERSION} if compress else None}
+
+
+def write_json(path: Path, value) -> None:
+    with path.open("x") as stream:
+        json.dump(value, stream, indent=2, sort_keys=True)
+        stream.write("\n")
+
+
+def execute(expected_e: str, expected_receipt: str) -> int:
+    require(not DESTINATION.exists(), "public destination already exists; never resume or overwrite")
+    protocol = preparation_files()
+    reviews = [validate_receipt(mode, expected_e, expected_receipt) for mode in MODES]
+    pins = {**protocol, **{Path(path): pin for review in reviews for path, pin in review["files"].items()}}
+    dependencies = {ROOT / name: pin for name, pin in Q.AUTHORITIES.items()}
+    dependencies.update({ROOT / name: pin for name, pin in Q.N.RECEIPTS.items()})
+    dependencies.update({ROOT / "build/v7_meb_paired/runner.py": Q.N.LEGACY_SHA})
+    dependencies.update({ROOT / "morsehgp3D_v7/bench" / name: pin for name, pin in Q.N.R.HELPER_PINS.items()})
+    require(all(Q.H.digest(path) == pin for path, pin in dependencies.items()), "historical dependency pin mismatch")
+    pins.update(dependencies)
+    pins.update({BASE / name: Q.H.digest(BASE / name) for name in EXPORTER_FILES})
+    # No writes before every qualification and source pin has been checked.
+    DESTINATION.mkdir(parents=True, exist_ok=False)
+    provenance = []
+    try:
+        for source, pin in protocol.items():
+            name = source.relative_to(PROTOCOL)
+            if source.name in ("manifest_revision3.json", "SHA256SUMS"):
+                name = name.with_name("SOURCE_" + name.name + ".txt")
+            elif source.suffix in (".py", ".md"):
+                name = Path(str(name) + ".txt")
+            provenance.append(copy_artifact(source, DESTINATION / "protocol" / name, pin, compress=False))
+        for review in reviews:
+            _build, folder = Q.paths(review["mode"])
+            for name, pin in review["files"].items():
+                source = Path(name)
+                target_name = source.name if source.name != "receipt_manifest.json" else "SOURCE_receipt_manifest.json"
+                compress = source.name.startswith("LastTest") and source.suffix == ".stdout" and source.stat().st_size >= 1_048_576
+                if compress:
+                    target_name += ".gz"
+                require(not target_name.endswith(".log"), "ignored .log filename refused")
+                provenance.append(copy_artifact(source, DESTINATION / (review["mode"] + "_receipts") / target_name, pin, compress=compress))
+        # Private dependency sources are included as inert snapshots; public
+        # receipt dependencies are referenced by their already-published pins.
+        for source, pin in dependencies.items():
+            if source.is_relative_to(ROOT / "build") and source.suffix == ".py":
+                target = DESTINATION / "protocol/dependencies" / (source.parent.name + "__" + source.name + ".txt")
+                provenance.append(copy_artifact(source, target, pin, compress=False))
+        for name in EXPORTER_FILES:
+            provenance.append(copy_artifact(BASE / name, DESTINATION / "protocol/exporter" / (name + ".txt"), pins[BASE / name], compress=False))
+        published_equivalents = {
+            "build/v7_meb_full_release/run_full_release.py": "morsehgp3D_v7/receipts/meb_full_release_20260905/run_full_release.historical.py",
+            "build/v7_meb_full_release/expected_test_names.json": "morsehgp3D_v7/receipts/meb_full_release_20260905/expected_test_names.json",
+            "build/v7_meb_integrated_tests/run_targeted.py": "morsehgp3D_v7/receipts/meb_lazy_integrated_20260905/run_targeted.original.py",
+            "build/v7_meb_paired/runner.py": "morsehgp3D_v7/receipts/meb_mono_20260905/protocol/runner.py.snapshot.txt",
+        }
+        require(all(Q.H.digest(ROOT / target) == dependencies[ROOT / source] for source, target in published_equivalents.items()),
+                "published historical dependency no longer byte-identical")
+        write_json(DESTINATION / "dependencies.json", {"scope": "referenced_historical_authorities_not_reused_test_results",
+                   "files": {str(path.relative_to(ROOT)): pin for path, pin in dependencies.items()},
+                   "published_byte_identical_equivalents": published_equivalents})
+        write_json(DESTINATION / "provenance.json", provenance)
+        write_json(DESTINATION / "validation.json", {"status": "three_qualifications_replayed_read_only", "reviews": reviews,
+                   "engine_runs_during_export": 0, "builds_during_export": 0, "public_status": "not_claimed"})
+        with (DESTINATION / "README.md").open("x") as stream:
+            stream.write("# Qualification E/q2 intégrée\n\nTrois qualifications fermées sont publiées : **33/33 Release ciblées, 33/33 ASAN/UBSAN et 324/324 Release complètes**. Les sorties sont relues, pas les moteurs réexécutés. `public_status=not_claimed`, `backend=cpu_reference`, `profile=quantized_u16_input_only`. GCP non utilisé par cet export.\n\n")
+            stream.write("Les répertoires `release_receipts`, `sanitized_receipts` et `full_receipts` conservent les résultats séparément. Les sources, binaires, liaisons de compilation, inventaires, JUnit et journaux LastTest/fences sont vérifiés avant copie puis à la frontière finale. E Release est lié au SHA " + expected_e + "; le CLI instrumenté a son propre SHA. Les baselines historiques C/C/D ne deviennent jamais E. Le build complet est incrémental et les exécutions des portes sont fraîches.\n\n")
+            stream.write("`protocol/` conserve les trois révisions de préparation, y compris les faux rejets de précision UTC/kernel et leurs sorties brutes. Ces tests de protocole ne sont pas des qualifications moteur. Les snapshots `.py.txt` et `.md.txt` restent inertes et leurs chemins sources sont historiques ; les manifestes `SOURCE_*` ne désignent pas les noms de cette projection. `dependencies.json` référence les autorités historiques par SHA, sans réutilisation de leurs résultats.\n\n")
+            stream.write("`provenance.json` donne chaque correspondance source/public, SHA et taille. Les copies sont byte-exactes, sans LF ajouté. Un grand LastTest est compressé en gzip déterministe ; le SHA et la taille décompressés égalent exactement le brut conservé. Aucun journal n'est tronqué ni publié sous une extension `.log` ignorée. `SHA256SUMS` couvre tout le contenu livré et le manifeste, hors lui-même.\n\nCes portes ne démontrent ni exactitude globale industrielle, ni SLO 50k/1 s/100 ms, ni passage massif/GPU.\n")
+        require(all(Q.H.digest(path) == pin for path, pin in pins.items()), "source changed during publication")
+        require([validate_receipt(mode, expected_e, expected_receipt) for mode in MODES] == reviews,
+                "qualification changed at publication boundary")
+        entries = [{"path": str(path.relative_to(DESTINATION)), "sha256": Q.H.digest(path), "size": path.stat().st_size}
+                   for path in sorted(DESTINATION.rglob("*")) if path.is_file()]
+        write_json(DESTINATION / "manifest.json", {"schema": "mhgp7-q2-integrated-publication-v1", "status": "completed",
+                   "qualification_counts": [33, 33, 324], "expected_E_sha256": expected_e, "entries": entries,
+                   "public_status": "not_claimed", "gcp": "not_used"})
+        with (DESTINATION / "SHA256SUMS").open("x") as stream:
+            for path in sorted(DESTINATION.rglob("*")):
+                if path.is_file() and path.name != "SHA256SUMS":
+                    stream.write(Q.H.digest(path) + "  " + str(path.relative_to(DESTINATION)) + "\n")
+        print(json.dumps({"status": "completed", "copied_artifacts": len(provenance), "destination": str(DESTINATION),
+                          "engine_runs": 0, "builds": 0, "public_status": "not_claimed"}), flush=True)
+        return 0
+    except BaseException as error:
+        write_json(DESTINATION / "EXPORT_FAILURE.json", {"status": "failed_or_invalid", "error": f"{type(error).__name__}: {error}",
+                   "partial_artifacts_preserved": True, "do_not_resume_or_claim_completed": True})
+        raise
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--expected-e-sha256")
+    parser.add_argument("--build-receipt-sha256")
+    args = parser.parse_args(argv)
+    if not args.execute:
+        print(json.dumps({"status": "prepared_not_executed", "writes": False, "engine_runs": 0, "builds": 0,
+                          "destination": str(DESTINATION), "required_closed_qualifications": {"release": 33, "sanitized": 33, "full": 324},
+                          "requires_separate_GO_after_qualifications_closed": True}, indent=2))
+        return 0
+    require(args.expected_e_sha256 is not None and args.build_receipt_sha256 is not None, "explicit E pins required")
+    return execute(args.expected_e_sha256, args.build_receipt_sha256)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

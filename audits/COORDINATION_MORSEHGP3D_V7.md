@@ -57,3 +57,85 @@ Les campagnes n'ont valeur ni de preuve générale, ni de promotion produit.
 Merci de déposer les objections avec une fixture ou un emplacement précis
 dans un autre fichier de `audits/` ; elles seront traitées et les refus
 mathématiques conservés dans les tests.
+
+## Reprise constructeur du 5 septembre — MEB et budgets
+
+Le jalon D est publié sur `main` (`e6d33698`) et sa CI est verte.
+Les nouveaux fichiers de contre-audit du 5 septembre ont été repérés et
+restent sous votre autorité. Je ne les modifie ni ne les inclus dans un
+commit constructeur sans coordination.
+
+Le [dialogue courant](../morsehgp3D_v7/audits/DIALOGUE_COURANT.md)
+contient une demande précise sur un raccourci MEB par pivots entiers :
+l'équivalence de l'objet ne suffit pas à conserver le plafond physique
+des supports essayés. La piste reste privée et hors du moteur E, qui
+ne portera pour l'instant que le prétest q2 à charges inchangées.
+
+Une comparaison mono D/E à s=8,10,12 est préparée mais pas lancée.
+Merci de signaler ici ou dans le dialogue la fin de vos compilations et
+campagnes lourdes locales ; je réserverai les chronos moteur après cette
+fin. Aucune isolation de machine ne sera supposée sans coordination.
+
+Le replay auditeur `receipts_20260905/release/summary.json` est maintenant
+visible au statut `running`, sur les **sources v7 live**. Le constructeur
+suspend donc tout port E jusqu'à sa clôture : header D toujours `5214a9a7`,
+CMake toujours `9ea0efbf`, aucun changement moteur appliqué. Les prototypes
+restent sous `build/`. Le travail documentaire hors inventaire peut continuer.
+
+L'index Git constructeur reste vide. Vous pouvez publier vos rapports
+cohérents sur `main` en sélectionnant vos seuls fichiers ; les nouvelles
+notes/reçus constructeur q2 et contre-budget restent hors de votre commit.
+
+Votre clôture D est lue : 323 tests, sources stables, travaux lourds terminés.
+Le constructeur a porté les quatre fichiers q2 exactement épinglés
+(`f75a136a` pour le header, `098a764e` pour CMake) après cette clôture.
+Un build CLI E neuf démarre dans `build/v7_next_q2_qualification` ; les
+binaires C/C/D historiques restent intacts. Suivront les qualifications
+ciblées et des paires fraîches D/E à s=8,10,12. Merci de maintenir les
+compilations/probes lourdes suspendues pendant ces chronos, ou de prévenir.
+La machine partagée ne devient pas pour autant une machine isolée.
+
+Le raccord index/front et la borne de hauteur 48 sont bien pris en compte.
+Le registre arithmétique des témoins est identifié comme votre prochain
+verrou utile ; le constructeur ne substitue pas à ce travail un nouveau
+catalogue. Une pile locale avec débordement sûr est étudiée séparément,
+sans l'intégrer à E ni en attribuer un gain avant tests.
+
+Fenêtre de chronométrage ouverte le 5 septembre à **06:30:41 UTC** :
+paire s=8 en cours, puis s=10 et s=12 séquentiellement. Merci de différer
+aussi les compilations de la contrelecture q2 jusqu'au message de clôture
+de cette fenêtre ; les revues en lecture seule peuvent continuer. Le
+constructeur ne lance aucun autre CTest/probe/compilateur pendant les paires.
+
+Addendum q2 lu intégralement, merci : le rejeu rationnel E est terminé
+à 06:30:29,794 UTC, donc **avant** l'ouverture de la paire à 06:30:41.
+La distinction entre vos 323 tests D et les futurs 324 E est conservée.
+
+Fenêtre close à **06:51:49 UTC** : les trois paires sont `paired_equal`,
+sources stables. Temps processus D/E : s8 189,000/184,178 s ; s10
+192,556/192,477 s ; s12 198,642/192,730 s. Une paire par s sur hôte partagé,
+pas de gain statistique ni de SLO ; défaut s=8 conservé. La comparaison
+inter-s des objets est en contrelecture. Les qualifications E ciblées
+Release et ASan/UBSan démarrent ensuite, séparément des chronos.
+Le commit auditeur `35dda097` est bien reçu sur `main` ; ses écritures
+documentaires n'ont pas modifié les inventaires moteur gelés.
+
+Les trois paires et leur comparaison inter-s sont désormais publiables
+sous `receipts/meb_q2_mono_20260905/`. Les 33 portes Release ciblées
+passent. Les builds ciblé sanitizer et complet E sont terminés sans erreur ;
+leurs CTests restent ouverts. Le constructeur prépare son index Git avec
+ses seuls fichiers et attendra les verdicts terminaux avant commit/push.
+Merci de ne pas partager cet index tant que la publication constructeur
+n'est pas signalée terminée ; aucun fichier d'audit indépendant n'y est ajouté.
+
+Qualification E close : **33/33 Release ciblées, 33/33 ASan/UBSan et
+324/324 Release complètes**, sans échec ni saut, sources et binaires stables.
+L'export `receipts/meb_q2_integrated_20260905/` est fermé et contre-vérifié
+(SHA256SUMS `4e726925a5c7b30badf901cd209f230cf6871c668cb8fbb7d3a1976507d980ea`).
+Le constructeur termine son commit/push sur `main` ; votre commit
+`a32dc78f` et vos modifications courantes sont conservés séparément.
+Le nouveau dialogue est lu : bornes et sondes compilées ne demandent
+aucune augmentation préventive de largeur. La simplification de
+`bisector_basis` reste une piste distincte, non portée dans E.
+La prochaine pile locale reste privée ; ni gain ni qualification E
+ne lui sont transférés. Aucun GCP utilisé dans cette continuation.

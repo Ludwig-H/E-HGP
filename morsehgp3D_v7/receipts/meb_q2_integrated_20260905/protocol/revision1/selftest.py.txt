@@ -1,0 +1,206 @@
+"""Qualification judge/planning fixtures only; no real CMake, CTest or engine."""
+from __future__ import annotations
+
+import contextlib
+import copy
+import io
+import json
+import os
+from pathlib import Path
+import tempfile
+import unittest
+from unittest.mock import patch
+import xml.etree.ElementTree as ET
+
+import qualification as Q
+
+
+def document(mode: str) -> ET.Element:
+    doc = ET.Element("testsuite")
+    for name in Q.names(mode):
+        ET.SubElement(doc, "testcase", name=name, status="run")
+    return doc
+
+
+class QualificationGate(unittest.TestCase):
+    def test_precise_names_and_all_junit_rejections(self):
+        for mode, count in (("full", 324), ("release", 33), ("sanitized", 33)):
+            expected = Q.names(mode)
+            self.assertEqual(len(expected), count)
+            self.assertEqual(expected.count(Q.NEW_NAME), 1)
+            self.assertEqual(Q.F.judge_junit(document(mode), expected)["tests"], count)
+            for mutant in ("empty", "missing", "duplicate", "unknown", "failure", "error", "skipped", "notrun"):
+                doc = document(mode)
+                if mutant == "empty":
+                    doc.clear()
+                elif mutant == "missing":
+                    doc.remove(doc[-1])
+                elif mutant == "duplicate":
+                    doc[-1].set("name", doc[0].get("name"))
+                elif mutant == "unknown":
+                    doc[-1].set("name", "unknown")
+                elif mutant == "notrun":
+                    doc[-1].set("status", "notrun")
+                else:
+                    ET.SubElement(doc[-1], mutant)
+                with self.subTest(mode=mode, mutant=mutant), self.assertRaises(RuntimeError):
+                    Q.F.judge_junit(doc, expected)
+
+    def test_previews_inert_and_commands_match_requested_scope(self):
+        for mode in ("full", "release", "sanitized"):
+            with patch.object(Q, "execute", side_effect=RuntimeError("must not execute")), contextlib.redirect_stdout(io.StringIO()) as stdout:
+                self.assertEqual(Q.main(["--mode", mode]), 0)
+            value = json.loads(stdout.getvalue())
+            self.assertEqual(value["status"], "prepared_not_executed")
+            self.assertEqual(value["test_engine_runs"], 0)
+            self.assertEqual(value["builds"], 0)
+            commands = value["commands"]
+            self.assertEqual(len(commands), 4)
+            self.assertTrue(all(0 < command[2] <= 7200 for command in commands))
+            self.assertIn("--no-tests=error", commands[-1][1])
+            self.assertIn("--output-junit", commands[-1][1])
+            if mode != "full":
+                regex = commands[-1][1][commands[-1][1].index("-R") + 1]
+                self.assertTrue(all(Q.re.fullmatch(regex, name) for name in Q.names(mode)))
+                self.assertFalse(Q.re.fullmatch(regex, Q.NEW_NAME + "_suffix"))
+                self.assertEqual(commands[1][1][commands[1][1].index("--target") + 1:], Q.T.TARGETS)
+            self.assertEqual(any("fsanitize" in arg for arg in commands[0][1]), mode == "sanitized")
+        with patch.object(Q, "execute") as execute:
+            with self.assertRaisesRegex(RuntimeError, "two explicit E pins"):
+                Q.main(["--mode", "full", "--execute"])
+            execute.assert_not_called()
+
+    def test_sanitizer_guard_rejects_leak_disabling_and_overrides(self):
+        clean = {name: "" for name in os.environ if name.startswith("LD_")}
+        clean.update(ASAN_OPTIONS=Q.ASAN, UBSAN_OPTIONS=Q.UBSAN, LSAN_OPTIONS="")
+        with patch.dict(os.environ, clean):
+            self.assertEqual(Q.environment("sanitized")["sanitizer_options"]["ASAN_OPTIONS"], Q.ASAN)
+            for key, value in (("ASAN_OPTIONS", ""), ("ASAN_OPTIONS", "detect_leaks=0:halt_on_error=1"),
+                               ("ASAN_OPTIONS", Q.ASAN + ":detect_leaks=0"), ("UBSAN_OPTIONS", "halt_on_error=0"),
+                               ("LSAN_OPTIONS", "suppressions=fixture-private"), ("LD_FAKE", "fixture-private")):
+                with patch.dict(os.environ, {key: value}), self.assertRaises(RuntimeError) as caught:
+                    Q.environment("sanitized")
+                self.assertNotIn("fixture-private", str(caught.exception))
+
+    def test_terminal_no_false_green(self):
+        kwargs = {"results": {"a": {"exit_code": 0, "status": "completed"}}, "labels": {"a"},
+                  "failure": None, "final_errors": [], "before": {"source": "pin"}, "after": {"source": "pin"},
+                  "tested": ["bin"], "binaries_after": ["bin"], "binding": {"db": "pin"},
+                  "binding_after": {"db": "pin"}, "inventory": {"tests": ["one"]}, "junit": {"tests": 1}}
+        self.assertTrue(Q.terminal_pass(**kwargs))
+        mutants = {"results": {}, "failure": "interrupted", "final_errors": ["late check failed"],
+                   "after": {"source": "changed"}, "tested": None, "binaries_after": ["changed"],
+                   "binding": None, "binding_after": {"db": "changed"}, "inventory": None, "junit": None}
+        for field, value in mutants.items():
+            damaged = copy.deepcopy(kwargs)
+            damaged[field] = value
+            self.assertFalse(Q.terminal_pass(**damaged), field)
+        for value in ({"exit_code": 0, "status": "censored"}, {"exit_code": 124, "status": "completed"}):
+            damaged = copy.deepcopy(kwargs)
+            damaged["results"]["a"] = value
+            self.assertFalse(Q.terminal_pass(**damaged))
+
+    def test_explicit_candidate_pins_required_before_read(self):
+        with patch.object(Q.H, "digest") as digest:
+            for left, right in (("", ""), ("f" * 63, "0" * 64), ("A" * 64, "0" * 64), ("0" * 64, "g" * 64)):
+                with self.assertRaisesRegex(RuntimeError, "explicit E"):
+                    Q.candidate_binding(left, right)
+            digest.assert_not_called()
+
+    def test_compilation_binding_flags_and_source_targets(self):
+        for mode in ("full", "release", "sanitized"):
+            with tempfile.TemporaryDirectory(prefix="mhgp7-E-compile-binding-") as tmp:
+                build = Path(tmp)
+                historic_mode = "sanitized" if mode == "sanitized" else "release"
+                rows = json.loads((Q.ROOT / f"build/v7_meb_integrated_tests/{historic_mode}_receipts/compile_binding.json").read_text())
+                for row in rows:
+                    row["directory"] = str(build)
+                release_flags = "-O1 -g -DNDEBUG -fsanitize=address,undefined -fno-omit-frame-pointer" if mode == "sanitized" else "-O3 -DNDEBUG"
+                linker_flags = "-fsanitize=address,undefined" if mode == "sanitized" else ""
+                cache = "\n".join(["CMAKE_BUILD_TYPE:STRING=Release", "MHGP7_ENABLE_CUDA:BOOL=OFF",
+                    "CMAKE_HOME_DIRECTORY:INTERNAL=" + str(Q.SOURCE), "CMAKE_CXX_FLAGS:STRING=",
+                    "CMAKE_CXX_FLAGS_RELEASE:STRING=" + release_flags, "CMAKE_EXE_LINKER_FLAGS:STRING=" + linker_flags,
+                    "CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING="]) + "\n"
+                (build / "CMakeCache.txt").write_text(cache)
+                (build / "CTestTestfile.cmake").write_text("fixture only\n")
+                (build / "compile_commands.json").write_text(json.dumps(rows))
+                cli = build / "mhgp7"
+                cli.write_bytes(b"fixture bytes, never executed")
+                cli.chmod(0o700)
+                pin = Q.H.digest(cli)
+                self.assertEqual(len(Q.compile_binding(build, mode, pin)["commands"]), 1 if mode == "full" else 9)
+                for flag in (" -ffast-math", " -DMHGP7_PROFILE_REDUCE=1", " @flags.rsp", " -O0", " -DNDEBUG"):
+                    damaged = copy.deepcopy(rows)
+                    damaged[0]["command"] += flag
+                    (build / "compile_commands.json").write_text(json.dumps(damaged))
+                    with self.subTest(mode=mode, flag=flag), self.assertRaises(RuntimeError):
+                        Q.compile_binding(build, mode, pin)
+                damaged = copy.deepcopy(rows)
+                damaged[0]["directory"] = str(build / "foreign")
+                (build / "compile_commands.json").write_text(json.dumps(damaged))
+                with self.assertRaises(RuntimeError):
+                    Q.compile_binding(build, mode, pin)
+                (build / "compile_commands.json").write_text(json.dumps(rows))
+                (build / "CMakeCache.txt").write_text(cache.replace("CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=", "CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=-Wl,fixture"))
+                with self.assertRaisesRegex(RuntimeError, "cached compile/link"):
+                    Q.compile_binding(build, mode, pin)
+
+    def test_fake_lifecycle_completion_failures_and_stability(self):
+        for mode in ("full", "release", "sanitized"):
+            for scenario in ("completed", "failed", "censored", "interrupted", "inventory_missing", "junit_failed", "late_drift", "binary_drift"):
+                with self.subTest(mode=mode, scenario=scenario), tempfile.TemporaryDirectory(prefix="mhgp7-E-qualification-") as tmp:
+                    base = Path(tmp)
+                    build, out = base / "build", base / "receipt"
+                    if mode == "full":
+                        build.mkdir()
+                    calls, repository_calls = [], [0]
+                    bins = [{"path": "build/" + name, "sha256": "fixture", "size": 1} for name in Q.T.TARGETS]
+                    def frozen(*_args):
+                        return {"pin": "changed" if scenario == "late_drift" and repository_calls[0] >= 2 else "fixed"}
+                    def repository():
+                        repository_calls[0] += 1
+                        return {"head": "fixture", "worktree": ""}
+                    def binaries():
+                        return [{"changed": True}] if scenario == "binary_drift" and repository_calls[0] >= 2 else bins
+                    def run(label, argv, limit):
+                        calls.append(label)
+                        self.assertGreater(limit, 0)
+                        self.assertLessEqual(limit, 7200)
+                        if label == "configure":
+                            build.mkdir(exist_ok=True)
+                        if label.startswith("build_"):
+                            if scenario == "interrupted":
+                                raise KeyboardInterrupt("fixture")
+                            if scenario in ("failed", "censored"):
+                                return {"exit_code": 1 if scenario == "failed" else 124, "status": scenario}
+                        if label == "inventory":
+                            expected = Q.names(mode)
+                            if scenario == "inventory_missing":
+                                expected = expected[:-1]
+                            (out / "inventory.stdout").write_text(json.dumps({"tests": [{"name": name} for name in expected]}))
+                        if label == "ctest":
+                            doc = document(mode)
+                            if scenario == "junit_failed":
+                                ET.SubElement(doc[-1], "failure")
+                            (out / "ctest.junit.xml").write_bytes(ET.tostring(doc))
+                        return {"exit_code": 0, "status": "completed"}
+                    with patch.object(Q, "paths", return_value=(build, out)), \
+                            patch.object(Q, "environment", return_value={}), patch.object(Q, "frozen_inputs", side_effect=frozen), \
+                            patch.object(Q.N, "baseline_binding", return_value={"protected_binaries": {"C1": "C", "C2": "C", "D": "D"}}), \
+                            patch.object(Q.N.R, "repository_state", side_effect=repository), \
+                            patch.object(Q.N.R, "host_observation", return_value={"host_shared": True}), \
+                            patch.object(Q.H, "run", side_effect=run), patch.object(Q.H, "binaries", side_effect=binaries), \
+                            patch.object(Q, "compile_binding", return_value={"command": "fixture"}), contextlib.redirect_stdout(io.StringIO()):
+                        rc = Q.execute(mode, "e" * 64, "f" * 64)
+                        with self.assertRaisesRegex(RuntimeError, "already exists"):
+                            Q.execute(mode, "e" * 64, "f" * 64)
+                    summary = json.loads((out / "summary.json").read_text())
+                    self.assertEqual(rc, 0 if scenario == "completed" else 1)
+                    self.assertEqual(summary["status"], "passed" if scenario == "completed" else "failed_or_invalid")
+                    self.assertFalse(summary["gate_results_reused"])
+                    self.assertEqual(summary["protected_C_C_D_historical"], {"C1": "C", "C2": "C", "D": "D"})
+                    self.assertEqual(len(calls), 2 if scenario in ("failed", "censored", "interrupted") else 3 if scenario == "inventory_missing" else 4)
+
+
+if __name__ == "__main__":
+    unittest.main()

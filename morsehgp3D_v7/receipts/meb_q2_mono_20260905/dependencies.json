@@ -1,0 +1,64 @@
+{
+  "baseline_qualification_not_reexecuted_or_transferred": true,
+  "existing_public_files": [
+    {
+      "repository_relative_path": "morsehgp3D_v7/receipts/meb_full_release_20260905/full_release/protected_after.json",
+      "sha256": "79fb1447f1b51f97a096fe2bf3aa5e5f500388f1c98c5caf009ed37ab8c54ac2"
+    },
+    {
+      "repository_relative_path": "morsehgp3D_v7/receipts/meb_full_release_20260905/full_release/summary.json",
+      "sha256": "5068b5f7bf531b29455676573034a42564b26f28fa5eec629e47278df32c3a3e"
+    },
+    {
+      "repository_relative_path": "morsehgp3D_v7/receipts/meb_mono_20260905/build_D/build_D.json",
+      "sha256": "aedfe1b48d0b7bbef211a92d72c678e6cd6e9a53f20328db6740a0c8ec367812"
+    },
+    {
+      "repository_relative_path": "morsehgp3D_v7/receipts/meb_mono_20260905/protocol/build_cli_selftest.py.snapshot.txt",
+      "sha256": "5697fac2ad584b7f50bcdf0e4536aa96f08ee8e13a6f3521e1d31cd47ffb9d3d"
+    },
+    {
+      "repository_relative_path": "morsehgp3D_v7/receipts/meb_mono_20260905/protocol/compare_v6_v7.py.snapshot.txt",
+      "sha256": "fe22493fcb7494813e79fea9826873cce8cf14918097ce500b44018f1a64f2ef"
+    },
+    {
+      "repository_relative_path": "morsehgp3D_v7/receipts/meb_mono_20260905/protocol/incidence_campaign.py.snapshot.txt",
+      "sha256": "6ca21d8b1c89e6baea99ecc3dd414b35d06581df50833e76bac9bdc1d5d1c20a"
+    },
+    {
+      "repository_relative_path": "morsehgp3D_v7/receipts/meb_mono_20260905/protocol/incidence_campaign_gate.py.snapshot.txt",
+      "sha256": "d74bca5257bd307b5956a946ca188a217f519ec2dc49e6b0de3ebf33a0ccca0a"
+    },
+    {
+      "repository_relative_path": "morsehgp3D_v7/receipts/meb_mono_20260905/protocol/runner.py.snapshot.txt",
+      "sha256": "3abe27f8a10173867a0395430ff56392bb82b5cbee3eb766fb293ffa65cc2645"
+    },
+    {
+      "repository_relative_path": "morsehgp3D_v7/receipts/meb_mono_20260905/protocol/selftest.py.snapshot.txt",
+      "sha256": "f192a95f013e0b1df56a9324d8f18034949cd51410fcc6d41e8ee87af9048348"
+    },
+    {
+      "repository_relative_path": "morsehgp3D_v7/receipts/release_c_20260904/binaries_tested.json",
+      "sha256": "3a57eeaa8c832d391d020caae48b7ef7a08c72792e74b1e41701ff4e2808fa66"
+    },
+    {
+      "repository_relative_path": "morsehgp3D_v7/receipts/release_c_20260904/build_binding.json",
+      "sha256": "60e83158863799ca3225b4814bec957b8581c9cbd8e734ea3577f9f7d77fb278"
+    },
+    {
+      "repository_relative_path": "morsehgp3D_v7/receipts/release_c_20260904/receipt_manifest.json",
+      "sha256": "17b94a1e3d92e6e8a490943c0b2a11600ccb8d71c180820525c1029692c21931"
+    },
+    {
+      "repository_relative_path": "morsehgp3D_v7/receipts/release_c_20260904/sources_before.json",
+      "sha256": "757cec606d0db89f1271112d33c01a483dabb43fd7ed668d5c7ec7a20556f927"
+    },
+    {
+      "repository_relative_path": "morsehgp3D_v7/receipts/release_c_20260904/summary.json",
+      "sha256": "d6c4d15a40aedfb9ed737019974980640e4fc83206f8660c1ca143f7b347066b"
+    }
+  ],
+  "restore_original_layout_and_verify_all_pins_before_any_future_replay": true,
+  "schema": "mhgp7-q2-publication-dependencies-v1",
+  "snapshots_are_inert": true
+}

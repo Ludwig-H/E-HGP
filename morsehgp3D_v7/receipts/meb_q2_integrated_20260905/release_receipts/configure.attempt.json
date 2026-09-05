@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/morsehgp3D_v7",
+    "-B",
+    "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/release",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP7_ENABLE_CUDA=OFF",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+  ],
+  "started_utc": "2026-09-05T06:52:52Z",
+  "status": "running",
+  "timeout_seconds": 120
+}

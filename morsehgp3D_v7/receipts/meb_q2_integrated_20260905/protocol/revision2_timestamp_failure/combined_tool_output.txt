@@ -1,0 +1,45 @@
+command: taskset --cpu-list 0 python3 -B build/v7_next_q2_tests_20260905/selftest.py
+scope: raw combined stdout/stderr returned by exec_command; no engine/build/CTest
+
+..FFFE.....
+======================================================================
+ERROR: test_last_log_archive_freshness_copy_and_postcopy_changes (__main__.QualificationGate.test_last_log_archive_freshness_copy_and_postcopy_changes) (scenario='completed')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/selftest.py", line 207, in test_last_log_archive_freshness_copy_and_postcopy_changes
+    result = Q.archive_current_log(build, out, expected, prior, boundary)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/qualification.py", line 243, in archive_current_log
+    require(started_ns <= source["mtime_ns"] <= observed_ns and started_ns <= source["ctime_ns"] <= observed_ns,
+  File "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/qualification.py", line 37, in require
+    raise RuntimeError(message)
+RuntimeError: LastTest timestamp precedes owned CTest or lies in the future
+
+======================================================================
+FAIL: test_fake_lifecycle_completion_failures_and_stability (__main__.QualificationGate.test_fake_lifecycle_completion_failures_and_stability) (mode='release', scenario='junit_failed')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/selftest.py", line 285, in test_fake_lifecycle_completion_failures_and_stability
+    self.assertEqual(summary["last_test_log_qualified"], scenario not in
+AssertionError: False != True
+
+======================================================================
+FAIL: test_fake_lifecycle_completion_failures_and_stability (__main__.QualificationGate.test_fake_lifecycle_completion_failures_and_stability) (mode='release', scenario='binary_drift')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/selftest.py", line 285, in test_fake_lifecycle_completion_failures_and_stability
+    self.assertEqual(summary["last_test_log_qualified"], scenario not in
+AssertionError: False != True
+
+======================================================================
+FAIL: test_fake_lifecycle_completion_failures_and_stability (__main__.QualificationGate.test_fake_lifecycle_completion_failures_and_stability) (mode='sanitized', scenario='late_drift')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v7_next_q2_tests_20260905/selftest.py", line 285, in test_fake_lifecycle_completion_failures_and_stability
+    self.assertEqual(summary["last_test_log_qualified"], scenario not in
+AssertionError: False != True
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.612s
+
+FAILED (failures=3, errors=1)

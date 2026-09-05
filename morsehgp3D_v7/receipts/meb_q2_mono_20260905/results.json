@@ -1,0 +1,342 @@
+{
+  "build": {
+    "E_build_receipt_sha256": "30f133d6c052e1d53c8c539457b5b553267d202c11b043188feb6c0f30af1e16",
+    "E_sha256": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6",
+    "all_four_command_records_revalidated": true,
+    "build_seconds_diagnostic": 17.908436664999954,
+    "ended_utc": "2026-09-05T06:30:03.487072Z",
+    "scope": "read_only_E_build_binding_not_new_build",
+    "source_manifest_sha256": "c3863a6732c1105010467be55488f998469faa084ad9ee4ef18aa8642ddb0580",
+    "sources_helpers_C_stable": true,
+    "started_utc": "2026-09-05T06:29:44.097874Z",
+    "status": "passed"
+  },
+  "cross_separations": {
+    "all_six_engine_completed": true,
+    "all_three_terminal_attempts_present": true,
+    "compared_fields": [
+      "digests",
+      "cardinalities"
+    ],
+    "equality": {
+      "cardinalities": true,
+      "digests": true
+    },
+    "reference_cardinalities": {
+      "1": {
+        "attachements": 0,
+        "deltas": 7999,
+        "evenements": 29875,
+        "facettes": 8000,
+        "fusions": 7999,
+        "noeuds": 7999
+      },
+      "10": {
+        "attachements": 8127546,
+        "deltas": 1005622,
+        "evenements": 1088869,
+        "facettes": 8918681,
+        "fusions": 8918680,
+        "noeuds": 15514
+      },
+      "2": {
+        "attachements": 32713,
+        "deltas": 51121,
+        "evenements": 67539,
+        "facettes": 62910,
+        "fusions": 62909,
+        "noeuds": 2122
+      },
+      "3": {
+        "attachements": 147239,
+        "deltas": 120877,
+        "evenements": 124135,
+        "facettes": 213686,
+        "fusions": 213685,
+        "noeuds": 2929
+      },
+      "4": {
+        "attachements": 399983,
+        "deltas": 197242,
+        "evenements": 201156,
+        "facettes": 517876,
+        "fusions": 517875,
+        "noeuds": 4068
+      },
+      "5": {
+        "attachements": 850158,
+        "deltas": 289705,
+        "evenements": 298870,
+        "facettes": 1036109,
+        "fusions": 1036108,
+        "noeuds": 5419
+      },
+      "6": {
+        "attachements": 1552470,
+        "deltas": 398776,
+        "evenements": 415933,
+        "facettes": 1824039,
+        "fusions": 1824038,
+        "noeuds": 7004
+      },
+      "7": {
+        "attachements": 2573565,
+        "deltas": 525699,
+        "evenements": 554022,
+        "facettes": 2947215,
+        "fusions": 2947214,
+        "noeuds": 8780
+      },
+      "8": {
+        "attachements": 3969114,
+        "deltas": 668888,
+        "evenements": 712109,
+        "facettes": 4463468,
+        "fusions": 4463467,
+        "noeuds": 10954
+      },
+      "9": {
+        "attachements": 5809858,
+        "deltas": 829864,
+        "evenements": 891721,
+        "facettes": 6443014,
+        "fusions": 6443013,
+        "noeuds": 13150
+      }
+    },
+    "reference_digests": {
+      "digest_all": "4c3ceb0498990bafa41a9e43d0bffe25a3fee579b12b5d34365f3578f526a0e7",
+      "digest_forest_K1": "fff29fb38092c02dd43271de33b9aee28a03408fbb70153385c3fc1e69e3573a",
+      "digest_forest_K10": "a44af66ade1a06ad1be19a512642b65a87f8d3b75c102b4850a719b68a3b77bb",
+      "digest_forest_K2": "dd657928d626854e23bc1ff59327eb6c834d4ff94fbb0f1913156e251f14b213",
+      "digest_forest_K3": "ba8973abbad9fc0aa1008589f0f3a669389f6406350501bdda97aa879dedcf0a",
+      "digest_forest_K4": "69b328c5a690c5b63d607018de6e28ae7f3f8f82f4320989cccec6379b0ad358",
+      "digest_forest_K5": "0598690dcf3a59d3cee0a7447d06d6773ed3b4d6d733c35d801dd3924e14ba6a",
+      "digest_forest_K6": "45014ce7ef7d17c8baeb1f5df32d90f6643cbc913cdc3817d10af1db88be363a",
+      "digest_forest_K7": "e8dc58ed4133f76f6541c474f9dedfb3c8d8880d1463bc49f32e8a36cbc62c80",
+      "digest_forest_K8": "aa7bcd6f453905566e423de55991caedb3afed38e4164d2cf5c295c85975e318",
+      "digest_forest_K9": "7b6c460d6df9631d0ef3851b5e939b161fdc559ecddb0396a94991ca970e1bb3"
+    },
+    "six_fresh_ordered_observations_bound": true,
+    "slo": "not_evaluated",
+    "statistical_gain": "not_claimed",
+    "status": "objects_equal",
+    "work_counts_not_required_equal_across_separations": true
+  },
+  "gcp": "not_used",
+  "no_estimate_50k_or_massive_or_GPU": true,
+  "observations": [
+    {
+      "costs": {
+        "D": {
+          "max_rss_kb": 2304088,
+          "pipeline_ms": 188965.3,
+          "stage_ms": {
+            "census": 7795.9,
+            "cli_e2e": 188967.35,
+            "comptage": 33.1,
+            "digest": 3931.0,
+            "expansion": 636.4,
+            "fold": 32300.0,
+            "fold_wall": 108691.2,
+            "fusion": 5855.9,
+            "gen": 59798.7,
+            "index": 2.1,
+            "intern": 16986.9,
+            "prefiltre": 10098.1,
+            "rects": 30382.4,
+            "reduce": 4885.9,
+            "rle": 1629.9,
+            "silent_incidence": 72600.941,
+            "tri": 4544.9,
+            "wspd": 29416.1
+          },
+          "wall_seconds": 189.00030586600042
+        },
+        "E": {
+          "max_rss_kb": 2301028,
+          "pipeline_ms": 184162.1,
+          "stage_ms": {
+            "census": 7596.8,
+            "cli_e2e": 184164.144,
+            "comptage": 32.8,
+            "digest": 3942.9,
+            "expansion": 625.1,
+            "fold": 32067.5,
+            "fold_wall": 103270.2,
+            "fusion": 5763.2,
+            "gen": 60609.7,
+            "index": 2.2,
+            "intern": 16927.9,
+            "prefiltre": 10166.6,
+            "rects": 30699.0,
+            "reduce": 4845.8,
+            "rle": 1566.6,
+            "silent_incidence": 67410.935,
+            "tri": 4504.0,
+            "wspd": 29910.4
+          },
+          "wall_seconds": 184.17817240299973
+        }
+      },
+      "equality": {
+        "cardinalities": true,
+        "counts": true,
+        "digests": true,
+        "payload_caps": true,
+        "silent": true,
+        "silent_limits": true
+      },
+      "observed_process_reduction_percent_one_pair": 2.551389237655277,
+      "pair_status": "paired_equal",
+      "run_statuses": [
+        "engine_completed",
+        "engine_completed"
+      ],
+      "separation": 8
+    },
+    {
+      "costs": {
+        "D": {
+          "max_rss_kb": 2303660,
+          "pipeline_ms": 192498.8,
+          "stage_ms": {
+            "census": 7878.4,
+            "cli_e2e": 192501.479,
+            "comptage": 33.1,
+            "digest": 3944.6,
+            "expansion": 643.7,
+            "fold": 32912.0,
+            "fold_wall": 110609.2,
+            "fusion": 5793.6,
+            "gen": 61372.7,
+            "index": 2.6,
+            "intern": 17197.3,
+            "prefiltre": 10179.4,
+            "rects": 29338.6,
+            "reduce": 5016.2,
+            "rle": 1505.3,
+            "silent_incidence": 73894.283,
+            "tri": 4878.6,
+            "wspd": 32033.8
+          },
+          "wall_seconds": 192.55602913099983
+        },
+        "E": {
+          "max_rss_kb": 2305132,
+          "pipeline_ms": 192462.9,
+          "stage_ms": {
+            "census": 7914.2,
+            "cli_e2e": 192464.854,
+            "comptage": 32.3,
+            "digest": 3978.9,
+            "expansion": 665.8,
+            "fold": 33957.1,
+            "fold_wall": 107050.3,
+            "fusion": 5998.3,
+            "gen": 64483.3,
+            "index": 2.2,
+            "intern": 17288.8,
+            "prefiltre": 10419.2,
+            "rects": 30556.6,
+            "reduce": 5497.9,
+            "rle": 1642.0,
+            "silent_incidence": 69183.678,
+            "tri": 5144.2,
+            "wspd": 33926.3
+          },
+          "wall_seconds": 192.47728785799973
+        }
+      },
+      "equality": {
+        "cardinalities": true,
+        "counts": true,
+        "digests": true,
+        "payload_caps": true,
+        "silent": true,
+        "silent_limits": true
+      },
+      "observed_process_reduction_percent_one_pair": 0.04089265516923346,
+      "pair_status": "paired_equal",
+      "run_statuses": [
+        "engine_completed",
+        "engine_completed"
+      ],
+      "separation": 10
+    },
+    {
+      "costs": {
+        "D": {
+          "max_rss_kb": 2304292,
+          "pipeline_ms": 198616.6,
+          "stage_ms": {
+            "census": 8015.5,
+            "cli_e2e": 198618.544,
+            "comptage": 34.2,
+            "digest": 3990.3,
+            "expansion": 650.2,
+            "fold": 33530.7,
+            "fold_wall": 112194.2,
+            "fusion": 5977.1,
+            "gen": 65352.7,
+            "index": 2.1,
+            "intern": 17205.3,
+            "prefiltre": 10452.8,
+            "rects": 30353.4,
+            "reduce": 5357.2,
+            "rle": 1615.7,
+            "silent_incidence": 74812.637,
+            "tri": 4962.7,
+            "wspd": 34999.1
+          },
+          "wall_seconds": 198.64194446700003
+        },
+        "E": {
+          "max_rss_kb": 2302764,
+          "pipeline_ms": 192687.8,
+          "stage_ms": {
+            "census": 7945.9,
+            "cli_e2e": 192689.808,
+            "comptage": 34.0,
+            "digest": 3964.5,
+            "expansion": 656.5,
+            "fold": 33396.2,
+            "fold_wall": 106374.7,
+            "fusion": 5763.7,
+            "gen": 65413.9,
+            "index": 2.1,
+            "intern": 17209.5,
+            "prefiltre": 10367.1,
+            "rects": 30368.6,
+            "reduce": 5226.4,
+            "rle": 1626.7,
+            "silent_incidence": 69138.346,
+            "tri": 5167.4,
+            "wspd": 35045.2
+          },
+          "wall_seconds": 192.73015169100017
+        }
+      },
+      "equality": {
+        "cardinalities": true,
+        "counts": true,
+        "digests": true,
+        "payload_caps": true,
+        "silent": true,
+        "silent_limits": true
+      },
+      "observed_process_reduction_percent_one_pair": 2.9761049670866346,
+      "pair_status": "paired_equal",
+      "run_statuses": [
+        "engine_completed",
+        "engine_completed"
+      ],
+      "separation": 12
+    }
+  ],
+  "public_status": "not_claimed",
+  "schema": "mhgp7-q2-mono-three-separations-results-v1",
+  "scope": "one_cold_D_then_E_pair_per_s_shared_host_candidate_horizontal_K1_to_10_no_archive",
+  "slo": "not_evaluated",
+  "status": "all_pairs_equal"
+}

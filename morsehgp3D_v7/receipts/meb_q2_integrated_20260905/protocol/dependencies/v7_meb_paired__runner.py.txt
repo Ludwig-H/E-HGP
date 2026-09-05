@@ -1,0 +1,400 @@
+#!/usr/bin/env python3
+"""Prepared C/D mono MEB comparison. No engine is run without --execute."""
+from __future__ import annotations
+
+import argparse
+from datetime import datetime, timezone
+import hashlib
+import json
+import math
+import os
+from pathlib import Path
+import re
+import shlex
+import signal
+import subprocess
+import sys
+import types
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+BASELINE = ROOT / "build/v7_c_qualification/mhgp7"
+BASELINE_SHA = "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2"
+RELEASE = ROOT / "morsehgp3D_v7/receipts/release_c_20260904"
+RELEASE_PINS = {
+    "receipt_manifest.json": "17b94a1e3d92e6e8a490943c0b2a11600ccb8d71c180820525c1029692c21931",
+    "summary.json": "d6c4d15a40aedfb9ed737019974980640e4fc83206f8660c1ca143f7b347066b",
+    "binaries_tested.json": "3a57eeaa8c832d391d020caae48b7ef7a08c72792e74b1e41701ff4e2808fa66",
+    "build_binding.json": "60e83158863799ca3225b4814bec957b8581c9cbd8e734ea3577f9f7d77fb278",
+    "sources_before.json": "757cec606d0db89f1271112d33c01a483dabb43fd7ed668d5c7ec7a20556f927",
+}
+HELPER_PINS = {
+    "compare_v6_v7.py": "fe22493fcb7494813e79fea9826873cce8cf14918097ce500b44018f1a64f2ef",
+    "incidence_campaign.py": "6ca21d8b1c89e6baea99ecc3dd414b35d06581df50833e76bac9bdc1d5d1c20a",
+}
+CAPS = {"core_records": 8000000, "chain_steps": 2000000, "cofaces": 2000000,
+        "query_nodes": 1000000000, "meb_supports": 1000000000}
+IDENTITY = {"family": "uniform", "n": 8000, "coord": 65536, "seed": 3,
+            "threads": 1, "meb_supports": CAPS["meb_supports"]}
+CPU = 6
+TIMEOUT = 600
+ADDRESS_LIMIT_GIB = 26
+MEMORY_PROXY = 17179869184
+INJECTION_VARIABLES = ("LD_PRELOAD", "LD_AUDIT", "LD_LIBRARY_PATH")
+
+
+def require(value: bool, message: str) -> None:
+    if not value:
+        raise RuntimeError(message)
+
+
+def digest(path: Path) -> str:
+    with path.open("rb") as stream:
+        result = hashlib.sha256()
+        for block in iter(lambda: stream.read(1 << 20), b""):
+            result.update(block)
+    return result.hexdigest()
+
+
+def utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def environment_guard() -> dict[str, bool]:
+    state = {name: bool(os.environ.get(name, "")) for name in INJECTION_VARIABLES}
+    require(not any(state.values()), "nonempty loader injection variable refused: " +
+            ",".join(name for name, present in state.items() if present))
+    return state
+
+
+def repository_state() -> dict:
+    environment_guard()
+    environment = dict(os.environ, LC_ALL="C", LANG="C")
+    return {"observed_utc": utc_now(),
+            "head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True,
+                                             timeout=10, env=environment).strip(),
+            "worktree_porcelain": subprocess.check_output(["git", "status", "--porcelain=v1"], cwd=ROOT,
+                                                           text=True, timeout=10, env=environment)}
+
+
+def host_observation() -> dict:
+    cpuinfo = Path("/proc/cpuinfo").read_text()
+    model = re.search(r"^model name\s*:\s*(.+)$", cpuinfo, re.M)
+    memory = re.search(r"^MemTotal:\s+([0-9]+) kB$", Path("/proc/meminfo").read_text(), re.M)
+    require(model is not None and memory is not None, "host CPU/memory metadata unavailable")
+    return {"observed_utc": utc_now(), "cpu_model": model[1], "logical_cpus": os.cpu_count(),
+            "affinity_cpus": sorted(os.sched_getaffinity(0)), "mem_total_bytes": int(memory[1]) * 1024,
+            "kernel_release": os.uname().release, "architecture": os.uname().machine,
+            "host_shared": True, "loadavg_1_5_15": list(os.getloadavg())}
+
+
+def helpers():
+    """Check bytes before importing either authoritative existing helper."""
+    modules = {}
+    for name, expected in HELPER_PINS.items():
+        path = ROOT / "morsehgp3D_v7/bench" / name
+        data = path.read_bytes()
+        require(hashlib.sha256(data).hexdigest() == expected, "helper pin changed: " + name)
+        key = path.stem
+        module = types.ModuleType(key)
+        module.__file__ = str(path)
+        sys.modules[key] = module
+        # Execute exactly the bytes just hashed, never a second source read or pycache.
+        exec(compile(data, str(path), "exec"), module.__dict__)
+        modules[key] = module
+    return modules["compare_v6_v7"], modules["incidence_campaign"]
+
+
+def command(binary: Path) -> list[str]:
+    return [str(binary), "--family=uniform", "--n=8000", "--coord=65536", "--seed=3", "--s=8",
+            "--smax=11", "--threads=1", "--fold-inflight=1", "--fold-join=1", "--layout=csr",
+            "--digest", "--complete-incidences", f"--mem-budget={MEMORY_PROXY}",
+            *["--silent-" + key.replace("_", "-") + "=" + str(value) for key, value in CAPS.items()]]
+
+
+def baseline_binding() -> dict:
+    for name, expected in RELEASE_PINS.items():
+        require(digest(RELEASE / name) == expected, "C build receipt changed: " + name)
+    require(digest(BASELINE) == BASELINE_SHA, "C baseline executable pin changed")
+    inventory = json.loads((RELEASE / "binaries_tested.json").read_text())
+    require(any(row["path"] == str(BASELINE.relative_to(ROOT)) and row["sha256"] == BASELINE_SHA
+                for row in inventory), "C executable absent from tested build receipt")
+    summary = json.loads((RELEASE / "summary.json").read_text())
+    require(summary["status"] == "passed" and summary["fresh_product_sha256"] == BASELINE_SHA,
+            "C build receipt not successful")
+    return {"binary": str(BASELINE), "sha256": BASELINE_SHA, "receipt": str(RELEASE),
+            "receipt_pins": RELEASE_PINS,
+            "binding": "historical_C_isolated_build_receipt_not_current_D_worktree"}
+
+
+def candidate_sources(source: Path) -> dict[str, str]:
+    """Explicit D tree; hash evidence is not an independent build attestation."""
+    require((source / "CMakeLists.txt").is_file(), "D source CMake missing")
+    paths = [source / "CMakeLists.txt"]
+    for name in ("src", "cli", "oracle"):
+        require((source / name).is_dir(), "D source directory missing: " + name)
+        paths.extend(path for path in (source / name).rglob("*") if path.is_file())
+    return {str(path.relative_to(source)): digest(path) for path in sorted(paths)}
+
+
+def candidate_binding(candidate: Path, source: Path, receipt: Path | None) -> dict:
+    require(receipt is not None, "D build receipt is mandatory before execution")
+    value = json.loads(receipt.read_text())
+    require(value.get("schema") == "mhgp7-mono-meb-build-v1" and value.get("status") == "completed",
+            "D build receipt schema/status")
+    require(Path(value["source_root"]).resolve(strict=True) == source, "D build source root mismatch")
+    sources = candidate_sources(source)
+    require(value["sources_before"] == value["sources_after"] == sources, "D build source snapshots do not match live tree")
+    binary = value["binary"]
+    require(Path(binary["path"]).resolve(strict=True) == candidate and binary["sha256"] == digest(candidate)
+            and binary["bytes"] == candidate.stat().st_size, "D built CLI identity mismatch")
+    for key in ("compile_database", "cmake_cache"):
+        item = value[key]
+        require(digest(Path(item["path"])) == item["sha256"], "D build artifact changed: " + key)
+    cache_path = Path(value["cmake_cache"]["path"]).resolve(strict=True)
+    cache = cache_path.read_text().splitlines()
+    require("CMAKE_BUILD_TYPE:STRING=Release" in cache and "MHGP7_ENABLE_CUDA:BOOL=OFF" in cache,
+            "D must be a Release CPU build")
+    database = json.loads(Path(value["compile_database"]["path"]).read_text())
+    entry = value["compile_command"]
+    require(entry in database, "D CLI compile command absent from pinned database")
+    directory = Path(entry["directory"]).resolve(strict=True)
+    require(directory == cache_path.parent, "D compile directory differs from configured build")
+    require(Path(value["compile_database"]["path"]).resolve(strict=True) == directory / "compile_commands.json",
+            "D compilation database is outside the configured build")
+    require("CMAKE_HOME_DIRECTORY:INTERNAL=" + str(source) in cache, "D cache is bound to different source tree")
+    require(candidate.resolve(strict=True) == (directory / "mhgp7").resolve(strict=True),
+            "D candidate is not the CLI output of the configured build")
+    require(os.access(candidate, os.X_OK), "D built CLI is not executable")
+    require(Path(entry["file"]).resolve(strict=True) == source / "cli/mhgp7.cpp", "D compile source is not CLI")
+    args = shlex.split(entry["command"])
+    allowed = {"-O3", "-DNDEBUG", "-std=c++20", "-Wall", "-Wextra", "-Wpedantic", "-Werror"}
+    require(args and Path(args[0]).name in {"c++", "g++", "clang++"}, "D compile executable")
+    require(all(args.count(flag) == 1 for flag in allowed) and args.count("-o") == args.count("-c") == 1,
+            "D compile must use strict Release flags")
+    output_index, source_index = args.index("-o"), args.index("-c")
+    require(output_index + 1 < len(args) and source_index + 1 < len(args), "D compile option value missing")
+    require((directory / args[output_index + 1]).resolve().is_relative_to(directory), "D object outside build")
+    require("CMakeFiles/mhgp7.dir/" in args[output_index + 1], "D object is not product CLI target")
+    require(Path(args[source_index + 1]).resolve(strict=True) == source / "cli/mhgp7.cpp", "D compile input mismatch")
+    positions = {0, output_index, output_index + 1, source_index, source_index + 1}
+    require(all(index in positions or arg in allowed for index, arg in enumerate(args)),
+            "D compile has unreviewed flags, macros, wrappers or response files")
+    require(value["build_exit_code"] == 0, "D build did not complete")
+    build = value["build_command"]
+    require(len(build) == 7 and Path(build[0]).name == "cmake" and build[1] == "--build" and
+            Path(build[2]).resolve(strict=True) == directory and build[3] == "--parallel" and
+            str(build[4]).isdigit() and 1 <= int(build[4]) <= 8 and build[5:] == ["--target", "mhgp7"],
+            "D build command must build only mhgp7")
+    require(binary["sha256"] == digest(candidate), "D CLI changed during binding validation")
+    return {"receipt": str(receipt), "receipt_sha256": digest(receipt), "record": value,
+            "binding": "validated_recorded_Release_CLI_build_and_source_boundaries_not_hermetic_attestation"}
+
+
+def snapshot(candidate: Path, source: Path, build_receipt: Path | None, common) -> dict:
+    injection_state = environment_guard()
+    require(os.access(candidate, os.X_OK) and os.access(BASELINE, os.X_OK), "paired executable permission changed")
+    paths = [Path(__file__), BASELINE, candidate, Path("/usr/bin/time"), Path("/usr/bin/taskset"),
+             *[ROOT / "morsehgp3D_v7/bench" / name for name in HELPER_PINS],
+             *[RELEASE / name for name in RELEASE_PINS]]
+    if build_receipt is not None:
+        paths.append(build_receipt)
+        value = json.loads(build_receipt.read_text())
+        paths.extend(Path(value[key]["path"]) for key in ("compile_database", "cmake_cache"))
+    return {"files": {str(path): digest(path) for path in paths}, "loader_injection_nonempty": injection_state,
+            "repository_sources": common.source_snapshot(ROOT), "candidate_sources": candidate_sources(source)}
+
+
+def binding_matches_snapshot(before: dict, binding: dict, candidate: Path, receipt: Path) -> None:
+    record, files = binding["record"], before["files"]
+    require(files[str(candidate)] == record["binary"]["sha256"], "D CLI changed between binding and snapshot")
+    require(files[str(receipt)] == binding["receipt_sha256"], "D build receipt changed between binding and snapshot")
+    require(before["candidate_sources"] == record["sources_after"], "D source changed between binding and snapshot")
+    for key in ("compile_database", "cmake_cache"):
+        item = record[key]
+        require(files[str(Path(item["path"]))] == item["sha256"], "D artifact changed between binding and snapshot")
+    require(files[str(BASELINE)] == BASELINE_SHA, "C CLI changed between binding and snapshot")
+    for name, expected in RELEASE_PINS.items():
+        require(files[str(RELEASE / name)] == expected, "C receipt changed between binding and snapshot")
+    for name, expected in HELPER_PINS.items():
+        require(files[str(ROOT / "morsehgp3D_v7/bench" / name)] == expected, "helper changed between import and snapshot")
+
+
+def completed_extra(text: str, parsed: dict, common) -> dict:
+    """Add mono flags, explicit caps and costs to the existing completion judge."""
+    number = r"[0-9]+(?:\.[0-9]+)?"
+    fold = re.fullmatch(r"temps_fold_mur_ms=(" + number + r") \(etages A et B, "
+                        r"fold_inflight=1, fold_join=1, pic_mesure_en_vol=([01])\)",
+                        common.one_line(text, "temps_fold_mur_ms="))
+    require(fold is not None, "serialized A/B stages not verified")
+    workers = common.key_values(common.one_line(text, "ouvriers ")[len("ouvriers "):],
+                                {"wspd", "rects", "rle", "prefiltre", "census", "expansion", "fold"})
+    require(all(re.fullmatch("[01]", value) for value in workers.values()), "more than one requested stage worker")
+    limits = common.key_values(common.one_line(text, "silent_limits ")[len("silent_limits "):], set(CAPS))
+    require(all(re.fullmatch("[0-9]+", value) for value in limits.values()), "noninteger silent caps")
+    limits = {key: int(value) for key, value in limits.items()}
+    require(limits == CAPS, "silent caps differ from explicit command")
+    budget = common.key_values(common.one_line(text, "memory_budget_scope="),
+        {"memory_budget_scope", "budget", "cap_brut_demande", "cap_brut_effectif", "cap_fusion_budgetaire"})
+    require(budget.pop("memory_budget_scope") == "partial_named_payload_proxy_v1", "memory cap scope")
+    require(all(re.fullmatch("[0-9]+", value) for value in budget.values()), "noninteger payload cap")
+    budget = {key: int(value) for key, value in budget.items()}
+    require(budget["budget"] == MEMORY_PROXY and budget["cap_fusion_budgetaire"] > 0 and
+            0 < budget["cap_brut_effectif"] <= budget["cap_brut_demande"],
+            "invalid effective payload cap")
+    for values in parsed["silent"].values():
+        require(values["steps"] <= limits["chain_steps"] and values["added"] <= limits["cofaces"] and
+                values["query_nodes"] <= limits["query_nodes"], "successful output exceeded silent work caps")
+    silent = re.fullmatch(r"silent_incidence_ms=(" + number + r") "
+                          r"regularity=rank_window_and_local_descent vertical_maps=none",
+                          common.one_line(text, "silent_incidence_ms="))
+    require(silent is not None, "silent timing schema")
+    names = ["index", "gen", "wspd", "rects", "rle", "prefiltre", "census", "comptage", "expansion",
+             "fold", "tri", "intern", "fusion", "reduce", "digest"]
+    pattern = ("temps_ms index={n} gen={n} \\(wspd {n} rects {n}\\) rle={n} prefiltre={n} census={n} "
+               "comptage={n} expansion={n} fold={n} \\(tri {n} intern {n} fusion {n} reduce {n}\\) digest={n}").format(n="(" + number + ")")
+    stages = re.fullmatch(pattern, common.one_line(text, "temps_ms "))
+    require(stages is not None, "stage timing schema")
+    times = {key: float(value) for key, value in zip(names, stages.groups())}
+    times.update(silent_incidence=float(silent[1]), fold_wall=float(fold[1]))
+    cli = re.fullmatch(r"cli_e2e_ms=(" + number + r") includes_input_and_export=true archive_committed=false",
+                       common.one_line(text, "cli_e2e_ms="))
+    require(cli is not None, "CLI cost or no-archive scope missing")
+    times["cli_e2e"] = float(cli[1])
+    require(all(math.isfinite(value) and value >= 0 for value in times.values()), "invalid stage timing")
+    return {"silent_limits": limits, "payload_caps": budget, "stage_ms": times,
+            "stage_workers": {key: int(value) for key, value in workers.items()},
+            "serialized_stage_flags_verified": True, "strict_thread_creation_measurement": "not_performed_by_runner"}
+
+
+def classify(record: dict, out: Path, err: Path, usage: Path, common, incidence) -> None:
+    incidence.classify(record, out, err, usage, **IDENTITY)
+    if record["status"] == "engine_completed":
+        try:
+            record.update(completed_extra(out.read_text(), record, common))
+        except Exception:
+            # A late mono/cap validation failure must revoke the preliminary completion.
+            for key in ("digests", "counts", "cardinalities", "silent", "pipeline_ms", "max_rss_kb"):
+                record.pop(key, None)
+            record["status"] = "invalid"
+            raise
+
+
+def decision(records: list[dict], stable: bool, error: str | None = None) -> dict:
+    result = {"status": "invalid", "runs": len(records), "expected_runs": 2, "source_stable": stable,
+              "error": error, "public_status": "not_claimed", "slo": "not_evaluated", "gcp": "not_used"}
+    if error or not stable or len(records) != 2 or [r.get("role") for r in records] != ["C", "D"]:
+        return result
+    if any(row.get("status") not in {"engine_completed", "engine_refused", "censored"} for row in records):
+        return result
+    if any(row["status"] != "engine_completed" for row in records):
+        result.update(status="pair_incomplete", observations=[row["status"] for row in records])
+        return result
+    left, right = records
+    keys = ("digests", "cardinalities", "counts", "silent", "silent_limits", "payload_caps")
+    equal = {key: left.get(key) == right.get(key) and key in left and key in right for key in keys}
+    result.update(status="paired_equal" if all(equal.values()) else "divergent", equality=equal)
+    if all(equal.values()):
+        result["times"] = {row["role"]: {key: row[key] for key in
+                           ("wall_seconds", "pipeline_ms", "stage_ms", "max_rss_kb")} for row in records}
+        result["ratio_C_over_D"] = {"process": left["wall_seconds"] / right["wall_seconds"],
+                                      "pipeline": left["pipeline_ms"] / right["pipeline_ms"]}
+        result["time_scope"] = "single_cold_process_C_then_D_including_digest_no_archive_not_SLO_or_statistical_gain"
+    return result
+
+
+def execute(candidate: Path, source: Path, output: Path, build_receipt: Path | None, common, incidence) -> int:
+    injection_state = environment_guard()
+    if output.exists():
+        raise FileExistsError(output)
+    binding = baseline_binding()
+    require(candidate != BASELINE.resolve() and candidate.is_file() and os.access(candidate, os.X_OK), "D executable missing or same path")
+    d_binding = candidate_binding(candidate, source, build_receipt)
+    require(CPU in os.sched_getaffinity(0), "CPU6 is outside allowed affinity")
+    before = snapshot(candidate, source, build_receipt, common)
+    binding_matches_snapshot(before, d_binding, candidate, build_receipt)
+    repository_before, host_before, started = repository_state(), host_observation(), utc_now()
+    output.mkdir(parents=True, exist_ok=False)
+    common.atomic_json(output / "metadata.json", {
+        "schema": "mhgp7-mono-meb-paired-v1", "public_status": "not_claimed", "baseline": binding,
+        "candidate": d_binding,
+        "snapshot_before": before, "identity": IDENTITY, "s": 8, "smax": 11, "silent_limits": CAPS,
+        "started_utc": started, "repository_before": repository_before, "host_before": host_before,
+        "loader_injection_nonempty": injection_state, "effective_locale": {"LC_ALL": "C", "LANG": "C"},
+        "cpu_affinity_requested": [CPU], "timeout_per_run_seconds": TIMEOUT,
+        "rlimit_as_gib": ADDRESS_LIMIT_GIB, "rlimit_as_is_not_physical_RSS_limit": True,
+        "payload_proxy_bytes": MEMORY_PROXY, "archive": False, "digest": True, "run_order": ["C", "D"],
+        "strict_single_thread_claim": "separate_product_gate_not_measured_by_this_runner"})
+    records, failure, after = [], None, None
+    common.atomic_json(output / "runs.json", records)
+    try:
+        for role, binary in (("C", BASELINE), ("D", candidate)):
+            require(before == snapshot(candidate, source, build_receipt, common), "source/helper/binary changed before " + role)
+            out, err, usage = (output / (role + suffix) for suffix in (".out", ".err", ".time"))
+            wrapped = ["/usr/bin/taskset", "--cpu-list", str(CPU), "/usr/bin/time", "-v", "-o", str(usage), "--", *command(binary)]
+            record = {"role": role, "status": "invalid", "command": command(binary), "wrapped_command": wrapped,
+                      "started_utc": utc_now(), "ended_utc": None,
+                      "returncode": None, "timed_out": False, "wall_seconds": None,
+                      "stdout": out.name, "stderr": err.name, "usage": usage.name}
+            records.append(record)
+            common.atomic_json(output / "runs.json", records)
+            try:
+                code, censored, elapsed = common.run_process(wrapped, out, err, timeout=TIMEOUT, address_limit_gib=ADDRESS_LIMIT_GIB)
+                record.update(returncode=code, timed_out=censored, wall_seconds=elapsed)
+                classify(record, out, err, usage, common, incidence)
+            except BaseException as error:
+                record["validation_error"] = f"{type(error).__name__}: {error}"
+                raise
+            finally:
+                record["ended_utc"] = utc_now()
+                common.atomic_json(output / "runs.json", records)
+            require(before == snapshot(candidate, source, build_receipt, common), "source/helper/binary changed during " + role)
+    except BaseException as error:
+        failure = f"{type(error).__name__}: {error}"
+    try:
+        after = snapshot(candidate, source, build_receipt, common)
+    except BaseException as error:
+        failure = failure or f"{type(error).__name__}: {error}"
+    repository_after = None
+    try:
+        repository_after = repository_state()
+    except BaseException as error:
+        failure = failure or f"{type(error).__name__}: repository state unavailable"
+    summary = decision(records, before == after, failure)
+    summary.update(started_utc=started, ended_utc=utc_now(),
+                   repository_change_policy="HEAD_or_worktree_changes_recorded_source_snapshot_stability_remains_required")
+    common.atomic_json(output / "repository_after.json", repository_after)
+    common.atomic_json(output / "snapshot_after.json", after)
+    common.atomic_json(output / "summary.json", summary)
+    common.atomic_json(output / "hashes.json", {path.name: common.sha256(path) for path in sorted(output.iterdir()) if path.is_file()})
+    print(json.dumps(summary), flush=True)
+    return 0 if summary["status"] == "paired_equal" else 2 if summary["status"] == "pair_incomplete" else 1
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--candidate", type=Path, required=True)
+    parser.add_argument("--candidate-source-root", type=Path, default=ROOT / "morsehgp3D_v7")
+    parser.add_argument("--candidate-build-receipt", type=Path)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--execute", action="store_true", help="requires the separately granted execution GO")
+    args = parser.parse_args(argv)
+    if not args.execute:
+        print(json.dumps({"status": "prepared_not_executed", "writes": False, "candidate_exists": args.candidate.is_file(),
+              "commands": [command(BASELINE), command(args.candidate)], "timeout_per_run_seconds": TIMEOUT,
+              "rlimit_as_gib": ADDRESS_LIMIT_GIB, "cpu": CPU, "output_would_be": str(args.output),
+              "public_status": "not_claimed", "gcp": "not_used"}, indent=2))
+        return 0
+    environment_guard()
+    common, incidence = helpers()
+    return execute(args.candidate.resolve(strict=True), args.candidate_source_root.resolve(strict=True),
+                   args.output.resolve(), args.candidate_build_receipt.resolve(strict=True) if args.candidate_build_receipt else None,
+                   common, incidence)
+
+
+if __name__ == "__main__":
+    def interrupted(signum, _frame):
+        raise InterruptedError(f"signal {signum}")
+    for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+        signal.signal(sig, interrupted)
+    raise SystemExit(main())

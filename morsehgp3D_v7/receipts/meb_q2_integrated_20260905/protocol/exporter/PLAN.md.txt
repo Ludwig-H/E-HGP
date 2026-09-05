@@ -1,0 +1,23 @@
+# Export E/q2 — préparation uniquement
+
+Destination future unique : `morsehgp3D_v7/receipts/meb_q2_integrated_20260905`. `export.py` est inerte sans `--execute`. Aucun build, CTest, moteur, shell GPU ou GCP n'existe dans son chemin d'exécution ; `--execute` ne fait que lire, valider et exporter. Un GO distinct est obligatoire **après fermeture des trois qualifications**. Aucun export pendant les paires mono ou les qualifications.
+
+Le préflight doit retrouver exactement les trois dossiers fermés `release_receipts` (33), `sanitized_receipts` (33), `full_receipts` (324) sous `build/v7_next_q2_tests_20260905`. Il vérifie leurs manifestes complets et fichiers réguliers, statuts terminaux sans échec, sources avant/après encore présentes, CLI C/C/D historiques et E séparément, reçu de build E, commandes/attempts/results/bruts, compilation et neuf targets ciblés, inventaire exact, JUnit et LastTest. Il relit source, archive, ancien log éventuel et fence, contrôle hashes/stat, preuve de fraîcheur sur le même filesystem, noms complets et footer fermé. ASAN/UBSAN et LeakSanitizer restent actifs. Les deux SHA E explicites sont obligatoires. Une qualification absente, incomplète, refusée, obsolète ou divergente interdit tout début de publication.
+
+La préparation courante `qualification.py` est épinglée à `5f62b29d…`, le manifeste de préparation à `9f7401a0…`. Les trois révisions sont exportées : initiale (réserve LastTest), faux rejets UTC/kernel avec source et sortie brute, puis fence final et ses selftests. Leurs anciens statuts de préparation sont conservés ; ils ne deviennent jamais des résultats moteur. Les scripts/notes sont des snapshots inertes `.py.txt` / `.md.txt` ; les manifestes sources renommés `SOURCE_*` gardent leur attribution d'origine. Les dépendances privées Python sont aussi snapshottées ; les dépendances déjà publiées sont référencées par chemin/pin et équivalent byte-identique lorsqu'il existe.
+
+Toutes les copies sont byte-exactes : aucune normalisation, aucun LF ajouté. Les grands `LastTest*.stdout` (au moins 1 MiB) sont compressés par gzip déterministe, level 9, mtime 0, filename vide ; le runtime Python/zlib est enregistré. La décompression est immédiatement vérifiée contre **tous** les octets source, avec SHA et tailles brut/public/décompressé. Aucun `.log` ignoré n'est créé. Les anciens logs et les runs de préparation en échec restent conservés.
+
+`provenance.json` mappe chaque fichier source vers sa projection. `validation.json` rapporte les relectures, pas des exécutions nouvelles. Le manifeste public couvre tous les fichiers exportés et les métadonnées ; `SHA256SUMS` couvre aussi ce manifeste et s'exclut seulement lui-même. Une nouvelle vérification complète des trois sources de qualification ferme la copie avant publication des sommes. Aucun binaire, objet, archive de build ou dépendance système n'est distribué.
+
+La destination est create-only. En cas d'exception pendant copie, les artefacts partiels sont conservés avec `EXPORT_FAILURE.json` ; ni reprise ni écrasement, et aucune promotion si ce fichier existe ou si les checksums ne ferment pas le dossier. Un export terminé doit retourner 0 et posséder l'ensemble manifeste/checksums sans fichier d'échec. L'export n'effectue jamais `git add`, commit ou push ; root garde l'audit d'index et la publication sur main.
+
+Prévisualisation actuelle :
+
+```bash
+python3 -B build/v7_q2_export_20260905/export.py
+```
+
+Après revue et GO ultérieur seulement : ajouter `--execute --expected-e-sha256 SHA_E --build-receipt-sha256 SHA_RECU`, remplacés par les hashes réellement qualifiés. Pour E actuellement construit, les pins annoncés par root sont `df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6` et `30f133d6c052e1d53c8c539457b5b553267d202c11b043188feb6c0f30af1e16` ; ils ne valent pas encore qualification.
+
+Les cinq selftests légers, normaux et `-O`, couvrent inertie, qualification absente, refus des manifestes dangereux/incomplets, copie binaire sans LF terminal, gzip déterministe et sans perte, create-only et dérive source pendant copie. Ils ne créent que des fixtures temporaires. `public_status=not_claimed` demeure inchangé ; cet export ne démontre aucun SLO ni exactitude globale industrielle.

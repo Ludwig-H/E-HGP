@@ -1,0 +1,66 @@
+[
+  {
+    "cmd": "env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 timeout 30s build/v7_q2_next_20260905/meb_lazy_gate_sanitized",
+    "chunk_id": "8d48bf",
+    "wall_time_seconds": 0.887361592,
+    "exit_code": 0,
+    "original_token_count": 124,
+    "output": "meb_lazy_gate=passed mutant=none divergence=none public_status=not_claimed\nmeb_lazy_counts cases=11816 success=668 degenerate=12 capped=11136 q2=54 q3=79 q4=34 logical_reject3=329615 logical_reject4=26952 materialized3=320 materialized4=136 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=2 reference_complete=1\nmeb_lazy_q2 logical_reject2=421459 materialized2=224 rejected_materialized2=0 identities=514 positive=297 negative=1 zero=216 foreign_zero=96 profile_refusals=2\n"
+  },
+  {
+    "cmd": "env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 timeout 30s build/v7_q2_next_20260905/meb_lazy_gate_sanitized --mutant=silent-meb-q2-reject-shell",
+    "chunk_id": "f5a1d5",
+    "wall_time_seconds": 0.053841718,
+    "exit_code": 4,
+    "original_token_count": 128,
+    "output": "meb_lazy_gate=mutant_killed mutant=silent-meb-q2-reject-shell divergence=differential.status_reason public_status=not_claimed\nmeb_lazy_counts cases=0 success=0 degenerate=0 capped=0 q2=0 q3=0 q4=0 logical_reject3=0 logical_reject4=0 materialized3=0 materialized4=0 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=2 reference_complete=1\nmeb_lazy_q2 logical_reject2=1 materialized2=0 rejected_materialized2=0 identities=514 positive=297 negative=1 zero=216 foreign_zero=96 profile_refusals=2\n"
+  },
+  {
+    "cmd": "env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 timeout 30s build/v7_q2_next_20260905/meb_lazy_gate_sanitized --mutant=silent-meb-q3-reject-shell",
+    "chunk_id": "ea94cd",
+    "wall_time_seconds": 0.043552978,
+    "exit_code": 4,
+    "original_token_count": 128,
+    "output": "meb_lazy_gate=mutant_killed mutant=silent-meb-q3-reject-shell divergence=differential.status_reason public_status=not_claimed\nmeb_lazy_counts cases=0 success=0 degenerate=0 capped=0 q2=0 q3=0 q4=0 logical_reject3=1 logical_reject4=0 materialized3=0 materialized4=0 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=3 reference_complete=1\nmeb_lazy_q2 logical_reject2=3 materialized2=0 rejected_materialized2=0 identities=514 positive=297 negative=1 zero=216 foreign_zero=96 profile_refusals=2\n"
+  },
+  {
+    "cmd": "env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 timeout 30s build/v7_q2_next_20260905/meb_lazy_gate_sanitized --mutant=silent-meb-q4-reject-shell",
+    "chunk_id": "07a81b",
+    "wall_time_seconds": 0.042017726,
+    "exit_code": 4,
+    "original_token_count": 128,
+    "output": "meb_lazy_gate=mutant_killed mutant=silent-meb-q4-reject-shell divergence=differential.status_reason public_status=not_claimed\nmeb_lazy_counts cases=0 success=0 degenerate=0 capped=0 q2=0 q3=0 q4=0 logical_reject3=4 logical_reject4=1 materialized3=0 materialized4=0 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=4 reference_complete=1\nmeb_lazy_q2 logical_reject2=6 materialized2=0 rejected_materialized2=0 identities=514 positive=297 negative=1 zero=216 foreign_zero=96 profile_refusals=2\n"
+  },
+  {
+    "cmd": "env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 timeout 30s build/v7_q2_next_20260905/meb_lazy_gate_sanitized --mutant=silent-meb-eager-materialization",
+    "chunk_id": "2d17d0",
+    "wall_time_seconds": 1.218490074,
+    "exit_code": 4,
+    "original_token_count": 145,
+    "output": "meb_lazy_gate=mutant_killed mutant=silent-meb-eager-materialization divergence=logical_rejected_materialization public_status=not_claimed\nmeb_lazy_counts cases=11816 success=668 degenerate=12 capped=11136 q2=54 q3=79 q4=34 logical_reject3=329615 logical_reject4=26952 materialized3=329935 materialized4=27088 rejected_materialized3=329615 rejected_materialized4=26952 reference_minimal_q=2 reference_complete=1\nmeb_lazy_q2 logical_reject2=421459 materialized2=421683 rejected_materialized2=421459 identities=514 positive=297 negative=1 zero=216 foreign_zero=96 profile_refusals=2\n"
+  },
+  {
+    "cmd": "env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 timeout 30s build/v7_q2_next_20260905/meb_lazy_gate_sanitized --mutant=unknown",
+    "chunk_id": "cb0af9",
+    "wall_time_seconds": 0.052359275,
+    "exit_code": 2,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "cmd": "env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 timeout 30s build/v7_q2_next_20260905/meb_lazy_gate_sanitized --mutant=",
+    "chunk_id": "c0d336",
+    "wall_time_seconds": 0.036160133,
+    "exit_code": 2,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "cmd": "env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 timeout 30s build/v7_q2_next_20260905/meb_lazy_gate_sanitized --mutant=silent-meb-q2-reject-shell --mutant=silent-meb-q2-reject-shell",
+    "chunk_id": "6fd370",
+    "wall_time_seconds": 0.029792909,
+    "exit_code": 2,
+    "original_token_count": 0,
+    "output": ""
+  }
+]

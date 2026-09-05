@@ -1,0 +1,265 @@
+#!/usr/bin/env python3
+"""One fresh D/E pair at s=8,10,12; inert without --execute."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import sys
+import types
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+LEGACY = ROOT / "build/v7_meb_paired/runner.py"
+LEGACY_SHA = "3abe27f8a10173867a0395430ff56392bb82b5cbee3eb766fb293ffa65cc2645"
+BASELINE = ROOT / "build/v7_meb_qualification/mhgp7"
+BASELINE_SHA = "127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f"
+RECEIPTS = {
+    "morsehgp3D_v7/receipts/meb_mono_20260905/build_D/build_D.json":
+        "aedfe1b48d0b7bbef211a92d72c678e6cd6e9a53f20328db6740a0c8ec367812",
+    "morsehgp3D_v7/receipts/meb_full_release_20260905/full_release/summary.json":
+        "5068b5f7bf531b29455676573034a42564b26f28fa5eec629e47278df32c3a3e",
+    "morsehgp3D_v7/receipts/meb_full_release_20260905/full_release/protected_after.json":
+        "79fb1447f1b51f97a096fe2bf3aa5e5f500388f1c98c5caf009ed37ab8c54ac2",
+}
+SEPARATIONS = (8, 10, 12)
+
+
+def load_pinned(path: Path, expected: str, name: str):
+    data = path.read_bytes()
+    if hashlib.sha256(data).hexdigest() != expected:
+        raise RuntimeError("authority pin changed: " + str(path))
+    module = types.ModuleType(name)
+    module.__file__ = str(path)
+    exec(compile(data, str(path), "exec"), module.__dict__)
+    return module
+
+
+R = load_pinned(LEGACY, LEGACY_SHA, "paired_v3_authority")
+
+
+def helpers():
+    common, _unused_original_incidence = R.helpers()
+    path = ROOT / "morsehgp3D_v7/bench/incidence_campaign.py"
+    data = path.read_bytes()
+    R.require(hashlib.sha256(data).hexdigest() == R.HELPER_PINS[path.name], "incidence helper pin changed")
+    # Exactly two reviewed source substitutions parameterize the fixed s=8
+    # identity predicate. Never modify or normalize engine output bytes.
+    substitutions = {
+        "wall_seconds: float) -> dict:": "wall_seconds: float, separation: int = 8) -> dict:",
+        "(n, seed, threads, 8, 11)": "(n, seed, threads, separation, 11)",
+    }
+    source = data.decode()
+    for before, after in substitutions.items():
+        R.require(source.count(before) == 1, "separation adaptation anchor is not unique")
+        source = source.replace(before, after)
+    module = types.ModuleType("incidence_separation_adapter")
+    module.__file__ = str(path) + "[two-reviewed-separation-substitutions]"
+    exec(compile(source, module.__file__, "exec"), module.__dict__)
+    module.adapted_source_sha256 = hashlib.sha256(source.encode()).hexdigest()
+    return common, module
+
+
+def command(binary: Path, separation: int) -> list[str]:
+    R.require(separation in SEPARATIONS, "unreviewed separation")
+    args = R.command(binary)
+    R.require(args.count("--s=8") == 1, "legacy separation command changed")
+    return [f"--s={separation}" if arg == "--s=8" else arg for arg in args]
+
+
+def baseline_binding() -> dict:
+    for name, pin in RECEIPTS.items():
+        R.require(R.digest(ROOT / name) == pin, "historical D receipt changed: " + name)
+    build_path, summary_path, protected_path = [ROOT / name for name in RECEIPTS]
+    record = json.loads(build_path.read_text())
+    summary = json.loads(summary_path.read_text())
+    protected = json.loads(protected_path.read_text())
+    R.require(record["schema"] == "mhgp7-mono-meb-build-v1" and record["status"] == "completed",
+              "historical D build was not completed")
+    R.require(record["sources_before"] == record["sources_after"], "historical D sources were unstable")
+    R.require(record["binary"]["path"] == str(BASELINE) and record["binary"]["sha256"] == BASELINE_SHA,
+              "historical D output target mismatch")
+    R.require(BASELINE.stat().st_size == record["binary"]["bytes"] and os.access(BASELINE, os.X_OK),
+              "historical D binary size/permission changed")
+    R.require(R.digest(BASELINE) == BASELINE_SHA, "historical D binary changed")
+    R.require(summary["status"] == "passed" and summary["expected_D_sha256"] == BASELINE_SHA and
+              summary["source_stable"] and summary["tested_binaries_stable"] and
+              summary["build_binding_stable"], "historical D qualification incomplete")
+    R.require(protected[str(BASELINE)] == BASELINE_SHA, "qualified D target mismatch")
+    for name, expected in protected.items():
+        R.require(R.digest(Path(name)) == expected and os.access(Path(name), os.X_OK),
+                  "protected historical CLI changed: " + name)
+    for key in ("compile_database", "cmake_cache"):
+        R.require(R.digest(Path(record[key]["path"])) == record[key]["sha256"],
+                  "historical D build artifact changed: " + key)
+    return {"binary": str(BASELINE), "sha256": BASELINE_SHA, "record": record,
+            "protected_binaries": protected, "receipt_pins": RECEIPTS,
+            "binding": "sealed_historical_D_build_and_323_qualification_not_current_E_sources"}
+
+
+def snapshot(candidate: Path, source: Path, receipt: Path, baseline: dict, common) -> dict:
+    state = R.environment_guard()
+    R.require(os.access(candidate, os.X_OK), "candidate executable permission changed")
+    value = json.loads(receipt.read_text())
+    paths = [Path(__file__), LEGACY, candidate, receipt, Path("/usr/bin/time"), Path("/usr/bin/taskset"),
+             *[ROOT / name for name in RECEIPTS],
+             *[ROOT / "morsehgp3D_v7/bench" / name for name in R.HELPER_PINS],
+             *[Path(name) for name in baseline["protected_binaries"]]]
+    for name in baseline["protected_binaries"]:
+        R.require(os.access(Path(name), os.X_OK), "protected executable permission changed")
+    for record in (value, baseline["record"]):
+        paths.extend(Path(record[key]["path"]) for key in ("compile_database", "cmake_cache"))
+    return {"files": {str(path): R.digest(path) for path in paths},
+            "repository_sources": common.source_snapshot(ROOT), "candidate_sources": R.candidate_sources(source),
+            "loader_injection_nonempty": state}
+
+
+def binding_matches_snapshot(before: dict, baseline: dict, binding: dict, candidate: Path, receipt: Path) -> None:
+    files, value = before["files"], binding["record"]
+    expected = {str(LEGACY): LEGACY_SHA, str(candidate): value["binary"]["sha256"],
+                str(receipt): binding["receipt_sha256"], **baseline["protected_binaries"]}
+    expected.update({str(ROOT / name): pin for name, pin in RECEIPTS.items()})
+    expected.update({str(ROOT / "morsehgp3D_v7/bench" / name): pin for name, pin in R.HELPER_PINS.items()})
+    for record in (value, baseline["record"]):
+        expected.update({record[key]["path"]: record[key]["sha256"] for key in ("compile_database", "cmake_cache")})
+    R.require(all(files.get(name) == pin for name, pin in expected.items()), "binding changed before snapshot")
+    R.require(before["candidate_sources"] == value["sources_after"], "candidate sources changed before snapshot")
+
+
+def classify(record: dict, out: Path, err: Path, usage: Path, separation: int, common, incidence) -> None:
+    R.require(separation in SEPARATIONS, "unreviewed classification separation")
+    incidence.classify(record, out, err, usage, **R.IDENTITY, separation=separation)
+    if record["status"] == "engine_completed":
+        try:
+            record.update(R.completed_extra(out.read_text(), record, common))
+        except Exception:
+            for key in ("digests", "counts", "cardinalities", "silent", "pipeline_ms", "max_rss_kb"):
+                record.pop(key, None)
+            record["status"] = "invalid"
+            raise
+
+
+def decision(records: list[dict], stable: bool, separation: int, error: str | None = None) -> dict:
+    # Reuse the sealed exact-field comparison, with explicit role projection.
+    valid_identity = separation in SEPARATIONS and [r.get("role") for r in records] == ["D", "E"] and all(
+        r.get("separation") == separation for r in records)
+    projected = [dict(row, role="C" if row.get("role") == "D" else "D") for row in records]
+    result = R.decision(projected, stable, error if error else None if valid_identity else "pair identity mismatch")
+    result["separation"] = separation
+    if "times" in result:
+        result["times"] = {"D": result["times"]["C"], "E": result["times"]["D"]}
+        result["ratio_D_over_E"] = result.pop("ratio_C_over_D")
+        result["time_scope"] = "one_fresh_cold_D_then_E_pair_including_digest_no_archive_shared_host_not_SLO_or_statistical_gain"
+    return result
+
+
+def execute(candidate: Path, source: Path, output: Path, receipt: Path | None, separation: int, common, incidence) -> int:
+    R.environment_guard()
+    R.require(separation in SEPARATIONS, "unreviewed separation")
+    if output.exists():
+        raise FileExistsError(output)
+    baseline = baseline_binding()
+    R.require(candidate not in [Path(name).resolve() for name in baseline["protected_binaries"]],
+              "candidate is a protected historical CLI")
+    binding = R.candidate_binding(candidate, source, receipt)
+    R.require(R.CPU in os.sched_getaffinity(0), "CPU6 is outside allowed affinity")
+    before = snapshot(candidate, source, receipt, baseline, common)
+    binding_matches_snapshot(before, baseline, binding, candidate, receipt)
+    repository_before, host_before, started = R.repository_state(), R.host_observation(), R.utc_now()
+    output.mkdir(parents=True, exist_ok=False)
+    common.atomic_json(output / "metadata.json", {
+        "schema": "mhgp7-mono-next-pair-v1", "baseline": baseline, "candidate": binding,
+        "snapshot_before": before, "started_utc": started, "repository_before": repository_before,
+        "host_before": host_before, "identity": R.IDENTITY, "s": separation, "smax": 11,
+        "silent_limits": R.CAPS, "cpu_affinity_requested": [R.CPU], "timeout_per_run_seconds": R.TIMEOUT,
+        "rlimit_as_gib": R.ADDRESS_LIMIT_GIB, "rlimit_as_is_not_physical_RSS_limit": True,
+        "payload_proxy_bytes": R.MEMORY_PROXY, "archive": False, "digest": True, "run_order": ["D", "E"],
+        "fresh_observations_required": True, "historical_timing_reuse": False,
+        "incidence_adapted_source_sha256": incidence.adapted_source_sha256,
+        "strict_single_thread_claim": "separate_product_gate_not_measured_by_this_runner",
+        "effective_locale": {"LC_ALL": "C", "LANG": "C"}, "public_status": "not_claimed", "gcp": "not_used"})
+    records, failure, after = [], None, None
+    common.atomic_json(output / "runs.json", records)
+    try:
+        for role, binary in (("D", BASELINE), ("E", candidate)):
+            R.require(before == snapshot(candidate, source, receipt, baseline, common), "source/helper/binary changed before " + role)
+            out, err, usage = (output / (role + suffix) for suffix in (".out", ".err", ".time"))
+            argv = command(binary, separation)
+            wrapped = ["/usr/bin/taskset", "--cpu-list", str(R.CPU), "/usr/bin/time", "-v", "-o", str(usage), "--", *argv]
+            record = {"role": role, "separation": separation, "status": "invalid", "command": argv,
+                      "wrapped_command": wrapped, "started_utc": R.utc_now(), "ended_utc": None,
+                      "returncode": None, "timed_out": False, "wall_seconds": None,
+                      "stdout": out.name, "stderr": err.name, "usage": usage.name}
+            records.append(record)
+            common.atomic_json(output / "runs.json", records)
+            try:
+                code, censored, elapsed = common.run_process(wrapped, out, err, timeout=R.TIMEOUT, address_limit_gib=R.ADDRESS_LIMIT_GIB)
+                record.update(returncode=code, timed_out=censored, wall_seconds=elapsed)
+                classify(record, out, err, usage, separation, common, incidence)
+            except BaseException as error:
+                record["validation_error"] = f"{type(error).__name__}: {error}"
+                raise
+            finally:
+                record["ended_utc"] = R.utc_now()
+                common.atomic_json(output / "runs.json", records)
+            R.require(before == snapshot(candidate, source, receipt, baseline, common), "source/helper/binary changed during " + role)
+    except BaseException as error:
+        failure = f"{type(error).__name__}: {error}"
+    try:
+        after = snapshot(candidate, source, receipt, baseline, common)
+    except BaseException as error:
+        failure = failure or f"{type(error).__name__}: {error}"
+    repository_after = None
+    try:
+        repository_after = R.repository_state()
+    except BaseException as error:
+        failure = failure or f"{type(error).__name__}: repository state unavailable"
+    # Recheck after final repository metadata collection as well: a late
+    # source/build change cannot remain outside the terminal stable verdict.
+    try:
+        after = snapshot(candidate, source, receipt, baseline, common)
+    except BaseException as error:
+        failure = failure or f"{type(error).__name__}: terminal snapshot unavailable"
+    summary = decision(records, before == after, separation, failure)
+    summary.update(started_utc=started, ended_utc=R.utc_now(),
+                   repository_change_policy="HEAD_or_worktree_changes_recorded_source_snapshot_stability_required")
+    common.atomic_json(output / "repository_after.json", repository_after)
+    common.atomic_json(output / "snapshot_after.json", after)
+    common.atomic_json(output / "summary.json", summary)
+    common.atomic_json(output / "hashes.json", {path.name: common.sha256(path) for path in sorted(output.iterdir()) if path.is_file()})
+    print(json.dumps(summary), flush=True)
+    return 0 if summary["status"] == "paired_equal" else 2 if summary["status"] == "pair_incomplete" else 1
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--candidate", type=Path, required=True)
+    parser.add_argument("--candidate-source-root", type=Path, default=ROOT / "morsehgp3D_v7")
+    parser.add_argument("--candidate-build-receipt", type=Path)
+    parser.add_argument("--separation", type=int, choices=SEPARATIONS, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--execute", action="store_true")
+    args = parser.parse_args(argv)
+    if not args.execute:
+        print(json.dumps({"status": "prepared_not_executed", "writes": False, "engine_runs": 0,
+            "commands": [command(BASELINE, args.separation), command(args.candidate, args.separation)],
+            "run_order": ["D", "E"], "timeout_per_run_seconds": R.TIMEOUT, "rlimit_as_gib": R.ADDRESS_LIMIT_GIB,
+            "cpu": R.CPU, "output_would_be": str(args.output), "fresh_baseline_required": True,
+            "public_status": "not_claimed", "gcp": "not_used"}, indent=2))
+        return 0
+    R.environment_guard()
+    common, incidence = helpers()
+    return execute(args.candidate.resolve(strict=True), args.candidate_source_root.resolve(strict=True),
+                   args.output.resolve(), args.candidate_build_receipt.resolve(strict=True) if args.candidate_build_receipt else None,
+                   args.separation, common, incidence)
+
+
+if __name__ == "__main__":
+    def interrupted(signum, _frame):
+        raise InterruptedError(f"signal {signum}")
+    for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+        signal.signal(sig, interrupted)
+    raise SystemExit(main())

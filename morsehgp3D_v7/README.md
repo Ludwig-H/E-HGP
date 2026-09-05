@@ -114,6 +114,8 @@ Lire [l'état de livraison](PASSATION.md),
 [le mode mono](docs/MODE_MONO.md),
 [la première comparaison s=8/10/12](docs/RESULTATS_MONO_20260904.md),
 [la comparaison mono de la MEB différée](docs/RESULTATS_MONO_MEB_20260905.md),
+[le prétest q2 et ses trois paires mono](docs/RESULTATS_MONO_Q2_20260905.md),
+[la qualification E : 33/33/324 portes](receipts/meb_q2_integrated_20260905/README.md),
 [les résultats G4 à 50k et les primitives GPU](docs/RESULTATS_G4_20260904.md),
 [les limites de résidence et la voie massive](docs/RESIDENCE_MASSIVE.md),
 [l'état courant](audits/ETAT_COURANT.md) et

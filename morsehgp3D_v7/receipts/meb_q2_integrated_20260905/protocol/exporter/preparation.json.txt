@@ -1,0 +1,31 @@
+{
+  "status": "prepared_selftests_passed_no_export",
+  "observed_time": {
+    "current_time": "2026-09-05 06:50:10 UTC"
+  },
+  "builds": 0,
+  "engine_runs": 0,
+  "public_writes": 0,
+  "public_status": "not_claimed",
+  "source_pins_after_tests": "3714f15773c342f63405b27ee110ec22afb3a584ffca147c1fd6860096fb8e03  build/v7_q2_export_20260905/export.py\nd774a6f22ba03b6bcd269ed3ae7bfe1ce0b5002c28ce27c2f07bfe87f1d7735b  build/v7_q2_export_20260905/selftest.py\na5f6fc388c1ff9658c7340079450327b5746af171ff1c1253c50d34d2d529503  build/v7_q2_export_20260905/PLAN.md\n",
+  "runs": [
+    {
+      "command": "taskset --cpu-list 0 python3 -B build/v7_q2_export_20260905/selftest.py",
+      "exit_code": 0,
+      "combined_tool_output": ".....\n----------------------------------------------------------------------\nRan 5 tests in 0.005s\n\nOK\n",
+      "tool_wall_time_seconds": 0.188550799
+    },
+    {
+      "command": "taskset --cpu-list 0 python3 -B -O build/v7_q2_export_20260905/selftest.py",
+      "exit_code": 0,
+      "combined_tool_output": ".....\n----------------------------------------------------------------------\nRan 5 tests in 0.005s\n\nOK\n",
+      "tool_wall_time_seconds": 0.188300497
+    },
+    {
+      "command": "taskset --cpu-list 0 python3 -B build/v7_q2_export_20260905/export.py",
+      "exit_code": 0,
+      "combined_tool_output": "{\n  \"status\": \"prepared_not_executed\",\n  \"writes\": false,\n  \"engine_runs\": 0,\n  \"builds\": 0,\n  \"destination\": \"/workspaces/E-HGP/morsehgp3D_v7/receipts/meb_q2_integrated_20260905\",\n  \"required_closed_qualifications\": {\n    \"release\": 33,\n    \"sanitized\": 33,\n    \"full\": 324\n  },\n  \"requires_separate_GO_after_qualifications_closed\": true\n}\n",
+      "tool_wall_time_seconds": 0.121870931
+    }
+  ]
+}

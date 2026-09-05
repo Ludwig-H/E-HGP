@@ -1,0 +1,195 @@
+--- a/morsehgp3D_v7/src/forest/silent_incidence.hpp
++++ b/morsehgp3D_v7/src/forest/silent_incidence.hpp
+@@ -116,6 +116,7 @@
+ // Private per-thread observations; absent from production and public Stats.
+ // These count logical materializations, not retained machine instructions.
+ struct MebMaterializationForTests {
++  u64 q2_rejected = 0, q2_materialized = 0, q2_rejected_materialized = 0;
+   u64 q3_rejected = 0, q4_rejected = 0;
+   u64 q3_materialized = 0, q4_materialized = 0;
+   u64 q3_rejected_materialized = 0, q4_rejected_materialized = 0;
+@@ -176,8 +177,35 @@
+         if (!charge(out.stats.meb_supports, caps.max_meb_supports, "silent_meb_support_budget")) return false;
+         const P3& pa = ix.upos[(size_t)sites[a]];
+         const P3& pb = ix.upos[(size_t)sites[b]];
+-        found = accept(q2_ball_key(pa, pb), promote_level(q2_exact_level(p3_norm2(p3_sub(pa, pb)))),
+-                       {sites[a], sites[b], 0, 0}, 2);
++        bool contains = true;
++        for (size_t i = 0; i < n; ++i) {
++          const P3& z = ix.upos[(size_t)sites[i]];
++          // Exact q2 power. Each difference is in [-65535,65535]; all
++          // products and partial sums fit i64 (absolute sum < 2^34).
++          const i64 power = p3_dot(p3_sub(z, pa), p3_sub(z, pb));
++          if (MHGP7_MUTANT("silent-meb-q2-reject-shell") ? power >= 0 : power > 0) {
++            contains = false;
++            break;
++          }
++        }
++        const auto materialize = [&]() {
++#if defined(MHGP7_TESTING)
++          auto& observed = meb_materialization_for_tests();
++          ++observed.q2_materialized;
++          if (!contains) ++observed.q2_rejected_materialized;
++#endif
++          return std::pair<BallKey, ExactLevel>{q2_ball_key(pa, pb),
++              promote_level(q2_exact_level(p3_norm2(p3_sub(pa, pb))))};
++        };
++        if (!contains) {
++#if defined(MHGP7_TESTING)
++          ++meb_materialization_for_tests().q2_rejected;
++          if (MHGP7_MUTANT("silent-meb-eager-materialization")) (void)materialize();
++#endif
++          continue;
++        }
++        const auto built = materialize();
++        found = accept(built.first, built.second, {sites[a], sites[b], 0, 0}, 2);
+       }
+     for (size_t a = 0; a < n && !found; ++a)
+       for (size_t b = a + 1; b < n && !found; ++b)
+--- a/morsehgp3D_v7/src/core/mutants.hpp
++++ b/morsehgp3D_v7/src/core/mutants.hpp
+@@ -133,7 +133,7 @@
+     "reduced-latent-parent", "reduced-drop-materialization",
+     "axis-argmin-floor-only", "axis-argmin-ceil-always", "axis-argmin-no-clip",
+     "axis-argmin-narrow-coefficient", "axis-argmin-max-min",
+-    "silent-meb-q3-reject-shell", "silent-meb-q4-reject-shell",
++    "silent-meb-q2-reject-shell", "silent-meb-q3-reject-shell", "silent-meb-q4-reject-shell",
+     "silent-meb-eager-materialization",
+ };
+ 
+--- a/morsehgp3D_v7/tests/meb_lazy_gate.cpp
++++ b/morsehgp3D_v7/tests/meb_lazy_gate.cpp
+@@ -114,8 +114,40 @@
+     for (size_t j=0;j<n;++j) pts.push_back(P3{(i64)((next()>>32)&65535),(i64)((next()>>32)&65535),(i64)((next()>>32)&65535)});
+     all.push_back(make(pts));
+   }
++  check(all.size()==168,"fixture.original_cardinality");
++  all.push_back(make({{0,0,0},{65535,65535,0},{65535,0,0}})); // foreign q2 shell
++  all.push_back(make({{0,0,0},{0,0,1},{65535,65535,65535}})); // rejected q2 > i32
+   return all;
+ }
++u64 q2_identities=0,q2_positive=0,q2_negative=0,q2_zero=0,q2_foreign_zero=0,profile_refusals=0;
++i64 checked_q2_power(const P3& a,const P3& b,const P3& z) {
++  check(p3_in_profile(a)&&p3_in_profile(b)&&p3_in_profile(z),"q2_power.profile");
++  const i64 power=p3_dot(p3_sub(z,a),p3_sub(z,b));
++  check(power>=-12884508675LL&&power<=12884508675LL,"q2_power.i64_bound");
++  check((i128)power==q2_ball_key(a,b).power(z),"q2_power.exact_identity");
++  ++q2_identities;q2_positive+=power>0;q2_negative+=power<0;q2_zero+=power==0;
++  q2_foreign_zero+=(power==0&&z!=a&&z!=b);
++  return power;
++}
++void q2_power_fixtures() {
++  // Zero-radius pairs are algebraic checks only; MEB inputs remain distinct.
++  std::vector<P3> corners;
++  for(int x=0;x<2;++x)for(int y=0;y<2;++y)for(int z=0;z<2;++z)
++    corners.push_back({x*65535LL,y*65535LL,z*65535LL});
++  for(const auto& a:corners)for(const auto& b:corners)for(const auto& z:corners)
++    (void)checked_q2_power(a,b,z);
++  check(checked_q2_power({0,0,0},{0,0,1},{65535,65535,65535})==12884443140LL,
++        "q2_power.positive_exceeds_i32");
++  check(checked_q2_power({0,0,0},{65535,65535,65535},{32767,32767,32767})==-3221127168LL,
++        "q2_power.negative_exceeds_i32");
++  for(const P3 bad:std::array<P3,2>{{{-1,0,0},{65536,0,0}}}) {
++    check(!p3_in_profile(bad),"q2_power.invalid_position");
++    check(!build_cloud_index(std::vector<P3>{{0,0,0},bad}).valid,"q2_power.invalid_index_refused");
++    ++profile_refusals; // No predicate is evaluated outside its domain.
++  }
++  check(q2_identities==514&&q2_positive>0&&q2_negative>0&&q2_zero>0&&
++        q2_foreign_zero>0&&profile_refusals==2,"q2_power.nonvacuity");
++}
+ bool stats_equal(const SilentIncidenceStats& a,const SilentIncidenceStats& b) {
+   return a.core_records==b.core_records && a.core_facets==b.core_facets &&
+     a.facets_with_two_intruders==b.facets_with_two_intruders && a.chain_steps==b.chain_steps &&
+@@ -146,6 +178,7 @@
+ }
+ 
+ std::string active_mutant;
++u64 logical_reject2=0,built2=0,rejected_built2=0;
+ u64 logical_reject3=0, logical_reject4=0, built3=0, built4=0, rejected_built3=0, rejected_built4=0;
+ u8 mismatch_reference_q=0;
+ bool mismatch_reference_complete=false;
+@@ -154,11 +187,17 @@
+   SilentIncidenceLimits caps;caps.max_meb_supports=cap;
+   SilentIncidenceResult ra,rb;
+   silent_detail::LocalBall ba,bb;
++  // Compare output preservation on cap/refusal, not only zero initialization.
++  ba.key=bb.key=BallKey{17,{19,23,29},31};
++  ba.level=bb.level=ExactLevel{{37,41,43},47};
++  ba.q=bb.q=9;ba.support=bb.support={53,59,61,67};
+   const bool oka=reference_miniball(f.index,caps,ra,f.sites,f.pts.size(),&ba);
+   silent_detail::meb_materialization_for_tests()={};
+   silent_detail::Builder b(f.index,direct,caps,&rb);
+   const bool okb=b.miniball(f.sites,f.pts.size(),&bb);
+   const auto observed=silent_detail::meb_materialization_for_tests();
++  logical_reject2+=observed.q2_rejected;built2+=observed.q2_materialized;
++  rejected_built2+=observed.q2_rejected_materialized;
+   logical_reject3+=observed.q3_rejected;logical_reject4+=observed.q4_rejected;
+   built3+=observed.q3_materialized;built4+=observed.q4_materialized;
+   rejected_built3+=observed.q3_rejected_materialized;rejected_built4+=observed.q4_rejected_materialized;
+@@ -183,19 +222,28 @@
+     (unsigned long long)q2,(unsigned long long)q3,(unsigned long long)q4,(unsigned long long)logical_reject3,
+     (unsigned long long)logical_reject4,(unsigned long long)built3,(unsigned long long)built4,
+     (unsigned long long)rejected_built3,(unsigned long long)rejected_built4,(unsigned)mismatch_reference_q,(int)mismatch_reference_complete);
++  std::printf("meb_lazy_q2 logical_reject2=%llu materialized2=%llu rejected_materialized2=%llu identities=%llu positive=%llu negative=%llu zero=%llu foreign_zero=%llu profile_refusals=%llu\n",
++    (unsigned long long)logical_reject2,(unsigned long long)built2,(unsigned long long)rejected_built2,
++    (unsigned long long)q2_identities,(unsigned long long)q2_positive,(unsigned long long)q2_negative,
++    (unsigned long long)q2_zero,(unsigned long long)q2_foreign_zero,(unsigned long long)profile_refusals);
+ }
+ }
+ int main(int argc,char** argv) {
+   if(argc==2&&std::string(argv[1]).starts_with("--mutant="))active_mutant=std::string(argv[1]).substr(9);
+   else if(argc!=1)return 2;
+   if(argc==2&&active_mutant.empty())return 2;
+-  if(!active_mutant.empty()&&active_mutant!="silent-meb-q3-reject-shell"&&
++  if(!active_mutant.empty()&&active_mutant!="silent-meb-q2-reject-shell"&&active_mutant!="silent-meb-q3-reject-shell"&&
+      active_mutant!="silent-meb-q4-reject-shell"&&active_mutant!="silent-meb-eager-materialization")return 2;
+   if(!active_mutant.empty()) {
+     if(!mutants_enable(active_mutant))return 2;
+   }
+   try {
++    q2_power_fixtures();
+     const auto fs=fixtures();
++    if(active_mutant=="silent-meb-q2-reject-shell") {
++      one(fs[0],1000000,true);
++      throw std::runtime_error("mutant_survived.q2");
++    }
+     if(active_mutant=="silent-meb-q3-reject-shell") {
+       one(fs[1],1000000,true);
+       throw std::runtime_error("mutant_survived.q3");
+@@ -211,9 +259,11 @@
+       one(reversed,1000000);
+     }
+     check(q2>0&&q3>0&&q4>0&&degenerate>0&&capped>0&&saved_q3>0&&saved_q4>0&&
+-          logical_reject3>0&&logical_reject4>0&&built3>0&&built4>0,"nonvacuity");
+-    if(rejected_built3||rejected_built4) {
+-      check(active_mutant=="silent-meb-eager-materialization"&&rejected_built3>0&&rejected_built4>0,
++          logical_reject2>0&&logical_reject3>0&&logical_reject4>0&&built2>0&&built3>0&&built4>0,"nonvacuity");
++    check(fs.size()==170&&cases==11816&&success==668&&degenerate==12&&capped==11136,
++          "nonvacuity.fixed_differential_floor");
++    if(rejected_built2||rejected_built3||rejected_built4) {
++      check(active_mutant=="silent-meb-eager-materialization"&&rejected_built2>0&&rejected_built3>0&&rejected_built4>0,
+             "unrecognized.cost_divergence");
+       report("mutant_killed","logical_rejected_materialization");return 4;
+     }
+@@ -221,7 +271,8 @@
+     report("passed","none");return 0;
+   }catch(const std::exception& e) {
+     const bool causal=std::strcmp(e.what(),"differential.status_reason")==0&&mismatch_reference_complete&&
+-      ((active_mutant=="silent-meb-q3-reject-shell"&&mismatch_reference_q==3&&logical_reject3>0)||
++      ((active_mutant=="silent-meb-q2-reject-shell"&&mismatch_reference_q==2&&logical_reject2>0)||
++       (active_mutant=="silent-meb-q3-reject-shell"&&mismatch_reference_q==3&&logical_reject3>0)||
+        (active_mutant=="silent-meb-q4-reject-shell"&&mismatch_reference_q==4&&logical_reject4>0));
+     report(causal?"mutant_killed":"failed",e.what());return causal?4:1;
+   }
+--- a/morsehgp3D_v7/CMakeLists.txt
++++ b/morsehgp3D_v7/CMakeLists.txt
+@@ -990,6 +990,9 @@
+ target_include_directories(mhgp7_meb_lazy_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+ mhgp7_gate(mhgp7_meb_lazy 0 mhgp7_meb_lazy_gate
+   EXPECT_PREFIX "meb_lazy_gate=passed mutant=none divergence=none" TIMEOUT 30)
++mhgp7_gate(mhgp7_meb_lazy_q2_reject_shell 4 mhgp7_meb_lazy_gate
++  ARGS --mutant=silent-meb-q2-reject-shell
++  EXPECT_PREFIX "meb_lazy_gate=mutant_killed mutant=silent-meb-q2-reject-shell divergence=differential.status_reason" TIMEOUT 30)
+ mhgp7_gate(mhgp7_meb_lazy_q3_reject_shell 4 mhgp7_meb_lazy_gate
+   ARGS --mutant=silent-meb-q3-reject-shell
+   EXPECT_PREFIX "meb_lazy_gate=mutant_killed mutant=silent-meb-q3-reject-shell divergence=differential.status_reason" TIMEOUT 30)

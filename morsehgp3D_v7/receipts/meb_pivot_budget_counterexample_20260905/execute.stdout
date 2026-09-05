@@ -1,0 +1,3 @@
+counter_budget_case limit=4 reference_supports=4 proposal_candidates=5 terminal_equal=1 sentinel_preserved=0 reference_ok=1 reason=complete_relative_to_supplied_regular_direct_catalogue
+counter_budget_case limit=1 reference_supports=1 proposal_candidates=5 terminal_equal=1 sentinel_preserved=1 reference_ok=0 reason=silent_meb_support_budget
+counter_budget=counterexample_confirmed cases=2 proposition_candidates=5 reference_ordinal=4 public_status=not_claimed

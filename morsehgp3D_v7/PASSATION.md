@@ -44,6 +44,33 @@ est `build/v7_meb_qualification/mhgp7` ; les anciens CLI C dans
 `build/v7/` et `build/v7_c_qualification/` sont conservés comme témoins
 historiques, pas présentés comme le binaire du nouveau delta.
 
+Le delta E étend le [prétest entier à q2](docs/OPTIMISATION_MEB_Q2.md),
+sans modifier l'ordre, les charges ni les contrôles finaux. La
+[contrelecture rationnelle indépendante](audits/ADDENDUM_MEB_Q2_E_20260905.md)
+confirme sa conservation locale. Les
+[trois paires mono fraîches D/E](docs/RESULTATS_MONO_Q2_20260905.md)
+à s=8,10,12 retrouvent les mêmes objets et comptes, avec une baisse totale
+observée de 2,55 %, 0,04 % et 2,98 % respectivement. Une paire par s sur
+hôte partagé ne qualifie ni un gain statistique ni un meilleur s ; le
+défaut 8 reste inchangé. Le CLI E est
+`build/v7_next_q2_qualification/mhgp7`, SHA `df751533…` ; ni les témoins
+C/D ni leurs qualifications historiques ne lui sont réattribués.
+
+La [qualification E intégrée](receipts/meb_q2_integrated_20260905/README.md)
+ferme les 33 portes ciblées Release, les 33 portes ASan/UBSan et les
+324 portes Release complètes, toutes exécutées fraîchement, sans échec
+ni saut. Le build complet est incrémental (235,36 s), suivi de 627,84 s
+CTest ; ses 140 sources et 37 binaires restent stables. Les inventaires,
+JUnit et journaux intégraux sont contrôlés ; la fraîcheur de LastTest est
+ancrée dans le même système de fichiers, pas supposée à partir du seul
+horodatage UTC. Les premiers faux rejets du harnais restent publiés.
+
+La [proposition MEB par pivots et ses budgets](docs/PROPOSITION_MEB_ET_BUDGETS.md)
+reste hors produit. Un contre-exemple compilé montre que l'ordinal de la
+référence ne borne pas le travail physique d'une proposition ; une future
+route devra charger ce travail séparément et prospectivement. Le candidat
+de pile inline des témoins reste également séparé du binaire E mesuré.
+
 `verified_events_only` reste le payload par défaut. La route
 `--complete-incidences` porte `normalized_horizontal_h0_candidate` et refuse
 les dégénérescences pertinentes non prises en charge. `--require-exact`
@@ -65,6 +92,8 @@ qualifié exact derrière cette option.
 | [MEB D ciblée](receipts/meb_lazy_integrated_20260905/README.md) | 32/32 portes fraîches Release et 32/32 ASan/UBSan | Deux builds isolés ; Γ/API/archive/mono/refus et sept nouvelles portes ; aucune erreur sanitizer masquée |
 | [Release D complète](receipts/meb_full_release_20260905/README.md) | 323/323 portes CPU fraîches, zéro échec/skip | Build incrémental distinct de C ; D, sources et 37 binaires stables ; pas de résultat C réutilisé |
 | [Mono C/D complétée](docs/RESULTATS_MONO_MEB_20260905.md) | Deux runs achevés : 225,75 s puis 172,67 s, mêmes objets et comptes | n=8000 uniforme étendu, s=8, tour candidate entière 1..10 ; baisse observée 23,51 %, pas de SLO |
+| [Mono D/E q2 s=8/10/12](receipts/meb_q2_mono_20260905/README.md) | Six runs achevés, trois paires égales ; digests et cardinalités identiques entre s | n=8000 étendu, tour candidate 1..10 ; baisse totale observée 0,04–2,98 %, pas de gain statistique ni de SLO |
+| [Qualification E intégrée](receipts/meb_q2_integrated_20260905/README.md) | 33/33 ciblées Release, 33/33 ASan/UBSan, 324/324 complètes ; zéro échec/skip | Tests frais, build complet incrémental, 140 sources et 37 binaires stables ; aucun résultat D réattribué |
 | [Mono B/C s=8/10/12](docs/RESULTATS_MONO_20260904.md) | Six runs achevés, mêmes objets ; C 105,1–105,9 s contre B 125,5–128,0 s | n=8000 uniforme, tour entière 1..10, objet Gabriel ; un seul couple par s, pas de SLO |
 | [Campagne locale v6/v7 A](receipts/local_paired_20260904/summary.json) | 15 paires achevées identiques ; cinq censures dans trois autres paires | 36 tentatives à 8 threads, n=8k/16k/32k ; campagne globale `invalid`, aucun SLO |
 | [Complétion locale](receipts/incidence_local_20260904/summary.json) | Six refus de domaine, zéro succès moteur | Observations achevées, pas capacité exacte à 8k/16k/32k |
@@ -165,6 +194,13 @@ est ensuite entièrement vert : construction, documentation, 316/316 portes
 CPU (780,55 s CTest), banc d'incidences et garde-fous cloud sans accès GCP.
 Il qualifie ce commit C, pas rétroactivement les échecs précédents ni
 automatiquement le nouveau delta D et ses sept portes supplémentaires.
+
+Le [run D e6d33698](https://github.com/Ludwig-H/E-HGP/actions/runs/33933790563)
+est lui aussi terminé avec succès le 5 septembre à 00:59:02 UTC : les
+étapes de build, validation documentaire, contrats CPU, banc d'incidences
+et garde-fous sans accès cloud sont vertes. Ce constat est une lecture
+distincte de GitHub ; il ne remplace pas les reçus locaux D et ne qualifie
+pas automatiquement un delta ultérieur.
 
 Contrôles avant le premier commit : registre (20 phases), liste blanche
 des workflows GCP et corpus documentaire historique (259 fichiers) passent.
