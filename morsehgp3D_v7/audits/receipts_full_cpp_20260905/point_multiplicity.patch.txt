@@ -1,0 +1,11 @@
+--- a/src/forest/full_certificate.hpp
++++ b/src/forest/full_certificate.hpp
+@@ -296,7 +296,7 @@
+       }
+     }
+     std::sort(out.values.begin(), out.values.end());
+-    out.values.erase(std::unique(out.values.begin(), out.values.end()), out.values.end());
++    // Audit mutant: retain repeated point references in the returned union.
+     out.status = FullCertificateStatus::kOk;
+     out.reason = "structural_only";
+   } catch (const std::bad_alloc&) {

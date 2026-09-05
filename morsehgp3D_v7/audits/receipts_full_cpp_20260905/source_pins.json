@@ -1,0 +1,74 @@
+{
+  "schema": "mhgp7-full-cpp-input-pins-v1",
+  "source_commit": "f4c0734c53a18d1e2de477ca09584c8f15c938f9",
+  "captured_utc": "2026-09-05T14:42:19.349406+00:00",
+  "bridge_sha256": "66369303d159de54edaaaf8288fea80451809fcdf0bdd94edb2a4528feb4117c",
+  "sources": [
+    {
+      "path": "morsehgp3D_v7/src/forest/full_certificate.hpp",
+      "sha256": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+      "capture": "receipts_full_cpp_20260905/source/morsehgp3D_v7/src/forest/full_certificate.hpp"
+    },
+    {
+      "path": "morsehgp3D_v7/src/lanes/keys.hpp",
+      "sha256": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+      "capture": "receipts_full_cpp_20260905/source/morsehgp3D_v7/src/lanes/keys.hpp"
+    },
+    {
+      "path": "morsehgp3D_v7/src/core/device.hpp",
+      "sha256": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37",
+      "capture": "receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/device.hpp"
+    },
+    {
+      "path": "morsehgp3D_v7/src/core/intmath.hpp",
+      "sha256": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+      "capture": "receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/intmath.hpp"
+    },
+    {
+      "path": "morsehgp3D_v7/src/core/types.hpp",
+      "sha256": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+      "capture": "receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/types.hpp"
+    },
+    {
+      "path": "morsehgp3D_v7/src/lanes/level.hpp",
+      "sha256": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c",
+      "capture": "receipts_full_cpp_20260905/source/morsehgp3D_v7/src/lanes/level.hpp"
+    },
+    {
+      "path": "morsehgp3D_v7/src/core/wide.hpp",
+      "sha256": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85",
+      "capture": "receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/wide.hpp"
+    },
+    {
+      "path": "morsehgp3D_v7/src/core/mutants.hpp",
+      "sha256": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5",
+      "capture": "receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/mutants.hpp"
+    }
+  ],
+  "mutants": [
+    {
+      "name": "closed_side",
+      "target": "src/forest/full_certificate.hpp",
+      "original_sha256": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+      "mutated_sha256": "61ac83f459adaf1bddee361412a5a6b59e04992d31fc8a02a06de4f3c7fc8bb9",
+      "patch": "closed_side.patch.txt"
+    },
+    {
+      "name": "retained_parent",
+      "target": "src/forest/full_certificate.hpp",
+      "original_sha256": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+      "mutated_sha256": "a4e0ffdd21a9fc12bb373ae8f0c461e5358d934e55a63094d53e560b62a5cc5a",
+      "patch": "retained_parent.patch.txt"
+    },
+    {
+      "name": "point_multiplicity",
+      "target": "src/forest/full_certificate.hpp",
+      "original_sha256": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+      "mutated_sha256": "7fe4e5920ee1055f65ce05ea89a7ec57890e19090ab08488946ff95744bd9c11",
+      "patch": "point_multiplicity.patch.txt"
+    }
+  ],
+  "scope": "Literal product snapshot and three private mutations; production files are never changed",
+  "public_status": "not_claimed",
+  "gcp": "not_used"
+}

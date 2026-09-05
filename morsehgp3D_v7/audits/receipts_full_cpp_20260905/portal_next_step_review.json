@@ -1,0 +1,109 @@
+{
+  "schema": "mhgp7_full_portal_next_step_math_review_v1",
+  "date_utc": "2026-09-05",
+  "frame": {
+    "phase": "exploration_v7_hors_registre",
+    "backend": "cpu_reference",
+    "profile": "quantized_u16_input_only",
+    "mode": "audit_independant_math_and_architecture",
+    "public_status": "not_claimed"
+  },
+  "verdict": "proposed_shortcut_mathematically_valid_under_stated_premises",
+  "scope": "mathematical_review_of_announced_next_step_only",
+  "coordination": {
+    "path": "audits/COORDINATION_MORSEHGP3D_V7.md",
+    "whole_sha256_as_read": "98202657ee020ab5477104a2decc64f04322903da86e3410be13daa705ab820e",
+    "section_heading": "## Raccord suivant : FULL relatif aux catalogues Gabriel fournis",
+    "start_line": 658,
+    "section_sha256_as_read": "9c3c3a76dd8a49a5d7c0d3a6edf78b0ca1c48d64e363bbdc4f1bd7431f554b41",
+    "section_text_exact": "## Raccord suivant : FULL relatif aux catalogues Gabriel fournis\n\nReprise utilisateur « Continue » après `f4c0734c`. Nous préparons un\nconstructeur horizontal séparé dans `src/forest/full_gabriel.hpp`, sans\nmodifier les sources F ni activer de CLI. Il consomme deux catalogues\nGabriel complets et réguliers sous autorité extérieure : cardinal K pour\nles minima, K+1 pour les connexions ; points explicites à zéro pour K1,\net minimum terminal conservé à K=n.\n\nPlan : traiter leurs niveaux atomiquement, conserver des alias de facettes\nvers des nœuds historiques et les successeurs de ces nœuds. Seuls les\nretraits essentiels (au plus quatre) demandent une racine pré-lot ; les\nretraits d'intérieurs sont installés dans le lot sans MEB supplémentaire.\nUne facette stricte inconnue doit avoir au moins deux intrus : sinon le\nminimum ou l'incidence directe antérieure manque. Pour deux intrus certifiés\nz,w, la première coface F+z réutilise la MEB de F et descend directement\npar remplacement d'un essentiel par w. Les étapes suivantes vérifient la\ndécroissance stricte et le bord. Un terminal direct antérieur conserve son\nancre même si son lot n'a publié aucune fusion ; cette ancre est normalisée\navant consommation. Aucun cœur global ni journal de cofaces silencieuses\nn'est construit. Le premier raccord n'aura pas de cache de cofaces de\ndescente : seuls les alias des facettes consommées sont conservés.\n\nNous réutilisons uniquement `Builder::miniball` et `Builder::intruders`\nde F avec leur état privé persistant, jamais `run()` ; les caps et compteurs\ndu nouveau calendrier seront distincts. Les tests construisent le catalogue\npar génération/census produit, puis le confrontent à un oracle FULL borné\nOBig indépendant qui active aussi les facettes isolées. Merci de signaler\ntoute objection au protocole pré-lot ou à l'économie de la première étape.\nPas de benchmark lourd, pas de GCP ; index libre jusqu'à annonce.\n",
+    "whole_sha256_at_close": "98202657ee020ab5477104a2decc64f04322903da86e3410be13daa705ab820e",
+    "section_sha256_at_close": "9c3c3a76dd8a49a5d7c0d3a6edf78b0ca1c48d64e363bbdc4f1bd7431f554b41"
+  },
+  "sources": [
+    {
+      "path": "morsehgp3D_v7/audits/receipts_gabriel_20260905/full_proof_review.md",
+      "sha256_as_read": "921b438f06ae5e6599536c01c27c1574c8c115d046fcf0defbe3124323fecf3d",
+      "sha256_at_close": "921b438f06ae5e6599536c01c27c1574c8c115d046fcf0defbe3124323fecf3d"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/receipts_gabriel_20260905/level_proof_review.md",
+      "sha256_as_read": "6c490b57c167aa3eaedfec28ec922c2e73963aafa4bfb113e266017490abec20",
+      "sha256_at_close": "6c490b57c167aa3eaedfec28ec922c2e73963aafa4bfb113e266017490abec20"
+    },
+    {
+      "path": "morsehgp3D_v7/docs/CONTRAT_CERTIFICAT_FULL.md",
+      "sha256_as_read": "085b7cf651060beed475bc908caface51181e134eb897f8e527b90a8a59b1e13",
+      "sha256_at_close": "085b7cf651060beed475bc908caface51181e134eb897f8e527b90a8a59b1e13"
+    },
+    {
+      "path": "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "sha256_as_read": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76",
+      "lines_read": "289-335 and call context 403-448",
+      "role": "historical helper intruders preserves full external shell check while storing at most two witnesses; no new helper qualification"
+    }
+  ],
+  "closed_lemmas": [
+    {
+      "id": "only_essential_removals_strict",
+      "claim": "for regular direct D, deleting essential u gives beta(D-u)<beta(D); deleting an interior preserves the complete essential support and its MEB, so the facet is new in the current lot"
+    },
+    {
+      "id": "unknown_strict_facet_has_two_intruders",
+      "premises": [
+        "all earlier minima and direct cofaces processed",
+        "no forgotten alias without equivalent resolver",
+        "current facet level b strictly below batch a",
+        "MEB support-shell regular and global census complete"
+      ],
+      "claim": "zero intruders implies prior known minimum; one implies prior direct F+z; therefore an unknown valid facet has at least two"
+    },
+    {
+      "id": "first_step_reuse",
+      "premises": [
+        "z and w distinct strict intruders outside F",
+        "u essential in support U of F",
+        "B(F) certified and external shell census completed"
+      ],
+      "claim": "B(F+z)=B(F), same level and support; R=(F-u)+z+w has cardinal K+1 and beta(R)<beta(F)<a"
+    },
+    {
+      "id": "component_transport",
+      "claim": "F connects through Q=F+z to R by common facet (F-u)+z; both cofaces precede a, so subsequent descent resolves the correct strict-prebatch component"
+    },
+    {
+      "id": "terminal_authority",
+      "claim": "strict descent over finite coface family terminates on the regular domain; terminal direct must match supplied catalogue identity and level, then its historical anchor is normalized at a-minus even when its original direct event emitted no merge"
+    }
+  ],
+  "implementation_cautions_not_defects": [
+    "intruders count=2 is saturated and does not certify exactly two total intruders",
+    "regularity of supplied direct catalogues does not imply regularity of all visited nongabriel MEBs",
+    "do not transfer the successful MEB or shell census of F to the changed ball of R",
+    "charge physical work and retain per-order helper state even for cofaces omitted from the final journal",
+    "bound of four strict facet lookups per direct coface does not bound total descent length or MEB work"
+  ],
+  "not_qualified": [
+    "future full_gabriel.hpp implementation",
+    "future gate results",
+    "geometry catalogue completeness from supplied bytes alone",
+    "F or E path-domain transfer",
+    "performance"
+  ],
+  "execution": {
+    "builds": 0,
+    "component_runs": 0,
+    "benchmarks": 0,
+    "product_writes": 0,
+    "git_mutations": 0,
+    "gcp_used": false
+  },
+  "note": {
+    "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/portal_next_step_review.md",
+    "sha256": "07ec591547c8b38776b1036234d94d9d866cdc33565cdfd5b404e7712aabe901"
+  },
+  "link_checks": {
+    "count": 5,
+    "all_exist": true
+  }
+}

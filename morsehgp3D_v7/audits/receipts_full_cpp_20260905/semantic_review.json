@@ -1,0 +1,257 @@
+{
+  "schema": "mhgp7_full_certificate_semantic_review_v1",
+  "closed_at_utc": "2026-09-05T14:43:53.844417+00:00",
+  "frame": {
+    "phase": "exploration_v7_hors_registre",
+    "backend": "cpu_reference",
+    "profile": "quantized_u16_input_only",
+    "mode": "audit_independant_math_and_architecture",
+    "public_status": "not_claimed"
+  },
+  "commit": "f4c0734c53a18d1e2de477ca09584c8f15c938f9",
+  "authority": "independent_static_review_of_structural_only_component",
+  "verdict": "no_concrete_defect_identified_in_declared_structural_contract",
+  "execution": {
+    "component_builds": 0,
+    "component_runs": 0,
+    "benchmarks": 0,
+    "product_writes": 0,
+    "git_mutations": 0,
+    "gcp_used": false,
+    "checks_performed": [
+      "read_sources",
+      "compare_source_bytes_to_commit",
+      "check_source_hashes_at_close",
+      "check_note_links"
+    ]
+  },
+  "sources": [
+    {
+      "path": "morsehgp3D_v7/src/forest/full_certificate.hpp",
+      "sha256_as_read": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+      "sha256_at_close": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+      "equals_commit_bytes": true
+    },
+    {
+      "path": "morsehgp3D_v7/tests/full_certificate_gate.cpp",
+      "sha256_as_read": "17f5e2bafecc66556bcc1cfbfc51ed20e47cca82716ad0f2e34b1e5994a266a7",
+      "sha256_at_close": "17f5e2bafecc66556bcc1cfbfc51ed20e47cca82716ad0f2e34b1e5994a266a7",
+      "equals_commit_bytes": true
+    },
+    {
+      "path": "morsehgp3D_v7/docs/CONTRAT_CERTIFICAT_FULL.md",
+      "sha256_as_read": "085b7cf651060beed475bc908caface51181e134eb897f8e527b90a8a59b1e13",
+      "sha256_at_close": "085b7cf651060beed475bc908caface51181e134eb897f8e527b90a8a59b1e13",
+      "equals_commit_bytes": true
+    },
+    {
+      "path": "morsehgp3D_v7/src/lanes/keys.hpp",
+      "sha256_as_read": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+      "sha256_at_close": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+      "equals_commit_bytes": true
+    },
+    {
+      "path": "morsehgp3D_v7/src/lanes/level.hpp",
+      "sha256_as_read": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c",
+      "sha256_at_close": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c",
+      "equals_commit_bytes": true
+    },
+    {
+      "path": "morsehgp3D_v7/src/core/wide.hpp",
+      "sha256_as_read": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85",
+      "sha256_at_close": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85",
+      "equals_commit_bytes": true
+    },
+    {
+      "path": "morsehgp3D_v7/src/core/types.hpp",
+      "sha256_as_read": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+      "sha256_at_close": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+      "equals_commit_bytes": true
+    }
+  ],
+  "constructor_receipts_read": [
+    {
+      "path": "morsehgp3D_v7/receipts/full_certificate_20260905/README.md",
+      "sha256": "5cf355681c437b3c1187afb7f8500bfc8512e5bd9b6fb097c5ddd8e6cabfa93f",
+      "role": "constructor_claims_read_only_not_rerun"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_certificate_20260905/qualification.json",
+      "sha256": "2b702cb5f8e4bd3aeab2541e7084624afcffefb7db4afa974ba5122d74191c68",
+      "role": "constructor_claims_read_only_not_rerun"
+    }
+  ],
+  "closed_arguments": [
+    {
+      "id": "strict_atomic_parents",
+      "source_lines": "full_certificate.hpp:179-198",
+      "argument": "all referenced IDs are pre-batch live roots; all are consumed before installation; shared parents, current-batch references and reused ancestors are rejected"
+    },
+    {
+      "id": "abstract_identity",
+      "source_lines": "full_certificate.hpp:235-245,298-299",
+      "argument": "roots use dense node identities; point deduplication is local to a coverage result and cannot coalesce distinct roots"
+    },
+    {
+      "id": "wide_rational_order",
+      "source_lines": "level.hpp:51-58; wide.hpp:44-60",
+      "argument": "nonnegative numerator <2^192 and positive denominator <2^127 give cross products <2^319; partial-word sums fit u128"
+    },
+    {
+      "id": "count_and_csr_safety",
+      "source_lines": "full_certificate.hpp:92-95,130-169,194-198",
+      "argument": "prospective additions bounded by u64 caps, size_t checks before casts, each CSR range lies within bounded parents arena"
+    },
+    {
+      "id": "coverage_scheduling_cap",
+      "source_lines": "full_certificate.hpp:265-295",
+      "argument": "visited+pending.size<=max_nodes is preserved by pop/visit and checked prospective scheduling, preventing unsigned subtraction underflow"
+    },
+    {
+      "id": "transaction_and_move",
+      "source_lines": "full_certificate.hpp:49-79,105-116,171-214",
+      "argument": "private temporary arenas discarded on refusal; no-copy/noexcept swaps transfer all arenas and invalidate source; readers reject invalid moved-from values"
+    },
+    {
+      "id": "terminal_order",
+      "source_lines": "full_certificate.hpp:117-167,179-206",
+      "argument": "K=n admits only the single complete-domain facet; unique minima and parent arity >=2 force exactly one leaf and no merges on every successful construction"
+    },
+    {
+      "id": "zero",
+      "source_lines": "full_certificate.hpp:156-165,238-239",
+      "argument": "K1 all points at level0 with no later births; open0 excludes that lot, closed0 includes it; K>1 zero batches rejected"
+    },
+    {
+      "id": "relabel_covariance",
+      "source_lines": "full_certificate.hpp:135-154,179-198",
+      "argument": "bijection of PointIds followed by canonical relabeling of facets and dense node references preserves the encoded abstract forest up to isomorphism; unsorted inputs remain invalid by contract"
+    }
+  ],
+  "analytic_fixture_equal_coverages": {
+    "qualification": "combinatorial_structural_only_not_executed_not_geometric_counterexample",
+    "order": 2,
+    "points": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "batches": [
+      {
+        "level": [
+          1,
+          1
+        ],
+        "births": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "merges": []
+      },
+      {
+        "level": [
+          2,
+          1
+        ],
+        "births": [],
+        "merges": [
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "level": [
+          3,
+          1
+        ],
+        "births": [],
+        "merges": [
+          [
+            4,
+            5
+          ]
+        ]
+      }
+    ],
+    "closed_roots_at_2": [
+      4,
+      5
+    ],
+    "closed_roots_at_3": [
+      6
+    ],
+    "coverage_4": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "coverage_5": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "coverage_6": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "exact_build_caps": {
+      "max_batches": 3,
+      "max_nodes": 7,
+      "max_parent_refs": 6
+    },
+    "exact_coverage_6_caps": {
+      "max_nodes": 7,
+      "max_point_refs": 8
+    },
+    "fault_refuted_by_expected_states": "coalescing roots or deleting a true merge because all point coverages coincide"
+  },
+  "bounded_test_additions_proposed_not_executed": [
+    "distinct simultaneous outputs with identical point coverage followed by a true merge with zero new points",
+    "nonmonotone PointId bijection with full canonicalization and remapping of dense parent IDs"
+  ],
+  "scope_limits": [
+    "no compiled qualification attributed to this review",
+    "no geometric generator, complete Gabriel discovery, vertical resolver, weighted payload, CLI or export qualified",
+    "no horizon or terminal geometry seal: a structurally valid prefix is accepted and only that encoded forest is replayed after its last event",
+    "input domain identity, metric, level units, completeness and node/payload identity must be linked by future external manifest",
+    "coverage accepts historical nodes; current component coverage requires selecting roots at the intended cut first",
+    "caps count records and scheduled references, not allocated byte capacities, RSS or CPU work",
+    "upper product bit range statically justified here, not newly executed by this review",
+    "unrealizable container overflow branches not claimed exercised",
+    "K=n terminal supported only within representable K<=10",
+    "no equivalence of binary encodings for semantically equal unreduced fractions promised"
+  ],
+  "note": {
+    "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/semantic_review.md",
+    "sha256": "2aa2f34b9d6288f49391895cd5751d1b6cab2e5fedd044c3b8931780ac3f6d1c"
+  },
+  "link_checks": {
+    "existing_link_count_excluding_self_json": 6,
+    "all_exist": true
+  }
+}

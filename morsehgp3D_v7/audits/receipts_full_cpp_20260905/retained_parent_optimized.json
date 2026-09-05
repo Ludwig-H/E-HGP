@@ -1,0 +1,7 @@
+{
+  "status": "rejected",
+  "reason": "full_cpp.cut_parent_still_active",
+  "checker_sha256": "bfef0116bbb66d8baaa8db278e06bbee2866f22ffa43a737c68e4a04d42735c9",
+  "output_sha256": "5dcd8699d1ba0e7a636f7d6d713414b37438ff433b97ba24f12d8629ffbca1ef",
+  "python_optimized": true
+}

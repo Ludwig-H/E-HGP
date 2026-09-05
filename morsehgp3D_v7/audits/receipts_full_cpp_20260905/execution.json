@@ -1,0 +1,446 @@
+{
+  "schema": "mhgp7-full-cpp-execution-v1",
+  "runs": [
+    {
+      "name": "O2",
+      "command": [
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/O2"
+      ],
+      "exit_code": 0,
+      "started_utc": "2026-09-05T14:46:03.433147+00:00",
+      "finished_utc": "2026-09-05T14:46:03.550344+00:00",
+      "environment_override": {},
+      "binary_sha256": "2bceb8695b0355575e03bde471d2d180bcb1ee2eec78def4276fd5724fb5d60e",
+      "input_sha256": "fd731c7f81fe2ae55d56944df951ac5cb3423906996de4df6fca7ca7ee4cf8b6",
+      "stdout": "O2_output.json",
+      "stdout_sha256": "ef98fccb0c18afe9a19685fa81181c9e169ed15f4afa3db6d3ab0b7aa771f803",
+      "stderr": "O2_stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependencies": [
+        {
+          "path": "morsehgp3D_v7/audits/full_cpp_bridge.cpp",
+          "sha256": "66369303d159de54edaaaf8288fea80451809fcdf0bdd94edb2a4528feb4117c"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/forest/full_certificate.hpp",
+          "sha256": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/lanes/keys.hpp",
+          "sha256": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/device.hpp",
+          "sha256": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/intmath.hpp",
+          "sha256": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/types.hpp",
+          "sha256": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/lanes/level.hpp",
+          "sha256": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/wide.hpp",
+          "sha256": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/mutants.hpp",
+          "sha256": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5"
+        }
+      ]
+    },
+    {
+      "name": "sanitized",
+      "command": [
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/sanitized"
+      ],
+      "exit_code": 0,
+      "started_utc": "2026-09-05T14:46:03.551277+00:00",
+      "finished_utc": "2026-09-05T14:46:03.719151+00:00",
+      "environment_override": {
+        "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "binary_sha256": "d58deda890467c8dc01cb68454c469a67253758889d04edd92569b9441abc06e",
+      "input_sha256": "fd731c7f81fe2ae55d56944df951ac5cb3423906996de4df6fca7ca7ee4cf8b6",
+      "stdout": "sanitized_output.json",
+      "stdout_sha256": "ef98fccb0c18afe9a19685fa81181c9e169ed15f4afa3db6d3ab0b7aa771f803",
+      "stderr": "sanitized_stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependencies": [
+        {
+          "path": "morsehgp3D_v7/audits/full_cpp_bridge.cpp",
+          "sha256": "66369303d159de54edaaaf8288fea80451809fcdf0bdd94edb2a4528feb4117c"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/forest/full_certificate.hpp",
+          "sha256": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/lanes/keys.hpp",
+          "sha256": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/device.hpp",
+          "sha256": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/intmath.hpp",
+          "sha256": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/types.hpp",
+          "sha256": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/lanes/level.hpp",
+          "sha256": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/wide.hpp",
+          "sha256": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7/src/core/mutants.hpp",
+          "sha256": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5"
+        }
+      ]
+    },
+    {
+      "name": "closed_side",
+      "command": [
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/closed_side.bin"
+      ],
+      "exit_code": 0,
+      "started_utc": "2026-09-05T14:46:03.723121+00:00",
+      "finished_utc": "2026-09-05T14:46:03.839928+00:00",
+      "environment_override": {},
+      "binary_sha256": "5b538420eeb816c8b1c4edc680f00ea588199201c347cbd25baf788e216be047",
+      "input_sha256": "fd731c7f81fe2ae55d56944df951ac5cb3423906996de4df6fca7ca7ee4cf8b6",
+      "stdout": "closed_side_output.json",
+      "stdout_sha256": "ca68fd6ed2acfb358d0bc1d17f0967506c2b245a1a0c6fc83ad253d72c81a900",
+      "stderr": "closed_side_stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependencies": [
+        {
+          "path": "morsehgp3D_v7/audits/full_cpp_bridge.cpp",
+          "sha256": "66369303d159de54edaaaf8288fea80451809fcdf0bdd94edb2a4528feb4117c"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/closed_side/morsehgp3D_v7/src/forest/full_certificate.hpp",
+          "sha256": "61ac83f459adaf1bddee361412a5a6b59e04992d31fc8a02a06de4f3c7fc8bb9"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/closed_side/morsehgp3D_v7/src/lanes/keys.hpp",
+          "sha256": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/closed_side/morsehgp3D_v7/src/core/device.hpp",
+          "sha256": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/closed_side/morsehgp3D_v7/src/core/intmath.hpp",
+          "sha256": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/closed_side/morsehgp3D_v7/src/core/types.hpp",
+          "sha256": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/closed_side/morsehgp3D_v7/src/lanes/level.hpp",
+          "sha256": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/closed_side/morsehgp3D_v7/src/core/wide.hpp",
+          "sha256": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/closed_side/morsehgp3D_v7/src/core/mutants.hpp",
+          "sha256": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5"
+        }
+      ]
+    },
+    {
+      "name": "retained_parent",
+      "command": [
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/retained_parent.bin"
+      ],
+      "exit_code": 0,
+      "started_utc": "2026-09-05T14:46:03.840659+00:00",
+      "finished_utc": "2026-09-05T14:46:03.957523+00:00",
+      "environment_override": {},
+      "binary_sha256": "38aa661f41a7b3265c0563ababad0678a5a50f74bbe74af0ad18170f72724781",
+      "input_sha256": "fd731c7f81fe2ae55d56944df951ac5cb3423906996de4df6fca7ca7ee4cf8b6",
+      "stdout": "retained_parent_output.json",
+      "stdout_sha256": "5dcd8699d1ba0e7a636f7d6d713414b37438ff433b97ba24f12d8629ffbca1ef",
+      "stderr": "retained_parent_stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependencies": [
+        {
+          "path": "morsehgp3D_v7/audits/full_cpp_bridge.cpp",
+          "sha256": "66369303d159de54edaaaf8288fea80451809fcdf0bdd94edb2a4528feb4117c"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/retained_parent/morsehgp3D_v7/src/forest/full_certificate.hpp",
+          "sha256": "a4e0ffdd21a9fc12bb373ae8f0c461e5358d934e55a63094d53e560b62a5cc5a"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/retained_parent/morsehgp3D_v7/src/lanes/keys.hpp",
+          "sha256": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/retained_parent/morsehgp3D_v7/src/core/device.hpp",
+          "sha256": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/retained_parent/morsehgp3D_v7/src/core/intmath.hpp",
+          "sha256": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/retained_parent/morsehgp3D_v7/src/core/types.hpp",
+          "sha256": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/retained_parent/morsehgp3D_v7/src/lanes/level.hpp",
+          "sha256": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/retained_parent/morsehgp3D_v7/src/core/wide.hpp",
+          "sha256": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/retained_parent/morsehgp3D_v7/src/core/mutants.hpp",
+          "sha256": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5"
+        }
+      ]
+    },
+    {
+      "name": "point_multiplicity",
+      "command": [
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/point_multiplicity.bin"
+      ],
+      "exit_code": 0,
+      "started_utc": "2026-09-05T14:46:03.958228+00:00",
+      "finished_utc": "2026-09-05T14:46:04.075683+00:00",
+      "environment_override": {},
+      "binary_sha256": "d801434c992d0541b541b25b9e10ab46bfb0e6f2da61f757ee23abefc1fd0d7f",
+      "input_sha256": "fd731c7f81fe2ae55d56944df951ac5cb3423906996de4df6fca7ca7ee4cf8b6",
+      "stdout": "point_multiplicity_output.json",
+      "stdout_sha256": "990f562c57e83b86452f099cb25855333c16fc933f36af58f3570ac2af90a718",
+      "stderr": "point_multiplicity_stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependencies": [
+        {
+          "path": "morsehgp3D_v7/audits/full_cpp_bridge.cpp",
+          "sha256": "66369303d159de54edaaaf8288fea80451809fcdf0bdd94edb2a4528feb4117c"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/point_multiplicity/morsehgp3D_v7/src/forest/full_certificate.hpp",
+          "sha256": "7fe4e5920ee1055f65ce05ea89a7ec57890e19090ab08488946ff95744bd9c11"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/point_multiplicity/morsehgp3D_v7/src/lanes/keys.hpp",
+          "sha256": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/point_multiplicity/morsehgp3D_v7/src/core/device.hpp",
+          "sha256": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/point_multiplicity/morsehgp3D_v7/src/core/intmath.hpp",
+          "sha256": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/point_multiplicity/morsehgp3D_v7/src/core/types.hpp",
+          "sha256": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/point_multiplicity/morsehgp3D_v7/src/lanes/level.hpp",
+          "sha256": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/point_multiplicity/morsehgp3D_v7/src/core/wide.hpp",
+          "sha256": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_cpp_20260905/point_multiplicity/morsehgp3D_v7/src/core/mutants.hpp",
+          "sha256": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5"
+        }
+      ]
+    }
+  ],
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+  "scope": "Two nominal builds and three private product mutants; no product pipeline or geometric generator executed",
+  "public_status": "not_claimed",
+  "gcp": "not_used",
+  "builds": [
+    {
+      "name": "O2",
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-DNDEBUG",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-Imorsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7",
+        "-MMD",
+        "-MF",
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/O2.d",
+        "morsehgp3D_v7/audits/full_cpp_bridge.cpp",
+        "-o",
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/O2"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "dependency_count": 9,
+      "provenance": "Direct compiler invocation observed by the root auditor; literal product snapshot verified before compilation, dependency hashes checked after execution and before cleanup."
+    },
+    {
+      "name": "sanitized",
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-O1",
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-Imorsehgp3D_v7/audits/receipts_full_cpp_20260905/source/morsehgp3D_v7",
+        "-MMD",
+        "-MF",
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/sanitized.d",
+        "morsehgp3D_v7/audits/full_cpp_bridge.cpp",
+        "-o",
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/sanitized"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "dependency_count": 9,
+      "provenance": "Direct compiler invocation observed by the root auditor; literal product snapshot verified before compilation, dependency hashes checked after execution and before cleanup."
+    },
+    {
+      "name": "closed_side",
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-DNDEBUG",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-Imorsehgp3D_v7/audits/.work_full_cpp_20260905/closed_side/morsehgp3D_v7",
+        "-MMD",
+        "-MF",
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/closed_side.d",
+        "morsehgp3D_v7/audits/full_cpp_bridge.cpp",
+        "-o",
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/closed_side.bin"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "dependency_count": 9,
+      "provenance": "Direct compiler invocation observed by the root auditor; literal product snapshot verified before compilation, dependency hashes checked after execution and before cleanup."
+    },
+    {
+      "name": "retained_parent",
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-DNDEBUG",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-Imorsehgp3D_v7/audits/.work_full_cpp_20260905/retained_parent/morsehgp3D_v7",
+        "-MMD",
+        "-MF",
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/retained_parent.d",
+        "morsehgp3D_v7/audits/full_cpp_bridge.cpp",
+        "-o",
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/retained_parent.bin"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "dependency_count": 9,
+      "provenance": "Direct compiler invocation observed by the root auditor; literal product snapshot verified before compilation, dependency hashes checked after execution and before cleanup."
+    },
+    {
+      "name": "point_multiplicity",
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-DNDEBUG",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-Imorsehgp3D_v7/audits/.work_full_cpp_20260905/point_multiplicity/morsehgp3D_v7",
+        "-MMD",
+        "-MF",
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/point_multiplicity.d",
+        "morsehgp3D_v7/audits/full_cpp_bridge.cpp",
+        "-o",
+        "morsehgp3D_v7/audits/.work_full_cpp_20260905/point_multiplicity.bin"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "dependency_count": 9,
+      "provenance": "Direct compiler invocation observed by the root auditor; literal product snapshot verified before compilation, dependency hashes checked after execution and before cleanup."
+    }
+  ],
+  "nominal_outputs_byte_equal": true,
+  "five_judgment_pairs_equal_except_optimized_flag": true,
+  "sanitizer_binary_libraries": [
+    "0x0000000000000001 (NEEDED)             Shared library: [libasan.so.8]",
+    "0x0000000000000001 (NEEDED)             Shared library: [libubsan.so.1]"
+  ],
+  "scope_limits": [
+    "Both nominal builds consume 106 precomputed forests; no product geometry or pipeline is invoked.",
+    "The Gamma population is 50 original forests encoded twice, not 100 independent geometric cases.",
+    "No allocation-failure injector in this independent bridge; those tests belong to the separately inspected constructor gates.",
+    "Compiler and eight local product headers are pinned; system headers and toolchain are not a hermetic snapshot.",
+    "All bridge level denominators fit u64; this geometric corpus does not replace prior wide-arithmetic qualification."
+  ],
+  "cleanup": {
+    "removed_only": "morsehgp3D_v7/audits/.work_full_cpp_20260905",
+    "exists_after": false,
+    "verified_utc": "2026-09-05T14:58:09.465110+00:00",
+    "all_five_binary_and_dependency_pins_checked_before_removal": true,
+    "post_cleanup_replay": {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/full_cpp_audit.py",
+        "--check",
+        "morsehgp3D_v7/audits/receipts_full_cpp_20260905/sanitized_output.json",
+        "--result",
+        "morsehgp3D_v7/audits/receipts_full_cpp_20260905/sanitized_optimized.json"
+      ],
+      "exit_code": 0,
+      "result_byte_unchanged": true,
+      "stdout": "{\"status\": \"completed_bounded_cpp_output_judgment\", \"counts\": {\"node_coverage_checks\": 616, \"exact_subtree_budget_successes\": 616, \"subtree_budget_minus_one_refusals\": 1232, \"root_cut_checks\": 4608, \"build_node_budget_minus_one_refusals\": 106, \"records\": 106, \"gamma_fixture_records\": 100, \"nodes\": 616, \"parent_refs\": 510, \"minima\": 382, \"structural_only_records\": 6, \"gamma_cuts\": 4530, \"gamma_naturality_squares\": 4450, \"gamma_records\": 100}}\n",
+      "stderr": ""
+    }
+  }
+}

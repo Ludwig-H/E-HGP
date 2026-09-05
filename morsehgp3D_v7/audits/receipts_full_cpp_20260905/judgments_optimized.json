@@ -1,0 +1,87 @@
+[
+  {
+    "name": "O2",
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "morsehgp3D_v7/audits/full_cpp_audit.py",
+      "--check",
+      "morsehgp3D_v7/audits/receipts_full_cpp_20260905/O2_output.json",
+      "--result",
+      "morsehgp3D_v7/audits/receipts_full_cpp_20260905/O2_optimized.json"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"status\": \"completed_bounded_cpp_output_judgment\", \"counts\": {\"node_coverage_checks\": 616, \"exact_subtree_budget_successes\": 616, \"subtree_budget_minus_one_refusals\": 1232, \"root_cut_checks\": 4608, \"build_node_budget_minus_one_refusals\": 106, \"records\": 106, \"gamma_fixture_records\": 100, \"nodes\": 616, \"parent_refs\": 510, \"minima\": 382, \"structural_only_records\": 6, \"gamma_cuts\": 4530, \"gamma_naturality_squares\": 4450, \"gamma_records\": 100}}\n",
+    "stderr": "",
+    "result": "O2_optimized.json"
+  },
+  {
+    "name": "sanitized",
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "morsehgp3D_v7/audits/full_cpp_audit.py",
+      "--check",
+      "morsehgp3D_v7/audits/receipts_full_cpp_20260905/sanitized_output.json",
+      "--result",
+      "morsehgp3D_v7/audits/receipts_full_cpp_20260905/sanitized_optimized.json"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"status\": \"completed_bounded_cpp_output_judgment\", \"counts\": {\"node_coverage_checks\": 616, \"exact_subtree_budget_successes\": 616, \"subtree_budget_minus_one_refusals\": 1232, \"root_cut_checks\": 4608, \"build_node_budget_minus_one_refusals\": 106, \"records\": 106, \"gamma_fixture_records\": 100, \"nodes\": 616, \"parent_refs\": 510, \"minima\": 382, \"structural_only_records\": 6, \"gamma_cuts\": 4530, \"gamma_naturality_squares\": 4450, \"gamma_records\": 100}}\n",
+    "stderr": "",
+    "result": "sanitized_optimized.json"
+  },
+  {
+    "name": "closed_side",
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "morsehgp3D_v7/audits/full_cpp_audit.py",
+      "--check",
+      "morsehgp3D_v7/audits/receipts_full_cpp_20260905/closed_side_output.json",
+      "--result",
+      "morsehgp3D_v7/audits/receipts_full_cpp_20260905/closed_side_optimized.json"
+    ],
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "full_cpp.cut_boundary\n",
+    "result": "closed_side_optimized.json"
+  },
+  {
+    "name": "retained_parent",
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "morsehgp3D_v7/audits/full_cpp_audit.py",
+      "--check",
+      "morsehgp3D_v7/audits/receipts_full_cpp_20260905/retained_parent_output.json",
+      "--result",
+      "morsehgp3D_v7/audits/receipts_full_cpp_20260905/retained_parent_optimized.json"
+    ],
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "full_cpp.cut_parent_still_active\n",
+    "result": "retained_parent_optimized.json"
+  },
+  {
+    "name": "point_multiplicity",
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "morsehgp3D_v7/audits/full_cpp_audit.py",
+      "--check",
+      "morsehgp3D_v7/audits/receipts_full_cpp_20260905/point_multiplicity_output.json",
+      "--result",
+      "morsehgp3D_v7/audits/receipts_full_cpp_20260905/point_multiplicity_optimized.json"
+    ],
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "full_cpp.coverage_duplicates\n",
+    "result": "point_multiplicity_optimized.json"
+  }
+]

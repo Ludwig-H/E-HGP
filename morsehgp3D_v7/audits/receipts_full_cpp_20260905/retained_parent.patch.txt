@@ -1,0 +1,11 @@
+--- a/src/forest/full_certificate.hpp
++++ b/src/forest/full_certificate.hpp
+@@ -238,7 +238,7 @@
+       const int cmp = compare_exact_level(node.level, cut);
+       if (cmp > 0 || (cmp == 0 && !closed)) break;
+       for (u64 j = 0; j < node.parent_count; ++j)
+-        live[static_cast<size_t>(forest.parents()[static_cast<size_t>(node.first + j)])] = 0;
++        live[static_cast<size_t>(forest.parents()[static_cast<size_t>(node.first + j)])] = 1;
+       live[id] = 1;
+     }
+     for (size_t id = 0; id < live.size(); ++id)

@@ -1,0 +1,26 @@
+{
+  "status": "completed_bounded_cpp_output_judgment",
+  "public_status": "not_claimed",
+  "counts": {
+    "node_coverage_checks": 616,
+    "exact_subtree_budget_successes": 616,
+    "subtree_budget_minus_one_refusals": 1232,
+    "root_cut_checks": 4608,
+    "build_node_budget_minus_one_refusals": 106,
+    "records": 106,
+    "gamma_fixture_records": 100,
+    "nodes": 616,
+    "parent_refs": 510,
+    "minima": 382,
+    "structural_only_records": 6,
+    "gamma_cuts": 4530,
+    "gamma_naturality_squares": 4450,
+    "gamma_records": 100
+  },
+  "python_optimized": false,
+  "output_sha256": "ef98fccb0c18afe9a19685fa81181c9e169ed15f4afa3db6d3ab0b7aa771f803",
+  "fixture_sha256": "a6875914a1792d343a9cb4a74b1353232438fcee8089f28cddd031b4599cb604",
+  "fixture_text_sha256": "fd731c7f81fe2ae55d56944df951ac5cb3423906996de4df6fca7ca7ee4cf8b6",
+  "checker_sha256": "bfef0116bbb66d8baaa8db278e06bbee2866f22ffa43a737c68e4a04d42735c9",
+  "scope": "100 geometric representations plus 6 structural representations. Gamma checks only the geometric population. No producer completeness, mass, vertical-map or performance claim."
+}

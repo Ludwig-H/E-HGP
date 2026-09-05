@@ -1,0 +1,7 @@
+{
+  "status": "rejected",
+  "reason": "full_cpp.coverage_duplicates",
+  "checker_sha256": "bfef0116bbb66d8baaa8db278e06bbee2866f22ffa43a737c68e4a04d42735c9",
+  "output_sha256": "990f562c57e83b86452f099cb25855333c16fc933f36af58f3570ac2af90a718",
+  "python_optimized": false
+}

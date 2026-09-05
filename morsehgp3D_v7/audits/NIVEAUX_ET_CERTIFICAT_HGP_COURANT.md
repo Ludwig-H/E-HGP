@@ -150,6 +150,8 @@ Gamma exhaustif, borné ici à sept points, fournit les catalogues de fixtures e
 
 Les deux descentes exercées ont un seul pas strict, sur E5 et son réindexage. Les normalisations historiques sont aussi exercées sur les deux triangles séparés, mais aucune chaîne longue n’est qualifiée. Les tables de construction restent des témoins d’audit, sans borne industrielle de résidence. Les cartes verticales FULL et la masse sont prouvées ou contractualisées ci-dessus, sans nouvelle exécution produit. Les corpus FULL et réduit diffèrent : leurs nombres totaux d’événements ne donnent pas un ratio de compression.
 
+Le [premier composant C++ FULL](CERTIFICAT_FULL_CPP_COURANT.md) possède depuis `f4c0734c` une qualification indépendante du stockage et du rejeu sur les lots fournis. Ses 4 608 coupes et 616 couvertures par build ne sont pas réattribuées aux sondes Python ci-dessus. Cette étape ferme le lecteur structurel, sans encore fournir les minima ou les parents depuis la géométrie.
+
 ## 10. Décision pour la suite
 
 La question « faut-il garder tous les niveaux Gamma pour les K hiérarchies HGP du manuscrit ? » est résolue négativement dans le domaine annoncé. Le certificat FULL est constitué des minima Gabriel et des vraies multifusions, munis de leurs niveaux et de leurs parents. Il permet aussi de dériver la restriction réduite actuellement qualifiée. Les rattachements sont à certifier pendant la construction ; la tour, les masses et le vote possèdent leurs suppléments explicites. Les saturés Gabriel de tous les ordres réencodent certes les niveaux Gamma, mais leur rang peut atteindre n ; cette identité n’est pas une architecture parcimonieuse pour une fenêtre K limitée.

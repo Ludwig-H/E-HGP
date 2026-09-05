@@ -1,0 +1,528 @@
+{
+  "schema": "mhgp7-full-cpp-constructor-receipt-independent-review-v1",
+  "status": "completed_read_only_counterverification",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "authority": "constructor_structural_gates_counterverified_not_independently_executed",
+  "publication_commit": "f4c0734c53a18d1e2de477ca09584c8f15c938f9",
+  "qualification_base_head": "94a3513b081bd61a8276c3e73e7d91ca5aa42abe",
+  "review_started_utc": "2026-09-05T14:43:08.223471+00:00",
+  "review_ended_utc": "2026-09-05T14:43:08.343537+00:00",
+  "verdict": "Package and current source bytes match the published commit; both archived local CTest runs closed with the declared outcomes. No contradictory receipt evidence identified.",
+  "package_directory": "morsehgp3D_v7/receipts/full_certificate_20260905",
+  "package_files": {
+    "README.md": {
+      "sha256": "5cf355681c437b3c1187afb7f8500bfc8512e5bd9b6fb097c5ddd8e6cabfa93f",
+      "bytes": 4452,
+      "matches_publication_commit": true
+    },
+    "qualification.json": {
+      "sha256": "2b702cb5f8e4bd3aeab2541e7084624afcffefb7db4afa974ba5122d74191c68",
+      "bytes": 3418,
+      "matches_publication_commit": true
+    },
+    "source_sha256.txt": {
+      "sha256": "2aea7b61a59aaf0b54d238b1b744756b1aade031ae6ae0120208a6c7da3be44e",
+      "bytes": 1120,
+      "matches_publication_commit": true
+    },
+    "binary_sha256.txt": {
+      "sha256": "eeda548717bbd81a9f59146e4876d2bd8bd0d37bbb4d78135ceef79ec6f37393",
+      "bytes": 268,
+      "matches_publication_commit": true
+    },
+    "release_last_test.log": {
+      "sha256": "9390c94b98100c96314e5b2c91c7445cef93051984c0daf61805eb487924f636",
+      "bytes": 2092,
+      "matches_publication_commit": true
+    },
+    "sanitized_last_test.log": {
+      "sha256": "00b291e2d0ff738eadf4ae0c54aa3d334c8a1aa9e7b5bb2e42b227bd72cd8372",
+      "bytes": 2132,
+      "matches_publication_commit": true
+    },
+    "release_flags.txt": {
+      "sha256": "f41da400921d45c4bb984b4219aa314ac45b86df5dfabe06aae5b7113ce008f1",
+      "bytes": 235,
+      "matches_publication_commit": true
+    },
+    "sanitized_flags.txt": {
+      "sha256": "aee40279e0a992ea20350a8f84debb071fc73ed2fdb88c7999a50df5a13452bd",
+      "bytes": 278,
+      "matches_publication_commit": true
+    },
+    "worktree_at_qualification.txt": {
+      "sha256": "4facf3e6dd878cae4bc26223cea93ed54dbb341e56271fb6c2d69ca1623de69b",
+      "bytes": 1446,
+      "matches_publication_commit": true
+    },
+    "release_dependencies.d": {
+      "sha256": "29f928d98fd57f8aafe05af0efc8b20ea6450bbb9e099918454efd8cb1952d70",
+      "bytes": 10130,
+      "matches_publication_commit": true
+    },
+    "release_link.txt": {
+      "sha256": "d83681bf311f56f77113b468c85a9e9ddc3d05d1effab2ae79aa49e66635d84e",
+      "bytes": 135,
+      "matches_publication_commit": true
+    },
+    "sanitized_link.txt": {
+      "sha256": "b240760693e46a2cba8e9b86092d9764fd8191956ee8c102c5d21cb26f6cb2f1",
+      "bytes": 207,
+      "matches_publication_commit": true
+    },
+    "SHA256SUMS": {
+      "sha256": "f34dc4767068ac89d1bb472fdc502f3a86d50a82de9efd67c1b4efdb4136ca79",
+      "bytes": 1030,
+      "matches_publication_commit": true
+    }
+  },
+  "source_pins": {
+    "morsehgp3D_v7/src/forest/full_certificate.hpp": {
+      "sha256": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+      "bytes": 12991,
+      "matches_publication_commit": true
+    },
+    "morsehgp3D_v7/tests/full_certificate_gate.cpp": {
+      "sha256": "17f5e2bafecc66556bcc1cfbfc51ed20e47cca82716ad0f2e34b1e5994a266a7",
+      "bytes": 25751,
+      "matches_publication_commit": true
+    },
+    "morsehgp3D_v7/src/lanes/keys.hpp": {
+      "sha256": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+      "bytes": 4282,
+      "matches_publication_commit": true
+    },
+    "morsehgp3D_v7/src/lanes/level.hpp": {
+      "sha256": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c",
+      "bytes": 2622,
+      "matches_publication_commit": true
+    },
+    "morsehgp3D_v7/src/core/device.hpp": {
+      "sha256": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37",
+      "bytes": 484,
+      "matches_publication_commit": true
+    },
+    "morsehgp3D_v7/src/core/intmath.hpp": {
+      "sha256": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+      "bytes": 2238,
+      "matches_publication_commit": true
+    },
+    "morsehgp3D_v7/src/core/types.hpp": {
+      "sha256": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+      "bytes": 2537,
+      "matches_publication_commit": true
+    },
+    "morsehgp3D_v7/src/core/wide.hpp": {
+      "sha256": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85",
+      "bytes": 2954,
+      "matches_publication_commit": true
+    },
+    "morsehgp3D_v7/src/core/mutants.hpp": {
+      "sha256": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5",
+      "bytes": 11457,
+      "matches_publication_commit": true
+    },
+    "morsehgp3D_v7/CMakeLists.txt": {
+      "sha256": "3dc94a0cbb3fec76880567888c8340c47d4c6d5d6f42136d6cf9dbe693a1e4a6",
+      "bytes": 75569,
+      "matches_publication_commit": true
+    },
+    "morsehgp3D_v7/cmake/run_expect.cmake": {
+      "sha256": "7bb9af4eddbea7e7a66619c92491dc11c22a49d7b3b46bddd6b2c25b20b2d605",
+      "bytes": 1624,
+      "matches_publication_commit": true
+    }
+  },
+  "binary_pins": {
+    "build/v7_full_certificate_20260905/mhgp7_full_certificate_gate": {
+      "sha256": "446111a83c7e453f50fcc09a9ebb1fcdef10a7a672d2ee4efe5429a962eb850a",
+      "bytes": 107888,
+      "needed_libraries": [
+        "libstdc++.so.6",
+        "libgcc_s.so.1",
+        "libc.so.6"
+      ],
+      "inspection": "readelf -d; executable not invoked"
+    },
+    "build/v7_full_certificate_sanitized_20260905/mhgp7_full_certificate_gate": {
+      "sha256": "452419298fcf7649092f760b5ffb1818feac6831ee5a6286b95c81c2c395f0fa",
+      "bytes": 2815056,
+      "needed_libraries": [
+        "libasan.so.8",
+        "libstdc++.so.6",
+        "libm.so.6",
+        "libubsan.so.1",
+        "libgcc_s.so.1",
+        "libc.so.6"
+      ],
+      "inspection": "readelf -d; executable not invoked"
+    }
+  },
+  "contract": {
+    "path": "morsehgp3D_v7/docs/CONTRAT_CERTIFICAT_FULL.md",
+    "sha256": "085b7cf651060beed475bc908caface51181e134eb897f8e527b90a8a59b1e13",
+    "bytes": 7732,
+    "matches_publication_commit": true
+  },
+  "builds": {
+    "release": {
+      "build_directory": "build/v7_full_certificate_20260905",
+      "build_type": "Release",
+      "captured_files_match_live": {
+        "build/v7_full_certificate_20260905/Testing/Temporary/LastTest.log": {
+          "archive": "morsehgp3D_v7/receipts/full_certificate_20260905/release_last_test.log",
+          "sha256": "9390c94b98100c96314e5b2c91c7445cef93051984c0daf61805eb487924f636",
+          "bytes": 2092,
+          "byte_identical": true
+        },
+        "build/v7_full_certificate_20260905/CMakeFiles/mhgp7_full_certificate_gate.dir/flags.make": {
+          "archive": "morsehgp3D_v7/receipts/full_certificate_20260905/release_flags.txt",
+          "sha256": "f41da400921d45c4bb984b4219aa314ac45b86df5dfabe06aae5b7113ce008f1",
+          "bytes": 235,
+          "byte_identical": true
+        },
+        "build/v7_full_certificate_20260905/CMakeFiles/mhgp7_full_certificate_gate.dir/link.txt": {
+          "archive": "morsehgp3D_v7/receipts/full_certificate_20260905/release_link.txt",
+          "sha256": "d83681bf311f56f77113b468c85a9e9ddc3d05d1effab2ae79aa49e66635d84e",
+          "bytes": 135,
+          "byte_identical": true
+        }
+      },
+      "dependency_file": {
+        "path": "build/v7_full_certificate_20260905/CMakeFiles/mhgp7_full_certificate_gate.dir/tests/full_certificate_gate.cpp.o.d",
+        "sha256": "29f928d98fd57f8aafe05af0efc8b20ea6450bbb9e099918454efd8cb1952d70",
+        "bytes": 10130,
+        "local_paths": [
+          "morsehgp3D_v7/src/core/device.hpp",
+          "morsehgp3D_v7/src/core/intmath.hpp",
+          "morsehgp3D_v7/src/core/mutants.hpp",
+          "morsehgp3D_v7/src/core/types.hpp",
+          "morsehgp3D_v7/src/core/wide.hpp",
+          "morsehgp3D_v7/src/forest/full_certificate.hpp",
+          "morsehgp3D_v7/src/lanes/keys.hpp",
+          "morsehgp3D_v7/src/lanes/level.hpp",
+          "morsehgp3D_v7/tests/full_certificate_gate.cpp"
+        ],
+        "unique_dependency_strings": 224,
+        "local_map_exact": true,
+        "archived": true
+      },
+      "compiler_metadata": {
+        "path": "build/v7_full_certificate_20260905/CMakeFiles/3.28.3/CMakeCXXCompiler.cmake",
+        "sha256": "12aa7c8bbf1cab72086c6cf13c49e3efb595ce9a89e3a1cbc73bf019b660bd12",
+        "bytes": 5539,
+        "compiler": "GNU 13.3.0",
+        "platform": "Linux x86_64; ELF; little endian; 8-byte pointers from CMake compiler metadata"
+      },
+      "cache": {
+        "path": "build/v7_full_certificate_20260905/CMakeCache.txt",
+        "sha256": "44868eea61a672ac1881f292e849850cbd1502a858e457a86ed176e90d95c9d9",
+        "bytes": 12893,
+        "cuda_enabled": false
+      },
+      "CTestTestfile": {
+        "path": "build/v7_full_certificate_20260905/CTestTestfile.cmake",
+        "sha256": "3baec2ac2c76ca59e8aefdcb144c0e9213fc7ed32fad3a740931a2411c04b4ad",
+        "bytes": 247161,
+        "registrations": [
+          "add_test([=[mhgp7_full_certificate]=] \"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_certificate_20260905/mhgp7_full_certificate_gate\" \"-DARGS=--selftest\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\")",
+          "add_test([=[mhgp7_full_certificate_rejects]=] \"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_certificate_20260905/mhgp7_full_certificate_gate\" \"-DARGS=--rejects\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\")"
+        ],
+        "timeout_seconds": 60
+      },
+      "xml_files_found": [],
+      "xml_authority": "No XML produced/archived by these plain CTest runs; LastTest.log is the raw test authority.",
+      "start_logged": "Sep 05 14:05 UTC",
+      "end_logged": "Sep 05 14:05 UTC",
+      "logged_elapsed_seconds": [
+        0.01,
+        0.01
+      ],
+      "tests": [
+        {
+          "test": "mhgp7_full_certificate",
+          "mode": "--selftest",
+          "raw_summary": "full_certificate mode=--selftest authority=structural_only positives=11 build_refusals=0 read_refusals=3 allocation_failures=0 checks=68 failures=0 floor=1",
+          "values": {
+            "positives": 11,
+            "build_refusals": 0,
+            "read_refusals": 3,
+            "allocation_failures": 0,
+            "checks": 68,
+            "failures": 0,
+            "floor": 1
+          },
+          "command": "\"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_certificate_20260905/mhgp7_full_certificate_gate\" \"-DARGS=--selftest\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"",
+          "test_passed": true,
+          "exit_code": 0,
+          "exit_code_authority": "CTest Passed through pinned run_expect.cmake requiring numeric code exactly 0"
+        },
+        {
+          "test": "mhgp7_full_certificate_rejects",
+          "mode": "--rejects",
+          "raw_summary": "full_certificate mode=--rejects authority=structural_only positives=13 build_refusals=45 read_refusals=19 allocation_failures=15 checks=218 failures=0 floor=1",
+          "values": {
+            "positives": 13,
+            "build_refusals": 45,
+            "read_refusals": 19,
+            "allocation_failures": 15,
+            "checks": 218,
+            "failures": 0,
+            "floor": 1
+          },
+          "command": "\"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_certificate_20260905/mhgp7_full_certificate_gate\" \"-DARGS=--rejects\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"",
+          "test_passed": true,
+          "exit_code": 0,
+          "exit_code_authority": "CTest Passed through pinned run_expect.cmake requiring numeric code exactly 0"
+        }
+      ]
+    },
+    "sanitized": {
+      "build_directory": "build/v7_full_certificate_sanitized_20260905",
+      "build_type": "Debug",
+      "captured_files_match_live": {
+        "build/v7_full_certificate_sanitized_20260905/Testing/Temporary/LastTest.log": {
+          "archive": "morsehgp3D_v7/receipts/full_certificate_20260905/sanitized_last_test.log",
+          "sha256": "00b291e2d0ff738eadf4ae0c54aa3d334c8a1aa9e7b5bb2e42b227bd72cd8372",
+          "bytes": 2132,
+          "byte_identical": true
+        },
+        "build/v7_full_certificate_sanitized_20260905/CMakeFiles/mhgp7_full_certificate_gate.dir/flags.make": {
+          "archive": "morsehgp3D_v7/receipts/full_certificate_20260905/sanitized_flags.txt",
+          "sha256": "aee40279e0a992ea20350a8f84debb071fc73ed2fdb88c7999a50df5a13452bd",
+          "bytes": 278,
+          "byte_identical": true
+        },
+        "build/v7_full_certificate_sanitized_20260905/CMakeFiles/mhgp7_full_certificate_gate.dir/link.txt": {
+          "archive": "morsehgp3D_v7/receipts/full_certificate_20260905/sanitized_link.txt",
+          "sha256": "b240760693e46a2cba8e9b86092d9764fd8191956ee8c102c5d21cb26f6cb2f1",
+          "bytes": 207,
+          "byte_identical": true
+        }
+      },
+      "dependency_file": {
+        "path": "build/v7_full_certificate_sanitized_20260905/CMakeFiles/mhgp7_full_certificate_gate.dir/tests/full_certificate_gate.cpp.o.d",
+        "sha256": "c339113299dd0903cb272bce40fcb6c7d470b2984a32e583f5a9fd32a4e429ed",
+        "bytes": 9572,
+        "local_paths": [
+          "morsehgp3D_v7/src/core/device.hpp",
+          "morsehgp3D_v7/src/core/intmath.hpp",
+          "morsehgp3D_v7/src/core/mutants.hpp",
+          "morsehgp3D_v7/src/core/types.hpp",
+          "morsehgp3D_v7/src/core/wide.hpp",
+          "morsehgp3D_v7/src/forest/full_certificate.hpp",
+          "morsehgp3D_v7/src/lanes/keys.hpp",
+          "morsehgp3D_v7/src/lanes/level.hpp",
+          "morsehgp3D_v7/tests/full_certificate_gate.cpp"
+        ],
+        "unique_dependency_strings": 213,
+        "local_map_exact": true,
+        "archived": false
+      },
+      "compiler_metadata": {
+        "path": "build/v7_full_certificate_sanitized_20260905/CMakeFiles/3.28.3/CMakeCXXCompiler.cmake",
+        "sha256": "bc002abf1eef9434c561e423067da0ef7bce6c4b32b5a17a07ac84172d1c3ca1",
+        "bytes": 5550,
+        "compiler": "GNU 13.3.0",
+        "platform": "Linux x86_64; ELF; little endian; 8-byte pointers from CMake compiler metadata"
+      },
+      "cache": {
+        "path": "build/v7_full_certificate_sanitized_20260905/CMakeCache.txt",
+        "sha256": "231b3b5d941cb7f6d3021928868286b5e9c0ab553912d693af36ba7690383a20",
+        "bytes": 13011,
+        "cuda_enabled": false
+      },
+      "CTestTestfile": {
+        "path": "build/v7_full_certificate_sanitized_20260905/CTestTestfile.cmake",
+        "sha256": "4f5bd7c35209b7249b9fdc5ad35f1efd789de89f25fe39726e7293c317f83c24",
+        "bytes": 250941,
+        "registrations": [
+          "add_test([=[mhgp7_full_certificate]=] \"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_certificate_sanitized_20260905/mhgp7_full_certificate_gate\" \"-DARGS=--selftest\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\")",
+          "add_test([=[mhgp7_full_certificate_rejects]=] \"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_certificate_sanitized_20260905/mhgp7_full_certificate_gate\" \"-DARGS=--rejects\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\")"
+        ],
+        "timeout_seconds": 60
+      },
+      "xml_files_found": [],
+      "xml_authority": "No XML produced/archived by these plain CTest runs; LastTest.log is the raw test authority.",
+      "start_logged": "Sep 05 14:07 UTC",
+      "end_logged": "Sep 05 14:07 UTC",
+      "logged_elapsed_seconds": [
+        0.03,
+        0.03
+      ],
+      "tests": [
+        {
+          "test": "mhgp7_full_certificate",
+          "mode": "--selftest",
+          "raw_summary": "full_certificate mode=--selftest authority=structural_only positives=11 build_refusals=0 read_refusals=3 allocation_failures=0 checks=68 failures=0 floor=1",
+          "values": {
+            "positives": 11,
+            "build_refusals": 0,
+            "read_refusals": 3,
+            "allocation_failures": 0,
+            "checks": 68,
+            "failures": 0,
+            "floor": 1
+          },
+          "command": "\"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_certificate_sanitized_20260905/mhgp7_full_certificate_gate\" \"-DARGS=--selftest\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"",
+          "test_passed": true,
+          "exit_code": 0,
+          "exit_code_authority": "CTest Passed through pinned run_expect.cmake requiring numeric code exactly 0"
+        },
+        {
+          "test": "mhgp7_full_certificate_rejects",
+          "mode": "--rejects",
+          "raw_summary": "full_certificate mode=--rejects authority=structural_only positives=13 build_refusals=45 read_refusals=19 allocation_failures=15 checks=218 failures=0 floor=1",
+          "values": {
+            "positives": 13,
+            "build_refusals": 45,
+            "read_refusals": 19,
+            "allocation_failures": 15,
+            "checks": 218,
+            "failures": 0,
+            "floor": 1
+          },
+          "command": "\"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_certificate_sanitized_20260905/mhgp7_full_certificate_gate\" \"-DARGS=--rejects\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"",
+          "test_passed": true,
+          "exit_code": 0,
+          "exit_code_authority": "CTest Passed through pinned run_expect.cmake requiring numeric code exactly 0"
+        }
+      ]
+    }
+  },
+  "declared_commands": [
+    {
+      "command": "cmake -S morsehgp3D_v7 -B build/v7_full_certificate_20260905 -DCMAKE_BUILD_TYPE=Release",
+      "exit_code": 0
+    },
+    {
+      "command": "cmake --build build/v7_full_certificate_20260905 --target mhgp7_full_certificate_gate --parallel 2",
+      "exit_code": 0
+    },
+    {
+      "command": "ctest --test-dir build/v7_full_certificate_20260905 --output-on-failure -V -R '^mhgp7_full_certificate'",
+      "exit_code": 0
+    },
+    {
+      "command": "cmake -S morsehgp3D_v7 -B build/v7_full_certificate_sanitized_20260905 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-fsanitize=address,undefined -fno-omit-frame-pointer' -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address,undefined'",
+      "exit_code": 0
+    },
+    {
+      "command": "cmake --build build/v7_full_certificate_sanitized_20260905 --target mhgp7_full_certificate_gate --parallel 2",
+      "exit_code": 0
+    },
+    {
+      "command": "env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 ctest --test-dir build/v7_full_certificate_sanitized_20260905 --output-on-failure -V -R '^mhgp7_full_certificate'",
+      "exit_code": 0
+    }
+  ],
+  "source_gate_review": {
+    "runtime_check_authority": "check increments checks and failures unconditionally; final exit 1 on failures, 3 on unmet floor, 0 only on both success conditions; argc/mode rejects use 2.",
+    "selftest_positive_cases": 11,
+    "rejects_positive_cases": 13,
+    "positive_scope": [
+      "acute and obtuse supplied forests",
+      "simultaneous minima and independent multifusions",
+      "K1 open/closed zero including PointId UINT32_MAX",
+      "K1=n singleton and K=n isolated terminal",
+      "K10 all slots",
+      "mixed births and pre-lot merge",
+      "U192 nontruncated levels and rational equality",
+      "CSR covers and pre-dedup point-reference budgets",
+      "move-only noexcept transfer, invalidated source, self move"
+    ],
+    "build_rejection_literal_calls": 45,
+    "build_rejection_reason_counts": {
+      "full_invalid_domain": 5,
+      "full_point_order": 2,
+      "full_invalid_level": 2,
+      "full_nonincreasing_batch": 3,
+      "full_empty_batch": 1,
+      "full_minimum_order": 1,
+      "full_minimum_points": 3,
+      "full_minimum_padding": 1,
+      "full_minimum_sort": 2,
+      "full_duplicate_minimum": 1,
+      "full_not_multifusion": 2,
+      "full_parent_order": 2,
+      "full_merge_sort": 2,
+      "full_parent_not_prebatch_root": 6,
+      "full_no_minimum": 1,
+      "full_positive_level_required": 1,
+      "full_k1_roots": 3,
+      "full_k1_late_birth": 1,
+      "full_batch_budget": 2,
+      "full_node_budget": 2,
+      "full_parent_budget": 2
+    },
+    "read_rejection_literal_calls_total": 19,
+    "read_refusals_in_positive_gate": 3,
+    "allocation_failure_observed_total_each_rejects_run": 15,
+    "allocation_method": "Global new/new[] including aligned/nothrow variants; successful call count 1..64 per API, persistent failure swept at each observed allocation index for build, roots, coverage; each index requires denied!=0 and exact resource status/reason/empty output. Escaping exception increments failure. Existing certificate and explicit retry compared.",
+    "allocation_breakdown": "No per-API counts in raw stdout; only the aggregate 15 is externally recoverable from these receipts.",
+    "nonvacuity_floors": {
+      "positive_cases": 11,
+      "checks": 55,
+      "reject_builds": 45,
+      "reject_reads": 15,
+      "allocation_failures": 10
+    },
+    "counts_are_not_independent_tests": "The rejects mode reruns the positive gate; 68+218 are executed checks, not 286 independent tests or a full historical suite.",
+    "unexercised_declared": [
+      "full_size_overflow",
+      "full_read_size_overflow",
+      "arbitrary geometry/completeness",
+      "full historical F suite"
+    ],
+    "line_references": {
+      "checks_and_refusals": "tests/full_certificate_gate.cpp:81-155",
+      "positive_modes": "tests/full_certificate_gate.cpp:157-279",
+      "rejection_mode": "tests/full_certificate_gate.cpp:282-378",
+      "allocation_sweep": "tests/full_certificate_gate.cpp:381-439",
+      "exit_and_floor": "tests/full_certificate_gate.cpp:442-465",
+      "transactional_build": "src/forest/full_certificate.hpp:102-215",
+      "roots_and_coverage": "src/forest/full_certificate.hpp:225-310"
+    }
+  },
+  "preparatory_failed_attempt": {
+    "scope": "agent direct -O2 gate before final test source",
+    "exit_code": 3,
+    "checks": 216,
+    "failures": 0,
+    "observed_build_refusals": 44,
+    "required_build_refusals": 45,
+    "binary": "build/v7_full_certificate_gate_agent",
+    "binary_sha256": "8242cee343f2fc1d8de09a5dd2afa86c254e265ab653ddd76b6d5da9026550b3",
+    "correction": "added explicit 9/1 versus 18/2 nonincreasing-batch rejection; did not weaken floor",
+    "provenance": "delegated runner result; failed binary retained, no full raw transcript archived",
+    "retained_binary_observed": {
+      "sha256": "8242cee343f2fc1d8de09a5dd2afa86c254e265ab653ddd76b6d5da9026550b3",
+      "bytes": 101080
+    },
+    "counterverification_limit": "Binary hash verified without execution; exit 3 and 216/44 results remain attributed to delegated runner because no full raw transcript or matching initial source snapshot is archived."
+  },
+  "temporal_and_provenance_limits": [
+    "Source pins were originally taken after tests; this review before/after stability is not retroactive build-time mutation monitoring.",
+    "Configure/build commands, return codes and fresh-directory assertion are declared; their raw stdout/stderr are not archived.",
+    "ASAN_OPTIONS and UBSAN_OPTIONS are present in the declared command, not recorded in LastTest.log; instrumentation is separately supported by compile/link options and ELF dependencies.",
+    "No XML exists in archive or either observed build; no XML/output double comparison is claimed.",
+    "Logs date test starts/ends to minutes (14:05 UTC Release, 14:07 UTC sanitized) and print rounded elapsed times; no host identifier, scheduler isolation, CPU affinity or benchmark envelope is archived.",
+    "CMake compiler metadata supports GNU 13.3.0 and platform locally but is not a hermetic toolchain capture; system headers and linked library bytes are not pinned in the published source seal.",
+    "ELF artifacts are local hash witnesses; binary bytes are not included in the Git receipt package.",
+    "Only two dedicated CTests per configuration ran, although registration contains 387 tests; registration does not qualify the other 385.",
+    "Read-only counterverification and source review do not constitute an auditor rerun or independent geometric qualification. Root separately qualifies C++ against sealed FULL journals."
+  ],
+  "review_scope": {
+    "builds_executed": 0,
+    "engine_executions": 0,
+    "git_mutations": 0,
+    "writes": "only these independent review JSON/Markdown files under audits",
+    "gcp_used": false
+  },
+  "before_after_stable": true,
+  "observed_file_count": 42
+}

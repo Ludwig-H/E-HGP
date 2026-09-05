@@ -1,0 +1,7 @@
+{
+  "status": "rejected",
+  "reason": "full_cpp.cut_boundary",
+  "checker_sha256": "bfef0116bbb66d8baaa8db278e06bbee2866f22ffa43a737c68e4a04d42735c9",
+  "output_sha256": "ca68fd6ed2acfb358d0bc1d17f0967506c2b245a1a0c6fc83ad253d72c81a900",
+  "python_optimized": true
+}
