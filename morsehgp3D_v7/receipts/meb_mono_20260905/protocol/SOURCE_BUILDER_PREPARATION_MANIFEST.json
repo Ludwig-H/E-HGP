@@ -1,0 +1,45 @@
+{
+  "builder_executions_by_preparing_agent": 0,
+  "engine_runs_by_preparing_agent": 0,
+  "files": [
+    {
+      "bytes": 9292,
+      "path": "build_cli.py",
+      "sha256": "428714891c4a5741988f3255593d9727637f876e1a07544137453f16899b150d"
+    },
+    {
+      "bytes": 6659,
+      "path": "build_cli_selftest.py",
+      "sha256": "5697fac2ad584b7f50bcdf0e4536aa96f08ee8e13a6f3521e1d31cd47ffb9d3d"
+    },
+    {
+      "bytes": 2843,
+      "path": "BUILD_CLI.md",
+      "sha256": "30cb0a42d8c27e37c2c5c8ab4a8cea1893bc7efa0ba21bd1f0ee954334f3f0c4"
+    },
+    {
+      "bytes": 1051,
+      "path": "build_preparation/prepared_preview.log",
+      "sha256": "0c3aa1f487fd6137e14b1f039e2c5602b99bd040d02a9454bda289a70bca4919"
+    },
+    {
+      "bytes": 2015,
+      "path": "build_preparation/results.json",
+      "sha256": "4b75b785862432d2532d05677293e64a3953ac01e7695b724b7f1bf90e01dd65"
+    },
+    {
+      "bytes": 100,
+      "path": "build_preparation/selftest.log",
+      "sha256": "b4e0267d51ecc520242e16dc1d6d8461b5157a94ae2f31b62263f34719707840"
+    },
+    {
+      "bytes": 100,
+      "path": "build_preparation/selftest_optimized.log",
+      "sha256": "088e16fbcdf30e2c8e5462ad3ceb86b076f237f2dac41499b782c05719095f04"
+    }
+  ],
+  "gcp": "not_used",
+  "runner_sha256": "3abe27f8a10173867a0395430ff56392bb82b5cbee3eb766fb293ffa65cc2645",
+  "scope": "builder_preparation_only_actual_build_owned_by_root_and_receipted_separately",
+  "status": "prepared_tests_passed"
+}

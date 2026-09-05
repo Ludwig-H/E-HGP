@@ -113,6 +113,7 @@ Lire [l'état de livraison](PASSATION.md),
 [les portes arithmétiques intégrées](receipts/arithmetic_gates_20260904/README.md),
 [le mode mono](docs/MODE_MONO.md),
 [la première comparaison s=8/10/12](docs/RESULTATS_MONO_20260904.md),
+[la comparaison mono de la MEB différée](docs/RESULTATS_MONO_MEB_20260905.md),
 [les résultats G4 à 50k et les primitives GPU](docs/RESULTATS_G4_20260904.md),
 [les limites de résidence et la voie massive](docs/RESIDENCE_MASSIVE.md),
 [l'état courant](audits/ETAT_COURANT.md) et

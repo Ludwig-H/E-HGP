@@ -1,0 +1,42 @@
+{
+  "C_process_seconds": 225.74753629900079,
+  "D_process_seconds": 172.67457106200163,
+  "classification_and_all_record_fields_match": true,
+  "ended_utc": "2026-09-05T00:13:05.495688Z",
+  "engine_runs": 0,
+  "equality": {
+    "cardinalities": true,
+    "counts": true,
+    "digests": true,
+    "payload_caps": true,
+    "silent": true,
+    "silent_limits": true
+  },
+  "gcp": "not_used",
+  "helper_sha256": {
+    "compare_v6_v7.py": "fe22493fcb7494813e79fea9826873cce8cf14918097ce500b44018f1a64f2ef",
+    "incidence_campaign.py": "6ca21d8b1c89e6baea99ecc3dd414b35d06581df50833e76bac9bdc1d5d1c20a"
+  },
+  "manifest_sha256": "707ff3ed47779f8ffd6aa88b416886a9395d37a88c0119c3989ee1bd56db3a6b",
+  "observed_process_reduction_percent_one_pair": 23.50987572537866,
+  "observed_silent_reduction_percent_one_pair": 43.42603882551691,
+  "public_status": "not_claimed",
+  "raw_files_verified": 11,
+  "replayed_roles": [
+    "C",
+    "D"
+  ],
+  "replayed_statuses": [
+    "engine_completed",
+    "engine_completed"
+  ],
+  "runner_sha256": "3abe27f8a10173867a0395430ff56392bb82b5cbee3eb766fb293ffa65cc2645",
+  "scope": "read_only_raw_replay_not_new_engine_run",
+  "shared_host": true,
+  "slo": "not_evaluated",
+  "source_helpers_binaries_and_bindings_revalidated": true,
+  "started_utc": "2026-09-05T00:06:26.930933Z",
+  "statistical_speedup": "not_claimed",
+  "status": "passed",
+  "terminal_decision_matches": true
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "mhgp7.meb-lazy.integration-binding.v1",
+  "public_status": "not_claimed",
+  "integrated": true,
+  "method": "apply_patch only, four authorized product files; no v6 edits",
+  "source_reference": "build/v7_meb_lazy_gate_proposal/revision2",
+  "pins_sha256": "5214a9a7f2b6f53b1c59c803d414e109c9a660f15ab9448d88aec90300160c71  morsehgp3D_v7/src/forest/silent_incidence.hpp\nd0a49c091574a6582f43261206b4c808538c258ca67fdd09acc79a77fb0da5c3  morsehgp3D_v7/src/core/mutants.hpp\n122807a3fe431bd9658262f8061bcb7e2258a7832516ceff918da52d08ac3a55  morsehgp3D_v7/tests/meb_lazy_gate.cpp\n9ea0efbfa913d6de86cb6c8a2c40052eab66f1a8351e903b34fcca8648ff988a  morsehgp3D_v7/CMakeLists.txt\nd5f273e37d506daf3894c8d7fd271e3b8b877522119863d73d629344ab499bed  build/v7_meb_lazy_gate_proposal/revision2/integration.patch\n24e9801fc03ae3c049496d0cd87567ff0edc769b94dd1ba441dc8b47f4cec3c3  build/v7_meb_integrated_tests/run_targeted.py\n25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2  build/v7/mhgp7\n25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2  build/v7_c_qualification/mhgp7\n",
+  "allowed_product_edits": [
+    "src/forest/silent_incidence.hpp",
+    "src/core/mutants.hpp",
+    "tests/meb_lazy_gate.cpp",
+    "CMakeLists.txt"
+  ],
+  "independent_review": "/root/audit_v6_math: real source/test byte comparisons rc0; exactly 3 mutant names and 7 appended CTests",
+  "qualification": "32 fixed CTests per isolated Release/ASAN-UBSAN build; no benchmark",
+  "gcp": "not_used"
+}

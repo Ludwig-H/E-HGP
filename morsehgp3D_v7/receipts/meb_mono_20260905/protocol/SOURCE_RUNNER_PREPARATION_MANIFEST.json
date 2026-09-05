@@ -1,0 +1,44 @@
+{
+  "engine_runs": 0,
+  "files": [
+    {
+      "bytes": 24534,
+      "path": "runner.py",
+      "sha256": "3abe27f8a10173867a0395430ff56392bb82b5cbee3eb766fb293ffa65cc2645"
+    },
+    {
+      "bytes": 24836,
+      "path": "selftest.py",
+      "sha256": "f192a95f013e0b1df56a9324d8f18034949cd51410fcc6d41e8ee87af9048348"
+    },
+    {
+      "bytes": 7345,
+      "path": "README.md",
+      "sha256": "36a67f04d4be28dbb0ff1b195928c6252046b9ff4e093cada96c3403d7f4b8bb"
+    },
+    {
+      "bytes": 631,
+      "path": "validation_v3/results.json",
+      "sha256": "0239ce7c897eae1493d0e8ccd180f5ddcc1dfda37a70810421692c49e2ab551a"
+    },
+    {
+      "bytes": 111,
+      "path": "validation_v3/selftest.log",
+      "sha256": "38782bacceebbcea0d842d1ef8fbc5aca83a8652bc72c32840298916056c880d"
+    },
+    {
+      "bytes": 111,
+      "path": "validation_v3/selftest_optimized.log",
+      "sha256": "a2af3199259cabac85e75d74a187f1074ed51dfb02cefc086e47b68c1742bf40"
+    }
+  ],
+  "gcp": "not_used",
+  "historical_revision2_manifest": {
+    "path": "revision2/prepared_manifest_v2.json",
+    "referenced_files_verified": true,
+    "sha256": "6eb797e3b885a1ff725d2965ff3bf115d565216295929ad8bb9642d0190cd914"
+  },
+  "revision": 3,
+  "scope": "paired_runner_only",
+  "status": "prepared_not_executed"
+}

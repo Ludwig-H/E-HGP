@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v7_meb_integrated_tests/release",
+    "--parallel",
+    "2",
+    "--target",
+    "mhgp7_meb_lazy_gate",
+    "mhgp7_silent_incidence_gate",
+    "mhgp7",
+    "mhgp7_archive_api_gate",
+    "mhgp7_archive_cleanup_gate",
+    "mhgp7_mono_inline_gate",
+    "mhgp7_census_direct_gate",
+    "mhgp7_bad_alloc_gate",
+    "mhgp7_thread_failure_gate"
+  ],
+  "started_utc": "2026-09-04T23:56:59Z",
+  "status": "running",
+  "timeout_seconds": 1200
+}

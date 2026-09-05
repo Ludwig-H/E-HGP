@@ -1,0 +1,115 @@
+"""Prepared builder decisions with fake compiler outputs; no real build."""
+from __future__ import annotations
+import contextlib
+import copy
+import io
+import json
+from pathlib import Path
+import tempfile
+import unittest
+from unittest.mock import patch
+
+import build_cli as B
+
+COMMON, INCIDENCE = B.R.helpers()
+
+
+class BuildCliGate(unittest.TestCase):
+    def test_prepared_never_creates_or_runs(self):
+        with tempfile.TemporaryDirectory(prefix="mhgp7-build-prepare-") as tmp:
+            base = Path(tmp)
+            with patch.object(B.R, "helpers", side_effect=RuntimeError("must not execute")), contextlib.redirect_stdout(io.StringIO()) as text:
+                self.assertEqual(B.main(["--build-dir", str(base / "D"), "--output", str(base / "out")]), 0)
+            self.assertEqual(list(base.iterdir()), [])
+            self.assertEqual(json.loads(text.getvalue())["status"], "prepared_not_executed")
+
+    def test_fake_build_completion_failures_and_late_rejection(self):
+        for mode in ("completed", "build_failed", "censored", "interrupted", "drift", "late_repository_error", "late_binary_change",
+                     "late_cache_change", "late_database_change"):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory(prefix="mhgp7-build-fake-") as tmp:
+                root = Path(tmp)
+                source, build, output = root / "morsehgp3D_v7", root / "build/D", root / "receipt"
+                for name in ("src", "cli", "oracle"):
+                    (source / name).mkdir(parents=True)
+                (source / "CMakeLists.txt").write_text("source fixture")
+                cli = source / "cli/mhgp7.cpp"
+                cli.write_text("int main(){}")
+                before = {"files": {str(B.R.BASELINE): B.R.BASELINE_SHA,
+                                    str(B.HERE / "runner.py"): B.RUNNER_SHA},
+                          "sources": B.R.candidate_sources(source)}
+                state = {"changed": False, "repository_calls": 0}
+                calls = []
+
+                def tracking(_common):
+                    value = copy.deepcopy(before)
+                    if state["changed"]:
+                        value["sources"]["CMakeLists.txt"] = "changed"
+                    return value
+
+                def repository():
+                    state["repository_calls"] += 1
+                    if state["repository_calls"] == 2:
+                        if mode == "late_repository_error":
+                            raise RuntimeError("late fixture error")
+                        if mode == "late_binary_change":
+                            (build / "mhgp7").write_bytes(b"changed after first binding validation")
+                        if mode == "late_cache_change":
+                            (build / "CMakeCache.txt").write_text("changed cache at terminal boundary")
+                        if mode == "late_database_change":
+                            (build / "compile_commands.json").write_text("[]")
+                    return {"head": "fixture", "worktree_porcelain": ""}
+
+                def run(argv, out, err, *, timeout, address_limit_gib):
+                    calls.append(argv)
+                    self.assertLessEqual(timeout, 300)
+                    self.assertEqual(address_limit_gib, 26)
+                    out.write_text("fixture compiler output\n")
+                    err.write_text("")
+                    if "-S" in argv:
+                        build.mkdir(parents=True)
+                        (build / "CMakeCache.txt").write_text("CMAKE_BUILD_TYPE:STRING=Release\nMHGP7_ENABLE_CUDA:BOOL=OFF\nCMAKE_HOME_DIRECTORY:INTERNAL=" + str(source) + "\n")
+                        entry = {"directory": str(build), "file": str(cli), "command": "/usr/bin/c++ -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o -c " + str(cli)}
+                        (build / "compile_commands.json").write_text(json.dumps([entry]))
+                    if "--build" in argv:
+                        self.assertEqual(argv, ["cmake", "--build", str(build), "--parallel", "2", "--target", "mhgp7"])
+                        if mode == "interrupted":
+                            raise KeyboardInterrupt("fixture interruption")
+                        (build / "mhgp7").write_bytes(b"fixture executable bytes, never executed")
+                        (build / "mhgp7").chmod(0o700)
+                        state["changed"] = mode == "drift"
+                        if mode == "build_failed":
+                            return 1, False, 0.001
+                        if mode == "censored":
+                            return -9, True, 0.001
+                    return 0, False, 0.001
+
+                with patch.object(B, "SOURCE", source), patch.object(B.R, "ROOT", root), \
+                        patch.object(B.R, "helpers", return_value=(COMMON, INCIDENCE)), \
+                        patch.object(B.R, "baseline_binding", return_value={}), patch.object(B, "tracking", side_effect=tracking), \
+                        patch.object(B.R, "repository_state", side_effect=repository), \
+                        patch.object(B.R, "host_observation", return_value={"host_shared": True}), \
+                        patch.object(COMMON, "run_process", side_effect=run), contextlib.redirect_stdout(io.StringIO()):
+                    rc = B.execute(build, output)
+                    with self.assertRaises(FileExistsError):
+                        B.execute(build, output)
+                summary = json.loads((output / "summary.json").read_text())
+                attempts = json.loads((output / "runs.json").read_text())
+                self.assertEqual(len(calls), 4)
+                self.assertEqual(len(attempts), 4)
+                self.assertTrue((output / "hashes.json").is_file())
+                self.assertEqual(rc, 0 if mode == "completed" else 1)
+                self.assertEqual((output / "build_D.json").exists(), mode == "completed")
+                self.assertEqual(summary["engine_runs"], 0)
+                if mode == "completed":
+                    self.assertEqual(summary["status"], "completed")
+                    value = json.loads((output / "build_D.json").read_text())
+                    B.R.candidate_binding(build / "mhgp7", source, output / "build_D.json")
+                    self.assertEqual(value["sources_before"], value["sources_after"])
+                else:
+                    self.assertEqual(summary["status"], "failed_or_invalid")
+                if mode.startswith("late_"):
+                    self.assertTrue((output / "build_record.provisional.json").exists())
+
+
+if __name__ == "__main__":
+    unittest.main()

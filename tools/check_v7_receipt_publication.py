@@ -28,11 +28,15 @@ def verify_manifest(manifest: str, data: bytes,
     for line in data.decode("utf-8").splitlines():
         match = re.fullmatch(r"([0-9a-f]{64})  ([A-Za-z0-9_./-]+)", line)
         require(match is not None, f"{manifest}: malformed checksum line")
-        expected, path = match.groups()
-        parts = PurePosixPath(path).parts
-        require(path.startswith(parent) and not path.startswith("/")
-                and ".." not in parts and str(PurePosixPath(path)) == path,
+        expected, written_path = match.groups()
+        parts = PurePosixPath(written_path).parts
+        require(not written_path.startswith("/") and ".." not in parts
+                and str(PurePosixPath(written_path)) == written_path,
                 f"{manifest}: path escapes its receipt")
+        # Both established repository-root paths and conventional receipt-local
+        # paths resolve to indexed blobs; never fall back to the working tree.
+        path = written_path if written_path.startswith(PREFIX) else parent + written_path
+        require(path.startswith(parent), f"{manifest}: path escapes its receipt")
         require(path != manifest and path not in seen,
                 f"{manifest}: repeated or recursive entry")
         seen.add(path)
@@ -81,18 +85,21 @@ def selftest() -> None:
         return payload
 
     require(verify_manifest(manifest, line, fetch) == 1, "positive fixture")
+    local_line = f"{digest}  result.log\n".encode()
+    require(verify_manifest(manifest, local_line, fetch) == 1, "receipt-local fixture")
     rejected = 0
     for bad in (b"", line + line, b"malformed\n",
                 f"{'0' * 64}  {path}\n".encode(),
                 f"{digest}  {PREFIX}fixture/missing.log\n".encode(),
                 f"{digest}  {PREFIX}fixture/../escape.log\n".encode(),
-                f"{digest}  {PREFIX}elsewhere/result.log\n".encode()):
+                f"{digest}  {PREFIX}elsewhere/result.log\n".encode(),
+                line + local_line, f"{digest}  /absolute/result.log\n".encode()):
         try:
             verify_manifest(manifest, bad, fetch)
         except ValueError:
             rejected += 1
-    require(rejected == 7, "a publication counter-fixture survived")
-    print("receipt_publication_selftest positive=1 rejected=7 PASS")
+    require(rejected == 9, "a publication counter-fixture survived")
+    print("receipt_publication_selftest positive=2 rejected=9 PASS")
 
 
 def main() -> int:

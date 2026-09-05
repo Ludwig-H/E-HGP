@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_meb_qualification",
+    "--output-on-failure",
+    "--no-tests=error",
+    "-L",
+    "^gate$",
+    "--parallel",
+    "2",
+    "--output-junit",
+    "/workspaces/E-HGP/build/v7_meb_full_release/full_release/ctest.junit.xml"
+  ],
+  "elapsed_seconds": 574.116821607,
+  "exit_code": 0,
+  "started_utc": "2026-09-05T00:17:46Z",
+  "status": "completed",
+  "timeout_seconds": 7200
+}

@@ -1,0 +1,31 @@
+{
+  "affinity_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "all_gate_executions": "fresh",
+  "build_kind": "incremental",
+  "expected_C_sha256": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+  "expected_D_sha256": "127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f",
+  "expected_names_sha256": "0c85da58fdc386a00effbc82ebd85ccf4f71ac9e9f2ee329aa99ae3270154223",
+  "gcp": "not_used",
+  "head": "eabedd7e39639acd4980eaacec66bc12000ff9f1",
+  "helper_sha256": "582922e64fcd2927be3e63c7156fefa839fd1f8c055f92a75c97514cad7a0ee5",
+  "public_status": "not_claimed",
+  "runner_sha256": "1ad9089c4542a0d6539376c0c67a723d204417b755a41c7f4953e7c70ee61a9f",
+  "started_utc": "2026-09-05T00:13:53Z",
+  "uname": [
+    "Linux",
+    "codespaces-0bcb78",
+    "6.8.0-1052-azure",
+    "#58~22.04.1-Ubuntu SMP Thu Mar 26 05:02:21 UTC 2026",
+    "x86_64"
+  ],
+  "worktree": " M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/audits/DIALOGUE_COURANT.md\n M morsehgp3D_v7/docs/ERRATA_PUBLICATION_20260904.md\n M morsehgp3D_v7/src/core/mutants.hpp\n M morsehgp3D_v7/src/forest/silent_incidence.hpp\n M tools/check_v7_receipt_publication.py\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/docs/OPTIMISATION_MEB_DIFFEREE.md\n?? morsehgp3D_v7/receipts/meb_lazy_integrated_20260905/\n?? morsehgp3D_v7/receipts/meb_lazy_review_20260904/\n?? morsehgp3D_v7/tests/meb_lazy_gate.cpp\n"
+}

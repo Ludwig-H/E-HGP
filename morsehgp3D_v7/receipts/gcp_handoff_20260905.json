@@ -1,0 +1,28 @@
+{
+  "schema": "mhgp7-gcp-read-only-handoff-check-v1",
+  "recorded_utc": "2026-09-05T00:26:13Z",
+  "public_status": "not_claimed",
+  "mutations": 0,
+  "command_exit_code": 0,
+  "project": "devpod-gpu-exploration",
+  "zone": "us-central1-b",
+  "sdk": "/home/codespace/google-cloud-sdk/bin/gcloud",
+  "describe_selection": "name,id,status,lastStartTimestamp,scheduling.provisioningModel,scheduling.instanceTerminationAction,scheduling.maxRunDuration,labels.project",
+  "target": {
+    "id": "4526841274685623561",
+    "labels": {"project": "e-hgp"},
+    "lastStartTimestamp": "2026-09-04T15:45:50.919-07:00",
+    "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "scheduling": {
+      "instanceTerminationAction": "STOP",
+      "maxRunDuration": {"nanos": 0, "seconds": "3600"},
+      "provisioningModel": "SPOT"
+    },
+    "status": "TERMINATED"
+  },
+  "inventory_filter": "labels.project=e-hgp AND status=RUNNING",
+  "inventory_selection": "name,zone,status,id,lastStartTimestamp",
+  "running_labelled_instances": [],
+  "scope": "read-only recheck of the same stopped target generation and current labelled RUNNING inventory; not a new session or GPU test",
+  "storage_note": "previously retained boot disk was not deleted; stopped compute does not imply zero storage charges"
+}

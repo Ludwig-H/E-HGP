@@ -1,0 +1,187 @@
+{
+  "status": "passed",
+  "public_status": "not_claimed",
+  "scope": "14 argv replays on existing source-owner overlay binaries; not a rebuild",
+  "records": [
+    {
+      "binary": "release/mhgp7_meb_lazy_gate",
+      "binary_sha256": "893b78577f199c80aa0c80bb349af1d7b3ae9c1ad3fa3bb9fd45f0bad4c33b47",
+      "args": [],
+      "expected_exit_code": 0,
+      "expected_prefix": "meb_lazy_gate=passed mutant=none divergence=none",
+      "exit_code": 0,
+      "stdout": "meb_lazy_gate=passed mutant=none divergence=none public_status=not_claimed\nmeb_lazy_counts cases=11805 success=664 degenerate=8 capped=11133 q2=53 q3=79 q4=34 logical_reject3=329615 logical_reject4=26952 materialized3=320 materialized4=136 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=4 reference_complete=1\n",
+      "stderr": "",
+      "elapsed_seconds": 0.18320984300044074
+    },
+    {
+      "binary": "release/mhgp7_meb_lazy_gate",
+      "binary_sha256": "893b78577f199c80aa0c80bb349af1d7b3ae9c1ad3fa3bb9fd45f0bad4c33b47",
+      "args": [
+        "--mutant=silent-meb-q3-reject-shell"
+      ],
+      "expected_exit_code": 4,
+      "expected_prefix": "meb_lazy_gate=mutant_killed mutant=silent-meb-q3-reject-shell divergence=differential.status_reason",
+      "exit_code": 4,
+      "stdout": "meb_lazy_gate=mutant_killed mutant=silent-meb-q3-reject-shell divergence=differential.status_reason public_status=not_claimed\nmeb_lazy_counts cases=0 success=0 degenerate=0 capped=0 q2=0 q3=0 q4=0 logical_reject3=1 logical_reject4=0 materialized3=0 materialized4=0 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=3 reference_complete=1\n",
+      "stderr": "",
+      "elapsed_seconds": 0.0025389450001966907
+    },
+    {
+      "binary": "release/mhgp7_meb_lazy_gate",
+      "binary_sha256": "893b78577f199c80aa0c80bb349af1d7b3ae9c1ad3fa3bb9fd45f0bad4c33b47",
+      "args": [
+        "--mutant=silent-meb-q4-reject-shell"
+      ],
+      "expected_exit_code": 4,
+      "expected_prefix": "meb_lazy_gate=mutant_killed mutant=silent-meb-q4-reject-shell divergence=differential.status_reason",
+      "exit_code": 4,
+      "stdout": "meb_lazy_gate=mutant_killed mutant=silent-meb-q4-reject-shell divergence=differential.status_reason public_status=not_claimed\nmeb_lazy_counts cases=0 success=0 degenerate=0 capped=0 q2=0 q3=0 q4=0 logical_reject3=4 logical_reject4=1 materialized3=0 materialized4=0 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=4 reference_complete=1\n",
+      "stderr": "",
+      "elapsed_seconds": 0.002228654000646202
+    },
+    {
+      "binary": "release/mhgp7_meb_lazy_gate",
+      "binary_sha256": "893b78577f199c80aa0c80bb349af1d7b3ae9c1ad3fa3bb9fd45f0bad4c33b47",
+      "args": [
+        "--mutant=silent-meb-eager-materialization"
+      ],
+      "expected_exit_code": 4,
+      "expected_prefix": "meb_lazy_gate=mutant_killed mutant=silent-meb-eager-materialization divergence=logical_rejected_materialization",
+      "exit_code": 4,
+      "stdout": "meb_lazy_gate=mutant_killed mutant=silent-meb-eager-materialization divergence=logical_rejected_materialization public_status=not_claimed\nmeb_lazy_counts cases=11805 success=664 degenerate=8 capped=11133 q2=53 q3=79 q4=34 logical_reject3=329615 logical_reject4=26952 materialized3=329935 materialized4=27088 rejected_materialized3=329615 rejected_materialized4=26952 reference_minimal_q=4 reference_complete=1\n",
+      "stderr": "",
+      "elapsed_seconds": 0.29079499500039674
+    },
+    {
+      "binary": "release/mhgp7_meb_lazy_gate",
+      "binary_sha256": "893b78577f199c80aa0c80bb349af1d7b3ae9c1ad3fa3bb9fd45f0bad4c33b47",
+      "args": [
+        "--mutant=unknown"
+      ],
+      "expected_exit_code": 2,
+      "expected_prefix": null,
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "",
+      "elapsed_seconds": 0.002034011000432656
+    },
+    {
+      "binary": "release/mhgp7_meb_lazy_gate",
+      "binary_sha256": "893b78577f199c80aa0c80bb349af1d7b3ae9c1ad3fa3bb9fd45f0bad4c33b47",
+      "args": [
+        "--mutant="
+      ],
+      "expected_exit_code": 2,
+      "expected_prefix": null,
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "",
+      "elapsed_seconds": 0.0016960089997155592
+    },
+    {
+      "binary": "release/mhgp7_meb_lazy_gate",
+      "binary_sha256": "893b78577f199c80aa0c80bb349af1d7b3ae9c1ad3fa3bb9fd45f0bad4c33b47",
+      "args": [
+        "--mutant=silent-meb-q3-reject-shell",
+        "--mutant=silent-meb-q3-reject-shell"
+      ],
+      "expected_exit_code": 2,
+      "expected_prefix": null,
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "",
+      "elapsed_seconds": 0.001649362000534893
+    },
+    {
+      "binary": "sanitized/mhgp7_meb_lazy_gate",
+      "binary_sha256": "d92c133db6fb300bd848a6c54e206a5253f75ea93ab3769cfc3b6b985ebdd123",
+      "args": [],
+      "expected_exit_code": 0,
+      "expected_prefix": "meb_lazy_gate=passed mutant=none divergence=none",
+      "exit_code": 0,
+      "stdout": "meb_lazy_gate=passed mutant=none divergence=none public_status=not_claimed\nmeb_lazy_counts cases=11805 success=664 degenerate=8 capped=11133 q2=53 q3=79 q4=34 logical_reject3=329615 logical_reject4=26952 materialized3=320 materialized4=136 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=4 reference_complete=1\n",
+      "stderr": "",
+      "elapsed_seconds": 0.9042579930010106
+    },
+    {
+      "binary": "sanitized/mhgp7_meb_lazy_gate",
+      "binary_sha256": "d92c133db6fb300bd848a6c54e206a5253f75ea93ab3769cfc3b6b985ebdd123",
+      "args": [
+        "--mutant=silent-meb-q3-reject-shell"
+      ],
+      "expected_exit_code": 4,
+      "expected_prefix": "meb_lazy_gate=mutant_killed mutant=silent-meb-q3-reject-shell divergence=differential.status_reason",
+      "exit_code": 4,
+      "stdout": "meb_lazy_gate=mutant_killed mutant=silent-meb-q3-reject-shell divergence=differential.status_reason public_status=not_claimed\nmeb_lazy_counts cases=0 success=0 degenerate=0 capped=0 q2=0 q3=0 q4=0 logical_reject3=1 logical_reject4=0 materialized3=0 materialized4=0 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=3 reference_complete=1\n",
+      "stderr": "",
+      "elapsed_seconds": 0.017390997001712094
+    },
+    {
+      "binary": "sanitized/mhgp7_meb_lazy_gate",
+      "binary_sha256": "d92c133db6fb300bd848a6c54e206a5253f75ea93ab3769cfc3b6b985ebdd123",
+      "args": [
+        "--mutant=silent-meb-q4-reject-shell"
+      ],
+      "expected_exit_code": 4,
+      "expected_prefix": "meb_lazy_gate=mutant_killed mutant=silent-meb-q4-reject-shell divergence=differential.status_reason",
+      "exit_code": 4,
+      "stdout": "meb_lazy_gate=mutant_killed mutant=silent-meb-q4-reject-shell divergence=differential.status_reason public_status=not_claimed\nmeb_lazy_counts cases=0 success=0 degenerate=0 capped=0 q2=0 q3=0 q4=0 logical_reject3=4 logical_reject4=1 materialized3=0 materialized4=0 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=4 reference_complete=1\n",
+      "stderr": "",
+      "elapsed_seconds": 0.016680970000379602
+    },
+    {
+      "binary": "sanitized/mhgp7_meb_lazy_gate",
+      "binary_sha256": "d92c133db6fb300bd848a6c54e206a5253f75ea93ab3769cfc3b6b985ebdd123",
+      "args": [
+        "--mutant=silent-meb-eager-materialization"
+      ],
+      "expected_exit_code": 4,
+      "expected_prefix": "meb_lazy_gate=mutant_killed mutant=silent-meb-eager-materialization divergence=logical_rejected_materialization",
+      "exit_code": 4,
+      "stdout": "meb_lazy_gate=mutant_killed mutant=silent-meb-eager-materialization divergence=logical_rejected_materialization public_status=not_claimed\nmeb_lazy_counts cases=11805 success=664 degenerate=8 capped=11133 q2=53 q3=79 q4=34 logical_reject3=329615 logical_reject4=26952 materialized3=329935 materialized4=27088 rejected_materialized3=329615 rejected_materialized4=26952 reference_minimal_q=4 reference_complete=1\n",
+      "stderr": "",
+      "elapsed_seconds": 1.1565984530006972
+    },
+    {
+      "binary": "sanitized/mhgp7_meb_lazy_gate",
+      "binary_sha256": "d92c133db6fb300bd848a6c54e206a5253f75ea93ab3769cfc3b6b985ebdd123",
+      "args": [
+        "--mutant=unknown"
+      ],
+      "expected_exit_code": 2,
+      "expected_prefix": null,
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "",
+      "elapsed_seconds": 0.01018122399909771
+    },
+    {
+      "binary": "sanitized/mhgp7_meb_lazy_gate",
+      "binary_sha256": "d92c133db6fb300bd848a6c54e206a5253f75ea93ab3769cfc3b6b985ebdd123",
+      "args": [
+        "--mutant="
+      ],
+      "expected_exit_code": 2,
+      "expected_prefix": null,
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "",
+      "elapsed_seconds": 0.009658517999923788
+    },
+    {
+      "binary": "sanitized/mhgp7_meb_lazy_gate",
+      "binary_sha256": "d92c133db6fb300bd848a6c54e206a5253f75ea93ab3769cfc3b6b985ebdd123",
+      "args": [
+        "--mutant=silent-meb-q3-reject-shell",
+        "--mutant=silent-meb-q3-reject-shell"
+      ],
+      "expected_exit_code": 2,
+      "expected_prefix": null,
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "",
+      "elapsed_seconds": 0.009788892000869964
+    }
+  ]
+}

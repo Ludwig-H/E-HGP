@@ -1,0 +1,17 @@
+{
+  "schema": "mhgp7.meb-integrated-sanitizer-launch.v1",
+  "public_status": "not_claimed",
+  "runner_sha256": "24e9801fc03ae3c049496d0cd87567ff0edc769b94dd1ba441dc8b47f4cec3c3",
+  "environment_overrides": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "argv": [
+    "env",
+    "ASAN_OPTIONS=detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1",
+    "python3", "-B", "build/v7_meb_integrated_tests/run_targeted.py", "--mode", "sanitized"
+  ],
+  "inheritance": "runner helper run creates subprocess environments from os.environ, preserving both explicit option values; no runner edit after Release began",
+  "scope": "32 bounded integrated gates; no proof of memory safety outside tested executions; no benchmark, GCP or historical C modification"
+}

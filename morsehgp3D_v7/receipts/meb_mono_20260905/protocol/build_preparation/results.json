@@ -1,0 +1,26 @@
+{
+  "status": "prepared_tests_passed",
+  "builds": 0,
+  "engine_runs": 0,
+  "gcp": "not_used",
+  "checks": [
+    {
+      "name": "selftest",
+      "command": "python3 -B build/v7_meb_paired/build_cli_selftest.py",
+      "exit_code": 0,
+      "output": "..\n----------------------------------------------------------------------\nRan 2 tests in 0.331s\n\nOK\n"
+    },
+    {
+      "name": "selftest_optimized",
+      "command": "python3 -B -O build/v7_meb_paired/build_cli_selftest.py",
+      "exit_code": 0,
+      "output": "..\n----------------------------------------------------------------------\nRan 2 tests in 0.336s\n\nOK\n"
+    },
+    {
+      "name": "prepared_preview",
+      "command": "python3 -B build/v7_meb_paired/build_cli.py --output build/v7_meb_paired/build_D_receipt",
+      "exit_code": 0,
+      "output": "{\n  \"status\": \"prepared_not_executed\",\n  \"writes\": false,\n  \"engine_runs\": 0,\n  \"build_dir_exists\": true,\n  \"commands\": [\n    [\n      \"compiler_version\",\n      [\n        \"c++\",\n        \"--version\"\n      ],\n      30\n    ],\n    [\n      \"cmake_version\",\n      [\n        \"cmake\",\n        \"--version\"\n      ],\n      30\n    ],\n    [\n      \"configure\",\n      [\n        \"cmake\",\n        \"-S\",\n        \"/workspaces/E-HGP/morsehgp3D_v7\",\n        \"-B\",\n        \"/workspaces/E-HGP/build/v7_meb_qualification\",\n        \"-DCMAKE_BUILD_TYPE=Release\",\n        \"-DMHGP7_ENABLE_CUDA=OFF\",\n        \"-DCMAKE_EXPORT_COMPILE_COMMANDS=ON\"\n      ],\n      300\n    ],\n    [\n      \"build\",\n      [\n        \"cmake\",\n        \"--build\",\n        \"/workspaces/E-HGP/build/v7_meb_qualification\",\n        \"--parallel\",\n        \"2\",\n        \"--target\",\n        \"mhgp7\"\n      ],\n      300\n    ]\n  ],\n  \"output_would_be\": \"/workspaces/E-HGP/build/v7_meb_paired/build_D_receipt\",\n  \"runner_sha256\": \"3abe27f8a10173867a0395430ff56392bb82b5cbee3eb766fb293ffa65cc2645\",\n  \"gcp\": \"not_used\"\n}\n"
+    }
+  ]
+}

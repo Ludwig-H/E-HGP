@@ -1,0 +1,41 @@
+{
+  "public_status": "not_claimed",
+  "status": "passed",
+  "compile_command": "c++ -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -I morsehgp3D_v7 -I morsehgp3D_v7/src/forest -pthread build/v7_meb_review/production_differential.cpp -o build/v7_meb_review/production_differential",
+  "compile_initial": {
+    "chunk_id": "bb9e45",
+    "wall_time_seconds": 1.001208042,
+    "session_id": 88203,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "compile_final": {
+    "chunk_id": "768504",
+    "wall_time_seconds": 0.000001132,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "run_and_pins": {
+    "chunk_id": "67e502",
+    "wall_time_seconds": 0.199799447,
+    "exit_code": 0,
+    "original_token_count": 208,
+    "output": "meb_production_differential=passed mutant=none divergence=none public_status=not_claimed\nmeb_lazy_counts cases=11805 success=664 degenerate=8 capped=11133 q2=53 q3=79 q4=34 logical_reject3=0 logical_reject4=0 materialized3=0 materialized4=0 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=4 reference_complete=1\n4ba0a9b8ae0de9abaf6f762759fddc5cb0b82564c42890198071956645fd6aff  build/v7_meb_review/production_differential\nf91118f2620b36c8d0b0d56ae3c52c3e9b2d9124c01244885d0ea029951b26e8  build/v7_meb_review/production_differential.cpp\n1604fb6fd305d1d27fcff1c423402b50c2541528d09fae7b3d6d0414a5802ce0  build/v7_meb_lazy_gate_proposal/revision2/release/mhgp7_meb_lazy_gate\n33b725ede6210cd138bd914d73fc48a49ab6b13e55ec067025411b77dddff01c  build/v7_meb_lazy_gate_proposal/revision2/sanitized/mhgp7_meb_lazy_gate\n"
+  },
+  "testing_macro_defined": false,
+  "compile_time_guard_against_testing": true,
+  "materialization_counter_symbols_found": 0,
+  "fixtures": 168,
+  "cases": 11805,
+  "success": 664,
+  "unsupported_degeneracy": 8,
+  "capped": 11133,
+  "arity_counts": {
+    "q2": 53,
+    "q3": 79,
+    "q4": 34
+  },
+  "counter_zero_fields": "not observed: test instrumentation intentionally absent; retained reporting globals remain zero",
+  "scope": "production branch differential against explicitly ported C miniball, not full pipeline or performance"
+}

@@ -1,0 +1,16 @@
+{
+  "normal": {
+    "chunk_id": "575fdf",
+    "wall_time_seconds": 0.062178892,
+    "exit_code": 0,
+    "original_token_count": 19,
+    "output": "full_release_junit_selftest positive=1 rejected=8 required_names=323 PASS\n"
+  },
+  "optimized": {
+    "chunk_id": "c16ded",
+    "wall_time_seconds": 0.073081617,
+    "exit_code": 0,
+    "original_token_count": 19,
+    "output": "full_release_junit_selftest positive=1 rejected=8 required_names=323 PASS\n"
+  }
+}

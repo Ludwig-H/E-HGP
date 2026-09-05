@@ -21,6 +21,12 @@ et non contre des fichiers locaux potentiellement absents du commit.
 Sa fixture positive et sept rejets restent actifs sous Python normal et `-O`.
 Ce contrôle ne prétend pas valider les autres formats de reçus JSON.
 
+Extension du 5 septembre : les chemins relatifs au dossier du reçu sont
+également résolus contre l'index, avec les mêmes interdictions de sortie
+du périmètre. Deux écritures désignant le même fichier sont rejetées
+comme doublon. Les manifestes historiques ne sont pas réécrits pour
+uniformiser leur convention de chemins.
+
 ## Journal incomplet du smoke mono historique
 
 Le seizième fichier est le

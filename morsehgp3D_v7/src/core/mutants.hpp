@@ -133,6 +133,8 @@ inline constexpr const char* kMutants[] = {
     "reduced-latent-parent", "reduced-drop-materialization",
     "axis-argmin-floor-only", "axis-argmin-ceil-always", "axis-argmin-no-clip",
     "axis-argmin-narrow-coefficient", "axis-argmin-max-min",
+    "silent-meb-q3-reject-shell", "silent-meb-q4-reject-shell",
+    "silent-meb-eager-materialization",
 };
 
 inline std::vector<std::string>& mutant_registry() {

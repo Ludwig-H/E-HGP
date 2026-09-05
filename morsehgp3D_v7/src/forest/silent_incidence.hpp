@@ -112,6 +112,20 @@ struct LocalBall {
   std::array<i32, 4> support{};
 };
 
+#if defined(MHGP7_TESTING)
+// Private per-thread observations; absent from production and public Stats.
+// These count logical materializations, not retained machine instructions.
+struct MebMaterializationForTests {
+  u64 q3_rejected = 0, q4_rejected = 0;
+  u64 q3_materialized = 0, q4_materialized = 0;
+  u64 q3_rejected_materialized = 0, q4_rejected_materialized = 0;
+};
+inline MebMaterializationForTests& meb_materialization_for_tests() {
+  static thread_local MebMaterializationForTests counters;
+  return counters;
+}
+#endif
+
 class Builder {
  public:
   Builder(const CloudIndex& index, const std::vector<ForestEvent>& direct,
@@ -177,8 +191,31 @@ class Builder {
               p3_dot(p3_sub(pa, pc), p3_sub(pb, pc)) <= 0) continue;
           const Q3Form f = q3_form(pa, pb, pc);
           if (f.g <= 0) continue;
-          found = accept(q3_ball_key(f), promote_level(q3_exact_level(pa, pb, pc)),
-                         {sites[a], sites[b], sites[c], 0}, 3);
+          bool contains = true;
+          for (size_t i = 0; i < n; ++i) {
+            const i128 power = q3_power(f, ix.upos[(size_t)sites[i]]);
+            if (MHGP7_MUTANT("silent-meb-q3-reject-shell") ? power >= 0 : power > 0) {
+              contains = false;
+              break;
+            }
+          }
+          const auto materialize = [&]() {
+#if defined(MHGP7_TESTING)
+            auto& observed = meb_materialization_for_tests();
+            ++observed.q3_materialized;
+            if (!contains) ++observed.q3_rejected_materialized;
+#endif
+            return std::pair<BallKey, ExactLevel>{q3_ball_key(f), promote_level(q3_exact_level(pa, pb, pc))};
+          };
+          if (!contains) {
+#if defined(MHGP7_TESTING)
+            ++meb_materialization_for_tests().q3_rejected;
+            if (MHGP7_MUTANT("silent-meb-eager-materialization")) (void)materialize();
+#endif
+            continue;
+          }
+          const auto built = materialize();
+          found = accept(built.first, built.second, {sites[a], sites[b], sites[c], 0}, 3);
         }
     for (size_t a = 0; a < n && !found; ++a)
       for (size_t b = a + 1; b < n && !found; ++b)
@@ -191,8 +228,31 @@ class Builder {
             const P3& pd = ix.upos[(size_t)sites[d]];
             const Q4Form f = q4_form(pa, pb, pc, pd);
             if (f.det == 0 || !q4_center_strictly_inside(f, pa, pb, pc, pd)) continue;
-            found = accept(ball_key_reduce(q4_ball_form(f)), q4_level_raw(f),
-                           {sites[a], sites[b], sites[c], sites[d]}, 4);
+            bool contains = true;
+            for (size_t i = 0; i < n; ++i) {
+              const i128 power = q4_power(f, ix.upos[(size_t)sites[i]]);
+              if (MHGP7_MUTANT("silent-meb-q4-reject-shell") ? power >= 0 : power > 0) {
+                contains = false;
+                break;
+              }
+            }
+            const auto materialize = [&]() {
+#if defined(MHGP7_TESTING)
+              auto& observed = meb_materialization_for_tests();
+              ++observed.q4_materialized;
+              if (!contains) ++observed.q4_rejected_materialized;
+#endif
+              return std::pair<BallKey, ExactLevel>{ball_key_reduce(q4_ball_form(f)), q4_level_raw(f)};
+            };
+            if (!contains) {
+#if defined(MHGP7_TESTING)
+              ++meb_materialization_for_tests().q4_rejected;
+              if (MHGP7_MUTANT("silent-meb-eager-materialization")) (void)materialize();
+#endif
+              continue;
+            }
+            const auto built = materialize();
+            found = accept(built.first, built.second, {sites[a], sites[b], sites[c], sites[d]}, 4);
           }
     if (!found) return fail(SilentIncidenceStatus::kInvariantViolated, "silent_no_local_miniball");
     size_t shell = 0;

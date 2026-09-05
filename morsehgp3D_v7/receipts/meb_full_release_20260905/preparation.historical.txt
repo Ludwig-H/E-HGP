@@ -1,0 +1,73 @@
+# Qualification Release complète D — préparation inerte
+
+État : runner préparé, **aucune configuration, compilation ni porte exécutée**.
+Le GO de root après la comparaison chronométrée C/D est obligatoire.
+`public_status=not_claimed`, CPU local, GCP non utilisé.
+
+## Provenance et exécution future
+
+`run_full_release.py` adapte explicitement le runner des 316 portes,
+SHA a55b9dbe8607e5b8127754e1e8563c1048a18669f0cb00f290e403bb7f6f5b71,
+sans modifier son reçu historique. Son inventaire des 316 noms, SHA
+63d781d479e87006163ea7431aa1d95cb82d7eafce5d6ab263726592b3dd1cbe,
+est étendu des sept inscriptions MEB, sans renommage ni suppression.
+L'inventaire attendu contient exactement 323 noms uniques.
+
+Le helper historique 582922e6 fournit seulement les fonctions d'exécution
+bornée, drainage du groupe possédé et inventaires. Ses octets sont lus une
+seule fois, hashés puis exécutés ; aucun ancien résultat n'est consommé.
+Ses chemins de build et de sortie sont redirigés vers cette tentative.
+
+Prévisualisation inerte, puis selftest du juge uniquement, après levée du gel :
+
+```bash
+python3 -B build/v7_meb_full_release/run_full_release.py
+python3 -B build/v7_meb_full_release/run_full_release.py --selftest
+python3 -B -O build/v7_meb_full_release/run_full_release.py --selftest
+```
+
+Après revue et GO de root, l'exécution complète sera :
+
+```bash
+python3 -B build/v7_meb_full_release/run_full_release.py --execute
+```
+
+Le build est **incrémental** dans `build/v7_meb_qualification`, où le CLI D
+a déjà été construit et épinglé à 127c5f92. Les portes seront toutes
+exécutées à neuf ; ni build hermétique, ni reconstruction entièrement neuve
+ne sont annoncés. Le reçu de build D aedfe1b4 est contrôlé : source exacte,
+statut complet, binaire, cache, base et commande de compilation concordants.
+Il n'est pas pris pour un reçu des portes.
+
+Les phases prévues sont configure (120 s), build de toutes les cibles ALL
+avec parallel 2 (3 600 s), inventaire CTest (60 s), puis les 323 portes
+`gate` avec parallel 2 et borne globale de 7 200 s. Aucun benchmark scale,
+MorseHGP chronométré autonome ou accès cloud n'est ajouté.
+
+## Conditions terminales
+
+La sortie `full_release/` doit être absente ; aucun reçu antérieur n'est
+écrasé. Toute variable LD_* non vide est refusée sans afficher sa valeur.
+Les deux CLI C 25c9bf8e et le CLI D 127c5f92 sont protégés avant, entre et
+après les phases. Les sources, tests, bancs, oracle et CMake sont inventoriés
+avant/après ; les binaires testés et les métadonnées de build doivent rester
+identiques entre leur sélection et le verdict terminal. Le runner, ses
+noms attendus et ses autorités épinglées restent eux aussi inchangés.
+
+Le juge requiert les quatre commandes à code 0, les 323 noms exacts uniques
+dans l'inventaire CMake et le JUnit, tous à status=run et sans failure,
+error ni skipped. Un refus, échec, délai, interruption, dérive ou observation
+terminale manquante ne peut donner `passed`. Les stdout/stderr, commandes,
+durées, UTC, HEAD/worktree, JUnit et pins sont conservés dans un reçu neuf.
+Le code de sortie 124 du helper reste une censure, jamais un test réussi.
+
+Le contrôle de stabilité se fait aux frontières : il n'est pas une
+attestation hermétique ni une surveillance de toute écriture transitoire.
+Aucun résultat mathématique global ou SLO ne découle du simple total 323.
+
+## État de la préparation
+
+Le juge contient une fixture positive et huit rejets synthétiques
+(vide, nom manquant, doublon, nom inconnu, failure, error, skipped, notrun),
+effectifs sans assert. Ils ne sont **pas encore exécutés** dans cette
+préparation pendant le gel de la comparaison.

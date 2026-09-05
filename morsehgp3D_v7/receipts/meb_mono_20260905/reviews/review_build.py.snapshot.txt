@@ -1,0 +1,97 @@
+"""Read-only checks of the closed D build receipt; never invokes an engine."""
+from datetime import datetime
+import hashlib
+import json
+import os
+from pathlib import Path
+import shlex
+
+ROOT = Path('/workspaces/E-HGP')
+RECEIPT = ROOT / 'build/v7_meb_build_20260905'
+BUILD = ROOT / 'build/v7_meb_qualification'
+PRIVATE = ROOT / 'build/v7_meb_integrated_tests/release/mhgp7'
+SOURCE = ROOT / 'morsehgp3D_v7'
+D_SHA = '127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f'
+C_SHA = '25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2'
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def require(value, message):
+    if not value:
+        raise RuntimeError(message)
+
+
+def load(name):
+    return json.loads((RECEIPT / name).read_text())
+
+
+def main():
+    checks = []
+
+    def check(value, label):
+        require(value, label)
+        checks.append(label)
+
+    manifest = load('hashes.json')
+    check(set(manifest) == {path.name for path in RECEIPT.iterdir() if path.is_file()} - {'hashes.json'}, 'exact_receipt_inventory')
+    for name, expected in manifest.items():
+        check(digest(RECEIPT / name) == expected, 'receipt_hash:' + name)
+    summary, metadata, after, value = (load(name) for name in ('summary.json', 'metadata.json', 'tracking_after.json', 'build_D.json'))
+    check(summary['status'] == 'completed' and summary['error'] is None and summary['binding_validated'] is True and
+          summary['sources_helpers_C_stable'] is True, 'terminal_completed_stable')
+    check(summary['engine_runs'] == 0 and summary['gcp'] == 'not_used' and summary['public_status'] == 'not_claimed', 'bounded_build_scope')
+    before = metadata['tracking_before']
+    check(before == after, 'identical_tracking_before_after')
+    for path, expected in before['files'].items():
+        check(digest(Path(path)) == expected, 'tracked_file:' + str(Path(path).relative_to(ROOT)))
+    for path, expected in before['repository_sources'].items():
+        check(digest(ROOT / path) == expected, 'current_repository_source:' + path)
+    for path, expected in before['sources'].items():
+        check(digest(SOURCE / path) == expected, 'current_D_source:' + path)
+    check(value['sources_before'] == value['sources_after'] == before['sources'], 'build_record_matches_frozen_D_sources')
+    check(value['source_root'] == str(SOURCE), 'D_source_root')
+    check((RECEIPT / 'build_D.json').read_bytes() == (RECEIPT / 'build_record.provisional.json').read_bytes(), 'published_record_identical_to_validated_draft')
+    binary = Path(value['binary']['path'])
+    check(binary.resolve() == (BUILD / 'mhgp7').resolve() and os.access(binary, os.X_OK), 'exact_executable_target')
+    check(digest(binary) == value['binary']['sha256'] == D_SHA and binary.stat().st_size == value['binary']['bytes'], 'D_binary_pin')
+    check(digest(PRIVATE) == D_SHA and PRIVATE.read_bytes() == binary.read_bytes(), 'D_identical_bytes_to_separate_private_32_gate_CLI')
+    check(digest(ROOT / 'build/v7_c_qualification/mhgp7') == C_SHA, 'C_binary_unchanged')
+    cache, database = (Path(value[key]['path']) for key in ('cmake_cache', 'compile_database'))
+    for key, path in (('cmake_cache', cache), ('compile_database', database)):
+        check(digest(path) == value[key]['sha256'], 'artifact_pin:' + key)
+        check(path.parent.resolve() == BUILD.resolve(), 'artifact_build_parent:' + key)
+    lines = cache.read_text().splitlines()
+    check(all(line in lines for line in ('CMAKE_BUILD_TYPE:STRING=Release', 'MHGP7_ENABLE_CUDA:BOOL=OFF',
+                                        'CMAKE_HOME_DIRECTORY:INTERNAL=' + str(SOURCE))), 'Release_CPU_source_cache')
+    entry = value['compile_command']
+    check(entry in json.loads(database.read_text()), 'CLI_command_in_pinned_compile_database')
+    args = shlex.split(entry['command'])
+    check(Path(entry['directory']).resolve() == BUILD.resolve() and Path(entry['file']).resolve() == SOURCE / 'cli/mhgp7.cpp', 'CLI_compile_target_identity')
+    flags = {'-O3', '-DNDEBUG', '-std=c++20', '-Wall', '-Wextra', '-Wpedantic', '-Werror'}
+    check(set(args[1:-4]) == flags and len(args[1:-4]) == len(flags) and args[-4:] ==
+          ['-o', 'CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o', '-c', str(SOURCE / 'cli/mhgp7.cpp')], 'exact_Release_test_free_compile_flags')
+    expected_build = ['cmake', '--build', str(BUILD), '--parallel', '2', '--target', 'mhgp7']
+    check(value['build_command'] == expected_build and value['build_exit_code'] == 0, 'exact_single_CLI_build_command')
+    records = load('runs.json')
+    check([record['name'] for record in records] == ['compiler_version', 'cmake_version', 'configure', 'build'], 'four_required_commands_ordered')
+    check(records[-1]['argv'] == expected_build, 'executed_build_matches_binding')
+    previous = datetime.fromisoformat(summary['started_utc'])
+    for record in records:
+        check(record['status'] == 'completed' and record['returncode'] == 0 and not record['timed_out'], 'completed_command:' + record['name'])
+        start, end = datetime.fromisoformat(record['started_utc']), datetime.fromisoformat(record['ended_utc'])
+        check(previous <= start <= end and 0 <= record['wall_seconds'] <= record['timeout_seconds'] <= 300, 'bounded_chronology:' + record['name'])
+        previous = end
+    check(previous <= datetime.fromisoformat(summary['ended_utc']), 'terminal_after_all_commands')
+    check(before['loader_injection_nonempty'] == {name: False for name in ('LD_PRELOAD', 'LD_AUDIT', 'LD_LIBRARY_PATH')}, 'no_loader_injection_declared')
+    print(json.dumps({'status': 'passed', 'checks': len(checks), 'check_labels': checks,
+        'scope': 'read_only_closed_D_build_review_not_a_new_test_or_benchmark', 'engine_runs': 0, 'gcp': 'not_used',
+        'receipt_manifest_sha256': digest(RECEIPT / 'hashes.json'), 'D_sha256': D_SHA, 'C_sha256': C_SHA,
+        'private_32_gate_CLI_bytes_identical': True, 'started_utc': summary['started_utc'], 'ended_utc': summary['ended_utc'],
+        'build_seconds_diagnostic': records[-1]['wall_seconds']}, indent=2, sort_keys=True))
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,167 @@
+{
+  "schema": "mhgp7.meb-independent-review-archive.v1",
+  "public_status": "not_claimed",
+  "prepared_utc": "2026-09-04 23:58:09 UTC",
+  "sealed_utc": "2026-09-05 00:06:33 UTC",
+  "status": "premeasurement_local_review_archived_before_CD_results",
+  "copies_byte_identical": true,
+  "copy_count": 11,
+  "copies": [
+    {
+      "source": "build/v7_meb_review/README.md",
+      "archive": "morsehgp3D_v7/receipts/meb_lazy_review_20260904/review.before_integration.txt",
+      "sha256": "5ddcf3108252a1156b40545de10cced4b12e1f38d22c066e08fddf3cb87c4d52",
+      "bytes": 8566
+    },
+    {
+      "source": "build/v7_meb_review/HISTORIQUE.md",
+      "archive": "morsehgp3D_v7/receipts/meb_lazy_review_20260904/review.first_revision.txt",
+      "sha256": "96f2759234ee43d2a5e57fffbda49871fc2b3b0b6698503f1574029cd7391e0f",
+      "bytes": 1426
+    },
+    {
+      "source": "build/v7_meb_review/production_differential.cpp",
+      "archive": "morsehgp3D_v7/receipts/meb_lazy_review_20260904/production_differential.historical.cpp",
+      "sha256": "f91118f2620b36c8d0b0d56ae3c52c3e9b2d9124c01244885d0ea029951b26e8",
+      "bytes": 12493
+    },
+    {
+      "source": "build/v7_meb_review/production_result.json",
+      "archive": "morsehgp3D_v7/receipts/meb_lazy_review_20260904/production_result.json",
+      "sha256": "5a920b55990f29b4885fc21939d725cbdba3fd440eddf5ef1e2a297b9344db4a",
+      "bytes": 2150
+    },
+    {
+      "source": "build/v7_meb_review/production_dependencies.d",
+      "archive": "morsehgp3D_v7/receipts/meb_lazy_review_20260904/production_dependencies.historical.d",
+      "sha256": "8f7a692a0d28fd9f6c47ec704f499b3586528bc554904d126d61670e333630e5",
+      "bytes": 959
+    },
+    {
+      "source": "build/v7_meb_review/sources.sha256",
+      "archive": "morsehgp3D_v7/receipts/meb_lazy_review_20260904/sources.before_integration.sha256",
+      "sha256": "9a1c53fd4240ff47d022aa6cb9697ac6ae65f15e7c0e7b3b211ac919997f1ba8",
+      "bytes": 3623
+    },
+    {
+      "source": "build/v7_meb_review/SHA256SUMS",
+      "archive": "morsehgp3D_v7/receipts/meb_lazy_review_20260904/review.historical.SHA256SUMS",
+      "sha256": "9a3053d52d9e7f2e1fd418bfa2660d18333b3bdde6a6ebaf4659e7189515e96d",
+      "bytes": 1040
+    },
+    {
+      "source": "build/v7_meb_review/replay.py",
+      "archive": "morsehgp3D_v7/receipts/meb_lazy_review_20260904/replay.first_revision.historical.py",
+      "sha256": "ccc010b1b472196b4a3d31dac6efaf21d004b708dc5454192b553b19bd30eb96",
+      "bytes": 3152
+    },
+    {
+      "source": "build/v7_meb_review/replay.json",
+      "archive": "morsehgp3D_v7/receipts/meb_lazy_review_20260904/replay.first_revision.json",
+      "sha256": "074ea6c8ce20d3c07d2c378fe2326272e0ae4917afddc96804f7d43198e91b47",
+      "bytes": 9204
+    },
+    {
+      "source": "build/v7_meb_review/replay_revision2.py",
+      "archive": "morsehgp3D_v7/receipts/meb_lazy_review_20260904/replay.revision2.historical.py",
+      "sha256": "719103161e0b943963aac275d18da2140e60eacf752fa01360fa56698e4ad1c8",
+      "bytes": 3172
+    },
+    {
+      "source": "build/v7_meb_review/replay_revision2.json",
+      "archive": "morsehgp3D_v7/receipts/meb_lazy_review_20260904/replay.revision2.json",
+      "sha256": "b8bedb143ff9283a07aa1fd8549b07b11f9353e375dd57e34bb821de7fa6d674",
+      "bytes": 9214
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "README.md",
+      "sha256": "8150cf118c77191e9b756ee14290dc8deb116f99eae6f3680ddfd0e6d1747e30",
+      "bytes": 3377
+    },
+    {
+      "path": "production_dependencies.historical.d",
+      "sha256": "8f7a692a0d28fd9f6c47ec704f499b3586528bc554904d126d61670e333630e5",
+      "bytes": 959
+    },
+    {
+      "path": "production_differential.historical.cpp",
+      "sha256": "f91118f2620b36c8d0b0d56ae3c52c3e9b2d9124c01244885d0ea029951b26e8",
+      "bytes": 12493
+    },
+    {
+      "path": "production_result.json",
+      "sha256": "5a920b55990f29b4885fc21939d725cbdba3fd440eddf5ef1e2a297b9344db4a",
+      "bytes": 2150
+    },
+    {
+      "path": "replay.first_revision.historical.py",
+      "sha256": "ccc010b1b472196b4a3d31dac6efaf21d004b708dc5454192b553b19bd30eb96",
+      "bytes": 3152
+    },
+    {
+      "path": "replay.first_revision.json",
+      "sha256": "074ea6c8ce20d3c07d2c378fe2326272e0ae4917afddc96804f7d43198e91b47",
+      "bytes": 9204
+    },
+    {
+      "path": "replay.revision2.historical.py",
+      "sha256": "719103161e0b943963aac275d18da2140e60eacf752fa01360fa56698e4ad1c8",
+      "bytes": 3172
+    },
+    {
+      "path": "replay.revision2.json",
+      "sha256": "b8bedb143ff9283a07aa1fd8549b07b11f9353e375dd57e34bb821de7fa6d674",
+      "bytes": 9214
+    },
+    {
+      "path": "review.before_integration.txt",
+      "sha256": "5ddcf3108252a1156b40545de10cced4b12e1f38d22c066e08fddf3cb87c4d52",
+      "bytes": 8566
+    },
+    {
+      "path": "review.first_revision.txt",
+      "sha256": "96f2759234ee43d2a5e57fffbda49871fc2b3b0b6698503f1574029cd7391e0f",
+      "bytes": 1426
+    },
+    {
+      "path": "review.historical.SHA256SUMS",
+      "sha256": "9a3053d52d9e7f2e1fd418bfa2660d18333b3bdde6a6ebaf4659e7189515e96d",
+      "bytes": 1040
+    },
+    {
+      "path": "sources.before_integration.sha256",
+      "sha256": "9a1c53fd4240ff47d022aa6cb9697ac6ae65f15e7c0e7b3b211ac919997f1ba8",
+      "bytes": 3623
+    }
+  ],
+  "document": {
+    "path": "morsehgp3D_v7/docs/OPTIMISATION_MEB_DIFFEREE.md",
+    "sha256": "ea623570585d0e649f1225cd5eddbcd69b45134a1878cdd3c3f562b808a893ad"
+  },
+  "production": {
+    "testing_macro_defined": false,
+    "build": "fresh standalone production differential, not pipeline rebuild",
+    "cases": 11805,
+    "fixtures": 168,
+    "success": 664,
+    "unsupported_degeneracy": 8,
+    "cap_refusals": 11133,
+    "exit_code": 0
+  },
+  "replays": {
+    "revision2": 14,
+    "builds_rebuilt_by_reviewer": 0,
+    "authority": "exact return code and causal output on explicitly pinned owner overlay binaries"
+  },
+  "limitations": [
+    "No global exactness promotion",
+    "No pipeline performance claim",
+    "Historical includes/commands preserved, not silently rewritten to current source",
+    "Local events.empty is not a publication/cleanup proof",
+    "Current integrated qualification belongs to a separate receipt",
+    "No binaries archived",
+    "GCP not used"
+  ]
+}

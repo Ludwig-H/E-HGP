@@ -1,0 +1,11 @@
+{
+  "all_copies_byte_identical": true,
+  "append_LF": 0,
+  "binaries_or_dependency_archives_copied": false,
+  "copied_files": 50,
+  "gcp": "not_used",
+  "new_engine_runs": 0,
+  "raw_build_and_pair_manifest_entries_verified": 26,
+  "reviews": "raw_pair_replay_and_206_build_checks_completed",
+  "status": "passed"
+}

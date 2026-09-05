@@ -1,4 +1,4 @@
-# État de livraison v7 — 4 septembre 2026
+# État de livraison v7 — 5 septembre 2026
 
 Cadre : `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -27,6 +27,23 @@ options par défaut ; les callbacks du mode mono arrivent désormais sur le
 thread appelant. Le second conserve les signes stricts du census et n'ajoute
 que trois valeurs locales par requête, pas un cache global par point ou boule.
 
+Le delta D ajoute la [matérialisation différée des MEB q3/q4](docs/OPTIMISATION_MEB_DIFFEREE.md) :
+les candidats déjà rejetés par une puissance entière strictement positive
+ne construisent plus leur clé primitive et leur niveau. Supports, charges,
+caps et contrôles finaux restent identiques ; aucune structure globale
+n'est ajoutée. Les [32 portes ciblées](receipts/meb_lazy_integrated_20260905/README.md)
+passent en Release et sous ASan/UBSan. La
+[paire mono complète](docs/RESULTATS_MONO_MEB_20260905.md) conserve toutes
+les sorties et comptes, avec 225,75 s pour C et 172,67 s pour D sur
+n=8000 étendu ; cela reste une observation, pas une qualification SLO.
+La [qualification Release D complète](receipts/meb_full_release_20260905/README.md)
+réexécute ensuite les 323 portes CPU : toutes passent, aucun saut,
+sources et binaires stables. CTest prend 574,05 s après un build
+incrémental explicitement déclaré de 232,82 s. Le binaire D qualifié
+est `build/v7_meb_qualification/mhgp7` ; les anciens CLI C dans
+`build/v7/` et `build/v7_c_qualification/` sont conservés comme témoins
+historiques, pas présentés comme le binaire du nouveau delta.
+
 `verified_events_only` reste le payload par défaut. La route
 `--complete-incidences` porte `normalized_horizontal_h0_candidate` et refuse
 les dégénérescences pertinentes non prises en charge. `--require-exact`
@@ -45,6 +62,9 @@ qualifié exact derrière cette option.
 | [Correction du harnais CI](receipts/ci_sonde_environment_20260904/README.md) | Avant : trois erreurs reproduites ; après : quatre exécutions de 23 scènes vertes | Python normal/-O, environnement propre/hérité ; ce correctif ne change que le harnais Python, pas le moteur |
 | [Portes arithmétiques intégrées](receipts/arithmetic_gates_20260904/README.md) | 24/24 ciblées Release et 24/24 ASAN/UBSAN ; puis 316/316 portes CPU fraîches, zéro échec/skip | Build complet incrémental déclaré, CTest 558,50 s ; sources et binaires stables ; CLI C inchangé |
 | [Autorité Boost indépendante](receipts/arithmetic_boost_20260904/README.md) | 8/8 portes entières avec Boost 1.83 réellement compilé, plus 16/16 lanes | En-têtes privés extraits sans installation système ; OBig + littéraux restent l'autorité des lanes ; pas un second pipeline qualifié |
+| [MEB D ciblée](receipts/meb_lazy_integrated_20260905/README.md) | 32/32 portes fraîches Release et 32/32 ASan/UBSan | Deux builds isolés ; Γ/API/archive/mono/refus et sept nouvelles portes ; aucune erreur sanitizer masquée |
+| [Release D complète](receipts/meb_full_release_20260905/README.md) | 323/323 portes CPU fraîches, zéro échec/skip | Build incrémental distinct de C ; D, sources et 37 binaires stables ; pas de résultat C réutilisé |
+| [Mono C/D complétée](docs/RESULTATS_MONO_MEB_20260905.md) | Deux runs achevés : 225,75 s puis 172,67 s, mêmes objets et comptes | n=8000 uniforme étendu, s=8, tour candidate entière 1..10 ; baisse observée 23,51 %, pas de SLO |
 | [Mono B/C s=8/10/12](docs/RESULTATS_MONO_20260904.md) | Six runs achevés, mêmes objets ; C 105,1–105,9 s contre B 125,5–128,0 s | n=8000 uniforme, tour entière 1..10, objet Gabriel ; un seul couple par s, pas de SLO |
 | [Campagne locale v6/v7 A](receipts/local_paired_20260904/summary.json) | 15 paires achevées identiques ; cinq censures dans trois autres paires | 36 tentatives à 8 threads, n=8k/16k/32k ; campagne globale `invalid`, aucun SLO |
 | [Complétion locale](receipts/incidence_local_20260904/summary.json) | Six refus de domaine, zéro succès moteur | Observations achevées, pas capacité exacte à 8k/16k/32k |
@@ -114,6 +134,10 @@ ehgp-v7-4fa0e0789a7d5bb06b787d35`, génération
 `2026-09-04T15:45:50.919-07:00`, est certifiée `TERMINATED` à
 22:55:26 UTC. Le contrôle indépendant root confirme la même génération
 arrêtée ; l'inventaire ne trouve aucune autre VM E-HGP active.
+Un [nouveau contrôle en lecture seule](receipts/gcp_handoff_20260905.json),
+enregistré le 5 septembre à 00:26:13 UTC, confirme la même génération
+`TERMINATED` et un inventaire `RUNNING` étiqueté E-HGP vide. Aucune
+mutation ni nouvelle session n'a été effectuée pour cette revérification.
 Aucune autre cible n'a été arrêtée. La qualification GCC11/CUDA de cette
 copie source reste distincte de la qualification locale GCC13.
 
@@ -135,6 +159,12 @@ Le [run automatique du commit auditeur](https://github.com/Ludwig-H/E-HGP/action
 `d2b27058`, encore dépourvu du correctif constructeur, retrouve le même
 unique échec sur 292 ; aucun autre test n'y échoue. Il n'a été ni annulé
 ni relancé manuellement.
+
+Le [run eabedd7e](https://github.com/Ludwig-H/E-HGP/actions/runs/33931042316)
+est ensuite entièrement vert : construction, documentation, 316/316 portes
+CPU (780,55 s CTest), banc d'incidences et garde-fous cloud sans accès GCP.
+Il qualifie ce commit C, pas rétroactivement les échecs précédents ni
+automatiquement le nouveau delta D et ses sept portes supplémentaires.
 
 Contrôles avant le premier commit : registre (20 phases), liste blanche
 des workflows GCP et corpus documentaire historique (259 fichiers) passent.

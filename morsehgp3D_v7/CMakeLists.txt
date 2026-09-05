@@ -984,3 +984,24 @@ mhgp7_gate(mhgp7_arithmetic_lanes_u192_case_mismatch 2 mhgp7_arithmetic_lanes_ga
   ARGS --case=all --inject=level-trunc-hi TIMEOUT 30)
 mhgp7_gate(mhgp7_arithmetic_lanes_oracle_case_mismatch 2 mhgp7_arithmetic_lanes_gate
   ARGS --case=all --inject=obig-carry-lost TIMEOUT 30)
+
+# Exact relative containment before local MEB materialization, test-only cost witness.
+mhgp7_executable(mhgp7_meb_lazy_gate tests/meb_lazy_gate.cpp)
+target_include_directories(mhgp7_meb_lazy_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+mhgp7_gate(mhgp7_meb_lazy 0 mhgp7_meb_lazy_gate
+  EXPECT_PREFIX "meb_lazy_gate=passed mutant=none divergence=none" TIMEOUT 30)
+mhgp7_gate(mhgp7_meb_lazy_q3_reject_shell 4 mhgp7_meb_lazy_gate
+  ARGS --mutant=silent-meb-q3-reject-shell
+  EXPECT_PREFIX "meb_lazy_gate=mutant_killed mutant=silent-meb-q3-reject-shell divergence=differential.status_reason" TIMEOUT 30)
+mhgp7_gate(mhgp7_meb_lazy_q4_reject_shell 4 mhgp7_meb_lazy_gate
+  ARGS --mutant=silent-meb-q4-reject-shell
+  EXPECT_PREFIX "meb_lazy_gate=mutant_killed mutant=silent-meb-q4-reject-shell divergence=differential.status_reason" TIMEOUT 30)
+mhgp7_gate(mhgp7_meb_lazy_eager_materialization 4 mhgp7_meb_lazy_gate
+  ARGS --mutant=silent-meb-eager-materialization
+  EXPECT_PREFIX "meb_lazy_gate=mutant_killed mutant=silent-meb-eager-materialization divergence=logical_rejected_materialization" TIMEOUT 30)
+mhgp7_gate(mhgp7_meb_lazy_unknown_mutant 2 mhgp7_meb_lazy_gate
+  ARGS --mutant=unknown TIMEOUT 30)
+mhgp7_gate(mhgp7_meb_lazy_empty_mutant 2 mhgp7_meb_lazy_gate
+  ARGS --mutant= TIMEOUT 30)
+mhgp7_gate(mhgp7_meb_lazy_duplicate_mutant 2 mhgp7_meb_lazy_gate
+  ARGS --mutant=silent-meb-q3-reject-shell --mutant=silent-meb-q3-reject-shell TIMEOUT 30)

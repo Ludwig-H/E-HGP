@@ -1,0 +1,154 @@
+# Contrelecture indépendante du delta MEB — révision 2
+
+`phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+
+Verdict : **aucun défaut certain identifié dans le delta proposé**.
+L'équivalence locale à C est démontrée sous les préconditions ci-dessous.
+Le raccord final test/production demandé par root est présent. Le port réel
+et sa qualification intégrée restent à décider par root ; cette revue ne
+promeut ni C ni D en moteur HGP globalement certifié.
+
+## Octets relus et périmètre
+
+Le [patch révision 2](../v7_meb_lazy_gate_proposal/revision2/integration.patch),
+son header complet par différence à C, le test complet, le CMake, les sites
+d'injection et les deux README ont été relus. [sources.sha256](sources.sha256)
+épingle 33 fichiers : proposition, source C, tests, raccords, documents et
+dépendances non système du différentiel de production.
+
+- Proposition : `5214a9a7f2b6f53b1c59c803d414e109c9a660f15ab9448d88aec90300160c71`.
+- Test permanent : `122807a3fe431bd9658262f8061bcb7e2258a7832516ceff918da52d08ac3a55`.
+- Patch : `d5f273e37d506daf3894c8d7fd271e3b8b877522119863d73d629344ab499bed`.
+- Source C réelle et copiée : `fddde6e233eea8e80d23af4d42b50952e7c49a50ed84357e973279ff14d555e8`.
+
+La [première note](../v7_meb_next_review/README.md) n'est pas prise comme
+autorité de performance. Les [replays précédents](HISTORIQUE.md) restent
+distincts ; ils ne qualifient pas rétroactivement cette révision.
+
+## Preuve de substitution locale
+
+Hypothèses : sites distincts issus d'un index admis u16, n entre 2 et 11,
+arithmétique et primitives non mutées. Les formes sont celles effectivement
+construites depuis leurs supports, pas des Q3Form/Q4Form arbitraires.
+La méthode interne ne devient pas une API validant des tableaux hors domaine.
+
+Dans q3, le garde existant donne G>0. Développer la puissance relative
+`G|z-a|² - W·(z-a)` donne exactement la BallForm
+`(G, -(2Ga+W), G|a|²+W·a)`. Dans q4, q4_form canonise det>0 avant le
+garde de bien-centrage ; développer
+`det|z-a|² - 2N'·(z-a)` donne
+`(det, -2(det a+N'), det|a|²+2N'·a)`.
+Voir q3.hpp:54–71 et q4.hpp:75–78, 134–146 dans
+[les sources réelles](../../morsehgp3D_v7/src/lanes/q3.hpp).
+
+Dans les deux cas, ball_key_reduce divise tous les coefficients par
+un PGCD g strictement positif, au plus A, sans changement de signe
+(keys.hpp:101–110). Donc puissance brute = g × puissance primitive :
+positif, négatif et zéro sont équivalents. Aucun rejet strictement positif
+du prétest ne pouvait être accepté par l'ancien accept.
+
+Les opérations nouvellement exécutées sur les rejets sont sûres dans ce
+domaine : chaque différence de coordonnées est dans [-M,M], M=65535 ;
+la norme est au plus 3M². En q3, les termes Wv sont bornés par 36M⁶,
+leurs sommes partielles par 72M⁶ et 108M⁶, le terme G|v|² par 27M⁶,
+et la soustraction par 135M⁶<2^104. En q4 : det|v|² au plus 144M⁵,
+somme N'v au plus 216M⁵, son double au plus 432M⁵, soustraction au plus
+576M⁵<2^90. Tous ces intermédiaires restent dans i128. Ce sont les bornes
+du [grand-livre](../../morsehgp3D_v7/docs/ARITHMETIQUE_PRIMITIVES.md):67,147,
+pas une inférence à partir des fixtures.
+
+L'induction sur le même parcours de supports suffit alors, sans supposer
+l'exactitude globale de C : un candidat rejeté laisse la même sortie
+intacte ; un candidat contenant est construit par les mêmes appels et
+passe le même accept. Le premier candidat accepté est identique.
+
+Conséquences relues dans proposal.hpp:161–264 :
+
+- q2, acuité q3, orientation/bien-centrage q4, boucles et ordre des supports
+  sont inchangés ; aucune réorganisation ou nouvelle proposition.
+- charge précède chaque même support (lignes176,185,224) : mêmes
+  meb_calls/meb_supports, mêmes frontières de silent_meb_support_budget.
+- même BallKey, q, ordre de support et représentation du niveau, y compris
+  le q4 non réduit. ExactLevel::operator== compare les champs num/den
+  (level.hpp:39), pas une égalité rationnelle qui masquerait un changement.
+- accept puis test shell restent présents. Un extra-shell local conserve
+  son refus silent_local_nonessential_shell ; aucun zéro n'est perdu.
+- les opérations différées sont entières et sans allocation de tas.
+  La closure/pair est locale et n'introduit aucune structure globale.
+  Aucune identité de coût machine, de pile ou de temps n'en est déduite.
+
+L'induction s'applique aussi à un LocalBall déjà rempli : les rejets
+n'écrivent pas avant accept. Les fixtures de refus partent d'un LocalBall
+initialisé par défaut ; ce prolongement repose sur la lecture du code.
+
+## Raccord et pouvoir des portes
+
+Une seule closure par lane, lignes202 et239, contient la construction
+dans les deux modes ; seuls compteurs et appel eager sont sous TESTING.
+Les compteurs TLS sont privés, absents de SilentIncidenceStats, sans
+course inter-thread introduite. Ils mesurent les appels logiques, pas
+les instructions que le compilateur conserve.
+
+Les deux faux négatifs >0 vers >=0 sont isolés par lane. Le code4 exige
+une référence complète q=3/q=4, une visite rejetée non nulle et exactement
+differential.status_reason ; une exception arbitraire ne les tue pas.
+Les supports minimaux sont constitués de leurs seuls sites de coquille,
+donc le zéro nécessaire est réel.
+
+Le mutant eager appelle la même closure sur rejet sans accès à LocalBall.
+La porte exige encore toutes les comparaisons avant de constater les deux
+compteurs non nuls. Il ne peut donc être déclaré tué par une simple
+divergence d'objet. L'observation porte sur cette construction logique,
+pas sur un ralentissement dont le compilateur pourrait supprimer la cause.
+
+Le permanent ne contient plus de contournement OVERLAY_REGISTRY : il
+appelle mutants_enable et nécessite les trois noms du patch registre.
+Le seul raccord temporaire est explicite dans overlay_gate.cpp.
+Les sept inscriptions CMake ont code exact, préfixe causal et timeout30.
+Le patch complet passe git apply --check sans application.
+
+## Exécutions propres à cette contrelecture
+
+[replay_revision2.json](replay_revision2.json) conserve quatorze replays :
+sept argv sur chacun des binaires Release et ASAN/UBSAN de scale, épinglés
+avant/après. Codes et préfixes exacts conformes, stderr vide. Ce sont des
+replays de ses binaires existants, pas mes reconstructions de ces cibles.
+
+Nominal et eager comparent chacun 11805 cas. Le nominal observe
+329615/26952 rejets q3/q4, 320/136 constructions finales, zéro construction
+rejetée. Eager conserve les objets/statuts/stats mais observe
+329615/26952 constructions rejetées.
+
+J'ai aussi compilé **sans MHGP7_TESTING**, en O3 strict, le
+[différentiel de production](production_differential.cpp). Son port depuis
+le test final retire seulement les lectures/planchers de compteurs, change
+l'include et le préfixe, et interdit tout argument. Référence C, 168 fixtures,
+tous caps jusqu'au coût atteint plus un, ordre renversé, comparaisons des
+13 stats, des statuts et de tous les champs restent identiques.
+Un garde de compilation interdit TESTING.
+
+Résultat propre : **11805/11805 comparaisons**, 664 succès, 8 refus de
+dégénérescence, 11133 refus cap ; q2/q3/q4 non vides : 53/79/34.
+[production_result.json](production_result.json) contient commande, sorties
+et hashes ; binaire `4ba0a9b8ae0de9abaf6f762759fddc5cb0b82564c42890198071956645fd6aff`.
+Aucun symbole de compteur MebMaterialization n'est observé par nm.
+Les compteurs de coût affichés zéro par ce harness ne sont **pas** des
+mesures : ses variables de reporting sont volontairement inertes.
+
+## Limites pour l'intégration
+
+Le différentiel conserve C ; il n'est pas un oracle indépendant de la MEB
+ou de Gamma. Le parcours renversé est comparé C/D, pas promu en preuve
+d'invariance absolue des sorties au réindexage.
+
+Le local_events_empty du helper ne teste aucune publication transactionnelle.
+run, intruders, event et la purge finale sont inchangés, mais les portes
+Gamma/OBig, API, refus et archive devront être rejouées sur les vrais
+headers intégrés. La conformité de la source du catalogue direct et le
+théorème horizontal global restent leurs obligations propres.
+
+Aucune borne de vitesse, résultat pipeline, résultat GPU ou promotion
+scientifique ne découle de cette revue. Aucun fichier produit, CMake réel,
+registre, rapport externe, branche Git, commit ou ressource GCP modifié.

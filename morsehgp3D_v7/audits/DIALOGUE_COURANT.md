@@ -158,3 +158,59 @@ MEB est préparé uniquement en overlay : précontenance q3_power/q4_power
 avant PGCD/niveau, mêmes supports et caps, sans réordonnancement ni
 reconstruction de Gamma exhaustif. Les preuves causales permanentes et
 une comparaison appariée de la tour complétée précéderont sa qualification.
+
+## Constructeur — publication réparée et intégration MEB en qualification
+
+Le commit `eabedd7e` publie les journaux ignorés par `*.log` et ajoute un
+contrôle des `SHA256SUMS` contre l'index Git. L'échec documentaire de la
+CI précédente et une trace mono historique incomplète sont conservés dans
+l'[erratum](../docs/ERRATA_PUBLICATION_20260904.md), sans réécriture des reçus.
+
+Le delta MEB révision 2 est maintenant porté : header
+`5214a9a7f2b6f53b1c59c803d414e109c9a660f15ab9448d88aec90300160c71`,
+test permanent
+`122807a3fe431bd9658262f8061bcb7e2258a7832516ceff918da52d08ac3a55`.
+La contrelecture locale démontre l'équivalence des signes avant réduction
+primitive ; les replays avec et sans instrumentation concordent sur
+11 805 cas. Une seule closure de matérialisation est partagée par test
+et produit. Ni supports, ni caps, ni décisions de coquille ne sont changés.
+Cette preuve locale ne promeut pas le théorème horizontal global.
+
+Les portes intégrées Gamma/API/archive/refus et le nouveau binaire D
+restent en qualification. Le CLI C mesuré est conservé intact dans
+`build/v7_c_qualification/mhgp7` pour une paire mono complète, sans autre
+travail lourd local pendant les chronos. Aucun gain de pipeline n'est
+encore attribué au delta MEB ; aucune nouvelle session GCP n'est ouverte.
+
+## Constructeur — paire D close, qualification complète engagée
+
+Mise à jour du 5 septembre : les 32 portes ciblées passent dans les deux
+builds Release et ASan/UBSan, avec fuite/erreur non neutralisées. Le
+[reçu intégré](../receipts/meb_lazy_integrated_20260905/README.md) conserve
+les deux JUnit et les journaux complets. Le CLI D mesuré est identique
+octet pour octet au CLI Release de ces portes :
+`127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f`.
+
+La [paire mono C/D](../docs/RESULTATS_MONO_MEB_20260905.md) est fermée :
+n=8000, coordonnées étendues, s=8, tour candidate 1..10, mêmes digests,
+cartes et tous comptes silent/caps. C termine en 225,747536 s et D en
+172,674571 s ; le temps silent passe de 116,615421 s à 65,973963 s.
+Cette observation unique sur hôte partagé ne ferme aucun contrat SLO.
+La suite CPU complète de 323 portes est lancée après ces chronos dans
+un build D séparé, sans réutiliser les anciens résultats C.
+
+Question de prochaine contrelecture, sans demande de promotion : le
+prétest q2 `(z-a)·(z-b)` permettrait-il le même déplacement de construction
+en i64, sous les seules préconditions u16 déjà admises ? Chaque produit
+est borné par M², les sommes partielles par 2M² puis 3M² < 2^34.
+Un overlay distinct vérifie cette piste sans modifier D, son ordre de
+supports ou ses caps. La clé q2 n'a déjà aucun PGCD ; seul son niveau
+et les puissances générales seraient évités sur rejet. Aucun gain de
+temps q2 n'est encore affirmé.
+
+Clôture du jalon D : la suite complète est terminée, **323/323 portes
+CPU fraîches**, JUnit exact sans échec/skip et cinq contrôles terminaux
+de stabilité verts. Build incrémental 232,82 s, CTest 574,05 s ; aucun
+résultat C réutilisé. Les reçus complets seront publiés avec le code D
+sur `main`. La piste q2 reste en overlay et ne fait pas partie de ce
+binaire, de cette qualification ou du gain observé de 23,51 %.

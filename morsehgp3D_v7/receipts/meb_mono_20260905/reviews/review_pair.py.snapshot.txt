@@ -1,0 +1,95 @@
+"""Read-only raw-output replay of the closed mono MEB pair; no engine call."""
+from datetime import datetime
+import hashlib
+import json
+from pathlib import Path
+import types
+
+ROOT = Path('/workspaces/E-HGP')
+PAIR = ROOT / 'build/v7_meb_pair_20260905'
+RUNNER = ROOT / 'build/v7_meb_paired/runner.py'
+PIN = '3abe27f8a10173867a0395430ff56392bb82b5cbee3eb766fb293ffa65cc2645'
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def require(value, message):
+    if not value:
+        raise RuntimeError(message)
+
+
+def load(name):
+    return json.loads((PAIR / name).read_text())
+
+
+def main():
+    data = RUNNER.read_bytes()
+    require(hashlib.sha256(data).hexdigest() == PIN, 'runner bytes changed')
+    runner = types.ModuleType('closed_meb_review')
+    runner.__file__ = str(RUNNER)
+    exec(compile(data, str(RUNNER), 'exec'), runner.__dict__)
+    common, incidence = runner.helpers()
+    manifest = load('hashes.json')
+    require(set(manifest) == {p.name for p in PAIR.iterdir() if p.is_file()} - {'hashes.json'}, 'pair file inventory')
+    for name, expected in manifest.items():
+        require(digest(PAIR / name) == expected, 'raw file hash:' + name)
+    metadata, records, summary, after = (load(name) for name in ('metadata.json', 'runs.json', 'summary.json', 'snapshot_after.json'))
+    require(len(records) == 2 and [r['role'] for r in records] == ['C', 'D'], 'two ordered attempts')
+    require(metadata['identity'] == runner.IDENTITY and metadata['s'] == 8 and metadata['smax'] == 11 and
+            metadata['silent_limits'] == runner.CAPS and metadata['archive'] is False and metadata['digest'] is True,
+            'paired identity and command scope')
+    require(metadata['cpu_affinity_requested'] == [6] and metadata['timeout_per_run_seconds'] == 600 and
+            metadata['rlimit_as_gib'] == 26 and metadata['payload_proxy_bytes'] == runner.MEMORY_PROXY, 'resource bounds')
+    require(metadata['host_before']['host_shared'] is True, 'shared host declaration')
+    require(metadata['baseline'] == runner.baseline_binding(), 'C bound to historical Release C')
+    candidate = Path(metadata['candidate']['record']['binary']['path'])
+    source = Path(metadata['candidate']['record']['source_root'])
+    build_receipt = Path(metadata['candidate']['receipt'])
+    require(runner.candidate_binding(candidate, source, build_receipt) == metadata['candidate'], 'D source/build binding replay')
+    before = metadata['snapshot_before']
+    require(before == after == runner.snapshot(candidate, source, build_receipt, common), 'sources/helpers/binaries stable')
+    runner.binding_matches_snapshot(before, metadata['candidate'], candidate, build_receipt)
+    replayed = []
+    previous = datetime.fromisoformat(summary['started_utc'])
+    for original, binary in zip(records, (runner.BASELINE, candidate)):
+        role = original['role']
+        out, err, usage = (PAIR / (role + suffix) for suffix in ('.out', '.err', '.time'))
+        require(original['command'] == runner.command(binary), 'exact engine argv:' + role)
+        require(original['wrapped_command'] == ['/usr/bin/taskset', '--cpu-list', '6', '/usr/bin/time', '-v', '-o',
+                str(usage), '--', *runner.command(binary)], 'exact wrapper argv:' + role)
+        require([original[key] for key in ('stdout', 'stderr', 'usage')] == [out.name, err.name, usage.name], 'raw paths:' + role)
+        replay = {key: original[key] for key in ('role', 'returncode', 'timed_out', 'wall_seconds')}
+        replay['status'] = 'invalid'
+        runner.classify(replay, out, err, usage, common, incidence)
+        normalized = json.loads(json.dumps(replay))
+        for key, value in normalized.items():
+            require(original[key] == value, 'raw replay differs:' + role + ':' + key)
+        replayed.append(normalized)
+        start, end = datetime.fromisoformat(original['started_utc']), datetime.fromisoformat(original['ended_utc'])
+        require(previous <= start <= end and original['wall_seconds'] <= 600, 'bounded serial UTC:' + role)
+        previous = end
+    decision = runner.decision(replayed, True)
+    for key, value in decision.items():
+        require(summary[key] == value, 'terminal decision replay:' + key)
+    require(previous <= datetime.fromisoformat(summary['ended_utc']), 'terminal chronology')
+    require(summary['status'] == 'paired_equal' and all(summary['equality'].values()), 'complete strict paired agreement')
+    c, d = replayed
+    reduction = 100 * (1 - d['wall_seconds'] / c['wall_seconds'])
+    silent_reduction = 100 * (1 - d['stage_ms']['silent_incidence'] / c['stage_ms']['silent_incidence'])
+    print(json.dumps({'status': 'passed', 'scope': 'read_only_raw_replay_not_new_engine_run', 'engine_runs': 0,
+        'gcp': 'not_used', 'public_status': 'not_claimed', 'runner_sha256': PIN, 'helper_sha256': runner.HELPER_PINS,
+        'manifest_sha256': digest(PAIR / 'hashes.json'), 'raw_files_verified': len(manifest),
+        'replayed_roles': [r['role'] for r in replayed], 'replayed_statuses': [r['status'] for r in replayed],
+        'classification_and_all_record_fields_match': True, 'terminal_decision_matches': True,
+        'source_helpers_binaries_and_bindings_revalidated': True, 'equality': summary['equality'],
+        'C_process_seconds': c['wall_seconds'], 'D_process_seconds': d['wall_seconds'],
+        'observed_process_reduction_percent_one_pair': reduction,
+        'observed_silent_reduction_percent_one_pair': silent_reduction,
+        'statistical_speedup': 'not_claimed', 'slo': 'not_evaluated', 'shared_host': True,
+        'started_utc': summary['started_utc'], 'ended_utc': summary['ended_utc']}, indent=2, sort_keys=True))
+
+
+if __name__ == '__main__':
+    main()

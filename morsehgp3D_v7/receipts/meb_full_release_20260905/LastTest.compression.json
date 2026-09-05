@@ -1,0 +1,14 @@
+{
+  "source": "build/v7_meb_qualification/Testing/Temporary/LastTest.log",
+  "destination": "morsehgp3D_v7/receipts/meb_full_release_20260905/full_release/LastTest.stdout.gz",
+  "original_preserved": true,
+  "compressed_bytes": 83168,
+  "compressed_sha256": "021ca773e155266caee6e91239c832b81bc23770bc054e6d6bfc495e0c685c5a",
+  "decompressed_bytes": 7679311,
+  "decompressed_lines": 146517,
+  "decompressed_sha256": "42007892ba39f3627f103002fbe19963f0051f2ba0ee8c6e05a7439b105f6f58",
+  "compression": "gzip 1.12 -n --keep",
+  "compressed_header_mtime": 0,
+  "copy": "cp --no-clobber; destination absence checked before command",
+  "scope": "complete lossless transcript, not an executable"
+}

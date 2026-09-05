@@ -1,0 +1,27 @@
+[ 50%] Building CXX object CMakeFiles/mhgp7_meb_lazy_gate.dir/tests/meb_lazy_gate.cpp.o
+[100%] Linking CXX executable mhgp7_meb_lazy_gate
+[100%] Built target mhgp7_meb_lazy_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_silent_incidence_gate.dir/tests/silent_incidence_gate.cpp.o
+[100%] Linking CXX executable mhgp7_silent_incidence_gate
+[100%] Built target mhgp7_silent_incidence_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7.dir/cli/mhgp7.cpp.o
+[100%] Linking CXX executable mhgp7
+[100%] Built target mhgp7
+[ 50%] Building CXX object CMakeFiles/mhgp7_archive_api_gate.dir/tests/archive_api_gate.cpp.o
+[100%] Linking CXX executable mhgp7_archive_api_gate
+[100%] Built target mhgp7_archive_api_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_archive_cleanup_gate.dir/tests/archive_cleanup_gate.cpp.o
+[100%] Linking CXX executable mhgp7_archive_cleanup_gate
+[100%] Built target mhgp7_archive_cleanup_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_mono_inline_gate.dir/tests/mono_inline_gate.cpp.o
+[100%] Linking CXX executable mhgp7_mono_inline_gate
+[100%] Built target mhgp7_mono_inline_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_census_direct_gate.dir/tests/census_direct_gate.cpp.o
+[100%] Linking CXX executable mhgp7_census_direct_gate
+[100%] Built target mhgp7_census_direct_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_bad_alloc_gate.dir/tests/bad_alloc_gate.cpp.o
+[100%] Linking CXX executable mhgp7_bad_alloc_gate
+[100%] Built target mhgp7_bad_alloc_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_thread_failure_gate.dir/tests/thread_failure_gate.cpp.o
+[100%] Linking CXX executable mhgp7_thread_failure_gate
+[100%] Built target mhgp7_thread_failure_gate

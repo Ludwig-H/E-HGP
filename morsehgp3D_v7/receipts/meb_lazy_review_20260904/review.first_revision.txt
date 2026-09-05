@@ -1,0 +1,24 @@
+# Revue intermédiaire, conservée sans promotion
+
+Les fichiers `replay.py` et `replay.json` de ce dossier concernent uniquement
+la première porte permanente proposée, avant la demande de simplification
+root : proposition b150256878370f508b990b00b6bc21340eed9898fa5d027a13efbf6e083fe46e,
+test 7a4ff18a43e92001c72ee18cfc62b788023b16079ced98ff88ccadcc451d93b1,
+patch 777147ec2b367e90882eedd61b1e42705873bbdc168793de9b70522cca07b325.
+
+Les sept argv ont été rejoués sur chacun des deux binaires overlay épinglés,
+Release et sanitizers : 14 codes/préfixes conformes, stderr vide. Aucun
+nouveau build, benchmark ou pipeline n'a été exécuté pour ce premier rejeu.
+Ce n'est pas encore la qualification de la révision finale demandée.
+
+La lecture n'a trouvé aucun défaut géométrique certain. La demande root
+suivante vise une closure de matérialisation commune test/production et
+la suppression de l'adaptateur de registre du test permanent. Scale prépare
+`revision2` séparément ; cette première proposition demeure inchangée.
+
+Les fichiers de revue finale seront distincts. Le test `events.empty` du
+helper local ne prouve pas la publication ni la purge d'un pipeline : ces
+obligations restent confiées aux portes Gamma/API/archive après intégration.
+
+`public_status=not_claimed`. Aucun fichier produit, CMake réel, registre,
+rapport externe, branche Git, commit ou ressource GCP modifié par cette revue.

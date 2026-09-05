@@ -1,0 +1,78 @@
+{
+  "status": "paired_equal",
+  "runs": 2,
+  "expected_runs": 2,
+  "source_stable": true,
+  "error": null,
+  "public_status": "not_claimed",
+  "slo": "not_evaluated",
+  "gcp": "not_used",
+  "equality": {
+    "digests": true,
+    "cardinalities": true,
+    "counts": true,
+    "silent": true,
+    "silent_limits": true,
+    "payload_caps": true
+  },
+  "times": {
+    "C": {
+      "wall_seconds": 225.74753629900079,
+      "pipeline_ms": 225719.9,
+      "stage_ms": {
+        "index": 2.1,
+        "gen": 56816.9,
+        "wspd": 28012.9,
+        "rects": 28803.8,
+        "rle": 1492.9,
+        "prefiltre": 9561.7,
+        "census": 7672.5,
+        "comptage": 35.4,
+        "expansion": 639.1,
+        "fold": 29137.8,
+        "tri": 3813.7,
+        "intern": 15141.6,
+        "fusion": 4957.0,
+        "reduce": 5198.0,
+        "digest": 3597.2,
+        "silent_incidence": 116615.421,
+        "fold_wall": 149280.4,
+        "cli_e2e": 225721.748
+      },
+      "max_rss_kb": 2302712
+    },
+    "D": {
+      "wall_seconds": 172.67457106200163,
+      "pipeline_ms": 172623.0,
+      "stage_ms": {
+        "index": 2.4,
+        "gen": 55692.7,
+        "wspd": 27274.6,
+        "rects": 28417.9,
+        "rle": 1432.9,
+        "prefiltre": 9318.5,
+        "census": 7445.4,
+        "comptage": 34.7,
+        "expansion": 617.6,
+        "fold": 28363.8,
+        "tri": 3610.8,
+        "intern": 14848.0,
+        "fusion": 4877.2,
+        "reduce": 5003.2,
+        "digest": 3591.4,
+        "silent_incidence": 65973.963,
+        "fold_wall": 97847.3,
+        "cli_e2e": 172624.833
+      },
+      "max_rss_kb": 2301540
+    }
+  },
+  "ratio_C_over_D": {
+    "process": 1.30735831518552,
+    "pipeline": 1.3075887917600784
+  },
+  "time_scope": "single_cold_process_C_then_D_including_digest_no_archive_not_SLO_or_statistical_gain",
+  "started_utc": "2026-09-05T00:06:26.930933Z",
+  "ended_utc": "2026-09-05T00:13:05.495688Z",
+  "repository_change_policy": "HEAD_or_worktree_changes_recorded_source_snapshot_stability_remains_required"
+}

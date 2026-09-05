@@ -1,0 +1,54 @@
+{
+  "status": "prepared_not_executed",
+  "writes": false,
+  "engine_runs": 0,
+  "build_dir_exists": true,
+  "commands": [
+    [
+      "compiler_version",
+      [
+        "c++",
+        "--version"
+      ],
+      30
+    ],
+    [
+      "cmake_version",
+      [
+        "cmake",
+        "--version"
+      ],
+      30
+    ],
+    [
+      "configure",
+      [
+        "cmake",
+        "-S",
+        "/workspaces/E-HGP/morsehgp3D_v7",
+        "-B",
+        "/workspaces/E-HGP/build/v7_meb_qualification",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP7_ENABLE_CUDA=OFF",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+      ],
+      300
+    ],
+    [
+      "build",
+      [
+        "cmake",
+        "--build",
+        "/workspaces/E-HGP/build/v7_meb_qualification",
+        "--parallel",
+        "2",
+        "--target",
+        "mhgp7"
+      ],
+      300
+    ]
+  ],
+  "output_would_be": "/workspaces/E-HGP/build/v7_meb_paired/build_D_receipt",
+  "runner_sha256": "3abe27f8a10173867a0395430ff56392bb82b5cbee3eb766fb293ffa65cc2645",
+  "gcp": "not_used"
+}

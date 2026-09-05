@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_meb_qualification",
+    "--show-only=json-v1",
+    "-L",
+    "^gate$"
+  ],
+  "started_utc": "2026-09-05T00:17:46Z",
+  "status": "running",
+  "timeout_seconds": 60
+}

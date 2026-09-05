@@ -1,0 +1,10 @@
+{
+  "schema": "mhgp7.meb-sanitizer-effective-options.v1",
+  "observation": "read-only /proc environment of unique exact-command running sanitizer qualification process; only these two option names selected",
+  "effective_options": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "status": "matches_explicit_launch",
+  "public_status": "not_claimed"
+}

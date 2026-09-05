@@ -1,0 +1,22 @@
+{
+  "schema": "mhgp7.meb-targeted-judge-selftests.v1",
+  "runner_sha256": "24e9801fc03ae3c049496d0cd87567ff0edc769b94dd1ba441dc8b47f4cec3c3",
+  "results": [
+    {
+      "cmd": "python3 -B build/v7_meb_integrated_tests/run_targeted.py --selftest",
+      "chunk_id": "ab7060",
+      "wall_time_seconds": 0.152800611,
+      "exit_code": 0,
+      "original_token_count": 15,
+      "output": "meb_targeted_judge=passed positive=1 rejected=8 names=32\n"
+    },
+    {
+      "cmd": "python3 -B -O build/v7_meb_integrated_tests/run_targeted.py --selftest",
+      "chunk_id": "ab3578",
+      "wall_time_seconds": 0.084871633,
+      "exit_code": 0,
+      "original_token_count": 15,
+      "output": "meb_targeted_judge=passed positive=1 rejected=8 names=32\n"
+    }
+  ]
+}

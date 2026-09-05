@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="32"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="31"
+	timestamp="2026-09-05T00:04:55"
+	>
+	<testcase name="mhgp7_bad_alloc_temoin" classname="mhgp7_bad_alloc_temoin" time="9.77942" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>temoin : run complet, etage_atteint=publication, 10 callbacks (kmax_eff=10) — conforme
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_bad_alloc_etage_provision" classname="mhgp7_bad_alloc_etage_provision" time="0.0319717" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>caps-throw-bad-alloc-provision inflight=1 : resource_exhausted : allocation impossible a l'etage entree (rss_mb apres_generation=0 apres_rle=0 apres_prefiltre=0 apres_census=0 max_fold=0)
+caps-throw-bad-alloc-provision inflight=2 : resource_exhausted : allocation impossible a l'etage entree (rss_mb apres_generation=0 apres_rle=0 apres_prefiltre=0 apres_census=0 max_fold=0)
+caps-throw-bad-alloc-provision inflight=8 : resource_exhausted : allocation impossible a l'etage entree (rss_mb apres_generation=0 apres_rle=0 apres_prefiltre=0 apres_census=0 max_fold=0)
+bad_alloc a l'etage entree : refus transactionnel conforme (statut, curseur, zero callback, aucun provisoire) sur inflight 1/2/8 — jamais un abort
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_bad_alloc_etage_census" classname="mhgp7_bad_alloc_etage_census" time="18.4117" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>caps-throw-bad-alloc-census inflight=1 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=138 apres_rle=140 apres_prefiltre=147 apres_census=0 max_fold=0)
+caps-throw-bad-alloc-census inflight=2 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=250 apres_rle=251 apres_prefiltre=257 apres_census=0 max_fold=0)
+caps-throw-bad-alloc-census inflight=8 : resource_exhausted : allocation impossible a l'etage census (rss_mb apres_generation=360 apres_rle=361 apres_prefiltre=368 apres_census=0 max_fold=0)
+bad_alloc a l'etage census : refus transactionnel conforme (statut, curseur, zero callback, aucun provisoire) sur inflight 1/2/8 — jamais un abort
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_bad_alloc_etage_fold" classname="mhgp7_bad_alloc_etage_fold" time="20.3888" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>caps-throw-bad-alloc-fold inflight=1 : resource_exhausted : allocation impossible a l'etage fold (rss_mb apres_generation=137 apres_rle=140 apres_prefiltre=146 apres_census=169 max_fold=0)
+caps-throw-bad-alloc-fold inflight=2 : resource_exhausted : allocation impossible a l'etage fold (rss_mb apres_generation=285 apres_rle=286 apres_prefiltre=293 apres_census=315 max_fold=0)
+caps-throw-bad-alloc-fold inflight=8 : resource_exhausted : allocation impossible a l'etage fold (rss_mb apres_generation=391 apres_rle=392 apres_prefiltre=398 apres_census=420 max_fold=0)
+bad_alloc a l'etage fold : refus transactionnel conforme (statut, curseur, zero callback, aucun provisoire) sur inflight 1/2/8 — jamais un abort
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_thread_failure" classname="mhgp7_thread_failure" time="0.493852" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>thread_failure partial=4 runtime=4 workers=4 failures=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_thread_failure_mutant_admission" classname="mhgp7_thread_failure_mutant_admission" time="0.0338699" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>partial_launch cases=2 admitted=65568 active=0 failures=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_thread_failure_refus_arg" classname="mhgp7_thread_failure_refus_arg" time="0.0385397" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_direct" classname="mhgp7_census_direct" time="0.780771" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>census_direct version=mhgp7-census-direct-v1 balls=5562 regular=5547 plateau=15 events=5787 refusals=14 object_errors=0 publish_errors=0 residence_errors=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_direct_offset" classname="mhgp7_census_direct_offset" time="0.801167" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>census_direct version=mhgp7-census-direct-v1 balls=5562 regular=5547 plateau=15 events=5787 refusals=14 object_errors=6594 publish_errors=0 residence_errors=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_direct_transaction" classname="mhgp7_census_direct_transaction" time="0.893034" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>census_direct version=mhgp7-census-direct-v1 balls=5562 regular=5547 plateau=15 events=5787 refusals=14 object_errors=0 publish_errors=14 residence_errors=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_direct_residence" classname="mhgp7_census_direct_residence" time="0.796265" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>census_direct version=mhgp7-census-direct-v1 balls=5562 regular=5547 plateau=15 events=5787 refusals=14 object_errors=0 publish_errors=0 residence_errors=12
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_silent_incidence" classname="mhgp7_silent_incidence" time="4.54561" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>silent_incidence cases=26 cuts=1492 core_pairs=1543928 silent=8 longest_chain=2 cache_hits=1 delta_cuts=1354 delta_records=330 normalized_transitions=371 failures=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_silent_incidence_mutant" classname="mhgp7_silent_incidence_mutant" time="0.067338" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_reduced_latent_parent_mutant" classname="mhgp7_reduced_latent_parent_mutant" time="0.0906033" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_reduced_drop_materialization_mutant" classname="mhgp7_reduced_drop_materialization_mutant" time="0.0661442" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_silent_drop_nonmerge_mutant" classname="mhgp7_silent_drop_nonmerge_mutant" time="0.0673876" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_silent_csr_stale_level_mutant" classname="mhgp7_silent_csr_stale_level_mutant" time="0.0497951" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_archive" classname="mhgp7_archive" time="0.942179" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>archive_gate=passed scenes=24 digest_replay=independent delta_replay=independent corruption=rejected
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_archive_optimized" classname="mhgp7_archive_optimized" time="0.879309" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>archive_gate=passed scenes=24 digest_replay=independent delta_replay=independent corruption=rejected
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_archive_api" classname="mhgp7_archive_api" time="0.038545" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>archive_api_gate=passed completed=2 parent_sync_fault=1 file_sync_fault=1 closed_lifecycle=6 invalid_inputs=3 semantics_refusals=3
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_archive_cleanup" classname="mhgp7_archive_cleanup" time="0.0681518" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>archive_cleanup_gate=passed persistent=1 all_order_files=10 constructor_faults=8 post_mkdir_faults=1 commit_faults=10 callback_mask=6 parent_sync_fault=1 os_cleanup_fault=1 denied_allocations=23
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mono_inline" classname="mhgp7_mono_inline" time="0.42363" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>object=nominal kmax=5 complete=0 exception= status=0 callbacks=1,2,3,4,5, digest=7e2ced67b1eb1da5c59bdc0c2c39960bf964ae308ae90c1a964dce082d3b136a
+K=1 digest=413e1d8eab0c14098a735bcf09ede1d41f540601721565b6fd69e171a955c69c events=19 facets=11 deltas=10 attachments=0 fusions=10 nodes=10
+K=2 digest=3de6c56f391fbde20a5bb19bdebd1dd3125824c645d5549409d9c686b3042cf3 events=24 facets=33 deltas=23 attachments=14 fusions=32 nodes=13
+K=3 digest=57b9c36421da716a8aaa08bf6ec549ce1f051ddbbe66b4b5855de0ee4c50d13d events=23 facets=52 deltas=23 attachments=27 fusions=51 nodes=15
+K=4 digest=4e1a943013148ad13774b9ba7d14cec2aa0bd36c80c95263a091bca678d0f747 events=23 facets=76 deltas=23 attachments=50 fusions=75 nodes=18
+K=5 digest=5568a15469dde617e8b831948b1f3d75fe37da754676ba6d0063a8f09d61c2af events=23 facets=97 deltas=23 attachments=71 fusions=96 nodes=15
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:3,2:5,3:0,3:2,3:3,3:5,4:0,4:2,4:3,4:5,5:0,5:2,5:3,5:5,
+object=nominal kmax=10 complete=0 exception= status=0 callbacks=1,2,3,4,5,6,7,8,9,10, ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mono_inline_late_a" classname="mhgp7_mono_inline_late_a" time="0.0741423" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>object=--inject=fold-inject-a-failure-k2 kmax=10 complete=0 exception= status=4 callbacks=1, digest=
+phases=1:0,1:2,1:3,1:5,2:0,2:1,
+object=--inject=fold-inject-a-failure-k2 kmax=10 complete=1 exception= status=4 callbacks=1, digest=
+phases=1:0,1:2,1:3,1:5,2:0,2:1,
+mono_inline_injected=passed cases=2 failures=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mono_inline_late_b" classname="mhgp7_mono_inline_late_b" time="0.0805411" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>object=--inject=fold-inject-b-exception-k3 kmax=10 complete=0 exception=mutant fold-inject-b-exception-k3 : exception de reduction (K=3) status=0 callbacks=1,2, digest=
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:3,2:5,3:0,3:2,3:4,3:6,
+object=--inject=fold-inject-b-exception-k3 kmax=10 complete=1 exception=mutant fold-inject-b-exception-k3 : exception de reduction (K=3) status=0 callbacks=1,2, digest=
+phases=1:0,1:2,1:3,1:5,2:0,2:2,2:3,2:5,3:0,3:2,3:4,3:6,
+mono_inline_injected=passed cases=2 failures=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_mono_inline_early_alloc" classname="mhgp7_mono_inline_early_alloc" time="0.0689185" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>object=--inject=caps-throw-bad-alloc-fold kmax=10 complete=0 exception= status=2 callbacks= digest=
+phases=1:0,1:2,1:4,1:6,
+object=--inject=caps-throw-bad-alloc-fold kmax=10 complete=1 exception= status=2 callbacks= digest=
+phases=1:0,1:2,1:4,1:6,
+mono_inline_injected=passed cases=2 failures=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_meb_lazy" classname="mhgp7_meb_lazy" time="0.956683" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>meb_lazy_gate=passed mutant=none divergence=none public_status=not_claimed
+meb_lazy_counts cases=11805 success=664 degenerate=8 capped=11133 q2=53 q3=79 q4=34 logical_reject3=329615 logical_reject4=26952 materialized3=320 materialized4=136 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=4 reference_complete=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_meb_lazy_q3_reject_shell" classname="mhgp7_meb_lazy_q3_reject_shell" time="0.0291159" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>meb_lazy_gate=mutant_killed mutant=silent-meb-q3-reject-shell divergence=differential.status_reason public_status=not_claimed
+meb_lazy_counts cases=0 success=0 degenerate=0 capped=0 q2=0 q3=0 q4=0 logical_reject3=1 logical_reject4=0 materialized3=0 materialized4=0 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=3 reference_complete=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_meb_lazy_q4_reject_shell" classname="mhgp7_meb_lazy_q4_reject_shell" time="0.0289386" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>meb_lazy_gate=mutant_killed mutant=silent-meb-q4-reject-shell divergence=differential.status_reason public_status=not_claimed
+meb_lazy_counts cases=0 success=0 degenerate=0 capped=0 q2=0 q3=0 q4=0 logical_reject3=4 logical_reject4=1 materialized3=0 materialized4=0 rejected_materialized3=0 rejected_materialized4=0 reference_minimal_q=4 reference_complete=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_meb_lazy_eager_materialization" classname="mhgp7_meb_lazy_eager_materialization" time="1.14867" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>meb_lazy_gate=mutant_killed mutant=silent-meb-eager-materialization divergence=logical_rejected_materialization public_status=not_claimed
+meb_lazy_counts cases=11805 success=664 degenerate=8 capped=11133 q2=53 q3=79 q4=34 logical_reject3=329615 logical_reject4=26952 materialized3=329935 materialized4=27088 rejected_materialized3=329615 rejected_materialized4=26952 reference_minimal_q=4 reference_complete=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_meb_lazy_unknown_mutant" classname="mhgp7_meb_lazy_unknown_mutant" time="0.0229887" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_meb_lazy_empty_mutant" classname="mhgp7_meb_lazy_empty_mutant" time="0.021504" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_meb_lazy_duplicate_mutant" classname="mhgp7_meb_lazy_duplicate_mutant" time="0.0210017" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+</testsuite>
