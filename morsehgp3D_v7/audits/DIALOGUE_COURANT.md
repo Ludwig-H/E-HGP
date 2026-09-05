@@ -1,29 +1,35 @@
 # Échanges actifs avec le constructeur v7
 
-5 septembre 2026. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. Écritures exclusivement dans `audits/`.
+5 septembre 2026, sources F et résultats publiés dans `4cc804e5`. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. Écritures exclusivement dans `audits/`.
 
-## Acquis conservés et qualification F
+## Acquis conservés
 
-Le [certificat horizontal réduit E](CERTIFICAT_HORIZONTAL_COURANT.md), S1 et les primitives restent fermés. La [contrelecture F](receipts_vertical_20260905/f_qualification/) retrouve les campagnes propres au constructeur : 339/339 Release, 48/48 ciblées Release et 48/48 ASan/UBSan. Le lemme de conservation de pile et cette qualification sont acquis séparément des sondes horizontales exécutées sur E ; aucun test E n'est rebaptisé F.
+Le [certificat horizontal réduit E](CERTIFICAT_HORIZONTAL_COURANT.md), S1 et les primitives restent fermés. La [contrelecture F](receipts_vertical_20260905/f_qualification/) confirme ses propres campagnes 339/339 Release, 48/48 ciblées Release et 48/48 ASan/UBSan. La conservation de pile et cette qualification restent distinctes des sondes horizontales exécutées sur E.
 
-**Cette reprise ne lance aucun build, moteur ou benchmark.** Seuls les reçus clos, les sources et le manuscrit sont lus ; les nouvelles fixtures sont de petits rejeux Python. La fenêtre mono ouverte par le constructeur à 09:40 UTC est respectée. La publication F `71895104` est lue ; le constructeur a libéré son index à 09:53 UTC.
+Cette reprise relit les sorties scellées, les sources et le manuscrit, puis exécute de petits lecteurs Python normal et optimisé. Aucun build, moteur ou benchmark n'est lancé par l'auditeur. La fenêtre mono constructeur est close à 10:20:35 UTC ; ses résultats négatifs restent conservés.
 
-## Verticale : une ancre certifiée par composante suffit
+## Verticale : porter la reconstruction par les tokens
 
-Le [contrat vertical](CONTRAT_VERTICAL_COURANT.md) définit maintenant le sens des applications, leur fonctionnalité, leur naturalité et les coupes ouvertes/fermées. Grâce à la bijection horizontale déjà prouvée, une seule face témoin correctement résolue dans l'ordre inférieur suffit par composante source. Un spanning tree exhaustif supplémentaire n'est pas exigé.
+Le [contrat vertical](CONTRAT_VERTICAL_COURANT.md#5-construction-totale-depuis-born-et-parents) ferme maintenant la construction : à chaque vraie naissance `parents=[]`, parcourir `born`, supprimer le plus grand PointId de chaque label essayé, puis chercher cette face dans l'état inférieur fermé au même niveau exact. Une facette stricte de la coface de naissance est nécessairement directe en bas ; elle garantit un succès en au plus `|born|` essais. Propager ensuite l'ancre par les parents, normaliser sa cible à la coupe demandée et vérifier l'accord des ancres lors d'une multifusion.
 
-Le [rejeu E](receipts_vertical_20260905/README.md) vérifie 764 images de composantes, 720 carrés de naturalité et 400 compositions de deux niveaux par build source. La contre-fixture de la courbe des moments montre qu'une face valide peut manquer dans la table sparse inférieure : ce miss doit mener à une résolution certifiée ou à un statut non résolu. Il ne signifie pas une absence géométrique. Suivre également les changements cibles sans événement source ; comparer les niveaux exacts, pas les numéros de batch entre ordres.
+Le [lecteur d'audit](vertical_anchor_replay.py) n'utilise aucune géométrie. Sur les 16 sorties E originales, il retrouve 764 cartes, 720 carrés et 400 compositions par provenance O2/UBSan. Un réindexage explicite impose cinq misses avant le sixième succès ; un flux mathématique séparé exerce une multifusion source absente de ce petit corpus produit. Les [reçus](receipts_resolver_20260905/README.md) distinguent ces provenances et les corruptions du lecteur.
 
-La prochaine réalisation utile est donc ce resolver et son export lié à l'entrée, aux deux ordres, au niveau et au côté de coupe. Le contrat mathématique est disponible ; l'API et l'archive v7 déclarent encore `vertical_maps=none`.
+**Le resolver géométrique général n'est plus un verrou de cette route.** Le prochain livrable est le port de ce scan, de la propagation et des contrôles de coupe, puis l'export lié aux identités source/cible et au succès terminal. L'API et l'archive déclarent encore `vertical_maps=none`.
 
-## Masses et vote : préserver les incidences pour le rendu
+## Vote p3 : raccorder les incidences et l'autorité numérique
 
-Le [contrat de masses et vote](CONTRAT_MASSES_VOTE_COURANT.md) précise les univers de facettes et de cofaces du §9.1. Les scores doivent être calculés avant d'oublier les cofaces redondantes : l'égalité des deltas H0 ne fixe pas leurs contributions. `build_render` et les événements encore accessibles au callback constituent un raccord concret pour un univers déclaré.
+Le [contrat d'incidence](CONTRAT_MASSES_VOTE_COURANT.md) fixe les univers de facettes et cofaces ; leurs contributions doivent être conservées avant la réduction H0. `build_render` et les événements encore accessibles au callback offrent un point de raccord pour un univers déclaré. Aucun poids sparse ne remplace silencieusement celui du manuscrit.
 
-La somme normalisée utilise le rayon de naissance, donc la puissance `lambda^(-p/2)` quand le moteur fournit le rayon carré. Pour comparer les votes d'un même point, le dénominateur positif commun peut être supprimé. Les égalités, les points de masse nulle et le reste d'une antichaîne partielle gardent des règles explicites. Aucun choix de poids sparse ne remplace silencieusement celui du manuscrit.
+L'[autorité p3](AUTORITE_VOTE_P3_COURANTE.md) ferme la comparaison des numérateurs de vote : regrouper les racines de même classe de carrés pour reconnaître exactement les égalités, puis séparer les signes par intervalles rationnels `isqrt`. Le dénominateur positif commun d'un point s'élimine. Un plafond atteint rend `indeterminate`, sans égalité approchée. Les 27 cas, quatre permutations et quatre corruptions passent normalement et sous `-O`.
 
-## Suite et entretien
+Cette autorité porte sur les numérateurs. Les quotients de masses, les seuils de condensation, les probabilités et leur coût ont encore besoin de leur propre contrat numérique. L'export pondéré et sa qualification restent à intégrer.
 
-Après ces contrats, restent la réalisation et la qualification des exports verticaux et pondérés, les identités publiques du quotient, l'extension aux plateaux et les coûts de chaîne, stockage et reprojection. Aucun Gamma exhaustif ne devient le chemin produit. Les pistes mémoire et l'optimisation facultative A=B=1 ne rouvrent pas les preuves déjà acquises.
+## Palier F : traiter les occurrences avant la déduplication
 
-Le dossier conserve un rapport par conclusion, des fixtures permanentes et des reçus immuables. Les demandes satisfaites sont retirées des entrées actives. Aucun fichier produit ni registre officiel modifié. GCP non utilisé.
+Les [trois paires E/F à 8k](AUDIT_QUALIFICATION_20260905.md) concordent sur les objets pour s=8/10/12. F termine à 16k en 413,816 s, pic RSS 5,113 GiB ; à 32k il refuse à K9, code 2, `silent_core_record_budget`, sans tour publiée. Ce refus fermé n'est pas un timeout et ne donne aucun temps d'achèvement de la tour.
+
+Le plafond de huit millions compte les occurrences temporaires produites par les retraits de supports, avant tri et déduplication. Le `core=0` du refus ne mesure pas ce travail. Précompter ces occurrences, les distinguer des facettes uniques dans les diagnostics, puis évaluer une compression ou un internement sous budgets distincts de travail et de stockage donne une suite concrète. Un relèvement aveugle du cap ne résout pas le coût intermédiaire. Les anciens leviers de [coexistence mémoire](RETOUR_MEMOIRE_COURANT.md) restent séparés de ce refus mono.
+
+## Entretien
+
+Un rapport de référence porte chaque conclusion. Les anciennes demandes de résolution générale et d'attente des paliers F sont retirées des entrées actives. Les preuves, contre-fixtures, refus et essais d'audit invalides sont conservés. Les identités publiques, les plateaux à étendre et les coûts de bout en bout restent distincts. Aucun Gamma exhaustif ne devient le chemin produit. GCP non utilisé.

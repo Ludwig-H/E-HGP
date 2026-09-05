@@ -1,0 +1,22 @@
+{
+  "status": "observations_completed",
+  "error": null,
+  "runs": 1,
+  "expected_runs": 1,
+  "source_stable": true,
+  "engine_successes": 1,
+  "engine_refusals": 0,
+  "censored": 0,
+  "invalid": 0,
+  "public_status": "not_claimed",
+  "n": 16000,
+  "role": "F",
+  "comparison": "none_F_only",
+  "slo": "not_evaluated",
+  "gcp": "not_used",
+  "cost_scope": "one_cold_process_including_digest_no_archive_shared_host_not_statistical_gain",
+  "receipt_scope": "independent_scale_observation_not_part_of_8000_pairs",
+  "started_utc": "2026-09-05T10:01:54.922975Z",
+  "ended_utc": "2026-09-05T10:08:48.852723Z",
+  "repository_change_policy": "HEAD_or_worktree_changes_recorded_source_snapshot_stability_required"
+}

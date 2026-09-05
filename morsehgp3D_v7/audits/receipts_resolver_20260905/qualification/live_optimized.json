@@ -1,0 +1,593 @@
+{
+  "backend": "cpu_reference",
+  "capture_sha256": "dbf3dc2d9744b4620c62cd9b9f56ecc3f91d6f9da4b5bd1b84627c3d977f7afd",
+  "cross_s_reference": {
+    "cardinalities": {
+      "1": {
+        "attachements": 0,
+        "deltas": 7999,
+        "evenements": 29875,
+        "facettes": 8000,
+        "fusions": 7999,
+        "noeuds": 7999
+      },
+      "10": {
+        "attachements": 8127546,
+        "deltas": 1005622,
+        "evenements": 1088869,
+        "facettes": 8918681,
+        "fusions": 8918680,
+        "noeuds": 15514
+      },
+      "2": {
+        "attachements": 32713,
+        "deltas": 51121,
+        "evenements": 67539,
+        "facettes": 62910,
+        "fusions": 62909,
+        "noeuds": 2122
+      },
+      "3": {
+        "attachements": 147239,
+        "deltas": 120877,
+        "evenements": 124135,
+        "facettes": 213686,
+        "fusions": 213685,
+        "noeuds": 2929
+      },
+      "4": {
+        "attachements": 399983,
+        "deltas": 197242,
+        "evenements": 201156,
+        "facettes": 517876,
+        "fusions": 517875,
+        "noeuds": 4068
+      },
+      "5": {
+        "attachements": 850158,
+        "deltas": 289705,
+        "evenements": 298870,
+        "facettes": 1036109,
+        "fusions": 1036108,
+        "noeuds": 5419
+      },
+      "6": {
+        "attachements": 1552470,
+        "deltas": 398776,
+        "evenements": 415933,
+        "facettes": 1824039,
+        "fusions": 1824038,
+        "noeuds": 7004
+      },
+      "7": {
+        "attachements": 2573565,
+        "deltas": 525699,
+        "evenements": 554022,
+        "facettes": 2947215,
+        "fusions": 2947214,
+        "noeuds": 8780
+      },
+      "8": {
+        "attachements": 3969114,
+        "deltas": 668888,
+        "evenements": 712109,
+        "facettes": 4463468,
+        "fusions": 4463467,
+        "noeuds": 10954
+      },
+      "9": {
+        "attachements": 5809858,
+        "deltas": 829864,
+        "evenements": 891721,
+        "facettes": 6443014,
+        "fusions": 6443013,
+        "noeuds": 13150
+      }
+    },
+    "digests": {
+      "digest_all": "4c3ceb0498990bafa41a9e43d0bffe25a3fee579b12b5d34365f3578f526a0e7",
+      "digest_forest_K1": "fff29fb38092c02dd43271de33b9aee28a03408fbb70153385c3fc1e69e3573a",
+      "digest_forest_K10": "a44af66ade1a06ad1be19a512642b65a87f8d3b75c102b4850a719b68a3b77bb",
+      "digest_forest_K2": "dd657928d626854e23bc1ff59327eb6c834d4ff94fbb0f1913156e251f14b213",
+      "digest_forest_K3": "ba8973abbad9fc0aa1008589f0f3a669389f6406350501bdda97aa879dedcf0a",
+      "digest_forest_K4": "69b328c5a690c5b63d607018de6e28ae7f3f8f82f4320989cccec6379b0ad358",
+      "digest_forest_K5": "0598690dcf3a59d3cee0a7447d06d6773ed3b4d6d733c35d801dd3924e14ba6a",
+      "digest_forest_K6": "45014ce7ef7d17c8baeb1f5df32d90f6643cbc913cdc3817d10af1db88be363a",
+      "digest_forest_K7": "e8dc58ed4133f76f6541c474f9dedfb3c8d8880d1463bc49f32e8a36cbc62c80",
+      "digest_forest_K8": "aa7bcd6f453905566e423de55991caedb3afed38e4164d2cf5c295c85975e318",
+      "digest_forest_K9": "7b6c460d6df9631d0ef3851b5e939b161fdc559ecddb0396a94991ca970e1bb3"
+    }
+  },
+  "engine_build_runs": 0,
+  "gcp": "not_used",
+  "limits": [
+    "One cold ordered pair per s and one unpaired F observation per larger n; no statistical gain/SLO or exactness claim.",
+    "Raw scope is normalized horizontal candidate, terminal authority, provisional callbacks, no vertical maps or archive.",
+    "RSS, virtual-address RLIMIT and partial named payload proxy are distinct quantities.",
+    "F32k refusal has no published forest/digest: diagnostic work is provisional, duration is time to refusal.",
+    "Recorded source/build binding is not hermetic attestation."
+  ],
+  "live": {
+    "historical_receipt_validity_not_reassigned_from_worktree": true,
+    "mismatches": [],
+    "performed": true,
+    "pins": 122
+  },
+  "measurements": [
+    {
+      "ended_utc": "2026-09-05T09:43:42.467298Z",
+      "max_rss_kb": 2298584,
+      "n": 8000,
+      "pipeline_ms": 187641.3,
+      "role": "E",
+      "s": 8,
+      "stage_ms": {
+        "census": 7859.6,
+        "cli_e2e": 187643.407,
+        "comptage": 32.7,
+        "digest": 3964.7,
+        "expansion": 653.8,
+        "fold": 33679.4,
+        "fold_wall": 106256.5,
+        "fusion": 5901.0,
+        "gen": 60416.6,
+        "index": 2.2,
+        "intern": 17209.7,
+        "prefiltre": 10489.3,
+        "rects": 30850.3,
+        "reduce": 5508.5,
+        "rle": 1654.6,
+        "silent_incidence": 68692.386,
+        "tri": 5032.1,
+        "wspd": 29566.0
+      },
+      "started_utc": "2026-09-05T09:40:34.784349Z",
+      "wall_seconds": 187.67723476299943
+    },
+    {
+      "ended_utc": "2026-09-05T09:46:51.481250Z",
+      "max_rss_kb": 2299856,
+      "n": 8000,
+      "pipeline_ms": 188944.0,
+      "role": "F",
+      "s": 8,
+      "stage_ms": {
+        "census": 8013.3,
+        "cli_e2e": 188946.12,
+        "comptage": 34.1,
+        "digest": 3985.8,
+        "expansion": 649.0,
+        "fold": 33790.1,
+        "fold_wall": 106362.2,
+        "fusion": 6103.6,
+        "gen": 61504.1,
+        "index": 2.1,
+        "intern": 17246.5,
+        "prefiltre": 10452.7,
+        "rects": 31275.7,
+        "reduce": 5459.7,
+        "rle": 1633.9,
+        "silent_incidence": 68705.268,
+        "tri": 4951.7,
+        "wspd": 30228.2
+      },
+      "started_utc": "2026-09-05T09:43:42.507759Z",
+      "wall_seconds": 188.96936113599986
+    },
+    {
+      "ended_utc": "2026-09-05T09:50:50.854698Z",
+      "max_rss_kb": 2304700,
+      "n": 8000,
+      "pipeline_ms": 190040.5,
+      "role": "E",
+      "s": 10,
+      "stage_ms": {
+        "census": 7940.9,
+        "cli_e2e": 190042.507,
+        "comptage": 33.0,
+        "digest": 3958.3,
+        "expansion": 652.6,
+        "fold": 33194.6,
+        "fold_wall": 105437.1,
+        "fusion": 5837.0,
+        "gen": 63679.7,
+        "index": 2.3,
+        "intern": 17142.8,
+        "prefiltre": 10393.6,
+        "rects": 30454.9,
+        "reduce": 5073.7,
+        "rle": 1633.1,
+        "silent_incidence": 68399.702,
+        "tri": 5115.5,
+        "wspd": 33224.4
+      },
+      "started_utc": "2026-09-05T09:47:40.771602Z",
+      "wall_seconds": 190.07731555899954
+    },
+    {
+      "ended_utc": "2026-09-05T09:53:56.557621Z",
+      "max_rss_kb": 2300476,
+      "n": 8000,
+      "pipeline_ms": 185623.8,
+      "role": "F",
+      "s": 10,
+      "stage_ms": {
+        "census": 7873.5,
+        "cli_e2e": 185625.821,
+        "comptage": 34.7,
+        "digest": 3990.2,
+        "expansion": 617.4,
+        "fold": 32865.7,
+        "fold_wall": 103132.1,
+        "fusion": 6075.8,
+        "gen": 61795.8,
+        "index": 2.2,
+        "intern": 16914.1,
+        "prefiltre": 10233.9,
+        "rects": 29760.3,
+        "reduce": 5034.9,
+        "rle": 1589.1,
+        "silent_incidence": 66474.825,
+        "tri": 4815.0,
+        "wspd": 32035.3
+      },
+      "started_utc": "2026-09-05T09:50:50.893383Z",
+      "wall_seconds": 185.66028154299966
+    },
+    {
+      "ended_utc": "2026-09-05T09:57:42.463003Z",
+      "max_rss_kb": 2300976,
+      "n": 8000,
+      "pipeline_ms": 184847.1,
+      "role": "E",
+      "s": 12,
+      "stage_ms": {
+        "census": 7701.9,
+        "cli_e2e": 184849.089,
+        "comptage": 33.4,
+        "digest": 3932.0,
+        "expansion": 628.9,
+        "fold": 32517.4,
+        "fold_wall": 102698.6,
+        "fusion": 5772.5,
+        "gen": 61792.6,
+        "index": 2.2,
+        "intern": 16888.3,
+        "prefiltre": 10104.4,
+        "rects": 28633.9,
+        "reduce": 4994.1,
+        "rle": 1600.7,
+        "silent_incidence": 66389.393,
+        "tri": 4835.3,
+        "wspd": 33158.4
+      },
+      "started_utc": "2026-09-05T09:54:37.579550Z",
+      "wall_seconds": 184.87840329699975
+    },
+    {
+      "ended_utc": "2026-09-05T10:00:52.545581Z",
+      "max_rss_kb": 2302616,
+      "n": 8000,
+      "pipeline_ms": 190026.1,
+      "role": "F",
+      "s": 12,
+      "stage_ms": {
+        "census": 7906.5,
+        "cli_e2e": 190028.137,
+        "comptage": 35.3,
+        "digest": 3944.4,
+        "expansion": 652.0,
+        "fold": 33331.4,
+        "fold_wall": 106089.9,
+        "fusion": 5833.8,
+        "gen": 63078.2,
+        "index": 2.5,
+        "intern": 17185.2,
+        "prefiltre": 10296.1,
+        "rects": 29932.0,
+        "reduce": 5137.7,
+        "rle": 1701.7,
+        "silent_incidence": 68924.642,
+        "tri": 5149.1,
+        "wspd": 33146.1
+      },
+      "started_utc": "2026-09-05T09:57:42.502062Z",
+      "wall_seconds": 190.03904867299934
+    },
+    {
+      "ended_utc": "2026-09-05T10:08:48.786882Z",
+      "max_rss_kb": 5361880,
+      "n": 16000,
+      "pipeline_ms": 413790.2,
+      "role": "F",
+      "s": 8,
+      "stage_ms": {
+        "census": 18590.7,
+        "cli_e2e": 413794.438,
+        "comptage": 71.3,
+        "digest": 8329.3,
+        "expansion": 1411.2,
+        "fold": 74605.4,
+        "fold_wall": 227647.3,
+        "fusion": 12826.4,
+        "gen": 137616.8,
+        "index": 4.3,
+        "intern": 36205.5,
+        "prefiltre": 23859.8,
+        "rects": 66187.3,
+        "reduce": 13101.5,
+        "rle": 3994.9,
+        "silent_incidence": 144834.171,
+        "tri": 12429.1,
+        "wspd": 71429.1
+      },
+      "started_utc": "2026-09-05T10:01:54.965026Z",
+      "wall_seconds": 413.81637407000017
+    }
+  ],
+  "mode": "audit_independant_math_and_architecture",
+  "phase": "exploration_v7_hors_registre",
+  "previous_bytes_referenced": 28,
+  "profile": "quantized_u16_input_only",
+  "public_files_verified": 69,
+  "public_status": "not_claimed",
+  "scale": {
+    "16000": {
+      "cardinalities": {
+        "1": {
+          "attachements": 0,
+          "deltas": 15998,
+          "evenements": 60552,
+          "facettes": 16000,
+          "fusions": 15999,
+          "noeuds": 15998
+        },
+        "10": {
+          "attachements": 17120462,
+          "deltas": 2120263,
+          "evenements": 2294397,
+          "facettes": 18776291,
+          "fusions": 18776290,
+          "noeuds": 33194
+        },
+        "2": {
+          "attachements": 67050,
+          "deltas": 104413,
+          "evenements": 138218,
+          "facettes": 128228,
+          "fusions": 128227,
+          "noeuds": 4281
+        },
+        "3": {
+          "attachements": 304265,
+          "deltas": 249772,
+          "evenements": 256626,
+          "facettes": 440306,
+          "fusions": 440305,
+          "noeuds": 5986
+        },
+        "4": {
+          "attachements": 828257,
+          "deltas": 409011,
+          "evenements": 417437,
+          "facettes": 1071830,
+          "fusions": 1071829,
+          "noeuds": 8257
+        },
+        "5": {
+          "attachements": 1761810,
+          "deltas": 600957,
+          "evenements": 620400,
+          "facettes": 2147235,
+          "fusions": 2147234,
+          "noeuds": 11124
+        },
+        "6": {
+          "attachements": 3235973,
+          "deltas": 831013,
+          "evenements": 867457,
+          "facettes": 3798168,
+          "fusions": 3798167,
+          "noeuds": 14463
+        },
+        "7": {
+          "attachements": 5377715,
+          "deltas": 1098475,
+          "evenements": 1158286,
+          "facettes": 6156130,
+          "fusions": 6156129,
+          "noeuds": 18366
+        },
+        "8": {
+          "attachements": 8320996,
+          "deltas": 1402264,
+          "evenements": 1493209,
+          "facettes": 9351090,
+          "fusions": 9351089,
+          "noeuds": 22933
+        },
+        "9": {
+          "attachements": 12189788,
+          "deltas": 1742579,
+          "evenements": 1871641,
+          "facettes": 13511952,
+          "fusions": 13511951,
+          "noeuds": 27787
+        }
+      },
+      "counts": {
+        "boules_uniques": 6590753,
+        "census_int": 33849711,
+        "census_shell": 21948186,
+        "coord": 65536,
+        "deltas": 8574745,
+        "emis": 6590753,
+        "evenements": 9178223,
+        "facettes": 55397230,
+        "fusions": 55397220,
+        "mortes_profondeur": 64037,
+        "n": 16000,
+        "noeuds": 162389,
+        "s": 8,
+        "seed": 3,
+        "smax": 11,
+        "survivantes": 6526716,
+        "threads": 1
+      },
+      "digests": {
+        "digest_all": "097c04195eeedbe26603582a0ccd2ea0695419d80253cb726daab2b8076d98db",
+        "digest_forest_K1": "dcff0a571e14af6c514b8cd3c76ac3b3203e98aa6f85b818289f9b882bdff0c6",
+        "digest_forest_K10": "a975285f4c8a61d99856e59d65d1466106227a3ef6a353b6e3abd47a5aa23891",
+        "digest_forest_K2": "ec8905dece0bc8b5678d7926925d5e4f4343d13a51c9ecc6a59fc781ddfcbbc1",
+        "digest_forest_K3": "f6d22297a822a84269850b77eb9dce9bc65300c2eed9694c7bc4ab4eccdecd89",
+        "digest_forest_K4": "5a2ad53511f23f14d59b9dbb1492cc30c8e6f1ed2f603b8442dfce428da97447",
+        "digest_forest_K5": "be95e3b3c217a8fe5afeed4f85f20d4993cc4709dcb4529edcef2cd0368753e2",
+        "digest_forest_K6": "69ceeb3e47cf65577ac181a5207739d0a5337c79ec27627d527432d705890641",
+        "digest_forest_K7": "e1a49f569c2a4b1d14302703232778efc66652965656e69d5c5174c40a8bf752",
+        "digest_forest_K8": "20933d1ff4f39732baf165ff059532a904bd7a922bcd1dfc7ba340a5c9080eb3",
+        "digest_forest_K9": "9b2ec461d1c3efeecc0db121534281c953257d5fb7f467e6f56536311d45412e"
+      },
+      "max_rss_kb": 5361880,
+      "payload_caps": {
+        "budget": 17179869184,
+        "cap_brut_demande": 4294967295,
+        "cap_brut_effectif": 119304647,
+        "cap_fusion_budgetaire": 59652323
+      },
+      "pipeline_ms": 413790.2,
+      "silent": {
+        "10": {
+          "added": 778083,
+          "core": 2848194,
+          "max_chain": 17,
+          "meb_supports": 833506587,
+          "query_nodes": 382961561,
+          "steps": 778083,
+          "with_two_intruders": 544079
+        },
+        "2": {
+          "added": 8690,
+          "core": 93953,
+          "max_chain": 8,
+          "meb_supports": 132167,
+          "query_nodes": 5340469,
+          "steps": 8690,
+          "with_two_intruders": 6819
+        },
+        "3": {
+          "added": 33352,
+          "core": 235946,
+          "max_chain": 8,
+          "meb_supports": 1095319,
+          "query_nodes": 16839076,
+          "steps": 33352,
+          "with_two_intruders": 25412
+        },
+        "4": {
+          "added": 76520,
+          "core": 438545,
+          "max_chain": 9,
+          "meb_supports": 5022921,
+          "query_nodes": 36426405,
+          "steps": 76520,
+          "with_two_intruders": 57171
+        },
+        "5": {
+          "added": 139719,
+          "core": 699792,
+          "max_chain": 15,
+          "meb_supports": 16663106,
+          "query_nodes": 65286547,
+          "steps": 139719,
+          "with_two_intruders": 102898
+        },
+        "6": {
+          "added": 223040,
+          "core": 1018704,
+          "max_chain": 15,
+          "meb_supports": 45266593,
+          "query_nodes": 104458824,
+          "steps": 223040,
+          "with_two_intruders": 162847
+        },
+        "7": {
+          "added": 329172,
+          "core": 1393255,
+          "max_chain": 14,
+          "meb_supports": 107145317,
+          "query_nodes": 155005003,
+          "steps": 329172,
+          "with_two_intruders": 236910
+        },
+        "8": {
+          "added": 457176,
+          "core": 1823694,
+          "max_chain": 16,
+          "meb_supports": 229044124,
+          "query_nodes": 217751694,
+          "steps": 457176,
+          "with_two_intruders": 325722
+        },
+        "9": {
+          "added": 605755,
+          "core": 2310649,
+          "max_chain": 18,
+          "meb_supports": 451261735,
+          "query_nodes": 293578244,
+          "steps": 605755,
+          "with_two_intruders": 427342
+        }
+      },
+      "silent_limits": {
+        "chain_steps": 2000000,
+        "cofaces": 2000000,
+        "core_records": 8000000,
+        "meb_supports": 1000000000,
+        "query_nodes": 1000000000
+      },
+      "stage_ms": {
+        "census": 18590.7,
+        "cli_e2e": 413794.438,
+        "comptage": 71.3,
+        "digest": 8329.3,
+        "expansion": 1411.2,
+        "fold": 74605.4,
+        "fold_wall": 227647.3,
+        "fusion": 12826.4,
+        "gen": 137616.8,
+        "index": 4.3,
+        "intern": 36205.5,
+        "prefiltre": 23859.8,
+        "rects": 66187.3,
+        "reduce": 13101.5,
+        "rle": 3994.9,
+        "silent_incidence": 144834.171,
+        "tri": 12429.1,
+        "wspd": 71429.1
+      },
+      "stage_workers": {
+        "census": 1,
+        "expansion": 1,
+        "fold": 1,
+        "prefiltre": 1,
+        "rects": 1,
+        "rle": 1,
+        "wspd": 1
+      }
+    },
+    "32000": {
+      "GNU_time_wall_seconds": 569.83,
+      "diagnostic_completion_ms": 108089.183,
+      "diagnostic_counts": {
+        "census_balls": 13502432,
+        "plateau_balls": 0
+      },
+      "diagnostic_total_ms": 569822.087,
+      "exit_code": 2,
+      "max_rss_kb": 7100740,
+      "reason": "REFUS silent incidence K=9 : silent_core_record_budget",
+      "status": "engine_refused"
+    }
+  },
+  "status": "three_pairs_equal_F16k_success_F32k_closed_budget_refusal"
+}

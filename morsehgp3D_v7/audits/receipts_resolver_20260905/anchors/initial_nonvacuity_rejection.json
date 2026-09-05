@@ -1,0 +1,7 @@
+{
+  "status": "invalid_audit_corpus_assumption",
+  "exit_code": 1,
+  "stderr": "nonvacuity.multifusions\n",
+  "script_sha256": "27e22ce0243c1129388e1430548e04884a55b72e93a53a84e376ec1858278dee",
+  "reason": "Sealed E clouds exercise only continuations at source orders >=2; full horizontal multifusions include K1 and are not vertical source multifusions. No product defect inferred. A separate mathematical two-cluster stream is required for this branch."
+}

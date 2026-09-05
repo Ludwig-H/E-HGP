@@ -1,0 +1,308 @@
+[
+  {
+    "role": "F",
+    "n": 16000,
+    "status": "engine_completed",
+    "command": [
+      "/workspaces/E-HGP/build/v7_f_qualification/mhgp7",
+      "--family=uniform",
+      "--n=16000",
+      "--coord=65536",
+      "--seed=3",
+      "--s=8",
+      "--smax=11",
+      "--threads=1",
+      "--fold-inflight=1",
+      "--fold-join=1",
+      "--layout=csr",
+      "--digest",
+      "--complete-incidences",
+      "--mem-budget=17179869184",
+      "--silent-core-records=8000000",
+      "--silent-chain-steps=2000000",
+      "--silent-cofaces=2000000",
+      "--silent-query-nodes=1000000000",
+      "--silent-meb-supports=1000000000"
+    ],
+    "wrapped_command": [
+      "/usr/bin/taskset",
+      "--cpu-list",
+      "6",
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/build/v7_f_scale_20260905/n16000_receipts/F.time",
+      "--",
+      "/workspaces/E-HGP/build/v7_f_qualification/mhgp7",
+      "--family=uniform",
+      "--n=16000",
+      "--coord=65536",
+      "--seed=3",
+      "--s=8",
+      "--smax=11",
+      "--threads=1",
+      "--fold-inflight=1",
+      "--fold-join=1",
+      "--layout=csr",
+      "--digest",
+      "--complete-incidences",
+      "--mem-budget=17179869184",
+      "--silent-core-records=8000000",
+      "--silent-chain-steps=2000000",
+      "--silent-cofaces=2000000",
+      "--silent-query-nodes=1000000000",
+      "--silent-meb-supports=1000000000"
+    ],
+    "started_utc": "2026-09-05T10:01:54.965026Z",
+    "ended_utc": "2026-09-05T10:08:48.786882Z",
+    "returncode": 0,
+    "timed_out": false,
+    "wall_seconds": 413.81637407000017,
+    "stdout": "F.out",
+    "stderr": "F.err",
+    "usage": "F.time",
+    "digests": {
+      "digest_forest_K1": "dcff0a571e14af6c514b8cd3c76ac3b3203e98aa6f85b818289f9b882bdff0c6",
+      "digest_forest_K2": "ec8905dece0bc8b5678d7926925d5e4f4343d13a51c9ecc6a59fc781ddfcbbc1",
+      "digest_forest_K3": "f6d22297a822a84269850b77eb9dce9bc65300c2eed9694c7bc4ab4eccdecd89",
+      "digest_forest_K4": "5a2ad53511f23f14d59b9dbb1492cc30c8e6f1ed2f603b8442dfce428da97447",
+      "digest_forest_K5": "be95e3b3c217a8fe5afeed4f85f20d4993cc4709dcb4529edcef2cd0368753e2",
+      "digest_forest_K6": "69ceeb3e47cf65577ac181a5207739d0a5337c79ec27627d527432d705890641",
+      "digest_forest_K7": "e1a49f569c2a4b1d14302703232778efc66652965656e69d5c5174c40a8bf752",
+      "digest_forest_K8": "20933d1ff4f39732baf165ff059532a904bd7a922bcd1dfc7ba340a5c9080eb3",
+      "digest_forest_K9": "9b2ec461d1c3efeecc0db121534281c953257d5fb7f467e6f56536311d45412e",
+      "digest_forest_K10": "a975285f4c8a61d99856e59d65d1466106227a3ef6a353b6e3abd47a5aa23891",
+      "digest_all": "097c04195eeedbe26603582a0ccd2ea0695419d80253cb726daab2b8076d98db"
+    },
+    "counts": {
+      "n": 16000,
+      "coord": 65536,
+      "s": 8,
+      "smax": 11,
+      "seed": 3,
+      "threads": 1,
+      "emis": 6590753,
+      "boules_uniques": 6590753,
+      "mortes_profondeur": 64037,
+      "survivantes": 6526716,
+      "census_int": 33849711,
+      "census_shell": 21948186,
+      "evenements": 9178223,
+      "facettes": 55397230,
+      "fusions": 55397220,
+      "deltas": 8574745,
+      "noeuds": 162389
+    },
+    "cardinalities": {
+      "1": {
+        "evenements": 60552,
+        "facettes": 16000,
+        "deltas": 15998,
+        "attachements": 0,
+        "fusions": 15999,
+        "noeuds": 15998
+      },
+      "2": {
+        "evenements": 138218,
+        "facettes": 128228,
+        "deltas": 104413,
+        "attachements": 67050,
+        "fusions": 128227,
+        "noeuds": 4281
+      },
+      "3": {
+        "evenements": 256626,
+        "facettes": 440306,
+        "deltas": 249772,
+        "attachements": 304265,
+        "fusions": 440305,
+        "noeuds": 5986
+      },
+      "4": {
+        "evenements": 417437,
+        "facettes": 1071830,
+        "deltas": 409011,
+        "attachements": 828257,
+        "fusions": 1071829,
+        "noeuds": 8257
+      },
+      "5": {
+        "evenements": 620400,
+        "facettes": 2147235,
+        "deltas": 600957,
+        "attachements": 1761810,
+        "fusions": 2147234,
+        "noeuds": 11124
+      },
+      "6": {
+        "evenements": 867457,
+        "facettes": 3798168,
+        "deltas": 831013,
+        "attachements": 3235973,
+        "fusions": 3798167,
+        "noeuds": 14463
+      },
+      "7": {
+        "evenements": 1158286,
+        "facettes": 6156130,
+        "deltas": 1098475,
+        "attachements": 5377715,
+        "fusions": 6156129,
+        "noeuds": 18366
+      },
+      "8": {
+        "evenements": 1493209,
+        "facettes": 9351090,
+        "deltas": 1402264,
+        "attachements": 8320996,
+        "fusions": 9351089,
+        "noeuds": 22933
+      },
+      "9": {
+        "evenements": 1871641,
+        "facettes": 13511952,
+        "deltas": 1742579,
+        "attachements": 12189788,
+        "fusions": 13511951,
+        "noeuds": 27787
+      },
+      "10": {
+        "evenements": 2294397,
+        "facettes": 18776291,
+        "deltas": 2120263,
+        "attachements": 17120462,
+        "fusions": 18776290,
+        "noeuds": 33194
+      }
+    },
+    "silent": {
+      "2": {
+        "core": 93953,
+        "with_two_intruders": 6819,
+        "steps": 8690,
+        "added": 8690,
+        "max_chain": 8,
+        "query_nodes": 5340469,
+        "meb_supports": 132167
+      },
+      "3": {
+        "core": 235946,
+        "with_two_intruders": 25412,
+        "steps": 33352,
+        "added": 33352,
+        "max_chain": 8,
+        "query_nodes": 16839076,
+        "meb_supports": 1095319
+      },
+      "4": {
+        "core": 438545,
+        "with_two_intruders": 57171,
+        "steps": 76520,
+        "added": 76520,
+        "max_chain": 9,
+        "query_nodes": 36426405,
+        "meb_supports": 5022921
+      },
+      "5": {
+        "core": 699792,
+        "with_two_intruders": 102898,
+        "steps": 139719,
+        "added": 139719,
+        "max_chain": 15,
+        "query_nodes": 65286547,
+        "meb_supports": 16663106
+      },
+      "6": {
+        "core": 1018704,
+        "with_two_intruders": 162847,
+        "steps": 223040,
+        "added": 223040,
+        "max_chain": 15,
+        "query_nodes": 104458824,
+        "meb_supports": 45266593
+      },
+      "7": {
+        "core": 1393255,
+        "with_two_intruders": 236910,
+        "steps": 329172,
+        "added": 329172,
+        "max_chain": 14,
+        "query_nodes": 155005003,
+        "meb_supports": 107145317
+      },
+      "8": {
+        "core": 1823694,
+        "with_two_intruders": 325722,
+        "steps": 457176,
+        "added": 457176,
+        "max_chain": 16,
+        "query_nodes": 217751694,
+        "meb_supports": 229044124
+      },
+      "9": {
+        "core": 2310649,
+        "with_two_intruders": 427342,
+        "steps": 605755,
+        "added": 605755,
+        "max_chain": 18,
+        "query_nodes": 293578244,
+        "meb_supports": 451261735
+      },
+      "10": {
+        "core": 2848194,
+        "with_two_intruders": 544079,
+        "steps": 778083,
+        "added": 778083,
+        "max_chain": 17,
+        "query_nodes": 382961561,
+        "meb_supports": 833506587
+      }
+    },
+    "pipeline_ms": 413790.2,
+    "max_rss_kb": 5361880,
+    "silent_limits": {
+      "core_records": 8000000,
+      "chain_steps": 2000000,
+      "cofaces": 2000000,
+      "query_nodes": 1000000000,
+      "meb_supports": 1000000000
+    },
+    "payload_caps": {
+      "budget": 17179869184,
+      "cap_brut_demande": 4294967295,
+      "cap_brut_effectif": 119304647,
+      "cap_fusion_budgetaire": 59652323
+    },
+    "stage_ms": {
+      "index": 4.3,
+      "gen": 137616.8,
+      "wspd": 71429.1,
+      "rects": 66187.3,
+      "rle": 3994.9,
+      "prefiltre": 23859.8,
+      "census": 18590.7,
+      "comptage": 71.3,
+      "expansion": 1411.2,
+      "fold": 74605.4,
+      "tri": 12429.1,
+      "intern": 36205.5,
+      "fusion": 12826.4,
+      "reduce": 13101.5,
+      "digest": 8329.3,
+      "silent_incidence": 144834.171,
+      "fold_wall": 227647.3,
+      "cli_e2e": 413794.438
+    },
+    "stage_workers": {
+      "wspd": 1,
+      "rects": 1,
+      "rle": 1,
+      "prefiltre": 1,
+      "census": 1,
+      "expansion": 1,
+      "fold": 1
+    },
+    "serialized_stage_flags_verified": true,
+    "strict_thread_creation_measurement": "not_performed_by_runner"
+  }
+]

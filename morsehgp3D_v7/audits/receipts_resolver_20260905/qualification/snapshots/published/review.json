@@ -1,0 +1,488 @@
+{
+  "additional_bound_artifacts_watched": 25,
+  "all_copied_bytes_verified": true,
+  "baseline_C_C_D_E_protected": {
+    "/workspaces/E-HGP/build/v7/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+    "/workspaces/E-HGP/build/v7_c_qualification/mhgp7": "25c9bf8e4ef3cded5647a22f16d81af7a1e778196ad3bff73884a7f58da985f2",
+    "/workspaces/E-HGP/build/v7_meb_qualification/mhgp7": "127c5f923fcc9618d826b89dedda4de0f5201ea48e27330e2ea68e83d76a1b3f",
+    "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6"
+  },
+  "build": {
+    "F_build_receipt_sha256": "522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4",
+    "F_sha256": "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85",
+    "all_four_command_records_revalidated": true,
+    "build_seconds_diagnostic": 20.015631869000572,
+    "ended_utc": "2026-09-05T09:17:15.103807Z",
+    "scope": "read_only_F_build_binding_not_new_build",
+    "source_manifest_sha256": "0a9a1f8afb8a4ab398d3fd8acb67eb2f0724f22e53ab52c4caf1f29e74506601",
+    "sources_helpers_C_stable": true,
+    "started_utc": "2026-09-05T09:16:53.471279Z",
+    "status": "passed"
+  },
+  "builder_sha256": "428714891c4a5741988f3255593d9727637f876e1a07544137453f16899b150d",
+  "builds": 0,
+  "copied_files": 61,
+  "cross_separations": {
+    "all_six_engine_completed": true,
+    "all_three_terminal_attempts_present": true,
+    "compared_fields": [
+      "digests",
+      "cardinalities"
+    ],
+    "equality": {
+      "cardinalities": true,
+      "digests": true
+    },
+    "reference_cardinalities": {
+      "1": {
+        "attachements": 0,
+        "deltas": 7999,
+        "evenements": 29875,
+        "facettes": 8000,
+        "fusions": 7999,
+        "noeuds": 7999
+      },
+      "10": {
+        "attachements": 8127546,
+        "deltas": 1005622,
+        "evenements": 1088869,
+        "facettes": 8918681,
+        "fusions": 8918680,
+        "noeuds": 15514
+      },
+      "2": {
+        "attachements": 32713,
+        "deltas": 51121,
+        "evenements": 67539,
+        "facettes": 62910,
+        "fusions": 62909,
+        "noeuds": 2122
+      },
+      "3": {
+        "attachements": 147239,
+        "deltas": 120877,
+        "evenements": 124135,
+        "facettes": 213686,
+        "fusions": 213685,
+        "noeuds": 2929
+      },
+      "4": {
+        "attachements": 399983,
+        "deltas": 197242,
+        "evenements": 201156,
+        "facettes": 517876,
+        "fusions": 517875,
+        "noeuds": 4068
+      },
+      "5": {
+        "attachements": 850158,
+        "deltas": 289705,
+        "evenements": 298870,
+        "facettes": 1036109,
+        "fusions": 1036108,
+        "noeuds": 5419
+      },
+      "6": {
+        "attachements": 1552470,
+        "deltas": 398776,
+        "evenements": 415933,
+        "facettes": 1824039,
+        "fusions": 1824038,
+        "noeuds": 7004
+      },
+      "7": {
+        "attachements": 2573565,
+        "deltas": 525699,
+        "evenements": 554022,
+        "facettes": 2947215,
+        "fusions": 2947214,
+        "noeuds": 8780
+      },
+      "8": {
+        "attachements": 3969114,
+        "deltas": 668888,
+        "evenements": 712109,
+        "facettes": 4463468,
+        "fusions": 4463467,
+        "noeuds": 10954
+      },
+      "9": {
+        "attachements": 5809858,
+        "deltas": 829864,
+        "evenements": 891721,
+        "facettes": 6443014,
+        "fusions": 6443013,
+        "noeuds": 13150
+      }
+    },
+    "reference_digests": {
+      "digest_all": "4c3ceb0498990bafa41a9e43d0bffe25a3fee579b12b5d34365f3578f526a0e7",
+      "digest_forest_K1": "fff29fb38092c02dd43271de33b9aee28a03408fbb70153385c3fc1e69e3573a",
+      "digest_forest_K10": "a44af66ade1a06ad1be19a512642b65a87f8d3b75c102b4850a719b68a3b77bb",
+      "digest_forest_K2": "dd657928d626854e23bc1ff59327eb6c834d4ff94fbb0f1913156e251f14b213",
+      "digest_forest_K3": "ba8973abbad9fc0aa1008589f0f3a669389f6406350501bdda97aa879dedcf0a",
+      "digest_forest_K4": "69b328c5a690c5b63d607018de6e28ae7f3f8f82f4320989cccec6379b0ad358",
+      "digest_forest_K5": "0598690dcf3a59d3cee0a7447d06d6773ed3b4d6d733c35d801dd3924e14ba6a",
+      "digest_forest_K6": "45014ce7ef7d17c8baeb1f5df32d90f6643cbc913cdc3817d10af1db88be363a",
+      "digest_forest_K7": "e8dc58ed4133f76f6541c474f9dedfb3c8d8880d1463bc49f32e8a36cbc62c80",
+      "digest_forest_K8": "aa7bcd6f453905566e423de55991caedb3afed38e4164d2cf5c295c85975e318",
+      "digest_forest_K9": "7b6c460d6df9631d0ef3851b5e939b161fdc559ecddb0396a94991ca970e1bb3"
+    },
+    "six_fresh_ordered_observations_bound": true,
+    "slo": "not_evaluated",
+    "statistical_gain": "not_claimed",
+    "status": "objects_equal",
+    "work_counts_not_required_equal_across_separations": true
+  },
+  "engine_runs": 0,
+  "exporter_sha256": "5f7717af38a18ecf772a3d5b384a3b040907589ac91c1a6c07f1be06e6ea95eb",
+  "gcp": "not_used",
+  "helpers": {
+    "compare_v6_v7.py": "fe22493fcb7494813e79fea9826873cce8cf14918097ce500b44018f1a64f2ef",
+    "incidence_campaign.py": "6ca21d8b1c89e6baea99ecc3dd414b35d06581df50833e76bac9bdc1d5d1c20a"
+  },
+  "pairs": {
+    "10": {
+      "classification_and_all_record_fields_match": true,
+      "decision": {
+        "equality": {
+          "cardinalities": true,
+          "counts": true,
+          "digests": true,
+          "payload_caps": true,
+          "silent": true,
+          "silent_limits": true
+        },
+        "error": null,
+        "expected_runs": 2,
+        "gcp": "not_used",
+        "public_status": "not_claimed",
+        "ratio_E_over_F": {
+          "pipeline": 1.0237938238523294,
+          "process": 1.0237909475267972
+        },
+        "runs": 2,
+        "separation": 10,
+        "slo": "not_evaluated",
+        "source_stable": true,
+        "status": "paired_equal",
+        "time_scope": "one_fresh_cold_E_then_F_pair_including_digest_no_archive_shared_host_not_SLO_or_statistical_gain",
+        "times": {
+          "E": {
+            "max_rss_kb": 2304700,
+            "pipeline_ms": 190040.5,
+            "stage_ms": {
+              "census": 7940.9,
+              "cli_e2e": 190042.507,
+              "comptage": 33.0,
+              "digest": 3958.3,
+              "expansion": 652.6,
+              "fold": 33194.6,
+              "fold_wall": 105437.1,
+              "fusion": 5837.0,
+              "gen": 63679.7,
+              "index": 2.3,
+              "intern": 17142.8,
+              "prefiltre": 10393.6,
+              "rects": 30454.9,
+              "reduce": 5073.7,
+              "rle": 1633.1,
+              "silent_incidence": 68399.702,
+              "tri": 5115.5,
+              "wspd": 33224.4
+            },
+            "wall_seconds": 190.07731555899954
+          },
+          "F": {
+            "max_rss_kb": 2300476,
+            "pipeline_ms": 185623.8,
+            "stage_ms": {
+              "census": 7873.5,
+              "cli_e2e": 185625.821,
+              "comptage": 34.7,
+              "digest": 3990.2,
+              "expansion": 617.4,
+              "fold": 32865.7,
+              "fold_wall": 103132.1,
+              "fusion": 6075.8,
+              "gen": 61795.8,
+              "index": 2.2,
+              "intern": 16914.1,
+              "prefiltre": 10233.9,
+              "rects": 29760.3,
+              "reduce": 5034.9,
+              "rle": 1589.1,
+              "silent_incidence": 66474.825,
+              "tri": 4815.0,
+              "wspd": 32035.3
+            },
+            "wall_seconds": 185.66028154299966
+          }
+        }
+      },
+      "ended_utc": "2026-09-05T09:53:56.640753Z",
+      "fresh_E_then_F_bound_to_distinct_current_receipt": true,
+      "replayed_statuses": [
+        "engine_completed",
+        "engine_completed"
+      ],
+      "repository_change": {
+        "commit_contents_not_inferred_or_reaudited_by_exporter": true,
+        "head_after": "71895104c7d750fdd6ef0a313cfb09e9ac161204",
+        "head_before": "39ca40d989860041ccddcdf48ab7843aaec828ca",
+        "head_changed": true,
+        "policy": "HEAD_or_worktree_changes_recorded_source_snapshot_stability_required",
+        "source_and_binary_snapshots_still_identical": true
+      },
+      "run_intervals": [
+        {
+          "ended_utc": "2026-09-05T09:50:50.854698Z",
+          "role": "E",
+          "started_utc": "2026-09-05T09:47:40.771602Z"
+        },
+        {
+          "ended_utc": "2026-09-05T09:53:56.557621Z",
+          "role": "F",
+          "started_utc": "2026-09-05T09:50:50.893383Z"
+        }
+      ],
+      "scope": "read_only_raw_reclassification_not_new_observation",
+      "separation": 10,
+      "source_manifest_sha256": "a559ca5f881271bc7a7ee2e13d413045152dc18231a0a72c28c878531ab45a40",
+      "started_utc": "2026-09-05T09:47:40.745642Z",
+      "status": "passed",
+      "terminal_decision_matches": true
+    },
+    "12": {
+      "classification_and_all_record_fields_match": true,
+      "decision": {
+        "equality": {
+          "cardinalities": true,
+          "counts": true,
+          "digests": true,
+          "payload_caps": true,
+          "silent": true,
+          "silent_limits": true
+        },
+        "error": null,
+        "expected_runs": 2,
+        "gcp": "not_used",
+        "public_status": "not_claimed",
+        "ratio_E_over_F": {
+          "pipeline": 0.972745849122831,
+          "process": 0.9728442895708265
+        },
+        "runs": 2,
+        "separation": 12,
+        "slo": "not_evaluated",
+        "source_stable": true,
+        "status": "paired_equal",
+        "time_scope": "one_fresh_cold_E_then_F_pair_including_digest_no_archive_shared_host_not_SLO_or_statistical_gain",
+        "times": {
+          "E": {
+            "max_rss_kb": 2300976,
+            "pipeline_ms": 184847.1,
+            "stage_ms": {
+              "census": 7701.9,
+              "cli_e2e": 184849.089,
+              "comptage": 33.4,
+              "digest": 3932.0,
+              "expansion": 628.9,
+              "fold": 32517.4,
+              "fold_wall": 102698.6,
+              "fusion": 5772.5,
+              "gen": 61792.6,
+              "index": 2.2,
+              "intern": 16888.3,
+              "prefiltre": 10104.4,
+              "rects": 28633.9,
+              "reduce": 4994.1,
+              "rle": 1600.7,
+              "silent_incidence": 66389.393,
+              "tri": 4835.3,
+              "wspd": 33158.4
+            },
+            "wall_seconds": 184.87840329699975
+          },
+          "F": {
+            "max_rss_kb": 2302616,
+            "pipeline_ms": 190026.1,
+            "stage_ms": {
+              "census": 7906.5,
+              "cli_e2e": 190028.137,
+              "comptage": 35.3,
+              "digest": 3944.4,
+              "expansion": 652.0,
+              "fold": 33331.4,
+              "fold_wall": 106089.9,
+              "fusion": 5833.8,
+              "gen": 63078.2,
+              "index": 2.5,
+              "intern": 17185.2,
+              "prefiltre": 10296.1,
+              "rects": 29932.0,
+              "reduce": 5137.7,
+              "rle": 1701.7,
+              "silent_incidence": 68924.642,
+              "tri": 5149.1,
+              "wspd": 33146.1
+            },
+            "wall_seconds": 190.03904867299934
+          }
+        }
+      },
+      "ended_utc": "2026-09-05T10:00:52.636042Z",
+      "fresh_E_then_F_bound_to_distinct_current_receipt": true,
+      "replayed_statuses": [
+        "engine_completed",
+        "engine_completed"
+      ],
+      "repository_change": {
+        "commit_contents_not_inferred_or_reaudited_by_exporter": true,
+        "head_after": "71895104c7d750fdd6ef0a313cfb09e9ac161204",
+        "head_before": "71895104c7d750fdd6ef0a313cfb09e9ac161204",
+        "head_changed": false,
+        "policy": "HEAD_or_worktree_changes_recorded_source_snapshot_stability_required",
+        "source_and_binary_snapshots_still_identical": true
+      },
+      "run_intervals": [
+        {
+          "ended_utc": "2026-09-05T09:57:42.463003Z",
+          "role": "E",
+          "started_utc": "2026-09-05T09:54:37.579550Z"
+        },
+        {
+          "ended_utc": "2026-09-05T10:00:52.545581Z",
+          "role": "F",
+          "started_utc": "2026-09-05T09:57:42.502062Z"
+        }
+      ],
+      "scope": "read_only_raw_reclassification_not_new_observation",
+      "separation": 12,
+      "source_manifest_sha256": "0919ad682e6b852ad7b5677f6b35a5b28dfd2ad6d977f05f81a0089a7bc40b77",
+      "started_utc": "2026-09-05T09:54:37.547074Z",
+      "status": "passed",
+      "terminal_decision_matches": true
+    },
+    "8": {
+      "classification_and_all_record_fields_match": true,
+      "decision": {
+        "equality": {
+          "cardinalities": true,
+          "counts": true,
+          "digests": true,
+          "payload_caps": true,
+          "silent": true,
+          "silent_limits": true
+        },
+        "error": null,
+        "expected_runs": 2,
+        "gcp": "not_used",
+        "public_status": "not_claimed",
+        "ratio_E_over_F": {
+          "pipeline": 0.9931053645524599,
+          "process": 0.9931622440525134
+        },
+        "runs": 2,
+        "separation": 8,
+        "slo": "not_evaluated",
+        "source_stable": true,
+        "status": "paired_equal",
+        "time_scope": "one_fresh_cold_E_then_F_pair_including_digest_no_archive_shared_host_not_SLO_or_statistical_gain",
+        "times": {
+          "E": {
+            "max_rss_kb": 2298584,
+            "pipeline_ms": 187641.3,
+            "stage_ms": {
+              "census": 7859.6,
+              "cli_e2e": 187643.407,
+              "comptage": 32.7,
+              "digest": 3964.7,
+              "expansion": 653.8,
+              "fold": 33679.4,
+              "fold_wall": 106256.5,
+              "fusion": 5901.0,
+              "gen": 60416.6,
+              "index": 2.2,
+              "intern": 17209.7,
+              "prefiltre": 10489.3,
+              "rects": 30850.3,
+              "reduce": 5508.5,
+              "rle": 1654.6,
+              "silent_incidence": 68692.386,
+              "tri": 5032.1,
+              "wspd": 29566.0
+            },
+            "wall_seconds": 187.67723476299943
+          },
+          "F": {
+            "max_rss_kb": 2299856,
+            "pipeline_ms": 188944.0,
+            "stage_ms": {
+              "census": 8013.3,
+              "cli_e2e": 188946.12,
+              "comptage": 34.1,
+              "digest": 3985.8,
+              "expansion": 649.0,
+              "fold": 33790.1,
+              "fold_wall": 106362.2,
+              "fusion": 6103.6,
+              "gen": 61504.1,
+              "index": 2.1,
+              "intern": 17246.5,
+              "prefiltre": 10452.7,
+              "rects": 31275.7,
+              "reduce": 5459.7,
+              "rle": 1633.9,
+              "silent_incidence": 68705.268,
+              "tri": 4951.7,
+              "wspd": 30228.2
+            },
+            "wall_seconds": 188.96936113599986
+          }
+        }
+      },
+      "ended_utc": "2026-09-05T09:46:51.569712Z",
+      "fresh_E_then_F_bound_to_distinct_current_receipt": true,
+      "replayed_statuses": [
+        "engine_completed",
+        "engine_completed"
+      ],
+      "repository_change": {
+        "commit_contents_not_inferred_or_reaudited_by_exporter": true,
+        "head_after": "39ca40d989860041ccddcdf48ab7843aaec828ca",
+        "head_before": "39ca40d989860041ccddcdf48ab7843aaec828ca",
+        "head_changed": false,
+        "policy": "HEAD_or_worktree_changes_recorded_source_snapshot_stability_required",
+        "source_and_binary_snapshots_still_identical": true
+      },
+      "run_intervals": [
+        {
+          "ended_utc": "2026-09-05T09:43:42.467298Z",
+          "role": "E",
+          "started_utc": "2026-09-05T09:40:34.784349Z"
+        },
+        {
+          "ended_utc": "2026-09-05T09:46:51.481250Z",
+          "role": "F",
+          "started_utc": "2026-09-05T09:43:42.507759Z"
+        }
+      ],
+      "scope": "read_only_raw_reclassification_not_new_observation",
+      "separation": 8,
+      "source_manifest_sha256": "ef70b24e32be3b1d9e7629376f5c05aad373984e472f303e81aa83b5efb483eb",
+      "started_utc": "2026-09-05T09:40:34.760110Z",
+      "status": "passed",
+      "terminal_decision_matches": true
+    }
+  },
+  "public_status": "not_claimed",
+  "reviewed_utc": "2026-09-05T10:02:20.491632+00:00",
+  "runner_sha256": "20f956612c598da256e24f8de893e7df5132f6dff0221dbc2edcdd7fe2ecce3d",
+  "schema": "mhgp7-witness-stack-three-pairs-read-only-review-v1",
+  "scope": "raw_parsing_hash_binding_review_only_no_new_build_engine_selftest_git_or_cloud",
+  "separation_adapter_sha256": "fd3c6095c5f78b0771f79b027cb1d5bc79eb0af64db0bdd63c039e4f80f3f7e0",
+  "slo": "not_evaluated",
+  "source_files_read_and_pinned": 78,
+  "status": "passed"
+}

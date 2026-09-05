@@ -1,0 +1,280 @@
+{
+  "schema": "mhgp7-token-vertical-anchor-audit-v1",
+  "status": "passed",
+  "utc": "2026-09-05T10:53:01.495624+00:00",
+  "python_optimized": false,
+  "results": [
+    {
+      "sealed_source_build": "o2",
+      "original_cases": 16,
+      "relabeled_certificates": 1,
+      "synthetic_mathematical_streams": 1,
+      "totals": {
+        "cuts": 504,
+        "component_maps": 919,
+        "naturality_squares": 866,
+        "two_step_squares": 485,
+        "births": 54,
+        "birth_lookups": 59,
+        "birth_misses": 5,
+        "max_birth_lookups": 6,
+        "parent_lookups": 130,
+        "continuations": 128,
+        "multifusions": 1
+      },
+      "original_only": {
+        "cuts": 432,
+        "component_maps": 764,
+        "naturality_squares": 720,
+        "two_step_squares": 400,
+        "births": 44,
+        "birth_lookups": 44,
+        "birth_misses": 0,
+        "max_birth_lookups": 1,
+        "parent_lookups": 104,
+        "continuations": 104,
+        "multifusions": 0
+      },
+      "relabel_only": {
+        "cuts": 42,
+        "component_maps": 101,
+        "naturality_squares": 96,
+        "two_step_squares": 64,
+        "births": 5,
+        "birth_lookups": 10,
+        "birth_misses": 5,
+        "max_birth_lookups": 6,
+        "parent_lookups": 10,
+        "continuations": 10,
+        "multifusions": 0
+      },
+      "synthetic_only": {
+        "cuts": 30,
+        "component_maps": 54,
+        "naturality_squares": 50,
+        "two_step_squares": 21,
+        "births": 5,
+        "birth_lookups": 5,
+        "birth_misses": 0,
+        "max_birth_lookups": 1,
+        "parent_lookups": 16,
+        "continuations": 14,
+        "multifusions": 1
+      },
+      "first_birth_miss": {
+        "source_K": 6,
+        "cut": "11997",
+        "source_output": [
+          3,
+          19,
+          211,
+          65537,
+          4000000000,
+          4000000007
+        ],
+        "source_label": [
+          3,
+          19,
+          211,
+          65537,
+          4000000000,
+          4000000007
+        ],
+        "missing_lower_face": [
+          3,
+          19,
+          211,
+          65537,
+          4000000000
+        ]
+      },
+      "negatives": [
+        {
+          "fault": "first-born-only",
+          "rejection": "anchor.birth_not_resolved",
+          "kind": "audit_consumer_fault_or_budget_not_product_mutant"
+        },
+        {
+          "fault": "miss-means-no-image",
+          "rejection": "judge.vertical_totality",
+          "kind": "audit_consumer_fault_or_budget_not_product_mutant"
+        },
+        {
+          "fault": "stale-target",
+          "rejection": "anchor.target_not_current",
+          "kind": "audit_consumer_fault_or_budget_not_product_mutant"
+        },
+        {
+          "fault": "zero_lookup_budget",
+          "rejection": "budget.birth_lookup",
+          "kind": "audit_consumer_fault_or_budget_not_product_mutant"
+        }
+      ],
+      "empty_family_zero_budget_accepted": true
+    },
+    {
+      "sealed_source_build": "ubsan",
+      "original_cases": 16,
+      "relabeled_certificates": 1,
+      "synthetic_mathematical_streams": 1,
+      "totals": {
+        "cuts": 504,
+        "component_maps": 919,
+        "naturality_squares": 866,
+        "two_step_squares": 485,
+        "births": 54,
+        "birth_lookups": 59,
+        "birth_misses": 5,
+        "max_birth_lookups": 6,
+        "parent_lookups": 130,
+        "continuations": 128,
+        "multifusions": 1
+      },
+      "original_only": {
+        "cuts": 432,
+        "component_maps": 764,
+        "naturality_squares": 720,
+        "two_step_squares": 400,
+        "births": 44,
+        "birth_lookups": 44,
+        "birth_misses": 0,
+        "max_birth_lookups": 1,
+        "parent_lookups": 104,
+        "continuations": 104,
+        "multifusions": 0
+      },
+      "relabel_only": {
+        "cuts": 42,
+        "component_maps": 101,
+        "naturality_squares": 96,
+        "two_step_squares": 64,
+        "births": 5,
+        "birth_lookups": 10,
+        "birth_misses": 5,
+        "max_birth_lookups": 6,
+        "parent_lookups": 10,
+        "continuations": 10,
+        "multifusions": 0
+      },
+      "synthetic_only": {
+        "cuts": 30,
+        "component_maps": 54,
+        "naturality_squares": 50,
+        "two_step_squares": 21,
+        "births": 5,
+        "birth_lookups": 5,
+        "birth_misses": 0,
+        "max_birth_lookups": 1,
+        "parent_lookups": 16,
+        "continuations": 14,
+        "multifusions": 1
+      },
+      "first_birth_miss": {
+        "source_K": 6,
+        "cut": "11997",
+        "source_output": [
+          3,
+          19,
+          211,
+          65537,
+          4000000000,
+          4000000007
+        ],
+        "source_label": [
+          3,
+          19,
+          211,
+          65537,
+          4000000000,
+          4000000007
+        ],
+        "missing_lower_face": [
+          3,
+          19,
+          211,
+          65537,
+          4000000000
+        ]
+      },
+      "negatives": [
+        {
+          "fault": "first-born-only",
+          "rejection": "anchor.birth_not_resolved",
+          "kind": "audit_consumer_fault_or_budget_not_product_mutant"
+        },
+        {
+          "fault": "miss-means-no-image",
+          "rejection": "judge.vertical_totality",
+          "kind": "audit_consumer_fault_or_budget_not_product_mutant"
+        },
+        {
+          "fault": "stale-target",
+          "rejection": "anchor.target_not_current",
+          "kind": "audit_consumer_fault_or_budget_not_product_mutant"
+        },
+        {
+          "fault": "zero_lookup_budget",
+          "rejection": "budget.birth_lookup",
+          "kind": "audit_consumer_fault_or_budget_not_product_mutant"
+        }
+      ],
+      "empty_family_zero_budget_accepted": true
+    }
+  ],
+  "pins": {
+    "vertical_anchor_replay.py": "df203c33951afa84577f061a80222e0abe286ff11be8d1b3f865f51d197dba8e",
+    "horizontal_rational_oracle.py": "fdff23d640ce692ef459f41eea6b9863bae0a5daa1d6a6c35edc60a8712fe83d",
+    "vertical_replay.py": "c8e43aee8a55835060e0ad9bfba3f832cae31c6a09741550e6640382946868a9",
+    "meb_rational_oracle_20260905.py": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b",
+    "receipts_horizontal_20260905/pipeline/o2/nominal.stdout": "bc8546548666816cb02b185442b01e77d76bc62917d9a23cb407d5ea75beab2f",
+    "receipts_horizontal_20260905/pipeline/ubsan/nominal.stdout": "bc8546548666816cb02b185442b01e77d76bc62917d9a23cb407d5ea75beab2f"
+  },
+  "geometry_in_consumer": false,
+  "product_executed": false,
+  "product_vertical_export_qualified": false,
+  "source_authority": "sealed E; one explicit audit relabeling, not a new product run",
+  "synthetic_source": "full Gamma on six moment-curve points, not an E run; fusion branch only",
+  "synthetic_points": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      1,
+      1
+    ],
+    [
+      2,
+      4,
+      8
+    ],
+    [
+      10,
+      100,
+      1000
+    ],
+    [
+      11,
+      121,
+      1331
+    ],
+    [
+      12,
+      144,
+      1728
+    ]
+  ],
+  "relabeled_ids": [
+    3,
+    211,
+    65537,
+    4000000000,
+    4000000007,
+    4294967294,
+    19
+  ],
+  "public_status": "not_claimed",
+  "gcp_used": false
+}

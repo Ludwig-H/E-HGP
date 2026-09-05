@@ -143,6 +143,8 @@ Ainsi ψ est positive et finie ; à p=3, chaque contribution vaut au plus 8. Pou
 
 À exposant entier pair, les contributions sont rationnelles lorsque λ est rationnel ; une référence arbitraire précision suffit mathématiquement, avec ses coûts en bits à mesurer. À p=3, des racines apparaissent. Il faut alors déclarer une autorité symbolique algébrique, ou des intervalles certifiés avec une procédure exacte pour égalités et seuils non séparés. Un flottant plausible et un epsilon ne prouvent pas la règle de départage de la Proposition 7. Une fonction ψ arbitraire ne promet pas automatiquement une procédure de comparaison exacte.
 
+Pour les numérateurs de vote p3, cette obligation dispose désormais d'une [méthode constructive et d'un juge borné](AUTORITE_VOTE_P3_COURANTE.md) : égalités décidées exactement par classes de carrés rationnels sans factorisation, puis signe certifié par intervalles `isqrt`, ou statut indécis sur plafond. Le raccord produit et les expressions contenant les quotients de masses restent distincts.
+
 Pour un point de score total positif, le dénominateur T est commun aux classes. Le vote dur peut comparer les numérateurs :
 
 $$V_x(c)=\frac{\sum_{\substack{\tau\in F\\x\in\tau,\ \ell(\tau)=c}}S_\tau}{T_x},\qquad \mathop{\mathrm{argmax}}_c V_x(c)=\mathop{\mathrm{argmax}}_c\sum_{\substack{\tau\in F\\x\in\tau,\ \ell(\tau)=c}}S_\tau.$$

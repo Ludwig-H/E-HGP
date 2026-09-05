@@ -1,10 +1,14 @@
 # Admission mémoire et durées de vie du pipeline v7
 
-État vérifié le 4 septembre 2026 à 20:58 UTC. Cadre : `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+État actualisé le 5 septembre 2026. Cadre : `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
-Périmètre d'ordonnancement : les fixtures de cette note utilisent `fold_join_before_next_k=false`. Le [mode mono direct courant](MONO_COURANT.md), avec `threads=1` et jonction activée, exécute B sur l'appelant et termine B1 avant A2. La coexistence mesurée ici ne s'applique donc pas à ce mode. La relecture du delta courant, `run.hpp` SHA-256 `1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c`, confirme que les expressions de budget et la route avec recouvrement sont inchangées ; cette confirmation est statique, sans nouveau run mémoire.
+Le verrou de palier désormais observé en mono F est le refus à 32 000 points : code 2 à K9, `silent_core_record_budget`, après 569,876 s et avec un pic RSS de 7 100 740 KiB. La [qualification des observations closes](receipts_resolver_20260905/qualification/review.json) distingue ce reçu terminé d'un moteur réussi : stdout est vide, les diagnostics précédents restent provisoires. Le palier 16 000 points termine K1–10 avec un pic RSS de 5 361 880 KiB.
 
-Le levier prioritaire est de borner la concurrence utilisée dans l'admission par le nombre d'ordres effectivement publiables. Deux fixtures montrent que la réservation pour seize travaux peut refuser un calcul qui ne peut en produire qu'un ou deux, alors que le même objet est obtenu avec la concurrence bornée. Ces refus appliquent correctement la formule conservative déclarée `partial_named_payload_proxy_v1` : ils ne démontrent ni dépassement de cette formule, ni dépassement d'une limite de RSS.
+Le plafond de 8 millions porte sur `core_records`, occurrences chargées selon la somme des `q` avant tri/dédoublonnage. `core_facets` compte ensuite les facettes uniques : son zéro imprimé à K9 ne signifie pas zéro travail. Le total nécessaire pour terminer K9/K10 et sa mémoire prospective ne sont pas mesurés. Ce cap de travail/stockage temporaire, le proxy partiel de payload de 16 GiB et `RLIMIT_AS=26 GiB` d'espace virtuel sont distincts d'une limite de RSS. Le chantier utile est de précompter ces occurrences et examiner compression ou interning sous des plafonds distincts, avec facture des capacités avant tout relèvement de cap.
+
+Les propositions et fixtures de coexistence ci-dessous restent indépendantes de ce refus mono. Elles ont été vérifiées le 4 septembre à 20:58 UTC avec `fold_join_before_next_k=false`. Le [mode mono direct courant](MONO_COURANT.md), avec `threads=1` et jonction activée, exécute B sur l'appelant et termine B1 avant A2. La coexistence mesurée ici ne s'applique donc pas à ce mode. La relecture du delta mono, `run.hpp` SHA-256 `1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c`, confirme que les expressions de budget et la route avec recouvrement sont inchangées ; cette confirmation est statique, sans nouveau run mémoire.
+
+Sur ces fixtures à jonction désactivée, le levier proposé est de borner la concurrence utilisée dans l'admission par le nombre d'ordres effectivement publiables. Deux fixtures montrent que la réservation pour seize travaux peut refuser un calcul qui ne peut en produire qu'un ou deux, alors que le même objet est obtenu avec la concurrence bornée. Ces refus appliquent correctement la formule conservative déclarée `partial_named_payload_proxy_v1` : ils ne démontrent ni dépassement de cette formule, ni dépassement d'une limite de RSS.
 
 Les sources, commandes, sorties positives et négatives, ainsi que les hashes avant copie, après copie et après essais sont dans [memory_budget_current.json](receipts_20260904/memory_budget_current.json). Les 46 fichiers du snapshot sont restés identiques pendant les essais. Sources principales : `src/pipeline/run.hpp`, SHA-256 `885348a92f48658642e3783027cb7c4f239f1c8e1a0b91c66a698f3be6b29762` ; `src/pipeline/expand.hpp`, SHA-256 `7cafb0341344fbc7d1584001e4685e2e5bf0122fe3b7e37277f5468d5c5e1cf0`. Les conclusions portent sur ces octets ; le constructeur peut faire évoluer les sources en parallèle.
 
@@ -12,7 +16,7 @@ Les sources, commandes, sorties positives et négatives, ainsi que les hashes av
 
 Sur cet ABI, `sizeof(BallCandidate)=144`, `sizeof(Survivor)=16`, `sizeof(BallData)=224` et `sizeof(ForestEvent)=144`. Notons $R$ le nombre de candidats bruts, $C$ leur taille après dédoublonnage, $S$ le nombre de survivantes, $E_K$ les événements avant complétion, $A_K$ les cofaces ajoutées et $f$ le `fold_inflight` demandé.
 
-| Porte actuelle | Proxy testé en octets | Moment du refus |
+| Porte du snapshot testé | Proxy testé en octets | Moment du refus |
 | --- | ---: | --- |
 | Fusion des candidats et admission avant tri | $288R$ | Avant traitement post-RLE |
 | Préfiltre et census | $C(144+16+2\times224)=608C$ | Avant le préfiltre ; borne $S\leq C$ |

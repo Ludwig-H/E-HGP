@@ -5,8 +5,8 @@ Entrée actualisée le 5 septembre 2026. Commencer par l’[état courant](ETAT_
 | Contrat ou preuve maintenue | Rapport de référence |
 | --- | --- |
 | Certificat horizontal réduit et domaine accepté | [Certificat courant](CERTIFICAT_HORIZONTAL_COURANT.md), [preuves exécutées](receipts_horizontal_20260905/README.md) |
-| Applications verticales et résolution des ancres | [Contrat vertical](CONTRAT_VERTICAL_COURANT.md), [rejeux et contre-fixtures](receipts_vertical_20260905/README.md) |
-| Univers d’incidence, masses et vote | [Contrat pondéré](CONTRAT_MASSES_VOTE_COURANT.md) |
+| Reconstruction verticale depuis `born` et `parents` | [Preuve et contrat](CONTRAT_VERTICAL_COURANT.md), [lecteur et reçus](receipts_resolver_20260905/README.md) |
+| Univers d’incidence, masses et vote | [Contrat pondéré](CONTRAT_MASSES_VOTE_COURANT.md), [comparaison exacte des numérateurs p3](AUTORITE_VOTE_P3_COURANTE.md) |
 | Modèle, incidences et réduction horizontale | [Mathématiques](AUDIT_MATHEMATIQUE_20260904.md), [composition](REPONSE_AUDITEUR_COMPOSITION.md), [frontière de fenêtre](RETOUR_MATH_COURANT.md) |
 | Couverture des boules jusqu’au RLE | [S1](S1_COURANT.md), [index](AUDIT_INDEX_20260905.md), [raccord front/cover](AUDIT_RACCORD_INDEX_FRONT_20260905.md) |
 | Géométrie des témoins et bornes opérationnelles | [Front](FRONT_ET_TEMOINS_COURANT.md), [fuseaux](ARITHMETIQUE_SPINDLE_COURANTE.md), [secteurs/cordes](ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md), [cellules](ARITHMETIQUE_CELLULES_COURANTE.md) |
@@ -27,6 +27,6 @@ Le [manifeste courant](validation_current.json) épingle les preuves communes et
 
 Une conclusion active a un rapport de référence. Douze notes transitoires ou dépassées ont été fusionnées et retirées ; le [registre de consolidation](receipts_front_20260905/documentation_retirement.json) donne pour chacune son remplacement, le commit historique et son hash. Les fixtures permanentes et reçus bruts, y compris échecs et refus, restent à leur emplacement reproductible. Les répertoires `.work*` sont des temporaires ignorés, pas des autorités publiques.
 
-Les [reçus D/E](receipts_20260905/README.md) conservent leurs attributions historiques. Les [certificats entiers du front](receipts_front_20260905/README.md) sont complétés par le [raccord C++ exécuté](receipts_front_compiled_20260905/README.md). Les contrôles CTest locaux, CI et campagnes du constructeur restent distincts. Les demandes désormais fermées sont retirées des entrées courantes.
+Les [reçus D/E](receipts_20260905/README.md) conservent leurs attributions historiques. Les [certificats entiers du front](receipts_front_20260905/README.md) sont complétés par le [raccord C++ exécuté](receipts_front_compiled_20260905/README.md). Les contrôles CTest locaux, CI et campagnes du constructeur restent distincts. Les [nouveaux rejeux verticaux et p3](receipts_resolver_20260905/README.md) conservent leurs limites d’audit et la contrelecture des paliers F : succès 16k, refus budgétaire 32k à K9. Les demandes désormais fermées sont retirées des entrées courantes.
 
 Statut public : `not_claimed`. Aucun registre officiel modifié. GCP non utilisé.

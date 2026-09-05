@@ -3,28 +3,30 @@
 Cadre : `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
-**La qualification constructeur E est désormais contre-vérifiée : 324/324
-portes Release complètes, 33/33 ciblées Release et 33/33 ASan/UBSan.** Les
-six sorties mono D/E concordent sur les cardinalités et digests de la tour
-horizontale candidate K1–10 avec complétion des incidences. Cet audit relit
-les exécutions closes du constructeur ; il n'a relancé ni moteur, ni CTest,
-ni benchmark. Ces résultats ne certifient ni HGP complet ni une performance
-industrielle. Le cadre public reste `not_claimed`. La nouvelle fermeture du
-[certificat horizontal réduit](CERTIFICAT_HORIZONTAL_COURANT.md) utilise un
-snapshot E figé. F est maintenant publié dans `71895104` : sa revue de
-conservation est complétée par ses propres campagnes 339/339 Release,
-48/48 ciblées Release et 48/48 ASan/UBSan, contre-vérifiées dans le
-[dossier F](receipts_vertical_20260905/f_qualification/). Aucun test E ne
-leur est transféré.
+**F possède sa propre qualification contre-vérifiée : 339/339 portes
+Release complètes, 48/48 ciblées Release et 48/48 ASan/UBSan.** Les trois
+paires E/F à 8 000 points conservent les mêmes digests de forêts et
+cardinalités à `s=8,10,12`. Les observations F suivantes sont également
+closes : succès à 16 000 points, puis refus budgétaire K9 à 32 000 points,
+code 2, `silent_core_record_budget`, sans tour publiée. La
+[contrelecture des mesures et paliers](receipts_resolver_20260905/qualification/review.json)
+établit ces distinctions depuis les bruts ; elle ne déduit ni gain
+statistique, ni SLO, ni exactitude industrielle globale.
 
-La section E a été actualisée le 5 septembre à 07:20 UTC. La présente
-entrée intègre ensuite F, publié à 09:53 UTC après ses campagnes closes.
-Les preuves nécessaires sont copiées sous `audits/`, y compris lorsque
-leur origine constructeur était encore privée ou non suivie par Git.
-Les sources E du worktree et les binaires observés sont vérifiés contre
-leurs propres reçus. D conserve sa qualification historique 323 ; aucune
-exécution D n'est comptée dans les 324 E. Les écritures restent dans
-`audits/` ; GCP non utilisé, aucun changement produit ou v6.
+Cette entrée couvre les observations closes jusqu'au 5 septembre à
+10:20:35 UTC. F, publié dans `71895104`, conserve ses
+[preuves de qualification propres](receipts_vertical_20260905/f_qualification/review.json).
+E garde ses 324/324 portes complètes et 33/33 + 33/33 ciblées, ainsi que
+le snapshot du [certificat horizontal réduit](CERTIFICAT_HORIZONTAL_COURANT.md).
+D conserve sa qualification historique 323. Aucun de ces tests ou
+certificats n'est transféré implicitement d'une version à l'autre.
+
+Les inspecteurs relisent les campagnes closes du constructeur sans
+relancer moteur, CTest ou benchmark. Les pièces nécessaires sont
+conservées sous `audits/`, avec référence aux octets déjà capturés lorsque
+cela évite une copie redondante. Les identités source/binaire sont liées
+à leurs reçus datés ; le HEAD seul ne les remplace pas. Les écritures
+restent dans `audits/` ; GCP non utilisé, aucun changement produit ou v6.
 
 L'inspection initiale D était datée de 06:19:38 UTC au HEAD
 `e6d33698e62ebecf74dff01c16d7de17149d7a4e`. Les identités « courantes »
@@ -42,6 +44,9 @@ Les résumés constructeur sont comparés aux XML, inventaires, snapshots
 et octets ; leur seul statut `passed` n'est pas le critère d'acceptation.
 
 ## Résultats confirmés
+
+Ce tableau conserve l'inspection historique C/D de 06:19 UTC ; les
+campagnes E et F ont leurs sections et leurs reçus propres ci-dessous.
 
 | Reçu constructeur relu | Exécutions dans les XML publiés | Liaison et limite vérifiées |
 | --- | --- | --- |
@@ -112,11 +117,11 @@ par D, tandis que les 140 pins D correspondaient. L'entrée d'audit a depuis
 aucune actualisation D supplémentaire n'est demandée.
 
 Le contrôleur [actuel](verify_current.py) utilise le manifeste v2 à
-variantes entières D/E : il distingue octets périmés (code 1) et manifeste
-invalide (code 2), sans union de sources D/E ni `assert`. Son code 0
+variantes entières D/E/F : il distingue octets périmés (code 1) et manifeste
+invalide (code 2), sans union de sources de variantes ni `assert`. Son code 0
 identifie une variante et sa portée ; il ne qualifie pas à lui seul les
 reçus ou les binaires. Les contrelectures ci-dessous établissent les
-liaisons des campagnes E effectivement closes. Les anciens pins bruts
+liaisons des campagnes E et F effectivement closes. Les anciens pins bruts
 et leurs domaines demeurent inchangés.
 
 La prochaine qualification doit être déclenchée par un changement réel
@@ -265,4 +270,70 @@ restent effectifs sous Python optimisé. Ses dix corruptions sont rejetées.
 La preuve de conservation LIFO/masques/comptes demeure liée au delta F
 épinglé. Les tests horizontaux de l’auditeur restent attribués à E, et
 aucun export vertical ni pondéré n’est ajouté par cette qualification.
-L’auditeur ne relance ni moteur ni CTest pendant la fenêtre mono E/F.
+Cette contrelecture n'a relancé ni moteur ni CTest.
+
+## F mono et paliers : observations closes
+
+La [revue indépendante](receipts_resolver_20260905/qualification/review.json)
+vérifie les 69 fichiers du reçu mono publié, ses manifestes et les deux
+listes SHA, puis les 61 projections contre les originaux privés. Les
+[captures](receipts_resolver_20260905/qualification/capture_manifest.json)
+ajoutent 63 pièces et référencent 28 pièces antérieures identiques,
+notamment la paire `s=8` et le build F. Le
+[lecteur portable](receipts_resolver_20260905/qualification/verify_observations.py)
+parse les sorties sans importer les juges constructeur. Ses
+[contrôles normal et optimisé](receipts_resolver_20260905/qualification/inspector_checks.json)
+passent, avec un positif et onze rejets ; la lecture locale constate
+122 pins concordants. Ces contrôles n'exécutent pas le moteur.
+
+| Entrée uniforme, seed 3 | E, processus | F, processus | Pic F, KiB | Résultat moteur F |
+| --- | ---: | ---: | ---: | --- |
+| 8 000, `s=8` | 187,677 s | 188,969 s | 2 299 856 | Code 0, paire égale |
+| 8 000, `s=10` | 190,077 s | 185,660 s | 2 300 476 | Code 0, paire égale |
+| 8 000, `s=12` | 184,878 s | 190,039 s | 2 302 616 | Code 0, paire égale |
+| 16 000, `s=8` | Non mesuré | 413,816 s | 5 361 880 | Code 0, K1–10 publiés |
+| 32 000, `s=8` | Non mesuré | 569,876 s jusqu'au refus | 7 100 740 | Code 2, refus K9 |
+
+Chaque bras utilise `coord=65536`, `smax=11`, complétion des incidences,
+CSR, digest inclus, aucune archive, CPU logique 6 et les trois réglages
+de sérialisation à 1. Les six bras 8k concordent sur les dix cardinalités
+et les onze digests forêt/global. Les compteurs de travail ne sont pas
+exigés identiques entre séparations. Les paliers 16k/32k n'ont aucun bras
+E de comparaison. Les métadonnées distinguent les observations froides
+uniques sur hôte partagé de tout gain statistique. Les types restent
+`normalized_horizontal_h0_candidate`, `authority=status_terminal`,
+`callbacks=provisional` et `vertical_maps=none`.
+
+À 32k, `observations_completed` signifie que le **reçu est clos** : le
+moteur a refusé. GNU time et le journal de commande confirment le code 2,
+sans timeout ; stdout est vide. Les diagnostics K2–8 et les 108,089 s de
+complétion déjà dépensées sont provisoires. Le temps jusqu'au refus ne
+constitue pas un temps de calcul d'une tour complète.
+
+Le motif K9 borne les **occurrences de core avant dédoublonnage**. La
+[source F épinglée](receipts_resolver_20260905/qualification/snapshots/source/silent_incidence.hpp)
+charge `core_records` une fois par support supprimé, donc selon la somme
+des `q` des cofaces directes traitées, puis trie et dédoublonne avant de
+renseigner `core_facets`. Le contrôle du catalogue direct a un autre
+motif. Le `core=0` imprimé à K9 indique que le compteur de facettes uniques
+n'a pas encore été affecté ; il ne signifie pas zéro occurrence traitée.
+Le refus et ce contrôle impliquent 8 millions d'occurrences chargées et
+une suivante refusée. Le total nécessaire pour achever K9, celui de K10
+et leur mémoire prospective ne sont pas mesurés.
+
+Les limites restent distinctes : 600 s par processus, 26 GiB d'espace
+virtuel via `RLIMIT_AS`, proxy partiel de payload de 16 GiB, puis caps
+par ordre de 8 millions d'occurrences, 2 millions de pas/cofaces et
+1 milliard de visites/supports MEB. Ni la borne d'espace virtuel ni le
+proxy de payload ne désignent une limite de RSS ; le proxy ne couvre pas
+toutes les allocations. À 16k, K10 consomme déjà 833 506 587 supports MEB.
+
+Sur les succès, la complétion silencieuse représente environ 35–37 %
+du mur pipeline, la génération 32–34 %. `fold_wall` englobe des coûts de
+complétion et de digest : ne pas l'additionner à ces sous-coûts. Le travail
+utile suivant consiste à précompter les occurrences et examiner leur
+compression ou leur interning, avec plafonds séparés de travail, stockage
+temporaire et sortie. Une hausse des caps demande d'abord une facture
+prospective des capacités et des octets des structures concernées. Les
+[propositions mémoire sur la coexistence](RETOUR_MEMOIRE_COURANT.md)
+restent un chantier distinct de ce refus mono.

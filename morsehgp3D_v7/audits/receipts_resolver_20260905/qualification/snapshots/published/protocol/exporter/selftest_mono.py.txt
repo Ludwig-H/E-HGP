@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+"""Small synthetic checks only: no receipt read, engine, build or publication."""
+from __future__ import annotations
+
+import contextlib
+import copy
+import importlib.util
+import io
+import json
+from pathlib import Path
+import tempfile
+
+
+BASE = Path(__file__).resolve().parent
+spec = importlib.util.spec_from_file_location("export_mono_F_selftest", BASE / "export_mono.py")
+E = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(E)
+
+
+def check(value, reason):
+    if not value:
+        raise RuntimeError(reason)
+
+
+def rejects(function, message):
+    try:
+        function()
+    except (RuntimeError, ValueError, FileNotFoundError) as error:
+        check(message in str(error), "wrong rejection: " + str(error))
+        return
+    raise RuntimeError("expected rejection: " + message)
+
+
+def main():
+    groups = []
+    output = io.StringIO()
+    with contextlib.redirect_stdout(output):
+        check(E.main([]) == 0, "inert preview exit")
+    preview = json.loads(output.getvalue())
+    check(preview["status"] == "prepared_not_executed" and not preview["writes"]
+          and not preview["receipt_reads"], "preview is not inert")
+    groups.append("inert_preview")
+
+    rejects(lambda: E.json_value(b'{"x":1,"x":2}'), "duplicate JSON member")
+    rejects(lambda: E.json_value(b'{"nested":{"x":1,"x":2}}'), "duplicate JSON member")
+    rejects(lambda: E.json_value(b'{"x":NaN}'), "nonfinite JSON")
+    check(E.json_value(b'{"x":1}') == {"x": 1}, "valid JSON rejected")
+    groups.append("json_duplicates_and_nonfinite")
+
+    with tempfile.TemporaryDirectory(prefix="F-export-synthetic-", dir=BASE) as directory:
+        root = Path(directory)
+        old_root, old_public = E.ROOT, E.PUBLIC
+        try:
+            E.ROOT, E.PUBLIC = root, root
+            rejects(lambda: E.execute("a" * 64, "b" * 64), "publication target already exists")
+            groups.append("existing_public_refused_before_authority_loading")
+            receipt = root / "synthetic_closed"
+            receipt.mkdir()
+            (receipt / "raw.out").write_bytes(b"raw\r\nno-final-newline")
+            names = {"raw.out", "hashes.json"}
+            rejects(lambda: E.closed_directory(E.Reader(), receipt, names), "inventory differs")
+            (receipt / "hashes.json").write_bytes(E.json_bytes({"raw.out": E.sha((receipt / "raw.out").read_bytes())}))
+            reader = E.Reader()
+            exact = E.closed_directory(reader, receipt, names)
+            check(exact["raw.out"] == b"raw\r\nno-final-newline", "raw bytes normalized")
+            (receipt / "raw.out").write_bytes(b"changed")
+            rejects(lambda: E.closed_directory(E.Reader(), receipt, names), "source pin mismatch")
+            rejects(lambda: reader.terminal(lambda path: E.sha(path.read_bytes())), "source drift")
+            groups.append("missing_manifest_stale_bytes_and_terminal_drift")
+        finally:
+            E.ROOT, E.PUBLIC = old_root, old_public
+
+    pairs = {}
+    for i, separation in enumerate(E.SEPARATIONS):
+        prefix = f"2026-09-05T00:0{i}:"
+        rows = [{"role": role, "status": "engine_completed", "started_utc": prefix + second + "Z",
+                 "digests": {1: "digest"}, "cardinalities": {1: [10, 9]}, "wall_seconds": wall}
+                for role, second, wall in (("E", "01", 2.0), ("F", "03", 1.0))]
+        decision = {"status": "paired_equal", "times": {role: {"wall_seconds": wall}
+                    for role, wall in (("E", 2.0), ("F", 1.0))}, "equality": {"digests": True}}
+        pairs[separation] = ({"started_utc": prefix + "00Z", "ended_utc": prefix + "05Z",
+                              "decision": decision}, rows, {})
+    cross = E.cross_separations(pairs)
+    check(cross["status"] == "objects_equal" and all(cross["equality"].values()), "equal cross-s failed")
+    for field in ("digests", "cardinalities"):
+        altered = copy.deepcopy(pairs)
+        altered[12][1][1][field] = {1: "different"}
+        result = E.cross_separations(altered)
+        check(result["status"] == "objects_divergent" and not result["equality"][field], "divergence was green")
+    reordered = copy.deepcopy(pairs)
+    reordered[10][0]["started_utc"] = pairs[8][0]["started_utc"]
+    rejects(lambda: E.cross_separations(reordered), "overlap or are reordered")
+    reused = copy.deepcopy(pairs)
+    reused[10][1][0]["started_utc"] = pairs[8][1][0]["started_utc"]
+    rejects(lambda: E.cross_separations(reused), "timestamp reused")
+    groups.append("inter_s_equal_divergent_overlap_and_reuse")
+
+    censored = copy.deepcopy(pairs)
+    censored[12][0]["decision"] = {"status": "pair_incomplete"}
+    censored[12][1][1] = {"role": "F", "status": "censored", "started_utc": "2026-09-05T00:02:03Z"}
+    cross = E.cross_separations(censored)
+    check(cross["status"] == "not_comparable_incomplete" and "equality" not in cross, "censure projected objects")
+    results = E.result_document({}, censored, cross)
+    item = results["observations"][-1]
+    check("costs" not in item and "observed_process_reduction_percent_one_pair" not in item,
+          "censored pair received comparative times")
+    check(results["status"] == "terminal_attempts_not_all_equal", "censure became success")
+    groups.append("censored_pair_has_no_object_or_timing_promotion")
+    print(json.dumps({"status": "passed", "groups": groups, "group_count": len(groups),
+                      "synthetic_only": True, "engine_runs": 0, "real_receipt_reads": 0,
+                      "public_writes": 0, "gcp": "not_used"}, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,19 +1,25 @@
 # Exécution mono directe : état vérifié
 
-4 septembre 2026. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+5 septembre 2026. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
-Le chemin `threads=1` avec `fold_join_before_next_k=true` exécute le corps du fold B sur le thread appelant. Les quatre portes dédiées passent sur une copie courante isolée : zéro appel à `pthread_create` dans les runs mono observés, mêmes objets que la route asynchrone, refus et préfixes provisoires attendus. Cela qualifie ce changement d'ordonnancement sur les fixtures décrites ; aucune mesure de performance industrielle ni qualification globale n'en est déduite.
+Le chemin `threads=1` avec `fold_join_before_next_k=true` exécute le corps du fold B sur le thread appelant. Les quatre portes dédiées ont passé la requalification isolée du 4 septembre : zéro appel à `pthread_create` dans les runs mono observés, mêmes objets que la route asynchrone, refus et préfixes provisoires attendus. Cet acquis d'ordonnancement reste attaché aux fixtures et au snapshot décrits ci-dessous.
 
-Le census courant passe aussi ses [six portes AxisBounds indépendantes](CENSUS_AXIS_COURANT.md). Le CLI courant C `25c9bf8e…` a été reconstruit et ses interfaces rejouées ; la [qualification C](AUDIT_QUALIFICATION_20260905.md#autorités-des-mesures-et-du-cloud) précise ce rattachement. Les quatre portes mono décrites ci-dessous restent attachées à leur propre snapshot : leurs sources de fold et de test sont inchangées, et leurs reçus bruts sont conservés.
+Le CLI des dernières mesures est F, SHA-256 `ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85`. Sa [qualification propre](AUDIT_QUALIFICATION_20260905.md#qualification-f-désormais-fermée) comprend 339 portes complètes et 48 + 48 ciblées, dont les quatre portes mono. Le census possède également ses [six portes AxisBounds indépendantes](CENSUS_AXIS_COURANT.md). Ces preuves d'ordonnancement et de calcul ne constituent pas une mesure de performance industrielle.
 
-Les sources, commandes complètes, stdout/stderr et hashes sont conservés dans [mono_current.json](receipts_20260904/mono_current.json), avec le [JUnit courant](receipts_20260904/mono_ctest_current.xml). La phase courante vérifie 110 fichiers identiques avant copie, après copie et après construction/exécution ; les deux binaires restent identiques avant et après les tests. Une première observation de stabilité avait détecté uniquement la correction du nom de version dans le commentaire initial de CMake ; elle est conservée dans le reçu, puis la copie a été actualisée et requalifiée.
+Les sources, commandes complètes, stdout/stderr et hashes de la requalification du 4 septembre sont conservés dans [mono_current.json](receipts_20260904/mono_current.json), avec son [JUnit](receipts_20260904/mono_ctest_current.xml). Cette campagne vérifie 110 fichiers identiques avant copie, après copie et après construction/exécution ; les deux binaires restent identiques avant et après les tests. Une première observation de stabilité avait détecté uniquement la correction du nom de version dans le commentaire initial de CMake ; elle est conservée dans le reçu, puis la copie a été actualisée et requalifiée.
 
-| Élément qualifié | SHA-256 |
+| Élément du snapshot qualifié le 4 septembre | SHA-256 |
 | --- | --- |
 | `src/pipeline/run.hpp` | `1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c` |
 | `CMakeLists.txt` | `25030fb015309b44685101057f9259fc6b39847681777775119cf2905308bf73` |
 | Binaire `mhgp7_mono_inline_gate` | `090c268a51a223119823397c25a7dd97cd8777f2a57f262f0232eece1290fd58` |
 | Binaire produit `mhgp7` | `c7da95a3a83c1e31fdfd95db852fed86f43208e6b1b051dfb36e78baf45e5175` |
+
+## Dernières observations mono F
+
+La [contrelecture des paires et paliers](AUDIT_QUALIFICATION_20260905.md#f-mono-et-paliers--observations-closes), appuyée sur les [bruts et leur revue](receipts_resolver_20260905/qualification/review.json), confirme les trois paires E/F à 8 000 points : mêmes cardinalités et digests à `s=8,10,12`, tour horizontale candidate K1–10 avec complétion, CSR et digest, sans archive. Chaque séparation possède une seule paire froide E puis F sur hôte partagé. Les options et les nombres d'ouvriers annoncés ne remplacent pas les portes qui interceptent réellement `pthread_create`.
+
+F termine également l'entrée 16 000 points en 413,816 s de processus, avec un pic RSS de 5 361 880 KiB. À 32 000 points, il refuse à K9 après 569,876 s, code 2, `silent_core_record_budget`, avec stdout vide et un pic RSS de 7 100 740 KiB. Le cap vise les occurrences temporaires avant dédoublonnage ; le [retour mémoire](RETOUR_MEMOIRE_COURANT.md) précise ce nouveau verrou. Ces deux observations F n'ont pas de bras E de comparaison ; la durée à 32k est un temps jusqu'au refus. Aucun gain statistique ni SLO n'est qualifié. Cette contrelecture n'a relancé ni moteur ni benchmark.
 
 ## Revue de l'ordonnancement et des erreurs
 
@@ -52,6 +58,6 @@ cmake --build morsehgp3D_v7/audits/.work_mono/build --target mhgp7 mhgp7_mono_in
 ctest --test-dir morsehgp3D_v7/audits/.work_mono/build --output-on-failure --no-tests=error -V -R '^mhgp7_mono_inline(_late_a|_late_b|_early_alloc)?$'
 ```
 
-Une reproduction sans copie peut utiliser `-S morsehgp3D_v7` après vérification des hashes, en conservant le répertoire de construction sous `audits/`. Le produit compilé se trouve dans `audits/.work_mono/build/mhgp7` ; ses tests d'interface sont rattachés à leur reçu propre.
+Une reproduction sans copie peut utiliser `-S morsehgp3D_v7` après vérification des hashes, en conservant le répertoire de construction sous `audits/`. Le reçu historique référence le produit compilé sous `audits/.work_mono/build/mhgp7` ; ses tests d'interface sont rattachés à leur reçu propre.
 
-Le [retour mémoire](RETOUR_MEMOIRE_COURANT.md) reste pertinent pour la route avec recouvrement : ses fixtures utilisent la jonction désactivée, et les expressions d'admission sont inchangées dans ce delta. Le chemin mono direct ne présente pas de coexistence A2/B1, puisque B1 termine avant A2. Les shards et la destination d'expansion restent présents. Aucun nouveau pic de RAM ni ajustement de budget n'est mesuré ici ; aucune fixture mémoire n'a été recompilée pour cette requalification ciblée. GCP non utilisé. Aucun code produit modifié par l'auditeur.
+Les fixtures du [retour mémoire](RETOUR_MEMOIRE_COURANT.md) utilisent la jonction désactivée ; les expressions d'admission sont inchangées dans le delta mono. Le chemin mono direct ne présente pas de coexistence A2/B1, puisque B1 termine avant A2. Les shards et la destination d'expansion restent présents. La requalification d'ordonnancement du 4 septembre n'avait mesuré aucun nouveau pic de RAM ni recompilé de fixture mémoire ; les RSS des observations F ci-dessus ont leur reçu distinct. GCP non utilisé. Aucun code produit modifié par l'auditeur.

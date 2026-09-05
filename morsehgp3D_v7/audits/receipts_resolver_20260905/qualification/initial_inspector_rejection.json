@@ -1,0 +1,9 @@
+{
+  "exit_code": 1,
+  "stdout": {
+    "status": "rejected",
+    "error": "[Errno 2] No such file or directory: '/workspaces/E-HGP/runner.py'"
+  },
+  "cause": "Inspector resolved relative scale_protocol_files keys against repository root instead of private scale protocol directory. Corrected path binding only; captured observations had already passed raw semantic checks.",
+  "product_anomaly": false
+}

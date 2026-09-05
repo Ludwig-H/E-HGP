@@ -1,0 +1,17 @@
+{
+  "positive": 1,
+  "rejections": [
+    "RSS_zero",
+    "bad_cardinality_sum",
+    "duplicate_JSON",
+    "duplicate_digest",
+    "empty_output",
+    "exact_claim",
+    "missing_digest",
+    "over_meb_cap",
+    "refusal_promoted_to_success",
+    "vertical_maps_claim",
+    "workers_two"
+  ],
+  "status": "passed"
+}

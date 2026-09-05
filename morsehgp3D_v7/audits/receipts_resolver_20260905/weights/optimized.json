@@ -1,0 +1,1485 @@
+{
+  "status": "completed",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "gcp": "not_used",
+  "utc": "2026-09-05T10:57:21.179631+00:00",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "optimization": 1,
+  "argv": [
+    "morsehgp3D_v7/audits/vote_p3_exact_probe.py",
+    "--receipt",
+    "optimized"
+  ],
+  "source": "vote_p3_exact_probe.py",
+  "source_sha256_before": "61219255a88b0cc9209beb62dadaf8d92f21704498f7a55752c8b13bf6317f0e",
+  "result": {
+    "numeric_profile": "p3_exact_algebraic_equality_and_rational_interval_sign",
+    "cases": [
+      {
+        "name": "empty",
+        "left": [],
+        "right": [],
+        "expected_status": "equal",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "equal",
+          "sign": 0,
+          "reason": "all_square_class_coefficients_zero",
+          "normal_form": {},
+          "interval": null,
+          "stats": {
+            "input_rows": 0,
+            "rational_levels": 0,
+            "radicands": 0,
+            "classes": 0,
+            "class_pair_tests": 0,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 0,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 0,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "rational_square",
+        "left": [
+          [
+            1,
+            1,
+            1
+          ]
+        ],
+        "right": [
+          [
+            4,
+            1,
+            8
+          ]
+        ],
+        "expected_status": "equal",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "equal",
+          "sign": 0,
+          "reason": "all_square_class_coefficients_zero",
+          "normal_form": {},
+          "interval": null,
+          "stats": {
+            "input_rows": 2,
+            "rational_levels": 2,
+            "radicands": 0,
+            "classes": 0,
+            "class_pair_tests": 0,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 2,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 2,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "irrational_square_ratio",
+        "left": [
+          [
+            2,
+            1,
+            1
+          ]
+        ],
+        "right": [
+          [
+            8,
+            1,
+            8
+          ]
+        ],
+        "expected_status": "equal",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "equal",
+          "sign": 0,
+          "reason": "all_square_class_coefficients_zero",
+          "normal_form": {},
+          "interval": null,
+          "stats": {
+            "input_rows": 2,
+            "rational_levels": 2,
+            "radicands": 2,
+            "classes": 1,
+            "class_pair_tests": 1,
+            "square_ratio_merges": 1,
+            "isqrt_calls": 4,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 4,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "nondividing_radicands",
+        "left": [
+          [
+            9,
+            2,
+            27
+          ]
+        ],
+        "right": [
+          [
+            25,
+            2,
+            125
+          ]
+        ],
+        "expected_status": "equal",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "equal",
+          "sign": 0,
+          "reason": "all_square_class_coefficients_zero",
+          "normal_form": {},
+          "interval": null,
+          "stats": {
+            "input_rows": 2,
+            "rational_levels": 2,
+            "radicands": 2,
+            "classes": 1,
+            "class_pair_tests": 1,
+            "square_ratio_merges": 1,
+            "isqrt_calls": 4,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 3,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "mixed_irrational_equality_no_refinement",
+        "left": [
+          [
+            2,
+            1,
+            3
+          ],
+          [
+            3,
+            1,
+            2
+          ]
+        ],
+        "right": [
+          [
+            8,
+            1,
+            24
+          ],
+          [
+            12,
+            1,
+            16
+          ]
+        ],
+        "expected_status": "equal",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 0,
+          "interval_rounds": 0,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "equal",
+          "sign": 0,
+          "reason": "all_square_class_coefficients_zero",
+          "normal_form": {},
+          "interval": null,
+          "stats": {
+            "input_rows": 4,
+            "rational_levels": 4,
+            "radicands": 4,
+            "classes": 2,
+            "class_pair_tests": 4,
+            "square_ratio_merges": 2,
+            "isqrt_calls": 12,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 4,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "duplicates_and_equivalent_fractions",
+        "left": [
+          [
+            4,
+            2,
+            1
+          ],
+          [
+            2,
+            1,
+            1
+          ],
+          [
+            3,
+            1,
+            0
+          ]
+        ],
+        "right": [
+          [
+            16,
+            2,
+            16
+          ]
+        ],
+        "expected_status": "equal",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "equal",
+          "sign": 0,
+          "reason": "all_square_class_coefficients_zero",
+          "normal_form": {},
+          "interval": null,
+          "stats": {
+            "input_rows": 4,
+            "rational_levels": 2,
+            "radicands": 2,
+            "classes": 1,
+            "class_pair_tests": 1,
+            "square_ratio_merges": 1,
+            "isqrt_calls": 4,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 3,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "positive_monotonicity",
+        "left": [
+          [
+            1,
+            1,
+            1
+          ]
+        ],
+        "right": [
+          [
+            4,
+            1,
+            1
+          ]
+        ],
+        "expected_status": "greater",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "greater",
+          "sign": 1,
+          "reason": "certified_rational_interval",
+          "interval": [
+            "7/8",
+            "7/8"
+          ],
+          "normal_form": {
+            "1": "7/8"
+          },
+          "stats": {
+            "input_rows": 2,
+            "rational_levels": 2,
+            "radicands": 1,
+            "classes": 1,
+            "class_pair_tests": 0,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 3,
+            "interval_rounds": 1,
+            "precision_bits": 0,
+            "max_coefficient_bits": 5,
+            "max_interval_integer_bits": 1,
+            "max_accumulator_bits": 4
+          }
+        }
+      },
+      {
+        "name": "negative_monotonicity",
+        "left": [
+          [
+            4,
+            1,
+            1
+          ]
+        ],
+        "right": [
+          [
+            1,
+            1,
+            1
+          ]
+        ],
+        "expected_status": "less",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "less",
+          "sign": -1,
+          "reason": "certified_rational_interval",
+          "interval": [
+            "-7/8",
+            "-7/8"
+          ],
+          "normal_form": {
+            "1": "-7/8"
+          },
+          "stats": {
+            "input_rows": 2,
+            "rational_levels": 2,
+            "radicands": 1,
+            "classes": 1,
+            "class_pair_tests": 0,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 3,
+            "interval_rounds": 1,
+            "precision_bits": 0,
+            "max_coefficient_bits": 5,
+            "max_interval_integer_bits": 1,
+            "max_accumulator_bits": 4
+          }
+        }
+      },
+      {
+        "name": "three_distinct_classes_rank_two",
+        "left": [
+          [
+            2,
+            1,
+            4
+          ],
+          [
+            3,
+            1,
+            9
+          ]
+        ],
+        "right": [
+          [
+            6,
+            1,
+            36
+          ]
+        ],
+        "expected_status": "greater",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "greater",
+          "sign": 1,
+          "reason": "certified_rational_interval",
+          "interval": [
+            "9/16",
+            "3/4"
+          ],
+          "normal_form": {
+            "2": "1",
+            "3": "1",
+            "6": "-1"
+          },
+          "stats": {
+            "input_rows": 3,
+            "rational_levels": 3,
+            "radicands": 3,
+            "classes": 3,
+            "class_pair_tests": 3,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 15,
+            "interval_rounds": 2,
+            "precision_bits": 4,
+            "max_coefficient_bits": 1,
+            "max_interval_integer_bits": 11,
+            "max_accumulator_bits": 6
+          }
+        }
+      },
+      {
+        "name": "pell_22",
+        "left": [
+          [
+            1,
+            1,
+            131836323
+          ]
+        ],
+        "right": [
+          [
+            2,
+            1,
+            372889432
+          ]
+        ],
+        "expected_status": "greater",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "greater",
+          "sign": 1,
+          "reason": "certified_rational_interval",
+          "interval": [
+            "34966366909/9223372036854775808",
+            "4376622261/1152921504606846976"
+          ],
+          "normal_form": {
+            "1": "131836323",
+            "2": "-93222358"
+          },
+          "stats": {
+            "input_rows": 2,
+            "rational_levels": 2,
+            "radicands": 2,
+            "classes": 2,
+            "class_pair_tests": 1,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 16,
+            "interval_rounds": 6,
+            "precision_bits": 64,
+            "max_coefficient_bits": 27,
+            "max_interval_integer_bits": 130,
+            "max_accumulator_bits": 64
+          }
+        }
+      },
+      {
+        "name": "pell_22_bounded",
+        "left": [
+          [
+            1,
+            1,
+            131836323
+          ]
+        ],
+        "right": [
+          [
+            2,
+            1,
+            372889432
+          ]
+        ],
+        "expected_status": "indeterminate",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 16,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "indeterminate",
+          "reason": "precision_bits",
+          "sign": null,
+          "normal_form": {
+            "1": "131836323",
+            "2": "-93222358"
+          },
+          "interval": [
+            "-2330007/16384",
+            "41951165/32768"
+          ],
+          "stats": {
+            "input_rows": 2,
+            "rational_levels": 2,
+            "radicands": 2,
+            "classes": 2,
+            "class_pair_tests": 1,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 12,
+            "interval_rounds": 4,
+            "precision_bits": 16,
+            "max_coefficient_bits": 27,
+            "max_interval_integer_bits": 34,
+            "max_accumulator_bits": 27
+          }
+        }
+      },
+      {
+        "name": "pell_23",
+        "left": [
+          [
+            1,
+            1,
+            318281039
+          ]
+        ],
+        "right": [
+          [
+            2,
+            1,
+            900234724
+          ]
+        ],
+        "expected_status": "less",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "less",
+          "sign": -1,
+          "reason": "certified_rational_interval",
+          "interval": [
+            "-29046414401/18446744073709551616",
+            "-3602669465/2305843009213693952"
+          ],
+          "normal_form": {
+            "1": "318281039",
+            "2": "-225058681"
+          },
+          "stats": {
+            "input_rows": 2,
+            "rational_levels": 2,
+            "radicands": 2,
+            "classes": 2,
+            "class_pair_tests": 1,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 16,
+            "interval_rounds": 6,
+            "precision_bits": 64,
+            "max_coefficient_bits": 29,
+            "max_interval_integer_bits": 130,
+            "max_accumulator_bits": 65
+          }
+        }
+      },
+      {
+        "name": "pell_23_bounded",
+        "left": [
+          [
+            1,
+            1,
+            318281039
+          ]
+        ],
+        "right": [
+          [
+            2,
+            1,
+            900234724
+          ]
+        ],
+        "expected_status": "indeterminate",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 16,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "indeterminate",
+          "reason": "precision_bits",
+          "sign": null,
+          "normal_form": {
+            "1": "318281039",
+            "2": "-225058681"
+          },
+          "interval": [
+            "-11250269/32768",
+            "202558143/65536"
+          ],
+          "stats": {
+            "input_rows": 2,
+            "rational_levels": 2,
+            "radicands": 2,
+            "classes": 2,
+            "class_pair_tests": 1,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 12,
+            "interval_rounds": 4,
+            "precision_bits": 16,
+            "max_coefficient_bits": 29,
+            "max_interval_integer_bits": 34,
+            "max_accumulator_bits": 29
+          }
+        }
+      },
+      {
+        "name": "pell_31",
+        "left": [
+          [
+            1,
+            1,
+            367296043199
+          ]
+        ],
+        "right": [
+          [
+            2,
+            1,
+            1038870091396
+          ]
+        ],
+        "expected_status": "less",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "less",
+          "sign": -1,
+          "reason": "certified_rational_interval",
+          "interval": [
+            "-463226290102687747871285151/340282366920938463463374607431768211456",
+            "-231613145051343744076881151/170141183460469231731687303715884105728"
+          ],
+          "normal_form": {
+            "1": "367296043199",
+            "2": "-259717522849"
+          },
+          "stats": {
+            "input_rows": 2,
+            "rational_levels": 2,
+            "radicands": 2,
+            "classes": 2,
+            "class_pair_tests": 1,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 18,
+            "interval_rounds": 7,
+            "precision_bits": 128,
+            "max_coefficient_bits": 39,
+            "max_interval_integer_bits": 258,
+            "max_accumulator_bits": 129
+          }
+        }
+      },
+      {
+        "name": "pell_31_bounded",
+        "left": [
+          [
+            1,
+            1,
+            367296043199
+          ]
+        ],
+        "right": [
+          [
+            2,
+            1,
+            1038870091396
+          ]
+        ],
+        "expected_status": "indeterminate",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 16,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "indeterminate",
+          "reason": "precision_bits",
+          "sign": null,
+          "normal_form": {
+            "1": "367296043199",
+            "2": "-259717522849"
+          },
+          "interval": [
+            "-12982800677/32768",
+            "233751921495/65536"
+          ],
+          "stats": {
+            "input_rows": 2,
+            "rational_levels": 2,
+            "radicands": 2,
+            "classes": 2,
+            "class_pair_tests": 1,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 12,
+            "interval_rounds": 4,
+            "precision_bits": 16,
+            "max_coefficient_bits": 39,
+            "max_interval_integer_bits": 34,
+            "max_accumulator_bits": 39
+          }
+        }
+      },
+      {
+        "name": "pell_32",
+        "left": [
+          [
+            1,
+            1,
+            886731088897
+          ]
+        ],
+        "right": [
+          [
+            2,
+            1,
+            2508054264192
+          ]
+        ],
+        "expected_status": "greater",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "greater",
+          "sign": 1,
+          "reason": "certified_rational_interval",
+          "interval": [
+            "5996081619009578358356531/10633823966279326983230456482242756608",
+            "2998040809504798976265235/5316911983139663491615228241121378304"
+          ],
+          "normal_form": {
+            "1": "886731088897",
+            "2": "-627013566048"
+          },
+          "stats": {
+            "input_rows": 2,
+            "rational_levels": 2,
+            "radicands": 2,
+            "classes": 2,
+            "class_pair_tests": 1,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 18,
+            "interval_rounds": 7,
+            "precision_bits": 128,
+            "max_coefficient_bits": 40,
+            "max_interval_integer_bits": 258,
+            "max_accumulator_bits": 124
+          }
+        }
+      },
+      {
+        "name": "pell_32_bounded",
+        "left": [
+          [
+            1,
+            1,
+            886731088897
+          ]
+        ],
+        "right": [
+          [
+            2,
+            1,
+            2508054264192
+          ]
+        ],
+        "expected_status": "indeterminate",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 16,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "indeterminate",
+          "reason": "precision_bits",
+          "sign": null,
+          "normal_form": {
+            "1": "886731088897",
+            "2": "-627013566048"
+          },
+          "interval": [
+            "-979476671/1024",
+            "17635220597/2048"
+          ],
+          "stats": {
+            "input_rows": 2,
+            "rational_levels": 2,
+            "radicands": 2,
+            "classes": 2,
+            "class_pair_tests": 1,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 12,
+            "interval_rounds": 4,
+            "precision_bits": 16,
+            "max_coefficient_bits": 40,
+            "max_interval_integer_bits": 34,
+            "max_accumulator_bits": 40
+          }
+        }
+      },
+      {
+        "name": "term_budget",
+        "left": [
+          [
+            2,
+            1,
+            3
+          ],
+          [
+            3,
+            1,
+            2
+          ]
+        ],
+        "right": [
+          [
+            8,
+            1,
+            24
+          ],
+          [
+            12,
+            1,
+            16
+          ]
+        ],
+        "expected_status": "indeterminate",
+        "limits": {
+          "input_rows": 1,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "indeterminate",
+          "reason": "input_rows",
+          "sign": null,
+          "normal_form": {},
+          "interval": null,
+          "stats": {
+            "input_rows": 4,
+            "rational_levels": 0,
+            "radicands": 0,
+            "classes": 0,
+            "class_pair_tests": 0,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 0,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 0,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "class_budget",
+        "left": [
+          [
+            2,
+            1,
+            4
+          ],
+          [
+            3,
+            1,
+            9
+          ]
+        ],
+        "right": [
+          [
+            6,
+            1,
+            36
+          ]
+        ],
+        "expected_status": "indeterminate",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 1,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "indeterminate",
+          "reason": "classes",
+          "sign": null,
+          "normal_form": {
+            "2": "1"
+          },
+          "interval": null,
+          "stats": {
+            "input_rows": 3,
+            "rational_levels": 3,
+            "radicands": 3,
+            "classes": 0,
+            "class_pair_tests": 1,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 5,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 1,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "pair_budget",
+        "left": [
+          [
+            9,
+            2,
+            27
+          ]
+        ],
+        "right": [
+          [
+            25,
+            2,
+            125
+          ]
+        ],
+        "expected_status": "indeterminate",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 0,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "indeterminate",
+          "reason": "class_pair_tests",
+          "sign": null,
+          "normal_form": {
+            "18": "2/3"
+          },
+          "interval": null,
+          "stats": {
+            "input_rows": 2,
+            "rational_levels": 2,
+            "radicands": 2,
+            "classes": 0,
+            "class_pair_tests": 0,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 2,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 3,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "coefficient_budget",
+        "left": [
+          [
+            1,
+            1,
+            100
+          ]
+        ],
+        "right": [],
+        "expected_status": "indeterminate",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 3,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "indeterminate",
+          "reason": "coefficient_bits",
+          "sign": null,
+          "normal_form": {},
+          "interval": null,
+          "stats": {
+            "input_rows": 1,
+            "rational_levels": 1,
+            "radicands": 0,
+            "classes": 0,
+            "class_pair_tests": 0,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 0,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 7,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "zero_level",
+        "left": [
+          [
+            0,
+            1,
+            1
+          ]
+        ],
+        "right": [],
+        "expected_status": "invalid_input",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "invalid_input",
+          "reason": "positive_level_nonnegative_count",
+          "sign": null,
+          "normal_form": {},
+          "interval": null,
+          "stats": {
+            "input_rows": 1,
+            "rational_levels": 0,
+            "radicands": 0,
+            "classes": 0,
+            "class_pair_tests": 0,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 0,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 0,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "zero_denominator",
+        "left": [
+          [
+            1,
+            0,
+            1
+          ]
+        ],
+        "right": [],
+        "expected_status": "invalid_input",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "invalid_input",
+          "reason": "positive_level_nonnegative_count",
+          "sign": null,
+          "normal_form": {},
+          "interval": null,
+          "stats": {
+            "input_rows": 1,
+            "rational_levels": 0,
+            "radicands": 0,
+            "classes": 0,
+            "class_pair_tests": 0,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 0,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 0,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "negative_multiplicity",
+        "left": [
+          [
+            1,
+            1,
+            -1
+          ]
+        ],
+        "right": [],
+        "expected_status": "invalid_input",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "invalid_input",
+          "reason": "positive_level_nonnegative_count",
+          "sign": null,
+          "normal_form": {},
+          "interval": null,
+          "stats": {
+            "input_rows": 1,
+            "rational_levels": 0,
+            "radicands": 0,
+            "classes": 0,
+            "class_pair_tests": 0,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 0,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 0,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "level_outside_u16_domain",
+        "left": [
+          [
+            1,
+            8,
+            1
+          ]
+        ],
+        "right": [],
+        "expected_status": "invalid_input",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "invalid_input",
+          "reason": "u16_level_range",
+          "sign": null,
+          "normal_form": {},
+          "interval": null,
+          "stats": {
+            "input_rows": 1,
+            "rational_levels": 0,
+            "radicands": 0,
+            "classes": 0,
+            "class_pair_tests": 0,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 0,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 0,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "malformed_row",
+        "left": [
+          [
+            1,
+            1
+          ]
+        ],
+        "right": [],
+        "expected_status": "invalid_input",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "invalid_input",
+          "reason": "row_schema",
+          "sign": null,
+          "normal_form": {},
+          "interval": null,
+          "stats": {
+            "input_rows": 1,
+            "rational_levels": 0,
+            "radicands": 0,
+            "classes": 0,
+            "class_pair_tests": 0,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 0,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 0,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      },
+      {
+        "name": "noninteger_multiplicity",
+        "left": [
+          [
+            1,
+            1,
+            1.0
+          ]
+        ],
+        "right": [],
+        "expected_status": "invalid_input",
+        "limits": {
+          "input_rows": 256,
+          "numerator_bits": 192,
+          "denominator_bits": 128,
+          "count_bits": 64,
+          "coefficient_bits": 4096,
+          "classes": 64,
+          "class_pair_tests": 4096,
+          "precision_bits": 128,
+          "interval_rounds": 8,
+          "accumulator_bits": 16384
+        },
+        "result": {
+          "status": "invalid_input",
+          "reason": "row_schema",
+          "sign": null,
+          "normal_form": {},
+          "interval": null,
+          "stats": {
+            "input_rows": 1,
+            "rational_levels": 0,
+            "radicands": 0,
+            "classes": 0,
+            "class_pair_tests": 0,
+            "square_ratio_merges": 0,
+            "isqrt_calls": 0,
+            "interval_rounds": 0,
+            "precision_bits": 0,
+            "max_coefficient_bits": 0,
+            "max_interval_integer_bits": 0,
+            "max_accumulator_bits": 0
+          }
+        }
+      }
+    ],
+    "status_counts": {
+      "equal": 6,
+      "greater": 4,
+      "less": 3,
+      "indeterminate": 8,
+      "invalid_input": 6
+    },
+    "permutation_checks": 4,
+    "audit_faults_rejected": {
+      "audit_disable_square_ratio": {
+        "wanted": "equal",
+        "observed": "indeterminate"
+      },
+      "audit_floor_used_as_upper_bound": {
+        "wanted": "less",
+        "observed": "greater"
+      },
+      "audit_beta_minus_three": {
+        "wanted": "equal",
+        "observed": "greater",
+        "wrong_difference": "7/8"
+      },
+      "audit_float_epsilon_equality": {
+        "wanted": "greater",
+        "observed": "equal",
+        "binary64_difference": 0.0
+      }
+    },
+    "scope": "audit_only_no_product_execution_no_universal_latency_claim"
+  },
+  "source_sha256_after": "61219255a88b0cc9209beb62dadaf8d92f21704498f7a55752c8b13bf6317f0e"
+}
