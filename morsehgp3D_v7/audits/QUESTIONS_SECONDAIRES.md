@@ -1,0 +1,16 @@
+# Questions secondaires regroupées
+
+Ces sujets ne bloquent pas les qualifications closes et ne déclenchent pas une nouvelle campagne. Les contrats et pistes déjà documentés sont renvoyés au [dossier principal](../PASSATION.md) et à ses [décisions écartées](../docs/FAUSSES_PISTES.md).
+
+| À reprendre seulement si le périmètre l’exige | Question résiduelle |
+| --- | --- |
+| Export pondéré | Fixer l’univers contributif et la date d’affectation des masses avant condensation. Le [comparateur p3](AUTORITE_VOTE_P3_COURANTE.md) traite les numérateurs, pas les quotients, seuils ou probabilités. [Contrat conservé](CONTRAT_MASSES_VOTE_COURANT.md) |
+| Domaine hors régularité | Définir le quotient des naissances et connexions simultanées avant de lever un refus de coquille. L’argument FULL régulier ne suffit pas. [Contre-fixture](receipts_gabriel_20260905/full_proof_review.md) |
+| Proposition MEB activée | Le Builder privé est qualifié ; son intégration produit et ses consommateurs doivent conserver les deux budgets. Pas d’activation générale fondée sur les seuls compteurs. [État local](MEB_DOUBLE_BUDGET_COURANT.md) |
+| Ancienne route avec jonction désactivée | Le budget de témoins pourrait employer `min(f,Kmax_eff)`, puis un précontrôle `+3` avant complétion et un quota résiduel distinct. Les [témoins historiques](receipts_20260904/memory_budget_current.json) montrent des refus conservatifs évitables ; ils ne qualifient ni mono ni FULL. À reprendre seulement si ce consommateur revient dans la cible. |
+| Nettoyage de l’export | Garder un inventaire fermé des fichiers appartenant au staging, sa propriété exclusive et aucune suppression après publication. Le renommage et la synchronisation du parent sont deux étapes distinctes. Les [témoins A1](receipts_20260904/archive_delta_current.json) et [interfaces](receipts_iteration3/interfaces_execution.json) sont conservés. |
+| Identités publiques et reprise | Versionner les identités du quotient et la coupe servie par l’export. Une archive atomique ne constitue pas un checkpoint moteur. Les engagements industriels restent dans les contrats principaux. |
+
+La verticale par `born` est totale dans son domaine réduit qualifié ; un resolver géométrique arbitraire n’est pas une obligation supplémentaire de cette route. Les masses indépendamment recalculées entre ordres ne deviennent pas une mesure conservée par les cartes verticales.
+
+Commentaires internes à corriger seulement lors d’une intervention sur ces helpers : `sector_kill.hpp` ne garantit pas la seconde norme ≥D√(2/3) (d=(1,1,0) la réfute) ; `chord_kill.hpp` doit parler du maximum aux deux extrémités, pas du minimum ; `true_spindle_count` peut dépasser h dans le helper non consommé ; `floor_div128` doit exclure INT128_MIN/−1 en plus du dénominateur nul. Les [preuves secteurs/cordes](PREUVE_CHORD_SECTOR_COURANTE.md), [fuseaux](ARITHMETIQUE_SPINDLE_COURANTE.md) et [entiers](receipts_iteration3/wide_static_current.json) bornent ces constats : aucun défaut des appels produit qualifiés n’en est déduit.
