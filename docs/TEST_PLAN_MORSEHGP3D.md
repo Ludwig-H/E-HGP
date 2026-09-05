@@ -1,7 +1,46 @@
 # Plan de validation de MorseHGP3D
 
 > [!IMPORTANT]
-> Ce document est un **contrat de validation pour une implémentation future**. Les seuils de temps sont des objectifs réfutables sur une configuration G4 donnée, pas des garanties de complexité ni des performances déjà mesurées.
+> Ce document sépare le contrat de validation de la ligne enregistrée et la mission v7 FULL hors registre précisée ci-dessous. Les seuils de temps sont des objectifs réfutables sur une configuration déclarée, pas des garanties de complexité ni des performances déjà mesurées.
+
+## Mission de validation v7 FULL — 5 septembre 2026
+
+Le chantier [`morsehgp3D_v7/`](../morsehgp3D_v7/README.md) annonce `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. La Phase 15 et le contrat public v2 restent ceux de la ligne enregistrée ; ils ne sont ni promus ni remplacés par les tests v7. Les sections numérotées conservent ce contexte historique lorsqu'elles nomment ses API, ses phases ou ses reçus.
+
+L'objet FULL du [certificat courant](../morsehgp3D_v7/audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md) comprend les composantes isolées, leur généalogie et leurs points couverts. Sous les hypothèses annoncées, son journal ne conserve que les feuilles Gabriel de cardinal K et les vraies multifusions aux niveaux Gabriel de cardinal K+1. Cela n'autorise ni le fold Gabriel brut, ni l'abandon des attaches nécessaires au calcul des parents. La partition de toutes les facettes, les cartes verticales, les masses et le vote ont des obligations supplémentaires ; aucun de ces objets ne se déduit d'un simple succès syntaxique du journal.
+
+### Première porte : certificat structurel et lecteurs
+
+Le module [`full_certificate.hpp`](../morsehgp3D_v7/src/forest/full_certificate.hpp) et sa porte [`full_certificate_gate.cpp`](../morsehgp3D_v7/tests/full_certificate_gate.cpp) sont évalués sous `full_minima_merge_forest_v1`, autorité `structural_only`. Le constructeur reçoit des lots déjà fournis ; il ne découvre aucune géométrie, aucun portail, et n'est raccordé ni à la CLI ni à l'archive produit. Les CTests dédiés et leurs reçus fermés doivent lier exactement sources, binaire, commandes, sorties et statuts ; aucun compte provisoire ni exécution privée isolée ne remplace cette qualification.
+
+Les vérifications de cette porte comprennent :
+
+- naissances et vraies multifusions, coupes ouvertes/fermées, points K1 à zéro, ordre terminal K=n et coexistence de feuilles dont les points se recouvrent ; une coupe vide est distincte d'une construction refusée ;
+- niveaux rationnels comparés sémantiquement : scinder `1/2` et `2/4` en deux lots est invalide ; aucun parent créé dans le lot courant ne devient un parent pré-lot, et aucun ancien parent ne peut être consommé par deux groupes ;
+- domaines, PointId triés et distincts, cardinal et padding des minima, doublons entre niveaux, ordre des parents, références futures ou mortes et refus des continuations encodées comme multifusions ;
+- plafonds de lots, nœuds et références parentales à la frontière exacte puis à moins un, sans addition débordante ni arène scientifique partielle au refus ;
+- budgets des lectures, notamment références ponctuelles comptées avant déduplication : deux feuilles AZ/BZ exigent quatre références pour une couverture de trois points ;
+- opacité du certificat move-only, déplacements sans allocation, source déplacée invalide, affectation vers une destination non vide et self-move ; pannes d'allocation pendant construction et lectures, avec résultat refusé vide.
+
+Les fixtures analytiques à maintenir incluent A=(0,0,0), B=(4,0,0), Z=(2,1,0) : K1 fusionne atomiquement trois points à `5/4` ; K2 possède deux feuilles AZ/BZ à `5/4`, puis leur fusion à `4`, sans feuille AB ; K3=n possède une seule feuille ABZ à `4`. La variante Z=(1,1,0) sépare les deux naissances K2 aux niveaux `1/2` et `5/2`. À ce premier jalon, fournir ces journaux comme entrées teste leur structure, pas leur dérivation depuis les coordonnées.
+
+### Portes géométriques suivantes, non héritées du composant structurel
+
+Les [reçus dédiés du 5 septembre](../morsehgp3D_v7/receipts/full_certificate_20260905/README.md) ferment les deux CTests structurels en Release et les deux sous ASan/UBSan. Ils ne réexécutent ni ne réattribuent la suite historique F et conservent l'essai initial du gate rejeté par son plancher.
+
+Le futur producteur FULL doit être comparé à un Gamma exhaustif uniquement borné côté juge. La comparaison porte sur chaque coupe ouverte et fermée, les parents abstraits, les couvertures, les changements de noms sous permutation et la naturalité ; le constructeur produit ne reçoit pas les partitions de cet oracle. Un catalogue Gabriel fourni par l'oracle ne constitue pas un test de complétude du générateur produit.
+
+E5 doit exercer un vrai portail et la normalisation d'un terminal historique après fusion, sans publier une transition K2 au niveau silencieux `33/2`. Les mutations causales doivent notamment supprimer cette attache, conserver une racine périmée, fabriquer une naissance avec l'unique intrus et sérialiser abusivement une multifusion simultanée. Le cas A=(0,0,0), B=(2,0,0), C=(1,1,0), avec extra-shell au niveau `1`, reste un rejet du domaine régulier, pas un succès FULL obtenu par effacement d'une naissance. Les contrôles de fenêtre, contacts, shell et budgets sont requalifiés pour les chemins réellement exécutés.
+
+Les ancres verticales FULL se lisent après fermeture de tout le plateau inférieur simultané. Leur propagation doit être testée sur l'union des graduations inter-K, même quand un ordre source n'émet rien. Les minima du journal ne sont pas les feuilles pondérées de toutes les cofaces Gabriel : le profil de contribution, sa date d'affectation et le contrat de condensation restent à fixer et tester séparément.
+
+### Objectifs d'optimisation et campagnes v7
+
+L'ordre de travail est **mono-thread, puis multi-CPU, enfin GPU**, sans attribuer une mesure d'un backend à un autre. Les sondes locales demandées portent sur `n=8000`, `16000` et `32000`. Comparer WSPD `s=8`, `s=10` et `s=12` sur les mêmes entrées, seeds, ordres, caps et payload ; conserver les refus et censures avec les succès. Les reçus historiques restent attribués à leur propre moteur et à leur propre objet réduit ou FULL.
+
+À 50 000 points, le premier objectif est **toute la tour 1..10 en moins d'une seconde**. Si ce contrat n'est pas satisfait, le repli porte explicitement sur **toute la tour 1..5**, dans une série distincte ; calculer seulement K=10 ou K=5 ne satisfait aucun de ces deux contrats. Une fois la seconde atteinte, viser 100 ms. Avant campagne, figer le payload demandé, les limites du chronomètre, le nombre de répétitions et les statistiques ; ne remplacer ni la construction depuis le nuage par le rejeu d'un journal fourni, ni un total par un temps de kernel.
+
+Les nuages de plusieurs dizaines de millions de points sur G4 constituent une qualification d'échelle distincte, avec plafonds de durée, travail, RAM/VRAM et stockage, et tests de reprise si celle-ci est revendiquée. Aucune extrapolation depuis 8 k ou une porte structurelle ne vaut preuve massive. Toute session utilise les scripts gardés du dépôt, SPOT, les deux coupe-circuits vérifiés et l'arrêt certifié de la cible exacte ; aucune VM n'est utilisée pour cette actualisation documentaire.
 
 ## 1. Objet du plan
 
@@ -16,13 +55,13 @@ MorseHGP3D doit construire, pour un nuage fini $X\subset\mathbb{R}^{3}$ et tous 
 
 Le plan vérifie en plus l'objectif architectural premier : le chemin produit doit être beaucoup plus léger que `HGP-old` et ne doit jamais matérialiser la mosaïque de Delaunay d'ordre $K$, tous les parents top-$m$ ou Gamma global. Les supports et Gamma exhaustifs restent autorisés dans l'oracle borné $n\leq14$; l'atlas cellulaire top-$m$ est séparément gelé à $n\leq8$.
 
-Il n'existe qu'un chemin produit testable : `exact_sparse_frontier`. Le premier gate est le catalogue GPU résident des paires de rang fermé $2\leq R\leq K_{\max}+1$ avec payload complet, calculé en une passe multi-ordre sur le LBVH Morton partagé et les cutoffs Yao48 exacts. Viennent ensuite la frontière indépendante des triangles aigus, celle des tétraèdres bien centrés, le merge canonique et le reducer sparse. À $k=1$, le flux exact de paires est réduit directement; l'EMST sert uniquement de garde-fou comparatif hors ligne. Les surrogates historiques, Borůvka, les restrictions Delaunay et Geogram/PDEL appartiennent exclusivement aux suites d'oracles bornés hors ligne ou aux archives. Aucune Delaunay ordinaire ou d'ordre supérieur n'est une entrée, une dépendance ou un fallback industriel.
+Dans la ligne enregistrée `morsehgp3d/`, il n'existe qu'un chemin produit déclaré testable : `exact_sparse_frontier`. Cette exclusivité ne vise pas la mission v7 hors registre décrite en tête. Le premier gate historique est le catalogue GPU résident des paires de rang fermé $2\leq R\leq K_{\max}+1$ avec payload complet, calculé en une passe multi-ordre sur le LBVH Morton partagé et les cutoffs Yao48 exacts. Viennent ensuite la frontière indépendante des triangles aigus, celle des tétraèdres bien centrés, le merge canonique et le reducer sparse. À $k=1$, le flux exact de paires est réduit directement; l'EMST sert uniquement de garde-fou comparatif hors ligne. Les surrogates historiques, Borůvka, les restrictions Delaunay et Geogram/PDEL appartiennent exclusivement aux suites d'oracles bornés hors ligne ou aux archives. Aucune Delaunay ordinaire ou d'ordre supérieur n'est une entrée, une dépendance ou un fallback industriel.
 
 Le résultat mathématique testé est prioritaire sur toute mesure de qualité par rapport à des étiquettes « terrain ». Un bon score de clustering ne compense jamais une erreur de hiérarchie.
 
 Chaque campagne valide aussi [`implementation_status.toml`](implementation_status.toml) : une phase ne peut être marquée fermée sans porte satisfaite et preuves référencées.
 
-### 1.1 Réduction exacte-relative vers les points
+### 1.1 Réduction historique exacte-relative vers les points — Phase 15
 
 Le réducteur public `build_exact_point_hierarchy` possède un périmètre de validation distinct de la source HGP. Le CTest `morsehgp3d.api_point_hierarchy` couvre actuellement :
 
@@ -68,7 +107,7 @@ Chaque exécution indique un `profile` :
 
 Un test ne doit jamais accepter une sortie `hgp_reduced` comme preuve implicite de `full_pi0`. À l'ordre $k\geq2$, les unions de points associées aux composantes forment en général une **couverture** et non une partition ; leur recouvrement est donc autorisé et doit être testé.
 
-Le contrat actif est v2. `hgp_reduced` exact exige `reconstruction_contract_id=hgp-reduced-v2`, `proof_basis=gamma_exhaustive_reference` et `effective_backend=reference_cpu`. Une sortie issue du flot Gabriel brut exige `proof_basis=gabriel_positive_connectivity`, `forest_semantics=partial_refinement`, `require_exact=false` et un statut non exact. Les tests T0 rejettent toute autre combinaison, notamment la base v1 `reduced_manuscript_theorem_5` et la base future non activée `incidence_complete_reduction_proved`.
+Le contrat public actif de la ligne enregistrée est v2 ; ce n'est pas un statut attribué à la v7 hors registre. Dans ce contrat, `hgp_reduced` exact exige `reconstruction_contract_id=hgp-reduced-v2`, `proof_basis=gamma_exhaustive_reference` et `effective_backend=reference_cpu`. Une sortie issue du flot Gabriel brut exige `proof_basis=gabriel_positive_connectivity`, `forest_semantics=partial_refinement`, `require_exact=false` et un statut non exact. Les tests T0 rejettent toute autre combinaison, notamment la base v1 `reduced_manuscript_theorem_5` et la base future non activée `incidence_complete_reduction_proved`.
 
 ### 2.3 Modes et statuts d'exécution
 
@@ -1109,6 +1148,8 @@ Une suite non bloquante puis une suite de release utilisent des scènes LiDAR et
 
 ## 10. Matrice des tailles
 
+Cette matrice est celle du protocole historique enregistré. Les paliers locaux 8 000/16 000/32 000 et les dizaines de millions demandés pour la v7 sont définis dans la mission en tête ; ils ne sont pas réduits aux seules tailles ci-dessous.
+
 | classe | valeurs de $n$ | rôle |
 |---|---|---|
 | micro | $4$ à $14$ | oracle exhaustif et réduction de contre-exemples |
@@ -1211,6 +1252,8 @@ Les générateurs à amas connus permettent de mesurer, à titre exploratoire :
 Ces métriques évaluent des choix heuristiques de condensation ou de coupe. Elles ne participent jamais au verdict d'exactitude de MorseHGP3D.
 
 ## 14. Protocoles de performance sur G4
+
+Les configurations, contrats et chiffres de cette section appartiennent au protocole historique enregistré. En particulier, la priorité 100 ms puis une seconde du §14.4 n'est pas celle de la mission v7 FULL : pour celle-ci, appliquer une seconde sur toute la tour 1..10, le repli déclaré 1..5, puis l'objectif 100 ms. Aucun payload `hgp_reduced` historique ne qualifie implicitement une sortie FULL.
 
 ### 14.1 Configuration figée
 

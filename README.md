@@ -7,9 +7,13 @@ L'objet scientifique implémenté est le HGP-Clusterer du [manuscrit de thèse d
 > [!IMPORTANT]
 > État courant : la Phase 15 reste `backend=reference_cpu`, `profile=hgp_reduced`, `mode=budgeted`, `deployment_status=architecture_only`, `public_status=not_claimed`. Son réducteur aval utilise le mode `exact_relative_multi_order_laminar_point_projection_v1` : il est disponible et testé relativement à une tour de $T_1$ à $T_K$ déclarée complète et exacte par son producteur, puis liée à son payload par reçus. Le réducteur n'authentifie pas cette vérité amont. Le producteur géométrique complet de la tour, sa qualification GCP et les capacités 50 000 ou 10 000 001 points ne sont pas terminés. Aucun benchmark ne promeut ce statut.
 
-## Chantier actif : morsehgp3D_v5
+## Chantier actif : morsehgp3D_v7
 
-Le chantier actif est [`morsehgp3D_v5/`](morsehgp3D_v5/README.md) (`phase=exploration_v5_hors_registre`, `public_status=not_claimed`) : la forêt HGP complète K = 1..10 sur le profil u16, reprise à propre de la v4 avec conformité prouvée par digests canoniques appariés. Il ne promeut rien dans le registre ci-dessous ; `AGENTS.md` fixe ses règles.
+Le chantier actif est [`morsehgp3D_v7/`](morsehgp3D_v7/README.md), sur `main` : `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. Il reprend la v6 avec un port épinglé et ses propres qualifications. La Phase 15, l'API de points et les mesures anciennes décrites plus bas restent celles de la ligne enregistrée ; elles ne sont pas des résultats v7.
+
+L'[audit mathématique courant](morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md) ferme sous régularité la suffisance d'un certificat HGP FULL : minima Gabriel de cardinal K et vraies multifusions de cardinal K+1, avec parents résolus. Il n'est pas nécessaire de conserver tous les niveaux Gamma. Les portails restent indispensables pour reconstruire les bons parents ; leur producteur compact reste à qualifier. FULL conserve le recouvrement des points, contrairement à une projection ponctuelle laminaire. Les sources F du moteur réduit sont conservées comme témoins, sans promotion en producteur FULL.
+
+Le [contrat v7](morsehgp3D_v7/docs/CONTRAT_PERFORMANCE.md) impose d'abord l'optimisation mono-thread, puis multi-CPU et GPU : **50 000 points, toute la tour K=1..10 sous une seconde**, repli K=1..5 si nécessaire, puis cible 100 ms une fois ce premier jalon atteint. Les comparaisons WSPD s=8/10/12 et les nuages de plusieurs dizaines de millions sur G4 restent requis. **Aucun de ces contrats de bout en bout n'est atteint** ; voir la [passation v7](morsehgp3D_v7/PASSATION.md) pour les mesures et refus récents.
 
 ## API de hiérarchie de points
 
@@ -39,7 +43,7 @@ Le nouveau module de points ne remplace pas cette source. Il consomme une tour s
 
 À ce jour, la tentative HGP de référence à 50 000 points est censurée après au moins 300,000014 s sans hiérarchie complète. Les mesures à 10 M et 30 M concernent seulement une frontière partielle de composant. Le p95 historique de 95,791070 ms appartient à un point-MST rejeté et archivé; ce n'est pas une mesure de MorseHGP3D.
 
-### Où en est l'écart au contrat 50 000 points
+### Écart historique au contrat 50 000 points — ligne enregistrée
 
 Trois postes le composent, et un seul domine. Le détail et ses certificats sont dans le [rapport de session du 8 août 2026](docs/research/RAPPORT_SESSION_20260808.md); le tableau se lit en secondes sur 48 cœurs contre un contrat de 1 s, à $K=5$.
 
@@ -61,7 +65,7 @@ Pour l'arité quatre, une paire diamètre transforme chaque troisième point en 
 
 La sous-porte `P15-HOCUDA-P0` construit maintenant la première primitive CUDA de ce chemin : un range-report LBVH `count--scan--emit` produit des cordes de Jung en CSR résident, marque séparément les carriers compatibles avec la paire diamètre et conserve toute ambiguïté `binary64` en `fail_open`. Elle ne matérialise ni matrice paire--point, ni cliques, ni cellules, cofaces ou mosaïque de Delaunay d'ordre supérieur. Elle reste toutefois `proposal_only` : ses ancres Morton bornées ne sont pas complètes, aucun niveau peu profond ni support terminal n'est encore produit, et sa capacité explicite interdit toute revendication du contrat 50 k.
 
-La trajectoire 50 k place devant ce CSR un self-join LBVH par blocs. Un recouvrement fixe de la boîte des centres de Jung permet de certifier huit témoins strictement intérieurs par patch au rang fermé 11 et de rejeter un bloc entier de paires; une borne ambiguë subdivise au lieu de rejeter. Dans le régime favorable, le travail dépend du nombre de blocs, d'ancres résiduelles et de lignes actives plutôt que des $\binom{n}{2}$ paires; le pire cas dense reste possible et doit finir en résidu budgétaire, jamais en mosaïque globale. Le budget produit reste le p95 `warm_e2e` sous 100 ms, avec le seuil sous une seconde seulement secondaire : un résultat de composant isolé ne suffit pas.
+La trajectoire historique 50 k place devant ce CSR un self-join LBVH par blocs. Un recouvrement fixe de la boîte des centres de Jung permet de certifier huit témoins strictement intérieurs par patch au rang fermé 11 et de rejeter un bloc entier de paires; une borne ambiguë subdivise au lieu de rejeter. Dans le régime favorable, le travail dépend du nombre de blocs, d'ancres résiduelles et de lignes actives plutôt que des $\binom{n}{2}$ paires; le pire cas dense reste possible et doit finir en résidu budgétaire, jamais en mosaïque globale. Cette ligne enregistrée visait d'abord le p95 `warm_e2e` sous 100 ms. La priorité demandée pour la v7 est désormais une seconde, puis 100 ms ; dans les deux cas, un résultat de composant isolé ne suffit pas.
 
 ## Construction locale
 

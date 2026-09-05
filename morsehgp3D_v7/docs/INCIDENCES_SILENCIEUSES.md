@@ -7,6 +7,17 @@ distinctes, portée horizontale relative au catalogue direct fourni.
 source Gabriel complète autonome, ni le reducer normalisé, ni une
 implémentation de l'identité publique v2.
 
+**Portée mise à jour le 5 septembre.** Les preuves et les portes ci-dessous
+décrivent le constructeur de sous-flot et le fold **réduit** existants.
+L'[audit des niveaux utiles](AUDIT_NIVEAUX_GABRIEL_20260905.md) et l'[audit
+indépendant FULL](../audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md) établissent
+un certificat de sortie plus petit pour HGP complet : minima Gabriel de
+cardinal K, vraies multifusions aux niveaux Gabriel de cardinal K+1,
+niveaux exacts et parents. La nécessité de résoudre une attache ne signifie
+pas que sa coface silencieuse doit être émise, triée et conservée en sortie.
+Cette nouvelle voie reste à raccorder et qualifier ; elle ne change pas
+rétroactivement le payload, les digests ou les budgets du moteur F.
+
 ## 1. Obstruction et autorité mathématique
 
 La proposition 6 et le théorème 5 du manuscrit oublient les facettes
@@ -183,3 +194,31 @@ callback provisoire d'un ordre précédent : la porte impose ce préfixe
 déclaré et l'invalidation des digests et compteurs publics du résultat
 final. Le consommateur doit donc attendre le succès global pour valider
 une archive; les callbacks seuls ne constituent pas une transaction.
+
+## 6. Prochain raccord : portails internes et certificat FULL
+
+Le [jalon structurel livré](CONTRAT_CERTIFICAT_FULL.md) dans
+`src/forest/full_certificate.hpp` porte sur
+le rejeu de feuilles étiquetées et de multifusions atomiques, pas encore
+sur leur découverte géométrique. Une couverture FULL se dérive des feuilles
+descendantes ; les continuations sans fusion n'ont pas à devenir des records.
+À K=1 les points naissent à zéro ; à K=n l'unique minimum X doit subsister
+même sans coface de cardinal n+1. La restriction réduite demeure une
+projection distincte, pas un mode FULL obtenu en renommant `born`.
+
+Le constructeur futur doit distinguer facette absente, racine FULL déjà
+née mais isolée, parent antérieur résolu et première incidence dans le lot.
+Le prédicat actuel « déjà incidente » ne reconnaît pas toutes les racines
+FULL. Un portail doit retrouver une ancre certifiée puis son successeur
+dans le snapshot strict pré-lot ; une clé créée pendant le lot ne constitue
+pas un parent antérieur. Descente stricte, shell, contacts et budgets restent
+à contrôler, sans appel à un oracle Gamma global. Le certificat vertical
+demande en outre les ancres après fermeture du plateau inférieur simultané.
+
+Ce changement de représentation ne promet pas les mêmes masses à toute
+coupe. L'univers pondéré des facettes du catalogue Gabriel, sa politique
+d'affectation et le vote doivent être déclarés séparément. Les cofaces de
+descente ne deviennent pas des contributions supplémentaires aux scores.
+Si le profil retient la première incidence Gamma comme date de transfert,
+cette information utile doit être conservée, explicitement ou implicitement ;
+elle n'impose pas de reconstruire Gamma exhaustif.

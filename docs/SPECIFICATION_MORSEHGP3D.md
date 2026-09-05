@@ -3,6 +3,15 @@
 > [!IMPORTANT]
 > Ce document fixe l'objet à calculer. Une optimisation n'a le droit de modifier ni cet objet, ni les niveaux, ni les inclusions entre ordres. Toute exécution publie son profil, ses hypothèses satisfaites et son statut de certification.
 
+**Portée au 5 septembre 2026.** Les contrats publics, schémas et jalons
+historiques ci-dessous décrivent la ligne enregistrée `morsehgp3d/`, notamment
+son contrat v2 ; ils ne sont pas transférés implicitement à la v7 hors registre.
+La [preuve conditionnelle FULL v7](../morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md)
+ajoute une autorité mathématique de reconstruction, explicitée au §8,
+sans activer de nouvelle base publique ni fermer le registre d'implémentation.
+La [priorité de performance v7](../morsehgp3D_v7/docs/CONTRAT_PERFORMANCE.md)
+reste distincte des objectifs historiques de la ligne enregistrée.
+
 ## 1. Verdict d'architecture
 
 La bonne voie 3D n'est ni de lisser la hiérarchie puis d'espérer retrouver ses fusions, ni de reconstruire sous un autre nom la mosaïque de Delaunay d'ordre $K$ utilisée par `HGP-old`. Elle consiste à exploiter trois propriétés propres à la dimension fixée et à $K_{\max}=10$ :
@@ -25,7 +34,7 @@ Le [contrat des paires diamétrales](math/CATALOGUE_PAIRES_DIAMETRALES_EXACT.md)
 
 Il est interdit d'y allouer un tableau indexé par $\binom{n}{k}$, de conserver toutes les cellules top-$m$, de construire toutes les cofaces de Gamma ou de persister une mosaïque d'ordre supérieur. Les seuls états durables autorisés sont les points et leur index spatial, une frontière de travail explicitement budgetée, les événements et attaches effectivement produits, les lots triés et les sorties demandées. Une cellule ou un polytope local est un témoin temporaire évincé après certification.
 
-Chaque sous-arbre de candidats omis doit porter un certificat d'exclusion rejouable. Une frontière non épuisée donne un résultat `budgeted` sans assertion d'absence. Le flot de Gabriel brut, les descentes par miniball, la DTM, l'entropie et les voisinages approchés restent des voies de proposition, de connectivité positive ou de compression. Le flux direct ne remplace Gamma exhaustif dans une base exacte qu'après preuve de complétude des événements et des attaches, notamment des incidences silencieuses mises en évidence par le contre-exemple à cinq points.
+Chaque sous-arbre de candidats omis doit porter un certificat d'exclusion rejouable. Une frontière non épuisée donne un résultat `budgeted` sans assertion d'absence. Le flot de Gabriel brut reste une source de connectivité positive, pas une reconstruction complète. Les descentes par miniball peuvent certifier des attaches lorsqu'elles ferment leurs prémisses ; la DTM, l'entropie et les voisinages approchés ne remplacent aucune preuve de complétude. Dans le contrat public v2, une base exacte différente de Gamma exhaustif exige une migration explicite. La preuve FULL v7 distingue cette obligation contractuelle de la suffisance mathématique des minima Gabriel et des vraies multifusions, dont les parents doivent être résolus exactement, notamment sur le contre-exemple à cinq points.
 
 Une seconde représentation combinatoire est désormais démontrée sur le papier : la [tour globale de boules saturées](math/TOUR_BOULES_SATUREES.md) engendre exactement le complexe de Čech, puis les composantes de Gamma, au moyen de simplexes implicites et d'une forêt d'intersections seuillée. Elle constitue une voie candidate indépendante, non un backend ni une base de preuve du contrat v2. Son prototype, sa persistance et son éventuelle migration contractuelle suivent une piste de recherche séparée; la chaîne active ci-dessus et la cible $K_{\max}=10$ restent inchangées.
 
@@ -268,7 +277,7 @@ Le contrat ne promet pas la généalogie publique d'une facette isolée avant so
 
 Le flot Gabriel brut ne contient que des cofaces de Gamma et fournit donc une relation positive de connectivité sans inventer de connexion. Il peut manquer ou retarder des connexions; il émet `proof_basis=gabriel_positive_connectivity`, `forest_semantics=partial_refinement`, `require_exact=false` et un statut `conditional` ou `budget_exhausted`. Une future réduction complétée en incidences devra recevoir une preuve, une base de preuve nouvelle et des tests dédiés avant toute promotion.
 
-La [preuve des incidences silencieuses](math/INCIDENCES_SILENCIEUSES_GAMMA.md) ferme la partie combinatoire : sous support essentiel unique, une coface non-Gabriel ne peut produire qu'une attache $q=1$ sans nouveau point, et une étoile vers ses facettes simultanées restitue Gamma si toutes les cofaces sont connues. Elle ne ferme pas la partie algorithmique scalable, qui doit encore découvrir et certifier toutes les facettes-portes et leurs premiers niveaux d'incidence. La base contractuelle future reste donc désactivée.
+La [preuve des incidences silencieuses](math/INCIDENCES_SILENCIEUSES_GAMMA.md) ferme la partie combinatoire sur son domaine régulier : une coface non-Gabriel ne peut produire qu'une attache $q=1$ sans nouveau point, et une étoile vers ses facettes simultanées restitue Gamma si toutes les cofaces sont connues. Les constructeurs de sous-flot fondés sur les premières incidences doivent certifier les facettes-portes qu'ils consomment et leurs niveaux. Cela n'impose pas de publier toutes ces incidences pour le seul certificat FULL du §8 : une résolution par portails aux bonnes composantes pré-lot peut suffire. La découverte complète et le coût de ce nouveau constructeur restent à qualifier ; aucune base contractuelle v2 n'est activée par cette preuve.
 
 ## 8. Profil cible `full_pi0`
 
@@ -281,13 +290,67 @@ Le profil `full_pi0` retourne toutes les composantes de $L_k(a)$, y compris cell
 5. seules les attaches entre composantes distinctes créent une fusion.
 
 > [!WARNING]
-> La caractérisation locale des événements ne décide pas seule si un point d'indice un tue une classe de $H_0$ : cette décision est globale. Des attaches accompagnées de chemins sous-niveau certifiés, ou déterminées par une structure de composantes déjà prouvée complète, sont nécessaires mais ne suffisent à publier `exact` qu'après fermeture de M.1.
+> La caractérisation locale des événements ne décide pas seule si un point d'indice un tue une classe de $H_0$ : cette décision est globale. Dans le contrat public v2, des attaches accompagnées de chemins sous-niveau certifiés, ou déterminées par une structure de composantes déjà prouvée complète, sont nécessaires mais ne suffisent à publier `exact` qu'après fermeture de M.1.
 
-L'énoncé de reconstruction que l'implémentation devra satisfaire est le suivant.
+L'énoncé historique de reconstruction que cette chaîne enregistrée devra satisfaire est le suivant.
 
 > **Obligation de preuve M.1 — reconstruction complète.** Sous position générale, si le catalogue contient tous les événements de rang au plus $s_{\max}$, si les $\lvert U\rvert$ bras de chaque point d'indice un sont tous attachés à leur composante de $\left\lbrace D_k<a\right\rbrace$, et si tous les centres d'un même niveau exact sont traités dans un seul lot respectant leur multiplicité locale, alors la tour de forêts produite représente $\mathcal{H}_X(k,a)$ pour $1\leq k\leq K_{\mathrm{eff}}$.
 
-M.1 possède actuellement le statut `proof_obligation`. Les résultats de Reani–Bobrowski caractérisent les événements locaux, y compris la multiplicité $\binom{\lvert U\rvert-1}{\mu}$, mais la documentation active ne contient pas encore la preuve globale requise pour convertir simultanément toutes les attaches en morphismes de $\pi_0$, notamment lorsque plusieurs centres ont le même niveau. Un accord exhaustif avec l'oracle est nécessaire mais ne remplace pas cette preuve. Jusqu'à fermeture de M.1, `full_pi0` reste un profil de recherche qui ne peut pas publier le statut `exact`; `hgp_reduced` exact reste limité au Gamma exhaustif du backend de référence.
+Dans le contrat public v2 de la ligne enregistrée, M.1 conserve le statut
+`proof_obligation` : la qualification complète de sa chaîne et de ses champs
+de certificat n'est pas fermée. Les résultats locaux de Reani–Bobrowski et
+un accord avec l'oracle ne suffisent pas à cette promotion. Cette réserve
+historique ne signifie plus qu'aucune preuve globale conditionnelle de
+reconstruction des composantes n'existe : le résultat FULL v7 ci-dessous
+traite les plateaux sur son domaine déclaré. Dans le contrat public v2,
+`full_pi0` reste non publiable comme `exact` et la base exacte autorisée de
+`hgp_reduced` reste `gamma_exhaustive_reference` sur `reference_cpu`.
+
+### Complément v7 — certificat FULL conditionnel, distinct du schéma v2
+
+L'[audit constructeur](../morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md)
+et la [contrelecture indépendante](../morsehgp3D_v7/audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md)
+établissent sous régularité la reconstruction HGP **isolés inclus**.
+Les prémisses portent sur les supports essentiels uniques, les intrusions
+strictes, l'absence d'extra-shell pertinente et le quotient atomique des
+niveaux égaux. L'extension par inertie des blocs hors fenêtre est une
+autorité distincte ; un nouveau producteur doit certifier les contrôles
+de fenêtre, de contact et de chaîne qu'il consomme.
+
+À l'ordre K, conserver une feuille par minimum Gabriel de cardinal K,
+avec identité distincte, K PointId et niveau exact de naissance. Conserver
+ensuite seulement les vraies multifusions aux niveaux Gabriel de cardinal
+K+1, avec identités et parents distincts actifs dans la coupe stricte.
+Le manifeste fixe l'entrée, les ordres, l'horizon, les conventions de coupe
+et l'autorité terminale de complétude. La couverture d'une composante est
+l'union des points de ses feuilles descendantes : les continuations FULL
+n'ajoutent aucun point. Elles n'exigent donc ni delta ponctuel ni record
+de coface silencieuse pour ce rejeu. La restriction `hgp_reduced` se déduit
+de FULL, mais ne lui transfère ni ses champs `born` ni ses identités v2.
+
+À K=1, les feuilles sont les points nés à zéro. À K=n, X est l'unique
+feuille née à $\beta(X)$, même en l'absence de coface de cardinal n+1.
+Un ordre vide, non demandé ou interrompu garde trois sens distincts.
+Avec L minima, R racines finales et I multifusions, $I\leq L-R$ ; les
+labels coûtent $O(KL)$ identifiants, sans borne générale de L par n.
+Pour la tour, une ancre certifiée par naissance d'ordre K>1 vers la composante
+de l'ordre inférieur, après fermeture du plateau simultané, complète le rejeu.
+
+Le constructeur doit encore produire les bons parents, par portails
+certifiés ou autorité équivalente, normaliser les ancres dans l'état pré-lot
+et distinguer une racine FULL isolée d'une facette seulement inconnue du
+fold réduit. Un lecteur structurel ne prouve pas cette fidélité géométrique.
+Ni Gamma exhaustif ni la mosaïque de Delaunay d'ordre supérieur ne sont
+requis par défaut ; la taille du certificat final ne borne pas le travail
+pour le découvrir. Ce résultat ne ferme ni le constructeur v7, ni toutes
+les obligations Morse ou les champs M.1 logiciels de la ligne enregistrée,
+ni les dégénérescences générales, la reprise ou les contrats de performance.
+
+Enfin, les minima FULL ne sont pas l'univers pondéré de l'Algorithme 1
+(PDF 126), qui utilise toutes les facettes des cofaces Gabriel contributrices.
+Scores, normalisations, dates d'affectation des masses, condensation et vote
+constituent un supplément déclaré. Le certificat topologique seul ne les
+reconstruit pas ; ce supplément n'impose pas non plus Gamma exhaustif.
 
 ### 8.1 Comptabilité locale M.1/O5 des décès $H_0$
 
@@ -1451,7 +1514,7 @@ Usages interdits pour le statut `exact` : exclure une région sans borne globale
 
 ## 17. Objet de sortie
 
-Pour $k>1$, l'univers horizontal n'est pas l'ensemble des $n$ points mais celui des facettes de cardinal $k$ de $\Gamma_k$, reliées par leurs cofaces de cardinal $k+1$. Conceptuellement, sur 50 000 points, ces univers complets comptent $\binom{50\,000}{k}$ facettes et $\binom{50\,000}{k+1}$ cofaces; le chemin produit doit précisément éviter de les matérialiser globalement. Une sortie qui remplace cet univers par $n$ sommets points et force exactement $n-1$ fusions par ordre est un surrogate de type point-MST, pas une hiérarchie Morse-HGP 3D. La source normative doit restituer, éventuellement sous forme streamée et certifiée plutôt que par arènes globales, les identités de facettes utiles, les cofaces, toutes les incidences y compris silencieuses, les `coverage_delta`, les lots exacts et les applications verticales. Le nombre de records de la hiérarchie condensée dépend du nuage et reste inconnu avant construction de la vraie source; il n'existe aucune borne normative de $n-1$ sur ses naissances et multifusions aux ordres supérieurs. `min_cluster_size=20` borne seulement la vue visible et ne borne jamais le catalogue ou l'état interne requis pour la produire.
+Pour $k>1$, l'univers horizontal n'est pas l'ensemble des $n$ points mais celui des facettes de cardinal $k$ de $\Gamma_k$, reliées par leurs cofaces de cardinal $k+1$. Conceptuellement, sur 50 000 points, ces univers complets comptent $\binom{50\,000}{k}$ facettes et $\binom{50\,000}{k+1}$ cofaces; le chemin produit doit précisément éviter de les matérialiser globalement. Une sortie qui remplace cet univers par $n$ sommets points et force exactement $n-1$ fusions par ordre est un surrogate de type point-MST, pas une hiérarchie Morse-HGP 3D. Dans le schéma public v2 reproduit ci-dessous, la source restitue les identités de facettes utiles, les cofaces et incidences requises par ses engagements de complétude, les `coverage_delta`, les lots exacts et les applications verticales. Cette obligation de format n'est pas une borne inférieure de l'information nécessaire au rejeu HGP : le certificat FULL v7 du §8 garde minima et vraies multifusions sans publier les cofaces silencieuses ni les deltas de continuation FULL. Le nombre de records de la hiérarchie condensée dépend du nuage et reste inconnu avant construction de la vraie source; il n'existe aucune borne normative de $n-1$ sur ses naissances et multifusions aux ordres supérieurs. `min_cluster_size=20` borne seulement la vue visible et ne borne jamais le catalogue ou l'état interne requis pour la produire. La base de cardinalité ponctuelle du schéma historique `CondensedView` ci-dessous ne définit pas implicitement le profil pondéré du manuscrit.
 
 ```text
 MorseHGP3DResult

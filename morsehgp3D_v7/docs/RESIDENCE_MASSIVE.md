@@ -8,13 +8,47 @@ produit, GCP non utilisé**. Cadre :
 `public_status=not_claimed`. Cette note ne rouvre pas la géométrie S1 fermée
 conditionnellement ; elle distingue représentation, cardinalité et résidence.
 
-Conclusion : **10 millions de points passent le verrou d'indices spatiaux,
-pas nécessairement ceux des catalogues intermédiaires**. Le moteur actuel
+Conclusion sur le snapshot C : **10 millions de points passent le verrou
+d'indices spatiaux, pas nécessairement ceux des catalogues intermédiaires**. Ce moteur
 doit conserver en RAM l'index et les boules survivantes globales, puis un
 catalogue complet d'événements/facettes pour chaque ordre traité. « Streamé
 par K » n'est pas un calcul externe. L'étape 1 proposée s'arrête à un index
 immutable et un catalogue externe de candidats ; elle ne livre pas une
 tour exacte 10M complète.
+
+## Complément du 5 septembre : résidence du certificat FULL à concevoir
+
+L'[audit des niveaux utiles](AUDIT_NIVEAUX_GABRIEL_20260905.md) et sa
+[contrelecture indépendante](../audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md)
+séparent désormais l'état de construction du résultat HGP complet.
+Sous régularité, celui-ci conserve les minima Gabriel de cardinal K avec
+leurs K PointId et niveaux, puis les vraies multifusions aux niveaux Gabriel
+de cardinal K+1 avec leurs parents. Les couvertures sont des unions de
+feuilles descendantes, pas des copies obligatoires dans chaque nœud.
+Les cofaces de descente et les continuations FULL ne sont pas un payload
+persistant nécessaire. Les portails restent un travail interne à certifier.
+
+Avec L minima et R racines finales à un ordre, I multifusions vérifient
+$I\leq L-R$ et le nombre de liens vaut $L+I-R$. Le stockage topologique est
+linéaire en L, avec $O(KL)$ identifiants pour les labels des feuilles.
+L n'est pas borné par n aux ordres supérieurs. Cette borne du résultat ne
+borne ni les candidats, ni le cache de portails, ni la longueur des descentes,
+ni la résidence du générateur WSPD ; elle ne démontre aucun palier massif.
+
+Le [premier jalon livré](CONTRAT_CERTIFICAT_FULL.md),
+`src/forest/full_certificate.hpp`, qualifie uniquement un certificat
+structurel et son lecteur. Il ne livre ni constructeur FULL,
+ni format de checkpoint durable, ni reprise du moteur. Le raccord au
+catalogue direct, les ancres pré-lot et inter-K ainsi que les budgets de
+travail demandent leurs propres preuves. Les limites et mesures C ci-dessous
+restent historiques ; elles ne se transfèrent pas à ce nouveau schéma.
+
+Pour les masses et le vote, déclarer un supplément avec son univers de
+feuilles et sa politique d'affectation. Les feuilles pondérées du catalogue
+Gabriel ne sont pas les seuls minima FULL ; leur information utile peut
+demander un journal distinct, sans imposer toutes les facettes Gamma.
+Les frontières externes proposées aux §§4–5 restent des pistes relatives
+au snapshot C, pas des étapes obligatoires avant le certificat FULL.
 
 ## 1. Notation et nature des conclusions
 

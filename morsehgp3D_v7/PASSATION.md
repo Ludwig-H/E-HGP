@@ -25,6 +25,22 @@ payload réduit qualifié ; aucun nouveau benchmark ni GCP n'a été utilisé
 pour cet audit. Les contrats 50k restent non atteints. Les travaux privés
 MEB déjà qualifiés sont conservés, mais ne décident pas cette représentation.
 
+Le premier [certificat FULL structurel](docs/CONTRAT_CERTIFICAT_FULL.md)
+est désormais livré comme composant autonome, sans raccord au moteur F.
+Il valide les minima, les multifusions et leurs parents pré-lot, stocke
+les parents en CSR, rejoue les coupes et calcule les couvertures par union
+des feuilles. Refus et pannes mémoire ne publient aucun préfixe ; les copies
+sont interdites et les déplacements invalident la source.
+Les [reçus dédiés](receipts/full_certificate_20260905/README.md) ferment
+2/2 CTests Release et 2/2 ASan/UBSan : 68 contrôles positifs, puis 218
+incluant 45 refus de construction, 19 refus de lecture et 15 pannes
+d'allocation. Le premier essai du gate, refusé pour un plancher non atteint,
+reste déclaré. La suite F complète n'est pas réattribuée à ce nouveau module.
+Prochain raccord : minima issus du catalogue direct et portails vers les
+racines FULL strictement antérieures ; la verticale suit le plateau
+inférieur fermé. Le composant seul ne certifie aucune géométrie ni
+complétude et ne livre pas encore cette construction. GCP non utilisé.
+
 ## Ce que contient la v7
 
 La v6 a été lue et portée explicitement après lecture intégrale des deux

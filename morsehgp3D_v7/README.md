@@ -48,6 +48,14 @@ leurs parents correctement résolus. Ce certificat n'exige pas Gamma
 exhaustif ; son constructeur, ses plateaux et son supplément pondéré restent
 à qualifier. Aucun changement du moteur ni succès 50k n'en est déduit.
 
+Le premier [composant FULL compact](docs/CONTRAT_CERTIFICAT_FULL.md) est
+maintenant implémenté séparément : validation transactionnelle de minima
+et multifusions déjà décidés, parents CSR, coupes exactes et unions de
+feuilles sous plafonds. Ses [deux portes dédiées](receipts/full_certificate_20260905/README.md)
+passent en Release et sous ASan/UBSan. Son autorité reste strictement
+structurelle : aucun portail calculé, aucune complétude géométrique
+certifiée, aucune activation dans la CLI ou le pipeline F.
+
 ## Construire et tester
 
 ```bash

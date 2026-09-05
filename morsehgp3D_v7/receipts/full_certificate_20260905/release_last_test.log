@@ -1,0 +1,42 @@
+Start testing: Sep 05 14:05 UTC
+----------------------------------------------------------
+1/387 Testing: mhgp7_full_certificate
+1/387 Test: mhgp7_full_certificate
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_certificate_20260905/mhgp7_full_certificate_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_certificate_20260905
+"mhgp7_full_certificate" start time: Sep 05 14:05 UTC
+Output:
+----------------------------------------------------------
+full_certificate mode=--selftest authority=structural_only positives=11 build_refusals=0 read_refusals=3 allocation_failures=0 checks=68 failures=0 floor=1
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_certificate" end time: Sep 05 14:05 UTC
+"mhgp7_full_certificate" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/387 Testing: mhgp7_full_certificate_rejects
+2/387 Test: mhgp7_full_certificate_rejects
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_full_certificate_20260905/mhgp7_full_certificate_gate" "-DARGS=--rejects" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_full_certificate_20260905
+"mhgp7_full_certificate_rejects" start time: Sep 05 14:05 UTC
+Output:
+----------------------------------------------------------
+full_certificate mode=--rejects authority=structural_only positives=13 build_refusals=45 read_refusals=19 allocation_failures=15 checks=218 failures=0 floor=1
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_certificate_rejects" end time: Sep 05 14:05 UTC
+"mhgp7_full_certificate_rejects" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 05 14:05 UTC
+
+full_certificate =   0.03 sec*proc
+
+gate =   0.03 sec*proc
+

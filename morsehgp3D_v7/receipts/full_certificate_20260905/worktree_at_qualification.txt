@@ -1,0 +1,35 @@
+base_head=94a3513b081bd61a8276c3e73e7d91ca5aa42abe
+ M AGENTS.md
+ M README.md
+ M audits/COORDINATION_MORSEHGP3D_V7.md
+ M docs/PERFORMANCE_MORSEHGP3D.md
+ M docs/README.md
+ M docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md
+ M docs/SPECIFICATION_MORSEHGP3D.md
+ M docs/TEST_PLAN_MORSEHGP3D.md
+ M docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md
+ M morsehgp3D_v6/src/gpu/lot_ring.hpp
+ M morsehgp3D_v6/src/parallel/sort.hpp
+ M morsehgp3D_v6/src/pipeline/census.hpp
+ M morsehgp3D_v6/src/pipeline/expand.hpp
+ M morsehgp3D_v7/CMakeLists.txt
+ M morsehgp3D_v7/audits/AUDIT_INDEPENDANT_20260904.md
+ M morsehgp3D_v7/audits/DIALOGUE_COURANT.md
+ M morsehgp3D_v7/audits/ETAT_COURANT.md
+ M morsehgp3D_v7/audits/README.md
+ M morsehgp3D_v7/audits/validation_current.json
+ M morsehgp3D_v7/docs/CONTRAT_PERFORMANCE.md
+ M morsehgp3D_v7/docs/INCIDENCES_SILENCIEUSES.md
+ M morsehgp3D_v7/docs/LECTURE_ET_CONTRATS.md
+ M morsehgp3D_v7/docs/RESIDENCE_MASSIVE.md
+?? morsehgp3D_v6/src/gpu/route_c6.hpp
+?? morsehgp3D_v6/tests/perm_sort_gate.cpp
+?? morsehgp3D_v6/tests/route_c6_gate.cpp
+?? morsehgp3D_v7/audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md
+?? morsehgp3D_v7/audits/full_to_reduced_replay.py
+?? morsehgp3D_v7/audits/gabriel_full_probe.py
+?? morsehgp3D_v7/audits/gabriel_portal_probe.py
+?? morsehgp3D_v7/audits/receipts_gabriel_20260905/
+?? morsehgp3D_v7/docs/CONTRAT_CERTIFICAT_FULL.md
+?? morsehgp3D_v7/src/forest/full_certificate.hpp
+?? morsehgp3D_v7/tests/full_certificate_gate.cpp

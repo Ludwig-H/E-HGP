@@ -1,0 +1,92 @@
+{
+  "schema": "mhgp7_full_certificate_structural_qualification_v1",
+  "date_utc": "2026-09-05",
+  "base_head": "94a3513b081bd61a8276c3e73e7d91ca5aa42abe",
+  "public_status": "not_claimed",
+  "authority": "structural_only",
+  "status": "completed",
+  "compiler": "GNU 13.3.0",
+  "builds_fresh_directories": true,
+  "commands": [
+    {
+      "command": "cmake -S morsehgp3D_v7 -B build/v7_full_certificate_20260905 -DCMAKE_BUILD_TYPE=Release",
+      "exit_code": 0
+    },
+    {
+      "command": "cmake --build build/v7_full_certificate_20260905 --target mhgp7_full_certificate_gate --parallel 2",
+      "exit_code": 0
+    },
+    {
+      "command": "ctest --test-dir build/v7_full_certificate_20260905 --output-on-failure -V -R '^mhgp7_full_certificate'",
+      "exit_code": 0
+    },
+    {
+      "command": "cmake -S morsehgp3D_v7 -B build/v7_full_certificate_sanitized_20260905 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-fsanitize=address,undefined -fno-omit-frame-pointer' -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address,undefined'",
+      "exit_code": 0
+    },
+    {
+      "command": "cmake --build build/v7_full_certificate_sanitized_20260905 --target mhgp7_full_certificate_gate --parallel 2",
+      "exit_code": 0
+    },
+    {
+      "command": "env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 ctest --test-dir build/v7_full_certificate_sanitized_20260905 --output-on-failure -V -R '^mhgp7_full_certificate'",
+      "exit_code": 0
+    }
+  ],
+  "suites": {
+    "release": {
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0
+    },
+    "asan_ubsan": {
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "modes": {
+    "selftest": {
+      "checks": 68,
+      "positive_cases": 11,
+      "read_refusals": 3,
+      "failures": 0,
+      "floor": 1
+    },
+    "rejects": {
+      "checks": 218,
+      "positive_cases": 13,
+      "build_refusals": 45,
+      "read_refusals": 19,
+      "injected_allocation_failures": 15,
+      "failures": 0,
+      "floor": 1
+    }
+  },
+  "limitations": [
+    "structural-only; supplied geometry and completeness are not certified",
+    "only two dedicated gates per build; historical F suite not rerun",
+    "no geometric producer, vertical maps, weighted profile, CLI, export or streaming integration",
+    "no byte/RSS budget qualification",
+    "impractical size_overflow branches not exercised on 64-bit host",
+    "no timing, SLO, large-scale or GPU qualification"
+  ],
+  "static_review": {
+    "scope": "internal independent subagent review, not external auditor C++ qualification",
+    "initial_defect": "potentially inconsistent partial copy assignment after allocation failure",
+    "resolution": "move-only, noexcept move with invalidated source; tests cover moves under persistent allocation failure"
+  },
+  "preparatory_failed_attempt": {
+    "scope": "agent direct -O2 gate before final test source",
+    "exit_code": 3,
+    "checks": 216,
+    "failures": 0,
+    "observed_build_refusals": 44,
+    "required_build_refusals": 45,
+    "binary": "build/v7_full_certificate_gate_agent",
+    "binary_sha256": "8242cee343f2fc1d8de09a5dd2afa86c254e265ab653ddd76b6d5da9026550b3",
+    "correction": "added explicit 9/1 versus 18/2 nonincreasing-batch rejection; did not weaken floor",
+    "provenance": "delegated runner result; failed binary retained, no full raw transcript archived"
+  },
+  "gcp_used": false
+}

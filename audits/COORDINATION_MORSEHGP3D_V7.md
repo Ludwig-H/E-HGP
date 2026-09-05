@@ -594,3 +594,63 @@ réduite tant que vous ne l'aurez pas revue séparément.
 la note de suffisance, README, passation et cette coordination. Aucun
 fichier de vos nouveaux audits ni du worktree v6 ne sera inclus. Les
 sources produit restent inchangées ; pas de build, chrono ou GCP.
+
+Le commit constructeur `94a3513b081bd61a8276c3e73e7d91ca5aa42abe`
+est poussé sur `main` ; `HEAD=origin/main`, **index libéré**. Les quatre
+fichiers documentaires seuls sont inclus. Contrôles : 318 documents actifs
+et 20 phases, en Python normal et optimisé ; whitespace du lot conforme.
+La note FULL est figée `0b9cd8e17636fcaeb2211bc2c9446bc7ebc6a356e07c399c42529a6f84c9abfd`
+pour votre contrelecture complémentaire. Votre sonde de portails réduits
+reste attribuée séparément, sans lui transférer la conclusion FULL.
+
+## Reprise : mise à jour des autorités et premier composant FULL
+
+L'utilisateur demande de mettre à jour tous les fichiers d'intérêt puis de
+continuer. Votre réponse désormais étendue au FULL est reçue ; les fichiers
+de votre paquet Gabriel encore en préparation restent sous votre propriété.
+Nous actualisons les entrées constructeur et transverses sans promouvoir
+le registre officiel ni réattribuer les preuves F.
+
+Le premier delta C++ sera séparé : un certificat structurel compact FULL,
+avec feuilles minima et parents CSR, validation des lots stricts, plafonds
+prospectifs et rejeu des coupes. Il consommera des parents déjà décidés ;
+il ne prétendra ni trouver les portails ni certifier la géométrie d'un
+flux arbitraire. Pas de CLI FULL activée, pas de modification des sources
+F du moteur existant. Les constructions de tests locales sont légères,
+hors fenêtre de performance ; aucun GCP. Index libre jusqu'à annonce.
+
+Le premier composant est maintenant disponible pour contrelecture :
+`src/forest/full_certificate.hpp`, SHA
+`463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2`,
+et sa porte dédiée SHA
+`17f5e2bafecc66556bcc1cfbfc51ed20e47cca82716ad0f2e34b1e5994a266a7`.
+Deux CTests Release et les mêmes deux sous ASan/UBSan passent : 68 contrôles
+positifs, puis 218 avec 45 refus de construction, 19 refus de lecture et
+15 pannes persistantes d'allocation observées. Une contrelecture interne
+a fait supprimer les copies potentiellement interrompues et invalider les
+sources déplacées. Aucune géométrie certifiée par ce code, aucune CLI FULL,
+aucun changement F. Le contrat détaillé est
+`docs/CONTRAT_CERTIFICAT_FULL.md` ; les reçus sont en cours d'archivage.
+
+Vos nouvelles entrées FULL et la projection 100/100 sont reçues. Les
+documents constructeurs et transverses les référencent ; merci de publier
+votre paquet autonome avant notre livraison si prêt. Index toujours libre
+pour votre commit. Nous ne prendrons aucun de vos fichiers en préparation.
+
+Votre commit `a3b1b271` est reçu. **Index réservé par le constructeur à
+14:19 UTC** pour le premier composant FULL, ses deux portes, ses reçus
+Release/ASan/UBSan et les entrées documentaires mises à jour. Les sources F
+et la note mathématique figée restent inchangées. Aucun fichier d'audit
+indépendant ni fichier v6 ne sera inclus. La contrelecture des reçus a
+vérifié onze pins sources et deux binaires ; les captures CTest/options
+sont désormais identiques aux originaux, lignes vides terminales comprises.
+Les limites de provenance configure/build sont déclarées sans prétendre à
+une chaîne hermétique. Contrôles transverses : 320 Markdown, 20 phases,
+Python normal et optimisé ; aucune promotion du registre, GCP non utilisé.
+
+Cette réservation vaut jusqu'au commit de ce lot. Dès que la présente
+version figure dans `HEAD` et que l'index est vide, l'index est libéré ;
+le constructeur ne prendra pas un second lot dans cette séquence.
+La contrelecture externe du composant C++ reste bienvenue séparément :
+le reçu actuel ne lui attribue que la preuve mathématique FULL, pas les
+deux portes exécutées par le constructeur.

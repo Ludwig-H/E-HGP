@@ -36,6 +36,36 @@ proposition 6 et du théorème 5 n'est plus une autorité autorisée : la
 [contre-fixture à cinq points](../../docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md)
 montre une incidence silencieuse nécessaire à une fusion ultérieure.
 
+## Priorité du 5 septembre : certificat HGP complet
+
+L'[audit des niveaux utiles](AUDIT_NIVEAUX_GABRIEL_20260905.md) et la
+[contrelecture indépendante FULL](../audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md)
+précisent maintenant l'objet du manuscrit, **isolés inclus**. Sous les
+hypothèses régulières déclarées, une feuille de l'ordre K est un minimum
+Gabriel de cardinal K, avec ses K PointId et son niveau exact. Les seuls
+nœuds internes nécessaires sont les vraies multifusions aux niveaux Gabriel
+de cardinal K+1, avec leurs parents distincts lus avant le lot atomique.
+La couverture d'une composante est l'union des points de ses feuilles
+descendantes : une continuation FULL n'ajoute aucun point.
+
+La restriction réduite actuellement qualifiée se déduit de ce certificat,
+mais ses feuilles, son champ `born` et ses deltas ne sont pas ceux du FULL.
+Les rattachements silencieux restent à certifier pendant la construction,
+éventuellement par portails à la première consommation ; leurs cofaces et
+leurs niveaux ne sont pas nécessairement des événements à publier.
+Le premier [certificat structurel et son lecteur](CONTRAT_CERTIFICAT_FULL.md)
+sont livrés dans `src/forest/full_certificate.hpp`, avant le raccord d'un
+constructeur FULL ; leurs portes dédiées passent en Release et ASan/UBSan.
+Un lecteur cohérent ne prouve pas la complétude géométrique de son producteur.
+Ce jalon ne promeut ni le moteur F ni l'ancien contrat public.
+
+Les minima FULL ne sont pas l'univers pondéré de l'Algorithme 1 (PDF 126) :
+celui-ci prend toutes les facettes des cofaces Gabriel contributrices.
+Scores, normalisations, dates d'affectation et condensation demandent un
+profil explicite distinct. Ni cet univers ni une politique temporelle ne
+doivent être remplacés implicitement ; aucun catalogue Gamma exhaustif
+n'est imposé par défaut à ce supplément.
+
 ## Ce que la v6 optimise
 
 La v6 utilise un seul index radix sur Morton et une descente WSPD fusionnée
@@ -96,7 +126,8 @@ distincte de `verified_events_only`. `--require-exact` refuse encore.
 
 Le [plan transverse](../../docs/TEST_PLAN_MORSEHGP3D.md) exige un véritable
 payload complet à 50 000 points : deux échauffements, dix nuages frais par
-famille, incidences silencieuses et verticales. **La consigne utilisateur
+famille, rattachements certifiés et verticales. Cela n'impose pas de publier
+les cofaces silencieuses d'un certificat FULL. **La consigne utilisateur
 du 4 septembre 2026 remplace la priorité temporelle pour la v7 : moins
 d'une seconde pour toute la tour K=1 à 10 ; repli sur toute la tour K=1
 à 5 si le délai n'est pas satisfait à 10.** L'ancienne cible primaire

@@ -11,8 +11,10 @@ Ce document ne rapporte aucun objectif atteint.
 
 Le statut demeure `public_status=not_claimed`, profil d'entrée u16.
 La cible de 100 ms du plan transverse est ainsi conservée comme jalon
-suivant, et non comme premier délai à valider. La verticale, les poids et les incidences
-silencieuses ne sont pas supprimés pour gagner une mesure de temps.
+suivant, et non comme premier délai à valider. Les rattachements certifiés,
+la verticale et le supplément pondéré déclaré ne sont pas supprimés pour
+gagner une mesure de temps ; conserver leur effet ne signifie pas
+matérialiser leurs cofaces silencieuses ou Gamma exhaustif.
 
 ## Périmètre et preuve
 
@@ -20,6 +22,24 @@ L'utilisateur a confirmé explicitement le périmètre de tour 1..K :
 `smax=11` pour K=10 et `smax=6` pour le repli K=5.
 Ne pas assimiler silencieusement une hiérarchie d'ordre isolé à cette
 tour, ni une sortie Gabriel `verified_events_only` au résultat HGP complet.
+
+L'[audit du certificat FULL](AUDIT_NIVEAUX_GABRIEL_20260905.md),
+[contrelu indépendamment](../audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md),
+fixe la cible topologique régulière : minima Gabriel de cardinal K avec
+leurs points et niveaux, vraies multifusions aux niveaux Gabriel de cardinal
+K+1 et parents certifiés. Leurs unions descendantes restituent les couvertures,
+isolés inclus. Le [lecteur structurel livré](CONTRAT_CERTIFICAT_FULL.md)
+`src/forest/full_certificate.hpp` n'est pas, à lui seul, un constructeur
+complet ni une porte de performance.
+Le produit F et ses mesures réduites ou `verified_events_only` conservent
+leur portée historique ; aucune de ces mesures ne qualifie ce nouveau payload.
+
+Le profil pondéré doit préciser l'univers de facettes contributrices,
+les scores, la date d'affectation de leur masse et la convention de
+condensation. Les minima FULL ne remplacent pas automatiquement ces feuilles.
+Comparer des timings de profils pondérés différents n'est pas un gain
+algorithmique à objet constant. Ce supplément n'exige pas par principe
+l'univers de toutes les facettes Gamma.
 
 Chaque résultat nomme la sémantique du payload, les ordres réellement
 publiés, le backend et le nombre de threads. Un refus de dégénérescence,

@@ -49,6 +49,15 @@ endfunction()
 # ---- Pilote produit.
 mhgp7_product_executable(mhgp7 cli/mhgp7.cpp)
 
+# ---- Certificat FULL autonome : autorite structurelle, aucun producteur
+# geometrique ni changement de la CLI. Les pannes d'allocation sont injectees
+# par le binaire de test sans macro de mutation dans le composant produit.
+mhgp7_product_executable(mhgp7_full_certificate_gate tests/full_certificate_gate.cpp)
+mhgp7_gate(mhgp7_full_certificate 0 mhgp7_full_certificate_gate
+           ARGS --selftest LABELS "gate;full_certificate" TIMEOUT 60)
+mhgp7_gate(mhgp7_full_certificate_rejects 0 mhgp7_full_certificate_gate
+           ARGS --rejects LABELS "gate;full_certificate" TIMEOUT 60)
+
 # ---- Selftests du cœur (etablis en premier ; chaque porte a son code exact).
 mhgp7_executable(mhgp7_selftest tests/selftest.cpp)
 mhgp7_gate(mhgp7_arith_selftest 0 mhgp7_selftest ARGS --arith)

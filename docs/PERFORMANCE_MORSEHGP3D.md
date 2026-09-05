@@ -3,20 +3,30 @@
 ## Statut actuel
 
 > [!WARNING]
-> Le dépôt ne contient encore **aucun résultat de performance qualifié pour le produit MorseHGP3D exact** à 50 000, 10 000 001 ou 30 000 000 de points. La campagne de référence est définie, mais sa porte d'entrée est fermée (`entry_gate_satisfied=false`) tant que le coordinateur et le binaire produit v4 ne satisfont pas le contrat complet. Les nombres historiques ci-dessous sont conservés pour la traçabilité ; ils ne constituent ni un SLO atteint, ni une promesse de capacité, ni une preuve d'exactitude.
+> Au 5 septembre 2026, le chantier courant est la [v7](../morsehgp3D_v7/README.md), `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. **Aucun résultat ne qualifie encore le contrat FULL exact à 50 000 points ni la capacité à plusieurs dizaines de millions de points.** Les campagnes Phase 15/v4 et leurs nombres ci-dessous sont conservés comme historiques, sans transfert de statut, de mesure ou de protocole à la v7.
+
+## Chantier v7 et objectifs courants
+
+La [passation v7](../morsehgp3D_v7/PASSATION.md), la [note sur le certificat FULL](../morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md) et le [contrat de performance](../morsehgp3D_v7/docs/CONTRAT_PERFORMANCE.md) constituent l'entrée actuelle. La cible conserve les minima Gabriel, isolés inclus, les vraies multifusions et leurs parents certifiés ; leurs unions descendantes restituent les couvertures. Les rattachements de construction et les ancres verticales restent à certifier, sans imposer Gamma exhaustif. Un lecteur structurel correct ne constitue pas un constructeur complet ni une preuve de performance ; le supplément pondéré conserve son propre périmètre.
+
+Priorité **mono-thread, puis multi-CPU, puis GPU**. À 50 000 points, le premier objectif est **toute la tour K=1 à 10 en moins d'une seconde** ; si nécessaire, le repli porte sur **toute la tour K=1 à 5**, avec la même exactitude. **100 ms vient après qualification de la seconde**, pour le périmètre de tour déclaré. Les comparaisons WSPD s=8,10,12 utilisent les mêmes nuages et graines ; s ne désigne pas `smax=K+1`. Les paliers massifs G4, dont plusieurs dizaines de millions de points, exigent leur propre qualification, leur enveloppe RAM/VRAM et des sessions `SPOT` avec deux coupe-circuits puis arrêt ciblé certifié. Aucun de ces objectifs n'est présenté comme atteint.
+
+La dernière session G4 v7 ici référencée, celle du **4 septembre 2026**, demeure incomplète au regard du contrat FULL 50 k : des tours `verified_events_only` ont terminé, mais la complétion candidate à 50 k refuse une dégénérescence et ne produit pas ce payload. Lire le [rapport v7](../morsehgp3D_v7/docs/RESULTATS_G4_20260904.md) et son [reçu scellé](../morsehgp3D_v7/receipts/gcp_requalified_20260904/published/receipt.json), sans assimiler ses temps à une tour FULL ou à une exécution GPU de bout en bout. Les [trois paires mono et les paliers locaux v7 F](../morsehgp3D_v7/docs/RESULTATS_MONO_F_20260905.md) restent également attachés à leur sémantique réduite, leurs sources et leurs binaires.
 
 Cette page distingue systématiquement quatre objets qui ne doivent jamais être comparés comme s'ils mesuraient le même calcul :
 
-- un **résultat exact qualifié**, qui matérialise et certifie toute la source Morse résidente, les dix forêts horizontales, les neuf applications verticales adjacentes, la coupe fermée d'ordre 1, la réduction de Hartigan exacte et la vue finale ;
+- un **résultat exact qualifié**, qui certifie le payload déclaré, toute la tour demandée avec ses composantes isolées, les parents, les applications verticales et les suppléments de sortie explicitement retenus ; il ne suffit pas de mesurer le catalogue Gabriel brut ou un lecteur structurel ;
 - une **exécution censurée**, arrêtée avant la fin et qui ne fournit qu'une borne inférieure sur sa durée ;
 - un **profil de composant**, utile pour dimensionner une étape mais incomplet par construction ;
 - un **surrogate rejeté**, qui calcule un autre objet et ne doit jamais être présenté comme MorseHGP3D.
 
-Le statut normatif de la phase reste `in_progress`, avec `deployment_status=architecture_only` et `public_status=not_claimed` dans [implementation_status.toml](implementation_status.toml). Un benchmark ne peut ni démontrer à lui seul la complétude des incidences, ni promouvoir le statut public à `exact`.
+Le [registre des phases](implementation_status.toml) conserve les états des lignes historiques ; cette mise à jour documentaire n'ouvre ni ne ferme une phase et ne promeut pas la v7 dans ce registre. Un benchmark ne peut ni démontrer à lui seul la complétude des incidences, ni promouvoir le statut public à `exact`.
 
 Le test hôte et `morsehgp3d.point_hierarchy_sklearn_differential`, limité à une fixture multi-ordres $K=2$ de neuf points, sont des validations fonctionnelles bornées, pas des mesures de capacité. Le diagnostic local de projection 50 k documenté plus bas reste lui aussi non qualifiant. Une future ligne produit devra séparer le coût de construction de la tour source et celui de la projection multi-ordres, comme l'exige la section 17 de la [présentation mathématique](math/HIERARCHIE_DE_POINTS_MULTI_ORDRES.md).
 
-## Diagnostic local du réducteur sur 50 000 points
+## Historique : diagnostic local du réducteur sur 50 000 points
+
+Les sections de mesures et plans Phase 15/v4 qui suivent conservent leurs valeurs et leurs objets d'origine. La censure de 300 s et le point-MST à 95,791070 ms ne décrivent pas l'état courant de la v7. Le protocole v7 prioritaire reste celui lié en tête de page.
 
 Le harnais [`point_hierarchy_projection_benchmark.cpp`](../morsehgp3d/src/tools/point_hierarchy_projection_benchmark.cpp) mesure uniquement le réducteur public sur une tour résidente synthétique équilibrée d'ordre 1. Il se construit avec `MORSEHGP3D_BUILD_TOOLS=ON`, puis s'exécute ainsi :
 
@@ -41,7 +51,7 @@ La fixture contient 50 000 simplexes ponctuels, 99 999 nœuds source et 99 998 a
 
 Ce diagnostic n'est pas un p95 et ne couvre ni le nuage brut, ni la construction de la source HGP, ni la forêt complète de $T_1$ à $T_K$, ni les applications verticales, ni le streaming, ni CUDA, ni GCP. Il ne qualifie donc pas la cible produit 50 k et ne permet aucune extrapolation vers dix ou trente millions de points. `PointHierarchyBudget::large_resident_30m()` ne fait qu'ouvrir explicitement des plafonds fail-closed pour un processus disposant de la mémoire correspondante; ce profil n'est pas une preuve que la charge tient en mémoire ou termine.
 
-## Coût unitaire et génération de l'étage higher (8 août 2026)
+## Historique : coût unitaire et génération de l'étage higher (8 août 2026)
 
 Deux mesures G4 du 8 août, avec artefacts sous
 [`validation/phase15_session_g4_20260808/`](validation/phase15_session_g4_20260808/RESULTATS.md),
@@ -115,7 +125,7 @@ Le vide qui laisse grossir la boule tangente est intérieur à l'enveloppe, donc
 aucun majorant convexe ne peut l'exclure. **Le contrat 50 000 points doit rester
 énoncé par famille**, et cette famille est l'une des trois de la porte P0.
 
-## Profil local des supports trois et quatre
+## Historique : profil local des supports trois et quatre
 
 Le binaire de profil [`exact_higher_support_growth_profile.cpp`](../morsehgp3d/tests/profiling/exact_higher_support_growth_profile.cpp) mesure séparément la frontière exacte des triplets et quadruplets. Il utilise trois nuages dyadiques — uniforme, amas séparés et amas multi-échelles — pour $n\in\left\lbrace32,64,128\right\rbrace$ et $K\in\left\lbrace1,5,10\right\rbrace$. Le cas $K=1$ est explicitement non applicable aux arités trois et quatre. Chaque série s'arrête dès que le run précédent ne termine pas dans 5 000 unités ou dépasse une frontière de $8n$ entrées; ce coupe-circuit évite de transformer un profil négatif en campagne combinatoire.
 
@@ -138,7 +148,7 @@ Ce résultat montre une amélioration locale nette face aux 53--62 supports de l
 
 Il serait invalide de lancer 50 000 points sur GCP ou d'extrapoler vers dix millions à partir de cette ligne. La campagne facturable reste bloquée avant démarrage; GCP n'a pas été utilisé pour ce profil.
 
-## Campagne de qualité du clustering
+## Plan historique de qualité du clustering
 
 Le plan [`point_hierarchy_quality_campaign_v2.json`](../morsehgp3d/tests/profiling/point_hierarchy_quality_campaign_v2.json), SHA-256 `0c41a6ad648816fbe19326db85dea7b3aca6535f7ac1c27022d328abd3c213e8`, fixe la comparaison demandée sans fabriquer de résultats. Il construit une seule source exacte complète $T_1,\ldots,T_{10}$ par nuage, réutilise ses préfixes $K\in\left\lbrace1,5,10\right\rbrace$, puis rend DBSCAN et HDBSCAN-EOM pour $\mathrm{expZ}\in\left\lbrace1,2,3\right\rbrace$ avec `min_cluster_size=20` et `min_samples=K`. Les poids d'ordre valent exactement $1/K$ et la distribution simplexe--point emploie le poids de rayon inverse.
 
@@ -148,7 +158,7 @@ Chaque rendu publiera la proportion classifiée, le nombre de clusters, ARI et N
 
 Le protocole compte 84 transactions : 6 générations, 6 constructions exactes $T_1$ à $T_{10}$, 54 réductions/rendus et 18 baselines. Un producteur et un vérificateur scientifique distincts sont obligatoires. Le spool est transactionnel, reprend au prochain ordinal non committé et lie le bundle source durable à tous les préfixes. Le conteneur épingle NumPy, SciPy, scikit-learn, Joblib et threadpoolctl avec hashes. La porte reste `campaign_entry_gate_satisfied=false` tant que les exécutables réels n'existent pas; le test de contrat emploie seulement de faux exécutables et ne produit aucune mesure scientifique.
 
-## Mesures existantes et provenance
+## Mesures historiques et provenance
 
 | Mesure | Périmètre réellement chronométré | Observation | Statut utilisable |
 |---|---|---:|---|
@@ -231,11 +241,11 @@ La session G4 du 5 août 2026 a exécuté pour la première fois le harnais [pha
 
 La fermeture de masse `candidats + prunées + non résolues = n(n-1)/2` est validée par le contrat du harnais aux deux échelles. Le passage de 10 M à 30 M multiplie l'univers de paires par 9 et le temps interne par 4,71 seulement. Ces exécutions utilisent le **rang fermé 6** et la seule famille `affine_uniform_binary64`, graine `1558325537444281125` ; elles remplacent l'échec historique `code 124` à 5 400 s du 30 M en démontrant que les cutoffs antérieurs étaient trop courts pour ce chemin. Le manifeste conserve `profile_only`, tous les claims à `false` : aucune forêt, aucune hiérarchie, aucun SLO, aucune qualification, et la campagne normative 10 000 001 / 30 000 000 du vrai HGP reste entièrement ouverte.
 
-## Campagne reproductible de référence
+## Protocole historique de référence Phase 15/v4
 
-La seule campagne à employer pour de futurs chiffres produit est le plan [phase15_true_hgp_scale_campaign_v4.json](../morsehgp3d/tests/profiling/phase15_true_hgp_scale_campaign_v4.json), SHA-256 `2de957bdd757ad4da3e81735dad3d19add258df14ef379ce597796b4c812a34a`, exécuté par [phase15_true_hgp_scale_campaign_v4.py](../morsehgp3d/tests/profiling/phase15_true_hgp_scale_campaign_v4.py), SHA-256 `da09840a6576d695545564547ba67a1365c5b511f0b0a1a5d5dd2f566b11debc`. Le stockage transactionnel et la reprise sont définis dans [campaign_runtime.py](../morsehgp3d/tests/profiling/campaign_runtime.py), et le contrat du harnais est testé par [test_phase15_true_hgp_scale_campaign_v4.py](../morsehgp3d/tests/profiling/test_phase15_true_hgp_scale_campaign_v4.py).
+La campagne définie pour la ligne historique est le plan [phase15_true_hgp_scale_campaign_v4.json](../morsehgp3d/tests/profiling/phase15_true_hgp_scale_campaign_v4.json), SHA-256 `2de957bdd757ad4da3e81735dad3d19add258df14ef379ce597796b4c812a34a`, exécuté par [phase15_true_hgp_scale_campaign_v4.py](../morsehgp3d/tests/profiling/phase15_true_hgp_scale_campaign_v4.py), SHA-256 `da09840a6576d695545564547ba67a1365c5b511f0b0a1a5d5dd2f566b11debc`. Le stockage transactionnel et la reprise sont définis dans [campaign_runtime.py](../morsehgp3d/tests/profiling/campaign_runtime.py), et le contrat du harnais est testé par [test_phase15_true_hgp_scale_campaign_v4.py](../morsehgp3d/tests/profiling/test_phase15_true_hgp_scale_campaign_v4.py). Cette matrice et les exigences ci-dessous sont historisées ; elles ne sont pas un protocole FULL v7 implicitement migré.
 
-À la date de cette page, ce plan indique :
+Dans le plan historique épinglé, les champs indiquent :
 
 - `backend=cuda_g4`, `profile=hgp_reduced`, ordre maximal 10 ;
 - `entry_gate_satisfied=false` ;
@@ -255,7 +265,7 @@ Il est interdit de remplacer ce plan par le point-MST archivé, par un profil «
 
 Les trois familles à 50 000 points sont `affine_uniform_binary64`, `jittered_dyadic_grid3d` et `balanced_multiscale_clusters`. Leurs graines d'échauffement et de mesure sont fixées dans le plan v4 ; les changer crée une autre campagne. P0 compte 36 transactions au total, dont 30 mesures. Chaque mesure part d'un nuage frais. Une reprise après préemption n'est jamais comptée comme un échauffement gratuit ou comme une nouvelle mesure.
 
-Le seuil de 1 s est une **porte de progression secondaire**, pas un résultat acquis. Le plan de test conserve un objectif produit primaire de p95 inférieur à 100 ms, lui aussi non démontré. Un échec à P0 interdit P1 ; un échec à P1 interdit P2 ; un échec à P2 interdit P3.
+Dans ce plan historique, le seuil de 1 s était une **porte de progression secondaire** et 100 ms l'objectif primaire, tous deux non démontrés. Son enchaînement interdit P1 après échec de P0, P2 après échec de P1 et P3 après échec de P2. Pour la v7, la consigne actuelle inverse explicitement la priorité temporelle : qualifier d'abord la seconde sur la tour entière déclarée, puis viser 100 ms.
 
 **Le binaire mesuré est le binaire sans budget (directive normative du 7 août 2026, `SPECIFICATION_MORSEHGP3D.md` §1.1).** Les quatre portes P0 à P3 s'exécutent sur la version industrielle exacte, dont aucun axe de budget n'est configuré. Une exécution qui porte un plafond réglable, **même non atteint**, est inadmissible comme résultat de campagne : elle ne prouve pas que ce plafond n'aurait pas mordu sur un autre nuage de la même famille. Le reçu doit publier, dérivé de ce qui a réellement été installé et jamais de ce qui a été demandé, que tous les axes valent le plafond représentationnel, qu'aucun arrêt n'a été causé par un budget, et l'inventaire des bornes structurelles scellées encore en vigueur sur le chemin parcouru. Un `budget_exhausted` dans ce profil est un défaut, pas une observation censurée recevable.
 
@@ -264,7 +274,7 @@ Le seuil de 1 s est une **porte de progression secondaire**, pas un résultat ac
 Le champ de référence est `timings_ns.warm_e2e` :
 
 1. il commence avec les coordonnées brutes déjà présentes en mémoire hôte ;
-2. il inclut canonicalisation, construction et recertification de la source résidente v7, coupe fermée d'ordre 1, dix réductions horizontales, neuf applications verticales, manifeste de Hartigan exact, validation de la vue et scellement de la sortie ;
+2. il inclut canonicalisation, construction et recertification de la source résidente liée au plan historique, coupe fermée d'ordre 1, dix réductions horizontales, neuf applications verticales, manifeste de Hartigan exact, validation de la vue et scellement de la sortie ;
 3. il se termine seulement lorsque les artefacts de sortie et leurs digests sont scellés ;
 4. la génération synthétique du nuage et la gestion externe du spool ne sont pas incluses, mais doivent être rapportées séparément.
 
@@ -281,14 +291,14 @@ Une ligne de résultat n'est publiable que si l'exécution certifie simultanéme
 - le manifeste de niveaux de Hartigan sous forme rationnelle réduite canonique, jamais sérialisé en `binary64` ;
 - la vue `at_least20`, dont la cardinalité est l'union des `PointId` distincts portés par les facettes de la composante ;
 - zéro échec numérique, zéro obligation non résolue et zéro dégénérescence non supportée ;
-- le replay exact après checkpoint avec égalité des digests de la source v7, de K1, des forêts horizontales, des applications verticales, de Hartigan et de la vue ;
+- le replay exact après checkpoint avec égalité des digests de la source liée au plan, de K1, des forêts horizontales, des applications verticales, de Hartigan et de la vue ;
 - l'identité du code, du binaire, du plan, des capacités, de l'environnement et de la session GCP.
 
 Une sortie plausible, un accord moyen avec un oracle ou un bon temps ne remplace aucun de ces certificats.
 
 ## Métriques à enregistrer
 
-Le reçu v4 couvre déjà les temps algorithmiques, les tailles d'artefacts, les pics mémoire déclarés, les compteurs de travail et les chaînes de digests. Pour une publication de performance détaillée, il doit être accompagné d'un sidecar système scellé dans la même chaîne de provenance.
+Le schéma de reçu v4 historique couvre les temps algorithmiques, les tailles d'artefacts, les pics mémoire déclarés, les compteurs de travail et les chaînes de digests. Les exigences de traçabilité ci-dessous restent utiles à la v7, mais demandent une liaison explicite à son propre protocole et à son payload FULL. Pour une publication détaillée, le reçu doit être accompagné d'un sidecar système scellé dans la même chaîne de provenance.
 
 | Domaine | Champs minimaux à publier | Raison |
 |---|---|---|
@@ -314,10 +324,10 @@ Pour les portes massives, chaque point est une campagne de capacité à graine f
 
 ## Déploiement GCP gardé
 
-La cible de référence documentée est une `g4-standard-48` Spot, 48 vCPU, 180 Go de mémoire hôte et une RTX PRO 6000 Blackwell Server Edition de 96 Go. Les couples autorisés par l'infrastructure sont `europe-west4-a/ehgp-blackwell-spot` et le repli `europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, dans le projet `devpod-gpu-exploration`. La documentation opérationnelle complète se trouve dans [gcp-migration/README.md](../gcp-migration/README.md).
+La cible de référence documentée est une `g4-standard-48` Spot, 48 vCPU, 180 Go de mémoire hôte et une RTX PRO 6000 Blackwell Server Edition de 96 Go. Les couples `europe-west4-a/ehgp-blackwell-spot` et `europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, dans le projet `devpod-gpu-exploration`, sont ceux du protocole historique ; ils ne remplacent pas la cible exacte inscrite au reçu de chaque session v7. La documentation opérationnelle complète se trouve dans [gcp-migration/README.md](../gcp-migration/README.md).
 
 > [!CAUTION]
-> La campagne v4 est actuellement bloquée. Aucun benchmark scientifique ne doit démarrer tant que son binaire produit, son échange de capacités et sa porte d'entrée ne sont pas satisfaits. Les étapes suivantes décrivent la procédure future ; elles ne sont pas une attestation d'exécution.
+> La campagne historique v4 reste déclarée bloquée dans son plan ; cela n'efface pas les diagnostics v7 réellement exécutés et référencés plus haut. Pour toute nouvelle campagne, le binaire, le protocole, les autorisations et sa porte scientifique doivent être vérifiés avant calcul. Les étapes suivantes décrivent les garde-fous, pas une attestation d'exécution.
 
 Une session autorisée suit obligatoirement cet ordre :
 
@@ -327,7 +337,7 @@ Une session autorisée suit obligatoirement cet ordre :
 4. créer hors dépôt une clé ED25519 OS Login éphémère dont la durée couvre la session sans devenir persistante ;
 5. démarrer exclusivement avec [start_and_verify.sh](../gcp-migration/start_and_verify.sh), jamais avec `gcloud compute instances start` ; le script doit certifier le coupe-circuit GCE et armer puis relire le coupe-circuit invité ;
 6. exécuter [blackwell_preflight.sh](../gcp-migration/blackwell_preflight.sh) et exiger un bilan vert avant tout calcul ;
-7. lancer le harnais v4 seulement si l'échange de capacités correspond exactement au plan et si la porte scientifique est ouverte ;
+7. lancer seulement le harnais de la campagne explicitement autorisée, avec le binaire et les capacités liés à son plan, lorsque sa porte scientifique est ouverte ;
 8. quel que soit le résultat, arrêter la même cible avec [stop_and_verify.sh](../gcp-migration/stop_and_verify.sh) en donnant `--yes --expected-last-start-timestamp HORODATAGE`, puis archiver la preuve finale `TERMINATED` ;
 9. inventorier les autres VM `project=e-hgp` actives sans les arrêter ni se les attribuer.
 
@@ -343,7 +353,7 @@ Chaque campagne qualifiée doit déposer, sous un identifiant immuable :
 - les requêtes et reçus JSONL chaînés, le journal de construction et les versions du compilateur ;
 - les coordonnées ou le générateur, ses paramètres et ses graines ;
 - les checkpoints, leurs tailles et digests, avec le reçu de reprise ;
-- les artefacts source v7, K1, horizontaux, verticaux, Hartigan et vue, tous scellés ;
+- les artefacts liés au payload déclaré : source, K1, horizontaux, verticaux et suppléments retenus, tous scellés ; pour la v7 FULL, aucune réutilisation implicite du schéma historique Hartigan/vue ;
 - le sidecar CPU/GPU/mémoire/I/O et sa fréquence d'échantillonnage ;
 - le résumé statistique dérivé uniquement des reçus valides ;
 - le reçu de cycle GCP jusqu'à l'état final `TERMINATED`.
