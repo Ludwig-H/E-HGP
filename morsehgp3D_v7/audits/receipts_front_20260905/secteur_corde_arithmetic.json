@@ -1,0 +1,46 @@
+{
+  "basis_initial_scale": [
+    1,
+    1
+  ],
+  "basis_vectors": 368,
+  "gcp": "not_used",
+  "integer_bounds": {
+    "B": 1688772552032250,
+    "J": 6416893648119416700611340140625,
+    "L": 17111716394985111201630240375000,
+    "basis_cross2": 221347418394867007500,
+    "basis_test": 2656169020738404090000,
+    "chord_v": 32322130968305210047523787375000,
+    "mu_hat": 2251696736043000,
+    "sector_4dot": 206152138800
+  },
+  "mode": "small_arithmetic_models_no_product_execution",
+  "old_comment_counterexample": {
+    "D2": 2,
+    "claimed_lower_bound": "4/3",
+    "d": [
+      1,
+      1,
+      0
+    ],
+    "second_norm2": 1
+  },
+  "product_tests_run": 0,
+  "python_optimized": true,
+  "sqrt_cases": 53,
+  "sqrt_cases_with_correction": 13,
+  "sqrt_corrections": 14,
+  "status": "passed",
+  "strict_power_of_two_bounds": {
+    "B": 51,
+    "J": 103,
+    "L": 104,
+    "basis_cross2": 68,
+    "basis_test": 72,
+    "chord_v": 105,
+    "mu_hat": 51,
+    "sector_4dot": 38
+  },
+  "tight_inradius_squared_over_D2": "1/6"
+}

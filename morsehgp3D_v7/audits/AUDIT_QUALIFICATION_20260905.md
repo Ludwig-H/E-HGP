@@ -133,3 +133,21 @@ et [optimisé](receipts_20260905/qualification_selftest_optimized.json)
 sont identiques. Le rejeu complet demande les artefacts locaux sous build
 explicitement nommés ; leur absence fait échouer cette inspection locale
 et ne rend pas rétroactivement invalide le reçu public historique.
+
+## Harnais et classification des campagnes
+
+Les demandes d'enregistrement C1 et de nettoyage du harnais sont fermées. Le [reçu de classification](receipts_20260904/campaign_current.json) vérifie sept tests normal/-O, dix motifs reconnus aux frontières K2/K10 et un vrai refus MEB sur 11 points : code 2, `engine_refused/resource_exhausted`, ordre 2, zéro succès moteur. Les motifs inconnus et invariants restent `invalid`, un timeout reste `censored`. Les deux CTests enregistrés passent dans le [reçu ciblé](receipts_20260904/campaign_registration_current.json), puis dans la suite D.
+
+Le [reçu du lanceur apparié](receipts_20260904/paired_runner_delta_current.json) vérifie les quatre portes Python normal/-O : K5/K10, versions effectives v6/v7 distinctes du rôle, séparations 8/10/12, mode sérialisé, 24 positifs du parseur, 228 rejets étendus et 16 campagnes factices. Les campagnes contrôlent les objets entre bras et entre séparations ; les refus, dérives et descendants interrompus restent conservés. L'égalité de hashes source/binaire ne prouve pas à elle seule leur liaison de construction.
+
+Le [correctif de sonde CI](receipts_iteration3/sonde_ci_current.json) passe ses 23 scènes normal/-O sous environnement hérité simulé. L'appel brut avec `LD_LIBRARY_PATH` conserve son refus de code 2 et stdout vide ; seuls les inventaires nominaux nettoient les sept variables déjà refusées par le lanceur. Ces résultats sont des portes locales sur faux binaires, distinctes des runs GitHub.
+
+Le lanceur apparié historique exige `verified_events_only`, inclut processus externe et digest dans le temps et n'affirme pas un p95 ou le coût HGP complet. Le banc d'incidences fournit l'autre objet et sa classification. La sémantique consommée, les ordres effectifs et les plafonds doivent être appariés avant toute interprétation de performance.
+
+## Autorités des mesures et du cloud
+
+La contrelecture B/C historique reste dans son [reçu](receipts_iteration3/constructor_receipts_review.json) : 46 fichiers Release, 292 noms CTest, puis 22 fichiers de six processus appariés sur un seul uniforme 8k, K1..10, `verified_events_only`. Les réductions de temps de 15,88 à 17,24 % sur cette entrée appartiennent à cette campagne, avec une seule paire par séparation ; ce ne sont ni les résultats actuels D/E, ni des mesures avec complétion. Le [bilan constructeur](../docs/RESULTATS_MONO_20260904.md) reste la source de ses mesures.
+
+La proposition initiale G4 n'est plus un plan à exécuter : le constructeur a publié ses [résultats G4](../docs/RESULTATS_G4_20260904.md), leurs [pièces de contrôle](../receipts/gcp_requalified_20260904/public_review.json) et son [constat de fermeture daté](../receipts/gcp_handoff_20260905.json). Ces fichiers ne sont pas un inventaire live. Cet audit n'utilise pas GCP, ne démarre aucune session et ne transforme pas ces observations GCC11/CUDA en preuve du binaire local GCC13. Les résultats CI publiés sont attribués séparément dans la [passation constructeur](../PASSATION.md#cloud-et-ci) ; les anciens échecs ne sont pas réécrits.
+
+Les notes transitoires regroupées ici sont retirées de l'entrée active. Leurs octets restent accessibles au commit indiqué dans le [registre de consolidation](receipts_front_20260905/documentation_retirement.json), avec leur hash et leur rapport de remplacement. Les preuves brutes et fixtures permanentes restent inchangées.

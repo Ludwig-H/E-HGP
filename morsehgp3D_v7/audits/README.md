@@ -1,44 +1,29 @@
 # Audits courants de MorseHGP3D v7
 
-Entrée maintenue le 5 septembre 2026. Toutes les écritures de l'auditeur
-restent dans ce dossier ; le constructeur réalise les changements produit.
+Entrée actualisée le 5 septembre 2026. Commencer par l’[état courant](ETAT_COURANT.md), la [synthèse](AUDIT_INDEPENDANT_20260904.md), puis les [demandes actives au constructeur](DIALOGUE_COURANT.md). Les écritures de l’auditeur restent exclusivement dans ce dossier.
 
-Commencer par la [synthèse indépendante](AUDIT_INDEPENDANT_20260904.md)
-et l'[état courant](ETAT_COURANT.md), puis consulter :
+| Contrat ou preuve maintenue | Rapport de référence |
+| --- | --- |
+| Modèle, incidences et réduction horizontale | [Mathématiques](AUDIT_MATHEMATIQUE_20260904.md), [composition](REPONSE_AUDITEUR_COMPOSITION.md), [frontière de fenêtre](RETOUR_MATH_COURANT.md) |
+| Couverture des boules jusqu’au RLE | [S1](S1_COURANT.md), [index](AUDIT_INDEX_20260905.md), [raccord front/cover](AUDIT_RACCORD_INDEX_FRONT_20260905.md) |
+| Géométrie des témoins et bornes opérationnelles | [Front](FRONT_ET_TEMOINS_COURANT.md), [fuseaux](ARITHMETIQUE_SPINDLE_COURANTE.md), [secteurs/cordes](ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md), [cellules](ARITHMETIQUE_CELLULES_COURANTE.md) |
+| Certificats de prune | [Secteurs/cordes](PREUVE_CHORD_SECTOR_COURANTE.md), [cellules](CELLULES_COURANT.md), [marges flottantes](FILTRES_FLOTTANTS_COURANTS.md) |
+| Formes, niveaux et MEB | [Lanes](ARITHMETIQUE_LANES_COURANTE.md), [entiers larges](ARITHMETIQUE_LARGE_COURANTE.md), [MEB D](AUDIT_MEB_DIFFEREE_20260905.md), [delta q2 E](ADDENDUM_MEB_Q2_E_20260905.md) |
+| Exécution et preuves de campagne | [Domaine CPU](DOMAINE_CPU_COURANT.md), [arrondi](AUDIT_ARRONDI_20260905.md), [qualification et harnais](AUDIT_QUALIFICATION_20260905.md) |
+| Archive, résidence et budgets | [Interfaces et nettoyage A1](AUDIT_INTERFACES_20260904.md), [résidence](AUDIT_RESIDENCE_20260904.md), [mémoire](RETOUR_MEMOIRE_COURANT.md), [mono](MONO_COURANT.md), [census](CENSUS_AXIS_COURANT.md) |
 
-- [Échanges avec le constructeur](DIALOGUE_COURANT.md) : acquis désormais levés et prochaines fermetures concrètes.
-- [MEB différée](AUDIT_MEB_DIFFEREE_20260905.md) : preuve locale, oracle rationnel indépendant, budgets et mutants.
-- [Addendum q2 E](ADDENDUM_MEB_Q2_E_20260905.md) : delta ultérieur jugé localement, sans transfert de la suite D.
-- [Index Morton/Karras](AUDIT_INDEX_20260905.md) : preuve de partition et oracle de trie indépendant.
-- [Raccord index/front](AUDIT_RACCORD_INDEX_FRONT_20260905.md) : populations, antichaînes et permutation du cover.
-- [Garde d'arrondi](AUDIT_ARRONDI_20260905.md) : quatre modes, replis et objets effectivement contrôlés.
-- [Qualification des reçus D](AUDIT_QUALIFICATION_20260905.md) : intégrité, tests, sources, binaires et autorité Boost.
-- [Reconstruction indépendante D](receipts_20260905/release/summary.json) : build neuf et CTest locaux du présent audit.
-- [Mathématiques et hiérarchie](AUDIT_MATHEMATIQUE_20260904.md) et [couverture S1](S1_COURANT.md) : composition conditionnelle et raccord des primitives.
-- [Interfaces](AUDIT_INTERFACES_20260904.md), [mode mono](MONO_COURANT.md) et [census](CENSUS_AXIS_COURANT.md) : contrats et contre-fixtures conservés.
-- [Arithmétique des lanes](ARITHMETIQUE_LANES_COURANTE.md) et [entiers larges](ARITHMETIQUE_LARGE_COURANTE.md) : bornes locales et portes compilées.
-- [Résidence](AUDIT_RESIDENCE_20260904.md) et [retour mémoire](RETOUR_MEMOIRE_COURANT.md) : coûts et propositions ciblées encore applicables.
-- [Validation courante](receipts_20260905/validation_current.json) : sources épinglées et autorités des contrôles.
-
-Les rapports courants retirent les objections corrigées. Les reçus
-historiques conservent leurs résultats, y compris échecs et refus ; ils ne
-sont pas transformés en résultats du dernier code. Les copies de sources,
-binaires et temporaires restent sous `.work*`, ignorés par Git.
-
-Avant de réutiliser les conclusions, contrôler les sources depuis la racine :
+## Contrôler la fraîcheur
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 python3 -O morsehgp3D_v7/audits/verify_current.py
 ```
 
-Le code 1 demande une actualisation des octets indiqués ; le code 2 signale
-un manifeste invalide. Le code 0 confirme uniquement la fraîcheur des pins,
-sans réexécuter les tests ni promouvoir le produit. Les contrôles CTest
-locaux et les runs GitHub sont des autorités distinctes.
+Le [manifeste courant](validation_current.json) épingle les preuves communes et les variantes complètes D/E. Le code 0 affiche la variante reconnue **et sa portée** : suite D de 323 portes, ou qualification locale q2 E. Il ne transfère aucun résultat entre variantes et ne réexécute aucun test. Le code 1 demande une actualisation de sources ; le code 2 rejette un manifeste invalide. La compatibilité `--manifest` conserve l’accès aux anciens formats. Les 30 [tests de ce contrôleur](test_verify_current.py) passent normalement et sous `-O`.
 
-Statut public : `not_claimed`. GCP non utilisé.
+## Entretien du dossier
 
-Le [recueil des reçus](receipts_20260905/README.md) donne les commandes
-de reproduction et le périmètre exact. E q2 a commencé dans le worktree
-après le run D : le code de fraîcheur 1 sur les quatre fichiers concernés
-est attendu ; le présent commit d'audit ne publie pas ces changements produit.
+Une conclusion active a un rapport de référence. Douze notes transitoires ou dépassées ont été fusionnées et retirées ; le [registre de consolidation](receipts_front_20260905/documentation_retirement.json) donne pour chacune son remplacement, le commit historique et son hash. Les fixtures permanentes et reçus bruts, y compris échecs et refus, restent à leur emplacement reproductible. Les répertoires `.work*` sont des temporaires ignorés, pas des autorités publiques.
+
+Les [reçus D/E](receipts_20260905/README.md) conservent leurs attributions historiques. Les [certificats du front](receipts_front_20260905/README.md) sont de nouveaux calculs légers, sans exécution produit. Les contrôles CTest locaux, CI et campagnes du constructeur restent distincts.
+
+Statut public : `not_claimed`. Aucun registre officiel modifié. GCP non utilisé.

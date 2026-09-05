@@ -1,9 +1,6 @@
-# État courant v7
+# État courant de l’audit v7
 
-Actualisé le 5 septembre 2026, sources examinées au HEAD
-`e6d33698e62ebecf74dff01c16d7de17149d7a4e`.
-Autorité : [synthèse indépendante](AUDIT_INDEPENDANT_20260904.md) et
-[validation courante](receipts_20260905/validation_current.json).
+Actualisé le 5 septembre 2026 depuis `35dda097f75a66f8264002c58b9ccc4888c46d2e`. Les écritures restent exclusivement dans ce dossier, sur `main` sans nouvelle branche.
 
 ```text
 phase=exploration_v7_hors_registre
@@ -13,44 +10,17 @@ mode=audit_independant_math_and_architecture
 public_status=not_claimed
 ```
 
-Porte exploratoire satisfaite : demande v7 explicite, lecture intégrale
-des parties I et II du manuscrit et réserves déclarées. Les hashes des
-sources font foi ; les reçus antérieurs conservent leurs octets et auteurs.
+La porte exploratoire est satisfaite : demande v7 explicite, lecture intégrale des parties I et II du manuscrit, sources et limites déclarées. Le [manifeste courant](validation_current.json) distingue deux snapshots entiers ; son code 0 affiche celui qui correspond et sa portée, sans promotion publique.
 
-**La MEB différée et la topologie de l'index sont justifiées sous leurs
-préconditions.** Leurs juges indépendants passent : 431 appels MEB et
-6 176 puissances rationnelles ; 237 212 nuages d'index sur chacun des
-deux binaires, avec sept mutants structurels. Les exécutions UBSan ne
-produisent aucun diagnostic. Les 40 appels de la porte d'arrondi
-conservent les objets et exercent effectivement les replis entiers.
+| Source reconnue | Qualification réellement acquise |
+| --- | --- |
+| D, produit du commit `e6d33698` | Construction indépendante neuve Release : 323/323 CTests CPU, zéro échec/skip, 115 sources et 37 binaires stables ; MEB/index/arrondi jugés séparément |
+| E q2, delta constructeur épinglé | Preuve locale et même oracle rationnel : 431 appels identiques à D, mutant q2 détecté ; aucune suite complète E exécutée par cet audit |
 
-Les reçus constructeur D sont contre-vérifiés : 323 noms CTest distincts,
-sans échec ni skip, 140 sources et 37 binaires conformes. Les portes
-arithmétiques, dont la branche Boost réellement compilée, ne restent
-plus des travaux « à porter ». La nouvelle construction indépendante
-Release passe ses 323 portes CPU, sans échec ni skip ; sources et
-37 binaires stables. Construction 247,62 s, CTest 607,43 s sur hôte partagé.
-Son reçu reste distinct de ceux du constructeur.
+**Le registre arithmétique des témoins est maintenant couvert** par les preuves des [fuseaux](ARITHMETIQUE_SPINDLE_COURANTE.md), [secteurs/cordes](ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md) et [cellules](ARITHMETIQUE_CELLULES_COURANTE.md). La base des secteurs réussit dès A=B=1 dans le domaine appelé. Les nouveaux certificats sont des calculs Python légers ; les frontières proposées restent à raccorder directement aux helpers compilés.
 
-**Ce résultat complet porte sur D.** Le constructeur a commencé E après
-la clôture : quatre fichiers produit du worktree portent le prétest q2.
-Le manifeste conserve le snapshot D et son contrôleur renvoie donc 1 sur
-ce delta local ; il ne faut ni actualiser ces pins mécaniquement ni
-transférer les 323 passes à E. Les fichiers produit restent hors du commit
-de l'auditeur.
-L'[addendum q2](ADDENDUM_MEB_Q2_E_20260905.md) confirme néanmoins
-la preuve locale et les mêmes 431 appels sur E, avec le nouveau mutant
-détecté. Il ne remplace pas les portes intégrées E.
+La composition S1 dispose des preuves géométriques, du raccord index/front, des bornes de primitives et d’un [domaine CPU explicite](DOMAINE_CPU_COURANT.md). La qualification intégrée du prochain delta, le certificat horizontal réduit et son domaine de régularité, puis les plateaux, la verticale, les poids et les coûts gardent leurs obligations. Le payload par défaut reste `verified_events_only`, la complétion `normalized_horizontal_h0_candidate`, l’archive `vertical_maps=none` ; `--require-exact` refuse.
 
-La composition horizontale et S1 restent conditionnelles au raccord
-complet des primitives et du domaine d'exécution. Le nouvel audit
-décharge l'index et raccorde les parcours WSPD/cover ; le grand-livre
-arithmétique restant des témoins du front garde ses obligations. Les plateaux pertinents sont encore refusés.
-L'archive annonce `vertical_maps=none` et ne fournit pas les scores de
-vote. Le mode par défaut reste `verified_events_only` ; la complétion reste
-`normalized_horizontal_h0_candidate`. `--require-exact` refuse.
+Les constats A1/C1 et les demandes d’intégration Cassini/U320 sont fermés. Douze notes transitoires sont [consolidées](receipts_front_20260905/documentation_retirement.json) ; leurs preuves brutes et fixtures sont conservées. Aucun chantier déjà fermé n’est rouvert par le nettoyage.
 
-Ni le seuil 50k, ni le domaine massif, ni la reprise moteur ne sont
-qualifiés par les essais présents. Le registre officiel est inchangé.
-Travail sur `main`, écritures limitées à `audits/`. GCP non utilisé ;
-aucune mesure GPU attribuée à cet audit.
+Consulter la [synthèse](AUDIT_INDEPENDANT_20260904.md) et le [dialogue actif](DIALOGUE_COURANT.md). Aucune nouvelle compilation ou charge lourde n’a été lancée pendant la fenêtre de mesure constructeur. GCP non utilisé ; aucun résultat GPU attribué à cet audit.

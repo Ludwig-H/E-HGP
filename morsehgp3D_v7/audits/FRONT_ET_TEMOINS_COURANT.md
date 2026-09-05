@@ -2,7 +2,7 @@
 
 4 septembre 2026. Cadre exploratoire v7 : CPU de référence, entrée u16, audit mathématique et architectural indépendant, statut public `not_claimed`.
 
-Cette contre-lecture justifie les raccords combinatoires du front et la sûreté géométrique des crédits de fuseau. Elle complète la [matrice S1](S1_COURANT.md) ; les certificats aval, l'arithmétique de tous les prédicats et la composition finale gardent leurs obligations. Aucun nouveau test lourd n'est lancé pour cette lecture.
+Cette contre-lecture justifie les raccords combinatoires du front et la sûreté géométrique des crédits de fuseau. Elle complète la [matrice S1](S1_COURANT.md) ; les certificats aval et la composition gardent leurs domaines propres. Les bornes des [fuseaux](ARITHMETIQUE_SPINDLE_COURANTE.md), [secteurs/cordes](ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md) et [cellules](ARITHMETIQUE_CELLULES_COURANTE.md) sont fermées dans les compléments du 5 septembre. Aucun nouveau test lourd n'est lancé pour cette lecture.
 
 ## Partition et terminaison du front
 

@@ -1,0 +1,78 @@
+{
+  "source_commit": "35dda097f75a66f8264002c58b9ccc4888c46d2e",
+  "policy": "Consolidate superseded active reports; preserve original bytes in Git history and raw receipts unchanged; no retired report is a runner dependency.",
+  "retired": [
+    {
+      "path": "ARCHIVE_TRANSACTION_20260904.md",
+      "sha256": "ade5d7486cc2125d7b9ae6e2fc040c86e520c2fdb7e1005e238365270f6ab04e",
+      "replacement": "AUDIT_INTERFACES_20260904.md#nettoyage-a1-et-publication",
+      "historical_url": "https://github.com/Ludwig-H/E-HGP/blob/35dda097f75a66f8264002c58b9ccc4888c46d2e/morsehgp3D_v7/audits/ARCHIVE_TRANSACTION_20260904.md"
+    },
+    {
+      "path": "RETOUR_ARCHIVE_COURANT.md",
+      "sha256": "1034aa41b74a7c084f88f8f809a91ea7de6229ead1242d7ba628430b1967768f",
+      "replacement": "AUDIT_INTERFACES_20260904.md#nettoyage-a1-et-publication",
+      "historical_url": "https://github.com/Ludwig-H/E-HGP/blob/35dda097f75a66f8264002c58b9ccc4888c46d2e/morsehgp3D_v7/audits/RETOUR_ARCHIVE_COURANT.md"
+    },
+    {
+      "path": "REVUE_NETTOYAGE_ARCHIVE_COURANT.md",
+      "sha256": "51c062de0794d4a05a7caf48c0a9cdcc1fd0f09e2f9dea8144256a81a268a28a",
+      "replacement": "AUDIT_INTERFACES_20260904.md#nettoyage-a1-et-publication",
+      "historical_url": "https://github.com/Ludwig-H/E-HGP/blob/35dda097f75a66f8264002c58b9ccc4888c46d2e/morsehgp3D_v7/audits/REVUE_NETTOYAGE_ARCHIVE_COURANT.md"
+    },
+    {
+      "path": "CENSUS_DIRECT_20260904.md",
+      "sha256": "c9166b7d772f38694c8bf41a4969a6b954b44b5884581ec045bc8b778b357cea",
+      "replacement": "AUDIT_RESIDENCE_20260904.md#acquis-de-census-et-de-parallélisme",
+      "historical_url": "https://github.com/Ludwig-H/E-HGP/blob/35dda097f75a66f8264002c58b9ccc4888c46d2e/morsehgp3D_v7/audits/CENSUS_DIRECT_20260904.md"
+    },
+    {
+      "path": "SORT_LOCAL_INDICES_20260904.md",
+      "sha256": "5a289a2ad3fd4935c56e35c074747ae02607cbb9895511e58a2f51a663c59c58",
+      "replacement": "AUDIT_RESIDENCE_20260904.md#tri-par-permutation--objet-et-allocations",
+      "historical_url": "https://github.com/Ludwig-H/E-HGP/blob/35dda097f75a66f8264002c58b9ccc4888c46d2e/morsehgp3D_v7/audits/SORT_LOCAL_INDICES_20260904.md"
+    },
+    {
+      "path": "THREADS_ET_PORTES_20260904.md",
+      "sha256": "164e5c987170cbfbf99de892f9bd39c2d1e865705696a97d5e77dfbcb60b1886",
+      "replacement": "AUDIT_RESIDENCE_20260904.md#admission-des-fils-et-portes-intégrées",
+      "historical_url": "https://github.com/Ludwig-H/E-HGP/blob/35dda097f75a66f8264002c58b9ccc4888c46d2e/morsehgp3D_v7/audits/THREADS_ET_PORTES_20260904.md"
+    },
+    {
+      "path": "REPONSE_INCIDENCES_ET_DELTAS_20260904.md",
+      "sha256": "3631331c53002b776d4be1638e11e79d1327a5d5266c19a1cb84ab3943957e69",
+      "replacement": "AUDIT_MATHEMATIQUE_20260904.md",
+      "historical_url": "https://github.com/Ludwig-H/E-HGP/blob/35dda097f75a66f8264002c58b9ccc4888c46d2e/morsehgp3D_v7/audits/REPONSE_INCIDENCES_ET_DELTAS_20260904.md"
+    },
+    {
+      "path": "CAMPAGNE_APPARIEE_20260904.md",
+      "sha256": "33663e6c101f602de8123a3e1f1647ab745678685c997111eedc8a3e44fcd8a3",
+      "replacement": "AUDIT_QUALIFICATION_20260905.md#harnais-et-classification-des-campagnes",
+      "historical_url": "https://github.com/Ludwig-H/E-HGP/blob/35dda097f75a66f8264002c58b9ccc4888c46d2e/morsehgp3D_v7/audits/CAMPAGNE_APPARIEE_20260904.md"
+    },
+    {
+      "path": "CAMPAGNE_INCIDENCES_COURANTE.md",
+      "sha256": "64e91193d1c2c40885b4292017f26c2f3228fb6eb99071b3347ba3b19acb8d02",
+      "replacement": "AUDIT_QUALIFICATION_20260905.md#harnais-et-classification-des-campagnes",
+      "historical_url": "https://github.com/Ludwig-H/E-HGP/blob/35dda097f75a66f8264002c58b9ccc4888c46d2e/morsehgp3D_v7/audits/CAMPAGNE_INCIDENCES_COURANTE.md"
+    },
+    {
+      "path": "SONDE_CI_COURANTE.md",
+      "sha256": "731c0506b7f9e0958ebb9e1c8bc0ab6406b67cd6659c4afbb91f83637dc3b061",
+      "replacement": "AUDIT_QUALIFICATION_20260905.md#harnais-et-classification-des-campagnes",
+      "historical_url": "https://github.com/Ludwig-H/E-HGP/blob/35dda097f75a66f8264002c58b9ccc4888c46d2e/morsehgp3D_v7/audits/SONDE_CI_COURANTE.md"
+    },
+    {
+      "path": "QUALIFICATION_C_COURANTE.md",
+      "sha256": "0daeedb04e0ab0147a940e1ac341ab1dc8446c592d23b95a6e4bb50df89c968f",
+      "replacement": "AUDIT_QUALIFICATION_20260905.md#autorités-des-mesures-et-du-cloud",
+      "historical_url": "https://github.com/Ludwig-H/E-HGP/blob/35dda097f75a66f8264002c58b9ccc4888c46d2e/morsehgp3D_v7/audits/QUALIFICATION_C_COURANTE.md"
+    },
+    {
+      "path": "PROTOCOLE_G4_V7_20260904.md",
+      "sha256": "4e680d5c11c28c2dc4dea881642f2e76e93054685d49248deb524be59e455cf2",
+      "replacement": "AUDIT_QUALIFICATION_20260905.md#autorités-des-mesures-et-du-cloud",
+      "historical_url": "https://github.com/Ludwig-H/E-HGP/blob/35dda097f75a66f8264002c58b9ccc4888c46d2e/morsehgp3D_v7/audits/PROTOCOLE_G4_V7_20260904.md"
+    }
+  ]
+}

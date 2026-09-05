@@ -14,7 +14,7 @@ Les parties I, pages PDF 35–76, puis II, pages PDF 77–134 du manuscrit ont �
 
 Les sources de la compilation sont copiées sous `audits/.work_residence/current/`. Le [reçu courant](receipts_20260904/residence_current.json) contient leurs hashes avant copie, après copie et après vérification, les commandes et sorties brutes. Les octets doivent correspondre à ces hashes pour que les conclusions s'appliquent.
 
-| Source dans `morsehgp3D_v7/` | SHA-256 vérifié |
+| Source de la campagne historique dans `morsehgp3D_v7/` | SHA-256 vérifié |
 | --- | --- |
 | `src/parallel/sort.hpp` | `ceb89f8ba42fbc3f44351f4dcbf5e347e7d66a4c85bce08f346e66a9b11f20bd` |
 | `src/parallel/pool.hpp` | `5c20aabbe673e2baa1018bea893185592bc3b394d025eadd9be07542453befc6` |
@@ -63,3 +63,13 @@ La porte `perm_sort_gate` rend 0 sur 241 000 éléments synthétiques, 210 882 p
 4. **Libération par lots certifiés.** Le tableau `BallData` reste global jusqu'au dernier fold. Qualifier de grandes entrées demande de préciser quelles données sont libérées par lot et comment une incidence ultérieure retrouve un représentant valide. Le certificat doit préserver les composantes et leurs niveaux de naissance ou de fusion. Mesurer ensemble candidats, survivantes, cofaces ajoutées, facettes distinctes et coûts bout en bout.
 
 Ces étapes évitent de matérialiser toutes les facettes possibles et les cellules de Delaunay. Aucun benchmark 8k/16k/32k, aucune mesure GPU et aucune qualification industrielle ne sont rapportés dans cette note. GCP non utilisé.
+
+## Admission des fils et portes intégrées
+
+Le census actuel inclut [AxisBounds](CENSUS_AXIS_COURANT.md) ; le hash du tableau ci-dessus est celui de la campagne de résidence antérieure. Sa destination unique et son contrat `mhgp7-census-direct-v1` sont conservés. `census_merge_peak_bytes` compte la capacité de cette destination dès allocation et celle du tableau réellement ajouté par le mutant `keep-ball-chunks`, sans devenir une borne RSS.
+
+Le tri annule l'admission si une création de thread échoue, joint tous les fils déjà créés puis propage l'exception. Une faute de comparateur fait quitter sa barrière au worker par `arrive_and_drop`, puis tous les fils sont joints avant propagation. `thread_failure_gate` couvre quatre créations partielles après deux fils, quatre fautes de travail, une panne de comparaison inter-tranches et un témoin de réutilisation. L'API transforme la panne en refus de ressources, sans payload public conservé.
+
+La porte de résidence permanente complète la sonde indépendante : 12 scènes sur trois tailles et quatre nombres de fils, 15 refus d'allocation, cinq de comparaison et un lancement partiel. Elle oppose les charges utiles à la référence stable ; les trois mutants de permutation attendent le code 4, une mauvaise CLI le code 2 et un plancher non exercé le code 3. Le rendez-vous de l'ancien tri ne concerne que son témoin négatif ; le tri courant n'exige pas de tampon pour faire passer la porte.
+
+Ces portes sont enregistrées et exécutées dans la [suite D complète de 323 tests](receipts_20260905/release/summary.json). `EXPECT_LINE` impose une ligne entière ; `EXPECT_PREFIX` est une option explicite aussi utilisée par les portes arithmétiques/MEB. Leur résultat est lié au code attendu, sans prétendre couvrir tout mutant imaginable. C6a reste un stub CPU. Les nouveaux deltas gardent leurs propres obligations de qualification.

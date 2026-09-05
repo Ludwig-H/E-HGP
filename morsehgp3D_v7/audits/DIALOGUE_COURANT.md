@@ -1,111 +1,27 @@
 # Échanges actifs avec le constructeur v7
 
-Actualisé le 5 septembre 2026. `phase=exploration_v7_hors_registre`,
-`backend=cpu_reference`, `profile=quantized_u16_input_only`,
-`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
-Toutes les écritures de l'auditeur restent dans `audits/`.
+5 septembre 2026. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. Écritures de l’auditeur exclusivement dans `audits/`.
 
-## Retour courant : deux verrous levés et une garde exercée
+## Nouveau retour : registre arithmétique des témoins couvert
 
-Le delta D de MEB différée est **justifié et vérifié indépendamment**.
-Le [rapport MEB](AUDIT_MEB_DIFFEREE_20260905.md) démontre que la puissance
-brute conserve signes et zéros par division par un PGCD positif. Le juge
-rationnel, indépendant de q3/q4, contrôle les boules, supports, niveaux,
-caps et coquilles. Il n'y a pas de correctif MEB à appliquer à la suite
-de cet audit. La mesure de coût reste une question distincte.
+Les [fuseaux](ARITHMETIQUE_SPINDLE_COURANTE.md), [secteurs/cordes](ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md) et [cellules](ARITHMETIQUE_CELLULES_COURANTE.md) ont leurs bornes opérationnelles, échelles, casts, racines corrigées et comptes locaux. Le produit i64 `2*cq*s2+E-1` reste sur 57 bits ; les coordonnées de corde/cellule restent dans i128. Aucune augmentation préventive de largeur n’est demandée.
 
-Le [rapport index](AUDIT_INDEX_20260905.md) ferme la partition Morton,
-les buckets, la topologie Karras, les références et `clzll` sous la garde
-produit existante. Deux binaires, dont un sous UBSan, passent l'oracle de
-trie indépendant et les sept corruptions structurelles. Ce raccord peut
-maintenant remplacer la prémisse non déchargée « index correct » de S1.
-L'API interne appelée directement conserve sa précondition de cardinal.
+**Simplification démontrée : `bisector_basis` réussit dès A=B=1** pour les dénominateurs 8/12. La règle effective de sélection des deux axes donne un rayon inscrit carré au moins D²/6. Le constructeur peut supprimer la recherche dans ce domaine après une qualification appariée ; le présent audit ne porte pas cette optimisation.
 
-La [porte d'arrondi](AUDIT_ARRONDI_20260905.md) exerce le pipeline sous
-les quatre modes, avec filtres actifs au plus proche et désactivés dans
-les trois autres modes, compteurs non vides et objets inchangés. Ce
-contrôle qualifie le mécanisme de repli sur l'hôte et la compilation
-indiqués ; il ne fournit pas une preuve universelle de toute toolchain.
+Deux corrections documentaires précises sont proposées, sans blocage du produit : le second vecteur n’a pas toujours une norme au moins D√(2/3), comme le montre d=(1,1,0), et `true_spindle_count`, sans appel produit trouvé, arrête au seuil sans écrêter sa valeur. Les contre-fixtures sont conservées dans les certificats légers. La preuve géométrique utile reste valable.
 
-## Portes arithmétiques : la demande d'intégration est satisfaite
+## Prochaines fermetures concrètes
 
-Les portes Cassini, Cramer, PGCD, retenues et U192/U320 sont intégrées.
-La [contrelecture des reçus](AUDIT_QUALIFICATION_20260905.md) confirme
-leurs exécutions, y compris le second site U320 non vide et la compilation
-réelle de Boost pour la porte entière. Les bornes statiques des
-[lanes](ARITHMETIQUE_LANES_COURANTE.md) et des
-[entiers larges](ARITHMETIQUE_LARGE_COURANTE.md) conservent leurs domaines.
-Leurs anciennes formulations « porte future » ne doivent plus être
-interprétées comme des demandes ouvertes au constructeur.
+1. Raccorder les frontières nouvelles aux helpers C++ : racines carrées exactes et voisines, sens de l’arrondi du cœur, base d=(1,1,1), mauvais choix d’axes d=(1,1,0), coordonnées extrêmes des cellules. Conserver un nominal non vide et les rejets causaux déjà disponibles ; ne pas recréer un oracle exhaustif produit.
+2. Qualifier le delta E intégré sur ses sources et binaires, avec le [domaine CPU](DOMAINE_CPU_COURANT.md) et les compteurs/caps appariés. Le [prétest q2](ADDENDUM_MEB_Q2_E_20260905.md) est localement favorable ; il ne reçoit pas les 323 tests D par héritage.
+3. Assembler le certificat horizontal pour le payload réduit et le domaine de régularité effectivement acceptés. La verticale et le vote demandent leurs données d’incidence propres ; les deltas H0 ne les remplacent pas. Les coûts de chaîne, de catalogue et de reprojection sont mesurés séparément.
 
-Les 323 portes D rapportées par le constructeur sont vérifiées via leurs
-XML, inventaires et hashes. La reconstruction indépendante de cet audit
-est suivie dans son [reçu distinct](receipts_20260905/release/summary.json).
-Les 316 portes C et les anciens binaires C restent historiques.
+Le raccourci MEB par pivots reste une piste distincte : l’ordinal d’un support dans la référence ne borne pas le travail déjà effectué pour le trouver. Charger prospectivement proposition, certification et repli, avec un plafond physique explicite ; garder les sentinelles intactes au refus. Aucun port de pivots n’est approuvé par les preuves D/E de conservation locale.
 
-## Prochain travail concret proposé
+## Coordination et entretien
 
-Le [raccord WSPD/cover](AUDIT_RACCORD_INDEX_FRONT_20260905.md) compose
-maintenant leurs boucles avec la partition d'index prouvée. Terminer le
-grand-livre arithmétique des témoins du front, en réutilisant la
-composition géométrique et horizontale existante : ni une nouvelle preuve
-d'existence de seed ni un catalogue Gamma ne sont demandés. Les entrées
-et compilations acceptées doivent nommer leur domaine de qualification.
+La fenêtre de chronométrage constructeur ouverte à 06:30:41 UTC est respectée : uniquement revues, calculs Python courts et contrôles documentaires dans cette reprise, aucune compilation/probe moteur. La campagne lourde D était close, et l’oracle E terminé à 06:30:29,794 avant cette fenêtre. Ces faits ne certifient pas l’isolation de la machine.
 
-Le constructeur pourra ensuite qualifier l'objet horizontal correspondant,
-puis traiter les plateaux, cartes verticales et poids exigés par le
-contrat complet. Pour le coût, conserver objets et plafonds appariés,
-mesurer les chaînes et les volumes de facettes ; une optimisation de MEB
-locale ne borne pas la résidence globale. Les gardes mémoire proposées
-dans [RETOUR_MEMOIRE_COURANT](RETOUR_MEMOIRE_COURANT.md) restent ciblées.
+Le [contrôleur](verify_current.py) reconnaît désormais chaque snapshot complet D/E avec sa portée et rejette leurs mélanges ; 30 scènes passent en Python normal et optimisé. Le [manifeste](validation_current.json) est l’unique entrée maintenue. Les douze notes transitoires fusionnées ne restent pas des listes parallèles de demandes ; les octets antérieurs restent récupérables par le [registre de consolidation](receipts_front_20260905/documentation_retirement.json).
 
-Les anciens constats A1 (archive) et C1 (campagnes) sont levés et leurs
-contre-fixtures demeurent exécutables. Il n'y a aucune demande de revenir
-sur ces correctifs. La [synthèse](AUDIT_INDEPENDANT_20260904.md) centralise
-les acquis, les limites de payload et les critères industriels restants.
-
-## Retour sur les pistes constructeur q2 et pivots
-
-La demande q2 formulée à la fin du jalon D reçoit une réponse positive
-sur le plan algébrique : `(z-a)·(z-b)` est exactement la puissance de la
-boule diamétrale, sans facteur de normalisation. Avec des coordonnées
-u16, chaque produit est borné en module par M², les sommes partielles
-par 2M² puis 3M², sous 2^34. Les différences, produits et sommes tiennent
-en i64. Garder la charge avant chaque paire et le rejet strict `>0`
-permet le même argument d'induction que pour D. Les égalités doivent
-survivre jusqu'au contrôle de coquille. Il n'y a aucun PGCD de clé q2
-à économiser ; le niveau et la puissance générale constituent les
-travaux évitables. Le port E postérieur reçoit maintenant un
-[addendum indépendant](ADDENDUM_MEB_Q2_E_20260905.md) : même oracle
-rationnel, 431 appels identiques à D, nouveau mutant q2 détecté. Il s'agit
-d'une qualification locale ; aucun gain D/E ni suite complète E ne sont
-attribués au présent audit.
-
-Pour la proposition par pivots, séparer deux obligations : un support
-positif contenant, avec coquille exactement égale à ce support, certifie
-la MEB régulière unique ; son ordinal dans la référence ne borne pas le
-travail déjà effectué pour le trouver. La préparation constructeur a
-identifié ce problème de plafond physique. Un compteur ordinal seul
-ne suffit donc pas à préserver le contrat des supports essayés. Une
-route future doit nommer et charger prospectivement le travail de
-proposition/certification/repli, avec un budget distinct du coût logique
-de référence si celui-ci est conservé. Refus de cap déjà épuisé avant
-proposition, sentinelle intacte avant décision et cap exactement égal
-au coût sont les frontières à conserver. Aucun port du prototype par
-pivots n'est validé par la présente qualification D.
-
-## Fin des travaux lourds de l'auditeur
-
-La construction indépendante et CTest sont clos : **323/323**, aucun
-échec ni saut, sources et 37 binaires stables. Les sondes MEB, index et
-arrondi sont également terminées ; aucun benchmark ou build lourd de
-cet audit ne reste en cours. Cela n'atteste pas l'absence de toute autre
-charge sur l'hôte. Le constructeur a commencé E après cette clôture :
-quatre fichiers produit ont changé. Les pins et reçus du run restent D ;
-le code de fraîcheur 1 sur ce delta est attendu. La publication de
-l'auditeur sélectionne uniquement ses fichiers, sans inclure le port E.
-Sa qualification complète reste distincte des 323 portes D. La
-contrelecture q2 ciblée est terminée avec verdict favorable ; aucun
-nouveau benchmark moteur ou travail lourd ne reste lancé par l'auditeur.
-
-GCP non utilisé. Aucun code produit modifié.
+Archive A1, classification C1, mode mono, Cassini/U320, index et MEB ne sont plus des demandes ouvertes. Les détails et reçus restent accessibles dans la [synthèse](AUDIT_INDEPENDANT_20260904.md). GCP non utilisé. Aucun code produit modifié.

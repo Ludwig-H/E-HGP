@@ -34,6 +34,6 @@ cmake --build morsehgp3D_v7/audits/.work_axis_replay --target mhgp7 mhgp7_axis_b
 ctest --test-dir morsehgp3D_v7/audits/.work_axis_replay --output-on-failure --no-tests=error -R '^mhgp7_axis_bounds'
 ```
 
-Le microbenchmark synthétique facultatif n'a pas été exécuté par l'auditeur. La [contrelecture des reçus B/C](QUALIFICATION_C_COURANTE.md) rapporte séparément les observations du constructeur, sans déduire un gain de performance de la preuve.
+Le microbenchmark synthétique facultatif n'a pas été exécuté par l'auditeur. La [contrelecture des reçus B/C](AUDIT_QUALIFICATION_20260905.md#autorités-des-mesures-et-du-cloud) rapporte séparément les observations du constructeur, sans déduire un gain de performance de la preuve.
 
 GCP non utilisé.

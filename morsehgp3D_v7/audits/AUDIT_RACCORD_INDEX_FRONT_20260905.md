@@ -13,7 +13,7 @@ autorité propre ; ce texte établit la conservation des populations.
 Sources relues : [index](../src/tree/cloud_index.hpp),
 [front fusionné](../src/pipeline/generate.hpp),
 [WSPD](../src/wspd/wavefront.hpp) et [covers](../src/lanes/edge_cover.hpp).
-Les hashes sont ceux de la [validation courante](receipts_20260905/validation_current.json).
+Les hashes sont ceux de la [validation courante](validation_current.json).
 La [preuve d'index](AUDIT_INDEX_20260905.md) fournit les enfants disjoints,
 leurs plages exactes, l'atteignabilité unique et les boîtes serrées.
 

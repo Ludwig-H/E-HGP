@@ -1,0 +1,112 @@
+{
+  "status": "passed",
+  "source_head": "35dda097f75a66f8264002c58b9ccc4888c46d2e",
+  "all_staged_files_in_audits": true,
+  "staged_paths": [
+    "morsehgp3D_v7/audits/ARCHIVE_TRANSACTION_20260904.md",
+    "morsehgp3D_v7/audits/ARITHMETIQUE_CELLULES_COURANTE.md",
+    "morsehgp3D_v7/audits/ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md",
+    "morsehgp3D_v7/audits/ARITHMETIQUE_SPINDLE_COURANTE.md",
+    "morsehgp3D_v7/audits/AUDIT_INDEPENDANT_20260904.md",
+    "morsehgp3D_v7/audits/AUDIT_INTERFACES_20260904.md",
+    "morsehgp3D_v7/audits/AUDIT_MATHEMATIQUE_20260904.md",
+    "morsehgp3D_v7/audits/AUDIT_QUALIFICATION_20260905.md",
+    "morsehgp3D_v7/audits/AUDIT_RACCORD_INDEX_FRONT_20260905.md",
+    "morsehgp3D_v7/audits/AUDIT_RESIDENCE_20260904.md",
+    "morsehgp3D_v7/audits/CAMPAGNE_APPARIEE_20260904.md",
+    "morsehgp3D_v7/audits/CAMPAGNE_INCIDENCES_COURANTE.md",
+    "morsehgp3D_v7/audits/CELLULES_COURANT.md",
+    "morsehgp3D_v7/audits/CENSUS_AXIS_COURANT.md",
+    "morsehgp3D_v7/audits/CENSUS_DIRECT_20260904.md",
+    "morsehgp3D_v7/audits/DIALOGUE_COURANT.md",
+    "morsehgp3D_v7/audits/DOMAINE_CPU_COURANT.md",
+    "morsehgp3D_v7/audits/ETAT_COURANT.md",
+    "morsehgp3D_v7/audits/FILTRES_FLOTTANTS_COURANTS.md",
+    "morsehgp3D_v7/audits/FRONT_ET_TEMOINS_COURANT.md",
+    "morsehgp3D_v7/audits/MONO_COURANT.md",
+    "morsehgp3D_v7/audits/PROTOCOLE_G4_V7_20260904.md",
+    "morsehgp3D_v7/audits/QUALIFICATION_C_COURANTE.md",
+    "morsehgp3D_v7/audits/README.md",
+    "morsehgp3D_v7/audits/REPONSE_CONSTRUCTEUR_20260904.md",
+    "morsehgp3D_v7/audits/REPONSE_INCIDENCES_ET_DELTAS_20260904.md",
+    "morsehgp3D_v7/audits/RETOUR_ARCHIVE_COURANT.md",
+    "morsehgp3D_v7/audits/RETOUR_MATH_COURANT.md",
+    "morsehgp3D_v7/audits/REVUE_NETTOYAGE_ARCHIVE_COURANT.md",
+    "morsehgp3D_v7/audits/S1_COURANT.md",
+    "morsehgp3D_v7/audits/SONDE_CI_COURANTE.md",
+    "morsehgp3D_v7/audits/SORT_LOCAL_INDICES_20260904.md",
+    "morsehgp3D_v7/audits/THREADS_ET_PORTES_20260904.md",
+    "morsehgp3D_v7/audits/cell_width_certificate.py",
+    "morsehgp3D_v7/audits/receipts_front_20260905/README.md",
+    "morsehgp3D_v7/audits/receipts_front_20260905/cell_width.json",
+    "morsehgp3D_v7/audits/receipts_front_20260905/cell_width_optimized.json",
+    "morsehgp3D_v7/audits/receipts_front_20260905/documentation_checks.json",
+    "morsehgp3D_v7/audits/receipts_front_20260905/documentation_retirement.json",
+    "morsehgp3D_v7/audits/receipts_front_20260905/freshness_normal.json",
+    "morsehgp3D_v7/audits/receipts_front_20260905/freshness_optimized.json",
+    "morsehgp3D_v7/audits/receipts_front_20260905/secteur_corde_arithmetic.json",
+    "morsehgp3D_v7/audits/receipts_front_20260905/spindle_bounds.json",
+    "morsehgp3D_v7/audits/secteur_corde_arithmetic_20260905.py",
+    "morsehgp3D_v7/audits/spindle_arithmetic_probe.py",
+    "morsehgp3D_v7/audits/test_verify_current.py",
+    "morsehgp3D_v7/audits/validation_current.json",
+    "morsehgp3D_v7/audits/verify_current.py"
+  ],
+  "common_pins_checked": 148,
+  "D_source_pins_checked": 115,
+  "freshness": [
+    {
+      "scope": "worktree_E",
+      "command": [
+        "python3",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py",
+        "--manifest",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/validation_current.json"
+      ],
+      "returncode": 0,
+      "stdout": "Audit courant : variante=E_q2_local\nqualification_scope=q2 MEB proof and independent 431-call oracle only, common front arithmetic proofs; no integrated/full E CTest run by auditor; D323 not transferred\n148 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "scope": "worktree_E",
+      "command": [
+        "python3",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py",
+        "--manifest",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/validation_current.json"
+      ],
+      "returncode": 0,
+      "stdout": "Audit courant : variante=E_q2_local\nqualification_scope=q2 MEB proof and independent 431-call oracle only, common front arithmetic proofs; no integrated/full E CTest run by auditor; D323 not transferred\n148 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "scope": "index_D",
+      "command": [
+        "python3",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_front_20260905/publication_D/audits/verify_current.py",
+        "--manifest",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/validation_current.json"
+      ],
+      "returncode": 0,
+      "stdout": "Audit courant : variante=D\nqualification_scope=323/323 CTests CPU Release independently executed; local MEB/index/rounding oracles; front arithmetic proofs; no product exactness claim\n148 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "scope": "index_D",
+      "command": [
+        "python3",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_front_20260905/publication_D/audits/verify_current.py",
+        "--manifest",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/validation_current.json"
+      ],
+      "returncode": 0,
+      "stdout": "Audit courant : variante=D\nqualification_scope=323/323 CTests CPU Release independently executed; local MEB/index/rounding oracles; front arithmetic proofs; no product exactness claim\n148 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    }
+  ],
+  "cached_whitespace_code": 0,
+  "scope": "read-only source validation and snapshot under audits, no C++ build",
+  "gcp": "not_used"
+}

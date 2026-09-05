@@ -1,0 +1,193 @@
+{
+  "schema": "mhgp7-freshness-verifier-selftest-v1",
+  "status": "passed",
+  "public_status": "not_claimed",
+  "optimized": false,
+  "tests": 30,
+  "product_tests_executed": 0,
+  "results": [
+    {
+      "name": "complete_D",
+      "expected_code": 0,
+      "observed_code": 0,
+      "required_marker": "variante=D"
+    },
+    {
+      "name": "complete_E",
+      "expected_code": 0,
+      "observed_code": 0,
+      "required_marker": "fixture_targeted_E_only"
+    },
+    {
+      "name": "mixed_D_E_rejected",
+      "expected_code": 1,
+      "observed_code": 1,
+      "required_marker": "aucune variante complète"
+    },
+    {
+      "name": "mixed_E_D_rejected",
+      "expected_code": 1,
+      "observed_code": 1,
+      "required_marker": "aucune variante complète"
+    },
+    {
+      "name": "common_changed",
+      "expected_code": 1,
+      "observed_code": 1,
+      "required_marker": "pins communs modifiés"
+    },
+    {
+      "name": "source_missing",
+      "expected_code": 1,
+      "observed_code": 1,
+      "required_marker": ""
+    },
+    {
+      "name": "legacy_v1",
+      "expected_code": 0,
+      "observed_code": 0,
+      "required_marker": "Audit courant"
+    },
+    {
+      "name": "legacy_v1_stale",
+      "expected_code": 1,
+      "observed_code": 1,
+      "required_marker": "Audit à actualiser"
+    },
+    {
+      "name": "duplicate_variant_id",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "duplicate"
+    },
+    {
+      "name": "malformed_unmatched_E",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "invalid SHA-256"
+    },
+    {
+      "name": "empty_unmatched_variant",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "nonempty"
+    },
+    {
+      "name": "empty_common",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "nonempty"
+    },
+    {
+      "name": "empty_variants",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "nonempty"
+    },
+    {
+      "name": "nonobject_variant",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "object"
+    },
+    {
+      "name": "invalid_id_empty",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "identifier"
+    },
+    {
+      "name": "invalid_id_space",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "identifier"
+    },
+    {
+      "name": "invalid_scope_empty",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "scope"
+    },
+    {
+      "name": "invalid_scope_nonstring",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "scope"
+    },
+    {
+      "name": "invalid_path_traversal",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "source path"
+    },
+    {
+      "name": "invalid_path_absolute",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "source path"
+    },
+    {
+      "name": "invalid_path_alias",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "source path"
+    },
+    {
+      "name": "invalid_path_backslash",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "source path"
+    },
+    {
+      "name": "symlink_escape",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "outside v7"
+    },
+    {
+      "name": "common_variant_conflict",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "conflicting"
+    },
+    {
+      "name": "duplicate_root_json_key",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "duplicate"
+    },
+    {
+      "name": "duplicate_nested_pin",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "duplicate"
+    },
+    {
+      "name": "unsupported_schema",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": ""
+    },
+    {
+      "name": "nonobject_manifest",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "object"
+    },
+    {
+      "name": "invalid_json",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": ""
+    },
+    {
+      "name": "legacy_v1_empty",
+      "expected_code": 2,
+      "observed_code": 2,
+      "required_marker": "nonempty"
+    }
+  ],
+  "verifier_sha256": "b75e86a520193c55c08729ab41fa245a86c18add5e3d3213727587c65a378834",
+  "test_sha256": "bbffbb321d90d03da73e2a5063b3579535b13ce0b0e8e2be6101c7564cf11548",
+  "gcp": "not_used"
+}

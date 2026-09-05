@@ -1,0 +1,86 @@
+{
+  "status": "passed",
+  "public_status": "not_claimed",
+  "authority": "integer bound certificate; no product execution",
+  "bounds": {
+    "w_coordinate": {
+      "value": 131070,
+      "bits": 17
+    },
+    "w_norm2": {
+      "value": 51538034700,
+      "bits": 36
+    },
+    "gram_entry_abs": {
+      "value": 12884508675,
+      "bits": 34
+    },
+    "gram_product": {
+      "value": 166010563796150255625,
+      "bits": 68
+    },
+    "du_dv_abs": {
+      "value": 25769017350,
+      "bits": 35
+    },
+    "rhs_abs_G16": {
+      "value": 824608555200,
+      "bits": 40
+    },
+    "mag_G16": {
+      "value": 3298434220800,
+      "bits": 42
+    },
+    "Nk_abs": {
+      "value": 54397511491903535011921875,
+      "bits": 86
+    },
+    "center_pu_pv_abs": {
+      "value": 10694822746865694501018900234375,
+      "bits": 104
+    },
+    "J_upper": {
+      "value": 6416893648119416700611340140625,
+      "bits": 103
+    },
+    "normal_basis_dot_abs": {
+      "value": 1688772552032250,
+      "bits": 51
+    },
+    "mu_upper": {
+      "value": 1791213785135574,
+      "bits": 51
+    },
+    "endpoint_pu_pv_abs": {
+      "value": 13719775422024444115554370495875,
+      "bits": 104
+    }
+  },
+  "guarded_extrema": [
+    -31,
+    -9223372036854775775,
+    9223372036854775775,
+    31,
+    -63,
+    -9223372036854775743,
+    9223372036854775743,
+    63
+  ],
+  "square_checks": 17,
+  "bound_mutants_detected": {
+    "rhs_narrow_i32": true,
+    "endpoint_narrow_i64": true,
+    "sqrt_without_plus_one": true
+  },
+  "pinned_sources": {
+    "src/lanes/cell_grid.hpp": "f888539647e4dfd2e5f89d578f5f850cbad4a30b827d0bd5bef9142b5fc4c588",
+    "src/lanes/sector_kill.hpp": "4742ccccbcfdec847ea2e6bdded9f73b78d62e32585058b09d4b45b5951b7e06",
+    "src/pipeline/generate.hpp": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59",
+    "src/lanes/q3.hpp": "4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe",
+    "src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "src/pipeline/float_filter.hpp": "52e07b4e4dfb1ca66e2a6218fc9c31afc9586e0a81ca5a4a846ed7727e44b7d9"
+  },
+  "script_sha256": "33c42e3ae2692abd302340d8a9cc163e55a28605356524a6655692cdf1d4ae3b",
+  "python_optimized": true,
+  "gcp": "not_used"
+}

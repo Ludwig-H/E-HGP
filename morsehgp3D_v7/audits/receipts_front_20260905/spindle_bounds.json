@@ -1,0 +1,157 @@
+{
+  "status": "completed",
+  "scope": "static_bound_ledger_and_python_mathematical_models",
+  "cpp_executed": false,
+  "compilation": false,
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "gcp": "not_used",
+  "utc": "2026-09-05T06:45:05.451780+00:00",
+  "head": "35dda097f75a66f8264002c58b9ccc4888c46d2e",
+  "worktree": "M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/PASSATION.md\n M morsehgp3D_v7/docs/ERRATA_PUBLICATION_20260904.md\n M morsehgp3D_v7/src/core/mutants.hpp\n M morsehgp3D_v7/src/forest/silent_incidence.hpp\n M morsehgp3D_v7/tests/meb_lazy_gate.cpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/receipts_front_20260905/\n?? morsehgp3D_v7/audits/secteur_corde_arithmetic_20260905.py\n?? morsehgp3D_v7/audits/spindle_arithmetic_probe.py\n?? morsehgp3D_v7/docs/OPTIMISATION_MEB_Q2.md\n?? morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md\n?? morsehgp3D_v7/receipts/meb_pivot_budget_counterexample_20260905/\n?? morsehgp3D_v7/receipts/meb_q2_review_20260905/",
+  "command": "python3 -O morsehgp3D_v7/audits/spindle_arithmetic_probe.py",
+  "sources_before": {
+    "morsehgp3D_v7/src/spindle/spindle.hpp": "f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577",
+    "morsehgp3D_v7/src/spindle/witness_count.hpp": "fce9510ee21cbe025283a9ce777b120e4173ce62eee736e1c48dc772afb67a42",
+    "morsehgp3D_v7/src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+    "morsehgp3D_v7/src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "morsehgp3D_v7/src/core/caps.hpp": "d388c877bf4ca8c0fc164148f176959530a0ceff3052640402db3dcd3c256912",
+    "morsehgp3D_v7/src/tree/cloud_index.hpp": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95",
+    "morsehgp3D_v7/src/wspd/wavefront.hpp": "481a0d05da0631c71d74b52d90ea84233ad9c7624221a3783f322554fdb32063",
+    "morsehgp3D_v7/src/pipeline/generate.hpp": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59",
+    "morsehgp3D_v7/src/pipeline/run.hpp": "1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c",
+    "morsehgp3D_v7/audits/spindle_arithmetic_probe.py": "659c9cbe6400e3f1f769a716f4371f6b338476399bee322a9ceb14e0d2f9ac18"
+  },
+  "sources_after": {
+    "morsehgp3D_v7/src/spindle/spindle.hpp": "f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577",
+    "morsehgp3D_v7/src/spindle/witness_count.hpp": "fce9510ee21cbe025283a9ce777b120e4173ce62eee736e1c48dc772afb67a42",
+    "morsehgp3D_v7/src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+    "morsehgp3D_v7/src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "morsehgp3D_v7/src/core/caps.hpp": "d388c877bf4ca8c0fc164148f176959530a0ceff3052640402db3dcd3c256912",
+    "morsehgp3D_v7/src/tree/cloud_index.hpp": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95",
+    "morsehgp3D_v7/src/wspd/wavefront.hpp": "481a0d05da0631c71d74b52d90ea84233ad9c7624221a3783f322554fdb32063",
+    "morsehgp3D_v7/src/pipeline/generate.hpp": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59",
+    "morsehgp3D_v7/src/pipeline/run.hpp": "1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c",
+    "morsehgp3D_v7/audits/spindle_arithmetic_probe.py": "659c9cbe6400e3f1f769a716f4371f6b338476399bee322a9ceb14e0d2f9ac18"
+  },
+  "ledger": {
+    "d2q": {
+      "upper_bound": 51538034700,
+      "magnitude_bits": 36,
+      "signed_storage_bits": 64
+    },
+    "w2a_w2b": {
+      "upper_bound": 12884508675,
+      "magnitude_bits": 34,
+      "signed_storage_bits": 64
+    },
+    "ra2u_rb2u": {
+      "upper_bound": 113510,
+      "magnitude_bits": 17,
+      "signed_storage_bits": 64
+    },
+    "d2u": {
+      "upper_bound": 227019,
+      "magnitude_bits": 18,
+      "signed_storage_bits": 64
+    },
+    "r2u": {
+      "upper_bound": 227020,
+      "magnitude_bits": 18,
+      "signed_storage_bits": 64
+    },
+    "s2": {
+      "upper_bound": 25769040200,
+      "magnitude_bits": 35,
+      "signed_storage_bits": 64
+    },
+    "sub2_numerator": {
+      "upper_bound": 108083188388069375,
+      "magnitude_bits": 57,
+      "signed_storage_bits": 64
+    },
+    "sub2": {
+      "upper_bound": 103076160800,
+      "magnitude_bits": 37,
+      "signed_storage_bits": 64
+    },
+    "ceil_sqrt_sub2": {
+      "upper_bound": 321055,
+      "magnitude_bits": 19,
+      "signed_storage_bits": 64
+    },
+    "aq_times_d2u": {
+      "upper_bound": 243759795142656,
+      "magnitude_bits": 48,
+      "signed_storage_bits": 128
+    },
+    "center4": {
+      "upper_bound": 262140,
+      "magnitude_bits": 18,
+      "signed_storage_bits": 64
+    },
+    "ball_distance_squared": {
+      "upper_bound": 206152138800,
+      "magnitude_bits": 38,
+      "signed_storage_bits": 128
+    },
+    "ball_radius_squared": {
+      "upper_bound": 51537626361,
+      "magnitude_bits": 36,
+      "signed_storage_bits": 128
+    },
+    "cross_square_sum_loose": {
+      "upper_bound": 221347418394867007500,
+      "magnitude_bits": 68,
+      "signed_storage_bits": 128
+    },
+    "three_h_square_loose": {
+      "upper_bound": 498031691388450766875,
+      "magnitude_bits": 69,
+      "signed_storage_bits": 128
+    },
+    "hmax4_absolute_loose": {
+      "upper_bound": 51538034700,
+      "magnitude_bits": 36,
+      "signed_storage_bits": 64
+    },
+    "q4_static_assert_square": {
+      "upper_bound": 3991276797938567332485628241121378304,
+      "magnitude_bits": 122,
+      "signed_storage_bits": 128
+    },
+    "q4_static_assert_rhs": {
+      "upper_bound": 3987683987354747618711421180841033728,
+      "magnitude_bits": 122,
+      "signed_storage_bits": 128
+    }
+  },
+  "root_model_cases": 92,
+  "axis_identity_cases": 125,
+  "ceil_distance_counter_fixture": {
+    "a": [
+      0,
+      0,
+      0
+    ],
+    "b": [
+      1,
+      1,
+      0
+    ],
+    "z": [
+      0,
+      1,
+      0
+    ],
+    "normal_radius4": 2,
+    "mutant_radius4": 3,
+    "witness_distance4_squared": 8,
+    "witness_h": 0,
+    "authority": "integer_equations_not_cpp_run"
+  },
+  "elapsed_seconds": 0.02809142400019482
+}
