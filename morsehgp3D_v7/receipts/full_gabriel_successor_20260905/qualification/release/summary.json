@@ -1,0 +1,358 @@
+{
+  "binaries_stable": true,
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "0",
+        "/usr/bin/cmake",
+        "-S",
+        "/workspaces/E-HGP/morsehgp3D_v7",
+        "-B",
+        "/workspaces/E-HGP/build/v7_successor_20260905_r2_release",
+        "-G",
+        "Unix Makefiles",
+        "-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_CXX_FLAGS=",
+        "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG",
+        "-DCMAKE_EXE_LINKER_FLAGS=",
+        "-DCMAKE_EXE_LINKER_FLAGS_RELEASE=",
+        "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR:PATH=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-DMHGP7_ENABLE_CUDA=OFF",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.565461944001072,
+      "ended_utc": "2026-09-05T21:28:39.393581+00:00",
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "error": null,
+      "exit_code": 0,
+      "expected_code": 0,
+      "label": "configure",
+      "raw": {
+        "stderr": {
+          "bytes": 0,
+          "ctime_ns": 1788643718827215333,
+          "device": 1796,
+          "inode": 1841912,
+          "mtime_ns": 1788643718827215333,
+          "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/configure.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 527,
+          "ctime_ns": 1788643719343215342,
+          "device": 1796,
+          "inode": 1841911,
+          "mtime_ns": 1788643719343215342,
+          "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/configure.stdout",
+          "sha256": "d0b8c90c291e71722e51c7a22860cd95b5d4488c3b1fcbc1fea8208a499e519c"
+        }
+      },
+      "started_utc": "2026-09-05T21:28:38.825905+00:00",
+      "status": "completed",
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "0",
+        "/usr/bin/cmake",
+        "--build",
+        "/workspaces/E-HGP/build/v7_successor_20260905_r2_release",
+        "--parallel",
+        "2",
+        "--target",
+        "mhgp7_full_certificate_gate",
+        "mhgp7_full_gabriel_gate",
+        "mhgp7_full_gabriel_allocation_gate",
+        "mhgp7_full_gabriel_lazy_gate",
+        "mhgp7_full_gabriel_lazy_allocation_gate",
+        "mhgp7_full_gabriel_digest_gate",
+        "mhgp7_full_gabriel_singleton_gate",
+        "mhgp7_full_gabriel_successor_gate"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 104.59942758399848,
+      "ended_utc": "2026-09-05T21:30:24.454572+00:00",
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "error": null,
+      "exit_code": 0,
+      "expected_code": 0,
+      "label": "build",
+      "raw": {
+        "stderr": {
+          "bytes": 0,
+          "ctime_ns": 1788643719854215351,
+          "device": 1796,
+          "inode": 1842468,
+          "mtime_ns": 1788643719854215351,
+          "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/build.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 1804,
+          "ctime_ns": 1788643824401217234,
+          "device": 1796,
+          "inode": 1842467,
+          "mtime_ns": 1788643824401217234,
+          "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/build.stdout",
+          "sha256": "cf7092fc611cbf487e5bcd43a685c880d2a58f4ef905e84b4ff20031e6596cb0"
+        }
+      },
+      "started_utc": "2026-09-05T21:28:39.852728+00:00",
+      "status": "completed",
+      "timeout_seconds": 600
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "0",
+        "/usr/bin/ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7_successor_20260905_r2_release",
+        "--show-only=json-v1",
+        "-L",
+        "^(full_certificate|full_gabriel|full_gabriel_lazy|full_gabriel_digest|full_gabriel_singleton|full_gabriel_successor)$"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.032083295000120415,
+      "ended_utc": "2026-09-05T21:30:25.602655+00:00",
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "error": null,
+      "exit_code": 0,
+      "expected_code": 0,
+      "label": "inventory",
+      "raw": {
+        "stderr": {
+          "bytes": 0,
+          "ctime_ns": 1788643825569217255,
+          "device": 1796,
+          "inode": 1842498,
+          "mtime_ns": 1788643825569217255,
+          "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/inventory.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 22151,
+          "ctime_ns": 1788643825590217256,
+          "device": 1796,
+          "inode": 1842497,
+          "mtime_ns": 1788643825590217256,
+          "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/inventory.stdout",
+          "sha256": "4e105b5fb673aeb81e5fedf0afa0121e11b8441fc10a438d9fe352a0d32042d7"
+        }
+      },
+      "started_utc": "2026-09-05T21:30:25.568006+00:00",
+      "status": "completed",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/usr/bin/taskset",
+        "-c",
+        "6",
+        "/usr/bin/ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7_successor_20260905_r2_release",
+        "-j1",
+        "-V",
+        "--output-on-failure",
+        "--no-tests=error",
+        "--timeout",
+        "60",
+        "-L",
+        "^(full_certificate|full_gabriel|full_gabriel_lazy|full_gabriel_digest|full_gabriel_singleton|full_gabriel_successor)$",
+        "--output-junit",
+        "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/ctest.junit.xml"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 1.6180111049998231,
+      "ended_utc": "2026-09-05T21:30:28.252456+00:00",
+      "environment": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PATH": "/usr/bin:/bin",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "error": null,
+      "exit_code": 0,
+      "expected_code": 0,
+      "label": "ctest",
+      "raw": {
+        "stderr": {
+          "bytes": 0,
+          "ctime_ns": 1788643826633217274,
+          "device": 1796,
+          "inode": 1842511,
+          "mtime_ns": 1788643826633217274,
+          "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/ctest.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 16705,
+          "ctime_ns": 1788643828231217303,
+          "device": 1796,
+          "inode": 1842510,
+          "mtime_ns": 1788643828231217303,
+          "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/ctest.stdout",
+          "sha256": "f6b6a4ec521ecf512182e31e502052d3613378759797513819ef114df19913e1"
+        }
+      },
+      "started_utc": "2026-09-05T21:30:26.632437+00:00",
+      "status": "completed",
+      "timeout_seconds": 180
+    }
+  ],
+  "compile_binding_stable": true,
+  "errors": [],
+  "inventory": {
+    "commands_codes_and_timeouts_exact": true,
+    "label_filter": "^(full_certificate|full_gabriel|full_gabriel_lazy|full_gabriel_digest|full_gabriel_singleton|full_gabriel_successor)$",
+    "names": [
+      "mhgp7_full_certificate",
+      "mhgp7_full_certificate_rejects",
+      "mhgp7_full_gabriel",
+      "mhgp7_full_gabriel_allocation",
+      "mhgp7_full_gabriel_allocation_bad_argument",
+      "mhgp7_full_gabriel_bad_argument",
+      "mhgp7_full_gabriel_digest",
+      "mhgp7_full_gabriel_digest_bad_argument",
+      "mhgp7_full_gabriel_lazy",
+      "mhgp7_full_gabriel_lazy_allocation",
+      "mhgp7_full_gabriel_lazy_allocation_bad_argument",
+      "mhgp7_full_gabriel_lazy_bad_argument",
+      "mhgp7_full_gabriel_lazy_rejects",
+      "mhgp7_full_gabriel_rejects",
+      "mhgp7_full_gabriel_singleton",
+      "mhgp7_full_gabriel_singleton_bad_argument",
+      "mhgp7_full_gabriel_singleton_rejects",
+      "mhgp7_full_gabriel_successor",
+      "mhgp7_full_gabriel_successor_bad_argument",
+      "mhgp7_full_gabriel_successor_rejects"
+    ],
+    "tests": 20
+  },
+  "mode": "release",
+  "source_sha256": "8c977bc529b5d354c1a69b50dc51d1a27b6cf04ec7901a75572367f27466d20e",
+  "sources_stable": true,
+  "status": "completed",
+  "test_outputs": {
+    "copies": {
+      "JUnit.stdout": {
+        "archive": {
+          "bytes": 10412,
+          "ctime_ns": 1788643829391217324,
+          "device": 1796,
+          "inode": 1842559,
+          "mtime_ns": 1788643829391217324,
+          "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/JUnit.stdout",
+          "sha256": "7dd3a84a62478fcfc47a319336c3727a21222f7490ff6d1663c3b799ad06f14d"
+        },
+        "source": {
+          "bytes": 10412,
+          "ctime_ns": 1788643828232217303,
+          "device": 1796,
+          "inode": 1842514,
+          "mtime_ns": 1788643828232217303,
+          "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/ctest.junit.xml",
+          "sha256": "7dd3a84a62478fcfc47a319336c3727a21222f7490ff6d1663c3b799ad06f14d"
+        }
+      },
+      "LastTest.stdout": {
+        "archive": {
+          "bytes": 22151,
+          "ctime_ns": 1788643829388217324,
+          "device": 1796,
+          "inode": 1842558,
+          "mtime_ns": 1788643829388217324,
+          "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/LastTest.stdout",
+          "sha256": "beabf79cdda21138c6a312155259a8388c309645916fe50205b3aab3e4416b71"
+        },
+        "source": {
+          "bytes": 22151,
+          "ctime_ns": 1788643828232217303,
+          "device": 1796,
+          "inode": 1842512,
+          "mtime_ns": 1788643828232217303,
+          "path": "/workspaces/E-HGP/build/v7_successor_20260905_r2_release/Testing/Temporary/LastTest.log",
+          "sha256": "beabf79cdda21138c6a312155259a8388c309645916fe50205b3aab3e4416b71"
+        }
+      }
+    },
+    "fresh": true,
+    "junit": {
+      "all_run": true,
+      "names": [
+        "mhgp7_full_certificate",
+        "mhgp7_full_certificate_rejects",
+        "mhgp7_full_gabriel",
+        "mhgp7_full_gabriel_allocation",
+        "mhgp7_full_gabriel_allocation_bad_argument",
+        "mhgp7_full_gabriel_bad_argument",
+        "mhgp7_full_gabriel_digest",
+        "mhgp7_full_gabriel_digest_bad_argument",
+        "mhgp7_full_gabriel_lazy",
+        "mhgp7_full_gabriel_lazy_allocation",
+        "mhgp7_full_gabriel_lazy_allocation_bad_argument",
+        "mhgp7_full_gabriel_lazy_bad_argument",
+        "mhgp7_full_gabriel_lazy_rejects",
+        "mhgp7_full_gabriel_rejects",
+        "mhgp7_full_gabriel_singleton",
+        "mhgp7_full_gabriel_singleton_bad_argument",
+        "mhgp7_full_gabriel_singleton_rejects",
+        "mhgp7_full_gabriel_successor",
+        "mhgp7_full_gabriel_successor_bad_argument",
+        "mhgp7_full_gabriel_successor_rejects"
+      ],
+      "tests": 20
+    },
+    "last_test": {
+      "all_blocks_passed": true,
+      "names": [
+        "mhgp7_full_certificate",
+        "mhgp7_full_certificate_rejects",
+        "mhgp7_full_gabriel",
+        "mhgp7_full_gabriel_allocation",
+        "mhgp7_full_gabriel_allocation_bad_argument",
+        "mhgp7_full_gabriel_bad_argument",
+        "mhgp7_full_gabriel_digest",
+        "mhgp7_full_gabriel_digest_bad_argument",
+        "mhgp7_full_gabriel_lazy",
+        "mhgp7_full_gabriel_lazy_allocation",
+        "mhgp7_full_gabriel_lazy_allocation_bad_argument",
+        "mhgp7_full_gabriel_lazy_bad_argument",
+        "mhgp7_full_gabriel_lazy_rejects",
+        "mhgp7_full_gabriel_rejects",
+        "mhgp7_full_gabriel_singleton",
+        "mhgp7_full_gabriel_singleton_bad_argument",
+        "mhgp7_full_gabriel_singleton_rejects",
+        "mhgp7_full_gabriel_successor",
+        "mhgp7_full_gabriel_successor_bad_argument",
+        "mhgp7_full_gabriel_successor_rejects"
+      ],
+      "terminal_footer": true,
+      "tests": 20
+    }
+  },
+  "toolchain_stable": true
+}

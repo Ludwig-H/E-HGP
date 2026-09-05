@@ -1,0 +1,7 @@
+{
+  "exit_code": 1,
+  "output_absent": true,
+  "source_sha256": "1fb757ed5afc18bb207657c709b6e8fe37b5e38f9e444d66cc7c38449c932ba0",
+  "status": "expected_compile_rejection",
+  "tag": "mhgp7_obsolete_full_probe_calendar"
+}

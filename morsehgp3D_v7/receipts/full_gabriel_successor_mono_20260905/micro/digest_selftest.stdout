@@ -1,0 +1,1 @@
+{"schema":"mhgp7-full-gabriel-probe-v3","type":"digest_selftest","successor_accounting":"full_successor_reads_writes_no_last_pair_v2","checks":24,"failures":0,"expected_checks":24,"passed":true,"scope":"bench_serializer_only_no_geometry_or_catalogue_oracle"}

@@ -1,0 +1,98 @@
+{
+  "all_planned_heavy_attempts_successful": false,
+  "build_argument": "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/build_admission/receipt.json=864752523560865bb102788dfedef2fe4d626b6bf5b3477f729837acad57f7a1",
+  "captured_statuses": {
+    "build": "completed",
+    "heavy": "completed",
+    "micro": "completed"
+  },
+  "closed_valid_heavy_terminals": 5,
+  "comparisons_argument": "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/comparison_final/receipt.json=5ee6256151b13ca8e2c3681a791f2e3a47645eb7ee8bea4581d45181342ecd32",
+  "comparisons_requalified_here": false,
+  "engine_or_judge_rerun": false,
+  "excluded_original_timing": {
+    "attempt_argument": "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/heavy_local/n8000_s8_k10_lazy_c1000000.receipt.json=3be6826b540a89ea0b9a7b0c02f17844b4ff6910366eb8af95bb73f8b7022d80",
+    "functional_capture_valid_and_successful": true,
+    "incident_authority": "ROOT_declared_auditor_CPU0_overlap",
+    "incident_interval_utc": [
+      "2026-09-05T21:54:33.912911+00:00",
+      "2026-09-05T21:54:34.770106+00:00"
+    ],
+    "original_bytes_unchanged": true,
+    "original_interval_utc": [
+      "2026-09-05T21:53:39.145401+00:00",
+      "2026-09-05T21:56:01.656468+00:00"
+    ],
+    "timing_eligible": false
+  },
+  "gcp_used": false,
+  "heavy_argument": "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/heavy_local/receipt.json=925219da3489577ab6323af4ca2a3acea863a66804ac2bf4ca2093839502d7c5",
+  "historical_results_reused_as_fresh": false,
+  "historical_timing_pair_claim": false,
+  "integrated_inter_k_tower": false,
+  "micro_argument": "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/receipt.json=c4bbd2cf887695fb89ce5b53606f675819853116ad2ad0816f948311f281159e",
+  "omissions": [
+    {
+      "bytes": 510784,
+      "captured_build_status": "completed",
+      "path": "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/build_admission/full_gabriel_lazy_probe",
+      "reason": "only_exact_probe_ELF_omitted",
+      "sha256": "8ff0dd10bdc0b43d405abde53809242029ca5094be3c61b04120359af28b0780"
+    }
+  ],
+  "planned_heavy_jobs": 5,
+  "prefix_promoted_to_global_success": false,
+  "producer_sha256": "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad",
+  "public_status": "not_claimed",
+  "qualification_reference": {
+    "all_sealed_artifacts_verified": true,
+    "argument": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/receipt.json=49be3d72045f9b3a2306a69230d114e6bac96861f6029e6e13c495091f61e72d",
+    "producer_sha256": "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad",
+    "reference_only": true,
+    "tests_per_mode_reported": 20,
+    "tests_rerun_here": false
+  },
+  "schema": "mhgp7-successor-mono-publication-v1",
+  "single_replay": {
+    "argument": "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/replay_s8/receipt.json=8f3a1cd487c6d56f77d18f2ddc8b4edd0570edb12114a0725e5806d586300822",
+    "comparison": {
+      "affine_accounting_transform_applied": false,
+      "global_FULL_successful": false,
+      "order_measure_exclusions": [
+        "build_ms",
+        "digest_ms",
+        "expand_ms",
+        "hwm_mib_sample",
+        "read_ms",
+        "release_ms",
+        "rss_mib_sample"
+      ],
+      "orders_compared": 10,
+      "scope": "complete_v3_v3_nonmeasure_fields",
+      "status": "valid",
+      "successor_steps_unchanged": true,
+      "terminal_measure_exclusions": [
+        "compute_read_release_ms_subtracted_diagnostic",
+        "digest_ms",
+        "elapsed_before_terminal_ms",
+        "generation_rects_ms",
+        "generation_wspd_ms",
+        "hwm_mib_sample",
+        "provisional_output_ms",
+        "rss_mib_sample",
+        "stage_ms"
+      ],
+      "timing_ratio_computed": false
+    },
+    "functional_comparison_requalified_here": false,
+    "global_FULL_successful": false,
+    "historical_comparison_is_separate": true,
+    "planned_jobs": 1,
+    "quiet_window_independently_certified": false,
+    "replaces_original_five_job_capture": false,
+    "same_binary_functional_replay_successful": true,
+    "status": "completed",
+    "timing_eligibility": "requires_ROOT_review_after_capture"
+  },
+  "status": "captured_bytes_verified_only"
+}

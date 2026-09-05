@@ -1,0 +1,20 @@
+{
+  "archive": {
+    "bytes": 158,
+    "ctime_ns": 1788644100248222202,
+    "device": 1796,
+    "inode": 1843165,
+    "mtime_ns": 1788644100248222202,
+    "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/san/ctest.fence",
+    "sha256": "a8e1b1688233855ab54a7993057e9f263de3781f5ca60a109c0363fec780f657"
+  },
+  "source": {
+    "bytes": 158,
+    "ctime_ns": 1788644100246222202,
+    "device": 1796,
+    "inode": 1843164,
+    "mtime_ns": 1788644100246222202,
+    "path": "/workspaces/E-HGP/build/v7_successor_20260905_r2_san/Testing/Temporary/.successor_owned_ctest_fence",
+    "sha256": "a8e1b1688233855ab54a7993057e9f263de3781f5ca60a109c0363fec780f657"
+  }
+}

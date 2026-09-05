@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/cmake",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.01589399700060312,
+  "ended_utc": "2026-09-05T21:25:24.235012+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "cmake_version",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788643524218211828,
+      "device": 1796,
+      "inode": 1841213,
+      "mtime_ns": 1788643524218211828,
+      "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification/cmake_version.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 91,
+      "ctime_ns": 1788643524227211829,
+      "device": 1796,
+      "inode": 1841212,
+      "mtime_ns": 1788643524227211829,
+      "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification/cmake_version.stdout",
+      "sha256": "d3d5b682f3f5ef5b24a79ed8cf4b8c5868fc950dad48cab1be0e3c060a77f8ee"
+    }
+  },
+  "started_utc": "2026-09-05T21:25:24.217643+00:00",
+  "status": "completed",
+  "timeout_seconds": 15
+}

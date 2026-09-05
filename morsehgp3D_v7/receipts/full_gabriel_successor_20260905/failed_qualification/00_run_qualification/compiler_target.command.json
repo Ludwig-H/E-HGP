@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/g++",
+    "-dumpmachine"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.003710735998538439,
+  "ended_utc": "2026-09-05T21:25:24.273341+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "compiler_target",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788643524268211829,
+      "device": 1796,
+      "inode": 1841225,
+      "mtime_ns": 1788643524268211829,
+      "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification/compiler_target.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 17,
+      "ctime_ns": 1788643524270211829,
+      "device": 1796,
+      "inode": 1841224,
+      "mtime_ns": 1788643524270211829,
+      "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification/compiler_target.stdout",
+      "sha256": "08cababdf891ccbf96eb376f1e84f279f70302fb13d84e5f98637becdfc6d989"
+    }
+  },
+  "started_utc": "2026-09-05T21:25:24.267533+00:00",
+  "status": "completed",
+  "timeout_seconds": 15
+}

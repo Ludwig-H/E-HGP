@@ -1,0 +1,19 @@
+/workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_successor_gate.cpp: In function 'int main(int, char**)':
+/workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_successor_gate.cpp:385:10: error: reference to 'detail' is ambiguous
+  385 |   check(!detail::force_legacy_successor, "legacy switch remains restored at exit");
+      |          ^~~~~~
+/workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_successor_gate.cpp:19:39: note: candidates are: 'namespace <unnamed>::detail = mhgp7::mhgp7::full_gabriel_detail;'
+   19 | namespace detail = full_gabriel_detail;
+      |                                       ^
+In file included from /workspaces/E-HGP/morsehgp3D_v7/tests/../src/forest/../lanes/q3.hpp:25,
+                 from /workspaces/E-HGP/morsehgp3D_v7/tests/../src/forest/silent_incidence.hpp:34,
+                 from /workspaces/E-HGP/morsehgp3D_v7/tests/../src/forest/full_gabriel.hpp:16,
+                 from /workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_singleton_fixtures.hpp:18,
+                 from /workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_successor_gate.cpp:11:
+/workspaces/E-HGP/morsehgp3D_v7/tests/../src/forest/../lanes/../tree/cloud_index.hpp:103:11: note:                 'namespace mhgp7::detail { }'
+  103 | namespace detail {
+      |           ^~~~~~
+gmake[3]: *** [CMakeFiles/mhgp7_full_gabriel_successor_gate.dir/build.make:76: CMakeFiles/mhgp7_full_gabriel_successor_gate.dir/tests/full_gabriel_successor_gate.cpp.o] Error 1
+gmake[2]: *** [CMakeFiles/Makefile2:358: CMakeFiles/mhgp7_full_gabriel_successor_gate.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:365: CMakeFiles/mhgp7_full_gabriel_successor_gate.dir/rule] Error 2
+gmake: *** [Makefile:225: mhgp7_full_gabriel_successor_gate] Error 2

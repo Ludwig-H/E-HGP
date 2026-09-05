@@ -1,0 +1,9 @@
+{
+  "build_argument": "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/build_admission/receipt.json=864752523560865bb102788dfedef2fe4d626b6bf5b3477f729837acad57f7a1",
+  "excluded_attempt_argument": "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/heavy_local/n8000_s8_k10_lazy_c1000000.receipt.json=3be6826b540a89ea0b9a7b0c02f17844b4ff6910366eb8af95bb73f8b7022d80",
+  "micro_argument": "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/receipt.json=c4bbd2cf887695fb89ce5b53606f675819853116ad2ad0816f948311f281159e",
+  "original_campaign_lock": "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/heavy_local/session.lock",
+  "planned_heavy_jobs": 1,
+  "qualification_argument": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/receipt.json=49be3d72045f9b3a2306a69230d114e6bac96861f6029e6e13c495091f61e72d",
+  "replay_schema": "mhgp7-successor-single-replay-v1"
+}

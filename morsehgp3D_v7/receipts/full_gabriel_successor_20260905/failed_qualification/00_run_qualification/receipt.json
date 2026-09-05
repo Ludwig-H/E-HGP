@@ -1,0 +1,360 @@
+{
+  "artifacts": {
+    "boost_dependency_identities.stdout": "ec9abb0b435d292607f40e7fc163f6dec7e38c900830492505faddddd8a9dc89",
+    "boost_inventory.json": "0ac9abe5de11d2ca6a7b3aa2d0866d75d82a452c6cc8769200530b99857c0231",
+    "cmake_version.command.json": "437881b1015c52ec3ded6b7a604f19a2f5a283f94f688184b8d281e4f2c78c71",
+    "cmake_version.intent.json": "8e96adcda38e9641d4dc553461737593d09cb3c0542cb34768c8150999a43269",
+    "cmake_version.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cmake_version.stdout": "d3d5b682f3f5ef5b24a79ed8cf4b8c5868fc950dad48cab1be0e3c060a77f8ee",
+    "compiler_target.command.json": "c5d94dae9c5cd9cb12372955a554ab44408682e0ecf0cb6b5f75f038b6b05201",
+    "compiler_target.intent.json": "0fa1a8eaa5adeb9a6d9ac5b7f962100c7d23ee000ca2f930bf3da8a31d3917f2",
+    "compiler_target.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_target.stdout": "08cababdf891ccbf96eb376f1e84f279f70302fb13d84e5f98637becdfc6d989",
+    "compiler_version.command.json": "fa0a5cd1ac3897c103b5a4c5789581078b46b712b16a1992415eeef736f36ae7",
+    "compiler_version.intent.json": "17f0a510ae76f2a5db11e41028d653451d4136d4a2eeab2dddcc5dbd85c6e139",
+    "compiler_version.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_version.stdout": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8",
+    "ctest_version.command.json": "04aa0423961a57033bbccf1dad50b8f5f775925c8a350b05b7a28e200d87012d",
+    "ctest_version.intent.json": "89d0683d98eb440ebebe0d461dccc1bd3a0167d9e31f0d39b6f3e66dcfb0cecf",
+    "ctest_version.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ctest_version.stdout": "fd61d05e1e746f5652d87e0b6c9bafa334e95b89d1e53b1bfeb7d2af3ab208dc",
+    "freshness.json": "6aa47f54dba0a6c2f790ebba91fed8cc0b7c58b6ded934e0edd38b37cdd3b8f0",
+    "host_after.json": "84db320054b76f981428fb8b5e11d9a511f67c9cfd5e001517830f8f1b27b7db",
+    "host_before.json": "6ff1e5be9f0e49b29ff7596ce176081da759cca6703e80e6e5c7d0ac2032af60",
+    "metadata_selftest_normal.command.json": "5a90b5cfa7d0a2091fbc36005f4cab3e3ce5a0f7ffacf2404cde05509406e5c0",
+    "metadata_selftest_normal.intent.json": "7a171261553542fee1d1d2efd9309ca648420dfa6c0300f0b3e2ad47b1a525cd",
+    "metadata_selftest_normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "metadata_selftest_normal.stdout": "f256474c52790891e368216db985aa9610f0ace52d645f2fccc1ea6e99d7745e",
+    "metadata_selftest_optimized.command.json": "f8954a472d972785e684c00d3c5e95f8f7c2169f48811366f43c2e52339381b2",
+    "metadata_selftest_optimized.intent.json": "75b05c62a2d42a52dd82e6c2c208dac60e96184b8bea2d520c0ed78bdda1c735",
+    "metadata_selftest_optimized.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "metadata_selftest_optimized.stdout": "f256474c52790891e368216db985aa9610f0ace52d645f2fccc1ea6e99d7745e",
+    "protocol/capture.py": "265be9e2425078e18c288642610ad4d4fae9a5e18224a10f1651d57186281e8a",
+    "protocol/check_v7_receipt_publication.py": "32420385f487260e0706b3e649befca25cc95a9d45f17d22472c333870729580",
+    "protocol/legacy_capture.py": "528175a4fae239aa62630c32c27355be34db1092bef7f8cdb98e589022663bb4",
+    "protocol/publication_common.py": "5c7f18a2577ee388a8f9652c3596ffe9ab9ade6bbc3101ae45f18fc91da6dfba",
+    "release/build.command.json": "0a83e3e1cc8d742269ea294b32271dbb9baea815ce8f3a35b419cbd9ddead178",
+    "release/build.intent.json": "1d57277564c077ffb3e671cc3d2d319cd291b804dee6409246cb77f479f3728c",
+    "release/build.stderr": "03a4fe6b73327b8bc138d89ebaffc0dcab093e8758e3237d9c6b1353c6f66dde",
+    "release/build.stdout": "ed804c0f3b6a653ea4fa0905f3864a6cebe19857800a0732fd635257a5f7b599",
+    "release/build_artifact_copies.json": "0a3e70028aa6ba8d08a1a1548d78dc90b8bcbe979958fc970d6c6b2cb400a9b4",
+    "release/build_artifacts.json": "0a3e70028aa6ba8d08a1a1548d78dc90b8bcbe979958fc970d6c6b2cb400a9b4",
+    "release/build_artifacts/CMakeCache.txt": "4aa2f36a5e5747bcd0ddc6bef9dc69fd3448c5f386279048571c2c3d0db91f4b",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__build.make": "7fb67a987849d5b0557ef61c12bf9c6feeb503d664f94cca87694619877f6bcd",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__flags.make": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__link.txt": "28f4650f642b0f7542f0831a4b79f589327f710284c20f73028968ccbec539b2",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_certificate_gate.dir__tests__full_certificate_gate.cpp.o.d": "29f928d98fd57f8aafe05af0efc8b20ea6450bbb9e099918454efd8cb1952d70",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__build.make": "981d0ba8aeac6c5beea5ddc20f60f768451c457f1f9b93fef6aa4a9035eac4dd",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__flags.make": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__link.txt": "39440237a01cf647001dcde70fc10dc17a353b29193af7323b167d76f44ed8e5",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_allocation_gate.dir__tests__full_gabriel_allocation_gate.cpp.o.d": "12a686983504d5dd00cf384f54bef57956f2a11b17944bbd076b6af55d775064",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__build.make": "ca49b26f7eb431e367d2f811fe3888df1371ba19faad22f5773a0819bde768f2",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__flags.make": "77bcd3ad1dc163c35112739e78c9787030afb59bbf8472a82daac110cd332efa",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__link.txt": "0a631e1115a0e8a895c8b342fca1c6671dcea01546f89ee68e6c289e651f805f",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_digest_gate.dir__tests__full_gabriel_digest_gate.cpp.o.d": "ec9abb0b435d292607f40e7fc163f6dec7e38c900830492505faddddd8a9dc89",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__build.make": "48d04ee51d1a77e6389c17c78fcc993922d3aff68aceeb3553e1f6bf2cbee226",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__flags.make": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__link.txt": "ded6574334e999ccd14b5c7f05a0e8420fba4c344fcd2f173731ac66111ed098",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_gate.dir__tests__full_gabriel_gate.cpp.o.d": "88aae30c5ef9809b4303d6ba96dd40f8eea67e7944f9f9d644ef7e77ed7b5afc",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__build.make": "93b2c342b3ffcddba0fb5b130503c4bb72561e40e44dfa46b75b7e779f835c36",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__flags.make": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__link.txt": "bde7c4b29033340b9bd7e6d06fb268a2d0f6ff8ae02e337b4187c6c93a94783f",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_allocation_gate.dir__tests__full_gabriel_lazy_allocation_gate.cpp.o.d": "e0dd2a1d2531b1005464c3515b99b6e3045e8b7dc344683ae6b958b0cc4f16a1",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__build.make": "601fc4b67f9d999e85031b954edaade4bca2a0bce7c9d8c50671403a1621f607",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__flags.make": "c5d14b26aed02eb6e3f5d6f0203b4b5e86e445a6884b5a8072ba9b017ed0d46b",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__link.txt": "c3e1b73526f418ba4de2af09321c36fb08ef93466f97bcc5e0b6bfa41c9b6070",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_lazy_gate.dir__tests__full_gabriel_lazy_gate.cpp.o.d": "11daf52f2e2ad7b47135861ee11753300d576e3c0f1282e7a3d21bf702d5d767",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_singleton_gate.dir__build.make": "870d45d448c48a26ff6f15ceb9701f471c193b4b1c855929e7661f8091ff4cc5",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_singleton_gate.dir__flags.make": "e0ff813e7ef2cfcde76fe70977f08581aa73bd2b45926efd2e01ecd6fb4e5062",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_singleton_gate.dir__link.txt": "937d72be48087f91d29965a23def3aa02553efd913cf68a21d4ba4bfee852a34",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_singleton_gate.dir__tests__full_gabriel_singleton_gate.cpp.o.d": "c6a11277f9dc813293979b8128de1b4a0bed51a6b0f7df10b04d409d6062aafa",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_successor_gate.dir__build.make": "dab4da5b28eada43596b851739f695dba25d05bba6a09712475c645406ff25e7",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_successor_gate.dir__flags.make": "e0ff813e7ef2cfcde76fe70977f08581aa73bd2b45926efd2e01ecd6fb4e5062",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_successor_gate.dir__link.txt": "29dfd66a7d7f7ec9c7b036d5a16b73f150bb030760bfd80b2aee05e53d0dd7c8",
+    "release/build_artifacts/CMakeFiles__mhgp7_full_gabriel_successor_gate.dir__tests__full_gabriel_successor_gate.cpp.o.d": "a82a87feaccdd0f85b7056b8d924951ac823f991ef66b1e0373e7f2bf28b2e5e",
+    "release/build_artifacts/CTestTestfile.cmake": "ee75e5a1d1834a1782093617ba20af009c4a725e1069faa6ebff56d776ae0fba",
+    "release/build_artifacts/compile_commands.json": "ed8606c7f36a861ce915d62031fac8dcfcfd7e9a01c8349fab99473293236802",
+    "release/configure.command.json": "d7eacd8f0da761e0dac605ec283a4e8b48c267ccdb55b72200de84b63320e224",
+    "release/configure.intent.json": "17677fef86f01501671ef242fbb8ffbece7e9691c177dbddbd3068f3eb13178c",
+    "release/configure.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "release/configure.stdout": "dbc73ac4dec3b2613e1712f72fd82eeb643603a3d04e529104fc76abaebd0d3a",
+    "release/environment.json": "7488a611e838100c16b4cab9e588e171ad62cb1f985cf53b335bdc2afee5764a",
+    "release/host_after.json": "eb3e2cbc6f4c308d7f3d7b057d5520dc1315ad00fd8ba18322a58a6010ece05b",
+    "release/host_before.json": "efa97eb5384447127de4bc2762d1a9e52961cfd345440f4feecd23231056d464",
+    "release/sources_after.json": "7bd7ec72dc96a7a07f8e64f2928dd1d4f3077be5bd2c40f85be9112e760055ff",
+    "release/summary.json": "9fe452fc35b6ac02b63adbf464de268525dd22daa1952a8e9d4a1d47418a1e86",
+    "release/toolchain_after.json": "3437145b9a54374a27bd332ec9da5455cd15ddf6acd4bdb846cd29eca1d1fc81",
+    "sources_after.json": "7bd7ec72dc96a7a07f8e64f2928dd1d4f3077be5bd2c40f85be9112e760055ff",
+    "sources_before.json": "7bd7ec72dc96a7a07f8e64f2928dd1d4f3077be5bd2c40f85be9112e760055ff",
+    "toolchain_after.json": "3437145b9a54374a27bd332ec9da5455cd15ddf6acd4bdb846cd29eca1d1fc81",
+    "toolchain_before.json": "3437145b9a54374a27bd332ec9da5455cd15ddf6acd4bdb846cd29eca1d1fc81",
+    "toolchain_commands.json": "06a35ba4f704b7f7fbb5fa195b2b88a12df2bc4bc4ce305f670d929c8757ff41"
+  },
+  "build_tag": "",
+  "controller_sha256": "265be9e2425078e18c288642610ad4d4fae9a5e18224a10f1651d57186281e8a",
+  "development": false,
+  "ended_utc": "2026-09-05T21:26:57.249428+00:00",
+  "errors": [
+    "RuntimeError: release qualification failed; no automatic retry"
+  ],
+  "gcp_used": false,
+  "hermetic": false,
+  "historical_results_reused": false,
+  "kind": "qualification",
+  "permission_override": "none",
+  "phases": [
+    {
+      "binaries_stable": false,
+      "commands": [
+        {
+          "argv": [
+            "/usr/bin/taskset",
+            "-c",
+            "0",
+            "/usr/bin/cmake",
+            "-S",
+            "/workspaces/E-HGP/morsehgp3D_v7",
+            "-B",
+            "/workspaces/E-HGP/build/v7_successor_20260905_release",
+            "-G",
+            "Unix Makefiles",
+            "-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DCMAKE_CXX_FLAGS=",
+            "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG",
+            "-DCMAKE_EXE_LINKER_FLAGS=",
+            "-DCMAKE_EXE_LINKER_FLAGS_RELEASE=",
+            "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR:PATH=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+            "-DMHGP7_ENABLE_CUDA=OFF",
+            "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+          ],
+          "cwd": "/workspaces/E-HGP",
+          "elapsed_seconds": 0.5660936420008511,
+          "ended_utc": "2026-09-05T21:25:25.511513+00:00",
+          "environment": {
+            "LANG": "C",
+            "LC_ALL": "C",
+            "PATH": "/usr/bin:/bin",
+            "PYTHONDONTWRITEBYTECODE": "1"
+          },
+          "error": null,
+          "exit_code": 0,
+          "expected_code": 0,
+          "label": "configure",
+          "raw": {
+            "stderr": {
+              "bytes": 0,
+              "ctime_ns": 1788643524944211842,
+              "device": 1796,
+              "inode": 1841241,
+              "mtime_ns": 1788643524944211842,
+              "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification/release/configure.stderr",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 524,
+              "ctime_ns": 1788643525473211851,
+              "device": 1796,
+              "inode": 1841240,
+              "mtime_ns": 1788643525473211851,
+              "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification/release/configure.stdout",
+              "sha256": "dbc73ac4dec3b2613e1712f72fd82eeb643603a3d04e529104fc76abaebd0d3a"
+            }
+          },
+          "started_utc": "2026-09-05T21:25:24.943028+00:00",
+          "status": "completed",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "/usr/bin/taskset",
+            "-c",
+            "0",
+            "/usr/bin/cmake",
+            "--build",
+            "/workspaces/E-HGP/build/v7_successor_20260905_release",
+            "--parallel",
+            "2",
+            "--target",
+            "mhgp7_full_certificate_gate",
+            "mhgp7_full_gabriel_gate",
+            "mhgp7_full_gabriel_allocation_gate",
+            "mhgp7_full_gabriel_lazy_gate",
+            "mhgp7_full_gabriel_lazy_allocation_gate",
+            "mhgp7_full_gabriel_digest_gate",
+            "mhgp7_full_gabriel_singleton_gate",
+            "mhgp7_full_gabriel_successor_gate"
+          ],
+          "cwd": "/workspaces/E-HGP",
+          "elapsed_seconds": 90.06513036300021,
+          "ended_utc": "2026-09-05T21:26:56.036159+00:00",
+          "environment": {
+            "LANG": "C",
+            "LC_ALL": "C",
+            "PATH": "/usr/bin:/bin",
+            "PYTHONDONTWRITEBYTECODE": "1"
+          },
+          "error": null,
+          "exit_code": 2,
+          "expected_code": 0,
+          "label": "build",
+          "raw": {
+            "stderr": {
+              "bytes": 1740,
+              "ctime_ns": 1788643616008213481,
+              "device": 1796,
+              "inode": 1841797,
+              "mtime_ns": 1788643616008213481,
+              "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification/release/build.stderr",
+              "sha256": "03a4fe6b73327b8bc138d89ebaffc0dcab093e8758e3237d9c6b1353c6f66dde"
+            },
+            "stdout": {
+              "bytes": 1686,
+              "ctime_ns": 1788643612732213422,
+              "device": 1796,
+              "inode": 1841796,
+              "mtime_ns": 1788643612732213422,
+              "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification/release/build.stdout",
+              "sha256": "ed804c0f3b6a653ea4fa0905f3864a6cebe19857800a0732fd635257a5f7b599"
+            }
+          },
+          "started_utc": "2026-09-05T21:25:25.968150+00:00",
+          "status": "failed",
+          "timeout_seconds": 600
+        }
+      ],
+      "compile_binding_stable": false,
+      "errors": [
+        "RuntimeError: build failed",
+        "binaries_after:RuntimeError: missing executable:mhgp7_full_gabriel_successor_gate",
+        "final_compile_binding:FileNotFoundError: [Errno 2] No such file or directory: '/workspaces/E-HGP/build/v7_successor_20260905_release/CMakeFiles/mhgp7_full_gabriel_successor_gate.dir/tests/full_gabriel_successor_gate.cpp.o'",
+        "CTest not admitted; no test success inferred"
+      ],
+      "mode": "release",
+      "source_sha256": "7bd7ec72dc96a7a07f8e64f2928dd1d4f3077be5bd2c40f85be9112e760055ff",
+      "sources_stable": true,
+      "status": "failed",
+      "toolchain_stable": true
+    }
+  ],
+  "producer_sha256": "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad",
+  "public_status": "not_claimed",
+  "repository_head_declared_by_ROOT": "b2f0dc08564d7eceecd809925a2b0aaaa088c995",
+  "schema": "mhgp7-successor-qualification-v1",
+  "scope": "20 targeted CTests per fresh Release/SAN build; not F or whole suite",
+  "source_sha256": "7bd7ec72dc96a7a07f8e64f2928dd1d4f3077be5bd2c40f85be9112e760055ff",
+  "started_utc": "2026-09-05T21:25:23.911269+00:00",
+  "status": "failed",
+  "targets": {
+    "mhgp7_full_certificate_gate": "tests/full_certificate_gate.cpp",
+    "mhgp7_full_gabriel_allocation_gate": "tests/full_gabriel_allocation_gate.cpp",
+    "mhgp7_full_gabriel_digest_gate": "tests/full_gabriel_digest_gate.cpp",
+    "mhgp7_full_gabriel_gate": "tests/full_gabriel_gate.cpp",
+    "mhgp7_full_gabriel_lazy_allocation_gate": "tests/full_gabriel_lazy_allocation_gate.cpp",
+    "mhgp7_full_gabriel_lazy_gate": "tests/full_gabriel_lazy_gate.cpp",
+    "mhgp7_full_gabriel_singleton_gate": "tests/full_gabriel_singleton_gate.cpp",
+    "mhgp7_full_gabriel_successor_gate": "tests/full_gabriel_successor_gate.cpp"
+  },
+  "tests": {
+    "mhgp7_full_certificate": [
+      "mhgp7_full_certificate_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_certificate_rejects": [
+      "mhgp7_full_certificate_gate",
+      "--rejects",
+      0
+    ],
+    "mhgp7_full_gabriel": [
+      "mhgp7_full_gabriel_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_allocation": [
+      "mhgp7_full_gabriel_allocation_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_allocation_bad_argument": [
+      "mhgp7_full_gabriel_allocation_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_bad_argument": [
+      "mhgp7_full_gabriel_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_digest": [
+      "mhgp7_full_gabriel_digest_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_digest_bad_argument": [
+      "mhgp7_full_gabriel_digest_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_lazy": [
+      "mhgp7_full_gabriel_lazy_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_lazy_allocation": [
+      "mhgp7_full_gabriel_lazy_allocation_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_lazy_allocation_bad_argument": [
+      "mhgp7_full_gabriel_lazy_allocation_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_lazy_bad_argument": [
+      "mhgp7_full_gabriel_lazy_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_lazy_rejects": [
+      "mhgp7_full_gabriel_lazy_gate",
+      "--rejects",
+      0
+    ],
+    "mhgp7_full_gabriel_rejects": [
+      "mhgp7_full_gabriel_gate",
+      "--rejects",
+      0
+    ],
+    "mhgp7_full_gabriel_singleton": [
+      "mhgp7_full_gabriel_singleton_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_singleton_bad_argument": [
+      "mhgp7_full_gabriel_singleton_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_singleton_rejects": [
+      "mhgp7_full_gabriel_singleton_gate",
+      "--rejects",
+      0
+    ],
+    "mhgp7_full_gabriel_successor": [
+      "mhgp7_full_gabriel_successor_gate",
+      "--selftest",
+      0
+    ],
+    "mhgp7_full_gabriel_successor_bad_argument": [
+      "mhgp7_full_gabriel_successor_gate",
+      "--unknown",
+      2
+    ],
+    "mhgp7_full_gabriel_successor_rejects": [
+      "mhgp7_full_gabriel_successor_gate",
+      "--rejects",
+      0
+    ]
+  }
+}

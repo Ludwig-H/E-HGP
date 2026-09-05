@@ -1,0 +1,29 @@
+{
+  "affine_accounting_transform_applied": false,
+  "global_FULL_successful": false,
+  "order_measure_exclusions": [
+    "build_ms",
+    "digest_ms",
+    "expand_ms",
+    "hwm_mib_sample",
+    "read_ms",
+    "release_ms",
+    "rss_mib_sample"
+  ],
+  "orders_compared": 10,
+  "scope": "complete_v3_v3_nonmeasure_fields",
+  "status": "valid",
+  "successor_steps_unchanged": true,
+  "terminal_measure_exclusions": [
+    "compute_read_release_ms_subtracted_diagnostic",
+    "digest_ms",
+    "elapsed_before_terminal_ms",
+    "generation_rects_ms",
+    "generation_wspd_ms",
+    "hwm_mib_sample",
+    "provisional_output_ms",
+    "rss_mib_sample",
+    "stage_ms"
+  ],
+  "timing_ratio_computed": false
+}

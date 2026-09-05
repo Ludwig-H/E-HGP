@@ -1,0 +1,56 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "6",
+    "/usr/bin/ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_successor_20260905_r2_release",
+    "-j1",
+    "-V",
+    "--output-on-failure",
+    "--no-tests=error",
+    "--timeout",
+    "60",
+    "-L",
+    "^(full_certificate|full_gabriel|full_gabriel_lazy|full_gabriel_digest|full_gabriel_singleton|full_gabriel_successor)$",
+    "--output-junit",
+    "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/ctest.junit.xml"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 1.6180111049998231,
+  "ended_utc": "2026-09-05T21:30:28.252456+00:00",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "expected_code": 0,
+  "label": "ctest",
+  "raw": {
+    "stderr": {
+      "bytes": 0,
+      "ctime_ns": 1788643826633217274,
+      "device": 1796,
+      "inode": 1842511,
+      "mtime_ns": 1788643826633217274,
+      "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/ctest.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 16705,
+      "ctime_ns": 1788643828231217303,
+      "device": 1796,
+      "inode": 1842510,
+      "mtime_ns": 1788643828231217303,
+      "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/ctest.stdout",
+      "sha256": "f6b6a4ec521ecf512182e31e502052d3613378759797513819ef114df19913e1"
+    }
+  },
+  "started_utc": "2026-09-05T21:30:26.632437+00:00",
+  "status": "completed",
+  "timeout_seconds": 180
+}

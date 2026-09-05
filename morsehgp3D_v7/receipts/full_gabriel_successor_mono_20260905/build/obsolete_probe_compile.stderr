@@ -1,0 +1,3 @@
+/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_probe.cpp:4:2: error: #error "mhgp7_obsolete_full_probe_calendar: use full_gabriel_lazy_probe.cpp; historical v1 requires its pinned sources"
+    4 | #error "mhgp7_obsolete_full_probe_calendar: use full_gabriel_lazy_probe.cpp; historical v1 requires its pinned sources"
+      |  ^~~~~

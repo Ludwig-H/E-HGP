@@ -1,0 +1,61 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/compare.py",
+    "--scope",
+    "complete",
+    "--expected-comparator-sha256",
+    "15176b19ff7dd6b56c56470a887ecc9438fd673215cdefbd48f1a49953015718",
+    "--new-producer-sha256",
+    "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad",
+    "--old-kind",
+    "singleton21b77",
+    "--judge",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py=5de5b8d20d6073d5521a4217b8d504a59d255fad514eb8f4ddc257553ee0f032",
+    "--old",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/micro_admission_new/k10/n8_s10_k10_eager_c0.receipt.json=6caaaf84646ccde5c6e1b21bef30665f896c921e0eaeb4102a81b06901148233",
+    "--new",
+    "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/k10/n8_s10_k10_eager_c0.receipt.json=e5647fbfdf81a1c889b0cbf2ff75f84a3e21a3bd1c3a27c073f29644621e8f24",
+    "--old-protocol",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/micro_admission_new/k10/protocol.json=91d08dd269186043dbab799ff84dd0855b6b16604e1e68bf36f501a0336e994a",
+    "--new-protocol",
+    "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/k10/protocol.json=e63b601656b756fed963a5cc460b97160f2a22dd4ab24a03665e8a3a46250211",
+    "--old-sources",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/micro_admission_new/k10/n8_s10_k10_eager_c0.sources_before.json=960b75dbae9da8073f77ec16c1bf004a8c52dd944cfec144bb0707920bff970b",
+    "--new-sources",
+    "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/k10/n8_s10_k10_eager_c0.sources_before.json=037f6c3bb54653acb3a37d365f1406bd5f43b9cf24a3dbf743503eff9b4e8cd0"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/taskset -c 0 /home/codespace/.python/current/bin/python3 -B -O /workspaces/E-HGP/build/v7_successor_20260905_mono_controller/compare.py --scope complete --expected-comparator-sha256 15176b19ff7dd6b56c56470a887ecc9438fd673215cdefbd48f1a49953015718 --new-producer-sha256 85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad --old-kind singleton21b77 --judge /workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py=5de5b8d20d6073d5521a4217b8d504a59d255fad514eb8f4ddc257553ee0f032 --old /workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/micro_admission_new/k10/n8_s10_k10_eager_c0.receipt.json=6caaaf84646ccde5c6e1b21bef30665f896c921e0eaeb4102a81b06901148233 --new /workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/k10/n8_s10_k10_eager_c0.receipt.json=e5647fbfdf81a1c889b0cbf2ff75f84a3e21a3bd1c3a27c073f29644621e8f24 --old-protocol /workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/micro_admission_new/k10/protocol.json=91d08dd269186043dbab799ff84dd0855b6b16604e1e68bf36f501a0336e994a --new-protocol /workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/k10/protocol.json=e63b601656b756fed963a5cc460b97160f2a22dd4ab24a03665e8a3a46250211 --old-sources /workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/micro_admission_new/k10/n8_s10_k10_eager_c0.sources_before.json=960b75dbae9da8073f77ec16c1bf004a8c52dd944cfec144bb0707920bff970b --new-sources /workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/k10/n8_s10_k10_eager_c0.sources_before.json=037f6c3bb54653acb3a37d365f1406bd5f43b9cf24a3dbf743503eff9b4e8cd0",
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.1160083040012978,
+  "ended": "2026-09-05T22:21:16.616649+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_rc": [
+    0,
+    1,
+    2
+  ],
+  "id": "16_n8_s10_k10_eager_c0_optimized",
+  "outer_timeout_seconds": 60,
+  "process_vm_max_bytes": 27917287424,
+  "started": "2026-09-05T22:21:16.500410+00:00",
+  "status": "completed",
+  "streams": {
+    "16_n8_s10_k10_eager_c0_optimized.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "16_n8_s10_k10_eager_c0_optimized.stdout": {
+      "bytes": 6442,
+      "sha256": "47aca4d9612956cd7bb9ad950cfe99cf99c85ef8310aff0664debd7599fa996c"
+    }
+  }
+}

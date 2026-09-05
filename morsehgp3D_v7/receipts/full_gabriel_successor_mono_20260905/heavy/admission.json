@@ -1,0 +1,15 @@
+{
+  "kind": "heavy",
+  "micro_argument": "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/receipt.json=c4bbd2cf887695fb89ce5b53606f675819853116ad2ad0816f948311f281159e",
+  "no_probe_launched": true,
+  "phase": "new_only",
+  "qualification": {
+    "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/receipt.json",
+    "producer_sha256": "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad",
+    "sha256": "49be3d72045f9b3a2306a69230d114e6bac96861f6029e6e13c495091f61e72d",
+    "source_sha256": "8c977bc529b5d354c1a69b50dc51d1a27b6cf04ec7901a75572367f27466d20e",
+    "tests_per_mode": 20
+  },
+  "qualification_argument": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/receipt.json=49be3d72045f9b3a2306a69230d114e6bac96861f6029e6e13c495091f61e72d",
+  "started": "2026-09-05T21:47:09.442089+00:00"
+}

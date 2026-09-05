@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "/usr/bin/g++",
+    "--version"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/g++ --version",
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.003198991000317619,
+  "ended": "2026-09-05T21:44:04.876617+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_rc": [
+    0
+  ],
+  "id": "compiler_version",
+  "outer_timeout_seconds": 30,
+  "process_vm_max_bytes": 27917287424,
+  "started": "2026-09-05T21:44:04.873210+00:00",
+  "status": "completed",
+  "streams": {
+    "compiler_version.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "compiler_version.stdout": {
+      "bytes": 246,
+      "sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8"
+    }
+  }
+}

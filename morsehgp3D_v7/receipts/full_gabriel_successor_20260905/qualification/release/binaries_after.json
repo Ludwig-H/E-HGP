@@ -1,0 +1,74 @@
+{
+  "mhgp7_full_certificate_gate": {
+    "bytes": 107888,
+    "ctime_ns": 1788643722824215405,
+    "device": 1796,
+    "inode": 1842475,
+    "mtime_ns": 1788643722824215405,
+    "path": "/workspaces/E-HGP/build/v7_successor_20260905_r2_release/mhgp7_full_certificate_gate",
+    "sha256": "446111a83c7e453f50fcc09a9ebb1fcdef10a7a672d2ee4efe5429a962eb850a"
+  },
+  "mhgp7_full_gabriel_allocation_gate": {
+    "bytes": 413120,
+    "ctime_ns": 1788643754957215984,
+    "device": 1796,
+    "inode": 1842481,
+    "mtime_ns": 1788643754957215984,
+    "path": "/workspaces/E-HGP/build/v7_successor_20260905_r2_release/mhgp7_full_gabriel_allocation_gate",
+    "sha256": "4bb1f99874529bf2bdd52a2d73f8836326d9f2ae5ebe3888f64bd21e477fff7d"
+  },
+  "mhgp7_full_gabriel_digest_gate": {
+    "bytes": 115984,
+    "ctime_ns": 1788643790214216618,
+    "device": 1796,
+    "inode": 1842490,
+    "mtime_ns": 1788643790213216618,
+    "path": "/workspaces/E-HGP/build/v7_successor_20260905_r2_release/mhgp7_full_gabriel_digest_gate",
+    "sha256": "1be5909f6a33516e1ad79d6874df9a47b61cd7386995a589e8136277a19e3b0d"
+  },
+  "mhgp7_full_gabriel_gate": {
+    "bytes": 534576,
+    "ctime_ns": 1788643739433215704,
+    "device": 1796,
+    "inode": 1842478,
+    "mtime_ns": 1788643739433215704,
+    "path": "/workspaces/E-HGP/build/v7_successor_20260905_r2_release/mhgp7_full_gabriel_gate",
+    "sha256": "63740a0fdfd6fd036325c0c2bdd7e569d4fde986a42b37fd095a36b3fe4010da"
+  },
+  "mhgp7_full_gabriel_lazy_allocation_gate": {
+    "bytes": 427712,
+    "ctime_ns": 1788643785359216531,
+    "device": 1796,
+    "inode": 1842487,
+    "mtime_ns": 1788643785359216531,
+    "path": "/workspaces/E-HGP/build/v7_successor_20260905_r2_release/mhgp7_full_gabriel_lazy_allocation_gate",
+    "sha256": "d275f6f32624cb09d818e0c10449fea21e03f8b7bc90d31b87cd1d0d8b2d3f1c"
+  },
+  "mhgp7_full_gabriel_lazy_gate": {
+    "bytes": 513664,
+    "ctime_ns": 1788643771243216277,
+    "device": 1796,
+    "inode": 1842484,
+    "mtime_ns": 1788643771243216277,
+    "path": "/workspaces/E-HGP/build/v7_successor_20260905_r2_release/mhgp7_full_gabriel_lazy_gate",
+    "sha256": "264447226fecb2768d7f06306ba6d8a910b70aaabadc51b5e1908c5aa5488766"
+  },
+  "mhgp7_full_gabriel_singleton_gate": {
+    "bytes": 579848,
+    "ctime_ns": 1788643807278216926,
+    "device": 1796,
+    "inode": 1842493,
+    "mtime_ns": 1788643807278216926,
+    "path": "/workspaces/E-HGP/build/v7_successor_20260905_r2_release/mhgp7_full_gabriel_singleton_gate",
+    "sha256": "f82ffabb5765cd92bba2e30a9ebcbb74b043e13ba0db5fb21f13a405e38d7148"
+  },
+  "mhgp7_full_gabriel_successor_gate": {
+    "bytes": 580728,
+    "ctime_ns": 1788643824387217234,
+    "device": 1796,
+    "inode": 1842496,
+    "mtime_ns": 1788643824387217234,
+    "path": "/workspaces/E-HGP/build/v7_successor_20260905_r2_release/mhgp7_full_gabriel_successor_gate",
+    "sha256": "fa3725a2a6ce39984503f10515b5740b235b0f3dfff1d94fb8e78379f51c3495"
+  }
+}

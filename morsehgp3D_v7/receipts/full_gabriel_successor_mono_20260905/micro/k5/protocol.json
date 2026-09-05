@@ -1,0 +1,109 @@
+{
+  "authority": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues",
+  "binary": "build/v7_successor_20260905_mono_controller/build_admission/full_gabriel_lazy_probe",
+  "binary_sha256": "8ff0dd10bdc0b43d405abde53809242029ca5094be3c61b04120359af28b0780",
+  "comparison_s": "semantic_horizontal_forest_digest_not_oracle",
+  "continuation_policy": "explicit reviewed next attempt; no cap change",
+  "coord": 65536,
+  "cpu_affinity": [
+    6
+  ],
+  "digest_header_sha256": "671b2dfb51f1385ee7301bd6b03ef64e62c0d768c92534a6f09589726ce9adc3",
+  "family": "uniform",
+  "first_c_sha256": "ba9c0ba412f9b6eeabf891583e9802f2ba6581e31f476afff7d6b71b26c35a70",
+  "gcp_used": false,
+  "judge_sha256": "5de5b8d20d6073d5521a4217b8d504a59d255fad514eb8f4ddc257553ee0f032",
+  "kill_grace_seconds": 10,
+  "kmax": 5,
+  "measurement_kind": "new_only_no_historical_timing_pair",
+  "named_payload_proxy_gib": 8,
+  "output_capture": "merged stdout/stderr exact bytes plus GNU time -v",
+  "paired_F_speedup_claim": false,
+  "planned_sequence": [
+    [
+      8,
+      8,
+      "eager",
+      0
+    ],
+    [
+      8,
+      8,
+      "lazy",
+      0
+    ],
+    [
+      8,
+      8,
+      "lazy",
+      1
+    ],
+    [
+      8,
+      8,
+      "lazy",
+      1000000
+    ],
+    [
+      8,
+      10,
+      "eager",
+      0
+    ],
+    [
+      8,
+      10,
+      "lazy",
+      0
+    ],
+    [
+      8,
+      10,
+      "lazy",
+      1
+    ],
+    [
+      8,
+      10,
+      "lazy",
+      1000000
+    ],
+    [
+      8,
+      12,
+      "eager",
+      0
+    ],
+    [
+      8,
+      12,
+      "lazy",
+      0
+    ],
+    [
+      8,
+      12,
+      "lazy",
+      1
+    ],
+    [
+      8,
+      12,
+      "lazy",
+      1000000
+    ]
+  ],
+  "probe_schema": "mhgp7-full-gabriel-probe-v3",
+  "probe_sha256": "d49db1fa30823ac91c5dbf65e260c74a93d813d2cd6123b6b65e42eb3a9c1d9a",
+  "process_vm_soft_limit_max_gib": 26,
+  "producer_sha256": "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad",
+  "public_status": "not_claimed",
+  "schema": "mhgp7-full-gabriel-mono-observation-v3",
+  "scope": "horizontal_relative_orders_not_integrated_inter_k_tower",
+  "seed": 3,
+  "slo_claim": false,
+  "successor_accounting": "full_successor_reads_writes_no_last_pair_v2",
+  "threads": 1,
+  "timeout_seconds_each": 600,
+  "timing_reference": "elapsed includes digests and provisional output"
+}

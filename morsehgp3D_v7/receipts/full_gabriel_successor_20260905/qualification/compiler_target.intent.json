@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/g++",
+    "-dumpmachine"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_code": 0,
+  "label": "compiler_target",
+  "started_utc": "2026-09-05T21:28:38.149203+00:00",
+  "timeout_seconds": 15
+}

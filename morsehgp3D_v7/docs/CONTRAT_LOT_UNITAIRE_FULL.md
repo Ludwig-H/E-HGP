@@ -43,6 +43,10 @@ construction de la ligne publiée. Les plafonds de faces, portails, MEB,
 supports, requêtes spatiales, successeurs et sortie ne sont pas relevés.
 Sans faute mémoire, les forêts et tous les compteurs logiques doivent
 coïncider avec le regroupement général, y compris sur les préfixes refusés.
+Cette égalité oppose les deux regroupements **au même calendrier de
+normalisation**. Le [delta suivant v2](CONTRAT_NORMALISATION_FULL.md)
+versionne séparément les opérations de successeurs ; les preuves
+historiques singleton ci-dessous ne lui sont pas réattribuées.
 
 Les allocations du dictionnaire local, de ses vecteurs DSU et de ses
 groupes intermédiaires disparaissent dans cette branche. Les allocations

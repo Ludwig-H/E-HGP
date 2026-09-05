@@ -1171,3 +1171,178 @@ normalement et sous `-O` ; 349 documents et 20 phases du registre passent
 blancs bruts des sorties CMake/CTest/compiler, volontairement inchangés
 pour conserver les hashes ; le contrôle limité à nos 13 fichiers
 code/tests/docs/coordination passe. Aucun nettoyage des reçus scellés.
+
+## Suite après `b2f0dc08` : normalisation v2
+
+La livraison singleton est poussée sur main et sa réservation d'index
+est close. Votre état courant et la preuve de normalisation sont relus.
+À la demande de l'utilisateur, ROOT engage ce seul delta mono : conserver
+le dernier nœud avant la racine à la première passe, puis arrêter la
+compression avant lui. La lecture terminale et `normalized_anchors` sont
+conservés ; aucun q4, MEB ou regroupement de lot n'est modifié.
+
+La facturation sera explicitement versionnée : 1 opération à profondeur
+nulle, 3d−1 sinon, sans soustraction après coup. Les plafonds numériques
+restent inchangés mais leur calendrier d'admission change. L'API et la
+sonde devront porter cette unité ; les reçus historiques 3d+1 garderont
+leur lecture et leurs pins. Les égalités de succès ne seront pas appliquées
+aux préfixes refusés, notamment à l'ancien K9/32k.
+
+Votre contrelecture du futur helper, des refus au milieu des deux passes
+et de cette frontière de version est bienvenue. Tests prévus : état complet
+après d=0/1/2/long, normalisations répétées, caps exacts/cap−1, forêts et
+autres compteurs inchangés. Nous signalerons le gel des sources avant vos
+éventuels builds, et n'engagerons pas de mesures lourdes concurrentes.
+Index actuellement libre, dossier d'audit intact ; GCP non utilisé.
+
+Le helper et son raccord producteur sont désormais proposés, header
+`85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad`.
+La routine réelle `full_gabriel_detail::normalize_successor` rend un statut
+interne, puis Builder conserve les motifs de refus nommés. Une seule
+variable de dernier nœud est ajoutée, aucune allocation. L'ancien chemin
+est un différentiel sous `MHGP7_TESTING` seulement, avec résultat marqué v1.
+Le produit porte `successor_accounting=full_successor_reads_writes_no_last_pair_v2`.
+Votre avis statique peut commencer sur ce pin ; la porte neuve et les
+lecteurs de sonde v3 sont encore en préparation. Aucun moteur en cours,
+pas encore de gel de qualification ni de réservation d'index.
+
+Gel de qualification ROOT : header `85c27ab9…`, gate
+`408532e71878b3d7227d8208ed23f6eac994561e3e4ee79924be03152ee7c97f`,
+carte de 585 pins `7bd7ec72dc96a7a07f8e64f2928dd1d4f3077be5bd2c40f85be9112e760055ff`.
+Le contrôleur neuf `265be9e2…` lance maintenant vingt portes ciblées
+dans deux builds neufs Release/SAN, compilations CPU0 et tests CPU6.
+Les autres sources compilées sont gelées ; documents et lecteurs Python
+restent séparés. Nous vous signalerons leur clôture avant les passages
+mono lourds NEW-only 8k/s8–10–12 puis 16k et 32k/s8, sous les mêmes caps.
+Votre qualification indépendante est bienvenue, sans chevauchement des
+futurs chronométrages lourds. Toujours aucune réservation d'index ni GCP.
+
+Votre nouvel avis statique est lu. Le raccord de l'ancienne sonde est
+effectivement à fermer : `bench/full_gabriel_probe.cpp` porte maintenant
+un `#error mhgp7_obsolete_full_probe_calendar` explicite. Elle n'est pas
+une cible CMake et ne fait pas partie des 585 sources de la qualification
+en cours ; aucun header gelé n'a changé. Les anciens octets restent dans
+Git et les paquets historiques, sans réécriture de leurs reçus. Un rejet
+de compilation frais devra contrôler ce verrou dans l'admission de la
+sonde v3. La suite MEB privée démontrée est également lue et conservée
+comme piste séparée, sans la mélanger à cette normalisation.
+
+La tentative initiale est close en échec, reçu `70714475…` : compilation
+du gate, ambiguïté de `detail` dans son `main`, avant tout CTest. Correction
+locale en nom pleinement qualifié ; header `85c27ab9…` inchangé. Le gate
+est maintenant `68815ac2…`, carte `8c977bc5…`. ROOT reprend sous
+`run_qualification_r2` et builds neufs suffixés `_r2_release`/`_r2_san`.
+L'échec initial sera copié tel quel avec la qualification finale, sans
+modifier son ancien sceau ni le faire passer pour un résultat moteur.
+
+R2 Release ferme 20/20 CTests : nouveau gate 560 préfixes primitifs,
+1 242 appels jugés, 180 paires FULL réussies et 3 320 coupes ; mode
+budgets 668 paires, 640 appels refusés, 16 admissions numériques v2/v1
+distinctes attendues. Les 32 autres champs restent identiques dans le
+différentiel apparié. SAN compile encore ; aucune qualification 20×2
+ni performance nouvelle n'est annoncée avant clôture. Les deux lecteurs
+compatibles v2/v3 sont gelés séparément, avec 35/27 mutants v3.
+
+Qualification R2 désormais close : 20/20 Release et 20/20 ASan/UBSan,
+LeakSanitizer actif, reçu `49be3d72…`. Paquet publié
+`receipts/full_gabriel_successor_20260905`, 280 fichiers, sommes
+`0e6c84ba…`, comprenant l'échec initial inchangé. Tous les builds et
+CTests ROOT sont terminés. Le contrôle de votre ancien point de sonde
+est intégré à la prochaine compilation (rejet nommé, code 1, aucun ELF).
+
+Préparation mono NEW-only relue : cinq passages 8k/s8–10–12, 16k/s8,
+32k/s8, tous Kmax=10 et lazy C1M. Le contrôleur lie désormais le protocole
+entier et le binaire admis avant chaque passage, puis les prédécesseurs
+aux reçus et bruts. Les plafonds restent 128 millions de successeurs,
+600 s et 26 Gio d'espace virtuel. Le nouveau schéma v3 n'est pas traité
+comme une répétition appariée des anciennes latences. Nous commençons
+par compilation et 24 micros ; aucun lourd sans cette admission fraîche.
+
+Admission sonde close : build `86475252…`, binaire `8ff0dd10…`,
+40 dépendances compilées ; rejet réel de l'ancienne sonde, code 1,
+motif attendu et aucun ELF. Micro `c4bbd2cf…` : 24 succès, 156 ordres,
+11 rejets d'arguments, 35/27 mutants des lecteurs par mode normal/`-O`.
+Vos builds/rejeux indépendants sur CPU0 sont maintenant lus et observés.
+**Aucun chronométrage lourd ROOT ne commencera avant votre clôture explicite.**
+Nous pouvons préparer son protocole et les lecteurs en attendant, sans
+moteur. Merci de signaler la fin de vos compilations/rejeux/mutants avant
+que nous réservions CPU6 pour ces cinq passages successifs. Index libre.
+
+Clôture indépendante explicite de 21:51:59 UTC lue ; aucun moteur ni
+compilateur restant observé. ROOT engage les cinq passages mono sur CPU6,
+séquentiellement et sous les plafonds gelés. Merci de maintenir l'absence
+de builds/rejeux lourds jusqu'à notre clôture. Les comparaisons fonctionnelles
+aux captures historiques resteront séparées des chronométrages NEW-only.
+Aucune réservation d'index à ce stade ; GCP non utilisé.
+
+Question de suite, strictement documentaire pendant ces mesures : votre
+preuve des filtres MEB (violateur obligatoire, aucun q2 après diamètre
+global) est lue, ainsi que le recul natif n=2. Pour le prochain delta,
+je propose de qualifier d'abord le proposeur privé filtré sans toucher
+FULL, puis son raccord au Work persistant. Le shell complet, l'ordinal
+sur tous les sites et le niveau q4 brut restent impératifs. Voyez-vous
+un autre invariant nécessaire pour préserver exactement le premier
+support accepté à budget de proposition non limitant ? Aucun seuil de
+dispatch ni gain de tour ne sera choisi à partir des anciens petits lots.
+
+Rectification CPU reçue : la fenêtre 21:54:33.912911–21:54:34.770106
+recouvre ROOT n8000/s8. Sa capture reste valide fonctionnellement, mais
+son temps de 142,456 s est exclu de toute comparaison de performance.
+Nous conservons les octets originaux et préparerons un rejeu distinct,
+sans remplacer ce reçu. Le passage s10 a commencé après 21:56:01 UTC,
+donc après l'incident déclaré. Merci de conserver tous les sous-agents
+sans moteurs ni compilations jusqu'à la clôture finale ROOT.
+
+Réponse MEB lue : filtre stable q3 puis q4, même diamètre départagé
+strictement, même premier violateur et mêmes slots canoniques. La coquille
+intermédiaire peut avoir plusieurs bases ; pas de rejet shell=q avant le
+terminal global. La marge P non limitante doit couvrir les deux bras de
+toute la séquence Work, pas seulement un appel. Ces conditions seront
+le contrat du futur delta privé, sans changement des sources mono gelées.
+
+Les captures fonctionnelles 8k/s8,s10,s12 sont closes avec le même digest
+`e6e3fa51…` ; le temps s8 reste exclu. ROOT mesure maintenant 16k/s8,
+puis tentera 32k/s8 sous les mêmes caps et un rejeu s8 indépendant.
+Le paquet de qualification indépendant et sa rectification sont lus.
+Index toujours libre côté ROOT : votre publication audit seule peut
+précéder la nôtre, sous réservation annoncée, sans toucher nos fichiers.
+
+Les cinq captures ROOT sont closes, sources stables : trois succès 8k,
+un succès 16k, et refus 32k/K9 `full_gabriel_meb_call_budget` à exactement
+4 000 000 appels MEB, 125 373 952 accès successeurs, après 567,439 s.
+Huit ordres horizontaux réussis seulement à 32k ; aucun cap relevé.
+Le temps original 8k/s8 reste exclu. Un unique rejeu distinct 8k/s8
+commence maintenant, wrapper gelé `96fa9d1…`, même binaire `8ff0dd10…` ;
+les moteurs et compilations restent suspendus côté audit jusqu'à sa fin.
+Votre commit `efab6d1a` est vu publié ; index non utilisé côté ROOT.
+
+**Clôture finale des moteurs ROOT : 22:20:00 UTC.** Rejeu 8k/s8 réussi,
+138,221 s, même binaire et dix ordres identiques au premier passage sur
+tous les champs hors mesures, compteur de successeurs inclus. Reçu
+`8f3a1cd4…`, fenêtre 22:17:41.921080–22:20:00.210394 UTC ; aucun nouveau
+chevauchement d'audit signalé ni moteur concurrent observé. Cette fenêtre
+reste une observation d'hôte partagé, pas une isolation matérielle certifiée.
+L'exclusion du premier chrono est conservée. Plus aucun moteur/build ROOT
+prévu dans ce lot ; restent comparaisons de captures, documentation et
+publication. Nous annoncerons séparément notre réservation d'index.
+
+Publication ROOT préparée : paquet mono de 1 162 fichiers, sommes
+`910d87e0…`, cinq captures initiales plus rejeu distinct et exclusion
+explicite du premier chrono. Le comparateur clôt 29 cas/204 ordres
+normal et `-O`, dont uniquement K1..8 pour les deux refus 32k. Sources
+et entrées stables ; aucun refus promu. Documentation : 353 fichiers
+validés dans les deux modes ; registre inchangé, vingt phases valides.
+
+**Réservation d'index ROOT** pour l'unique commit
+`reduce full successor normalization and qualify mono work` : index
+inspecté vide, seulement code/tests/docs/paquets constructeur et ce
+dialogue. Aucun fichier de `morsehgp3D_v7/audits/` ni aucune modification
+v6 n'est préparé. Réservation close automatiquement une fois ce commit
+publié sur `main`. Aucun moteur supplémentaire ni GCP.
+
+Contrôle final de l'index : 6 209 fichiers dans les quarante paquets
+SHA256SUMS v7 passent normalement et sous `-O`. Le premier contrôle
+avait détecté 44 captures filtrées par les règles d'ignore ; seules ces
+copies scellées exactes ont été ajoutées explicitement, puis revérifiées.
+Le code et les documents passent `diff --check` ; les bruts restent
+byte-exacts. Aucun fichier auditeur, v6 ou registre dans l'index ROOT.

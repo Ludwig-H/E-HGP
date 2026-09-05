@@ -1,0 +1,21 @@
+{
+  "attempt_id": "n32000_s8_k10_lazy_c1000000",
+  "attempt_success": false,
+  "base_verdict": {
+    "attempt_id": "n32000_s8_k10_lazy_c1000000",
+    "attempt_success": false,
+    "capture_valid": true,
+    "certificate_digest": "",
+    "ended": "2026-09-05T22:16:43.232613+00:00",
+    "input_digest": "78b5dd1c4c244004dd801088efdb8a0d5ec638a6b37328ecb987939dde99805b",
+    "outcome": "resource_exhausted",
+    "started": "2026-09-05T22:16:43.090949+00:00",
+    "status": "completed"
+  },
+  "certificate_digest": "",
+  "ended": "2026-09-05T22:16:43.374886+00:00",
+  "input_digest": "78b5dd1c4c244004dd801088efdb8a0d5ec638a6b37328ecb987939dde99805b",
+  "outcome": "resource_exhausted",
+  "started": "2026-09-05T22:16:43.232903+00:00",
+  "status": "completed"
+}

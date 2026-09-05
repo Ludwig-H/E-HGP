@@ -1,0 +1,60 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/compare.py",
+    "--scope",
+    "complete",
+    "--expected-comparator-sha256",
+    "15176b19ff7dd6b56c56470a887ecc9438fd673215cdefbd48f1a49953015718",
+    "--new-producer-sha256",
+    "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad",
+    "--old-kind",
+    "singleton21b77",
+    "--judge",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py=5de5b8d20d6073d5521a4217b8d504a59d255fad514eb8f4ddc257553ee0f032",
+    "--old",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/micro_admission_new/k10/n8_s12_k10_lazy_c0.receipt.json=ed96e2b689edfeac3ef2ff7e6b9a39a6f9f3d3e91111780532c55ec48a3f3bf7",
+    "--new",
+    "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/k10/n8_s12_k10_lazy_c0.receipt.json=9d507d9b5f3978593274c751d873aad655192d02479a461df7769346f7507b76",
+    "--old-protocol",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/micro_admission_new/k10/protocol.json=91d08dd269186043dbab799ff84dd0855b6b16604e1e68bf36f501a0336e994a",
+    "--new-protocol",
+    "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/k10/protocol.json=e63b601656b756fed963a5cc460b97160f2a22dd4ab24a03665e8a3a46250211",
+    "--old-sources",
+    "/workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/micro_admission_new/k10/n8_s12_k10_lazy_c0.sources_before.json=960b75dbae9da8073f77ec16c1bf004a8c52dd944cfec144bb0707920bff970b",
+    "--new-sources",
+    "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/k10/n8_s12_k10_lazy_c0.sources_before.json=037f6c3bb54653acb3a37d365f1406bd5f43b9cf24a3dbf743503eff9b4e8cd0"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/taskset -c 0 /home/codespace/.python/current/bin/python3 -B /workspaces/E-HGP/build/v7_successor_20260905_mono_controller/compare.py --scope complete --expected-comparator-sha256 15176b19ff7dd6b56c56470a887ecc9438fd673215cdefbd48f1a49953015718 --new-producer-sha256 85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad --old-kind singleton21b77 --judge /workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py=5de5b8d20d6073d5521a4217b8d504a59d255fad514eb8f4ddc257553ee0f032 --old /workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/micro_admission_new/k10/n8_s12_k10_lazy_c0.receipt.json=ed96e2b689edfeac3ef2ff7e6b9a39a6f9f3d3e91111780532c55ec48a3f3bf7 --new /workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/k10/n8_s12_k10_lazy_c0.receipt.json=9d507d9b5f3978593274c751d873aad655192d02479a461df7769346f7507b76 --old-protocol /workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/micro_admission_new/k10/protocol.json=91d08dd269186043dbab799ff84dd0855b6b16604e1e68bf36f501a0336e994a --new-protocol /workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/k10/protocol.json=e63b601656b756fed963a5cc460b97160f2a22dd4ab24a03665e8a3a46250211 --old-sources /workspaces/E-HGP/build/v7_singleton_20260905_mono_controller/micro_admission_new/k10/n8_s12_k10_lazy_c0.sources_before.json=960b75dbae9da8073f77ec16c1bf004a8c52dd944cfec144bb0707920bff970b --new-sources /workspaces/E-HGP/build/v7_successor_20260905_mono_controller/micro_admission/k10/n8_s12_k10_lazy_c0.sources_before.json=037f6c3bb54653acb3a37d365f1406bd5f43b9cf24a3dbf743503eff9b4e8cd0",
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.11594252199938637,
+  "ended": "2026-09-05T22:21:17.720617+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_rc": [
+    0,
+    1,
+    2
+  ],
+  "id": "21_n8_s12_k10_lazy_c0_normal",
+  "outer_timeout_seconds": 60,
+  "process_vm_max_bytes": 27917287424,
+  "started": "2026-09-05T22:21:17.604468+00:00",
+  "status": "completed",
+  "streams": {
+    "21_n8_s12_k10_lazy_c0_normal.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "21_n8_s12_k10_lazy_c0_normal.stdout": {
+      "bytes": 6421,
+      "sha256": "9ab9ecc67f75ade521164182b477ce79e784292fcb06d0abe1a0b13882441a33"
+    }
+  }
+}

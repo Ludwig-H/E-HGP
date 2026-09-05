@@ -1,0 +1,23 @@
+{
+  "binding": {
+    "archive": {
+      "bytes": 121,
+      "ctime_ns": 1788643826614217274,
+      "device": 1796,
+      "inode": 1842503,
+      "mtime_ns": 1788643826614217274,
+      "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/LastTest.preexisting.stdout",
+      "sha256": "104742e690ea5494d1965f9e693872d7334ca282369973085af852e5a8fc4e08"
+    },
+    "source": {
+      "bytes": 121,
+      "ctime_ns": 1788643825590217256,
+      "device": 1796,
+      "inode": 1842501,
+      "mtime_ns": 1788643825590217256,
+      "path": "/workspaces/E-HGP/build/v7_successor_20260905_r2_release/Testing/Temporary/LastTest.log",
+      "sha256": "104742e690ea5494d1965f9e693872d7334ca282369973085af852e5a8fc4e08"
+    }
+  },
+  "present": true
+}

@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/g++",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_probe.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/build_admission/obsolete_full_gabriel_probe"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/taskset -c 0 /usr/bin/g++ -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -pthread /workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_probe.cpp -o /workspaces/E-HGP/build/v7_successor_20260905_mono_controller/build_admission/obsolete_full_gabriel_probe",
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 3.7743967639999028,
+  "ended": "2026-09-05T21:43:04.391601+00:00",
+  "error": null,
+  "exit_code": 1,
+  "expected_rc": [
+    1
+  ],
+  "id": "obsolete_probe_compile",
+  "outer_timeout_seconds": 600,
+  "process_vm_max_bytes": 27917287424,
+  "started": "2026-09-05T21:43:00.616995+00:00",
+  "status": "completed",
+  "streams": {
+    "obsolete_probe_compile.stderr": {
+      "bytes": 336,
+      "sha256": "2f830a6490427e44fce4f18368859d8f26d30332a0e7767d9aab5de08b4bab0c"
+    },
+    "obsolete_probe_compile.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

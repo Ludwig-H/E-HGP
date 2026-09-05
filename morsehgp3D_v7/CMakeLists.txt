@@ -98,6 +98,16 @@ mhgp7_gate(mhgp7_full_gabriel_singleton_rejects 0 mhgp7_full_gabriel_singleton_g
 mhgp7_gate(mhgp7_full_gabriel_singleton_bad_argument 2 mhgp7_full_gabriel_singleton_gate
            ARGS --unknown LABELS "gate;full_gabriel_singleton" TIMEOUT 60)
 
+# Real successor helper: independent operation-prefix oracle and FULL
+# differential against the test-only legacy work calendar.
+mhgp7_executable(mhgp7_full_gabriel_successor_gate tests/full_gabriel_successor_gate.cpp)
+mhgp7_gate(mhgp7_full_gabriel_successor 0 mhgp7_full_gabriel_successor_gate
+           ARGS --selftest LABELS "gate;full_gabriel_successor;oracle" TIMEOUT 60)
+mhgp7_gate(mhgp7_full_gabriel_successor_rejects 0 mhgp7_full_gabriel_successor_gate
+           ARGS --rejects LABELS "gate;full_gabriel_successor;oracle" TIMEOUT 60)
+mhgp7_gate(mhgp7_full_gabriel_successor_bad_argument 2 mhgp7_full_gabriel_successor_gate
+           ARGS --unknown LABELS "gate;full_gabriel_successor" TIMEOUT 60)
+
 # Le digest est un outil de comparaison bench, pas une autorite scientifique.
 find_path(MHGP7_DIGEST_BOOST_INCLUDE_DIR boost/multiprecision/cpp_int.hpp)
 if(NOT MHGP7_DIGEST_BOOST_INCLUDE_DIR)

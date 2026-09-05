@@ -30,6 +30,9 @@ conserve ce contrat de cache et repasse les portes lazy dans ses
 17 CTests ciblés par build. Ses balayages frais observent 209 allocations
 lazy sur les mêmes six cellules ; les 434 citées plus bas appartiennent
 au header historique `13c6cc72…`.
+La [normalisation v2](CONTRAT_NORMALISATION_FULL.md), engagée séparément,
+conserve first-C mais versionne les accès de successeurs et leurs refus.
+Les reçus de ce document restent attribués à leur ancien calendrier.
 
 ## Deux API et deux contrats distincts
 

@@ -18,6 +18,9 @@ s'applique aux deux politiques : elle remplace seulement le regroupement
 local par tri/déduplication d'au plus quatre racines. Elle conserve les
 demandes, les budgets et le suffixe de fermeture ; sa qualification
 fraîche est distincte des reçus historiques de ce document.
+La [normalisation v2](CONTRAT_NORMALISATION_FULL.md) supprime désormais
+la dernière paire de compression redondante ; son calendrier de travail
+est distinct de celui des reçus historiques ci-dessous.
 
 ## 1. Autorité et domaine exacts
 
@@ -131,9 +134,10 @@ Les plafonds sont nuls par défaut et chargés prospectivement :
 | `max_successor_steps` | Lectures logiques du tableau de successeurs et écritures de compression |
 | `certificate.*` | Lots de sortie, nœuds et références de parents |
 
-Pour une normalisation de profondeur d, le compteur de successeurs facture
-3d+1 opérations : la lecture terminale est incluse, même pour une racine
-déjà active. Ce n'est **pas** un budget de toutes les opérations DSU : les
+Le calendrier historique facture 3d+1 opérations pour une profondeur d.
+Le [calendrier courant v2](CONTRAT_NORMALISATION_FULL.md) facture une opération
+à profondeur nulle, 3d−1 sinon : la lecture terminale est incluse, même
+pour une racine déjà active. Ce n'est **pas** un budget de toutes les opérations DSU : les
 unions locales du lot et les installations de nouveaux successeurs n'y
 sont pas incluses. Leur domaine et leurs appels sont bornés par les visites
 de faces et les nœuds. Aucun compteur n'est assimilé à un temps CPU maximal.

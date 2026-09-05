@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "6",
+    "/usr/bin/ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_successor_20260905_r2_release",
+    "-j1",
+    "-V",
+    "--output-on-failure",
+    "--no-tests=error",
+    "--timeout",
+    "60",
+    "-L",
+    "^(full_certificate|full_gabriel|full_gabriel_lazy|full_gabriel_digest|full_gabriel_singleton|full_gabriel_successor)$",
+    "--output-junit",
+    "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/ctest.junit.xml"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_code": 0,
+  "label": "ctest",
+  "started_utc": "2026-09-05T21:30:26.632437+00:00",
+  "timeout_seconds": 180
+}

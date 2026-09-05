@@ -96,6 +96,17 @@ Il ne change ni le volume des catalogues ni les arènes de sortie, et
 ne lève pas le refus 32k du budget de successeurs. Les baisses d'allocations
 sur petites fixtures ne constituent pas une borne RSS massive.
 
+La [normalisation v2](CONTRAT_NORMALISATION_FULL.md) économise ensuite
+la dernière paire lecture/écriture sur chaque chemin non trivial. Elle
+n'ajoute qu'un identifiant local, sans allocation ni structure globale,
+et conserve les mêmes tableaux finaux. Elle ne compacte ni les minima,
+ni les niveaux, ni les références parentales. Ses
+[passages locaux propres](RESULTATS_MONO_FULL_SUCCESSOR_20260905.md)
+restent distincts des refus et mesures historiques ci-dessus : diminuer
+le travail de normalisation n'est pas une borne de résidence massive.
+À 32k, K9 atteint maintenant le plafond de quatre millions d'appels MEB,
+après huit ordres réussis ; ce déplacement du refus ne livre pas K1..10.
+
 Le [reçu lazy 8k/s8 historique](../receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s8_k10_lazy_c1000000.receipt.json)
 permet aussi de sommer la **sortie**, distinctement du pic : 3 976 472
 nœuds, 2 404 646 minima et 3 976 462 références parentales sur K1..10.

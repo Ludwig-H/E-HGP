@@ -1,0 +1,98 @@
+{
+  "copies": {
+    "JUnit.stdout": {
+      "archive": {
+        "bytes": 10412,
+        "ctime_ns": 1788643829391217324,
+        "device": 1796,
+        "inode": 1842559,
+        "mtime_ns": 1788643829391217324,
+        "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/JUnit.stdout",
+        "sha256": "7dd3a84a62478fcfc47a319336c3727a21222f7490ff6d1663c3b799ad06f14d"
+      },
+      "source": {
+        "bytes": 10412,
+        "ctime_ns": 1788643828232217303,
+        "device": 1796,
+        "inode": 1842514,
+        "mtime_ns": 1788643828232217303,
+        "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/ctest.junit.xml",
+        "sha256": "7dd3a84a62478fcfc47a319336c3727a21222f7490ff6d1663c3b799ad06f14d"
+      }
+    },
+    "LastTest.stdout": {
+      "archive": {
+        "bytes": 22151,
+        "ctime_ns": 1788643829388217324,
+        "device": 1796,
+        "inode": 1842558,
+        "mtime_ns": 1788643829388217324,
+        "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification_r2/release/LastTest.stdout",
+        "sha256": "beabf79cdda21138c6a312155259a8388c309645916fe50205b3aab3e4416b71"
+      },
+      "source": {
+        "bytes": 22151,
+        "ctime_ns": 1788643828232217303,
+        "device": 1796,
+        "inode": 1842512,
+        "mtime_ns": 1788643828232217303,
+        "path": "/workspaces/E-HGP/build/v7_successor_20260905_r2_release/Testing/Temporary/LastTest.log",
+        "sha256": "beabf79cdda21138c6a312155259a8388c309645916fe50205b3aab3e4416b71"
+      }
+    }
+  },
+  "fresh": true,
+  "junit": {
+    "all_run": true,
+    "names": [
+      "mhgp7_full_certificate",
+      "mhgp7_full_certificate_rejects",
+      "mhgp7_full_gabriel",
+      "mhgp7_full_gabriel_allocation",
+      "mhgp7_full_gabriel_allocation_bad_argument",
+      "mhgp7_full_gabriel_bad_argument",
+      "mhgp7_full_gabriel_digest",
+      "mhgp7_full_gabriel_digest_bad_argument",
+      "mhgp7_full_gabriel_lazy",
+      "mhgp7_full_gabriel_lazy_allocation",
+      "mhgp7_full_gabriel_lazy_allocation_bad_argument",
+      "mhgp7_full_gabriel_lazy_bad_argument",
+      "mhgp7_full_gabriel_lazy_rejects",
+      "mhgp7_full_gabriel_rejects",
+      "mhgp7_full_gabriel_singleton",
+      "mhgp7_full_gabriel_singleton_bad_argument",
+      "mhgp7_full_gabriel_singleton_rejects",
+      "mhgp7_full_gabriel_successor",
+      "mhgp7_full_gabriel_successor_bad_argument",
+      "mhgp7_full_gabriel_successor_rejects"
+    ],
+    "tests": 20
+  },
+  "last_test": {
+    "all_blocks_passed": true,
+    "names": [
+      "mhgp7_full_certificate",
+      "mhgp7_full_certificate_rejects",
+      "mhgp7_full_gabriel",
+      "mhgp7_full_gabriel_allocation",
+      "mhgp7_full_gabriel_allocation_bad_argument",
+      "mhgp7_full_gabriel_bad_argument",
+      "mhgp7_full_gabriel_digest",
+      "mhgp7_full_gabriel_digest_bad_argument",
+      "mhgp7_full_gabriel_lazy",
+      "mhgp7_full_gabriel_lazy_allocation",
+      "mhgp7_full_gabriel_lazy_allocation_bad_argument",
+      "mhgp7_full_gabriel_lazy_bad_argument",
+      "mhgp7_full_gabriel_lazy_rejects",
+      "mhgp7_full_gabriel_rejects",
+      "mhgp7_full_gabriel_singleton",
+      "mhgp7_full_gabriel_singleton_bad_argument",
+      "mhgp7_full_gabriel_singleton_rejects",
+      "mhgp7_full_gabriel_successor",
+      "mhgp7_full_gabriel_successor_bad_argument",
+      "mhgp7_full_gabriel_successor_rejects"
+    ],
+    "terminal_footer": true,
+    "tests": 20
+  }
+}

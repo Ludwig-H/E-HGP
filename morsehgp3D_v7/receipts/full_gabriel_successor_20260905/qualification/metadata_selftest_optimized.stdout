@@ -1,0 +1,20 @@
+{
+  "engine_runs": 0,
+  "models_are_engine_receipts": false,
+  "mutants_killed": [
+    "inventory_missing",
+    "inventory_duplicate",
+    "inventory_expected_code",
+    "inventory_disabled",
+    "inventory_label",
+    "inventory_timeout",
+    "inventory_environment",
+    "junit_missing",
+    "junit_duplicate",
+    "junit_not_run",
+    "junit_skipped",
+    "junit_failure"
+  ],
+  "positive_models": 2,
+  "status": "selftests_passed"
+}

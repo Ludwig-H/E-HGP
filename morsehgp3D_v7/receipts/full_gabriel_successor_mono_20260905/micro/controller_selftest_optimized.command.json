@@ -1,0 +1,38 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/build/v7_successor_20260905_mono_controller/capture.py",
+    "--selftest"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/taskset -c 0 /home/codespace/.python/current/bin/python3 -B -O /workspaces/E-HGP/build/v7_successor_20260905_mono_controller/capture.py --selftest",
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.0655298750007205,
+  "ended": "2026-09-05T21:44:05.041300+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_rc": [
+    0
+  ],
+  "id": "controller_selftest_optimized",
+  "outer_timeout_seconds": 30,
+  "process_vm_max_bytes": 27917287424,
+  "started": "2026-09-05T21:44:04.975559+00:00",
+  "status": "completed",
+  "streams": {
+    "controller_selftest_optimized.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "controller_selftest_optimized.stdout": {
+      "bytes": 310,
+      "sha256": "31f40a8560568781bfb1b994976a98e4bb7494acc0ffbf4f35ec9d90cb80708d"
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"engine_runs": 0, "models_are_engine_receipts": false, "mutants_killed": ["plan_kmax_5", "plan_binary_'other_binary'", "plan_cap_256000000", "plan_enabled_1", "plan_kmax_10.0", "false_success", "false_exit", "false_terminal", "false_base", "false_orders"], "positive_models": 2, "status": "selftests_passed"}

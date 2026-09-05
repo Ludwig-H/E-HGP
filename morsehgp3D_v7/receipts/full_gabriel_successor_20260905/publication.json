@@ -1,0 +1,39 @@
+{
+  "capture_receipt_sha256": "49be3d72045f9b3a2306a69230d114e6bac96861f6029e6e13c495091f61e72d",
+  "controller_sha256": "265be9e2425078e18c288642610ad4d4fae9a5e18224a10f1651d57186281e8a",
+  "development": [],
+  "failed_qualification": [
+    {
+      "captured_status": "failed",
+      "not_imported_as_qualification": true,
+      "path": "/workspaces/E-HGP/build/v7_successor_20260905_controller/run_qualification/receipt.json",
+      "sha256": "70714475a7f642302a0c80efabd9062cb563a7dc1b541fee0c109d2b40f477cd"
+    }
+  ],
+  "gcp_used": false,
+  "historical_results_reused": false,
+  "phases": [
+    {
+      "binaries": 8,
+      "build_seconds": 104.59942758399848,
+      "ctest_seconds": 1.6180111049998231,
+      "mode": "release",
+      "status": "revalidated_20_targeted_tests",
+      "tests": 20
+    },
+    {
+      "binaries": 8,
+      "build_seconds": 267.03038972600007,
+      "ctest_seconds": 8.741471826999259,
+      "mode": "san",
+      "status": "revalidated_20_targeted_tests",
+      "tests": 20
+    }
+  ],
+  "producer_sha256": "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad",
+  "public_status": "not_claimed",
+  "publisher_sha256": "d2a115739f91ebf17da9ffc6a4ac28555d412916e7d57ce08a7f36e47c8b2960",
+  "schema": "mhgp7-successor-publication-v1",
+  "status": "qualified_targeted",
+  "whole_suite_qualified": false
+}
