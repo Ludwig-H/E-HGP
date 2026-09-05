@@ -1,0 +1,51 @@
+# Raccord Builder privé — nominal seulement, non compilé
+
+`phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=port_prive_non_compile`, `public_status=not_claimed`. Aucun moteur, build, test C++, Git ou GCP ; aucune source produit, helper gelé ou gate géométrique modifié. Ce port reste conditionnel à une géométrie qualifiée et un coût réel utile, puis aux contrats d'intégration.
+
+Autorité de conception : `build/v7_meb_dual_integration_plan/PLAN_20260905.md`, SHA `408173f01ab6891351a0ea48ee0312b9194f07114fd3ac15dee80186cfe64ebc`.
+
+## Artefacts et port littéral
+
+- `reference_F.hpp` est la copie entière inchangée de F : `f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76`. Ses includes historiques restent intentionnellement ceux de F ; toute adaptation de référence pour une future porte doit être explicite et épinglée.
+- `silent_incidence.hpp` porte seulement ce delta Builder : `6e517c5705ca5d21dfe8fb920510ee50d61af7c53a465cfe3175959ff45a0b15`.
+- `builder_from_F.patch` est le diff unifié complet : `42c495bcce7b9a9a22bd13a59f271e96981ac8a3dc5420c7c8da36cb20a07e51`.
+- Helper consommé localement, inchangé : `meb_proposal.hpp`, SHA `33255ebcb92864acd6322424618ebdc2d4e1253e917004c1c4d76a3798ecf352`, port de d6db/0645 expliqué dans README.
+
+Le corps de `Builder::miniball_reference` est le corps F **littéral**, seule sa signature est renommée et son accès devient privé. `miniball` reste le point d'entrée public des appels locaux et de `run`. Aucun changement dans intruders, run, cofaces, budgets non MEB, refus/purge du wrapper ou expressions géométriques de référence. Les includes de l'overlay deviennent `src/...` plus le helper relatif ; aucun changement de CMake.
+
+## État / routes / nouveaux diagnostics
+
+Un seul Work scalaire membre du Builder est initialisé depuis les nouveaux champs de Stats au constructeur. Il n'est jamais réinitialisé ni réimporté de Stats entre deux MEB. Builder possède cet état pendant la tentative/ordre ; des mutations externes concurrentes ou entre appels de ses champs miroirs ne constituent pas une API d'injection supportée.
+
+Les 13 champs legacy restent en tête, inchangés. Sont ajoutés P effectif `meb_proposal_supports`, A effectif `meb_fallback_supports`, puis `meb_proposal_pivots`, `meb_proposal_certified`, `meb_proposal_fallback`. Le dernier compte les décisions de repli 0645 avec marge legacy initiale : à P0/L déjà atteint, le corps F est appelé mais ce compteur n'augmente pas et A gagne zéro. Ce n'est donc pas un compteur brut de toutes les entrées de fonction F.
+
+| Route | `meb_calls` | Charge legacy / boule | P et A |
+| --- | --- | --- | --- |
+| P=0 | Dans le corps F uniquement | F littéral, même priorité interne et mêmes effets de sentinelle | A ajoute Δlegacy F ; aucune recherche de paire ni charge P |
+| P>0, legacy déjà atteint | Une incrémentation au dispatcher | Refus `silent_meb_support_budget`, compteur et sentinelle inchangés | Aucun P/A/repli nouveau |
+| P>0, P épuisé ou proposition non certifiée | Dans F uniquement | Repli au même état legacy initial | Charges P conservées ; A ajoute seulement Δlegacy F |
+| Certificat et marge legacy suffisante | Une incrémentation au dispatcher | Ajoute R ; finalisation littérale `materialize<LocalBall>` | P effectif conservé, A inchangé |
+| Certificat mais marge legacy insuffisante | Une incrémentation au dispatcher | Legacy amené au cap ; même motif, sentinelle conservée | P conservé, A inchangé ; `certified` augmente sans succès public |
+
+Les futurs affichages P0 doivent rester identiques, mais ne sont pas modifiés par cet overlay. À P>0, le schéma explicite `reference_ordinal_plus_proposal_v1` reste à raccorder par le constructeur ; ce header ne constitue pas un produit opt-in distribuable à lui seul.
+
+## Exceptions et arithmétique
+
+Deux gardes locales à destructeur `noexcept`, sans allocation : le miroir extérieur publie P/pivots/certified/fallback sur toute sortie ; le miroir intérieur autour de F ajoute à A le delta legacy, y compris après une exception. Aucun rollback de travail déjà chargé, aucun catch nouveau. Le wrapper historique garde sa seule capture `bad_alloc`, sa purge des événements et son motif `silent_allocation_failure`.
+
+Le proposeur nominal et les calculs de finalisation actuels n'allouent pas. Une future injection d'exception dans la proposition doit conserver les charges P déjà payées sans inventer un repli ; le legacy est encore à son état initial si l'exception précède le certificat/repli, comme dans 0645. Une exception d'instrumentation n'est pas une preuve que F et le proposeur partagent un calendrier de pannes. Les retours normaux, refus compris, comptent exactement un meb_calls par appel ; la référence historique n'est pas réécrite pour normaliser de nouveaux effets exceptionnels.
+
+États scalaires admis : construits depuis zéro par cette route, ou injections cohérentes de test. A initial≤legacy initial ; pivots≤P acquis et certified≤P acquis ; certified+fallback≤meb_calls en arithmétique élargie. Conserver de la marge pour tous les appels futurs dans meb_calls et les observations terminales ; ne pas injecter MAX dans ces compteurs puis prétendre qualifier leur incrément. L'ancien meb_calls++ est inchangé. Les états c>L ou p>P dus à un cap abaissé restent testables : ils entraînent l'arrêt/repli prévu, sans remettre les charges historiques à zéro.
+
+Preuves de bornes sur ces états : F ne diminue pas legacy, donc A+Δlegacy≤legacy_initial+Δlegacy≤MAX ; la garde prospective P précède son incrément ; R≤550 dans le domaine local, et `R > L-prior` n'est évalué qu'après la garde prior≥L. Chaque nouvelle proposition paie sa forme initiale et chaque pivot non final payé antérieurement permet de borner les pivots par les charges P, y compris le dernier pivot interrompu avant une nouvelle forme ; un certificat exige au moins une charge P. Les décisions terminales restent au plus les appels comptés. Ne pas additionner A+P ni les totaux de tour en u64. Aucun nouveau motif public ni saturation mensongère n'est ajouté pour des statistiques internes artificielles incohérentes.
+
+## Portes futures et couture causale — pas de code de qualification ici
+
+1. Comparer le vrai dispatcher à une référence F séparément épinglée : booléen, statut/raison, 13 champs legacy, clé, q, tout support, trois limbs/dénominateur et événements sentinelles non vides. Juger les cinq nouveaux champs séparément ; ne pas transformer l'égalité legacy en comparaison silencieusement incomplète de la nouvelle structure.
+2. P0 : plusieurs MEB du même Builder, tous caps autour de R, c=L/c>L, shell dégénéré, réussite. Exiger aucun appel du proposeur, A=Δlegacy depuis zéro, fallback conforme au tableau, corps de référence identique après renommage. P>0 : triangle P0/1/4/5, P7/L12 cumulé, q2/q3/q4, ordinal55/550, cap legacy après certificat, plafonds MAX avec A initial cohérent. Les mêmes Work/Stats doivent survivre réellement dans un Builder unique, pas être recopiés par le juge à chaque appel.
+3. Injecter hors production une exception après charge P / pendant un repli ayant payé des candidats ; vérifier les deux miroirs, le statut/purge du wrapper si bad_alloc et la propagation inchangée des autres exceptions. État frontière possible : A=legacy=MAX−4 sur triangle F, puis plafond MAX ; ne pas déborder un total A+P dans le juge.
+4. **La future mutation doit traverser le vrai Builder.** Prévoir une couture TESTING dans son dispatcher pour sélectionner `propose<true>` en cas de mutant charge-après, avec observateur causal au vrai `before_form`. Le nominal doit garder la même route, sans désactivation fast sous TESTING. Une porte appelant seulement le helper muté ne qualifie pas ce raccord. Le registre, la cause précise, le plancher et rc4 doivent être vérifiés via Builder / build_silent_cofaces, puis la route NoObserver native doit être comparée hors chrono.
+5. Les mutants géométriques (extra-shell, positivité, contenance, ordinal/canonisation, niveau brut) demanderont une couture séparée relue dans le helper consommé par Builder. Le helper 33255e gelé n'est pas modifié ici. Les anciens mutants de la référence peuvent être contournés par un certificat rapide : déclarer leurs routes, conserver leur non-vacuité à P0/repli et ne pas hériter leurs verts pour P>0.
+6. Après qualification locale et coût utile seulement : Gamma/descente/purge, API et versions CLI/archive/parseurs, source/binaire/dépendances épinglés, puis paires de tour. Aucun reçu de coût du prototype seul ne mesure le surcoût de ce nouveau dispatcher, des miroirs ou du champ A.
+
+Ce document décrit des attentes et obligations, pas des tests exécutés. Les octets restent privés et aucune promotion produit n'est autorisée par leur seule préparation.

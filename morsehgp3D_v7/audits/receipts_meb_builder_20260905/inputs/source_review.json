@@ -1,0 +1,58 @@
+{
+  "schema": "mhgp7-private-builder-source-review-v1",
+  "status": "prepared_source_capture_verified_no_compilation_attributed",
+  "public_status": "not_claimed",
+  "capture_manifest_sha256": "8a76ead45a509d4c4f4beca9163b14a63d0022c2c3459bb7c8e4d616c4666d9c",
+  "include_map_sha256": "cb1b8b3d62a476403578e5c1cf474c22fcbc512f56d5ab44ddd246c982029751",
+  "observed_utc": "2026-09-05T12:32:41.087575+00:00",
+  "checks": {
+    "all_source_pins_equal_before_after": true,
+    "source_authorities": 28,
+    "capture_entries": 28,
+    "preservation_counts": {
+      "reference_to_identical_audit_bytes": 21,
+      "new_exact_byte_capture": 7
+    },
+    "overlay_inventory": {
+      "BUILDER_PORT.md": "4ef6316cb8edc3ca589c07ae74400c691b35ef69e529117184102edc0c606b71",
+      "README.md": "de2cbf85c8ead15bdcd0e2218fa68165b591ae54983d7917e21c96b3f38489a7",
+      "builder_from_F.patch": "42c495bcce7b9a9a22bd13a59f271e96981ac8a3dc5420c7c8da36cb20a07e51",
+      "meb_proposal.hpp": "33255ebcb92864acd6322424618ebdc2d4e1253e917004c1c4d76a3798ecf352",
+      "port_from_0645.patch": "52e5ec65fa89eeb6f954d24467af318349744293d5806169e3c8a4d57c1bf30e",
+      "reference_F.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76",
+      "silent_incidence.hpp": "6e517c5705ca5d21dfe8fb920510ee50d61af7c53a465cfe3175959ff45a0b15"
+    },
+    "reference_F_entire_file_equals_current_F": true,
+    "complete_unified_patch_recomputed_byte_exact": true,
+    "reference_function_literal_after_signature_rename": true,
+    "reference_function_bytes_including_signature": 5964,
+    "reference_function_sha256_before_signature_rename": "5049ae97c86491c14892ab5c9ea55eed4f23a4e841a71ebbd319e3903a509bcf",
+    "source_F_reference_function_lines": [
+      162,
+      292
+    ],
+    "overlay_reference_function_lines": [
+      234,
+      364
+    ],
+    "tail_intruders_run_wrapper_unchanged_except_access_marker_and_Work_member": true,
+    "quoted_include_closure_headers": 19,
+    "quoted_include_edges": 50,
+    "product_CMake_and_reference_pins_preserved": true
+  },
+  "status_distinctions": {
+    "prepared": "The seven-file private overlay declares a nominal Builder port; README and BUILDER_PORT remain preparation documents. This capture verifies exact source and static differences only.",
+    "compiled": "No own build, binary or terminal execution receipt is present in the inspected private overlay directory. This source capture performs no compilation and transfers no prior helper/native/Trace result to the new dispatcher. Any later auditor compiled result must have its own receipt and authority mapping.",
+    "integrated": "The product silent_incidence.hpp remains the F bytes f75a136a and CMake is unchanged under its prior pin. The private overlay is not product integration or a qualified CLI/tower route."
+  },
+  "source_delta": "New opt-in cap and five diagnostic fields, persistent Builder Work, dispatcher and two RAII mirrors, literal renamed F body, private/public access markers and include adaptation. Full retained patch is the byte authority; semantic qualification belongs to a separate review.",
+  "limitations": [
+    "Quoted-include traversal does not enumerate standard-library/system headers or macro-expanded/compiler-selected dependencies. A later actual depfile remains necessary.",
+    "Reference function equality is a source fact, not a binary equivalence or latency result.",
+    "The integration plan is captured as historical design context; its earlier future/pending gate descriptions do not override later independently sealed receipts.",
+    "No builder causal/exception fixture, benchmark, API/archive integration, GPU, full-suite or exact claim is established by this source capture."
+  ],
+  "auditor_cpp_build_or_engine_runs": 0,
+  "git_mutations": 0,
+  "GCP": "non utilisé"
+}

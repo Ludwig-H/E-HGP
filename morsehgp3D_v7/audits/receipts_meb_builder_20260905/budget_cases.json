@@ -1,0 +1,2260 @@
+{
+  "schema": "mhgp7-audit-builder-budget-fixtures-v1",
+  "status": "derived_not_compiled",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "gcp_used": false,
+  "source_sha256": {
+    "build/v7_meb_dual_product_overlay/silent_incidence.hpp": "6e517c5705ca5d21dfe8fb920510ee50d61af7c53a465cfe3175959ff45a0b15",
+    "build/v7_meb_dual_product_overlay/meb_proposal.hpp": "33255ebcb92864acd6322424618ebdc2d4e1253e917004c1c4d76a3798ecf352",
+    "build/v7_meb_dual_product_overlay/reference_F.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76",
+    "build/v7_meb_dual_product_overlay/BUILDER_PORT.md": "4ef6316cb8edc3ca589c07ae74400c691b35ef69e529117184102edc0c606b71",
+    "morsehgp3D_v7/src/pipeline/run.hpp": "1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c",
+    "morsehgp3D_v7/src/forest/silent_incidence.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76"
+  },
+  "integer_domain": "Parse all integers exactly; MAX cases must never pass through binary64. Initial boundary states constrain increments, not an observed historical workload.",
+  "fixture_contract": {
+    "slots": "sites[] follows point_ids_in_local_order, resolved independently through ix.point_id. Never treat PointId as the Morton slot.",
+    "state": "One Builder for every local sequence; caps referenced by that Builder; no reconstruction or import of Stats between steps. Ball sentinel reset before each call; local nonempty event sentinels remain unchanged.",
+    "local_success": "A true local return leaves incoming status/reason unchanged, as F does. Public wrapper starts at complete.",
+    "legacy_projection": "All 13 original stats, complete ball (including raw inactive zero slots and raw level), and event sentinels compared separately from five appended diagnostics. meb_calls_delta is cumulative from sequence start.",
+    "initial_calls": "The bridge may keep a fixed distinguishable incoming meb_calls with enough margin. All fixture certified/fallback seeds are zero; never inject auxiliary counters at MAX.",
+    "exception": "Inject only in audit copies at explicitly named charge boundaries; no allocation naturally occurs in these arithmetic helpers. Do not inject through noexcept NoObserver without changing the audit seam. Do not throw from RAII destructors."
+  },
+  "geometry": {
+    "pair": {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0
+        ]
+      ],
+      "point_ids_in_local_order": [
+        0,
+        1
+      ],
+      "reference_rank": 1,
+      "P_attempts_to_certificate": 1,
+      "pivots_to_certificate": 0,
+      "MEB": {
+        "q": 2,
+        "active_support_point_ids": [
+          0,
+          1
+        ],
+        "raw_unused_support_slots": [
+          0,
+          0
+        ],
+        "key": [
+          1,
+          [
+            -2,
+            0,
+            0
+          ],
+          0
+        ],
+        "level_value": [
+          1,
+          1
+        ]
+      }
+    },
+    "triangle": {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          2,
+          0
+        ],
+        [
+          2,
+          0,
+          2
+        ]
+      ],
+      "point_ids_in_local_order": [
+        0,
+        1,
+        2
+      ],
+      "reference_rank": 4,
+      "P_attempts_to_certificate": 5,
+      "pivots_to_certificate": 1,
+      "reason": "Three diameter balls each exclude the remaining vertex (power4); then the strictly positive triangle. Proposer pays one initial pair, the three pairs of that same three-site pivot set, then its triangle.",
+      "MEB": {
+        "q": 3,
+        "active_support_point_ids": [
+          0,
+          1,
+          2
+        ],
+        "raw_unused_support_slots": [
+          0
+        ],
+        "key": [
+          3,
+          [
+            -8,
+            -4,
+            -4
+          ],
+          0
+        ],
+        "level_value": [
+          8,
+          3
+        ]
+      },
+      "complete_direct_K2": [
+        {
+          "support": [
+            0,
+            1,
+            2
+          ],
+          "interior": [],
+          "active_mask": 7,
+          "level": [
+            8,
+            3
+          ]
+        }
+      ]
+    },
+    "tetra": {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          2,
+          0
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          0,
+          2,
+          2
+        ]
+      ],
+      "point_ids_in_local_order": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_rank": 11,
+      "P_attempts_to_certificate": 16,
+      "pivots_to_certificate": 2,
+      "reason": "Six pairs and four face triangles exclude at least one other vertex; tetrahedron center=(1,1,1), positive barycentric weights1/4. Proposal pays1+4+11.",
+      "MEB": {
+        "q": 4,
+        "active_support_point_ids": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "key": [
+          1,
+          [
+            -2,
+            -2,
+            -2
+          ],
+          0
+        ],
+        "level_value": [
+          3,
+          1
+        ],
+        "literal_level": "Raw q4 representation must additionally match pinned F; do not substitute reduced3/1 for its raw limbs."
+      }
+    },
+    "tetra_K3": {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          2,
+          0
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          0,
+          2,
+          2
+        ]
+      ],
+      "complete_direct": [
+        {
+          "support": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "interior": [],
+          "active_mask": 15,
+          "level": [
+            3,
+            1
+          ]
+        }
+      ],
+      "core_local_orders": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          3
+        ],
+        [
+          0,
+          2,
+          3
+        ],
+        [
+          1,
+          2,
+          3
+        ]
+      ],
+      "core_reference_ranks": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "reason": "The opposite vertex is outside each regular face circumdisk, hence no chain or hidden local call."
+    },
+    "square": {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0
+        ],
+        [
+          2,
+          2,
+          0
+        ],
+        [
+          0,
+          2,
+          0
+        ]
+      ],
+      "point_ids_in_local_order": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "reference_rank": 2,
+      "P_attempts_before_shell_fallback": 1,
+      "MEB_before_shell_refusal": {
+        "q": 2,
+        "active_support_point_ids": [
+          0,
+          2
+        ],
+        "raw_unused_support_slots": [
+          0,
+          0
+        ],
+        "key": [
+          1,
+          [
+            -2,
+            -2,
+            0
+          ],
+          0
+        ],
+        "level_value": [
+          2,
+          1
+        ]
+      },
+      "reason": "First edge fails containment; diagonal02 is second in reference order and has four shell points. Proposal finds this diameter in one attempt but must fall back. At L1 the public local refusal remains budget, not shell."
+    },
+    "chain5": {
+      "points": [
+        [
+          0,
+          4,
+          0
+        ],
+        [
+          8,
+          4,
+          0
+        ],
+        [
+          4,
+          10,
+          0
+        ],
+        [
+          3,
+          1,
+          0
+        ],
+        [
+          5,
+          1,
+          0
+        ]
+      ],
+      "complete_direct_K2": [
+        {
+          "support": [
+            0,
+            4
+          ],
+          "interior": [
+            3
+          ],
+          "level": [
+            17,
+            2
+          ],
+          "active_mask": 3
+        },
+        {
+          "support": [
+            1,
+            3
+          ],
+          "interior": [
+            4
+          ],
+          "level": [
+            17,
+            2
+          ],
+          "active_mask": 3
+        },
+        {
+          "support": [
+            2,
+            3
+          ],
+          "interior": [
+            0
+          ],
+          "level": [
+            41,
+            2
+          ],
+          "active_mask": 3
+        },
+        {
+          "support": [
+            2,
+            4
+          ],
+          "interior": [
+            1
+          ],
+          "level": [
+            41,
+            2
+          ],
+          "active_mask": 3
+        },
+        {
+          "support": [
+            0,
+            1,
+            2
+          ],
+          "interior": [],
+          "level": [
+            169,
+            9
+          ],
+          "active_mask": 7
+        }
+      ],
+      "independent_geometry": "All10pairs and10triples checked by exact Gram elimination and strict barycentric positivity; coplanarity excludes essential q4 supports. Every positive support below has exactly its own shell. Filter q+number_inside=3 gives exactly the five declared events.",
+      "positive_support_certificates": [
+        {
+          "support": [
+            0,
+            1
+          ],
+          "inside": [
+            3,
+            4
+          ],
+          "center": [
+            "4",
+            "4",
+            "0"
+          ],
+          "radius_squared": "16",
+          "powers": [
+            "0",
+            "0",
+            "20",
+            "-6",
+            "-6"
+          ]
+        },
+        {
+          "support": [
+            0,
+            2
+          ],
+          "inside": [],
+          "center": [
+            "2",
+            "7",
+            "0"
+          ],
+          "radius_squared": "13",
+          "powers": [
+            "0",
+            "32",
+            "0",
+            "24",
+            "32"
+          ]
+        },
+        {
+          "support": [
+            0,
+            3
+          ],
+          "inside": [],
+          "center": [
+            "3/2",
+            "5/2",
+            "0"
+          ],
+          "radius_squared": "9/2",
+          "powers": [
+            "0",
+            "40",
+            "58",
+            "0",
+            "10"
+          ]
+        },
+        {
+          "support": [
+            0,
+            4
+          ],
+          "inside": [
+            3
+          ],
+          "center": [
+            "5/2",
+            "5/2",
+            "0"
+          ],
+          "radius_squared": "17/2",
+          "powers": [
+            "0",
+            "24",
+            "50",
+            "-6",
+            "0"
+          ]
+        },
+        {
+          "support": [
+            1,
+            2
+          ],
+          "inside": [],
+          "center": [
+            "6",
+            "7",
+            "0"
+          ],
+          "radius_squared": "13",
+          "powers": [
+            "32",
+            "0",
+            "0",
+            "32",
+            "24"
+          ]
+        },
+        {
+          "support": [
+            1,
+            3
+          ],
+          "inside": [
+            4
+          ],
+          "center": [
+            "11/2",
+            "5/2",
+            "0"
+          ],
+          "radius_squared": "17/2",
+          "powers": [
+            "24",
+            "0",
+            "50",
+            "0",
+            "-6"
+          ]
+        },
+        {
+          "support": [
+            1,
+            4
+          ],
+          "inside": [],
+          "center": [
+            "13/2",
+            "5/2",
+            "0"
+          ],
+          "radius_squared": "9/2",
+          "powers": [
+            "40",
+            "0",
+            "58",
+            "10",
+            "0"
+          ]
+        },
+        {
+          "support": [
+            2,
+            3
+          ],
+          "inside": [
+            0
+          ],
+          "center": [
+            "7/2",
+            "11/2",
+            "0"
+          ],
+          "radius_squared": "41/2",
+          "powers": [
+            "-6",
+            "2",
+            "0",
+            "0",
+            "2"
+          ]
+        },
+        {
+          "support": [
+            2,
+            4
+          ],
+          "inside": [
+            1
+          ],
+          "center": [
+            "9/2",
+            "11/2",
+            "0"
+          ],
+          "radius_squared": "41/2",
+          "powers": [
+            "2",
+            "-6",
+            "0",
+            "2",
+            "0"
+          ]
+        },
+        {
+          "support": [
+            3,
+            4
+          ],
+          "inside": [],
+          "center": [
+            "4",
+            "1",
+            "0"
+          ],
+          "radius_squared": "1",
+          "powers": [
+            "24",
+            "24",
+            "80",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "support": [
+            0,
+            1,
+            2
+          ],
+          "inside": [],
+          "center": [
+            "4",
+            "17/3",
+            "0"
+          ],
+          "radius_squared": "169/9",
+          "powers": [
+            "0",
+            "0",
+            "0",
+            "4",
+            "4"
+          ]
+        },
+        {
+          "support": [
+            0,
+            2,
+            4
+          ],
+          "inside": [
+            1
+          ],
+          "center": [
+            "30/7",
+            "115/21",
+            "0"
+          ],
+          "radius_squared": "9061/441",
+          "powers": [
+            "0",
+            "-32/7",
+            "0",
+            "8/7",
+            "0"
+          ]
+        },
+        {
+          "support": [
+            1,
+            2,
+            3
+          ],
+          "inside": [
+            0
+          ],
+          "center": [
+            "26/7",
+            "115/21",
+            "0"
+          ],
+          "radius_squared": "9061/441",
+          "powers": [
+            "-32/7",
+            "0",
+            "0",
+            "0",
+            "8/7"
+          ]
+        },
+        {
+          "support": [
+            2,
+            3,
+            4
+          ],
+          "inside": [
+            0,
+            1
+          ],
+          "center": [
+            "4",
+            "49/9",
+            "0"
+          ],
+          "radius_squared": "1681/81",
+          "powers": [
+            "-8/3",
+            "-8/3",
+            "0",
+            "0",
+            "0"
+          ]
+        }
+      ],
+      "core_facets": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "local_orders": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1,
+          3
+        ],
+        [
+          1,
+          3,
+          4
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "reference_ranks": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "proposal_attempts_if_available": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "added_event": {
+        "support": [
+          0,
+          1
+        ],
+        "interior": [
+          3
+        ],
+        "active_mask": 3,
+        "level": [
+          16,
+          1
+        ]
+      },
+      "reason": "AB diameter has strict intrudersD,E; MortonD<E. ABD is absent from direct catalogue and is appended; remove essentialA and insertE, yielding directBDE. Its radius drops16→17/2. Other core edges have no foreign intruder."
+    }
+  },
+  "local_cases": [
+    {
+      "id": "triangle_L1_P0",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 1,
+            "P": 0
+          },
+          "expected": {
+            "legacy": 1,
+            "P": 0,
+            "A": 1,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": false,
+            "ball": "sentinel",
+            "status_rule": "kResourceExhausted/silent_meb_support_budget"
+          }
+        }
+      ]
+    },
+    {
+      "id": "triangle_L1_P1",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 1,
+            "P": 1
+          },
+          "expected": {
+            "legacy": 1,
+            "P": 1,
+            "A": 1,
+            "pivots": 1,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": false,
+            "ball": "sentinel",
+            "status_rule": "kResourceExhausted/silent_meb_support_budget"
+          }
+        }
+      ]
+    },
+    {
+      "id": "triangle_L1_P4",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 1,
+            "P": 4
+          },
+          "expected": {
+            "legacy": 1,
+            "P": 4,
+            "A": 1,
+            "pivots": 1,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": false,
+            "ball": "sentinel",
+            "status_rule": "kResourceExhausted/silent_meb_support_budget"
+          }
+        }
+      ]
+    },
+    {
+      "id": "triangle_L1_P5",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 1,
+            "P": 5
+          },
+          "expected": {
+            "legacy": 1,
+            "P": 5,
+            "A": 0,
+            "pivots": 1,
+            "certified": 1,
+            "fallback": 0,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": false,
+            "ball": "sentinel",
+            "status_rule": "kResourceExhausted/silent_meb_support_budget"
+          }
+        }
+      ]
+    },
+    {
+      "id": "triangle_L4_P0",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 4,
+            "P": 0
+          },
+          "expected": {
+            "legacy": 4,
+            "P": 0,
+            "A": 4,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": true,
+            "ball": "triangle_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          }
+        }
+      ]
+    },
+    {
+      "id": "triangle_L4_P1",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 4,
+            "P": 1
+          },
+          "expected": {
+            "legacy": 4,
+            "P": 1,
+            "A": 4,
+            "pivots": 1,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": true,
+            "ball": "triangle_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          }
+        }
+      ]
+    },
+    {
+      "id": "triangle_L4_P4",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 4,
+            "P": 4
+          },
+          "expected": {
+            "legacy": 4,
+            "P": 4,
+            "A": 4,
+            "pivots": 1,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": true,
+            "ball": "triangle_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          }
+        }
+      ]
+    },
+    {
+      "id": "triangle_L4_P5",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 4,
+            "P": 5
+          },
+          "expected": {
+            "legacy": 4,
+            "P": 5,
+            "A": 0,
+            "pivots": 1,
+            "certified": 1,
+            "fallback": 0,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": true,
+            "ball": "triangle_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          }
+        }
+      ]
+    },
+    {
+      "id": "triangle_persistent_P7_L12",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 12,
+            "P": 7
+          },
+          "expected": {
+            "legacy": 4,
+            "P": 5,
+            "A": 0,
+            "pivots": 1,
+            "certified": 1,
+            "fallback": 0,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": true,
+            "ball": "triangle_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          }
+        },
+        {
+          "limits": {
+            "L": 12,
+            "P": 7
+          },
+          "expected": {
+            "legacy": 8,
+            "P": 7,
+            "A": 4,
+            "pivots": 2,
+            "certified": 1,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 2,
+            "ok": true,
+            "ball": "triangle_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          }
+        },
+        {
+          "limits": {
+            "L": 12,
+            "P": 7
+          },
+          "expected": {
+            "legacy": 12,
+            "P": 7,
+            "A": 8,
+            "pivots": 2,
+            "certified": 1,
+            "fallback": 2,
+            "meb_calls_delta_from_sequence_start": 3,
+            "ok": true,
+            "ball": "triangle_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          }
+        },
+        {
+          "limits": {
+            "L": 12,
+            "P": 7
+          },
+          "expected": {
+            "legacy": 12,
+            "P": 7,
+            "A": 8,
+            "pivots": 2,
+            "certified": 1,
+            "fallback": 2,
+            "meb_calls_delta_from_sequence_start": 4,
+            "ok": false,
+            "ball": "sentinel",
+            "status_rule": "kResourceExhausted/silent_meb_support_budget"
+          }
+        }
+      ],
+      "must_use_one_Builder": true
+    },
+    {
+      "id": "triangle_P0_persistent",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 8,
+            "P": 0
+          },
+          "expected": {
+            "legacy": 4,
+            "P": 0,
+            "A": 4,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": true,
+            "ball": "triangle_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          }
+        },
+        {
+          "limits": {
+            "L": 8,
+            "P": 0
+          },
+          "expected": {
+            "legacy": 8,
+            "P": 0,
+            "A": 8,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 2,
+            "meb_calls_delta_from_sequence_start": 2,
+            "ok": true,
+            "ball": "triangle_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          }
+        },
+        {
+          "limits": {
+            "L": 8,
+            "P": 0
+          },
+          "expected": {
+            "legacy": 8,
+            "P": 0,
+            "A": 8,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 2,
+            "meb_calls_delta_from_sequence_start": 3,
+            "ok": false,
+            "ball": "sentinel",
+            "status_rule": "kResourceExhausted/silent_meb_support_budget"
+          }
+        }
+      ],
+      "must_use_one_Builder": true
+    },
+    {
+      "id": "tetra_L11_P15",
+      "geometry": "tetra",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 11,
+            "P": 15
+          },
+          "expected": {
+            "legacy": 11,
+            "P": 15,
+            "A": 11,
+            "pivots": 2,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": true,
+            "ball": "tetra_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          }
+        }
+      ]
+    },
+    {
+      "id": "tetra_L10_P16",
+      "geometry": "tetra",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 10,
+            "P": 16
+          },
+          "expected": {
+            "legacy": 10,
+            "P": 16,
+            "A": 0,
+            "pivots": 2,
+            "certified": 1,
+            "fallback": 0,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": false,
+            "ball": "sentinel",
+            "status_rule": "kResourceExhausted/silent_meb_support_budget"
+          }
+        }
+      ]
+    },
+    {
+      "id": "tetra_L11_P16",
+      "geometry": "tetra",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 11,
+            "P": 16
+          },
+          "expected": {
+            "legacy": 11,
+            "P": 16,
+            "A": 0,
+            "pivots": 2,
+            "certified": 1,
+            "fallback": 0,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": true,
+            "ball": "tetra_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          }
+        }
+      ]
+    },
+    {
+      "id": "square_shell_L2_P0",
+      "geometry": "square",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 2,
+            "P": 0
+          },
+          "expected": {
+            "legacy": 2,
+            "P": 0,
+            "A": 2,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": false,
+            "ball": "square_diagonal_MEB",
+            "status_rule": "kUnsupportedDegeneracy/silent_local_nonessential_shell"
+          }
+        }
+      ]
+    },
+    {
+      "id": "square_shell_L2_P1",
+      "geometry": "square",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 2,
+            "P": 1
+          },
+          "expected": {
+            "legacy": 2,
+            "P": 1,
+            "A": 2,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": false,
+            "ball": "square_diagonal_MEB",
+            "status_rule": "kUnsupportedDegeneracy/silent_local_nonessential_shell"
+          }
+        }
+      ]
+    },
+    {
+      "id": "square_shell_L2_P401",
+      "geometry": "square",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 2,
+            "P": 401
+          },
+          "expected": {
+            "legacy": 2,
+            "P": 1,
+            "A": 2,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": false,
+            "ball": "square_diagonal_MEB",
+            "status_rule": "kUnsupportedDegeneracy/silent_local_nonessential_shell"
+          }
+        }
+      ]
+    },
+    {
+      "id": "square_shell_budget_priority",
+      "geometry": "square",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 1,
+            "P": 401
+          },
+          "expected": {
+            "legacy": 1,
+            "P": 1,
+            "A": 1,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": false,
+            "ball": "sentinel",
+            "status_rule": "kResourceExhausted/silent_meb_support_budget"
+          }
+        }
+      ]
+    },
+    {
+      "id": "pair_MAX_P_then_fallback",
+      "geometry": "pair",
+      "initial": {
+        "legacy": 0,
+        "P": 18446744073709551614,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 2,
+            "P": 18446744073709551615
+          },
+          "expected": {
+            "legacy": 1,
+            "P": 18446744073709551615,
+            "A": 0,
+            "pivots": 0,
+            "certified": 1,
+            "fallback": 0,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": true,
+            "ball": "pair_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          }
+        },
+        {
+          "limits": {
+            "L": 2,
+            "P": 18446744073709551615
+          },
+          "expected": {
+            "legacy": 2,
+            "P": 18446744073709551615,
+            "A": 1,
+            "pivots": 0,
+            "certified": 1,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 2,
+            "ok": true,
+            "ball": "pair_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          }
+        }
+      ],
+      "injection_scope": "Coherent scalar boundary, not an observed historical workload.",
+      "exact_A_plus_P_after_last": "18446744073709551616"
+    },
+    {
+      "id": "triangle_MAX_A_F",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 18446744073709551611,
+        "P": 0,
+        "A": 18446744073709551611,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 18446744073709551615,
+            "P": 0
+          },
+          "expected": {
+            "legacy": 18446744073709551615,
+            "P": 0,
+            "A": 18446744073709551615,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": true,
+            "ball": "triangle_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          }
+        }
+      ],
+      "injection_scope": "A<=legacy; increment-only boundary test, no reconstructed physical past."
+    },
+    {
+      "id": "legacy_above_lowered_L_P0",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 5,
+        "P": 0,
+        "A": 3,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 4,
+            "P": 0
+          },
+          "expected": {
+            "legacy": 5,
+            "P": 0,
+            "A": 3,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 0,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": false,
+            "ball": "sentinel",
+            "status_rule": "kResourceExhausted/silent_meb_support_budget"
+          },
+          "reference_entries_delta": 1,
+          "pair_selections_delta": 0
+        }
+      ],
+      "injection_scope": "Lowered-limit robustness; limits are immutable in a normal order attempt."
+    },
+    {
+      "id": "legacy_above_lowered_L_P5",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 5,
+        "P": 0,
+        "A": 3,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 4,
+            "P": 5
+          },
+          "expected": {
+            "legacy": 5,
+            "P": 0,
+            "A": 3,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 0,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": false,
+            "ball": "sentinel",
+            "status_rule": "kResourceExhausted/silent_meb_support_budget"
+          },
+          "reference_entries_delta": 0,
+          "pair_selections_delta": 0
+        }
+      ],
+      "injection_scope": "Lowered-limit robustness; limits are immutable in a normal order attempt."
+    },
+    {
+      "id": "proposal_above_lowered_P0",
+      "geometry": "pair",
+      "initial": {
+        "legacy": 0,
+        "P": 5,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 1,
+            "P": 0
+          },
+          "expected": {
+            "legacy": 1,
+            "P": 5,
+            "A": 1,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": true,
+            "ball": "pair_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          },
+          "pair_selections_delta": 0
+        }
+      ],
+      "injection_scope": "Lowered-limit robustness; do not reset acquired proposal charges."
+    },
+    {
+      "id": "proposal_above_lowered_P4",
+      "geometry": "pair",
+      "initial": {
+        "legacy": 0,
+        "P": 5,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 1,
+            "P": 4
+          },
+          "expected": {
+            "legacy": 1,
+            "P": 5,
+            "A": 1,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": true,
+            "ball": "pair_MEB",
+            "status_rule": "incoming_status_and_reason_unchanged"
+          },
+          "pair_selections_delta": 0
+        }
+      ],
+      "injection_scope": "Lowered-limit robustness; do not reset acquired proposal charges."
+    }
+  ],
+  "local_exception_cases": [
+    {
+      "id": "local_after_first_P_charge",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 4,
+            "P": 5
+          },
+          "expected": {
+            "legacy": 0,
+            "P": 1,
+            "A": 0,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 0,
+            "meb_calls_delta_from_sequence_start": 0,
+            "ok": null,
+            "ball": "sentinel",
+            "status_rule": "incoming_status_and_reason_unchanged_during_local_unwind"
+          }
+        }
+      ],
+      "fault_kind": "audit_copy_exception_injection",
+      "fault": "after_first_P_charge",
+      "exception_types": [
+        "std::bad_alloc",
+        "std::runtime_error"
+      ],
+      "expected_propagation": "Both propagate through direct Builder::miniball; external result retains mirrored charges; local events stay untouched."
+    },
+    {
+      "id": "local_after_first_F_charge",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 4,
+            "P": 1
+          },
+          "expected": {
+            "legacy": 1,
+            "P": 1,
+            "A": 1,
+            "pivots": 1,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": null,
+            "ball": "sentinel",
+            "status_rule": "incoming_status_and_reason_unchanged_during_local_unwind"
+          }
+        }
+      ],
+      "fault_kind": "audit_copy_exception_injection",
+      "fault": "after_first_F_charge",
+      "exception_types": [
+        "std::bad_alloc",
+        "std::runtime_error"
+      ],
+      "expected_propagation": "Both propagate through direct Builder::miniball; external result retains mirrored charges; local events stay untouched."
+    },
+    {
+      "id": "local_after_first_F_charge_P0",
+      "geometry": "triangle",
+      "initial": {
+        "legacy": 0,
+        "P": 0,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0
+      },
+      "steps": [
+        {
+          "limits": {
+            "L": 4,
+            "P": 0
+          },
+          "expected": {
+            "legacy": 1,
+            "P": 0,
+            "A": 1,
+            "pivots": 0,
+            "certified": 0,
+            "fallback": 1,
+            "meb_calls_delta_from_sequence_start": 1,
+            "ok": null,
+            "ball": "sentinel",
+            "status_rule": "incoming_status_and_reason_unchanged_during_local_unwind"
+          }
+        }
+      ],
+      "fault_kind": "audit_copy_exception_injection",
+      "fault": "after_first_F_charge_P0",
+      "exception_types": [
+        "std::bad_alloc",
+        "std::runtime_error"
+      ],
+      "expected_propagation": "Both propagate through direct Builder::miniball; external result retains mirrored charges; local events stay untouched."
+    }
+  ],
+  "public_completion_cases": [
+    {
+      "id": "public_triangle_P0",
+      "geometry": "triangle",
+      "limits": {
+        "L": 3,
+        "P": 0
+      },
+      "expected": {
+        "meb_calls": 3,
+        "legacy": 3,
+        "P": 0,
+        "A": 3,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 3,
+        "status": "kComplete",
+        "events": 0,
+        "core_records": 3,
+        "core_facets": 3
+      }
+    },
+    {
+      "id": "public_triangle_P1",
+      "geometry": "triangle",
+      "limits": {
+        "L": 3,
+        "P": 1
+      },
+      "expected": {
+        "meb_calls": 3,
+        "legacy": 3,
+        "P": 1,
+        "A": 2,
+        "pivots": 0,
+        "certified": 1,
+        "fallback": 2,
+        "status": "kComplete",
+        "events": 0,
+        "core_records": 3,
+        "core_facets": 3
+      }
+    },
+    {
+      "id": "public_triangle_P2",
+      "geometry": "triangle",
+      "limits": {
+        "L": 3,
+        "P": 2
+      },
+      "expected": {
+        "meb_calls": 3,
+        "legacy": 3,
+        "P": 2,
+        "A": 1,
+        "pivots": 0,
+        "certified": 2,
+        "fallback": 1,
+        "status": "kComplete",
+        "events": 0,
+        "core_records": 3,
+        "core_facets": 3
+      }
+    },
+    {
+      "id": "public_triangle_P3",
+      "geometry": "triangle",
+      "limits": {
+        "L": 3,
+        "P": 3
+      },
+      "expected": {
+        "meb_calls": 3,
+        "legacy": 3,
+        "P": 3,
+        "A": 0,
+        "pivots": 0,
+        "certified": 3,
+        "fallback": 0,
+        "status": "kComplete",
+        "events": 0,
+        "core_records": 3,
+        "core_facets": 3
+      }
+    },
+    {
+      "id": "public_triangle_P401",
+      "geometry": "triangle",
+      "limits": {
+        "L": 3,
+        "P": 401
+      },
+      "expected": {
+        "meb_calls": 3,
+        "legacy": 3,
+        "P": 3,
+        "A": 0,
+        "pivots": 0,
+        "certified": 3,
+        "fallback": 0,
+        "status": "kComplete",
+        "events": 0,
+        "core_records": 3,
+        "core_facets": 3
+      }
+    },
+    {
+      "id": "public_triangle_legacy_refusal",
+      "geometry": "triangle",
+      "limits": {
+        "L": 2,
+        "P": 1
+      },
+      "expected": {
+        "meb_calls": 3,
+        "legacy": 2,
+        "P": 1,
+        "A": 1,
+        "pivots": 0,
+        "certified": 1,
+        "fallback": 1,
+        "status": "kResourceExhausted",
+        "reason": "silent_meb_support_budget",
+        "events": 0,
+        "core_records": 3,
+        "core_facets": 3
+      }
+    },
+    {
+      "id": "public_tetra_K3_persistent",
+      "geometry": "tetra_K3",
+      "limits": {
+        "L": 16,
+        "P": 7
+      },
+      "expected": {
+        "meb_calls": 4,
+        "legacy": 16,
+        "P": 7,
+        "A": 12,
+        "pivots": 2,
+        "certified": 1,
+        "fallback": 3,
+        "status": "kComplete",
+        "events": 0,
+        "core_records": 4,
+        "core_facets": 4
+      }
+    },
+    {
+      "id": "public_chain_complete",
+      "geometry": "chain5",
+      "limits": {
+        "L": 8,
+        "P": 2
+      },
+      "expected": {
+        "meb_calls": 8,
+        "legacy": 8,
+        "P": 2,
+        "A": 6,
+        "pivots": 0,
+        "certified": 2,
+        "fallback": 6,
+        "status": "kComplete",
+        "events": 1,
+        "core_records": 11,
+        "core_facets": 6,
+        "facets_with_two_intruders": 1,
+        "chain_steps": 1,
+        "added_cofaces": 1,
+        "terminal_direct": 1,
+        "terminal_cached": 0,
+        "max_chain_length": 1
+      }
+    },
+    {
+      "id": "public_chain_refuse_after_nonempty_P0",
+      "geometry": "chain5",
+      "limits": {
+        "L": 2,
+        "P": 0
+      },
+      "expected": {
+        "meb_calls": 3,
+        "legacy": 2,
+        "P": 0,
+        "A": 2,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 2,
+        "status": "kResourceExhausted",
+        "reason": "silent_meb_support_budget",
+        "events": 0,
+        "core_records": 11,
+        "core_facets": 6,
+        "facets_with_two_intruders": 1,
+        "chain_steps": 1,
+        "added_cofaces": 1,
+        "terminal_direct": 0,
+        "max_chain_length": 0,
+        "events_immediately_before_third_MEB": 1
+      }
+    },
+    {
+      "id": "public_chain_refuse_after_nonempty_P2",
+      "geometry": "chain5",
+      "limits": {
+        "L": 2,
+        "P": 2
+      },
+      "expected": {
+        "meb_calls": 3,
+        "legacy": 2,
+        "P": 2,
+        "A": 0,
+        "pivots": 0,
+        "certified": 2,
+        "fallback": 0,
+        "status": "kResourceExhausted",
+        "reason": "silent_meb_support_budget",
+        "events": 0,
+        "core_records": 11,
+        "core_facets": 6,
+        "facets_with_two_intruders": 1,
+        "chain_steps": 1,
+        "added_cofaces": 1,
+        "terminal_direct": 0,
+        "max_chain_length": 0,
+        "events_immediately_before_third_MEB": 1
+      }
+    }
+  ],
+  "public_exception_cases": [
+    {
+      "id": "public_after_first_P",
+      "geometry": "triangle",
+      "limits": {
+        "L": 100,
+        "P": 5
+      },
+      "fault_charge_ordinal": 1,
+      "fault_source": "after_P_increment_before_form",
+      "expected_mirrored_diagnostics": {
+        "meb_calls": 0,
+        "legacy": 0,
+        "P": 1,
+        "A": 0,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 0,
+        "core_records": 3,
+        "core_facets": 3,
+        "events_before_fault": 0
+      },
+      "bad_alloc_result": {
+        "status": "kResourceExhausted",
+        "reason": "silent_allocation_failure",
+        "events": 0
+      },
+      "runtime_error_result": "Propagates from build_silent_cofaces; no returned result. Direct Builder::run with external result can expose mirrored state before its owner is destroyed.",
+      "fault_kind": "audit_copy_exception_injection_not_a_natural_allocation_in_the_arithmetic_helper"
+    },
+    {
+      "id": "public_nonempty_after_third_P",
+      "geometry": "chain5",
+      "limits": {
+        "L": 100,
+        "P": 401
+      },
+      "fault_charge_ordinal": 3,
+      "fault_source": "after_P_increment_before_form",
+      "expected_mirrored_diagnostics": {
+        "meb_calls": 2,
+        "legacy": 2,
+        "P": 3,
+        "A": 0,
+        "pivots": 0,
+        "certified": 2,
+        "fallback": 0,
+        "core_records": 11,
+        "core_facets": 6,
+        "chain_steps": 1,
+        "added_cofaces": 1,
+        "facets_with_two_intruders": 1,
+        "terminal_direct": 0,
+        "max_chain_length": 0,
+        "events_before_fault": 1
+      },
+      "bad_alloc_result": {
+        "status": "kResourceExhausted",
+        "reason": "silent_allocation_failure",
+        "events": 0
+      },
+      "runtime_error_result": "Propagates from build_silent_cofaces; no returned result. Direct Builder::run with external result can expose mirrored state before its owner is destroyed.",
+      "fault_kind": "audit_copy_exception_injection_not_a_natural_allocation_in_the_arithmetic_helper"
+    },
+    {
+      "id": "public_nonempty_first_F_after_P2",
+      "geometry": "chain5",
+      "limits": {
+        "L": 100,
+        "P": 2
+      },
+      "fault_charge_ordinal": 1,
+      "fault_source": "after_successful_F_meb_support_charge",
+      "expected_mirrored_diagnostics": {
+        "meb_calls": 3,
+        "legacy": 3,
+        "P": 2,
+        "A": 1,
+        "pivots": 0,
+        "certified": 2,
+        "fallback": 1,
+        "core_records": 11,
+        "core_facets": 6,
+        "chain_steps": 1,
+        "added_cofaces": 1,
+        "facets_with_two_intruders": 1,
+        "terminal_direct": 0,
+        "max_chain_length": 0,
+        "events_before_fault": 1
+      },
+      "bad_alloc_result": {
+        "status": "kResourceExhausted",
+        "reason": "silent_allocation_failure",
+        "events": 0
+      },
+      "runtime_error_result": "Propagates from build_silent_cofaces; no returned result. Direct Builder::run with external result can expose mirrored state before its owner is destroyed.",
+      "fault_kind": "audit_copy_exception_injection_not_a_natural_allocation_in_the_arithmetic_helper"
+    },
+    {
+      "id": "public_nonempty_third_F_P0",
+      "geometry": "chain5",
+      "limits": {
+        "L": 100,
+        "P": 0
+      },
+      "fault_charge_ordinal": 3,
+      "fault_source": "after_successful_F_meb_support_charge",
+      "expected_mirrored_diagnostics": {
+        "meb_calls": 3,
+        "legacy": 3,
+        "P": 0,
+        "A": 3,
+        "pivots": 0,
+        "certified": 0,
+        "fallback": 3,
+        "core_records": 11,
+        "core_facets": 6,
+        "chain_steps": 1,
+        "added_cofaces": 1,
+        "facets_with_two_intruders": 1,
+        "terminal_direct": 0,
+        "max_chain_length": 0,
+        "events_before_fault": 1
+      },
+      "bad_alloc_result": {
+        "status": "kResourceExhausted",
+        "reason": "silent_allocation_failure",
+        "events": 0
+      },
+      "runtime_error_result": "Propagates from build_silent_cofaces; no returned result. Direct Builder::run with external result can expose mirrored state before its owner is destroyed.",
+      "fault_kind": "audit_copy_exception_injection_not_a_natural_allocation_in_the_arithmetic_helper"
+    }
+  ],
+  "public_rejections": [
+    {
+      "id": "invalid_index",
+      "mutation": "Supply invalid CloudIndex to wrapper",
+      "status": "kInvalidInput",
+      "reason": "silent_invalid_index",
+      "meb_calls": 0,
+      "new_stats_all_zero": true
+    },
+    {
+      "id": "nonregular_mask",
+      "mutation": "Triangle catalogue active_mask6 instead of7",
+      "status": "kUnsupportedDegeneracy",
+      "reason": "silent_nonregular_direct_catalogue",
+      "meb_calls": 0,
+      "new_stats_all_zero": true
+    },
+    {
+      "id": "duplicate_direct",
+      "mutation": "Repeat the single regular triangle event",
+      "status": "kInvalidInput",
+      "reason": "silent_duplicate_direct_coface",
+      "meb_calls": 0,
+      "new_stats_all_zero": true
+    },
+    {
+      "id": "empty_source",
+      "mutation": "Valid index and empty catalogue",
+      "status": "kComplete",
+      "meb_calls": 0,
+      "new_stats_all_zero": true
+    },
+    {
+      "id": "K1_no_local_MEB",
+      "mutation": "Two-point cloud and its q2,d0,mask3 level1 event",
+      "status": "kComplete",
+      "meb_calls": 0,
+      "new_stats_all_zero": true
+    }
+  ],
+  "internal_preconditions_not_product_rejections": [
+    "Do not call Builder::miniball with n<2 or n>11, duplicate/out-of-range sites, invalid index, or hostile Candidate. The public wrapper/run admits the index/catalogue; the internal primitive assumes its local domain.",
+    "Do not mutate mirror Stats between calls while Builder owns Work; that is not an injection API. Use fresh initial scalar injections before construction."
+  ],
+  "per_order_isolation": "Call build_silent_cofaces twice with the same triangle/P1: each independent result hasP1,A2,cert1,fallback2. Calling triangle then tetra_K3 withP7 independently givesP3 thenP7; no budget or diagnostics may leak across the two Builder instances.",
+  "targeted_audit_mutants": [
+    {
+      "name": "reset_Work_per_local_call",
+      "witness": "triangle_persistent_P7_L12; public_triangle_P1; public_chain_complete"
+    },
+    {
+      "name": "A_includes_virtual_ordinal",
+      "witness": "triangle_L4_P5 giveslegacy4,P5,A0; public_triangle_P1 givesA2"
+    },
+    {
+      "name": "lost_P_on_fallback",
+      "witness": "triangle_persistent_P7_L12 call2 keepsP7 while A becomes4"
+    },
+    {
+      "name": "double_meb_calls",
+      "witness": "Every normal local call including refusal changesmeb_calls byexactly1"
+    },
+    {
+      "name": "lost_Work_mirror_on_exception",
+      "witness": "local_after_first_P_charge preservesP1 althoughmeb_calls_delta0"
+    },
+    {
+      "name": "lost_A_mirror_on_exception",
+      "witness": "local_after_first_F_charge preserveslegacy1,A1,P1"
+    },
+    {
+      "name": "uncleared_nonempty_events",
+      "witness": "public_chain_refuse_after_nonempty_P2; public_nonempty_first_F_after_P2"
+    },
+    {
+      "name": "charge_after_dispatch",
+      "witness": "Causal observer in real Builder dispatcher must reject same finalcounts when form boundary sees unpaidP; helper-only mutant doesnotqualifyBuilder."
+    }
+  ],
+  "no_new_consumer_found": {
+    "product_pipeline": "src/pipeline/run.hpp still includes src/forest/silent_incidence.hpp and calls its build_silent_cofaces forK>=2; it doesnotinclude the private overlay. silent_stats[K]=added.stats occursbeforestatuscheck.",
+    "remaining_product_contract": "Opt-in field propagation/schema/CLI/archive accounting and refusal forP>0 without completion are not implemented by these two private headers."
+  },
+  "reference_body_check": {
+    "status": "byte_identical_between_function_braces",
+    "sha256": "0b7ddc2953c94d9fcc51543d914236280195c39a61ca2a98d4534c1efb51b566",
+    "scope": "Signature renamed and access private; body bytes including geometric predicates are identical to pinned F."
+  }
+}

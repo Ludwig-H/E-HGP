@@ -1,0 +1,45 @@
+{
+  "GCP": "non utilis\u00e9",
+  "build_runs": 0,
+  "engine_runs": 0,
+  "input_sha256": {
+    "current_judge": "ad1521f8d877b731856e80215ab7ceaf2aa73d9edae6ee26af93c7349fcdfa87",
+    "driver_at_capture": "47d1956f97baf05d3a0efc39a369091f0eef4a58ba5a821e4dc6a304ad12269e",
+    "include_mapping": "cb1b8b3d62a476403578e5c1cf474c22fcbc512f56d5ab44ddd246c982029751",
+    "inspector_checks": "ec7ade0060bb1641d34c810fa03ae517b6667716cbe3b442da592721d9822c17",
+    "run": "720d001963238a53780a028fbd5e1244bed2a6b3a90f5583c2208650b34442c2"
+  },
+  "optimization": 0,
+  "positives": 1,
+  "preserved_files_verified_unchanged": 59,
+  "public_status": "not_claimed",
+  "replay_writes": 0,
+  "schema": "mhgp7-builder-provenance-inspector-checks-v1",
+  "status": "passed",
+  "targeted_rejections": [
+    {
+      "cause": "receipt.transformed_source_pins",
+      "name": "transformed_header_pin"
+    },
+    {
+      "cause": "receipt.exact_dependency_pins",
+      "name": "foreign_dependency_same_cardinality"
+    },
+    {
+      "cause": "receipt.build_command_binding",
+      "name": "different_binary_argv"
+    },
+    {
+      "cause": "receipt.build_route",
+      "name": "different_instrumentation_route"
+    },
+    {
+      "cause": "receipt.patch_bytes",
+      "name": "changed_patch_bytes"
+    },
+    {
+      "cause": "mutant.unexpected_rejection.reset_work",
+      "name": "malformed_mutant_JSON_is_not_causal_rejection"
+    }
+  ]
+}

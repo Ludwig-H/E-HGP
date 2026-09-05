@@ -1,0 +1,196 @@
+{
+  "schema": "mhgp7-builder-publication-checks-v1",
+  "scope": "Private Builder qualification and portable replay; no product/CLI/archive promotion",
+  "public_status": "not_claimed",
+  "gcp": "not_used",
+  "publication_base_head": "2e3e7e94e597e14279b286d978766abfd277579c",
+  "repository_checks": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tools/check_docs.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Validated 317 active Markdown files.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tools/check_implementation_status.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Validated 20 implementation phases and their gates.\n",
+      "stderr": ""
+    }
+  ],
+  "audit_markdown": {
+    "files": 52,
+    "local_links": 757,
+    "errors": [],
+    "pins": {
+      "audits/ADDENDUM_MEB_Q2_E_20260905.md": "cbf0cc093c71f90085036a27ba11fbd444177caa5a7b28508c6362157f5a51dd",
+      "audits/ARITHMETIQUE_CELLULES_COURANTE.md": "61deffbabbb5f4db8846f75d07eb8734f7da14960ad80bff788a46bad950bb59",
+      "audits/ARITHMETIQUE_LANES_COURANTE.md": "d34b383926855b86b8017a12babf6f0436781ed123203473dfbef78b82513c71",
+      "audits/ARITHMETIQUE_LARGE_COURANTE.md": "9097318fdd12b7bc2dc97b5a1bdc91a502c5000a065e0319df8eeeb04e01909b",
+      "audits/ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md": "736cf8e94936a713df06044f9efea0d36bd1885e93cf461414db9110620e1491",
+      "audits/ARITHMETIQUE_SPINDLE_COURANTE.md": "19e2bdb98bfbe6b0ff86ff06182a81e511a5b5028aa1b278a5f8137621007e83",
+      "audits/AUDIT_ARRONDI_20260905.md": "7f849f40ccab86ad187acb4943ad9cb9301bcf7520a0191eb2534da4681faa6b",
+      "audits/AUDIT_INDEPENDANT_20260904.md": "8fd60b85fa72f6c1e141b10e01f14f41c2153bc11a51aeee7fef5d2bf3273c02",
+      "audits/AUDIT_INDEX_20260905.md": "aebb2886c3c17aac9617fcd633628861247a579c3c963586fd05f6c929584583",
+      "audits/AUDIT_INTERFACES_20260904.md": "563fcfeafefa32cba9b38af5b024fd4e46df925fab1739fabe62026b191f1539",
+      "audits/AUDIT_MATHEMATIQUE_20260904.md": "c3c5dec330c51ce8d315e208f30d8eeede06d8a0d7cf71784afda825af0617d6",
+      "audits/AUDIT_MEB_DIFFEREE_20260905.md": "b696a6ab163c6ea44b3cdde332b98428a428511d5457201395e7e7930240be1f",
+      "audits/AUDIT_QUALIFICATION_20260905.md": "dd1966cf4923aabe2e3d4d32388440c7c750e11495926b9479f1458a623e3fc2",
+      "audits/AUDIT_RACCORD_INDEX_FRONT_20260905.md": "0ac8049c8564a1c89480488d16962c120d0e54c21ceba50419e43df443566f3d",
+      "audits/AUDIT_RESIDENCE_20260904.md": "6f397f94a6d2ab7ace0526b90718ca2531c672816db09b742d82cfa6922c9ad6",
+      "audits/AUTORITE_VOTE_P3_COURANTE.md": "36d12fe126e59ff8ac1f02272a531cdf877ce29eda9d7a24767b1e5f0ec9e105",
+      "audits/CELLULES_COURANT.md": "f42853b2e50ccbd744753aeb7e446994ed90a731e4a7aab344ba463bc4c20091",
+      "audits/CENSUS_AXIS_COURANT.md": "25c9bc9ebedd35dd971ef388f1112d8b9d2330fc8b7b188d5e19fb089b5c53e7",
+      "audits/CERTIFICAT_HORIZONTAL_COURANT.md": "b275e66955d990be8c5de9aba1b57a88b19dd1c0958ce2e6e959382e6e796e27",
+      "audits/CONTRAT_MASSES_VOTE_COURANT.md": "095af1800dedb4df24a983fa8f76975453633c118bd550201fbeecd65af7088d",
+      "audits/CONTRAT_VERTICAL_COURANT.md": "711bd2d979e2c985c4b70c9c78c4297f2ecfadabe0270d2ffe5e0c80c38525cb",
+      "audits/DIALOGUE_COURANT.md": "db024eca24eecffae0253e2704feb0878ae4e02f566686f554084ff347943480",
+      "audits/DOMAINE_CPU_COURANT.md": "459da841af4e55f71777de484cbaecae787049d35a865b3be74bb8f5f9ae31d3",
+      "audits/ETAT_COURANT.md": "15d518388a30f044f79bd37c329effb1caaa0b176a53953d818abd040f5d152a",
+      "audits/FILTRES_FLOTTANTS_COURANTS.md": "67a5937c8d223619bfd045b7b6550195a4b495df1c180fa3a3b6d3f5c99a2f28",
+      "audits/FRONT_ET_TEMOINS_COURANT.md": "9c01dbceb1e72ededaa2715dd63ec1a1754117f501e220da71d679dea3d49d49",
+      "audits/MEB_DOUBLE_BUDGET_COURANT.md": "51629a4f244974f644ac5fa7373cd7625a09d9fac8ec8bbe451fc6e5fa9fa779",
+      "audits/MONO_COURANT.md": "864cd343b7ecc418de36389ab4f8e6cef8894d461e57b3f0e4d5ecb9e96a5c39",
+      "audits/PREUVE_CHORD_SECTOR_COURANTE.md": "dce2dc4bc2858177d89235fb8255dac0162769c9146b0e0f116d5e1c892ea228",
+      "audits/QUESTION_COMPOSITION_CONSTRUCTEUR_20260904.md": "5e92a0ae4761cd9fc15113021630a9ef721a0f3eefb7a271bd19457f822951c7",
+      "audits/README.md": "64c89ff8f03ed66e7c73666182978782eba85d4d239b6d7efd7dce7544fdb389",
+      "audits/REPONSE_AUDITEUR_COMPOSITION.md": "55344167e82bc0cbd8710ad134628979b81100ae95665c6aacd4800338656d3c",
+      "audits/REPONSE_CONSTRUCTEUR_20260904.md": "b4ae686b6874de0530267a200d06ab765d77c7bef141afa1b04e860108d1d720",
+      "audits/RETOUR_MATH_COURANT.md": "45c7aa2e4df4c51c557cbcb341c3cc6cec0366149dcb9a5f80d5373f4057d56d",
+      "audits/RETOUR_MEMOIRE_COURANT.md": "446ea9cfd4285e5e6bef035b33336eac130225a23520c9bae24ebf1fdfdd6517",
+      "audits/S1_COURANT.md": "893ad2c4bd341aafa58f066d70d53a936d16c0a7f175c0a4186960e5e843152e",
+      "audits/receipts_20260905/README.md": "3420f5eb99fa9046c416e927db3fb8bfb1b8b3c779c7fe690f348f615bbe7ca5",
+      "audits/receipts_front_20260905/README.md": "25e0aca5d1c65456de560a719c40833f227cab9fc31259ef26e86b593042c127",
+      "audits/receipts_front_compiled_20260905/README.md": "02253bef52137f6900fa07d9b033610a2ef6210966a999e67e371f216c4ead02",
+      "audits/receipts_horizontal_20260905/README.md": "49961ab9026c9f1455cea969cadd3f901804ca75389554c55bdcefd6fcf36f85",
+      "audits/receipts_meb_builder_20260905/README.md": "1aaa5fab3b8fe00e7189e440ec8e3cac194e0631fbfd06adaacec63d64d3659e",
+      "audits/receipts_meb_builder_20260905/contract_review.md": "b51ebbc50a106393a6e7a78c812d8482892a360431a3d6baf66964633bb96dad",
+      "audits/receipts_meb_builder_20260905/semantic_review.md": "f69240278073dc99233f9dfa07a9441d0b53ddb5fc15d5f39be20f4671736c4a",
+      "audits/receipts_meb_dual_20260905/README.md": "2061e6703948076a267e82d7c7c9de3654bc09041e8e2c54905c93be5941bae8",
+      "audits/receipts_meb_native_20260905/README.md": "7f8c5779a12461f378b1e583462013dc5fb3f4ce6f6755b443a86d2bab68f13b",
+      "audits/receipts_meb_native_20260905/cost_review.md": "4ad5eb97581d16716bcbe488adafa479695f0b5678dc6f804a79b03a78d22930",
+      "audits/receipts_meb_native_20260905/harness_review.md": "d6a6a5049375fea24375a2e232aff41b6137990db9607533bd1cf6000e7046b5",
+      "audits/receipts_meb_native_20260905/qualification/snapshots/authority/build/v7_meb_dual_budget_cost_plan/PROTOCOL.md": "4a76f875485f39a7b0c5707e53f82c635cc1dfdab73bf595bf8348681b8f9ea7",
+      "audits/receipts_meb_native_20260905/qualification/snapshots/protocol/README.md": "6924b2d950e768e2e43646bd6499ae60caa42e02f204197d12c38242df9fd332",
+      "audits/receipts_meb_native_20260905/qualification/snapshots/protocol/disassembly_review_root.md": "964d5ea703be17335e58307e6c22176778c12053f87273745cff6610890a6dd6",
+      "audits/receipts_resolver_20260905/README.md": "2c40eb41abb5342f94f26079e189664d598434bceb9f0fde79f619261d73d578",
+      "audits/receipts_vertical_20260905/README.md": "d13c7b90df6c9bd396a686ddc678c8e25391da506879a1467dc943fa9dfb38a2"
+    }
+  },
+  "checked_utc": "2026-09-05T12:58:32.587584+00:00",
+  "binary_files_before_cleanup": {
+    "O2": {
+      "sha256": "3300c68bdd0b9933b731eb14d1093b880f80c6272017009f21bb4ca64fe8e296",
+      "dependencies_matching": 20
+    },
+    "ubsan": {
+      "sha256": "f0efaeb5d338e8fc0f91952c8a20f4475b1f0c379138da9f88a897cb98ced0af",
+      "dependencies_matching": 20
+    },
+    "instrumented": {
+      "sha256": "604b267d5271e2f17cf50b2f5016837f822b1b8686136c4ce728b0ac4315e827",
+      "dependencies_matching": 20
+    },
+    "reset_work": {
+      "sha256": "60d2ed3dd7af140c1c585c9fc2cdea3467f9bec6ed97340ed2b43935d61e3ce3",
+      "dependencies_matching": 20
+    },
+    "drop_P_mirror": {
+      "sha256": "2bba588d997a2663d218f655cb73a5c2d92b8cc90a6e9e9942cb49aad71dbd85",
+      "dependencies_matching": 20
+    },
+    "drop_A_mirror": {
+      "sha256": "4e6909866e5a3dc12b960228aed3e178ca68b8df630b8c6d9593e990dab61991",
+      "dependencies_matching": 20
+    },
+    "charge_after": {
+      "sha256": "f17c21d161dff63ddcb1aaaaf29d5a01b687170ecdc1ebe579886dc28a334652",
+      "dependencies_matching": 20
+    }
+  },
+  "cleanup_policy": "Only this audit’s .work_meb_builder and its publication snapshots are temporary; exclude .work*, __pycache__, pyc and ELF from staging and current manifest. Original captured bytes and raw failed/refused outputs remain preserved.",
+  "replay_checks": {
+    "normal": "compiled/normal.json",
+    "optimized": "compiled/optimized.json",
+    "inspector_normal": "compiled/inspector_checks_normal.json",
+    "inspector_optimized": "compiled/inspector_checks_optimized.json",
+    "inspector_execution": "compiled/inspector_checks_execution.json"
+  },
+  "snapshot_freshness_checks": [
+    {
+      "variant": "D",
+      "source_commit": "a32dc78fa3f0c526a11bd21fafdcded8db687973",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=D\nqualification_scope=323/323 CTests CPU Release independently executed; local MEB/index/rounding oracles; front arithmetic proofs and compiled helpers; no product exactness claim\n1187 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "variant": "D",
+      "source_commit": "a32dc78fa3f0c526a11bd21fafdcded8db687973",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=D\nqualification_scope=323/323 CTests CPU Release independently executed; local MEB/index/rounding oracles; front arithmetic proofs and compiled helpers; no product exactness claim\n1187 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "variant": "E_qualified",
+      "source_commit": "61f72a6805e27f1bc216b5d7444164b31fc970b6",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=E_qualified\nqualification_scope=E horizontal reduced certificate and token-only vertical reconstruction proof/replay (764 maps on original sealed E per provenance; relabel and synthetic fusion separate); own E324 and E33+33 receipts inspected; no product vertical export; public_status=not_claimed\n1187 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "variant": "E_qualified",
+      "source_commit": "61f72a6805e27f1bc216b5d7444164b31fc970b6",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=E_qualified\nqualification_scope=E horizontal reduced certificate and token-only vertical reconstruction proof/replay (764 maps on original sealed E per provenance; relabel and synthetic fusion separate); own E324 and E33+33 receipts inspected; no product vertical export; public_status=not_claimed\n1187 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "variant": "F_qualified",
+      "source_commit": "2e3e7e94e597e14279b286d978766abfd277579c",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=F_qualified\nqualification_scope=F LIFO/masks/counts conservation; own F339 and F48+48 Release/ASan-UBSan receipts inspected; closed E/F8k pairs equal, F16k success and F32k K9 budget refusal; E vertical replay not renamed F; public_status=not_claimed\n1187 pins communs et 143 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "variant": "F_qualified",
+      "source_commit": "2e3e7e94e597e14279b286d978766abfd277579c",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=F_qualified\nqualification_scope=F LIFO/masks/counts conservation; own F339 and F48+48 Release/ASan-UBSan receipts inspected; closed E/F8k pairs equal, F16k success and F32k K9 budget refusal; E vertical replay not renamed F; public_status=not_claimed\n1187 pins communs et 143 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    }
+  ],
+  "seal_note": "Publication receipt included among common pins; after recording these checks, common hashes are sealed again and the staged/worktree closure is checked before commit. No source variant is promoted by a private overlay.",
+  "whitespace_check": {
+    "raw_exit_code": 2,
+    "raw_output": "morsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/builder_from_F.patch.txt:6: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/builder_from_F.patch.txt:17: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/builder_from_F.patch.txt:29: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/builder_from_F.patch.txt:31: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/builder_from_F.patch.txt:39: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/builder_from_F.patch.txt:49: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/builder_from_F.patch.txt:59: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/builder_from_F.patch.txt:65: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/builder_from_F.patch.txt:137: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/port_from_0645.patch.txt:5: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/port_from_0645.patch.txt:96: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/port_from_0645.patch.txt:118: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/port_from_0645.patch.txt:122: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/port_from_0645.patch.txt:128: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/port_from_0645.patch.txt:140: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/port_from_0645.patch.txt:147: trailing whitespace.\n+ \nmorsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/port_from_0645.patch.txt:161: trailing whitespace.\n+ \n",
+    "preserved_exact_captures_or_verified_patches": {
+      "morsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/builder_from_F.patch.txt": "42c495bcce7b9a9a22bd13a59f271e96981ac8a3dc5420c7c8da36cb20a07e51",
+      "morsehgp3D_v7/audits/receipts_meb_builder_20260905/inputs/documents/port_from_0645.patch.txt": "52e5ec65fa89eeb6f954d24467af318349744293d5806169e3c8a4d57c1bf30e"
+    },
+    "authored_and_nonexception_exit_code": 0,
+    "policy": "Only the listed exact source/document captures and reconstructed unified patches preserve whitespace; authored files pass independently."
+  },
+  "post_cleanup_replay": {
+    "command": "python3 -B -O morsehgp3D_v7/audits/meb_builder_audit.py",
+    "exit_code": 0,
+    "scratch_exists": false,
+    "optimized_result_unchanged": true,
+    "stdout_sha256": "7f3f69fa6596c7724391b31fb4b130d9d7f026b0716c9662799ded2804d07795",
+    "engine_runs": 0
+  }
+}

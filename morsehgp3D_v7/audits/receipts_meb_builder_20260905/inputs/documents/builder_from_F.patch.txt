@@ -1,0 +1,149 @@
+--- morsehgp3D_v7/src/forest/silent_incidence.hpp@f75a136a
++++ build/v7_meb_dual_product_overlay/silent_incidence.hpp
+@@ -21,6 +21,10 @@
+ // supports non essentiels rencontres sont refuses, jamais perturbes.
+ #pragma once
+ 
++// PRIVATE OVERLAY of F f75a136a; no product integration or qualification.
++// P>0: meb_supports is a reference ordinal, not a physical total.
++// Physical proposal/fallback candidates have separate appended statistics.
++
+ #include <algorithm>
+ #include <array>
+ #include <limits>
+@@ -29,11 +33,12 @@
+ #include <utility>
+ #include <vector>
+ 
+-#include "fold.hpp"
+-#include "../lanes/q2.hpp"
+-#include "../lanes/q3.hpp"
+-#include "../lanes/q4.hpp"
+-#include "../pipeline/census.hpp"
++#include "meb_proposal.hpp"
++#include "src/forest/fold.hpp"
++#include "src/lanes/q2.hpp"
++#include "src/lanes/q3.hpp"
++#include "src/lanes/q4.hpp"
++#include "src/pipeline/census.hpp"
+ 
+ namespace mhgp7 {
+ 
+@@ -48,6 +53,8 @@
+   u64 max_added_cofaces = 2000000;
+   u64 max_query_nodes = 1000000000;
+   u64 max_meb_supports = 1000000000;
++  // Opt-in proposal budget; zero keeps the literal F reference route.
++  u64 max_meb_proposal_supports = 0;
+ };
+ 
+ struct SilentIncidenceStats {
+@@ -56,6 +63,9 @@
+   u64 terminal_direct = 0, terminal_cached = 0, max_chain_length = 0;
+   u64 query_nodes = 0, query_leaves = 0, query_range_skips = 0;
+   u64 meb_calls = 0, meb_supports = 0;
++  // Appended diagnostics, never part of the legacy terminal projection.
++  u64 meb_proposal_supports = 0, meb_fallback_supports = 0;
++  u64 meb_proposal_pivots = 0, meb_proposal_certified = 0, meb_proposal_fallback = 0;
+ };
+ 
+ struct SilentIncidenceResult {
+@@ -131,7 +141,9 @@
+  public:
+   Builder(const CloudIndex& index, const std::vector<ForestEvent>& direct,
+           const SilentIncidenceLimits& limits, SilentIncidenceResult* result)
+-      : ix(index), source(direct), caps(limits), out(*result) {}
++      : ix(index), source(direct), caps(limits), out(*result),
++        meb_work{out.stats.meb_proposal_supports, out.stats.meb_proposal_pivots,
++                 out.stats.meb_proposal_certified, out.stats.meb_proposal_fallback} {}
+ 
+   bool fail(SilentIncidenceStatus status, const char* reason) {
+     out.status = status;
+@@ -156,10 +168,70 @@
+     return true;
+   }
+ 
++  // Work belongs to this Builder/order. Mirror its diagnostics on every
++  // exit, including an exception; never roll back paid proposal candidates.
++  bool miniball(const std::array<i32, 11>& sites, size_t n, LocalBall* ball) {
++    struct WorkMirror {
++      const meb_proposal_detail::Work& work;
++      SilentIncidenceStats& stats;
++      ~WorkMirror() noexcept {
++        stats.meb_proposal_supports = work.meb_proposal_supports;
++        stats.meb_proposal_pivots = work.pivots;
++        stats.meb_proposal_certified = work.certified;
++        stats.meb_proposal_fallback = work.fallback;
++      }
++    } mirror{meb_work, out.stats};
++    if (caps.max_meb_proposal_supports == 0) {
++      // Call the literal F body even when its legacy cap is already reached.
++      // This observation matches 0645: no fallback decision after legacy
++      // exhaustion; A still measures only candidates actually attempted.
++      if (out.stats.meb_supports < caps.max_meb_supports) ++meb_work.fallback;
++      return miniball_reference_counted(sites, n, ball);
++    }
++    if (out.stats.meb_supports >= caps.max_meb_supports) {
++      ++out.stats.meb_calls;
++      return fail(SilentIncidenceStatus::kResourceExhausted, "silent_meb_support_budget");
++    }
++    meb_proposal_detail::Candidate candidate;
++    meb_proposal_detail::NoObserver observer;
++    const meb_proposal_detail::Limits proposal_limits{caps.max_meb_proposal_supports};
++    if (meb_work.meb_proposal_supports >= caps.max_meb_proposal_supports ||
++        !meb_proposal_detail::propose<false>(
++            ix, sites, n, &candidate, proposal_limits, &meb_work, &observer)) {
++      ++meb_work.fallback;
++      return miniball_reference_counted(sites, n, ball);
++    }
++    ++meb_work.certified;
++    ++out.stats.meb_calls;
++    const u64 count = meb_proposal_detail::ordinal(n, candidate);
++    const u64 prior = out.stats.meb_supports;
++    if (prior >= caps.max_meb_supports || count > caps.max_meb_supports - prior) {
++      if (prior < caps.max_meb_supports) out.stats.meb_supports = caps.max_meb_supports;
++      return fail(SilentIncidenceStatus::kResourceExhausted, "silent_meb_support_budget");
++    }
++    out.stats.meb_supports += count;
++    *ball = meb_proposal_detail::materialize<LocalBall>(ix, sites, candidate);
++    return true;
++  }
++
++ private:
++  bool miniball_reference_counted(const std::array<i32, 11>& sites, size_t n, LocalBall* ball) {
++    struct ReferenceWorkMirror {
++      SilentIncidenceStats& stats;
++      const u64 prior;
++      ~ReferenceWorkMirror() noexcept {
++        // The unchanged F body never decreases the legacy counter.
++        // For admitted initial A<=legacy, A+delta<=legacy+delta<=UINT64_MAX.
++        stats.meb_fallback_supports += stats.meb_supports - prior;
++      }
++    } mirror{out.stats, out.stats.meb_supports};
++    return miniball_reference(sites, n, ball);
++  }
++
+   // Un support positif dont la boule contient F satisfait les conditions
+   // d'optimalite de la MEB. Le premier suffit : l'unicite de la MEB rend
+   // inutile de trier/comparer toutes les boules candidates.
+-  bool miniball(const std::array<i32, 11>& sites, size_t n, LocalBall* ball) {
++  bool miniball_reference(const std::array<i32, 11>& sites, size_t n, LocalBall* ball) {
+     ++out.stats.meb_calls;
+     bool found = false;
+     const auto accept = [&](const BallKey& key, const ExactLevel& level,
+@@ -291,6 +363,7 @@
+     return true;
+   }
+ 
++ public:
+   // Deux intrus suffisent, MAIS la requete de bord est achevee pour refuser
+   // toute extra-shell. Les sous-arbres strictement interieurs se sautent
+   // apres collecte : aucune liste de tous leurs points n'est materialisee.
+@@ -459,6 +532,7 @@
+   const std::vector<ForestEvent>& source;
+   const SilentIncidenceLimits& caps;
+   SilentIncidenceResult& out;
++  meb_proposal_detail::Work meb_work;
+   std::vector<std::pair<PointId, i32>> ids;
+   std::vector<NodeRef> stack;
+ };

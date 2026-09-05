@@ -1,0 +1,187 @@
+{
+  "schema": "mhgp7-builder-observed-contract-review-v1",
+  "status": "passed",
+  "public_status": "not_claimed",
+  "inputs_sha256": {
+    "budget_cases.json": "f7121127e768249774f2e7bd9cab51b2df2c99a539b270f12d49b051d05fe889",
+    "contract_review.md": "b51ebbc50a106393a6e7a78c812d8482892a360431a3d6baf66964633bb96dad",
+    "compiled/cases.json": "835241408f5ed79f587f515f242a67b396311bd687c03a25622c17cbdc3abd27",
+    "compiled/fault_cases.json": "d6015605caff575839bd46107214f48b7bcedbf4aa9a9301b042a8d060f805a7",
+    "compiled/O2.stdout.gz": "37ca3b2b45f4f9364717506b662cd200351484ce3c576038a4d747c2a31fdb0c",
+    "compiled/instrumented_faults.stdout.gz": "ce5653e9cbda12a251bab1abe473af1565a71651f6f5c79a76a38318d955e2d5"
+  },
+  "compiled_commands": 3496,
+  "nominal_output_rows_per_build": 3504,
+  "local_steps_per_build": 3444,
+  "public_wrappers_per_build": 60,
+  "rational_local_commands": 3430,
+  "named_sequences": {
+    "persistent_P7": 4,
+    "lowered_P": 3,
+    "MAX_reference": 2,
+    "MAX_certificate": 2,
+    "MAX_proposal": 1,
+    "legacy_above_cap": 2
+  },
+  "derived_local_cases_available": 23,
+  "scope_note": "The 23 derived local contract cases are not all executed as 23 sequences. The compiled six named scenarios exercise fourteen steps; extra derived expectations remain mathematical fixtures. Geometry rank boundaries from earlier receipts are not transferred to this Builder campaign. Counts and selected raw rows read without rerunning Gram or C++.",
+  "rational_domain": {
+    "n_min": 2,
+    "n_max": 11,
+    "distinct_local_orders": 178,
+    "max_rank": 465,
+    "selected_ranks_present": {
+      "55": true,
+      "56": true,
+      "220": false,
+      "221": false,
+      "550": false
+    }
+  },
+  "chain_selected_rows": [
+    {
+      "stdout_line_1_based": 3483,
+      "L": 2,
+      "P": 2,
+      "actual": {
+        "status": 3,
+        "reason": "silent_meb_support_budget",
+        "stats": [
+          11,
+          6,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          14,
+          4,
+          2,
+          3,
+          2
+        ],
+        "q": 0,
+        "key": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "num": [
+          0,
+          0,
+          0
+        ],
+        "den": 0,
+        "support_slots": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "events": []
+      },
+      "extra": [
+        2,
+        0,
+        0,
+        2,
+        0
+      ]
+    },
+    {
+      "stdout_line_1_based": 3495,
+      "L": 8,
+      "P": 2,
+      "actual": {
+        "status": 0,
+        "reason": "complete_relative_to_supplied_regular_direct_catalogue",
+        "stats": [
+          11,
+          6,
+          1,
+          1,
+          1,
+          1,
+          0,
+          1,
+          55,
+          14,
+          2,
+          8,
+          8
+        ],
+        "q": 0,
+        "key": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "num": [
+          0,
+          0,
+          0
+        ],
+        "den": 0,
+        "support_slots": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "events": [
+          [
+            2,
+            1,
+            3,
+            [
+              16,
+              0,
+              0
+            ],
+            1,
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              3,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        ]
+      },
+      "extra": [
+        2,
+        6,
+        0,
+        2,
+        6
+      ]
+    }
+  ],
+  "public_faults_with_preexisting_event": 4,
+  "public_runtime_error_internal_result_observable": false,
+  "engine_runs": 0,
+  "gcp": "not_used"
+}

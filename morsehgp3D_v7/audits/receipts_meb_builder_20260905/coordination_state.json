@@ -1,0 +1,15 @@
+{
+  "schema": "mhgp7-builder-coordination-state-v1",
+  "observed_utc": "2026-09-05T12:56:25.504784+00:00",
+  "builder_finished_utc": "2026-09-05T12:45:47.357831+00:00",
+  "constructor_followup_started_utc": "2026-09-05T12:47:32.461120+00:00",
+  "constructor_followup_finished_utc": "2026-09-05T12:47:35.248867+00:00",
+  "constructor_receipt": {
+    "source": "build/v7_meb_dual_budget_cost_followup/run_20260905/receipt.json",
+    "sha256": "ff429437ba607c7ea76dbed492c6b2345954fc47f26485fcfb84d84f350dee6a",
+    "capture": "inputs/documents/cost_followup_receipt_at_review.json"
+  },
+  "scope": "Timing metadata read only: constructor capture completed after all auditor C++ ended; followup outputs, judgment and costs not independently qualified here. Prior protocol review remains separately pinned.",
+  "public_status": "not_claimed",
+  "gcp": "not_used"
+}

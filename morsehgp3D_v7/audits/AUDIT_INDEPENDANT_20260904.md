@@ -1,6 +1,6 @@
 # Audit indépendant courant de MorseHGP3D v7
 
-Actualisé le 5 septembre 2026 depuis `36bccd98a1d6f6303aefebfdb95154123eb92a6e` (publication constructeur, sources F inchangées) ; qualification native MEB et contrelecture de coût ajoutées, acquis verticaux/p3 et paliers F conservés.
+Actualisé le 5 septembre 2026 depuis `2e3e7e94e597e14279b286d978766abfd277579c` (publication constructeur, sources F inchangées) ; raccord privé MEB au Builder qualifié, acquis verticaux/p3 et paliers F conservés.
 Toutes les écritures restent dans `morsehgp3D_v7/audits/`.
 
 La suite **D** de 323 portes a été reconstruite et exécutée par l'auditeur.
@@ -26,7 +26,7 @@ La nouvelle sonde du pipeline passe en O2/O1 UBSan : 60 ordres, 840 coupes et 1 
 
 F possède un [lemme de conservation de pile](receipts_horizontal_20260905/f_delta/review.json) favorable et sa [qualification intégrée propre](receipts_vertical_20260905/f_qualification/). Le certificat exécuté reste attribué aux octets E figés. Le [contrat vertical](CONTRAT_VERTICAL_COURANT.md) ferme désormais la reconstruction depuis les tokens : une vraie naissance fournit une ancre en au plus `|born|` lookups inférieurs, puis les parents et successeurs propagent les cartes. Le lecteur d’audit est vérifié ; son port et l’export produit restent à réaliser. Les [masses/vote](CONTRAT_MASSES_VOTE_COURANT.md) disposent d’un contrat d’incidence et d’une [autorité exacte des comparaisons p3](AUTORITE_VOTE_P3_COURANTE.md), avec indécision explicite sur plafond. Leur supplément pondéré et les quotients de masses restent à traiter. Identités publiques, plateaux à étendre et coûts gardent leurs obligations distinctes. Le statut demeure `not_claimed` et `--require-exact` refuse.
 
-La [MEB privée à deux budgets](MEB_DOUBLE_BUDGET_COURANT.md) possède maintenant une preuve locale de conservation de F et un oracle rationnel exécuté en O2/UBSan : 3 430 appels et 1 507 ordinaux par build, trois corruptions de copies privées détectées. La version produit F reste inchangée. Le prochain port doit garder un budget de proposition persistant par ordre, un repli sans proposition et des champs publics versionnés. La [contrelecture native v2](receipts_meb_native_20260905/README.md) ferme désormais `NoObserver` sur son corpus. Elle constate un raccourci physique utile et un surcoût q2 immédiat ; le suivi de coût déjà préparé précède toute hypothèse de seuil.
+La [MEB privée à deux budgets](MEB_DOUBLE_BUDGET_COURANT.md) possède maintenant une preuve locale de conservation de F et un oracle rationnel exécuté en O2/UBSan : 3 430 appels et 1 507 ordinaux par build, trois corruptions de copies privées détectées. La version produit F reste inchangée. Le [port privé du Builder](receipts_meb_builder_20260905/README.md) conserve désormais le budget partagé, la référence F littérale et les diagnostics après interruption. Il passe 3 444 appels locaux et 60 wrappers par build O2, UBSan et instrumenté, avec huit injections d’exception et quatre mutants privés. L’intégration produit et les champs publics versionnés restent à qualifier. La [contrelecture native v2](receipts_meb_native_20260905/README.md) ferme désormais `NoObserver` sur son corpus. Elle constate un raccourci physique utile et un surcoût q2 immédiat ; le suivi de coût déjà préparé précède toute hypothèse de seuil.
 
 ## Modèle lu et objet audité
 
@@ -69,6 +69,7 @@ sont contenus implicitement dans cet export.
 | Numérateurs de vote p3 | Égalités algébriques et signes par intervalles rationnels ; 27 cas, quatre permutations et quatre corruptions normal/-O | [Autorité numérique bornée](AUTORITE_VOTE_P3_COURANTE.md) |
 | Paires et paliers F | Trois paires 8k égales ; F16k complet en 413,816 s ; F32k refusé à K9 sur les occurrences temporaires, sans tour publiée | [Contrelecture des observations closes](AUDIT_QUALIFICATION_20260905.md) |
 | MEB privée à deux budgets | Support/ordinal/niveau q4 brut conservés ; 3 430 appels O2/UBSan chacun, 1 507 ordinaux et trois mutants privés ; contrelecture du reçu causal triangle distincte | [Preuve et qualification locale](MEB_DOUBLE_BUDGET_COURANT.md) |
+| Raccord MEB au Builder privé | Même Work entre appels, références et événements F conservés ; 3 444 appels locaux et 60 wrappers par build, huit exceptions, quatre mutants privés | [Preuves compilées et limites](receipts_meb_builder_20260905/README.md) |
 | MEB différée q3/q4 | Signes, zéros, premier support, niveau et budgets conservés ; 89 ensembles, 431 appels et 6 176 puissances, deux mutants détectés | [Preuve et oracle rationnel indépendant](AUDIT_MEB_DIFFEREE_20260905.md) |
 | Prétest q2 E | Identité et borne i64 ; oracle indépendant, 431 appels identiques à D et nouveau mutant q2 détecté | [Addendum E](ADDENDUM_MEB_Q2_E_20260905.md) |
 | Morton, buckets et Karras | Partition, références, racine, couverture unique et boîtes justifiées ; 237 212 nuages par binaire, sept mutants structurels rejetés sous O2 et UBSan | [Preuve et oracle de trie](AUDIT_INDEX_20260905.md) |
@@ -106,10 +107,11 @@ Leurs reçus bruts ne sont pas réécrits.
    leur univers déclaré ; les seuls deltas H0 ne les déterminent pas.
    Préserver les facettes comme feuilles ; le recouvrement apparaît dans
    la projection et ne nécessite pas de laminarisation arbitraire.
-2. **Raccorder le prototype MEB qualifié localement.**
-   Porter le budget de proposition par ordre avec P=0 par défaut, une
-   référence sans proposition et la version de comptabilité explicite.
-   Qualifier les consommateurs ; l'accord local de `NoObserver` est désormais
+2. **Intégrer le Builder privé qualifié et ses consommateurs.**
+   La persistance du budget, le repli sans proposition et les miroirs
+   sont qualifiés dans l’overlay privé. Porter ces octets sous le contrôle
+   du constructeur, conserver P=0 par défaut et versionner la comptabilité.
+   Qualifier CLI, archive et agrégats ; l'accord local de `NoObserver` est désormais
    contre-vérifié dans son [reçu propre](receipts_meb_native_20260905/README.md).
    Le surcoût q2 immédiat et le contrôle P0 sensible à l'ordre justifient
    le suivi à lots fixes déjà préparé, sans activation générale ni seuil

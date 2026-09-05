@@ -1,0 +1,195 @@
+{
+  "status": "passed",
+  "public_status": "not_claimed",
+  "optimization": 0,
+  "engine_runs": 0,
+  "gcp": "not_used",
+  "normal_builds": {
+    "O2": {
+      "local_steps": 3444,
+      "public_runs": 60,
+      "certificates_q2": 416,
+      "certificates_q3": 313,
+      "certificates_q4": 64,
+      "legacy_refusals": 1655,
+      "shell_refusals": 40,
+      "public_added_events": 12
+    },
+    "ubsan": {
+      "local_steps": 3444,
+      "public_runs": 60,
+      "certificates_q2": 416,
+      "certificates_q3": 313,
+      "certificates_q4": 64,
+      "legacy_refusals": 1655,
+      "shell_refusals": 40,
+      "public_added_events": 12
+    },
+    "instrumented": {
+      "local_steps": 3444,
+      "public_runs": 60,
+      "certificates_q2": 416,
+      "certificates_q3": 313,
+      "certificates_q4": 64,
+      "legacy_refusals": 1655,
+      "shell_refusals": 40,
+      "public_added_events": 12
+    }
+  },
+  "provenance": {
+    "builds": {
+      "O2": {
+        "source_headers": 19,
+        "dependencies": 20,
+        "dependency_file_sha256": "20419572f95b8a6d576e969baa43b47ae6699e7a511bb1abeb25adbf4b8aec5a",
+        "patches": {},
+        "depfile_hash_recorded_at_capture": false,
+        "binary_sha256": "3300c68bdd0b9933b731eb14d1093b880f80c6272017009f21bb4ca64fe8e296"
+      },
+      "ubsan": {
+        "source_headers": 19,
+        "dependencies": 20,
+        "dependency_file_sha256": "c641cd7db350cccfe9bf231cef048499b46b75c2472c301372644393c8fe3704",
+        "patches": {},
+        "depfile_hash_recorded_at_capture": false,
+        "binary_sha256": "f0efaeb5d338e8fc0f91952c8a20f4475b1f0c379138da9f88a897cb98ced0af"
+      },
+      "instrumented": {
+        "source_headers": 19,
+        "dependencies": 20,
+        "dependency_file_sha256": "84182b9432f6168366ae3856569b40f1b84e16c474394aaf1ee1355f241a582d",
+        "patches": {
+          "instrumented_meb_proposal.hpp.patch": "bf5970392a23869a840582f438949318f9509a2f6ec66783068f7fd8396b12af",
+          "instrumented_silent_incidence.hpp.patch": "3cedcef0c0a5390bfc4ff6e7f8738ea97d2028eae3b9ddf9a341d244a1b926a3"
+        },
+        "depfile_hash_recorded_at_capture": false,
+        "binary_sha256": "604b267d5271e2f17cf50b2f5016837f822b1b8686136c4ce728b0ac4315e827"
+      },
+      "reset_work": {
+        "source_headers": 19,
+        "dependencies": 20,
+        "dependency_file_sha256": "010ae8aff819b0764dce886308c8179daa78e0e043797a7a1a985ce71c5bb164",
+        "patches": {
+          "reset_work_meb_proposal.hpp.patch": "ad0421e8e3fc742d83f901722b565c098e340260bba0a4549a651e1a6304c3ce",
+          "reset_work_silent_incidence.hpp.patch": "5ef237e67bde9a87f2e5bb808be85e802bb4308877f09a198f3aca902a42b6f0"
+        },
+        "depfile_hash_recorded_at_capture": false,
+        "binary_sha256": "60d2ed3dd7af140c1c585c9fc2cdea3467f9bec6ed97340ed2b43935d61e3ce3"
+      },
+      "drop_P_mirror": {
+        "source_headers": 19,
+        "dependencies": 20,
+        "dependency_file_sha256": "5e0ee53f131ba6b72a9c4c5b855ee8b582c46ff44eb841ea455eb70d6c597464",
+        "patches": {
+          "drop_P_mirror_meb_proposal.hpp.patch": "8799ade6e5e120274491676eaf23c3b93d1cf424dab9c61aed61b3a93138615b",
+          "drop_P_mirror_silent_incidence.hpp.patch": "537a94addb231ba107f9dfc26c2543f5b4e30e0b7e799191d0ff57930d756d60"
+        },
+        "depfile_hash_recorded_at_capture": false,
+        "binary_sha256": "2bba588d997a2663d218f655cb73a5c2d92b8cc90a6e9e9942cb49aad71dbd85"
+      },
+      "drop_A_mirror": {
+        "source_headers": 19,
+        "dependencies": 20,
+        "dependency_file_sha256": "52046cdc156aa44dd4e66c73f99a45c560b1febefd4a0b3207b6c75d8e973af0",
+        "patches": {
+          "drop_A_mirror_meb_proposal.hpp.patch": "605b77e38944c87193205bcea327103d6012a31642f344dfdf5c49c19d39cbba",
+          "drop_A_mirror_silent_incidence.hpp.patch": "ede30b1f455e0fd046b289c21fea8e8361e6a6143c26184b4994ea57cdef53e4"
+        },
+        "depfile_hash_recorded_at_capture": false,
+        "binary_sha256": "4e6909866e5a3dc12b960228aed3e178ca68b8df630b8c6d9593e990dab61991"
+      },
+      "charge_after": {
+        "source_headers": 19,
+        "dependencies": 20,
+        "dependency_file_sha256": "f1db5752fd5eb8b8624e153b87ff6b67670883410faabd60523a142ef08f15ae",
+        "patches": {
+          "charge_after_meb_proposal.hpp.patch": "430ae2f92bbacbab5aa02ca09f66340f5166b9209b20a0182c42eaa7226ffdb0",
+          "charge_after_silent_incidence.hpp.patch": "24eaf7452a0d91b9b77c4fc09ffe8bf45228318309e6171d4d6cc9c21fa1fbaa"
+        },
+        "depfile_hash_recorded_at_capture": false,
+        "binary_sha256": "f17c21d161dff63ddcb1aaaaf29d5a01b687170ecdc1ebe579886dc28a334652"
+      }
+    },
+    "historical_paths_read": false,
+    "source_closure": "19 captured or reconstructed headers plus captured bridge; system headers excluded",
+    "binary_scope": "Historical before/after binary pins retained; replay does not require or execute binaries.",
+    "driver_at_capture_sha256": "47d1956f97baf05d3a0efc39a369091f0eef4a58ba5a821e4dc6a304ad12269e",
+    "current_judge_sha256": "ad1521f8d877b731856e80215ab7ceaf2aa73d9edae6ee26af93c7349fcdfa87"
+  },
+  "exceptions": [
+    {
+      "mode": "M",
+      "kind": 1,
+      "before_throw_events": 2,
+      "internal_result_observable": true
+    },
+    {
+      "mode": "R",
+      "kind": 1,
+      "before_throw_events": 1,
+      "internal_result_observable": true
+    },
+    {
+      "mode": "M",
+      "kind": 2,
+      "before_throw_events": 2,
+      "internal_result_observable": true
+    },
+    {
+      "mode": "R",
+      "kind": 2,
+      "before_throw_events": 1,
+      "internal_result_observable": false
+    },
+    {
+      "mode": "M",
+      "kind": 3,
+      "before_throw_events": 2,
+      "internal_result_observable": true
+    },
+    {
+      "mode": "R",
+      "kind": 3,
+      "before_throw_events": 1,
+      "internal_result_observable": true
+    },
+    {
+      "mode": "M",
+      "kind": 4,
+      "before_throw_events": 2,
+      "internal_result_observable": true
+    },
+    {
+      "mode": "R",
+      "kind": 4,
+      "before_throw_events": 1,
+      "internal_result_observable": false
+    }
+  ],
+  "mutants": [
+    {
+      "name": "reset_work",
+      "first_rejection": "instrumented.causal_or_physical"
+    },
+    {
+      "name": "drop_P_mirror",
+      "first_rejection": "instrumented.causal_or_physical"
+    },
+    {
+      "name": "drop_A_mirror",
+      "first_rejection": "instrumented.causal_or_physical"
+    },
+    {
+      "name": "charge_after",
+      "first_rejection": "instrumented.causal_or_physical"
+    },
+    {
+      "name": "drop_P_mirror_exception",
+      "first_rejection": "fault.local_mirrors"
+    },
+    {
+      "name": "drop_A_mirror_exception",
+      "first_rejection": "fault.local_mirrors"
+    }
+  ]
+}

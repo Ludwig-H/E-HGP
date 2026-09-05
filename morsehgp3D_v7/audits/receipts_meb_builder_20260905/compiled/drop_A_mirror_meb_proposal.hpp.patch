@@ -1,0 +1,13 @@
+--- overlay/meb_proposal.hpp@captured
++++ overlay/meb_proposal.hpp@audit_drop_A_mirror
+@@ -127,8 +127,8 @@
+ };
+ 
+ struct NoObserver {
+-  void before_pair_selection(const Work&, const Limits&) const noexcept {}
+-  void before_form(const Work&, const Limits&, u8) const noexcept {}
++  void before_pair_selection(const Work& w, const Limits& l) const noexcept { audit_hooks::pair(w.meb_proposal_supports,l.max_meb_proposal_supports); }
++  void before_form(const Work& w, const Limits& l, u8) const { audit_hooks::form(w.meb_proposal_supports,l.max_meb_proposal_supports); }
+ };
+ 
+ enum class Attempt { kRejected, kAccepted, kExhausted };

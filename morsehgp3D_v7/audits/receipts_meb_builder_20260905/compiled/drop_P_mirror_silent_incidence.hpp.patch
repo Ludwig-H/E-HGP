@@ -1,0 +1,23 @@
+--- overlay/silent_incidence.hpp@captured
++++ overlay/silent_incidence.hpp@audit_drop_P_mirror
+@@ -154,6 +154,7 @@
+   bool charge(u64& counter, u64 limit, const char* reason) {
+     if (counter >= limit) return fail(SilentIncidenceStatus::kResourceExhausted, reason);
+     ++counter;
++    if (std::strcmp(reason, "silent_meb_support_budget") == 0) audit_hooks::reference(counter);
+     return true;
+   }
+ 
+@@ -171,11 +172,11 @@
+   // Work belongs to this Builder/order. Mirror its diagnostics on every
+   // exit, including an exception; never roll back paid proposal candidates.
+   bool miniball(const std::array<i32, 11>& sites, size_t n, LocalBall* ball) {
++    audit_hooks::events_seen = out.events.size();
+     struct WorkMirror {
+       const meb_proposal_detail::Work& work;
+       SilentIncidenceStats& stats;
+       ~WorkMirror() noexcept {
+-        stats.meb_proposal_supports = work.meb_proposal_supports;
+         stats.meb_proposal_pivots = work.pivots;
+         stats.meb_proposal_certified = work.certified;
+         stats.meb_proposal_fallback = work.fallback;

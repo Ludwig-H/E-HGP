@@ -43,6 +43,23 @@ l'inspecteur. Elle résulte de
 Les résumés constructeur sont comparés aux XML, inventaires, snapshots
 et octets ; leur seul statut `passed` n'est pas le critère d'acceptation.
 
+## Raccord MEB privé au Builder
+
+La [campagne indépendante du Builder](receipts_meb_builder_20260905/README.md)
+qualifie séparément l’overlay privé épinglé à `6e517c57`, avec helper
+`33255ebc` et référence F `f75a136a`. Ses trois builds O2, UBSan et
+instrumenté passent chacun 3 444 appels locaux et 60 wrappers ; huit
+injections d’exception et quatre mutants de copies privées ciblent la
+persistance, les miroirs et la charge prospective. Le même résultat est
+rejugé normalement et sous Python optimisé. Les vingt dépendances locales
+par build sont liées au mapping et aux transformations déclarées.
+
+Ces compilations nouvelles sous `audits/` sont distinctes des campagnes
+CTest historiques ci-dessous. Elles ne qualifient ni CLI, ni archive,
+ni intégration produit et n’attribuent aucun gain de temps. Les injections
+`runtime_error` au wrapper prouvent la propagation, sans exposer son
+résultat interne après déroulement de pile.
+
 ## Résultats confirmés
 
 Ce tableau conserve l'inspection historique C/D de 06:19 UTC ; les

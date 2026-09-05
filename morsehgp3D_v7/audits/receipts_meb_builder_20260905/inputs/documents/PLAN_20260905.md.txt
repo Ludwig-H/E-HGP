@@ -1,0 +1,79 @@
+# Raccord MEB dual-budget dans F — plan privé, pas d'intégration
+
+`phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=plan_integration_prive`, `public_status=not_claimed`. Lecture seule du produit et des historiques ; seule cette note est écrite. Aucun moteur, build, Git ou GCP. Le nouvel export vertical n'est pas audité ici.
+
+## Décision proposée
+
+La voie est intégrable **après** les portes géométriques et de composition, pas sur le seul reçu de budget. Ajouter `SilentIncidenceLimits::max_meb_proposal_supports=0` et l'option `--silent-meb-proposal-supports=N`. À zéro, ne sélectionner aucune paire et appeler directement la référence F : mêmes terminaux, supports/niveaux littéraux, compteurs legacy et format historique. Cela ne promet pas des instructions machine ou une latence identiques après recompilation.
+
+À P>0, annoncer obligatoirement `meb_work_accounting=reference_ordinal_plus_proposal_v1`. Le compteur existant `meb_supports` conserve l'ordinal logique F et le motif `silent_meb_support_budget`, mais ne représente plus le nombre physique total de candidats tentés. Épuiser P déclenche un repli F, jamais un nouveau refus public. Les reçus F fermés restent dans leur comptabilité d'origine.
+
+La préparation README du prototype est historique (« non compilée »). Le reçu privé de budget est désormais fermé `completed` : nominal 0, charge-après 4, deux rejets CLI 2 ; il couvre le triangle, la cumulativité et MAX, **pas une qualification q4/Gamma/tour**. Le protocole géométrique privé prévoit 1 507 ordinaux, 384 ordres de scènes et au plus 9 344 comparaisons ; ce plan ne lui attribue aucune exécution nouvelle.
+
+## Représentation des coûts
+
+| Champ proposé par ordre / tentative Builder | Sens et mise à jour |
+| --- | --- |
+| `max_meb_supports`, `meb_supports` | Limite L et charges de référence : tentatives F effectives au repli, ordinal R virtuel après certificat rapide. Si R dépasse le reste, compteur amené à L, motif legacy et boule sentinelle conservés. |
+| `max_meb_proposal_supports`, `meb_proposal_supports` | Limite P et candidats de proposition réellement tentés, y compris forme initiale, rang/acuité rejetés. Charge avant tout prédicat/construction de chaque candidat ; état persistant entre les MEB et les replis. |
+| `meb_fallback_supports` | A, candidats réellement tentés dans la route F, y compris lorsque P=0. Ce compteur manque actuellement dans 0645 ; l'ajouter comme diagnostic, pas troisième plafond. |
+
+Ne pas calculer A comme `meb_supports - meb_proposal_supports` : le triangle certifié donne ordinal4, proposition5, repli0. La voie de repli peut mesurer l'incrément de `meb_supports` autour du corps F ; cette liaison doit couvrir ses retours budget/shell et toute sortie exceptionnelle pertinente, sans compter les appels de référence du juge. Une observation avant les candidats doit requalifier ce compte effectif. À P=0 et depuis un Builder neuf, A égale `meb_supports`.
+
+Depuis zéro, A≤`meb_supports`, et A+`meb_proposal_supports`≤L+P. Avec états injectés, raisonner sur les incréments et ne pas présenter leur passé artificiel comme travail observé. Conserver A et P séparés : leur somme peut dépasser u64 à l'API, de même que la somme par K. Utiliser arithmétique élargie si une somme est imprimée/testée ; aucune addition u64 naïve. La tour a la somme des plafonds des ordres tentés, pas un budget unique partagé.
+
+Cette comptabilité porte des **candidats tentés**, pas des instructions, durées, puissances, recherches de paire ou RAM. La finalisation clé/niveau réutilise le support certifié ; q3 recalcule ses expressions de niveau, q4 réutilise sa forme. L'annoncer comme finalisation du candidat, pas comme zéro calcul ni comme nouvelle forme spéculative gratuite. Si le port reconstruit d'autres candidats, ils doivent être chargés. Les compteurs privés `pivots`, `certified`, `fallback` peuvent aider à la non-vacuité : `certified` signifie certificat trouvé, même si le cap ordinal refuse ensuite, pas succès public.
+
+## Carte des consommateurs et delta borné
+
+| Zone F relue | Raccord indispensable |
+| --- | --- |
+| `src/forest/silent_incidence.hpp:45–65,160–289,353–481` | Limits/Stats et appels locaux. Conserver le corps F comme repli explicite ; `Builder::miniball` garde son API et devient l'aiguillage. Un seul état P/A par Builder, pas un Work neuf par MEB. Legacy atteint : `meb_calls` une fois, refus avant proposition. P épuisé : repli avant recherche de paire ; aucun état legacy/ball muté par une proposition échouée. |
+| Prototype `pivot.hpp` 0645 et dépendance historique d6db | Extraire seulement Candidate/form/power/ordinal/finalisation et proposeur borné dans `forest/meb_proposal.hpp`. Ne pas déplacer LocalBall : finalisation templated `OutBall`, instanciée avec LocalBall dans le Builder. Ne pas inclure `build/`, ni la vieille route ordinal seule, ni créer un repli qui rappelle l'aiguillage récursivement. Garder n2..11, q≤4, sous-ensemble≤5 et pivots≤16. |
+| `src/pipeline/run.hpp:78,203,679,782–784,377–405` | `RunOptions::silent_limits` transmet déjà les caps ; `RunResult::silent_stats[K]` conserve les diagnostics y compris sur refus. Nouveaux champs copiés avant contrôle du statut et non purgés avec le payload. API : refuser P>0 si la complétion n'est pas demandée, au lieu de l'ignorer. Append des champs = évolution d'API source ; ne pas prétendre une ABI binaire inchangée. |
+| `cli/mhgp7.cpp:80–105,188–193,221–239` | Parsing exact nouveau cap, zéro désactive et ne refuse pas. Garder l'obligation `--complete-incidences` même pour une option explicite zéro. Domaine CLI actuel des caps : [0,INT64_MAX], API u64 distincte. Rejeter signe/suffixe/vide/overflow et doublon du nouvel argument ; ne pas modifier silencieusement la politique des anciens arguments. Succès et refus doivent identifier mode et budgets réellement demandés. |
+| `run.hpp:1169–1184` et CLI stderr | Préserver le format P=0. P>0 : identifiant obligatoire et grammaire revue des limites/statistiques ; garder les sens des champs legacy, ajouter P/A par ordre. Préserver le préfixe exact `REFUS …` et les codes. Les refus précoces avant MEB peuvent n'avoir aucun compteur par ordre. `core_records` est un diagnostic indépendant proposé ailleurs, ne pas le glisser dans ce delta. |
+| `src/io/archive.hpp:290–325`, appel CLI `archive->commit` | Le manifeste horizontal v1 ne reçoit actuellement ni RunOptions ni comptabilité. Pour un export opt-in, transmettre explicitement un bloc de provenance borné, fermé et validé (mode, L/P, portée par ordre, compteurs diagnostics), avec version/schéma distinct ; aucun changement des fichiers géométriques ni de leurs digests attendu. Garder le commit transactionnel final, aucun manifeste/payload au refus. Coordonner avec l'évolution d'archive séparée, sans l'auditer ici. |
+| `bench/incidence_campaign.py:48–166,185–241` | Identité de commande, `silent_limits` et `silent_K` à clés fermées, stderr strict. Versionner parseur et metadata ; contrôler mode/P/A/caps, doublons, couverture K et incompatibilités. Ne jamais traiter l'épuisement P comme un nouveau refus, ni le défaut de provenance comme un résultat legacy. |
+| `bench/compare_v6_v7.py:92–112` | Sa route `verified_events_only` exclut déjà `silent_K` : ne pas la convertir en juge de complétion. Elle reste auxiliaire pour capture/digests sous son pin. |
+| `tests/meb_lazy_gate.cpp`, `tests/silent_incidence_gate.cpp` | `stats_equal` liste les seuls champs F : en faire explicitement la projection legacy et ajouter un juge séparé pour les nouveaux champs. À P=0, conserver portes eager/shell/q2/q3/q4 non vacues. À P>0, tester certificat et repli dans la vraie route ; les anciens mutants ne qualifient pas une route qu'ils ne traversent plus. |
+| `tests/archive_gate.py`, `archive_api_gate.cpp`, `archive_cleanup_gate.cpp`, `tests/incidence_campaign_gate.py`, `CMakeLists.txt` | Schémas de manifeste/inventaires fermés, signatures `commit` utilisées directement, refus/purge, parsing synthétique et -O. Ajouter portes ciblées et non-vacuité, sans affaiblir les lecteurs historiques ni les attentes rc0/2/4. Les sweeps allocation/fsync doivent inclure la nouvelle provenance si elle alloue. |
+| Runners privés `v7_meb_paired`, `v7_f_pair_20260905`, `v7_f_scale_20260905` | Caps, identités, pins helper/build et égalités de dictionnaires sont fermés. Faire de **nouveaux** runners/reçus : parser F historique d'un côté, candidat versionné de l'autre ; comparer projection géométrie+legacy, rapporter A/P séparément. Ne pas réécrire un runner/receipt clos. |
+| `gcp-migration/v7_g4_session.py:368–388,522–545` | CPU candidat sur G4 passe les caps et consomme le parseur incidence exact ; futurs manifestes/argv/juges doivent lier le nouveau mode. Le CLI CUDA ne porte actuellement aucune route `complete-incidences` : aucune activation GPU implicite ni claim transféré. Aucun changement des scripts de sécurité dans ce plan. |
+
+Attention au faux raccord : une simple ligne nouvelle peut être ignorée par le parseur succès historique, qui ne rejette pas toutes les lignes inconnues. Le format P>0 doit être **disjoint pour les anciens juges**, par exemple `silent_limits` avec la clé supplémentaire obligatoire `meb_proposal_supports` et l'identifiant de comptabilité, et nouveau parseur strict. L'ancien `key_values` refuse alors le jeu de clés inconnu. En stderr, la grammaire fermée doit également refuser la nouvelle version non comprise. Le format P=0 reste lisible sans repin des bruts historiques.
+
+Les archives v1 peuvent rester identiques par défaut. L'archive opt-in ne peut pas se déclarer v1 avec des champs supplémentaires non négociés : `archive_gate.py` compare exactement les clés et l'inventaire. L'identité de comptabilité ne doit jamais être cachée dans seed/s, ni le digest géométrique interprété comme un digest de provenance. Les nouveaux reçus déclarent mode effectif, valeur zéro/positive et autorité de build ; aucune attribution rétroactive des anciens reçus à ce nouveau schéma.
+
+### Choix recommandé pour le premier produit opt-in
+
+Pas de version globale nouvelle de tout `print_run` : garder les lignes géométriques, ajouter l'identifiant ci-dessus et un jeu de clés opt-in fermé pour `silent_limits`, plus lignes dédiées ordinal/A/P. Le parseur historique doit refuser ce format positif, et le nouveau accepter F seulement sous son mode/provenance legacy déclaré. Sans proposition demandée, aucun de ces nouveaux champs n'est imprimé.
+
+Archive opt-in **v2 seulement**, avec bloc de comptabilité explicite transmis à `commit` depuis les options et statistiques terminales. Minimum : identifiant, limites L/P, portée `per_order_attempt`, et compteurs ordinal/A/P pour chacun des ordres K2..kmax complétés (liste vide si la demande se limite à K1). Vérifier mode↔P>0, sémantique de complétion, couverture sans doublon, A≤ordinal≤L et P consommé≤P demandé ; ne pas sommer en u64. Les anciens appels `commit` sans ce bloc gardent la signature compatible par surcharge/défaut et le manifeste v1 exact. Un petit type de métadonnées explicite évite de faire dépendre l'archive de tout `RunOptions`/`RunResult`.
+
+La liaison indispensable est celle de **la demande effective et des compteurs du même résultat complet**, pas une étiquette fournie arbitrairement. Les tests doivent tuer un bloc mode/cap incohérent, un compteur inventé hors borne, un ordre absent/dupliqué, ainsi qu'un commit opt-in après refus. Les bins forêt et `digest_all` restent comparés littéralement à F ; le manifeste v2 diffère volontairement. Le hash du build/CLI/parser/argv est lié par le reçu de qualification : inutile d'inventer un hash source au runtime ou d'étendre ce delta à la nouvelle preuve/export vertical. Un simple marqueur dans stdout serait insuffisant pour une archive distribuée seule.
+
+## Portes indispensables avant le GO d'intégration
+
+1. **Budget causal, port réel** : reprendre P0/1/4/5 × L1/4 triangle ; état partagé P7/L12 sur quatre appels ; compteur initial non nul, c=L, c>L, MAX. Vérifier avant chaque forme, y compris rejet acuité/rang, que la charge P a eu lieu ; mutant charge-après avec mêmes compteurs finaux doit sortir 4 pour la raison causale. Mutants reset-P-par-MEB, perte-P-au-repli, double-meb_calls, search-after-P-exhaustion et wraparound. Observer A et tous les champs legacy sur réussite/refus, certificat suivi de refus L compris.
+2. **Certificat et représentation** : 1 507 ordinaux par enumeration indépendante, frontières 1/55/56/220/221/550 et mutants offset/+1/ordre. q2/q3/q4 non vacus ; centre strictement positif, rang, contenance et shell exactement q. Triangle obtus, rang nul, centre q4 sur face/extérieur, carré à diagonales concurrentes, q2 puissance>i32, u16 extrêmes, permutations physiques et de `sites[]`. Comparer clé, trois limbs/dénominateur, q et **tout** support, notamment support[0] qui décide de la descente. Les helpers internes ont des préconditions : valider avant une injection d'indices/arity invalides, jamais produire de l'UB pour un test de rejet.
+3. **Mutants géométriques effectifs** : omission de l'extra-shell (carré bd ne doit pas passer au cap de l'ordinal ab/ac), omission de positivité du centre, contenance `>=` au lieu de `>`, mauvaise canonisation des slots, niveau q4 réduit au lieu du niveau brut, support[0] erroné. Ne pas se contenter de ChargeAfter, qui ne couvre aucune de ces décisions. Ne pas fournir le support F au proposeur depuis le juge.
+4. **Repli / composition** : succès rapide dans chaque arité, plusieurs pivots, plafond interne, P épuisé dans small_ball puis entre deux MEB, shell/non-régularité repliés vers F avec les mêmes effets de sentinelle. Vraie route sans MHGP7_TESTING et sous ASan/UBSan, puis Gamma indépendant borné, descente, layouts/threads, API/purge/archivage et parsing. Pas de succès global déduit d'un accord MEB seul.
+5. **Provenance et coût** : sources F/candidat, nouveau header, dépendances `.d`, outils/flags/macros, commandes/caps/mode, bruts positifs et échecs, fermeture before/after. Inventaire CTest et parseflags actualisés. Ensuite seulement paires mono froides n8000, K1..10, s8/10/12, même seed/coord/caps legacy et budget P explicite. Exposer A, P, ordinal, latence et RSS ; pas de gain déduit du triangle, pas de plafond physique attribué à l'ordinal, ni de claim 50k/G4.
+
+## Pins de cette cartographie
+
+```text
+365e7a5dcde5a6d6fcd7d43e00d2f58f86efbf42279a779c62c7eaac7b54ec25  morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md
+0645aa00add4d4cb387861b8f6dbd4fa0734ba5b4f3ad712caad8886b3541c2d  build/v7_meb_dual_budget_prototype/pivot.hpp
+d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5  build/v7_meb_pivot_prototype/pivot.hpp
+6f748dc8dda7a6b0410e0c1eac31584f044fc58e891add3532c0f79d25993dda  build/v7_meb_dual_budget_prototype/dual_budget_gate.cpp
+a7dc00201920a678c42e75436cb09ecf8a95b63dd660e587b814cdc0b4a1ea0a  build/v7_meb_dual_budget_prototype/run_20260905/receipt.json
+f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76  morsehgp3D_v7/src/forest/silent_incidence.hpp
+1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c  morsehgp3D_v7/src/pipeline/run.hpp
+46280e1117d4455c894b513e045f66d25174037e1e20f94a6fe2051e7cbf2125  morsehgp3D_v7/cli/mhgp7.cpp
+cc2243aaa1bdbe63b69f165d65152cf62d7fac32ff6c641343542c247d989430  morsehgp3D_v7/src/io/archive.hpp
+6ca21d8b1c89e6baea99ecc3dd414b35d06581df50833e76bac9bdc1d5d1c20a  morsehgp3D_v7/bench/incidence_campaign.py
+```
+
+Pins relus/recalculés, pas de requalification du reçu historique par cette note. Les fichiers consommateurs sont des points de raccord proposés, non une autorisation de les modifier tous maintenant.

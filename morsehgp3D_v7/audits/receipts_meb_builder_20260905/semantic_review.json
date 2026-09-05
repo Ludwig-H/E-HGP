@@ -1,0 +1,79 @@
+{
+  "schema": "mhgp7-private-builder-static-semantic-review-v1",
+  "date_utc": "2026-09-05",
+  "status": "static_semantic_connection_closed_on_declared_internal_domain",
+  "public_status": "not_claimed",
+  "note": {
+    "audit_path": "receipts_meb_builder_20260905/semantic_review.md",
+    "sha256": "f69240278073dc99233f9dfa07a9441d0b53ddb5fc15d5f39be20f4671736c4a"
+  },
+  "scope": "Private pinned Builder overlay; read-only mathematical/source review, no compiled or integration result attributed.",
+  "sources": {
+    "silent_incidence.hpp": {
+      "private_path": "build/v7_meb_dual_product_overlay/silent_incidence.hpp",
+      "audit_path": "receipts_meb_builder_20260905/inputs/overlay/silent_incidence.hpp",
+      "bytes": 23756,
+      "sha256": "6e517c5705ca5d21dfe8fb920510ee50d61af7c53a465cfe3175959ff45a0b15"
+    },
+    "meb_proposal.hpp": {
+      "private_path": "build/v7_meb_dual_product_overlay/meb_proposal.hpp",
+      "audit_path": "receipts_meb_builder_20260905/inputs/overlay/meb_proposal.hpp",
+      "bytes": 9493,
+      "sha256": "33255ebcb92864acd6322424618ebdc2d4e1253e917004c1c4d76a3798ecf352"
+    },
+    "builder_from_F.patch": {
+      "private_path": "build/v7_meb_dual_product_overlay/builder_from_F.patch",
+      "audit_path": "receipts_meb_builder_20260905/inputs/documents/builder_from_F.patch.txt",
+      "bytes": 6207,
+      "sha256": "42c495bcce7b9a9a22bd13a59f271e96981ac8a3dc5420c7c8da36cb20a07e51"
+    },
+    "BUILDER_PORT.md": {
+      "private_path": "build/v7_meb_dual_product_overlay/BUILDER_PORT.md",
+      "audit_path": "receipts_meb_builder_20260905/inputs/documents/BUILDER_PORT.md.txt",
+      "bytes": 9029,
+      "sha256": "4ef6316cb8edc3ca589c07ae74400c691b35ef69e529117184102edc0c606b71"
+    },
+    "reference_F.hpp": {
+      "private_path": "build/v7_meb_dual_product_overlay/reference_F.hpp",
+      "audit_path": "receipts_resolver_20260905/qualification/snapshots/source/silent_incidence.hpp",
+      "bytes": 20111,
+      "sha256": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76"
+    },
+    "README.md": {
+      "private_path": "build/v7_meb_dual_product_overlay/README.md",
+      "audit_path": "receipts_meb_builder_20260905/inputs/documents/README.md.txt",
+      "bytes": 4502,
+      "sha256": "de2cbf85c8ead15bdcd0e2218fa68165b591ae54983d7917e21c96b3f38489a7"
+    },
+    "port_from_0645.patch": {
+      "private_path": "build/v7_meb_dual_product_overlay/port_from_0645.patch",
+      "audit_path": "receipts_meb_builder_20260905/inputs/documents/port_from_0645.patch.txt",
+      "bytes": 7937,
+      "sha256": "52e5ec65fa89eeb6f954d24467af318349744293d5806169e3c8a4d57c1bf30e"
+    }
+  },
+  "performed_checks": {
+    "private_and_audit_bytes_equal": 7,
+    "reference_function_literal_after_signature_rename": true,
+    "tail_intruders_event_run_wrapper_literal_after_Work_member_removal": true,
+    "markdown_link_targets_exist": 10
+  },
+  "semantic_conclusions": [
+    "One Work per Builder, shared by both local-call sites in run; no recursive or newly constructed fallback Builder.",
+    "Nominal terminal projection onto 13 legacy fields and complete LocalBall equals F on internal n2..11 domain, conditional on the previously proved local geometric certificate.",
+    "A measures only fallback legacy deltas; p is prospectively charged; virtual legacy ordinals are separate.",
+    "Two noexcept scalar RAII mirrors preserve paid work on ordinary and exceptional exits within coherent scalar state domain.",
+    "Induction preserves the nonexceptional run control flow and output events; no fresh binary qualification follows from source proof."
+  ],
+  "limits": [
+    "Mutants disabled in the nominal theorem; local sites and output pointers valid, no concurrent alias mutation, coherent counters with observation increment margin.",
+    "No equality of exception calendars is claimed; Stats mirrors are only fresh when miniball exits.",
+    "No API, CLI, archive or shared tower budget is introduced by this private header.",
+    "No previous helper timing or causal mutant result transfers automatically to this dispatcher."
+  ],
+  "cpp_builds": 0,
+  "engine_runs": 0,
+  "benchmarks": 0,
+  "git_mutations": 0,
+  "GCP": "non utilisé"
+}

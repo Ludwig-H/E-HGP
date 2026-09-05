@@ -1,0 +1,62 @@
+{
+  "status": "passed",
+  "observed_utc": "2026-09-05T13:01:34.753880+00:00",
+  "runs": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v7/audits/meb_builder_audit.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout_sha256": "485f5e77c1f3d4ba32a726d1e29c8ee8e9b3c77fd865234c475656bbee2db819",
+      "result": "normal.json"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/meb_builder_audit.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout_sha256": "7f3f69fa6596c7724391b31fb4b130d9d7f026b0716c9662799ded2804d07795",
+      "result": "optimized.json"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_meb_builder_20260905/compiled/inspector_checks.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout_sha256": "fe54a9d1c9478b636656f80fc544269bf356a05d55b03e0c97694495053d2001",
+      "result": "inspector_checks_normal.json"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_meb_builder_20260905/compiled/inspector_checks.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout_sha256": "ae1adab78cedcbfad44790992aaa2ad2daf3cb4633be332e4f8a2cf28956171d",
+      "result": "inspector_checks_optimized.json"
+    }
+  ],
+  "input_pins": {
+    "current_judge": "ad1521f8d877b731856e80215ab7ceaf2aa73d9edae6ee26af93c7349fcdfa87",
+    "driver_at_capture": "47d1956f97baf05d3a0efc39a369091f0eef4a58ba5a821e4dc6a304ad12269e",
+    "include_mapping": "cb1b8b3d62a476403578e5c1cf474c22fcbc512f56d5ab44ddd246c982029751",
+    "inspector_checks": "ec7ade0060bb1641d34c810fa03ae517b6667716cbe3b442da592721d9822c17",
+    "run": "720d001963238a53780a028fbd5e1244bed2a6b3a90f5583c2208650b34442c2"
+  },
+  "inspector_stdout_results_identical_except_optimization": true,
+  "engine_runs": 0,
+  "build_runs": 0
+}

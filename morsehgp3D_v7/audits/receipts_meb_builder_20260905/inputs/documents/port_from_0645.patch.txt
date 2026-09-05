@@ -1,0 +1,201 @@
+--- build/v7_meb_dual_budget_prototype/pivot.hpp@0645aa00
++++ build/v7_meb_dual_product_overlay/meb_proposal.hpp
+@@ -1,19 +1,118 @@
+ #pragma once
+ 
+-// Private, uncompiled dual-budget experiment. Not a CLI/product integration.
+-// Reuse only the exact local forms, ordinal and materialization from historical
+-// d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5.
+-// The fallback Builder comes from the current F include closure, not old D.
+-#include "../v7_meb_pivot_prototype/pivot.hpp"
++// Private product-overlay port; not integrated, compiled or qualified.
++// Exact authorities:
++// d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5
++// 0645aa00add4d4cb387861b8f6dbd4fa0734ba5b4f3ad712caad8886b3541c2d
++// Internal preconditions: validated unique u16 CloudIndex; sites[] positions
++// in range; n in [2,11]; form/ordinal receive valid distinct slots and q 2..4.
++// No hostile-candidate admission API, Builder fallback or legacy accounting
++// lives here. The caller owns the persistent Work and terminal transaction.
++#include <array>
++#include <cstddef>
++#include <utility>
++
++#include "src/lanes/q2.hpp"
++#include "src/lanes/q3.hpp"
++#include "src/lanes/q4.hpp"
++#include "src/tree/cloud_index.hpp"
++
++namespace mhgp7::meb_proposal_detail {
++
++struct Candidate {
++  std::array<size_t, 4> slots{};
++  u8 q = 0;
++  P3 a{}, b{};
++  Q3Form three{};
++  Q4Form four{};
++
++  i128 power(const P3& z) const {
++    if (q == 2) return p3_dot(p3_sub(z, a), p3_sub(z, b));
++    if (q == 3) return q3_power(three, z);
++    return q4_power(four, z);
++  }
++};
++
++inline const P3& point(const CloudIndex& ix, const std::array<i32, 11>& sites, size_t slot) {
++  return ix.upos[(size_t)sites[slot]];
++}
++
++inline bool form(const CloudIndex& ix, const std::array<i32, 11>& sites,
++                 std::array<size_t, 4> slots, u8 q, Candidate* result) {
++  // Canonical order is position in sites[], not PointId or Morton index.
++  for (size_t i = 1; i < q; ++i)
++    for (size_t j = i; j > 0 && slots[j] < slots[j - 1]; --j)
++      std::swap(slots[j], slots[j - 1]);
++  Candidate candidate;
++  candidate.slots = slots;
++  candidate.q = q;
++  candidate.a = point(ix, sites, slots[0]);
++  candidate.b = point(ix, sites, slots[1]);
++  if (q >= 3) {
++    const P3& c = point(ix, sites, slots[2]);
++    if (q == 3) {
++      if (p3_dot(p3_sub(candidate.b, candidate.a), p3_sub(c, candidate.a)) <= 0 ||
++          p3_dot(p3_sub(candidate.a, candidate.b), p3_sub(c, candidate.b)) <= 0 ||
++          p3_dot(p3_sub(candidate.a, c), p3_sub(candidate.b, c)) <= 0) return false;
++      candidate.three = q3_form(candidate.a, candidate.b, c);
++      if (candidate.three.g <= 0) return false;
++    } else {
++      const P3& d = point(ix, sites, slots[3]);
++      candidate.four = q4_form(candidate.a, candidate.b, c, d);
++      if (candidate.four.det <= 0 ||
++          !q4_center_strictly_inside(candidate.four, candidate.a, candidate.b, c, d)) return false;
++    }
++  }
++  *result = candidate;
++  return true;
++}
++
++inline u64 choose(size_t n, size_t k) {
++  if (k > n) return 0;
++  u64 value = 1;
++  for (size_t i = 1; i <= k; ++i) value = value * (n - k + i) / i;
++  return value;
++}
++
++inline u64 ordinal(size_t n, const Candidate& candidate) {
++  u64 count = 1;
++  for (size_t q = 2; q < candidate.q; ++q) count += choose(n, q);
++  size_t next = 0;
++  for (size_t i = 0; i < candidate.q; ++i) {
++    for (size_t slot = next; slot < candidate.slots[i]; ++slot)
++      count += choose(n - slot - 1, candidate.q - i - 1);
++    next = candidate.slots[i] + 1;
++  }
++  return count;
++}
+ 
+-namespace mhgp7::dual_budget_prototype {
++template <class OutBall>
++inline OutBall materialize(const CloudIndex& ix,
++                           const std::array<i32, 11>& sites,
++                           const Candidate& candidate) {
++  OutBall ball{};
++  ball.q = candidate.q;
++  for (size_t i = 0; i < candidate.q; ++i) ball.support[i] = sites[candidate.slots[i]];
++  if (candidate.q == 2) {
++    ball.key = q2_ball_key(candidate.a, candidate.b);
++    ball.level = promote_level(q2_exact_level(p3_norm2(p3_sub(candidate.a, candidate.b))));
++  } else if (candidate.q == 3) {
++    ball.key = q3_ball_key(candidate.three);
++    ball.level = promote_level(q3_exact_level(candidate.a, candidate.b,
++                                            point(ix, sites, candidate.slots[2])));
++  } else {
++    ball.key = ball_key_reduce(q4_ball_form(candidate.four));
++    ball.level = q4_level_raw(candidate.four);
++  }
++  return ball;
++}
+ 
+ inline constexpr const char* kWorkAccounting =
+     "reference_ordinal_plus_proposal_v1";
+ inline constexpr size_t kMaxPivots = 16;
+ 
+ struct Limits {
+-  // Explicit opt-in: zero disables proposals and retains the F fallback.
++  // Explicit opt-in: zero disables proposals; the caller owns the F fallback.
+   u64 max_meb_proposal_supports = 0;
+ };
+ 
+@@ -22,6 +121,7 @@
+   // call and fallback. Never reset this counter inside miniball/propose.
+   u64 meb_proposal_supports = 0;
+   u64 pivots = 0;
++  // Caller-owned terminal observations; propose() does not change these two.
+   u64 certified = 0;
+   u64 fallback = 0;
+ };
+@@ -31,11 +131,6 @@
+   void before_form(const Work&, const Limits&, u8) const noexcept {}
+ };
+ 
+-using pivot_prototype::Candidate;
+-using pivot_prototype::materialize;
+-using pivot_prototype::ordinal;
+-using pivot_prototype::point;
+-
+ enum class Attempt { kRejected, kAccepted, kExhausted };
+ 
+ // ChargeAfter is a private causal mutant, not a testing-only bypass of the
+@@ -51,7 +146,7 @@
+   // The guard proves that this increment cannot overflow, including limit MAX.
+   if constexpr (!ChargeAfter) ++work->meb_proposal_supports;
+   observer->before_form(*work, limits, q);
+-  const bool built = pivot_prototype::form(ix, sites, slots, q, result);
++  const bool built = form(ix, sites, slots, q, result);
+   if constexpr (ChargeAfter) ++work->meb_proposal_supports;
+   return built ? Attempt::kAccepted : Attempt::kRejected;
+ }
+@@ -143,42 +238,4 @@
+   return false;
+ }
+ 
+-template <bool ChargeAfter = false, class Observer = NoObserver>
+-inline bool miniball(const CloudIndex& ix, const std::vector<ForestEvent>& direct,
+-                     const SilentIncidenceLimits& caps, SilentIncidenceResult* out,
+-                     const std::array<i32, 11>& sites, size_t n,
+-                     silent_detail::LocalBall* ball, const Limits& limits,
+-                     Work* work, Observer* observer, size_t pivot_cap = 16) {
+-  if (out->stats.meb_supports >= caps.max_meb_supports) {
+-    ++out->stats.meb_calls;
+-    out->status = SilentIncidenceStatus::kResourceExhausted;
+-    out->reason = "silent_meb_support_budget";
+-    return false;
+-  }
+-  Candidate candidate;
+-  // Short circuit is intentional: an exhausted P never searches for a pair.
+-  if (work->meb_proposal_supports >= limits.max_meb_proposal_supports ||
+-      !propose<ChargeAfter>(ix, sites, n, &candidate, limits,
+-                            work, observer, pivot_cap)) {
+-    ++work->fallback;
+-    silent_detail::Builder reference(ix, direct, caps, out);
+-    return reference.miniball(sites, n, ball);
+-  }
+-  ++work->certified;
+-  ++out->stats.meb_calls;
+-  const u64 count = ordinal(n, candidate);
+-  const u64 prior = out->stats.meb_supports;
+-  if (prior >= caps.max_meb_supports || count > caps.max_meb_supports - prior) {
+-    if (prior < caps.max_meb_supports) out->stats.meb_supports = caps.max_meb_supports;
+-    out->status = SilentIncidenceStatus::kResourceExhausted;
+-    out->reason = "silent_meb_support_budget";
+-    return false;
+-  }
+-  out->stats.meb_supports += count;
+-  // Finalization of this accepted candidate, not another speculative support.
+-  // The historical helper preserves canonical slots and literal q4 raw level.
+-  *ball = materialize(ix, sites, candidate);
+-  return true;
+-}
+-
+-}  // namespace mhgp7::dual_budget_prototype
++}  // namespace mhgp7::meb_proposal_detail
