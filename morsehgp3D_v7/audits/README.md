@@ -7,7 +7,8 @@ Lire l’[état courant](ETAT_COURANT.md), puis le [dialogue actif](DIALOGUE_COU
 | Modèle FULL | [Décision et domaine](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md) |
 | Cache lazy et lot unitaire | [Verdict](CACHE_FULL_COURANT.md), [delta qualifié](receipts_full_singleton_20260905/README.md), [témoin lazy](receipts_full_lazy_20260905/README.md) |
 | EAGER et composant structurel | [Producteur relatif](PRODUCTEUR_FULL_GABRIEL_COURANT.md), [lecteur](CERTIFICAT_FULL_CPP_COURANT.md) |
-| Mono : EAGER clos et compteurs lazy | [Bornes, attribution et diagnostic des successeurs](MONO_FULL_COURANT.md) |
+| Mono : EAGER clos, successeurs et coût MEB | [Bornes, attribution et diagnostic des successeurs](MONO_FULL_COURANT.md) |
+| Proposeur MEB privé | [Qualifications et filtres démontrés des pivots](MEB_DOUBLE_BUDGET_COURANT.md) |
 | Intégrations différées | [Questions secondaires regroupées](QUESTIONS_SECONDAIRES.md) |
 
 ## Preuves conservées

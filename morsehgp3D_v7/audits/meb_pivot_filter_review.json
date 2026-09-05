@@ -1,0 +1,303 @@
+{
+  "status": "passed",
+  "source_sha256": "0645aa00add4d4cb387861b8f6dbd4fa0734ba5b4f3ad712caad8886b3541c2d",
+  "script_sha256": "f6ad7eecc5fc98c6bf5d2b4381d9b1cef83df3f393a7d0b2fa8e5367b2ee3450",
+  "oracle_sha256": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b",
+  "scope": "Exact rational local proof fixtures; no modified C++, runtime qualification or performance claim",
+  "old_base_permutations": 62,
+  "scenes": [
+    {
+      "name": "q2_to_q3",
+      "old_support": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          2,
+          0
+        ]
+      ],
+      "z": [
+        2,
+        0,
+        2
+      ],
+      "old_radius_squared": "2",
+      "outside_power": "4",
+      "diameter_squared": 8,
+      "pair_filter_premise": true,
+      "new_support_slots": [
+        0,
+        1,
+        2
+      ],
+      "new_radius_squared": "8/3",
+      "extra_shell": false
+    },
+    {
+      "name": "q3_to_q4",
+      "old_support": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          2,
+          0
+        ],
+        [
+          2,
+          0,
+          2
+        ]
+      ],
+      "z": [
+        0,
+        2,
+        2
+      ],
+      "old_radius_squared": "8/3",
+      "outside_power": "8/3",
+      "diameter_squared": 8,
+      "pair_filter_premise": true,
+      "new_support_slots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "new_radius_squared": "3",
+      "extra_shell": false
+    },
+    {
+      "name": "q4_to_q3_with_diameter_bound",
+      "old_support": [
+        [
+          30,
+          30,
+          30
+        ],
+        [
+          30,
+          10,
+          10
+        ],
+        [
+          10,
+          30,
+          10
+        ],
+        [
+          10,
+          10,
+          30
+        ]
+      ],
+      "z": [
+        20,
+        20,
+        38
+      ],
+      "old_radius_squared": "300",
+      "outside_power": "24",
+      "diameter_squared": 984,
+      "pair_filter_premise": true,
+      "new_support_slots": [
+        1,
+        2,
+        4
+      ],
+      "new_radius_squared": "15129/49",
+      "extra_shell": false
+    },
+    {
+      "name": "q4_replacement_general",
+      "old_support": [
+        [
+          1,
+          1,
+          1
+        ],
+        [
+          3,
+          3,
+          1
+        ],
+        [
+          3,
+          1,
+          3
+        ],
+        [
+          1,
+          3,
+          3
+        ]
+      ],
+      "z": [
+        0,
+        0,
+        0
+      ],
+      "old_radius_squared": "3",
+      "outside_power": "9",
+      "diameter_squared": 19,
+      "pair_filter_premise": false,
+      "new_support_slots": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "new_radius_squared": "1083/196",
+      "extra_shell": false
+    },
+    {
+      "name": "extra_shell_general",
+      "old_support": [
+        [
+          2,
+          1,
+          1
+        ],
+        [
+          1,
+          2,
+          1
+        ],
+        [
+          1,
+          1,
+          2
+        ]
+      ],
+      "z": [
+        0,
+        1,
+        1
+      ],
+      "old_radius_squared": "2/3",
+      "outside_power": "4/3",
+      "diameter_squared": 4,
+      "pair_filter_premise": false,
+      "new_support_slots": [
+        0,
+        3
+      ],
+      "new_radius_squared": "1",
+      "extra_shell": true
+    }
+  ],
+  "counterexamples": [
+    {
+      "name": "interior_is_not_strict",
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0
+        ]
+      ],
+      "lost_bases": [
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "shell_is_not_strict",
+      "points": [
+        [
+          0,
+          2,
+          0
+        ],
+        [
+          4,
+          2,
+          0
+        ],
+        [
+          2,
+          4,
+          0
+        ]
+      ],
+      "lost_bases": [
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "nonmaximal_pair",
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0
+        ],
+        [
+          5,
+          0,
+          0
+        ]
+      ],
+      "lost_bases": [
+        [
+          0,
+          2
+        ]
+      ]
+    }
+  ],
+  "candidate_ceilings": [
+    {
+      "old_q": 2,
+      "original": 4,
+      "z_only": 3,
+      "both": 1
+    },
+    {
+      "old_q": 3,
+      "original": 11,
+      "z_only": 7,
+      "both": 4
+    },
+    {
+      "old_q": 4,
+      "original": 25,
+      "z_only": 14,
+      "both": 10
+    }
+  ],
+  "max_forms_at_16_pivots": {
+    "original": 401,
+    "simple": 161,
+    "refined": 146
+  },
+  "public_status": "not_claimed",
+  "gcp": "not_used"
+}

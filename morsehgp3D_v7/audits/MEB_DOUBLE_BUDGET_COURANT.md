@@ -47,3 +47,25 @@ Huit injections contrôlent charges et exceptions. `bad_alloc` purge réellement
 ## Autorité native et coût
 
 La [qualification native v2](receipts_meb_native_20260905/README.md) ferme `NoObserver` : 9 351 états confrontés complètement à F/Trace avant et après mesure, captures consommées sous chrono. La [revue indépendante du coût](receipts_meb_native_20260905/cost_review.md) distingue 10 722 candidats physiques contre 67 884 pour les 1 152 appels principaux P401, ralentissement du n=2 répété et contrôle P0 sensible à AB/BA. Ces observations ne fixent aucun seuil produit. Les reçus ultérieurs de coût gardent leur qualification propre ; aucune nouvelle campagne n'est demandée ici.
+
+## Réduction démontrée des formes de pivot
+
+**Le proposeur natif `0645aa00` peut éliminer des candidats impossibles avant de former leurs boules.** Ceci est une preuve pour un futur delta privé, pas sa qualification C++ ni son intégration FULL. Le helper actuellement qualifié reste inchangé.
+
+Soit Q la base positive courante, de rayon r, et z un point **strictement extérieur** à sa boule. Par unicité de la MEB, celle de T=Q∪{z} a un rayon strictement supérieur à r. Toute base positive B⊆Q définit au contraire sa propre MEB de rayon au plus r. Sa boule ne peut donc contenir T : **tous les supports acceptables du pivot contiennent z**, même si T a des points supplémentaires sur sa coquille. Garder l’ordre relatif des candidats restants conserve le premier accepté.
+
+L’initialisation native cherche exactement le diamètre global D de tous les sites, puis forme sa boule de rayon D/2. Les pivots augmentent strictement le rayon. Dès le premier pivot, aucune paire de ces sites, de rayon au plus D/2, ne peut contenir T : **supprimer aussi tous les q2 des pivots**. Cette deuxième preuve dépend de la paire globale maximale et de la positivité courante ; elle ne s’applique ni au q2 d’initialisation ni à une petite MEB arbitraire.
+
+| Cardinal de Q | Maximum actuel | Imposer z | Imposer z et supprimer q2 |
+| --- | ---: | ---: | ---: |
+| 2 | 4 | 3 | 1 |
+| 3 | 11 | 7 | 4 |
+| 4 | 25 | 14 | 10 |
+
+Dans l’appel actuel, z occupe la dernière position du sous-ensemble. Il suffit donc d’énumérer les couples puis triples d’anciens sites complétés par z, en conservant le tri canonique de `form`. Seize pivots demanderaient au plus 161 formes, initialisation incluse, contre 401 ; en tenant compte des deux premières arités, la borne est `1+1+4+14×10=146`. Ce sont des bornes de formes, sans garantie de convergence ni de latence. Les recherches de paire et les puissances restent du travail ; le petit cas n=2 défavorable n’est pas accéléré par ces filtres.
+
+Le [juge rationnel](meb_pivot_filter_review.py) et son [reçu](meb_pivot_filter_review.json) passent normalement et sous `-O`, avec sorties identiques : cinq scènes, 62 permutations des bases anciennes, q2→q3, q3→q4, q4→q3, remplacement d’un essentiel q4 et coquille supplémentaire. Trois généralisations fausses sont réfutées : z intérieur, z seulement sur la coquille, paire initiale non maximale. Pour cette dernière, Q={(0,0,0),(2,0,0)} et z=(5,0,0) exigent une nouvelle base q2. La fixture q4→q3 satisfait la borne locale r≥D(T)/2 ; elle n’est pas présentée comme une trajectoire native effectivement exécutée.
+
+Filtrer avant `charged_form`, sans facturer P pour une forme non essayée. Ce calendrier change : conserver le témoin ancien, Work persistant, charges prospectives et repli F. À P non limitant, le premier accepté et la trajectoire restent identiques ; à P limité, le proposeur peut avancer davantage, donc ses compteurs et sa route peuvent changer. Garder le shell final, l’ordinal legacy **sur tous les sites de la demande**, le support entier dont `support[0]` et le niveau brut q4. Un rang dans le petit pivot ne remplace jamais cet ordinal.
+
+Les [bornes sur les appels FULL réels](MONO_FULL_COURANT.md#borne-des-supports-meb-q4-sur-les-six-passages-singleton) motivent ce suivi sans en choisir le dispatch. Un histogramme par K, type d’appel, n et ordinal R suffirait à compter arités et poids d’énumération ; comparer le proposeur sur cette distribution exige aussi les sites des demandes, et non les seuls agrégats.

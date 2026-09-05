@@ -1,6 +1,6 @@
 # État courant de l’audit v7
 
-Le lot FULL à une seule directe est qualifié indépendamment sur le header `21b77d29` : 114 ordres et 69 120 coupes par build, sans régression des forêts ou compteurs. Le supplément rationnel exerce la naissance simultanée manquante ; une mutation perdant le quatrième parent est réfutée. La réduction des opérations de normalisation reste une preuve pour un futur delta. L’export industriel et les contrats de performance restent ouverts.
+Le lot FULL à une seule directe est qualifié indépendamment sur le header `21b77d29` : 114 ordres et 69 120 coupes par build, sans régression des forêts ou compteurs. Le supplément rationnel exerce la naissance simultanée manquante ; une mutation perdant le quatrième parent est réfutée. Le helper de normalisation v2 est en relecture statique, sans nouvelle qualification. Deux filtres exacts pour le proposeur MEB privé et une borne sur les essais q4 apportent une suite concrète. L’export industriel et les contrats de performance restent ouverts.
 
 ```text
 phase=exploration_v7_hors_registre
@@ -20,8 +20,8 @@ La lecture intégrale des parties I et II du manuscrit, PDF 35–134, reste acqu
 | G, lecteur FULL | [Qualification structurelle](CERTIFICAT_FULL_CPP_COURANT.md), sans certification géométrique |
 | D/E/F, réduit et primitives | [Qualifications distinctes](AUDIT_QUALIFICATION_20260905.md) ; aucun reçu réduit réinterprété FULL |
 
-Les [documents du constructeur](../PASSATION.md) portent les campagnes ultérieures et leur progression. Le [diagnostic mono](MONO_FULL_COURANT.md) contrôle leurs seuls compteurs de normalisation, sans qualifier les latences massives. Le [manifeste](validation_current.json) conserve les sources qualifiées : la variante K ajoute explicitement la nouvelle qualification à D–J, conservées intactes. Elle vise les fichiers capturés du worktree ; leur présence dans un commit constructeur reste une étape distincte.
+Les [documents du constructeur](../PASSATION.md) portent les campagnes ultérieures et leur progression. Le [diagnostic mono](MONO_FULL_COURANT.md) contrôle leurs seuls compteurs de normalisation, sans qualifier les latences massives. Le [manifeste](validation_current.json) conserve les sources qualifiées : la variante K ajoute explicitement la nouvelle qualification à D–J, conservées intactes. Le constructeur a publié le header qualifié dans `b2f0dc08`. La normalisation v2 en préparation fera normalement diverger ces pins ; elle ne leur est pas substituée.
 
-Le [dialogue actif](DIALOGUE_COURANT.md) clôt le contrôle du lot unitaire et conserve la suite utile sur la normalisation. Les questions différées sont [regroupées](QUESTIONS_SECONDAIRES.md) ; les demandes déjà satisfaites restent retirées.
+Le [dialogue actif](DIALOGUE_COURANT.md) porte la relecture de normalisation, le raccord de calendrier corrigé statiquement et les filtres MEB pour une suite distincte. Les questions différées sont [regroupées](QUESTIONS_SECONDAIRES.md) ; les demandes déjà satisfaites restent retirées.
 
 Les reçus bruts et échecs restent conservés ; les anciennes synthèses sont accessibles par le [registre d’entretien](ENTRETIEN.json). GCP non utilisé.

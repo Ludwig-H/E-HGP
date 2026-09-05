@@ -639,5 +639,65 @@
     "variants_D_to_J_unchanged": true,
     "new_variant": "K_full_singleton",
     "gcp": "not_used"
+  },
+  "latest_meb_followup": {
+    "date": "2026-09-05T21:29:08.724300+00:00",
+    "base_head": "b2f0dc08564d7eceecd809925a2b0aaaa088c995",
+    "scope": "Two exact filters for the private native pivot; MEB q4 lower bounds on six closed singleton attempts. Static normalization helper review, one historical-probe calendar mismatch reported. No engines, builds or new C++ qualification.",
+    "proofs": [
+      "meb_pivot_filter_review.json",
+      "meb_full_work_review.json",
+      "normalization_static_review.json"
+    ],
+    "checks": {
+      "rational_and_count_normal_optimized": {
+        "exit_codes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "each_pair_byte_identical": true,
+        "positive_base_permutations": 62,
+        "invalid_generalizations_refuted": 3,
+        "closed_successful_orders": 60,
+        "data_corruptions_refuted": 4
+      },
+      "docs_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "active_documents": 350
+      },
+      "registry": {
+        "exit_code": 0,
+        "phases": 20
+      },
+      "authored_markdown": {
+        "files": 6,
+        "errors": []
+      },
+      "freshness_normal_optimized": {
+        "exit_codes": [
+          1,
+          1
+        ],
+        "diagnostics_byte_identical": true,
+        "common_pins_stale": [],
+        "K_stale": [
+          "CMakeLists.txt",
+          "docs/CONTRAT_CACHE_FULL_PARESSEUX.md",
+          "docs/CONTRAT_LOT_UNITAIRE_FULL.md",
+          "docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md",
+          "src/forest/full_gabriel.hpp"
+        ],
+        "classification": "Expected normalization-v2 source/document changes in preparation. No executable or receipt pin repointed."
+      }
+    },
+    "maintenance": "Still 25 root Markdown notes. Obsolete singleton publication/index waits removed. Historical lazy narrative and singleton calendar shortened now that the developer documents them. Stable cited anchors, immutable receipts and qualification variants D-K preserved.",
+    "variants_D_to_K_unchanged": true,
+    "gcp": "not_used",
+    "historical_probe_resolution": "Constructor added an unconditional obsolete-calendar #error before includes after our report; statically verified, fresh compilation rejection left to its planned admission."
   }
 }
