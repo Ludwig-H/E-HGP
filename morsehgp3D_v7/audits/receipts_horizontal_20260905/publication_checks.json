@@ -1,0 +1,483 @@
+{
+  "schema": "mhgp7-horizontal-publication-check-v1",
+  "checked_utc": "2026-09-05T09:32:35.302583+00:00",
+  "base_head": "61f72a6805e27f1bc216b5d7444164b31fc970b6",
+  "public_status": "not_claimed",
+  "checks": [
+    {
+      "check": "all audit Markdown/local links",
+      "files": 36,
+      "local_links": 520,
+      "errors": []
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v7/audits/test_verify_current.py"
+      ],
+      "exit_code": 0,
+      "result": {
+        "schema": "mhgp7-freshness-verifier-selftest-v1",
+        "status": "passed",
+        "public_status": "not_claimed",
+        "optimized": false,
+        "tests": 30,
+        "product_tests_executed": 0,
+        "results": [
+          {
+            "name": "complete_D",
+            "expected_code": 0,
+            "observed_code": 0,
+            "required_marker": "variante=D"
+          },
+          {
+            "name": "complete_E",
+            "expected_code": 0,
+            "observed_code": 0,
+            "required_marker": "fixture_targeted_E_only"
+          },
+          {
+            "name": "mixed_D_E_rejected",
+            "expected_code": 1,
+            "observed_code": 1,
+            "required_marker": "aucune variante complète"
+          },
+          {
+            "name": "mixed_E_D_rejected",
+            "expected_code": 1,
+            "observed_code": 1,
+            "required_marker": "aucune variante complète"
+          },
+          {
+            "name": "common_changed",
+            "expected_code": 1,
+            "observed_code": 1,
+            "required_marker": "pins communs modifiés"
+          },
+          {
+            "name": "source_missing",
+            "expected_code": 1,
+            "observed_code": 1,
+            "required_marker": ""
+          },
+          {
+            "name": "legacy_v1",
+            "expected_code": 0,
+            "observed_code": 0,
+            "required_marker": "Audit courant"
+          },
+          {
+            "name": "legacy_v1_stale",
+            "expected_code": 1,
+            "observed_code": 1,
+            "required_marker": "Audit à actualiser"
+          },
+          {
+            "name": "duplicate_variant_id",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "duplicate"
+          },
+          {
+            "name": "malformed_unmatched_E",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "invalid SHA-256"
+          },
+          {
+            "name": "empty_unmatched_variant",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "nonempty"
+          },
+          {
+            "name": "empty_common",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "nonempty"
+          },
+          {
+            "name": "empty_variants",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "nonempty"
+          },
+          {
+            "name": "nonobject_variant",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "object"
+          },
+          {
+            "name": "invalid_id_empty",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "identifier"
+          },
+          {
+            "name": "invalid_id_space",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "identifier"
+          },
+          {
+            "name": "invalid_scope_empty",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "scope"
+          },
+          {
+            "name": "invalid_scope_nonstring",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "scope"
+          },
+          {
+            "name": "invalid_path_traversal",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "source path"
+          },
+          {
+            "name": "invalid_path_absolute",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "source path"
+          },
+          {
+            "name": "invalid_path_alias",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "source path"
+          },
+          {
+            "name": "invalid_path_backslash",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "source path"
+          },
+          {
+            "name": "symlink_escape",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "outside v7"
+          },
+          {
+            "name": "common_variant_conflict",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "conflicting"
+          },
+          {
+            "name": "duplicate_root_json_key",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "duplicate"
+          },
+          {
+            "name": "duplicate_nested_pin",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "duplicate"
+          },
+          {
+            "name": "unsupported_schema",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": ""
+          },
+          {
+            "name": "nonobject_manifest",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "object"
+          },
+          {
+            "name": "invalid_json",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": ""
+          },
+          {
+            "name": "legacy_v1_empty",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "nonempty"
+          }
+        ],
+        "verifier_sha256": "b75e86a520193c55c08729ab41fa245a86c18add5e3d3213727587c65a378834",
+        "test_sha256": "bbffbb321d90d03da73e2a5063b3579535b13ce0b0e8e2be6101c7564cf11548",
+        "gcp": "not_used"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/test_verify_current.py"
+      ],
+      "exit_code": 0,
+      "result": {
+        "schema": "mhgp7-freshness-verifier-selftest-v1",
+        "status": "passed",
+        "public_status": "not_claimed",
+        "optimized": true,
+        "tests": 30,
+        "product_tests_executed": 0,
+        "results": [
+          {
+            "name": "complete_D",
+            "expected_code": 0,
+            "observed_code": 0,
+            "required_marker": "variante=D"
+          },
+          {
+            "name": "complete_E",
+            "expected_code": 0,
+            "observed_code": 0,
+            "required_marker": "fixture_targeted_E_only"
+          },
+          {
+            "name": "mixed_D_E_rejected",
+            "expected_code": 1,
+            "observed_code": 1,
+            "required_marker": "aucune variante complète"
+          },
+          {
+            "name": "mixed_E_D_rejected",
+            "expected_code": 1,
+            "observed_code": 1,
+            "required_marker": "aucune variante complète"
+          },
+          {
+            "name": "common_changed",
+            "expected_code": 1,
+            "observed_code": 1,
+            "required_marker": "pins communs modifiés"
+          },
+          {
+            "name": "source_missing",
+            "expected_code": 1,
+            "observed_code": 1,
+            "required_marker": ""
+          },
+          {
+            "name": "legacy_v1",
+            "expected_code": 0,
+            "observed_code": 0,
+            "required_marker": "Audit courant"
+          },
+          {
+            "name": "legacy_v1_stale",
+            "expected_code": 1,
+            "observed_code": 1,
+            "required_marker": "Audit à actualiser"
+          },
+          {
+            "name": "duplicate_variant_id",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "duplicate"
+          },
+          {
+            "name": "malformed_unmatched_E",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "invalid SHA-256"
+          },
+          {
+            "name": "empty_unmatched_variant",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "nonempty"
+          },
+          {
+            "name": "empty_common",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "nonempty"
+          },
+          {
+            "name": "empty_variants",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "nonempty"
+          },
+          {
+            "name": "nonobject_variant",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "object"
+          },
+          {
+            "name": "invalid_id_empty",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "identifier"
+          },
+          {
+            "name": "invalid_id_space",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "identifier"
+          },
+          {
+            "name": "invalid_scope_empty",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "scope"
+          },
+          {
+            "name": "invalid_scope_nonstring",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "scope"
+          },
+          {
+            "name": "invalid_path_traversal",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "source path"
+          },
+          {
+            "name": "invalid_path_absolute",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "source path"
+          },
+          {
+            "name": "invalid_path_alias",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "source path"
+          },
+          {
+            "name": "invalid_path_backslash",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "source path"
+          },
+          {
+            "name": "symlink_escape",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "outside v7"
+          },
+          {
+            "name": "common_variant_conflict",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "conflicting"
+          },
+          {
+            "name": "duplicate_root_json_key",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "duplicate"
+          },
+          {
+            "name": "duplicate_nested_pin",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "duplicate"
+          },
+          {
+            "name": "unsupported_schema",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": ""
+          },
+          {
+            "name": "nonobject_manifest",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "object"
+          },
+          {
+            "name": "invalid_json",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": ""
+          },
+          {
+            "name": "legacy_v1_empty",
+            "expected_code": 2,
+            "observed_code": 2,
+            "required_marker": "nonempty"
+          }
+        ],
+        "verifier_sha256": "b75e86a520193c55c08729ab41fa245a86c18add5e3d3213727587c65a378834",
+        "test_sha256": "bbffbb321d90d03da73e2a5063b3579535b13ce0b0e8e2be6101c7564cf11548",
+        "gcp": "not_used"
+      }
+    },
+    {
+      "snapshot": "D",
+      "source_commit": "a32dc78fa3f0c526a11bd21fafdcded8db687973",
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_horizontal_publication/D/morsehgp3D_v7/audits/verify_current.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=D\nqualification_scope=323/323 CTests CPU Release independently executed; local MEB/index/rounding oracles; front arithmetic proofs and compiled helpers; no product exactness claim\n593 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "snapshot": "E_qualified",
+      "source_commit": "61f72a6805e27f1bc216b5d7444164b31fc970b6",
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_horizontal_publication/E_qualified/morsehgp3D_v7/audits/verify_current.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=E_qualified\nqualification_scope=horizontal reduced certificate on E, independent rational Gamma/delta reader (840 cuts per build), normalized fold (272 cuts per build), 18 CLI domain cases; own E324 and E33+33 receipts inspected; public_status=not_claimed\n593 pins communs et 115 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "snapshot": "live_F_reviewed_only",
+      "command": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=F_reviewed_pending_full_tests\nqualification_scope=F source-only LIFO/masks/counts conservation review and closed CLI build inspected; full F qualification pending at audit; E horizontal certificate and E324 tests not transferred\n593 pins communs et 118 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "snapshot": "live_F_reviewed_only",
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=F_reviewed_pending_full_tests\nqualification_scope=F source-only LIFO/masks/counts conservation review and closed CLI build inspected; full F qualification pending at audit; E horizontal certificate and E324 tests not transferred\n593 pins communs et 118 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    }
+  ],
+  "gcp_used": false,
+  "canonical_docs": {
+    "command": [
+      "python3",
+      "tools/check_docs.py"
+    ],
+    "observed_exit_code": 0,
+    "active_files": 308
+  },
+  "registry": {
+    "command": [
+      "python3",
+      "tools/check_implementation_status.py"
+    ],
+    "observed_exit_code": 0,
+    "phases": 20
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "baseline_commit_E": "61f72a6805e27f1bc216b5d7444164b31fc970b6",
+  "captured_utc": "2026-09-05T09:20:08.709535+00:00",
+  "delta_patch_sha256": "44cbb5f3d3bc4717f6e1fc01756e4bdc66880a90b44da041ddc363d9a386b517",
+  "files": {
+    "morsehgp3D_v7/CMakeLists.txt": {
+      "E_exists": true,
+      "E_sha256": "098a764e63c235f3028136b7cf8ee35771b99541291c898a1ed0ae06703be5f9",
+      "F_bytes": 74980,
+      "F_sha256": "76d7d11303c227fc83e78973ad5e28353089bb743c2613f026b1b292e5bfc6ec"
+    },
+    "morsehgp3D_v7/src/core/inline_stack.hpp": {
+      "E_exists": false,
+      "E_sha256": null,
+      "F_bytes": 1675,
+      "F_sha256": "59bdc34eab997583e8221469fdc5e2b9109dfc516cc54356397eebb1bb8aeb42"
+    },
+    "morsehgp3D_v7/src/spindle/witness_count.hpp": {
+      "E_exists": true,
+      "E_sha256": "fce9510ee21cbe025283a9ce777b120e4173ce62eee736e1c48dc772afb67a42",
+      "F_bytes": 7498,
+      "F_sha256": "f20970aa2183f6c0904d640ae5fe072894b6e0b4f7f9440277fbed77e8245803"
+    },
+    "morsehgp3D_v7/tests/reference/witness_count_e.hpp": {
+      "E_exists": false,
+      "E_sha256": null,
+      "F_bytes": 8012,
+      "F_sha256": "e2141a7b0fc74b565938587802e3da5dbb23776378e15b3b6fc8a021e59b708d"
+    },
+    "morsehgp3D_v7/tests/witness_stack_gate.cpp": {
+      "E_exists": false,
+      "E_sha256": null,
+      "F_bytes": 26202,
+      "F_sha256": "0bf890a5a81c16494a03200b9df0c6603b9234bf4bd8fb861a2286f68ec54855"
+    }
+  },
+  "git_status_scoped": " M morsehgp3D_v7/CMakeLists.txt\n M morsehgp3D_v7/src/spindle/witness_count.hpp\n?? morsehgp3D_v7/src/core/inline_stack.hpp\n?? morsehgp3D_v7/tests/reference/\n?? morsehgp3D_v7/tests/witness_stack_gate.cpp\n",
+  "schema": "mhgp7-F-delta-source-capture-v1"
+}

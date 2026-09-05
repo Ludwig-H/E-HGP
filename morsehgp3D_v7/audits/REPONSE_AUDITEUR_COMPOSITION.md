@@ -1,6 +1,6 @@
 # Réponse courante : composition horizontale sous fermeture de fenêtre
 
-4 septembre 2026. Cadre : `phase=exploration_v7_hors_registre`,
+4 septembre 2026, conclusions actualisées le 5 septembre. Cadre : `phase=exploration_v7_hors_registre`,
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
@@ -9,7 +9,8 @@ pas de resolver top-K supplémentaire. La preuve gagne à séparer trois
 faits ci-dessous pour éviter de supposer la bijection au moment de la
 construire. Cette réponse examine le [texte du constructeur](../docs/PREUVE_HORIZONTALE_COMPOSITION.md)
 et ses [deux questions](QUESTION_COMPOSITION_CONSTRUCTEUR_20260904.md).
-Elle ne certifie pas S1 pour le générateur.
+La preuve de S1 et sa qualification compilée sont portées séparément par
+les notes réunies dans le [certificat horizontal CPU E](CERTIFICAT_HORIZONTAL_COURANT.md).
 
 Texte examiné : SHA-256
 `5aba4f18a90e4fabf05503ee2e420afbb079b72956ef7ec6bfdafd6ea3422e70`.
@@ -118,11 +119,16 @@ conditionnel, avec S1–S4 et les garanties exactes locales nommées.
 La régularité géométrique globale et un resolver top-K implicite n'ont
 pas à être ajoutés comme exigences générales de cette route.
 
-Le raccord S1 est désormais porté par le [théorème géométrique conditionnel](S1_COURANT.md),
-qui suit le parcours jusqu'au RLE. La qualification de ses primitives et
-de son domaine numérique reste à lier au produit exécuté. Un catalogue
-absent en amont ne pourrait être retrouvé par le census ni réparé par la
-composition. La verticale, les poids de rendu, l'archive et les coûts
-d'échelle gardent leurs propres critères de qualification.
+Le raccord S1 est porté par le [théorème géométrique conditionnel](S1_COURANT.md),
+qui suit le parcours jusqu'au RLE. Ses primitives, le [domaine CPU](DOMAINE_CPU_COURANT.md)
+et les [frontières compilées](receipts_front_compiled_20260905/README.md)
+sont désormais raccordés à la route E qualifiée. Le
+[certificat horizontal réduit](CERTIFICAT_HORIZONTAL_COURANT.md) ferme leur
+composition avec la complétion et le lecteur des deltas, dans son domaine
+local accepté et après succès terminal. La qualification des primitives et
+l'assemblage horizontal ne restent donc pas des demandes ouvertes sur E ;
+les sources F concurrentes conservent une attribution distincte.
+La verticale, les poids de rendu, les identités publiques du quotient,
+la reprise et les coûts d'échelle gardent leurs propres critères de qualification.
 
 GCP non utilisé.

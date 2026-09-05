@@ -1,0 +1,63 @@
+{
+  "backend": "cpu_reference",
+  "baseline_E_commit": "61f72a6805e27f1bc216b5d7444164b31fc970b6",
+  "constructive_requests": [],
+  "defects_found": [],
+  "evidence": {
+    "closed_F_CLI_build_capture": "build_F_capture.json",
+    "exact_delta_including_untracked_sources": "delta_E_F.patch",
+    "mechanical_source_and_CLI_build_checks": "source_checks.json",
+    "replay": "verify_source_delta.py",
+    "source_snapshot": "source_snapshot.json"
+  },
+  "gcp": "not_used",
+  "limits": [
+    "Semantic conservation does not preserve the calendar of allocation failures: F can succeed when E needed a vector allocation and failed.",
+    "No new width review, GPU, performance measure, build, engine run, full suite or CI qualification in this task.",
+    "The source proof requires valid finite index traversal and well-formed actual Entry operations; no claim for forged/cyclic indexes, empty back/pop, concurrent mutation or arbitrary template consumers.",
+    "Native sanitizer allocation counters of zero cannot prove allocation elimination or injected allocation failure.",
+    "The horizontal certificate assembled by root still names E; F receives only this pinned conservation lemma until its own qualification closes."
+  ],
+  "mode": "audit_independant_math_and_architecture",
+  "phase": "exploration_v7_hors_registre",
+  "profile": "quantized_u16_input_only",
+  "proof": [
+    {
+      "claim": "Logical stack = inline prefix of length i followed by overflow; 0<=i<=C and nonempty overflow implies i=C>0. Therefore empty() checking i==0 is exact on reachable states.",
+      "source": "src/core/inline_stack.hpp:25"
+    },
+    {
+      "claim": "Push writes inline before increment or appends solely to overflow. Pop consumes overflow before inline. Clear empties overflow then i. For the actual trivial Entry, overflowing vector push failure preserves previous stack state.",
+      "source": "src/core/inline_stack.hpp:30"
+    },
+    {
+      "claim": "Reversing only the new include and initial stack substitution recovers exact E source bytes. Root/open initialization, pop value, child pushes left then right (right processed first), predicates, mask closure, thresholds, c[0..2], nodes_visited, corner_evals and final clipping remain unchanged.",
+      "source": "src/spindle/witness_count.hpp:73"
+    },
+    {
+      "claim": "Induction on identical logical stacks and FusedCounts gives identical next entry, mask, credit and future sequence on successful reference executions. A zero threshold does not open a lane.",
+      "source": "src/spindle/witness_count.hpp:82"
+    },
+    {
+      "claim": "Reversing declared include/namespace/nominal no_mask adaptations recovers exact E bytes. Remaining geometry dependencies are shared with the product; this is a count-path differential reference, not an independent geometry oracle.",
+      "source": "tests/reference/witness_count_e.hpp:1"
+    }
+  ],
+  "public_status": "not_claimed",
+  "qualification_status": {
+    "E_qualification": "remains E324 and E33+33; no automatic transfer to F",
+    "closed_F_CLI_build": "verified recorded compile/link output, four zero-exit commands, 51 stable sources and current binary/configuration hashes; not hermetic attestation",
+    "private_preparatory_gate": "closed before integration; distinct test source hash and target registration; not promoted here to integrated F qualification"
+  },
+  "reviewed_utc": "2026-09-05T09:23:51.528431+00:00",
+  "schema": "mhgp7-F-bounded-source-review-v1",
+  "source_observation": "snapshot stable through read-only inspection; no constructor lock or future source stability assumed",
+  "test_registration": {
+    "CMake_added_gates": 15,
+    "F_closed_summaries_visible": [],
+    "executed_F_CTest_results_in_this_review": 0,
+    "planned_F_full_names": 339,
+    "planned_scope": "POD helper overflow/LIFO/allocation failure/aliasing plus all mask and threshold combinations and real product lane-mask mutant; sanitizer semantic target has allocation observer disabled."
+  },
+  "verdict": "conservation_LIFO_masks_counts_established_on_pinned_source_delta; integrated_F_tests_pending"
+}

@@ -1,0 +1,545 @@
+{
+  "backend": "cpu_reference",
+  "cases": [
+    {
+      "case": "two_default",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/two_default.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_h1llmajd/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences"
+      ],
+      "exitcode": 0,
+      "expected_kmax": 1,
+      "input_sha256": "040052ad47527843f72ab08d70ce0f066efcd045a4364b5d96d2e9e9c837e196",
+      "manifest": {
+        "digest_all": "a92357392b72018a6d31006be9ac58be402820db6499fb81d0cc1e013905d4b6",
+        "files": [
+          {
+            "bytes": 47,
+            "name": "input.u16",
+            "sha256": "168f47488ab52dfb6356ae1dc91fe3edc366c9bd12090bf34e14c9e71a635267"
+          },
+          {
+            "bytes": 326,
+            "name": "forest_K1.bin",
+            "sha256": "4e744537c2b46ce07daf520580b7ec8cbccd56ade7f7599de02ea7ed7da3adda"
+          }
+        ],
+        "forest_semantics": "normalized_horizontal_h0_candidate",
+        "kmax": 1,
+        "points": 2,
+        "public_status": "not_claimed",
+        "require_exact": false,
+        "schema": "mhgp7-archive-v1",
+        "status": "completed",
+        "vertical_maps": "none"
+      },
+      "started_utc": "2026-09-05T09:12:59.388891+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "548d3e587b798392020d1a725c668ae646312259be4df8949977d3849bde6c15"
+    },
+    {
+      "case": "two_zero_unused_caps",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/two_zero_unused_caps.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_xrdxbxvu/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences",
+        "--silent-core-records=0",
+        "--silent-chain-steps=0",
+        "--silent-cofaces=0",
+        "--silent-query-nodes=0",
+        "--silent-meb-supports=0"
+      ],
+      "exitcode": 0,
+      "expected_kmax": 1,
+      "input_sha256": "040052ad47527843f72ab08d70ce0f066efcd045a4364b5d96d2e9e9c837e196",
+      "manifest": {
+        "digest_all": "a92357392b72018a6d31006be9ac58be402820db6499fb81d0cc1e013905d4b6",
+        "files": [
+          {
+            "bytes": 47,
+            "name": "input.u16",
+            "sha256": "168f47488ab52dfb6356ae1dc91fe3edc366c9bd12090bf34e14c9e71a635267"
+          },
+          {
+            "bytes": 326,
+            "name": "forest_K1.bin",
+            "sha256": "4e744537c2b46ce07daf520580b7ec8cbccd56ade7f7599de02ea7ed7da3adda"
+          }
+        ],
+        "forest_semantics": "normalized_horizontal_h0_candidate",
+        "kmax": 1,
+        "points": 2,
+        "public_status": "not_claimed",
+        "require_exact": false,
+        "schema": "mhgp7-archive-v1",
+        "status": "completed",
+        "vertical_maps": "none"
+      },
+      "started_utc": "2026-09-05T09:12:59.401725+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "8217f78d3b8e0a49f2c3ebd997f8c0a71ff2dc242bbdc14db7b107f3dc1dc018"
+    },
+    {
+      "case": "two_smax2",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/two_smax2.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_6iecna7e/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences",
+        "--smax=2"
+      ],
+      "exitcode": 0,
+      "expected_kmax": 1,
+      "input_sha256": "040052ad47527843f72ab08d70ce0f066efcd045a4364b5d96d2e9e9c837e196",
+      "manifest": {
+        "digest_all": "a92357392b72018a6d31006be9ac58be402820db6499fb81d0cc1e013905d4b6",
+        "files": [
+          {
+            "bytes": 47,
+            "name": "input.u16",
+            "sha256": "168f47488ab52dfb6356ae1dc91fe3edc366c9bd12090bf34e14c9e71a635267"
+          },
+          {
+            "bytes": 326,
+            "name": "forest_K1.bin",
+            "sha256": "4e744537c2b46ce07daf520580b7ec8cbccd56ade7f7599de02ea7ed7da3adda"
+          }
+        ],
+        "forest_semantics": "normalized_horizontal_h0_candidate",
+        "kmax": 1,
+        "points": 2,
+        "public_status": "not_claimed",
+        "require_exact": false,
+        "schema": "mhgp7-archive-v1",
+        "status": "completed",
+        "vertical_maps": "none"
+      },
+      "started_utc": "2026-09-05T09:12:59.414411+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "718bc3501ecced090aa379523b9eb6c5ba1a9433227d344adb790762dd7b355b"
+    },
+    {
+      "case": "acute_three",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/acute_three.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_u4sb0bvs/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences"
+      ],
+      "exitcode": 0,
+      "expected_kmax": 2,
+      "input_sha256": "41fdc7bab923a192522b00657c4b3eec301bb7db83a7353431e5e7150d355b5a",
+      "manifest": {
+        "digest_all": "f61d4c2a711b30f17effc6b23d5d6e9039bca8ff219fad69bbaa2ea2f2427d9b",
+        "files": [
+          {
+            "bytes": 57,
+            "name": "input.u16",
+            "sha256": "116219f76bda85a784d4dd3c47597f6ef280c329b1fcfbf3c0d3b88100a83f8a"
+          },
+          {
+            "bytes": 558,
+            "name": "forest_K1.bin",
+            "sha256": "bd1db1202a1461ac8402dceab35621761276a9d44017c02b34cdd33bd9ce8afb"
+          },
+          {
+            "bytes": 412,
+            "name": "forest_K2.bin",
+            "sha256": "0959075fcf57ee48ced8c0fb620dece6baf933d2a678baf56b1b3755f5d8398b"
+          }
+        ],
+        "forest_semantics": "normalized_horizontal_h0_candidate",
+        "kmax": 2,
+        "points": 3,
+        "public_status": "not_claimed",
+        "require_exact": false,
+        "schema": "mhgp7-archive-v1",
+        "status": "completed",
+        "vertical_maps": "none"
+      },
+      "started_utc": "2026-09-05T09:12:59.427402+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "eacfa9aca4ff5fc48ff84654b45e050e432883a2c36019cbc8ece926c5170231"
+    },
+    {
+      "case": "acute_three_prefix",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/acute_three_prefix.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_m5463rg_/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences",
+        "--smax=2"
+      ],
+      "exitcode": 0,
+      "expected_kmax": 1,
+      "input_sha256": "41fdc7bab923a192522b00657c4b3eec301bb7db83a7353431e5e7150d355b5a",
+      "manifest": {
+        "digest_all": "b4123a9ddf8d1e23f606bd600ae8b3c6196ebd263777fd4873ef14b351c1f474",
+        "files": [
+          {
+            "bytes": 57,
+            "name": "input.u16",
+            "sha256": "116219f76bda85a784d4dd3c47597f6ef280c329b1fcfbf3c0d3b88100a83f8a"
+          },
+          {
+            "bytes": 558,
+            "name": "forest_K1.bin",
+            "sha256": "bd1db1202a1461ac8402dceab35621761276a9d44017c02b34cdd33bd9ce8afb"
+          }
+        ],
+        "forest_semantics": "normalized_horizontal_h0_candidate",
+        "kmax": 1,
+        "points": 3,
+        "public_status": "not_claimed",
+        "require_exact": false,
+        "schema": "mhgp7-archive-v1",
+        "status": "completed",
+        "vertical_maps": "none"
+      },
+      "started_utc": "2026-09-05T09:12:59.442004+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a5a821e9507ebbdd748ebdabc79efd53524316712528db2d8bda193b8c9333ea"
+    },
+    {
+      "case": "collinear_three",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/collinear_three.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_kcrakvpn/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences"
+      ],
+      "exitcode": 0,
+      "expected_kmax": 2,
+      "input_sha256": "932f121cef2db44e62b398b24b3cda2e8aba9f917dc15fc7b324f7d3e1b0df9f",
+      "manifest": {
+        "digest_all": "c011b33a0177c1294c158a6fe735dc8924802875ebca7b18761c6ef3943219fc",
+        "files": [
+          {
+            "bytes": 57,
+            "name": "input.u16",
+            "sha256": "893cd3c1134648c461984a8d4c91d6c17132eb9f031f555edc4bab1259e10a5a"
+          },
+          {
+            "bytes": 558,
+            "name": "forest_K1.bin",
+            "sha256": "e96740fb605de2a940434880e0f381593cbf734be8026044112e3504fb7c695c"
+          },
+          {
+            "bytes": 412,
+            "name": "forest_K2.bin",
+            "sha256": "0d30636b5143307ee9f05c7286d6bfc341632b7ec6d28394e45bc5bdc6aa6deb"
+          }
+        ],
+        "forest_semantics": "normalized_horizontal_h0_candidate",
+        "kmax": 2,
+        "points": 3,
+        "public_status": "not_claimed",
+        "require_exact": false,
+        "schema": "mhgp7-archive-v1",
+        "status": "completed",
+        "vertical_maps": "none"
+      },
+      "started_utc": "2026-09-05T09:12:59.452792+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4b9c3f9cdc8a3a92cd3555490633b49affd3fd57a6fc1f7eff048fb90916bf75"
+    },
+    {
+      "case": "empty",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/empty.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_0eks5k3v/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences"
+      ],
+      "exitcode": 2,
+      "expected_kmax": 0,
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "manifest": null,
+      "started_utc": "2026-09-05T09:12:59.464657+00:00",
+      "stderr_sha256": "d02dbb7f34f2438ee3a539598eed2a297604383bd79cbfb418ee7e09e403f4f3",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "singleton",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/singleton.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_x3x0ors9/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences"
+      ],
+      "exitcode": 2,
+      "expected_kmax": 0,
+      "input_sha256": "3e3fc2dee1d0498f2693b3c40bb4308a020587b91d0250544972407109f8537c",
+      "manifest": null,
+      "started_utc": "2026-09-05T09:12:59.467394+00:00",
+      "stderr_sha256": "d02dbb7f34f2438ee3a539598eed2a297604383bd79cbfb418ee7e09e403f4f3",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "duplicate_id",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/duplicate_id.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_uxp_v88g/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences"
+      ],
+      "exitcode": 2,
+      "expected_kmax": 0,
+      "input_sha256": "14f9222c4e286f6ef1a3661a2cd0138f0e5a05383bd0b593c0d61dc8ba1edaa2",
+      "manifest": null,
+      "started_utc": "2026-09-05T09:12:59.469739+00:00",
+      "stderr_sha256": "764ff7d897356e4ae755212e89700f5dd800dd189fe14ea2e6f0c2353b3c1d06",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "duplicate_position",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/duplicate_position.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_rskgh3zq/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences"
+      ],
+      "exitcode": 2,
+      "expected_kmax": 0,
+      "input_sha256": "6ab51ff54e4f92274b2e4ab2189cc33082c01c740e57e6520b6ce5a33ebc111a",
+      "manifest": null,
+      "started_utc": "2026-09-05T09:12:59.475086+00:00",
+      "stderr_sha256": "1fc71bcc5bb2ca34347d9ddf00e890ed30bd216611ac4414e1c4e2dd94361bc5",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "coordinate_high",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/coordinate_high.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_dgm8be8j/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences"
+      ],
+      "exitcode": 2,
+      "expected_kmax": 0,
+      "input_sha256": "bbeca1f6bfc926874e1f7b22be8a70e21965bd0cf292934381c77a170e5f10aa",
+      "manifest": null,
+      "started_utc": "2026-09-05T09:12:59.479917+00:00",
+      "stderr_sha256": "fc6084da87a2beffae53975a046b6003cd68f798efe6b3d57eaaede74c70843c",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "coordinate_negative",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/coordinate_negative.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_h305dy2k/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences"
+      ],
+      "exitcode": 2,
+      "expected_kmax": 0,
+      "input_sha256": "b709d9f4ac0b63c5d9c144fa645cd66c6b8ce643999f0774cb7114eb5db2e77f",
+      "manifest": null,
+      "started_utc": "2026-09-05T09:12:59.482203+00:00",
+      "stderr_sha256": "30f34369eede0e8927d88ca456d1766435f856083c8b51321f92b387b9a9522a",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "smax_low",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/smax_low.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_5dp1ywub/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences",
+        "--smax=1"
+      ],
+      "exitcode": 2,
+      "expected_kmax": 0,
+      "input_sha256": "040052ad47527843f72ab08d70ce0f066efcd045a4364b5d96d2e9e9c837e196",
+      "manifest": null,
+      "started_utc": "2026-09-05T09:12:59.484714+00:00",
+      "stderr_sha256": "98051d6d8798ab92fa3853be3a09f86175952f892733e7abedd4d2f0da424c96",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "smax_high",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/smax_high.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive__080axbe/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences",
+        "--smax=12"
+      ],
+      "exitcode": 2,
+      "expected_kmax": 0,
+      "input_sha256": "040052ad47527843f72ab08d70ce0f066efcd045a4364b5d96d2e9e9c837e196",
+      "manifest": null,
+      "started_utc": "2026-09-05T09:12:59.487192+00:00",
+      "stderr_sha256": "98051d6d8798ab92fa3853be3a09f86175952f892733e7abedd4d2f0da424c96",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "s_low",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/s_low.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_vvy92yp0/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences",
+        "--s=7"
+      ],
+      "exitcode": 2,
+      "expected_kmax": 0,
+      "input_sha256": "040052ad47527843f72ab08d70ce0f066efcd045a4364b5d96d2e9e9c837e196",
+      "manifest": null,
+      "started_utc": "2026-09-05T09:12:59.489636+00:00",
+      "stderr_sha256": "98051d6d8798ab92fa3853be3a09f86175952f892733e7abedd4d2f0da424c96",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "square_extra_shell",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/square_extra_shell.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_9u9b50v7/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences"
+      ],
+      "exitcode": 2,
+      "expected_kmax": 0,
+      "input_sha256": "c64adc70d20e7c325e1686a9ae77885dc948274108c40a8fe3a1ad2b0ecfad9e",
+      "manifest": null,
+      "started_utc": "2026-09-05T09:12:59.491906+00:00",
+      "stderr_sha256": "1a89b4bb6abfd48243282f271bc51cbe13b66613d196736c9fbf7e9da62012b8",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "require_exact",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/require_exact.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_hvml06bt/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences",
+        "--require-exact"
+      ],
+      "exitcode": 2,
+      "expected_kmax": 0,
+      "input_sha256": "040052ad47527843f72ab08d70ce0f066efcd045a4364b5d96d2e9e9c837e196",
+      "manifest": null,
+      "started_utc": "2026-09-05T09:12:59.497833+00:00",
+      "stderr_sha256": "51f32d6a13a1e70cb5c7cdea4a64a2260ae46ee17ac08e33cd1dbcaedc84fc5e",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "bad_cap",
+      "command": [
+        "/workspaces/E-HGP/build/v7_next_q2_qualification/mhgp7",
+        "--input=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/bad_cap.input.txt",
+        "--output=/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/.archive_1b5vuuia/result",
+        "--threads=1",
+        "--fold-join=1",
+        "--layout=csr",
+        "--digest",
+        "--complete-incidences",
+        "--silent-chain-steps=-1"
+      ],
+      "exitcode": 2,
+      "expected_kmax": 0,
+      "input_sha256": "41fdc7bab923a192522b00657c4b3eec301bb7db83a7353431e5e7150d355b5a",
+      "manifest": null,
+      "started_utc": "2026-09-05T09:12:59.500105+00:00",
+      "stderr_sha256": "98051d6d8798ab92fa3853be3a09f86175952f892733e7abedd4d2f0da424c96",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "completed_prefix_byte_equality_fixture": "acute_three_K1",
+  "gcp": "not_used",
+  "limits": [
+    "Tiny CLI domain fixtures, not a benchmark or full suite.",
+    "Archive fields and file hashes checked; semantic delta replay remains attributed to closed E archive gates.",
+    "No private pipeline callback observer used by this CLI guard."
+  ],
+  "mode": "audit_independant_math_and_architecture",
+  "phase": "exploration_v7_hors_registre",
+  "profile": "quantized_u16_input_only",
+  "public_status": "not_claimed",
+  "qualified_E_binary_sha256": "df75153326f7bbf4ce0a412031a365205559cb68155d4304adc9301461f505f6",
+  "qualified_sources": {
+    "morsehgp3D_v7/cli/mhgp7.cpp": "46280e1117d4455c894b513e045f66d25174037e1e20f94a6fe2051e7cbf2125",
+    "morsehgp3D_v7/src/forest/fold.hpp": "b11d02c86db5f8ae8cb12965f12e425548f9f049fb4626259790b32cd584928c",
+    "morsehgp3D_v7/src/forest/plateau.hpp": "9d40af95f4429c02fb4201dfd12608e58c00c593c7c4905e2304e4b4ae37ac49",
+    "morsehgp3D_v7/src/forest/silent_incidence.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76",
+    "morsehgp3D_v7/src/io/archive.hpp": "cc2243aaa1bdbe63b69f165d65152cf62d7fac32ff6c641343542c247d989430",
+    "morsehgp3D_v7/src/pipeline/expand.hpp": "7cafb0341344fbc7d1584001e4685e2e5bf0122fe3b7e37277f5468d5c5e1cf0",
+    "morsehgp3D_v7/src/pipeline/run.hpp": "1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c"
+  },
+  "rejections": 12,
+  "schema": "mhgp7-horizontal-cli-domain-v1",
+  "script_sha256": "78262a9fdd943a5bbdfa70153c0e9a29267cf7e3d9ab1b9a20b286f62efabee3",
+  "status": "passed",
+  "successes": 6
+}

@@ -1,0 +1,3 @@
+REFUS invalid_input : coordonnee hors profil u16 ou PointId duplique
+refus_etage=entree rss_mb apres_generation=0 apres_rle=0 apres_prefiltre=0 apres_census=0 max_fold=0 (frontiere de completion : dernier etage atteint)
+silent_refusal_work census_balls=0 plateau_balls=0 total_ms=0.033 completion_ms=0.000

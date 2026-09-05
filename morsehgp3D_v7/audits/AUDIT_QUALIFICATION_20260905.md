@@ -9,7 +9,11 @@ six sorties mono D/E concordent sur les cardinalités et digests de la tour
 horizontale candidate K1–10 avec complétion des incidences. Cet audit relit
 les exécutions closes du constructeur ; il n'a relancé ni moteur, ni CTest,
 ni benchmark. Ces résultats ne certifient ni HGP complet ni une performance
-industrielle. Le cadre public reste `not_claimed`.
+industrielle. Le cadre public reste `not_claimed`. La nouvelle fermeture du
+[certificat horizontal réduit](CERTIFICAT_HORIZONTAL_COURANT.md) utilise un
+snapshot E figé ; la [préparation F](receipts_horizontal_20260905/f_delta/review.json)
+possède seulement sa revue de conservation distincte et son build CLI clos
+au reçu, sans transfert des suites E.
 
 Actualisation du 5 septembre 2026 à 07:20 UTC, après la clôture du full E.
 Les preuves nécessaires sont copiées sous `audits/`, y compris lorsque

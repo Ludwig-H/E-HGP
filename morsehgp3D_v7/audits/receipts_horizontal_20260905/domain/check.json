@@ -1,0 +1,14 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "-O",
+    "morsehgp3D_v7/audits/receipts_horizontal_20260905/domain/check_cli_domain.py"
+  ],
+  "exitcode": 0,
+  "script_sha256": "78262a9fdd943a5bbdfa70153c0e9a29267cf7e3d9ab1b9a20b286f62efabee3",
+  "started_utc": "2026-09-05T09:12:59.340292+00:00",
+  "stderr": "check.stderr",
+  "stdout": "results.json",
+  "stdout_sha256": "3ca67054a24d92074da5a0ad2e11aff64bad175de555622859eb424f6c0628b2"
+}

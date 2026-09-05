@@ -2,7 +2,7 @@
 
 5 septembre 2026. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
-Le domaine retenu est **Linux x86-64, GCC 13.3 et sa bibliothèque C++/mathématique, types entiers du profil et binaire64 sans réassociation**. La qualification complète exécutée appartient au snapshot D. Le delta E q2 a une contre-épreuve locale distincte ; les clauses arithmétiques du front concernent des sources communes inchangées.
+Le domaine retenu est **Linux x86-64, GCC 13.3 et sa bibliothèque C++/mathématique, types entiers du profil et binaire64 sans réassociation**. La reconstruction indépendante D et les qualifications E contre-vérifiées ont leurs sources propres. Le certificat horizontal et sa nouvelle sonde du pipeline utilisent E figé ; la préparation concurrente F garde sa revue distincte. Les primitives inchangées conservent leurs preuves.
 
 ## Commandes et options effectivement observées
 
@@ -30,6 +30,6 @@ Les 40 appels compilés de la porte d'arrondi exercent effectivement les quatre 
 
 Les frontières des certificats sont désormais [raccordées aux helpers compilés](receipts_front_compiled_20260905/README.md), sans reconstruire Gamma ni balayer le domaine u16 : trois sondes, chacune en O2 et O1 UBSan. Les secteurs/cordes ajoutent explicitement `-frounding-math -ffp-contract=off` pour leurs essais sous quatre modes ; cette commande est distincte du produit D. Les grilles conservent les options numériques par défaut et contrôlent leur refus hors arrondi au plus proche. Les corps entiers des fuseaux sont confrontés à la dichotomie et aux identités de Gram indépendantes.
 
-Cette qualification est locale aux sources communes D/E. Le certificat horizontal doit encore nommer son domaine de régularité et son payload réduit. Verticale, vote, compteurs globaux et coût de bout en bout gardent des contrats distincts. La [qualification E](AUDIT_QUALIFICATION_20260905.md) conserve ses propres sources, binaires et verdicts terminaux.
+Cette qualification est locale aux sources communes D/E. Le [certificat horizontal](CERTIFICAT_HORIZONTAL_COURANT.md) nomme maintenant son domaine de régularité et son payload réduit, et les raccorde au lecteur des deltas. Verticale, vote, compteurs globaux et coût de bout en bout gardent des contrats distincts. La [qualification E](AUDIT_QUALIFICATION_20260905.md) conserve ses propres sources, binaires et verdicts terminaux.
 
 GCP non utilisé. Aucun code produit ou drapeau de compilation modifié.

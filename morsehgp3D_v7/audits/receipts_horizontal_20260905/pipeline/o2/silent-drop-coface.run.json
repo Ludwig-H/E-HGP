@@ -1,0 +1,6 @@
+{
+  "exit_code": 0,
+  "binary_sha256": "00d4e20e1291fcb2245bf2d329d7a4d8427bb222b6351482b143181afca846e7",
+  "input": "5 1 0 0 1 8 3 0 0 7 19 0 9 6 211 1 4 0 65537 0 0 1 4000000000 4 1 2\n",
+  "mutant": "silent-drop-coface"
+}

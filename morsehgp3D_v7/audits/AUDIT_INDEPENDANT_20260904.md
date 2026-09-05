@@ -1,6 +1,6 @@
 # Audit indépendant courant de MorseHGP3D v7
 
-Actualisé le 5 septembre 2026 depuis `a32dc78f`, à la suite de la publication constructeur E `2b94abddfde08101607f4639d42149156fb39e6c` ; qualifications propres D et E distinguées.
+Actualisé le 5 septembre 2026 depuis `61f72a6805e27f1bc216b5d7444164b31fc970b6` ; certificat horizontal réduit E et revue F distincte.
 Toutes les écritures restent dans `morsehgp3D_v7/audits/`.
 
 La suite **D** de 323 portes a été reconstruite et exécutée par l'auditeur.
@@ -20,18 +20,11 @@ public_status=not_claimed
 
 ## Avis pour le constructeur
 
-**Les bornes des témoins sont raccordées au code compilé, et la
-qualification intégrée E est close sur ses preuves propres.** Les trois
-sondes du front passent en O2 et O1 UBSan, avec six vrais mutants produit
-détectés. Aucun nouveau défaut produit n'a été trouvé. Les acquis MEB,
-index/front et garde d'arrondi restent fermés ; le constructeur peut
-s'appuyer dessus pour achever le certificat horizontal.
+**Le [certificat horizontal réduit](CERTIFICAT_HORIZONTAL_COURANT.md) est fermé sur E dans son domaine CPU explicite.** La preuve relie la fenêtre de boules, le catalogue direct, les suffixes d'ancrage, le fold et les seuls deltas exportés. La bijection par inclusion des facettes conserve les points et commute entre coupes ; la régularité géométrique globale n'est pas exigée.
 
-La composition S1 et la réduction horizontale disposent déjà de preuves
-conditionnelles. La partition du front et les antichaînes de cover sont maintenant
-[raccordées à l'index](AUDIT_RACCORD_INDEX_FRONT_20260905.md). Les bornes opérationnelles des témoins sont fermées pour les fuseaux, secteurs, cordes et cellules ; le [domaine CPU](DOMAINE_CPU_COURANT.md) et les [frontières compilées](receipts_front_compiled_20260905/README.md) sont documentés. Le domaine des plateaux, la verticale, le vote et les coûts gardent
-leurs propres contrats. Le refus de `--require-exact` reste cohérent avec
-cet état ; aucune promotion n'est faite par cet audit.
+La nouvelle sonde du pipeline passe en O2/O1 UBSan : 60 ordres, 840 coupes et 1 124 carrés de naturalité par build, avec détection d'une attache supprimée. Le fold séparé passe 272 coupes et sept vrais mutants. Aucun nouveau défaut produit n'a été trouvé. Les [18 gardes de domaine](receipts_horizontal_20260905/domain/results.json) précisent notamment K1, les collinéaires acceptés et les refus d'extra-shell.
+
+La préparation F possède un [lemme de conservation de pile](receipts_horizontal_20260905/f_delta/review.json) favorable ; sa qualification intégrée reste distincte. Le certificat exécuté est attribué aux octets E figés. Verticale, poids/vote, identités publiques, plateaux à étendre et coûts gardent leurs propres contrats. Le statut demeure `not_claimed` et `--require-exact` refuse.
 
 ## Modèle lu et objet audité
 
@@ -68,6 +61,8 @@ sont contenus implicitement dans cet export.
 
 | Domaine | Conclusion vérifiée | Preuves |
 | --- | --- | --- |
+| Composition horizontale réduite E | Preuve assemblée ; pipeline et lecteur seuls contre Gamma rationnel, fold et niveaux égaux, domaine CLI | [Certificat et reçus](CERTIFICAT_HORIZONTAL_COURANT.md) |
+| Préparation F | Conservation LIFO/masques/comptes sur delta épinglé ; aucune suite E transférée | [Revue statique distincte](receipts_horizontal_20260905/f_delta/review.json) |
 | MEB différée q3/q4 | Signes, zéros, premier support, niveau et budgets conservés ; 89 ensembles, 431 appels et 6 176 puissances, deux mutants détectés | [Preuve et oracle rationnel indépendant](AUDIT_MEB_DIFFEREE_20260905.md) |
 | Prétest q2 E | Identité et borne i64 ; oracle indépendant, 431 appels identiques à D et nouveau mutant q2 détecté | [Addendum E](ADDENDUM_MEB_Q2_E_20260905.md) |
 | Morton, buckets et Karras | Partition, références, racine, couverture unique et boîtes justifiées ; 237 212 nuages par binaire, sept mutants structurels rejetés sous O2 et UBSan | [Preuve et oracle de trie](AUDIT_INDEX_20260905.md) |
@@ -98,19 +93,13 @@ Leurs reçus bruts ne sont pas réécrits.
 
 ## Prochaines fermetures utiles
 
-1. **Assembler le certificat horizontal réduit dans son domaine CPU.**
-   Les commandes et préconditions numériques sont [déclarées](DOMAINE_CPU_COURANT.md).
-   Garder les refus d’extra-shell pertinents et nommer le domaine de
-   régularité. Une extension aux plateaux demande ses propres fixtures de
-   contacts égaux et de lots atomiques ; un refus déclaré n’est pas une
-   erreur de MEB. Les API internes conservent leurs préconditions.
-2. **Compléter l'objet demandé par le contrat industriel.**
+1. **Compléter l'objet demandé par le contrat industriel.**
    L'archive déclare `vertical_maps=none`. Définir et certifier les
    applications entre ordres, puis les contributions d'incidence du
    vote du § 9.1, sans les reconstruire depuis les seuls deltas H0.
    Préserver les facettes comme feuilles ; le recouvrement apparaît dans
    la projection et ne nécessite pas de laminarisation arbitraire.
-3. **Réduire puis mesurer le coût global de la route complétée.**
+2. **Réduire puis mesurer le coût global de la route complétée.**
    Les 550 supports possibles d'une MEB locale ne bornent ni les chaînes
    ni le catalogue de facettes. Mesurer leurs distributions et les
    reparcours de l'index. Les propositions précises du
@@ -122,8 +111,8 @@ Leurs reçus bruts ne sont pas réécrits.
 
 La base des secteurs peut être simplifiée à A=B=1 dans son domaine,
 après comparaison des objets et des plafonds ; cette optimisation reste
-facultative. Ni la demande de frontières compilées ni la qualification E
-ne sont conservées comme verrous ouverts.
+facultative. Ni la demande de frontières compilées, ni la qualification E, ni le
+certificat horizontal réduit ne restent des verrous ouverts sur ces octets.
 
 Ces étapes n'exigent ni Gamma exhaustif ni la mosaïque de Delaunay
 supérieure dans le produit. Les oracles bornés restent dans les audits

@@ -1,0 +1,87 @@
+{
+  "captured_utc": "2026-09-05T09:22:38.493111+00:00",
+  "files": {
+    "build.err": {
+      "bytes": 0,
+      "origin": "build/v7_f_build_20260905/build.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build.out": {
+      "bytes": 126,
+      "origin": "build/v7_f_build_20260905/build.out",
+      "sha256": "4d3d9a5d9cb5eaaebb974706f8006c0041a74de011a5d0df2913d5949a93d8d8"
+    },
+    "build_D.json": {
+      "bytes": 11156,
+      "origin": "build/v7_f_build_20260905/build_D.json",
+      "sha256": "522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4"
+    },
+    "build_record.provisional.json": {
+      "bytes": 11156,
+      "origin": "build/v7_f_build_20260905/build_record.provisional.json",
+      "sha256": "522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4"
+    },
+    "cmake_version.err": {
+      "bytes": 0,
+      "origin": "build/v7_f_build_20260905/cmake_version.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cmake_version.out": {
+      "bytes": 91,
+      "origin": "build/v7_f_build_20260905/cmake_version.out",
+      "sha256": "d3d5b682f3f5ef5b24a79ed8cf4b8c5868fc950dad48cab1be0e3c060a77f8ee"
+    },
+    "compiler_version.err": {
+      "bytes": 0,
+      "origin": "build/v7_f_build_20260905/compiler_version.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "compiler_version.out": {
+      "bytes": 246,
+      "origin": "build/v7_f_build_20260905/compiler_version.out",
+      "sha256": "88b7c4b67564a146863224148116065fee418539f0a408f3636a68f3bde51805"
+    },
+    "configure.err": {
+      "bytes": 0,
+      "origin": "build/v7_f_build_20260905/configure.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "configure.out": {
+      "bytes": 513,
+      "origin": "build/v7_f_build_20260905/configure.out",
+      "sha256": "85c2d792112025fffce32d37e2838f5f6ef56e289252305e31564f6d8d6cac81"
+    },
+    "hashes.json": {
+      "bytes": 1346,
+      "origin": "build/v7_f_build_20260905/hashes.json",
+      "sha256": "0a9a1f8afb8a4ab398d3fd8acb67eb2f0724f22e53ab52c4caf1f29e74506601"
+    },
+    "metadata.json": {
+      "bytes": 21229,
+      "origin": "build/v7_f_build_20260905/metadata.json",
+      "sha256": "7ac824f123d01dce3395eaf9a0ee7c076e21ffc3dd7fe6323eb5a3c571a39d7e"
+    },
+    "repository_after.json": {
+      "bytes": 938,
+      "origin": "build/v7_f_build_20260905/repository_after.json",
+      "sha256": "b77e82b09f1a2a7d913dde83061e2dc59db532928e53cd9d700845397fbaf183"
+    },
+    "runs.json": {
+      "bytes": 1635,
+      "origin": "build/v7_f_build_20260905/runs.json",
+      "sha256": "68d95fe2b1a2e7dfb6673097e2154fb5c79948d82d2d3c8b6b33fae24b20efb5"
+    },
+    "summary.json": {
+      "bytes": 314,
+      "origin": "build/v7_f_build_20260905/summary.json",
+      "sha256": "07816fa62c81f502d8fc5c2d96822b916321d3e0523111d9986878308c5f96a5"
+    },
+    "tracking_after.json": {
+      "bytes": 17587,
+      "origin": "build/v7_f_build_20260905/tracking_after.json",
+      "sha256": "88a071daa2e44dfa65916edd3a3e35d90400cc536adfa4d0ebcb08e742c9a85d"
+    }
+  },
+  "origin_state": "closed_private_build_receipt_not_test_qualification",
+  "source_directory": "build/v7_f_build_20260905"
+}

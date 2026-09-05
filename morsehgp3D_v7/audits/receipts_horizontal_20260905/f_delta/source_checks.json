@@ -1,0 +1,20 @@
+{
+  "F_CLI_binary": {
+    "bytes": 692296,
+    "path": "/workspaces/E-HGP/build/v7_f_qualification/mhgp7",
+    "sha256": "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85"
+  },
+  "F_stack_substitution_reverses_to_exact_E_bytes": true,
+  "baseline_E_commit": "61f72a6805e27f1bc216b5d7444164b31fc970b6",
+  "declared_reference_adaptations_reverse_to_exact_E_bytes": true,
+  "engine_or_build_executions_by_auditor": 0,
+  "frozen_snapshot_sources_still_match": true,
+  "gcp": "not_used",
+  "observed_utc": "2026-09-05T09:22:38.762139+00:00",
+  "public_status": "not_claimed",
+  "recorded_F_CLI_build_sources": 51,
+  "recorded_build_commands_all_zero": true,
+  "schema": "mhgp7-F-source-conservation-v1",
+  "script_sha256": "bad01e47ada334fd396b926210129e4e821a04ccf0b9356fdd56ea57de1017f3",
+  "status": "source_conservation_checked_F_test_qualification_not_inferred"
+}

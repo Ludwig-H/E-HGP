@@ -1,0 +1,19 @@
+{
+  "schema": "mhgp7-audit-whitespace-check-v1",
+  "checked_utc": "2026-09-05T09:37:29.354433+00:00",
+  "raw_exit_code": 2,
+  "raw_stdout": "morsehgp3D_v7/audits/receipts_horizontal_20260905/f_delta/build_F_snapshot/compiler_version.out:5: new blank line at EOF.\nmorsehgp3D_v7/audits/receipts_horizontal_20260905/f_delta/build_F_snapshot/configure.out:9: trailing whitespace.\n+-- Found Threads: TRUE  \nmorsehgp3D_v7/audits/receipts_horizontal_20260905/f_delta/snapshot_E/morsehgp3D_v7/src/spindle/witness_count.hpp:197: new blank line at EOF.\nmorsehgp3D_v7/audits/receipts_horizontal_20260905/f_delta/snapshot_F/morsehgp3D_v7/src/spindle/witness_count.hpp:199: new blank line at EOF.\nmorsehgp3D_v7/audits/receipts_horizontal_20260905/f_delta/snapshot_F/morsehgp3D_v7/tests/reference/witness_count_e.hpp:205: new blank line at EOF.\nmorsehgp3D_v7/audits/receipts_horizontal_20260905/fold/compiler.stdout:5: new blank line at EOF.\n",
+  "raw_stderr": "",
+  "raw_files_sha256": {
+    "morsehgp3D_v7/audits/receipts_horizontal_20260905/f_delta/build_F_snapshot/compiler_version.out": "88b7c4b67564a146863224148116065fee418539f0a408f3636a68f3bde51805",
+    "morsehgp3D_v7/audits/receipts_horizontal_20260905/f_delta/build_F_snapshot/configure.out": "85c2d792112025fffce32d37e2838f5f6ef56e289252305e31564f6d8d6cac81",
+    "morsehgp3D_v7/audits/receipts_horizontal_20260905/f_delta/snapshot_E/morsehgp3D_v7/src/spindle/witness_count.hpp": "fce9510ee21cbe025283a9ce777b120e4173ce62eee736e1c48dc772afb67a42",
+    "morsehgp3D_v7/audits/receipts_horizontal_20260905/f_delta/snapshot_F/morsehgp3D_v7/src/spindle/witness_count.hpp": "f20970aa2183f6c0904d640ae5fe072894b6e0b4f7f9440277fbed77e8245803",
+    "morsehgp3D_v7/audits/receipts_horizontal_20260905/f_delta/snapshot_F/morsehgp3D_v7/tests/reference/witness_count_e.hpp": "e2141a7b0fc74b565938587802e3da5dbb23776378e15b3b6fc8a021e59b708d",
+    "morsehgp3D_v7/audits/receipts_horizontal_20260905/fold/compiler.stdout": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8"
+  },
+  "authored_files_exit_code": 0,
+  "authored_files_stdout": "",
+  "authored_files_stderr": "",
+  "policy": "Preserve compiler outputs and source snapshots byte-for-byte. Exclude only these six exact evidence paths from the authored-file whitespace check."
+}

@@ -1,0 +1,23 @@
+{
+  "digest_all": "b4123a9ddf8d1e23f606bd600ae8b3c6196ebd263777fd4873ef14b351c1f474",
+  "files": [
+    {
+      "bytes": 57,
+      "name": "input.u16",
+      "sha256": "116219f76bda85a784d4dd3c47597f6ef280c329b1fcfbf3c0d3b88100a83f8a"
+    },
+    {
+      "bytes": 558,
+      "name": "forest_K1.bin",
+      "sha256": "bd1db1202a1461ac8402dceab35621761276a9d44017c02b34cdd33bd9ce8afb"
+    }
+  ],
+  "forest_semantics": "normalized_horizontal_h0_candidate",
+  "kmax": 1,
+  "points": 3,
+  "public_status": "not_claimed",
+  "require_exact": false,
+  "schema": "mhgp7-archive-v1",
+  "status": "completed",
+  "vertical_maps": "none"
+}

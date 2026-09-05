@@ -1,0 +1,28 @@
+{
+  "digest_all": "c011b33a0177c1294c158a6fe735dc8924802875ebca7b18761c6ef3943219fc",
+  "files": [
+    {
+      "bytes": 57,
+      "name": "input.u16",
+      "sha256": "893cd3c1134648c461984a8d4c91d6c17132eb9f031f555edc4bab1259e10a5a"
+    },
+    {
+      "bytes": 558,
+      "name": "forest_K1.bin",
+      "sha256": "e96740fb605de2a940434880e0f381593cbf734be8026044112e3504fb7c695c"
+    },
+    {
+      "bytes": 412,
+      "name": "forest_K2.bin",
+      "sha256": "0d30636b5143307ee9f05c7286d6bfc341632b7ec6d28394e45bc5bdc6aa6deb"
+    }
+  ],
+  "forest_semantics": "normalized_horizontal_h0_candidate",
+  "kmax": 2,
+  "points": 3,
+  "public_status": "not_claimed",
+  "require_exact": false,
+  "schema": "mhgp7-archive-v1",
+  "status": "completed",
+  "vertical_maps": "none"
+}

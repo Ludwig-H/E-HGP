@@ -1,0 +1,38 @@
+payload=mhgp7-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+forest_layout=csr forest_storage_kind=csr_facet_keys_v1 csr_fallback=0 ordres_publies=2 ordres_storage_conformes=2
+backend=cpu_reference
+forest_semantics=normalized_horizontal_h0_candidate public_status=not_claimed require_exact=false
+census_storage=mhgp7-census-direct-v1 census_payload_peak_scope=owned_balldata_capacities
+silent_limits core_records=8000000 chain_steps=2000000 cofaces=2000000 query_nodes=1000000000 meb_supports=1000000000
+silent_incidence_ms=0.007 regularity=rank_window_and_local_descent vertical_maps=none
+silent_K2 core=2 with_two_intruders=0 steps=0 added=0 max_chain=0 query_nodes=10 meb_supports=2
+tower_scope=prefix_k2 smax_requested=11 smax_effective=3 (K = 1..2, prefixe exact de l'objet complet)
+famille=input_u16 n=3 coord=65536 s=8 smax=3 seed=3 threads=1 emis=3 boules_uniques=3 mortes_profondeur=0 survivantes=3 census_int=1 census_shell=6 evenements=3 facettes=6 fusions=4 deltas=3 noeuds=2
+generation rect_alive=3/2/0 rect_visites_fusionnes=4 ancres=3/2/0 candidats=3/0/0 tues_profondeur=0/0/0 ancres_w4=0 ancres_w3=0 ancres_secteurs=0/0 ancres_cellules=0/0 seeds_cellules=0/0 grilles=0/0 seeds=0/0 completions_q4=0 seeds_core_tues=0 seeds_corde_tues=0 float_cert=0/0 repli=0 ancres_hist=0/0/0 hist_lignes=0/0/0 hist_seuil=0/0/0 hist_survivants=3/2/0 jung=0/0/0
+sweep tests_coeur=0 tests_prof_q3=0 tests_passe2=0 tri_comparaisons=0 seeds_passe2=0 racines_corde=0 groupes=0 racines_hors_corde=0 temoins_constants=0 rejets=lens:0/owner:0/once:0/i64:0/face:0/det:0/centre:0
+vwspd nœuds_temoins=29 coins=0 h_rect=0/6/0 h_scan=0/6/0 m_anchor=0/4/0 entrees_ancres=0/2/0 iters_coeur=0 iters_passe2=0
+octaves_q4 ancres=0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 seeds=0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 w1=0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 (octave = log2 de la taille du cover de l'ancre)
+octaves_q4_seeds cellules=0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 coeur=0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 corde=0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 passe2=0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+vcensus prefiltre_nœuds=13 prefiltre_feuilles=0 range_add=1 census_nœuds=15 census_feuilles=7
+p_factor=0/0/0 (evaluations d'auto-produits des histogrammes)
+ledger_paires emis=3/2/0 tues=0/1/3
+ouvriers wspd=1 rects=1 rle=1 prefiltre=1 census=1 expansion=1 fold=1
+temps_ms index=0.0 gen=0.0 (wspd 0.0 rects 0.0) rle=0.0 prefiltre=0.0 census=0.0 comptage=0.0 expansion=0.0 fold=0.0 (tri 0.0 intern 0.0 fusion 0.0 reduce 0.0) digest=0.0
+temps_mur_ms=3.5 (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, pas le mur)
+temps_fold_mur_ms=3.3 (etages A et B, fold_inflight=2, fold_join=1, pic_mesure_en_vol=1)
+rss_mb apres_generation=4 apres_rle=4 apres_prefiltre=4 apres_census=4 max_fold=4 fin=4 (telemetrie active : DEUX lectures par jalon — /proc/self/statm (instantane, ~57 us) et /proc/self/status (VmHWM, ~109 us) — dont une paire par K sous le verrou de publication ; a desarmer ou signer pour un run de debit)
+etage_atteint=publication (curseur d'etage ; un refus le nomme dans son message)
+residence_hwm_mb apres_generation=4 apres_rle=4 apres_prefiltre=4 apres_census=4 max_fold=4 fin=4 (VmHWM de /proc/self/status, maximum HISTORIQUE depuis le debut du processus — non decroissant a quelques centaines de kio pres, VmHWM valant max(hiwater enregistre, resident courant) ; l'ecart avec le rss_mb du meme jalon est un majorant global, pas une mesure d'etage)
+residence_increment_mb apres_generation=4 apres_rle=0 apres_prefiltre=0 apres_census=0 max_fold=0 fin=0 (increments du pic historique : ce que CHAQUE etage a ajoute au maximum)
+residence_compteurs boules_census=3 boules_plateau=0 plateau_pct=0.000 somme_parents_total=4 somme_parents_par_K=4,0
+cardinalites K=1 evenements=2 facettes=3 deltas=2 attachements=0 fusions=2 noeuds=2
+cardinalites K=2 evenements=1 facettes=3 deltas=1 attachements=1 fusions=2 noeuds=0
+stockage_foret K=1 kind=csr_facet_keys_v1 deltas=2 cles_parents=4 cles_nes=0 meta=2/2 offsets=6/6 parents=4/4 nes=0/0 csr_capacity_growths=5 octets_possedes=392 exact=1 offset_dernier_parents=4 offset_dernier_nes=0
+stockage_foret K=2 kind=csr_facet_keys_v1 deltas=1 cles_parents=0 cles_nes=3 meta=1/1 offsets=4/4 parents=0/0 nes=3/3 csr_capacity_growths=4 octets_possedes=244 exact=1 offset_dernier_parents=0 offset_dernier_nes=3
+digest_candidates_v5_compat=bc9827980b20517f2363705010326c27796383b9276e24a47451a3cf6a3beffd
+digest_postprefilter=34a07830b6af45cdb772ee5a26c1deef0e81cd181bde96c16bd0091d144b2df0
+digest_forest_K1=70d123e34fcc798a60a1423a2c593a33635a8d4877e5e6a7dcbc3f02c700a5ea
+digest_forest_K2=26d41a81bed1f59e863022023111182a2abd50ed9b5333a42805bf38d3e8a0f1
+digest_all=c011b33a0177c1294c158a6fe735dc8924802875ebca7b18761c6ef3943219fc
+rss_max_kb=19200
+cli_e2e_ms=8.285 includes_input_and_export=true archive_committed=true
