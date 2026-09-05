@@ -1,6 +1,6 @@
 # État courant de l’audit v7
 
-Le producteur FULL lazy `13c6cc72` possède une qualification indépendante sur son corpus borné. L’export industriel de la tour et les contrats de performance ne sont pas acquis. Le présent entretien raccourcit les entrées et retire les doublons ; il n’ajoute aucun résultat scientifique ou benchmark.
+Le producteur FULL lazy `13c6cc72` possède une qualification indépendante sur son corpus borné. Le nouvel avis ferme statiquement deux pistes d’optimisation demandées par le constructeur : regroupement d’un lot à une directe et rejet précoce d’un bloc q4 profond. Une contre-fixture rationnelle protège la poursuite du balayage et l’interprétation des compteurs. Aucun futur delta C++ ni nouveau benchmark n’est qualifié ici ; l’export industriel et les contrats de performance restent ouverts.
 
 ```text
 phase=exploration_v7_hors_registre
@@ -21,6 +21,6 @@ La lecture intégrale des parties I et II du manuscrit, PDF 35–134, reste acqu
 
 Les [documents du constructeur](../PASSATION.md) portent les campagnes ultérieures et leur progression. Les temps massifs lazy ne deviennent pas des résultats indépendamment audités par ce nettoyage. Le [manifeste courant](validation_current.json) précise les octets et documents reconnus ; son contrôle ne promeut pas le statut public.
 
-La suite utile porte sur les mesures appariées de bout en bout et l’export sous autorité terminale, puis les ancres inter-K. Les questions différées sont [regroupées](QUESTIONS_SECONDAIRES.md). Les demandes déjà satisfaites sont retirées du [dialogue actif](DIALOGUE_COURANT.md).
+Le [dialogue actif](DIALOGUE_COURANT.md) donne les conditions des deux transformations et les contrôles ciblés du prochain delta. Les questions différées sont [regroupées](QUESTIONS_SECONDAIRES.md) ; les demandes déjà satisfaites restent retirées.
 
 Les reçus bruts et échecs restent conservés ; les anciennes synthèses sont accessibles par le [registre d’entretien](ENTRETIEN.json). GCP non utilisé.

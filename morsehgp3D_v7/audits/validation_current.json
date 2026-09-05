@@ -1,6 +1,6 @@
 {
   "schema": "mhgp7-current-audit-validation-v2",
-  "updated_utc": "2026-09-05T19:10:46.772287+00:00",
+  "updated_utc": "2026-09-05T19:28:54.705284+00:00",
   "phase": "exploration_v7_hors_registre",
   "backend": "cpu_reference",
   "profile": "quantized_u16_input_only",
@@ -15,16 +15,16 @@
     "audits/AUDIT_INDEX_20260905.md": "4c16e13d1023748ceff63bc71c11733e72a9171f55b9b3d1268093a58ea688c1",
     "audits/AUDIT_QUALIFICATION_20260905.md": "74dc45816a51e9c7c0db2f3ca233b57b51f17224e77d63ccc54263ee86f3812a",
     "audits/AUTORITE_VOTE_P3_COURANTE.md": "c11db52d2df31e864702252de4b75da59d568c6fa071cd0f67ad3e4cc844723f",
-    "audits/CACHE_FULL_COURANT.md": "18d83e13b2572c681715e6e33f4d2c8b150608156a300dabe0278279b97e59e9",
+    "audits/CACHE_FULL_COURANT.md": "22047b3a23f6a5964bd88212e6935f723ce933164f4809ac948d9a6f1e2d5838",
     "audits/CELLULES_COURANT.md": "328d8dff75ce6612f6242ccd727c59989dfe73c72ff8e0ad7b516f1e5cad0b08",
     "audits/CERTIFICAT_FULL_CPP_COURANT.md": "31710a40a072e914036dc41d7dc36395f31e1ee036157d4c414a06452d941d96",
     "audits/CERTIFICAT_HORIZONTAL_COURANT.md": "e76714730f4ce24f4451a8d9bab0c365d29b25e9d18008d3675d2ea9f036c611",
     "audits/CONTRAT_MASSES_VOTE_COURANT.md": "2ed2a8eebef68fbb12b2a23fc18067d36a343b0a206c1330c2ca823ee26f2b72",
     "audits/CONTRAT_VERTICAL_COURANT.md": "6bb013a79405e70eec64526ee0dbc480aeb8f67555affc7d2d0a9a5642fc7c3a",
-    "audits/DIALOGUE_COURANT.md": "ec16b50ef81507d2e0349f71e2d44cfee54df4011ba66203a56635b20f3fd64a",
+    "audits/DIALOGUE_COURANT.md": "ee2470b504d1f8439c206ebe5e782e7504beaacf4f61a2f21e0b65eedb1ca3e2",
     "audits/DOMAINE_CPU_COURANT.md": "18258334cfc7d74f3a262ea1dab798ff621245b079bfd5cbe8b48c987404cd33",
-    "audits/ENTRETIEN.json": "3a85a233a488a3225cb955945c8779c0f8035033d18cc4518e3eb46e809a04ae",
-    "audits/ETAT_COURANT.md": "09de878313e9b4dcb74170f687f0000958405d91d5872d23d20497c793cb4168",
+    "audits/ENTRETIEN.json": "6b870c5d200b8a6edcb4a23520963556af6b88f5b109887c944a5d84649aac68",
+    "audits/ETAT_COURANT.md": "60f5ef90749651f005aa7b6cc7784d96518740c926e0f61663a7ee808e8e4c4a",
     "audits/FILTRES_FLOTTANTS_COURANTS.md": "7ba3d325a007b12e45baaa5d7d6ee00abb2cb978a1006af9bc7e9a8a3bc2af03",
     "audits/FRONT_ET_TEMOINS_COURANT.md": "6da012cbe85e1d5d53bb0a7ee922c2b66f9eb847ab58294c3c4293168a67a4a0",
     "audits/MEB_DOUBLE_BUDGET_COURANT.md": "5b0df144c43819576420df9b7bf554c547f2bf17a0b177ac41f715024625f4dd",
@@ -34,7 +34,7 @@
     "audits/PRODUCTEUR_FULL_GABRIEL_COURANT.md": "5a3e80d338c6c18f346224d811997e08e40b55876e12d3e9e8f837b8ef963910",
     "audits/QUESTIONS_SECONDAIRES.md": "ce9a471231c06936cf31c48dac96752550547f602963734aba52be5814d22b88",
     "audits/README.md": "32e5d0b9b436315872756c6df0a07005f1b72ae7c03be7d5024a7f89878b50e9",
-    "audits/S1_COURANT.md": "f7e10367e0692ace01f94c441b399fb05639e1568caeacf49fe5a33743d45e23",
+    "audits/S1_COURANT.md": "e4c79bc1cb57df636c226765c7a7be616998ff7248b86f93e61976e77fa173eb",
     "audits/archive_cleanup_probe.cpp": "f94bc8032d4a55f4afccf43a56497866f803eb3e42f2d96b05dc9420b964a63d",
     "audits/cell_compiled_bridge.cpp": "0a8045ec5b9691cb1db627fedaeca60042bf76714f4eca62db48264a8d6842fb",
     "audits/cell_compiled_oracle.py": "605da85a26280903459d7e08c5e2f7f2249f32d448fc0e4a5ef153e07f49fd02",
@@ -68,6 +68,8 @@
     "audits/meb_oracle_bridge_20260905.cpp": "393e5d2b73d80c924f8ba8fba14db0bcea778a5094c8c6723fbcfc19e78ef91d",
     "audits/meb_q2_replay_20260905.py": "7bce7df38b65f868f305a7a6c571d93dabc3944e4ccd23f67f6c533c8bf0f380",
     "audits/meb_rational_oracle_20260905.py": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b",
+    "audits/q4_block_counterfixture.json": "c3ce4dfae145789ebcb41c4bc2eae8c57640189b6431bdff3ec4db797478c298",
+    "audits/q4_block_counterfixture.py": "f8c4a1e898c9b11f8b1f0522804c1b972f638f61304085cf87c14cb59a762964",
     "audits/receipts_20260905/README.md": "3420f5eb99fa9046c416e927db3fb8bfb1b8b3c779c7fe690f348f615bbe7ca5",
     "audits/receipts_20260905/audit_markdown.json": "11390dd8a650f205b67e55731b776c54b1d18a8d6da7abac6dc0e330b4cd5bc8",
     "audits/receipts_20260905/audit_markdown_before_manifest.json": "b1e88797d013cd0a11595e94722b8bbc7d2fe04d37a06b133f0c8f20216110f6",
@@ -2680,7 +2682,7 @@
       "qualification_scope": "Independent lazy FULL on 109 orders/218 representations, eager+C0+C1+C100000: 67920 cuts per O2/ASan-UBSan build, budgets and three causal mutants. Own constructor 14+14 targeted CTests inspected; 24 n=8 digest probe admissions and composed first-C guard inspected. No K9/K10 oracle, mass lazy timing, vertical/mass/export or public promotion.",
       "pinned_sources": {
         "CMakeLists.txt": "53f122566fa18281a39d2d83615af18799ccae0ccbb9e62395f2c67ae824cd0d",
-        "PASSATION.md": "4caaa9503c6161c9ae8395f62a1d356d95384d545733304aae50ad701262d07c",
+        "PASSATION.md": "153556532f0a4476ed6d3d141b6d1061a307681575d849041e87ef644df588c1",
         "README.md": "02a79b0a04e6d4e3fef76a75b3acc6e799ab85e956e34f3392ffcbad51bf377f",
         "bench/COMPARE_MONO.md": "b3077c3a832a98b15479b92c46cb57f9efdb4a0a24a44728d7e50718aee5ef3f",
         "bench/agregateur.py": "641a985b6903c66024d2734ff9c73a10fce3c6bc86d291e4ccfad0c2dde08de3",
@@ -2703,12 +2705,12 @@
         "cli/mhgp7.cpp": "46280e1117d4455c894b513e045f66d25174037e1e20f94a6fe2051e7cbf2125",
         "cli/mhgp7_cuda.cu": "aee8a3717b207f34d03587a249fd052a4c129e8aa2b17323035befec5bedfea8",
         "cmake/run_expect.cmake": "7bb9af4eddbea7e7a66619c92491dc11c22a49d7b3b46bddd6b2c25b20b2d605",
-        "docs/CONTRAT_CACHE_FULL_PARESSEUX.md": "e970f46e65e660124e6b39aa82778c2c0faf29511517fd0bcdaf676b253eadcc",
+        "docs/CONTRAT_CACHE_FULL_PARESSEUX.md": "339e4b651061a7c98177c91c78560a72f04ced53e6828b5e19f9be56ae7f00ad",
         "docs/CONTRAT_CERTIFICAT_FULL.md": "028cffbaefd0455d66301f11608a087a56279bcf692442f55f0873c0237f577f",
         "docs/CONTRAT_DIGEST_FULL.md": "15617df1f84b665b8770f8992b484087522ad623c918f86c30b5d3a0fc679799",
         "docs/CONTRAT_PERFORMANCE.md": "7db637658ad98f176e8f38b58d3b2e781ec90917df05760ce769b6f68f27af0c",
         "docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md": "829814b12425eaa40d9ca0648d80940afcd4a5a2857d8ddf0842691898c1202a",
-        "docs/RESIDENCE_MASSIVE.md": "182f274a62e25abae708883a2cc8f226f0388cfc3a0b52d297ed0fb643704020",
+        "docs/RESIDENCE_MASSIVE.md": "0a1127fe54b20aa750b9198eeee198744144a12f9c2e7493a01f92ca22ad001f",
         "docs/RESULTATS_MONO_FULL_20260905.md": "f767a8ef170dcd5286368908375b959e11d213b2a310d51bed9f4c0d87e10f14",
         "oracle/full_gamma.hpp": "a17732d2bd7861a3e7e3f76d029da3b2078ce4ebf0b64f7d7571e5060de24f0c",
         "oracle/obig.hpp": "0e3e9241503e7979fb7da06e97a0a0006362cf4da381c7ce2c66d86acdabf8d5",
@@ -3627,7 +3629,17 @@
       ],
       "documentation_maintenance": {
         "record": "audits/ENTRETIEN.json",
-        "scope": "Five navigation/status documents refreshed after e7fa5da7; all executable and receipt pins and qualification scope unchanged. No mass timing or new receipt package qualified."
+        "scope": "Five navigation/status documents refreshed after e7fa5da7; all executable and receipt pins and qualification scope unchanged. No mass timing or new receipt package qualified.",
+        "latest_static_followup": {
+          "date": "2026-09-05T19:27:58.188919+00:00",
+          "record": "audits/ENTRETIEN.json#latest_static_followup",
+          "refreshed_documents": [
+            "PASSATION.md",
+            "docs/CONTRAT_CACHE_FULL_PARESSEUX.md",
+            "docs/RESIDENCE_MASSIVE.md"
+          ],
+          "scientific_scope_unchanged": true
+        }
       }
     }
   ],
@@ -3648,5 +3660,10 @@
   "full_producer_qualification_note": "H captures e02; I binds its publication and eager mono receipts. J separately qualifies 13c6 lazy on independent catalogues; no transfer of eager timings.",
   "full_mono_qualification_note": "Five sealed mono receipts: 3 relative successes at 8k, 2 alias refusals 16k/K9 and 32k/K7. Python normal/-O, 44 successful rows satisfy stronger identities; 4 independent data corruptions expose receipt-judge gaps. No new engine/build, forest digest, lazy measurement or paired F gain.",
   "full_lazy_qualification_note": "Independent lazy FULL on 109 orders/218 representations, eager+C0+C1+C100000: 67920 cuts per O2/ASan-UBSan build, budgets and three causal mutants. Own constructor 14+14 targeted CTests inspected; 24 n=8 digest probe admissions and composed first-C guard inspected. No K9/K10 oracle, mass lazy timing, vertical/mass/export or public promotion.",
-  "maintenance_note": "17 superseded notes deleted; unique independent arguments condensed and deferred questions grouped. Scientific receipts and executable source pins unchanged. See audits/ENTRETIEN.json for original Git versions and document-only refresh."
+  "maintenance_note": "17 superseded notes deleted; unique independent arguments condensed and deferred questions grouped. Scientific receipts and executable source pins unchanged. See audits/ENTRETIEN.json for original Git versions and document-only refresh.",
+  "static_optimization_review": {
+    "record": "audits/ENTRETIEN.json#latest_static_followup",
+    "scope": "Static advice on singleton-direct FULL lots and early deep q4 blocks; one independent rational local counterfixture. No new C++ qualification or mass measurement.",
+    "qualification_variants_extended": false
+  }
 }

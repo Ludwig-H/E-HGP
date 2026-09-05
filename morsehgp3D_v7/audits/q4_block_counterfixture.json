@@ -1,0 +1,108 @@
+{
+  "schema": "mhgp7-q4-block-rational-counterfixture-v1",
+  "status": "passed",
+  "scope": "local rational geometry only",
+  "public_status": "not_claimed",
+  "cpp_executed": false,
+  "global_regularity_qualified": false,
+  "points_in_point_id_order": [
+    [
+      57,
+      50,
+      51
+    ],
+    [
+      45,
+      55,
+      50
+    ],
+    [
+      45,
+      45,
+      50
+    ],
+    [
+      57,
+      50,
+      49
+    ],
+    [
+      57,
+      50,
+      48
+    ]
+  ],
+  "seed": [
+    0,
+    1,
+    2
+  ],
+  "smax": 4,
+  "h4": 1,
+  "D2": 170,
+  "G": 14500,
+  "J": 1615000,
+  "normal": [
+    -10,
+    0,
+    120
+  ],
+  "roots": [
+    {
+      "point_id": 4,
+      "P": "79500",
+      "B": -360,
+      "mu": "-1325/6",
+      "strict_depth": 1,
+      "scaled_powers": [
+        "0",
+        "0",
+        "0",
+        "-29000",
+        "0"
+      ]
+    },
+    {
+      "point_id": 3,
+      "P": "24000",
+      "B": -240,
+      "mu": "-100",
+      "strict_depth": 0,
+      "scaled_powers": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "43500"
+      ]
+    }
+  ],
+  "retained_positive_support": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "center": [
+    "50",
+    "50",
+    "50"
+  ],
+  "radius_squared": "50",
+  "barycentrics": [
+    "5/24",
+    "7/24",
+    "7/24",
+    "5/24"
+  ],
+  "counter_population_difference": {
+    "deep_roots": 1,
+    "old_depth_killed": 0,
+    "old_lens_rejected": 1
+  },
+  "counterexample": "breaking at deep Z loses admissible Y",
+  "helper_pins": {
+    "q4_block_counterfixture.py": "f8c4a1e898c9b11f8b1f0522804c1b972f638f61304085cf87c14cb59a762964",
+    "meb_rational_oracle_20260905.py": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b"
+  }
+}

@@ -57,3 +57,20 @@ Supposons l'index valide, les opérations entières et comparaisons larges confo
 Toutes les émissions ont un support positif ; aucune ne peut donc représenter B avec une arité inférieure à q(B). Les formes entières de B sont des multiples rationnels positifs ; leur réduction par PGCD, coefficient quadratique positif, donne la même clé primitive. Le tri par clé puis arité croissante et le dédoublonnage conservant le premier gardent exactement q(B), puisqu'un tel représentant a été émis. Le départage par représentation de niveau ne change pas sa valeur géométrique. Il n'est pas nécessaire d'émettre tous les supports alternatifs.
 
 Les preuves des [primitives entières](../docs/ARITHMETIQUE_PRIMITIVES.md), de l'[arithmétique des témoins](ARITHMETIQUE_SPINDLE_COURANTE.md), des secteurs et cellules déchargent les bornes locales sur le [domaine CPU](DOMAINE_CPU_COURANT.md). Les [reçus compilés](receipts_front_compiled_20260905/README.md) sont des vérifications bornées distinctes. La frontière de fenêtre, jugée jusqu'à 24 points avec refus pertinent et mutants, reste dans son [reçu indépendant](receipts_20260904/math_window_repro.json) et son [snapshot](receipts_20260904/math_window_source_snapshot.json) ; sa composition est documentée chez le constructeur. Aucun nouveau run ni qualification FULL industrielle dans cette condensation.
+
+## 7. Rejet précoce d’un bloc q4 : frontière de l’optimisation
+
+**Avis statique favorable**, sur `generate.hpp` = `ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59`. Toutes les racines d’un groupe désignent la même boule. Après retrait de ses sorties, `depth_at` est sa profondeur stricte ; si `depth_at>=h4`, aucune présentation du groupe ne peut être émise. Le test peut entourer la seule boucle de cascade (lignes 1120–1170), après l’application éventuelle du mutant de profondeur. Les mises à jour `ent+=ent_at; i=j` restent communes. Conserver le cover complet, les racines et leur tri, le traitement des égalités et les contrôles amont ; aucun arrêt de seed n’en découle.
+
+La [contre-fixture permanente](q4_block_counterfixture.json), recalculée par [élimination rationnelle de Gram](q4_block_counterfixture.py), utilise les PointId 0..4 dans cet ordre : A=(57,50,51), B=(45,55,50), X=(45,45,50), Y=(57,50,49), Z=(57,50,48). Pour le seed aigu ABX et `smax=4`, `h4=1`, D²=170, G=14500, J=1615000. Les deux sorties appartiennent à la corde fermée :
+
+| Racine | μ | Profondeur stricte | Conséquence |
+| --- | --- | --- | --- |
+| Z | −1325/6 | 1 | Le bloc peut être sauté ; Y est encore intérieur |
+| Y | −100 | 0 | ABXY doit survivre : centre (50,50,50), R²=50, poids (5,7,7,5)/24 |
+
+AB est propriétaire avec le départage des PointId ; X est le seed canonique. Arrêter au premier bloc perd donc une présentation admissible. De plus BZ²=173>D² : dans l’ancienne cascade, Z était rejeté par la lentille **avant** `depth_killed[2]`. Incrémenter ce dernier pour les blocs sautés changerait sa population. Cette preuve concerne la géométrie locale ; elle ne rapporte aucun passage C++, admission par le pipeline ou régularité globale du nuage.
+
+Versionner séparément les nombres de blocs/racines sautés et de complétions effectivement testées, avec les sorties CLI/sonde et leurs lecteurs. En succès, si le test de profondeur final est supprimé, les identités utiles sont `roots_onchord = roots_skipped_depth + completions_cascade` et `completions_cascade = sept rejets de cascade + candidats_q4`. Les refus interrompus ne portent pas ces identités de succès. Les filtres sautés sont purs et les blocs profonds n’émettaient déjà rien : les gardes de candidats restent actives. En multi-CPU, ne pas promettre un préfixe de refus identique sous un ordonnancement modifié.
+
+Pour le futur delta : comparer les boules canoniques et les forêts au générateur gelé, exercer cette baisse de profondeur, les blocs mixtes entrée/sortie de même racine, les bornes de corde et les mutants strict/non-strict. Vérifier les nouvelles identités de compteurs et conserver les refus de capacités. Le coût économisé reste à mesurer sur la tour complète.

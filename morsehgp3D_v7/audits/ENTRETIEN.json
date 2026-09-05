@@ -448,5 +448,90 @@
       "exit_code": 0
     }
   },
-  "checked_utc": "2026-09-05T19:10:46.770279+00:00"
+  "checked_utc": "2026-09-05T19:10:46.770279+00:00",
+  "latest_static_followup": {
+    "date": "2026-09-05T19:27:58.188919+00:00",
+    "base_head": "6126b37394c70ffeabf9754051c44c2dfc082db9",
+    "scope": "Static advice on singleton-direct FULL lots and early deep q4 blocks; one independent rational local counterfixture. No new C++ qualification or mass measurement.",
+    "product_sources": {
+      "src/forest/full_gabriel.hpp": "13c6cc72ab5065d498827bf89c6bc2a321b5e896c93a60263de52b9d800a2627",
+      "src/forest/full_certificate.hpp": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+      "src/pipeline/generate.hpp": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59",
+      "src/lanes/q4.hpp": "58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a",
+      "src/spindle/spindle.hpp": "f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577"
+    },
+    "proof": "q4_block_counterfixture.json",
+    "checks": {
+      "rational_normal_optimized": {
+        "commands": [
+          "taskset -c 0 python3 -B morsehgp3D_v7/audits/q4_block_counterfixture.py",
+          "taskset -c 0 python3 -B -O morsehgp3D_v7/audits/q4_block_counterfixture.py"
+        ],
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "local_depths": [
+          1,
+          0
+        ]
+      },
+      "canonical_docs": {
+        "command": "taskset -c 0 python3 -B tools/check_docs.py",
+        "exit_code": 0,
+        "active_files": 345
+      },
+      "registry": {
+        "command": "taskset -c 0 python3 -B tools/check_implementation_status.py",
+        "exit_code": 0,
+        "phases": 20
+      },
+      "authored_markdown": {
+        "checker": "tools.check_docs.validate on absolute paths of four edited notes",
+        "files": 4,
+        "local_or_external_links": 40,
+        "errors": []
+      },
+      "cpp_build_or_engine_executed": false,
+      "gcp": "not_used",
+      "freshness_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "variant": "J_full_lazy",
+        "common_pins": 1627,
+        "variant_pins": 929,
+        "scope": "All source and evidence scopes unchanged; document status and local proof only."
+      }
+    },
+    "document_only_J_refresh": [
+      {
+        "path": "PASSATION.md",
+        "previous_sha256": "4caaa9503c6161c9ae8395f62a1d356d95384d545733304aae50ad701262d07c",
+        "sha256": "153556532f0a4476ed6d3d141b6d1061a307681575d849041e87ef644df588c1"
+      },
+      {
+        "path": "docs/CONTRAT_CACHE_FULL_PARESSEUX.md",
+        "previous_sha256": "e970f46e65e660124e6b39aa82778c2c0faf29511517fd0bcdaf676b253eadcc",
+        "sha256": "339e4b651061a7c98177c91c78560a72f04ced53e6828b5e19f9be56ae7f00ad"
+      },
+      {
+        "path": "docs/RESIDENCE_MASSIVE.md",
+        "previous_sha256": "182f274a62e25abae708883a2cc8f226f0388cfc3a0b52d297ed0fb643704020",
+        "sha256": "0a1127fe54b20aa750b9198eeee198744144a12f9c2e7493a01f92ca22ad001f"
+      }
+    ],
+    "document_review": "The three constructor documents now describe the closed paired 8k observations, 16k success and 32k successor-budget refusal. Calendar/status reviewed; new mass packets and performance numbers are not independently qualified here.",
+    "historical_variants_D_to_I_unchanged": true,
+    "J_executable_and_receipt_pins_unchanged": true,
+    "maintenance": "Same 25 root Markdown notes; two existing scientific notes extended, active dialogue/state refreshed, one script and one rational receipt added. Retired notes and immutable receipts not recreated or changed.",
+    "constructor_acknowledgment": {
+      "commit": "6126b373",
+      "conditions_accepted": true,
+      "new_code_implemented": false,
+      "coordination": "../../audits/COORDINATION_MORSEHGP3D_V7.md"
+    }
+  }
 }
