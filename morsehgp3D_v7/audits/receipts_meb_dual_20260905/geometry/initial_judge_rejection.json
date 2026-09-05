@@ -1,0 +1,43 @@
+{
+  "status": "failed",
+  "optimization": 0,
+  "public_status": "not_claimed",
+  "gcp": "not_used",
+  "source_sets": 89,
+  "local_orders": 178,
+  "geometry_judge": "independent Fraction Gram elimination",
+  "private_prototype_only": true,
+  "product_integration": false,
+  "counts": {
+    "o2": {
+      "calls": 3430,
+      "fast_q2": 416,
+      "fast_q3": 310,
+      "fast_q4": 64,
+      "budget_refusals": 1650,
+      "shell_refusals": 40,
+      "fallbacks": 1459,
+      "certified_but_legacy_refused": 291,
+      "proposal_forms": 8509,
+      "early_legacy_no_proposal": 890,
+      "proposal_disabled": 686
+    },
+    "ubsan": {
+      "calls": 3430,
+      "fast_q2": 416,
+      "fast_q3": 310,
+      "fast_q4": 64,
+      "budget_refusals": 1650,
+      "shell_refusals": 40,
+      "fallbacks": 1459,
+      "certified_but_legacy_refused": 291,
+      "proposal_forms": 8509,
+      "early_legacy_no_proposal": 890,
+      "proposal_disabled": 686
+    }
+  },
+  "mutants": {
+    "skip_shell": "oracle.terminal.121"
+  },
+  "error": "mutant.wrong_rejection.oracle.terminal.6"
+}

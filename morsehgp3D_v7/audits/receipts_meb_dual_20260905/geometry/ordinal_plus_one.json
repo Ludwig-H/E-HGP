@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_meb_dual/ordinal_plus_one/probe"
+  ],
+  "exit_code": 0,
+  "timeout": false,
+  "wall_seconds": 0.06790408699816908,
+  "stdout_sha256": "01011986512cd5e2e98ccf8692306bb8095b8ba7d430587c93f671df5d28dffa",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "5d8e43c25f9aa374f8ce1b0968752aa923090ecc8909389c8a3d658177013e1e"
+}

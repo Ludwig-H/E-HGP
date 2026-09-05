@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_meb_dual/ubsan/probe"
+  ],
+  "exit_code": 0,
+  "timeout": false,
+  "wall_seconds": 0.006641842999670189,
+  "stdout_sha256": "1b247f6039cc7602855a86fed844ec08c82cfcb6d4562339b7d6663b1d2ec17e",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "3185d509a4ed2c4937c5f0d69c27496bfb85ee83fbadd41951f2eb731cd29dfa"
+}

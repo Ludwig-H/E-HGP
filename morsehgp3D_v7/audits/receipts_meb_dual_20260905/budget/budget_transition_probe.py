@@ -1,0 +1,244 @@
+"""Independent bounded integer budget review; never executes a C++ binary."""
+
+from __future__ import annotations
+
+import argparse
+from datetime import datetime, timezone
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[3]
+MAXIMUM = 2**64 - 1
+
+
+def require(ok: bool, reason: str) -> None:
+    if not ok:
+        raise ValueError(reason)
+
+
+def reference_charge(counter: int, limit: int, ordinal: int) -> tuple[bool, int, int]:
+    """One prospective unit per candidate, without the closed ordinal formula."""
+    attempts = 0
+    for _ in range(ordinal):
+        if counter >= limit:
+            return False, counter, attempts
+        counter += 1
+        attempts += 1
+    return True, counter, attempts
+
+
+def ordinal_transfer(counter: int, limit: int, ordinal: int) -> tuple[bool, int]:
+    if counter >= limit:
+        return False, counter
+    if ordinal > limit - counter:
+        return False, limit
+    return True, counter + ordinal
+
+
+def dual_call(counter: int, limit: int, proposal: int, proposal_limit: int,
+              ordinal: int, forms_to_certificate: int) -> dict:
+    before_c, before_p = counter, proposal
+    if counter >= limit:
+        return {"legacy": counter, "proposal": proposal, "ok": False, "certified": False,
+                "fallback": False, "reference_attempts": 0, "proposal_attempts": 0,
+                "calls_increment": 1, "pair_searches": 0}
+    attempted = 0
+    if proposal < proposal_limit:
+        for _ in range(forms_to_certificate):
+            if proposal >= proposal_limit:
+                break
+            proposal += 1
+            attempted += 1
+    certified = attempted == forms_to_certificate
+    if certified:
+        ok, counter = ordinal_transfer(counter, limit, ordinal)
+        reference_attempts = 0
+    else:
+        ok, counter, reference_attempts = reference_charge(counter, limit, ordinal)
+    require(reference_attempts <= counter - before_c and attempted == proposal - before_p,
+            "bound.increments")
+    require(reference_attempts + attempted <= counter - before_c + proposal - before_p,
+            "bound.physical_candidates")
+    return {"legacy": counter, "proposal": proposal, "ok": ok, "certified": certified,
+            "fallback": not certified, "reference_attempts": reference_attempts,
+            "proposal_attempts": attempted, "calls_increment": 1,
+            "pair_searches": int(before_p < proposal_limit)}
+
+
+def checks() -> dict:
+    tested = []
+    for ordinal in (1, 2, 4, 25, 55, 56, 220, 221, 550):
+        for remaining in sorted({0, 1, ordinal - 1, ordinal, ordinal + 1}):
+            for counter in sorted({0, 7, MAXIMUM - remaining}):
+                limit = counter + remaining
+                if limit > MAXIMUM:
+                    continue
+                expected = reference_charge(counter, limit, ordinal)
+                actual = ordinal_transfer(counter, limit, ordinal)
+                require(actual == expected[:2], "ordinal.transfer_disagreement")
+                require(0 <= actual[1] <= MAXIMUM, "ordinal.u64_domain")
+                tested.append((counter, limit, ordinal))
+    for counter, limit in ((17, 7), (MAXIMUM, MAXIMUM - 1)):
+        require(ordinal_transfer(counter, limit, 4) == (False, counter), "counter_above_limit_preserved")
+        tested.append((counter, limit, 4))
+    states, counter, proposal = [], 0, 0
+    for _ in range(4):
+        result = dual_call(counter, 12, proposal, 7, 4, 5)
+        states.append(result)
+        counter, proposal = result["legacy"], result["proposal"]
+    require([state["legacy"] for state in states] == [4, 8, 12, 12] and
+            [state["proposal"] for state in states] == [5, 7, 7, 7], "persistent.sequence")
+    require(sum(state["reference_attempts"] for state in states) == 8 and
+            sum(state["proposal_attempts"] for state in states) == 7, "persistent.physical_counts")
+    near_max = {}
+    for name, c, p, ordinal, required in (
+            ("fast_pair_exact_limit", MAXIMUM - 1, MAXIMUM - 1, 1, 1),
+            ("fast_triangle_exact_limit", MAXIMUM - 4, MAXIMUM - 5, 4, 5),
+            ("fast_triangle_insufficient_legacy", MAXIMUM - 3, MAXIMUM - 5, 4, 5),
+            ("fallback_triangle_one_proposal_left", MAXIMUM - 4, MAXIMUM - 1, 4, 5),
+            ("legacy_already_exhausted", MAXIMUM, MAXIMUM - 1, 4, 5)):
+        result = dual_call(c, MAXIMUM, p, MAXIMUM, ordinal, required)
+        near_max[name] = {"initial_legacy": c, "initial_proposal": p,
+                          "legacy_limit": MAXIMUM, "proposal_limit": MAXIMUM,
+                          "ordinal": ordinal, "forms_to_certificate": required, "expected": result}
+    require(near_max["fast_pair_exact_limit"]["expected"]["ok"] and
+            near_max["fast_triangle_exact_limit"]["expected"]["ok"], "max.fast_equal_budget")
+    refused = near_max["fast_triangle_insufficient_legacy"]["expected"]
+    require(not refused["ok"] and refused["certified"] and not refused["fallback"], "max.certificate_not_commit")
+    # Demonstrate two concrete audit corruptions; neither is attributed to the prototype.
+    expected = reference_charge(MAXIMUM - 1, MAXIMUM, 4)
+    wrapped = (MAXIMUM - 1 + 4) & MAXIMUM
+    require(wrapped <= MAXIMUM and not expected[0], "fault.wrapped_ordinal_sum")
+    reset_physical_proposal = 5 + 5
+    require(reset_physical_proposal > 7, "fault.reset_proposal_per_call")
+    combined_limits = MAXIMUM + MAXIMUM
+    require(combined_limits > MAXIMUM and combined_limits.bit_length() == 65,
+            "reporting.sum_needs_wider_integer")
+    require(len(tested) >= 120 and len(states) == 4 and len(near_max) == 5, "nonvacuity")
+    return {"closed_transfer_vs_unit_reference_cases": len(tested),
+            "ordinal_values": [1, 2, 4, 25, 55, 56, 220, 221, 550],
+            "persistent_triangle_sequence": states, "near_max_expected_transitions": near_max,
+            "combined_MAX_limits_exact": str(combined_limits),
+            "combined_MAX_limits_u64_wrapped": str(combined_limits & MAXIMUM),
+            "audit_faults_rejected": ["wrapped_c_plus_ordinal_before_guard", "Work_reset_per_local_call"],
+            "authority": "Python integer transition model, not a compiled prototype execution"}
+
+
+def review() -> dict:
+    return {
+        "verdict": "Budget mechanism statically coherent on declared internal inputs; no reachable counter overflow identified in a fresh bounded Builder attempt. The later constructor geometry gate closes the boundary gaps of the initial triangle gate. Product port remains separate.",
+        "prospective_charge": [
+            "charged_form tests P >= L_P before increment, then observes and calls form. At P=L_P-1, including MAX-1, increment reaches L_P without overflow.",
+            "A geometrically rejected candidate consumes its proposal charge. kExhausted propagates out of all small_ball loops.",
+            "The final charged candidate may finish containment/certification at P=L_P. This does not authorize another candidate attempt.",
+            "L_D already exhausted bypasses proposals and fallback. P already exhausted bypasses even extreme-pair selection and calls the F reference.",
+        ],
+        "invariants": [
+            "Across an attempt/order, delta(legacy)=A+sum(virtual charged prefixes on certified paths), where each prefix is min(R, L_D-prior), including a later logical-budget refusal, and A counts candidates attempted by F fallbacks. delta(P) is exactly proposal candidate attempts.",
+            "Thus A+P_actual <= delta(legacy)+delta(P). From fresh counters, legacy<=L_D and P<=L_P. Injected initial counts support only increment claims, not attribution of fictitious historical work.",
+            "The bound concerns support attempts, not actual q2/q3/q4 primitive constructions, instructions, distances, power tests, time, or RAM.",
+            "Per proposal: at most 55 pair distances, 1+16*25=401 support attempts, at most 17*11=187 whole-local-set power checks and 16*25*5=2000 small-set power checks, plus fixed-form predicates/finalization.",
+        ],
+        "auxiliary_counter_audit": {
+            "pivots": "From fresh consistent Work, pivots<=P. Before each pivot increment, its initial pair plus previously accepted pivot attempts have already paid at least the new pivot index; even a final pivot discovering exhaustion is covered by that slack.",
+            "certified": "Each increment follows a proposal consuming at least one charged candidate, hence certified<=P. It counts certificates found, including later legacy-budget refusals, not public fast successes.",
+            "fallback": "At fallback entry legacy<L_D. Every valid F fallback with n>=2 attempts at least one candidate, hence fallback<=legacy after the call. The pre-call increment is bounded by legacy+1<=L_D.",
+            "meb_calls": "For a productive Builder run let C be core facets and S charged chain steps. Each core has one initial local MEB and at most one terminal/failing chain MEB plus one per preceding charged step: calls<=2C+S. The run stops at its first failure.",
+            "default_caps": "C<=8,000,000 and S<=2,000,000 imply calls<=18,000,000. No MAX auxiliary counter can be reached under default caps.",
+            "max_configured_caps": "In the guarded pipeline C<=2^31-1. During Builder::run, S is at most the peak size of out.events plus one, including an append/refusal failure; the later transactional purge does not replace that peak by final size zero. A valid ForestEvent allocation uses at least 16 bytes per element (it contains i128), so on the declared 64-bit size_t target S<=floor(UINT64_MAX/16)+1. Consequently 2C+S<UINT64_MAX even when logical caps are MAX. This is an addressable-object bound, not a feasible allocation experiment.",
+            "excluded_claim": "Preloading pivots/certified/fallback/meb_calls arbitrarily at MAX is not reachable from the fresh Builder ownership contract. Unsigned wrap of such artificial diagnostic state is not presented as a product counterexample.",
+        },
+        "sum_representation": {
+            "current_prototype": "No expression adding L_D+L_P or legacy+P exists in the prototype. The cumulative C++ gate adds only tiny fixture values. No existing overflow is alleged.",
+            "port_requirement": "Report combined limits/work in u128 or exact decimal, or keep the pair of u64 fields. Two admissible MAX caps already sum to 2^65-2; the sum over at most ten orders fits 69 bits. Never evaluate the mathematical bound in u64.",
+        },
+        "compiled_evidence_read_only": {
+            "original_gate": "Eight triangle caps, four cumulative calls and one near-MAX fallback scene. The causal ChargeAfter mutant is observed at the form boundary; final counter equality alone would not detect it.",
+            "independent_geometry_campaign": "Existing root receipts geometry/normal.json and geometry/optimized.json report 3430 local calls and 1507 ordinal checks per O2/UBSan build. Each build exercises 890 early legacy refusals with L_D=0, 686 P0 calls, and 291 certificates followed by a legacy-budget refusal. The three copied-source mutants are detected. This budget review reads those receipts and their bridge/judge; it does not rerun or independently requalify that compiled campaign.",
+            "later_constructor_geometry_gate": [
+                "The captured geometry_constructor gate reports 9216 main comparisons, 123 boundary comparisons and 1507 ordinal checks. It calls the named q2/q3/q4 scenes plus ranks55/550 at (c,L_D)=(MAX-1,MAX) and (MAX-4,MAX), with P initially zero and L_P=401.",
+                "Named q2/q3 fast certificates are required in the main matrix. For those same inputs and proposal budget, propose does not read legacy c after the early c>=L_D guard. The boundary calls therefore exercise the same fast proposal statically: q2 commits at MAX-1; q3 commits at MAX-4 and obtains a certificate then logical refusal at MAX-1. The boundary gate checks terminal equality, all legacy stats and literal ball/sentinel, although it does not separately assert delta_certified in each boundary call.",
+                "Separate proposal-boundary calls use (P,L_P)=(MAX,MAX),(MAX-1,MAX),(5,4). Legacy boundaries include c=L_D and c>L_D. Thus previously mentioned lowered-limit robustness cases are also exercised. The initial triangle gate already checks a near-MAX proposal charge followed by fallback.",
+                "The Python model additionally combines both initial counters close to MAX on fast paths. Do not mislabel that combined injected state as a compiled fixture. The two overflow guards are independent; the model is arithmetic evidence and creates no new global test obligation.",
+            ],
+            "boundary_status": "The earlier missing-case list was relative to the triangle-only gate. Its legacy MAX and lowered-limit gaps are closed by the later constructor gate and are no longer current objections. Qualification/source capture of that gate is owned by the separate geometry_constructor review; this budget review reads its captured protocol and output without rerunning it.",
+        },
+        "concrete_port_contract": {
+            "version": "meb_work_accounting=reference_ordinal_plus_proposal_v1; independently identify proposal algorithm and its fixed pivot limit.",
+            "opt_in": "max_meb_proposal_supports defaults to zero. P0 follows F without pair selection. Positive P is an explicit API/CLI/receipt change, never hidden in seed or separation s.",
+            "ownership": "Create Work exactly once in the existing Builder/order attempt, beside the legacy result. Keep limits immutable for that attempt. Persist Work through every local call, success and fallback. Reset both authorities only for a new declared attempt/order.",
+            "fallback_source": "Extract/rename the pinned F reference miniball body as a no-proposal fallback using the same Builder state. Do not copy the prototype's fresh Builder(...).miniball call after replacing Builder::miniball: that can reset ownership or recurse into the proposal wrapper.",
+            "call_accounting": "Keep exactly one meb_calls increment per public local call. The fallback currently supplies its own increment; the proposal wrapper increments only on its other branches. Preserve that distinction or refactor a single entry charge explicitly.",
+            "public_fields": "Keep meb_supports as legacy/reference ordinal, add proposal attempts and its cap. If a physical reference-attempt counter A is exported, obtain it at F prospective candidate charges or by the nonnegative legacy delta of each raw F call, not by total meb_supports after fast ordinals.",
+            "diagnostics": "Name pivots, certificates found, committed fast successes, fallback calls and real reference attempts separately. A support attempt can fail before a geometric form is fully materialized.",
+            "order_scope": "Per-order work belongs to each K's Builder, including when orders overlap in pipeline scheduling. The total tower allowance is the sum of actually requested per-order limits, not one shared cap.",
+            "publication": "Add versioned schema/options/receipts and budget counters to transactional publication and invalidation. Geometric digests may remain stable; accounting receipts have new semantics. Do not inherit old physical-count performance conclusions.",
+        },
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--check-only", action="store_true")
+    args = parser.parse_args()
+    if args.check_only:
+        try:
+            result = checks()
+            print(json.dumps({"status": "completed", "python_optimization": sys.flags.optimize,
+                              "scope": "pure integer arithmetic; no source or receipt file is opened",
+                              "checks": result}, sort_keys=True))
+            return 0
+        except Exception as error:
+            print(json.dumps({"status": "failed", "error": str(error)}, sort_keys=True))
+            return 1
+    paths = [Path(__file__).resolve(), ROOT / "morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md",
+             ROOT / "build/v7_meb_dual_budget_prototype/pivot.hpp",
+             ROOT / "build/v7_meb_dual_budget_prototype/dual_budget_gate.cpp",
+             ROOT / "build/v7_meb_pivot_prototype/pivot.hpp",
+             ROOT / "build/v7_meb_dual_budget_prototype/run_20260905/receipt.json",
+             ROOT / "build/v7_meb_dual_budget_prototype/run_20260905/dependency_binding.json",
+             ROOT / "morsehgp3D_v7/audits/receipts_meb_dual_20260905/inputs/dual_pivot.hpp",
+             ROOT / "morsehgp3D_v7/audits/receipts_meb_dual_20260905/inputs/legacy_pivot.hpp",
+             ROOT / "morsehgp3D_v7/audits/receipts_meb_dual_20260905/geometry/normal.json",
+             ROOT / "morsehgp3D_v7/audits/receipts_meb_dual_20260905/geometry/optimized.json",
+             ROOT / "morsehgp3D_v7/audits/meb_dual_bridge.cpp",
+             ROOT / "morsehgp3D_v7/audits/meb_dual_oracle.py",
+             HERE.parent / "geometry_constructor/snapshots/protocol/geometry_gate.cpp",
+             HERE.parent / "geometry_constructor/snapshots/run/nominal.stdout",
+             HERE.parent / "geometry_constructor/capture_manifest.json",
+             ROOT / "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+             ROOT / "morsehgp3D_v7/src/forest/fold.hpp", ROOT / "morsehgp3D_v7/src/pipeline/run.hpp"]
+    def hashes() -> dict:
+        return {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest() for path in paths}
+    before = hashes()
+    result = {"status": "running", "utc": datetime.now(timezone.utc).isoformat(),
+              "phase": "exploration_v7_hors_registre", "backend": "cpu_reference",
+              "profile": "quantized_u16_input_only", "mode": "audit_independant_math_and_architecture",
+              "public_status": "not_claimed", "gcp": "not_used", "python_optimization": sys.flags.optimize,
+              "history": {"previous_review": "history/pre_portable_review.json",
+                          "previous_review_sha256": "8bf4347688effedc807d8a8a51f6a0b269f98c093ceeed41b127803dc0e8c9ca",
+                          "previous_source": "history/pre_portable_source.py.txt",
+                          "change": "Portable --check-only is now pure arithmetic; later captured constructor boundaries supersede the original triangle-only missing-case list."},
+              "sources_before": before, "review": review()}
+    try:
+        result["checks"] = checks()
+        result["sources_after"] = hashes()
+        require(before == result["sources_after"], "source.changed")
+        result["status"] = "completed"
+    except Exception as error:
+        result["status"] = "failed"
+        result["error"] = str(error)
+    if not args.check_only:
+        (HERE / "review.json").write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n")
+    print(f"budget review status={result['status']} optimization={sys.flags.optimize}")
+    if "error" in result:
+        print(result["error"])
+    return int(result["status"] != "completed")
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

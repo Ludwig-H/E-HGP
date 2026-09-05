@@ -1,0 +1,48 @@
+{
+  "status": "passed",
+  "optimization": 0,
+  "public_status": "not_claimed",
+  "gcp": "not_used",
+  "source_sets": 89,
+  "local_orders": 178,
+  "geometry_judge": "independent Fraction Gram elimination",
+  "private_prototype_only": true,
+  "product_integration": false,
+  "counts": {
+    "o2": {
+      "calls": 3430,
+      "fast_q2": 416,
+      "fast_q3": 310,
+      "fast_q4": 64,
+      "budget_refusals": 1650,
+      "shell_refusals": 40,
+      "fallbacks": 1459,
+      "certified_but_legacy_refused": 291,
+      "proposal_forms": 8509,
+      "early_legacy_no_proposal": 890,
+      "proposal_disabled": 686
+    },
+    "ubsan": {
+      "calls": 3430,
+      "fast_q2": 416,
+      "fast_q3": 310,
+      "fast_q4": 64,
+      "budget_refusals": 1650,
+      "shell_refusals": 40,
+      "fallbacks": 1459,
+      "certified_but_legacy_refused": 291,
+      "proposal_forms": 8509,
+      "early_legacy_no_proposal": 890,
+      "proposal_disabled": 686
+    }
+  },
+  "mutants": {
+    "skip_shell": "oracle.terminal.121",
+    "ordinal_plus_one": "oracle.terminal.6",
+    "q4_rescale_level": "oracle.q4_raw_level.84"
+  },
+  "ordinal_checks_per_build": 1507,
+  "replay_driver_sha256": "f5c277e24e077d02b3426ce7973954503d6b00c536cb329e63d368e73046716a",
+  "initial_driver_preserved": "initial_driver.py.txt",
+  "execution_not_repeated_after_judge_classification_fix": true
+}

@@ -1,0 +1,22 @@
+{
+  "positive_depfile": 1,
+  "positive_mutant_command": 1,
+  "positive_outputs": 2,
+  "rejections": [
+    "MAX_overflow",
+    "command_failed",
+    "counter_reset",
+    "counter_unpaid",
+    "duplicate_JSON",
+    "duplicate_triangle",
+    "empty",
+    "exact_claim",
+    "missing_F_dependency",
+    "missing_triangle",
+    "mutant_loses_causal_signal",
+    "mutant_wrong_exit",
+    "nominal_not_prospective",
+    "terminal_divergence"
+  ],
+  "status": "passed"
+}

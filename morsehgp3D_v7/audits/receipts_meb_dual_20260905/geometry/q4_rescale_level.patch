@@ -1,0 +1,11 @@
+--- legacy
++++ legacy
+@@ -159,6 +159,8 @@
+   } else {
+     ball.key = ball_key_reduce(q4_ball_form(candidate.four));
+     ball.level = q4_level_raw(candidate.four);
++    for (size_t j = 2; j > 0; --j) ball.level.num[j] = (ball.level.num[j] << 1) | (ball.level.num[j - 1] >> 63);
++    ball.level.num[0] <<= 1; ball.level.den *= 2;
+   }
+   return ball;
+ }

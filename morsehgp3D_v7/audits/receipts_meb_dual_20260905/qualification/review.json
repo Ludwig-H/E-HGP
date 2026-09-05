@@ -1,0 +1,165 @@
+{
+  "schema": "mhgp7-dual-budget-triangle-qualification-v1",
+  "observed_utc": "2026-09-05T11:32:05.295895+00:00",
+  "status": "closed_triangle_budget_gate_independently_verified",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "verdict_fr": "Le reçu constructeur fermé du prototype privé confirme la charge prospective sur le triangle et les budgets testés. Le nominal passe, le mutant réel charge-après conserve les mêmes terminaux mais déclenche 28 violations causales et sort4. Aucun défaut identifié dans cette contrelecture. Ce verdict ne qualifie ni q3/q4 général ni un raccord produit.",
+  "receipt": {
+    "sha256": "a7dc00201920a678c42e75436cb09ecf8a95b63dd660e587b814cdc0b4a1ea0a",
+    "started_at": "2026-09-05T10:41:38.718271+00:00",
+    "finished_at": "2026-09-05T10:41:41.788699+00:00",
+    "combined_deadline_seconds": 60,
+    "commands": {
+      "charge_after_mutant": 4,
+      "compile": 0,
+      "compiler": 0,
+      "extra_argument": 2,
+      "nominal": 0,
+      "unknown_argument": 2
+    },
+    "artifacts": 38,
+    "gate_binary_sha256": "6a96390fac144fd8f02f7316f7e8d20e515ca61d8711bd66a7692a2c41beccd6",
+    "gate_binary_bytes": 79080,
+    "source_authority_pins_before_after": 61,
+    "actual_MMD_local_dependencies": 20,
+    "observed_live_pins": 62,
+    "compile_mode": "GNU13.3.0 C++20 -O2 -Wall -Wextra -Wpedantic -Werror -pthread; no MHGP7_TESTING, no sanitizer",
+    "CPU_affinity_recorded": [
+      0
+    ],
+    "compiler_flags_and_loader_overrides": "recorded absent; C locale, UTC",
+    "binding": "Source, compiler, MMD and binary boundaries recorded; not hermetic attestation."
+  },
+  "triangle_domain": {
+    "coordinates": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        2,
+        0,
+        2
+      ]
+    ],
+    "n": 3,
+    "P": [
+      0,
+      1,
+      4,
+      5
+    ],
+    "L": [
+      1,
+      4
+    ],
+    "crossed_cases_per_invocation": 8,
+    "cumulative_calls_per_invocation": 4,
+    "near_MAX_case_per_invocation": 1,
+    "local_comparisons_per_invocation_inferred_from_pinned_gate": 13,
+    "reference": "Included F silent_detail::Builder.miniball on the same triangle; independent state for each arm",
+    "checked_by_compiled_gate": [
+      "boolean terminal",
+      "status and reason string",
+      "all legacy SilentIncidenceStats fields",
+      "literal key, q, support array, level numerator limbs and denominator",
+      "empty event payload",
+      "sentinel preservation on budget refusal"
+    ],
+    "q4_scenes_executed": 0,
+    "geometric_oracle_independent_of_F": "not supplied by this receipt"
+  },
+  "causal_result": {
+    "nominal_violations": 0,
+    "charge_after_violations": 28,
+    "mutant_exit_code": 4,
+    "mutant_terminal_and_counter_identity": true,
+    "prospective_observer": "pivot.hpp:52–55 increments before observer then form; mutant moves only that increment after form. Gate:102–113 checks the effective count at that boundary and unchanged legacy state.",
+    "same_terminal_judge": "dual_budget_gate.cpp:116–126 and return:251 apply to both template instantiations; no forced mutant exit or MHGP7_TESTING bypass.",
+    "distribution": "20 violations in the eight P/L rows,7 from cumulative proposal forms and1 at the injected MAX boundary; latter two inferred from pinned gate and final total.",
+    "P5_L1": "A certificate is found with P5 but legacy L1 still refuses; certified is not a successful public terminal."
+  },
+  "cumulative_and_boundary": {
+    "P": 7,
+    "L": 12,
+    "proposal_counts_checked_by_gate": [
+      5,
+      7,
+      7,
+      7
+    ],
+    "legacy_counts_checked_by_gate": [
+      4,
+      8,
+      12,
+      12
+    ],
+    "fallback_counts_checked_by_gate": [
+      0,
+      1,
+      2,
+      2
+    ],
+    "pair_selection_counts_checked_by_gate": [
+      1,
+      2,
+      2,
+      2
+    ],
+    "interpretation": "Second call exhausts P within small_ball; third falls back without pair search; fourth refuses legacy cap before proposal or new fallback. Work persists across all four calls.",
+    "near_MAX": "Injected proposal MAX-1 and legacy MAX-4 counters reach MAX by1 and4 respectively, without unsigned overflow; subsequent proposed form is not attempted.",
+    "work_bound_scope": "Starting from zero counters, this triangle uses7 proposal forms and8 F fallback candidates,15 <= legacy12 + proposal7 =19. These are candidates, not pair-selection work, power tests, time, memory or tower-wide cost.",
+    "raw_trace_limit": "The intermediate arrays and F fallback total are enforced or derived by the captured C++ fixture; stdout contains cumulative summary lines, not a per-call or per-F-form trace."
+  },
+  "protocol_scope": {
+    "runner": "captured inert run_dual_budget.py.txt; independent reader does not import or execute it",
+    "preparation_selftests": "Seven constructor Python mock-based tests retained as historical protocol evidence; not rerun or counted as C++ qualification by the auditor.",
+    "deadline_cleanup": "Runner source enforces create-only output,60s combined deadline, owned PID/PGID cleanup; actual six command records are terminal. Mock timeout/interrupt checks do not qualify all kernel failure paths.",
+    "README_and_header_noncompiled_wording": "Historical preparation bytes remain immutable; their initial status is superseded for the closed triangle gate only.",
+    "geometry_plan_status_at_final_read": "Only geometry_plan/{PROTOCOL.md,pins.json,additional_scenes.json}; only run_20260905/receipt.json exists under prototype. No completed geometry gate claimed.",
+    "geometry_plan_new_receipt_detected": false
+  },
+  "preservation": {
+    "capture_manifest": "capture_manifest.json",
+    "entries": 69,
+    "new_byte_exact_copies": 54,
+    "references_to_existing_or_identical_bytes": 14,
+    "private_binary_copied": false,
+    "dual_header_reference": "../inputs/dual_pivot.hpp",
+    "legacy_header_reference": "../inputs/legacy_pivot.hpp",
+    "source_files_and_protocols_are_inert_read_evidence": "No constructor runner or C++ gate executed by inspector."
+  },
+  "checks": {
+    "portable_reader": "verify_triangle.py",
+    "normal": "captured_normal.json",
+    "optimized": "captured_optimized.json",
+    "live": "live.json",
+    "command_ledger": "inspector_checks.json",
+    "positive_output_checks": 2,
+    "positive_depfile_checks": 1,
+    "positive_mutant_command_checks": 1,
+    "rejections_per_python_mode": 14,
+    "normal_optimized_returncodes": 0
+  },
+  "limits": [
+    "One triangle, eight P/L cases, four cumulative calls and one injected UINT64 boundary per invocation; no q4 scene.",
+    "Terminals, legacy statistics and literal balls are checked by the compiled fixture against the included F Builder; no independent geometric oracle is supplied by this reader.",
+    "Intermediate cumulative states and the fallback-candidate total are enforced or derived in the gate source; stdout is not a per-call/per-F-form trace.",
+    "MMD closes local non-system sources, not the toolchain and system-header environment hermetically.",
+    "The accounting caps support candidates, not elapsed time, pair search, power tests, memory, or total tower cost.",
+    "The retained README and preparation describe their earlier noncompiled state, superseded only for this triangle gate by the closed receipt."
+  ],
+  "auditor_build_or_Cpp_runs": 0,
+  "git_operations": 0,
+  "GCP": "non utilisé"
+}

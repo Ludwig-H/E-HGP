@@ -1,0 +1,68 @@
+{
+  "observed_utc": "2026-09-05T11:30:36.899759+00:00",
+  "script_sha256": "32919613b1c7858551f43bd225acc20fe3a7f9934f917afd54ad102d637d2e59",
+  "runs": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_meb_dual_20260905/qualification/verify_triangle.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "captured_normal.json",
+      "output_sha256": "25daf2f0659565e5016a0abfaba20b1586072587e7b3d8233d7f4b5a5e0fba64"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_meb_dual_20260905/qualification/verify_triangle.py",
+        "--self-test"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "selftest_normal.json",
+      "output_sha256": "486a1734e2e5edaabd9a2f4e6352bbea8162f06d019a685e1201ed738b7d012a"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_meb_dual_20260905/qualification/verify_triangle.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "captured_optimized.json",
+      "output_sha256": "25daf2f0659565e5016a0abfaba20b1586072587e7b3d8233d7f4b5a5e0fba64"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_meb_dual_20260905/qualification/verify_triangle.py",
+        "--self-test"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "selftest_optimized.json",
+      "output_sha256": "486a1734e2e5edaabd9a2f4e6352bbea8162f06d019a685e1201ed738b7d012a"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_meb_dual_20260905/qualification/verify_triangle.py",
+        "--live"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "live_optimized.json",
+      "output_sha256": "cb54e6e0d6b9188a6e350187cb7a8313cf14971672368b748394c13776b010e6"
+    }
+  ],
+  "engine_runs": 0
+}

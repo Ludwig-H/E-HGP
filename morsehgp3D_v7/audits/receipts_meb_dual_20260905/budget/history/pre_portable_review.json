@@ -1,0 +1,261 @@
+{
+  "status": "completed",
+  "utc": "2026-09-05T11:40:29.489828+00:00",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "gcp": "not_used",
+  "python_optimization": 0,
+  "sources_before": {
+    "morsehgp3D_v7/audits/receipts_meb_dual_20260905/budget/budget_transition_probe.py": "6105f473ef02a2840b2baa4dbaa9f495f1df2553a9a872bdb842592ace20f128",
+    "morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md": "365e7a5dcde5a6d6fcd7d43e00d2f58f86efbf42279a779c62c7eaac7b54ec25",
+    "build/v7_meb_dual_budget_prototype/pivot.hpp": "0645aa00add4d4cb387861b8f6dbd4fa0734ba5b4f3ad712caad8886b3541c2d",
+    "build/v7_meb_dual_budget_prototype/dual_budget_gate.cpp": "6f748dc8dda7a6b0410e0c1eac31584f044fc58e891add3532c0f79d25993dda",
+    "build/v7_meb_pivot_prototype/pivot.hpp": "d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5",
+    "build/v7_meb_dual_budget_prototype/run_20260905/receipt.json": "a7dc00201920a678c42e75436cb09ecf8a95b63dd660e587b814cdc0b4a1ea0a",
+    "build/v7_meb_dual_budget_prototype/run_20260905/dependency_binding.json": "1ce308a583b619ea2711d668b8bdfe307cb76caae9afee63d762b5a5eaf2f98e",
+    "morsehgp3D_v7/audits/receipts_meb_dual_20260905/inputs/dual_pivot.hpp": "0645aa00add4d4cb387861b8f6dbd4fa0734ba5b4f3ad712caad8886b3541c2d",
+    "morsehgp3D_v7/audits/receipts_meb_dual_20260905/inputs/legacy_pivot.hpp": "d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5",
+    "morsehgp3D_v7/audits/receipts_meb_dual_20260905/geometry/normal.json": "8afe1c57ae3dc1fca3c87f8b8e6a03b41d61b51f1fa38792d4fde5089f581eeb",
+    "morsehgp3D_v7/audits/receipts_meb_dual_20260905/geometry/optimized.json": "851ea40daae50832b18ba6a81398806c50ed08b9cdfdbfd7e5ac335450288403",
+    "morsehgp3D_v7/audits/meb_dual_bridge.cpp": "91880523987eb0dae952c3123f9baf4bdc33974cfe29ecfed649b787de20f23f",
+    "morsehgp3D_v7/audits/meb_dual_oracle.py": "f5c277e24e077d02b3426ce7973954503d6b00c536cb329e63d368e73046716a",
+    "morsehgp3D_v7/src/forest/silent_incidence.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76",
+    "morsehgp3D_v7/src/forest/fold.hpp": "b11d02c86db5f8ae8cb12965f12e425548f9f049fb4626259790b32cd584928c",
+    "morsehgp3D_v7/src/pipeline/run.hpp": "1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c"
+  },
+  "review": {
+    "verdict": "Budget mechanism statically coherent on declared internal inputs; no reachable counter overflow identified in a fresh bounded Builder attempt. Product port and missing compiled boundary cases remain separate.",
+    "prospective_charge": [
+      "charged_form tests P >= L_P before increment, then observes and calls form. At P=L_P-1, including MAX-1, increment reaches L_P without overflow.",
+      "A geometrically rejected candidate consumes its proposal charge. kExhausted propagates out of all small_ball loops.",
+      "The final charged candidate may finish containment/certification at P=L_P. This does not authorize another candidate attempt.",
+      "L_D already exhausted bypasses proposals and fallback. P already exhausted bypasses even extreme-pair selection and calls the F reference."
+    ],
+    "invariants": [
+      "Across an attempt/order, delta(legacy)=A+sum(virtual charged prefixes on certified paths), where each prefix is min(R, L_D-prior), including a later logical-budget refusal, and A counts candidates attempted by F fallbacks. delta(P) is exactly proposal candidate attempts.",
+      "Thus A+P_actual <= delta(legacy)+delta(P). From fresh counters, legacy<=L_D and P<=L_P. Injected initial counts support only increment claims, not attribution of fictitious historical work.",
+      "The bound concerns support attempts, not actual q2/q3/q4 primitive constructions, instructions, distances, power tests, time, or RAM.",
+      "Per proposal: at most 55 pair distances, 1+16*25=401 support attempts, at most 17*11=187 whole-local-set power checks and 16*25*5=2000 small-set power checks, plus fixed-form predicates/finalization."
+    ],
+    "auxiliary_counter_audit": {
+      "pivots": "From fresh consistent Work, pivots<=P. Before each pivot increment, its initial pair plus previously accepted pivot attempts have already paid at least the new pivot index; even a final pivot discovering exhaustion is covered by that slack.",
+      "certified": "Each increment follows a proposal consuming at least one charged candidate, hence certified<=P. It counts certificates found, including later legacy-budget refusals, not public fast successes.",
+      "fallback": "At fallback entry legacy<L_D. Every valid F fallback with n>=2 attempts at least one candidate, hence fallback<=legacy after the call. The pre-call increment is bounded by legacy+1<=L_D.",
+      "meb_calls": "For a productive Builder run let C be core facets and S charged chain steps. Each core has one initial local MEB and at most one terminal/failing chain MEB plus one per preceding charged step: calls<=2C+S. The run stops at its first failure.",
+      "default_caps": "C<=8,000,000 and S<=2,000,000 imply calls<=18,000,000. No MAX auxiliary counter can be reached under default caps.",
+      "max_configured_caps": "In the guarded pipeline C<=2^31-1. During Builder::run, S is at most the peak size of out.events plus one, including an append/refusal failure; the later transactional purge does not replace that peak by final size zero. A valid ForestEvent allocation uses at least 16 bytes per element (it contains i128), so on the declared 64-bit size_t target S<=floor(UINT64_MAX/16)+1. Consequently 2C+S<UINT64_MAX even when logical caps are MAX. This is an addressable-object bound, not a feasible allocation experiment.",
+      "excluded_claim": "Preloading pivots/certified/fallback/meb_calls arbitrarily at MAX is not reachable from the fresh Builder ownership contract. Unsigned wrap of such artificial diagnostic state is not presented as a product counterexample."
+    },
+    "sum_representation": {
+      "current_prototype": "No expression adding L_D+L_P or legacy+P exists in the prototype. The cumulative C++ gate adds only tiny fixture values. No existing overflow is alleged.",
+      "port_requirement": "Report combined limits/work in u128 or exact decimal, or keep the pair of u64 fields. Two admissible MAX caps already sum to 2^65-2; the sum over at most ten orders fits 69 bits. Never evaluate the mathematical bound in u64."
+    },
+    "compiled_evidence_read_only": {
+      "original_gate": "Eight triangle caps, four cumulative calls and one near-MAX fallback scene. The causal ChargeAfter mutant is observed at the form boundary; final counter equality alone would not detect it.",
+      "independent_geometry_campaign": "Existing root receipts geometry/normal.json and geometry/optimized.json report 3430 local calls and 1507 ordinal checks per O2/UBSan build. Each build exercises 890 early legacy refusals with L_D=0, 686 P0 calls, and 291 certificates followed by a legacy-budget refusal. The three copied-source mutants are detected. This budget review reads those receipts and their bridge/judge; it does not rerun or independently requalify that compiled campaign.",
+      "missing_boundary_teeth": [
+        "Fast q2 commit at legacy=MAX-1, L_D=MAX, P=MAX-1, L_P=MAX, ordinal1.",
+        "Fast regular q3 commit at legacy=MAX-4 and five proposal charges ending at MAX; exact remaining=ordinal4.",
+        "Fast regular q3 certificate but logical refusal at legacy=MAX-3; legacy becomes MAX, ball stays sentinel, certified increments, fallback does not.",
+        "Artificially lowered c>L_D / P>L_P preservation is an optional local robustness case, outside the immutable-limit/fresh-ownership product contract. The compiled geometry bridge initializes c=P=0, so it does not close the three injected near-MAX fast-path cases above. The Python transition model covers those arithmetic states; it does not claim their compiled execution."
+      ],
+      "boundary_status": "L_D=0 and ordinary certified-then-legacy-refused behavior are exercised and are no longer objections. The remaining near-MAX fast-path cases are a bounded qualification gap, not a demonstrated defect or a request to extend the completed campaign."
+    },
+    "concrete_port_contract": {
+      "version": "meb_work_accounting=reference_ordinal_plus_proposal_v1; independently identify proposal algorithm and its fixed pivot limit.",
+      "opt_in": "max_meb_proposal_supports defaults to zero. P0 follows F without pair selection. Positive P is an explicit API/CLI/receipt change, never hidden in seed or separation s.",
+      "ownership": "Create Work exactly once in the existing Builder/order attempt, beside the legacy result. Keep limits immutable for that attempt. Persist Work through every local call, success and fallback. Reset both authorities only for a new declared attempt/order.",
+      "fallback_source": "Extract/rename the pinned F reference miniball body as a no-proposal fallback using the same Builder state. Do not copy the prototype's fresh Builder(...).miniball call after replacing Builder::miniball: that can reset ownership or recurse into the proposal wrapper.",
+      "call_accounting": "Keep exactly one meb_calls increment per public local call. The fallback currently supplies its own increment; the proposal wrapper increments only on its other branches. Preserve that distinction or refactor a single entry charge explicitly.",
+      "public_fields": "Keep meb_supports as legacy/reference ordinal, add proposal attempts and its cap. If a physical reference-attempt counter A is exported, obtain it at F prospective candidate charges or by the nonnegative legacy delta of each raw F call, not by total meb_supports after fast ordinals.",
+      "diagnostics": "Name pivots, certificates found, committed fast successes, fallback calls and real reference attempts separately. A support attempt can fail before a geometric form is fully materialized.",
+      "order_scope": "Per-order work belongs to each K's Builder, including when orders overlap in pipeline scheduling. The total tower allowance is the sum of actually requested per-order limits, not one shared cap.",
+      "publication": "Add versioned schema/options/receipts and budget counters to transactional publication and invalidation. Geometric digests may remain stable; accounting receipts have new semantics. Do not inherit old physical-count performance conclusions."
+    }
+  },
+  "checks": {
+    "closed_transfer_vs_unit_reference_cases": 128,
+    "ordinal_values": [
+      1,
+      2,
+      4,
+      25,
+      55,
+      56,
+      220,
+      221,
+      550
+    ],
+    "persistent_triangle_sequence": [
+      {
+        "legacy": 4,
+        "proposal": 5,
+        "ok": true,
+        "certified": true,
+        "fallback": false,
+        "reference_attempts": 0,
+        "proposal_attempts": 5,
+        "calls_increment": 1,
+        "pair_searches": 1
+      },
+      {
+        "legacy": 8,
+        "proposal": 7,
+        "ok": true,
+        "certified": false,
+        "fallback": true,
+        "reference_attempts": 4,
+        "proposal_attempts": 2,
+        "calls_increment": 1,
+        "pair_searches": 1
+      },
+      {
+        "legacy": 12,
+        "proposal": 7,
+        "ok": true,
+        "certified": false,
+        "fallback": true,
+        "reference_attempts": 4,
+        "proposal_attempts": 0,
+        "calls_increment": 1,
+        "pair_searches": 0
+      },
+      {
+        "legacy": 12,
+        "proposal": 7,
+        "ok": false,
+        "certified": false,
+        "fallback": false,
+        "reference_attempts": 0,
+        "proposal_attempts": 0,
+        "calls_increment": 1,
+        "pair_searches": 0
+      }
+    ],
+    "near_max_expected_transitions": {
+      "fast_pair_exact_limit": {
+        "initial_legacy": 18446744073709551614,
+        "initial_proposal": 18446744073709551614,
+        "legacy_limit": 18446744073709551615,
+        "proposal_limit": 18446744073709551615,
+        "ordinal": 1,
+        "forms_to_certificate": 1,
+        "expected": {
+          "legacy": 18446744073709551615,
+          "proposal": 18446744073709551615,
+          "ok": true,
+          "certified": true,
+          "fallback": false,
+          "reference_attempts": 0,
+          "proposal_attempts": 1,
+          "calls_increment": 1,
+          "pair_searches": 1
+        }
+      },
+      "fast_triangle_exact_limit": {
+        "initial_legacy": 18446744073709551611,
+        "initial_proposal": 18446744073709551610,
+        "legacy_limit": 18446744073709551615,
+        "proposal_limit": 18446744073709551615,
+        "ordinal": 4,
+        "forms_to_certificate": 5,
+        "expected": {
+          "legacy": 18446744073709551615,
+          "proposal": 18446744073709551615,
+          "ok": true,
+          "certified": true,
+          "fallback": false,
+          "reference_attempts": 0,
+          "proposal_attempts": 5,
+          "calls_increment": 1,
+          "pair_searches": 1
+        }
+      },
+      "fast_triangle_insufficient_legacy": {
+        "initial_legacy": 18446744073709551612,
+        "initial_proposal": 18446744073709551610,
+        "legacy_limit": 18446744073709551615,
+        "proposal_limit": 18446744073709551615,
+        "ordinal": 4,
+        "forms_to_certificate": 5,
+        "expected": {
+          "legacy": 18446744073709551615,
+          "proposal": 18446744073709551615,
+          "ok": false,
+          "certified": true,
+          "fallback": false,
+          "reference_attempts": 0,
+          "proposal_attempts": 5,
+          "calls_increment": 1,
+          "pair_searches": 1
+        }
+      },
+      "fallback_triangle_one_proposal_left": {
+        "initial_legacy": 18446744073709551611,
+        "initial_proposal": 18446744073709551614,
+        "legacy_limit": 18446744073709551615,
+        "proposal_limit": 18446744073709551615,
+        "ordinal": 4,
+        "forms_to_certificate": 5,
+        "expected": {
+          "legacy": 18446744073709551615,
+          "proposal": 18446744073709551615,
+          "ok": true,
+          "certified": false,
+          "fallback": true,
+          "reference_attempts": 4,
+          "proposal_attempts": 1,
+          "calls_increment": 1,
+          "pair_searches": 1
+        }
+      },
+      "legacy_already_exhausted": {
+        "initial_legacy": 18446744073709551615,
+        "initial_proposal": 18446744073709551614,
+        "legacy_limit": 18446744073709551615,
+        "proposal_limit": 18446744073709551615,
+        "ordinal": 4,
+        "forms_to_certificate": 5,
+        "expected": {
+          "legacy": 18446744073709551615,
+          "proposal": 18446744073709551614,
+          "ok": false,
+          "certified": false,
+          "fallback": false,
+          "reference_attempts": 0,
+          "proposal_attempts": 0,
+          "calls_increment": 1,
+          "pair_searches": 0
+        }
+      }
+    },
+    "combined_MAX_limits_exact": "36893488147419103230",
+    "combined_MAX_limits_u64_wrapped": "18446744073709551614",
+    "audit_faults_rejected": [
+      "wrapped_c_plus_ordinal_before_guard",
+      "Work_reset_per_local_call"
+    ],
+    "authority": "Python integer transition model, not a compiled prototype execution"
+  },
+  "sources_after": {
+    "morsehgp3D_v7/audits/receipts_meb_dual_20260905/budget/budget_transition_probe.py": "6105f473ef02a2840b2baa4dbaa9f495f1df2553a9a872bdb842592ace20f128",
+    "morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md": "365e7a5dcde5a6d6fcd7d43e00d2f58f86efbf42279a779c62c7eaac7b54ec25",
+    "build/v7_meb_dual_budget_prototype/pivot.hpp": "0645aa00add4d4cb387861b8f6dbd4fa0734ba5b4f3ad712caad8886b3541c2d",
+    "build/v7_meb_dual_budget_prototype/dual_budget_gate.cpp": "6f748dc8dda7a6b0410e0c1eac31584f044fc58e891add3532c0f79d25993dda",
+    "build/v7_meb_pivot_prototype/pivot.hpp": "d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5",
+    "build/v7_meb_dual_budget_prototype/run_20260905/receipt.json": "a7dc00201920a678c42e75436cb09ecf8a95b63dd660e587b814cdc0b4a1ea0a",
+    "build/v7_meb_dual_budget_prototype/run_20260905/dependency_binding.json": "1ce308a583b619ea2711d668b8bdfe307cb76caae9afee63d762b5a5eaf2f98e",
+    "morsehgp3D_v7/audits/receipts_meb_dual_20260905/inputs/dual_pivot.hpp": "0645aa00add4d4cb387861b8f6dbd4fa0734ba5b4f3ad712caad8886b3541c2d",
+    "morsehgp3D_v7/audits/receipts_meb_dual_20260905/inputs/legacy_pivot.hpp": "d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5",
+    "morsehgp3D_v7/audits/receipts_meb_dual_20260905/geometry/normal.json": "8afe1c57ae3dc1fca3c87f8b8e6a03b41d61b51f1fa38792d4fde5089f581eeb",
+    "morsehgp3D_v7/audits/receipts_meb_dual_20260905/geometry/optimized.json": "851ea40daae50832b18ba6a81398806c50ed08b9cdfdbfd7e5ac335450288403",
+    "morsehgp3D_v7/audits/meb_dual_bridge.cpp": "91880523987eb0dae952c3123f9baf4bdc33974cfe29ecfed649b787de20f23f",
+    "morsehgp3D_v7/audits/meb_dual_oracle.py": "f5c277e24e077d02b3426ce7973954503d6b00c536cb329e63d368e73046716a",
+    "morsehgp3D_v7/src/forest/silent_incidence.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76",
+    "morsehgp3D_v7/src/forest/fold.hpp": "b11d02c86db5f8ae8cb12965f12e425548f9f049fb4626259790b32cd584928c",
+    "morsehgp3D_v7/src/pipeline/run.hpp": "1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c"
+  }
+}

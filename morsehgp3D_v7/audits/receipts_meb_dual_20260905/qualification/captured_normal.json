@@ -1,0 +1,201 @@
+{
+  "GCP": "non utilis\u00e9",
+  "auditor_Cpp_build_or_engine_runs": 0,
+  "backend": "cpu_reference",
+  "capture_sha256": "21d779b2bc2e05abba91a9703b140e7b29bed55b3c9b6f706d3593771506c379",
+  "commands": {
+    "charge_after_mutant": 4,
+    "compile": 0,
+    "compiler": 0,
+    "extra_argument": 2,
+    "nominal": 0,
+    "unknown_argument": 2
+  },
+  "finished_at": "2026-09-05T10:41:41.788699+00:00",
+  "geometry_gate_status": "preparation_only_in_captured_protocol",
+  "limits": [
+    "One triangle, eight P/L cases, four cumulative calls and one injected UINT64 boundary per invocation; no q4 scene.",
+    "Terminals, legacy statistics and literal balls are checked by the compiled fixture against the included F Builder; no independent geometric oracle is supplied by this reader.",
+    "Intermediate cumulative states and the fallback-candidate total are enforced or derived in the gate source; stdout is not a per-call/per-F-form trace.",
+    "MMD closes local non-system sources, not the toolchain and system-header environment hermetically.",
+    "The accounting caps support candidates, not elapsed time, pair search, power tests, memory, or total tower cost.",
+    "The retained README and preparation describe their earlier noncompiled state, superseded only for this triangle gate by the closed receipt."
+  ],
+  "local": {
+    "performed": false
+  },
+  "local_compile_dependencies": 20,
+  "mode": "audit_independant_math_and_architecture",
+  "nominal_and_mutant": {
+    "charge_after_mutant": {
+      "cumulative_calls": 4,
+      "near_MAX_cases": 1,
+      "prospective_violations": 28,
+      "triangle_cases": 8,
+      "triangle_rows": [
+        {
+          "L": 1,
+          "P": 0,
+          "fallback": 1,
+          "legacy": 1,
+          "proposal_forms": 0,
+          "prospective_violations": 0,
+          "terminal_equal": 1
+        },
+        {
+          "L": 4,
+          "P": 0,
+          "fallback": 1,
+          "legacy": 4,
+          "proposal_forms": 0,
+          "prospective_violations": 0,
+          "terminal_equal": 1
+        },
+        {
+          "L": 1,
+          "P": 1,
+          "fallback": 1,
+          "legacy": 1,
+          "proposal_forms": 1,
+          "prospective_violations": 1,
+          "terminal_equal": 1
+        },
+        {
+          "L": 4,
+          "P": 1,
+          "fallback": 1,
+          "legacy": 4,
+          "proposal_forms": 1,
+          "prospective_violations": 1,
+          "terminal_equal": 1
+        },
+        {
+          "L": 1,
+          "P": 4,
+          "fallback": 1,
+          "legacy": 1,
+          "proposal_forms": 4,
+          "prospective_violations": 4,
+          "terminal_equal": 1
+        },
+        {
+          "L": 4,
+          "P": 4,
+          "fallback": 1,
+          "legacy": 4,
+          "proposal_forms": 4,
+          "prospective_violations": 4,
+          "terminal_equal": 1
+        },
+        {
+          "L": 1,
+          "P": 5,
+          "fallback": 0,
+          "legacy": 1,
+          "proposal_forms": 5,
+          "prospective_violations": 5,
+          "terminal_equal": 1
+        },
+        {
+          "L": 4,
+          "P": 5,
+          "fallback": 0,
+          "legacy": 4,
+          "proposal_forms": 5,
+          "prospective_violations": 5,
+          "terminal_equal": 1
+        }
+      ]
+    },
+    "nominal": {
+      "cumulative_calls": 4,
+      "near_MAX_cases": 1,
+      "prospective_violations": 0,
+      "triangle_cases": 8,
+      "triangle_rows": [
+        {
+          "L": 1,
+          "P": 0,
+          "fallback": 1,
+          "legacy": 1,
+          "proposal_forms": 0,
+          "prospective_violations": 0,
+          "terminal_equal": 1
+        },
+        {
+          "L": 4,
+          "P": 0,
+          "fallback": 1,
+          "legacy": 4,
+          "proposal_forms": 0,
+          "prospective_violations": 0,
+          "terminal_equal": 1
+        },
+        {
+          "L": 1,
+          "P": 1,
+          "fallback": 1,
+          "legacy": 1,
+          "proposal_forms": 1,
+          "prospective_violations": 0,
+          "terminal_equal": 1
+        },
+        {
+          "L": 4,
+          "P": 1,
+          "fallback": 1,
+          "legacy": 4,
+          "proposal_forms": 1,
+          "prospective_violations": 0,
+          "terminal_equal": 1
+        },
+        {
+          "L": 1,
+          "P": 4,
+          "fallback": 1,
+          "legacy": 1,
+          "proposal_forms": 4,
+          "prospective_violations": 0,
+          "terminal_equal": 1
+        },
+        {
+          "L": 4,
+          "P": 4,
+          "fallback": 1,
+          "legacy": 4,
+          "proposal_forms": 4,
+          "prospective_violations": 0,
+          "terminal_equal": 1
+        },
+        {
+          "L": 1,
+          "P": 5,
+          "fallback": 0,
+          "legacy": 1,
+          "proposal_forms": 5,
+          "prospective_violations": 0,
+          "terminal_equal": 1
+        },
+        {
+          "L": 4,
+          "P": 5,
+          "fallback": 0,
+          "legacy": 4,
+          "proposal_forms": 5,
+          "prospective_violations": 0,
+          "terminal_equal": 1
+        }
+      ]
+    }
+  },
+  "phase": "exploration_v7_hors_registre",
+  "preserved_artifacts_excluding_binary": 37,
+  "private_binary_preservation": "hash_only_not_copied",
+  "profile": "quantized_u16_input_only",
+  "public_status": "not_claimed",
+  "schema": "mhgp7-dual-budget-independent-review-v1",
+  "source_boundary_binding": "recorded_not_hermetic",
+  "sources_and_authorities": 61,
+  "started_at": "2026-09-05T10:41:38.718271+00:00",
+  "status": "closed_triangle_budget_gate_verified"
+}

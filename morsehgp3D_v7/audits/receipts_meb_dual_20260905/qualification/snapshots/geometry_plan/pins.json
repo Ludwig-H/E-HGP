@@ -1,0 +1,30 @@
+{
+  "status": "design_authorities_only_future_gate_and_runner_not_written",
+  "files_relative_to_repository": {
+    "build/v7_meb_dual_budget_prototype/pivot.hpp": "0645aa00add4d4cb387861b8f6dbd4fa0734ba5b4f3ad712caad8886b3541c2d",
+    "build/v7_meb_dual_budget_prototype/dual_budget_gate.cpp": "6f748dc8dda7a6b0410e0c1eac31584f044fc58e891add3532c0f79d25993dda",
+    "build/v7_meb_dual_budget_prototype/run_dual_budget.py": "329ef731ed48002501999b1013edfeb2645091526d0a2cb7e15f3e28ad956c99",
+    "build/v7_meb_dual_budget_prototype/run_20260905/receipt.json": "a7dc00201920a678c42e75436cb09ecf8a95b63dd660e587b814cdc0b4a1ea0a",
+    "build/v7_meb_dual_budget_prototype/run_20260905/nominal.stdout": "6a5842e1cd9230976e8d2c59a762e78cd09ced82bd02bbcf7728fc337d7f037d",
+    "build/v7_meb_dual_budget_prototype/run_20260905/charge_after_mutant.stdout": "16a004ae32bf2df75bd804ffd97637f2cc3ddd26d17b5b2823b265a33616272b",
+    "build/v7_meb_pivot_prototype/pivot.hpp": "d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5",
+    "build/v7_meb_pivot_prototype/probe.cpp": "42f5cde4a168bcf2931064f5a727ac010afa9e68a1854b119624a2da430ea221",
+    "build/v7_meb_pivot_prototype/run_probe.py": "3683dc3c42273e87d6708f683790713c5f136dad762dc04beddcd6b58808f8f8",
+    "build/v7_f_build_20260905/build_D.json": "522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4",
+    "build/v7_f_qualification/mhgp7": "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85",
+    "morsehgp3D_v7/tests/meb_lazy_gate.cpp": "242513ee8d5d3a0d531fad7cfcc9a01556da24633da07a1d0cbee706f43efdc5",
+    "morsehgp3D_v7/docs/PROPOSITION_MEB_ET_BUDGETS.md": "365e7a5dcde5a6d6fcd7d43e00d2f58f86efbf42279a779c62c7eaac7b54ec25",
+    "morsehgp3D_v7/src/forest/silent_incidence.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76",
+    "morsehgp3D_v7/src/lanes/q2.hpp": "11049293b7ad2f7139e1699c11b2506e8af2c11a04f22dc951f33ba10406c52f",
+    "morsehgp3D_v7/src/lanes/q3.hpp": "4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe",
+    "morsehgp3D_v7/src/lanes/q4.hpp": "58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a",
+    "morsehgp3D_v7/src/lanes/level.hpp": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c",
+    "morsehgp3D_v7/src/tree/cloud_index.hpp": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95"
+  },
+  "compiler": {
+    "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+    "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769"
+  },
+  "historical_results_reused": false,
+  "public_status": "not_claimed"
+}

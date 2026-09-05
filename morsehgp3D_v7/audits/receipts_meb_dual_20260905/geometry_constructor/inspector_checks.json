@@ -1,0 +1,68 @@
+{
+  "observed_utc": "2026-09-05T11:51:24.110042+00:00",
+  "script_sha256": "1f7ddb12796b23498644e20d3b131601823e37cbca02d1088f9e30a85ba11214",
+  "runs": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_meb_dual_20260905/geometry_constructor/verify_geometry_receipt.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "captured_normal.json",
+      "output_sha256": "293714e99bacb2ce25b6b5a33d414bfa90d4d9f83073e95be3c52805afebddbd"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_meb_dual_20260905/geometry_constructor/verify_geometry_receipt.py",
+        "--self-test"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "selftest_normal.json",
+      "output_sha256": "29342cf9b0130e780084a2b1caf6936f2db089b2e1708479e4bf416b78e915b5"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_meb_dual_20260905/geometry_constructor/verify_geometry_receipt.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "captured_optimized.json",
+      "output_sha256": "293714e99bacb2ce25b6b5a33d414bfa90d4d9f83073e95be3c52805afebddbd"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_meb_dual_20260905/geometry_constructor/verify_geometry_receipt.py",
+        "--self-test"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "selftest_optimized.json",
+      "output_sha256": "29342cf9b0130e780084a2b1caf6936f2db089b2e1708479e4bf416b78e915b5"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_meb_dual_20260905/geometry_constructor/verify_geometry_receipt.py",
+        "--live"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "output": "live_optimized.json",
+      "output_sha256": "3fcc30a42674968a7c9945b4a67f90ea49e3becd50553414f7e9564d20ac431c"
+    }
+  ],
+  "engine_runs": 0
+}

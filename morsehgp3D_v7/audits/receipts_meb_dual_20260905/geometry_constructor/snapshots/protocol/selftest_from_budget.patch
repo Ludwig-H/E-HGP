@@ -1,0 +1,136 @@
+--- build/v7_meb_dual_budget_prototype/selftest.py	2026-09-05 10:09:22.104100897 +0000
++++ build/v7_meb_dual_budget_geometry/selftest.py	2026-09-05 11:21:58.644125194 +0000
+@@ -12,7 +12,7 @@
+ import unittest
+ from unittest.mock import patch
+ 
+-SPEC = importlib.util.spec_from_file_location("dual_budget_runner", Path(__file__).with_name("run_dual_budget.py"))
++SPEC = importlib.util.spec_from_file_location("dual_budget_runner", Path(__file__).with_name("run_geometry.py"))
+ R = importlib.util.module_from_spec(SPEC)
+ SPEC.loader.exec_module(R)
+ 
+@@ -65,24 +65,25 @@
+ 
+     def test_closed_F_and_fixed_pins_read_only(self):
+         with patch.object(R.subprocess, "Popen", side_effect=RuntimeError("forbidden")):
+-            pins = R.source_snapshot(R.digest(R.BASE / "run_dual_budget.py"))
++            pins = R.source_snapshot(R.digest(R.BASE / "run_geometry.py"))
+             self.assertEqual(pins[str(R.F_BINARY)], R.PINS[R.F_BINARY])
+             self.assertIn(str(R.PRODUCT / "src/core/inline_stack.hpp"), pins)
+             with patch.dict(R.PINS, {R.F_BINARY: "0" * 64}):
+                 with self.assertRaisesRegex(RuntimeError, "authority_pin_mismatch"):
+-                    R.source_snapshot(R.digest(R.BASE / "run_dual_budget.py"))
++                    R.source_snapshot(R.digest(R.BASE / "run_geometry.py"))
+ 
+     def test_depfile_closure_and_mutations(self):
+-        paths = [R.BASE / "dual_budget_gate.cpp", R.BASE / "pivot.hpp",
++        paths = [R.BASE / "geometry_gate.cpp", R.BASE / "additional_scenes.inc",
++                 R.PRIOR / "pivot.hpp",
+                  R.ROOT / "build/v7_meb_pivot_prototype/pivot.hpp",
+                  R.PRODUCT / "src/forest/silent_incidence.hpp"]
+         admitted = {str(path): R.digest(path) for path in paths}
+-        target = str(R.OUTPUT / "dual_budget_gate") + ": "
++        target = str(R.OUTPUT / "geometry_gate") + ": "
+         separator = " " + chr(92) + "\n "
+         text = target + separator.join(str(path) for path in paths) + "\n"
+         self.assertEqual(R.dependency_binding(text.encode(), admitted), dict(sorted(admitted.items())))
+         bad = [target + " ".join(str(path) for path in paths[:-1]),
+-               text + " " + str(paths[0]), text.replace("dual_budget_gate:", "other:"),
++               text + " " + str(paths[0]), text.replace("geometry_gate:", "other:"),
+                text + " /tmp/unadmitted.hpp", text + " $OTHER"]
+         for value in bad:
+             with self.subTest(value=value):
+@@ -93,19 +94,51 @@
+         with self.assertRaisesRegex(RuntimeError, "dependency_source_drift"):
+             R.dependency_binding(text.encode(), changed)
+ 
+-    def test_causal_output_is_not_an_exit_code_only_judge(self):
++    @staticmethod
++    def value(mutant=False):
++        value = {name: 1 for name in (
++            "ordinals", "scenes", "orders", "main_comparisons", "boundary_comparisons",
++            "reference_rank_calls", "prospective_violations", "proposal_forms", "pair_selections",
++            "legacy_charges", "actual_fallback_candidates", "certified", "fallback", "complete",
++            "degenerate", "capped", "fast_q2", "fast_q3", "fast_q4", "named_fast_q2",
++            "named_fast_q3", "named_fast_q4", "q4_two_pivots", "q4_high_limb",
++            "exhausted_fallback", "initial_p_fallback", "shell_fallback", "forced_fallback",
++            "direct_form_checks", "direct_form_rejected")}
++        value.update(schema="mhgp7-private-dual-budget-geometry-v1",
++                     status="causal_violation" if mutant else "passed",
++                     cause="charge_not_prospective" if mutant else "none",
++                     public_status="not_claimed", ordinals=1507, scenes=176, orders=384,
++                     main_comparisons=9216, boundary_comparisons=123, reference_rank_calls=384,
++                     direct_form_checks=6, direct_form_rejected=4, named_fast_q2=8,
++                     named_fast_q3=16, named_fast_q4=52, fast_q2=8, fast_q3=16, fast_q4=52,
++                     q4_two_pivots=52, q4_high_limb=52, complete=5000, capped=4338,
++                     certified=1000, fallback=3000, proposal_forms=1000,
++                     legacy_charges=10000, actual_fallback_candidates=10000,
++                     prospective_violations=1006 if mutant else 0)
++        return value
++
++    @staticmethod
++    def encoded(value):
++        return (json.dumps(value) + "\n").encode()
++
++    def test_geometric_output_strict_fields_types_and_cause(self):
+         for label, mutated in (("nominal", False), ("charge_after_mutant", True)):
+-            lines = [f"triangle P={p} L={l} proposal_forms={p} legacy={l} fallback={int(p < 5)} "
+-                     f"terminal_equal=1 prospective_violations={p if mutated else 0}"
+-                     for p in (0, 1, 4, 5) for l in (1, 4)]
+-            lines += ["cumulative calls=4 P=7 L=12 proposal_forms=7 F_fallback_candidates=8 legacy=12",
+-                      "near_max proposal_increment=1 legacy_increment=4 overflow=0",
+-                      "dual_budget accounting=reference_ordinal_plus_proposal_v1 "
+-                      f"prospective_violations={28 if mutated else 0} public_status=not_claimed"]
+-            data = ("\n".join(lines) + "\n").encode()
++            good = self.value(mutated)
++            data = self.encoded(good)
+             R.judge_output(label, data, b"")
+-            for bad in (data[:-1], data + (lines[0] + "\n").encode(),
+-                        data.replace(b"proposal_forms=7", b"proposal_forms=0"), b""):
++            for key, changed in (("ordinals", 1506), ("main_comparisons", 9215),
++                                 ("boundary_comparisons", 129), ("named_fast_q4", 51),
++                                 ("fast_q4", 1), ("proposal_forms", True), ("fallback", -1),
++                                 ("q4_two_pivots", 0), ("public_status", "exact"),
++                                 ("prospective_violations", 1), ("cause", "wrong")):
++                bad = dict(good, **{key: changed})
++                with self.subTest(label=label, key=key):
++                    with self.assertRaises(RuntimeError):
++                        R.judge_output(label, self.encoded(bad), b"")
++            missing, extra = dict(good), dict(good, unused=0)
++            missing.pop("ordinals")
++            for bad in (self.encoded(missing), self.encoded(extra), data[:-1],
++                        b'{"ordinals":1507,' + data[1:], b""):
+                 with self.assertRaises(RuntimeError):
+                     R.judge_output(label, bad, b"")
+             with self.assertRaises(RuntimeError):
+@@ -114,6 +147,30 @@
+         with self.assertRaises(RuntimeError):
+             R.judge_output("unknown_argument", b"unexpected", b"")
+ 
++    def test_paired_judge_retains_all_noncausal_metrics(self):
++        nominal, mutant = self.value(False), self.value(True)
++        R.paired_judge(self.encoded(nominal), self.encoded(mutant))
++        changed = dict(mutant, fast_q2=9)
++        with self.assertRaisesRegex(RuntimeError, "mutant_changed"):
++            R.paired_judge(self.encoded(nominal), self.encoded(changed))
++
++    def test_scene_projection_matches_pinned_data_and_refuses_bad_domain(self):
++        self.assertEqual(R.scene_projection(), R.read_bytes(R.BASE / "additional_scenes.inc"))
++        value = R.load_json(R.SCENES)
++        for mode in ("duplicate", "boolean", "outside", "missing"):
++            bad = json.loads(json.dumps(value))
++            if mode == "duplicate":
++                bad["additional_scenes"][0]["points"][1] = bad["additional_scenes"][0]["points"][0]
++            elif mode == "boolean":
++                bad["additional_scenes"][0]["points"][0][0] = True
++            elif mode == "outside":
++                bad["additional_scenes"][0]["points"][0][0] = 65536
++            else:
++                bad["additional_scenes"].pop()
++            with self.subTest(mode=mode), patch.object(R, "load_json", return_value=bad):
++                with self.assertRaises(RuntimeError):
++                    R.scene_projection()
++
+     def test_fake_timeout_and_interrupt_capture_and_drain(self):
+         for exception in (subprocess.TimeoutExpired(["fake"], 1), InterruptedError("synthetic")):
+             with self.subTest(exception=type(exception).__name__), tempfile.TemporaryDirectory() as name:

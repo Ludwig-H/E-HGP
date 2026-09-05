@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_meb_dual/q4_rescale_level/probe"
+  ],
+  "exit_code": 0,
+  "timeout": false,
+  "wall_seconds": 0.06943091199718765,
+  "stdout_sha256": "fca2d5d3f476d509c08d0dad8d247214de3ae2461e56075d013a22f977c49a34",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "5d8e43c25f9aa374f8ce1b0968752aa923090ecc8909389c8a3d658177013e1e"
+}

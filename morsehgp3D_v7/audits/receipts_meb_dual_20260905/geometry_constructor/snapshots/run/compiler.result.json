@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "--version"
+  ],
+  "elapsed_seconds": 0.0019007849987247027,
+  "error": null,
+  "expected_rc": 0,
+  "returncode": 0,
+  "status": "completed",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "39553616934606f58b27c04bed0cdbbe5b00c92c831a9aaadebd7ceda61d1334",
+  "timed_out": false
+}

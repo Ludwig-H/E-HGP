@@ -1,0 +1,11 @@
+--- dual
++++ dual
+@@ -126,7 +126,7 @@
+       if (power == 0) ++shell;
+     }
+     if (outside == n) {
+-      if (shell != candidate.q) return false;
++      if (false && shell != candidate.q) return false;
+       *result = candidate;
+       return true;
+     }

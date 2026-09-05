@@ -1,0 +1,11 @@
+--- dual
++++ dual
+@@ -166,7 +166,7 @@
+   }
+   ++work->certified;
+   ++out->stats.meb_calls;
+-  const u64 count = ordinal(n, candidate);
++  const u64 count = ordinal(n, candidate) + 1;
+   const u64 prior = out->stats.meb_supports;
+   if (prior >= caps.max_meb_supports || count > caps.max_meb_supports - prior) {
+     if (prior < caps.max_meb_supports) out->stats.meb_supports = caps.max_meb_supports;

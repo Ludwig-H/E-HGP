@@ -1,0 +1,29 @@
+{
+  "status": "harness_rejected_before_checks",
+  "attempts": [
+    {
+      "optimizations": [
+        0,
+        1
+      ],
+      "exit_codes": [
+        1,
+        1
+      ],
+      "reason": "A blanket file-open hook rejected loading __future__ before the module entry."
+    },
+    {
+      "optimizations": [
+        0,
+        1
+      ],
+      "exit_codes": [
+        1,
+        1
+      ],
+      "reason": "After module load, the same blanket hook rejected an argparse/gettext standard-library lazy import before checks."
+    }
+  ],
+  "correction": "The final hook permits files inside the Python installation for standard-library imports, and rejects every source/receipt/data file elsewhere. The simulated script location has no repository or build directory.",
+  "scope": "Harness setup failures; no arithmetic failure, engine, or build."
+}

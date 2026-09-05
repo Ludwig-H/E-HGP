@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_dual_budget_geometry/run_20260905/geometry_gate"
+  ],
+  "elapsed_seconds": 0.06800013600150123,
+  "error": null,
+  "expected_rc": 0,
+  "returncode": 0,
+  "status": "completed",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e584ff9b1fbee11baaee6456c62e3fea4df61dc516adbe30dbe6b939b2a3fd13",
+  "timed_out": false
+}

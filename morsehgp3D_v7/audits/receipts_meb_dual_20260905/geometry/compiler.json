@@ -1,0 +1,12 @@
+{
+  "command": [
+    "g++",
+    "--version"
+  ],
+  "exit_code": 0,
+  "timeout": false,
+  "wall_seconds": 0.0025897199993778486,
+  "stdout_sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

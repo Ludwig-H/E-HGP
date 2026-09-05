@@ -1,0 +1,18 @@
+{
+  "positives": 2,
+  "rejections": [
+    "bool_counter",
+    "duplicate_JSON",
+    "empty_corpus",
+    "exact_claim",
+    "extra_boundary",
+    "missing_direct_form_causality",
+    "missing_forced_fallback",
+    "missing_high_limb",
+    "missing_named_q4",
+    "wrong_ordinal_count",
+    "wrong_terminal_total",
+    "zero_causal_violation"
+  ],
+  "status": "passed"
+}

@@ -1,0 +1,27 @@
+{
+  "command": [
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-O2",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_meb_dual/o2",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_meb_dual/F",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/meb_dual_bridge.cpp",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_meb_dual_20260905/geometry/o2.d",
+    "-o",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_meb_dual/o2/probe"
+  ],
+  "exit_code": 0,
+  "timeout": false,
+  "wall_seconds": 2.7855989250019775,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

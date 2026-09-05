@@ -1,0 +1,85 @@
+{
+  "schema": "mhgp7-private-dual-budget-geometry-preparation-v1",
+  "status": "prepared_selftests_passed_cpp_not_run",
+  "cpp_compilations": 0,
+  "cpp_executions": 0,
+  "pipeline_executions": 0,
+  "public_status": "not_claimed",
+  "gcp_used": false,
+  "observer_route": "Trace_only_NoObserver_not_qualified",
+  "files": {
+    "geometry_gate.cpp": "c9971f8c340fe37eea2be824897110d436a38345e1d66d1834c9eb7f489bb1a9",
+    "additional_scenes.inc": "6ced272e70bb3527a8b53728442b774508c1a9e7e49413bf2739e2774e6c0d51",
+    "run_geometry.py": "b04dc2a69aec60c6c5e41e83688588a3b963a0ba5f4e91260580e4d195bda727",
+    "selftest.py": "4aef59a077ba74251fe3a2b998ce9b94b8c4b6d915f238eb26773bdd6807e15e",
+    "README.md": "0273317e4c1182b4eae3007f2215605cb311c92736cbe14dea3e2a4fa306b261",
+    "runner_from_budget.patch": "eea12e6bcebc408e54908e8a0742237cd42f38030f459f5811dee8477c41cdd3",
+    "selftest_from_budget.patch": "53f41b58f15cc691e256fee2a26b66f17adaf4b79c30c707321c3e482ce5030b"
+  },
+  "preparation_history": [
+    {
+      "kind": "static_review_objection_before_compilation",
+      "before_gate_sha256": "08018883e90776a5b1bb7cff7e08f72ba6684296e8040c0b16a849e123d8505b",
+      "objection": "Global fast_q and q4_two_pivots non-vacuity could be satisfied by random scenes while named extreme scenes all fell back.",
+      "correction": "Added main/index<3/P401/reference_ok guards for a fast certificate of arity index+2, q4 at least two pivots and nonzero upper limb; exact named counts 8/16/52 are checked and emitted.",
+      "after_gate_sha256": "c9971f8c340fe37eea2be824897110d436a38345e1d66d1834c9eb7f489bb1a9",
+      "review": "root and q2_qualification both gave favorable static review of the corrected gate; no C++ executed"
+    },
+    {
+      "kind": "pre_write_generation_refusal",
+      "source": "runner port construction in functions.exec, not the generated Python runner",
+      "expected_replacement_count": 7,
+      "actual_replacement_count": 8,
+      "source_or_target_files_written_before_refusal": 0,
+      "raw_tool_error": "Script error:\nError: replace count dual_budget_gate=8\n    at replaceAll (exec_main.mjs:3:100)\n    at exec_main.mjs:8:1",
+      "correction": "Accepted the statically counted eight occurrences of the exact filename token. Retained exact-count checks for all replacements; no broad E/F or CMAKE substitutions."
+    }
+  ],
+  "normal_selftests": {
+    "argv": ["taskset", "-c", "0", "timeout", "30s", "python3", "-B", "build/v7_meb_dual_budget_geometry/selftest.py"],
+    "tool_chunk": "d5eaa5",
+    "exit_code": 0,
+    "wall_time_seconds": 0.172403119,
+    "combined_output": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.026s\n\nOK\n"
+  },
+  "optimized_selftests": {
+    "argv": ["taskset", "-c", "0", "timeout", "30s", "python3", "-O", "-B", "build/v7_meb_dual_budget_geometry/selftest.py"],
+    "tool_chunk": "fdebb0",
+    "exit_code": 0,
+    "wall_time_seconds": 0.1895943,
+    "combined_output": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.035s\n\nOK\n"
+  },
+  "preview": {
+    "argv": ["taskset", "-c", "0", "timeout", "30s", "python3", "-B", "build/v7_meb_dual_budget_geometry/run_geometry.py"],
+    "tool_chunk": "d5ac6c",
+    "exit_code": 0,
+    "wall_time_seconds": 0.10739663,
+    "status": "prepared_not_executed",
+    "writes": false,
+    "subprocesses": 0,
+    "cpu_affinity": [0],
+    "combined_deadline_seconds": 60,
+    "future_command_count": 6,
+    "future_expected_exit_codes": [0,0,0,4,2,2]
+  },
+  "fixed_planned_counts_not_cpp_results": {
+    "ordinal_tuples": 1507,
+    "scenes": 176,
+    "orders": 384,
+    "reference_rank_calls": 384,
+    "main_comparisons": 9216,
+    "boundary_comparisons": 123,
+    "boundary_limit": 128,
+    "direct_form_checks": 6,
+    "direct_form_rejections": 4,
+    "named_fast_certificates": [8,16,52]
+  },
+  "excluded_from_preparation": ["run_20260905", "future compiler and gate artifacts", "any future qualification receipt"],
+  "limitations": [
+    "Only mocked process creation, timeout and interruption are tested here.",
+    "The native NoObserver template instantiation is not qualified by the instrumented Trace gate.",
+    "Shared F predicates are not an independent arithmetic oracle.",
+    "No geometric C++ result, sanitizer result, pipeline result, performance or global exactness claim.",
+    "A distinct explicit GO must bind the reviewed runner SHA before execution."
+  ]
+}

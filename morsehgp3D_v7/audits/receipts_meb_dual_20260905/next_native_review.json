@@ -1,0 +1,11 @@
+{
+  "observed_utc": "2026-09-05T11:54:39.539616+00:00",
+  "origin": "build/v7_meb_dual_budget_cost_v2/run_20260905/receipt.json",
+  "sha256": "874f100ffb1d65956f6d640c5e7ab838a81e9f5c7900f7c1d69b14504235c208",
+  "status_read": "completed",
+  "scope": "next review pointer only; source/receipt header inspected; no independent measurement qualification or gain claim",
+  "closed_utc": "2026-09-05T11:50:16.210694+00:00",
+  "native_observer": "NoObserver appears in measured route; existing run does not need to be requested again",
+  "next_action": "verify preserved native cost v2 receipt, pre/post judges, measurement protocol and causal attribution; do not rerun as first step",
+  "gcp": "not_used"
+}

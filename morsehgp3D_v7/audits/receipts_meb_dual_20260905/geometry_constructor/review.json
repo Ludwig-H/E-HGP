@@ -1,0 +1,104 @@
+{
+  "schema": "mhgp7-independent-constructor-geometry-review-v1",
+  "status": "closed_bounded_receipt_counterverification",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "observed_utc": "2026-09-05T11:51:24.110042+00:00",
+  "source_receipt": "build/v7_meb_dual_budget_geometry/run_20260905/receipt.json",
+  "constructor_interval": {
+    "started_at": "2026-09-05T11:28:38.320060+00:00",
+    "finished_at": "2026-09-05T11:28:42.278900+00:00"
+  },
+  "authorities": {
+    "gate_sha256": "c9971f8c340fe37eea2be824897110d436a38345e1d66d1834c9eb7f489bb1a9",
+    "runner_sha256": "b04dc2a69aec60c6c5e41e83688588a3b963a0ba5f4e91260580e4d195bda727",
+    "capture_manifest_sha256": "0e8269fd8abda7c8fb010a548159ee8ac882f000d892528cf54ea094ef558834",
+    "source_authorities": 66,
+    "local_compile_dependencies": 21,
+    "live_authorities_and_gate_binary": 67
+  },
+  "evidence": {
+    "captured_normal": "captured_normal.json",
+    "captured_optimized": "captured_optimized.json",
+    "live": "live.json",
+    "selftest_normal": "selftest_normal.json",
+    "selftest_optimized": "selftest_optimized.json",
+    "reader": "verify_geometry_receipt.py",
+    "checks": "inspector_checks.json",
+    "capture_manifest": "capture_manifest.json"
+  },
+  "capture": {
+    "entries": 70,
+    "new_exact_byte_copies": 28,
+    "references_to_identical_prior_audit_bytes": 41,
+    "private_binary_hash_only": 1,
+    "private_binaries_copied": 0
+  },
+  "verification": {
+    "command_codes": {
+      "charge_after_mutant": 4,
+      "compile": 0,
+      "compiler": 0,
+      "extra_argument": 2,
+      "nominal": 0,
+      "unknown_argument": 2
+    },
+    "reader_commands_passed": 5,
+    "reader_selftests_each_mode": {
+      "positives": 2,
+      "targeted_rejections": 12
+    },
+    "normal_optimized_results_equal": true,
+    "auditor_engine_or_build_runs": 0,
+    "GCP": "non utilisé",
+    "git_mutations": 0
+  },
+  "observations": {
+    "independent_ordinal_enumeration": 1507,
+    "scenes": 176,
+    "orders": 384,
+    "main_comparisons": 9216,
+    "boundary_comparisons": 123,
+    "comparisons_total": 9339,
+    "additional_F_rank_pilot_calls": 384,
+    "additional_direct_forms": 6,
+    "prospective_charge": {
+      "nominal_violations": 0,
+      "charge_after_mutant_violations": 46437,
+      "decomposition": "46431 proposal forms plus 6 direct form checks",
+      "mutant_exit_code": 4,
+      "same_judge_and_same_other_raw_counters": true
+    },
+    "fast_support_sizes": {
+      "q2": 1610,
+      "q3": 1520,
+      "q4": 486,
+      "q4_two_pivots": 486,
+      "q4_high_limb": 338,
+      "named_q2": 8,
+      "named_q3": 16,
+      "named_q4": 52
+    },
+    "rank_550": "An actual n=11 fixture has F rank 550 and support slots 7,8,9,10. Its main matrix tests legacy cuts 549/550/551; initial legacy count 7 tests shifted cuts.",
+    "MAX": "Five original fixtures exercise (initial legacy, limit)=(0,0),(MAX,MAX),(MAX,MAX-1),(MAX-1,MAX),(MAX-4,MAX), each with P=0 or 401; initial proposal counters (MAX,MAX),(MAX-1,MAX),(5,4) are also exercised.",
+    "pivot_cap": "Five pivot_cap=0 comparisons yield three actual forced fallbacks. Caps 17 and SIZE_MAX are also tested against the cap at 16.",
+    "cumulative_Work": "Four calls share proposal cap 7 and legacy cap 12; two further calls share proposal cap 0 and legacy cap 8. Source checks exact intermediate counters and refusal behavior.",
+    "state_preservation": "The local gate compares boolean result, status/reason, raw exact ball, thirteen legacy statistics and two nonempty event sentinels, with nontrivial initial state.",
+    "dependency_binding": "Captured before/after sources agree, local compile dependencies are covered, streams match individual terminal result records and receipt, protocol SHA256SUMS and ported additional scenes are checked."
+  },
+  "scope_and_limits": [
+    "These are the constructor gate own Trace executions. The earlier triangle receipt and the auditor rational geometry results are distinct and are not transferred here.",
+    "NoObserver is not instantiated by this constructor gate and is not qualified by it. The auditor rational bridge uses its own Observer; it is not a new NoObserver qualification either.",
+    "The reference is the included F resolver, sharing arithmetic with the prototype. This is a bounded local differential, not an independent arithmetic oracle, pipeline qualification, full u16 proof, CI result or performance claim.",
+    "complete=6047 is the local boolean actual_ok count, not product completion. The gate deliberately seeds a non-success status. certified=5081 includes proposals whose legacy charge is subsequently refused; successful fast results total 3616.",
+    "actual_fallback_candidates=341083 is the aggregate fallback legacy-charge delta derived by the gate, not an independently instrumented count of geometric forms.",
+    "The raw output does not expose per-boundary counters proving every MAX or rank-550 boundary took the fast route. Named fast non-vacuity floors apply to the first three fixtures in the main matrix.",
+    "No dedicated initial legacy count MAX-550 case is in this corpus. Near-MAX q2/q3 fast route and the rank-550 two-pivot route can be connected by separate source/non-interference arguments; those are deductions, not additional observed per-case counters in this receipt.",
+    "The README preparation label predates this closed receipt and remains historical; neither it nor the earlier triangle geometry-plan preparation should be treated as a new execution.",
+    "Only lightweight Python readers were executed by the auditor. No C++ compilation, engine run, benchmark, sanitizer campaign, GCP action or Git mutation was performed."
+  ],
+  "verdict": "The constructor Trace geometry receipt is internally consistent, source-bound and terminal. MAX/pivot/rank-550 coverage materially closes earlier corpus gaps within its stated scope. No new product defect is identified."
+}

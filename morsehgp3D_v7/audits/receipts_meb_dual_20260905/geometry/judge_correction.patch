@@ -1,0 +1,58 @@
+--- initial_driver.py
++++ meb_dual_oracle.py
+@@ -241,9 +241,14 @@
+ 
+ 
+ def main() -> int:
++    global GEOMETRY
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument("--run", action="store_true")
++    parser.add_argument("--destination", type=Path, help="receipt directory relative to audits; stays inside audits")
+     args = parser.parse_args()
++    if args.destination is not None:
++        GEOMETRY = (HERE / args.destination).resolve()
++        require(GEOMETRY.is_relative_to(HERE), "destination.outside_audits")
+     GEOMETRY.mkdir(parents=True, exist_ok=True)
+     oracles, rows, commands = make_cases()
+     ordinals, ordinal_input = ordinal_commands()
+@@ -255,8 +260,19 @@
+     try:
+         run = json.loads((GEOMETRY / "run.json").read_text())
+         require(run["status"] == "completed", "campaign.not_completed")
++        for label in ("o2", "ubsan", "skip_shell", "ordinal_plus_one", "q4_rescale_level"):
++            require(run["commands"][label]["stdin_sha256"] == sha(commands.encode()), "replay.geometry_input." + label)
++        for label in ("o2_ordinals", "ubsan_ordinals"):
++            require(run["commands"][label]["stdin_sha256"] == sha(ordinal_input.encode()), "replay.ordinal_input." + label)
+         for name, pin in run["input_pins"].items():
+-            require(sha((HERE / name).read_bytes()) == pin, "replay.input_changed." + name)
++            # The initial driver expected an ordinal counter mismatch first;
++            # the cap-at-R fixture correctly rejects the earlier terminal instead.
++            # Preserve the original driver as execution provenance; only replay
++            # the same compiled bytes with the corrected judge classification.
++            path = HERE / name
++            if name == "meb_dual_oracle.py" and sha(path.read_bytes()) != pin:
++                path = GEOMETRY / "initial_driver.py.txt"
++            require(sha(path.read_bytes()) == pin, "replay.input_changed." + name)
+         for label, metadata in run["commands"].items():
+             for suffix in ("stdout", "stderr"):
+                 data = gzip.decompress((GEOMETRY / f"{label}.{suffix}.gz").read_bytes())
+@@ -267,7 +283,7 @@
+             raw_ord = gzip.decompress((GEOMETRY / f"{variant}_ordinals.stdout.gz").read_bytes()).decode()
+             require([json.loads(row)["ordinal"] for row in raw_ord.splitlines()] == ordinals, "ordinal.enumeration")
+         for mutant, wanted in (("skip_shell", "oracle.terminal."),
+-                               ("ordinal_plus_one", "oracle.stats."),
++                               ("ordinal_plus_one", "oracle.terminal."),
+                                ("q4_rescale_level", "oracle.q4_raw_level.")):
+             raw = gzip.decompress((GEOMETRY / f"{mutant}.stdout.gz").read_bytes()).decode()
+             try: judge(raw, oracles, rows)
+@@ -276,6 +292,10 @@
+                 receipt["mutants"][mutant] = str(error)
+             else: raise ValueError("mutant.survived." + mutant)
+         receipt["ordinal_checks_per_build"] = len(ordinals)
++        receipt["replay_driver_sha256"] = sha(Path(__file__).read_bytes())
++        driver_changed = run["input_pins"]["meb_dual_oracle.py"] != receipt["replay_driver_sha256"]
++        receipt["initial_driver_preserved"] = "initial_driver.py.txt" if driver_changed else None
++        receipt["execution_not_repeated_after_judge_classification_fix"] = driver_changed
+         receipt["status"] = "passed"
+     except Exception as error:
+         receipt["status"] = "failed"

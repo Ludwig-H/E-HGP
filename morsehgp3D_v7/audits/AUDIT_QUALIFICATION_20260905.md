@@ -272,6 +272,18 @@ La preuve de conservation LIFO/masques/comptes demeure liée au delta F
 aucun export vertical ni pondéré n’est ajouté par cette qualification.
 Cette contrelecture n'a relancé ni moteur ni CTest.
 
+## Prototype MEB privé : qualification locale distincte
+
+La [note MEB à deux budgets](MEB_DOUBLE_BUDGET_COURANT.md) ferme son
+raccord local à F, avec une preuve des charges et de la représentation
+q4. Les [nouveaux reçus](receipts_meb_dual_20260905/README.md) séparent
+les portes privées constructeur et les sondes propres de l'auditeur :
+3 430 MEB contre un oracle Gram rationnel par build O2/UBSan, 1 507
+ordinaux par build et trois copies fautives détectées. Ce travail ne
+remplace aucune campagne F, ne modifie pas ses 339/48/48 tests et
+n'exécute aucune tour. L'intégration par ordre et les nouveaux schémas
+restent à qualifier sur leurs propres octets.
+
 ## F mono et paliers : observations closes
 
 La [revue indépendante](receipts_resolver_20260905/qualification/review.json)

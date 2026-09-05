@@ -1,0 +1,316 @@
+#!/usr/bin/env python3
+"""Private create-only dual-budget gate; preview never starts a subprocess."""
+from __future__ import annotations
+
+import argparse
+from collections import Counter
+from datetime import datetime, timezone
+import hashlib
+import json
+import os
+from pathlib import Path
+import shlex
+import signal
+import stat
+import subprocess
+import time
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+PRODUCT = ROOT / "morsehgp3D_v7"
+OUTPUT = BASE / "run_20260905"
+COMPILER = Path("/usr/bin/c++").resolve()
+COMPILER_SHA = "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769"
+F_RECEIPT = ROOT / "build/v7_f_build_20260905/build_D.json"
+F_BINARY = ROOT / "build/v7_f_qualification/mhgp7"
+PINS = {
+    BASE / "pivot.hpp": "0645aa00add4d4cb387861b8f6dbd4fa0734ba5b4f3ad712caad8886b3541c2d",
+    BASE / "dual_budget_gate.cpp": "6f748dc8dda7a6b0410e0c1eac31584f044fc58e891add3532c0f79d25993dda",
+    ROOT / "build/v7_meb_pivot_prototype/pivot.hpp": "d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5",
+    PRODUCT / "docs/PROPOSITION_MEB_ET_BUDGETS.md": "365e7a5dcde5a6d6fcd7d43e00d2f58f86efbf42279a779c62c7eaac7b54ec25",
+    F_RECEIPT: "522c950c70b60ca58759c4fa9b9a24ff995fe829b9aa1adf5b2f51b7b2177ac4",
+    F_BINARY: "ee29d3d5cfb49a728fa9dfa44fdb85a5a6043c941b1f61d4a6d9531ea4671f85",
+    COMPILER: COMPILER_SHA,
+}
+DEADLINE_SECONDS = 60
+SIGNALS = (signal.SIGINT, signal.SIGTERM, signal.SIGHUP)
+FORBIDDEN_ENV = ("LD_PRELOAD", "LD_AUDIT", "LD_LIBRARY_PATH", "CPATH",
+                 "CPLUS_INCLUDE_PATH", "C_INCLUDE_PATH", "GCC_EXEC_PREFIX",
+                 "COMPILER_PATH", "LIBRARY_PATH", "CPPFLAGS", "CXXFLAGS",
+                 "ASAN_OPTIONS", "LSAN_OPTIONS", "UBSAN_OPTIONS")
+
+
+def require(condition: bool, reason: str) -> None:
+    if not condition:
+        raise RuntimeError(reason)
+
+
+def read_bytes(path: Path) -> bytes:
+    before = path.lstat()
+    require(stat.S_ISREG(before.st_mode), "not_regular: " + str(path))
+    data = path.read_bytes()
+    after = path.lstat()
+    fields = ("st_dev", "st_ino", "st_size", "st_mtime_ns", "st_ctime_ns")
+    require(all(getattr(before, key) == getattr(after, key) for key in fields),
+            "changed_while_reading: " + str(path))
+    return data
+
+
+def digest(path: Path) -> str:
+    return hashlib.sha256(read_bytes(path)).hexdigest()
+
+
+def unique_object(pairs: list[tuple]) -> dict:
+    result = {}
+    for key, value in pairs:
+        require(key not in result, "duplicate_json_key")
+        result[key] = value
+    return result
+
+
+def load_json(path: Path):
+    return json.loads(read_bytes(path), object_pairs_hook=unique_object)
+
+
+def save(path: Path, value) -> None:
+    with path.open("x", encoding="utf-8") as stream:
+        json.dump(value, stream, sort_keys=True, indent=2)
+        stream.write("\n")
+
+
+def source_snapshot(expected_runner: str) -> dict[str, str]:
+    require(digest(BASE / "run_dual_budget.py") == expected_runner, "runner_pin_mismatch")
+    for path, pin in PINS.items():
+        require(digest(path) == pin, "authority_pin_mismatch: " + str(path))
+    record = load_json(F_RECEIPT)
+    require(record["status"] == "completed" and record["build_exit_code"] == 0 and
+            record["source_root"] == str(PRODUCT) and
+            record["sources_before"] == record["sources_after"] and
+            record["binary"]["path"] == str(F_BINARY) and
+            record["binary"]["sha256"] == PINS[F_BINARY], "F_binding_mismatch")
+    expected = record["sources_before"]
+    paths = {PRODUCT / "CMakeLists.txt", PRODUCT / "oracle/obig.hpp"}
+    for folder in ("src", "cli"):
+        paths.update(path for path in (PRODUCT / folder).rglob("*") if path.is_file())
+    actual = {str(path.relative_to(PRODUCT)): digest(path) for path in sorted(paths)}
+    require(actual == expected, "live_sources_differ_from_closed_F")
+    result = {str(PRODUCT / name): pin for name, pin in actual.items()}
+    result.update({str(path): digest(path) for path in PINS})
+    for name in ("run_dual_budget.py", "selftest.py", "README.md"):
+        result[str(BASE / name)] = digest(BASE / name)
+    return result
+
+
+def commands() -> list[tuple[str, list[str], int]]:
+    binary = OUTPUT / "dual_budget_gate"
+    return [
+        ("compiler", [str(COMPILER), "--version"], 0),
+        ("compile", [str(COMPILER), "-std=c++20", "-O2", "-Wall", "-Wextra",
+                     "-Wpedantic", "-Werror", "-pthread", "-I", str(PRODUCT),
+                     "-MMD", "-MF", str(OUTPUT / "dependencies.d"),
+                     str(BASE / "dual_budget_gate.cpp"), "-o", str(binary)], 0),
+        ("nominal", [str(binary)], 0),
+        ("charge_after_mutant", [str(binary), "--mutant=charge-after"], 4),
+        ("unknown_argument", [str(binary), "--unknown"], 2),
+        ("extra_argument", [str(binary), "--mutant=charge-after", "extra"], 2),
+    ]
+
+
+def dependency_binding(data: bytes, admitted: dict[str, str]) -> dict[str, str]:
+    text = data.decode("utf-8").replace("\\\n", " ")
+    require(text.count(":") == 1 and "$" not in text, "unsupported_depfile_syntax")
+    target, body = text.split(":", 1)
+    require(shlex.split(target) == [str(OUTPUT / "dual_budget_gate")], "wrong_depfile_target")
+    dependencies = [str((ROOT / name).resolve()) for name in shlex.split(body)]
+    require(dependencies and len(set(dependencies)) == len(dependencies), "empty_or_duplicate_dependencies")
+    mandatory = {str(BASE / "dual_budget_gate.cpp"), str(BASE / "pivot.hpp"),
+                 str(ROOT / "build/v7_meb_pivot_prototype/pivot.hpp"),
+                 str(PRODUCT / "src/forest/silent_incidence.hpp")}
+    require(mandatory <= set(dependencies) <= set(admitted), "unexpected_or_missing_dependency")
+    result = {name: digest(Path(name)) for name in sorted(dependencies)}
+    require(all(pin == admitted[name] for name, pin in result.items()), "dependency_source_drift")
+    return result
+
+
+def judge_output(label: str, stdout: bytes, stderr: bytes) -> None:
+    if label in ("compiler", "compile"):
+        return
+    require(stderr == b"", "unexpected_gate_stderr")
+    if label in ("unknown_argument", "extra_argument"):
+        require(stdout == b"", "argument_refusal_stdout")
+        return
+    require(label in ("nominal", "charge_after_mutant"), "unknown_result_label")
+    mutant = label == "charge_after_mutant"
+    expected = []
+    for p in (0, 1, 4, 5):
+        for l in (1, 4):
+            expected.append(f"triangle P={p} L={l} proposal_forms={p} legacy={l} "
+                            f"fallback={int(p < 5)} terminal_equal=1 prospective_violations={p if mutant else 0}")
+    expected += ["cumulative calls=4 P=7 L=12 proposal_forms=7 F_fallback_candidates=8 legacy=12",
+                 "near_max proposal_increment=1 legacy_increment=4 overflow=0",
+                 "dual_budget accounting=reference_ordinal_plus_proposal_v1 "
+                 f"prospective_violations={28 if mutant else 0} public_status=not_claimed"]
+    require(stdout.endswith(b"\n") and Counter(stdout.decode("utf-8").splitlines()) == Counter(expected),
+            "missing_duplicate_or_wrong_causal_output")
+
+
+def group_present(pid: int) -> bool:
+    try:
+        os.killpg(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+
+
+def drain_group(process) -> None:
+    # Every target is the PID/PGID of our start_new_session child, never a scan
+    # for unrelated processes. SIGKILL is sent even if its leader already exited.
+    handlers = {sig: signal.signal(sig, signal.SIG_IGN) for sig in SIGNALS}
+    try:
+        for sig in (signal.SIGTERM, signal.SIGKILL):
+            try:
+                os.killpg(process.pid, sig)
+            except ProcessLookupError:
+                pass
+        process.wait(timeout=1.0)
+        end = time.monotonic() + 0.5
+        while group_present(process.pid) and time.monotonic() < end:
+            time.sleep(0.01)
+        require(not group_present(process.pid), "owned_process_group_not_drained")
+    finally:
+        for sig, handler in handlers.items():
+            signal.signal(sig, handler)
+
+
+def run_command(label: str, argv: list[str], expected_rc: int,
+                deadline: float, environment: dict) -> dict:
+    remaining = deadline - time.monotonic() - 2.0  # Reserve bounded cleanup time.
+    require(remaining > 0, "combined_60s_deadline_exhausted")
+    save(OUTPUT / (label + ".attempt.json"), {"argv": argv, "expected_rc": expected_rc,
+         "cwd": str(ROOT), "timeout_seconds": remaining, "cpu_affinity": [0]})
+    started = time.monotonic()
+    process, returncode, error = None, None, None
+    timed_out = False
+    with (OUTPUT / (label + ".stdout")).open("xb") as stdout:
+        with (OUTPUT / (label + ".stderr")).open("xb") as stderr:
+            try:
+                process = subprocess.Popen(argv, cwd=ROOT, env=environment,
+                                           stdout=stdout, stderr=stderr, start_new_session=True)
+                save(OUTPUT / (label + ".spawned.json"), {"pid": process.pid, "pgid": process.pid})
+                returncode = process.wait(timeout=remaining)
+                require(not group_present(process.pid), "descendant_survived_command")
+            except BaseException as exception:
+                timed_out = isinstance(exception, subprocess.TimeoutExpired)
+                error = f"{type(exception).__name__}: {exception}"
+            finally:
+                if process is not None:
+                    try:
+                        drain_group(process)
+                        returncode = process.returncode
+                    except BaseException as exception:
+                        error = (error or "") + f"; cleanup: {type(exception).__name__}: {exception}"
+    result = {"argv": argv, "expected_rc": expected_rc, "returncode": returncode,
+              "status": "completed" if error is None else "failed", "error": error,
+              "timed_out": timed_out, "elapsed_seconds": time.monotonic() - started,
+              "stdout_sha256": digest(OUTPUT / (label + ".stdout")),
+              "stderr_sha256": digest(OUTPUT / (label + ".stderr"))}
+    save(OUTPUT / (label + ".result.json"), result)
+    return result
+
+
+def interrupted(signum, _frame) -> None:
+    raise InterruptedError("received_signal_" + str(signum))
+
+
+def execute(expected_runner: str) -> int:
+    require(not OUTPUT.exists(), "create_only_output_already_exists")
+    OUTPUT.mkdir(exist_ok=False)
+    started = datetime.now(timezone.utc).isoformat()
+    deadline = time.monotonic() + DEADLINE_SECONDS
+    before, after, binding, binary_pin = None, None, None, None
+    records, errors = {}, []
+    handlers = {sig: signal.signal(sig, interrupted) for sig in SIGNALS}
+    try:
+        before = source_snapshot(expected_runner)
+        save(OUTPUT / "inputs_before.json", before)
+        require(not any(os.environ.get(name) for name in FORBIDDEN_ENV), "compiler_or_loader_environment_override")
+        require(0 in os.sched_getaffinity(0), "CPU0_not_available")
+        os.sched_setaffinity(0, {0})
+        require(os.sched_getaffinity(0) == {0}, "CPU0_affinity_not_effective")
+        environment = dict(os.environ, LC_ALL="C", LANG="C", TZ="UTC")
+        save(OUTPUT / "environment.json", {"cpu_affinity": sorted(os.sched_getaffinity(0)),
+             "compiler": str(COMPILER), "compiler_sha256": COMPILER_SHA,
+             "denied_overrides": {name: os.environ.get(name) for name in FORBIDDEN_ENV},
+             "locale": {name: environment[name] for name in ("LC_ALL", "LANG", "TZ")}})
+        for label, argv, expected_rc in commands():
+            if binary_pin is not None:
+                require(digest(OUTPUT / "dual_budget_gate") == binary_pin, "binary_changed_before_execution")
+            record = run_command(label, argv, expected_rc, deadline, environment)
+            records[label] = record
+            require(record["status"] == "completed" and record["returncode"] == expected_rc,
+                    "unexpected_command_terminal: " + label)
+            judge_output(label, read_bytes(OUTPUT / (label + ".stdout")),
+                         read_bytes(OUTPUT / (label + ".stderr")))
+            if label == "compile":
+                binding = dependency_binding(read_bytes(OUTPUT / "dependencies.d"), before)
+                save(OUTPUT / "dependency_binding.json", binding)
+                binary_pin = digest(OUTPUT / "dual_budget_gate")
+                save(OUTPUT / "binary_before.json", {"sha256": binary_pin})
+        require(len(records) == 6 and binding and binary_pin, "missing_command_or_compile_evidence")
+    except BaseException as exception:
+        errors.append(f"{type(exception).__name__}: {exception}")
+    finally:
+        try:
+            after = source_snapshot(expected_runner)
+            save(OUTPUT / "inputs_after.json", after)
+            require(before is not None and before == after, "source_pins_changed")
+            if binding is not None:
+                require(dependency_binding(read_bytes(OUTPUT / "dependencies.d"), after) == binding,
+                        "dependency_binding_changed")
+            if binary_pin is not None:
+                terminal_pin = digest(OUTPUT / "dual_budget_gate")
+                save(OUTPUT / "binary_after.json", {"sha256": terminal_pin})
+                require(terminal_pin == binary_pin, "tested_binary_changed")
+            require(time.monotonic() <= deadline, "combined_60s_deadline_exceeded")
+        except BaseException as exception:
+            errors.append(f"final_validation: {type(exception).__name__}: {exception}")
+        for sig, handler in handlers.items():
+            signal.signal(sig, handler)
+    artifacts = {path.name: {"sha256": digest(path), "bytes": path.stat().st_size}
+                 for path in sorted(OUTPUT.iterdir()) if path.is_file()}
+    if time.monotonic() > deadline:
+        errors.append("combined_60s_deadline_exceeded_at_closure")
+    receipt = {"schema": "mhgp7-private-meb-dual-budget-gate-v1",
+               "status": "completed" if not errors else "failed", "errors": errors,
+               "started_at": started, "finished_at": datetime.now(timezone.utc).isoformat(),
+               "combined_deadline_seconds": DEADLINE_SECONDS, "commands": records,
+               "source_before": before, "source_after": after,
+               "sources_stable": before is not None and before == after,
+               "artifacts": artifacts, "meb_work_accounting": "reference_ordinal_plus_proposal_v1",
+               "scope": "private_triangle_budget_fixture_not_global_q3_q4_or_pipeline_qualification",
+               "testing_macro": False, "sanitizers": False, "gcp_used": False,
+               "public_status": "not_claimed"}
+    save(OUTPUT / "receipt.json", receipt)
+    print(json.dumps({"status": receipt["status"], "receipt": str(OUTPUT / "receipt.json"),
+                      "receipt_sha256": digest(OUTPUT / "receipt.json"), "errors": errors}))
+    return 0 if not errors else 1
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--expected-runner-sha256")
+    args = parser.parse_args(argv)
+    if not args.execute:
+        print(json.dumps({"status": "prepared_not_executed", "writes": False,
+                          "subprocesses": 0, "combined_deadline_seconds": 60,
+                          "cpu_affinity": [0], "commands": commands(),
+                          "requires_separate_GO": True}, indent=2))
+        return 0
+    require(args.expected_runner_sha256 is not None and len(args.expected_runner_sha256) == 64 and
+            all(c in "0123456789abcdef" for c in args.expected_runner_sha256), "explicit_runner_pin_required")
+    return execute(args.expected_runner_sha256)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,12 +1,22 @@
 # Échanges actifs avec le constructeur v7
 
-5 septembre 2026, sources F et résultats publiés dans `4cc804e5`. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. Écritures exclusivement dans `audits/`.
+5 septembre 2026, reprise depuis `b9d8b467`, sources F inchangées et prototype MEB privé épinglé. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. Écritures exclusivement dans `audits/`.
 
 ## Acquis conservés
 
 Le [certificat horizontal réduit E](CERTIFICAT_HORIZONTAL_COURANT.md), S1 et les primitives restent fermés. La [contrelecture F](receipts_vertical_20260905/f_qualification/) confirme ses propres campagnes 339/339 Release, 48/48 ciblées Release et 48/48 ASan/UBSan. La conservation de pile et cette qualification restent distinctes des sondes horizontales exécutées sur E.
 
-Cette reprise relit les sorties scellées, les sources et le manuscrit, puis exécute de petits lecteurs Python normal et optimisé. Aucun build, moteur ou benchmark n'est lancé par l'auditeur. La fenêtre mono constructeur est close à 10:20:35 UTC ; ses résultats négatifs restent conservés.
+Cette reprise ajoute des sondes locales isolées O2/UBSan et des lecteurs Python normal/-O. Aucune tour ni benchmark de performance n'est lancé par l'auditeur. Les anciennes fenêtres mono et leurs résultats négatifs restent clos.
+
+## MEB à deux budgets : raccord local fermé, port explicite
+
+La [preuve et la qualification locale](MEB_DOUBLE_BUDGET_COURANT.md) ferment le raccord du prototype privé à F : une coquille régulière impose son unique premier support accepté, puis son ordinal et ses champs exacts, y compris le niveau q4 brut. La proposition est chargée avant chaque forme ; son épuisement retrouve la référence F depuis le même état legacy. L'ancien défaut physique du prototype à seul ordinal est corrigé par cette autorité supplémentaire.
+
+L'oracle rationnel indépendant passe 3 430 MEB par build O2/UBSan, sur 89 nuages et leurs deux ordres locaux : 416/310/64 succès rapides q2/q3/q4, 40 refus shell, 1 650 refus legacy. Les 1 507 ordinaux sont comparés à l'énumération ; trois corruptions de copies privées sont détectées. Le reçu triangle conserve sa preuve causale et cumulative. La nouvelle porte constructeur ferme séparément 9 339 comparaisons Trace, les frontières de compteur et `pivot_cap=0` ; les anciennes demandes satisfaites sont retirées. Les [reçus et leur attribution](receipts_meb_dual_20260905/README.md) distinguent preuve, observation et préparation constructeur.
+
+Le port utile doit placer un `Work` unique dans la tentative de chaque ordre et extraire une référence sans proposition. Recopier le `Builder().miniball` du prototype après remplacement de la méthode produit pourrait rappeler la proposition ou recréer le budget. Garder P=0 par défaut, versionner `reference_ordinal_plus_proposal_v1` et publier séparément charges ordinales, essais effectifs, certificats et succès accélérés. Une somme de deux plafonds u64 doit rester un couple ou utiliser un entier plus large.
+
+Les preuves locales ne remplacent pas les contrôles du consommateur intégré. Les instanciations avec observateur, le chemin `NoObserver`, les mesures de coût et le cap de records 32k gardent leurs attributions propres. Aucun gain mono de bout en bout n'est déduit des sondes. Le [reçu natif v2 est désormais disponible](receipts_meb_dual_20260905/next_native_review.json), clos à 11:50:16 UTC avec `NoObserver` : la prochaine action d'audit est sa contrelecture, sans redemander son exécution. La qualification présente n'en attribue encore aucune mesure ni aucun gain.
 
 ## Verticale : porter la reconstruction par les tokens
 

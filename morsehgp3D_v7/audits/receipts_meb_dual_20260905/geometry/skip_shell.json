@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_meb_dual/skip_shell/probe"
+  ],
+  "exit_code": 0,
+  "timeout": false,
+  "wall_seconds": 0.06680757800131687,
+  "stdout_sha256": "4ff924f112d9f5a739d7e172da2d7c7f96fe36621bfb83fb08b095c1aedb8e06",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "5d8e43c25f9aa374f8ce1b0968752aa923090ecc8909389c8a3d658177013e1e"
+}
