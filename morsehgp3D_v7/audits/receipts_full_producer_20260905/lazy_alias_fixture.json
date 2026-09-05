@@ -1,0 +1,551 @@
+{
+  "schema": "mhgp7-lazy-alias-fixture-v1",
+  "status": "rational_fixture_verified",
+  "public_status": "not_claimed",
+  "case": {
+    "name": "lazy_equal_alias_J1",
+    "points": [
+      [
+        0,
+        5,
+        0
+      ],
+      [
+        4,
+        5,
+        0
+      ],
+      [
+        2,
+        6,
+        0
+      ],
+      [
+        2,
+        0,
+        0
+      ]
+    ],
+    "ids": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "reversed_ids": false
+  },
+  "all_regular_subsets": [
+    {
+      "label": [
+        0,
+        1
+      ],
+      "support": [
+        0,
+        1
+      ],
+      "squared_radius": "4",
+      "center": [
+        "2",
+        "5",
+        "0"
+      ],
+      "powers": [
+        "0",
+        "0",
+        "-3",
+        "21"
+      ],
+      "gabriel": false
+    },
+    {
+      "label": [
+        0,
+        2
+      ],
+      "support": [
+        0,
+        2
+      ],
+      "squared_radius": "5/4",
+      "center": [
+        "1",
+        "11/2",
+        "0"
+      ],
+      "powers": [
+        "0",
+        "8",
+        "0",
+        "30"
+      ],
+      "gabriel": true
+    },
+    {
+      "label": [
+        0,
+        3
+      ],
+      "support": [
+        0,
+        3
+      ],
+      "squared_radius": "29/4",
+      "center": [
+        "1",
+        "5/2",
+        "0"
+      ],
+      "powers": [
+        "0",
+        "8",
+        "6",
+        "0"
+      ],
+      "gabriel": true
+    },
+    {
+      "label": [
+        1,
+        2
+      ],
+      "support": [
+        1,
+        2
+      ],
+      "squared_radius": "5/4",
+      "center": [
+        "3",
+        "11/2",
+        "0"
+      ],
+      "powers": [
+        "8",
+        "0",
+        "0",
+        "30"
+      ],
+      "gabriel": true
+    },
+    {
+      "label": [
+        1,
+        3
+      ],
+      "support": [
+        1,
+        3
+      ],
+      "squared_radius": "29/4",
+      "center": [
+        "3",
+        "5/2",
+        "0"
+      ],
+      "powers": [
+        "8",
+        "0",
+        "6",
+        "0"
+      ],
+      "gabriel": true
+    },
+    {
+      "label": [
+        2,
+        3
+      ],
+      "support": [
+        2,
+        3
+      ],
+      "squared_radius": "9",
+      "center": [
+        "2",
+        "3",
+        "0"
+      ],
+      "powers": [
+        "-1",
+        "-1",
+        "0",
+        "0"
+      ],
+      "gabriel": false
+    },
+    {
+      "label": [
+        0,
+        1,
+        2
+      ],
+      "support": [
+        0,
+        1
+      ],
+      "squared_radius": "4",
+      "center": [
+        "2",
+        "5",
+        "0"
+      ],
+      "powers": [
+        "0",
+        "0",
+        "-3",
+        "21"
+      ],
+      "gabriel": true
+    },
+    {
+      "label": [
+        0,
+        1,
+        3
+      ],
+      "support": [
+        0,
+        1,
+        3
+      ],
+      "squared_radius": "841/100",
+      "center": [
+        "2",
+        "29/10",
+        "0"
+      ],
+      "powers": [
+        "0",
+        "0",
+        "6/5",
+        "0"
+      ],
+      "gabriel": true
+    },
+    {
+      "label": [
+        0,
+        2,
+        3
+      ],
+      "support": [
+        2,
+        3
+      ],
+      "squared_radius": "9",
+      "center": [
+        "2",
+        "3",
+        "0"
+      ],
+      "powers": [
+        "-1",
+        "-1",
+        "0",
+        "0"
+      ],
+      "gabriel": false
+    },
+    {
+      "label": [
+        1,
+        2,
+        3
+      ],
+      "support": [
+        2,
+        3
+      ],
+      "squared_radius": "9",
+      "center": [
+        "2",
+        "3",
+        "0"
+      ],
+      "powers": [
+        "-1",
+        "-1",
+        "0",
+        "0"
+      ],
+      "gabriel": false
+    },
+    {
+      "label": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "support": [
+        2,
+        3
+      ],
+      "squared_radius": "9",
+      "center": [
+        "2",
+        "3",
+        "0"
+      ],
+      "powers": [
+        "-1",
+        "-1",
+        "0",
+        "0"
+      ],
+      "gabriel": true
+    }
+  ],
+  "gamma_states": [
+    {
+      "squared_level": "0",
+      "closed": false,
+      "components": []
+    },
+    {
+      "squared_level": "0",
+      "closed": true,
+      "components": []
+    },
+    {
+      "squared_level": "5/4",
+      "closed": false,
+      "components": []
+    },
+    {
+      "squared_level": "5/4",
+      "closed": true,
+      "components": [
+        [
+          [
+            0,
+            2
+          ]
+        ],
+        [
+          [
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "squared_level": "4",
+      "closed": false,
+      "components": [
+        [
+          [
+            0,
+            2
+          ]
+        ],
+        [
+          [
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "squared_level": "4",
+      "closed": true,
+      "components": [
+        [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "squared_level": "29/4",
+      "closed": false,
+      "components": [
+        [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "squared_level": "29/4",
+      "closed": true,
+      "components": [
+        [
+          [
+            0,
+            3
+          ]
+        ],
+        [
+          [
+            1,
+            3
+          ]
+        ],
+        [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "squared_level": "841/100",
+      "closed": false,
+      "components": [
+        [
+          [
+            0,
+            3
+          ]
+        ],
+        [
+          [
+            1,
+            3
+          ]
+        ],
+        [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "squared_level": "841/100",
+      "closed": true,
+      "components": [
+        [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "squared_level": "9",
+      "closed": false,
+      "components": [
+        [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "squared_level": "9",
+      "closed": true,
+      "components": [
+        [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            3
+          ]
+        ]
+      ]
+    }
+  ],
+  "source_pins": {
+    "morsehgp3D_v7/audits/meb_rational_oracle_20260905.py": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b",
+    "morsehgp3D_v7/audits/horizontal_rational_oracle.py": "fdff23d640ce692ef459f41eea6b9863bae0a5daa1d6a6c35edc60a8712fe83d",
+    "morsehgp3D_v7/audits/gabriel_full_probe.py": "d1e1786df0f69a52f4e9c9ea1dfe56ba573d0d3bfbb1344c8df927d8d2899d9f"
+  },
+  "mechanism": "At ABW level 841/100, missing equal alias AB has the sole strict intruder C; ABC at 4 is an earlier exact direct anchor. No MEB of ABC is required after certifying B(AB).",
+  "scope": "Independent rational geometry and Gamma states only. No lazy dispatcher, C++ or performance executed."
+}

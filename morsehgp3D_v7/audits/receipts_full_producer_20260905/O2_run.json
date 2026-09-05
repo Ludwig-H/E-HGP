@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/O2.bin"
+  ],
+  "exit_code": 0,
+  "started_utc": "2026-09-05T15:57:17.853313+00:00",
+  "finished_utc": "2026-09-05T15:57:17.984612+00:00",
+  "environment_override": {},
+  "stdout": "O2_output.json",
+  "stdout_sha256": "9587acd7157fdbeb56b721c023695029f4cf50821e138b67b34eff940addb384",
+  "stderr": "O2_stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "binary_sha256": "7bf1424b31ad38d7f2da97032316cc9d361d42eb5a06a125613a7de3cbf17d94",
+  "input_sha256": "5323a58158df37ddc4854918884edc174e6f70cbe50d3e395afc0f6983f921c3"
+}

@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/omit_portal.bin"
+  ],
+  "exit_code": 0,
+  "started_utc": "2026-09-05T15:57:17.964889+00:00",
+  "finished_utc": "2026-09-05T15:57:18.070836+00:00",
+  "environment_override": {},
+  "stdout": "omit_portal_output.json",
+  "stdout_sha256": "ef910ccc70af06d2283261c2764e690b6b13915f8d35b7f8212095a91d8f4992",
+  "stderr": "omit_portal_stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "binary_sha256": "58aad4eeb5078dcc546fca0449c753214d11524414474236c98f2293482fbbdf",
+  "input_sha256": "5323a58158df37ddc4854918884edc174e6f70cbe50d3e395afc0f6983f921c3"
+}

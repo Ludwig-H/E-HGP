@@ -1,0 +1,11 @@
+--- morsehgp3D_v7/src/forest/full_gabriel.hpp
++++ private/stale_terminal/morsehgp3D_v7/src/forest/full_gabriel.hpp
+@@ -368,7 +368,7 @@
+         if (compare_exact_level(terminal->event->level, cut) >= 0 || terminal->token == kAbsent ||
+             terminal->token >= prior_count)
+           return invariant("full_gabriel_terminal_not_prior");
+-        if (!normalize(terminal->token, root)) return false;
++        root = terminal->token;  // Private mutant: consume stale terminal.
+         if (root >= prior_count) return invariant("full_gabriel_nonprior_anchor");
+         ++out.stats.terminal_direct;  // One terminal per charged request.
+         return put_alias(f, root);

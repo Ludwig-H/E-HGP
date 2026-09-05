@@ -1,0 +1,44 @@
+{
+  "status": "completed_bounded_full_producer_judgment",
+  "public_status": "not_claimed",
+  "python_optimized": true,
+  "counts": {
+    "cuts": 16506,
+    "naturality_squares": 17774,
+    "portal_requests": 10,
+    "chain_steps": 12,
+    "normalized_anchors": 3552,
+    "meb_calls": 22,
+    "face_visits": 4790,
+    "records": 200,
+    "nodes": 1606,
+    "minima": 1020,
+    "parent_refs": 1406,
+    "exact_budget_successes": 2,
+    "minus_one_budget_refusals": 26
+  },
+  "long_chains_observed": [
+    {
+      "id": 104,
+      "case": "E5_chain_two",
+      "order": 2,
+      "max_chain_length": 2,
+      "portal_requests": 1,
+      "chain_steps": 2
+    },
+    {
+      "id": 105,
+      "case": "E5_chain_two",
+      "order": 2,
+      "max_chain_length": 2,
+      "portal_requests": 1,
+      "chain_steps": 2
+    }
+  ],
+  "long_chain_floor_met": true,
+  "output_sha256": "9587acd7157fdbeb56b721c023695029f4cf50821e138b67b34eff940addb384",
+  "fixtures_sha256": "fd6b4b9d213729a85edcdbce46c7232cdb64ab4745185bf326c18cefefc2c6c9",
+  "fixture_text_sha256": "5323a58158df37ddc4854918884edc174e6f70cbe50d3e395afc0f6983f921c3",
+  "checker_sha256": "fbc98baf440e11d3894c0f1c13cbe1c84527fad55047fb32ef7ce57450b88713",
+  "scope": "100 unique orders/200 representations on independent complete regular catalogues; bounded FULL Gamma agreement, node/coverage/cut and prospective budget checks. No WSPD source completeness, mass, vertical, industrial-scale or runtime claim."
+}

@@ -1,0 +1,10 @@
+--- morsehgp3D_v7/src/forest/full_gabriel.hpp
++++ private/omit_portal/morsehgp3D_v7/src/forest/full_gabriel.hpp
+@@ -405,6 +405,7 @@
+         if (!charge(out.stats.face_visits, caps.max_face_visits, "full_gabriel_face_budget")) return false;
+         const FacetKey f = facet_without(r.key, r.event->support[drop]);
+         FullNodeId root = kAbsent;
++        if (aliases.find(f) == aliases.end()) continue;  // Private mutant.
+         if (!locate(f, level, prior_count, root)) return false;
+         const size_t local = intern(root);
+         if (drop == 0) { first = local; r.token = root; }

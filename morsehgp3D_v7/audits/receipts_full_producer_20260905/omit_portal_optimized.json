@@ -1,0 +1,7 @@
+{
+  "status": "rejected",
+  "reason": "producer.node_count",
+  "python_optimized": true,
+  "output_sha256": "ef910ccc70af06d2283261c2764e690b6b13915f8d35b7f8212095a91d8f4992",
+  "checker_sha256": "fbc98baf440e11d3894c0f1c13cbe1c84527fad55047fb32ef7ce57450b88713"
+}

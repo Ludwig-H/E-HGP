@@ -1,0 +1,7 @@
+{
+  "status": "rejected",
+  "reason": "producer.identity",
+  "python_optimized": false,
+  "output_sha256": "2f4be4f98df3ec1a4db6fe4ae8a410affbc0e9c862fec0c183b478da0618e8b6",
+  "checker_sha256": "fbc98baf440e11d3894c0f1c13cbe1c84527fad55047fb32ef7ce57450b88713"
+}

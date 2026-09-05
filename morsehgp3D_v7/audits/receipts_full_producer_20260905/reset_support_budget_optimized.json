@@ -1,0 +1,7 @@
+{
+  "status": "rejected",
+  "reason": "producer.named_E5_support_sum",
+  "python_optimized": true,
+  "output_sha256": "76cb03fa5bbeeea757f963f17c294fbe92e8c69dc02f869d61a8891729579d60",
+  "checker_sha256": "fbc98baf440e11d3894c0f1c13cbe1c84527fad55047fb32ef7ce57450b88713"
+}

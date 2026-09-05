@@ -1,0 +1,56 @@
+{
+  "schema": "mhgp7-full-producer-judgments-v1",
+  "python_optimized": false,
+  "outcomes": [
+    {
+      "name": "O2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "started_utc": "2026-09-05T16:03:37.048342+00:00",
+      "finished_utc": "2026-09-05T16:03:39.291525+00:00",
+      "result": "O2_normal.json"
+    },
+    {
+      "name": "sanitized",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "started_utc": "2026-09-05T16:03:39.291599+00:00",
+      "finished_utc": "2026-09-05T16:03:41.507056+00:00",
+      "result": "sanitized_normal.json"
+    },
+    {
+      "name": "stale_terminal",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "started_utc": "2026-09-05T16:03:41.507127+00:00",
+      "finished_utc": "2026-09-05T16:03:41.944687+00:00",
+      "result": "stale_terminal_normal.json"
+    },
+    {
+      "name": "reset_support_budget",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "started_utc": "2026-09-05T16:03:41.944737+00:00",
+      "finished_utc": "2026-09-05T16:03:42.388943+00:00",
+      "result": "reset_support_budget_normal.json"
+    },
+    {
+      "name": "omit_portal",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "started_utc": "2026-09-05T16:03:42.388993+00:00",
+      "finished_utc": "2026-09-05T16:03:42.861168+00:00",
+      "result": "omit_portal_normal.json"
+    }
+  ],
+  "checker_sha256": "fbc98baf440e11d3894c0f1c13cbe1c84527fad55047fb32ef7ce57450b88713",
+  "runner_sha256": "24f5111676ef234280af05d4a2f28deedad9da12e52b6d620b3a3bb8e4e37447",
+  "command": [
+    "python3",
+    "-B",
+    "morsehgp3D_v7/audits/full_producer_run.py",
+    "judge",
+    "--receipt",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_producer_20260905"
+  ]
+}

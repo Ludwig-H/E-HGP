@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/reset_support_budget.bin"
+  ],
+  "exit_code": 0,
+  "started_utc": "2026-09-05T15:57:17.946752+00:00",
+  "finished_utc": "2026-09-05T15:57:18.040627+00:00",
+  "environment_override": {},
+  "stdout": "reset_support_budget_output.json",
+  "stdout_sha256": "76cb03fa5bbeeea757f963f17c294fbe92e8c69dc02f869d61a8891729579d60",
+  "stderr": "reset_support_budget_stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "binary_sha256": "0163010c09f7922338ce793b128e4a0016302465ba2cf9e9dd47839c1c95a2bf",
+  "input_sha256": "5323a58158df37ddc4854918884edc174e6f70cbe50d3e395afc0f6983f921c3"
+}

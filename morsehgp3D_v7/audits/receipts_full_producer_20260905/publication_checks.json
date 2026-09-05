@@ -1,0 +1,385 @@
+{
+  "schema": "mhgp7-full-producer-publication-checks-v1",
+  "checked_utc": "2026-09-05T16:25:59.384998+00:00",
+  "base_head": "b63203b5897181d857cf87b98fa5cf96dfde3da7",
+  "source_authority": "as-read worktree bytes, not claimed committed in base HEAD",
+  "repository_checks": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tools/check_docs.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Validated 325 active Markdown files.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tools/check_implementation_status.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Validated 20 implementation phases and their gates.\n",
+      "stderr": ""
+    }
+  ],
+  "snapshot_checks": [
+    {
+      "variant": "D",
+      "pins": 116,
+      "common_pins": 1365,
+      "command": [
+        "python3",
+        "-B",
+        "-c",
+        "import importlib.util,sys; from pathlib import Path; s=importlib.util.spec_from_file_location(\"gate\",sys.argv[1]); g=importlib.util.module_from_spec(s); s.loader.exec_module(g); g.LINEAGE=Path(sys.argv[2]); sys.exit(g.check(Path(sys.argv[3])))",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/freshness/D",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/validation_current.json"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=D\nqualification_scope=323/323 CTests CPU Release independently executed; local MEB/index/rounding oracles; front arithmetic proofs and compiled helpers; no product exactness claim\n1365 pins communs et 116 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "variant": "D",
+      "pins": 116,
+      "common_pins": 1365,
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "-c",
+        "import importlib.util,sys; from pathlib import Path; s=importlib.util.spec_from_file_location(\"gate\",sys.argv[1]); g=importlib.util.module_from_spec(s); s.loader.exec_module(g); g.LINEAGE=Path(sys.argv[2]); sys.exit(g.check(Path(sys.argv[3])))",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/freshness/D",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/validation_current.json"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=D\nqualification_scope=323/323 CTests CPU Release independently executed; local MEB/index/rounding oracles; front arithmetic proofs and compiled helpers; no product exactness claim\n1365 pins communs et 116 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "variant": "E_qualified",
+      "pins": 116,
+      "common_pins": 1365,
+      "command": [
+        "python3",
+        "-B",
+        "-c",
+        "import importlib.util,sys; from pathlib import Path; s=importlib.util.spec_from_file_location(\"gate\",sys.argv[1]); g=importlib.util.module_from_spec(s); s.loader.exec_module(g); g.LINEAGE=Path(sys.argv[2]); sys.exit(g.check(Path(sys.argv[3])))",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/freshness/E_qualified",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/validation_current.json"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=E_qualified\nqualification_scope=E horizontal reduced certificate and token-only vertical reconstruction proof/replay (764 maps on original sealed E per provenance; relabel and synthetic fusion separate); own E324 and E33+33 receipts inspected; no product vertical export; public_status=not_claimed\n1365 pins communs et 116 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "variant": "E_qualified",
+      "pins": 116,
+      "common_pins": 1365,
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "-c",
+        "import importlib.util,sys; from pathlib import Path; s=importlib.util.spec_from_file_location(\"gate\",sys.argv[1]); g=importlib.util.module_from_spec(s); s.loader.exec_module(g); g.LINEAGE=Path(sys.argv[2]); sys.exit(g.check(Path(sys.argv[3])))",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/freshness/E_qualified",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/validation_current.json"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=E_qualified\nqualification_scope=E horizontal reduced certificate and token-only vertical reconstruction proof/replay (764 maps on original sealed E per provenance; relabel and synthetic fusion separate); own E324 and E33+33 receipts inspected; no product vertical export; public_status=not_claimed\n1365 pins communs et 116 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "variant": "F_qualified",
+      "pins": 144,
+      "common_pins": 1365,
+      "command": [
+        "python3",
+        "-B",
+        "-c",
+        "import importlib.util,sys; from pathlib import Path; s=importlib.util.spec_from_file_location(\"gate\",sys.argv[1]); g=importlib.util.module_from_spec(s); s.loader.exec_module(g); g.LINEAGE=Path(sys.argv[2]); sys.exit(g.check(Path(sys.argv[3])))",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/freshness/F_qualified",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/validation_current.json"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=F_qualified\nqualification_scope=F LIFO/masks/counts conservation; own F339 and F48+48 Release/ASan-UBSan receipts inspected; closed E/F8k pairs equal, F16k success and F32k K9 budget refusal; E vertical replay not renamed F; public_status=not_claimed\n1365 pins communs et 144 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "variant": "F_qualified",
+      "pins": 144,
+      "common_pins": 1365,
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "-c",
+        "import importlib.util,sys; from pathlib import Path; s=importlib.util.spec_from_file_location(\"gate\",sys.argv[1]); g=importlib.util.module_from_spec(s); s.loader.exec_module(g); g.LINEAGE=Path(sys.argv[2]); sys.exit(g.check(Path(sys.argv[3])))",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/freshness/F_qualified",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/validation_current.json"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=F_qualified\nqualification_scope=F LIFO/masks/counts conservation; own F339 and F48+48 Release/ASan-UBSan receipts inspected; closed E/F8k pairs equal, F16k success and F32k K9 budget refusal; E vertical replay not renamed F; public_status=not_claimed\n1365 pins communs et 144 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "variant": "G_full_structural",
+      "pins": 146,
+      "common_pins": 1365,
+      "command": [
+        "python3",
+        "-B",
+        "-c",
+        "import importlib.util,sys; from pathlib import Path; s=importlib.util.spec_from_file_location(\"gate\",sys.argv[1]); g=importlib.util.module_from_spec(s); s.loader.exec_module(g); g.LINEAGE=Path(sys.argv[2]); sys.exit(g.check(Path(sys.argv[3])))",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/freshness/G_full_structural",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/validation_current.json"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=G_full_structural\nqualification_scope=FULL structural component independently exercised O2/ASan-UBSan on 106 representations, 4608 cuts, 616 coverages, 1338 budget refusals and three private mutants; own constructor 2+2 CTests inspected; no geometric producer, F339 transfer or public exactness claim\n1365 pins communs et 146 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "variant": "G_full_structural",
+      "pins": 146,
+      "common_pins": 1365,
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "-c",
+        "import importlib.util,sys; from pathlib import Path; s=importlib.util.spec_from_file_location(\"gate\",sys.argv[1]); g=importlib.util.module_from_spec(s); s.loader.exec_module(g); g.LINEAGE=Path(sys.argv[2]); sys.exit(g.check(Path(sys.argv[3])))",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/freshness/G_full_structural",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/validation_current.json"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=G_full_structural\nqualification_scope=FULL structural component independently exercised O2/ASan-UBSan on 106 representations, 4608 cuts, 616 coverages, 1338 budget refusals and three private mutants; own constructor 2+2 CTests inspected; no geometric producer, F339 transfer or public exactness claim\n1365 pins communs et 146 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "variant": "H_full_relative",
+      "pins": 155,
+      "common_pins": 1365,
+      "command": [
+        "python3",
+        "-B",
+        "-c",
+        "import importlib.util,sys; from pathlib import Path; s=importlib.util.spec_from_file_location(\"gate\",sys.argv[1]); g=importlib.util.module_from_spec(s); s.loader.exec_module(g); g.LINEAGE=Path(sys.argv[2]); sys.exit(g.check(Path(sys.argv[3])))",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/freshness/H_full_relative",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/validation_current.json"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=H_full_relative\nqualification_scope=FULL horizontal producer relative to supplied complete exact regular Gabriel catalogues; independent O2/ASan-UBSan on 100 orders/200 representations, 16506 cuts, 1606 coverages, 17774 naturality squares, 26 budget refusals and three private mutants; own 7+7 constructor CTests inspected with first LSan failure retained; probe source read only, no mono performance or F339 transfer; public_status=not_claimed\n1365 pins communs et 155 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    },
+    {
+      "variant": "H_full_relative",
+      "pins": 155,
+      "common_pins": 1365,
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "-c",
+        "import importlib.util,sys; from pathlib import Path; s=importlib.util.spec_from_file_location(\"gate\",sys.argv[1]); g=importlib.util.module_from_spec(s); s.loader.exec_module(g); g.LINEAGE=Path(sys.argv[2]); sys.exit(g.check(Path(sys.argv[3])))",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/freshness/H_full_relative",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/validation_current.json"
+      ],
+      "exit_code": 0,
+      "stdout": "Audit courant : variante=H_full_relative\nqualification_scope=FULL horizontal producer relative to supplied complete exact regular Gabriel catalogues; independent O2/ASan-UBSan on 100 orders/200 representations, 16506 cuts, 1606 coverages, 17774 naturality squares, 26 budget refusals and three private mutants; own 7+7 constructor CTests inspected with first LSan failure retained; probe source read only, no mono performance or F339 transfer; public_status=not_claimed\n1365 pins communs et 155 pins de variante conformes aux hashes épinglés.\nContrôle de fraîcheur uniquement ; aucune promotion du statut public.\n",
+      "stderr": ""
+    }
+  ],
+  "audit_markdown": {
+    "files": 71,
+    "local_links": 956,
+    "errors": [],
+    "pins": {
+      "audits/AUDIT_ARRONDI_20260905.md": "7f849f40ccab86ad187acb4943ad9cb9301bcf7520a0191eb2534da4681faa6b",
+      "audits/RETOUR_MATH_COURANT.md": "45c7aa2e4df4c51c557cbcb341c3cc6cec0366149dcb9a5f80d5373f4057d56d",
+      "audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md": "a4005173d58ca40bd9a4138b9185080ade080e9abc10a9c0bd2f2616c68390b9",
+      "audits/AUDIT_RESIDENCE_20260904.md": "6f397f94a6d2ab7ace0526b90718ca2531c672816db09b742d82cfa6922c9ad6",
+      "audits/ARITHMETIQUE_SECTEUR_CORDE_COURANTE.md": "736cf8e94936a713df06044f9efea0d36bd1885e93cf461414db9110620e1491",
+      "audits/MONO_COURANT.md": "864cd343b7ecc418de36389ab4f8e6cef8894d461e57b3f0e4d5ecb9e96a5c39",
+      "audits/DIALOGUE_COURANT.md": "8e18cf9fc9d60ac513387dca54d8717cc2297422a4ea3ba86e3f12bf1381525f",
+      "audits/AUDIT_RACCORD_INDEX_FRONT_20260905.md": "0ac8049c8564a1c89480488d16962c120d0e54c21ceba50419e43df443566f3d",
+      "audits/RETOUR_MEMOIRE_COURANT.md": "446ea9cfd4285e5e6bef035b33336eac130225a23520c9bae24ebf1fdfdd6517",
+      "audits/AUDIT_MATHEMATIQUE_20260904.md": "c3c5dec330c51ce8d315e208f30d8eeede06d8a0d7cf71784afda825af0617d6",
+      "audits/PRODUCTEUR_FULL_GABRIEL_COURANT.md": "0e115b9b17ac013263ba674f2ac9b1d2eaa758a25251d80d8d2dbef43e67340c",
+      "audits/AUDIT_INDEPENDANT_20260904.md": "da72136d9381d52a190791ff78c81a2982d04ecfc02b751e9266244aa746974c",
+      "audits/ETAT_COURANT.md": "cda4769e511e46e0e7ef9564435ae671305f002d6c9736461859e460efc0913d",
+      "audits/ARITHMETIQUE_CELLULES_COURANTE.md": "61deffbabbb5f4db8846f75d07eb8734f7da14960ad80bff788a46bad950bb59",
+      "audits/ARITHMETIQUE_SPINDLE_COURANTE.md": "19e2bdb98bfbe6b0ff86ff06182a81e511a5b5028aa1b278a5f8137621007e83",
+      "audits/CELLULES_COURANT.md": "f42853b2e50ccbd744753aeb7e446994ed90a731e4a7aab344ba463bc4c20091",
+      "audits/MEB_DOUBLE_BUDGET_COURANT.md": "51629a4f244974f644ac5fa7373cd7625a09d9fac8ec8bbe451fc6e5fa9fa779",
+      "audits/REPONSE_AUDITEUR_COMPOSITION.md": "55344167e82bc0cbd8710ad134628979b81100ae95665c6aacd4800338656d3c",
+      "audits/S1_COURANT.md": "893ad2c4bd341aafa58f066d70d53a936d16c0a7f175c0a4186960e5e843152e",
+      "audits/AUDIT_INDEX_20260905.md": "aebb2886c3c17aac9617fcd633628861247a579c3c963586fd05f6c929584583",
+      "audits/ARITHMETIQUE_LANES_COURANTE.md": "d34b383926855b86b8017a12babf6f0436781ed123203473dfbef78b82513c71",
+      "audits/README.md": "8d7e2e577e7762c78bc2d96ca07ac983da569febe98fee91224de7ab344aee42",
+      "audits/CONTRAT_MASSES_VOTE_COURANT.md": "095af1800dedb4df24a983fa8f76975453633c118bd550201fbeecd65af7088d",
+      "audits/CENSUS_AXIS_COURANT.md": "25c9bc9ebedd35dd971ef388f1112d8b9d2330fc8b7b188d5e19fb089b5c53e7",
+      "audits/ADDENDUM_MEB_Q2_E_20260905.md": "cbf0cc093c71f90085036a27ba11fbd444177caa5a7b28508c6362157f5a51dd",
+      "audits/AUDIT_QUALIFICATION_20260905.md": "dd1966cf4923aabe2e3d4d32388440c7c750e11495926b9479f1458a623e3fc2",
+      "audits/AUDIT_INTERFACES_20260904.md": "563fcfeafefa32cba9b38af5b024fd4e46df925fab1739fabe62026b191f1539",
+      "audits/PREUVE_CHORD_SECTOR_COURANTE.md": "dce2dc4bc2858177d89235fb8255dac0162769c9146b0e0f116d5e1c892ea228",
+      "audits/ARITHMETIQUE_LARGE_COURANTE.md": "9097318fdd12b7bc2dc97b5a1bdc91a502c5000a065e0319df8eeeb04e01909b",
+      "audits/CERTIFICAT_FULL_CPP_COURANT.md": "fed566070f63765f1042d61fed94904be9aa3584939826cd7675a97db55dcf28",
+      "audits/AUDIT_MEB_DIFFEREE_20260905.md": "b696a6ab163c6ea44b3cdde332b98428a428511d5457201395e7e7930240be1f",
+      "audits/FILTRES_FLOTTANTS_COURANTS.md": "67a5937c8d223619bfd045b7b6550195a4b495df1c180fa3a3b6d3f5c99a2f28",
+      "audits/AUTORITE_VOTE_P3_COURANTE.md": "36d12fe126e59ff8ac1f02272a531cdf877ce29eda9d7a24767b1e5f0ec9e105",
+      "audits/REPONSE_CONSTRUCTEUR_20260904.md": "b4ae686b6874de0530267a200d06ab765d77c7bef141afa1b04e860108d1d720",
+      "audits/CONTRAT_VERTICAL_COURANT.md": "711bd2d979e2c985c4b70c9c78c4297f2ecfadabe0270d2ffe5e0c80c38525cb",
+      "audits/DOMAINE_CPU_COURANT.md": "459da841af4e55f71777de484cbaecae787049d35a865b3be74bb8f5f9ae31d3",
+      "audits/QUESTION_COMPOSITION_CONSTRUCTEUR_20260904.md": "5e92a0ae4761cd9fc15113021630a9ef721a0f3eefb7a271bd19457f822951c7",
+      "audits/CERTIFICAT_HORIZONTAL_COURANT.md": "b275e66955d990be8c5de9aba1b57a88b19dd1c0958ce2e6e959382e6e796e27",
+      "audits/FRONT_ET_TEMOINS_COURANT.md": "9c01dbceb1e72ededaa2715dd63ec1a1754117f501e220da71d679dea3d49d49",
+      "audits/receipts_meb_builder_20260905/semantic_review.md": "f69240278073dc99233f9dfa07a9441d0b53ddb5fc15d5f39be20f4671736c4a",
+      "audits/receipts_meb_builder_20260905/README.md": "1aaa5fab3b8fe00e7189e440ec8e3cac194e0631fbfd06adaacec63d64d3659e",
+      "audits/receipts_meb_builder_20260905/contract_review.md": "b51ebbc50a106393a6e7a78c812d8482892a360431a3d6baf66964633bb96dad",
+      "audits/receipts_meb_dual_20260905/README.md": "2061e6703948076a267e82d7c7c9de3654bc09041e8e2c54905c93be5941bae8",
+      "audits/receipts_meb_native_20260905/harness_review.md": "d6a6a5049375fea24375a2e232aff41b6137990db9607533bd1cf6000e7046b5",
+      "audits/receipts_meb_native_20260905/cost_review.md": "4ad5eb97581d16716bcbe488adafa479695f0b5678dc6f804a79b03a78d22930",
+      "audits/receipts_meb_native_20260905/README.md": "7f8c5779a12461f378b1e583462013dc5fb3f4ce6f6755b443a86d2bab68f13b",
+      "audits/receipts_resolver_20260905/README.md": "2c40eb41abb5342f94f26079e189664d598434bceb9f0fde79f619261d73d578",
+      "audits/receipts_front_20260905/README.md": "25e0aca5d1c65456de560a719c40833f227cab9fc31259ef26e86b593042c127",
+      "audits/receipts_20260905/README.md": "3420f5eb99fa9046c416e927db3fb8bfb1b8b3c779c7fe690f348f615bbe7ca5",
+      "audits/receipts_full_producer_20260905/semantic_review.md": "2395d7114a44afd183b9b1299099cae956efcacb4acddfa606baeaa30d97ba6a",
+      "audits/receipts_full_producer_20260905/constructor_receipt_review.md": "1887f0b69b2b00763ba3d1e208397b5757bd29a24deac2c88e32afe25b4d95bf",
+      "audits/receipts_full_producer_20260905/constructor_closure_review.md": "0ad512e70d36b3c74b451993ca1e7faebcb12549c0a0f3b3c63e041fff38b836",
+      "audits/receipts_full_producer_20260905/README.md": "95ad4d9ce9dcba6f6c995b1a16f4fcafafc7ad6489411e784a998d0664b3fd2b",
+      "audits/receipts_full_producer_20260905/lazy_alias_next_step_review.md": "418dfd4728f063cec0e65573d026215f2dcdb7897d4343c635a81614e1fa6324",
+      "audits/receipts_full_producer_20260905/source_delta_review.md": "f09fcb53c23ee40730b375df1168d379a34bd98d61612d1b69f85f8c0465df81",
+      "audits/receipts_full_cpp_20260905/portal_next_step_review.md": "07ec591547c8b38776b1036234d94d9d866cdc33565cdfd5b404e7712aabe901",
+      "audits/receipts_full_cpp_20260905/semantic_review.md": "2aa2f34b9d6288f49391895cd5751d1b6cab2e5fedd044c3b8931780ac3f6d1c",
+      "audits/receipts_full_cpp_20260905/constructor_receipt_review.md": "1ae05ee7bf6759ba75bf8353b80cd619280ee4ee8af240941b5c7a819db347e1",
+      "audits/receipts_full_cpp_20260905/README.md": "9f3206019944763dffdda967c52a279380fc267da85a7e9d3b66e9f35fd45768",
+      "audits/receipts_gabriel_20260905/level_proof_review.md": "6c490b57c167aa3eaedfec28ec922c2e73963aafa4bfb113e266017490abec20",
+      "audits/receipts_gabriel_20260905/minimal_certificate_review.md": "16d1a0597e8199401be62e0ef6337d5df64b1c9d70506448a1caa35a6330a411",
+      "audits/receipts_gabriel_20260905/full_proof_review.md": "921b438f06ae5e6599536c01c27c1574c8c115d046fcf0defbe3124323fecf3d",
+      "audits/receipts_gabriel_20260905/README.md": "106410e4f9f26550df05dd3c72d6965c73ab0d5d460c4e9538dad5358ddbef7f",
+      "audits/receipts_gabriel_20260905/full_certificate_review.md": "845e5612539410a65f83dedc58776defc710f3993bbe93c3df38f7171b6311bd",
+      "audits/receipts_gabriel_20260905/counterfixture_scope.md": "07ffda35e808e439ee98f0e3ae16862b9d437529d468543fdcce1454ead8688e",
+      "audits/receipts_horizontal_20260905/README.md": "49961ab9026c9f1455cea969cadd3f901804ca75389554c55bdcefd6fcf36f85",
+      "audits/receipts_front_compiled_20260905/README.md": "02253bef52137f6900fa07d9b033610a2ef6210966a999e67e371f216c4ead02",
+      "audits/receipts_vertical_20260905/README.md": "d13c7b90df6c9bd396a686ddc678c8e25391da506879a1467dc943fa9dfb38a2",
+      "audits/receipts_meb_native_20260905/qualification/snapshots/protocol/disassembly_review_root.md": "964d5ea703be17335e58307e6c22176778c12053f87273745cff6610890a6dd6",
+      "audits/receipts_meb_native_20260905/qualification/snapshots/protocol/README.md": "6924b2d950e768e2e43646bd6499ae60caa42e02f204197d12c38242df9fd332",
+      "audits/receipts_meb_native_20260905/qualification/snapshots/authority/build/v7_meb_dual_budget_cost_plan/PROTOCOL.md": "4a76f875485f39a7b0c5707e53f82c635cc1dfdab73bf595bf8348681b8f9ea7"
+    }
+  },
+  "nominal_outputs_byte_identical": true,
+  "build_run_closure": [
+    {
+      "name": "O2",
+      "checked": true,
+      "local_dependencies": 20,
+      "binary_sha256": "7bf1424b31ad38d7f2da97032316cc9d361d42eb5a06a125613a7de3cbf17d94"
+    },
+    {
+      "name": "sanitized",
+      "checked": true,
+      "local_dependencies": 20,
+      "binary_sha256": "4a1e6ba97d8e1fa11b2ac86fe9e688d1e5b9428cb2d691118f80219ecd229ccb"
+    },
+    {
+      "name": "stale_terminal",
+      "checked": true,
+      "local_dependencies": 20,
+      "binary_sha256": "7abaa102f2ed1c4ba2261bfc081ea4a383f9fdb84d0df3527d4ef1c5840a8270"
+    },
+    {
+      "name": "reset_support_budget",
+      "checked": true,
+      "local_dependencies": 20,
+      "binary_sha256": "0163010c09f7922338ce793b128e4a0016302465ba2cf9e9dd47839c1c95a2bf"
+    },
+    {
+      "name": "omit_portal",
+      "checked": true,
+      "local_dependencies": 20,
+      "binary_sha256": "58aad4eeb5078dcc546fca0449c753214d11524414474236c98f2293482fbbdf"
+    }
+  ],
+  "judgment_invocations": [
+    [
+      "taskset",
+      "-c",
+      "0",
+      "python3",
+      "-B",
+      "morsehgp3D_v7/audits/full_producer_run.py",
+      "judge"
+    ],
+    [
+      "taskset",
+      "-c",
+      "0",
+      "python3",
+      "-B",
+      "-O",
+      "morsehgp3D_v7/audits/full_producer_run.py",
+      "judge"
+    ]
+  ],
+  "current_source_matches": {
+    "morsehgp3D_v7/src/forest/full_gabriel.hpp": true,
+    "morsehgp3D_v7/src/forest/full_certificate.hpp": true,
+    "morsehgp3D_v7/src/lanes/keys.hpp": true,
+    "morsehgp3D_v7/src/core/device.hpp": true,
+    "morsehgp3D_v7/src/core/intmath.hpp": true,
+    "morsehgp3D_v7/src/core/types.hpp": true,
+    "morsehgp3D_v7/src/lanes/level.hpp": true,
+    "morsehgp3D_v7/src/core/wide.hpp": true,
+    "morsehgp3D_v7/src/core/mutants.hpp": true,
+    "morsehgp3D_v7/src/forest/silent_incidence.hpp": true,
+    "morsehgp3D_v7/src/forest/fold.hpp": true,
+    "morsehgp3D_v7/src/parallel/pool.hpp": true,
+    "morsehgp3D_v7/src/parallel/sort.hpp": true,
+    "morsehgp3D_v7/src/lanes/q2.hpp": true,
+    "morsehgp3D_v7/src/lanes/q3.hpp": true,
+    "morsehgp3D_v7/src/tree/cloud_index.hpp": true,
+    "morsehgp3D_v7/src/core/morton.hpp": true,
+    "morsehgp3D_v7/src/lanes/q4.hpp": true,
+    "morsehgp3D_v7/src/pipeline/census.hpp": true
+  },
+  "temporary_cleanup": {
+    "status": "completed",
+    "directory": "morsehgp3D_v7/audits/.work_full_producer_20260905",
+    "files_removed": 7565,
+    "verified_absent": true,
+    "finished_utc": "2026-09-05T16:27:29.597247+00:00",
+    "scope": "Only this turn owned scratch: five binaries, private mutant copies, freshness snapshots and temporary publication runner. Literal nominal source capture, dependency files, patches, execution logs and all failures remain in the receipt."
+  },
+  "gcp": "not_used",
+  "public_status": "not_claimed",
+  "git_whitespace_check": {
+    "full_exit_code": 2,
+    "full_stdout": "morsehgp3D_v7/audits/receipts_full_producer_20260905/source/morsehgp3D_v7/src/core/device.hpp:13: new blank line at EOF.\nmorsehgp3D_v7/audits/receipts_full_producer_20260905/source/morsehgp3D_v7/src/core/intmath.hpp:84: new blank line at EOF.\nmorsehgp3D_v7/audits/receipts_full_producer_20260905/source/morsehgp3D_v7/src/core/morton.hpp:41: new blank line at EOF.\nmorsehgp3D_v7/audits/receipts_full_producer_20260905/source/morsehgp3D_v7/src/core/types.hpp:63: new blank line at EOF.\nmorsehgp3D_v7/audits/receipts_full_producer_20260905/source/morsehgp3D_v7/src/core/wide.hpp:93: new blank line at EOF.\nmorsehgp3D_v7/audits/receipts_full_producer_20260905/source/morsehgp3D_v7/src/lanes/keys.hpp:125: new blank line at EOF.\nmorsehgp3D_v7/audits/receipts_full_producer_20260905/source/morsehgp3D_v7/src/lanes/level.hpp:75: new blank line at EOF.\nmorsehgp3D_v7/audits/receipts_full_producer_20260905/source/morsehgp3D_v7/src/lanes/q2.hpp:37: new blank line at EOF.\nmorsehgp3D_v7/audits/receipts_full_producer_20260905/source/morsehgp3D_v7/src/lanes/q3.hpp:205: new blank line at EOF.\nmorsehgp3D_v7/audits/receipts_full_producer_20260905/source/morsehgp3D_v7/src/lanes/q4.hpp:168: new blank line at EOF.\nmorsehgp3D_v7/audits/receipts_full_producer_20260905/source/morsehgp3D_v7/src/tree/cloud_index.hpp:256: new blank line at EOF.\n",
+    "interpretation": "Eleven copied product headers have an existing final blank line. Literal source evidence is preserved byte-for-byte, not reformatted. No authored file warning.",
+    "authored_command": [
+      "git",
+      "diff",
+      "--cached",
+      "--check",
+      "--",
+      "morsehgp3D_v7/audits/",
+      ":(exclude)morsehgp3D_v7/audits/receipts_full_producer_20260905/source/"
+    ],
+    "authored_exit_code": 0,
+    "authored_stdout": "",
+    "authored_stderr": ""
+  }
+}

@@ -1,0 +1,403 @@
+{
+  "schema": "mhgp7_lazy_alias_next_step_math_review_v1",
+  "closed_at_utc": "2026-09-05T16:22:37.025956+00:00",
+  "frame": {
+    "phase": "exploration_v7_hors_registre",
+    "backend": "cpu_reference",
+    "profile": "quantized_u16_input_only",
+    "mode": "audit_independant_math_and_architecture",
+    "public_status": "not_claimed"
+  },
+  "verdict": "lazy_alias_dispatcher_mathematically_sufficient_under_declared_authorities_and_local_checks",
+  "coordination_capture": {
+    "path": "audits/COORDINATION_MORSEHGP3D_V7.md",
+    "whole_sha256_as_read": "3575cd32e0778275cf5051b236749defaa5d4f9203740eb1d47aa47df5e367a5",
+    "section_start_line": 757,
+    "section_sha256": "9052fb2a02d0184c053d643767085bd80d136b31af4b2cb41b8b6fdb7b152f56",
+    "section_utf8_exact": "### Question suivante motivée par les volumes d'alias\n\nSur le premier probe 8k/s8, K9 atteint déjà 4 606 779 alias. Sans changer\nles octets actuellement mesurés, une piste à contre-lire serait de ne plus\ninstaller systématiquement les facettes égales des directes, voire de ne\nmémoriser que les minima et les facettes strictes effectivement demandées.\nOn conserverait TOUJOURS l'ancre de chaque directe après fermeture du lot.\n\nLe refus initial J≤1 devrait alors changer explicitement : J=0 renverrait\nau minimum déjà connu (sinon manque d'autorité) ; J=1 avec intrus z pourrait\nidentifier la directe F+z dans le catalogue, à β(F)<a, réutiliser la MEB\nde F et normaliser son ancre pré-lot sans descente ni MEB de F+z. J≥2\ngarderait la descente actuelle. Ce n'est pas une omission de rattachement :\nles incidences égales seraient résolues au premier usage ultérieur plutôt\nqu'installées par K+1 labels dès la naissance de la directe.\n\nL'enjeu est un échange explicite entre résidence et MEB/census répétés ;\naucun gain de temps n'est supposé. La table actuelle et ses refus restent\ninchangés pendant la campagne. Merci de vérifier si ces ancres de directes\net les minima suffisent à rendre ce dispatcher paresseux complet, notamment\npour les continuations muettes et les lots simultanés. Un budget de cache\nne pourrait alors jamais remplacer l'autorité terminale ou le coût du miss.\n"
+  },
+  "source_pins": [
+    {
+      "path": "morsehgp3D_v7/src/forest/full_gabriel.hpp",
+      "sha256_as_read": "e02d163ced2074d6b91fe810c112fb946aca56a7724c8e2ae586e3baee97c170"
+    },
+    {
+      "path": "morsehgp3D_v7/src/forest/silent_incidence.hpp",
+      "sha256_as_read": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76"
+    },
+    {
+      "path": "morsehgp3D_v7/docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md",
+      "sha256_as_read": "35e4f833864f1e854d5015a380cc241ce084393ee2f789c7555c91eeef3fc5a6"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/receipts_full_cpp_20260905/portal_next_step_review.md",
+      "sha256_as_read": "07ec591547c8b38776b1036234d94d9d866cdc33565cdfd5b404e7712aabe901"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/receipts_full_producer_20260905/semantic_review.md",
+      "sha256_as_read": "2395d7114a44afd183b9b1299099cae956efcacb4acddfa606baeaa30d97ba6a"
+    }
+  ],
+  "permanent_authorities": [
+    "complete exact regular Gabriel K catalogue with minimum-to-birth-node binding",
+    "complete exact regular Gabriel K+1 catalogue with anchor for every processed direct including no-ops",
+    "historical successor relation preserving normalization at the strict target cut"
+  ],
+  "optional_derived_storage": "cache of resolved strict facets; cache capacity zero allowed under separately declared policy",
+  "dispatcher": [
+    {
+      "case": "known_minimum_or_cached_facet",
+      "action": "normalize historical token at a-minus and check priorness"
+    },
+    {
+      "case": "J0_after_completed_MEB_and_boundary_census",
+      "action": "look up minimum label and exact level; missing minimum/binding is authority failure; never create a late birth"
+    },
+    {
+      "case": "J1_after_completed_MEB_and_boundary_census",
+      "action": "D0=F+z shares F MEB, support and level; full-label lookup plus exact-level/prior-anchor checks; normalize without recomputing D0"
+    },
+    {
+      "case": "J>=2",
+      "action": "existing strictly decreasing descent with per-step checks and authorized prior terminal"
+    }
+  ],
+  "closed_arguments": [
+    "only essential removals require strict parents; equal facets can be omitted from storage",
+    "J1 retained unique intruder plus completed global shell check certifies exactly the saturated direct F+z",
+    "strict initial level excludes same-batch terminal",
+    "atomic DSU sees identical old parents and therefore identical FULL output by induction",
+    "all direct anchors remain required by this resolver, including no-op connections",
+    "cache eviction only causes recomputation from permanent authority, never deletion of a mathematical attachment"
+  ],
+  "analytic_J1_fixture": {
+    "status": "proposed_analytically_derived_not_executed_by_this_review",
+    "order": 2,
+    "points": [
+      {
+        "id": 0,
+        "name": "A",
+        "xyz": [
+          0,
+          5,
+          0
+        ]
+      },
+      {
+        "id": 1,
+        "name": "B",
+        "xyz": [
+          4,
+          5,
+          0
+        ]
+      },
+      {
+        "id": 2,
+        "name": "C",
+        "xyz": [
+          2,
+          6,
+          0
+        ]
+      },
+      {
+        "id": 3,
+        "name": "W",
+        "xyz": [
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "gabriel_minima": [
+      {
+        "label": [
+          0,
+          2
+        ],
+        "level": [
+          5,
+          4
+        ]
+      },
+      {
+        "label": [
+          1,
+          2
+        ],
+        "level": [
+          5,
+          4
+        ]
+      },
+      {
+        "label": [
+          0,
+          3
+        ],
+        "level": [
+          29,
+          4
+        ]
+      },
+      {
+        "label": [
+          1,
+          3
+        ],
+        "level": [
+          29,
+          4
+        ]
+      }
+    ],
+    "gabriel_connections": [
+      {
+        "label": [
+          0,
+          1,
+          2
+        ],
+        "support": [
+          0,
+          1
+        ],
+        "level": [
+          4,
+          1
+        ],
+        "center": [
+          [
+            2,
+            1
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      },
+      {
+        "label": [
+          0,
+          1,
+          3
+        ],
+        "support": [
+          0,
+          1,
+          3
+        ],
+        "level": [
+          841,
+          100
+        ],
+        "center": [
+          [
+            2,
+            1
+          ],
+          [
+            29,
+            10
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    ],
+    "power_of_C_relative_to_ABW_radius_squared": [
+      6,
+      5
+    ],
+    "other_triangles": [
+      {
+        "label": [
+          0,
+          2,
+          3
+        ],
+        "support": [
+          2,
+          3
+        ],
+        "level": [
+          9,
+          1
+        ],
+        "strict_foreign_intruder": 1
+      },
+      {
+        "label": [
+          1,
+          2,
+          3
+        ],
+        "support": [
+          2,
+          3
+        ],
+        "level": [
+          9,
+          1
+        ],
+        "strict_foreign_intruder": 0
+      }
+    ],
+    "omitted_equal_facet": [
+      0,
+      1
+    ],
+    "later_requesting_direct": [
+      0,
+      1,
+      3
+    ],
+    "request_cut": [
+      841,
+      100
+    ],
+    "J1_intruder": 2,
+    "retrieved_direct": [
+      0,
+      1,
+      2
+    ],
+    "retrieved_level": [
+      4,
+      1
+    ],
+    "expected_canonical_batches": [
+      {
+        "level": [
+          5,
+          4
+        ],
+        "births": [
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "merges": []
+      },
+      {
+        "level": [
+          4,
+          1
+        ],
+        "births": [],
+        "merges": [
+          [
+            0,
+            1
+          ]
+        ]
+      },
+      {
+        "level": [
+          29,
+          4
+        ],
+        "births": [
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            3
+          ]
+        ],
+        "merges": []
+      },
+      {
+        "level": [
+          841,
+          100
+        ],
+        "births": [],
+        "merges": [
+          [
+            2,
+            3,
+            4
+          ]
+        ]
+      }
+    ],
+    "correction_to_proposed_AC_label": "AB is the equal facet with single intruder C; AC is a Gabriel minimum and belongs to J0"
+  },
+  "additional_fixture_proposals": [
+    {
+      "scope": "combinatorial_protocol_only_no_geometric_realizability_claim",
+      "case": "no_op_direct_anchor_then_intervening_merge",
+      "expected": "normalize its old token to current strict root, even though direct created no node"
+    },
+    {
+      "scope": "future_dispatcher_test_not_executed",
+      "case": "capacity_zero_or_forced_cache_eviction",
+      "expected": "same accepted forest under sufficient work budgets; misses charged anew"
+    },
+    {
+      "scope": "future_negative_tests_not_executed",
+      "cases": [
+        "old J<=1 refusal retained after deleting aliases",
+        "terminal selected only by radius",
+        "same-batch terminal allowed",
+        "no-op anchor forgotten",
+        "historical token used without normalization",
+        "minimum/direct authority evicted",
+        "post-eviction miss not charged"
+      ]
+    }
+  ],
+  "cost": {
+    "strict_requests": "V<=4D for D direct records",
+    "cache_residence": "at most explicitly declared C entries, separate from permanent minima/direct authority",
+    "physical_MEB_calls_on_success": "M+S, where M requests actually invoke initial MEB+census and S descent replacements execute",
+    "time_gain_claimed": false,
+    "RSS_gain_claimed": false,
+    "old_caps_success_transferred": false,
+    "budgets_persistent_per_order": true,
+    "eviction_does_not_refund_cumulative_work": true
+  },
+  "limits": [
+    "mathematical proposal only; e02d163c initial J<=1 guard remains unchanged",
+    "no compiled proof or new campaign attributed",
+    "cache policy and counter semantics require explicit new contract",
+    "global boundary check must finish even after two witnesses",
+    "local irregularity or work-budget refusal remains possible",
+    "no full Gamma architecture required",
+    "no changes requested to running measured source"
+  ],
+  "execution": {
+    "builds": 0,
+    "product_runs": 0,
+    "oracle_runs": 0,
+    "benchmarks": 0,
+    "git_commands": 0,
+    "product_writes": 0,
+    "gcp_used": false
+  },
+  "note": {
+    "path": "morsehgp3D_v7/audits/receipts_full_producer_20260905/lazy_alias_next_step_review.md",
+    "sha256": "418dfd4728f063cec0e65573d026215f2dcdb7897d4343c635a81614e1fa6324"
+  },
+  "link_checks": {
+    "count": 3,
+    "all_exist": true
+  }
+}

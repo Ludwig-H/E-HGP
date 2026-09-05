@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/sanitized.bin"
+  ],
+  "exit_code": 0,
+  "started_utc": "2026-09-05T15:57:17.863370+00:00",
+  "finished_utc": "2026-09-05T15:57:18.112162+00:00",
+  "environment_override": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "stdout": "sanitized_output.json",
+  "stdout_sha256": "9587acd7157fdbeb56b721c023695029f4cf50821e138b67b34eff940addb384",
+  "stderr": "sanitized_stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "binary_sha256": "4a1e6ba97d8e1fa11b2ac86fe9e688d1e5b9428cb2d691118f80219ecd229ccb",
+  "input_sha256": "5323a58158df37ddc4854918884edc174e6f70cbe50d3e395afc0f6983f921c3"
+}

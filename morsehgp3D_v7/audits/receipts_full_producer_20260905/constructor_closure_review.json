@@ -1,0 +1,483 @@
+{
+  "schema": "mhgp7-full-producer-constructor-closure-counterreview-v1",
+  "status": "completed_bounded_retry_and_final_pin_counterverification",
+  "phase": "exploration_v7_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "review_started_utc": "2026-09-05T16:02:02.933993+00:00",
+  "review_finished_utc": "2026-09-05T16:02:03.043249+00:00",
+  "verdict": "Release 7/7 from immutable first review; initial sanitizer 0/7 LSan/ptrace failure preserved; second constructor ROOT-context attempt 7/7 on identical instrumented binaries with leak checking retained. Source and binary final inventories close consistently.",
+  "attribution": "Read-only independent counterverification of constructor retry; no auditor C++ execution in this task. ROOT denotes the constructor agent context, not a documented operating-system uid.",
+  "previous_immutable_review": {
+    "constructor_receipt_review.json": {
+      "sha256": "8d224db1199546afe49ac77c6ac91cbf946d845add1a3afcd8b1f1173fa04d27",
+      "unchanged": true
+    },
+    "constructor_receipt_review.md": {
+      "sha256": "1887f0b69b2b00763ba3d1e208397b5757bd29a24deac2c88e32afe25b4d95bf",
+      "unchanged": true
+    }
+  },
+  "source_before_after": {
+    "source_count": 56,
+    "snapshots": {
+      "before_configure": "2026-09-05T15:32:13.577580+00:00",
+      "before_ROOT_attempt2": "2026-09-05T15:47:34.951735+00:00",
+      "attempt2_named_before": "2026-09-05T15:42:25.640434+00:00",
+      "after_campaign": "2026-09-05T15:54:53.872021+00:00"
+    },
+    "all_snapshot_files_equal": true,
+    "current_worktree_matches": true,
+    "product_header_sha256": "e02d163ced2074d6b91fe810c112fb946aca56a7724c8e2ae586e3baee97c170",
+    "pin_authority_reused": "constructor_receipt_review.json source_before.files",
+    "continuous_mutation_monitor": false
+  },
+  "retry_command": {
+    "command": "taskset -c 0 env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 ctest --test-dir build/v7_full_gabriel_20260905_san -j 1 -V --output-on-failure -R '^mhgp7_full_(certificate|gabriel)($|_)' --output-junit /workspaces/E-HGP/build/v7_full_gabriel_20260905_san/full_gabriel_root_attempt2.xml",
+    "started_utc": {
+      "current_time": "2026-09-05 15:47:57 UTC"
+    },
+    "ended_utc": {
+      "current_time": "2026-09-05 15:48:12 UTC"
+    },
+    "exit_code": 0,
+    "permission_override": "none",
+    "sanitizers_disabled": false,
+    "process_context_observed_before": {
+      "TracerPid": 0,
+      "NoNewPrivs": 0,
+      "Seccomp": 0
+    }
+  },
+  "parsed_argv": [
+    "taskset",
+    "-c",
+    "0",
+    "env",
+    "ASAN_OPTIONS=detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1",
+    "ctest",
+    "--test-dir",
+    "build/v7_full_gabriel_20260905_san",
+    "-j",
+    "1",
+    "-V",
+    "--output-on-failure",
+    "-R",
+    "^mhgp7_full_(certificate|gabriel)($|_)",
+    "--output-junit",
+    "/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/full_gabriel_root_attempt2.xml"
+  ],
+  "process_context_authority": "TracerPid/NoNewPrivs/Seccomp fields are preserved constructor observations before invocation; no raw per-test /proc snapshot is supplied.",
+  "retry": {
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0,
+    "command_exit_code": 0,
+    "junit_timestamp": "2026-09-05T15:47:57",
+    "junit_hostname": "",
+    "verbose_elapsed_seconds": 1.32,
+    "summed_test_seconds": 1.3029906,
+    "tests": [
+      {
+        "name": "mhgp7_full_certificate",
+        "engine_exit_code": 0,
+        "expected_engine_exit_code": 0,
+        "ctest_passed": true,
+        "command": "\"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate\" \"-DARGS=--selftest\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"",
+        "counts": {
+          "positives": 11,
+          "build_refusals": 0,
+          "read_refusals": 3,
+          "allocation_failures": 0,
+          "checks": 68,
+          "failures": 0,
+          "floor": 1
+        },
+        "raw_output_sha256": "19ee90253ceedc7ed2109378ff2521ae5174b2436c07aa3ab93af967ada7e1a2",
+        "same_full_output_as_release": true,
+        "junit_time_seconds": 0.0270778
+      },
+      {
+        "name": "mhgp7_full_certificate_rejects",
+        "engine_exit_code": 0,
+        "expected_engine_exit_code": 0,
+        "ctest_passed": true,
+        "command": "\"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate\" \"-DARGS=--rejects\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"",
+        "counts": {
+          "positives": 13,
+          "build_refusals": 45,
+          "read_refusals": 19,
+          "allocation_failures": 15,
+          "checks": 218,
+          "failures": 0,
+          "floor": 1
+        },
+        "raw_output_sha256": "716534d3aa0e07411b16423bf211f388a3e52109ad3ac5324857910b18588746",
+        "same_full_output_as_release": true,
+        "junit_time_seconds": 0.0302231
+      },
+      {
+        "name": "mhgp7_full_gabriel",
+        "engine_exit_code": 0,
+        "expected_engine_exit_code": 0,
+        "ctest_passed": true,
+        "command": "\"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate\" \"-DARGS=--selftest\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"",
+        "counts": {
+          "clouds": 10,
+          "catalogues": 30,
+          "records": 136,
+          "orders": 67,
+          "cuts": 1492,
+          "isolated_cuts": 1379,
+          "permutations": 27,
+          "named": 24,
+          "rejections": 0,
+          "shell_refusals": 0,
+          "authority_refutations": 0,
+          "checks": 43701,
+          "failures": 0,
+          "floor": 1
+        },
+        "raw_output_sha256": "c6895937d9b154775ed3ce860555dc9db3f8f2e89e5df902c695a04de3e481c0",
+        "same_full_output_as_release": true,
+        "junit_time_seconds": 0.5857
+      },
+      {
+        "name": "mhgp7_full_gabriel_rejects",
+        "engine_exit_code": 0,
+        "expected_engine_exit_code": 0,
+        "ctest_passed": true,
+        "command": "\"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate\" \"-DARGS=--rejects\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"",
+        "counts": {
+          "clouds": 13,
+          "catalogues": 36,
+          "records": 157,
+          "orders": 68,
+          "cuts": 1524,
+          "isolated_cuts": 1403,
+          "permutations": 27,
+          "named": 24,
+          "rejections": 80,
+          "shell_refusals": 1,
+          "authority_refutations": 1,
+          "checks": 44982,
+          "failures": 0,
+          "floor": 1
+        },
+        "raw_output_sha256": "4ecd1bb4a770cf486da8e94416080c90c45b0ee0f39544f53702ef51a68baae3",
+        "same_full_output_as_release": true,
+        "junit_time_seconds": 0.571375
+      },
+      {
+        "name": "mhgp7_full_gabriel_bad_argument",
+        "engine_exit_code": 2,
+        "expected_engine_exit_code": 2,
+        "ctest_passed": true,
+        "command": "\"/usr/bin/cmake\" \"-DEXPECTED=2\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate\" \"-DARGS=--unknown\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"",
+        "counts": {},
+        "raw_output_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "same_full_output_as_release": true,
+        "junit_time_seconds": 0.023315
+      },
+      {
+        "name": "mhgp7_full_gabriel_allocation",
+        "engine_exit_code": 0,
+        "expected_engine_exit_code": 0,
+        "ctest_passed": true,
+        "command": "\"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate\" \"-DARGS=--selftest\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"",
+        "counts": {
+          "positives": 3,
+          "portal_positives": 3,
+          "allocations": 102,
+          "fault_runs": 102,
+          "denied": 102,
+          "escaped": 0,
+          "checks": 786,
+          "failures": 0,
+          "floor": 1
+        },
+        "raw_output_sha256": "3aaf787b3d224cd3b872ff9232bb1cc6ef1eca9f1091be5919a6a27bc61b09a2",
+        "same_full_output_as_release": true,
+        "junit_time_seconds": 0.0416576
+      },
+      {
+        "name": "mhgp7_full_gabriel_allocation_bad_argument",
+        "engine_exit_code": 2,
+        "expected_engine_exit_code": 2,
+        "ctest_passed": true,
+        "command": "\"/usr/bin/cmake\" \"-DEXPECTED=2\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate\" \"-DARGS=--unknown\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"",
+        "counts": {},
+        "raw_output_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "same_full_output_as_release": true,
+        "junit_time_seconds": 0.0236421
+      }
+    ],
+    "xml_LastTest_verbose_agree": true,
+    "all_test_outputs_identical_to_release": true,
+    "capture_matches_live_dedicated_XML_and_LastTest": true
+  },
+  "binary_final_pins": {
+    "build/v7_full_gabriel_20260905/mhgp7_full_certificate_gate": {
+      "sha256": "446111a83c7e453f50fcc09a9ebb1fcdef10a7a672d2ee4efe5429a962eb850a",
+      "bytes": 107888,
+      "same_previous_review": true,
+      "same_before_after_campaign": true
+    },
+    "build/v7_full_gabriel_20260905/mhgp7_full_gabriel_gate": {
+      "sha256": "a920e2d5914f337b0607f9086bfc0c40d431d1ec5a810515576e0c6d7e3db0d3",
+      "bytes": 530736,
+      "same_previous_review": true,
+      "same_before_after_campaign": true
+    },
+    "build/v7_full_gabriel_20260905/mhgp7_full_gabriel_allocation_gate": {
+      "sha256": "75f82b233b71b6718632440a9fdf2a87f6f3175f98f70916e789ef5253138af6",
+      "bytes": 408928,
+      "same_previous_review": true,
+      "same_before_after_campaign": true
+    },
+    "build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate": {
+      "sha256": "6210dd200cdf1574106ff04c60738609cbe710e39f65daf92b203b3567b7f4f0",
+      "bytes": 2948776,
+      "same_previous_review": true,
+      "same_before_after_campaign": true
+    },
+    "build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate": {
+      "sha256": "baa6b02d950e326d068093ccc0ecb49d90e6107dedd74809af6a5c1b766126d6",
+      "bytes": 15961520,
+      "same_previous_review": true,
+      "same_before_after_campaign": true
+    },
+    "build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate": {
+      "sha256": "9472664ceab01abdd9a0823ec5fc20133895301a9aef7e7e74490d8a82f480a2",
+      "bytes": 12947928,
+      "same_previous_review": true,
+      "same_before_after_campaign": true
+    }
+  },
+  "sanitizer_same_three_binaries_before_first_after_first_before_second_and_final": true,
+  "compiler_capture_refs_to_previous_review": [
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/release/mhgp7_full_certificate_gate/dependencies.txt",
+      "sha256": "29f928d98fd57f8aafe05af0efc8b20ea6450bbb9e099918454efd8cb1952d70",
+      "bytes": 10130,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905/CMakeFiles/mhgp7_full_certificate_gate.dir/tests/full_certificate_gate.cpp.o.d"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/release/mhgp7_full_certificate_gate/flags.txt",
+      "sha256": "f41da400921d45c4bb984b4219aa314ac45b86df5dfabe06aae5b7113ce008f1",
+      "bytes": 235,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905/CMakeFiles/mhgp7_full_certificate_gate.dir/flags.make"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/release/mhgp7_full_certificate_gate/link.txt",
+      "sha256": "d83681bf311f56f77113b468c85a9e9ddc3d05d1effab2ae79aa49e66635d84e",
+      "bytes": 135,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905/CMakeFiles/mhgp7_full_certificate_gate.dir/link.txt"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/release/mhgp7_full_gabriel_gate/dependencies.txt",
+      "sha256": "88aae30c5ef9809b4303d6ba96dd40f8eea67e7944f9f9d644ef7e77ed7b5afc",
+      "bytes": 17987,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905/CMakeFiles/mhgp7_full_gabriel_gate.dir/tests/full_gabriel_gate.cpp.o.d"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/release/mhgp7_full_gabriel_gate/flags.txt",
+      "sha256": "f41da400921d45c4bb984b4219aa314ac45b86df5dfabe06aae5b7113ce008f1",
+      "bytes": 235,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905/CMakeFiles/mhgp7_full_gabriel_gate.dir/flags.make"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/release/mhgp7_full_gabriel_gate/link.txt",
+      "sha256": "34dbba5d65890c25174c325a8db8bcb4faae7d7cec98c24a2af1be6118ecef0c",
+      "bytes": 123,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905/CMakeFiles/mhgp7_full_gabriel_gate.dir/link.txt"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/release/mhgp7_full_gabriel_allocation_gate/dependencies.txt",
+      "sha256": "12a686983504d5dd00cf384f54bef57956f2a11b17944bbd076b6af55d775064",
+      "bytes": 17663,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905/CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/tests/full_gabriel_allocation_gate.cpp.o.d"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/release/mhgp7_full_gabriel_allocation_gate/flags.txt",
+      "sha256": "f41da400921d45c4bb984b4219aa314ac45b86df5dfabe06aae5b7113ce008f1",
+      "bytes": 235,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905/CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/flags.make"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/release/mhgp7_full_gabriel_allocation_gate/link.txt",
+      "sha256": "667851210f0fe7ce1600eb3bcd2428db5853211b9e958e45d8ef6e76033ceee7",
+      "bytes": 156,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905/CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/link.txt"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized/mhgp7_full_certificate_gate/dependencies.txt",
+      "sha256": "29f928d98fd57f8aafe05af0efc8b20ea6450bbb9e099918454efd8cb1952d70",
+      "bytes": 10130,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905_san/CMakeFiles/mhgp7_full_certificate_gate.dir/tests/full_certificate_gate.cpp.o.d"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized/mhgp7_full_certificate_gate/flags.txt",
+      "sha256": "a368e2163ef5fdca4d081632315e06d64649078ede0b8f72ffd493970cf75845",
+      "bytes": 300,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905_san/CMakeFiles/mhgp7_full_certificate_gate.dir/flags.make"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized/mhgp7_full_certificate_gate/link.txt",
+      "sha256": "58e30d8b19a33deab54f70e41cb102b89c1cc6c0283e9277fc9d2b8d4f52198d",
+      "bytes": 237,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905_san/CMakeFiles/mhgp7_full_certificate_gate.dir/link.txt"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized/mhgp7_full_gabriel_gate/dependencies.txt",
+      "sha256": "88aae30c5ef9809b4303d6ba96dd40f8eea67e7944f9f9d644ef7e77ed7b5afc",
+      "bytes": 17987,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905_san/CMakeFiles/mhgp7_full_gabriel_gate.dir/tests/full_gabriel_gate.cpp.o.d"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized/mhgp7_full_gabriel_gate/flags.txt",
+      "sha256": "a368e2163ef5fdca4d081632315e06d64649078ede0b8f72ffd493970cf75845",
+      "bytes": 300,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905_san/CMakeFiles/mhgp7_full_gabriel_gate.dir/flags.make"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized/mhgp7_full_gabriel_gate/link.txt",
+      "sha256": "413c6f9f937db7a3f9cdd89ab9e6f41c885c64e5b12492c5f5d0100c7c21f312",
+      "bytes": 225,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905_san/CMakeFiles/mhgp7_full_gabriel_gate.dir/link.txt"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized/mhgp7_full_gabriel_allocation_gate/dependencies.txt",
+      "sha256": "12a686983504d5dd00cf384f54bef57956f2a11b17944bbd076b6af55d775064",
+      "bytes": 17663,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905_san/CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/tests/full_gabriel_allocation_gate.cpp.o.d"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized/mhgp7_full_gabriel_allocation_gate/flags.txt",
+      "sha256": "a368e2163ef5fdca4d081632315e06d64649078ede0b8f72ffd493970cf75845",
+      "bytes": 300,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905_san/CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/flags.make"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized/mhgp7_full_gabriel_allocation_gate/link.txt",
+      "sha256": "591fb2628983d6035d3ed1b8e3ba623d9763416d1ee88e63b620f675d5fc205f",
+      "bytes": 258,
+      "previous_raw_capture": "build/v7_full_gabriel_20260905_san/CMakeFiles/mhgp7_full_gabriel_allocation_gate.dir/link.txt"
+    }
+  ],
+  "failed_initial_attempt": {
+    "passed": 0,
+    "failed": 7,
+    "preserved_constructor_captures": {
+      "sanitized_attempt1/junit.xml": {
+        "sha256": "dd880bc51d50bc58539e7e21940c24832904aa68fc3f32064dfb6f99203c432d",
+        "bytes": 4570,
+        "previous_review_field": [
+          "initial_sanitizer_failure_raw",
+          "build/v7_full_gabriel_20260905_san/qualification.xml"
+        ]
+      },
+      "sanitized_attempt1/LastTest.txt": {
+        "sha256": "d94abde45a9f17d6aefb7f13009f37ea91c14cbc81fb09f776a95358949b55db",
+        "bytes": 8273,
+        "previous_review_field": [
+          "initial_sanitizer_failure_raw",
+          "build/v7_full_gabriel_20260905_san/Testing/Temporary/LastTest.log"
+        ]
+      }
+    },
+    "failure_diagnosis": "fatal LSan/ptrace environment message, engine exit 1; no product defect inference or retrospective pass",
+    "retry_xml_routing": "qualification.xml remains attempt1; full_gabriel_root_attempt2.xml and sanitized_attempt2/junit.xml are attempt2. Current LastTest belongs to attempt2."
+  },
+  "bounded_counts_unchanged": {
+    "nominal_orders": 67,
+    "nominal_cuts": 1492,
+    "base_cloud_order_pairs": 40,
+    "permuted_repetitions": 27,
+    "rejects_orders": 68,
+    "rejects_cuts": 1524,
+    "targeted_refusals": 80,
+    "allocation_injections": 102,
+    "allocation_denied": 102,
+    "allocation_escaped": 0,
+    "nominal_max_n": 8,
+    "producer_K9_K10_unexercised": true
+  },
+  "limitations": [
+    "This closes the seven named targeted CTests, not the historical full F suite, performance campaign or public product exactness.",
+    "The command includes taskset -c 0, detect_leaks=1 and halt-on-error options. The command receipt reports no permission override or disabled sanitizer. This inspector did not measure CPU affinity or tracing of each child itself.",
+    "No standalone raw /proc context file, per-test environment dump or OS uid capture accompanies the compact pre-invocation context fields; do not equate the ROOT agent label with superuser privilege.",
+    "The second JUnit has an empty hostname; original environment_before identifies the shared Codespaces host. Timing is gate/oracle/injection work, not a producer or whole-tour benchmark.",
+    "All six binary pins and 56 source pins match before/after snapshots. This is not a hermetic toolchain image or proof that no transient edit occurred between snapshots.",
+    "A final package README/qualification manifest/checksum aggregate may still be assembled; available final source/binary inventories and closed raw attempts suffice for this bounded execution verdict, not for an unobserved later publication seal.",
+    "Catalogue completeness and exact regularity remain external input authority; no new CLI/export, vertical, mass or larger-n guarantee follows. The first frozen review retains its timestamped partial state and is not rewritten."
+  ],
+  "missing_capture_limits": [
+    "raw per-test process-context/environment snapshots",
+    "operating-system uid of ROOT agent context",
+    "whole-package final publication seal at this observation"
+  ],
+  "raw_new_capture": {
+    "morsehgp3D_v7/receipts/full_gabriel_20260905/root_sanitized_before.json": {
+      "sha256": "889c2bd83549b9c942e738312f761ecffb0fe02a1a643529a1a52943f6c57be0",
+      "bytes": 9347,
+      "utf8": "{\n  \"captured_utc\": \"2026-09-05T15:47:34.951735+00:00\",\n  \"files\": {\n    \"morsehgp3D_v7/CMakeLists.txt\": {\n      \"bytes\": 76597,\n      \"sha256\": \"7274e9be3ba42f391c06d66d5ab0caa451849fac36685630a43af0f32b5edf95\"\n    },\n    \"morsehgp3D_v7/cmake/run_expect.cmake\": {\n      \"bytes\": 1624,\n      \"sha256\": \"7bb9af4eddbea7e7a66619c92491dc11c22a49d7b3b46bddd6b2c25b20b2d605\"\n    },\n    \"morsehgp3D_v7/oracle/full_gamma.hpp\": {\n      \"bytes\": 11325,\n      \"sha256\": \"a17732d2bd7861a3e7e3f76d029da3b2078ce4ebf0b64f7d7571e5060de24f0c\"\n    },\n    \"morsehgp3D_v7/oracle/obig.hpp\": {\n      \"bytes\": 10780,\n      \"sha256\": \"0e3e9241503e7979fb7da06e97a0a0006362cf4da381c7ce2c66d86acdabf8d5\"\n    },\n    \"morsehgp3D_v7/src/cloud/families.hpp\": {\n      \"bytes\": 27400,\n      \"sha256\": \"bff4ff92368c3ced40b0367b426d4aff2e56371896b03603b72089ef5944ed11\"\n    },\n    \"morsehgp3D_v7/src/core/caps.hpp\": {\n      \"bytes\": 4274,\n      \"sha256\": \"d388c877bf4ca8c0fc164148f176959530a0ceff3052640402db3dcd3c256912\"\n    },\n    \"morsehgp3D_v7/src/core/device.hpp\": {\n      \"bytes\": 484,\n      \"sha256\": \"1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37\"\n    },\n    \"morsehgp3D_v7/src/core/dint.hpp\": {\n      \"bytes\": 14212,\n      \"sha256\": \"936ddf3304e5237c233f25db4cdc168e57a12dc32761dfa8d06d9ca9209721ad\"\n    },\n    \"morsehgp3D_v7/src/core/inline_stack.hpp\": {\n      \"bytes\": 1675,\n      \"sha256\": \"59bdc34eab997583e8221469fdc5e2b9109dfc516cc54356397eebb1bb8aeb42\"\n    },\n    \"morsehgp3D_v7/src/core/intmath.hpp\": {\n      \"bytes\": 2238,\n      \"sha256\": \"6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54\"\n    },\n    \"morsehgp3D_v7/src/core/morton.hpp\": {\n      \"bytes\": 1377,\n      \"sha256\": \"67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e\"\n    },\n    \"morsehgp3D_v7/src/core/mutants.hpp\": {\n      \"bytes\": 11457,\n      \"sha256\": \"870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5\"\n    },\n    \"morsehgp3D_v7/src/core/parse.hpp\": {\n      \"bytes\": 556,\n      \"sha256\": \"f576762564648c91a8e0106d4d35fada559dfe4fbf03214405debe061b77f4b9\"\n    },\n    \"morsehgp3D_v7/src/core/sha256.hpp\": {\n      \"bytes\": 13460,\n      \"sha256\": \"b675835e9bd05a0ca1fb63dfeaa6fa99d3521b761c35c50b1b51f0aac259798d\"\n    },\n    \"morsehgp3D_v7/src/core/types.hpp\": {\n      \"bytes\": 2537,\n      \"sha256\": \"913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca\"\n    },\n    \"morsehgp3D_v7/src/core/wide.hpp\": {\n      \"bytes\": 2954,\n      \"sha256\": \"a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85\"\n    },\n    \"morsehgp3D_v7/src/forest/fold.hpp\": {\n      \"bytes\": 62689,\n      \"sha256\": \"b11d02c86db5f8ae8cb12965f12e425548f9f049fb4626259790b32cd584928c\"\n    },\n    \"morsehgp3D_v7/src/forest/full_certificate.hpp\": {\n      \"bytes\": 12991,\n      \"sha256\": \"463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2\"\n    },\n    \"morsehgp3D_v7/src/forest/full_gabriel.hpp\": {\n      \"bytes\": 21054,\n      \"sha256\": \"e02d163ced2074d6b91fe810c112fb946aca56a7724c8e2ae586e3baee97c170\"\n    },\n    \"morsehgp3D_v7/src/forest/plateau.hpp\": {\n      \"bytes\": 7623,\n      \"sha256\": \"9d40af95f4429c02fb4201dfd12608e58c00c593c7c4905e2304e4b4ae37ac49\"\n    },\n    \"morsehgp3D_v7/src/forest/render.hpp\": {\n      \"bytes\": 6059,\n      \"sha256\": \"b1f0537319328d79fe54717fc85f3cbe9abe0f479a34ee5f72153cec148f6589\"\n    },\n    \"morsehgp3D_v7/src/forest/silent_incidence.hpp\": {\n      \"bytes\": 20111,\n      \"sha256\": \"f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76\"\n    },\n    \"morsehgp3D_v7/src/gpu/census_kernels.cuh\": {\n      \"bytes\": 12124,\n      \"sha256\": \"90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947\"\n    },\n    \"morsehgp3D_v7/src/gpu/device_witness.cu\": {\n      \"bytes\": 19136,\n      \"sha256\": \"5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153\"\n    },\n    \"morsehgp3D_v7/src/gpu/executor_pool.hpp\": {\n      \"bytes\": 16727,\n      \"sha256\": \"57eb5417624f660cce219748708ef983d6b76fb0afa2c8e1c432e707a50f73aa\"\n    },\n    \"morsehgp3D_v7/src/gpu/lot_ring.hpp\": {\n      \"bytes\": 36755,\n      \"sha256\": \"d1b184b84558a9353ed52859132434bcc1f73d25ed42984d2a12a488e318ed3a\"\n    },\n    \"morsehgp3D_v7/src/gpu/pack.hpp\": {\n      \"bytes\": 2585,\n      \"sha256\": \"2d1aa40dbd4707588eb8e01be94eaea434a075d66f249206c4753ea273bda8f0\"\n    },\n    \"morsehgp3D_v7/src/gpu/pilot.hpp\": {\n      \"bytes\": 5366,\n      \"sha256\": \"d4a8de7c56be93b29fbb9b9f4be1d3500fa2c81ae665417774cc4ff0f0310c33\"\n    },\n    \"morsehgp3D_v7/src/gpu/route_c6.hpp\": {\n      \"bytes\": 22784,\n      \"sha256\": \"9d8ec293b5898e42eb9c0947dcd793ccf62cd69894b8af9f7bb6ee9aec9efa18\"\n    },\n    \"morsehgp3D_v7/src/gpu/wire.hpp\": {\n      \"bytes\": 24111,\n      \"sha256\": \"1ab6a35d4e685d7a15513ef3f082bfd07a872da9fa78bdbfea6c0b52f100c5d1\"\n    },\n    \"morsehgp3D_v7/src/io/archive.hpp\": {\n      \"bytes\": 15302,\n      \"sha256\": \"cc2243aaa1bdbe63b69f165d65152cf62d7fac32ff6c641343542c247d989430\"\n    },\n    \"morsehgp3D_v7/src/lanes/cell_grid.hpp\": {\n      \"bytes\": 18904,\n      \"sha256\": \"f888539647e4dfd2e5f89d578f5f850cbad4a30b827d0bd5bef9142b5fc4c588\"\n    },\n    \"morsehgp3D_v7/src/lanes/chord_kill.hpp\": {\n      \"bytes\": 4153,\n      \"sha256\": \"f5a4ca9b6e2fbc0ea94e8adf92f64322ab2ef5c461c588efcedf1bc9e4faa039\"\n    },\n    \"morsehgp3D_v7/src/lanes/edge_cover.hpp\": {\n      \"bytes\": 9658,\n      \"sha256\": \"3186e5b67002a2d29a50e090bc465c86690224f78eab30088c5f33595d2e4836\"\n    },\n    \"morsehgp3D_v7/src/lanes/keys.hpp\": {\n      \"bytes\": 4282,\n      \"sha256\": \"c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0\"\n    },\n    \"morsehgp3D_v7/src/lanes/level.hpp\": {\n      \"bytes\": 2622,\n      \"sha256\": \"acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c\"\n    },\n    \"morsehgp3D_v7/src/lanes/q2.hpp\": {\n      \"bytes\": 953,\n      \"sha256\": \"11049293b7ad2f7139e1699c11b2506e8af2c11a04f22dc951f33ba10406c52f\"\n    },\n    \"morsehgp3D_v7/src/lanes/q3.hpp\": {\n      \"bytes\": 7352,\n      \"sha256\": \"4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe\"\n    },\n    \"morsehgp3D_v7/src/lanes/q4.hpp\": {\n      \"bytes\": 7159,\n      \"sha256\": \"58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a\"\n    },\n    \"morsehgp3D_v7/src/lanes/sector_kill.hpp\": {\n      \"bytes\": 14129,\n      \"sha256\": \"4742ccccbcfdec847ea2e6bdded9f73b78d62e32585058b09d4b45b5951b7e06\"\n    },\n    \"morsehgp3D_v7/src/parallel/pool.hpp\": {\n      \"bytes\": 5058,\n      \"sha256\": \"5c20aabbe673e2baa1018bea893185592bc3b394d025eadd9be07542453befc6\"\n    },\n    \"morsehgp3D_v7/src/parallel/sort.hpp\": {\n      \"bytes\": 20137,\n      \"sha256\": \"ceb89f8ba42fbc3f44351f4dcbf5e347e7d66a4c85bce08f346e66a9b11f20bd\"\n    },\n    \"morsehgp3D_v7/src/pipeline/candidates.hpp\": {\n      \"bytes\": 2162,\n      \"sha256\": \"33e908458110861d4182ed915eebf312ffb67dc848744c417a5f2ddc719e793b\"\n    },\n    \"morsehgp3D_v7/src/pipeline/census.hpp\": {\n      \"bytes\": 9174,\n      \"sha256\": \"95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be\"\n    },\n    \"morsehgp3D_v7/src/pipeline/digest.hpp\": {\n      \"bytes\": 5556,\n      \"sha256\": \"d0def105ebb969c9e95b10f68e0dd480ca9fa05b2553c4a6307a0c460893e668\"\n    },\n    \"morsehgp3D_v7/src/pipeline/expand.hpp\": {\n      \"bytes\": 18672,\n      \"sha256\": \"7cafb0341344fbc7d1584001e4685e2e5bf0122fe3b7e37277f5468d5c5e1cf0\"\n    },\n    \"morsehgp3D_v7/src/pipeline/float_filter.hpp\": {\n      \"bytes\": 4221,\n      \"sha256\": \"52e07b4e4dfb1ca66e2a6218fc9c31afc9586e0a81ca5a4a846ed7727e44b7d9\"\n    },\n    \"morsehgp3D_v7/src/pipeline/generate.hpp\": {\n      \"bytes\": 68270,\n      \"sha256\": \"ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59\"\n    },\n    \"morsehgp3D_v7/src/pipeline/run.hpp\": {\n      \"bytes\": 79655,\n      \"sha256\": \"1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c\"\n    },\n    \"morsehgp3D_v7/src/spindle/spindle.hpp\": {\n      \"bytes\": 9887,\n      \"sha256\": \"f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577\"\n    },\n    \"morsehgp3D_v7/src/spindle/witness_count.hpp\": {\n      \"bytes\": 7498,\n      \"sha256\": \"f20970aa2183f6c0904d640ae5fe072894b6e0b4f7f9440277fbed77e8245803\"\n    },\n    \"morsehgp3D_v7/src/tree/cloud_index.hpp\": {\n      \"bytes\": 9612,\n      \"sha256\": \"8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95\"\n    },\n    \"morsehgp3D_v7/src/wspd/wavefront.hpp\": {\n      \"bytes\": 6557,\n      \"sha256\": \"481a0d05da0631c71d74b52d90ea84233ad9c7624221a3783f322554fdb32063\"\n    },\n    \"morsehgp3D_v7/tests/full_certificate_gate.cpp\": {\n      \"bytes\": 25751,\n      \"sha256\": \"17f5e2bafecc66556bcc1cfbfc51ed20e47cca82716ad0f2e34b1e5994a266a7\"\n    },\n    \"morsehgp3D_v7/tests/full_gabriel_allocation_gate.cpp\": {\n      \"bytes\": 14617,\n      \"sha256\": \"5d3f8e86c2ab2e89bdc7e532d6d85921d4c894c3ff3a026e1a52d809042de8a4\"\n    },\n    \"morsehgp3D_v7/tests/full_gabriel_gate.cpp\": {\n      \"bytes\": 37108,\n      \"sha256\": \"577a689b729a55039609b64873cd5a9bd006969305824f7b3eebac2708501b1f\"\n    }\n  },\n  \"same_source_pins\": true,\n  \"binaries\": {\n    \"build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate\": \"6210dd200cdf1574106ff04c60738609cbe710e39f65daf92b203b3567b7f4f0\",\n    \"build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate\": \"9472664ceab01abdd9a0823ec5fc20133895301a9aef7e7e74490d8a82f480a2\",\n    \"build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate\": \"baa6b02d950e326d068093ccc0ecb49d90e6107dedd74809af6a5c1b766126d6\"\n  }\n}\n"
+    },
+    "morsehgp3D_v7/receipts/full_gabriel_20260905/root_sanitized_attempt2_command.json": {
+      "sha256": "326fa11ec0bbbbaa76d434e862df0e65ff605957e3cf374c5a3035bf7c849569",
+      "bytes": 675,
+      "utf8": "{\n  \"command\": \"taskset -c 0 env ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 ctest --test-dir build/v7_full_gabriel_20260905_san -j 1 -V --output-on-failure -R '^mhgp7_full_(certificate|gabriel)($|_)' --output-junit /workspaces/E-HGP/build/v7_full_gabriel_20260905_san/full_gabriel_root_attempt2.xml\",\n  \"started_utc\": {\n    \"current_time\": \"2026-09-05 15:47:57 UTC\"\n  },\n  \"ended_utc\": {\n    \"current_time\": \"2026-09-05 15:48:12 UTC\"\n  },\n  \"exit_code\": 0,\n  \"permission_override\": \"none\",\n  \"sanitizers_disabled\": false,\n  \"process_context_observed_before\": {\n    \"TracerPid\": 0,\n    \"NoNewPrivs\": 0,\n    \"Seccomp\": 0\n  }\n}\n"
+    },
+    "morsehgp3D_v7/receipts/full_gabriel_20260905/source_after.json": {
+      "sha256": "7f206c50805a896a3688f7bf33d02b888316143a84bdd8c2f9955163ac32c2bf",
+      "bytes": 8954,
+      "utf8": "{\n  \"captured_utc\": \"2026-09-05T15:54:53.872021+00:00\",\n  \"files\": {\n    \"morsehgp3D_v7/CMakeLists.txt\": {\n      \"bytes\": 76597,\n      \"sha256\": \"7274e9be3ba42f391c06d66d5ab0caa451849fac36685630a43af0f32b5edf95\"\n    },\n    \"morsehgp3D_v7/cmake/run_expect.cmake\": {\n      \"bytes\": 1624,\n      \"sha256\": \"7bb9af4eddbea7e7a66619c92491dc11c22a49d7b3b46bddd6b2c25b20b2d605\"\n    },\n    \"morsehgp3D_v7/oracle/full_gamma.hpp\": {\n      \"bytes\": 11325,\n      \"sha256\": \"a17732d2bd7861a3e7e3f76d029da3b2078ce4ebf0b64f7d7571e5060de24f0c\"\n    },\n    \"morsehgp3D_v7/oracle/obig.hpp\": {\n      \"bytes\": 10780,\n      \"sha256\": \"0e3e9241503e7979fb7da06e97a0a0006362cf4da381c7ce2c66d86acdabf8d5\"\n    },\n    \"morsehgp3D_v7/src/cloud/families.hpp\": {\n      \"bytes\": 27400,\n      \"sha256\": \"bff4ff92368c3ced40b0367b426d4aff2e56371896b03603b72089ef5944ed11\"\n    },\n    \"morsehgp3D_v7/src/core/caps.hpp\": {\n      \"bytes\": 4274,\n      \"sha256\": \"d388c877bf4ca8c0fc164148f176959530a0ceff3052640402db3dcd3c256912\"\n    },\n    \"morsehgp3D_v7/src/core/device.hpp\": {\n      \"bytes\": 484,\n      \"sha256\": \"1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37\"\n    },\n    \"morsehgp3D_v7/src/core/dint.hpp\": {\n      \"bytes\": 14212,\n      \"sha256\": \"936ddf3304e5237c233f25db4cdc168e57a12dc32761dfa8d06d9ca9209721ad\"\n    },\n    \"morsehgp3D_v7/src/core/inline_stack.hpp\": {\n      \"bytes\": 1675,\n      \"sha256\": \"59bdc34eab997583e8221469fdc5e2b9109dfc516cc54356397eebb1bb8aeb42\"\n    },\n    \"morsehgp3D_v7/src/core/intmath.hpp\": {\n      \"bytes\": 2238,\n      \"sha256\": \"6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54\"\n    },\n    \"morsehgp3D_v7/src/core/morton.hpp\": {\n      \"bytes\": 1377,\n      \"sha256\": \"67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e\"\n    },\n    \"morsehgp3D_v7/src/core/mutants.hpp\": {\n      \"bytes\": 11457,\n      \"sha256\": \"870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5\"\n    },\n    \"morsehgp3D_v7/src/core/parse.hpp\": {\n      \"bytes\": 556,\n      \"sha256\": \"f576762564648c91a8e0106d4d35fada559dfe4fbf03214405debe061b77f4b9\"\n    },\n    \"morsehgp3D_v7/src/core/sha256.hpp\": {\n      \"bytes\": 13460,\n      \"sha256\": \"b675835e9bd05a0ca1fb63dfeaa6fa99d3521b761c35c50b1b51f0aac259798d\"\n    },\n    \"morsehgp3D_v7/src/core/types.hpp\": {\n      \"bytes\": 2537,\n      \"sha256\": \"913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca\"\n    },\n    \"morsehgp3D_v7/src/core/wide.hpp\": {\n      \"bytes\": 2954,\n      \"sha256\": \"a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85\"\n    },\n    \"morsehgp3D_v7/src/forest/fold.hpp\": {\n      \"bytes\": 62689,\n      \"sha256\": \"b11d02c86db5f8ae8cb12965f12e425548f9f049fb4626259790b32cd584928c\"\n    },\n    \"morsehgp3D_v7/src/forest/full_certificate.hpp\": {\n      \"bytes\": 12991,\n      \"sha256\": \"463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2\"\n    },\n    \"morsehgp3D_v7/src/forest/full_gabriel.hpp\": {\n      \"bytes\": 21054,\n      \"sha256\": \"e02d163ced2074d6b91fe810c112fb946aca56a7724c8e2ae586e3baee97c170\"\n    },\n    \"morsehgp3D_v7/src/forest/plateau.hpp\": {\n      \"bytes\": 7623,\n      \"sha256\": \"9d40af95f4429c02fb4201dfd12608e58c00c593c7c4905e2304e4b4ae37ac49\"\n    },\n    \"morsehgp3D_v7/src/forest/render.hpp\": {\n      \"bytes\": 6059,\n      \"sha256\": \"b1f0537319328d79fe54717fc85f3cbe9abe0f479a34ee5f72153cec148f6589\"\n    },\n    \"morsehgp3D_v7/src/forest/silent_incidence.hpp\": {\n      \"bytes\": 20111,\n      \"sha256\": \"f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76\"\n    },\n    \"morsehgp3D_v7/src/gpu/census_kernels.cuh\": {\n      \"bytes\": 12124,\n      \"sha256\": \"90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947\"\n    },\n    \"morsehgp3D_v7/src/gpu/device_witness.cu\": {\n      \"bytes\": 19136,\n      \"sha256\": \"5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153\"\n    },\n    \"morsehgp3D_v7/src/gpu/executor_pool.hpp\": {\n      \"bytes\": 16727,\n      \"sha256\": \"57eb5417624f660cce219748708ef983d6b76fb0afa2c8e1c432e707a50f73aa\"\n    },\n    \"morsehgp3D_v7/src/gpu/lot_ring.hpp\": {\n      \"bytes\": 36755,\n      \"sha256\": \"d1b184b84558a9353ed52859132434bcc1f73d25ed42984d2a12a488e318ed3a\"\n    },\n    \"morsehgp3D_v7/src/gpu/pack.hpp\": {\n      \"bytes\": 2585,\n      \"sha256\": \"2d1aa40dbd4707588eb8e01be94eaea434a075d66f249206c4753ea273bda8f0\"\n    },\n    \"morsehgp3D_v7/src/gpu/pilot.hpp\": {\n      \"bytes\": 5366,\n      \"sha256\": \"d4a8de7c56be93b29fbb9b9f4be1d3500fa2c81ae665417774cc4ff0f0310c33\"\n    },\n    \"morsehgp3D_v7/src/gpu/route_c6.hpp\": {\n      \"bytes\": 22784,\n      \"sha256\": \"9d8ec293b5898e42eb9c0947dcd793ccf62cd69894b8af9f7bb6ee9aec9efa18\"\n    },\n    \"morsehgp3D_v7/src/gpu/wire.hpp\": {\n      \"bytes\": 24111,\n      \"sha256\": \"1ab6a35d4e685d7a15513ef3f082bfd07a872da9fa78bdbfea6c0b52f100c5d1\"\n    },\n    \"morsehgp3D_v7/src/io/archive.hpp\": {\n      \"bytes\": 15302,\n      \"sha256\": \"cc2243aaa1bdbe63b69f165d65152cf62d7fac32ff6c641343542c247d989430\"\n    },\n    \"morsehgp3D_v7/src/lanes/cell_grid.hpp\": {\n      \"bytes\": 18904,\n      \"sha256\": \"f888539647e4dfd2e5f89d578f5f850cbad4a30b827d0bd5bef9142b5fc4c588\"\n    },\n    \"morsehgp3D_v7/src/lanes/chord_kill.hpp\": {\n      \"bytes\": 4153,\n      \"sha256\": \"f5a4ca9b6e2fbc0ea94e8adf92f64322ab2ef5c461c588efcedf1bc9e4faa039\"\n    },\n    \"morsehgp3D_v7/src/lanes/edge_cover.hpp\": {\n      \"bytes\": 9658,\n      \"sha256\": \"3186e5b67002a2d29a50e090bc465c86690224f78eab30088c5f33595d2e4836\"\n    },\n    \"morsehgp3D_v7/src/lanes/keys.hpp\": {\n      \"bytes\": 4282,\n      \"sha256\": \"c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0\"\n    },\n    \"morsehgp3D_v7/src/lanes/level.hpp\": {\n      \"bytes\": 2622,\n      \"sha256\": \"acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c\"\n    },\n    \"morsehgp3D_v7/src/lanes/q2.hpp\": {\n      \"bytes\": 953,\n      \"sha256\": \"11049293b7ad2f7139e1699c11b2506e8af2c11a04f22dc951f33ba10406c52f\"\n    },\n    \"morsehgp3D_v7/src/lanes/q3.hpp\": {\n      \"bytes\": 7352,\n      \"sha256\": \"4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe\"\n    },\n    \"morsehgp3D_v7/src/lanes/q4.hpp\": {\n      \"bytes\": 7159,\n      \"sha256\": \"58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a\"\n    },\n    \"morsehgp3D_v7/src/lanes/sector_kill.hpp\": {\n      \"bytes\": 14129,\n      \"sha256\": \"4742ccccbcfdec847ea2e6bdded9f73b78d62e32585058b09d4b45b5951b7e06\"\n    },\n    \"morsehgp3D_v7/src/parallel/pool.hpp\": {\n      \"bytes\": 5058,\n      \"sha256\": \"5c20aabbe673e2baa1018bea893185592bc3b394d025eadd9be07542453befc6\"\n    },\n    \"morsehgp3D_v7/src/parallel/sort.hpp\": {\n      \"bytes\": 20137,\n      \"sha256\": \"ceb89f8ba42fbc3f44351f4dcbf5e347e7d66a4c85bce08f346e66a9b11f20bd\"\n    },\n    \"morsehgp3D_v7/src/pipeline/candidates.hpp\": {\n      \"bytes\": 2162,\n      \"sha256\": \"33e908458110861d4182ed915eebf312ffb67dc848744c417a5f2ddc719e793b\"\n    },\n    \"morsehgp3D_v7/src/pipeline/census.hpp\": {\n      \"bytes\": 9174,\n      \"sha256\": \"95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be\"\n    },\n    \"morsehgp3D_v7/src/pipeline/digest.hpp\": {\n      \"bytes\": 5556,\n      \"sha256\": \"d0def105ebb969c9e95b10f68e0dd480ca9fa05b2553c4a6307a0c460893e668\"\n    },\n    \"morsehgp3D_v7/src/pipeline/expand.hpp\": {\n      \"bytes\": 18672,\n      \"sha256\": \"7cafb0341344fbc7d1584001e4685e2e5bf0122fe3b7e37277f5468d5c5e1cf0\"\n    },\n    \"morsehgp3D_v7/src/pipeline/float_filter.hpp\": {\n      \"bytes\": 4221,\n      \"sha256\": \"52e07b4e4dfb1ca66e2a6218fc9c31afc9586e0a81ca5a4a846ed7727e44b7d9\"\n    },\n    \"morsehgp3D_v7/src/pipeline/generate.hpp\": {\n      \"bytes\": 68270,\n      \"sha256\": \"ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59\"\n    },\n    \"morsehgp3D_v7/src/pipeline/run.hpp\": {\n      \"bytes\": 79655,\n      \"sha256\": \"1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c\"\n    },\n    \"morsehgp3D_v7/src/spindle/spindle.hpp\": {\n      \"bytes\": 9887,\n      \"sha256\": \"f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577\"\n    },\n    \"morsehgp3D_v7/src/spindle/witness_count.hpp\": {\n      \"bytes\": 7498,\n      \"sha256\": \"f20970aa2183f6c0904d640ae5fe072894b6e0b4f7f9440277fbed77e8245803\"\n    },\n    \"morsehgp3D_v7/src/tree/cloud_index.hpp\": {\n      \"bytes\": 9612,\n      \"sha256\": \"8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95\"\n    },\n    \"morsehgp3D_v7/src/wspd/wavefront.hpp\": {\n      \"bytes\": 6557,\n      \"sha256\": \"481a0d05da0631c71d74b52d90ea84233ad9c7624221a3783f322554fdb32063\"\n    },\n    \"morsehgp3D_v7/tests/full_certificate_gate.cpp\": {\n      \"bytes\": 25751,\n      \"sha256\": \"17f5e2bafecc66556bcc1cfbfc51ed20e47cca82716ad0f2e34b1e5994a266a7\"\n    },\n    \"morsehgp3D_v7/tests/full_gabriel_allocation_gate.cpp\": {\n      \"bytes\": 14617,\n      \"sha256\": \"5d3f8e86c2ab2e89bdc7e532d6d85921d4c894c3ff3a026e1a52d809042de8a4\"\n    },\n    \"morsehgp3D_v7/tests/full_gabriel_gate.cpp\": {\n      \"bytes\": 37108,\n      \"sha256\": \"577a689b729a55039609b64873cd5a9bd006969305824f7b3eebac2708501b1f\"\n    }\n  },\n  \"scope\": \"source_superset_after_release_and_root_sanitized_attempt2\"\n}\n"
+    },
+    "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized_attempt2_source_before_ctest.json": {
+      "sha256": "9c5685733f0ec00d3b314ac2dc972685ad8931b2475093fa78a6e128de4035f7",
+      "bytes": 8960,
+      "utf8": "{\n  \"captured_utc\": \"2026-09-05T15:42:25.640434+00:00\",\n  \"files\": {\n    \"morsehgp3D_v7/CMakeLists.txt\": {\n      \"bytes\": 76597,\n      \"sha256\": \"7274e9be3ba42f391c06d66d5ab0caa451849fac36685630a43af0f32b5edf95\"\n    },\n    \"morsehgp3D_v7/cmake/run_expect.cmake\": {\n      \"bytes\": 1624,\n      \"sha256\": \"7bb9af4eddbea7e7a66619c92491dc11c22a49d7b3b46bddd6b2c25b20b2d605\"\n    },\n    \"morsehgp3D_v7/oracle/full_gamma.hpp\": {\n      \"bytes\": 11325,\n      \"sha256\": \"a17732d2bd7861a3e7e3f76d029da3b2078ce4ebf0b64f7d7571e5060de24f0c\"\n    },\n    \"morsehgp3D_v7/oracle/obig.hpp\": {\n      \"bytes\": 10780,\n      \"sha256\": \"0e3e9241503e7979fb7da06e97a0a0006362cf4da381c7ce2c66d86acdabf8d5\"\n    },\n    \"morsehgp3D_v7/src/cloud/families.hpp\": {\n      \"bytes\": 27400,\n      \"sha256\": \"bff4ff92368c3ced40b0367b426d4aff2e56371896b03603b72089ef5944ed11\"\n    },\n    \"morsehgp3D_v7/src/core/caps.hpp\": {\n      \"bytes\": 4274,\n      \"sha256\": \"d388c877bf4ca8c0fc164148f176959530a0ceff3052640402db3dcd3c256912\"\n    },\n    \"morsehgp3D_v7/src/core/device.hpp\": {\n      \"bytes\": 484,\n      \"sha256\": \"1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37\"\n    },\n    \"morsehgp3D_v7/src/core/dint.hpp\": {\n      \"bytes\": 14212,\n      \"sha256\": \"936ddf3304e5237c233f25db4cdc168e57a12dc32761dfa8d06d9ca9209721ad\"\n    },\n    \"morsehgp3D_v7/src/core/inline_stack.hpp\": {\n      \"bytes\": 1675,\n      \"sha256\": \"59bdc34eab997583e8221469fdc5e2b9109dfc516cc54356397eebb1bb8aeb42\"\n    },\n    \"morsehgp3D_v7/src/core/intmath.hpp\": {\n      \"bytes\": 2238,\n      \"sha256\": \"6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54\"\n    },\n    \"morsehgp3D_v7/src/core/morton.hpp\": {\n      \"bytes\": 1377,\n      \"sha256\": \"67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e\"\n    },\n    \"morsehgp3D_v7/src/core/mutants.hpp\": {\n      \"bytes\": 11457,\n      \"sha256\": \"870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5\"\n    },\n    \"morsehgp3D_v7/src/core/parse.hpp\": {\n      \"bytes\": 556,\n      \"sha256\": \"f576762564648c91a8e0106d4d35fada559dfe4fbf03214405debe061b77f4b9\"\n    },\n    \"morsehgp3D_v7/src/core/sha256.hpp\": {\n      \"bytes\": 13460,\n      \"sha256\": \"b675835e9bd05a0ca1fb63dfeaa6fa99d3521b761c35c50b1b51f0aac259798d\"\n    },\n    \"morsehgp3D_v7/src/core/types.hpp\": {\n      \"bytes\": 2537,\n      \"sha256\": \"913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca\"\n    },\n    \"morsehgp3D_v7/src/core/wide.hpp\": {\n      \"bytes\": 2954,\n      \"sha256\": \"a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85\"\n    },\n    \"morsehgp3D_v7/src/forest/fold.hpp\": {\n      \"bytes\": 62689,\n      \"sha256\": \"b11d02c86db5f8ae8cb12965f12e425548f9f049fb4626259790b32cd584928c\"\n    },\n    \"morsehgp3D_v7/src/forest/full_certificate.hpp\": {\n      \"bytes\": 12991,\n      \"sha256\": \"463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2\"\n    },\n    \"morsehgp3D_v7/src/forest/full_gabriel.hpp\": {\n      \"bytes\": 21054,\n      \"sha256\": \"e02d163ced2074d6b91fe810c112fb946aca56a7724c8e2ae586e3baee97c170\"\n    },\n    \"morsehgp3D_v7/src/forest/plateau.hpp\": {\n      \"bytes\": 7623,\n      \"sha256\": \"9d40af95f4429c02fb4201dfd12608e58c00c593c7c4905e2304e4b4ae37ac49\"\n    },\n    \"morsehgp3D_v7/src/forest/render.hpp\": {\n      \"bytes\": 6059,\n      \"sha256\": \"b1f0537319328d79fe54717fc85f3cbe9abe0f479a34ee5f72153cec148f6589\"\n    },\n    \"morsehgp3D_v7/src/forest/silent_incidence.hpp\": {\n      \"bytes\": 20111,\n      \"sha256\": \"f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76\"\n    },\n    \"morsehgp3D_v7/src/gpu/census_kernels.cuh\": {\n      \"bytes\": 12124,\n      \"sha256\": \"90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947\"\n    },\n    \"morsehgp3D_v7/src/gpu/device_witness.cu\": {\n      \"bytes\": 19136,\n      \"sha256\": \"5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153\"\n    },\n    \"morsehgp3D_v7/src/gpu/executor_pool.hpp\": {\n      \"bytes\": 16727,\n      \"sha256\": \"57eb5417624f660cce219748708ef983d6b76fb0afa2c8e1c432e707a50f73aa\"\n    },\n    \"morsehgp3D_v7/src/gpu/lot_ring.hpp\": {\n      \"bytes\": 36755,\n      \"sha256\": \"d1b184b84558a9353ed52859132434bcc1f73d25ed42984d2a12a488e318ed3a\"\n    },\n    \"morsehgp3D_v7/src/gpu/pack.hpp\": {\n      \"bytes\": 2585,\n      \"sha256\": \"2d1aa40dbd4707588eb8e01be94eaea434a075d66f249206c4753ea273bda8f0\"\n    },\n    \"morsehgp3D_v7/src/gpu/pilot.hpp\": {\n      \"bytes\": 5366,\n      \"sha256\": \"d4a8de7c56be93b29fbb9b9f4be1d3500fa2c81ae665417774cc4ff0f0310c33\"\n    },\n    \"morsehgp3D_v7/src/gpu/route_c6.hpp\": {\n      \"bytes\": 22784,\n      \"sha256\": \"9d8ec293b5898e42eb9c0947dcd793ccf62cd69894b8af9f7bb6ee9aec9efa18\"\n    },\n    \"morsehgp3D_v7/src/gpu/wire.hpp\": {\n      \"bytes\": 24111,\n      \"sha256\": \"1ab6a35d4e685d7a15513ef3f082bfd07a872da9fa78bdbfea6c0b52f100c5d1\"\n    },\n    \"morsehgp3D_v7/src/io/archive.hpp\": {\n      \"bytes\": 15302,\n      \"sha256\": \"cc2243aaa1bdbe63b69f165d65152cf62d7fac32ff6c641343542c247d989430\"\n    },\n    \"morsehgp3D_v7/src/lanes/cell_grid.hpp\": {\n      \"bytes\": 18904,\n      \"sha256\": \"f888539647e4dfd2e5f89d578f5f850cbad4a30b827d0bd5bef9142b5fc4c588\"\n    },\n    \"morsehgp3D_v7/src/lanes/chord_kill.hpp\": {\n      \"bytes\": 4153,\n      \"sha256\": \"f5a4ca9b6e2fbc0ea94e8adf92f64322ab2ef5c461c588efcedf1bc9e4faa039\"\n    },\n    \"morsehgp3D_v7/src/lanes/edge_cover.hpp\": {\n      \"bytes\": 9658,\n      \"sha256\": \"3186e5b67002a2d29a50e090bc465c86690224f78eab30088c5f33595d2e4836\"\n    },\n    \"morsehgp3D_v7/src/lanes/keys.hpp\": {\n      \"bytes\": 4282,\n      \"sha256\": \"c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0\"\n    },\n    \"morsehgp3D_v7/src/lanes/level.hpp\": {\n      \"bytes\": 2622,\n      \"sha256\": \"acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c\"\n    },\n    \"morsehgp3D_v7/src/lanes/q2.hpp\": {\n      \"bytes\": 953,\n      \"sha256\": \"11049293b7ad2f7139e1699c11b2506e8af2c11a04f22dc951f33ba10406c52f\"\n    },\n    \"morsehgp3D_v7/src/lanes/q3.hpp\": {\n      \"bytes\": 7352,\n      \"sha256\": \"4155a1c39193b68c47504e247a36e1bbf28b2c9ecbeeb50d6285d974519563fe\"\n    },\n    \"morsehgp3D_v7/src/lanes/q4.hpp\": {\n      \"bytes\": 7159,\n      \"sha256\": \"58aac9bd57ac1a9b19ad156f6397941f67df1379e29215c50fcf268268491c4a\"\n    },\n    \"morsehgp3D_v7/src/lanes/sector_kill.hpp\": {\n      \"bytes\": 14129,\n      \"sha256\": \"4742ccccbcfdec847ea2e6bdded9f73b78d62e32585058b09d4b45b5951b7e06\"\n    },\n    \"morsehgp3D_v7/src/parallel/pool.hpp\": {\n      \"bytes\": 5058,\n      \"sha256\": \"5c20aabbe673e2baa1018bea893185592bc3b394d025eadd9be07542453befc6\"\n    },\n    \"morsehgp3D_v7/src/parallel/sort.hpp\": {\n      \"bytes\": 20137,\n      \"sha256\": \"ceb89f8ba42fbc3f44351f4dcbf5e347e7d66a4c85bce08f346e66a9b11f20bd\"\n    },\n    \"morsehgp3D_v7/src/pipeline/candidates.hpp\": {\n      \"bytes\": 2162,\n      \"sha256\": \"33e908458110861d4182ed915eebf312ffb67dc848744c417a5f2ddc719e793b\"\n    },\n    \"morsehgp3D_v7/src/pipeline/census.hpp\": {\n      \"bytes\": 9174,\n      \"sha256\": \"95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be\"\n    },\n    \"morsehgp3D_v7/src/pipeline/digest.hpp\": {\n      \"bytes\": 5556,\n      \"sha256\": \"d0def105ebb969c9e95b10f68e0dd480ca9fa05b2553c4a6307a0c460893e668\"\n    },\n    \"morsehgp3D_v7/src/pipeline/expand.hpp\": {\n      \"bytes\": 18672,\n      \"sha256\": \"7cafb0341344fbc7d1584001e4685e2e5bf0122fe3b7e37277f5468d5c5e1cf0\"\n    },\n    \"morsehgp3D_v7/src/pipeline/float_filter.hpp\": {\n      \"bytes\": 4221,\n      \"sha256\": \"52e07b4e4dfb1ca66e2a6218fc9c31afc9586e0a81ca5a4a846ed7727e44b7d9\"\n    },\n    \"morsehgp3D_v7/src/pipeline/generate.hpp\": {\n      \"bytes\": 68270,\n      \"sha256\": \"ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59\"\n    },\n    \"morsehgp3D_v7/src/pipeline/run.hpp\": {\n      \"bytes\": 79655,\n      \"sha256\": \"1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c\"\n    },\n    \"morsehgp3D_v7/src/spindle/spindle.hpp\": {\n      \"bytes\": 9887,\n      \"sha256\": \"f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577\"\n    },\n    \"morsehgp3D_v7/src/spindle/witness_count.hpp\": {\n      \"bytes\": 7498,\n      \"sha256\": \"f20970aa2183f6c0904d640ae5fe072894b6e0b4f7f9440277fbed77e8245803\"\n    },\n    \"morsehgp3D_v7/src/tree/cloud_index.hpp\": {\n      \"bytes\": 9612,\n      \"sha256\": \"8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95\"\n    },\n    \"morsehgp3D_v7/src/wspd/wavefront.hpp\": {\n      \"bytes\": 6557,\n      \"sha256\": \"481a0d05da0631c71d74b52d90ea84233ad9c7624221a3783f322554fdb32063\"\n    },\n    \"morsehgp3D_v7/tests/full_certificate_gate.cpp\": {\n      \"bytes\": 25751,\n      \"sha256\": \"17f5e2bafecc66556bcc1cfbfc51ed20e47cca82716ad0f2e34b1e5994a266a7\"\n    },\n    \"morsehgp3D_v7/tests/full_gabriel_allocation_gate.cpp\": {\n      \"bytes\": 14617,\n      \"sha256\": \"5d3f8e86c2ab2e89bdc7e532d6d85921d4c894c3ff3a026e1a52d809042de8a4\"\n    },\n    \"morsehgp3D_v7/tests/full_gabriel_gate.cpp\": {\n      \"bytes\": 37108,\n      \"sha256\": \"577a689b729a55039609b64873cd5a9bd006969305824f7b3eebac2708501b1f\"\n    }\n  },\n  \"scope\": \"source_superset_after_failed_attempt1_before_sanitized_attempt2\"\n}\n"
+    },
+    "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized_attempt2/junit.xml": {
+      "sha256": "f87204567021e7d2941a17d1f13884c1876805459ce83dae1fdfc661f8b8cd22",
+      "bytes": 2975,
+      "utf8": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<testsuite name=\"(empty)\"\n\ttests=\"7\"\n\tfailures=\"0\"\n\tdisabled=\"0\"\n\tskipped=\"0\"\n\thostname=\"\"\n\ttime=\"1\"\n\ttimestamp=\"2026-09-05T15:47:57\"\n\t>\n\t<testcase name=\"mhgp7_full_certificate\" classname=\"mhgp7_full_certificate\" time=\"0.0270778\" status=\"run\">\n\t\t<properties>\n\t\t\t<property name=\"cmake_labels\" value=\"full_certificate;gate\"/>\n\t\t</properties>\n\t\t<system-out>full_certificate mode=--selftest authority=structural_only positives=11 build_refusals=0 read_refusals=3 allocation_failures=0 checks=68 failures=0 floor=1\n\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp7_full_certificate_rejects\" classname=\"mhgp7_full_certificate_rejects\" time=\"0.0302231\" status=\"run\">\n\t\t<properties>\n\t\t\t<property name=\"cmake_labels\" value=\"full_certificate;gate\"/>\n\t\t</properties>\n\t\t<system-out>full_certificate mode=--rejects authority=structural_only positives=13 build_refusals=45 read_refusals=19 allocation_failures=15 checks=218 failures=0 floor=1\n\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp7_full_gabriel\" classname=\"mhgp7_full_gabriel\" time=\"0.5857\" status=\"run\">\n\t\t<properties>\n\t\t\t<property name=\"cmake_labels\" value=\"full_gabriel;gate;oracle\"/>\n\t\t</properties>\n\t\t<system-out>full_gabriel mode=--selftest authority=relative_supplied_catalogues oracle=OBig_FULL clouds=10 catalogues=30 records=136 orders=67 cuts=1492 isolated_cuts=1379 permutations=27 named=24 rejections=0 shell_refusals=0 authority_refutations=0 checks=43701 failures=0 floor=1\n\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp7_full_gabriel_rejects\" classname=\"mhgp7_full_gabriel_rejects\" time=\"0.571375\" status=\"run\">\n\t\t<properties>\n\t\t\t<property name=\"cmake_labels\" value=\"full_gabriel;gate;oracle\"/>\n\t\t</properties>\n\t\t<system-out>full_gabriel mode=--rejects authority=relative_supplied_catalogues oracle=OBig_FULL clouds=13 catalogues=36 records=157 orders=68 cuts=1524 isolated_cuts=1403 permutations=27 named=24 rejections=80 shell_refusals=1 authority_refutations=1 checks=44982 failures=0 floor=1\n\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp7_full_gabriel_bad_argument\" classname=\"mhgp7_full_gabriel_bad_argument\" time=\"0.023315\" status=\"run\">\n\t\t<properties>\n\t\t\t<property name=\"cmake_labels\" value=\"full_gabriel;gate\"/>\n\t\t</properties>\n\t\t<system-out>\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp7_full_gabriel_allocation\" classname=\"mhgp7_full_gabriel_allocation\" time=\"0.0416576\" status=\"run\">\n\t\t<properties>\n\t\t\t<property name=\"cmake_labels\" value=\"full_gabriel;gate\"/>\n\t\t</properties>\n\t\t<system-out>full_gabriel_allocation positives=3 portal_positives=3 allocations=102 fault_runs=102 denied=102 escaped=0 checks=786 failures=0 floor=1\n\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp7_full_gabriel_allocation_bad_argument\" classname=\"mhgp7_full_gabriel_allocation_bad_argument\" time=\"0.0236421\" status=\"run\">\n\t\t<properties>\n\t\t\t<property name=\"cmake_labels\" value=\"full_gabriel;gate\"/>\n\t\t</properties>\n\t\t<system-out>\n</system-out>\n\t</testcase>\n</testsuite>\n"
+    },
+    "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized_attempt2/LastTest.txt": {
+      "sha256": "68a4c9f1d801071539590baa8937fc4b46190d20d30fbac8d5d1d9a442c8d63d",
+      "bytes": 6898,
+      "utf8": "Start testing: Sep 05 15:47 UTC\n----------------------------------------------------------\n1/392 Testing: mhgp7_full_certificate\n1/392 Test: mhgp7_full_certificate\nCommand: \"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate\" \"-DARGS=--selftest\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\nDirectory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\n\"mhgp7_full_certificate\" start time: Sep 05 15:47 UTC\nOutput:\n----------------------------------------------------------\nfull_certificate mode=--selftest authority=structural_only positives=11 build_refusals=0 read_refusals=3 allocation_failures=0 checks=68 failures=0 floor=1\n\n<end of output>\nTest time =   0.03 sec\n----------------------------------------------------------\nTest Passed.\n\"mhgp7_full_certificate\" end time: Sep 05 15:47 UTC\n\"mhgp7_full_certificate\" time elapsed: 00:00:00\n----------------------------------------------------------\n\n2/392 Testing: mhgp7_full_certificate_rejects\n2/392 Test: mhgp7_full_certificate_rejects\nCommand: \"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate\" \"-DARGS=--rejects\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\nDirectory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\n\"mhgp7_full_certificate_rejects\" start time: Sep 05 15:47 UTC\nOutput:\n----------------------------------------------------------\nfull_certificate mode=--rejects authority=structural_only positives=13 build_refusals=45 read_refusals=19 allocation_failures=15 checks=218 failures=0 floor=1\n\n<end of output>\nTest time =   0.03 sec\n----------------------------------------------------------\nTest Passed.\n\"mhgp7_full_certificate_rejects\" end time: Sep 05 15:47 UTC\n\"mhgp7_full_certificate_rejects\" time elapsed: 00:00:00\n----------------------------------------------------------\n\n3/392 Testing: mhgp7_full_gabriel\n3/392 Test: mhgp7_full_gabriel\nCommand: \"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate\" \"-DARGS=--selftest\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\nDirectory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\n\"mhgp7_full_gabriel\" start time: Sep 05 15:47 UTC\nOutput:\n----------------------------------------------------------\nfull_gabriel mode=--selftest authority=relative_supplied_catalogues oracle=OBig_FULL clouds=10 catalogues=30 records=136 orders=67 cuts=1492 isolated_cuts=1379 permutations=27 named=24 rejections=0 shell_refusals=0 authority_refutations=0 checks=43701 failures=0 floor=1\n\n<end of output>\nTest time =   0.59 sec\n----------------------------------------------------------\nTest Passed.\n\"mhgp7_full_gabriel\" end time: Sep 05 15:47 UTC\n\"mhgp7_full_gabriel\" time elapsed: 00:00:00\n----------------------------------------------------------\n\n4/392 Testing: mhgp7_full_gabriel_rejects\n4/392 Test: mhgp7_full_gabriel_rejects\nCommand: \"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate\" \"-DARGS=--rejects\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\nDirectory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\n\"mhgp7_full_gabriel_rejects\" start time: Sep 05 15:47 UTC\nOutput:\n----------------------------------------------------------\nfull_gabriel mode=--rejects authority=relative_supplied_catalogues oracle=OBig_FULL clouds=13 catalogues=36 records=157 orders=68 cuts=1524 isolated_cuts=1403 permutations=27 named=24 rejections=80 shell_refusals=1 authority_refutations=1 checks=44982 failures=0 floor=1\n\n<end of output>\nTest time =   0.57 sec\n----------------------------------------------------------\nTest Passed.\n\"mhgp7_full_gabriel_rejects\" end time: Sep 05 15:47 UTC\n\"mhgp7_full_gabriel_rejects\" time elapsed: 00:00:00\n----------------------------------------------------------\n\n5/392 Testing: mhgp7_full_gabriel_bad_argument\n5/392 Test: mhgp7_full_gabriel_bad_argument\nCommand: \"/usr/bin/cmake\" \"-DEXPECTED=2\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate\" \"-DARGS=--unknown\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\nDirectory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\n\"mhgp7_full_gabriel_bad_argument\" start time: Sep 05 15:47 UTC\nOutput:\n----------------------------------------------------------\n\n<end of output>\nTest time =   0.02 sec\n----------------------------------------------------------\nTest Passed.\n\"mhgp7_full_gabriel_bad_argument\" end time: Sep 05 15:47 UTC\n\"mhgp7_full_gabriel_bad_argument\" time elapsed: 00:00:00\n----------------------------------------------------------\n\n6/392 Testing: mhgp7_full_gabriel_allocation\n6/392 Test: mhgp7_full_gabriel_allocation\nCommand: \"/usr/bin/cmake\" \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate\" \"-DARGS=--selftest\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\nDirectory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\n\"mhgp7_full_gabriel_allocation\" start time: Sep 05 15:47 UTC\nOutput:\n----------------------------------------------------------\nfull_gabriel_allocation positives=3 portal_positives=3 allocations=102 fault_runs=102 denied=102 escaped=0 checks=786 failures=0 floor=1\n\n<end of output>\nTest time =   0.04 sec\n----------------------------------------------------------\nTest Passed.\n\"mhgp7_full_gabriel_allocation\" end time: Sep 05 15:47 UTC\n\"mhgp7_full_gabriel_allocation\" time elapsed: 00:00:00\n----------------------------------------------------------\n\n7/392 Testing: mhgp7_full_gabriel_allocation_bad_argument\n7/392 Test: mhgp7_full_gabriel_allocation_bad_argument\nCommand: \"/usr/bin/cmake\" \"-DEXPECTED=2\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate\" \"-DARGS=--unknown\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\nDirectory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\n\"mhgp7_full_gabriel_allocation_bad_argument\" start time: Sep 05 15:47 UTC\nOutput:\n----------------------------------------------------------\n\n<end of output>\nTest time =   0.02 sec\n----------------------------------------------------------\nTest Passed.\n\"mhgp7_full_gabriel_allocation_bad_argument\" end time: Sep 05 15:47 UTC\n\"mhgp7_full_gabriel_allocation_bad_argument\" time elapsed: 00:00:00\n----------------------------------------------------------\n\nEnd testing: Sep 05 15:47 UTC\n\nfull_certificate =   0.06 sec*proc\n\nfull_gabriel =   1.25 sec*proc\n\ngate =   1.30 sec*proc\n\noracle =   1.16 sec*proc\n\n"
+    },
+    "morsehgp3D_v7/receipts/full_gabriel_20260905/root_sanitized_ctest_attempt2.txt": {
+      "sha256": "255abd44d9a28e5db30563c4a5ee653dfd470488fcf02ccdff623306aa7c5657",
+      "bytes": 5617,
+      "utf8": "Internal ctest changing into directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\nUpdateCTestConfiguration  from :/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/DartConfiguration.tcl\nUpdateCTestConfiguration  from :/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/DartConfiguration.tcl\nTest project /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\nConstructing a list of tests\nDone constructing a list of tests\nUpdating test list for fixtures\nAdded 0 tests to meet fixture requirements\nChecking test dependency graph...\nChecking test dependency graph end\ntest 1\n    Start 1: mhgp7_full_certificate\n\n1: Test command: /usr/bin/cmake \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate\" \"-DARGS=--selftest\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\n1: Working Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\n1: Test timeout computed to be: 60\n1: full_certificate mode=--selftest authority=structural_only positives=11 build_refusals=0 read_refusals=3 allocation_failures=0 checks=68 failures=0 floor=1\n1: \n1/7 Test #1: mhgp7_full_certificate .......................   Passed    0.03 sec\ntest 2\n    Start 2: mhgp7_full_certificate_rejects\n\n2: Test command: /usr/bin/cmake \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate\" \"-DARGS=--rejects\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\n2: Working Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\n2: Test timeout computed to be: 60\n2: full_certificate mode=--rejects authority=structural_only positives=13 build_refusals=45 read_refusals=19 allocation_failures=15 checks=218 failures=0 floor=1\n2: \n2/7 Test #2: mhgp7_full_certificate_rejects ...............   Passed    0.03 sec\ntest 3\n    Start 3: mhgp7_full_gabriel\n\n3: Test command: /usr/bin/cmake \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate\" \"-DARGS=--selftest\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\n3: Working Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\n3: Test timeout computed to be: 60\n3: full_gabriel mode=--selftest authority=relative_supplied_catalogues oracle=OBig_FULL clouds=10 catalogues=30 records=136 orders=67 cuts=1492 isolated_cuts=1379 permutations=27 named=24 rejections=0 shell_refusals=0 authority_refutations=0 checks=43701 failures=0 floor=1\n3: \n3/7 Test #3: mhgp7_full_gabriel ...........................   Passed    0.59 sec\ntest 4\n    Start 4: mhgp7_full_gabriel_rejects\n\n4: Test command: /usr/bin/cmake \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate\" \"-DARGS=--rejects\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\n4: Working Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\n4: Test timeout computed to be: 60\n4: full_gabriel mode=--rejects authority=relative_supplied_catalogues oracle=OBig_FULL clouds=13 catalogues=36 records=157 orders=68 cuts=1524 isolated_cuts=1403 permutations=27 named=24 rejections=80 shell_refusals=1 authority_refutations=1 checks=44982 failures=0 floor=1\n4: \n4/7 Test #4: mhgp7_full_gabriel_rejects ...................   Passed    0.57 sec\ntest 5\n    Start 5: mhgp7_full_gabriel_bad_argument\n\n5: Test command: /usr/bin/cmake \"-DEXPECTED=2\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate\" \"-DARGS=--unknown\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\n5: Working Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\n5: Test timeout computed to be: 60\n5: \n5/7 Test #5: mhgp7_full_gabriel_bad_argument ..............   Passed    0.02 sec\ntest 6\n    Start 6: mhgp7_full_gabriel_allocation\n\n6: Test command: /usr/bin/cmake \"-DEXPECTED=0\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate\" \"-DARGS=--selftest\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\n6: Working Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\n6: Test timeout computed to be: 60\n6: full_gabriel_allocation positives=3 portal_positives=3 allocations=102 fault_runs=102 denied=102 escaped=0 checks=786 failures=0 floor=1\n6: \n6/7 Test #6: mhgp7_full_gabriel_allocation ................   Passed    0.04 sec\ntest 7\n    Start 7: mhgp7_full_gabriel_allocation_bad_argument\n\n7: Test command: /usr/bin/cmake \"-DEXPECTED=2\" \"-DCMD=/workspaces/E-HGP/build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate\" \"-DARGS=--unknown\" \"-DEXPECT_LINE=\" \"-DEXPECT_PREFIX=\" \"-P\" \"/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake\"\n7: Working Directory: /workspaces/E-HGP/build/v7_full_gabriel_20260905_san\n7: Test timeout computed to be: 60\n7: \n7/7 Test #7: mhgp7_full_gabriel_allocation_bad_argument ...   Passed    0.02 sec\n\nThe following tests passed:\n\tmhgp7_full_certificate\n\tmhgp7_full_certificate_rejects\n\tmhgp7_full_gabriel\n\tmhgp7_full_gabriel_rejects\n\tmhgp7_full_gabriel_bad_argument\n\tmhgp7_full_gabriel_allocation\n\tmhgp7_full_gabriel_allocation_bad_argument\n\n100% tests passed, 0 tests failed out of 7\n\nLabel Time Summary:\nfull_certificate    =   0.06 sec*proc (2 tests)\nfull_gabriel        =   1.25 sec*proc (5 tests)\ngate                =   1.30 sec*proc (7 tests)\noracle              =   1.16 sec*proc (2 tests)\n\nTotal Test time (real) =   1.32 sec\n"
+    },
+    "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized_binaries_before_ctest.txt": {
+      "sha256": "eadece83d7a983268f615b80a6b2b03f65857b99f8b8c3104bae8335d2e05ea9",
+      "bytes": 390,
+      "utf8": "6210dd200cdf1574106ff04c60738609cbe710e39f65daf92b203b3567b7f4f0  build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate\nbaa6b02d950e326d068093ccc0ecb49d90e6107dedd74809af6a5c1b766126d6  build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate\n9472664ceab01abdd9a0823ec5fc20133895301a9aef7e7e74490d8a82f480a2  build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate\n"
+    },
+    "morsehgp3D_v7/receipts/full_gabriel_20260905/sanitized_attempt1/binaries_after.txt": {
+      "sha256": "eadece83d7a983268f615b80a6b2b03f65857b99f8b8c3104bae8335d2e05ea9",
+      "bytes": 390,
+      "utf8": "6210dd200cdf1574106ff04c60738609cbe710e39f65daf92b203b3567b7f4f0  build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate\nbaa6b02d950e326d068093ccc0ecb49d90e6107dedd74809af6a5c1b766126d6  build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate\n9472664ceab01abdd9a0823ec5fc20133895301a9aef7e7e74490d8a82f480a2  build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate\n"
+    },
+    "morsehgp3D_v7/receipts/full_gabriel_20260905/binaries_after.txt": {
+      "sha256": "8b2e62f0fb7cbf3e2984dcfb0a4e2dbdc62fcd61602fd5ec3fa00aa5097e9a6f",
+      "bytes": 768,
+      "utf8": "446111a83c7e453f50fcc09a9ebb1fcdef10a7a672d2ee4efe5429a962eb850a  build/v7_full_gabriel_20260905/mhgp7_full_certificate_gate\na920e2d5914f337b0607f9086bfc0c40d431d1ec5a810515576e0c6d7e3db0d3  build/v7_full_gabriel_20260905/mhgp7_full_gabriel_gate\n75f82b233b71b6718632440a9fdf2a87f6f3175f98f70916e789ef5253138af6  build/v7_full_gabriel_20260905/mhgp7_full_gabriel_allocation_gate\n6210dd200cdf1574106ff04c60738609cbe710e39f65daf92b203b3567b7f4f0  build/v7_full_gabriel_20260905_san/mhgp7_full_certificate_gate\nbaa6b02d950e326d068093ccc0ecb49d90e6107dedd74809af6a5c1b766126d6  build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_gate\n9472664ceab01abdd9a0823ec5fc20133895301a9aef7e7e74490d8a82f480a2  build/v7_full_gabriel_20260905_san/mhgp7_full_gabriel_allocation_gate\n"
+    }
+  },
+  "all_observed_pins_stable_during_review": true,
+  "actions": {
+    "builds_executed": 0,
+    "engine_executions": 0,
+    "git_mutations": 0,
+    "gcp_used": false,
+    "writes": "only constructor_closure_review.md and .json"
+  }
+}

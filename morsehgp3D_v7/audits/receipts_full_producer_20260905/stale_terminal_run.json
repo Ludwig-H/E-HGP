@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_producer_20260905/stale_terminal.bin"
+  ],
+  "exit_code": 0,
+  "started_utc": "2026-09-05T15:57:17.932716+00:00",
+  "finished_utc": "2026-09-05T15:57:18.056047+00:00",
+  "environment_override": {},
+  "stdout": "stale_terminal_output.json",
+  "stdout_sha256": "2f4be4f98df3ec1a4db6fe4ae8a410affbc0e9c862fec0c183b478da0618e8b6",
+  "stderr": "stale_terminal_stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "binary_sha256": "7abaa102f2ed1c4ba2261bfc081ea4a383f9fdb84d0df3527d4ef1c5840a8270",
+  "input_sha256": "5323a58158df37ddc4854918884edc174e6f70cbe50d3e395afc0f6983f921c3"
+}

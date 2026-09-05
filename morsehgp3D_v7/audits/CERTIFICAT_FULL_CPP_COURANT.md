@@ -2,7 +2,7 @@
 
 5 septembre 2026, sources publiées dans `f4c0734c53a18d1e2de477ca09584c8f15c938f9`. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
-**Le premier composant FULL est qualifié pour construire et relire les forêts déjà décidées de ce corpus.** Les nœuds, minima, parents, coupes et couvertures du vrai C++ concordent avec le juge indépendant, en O2 et sous ASan/UBSan. Aucun défaut produit n’a été trouvé. Ce résultat ferme le premier jalon structurel ; la découverte des minima et des bons parents reste le prochain raccord géométrique.
+**Le premier composant FULL est qualifié pour construire et relire les forêts déjà décidées de ce corpus.** Les nœuds, minima, parents, coupes et couvertures du vrai C++ concordent avec le juge indépendant, en O2 et sous ASan/UBSan. Aucun défaut produit n’a été trouvé. Ce résultat ferme le premier jalon structurel. Le [raccord géométrique](PRODUCTEUR_FULL_GABRIEL_COURANT.md) possède désormais une qualification distincte, sans réattribuer à ce lecteur la découverte des minima ou des parents.
 
 La [preuve mathématique FULL](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md) et la présente qualification ont des objets distincts. Le composant porte justement `structural_only` et `full_minima_merge_forest_v1`. Il ne calcule aucune boule, aucun portail, aucun catalogue Gabriel, aucune verticale ou masse et n’est pas raccordé à la CLI F. Une forêt syntaxiquement valide peut omettre une fusion géométriquement nécessaire ; ce module ne prétend pas détecter cette omission.
 
@@ -53,12 +53,12 @@ La [contre-vérification des reçus constructeur](receipts_full_cpp_20260905/con
 
 Leurs limites de provenance restent explicites : `LastTest.log` est l’autorité brute, sans XML ; configure/build n’ont pas leurs sorties archivées ; les pins sont postérieurs aux tests. La nouvelle compilation indépendante et ses dépendances capturées ne réécrivent pas cette provenance historique. Les anciennes 339 portes F ne deviennent pas des portes FULL.
 
-## 5. Prochaine étape utile
+## 5. Raccord suivant et attribution conservée
 
-La [spécification du composant](../docs/CONTRAT_CERTIFICAT_FULL.md) permet maintenant de raccorder un producteur de lots FULL. Celui-ci doit émettre les minima Gabriel dès leur naissance, conserver les alias des facettes consommées, résoudre les portails vers des racines strictement antérieures et produire les multifusions atomiques. La réutilisation d’un minimum comme directe de l’ordre inférieur peut fournir son ancre verticale après fermeture du plateau inférieur.
+Le [producteur de lots FULL](PRODUCTEUR_FULL_GABRIEL_COURANT.md) a désormais sa qualification propre : minima Gabriel dès leur naissance, alias des facettes consommées, portails vers les racines strictement antérieures et multifusions atomiques. Ce rapport conserve les preuves du seul composant structurel. La réutilisation d’un minimum comme directe de l’ordre inférieur peut fournir son ancre verticale après fermeture du plateau inférieur.
 
 Le manifeste extérieur devra lier entrée, ordres, métrique, horizon, convention de coupe et succès terminal. Une coupe après le dernier événement ne prouve pas que toutes les fusions nécessaires ont été fournies. Les facettes pondérées et leur affectation temporelle restent distinctes des minima topologiques. Ce raccord ne demande ni Gamma exhaustif dans le produit, ni reprise des qualifications MEB déjà closes.
 
-La [contrelecture du prochain protocole](receipts_full_cpp_20260905/portal_next_step_review.md) justifie aussi les recherches limitées aux retraits essentiels et la réutilisation de la MEB à la première extension par un intrus. Elle précise les prémisses de catalogue, d’alias et de régularité ; elle ne transfère aucun résultat compilé au futur producteur.
+La [contrelecture du prochain protocole](receipts_full_cpp_20260905/portal_next_step_review.md) justifie aussi les recherches limitées aux retraits essentiels et la réutilisation de la MEB à la première extension par un intrus. Elle précise les prémisses de catalogue, d’alias et de régularité ; elle ne transfère aucun résultat compilé au producteur, qui possède ses propres reçus.
 
 La variante courante `G_full_structural` reconnaît les 145 fichiers du snapshot complet : 142 pins F inchangés, CMake relu et les deux nouveaux fichiers C++. Sa portée nouvelle est celle de ce module et de ses propres preuves ; les variantes D/E/F et leurs reçus restent intacts. GCP non utilisé.

@@ -1,0 +1,10 @@
+--- morsehgp3D_v7/src/forest/full_gabriel.hpp
++++ private/reset_support_budget/morsehgp3D_v7/src/forest/full_gabriel.hpp
+@@ -308,6 +308,7 @@
+   }
+   bool miniball(const std::array<i32, 11>& sites, size_t n, LocalBall& ball) {
+     if (!charge(out.stats.meb_calls, caps.max_meb_calls, "full_gabriel_meb_call_budget")) return false;
++    geometry_result.stats.meb_supports = 0;  // Private mutant.
+     return geometry.miniball(sites, n, &ball) || geometry_failed();
+   }
+   bool intruders(const LocalBall& ball, const std::array<i32, 11>& sites,

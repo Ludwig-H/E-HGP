@@ -1,6 +1,6 @@
 # Audit indépendant courant de MorseHGP3D v7
 
-Actualisé le 5 septembre 2026 depuis `f4c0734c53a18d1e2de477ca09584c8f15c938f9` ; certificat FULL C++ structurel qualifié, suffisance FULL et modèles de portails conservés, produit F réduit et acquis MEB/verticaux/p3 distincts.
+Actualisé le 5 septembre 2026 depuis `b63203b5`, producteur FULL relatif `e02d163c` capturé et qualifié indépendamment ; stockage structurel, modèles Python, produit F réduit et acquis MEB/verticaux/p3 conservent leurs attributions.
 Toutes les écritures restent dans `morsehgp3D_v7/audits/`.
 
 La suite **D** de 323 portes a été reconstruite et exécutée par l'auditeur.
@@ -8,7 +8,7 @@ Le delta q2 **E** du constructeur dispose maintenant de ses propres
 324 portes Release et de deux campagnes ciblées de 33 portes, Release
 et ASan/UBSan, dont les preuves brutes sont contre-vérifiées ici.
 Les quatre fichiers produit E restent sous la responsabilité du constructeur.
-Les 339 portes Release F et deux campagnes ciblées de 48 portes sont également contre-vérifiées depuis leurs propres reçus. Le [manifeste courant](validation_current.json) reconnaît séparément les octets D/E/F/G et affiche leur portée ; leur mélange est refusé.
+Les 339 portes Release F et deux campagnes ciblées de 48 portes sont également contre-vérifiées depuis leurs propres reçus. Le [manifeste courant](validation_current.json) reconnaît séparément les octets D/E/F/G/H et affiche leur portée ; leur mélange est refusé.
 
 ```text
 phase=exploration_v7_hors_registre
@@ -22,7 +22,9 @@ public_status=not_claimed
 
 **Le [certificat FULL du manuscrit](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md), isolés inclus, peut être beaucoup plus petit que Gamma.** Il suffit, dans le domaine déclaré, des minima Gabriel de cardinal K avec labels et niveaux, puis des vraies multifusions aux niveaux Gabriel de cardinal K+1 avec leurs parents. Les couvertures sont les unions des feuilles ; aucune croissance ponctuelle FULL n’est à publier. Les rattachements restent à certifier pendant la construction. K=n conserve sa feuille terminale ; la verticale exige les ancres inférieures fermées ; les minima ne remplacent pas l’univers pondéré de l’Algorithme 1.
 
-La [qualification des modèles Python](receipts_gabriel_20260905/README.md) retrouve Gamma sur 2 265 coupes FULL de 50 ordres. Un lecteur séparé des seuls journaux retrouve les 100 événements réduits sur les 36 ordres communs. Normal et `-O` concordent ; les mutants restent ceux des modèles d’audit. Ces résultats Python gardent leur portée. Le [lecteur C++ structurel](CERTIFICAT_FULL_CPP_COURANT.md) a maintenant sa propre qualification O2/ASan-UBSan : 4 608 coupes, 616 couvertures, 1 338 refus budgétaires et trois mutants privés. Ses 2+2 CTests constructeur sont contre-vérifiés séparément. La découverte industrielle des portails et leurs coûts restent à qualifier.
+La [qualification des modèles Python](receipts_gabriel_20260905/README.md) retrouve Gamma sur 2 265 coupes FULL de 50 ordres. Un lecteur séparé des seuls journaux retrouve les 100 événements réduits sur les 36 ordres communs. Normal et `-O` concordent ; les mutants restent ceux des modèles d’audit. Ces résultats Python gardent leur portée. Le [lecteur C++ structurel](CERTIFICAT_FULL_CPP_COURANT.md) a maintenant sa propre qualification O2/ASan-UBSan : 4 608 coupes, 616 couvertures, 1 338 refus budgétaires et trois mutants privés. Ses 2+2 CTests constructeur sont contre-vérifiés séparément. Le [producteur par portails](PRODUCTEUR_FULL_GABRIEL_COURANT.md) possède désormais sa propre qualification : 100 ordres/200 représentations, 16 506 coupes et 1 606 couvertures par build O2/ASan-UBSan, 26 refus budgétaires et trois mutants. La deuxième étape de descente est exercée. Les reçus propres 7+7 CTests sont contre-vérifiés en conservant l’échec LSan initial. La génération industrielle des catalogues, le manifeste terminal, la verticale, les masses et les coûts restent à raccorder.
+
+La [résolution des alias à la demande](receipts_full_producer_20260905/lazy_alias_next_step_review.md) est également justifiée : minima et ancres directes permanents suffisent, avec une branche explicite à un intrus. La fixture ABC/ABW est vérifiée rationnellement. Ce nouveau levier de mémoire reste une proposition à porter, distincte du C++ e02d qualifié.
 
 **Le [certificat horizontal réduit](CERTIFICAT_HORIZONTAL_COURANT.md) est fermé sur E dans son domaine CPU explicite.** La preuve relie la fenêtre de boules, le catalogue direct, les suffixes d'ancrage, le fold et les seuls deltas exportés. La bijection par inclusion des facettes conserve les points et commute entre coupes ; la régularité géométrique globale n'est pas exigée.
 
@@ -67,6 +69,7 @@ sont contenus implicitement dans cet export.
 
 | Domaine | Conclusion vérifiée | Preuves |
 | --- | --- | --- |
+| Producteur FULL relatif H | 100 ordres/200 représentations, portails à deux pas, Gamma rationnel, 26 refus et trois mutants ; propres reçus 7+7 CTests | [Qualification du producteur](PRODUCTEUR_FULL_GABRIEL_COURANT.md) |
 | Certificat FULL C++ autonome G | Deux builds indépendants, 4 608 coupes et 616 couvertures ; refus budgétaires et trois mutants ; reçus propres 2+2 CTests contre-vérifiés | [Qualification structurelle](CERTIFICAT_FULL_CPP_COURANT.md) |
 | HGP FULL et projection réduite | Preuves de minima, absence de croissance FULL, fenêtre et ancres ; modèles bornés sur 2 265 coupes FULL et 100 événements réduits retrouvés | [Décision et reçus](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md) |
 | Composition horizontale réduite E | Preuve assemblée ; pipeline et lecteur seuls contre Gamma rationnel, fold et niveaux égaux, domaine CLI | [Certificat et reçus](CERTIFICAT_HORIZONTAL_COURANT.md) |
