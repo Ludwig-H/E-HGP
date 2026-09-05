@@ -1,0 +1,17 @@
+{
+  "source_header": "21b77d29a4ba2bca453b602a8faa4564a978f4ba71af5167c164faae4ef0e1a5",
+  "changed_dependencies": [
+    "morsehgp3D_v7/src/forest/full_gabriel.hpp"
+  ],
+  "prior_header": "13c6cc72ab5065d498827bf89c6bc2a321b5e896c93a60263de52b9d800a2627",
+  "reused_inputs": {
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/fixtures.json": "c13d09188ac4165572c59e0286520029a972d6a740da8b502f70c7adffa3d881",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/fixtures.txt": "8b66b099da5ee1196166620cab1fbbc25e96b109534e47419de76c098f6fe1c5",
+    "morsehgp3D_v7/audits/receipts_full_lazy_20260905/O2_output.json": "0124f8dd670da10287156ad30edc498ec06c29f34aef1512c8f2d0e3e2d23bc3",
+    "morsehgp3D_v7/audits/full_lazy_bridge.cpp": "ca00a653ca3bd9887d9bd2d2ea62704547c8b9f3fce3137afb1cc90f65316c9d",
+    "morsehgp3D_v7/audits/full_lazy_audit.py": "a530583dea7a59658786a765396b840a519499da8abb799f2c02047793c0c6d1",
+    "morsehgp3D_v7/audits/full_producer_run.py": "24f5111676ef234280af05d4a2f28deedad9da12e52b6d620b3a3bb8e4e37447"
+  },
+  "scope": "Existing 109 orders reused as inputs, never as new execution results.",
+  "public_status": "not_claimed"
+}

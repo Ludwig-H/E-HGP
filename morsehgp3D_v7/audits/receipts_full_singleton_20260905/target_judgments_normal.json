@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "outcomes": [
+    {
+      "build": "O2",
+      "records": 40,
+      "cuts": 1200,
+      "mixed_K2_representations": 8
+    },
+    {
+      "build": "sanitized",
+      "records": 40,
+      "cuts": 1200,
+      "mixed_K2_representations": 8
+    }
+  ],
+  "public_status": "not_claimed",
+  "source_header": "21b77d29a4ba2bca453b602a8faa4564a978f4ba71af5167c164faae4ef0e1a5",
+  "script_sha256": "003dd0ced131c52d4d25a56ddbcab40d50343602e8f040727a64ddc59bd24165",
+  "scope": "Five additional orders from 26 independently checked subsets; no new allocation or performance claim"
+}

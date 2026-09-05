@@ -1,0 +1,58 @@
+{
+  "status": "refuted",
+  "reason": "lazy.identity",
+  "changed_records": 136,
+  "witnesses": [
+    {
+      "id": 24,
+      "order": 0,
+      "status": 4,
+      "reason": "full_gabriel_inconsistent_alias"
+    },
+    {
+      "id": 25,
+      "order": 4,
+      "status": 0,
+      "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues"
+    },
+    {
+      "id": 26,
+      "order": 4,
+      "status": 0,
+      "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues"
+    },
+    {
+      "id": 27,
+      "order": 4,
+      "status": 0,
+      "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues"
+    },
+    {
+      "id": 28,
+      "order": 0,
+      "status": 4,
+      "reason": "full_gabriel_inconsistent_alias"
+    },
+    {
+      "id": 29,
+      "order": 4,
+      "status": 0,
+      "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues"
+    },
+    {
+      "id": 30,
+      "order": 4,
+      "status": 0,
+      "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues"
+    },
+    {
+      "id": 31,
+      "order": 4,
+      "status": 0,
+      "reason": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues"
+    }
+  ],
+  "unchanged_records": 736,
+  "transport_exit_code": 0,
+  "public_status": "not_claimed"
+}

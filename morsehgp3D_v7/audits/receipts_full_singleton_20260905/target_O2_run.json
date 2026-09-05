@@ -1,0 +1,18 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "0",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_singleton_20260905/O2.bin"
+  ],
+  "exit_code": 0,
+  "started_utc": "2026-09-05T20:17:54.929814+00:00",
+  "finished_utc": "2026-09-05T20:17:54.942660+00:00",
+  "environment_override": {},
+  "stdout": "target_O2_output.json",
+  "stdout_sha256": "01c8479f7011f88b467b059e0f9f07f21a6cf41567029ce4b8b1bcb66d1ececb",
+  "stderr": "target_O2_stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "binary_sha256": "bb9e14aed6a2dba6c9dda53555fd990ce820cb7ad3a1bb93d90068f3e9a52217",
+  "input_sha256": "dc99339d5ee44826ebaccc54245f891ac01a9adee9880e1c4eafe91bf9851fc9"
+}

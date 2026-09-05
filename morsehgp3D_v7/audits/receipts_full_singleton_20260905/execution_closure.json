@@ -1,0 +1,12 @@
+{
+  "status": "closed",
+  "closed_utc": "2026-09-05T20:19:12.941236+00:00",
+  "cpu": 0,
+  "all_builds_and_engines_finished": true,
+  "source_drift": [],
+  "records_per_nominal_build": 912,
+  "cuts_per_nominal_build": 69120,
+  "public_status": "not_claimed",
+  "gcp": "not_used",
+  "unique_orders": 114
+}

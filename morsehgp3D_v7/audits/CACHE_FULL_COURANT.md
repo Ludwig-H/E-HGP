@@ -1,4 +1,21 @@
-# Cache FULL paresseux : qualification indépendante
+# Cache et lots FULL : qualification indépendante
+
+## Lot unitaire qualifié : 21b77d29
+
+**La spécialisation du lot à une directe conserve les forêts et les compteurs sur le corpus indépendant.** Le header `21b77d29a4ba2bca453b602a8faa4564a978f4ba71af5167c164faae4ef0e1a5` est capturé avec ses 19 dépendances produit. Deux builds neufs, O2 et ASan/UBSan avec détection des fuites, exécutent chacun **114 ordres, 912 sorties et 69 120 coupes**. Aucun défaut nominal trouvé ; qualification relative aux catalogues complets, exacts et réguliers fournis. `public_status=not_claimed`.
+
+Les [preuves propres à ce delta](receipts_full_singleton_20260905/README.md) distinguent :
+
+- 109 ordres historiques réexécutés : les 872 sorties sont identiques octet pour octet à `13c6`, y compris compteurs et préfixes refusés ; 16 plafonds exacts, 180 refus cap−1 et douze conflits d’API.
+- Le calendrier déduit de Gamma, sans observation de branche : 247 lots q2, 134 q3, 22 q4 ; 19 lots à quatre parents, 42 avec 1<U<q, 14 multi-directes et cinq consommations ultérieures d’ancres sans fusion.
+- Un supplément nécessaire : le corpus précédent n’avait aucune naissance simultanée à une directe unique. Un nuage de cinq points, proposé par le constructeur, est recalculé rationnellement sur ses 26 sous-ensembles non triviaux. Au niveau 25 et K=2, la naissance précède bien la fusion à trois parents. Ses cinq ordres ajoutent 40 sorties et 1 200 coupes par build.
+- Une mutation privée conserve les q résolutions mais perd le quatrième token au regroupement : 136 sorties changent sur 872, le juge rejette ; build et transport restent réussis. Les trois mutants historiques lazy ne sont pas réexécutés dans ce nouveau paquet.
+
+Les captures constructeur sont contre-vérifiées séparément : **17/17 Release et 17/17 ASan/UBSan**, sept binaires dont seul le différentiel singleton porte `MHGP7_TESTING`. Les nouveaux balayages comptent 49 fautes eager et 209 lazy, toutes refusées sans échappement ; les 357 paires refusées du différentiel passent. Ce sont des captures inspectées, pas des CTests relancés par l’auditeur.
+
+La relecture du delta retrouve les conditions démontrées ci-dessous : demandes dans l’ordre, premier token conservé, déduplication après résolution, naissances avant fusion et suffixe commun fermant aussi les no-op. Aucune cellule, coface ou incidence géométrique supplémentaire n’est nécessaire. La génération q4 et la normalisation ne changent pas. Les campagnes mono ultérieures, la réduction du compteur des successeurs et le SLO restent hors de cette qualification.
+
+## Témoin lazy antérieur : 13c6cc72
 
 Header gelé `13c6cc72ab5065d498827bf89c6bc2a321b5e896c93a60263de52b9d800a2627`, capturé après `6f4b4de5`. Cadre CPU u16 hors registre ; `public_status=not_claimed`.
 
@@ -29,7 +46,7 @@ La transformation doit garder les q `charge(face_visits)` puis `locate` dans l�
 
 Le nombre de naissances n’est pas borné par q. Garder `prior_count` avant elles, résoudre tous les parents avant leur installation, attribuer les IDs aux naissances puis à l’éventuelle fusion. Avec un seul parent distinct, aucune fusion ni charge de parents ; conserver néanmoins l’ancre fermée, `no_op_connections` et les alias eager avant l’élimination éventuelle du batch vide. Les lots à zéro ou plusieurs directes restent hors de cette branche.
 
-La comparaison ciblée doit conserver forêts **et compteurs logiques** entre politiques eager/C0/C1/grande capacité, avec budgets exacts et cap−1. Couvrir q2/q3/q4, quatre parents distincts, racines répétées, no-op consommé ultérieurement, une directe avec naissances simultanées et deux directes dans le même lot. Les corpus existants fournissent plusieurs de ces témoins ; les compléments géométriques doivent être admis par l’oracle. Le balayage des fautes d’allocation doit être recalculé sur les sites restants : mêmes refus transactionnels et arènes vides, sans imposer les 434 ordinaux de l’ancien programme. Cet avis ne qualifie pas le futur delta C++.
+Ces conditions sont désormais exercées par la qualification `21b77d29` ci-dessus. Les fautes d’allocation sont recalculées sur les sites restants : les 434 ordinaux du témoin lazy antérieur ne sont pas une cible à conserver.
 
 ## Normalisation : supprimer la dernière paire redondante
 

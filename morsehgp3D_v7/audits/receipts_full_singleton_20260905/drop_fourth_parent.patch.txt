@@ -1,0 +1,11 @@
+--- morsehgp3D_v7/src/forest/full_gabriel.hpp
++++ private/morsehgp3D_v7/src/forest/full_gabriel.hpp
+@@ -496,7 +496,7 @@
+       // order, even when they resolve to the same root: first-C and charges
+       // depend on this sequence. Keep the first token before any sorting.
+       Record& r = direct[direct_order[db]];
+-      single_count = r.event->q;
++      single_count = std::min<size_t>(3, r.event->q);  // Independent causal mutant.
+       for (size_t drop = 0; drop < r.event->q; ++drop) {
+         if (!charge(out.stats.face_visits, caps.max_face_visits, "full_gabriel_face_budget")) return false;
+         const FacetKey f = facet_without(r.key, r.event->support[drop]);

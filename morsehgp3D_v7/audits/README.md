@@ -5,7 +5,7 @@ Lire l’[état courant](ETAT_COURANT.md), puis le [dialogue actif](DIALOGUE_COU
 | Sujet courant | Qualification indépendante |
 | --- | --- |
 | Modèle FULL | [Décision et domaine](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md) |
-| Cache lazy, digest, first-C | [Verdict](CACHE_FULL_COURANT.md), [preuves](receipts_full_lazy_20260905/README.md) |
+| Cache lazy et lot unitaire | [Verdict](CACHE_FULL_COURANT.md), [delta qualifié](receipts_full_singleton_20260905/README.md), [témoin lazy](receipts_full_lazy_20260905/README.md) |
 | EAGER et composant structurel | [Producteur relatif](PRODUCTEUR_FULL_GABRIEL_COURANT.md), [lecteur](CERTIFICAT_FULL_CPP_COURANT.md) |
 | Mono : EAGER clos et compteurs lazy | [Bornes, attribution et diagnostic des successeurs](MONO_FULL_COURANT.md) |
 | Intégrations différées | [Questions secondaires regroupées](QUESTIONS_SECONDAIRES.md) |
@@ -25,7 +25,7 @@ Ces notes portent des arguments encore cités par le dossier principal ; elles n
 python3 -B -O morsehgp3D_v7/audits/verify_current.py
 ```
 
-Le [manifeste](validation_current.json) vérifie des sources et preuves épinglées, affiche leur portée et ne réexécute aucun test. Code 0 : une variante entière correspond ; 1 : sources ou documents à actualiser ; 2 : manifeste invalide. Un fichier non épinglé n’est pas qualifié par ce contrôle. Les variantes D à J gardent leurs autorités distinctes.
+Le [manifeste](validation_current.json) vérifie des sources et preuves épinglées, affiche leur portée et ne réexécute aucun test. Code 0 : une variante entière correspond ; 1 : sources ou documents à actualiser ; 2 : manifeste invalide. Un fichier non épinglé n’est pas qualifié par ce contrôle. Les variantes D à K gardent leurs autorités distinctes.
 
 Le [registre d’entretien](ENTRETIEN.json) donne les notes supprimées, leurs remplacements et leur version Git antérieure. Les sources, reçus scellés, contre-fixtures et échecs restent intacts. Les questions sans incidence immédiate sont raccourcies dans un seul fichier. Un nouvel audit ou push doit apporter une décision, une preuve, une correction ou un entretien utile ; aucune publication de routine sans contenu pertinent.
 

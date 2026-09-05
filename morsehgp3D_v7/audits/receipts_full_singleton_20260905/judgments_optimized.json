@@ -1,0 +1,63 @@
+{
+  "outcomes": [
+    {
+      "name": "O2",
+      "counts": {
+        "historical_eager_representations_equal": 200,
+        "portal_requests": 238,
+        "singleton_intruder_resolutions": 198,
+        "direct_lookups": 246,
+        "cache_inserts": 106,
+        "minimum_lookups": 6288,
+        "minimum_hits": 6042,
+        "cache_skips": 122,
+        "chain_steps": 48,
+        "meb_calls": 286,
+        "cache_hits": 18,
+        "cache_lookups": 246,
+        "records": 872,
+        "cuts": 67920,
+        "nodes": 6792,
+        "minima": 4336,
+        "parent_refs": 5920,
+        "exact_budget_successes": 16,
+        "budget_refusals": 180,
+        "api_conflict_refusals": 12,
+        "cross_policy_forest_comparisons": 654,
+        "no_skip_work_comparisons": 218
+      },
+      "byte_identical": true
+    },
+    {
+      "name": "sanitized",
+      "counts": {
+        "historical_eager_representations_equal": 200,
+        "portal_requests": 238,
+        "singleton_intruder_resolutions": 198,
+        "direct_lookups": 246,
+        "cache_inserts": 106,
+        "minimum_lookups": 6288,
+        "minimum_hits": 6042,
+        "cache_skips": 122,
+        "chain_steps": 48,
+        "meb_calls": 286,
+        "cache_hits": 18,
+        "cache_lookups": 246,
+        "records": 872,
+        "cuts": 67920,
+        "nodes": 6792,
+        "minima": 4336,
+        "parent_refs": 5920,
+        "exact_budget_successes": 16,
+        "budget_refusals": 180,
+        "api_conflict_refusals": 12,
+        "cross_policy_forest_comparisons": 654,
+        "no_skip_work_comparisons": 218
+      },
+      "byte_identical": true
+    }
+  ],
+  "runner_sha256": "e3871ff3fefa76c11bf853d150f5e2636e7446346cafab999da90c21161c49f8",
+  "python_optimized": true,
+  "public_status": "not_claimed"
+}

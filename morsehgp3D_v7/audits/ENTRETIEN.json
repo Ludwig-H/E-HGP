@@ -588,5 +588,56 @@
     "gcp": "not_used",
     "engine_builds_or_ctests": 0,
     "independent_reread": "Endpoint arithmetic and proof reviewed; four data-corruption guards precisely named, including non-success input rejection."
+  },
+  "latest_singleton_qualification": {
+    "date": "2026-09-05T20:33:28.122683+00:00",
+    "base_head": "764c80b995268cebfc7a38c9d4bb4fb31605d7aa",
+    "source_header": "21b77d29a4ba2bca453b602a8faa4564a978f4ba71af5167c164faae4ef0e1a5",
+    "receipt": "receipts_full_singleton_20260905/README.md",
+    "scope": "New independent O2/SAN executions: 114 orders, 912 outputs, 69120 cuts per build. 872 historical outputs byte-identical; mixed-birth rational supplement and fourth-parent causal mutant. Constructor 17+17 captured CTests inspected separately. No timing claim.",
+    "maintenance": "25 root Markdown notes preserved; current verdict replaces pending singleton review in four existing notes. No old sealed receipt changed. Only this task temporary build/source directory removed, identities and scientific raw outputs retained.",
+    "checks": {
+      "canonical_docs_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "active_documents": 348
+      },
+      "registry": {
+        "exit_code": 0,
+        "phases": 20
+      },
+      "authored_markdown": {
+        "files": 5,
+        "errors": []
+      },
+      "constructor_capture_review_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true
+      },
+      "engine_replays": "already closed at 20:19:12 UTC; no new engines during constructor timing",
+      "freshness_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "variant": "K_full_singleton",
+        "common_pins": 1722,
+        "variant_pins": 247
+      },
+      "whitespace": {
+        "authored_exit_code": 0,
+        "captured_source_exit_code": 2,
+        "preserved_source_eof_blank_lines": 11,
+        "reason": "Byte-exact scientific source captures retain existing source whitespace; not reformatted."
+      }
+    },
+    "variants_D_to_J_unchanged": true,
+    "new_variant": "K_full_singleton",
+    "gcp": "not_used"
   }
 }

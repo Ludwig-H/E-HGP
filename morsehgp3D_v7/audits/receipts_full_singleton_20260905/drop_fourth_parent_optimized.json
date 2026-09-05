@@ -1,0 +1,23 @@
+{
+  "status": "refuted",
+  "reason": "lazy.identity",
+  "python_optimized": true,
+  "transport_exit_code": 0,
+  "successful_wrong_forests": 102,
+  "first_successful_wrong_forest": {
+    "id": 25,
+    "K": 4,
+    "case": "E5",
+    "actual_parents": [
+      0,
+      1,
+      2
+    ],
+    "expected_parents": [
+      0,
+      1,
+      2,
+      3
+    ]
+  }
+}

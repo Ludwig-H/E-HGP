@@ -1,0 +1,18 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "0",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_singleton_20260905/drop_fourth_parent.bin"
+  ],
+  "exit_code": 0,
+  "started_utc": "2026-09-05T20:19:11.814853+00:00",
+  "finished_utc": "2026-09-05T20:19:12.244740+00:00",
+  "environment_override": {},
+  "stdout": "drop_fourth_parent_output.json",
+  "stdout_sha256": "50739cc9642c15586d7b6b89abad003bd9b86b7c4589e8cc3645a4e866b76571",
+  "stderr": "drop_fourth_parent_stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "binary_sha256": "9622dd43105c03b863f87227cba0778624edbcfea12f67ee71de5af21831792e",
+  "input_sha256": "8b66b099da5ee1196166620cab1fbbc25e96b109534e47419de76c098f6fe1c5"
+}
