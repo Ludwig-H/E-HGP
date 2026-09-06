@@ -4,7 +4,9 @@ Le raccord FULL du proposeur MEB filtré publié par 20b28b1d dispose de la **qu
 
 La [reconstruction de la vraie tour K-NN](receipts_gabriel_vertices_20260906/README.md) est établie sur un quotient des minima avec les bonnes connexions ; la restriction aux seules adjacences Gabriel est réfutée. Les [ancres horizontales et verticales](receipts_shared_anchors_20260906/README.md) peuvent partager leur valeur inférieure, avec leurs identités et coupes distinctes. Ces preuves ne qualifient pas encore une tour C++ intégrée ; les bornes et contre-fixtures restent accessibles depuis la décision FULL.
 
-La [suite admission et sélection](receipts_phase_selection_20260906/README.md) justifie les deux gardes CPU 176U puis 144U+240S, avec les U candidats conservés au census et une route fusionnée distincte. Elle réalise la sélection des ancres en temps proportionnel aux entrées et sorties, dans le même ordre Morton, et conserve les contre-fixtures de saturation et de comptabilité des blocs. Les modèles Python ne qualifient pas encore leur raccord C++.
+Le [raccord d’admission constructeur f4ffe38c](receipts_census_followup_20260906/README.md) est contre-lu favorablement : les U candidats restent présents et la garde précède le census. Ses captures et celles du prototype de blocs saturés concordent, sans nouvelle exécution C++ indépendante. Les micros n=smax ne peuvent éliminer aucune boule ; une fixture rationnelle à sept points fournit désormais un cas U=5,S=4 pour tester ce raccord à budget serré.
+
+La [sélection stable](receipts_phase_selection_20260906/README.md) reste une proposition distincte : coût proportionnel aux entrées et sorties, même ordre Morton, crédits exacts des survivantes. Les preuves générales et contre-fixtures de saturation restent conservées.
 
 Le [terminal unique](receipts_terminal_count_20260906/README.md) reste correct mais non retenu après la mesure négative du constructeur. La frontière différée et les [certificats de blocs](receipts_block_histograms_20260906/README.md) restent des voies prouvées à mesurer. La réserve du gate de cœur q2 positif est close par contrelecture du correctif constructeur.
 

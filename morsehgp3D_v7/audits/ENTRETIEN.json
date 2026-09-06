@@ -1666,5 +1666,124 @@
     "new_cpp_compilations": 0,
     "gcp": "not_used",
     "publication_scope_paths": 11
+  },
+  "latest_census_followup_20260906": {
+    "date": "2026-09-06T13:19:08.117981+00:00",
+    "base_head": "0072c88d8749cedfd3c6670d898e6edd1deed103",
+    "receipt": "receipts_census_followup_20260906/README.md",
+    "scope": "Favorable static census and saturated-block reviews; read-only constructor capture verification; exact seven-site seam input model and rerun of constructor pure worker predicates. No independent C++/VM/timing qualification.",
+    "source_hashes": {
+      "morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp": "3a17cbb8e16b3d38599aa22ef868fe3337032ae502506c09f41da2881df111d7",
+      "morsehgp3D_v7/bench/full_gabriel_probe_limits.hpp": "bcc780b1df44aae13ab0c7562eb5197000216aac10d87c28395e0ee62e1a9960",
+      "morsehgp3D_v7/src/pipeline/expand.hpp": "7cafb0341344fbc7d1584001e4685e2e5bf0122fe3b7e37277f5468d5c5e1cf0",
+      "morsehgp3D_v7/tests/full_gabriel_census_payload_gate.cpp": "4b51d84f6282a836ead8043a32ca227c31fb9a783fa6763c7b95fdd422dea497",
+      "morsehgp3D_v7/receipts/full_census_payload_20260906/SHA256SUMS": "423598ac788814f4ed6c60fa3f66d3aab13a44d8918fcb3f80dd746e13ce29e7",
+      "morsehgp3D_v7/receipts/full_census_payload_20260906/publication.json": "134a9396cc1fc34639331ed1a61bfeccbc4bf1be59079ee1cdaa956f15e73afa",
+      "morsehgp3D_v7/receipts/wspd_noncredit_saturation_20260906/nominal/histogram_negative.hpp": "bea5681890c5462cbef2a1af42b2fcd8d1f08df541b9f5dada49ee416e4fb198",
+      "morsehgp3D_v7/receipts/wspd_noncredit_saturation_20260906/nominal/negative_gate.cpp": "83e1f2f1062d3440cb4e7fb5c5065efff95bb03e61f3b55a6631f3dbd49ea86c",
+      "morsehgp3D_v7/receipts/wspd_noncredit_saturation_20260906/logs/O2_selftest.stdout": "643910c259a1ea6e46e91f59c28a0a4bd59b60a2a2ef0cd412e405942f45ca8a",
+      "morsehgp3D_v7/receipts/wspd_noncredit_saturation_20260906/logs/san_selftest.stdout": "643910c259a1ea6e46e91f59c28a0a4bd59b60a2a2ef0cd412e405942f45ca8a",
+      "gcp-migration/full_probe_worker_v7.py": "da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439",
+      "gcp-migration/selftest_full_probe_worker_v7.py": "54ffac16413813b87f38a8d3d658d27860c9712901f4612a5a0eb114e48cad48",
+      "gcp-migration/start_and_verify.sh": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0"
+    },
+    "census_capture_review": {
+      "manifest_files": 143,
+      "external_references": 50,
+      "stable_source_files": 53,
+      "closed_commands": 20,
+      "compiled_dependency_bindings": 117,
+      "ctests": 2,
+      "arithmetic_checks_per_O2_SAN": 40,
+      "micros": 4,
+      "micro_counts": {
+        "E": 71,
+        "U": 71,
+        "S": 71
+      },
+      "portable_verifier_normal_exit": 0,
+      "portable_verifier_optimized_exit": 0,
+      "portable_verifier_outputs_identical": true,
+      "limitation": "n=smax=8 prohibits any valid-support prefilter rejection; no dynamic seam refusal or guard-placement mutation exercised."
+    },
+    "block_capture_review": {
+      "comparisons_per_O2_SAN": 432,
+      "clipped_credit_blocks": 260,
+      "negative_pairs": 2400,
+      "saturation_unvisited_pairs": 6964,
+      "non_site_lanes": 4,
+      "O2_SAN_outputs_identical": true,
+      "xi_max_mutant_reject": "negative.true_witness_preserved",
+      "scope": "Nominal source and captures read, no C++ executed."
+    },
+    "worker_pure_tests": {
+      "commands": [
+        "taskset -c 1 python3 -B gcp-migration/selftest_full_probe_worker_v7.py",
+        "taskset -c 1 python3 -B -O gcp-migration/selftest_full_probe_worker_v7.py"
+      ],
+      "exit_codes": [
+        0,
+        0
+      ],
+      "outputs_identical": true,
+      "guard_positive": 1,
+      "guard_mutants_rejected": 7,
+      "positive_full_summaries": 3,
+      "failure_partial_wrong_K_rejected": 9,
+      "invalid_wire_rejected": 33,
+      "bootstrap_plan_checks": 2,
+      "child_process_or_cloud_called_by_selftest": false,
+      "scope": "Constructor pure selftest replay, not independent process-cleanup or VM qualification."
+    },
+    "checks": {
+      "model_normal_exit": 0,
+      "model_optimized_exit": 0,
+      "model_stdout_sha256": "82a3468918db3768c03a71972045aeac290b745cf8dd765a697979a30d2dd12b",
+      "model_outputs_identical": true,
+      "docs_normal_exit": 0,
+      "docs_optimized_exit": 0,
+      "active_markdown": 393,
+      "registry_exit": 0,
+      "registry_phases": 20,
+      "authored_markdown": 4,
+      "local_links": 86,
+      "link_math_errors": 0,
+      "git_diff_check_exit": 0,
+      "freshness": {
+        "common_pins": 2224,
+        "common_mismatches": 0,
+        "source_variants_unchanged": true,
+        "normal_exit": 1,
+        "optimized_exit": 1,
+        "outputs_identical": true,
+        "latest_variant": "O_full_meb_composition",
+        "latest_variant_deltas": [
+          "CMakeLists.txt",
+          "PASSATION.md",
+          "README.md",
+          "docs/FAUSSES_PISTES.md",
+          "docs/RESIDENCE_MASSIVE.md",
+          "src/pipeline/generate.hpp",
+          "tests/meb_proposal_local_gate.cpp"
+        ],
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "5b02791a84b77cc3623399cf065a5c2c1e1bc314410d26de50ec49d323fe7c90"
+      }
+    },
+    "maintenance": {
+      "root_markdown_notes": 25,
+      "dialogue_previous_words": 644,
+      "dialogue_current_words": 491,
+      "action": "Close implemented phase-admission proposal; replace duplicate details by constructor references; retain new finite geometry fixture and still-unintegrated stable selection."
+    },
+    "source_variants_D_to_O_unchanged": true,
+    "historical_scientific_receipts_modified": false,
+    "engine_invocations": 0,
+    "new_cpp_compilations": 0,
+    "gcp": "not_used_by_auditor",
+    "publication_scope_paths": 9,
+    "reviewed_constructor_commit": "f4ffe38caf1dde2025dd149a09654dc4998b8815",
+    "publication_base_head": "0072c88d8749cedfd3c6670d898e6edd1deed103",
+    "reviewed_sources_identical_to_f4ffe38c": true
   }
 }
