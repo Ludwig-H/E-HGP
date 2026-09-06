@@ -1,0 +1,26 @@
+{
+  "address_space_bytes": 27917287424,
+  "argv": [
+    "/workspaces/E-HGP/build/v7_wspd_histogram_blocks_20260906_measure_r1/histogram_bench",
+    "--unknown"
+  ],
+  "binary_after": "4a584a3f6b8a8d4de186350fc8b97cabf60a30daf29b844f2e099ed4e2a79f2d",
+  "binary_before": "4a584a3f6b8a8d4de186350fc8b97cabf60a30daf29b844f2e099ed4e2a79f2d",
+  "closed": true,
+  "cpu": 0,
+  "cpu_seconds": 320,
+  "cwd": "/workspaces/E-HGP",
+  "ended": "2026-09-06T12:11:10.413708+00:00",
+  "exit_code": 2,
+  "expected_exit": 2,
+  "fsize_bytes": 67108864,
+  "pid": 473768,
+  "sources_stable": true,
+  "started": "2026-09-06T12:11:10.408515+00:00",
+  "status": "completed",
+  "streams": {
+    "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "wall_seconds": 300
+}

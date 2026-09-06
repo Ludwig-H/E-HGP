@@ -43,7 +43,7 @@ conserve les limites de représentation, les admissions mémoire et le
 suivi des exécutions ; `P=unlimited` est explicite. Sa compilation fraîche
 et six nouveaux CTests passent ; la micro partielle et son défaut de
 format first-C restent déclarés dans la [passation](PASSATION.md).
-Les mesures directes 8k/16k/32k sont en cours. Aucun reçu n'est réétiqueté.
+Le premier triplet direct 8k/16k/32k est clos. Aucun reçu n'est réétiqueté.
 La [borne de sortie](docs/CROISSANCE_ET_BORNE_DE_SORTIE.md) interdit de
 promettre une sortie FULL explicite sous-quadratique pour tout nuage 3D.
 
@@ -57,43 +57,33 @@ promettre une sortie FULL explicite sous-quadratique pour tout nuage 3D.
 | [Proposeur MEB filtré dans FULL](docs/CONTRAT_MEB_FULL.md) | Opt-in C++ P, désactivé par défaut ; budget partagé par ordre, F inchangé et coûts physiques p/A séparés ; qualification propre au raccord |
 | CLI et archive | Route historique F séparée ; ni export FULL ni verticale FULL intégrée |
 
-Le delta singleton livré passe [17/17 CTests Release et 17/17 ASan/UBSan](receipts/full_gabriel_singleton_20260905/README.md),
-avec LeakSanitizer actif, oracle Gamma borné, 181 paires positives et
-357 refus du différentiel singleton. Les balayages frais injectent
-49 pannes d'allocation eager et 209 lazy. Le [précontrôle négatif lazy](receipts/full_lazy_development_20260905/README.md)
-reste conservé. La [comparaison mono singleton](docs/RESULTATS_MONO_FULL_SINGLETON_20260905.md)
-emploie la même sonde avec digest sémantique, coût inclus ; la
-[campagne lazy antérieure](docs/RESULTATS_MONO_FULL_LAZY_20260905.md)
-reste attribuée au header `13c6cc72…`.
-Le helper de normalisation passe ses propres [20/20 tests Release et
-20/20 ASan/UBSan](receipts/full_gabriel_successor_20260905/README.md), dont
-560 préfixes primitifs et 180 paires FULL positives. La première tentative
-de compilation échouée est conservée. L'[audit indépendant du même header](docs/CONTRAT_NORMALISATION_FULL.md#qualification-indépendante-du-même-header)
-`85c27ab9…` ajoute 114 ordres et 69 120 coupes par build O2/SAN,
-3 851 appels primitifs et deux mutants causaux réfutés. Sa portée reste
-relative aux catalogues fournis ; les 20+20 CTests sont contre-vérifiés
-sur captures, pas relancés par l'auditeur. La
-[campagne mono v2](docs/RESULTATS_MONO_FULL_SUCCESSOR_20260905.md) est close :
-8k/s8–10–12 à 138,221 / 143,301 / 145,404 s, 16k/s8 à 321,643 s,
-puis refus 32k/K9 sur quatre millions d'appels MEB. Le premier chrono
-s8 contaminé reste exclu et conservé ; son rejeu est distinct. Les
-comparaisons historiques passent sur 204 ordres réussis, sans promouvoir
-le préfixe 32k. Aucun gain de temps robuste ni contrat 50k n'est établi.
+Les qualifications antérieures restent attribuées à leurs sources :
 
-Le lot du 6 septembre qualifie le filtre MEB privé sur 9 344 comparaisons
-locales F/Trace/NoObserver et 3 430 appels jugés rationnellement par build,
-avec frontières budgétaires et mutants. Le triangle demande deux formes
-au lieu de cinq. Cette réduction de travail par appel ne levait pas, à elle
-seule, l'ancien plafond du **nombre** d'appels à 32k. Le
-[raccord au Builder](docs/CONTRAT_MEB_FULL.md) porte désormais le Work
-persistant ; sa qualification est distincte de ces reçus privés.
-Les mesures sur la distribution FULL réelle restent à établir avant
-toute activation par défaut.
-Le [raccord qualifié](docs/RESULTATS_MEB_FULL_20260906.md) passe 30/30
-CTest Release et 30/30 ASan/UBSan : budgets, coupes Gamma, allocations et
-injections explicites ; quatre copies mutantes sont réfutées. Les 9 344
-comparaisons locales sont aussi rejouées sur le header produit, sans
-héritage du reçu privé. Aucun nouveau chronométrage de tour dans ce lot.
+- [FULL/lazy/singleton](receipts/full_gabriel_singleton_20260905/README.md) : 17/17 Release et ASan/UBSan, oracle Gamma et pannes d'allocation.
+- [Normalisation](receipts/full_gabriel_successor_20260905/README.md) : 20/20 par build ; son [audit indépendant](docs/CONTRAT_NORMALISATION_FULL.md#qualification-indépendante-du-même-header) reste distinct.
+- [Raccord MEB](docs/RESULTATS_MEB_FULL_20260906.md) : 30/30 par build, 9 344 comparaisons locales et 3 430 appels rationnels ; opt-in, sans activation générale.
+
+Le [premier triplet complet sans quotas](docs/RESULTATS_MONO_FULL_SANS_QUOTAS_20260906.md)
+termine K1..10 à 8k/16k/32k : **133,038 / 307,643 / 684,574 s**, mono,
+s=8, P=unlimited. Les exposants observés sont 1,209 puis 1,154 sur cette
+famille uniforme seulement. Le [travail WSPD par blocs](docs/ELIMINATION_BLOCS_WSPD.md)
+est la priorité suivante. Les anciens refus et mesures restent conservés,
+notamment la [campagne de normalisation](docs/RESULTATS_MONO_FULL_SUCCESSOR_20260905.md).
+Aucun contrat 50k, export FULL intégré ou résultat massif G4 n'est acquis.
+
+Le réemploi du compte terminal q2 est intégré : [différentiel O2/SAN](receipts/wspd_terminal_q2_reuse_20260906/README.md)
+et [19 CTests ciblés](receipts/wspd_q2_ctest_20260906/README.md) passent.
+Les mesures fraîches 8k donnent 131,482 / 132,138 / 137,247 s à s=8/10/12,
+mêmes dix forêts, sans accélération robuste attribuée au seul delta.
+Le certificat de blocs pour h_a/h_b est prouvé avec l'auditeur, mais son
+prototype n'est pas retenu sur la route mesurée : petits facteurs et
+surcoût, histogrammes identiques. Le terminal systématiquement
+à un seul passage est écarté en l'état : il double les coins sur le cas 8k.
+Ce lot uniforme est clos ; les grands facteurs de deux amas séparés sont
+étudiés distinctement pendant la préparation multi-CPU. La suite est
+multi-CPU local puis
+G4 SPOT 48 CPU et GPU, sans convertir les reçus F
+ou les seules primitives device en résultats de tour FULL.
 
 Priorités : mono-thread, puis multi-CPU, puis GPU. Le
 [contrat 50k](docs/CONTRAT_PERFORMANCE.md) porte sur **toute la tour K=1..10

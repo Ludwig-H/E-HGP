@@ -1,0 +1,14 @@
+{
+  "public_status": "not_claimed",
+  "scope": "current_context_not_hermetic_build",
+  "source_sha256": {
+    "CMakeLists.txt": "8a8e27b0c62f9e7107841e56d67348fb0a97f2a0a4e3688f0079ebc470061caa",
+    "cmake/run_expect.cmake": "7bb9af4eddbea7e7a66619c92491dc11c22a49d7b3b46bddd6b2c25b20b2d605",
+    "src/pipeline/generate.hpp": "345129a775d430a40e151d3b1adb5cd9efeaf77a6ffb6713bd081c74d40bdd9c",
+    "src/spindle/spindle.hpp": "f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577",
+    "src/spindle/witness_count.hpp": "f20970aa2183f6c0904d640ae5fe072894b6e0b4f7f9440277fbed77e8245803",
+    "tests/selftest.cpp": "a9d3dc956f57f297605e86eecb1644a753ff0cd7e2cf5ef0281161fa2136be2d",
+    "tests/witness_stack_gate.cpp": "0bf890a5a81c16494a03200b9df0c6603b9234bf4bd8fb861a2286f68ec54855",
+    "tests/wspd_terminal_reuse_gate.cpp": "81a8657ae8c7dd2445e805c9cabdd0cf86b6d238edfd3e4b2484440a83f8455d"
+  }
+}

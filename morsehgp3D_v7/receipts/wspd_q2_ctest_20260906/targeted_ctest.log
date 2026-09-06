@@ -1,0 +1,46 @@
+[OUTPUT] 
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7_wspd_q2_ctest_20260906_r2
+
+[HANDLER_OUTPUT] 
+Test project /workspaces/E-HGP/build/v7_wspd_q2_ctest_20260906_r2
+
+      Start   1: mhgp7_wspd_terminal_reuse
+ 1/16 Test   #1: mhgp7_wspd_terminal_reuse ..................   Passed    0.02 sec
+      Start   2: mhgp7_wspd_terminal_reuse_bad_argument
+ 2/16 Test   #2: mhgp7_wspd_terminal_reuse_bad_argument .....   Passed    0.01 sec
+      Start  57: mhgp7_fused_descent
+ 3/16 Test  #57: mhgp7_fused_descent ........................   Passed    2.49 sec
+      Start 409: mhgp7_witness_stack
+ 4/16 Test #409: mhgp7_witness_stack ........................   Passed    0.12 sec
+      Start 410: mhgp7_witness_stack_helper
+ 5/16 Test #410: mhgp7_witness_stack_helper .................   Passed    0.01 sec
+      Start 411: mhgp7_witness_stack_witness
+ 6/16 Test #411: mhgp7_witness_stack_witness ................   Passed    0.12 sec
+      Start 412: mhgp7_witness_stack_lane_mask
+ 7/16 Test #412: mhgp7_witness_stack_lane_mask ..............   Passed    0.01 sec
+      Start 413: mhgp7_witness_stack_lane_mask_mutant
+ 8/16 Test #413: mhgp7_witness_stack_lane_mask_mutant .......   Passed    0.01 sec
+      Start 414: mhgp7_witness_stack_unknown_case
+ 9/16 Test #414: mhgp7_witness_stack_unknown_case ...........   Passed    0.01 sec
+      Start 415: mhgp7_witness_stack_empty_case
+10/16 Test #415: mhgp7_witness_stack_empty_case .............   Passed    0.01 sec
+      Start 416: mhgp7_witness_stack_duplicate_case
+11/16 Test #416: mhgp7_witness_stack_duplicate_case .........   Passed    0.01 sec
+      Start 417: mhgp7_witness_stack_unknown_argument
+12/16 Test #417: mhgp7_witness_stack_unknown_argument .......   Passed    0.01 sec
+      Start 418: mhgp7_witness_stack_unknown_mutant
+13/16 Test #418: mhgp7_witness_stack_unknown_mutant .........   Passed    0.01 sec
+      Start 419: mhgp7_witness_stack_empty_mutant
+14/16 Test #419: mhgp7_witness_stack_empty_mutant ...........   Passed    0.01 sec
+      Start 420: mhgp7_witness_stack_duplicate_mutant
+15/16 Test #420: mhgp7_witness_stack_duplicate_mutant .......   Passed    0.01 sec
+      Start 421: mhgp7_witness_stack_mutant_case_mismatch
+16/16 Test #421: mhgp7_witness_stack_mutant_case_mismatch ...   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 16
+
+Label Time Summary:
+gate                   =   2.89 sec*proc (16 tests)
+wspd_terminal_reuse    =   0.03 sec*proc (2 tests)
+
+Total Test time (real) =   2.91 sec

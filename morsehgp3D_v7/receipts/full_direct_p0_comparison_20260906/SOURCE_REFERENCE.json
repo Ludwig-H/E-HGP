@@ -1,0 +1,10 @@
+{
+  "binary_sha256": "4938b94b3166e8c13d02b0fd9687168130d5c528702d7efcf7b7379b3adeb360",
+  "build_receipt": "../full_probe_no_quotas_20260906/build_r1/receipt.json",
+  "build_receipt_sha256": "25ccae8eb8466280568090963314c9a67a579bc5d81aa43871830a13a6fd7e9d",
+  "product_meb_helper_sha256": "f922544b5cfdc214de96ecd49520e318ea8632d14a8142ef21fd248f9cc38fb3",
+  "runner": "../full_direct_scaling_20260906/bench/run_full_probe.py",
+  "runner_sha256": "d381fc81c378382e610c61722863f6ae5764e4c3ef34ee7f94ac18f53a6c5fe7",
+  "source_map_sha256": "72a147fec063382013b4c61a1990ad163cd99dbe9051a8c170c417797b519fbe",
+  "source_snapshot": "../full_probe_no_quotas_20260906/source_snapshot"
+}

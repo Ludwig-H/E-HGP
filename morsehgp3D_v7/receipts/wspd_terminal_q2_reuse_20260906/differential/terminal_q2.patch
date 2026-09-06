@@ -1,0 +1,15 @@
+--- a/morsehgp3D_v7/src/pipeline/generate.hpp
++++ b/morsehgp3D_v7/src/pipeline/generate.hpp
+@@ -390,5 +390,11 @@
+           // TERMINAL : recomptage avec autorite de coins ; il peut fermer des
+           // lanes de plus (les masses correspondantes vont au grand-livre).
+-          const FusedCounts ff = count_universal_witnesses(ix, t.r.a, t.r.b, h_of, m, true);
++          // q2 does not use corner authority: its clipped count is already
++          // available from fc. Only q3/q4 require the terminal recount.
++          FusedCounts ff;
++          const u8 corner_mask = static_cast<u8>(m & 0b110);
++          if (corner_mask != 0)
++            ff = count_universal_witnesses(ix, t.r.a, t.r.b, h_of, corner_mask, true);
++          if (m & 0b001) ff.c[0] = fc.c[0];
+           lst[c].wspd_witness_nodes += ff.nodes_visited;
+           lst[c].wspd_corner_evals += ff.corner_evals;

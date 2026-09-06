@@ -1,0 +1,56 @@
+--- a/src/pipeline/generate.hpp
++++ b/src/pipeline/generate.hpp
+@@ -313,7 +313,7 @@
+ // initial : par paire de nœuds, `count_universal_witnesses` (masques, ecretage
+ // a h_q) ; une lane dont le cœur atteint h_q sort du masque et sa masse de
+ // paires est versee au grand-livre `killed` ; le rectangle n'est scinde que si
+-// le masque reste non vide ; a un terminal, un second comptage AVEC autorite
++// le masque reste non vide ; a un terminal, ce seul comptage AVEC autorite
+ // de coins fournit core[3] et peut encore fermer des lanes. Les decisions de
+ // scission (separated sur boites serrees, plus grand diametre, ordre
+ // enfant/garde) sont INDEPENDANTES de la lane : l'arbre de rectangles est
+@@ -373,7 +373,9 @@
+       for (size_t i = c * chunk; i < std::min(nw, c * chunk + chunk); ++i) {
+         const Task& t = wave[i];
+         ++lst[c].rect_visited_fused;
+-        const FusedCounts fc = count_universal_witnesses(ix, t.r.a, t.r.b, h_of, t.mask, false);
++        const AxisBox va = ix.box_of(t.r.a), vb = ix.box_of(t.r.b);
++        const bool terminal = wspd_detail::separated(va, vb, s, 1) || (mut_cap && pair_mass(t.r) <= 9);
++        const FusedCounts fc = count_universal_witnesses(ix, t.r.a, t.r.b, h_of, t.mask, terminal);
+         lst[c].wspd_witness_nodes += fc.nodes_visited;
+         lst[c].wspd_corner_evals += fc.corner_evals;
+         u8 m = t.mask;
+@@ -385,29 +387,15 @@
+           }
+         }
+         if (m == 0) continue;  // rectangle mort pour toutes les lanes restantes
+-        const AxisBox va = ix.box_of(t.r.a), vb = ix.box_of(t.r.b);
+-        if (wspd_detail::separated(va, vb, s, 1) || (mut_cap && pair_mass(t.r) <= 9)) {
+-          // TERMINAL : recomptage avec autorite de coins ; il peut fermer des
+-          // lanes de plus (les masses correspondantes vont au grand-livre).
+-          // q2 does not use corner authority: its clipped count is already
+-          // available from fc. Only q3/q4 require the terminal recount.
+-          FusedCounts ff;
+-          const u8 corner_mask = static_cast<u8>(m & 0b110);
+-          if (corner_mask != 0)
+-            ff = count_universal_witnesses(ix, t.r.a, t.r.b, h_of, corner_mask, true);
+-          if (m & 0b001) ff.c[0] = fc.c[0];
+-          lst[c].wspd_witness_nodes += ff.nodes_visited;
+-          lst[c].wspd_corner_evals += ff.corner_evals;
++        if (terminal) {
++          // TERMINAL : fc inclut deja les coins ; aucune lane morte ne reste
++          // dans m et aucun second parcours de temoins n'est necessaire.
+           MultiAliveRect ar;
+           ar.r = t.r;
+           for (int q = 0; q < 3; ++q) {
+             if (!(m & (1u << q))) continue;
+-            if (ff.c[q] >= h_of[q] && !mask_stuck) {
+-              lst[c].ledger_killed_mass[q] += pair_mass(t.r);
+-              continue;
+-            }
+             ar.mask = (u8)(ar.mask | (1u << q));
+-            ar.core[q] = ff.c[q];
++            ar.core[q] = fc.c[q];
+             lst[c].ledger_emitted_mass[q] += pair_mass(t.r);
+             ++lst[c].rect_alive[q];
+           }

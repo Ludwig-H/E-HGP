@@ -1,0 +1,18 @@
+{
+  "address_space_limit": "not_set_ASan_shadow",
+  "argv": [
+    "g++",
+    "--version"
+  ],
+  "closed": false,
+  "cpu": 0,
+  "cpu_seconds": 45,
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": null,
+  "expected_exit": 0,
+  "fsize_bytes": 67108864,
+  "label": "compiler_version",
+  "pid": null,
+  "started": "2026-09-06T12:10:15.884705+00:00",
+  "wall_seconds": 60
+}

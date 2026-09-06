@@ -1,0 +1,12 @@
+{
+  "binaries": {
+    "O2": "4eaeb32c7fa3e365aa4deec244a09869ce3c15c86303cf827725e32804b698d3",
+    "san": "99610348c2ae15041079876f57af58577b1c82d1b1275b337c68ba248ce35451"
+  },
+  "commands": 6,
+  "cpp_closed": true,
+  "public_status": "not_claimed",
+  "schema": "mhgp7-private-histogram-block-qualification-v1",
+  "sources_stable": true,
+  "status": "completed"
+}

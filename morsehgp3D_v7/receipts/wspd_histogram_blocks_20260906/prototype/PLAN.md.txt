@@ -1,0 +1,11 @@
+# Prototype privé : histogrammes par blocs, ancre fixée
+
+Statut `public_status=not_claimed`. Aucun fichier produit modifié. Le prototype suit le [certificat indépendant](../../morsehgp3D_v7/audits/receipts_block_histograms_20260906/README.md), SHA `137514adbb09d243ea049000e31a0a7614d715245c0c6286753ffa6f2aa5db76`.
+
+Pour chaque ancre, parcourir le sous-arbre du facteur original : rejet par `hmax4` avec ancre ponctuelle, crédit strict par `Hmin/Ximax`, sinon descente et prédicat scalaire aux feuilles. Compter des positions, jamais les multiplicités ; soustraire la diagonale des rejets et ne jamais descendre un bloc crédité. Aucun catalogue, coface ou structure globale supplémentaire ; aucune saturation dans ce prototype. Le dispatch 8 reste un candidat de performance, pas un plafond de complétude.
+
+Qualification petite O2/SAN close : 126 comparaisons littérales contre le chemin produit et 42 histogrammes indépendants en i128 ; 42 vérifications de séparation ; crédits q2/q3/q4 et rejet contenant la diagonale non vacants. Sur les fixtures, 6 156 couples logiques se répartissent exactement en 2 844 positions créditées, 2 952 rejets `hmax` et 360 tests scalaires. Ces nombres ne prédisent aucun chrono. Reçu `../v7_wspd_histogram_blocks_20260906_qualification_r1/receipt.json`, SHA `45d55bda0cd3097aae503b82d3b43ae3016eb3330f077eb978901160876a7283`.
+
+La sonde privée n8000 crée une fois le front courant `uniform/coord65536/seed3/smax11`, puis mesure les histogrammes seuls par cohortes du maximum des deux tailles de facteurs. Trois bras dans l'ordre fixe scalaire produit, blocs forcés, hybride8 ; mêmes rectangles/lanes, aplatissement comparable, égalité littérale et digest hors chrono. Les compteurs physiques de blocs restent instrumentés ; le coût mesuré inclut appels, aplatissement et agrégation des compteurs, pas seulement le noyau géométrique. Une seule répétition ne qualifie ni ratio stable ni gain intégré. Les distributions des tailles sont comptées par facteur et lane, distinctes des cohortes de rectangles.
+
+Premier essai s8 seulement sur CPU6 après coordination ; s10/s12 exigent un créneau ultérieur. Pas de génération de complétions, de forêt FULL, de multi-CPU ou de GPU dans cette mesure. La pertinence du seuil sera déterminée par le coût des cohortes, pas par les seules réductions de couples scalaires.

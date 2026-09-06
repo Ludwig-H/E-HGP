@@ -1,0 +1,22 @@
+{
+  "address_space_limit": "not_set_ASan_shadow",
+  "argv": [
+    "python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/build/v7_wspd_terminal_once_20260906/compare.py",
+    "/workspaces/E-HGP/build/v7_wspd_terminal_once_20260906/logs/O2_reference_selftest.stdout",
+    "/workspaces/E-HGP/build/v7_wspd_terminal_once_20260906/logs/O2_candidate_selftest.stdout"
+  ],
+  "closed": false,
+  "cpu": 0,
+  "cpu_seconds": 45,
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": null,
+  "expected_exit": 0,
+  "fsize_bytes": 67108864,
+  "label": "compare_optimized",
+  "pid": null,
+  "started": "2026-09-06T12:01:52.652823+00:00",
+  "wall_seconds": 60
+}

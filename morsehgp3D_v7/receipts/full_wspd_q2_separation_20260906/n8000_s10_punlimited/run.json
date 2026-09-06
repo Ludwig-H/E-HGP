@@ -1,0 +1,27 @@
+{
+  "binary_sha256": "23646a320b4dee52c626cb3fb5a0fcc54822a2ff4b093e661b125f7a581ffe07",
+  "binary_sha256_after": "23646a320b4dee52c626cb3fb5a0fcc54822a2ff4b093e661b125f7a581ffe07",
+  "command": [
+    "taskset",
+    "-c",
+    "6",
+    "/usr/bin/time",
+    "-v",
+    "/workspaces/E-HGP/build/v7_wspd_probe_20260906/full_probe",
+    "--n=8000",
+    "--s=10",
+    "--kmax=10",
+    "--alias-policy=lazy",
+    "--cache-entries=1000000",
+    "--meb-proposal-supports=unlimited"
+  ],
+  "elapsed_seconds": 132.14907663099802,
+  "exit_code": 0,
+  "git_head": "4931906bb587719b6f14f3c8c093ed7d666346e4",
+  "pid": 403504,
+  "public_status": "not_claimed",
+  "started_utc": "2026-09-06T11:49:37Z",
+  "status": "completed",
+  "stderr_sha256": "3f3749a81da14f5823ad1cea5f9d70fc27557ce2b645b94ba2616cba62bc01f8",
+  "stdout_sha256": "ae70a4e61efaa6ee08901feac2bee81a74aa9838d8f5d9e8a4518be1bc16fed7"
+}

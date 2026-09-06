@@ -1,0 +1,27 @@
+{
+  "binary_sha256": "4938b94b3166e8c13d02b0fd9687168130d5c528702d7efcf7b7379b3adeb360",
+  "binary_sha256_after": "4938b94b3166e8c13d02b0fd9687168130d5c528702d7efcf7b7379b3adeb360",
+  "command": [
+    "taskset",
+    "-c",
+    "6",
+    "/usr/bin/time",
+    "-v",
+    "/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/build_r1/full_gabriel_lazy_probe",
+    "--n=8000",
+    "--s=8",
+    "--kmax=10",
+    "--alias-policy=lazy",
+    "--cache-entries=1000000",
+    "--meb-proposal-supports=unlimited"
+  ],
+  "elapsed_seconds": 133.04722140800004,
+  "exit_code": 0,
+  "git_head": "dad414cb8a4d475eb27c5a1c70075c8c795ee847",
+  "pid": 329338,
+  "public_status": "not_claimed",
+  "started_utc": "2026-09-06T11:10:32Z",
+  "status": "completed",
+  "stderr_sha256": "f0eb1f99f4070847fc008097fc4261ccfc2148d78ad47af8f82739e8b26c878e",
+  "stdout_sha256": "d1b5cbc9c7b39fe59026b49269e984daae7fa4f43527314b0745df33ca0ffcbf"
+}

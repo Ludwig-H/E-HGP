@@ -1755,3 +1755,105 @@ et ne dépend pas de ce booléen. Le reprendre au lieu de le refaire dans
 le second appel `with_corners=true` est une économie distincte, à mesurer.
 Le second appel peut être limité aux lanes q3/q4 encore ouvertes. Aucun
 changement des cœurs remis, des masques ou des masses n'est attendu.
+
+Lot constructeur publié : `a9ce3639` sur `origin/main`. Réservation d'index
+libérée ; l'index est vide après ce commit. Vos fichiers restent exclus.
+Le triplet direct est encore en cours (32k a franchi K9 à 4 605 147 MEB
+sur cet ordre, puis poursuit K10) ; aucun résultat complet 32k anticipé.
+
+### Réponse au certificat de blocs du 6 septembre
+
+Votre lot `receipts_block_histograms_20260906/README.md` est lu intégralement.
+ROOT retient le premier prototype à ancre fixée, H_min/Ξ_max entier, crédit
+du nombre de positions du sous-arbre original, feuilles aux coins actuels.
+La boule-cœur centrale est écartée de ce poste pour la raison démontrée ;
+le rejet hmax avec U variable et la double comptabilisation des populations
+parent/enfant deviennent des avertissements explicites dans les notes.
+Le prototype reste privé tant que ses histogrammes et son coût ne sont pas
+confrontés au scalaire ; pas de changement massif de la route produit.
+
+Le delta q2 terminal est maintenant intégré : différentiel O2 et ASan/UBSan
+sur 174 appels par bras, cœurs/rectangles/masses/ordre/coins identiques,
+1 283 visites évitées, six témoins n2/q2 de 6 à 3 visites. Le gate permanent
+passe les deux compilations et le rejet argument ; pas de gain de temps
+déduit de ces fixtures. Les mesures FULL fraîches s8/10/12 suivent sur CPU6
+avec le binaire `23646a32…` ; merci de garder ce CPU sans moteur concurrent.
+
+Le triplet direct antérieur s8/P=unlimited est clos : 133,038 / 307,643 /
+684,574 s pour 8k/16k/32k, dix ordres chacun. Le P0 du même binaire est
+également clos à 8k (154,837 s externes), en cours de comparaison détaillée.
+Ces mesures ne comprennent pas de verticale intégrée ni d'archive retenue.
+Votre réservation d'index pour le lot WSPD est respectée ; aucun fichier
+de votre dossier ne sera inclus dans le lot constructeur suivant.
+
+Le commit auditeur `4931906b` est vu sur main ; merci. Un second candidat
+privé vise le coût du **cœur h**, distinct des histogrammes : calculer la
+séparation avant le premier compte ; pour un terminal, appeler directement
+une seule fois `count_universal_witnesses(..., with_corners=true)`, pour les
+autres garder `false`. Le compte avec coins domine le compte sans coins,
+lane par lane et après écrêtage ; les cœurs remis, masques et rectangles
+devraient donc rester identiques au double passage actuel. En revanche,
+des coins supplémentaires peuvent être payés sur des lanes que le premier
+passage peu coûteux tuait déjà. Nous comparons cette variante séparément,
+sans supposer son gain ni la porter tout de suite. Merci de signaler une
+obligation mathématique autre que cette domination et la stabilité des
+comptes finaux. Pas de modification de `count_universal_witnesses` envisagée.
+
+L'utilisateur confirme la suite : clore ce lot mono, puis multi-CPU local,
+puis G4 SPOT 48 CPU et GPU pour les contrats. ROOT prépare cette transition
+sans confondre la construction horizontale actuelle et la tour intégrée.
+Le wrapper GCP actuel vise encore F et des primitives device ; il ne sera
+pas lancé comme s'il qualifiait déjà FULL.
+
+ROOT réserve maintenant l'index, observé vide, pour le lot q2 terminal et
+les captures directes 8k/16k/32k, P0/P∞ et s8/10/12. Aucun fichier de votre
+dossier `morsehgp3D_v7/audits/` ni de la v6 n'est inclus. Les prototypes
+de crédits histogrammes et de terminal à un passage restent privés et
+seront décidés séparément après leur mesure.
+
+La preuve du terminal unique dans `receipts_terminal_count_20260906/README.md`
+est lue : domination ET indépendance des lanes sont retenues. Le contrôle
+de cœur q2 positif demandé est ajouté au gate, en cours de recompilation
+O2/SAN avec mutant d'omission du transfert ; les anciennes captures sont
+conservées avec leur ancien gate. Merci pour cette lacune de test identifiée.
+
+Le terminal unique est correct sur 174 fronts et sur les 754 686 rectangles
+du cas uniforme 8k, mais **non retenu pour intégration** : O2, une paire
+front seul, 37 767,10→38 286,55 ms ; visites 563 616 452→547 864 549,
+coins 167 115 088→335 509 837. Le risque annoncé se réalise : les lanes
+tuées économiquement auparavant paient maintenant des coins. Aucun gain
+total ni conclusion statistique n'en est déduit. Les deux processus sont
+clos ; le paquet négatif sera publié séparément. L'index reste réservé
+au lot constructeur, sans vos nouveaux fichiers.
+
+Histogrammes sur le front uniforme 8k : 8 436 096 valeurs égales,
+93,819 ms scalaire / 186,560 ms blocs forcés / 101,318 ms hybride8,
+dans le chronométrage instrumenté. Maximum des facteurs : sept ; aucun
+bloc actif dans hybride8. Le scalaire est conservé sur ces petits facteurs.
+La conclusion n'est pas généralisée : ROOT demande ensuite le rectangle
+racine de deux amas compacts très séparés, A∪B=X donc h_cœur=0, facteurs
+de n/2 positions, à 8k/16k/32k. C'est le régime réellement quadratique du
+calcul actuel, absent du front uniforme ; aucun garde-fou de temps/CPU
+n'est ajouté à ces mesures directes. Le raccord pipeline multi-CPU se
+prépare en parallèle, sans exécution benchmark concurrente.
+
+L'audit local des constructions entre K confirme des API horizontales
+indépendantes : index/catalogues constants partageables, Builder/DSU/cache/
+Work privés. L'émission et le digest doivent rester ordonnés par K, et
+la mémoire cumulée doit être comptée. Aucun parallélisme inter-K n'est
+encore implémenté ni déduit du seul futur paramètre --threads du pipeline.
+
+Question ciblée pour les grands facteurs : le prototype h_a/h_b sait
+créditer des blocs mais ne rejette q3/q4 que via W2/Hmax. Les blocs situés
+hors du cône q3/q4 mais dans W2 risquent donc encore une descente jusqu'aux
+feuilles. À ancre a fixée, choisir un point b₀ de Box(B), puis calculer
+M4=hmax4_boxes({a},{b₀},Z), soit quatre fois un majorant de H, et Ξ_min
+par la distance de chaque intervalle de composante du produit vectoriel
+à zéro, carrés sommés. Si M4≤0, ou si M4>0 et t M4²≤16 Ξ_min,
+t=3/2 selon la lane, tous les z du bloc échouent pour b₀. Ils ne peuvent
+donc pas être universels sur Box(B). Le choix d'un coin suffit ; un point
+entier intérieur à la boîte paraît aussi valable par convexité du
+prédicat en b. Merci de réfuter/vérifier ce certificat de **non-crédit**,
+distinct d'une mort d'ancre, ainsi que les quantificateurs et l'i128.
+Il n'est ni implémenté ni mesuré pour l'instant ; la sonde des deux amas
+doit d'abord montrer le travail restant. Aucun hmax à U variable proposé.

@@ -1,0 +1,18 @@
+{
+  "all_process_groups_closed": true,
+  "binaries": {
+    "O2_candidate": "083869efb9d441303323617ba1c6b71bdd1fc1548c869f35db5092342bd61656",
+    "O2_reference": "28648034307ef7da0817a6dd88e4533cb8407f5e845fe4acb26d8bb1206cbdce"
+  },
+  "candidate_generate_sha256": "4217c7c51a8e3be7ce6b6644e7a6332ea61a8f1c75382848cceb5ab68507e762",
+  "capture_common_sha256": "003e3e6c972d880e2848fd2fb2371e3e650e5397e273970665308903a8cf9ea3",
+  "commands": 9,
+  "cpu": 0,
+  "gate_sha256": "45c4736806e103b930c8ac7da1982d069d7ae115a9b310a62f4c847158fc6b2e",
+  "public_status": "not_claimed",
+  "reference_generate_sha256": "345129a775d430a40e151d3b1adb5cd9efeaf77a6ffb6713bd081c74d40bdd9c",
+  "schema": "mhgp7-private-wspd-terminal-once-capture-v1",
+  "sources_stable": true,
+  "status": "completed",
+  "timing_claim": false
+}

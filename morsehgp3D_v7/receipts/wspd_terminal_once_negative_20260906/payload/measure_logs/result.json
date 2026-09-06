@@ -1,0 +1,26 @@
+{
+  "candidate_ms": 38286.547152,
+  "cpu": 6,
+  "literal_semantic_equality": true,
+  "public_status": "not_claimed",
+  "rectangle_count": 754686,
+  "reference_ms": 37767.100536,
+  "scope": "single_before_after_front_component_only",
+  "semantic_sha256": "3e99fb0b6c6e4f1f34ddd02c046ae790720c2ab4a6e84b1f03f243e9235fab58",
+  "speedup": 0.9864326596509796,
+  "status": "completed",
+  "stdout_sha256": {
+    "candidate": "f77ad838645135d72e7b49cc2db02009e55c2000b06e23fb61f831c6f21ee507",
+    "reference": "99516c788feae9058caf22aa560179226fa00b063396ad5aac5519068602b4b5"
+  },
+  "work": [
+    {
+      "corner_evals": 167115088,
+      "witness_nodes": 563616452
+    },
+    {
+      "corner_evals": 335509837,
+      "witness_nodes": 547864549
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "arms": {
+    "0": {
+      "GNU_peak_RSS_KiB": 1321684,
+      "elapsed_before_terminal_seconds": 154.822390106,
+      "git_head_observed": "e16e857babc78666b67f3495bb666f9ce0c56ce5",
+      "recorder_wall_seconds": 154.83712396400006,
+      "run_sha256": "4b770c150c55bf5697e86a57925dbe2cbab900ae2421d8814fc35cf0e3247124",
+      "stage_seconds": {
+        "census": 7.193224164,
+        "count": 0.034001549,
+        "digest": 1.767320702,
+        "expand": 0.641269337,
+        "full": 71.590271022,
+        "generation": 60.253237717000005,
+        "index": 0.002224333,
+        "input": 0.0018227850000000002,
+        "prefilter": 10.193639585000001,
+        "read": 1.331383736,
+        "regularity": 0.019046732,
+        "release": 0.041948966,
+        "rle": 1.751260788
+      },
+      "work_summed_K1_to_K10": {
+        "geometry_meb_calls": 4305891,
+        "meb_calls": 4305891,
+        "meb_proposal_certified": 0,
+        "meb_proposal_fallback": 4305891,
+        "meb_proposal_pivots": 0,
+        "meb_proposal_supports": 0,
+        "meb_reference_supports": 503231458,
+        "meb_supports": 503231458
+      }
+    },
+    "unlimited": {
+      "GNU_peak_RSS_KiB": 1320208,
+      "elapsed_before_terminal_seconds": 133.03774368,
+      "git_head_observed": "dad414cb8a4d475eb27c5a1c70075c8c795ee847",
+      "recorder_wall_seconds": 133.04722140800004,
+      "run_sha256": "f7c23062b380523ecc6990dbf67c59240455d03e801d513ff028fd96a8613358",
+      "stage_seconds": {
+        "census": 7.281810825,
+        "count": 0.03481423,
+        "digest": 1.7576404010000002,
+        "expand": 0.706597129,
+        "full": 50.476593714,
+        "generation": 59.639569865999995,
+        "index": 0.002156613,
+        "input": 0.001858519,
+        "prefilter": 9.925220488999999,
+        "read": 1.3192791449999999,
+        "regularity": 0.019301791999999998,
+        "release": 0.10949363599999999,
+        "rle": 1.76191572
+      },
+      "work_summed_K1_to_K10": {
+        "geometry_meb_calls": 4305891,
+        "meb_calls": 4305891,
+        "meb_proposal_certified": 4305891,
+        "meb_proposal_fallback": 0,
+        "meb_proposal_pivots": 7595308,
+        "meb_proposal_supports": 24777382,
+        "meb_reference_supports": 0,
+        "meb_supports": 503231458
+      }
+    }
+  },
+  "counter_ratio_is_not_a_time_or_homogeneous_operation_ratio": true,
+  "engine_invoked": false,
+  "equal_final_digest": "e6e3fa51140fa9e39904c63dfaff18636ea7f10e058bfafdf1dc7b70b51fa625",
+  "equal_nonmeasure_fields_except_P_and_MEB_diagnostics": true,
+  "equal_order_digests": [
+    {
+      "certificate_digest": "8799bda5f76252de1b64add2584d59fdddaa7ea6723c2dcb59d4994cef8e3015",
+      "k": 1
+    },
+    {
+      "certificate_digest": "2ad27bfbf04fb7ff0f895e432304bd08a653a98491b7ac001cfcfe10dde3d45b",
+      "k": 2
+    },
+    {
+      "certificate_digest": "dec0d498c39c47bfdbd7bd07f489d05f29046c4e8e0b8aabc5e6e0add182afa7",
+      "k": 3
+    },
+    {
+      "certificate_digest": "05a0ef5324fec2d08e418af760b7237d0c978daf8893d93f58b05806f80a2d3c",
+      "k": 4
+    },
+    {
+      "certificate_digest": "38593915ea762d1243773b04fc44c84c9809fe4605e2ca96a1e46aa0132648e7",
+      "k": 5
+    },
+    {
+      "certificate_digest": "0ef536b610bf5128f2afbaa0fc0c27681a392549a41c1529466efdd9e20a66c9",
+      "k": 6
+    },
+    {
+      "certificate_digest": "56d1c20c243e8e9cc6148a4ea12369db29bc78eeacae90f5fe7c114310f9787b",
+      "k": 7
+    },
+    {
+      "certificate_digest": "091b57d20eed4b4c0f8ecf4814c73e44a59109e571eda86ae20ca40d144fd802",
+      "k": 8
+    },
+    {
+      "certificate_digest": "cc4cba135cc74dffcb4cd6bcadab39269efd01d5ea1a9954cdd1fe2f33455899",
+      "k": 9
+    },
+    {
+      "certificate_digest": "95ebec1618c3a15af695b7512974d8f865aa1dc7511dcc5afade5ac9d21b9e07",
+      "k": 10
+    }
+  ],
+  "exclusions": {
+    "MEB_diagnostics": [
+      "meb_proposal_certified",
+      "meb_proposal_fallback",
+      "meb_proposal_pivots",
+      "meb_proposal_supports",
+      "meb_reference_supports"
+    ],
+    "P": [
+      "max_meb_proposal_supports_per_order",
+      "meb_proposal_budget_kind"
+    ],
+    "order_measures": [
+      "build_ms",
+      "digest_ms",
+      "expand_ms",
+      "hwm_mib_sample",
+      "read_ms",
+      "release_ms",
+      "rss_mib_sample"
+    ],
+    "terminal_measures": [
+      "compute_read_release_ms_subtracted_diagnostic",
+      "digest_ms",
+      "elapsed_before_terminal_ms",
+      "generation_rects_ms",
+      "generation_wspd_ms",
+      "hwm_mib_sample",
+      "provisional_output_ms",
+      "rss_mib_sample",
+      "stage_ms"
+    ]
+  },
+  "geometry_or_completeness_judged": false,
+  "integrated_inter_k_tower": false,
+  "observed_timing_ratios": {
+    "FULL_phase": {
+      "P0_over_Punlimited": 1.4182864919061284,
+      "reduction_percent": 29.492383541210042
+    },
+    "generation": {
+      "P0_over_Punlimited": 1.0102896089354572,
+      "reduction_percent": 1.0184811211014222
+    },
+    "wall": {
+      "P0_over_Punlimited": 1.1637757055382578,
+      "reduction_percent": 14.072789521113949
+    }
+  },
+  "physical_F_support_attempts_P0_over_proposal_forms_Punlimited": 20.310114200120093,
+  "public_status": "not_claimed",
+  "same_binary_sha256": "4938b94b3166e8c13d02b0fd9687168130d5c528702d7efcf7b7379b3adeb360",
+  "same_input_digest": "b73744755477b18a5853084851075bb4e3e468ae7d1353c98d0991576a099639",
+  "slo_claim": false,
+  "standalone_MEB_time_measured": false
+}

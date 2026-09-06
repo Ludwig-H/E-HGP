@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "taskset",
+    "-c",
+    "6",
+    "/workspaces/E-HGP/build/v7_wspd_terminal_once_20260906/bin/measure_candidate",
+    "--measure"
+  ],
+  "closed": true,
+  "cpu": 6,
+  "cwd": "/workspaces/E-HGP",
+  "ended": "2026-09-06T12:09:42.430262+00:00",
+  "exit_code": 0,
+  "imposed_rlimits": null,
+  "pid": 471797,
+  "started": "2026-09-06T12:09:03.802328+00:00",
+  "streams": {
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 16020597,
+      "sha256": "f77ad838645135d72e7b49cc2db02009e55c2000b06e23fb61f831c6f21ee507"
+    }
+  },
+  "timeout": null
+}

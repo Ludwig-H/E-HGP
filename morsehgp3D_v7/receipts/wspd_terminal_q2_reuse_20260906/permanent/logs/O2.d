@@ -1,0 +1,28 @@
+/workspaces/E-HGP/build/v7_wspd_q2_permanent_20260906_r1/bin/O2: \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/wspd_terminal_reuse_gate.cpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/generate.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/cell_grid.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/../core/mutants.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/../core/types.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/edge_cover.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/../core/device.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/../tree/cloud_index.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/../tree/../core/morton.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/sector_kill.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/../spindle/spindle.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/../spindle/../core/intmath.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../core/caps.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/chord_kill.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/q2.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/keys.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/level.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/../core/wide.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/q3.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../lanes/q4.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../parallel/pool.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../spindle/witness_count.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../spindle/../core/inline_stack.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../wspd/wavefront.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/candidates.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/../parallel/sort.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/../src/pipeline/float_filter.hpp

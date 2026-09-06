@@ -1,0 +1,8 @@
+{
+  "mutant_sha256": "72678fcb64630a385a3adc6a687572e96c9fdf2770f0815851705fc789ab2f3f",
+  "new": "          // Private mutant: omit the q2 core value transfer.",
+  "old": "          if (m & 0b001) ff.c[0] = fc.c[0];",
+  "product_modified": false,
+  "source_sha256": "345129a775d430a40e151d3b1adb5cd9efeaf77a6ffb6713bd081c74d40bdd9c",
+  "target": "morsehgp3D_v7/src/pipeline/generate.hpp"
+}

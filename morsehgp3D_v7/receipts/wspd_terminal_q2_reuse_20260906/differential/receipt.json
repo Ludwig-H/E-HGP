@@ -1,0 +1,16 @@
+{
+  "all_process_groups_closed": true,
+  "binaries": {
+    "O2_candidate": "28648034307ef7da0817a6dd88e4533cb8407f5e845fe4acb26d8bb1206cbdce",
+    "O2_reference": "1a0d94293202e77008c10a48eb42103f46614d1c7c435deefe009027346bfbc6",
+    "san_candidate": "007333e8df34a0b7c67a6a484ea131f7c58ca0d0a5a9469d4a5e13880f38d2a2",
+    "san_reference": "b164091e14aee4b9df2bbeb685255a5f31410a4cc8bde29f09ad3b0b7a930189"
+  },
+  "commands": 17,
+  "cpu": 0,
+  "public_status": "not_claimed",
+  "reference_source": "receipts/full_probe_no_quotas_20260906/source_snapshot",
+  "schema": "mhgp7-private-wspd-q2-capture-v1",
+  "sources_stable": true,
+  "status": "completed"
+}

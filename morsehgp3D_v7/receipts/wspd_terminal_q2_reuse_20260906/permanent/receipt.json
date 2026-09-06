@@ -1,0 +1,12 @@
+{
+  "binaries": {
+    "O2": "9b24a313c1a9e0d053b7ec1565ff8792527e1261e510cd119a0c6f2f3018b157",
+    "san": "e578a4fc6327b84841bf30e3f90208db05faddfbe668e25a807b8f19d5f8f0b4"
+  },
+  "commands": 6,
+  "cpp_closed": true,
+  "public_status": "not_claimed",
+  "schema": "mhgp7-wspd-terminal-reuse-live-capture-v1",
+  "sources_stable": true,
+  "status": "completed"
+}

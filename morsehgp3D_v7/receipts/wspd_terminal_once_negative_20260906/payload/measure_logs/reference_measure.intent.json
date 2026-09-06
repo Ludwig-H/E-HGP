@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "taskset",
+    "-c",
+    "6",
+    "/workspaces/E-HGP/build/v7_wspd_terminal_once_20260906/bin/measure_reference",
+    "--measure"
+  ],
+  "closed": false,
+  "cpu": 6,
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": null,
+  "imposed_rlimits": null,
+  "pid": null,
+  "started": "2026-09-06T12:08:25.181879+00:00",
+  "timeout": null
+}

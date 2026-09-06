@@ -1,0 +1,17 @@
+{
+  "bin/O2": {
+    "bytes": 76432,
+    "original_preserved": true,
+    "sha256": "19e6062cea8d604ed7429b8205b3cbba0f60b57e961e1b05d6d5c12f19349cc9"
+  },
+  "bin/mutant": {
+    "bytes": 76432,
+    "original_preserved": true,
+    "sha256": "a4d5d0b7a5fb9cef06aa90a0242ca86cd73fec7430d0c3cbafe95b001644a7c3"
+  },
+  "bin/san": {
+    "bytes": 2331376,
+    "original_preserved": true,
+    "sha256": "5802da9cb33b303fd4b0b3c1b66fc170c5b53de1f240349c83208e2a71e8da7c"
+  }
+}

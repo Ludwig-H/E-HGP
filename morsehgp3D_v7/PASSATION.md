@@ -116,6 +116,34 @@ présentés comme rejoués par le nouvel audit singleton.
 
 ## Mesures courantes et contrats ouverts
 
+Le [triplet direct s8/P=unlimited](docs/RESULTATS_MONO_FULL_SANS_QUOTAS_20260906.md)
+termine maintenant les dix ordres à chaque taille : 133,038 / 307,643 /
+684,574 s pour 8k/16k/32k. La croissance observée est sous-quadratique sur
+ce régime uniforme, sans garantie générale ni qualification 50k. Les
+[captures directes](receipts/full_direct_scaling_20260906/README.md) gardent
+les sorties brutes et leurs volumes. À 32k, K9 et K10 dépassent l'ancien
+quota de quatre millions de MEB et terminent. Les résultats qui suivent
+restent historiques, avec leurs propres plafonds et sources.
+
+Le [réemploi terminal q2](docs/ELIMINATION_BLOCS_WSPD.md) est intégré,
+avec différentiel O2/ASan-UBSan et 19 CTests ciblés réussis. Le [nouveau
+binaire à 8k](receipts/full_wspd_q2_separation_20260906/README.md) termine
+à 131,482 / 132,138 / 137,247 s pour s=8/10/12, mêmes dix forêts. Ni ces
+trois passages ni l'écart q2 de −1,17 % à s8 ne prouvent un gain robuste.
+La [paire P0/P∞ sur le même binaire antérieur](receipts/full_direct_p0_comparison_20260906/README.md)
+est close à 8k/s8 : 154,837 contre 133,047 s externes, mêmes forêts.
+Les crédits h_a/h_b par sous-arbres sont corrects, mais non intégrés sur
+le cas mesuré : aucun facteur >8 à 8k/s8, 93,819 ms au scalaire contre
+186,560 ms aux blocs forcés, dans une sonde instrumentée. Le [terminal à un
+seul passage](receipts/wspd_terminal_once_negative_20260906/README.md) n'est
+pas intégré : résultats identiques mais coins doublés sur le cas 8k,
+sans gain mesuré sur le front O2. Cette paire est distincte des temps FULL.
+Le [contrôle q2 positif](receipts/wspd_q2_positive_core_20260906/README.md)
+ajouté à la demande de l'auditeur passe O2/SAN et réfute l'omission de copie.
+Ce lot uniforme est clos ; un rectangle de deux amas séparés vérifie
+distinctement le cas des grands facteurs. La transition multi-CPU commence par les étapes
+déjà parallélisables, avec le coût FULL séquentiel déclaré séparément.
+
 La [campagne de normalisation v2](docs/RESULTATS_MONO_FULL_SUCCESSOR_20260905.md)
 ferme les cinq captures prévues : 8k/s10 et s12 à 143,301 et 145,404 s,
 16k/s8 à 321,643 s, puis refus 32k/K9 sur quatre millions d'appels MEB
@@ -171,8 +199,17 @@ Sur demande utilisateur, les mesures passent maintenant par un
 [enregistreur direct](bench/run_full_probe.py), avec suivi de progression
 et arrêt si le calcul tourne en rond, sans nouvelle admission de format.
 Comparer P0 et l'opt-in sur 8k/16k/32k et s=8/10/12 ; le premier triplet
-est s8/P=unlimited. Aucune activation par défaut ni extrapolation 50k/G4
-avant résultats. La piste
+s8/P=unlimited est clos, les autres cellules ne lui sont pas attribuées.
+La paire P0/P∞ 8k/s8 et les trois s du binaire q2 sont également closes,
+dans leurs paquets propres. L'utilisateur a confirmé la transition après
+ce lot mono : multi-CPU local, puis G4 SPOT à 48 CPU et GPU. La sonde
+actuelle fixe encore un thread ; le contrôleur GCP historique mesure F
+et des primitives device, pas la nouvelle tour FULL. Adapter et qualifier
+ces raccords avant de leur attribuer des résultats de contrats FULL.
+La priorité de génération demandée ensuite est l'[élimination par blocs
+WSPD](docs/ELIMINATION_BLOCS_WSPD.md), h_cœur/h_a/h_b : distinguer nouvelles
+morts, tests de seuil mutualisés et comptages redondants supprimés.
+Aucune activation par défaut ni extrapolation 50k/G4. La piste
 distincte de [réutilisation des terminaisons certifiées](audits/MEB_DOUBLE_BUDGET_COURANT.md#réutiliser-une-certification-terminale-déjà-acquise)
 demande de mesurer T−U, puis de conserver le premier recalcul complet et
 de normaliser le token courant, sans mémoriser une racine périmée.

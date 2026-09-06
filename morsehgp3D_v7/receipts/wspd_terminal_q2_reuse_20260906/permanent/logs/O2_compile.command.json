@@ -1,0 +1,41 @@
+{
+  "address_space_limit": "not_set_ASan_shadow",
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-O2",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_wspd_q2_permanent_20260906_r1/logs/O2.d",
+    "/workspaces/E-HGP/morsehgp3D_v7/tests/wspd_terminal_reuse_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_wspd_q2_permanent_20260906_r1/bin/O2"
+  ],
+  "closed": true,
+  "cpu": 0,
+  "cpu_seconds": 120,
+  "cwd": "/workspaces/E-HGP",
+  "ended": "2026-09-06T11:38:52.125656+00:00",
+  "exit_code": 0,
+  "expected_exit": 0,
+  "fsize_bytes": 536870912,
+  "label": "O2_compile",
+  "pid": 387038,
+  "started": "2026-09-06T11:38:48.751894+00:00",
+  "streams": {
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "wall_seconds": 180
+}
