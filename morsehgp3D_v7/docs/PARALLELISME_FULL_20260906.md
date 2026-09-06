@@ -112,6 +112,14 @@ Ces deux expressions remplacent le 608U historique dans la sonde seulement ;
 le garde du moteur réduit `run.hpp` reste inchangé. Les 40 contrôles
 arithmétiques passent en O2 et ASan/UBSan, ainsi que deux nouveaux CTests.
 Quatre micros n=8, P=0/illimité et 1/4 threads, conservent les mêmes forêts.
-Ce n'est encore ni une mesure 50k ni une qualification de complétude.
+Cette qualification locale n'est pas une mesure 50k ni une preuve de complétude.
 Les capacités, index, piles et équipes restent hors de ce proxy nommé ;
 la limite d'espace d'adressage est un mécanisme distinct.
+
+La [session G4 SPOT suivante](RESULTATS_G4_FULL_20260906.md) ferme ensuite
+deux vrais processus 50k/K10 et 50k/K5 avec 48 workers. L'admission et le
+census passent, mais la régularité refuse avant tout ordre FULL, après
+21,372 s et 5,646 s. Pas de temps de tour complète, ni de speedup par
+rapport au local à n différent. La VM est confirmée `TERMINATED` et les
+captures sont récupérées ; le verrou des coquilles supplémentaires est
+transmis à l'auditeur avant de payer une autre campagne.

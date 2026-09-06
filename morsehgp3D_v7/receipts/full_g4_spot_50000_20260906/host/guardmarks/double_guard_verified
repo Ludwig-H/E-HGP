@@ -1,0 +1,9 @@
+schema=e-hgp.guard-mark.v1
+mark=double_guard_verified
+project=devpod-gpu-exploration
+zone=us-central1-b
+instance=ehgp-v7-4fa0e0789a7d5bb06b787d35
+generation=2026-09-06T06:19:11.593-07:00
+max_run_seconds=3600
+guest_shutdown_minutes=30
+date_utc=2026-09-06T13:20:09Z

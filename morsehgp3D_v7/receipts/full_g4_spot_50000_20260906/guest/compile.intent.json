@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/usr/bin/g++",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-MMD",
+    "-MF",
+    "/tmp/ehgp-full-v7-dc37794a28c82f69.zzRPWgKPKk/output/full_probe.d",
+    "/tmp/ehgp-full-v7-dc37794a28c82f69.zzRPWgKPKk/source/morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp",
+    "-o",
+    "/tmp/ehgp-full-v7-dc37794a28c82f69.zzRPWgKPKk/output/full_probe"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-dc37794a28c82f69.zzRPWgKPKk/output",
+  "exit_code": null,
+  "group_closed": false,
+  "per_command_watchdog": null,
+  "pid": null,
+  "session_work_deadline_epoch": 1788702293,
+  "started_utc": "2026-09-06T13:20:37.489767+00:00"
+}

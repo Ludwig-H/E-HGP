@@ -1,0 +1,31 @@
+{
+  "bounds": {
+    "closing_margin_seconds": 300,
+    "guest_deadline_epoch": 1788702593.145085,
+    "safe_gce_deadline_epoch": 1788704051.593,
+    "work_deadline_epoch": 1788702293
+  },
+  "mark": {
+    "date_utc": "2026-09-06T13:20:09Z",
+    "generation": "2026-09-06T06:19:11.593-07:00",
+    "guest_shutdown_minutes": "30",
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "mark": "double_guard_verified",
+    "max_run_seconds": "3600",
+    "project": "devpod-gpu-exploration",
+    "schema": "e-hgp.guard-mark.v1",
+    "zone": "us-central1-b"
+  },
+  "metadata": {
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "machine": "g4-standard-48",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-b"
+  },
+  "schedule": {
+    "MODE": "poweroff",
+    "USEC": "1788702593145085",
+    "WALL_MESSAGE": "Coupe-circuit E-HGP",
+    "WARN_WALL": "1"
+  }
+}

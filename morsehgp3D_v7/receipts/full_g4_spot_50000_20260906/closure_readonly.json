@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "instances",
+    "describe",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-b",
+    "--format=json(name,status,lastStartTimestamp,lastStopTimestamp,scheduling,labels)"
+  ],
+  "utc": "2026-09-06T13:23:51.668484+00:00",
+  "exit_code": 0,
+  "stdout": "{\n  \"labels\": {\n    \"ehgp-create\": \"4fa0e0789a7d5bb06b787d35\",\n    \"project\": \"e-hgp\",\n    \"role\": \"gpu-benchmark\"\n  },\n  \"lastStartTimestamp\": \"2026-09-06T06:19:11.593-07:00\",\n  \"lastStopTimestamp\": \"2026-09-06T06:22:29.885-07:00\",\n  \"name\": \"ehgp-v7-4fa0e0789a7d5bb06b787d35\",\n  \"scheduling\": {\n    \"automaticRestart\": false,\n    \"instanceTerminationAction\": \"STOP\",\n    \"maxRunDuration\": {\n      \"nanos\": 0,\n      \"seconds\": \"3600\"\n    },\n    \"onHostMaintenance\": \"TERMINATE\",\n    \"preemptible\": true,\n    \"provisioningModel\": \"SPOT\"\n  },\n  \"status\": \"TERMINATED\"\n}\n",
+  "stderr": ""
+}

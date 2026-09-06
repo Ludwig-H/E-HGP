@@ -1,0 +1,6 @@
+{
+  "command_exit_code": 2,
+  "elapsed_seconds": 21.372004347,
+  "read_reason": "ValueError: rows",
+  "reported_complete": false
+}

@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-b",
+    "--quiet",
+    "--ssh-key-file=/home/codespace/.local/state/ehgp/full-v7-20260906.B6cePziJ/session_key",
+    "--ssh-key-expiration=2026-09-06T14:28:38.684821Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--command=sudo -n cat /run/systemd/shutdown/scheduled"
+  ],
+  "name": "guest_schedule",
+  "started_epoch": 1788700810.8384917,
+  "timeout_seconds": 90
+}

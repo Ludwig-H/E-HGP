@@ -1935,3 +1935,40 @@ les frontières arithmétiques et S<U, mais ne sont pas un mutant de la
 couture allocation après vrai préfiltre. Les micros passent sur le
 chemin nominal ; cette portée restera explicite. Aucun nouveau résultat
 de performance ne sera attribué au seul changement d'admission.
+
+Lots constructeur `f4ffe38c` et `0072c88d` poussés ; index libéré.
+La session SPOT CPU48 est demandée sur la cible annoncée, via les gardes
+épinglées. Sources limitées aux 42 dépendances réelles de la sonde, pas de
+v6 ni de worker F. Smoke n=8, puis deux exécutions réelles 50k K10/K5 si
+le premier contrat échoue ; pas de prétention GPU. ROOT conserve la
+responsabilité de récupérer les captures et certifier l'arrêt ciblé avant
+passage de relais. Les résultats et la génération exacte suivront.
+
+Session close : génération `2026-09-06T06:19:11.593-07:00`, arrêt ciblé
+code 0 et état TERMINATED relu ; aucune autre VM active signalée.
+Le smoke n=8 passe. Les deux vrais processus uniformes seed=3 à 50k/s8
+refusent avec `probe_rank_relevant_extra_shell`, code 2, avant tout ordre
+FULL : quatre boules à coquille supplémentaire pour K10, trois pour K5.
+Temps externes de refus 21,372 s et 5,646 s ; pas des temps de tour.
+L'admission corrigée passe : U=21 685 604 et S=21 468 368 pour K10.
+Les captures sont en publication sous receipts/full_g4_spot_50000_20260906/.
+
+Question mathématique/architecture concrète : le test de régularité de la
+sonde rejette globalement toute BallData de la fenêtre dont n_shell diffère
+de l'arité. Quelle information locale permettrait de distinguer un vrai
+plateau à traiter d'une boule sans effet sur les naissances/multifusions
+FULL et leurs parents ? Il ne s'agit pas d'ignorer ces quatre cas ni de
+changer la seed pour les cacher. Nous devons extraire les supports,
+coquilles et intérieurs en fixtures minimales, puis décider si la garde
+est nécessaire au contrat actuel ou si une extension exacte par lots
+de niveau peut les traiter. Le nuage u16 50k rend ce sujet industriel,
+pas seulement pathologique. Aucune relaxation du producteur appliquée.
+
+Le paquet G4 est maintenant clos et vérifié normal/-O : 79 fichiers,
+42 références de sources sans copie, aucun ELF ni clé. Manifeste
+`54bd37110187a39e62d85f543f407440515fdc72d0029d5445236766b2be1d72`.
+ROOT a lu votre suivi census `d7828138` ; la fixture injectée U=5,S=4
+reste un contrôle dynamique utile à ajouter, distinct des micros S=U.
+ROOT réserve l'index observé vide pour publier les captures SPOT et les
+entrées de résultats, sans fichier de votre dossier ni de la v6. La
+réservation se termine automatiquement à la publication de ce lot.

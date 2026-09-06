@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/home/codespace/.local/state/ehgp/full-v7-20260906.B6cePziJ/full_host/stop_and_verify.sh",
+    "--yes",
+    "--expected-last-start-timestamp",
+    "2026-09-06T06:19:11.593-07:00"
+  ],
+  "name": "guarded_stop",
+  "started_epoch": 1788700886.1592855,
+  "timeout_seconds": null
+}

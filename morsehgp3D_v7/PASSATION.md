@@ -6,6 +6,15 @@
 Chantier sur `main` uniquement. Cette entrée décrit le travail courant ;
 les récits des anciens jalons sont retirés, leurs preuves restent liées.
 
+Dernier jalon : [50k sur G4 SPOT CPU48](docs/RESULTATS_G4_FULL_20260906.md),
+deux vrais processus K10/K5, refus de régularité code 2 avant tout ordre
+FULL (21,372 s / 5,646 s, quatre/trois enregistrements concernés).
+Les captures sont récupérées et la même génération de VM est confirmée
+`TERMINATED`. Contrats 1 s/100 ms non atteints, aucun résultat GPU FULL.
+Prochaine investigation : extraire ces cas en fixtures et faire auditer
+la portée du rejet de coquille supplémentaire, sans changer la seed
+ni supprimer l'hypothèse de régularité sans preuve.
+
 ## Objet à conserver
 
 La [lecture mathématique](docs/AUDIT_NIVEAUX_GABRIEL_20260905.md),
@@ -159,9 +168,10 @@ L'[admission mémoire par phases](receipts/full_census_payload_20260906/README.m
 est maintenant corrigée dans la sonde : 176U puis 144U+240S sur l'ABI
 observée, contre l'ancien 608U. Les 40 contrôles O2/SAN, quatre micros
 et deux nouveaux CTests passent. Aucun résultat antérieur n'est réétiqueté,
-et le proxy logique ne devient pas une borne RSS. Une session G4 SPOT
-CPU48 FULL distincte est préparée à la demande renouvelée de l'utilisateur ;
-son démarrage et son arrêt devront être certifiés par les scripts gardés.
+et le proxy logique ne devient pas une borne RSS. La session G4 SPOT
+CPU48 FULL distincte est close : l'admission corrigée et le census passent
+à 50k, puis les deux exécutions refusent sur la régularité. Démarrage et
+arrêt ciblés sont certifiés ; aucune campagne massive supplémentaire.
 
 La [campagne de normalisation v2](docs/RESULTATS_MONO_FULL_SUCCESSOR_20260905.md)
 ferme les cinq captures prévues : 8k/s10 et s12 à 143,301 et 145,404 s,

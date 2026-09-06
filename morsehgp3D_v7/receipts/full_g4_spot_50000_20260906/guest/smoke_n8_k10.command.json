@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "/tmp/ehgp-full-v7-dc37794a28c82f69.zzRPWgKPKk/output/full_probe",
+    "--n=8",
+    "--s=8",
+    "--kmax=10",
+    "--alias-policy=lazy",
+    "--cache-entries=1000000",
+    "--meb-proposal-supports=unlimited",
+    "--threads=48"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-dc37794a28c82f69.zzRPWgKPKk/output",
+  "elapsed_seconds": 0.015533996999991473,
+  "ended_utc": "2026-09-06T13:20:46.738190+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 3246,
+  "session_work_deadline_epoch": 1788702293,
+  "started_utc": "2026-09-06T13:20:46.722544+00:00",
+  "stderr_sha256": "0b9b072b63b84e7e5fb6fb29830b06eee65be1fc79dabe09b117954709289d4e",
+  "stdout_sha256": "3c96009ca72923ed4abfccc176f11a916773104f652fdf00b728ed681062a181"
+}

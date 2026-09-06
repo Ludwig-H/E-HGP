@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/home/codespace/.local/state/ehgp/full-v7-20260906.B6cePziJ/full_host/stop_and_verify.sh",
+    "--yes",
+    "--expected-last-start-timestamp",
+    "2026-09-06T06:19:11.593-07:00"
+  ],
+  "ended_epoch": 1788700955.7070413,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "guarded_stop",
+  "pid": 609750,
+  "started_epoch": 1788700886.1592855,
+  "stderr_sha256": "dd4e3d334309981c11a04c8be2e56061cd1ecb28b8132ecbf7a149b999b5042b",
+  "stdout_sha256": "8237101459ad3fd3b178090dc01ee238c1558b1e6f7658c0954b25af6b58c3ee",
+  "timeout_seconds": null
+}

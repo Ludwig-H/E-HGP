@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "--version"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-dc37794a28c82f69.zzRPWgKPKk/output",
+  "elapsed_seconds": 0.001781149999999343,
+  "ended_utc": "2026-09-06T13:20:37.489671+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 3240,
+  "session_work_deadline_epoch": 1788702293,
+  "started_utc": "2026-09-06T13:20:37.487859+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "a3b64288a651d40a18a243c43c871f7ae2886baa58b7e3c64a1061bfd651245f"
+}

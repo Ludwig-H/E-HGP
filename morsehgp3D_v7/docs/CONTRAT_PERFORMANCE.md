@@ -9,6 +9,12 @@ Une fois le jalon d'une seconde validé, **la cible suivante est 100 ms**
 pour le même périmètre de tour déclaré, sans relâcher l'exactitude.
 Ce document ne rapporte aucun objectif atteint.
 
+Dernière observation, le 6 septembre : [G4 SPOT CPU48 à 50k](RESULTATS_G4_FULL_20260906.md).
+K10 et le véritable repli K5 refusent avant toute hiérarchie, pour
+coquilles non régulières, en 21,372 s et 5,646 s. Aucune qualification
+de la seconde ni de 100 ms ; les dizaines de millions et le GPU FULL
+restent non mesurés. La session ciblée est close et ses preuves récupérées.
+
 Le statut demeure `public_status=not_claimed`, profil d'entrée u16.
 La cible de 100 ms du plan transverse est ainsi conservée comme jalon
 suivant, et non comme premier délai à valider. Les rattachements certifiés,

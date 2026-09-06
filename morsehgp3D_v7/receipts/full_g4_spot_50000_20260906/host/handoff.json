@@ -1,0 +1,1 @@
+{"guest_shutdown_minutes":30,"instance":"ehgp-v7-4fa0e0789a7d5bb06b787d35","last_start_timestamp":"2026-09-06T06:19:11.593-07:00","project":"devpod-gpu-exploration","schema":"e-hgp.start-handoff.v3","status":"targeted_running","zone":"us-central1-b"}

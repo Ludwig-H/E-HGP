@@ -58,3 +58,6 @@ Les sources de la campagne sont celles du
 [lot mémoire qualifié](../morsehgp3D_v7/receipts/full_census_payload_20260906/README.md).
 Les mesures CPU locales antérieures restent dans leur
 [lot séparé](../morsehgp3D_v7/docs/PARALLELISME_FULL_20260906.md).
+La [première session réelle](../morsehgp3D_v7/docs/RESULTATS_G4_FULL_20260906.md)
+est close : deux refus de régularité à 50k, captures récupérées, arrêt
+ciblé certifié. Ce résultat ne qualifie aucune tour FULL ni aucun GPU.

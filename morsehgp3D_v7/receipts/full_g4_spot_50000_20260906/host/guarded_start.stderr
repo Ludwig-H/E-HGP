@@ -1,0 +1,5 @@
+Starting instance(s) ehgp-v7-4fa0e0789a7d5bb06b787d35...
+............................................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35].
+Instance internal IP is 10.128.0.2
+Instance external IP is 34.68.126.179

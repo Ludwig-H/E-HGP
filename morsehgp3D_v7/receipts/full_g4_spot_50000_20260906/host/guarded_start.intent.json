@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/home/codespace/.local/state/ehgp/full-v7-20260906.B6cePziJ/full_host/start_and_verify.sh",
+    "--yes",
+    "--guest-shutdown-minutes",
+    "30",
+    "--handoff-file",
+    "/home/codespace/.local/state/ehgp/full-v7-20260906.B6cePziJ/full_host/handoff.json",
+    "--lifecycle-state-file",
+    "/home/codespace/.local/state/ehgp/full-v7-20260906.B6cePziJ/full_host/lifecycle.txt",
+    "--guard-mark-dir",
+    "/home/codespace/.local/state/ehgp/full-v7-20260906.B6cePziJ/full_host/guardmarks"
+  ],
+  "name": "guarded_start",
+  "started_epoch": 1788700719.6108568,
+  "timeout_seconds": null
+}

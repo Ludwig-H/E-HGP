@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_g4_spot_50000_20260906/verify.py",
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_g4_spot_50000_20260906"
+  ],
+  "exit_code": 0,
+  "scope": "offline captured evidence only; no engine/GCP",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "8ba3aeb6f36d5d8113683eb177c621e887d0b0494cd8c12b63a8a9eb5bdb09cb"
+}

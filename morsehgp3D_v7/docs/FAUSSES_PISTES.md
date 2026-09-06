@@ -36,6 +36,7 @@ non encore qualifiée n'est pas, à elle seule, une fausse piste.
 | Confondre saturation à need succès et plafond de need tests | Des ancres sans assez de témoins exigent encore de réfuter les autres positions. Arrêter après need tests perd des crédits ; un scan Morton peut rester quadratique même avec arrêt correct après need succès. [Analyse](ELIMINATION_BLOCS_WSPD.md) |
 | Promouvoir FULL depuis le lecteur structurel, un digest égal ou les reçus F | Aucun ne certifie la complétude géométrique du producteur FULL. Garder les autorités séparées et le succès relatif explicite. [Contrat producteur](CONTRAT_PRODUCTEUR_FULL_GABRIEL.md) |
 | Traiter un refus ou une capture interrompue comme une tour rapide | Sans terminal de succès, aucun temps de complétion n'est acquis. Conserver les tentatives négatives sans réparer leurs octets. [Interruption réelle](../receipts/full_gabriel_lazy_interrupted_20260905/README.md) |
+| Supposer qu'un nuage uniforme u16 est toujours régulier après quelques tailles réussies | Le premier essai 50k G4 refuse avant FULL : quatre enregistrements à coquille supplémentaire pour K10, trois pour K5. Extraire et traiter ces cas selon un contrat exact ; ni changer la seed pour effacer l'échec ni supprimer le test sans preuve. [Session close](RESULTATS_G4_FULL_20260906.md) |
 
 ## Règle d'entretien du dossier actif
 

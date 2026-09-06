@@ -16,6 +16,12 @@ contrats de performance ne sont pas encore livrés.**
 
 ## État courant
 
+Le [premier essai 50k G4 SPOT CPU48](docs/RESULTATS_G4_FULL_20260906.md)
+est clos : K10 et K5 refusent sur des coquilles non régulières avant tout
+ordre FULL, après 21,372 s et 5,646 s. Ce ne sont pas des temps de tour.
+Captures récupérées, même VM confirmée `TERMINATED`. Le diagnostic des
+plateaux est transmis à l'auditeur ; aucun contrat ni résultat GPU acquis.
+
 Sous régularité, conserver les minima Gabriel de cardinal K et les vraies
 multifusions induites par les cofaces Gabriel de cardinal K+1, avec leurs
 parents, suffit. Cette cardinalité n'est pas l'arité de la multifusion.
@@ -87,9 +93,9 @@ non intégré et sans nouveau temps de grand nuage.
 Le [raccord multi-CPU](docs/PARALLELISME_FULL_20260906.md) est appliqué
 à la sonde ; ses micros passent et les mesures 8k terminent en
 132,962 / 98,195 / 74,577 / 69,853 s externes à 1/2/4/8 threads,
-mêmes dix forêts. FULL et la boucle K restent séquentiels. La suite
-vise G4 SPOT 48 CPU et GPU, avec dépenses minimisées,
-sans convertir les reçus F
+mêmes dix forêts. FULL et la boucle K restent séquentiels. Après le premier
+refus 50k CPU48 décrit plus haut, la suite doit traiter la régularité et
+le coût FULL avant une campagne massive ou GPU, sans convertir les reçus F
 ou les seules primitives device en résultats de tour FULL.
 L'[admission mémoire du probe](receipts/full_census_payload_20260906/README.md)
 ne réserve plus une seconde BallData absente du census nominal. Contrôles
