@@ -1519,5 +1519,97 @@
     "engine_invocations": 0,
     "new_cpp_compilations": 0,
     "gcp": "not_used"
+  },
+  "latest_terminal_count_review_20260906": {
+    "date": "2026-09-06T12:05:48.610740+00:00",
+    "base_head": "4931906bb587719b6f14f3c8c093ed7d666346e4",
+    "receipt": "receipts_terminal_count_20260906/README.md",
+    "scope": "Terminal and deferred-frontier proof, q2 positive-value gate correction, noncredit q3/q4 block certificate with exact fixtures, and dated paired-capture review.",
+    "variants_D_to_O_unchanged": true,
+    "historical_scientific_receipts_modified": false,
+    "checks": {
+      "authored_markdown": {
+        "files": 6,
+        "local_links": 101,
+        "anchors": 6,
+        "errors": 0,
+        "math_format": "passed",
+        "unpublished_external_targets": 0
+      },
+      "fixed_countermodels": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "sha256": "615721c1839b5ed2245402f0361596b9736fa8c42454d195201ad6ce4362a2d2",
+        "scope": "Coupled-mask countermodel, three-point q2 census, noncredit block inside W2, strict boundaries and upper-as-lower interval mutants. No product run."
+      },
+      "q2_capture_scope": "174 calls per arm/build, six refusals,1283 saved visits and identical semantic outputs; read-only provenance review.",
+      "paired_MEB_scope": "Same binary/config/data/digests; K9-K10 account for78.89449935814677 percent of the observed FULL delta; no fresh timing.",
+      "unstaged_whitespace": "passed",
+      "docs_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "active_documents": 387
+      },
+      "registry": {
+        "exit_code": 0,
+        "phases": 20
+      },
+      "positive_core_gate_followup": {
+        "sha256": "35d28f2ce548976903b320b472f4c62a94b2bcf394faf11bf84507fb098d04e9",
+        "status": "gap closed by static read of value, uniqueness and nonvacuity checks",
+        "cpp_run_qualified": false
+      },
+      "freshness": {
+        "normal_optimized_exit_codes": [
+          1,
+          1
+        ],
+        "byte_identical": true,
+        "common_pins": 2215,
+        "common_mismatches": 0,
+        "source_variants_unchanged": 12,
+        "O_delta": [
+          "CMakeLists.txt",
+          "PASSATION.md",
+          "README.md",
+          "docs/FAUSSES_PISTES.md",
+          "docs/RESIDENCE_MASSIVE.md",
+          "src/pipeline/generate.hpp",
+          "tests/meb_proposal_local_gate.cpp"
+        ],
+        "interpretation": "Expected published19ff070a documentary/test/generator deltas; previous FULL/MEB headers unchanged, no C++ variant repinned."
+      },
+      "intermediate_docs_failure": {
+        "exit_code": 1,
+        "path": "receipts/wspd_histogram_blocks_20260906/prototype/PLAN.md:3",
+        "reason": "Concurrent constructor publication retained a now-broken relative link after copying private plan. Reported through owned dialogue; no external edit.",
+        "resolution": "Constructor publication fixed the copied plan routing; final global check rerun."
+      },
+      "publication_scope": {
+        "staged_paths": 12,
+        "outside_audits": 0,
+        "staged_whitespace": "passed",
+        "index_initially_empty": true,
+        "constructor_index_respected_until_publication": "19ff070a",
+        "branch": "main"
+      }
+    },
+    "maintenance": {
+      "root_markdown_files": 25,
+      "mono_words_before": 1179,
+      "mono_words_after": 1103,
+      "action": "Removed obsolete current-refusal framing and duplicate old narrative; retained unique bounds and sealed historical evidence. Active dialogue now focuses on terminal theorem and positive core check. State entry condensed to current subjects; obsolete open gate warning closed after constructor fix.",
+      "state_words_before": 786,
+      "state_words_after": 670
+    },
+    "engine_invocations": 0,
+    "new_cpp_compilations": 0,
+    "gcp": "not_used",
+    "publication_base_head": "19ff070a38c8abef2ff735641d56d78c4cf7ff97"
   }
 }

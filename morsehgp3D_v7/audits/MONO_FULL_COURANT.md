@@ -1,12 +1,12 @@
 # Mono FULL : observations et diagnostics de travail
 
-Le header des captures mono `85c27ab9` est publié dans `5633bc5a`. La [contrelecture du 6 septembre](receipts_followup_20260906/README.md) vérifie directement les 29 comparaisons et 204 ordres réussis des captures mono, puis le rejeu 8k/s8 : mêmes champs hors mesures, avec la transformation explicite des successeurs uniquement pour les comparaisons historiques. Le temps original concurrent reste exclu. Les [résultats principaux](../docs/RESULTATS_MONO_FULL_SUCCESSOR_20260905.md) portent les mesures et leurs limites ; aucun nouveau moteur ni gain de temps qualifié ici. `public_status=not_claimed`.
+Les [résultats sans quotas](../docs/RESULTATS_MONO_FULL_SANS_QUOTAS_20260906.md) remplacent le diagnostic de blocage par un plafond MEB : 8k/16k/32k ont terminé chacun les dix ordres horizontaux. La sonde libère les forêts ; elle ne mesure pas encore les liens inter-K ni une archive retenue. Les variantes antérieures restent des témoins historiques. public_status=not_claimed.
 
-## Refus courant : appels MEB, puis piste de réutilisation
+Le [relevé indépendant du 6 septembre](receipts_terminal_count_20260906/source_review.json) confirme le pairage P0/unlimited à 8k : mêmes données, binaire et digests, mêmes compteurs hors diagnostics MEB annoncés. K9–K10 concentrent 16,658 s des 21,114 s économisées dans FULL, soit 78,89 % sur cette paire. Cela étaye leur priorité d’optimisation ; ce n’est ni une nouvelle mesure, ni une vitesse isolée du MEB, ni une conclusion statistique. Les méthodes de mesure et les tableaux déjà décrits par le constructeur ne sont pas recopiés ici.
 
-À 32k/K9, la normalisation v2 atteint désormais le plafond de quatre millions d’appels MEB, avec 125 373 952 accès successeurs. Le [diagnostic reproductible](receipts_followup_20260906/work_review_normal.json) utilise le placement des charges du code capturé, sans appliquer les identités de succès au refus. P=2 646 836 demandes de portail et C=1 353 165 pas donnent P+C=M+1 ; `direct_lookups=singleton_intruder_resolutions+C` prouve que tous les pas de descente comptés ont déjà atteint leur recherche de terminal. Avec `terminal_direct=P−1`, **l’appel refusé est la MEB initiale sur K sites d’un nouveau portail**. Le terminal et la forêt restent refusés ; K1..8 seuls sont comparés.
+## Refus historique conservé
 
-Les filtres du proposeur désormais intégré à FULL réduisent les formes internes, tandis que `meb_calls` est chargé avant le helper. À parcours conservé, cette optimisation rencontrerait donc encore le même plafond. Une piste distincte est la [réutilisation d’un terminal déjà certifié localement](MEB_DOUBLE_BUDGET_COURANT.md#réutiliser-une-certification-terminale-déjà-acquise). Les agrégats comptent 826 460 terminaisons de descente achevées, mais ignorent leurs labels distincts : ils ne prouvent aucune répétition. Les 2 626 048 accès successeurs encore disponibles à ce préfixe ne garantissent pas non plus la fin de K9. Aucun cap n’est proposé à la hausse.
+Le [diagnostic 32k/K9](receipts_followup_20260906/work_review_normal.json) identifiait correctement la MEB initiale d’un nouveau portail au plafond de quatre millions, avec P+C=M+1. Ce plafond supprimé dans la sonde ne devient ni une nouvelle réussite de ce run ni un refus courant. Ses agrégats ne prouvaient pas la répétition des labels terminaux. La [réutilisation de certification](MEB_DOUBLE_BUDGET_COURANT.md#réutiliser-une-certification-terminale-déjà-acquise) reste une optimisation distincte des formes internes du proposeur.
 
 ## Témoin EAGER historique
 
@@ -20,7 +20,7 @@ Pour un ordre réussi, noter L les minima, D les directes, T la somme des cardin
 
 Avec minima séparés, le cache strict est borné par 4D : 5 063 544 clés au premier ordre refusé 16k/K9, 6 856 080 à 32k/K7. Huit millions suffisent pour ces caches seuls ; les autres budgets et ordres suivants ne sont pas admis par cet argument. La [preuve mémoire](receipts_full_mono_20260905/memory_model_review.md) conserve hypothèses et propriétaires.
 
-## Juge et comparaison suivante
+## Lecteurs et diagnostics conservés
 
 Quatre [corruptions de données](receipts_full_mono_20260905/judge_review.md) exposaient les lacunes du juge v1 : minima, miroir MEB, identité d’alias et temps. Elles ne préservaient pas les sceaux historiques et n’invalident pas les runs nominaux. Le v2 et son supplément first-C ont depuis leur [contre-vérification propre](CACHE_FULL_COURANT.md).
 
@@ -40,7 +40,7 @@ Le dernier calcul concerne **K8 réussi**, pas K9 refusé. Les trois valeurs pr�
 
 ## Borne des supports MEB q4 sur les six passages singleton
 
-La [nouvelle campagne constructeur](../docs/RESULTATS_MONO_FULL_SINGLETON_20260905.md) est close, sans accélération robuste retenue. Le [contrôle indépendant](meb_full_work_review.py) raccorde ses six bruts, reçus et snapshots de source ; son [résultat](meb_full_work_review.json) retrouve les mêmes comptes MEB sur 60 ordres réussis. Python normal et `-O` concordent ; quatre corruptions de données sont refusées. Ce contrôle porte sur les identités de travail, pas sur toute la qualification de la campagne ni sur ses temps.
+La [campagne singleton historique](../docs/RESULTATS_MONO_FULL_SINGLETON_20260905.md) est close, sans accélération robuste retenue. Le [contrôle indépendant](meb_full_work_review.py) raccorde ses six bruts, reçus et snapshots de source ; son [résultat](meb_full_work_review.json) retrouve les mêmes comptes MEB sur 60 ordres réussis. Python normal et `-O` concordent ; quatre corruptions de données sont refusées. Ce contrôle porte sur les identités de travail, pas sur toute la qualification de la campagne ni sur ses temps.
 
 En lazy réussi, P=`portal_requests` appelle une MEB sur K sites ; chacune des C=`chain_steps` appelle ensuite une MEB sur K+1 sites. Donc M=P+C. Chaque appel F énumère au plus B(n) supports q2/q3, puis au plus $\binom{n}{4}$ supports q4, où B(n) est la somme des nombres de paires et de triples. Avec S=`meb_supports` :
 

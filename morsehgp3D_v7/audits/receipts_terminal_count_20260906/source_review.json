@@ -1,0 +1,119 @@
+{
+  "schema": "mhgp7-terminal-count-static-and-capture-review-v1",
+  "reviewed_utc": "2026-09-06T12:03:38.091604+00:00",
+  "base_head": "4931906bb587719b6f14f3c8c093ed7d666346e4",
+  "sha256_at_read": {
+    "src/spindle/witness_count.hpp": "f20970aa2183f6c0904d640ae5fe072894b6e0b4f7f9440277fbed77e8245803",
+    "src/spindle/spindle.hpp": "f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577",
+    "src/pipeline/generate.hpp": "345129a775d430a40e151d3b1adb5cd9efeaf77a6ffb6713bd081c74d40bdd9c",
+    "tests/wspd_terminal_reuse_gate.cpp": "81a8657ae8c7dd2445e805c9cabdd0cf86b6d238edfd3e4b2484440a83f8455d",
+    "receipts/wspd_terminal_q2_reuse_20260906/SHA256SUMS": "63dd3bbebb5b9822273eec47ee4f3a66e0d556d4d5a56530811f5c4092274fa7",
+    "receipts/wspd_terminal_q2_reuse_20260906/differential/receipt.json": "dfc795ebbd69df677f238ee740b2e58993f15651d2dd57856fff455723e433d8",
+    "receipts/wspd_terminal_q2_reuse_20260906/permanent/receipt.json": "e70b3ee13dda6eacb64348345694b2a2234535e7473e137a7b41a29ee1449cfa",
+    "receipts/wspd_terminal_q2_reuse_20260906/permanent/logs/O2_selftest.stdout": "d8726d7c5cf05db7f3d81cc709fd147fc2cd1389ddf93d9ddf34eb7e10b52733",
+    "receipts/wspd_terminal_q2_reuse_20260906/permanent/logs/san_selftest.stdout": "d8726d7c5cf05db7f3d81cc709fd147fc2cd1389ddf93d9ddf34eb7e10b52733",
+    "receipts/full_direct_p0_comparison_20260906/SHA256SUMS": "ddd90cce9e92248e04f2fd953bbdbb1e271215d7bf14a60fdf5263c8c4ad7ea4",
+    "receipts/full_direct_p0_comparison_20260906/comparison.json": "38b623804464a913910d8844c45e992d2d47146f528d86c68befdd6c352671fd",
+    "receipts/full_direct_p0_comparison_20260906/SOURCE_REFERENCE.json": "c6b45c2ef25fa20bb0f6b687375f76084344be62deb855459cc7c4aee6a8961b",
+    "receipts/full_direct_p0_comparison_20260906/n8000_s8_p0/run.json": "4b770c150c55bf5697e86a57925dbe2cbab900ae2421d8814fc35cf0e3247124",
+    "receipts/full_direct_p0_comparison_20260906/n8000_s8_p0/stdout.jsonl": "02a7ffe8456b5cf641f617b25c4c08640a3f981624d2c039744e98d9274b9874",
+    "receipts/full_direct_p0_comparison_20260906/n8000_s8_punlimited/run.json": "f7c23062b380523ecc6990dbf67c59240455d03e801d513ff028fd96a8613358",
+    "receipts/full_direct_p0_comparison_20260906/n8000_s8_punlimited/stdout.jsonl": "d1b5cbc9c7b39fe59026b49269e984daae7fa4f43527314b0745df33ca0ffcbf"
+  },
+  "scope": "Independent static terminal equivalence proof, dated capture review without constructor judge import or ELF read; two fixed mathematical countermodels.",
+  "q2_constructor_captures_reviewed": {
+    "published_payload_files": 267,
+    "manifest_entries": 269,
+    "commands": 23,
+    "compile_dependencies": 162,
+    "system_headers_excluded_by_MMD": true,
+    "calls_per_arm_and_build": 174,
+    "refusals_per_arm_and_build": 6,
+    "nodes_saved_per_build": 1283,
+    "calls_with_nodes_saved_per_build": 24,
+    "six_to_three_witnesses_per_build": 6,
+    "objects_order_masks_cores_masses_and_corners_equal": true,
+    "permanent_gate_gap": "Static omitted q2 value assignment not fixed by existing predicates; no C++ mutant run. Positive existing scene1 pair -1,-3 requires core1."
+  },
+  "P0_unlimited_reviewed": {
+    "same_binary": "4938b94b3166e8c13d02b0fd9687168130d5c528702d7efcf7b7379b3adeb360",
+    "source_snapshot_files_verified": 62,
+    "same_input_config_except_P_and_ten_digests": true,
+    "nonmeasure_deltas_only_expected_MEB_diagnostics": true,
+    "full_seconds_by_high_order": {
+      "9": {
+        "0": 17.203069041,
+        "unlimited": 11.545926788000001
+      },
+      "10": {
+        "0": 26.078320149,
+        "unlimited": 15.077932505000001
+      }
+    },
+    "FULL_delta_seconds": 21.113677167,
+    "K9_K10_delta_seconds": 16.657529896999996,
+    "K9_K10_fraction": 0.7889449935814677,
+    "new_measurement": false,
+    "single_pair_no_statistical_inference": true
+  },
+  "countermodels": {
+    "normal_optimized_exit_codes": [
+      0,
+      0
+    ],
+    "byte_identical": true,
+    "sha256": "615721c1839b5ed2245402f0361596b9736fa8c42454d195201ad6ce4362a2d2",
+    "cpu": 1,
+    "product_imports": 0,
+    "final_extension": "Block noncredit positive fixture, two exact boundary controls and two upper-as-lower interval mutants. Normal/-O passed after extension; docstring-only edit afterwards."
+  },
+  "source_variants_D_to_O_changed": false,
+  "engine_invocations": 0,
+  "cpp_compilations": 0,
+  "gcp": "not_used",
+  "positive_gate_followup": {
+    "reviewed_utc": "2026-09-06T12:10:05.164450+00:00",
+    "current_sha256": "35d28f2ce548976903b320b472f4c62a94b2bcf394faf11bf84507fb098d04e9",
+    "fixed_predicates": [
+      "line.q2_positive_core_value",
+      "line.q2_positive_core_unique_rectangle",
+      "q2_positive_core_checks==1"
+    ],
+    "old_gate_gap_closed_statically": true,
+    "new_cpp_run_qualified": false,
+    "previous_capture_hashes_preserved": true
+  },
+  "constructor_single_pass_cost_report": {
+    "read_utc": "2026-09-06T12:13:17.044471+00:00",
+    "source": "audits/COORDINATION_MORSEHGP3D_V7.md",
+    "source_sha256_at_read": "b6e73edf1adad7cf7a3a1467eb45401152b8baa76cf84f3e9fa5f94ba806ba14",
+    "integration": "not_retained",
+    "front_only_milliseconds": [
+      37767.1,
+      38286.55
+    ],
+    "witness_nodes": [
+      563616452,
+      547864549
+    ],
+    "corner_evals": [
+      167115088,
+      335509837
+    ],
+    "status": "Constructor report read; raw negative packet not independently reviewed by this lot."
+  },
+  "deferred_frontier_followup": {
+    "scope": "Static constructive proof only; disjoint per-lane antichain of core-exterior stopped subtrees, root for zero radius, resume from acquired count.",
+    "point_leaf_mixed_classification_impossible": true,
+    "cpp_api_or_benchmark_delivered": false,
+    "storage_may_be_linear": true
+  },
+  "block_noncredit_followup": {
+    "scope": "Proof for fixed a and integer b0 in Box(B), upper H and lower Xi. No C++ run.",
+    "Hmin": 73,
+    "M4": 720,
+    "Xi_min": 160000,
+    "strict_W2_but_outside_q3_q4": true,
+    "i128_upper_exponent": 73
+  }
+}
