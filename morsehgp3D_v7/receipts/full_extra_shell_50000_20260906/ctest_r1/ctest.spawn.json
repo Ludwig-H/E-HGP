@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_extra_shell_20260906/cmake_r1",
+    "-R",
+    "^mhgp7_full_extra_shell_diagnostic(_bad_argument)?$",
+    "-V",
+    "--output-on-failure",
+    "--output-junit",
+    "/workspaces/E-HGP/build/v7_extra_shell_20260906/ctest_r1/junit.xml"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "imposed_timeout": null,
+  "pid": 155,
+  "started_ns": 1788711356712148155
+}

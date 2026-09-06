@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r2/gate_O2",
+    "--emit-square"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.0020744459999377796,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "pid": 86,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "8afba524064e3933855f0e3fbee2b2ced40119b026a05551e6e616590eec7045",
+  "timeout": null,
+  "utc": "2026-09-06T15:49:00.063289+00:00"
+}

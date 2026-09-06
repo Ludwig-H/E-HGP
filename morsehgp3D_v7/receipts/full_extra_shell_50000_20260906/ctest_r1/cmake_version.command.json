@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "cmake",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "ended_ns": 1788711352889997492,
+  "exit_code": 0,
+  "imposed_timeout": null,
+  "pid": 80,
+  "started_ns": 1788711351468011406,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "d3d5b682f3f5ef5b24a79ed8cf4b8c5868fc950dad48cab1be0e3c060a77f8ee"
+}

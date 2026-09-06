@@ -69,12 +69,13 @@ chemin actuel ; la supprimer sans preuve n'est pas une optimisation.
 Le cas 50k montre qu'il ne suffit pas de tester uniquement les petits
 nuages uniformes qui passent cette hypothèse.
 
-La question est transmise à l'auditeur : déterminer quelles boules
-non régulières influencent réellement les minima, multifusions et parents,
-et quelle extension par lots de niveau serait exacte. Les coordonnées
-des cas fautifs ne sont pas encore dans ce reçu : leur extraction en
-fixtures minimales est la prochaine étape diagnostique. Ni changement
-de seed pour effacer l'échec, ni relâchement du prédicat n'est appliqué.
+Les coordonnées des cas fautifs ne sont pas dans ce reçu G4 historique.
+Une [extraction locale ultérieure](PLATEAUX_FULL_ET_ANCRES.md) conserve
+désormais les quatre I/U et leurs clés, vérifiés contre tout le nuage.
+L'auditeur prouve un raccord par ancres de boule et un certificat augmenté
+des gains de couverture ; son intégration FULL reste à réaliser.
+Ni changement de seed pour effacer l'échec, ni relâchement du prédicat
+n'est appliqué. Les résultats G4 ci-dessus ne sont pas réétiquetés.
 Pas de nouvelle campagne massive tant que ce verrou et le coût FULL
 séquentiel ne sont pas traités. Les dizaines de millions et le GPU FULL
 restent à qualifier séparément.

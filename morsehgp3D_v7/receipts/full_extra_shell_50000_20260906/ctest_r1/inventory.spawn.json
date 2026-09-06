@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_extra_shell_20260906/cmake_r1",
+    "-R",
+    "^mhgp7_full_extra_shell_diagnostic(_bad_argument)?$",
+    "--show-only=json-v1"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "imposed_timeout": null,
+  "pid": 154,
+  "started_ns": 1788711356688584136
+}

@@ -1,0 +1,17 @@
+{
+  "note": "First synthetic test run: all models and named mutants completed, but the expected mutant count was 34 for 33 implemented cases. A bool PointId rejection was added before retry; no diagnostic or product source changed.",
+  "normal": {
+    "chunk_id": "ab1c23",
+    "wall_time_seconds": 0.13766987,
+    "exit_code": 1,
+    "original_token_count": 135,
+    "output": "Traceback (most recent call last):\n  File \"/workspaces/E-HGP/build/v7_extra_shell_20260906/selftest_reader.py\", line 203, in <module>\n    main()\n  File \"/workspaces/E-HGP/build/v7_extra_shell_20260906/selftest_reader.py\", line 195, in main\n    need(len(rejects) == 34 and mask_count == 80 and {row['q_min'] for row in summaries} == {2, 3, 4}, 'test non-vacuity')\n  File \"/workspaces/E-HGP/build/v7_extra_shell_20260906/selftest_reader.py\", line 20, in need\n    raise ValueError('selftest: ' + reason)\nValueError: selftest: test non-vacuity\n"
+  },
+  "optimized": {
+    "chunk_id": "c7b92a",
+    "wall_time_seconds": 0.143522074,
+    "exit_code": 1,
+    "original_token_count": 135,
+    "output": "Traceback (most recent call last):\n  File \"/workspaces/E-HGP/build/v7_extra_shell_20260906/selftest_reader.py\", line 203, in <module>\n    main()\n  File \"/workspaces/E-HGP/build/v7_extra_shell_20260906/selftest_reader.py\", line 195, in main\n    need(len(rejects) == 34 and mask_count == 80 and {row['q_min'] for row in summaries} == {2, 3, 4}, 'test non-vacuity')\n  File \"/workspaces/E-HGP/build/v7_extra_shell_20260906/selftest_reader.py\", line 20, in need\n    raise ValueError('selftest: ' + reason)\nValueError: selftest: test non-vacuity\n"
+  }
+}

@@ -6,6 +6,13 @@ L'extraction textuelle a été lue par plages contiguës 35–48, 49–62, 63–
 77–90, 91–104, 105–118 et 119–134. Aucun résultat empirique de la thèse
 n'est une mesure du code v7.
 
+Le [complément sur les plateaux et les ancres de boule](PLATEAUX_FULL_ET_ANCRES.md)
+précise depuis le 6 septembre le cas non régulier rencontré à 50k : les
+couvertures peuvent croître sans fusion. L'union des minima suffit dans
+le modèle régulier, pas comme contrat universel. Ni les poids du manuscrit
+ni les affectations de toutes les facettes ne sont hérités du certificat
+topologique augmenté proposé.
+
 ## Fondements retenus
 
 Le chapitre 2 relie le single-linkage, les composantes des graphes seuils,

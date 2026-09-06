@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "cmake",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "imposed_timeout": null,
+  "pid": 80,
+  "started_ns": 1788711351468011406
+}

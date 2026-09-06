@@ -1,0 +1,178 @@
+{
+  "GCP_used": false,
+  "artifacts": {
+    "build.command.json": "18c9093f8b6cb89c79e66a9e845f0e0d33428ce2323adbbdb87bc8526de936d5",
+    "build.intent.json": "05d8612d5cba76763cae00f4803798487a91eb0853dc72626118dfb9d7704466",
+    "build.spawn.json": "0b95451bc9786ee1087d18dda121d2454f0564b22108c59c71753e938cfc407b",
+    "build.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.stdout": "9d3510f53a642cf919d67af1e399e7afaafd63138cf38e964a93cc2fc332de1f",
+    "cmake_version.command.json": "c4d2da67cc2c01445231b7695ac2a334e79d17bf66425b4721c0c08df15b57a1",
+    "cmake_version.intent.json": "09dc0c52bc73990200a8ea0113745c959ae02e9f3a5c7ec8e759488ca6d8d460",
+    "cmake_version.spawn.json": "138c0b30a6a76c1550eec50aa1722fa203f2059d7d80c7e84ad1f921c2541408",
+    "cmake_version.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cmake_version.stdout": "d3d5b682f3f5ef5b24a79ed8cf4b8c5868fc950dad48cab1be0e3c060a77f8ee",
+    "compiler_version.command.json": "d52749775d097286942412c659af3f7700f6b8ab1fbc0f97c43ee8f90464ca30",
+    "compiler_version.intent.json": "898bb2f5d0789363554a255f778acbae4da871afdcea48d7a858d2c6bfd156e5",
+    "compiler_version.spawn.json": "dd0c477f50e6eda51f92f89df98d10589907f5cc41b3a6bc5e63e5ffb2ead07c",
+    "compiler_version.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_version.stdout": "88b7c4b67564a146863224148116065fee418539f0a408f3636a68f3bde51805",
+    "configure.command.json": "7e7ec5487dbcd5330ad37f4c81c9a56b5ac4905a68089d2b2860d556335fbe48",
+    "configure.intent.json": "b29fab82e68b0a1f30d0073a5182397642a41ad8544d6caad653612a4b46b9ff",
+    "configure.spawn.json": "40d2c495b1b885ea636da5a6737ad1c828cd500784f52eeba7229871eeadcd82",
+    "configure.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "configure.stdout": "690ec296e6d9107ea5a39947754174db669d33dd424e07454b8a41a89e30441c",
+    "ctest.command.json": "5a3d0eeb0c35b05ec755abf1d70a39019ca872b1676186f18efa6ee0d320b56d",
+    "ctest.intent.json": "aec5f045527692340dbc0da11c1da2d3b587f7772f9689aef4efb0d155f8bb0d",
+    "ctest.spawn.json": "b1befb0e85d322132ef49d9b7b26155c8cd819bd7672ee44fe20e2be0b6ace1a",
+    "ctest.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ctest.stdout": "f311d5ba2621f9d8aae150ea16b080047874b2dd30f98a6b7fdc20931a470650",
+    "ctest_capture.py": "0bb422d51fd9ad0339ac45629d9955688ca8d543308b63e3f8fef6cebbf65503",
+    "ctest_version.command.json": "58b9877060ad02d26aae0fff11eb3bd78a714ede83000c0b59ab456ac5b4469d",
+    "ctest_version.intent.json": "3d63d789207f29ccf7c1b2b37c9b3d4932a78b565b8f48a0a178299370447e67",
+    "ctest_version.spawn.json": "cbfc24a9941d7e62b5c43c358a2136d465fe93e7e1676e4d782b909047c87e05",
+    "ctest_version.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ctest_version.stdout": "fd61d05e1e746f5652d87e0b6c9bafa334e95b89d1e53b1bfeb7d2af3ab208dc",
+    "inventory.command.json": "97ce73830335914e0f5fbcdbaccb85cb4bbe3f6cf20b27451b4370be6f31c98d",
+    "inventory.intent.json": "67744a1f074d5acbfd888692c70989d6018651da930fc3d2b000ae455caf1b2e",
+    "inventory.spawn.json": "0bce795fb45a84b6af26b808bf62f651957b47d9fc6ff3f3c0fc365867b9f491",
+    "inventory.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "inventory.stdout": "1b26e8eb90a55726dff9467b8da42e860a59afbbf4f99e414acff0865c261cab",
+    "junit.xml": "e1f0068ad5ca648e58d506d0785c7323adb10f63904fdb7213fc92db500e1a7c",
+    "source_candidates_before.json": "b3a19bfe44ffd9af924535f0aabc2715ec0b0535ce7a2f4686a77442bd1dc41c",
+    "source_controls/CMakeLists.txt": "15b800e374dbc938e6feff820ee28fc60bd2d775be622fe51304885fe10d86da",
+    "source_controls/bench/full_extra_shell_diagnostic.hpp": "0aa228a251fd4b03d3db637334bd50ed24ef6c9636b6ac173aed296985b7585f",
+    "source_controls/cmake/run_expect.cmake": "7bb9af4eddbea7e7a66619c92491dc11c22a49d7b3b46bddd6b2c25b20b2d605",
+    "source_controls/tests/full_extra_shell_diagnostic_gate.cpp": "13b93cf5dee0633d41ba400ea122e94172ca7c2dea0c8a74d32810d25ef6d59b"
+  },
+  "benchmark": false,
+  "commands": [
+    {
+      "argv": [
+        "cmake",
+        "--version"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788711352889997492,
+      "exit_code": 0,
+      "imposed_timeout": null,
+      "pid": 80,
+      "started_ns": 1788711351468011406,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d3d5b682f3f5ef5b24a79ed8cf4b8c5868fc950dad48cab1be0e3c060a77f8ee"
+    },
+    {
+      "argv": [
+        "c++",
+        "--version"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788711352893155736,
+      "exit_code": 0,
+      "imposed_timeout": null,
+      "pid": 81,
+      "started_ns": 1788711352890417645,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "88b7c4b67564a146863224148116065fee418539f0a408f3636a68f3bde51805"
+    },
+    {
+      "argv": [
+        "ctest",
+        "--version"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788711353522463046,
+      "exit_code": 0,
+      "imposed_timeout": null,
+      "pid": 82,
+      "started_ns": 1788711352893439818,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fd61d05e1e746f5652d87e0b6c9bafa334e95b89d1e53b1bfeb7d2af3ab208dc"
+    },
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/workspaces/E-HGP/morsehgp3D_v7",
+        "-B",
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/cmake_r1",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+        "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788711354280501246,
+      "exit_code": 0,
+      "imposed_timeout": null,
+      "pid": 83,
+      "started_ns": 1788711353522998009,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "690ec296e6d9107ea5a39947754174db669d33dd424e07454b8a41a89e30441c"
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/cmake_r1",
+        "--target",
+        "mhgp7_full_extra_shell_diagnostic_gate",
+        "--parallel",
+        "1"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788711356688160768,
+      "exit_code": 0,
+      "imposed_timeout": null,
+      "pid": 129,
+      "started_ns": 1788711354280955790,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "9d3510f53a642cf919d67af1e399e7afaafd63138cf38e964a93cc2fc332de1f"
+    },
+    {
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/cmake_r1",
+        "-R",
+        "^mhgp7_full_extra_shell_diagnostic(_bad_argument)?$",
+        "--show-only=json-v1"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788711356711534695,
+      "exit_code": 0,
+      "imposed_timeout": null,
+      "pid": 154,
+      "started_ns": 1788711356688584136,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "1b26e8eb90a55726dff9467b8da42e860a59afbbf4f99e414acff0865c261cab"
+    },
+    {
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/cmake_r1",
+        "-R",
+        "^mhgp7_full_extra_shell_diagnostic(_bad_argument)?$",
+        "-V",
+        "--output-on-failure",
+        "--output-junit",
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/ctest_r1/junit.xml"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788711356759194291,
+      "exit_code": 0,
+      "imposed_timeout": null,
+      "pid": 155,
+      "started_ns": 1788711356712148155,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f311d5ba2621f9d8aae150ea16b080047874b2dd30f98a6b7fdc20931a470650"
+    }
+  ],
+  "error": "ValueError: '/usr/include/stdc-predef.h' is not in the subpath of '/workspaces/E-HGP'",
+  "expected_program_codes": {
+    "mhgp7_full_extra_shell_diagnostic": 0,
+    "mhgp7_full_extra_shell_diagnostic_bad_argument": 2
+  },
+  "explicit_TIMEOUT_added": false,
+  "public_status": "not_claimed",
+  "status": "failed"
+}

@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/gate_SAN",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.011476981999749114,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "pid": 39028,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "1e4b5729806e3f4d3f6db06028a96a6e446ec57c781e57c96c0f9b1ce20438c5",
+  "timeout": null,
+  "utc": "2026-09-06T16:11:57.736201+00:00"
+}

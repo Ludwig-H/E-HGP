@@ -6,27 +6,34 @@
 Chantier sur `main` uniquement. Cette entrée décrit le travail courant ;
 les récits des anciens jalons sont retirés, leurs preuves restent liées.
 
-Dernier jalon : [50k sur G4 SPOT CPU48](docs/RESULTATS_G4_FULL_20260906.md),
-deux vrais processus K10/K5, refus de régularité code 2 avant tout ordre
-FULL (21,372 s / 5,646 s, quatre/trois enregistrements concernés).
-Les captures sont récupérées et la même génération de VM est confirmée
-`TERMINATED`. Contrats 1 s/100 ms non atteints, aucun résultat GPU FULL.
-Prochaine investigation : extraire ces cas en fixtures et faire auditer
-la portée du rejet de coquille supplémentaire, sans changer la seed
-ni supprimer l'hypothèse de régularité sans preuve.
+Dernier jalon : [extraction des quatre coquilles réelles à 50k](docs/PLATEAUX_FULL_ET_ANCRES.md),
+contrôlées par un lecteur indépendant contre tout le nuage. Toutes ont
+trois points de frontière et un support diamétral ; un quotient local
+ne demande que huit masques par boule. Les parents globaux ne se
+déduisent pas de ce seul quotient. Le raccord par ancres de boule est
+prouvé par l'auditeur, mais le certificat doit aussi porter les gains de
+couverture sans fusion ; cette extension FULL reste à intégrer.
+
+Les [deux vrais processus G4 K10/K5](docs/RESULTATS_G4_FULL_20260906.md)
+restent des refus avant tout ordre FULL (21,372 s / 5,646 s).
+Leur VM est confirmée `TERMINATED` ; GCP non utilisé pour le présent
+delta local. Contrats 1 s/100 ms non atteints, aucun résultat GPU FULL.
 
 ## Objet à conserver
 
 La [lecture mathématique](docs/AUDIT_NIVEAUX_GABRIEL_20260905.md),
 contre-vérifiée par l'[auditeur](audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md),
-fixe FULL : feuilles minima Gabriel de cardinal K, niveaux exacts,
+fixe FULL sous régularité : feuilles minima Gabriel de cardinal K, niveaux exacts,
 multifusions véritables induites par les cofaces Gabriel de cardinal K+1
 et parents pré-lot, sans imposer K+1 parents à une fusion. La couverture
 se dérive des feuilles, sans fusionner deux identités par égalité de
 points. Les portails silencieux résolvent les parents mais ne sont pas
 des nœuds de sortie. Aucun Gamma exhaustif n'est nécessaire.
 
-K=n est traité séparément. Les plateaux hors régularité, ancres verticales
+K=n est traité séparément. Hors régularité, le
+[supplément de plateau](docs/PLATEAUX_FULL_ET_ANCRES.md) conserve couvertures
+initiales, gains datés, parents pré-lot et ancres fermées ; une continuation
+ne devient pas une multifusion. Les ancres verticales
 et profils pondérés gardent leurs obligations propres. Les minima FULL
 ne sont pas toutes les facettes contributrices des poids du manuscrit.
 Un validateur structurel et une égalité de digests ne certifient pas la

@@ -1,0 +1,1852 @@
+{
+  "diagnostic_only": true,
+  "input_recipe": "MT19937_seed3_high16_coord65536_deduplicated_ids0",
+  "public_status": "not_claimed",
+  "records": [
+    {
+      "all_input_points_scanned": 50000,
+      "all_minimal_positive_supports": [
+        {
+          "cardinal": 2,
+          "geometry_indices": [
+            36893,
+            36938
+          ],
+          "point_ids": [
+            36860,
+            46707
+          ],
+          "positive_weights": [
+            {
+              "denominator": "2",
+              "numerator": "1"
+            },
+            {
+              "denominator": "2",
+              "numerator": "1"
+            }
+          ],
+          "shell_mask": 5
+        }
+      ],
+      "ball_index": 174406,
+      "centre": [
+        {
+          "denominator": "1",
+          "numerator": "58718"
+        },
+        {
+          "denominator": "2",
+          "numerator": "63637"
+        },
+        {
+          "denominator": "1",
+          "numerator": "52737"
+        }
+      ],
+      "centre_in_convex_hull_by_mask": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ],
+      "global_parents_reconstructed": false,
+      "input_digest": "3f7c6dd47bcba4222e511c94f90aaeeeb80198b0d5ac8a6721e4ff55feedab3f",
+      "interior_ids": [
+        12055,
+        27569,
+        46679
+      ],
+      "kmax_requested": 10,
+      "local_quotients": [
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            12055,
+            27569,
+            36860,
+            42779,
+            46679,
+            46707
+          ],
+          "closed_facets": 6,
+          "global_parent_count": null,
+          "k": 1,
+          "local_strict_coverage": [
+            12055,
+            27569,
+            36860,
+            42779,
+            46679,
+            46707
+          ],
+          "newly_present_facets": 0,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                12055,
+                27569,
+                36860,
+                42779,
+                46679,
+                46707
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                12055
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 6,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            12055,
+            27569,
+            36860,
+            42779,
+            46679,
+            46707
+          ],
+          "closed_facets": 15,
+          "global_parent_count": null,
+          "k": 2,
+          "local_strict_coverage": [
+            12055,
+            27569,
+            36860,
+            42779,
+            46679,
+            46707
+          ],
+          "newly_present_facets": 1,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                12055,
+                27569,
+                36860,
+                42779,
+                46679,
+                46707
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                12055,
+                27569
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 14,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            12055,
+            27569,
+            36860,
+            42779,
+            46679,
+            46707
+          ],
+          "closed_facets": 20,
+          "global_parent_count": null,
+          "k": 3,
+          "local_strict_coverage": [
+            12055,
+            27569,
+            36860,
+            42779,
+            46679,
+            46707
+          ],
+          "newly_present_facets": 4,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                12055,
+                27569,
+                36860,
+                42779,
+                46679,
+                46707
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                12055,
+                27569,
+                46679
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 16,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            12055,
+            27569,
+            36860,
+            42779,
+            46679,
+            46707
+          ],
+          "closed_facets": 15,
+          "global_parent_count": null,
+          "k": 4,
+          "local_strict_coverage": [
+            12055,
+            27569,
+            36860,
+            42779,
+            46679,
+            46707
+          ],
+          "newly_present_facets": 6,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                12055,
+                27569,
+                36860,
+                42779,
+                46679,
+                46707
+              ],
+              "reduction": "absorb_all_interiors",
+              "representative": [
+                12055,
+                27569,
+                36860,
+                46679
+              ],
+              "shell_masks": [
+                1,
+                2,
+                4
+              ]
+            }
+          ],
+          "strict_facets": 9,
+          "sufficient_local_inertness": false
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            12055,
+            27569,
+            36860,
+            42779,
+            46679,
+            46707
+          ],
+          "closed_facets": 6,
+          "global_parent_count": null,
+          "k": 5,
+          "local_strict_coverage": [
+            12055,
+            27569,
+            36860,
+            42779,
+            46679,
+            46707
+          ],
+          "newly_present_facets": 4,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 2,
+          "strict_components": [
+            {
+              "coverage": [
+                12055,
+                27569,
+                36860,
+                42779,
+                46679
+              ],
+              "reduction": "absorb_all_interiors",
+              "representative": [
+                12055,
+                27569,
+                36860,
+                42779,
+                46679
+              ],
+              "shell_masks": [
+                3
+              ]
+            },
+            {
+              "coverage": [
+                12055,
+                27569,
+                42779,
+                46679,
+                46707
+              ],
+              "reduction": "absorb_all_interiors",
+              "representative": [
+                12055,
+                27569,
+                42779,
+                46679,
+                46707
+              ],
+              "shell_masks": [
+                6
+              ]
+            }
+          ],
+          "strict_facets": 2,
+          "sufficient_local_inertness": false
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            12055,
+            27569,
+            36860,
+            42779,
+            46679,
+            46707
+          ],
+          "closed_facets": 1,
+          "global_parent_count": null,
+          "k": 6,
+          "local_strict_coverage": [],
+          "newly_present_facets": 1,
+          "points_absent_from_local_strict_coverages": [
+            12055,
+            27569,
+            36860,
+            42779,
+            46679,
+            46707
+          ],
+          "strict_component_count": 0,
+          "strict_components": [],
+          "strict_facets": 0,
+          "sufficient_local_inertness": false
+        },
+        {
+          "block": "empty",
+          "closed_facets": 0,
+          "k": 7,
+          "strict_components": []
+        },
+        {
+          "block": "empty",
+          "closed_facets": 0,
+          "k": 8,
+          "strict_components": []
+        },
+        {
+          "block": "empty",
+          "closed_facets": 0,
+          "k": 9,
+          "strict_components": []
+        },
+        {
+          "block": "empty",
+          "closed_facets": 0,
+          "k": 10,
+          "strict_components": []
+        }
+      ],
+      "maximal_strict_shell_cardinality": 2,
+      "n": 50000,
+      "primitive_ball_key": {
+        "a": "1",
+        "b": [
+          "-117436",
+          "-63637",
+          "-105474"
+        ],
+        "c": "7237823525"
+      },
+      "q_min": 2,
+      "s": 8,
+      "shell_mask_point_ids": [
+        36860,
+        42779,
+        46707
+      ],
+      "squared_radius": {
+        "denominator": "4",
+        "numerator": "14352441"
+      }
+    },
+    {
+      "all_input_points_scanned": 50000,
+      "all_minimal_positive_supports": [
+        {
+          "cardinal": 2,
+          "geometry_indices": [
+            34187,
+            34216
+          ],
+          "point_ids": [
+            4912,
+            34292
+          ],
+          "positive_weights": [
+            {
+              "denominator": "2",
+              "numerator": "1"
+            },
+            {
+              "denominator": "2",
+              "numerator": "1"
+            }
+          ],
+          "shell_mask": 5
+        }
+      ],
+      "ball_index": 254569,
+      "centre": [
+        {
+          "denominator": "2",
+          "numerator": "111935"
+        },
+        {
+          "denominator": "2",
+          "numerator": "55901"
+        },
+        {
+          "denominator": "1",
+          "numerator": "46711"
+        }
+      ],
+      "centre_in_convex_hull_by_mask": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ],
+      "global_parents_reconstructed": false,
+      "input_digest": "3f7c6dd47bcba4222e511c94f90aaeeeb80198b0d5ac8a6721e4ff55feedab3f",
+      "interior_ids": [],
+      "kmax_requested": 10,
+      "local_quotients": [
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            4912,
+            32276,
+            34292
+          ],
+          "closed_facets": 3,
+          "global_parent_count": null,
+          "k": 1,
+          "local_strict_coverage": [
+            4912,
+            32276,
+            34292
+          ],
+          "newly_present_facets": 0,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                4912,
+                32276,
+                34292
+              ],
+              "reduction": "absorb_all_interiors",
+              "representative": [
+                4912
+              ],
+              "shell_masks": [
+                1,
+                2,
+                4
+              ]
+            }
+          ],
+          "strict_facets": 3,
+          "sufficient_local_inertness": false
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            4912,
+            32276,
+            34292
+          ],
+          "closed_facets": 3,
+          "global_parent_count": null,
+          "k": 2,
+          "local_strict_coverage": [
+            4912,
+            32276,
+            34292
+          ],
+          "newly_present_facets": 1,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 2,
+          "strict_components": [
+            {
+              "coverage": [
+                4912,
+                32276
+              ],
+              "reduction": "absorb_all_interiors",
+              "representative": [
+                4912,
+                32276
+              ],
+              "shell_masks": [
+                3
+              ]
+            },
+            {
+              "coverage": [
+                32276,
+                34292
+              ],
+              "reduction": "absorb_all_interiors",
+              "representative": [
+                32276,
+                34292
+              ],
+              "shell_masks": [
+                6
+              ]
+            }
+          ],
+          "strict_facets": 2,
+          "sufficient_local_inertness": false
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            4912,
+            32276,
+            34292
+          ],
+          "closed_facets": 1,
+          "global_parent_count": null,
+          "k": 3,
+          "local_strict_coverage": [],
+          "newly_present_facets": 1,
+          "points_absent_from_local_strict_coverages": [
+            4912,
+            32276,
+            34292
+          ],
+          "strict_component_count": 0,
+          "strict_components": [],
+          "strict_facets": 0,
+          "sufficient_local_inertness": false
+        },
+        {
+          "block": "empty",
+          "closed_facets": 0,
+          "k": 4,
+          "strict_components": []
+        },
+        {
+          "block": "empty",
+          "closed_facets": 0,
+          "k": 5,
+          "strict_components": []
+        },
+        {
+          "block": "empty",
+          "closed_facets": 0,
+          "k": 6,
+          "strict_components": []
+        },
+        {
+          "block": "empty",
+          "closed_facets": 0,
+          "k": 7,
+          "strict_components": []
+        },
+        {
+          "block": "empty",
+          "closed_facets": 0,
+          "k": 8,
+          "strict_components": []
+        },
+        {
+          "block": "empty",
+          "closed_facets": 0,
+          "k": 9,
+          "strict_components": []
+        },
+        {
+          "block": "empty",
+          "closed_facets": 0,
+          "k": 10,
+          "strict_components": []
+        }
+      ],
+      "maximal_strict_shell_cardinality": 2,
+      "n": 50000,
+      "primitive_ball_key": {
+        "a": "1",
+        "b": [
+          "-111935",
+          "-55901",
+          "-93422"
+        ],
+        "c": "6094057006"
+      },
+      "q_min": 2,
+      "s": 8,
+      "shell_mask_point_ids": [
+        4912,
+        32276,
+        34292
+      ],
+      "squared_radius": {
+        "denominator": "2",
+        "numerator": "2904043"
+      }
+    },
+    {
+      "all_input_points_scanned": 50000,
+      "all_minimal_positive_supports": [
+        {
+          "cardinal": 2,
+          "geometry_indices": [
+            42951,
+            42943
+          ],
+          "point_ids": [
+            25389,
+            40661
+          ],
+          "positive_weights": [
+            {
+              "denominator": "2",
+              "numerator": "1"
+            },
+            {
+              "denominator": "2",
+              "numerator": "1"
+            }
+          ],
+          "shell_mask": 3
+        }
+      ],
+      "ball_index": 996863,
+      "centre": [
+        {
+          "denominator": "2",
+          "numerator": "60899"
+        },
+        {
+          "denominator": "1",
+          "numerator": "54594"
+        },
+        {
+          "denominator": "2",
+          "numerator": "104077"
+        }
+      ],
+      "centre_in_convex_hull_by_mask": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true
+      ],
+      "global_parents_reconstructed": false,
+      "input_digest": "3f7c6dd47bcba4222e511c94f90aaeeeb80198b0d5ac8a6721e4ff55feedab3f",
+      "interior_ids": [
+        23184,
+        23681,
+        34559,
+        42468
+      ],
+      "kmax_requested": 10,
+      "local_quotients": [
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            23184,
+            23681,
+            25389,
+            34559,
+            40661,
+            42468,
+            43571
+          ],
+          "closed_facets": 7,
+          "global_parent_count": null,
+          "k": 1,
+          "local_strict_coverage": [
+            23184,
+            23681,
+            25389,
+            34559,
+            40661,
+            42468,
+            43571
+          ],
+          "newly_present_facets": 0,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                23184,
+                23681,
+                25389,
+                34559,
+                40661,
+                42468,
+                43571
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                23184
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 7,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            23184,
+            23681,
+            25389,
+            34559,
+            40661,
+            42468,
+            43571
+          ],
+          "closed_facets": 21,
+          "global_parent_count": null,
+          "k": 2,
+          "local_strict_coverage": [
+            23184,
+            23681,
+            25389,
+            34559,
+            40661,
+            42468,
+            43571
+          ],
+          "newly_present_facets": 1,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                23184,
+                23681,
+                25389,
+                34559,
+                40661,
+                42468,
+                43571
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                23184,
+                23681
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 20,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            23184,
+            23681,
+            25389,
+            34559,
+            40661,
+            42468,
+            43571
+          ],
+          "closed_facets": 35,
+          "global_parent_count": null,
+          "k": 3,
+          "local_strict_coverage": [
+            23184,
+            23681,
+            25389,
+            34559,
+            40661,
+            42468,
+            43571
+          ],
+          "newly_present_facets": 5,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                23184,
+                23681,
+                25389,
+                34559,
+                40661,
+                42468,
+                43571
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                23184,
+                23681,
+                34559
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 30,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            23184,
+            23681,
+            25389,
+            34559,
+            40661,
+            42468,
+            43571
+          ],
+          "closed_facets": 35,
+          "global_parent_count": null,
+          "k": 4,
+          "local_strict_coverage": [
+            23184,
+            23681,
+            25389,
+            34559,
+            40661,
+            42468,
+            43571
+          ],
+          "newly_present_facets": 10,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                23184,
+                23681,
+                25389,
+                34559,
+                40661,
+                42468,
+                43571
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                23184,
+                23681,
+                34559,
+                42468
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 25,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            23184,
+            23681,
+            25389,
+            34559,
+            40661,
+            42468,
+            43571
+          ],
+          "closed_facets": 21,
+          "global_parent_count": null,
+          "k": 5,
+          "local_strict_coverage": [
+            23184,
+            23681,
+            25389,
+            34559,
+            40661,
+            42468,
+            43571
+          ],
+          "newly_present_facets": 10,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                23184,
+                23681,
+                25389,
+                34559,
+                40661,
+                42468,
+                43571
+              ],
+              "reduction": "absorb_all_interiors",
+              "representative": [
+                23184,
+                23681,
+                25389,
+                34559,
+                42468
+              ],
+              "shell_masks": [
+                1,
+                2,
+                4
+              ]
+            }
+          ],
+          "strict_facets": 11,
+          "sufficient_local_inertness": false
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            23184,
+            23681,
+            25389,
+            34559,
+            40661,
+            42468,
+            43571
+          ],
+          "closed_facets": 7,
+          "global_parent_count": null,
+          "k": 6,
+          "local_strict_coverage": [
+            23184,
+            23681,
+            25389,
+            34559,
+            40661,
+            42468,
+            43571
+          ],
+          "newly_present_facets": 5,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 2,
+          "strict_components": [
+            {
+              "coverage": [
+                23184,
+                23681,
+                25389,
+                34559,
+                42468,
+                43571
+              ],
+              "reduction": "absorb_all_interiors",
+              "representative": [
+                23184,
+                23681,
+                25389,
+                34559,
+                42468,
+                43571
+              ],
+              "shell_masks": [
+                5
+              ]
+            },
+            {
+              "coverage": [
+                23184,
+                23681,
+                34559,
+                40661,
+                42468,
+                43571
+              ],
+              "reduction": "absorb_all_interiors",
+              "representative": [
+                23184,
+                23681,
+                34559,
+                40661,
+                42468,
+                43571
+              ],
+              "shell_masks": [
+                6
+              ]
+            }
+          ],
+          "strict_facets": 2,
+          "sufficient_local_inertness": false
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            23184,
+            23681,
+            25389,
+            34559,
+            40661,
+            42468,
+            43571
+          ],
+          "closed_facets": 1,
+          "global_parent_count": null,
+          "k": 7,
+          "local_strict_coverage": [],
+          "newly_present_facets": 1,
+          "points_absent_from_local_strict_coverages": [
+            23184,
+            23681,
+            25389,
+            34559,
+            40661,
+            42468,
+            43571
+          ],
+          "strict_component_count": 0,
+          "strict_components": [],
+          "strict_facets": 0,
+          "sufficient_local_inertness": false
+        },
+        {
+          "block": "empty",
+          "closed_facets": 0,
+          "k": 8,
+          "strict_components": []
+        },
+        {
+          "block": "empty",
+          "closed_facets": 0,
+          "k": 9,
+          "strict_components": []
+        },
+        {
+          "block": "empty",
+          "closed_facets": 0,
+          "k": 10,
+          "strict_components": []
+        }
+      ],
+      "maximal_strict_shell_cardinality": 2,
+      "n": 50000,
+      "primitive_ball_key": {
+        "a": "1",
+        "b": [
+          "-60899",
+          "-109188",
+          "-104077"
+        ],
+        "c": "6612344594"
+      },
+      "q_min": 2,
+      "s": 8,
+      "shell_mask_point_ids": [
+        25389,
+        40661,
+        43571
+      ],
+      "squared_radius": {
+        "denominator": "2",
+        "numerator": "6675549"
+      }
+    },
+    {
+      "all_input_points_scanned": 50000,
+      "all_minimal_positive_supports": [
+        {
+          "cardinal": 2,
+          "geometry_indices": [
+            18434,
+            18500
+          ],
+          "point_ids": [
+            27084,
+            44066
+          ],
+          "positive_weights": [
+            {
+              "denominator": "2",
+              "numerator": "1"
+            },
+            {
+              "denominator": "2",
+              "numerator": "1"
+            }
+          ],
+          "shell_mask": 3
+        }
+      ],
+      "ball_index": 1251653,
+      "centre": [
+        {
+          "denominator": "2",
+          "numerator": "43377"
+        },
+        {
+          "denominator": "1",
+          "numerator": "64318"
+        },
+        {
+          "denominator": "2",
+          "numerator": "55885"
+        }
+      ],
+      "centre_in_convex_hull_by_mask": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true
+      ],
+      "global_parents_reconstructed": false,
+      "input_digest": "3f7c6dd47bcba4222e511c94f90aaeeeb80198b0d5ac8a6721e4ff55feedab3f",
+      "interior_ids": [
+        8622,
+        9003,
+        13287,
+        14710,
+        16188,
+        49148,
+        49421,
+        49620,
+        49945
+      ],
+      "kmax_requested": 10,
+      "local_quotients": [
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "closed_facets": 12,
+          "global_parent_count": null,
+          "k": 1,
+          "local_strict_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "newly_present_facets": 0,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                27084,
+                44066,
+                48544,
+                49148,
+                49421,
+                49620,
+                49945
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                8622
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 12,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "closed_facets": 66,
+          "global_parent_count": null,
+          "k": 2,
+          "local_strict_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "newly_present_facets": 1,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                27084,
+                44066,
+                48544,
+                49148,
+                49421,
+                49620,
+                49945
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                8622,
+                9003
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 65,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "closed_facets": 220,
+          "global_parent_count": null,
+          "k": 3,
+          "local_strict_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "newly_present_facets": 10,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                27084,
+                44066,
+                48544,
+                49148,
+                49421,
+                49620,
+                49945
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                8622,
+                9003,
+                13287
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 210,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "closed_facets": 495,
+          "global_parent_count": null,
+          "k": 4,
+          "local_strict_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "newly_present_facets": 45,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                27084,
+                44066,
+                48544,
+                49148,
+                49421,
+                49620,
+                49945
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                8622,
+                9003,
+                13287,
+                14710
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 450,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "closed_facets": 792,
+          "global_parent_count": null,
+          "k": 5,
+          "local_strict_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "newly_present_facets": 120,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                27084,
+                44066,
+                48544,
+                49148,
+                49421,
+                49620,
+                49945
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 672,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "closed_facets": 924,
+          "global_parent_count": null,
+          "k": 6,
+          "local_strict_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "newly_present_facets": 210,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                27084,
+                44066,
+                48544,
+                49148,
+                49421,
+                49620,
+                49945
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                49148
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 714,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "closed_facets": 792,
+          "global_parent_count": null,
+          "k": 7,
+          "local_strict_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "newly_present_facets": 252,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                27084,
+                44066,
+                48544,
+                49148,
+                49421,
+                49620,
+                49945
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                49148,
+                49421
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 540,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "closed_facets": 495,
+          "global_parent_count": null,
+          "k": 8,
+          "local_strict_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "newly_present_facets": 210,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                27084,
+                44066,
+                48544,
+                49148,
+                49421,
+                49620,
+                49945
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                49148,
+                49421,
+                49620
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 285,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "closed_facets": 220,
+          "global_parent_count": null,
+          "k": 9,
+          "local_strict_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "newly_present_facets": 120,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                27084,
+                44066,
+                48544,
+                49148,
+                49421,
+                49620,
+                49945
+              ],
+              "reduction": "interior_connected",
+              "representative": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                49148,
+                49421,
+                49620,
+                49945
+              ],
+              "shell_masks": null
+            }
+          ],
+          "strict_facets": 100,
+          "sufficient_local_inertness": true
+        },
+        {
+          "block": "one_closed_group",
+          "closed_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "closed_facets": 66,
+          "global_parent_count": null,
+          "k": 10,
+          "local_strict_coverage": [
+            8622,
+            9003,
+            13287,
+            14710,
+            16188,
+            27084,
+            44066,
+            48544,
+            49148,
+            49421,
+            49620,
+            49945
+          ],
+          "newly_present_facets": 45,
+          "points_absent_from_local_strict_coverages": [],
+          "strict_component_count": 1,
+          "strict_components": [
+            {
+              "coverage": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                27084,
+                44066,
+                48544,
+                49148,
+                49421,
+                49620,
+                49945
+              ],
+              "reduction": "absorb_all_interiors",
+              "representative": [
+                8622,
+                9003,
+                13287,
+                14710,
+                16188,
+                27084,
+                49148,
+                49421,
+                49620,
+                49945
+              ],
+              "shell_masks": [
+                1,
+                2,
+                4
+              ]
+            }
+          ],
+          "strict_facets": 21,
+          "sufficient_local_inertness": false
+        }
+      ],
+      "maximal_strict_shell_cardinality": 2,
+      "n": 50000,
+      "primitive_ball_key": {
+        "a": "1",
+        "b": [
+          "-43377",
+          "-128636",
+          "-55885"
+        ],
+        "c": "5381668141"
+      },
+      "q_min": 2,
+      "s": 8,
+      "shell_mask_point_ids": [
+        27084,
+        44066,
+        48544
+      ],
+      "squared_radius": {
+        "denominator": "2",
+        "numerator": "12622643"
+      }
+    }
+  ],
+  "schema": "mhgp7-extra-shell-rational-review-v1",
+  "scope": "all-input I/U census and rational local shell quotients only; no complete ball catalogue or global parents",
+  "source_jsonl_sha256": "3cd74b330c62978d8c3eedd175e12bf5fe02893facb2e008150c32b5054aea72",
+  "status": "locally_verified"
+}

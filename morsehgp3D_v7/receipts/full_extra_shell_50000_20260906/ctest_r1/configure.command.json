@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/morsehgp3D_v7",
+    "-B",
+    "/workspaces/E-HGP/build/v7_extra_shell_20260906/cmake_r1",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "ended_ns": 1788711354280501246,
+  "exit_code": 0,
+  "imposed_timeout": null,
+  "pid": 83,
+  "started_ns": 1788711353522998009,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "690ec296e6d9107ea5a39947754174db669d33dd424e07454b8a41a89e30441c"
+}

@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "c++",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "ended_ns": 1788711352893155736,
+  "exit_code": 0,
+  "imposed_timeout": null,
+  "pid": 81,
+  "started_ns": 1788711352890417645,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "88b7c4b67564a146863224148116065fee418539f0a408f3636a68f3bde51805"
+}

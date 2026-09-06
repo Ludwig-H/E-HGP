@@ -1,0 +1,28 @@
+{"schema":"mhgp7-extra-shell-diagnostic-v1","type":"extra_shell","diagnostic_only":true,"n":50000,"s":8,"kmax_requested":10,"smax":11,"input_digest":"3f7c6dd47bcba4222e511c94f90aaeeeb80198b0d5ac8a6721e4ff55feedab3f","ball_index":174406,"ball_key":{"a":"1","b":["-117436","-63637","-105474"],"c":"7237823525"},"squared_radius":{"numerator_u64_le":[14352441,0,0],"denominator":"4"},"minimal_arity":2,"interior":[{"geometry_index":36937,"point_id":27569,"xyz":[59112,31775,52793]},{"geometry_index":36936,"point_id":12055,"xyz":[58267,32440,51837]},{"geometry_index":36935,"point_id":46679,"xyz":[59595,30228,52912]}],"shell":[{"geometry_index":36938,"point_id":46707,"xyz":[60349,31678,51784]},{"geometry_index":36893,"point_id":36860,"xyz":[57087,31959,53690]},{"geometry_index":36848,"point_id":42779,"xyz":[56857,31903,52394]}]}
+{"schema":"mhgp7-extra-shell-diagnostic-v1","type":"extra_shell","diagnostic_only":true,"n":50000,"s":8,"kmax_requested":10,"smax":11,"input_digest":"3f7c6dd47bcba4222e511c94f90aaeeeb80198b0d5ac8a6721e4ff55feedab3f","ball_index":254569,"ball_key":{"a":"1","b":["-111935","-55901","-93422"],"c":"6094057006"},"squared_radius":{"numerator_u64_le":[2904043,0,0],"denominator":"2"},"minimal_arity":2,"interior":[],"shell":[{"geometry_index":34216,"point_id":34292,"xyz":[56652,28927,46884]},{"geometry_index":34188,"point_id":32276,"xyz":[56657,27037,47088]},{"geometry_index":34187,"point_id":4912,"xyz":[55283,26974,46538]}]}
+{"schema":"mhgp7-extra-shell-diagnostic-v1","type":"extra_shell","diagnostic_only":true,"n":50000,"s":8,"kmax_requested":10,"smax":11,"input_digest":"3f7c6dd47bcba4222e511c94f90aaeeeb80198b0d5ac8a6721e4ff55feedab3f","ball_index":996863,"ball_key":{"a":"1","b":["-60899","-109188","-104077"],"c":"6612344594"},"squared_radius":{"numerator_u64_le":[6675549,0,0],"denominator":"2"},"minimal_arity":2,"interior":[{"geometry_index":42952,"point_id":34559,"xyz":[30002,56227,52178]},{"geometry_index":42950,"point_id":23184,"xyz":[31361,53742,52379]},{"geometry_index":42948,"point_id":42468,"xyz":[28688,54484,51573]},{"geometry_index":42930,"point_id":23681,"xyz":[30692,53074,52590]}],"shell":[{"geometry_index":42955,"point_id":43571,"xyz":[31658,55904,51637]},{"geometry_index":42951,"point_id":25389,"xyz":[31694,53596,52929]},{"geometry_index":42943,"point_id":40661,"xyz":[29205,55592,51148]}]}
+{"schema":"mhgp7-extra-shell-diagnostic-v1","type":"extra_shell","diagnostic_only":true,"n":50000,"s":8,"kmax_requested":10,"smax":11,"input_digest":"3f7c6dd47bcba4222e511c94f90aaeeeb80198b0d5ac8a6721e4ff55feedab3f","ball_index":1251653,"ball_key":{"a":"1","b":["-43377","-128636","-55885"],"c":"5381668141"},"squared_radius":{"numerator_u64_le":[12622643,0,0],"denominator":"2"},"minimal_arity":2,"interior":[{"geometry_index":18499,"point_id":16188,"xyz":[22931,64793,28880]},{"geometry_index":18498,"point_id":49421,"xyz":[23855,63782,28680]},{"geometry_index":18497,"point_id":9003,"xyz":[21594,64060,29969]},{"geometry_index":18451,"point_id":49148,"xyz":[23000,65217,26759]},{"geometry_index":18450,"point_id":8622,"xyz":[23415,62995,28142]},{"geometry_index":18448,"point_id":13287,"xyz":[20792,62287,28443]},{"geometry_index":18446,"point_id":49620,"xyz":[21771,62035,27236]},{"geometry_index":18443,"point_id":14710,"xyz":[22530,64159,26323]},{"geometry_index":18441,"point_id":49945,"xyz":[21328,64582,25645]}],"shell":[{"geometry_index":18500,"point_id":44066,"xyz":[23583,64771,29529]},{"geometry_index":18496,"point_id":48544,"xyz":[22951,63283,29852]},{"geometry_index":18434,"point_id":27084,"xyz":[19794,63865,26356]}]}
+Command exited with non-zero status 2
+	Command being timed: "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/probe_O3 --n=50000 --s=8 --kmax=10 --alias-policy=lazy --cache-entries=1000000 --meb-proposal-supports=unlimited --threads=8 --extra-shell-diagnostics"
+	User time (seconds): 906.22
+	System time (seconds): 4.65
+	Percent of CPU this job got: 690%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:11.97
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 8097632
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 907737
+	Voluntary context switches: 405
+	Involuntary context switches: 242667
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 32
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 2

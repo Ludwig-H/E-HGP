@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "ctest",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "ended_ns": 1788711353522463046,
+  "exit_code": 0,
+  "imposed_timeout": null,
+  "pid": 82,
+  "started_ns": 1788711352893439818,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "fd61d05e1e746f5652d87e0b6c9bafa334e95b89d1e53b1bfeb7d2af3ab208dc"
+}

@@ -37,6 +37,10 @@ non encore qualifiée n'est pas, à elle seule, une fausse piste.
 | Promouvoir FULL depuis le lecteur structurel, un digest égal ou les reçus F | Aucun ne certifie la complétude géométrique du producteur FULL. Garder les autorités séparées et le succès relatif explicite. [Contrat producteur](CONTRAT_PRODUCTEUR_FULL_GABRIEL.md) |
 | Traiter un refus ou une capture interrompue comme une tour rapide | Sans terminal de succès, aucun temps de complétion n'est acquis. Conserver les tentatives négatives sans réparer leurs octets. [Interruption réelle](../receipts/full_gabriel_lazy_interrupted_20260905/README.md) |
 | Supposer qu'un nuage uniforme u16 est toujours régulier après quelques tailles réussies | Le premier essai 50k G4 refuse avant FULL : quatre enregistrements à coquille supplémentaire pour K10, trois pour K5. Extraire et traiter ces cas selon un contrat exact ; ni changer la seed pour effacer l'échec ni supprimer le test sans preuve. [Session close](RESULTATS_G4_FULL_20260906.md) |
+| Retirer le refus de coquille supplémentaire en gardant le certificat régulier | Une composante peut gagner un point sans fusion, et une naissance couvrir plus de K points. Ajouter couvertures initiales et gains datés dans un contrat distinct. [Preuve et cas réels](PLATEAUX_FULL_ET_ANCRES.md) |
+| Déduire les parents globaux du nombre de composantes strictes locales | Un point extérieur à la boule peut déjà relier deux composantes locales. Résoudre leurs représentants dans l'état pré-lot, puis fermer les boules simultanées ensemble. [Contre-fixture](PLATEAUX_FULL_ET_ANCRES.md) |
+| Omettre toute ancre d'une boule localement inerte | Sa forêt peut rester inchangée tandis que la résolution d'un label faible échoue. Conserver les ancres fermées de l'intervalle utile, pas seulement celles des nœuds publiés. [Raccord audité](PLATEAUX_FULL_ET_ANCRES.md) |
+| Étendre p+u≤smax aux coquilles non régulières | La coquille de sept points à K5 donne une naissance malgré 7>6. Le filtre démontré reste p+q_min≤smax ; l'arité d'un support local choisi ne remplace pas q_min global. [Preuve](PLATEAUX_FULL_ET_ANCRES.md) |
 
 ## Règle d'entretien du dossier actif
 

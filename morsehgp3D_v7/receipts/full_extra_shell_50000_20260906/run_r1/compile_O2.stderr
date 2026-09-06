@@ -1,0 +1,4 @@
+/workspaces/E-HGP/morsehgp3D_v7/tests/full_extra_shell_diagnostic_gate.cpp:14:58: error: ignoring attributes on template argument ‘int (*)(FILE*)’ [-Werror=ignored-attributes]
+   14 | using File = std::unique_ptr<FILE, decltype(&std::fclose)>;
+      |                                                          ^
+cc1plus: all warnings being treated as errors

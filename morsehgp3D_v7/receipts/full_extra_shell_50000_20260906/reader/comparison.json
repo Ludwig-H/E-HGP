@@ -1,0 +1,369 @@
+{
+  "ball_key_identity_with_gcp_proven": false,
+  "censoring": "Both processes return explicit unsupported_degeneracy code 2 before any FULL order; neither is a timeout-censored FULL run.",
+  "configuration": {
+    "differences": {
+      "extra_shell_diagnostics": {
+        "new_local": "mhgp7-extra-shell-diagnostic-v1",
+        "old_gcp": null
+      },
+      "pipeline_threads": {
+        "new_local": 8,
+        "old_gcp": 48
+      },
+      "threads": {
+        "new_local": 8,
+        "old_gcp": 48
+      }
+    },
+    "equal_nonexcluded_fields": 84,
+    "nonexcluded_fields": [
+      "alias_policy",
+      "archive",
+      "authority",
+      "backend",
+      "cache_entries",
+      "cache_policy",
+      "candidate_fusion_cap_2e",
+      "catalogue_cardinality_max",
+      "cell_grid_min_sites",
+      "census_payload_accounting",
+      "certificate_digest_kind",
+      "coord",
+      "digest_scratch_bytes_per_node",
+      "digest_scratch_bytes_per_parent",
+      "digest_scratch_scope",
+      "digest_timing_scope",
+      "effective_raw_cap",
+      "family",
+      "full_order_builder_threads",
+      "gpu",
+      "input_digest_kind",
+      "input_digest_scratch_bytes_per_point",
+      "input_generator",
+      "kmax_effective",
+      "kmax_requested",
+      "legacy_F_fold_guard_applied",
+      "limits_profile",
+      "max_aliases_per_order",
+      "max_alive_rects",
+      "max_cache_entries",
+      "max_certificate_batches_per_order",
+      "max_certificate_nodes_per_order",
+      "max_certificate_parent_refs_per_order",
+      "max_chain_steps_per_order",
+      "max_digest_scratch_logical_bytes",
+      "max_face_visits_per_order",
+      "max_input_records_per_order",
+      "max_meb_calls_per_order",
+      "max_meb_proposal_supports_per_order",
+      "max_meb_supports_per_order",
+      "max_points_per_order",
+      "max_portal_requests_per_order",
+      "max_query_nodes_per_order",
+      "max_raw_candidates",
+      "max_read_point_refs_per_order",
+      "max_successor_steps_per_order",
+      "max_wave_tasks",
+      "meb_accounting",
+      "meb_proposal_budget_kind",
+      "mode",
+      "n",
+      "named_payload_budget_bytes",
+      "order_schedule",
+      "parallel_profile",
+      "phase",
+      "pretest_query_min_points",
+      "profile",
+      "public_status",
+      "read_kind",
+      "s",
+      "s_comparison_scope",
+      "schema",
+      "seed",
+      "shell_cap",
+      "sizeof_alias_entry_payload",
+      "sizeof_ball_candidate",
+      "sizeof_ball_data",
+      "sizeof_facet_key",
+      "sizeof_forest_event",
+      "sizeof_full_batch",
+      "sizeof_full_node",
+      "sizeof_full_parent_id",
+      "sizeof_full_record",
+      "sizeof_input_point",
+      "sizeof_point_id",
+      "sizeof_survivor",
+      "storage_difference_max",
+      "storage_limit_kind",
+      "storage_size_max",
+      "successor_accounting",
+      "type",
+      "vertical",
+      "vm_soft_limit_bytes",
+      "work_counter_ceiling"
+    ]
+  },
+  "diagnostic_only": true,
+  "gcp_k10": {
+    "command": {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-full-v7-dc37794a28c82f69.zzRPWgKPKk/output/full_probe",
+        "--n=50000",
+        "--s=8",
+        "--kmax=10",
+        "--alias-policy=lazy",
+        "--cache-entries=1000000",
+        "--meb-proposal-supports=unlimited",
+        "--threads=48"
+      ],
+      "cwd": "/tmp/ehgp-full-v7-dc37794a28c82f69.zzRPWgKPKk/output",
+      "elapsed_seconds": 21.372004347,
+      "ended_utc": "2026-09-06T13:21:08.111202+00:00",
+      "exit_code": 2,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3706,
+      "session_work_deadline_epoch": 1788702293,
+      "started_utc": "2026-09-06T13:20:46.739175+00:00",
+      "stderr_sha256": "f3b5b9e0c74c3e18acdd12429c6a229f69a7229348ef38a49abfd1b5ba13deb9",
+      "stdout_sha256": "198ca747641d4be8d6f4e23a088060139b33e724b12c694e4b540709818e0994"
+    },
+    "command_sha256": "878a451094067153079736baed1ceb511255665de20622c49551e3577e61ce62",
+    "stderr_sha256": "f3b5b9e0c74c3e18acdd12429c6a229f69a7229348ef38a49abfd1b5ba13deb9",
+    "stdout_sha256": "198ca747641d4be8d6f4e23a088060139b33e724b12c694e4b540709818e0994"
+  },
+  "gcp_k10_extra_shell": 4,
+  "gcp_k5": {
+    "command": {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-full-v7-dc37794a28c82f69.zzRPWgKPKk/output/full_probe",
+        "--n=50000",
+        "--s=8",
+        "--kmax=5",
+        "--alias-policy=lazy",
+        "--cache-entries=1000000",
+        "--meb-proposal-supports=unlimited",
+        "--threads=48"
+      ],
+      "cwd": "/tmp/ehgp-full-v7-dc37794a28c82f69.zzRPWgKPKk/output",
+      "elapsed_seconds": 5.645515398000001,
+      "ended_utc": "2026-09-06T13:21:13.757657+00:00",
+      "exit_code": 2,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 5532,
+      "session_work_deadline_epoch": 1788702293,
+      "started_utc": "2026-09-06T13:21:08.112117+00:00",
+      "stderr_sha256": "f6f66312a3a9a674f086b829ff59d2aef84b26bf704eec2a83d7d875b2f58e83",
+      "stdout_sha256": "279ba2a8097808d1032e4b4262b300e55935bbe82f90daee547e0f814f9a6373"
+    },
+    "command_sha256": "1cd8fe8d9c9fac51165e59e5cbd50ab4481e510f0b7000fcee754d720b8e448e",
+    "stderr_sha256": "f6f66312a3a9a674f086b829ff59d2aef84b26bf704eec2a83d7d875b2f58e83",
+    "stdout_sha256": "279ba2a8097808d1032e4b4262b300e55935bbe82f90daee547e0f814f9a6373"
+  },
+  "gcp_k5_extra_shell": 3,
+  "input_digest": "3f7c6dd47bcba4222e511c94f90aaeeeb80198b0d5ac8a6721e4ff55feedab3f",
+  "limitation": "GCP captures contain aggregate counts, not ball keys or a catalogue digest. Matching counters do not prove identity of its individual balls.",
+  "local": {
+    "command": {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/probe_O3",
+        "--n=50000",
+        "--s=8",
+        "--kmax=10",
+        "--alias-policy=lazy",
+        "--cache-entries=1000000",
+        "--meb-proposal-supports=unlimited",
+        "--threads=8",
+        "--extra-shell-diagnostics"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 132.02719300000035,
+      "exit_code": 2,
+      "expected_exit": 2,
+      "pid": 40013,
+      "stderr_sha256": "3cd74b330c62978d8c3eedd175e12bf5fe02893facb2e008150c32b5054aea72",
+      "stdout_sha256": "3307f28a518f3a85b87961f363d1923e5a3456bef2b910c0979eab13c79aab7a",
+      "timeout": null,
+      "utc": "2026-09-06T16:12:14.110526+00:00"
+    },
+    "command_sha256": "7a1b6fff8a4c9bd408edb9890d6439166e2195195de0d0c72d57abf75bf3ad2e",
+    "stderr_sha256": "3cd74b330c62978d8c3eedd175e12bf5fe02893facb2e008150c32b5054aea72",
+    "stdout_sha256": "3307f28a518f3a85b87961f363d1923e5a3456bef2b910c0979eab13c79aab7a"
+  },
+  "public_status": "not_claimed",
+  "status": "same_K10_nonmeasurement_capture_fields",
+  "terminal": {
+    "differences": {
+      "compute_read_release_ms_subtracted_diagnostic": {
+        "new_local": 131973.182024,
+        "old_gcp": 21309.13558
+      },
+      "digest_ms": {
+        "new_local": 2.780795,
+        "old_gcp": 1.92336
+      },
+      "elapsed_before_terminal_ms": {
+        "new_local": 131973.182024,
+        "old_gcp": 21309.13558
+      },
+      "extra_shell_diagnostic_records": {
+        "new_local": 4,
+        "old_gcp": null
+      },
+      "extra_shell_diagnostics": {
+        "new_local": "mhgp7-extra-shell-diagnostic-v1",
+        "old_gcp": null
+      },
+      "generation_rects_ms": {
+        "new_local": 40835.0498,
+        "old_gcp": 4620.669007
+      },
+      "generation_wspd_ms": {
+        "new_local": 55308.590076,
+        "old_gcp": 7639.000778
+      },
+      "hwm_mib_sample": {
+        "new_local": 7907.84375,
+        "old_gcp": 9625.554688
+      },
+      "pipeline_threads": {
+        "new_local": 8,
+        "old_gcp": 48
+      },
+      "rss_mib_sample": {
+        "new_local": 9.285156,
+        "old_gcp": 1736.136719
+      },
+      "stage_ms": {
+        "new_local": {
+          "census": 13660.402339,
+          "count": 0.0,
+          "digest": 2.780795,
+          "expand": 0.0,
+          "full": 0.0,
+          "generation": 96144.735551,
+          "index": 12.405679,
+          "input": 15.142548,
+          "prefilter": 16219.944536,
+          "read": 0.0,
+          "regularity": 160.79025,
+          "release": 14.48298,
+          "rle": 5472.727957
+        },
+        "old_gcp": {
+          "census": 2819.453804,
+          "count": 0.0,
+          "digest": 1.92336,
+          "expand": 0.0,
+          "full": 0.0,
+          "generation": 12263.483214,
+          "index": 8.338138,
+          "input": 8.749148,
+          "prefilter": 2851.625497,
+          "read": 0.0,
+          "regularity": 92.93167,
+          "release": 59.496248,
+          "rle": 3122.518609
+        }
+      },
+      "workers_census": {
+        "new_local": 8,
+        "old_gcp": 48
+      },
+      "workers_prefilter": {
+        "new_local": 8,
+        "old_gcp": 48
+      },
+      "workers_rects": {
+        "new_local": 8,
+        "old_gcp": 48
+      },
+      "workers_sort": {
+        "new_local": 8,
+        "old_gcp": 48
+      },
+      "workers_wspd": {
+        "new_local": 8,
+        "old_gcp": 48
+      }
+    },
+    "equal_nonexcluded_fields": 67,
+    "nonexcluded_fields": [
+      "alias_policy",
+      "alive_peak_rects",
+      "authority",
+      "ball_capacity_observed",
+      "cache_entries",
+      "candidate_capacity_observed",
+      "census_balls",
+      "census_merge_peak_bytes",
+      "census_payload_accounting",
+      "census_query_nodes",
+      "certificate_digest",
+      "certificate_digest_kind",
+      "certificate_retained",
+      "complete_requested_horizontal_orders",
+      "completed_orders_diagnostic",
+      "digest_proves_catalogue_completeness",
+      "emitted_at_refus",
+      "exit_code",
+      "frontier_ledger_closed",
+      "full_order_builder_threads",
+      "generation_cap_refus",
+      "input_digest",
+      "input_digest_kind",
+      "integrated_inter_k_tower",
+      "invariant_jneg",
+      "kmax_effective",
+      "kmax_requested",
+      "last_order",
+      "last_order_work",
+      "last_stage",
+      "ledger_q2_emitted",
+      "ledger_q2_killed",
+      "ledger_q3_emitted",
+      "ledger_q3_killed",
+      "ledger_q4_emitted",
+      "ledger_q4_killed",
+      "legacy_F_fold_guard_applied",
+      "limits_profile",
+      "max_meb_proposal_supports_per_order",
+      "meb_accounting",
+      "meb_proposal_budget_kind",
+      "n",
+      "order_schedule",
+      "outcome",
+      "pair_mass_expected_per_lane",
+      "parallel_profile",
+      "prefilter_query_nodes",
+      "public_status",
+      "q4_completions",
+      "q4_core_site_tests",
+      "rank_relevant_extra_shell",
+      "rank_window_regular",
+      "raw_candidates",
+      "reason",
+      "reference_timing",
+      "s",
+      "s_comparison_scope",
+      "schema",
+      "subtracted_timing_scope",
+      "successor_accounting",
+      "terminal_root_coverage_proves_equality",
+      "terminal_status",
+      "type",
+      "unique_candidates",
+      "wave_peak_tasks",
+      "wspd_corner_evals",
+      "wspd_witness_nodes"
+    ]
+  }
+}

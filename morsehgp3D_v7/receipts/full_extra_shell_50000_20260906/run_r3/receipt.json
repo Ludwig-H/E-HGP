@@ -1,0 +1,255 @@
+{
+  "actual_GCP_used": false,
+  "commands": [
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-O2",
+        "-DNDEBUG",
+        "/workspaces/E-HGP/morsehgp3D_v7/tests/full_extra_shell_diagnostic_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/gate_O2"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 2.294644409999819,
+      "exit_code": 0,
+      "expected_exit": 0,
+      "pid": 38799,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout": null,
+      "utc": "2026-09-06T16:11:50.576563+00:00"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/gate_O2",
+        "--selftest"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.0023251780003192835,
+      "exit_code": 0,
+      "expected_exit": 0,
+      "pid": 38893,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "1e4b5729806e3f4d3f6db06028a96a6e446ec57c781e57c96c0f9b1ce20438c5",
+      "timeout": null,
+      "utc": "2026-09-06T16:11:52.872037+00:00"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/gate_O2",
+        "--emit-square"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.002032174000305531,
+      "exit_code": 0,
+      "expected_exit": 0,
+      "pid": 38894,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "8afba524064e3933855f0e3fbee2b2ced40119b026a05551e6e616590eec7045",
+      "timeout": null,
+      "utc": "2026-09-06T16:11:52.874905+00:00"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "/workspaces/E-HGP/morsehgp3D_v7/tests/full_extra_shell_diagnostic_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/gate_SAN"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 4.858040146999883,
+      "exit_code": 0,
+      "expected_exit": 0,
+      "pid": 38895,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout": null,
+      "utc": "2026-09-06T16:11:52.877465+00:00"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/gate_SAN",
+        "--selftest"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.011476981999749114,
+      "exit_code": 0,
+      "expected_exit": 0,
+      "pid": 39028,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "1e4b5729806e3f4d3f6db06028a96a6e446ec57c781e57c96c0f9b1ce20438c5",
+      "timeout": null,
+      "utc": "2026-09-06T16:11:57.736201+00:00"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/gate_SAN",
+        "--emit-square"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.011850925999624451,
+      "exit_code": 0,
+      "expected_exit": 0,
+      "pid": 39030,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "8afba524064e3933855f0e3fbee2b2ced40119b026a05551e6e616590eec7045",
+      "timeout": null,
+      "utc": "2026-09-06T16:11:57.748314+00:00"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/gate_O2",
+        "--unknown"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.0020175620002191863,
+      "exit_code": 2,
+      "expected_exit": 2,
+      "pid": 39032,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout": null,
+      "utc": "2026-09-06T16:11:57.760948+00:00"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-O3",
+        "-DNDEBUG",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/probe.d",
+        "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/probe_O3"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 16.307909199999813,
+      "exit_code": 0,
+      "expected_exit": 0,
+      "pid": 39033,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout": null,
+      "utc": "2026-09-06T16:11:57.763562+00:00"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/probe_O3",
+        "--n=8",
+        "--s=8",
+        "--kmax=10",
+        "--alias-policy=lazy",
+        "--cache-entries=1000000",
+        "--meb-proposal-supports=unlimited",
+        "--threads=8"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.00758938599983594,
+      "exit_code": 0,
+      "expected_exit": 0,
+      "pid": 39848,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "ca523faa51783af17fc801c3b6746fe74af5306b3a163dd5af996bb291213542",
+      "timeout": null,
+      "utc": "2026-09-06T16:12:14.091149+00:00"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/probe_O3",
+        "--n=8",
+        "--s=8",
+        "--kmax=10",
+        "--alias-policy=lazy",
+        "--cache-entries=1000000",
+        "--meb-proposal-supports=unlimited",
+        "--threads=8",
+        "--extra-shell-diagnostics"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.007298825999896508,
+      "exit_code": 0,
+      "expected_exit": 0,
+      "pid": 39931,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "827550825157b84f58be95ce0bcdc4294a4fb5d0c9bf3c98dc50fe0f4edb2eeb",
+      "timeout": null,
+      "utc": "2026-09-06T16:12:14.099401+00:00"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/probe_O3",
+        "--n=8",
+        "--s=8",
+        "--kmax=10",
+        "--alias-policy=lazy",
+        "--cache-entries=1000000",
+        "--meb-proposal-supports=unlimited",
+        "--threads=8",
+        "--extra-shell-diagnostics",
+        "--extra-shell-diagnostics"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 0.0019908330000362184,
+      "exit_code": 2,
+      "expected_exit": 2,
+      "pid": 40012,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5af918129c7e07ef3d5a9ea763a85ca879f127f9b462c88f860d5ae7c088ecb5",
+      "timeout": null,
+      "utc": "2026-09-06T16:12:14.107248+00:00"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/probe_O3",
+        "--n=50000",
+        "--s=8",
+        "--kmax=10",
+        "--alias-policy=lazy",
+        "--cache-entries=1000000",
+        "--meb-proposal-supports=unlimited",
+        "--threads=8",
+        "--extra-shell-diagnostics"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "elapsed_seconds": 132.02719300000035,
+      "exit_code": 2,
+      "expected_exit": 2,
+      "pid": 40013,
+      "stderr_sha256": "3cd74b330c62978d8c3eedd175e12bf5fe02893facb2e008150c32b5054aea72",
+      "stdout_sha256": "3307f28a518f3a85b87961f363d1923e5a3456bef2b910c0979eab13c79aab7a",
+      "timeout": null,
+      "utc": "2026-09-06T16:12:14.110526+00:00"
+    }
+  ],
+  "no_new_time_or_operation_quotas": true,
+  "performance_contract_certified": false,
+  "public_status": "not_claimed",
+  "sources_stable": true,
+  "status": "completed"
+}

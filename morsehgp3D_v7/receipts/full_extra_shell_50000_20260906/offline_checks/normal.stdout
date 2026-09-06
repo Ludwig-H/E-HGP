@@ -1,0 +1,1 @@
+{"BallData_traces": 4, "CTest_passed": 2, "GCP_used": false, "diagnostic_checks": 33, "historical_commands": 25, "micro_orders_per_arm": 8, "n50000_FULL_orders": 0, "n50000_exit": 2, "new_engine_runs": 0, "performance_contract_certified": false, "probe_dependencies": 43, "public_status": "not_claimed", "status": "verified_offline"}

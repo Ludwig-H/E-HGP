@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-O1",
+    "-g",
+    "-fsanitize=address,undefined",
+    "-fno-omit-frame-pointer",
+    "/workspaces/E-HGP/morsehgp3D_v7/tests/full_extra_shell_diagnostic_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r2/gate_SAN"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 5.149017322999953,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "pid": 87,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout": null,
+  "utc": "2026-09-06T15:49:00.065864+00:00"
+}

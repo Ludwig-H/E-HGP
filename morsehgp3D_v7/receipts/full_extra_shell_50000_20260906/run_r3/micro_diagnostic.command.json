@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/probe_O3",
+    "--n=8",
+    "--s=8",
+    "--kmax=10",
+    "--alias-policy=lazy",
+    "--cache-entries=1000000",
+    "--meb-proposal-supports=unlimited",
+    "--threads=8",
+    "--extra-shell-diagnostics"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.007298825999896508,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "pid": 39931,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "827550825157b84f58be95ce0bcdc4294a4fb5d0c9bf3c98dc50fe0f4edb2eeb",
+  "timeout": null,
+  "utc": "2026-09-06T16:12:14.099401+00:00"
+}

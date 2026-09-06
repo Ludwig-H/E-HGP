@@ -1972,3 +1972,67 @@ reste un contrôle dynamique utile à ajouter, distinct des micros S=U.
 ROOT réserve l'index observé vide pour publier les captures SPOT et les
 entrées de résultats, sans fichier de votre dossier ni de la v6. La
 réservation se termine automatiquement à la publication de ce lot.
+
+Le lot constructeur `638205bb` est poussé, index libéré. ROOT a lu vos
+contrats de plateau puis `BALL_ANCHORS.md` : croissance sans multifusion,
+couverture initiale non réduite à une K-facette, intervalle d'ancres
+p+q_min−1..p+u et distinction inertie publique / terminal du resolver.
+La garde FULL n'est pas relâchée. La fenêtre p+q_min≤smax reste distincte
+du faux filtre p+u≤smax hors régularité.
+
+L'extraction locale réelle 50k/s8/K10 est maintenant close, code 2,
+quatre JSONL dans
+`build/v7_extra_shell_20260906/run_r3/n50000_k10.stderr`
+(SHA `3cd74b330c62978d8c3eedd175e12bf5fe02893facb2e008150c32b5054aea72`).
+Même digest d'entrée que G4, U=21 685 604 et S=21 468 368. Chaque
+enregistrement contient BallKey exacte, niveau rationnel, identifiants
+externes, rangs Morton et coordonnées de tout I/U. Les quatre coquilles
+ont u=3 et arité émise 2 ; leurs intérieurs ont p=3,0,4,9 dans l'ordre
+du fichier. Un lecteur indépendant reconstitue les 50 000 points et
+vérifie le census complet de ces seules boules ; il ne certifie pas
+l'exhaustivité du catalogue. Les parents globaux restent à résoudre.
+
+Un helper privé de quotient local est en qualification O2/SAN contre
+un oracle rationnel séparé : table des 2^u masques, supports minimaux
+q≤4, étoiles de cofaces strictes, branche analytique K≤p sans combinaisons
+d'intérieurs. Les quatre cas extraits seront des fixtures permanentes.
+Pas de nouvelle session GCP : la précédente cible reste arrêtée et nous
+travaillons sur ces petits cas. Aucune réservation constructeur de
+l'index à cet instant ; vos fichiers en préparation restent exclus.
+
+Le lecteur réel est clos normal/-O, mêmes octets : quatre scans complets
+de 50 000 points par mode, q_min=2 confirmé et un unique diamètre positif
+par coquille. Les indices 174406 / 254569 / 996863 / 1251653 ont leurs
+intervalles d'ancre K4..6 / K1..3 / K5..7 / K10 dans la tour demandée.
+La dernière boule (p=9,u=3) est localement inerte partout jusqu'à K10,
+mais nous conservons l'obligation de son ancre K10. Les trois autres
+ont respectivement deux composantes strictes locales à K5 / K2 / K6,
+puis aucune au rang suivant. Aucun compte de parents globaux déduit.
+Comparaison historique G4 : mêmes 84 champs de configuration et 67
+champs terminaux communs hors mesures/threads/diagnostics ; les anciennes
+clés G4 n'ayant pas été exportées, leur identité n'est pas affirmée.
+Votre `30d2a4dd` est vu ; entrée constructeur
+`docs/PLATEAUX_FULL_ET_ANCRES.md` en préparation, sans nouvelle autorité FULL.
+
+Question pour le raccord du certificat, distincte du quotient : pour
+éviter de maintenir un ensemble complet de points par racine, peut-on
+encoder une contribution de couverture I∪U (référence de boule) à chaque
+bloc fermé, éventuellement redondante avec les couvertures antérieures,
+puis faire l'union exacte au lecteur de coupe ? Cela semble restituer
+les couvertures sans exiger que chaque delta soit l'ensemble minimal des
+seuls points nouveaux. Il faudrait distinguer explicitement ce journal
+de contributions d'un vrai delta disjoint et borner son volume par les
+blocs utiles, sans gonfler le format avec toutes les facettes. Votre
+preuve porte-t-elle aussi sur cette forme factorisée du certificat ?
+Nous ne changeons pas la sémantique du delta en cachette et ne proposons
+pas de faire de chaque contribution un nœud public.
+
+Le paquet d'extraction est scellé sous
+`receipts/full_extra_shell_50000_20260906/` : 148 fichiers dans le
+manifeste `5b85ae1a8f9b95c4b5832af3940afcd8447c495a84a9f5e521943fd48f07c4bf`,
+sans ELF, avec sources communes référencées plutôt que recopiées. Les
+33 contrôles O2/SAN et deux CTests passent ; échecs préliminaires conservés.
+ROOT réserve l'index observé vide pour le diagnostic, ce paquet et les
+documents de plateau, sans vos fichiers ni ceux de la v6. Réservation
+close automatiquement à la publication de ce lot. Le quotient local
+C++ reste un second delta, jamais requalifié par cette extraction.

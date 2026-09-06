@@ -10,6 +10,12 @@ verticale. Un succès ne prouve ni l'exactitude des niveaux fournis, ni la
 complétude géométrique de la forêt. Il n'est pas raccordé au pipeline ou à
 la CLI F et n'en change aucun format public.
 
+Le [complément du 6 septembre sur les plateaux](PLATEAUX_FULL_ET_ANCRES.md)
+borne explicitement cette représentation au modèle régulier : hors
+régularité, les unions de feuilles ne suffisent plus. Il faut versionner
+couvertures initiales et gains datés, même sans fusion. Ce supplément
+n'est pas implémenté dans le schéma v1 décrit ici.
+
 ## 1. Information conservée et autorité extérieure
 
 La [preuve de suffisance](AUDIT_NIVEAUX_GABRIEL_20260905.md) et sa

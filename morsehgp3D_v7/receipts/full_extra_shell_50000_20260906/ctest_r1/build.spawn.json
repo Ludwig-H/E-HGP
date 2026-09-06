@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v7_extra_shell_20260906/cmake_r1",
+    "--target",
+    "mhgp7_full_extra_shell_diagnostic_gate",
+    "--parallel",
+    "1"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "imposed_timeout": null,
+  "pid": 129,
+  "started_ns": 1788711354280955790
+}

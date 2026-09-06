@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "ctest",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "imposed_timeout": null,
+  "pid": 82,
+  "started_ns": 1788711352893439818
+}

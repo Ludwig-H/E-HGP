@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "c++",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "imposed_timeout": null,
+  "pid": 81,
+  "started_ns": 1788711352890417645
+}

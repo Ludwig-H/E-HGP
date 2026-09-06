@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="2"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="0"
+	timestamp="2026-09-06T16:15:56"
+	>
+	<testcase name="mhgp7_full_extra_shell_diagnostic" classname="mhgp7_full_extra_shell_diagnostic" time="0.0125644" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_extra_shell_diagnostic;gate"/>
+		</properties>
+		<system-out>{"schema":"mhgp7-extra-shell-diagnostic-gate-v1","checks":33,"status":"passed","FULL_built":false}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_extra_shell_diagnostic_bad_argument" classname="mhgp7_full_extra_shell_diagnostic_bad_argument" time="0.0117703" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_extra_shell_diagnostic;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+</testsuite>

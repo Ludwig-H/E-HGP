@@ -14,6 +14,9 @@ K10 et le véritable repli K5 refusent avant toute hiérarchie, pour
 coquilles non régulières, en 21,372 s et 5,646 s. Aucune qualification
 de la seconde ni de 100 ms ; les dizaines de millions et le GPU FULL
 restent non mesurés. La session ciblée est close et ses preuves récupérées.
+Le [diagnostic local suivant](PLATEAUX_FULL_ET_ANCRES.md) vérifie les quatre
+coquilles contre toute l'entrée, sans nouvelle VM. Son temps de refus
+n'est pas un temps de tour ni un gain de performance.
 
 Le statut demeure `public_status=not_claimed`, profil d'entrée u16.
 La cible de 100 ms du plan transverse est ainsi conservée comme jalon

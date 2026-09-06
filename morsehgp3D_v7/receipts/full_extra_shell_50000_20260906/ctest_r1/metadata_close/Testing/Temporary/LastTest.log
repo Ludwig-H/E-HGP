@@ -1,0 +1,41 @@
+Start testing: Sep 06 16:15 UTC
+----------------------------------------------------------
+37/427 Testing: mhgp7_full_extra_shell_diagnostic
+37/427 Test: mhgp7_full_extra_shell_diagnostic
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_extra_shell_20260906/cmake_r1/mhgp7_full_extra_shell_diagnostic_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_extra_shell_20260906/cmake_r1
+"mhgp7_full_extra_shell_diagnostic" start time: Sep 06 16:15 UTC
+Output:
+----------------------------------------------------------
+{"schema":"mhgp7-extra-shell-diagnostic-gate-v1","checks":33,"status":"passed","FULL_built":false}
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_extra_shell_diagnostic" end time: Sep 06 16:15 UTC
+"mhgp7_full_extra_shell_diagnostic" time elapsed: 00:00:00
+----------------------------------------------------------
+
+38/427 Testing: mhgp7_full_extra_shell_diagnostic_bad_argument
+38/427 Test: mhgp7_full_extra_shell_diagnostic_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_extra_shell_20260906/cmake_r1/mhgp7_full_extra_shell_diagnostic_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_extra_shell_20260906/cmake_r1
+"mhgp7_full_extra_shell_diagnostic_bad_argument" start time: Sep 06 16:15 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_extra_shell_diagnostic_bad_argument" end time: Sep 06 16:15 UTC
+"mhgp7_full_extra_shell_diagnostic_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 06 16:15 UTC
+
+full_extra_shell_diagnostic =   0.02 sec*proc
+
+gate =   0.02 sec*proc
+

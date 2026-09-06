@@ -19,8 +19,12 @@ contrats de performance ne sont pas encore livrés.**
 Le [premier essai 50k G4 SPOT CPU48](docs/RESULTATS_G4_FULL_20260906.md)
 est clos : K10 et K5 refusent sur des coquilles non régulières avant tout
 ordre FULL, après 21,372 s et 5,646 s. Ce ne sont pas des temps de tour.
-Captures récupérées, même VM confirmée `TERMINATED`. Le diagnostic des
-plateaux est transmis à l'auditeur ; aucun contrat ni résultat GPU acquis.
+Captures récupérées, même VM confirmée `TERMINATED`. Les
+[quatre coquilles ont maintenant été extraites et vérifiées localement](docs/PLATEAUX_FULL_ET_ANCRES.md)
+contre les 50 000 points. Le raccord prouvé par l'auditeur repose sur
+des quotients locaux et des ancres de boule fermées ; il exige aussi des
+gains de couverture datés hors régularité. FULL ne traite pas encore ces
+plateaux : aucun contrat ni résultat GPU acquis.
 
 Sous régularité, conserver les minima Gabriel de cardinal K et les vraies
 multifusions induites par les cofaces Gabriel de cardinal K+1, avec leurs

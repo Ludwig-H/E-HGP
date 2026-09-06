@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/build/v7_extra_shell_20260906/read_extra_shell.py",
+    "/workspaces/E-HGP/build/v7_extra_shell_20260906/run_r3/n50000_k10.stderr",
+    "--expected-n",
+    "50000",
+    "--mixed-stderr"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.9872474009998768,
+  "exit_code": 0,
+  "pid": 81,
+  "started_utc": "2026-09-06T16:22:41.021636+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "c4a066e620b7850b6b3f1937f5b6d92b027f763012a554f9d1fbbf5512cc3c81",
+  "watchdog": null
+}

@@ -1,0 +1,3 @@
+[ 50%] Building CXX object CMakeFiles/mhgp7_full_extra_shell_diagnostic_gate.dir/tests/full_extra_shell_diagnostic_gate.cpp.o
+[100%] Linking CXX executable mhgp7_full_extra_shell_diagnostic_gate
+[100%] Built target mhgp7_full_extra_shell_diagnostic_gate

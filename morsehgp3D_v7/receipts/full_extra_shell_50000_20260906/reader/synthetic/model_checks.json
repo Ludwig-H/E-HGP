@@ -1,0 +1,31 @@
+{
+  "scope": "Pure synthetic qualification only, no actual 50k diagnostic. Tool output is captured as returned by exec_command (not separately attributed stdout/stderr).",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "build/v7_extra_shell_20260906/selftest_reader.py"
+      ],
+      "chunk_id": "1d8142",
+      "wall_time_seconds": 0.134649635,
+      "exit_code": 0,
+      "original_token_count": 371,
+      "output": "{\n  \"diagnostic_only\": true,\n  \"exhaustive_strict_facets\": 165,\n  \"generator_digest_checks\": 2,\n  \"independent_mask_checks\": 80,\n  \"mutant_names\": [\n    \"duplicate_top\",\n    \"duplicate_nested\",\n    \"float_1.0\",\n    \"float_NaN\",\n    \"float_Infinity\",\n    \"float_-Infinity\",\n    \"float_1e999\",\n    \"unknown_field\",\n    \"not_diagnostic\",\n    \"bool_n\",\n    \"digest\",\n    \"rank_window\",\n    \"decimal_+1\",\n    \"decimal_01\",\n    \"decimal_-0\",\n    \"decimal_170141183460469231731687303715884105728\",\n    \"scaled_key\",\n    \"negative_key\",\n    \"wrong_c\",\n    \"wrong_b_shape\",\n    \"zero_denominator\",\n    \"negative_denominator\",\n    \"wrong_radius\",\n    \"bool_limb\",\n    \"large_limb\",\n    \"missing_shell\",\n    \"missing_interior\",\n    \"duplicate_point\",\n    \"bool_point_id\",\n    \"geometry_index\",\n    \"coordinates\",\n    \"interior_as_shell\",\n    \"wrong_minimal_arity\",\n    \"no_positive_support\"\n  ],\n  \"positive_geometries\": [\n    {\n      \"interior\": 0,\n      \"q_min\": 2,\n      \"shell\": 4,\n      \"supports\": 2\n    },\n    {\n      \"interior\": 1,\n      \"q_min\": 2,\n      \"shell\": 4,\n      \"supports\": 2\n    },\n    {\n      \"interior\": 1,\n      \"q_min\": 3,\n      \"shell\": 4,\n      \"supports\": 2\n    },\n    {\n      \"interior\": 2,\n      \"q_min\": 4,\n      \"shell\": 5,\n      \"supports\": 2\n    }\n  ],\n  \"reader_sha256\": \"a6d7d26615101eb3f6793f3bf3a08f681b693d7db5c7e601587552924b1d6c5c\",\n  \"real_50k_traces_qualified\": false,\n  \"rejected_mutants\": 34,\n  \"status\": \"passed\",\n  \"unreduced_radius_positive\": 1\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "build/v7_extra_shell_20260906/selftest_reader.py"
+      ],
+      "chunk_id": "c7afcf",
+      "wall_time_seconds": 0.135551943,
+      "exit_code": 0,
+      "original_token_count": 371,
+      "output": "{\n  \"diagnostic_only\": true,\n  \"exhaustive_strict_facets\": 165,\n  \"generator_digest_checks\": 2,\n  \"independent_mask_checks\": 80,\n  \"mutant_names\": [\n    \"duplicate_top\",\n    \"duplicate_nested\",\n    \"float_1.0\",\n    \"float_NaN\",\n    \"float_Infinity\",\n    \"float_-Infinity\",\n    \"float_1e999\",\n    \"unknown_field\",\n    \"not_diagnostic\",\n    \"bool_n\",\n    \"digest\",\n    \"rank_window\",\n    \"decimal_+1\",\n    \"decimal_01\",\n    \"decimal_-0\",\n    \"decimal_170141183460469231731687303715884105728\",\n    \"scaled_key\",\n    \"negative_key\",\n    \"wrong_c\",\n    \"wrong_b_shape\",\n    \"zero_denominator\",\n    \"negative_denominator\",\n    \"wrong_radius\",\n    \"bool_limb\",\n    \"large_limb\",\n    \"missing_shell\",\n    \"missing_interior\",\n    \"duplicate_point\",\n    \"bool_point_id\",\n    \"geometry_index\",\n    \"coordinates\",\n    \"interior_as_shell\",\n    \"wrong_minimal_arity\",\n    \"no_positive_support\"\n  ],\n  \"positive_geometries\": [\n    {\n      \"interior\": 0,\n      \"q_min\": 2,\n      \"shell\": 4,\n      \"supports\": 2\n    },\n    {\n      \"interior\": 1,\n      \"q_min\": 2,\n      \"shell\": 4,\n      \"supports\": 2\n    },\n    {\n      \"interior\": 1,\n      \"q_min\": 3,\n      \"shell\": 4,\n      \"supports\": 2\n    },\n    {\n      \"interior\": 2,\n      \"q_min\": 4,\n      \"shell\": 5,\n      \"supports\": 2\n    }\n  ],\n  \"reader_sha256\": \"a6d7d26615101eb3f6793f3bf3a08f681b693d7db5c7e601587552924b1d6c5c\",\n  \"real_50k_traces_qualified\": false,\n  \"rejected_mutants\": 34,\n  \"status\": \"passed\",\n  \"unreduced_radius_positive\": 1\n}\n"
+    }
+  ],
+  "combined_outputs_byte_equal": true
+}
