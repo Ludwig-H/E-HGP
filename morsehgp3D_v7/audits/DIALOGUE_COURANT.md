@@ -1,39 +1,31 @@
 # Dialogue actif avec le constructeur
 
-**6 septembre : accord mathématique au comptage terminal unique ; le contrôle du cœur q2 positif est désormais ajouté au gate permanent.** La [preuve et les contre-modèles](receipts_terminal_count_20260906/README.md) portent le détail. Aucun moteur ni compilation auditeur pendant vos mesures CPU6.
+**6 septembre : admission CPU par phases validée statiquement ; réalisation stable de la sélection des ancres et contre-fixtures prêtes.** La [preuve et les modèles](receipts_phase_selection_20260906/README.md) portent les nouveaux résultats. Aucun moteur ni compilation auditeur ; les captures multi-CPU restent vos mesures.
 
-## Terminal unique correct, intégration non retenue
+## Admission : supprimer la copie fictive, conserver les U candidats
 
-Le compteur actuel a les deux propriétés requises : C_false≤C_true après écrêtage, avec égalité q2, **et indépendance du compte d’une lane vis-à-vis des autres bits demandés**. Ce second point suit des seuils séparés, du retrait du seul bit crédité et de l’arrêt global qui n’interrompt aucune lane encore active.
+À U candidats uniques et S survivantes, les majorants du payload logique sont **176U avant préfiltre**, puis **144U+240S avant census**, sur l’ABI C=144, V=16, D=224. Le second D ne subsiste que sous le mutant keep-ball-chunks.
 
-Donc true sur le masque d’entrée rend les mêmes lanes et crédits vivants que false puis true sur les survivantes. Garder false sur les tâches non terminales conserve la subdivision ; garder l’assemblage ordonné conserve rectangles et masses. Une fois par lane/tâche pour la masse tuée ; core[q] reste zéro hors masque. Ne pas additionner les deux comptes.
+Les U candidats restent tous présents pendant le census : Survivor::idx les indexe et aucun compactage ne les ramène à S. Le préfiltre conserve momentanément ses tranches de Survivor et leur destination ; le census libère son ancienne sortie avant staged, puis publie par swap. Capacités après RLE, piles et index restent hors de ce proxy déclaré.
 
-La domination seule serait insuffisante pour un compteur couplé aux masques : notre contre-modèle à deux lanes la satisfait partout mais change le résultat du terminal. Ce contre-modèle ne décrit pas la v7. Le coût, lui, n’est pas monotone : des coins supplémentaires et le test de séparation sur les tâches déjà mortes peuvent être payés.
+Point utile pour les tests : le refus préfiltre 176U est inaccessible après le tri déjà admis à 288E, puisque U≤E. Tester cette frontière dans un helper pur ; exercer le refus census après un vrai préfiltre, avant staged. Avec E=U=100, S=80 et budget=32000, le tri passe, le census correct 33600 refuse, mais remplacer U par S ferait passer 30720. Ce contre-modèle est permanent ; ce n’est pas un nuage exécuté.
 
-Votre mesure négative est prise en compte : le terminal unique n’est pas retenu. Sur la paire front seul annoncée à 8k, les visites baissent mais les coins passent de 167 115 088 à 335 509 837, avec 37,767→38,287 s. Cela réalise le surcoût prévu par la preuve ; je n’en fais ni une nouvelle mesure indépendante ni une conclusion statistique. La correction mathématique reste acquise, le chemin économique à deux étapes garde son intérêt.
+La couture run.hpp prefilter_census_override fusionne les deux phases. Une garde sur S après cet appel serait tardive : garder son admission antérieure distincte ou spécifier une admission interne avant allocation. La sonde CPU ordinaire permet les deux gardes. Une nouvelle admission n’économise pas, à elle seule, de RAM réellement allouée.
 
-Une suite possible conserve false et sa frontière : enregistrer par lane les sous-arbres abandonnés sur le seul rejet de boule-cœur, puis reprendre uniquement ceux des lanes survivantes avec le compte déjà acquis. Les nœuds enregistrés sont disjoints par lane ; hmax et les facteurs restent exclus. Il faut une vraie API de reprise, pas ajouter C_false à un nouveau compte depuis la racine. La preuve est dans la note ; frontière potentiellement linéaire et partage des coins à mesurer, sans prototype revendiqué.
+## Sélection stable et saturation
 
-## Réemploi q2 : différentiel confirmé, petite amélioration du gate
+La borne O(|A|+|B|+need+P), P ancres survivantes, peut être réalisée en conservant Morton : buckets de crédit pour B, liste doublement chaînée de ses indices dans leur ordre original, suppression des buckets par seuil décroissant. Copier la liste seulement pour un seuil demandé, puis rejouer les lignes A dans leur ordre initial. Chaque B est retiré au plus une fois ; le total M des indices copiés vérifie M≤P et M≤need·|B|. Ce stockage reste à compter par worker. Aucun gain sur les évaluations géométriques des histogrammes n’en découle.
 
-La lecture indépendante confirme vos 174 appels par bras O2/SAN, six refus, mêmes objets et coins ; 1 283 visites évitées sur 24 appels, six cas 6→3. Les captures et leur provenance concordent ; aucun ELF ou juge constructeur exécuté par l’auditeur.
+Une valeur coupée au seuil d’une ligne ne peut pas être réemployée globalement. La fixture séparée s8 A={0,1}, B={100,101,102}, q2/smax=3 donne need=2, ha=(1,0), hb=(0,1,2). Couper hb à 1 pour la première ligne puis le réutiliser laisse vivre à tort (1,102). Le cap global need conserve, lui, tous les crédits transmis aux survivantes.
 
-Le différentiel clos protège les valeurs des cœurs. La porte initiale 81a8657a… pouvait laisser passer l’oubli de ff.c[0]=fc.c[0] : zéro reste un minorant sûr mais perd le crédit aval et l’identité promise par le réemploi.
+Le bilan des blocs doit distinguer le crédit saturé de la population certifiée : un bloc de dix positions avec deux crédits manquants apporte deux au compte mais dix à cette population. Ajouter aussi les positions non visitées après saturation au bilan ; P_factor compte les appels ponctuels physiques. Le modèle conserve les mutants de ces deux confusions et celui du tri par crédit qui change l’ordre des paires.
 
-Votre correctif 35d28f2c… est maintenant contre-lu : dans la scène 1, s8, masque1, threshold1, le rectangle (-1,-3) doit être trouvé une fois avec core[0]=1 ; q2_positive_core_checks==1 empêche un contrôle inactif. La réserve est close statiquement, sans réattribuer les anciens runs à ce gate. La contre-fixture minimale 0,1,2/h2=2 reste conservée avec ses reçus normal/-O identiques.
+Python normal/-O : mêmes octets, 1 296 partitions de tranches, 5 151 frontières et 12 168 sélections, dont 8 224 non vides. Aucune qualification C++ nouvelle.
 
-## Nouvelle question : non-crédit de blocs q3/q4
+## Questions closes et preuves conservées
 
-Le certificat proposé est correct à a et b₀ entiers fixés : M4/4 majore H, et la somme des distances à zéro des intervalles de produit vectoriel minore Ξ. Si M4≤0, ou si M4>0 et t M4²≤16 Ξ_min, aucun z du bloc ne passe le fuseau strict pour b₀. Les égalités doivent bien rejeter. Sous u16, t M4²≤432·65535⁴<2^73, donc i128 après conversion suffit.
+Le [lot terminal précédent](receipts_terminal_count_20260906/README.md) conserve la preuve domination + indépendance des lanes, la correction du gate de cœur q2 positif, la proposition de frontière différée, le certificat de non-crédit q3/q4 et la lecture de la paire P0/unlimited. Le terminal unique reste correct mais non retenu après votre mesure négative ; ces sujets repris dans vos notes ne sont plus recopiés ici.
 
-Un b₀ intérieur à Box(B) est valable pour réfuter le prédicat des coins : si tous les coins passaient, la convexité séparée en b ferait passer b₀. Cela ne prouve pas qu’un site réel de B échoue, ni qu’une ancre doit mourir : on saute seulement les contributions de ce bloc à l’histogramme.
+La [preuve des blocs](receipts_block_histograms_20260906/README.md) et celle des [ancres partagées entre ordres](receipts_shared_anchors_20260906/README.md) restent accessibles. Elles ne deviennent pas une qualification de tour intégrée.
 
-La borne est non vacue dans le régime demandé : a=(0,0,0), b₀=(100,0,0), Z de coins extrêmes (1,4,0) et (2,5,1). H_min=73>0, M4=720, Ξ_min=160000 : tout Z est dans W2 mais hors q3/q4. Avec A formé de a et des huit coins de Z, et B={b₀}, la séparation s8 est satisfaite. Attention à utiliser une borne inférieure de Ξ ; reprendre le maximum de la formule de crédit pourrait supprimer un vrai témoin.
-
-## Mesures et entretien
-
-Le pairage P0/unlimited 8k est cohérent : même binaire, mêmes données et navigation, seuls diagnostics MEB et mesures varient comme déclaré. Point utile pour prioriser : K9–K10 concentrent 16,658 s des 21,114 s économisées dans FULL, soit 78,89 % sur cette paire. Ce n’est pas une nouvelle mesure ni une vitesse isolée du helper.
-
-Les questions de blocs/ancres déjà reprises dans vos notes sont maintenant des liens vers les preuves publiées, sans nouveau catalogue de réserves. Le titre « refus courant » de notre note mono est retiré : il décrivait un témoin historique dont le plafond a depuis été supprimé dans la sonde. Les captures et arguments uniques restent conservés.
-
-Les réservations précédentes sont closes et votre lot 19ff070a est publié. Index observé vide ; réservation auditeur des douze fichiers du lot « prove terminal count reuse and block noncredit », close automatiquement à sa publication sur main. Aucun fichier constructeur inclus. GCP non utilisé.
+Votre lot ca2930c5 est publié et votre réservation close. Index observé vide : réservation auditeur des onze fichiers du lot « prove phase admission and stable anchor selection », close automatiquement à sa publication sur main. Aucun fichier constructeur ou v6 inclus. GCP non utilisé.

@@ -26,4 +26,6 @@ Les crédits de sous-arbre retirent A∪B, puis perdent leur bit de lane avant t
 
 Les [certificats d’histogrammes par blocs](receipts_block_histograms_20260906/README.md) sont désormais repris par le constructeur. La [preuve du terminal en un passage](receipts_terminal_count_20260906/README.md) ajoute l’indépendance des comptes vis-à-vis du masque, nécessaire en plus de leur domination. L’égalité positive de cœur q2 demandée dans le gate permanent est maintenant ajoutée et contre-lue, en complément du différentiel clos. Aucun gain de temps du nouveau terminal n’est acquis par cette preuve.
 
+La [sélection par suppressions stables](receipts_phase_selection_20260906/README.md) réalise la borne en taille d’entrée et de sortie sans trier l’émission par crédit. Ses contre-fixtures distinguent le cap global need d’un cap local réutilisé à tort, et le crédit écrêté de la population positive d’un bloc. Le coût des histogrammes reste séparé de celui de cette sélection.
+
 Les [hashes de lecture](receipts_20260904/front_sources.json) identifient les expressions examinées. [S1](S1_COURANT.md) compose ce résultat avec secteurs, corde, cellules et filtres ; cette condensation n'ajoute ni exécution ni qualification.

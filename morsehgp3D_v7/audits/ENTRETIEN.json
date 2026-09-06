@@ -1611,5 +1611,60 @@
     "new_cpp_compilations": 0,
     "gcp": "not_used",
     "publication_base_head": "19ff070a38c8abef2ff735641d56d78c4cf7ff97"
+  },
+  "latest_phase_selection_review_20260906": {
+    "date": "2026-09-06T12:56:51.485348+00:00",
+    "base_head": "56c6e0a8a8b650939e8922fa5b59ff484a675cc9",
+    "publication_base_head": "ca2930c5b68739ecebc81de9e04188167146686a",
+    "receipt": "receipts_phase_selection_20260906/README.md",
+    "scope": "Static CPU phase admission, ordered threshold deletion construction and independent finite countermodels; no constructor C++ or timing qualification.",
+    "variants_D_to_O_unchanged": true,
+    "historical_scientific_receipts_modified": false,
+    "checks": {
+      "model_normal_exit": 0,
+      "model_optimized_exit": 0,
+      "model_outputs_identical": true,
+      "model_stdout_sha256": "757816a762ce291277c85acf23d6f6f608b73a76f5677ab41a8d209984254a2c",
+      "docs_normal_exit": 0,
+      "docs_optimized_exit": 0,
+      "active_markdown": 392,
+      "registry_exit": 0,
+      "registry_phases": 20,
+      "authored_markdown": 5,
+      "local_links": 94,
+      "anchors": 2,
+      "link_math_errors": 0,
+      "git_diff_check_exit": 0,
+      "freshness": {
+        "common_pins": 2220,
+        "common_mismatches": 0,
+        "source_variants_unchanged": true,
+        "normal_exit": 1,
+        "optimized_exit": 1,
+        "outputs_identical": true,
+        "latest_variant": "O_full_meb_composition",
+        "latest_variant_deltas": [
+          "CMakeLists.txt",
+          "PASSATION.md",
+          "README.md",
+          "docs/FAUSSES_PISTES.md",
+          "docs/RESIDENCE_MASSIVE.md",
+          "src/pipeline/generate.hpp",
+          "tests/meb_proposal_local_gate.cpp"
+        ],
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "5b02791a84b77cc3623399cf065a5c2c1e1bc314410d26de50ec49d323fe7c90"
+      }
+    },
+    "maintenance": {
+      "root_markdown_notes": 25,
+      "dialogue_previous_words": 869,
+      "dialogue_current_words": 644,
+      "action": "Replaced closed terminal/q2/noncredit exchanges with links; removed obsolete fixed count of qualification source deltas. Unique proofs and scientific receipts preserved."
+    },
+    "engine_invocations": 0,
+    "new_cpp_compilations": 0,
+    "gcp": "not_used",
+    "publication_scope_paths": 11
   }
 }

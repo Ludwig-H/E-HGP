@@ -1,0 +1,46 @@
+{
+  "schema": "mhgp7-independent-phase-selection-review-v1",
+  "reviewed_utc": "2026-09-06T12:53:55.201912+00:00",
+  "source_head": "56c6e0a8a8b650939e8922fa5b59ff484a675cc9",
+  "scope": "Static ownership and mathematical finite-model review only. No C++ or constructor capture qualification.",
+  "source_hashes": {
+    "morsehgp3D_v7/src/pipeline/expand.hpp": "7cafb0341344fbc7d1584001e4685e2e5bf0122fe3b7e37277f5468d5c5e1cf0",
+    "morsehgp3D_v7/src/pipeline/candidates.hpp": "33e908458110861d4182ed915eebf312ffb67dc848744c417a5f2ddc719e793b",
+    "morsehgp3D_v7/src/pipeline/run.hpp": "1999f901fb44caf3ca743e77e64bb3e5765070fa01a369447b9e89be21ce728c",
+    "morsehgp3D_v7/src/pipeline/generate.hpp": "345129a775d430a40e151d3b1adb5cd9efeaf77a6ffb6713bd081c74d40bdd9c",
+    "morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp": "7a0867657fad131e12ce0035a33e46f860c7ac00fcb667ce738300045b81b30c",
+    "morsehgp3D_v7/tests/census_direct_gate.cpp": "f396dd20bcad88210692795422079cccb32bcc6543273a2e1135c1690d577258",
+    "morsehgp3D_v7/tests/selftest.cpp": "a9d3dc956f57f297605e86eecb1644a753ff0cd7e2cf5ef0281161fa2136be2d",
+    "morsehgp3D_v7/docs/ELIMINATION_BLOCS_WSPD.md": "3bb0980fed06d0d9101c117acde776680c8af9124fd233e20651b96472231d4b",
+    "morsehgp3D_v7/receipts/full_pipeline_threads_micro_20260906/logs/default.stdout": "d7ff48f501e3192f7e771de645a00ac8e0fa0c508698d24ffda6a788ff02a39d"
+  },
+  "source_status": [
+    "M  morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp",
+    "M  morsehgp3D_v7/docs/ELIMINATION_BLOCS_WSPD.md",
+    "A  morsehgp3D_v7/receipts/full_pipeline_threads_micro_20260906/logs/default.stdout"
+  ],
+  "abi": {
+    "candidate_captured": 144,
+    "ball_captured": 224,
+    "survivor": 16,
+    "survivor_authority": "u32/u64 layout on declared ABI; no fresh sizeof execution"
+  },
+  "model_runs": [
+    {
+      "command": "taskset -c 1 python3 -B morsehgp3D_v7/audits/receipts_phase_selection_20260906/countermodels.py",
+      "exit_code": 0,
+      "stdout_sha256": "757816a762ce291277c85acf23d6f6f608b73a76f5677ab41a8d209984254a2c",
+      "stderr_empty": true
+    },
+    {
+      "command": "taskset -c 1 python3 -B -O morsehgp3D_v7/audits/receipts_phase_selection_20260906/countermodels.py",
+      "exit_code": 0,
+      "stdout_sha256": "757816a762ce291277c85acf23d6f6f608b73a76f5677ab41a8d209984254a2c",
+      "stderr_empty": true
+    }
+  ],
+  "source_variants_D_to_O_unchanged": true,
+  "engine_executed": false,
+  "gcp": "not_used",
+  "public_status": "not_claimed"
+}
