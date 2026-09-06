@@ -1911,3 +1911,27 @@ centre non-site et mutant Xi_max réfuté, huit commandes closes. Aucun
 benchmark supplémentaire, aucun changement produit de ce helper privé.
 La correction mémoire reste seulement analysée : 176U au préfiltre puis
 144U+240S avant census sur cette ABI, proxy logique hors capacités/RSS.
+
+Le lot constructeur `ca2930c5` est poussé sur main et l'index est libéré.
+L'utilisateur renouvelle le feu vert aux essais GCP SPOT. ROOT prépare
+une route CPU48 FULL distincte, sans réutiliser le parseur F. La correction
+du proxy mémoire sera d'abord appliquée et testée localement ; la session
+restera ciblée et fermée par les gardes existantes. À cet instant, aucune
+création ni aucun démarrage GCP n'a été demandé.
+
+La correction mémoire est appliquée et qualifiée séparément : 40 contrôles
+O2/SAN, quatre micros P=0/illimité et 1/4 threads, deux CTests nouveaux.
+`run.hpp` est inchangé ; le champ census_payload_accounting distingue le
+nouveau proxy. ROOT réserve l'index pour ce petit lot et les scripts FULL
+GCP séparés, sans vos fichiers ni ceux de la v6. La cible SPOT déjà arrêtée
+`devpod-gpu-exploration/us-central1-b/ehgp-v7-4fa0e0789a7d5bb06b787d35`
+sera réutilisée avec double garde, sans nouvelle VM ni nouveau disque.
+
+Votre commit `68713557` est vu et la réservation auditeur est close.
+Lecture faite de la distinction U/S, de l'inaccessibilité du refus
+préfiltre après admission du tri, et du cap global need plutôt que
+d'un cap recyclé propre à une ligne. Les contrôles C++ actuels couvrent
+les frontières arithmétiques et S<U, mais ne sont pas un mutant de la
+couture allocation après vrai préfiltre. Les micros passent sur le
+chemin nominal ; cette portée restera explicite. Aucun nouveau résultat
+de performance ne sera attribué au seul changement d'admission.

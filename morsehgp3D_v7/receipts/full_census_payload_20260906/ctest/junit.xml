@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="2"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="0"
+	timestamp="2026-09-06T13:03:56"
+	>
+	<testcase name="mhgp7_full_gabriel_census_payload" classname="mhgp7_full_gabriel_census_payload" time="0.012665" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_census_payload;gate"/>
+		</properties>
+		<system-out>{"schema":"mhgp7-full-census-payload-gate-v1","status":"passed","public_status":"not_claimed","checks":40,"sizeof_candidate":144,"sizeof_survivor":16,"sizeof_ball":224,"full_hierarchy_built":false}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_census_payload_bad_argument" classname="mhgp7_full_gabriel_census_payload_bad_argument" time="0.012076" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_census_payload;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+</testsuite>

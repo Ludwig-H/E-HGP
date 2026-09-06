@@ -1,0 +1,39 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1/DartConfiguration.tcl
+Test project /workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 35
+    Start 35: mhgp7_full_gabriel_census_payload
+
+35: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1/mhgp7_full_gabriel_census_payload_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+35: Working Directory: /workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1
+35: Test timeout computed to be: 10000000
+35: {"schema":"mhgp7-full-census-payload-gate-v1","status":"passed","public_status":"not_claimed","checks":40,"sizeof_candidate":144,"sizeof_survivor":16,"sizeof_ball":224,"full_hierarchy_built":false}
+35: 
+1/2 Test #35: mhgp7_full_gabriel_census_payload ................   Passed    0.01 sec
+test 36
+    Start 36: mhgp7_full_gabriel_census_payload_bad_argument
+
+36: Test command: /usr/bin/cmake "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1/mhgp7_full_gabriel_census_payload_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+36: Working Directory: /workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1
+36: Test timeout computed to be: 10000000
+36: 
+2/2 Test #36: mhgp7_full_gabriel_census_payload_bad_argument ...   Passed    0.01 sec
+
+The following tests passed:
+	mhgp7_full_gabriel_census_payload
+	mhgp7_full_gabriel_census_payload_bad_argument
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+full_census_payload    =   0.02 sec*proc (2 tests)
+gate                   =   0.02 sec*proc (2 tests)
+
+Total Test time (real) =   0.04 sec

@@ -94,19 +94,24 @@ minimiser les dépenses : préparer et vérifier les changements localement,
 ne pas répéter les campagnes closes sans hypothèse nouvelle, et réserver
 une session SPOT courte et ciblée aux questions nécessitant réellement G4.
 
-Avant 50k, revoir aussi l'admission mémoire de la sonde : elle conserve
-un proxy historique avec deux BallData par candidate, alors que le census
-nominal v7 n'a plus qu'une destination. Le profil et les captures ci-dessus
-ne sont pas modifiés rétroactivement. Une admission par phases peut
-retirer cette réserve devenue inutile, sans confondre tailles logiques,
-capacités d'allocateur et mémoire résidente globale.
+L'admission mémoire de la sonde est désormais corrigée et
+[qualifiée séparément](../receipts/full_census_payload_20260906/README.md).
+Le proxy historique réservait deux BallData par candidate, alors que le
+census nominal v7 n'a plus qu'une destination. Les captures ci-dessus
+ne sont pas modifiées rétroactivement. Le nouveau champ
+`census_payload_accounting=preflight_survivor_then_direct_census_v2`
+identifie cette admission par phases, distincte des capacités d'allocateur
+et de la mémoire résidente globale.
 
 La lecture du [census direct](../src/pipeline/expand.hpp) donne, avec U
 candidates uniques et S survivantes, un proxy préfiltre de 176U octets
 (candidates et deux populations Survivor), puis 144U+240S avant census
 (candidates, Survivor et une seule BallData). Les tailles sont celles de
 l'ABI mesurée ; le second tableau BallData n'existe que sous mutant.
-Ces deux expressions remplaceraient le 608U historique. Il s'agit d'une
-correction préparée, **non appliquée** à la sonde ni mesurée à 50k. Les
-capacités, index, piles et équipes restent hors de ce proxy nommé ; la
-limite d'espace d'adressage est un mécanisme distinct.
+Ces deux expressions remplacent le 608U historique dans la sonde seulement ;
+le garde du moteur réduit `run.hpp` reste inchangé. Les 40 contrôles
+arithmétiques passent en O2 et ASan/UBSan, ainsi que deux nouveaux CTests.
+Quatre micros n=8, P=0/illimité et 1/4 threads, conservent les mêmes forêts.
+Ce n'est encore ni une mesure 50k ni une qualification de complétude.
+Les capacités, index, piles et équipes restent hors de ce proxy nommé ;
+la limite d'espace d'adressage est un mécanisme distinct.

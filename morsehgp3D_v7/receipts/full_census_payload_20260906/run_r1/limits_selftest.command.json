@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1/bin/limits_O2",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1",
+  "ended_ns": 1788699554663115775,
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "imposed_rlimits": null,
+  "name": "limits_selftest",
+  "pid": 575320,
+  "started_ns": 1788699554661196846,
+  "timeout": null
+}

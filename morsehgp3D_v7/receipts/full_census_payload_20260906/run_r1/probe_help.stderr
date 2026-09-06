@@ -1,0 +1,10 @@
+full_gabriel_lazy_probe --n=N --s={8,10,12} --kmax={5,10}
+  --alias-policy=eager | --alias-policy=lazy --cache-entries=C
+  --meb-proposal-supports={unsigned_decimal|unlimited} (mandatory, shared within each order)
+  [--threads=N] N positive representable int; explicit option selects schema v6
+full_gabriel_lazy_probe --digest-selftest
+Fixed uniform/seed3/coord65536; threads1 by default. FULL builders stay serial.
+Pipeline worker counts are measured per stage; threads is only the requested budget.
+N>=2 and C>=0 obey memory/representation limits. No operation quotas.
+P=0 follows F; finite P exhaustion falls back to F; unlimited retains checked u64 counters.
+Semantic digests, no archive/vertical export. Monitor larger runs directly.

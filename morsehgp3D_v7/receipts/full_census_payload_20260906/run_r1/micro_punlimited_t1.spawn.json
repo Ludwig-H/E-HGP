@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1/bin/probe_O3",
+    "--n=8",
+    "--s=8",
+    "--kmax=10",
+    "--alias-policy=lazy",
+    "--cache-entries=1000000",
+    "--meb-proposal-supports=unlimited"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1",
+  "expected_exit_code": 0,
+  "imposed_rlimits": null,
+  "name": "micro_punlimited_t1",
+  "pid": 575367,
+  "started_ns": 1788699554680375375,
+  "timeout": null
+}

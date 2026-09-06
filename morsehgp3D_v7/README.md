@@ -91,6 +91,10 @@ mêmes dix forêts. FULL et la boucle K restent séquentiels. La suite
 vise G4 SPOT 48 CPU et GPU, avec dépenses minimisées,
 sans convertir les reçus F
 ou les seules primitives device en résultats de tour FULL.
+L'[admission mémoire du probe](receipts/full_census_payload_20260906/README.md)
+ne réserve plus une seconde BallData absente du census nominal. Contrôles
+arithmétiques O2/SAN, micros et deux nouveaux CTests passent ; il s'agit
+d'un changement du proxy logique, pas d'un gain chronométré à 50k.
 
 Priorités : mono-thread, puis multi-CPU, puis GPU. Le
 [contrat 50k](docs/CONTRAT_PERFORMANCE.md) porte sur **toute la tour K=1..10

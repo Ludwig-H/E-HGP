@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/usr/bin/g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-O2",
+    "-DNDEBUG",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1/limits_O2.d",
+    "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1/sources/morsehgp3D_v7/tests/full_gabriel_probe_limits_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1/bin/limits_O2"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1",
+  "expected_exit_code": 0,
+  "imposed_rlimits": null,
+  "name": "compile_limits_O2",
+  "pid": 575152,
+  "started_ns": 1788699536966451688,
+  "timeout": null
+}

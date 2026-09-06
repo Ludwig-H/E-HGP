@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1/bin/probe_O3",
+    "--digest-selftest"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1",
+  "expected_exit_code": 0,
+  "imposed_rlimits": null,
+  "name": "probe_digest",
+  "started_ns": 1788699554665366397,
+  "timeout": null
+}

@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1/bin/probe_O3",
+    "--n=8",
+    "--s=8",
+    "--kmax=10",
+    "--alias-policy=lazy",
+    "--cache-entries=1000000",
+    "--meb-proposal-supports=unlimited",
+    "--threads=4"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1",
+  "expected_exit_code": 0,
+  "imposed_rlimits": null,
+  "name": "micro_punlimited_t4",
+  "pid": 575368,
+  "started_ns": 1788699554683967146,
+  "timeout": null
+}

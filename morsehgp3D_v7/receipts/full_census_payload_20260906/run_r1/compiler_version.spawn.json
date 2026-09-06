@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/usr/bin/g++",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1",
+  "expected_exit_code": 0,
+  "imposed_rlimits": null,
+  "name": "compiler_version",
+  "pid": 575124,
+  "started_ns": 1788699532470000680,
+  "timeout": null
+}

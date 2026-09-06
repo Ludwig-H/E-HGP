@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1/bin/gate_SAN",
+    "--rejects"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1",
+  "ended_ns": 1788699554651977553,
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "imposed_rlimits": null,
+  "name": "gate_SAN_rejects",
+  "pid": 575316,
+  "started_ns": 1788699554643212386,
+  "timeout": null
+}

@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1",
+    "-R",
+    "^mhgp7_full_gabriel_census_payload(_bad_argument)?$",
+    "-V",
+    "--output-on-failure",
+    "--output-junit",
+    "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/ctest_r1/junit.xml"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "pid": 579689,
+  "started_ns": 1788699836488201035,
+  "timeout": null
+}

@@ -1,0 +1,82 @@
+{
+  "CMakeLists_sha256": "c9ad6e3c5b2fb9861c28f0826942e979a5fa16e9ce3a30db7a1ec204cc67c68b",
+  "binary_sha256": "91f27f3049c64f39cf9d7f85422718e8300ed610292d515f22c551295fe1ba81",
+  "commands": [
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/workspaces/E-HGP/morsehgp3D_v7",
+        "-B",
+        "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+        "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788699834351464945,
+      "exit_code": 0,
+      "pid": 579587,
+      "started_ns": 1788699833865084196,
+      "timeout": null
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1",
+        "--target",
+        "mhgp7_full_gabriel_census_payload_gate",
+        "--parallel",
+        "2"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788699836464701459,
+      "exit_code": 0,
+      "pid": 579635,
+      "started_ns": 1788699834351833384,
+      "timeout": null
+    },
+    {
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1",
+        "-R",
+        "^mhgp7_full_gabriel_census_payload(_bad_argument)?$",
+        "--show-only=json-v1"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788699836487739488,
+      "exit_code": 0,
+      "pid": 579688,
+      "started_ns": 1788699836465066593,
+      "timeout": null
+    },
+    {
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1",
+        "-R",
+        "^mhgp7_full_gabriel_census_payload(_bad_argument)?$",
+        "-V",
+        "--output-on-failure",
+        "--output-junit",
+        "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/ctest_r1/junit.xml"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788699836536689145,
+      "exit_code": 0,
+      "pid": 579689,
+      "started_ns": 1788699836488201035,
+      "timeout": null
+    }
+  ],
+  "explicit_timeout": null,
+  "status": "completed",
+  "tests": [
+    "mhgp7_full_gabriel_census_payload",
+    "mhgp7_full_gabriel_census_payload_bad_argument"
+  ]
+}

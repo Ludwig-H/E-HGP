@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1/bin/probe_O3",
+    "--unknown"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_probe_census_payload_20260906/run_r1",
+  "expected_exit_code": 2,
+  "imposed_rlimits": null,
+  "name": "probe_unknown",
+  "started_ns": 1788699554667558232,
+  "timeout": null
+}

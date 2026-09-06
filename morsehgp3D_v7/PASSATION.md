@@ -154,10 +154,14 @@ passent. Les mesures appariées 8k terminent en 132,962 / 98,195 /
 74,577 / 69,853 s externes à 1/2/4/8 threads, mêmes dix forêts et
 mêmes champs d'ordre non mesurés. Le coût FULL reste autour de 50 s ;
 `--threads` ne parallélise pas les ordres. Le dernier bras emploie le
-SMT sur quatre cœurs physiques, pas huit cœurs. Dépenses GCP à minimiser,
-aucune session ouverte. L'admission mémoire pré-census héritée avec deux
-BallData par candidate reste à corriger séparément, sans réétiqueter ces
-captures ni supprimer les contrôles de mémoire réellement nécessaires.
+SMT sur quatre cœurs physiques, pas huit cœurs. Dépenses GCP à minimiser.
+L'[admission mémoire par phases](receipts/full_census_payload_20260906/README.md)
+est maintenant corrigée dans la sonde : 176U puis 144U+240S sur l'ABI
+observée, contre l'ancien 608U. Les 40 contrôles O2/SAN, quatre micros
+et deux nouveaux CTests passent. Aucun résultat antérieur n'est réétiqueté,
+et le proxy logique ne devient pas une borne RSS. Une session G4 SPOT
+CPU48 FULL distincte est préparée à la demande renouvelée de l'utilisateur ;
+son démarrage et son arrêt devront être certifiés par les scripts gardés.
 
 La [campagne de normalisation v2](docs/RESULTATS_MONO_FULL_SUCCESSOR_20260905.md)
 ferme les cinq captures prévues : 8k/s10 et s12 à 143,301 et 145,404 s,
