@@ -1,0 +1,513 @@
+{
+  "checks": 3584,
+  "core": {
+    "release": {
+      "compiled_targets": 10,
+      "expected_codes": {
+        "mhgp7_full_certificate": 0,
+        "mhgp7_full_certificate_rejects": 0,
+        "mhgp7_full_gabriel": 0,
+        "mhgp7_full_gabriel_allocation": 0,
+        "mhgp7_full_gabriel_allocation_bad_argument": 2,
+        "mhgp7_full_gabriel_bad_argument": 2,
+        "mhgp7_full_gabriel_digest": 0,
+        "mhgp7_full_gabriel_digest_bad_argument": 2,
+        "mhgp7_full_gabriel_lazy": 0,
+        "mhgp7_full_gabriel_lazy_allocation": 0,
+        "mhgp7_full_gabriel_lazy_allocation_bad_argument": 2,
+        "mhgp7_full_gabriel_lazy_bad_argument": 2,
+        "mhgp7_full_gabriel_lazy_rejects": 0,
+        "mhgp7_full_gabriel_meb_allocation_large": 0,
+        "mhgp7_full_gabriel_meb_allocation_low": 0,
+        "mhgp7_full_gabriel_meb_bad_argument": 2,
+        "mhgp7_full_gabriel_meb_lazy_allocation_large": 0,
+        "mhgp7_full_gabriel_meb_lazy_allocation_low": 0,
+        "mhgp7_full_gabriel_meb_rejects": 0,
+        "mhgp7_full_gabriel_meb_selftest": 0,
+        "mhgp7_full_gabriel_rejects": 0,
+        "mhgp7_full_gabriel_singleton": 0,
+        "mhgp7_full_gabriel_singleton_bad_argument": 2,
+        "mhgp7_full_gabriel_singleton_rejects": 0,
+        "mhgp7_full_gabriel_successor": 0,
+        "mhgp7_full_gabriel_successor_bad_argument": 2,
+        "mhgp7_full_gabriel_successor_rejects": 0,
+        "mhgp7_meb_proposal_local_bad_argument": 2,
+        "mhgp7_meb_proposal_local_rejects": 0,
+        "mhgp7_meb_proposal_local_selftest": 0
+      },
+      "product_targets_without_testing_macro": 8,
+      "semantic_summaries": [
+        {
+          "all_13_F_stats_comparisons": 218,
+          "all_5_Work_comparisons": 109,
+          "calls": 109,
+          "capped": 0,
+          "exception_boundaries": 0,
+          "fast_q2": 18,
+          "fast_q3": 4,
+          "fast_q4": 17,
+          "max_boundaries": 0,
+          "physical_F_supports": 3926,
+          "proposal_forms": 144,
+          "public_status": "not_claimed",
+          "q4_raw": 4,
+          "schema": "mhgp7-meb-proposal-local-v1",
+          "shell": 12,
+          "status": "passed",
+          "success": 97,
+          "terminal_comparisons": 218,
+          "test_mode": "selftest"
+        },
+        {
+          "budgets": [
+            {
+              "exact": 0,
+              "one_short": 0
+            },
+            {
+              "exact": 0,
+              "one_short": 0
+            },
+            {
+              "exact": 0,
+              "one_short": 0
+            },
+            {
+              "exact": 0,
+              "one_short": 0
+            },
+            {
+              "exact": 0,
+              "one_short": 0
+            }
+          ],
+          "cache_hit_cases": 24,
+          "chain_cases": 48,
+          "checks": 876328,
+          "clouds": 21,
+          "cuts": 33792,
+          "dispatch": [
+            {
+              "certified": 102,
+              "fallback": 198
+            },
+            {
+              "certified": 216,
+              "fallback": 372
+            },
+            {
+              "certified": 210,
+              "fallback": 366
+            },
+            {
+              "certified": 210,
+              "fallback": 366
+            }
+          ],
+          "failures": 0,
+          "full_calls": 1488,
+          "gamma_runs": 1488,
+          "matrix_calls": 1488,
+          "meb_accounting": "reference_ordinal_plus_native_z_q3_q4_proposal_v2",
+          "metadata_rejects": 0,
+          "orders": 93,
+          "pairs": 1116,
+          "persistent_cases": 42,
+          "public_status": "not_claimed",
+          "q4_catalogue_records": 33,
+          "records": 375,
+          "retained_proposal_refusals": 0,
+          "saved_reference_cases": 267,
+          "schema": "mhgp7-full-gabriel-meb-gate-v1",
+          "status": "passed",
+          "terminals": 336,
+          "test_mode": "--selftest"
+        },
+        {
+          "all_13_F_stats_comparisons": 90,
+          "all_5_Work_comparisons": 45,
+          "calls": 45,
+          "capped": 22,
+          "exception_boundaries": 3,
+          "fast_q2": 0,
+          "fast_q3": 7,
+          "fast_q4": 0,
+          "max_boundaries": 8,
+          "physical_F_supports": 63,
+          "proposal_forms": 38,
+          "public_status": "not_claimed",
+          "q4_raw": 0,
+          "schema": "mhgp7-meb-proposal-local-v1",
+          "shell": 6,
+          "status": "passed",
+          "success": 17,
+          "terminal_comparisons": 90,
+          "test_mode": "rejects"
+        },
+        {
+          "budgets": [
+            {
+              "exact": 32,
+              "one_short": 32
+            },
+            {
+              "exact": 32,
+              "one_short": 32
+            },
+            {
+              "exact": 32,
+              "one_short": 32
+            },
+            {
+              "exact": 32,
+              "one_short": 32
+            },
+            {
+              "exact": 32,
+              "one_short": 32
+            }
+          ],
+          "cache_hit_cases": 24,
+          "chain_cases": 48,
+          "checks": 883001,
+          "clouds": 21,
+          "cuts": 33792,
+          "dispatch": [
+            {
+              "certified": 102,
+              "fallback": 198
+            },
+            {
+              "certified": 216,
+              "fallback": 372
+            },
+            {
+              "certified": 210,
+              "fallback": 366
+            },
+            {
+              "certified": 210,
+              "fallback": 366
+            }
+          ],
+          "failures": 0,
+          "full_calls": 2036,
+          "gamma_runs": 1488,
+          "matrix_calls": 1488,
+          "meb_accounting": "reference_ordinal_plus_native_z_q3_q4_proposal_v2",
+          "metadata_rejects": 28,
+          "orders": 93,
+          "pairs": 1116,
+          "persistent_cases": 42,
+          "public_status": "not_claimed",
+          "q4_catalogue_records": 33,
+          "records": 375,
+          "retained_proposal_refusals": 120,
+          "saved_reference_cases": 267,
+          "schema": "mhgp7-full-gabriel-meb-gate-v1",
+          "status": "passed",
+          "terminals": 336,
+          "test_mode": "--rejects"
+        }
+      ],
+      "tests": 30
+    },
+    "san": {
+      "compiled_targets": 10,
+      "expected_codes": {
+        "mhgp7_full_certificate": 0,
+        "mhgp7_full_certificate_rejects": 0,
+        "mhgp7_full_gabriel": 0,
+        "mhgp7_full_gabriel_allocation": 0,
+        "mhgp7_full_gabriel_allocation_bad_argument": 2,
+        "mhgp7_full_gabriel_bad_argument": 2,
+        "mhgp7_full_gabriel_digest": 0,
+        "mhgp7_full_gabriel_digest_bad_argument": 2,
+        "mhgp7_full_gabriel_lazy": 0,
+        "mhgp7_full_gabriel_lazy_allocation": 0,
+        "mhgp7_full_gabriel_lazy_allocation_bad_argument": 2,
+        "mhgp7_full_gabriel_lazy_bad_argument": 2,
+        "mhgp7_full_gabriel_lazy_rejects": 0,
+        "mhgp7_full_gabriel_meb_allocation_large": 0,
+        "mhgp7_full_gabriel_meb_allocation_low": 0,
+        "mhgp7_full_gabriel_meb_bad_argument": 2,
+        "mhgp7_full_gabriel_meb_lazy_allocation_large": 0,
+        "mhgp7_full_gabriel_meb_lazy_allocation_low": 0,
+        "mhgp7_full_gabriel_meb_rejects": 0,
+        "mhgp7_full_gabriel_meb_selftest": 0,
+        "mhgp7_full_gabriel_rejects": 0,
+        "mhgp7_full_gabriel_singleton": 0,
+        "mhgp7_full_gabriel_singleton_bad_argument": 2,
+        "mhgp7_full_gabriel_singleton_rejects": 0,
+        "mhgp7_full_gabriel_successor": 0,
+        "mhgp7_full_gabriel_successor_bad_argument": 2,
+        "mhgp7_full_gabriel_successor_rejects": 0,
+        "mhgp7_meb_proposal_local_bad_argument": 2,
+        "mhgp7_meb_proposal_local_rejects": 0,
+        "mhgp7_meb_proposal_local_selftest": 0
+      },
+      "product_targets_without_testing_macro": 8,
+      "semantic_summaries": [
+        {
+          "all_13_F_stats_comparisons": 218,
+          "all_5_Work_comparisons": 109,
+          "calls": 109,
+          "capped": 0,
+          "exception_boundaries": 0,
+          "fast_q2": 18,
+          "fast_q3": 4,
+          "fast_q4": 17,
+          "max_boundaries": 0,
+          "physical_F_supports": 3926,
+          "proposal_forms": 144,
+          "public_status": "not_claimed",
+          "q4_raw": 4,
+          "schema": "mhgp7-meb-proposal-local-v1",
+          "shell": 12,
+          "status": "passed",
+          "success": 97,
+          "terminal_comparisons": 218,
+          "test_mode": "selftest"
+        },
+        {
+          "budgets": [
+            {
+              "exact": 0,
+              "one_short": 0
+            },
+            {
+              "exact": 0,
+              "one_short": 0
+            },
+            {
+              "exact": 0,
+              "one_short": 0
+            },
+            {
+              "exact": 0,
+              "one_short": 0
+            },
+            {
+              "exact": 0,
+              "one_short": 0
+            }
+          ],
+          "cache_hit_cases": 24,
+          "chain_cases": 48,
+          "checks": 876328,
+          "clouds": 21,
+          "cuts": 33792,
+          "dispatch": [
+            {
+              "certified": 102,
+              "fallback": 198
+            },
+            {
+              "certified": 216,
+              "fallback": 372
+            },
+            {
+              "certified": 210,
+              "fallback": 366
+            },
+            {
+              "certified": 210,
+              "fallback": 366
+            }
+          ],
+          "failures": 0,
+          "full_calls": 1488,
+          "gamma_runs": 1488,
+          "matrix_calls": 1488,
+          "meb_accounting": "reference_ordinal_plus_native_z_q3_q4_proposal_v2",
+          "metadata_rejects": 0,
+          "orders": 93,
+          "pairs": 1116,
+          "persistent_cases": 42,
+          "public_status": "not_claimed",
+          "q4_catalogue_records": 33,
+          "records": 375,
+          "retained_proposal_refusals": 0,
+          "saved_reference_cases": 267,
+          "schema": "mhgp7-full-gabriel-meb-gate-v1",
+          "status": "passed",
+          "terminals": 336,
+          "test_mode": "--selftest"
+        },
+        {
+          "all_13_F_stats_comparisons": 90,
+          "all_5_Work_comparisons": 45,
+          "calls": 45,
+          "capped": 22,
+          "exception_boundaries": 3,
+          "fast_q2": 0,
+          "fast_q3": 7,
+          "fast_q4": 0,
+          "max_boundaries": 8,
+          "physical_F_supports": 63,
+          "proposal_forms": 38,
+          "public_status": "not_claimed",
+          "q4_raw": 0,
+          "schema": "mhgp7-meb-proposal-local-v1",
+          "shell": 6,
+          "status": "passed",
+          "success": 17,
+          "terminal_comparisons": 90,
+          "test_mode": "rejects"
+        },
+        {
+          "budgets": [
+            {
+              "exact": 32,
+              "one_short": 32
+            },
+            {
+              "exact": 32,
+              "one_short": 32
+            },
+            {
+              "exact": 32,
+              "one_short": 32
+            },
+            {
+              "exact": 32,
+              "one_short": 32
+            },
+            {
+              "exact": 32,
+              "one_short": 32
+            }
+          ],
+          "cache_hit_cases": 24,
+          "chain_cases": 48,
+          "checks": 883001,
+          "clouds": 21,
+          "cuts": 33792,
+          "dispatch": [
+            {
+              "certified": 102,
+              "fallback": 198
+            },
+            {
+              "certified": 216,
+              "fallback": 372
+            },
+            {
+              "certified": 210,
+              "fallback": 366
+            },
+            {
+              "certified": 210,
+              "fallback": 366
+            }
+          ],
+          "failures": 0,
+          "full_calls": 2036,
+          "gamma_runs": 1488,
+          "matrix_calls": 1488,
+          "meb_accounting": "reference_ordinal_plus_native_z_q3_q4_proposal_v2",
+          "metadata_rejects": 28,
+          "orders": 93,
+          "pairs": 1116,
+          "persistent_cases": 42,
+          "public_status": "not_claimed",
+          "q4_catalogue_records": 33,
+          "records": 375,
+          "retained_proposal_refusals": 120,
+          "saved_reference_cases": 267,
+          "schema": "mhgp7-full-gabriel-meb-gate-v1",
+          "status": "passed",
+          "terminals": 336,
+          "test_mode": "--rejects"
+        }
+      ],
+      "tests": 30
+    }
+  },
+  "cpp_closed_utc": "2026-09-06T09:36:43.022417+00:00",
+  "failed_attempts": [
+    {
+      "failed_commands": [
+        [
+          "release_configure",
+          1
+        ]
+      ],
+      "path": "failed_attempts/v7_meb_product_qualification_20260906/capture/run.json"
+    },
+    {
+      "failed_commands": [
+        [
+          "san_build",
+          2
+        ]
+      ],
+      "path": "failed_attempts/v7_meb_product_qualification_20260906_r2/capture/run.json"
+    }
+  ],
+  "gcp": "not_used",
+  "late_injection_evidence": "compiled check code plus aggregate stdout; individual states not published",
+  "late_injections_per_build": {
+    "F_exception_coverage": "not_exercised",
+    "baselines": 2,
+    "builder_propagations": 6,
+    "cases": 12,
+    "checks": 9091,
+    "compared_mirrors": 8,
+    "failures": 0,
+    "mirrors": 10,
+    "nominal_noobserver_exception_claim": false,
+    "paid_at_throw": 36,
+    "public_refusals": 4,
+    "public_status": "not_claimed",
+    "retries": 6,
+    "runtime_propagations": 2,
+    "schema": "mhgp7-private-full-meb-form-fault-v1",
+    "status": "passed"
+  },
+  "late_prefix_scope": "p=3, certified=2, outer_calls=3, geometry_calls=2; F fallback and A remain zero",
+  "mutations": {
+    "charge_after": {
+      "after": "824033d1de2a83333c2754a1babce32e6369bdc5f835c0143485cf864733a805",
+      "before": "f922544b5cfdc214de96ecd49520e318ea8632d14a8142ef21fd248f9cc38fb3",
+      "target": "morsehgp3D_v7/src/forest/meb_proposal.hpp"
+    },
+    "drop_A": {
+      "after": "b7b9f5c8982fd1d709ce51626884c43b74408f0aa928e594c8aa7f488fca8b81",
+      "before": "f922544b5cfdc214de96ecd49520e318ea8632d14a8142ef21fd248f9cc38fb3",
+      "target": "morsehgp3D_v7/src/forest/meb_proposal.hpp"
+    },
+    "drop_FULL_P_mirror": {
+      "after": "ee1ba2895df5c17539ca3d03d9b28362b0b4cae3e769fb7b58545ae6fc3b9400",
+      "before": "a946e31dde8fbd8ec528d6f5e94f9c727998acc172b4dd29c084dd522c730d1d",
+      "target": "morsehgp3D_v7/src/forest/full_gabriel.hpp"
+    },
+    "form_fault": {
+      "after": "c3e166933252fd2416ab55e29c6e98724974d665e75436f80448c6f237fd9f74",
+      "before": "f922544b5cfdc214de96ecd49520e318ea8632d14a8142ef21fd248f9cc38fb3",
+      "target": "morsehgp3D_v7/src/forest/meb_proposal.hpp"
+    },
+    "reset_Work": {
+      "after": "c478d9ece71629da146bda453325ad0cba1625fd4ad6c7ff9f7a32901c3ea71a",
+      "before": "a946e31dde8fbd8ec528d6f5e94f9c727998acc172b4dd29c084dd522c730d1d",
+      "target": "morsehgp3D_v7/src/forest/full_gabriel.hpp"
+    }
+  },
+  "other_limits": [
+    "no C++ rerun",
+    "ELF hashes bound to receipts, binaries not distributed",
+    "system dependencies recorded after run, not hermetic",
+    "extra packet sealed but its scientific judgments not independently rerun here",
+    "FULL fast-q4 dispatch not demonstrated by q4 catalogue counts",
+    "no K9/K10 FULL oracle, CLI, archive, vertical or performance qualification"
+  ],
+  "packet_seal_sha256": "bbdbc40dfb737b3dc78b3fd6a146e6f11324f2e892f43e54307ddf7e8c451a2b",
+  "product_full_sha256": "a946e31dde8fbd8ec528d6f5e94f9c727998acc172b4dd29c084dd522c730d1d",
+  "product_meb_sha256": "f922544b5cfdc214de96ecd49520e318ea8632d14a8142ef21fd248f9cc38fb3",
+  "public_status": "not_claimed",
+  "review_kind": "independent_read_only_no_imported_judge_no_engine",
+  "review_script_sha256": "e09692eb44ff1ee41f386641b88103cdf4430ee924af88855ad8b44654596d7a",
+  "runtime_wrapper_private_result_observable": false,
+  "sealed_payload_files": 1250,
+  "status": "passed"
+}

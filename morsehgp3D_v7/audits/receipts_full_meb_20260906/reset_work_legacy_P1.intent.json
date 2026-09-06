@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "timeout",
+    "--signal=TERM",
+    "--kill-after=5",
+    "180",
+    "taskset",
+    "-c",
+    "1",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_meb_20260906/reset_work.bin",
+    "1"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "environment": {},
+  "input_sha256": "8b66b099da5ee1196166620cab1fbbc25e96b109534e47419de76c098f6fe1c5",
+  "started_utc": "2026-09-06T09:45:34.325166+00:00"
+}

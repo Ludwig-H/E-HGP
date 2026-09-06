@@ -931,5 +931,182 @@
     },
     "maintenance": "25 root Markdown notes retained; stale private-filter static-only and q4/MAX-open reservations removed, resolved facts linked to main documentation, active dialogue rewritten around current integration and concrete terminal fixture. No duplicate root note or work/build directory created.",
     "gcp": "not_used"
+  },
+  "latest_full_meb_qualification_20260906": {
+    "date": "2026-09-06T10:05:21.948453+00:00",
+    "base_head": "20b28b1d",
+    "scope": "Fresh independent bounded FULL/proposal C++ qualification, two high-order rational fixtures, two causal mutants, separate constructor capture reread. No performance measurement or GCP.",
+    "receipt": "receipts_full_meb_20260906/README.md",
+    "new_variant": "O_full_meb_composition",
+    "variants_D_to_N_unchanged": true,
+    "historical_scientific_receipts_modified": false,
+    "checks": {
+      "docs_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "active_documents": 367,
+        "scope": "Repository checker includes concurrent constructor documents; authored audit Markdown checked separately."
+      },
+      "registry": {
+        "exit_code": 0,
+        "phases": 20
+      },
+      "authored_markdown": {
+        "files": 7,
+        "links": 126,
+        "anchors": 7,
+        "errors": []
+      },
+      "independent_full_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "sha256": "895f3ee15a90c2bc007dac40bf488e6d5727ea50881f4a5ccb2ae7c4fa13f741",
+        "per_build": {
+          "outputs": 2784,
+          "cuts": 214704,
+          "exact_caps": 48,
+          "cap_minus_one": 540,
+          "alias_conflicts": 36
+        }
+      },
+      "local_calendar_normal_optimized": {
+        "exit_codes": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "nominal_calls_per_build": 9,
+        "mutant_same_geometry_terminal_checks": 18,
+        "mutant_calendar_differences": 9
+      },
+      "constructor_capture_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "checks": 3584,
+        "sha256": "8c63e90cfb906671a2ec63a525d18c838f9cf35bea3d811134f169ff5da0358f"
+      },
+      "published_source_pins": {
+        "schema": "mhgp7-audit-published-source-pin-check-v1",
+        "source_commit": "20b28b1d56ed53cb0ce2584d25538cfbcaf475f5",
+        "variant": "O_full_meb_composition",
+        "published_pins_checked": 3401,
+        "mismatches": [],
+        "method": "git cat-file --batch, SHA256 of each 20b28b1d blob; no checkout or worktree modification",
+        "scope": "Published source pins only. Fresh scientific qualification scoped in variant O and README. Concurrent probe/gate preparations deliberately not promoted.",
+        "status": "passed"
+      },
+      "capture_binding_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "sha256": "68a46c947a94b407c803859ab7017de8f007b8c0b0c2f671514afe0116ad3e82",
+        "initial_pins": 30,
+        "commands": 34,
+        "non_system_dependency_entries": 120,
+        "local_elf_rehashed_before_cleanup": 6
+      },
+      "worktree_freshness_normal_optimized": {
+        "exit_codes": [
+          1,
+          1
+        ],
+        "byte_identical": true,
+        "expected": true,
+        "common_pins_valid": 2153,
+        "published_variant_pins_verified_separately": 3401,
+        "unqualified_concurrent_delta": [
+          "tests/meb_proposal_local_gate.cpp"
+        ],
+        "reason": "Constructor preparing probe v4 and permanent local calendar test; O deliberately pins published20b28b1d. Current compiled FULL and helper unchanged."
+      },
+      "portable_binding_after_elf_cleanup": {
+        "exit_code": 0,
+        "python_optimized": true,
+        "elf_read_or_executed": false
+      },
+      "staged_whitespace": {
+        "exit_code": 0,
+        "all_authored_and_captured_files": true,
+        "staged_paths": 192,
+        "scope": "Only morsehgp3D_v7/audits/; no constructor, v6 or registry path."
+      }
+    },
+    "engine_closure": {
+      "compiles": 6,
+      "runs": 22,
+      "last_ended_utc": "2026-09-06T09:46:09.323911+00:00",
+      "receipt": "receipts_full_meb_20260906/closure.json",
+      "cpu": 1,
+      "sequential": true,
+      "timeout_seconds": 180
+    },
+    "constructive_result": {
+      "K9_C0": {
+        "n": 14,
+        "calls": 14,
+        "F_forms_P0": 1634,
+        "proposal_forms_large_P": 61,
+        "F_forms_large_P": 0
+      },
+      "K10_C0": {
+        "n": 14,
+        "calls": 11,
+        "F_forms_P0": 1471,
+        "proposal_forms_large_P": 50,
+        "F_forms_large_P": 0
+      },
+      "scope": "Work counts on bounded fixtures, no timing; current call-count cap unchanged. Terminal reuse remains a separately documented unimplemented proposal."
+    },
+    "maintenance": "25 root Markdown notes retained. Closed integration/Work/exception reservations removed; historical private qualification summaries shortened and linked to immutable evidence. No duplicate root note, no historical fixture/failure removed. Concurrent local gate deliberately left at its published pin; probe v4 is not pinned or qualified by O.",
+    "gcp": "not_used",
+    "cleanup": {
+      "schema": "mhgp7-audit-owned-build-cleanup-v1",
+      "ended_utc": "2026-09-06T10:07:58.833856+00:00",
+      "removed": [
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_meb_20260906/O2.bin",
+          "sha256": "95b4aa3c817e969b95bea9b0081214251f9535097750a90872d18c4ab3e13350"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_meb_20260906/sanitized.bin",
+          "sha256": "7281d94104812f6ebee47d553e20242c6cafcfa2c3ed316bc0e0103cf33e344a"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_meb_20260906/reset_work.bin",
+          "sha256": "0eb86561ff05d3965d8971c06daf34ed0bb6513145ac96bbc83811b240173a0a"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_meb_20260906/calendar_O2.bin",
+          "sha256": "6bbf7a12b0705bcadf8ee2d56aa273a2ab41bf0d0e5325303693d0faaf0a0b21"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_meb_20260906/calendar_sanitized.bin",
+          "sha256": "32cdc576f53ca06821cc094bf6b40172016cf2b53305417065307f52a21a8dbd"
+        },
+        {
+          "path": "morsehgp3D_v7/audits/.work_full_meb_20260906/calendar_q4_first.bin",
+          "sha256": "36b62c8eef6aaef35c0a5ffe3b56057668aacde5d554e92c02e822b918370e43"
+        }
+      ],
+      "removed_directory": "morsehgp3D_v7/audits/.work_full_meb_20260906",
+      "directory_absent": true,
+      "local_elf_check_before_cleanup": "capture_binding_review_local_elf.json",
+      "other_work_directories_touched": false,
+      "preserved": "Sources, .d, binary identities, command intents, all streams and terminal receipts. Portable judges require no ELF.",
+      "status": "completed"
+    }
   }
 }

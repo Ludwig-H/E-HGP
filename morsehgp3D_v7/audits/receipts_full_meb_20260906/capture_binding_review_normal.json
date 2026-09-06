@@ -1,0 +1,111 @@
+{
+  "builds": {
+    "binaries": {
+      "O2": {
+        "engine_runs": [
+          "O2_higher_P0",
+          "O2_higher_P1",
+          "O2_higher_P1000000",
+          "O2_legacy_P0",
+          "O2_legacy_P1",
+          "O2_legacy_P1000000",
+          "O2_mixed_P0",
+          "O2_mixed_P1",
+          "O2_mixed_P1000000"
+        ],
+        "historical_path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_meb_20260906/O2.bin",
+        "local_ELF_rehashed": false,
+        "non_system_dependencies": 21,
+        "sha256": "95b4aa3c817e969b95bea9b0081214251f9535097750a90872d18c4ab3e13350"
+      },
+      "calendar_O2": {
+        "engine_runs": [
+          "calendar_O2_run"
+        ],
+        "historical_path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_meb_20260906/calendar_O2.bin",
+        "local_ELF_rehashed": false,
+        "non_system_dependencies": 19,
+        "sha256": "6bbf7a12b0705bcadf8ee2d56aa273a2ab41bf0d0e5325303693d0faaf0a0b21"
+      },
+      "calendar_q4_first": {
+        "engine_runs": [
+          "calendar_q4_first_run"
+        ],
+        "historical_path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_meb_20260906/calendar_q4_first.bin",
+        "local_ELF_rehashed": false,
+        "non_system_dependencies": 19,
+        "sha256": "36b62c8eef6aaef35c0a5ffe3b56057668aacde5d554e92c02e822b918370e43"
+      },
+      "calendar_sanitized": {
+        "engine_runs": [
+          "calendar_sanitized_run"
+        ],
+        "historical_path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_meb_20260906/calendar_sanitized.bin",
+        "local_ELF_rehashed": false,
+        "non_system_dependencies": 19,
+        "sha256": "32cdc576f53ca06821cc094bf6b40172016cf2b53305417065307f52a21a8dbd"
+      },
+      "reset_work": {
+        "engine_runs": [
+          "reset_work_legacy_P1"
+        ],
+        "historical_path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_meb_20260906/reset_work.bin",
+        "local_ELF_rehashed": false,
+        "non_system_dependencies": 21,
+        "sha256": "0eb86561ff05d3965d8971c06daf34ed0bb6513145ac96bbc83811b240173a0a"
+      },
+      "sanitized": {
+        "engine_runs": [
+          "sanitized_higher_P0",
+          "sanitized_higher_P1",
+          "sanitized_higher_P1000000",
+          "sanitized_legacy_P0",
+          "sanitized_legacy_P1",
+          "sanitized_legacy_P1000000",
+          "sanitized_mixed_P0",
+          "sanitized_mixed_P1",
+          "sanitized_mixed_P1000000"
+        ],
+        "historical_path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_meb_20260906/sanitized.bin",
+        "local_ELF_rehashed": false,
+        "non_system_dependencies": 21,
+        "sha256": "7281d94104812f6ebee47d553e20242c6cafcfa2c3ed316bc0e0103cf33e344a"
+      }
+    },
+    "dependency_entries": 120,
+    "local_ELF_rehashed": 0
+  },
+  "closure": {
+    "closure_sha256": "8b5a7dc21d91de1efbd4b716e2a690687b320d201d595544cbea7115ce5ac607",
+    "cpp_compilations": 6,
+    "cpp_engine_runs": 22,
+    "cpp_overlap": false,
+    "last_cpp_ended_utc": "2026-09-06T09:46:09.323911+00:00",
+    "python_calendar_reads": 6
+  },
+  "commands": 34,
+  "engines_invoked": 0,
+  "gcp": "not_used",
+  "limits": [
+    "Hashes and recorded commands bind captures; no new scientific geometry judgment.",
+    "Compiler identity is recorded g++ and version text, not a hermetic toolchain capture.",
+    "System headers omitted by -MMD are not checked.",
+    "Only declared process environment overrides are recorded and checked.",
+    "Default mode checks preserved binary identities without reading or executing ELF."
+  ],
+  "portable_without_ELF": true,
+  "public_status": "not_claimed",
+  "runners_imported": 0,
+  "schema": "mhgp7-independent-full-meb-capture-binding-v1",
+  "source_binding": {
+    "compiled_adapter_copies_equal": 3,
+    "initial_snapshot_substitutions": {
+      "morsehgp3D_v7/audits/full_meb_bridge.cpp": "preparation_adapter.cpp.txt",
+      "morsehgp3D_v7/audits/full_meb_run.py": "preparation_runner.py.txt"
+    },
+    "pins": 30,
+    "source_binding_sha256": "d83769f39431b907be9d1d35cddeb7abb809c657c9d605a1a238b292822d6913"
+  },
+  "status": "passed",
+  "stream_triplets_verified": 34
+}

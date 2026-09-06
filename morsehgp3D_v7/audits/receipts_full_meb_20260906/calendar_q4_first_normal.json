@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "timeout",
+    "--signal=TERM",
+    "--kill-after=5",
+    "180",
+    "taskset",
+    "-c",
+    "1",
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_full_meb_20260906/local_calendar_judge.py",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_meb_20260906/calendar_q4_first.jsonl",
+    "--expect-q4-first"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "ended_utc": "2026-09-06T09:46:09.483250+00:00",
+  "environment": {},
+  "exit_code": 0,
+  "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "started_utc": "2026-09-06T09:46:09.431382+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_gzip_sha256": "dde3367fcff80e7030904b1f3f089c0d4b825311ec5384a86541fcf6c46a208d",
+  "stdout_sha256": "4787366512cb7bac404faad5406f243e95330d52b29e943f27c8dab61bcd8696"
+}

@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "timeout",
+    "--signal=TERM",
+    "--kill-after=5",
+    "180",
+    "taskset",
+    "-c",
+    "1",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_meb_20260906/sanitized.bin",
+    "0"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "ended_utc": "2026-09-06T09:41:49.121709+00:00",
+  "environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "exit_code": 0,
+  "input_sha256": "dc99339d5ee44826ebaccc54245f891ac01a9adee9880e1c4eafe91bf9851fc9",
+  "started_utc": "2026-09-06T09:41:49.091860+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_gzip_sha256": "ff4a464d4895966b240f5df41322157f68ced95b352a836fda3158fe068de7e1",
+  "stdout_sha256": "2ea7ad6a6e5ed57cde3a481c34d84a9c16d1820aa004ed4e191a0d3d5960214c"
+}

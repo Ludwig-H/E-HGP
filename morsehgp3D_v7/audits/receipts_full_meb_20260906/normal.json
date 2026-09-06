@@ -1,0 +1,39 @@
+{
+  "builds": [
+    "O2",
+    "sanitized"
+  ],
+  "counts": {
+    "budget_trials": 1248,
+    "certified_outputs_P0": 0,
+    "certified_outputs_P1": 188,
+    "certified_outputs_P1000000": 268,
+    "cuts": 429408,
+    "higher_C0_model_count_matches": 24,
+    "higher_K10_chain_outputs": 48,
+    "higher_K9_chain_outputs": 48,
+    "mixed_outputs_P0": 0,
+    "mixed_outputs_P1": 156,
+    "mixed_outputs_P1000000": 0,
+    "records": 5568,
+    "reset_work_mutant_witnesses": 90
+  },
+  "gcp": "not_used",
+  "policies": [
+    0,
+    1,
+    1000000
+  ],
+  "public_status": "not_claimed",
+  "schema": "mhgp7-independent-full-meb-replay-v1",
+  "scope": "Fresh bounded FULL engines on captured headers, independent rational Gamma fixtures and literal L differential; no performance or catalogue producer qualification.",
+  "scripts": {
+    "morsehgp3D_v7/audits/full_meb_bridge.cpp": "08ca866c6c96b8313b7bc6acb52844ffa0ffc9945694a808e23385eb340d28d0",
+    "morsehgp3D_v7/audits/full_meb_run.py": "3f84fda059e54bf12abc9e5ea01b57cece22c227127473c1228cbfb2b009f706"
+  },
+  "source_headers": {
+    "src/forest/full_gabriel.hpp": "a946e31dde8fbd8ec528d6f5e94f9c727998acc172b4dd29c084dd522c730d1d",
+    "src/forest/meb_proposal.hpp": "f922544b5cfdc214de96ecd49520e318ea8632d14a8142ef21fd248f9cc38fb3"
+  },
+  "status": "passed"
+}

@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "timeout",
+    "--signal=TERM",
+    "--kill-after=5",
+    "180",
+    "taskset",
+    "-c",
+    "1",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_full_meb_20260906/calendar_q4_first.bin"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "ended_utc": "2026-09-06T09:46:09.323911+00:00",
+  "environment": {},
+  "exit_code": 0,
+  "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "started_utc": "2026-09-06T09:46:09.318406+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_gzip_sha256": "c3d3f136ea37c60cdd0ebc7202aa4e24913bf42d009c4a64a15b2cf262b5d1af",
+  "stdout_sha256": "e6fff6479272a982b98b3f58597f648e50f71fc9b09fabde7bd5e768291ff32a"
+}

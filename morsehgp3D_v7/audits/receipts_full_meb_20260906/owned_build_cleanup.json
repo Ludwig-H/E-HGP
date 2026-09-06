@@ -1,0 +1,36 @@
+{
+  "schema": "mhgp7-audit-owned-build-cleanup-v1",
+  "ended_utc": "2026-09-06T10:07:58.833856+00:00",
+  "removed": [
+    {
+      "path": "morsehgp3D_v7/audits/.work_full_meb_20260906/O2.bin",
+      "sha256": "95b4aa3c817e969b95bea9b0081214251f9535097750a90872d18c4ab3e13350"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/.work_full_meb_20260906/sanitized.bin",
+      "sha256": "7281d94104812f6ebee47d553e20242c6cafcfa2c3ed316bc0e0103cf33e344a"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/.work_full_meb_20260906/reset_work.bin",
+      "sha256": "0eb86561ff05d3965d8971c06daf34ed0bb6513145ac96bbc83811b240173a0a"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/.work_full_meb_20260906/calendar_O2.bin",
+      "sha256": "6bbf7a12b0705bcadf8ee2d56aa273a2ab41bf0d0e5325303693d0faaf0a0b21"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/.work_full_meb_20260906/calendar_sanitized.bin",
+      "sha256": "32cdc576f53ca06821cc094bf6b40172016cf2b53305417065307f52a21a8dbd"
+    },
+    {
+      "path": "morsehgp3D_v7/audits/.work_full_meb_20260906/calendar_q4_first.bin",
+      "sha256": "36b62c8eef6aaef35c0a5ffe3b56057668aacde5d554e92c02e822b918370e43"
+    }
+  ],
+  "removed_directory": "morsehgp3D_v7/audits/.work_full_meb_20260906",
+  "directory_absent": true,
+  "local_elf_check_before_cleanup": "capture_binding_review_local_elf.json",
+  "other_work_directories_touched": false,
+  "preserved": "Sources, .d, binary identities, command intents, all streams and terminal receipts. Portable judges require no ELF.",
+  "status": "completed"
+}

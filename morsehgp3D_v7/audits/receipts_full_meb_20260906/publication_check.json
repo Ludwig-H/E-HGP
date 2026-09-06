@@ -1,0 +1,10 @@
+{
+  "schema": "mhgp7-audit-published-source-pin-check-v1",
+  "source_commit": "20b28b1d56ed53cb0ce2584d25538cfbcaf475f5",
+  "variant": "O_full_meb_composition",
+  "published_pins_checked": 3401,
+  "mismatches": [],
+  "method": "git cat-file --batch, SHA256 of each 20b28b1d blob; no checkout or worktree modification",
+  "scope": "Published source pins only. Fresh scientific qualification scoped in variant O and README. Concurrent probe/gate preparations deliberately not promoted.",
+  "status": "passed"
+}

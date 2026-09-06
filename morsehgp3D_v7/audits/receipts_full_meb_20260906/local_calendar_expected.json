@@ -1,0 +1,36 @@
+{
+  "schema": "mhgp7-independent-local-calendar-expectations-v1",
+  "public_status": "not_claimed",
+  "derivation": "Fixed rational tetrahedron; no product engine was used to generate these expectations.",
+  "source_sha256": "f922544b5cfdc214de96ecd49520e318ea8632d14a8142ef21fd248f9cc38fb3",
+  "points": [[0, 0, 0], [2, 2, 0], [2, 0, 2], [0, 2, 2]],
+  "center": [1, 1, 1],
+  "radius_squared": [3, 1],
+  "positive_barycentric_coefficients": [[1, 4], [1, 4], [1, 4], [1, 4]],
+  "all_pair_squared_distances": 8,
+  "triangle_radius_squared": [8, 3],
+  "signed_determinant_twice_edges": -128,
+  "orientation_normalized_cramer_numerators": [128, 128, 128],
+  "reference_ordinal": 11,
+  "ordinal_decomposition": [6, 4, 1],
+  "nominal_proposal_arities": [2, 3, 3, 3, 3, 4],
+  "q4_first_proposal_arities": [2, 3, 4],
+  "accounting": "reference_ordinal_plus_native_z_q3_q4_proposal_v2",
+  "L": 33,
+  "terminal": {
+    "ok": true,
+    "status": 0,
+    "reason": "local_calendar_initial",
+    "q": 4,
+    "support": [0, 1, 2, 3],
+    "key": [1, -2, -2, -2, 0],
+    "num": [49152, 0, 0],
+    "den": 16384
+  },
+  "work_columns": ["p", "pivots", "certified", "fallback", "A"],
+  "sequences": [
+    {"P": 3, "nominal": [[3, 2, 0, 1, 11], [3, 2, 0, 2, 22], [3, 2, 0, 3, 33]], "q4_first": [[3, 2, 1, 0, 0], [3, 2, 1, 1, 11], [3, 2, 1, 2, 22]]},
+    {"P": 6, "nominal": [[6, 2, 1, 0, 0], [6, 2, 1, 1, 11], [6, 2, 1, 2, 22]], "q4_first": [[3, 2, 1, 0, 0], [6, 4, 2, 0, 0], [6, 4, 2, 1, 11]]},
+    {"P": 12, "nominal": [[6, 2, 1, 0, 0], [12, 4, 2, 0, 0], [12, 4, 2, 1, 11]], "q4_first": [[3, 2, 1, 0, 0], [6, 4, 2, 0, 0], [9, 6, 3, 0, 0]]}
+  ]
+}

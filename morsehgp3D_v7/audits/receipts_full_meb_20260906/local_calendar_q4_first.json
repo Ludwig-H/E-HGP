@@ -1,0 +1,13 @@
+{
+  "schema": "mhgp7-independent-local-calendar-mutation-v1",
+  "file": "morsehgp3D_v7/src/forest/meb_proposal.hpp",
+  "source_sha256": "f922544b5cfdc214de96ecd49520e318ea8632d14a8142ef21fd248f9cc38fb3",
+  "mutated_sha256": "cd79daa8e3d5112b118c4c966e99b4f9b69b366c29a898a5cb29ba5b9f7d23fd",
+  "mutation": "swap only the two adjacent q3/q4 enumeration blocks in native_pivot_ball",
+  "before": "  for (size_t a = 0; a < old_count; ++a)\n    for (size_t b = a + 1; b < old_count; ++b) {\n      const Attempt attempt = accept({subset[a], subset[b], violator, 0}, 3);\n      if (attempt != Attempt::kRejected) return attempt;\n    }\n  for (size_t a = 0; a < old_count; ++a)\n    for (size_t b = a + 1; b < old_count; ++b)\n      for (size_t c = b + 1; c < old_count; ++c) {\n        const Attempt attempt = accept(\n            {subset[a], subset[b], subset[c], violator}, 4);\n        if (attempt != Attempt::kRejected) return attempt;\n      }\n",
+  "after": "  for (size_t a = 0; a < old_count; ++a)\n    for (size_t b = a + 1; b < old_count; ++b)\n      for (size_t c = b + 1; c < old_count; ++c) {\n        const Attempt attempt = accept(\n            {subset[a], subset[b], subset[c], violator}, 4);\n        if (attempt != Attempt::kRejected) return attempt;\n      }\n  for (size_t a = 0; a < old_count; ++a)\n    for (size_t b = a + 1; b < old_count; ++b) {\n      const Attempt attempt = accept({subset[a], subset[b], violator, 0}, 3);\n      if (attempt != Attempt::kRejected) return attempt;\n    }\n",
+  "expected_cause": "q4_first_changes_P3_certification_same_geometry",
+  "accounting_marker_intentionally_unchanged": true,
+  "engines_invoked": 0,
+  "public_status": "not_claimed"
+}

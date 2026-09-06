@@ -1,10 +1,10 @@
-# MEB privée à deux budgets : qualification indépendante
+# MEB à deux budgets : qualification indépendante
 
 6 septembre 2026. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
-**Le filtre privé `484a89bc` est maintenant qualifié par le constructeur ; ses captures font l’objet d’une contrelecture indépendante.** Le certificat local à deux budgets et son ancien raccord Builder gardent leurs qualifications séparées. Le filtre reste à intégrer au Builder : aucun reçu ne lui attribue déjà une intégration FULL ou un gain de tour. Aucun moteur relancé par cet audit. GCP non utilisé.
+**Le proposeur filtré est intégré à FULL et qualifié indépendamment sur `20b28b1d`.** Le [nouveau rejeu](receipts_full_meb_20260906/README.md) contrôle 2 784 sorties et 214 704 coupes par build O2/ASan-UBSan, les budgets et Work persistant, jusqu’à K10. Les preuves privées ci-dessous gardent leur attribution historique ; elles n’ont pas servi à promouvoir automatiquement ce port. GCP non utilisé.
 
-La preuve du support unique, l'ordinal, le carré non régulier et la réfutation du budget ordinal seul sont exposés dans [PROPOSITION_MEB_ET_BUDGETS.md](../docs/PROPOSITION_MEB_ET_BUDGETS.md). Ses mentions « futur » décrivent sa préparation initiale. Les [résultats constructeur à deux budgets](../docs/RESULTATS_MEB_DOUBLE_BUDGET_20260905.md) et [résultats de coût](../docs/RESULTATS_COUT_MEB_20260905.md) ont leurs autorités propres. Cette note conserve les raccords et preuves indépendantes supplémentaires.
+La preuve du support unique, l'ordinal, le carré non régulier et la réfutation du budget ordinal seul sont exposés dans [PROPOSITION_MEB_ET_BUDGETS.md](../docs/PROPOSITION_MEB_ET_BUDGETS.md). Ses mentions « futur » décrivent sa préparation initiale. Les [résultats constructeur à deux budgets](../docs/RESULTATS_MEB_DOUBLE_BUDGET_20260905.md) et [résultats de coût](../docs/RESULTATS_COUT_MEB_20260905.md) ont leurs autorités propres. Le [contrat courant du raccord](../docs/CONTRAT_MEB_FULL.md) et ses [résultats](../docs/RESULTATS_MEB_FULL_20260906.md) ferment les anciennes demandes d’intégration ; cette note conserve les preuves indépendantes et le delta terminal proposé.
 
 ## Domaine et vérification du code capturé
 
@@ -20,7 +20,7 @@ La [revue budgétaire](receipts_meb_dual_20260905/budget/review.json) distingue 
 
 Exactement, $\Delta c=A+\sum\min(R,L-c_{\mathrm{avant}})$ sur les branches certifiées, tandis que $\Delta p$ compte les formes proposées. Ainsi $A+\Delta p\leq\Delta c+\Delta p$. Les plafonds restent deux u64 séparés : leur somme mathématique peut dépasser u64. Depuis un état cohérent A≤c, le miroir F conserve cette inégalité même sur exception. Les compteurs auxiliaires doivent garder leur marge ; injecter arbitrairement MAX dans un compteur déjà plein est hors contrat.
 
-Un seul `Work` appartient à la tentative de l'ordre, sans réinitialisation par MEB ou repli. Le port conserve P=0 par défaut, une référence sans proposition et `reference_ordinal_plus_proposal_v1`. Les consommateurs publics doivent qualifier ce schéma séparément. Le [juge arithmétique](receipts_meb_dual_20260905/budget/budget_transition_probe.py) offre un `--check-only` portable ; ses transitions Python ne sont pas des exécutions C++.
+Un seul `Work` appartient à la tentative de l'ordre, sans réinitialisation par MEB ou repli. Le prototype historique conserve P=0 par défaut et `reference_ordinal_plus_proposal_v1`. Le port produit qualifié conserve P=0 et annonce désormais `reference_ordinal_plus_native_z_q3_q4_proposal_v2`. Le [juge arithmétique](receipts_meb_dual_20260905/budget/budget_transition_probe.py) offre un `--check-only` portable ; ses transitions Python ne sont pas des exécutions C++.
 
 ## 7. Reçus privés et obligations de qualification actualisées
 
@@ -28,35 +28,23 @@ L'ancre historique conserve son contenu d'attribution. La [contrelecture constru
 
 Les frontières rapides q2 à c=MAX−1 et q3 à c=MAX−4/MAX−1 sont appelées à P401. Leur branche rapide est raccordée par non-interférence : `propose` ne lit pas c et les mêmes scènes exigent un certificat dans `named_fast`. Aucun compteur rapide par frontière n'est inventé. La vraie scène q4 de rang 550 est appelée aux caps 549/550/551 ; ses deux pivots essaient seize formes. Ce paquet historique ne mesure pas la combinaison q4, c=MAX−550, L=MAX ; le paquet filtré du 6 septembre la ferme désormais, avec certificat rapide et sans repli.
 
-## Qualification locale indépendante
+## Qualifications historiques et raccord courant
 
-Le [bridge](meb_dual_bridge.cpp), le [juge rationnel](meb_dual_oracle.py) et le [reçu compilé](receipts_meb_dual_20260905/geometry/run.json) conservent deux builds C++20 stricts O2 et O1/UBSan. Par build : 89 nuages, 178 ordres, 3 430 MEB, 1 507 ordinaux ; 416/310/64 succès rapides q2/q3/q4, 1 650 refus legacy et 40 refus de coquille. Les [rejeux normal](receipts_meb_dual_20260905/geometry/normal.json) et [optimisé](receipts_meb_dual_20260905/geometry/optimized.json) jugent les mêmes sorties.
+Les [reçus locaux](receipts_meb_dual_20260905/geometry/run.json) conservent 3 430 MEB et 1 507 ordinaux par build O2/O1-UBSan, avec juge Gram rationnel et trois mutants géométriques ; l’[erreur initiale du juge](receipts_meb_dual_20260905/geometry/initial_judge_rejection.json) reste documentée. L’[ancien Builder](receipts_meb_builder_20260905/README.md) qualifie séparément Work persistant, miroirs et exceptions sur l’overlay `6e517c57`/`33255ebc`. La [qualification native v2](receipts_meb_native_20260905/README.md) et la [revue du coût](receipts_meb_native_20260905/cost_review.md) gardent leurs mesures locales et le cas n=2 défavorable, sans seuil produit acquis. Les synthèses détaillées ne sont pas des obligations ouvertes à répéter.
 
-Le Gram rationnel, les coordonnées barycentriques, la contenance, le shell et l'énumération lexicographique Python fixent indépendamment support, R et caps. Pour q4, le déterminant rationnel fournit aussi les trois limbs bruts attendus. Trois copies fautives sont réfutées : shell omis, ordinal +1, numérateur/dénominateur q4 doublés. La dernière conserve le rayon : son rejet contrôle réellement la représentation brute. L'[erreur initiale de classement du juge](receipts_meb_dual_20260905/geometry/initial_judge_rejection.json) reste conservée.
+Le [raccord courant](receipts_full_meb_20260906/README.md) compile les headers `a946e31d` / `f922544b` et le F inchangé sur copies capturées. Il retrouve littéralement les 33 champs historiques et les préfixes L ; P1 mêle certification et repli dans 78 sorties par build. Remettre Work à zéro par appel viole la partition des appels dans 90 sorties, sans modifier leur géométrie. La contrelecture constructeur rattache 30+30 CTests et les douze injections tardives par build aux contrôles effectivement compilés ; elle distingue appel FULL déjà payé, appel géométrique pas encore payé et résultat interne détruit non observable.
 
-Cette campagne part de Work frais. Son maximum rapide observé est R=465, quatre pivots ; 44 succès q4 utilisent le limb supérieur et 114 succès ont au moins deux pivots. Les [dépendances](receipts_meb_dual_20260905/geometry/dependency_review.json) sont liées aux captures, sans prétention de build hermétique.
-
-## Builder persistant et exceptions
-
-Le [dossier Builder](receipts_meb_builder_20260905/README.md) qualifie l'overlay `6e517c57`/helper `33255ebc`, distinct de F. La [revue sémantique](receipts_meb_builder_20260905/semantic_review.md) vérifie le corps F littéral, les callers inchangés et les miroirs ; l'identité locale fournit l'induction sur le même parcours silencieux.
-
-Les [trois builds nominaux](receipts_meb_builder_20260905/compiled/run.json) passent chacun 3 444 appels locaux et 60 wrappers. Six séquences exécutent quatorze étapes sur le même Builder ; les 23 [attendus dérivés](receipts_meb_builder_20260905/budget_cases.json) ne sont pas tous exécutés. CHAIN5 produit huit MEB de rang un et une coface silencieuse déjà présente avant le troisième appel ; à P2, p=2 et A=6.
-
-Huit injections contrôlent charges et exceptions. `bad_alloc` purge réellement une sortie non vide ; `runtime_error` se propage, sans rendre observable le résultat interne détruit du wrapper. Ses miroirs restent testés à l'appel local. Quatre copies fautives ciblent reset Work, miroirs p/A et charge après forme ; les [jugements normal](receipts_meb_builder_20260905/compiled/normal.json) et [optimisé](receipts_meb_builder_20260905/compiled/optimized.json) exigent leurs motifs causaux précis.
-
-## Autorité native et coût
-
-La [qualification native v2](receipts_meb_native_20260905/README.md) ferme `NoObserver` : 9 351 états confrontés complètement à F/Trace avant et après mesure, captures consommées sous chrono. La [revue indépendante du coût](receipts_meb_native_20260905/cost_review.md) distingue 10 722 candidats physiques contre 67 884 pour les 1 152 appels principaux P401, ralentissement du n=2 répété et contrôle P0 sensible à AB/BA. Ces observations ne fixent aucun seuil produit. Les reçus ultérieurs de coût gardent leur qualification propre ; aucune nouvelle campagne n'est demandée ici.
+Le complément K9/K10 utilise des catalogues rationnels n=14 et Gamma exhaustif. À nombre d’appels inchangé, grand P remplace respectivement 1 634 et 1 471 formes F par 61 et 50 propositions, sans repli. Le calendrier q4 est désormais aussi éprouvé sur le helper produit : P3 replie, P6 certifie, tandis que q4-first change seulement les admissions. Cette preuve de travail supprimé ne mesure aucun gain de tour.
 
 ## Réduction démontrée des formes de pivot
 
-**Le filtre `484a89bc` élimine les candidats impossibles du proposeur `0645aa00` avant de former leurs boules.** La preuve ci-dessous motive ce delta maintenant qualifié localement ; elle ne qualifie pas son intégration FULL.
+**Le filtre `484a89bc` élimine les candidats impossibles du proposeur `0645aa00` avant de former leurs boules.** La preuve ci-dessous motive ce delta ; son port FULL a reçu la qualification distincte décrite ci-dessus.
 
 Soit Q la base positive courante, de rayon r, et z un point **strictement extérieur** à sa boule. Par unicité de la MEB, celle de T=Q∪{z} a un rayon strictement supérieur à r. Toute base positive B⊆Q définit au contraire sa propre MEB de rayon au plus r. Sa boule ne peut donc contenir T : **tous les supports acceptables du pivot contiennent z**, même si T a des points supplémentaires sur sa coquille. Garder l’ordre relatif des candidats restants conserve le premier accepté.
 
 L’initialisation native cherche exactement le diamètre global D de tous les sites, puis forme sa boule de rayon D/2. Les pivots augmentent strictement le rayon. Dès le premier pivot, aucune paire de ces sites, de rayon au plus D/2, ne peut contenir T : **supprimer aussi tous les q2 des pivots**. Cette deuxième preuve dépend de la paire globale maximale et de la positivité courante ; elle ne s’applique ni au q2 d’initialisation ni à une petite MEB arbitraire.
 
-| Cardinal de Q | Maximum actuel | Imposer z | Imposer z et supprimer q2 |
+| Cardinal de Q | Maximum avant filtre | Imposer z | Imposer z et supprimer q2 |
 | --- | ---: | ---: | ---: |
 | 2 | 4 | 3 | 1 |
 | 3 | 11 | 7 | 4 |
@@ -82,11 +70,11 @@ $$\lVert b-c\rVert^{2}+R^{2}-r^{2}>0.$$
 
 Ainsi b n’appartient pas à ce plan. Comme b appartient à l’enveloppe convexe de S∪{z}, z ne peut appartenir à l’enveloppe affine de S. Toute la nouvelle coquille est donc affinement indépendante ; les coordonnées barycentriques de b y sont uniques, et leurs coefficients strictement positifs donnent l’unique base. Certains coefficients peuvent être nuls : une coquille supplémentaire reste possible sans ambiguïté de base. La borne de demi-diamètre n’est pas nécessaire à cette preuve.
 
-La [preuve et les fixtures permanentes](receipts_followup_20260906/multiple_bases_proof.md) distinguent un violateur strict et un point seulement sur la coquille, où deux bases peuvent effectivement exister. Le tétraèdre régulier fournit une sentinelle admissible pour l’ordre des essais : même base q4, mais quatre formes contre une au second pivot, donc admissions P différentes. Ce sont des calculs rationnels, sans nouvelle qualification C++.
+La [preuve et les fixtures permanentes](receipts_followup_20260906/multiple_bases_proof.md) distinguent un violateur strict et un point seulement sur la coquille, où deux bases peuvent effectivement exister. Le tétraèdre régulier fournit une sentinelle admissible pour l’ordre des essais : même base q4, mais quatre formes contre une au second pivot, donc admissions P différentes. Ces calculs rationnels conservent leur autorité propre ; la nouvelle sentinelle C++ produit est liée au reçu courant ci-dessus.
 
 Les [bornes sur les appels FULL réels](MONO_FULL_COURANT.md#borne-des-supports-meb-q4-sur-les-six-passages-singleton) motivent ce suivi sans en choisir le dispatch. Un histogramme par K, type d’appel, n et ordinal R suffirait à compter arités et poids d’énumération ; comparer le proposeur sur cette distribution exige aussi les sites des demandes, et non les seuls agrégats.
 
-La [contrelecture du paquet filtré](receipts_filtered_review_20260906/README.md) remplace notre seule réserve de préparation statique : les octets `484a89bc` sont inchangés et les captures O2/ASan-UBSan sont maintenant disponibles. Les 59 transitions ciblées et les 3 430 appels rationnels / 1 507 ordinaux par build sont rejugés indépendamment ; les 9 344 comparaisons natives et la sentinelle admissible d’ordre sont rattachées à leurs portes capturées. Leur résultat détaillé appartient aux [résultats constructeur](../docs/RESULTATS_MEB_FILTREE_20260906.md). Aucun moteur C++ ni chronométrage nouveau de l’audit ; le raccord au Work persistant du Builder et ses exceptions reste distinct.
+La [contrelecture historique du paquet filtré](receipts_filtered_review_20260906/README.md) ferme séparément les frontières MAX et l’ordre admissible sur `484a89bc`. Les détails repris dans les [résultats constructeur](../docs/RESULTATS_MEB_FILTREE_20260906.md) ne restent pas des demandes ouvertes.
 
 ## Réutiliser une certification terminale déjà acquise
 
