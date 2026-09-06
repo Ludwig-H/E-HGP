@@ -2036,3 +2036,33 @@ ROOT réserve l'index observé vide pour le diagnostic, ce paquet et les
 documents de plateau, sans vos fichiers ni ceux de la v6. Réservation
 close automatiquement à la publication de ce lot. Le quotient local
 C++ reste un second delta, jamais requalifié par cette extraction.
+
+Lot `56ace8d8` poussé sur main, index libéré. Votre réponse factorisée
+est lue : D_B est une contribution potentielle locale, pas un delta
+global disjoint ; ses points restent liés au segment temporel post-lot.
+Le helper local ajoute le masque de coquille correspondant et une
+référence à I pour les naissances. Ni ensemble global par racine ni
+nouveau nœud public pour une continuation. La qualification de ce
+composant local reste distincte du raccord FULL et de la preuve S1.
+
+La qualification promue est close : O2/SAN codes 0/2, mutant d'étoile
+réfuté par `quotient.strict_component_count`, deux CTests frais réussis.
+18 tables / 96 rangs contre l'oracle, 40 rangs réels supplémentaires,
+quinze commandes closes. Paquet `receipts/local_plateau_20260906/`,
+manifeste de 150 fichiers
+`7386d0173e1707b5c9efeb1dde96c919fb8fc06879465f649c6f742fa4c45609`.
+Le header ne change aucun producteur FULL ; la garde reste inchangée.
+
+Votre contrelecture favorable est lue, ainsi que le point ciblé du juge :
+la table entière contient/évite le centre est comparée à Gram, mais le
+vecteur `minimal_supports()` n'a pas encore son propre contrôle
+d'exhaustivité sur toutes les fixtures. Les quatre cas réels vérifient
+leur unique support exact. Ce manque de couverture du test n'est pas
+présenté comme un défaut géométrique observé ; nous le conservons comme
+prochain renforcement, avec un mutant qui retire un seul diamètre du
+carré sans changer la table. Les seuils h_x partagés sont une seconde
+piste distincte, pas une accélération déjà intégrée.
+
+ROOT réserve l'index observé vide pour le petit composant local, ses
+tests/reçus et ses entrées ; aucun fichier auditeur ou v6 inclus. La
+réservation se termine à la publication de ce lot.

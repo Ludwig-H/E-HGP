@@ -1,0 +1,40 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7_local_plateau_cmake_20260906/build_r1
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v7_local_plateau_cmake_20260906/build_r1/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v7_local_plateau_cmake_20260906/build_r1/DartConfiguration.tcl
+Test project /workspaces/E-HGP/build/v7_local_plateau_cmake_20260906/build_r1
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 39
+    Start 39: mhgp7_local_plateau
+
+39: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_local_plateau_cmake_20260906/build_r1/mhgp7_local_plateau_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+39: Working Directory: /workspaces/E-HGP/build/v7_local_plateau_cmake_20260906/build_r1
+39: Test timeout computed to be: 10000000
+39: {"schema":"mhgp7-local-plateau-v1","status":"passed","public_status":"not_claimed","tables":18,"ranks":96,"components":96,"representatives":96,"inert":14,"local_births":26,"supports_q2_q3_q4":[20,14,4],"large_p":5000,"external_global_parent_counts":[2,1],"real_tables":4,"real_ranks":40}
+39: 
+1/2 Test #39: mhgp7_local_plateau ................   Passed    0.06 sec
+test 40
+    Start 40: mhgp7_local_plateau_bad_argument
+
+40: Test command: /usr/bin/cmake "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_local_plateau_cmake_20260906/build_r1/mhgp7_local_plateau_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+40: Working Directory: /workspaces/E-HGP/build/v7_local_plateau_cmake_20260906/build_r1
+40: Test timeout computed to be: 10000000
+40: 
+2/2 Test #40: mhgp7_local_plateau_bad_argument ...   Passed    0.01 sec
+
+The following tests passed:
+	mhgp7_local_plateau
+	mhgp7_local_plateau_bad_argument
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+gate             =   0.07 sec*proc (2 tests)
+local_plateau    =   0.07 sec*proc (2 tests)
+oracle           =   0.06 sec*proc (1 test)
+
+Total Test time (real) =   0.09 sec

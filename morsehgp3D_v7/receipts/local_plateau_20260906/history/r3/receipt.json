@@ -1,0 +1,10 @@
+{
+  "commands": 5,
+  "cpp_closed": true,
+  "mutant_binary_sha256": "683948c4319317a21863248a6b95952f30737ef7313ef9a17d01748c4c12eace",
+  "previous_receipt_sha256": "0074a0797234906b90701fdd85063dd29c4e97ca9d0609e2b3b2ae7e4bccc3c5",
+  "public_status": "not_claimed",
+  "reason": "r2 LeakSanitizer cannot run under sandbox ptrace; no source delta",
+  "schema": "mhgp7-private-local-plateau-qualification-completion-v1",
+  "status": "completed"
+}

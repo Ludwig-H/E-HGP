@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_local_plateau_cmake_20260906/build_r1",
+    "-N",
+    "--show-only=json-v1",
+    "-R",
+    "^mhgp7_local_plateau"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "ended_ns": 1788712788584856968,
+  "exit_code": 0,
+  "imposed_timeout": null,
+  "pid": 151,
+  "started_ns": 1788712788562624144,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "f7d59ba65acdf2d4959653e941965aecc32efb91e97e798ac99ac61a7343c871"
+}

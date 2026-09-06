@@ -1,0 +1,14 @@
+{
+  "morsehgp3D_v7/CMakeLists.txt": "797eda1f7ad95bd1e40ab15aedb94879986e341f3e58974df892aefc054d471d",
+  "morsehgp3D_v7/cmake/run_expect.cmake": "7bb9af4eddbea7e7a66619c92491dc11c22a49d7b3b46bddd6b2c25b20b2d605",
+  "morsehgp3D_v7/oracle/local_plateau_oracle.hpp": "7a002853749784bb14a8db178fbfe637244bd3019a08ae1daf92fd20aeae670d",
+  "morsehgp3D_v7/src/core/device.hpp": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37",
+  "morsehgp3D_v7/src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+  "morsehgp3D_v7/src/core/mutants.hpp": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5",
+  "morsehgp3D_v7/src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+  "morsehgp3D_v7/src/core/wide.hpp": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85",
+  "morsehgp3D_v7/src/forest/local_plateau.hpp": "e953b617f9aeb8604a5e8d41c35782d7bdf8941a5a2c8fcc460f598bb31facaf",
+  "morsehgp3D_v7/src/forest/plateau.hpp": "9d40af95f4429c02fb4201dfd12608e58c00c593c7c4905e2304e4b4ae37ac49",
+  "morsehgp3D_v7/src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+  "morsehgp3D_v7/tests/local_plateau_gate.cpp": "12092234827e2c7eb6e07c0dabb3fea2057f565817fe59b1dbaae3b395ac8477"
+}

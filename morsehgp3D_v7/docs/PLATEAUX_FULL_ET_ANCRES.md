@@ -28,11 +28,29 @@ couvertures aux coupes, **pas** les dates de toutes les facettes ni les
 poids du manuscrit. Le format régulier `full_minima_merge_forest_v1` n'est
 pas réinterprété ; le supplément pondéré garde son propre contrat.
 
+Le [complément de l'auditeur](../audits/receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md) autorise une
+forme factorisée : une contribution de couverture datée par bloc, liée
+à son token après fermeture et à une population immuable. Les contributions
+peuvent se recouvrir ; le lecteur fait une union ensembliste. Aucun
+ensemble global de points par racine n'est requis à la production.
+Plus précisément, soustraire de I∪U l'union des couvertures strictes
+locales donne une contribution potentielle suffisante. Avec au moins
+un groupe strict, I est déjà couvert : seul un masque de U reste à
+enregistrer. Sans groupe strict, la contribution est tout I∪U.
+
+Ce n'est **pas un delta global disjoint** : des chemins extérieurs
+peuvent avoir déjà apporté certains de ces points. Une contribution vide
+peut être omise, pas l'ancre nécessaire au resolver. Chaque contribution
+reste sur son segment temporel ; l'attribuer rétroactivement à une feuille
+ou à la racine finale ferait fuiter des points dans les anciennes coupes.
+Ces règles simplifient le certificat à construire ; aucun format FULL
+étendu n'est déjà livré par ce seul contrat.
+
 ## Réduction locale sans combinaisons d'intérieurs
 
 Pour une boule de rayon positif, I est son intérieur complet, U sa
 coquille complète, p=|I|, u=|U| et q_min la taille minimale d'un support
-positif du centre. Un sous-ensemble a le même rayon minimal que la boule
+positif du centre. Un sous-ensemble non vide de I∪U a le même rayon minimal que la boule
 exactement lorsque ses points de U contiennent le centre dans leur
 enveloppe convexe. Les supports positifs minimaux ont au plus quatre
 points en 3D. Ils alimentent une seule table de sous-ensembles de U,
@@ -112,6 +130,13 @@ premières boules et écarte la quatrième : c'est une déduction depuis
 cette capture K10, **pas une nouvelle extraction K5**. Les anciennes
 mesures G4 K10/K5 étaient deux vrais processus, sans ces clés détaillées.
 
+L'[audit indépendant du census complet](../audits/receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md#3-ce-que-les-quatre-coquilles-réelles-permettent-de-conclure)
+permet de conclure davantage : les trois naissances K6/K3/K7 sont
+géométriquement prouvées, de couvertures six/trois/sept points, sans être
+déjà produites par FULL. Pour les blocs à deux groupes stricts, leur
+union couvre tout I∪U : aucune croissance ponctuelle n'y est possible ;
+seules les éventuelles fusions et leurs parents restent à décider.
+
 L'extraction a pris 132,027 s externes sur huit threads locaux, avec
 compilations légères concurrentes : durée diagnostique jusqu'au refus,
 pas benchmark apparié ni temps de tour. Même entrée, mêmes volumes
@@ -119,6 +144,45 @@ U=21 685 604 et S=21 468 368 que le refus G4 K10 ; ce rapprochement ne
 prouve pas l'identité de chaque boule non exportée par l'ancien binaire.
 Le nouveau flag `--extra-shell-diagnostics` est facultatif et conserve
 le refus de régularité. Sans lui, aucun champ diagnostique n'est ajouté.
+
+## Composant local implémenté et qualifié
+
+[local_plateau.hpp](../src/forest/local_plateau.hpp) fournit désormais
+`mhgp7::local_plateau::ShellTable` : préparation unique de la coquille,
+quotient `rank(K)`, représentants, couvertures factorisées et contribution
+potentielle `contribution_shell` / `contribution_interior`. Les identifiants
+externes sont conservés et les points intérieurs partagés, sans copie
+par facette. La liste des masques réduits de chaque composante est locale
+à U ; aucun membre global de Gamma n'est matérialisé.
+
+Ce helper utilise seulement les prédicats géométriques élémentaires de
+`plateau.hpp`, **pas** son ancienne expansion exhaustive d'événements.
+Il vérifie son domaine arithmétique avant calcul : A<2^68, |B_i|<2^87,
+|C|<2^105, coordonnées u16 et census local cohérent. La complétude de I/U
+relativement au nuage reste une précondition extérieure, pas un fait
+établi par ces contrôles. Aucun plafond d'opérations ou d'intérieurs
+n'est ajouté ; u≤12 reste le domaine de représentation déclaré.
+
+Le [reçu propre au composant](../receipts/local_plateau_20260906/README.md)
+ferme quinze commandes de compilation/tests, dont deux CTests :
+18 tables / 96 rangs contre l'oracle rationnel indépendant, et 40 rangs
+supplémentaires issus des quatre cas réels. O2 et ASan/UBSan avec détection
+des fuites donnent les mêmes résultats ; le mutant supprimant les unions
+d'étoile est rejeté sur le nombre de composantes. Les cas de croissance
+sans fusion, naissance couvrant plus de K points, chemins extérieurs,
+u=12 et p=5000 sont exercés. Les prototypes échoués sont conservés sous
+leur propre autorité, sans transfert de leurs succès aux sources promues.
+
+La contrelecture statique de l'auditeur est favorable et demande un
+renforcement précis du juge : comparer aussi la liste **complète** des
+supports minimaux à l'oracle, pas seulement leur minimalité et la table
+entière contient/évite le centre. Cette liste est déjà comparée exactement
+sur les quatre cas réels à support unique ; le mutant d'un diamètre omis
+sur le carré reste à ajouter. Aucun défaut du helper n'est observé.
+
+Ce composant n'est encore appelé ni par `full_gabriel.hpp` ni par la
+sonde FULL : **aucun gain de temps de tour ni levée du refus 50k n'est
+attribué à cette implémentation locale.**
 
 ## Ce qui reste à raccorder et à mesurer
 

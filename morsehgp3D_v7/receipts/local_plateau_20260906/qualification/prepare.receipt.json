@@ -1,0 +1,13 @@
+{
+  "binaries": {
+    "O2": "a4fbc8a0b0bdffb0c01c4ac6d4a312431aa1a6993a1051aeb731018b9303715f",
+    "mutant": "f5aecec30ab60b41025b1a658b22be2a1acc0bccfecb4833fc94aacab6630410",
+    "san": "4ece232799049bea9671fba643d22a67f9957f8f5ca56e754aadcc30fce14f39"
+  },
+  "commands": 9,
+  "cpp_closed": true,
+  "phase": "prepare",
+  "public_status": "not_claimed",
+  "schema": "mhgp7-local-plateau-product-qualification-v1",
+  "status": "completed"
+}

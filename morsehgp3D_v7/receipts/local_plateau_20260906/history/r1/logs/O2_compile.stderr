@@ -1,0 +1,87 @@
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp: In function ‘std::vector<{anonymous}::Case> {anonymous}::fixtures()’:
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:55:39: error: a function-definition is not allowed here before ‘{’ token
+   55 | lp::LocalCensus census(const Case& f) {
+      |                                       ^
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:66:52: error: a function-definition is not allowed here before ‘{’ token
+   66 | u32 mask_of(const std::vector<InputPoint>& points) {
+      |                                                    ^
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:71:84: error: a function-definition is not allowed here before ‘{’ token
+   71 | u32 lift(const lp::ShellTable& table, lp::Mask shell, std::size_t interior_prefix) {
+      |                                                                                    ^
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:78:49: error: a function-definition is not allowed here before ‘{’ token
+   78 | u32 coverage(const std::vector<u32>& component) { u32 out = 0; for (u32 f : component) out |= f; return out; }
+      |                                                 ^
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:81:86: error: a function-definition is not allowed here before ‘{’ token
+   81 | void compare(const Case& f, const oracle::Model& model, const lp::ShellTable& table) {
+      |                                                                                      ^
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:141:43: error: a function-definition is not allowed here before ‘{’ token
+  141 | void named(const std::vector<Case>& data) {
+      |                                           ^
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:171:34: error: a function-definition is not allowed here before ‘{’ token
+  171 | void noncombinatorial_interior() {
+      |                                  ^
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:185:22: error: a function-definition is not allowed here before ‘{’ token
+  185 | void maximal_shell() {
+      |                      ^
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:197:29: error: a function-definition is not allowed here before ‘{’ token
+  197 | void rejects(const Case& f) {
+      |                             ^
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:213:8: error: empty parentheses were disambiguated as a function declaration [-Werror=vexing-parse]
+  213 | int run() {
+      |        ^~
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:213:8: note: remove parentheses to default-initialize a variable
+  213 | int run() {
+      |        ^~
+      |        --
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:213:8: note: or replace parentheses with braces to value-initialize a variable
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:213:11: error: a function-definition is not allowed here before ‘{’ token
+  213 | int run() {
+      |           ^
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:79:5: error: unused variable ‘ranks’ [-Werror=unused-variable]
+   79 | u64 ranks = 0, tables = 0, components = 0, representatives = 0, inert = 0, births = 0;
+      |     ^~~~~
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:79:16: error: unused variable ‘tables’ [-Werror=unused-variable]
+   79 | u64 ranks = 0, tables = 0, components = 0, representatives = 0, inert = 0, births = 0;
+      |                ^~~~~~
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:79:28: error: unused variable ‘components’ [-Werror=unused-variable]
+   79 | u64 ranks = 0, tables = 0, components = 0, representatives = 0, inert = 0, births = 0;
+      |                            ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:79:44: error: unused variable ‘representatives’ [-Werror=unused-variable]
+   79 | u64 ranks = 0, tables = 0, components = 0, representatives = 0, inert = 0, births = 0;
+      |                                            ^~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:79:65: error: unused variable ‘inert’ [-Werror=unused-variable]
+   79 | u64 ranks = 0, tables = 0, components = 0, representatives = 0, inert = 0, births = 0;
+      |                                                                 ^~~~~
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:79:76: error: unused variable ‘births’ [-Werror=unused-variable]
+   79 | u64 ranks = 0, tables = 0, components = 0, representatives = 0, inert = 0, births = 0;
+      |                                                                            ^~~~~~
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:80:20: error: unused variable ‘positive_by_size’ [-Werror=unused-variable]
+   80 | std::array<u64, 5> positive_by_size{};
+      |                    ^~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp: In function ‘int {anonymous}::main(int, char**)’:
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:239:16: error: ‘run’ was not declared in this scope
+  239 |   try { return run(); }
+      |                ^~~
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp: At global scope:
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:243:2: error: expected ‘}’ at end of input
+  243 | }
+      |  ^
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:12:11: note: to match this ‘{’
+   12 | namespace {
+      |           ^
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:237:5: error: ‘int {anonymous}::main(int, char**)’ defined but not used [-Werror=unused-function]
+  237 | int main(int argc, char** argv) {
+      |     ^~~~
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:43:19: error: ‘std::vector<{anonymous}::Case> {anonymous}::fixtures()’ defined but not used [-Werror=unused-function]
+   43 | std::vector<Case> fixtures() {
+      |                   ^~~~~~~~
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:34:5: error: ‘local_plateau_oracle::Rat {anonymous}::distance2(const mhgp7::P3&, const local_plateau_oracle::Ball&)’ defined but not used [-Werror=unused-function]
+   34 | Rat distance2(const P3& p, const oracle::Ball& ball) {
+      |     ^~~~~~~~~
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:25:14: error: ‘local_plateau_oracle::Ball {anonymous}::rational_ball(const mhgp7::BallKey&)’ defined but not used [-Werror=unused-function]
+   25 | oracle::Ball rational_ball(const BallKey& key) {
+      |              ^~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r1/nominal/local_gate.cpp:18:6: error: ‘void {anonymous}::need(bool, const char*)’ defined but not used [-Werror=unused-function]
+   18 | void need(bool ok, const char* why) { if (!ok) throw Failure{why}; }
+      |      ^~~~
+cc1plus: all warnings being treated as errors

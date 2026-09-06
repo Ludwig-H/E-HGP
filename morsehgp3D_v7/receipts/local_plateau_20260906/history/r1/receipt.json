@@ -1,0 +1,9 @@
+{
+  "binaries": {},
+  "commands": 2,
+  "cpp_closed": true,
+  "error": "ValueError: O2_compile",
+  "public_status": "not_claimed",
+  "schema": "mhgp7-private-local-plateau-qualification-v1",
+  "status": "failed"
+}

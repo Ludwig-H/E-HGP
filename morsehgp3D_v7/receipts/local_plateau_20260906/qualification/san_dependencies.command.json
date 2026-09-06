@@ -1,0 +1,40 @@
+{
+  "added_quotas": "none",
+  "argv": [
+    "taskset",
+    "--cpu-list",
+    "0",
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-O1",
+    "-g",
+    "-fsanitize=address,undefined",
+    "-fno-omit-frame-pointer",
+    "-fno-pie",
+    "-no-pie",
+    "-I/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-MM",
+    "/workspaces/E-HGP/morsehgp3D_v7/tests/local_plateau_gate.cpp"
+  ],
+  "closed": true,
+  "cpu": 0,
+  "cwd": "/workspaces/E-HGP",
+  "ended": "2026-09-06T16:39:23.516668+00:00",
+  "environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "exit_code": 0,
+  "expected_exit": 0,
+  "pid": 89,
+  "started": "2026-09-06T16:39:23.292924+00:00",
+  "streams": {
+    "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout": "91ad5d3ea658ca9fda2f80c5bcbbc0538a040fbed5f3dafa3b9cd8fa3f7c0329"
+  }
+}

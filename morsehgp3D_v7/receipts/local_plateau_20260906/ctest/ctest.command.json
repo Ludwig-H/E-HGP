@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_local_plateau_cmake_20260906/build_r1",
+    "-V",
+    "--output-on-failure",
+    "--output-junit",
+    "/workspaces/E-HGP/build/v7_local_plateau_cmake_20260906/run_r1/junit.xml",
+    "-R",
+    "^mhgp7_local_plateau"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "ended_ns": 1788712788682645072,
+  "exit_code": 0,
+  "imposed_timeout": null,
+  "pid": 152,
+  "started_ns": 1788712788585246726,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "5820dad2dd2063372cdd606a39d96bbd29846c2af3d09e966e97e9de4e102399"
+}

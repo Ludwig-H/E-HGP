@@ -1,0 +1,41 @@
+{
+  "added_quotas": "none",
+  "argv": [
+    "taskset",
+    "--cpu-list",
+    "0",
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-O1",
+    "-g",
+    "-fsanitize=address,undefined",
+    "-fno-omit-frame-pointer",
+    "-fno-pie",
+    "-no-pie",
+    "-I/workspaces/E-HGP/morsehgp3D_v7",
+    "-I/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-MM",
+    "/workspaces/E-HGP/build/v7_local_plateau_20260906_qualification_r2/nominal/local_gate.cpp"
+  ],
+  "closed": true,
+  "cpu": 0,
+  "cwd": "/workspaces/E-HGP",
+  "ended": "2026-09-06T15:55:56.798580+00:00",
+  "environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "exit_code": 0,
+  "expected_exit": 0,
+  "pid": 89,
+  "started": "2026-09-06T15:55:56.577329+00:00",
+  "streams": {
+    "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout": "be1b306120247c18ec2484f52950cc1915ae238197bf80c513ef90ae56ba76dd"
+  }
+}

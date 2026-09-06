@@ -1,0 +1,12 @@
+{
+  "binaries": {
+    "O2": "f00def98087ee7b50579e018e1862393c234454672f5292a0c778ce836cd0921",
+    "san": "de695de57fc1a80c46cc66ea0c095a82ee74ee8d0402a41b4eb0f9b22775da60"
+  },
+  "commands": 7,
+  "cpp_closed": true,
+  "error": "ValueError: san_selftest",
+  "public_status": "not_claimed",
+  "schema": "mhgp7-private-local-plateau-qualification-v1",
+  "status": "failed"
+}

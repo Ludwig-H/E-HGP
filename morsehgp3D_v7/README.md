@@ -25,6 +25,10 @@ contre les 50 000 points. Le raccord prouvé par l'auditeur repose sur
 des quotients locaux et des ancres de boule fermées ; il exige aussi des
 gains de couverture datés hors régularité. FULL ne traite pas encore ces
 plateaux : aucun contrat ni résultat GPU acquis.
+Le [quotient local C++](receipts/local_plateau_20260906/README.md) est
+implémenté et qualifié séparément : tables de coquille partagées,
+intérieurs factorisés et contributions de couverture compactes.
+Il n'est pas encore raccordé au producteur FULL.
 
 Sous régularité, conserver les minima Gabriel de cardinal K et les vraies
 multifusions induites par les cofaces Gabriel de cardinal K+1, avec leurs
@@ -60,6 +64,7 @@ promettre une sortie FULL explicite sous-quadratique pour tout nuage 3D.
 | Composant | Autorité actuelle |
 | --- | --- |
 | [Certificat FULL et lecteur](docs/CONTRAT_CERTIFICAT_FULL.md) | Validation structurelle transactionnelle ; aucune certification géométrique |
+| [Quotient local de plateau](docs/PLATEAUX_FULL_ET_ANCRES.md#composant-local-implémenté-et-qualifié) | 18 tables / 96 rangs rationnels, 40 rangs réels et contributions potentielles ; pas de parents globaux ni de raccord FULL |
 | [Producteur horizontal FULL](docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md) | Parents calculés, minima isolés et K=n conservés ; succès relatif à des catalogues complets, exacts et réguliers fournis |
 | [Cache FULL facultatif](docs/CONTRAT_CACHE_FULL_PARESSEUX.md) | API lazy distincte, capacité nulle permise, dispatcher J=1 ; minima et ancres restent obligatoires |
 | [Lots unitaires](docs/CONTRAT_LOT_UNITAIRE_FULL.md) | Tableau de quatre racines au lieu de la DSU locale ; mêmes demandes, compteurs, parents et ancres |

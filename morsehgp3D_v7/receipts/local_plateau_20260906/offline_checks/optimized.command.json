@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "verify.py"
+  ],
+  "cwd": "receipt_root",
+  "exit_code": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e32e2073511f8e5c49030dd55327c21405e784a00931fb0b2b749974958c9acb"
+}

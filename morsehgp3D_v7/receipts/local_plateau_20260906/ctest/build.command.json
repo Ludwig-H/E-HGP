@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v7_local_plateau_cmake_20260906/build_r1",
+    "--target",
+    "mhgp7_local_plateau_gate",
+    "--parallel",
+    "2"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "ended_ns": 1788712788562160005,
+  "exit_code": 0,
+  "imposed_timeout": null,
+  "pid": 126,
+  "started_ns": 1788712781668070968,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "0c2b23e2bdc188ed963f446e7be35af7cb0cecdf7e1875b0daf70efe7ed1d968"
+}

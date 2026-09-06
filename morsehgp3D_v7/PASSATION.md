@@ -14,6 +14,15 @@ déduisent pas de ce seul quotient. Le raccord par ancres de boule est
 prouvé par l'auditeur, mais le certificat doit aussi porter les gains de
 couverture sans fusion ; cette extension FULL reste à intégrer.
 
+Le [composant local de coquille](receipts/local_plateau_20260906/README.md)
+est livré dans `src/forest/local_plateau.hpp`, sans appel depuis FULL.
+O2 et ASan/UBSan passent 18 tables / 96 rangs contre l'oracle rationnel,
+plus 40 rangs des quatre cas réels ; le mutant d'union est rejeté et les
+deux nouveaux CTests passent. Les contributions sont des masques locaux
+potentiellement redondants, pas des deltas globaux minimaux : l'auditeur
+confirme qu'aucun ensemble complet de points par racine n'est nécessaire
+à leur production. Le journal daté et son lecteur restent à construire.
+
 Les [deux vrais processus G4 K10/K5](docs/RESULTATS_G4_FULL_20260906.md)
 restent des refus avant tout ordre FULL (21,372 s / 5,646 s).
 Leur VM est confirmée `TERMINATED` ; GCP non utilisé pour le présent

@@ -1,0 +1,1 @@
+{"CTests_passed": 2, "FULL_integrated": false, "GCP_used": false, "O2_SAN_equal": true, "causal_mutant_rejected": true, "commands_closed": 15, "oracle_ranks": 96, "oracle_tables": 18, "public_status": "not_claimed", "real_ranks": 40, "status": "verified_offline"}
