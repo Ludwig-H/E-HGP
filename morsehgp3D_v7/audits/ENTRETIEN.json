@@ -757,5 +757,86 @@
       }
     },
     "gcp": "not_used"
+  },
+  "latest_followup_20260906": {
+    "date": "2026-09-06T08:08:35.875674+00:00",
+    "base_head": "5633bc5a3b3d9c1c4ea87279ae760cb4d4d8d537",
+    "scope": "Read-only mono captures, one refusal diagnosis, private-filter static review and rational correction; no engine/build/CTest.",
+    "new_variant": "M_successor_publication_review",
+    "variants_D_to_L_unchanged": true,
+    "receipt": "receipts_followup_20260906/README.md",
+    "mathematical_correction": {
+      "prior_claim_commit": "efab6d1a58ee959475aeb1f480c709ab8324a3e1",
+      "prior_active_note": "MEB_DOUBLE_BUDGET_COURANT.md",
+      "incorrect_rationale": "Multiple positive bases could occur at an intermediate strict native pivot.",
+      "corrected_statement": "A positive affinely independent Q and strict violator z imply that the full new shell is affinely independent and its positive basis unique. No diameter premise is needed.",
+      "proof": "receipts_followup_20260906/multiple_bases_proof.md",
+      "permanent_fixtures": "receipts_followup_20260906/multiple_bases_review.py",
+      "historical_sealed_receipts_modified": false
+    },
+    "constructive_next_step": "Reuse only local certifications already acquired at direct chain terminals; immutable full labels and current-token normalization, declared resource calendar; no benefit established without distinct-label count.",
+    "checks": {
+      "docs_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "active_documents": 353
+      },
+      "registry": {
+        "exit_code": 0,
+        "phases": 20
+      },
+      "authored_markdown": {
+        "files": 7,
+        "links": 127,
+        "anchors": 9,
+        "errors": []
+      },
+      "rational_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "old_base_permutations": 62,
+        "native_trace_proposal_forms": [
+          6,
+          3
+        ]
+      },
+      "raw_review_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "comparisons": 29,
+        "orders": 204
+      },
+      "failure_diagnosis_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "data_corruptions_refuted": 4
+      },
+      "freshness_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "variant": "M_successor_publication_review",
+        "common_pins": 1958,
+        "variant_pins": 1637
+      },
+      "staged_whitespace": {
+        "exit_code": 0,
+        "all_authored_and_captured_files": true
+      }
+    },
+    "maintenance": "25 root Markdown notes preserved. Closed publication/replay/index waits removed; historical successor predictions relabelled as confirmed counts; erroneous active mathematical rationale corrected without altering scientific history. No work/build directory created.",
+    "gcp": "not_used"
   }
 }

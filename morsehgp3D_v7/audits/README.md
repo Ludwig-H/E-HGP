@@ -7,7 +7,7 @@ Lire l’[état courant](ETAT_COURANT.md), puis le [dialogue actif](DIALOGUE_COU
 | Modèle FULL | [Décision et domaine](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md) |
 | Cache, lots et normalisation | [Verdict](CACHE_FULL_COURANT.md), [normalisation v2](receipts_full_successor_20260905/README.md), [lot unitaire](receipts_full_singleton_20260905/README.md) |
 | EAGER et composant structurel | [Producteur relatif](PRODUCTEUR_FULL_GABRIEL_COURANT.md), [lecteur](CERTIFICAT_FULL_CPP_COURANT.md) |
-| Mono : EAGER clos, successeurs et coût MEB | [Bornes, attribution et diagnostic des successeurs](MONO_FULL_COURANT.md) |
+| Mono : EAGER clos, successeurs et coût MEB | [Captures courantes, bornes et refus MEB](MONO_FULL_COURANT.md) |
 | Proposeur MEB privé | [Qualifications et filtres démontrés des pivots](MEB_DOUBLE_BUDGET_COURANT.md) |
 | Intégrations différées | [Questions secondaires regroupées](QUESTIONS_SECONDAIRES.md) |
 
@@ -26,7 +26,7 @@ Ces notes portent des arguments encore cités par le dossier principal ; elles n
 python3 -B -O morsehgp3D_v7/audits/verify_current.py
 ```
 
-Le [manifeste](validation_current.json) vérifie des sources et preuves épinglées, affiche leur portée et ne réexécute aucun test. Code 0 : une variante entière correspond ; 1 : sources ou documents à actualiser ; 2 : manifeste invalide. Un fichier non épinglé n’est pas qualifié par ce contrôle. Les variantes D à L gardent leurs autorités distinctes.
+Le [manifeste](validation_current.json) vérifie des sources et preuves épinglées, affiche leur portée et ne réexécute aucun test. Code 0 : une variante entière correspond ; 1 : sources ou documents à actualiser ; 2 : manifeste invalide. Un fichier non épinglé n’est pas qualifié par ce contrôle. Les variantes D à M gardent leurs autorités distinctes.
 
 Le [registre d’entretien](ENTRETIEN.json) donne les notes supprimées, leurs remplacements et leur version Git antérieure. Les sources, reçus scellés, contre-fixtures et échecs restent intacts. Les questions sans incidence immédiate sont raccourcies dans un seul fichier. Un nouvel audit ou push doit apporter une décision, une preuve, une correction ou un entretien utile ; aucune publication de routine sans contenu pertinent.
 

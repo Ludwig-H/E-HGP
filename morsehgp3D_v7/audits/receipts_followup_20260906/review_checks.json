@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "date": "2026-09-06T08:08:35.548150+00:00",
+  "authored_markdown": {
+    "files": 7,
+    "links": 127,
+    "anchors": 9,
+    "errors": []
+  },
+  "normal_optimized_judgments_byte_identical": [
+    "mono_review",
+    "work_review",
+    "multiple_bases"
+  ],
+  "root_markdown_files": 25,
+  "engines_builds_ctests": 0,
+  "gcp": "not_used"
+}

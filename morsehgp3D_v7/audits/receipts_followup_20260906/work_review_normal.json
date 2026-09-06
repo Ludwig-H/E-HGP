@@ -1,0 +1,47 @@
+{
+  "data_corruptions_refuted": [
+    {
+      "mutation": "extra_charged_call",
+      "rejected_by": "call_cap_and_geometry_mirror"
+    },
+    {
+      "mutation": "promoted_terminal",
+      "rejected_by": "no_refusal_promotion"
+    },
+    {
+      "mutation": "missing_direct_lookup",
+      "rejected_by": "all_charged_chain_mebs_reached_direct_lookup"
+    },
+    {
+      "mutation": "missing_cache_disposition",
+      "rejected_by": "completed_cache_dispositions"
+    }
+  ],
+  "diagnosis": {
+    "chain_steps": 1353165,
+    "charged_meb_calls": 4000000,
+    "completed_chain_terminations": 826460,
+    "failed_site": "initial_K_site_MEB_of_new_portal",
+    "pending_invocation_ordinal": 4000001,
+    "portal_requests": 2646836,
+    "possible_repeated_chain_terminals": {
+      "distinct_labels_U": "not_recorded",
+      "formula": "R=T-U, only for the already completed prefix and first-use certification",
+      "lower_bound": 0,
+      "upper_bound": 826459
+    },
+    "prediction_of_completed_K9_or_K10": false,
+    "successor_budget_remaining_at_this_prefix": 2626048
+  },
+  "gcp": "not_used",
+  "inputs": {
+    "morsehgp3D_v7/receipts/full_gabriel_successor_mono_20260905/heavy/n32000_s8_k10_lazy_c1000000.raw.txt": "b3a91ed12340b0b36c84dc7fff5cf0e894105380e431cab7777433a667f6caa7",
+    "morsehgp3D_v7/receipts/full_gabriel_successor_mono_20260905/heavy/n32000_s8_k10_lazy_c1000000.receipt.json": "f0825b258e54336359787844bd651336245cf4180552528fe10f50d8d4df631e",
+    "morsehgp3D_v7/src/forest/full_gabriel.hpp": "85c27ab91d7f159520a8db3098629447b0a213a134c5c042a86c585416847fad",
+    "morsehgp3D_v7/src/forest/silent_incidence.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76"
+  },
+  "public_status": "not_claimed",
+  "scope": "Bounded control-flow inference on one captured failure; no engine or timing claim",
+  "script_sha256": "c479748ee55f7de94502e2e22ccea8fbec9fabca22c6c1a369743297150d27b7",
+  "status": "passed"
+}

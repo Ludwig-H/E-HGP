@@ -1,0 +1,63 @@
+{
+  "schema": "mhgp7-readonly-followup-receipt-v1",
+  "public_status": "not_claimed",
+  "inventory": {
+    "README.md": {
+      "sha256": "9a3110a8bcfe289aeeffc0ea518430005d0a94521e9e634c3bd4334468775a1a",
+      "bytes": 4171
+    },
+    "filtered_pivot.hpp.txt": {
+      "sha256": "484a89bc2dbd472cc0571ed31d59631d5f31f9b0a425118040c916fc16e5abcf",
+      "bytes": 8364
+    },
+    "filtered_static_review.json": {
+      "sha256": "199b60262bdd52743b3d9e928f227a1697ab980ac94cea7d143922ce2508f54c",
+      "bytes": 1426
+    },
+    "mono_review.py": {
+      "sha256": "f0731e9d2726e33c530b1d2b6250779a3992ddc014ced4d541b8d673bff9d49d",
+      "bytes": 14171
+    },
+    "mono_review_normal.json": {
+      "sha256": "87c84e9be657ccd5c2aabfd8c9e5fe6e444c85bf6db9e6c05815c80d3434e2b7",
+      "bytes": 244698
+    },
+    "mono_review_optimized.json": {
+      "sha256": "87c84e9be657ccd5c2aabfd8c9e5fe6e444c85bf6db9e6c05815c80d3434e2b7",
+      "bytes": 244698
+    },
+    "multiple_bases_normal.json": {
+      "sha256": "2783b818cf6b30d782fc0f2caf4e1a9bb0ec2c68188d968d9878ca5c213108c3",
+      "bytes": 8893
+    },
+    "multiple_bases_optimized.json": {
+      "sha256": "2783b818cf6b30d782fc0f2caf4e1a9bb0ec2c68188d968d9878ca5c213108c3",
+      "bytes": 8893
+    },
+    "multiple_bases_proof.md": {
+      "sha256": "cbb3f536d93409c68373839a2fd0debb7184e9ca30edc249ede8f17b5a595a86",
+      "bytes": 5009
+    },
+    "multiple_bases_review.py": {
+      "sha256": "701cda74fbcadba8c1671899d56c3e024a9d00ebf171b8a9c22a509d48500893",
+      "bytes": 9894
+    },
+    "review_checks.json": {
+      "sha256": "3c887cdd1faa9cd9cc935620bfac438b83bf1be85a4cd68aabbc9a43ab751a8b",
+      "bytes": 363
+    },
+    "work_review.py": {
+      "sha256": "c479748ee55f7de94502e2e22ccea8fbec9fabca22c6c1a369743297150d27b7",
+      "bytes": 5490
+    },
+    "work_review_normal.json": {
+      "sha256": "d2ccae464e971e42e43202702fc91fe047e81bdfd721657ae986502d601d7d52",
+      "bytes": 1952
+    },
+    "work_review_optimized.json": {
+      "sha256": "d2ccae464e971e42e43202702fc91fe047e81bdfd721657ae986502d601d7d52",
+      "bytes": 1952
+    }
+  },
+  "self_excluded": "manifest.json"
+}
