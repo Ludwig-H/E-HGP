@@ -8,6 +8,8 @@ La [question sur les seuls sommets Gabriel](receipts_gabriel_vertices_20260906/R
 
 La [contrelecture suivante](receipts_shared_anchors_20260906/README.md) ferme l’identité entre ancre directe et ancre verticale et borne l’économie de stockage : leurs valeurs se partagent, elles ne disparaissent pas de la tour demandée. Elle certifie le négatif J1 du premier essentiel et sa réparation par lookup des autres retraits, puis vérifie les transports d’ancres et les confusions de tokens/coupes. Un partage inter-ordres doit aussi préserver le refus transactionnel du Builder. Aucun nouveau code produit ou chronométrage.
 
+La [priorité WSPD](receipts_block_histograms_20260906/README.md) dispose maintenant d’un certificat strict de sous-arbres pour les histogrammes d’extrémités. Le cœur central serait vacu pour cet usage ; la borne H_min/Ξ_max offre des crédits non vacants. Les modèles contrôlent aussi les listes de seuils et la perte d’une contribution causée par un mauvais rejet hmax sur un bloc d’ancres. Aucun gain C++ mesuré.
+
 ```text
 phase=exploration_v7_hors_registre
 backend=cpu_reference
@@ -30,7 +32,7 @@ La lecture intégrale des parties I et II du manuscrit, PDF 35–134, reste acqu
 | G, lecteur FULL | [Qualification structurelle](CERTIFICAT_FULL_CPP_COURANT.md), sans certification géométrique |
 | D/E/F, réduit et primitives | [Qualifications distinctes](AUDIT_QUALIFICATION_20260905.md) ; aucun reçu réduit réinterprété FULL |
 
-Le [manifeste](validation_current.json) ajoute O sur le publié `20b28b1d`, en conservant D–N. Les deux headers compilés sont des copies capturées ; les autres dépendances L sont réutilisées comme octets inchangés. Le lot constructeur `a9ce3639` modifie CMake, les entrées README/PASSATION, deux documents et la porte locale : ces six écarts à O restent déclarés sans requalification implicite. Les headers FULL/MEB qualifiés sont inchangés. La sonde v4 n’est ni épinglée ni qualifiée par O. Le juge se rejoue sur les captures sans moteur.
+Le [manifeste](validation_current.json) ajoute O sur le publié `20b28b1d`, en conservant D–N. Les deux headers compilés sont des copies capturées ; les autres dépendances L sont réutilisées comme octets inchangés. Le lot constructeur `a9ce3639` modifie CMake, les entrées README/PASSATION, deux documents et la porte locale : ces six écarts à O restent déclarés sans requalification implicite. Les headers FULL/MEB qualifiés sont inchangés. Une réutilisation terminale du compte q2 est désormais en préparation dans le générateur ; elle reste hors de cette qualification. La sonde v4 n’est ni épinglée ni qualifiée par O. Le juge se rejoue sur les captures sans moteur.
 
 Le [dialogue actif](DIALOGUE_COURANT.md) situe la descente vers les minima et la recherche d’une tour plus efficace. Le [diagnostic mono](MONO_FULL_COURANT.md) conserve le refus historique 32k/K9 aux quatre millions d’appels ; sa suppression publiée dans la sonde par `a9ce3639` ne change pas ce reçu. La [réutilisation terminale](MEB_DOUBLE_BUDGET_COURANT.md#réutiliser-une-certification-terminale-déjà-acquise) reste une proposition séparée, avec sa [fixture causale n=12/K7](receipts_filtered_review_20260906/terminal_reuse_fixture.md). Les questions différées sont [regroupées](QUESTIONS_SECONDAIRES.md).
 

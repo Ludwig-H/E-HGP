@@ -1,0 +1,45 @@
+{
+  "schema": "mhgp7-block-histograms-source-review-v1",
+  "reviewed_utc": "2026-09-06T11:43:10.627805+00:00",
+  "base_head": "e16e857babc78666b67f3495bb666f9ce0c56ce5",
+  "source_sha256": {
+    "src/spindle/spindle.hpp": "f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577",
+    "src/spindle/witness_count.hpp": "f20970aa2183f6c0904d640ae5fe072894b6e0b4f7f9440277fbed77e8245803",
+    "src/pipeline/generate.hpp": "345129a775d430a40e151d3b1adb5cd9efeaf77a6ffb6713bd081c74d40bdd9c",
+    "src/wspd/wavefront.hpp": "481a0d05da0631c71d74b52d90ea84233ad9c7624221a3783f322554fdb32063",
+    "src/tree/cloud_index.hpp": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95"
+  },
+  "scope": "Exact independent proof and bounded models of strict block certificates, central core exclusion, threshold lists and original-factor populations.",
+  "checks": {
+    "block": {
+      "exit_codes": [
+        0,
+        0
+      ],
+      "normal_optimized_byte_identical": true,
+      "sha256": "5e997d346afb54929bef7715ca545d7327293d1decd094552b51e7b8ac78ad86",
+      "grid_triples": 39460,
+      "explicit_checks": 278621
+    },
+    "stable": {
+      "exit_codes": [
+        0,
+        0
+      ],
+      "normal_optimized_byte_identical": true,
+      "sha256": "af09c6ad8954b1f36d3f380f8e737144e72682b0ed4403377e0afb99cd367de6",
+      "models": 54,
+      "comparisons": 108
+    }
+  },
+  "physical_execution": "Four tiny Python runs, sequential on CPU1, normal and -O; no product imports, compile or engine run.",
+  "source_variants_D_to_O_modified": false,
+  "product_qualification": false,
+  "performance_claim": false,
+  "gcp": "not_used",
+  "concurrent_generator_delta": {
+    "published_sha256": "ee2a4a1f96875c7db1fbd054700a22db6eabb8f62379c71c0ed6728f1b18de59",
+    "observed_worktree_sha256": "345129a775d430a40e151d3b1adb5cd9efeaf77a6ffb6713bd081c74d40bdd9c",
+    "status": "Read six-line terminal q2 reuse delta in preparation; histogram loops unchanged. No execution or C++ qualification of this delta."
+  }
+}

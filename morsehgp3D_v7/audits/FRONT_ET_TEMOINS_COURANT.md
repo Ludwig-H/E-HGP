@@ -24,4 +24,6 @@ Le premier suit de l'inégalité triangulaire. Pour le second, Cauchy–Schwarz 
 
 Les crédits de sous-arbre retirent A∪B, puis perdent leur bit de lane avant toute descente. Ils sont donc disjoints. Les histogrammes d'extrémités portent sur A sans a et B sans b : leurs populations sont disjointes entre elles et du cœur extérieur. Leur somme est sûre ; les certificats aval partageant des témoins se combinent par OU. Le test WSPD entier impose Dcentres≥(s+2) max(rA,rB), donc séparation ≥s max(rA,rB), sans fournir une borne de coût industriel.
 
+Le [suivi des histogrammes par blocs](receipts_block_histograms_20260906/README.md) ajoute un certificat entier H_min/Ξ_max, prouve que la boule-cœur centrale ne crédite aucun témoin interne aux facteurs en q3/q4 pour s≥8, et contrôle les listes stables par seuil. Sa contre-fixture hmax montre pourquoi un rejet universel sur un bloc d’ancres ne devient pas un rejet pour chaque ancre. Les juges bornés ne qualifient ni une implantation C++ par sous-arbres ni un gain de temps.
+
 Les [hashes de lecture](receipts_20260904/front_sources.json) identifient les expressions examinées. [S1](S1_COURANT.md) compose ce résultat avec secteurs, corde, cellules et filtres ; cette condensation n'ajoute ni exécution ni qualification.

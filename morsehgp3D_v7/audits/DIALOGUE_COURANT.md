@@ -1,30 +1,27 @@
 # Dialogue actif avec le constructeur
 
-**6 septembre : votre identité d’ancres est correcte ; l’hybride peut aussi tester les retraits essentiels dans les minima avant la prochaine MEB.** La [suite indépendante](receipts_shared_anchors_20260906/README.md) porte les preuves et reçus. La descente et la tour précédentes sont publiées sous `dad414cb` ; leur réservation d’index est close. Aucun nouveau C++, moteur produit ou benchmark lancé par l’auditeur.
+**6 septembre : le crédit de sous-arbres pour h_a/h_b est mathématiquement possible ; la boule-cœur actuelle ne convient pas à ce poste.** La [contrelecture](receipts_block_histograms_20260906/README.md) porte le certificat, les limites et deux juges indépendants. Aucun C++, moteur ou benchmark concurrent.
 
-## Réponse pour la tour verticale
+## Réponse à la priorité WSPD
 
-L’ancre fermée de Q, cardinal m, dans l’ordre m−1 est exactement l’image verticale de sa feuille dans l’ordre m. Elle reste utile quand Q ne fusionne rien en dessous : CE dans E5 naît à K2 au niveau 11/2, sans événement K1 à cette date. Son ancre 5 désigne la composante CDE déjà formée ; son token supérieur vaut 2.
+Votre convexité en z est correcte ; avec les convexités séparées des extrémités, les coins U×T×Z suffisent. Mais ils coûtent jusqu’à 64 tests pour a fixé, 512 pour une boîte U. La borne entière H_min>0 et t H_min²>Ξ_max, t=3 en q3 et 2 en q4, fournit un certificat moins précis sans ce produit systématique de coins. Ξ_max provient des intervalles du produit vectoriel ; i64/i128 suffisent sous u16.
 
-Les records de rangs 2..min(n,Kmax) peuvent porter un même champ inférieur pour les deux usages. Le token de naissance supérieur reste distinct. Seul le rang Kmax+1, s’il existe, n’a pas de rôle vertical demandé. Dans le témoin 8k épinglé, cela représente 2 396 646 images verticales et 716 735 ancres du dernier rang. Ce sont des comptes de records, pas une économie RSS déjà réalisée ; la sonde actuelle ne stocke pas une seconde table verticale.
+La boule core_ball(U,B) ne peut créditer aucun témoin z∈A en q3/q4 lorsque s≥8 : sa position centrale et son rayon maximal la séparent de tout le facteur A. C’est démontré pour toute sous-boîte U, pas seulement pour un exemple. Il faut donc une borne adaptée aux témoins proches de l’extrémité. Notre fixture positive donne deux témoins par ancre sur deux ancres, avec la borne proposée.
 
-Le rejeu contrôle sept records, 65 transports aux coupes et six rejets de protocole, plus les confusions sémantiques. AD et CD ont une image K1 commune mais sont deux feuilles K2 distinctes. Pour CD, le token supérieur 1 est un entier inférieur valide, mais désigne B au lieu d’ACD à la naissance. La coupe finale seule masque cette erreur.
+La première implantation simple fixe a et parcourt les sous-arbres témoins de A. Créditer un nœud certifié, sinon descendre et garder les coins actuels aux feuilles. Cela peut conserver les histogrammes exactement, éventuellement saturés à need. Conserver le nombre de positions comme unité et les populations originales A/B. Les petits facteurs peuvent garder leur boucle scalaire.
 
-## Choix de descente : le négatif J1 donne un filtre utile
+Pour une boîte U variable, **ne pas jeter tout Z avec hmax4_boxes(U,T,Z)≤0**. Le minimum trouve seulement une ancre défavorable. Notre contre-fixture a des clés Morton 0,27/64, des populations disjointes et une séparation s8 : le majorant vaut −816, mais une ancre a un vrai témoin q3/q4. Le rejet reste sûr pour a fixé. Si U et Z se rencontrent, aucun crédit strict uniforme n’est possible à cause de la diagonale z=a.
 
-Votre fixture BD→BCD contre BD→CD→DE est confirmée par sept certificats rationnels fixes : une MEB contre deux pour le choix du premier essentiel. Mais l’autre retrait de BD donne **BC**, déjà minimum Gabriel. Tester les deux labels dans le catalogue termine donc après une seule MEB, sans ancre directe. Les deux programmes d’audit passent en normal/`-O`, avec reçus identiques.
+## Listes de seuils et compteurs
 
-Plus généralement, pour un intrus strict z, chaque retrait essentiel F_s=(F−s)+z est strictement antérieur et connecté à F avant sa consommation. Au plus q≤4 recherches dans le catalogue des minima peuvent trouver un terminal sans nouvelle MEB. Si toutes manquent, conserver la règle de base préserve sa trajectoire. Le gain porte sur les MEB/census de cette requête, hors budgets et effets de cache ; les lookups supplémentaires peuvent coûter du temps.
+Votre liste B stable par seuil est correcte en conservant l’ordre A. Les 54 modèles pour need=1..9 vérifient crédits et comptabilité, avec/sans saturation. Le mutant qui regroupe A conserve les mêmes comptes et paires, mais change le premier survivant : un digest final ne voit pas cet effet sur le préfixe.
 
-L’hybride à comparer conserve J1 si l’ancre partagée est disponible, puis teste ces candidats avant la descente. Une ancre volontairement absente autorise le repli ; une ancre présente invalide doit refuser. Les calendriers réussis ne qualifient ni refus à budget fini, ni latence. Si tous les appels restent à cardinal≤10, le maximum F par appel est 375 supports ; ne pas réinterpréter les reçus actuels à onze sites.
+Les listes économisent des tests de seuil, sans réduire seules P_factor. Une saturation précoce ou un crédit de sous-arbre réduit au contraire les évaluations géométriques : ne plus utiliser nA(nA−1)+nB(nB−1) comme coût physique. Déclarer nœuds, crédits de blocs, feuilles testées et paires logiques couvertes. Les listes temporaires peuvent demander need·nB indices par worker ; construire seulement les seuils utiles.
 
-Votre ajout ultérieur « un seul lookup avant la branche J≥2 » est correct : G=(F−s)+z est déjà relié à F avant la coupe. Un hit minimum fournit le parent normalisé sans la MEB de la coface suivante ; un miss laisse le trajet actuel intact. J1 reste inchangé. Ce petit delta n’ajoute aucune boule à visiter ; il exige néanmoins le nouveau calendrier et sa qualification. E5 fournit un hit CD avant CDE.
+Les deux juges passent en normal/-O, reçus identiques : 39 460 triples exacts pour les boîtes, 108 comparaisons pour les listes. Cela donne une voie à implanter et mesurer, sans prétendre déjà améliorer les temps du triplet. Votre delta terminal de réutilisation q2 a été lu ; il est distinct et n’est pas qualifié par ces juges.
 
-## Deux obligations du port vers une table partagée
+## Tour K-NN et entretien
 
-- Une ancre doit être normalisée à la coupe demandée, avec son côté. Le successor final d’un ordre entièrement terminé/compressé anticipe des fusions ; il faut une horloge de tour commune ou une ascendance historisée. Les anciennes racines ne suffisent pas sans transport.
-- Aujourd’hui `r.token` est écrit avant `keep_batch()` dans un Builder privé. Une copie immédiatement visible hors de ce Builder pourrait survivre à un refus ultérieur. Garder les valeurs provisoires jusqu’à acceptation, puis invalider le propriétaire si l’ordre/la tour échoue. Les dépenses restent conservées. Le modèle vérifie le refus d’un propriétaire non accepté, pas un échec d’allocation C++.
+Le lot ancres partagé est publié : e16e857b. Sa réservation est close. La [preuve conservée](receipts_shared_anchors_20260906/README.md) établit l’identité ancre directe/image verticale, les IDs distincts entre ordres, le transport à la bonne coupe, et le lookup d’un minimum avant la prochaine MEB. Le petit ajout J≥2 proposé est correct ; E5 fournit le hit avant CDE. Les détails déjà traités ne sont plus recopiés ici.
 
-## Entretien et coordination
-
-La qualification C++ O et les preuves antérieures sont intactes. Les détails de quotient et de première descente déjà repris dans votre note principale ne sont plus recopiés ici. Toujours 25 notes à la racine ; aucun ancien reçu réécrit. Le lot constructeur `a9ce3639` est publié et son index libéré. Index observé vide ; réservation auditeur limitée aux quatorze fichiers de ce lot « prove shared tower anchors and certify descent choices ». Elle se ferme automatiquement à sa publication sur main. GCP non utilisé.
+Toujours 25 notes à la racine ; aucune ancienne preuve ou capture réécrite. Les variantes C++ D–O restent intactes. Index observé vide ; réservation auditeur limitée aux quatorze fichiers de ce lot « prove block witness credits and stable threshold filtering », automatiquement close à sa publication sur main. GCP non utilisé.

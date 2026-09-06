@@ -1432,5 +1432,92 @@
     "engine_invocations": 0,
     "new_cpp_compilations": 0,
     "gcp": "not_used"
+  },
+  "latest_block_histograms_review_20260906": {
+    "date": "2026-09-06T11:46:15.180261+00:00",
+    "base_head": "e16e857babc78666b67f3495bb666f9ce0c56ce5",
+    "receipt": "receipts_block_histograms_20260906/README.md",
+    "scope": "Integer block witness certificate, proof central core ball is vacuous inside endpoint factors for q3/q4 s>=8, hmax quantifier counterfixture, stable threshold lists and saturation.",
+    "variants_D_to_O_unchanged": true,
+    "historical_scientific_receipts_modified": false,
+    "checks": {
+      "authored_markdown": {
+        "files": 5,
+        "local_links": 86,
+        "anchors": 2,
+        "errors": 0,
+        "math_format": "passed"
+      },
+      "block": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "sha256": "5e997d346afb54929bef7715ca545d7327293d1decd094552b51e7b8ac78ad86",
+        "exact_grid_triples": 39460,
+        "checks": 278621
+      },
+      "stable_lists": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "sha256": "af09c6ad8954b1f36d3f380f8e737144e72682b0ed4403377e0afb99cd367de6",
+        "models": 54,
+        "comparisons": 108,
+        "totals": {
+          "killed_rows": 126,
+          "killed_threshold": 203,
+          "visited": 211
+        },
+        "group_A_order_mutant_rejected": true
+      },
+      "source_changes_during_final_read": [],
+      "unstaged_whitespace": "passed",
+      "docs_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "active_documents": 375
+      },
+      "registry": {
+        "exit_code": 0,
+        "phases": 20
+      },
+      "freshness": {
+        "normal_optimized_exit_codes": [
+          1,
+          1
+        ],
+        "byte_identical": true,
+        "common_pins": 2210,
+        "common_mismatches": 0,
+        "source_variants_unchanged": 12,
+        "O_delta": [
+          "CMakeLists.txt",
+          "PASSATION.md",
+          "README.md",
+          "docs/FAUSSES_PISTES.md",
+          "docs/RESIDENCE_MASSIVE.md",
+          "src/pipeline/generate.hpp",
+          "tests/meb_proposal_local_gate.cpp"
+        ],
+        "interpretation": "Expected absence of new C++ qualification for constructor current documentation/local gate and terminal q2 reuse."
+      },
+      "publication_scope": {
+        "staged_paths": 14,
+        "outside_audits": 0,
+        "staged_whitespace": "passed",
+        "index_initially_empty": true,
+        "branch": "main"
+      }
+    },
+    "maintenance": "25 root notes retained. Current dialogue shortened to active block-credit decisions and link to published anchor proof. Existing front note extended by one current pointer; no old scientific receipt or C++ variant modified.",
+    "engine_invocations": 0,
+    "new_cpp_compilations": 0,
+    "gcp": "not_used"
   }
 }

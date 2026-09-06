@@ -1,0 +1,134 @@
+{
+  "H_sign_and_diagonal_controls": 4,
+  "corpus": [
+    {
+      "Hmin": 286,
+      "Xi_upper": 21026,
+      "corner_accepts": {
+        "3": true,
+        "4": true
+      },
+      "grid_triples": 81,
+      "interval_accepts": {
+        "3": true,
+        "4": true
+      },
+      "name": "endpoint_positive"
+    },
+    {
+      "Hmin": 286,
+      "Xi_upper": 22476,
+      "corner_accepts": {
+        "3": true,
+        "4": true
+      },
+      "grid_triples": 19683,
+      "interval_accepts": {
+        "3": true,
+        "4": true
+      },
+      "name": "three_varying_boxes"
+    },
+    {
+      "Hmin": 270,
+      "Xi_upper": 10800,
+      "corner_accepts": {
+        "3": true,
+        "4": true
+      },
+      "grid_triples": 19683,
+      "interval_accepts": {
+        "3": true,
+        "4": true
+      },
+      "name": "central_positive"
+    },
+    {
+      "Hmin": 0,
+      "Xi_upper": 0,
+      "corner_accepts": {
+        "3": false,
+        "4": false
+      },
+      "grid_triples": 1,
+      "interval_accepts": {
+        "3": false,
+        "4": false
+      },
+      "name": "diagonal"
+    },
+    {
+      "Hmin": -11,
+      "Xi_upper": 0,
+      "corner_accepts": {
+        "3": false,
+        "4": false
+      },
+      "grid_triples": 1,
+      "interval_accepts": {
+        "3": false,
+        "4": false
+      },
+      "name": "negative_H"
+    },
+    {
+      "Hmin": 1,
+      "Xi_upper": 3,
+      "corner_accepts": {
+        "3": false,
+        "4": false
+      },
+      "grid_triples": 1,
+      "interval_accepts": {
+        "3": false,
+        "4": false
+      },
+      "name": "boundary_q3"
+    },
+    {
+      "Hmin": 2,
+      "Xi_upper": 8,
+      "corner_accepts": {
+        "3": true,
+        "4": false
+      },
+      "grid_triples": 1,
+      "interval_accepts": {
+        "3": true,
+        "4": false
+      },
+      "name": "boundary_q4"
+    },
+    {
+      "Hmin": -204,
+      "Xi_upper": 490000,
+      "corner_accepts": {
+        "3": false,
+        "4": false
+      },
+      "grid_triples": 9,
+      "interval_accepts": {
+        "3": false,
+        "4": false
+      },
+      "name": "variable_anchor_rejection"
+    }
+  ],
+  "exact_integer_midpoint_grid_triples": 39460,
+  "explicit_checks": 278621,
+  "limits": {
+    "asymptotic_or_measured_gain_claimed": false,
+    "engine_invoked": false,
+    "gcp_used": false,
+    "general_continuous_proof_replaced_by_grid": false,
+    "histogram_product_implementation_qualified": false,
+    "product_imported": false,
+    "public_status": "not_claimed"
+  },
+  "positive_real_anchors": 2,
+  "positive_real_witnesses_per_anchor": 2,
+  "schema": "mhgp7-auditor-block-histogram-certificate-v1",
+  "status": "passed",
+  "strict_boundary_mutants": 2,
+  "variable_anchor_hmax_counterexamples": 2
+}
