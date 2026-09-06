@@ -1,0 +1,239 @@
+[
+  {
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "closed": true,
+    "elapsed_seconds": 0.0024286120005854173,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "git_head"
+  },
+  {
+    "argv": [
+      "git",
+      "status",
+      "--porcelain=v1"
+    ],
+    "closed": true,
+    "elapsed_seconds": 0.05475638700045238,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "git_status"
+  },
+  {
+    "argv": [
+      "g++",
+      "--version"
+    ],
+    "closed": true,
+    "elapsed_seconds": 0.002306251000845805,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "compiler_version"
+  },
+  {
+    "argv": [
+      "uname",
+      "-a"
+    ],
+    "closed": true,
+    "elapsed_seconds": 0.0016449900012958096,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "uname"
+  },
+  {
+    "argv": [
+      "g++",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O2",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/O2.d",
+      "/workspaces/E-HGP/morsehgp3D_v7/tests/full_coverage_certificate_gate.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/O2"
+    ],
+    "closed": true,
+    "elapsed_seconds": 5.93217692700091,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "compile_O2"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/O2",
+      "--selftest"
+    ],
+    "closed": true,
+    "elapsed_seconds": 0.00418907299899729,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "O2_selftest"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/O2",
+      "--unknown"
+    ],
+    "closed": true,
+    "elapsed_seconds": 0.0015942340014589718,
+    "exit_code": 2,
+    "expected": 2,
+    "name": "O2_unknown"
+  },
+  {
+    "argv": [
+      "g++",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/SAN.d",
+      "/workspaces/E-HGP/morsehgp3D_v7/tests/full_coverage_certificate_gate.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/SAN"
+    ],
+    "closed": true,
+    "elapsed_seconds": 16.22797216700019,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "compile_SAN"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/SAN",
+      "--selftest"
+    ],
+    "closed": true,
+    "elapsed_seconds": 0.039631489000385045,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "SAN_selftest"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/SAN",
+      "--unknown"
+    ],
+    "closed": true,
+    "elapsed_seconds": 0.010903370999585604,
+    "exit_code": 2,
+    "expected": 2,
+    "name": "SAN_unknown"
+  },
+  {
+    "argv": [
+      "g++",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O2",
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/mutants/drop_continuation/morsehgp3D_v7/tests/full_coverage_certificate_gate.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/drop_continuation"
+    ],
+    "closed": true,
+    "elapsed_seconds": 5.8976830070005235,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "compile_drop_continuation"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/drop_continuation",
+      "--selftest"
+    ],
+    "closed": true,
+    "elapsed_seconds": 0.003140697999697295,
+    "exit_code": 1,
+    "expected": 1,
+    "name": "drop_continuation"
+  },
+  {
+    "argv": [
+      "g++",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O2",
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/mutants/future_contribution/morsehgp3D_v7/tests/full_coverage_certificate_gate.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/future_contribution"
+    ],
+    "closed": true,
+    "elapsed_seconds": 5.920474471000489,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "compile_future_contribution"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/future_contribution",
+      "--selftest"
+    ],
+    "closed": true,
+    "elapsed_seconds": 0.0032043219998740824,
+    "exit_code": 1,
+    "expected": 1,
+    "name": "future_contribution"
+  },
+  {
+    "argv": [
+      "g++",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O2",
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/mutants/final_root/morsehgp3D_v7/tests/full_coverage_certificate_gate.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/final_root"
+    ],
+    "closed": true,
+    "elapsed_seconds": 5.917208465998556,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "compile_final_root"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_coverage_20260906/r1/final_root",
+      "--selftest"
+    ],
+    "closed": true,
+    "elapsed_seconds": 0.0036894919994665543,
+    "exit_code": 1,
+    "expected": 1,
+    "name": "final_root"
+  }
+]

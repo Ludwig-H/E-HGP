@@ -1,0 +1,9 @@
+[100%] Building CXX object CMakeFiles/mhgp7_full_coverage_certificate_gate.dir/tests/full_coverage_certificate_gate.cpp.o
+[100%] Linking CXX executable mhgp7_full_coverage_certificate_gate
+[100%] Built target mhgp7_full_coverage_certificate_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_local_plateau_gate.dir/tests/local_plateau_gate.cpp.o
+[100%] Linking CXX executable mhgp7_local_plateau_gate
+[100%] Built target mhgp7_local_plateau_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_full_certificate_gate.dir/tests/full_certificate_gate.cpp.o
+[100%] Linking CXX executable mhgp7_full_certificate_gate
+[100%] Built target mhgp7_full_certificate_gate

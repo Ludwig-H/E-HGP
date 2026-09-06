@@ -1,0 +1,7 @@
+{
+  "morsehgp3D_v7/CMakeLists.txt": "14ae8f8a57525fafc4e8e19751c43ec720829d40885cf0ad218869ae045a2c9c",
+  "morsehgp3D_v7/src/forest/full_coverage_certificate.hpp": "e8e65b211ec01964f35f1eb60587096a9b1e144d2c4634d2cad0c2f50ae5e883",
+  "morsehgp3D_v7/src/forest/local_plateau.hpp": "df56fbf33ea3088218174f88a646c65702d97a0366ec848887f1846ae7666f2e",
+  "morsehgp3D_v7/tests/full_coverage_certificate_gate.cpp": "7d58362da3b5ca126e7c9b35982f4f2095ec23d8bc9b0a600a1fda323d624931",
+  "morsehgp3D_v7/tests/local_plateau_gate.cpp": "22bb006e26a7846c332d032f14a2fb09478efb6dfdaa9b134911187f6a44fce2"
+}

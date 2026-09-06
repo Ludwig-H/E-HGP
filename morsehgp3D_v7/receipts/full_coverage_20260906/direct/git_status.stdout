@@ -1,0 +1,23 @@
+ M morsehgp3D_v6/src/gpu/lot_ring.hpp
+ M morsehgp3D_v6/src/parallel/sort.hpp
+ M morsehgp3D_v6/src/pipeline/census.hpp
+ M morsehgp3D_v6/src/pipeline/expand.hpp
+ M morsehgp3D_v7/CMakeLists.txt
+ M morsehgp3D_v7/audits/DIALOGUE_COURANT.md
+ M morsehgp3D_v7/audits/ETAT_COURANT.md
+ M morsehgp3D_v7/audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md
+ M morsehgp3D_v7/audits/README.md
+ M morsehgp3D_v7/audits/receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md
+ M morsehgp3D_v7/audits/receipts_plateaux_full_20260906/README.md
+ M morsehgp3D_v7/src/forest/local_plateau.hpp
+ M morsehgp3D_v7/tests/local_plateau_gate.cpp
+?? morsehgp3D_v6/src/gpu/route_c6.hpp
+?? morsehgp3D_v6/tests/perm_sort_gate.cpp
+?? morsehgp3D_v6/tests/route_c6_gate.cpp
+?? morsehgp3D_v7/audits/receipts_plateaux_full_20260906/GLOBAL_PARENTS.md
+?? morsehgp3D_v7/audits/receipts_plateaux_full_20260906/global_parent_review.json
+?? morsehgp3D_v7/audits/receipts_plateaux_full_20260906/real_parent_certificates.py
+?? morsehgp3D_v7/audits/receipts_plateaux_full_20260906/real_parent_certificates_normal.json
+?? morsehgp3D_v7/audits/receipts_plateaux_full_20260906/real_parent_certificates_optimized.json
+?? morsehgp3D_v7/src/forest/full_coverage_certificate.hpp
+?? morsehgp3D_v7/tests/full_coverage_certificate_gate.cpp

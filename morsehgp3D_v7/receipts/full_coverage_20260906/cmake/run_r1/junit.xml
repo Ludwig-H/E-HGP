@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="6"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="0"
+	timestamp="2026-09-06T19:27:08"
+	>
+	<testcase name="mhgp7_full_certificate" classname="mhgp7_full_certificate" time="0.0123058" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_certificate;gate"/>
+		</properties>
+		<system-out>full_certificate mode=--selftest authority=structural_only positives=11 build_refusals=0 read_refusals=3 allocation_failures=0 checks=68 failures=0 floor=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_certificate_rejects" classname="mhgp7_full_certificate_rejects" time="0.0118729" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_certificate;gate"/>
+		</properties>
+		<system-out>full_certificate mode=--rejects authority=structural_only positives=13 build_refusals=45 read_refusals=19 allocation_failures=15 checks=218 failures=0 floor=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_local_plateau" classname="mhgp7_local_plateau" time="0.0620167" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;local_plateau;oracle"/>
+		</properties>
+		<system-out>{"schema":"mhgp7-local-plateau-v1","status":"passed","public_status":"not_claimed","tables":18,"ranks":96,"components":96,"representatives":96,"inert":14,"local_births":26,"supports_q2_q3_q4":[20,14,4],"large_p":5000,"external_global_parent_counts":[2,1],"real_tables":4,"real_ranks":40,"complete_support_sets":18,"diameter_hubs":17,"dsu_ranks":68,"u2_exclusions":1}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_local_plateau_bad_argument" classname="mhgp7_local_plateau_bad_argument" time="0.0132417" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;local_plateau"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_coverage_certificate" classname="mhgp7_full_coverage_certificate" time="0.0149523" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_coverage_certificate;gate;oracle"/>
+		</properties>
+		<system-out>full_coverage_certificate checks=710 rejects=30 replay_cuts=30 gamma_cuts=34 allocation_rejects=34 authority=structural_only
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_coverage_certificate_bad_argument" classname="mhgp7_full_coverage_certificate_bad_argument" time="0.0121107" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_coverage_certificate;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+</testsuite>

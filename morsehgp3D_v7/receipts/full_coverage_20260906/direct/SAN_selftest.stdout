@@ -1,0 +1,1 @@
+full_coverage_certificate checks=710 rejects=30 replay_cuts=30 gamma_cuts=34 allocation_rejects=34 authority=structural_only

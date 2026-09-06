@@ -1,0 +1,116 @@
+{
+  "GCP_used": false,
+  "binaries": {
+    "mhgp7_full_certificate_gate": "446111a83c7e453f50fcc09a9ebb1fcdef10a7a672d2ee4efe5429a962eb850a",
+    "mhgp7_full_coverage_certificate_gate": "2ecaa14bbf3e15fbdcc41a0d427356dff402a1f2f7388e85928ad7bb7a2ebef1",
+    "mhgp7_local_plateau_gate": "c7df566cb69734b9dac0d49b778aca1a56d602934fb1b830ec2e3a674829f605"
+  },
+  "commands": [
+    {
+      "added_resource_limits": false,
+      "argv": [
+        "cmake",
+        "-S",
+        "/workspaces/E-HGP/morsehgp3D_v7",
+        "-B",
+        "/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+        "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include"
+      ],
+      "closed": true,
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788722812563739638,
+      "exit_code": 0,
+      "imposed_timeout": null,
+      "pid": 80,
+      "started_ns": 1788722812068312788,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4290c9e5612d3ab35c44e08a9bade585ff7ead02f0226fc77ec2588f7c48aa20"
+    },
+    {
+      "added_resource_limits": false,
+      "argv": [
+        "cmake",
+        "--build",
+        "/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1",
+        "--target",
+        "mhgp7_full_coverage_certificate_gate",
+        "mhgp7_local_plateau_gate",
+        "mhgp7_full_certificate_gate",
+        "--parallel",
+        "1"
+      ],
+      "closed": true,
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788722828689138504,
+      "exit_code": 0,
+      "imposed_timeout": null,
+      "pid": 126,
+      "started_ns": 1788722812564176406,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f2fabf331e2c0179141a6d22df5e7e3c6f4ed5ee571494082a5324657bf54054"
+    },
+    {
+      "added_resource_limits": false,
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1",
+        "-N",
+        "--show-only=json-v1",
+        "-R",
+        "^(mhgp7_full_coverage_certificate|mhgp7_full_coverage_certificate_bad_argument|mhgp7_local_plateau|mhgp7_local_plateau_bad_argument|mhgp7_full_certificate|mhgp7_full_certificate_rejects)$"
+      ],
+      "closed": true,
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788722828713458164,
+      "exit_code": 0,
+      "imposed_timeout": null,
+      "pid": 195,
+      "started_ns": 1788722828690570408,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "1f7a355950f678963f7430cf23be9ac4aa35973c8c4f08f3424cb14c542d7253"
+    },
+    {
+      "added_resource_limits": false,
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1",
+        "-V",
+        "--output-on-failure",
+        "--output-junit",
+        "/workspaces/E-HGP/build/v7_coverage_cmake_20260906/run_r1/junit.xml",
+        "-R",
+        "^(mhgp7_full_coverage_certificate|mhgp7_full_coverage_certificate_bad_argument|mhgp7_local_plateau|mhgp7_local_plateau_bad_argument|mhgp7_full_certificate|mhgp7_full_certificate_rejects)$",
+        "--parallel",
+        "1"
+      ],
+      "closed": true,
+      "cwd": "/workspaces/E-HGP",
+      "ended_ns": 1788722828866177659,
+      "exit_code": 0,
+      "imposed_timeout": null,
+      "pid": 196,
+      "started_ns": 1788722828714015590,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e75bd934325612bd4db15166093b452dcac7ef363cf315bb9624b773e67f4adf"
+    }
+  ],
+  "cpp_closed": true,
+  "error": null,
+  "expected_tests": {
+    "mhgp7_full_certificate": 0,
+    "mhgp7_full_certificate_rejects": 0,
+    "mhgp7_full_coverage_certificate": 0,
+    "mhgp7_full_coverage_certificate_bad_argument": 2,
+    "mhgp7_local_plateau": 0,
+    "mhgp7_local_plateau_bad_argument": 2
+  },
+  "new_time_quotas": false,
+  "public_status": "not_claimed",
+  "recorder_sha256": "1243da6f3662f67108d7c1f1e392144c5fe0724b1f59297e6d76501b658f7191",
+  "scope": "three targets and six explicit CTests only",
+  "status": "completed"
+}

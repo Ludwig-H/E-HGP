@@ -42,6 +42,8 @@ non encore qualifiée n'est pas, à elle seule, une fausse piste.
 | Omettre toute ancre d'une boule localement inerte | Sa forêt peut rester inchangée tandis que la résolution d'un label faible échoue. Conserver les ancres fermées de l'intervalle utile, pas seulement celles des nœuds publiés. [Raccord audité](PLATEAUX_FULL_ET_ANCRES.md) |
 | Étendre p+u≤smax aux coquilles non régulières | La coquille de sept points à K5 donne une naissance malgré 7>6. Le filtre démontré reste p+q_min≤smax ; l'arité d'un support local choisi ne remplace pas q_min global. [Preuve](PLATEAUX_FULL_ET_ANCRES.md) |
 | Confondre manque de couverture local et nouveaux points globaux certains | Deux points extérieurs peuvent avoir déjà relié le point manquant au parent. Encoder une contribution potentiellement redondante, datée et unie au lecteur, évite de maintenir des ensembles complets dans le producteur. [Preuve et contre-fixture](../audits/receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md) |
+| Attribuer toutes les contributions à la naissance ou à la racine finale | Cela injecte des points ou des fusions futures dans les anciennes coupes. Conserver date, segment et successeur historique ; trois mutants ciblés sont réfutés. [Journal v2](CONTRAT_COUVERTURES_DATEES.md) |
+| Relâcher seulement la garde de rayon strict du resolver F | Ses MEB et requêtes d'intrus refusent aussi les coquilles supplémentaires. Il faut une entrée MEB à coquille libre, à cardinal K, avec terminal par ancre de boule ; jamais récupérer une sortie F déclarée échouée. [Couture prévue](CONTRAT_COUVERTURES_DATEES.md#prochain-raccord) |
 
 ## Règle d'entretien du dossier actif
 

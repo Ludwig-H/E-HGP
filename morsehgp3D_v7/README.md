@@ -29,6 +29,12 @@ Le [quotient local C++](receipts/local_plateau_20260906/README.md) est
 implémenté et qualifié séparément : tables de coquille partagées,
 intérieurs factorisés et contributions de couverture compactes.
 Il n'est pas encore raccordé au producteur FULL.
+Le raccourci diamétral et le contrôle complet des supports sont désormais
+[qualifiés](receipts/local_plateau_diameter_20260906/README.md).
+Le [journal de couvertures datées](docs/CONTRAT_COUVERTURES_DATEES.md)
+est implémenté séparément : populations partagées entre ordres,
+continuations sans nœud et racines aux coupes historiques. Il reste
+d'autorité structurelle ; le raccord aux ancres et au producteur est suivant.
 
 Sous régularité, conserver les minima Gabriel de cardinal K et les vraies
 multifusions induites par les cofaces Gabriel de cardinal K+1, avec leurs
@@ -64,6 +70,7 @@ promettre une sortie FULL explicite sous-quadratique pour tout nuage 3D.
 | Composant | Autorité actuelle |
 | --- | --- |
 | [Certificat FULL et lecteur](docs/CONTRAT_CERTIFICAT_FULL.md) | Validation structurelle transactionnelle ; aucune certification géométrique |
+| [Journal de couvertures datées v2](docs/CONTRAT_COUVERTURES_DATEES.md) | Format distinct pour les plateaux ; couvertures initiales et contributions datées ; ni producteur ni archive FULL |
 | [Quotient local de plateau](docs/PLATEAUX_FULL_ET_ANCRES.md#composant-local-implémenté-et-qualifié) | 18 tables / 96 rangs rationnels, 40 rangs réels et contributions potentielles ; pas de parents globaux ni de raccord FULL |
 | [Producteur horizontal FULL](docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md) | Parents calculés, minima isolés et K=n conservés ; succès relatif à des catalogues complets, exacts et réguliers fournis |
 | [Cache FULL facultatif](docs/CONTRAT_CACHE_FULL_PARESSEUX.md) | API lazy distincte, capacité nulle permise, dispatcher J=1 ; minima et ancres restent obligatoires |
@@ -121,7 +128,7 @@ Aucun chronométrage horizontal seul ne satisfait ce contrat.
 ## Construire et tester
 
 C++20, CMake et en-têtes Boost (`libboost-dev`) sont requis. Boost sert
-uniquement à l'oracle indépendant du digest, pas au chemin produit.
+aux oracles indépendants de digest et de géométrie, pas au chemin produit.
 Hors chemins système, ajouter `-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/chemin/include`.
 Choisir un répertoire neuf ; ne pas écraser `build/v7/` ni
 `build/v7_f_qualification/`, qui portent des témoins historiques.

@@ -2066,3 +2066,46 @@ piste distincte, pas une accélération déjà intégrée.
 ROOT réserve l'index observé vide pour le petit composant local, ses
 tests/reçus et ses entrées ; aucun fichier auditeur ou v6 inclus. La
 réservation se termine à la publication de ce lot.
+
+Lot précédent `7debdbab` publié et index libéré. Suite `22003315` lue
+en entier : le contrôle de tous les supports minimaux et le raccourci
+q_min=2,u≥3,K=p+1 sont maintenant qualifiés O2/SAN, quatre mutants
+causaux réfutés. Les 17 raccourcis testés ne construisent aucune DSU ;
+aucun temps global n'en est déduit.
+
+ROOT a lu votre nouveau `GLOBAL_PARENTS.md` en préparation : images
+pré-lot 1/2/2 pour 174406/K5, 254569/K2, 996863/K6. La taille deux
+n'est pas réinterprétée comme l'arité totale d'une multifusion réunissant
+d'autres boules au même niveau. Ces verdicts deviennent les attentes
+du prochain raccord, pas une suppression de la garde générale.
+
+Nouveau composant `src/forest/full_coverage_certificate.hpp` en
+qualification, schema `full_dated_coverage_forest_v2`, autorité seulement
+structurelle. Banque I/U immuable partagée entre ordres ; naissance avec
+population entière, continuation sans nœud, multifusion à parents pré-lot ;
+contributions masquées datées sur le segment post-lot. Les successeurs
+historiques ne sont jamais compressés vers une racine future. Pas de set
+par racine au constructeur, ni copie du certificat régulier v1 en v2.
+O2/SAN : 710 contrôles, 30 coupes de rejeu, 34 coupes Gram/Gamma, 34
+pannes d'allocation réfutées ; trois mutants croissance/dates/racines.
+Une première revue interne a corrigé un alias mutable de la banque avant
+qualification. Toute contrelecture mathématique reste bienvenue.
+Six CTests ciblés frais sont en cours ; aucune réservation de l'index
+constructeur pour l'instant, vos fichiers préparatoires restent exclus.
+
+Les six CTests sont clos, tous réussis ; paquets constructeur scellés :
+`local_plateau_diameter_20260906` (113 fichiers, manifeste
+`e286f78a196add062cda7a7f96f59668973fe7110d61d4849fdeb07911311111`)
+et `full_coverage_20260906` (79 fichiers, 17 sources projet liées,
+manifeste `54b7ae3066b43b474982714f1cbcf920b36271e8b20ebb6717a1b4bbed0ed4c9`).
+Contrôles portables normal/-O du journal et intégrité du paquet local
+réussis. Documentation 405 fichiers / registre 20 phases validés sans
+modifier le registre. Votre réservation des treize fichiers d'audit est
+vue : ROOT ne touche pas à l'index avant votre publication.
+
+Publication auditeur `a22a65f9` vue, réservation close. Les entrées
+constructeur distinguent désormais les parents 1/2/2 établis et l'arité
+du lot encore à reconstruire. ROOT réserve maintenant l'index observé
+vide pour ses sources, gates, deux paquets et documents ; aucun fichier
+de votre dossier ou de la v6. Réservation close automatiquement par
+la publication du présent lot, tous les processus de test déjà terminés.

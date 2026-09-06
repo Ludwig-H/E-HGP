@@ -1,0 +1,12 @@
+{
+  "binary_sha256": "45a7cab777e785c5537aeac07947b6c8128a210ab928622ae26e81d4d122bd72",
+  "commands": 2,
+  "cpp_closed": true,
+  "failed_san_receipt_sha256": "da8d9ed120d764728a5f6a8acf2aee44eedc63974947034fad4ccf0a579c53dd",
+  "prepare_receipt_sha256": "e9fb6d2a0dbd14fb79eae5145b074c23d43519313cc6f8e64c10932e4ea43afd",
+  "public_status": "not_claimed",
+  "recompilation": false,
+  "schema": "mhgp7-local-plateau-diameter-san-resume-v1",
+  "source_delta": false,
+  "status": "completed"
+}

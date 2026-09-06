@@ -1,0 +1,11 @@
+{
+  "O2_elf_sha256": "2b9b6663fd4123617cac2da8b1b5adf5d1d4685364c06e45f0a298314b0ffac5",
+  "SAN_elf_sha256": "f202134d13a219095c86046cd4a1850307d6cccb1184fe32485242cb85b33287",
+  "all_cpp_closed": true,
+  "authority": "structural_only",
+  "commands": 16,
+  "gcp_used": false,
+  "public_status": "not_claimed",
+  "schema": "mhgp7-coverage-local-qualification-v1",
+  "status": "completed"
+}

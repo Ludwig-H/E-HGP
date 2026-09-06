@@ -1,0 +1,18 @@
+{
+  "binaries": {
+    "O2": "c2f4b10b8c79ac75f54fa62faddb5eaa460f0139bc6e9282ab5315eb2d30c6bb",
+    "admit_u2": "672b5a575fd26f32d3ac69d7eee9a54085f4140853706f260a01c33bd37032e4",
+    "disable_diameter_hub": "88b3ae3f10acf258d8577d918a84bc601d2770c4cdac8e12f8dcb2473b2b4d89",
+    "drop_square_diameter": "a961465e41b5d220ad20e64192d317164467b9be5367659ed0dd6d69795142b7",
+    "drop_star_unions": "eeead322cdaebca18207be799d28655bcdd278f075652b4a8d37ed3d1e9650b0",
+    "san": "45a7cab777e785c5537aeac07947b6c8128a210ab928622ae26e81d4d122bd72"
+  },
+  "commands": 1,
+  "cpp_closed": true,
+  "error": "ValueError: san_selftest",
+  "phase": "san",
+  "prepare_receipt_sha256": "e9fb6d2a0dbd14fb79eae5145b074c23d43519313cc6f8e64c10932e4ea43afd",
+  "public_status": "not_claimed",
+  "schema": "mhgp7-local-plateau-diameter-qualification-v1",
+  "status": "failed"
+}

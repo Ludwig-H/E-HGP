@@ -1,0 +1,306 @@
+{
+  "backtraceGraph" : 
+  {
+    "commands" : 
+    [
+      "add_test",
+      "mhgp7_gate"
+    ],
+    "files" : 
+    [
+      "/workspaces/E-HGP/morsehgp3D_v7/CMakeLists.txt"
+    ],
+    "nodes" : 
+    [
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 63,
+        "parent" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 1
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 65,
+        "parent" : 3
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 4
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 175,
+        "parent" : 6
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 7
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 177,
+        "parent" : 9
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 10
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 183,
+        "parent" : 12
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 13
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 185,
+        "parent" : 15
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 16
+      }
+    ]
+  },
+  "kind" : "ctestInfo",
+  "tests" : 
+  [
+    {
+      "backtrace" : 2,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1/mhgp7_full_certificate_gate",
+        "-DARGS=--selftest",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_certificate",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_certificate",
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1"
+        }
+      ]
+    },
+    {
+      "backtrace" : 5,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1/mhgp7_full_certificate_gate",
+        "-DARGS=--rejects",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_certificate_rejects",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_certificate",
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1"
+        }
+      ]
+    },
+    {
+      "backtrace" : 8,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1/mhgp7_local_plateau_gate",
+        "-DARGS=--selftest",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_local_plateau",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate",
+            "local_plateau",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1"
+        }
+      ]
+    },
+    {
+      "backtrace" : 11,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1/mhgp7_local_plateau_gate",
+        "-DARGS=--unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_local_plateau_bad_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate",
+            "local_plateau"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1"
+        }
+      ]
+    },
+    {
+      "backtrace" : 14,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1/mhgp7_full_coverage_certificate_gate",
+        "-DARGS=--selftest",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_coverage_certificate",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_coverage_certificate",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1"
+        }
+      ]
+    },
+    {
+      "backtrace" : 17,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1/mhgp7_full_coverage_certificate_gate",
+        "-DARGS=--unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_coverage_certificate_bad_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_coverage_certificate",
+            "gate"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1"
+        }
+      ]
+    }
+  ],
+  "version" : 
+  {
+    "major" : 1,
+    "minor" : 0
+  }
+}

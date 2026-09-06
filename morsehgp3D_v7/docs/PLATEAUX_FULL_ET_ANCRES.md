@@ -137,6 +137,18 @@ déjà produites par FULL. Pour les blocs à deux groupes stricts, leur
 union couvre tout I∪U : aucune croissance ponctuelle n'y est possible ;
 seules les éventuelles fusions et leurs parents restent à décider.
 
+Le [complément global de l'auditeur](../audits/receipts_plateaux_full_20260906/GLOBAL_PARENTS.md),
+publié ensuite dans `a22a65f9`, tranche ces trois ambiguïtés :
+174406/K5 a un seul parent, via un chemin strict extérieur par 45617 ;
+254569/K2 et 996863/K6 ont chacun deux parents distincts, une facette
+étant isolée avant le niveau. Les scans du nuage complet et quelques MEB
+rationnelles suffisent à ces certificats particuliers, sans catalogue
+Gamma. Le nombre deux est celui des parents du bloc, pas nécessairement
+l'arité de la multifusion regroupant d'autres boules du même niveau.
+Le premier bloc n'apporte ni topologie ni point, mais conserve son ancre.
+Ces preuves fixent les attentes du raccord ; elles ne sont pas encore
+des sorties du constructeur C++.
+
 L'extraction a pris 132,027 s externes sur huit threads locaux, avec
 compilations légères concurrentes : durée diagnostique jusqu'au refus,
 pas benchmark apparié ni temps de tour. Même entrée, mêmes volumes
@@ -173,12 +185,20 @@ sans fusion, naissance couvrant plus de K points, chemins extérieurs,
 u=12 et p=5000 sont exercés. Les prototypes échoués sont conservés sous
 leur propre autorité, sans transfert de leurs succès aux sources promues.
 
-La contrelecture statique de l'auditeur est favorable et demande un
-renforcement précis du juge : comparer aussi la liste **complète** des
-supports minimaux à l'oracle, pas seulement leur minimalité et la table
-entière contient/évite le centre. Cette liste est déjà comparée exactement
-sur les quatre cas réels à support unique ; le mutant d'un diamètre omis
-sur le carré reste à ajouter. Aucun défaut du helper n'est observé.
+Le [supplément qualifié](../receipts/local_plateau_diameter_20260906/README.md)
+répond au renforcement du juge demandé par l'auditeur : 18 ensembles
+**complets** de supports minimaux comparés à Gram ; le mutant retirant
+un diamètre du carré sans modifier la table booléenne est réfuté.
+Pour q_min=2,u≥3,K=p+1, un chemin analytique émet directement la seule
+composante stricte, sans DSU ; 17 occurrences testées, u=2 exclu.
+La préparation partagée des supports reste inchangée et l'ancre fermée
+reste nécessaire. Aucun gain de temps global n'est déduit de ce raccourci.
+
+Le [journal daté v2](CONTRAT_COUVERTURES_DATEES.md) est aussi implémenté
+et qualifié séparément : banque I/U partagée entre ordres, naissance de
+couverture éventuellement supérieure à K, continuation sans nouveau nœud,
+contribution datée et racines historiques aux coupes. Son autorité est
+structurelle, sans certification du census ni des parents fournis.
 
 Ce composant n'est encore appelé ni par `full_gabriel.hpp` ni par la
 sonde FULL : **aucun gain de temps de tour ni levée du refus 50k n'est
@@ -186,8 +206,9 @@ attribué à cette implémentation locale.**
 
 ## Ce qui reste à raccorder et à mesurer
 
-Le quotient local ne décide ni parents globaux, ni lots, ni verticale,
-ni certificat étendu. La suppression du refus ne sera correcte qu'après
+Le quotient local ne décide ni parents globaux, ni lots, ni verticale.
+Le journal étendu est disponible, sans raccord au constructeur. La
+suppression du refus ne sera correcte qu'après
 ce raccord et sa qualification sur coupes ouvertes/fermées, continuations,
 naissances de plateau, racines répétées et ancres silencieuses.
 Le traitement régulier doit conserver son chemin économique ; aucune

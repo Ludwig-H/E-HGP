@@ -1,0 +1,23 @@
+{
+  "added_resource_limits": false,
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1",
+    "--target",
+    "mhgp7_full_coverage_certificate_gate",
+    "mhgp7_local_plateau_gate",
+    "mhgp7_full_certificate_gate",
+    "--parallel",
+    "1"
+  ],
+  "closed": true,
+  "cwd": "/workspaces/E-HGP",
+  "ended_ns": 1788722828689138504,
+  "exit_code": 0,
+  "imposed_timeout": null,
+  "pid": 126,
+  "started_ns": 1788722812564176406,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "f2fabf331e2c0179141a6d22df5e7e3c6f4ed5ee571494082a5324657bf54054"
+}

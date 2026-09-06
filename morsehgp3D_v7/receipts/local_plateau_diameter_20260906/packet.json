@@ -1,0 +1,47 @@
+{
+  "FULL_integrated": false,
+  "GCP_used": false,
+  "external_dependency_hashes_in": "O2.sources_before.json",
+  "historical_product_dependencies": {
+    "morsehgp3D_v7/src/core/device.hpp": {
+      "repo_path": "morsehgp3D_v7/receipts/full_pipeline_threads_micro_20260906/sources/morsehgp3D_v7/src/core/device.hpp",
+      "sha256": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37"
+    },
+    "morsehgp3D_v7/src/core/intmath.hpp": {
+      "repo_path": "morsehgp3D_v7/receipts/full_pipeline_threads_micro_20260906/sources/morsehgp3D_v7/src/core/intmath.hpp",
+      "sha256": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54"
+    },
+    "morsehgp3D_v7/src/core/mutants.hpp": {
+      "repo_path": "morsehgp3D_v7/receipts/full_pipeline_threads_micro_20260906/sources/morsehgp3D_v7/src/core/mutants.hpp",
+      "sha256": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5"
+    },
+    "morsehgp3D_v7/src/core/types.hpp": {
+      "repo_path": "morsehgp3D_v7/receipts/full_pipeline_threads_micro_20260906/sources/morsehgp3D_v7/src/core/types.hpp",
+      "sha256": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca"
+    },
+    "morsehgp3D_v7/src/core/wide.hpp": {
+      "repo_path": "morsehgp3D_v7/receipts/full_pipeline_threads_micro_20260906/sources/morsehgp3D_v7/src/core/wide.hpp",
+      "sha256": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85"
+    },
+    "morsehgp3D_v7/src/forest/plateau.hpp": {
+      "repo_path": "morsehgp3D_v7/receipts/full_pipeline_threads_micro_20260906/sources/morsehgp3D_v7/src/forest/plateau.hpp",
+      "sha256": "9d40af95f4429c02fb4201dfd12608e58c00c593c7c4905e2304e4b4ae37ac49"
+    },
+    "morsehgp3D_v7/src/lanes/keys.hpp": {
+      "repo_path": "morsehgp3D_v7/receipts/full_pipeline_threads_micro_20260906/sources/morsehgp3D_v7/src/lanes/keys.hpp",
+      "sha256": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0"
+    }
+  },
+  "omitted_ELF": {
+    "O2": "c2f4b10b8c79ac75f54fa62faddb5eaa460f0139bc6e9282ab5315eb2d30c6bb",
+    "admit_u2": "672b5a575fd26f32d3ac69d7eee9a54085f4140853706f260a01c33bd37032e4",
+    "disable_diameter_hub": "88b3ae3f10acf258d8577d918a84bc601d2770c4cdac8e12f8dcb2473b2b4d89",
+    "drop_square_diameter": "a961465e41b5d220ad20e64192d317164467b9be5367659ed0dd6d69795142b7",
+    "drop_star_unions": "eeead322cdaebca18207be799d28655bcdd278f075652b4a8d37ed3d1e9650b0",
+    "san": "45a7cab777e785c5537aeac07947b6c8128a210ab928622ae26e81d4d122bd72"
+  },
+  "public_status": "not_claimed",
+  "reused_test_sources": "mutants use nominal gate/oracle from source_snapshot; only changed helper copied",
+  "schema": "mhgp7-local-plateau-diameter-packet-v1",
+  "status": "prepared_in_build"
+}

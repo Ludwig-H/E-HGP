@@ -6,13 +6,17 @@
 Chantier sur `main` uniquement. Cette entrée décrit le travail courant ;
 les récits des anciens jalons sont retirés, leurs preuves restent liées.
 
-Dernier jalon : [extraction des quatre coquilles réelles à 50k](docs/PLATEAUX_FULL_ET_ANCRES.md),
+Les [quatre coquilles réelles à 50k](docs/PLATEAUX_FULL_ET_ANCRES.md) sont
 contrôlées par un lecteur indépendant contre tout le nuage. Toutes ont
 trois points de frontière et un support diamétral ; un quotient local
 ne demande que huit masques par boule. Les parents globaux ne se
 déduisent pas de ce seul quotient. Le raccord par ancres de boule est
 prouvé par l'auditeur, mais le certificat doit aussi porter les gains de
 couverture sans fusion ; cette extension FULL reste à intégrer.
+Le [complément indépendant des parents globaux](audits/receipts_plateaux_full_20260906/GLOBAL_PARENTS.md)
+est publié : images pré-lot 1/2/2 pour 174406/K5, 254569/K2, 996863/K6.
+Le raccord doit retrouver ces résultats, puis regrouper les autres boules
+éventuelles du même niveau avant de décider l'arité finale des fusions.
 
 Le [composant local de coquille](receipts/local_plateau_20260906/README.md)
 est livré dans `src/forest/local_plateau.hpp`, sans appel depuis FULL.
@@ -21,7 +25,18 @@ plus 40 rangs des quatre cas réels ; le mutant d'union est rejeté et les
 deux nouveaux CTests passent. Les contributions sont des masques locaux
 potentiellement redondants, pas des deltas globaux minimaux : l'auditeur
 confirme qu'aucun ensemble complet de points par racine n'est nécessaire
-à leur production. Le journal daté et son lecteur restent à construire.
+à leur production. Le [raccourci diamétral](receipts/local_plateau_diameter_20260906/README.md)
+et la comparaison des 18 ensembles complets de supports sont qualifiés :
+17 chemins sans DSU, quatre mutants causaux rejetés, mêmes 40 rangs réels.
+
+Dernier jalon : [journal de couvertures datées v2](docs/CONTRAT_COUVERTURES_DATEES.md),
+distinct du certificat régulier v1. Populations I/U immuables partagées
+entre ordres, continuations sans faux nœud, contributions potentiellement
+redondantes et racines historiques. O2/SAN : 710 contrôles, 34 coupes
+Gram/Gamma, 30 coupes de rejeu, 34 pannes d'allocation, trois mutants.
+Le raccord global doit maintenant ajouter une MEB à coquille libre,
+résoudre les représentants avant le lot et installer les ancres seulement
+après fermeture. Aucun appel depuis la sonde FULL à ce stade.
 
 Les [deux vrais processus G4 K10/K5](docs/RESULTATS_G4_FULL_20260906.md)
 restent des refus avant tout ordre FULL (21,372 s / 5,646 s).
@@ -248,9 +263,11 @@ s8/P=unlimited est clos, les autres cellules ne lui sont pas attribuées.
 La paire P0/P∞ 8k/s8 et les trois s du binaire q2 sont également closes,
 dans leurs paquets propres. L'utilisateur a confirmé la transition après
 ce lot mono : multi-CPU local, puis G4 SPOT à 48 CPU et GPU. La sonde
-actuelle fixe encore un thread ; le contrôleur GCP historique mesure F
-et des primitives device, pas la nouvelle tour FULL. Adapter et qualifier
-ces raccords avant de leur attribuer des résultats de contrats FULL.
+propose maintenant le front multi-CPU, mesuré localement puis sur G4
+CPU48 ; le traitement FULL reste séquentiel. Le contrôleur GCP historique
+mesure F et des primitives device, pas la nouvelle tour FULL. Le premier
+contrôleur de sonde FULL CPU est qualifié séparément et ses deux processus
+50k refusent sur les coquilles supplémentaires avant tout ordre.
 La priorité de génération demandée ensuite est l'[élimination par blocs
 WSPD](docs/ELIMINATION_BLOCS_WSPD.md), h_cœur/h_a/h_b : distinguer nouvelles
 morts, tests de seuil mutualisés et comptages redondants supprimés.

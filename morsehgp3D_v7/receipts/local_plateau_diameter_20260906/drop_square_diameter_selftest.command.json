@@ -1,0 +1,26 @@
+{
+  "added_quotas": "none",
+  "argv": [
+    "taskset",
+    "--cpu-list",
+    "0",
+    "/workspaces/E-HGP/build/v7_local_plateau_diameter_20260906/bin/drop_square_diameter",
+    "--selftest"
+  ],
+  "closed": true,
+  "cpu": 0,
+  "cwd": "/workspaces/E-HGP",
+  "ended": "2026-09-06T19:15:40.290156+00:00",
+  "environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "exit_code": 1,
+  "expected_exit": 1,
+  "pid": 103,
+  "started": "2026-09-06T19:15:40.284447+00:00",
+  "streams": {
+    "stderr": "ad91a9fd5871386e8153c9020b48ea37d3c7b6485fbaa4f49fa579704cb007e6",
+    "stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

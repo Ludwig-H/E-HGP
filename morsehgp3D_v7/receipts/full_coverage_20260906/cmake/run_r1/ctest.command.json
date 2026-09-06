@@ -1,0 +1,25 @@
+{
+  "added_resource_limits": false,
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_coverage_cmake_20260906/build_r1",
+    "-V",
+    "--output-on-failure",
+    "--output-junit",
+    "/workspaces/E-HGP/build/v7_coverage_cmake_20260906/run_r1/junit.xml",
+    "-R",
+    "^(mhgp7_full_coverage_certificate|mhgp7_full_coverage_certificate_bad_argument|mhgp7_local_plateau|mhgp7_local_plateau_bad_argument|mhgp7_full_certificate|mhgp7_full_certificate_rejects)$",
+    "--parallel",
+    "1"
+  ],
+  "closed": true,
+  "cwd": "/workspaces/E-HGP",
+  "ended_ns": 1788722828866177659,
+  "exit_code": 0,
+  "imposed_timeout": null,
+  "pid": 196,
+  "started_ns": 1788722828714015590,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e75bd934325612bd4db15166093b452dcac7ef363cf315bb9624b773e67f4adf"
+}
