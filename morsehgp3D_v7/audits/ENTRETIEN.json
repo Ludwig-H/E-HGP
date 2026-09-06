@@ -1336,5 +1336,101 @@
     "engine_invocations": 0,
     "new_cpp_compilations": 0,
     "gcp": "not_used"
+  },
+  "latest_shared_anchors_review_20260906": {
+    "date": "2026-09-06T11:35:42.209386+00:00",
+    "base_head": "a9ce3639117d84e9eccc4ad1c33661567129ae79",
+    "receipt": "receipts_shared_anchors_20260906/README.md",
+    "scope": "Identity of horizontal and vertical closed anchors, exact temporal transport, J1 counterfixture and minimum candidate shortcut; no new C++ or timing.",
+    "variants_D_to_O_unchanged": true,
+    "historical_scientific_receipts_modified": false,
+    "checks": {
+      "docs_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "active_documents": 374
+      },
+      "registry": {
+        "exit_code": 0,
+        "phases": 20
+      },
+      "authored_markdown": {
+        "files": 5,
+        "local_links": 90,
+        "anchors": 1,
+        "errors": 0,
+        "math_format": "passed"
+      },
+      "j1": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "sha256": "0d51766c0ba5b4ecffe65c2c735beaf03921cac53d60031f381efcd3a60797db",
+        "fixed_certificates": 7,
+        "calendars_meb_calls": [
+          1,
+          2,
+          1,
+          1
+        ]
+      },
+      "shared": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "sha256": "1cefcbb4a1ff69d0ac45d8f7c687357ed872fb280e5c590859a5444f69196b9d",
+        "records": 7,
+        "transports": 65,
+        "protocol_rejections": 6,
+        "extra_E5_noop_birth_checked": true
+      },
+      "unstaged_whitespace": "passed",
+      "initial_freshness_read": {
+        "normal_optimized_exit_codes": [
+          1,
+          1
+        ],
+        "common_delta": [
+          "docs/LECTURE_ET_CONTRATS.md"
+        ],
+        "resolution": "Read entire published entry and its seven-line quotient/descent addition; refreshed this common documentary pin only. D-O unchanged."
+      },
+      "freshness": {
+        "normal_optimized_exit_codes": [
+          1,
+          1
+        ],
+        "byte_identical": true,
+        "common_pins": 2202,
+        "common_mismatches": 0,
+        "source_variants_unchanged": 12,
+        "O_delta": [
+          "CMakeLists.txt",
+          "PASSATION.md",
+          "README.md",
+          "docs/FAUSSES_PISTES.md",
+          "docs/RESIDENCE_MASSIVE.md",
+          "tests/meb_proposal_local_gate.cpp"
+        ],
+        "interpretation": "Expected documentary/test delta of published a9ce3639; compiled FULL/MEB headers unchanged, no new C++ qualification."
+      },
+      "publication_scope": {
+        "staged_paths": 14,
+        "outside_audits": 0,
+        "staged_whitespace": "passed",
+        "index_initially_empty": true,
+        "branch": "main"
+      }
+    },
+    "maintenance": "25 root Markdown notes retained, dialogue focused on current questions, published constructor quota change reflected without repinning C++ qualification. Prior proof packets and failures unchanged.",
+    "engine_invocations": 0,
+    "new_cpp_compilations": 0,
+    "gcp": "not_used"
   }
 }

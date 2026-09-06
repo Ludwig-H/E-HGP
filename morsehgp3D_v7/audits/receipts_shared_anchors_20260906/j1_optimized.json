@@ -1,0 +1,599 @@
+{
+  "Gamma_path_witnesses": [
+    [
+      "BD",
+      "CD",
+      "BCD"
+    ],
+    [
+      "CD",
+      "DE",
+      "CDE"
+    ],
+    [
+      "BD",
+      "BC",
+      "BCD"
+    ]
+  ],
+  "all_BD_essential_replacement_candidates": [
+    {
+      "descendant": "CD",
+      "minimum": false,
+      "path_coface": "BCD",
+      "removed": "B",
+      "squared_level": {
+        "denominator": 2,
+        "numerator": 53
+      }
+    },
+    {
+      "descendant": "BC",
+      "minimum": true,
+      "path_coface": "BCD",
+      "removed": "D",
+      "squared_level": {
+        "denominator": 2,
+        "numerator": 25
+      }
+    }
+  ],
+  "alternative_facet_choice": {
+    "MEB_calls_if_lookup_before_MEB": 1,
+    "path": [
+      "BD",
+      "BC"
+    ],
+    "replace": "D by C in BD",
+    "terminal": "certified_minimum_BC"
+  },
+  "assumptions": [
+    "Initial BD request misses the optional cache; mandatory catalogue lookups remain available.",
+    "Complete exact catalogues supply minimum identities and the already processed closed BCD anchor.",
+    "Work counts are successful unbounded local calendars at P=0; no finite-budget refusal is replayed.",
+    "The pure rule removes the first essential PointId; the singleton intruder choices are unique."
+  ],
+  "certificate_count": 7,
+  "certificates": {
+    "ABD": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "C": {
+          "denominator": 41,
+          "numerator": 744
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "E": {
+          "denominator": 41,
+          "numerator": 1908
+        }
+      },
+      "center": [
+        {
+          "denominator": 41,
+          "numerator": 254
+        },
+        {
+          "denominator": 41,
+          "numerator": 230
+        },
+        {
+          "denominator": 41,
+          "numerator": 171
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 41,
+        "numerator": 1909
+      },
+      "strict_intruders": [],
+      "support": [
+        "A",
+        "B",
+        "D"
+      ],
+      "weights": {
+        "A": {
+          "denominator": 246,
+          "numerator": 83
+        },
+        "B": {
+          "denominator": 41,
+          "numerator": 8
+        },
+        "D": {
+          "denominator": 246,
+          "numerator": 115
+        }
+      }
+    },
+    "BC": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 75
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 111
+        },
+        "E": {
+          "denominator": 1,
+          "numerator": 48
+        }
+      },
+      "center": [
+        {
+          "denominator": 2,
+          "numerator": 11
+        },
+        {
+          "denominator": 1,
+          "numerator": 4
+        },
+        {
+          "denominator": 2,
+          "numerator": 21
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 2,
+        "numerator": 25
+      },
+      "strict_intruders": [],
+      "support": [
+        "B",
+        "C"
+      ],
+      "weights": {
+        "B": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "C": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "BCD": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 30
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": -5
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "E": {
+          "denominator": 1,
+          "numerator": 14
+        }
+      },
+      "center": [
+        {
+          "denominator": 2,
+          "numerator": 15
+        },
+        {
+          "denominator": 2,
+          "numerator": 11
+        },
+        {
+          "denominator": 1,
+          "numerator": 6
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 2,
+        "numerator": 83
+      },
+      "strict_intruders": [],
+      "support": [
+        "B",
+        "D"
+      ],
+      "weights": {
+        "B": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "D": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "BD": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 30
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": -5
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "E": {
+          "denominator": 1,
+          "numerator": 14
+        }
+      },
+      "center": [
+        {
+          "denominator": 2,
+          "numerator": 15
+        },
+        {
+          "denominator": 2,
+          "numerator": 11
+        },
+        {
+          "denominator": 1,
+          "numerator": 6
+        }
+      ],
+      "gabriel": false,
+      "radius_squared": {
+        "denominator": 2,
+        "numerator": 83
+      },
+      "strict_intruders": [
+        "C"
+      ],
+      "support": [
+        "B",
+        "D"
+      ],
+      "weights": {
+        "B": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "D": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "CD": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 114
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 55
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "E": {
+          "denominator": 1,
+          "numerator": -3
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 10
+        },
+        {
+          "denominator": 2,
+          "numerator": 15
+        },
+        {
+          "denominator": 2,
+          "numerator": 15
+        }
+      ],
+      "gabriel": false,
+      "radius_squared": {
+        "denominator": 2,
+        "numerator": 53
+      },
+      "strict_intruders": [
+        "E"
+      ],
+      "support": [
+        "C",
+        "D"
+      ],
+      "weights": {
+        "C": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "D": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "CDE": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 114
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 55
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "E": {
+          "denominator": 1,
+          "numerator": -3
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 10
+        },
+        {
+          "denominator": 2,
+          "numerator": 15
+        },
+        {
+          "denominator": 2,
+          "numerator": 15
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 2,
+        "numerator": 53
+      },
+      "strict_intruders": [],
+      "support": [
+        "C",
+        "D"
+      ],
+      "weights": {
+        "C": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "D": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "DE": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 174
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 106
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 29
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "E": {
+          "denominator": 1,
+          "numerator": 0
+        }
+      },
+      "center": [
+        {
+          "denominator": 2,
+          "numerator": 25
+        },
+        {
+          "denominator": 2,
+          "numerator": 15
+        },
+        {
+          "denominator": 1,
+          "numerator": 7
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 2,
+        "numerator": 37
+      },
+      "strict_intruders": [],
+      "support": [
+        "D",
+        "E"
+      ],
+      "weights": {
+        "D": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "E": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    }
+  },
+  "constructor_comparison_observed": {
+    "is_execution_dependency": false,
+    "path": "morsehgp3D_v7/tests/full_gabriel_descent_comparison_gate.py",
+    "sha256": "5e357ead0d626121cf66e15d17f0817475520663db7fe5237d9cbd7f25448a16",
+    "status": "worktree preparation observed, not executed or qualified"
+  },
+  "consuming_coface": "ABD",
+  "consumption_squared_level": {
+    "denominator": 41,
+    "numerator": 1909
+  },
+  "engine_calls": 0,
+  "gcp": "not_used",
+  "limits": [
+    "Only these seven fixed labels have independent geometry certificates here, not all 31 subsets.",
+    "The two-call counterexample concerns this deterministic facet rule, not every choice of descent.",
+    "Retaining J1 keeps direct-anchor storage/normalization; their costs are not measured.",
+    "No query nodes, successor reads, elapsed time, memory, or product execution are qualified."
+  ],
+  "paths": {
+    "hybrid_retaining_J1": {
+      "MEB_calls": 1,
+      "P0_F_support_ordinal_sum": 1,
+      "census_calls": 1,
+      "census_labels": [
+        "BD"
+      ],
+      "meb_labels": [
+        "BD"
+      ],
+      "path": [
+        "BD",
+        "BCD"
+      ],
+      "terminal": "BCD",
+      "terminal_kind": "prior_direct_closed_anchor"
+    },
+    "old_J1": {
+      "MEB_calls": 1,
+      "P0_F_support_ordinal_sum": 1,
+      "census_calls": 1,
+      "census_labels": [
+        "BD"
+      ],
+      "meb_labels": [
+        "BD"
+      ],
+      "path": [
+        "BD",
+        "BCD"
+      ],
+      "terminal": "BCD",
+      "terminal_kind": "prior_direct_closed_anchor"
+    },
+    "probe_all_essential_minima": {
+      "MEB_calls": 1,
+      "P0_F_support_ordinal_sum": 1,
+      "candidate_lookups": 2,
+      "census_calls": 1,
+      "census_labels": [
+        "BD"
+      ],
+      "meb_labels": [
+        "BD"
+      ],
+      "path": [
+        "BD",
+        "BC"
+      ],
+      "terminal": "BC",
+      "terminal_kind": "minimum_lookup"
+    },
+    "pure_first_essential": {
+      "MEB_calls": 2,
+      "P0_F_support_ordinal_sum": 2,
+      "census_calls": 2,
+      "census_labels": [
+        "BD",
+        "CD"
+      ],
+      "meb_labels": [
+        "BD",
+        "CD"
+      ],
+      "path": [
+        "BD",
+        "CD",
+        "DE"
+      ],
+      "terminal": "DE",
+      "terminal_kind": "minimum_lookup"
+    }
+  },
+  "points_u16": {
+    "A": [
+      0,
+      3,
+      3
+    ],
+    "B": [
+      3,
+      2,
+      9
+    ],
+    "C": [
+      8,
+      6,
+      12
+    ],
+    "D": [
+      12,
+      9,
+      3
+    ],
+    "E": [
+      13,
+      6,
+      11
+    ]
+  },
+  "product_imports": 0,
+  "public_status": "not_claimed",
+  "schema": "mhgp7-independent-J1-fixed-certificates-v1",
+  "script_sha256": "d5579511ca93aeaa9efcafd799eb003d42290185d47844f58fdb61434f6e8e37",
+  "status": "passed"
+}

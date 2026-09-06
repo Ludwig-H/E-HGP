@@ -1,0 +1,28 @@
+{
+  "schema": "mhgp7-shared-anchors-source-review-v1",
+  "reviewed_utc": "2026-09-06T11:24:40.341897+00:00",
+  "base_head": "dad414cb8a4d475eb27c5a1c70075c8c795ee847",
+  "source_sha256": {
+    "morsehgp3D_v7/src/forest/full_gabriel.hpp": "a946e31dde8fbd8ec528d6f5e94f9c727998acc172b4dd29c084dd522c730d1d",
+    "morsehgp3D_v7/src/forest/full_certificate.hpp": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+    "morsehgp3D_v7/src/forest/meb_proposal.hpp": "f922544b5cfdc214de96ecd49520e318ea8632d14a8142ef21fd248f9cc38fb3",
+    "morsehgp3D_v7/audits/receipts_gabriel_vertices_20260906/tower_normal.json": "13fbed40cbdb627e3bf578fb8e8783e420c0cbc618d12fcd80b8e047fe031d0d",
+    "morsehgp3D_v7/audits/receipts_gabriel_vertices_20260906/baseline_read.json": "6ce3bf904c570d4c308a5d52623f8b3146e0f5d63ba3f7b86f0628e67dca335c",
+    "morsehgp3D_v7/audits/receipts_gabriel_20260905/full_normal.json": "00911669a9045b0bd466ee991d9972e764c46a0fa941d7ab79cfeca3082e627f"
+  },
+  "scope": "Shared horizontal/vertical closed anchors, historical transport and owner validity, fixed J1 certificates and essential replacement minimum lookups.",
+  "constructor_comparison_observed": {
+    "is_execution_dependency": false,
+    "path": "morsehgp3D_v7/tests/full_gabriel_descent_comparison_gate.py",
+    "sha256": "5e357ead0d626121cf66e15d17f0817475520663db7fe5237d9cbd7f25448a16",
+    "status": "worktree preparation observed, not executed or qualified"
+  },
+  "qualification_limits": "No constructor import or execution, no new C++ build or benchmark, no complete n5 subset oracle, no budgeted-product refusal or allocation failure replay.",
+  "source_variants_D_to_O_modified": false,
+  "gcp": "not_used",
+  "publication_followup": {
+    "head": "a9ce3639117d84e9eccc4ad1c33661567129ae79",
+    "source_sha256_still_valid": true,
+    "constructor_comparison_now_published": true
+  }
+}

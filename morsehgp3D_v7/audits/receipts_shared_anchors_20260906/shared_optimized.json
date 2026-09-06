@@ -1,0 +1,163 @@
+{
+  "engine_calls": 0,
+  "gcp": "not_used",
+  "horizons": [
+    {
+      "Kmax": 1,
+      "optional_top_rank_anchors": [
+        "AD",
+        "CD",
+        "AB",
+        "BC"
+      ],
+      "shared_vertical_records": []
+    },
+    {
+      "Kmax": 2,
+      "optional_top_rank_anchors": [
+        "ACD",
+        "ABC"
+      ],
+      "shared_vertical_records": [
+        "AD",
+        "CD",
+        "AB",
+        "BC"
+      ]
+    },
+    {
+      "Kmax": 3,
+      "optional_top_rank_anchors": [
+        "ABCD"
+      ],
+      "shared_vertical_records": [
+        "AD",
+        "CD",
+        "AB",
+        "BC",
+        "ACD",
+        "ABC"
+      ]
+    },
+    {
+      "Kmax": 4,
+      "optional_top_rank_anchors": [],
+      "shared_vertical_records": [
+        "AD",
+        "CD",
+        "AB",
+        "BC",
+        "ACD",
+        "ABC",
+        "ABCD"
+      ]
+    }
+  ],
+  "no_op_source_sha256": "00911669a9045b0bd466ee991d9972e764c46a0fa941d7ab79cfeca3082e627f",
+  "no_op_witness": {
+    "case": "E5",
+    "foreign_powers": {
+      "0": 43,
+      "1": 68,
+      "3": 7
+    },
+    "label": "CE",
+    "level": "11/2",
+    "lower_closed_anchor": 5,
+    "lower_points": [
+      2,
+      3,
+      4
+    ],
+    "rank": 2,
+    "upper_birth": 2
+  },
+  "protocol_rejections": {
+    "out_of_range": "token_range",
+    "same_lot": "anchor_not_prior",
+    "unaccepted_owner": "anchor_owner_unaccepted",
+    "wrong_key": "anchor_key",
+    "wrong_level": "anchor_level",
+    "wrong_order": "anchor_order"
+  },
+  "public_status": "not_claimed",
+  "publication": "accepted flag models owner validity; no product allocation failure or shared-memory implementation exercised",
+  "records": [
+    {
+      "accepted": true,
+      "label": "AD",
+      "level": "13/2",
+      "lower_anchor": 4,
+      "lower_order": 1,
+      "rank": 2,
+      "upper_birth": 0
+    },
+    {
+      "accepted": true,
+      "label": "CD",
+      "level": "13/2",
+      "lower_anchor": 4,
+      "lower_order": 1,
+      "rank": 2,
+      "upper_birth": 1
+    },
+    {
+      "accepted": true,
+      "label": "AB",
+      "level": "13",
+      "lower_anchor": 5,
+      "lower_order": 1,
+      "rank": 2,
+      "upper_birth": 2
+    },
+    {
+      "accepted": true,
+      "label": "BC",
+      "level": "13",
+      "lower_anchor": 5,
+      "lower_order": 1,
+      "rank": 2,
+      "upper_birth": 3
+    },
+    {
+      "accepted": true,
+      "label": "ACD",
+      "level": "16",
+      "lower_anchor": 4,
+      "lower_order": 2,
+      "rank": 3,
+      "upper_birth": 0
+    },
+    {
+      "accepted": true,
+      "label": "ABC",
+      "level": "169/9",
+      "lower_anchor": 5,
+      "lower_order": 2,
+      "rank": 3,
+      "upper_birth": 1
+    },
+    {
+      "accepted": true,
+      "label": "ABCD",
+      "level": "41/2",
+      "lower_anchor": 2,
+      "lower_order": 3,
+      "rank": 4,
+      "upper_birth": 0
+    }
+  ],
+  "schema": "mhgp7-shared-anchor-history-replay-v1",
+  "scope": "Pinned n4 tower histories, shared-anchor identity and proposed protocol rejection models; no new constructor or C++ run",
+  "script_sha256": "244b227170ba5c79533c1bc3f747c2045260b1c4a6df48004b3ae6014504fb53",
+  "semantic_mutants": {
+    "distinct_upper_leaves": 2,
+    "expected_at_birth": 4,
+    "final_normalization_too_early": 5,
+    "shared_lower_value": 1,
+    "upper_token_as_lower": 1
+  },
+  "source_sha256": "13fbed40cbdb627e3bf578fb8e8783e420c0cbc618d12fcd80b8e047fe031d0d",
+  "status": "passed",
+  "transport_checks": 65
+}
