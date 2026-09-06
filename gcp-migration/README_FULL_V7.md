@@ -12,6 +12,17 @@ invité encore programmé. Il ne modifie aucune garde et n'appelle pas GCP.
 ROOT doit récupérer les preuves puis certifier l'arrêt de la même génération
 avec [stop_and_verify.sh](stop_and_verify.sh), même en cas d'échec.
 
+Le [contrôleur hôte](full_probe_session_v7.py) réalise cette séquence pour
+la cible existante `devpod-gpu-exploration/us-central1-b/ehgp-v7-4fa0e0789a7d5bb06b787d35`.
+Il reste inerte sans `--execute`. Il reçoit un répertoire privé neuf,
+une clé de session déjà créée, les sources archivées, leur manifeste et
+les empreintes attendues. Il inscrit la clé publique avec une durée de
+70 minutes, puis laisse le script gardé vérifier son expiration exacte.
+L'arrêt invité est fixé à 30 minutes. Aucune création de VM ou de disque,
+aucune mutation d'une autre instance. L'archive récupérée exclut le binaire.
+L'arrêt ciblé est dans un `finally` indépendant du succès des captures ;
+les clés privées restent hors du dépôt et des reçus publiés.
+
 La campagne minimale compile uniquement les dépendances v7 de la sonde
 FULL, en C++20 O3 strict. Pas de v6, Boost, CMake ni installation CUDA.
 Si nécessaire et explicitement demandé, le bootstrap installe seulement
@@ -39,6 +50,8 @@ Tests purs sans GCP, compilation ni sous-processus :
 ```bash
 python3 gcp-migration/selftest_full_probe_worker_v7.py
 python3 -O gcp-migration/selftest_full_probe_worker_v7.py
+python3 gcp-migration/selftest_full_probe_session_v7.py
+python3 -O gcp-migration/selftest_full_probe_session_v7.py
 ```
 
 Les sources de la campagne sont celles du

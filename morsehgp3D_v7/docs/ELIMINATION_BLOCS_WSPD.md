@@ -45,6 +45,23 @@ histogrammes eux-mêmes, O(|A|²+|B|²). Saturer un histogramme à need est
 sûr : seules ses valeurs strictement inférieures peuvent être transmises
 à une ancre survivante, et celles-ci doivent rester exactes.
 
+L'[auditeur donne maintenant une réalisation stable](../audits/receipts_phase_selection_20260906/README.md#2-réaliser-la-borne-de-sélection-en-conservant-morton) : buckets de crédits B,
+liste doublement chaînée dans l'ordre Morton, puis suppression des buckets
+par seuil décroissant. Copier une liste seulement pour un seuil demandé,
+et rejouer A dans son ordre initial. Chaque indice B est supprimé au plus
+une fois ; le total M des indices copiés vérifie M≤survivants et
+M≤need·|B|. La mémoire inclut ces copies, par worker : elle n'est pas
+simplement O(|B|+need). Cette preuve et ses contre-modèles Python ne sont
+pas encore une qualification C++ ni une mesure de gain.
+
+La saturation doit rester globale à need. Une valeur tronquée au seuil
+particulier d'une ligne ne peut pas être recyclée pour toutes les autres :
+la contre-fixture A={0,1}, B={100,101,102}, q2/smax=3 possède need=2,
+h_a=(1,0), h_b=(0,1,2). Couper h_b à 1 pour la première ligne et conserver
+ce cap laisserait vivre à tort (1,102). Le prototype privé utilise bien
+le cap global ; l'optimisation de sélection reste distincte de celle des
+évaluations géométriques.
+
 ## Sous-blocs : un certificat sûr, et un faux raccourci
 
 Pour A′⊆A et B′⊆B, conserver les **populations parentales** donne le rejet :
