@@ -1,0 +1,1722 @@
+{
+  "affine_determinant": -48,
+  "canonical_descent_paths": {
+    "AC": [
+      "AC",
+      "CD"
+    ],
+    "BD": [
+      "BD",
+      "AD"
+    ]
+  },
+  "certificate_count": 15,
+  "certificates": {
+    "A": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 52
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 64
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 26
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 0
+        },
+        {
+          "denominator": 1,
+          "numerator": 3
+        },
+        {
+          "denominator": 1,
+          "numerator": 0
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 1,
+        "numerator": 0
+      },
+      "support": "A",
+      "weights": {
+        "A": {
+          "denominator": 1,
+          "numerator": 1
+        }
+      }
+    },
+    "AB": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 32
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 28
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 2
+        },
+        {
+          "denominator": 1,
+          "numerator": 6
+        },
+        {
+          "denominator": 1,
+          "numerator": 0
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 1,
+        "numerator": 13
+      },
+      "support": "AB",
+      "weights": {
+        "A": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "B": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "ABC": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 4
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 4
+        },
+        {
+          "denominator": 3,
+          "numerator": 14
+        },
+        {
+          "denominator": 1,
+          "numerator": 0
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 9,
+        "numerator": 169
+      },
+      "support": "ABC",
+      "weights": {
+        "A": {
+          "denominator": 36,
+          "numerator": 13
+        },
+        "B": {
+          "denominator": 18,
+          "numerator": 5
+        },
+        "C": {
+          "denominator": 36,
+          "numerator": 13
+        }
+      }
+    },
+    "ABCD": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": -2
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": -2
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 0
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 4
+        },
+        {
+          "denominator": 2,
+          "numerator": 9
+        },
+        {
+          "denominator": 2,
+          "numerator": 1
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 2,
+        "numerator": 41
+      },
+      "support": "BD",
+      "weights": {
+        "B": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "D": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "ABD": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": -2
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": -2
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 0
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 4
+        },
+        {
+          "denominator": 2,
+          "numerator": 9
+        },
+        {
+          "denominator": 2,
+          "numerator": 1
+        }
+      ],
+      "gabriel": false,
+      "radius_squared": {
+        "denominator": 2,
+        "numerator": 41
+      },
+      "support": "BD",
+      "weights": {
+        "B": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "D": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "AC": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 20
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": -6
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 4
+        },
+        {
+          "denominator": 1,
+          "numerator": 3
+        },
+        {
+          "denominator": 1,
+          "numerator": 0
+        }
+      ],
+      "gabriel": false,
+      "radius_squared": {
+        "denominator": 1,
+        "numerator": 16
+      },
+      "support": "AC",
+      "weights": {
+        "A": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "C": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "ACD": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 20
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": -6
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 4
+        },
+        {
+          "denominator": 1,
+          "numerator": 3
+        },
+        {
+          "denominator": 1,
+          "numerator": 0
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 1,
+        "numerator": 16
+      },
+      "support": "AC",
+      "weights": {
+        "A": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "C": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "AD": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 54
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 32
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 0
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 2
+        },
+        {
+          "denominator": 2,
+          "numerator": 3
+        },
+        {
+          "denominator": 2,
+          "numerator": 1
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 2,
+        "numerator": 13
+      },
+      "support": "AD",
+      "weights": {
+        "A": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "D": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "B": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 52
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 52
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 82
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 4
+        },
+        {
+          "denominator": 1,
+          "numerator": 9
+        },
+        {
+          "denominator": 1,
+          "numerator": 0
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 1,
+        "numerator": 0
+      },
+      "support": "B",
+      "weights": {
+        "B": {
+          "denominator": 1,
+          "numerator": 1
+        }
+      }
+    },
+    "BC": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 32
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 28
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 6
+        },
+        {
+          "denominator": 1,
+          "numerator": 6
+        },
+        {
+          "denominator": 1,
+          "numerator": 0
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 1,
+        "numerator": 13
+      },
+      "support": "BC",
+      "weights": {
+        "B": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "C": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "BCD": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": -2
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": -2
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 0
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 4
+        },
+        {
+          "denominator": 2,
+          "numerator": 9
+        },
+        {
+          "denominator": 2,
+          "numerator": 1
+        }
+      ],
+      "gabriel": false,
+      "radius_squared": {
+        "denominator": 2,
+        "numerator": 41
+      },
+      "support": "BD",
+      "weights": {
+        "B": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "D": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "BD": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": -2
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": -2
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 0
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 4
+        },
+        {
+          "denominator": 2,
+          "numerator": 9
+        },
+        {
+          "denominator": 2,
+          "numerator": 1
+        }
+      ],
+      "gabriel": false,
+      "radius_squared": {
+        "denominator": 2,
+        "numerator": 41
+      },
+      "support": "BD",
+      "weights": {
+        "B": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "D": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "C": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 64
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 52
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 26
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 8
+        },
+        {
+          "denominator": 1,
+          "numerator": 3
+        },
+        {
+          "denominator": 1,
+          "numerator": 0
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 1,
+        "numerator": 0
+      },
+      "support": "C",
+      "weights": {
+        "C": {
+          "denominator": 1,
+          "numerator": 1
+        }
+      }
+    },
+    "CD": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 32
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 54
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 0
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 6
+        },
+        {
+          "denominator": 2,
+          "numerator": 3
+        },
+        {
+          "denominator": 2,
+          "numerator": 1
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 2,
+        "numerator": 13
+      },
+      "support": "CD",
+      "weights": {
+        "C": {
+          "denominator": 2,
+          "numerator": 1
+        },
+        "D": {
+          "denominator": 2,
+          "numerator": 1
+        }
+      }
+    },
+    "D": {
+      "all_point_powers": {
+        "A": {
+          "denominator": 1,
+          "numerator": 26
+        },
+        "B": {
+          "denominator": 1,
+          "numerator": 82
+        },
+        "C": {
+          "denominator": 1,
+          "numerator": 26
+        },
+        "D": {
+          "denominator": 1,
+          "numerator": 0
+        }
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 4
+        },
+        {
+          "denominator": 1,
+          "numerator": 0
+        },
+        {
+          "denominator": 1,
+          "numerator": 1
+        }
+      ],
+      "gabriel": true,
+      "radius_squared": {
+        "denominator": 1,
+        "numerator": 0
+      },
+      "support": "D",
+      "weights": {
+        "D": {
+          "denominator": 1,
+          "numerator": 1
+        }
+      }
+    }
+  },
+  "counterexample": {
+    "Gabriel_induced_all_unions": [
+      [
+        "AB",
+        "BC"
+      ],
+      [
+        "AD",
+        "CD"
+      ]
+    ],
+    "Gamma": [
+      [
+        "AB",
+        "AC",
+        "AD",
+        "BC",
+        "CD"
+      ]
+    ],
+    "Gamma_point_covers": [
+      "ABCD"
+    ],
+    "compressed": [
+      [
+        "AB",
+        "AD",
+        "BC",
+        "CD"
+      ]
+    ],
+    "induced_point_covers": [
+      "ABC",
+      "ACD"
+    ],
+    "side": "closed",
+    "squared_level": {
+      "denominator": 9,
+      "numerator": 169
+    }
+  },
+  "critical_squared_levels": [
+    {
+      "denominator": 1,
+      "numerator": 0
+    },
+    {
+      "denominator": 2,
+      "numerator": 13
+    },
+    {
+      "denominator": 1,
+      "numerator": 13
+    },
+    {
+      "denominator": 1,
+      "numerator": 16
+    },
+    {
+      "denominator": 9,
+      "numerator": 169
+    },
+    {
+      "denominator": 2,
+      "numerator": 41
+    }
+  ],
+  "cross_union_levels": {
+    "AD--AB": {
+      "denominator": 2,
+      "numerator": 41
+    },
+    "AD--BC": {
+      "denominator": 2,
+      "numerator": 41
+    },
+    "CD--AB": {
+      "denominator": 2,
+      "numerator": 41
+    },
+    "CD--BC": {
+      "denominator": 2,
+      "numerator": 41
+    }
+  },
+  "cut_count": 19,
+  "engine_calls": 0,
+  "first_induced_crossing_squared_level": {
+    "denominator": 2,
+    "numerator": 41
+  },
+  "gcp": "not_used",
+  "minima": [
+    "AB",
+    "AD",
+    "BC",
+    "CD"
+  ],
+  "points_u16": {
+    "A": [
+      0,
+      3,
+      0
+    ],
+    "B": [
+      4,
+      9,
+      0
+    ],
+    "C": [
+      8,
+      3,
+      0
+    ],
+    "D": [
+      4,
+      0,
+      1
+    ]
+  },
+  "public_status": "not_claimed",
+  "schema": "mhgp7-gabriel-vertices-counterfixture-v1",
+  "scope": "Verification of 15 fixed rational certificates and 19 finite graph cuts; no MEB search or product import.",
+  "script_sha256": "a5f4b4c54827f72769be181aff986469e6458c0360bde0e0fe52f776e30a73a4",
+  "states": [
+    {
+      "Gabriel_induced_all_unions": [],
+      "Gamma": [],
+      "Gamma_point_covers": [],
+      "compressed": [],
+      "induced_point_covers": [],
+      "side": "closed",
+      "squared_level": {
+        "denominator": 1,
+        "numerator": -1
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [],
+      "Gamma": [],
+      "Gamma_point_covers": [],
+      "compressed": [],
+      "induced_point_covers": [],
+      "side": "closed",
+      "squared_level": {
+        "denominator": 1,
+        "numerator": 0
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [],
+      "Gamma": [],
+      "Gamma_point_covers": [],
+      "compressed": [],
+      "induced_point_covers": [],
+      "side": "open",
+      "squared_level": {
+        "denominator": 1,
+        "numerator": 0
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [],
+      "Gamma": [],
+      "Gamma_point_covers": [],
+      "compressed": [],
+      "induced_point_covers": [],
+      "side": "closed",
+      "squared_level": {
+        "denominator": 4,
+        "numerator": 13
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [
+        [
+          "AD"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "Gamma": [
+        [
+          "AD"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "Gamma_point_covers": [
+        "AD",
+        "CD"
+      ],
+      "compressed": [
+        [
+          "AD"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "induced_point_covers": [
+        "AD",
+        "CD"
+      ],
+      "side": "closed",
+      "squared_level": {
+        "denominator": 2,
+        "numerator": 13
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [],
+      "Gamma": [],
+      "Gamma_point_covers": [],
+      "compressed": [],
+      "induced_point_covers": [],
+      "side": "open",
+      "squared_level": {
+        "denominator": 2,
+        "numerator": 13
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [
+        [
+          "AD"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "Gamma": [
+        [
+          "AD"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "Gamma_point_covers": [
+        "AD",
+        "CD"
+      ],
+      "compressed": [
+        [
+          "AD"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "induced_point_covers": [
+        "AD",
+        "CD"
+      ],
+      "side": "closed",
+      "squared_level": {
+        "denominator": 4,
+        "numerator": 39
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [
+        [
+          "AB"
+        ],
+        [
+          "AD"
+        ],
+        [
+          "BC"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "Gamma": [
+        [
+          "AB"
+        ],
+        [
+          "AD"
+        ],
+        [
+          "BC"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "Gamma_point_covers": [
+        "AB",
+        "AD",
+        "BC",
+        "CD"
+      ],
+      "compressed": [
+        [
+          "AB"
+        ],
+        [
+          "AD"
+        ],
+        [
+          "BC"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "induced_point_covers": [
+        "AB",
+        "AD",
+        "BC",
+        "CD"
+      ],
+      "side": "closed",
+      "squared_level": {
+        "denominator": 1,
+        "numerator": 13
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [
+        [
+          "AD"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "Gamma": [
+        [
+          "AD"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "Gamma_point_covers": [
+        "AD",
+        "CD"
+      ],
+      "compressed": [
+        [
+          "AD"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "induced_point_covers": [
+        "AD",
+        "CD"
+      ],
+      "side": "open",
+      "squared_level": {
+        "denominator": 1,
+        "numerator": 13
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [
+        [
+          "AB"
+        ],
+        [
+          "AD"
+        ],
+        [
+          "BC"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "Gamma": [
+        [
+          "AB"
+        ],
+        [
+          "AD"
+        ],
+        [
+          "BC"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "Gamma_point_covers": [
+        "AB",
+        "AD",
+        "BC",
+        "CD"
+      ],
+      "compressed": [
+        [
+          "AB"
+        ],
+        [
+          "AD"
+        ],
+        [
+          "BC"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "induced_point_covers": [
+        "AB",
+        "AD",
+        "BC",
+        "CD"
+      ],
+      "side": "closed",
+      "squared_level": {
+        "denominator": 2,
+        "numerator": 29
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [
+        [
+          "AB"
+        ],
+        [
+          "AD",
+          "CD"
+        ],
+        [
+          "BC"
+        ]
+      ],
+      "Gamma": [
+        [
+          "AB"
+        ],
+        [
+          "AC",
+          "AD",
+          "CD"
+        ],
+        [
+          "BC"
+        ]
+      ],
+      "Gamma_point_covers": [
+        "AB",
+        "ACD",
+        "BC"
+      ],
+      "compressed": [
+        [
+          "AB"
+        ],
+        [
+          "AD",
+          "CD"
+        ],
+        [
+          "BC"
+        ]
+      ],
+      "induced_point_covers": [
+        "AB",
+        "ACD",
+        "BC"
+      ],
+      "side": "closed",
+      "squared_level": {
+        "denominator": 1,
+        "numerator": 16
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [
+        [
+          "AB"
+        ],
+        [
+          "AD"
+        ],
+        [
+          "BC"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "Gamma": [
+        [
+          "AB"
+        ],
+        [
+          "AD"
+        ],
+        [
+          "BC"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "Gamma_point_covers": [
+        "AB",
+        "AD",
+        "BC",
+        "CD"
+      ],
+      "compressed": [
+        [
+          "AB"
+        ],
+        [
+          "AD"
+        ],
+        [
+          "BC"
+        ],
+        [
+          "CD"
+        ]
+      ],
+      "induced_point_covers": [
+        "AB",
+        "AD",
+        "BC",
+        "CD"
+      ],
+      "side": "open",
+      "squared_level": {
+        "denominator": 1,
+        "numerator": 16
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [
+        [
+          "AB"
+        ],
+        [
+          "AD",
+          "CD"
+        ],
+        [
+          "BC"
+        ]
+      ],
+      "Gamma": [
+        [
+          "AB"
+        ],
+        [
+          "AC",
+          "AD",
+          "CD"
+        ],
+        [
+          "BC"
+        ]
+      ],
+      "Gamma_point_covers": [
+        "AB",
+        "ACD",
+        "BC"
+      ],
+      "compressed": [
+        [
+          "AB"
+        ],
+        [
+          "AD",
+          "CD"
+        ],
+        [
+          "BC"
+        ]
+      ],
+      "induced_point_covers": [
+        "AB",
+        "ACD",
+        "BC"
+      ],
+      "side": "closed",
+      "squared_level": {
+        "denominator": 18,
+        "numerator": 313
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [
+        [
+          "AB",
+          "BC"
+        ],
+        [
+          "AD",
+          "CD"
+        ]
+      ],
+      "Gamma": [
+        [
+          "AB",
+          "AC",
+          "AD",
+          "BC",
+          "CD"
+        ]
+      ],
+      "Gamma_point_covers": [
+        "ABCD"
+      ],
+      "compressed": [
+        [
+          "AB",
+          "AD",
+          "BC",
+          "CD"
+        ]
+      ],
+      "induced_point_covers": [
+        "ABC",
+        "ACD"
+      ],
+      "side": "closed",
+      "squared_level": {
+        "denominator": 9,
+        "numerator": 169
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [
+        [
+          "AB"
+        ],
+        [
+          "AD",
+          "CD"
+        ],
+        [
+          "BC"
+        ]
+      ],
+      "Gamma": [
+        [
+          "AB"
+        ],
+        [
+          "AC",
+          "AD",
+          "CD"
+        ],
+        [
+          "BC"
+        ]
+      ],
+      "Gamma_point_covers": [
+        "AB",
+        "ACD",
+        "BC"
+      ],
+      "compressed": [
+        [
+          "AB"
+        ],
+        [
+          "AD",
+          "CD"
+        ],
+        [
+          "BC"
+        ]
+      ],
+      "induced_point_covers": [
+        "AB",
+        "ACD",
+        "BC"
+      ],
+      "side": "open",
+      "squared_level": {
+        "denominator": 9,
+        "numerator": 169
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [
+        [
+          "AB",
+          "BC"
+        ],
+        [
+          "AD",
+          "CD"
+        ]
+      ],
+      "Gamma": [
+        [
+          "AB",
+          "AC",
+          "AD",
+          "BC",
+          "CD"
+        ]
+      ],
+      "Gamma_point_covers": [
+        "ABCD"
+      ],
+      "compressed": [
+        [
+          "AB",
+          "AD",
+          "BC",
+          "CD"
+        ]
+      ],
+      "induced_point_covers": [
+        "ABC",
+        "ACD"
+      ],
+      "side": "closed",
+      "squared_level": {
+        "denominator": 36,
+        "numerator": 707
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [
+        [
+          "AB",
+          "AD",
+          "BC",
+          "CD"
+        ]
+      ],
+      "Gamma": [
+        [
+          "AB",
+          "AC",
+          "AD",
+          "BC",
+          "BD",
+          "CD"
+        ]
+      ],
+      "Gamma_point_covers": [
+        "ABCD"
+      ],
+      "compressed": [
+        [
+          "AB",
+          "AD",
+          "BC",
+          "CD"
+        ]
+      ],
+      "induced_point_covers": [
+        "ABCD"
+      ],
+      "side": "closed",
+      "squared_level": {
+        "denominator": 2,
+        "numerator": 41
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [
+        [
+          "AB",
+          "BC"
+        ],
+        [
+          "AD",
+          "CD"
+        ]
+      ],
+      "Gamma": [
+        [
+          "AB",
+          "AC",
+          "AD",
+          "BC",
+          "CD"
+        ]
+      ],
+      "Gamma_point_covers": [
+        "ABCD"
+      ],
+      "compressed": [
+        [
+          "AB",
+          "AD",
+          "BC",
+          "CD"
+        ]
+      ],
+      "induced_point_covers": [
+        "ABC",
+        "ACD"
+      ],
+      "side": "open",
+      "squared_level": {
+        "denominator": 2,
+        "numerator": 41
+      }
+    },
+    {
+      "Gabriel_induced_all_unions": [
+        [
+          "AB",
+          "AD",
+          "BC",
+          "CD"
+        ]
+      ],
+      "Gamma": [
+        [
+          "AB",
+          "AC",
+          "AD",
+          "BC",
+          "BD",
+          "CD"
+        ]
+      ],
+      "Gamma_point_covers": [
+        "ABCD"
+      ],
+      "compressed": [
+        [
+          "AB",
+          "AD",
+          "BC",
+          "CD"
+        ]
+      ],
+      "induced_point_covers": [
+        "ABCD"
+      ],
+      "side": "closed",
+      "squared_level": {
+        "denominator": 2,
+        "numerator": 43
+      }
+    }
+  ],
+  "status": "passed",
+  "strict_facet_descent_transitions": [
+    {
+      "coface": "ACD",
+      "descendant": "CD",
+      "descendant_squared_level": {
+        "denominator": 2,
+        "numerator": 13
+      },
+      "intruder": "D",
+      "removed": "A",
+      "source": "AC",
+      "source_squared_level": {
+        "denominator": 1,
+        "numerator": 16
+      }
+    },
+    {
+      "coface": "ACD",
+      "descendant": "AD",
+      "descendant_squared_level": {
+        "denominator": 2,
+        "numerator": 13
+      },
+      "intruder": "D",
+      "removed": "C",
+      "source": "AC",
+      "source_squared_level": {
+        "denominator": 1,
+        "numerator": 16
+      }
+    },
+    {
+      "coface": "ABD",
+      "descendant": "AD",
+      "descendant_squared_level": {
+        "denominator": 2,
+        "numerator": 13
+      },
+      "intruder": "A",
+      "removed": "B",
+      "source": "BD",
+      "source_squared_level": {
+        "denominator": 2,
+        "numerator": 41
+      }
+    },
+    {
+      "coface": "ABD",
+      "descendant": "AB",
+      "descendant_squared_level": {
+        "denominator": 1,
+        "numerator": 13
+      },
+      "intruder": "A",
+      "removed": "D",
+      "source": "BD",
+      "source_squared_level": {
+        "denominator": 2,
+        "numerator": 41
+      }
+    },
+    {
+      "coface": "BCD",
+      "descendant": "CD",
+      "descendant_squared_level": {
+        "denominator": 2,
+        "numerator": 13
+      },
+      "intruder": "C",
+      "removed": "B",
+      "source": "BD",
+      "source_squared_level": {
+        "denominator": 2,
+        "numerator": 41
+      }
+    },
+    {
+      "coface": "BCD",
+      "descendant": "BC",
+      "descendant_squared_level": {
+        "denominator": 1,
+        "numerator": 13
+      },
+      "intruder": "C",
+      "removed": "D",
+      "source": "BD",
+      "source_squared_level": {
+        "denominator": 2,
+        "numerator": 41
+      }
+    }
+  ],
+  "synthetic_compression_edges": [
+    [
+      "AD",
+      "CD",
+      {
+        "denominator": 1,
+        "numerator": 16
+      }
+    ],
+    [
+      "AB",
+      "BC",
+      {
+        "denominator": 9,
+        "numerator": 169
+      }
+    ],
+    [
+      "AD",
+      "AB",
+      {
+        "denominator": 9,
+        "numerator": 169
+      }
+    ]
+  ]
+}

@@ -16,6 +16,12 @@ Le rejeu active les feuilles, puis contracte atomiquement les groupes de parents
 
 À K1, les points naissent à zéro, absent au côté ouvert et présent au côté fermé. À K=n, X est une feuille née à sa MEB, sans coface ni fusion. Hors régularité, AB peut être Gabriel faible et naître avec ABC : ce plateau ne justifie pas une feuille isolée persistante. Le [négatif permanent](receipts_gabriel_20260905/full_proof_review.md) conserve ce cas.
 
+## Sommets Gabriel et vraie hiérarchie K-NN
+
+La [preuve et la tour bornée](receipts_gabriel_vertices_20260906/README.md) répondent à la question utilisateur du 6 septembre. Les seuls minima peuvent représenter exactement les composantes de L_K(r), leurs naissances, fusions et couvertures, avec des liens portant les seuils des chemins omis. Leur graphe induit est faux : quatre points u16 réguliers en dimension trois retardent une fusion de 169/9 à 41/2, même avec toutes les unions de la définition 21. Ce n’est donc pas un remplacement littéral des sommets de Γ ou de la définition 29.
+
+Une descente de cardinal K est possible : remplacer un essentiel de la facette par un intrus strict diminue sa MEB et garde un chemin au niveau source. Le minimum terminal, normalisé dans l’ordre concerné, suffit à retrouver le parent. Cela ouvre un resolver sans ancre directe comme autorité horizontale, à qualifier séparément du C++ actuel. Le modèle sur K1..4 vérifie 76 coupes, couvertures et cartes verticales ; aucune performance n’est déduite. La génération et le census sont déjà partagés par la v7 entre les ordres. Les racines inférieures ne résolvent pas les parents supérieurs : ceux d’une même fusion ont déjà une image verticale commune avant celle-ci.
+
 ## Taille des feuilles : le pire cas porte sur FULL
 
 La [preuve indépendante à K fixé](receipts_probe_meb_review_20260906/full_output_growth.md) établit, pour chaque K≥2, m² minima sur N=2m+K−2 sites réguliers en dimension ambiante trois. Une boule Gabriel stricte interdit toute coface au même rayon par unicité de la MEB ; elle donne donc une feuille isolée, même si ses points sont partagés. Deux arcs rationnels assurent m² paires croisées, et K−2 ancres dans leur intérieur commun étendent ce résultat à chaque ordre fixé. Une perturbation rationnelle générique assez petite conserve ces inégalités strictes.

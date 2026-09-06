@@ -1,0 +1,33 @@
+{
+  "schema": "mhgp7-gabriel-vertices-math-source-review-v1",
+  "reviewed_utc": "2026-09-06T10:55:28.072803+00:00",
+  "base_head": "08cf65dcf07219feed229cca20931fbdd45bc505",
+  "source_sha256": {
+    "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef",
+    "morsehgp3D_v7/src/forest/full_gabriel.hpp": "a946e31dde8fbd8ec528d6f5e94f9c727998acc172b4dd29c084dd522c730d1d",
+    "morsehgp3D_v7/src/pipeline/expand.hpp": "7cafb0341344fbc7d1584001e4685e2e5bf0122fe3b7e37277f5468d5c5e1cf0",
+    "morsehgp3D_v7/audits/receipts_gabriel_20260905/full_certificate_manuscript_pdf84_85.txt": "625439a0205ee325942733b43b7e1f3d6475a58e59dfefa792e24be9f1d2c00b",
+    "morsehgp3D_v7/audits/receipts_full_producer_20260905/lazy_alias_next_step_review.md": "418dfd4728f063cec0e65573d026215f2dcdb7897d4343c635a81614e1fa6324"
+  },
+  "thesis_pages_revisited": [
+    84,
+    85,
+    86,
+    87,
+    111,
+    112,
+    113,
+    114,
+    115,
+    122,
+    123,
+    124,
+    125,
+    126
+  ],
+  "math_scope": "Exact K-NN component filtration via Gamma, counterexample to induced minimum graph, constant-cardinality descent and unified tower. Regularity assumptions explicit.",
+  "prototype_scope": "Four u16 sites, fixed exact MEB certificates, 19 cuts per order; no product helper, no search-based geometry constructor, no industrial claim.",
+  "prior_variants_D_to_O_modified": false,
+  "new_cpp_or_engine": false,
+  "gcp": "not_used"
+}

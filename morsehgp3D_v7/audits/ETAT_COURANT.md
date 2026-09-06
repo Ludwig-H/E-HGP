@@ -4,6 +4,8 @@ Le raccord FULL du proposeur MEB filtré publié par `20b28b1d` passe une **nouv
 
 Le [suivi du 6 septembre](receipts_probe_meb_review_20260906/README.md) ajoute une preuve quadratique sur les **minima FULL**, pour chaque K fixé≥2 à précision croissante, et des paires strictes sur les littéraux u16. Il apporte aussi deux gardes contre les faux diagnostics d’économie F et ferme les anciens défauts de format après contrelecture de 48 vraies paires / 312 ordres du comparateur réparé. Aucun nouveau moteur ni temps de tour n’est ajouté.
 
+La [question sur les seuls sommets Gabriel](receipts_gabriel_vertices_20260906/README.md) est résolue mathématiquement : la restriction induite retarde une vraie fusion K-NN sur quatre points réguliers ; un quotient sur les minima avec les bons liens préserve exactement la hiérarchie. Une descente de facettes de cardinal constant permet un resolver sans ancres directes horizontales. Le prototype rationnel compose toute la tour K1..4, avec 76 comparaisons Γ et les cartes verticales. C’est une piste constructive nouvelle, sans qualification C++ ni gain de temps acquis ; le partage géométrique entre ordres existe déjà dans la v7.
+
 ```text
 phase=exploration_v7_hors_registre
 backend=cpu_reference
@@ -26,8 +28,8 @@ La lecture intégrale des parties I et II du manuscrit, PDF 35–134, reste acqu
 | G, lecteur FULL | [Qualification structurelle](CERTIFICAT_FULL_CPP_COURANT.md), sans certification géométrique |
 | D/E/F, réduit et primitives | [Qualifications distinctes](AUDIT_QUALIFICATION_20260905.md) ; aucun reçu réduit réinterprété FULL |
 
-Le [manifeste](validation_current.json) ajoute O sur le publié `20b28b1d`, en conservant D–N. Les deux headers compilés sont des copies capturées ; les autres dépendances L sont réutilisées comme octets inchangés. La porte locale en préparation garde son pin publié et explique l’écart de fraîcheur courant. La sonde v4 n’est ni épinglée ni qualifiée par O. Le juge se rejoue sur les captures sans moteur.
+Le [manifeste](validation_current.json) ajoute O sur le publié `20b28b1d`, en conservant D–N. Les deux headers compilés sont des copies capturées ; les autres dépendances L sont réutilisées comme octets inchangés. CMake, deux documents et la porte locale en préparation gardent leurs pins publiés et expliquent l’écart de fraîcheur courant. La sonde v4 n’est ni épinglée ni qualifiée par O. Le juge se rejoue sur les captures sans moteur.
 
-Le [dialogue actif](DIALOGUE_COURANT.md) ferme les obligations du raccord et situe la prochaine comparaison P0/opt-in sur distribution réelle. Le [diagnostic mono](MONO_FULL_COURANT.md) conserve le refus 32k/K9 aux quatre millions d’appels : les nouveaux petits témoins montrent moins de formes, autant d’appels, sans mesure de latence. La [réutilisation terminale](MEB_DOUBLE_BUDGET_COURANT.md#réutiliser-une-certification-terminale-déjà-acquise) reste une proposition séparée, avec sa [fixture causale n=12/K7](receipts_filtered_review_20260906/terminal_reuse_fixture.md). Les questions différées sont [regroupées](QUESTIONS_SECONDAIRES.md).
+Le [dialogue actif](DIALOGUE_COURANT.md) situe la descente vers les minima et la recherche d’une tour plus efficace. Le [diagnostic mono](MONO_FULL_COURANT.md) conserve le refus historique 32k/K9 aux quatre millions d’appels ; sa suppression prospective dans la sonde ne change pas ce reçu. La [réutilisation terminale](MEB_DOUBLE_BUDGET_COURANT.md#réutiliser-une-certification-terminale-déjà-acquise) reste une proposition séparée, avec sa [fixture causale n=12/K7](receipts_filtered_review_20260906/terminal_reuse_fixture.md). Les questions différées sont [regroupées](QUESTIONS_SECONDAIRES.md).
 
 Les reçus bruts et échecs restent conservés ; les anciennes synthèses sont accessibles par le [registre d’entretien](ENTRETIEN.json). GCP non utilisé.

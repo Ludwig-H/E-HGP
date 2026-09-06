@@ -1230,5 +1230,111 @@
     "maintenance": "25 root Markdown notes retained. Closed transport reservations replaced with dated verified repair; old per-build details remain in their existing proof packet. Secondary MEB activation row removed because main documentation and current MEB note already cover it. No new root note/build directory; old evidence and failure receipts unchanged.",
     "engine_invocations": 0,
     "gcp": "not_used"
+  },
+  "latest_gabriel_vertices_review_20260906": {
+    "date": "2026-09-06T10:58:15.375418+00:00",
+    "base_head": "08cf65dcf07219feed229cca20931fbdd45bc505",
+    "scope": "Exact K-NN hierarchy: induced Gabriel-vertices counterexample, same-cardinality facet descent, unified tower prototype, and dated read of one existing P0 baseline.",
+    "receipt": "receipts_gabriel_vertices_20260906/README.md",
+    "source_variant_added": false,
+    "variants_D_to_O_unchanged": true,
+    "historical_scientific_receipts_modified": false,
+    "checks": {
+      "docs_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "active_documents": 369
+      },
+      "registry": {
+        "exit_code": 0,
+        "phases": 20
+      },
+      "authored_markdown": {
+        "files": 5,
+        "local_links": 90,
+        "anchors": 3,
+        "errors": 0,
+        "unpublished_external_targets": 0,
+        "math_format": "passed"
+      },
+      "counterfixture": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "sha256": "7ac7608813cb853e361827a41b232c79beabb4c0da6f13c669cb09381aeb7021",
+        "fixed_MEB_certificates": 15,
+        "u16_points": 4,
+        "affine_dimension": 3,
+        "cuts": 19,
+        "descent_variants": 6,
+        "true_merge_squared_level": "169/9",
+        "induced_merge_squared_level": "41/2"
+      },
+      "unified_tower": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "byte_identical": true,
+        "sha256": "13fbed40cbdb627e3bf578fb8e8783e420c0cbc618d12fcd80b8e047fe031d0d",
+        "orders": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "global_batches": 6,
+        "Gamma_comparisons": 76,
+        "horizontal_inclusions": 70,
+        "vertical_images": 45,
+        "vertical_naturality_squares": 42,
+        "output_only_vertical_anchors": 7,
+        "nonunique_terminal_choices_equivalent": true,
+        "root_authority": "minima and per-order successors only",
+        "geometric_authority": "fixed rational certificates, no MEB search or product helper"
+      },
+      "baseline_dated_read": {
+        "receipt_sha256": "6ce3bf904c570d4c308a5d52623f8b3146e0f5d63ba3f7b86f0628e67dca335c",
+        "stable_files": 7,
+        "unpaired_P0_only": true,
+        "n": 8000,
+        "s": 8,
+        "Kmax": 10,
+        "no_benchmark_requalification": true
+      },
+      "unstaged_whitespace": "passed",
+      "python_type_annotations": "all functions annotated; final normal/-O reruns passed with unchanged semantic outputs",
+      "freshness": {
+        "normal_optimized_exit_codes": [
+          1,
+          1
+        ],
+        "common_pins": 2194,
+        "common_mismatches": 0,
+        "source_variants_unchanged": 12,
+        "O_delta": [
+          "CMakeLists.txt",
+          "docs/FAUSSES_PISTES.md",
+          "docs/RESIDENCE_MASSIVE.md",
+          "tests/meb_proposal_local_gate.cpp"
+        ],
+        "interpretation": "Expected non-promotion of constructor files in preparation; previous C++ qualification remains pinned."
+      },
+      "publication_scope": {
+        "staged_paths": 15,
+        "outside_audits": 0,
+        "staged_whitespace": "passed",
+        "index_initially_empty": true,
+        "branch": "main"
+      }
+    },
+    "maintenance": "25 root Markdown notes retained; dialogue replaced old resolved details by links and focuses on the current K-NN question. No new root note, build or C++ source. All prior scientific receipts and D-O variants retained unchanged.",
+    "engine_invocations": 0,
+    "new_cpp_compilations": 0,
+    "gcp": "not_used"
   }
 }

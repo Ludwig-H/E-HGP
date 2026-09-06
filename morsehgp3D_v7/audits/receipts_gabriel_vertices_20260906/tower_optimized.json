@@ -1,0 +1,5382 @@
+{
+  "alternative_choices": {
+    "Gamma_comparisons": 76,
+    "counts": {
+      "1": {
+        "certificate_reads": 0,
+        "descent_steps": 0,
+        "max_requested_cardinality": 0,
+        "minimum_hits": 8,
+        "requests": 8
+      },
+      "2": {
+        "certificate_reads": 1,
+        "descent_steps": 1,
+        "max_requested_cardinality": 2,
+        "minimum_hits": 5,
+        "requests": 5
+      },
+      "3": {
+        "certificate_reads": 0,
+        "descent_steps": 0,
+        "max_requested_cardinality": 0,
+        "minimum_hits": 2,
+        "requests": 2
+      },
+      "4": {
+        "certificate_reads": 0,
+        "descent_steps": 0,
+        "max_requested_cardinality": 0,
+        "minimum_hits": 0,
+        "requests": 0
+      }
+    },
+    "global_batches": [
+      {
+        "events": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "level": "0",
+        "orders": [
+          {
+            "births": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "merges": [],
+            "order": 1
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 2
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 3
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 4
+          }
+        ]
+      },
+      {
+        "events": [
+          "AD",
+          "CD"
+        ],
+        "level": "13/2",
+        "orders": [
+          {
+            "births": [],
+            "merges": [
+              4
+            ],
+            "order": 1
+          },
+          {
+            "births": [
+              0,
+              1
+            ],
+            "merges": [],
+            "order": 2
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 3
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 4
+          }
+        ]
+      },
+      {
+        "events": [
+          "AB",
+          "BC"
+        ],
+        "level": "13",
+        "orders": [
+          {
+            "births": [],
+            "merges": [
+              5
+            ],
+            "order": 1
+          },
+          {
+            "births": [
+              2,
+              3
+            ],
+            "merges": [],
+            "order": 2
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 3
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 4
+          }
+        ]
+      },
+      {
+        "events": [
+          "ACD"
+        ],
+        "level": "16",
+        "orders": [
+          {
+            "births": [],
+            "merges": [],
+            "order": 1
+          },
+          {
+            "births": [],
+            "merges": [
+              4
+            ],
+            "order": 2
+          },
+          {
+            "births": [
+              0
+            ],
+            "merges": [],
+            "order": 3
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 4
+          }
+        ]
+      },
+      {
+        "events": [
+          "ABC"
+        ],
+        "level": "169/9",
+        "orders": [
+          {
+            "births": [],
+            "merges": [],
+            "order": 1
+          },
+          {
+            "births": [],
+            "merges": [
+              5
+            ],
+            "order": 2
+          },
+          {
+            "births": [
+              1
+            ],
+            "merges": [],
+            "order": 3
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 4
+          }
+        ]
+      },
+      {
+        "events": [
+          "ABCD"
+        ],
+        "level": "41/2",
+        "orders": [
+          {
+            "births": [],
+            "merges": [],
+            "order": 1
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 2
+          },
+          {
+            "births": [],
+            "merges": [
+              2
+            ],
+            "order": 3
+          },
+          {
+            "births": [
+              0
+            ],
+            "merges": [],
+            "order": 4
+          }
+        ]
+      }
+    ],
+    "horizontal_inclusions": 70,
+    "observations": [
+      {
+        "level": "-1",
+        "orders": [
+          {
+            "Gamma": [],
+            "order": 1,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 2,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": []
+      },
+      {
+        "level": "0",
+        "orders": [
+          {
+            "Gamma": [],
+            "order": 1,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 2,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "open",
+        "vertical": []
+      },
+      {
+        "level": "0",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A"
+              ],
+              [
+                "B"
+              ],
+              [
+                "C"
+              ],
+              [
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "A"
+                ],
+                "point_cover": "A"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "B"
+                ],
+                "point_cover": "B"
+              },
+              {
+                "id": 2,
+                "minima": [
+                  "C"
+                ],
+                "point_cover": "C"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "D"
+                ],
+                "point_cover": "D"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 2,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": []
+      },
+      {
+        "level": "13/4",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A"
+              ],
+              [
+                "B"
+              ],
+              [
+                "C"
+              ],
+              [
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "A"
+                ],
+                "point_cover": "A"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "B"
+                ],
+                "point_cover": "B"
+              },
+              {
+                "id": 2,
+                "minima": [
+                  "C"
+                ],
+                "point_cover": "C"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "D"
+                ],
+                "point_cover": "D"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 2,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": []
+      },
+      {
+        "level": "13/2",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A"
+              ],
+              [
+                "B"
+              ],
+              [
+                "C"
+              ],
+              [
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "A"
+                ],
+                "point_cover": "A"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "B"
+                ],
+                "point_cover": "B"
+              },
+              {
+                "id": 2,
+                "minima": [
+                  "C"
+                ],
+                "point_cover": "C"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "D"
+                ],
+                "point_cover": "D"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 2,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "open",
+        "vertical": []
+      },
+      {
+        "level": "13/2",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "C",
+                "D"
+              ],
+              [
+                "B"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 1,
+                "minima": [
+                  "B"
+                ],
+                "point_cover": "B"
+              },
+              {
+                "id": 4,
+                "minima": [
+                  "A",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AD"
+              ],
+              [
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "AD"
+                ],
+                "point_cover": "AD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "CD"
+                ],
+                "point_cover": "CD"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "CD"
+            ],
+            "upper_order": 2
+          }
+        ]
+      },
+      {
+        "level": "39/4",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "C",
+                "D"
+              ],
+              [
+                "B"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 1,
+                "minima": [
+                  "B"
+                ],
+                "point_cover": "B"
+              },
+              {
+                "id": 4,
+                "minima": [
+                  "A",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AD"
+              ],
+              [
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "AD"
+                ],
+                "point_cover": "AD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "CD"
+                ],
+                "point_cover": "CD"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "CD"
+            ],
+            "upper_order": 2
+          }
+        ]
+      },
+      {
+        "level": "13",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "C",
+                "D"
+              ],
+              [
+                "B"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 1,
+                "minima": [
+                  "B"
+                ],
+                "point_cover": "B"
+              },
+              {
+                "id": 4,
+                "minima": [
+                  "A",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AD"
+              ],
+              [
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "AD"
+                ],
+                "point_cover": "AD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "CD"
+                ],
+                "point_cover": "CD"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "open",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "CD"
+            ],
+            "upper_order": 2
+          }
+        ]
+      },
+      {
+        "level": "13",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB"
+              ],
+              [
+                "AD"
+              ],
+              [
+                "BC"
+              ],
+              [
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "AD"
+                ],
+                "point_cover": "AD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "CD"
+                ],
+                "point_cover": "CD"
+              },
+              {
+                "id": 2,
+                "minima": [
+                  "AB"
+                ],
+                "point_cover": "AB"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "BC"
+                ],
+                "point_cover": "BC"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "BC"
+            ],
+            "upper_order": 2
+          }
+        ]
+      },
+      {
+        "level": "29/2",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB"
+              ],
+              [
+                "AD"
+              ],
+              [
+                "BC"
+              ],
+              [
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "AD"
+                ],
+                "point_cover": "AD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "CD"
+                ],
+                "point_cover": "CD"
+              },
+              {
+                "id": 2,
+                "minima": [
+                  "AB"
+                ],
+                "point_cover": "AB"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "BC"
+                ],
+                "point_cover": "BC"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "BC"
+            ],
+            "upper_order": 2
+          }
+        ]
+      },
+      {
+        "level": "16",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB"
+              ],
+              [
+                "AD"
+              ],
+              [
+                "BC"
+              ],
+              [
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "AD"
+                ],
+                "point_cover": "AD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "CD"
+                ],
+                "point_cover": "CD"
+              },
+              {
+                "id": 2,
+                "minima": [
+                  "AB"
+                ],
+                "point_cover": "AB"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "BC"
+                ],
+                "point_cover": "BC"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "open",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "BC"
+            ],
+            "upper_order": 2
+          }
+        ]
+      },
+      {
+        "level": "16",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB"
+              ],
+              [
+                "AC",
+                "AD",
+                "CD"
+              ],
+              [
+                "BC"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 2,
+                "minima": [
+                  "AB"
+                ],
+                "point_cover": "AB"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "BC"
+                ],
+                "point_cover": "BC"
+              },
+              {
+                "id": 4,
+                "minima": [
+                  "AD",
+                  "CD"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ACD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ACD"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "BC"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AD",
+              "CD"
+            ],
+            "upper_minima": [
+              "ACD"
+            ],
+            "upper_order": 3
+          }
+        ]
+      },
+      {
+        "level": "313/18",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB"
+              ],
+              [
+                "AC",
+                "AD",
+                "CD"
+              ],
+              [
+                "BC"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 2,
+                "minima": [
+                  "AB"
+                ],
+                "point_cover": "AB"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "BC"
+                ],
+                "point_cover": "BC"
+              },
+              {
+                "id": 4,
+                "minima": [
+                  "AD",
+                  "CD"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ACD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ACD"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "BC"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AD",
+              "CD"
+            ],
+            "upper_minima": [
+              "ACD"
+            ],
+            "upper_order": 3
+          }
+        ]
+      },
+      {
+        "level": "169/9",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB"
+              ],
+              [
+                "AC",
+                "AD",
+                "CD"
+              ],
+              [
+                "BC"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 2,
+                "minima": [
+                  "AB"
+                ],
+                "point_cover": "AB"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "BC"
+                ],
+                "point_cover": "BC"
+              },
+              {
+                "id": 4,
+                "minima": [
+                  "AD",
+                  "CD"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ACD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ACD"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "open",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "BC"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AD",
+              "CD"
+            ],
+            "upper_minima": [
+              "ACD"
+            ],
+            "upper_order": 3
+          }
+        ]
+      },
+      {
+        "level": "169/9",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB",
+                "AC",
+                "AD",
+                "BC",
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "AB",
+                  "AD",
+                  "BC",
+                  "CD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ABC"
+              ],
+              [
+                "ACD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ACD"
+                ],
+                "point_cover": "ACD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "ABC"
+                ],
+                "point_cover": "ABC"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ACD"
+            ],
+            "upper_order": 3
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ABC"
+            ],
+            "upper_order": 3
+          }
+        ]
+      },
+      {
+        "level": "707/36",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB",
+                "AC",
+                "AD",
+                "BC",
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "AB",
+                  "AD",
+                  "BC",
+                  "CD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ABC"
+              ],
+              [
+                "ACD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ACD"
+                ],
+                "point_cover": "ACD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "ABC"
+                ],
+                "point_cover": "ABC"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ACD"
+            ],
+            "upper_order": 3
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ABC"
+            ],
+            "upper_order": 3
+          }
+        ]
+      },
+      {
+        "level": "41/2",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB",
+                "AC",
+                "AD",
+                "BC",
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "AB",
+                  "AD",
+                  "BC",
+                  "CD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ABC"
+              ],
+              [
+                "ACD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ACD"
+                ],
+                "point_cover": "ACD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "ABC"
+                ],
+                "point_cover": "ABC"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "open",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ACD"
+            ],
+            "upper_order": 3
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ABC"
+            ],
+            "upper_order": 3
+          }
+        ]
+      },
+      {
+        "level": "41/2",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB",
+                "AC",
+                "AD",
+                "BC",
+                "BD",
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "AB",
+                  "AD",
+                  "BC",
+                  "CD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ABC",
+                "ABD",
+                "ACD",
+                "BCD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 2,
+                "minima": [
+                  "ABC",
+                  "ACD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ABCD"
+              ]
+            ],
+            "order": 4,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ABCD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ABC",
+              "ACD"
+            ],
+            "upper_order": 3
+          },
+          {
+            "lower_minima": [
+              "ABC",
+              "ACD"
+            ],
+            "upper_minima": [
+              "ABCD"
+            ],
+            "upper_order": 4
+          }
+        ]
+      },
+      {
+        "level": "43/2",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB",
+                "AC",
+                "AD",
+                "BC",
+                "BD",
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "AB",
+                  "AD",
+                  "BC",
+                  "CD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ABC",
+                "ABD",
+                "ACD",
+                "BCD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 2,
+                "minima": [
+                  "ABC",
+                  "ACD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ABCD"
+              ]
+            ],
+            "order": 4,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ABCD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ABC",
+              "ACD"
+            ],
+            "upper_order": 3
+          },
+          {
+            "lower_minima": [
+              "ABC",
+              "ACD"
+            ],
+            "upper_minima": [
+              "ABCD"
+            ],
+            "upper_order": 4
+          }
+        ]
+      }
+    ],
+    "orders": {
+      "1": {
+        "minima": {
+          "A": 0,
+          "B": 1,
+          "C": 2,
+          "D": 3
+        },
+        "nodes": [
+          {
+            "level": "0",
+            "minima": [
+              "A"
+            ],
+            "minimum": "A",
+            "parents": []
+          },
+          {
+            "level": "0",
+            "minima": [
+              "B"
+            ],
+            "minimum": "B",
+            "parents": []
+          },
+          {
+            "level": "0",
+            "minima": [
+              "C"
+            ],
+            "minimum": "C",
+            "parents": []
+          },
+          {
+            "level": "0",
+            "minima": [
+              "D"
+            ],
+            "minimum": "D",
+            "parents": []
+          },
+          {
+            "level": "13/2",
+            "minima": [
+              "A",
+              "C",
+              "D"
+            ],
+            "minimum": null,
+            "parents": [
+              0,
+              2,
+              3
+            ]
+          },
+          {
+            "level": "13",
+            "minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "minimum": null,
+            "parents": [
+              1,
+              4
+            ]
+          }
+        ],
+        "successor": [
+          4,
+          5,
+          4,
+          4,
+          5,
+          5
+        ]
+      },
+      "2": {
+        "minima": {
+          "AB": 2,
+          "AD": 0,
+          "BC": 3,
+          "CD": 1
+        },
+        "nodes": [
+          {
+            "level": "13/2",
+            "minima": [
+              "AD"
+            ],
+            "minimum": "AD",
+            "parents": []
+          },
+          {
+            "level": "13/2",
+            "minima": [
+              "CD"
+            ],
+            "minimum": "CD",
+            "parents": []
+          },
+          {
+            "level": "13",
+            "minima": [
+              "AB"
+            ],
+            "minimum": "AB",
+            "parents": []
+          },
+          {
+            "level": "13",
+            "minima": [
+              "BC"
+            ],
+            "minimum": "BC",
+            "parents": []
+          },
+          {
+            "level": "16",
+            "minima": [
+              "AD",
+              "CD"
+            ],
+            "minimum": null,
+            "parents": [
+              0,
+              1
+            ]
+          },
+          {
+            "level": "169/9",
+            "minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "minimum": null,
+            "parents": [
+              2,
+              3,
+              4
+            ]
+          }
+        ],
+        "successor": [
+          4,
+          4,
+          5,
+          5,
+          5,
+          5
+        ]
+      },
+      "3": {
+        "minima": {
+          "ABC": 1,
+          "ACD": 0
+        },
+        "nodes": [
+          {
+            "level": "16",
+            "minima": [
+              "ACD"
+            ],
+            "minimum": "ACD",
+            "parents": []
+          },
+          {
+            "level": "169/9",
+            "minima": [
+              "ABC"
+            ],
+            "minimum": "ABC",
+            "parents": []
+          },
+          {
+            "level": "41/2",
+            "minima": [
+              "ABC",
+              "ACD"
+            ],
+            "minimum": null,
+            "parents": [
+              0,
+              1
+            ]
+          }
+        ],
+        "successor": [
+          2,
+          2,
+          2
+        ]
+      },
+      "4": {
+        "minima": {
+          "ABCD": 0
+        },
+        "nodes": [
+          {
+            "level": "41/2",
+            "minima": [
+              "ABCD"
+            ],
+            "minimum": "ABCD",
+            "parents": []
+          }
+        ],
+        "successor": [
+          0
+        ]
+      }
+    },
+    "traces": [
+      {
+        "cut": "13/2",
+        "normalized_root": 3,
+        "order": 1,
+        "path": [
+          "D"
+        ],
+        "source": "D",
+        "terminal": "D"
+      },
+      {
+        "cut": "13/2",
+        "normalized_root": 0,
+        "order": 1,
+        "path": [
+          "A"
+        ],
+        "source": "A",
+        "terminal": "A"
+      },
+      {
+        "cut": "13/2",
+        "normalized_root": 3,
+        "order": 1,
+        "path": [
+          "D"
+        ],
+        "source": "D",
+        "terminal": "D"
+      },
+      {
+        "cut": "13/2",
+        "normalized_root": 2,
+        "order": 1,
+        "path": [
+          "C"
+        ],
+        "source": "C",
+        "terminal": "C"
+      },
+      {
+        "cut": "13",
+        "normalized_root": 1,
+        "order": 1,
+        "path": [
+          "B"
+        ],
+        "source": "B",
+        "terminal": "B"
+      },
+      {
+        "cut": "13",
+        "normalized_root": 4,
+        "order": 1,
+        "path": [
+          "A"
+        ],
+        "source": "A",
+        "terminal": "A"
+      },
+      {
+        "cut": "13",
+        "normalized_root": 4,
+        "order": 1,
+        "path": [
+          "C"
+        ],
+        "source": "C",
+        "terminal": "C"
+      },
+      {
+        "cut": "13",
+        "normalized_root": 1,
+        "order": 1,
+        "path": [
+          "B"
+        ],
+        "source": "B",
+        "terminal": "B"
+      },
+      {
+        "cut": "16",
+        "normalized_root": 1,
+        "order": 2,
+        "path": [
+          "CD"
+        ],
+        "source": "CD",
+        "terminal": "CD"
+      },
+      {
+        "cut": "16",
+        "normalized_root": 0,
+        "order": 2,
+        "path": [
+          "AD"
+        ],
+        "source": "AD",
+        "terminal": "AD"
+      },
+      {
+        "cut": "169/9",
+        "normalized_root": 3,
+        "order": 2,
+        "path": [
+          "BC"
+        ],
+        "source": "BC",
+        "terminal": "BC"
+      },
+      {
+        "cut": "169/9",
+        "normalized_root": 4,
+        "order": 2,
+        "path": [
+          "AC",
+          "AD"
+        ],
+        "source": "AC",
+        "terminal": "AD"
+      },
+      {
+        "cut": "169/9",
+        "normalized_root": 2,
+        "order": 2,
+        "path": [
+          "AB"
+        ],
+        "source": "AB",
+        "terminal": "AB"
+      },
+      {
+        "cut": "41/2",
+        "normalized_root": 0,
+        "order": 3,
+        "path": [
+          "ACD"
+        ],
+        "source": "ACD",
+        "terminal": "ACD"
+      },
+      {
+        "cut": "41/2",
+        "normalized_root": 1,
+        "order": 3,
+        "path": [
+          "ABC"
+        ],
+        "source": "ABC",
+        "terminal": "ABC"
+      }
+    ],
+    "vertical_birth_links": [
+      {
+        "leaf": "AD",
+        "level": "13/2",
+        "lower_closed_anchor": 4,
+        "upper_birth": 0,
+        "upper_order": 2
+      },
+      {
+        "leaf": "CD",
+        "level": "13/2",
+        "lower_closed_anchor": 4,
+        "upper_birth": 1,
+        "upper_order": 2
+      },
+      {
+        "leaf": "AB",
+        "level": "13",
+        "lower_closed_anchor": 5,
+        "upper_birth": 2,
+        "upper_order": 2
+      },
+      {
+        "leaf": "BC",
+        "level": "13",
+        "lower_closed_anchor": 5,
+        "upper_birth": 3,
+        "upper_order": 2
+      },
+      {
+        "leaf": "ACD",
+        "level": "16",
+        "lower_closed_anchor": 4,
+        "upper_birth": 0,
+        "upper_order": 3
+      },
+      {
+        "leaf": "ABC",
+        "level": "169/9",
+        "lower_closed_anchor": 5,
+        "upper_birth": 1,
+        "upper_order": 3
+      },
+      {
+        "leaf": "ABCD",
+        "level": "41/2",
+        "lower_closed_anchor": 2,
+        "upper_birth": 0,
+        "upper_order": 4
+      }
+    ],
+    "vertical_component_checks": 45,
+    "vertical_naturality_squares": 42
+  },
+  "authority": "parent resolver reads only minimum tokens and per-order successors; vertical links are output-only",
+  "engine_calls": 0,
+  "gcp": "not_used",
+  "limits": "No physical MEB counters, performance, mass/vote, catalogue-generation or industrial qualification",
+  "nominal": {
+    "Gamma_comparisons": 76,
+    "counts": {
+      "1": {
+        "certificate_reads": 0,
+        "descent_steps": 0,
+        "max_requested_cardinality": 0,
+        "minimum_hits": 8,
+        "requests": 8
+      },
+      "2": {
+        "certificate_reads": 1,
+        "descent_steps": 1,
+        "max_requested_cardinality": 2,
+        "minimum_hits": 5,
+        "requests": 5
+      },
+      "3": {
+        "certificate_reads": 0,
+        "descent_steps": 0,
+        "max_requested_cardinality": 0,
+        "minimum_hits": 2,
+        "requests": 2
+      },
+      "4": {
+        "certificate_reads": 0,
+        "descent_steps": 0,
+        "max_requested_cardinality": 0,
+        "minimum_hits": 0,
+        "requests": 0
+      }
+    },
+    "global_batches": [
+      {
+        "events": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "level": "0",
+        "orders": [
+          {
+            "births": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "merges": [],
+            "order": 1
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 2
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 3
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 4
+          }
+        ]
+      },
+      {
+        "events": [
+          "AD",
+          "CD"
+        ],
+        "level": "13/2",
+        "orders": [
+          {
+            "births": [],
+            "merges": [
+              4
+            ],
+            "order": 1
+          },
+          {
+            "births": [
+              0,
+              1
+            ],
+            "merges": [],
+            "order": 2
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 3
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 4
+          }
+        ]
+      },
+      {
+        "events": [
+          "AB",
+          "BC"
+        ],
+        "level": "13",
+        "orders": [
+          {
+            "births": [],
+            "merges": [
+              5
+            ],
+            "order": 1
+          },
+          {
+            "births": [
+              2,
+              3
+            ],
+            "merges": [],
+            "order": 2
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 3
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 4
+          }
+        ]
+      },
+      {
+        "events": [
+          "ACD"
+        ],
+        "level": "16",
+        "orders": [
+          {
+            "births": [],
+            "merges": [],
+            "order": 1
+          },
+          {
+            "births": [],
+            "merges": [
+              4
+            ],
+            "order": 2
+          },
+          {
+            "births": [
+              0
+            ],
+            "merges": [],
+            "order": 3
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 4
+          }
+        ]
+      },
+      {
+        "events": [
+          "ABC"
+        ],
+        "level": "169/9",
+        "orders": [
+          {
+            "births": [],
+            "merges": [],
+            "order": 1
+          },
+          {
+            "births": [],
+            "merges": [
+              5
+            ],
+            "order": 2
+          },
+          {
+            "births": [
+              1
+            ],
+            "merges": [],
+            "order": 3
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 4
+          }
+        ]
+      },
+      {
+        "events": [
+          "ABCD"
+        ],
+        "level": "41/2",
+        "orders": [
+          {
+            "births": [],
+            "merges": [],
+            "order": 1
+          },
+          {
+            "births": [],
+            "merges": [],
+            "order": 2
+          },
+          {
+            "births": [],
+            "merges": [
+              2
+            ],
+            "order": 3
+          },
+          {
+            "births": [
+              0
+            ],
+            "merges": [],
+            "order": 4
+          }
+        ]
+      }
+    ],
+    "horizontal_inclusions": 70,
+    "observations": [
+      {
+        "level": "-1",
+        "orders": [
+          {
+            "Gamma": [],
+            "order": 1,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 2,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": []
+      },
+      {
+        "level": "0",
+        "orders": [
+          {
+            "Gamma": [],
+            "order": 1,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 2,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "open",
+        "vertical": []
+      },
+      {
+        "level": "0",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A"
+              ],
+              [
+                "B"
+              ],
+              [
+                "C"
+              ],
+              [
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "A"
+                ],
+                "point_cover": "A"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "B"
+                ],
+                "point_cover": "B"
+              },
+              {
+                "id": 2,
+                "minima": [
+                  "C"
+                ],
+                "point_cover": "C"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "D"
+                ],
+                "point_cover": "D"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 2,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": []
+      },
+      {
+        "level": "13/4",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A"
+              ],
+              [
+                "B"
+              ],
+              [
+                "C"
+              ],
+              [
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "A"
+                ],
+                "point_cover": "A"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "B"
+                ],
+                "point_cover": "B"
+              },
+              {
+                "id": 2,
+                "minima": [
+                  "C"
+                ],
+                "point_cover": "C"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "D"
+                ],
+                "point_cover": "D"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 2,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": []
+      },
+      {
+        "level": "13/2",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A"
+              ],
+              [
+                "B"
+              ],
+              [
+                "C"
+              ],
+              [
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "A"
+                ],
+                "point_cover": "A"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "B"
+                ],
+                "point_cover": "B"
+              },
+              {
+                "id": 2,
+                "minima": [
+                  "C"
+                ],
+                "point_cover": "C"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "D"
+                ],
+                "point_cover": "D"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 2,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "open",
+        "vertical": []
+      },
+      {
+        "level": "13/2",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "C",
+                "D"
+              ],
+              [
+                "B"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 1,
+                "minima": [
+                  "B"
+                ],
+                "point_cover": "B"
+              },
+              {
+                "id": 4,
+                "minima": [
+                  "A",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AD"
+              ],
+              [
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "AD"
+                ],
+                "point_cover": "AD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "CD"
+                ],
+                "point_cover": "CD"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "CD"
+            ],
+            "upper_order": 2
+          }
+        ]
+      },
+      {
+        "level": "39/4",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "C",
+                "D"
+              ],
+              [
+                "B"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 1,
+                "minima": [
+                  "B"
+                ],
+                "point_cover": "B"
+              },
+              {
+                "id": 4,
+                "minima": [
+                  "A",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AD"
+              ],
+              [
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "AD"
+                ],
+                "point_cover": "AD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "CD"
+                ],
+                "point_cover": "CD"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "CD"
+            ],
+            "upper_order": 2
+          }
+        ]
+      },
+      {
+        "level": "13",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "C",
+                "D"
+              ],
+              [
+                "B"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 1,
+                "minima": [
+                  "B"
+                ],
+                "point_cover": "B"
+              },
+              {
+                "id": 4,
+                "minima": [
+                  "A",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AD"
+              ],
+              [
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "AD"
+                ],
+                "point_cover": "AD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "CD"
+                ],
+                "point_cover": "CD"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "open",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "CD"
+            ],
+            "upper_order": 2
+          }
+        ]
+      },
+      {
+        "level": "13",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB"
+              ],
+              [
+                "AD"
+              ],
+              [
+                "BC"
+              ],
+              [
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "AD"
+                ],
+                "point_cover": "AD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "CD"
+                ],
+                "point_cover": "CD"
+              },
+              {
+                "id": 2,
+                "minima": [
+                  "AB"
+                ],
+                "point_cover": "AB"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "BC"
+                ],
+                "point_cover": "BC"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "BC"
+            ],
+            "upper_order": 2
+          }
+        ]
+      },
+      {
+        "level": "29/2",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB"
+              ],
+              [
+                "AD"
+              ],
+              [
+                "BC"
+              ],
+              [
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "AD"
+                ],
+                "point_cover": "AD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "CD"
+                ],
+                "point_cover": "CD"
+              },
+              {
+                "id": 2,
+                "minima": [
+                  "AB"
+                ],
+                "point_cover": "AB"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "BC"
+                ],
+                "point_cover": "BC"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "BC"
+            ],
+            "upper_order": 2
+          }
+        ]
+      },
+      {
+        "level": "16",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB"
+              ],
+              [
+                "AD"
+              ],
+              [
+                "BC"
+              ],
+              [
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "AD"
+                ],
+                "point_cover": "AD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "CD"
+                ],
+                "point_cover": "CD"
+              },
+              {
+                "id": 2,
+                "minima": [
+                  "AB"
+                ],
+                "point_cover": "AB"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "BC"
+                ],
+                "point_cover": "BC"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 3,
+            "roots": []
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "open",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "BC"
+            ],
+            "upper_order": 2
+          }
+        ]
+      },
+      {
+        "level": "16",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB"
+              ],
+              [
+                "AC",
+                "AD",
+                "CD"
+              ],
+              [
+                "BC"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 2,
+                "minima": [
+                  "AB"
+                ],
+                "point_cover": "AB"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "BC"
+                ],
+                "point_cover": "BC"
+              },
+              {
+                "id": 4,
+                "minima": [
+                  "AD",
+                  "CD"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ACD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ACD"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "BC"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AD",
+              "CD"
+            ],
+            "upper_minima": [
+              "ACD"
+            ],
+            "upper_order": 3
+          }
+        ]
+      },
+      {
+        "level": "313/18",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB"
+              ],
+              [
+                "AC",
+                "AD",
+                "CD"
+              ],
+              [
+                "BC"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 2,
+                "minima": [
+                  "AB"
+                ],
+                "point_cover": "AB"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "BC"
+                ],
+                "point_cover": "BC"
+              },
+              {
+                "id": 4,
+                "minima": [
+                  "AD",
+                  "CD"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ACD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ACD"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "BC"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AD",
+              "CD"
+            ],
+            "upper_minima": [
+              "ACD"
+            ],
+            "upper_order": 3
+          }
+        ]
+      },
+      {
+        "level": "169/9",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB"
+              ],
+              [
+                "AC",
+                "AD",
+                "CD"
+              ],
+              [
+                "BC"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 2,
+                "minima": [
+                  "AB"
+                ],
+                "point_cover": "AB"
+              },
+              {
+                "id": 3,
+                "minima": [
+                  "BC"
+                ],
+                "point_cover": "BC"
+              },
+              {
+                "id": 4,
+                "minima": [
+                  "AD",
+                  "CD"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ACD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ACD"
+                ],
+                "point_cover": "ACD"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "open",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "BC"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AD",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AD",
+              "CD"
+            ],
+            "upper_minima": [
+              "ACD"
+            ],
+            "upper_order": 3
+          }
+        ]
+      },
+      {
+        "level": "169/9",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB",
+                "AC",
+                "AD",
+                "BC",
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "AB",
+                  "AD",
+                  "BC",
+                  "CD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ABC"
+              ],
+              [
+                "ACD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ACD"
+                ],
+                "point_cover": "ACD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "ABC"
+                ],
+                "point_cover": "ABC"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ACD"
+            ],
+            "upper_order": 3
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ABC"
+            ],
+            "upper_order": 3
+          }
+        ]
+      },
+      {
+        "level": "707/36",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB",
+                "AC",
+                "AD",
+                "BC",
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "AB",
+                  "AD",
+                  "BC",
+                  "CD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ABC"
+              ],
+              [
+                "ACD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ACD"
+                ],
+                "point_cover": "ACD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "ABC"
+                ],
+                "point_cover": "ABC"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ACD"
+            ],
+            "upper_order": 3
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ABC"
+            ],
+            "upper_order": 3
+          }
+        ]
+      },
+      {
+        "level": "41/2",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB",
+                "AC",
+                "AD",
+                "BC",
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "AB",
+                  "AD",
+                  "BC",
+                  "CD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ABC"
+              ],
+              [
+                "ACD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ACD"
+                ],
+                "point_cover": "ACD"
+              },
+              {
+                "id": 1,
+                "minima": [
+                  "ABC"
+                ],
+                "point_cover": "ABC"
+              }
+            ]
+          },
+          {
+            "Gamma": [],
+            "order": 4,
+            "roots": []
+          }
+        ],
+        "side": "open",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ACD"
+            ],
+            "upper_order": 3
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ABC"
+            ],
+            "upper_order": 3
+          }
+        ]
+      },
+      {
+        "level": "41/2",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB",
+                "AC",
+                "AD",
+                "BC",
+                "BD",
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "AB",
+                  "AD",
+                  "BC",
+                  "CD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ABC",
+                "ABD",
+                "ACD",
+                "BCD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 2,
+                "minima": [
+                  "ABC",
+                  "ACD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ABCD"
+              ]
+            ],
+            "order": 4,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ABCD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ABC",
+              "ACD"
+            ],
+            "upper_order": 3
+          },
+          {
+            "lower_minima": [
+              "ABC",
+              "ACD"
+            ],
+            "upper_minima": [
+              "ABCD"
+            ],
+            "upper_order": 4
+          }
+        ]
+      },
+      {
+        "level": "43/2",
+        "orders": [
+          {
+            "Gamma": [
+              [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            ],
+            "order": 1,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "AB",
+                "AC",
+                "AD",
+                "BC",
+                "BD",
+                "CD"
+              ]
+            ],
+            "order": 2,
+            "roots": [
+              {
+                "id": 5,
+                "minima": [
+                  "AB",
+                  "AD",
+                  "BC",
+                  "CD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ABC",
+                "ABD",
+                "ACD",
+                "BCD"
+              ]
+            ],
+            "order": 3,
+            "roots": [
+              {
+                "id": 2,
+                "minima": [
+                  "ABC",
+                  "ACD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          },
+          {
+            "Gamma": [
+              [
+                "ABCD"
+              ]
+            ],
+            "order": 4,
+            "roots": [
+              {
+                "id": 0,
+                "minima": [
+                  "ABCD"
+                ],
+                "point_cover": "ABCD"
+              }
+            ]
+          }
+        ],
+        "side": "closed",
+        "vertical": [
+          {
+            "lower_minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "upper_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_order": 2
+          },
+          {
+            "lower_minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "upper_minima": [
+              "ABC",
+              "ACD"
+            ],
+            "upper_order": 3
+          },
+          {
+            "lower_minima": [
+              "ABC",
+              "ACD"
+            ],
+            "upper_minima": [
+              "ABCD"
+            ],
+            "upper_order": 4
+          }
+        ]
+      }
+    ],
+    "orders": {
+      "1": {
+        "minima": {
+          "A": 0,
+          "B": 1,
+          "C": 2,
+          "D": 3
+        },
+        "nodes": [
+          {
+            "level": "0",
+            "minima": [
+              "A"
+            ],
+            "minimum": "A",
+            "parents": []
+          },
+          {
+            "level": "0",
+            "minima": [
+              "B"
+            ],
+            "minimum": "B",
+            "parents": []
+          },
+          {
+            "level": "0",
+            "minima": [
+              "C"
+            ],
+            "minimum": "C",
+            "parents": []
+          },
+          {
+            "level": "0",
+            "minima": [
+              "D"
+            ],
+            "minimum": "D",
+            "parents": []
+          },
+          {
+            "level": "13/2",
+            "minima": [
+              "A",
+              "C",
+              "D"
+            ],
+            "minimum": null,
+            "parents": [
+              0,
+              2,
+              3
+            ]
+          },
+          {
+            "level": "13",
+            "minima": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "minimum": null,
+            "parents": [
+              1,
+              4
+            ]
+          }
+        ],
+        "successor": [
+          4,
+          5,
+          4,
+          4,
+          5,
+          5
+        ]
+      },
+      "2": {
+        "minima": {
+          "AB": 2,
+          "AD": 0,
+          "BC": 3,
+          "CD": 1
+        },
+        "nodes": [
+          {
+            "level": "13/2",
+            "minima": [
+              "AD"
+            ],
+            "minimum": "AD",
+            "parents": []
+          },
+          {
+            "level": "13/2",
+            "minima": [
+              "CD"
+            ],
+            "minimum": "CD",
+            "parents": []
+          },
+          {
+            "level": "13",
+            "minima": [
+              "AB"
+            ],
+            "minimum": "AB",
+            "parents": []
+          },
+          {
+            "level": "13",
+            "minima": [
+              "BC"
+            ],
+            "minimum": "BC",
+            "parents": []
+          },
+          {
+            "level": "16",
+            "minima": [
+              "AD",
+              "CD"
+            ],
+            "minimum": null,
+            "parents": [
+              0,
+              1
+            ]
+          },
+          {
+            "level": "169/9",
+            "minima": [
+              "AB",
+              "AD",
+              "BC",
+              "CD"
+            ],
+            "minimum": null,
+            "parents": [
+              2,
+              3,
+              4
+            ]
+          }
+        ],
+        "successor": [
+          4,
+          4,
+          5,
+          5,
+          5,
+          5
+        ]
+      },
+      "3": {
+        "minima": {
+          "ABC": 1,
+          "ACD": 0
+        },
+        "nodes": [
+          {
+            "level": "16",
+            "minima": [
+              "ACD"
+            ],
+            "minimum": "ACD",
+            "parents": []
+          },
+          {
+            "level": "169/9",
+            "minima": [
+              "ABC"
+            ],
+            "minimum": "ABC",
+            "parents": []
+          },
+          {
+            "level": "41/2",
+            "minima": [
+              "ABC",
+              "ACD"
+            ],
+            "minimum": null,
+            "parents": [
+              0,
+              1
+            ]
+          }
+        ],
+        "successor": [
+          2,
+          2,
+          2
+        ]
+      },
+      "4": {
+        "minima": {
+          "ABCD": 0
+        },
+        "nodes": [
+          {
+            "level": "41/2",
+            "minima": [
+              "ABCD"
+            ],
+            "minimum": "ABCD",
+            "parents": []
+          }
+        ],
+        "successor": [
+          0
+        ]
+      }
+    },
+    "traces": [
+      {
+        "cut": "13/2",
+        "normalized_root": 3,
+        "order": 1,
+        "path": [
+          "D"
+        ],
+        "source": "D",
+        "terminal": "D"
+      },
+      {
+        "cut": "13/2",
+        "normalized_root": 0,
+        "order": 1,
+        "path": [
+          "A"
+        ],
+        "source": "A",
+        "terminal": "A"
+      },
+      {
+        "cut": "13/2",
+        "normalized_root": 3,
+        "order": 1,
+        "path": [
+          "D"
+        ],
+        "source": "D",
+        "terminal": "D"
+      },
+      {
+        "cut": "13/2",
+        "normalized_root": 2,
+        "order": 1,
+        "path": [
+          "C"
+        ],
+        "source": "C",
+        "terminal": "C"
+      },
+      {
+        "cut": "13",
+        "normalized_root": 1,
+        "order": 1,
+        "path": [
+          "B"
+        ],
+        "source": "B",
+        "terminal": "B"
+      },
+      {
+        "cut": "13",
+        "normalized_root": 4,
+        "order": 1,
+        "path": [
+          "A"
+        ],
+        "source": "A",
+        "terminal": "A"
+      },
+      {
+        "cut": "13",
+        "normalized_root": 4,
+        "order": 1,
+        "path": [
+          "C"
+        ],
+        "source": "C",
+        "terminal": "C"
+      },
+      {
+        "cut": "13",
+        "normalized_root": 1,
+        "order": 1,
+        "path": [
+          "B"
+        ],
+        "source": "B",
+        "terminal": "B"
+      },
+      {
+        "cut": "16",
+        "normalized_root": 1,
+        "order": 2,
+        "path": [
+          "CD"
+        ],
+        "source": "CD",
+        "terminal": "CD"
+      },
+      {
+        "cut": "16",
+        "normalized_root": 0,
+        "order": 2,
+        "path": [
+          "AD"
+        ],
+        "source": "AD",
+        "terminal": "AD"
+      },
+      {
+        "cut": "169/9",
+        "normalized_root": 3,
+        "order": 2,
+        "path": [
+          "BC"
+        ],
+        "source": "BC",
+        "terminal": "BC"
+      },
+      {
+        "cut": "169/9",
+        "normalized_root": 4,
+        "order": 2,
+        "path": [
+          "AC",
+          "CD"
+        ],
+        "source": "AC",
+        "terminal": "CD"
+      },
+      {
+        "cut": "169/9",
+        "normalized_root": 2,
+        "order": 2,
+        "path": [
+          "AB"
+        ],
+        "source": "AB",
+        "terminal": "AB"
+      },
+      {
+        "cut": "41/2",
+        "normalized_root": 0,
+        "order": 3,
+        "path": [
+          "ACD"
+        ],
+        "source": "ACD",
+        "terminal": "ACD"
+      },
+      {
+        "cut": "41/2",
+        "normalized_root": 1,
+        "order": 3,
+        "path": [
+          "ABC"
+        ],
+        "source": "ABC",
+        "terminal": "ABC"
+      }
+    ],
+    "vertical_birth_links": [
+      {
+        "leaf": "AD",
+        "level": "13/2",
+        "lower_closed_anchor": 4,
+        "upper_birth": 0,
+        "upper_order": 2
+      },
+      {
+        "leaf": "CD",
+        "level": "13/2",
+        "lower_closed_anchor": 4,
+        "upper_birth": 1,
+        "upper_order": 2
+      },
+      {
+        "leaf": "AB",
+        "level": "13",
+        "lower_closed_anchor": 5,
+        "upper_birth": 2,
+        "upper_order": 2
+      },
+      {
+        "leaf": "BC",
+        "level": "13",
+        "lower_closed_anchor": 5,
+        "upper_birth": 3,
+        "upper_order": 2
+      },
+      {
+        "leaf": "ACD",
+        "level": "16",
+        "lower_closed_anchor": 4,
+        "upper_birth": 0,
+        "upper_order": 3
+      },
+      {
+        "leaf": "ABC",
+        "level": "169/9",
+        "lower_closed_anchor": 5,
+        "upper_birth": 1,
+        "upper_order": 3
+      },
+      {
+        "leaf": "ABCD",
+        "level": "41/2",
+        "lower_closed_anchor": 2,
+        "upper_birth": 0,
+        "upper_order": 4
+      }
+    ],
+    "vertical_component_checks": 45,
+    "vertical_naturality_squares": 42
+  },
+  "public_status": "not_claimed",
+  "schema": "mhgp7-rational-unified-tower-minima-descent-v1",
+  "scope": "n=4 fixed certificates, K1..4 rational topology model; no geometric search or product execution",
+  "script_sha256": "21798b5e4f44f41ec12db6d0dfe585cf56ea9ffd18c83804406bf974b615f7f9",
+  "source_sha256": "7ac7608813cb853e361827a41b232c79beabb4c0da6f13c669cb09381aeb7021",
+  "status": "passed"
+}

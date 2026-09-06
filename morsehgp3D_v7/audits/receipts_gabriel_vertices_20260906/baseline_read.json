@@ -1,0 +1,53 @@
+{
+  "schema": "mhgp7-auditor-local-P0-baseline-read-v1",
+  "reviewed_utc": "2026-09-06T10:50:04.478185+00:00",
+  "scope": "dated_read_of_one_closed_unpaired_P0_attempt_not_new_benchmark_qualification",
+  "inputs": {"raw":{"path":"build/v7_meb_probe_20260906_controller/heavy_s_scaling_r1/n8000_s8_k10_lazy_c1000000_p0.raw.txt","sha256":"305e39cdf9d85adc9db43dffe885639984573a914d9edd7ccba593dc7c4821dd"},"attempt_receipt":{"path":"build/v7_meb_probe_20260906_controller/heavy_s_scaling_r1/n8000_s8_k10_lazy_c1000000_p0.receipt.json","sha256":"d59a8e209bc3f9ee12ccc920cb99ed8daafadddbd3bcba0385f508985a2d1343"},"sources_before":{"path":"build/v7_meb_probe_20260906_controller/heavy_s_scaling_r1/n8000_s8_k10_lazy_c1000000_p0.sources_before.json","sha256":"a4242d5842184b5d6926adb7d4887e109f926178c39a600dc3d70d8ac1a91f57"},"sources_after":{"path":"build/v7_meb_probe_20260906_controller/heavy_s_scaling_r1/n8000_s8_k10_lazy_c1000000_p0.sources_after.json","sha256":"a4242d5842184b5d6926adb7d4887e109f926178c39a600dc3d70d8ac1a91f57"},"protocol":{"path":"build/v7_meb_probe_20260906_controller/heavy_s_scaling_r1/protocol.json","sha256":"91d5f20bdfe895db6bf50f16740cd358460071bece64e8cdf50cb4b85490dee5"},"closed_build_receipt":{"path":"build/v7_meb_probe_20260906_controller/build_r1/receipt.json","sha256":"9262ea2dd0fd71986d00282149cdb8b9ea21af172e4bc7b27b209ee26be1a7f7"},"closed_micro_preparation_receipt":{"path":"build/v7_meb_probe_20260906_controller/micro_r1/receipt.json","sha256":"526f03ce20e8c4f529acb965574562dbb6fbf016b49fe99feca3e1153e10ac9c"}},
+  "raw_terminal_line_sha256_without_newline": "e19d3f22fb66bccaf5f5515ec9344fe65ff96ce79bb0fda18e91f002dde77b5f",
+  "all_read_files_sha256_stable_before_after": true,
+  "raw_matches_typed_receipt": true,
+  "source_map_sha256": "f0b5afcd44ac4e793abf78f131f2a0c8e6ffcf5f6273e5dd5f5d5f1f03a12a7f",
+  "captured_full_header_sha256": "a946e31dde8fbd8ec528d6f5e94f9c727998acc172b4dd29c084dd522c730d1d",
+  "captured_probe_sha256": "63330d7be1493b779c220485ff8ca372fa707a1f34c26d4e7362744c2815bf8a",
+  "attempt": {"n":8000,"s":8,"seed":3,"Kmax_requested":10,"Kmax_effective":10,"P":0,"cache_entries_per_order":1000000,"started_utc":"2026-09-06T10:20:28.853600+00:00","ended_utc":"2026-09-06T10:23:08.083074+00:00","exit_code":0,"process_group_closed":true,"complete_relative_horizontal_orders":10},
+  "observed_seconds": {"process_elapsed":159.22926442599965,"before_terminal":159.15978668,"full_K1_to_K5":5.466227509,"full_K6_to_K10":68.33199378},
+  "observed_stage_ms": {
+    "input": 2.461016,
+    "index": 2.292716,
+    "generation": 61807.434502,
+    "rle": 1846.33906,
+    "prefilter": 10287.814671,
+    "census": 7251.767251,
+    "regularity": 19.541991,
+    "count": 36.522055,
+    "expand": 748.992346,
+    "full": 73798.224742,
+    "read": 1373.576447,
+    "digest": 1850.331356,
+    "release": 132.799462
+  },
+  "global_source_counts": {"raw_candidates":3144017,"unique_candidates":3144017,"census_balls":3113381,"generation_cap_refus":0,"rank_relevant_extra_shell":0,"prefilter_query_nodes":279817429,"census_query_nodes":284536613,"wspd_corner_evals":167115088,"wspd_witness_nodes":563616452,"q4_completions":39627584,"q4_core_site_tests":218060801},
+  "derived_unique_minus_census_records": 30636,
+  "summed_horizontal_work": {"face_visits":10456312,"minimum_hits":7091033,"cache_hits":585040,"cache_skips":0,"portal_requests":2780239,"chain_steps":1525652,"meb_calls":4305891,"geometry_meb_calls":4305891,"meb_reference_supports":503231458,"query_nodes":313986722,"successor_steps":132893216,"minimum_catalogue_records":2396646,"connection_catalogue_records":3113381,"certificate_minima":2404646,"certificate_nodes":3976472},
+  "per_order_columns": [
+    "K",
+    "minimum_catalogue_records",
+    "connection_catalogue_records",
+    "certificate_minima",
+    "build_ms",
+    "meb_calls"
+  ],
+  "per_order": [
+    [1,0,29875,8000,43.560389,0],
+    [2,29875,63353,29875,274.290032,20586],
+    [3,63353,108117,63353,766.933069,68597],
+    [4,108117,164195,108117,1562.468056,145382],
+    [5,164195,231663,164195,2818.975963,249961],
+    [6,231663,308825,231663,4640.049737,382379],
+    [7,308825,396424,308825,7477.584276,544625],
+    [8,396424,493388,396424,11543.468577,735078],
+    [9,493388,600806,493388,17868.125562,956321],
+    [10,600806,716735,600806,26802.765628,1202962]
+  ],
+  "limits": {"unpaired_P0_only":true,"source_generation_shared_across_orders":true,"global_census_shared_across_orders":true,"per_order_census_call_count_not_serialized":true,"local_phase_times_inside_FULL_not_separated":true,"constructor_judges_imported_or_reexecuted":false,"new_engine_or_compilation":false,"ELF_read":false,"geometry_or_catalogue_completeness_requalified":false,"integrated_inter_k_tower":false,"extrapolation":false,"slo_claim":false,"gcp_used":false,"public_status":"not_claimed"}
+}
