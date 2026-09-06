@@ -1,0 +1,53 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/usr/bin/g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/local_O2.d",
+    "-O2",
+    "/workspaces/E-HGP/morsehgp3D_v7/tests/meb_proposal_local_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/local_O2"
+  ],
+  "capture": "separate_exact_bytes",
+  "closure_errors": [],
+  "command": "/usr/bin/taskset -c 0 /usr/bin/g++ -std=c++20 -Wall -Wextra -Wpedantic -Werror -MMD -MF /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/local_O2.d -O2 /workspaces/E-HGP/morsehgp3D_v7/tests/meb_proposal_local_gate.cpp -o /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/local_O2",
+  "cpu_limit_seconds": 1220,
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 3.173929059001239,
+  "ended": "2026-09-06T11:07:03.006947+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_rc": [
+    0
+  ],
+  "file_size_limit_bytes": 536870912,
+  "id": "compile_local_O2",
+  "outer_timeout_seconds": 600,
+  "pid": 319527,
+  "process_group_closed": true,
+  "process_vm_max_bytes": 27917287424,
+  "sanitizer_virtual_address_reservation": false,
+  "started": "2026-09-06T11:06:59.832838+00:00",
+  "status": "completed",
+  "streams": {
+    "compile_local_O2.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "compile_local_O2.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "unavailable_streams": []
+}

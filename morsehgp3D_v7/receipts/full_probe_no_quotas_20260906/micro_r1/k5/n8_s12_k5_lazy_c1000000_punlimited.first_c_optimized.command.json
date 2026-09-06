@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_cache_policy_audit.py",
+    "/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/k5/n8_s12_k5_lazy_c1000000_punlimited.receipt.json"
+  ],
+  "capture": "separate_exact_bytes",
+  "closure_errors": [],
+  "command": "/usr/bin/taskset -c 0 /home/codespace/.python/current/bin/python3 -B -O /workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_cache_policy_audit.py /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/k5/n8_s12_k5_lazy_c1000000_punlimited.receipt.json",
+  "cpu_limit_seconds": 1220,
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.06640780300040205,
+  "ended": "2026-09-06T11:07:23.726066+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_rc": [
+    0
+  ],
+  "file_size_limit_bytes": 67108864,
+  "id": "n8_s12_k5_lazy_c1000000_punlimited.first_c_optimized",
+  "outer_timeout_seconds": 30,
+  "pid": 320682,
+  "process_group_closed": true,
+  "process_vm_max_bytes": 27917287424,
+  "sanitizer_virtual_address_reservation": false,
+  "started": "2026-09-06T11:07:23.659451+00:00",
+  "status": "completed",
+  "streams": {
+    "n8_s12_k5_lazy_c1000000_punlimited.first_c_optimized.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "n8_s12_k5_lazy_c1000000_punlimited.first_c_optimized.stdout": {
+      "bytes": 1052,
+      "sha256": "80ced76d3af84f3884c1a9be91fcd006032f7be03f837350b4a014bd6c37233d"
+    }
+  },
+  "unavailable_streams": []
+}

@@ -1,0 +1,295 @@
+{
+  "authority": "full_horizontal_relative_to_supplied_complete_exact_regular_gabriel_catalogues",
+  "binary": "build/v7_no_work_quotas_20260906_controller/build_r1/full_gabriel_lazy_probe",
+  "binary_sha256": "4938b94b3166e8c13d02b0fd9687168130d5c528702d7efcf7b7379b3adeb360",
+  "comparison_s": "semantic_horizontal_forest_digest_not_oracle",
+  "continuation_policy": "each_predeclared_attempt_independent_after_closed_predecessor",
+  "coord": 65536,
+  "cpu_affinity": [
+    6
+  ],
+  "digest_header_sha256": "671b2dfb51f1385ee7301bd6b03ef64e62c0d768c92534a6f09589726ce9adc3",
+  "family": "uniform",
+  "first_c_sha256": "a57e54c4ba57d85f736e1df2efbb4f2174b5531c74a0c3e13ec663b47c64b38f",
+  "gcp_used": false,
+  "judge_sha256": "040f738770ea2f141a2d0da80872c2a62118ad9d1e81dd6040066c10b8519a14",
+  "kill_grace_seconds": 10,
+  "kmax": 5,
+  "limits_header_sha256": "c2537bafaeafa8bb737de2a7fab69ad56ab7381b85ca0e5c8ec2703350f76aef",
+  "limits_profile": "memory_guarded_no_operation_quotas_v1",
+  "max_meb_proposal_supports_per_order_max": 18446744073709551615,
+  "measurement_kind": "same_binary_P0_vs_explicit_filtered_proposals",
+  "meb_accounting": "reference_ordinal_plus_native_z_q3_q4_proposal_v2",
+  "meb_header_sha256": "f922544b5cfdc214de96ecd49520e318ea8632d14a8142ef21fd248f9cc38fb3",
+  "named_payload_proxy_gib": 8,
+  "output_capture": "merged stdout/stderr exact bytes plus GNU time -v",
+  "paired_F_speedup_claim": false,
+  "planned_sequence": [
+    [
+      8,
+      8,
+      "eager",
+      0,
+      0
+    ],
+    [
+      8,
+      8,
+      "eager",
+      0,
+      1
+    ],
+    [
+      8,
+      8,
+      "eager",
+      0,
+      "unlimited"
+    ],
+    [
+      8,
+      8,
+      "lazy",
+      0,
+      0
+    ],
+    [
+      8,
+      8,
+      "lazy",
+      0,
+      1
+    ],
+    [
+      8,
+      8,
+      "lazy",
+      0,
+      "unlimited"
+    ],
+    [
+      8,
+      8,
+      "lazy",
+      1,
+      0
+    ],
+    [
+      8,
+      8,
+      "lazy",
+      1,
+      1
+    ],
+    [
+      8,
+      8,
+      "lazy",
+      1,
+      "unlimited"
+    ],
+    [
+      8,
+      8,
+      "lazy",
+      1000000,
+      0
+    ],
+    [
+      8,
+      8,
+      "lazy",
+      1000000,
+      1
+    ],
+    [
+      8,
+      8,
+      "lazy",
+      1000000,
+      "unlimited"
+    ],
+    [
+      8,
+      10,
+      "eager",
+      0,
+      0
+    ],
+    [
+      8,
+      10,
+      "eager",
+      0,
+      1
+    ],
+    [
+      8,
+      10,
+      "eager",
+      0,
+      "unlimited"
+    ],
+    [
+      8,
+      10,
+      "lazy",
+      0,
+      0
+    ],
+    [
+      8,
+      10,
+      "lazy",
+      0,
+      1
+    ],
+    [
+      8,
+      10,
+      "lazy",
+      0,
+      "unlimited"
+    ],
+    [
+      8,
+      10,
+      "lazy",
+      1,
+      0
+    ],
+    [
+      8,
+      10,
+      "lazy",
+      1,
+      1
+    ],
+    [
+      8,
+      10,
+      "lazy",
+      1,
+      "unlimited"
+    ],
+    [
+      8,
+      10,
+      "lazy",
+      1000000,
+      0
+    ],
+    [
+      8,
+      10,
+      "lazy",
+      1000000,
+      1
+    ],
+    [
+      8,
+      10,
+      "lazy",
+      1000000,
+      "unlimited"
+    ],
+    [
+      8,
+      12,
+      "eager",
+      0,
+      0
+    ],
+    [
+      8,
+      12,
+      "eager",
+      0,
+      1
+    ],
+    [
+      8,
+      12,
+      "eager",
+      0,
+      "unlimited"
+    ],
+    [
+      8,
+      12,
+      "lazy",
+      0,
+      0
+    ],
+    [
+      8,
+      12,
+      "lazy",
+      0,
+      1
+    ],
+    [
+      8,
+      12,
+      "lazy",
+      0,
+      "unlimited"
+    ],
+    [
+      8,
+      12,
+      "lazy",
+      1,
+      0
+    ],
+    [
+      8,
+      12,
+      "lazy",
+      1,
+      1
+    ],
+    [
+      8,
+      12,
+      "lazy",
+      1,
+      "unlimited"
+    ],
+    [
+      8,
+      12,
+      "lazy",
+      1000000,
+      0
+    ],
+    [
+      8,
+      12,
+      "lazy",
+      1000000,
+      1
+    ],
+    [
+      8,
+      12,
+      "lazy",
+      1000000,
+      "unlimited"
+    ]
+  ],
+  "probe_schema": "mhgp7-full-gabriel-probe-v5",
+  "probe_sha256": "ca417496382823661bf081eab5258a871768085dacbc5f7da0245aaedfaa60db",
+  "process_vm_soft_limit_max_gib": 26,
+  "producer_sha256": "a946e31dde8fbd8ec528d6f5e94f9c727998acc172b4dd29c084dd522c730d1d",
+  "public_status": "not_claimed",
+  "schema": "mhgp7-full-gabriel-mono-observation-v5",
+  "scope": "horizontal_relative_orders_not_integrated_inter_k_tower",
+  "seed": 3,
+  "slo_claim": false,
+  "source_map_sha256": "72a147fec063382013b4c61a1990ad163cd99dbe9051a8c170c417797b519fbe",
+  "successor_accounting": "full_successor_reads_writes_no_last_pair_v2",
+  "threads": 1,
+  "timeout_seconds_each": 1200,
+  "timing_reference": "elapsed includes digests and provisional output"
+}

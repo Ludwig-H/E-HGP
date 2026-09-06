@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/mhgp7_witness_stack_gate.dir/tests/witness_stack_gate.cpp.o -o mhgp7_witness_stack_gate 

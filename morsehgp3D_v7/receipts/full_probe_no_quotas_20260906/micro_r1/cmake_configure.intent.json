@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/morsehgp3D_v7",
+    "-B",
+    "/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/cmake",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/taskset -c 0 cmake -S /workspaces/E-HGP/morsehgp3D_v7 -B /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+  "cpu_limit_seconds": 1220,
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "expected_rc": [
+    0
+  ],
+  "file_size_limit_bytes": 67108864,
+  "id": "cmake_configure",
+  "outer_timeout_seconds": 60,
+  "process_vm_max_bytes": 27917287424,
+  "sanitizer_virtual_address_reservation": false,
+  "started": "2026-09-06T11:06:56.347530+00:00"
+}

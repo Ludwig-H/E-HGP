@@ -1,0 +1,1 @@
+{"argv": ["/home/codespace/.python/current/bin/python3", "-B", "/workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_minima_quotient_gate.py", "--unknown"], "cwd": "/workspaces/E-HGP", "expected": 2, "timeout_seconds": 10}

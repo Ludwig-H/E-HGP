@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "git",
+    "status",
+    "--porcelain=v1",
+    "--untracked-files=all",
+    "--",
+    "morsehgp3D_v7"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "git status --porcelain=v1 --untracked-files=all -- morsehgp3D_v7",
+  "cpu_limit_seconds": 1220,
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "expected_rc": [
+    0
+  ],
+  "file_size_limit_bytes": 67108864,
+  "id": "worktree",
+  "outer_timeout_seconds": 30,
+  "process_vm_max_bytes": 27917287424,
+  "sanitizer_virtual_address_reservation": false,
+  "started": "2026-09-06T11:06:51.562110+00:00"
+}

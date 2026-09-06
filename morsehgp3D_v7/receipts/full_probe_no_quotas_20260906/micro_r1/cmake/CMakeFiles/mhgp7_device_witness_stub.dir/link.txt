@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/mhgp7_device_witness_stub.dir/tests/device_witness_stub.cpp.o -o mhgp7_device_witness_stub 

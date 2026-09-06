@@ -28,6 +28,25 @@ l'[audit mathématique](docs/AUDIT_NIVEAUX_GABRIEL_20260905.md) et sa
 K=n, plateaux non réguliers, ancres verticales et profils pondérés restent
 distingués ; les minima FULL ne sont pas tout l'univers des poids.
 
+La [nouvelle étude des sommets Gabriel](docs/SQUELETTE_MINIMA_GABRIEL.md)
+précise la simplification : les minima suffisent avec des connexions
+transférant les chemins omis, **pas** avec les seules adjacences induites.
+La descente à cardinal K constant fournit une autre méthode correcte pour
+retrouver les parents ; le raccourci J=1 actuel peut toutefois être moins
+coûteux. Le choix hybride et le partage des ancres horizontales/verticales
+restent à qualifier dans le produit. Le catalogue géométrique est déjà
+partagé entre ordres ; cette étude ne revendique pas un facteur K gagné.
+
+La [sonde v5](docs/CONTRAT_SONDE_FULL_MEB.md) retire les quotas arbitraires
+d'opérations FULL et les listes fermées de tailles d'entrée/cache. Elle
+conserve les limites de représentation, les admissions mémoire et le
+suivi des exécutions ; `P=unlimited` est explicite. Sa compilation fraîche
+et six nouveaux CTests passent ; la micro partielle et son défaut de
+format first-C restent déclarés dans la [passation](PASSATION.md).
+Les mesures directes 8k/16k/32k sont en cours. Aucun reçu n'est réétiqueté.
+La [borne de sortie](docs/CROISSANCE_ET_BORNE_DE_SORTIE.md) interdit de
+promettre une sortie FULL explicite sous-quadratique pour tout nuage 3D.
+
 | Composant | Autorité actuelle |
 | --- | --- |
 | [Certificat FULL et lecteur](docs/CONTRAT_CERTIFICAT_FULL.md) | Validation structurelle transactionnelle ; aucune certification géométrique |
@@ -64,8 +83,8 @@ le préfixe 32k. Aucun gain de temps robuste ni contrat 50k n'est établi.
 Le lot du 6 septembre qualifie le filtre MEB privé sur 9 344 comparaisons
 locales F/Trace/NoObserver et 3 430 appels jugés rationnellement par build,
 avec frontières budgétaires et mutants. Le triangle demande deux formes
-au lieu de cinq. Cette réduction de travail par appel ne lève pas, à elle
-seule, le plafond du **nombre** d'appels à 32k. Le
+au lieu de cinq. Cette réduction de travail par appel ne levait pas, à elle
+seule, l'ancien plafond du **nombre** d'appels à 32k. Le
 [raccord au Builder](docs/CONTRAT_MEB_FULL.md) porte désormais le Work
 persistant ; sa qualification est distincte de ces reçus privés.
 Les mesures sur la distribution FULL réelle restent à établir avant

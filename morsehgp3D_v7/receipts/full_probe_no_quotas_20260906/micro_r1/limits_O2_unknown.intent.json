@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/limits_O2",
+    "--unknown"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/taskset -c 0 /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/limits_O2 --unknown",
+  "cpu_limit_seconds": 1220,
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "expected_rc": [
+    2
+  ],
+  "file_size_limit_bytes": 67108864,
+  "id": "limits_O2_unknown",
+  "outer_timeout_seconds": 30,
+  "process_vm_max_bytes": 27917287424,
+  "sanitizer_virtual_address_reservation": false,
+  "started": "2026-09-06T11:06:53.684802+00:00"
+}

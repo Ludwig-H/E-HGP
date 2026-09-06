@@ -1,0 +1,15 @@
+{
+  "build_status": "completed",
+  "copied_capture_bytes_unchanged": true,
+  "engine_invoked": false,
+  "excluded_files": 10,
+  "micro_status": "failed",
+  "original_directory": "/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller",
+  "public_status": "not_claimed",
+  "receipt_sha256": {
+    "build_r1": "25ccae8eb8466280568090963314c9a67a579bc5d81aa43871830a13a6fd7e9d",
+    "micro_r1": "d5d95a5036f89532ce91aeddda4cec5d5d36ba41909e9198b7649b449f6ae279"
+  },
+  "schema": "mhgp7-v5-R1-preserved-captures-v1",
+  "source_map_sha256": "72a147fec063382013b4c61a1990ad163cd99dbe9051a8c170c417797b519fbe"
+}

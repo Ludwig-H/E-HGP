@@ -1,0 +1,8 @@
+{
+  "after_sha256": "cd79daa8e3d5112b118c4c966e99b4f9b69b366c29a898a5cb29ba5b9f7d23fd",
+  "before_sha256": "f922544b5cfdc214de96ecd49520e318ea8632d14a8142ef21fd248f9cc38fb3",
+  "new": "  for (size_t a = 0; a < old_count; ++a)\n    for (size_t b = a + 1; b < old_count; ++b)\n      for (size_t c = b + 1; c < old_count; ++c) {\n        const Attempt attempt = accept(\n            {subset[a], subset[b], subset[c], violator}, 4);\n        if (attempt != Attempt::kRejected) return attempt;\n      }\n  for (size_t a = 0; a < old_count; ++a)\n    for (size_t b = a + 1; b < old_count; ++b) {\n      const Attempt attempt = accept({subset[a], subset[b], violator, 0}, 3);\n      if (attempt != Attempt::kRejected) return attempt;\n    }\n",
+  "old": "  for (size_t a = 0; a < old_count; ++a)\n    for (size_t b = a + 1; b < old_count; ++b) {\n      const Attempt attempt = accept({subset[a], subset[b], violator, 0}, 3);\n      if (attempt != Attempt::kRejected) return attempt;\n    }\n  for (size_t a = 0; a < old_count; ++a)\n    for (size_t b = a + 1; b < old_count; ++b)\n      for (size_t c = b + 1; c < old_count; ++c) {\n        const Attempt attempt = accept(\n            {subset[a], subset[b], subset[c], violator}, 4);\n        if (attempt != Attempt::kRejected) return attempt;\n      }\n",
+  "product_mutated": false,
+  "target": "morsehgp3D_v7/src/forest/meb_proposal.hpp"
+}

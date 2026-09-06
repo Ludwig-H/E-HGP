@@ -131,6 +131,23 @@ identités et niveaux, avec un format et un lecteur qualifiés séparément.
 
 ## 1. Notation et nature des conclusions
 
+### État du 6 septembre : admission et représentation ne sont pas la mémoire
+
+La [sonde v5](CONTRAT_SONDE_FULL_MEB.md) retire les quotas d'opérations
+qui censuraient les tests de croissance. Les arènes et caches reçoivent
+des capacités calculées depuis le budget logique et leurs types ; les
+limites d'adressage, d'allocation et de temps persistent. Aucun gain de
+RAM ni résultat massif ne découle de cette seule levée d'admission.
+Les valeurs fixes et refus des paragraphes précédents sont historiques.
+
+La [réduction aux minima](SQUELETTE_MINIMA_GABRIEL.md) ne change pas le
+nombre de feuilles FULL à produire. Sa variante de descente à cardinal K
+pourrait supprimer certaines ancres horizontales de directes ; elle n'est
+pas intégrée ni mesurée ici. Une tour traitée niveau par niveau partagerait
+ses fermetures et ancres verticales, mais garderait plusieurs états d'ordres
+simultanément vivants. Ce compromis doit être comparé au traitement
+séquentiel avant d'en déduire une économie de mémoire sur G4.
+
 - **[B] Borne de code et argument d'entiers** : indépendante d'une mesure,
   sous les préconditions explicitement gardées du pipeline.
 - **[R] Résidence structurelle** : conteneurs effectivement possédés et

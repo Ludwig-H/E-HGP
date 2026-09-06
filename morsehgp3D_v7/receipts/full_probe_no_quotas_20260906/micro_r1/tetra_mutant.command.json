@@ -1,0 +1,42 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/q4_before_q3/local_mutant",
+    "--selftest"
+  ],
+  "capture": "separate_exact_bytes",
+  "closure_errors": [],
+  "command": "/usr/bin/taskset -c 0 /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/q4_before_q3/local_mutant --selftest",
+  "cpu_limit_seconds": 1220,
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.0058252479993825546,
+  "ended": "2026-09-06T11:07:12.447262+00:00",
+  "error": null,
+  "exit_code": 1,
+  "expected_rc": [
+    1
+  ],
+  "file_size_limit_bytes": 67108864,
+  "id": "tetra_mutant",
+  "outer_timeout_seconds": 30,
+  "pid": 319772,
+  "process_group_closed": true,
+  "process_vm_max_bytes": 27917287424,
+  "sanitizer_virtual_address_reservation": false,
+  "started": "2026-09-06T11:07:12.441058+00:00",
+  "status": "completed",
+  "streams": {
+    "tetra_mutant.stderr": {
+      "bytes": 72,
+      "sha256": "ea345a3807c691af71a5888300ee01d2e2e394650e22c34636587c6e0d1a95f1"
+    },
+    "tetra_mutant.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "unavailable_streams": []
+}

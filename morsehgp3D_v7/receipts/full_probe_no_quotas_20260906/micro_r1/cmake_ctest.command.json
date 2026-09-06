@@ -1,0 +1,48 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/cmake",
+    "-R",
+    "^mhgp7_(full_gabriel_probe_limits|full_minima_quotient)",
+    "--output-on-failure",
+    "--parallel",
+    "1"
+  ],
+  "capture": "separate_exact_bytes",
+  "closure_errors": [],
+  "command": "/usr/bin/taskset -c 0 ctest --test-dir /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/cmake -R '^mhgp7_(full_gabriel_probe_limits|full_minima_quotient)' --output-on-failure --parallel 1",
+  "cpu_limit_seconds": 1220,
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.7178751709998323,
+  "ended": "2026-09-06T11:06:59.612361+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_rc": [
+    0
+  ],
+  "file_size_limit_bytes": 67108864,
+  "id": "cmake_ctest",
+  "outer_timeout_seconds": 400,
+  "pid": 319490,
+  "process_group_closed": true,
+  "process_vm_max_bytes": 27917287424,
+  "sanitizer_virtual_address_reservation": false,
+  "started": "2026-09-06T11:06:58.894309+00:00",
+  "status": "completed",
+  "streams": {
+    "cmake_ctest.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cmake_ctest.stdout": {
+      "bytes": 1364,
+      "sha256": "a699b3aa25baeb09cf1fe332a74ab8f16d1e603bd986cdc7430b0c8b3477b56b"
+    }
+  },
+  "unavailable_streams": []
+}

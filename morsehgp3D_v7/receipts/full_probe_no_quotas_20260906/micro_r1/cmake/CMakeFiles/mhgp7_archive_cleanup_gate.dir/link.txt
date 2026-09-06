@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG -Wl,--wrap=openat -Wl,--wrap=fsync CMakeFiles/mhgp7_archive_cleanup_gate.dir/tests/archive_cleanup_gate.cpp.o -o mhgp7_archive_cleanup_gate 

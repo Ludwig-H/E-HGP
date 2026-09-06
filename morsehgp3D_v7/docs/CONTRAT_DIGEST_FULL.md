@@ -40,11 +40,16 @@ d'ordre antérieures demeurent diagnostiques et provisoires.
 
 Le sérialiseur reçoit uniquement le certificat opaque validé par la
 factory. Sa vue de test n'est pas un parseur de forêts non fiables.
-La sonde fixe quatre millions de nœuds et huit millions de références
+La sonde historique fixait quatre millions de nœuds et huit millions de références
 parentales par ordre. Le scratch logique vaut 25 octets par nœud plus
 8 par référence, soit au plus 164 millions d'octets sur cette ABI. Ce
 n'est pas une borne de capacités d'allocation ou de RSS. Le tri d'entrée
 ajoute un indice `size_t` par point.
+
+La [sonde v5](CONTRAT_SONDE_FULL_MEB.md) remplace ces nombres fixes par
+des capacités dérivées de la mémoire et de la représentation. La formule
+du scratch reste la même ; son addition est vérifiée sans débordement.
+Les 164 millions d'octets ci-dessus ne décrivent que le profil historique.
 
 Tous les calculs du digest sont inclus dans `elapsed_before_terminal_ms`
 et isolés dans `stage_ms.digest`. Aucun ratio avec l'ancienne sonde v1

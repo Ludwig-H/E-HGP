@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/mhgp7_lot_ring_gate.dir/tests/lot_ring_gate.cpp.o -o mhgp7_lot_ring_gate 

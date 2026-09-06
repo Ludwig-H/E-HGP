@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-I",
+    "-B",
+    "/tmp/mhgp7_minima_math_relocation_1mzn89kc/payload/replay.py",
+    "--execute",
+    "--output",
+    "/workspaces/E-HGP/build/v7_minima_math_publication_20260906/stage_r1/qualification/relocated"
+  ],
+  "cwd": "/tmp/mhgp7_minima_math_relocation_1mzn89kc/payload",
+  "engine_invoked": false,
+  "exit_code": 0,
+  "expected": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "4effff4cd4fab35717cce3b1967019585915ea6fda7da651b179340d72020067",
+  "timeout_seconds": 30
+}

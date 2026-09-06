@@ -1,8 +1,10 @@
 # Banc historique Gabriel B/C : campagnes appariées et séparations WSPD
 
 Ce banc conserve le différentiel historique de la CLI ; il ne qualifie
-pas FULL. Le protocole actif eager/lazy avec digest sémantique est dans
-[la campagne FULL courante](../docs/RESULTATS_MONO_FULL_LAZY_20260905.md).
+pas FULL. La [sonde FULL v5](../docs/CONTRAT_SONDE_FULL_MEB.md) mesure
+séparément le proposeur MEB à P explicite. La [campagne eager/lazy](../docs/RESULTATS_MONO_FULL_LAZY_20260905.md)
+garde ses sources et mesures historiques ; ses reçus ne deviennent pas
+ceux du nouveau raccord.
 
 Cadre : `exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 

@@ -1,0 +1,164 @@
+# Croissance mesurée et borne de sortie FULL
+
+6 septembre 2026. Cadre : `phase=exploration_v7_hors_registre`,
+`backend=cpu_reference`, `profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+La preuve ci-dessous porte sur la géométrie euclidienne exacte à précision
+croissante. Les modèles rationnels associés ne sont pas des entrées u16 ni
+des exécutions du producteur FULL.
+
+## Ce qui est réellement conservé
+
+Les définitions 21–22 du [manuscrit, pages PDF 84–85](../../docs/references/MANUSCRIT_THESE_HAUSEUX.pdf)
+incluent les composantes isolées du graphe des facettes. La
+[preuve des naissances régulières](AUDIT_NIVEAUX_GABRIEL_20260905.md#11-hiérarchie-complète--minima-puis-fusions)
+et sa [contrelecture indépendante](../audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md)
+établissent qu'une facette Gabriel stricte de cardinal K est une feuille FULL
+de l'ordre K. Cette feuille n'est pas supprimée parce qu'elle fusionnera
+plus tard ou partage des points avec une autre feuille.
+
+Avec $L_K$ feuilles et $R_K$ racines, le nombre de vraies multifusions vérifie
+$I_K\leq L_K-R_K$, et le nombre de liens vaut $L_K+I_K-R_K$. Le certificat
+explicite est donc linéaire en minima, avec $O(KL_K)$ identifiants de points,
+mais aucune borne linéaire en nombre de points n'en découle. À K=1 les
+feuilles sont les points ; une arête Gabriel n'y est pas nécessairement une
+fusion conservée. À K=2, cette même arête stricte est au contraire une
+**feuille**. C'est ce changement de rôle qui justifie la borne suivante.
+
+## Une famille rationnelle à sortie quadratique dès K=2
+
+**Énoncé.** Pour chaque entier $m\geq2$, il existe un nuage régulier de
+$N=2m$ points de $\mathbb{R}^{3}$ ayant au moins $m^{2}=N^{2}/4$ minima FULL
+de cardinal 2. La borne concerne donc un ordre fixé, présent dans les deux
+tours 1..5 et 1..10, et non un ordre croissant avec N.
+
+Posons $\delta=\frac{1}{10m^{2}}$, $t_i=i\delta$ pour $1\leq i\leq m$,
+et $a=m\delta=\frac{1}{10m}$. Considérons les deux arcs rationnels :
+
+$$A(t)=\left(\frac{1-t^{2}}{1+t^{2}},\frac{2t}{1+t^{2}},0\right),\qquad B(u)=\left(\frac{2u^{2}}{1+u^{2}},0,\frac{2u}{1+u^{2}}\right).$$
+
+Pour une paire croisée A(t), B(u), la puissance diamétrale d'un autre point
+A(v), à savoir son carré de distance au milieu moins le carré du demi-diamètre,
+est donnée par l'identité exacte :
+
+$$\Phi_{t,u}(A(v))=(A(v)-A(t))\cdot(A(v)-B(u))=\frac{2(v-t)\left((v-t)+u^{2}(3v+t)\right)}{(1+t^{2})(1+v^{2})(1+u^{2})}.$$
+
+Les paramètres sont positifs et distincts sur chaque arc. Ainsi
+$|v-t|\geq\delta$ et $0\leq u^{2}(3v+t)\leq4a^{3}<\delta$, puisque :
+
+$$\delta-4a^{3}=\frac{25m-1}{250m^{3}}>0.$$
+
+Si v>t, les deux facteurs du numérateur sont positifs. Si v<t, ils sont
+tous deux négatifs. Le dénominateur est positif. Plus précisément :
+
+$$\Phi_{t,u}(A(v))\geq\frac{2\delta(\delta-4a^{3})}{(1+a^{2})^{3}}>0.$$
+
+La transformation isométrique $(x,y,z)\mapsto(1-x,z,y)$ échange les arcs.
+Elle donne la même conclusion pour les autres points B(v), en échangeant
+t et u. Les $m^{2}$ boules diamétrales des paires croisées sont donc
+**strictement vides de tout point étranger**, coquille comprise.
+
+Les arcs initiaux peuvent posséder des dégénérescences étrangères à ces
+inégalités. Pour chaque m fixé, les inégalités strictes précédentes forment
+une famille finie et définissent un voisinage ouvert du nuage. Une
+perturbation rationnelle générique suffisamment petite les conserve et peut
+éviter les égalités algébriques de dégénérescence des supports pertinents
+(rang, extra-shell et barycentrique nulle). Il existe donc dans ce voisinage
+un nuage régulier. Il s'agit d'un argument d'existence sur une nouvelle
+entrée, pas d'une perturbation symbolique autorisée sur les données produit.
+La précision nécessaire n'est pas uniformément bornée par 16 bits.
+
+Enfin, une paire ne peut avoir une extension de même rayon : sa boule
+englobante minimale est unique, et une telle extension imposerait qu'un
+point étranger appartienne à cette même boule fermée. Chaque paire croisée
+est donc isolée à sa naissance dans Γ₂ et fournit une identité de feuille
+FULL distincte. Par conséquent, $L_2\geq m^{2}$. Aucun théorème sur la taille
+de Delaunay, aucun catalogue Gamma exhaustif et aucune propriété WSPD ne
+sont nécessaires à cette preuve.
+
+## Ce que cette borne n'affirme pas
+
+Un producteur qui **énumère le certificat FULL explicite** doit émettre au
+moins un record par feuille : son temps d'émission est donc
+$\Omega(N^{2})$ sur cette famille, même si son travail supplémentaire est
+optimal. Une sortie streamée peut réduire la mémoire résidente ; elle ne
+supprime pas le nombre de records à produire.
+
+La borne ne s'applique pas automatiquement à tout encodage implicite ou
+reconstructible. Changer d'API demanderait de préciser ce qui est stocké,
+le coût des requêtes et celui de l'expansion complète. Il ne faut pas
+transformer une borne de matérialisation en impossibilité de toute compression.
+
+Le profil u16 courant a un univers fini. La famille exacte à précision
+croissante ne démontre donc pas une asymptotique infinie dans cet univers
+fixe, ni un plafond temporel matériel à 50 000 points. Elle interdit une
+promesse géométrique générale sous-quadratique pour l'énumération FULL
+explicite indépendamment du volume de sortie. Un refus budgétaire n'est
+pas une réalisation rapide et complète du contrat sur l'entrée refusée.
+
+Les [arcs liés historiques](../../morsehgp3D_v6/docs/MATHEMATIQUES.md#5-contrat-de-sortie-barrière)
+et la [porte entière portée en v7](../tests/linked_arcs_gate.cpp) concernent
+des q3 aigus et q4 bien centrés à boule strictement vide. Ces propriétés
+géométriques impliquent aussi des minima de cardinal 3 et 4. Toutefois,
+la portée exécutée de cette porte est **génération → census**, pas une
+qualification du producteur FULL ni de sa forêt. Ses quatre tailles
+N=6/10/18/34 ne prouvent pas une asymptotique expérimentale. Aucun résultat
+historique n'est réétiqueté en reçu FULL par le présent argument.
+
+## Protocole de croissance 8k, 16k, 32k
+
+Le [contrat de performance](CONTRAT_PERFORMANCE.md) conserve les priorités
+mono-thread, puis multi-CPU, puis GPU, et la comparaison s=8/10/12. Les
+mesures doivent distinguer la tour complète de la sonde horizontale relative.
+
+Pour chaque famille, configuration et périmètre identiques, relever les
+temps complets $T_{8000}$, $T_{16000}$ et $T_{32000}$, puis :
+
+$$\alpha_{8\rightarrow16}=\log_2\left(\frac{T_{16000}}{T_{8000}}\right),\qquad\alpha_{16\rightarrow32}=\log_2\left(\frac{T_{32000}}{T_{16000}}\right),\qquad\alpha_{8\rightarrow32}=\frac{1}{2}\log_2\left(\frac{T_{32000}}{T_{8000}}\right).$$
+
+Publier simultanément, par ordre et pour le total : feuilles, multifusions,
+liens, références de points des feuilles et octets explicites. Pour un volume
+positif V défini de façon identique aux deux tailles, relever
+$\beta=\log_2(V_{2N}/V_N)$ et $\alpha-\beta$, l'exposant du temps par unité de
+sortie. Si V est nul ou que le payload n'est pas effectivement sérialisé,
+ne pas inventer un ratio ni des octets mesurés : les tailles logiques restent
+nommées comme telles. Compter séparément candidats, visites spatiales, appels
+MEB, supports et autres coûts intermédiaires.
+
+Les comparaisons utilisent le même binaire, le même cœur mono, les mêmes
+paramètres K/s/C/P et budgets, ainsi qu'un périmètre temporel inchangé.
+Graines, familles et règles de génération sont déclarées ; les répétitions
+fraîches et leur dispersion restent nécessaires. Un timing contaminé n'est
+pas utilisé pour un speedup. Les temps de composants restent diagnostics,
+sans soustraction opportuniste du temps complet.
+
+Un refus ou une censure à 32k interdit de publier un exposant de tour complète
+incluant ce point. Un éventuel préfixe commun doit être identifié comme tel,
+sans le promouvoir en succès global. Deux ratios observés inférieurs à 2
+ne sont ni une preuve asymptotique ni une garantie « tous régimes ».
+
+## Porte rationnelle indépendante et statut
+
+Le [test Python](../tests/full_output_lower_bound_gate.py) est indépendant
+du moteur et de ses prédicats. Il prépare les modèles m=2,5,10, soit 129
+paires croisées et 2 008 comparaisons exactes de l'identité avec le produit
+scalaire, avec marge strictement positive. Six modèles de boule vérifient
+notamment qu'un seul extérieur ne suffit pas, qu'un intrus interdit la
+vacuité et qu'un point étranger sur la coquille interdit la vacuité stricte.
+Huit mutants ciblent l'identité, sa marge et la fausse promotion par
+`any` ou par oubli d'un point étranger. Aucun `assert` ne porte une décision.
+
+Commandes exécutées le 6 septembre, avant la fenêtre de mesure mono :
+
+```bash
+python3 -B morsehgp3D_v7/tests/full_output_lower_bound_gate.py --selftest
+python3 -B -O morsehgp3D_v7/tests/full_output_lower_bound_gate.py --selftest
+```
+
+Les deux modes retournent 0 ; l'invocation inconnue retourne 2 dans chacun.
+Les 2 008 identités et huit mutants sont vérifiés ; les sorties coïncident
+hors champ déclaratif d'optimisation Python. Ces tests bornés ne prouvent
+pas à eux seuls l'énoncé infini,
+ne construisent pas la perturbation régulière et ne qualifient ni le moteur
+FULL ni une performance. Aucun raccord CMake, aucune mesure moteur et
+aucun usage GCP ne sont introduits par ces deux fichiers.

@@ -1,0 +1,7 @@
+{
+  "attempt_id": "n8_s8_k10_eager_c0_p0",
+  "ended": "2026-09-06T11:07:24.431697+00:00",
+  "reason": "KeyError: 'successor_accounting'",
+  "started": "2026-09-06T11:07:23.769986+00:00",
+  "status": "failed"
+}

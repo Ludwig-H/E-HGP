@@ -70,6 +70,13 @@ n'est imposé par défaut à ce supplément.
 
 ## Ce que la v6 optimise
 
+L'[étude du 6 septembre](SQUELETTE_MINIMA_GABRIEL.md) précise la réduction
+supplémentaire demandée : un quotient filtré sur les seuls minima conserve
+les hiérarchies et les couvertures si ses connexions transfèrent les chemins
+omis. Les adjacences géométriques induites ne suffisent pas. La descente à
+cardinal K constant fournit un resolver alternatif ; son coût et le partage
+des ancres verticales restent à qualifier dans la tour produit.
+
 La v6 utilise un seul index radix sur Morton et une descente WSPD fusionnée
 avec masques pour trois arités. Une paire de facteurs est terminale dès
 qu'elle est géométriquement séparée ; aucun cap de population ne remplace

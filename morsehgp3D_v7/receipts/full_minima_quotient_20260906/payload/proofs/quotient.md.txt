@@ -1,0 +1,147 @@
+# Minima Gabriel : graphe induit insuffisant, quotient filtré suffisant
+
+6 septembre 2026. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
+`public_status=not_claimed`. Travail mathématique indépendant, sans moteur C++.
+
+## Trois objets à distinguer
+
+Le manuscrit, définition 21 (PDF84), définit Γ_K sur **tous** les labels de
+cardinal K de Čech ; deux labels sont adjacents lorsque leur union est dans
+Čech. La proposition 5 (PDF112) permet les seules adjacences élémentaires,
+sans changer les composantes. La définition 29 (PDF115–116) définit un autre
+graphe, G_K^Gab, sur **toutes les facettes des cofaces Gabriel** ; elle ne
+restreint pas ces facettes aux seuls minima Gabriel. L'Algorithme 1 (PDF126)
+emploie encore cet univers de facettes pour les scores.
+
+Référence lue : [manuscrit](../../docs/references/MANUSCRIT_THESE_HAUSEUX.pdf),
+PDF84–85, 109–119, 121–127 ;
+[naissances FULL](../../morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md#11-hiérarchie-complète--minima-puis-fusions) ;
+[attaches silencieuses](../../docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md), §§2–5.2.
+La proposition 6 contestée n'est utilisée dans aucune preuve ci-dessous.
+
+Soit M_K l'ensemble des minima Gabriel de cardinal K, chacun conservant sa
+naissance exacte. Deux restrictions sont insuffisantes :
+
+- relier seulement les minima facettes d'une même coface Gabriel ;
+- plus généreusement, relier deux minima g,h au niveau β(g∪h), même lorsque
+  leur union a plus de K+1 points. C'est exactement le graphe d'intersection
+  de leurs seules régions témoins, pas encore une fermeture par chemins Γ.
+
+## Contre-fixture minimale : quatre points u16 réguliers
+
+Pour K=2, prendre A=(1,1,7), B=(5,2,1), C=(7,2,2), D=(5,2,8).
+L'oracle rationnel vérifie la régularité sur tous les sous-ensembles non vides
+et leurs MEB, pas seulement les cofaces affichées. Les coordonnées sont u16
+et le déterminant affine est non nul. Tous les niveaux sont des rayons carrés.
+
+| Label | Niveau β | Rôle |
+| --- | ---: | --- |
+| BC | 5/4 | minimum |
+| AD | 9/2 | minimum |
+| CD | 10 | minimum |
+| BD et BCD | 49/4 | BD non-Gabriel ; BCD directe Gabriel obtuse |
+| AB | 53/4 | minimum |
+| ABD | 477/34 | directe Gabriel aiguë, vraie multifusion |
+| AC, ABC, ACD, ABCD | 31/2 | AC, ABC et ACD non-Gabriel ; ABCD saturé |
+
+La boule diamétrale BD contient C avec puissance −2. BCD relie BC et CD
+au niveau 49/4 et y rattache simultanément BD. Quand ABD arrive à 477/34,
+ses trois bras rejoignent les parents distincts AB, AD et {BC,CD}. Γ₂ passe
+donc de trois composantes juste avant ce niveau à une seule au côté fermé.
+
+Les deux restrictions aux minima ne voient que {AB,AD}, couvrant ABD, et
+{BC,CD}, couvrant BCD. Elles perdent le pont BD. Pour les quatre paires
+croisées entre ces groupes, β(g∪h)=31/2, alors que le vrai niveau minimax
+est 477/34. Même autoriser les unions disjointes AB∪CD et AD∪BC ne répare
+donc pas le retard. Le graphe généreux fusionne seulement à 31/2 ; la
+restriction aux seules cofaces Gabriel garde ici ses deux groupes séparés.
+
+**Le pont BD est rattaché par une directe BCD**, cas à intrus unique.
+Cette fixture ne demande aucune coface silencieuse non-Gabriel. E5 reste
+distinct : son attache AC par ACD/ACE non-Gabriel est nécessaire avant ABC.
+Le test confirme pour E5 la fausse séparation des deux graphes restreints,
+au niveau fermé 83886/3563.
+
+**Minimalité pour K=2 régulier.** À N=2, il existe une unique feuille et
+aucune connexion. À N=3, la seule coface est X, toujours Gabriel. Une paire
+non-Gabriel a son troisième point strictement dans sa MEB ; elle naît donc
+au même niveau que X. Avant β(X), toutes les paires présentes sont des
+minima isolés ; à β(X), l'unique coface relie tous les minima et couvre X.
+Les deux restrictions sont donc correctes pour N≤3. N=4 est minimal dans
+ce domaine, sans prétendre à une minimalité des coordonnées choisies.
+
+## Réduction correcte sur les seuls minima
+
+Sous régularité, toute facette F rejoint à sa naissance un minimum. Si F
+n'est pas Gabriel, choisir un intrus strict z et remplacer un essentiel u
+par z diminue strictement β. F et la facette remplacée sont reliées au
+niveau β(F), puisque leur union est contenue dans la MEB de F. Une chaîne
+finie de descentes termine donc sur un minimum g. Cela fournit une ancre
+a(F) dans la même composante, à un niveau au plus β(F).
+
+La couverture en points est aussi conservée par l'ensemble des minima de
+chaque composante : les remplacements par z de chacun des essentiels de F
+sont strictement antérieurs ; leur union couvre F, car il y a au moins
+deux essentiels. L'induction sur β ramène ainsi tous les points de F à des
+minima de la composante. Une ancre individuelle n'a pas à couvrir F seule.
+
+Pour deux minima, définir le poids minimax hérité des chemins de Γ :
+
+$$d_K(g,h)=\min_{g=F_0,\ldots,F_q=h}\max_{0\leq i<q}\beta(F_i\cup F_{i+1}),\qquad d_K(g,g)=\beta(g).$$
+
+Les sommets du graphe réduit restent nés à β(g). Pour toute coupe ouverte
+ou fermée, d_K(g,h) est sous le seuil exactement lorsqu'un chemin Γ l'est.
+Chaque composante Γ contenant un minimum, cela donne une bijection des
+composantes, compatible avec toute inclusion de seuil, et conserve leurs
+couvertures en points. Le graphe réduit est **une fermeture par chemins**,
+pas le graphe induit ni le graphe d'intersection directe des régions minima.
+
+Une autre construction transfère chaque arête F–G de Γ vers a(F)–a(G),
+au poids original β(F∪G), puis retire les boucles et garde le plus petit
+poids parallèle. Les chemins F–a(F) et G–a(G), disponibles dès les naissances,
+justifient les deux sens de l'équivalence. Les adjacences élémentaires
+suffisent aussi, par la proposition 5.
+
+Un arbre minimum de ce graphe réduit conserve toutes les coupes ; à horizon
+fixé une forêt sur L minima actifs et R composantes possède L−R arêtes.
+Les naissances doivent rester explicites et les poids égaux traités
+atomiquement pour reconstruire les vraies multifusions, et non une chaîne
+binaire artificielle. Le graphe minimax complet et l'énumération exhaustive
+des facettes ne sont que des définitions/oracles : ils ne sont pas une
+architecture produit sparse ni un procédé économique pour calculer les poids.
+
+## Conséquence v7 et limites
+
+Oui aux seuls minima comme **identités terminales du certificat FULL**,
+avec transferts de chemins/parents certifiés : c'est cohérent avec le
+certificat v7 actuel. Non à la suppression des facettes non-Gabriel dans
+le calcul des attaches. Elles peuvent rester des portails temporaires/cache,
+sans devenir des nœuds publics. Le coût de découverte des minima, des parents
+et des chemins reste à optimiser et qualifier ; leur nombre n'est pas
+universellement linéaire en points.
+
+Cette réduction conserve H0 filtré et la hiérarchie en recouvrement, pas
+l'adjacence brute, toutes les facettes, ni la géométrie de l'union des
+régions témoins. Elle ne remplace pas automatiquement l'univers pondéré
+du chapitre 9. Le lien à l'estimateur de densité K-NN concerne les ensembles
+de centres couverts par au moins K boules ; il ne s'agit pas du graphe
+ordinaire reliant chaque point à ses K voisins.
+
+## Reçu borné et reproductible
+
+Source permanente : [full_gabriel_minima_quotient_gate.py](../../morsehgp3D_v7/tests/full_gabriel_minima_quotient_gate.py),
+SHA `bee615b5f8b937e11104597fd674d868828d6b850616582f5163b44454ab9434`.
+Capture create-only : [receipt.json](rational_capture/receipt.json),
+SHA `24210dfeb475dfa75ecef65dc13aadc2a6d8336cd76e663b3cec79c352a98c2a`.
+
+Normal et `python -O` : 17 modèles, 640 contrôles de coupe sur quatre
+graphes corrigés, 68 histoires de lots comparées, dix mutants tués.
+Les graphes testés sont Γ élémentaire, fermeture minimax sur minima,
+transfert par ancres et arbre minimum du quotient. Les signatures comparent
+les identités de minima **et** les couvertures, sans confondre des composantes
+qui partagent des points. K=n est inclus pour chaque nuage.
+Les quatre commandes ont les codes attendus 0/2/0/2 ; stderr vides et
+stdout identiques entre normal et `-O`. Commandes, sources, stdout/stderr et
+[SHA256SUMS](rational_capture/SHA256SUMS) sont conservés. Aucun moteur C++,
+build, Git, GCP ou fichier de l'auditeur n'a été modifié.

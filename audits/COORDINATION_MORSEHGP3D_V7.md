@@ -1498,3 +1498,260 @@ et `-O`, dont le nouveau paquet ajouté entièrement avec ses snapshots
 inertes. Les 366 documents actifs et les vingt phases du registre inchangé
 passent aussi dans les deux modes. Aucun fichier auditeur vivant ou v6
 préparé ; aucune source testée ne diffère de son pin avant commit.
+
+## Sonde MEB v4 et sentinelle produit — 6 septembre, après 20b28b1d
+
+Le raccord est publié ; réservation ROOT précédente close. Nouvelle étape :
+sonde v4 avec P obligatoire explicite, calendrier MEB et cinq diagnostics,
+lecteurs stricts et comparaisons P0/opt-in. Aucun changement du helper ou
+du Builder FULL. Le complément permanent tétraèdre P3/P6 demandé est porté
+sur le helper produit ; votre extension indépendante K9/K10 reste distincte.
+Les premières exécutions seront des admissions bornées, pas des temps lourds.
+
+Merci de signaler la clôture de vos moteurs CPU1 avant une fenêtre de mesure
+mono : ROOT n'en lance pas encore, et ne s'attribue pas votre résultat en
+préparation. Les neuf cellules n=8k/16k/32k et s=8/10/12 auront chacune
+deux tentatives indépendantes ; un refus P0 ne censurera pas l'opt-in.
+L'index reste libre pour votre publication. GCP non utilisé.
+
+Votre nouveau `receipts_full_meb_20260906/README.md` et la contrelecture
+constructeur sont maintenant lus en entier : 116 ordres / 2 784 sorties /
+214 704 coupes par build, extension n14/K9–K10 et clôture des 28 commandes
+C++ à 09:46:09 UTC. Merci ; je lierai cet apport comme preuve indépendante,
+sans requalifier par lui les catalogues ou les mesures. Votre réserve sur
+les états individuels non publiés des douze exceptions est conservée.
+La sentinelle permanente P3/P6 est prête (gate `ac25cbc7…`), sa compilation
+fraîche et son mutant q4-first sont prévus dans l'admission de la sonde.
+Sauf nouveau moteur signalé, la fenêtre mono suivra cette admission ;
+aucune autre compilation ROOT ne sera alors lancée simultanément.
+
+Votre réservation d'index pour `qualify full meb composition through order ten`
+est vue et respectée. Aucun fichier constructeur préparé. Votre confirmation
+d'absence de nouveau moteur est reçue ; les captures mono seront séquentielles,
+après l'admission bornée, avec toutes les compilations ROOT déjà closes.
+
+## Croissance 8k / 16k / 32k — priorité utilisateur
+
+L'utilisateur demande maintenant explicitement de contrôler la croissance
+sous-quadratique dans les différents régimes. ROOT réordonne le plan avant
+son gel : le triplet 8k/16k/32k à s8 vient d'abord, chacun P0/grand P,
+puis s10 et s12. Les refus/censures ne sont pas des succès de tour ni
+des points permettant de calculer un exposant de temps complet.
+Le contrôleur `ee9d4640…`, carte de 58 sources `f0b5afcd…`, entre en
+admission bornée ; aucun temps lourd avant clôture des compilations.
+
+Question mathématique précise pour vous : dans notre domaine FULL 3D
+régulier, K fixe≤10, la famille d'arcs liés établit-elle un nombre
+quadratique de **minima FULL effectivement distincts**, ou seulement
+de candidats/catalogues intermédiaires ? Ne pas transférer une borne
+Delaunay ou du Gabriel brut à la sortie FULL sans ce raccord. Je distingue
+le coût de sortie du surcoût du constructeur ; une affirmation universelle
+de sous-quadraticité exige une preuve, pas trois timings. La campagne
+uniforme actuelle ne représentera pas tous les régimes géométriques.
+
+Votre `3e62aadd` est vu publié. L'admission C++ de la sonde est close à
+10:13:55 UTC : build O3 puis 72 micro-exécutions / 468 ordres ; 413
+commandes micro toutes closes, porte locale O2/SAN 111+45 appels et
+mutant q4-first causal. Aucun lourd lancé pour l'instant. Les trois écarts
+de transport du comparateur ont été trouvés aussi en relecture ROOT et
+transmis à son auteur **avant** l'exécution du comparateur sur captures :
+le brouillon est corrigé vers les vrais snapshots/streams/intentions,
+sans changer les captures gelées. Son ancien modèle reste explicitement
+synthétique ; nous attendons 48 vraies paires / 312 ordres comparés avant GO.
+
+Une preuve autonome de borne de sortie est également en cours de rédaction :
+deux petits arcs rationnels en 3D ont toutes leurs paires croisées Gabriel
+strictes, donc des minima FULL à K2. Elle distinguera précision croissante,
+univers u16 fini et sortie explicite ; aucun transfert depuis Delaunay.
+
+**GO mono après clôture de l'admission réelle.** Le comparateur corrigé
+`910b30ac…` réadmet maintenant les 72 vraies tentatives : 48 paires / 312
+ordres comparés, 25 anciens compteurs et tous les autres champs non mesurés
+égaux. Les sorties normal/-O sont identiques (reçu `37f6a202…`). Le
+brouillon de transport antérieur n'a lancé aucun moteur et reste conservé
+comme préparation, pas comme qualification des captures réelles.
+Toutes les compilations ROOT sont closes. Début des tentatives CPU6
+séquentielles ; merci de ne pas ouvrir de nouveau moteur ou calcul lourd
+pendant cette fenêtre. Les lectures/écritures de documents restent libres.
+
+## Sommets Gabriel seuls et suppression des plafonds — 6 septembre
+
+La première tentative n8000/s8/P0 est close : sortie 0, groupe fermé,
+159,160 s horizontaux, sans comparaison P0/P>0 encore exécutée. Aucun
+moteur ROOT actif, aucune session GCP. Votre réservation d'index actuelle
+est vue ; aucun fichier constructeur ne sera indexé pendant celle-ci.
+
+Nouvelle demande explicite : étudier si les sommets de Gamma_K peuvent
+être les seuls (K−1)-simplexes Gabriel, au lieu des facettes des K-simplexes
+Gabriel, puis supprimer les plafonds de travail arbitraires de la sonde.
+Merci d'une contrelecture mathématique indépendante : distinguer le graphe
+induit naïf (deux minima facettes d'une même coface Gabriel), le quotient
+avec rattachements/chemins silencieux et une éventuelle adjacency directe
+entre régions témoins des seuls minima. Les minima suffisent-ils comme
+sommets filtrés avec des arêtes explicitement constructibles, et quelle
+information reste indispensable pour niveaux, parents, points, verticale
+et poids ? Une contre-fixture rationnelle/u16 du graphe naïf et une preuve
+de suffisance du quotient seraient utiles ; ne pas confondre la filtration
+HGP du manuscrit avec celle d'un graphe k-NN ordinaire.
+
+ROOT conserve temps/RAM, arithmétique vérifiée et limites des types ; les
+quotas d'opérations ne doivent plus censurer la campagne à 32k. Les
+captures précédentes restent gelées, avec leurs anciens budgets. Vos
+bornes p≤146×appels et certified≤c−A≤550×certified sont lues et seront
+prises en compte dans la nouvelle admission. Aucun moteur lourd demandé
+à l'auditeur pour cette question.
+
+L'utilisateur insiste sur la difficulté du meilleur reconstructeur et
+demande explicitement de poursuivre notre échange. Une nouvelle fixture
+constructeur n4/K2 est trouvée par l'oracle rationnel et contre-calculée
+algébriquement par ROOT : A=(1,1,7), B=(5,2,1), C=(7,2,2), D=(5,2,8).
+Minima AB,AD,BC,CD ; BD a l'intrus C (puissance −2). BCD, directe de
+niveau carré 49/4, installe BD dans la composante BC/CD ; ABD, directe
+de niveau 477/34, fusionne cette composante avec AB et AD. Restreindre
+aux minima produit au contraire les deux groupes AB/AD et BC/CD. Même
+le graphe d'intersection complet sur minima retarde cette fusion à 31/2.
+Cette fixture isole la suppression d'un sommet non-Gabriel sans nécessiter
+de coface silencieuse ; elle complète E5 plutôt que la remplacer.
+
+La nouvelle note `docs/SQUELETTE_MINIMA_GABRIEL.md` formule le quotient
+filtré avec poids minimax des chemins Gamma, puis sa forêt de L−R arêtes
+sur des représentants de minima. Cette suffisance informationnelle n'est
+pas présentée comme un algorithme rapide pour découvrir ces poids.
+Merci de pousser surtout cette frontière algorithmique : existe-t-il
+une caractérisation locale certifiable des connexions entre bassins de
+minima évitant les résolutions de toutes les facettes directes ? Une
+sélection des seuls bras essentiels avec arrêt après q−1 connexions, une
+descente de bassins memoïsée, ou une recherche de coupes de type Borůvka
+peut-elle être justifiée sans oracle circulaire ni énumération quadratique
+des paires de minima ? Toute prétendue économie doit préserver les parents
+pré-lot, leurs identités, et les ancres des directes sans fusion réutilisées.
+La v7 ne matérialise déjà pas toutes les facettes comme feuilles ; le gain
+reste à chercher dans la découverte/réutilisation des connexions, pas dans
+un renommage de son certificat de sortie.
+
+Votre `08cf65dc` est vu publié, réservation d'index de ce lot close selon
+votre règle. ROOT ne prépare pas encore d'index. GCP non utilisé.
+
+Précision utilisateur suivante : l'idée de représentation peut évoluer,
+la cible est la tour K-NN 3D la plus simple/rapide possible, sous les
+contrats 50k et dizaines de millions G4. Point à intégrer à votre analyse :
+une directe de cardinal m≤Kmax est aussi une feuille FULL obligatoire de
+l'ordre m. La supprimer parce qu'elle ne fusionne rien à m−1 n'économise
+pas sa découverte pour la **tour**. Seul le dernier rang Kmax+1 n'a pas
+ce second rôle de naissance demandée. Merci d'évaluer les optimisations
+sur cette géométrie partagée, pas seulement sur un ordre isolé. Garder
+L dépendant des données et la borne quadratique explicite distincts des
+contrats matériels bornés ; aucun rapprochement approximatif autorisé.
+
+Votre nouvelle note sur la descente à cardinal K est lue intégralement.
+La preuve est cohérente ; ROOT l'a ajoutée comme variante à qualifier,
+sans changement silencieux du resolver. Le petit différentiel rationnel
+constructeur trouve déjà le compromis J1 : sur A=(0,3,3), B=(3,2,9),
+C=(8,6,12), D=(12,9,3), E=(13,6,11), K2, BD consommée par ABD à
+1909/41, le raccourci actuel BD→BCD fait une MEB, alors que la descente
+BD→CD→DE en fait deux. À l'inverse E5 offre une économie. Les chiffres
+seront conservés comme modèle rationnel, pas comme mesure C++.
+
+Question spécifique **tour verticale**, pour ne pas surévaluer la mémoire
+économisable : pour chaque Q Gabriel de rang m≤Kmax, son ancre horizontale
+fermée dans l'ordre m−1 n'est-elle pas exactement l'ancre verticale requise
+par la feuille Q de l'ordre m ? Si oui, ces valeurs restent nécessaires
+dans la tour, mais pourraient partager leur stockage/index avec les
+feuilles supérieures ; les supprimer du seul resolver horizontal ne donne
+pas toute cette économie de sortie. Le rang Kmax+1 est encore distinct.
+Un hybride conservant le J1 rapide quand cette ancre partagée est disponible,
+puis descendant les facettes sinon, paraît donc à comparer plutôt qu'un
+remplacement systématique. Merci de préciser la naturalité aux plateaux
+et le risque de confondre token supérieur et ancre inférieure.
+
+### Mesures directes à la demande utilisateur
+
+Le lot auditeur `dad414cb` est vu sur main, merci. L'utilisateur demande
+maintenant d'arrêter la surenchère de garde-fous : suivre les scripts et
+les arrêter s'ils tournent en rond. ROOT lance donc les mesures directement
+avec un enregistreur simple, sans attendre une nouvelle admission de format.
+CPU6 est réservé au seul moteur FULL mono pendant les essais 8k/16k/32k,
+commençant à s8/P=unlimited. Pas d'autre moteur/compilation en parallèle.
+
+Le binaire fraîchement compilé est `4938b94b…`, sources de calcul stables.
+La micro r1 est close en échec de protocole : un selftest first-C ne
+renvoyait pas `successor_accounting`, sans effet sur le moteur C++. Les
+premiers tests C++ et données brutes sont conservés, sans prétendre que
+la campagne entière est passée. La correction est une ligne du lecteur.
+Aucune réécriture des captures ni nouveau protocole volumineux. GCP non utilisé.
+
+Premier résultat direct : 8k/s8/P=unlimited réussit les dix ordres à
+133,038 s avant terminal ; digest `e6e3fa51…` identique au P0 clos de
+159,160 s. FULL 50,477 s contre 73,798 s. Les 4 305 891 MEB sont toutes
+certifiées par le proposeur (24 777 382 formes proposées, aucun repli F).
+Un passage n'est pas une accélération robuste ; P0 du même nouveau binaire
+reste à mesurer. 16k est en cours, sans boucle bloquée observée.
+
+Prochaine simplification minimale proposée par la contrelecture interne :
+préserver J=1 ; après census J≥2, chercher seulement le label
+F′=(F−premier essentiel)+premier intrus dans le catalogue des minima.
+S'il y est avec niveau strictement inférieur à beta(F), normaliser son
+token et terminer ; sinon reprendre la route actuelle sans autre MEB ni
+census ajouté. Aucun nouveau domaine de boules visitées, un lookup
+supplémentaire par J≥2. Ce terminal d'un seul pas pourrait tester votre
+nouvelle descente sans remplacer toute l'architecture. Merci de réfuter
+si une obligation de parents/plateaux/ancres échappe à cet argument.
+Pas encore de changement produit ni de gain C++ revendiqué.
+
+### Priorité utilisateur : élimination par blocs WSPD, h/h_a/h_b
+
+L'utilisateur demande explicitement de renforcer cette élimination pour la
+génération. ROOT relit `FRONT_ET_TEMOINS_COURANT.md`, `S1_COURANT.md`,
+`witness_count.hpp`, `spindle.hpp` et la double boucle de `generate.hpp`.
+Merci de concentrer la prochaine contrelecture sur ce poste, distinct du
+rejet tardif des groupes de racines q4. 32k/s8/P=unlimited tourne sur CPU6 ;
+pas de compilation ni moteur concurrent. Les dix ordres 16k ont réussi.
+
+Deux points précis à éprouver :
+
+1. Pour un rectangle vivant, min_a h_a=min_b h_b=0 : choisir dans A le
+   point le plus proche d'une extrémité fixe de B ; un témoin interne au
+   fuseau donnerait un point de A encore plus proche. Les min globaux
+   n'ajoutent donc aucun rejet au seul cœur. Un sous-bloc A′×B′ peut en
+   revanche réutiliser les témoins des **facteurs originaux**, avec
+   h_coeur+min_{A′}h_a+min_{B′}h_b≥h_q ; ne pas modifier leur population
+   puis sommer des crédits qui se recouvrent.
+2. Après les lignes ha≥need déjà éliminées, toutes les lignes de même
+   crédit ha ont exactement la même liste stable de B admissibles :
+   hb<need−ha. Construire au plus h_q listes par seuil évite de rebalayer
+   tout B pour chaque a, sans changer l'ordre Morton des ancres survivantes
+   ni les crédits effectivement transmis. Saturer les histogrammes à need
+   est également sûr si les comptes des survivants restent exacts ; les
+   évaluations évitées doivent être distinguées de P_factor historique.
+
+La piste plus ambitieuse est de créditer des sous-arbres entiers pour ces
+histogrammes, comme pour h_coeur, au lieu du produit quadratique A×A et B×B.
+Merci de préciser un certificat strict de bloc valable en q3/q4, les
+contraintes de disjonction et si ses tests peuvent coûter moins que les
+coins actuellement payés. Aucun raffinement WSPD post-séparation aveugle
+n'est proposé : l'ancien résultat négatif +34 % reste un avertissement.
+
+ROOT prépare l'index du lot constructeur « remove full probe work quotas
+and prove the minima quotient » : seuls code/notes constructeur et deux
+paquets `receipts/full_probe_no_quotas_20260906/` et
+`receipts/full_minima_quotient_20260906/`. Aucun fichier de votre dossier
+`audits/`, notamment `receipts_shared_anchors_20260906/`, n'est inclus.
+L'index est vide à la prise de réservation ; libération après push main.
+
+Pour les histogrammes par blocs de témoins Z : à a,b fixés,
+W_q est aussi convexe en z. Avec m=(a+b)/2 et projection perpendiculaire
+y⊥ de z−m, le test q3/q4 s'écrit
+`|z−m|² + |a−b| |y⊥| / sqrt(t) < |a−b|²/4`, t=3/2.
+Il suggère un crédit de sous-arbre via tous les coins de Z puis de B,
+en gardant a fixé : la convexité en z et celle, séparée, en b suffiraient
+à étendre les tests stricts aux deux boîtes. À confronter au coût du test
+de coins et à un minorant Hmin/majorant Xi moins cher ; aucune identité
+du seul « cœur rond » ne remplace cette justification près des extrémités.
+Merci de contre-vérifier cet usage de convexité avant tout port du crédit.
+
+En parallèle, premier delta de coût sans nouveau rejet étudié : au
+rectangle terminal, le compte q2 `with_corners=false` est déjà complet
+et ne dépend pas de ce booléen. Le reprendre au lieu de le refaire dans
+le second appel `with_corners=true` est une économie distincte, à mesurer.
+Le second appel peut être limité aux lanes q3/q4 encore ouvertes. Aucun
+changement des cœurs remis, des masques ou des masses n'est attendu.

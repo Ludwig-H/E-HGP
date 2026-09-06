@@ -1,0 +1,65 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_minima_quotient_gate.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "expected": 0,
+      "name": "normal_selftest",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "7d80c8a06d281b397bac109dc11e5e2470589835d08ec95e8b82d2aace4eb6fb"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_minima_quotient_gate.py",
+        "--unknown"
+      ],
+      "exit_code": 2,
+      "expected": 2,
+      "name": "normal_unknown",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "2e67e02fd478475b9f8d7e9ce167d7781936ba1a9b852e717f8e302674ffb3a3"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_minima_quotient_gate.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "expected": 0,
+      "name": "optimized_selftest",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "7d80c8a06d281b397bac109dc11e5e2470589835d08ec95e8b82d2aace4eb6fb"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_minima_quotient_gate.py",
+        "--unknown"
+      ],
+      "exit_code": 2,
+      "expected": 2,
+      "name": "optimized_unknown",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "2e67e02fd478475b9f8d7e9ce167d7781936ba1a9b852e717f8e302674ffb3a3"
+    }
+  ],
+  "engine_invoked": false,
+  "errors": [],
+  "normal_optimized_byte_parity": true,
+  "public_status": "not_claimed",
+  "schema": "mhgp7-minima-quotient-math-capture-v1",
+  "source_sha256": "bee615b5f8b937e11104597fd674d868828d6b850616582f5163b44454ab9434",
+  "status": "completed"
+}

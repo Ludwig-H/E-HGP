@@ -1,0 +1,46 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/build_r1/full_gabriel_lazy_probe",
+    "--n=8",
+    "--s=8",
+    "--kmax=10",
+    "--alias-policy=eager",
+    "--meb-proposal-supports=+1"
+  ],
+  "capture": "separate_exact_bytes",
+  "closure_errors": [],
+  "command": "/usr/bin/taskset -c 0 /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/build_r1/full_gabriel_lazy_probe --n=8 --s=8 --kmax=10 --alias-policy=eager --meb-proposal-supports=+1",
+  "cpu_limit_seconds": 1220,
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.00549541600048542,
+  "ended": "2026-09-06T11:06:59.773708+00:00",
+  "error": null,
+  "exit_code": 2,
+  "expected_rc": [
+    2
+  ],
+  "file_size_limit_bytes": 67108864,
+  "id": "reject_P_plus_sign",
+  "outer_timeout_seconds": 30,
+  "pid": 319517,
+  "process_group_closed": true,
+  "process_vm_max_bytes": 27917287424,
+  "sanitizer_virtual_address_reservation": false,
+  "started": "2026-09-06T11:06:59.768039+00:00",
+  "status": "completed",
+  "streams": {
+    "reject_P_plus_sign.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "reject_P_plus_sign.stdout": {
+      "bytes": 3148,
+      "sha256": "0dc6ed237f590b2ae88295ad690485b193f10e4f4a897729e02f86534d44a5a7"
+    }
+  },
+  "unavailable_streams": []
+}

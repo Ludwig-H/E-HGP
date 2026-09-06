@@ -1,0 +1,42 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/limits_O2",
+    "--selftest"
+  ],
+  "capture": "separate_exact_bytes",
+  "closure_errors": [],
+  "command": "/usr/bin/taskset -c 0 /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/limits_O2 --selftest",
+  "cpu_limit_seconds": 1220,
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.005786609999631764,
+  "ended": "2026-09-06T11:06:53.673928+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_rc": [
+    0
+  ],
+  "file_size_limit_bytes": 67108864,
+  "id": "limits_O2_selftest",
+  "outer_timeout_seconds": 30,
+  "pid": 319309,
+  "process_group_closed": true,
+  "process_vm_max_bytes": 27917287424,
+  "sanitizer_virtual_address_reservation": false,
+  "started": "2026-09-06T11:06:53.667949+00:00",
+  "status": "completed",
+  "streams": {
+    "limits_O2_selftest.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "limits_O2_selftest.stdout": {
+      "bytes": 183,
+      "sha256": "d3b9f2163a98f8079f681a2603b054eca69bb0e8340ea54ebb13e6d0c834dcaa"
+    }
+  },
+  "unavailable_streams": []
+}

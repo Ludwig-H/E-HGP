@@ -1,0 +1,26 @@
+{
+  "archived_root_manifest": {
+    "path": "publication_history/initial/SHA256SUMS.original",
+    "sha256": "f22d594a86a24ddb3dfe051b7eb9a6cd28347005ff88c59386b337f70e1fa16b"
+  },
+  "engine_invoked": false,
+  "historical_qualification_relabelled": false,
+  "latency_qualified": false,
+  "new_test_campaign_after_doc_fix": false,
+  "portable_payload_manifest_sha256": "559b587e6566aa3b392a7e79a97cb95715ec7d920d817713e2767c8980852a39",
+  "post_replay_change": "three_document_suffixes_only_same_bytes_and_readme_links",
+  "public_status": "not_claimed",
+  "qualifications": [
+    {
+      "commands": 12,
+      "name": "relocated",
+      "receipt_sha256": "bb6368ea3c4baa630a017165cc92b6a31790d95657480192d2943e04e4541ab0",
+      "status": "completed"
+    }
+  ],
+  "relocated_readonly_copy_retained": "/tmp/mhgp7_minima_math_relocation_1mzn89kc/payload",
+  "replayed_payload_manifest_sha256": "26be4445fb571a72ac8ed30a340359f0f8a453b0bf46674ffa84b37e544ee275",
+  "schema": "mhgp7-public-minima-math-packet-v1",
+  "sources_before_after_stable": true,
+  "status": "completed"
+}

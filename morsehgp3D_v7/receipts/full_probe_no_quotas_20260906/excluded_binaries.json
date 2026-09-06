@@ -1,0 +1,52 @@
+{
+  "build_r1/full_gabriel_lazy_probe": {
+    "bytes": 528144,
+    "original_preserved": true,
+    "sha256": "4938b94b3166e8c13d02b0fd9687168130d5c528702d7efcf7b7379b3adeb360"
+  },
+  "micro_r1/cmake/CMakeFiles/3.28.3/CMakeDetermineCompilerABI_CXX.bin": {
+    "bytes": 15992,
+    "original_preserved": true,
+    "sha256": "879b5d31eac14d7b0ca6cd3b96320041ad8d87b538fea24a17e8707f0656bc96"
+  },
+  "micro_r1/cmake/CMakeFiles/3.28.3/CompilerIdCXX/a.out": {
+    "bytes": 16096,
+    "original_preserved": true,
+    "sha256": "a3d366f5f634a9cc0d9340115704a2d978e930f75ce0aceac02d7177849a8a1a"
+  },
+  "micro_r1/cmake/CMakeFiles/mhgp7_full_gabriel_probe_limits_gate.dir/tests/full_gabriel_probe_limits_gate.cpp.o": {
+    "bytes": 16656,
+    "original_preserved": true,
+    "sha256": "bd5cd38705ab9ec60ec3fbc6e7911954aa8601c06418c18df5878600dfbacc0d"
+  },
+  "micro_r1/cmake/mhgp7_full_gabriel_probe_limits_gate": {
+    "bytes": 21808,
+    "original_preserved": true,
+    "sha256": "edad9391a6063c8864980072e9aeeaec41b339a97a356620e215b14e3b6c98cb"
+  },
+  "micro_r1/limits_O2": {
+    "bytes": 22024,
+    "original_preserved": true,
+    "sha256": "4443936361da1e394920098478eb02fa019d73a5a0cb2fbfa874d9ff0f37a7ac"
+  },
+  "micro_r1/limits_san": {
+    "bytes": 255856,
+    "original_preserved": true,
+    "sha256": "df01c44f3d5368fab6913a0aedd18c12f53db381d14bd62d6f67b6e039c95cac"
+  },
+  "micro_r1/local_O2": {
+    "bytes": 93584,
+    "original_preserved": true,
+    "sha256": "1e3fc91a97732d16f7258bfcff6ff782d5efdc05e4a51b392c131c2460bedb21"
+  },
+  "micro_r1/local_san": {
+    "bytes": 1866856,
+    "original_preserved": true,
+    "sha256": "e26f311de08d0f778b18833cfa11f96531e654ae15601f5ff30b1b896d4afb0f"
+  },
+  "micro_r1/q4_before_q3/local_mutant": {
+    "bytes": 93584,
+    "original_preserved": true,
+    "sha256": "5727aaa1b1b5b4bbb598a64e54e667bbe8742eb60850026fb133bb5e4ede12d0"
+  }
+}

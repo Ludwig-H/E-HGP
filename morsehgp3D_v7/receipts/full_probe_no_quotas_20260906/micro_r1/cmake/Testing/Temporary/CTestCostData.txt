@@ -1,0 +1,7 @@
+mhgp7_full_gabriel_probe_limits 1 0.0134159
+mhgp7_full_gabriel_probe_limits_bad_argument 1 0.0123824
+mhgp7_full_minima_quotient_normal_selftest 1 0.217819
+mhgp7_full_minima_quotient_normal_unknown 1 0.0439209
+mhgp7_full_minima_quotient_optimized_selftest 1 0.280984
+mhgp7_full_minima_quotient_optimized_unknown 1 0.104236
+---

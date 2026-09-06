@@ -1,0 +1,19 @@
+{
+  "engine_invoked": false,
+  "historical_qualification_relabelled": false,
+  "latency_qualified": false,
+  "portable_payload_manifest_sha256": "26be4445fb571a72ac8ed30a340359f0f8a453b0bf46674ffa84b37e544ee275",
+  "public_status": "not_claimed",
+  "qualifications": [
+    {
+      "commands": 12,
+      "name": "relocated",
+      "receipt_sha256": "bb6368ea3c4baa630a017165cc92b6a31790d95657480192d2943e04e4541ab0",
+      "status": "completed"
+    }
+  ],
+  "relocated_readonly_copy_retained": "/tmp/mhgp7_minima_math_relocation_1mzn89kc/payload",
+  "schema": "mhgp7-public-minima-math-packet-v1",
+  "sources_before_after_stable": true,
+  "status": "completed"
+}

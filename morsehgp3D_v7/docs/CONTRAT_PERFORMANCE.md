@@ -63,6 +63,19 @@ pas une qualification mono-thread.
 
 ## Ordre d'optimisation
 
+Pour le chantier mono courant, la [sonde v5](CONTRAT_SONDE_FULL_MEB.md)
+retire les quotas arbitraires d'opérations. Les garde-fous temps/RAM et
+de représentation restent distincts ; augmenter l'admission ne constitue
+pas une accélération. Les triplets 8k/16k/32k doivent comparer des runs
+complets de même profil, ainsi que le volume des minima et le travail
+intermédiaire. Une croissance locale sous-quadratique n'est pas une preuve
+universelle : [la sortie FULL peut elle-même être quadratique](CROISSANCE_ET_BORNE_DE_SORTIE.md).
+
+La [réduction aux minima](SQUELETTE_MINIMA_GABRIEL.md) conserve la cible,
+à condition de transférer les bonnes connexions. Elle n'autorise ni un
+graphe d'intersection naïf sur ces minima ni la perte des naissances d'un
+ordre supérieur sous prétexte qu'elles sont des no-op dans l'ordre inférieur.
+
 1. Établir le chemin mono-thread réel, y compris le fold ; `threads=1`
    ne suffit pas si un autre étage tourne en parallèle. Conserver un
    témoin v6 et un témoin v7 avant chaque optimisation, sur les mêmes

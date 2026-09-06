@@ -1,0 +1,54 @@
+{
+  "argv": [
+    "timeout",
+    "--signal=TERM",
+    "--kill-after=10s",
+    "1200s",
+    "taskset",
+    "-c",
+    "6",
+    "/usr/bin/time",
+    "-v",
+    "build/v7_no_work_quotas_20260906_controller/build_r1/full_gabriel_lazy_probe",
+    "--n=8",
+    "--s=10",
+    "--kmax=5",
+    "--alias-policy=eager",
+    "--meb-proposal-supports=0"
+  ],
+  "capture": "merged_exact_bytes",
+  "closure_errors": [],
+  "command": "timeout --signal=TERM --kill-after=10s 1200s taskset -c 6 /usr/bin/time -v build/v7_no_work_quotas_20260906_controller/build_r1/full_gabriel_lazy_probe --n=8 --s=10 --kmax=5 --alias-policy=eager --meb-proposal-supports=0",
+  "cpu_limit_seconds": 1220,
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.018085351000991068,
+  "ended": "2026-09-06T11:07:16.251699+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_rc": [
+    0,
+    2,
+    3
+  ],
+  "file_size_limit_bytes": 67108864,
+  "id": "n8_s10_k5_eager_c0_p0",
+  "outer_timeout_seconds": 1220,
+  "pid": 320375,
+  "process_group_closed": true,
+  "process_vm_max_bytes": 27917287424,
+  "sanitizer_virtual_address_reservation": false,
+  "started": "2026-09-06T11:07:16.233421+00:00",
+  "status": "completed",
+  "streams": {
+    "n8_s10_k5_eager_c0_p0.raw.txt": {
+      "bytes": 15434,
+      "sha256": "f301a7f6a1abb9a290a6d7a462bcf66b48b6819865e222e6d33f3afffb8273a4"
+    },
+    "n8_s10_k5_eager_c0_p0.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "unavailable_streams": []
+}

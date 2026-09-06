@@ -1,0 +1,168 @@
+# Descente de facettes : preuve valide, coût non monotone
+
+6 septembre 2026. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
+`public_status=not_claimed`. Revue et petits modèles rationnels indépendants ;
+aucune exécution, compilation ou modification du moteur C++, aucun GCP.
+
+## Conclusion
+
+La descente de cardinal K vers les minima est une autorité constructive correcte
+pour les parents FULL sous les hypothèses régulières énoncées. Chercher le
+terminal dans le catalogue **avant** sa MEB évite son recalcul. Cela ne prouve
+pas une diminution du nombre d'appels face au resolver actuel : celui-ci termine
+sur une coface déjà traitée, parfois beaucoup plus tôt grâce au cas J=1.
+Les fixtures ci-dessous établissent exactement les deux sens du compromis.
+
+## Sources relues et domaine
+
+- [Preuve auditeur](../../morsehgp3D_v7/audits/receipts_gabriel_vertices_20260906/README.md),
+  intégralement, notamment §§4–6 ; version lue SHA
+  `4dd92c0359ec7007d4d43723c6f940a0ed1751a557e8dbb565115485f2740a75`.
+- [Builder FULL](../../morsehgp3D_v7/src/forest/full_gabriel.hpp),
+  SHA `a946e31dde8fbd8ec528d6f5e94f9c727998acc172b4dd29c084dd522c730d1d`.
+  `minimum_anchor`, `direct_anchor`, `locate` et la fermeture atomique de `lot`.
+- Géométrie F : `silent_incidence.hpp`, SHA
+  `f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76` ;
+  ordre Morton : `core/morton.hpp`, SHA
+  `67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e`.
+
+Enlever un essentiel puis ajouter un intrus strict donne une facette F′ avec
+β(F′)<β(F) et β(F∪F′)=β(F). Le chemin reste donc avant toute coupe stricte a
+où F est admise. La finitude donne un minimum ; sa normalisation au niveau a
+donne le parent, indépendamment du minimum terminal choisi. Pour préserver un
+point x de F, enlever à chaque pas un essentiel différent de x donne la preuve
+de couverture ponctuelle. Un support non trivial contient au moins deux points.
+K=1 et K=n sont bien les cas terminaux explicités dans la preuve.
+
+Cette preuve suppose la régularité de **toutes les MEB visitées**, pas uniquement
+celle des catalogues de rangs K et K+1. Le changement de route peut rencontrer
+une coquille supplémentaire que l'ancien resolver ne visitait pas. Il doit
+conserver le rejet de cette situation, le census global de bord, le contrôle
+de support, la stricte décroissance et le refus d'un minimum absent. Une boule
+de facette n'est pas nécessairement contenue dans celle de sa coface : le seul
+census supérieur ne remplace pas cette requête globale. La conformité sur ce
+domaine commun ne garantit pas les mêmes refus opérationnels hors domaine.
+
+## Calendriers comparés, sans coût fictif
+
+Le modèle suit l'ordre des cofaces `(niveau, label)`, les essentiels dans l'ordre
+des PointId, les intrus dans l'ordre Morton, et un cache facultatif first-C sur
+les **demandes initiales**. Il n'insère pas les facettes intermédiaires. Il
+normalise les terminaux par l'oracle Γ pour comparer les bonnes identités de
+composantes ; il ne simule pas les tokens ni les lectures de successeurs C++.
+
+L'ancien chemin modèle bien les économies déjà présentes :
+
+1. Une demande trouvée dans les minima ou le cache ne fait aucune MEB.
+2. Une demande manquée F fait une MEB de cardinal K et son census.
+3. Si J=1, F+z est une directe : lookup d'ancre fermée, **sans** seconde MEB,
+   sans second census et sans pas de chaîne.
+4. Si J≥2, Q0=F+z réutilise la boule/support de F ; l'autre intrus est conservé.
+   Chaque remplacement d'essentiel fait ensuite une MEB de cardinal K+1,
+   cherche une directe et ne lance un census que si cette recherche échoue.
+
+Le nouveau chemin fait un lookup minimum à chaque facette visitée ; seulement
+sur miss, il calcule sa MEB de cardinal K, termine le census puis remplace le
+premier essentiel par le premier intrus. Le minimum terminal n'est pas recalculé.
+Les appels/census indiqués sont donc des consultations **conditionnelles** de
+certificats rationnels, pas des appels C++ observés.
+
+Pour P=0, l'ordinal F d'un support est sa position dans les combinaisons de
+tailles 2, 3 puis 4 du label. Sur ces données globalement régulières, cette
+position est exactement le nombre de supports chargés avant l'acceptation
+du support essentiel unique. Cela ne compte ni les tests intérieurs arrêtés
+tôt, ni l'arithmétique entière, ni les nœuds d'index visités, ni la latence.
+Cette identité d'ordinals ne qualifie pas une exécution physique F ou P>0.
+
+## Les 17 modèles déjà qualifiés
+
+Même corpus que le gate quotient figé : deux points, triangles aigu et obtus,
+n4 et E5, tous leurs ordres K=1..n. Chaque ordre est testé avec C=0, C=1 et
+C=1 000 000, soit 51 configurations. Il y a 74 demandes par capacité, dont
+70 minima immédiats et quatre résolutions non minimales. Aucun cache hit n'est
+observé : ces capacités ne constituent pas une qualification non vacue des
+économies de cache. Les 14 autres modèles n'appellent aucune MEB de resolver.
+
+| Modèle, capacité C=0 | MEB ancien → nouveau | Census ancien → nouveau | Ordinaux F ancien → nouveau | Pas ancien → nouveau |
+| --- | ---: | ---: | ---: | ---: |
+| n4, K2 | 1 → 1 | 1 → 1 | 1 → 1 | 0 → 1 |
+| E5, K2 | 2 → 1 | 1 → 1 | 5 → 1 | 1 → 1 |
+| E5, K3 | 2 → 2 | 2 → 2 | 2 → 2 | 0 → 2 |
+| Total des 17 modèles | 5 → 4 | 4 → 4 | 8 → 4 | 1 → 4 |
+
+Les cinq anciens appels se décomposent en quatre MEB de cardinal K et une
+de cardinal K+1 ; les quatre nouveaux portent tous sur K. Les lookups minima
+passent de 74 à 78, tandis que les quatre lookups directs disparaissent.
+Les pas ne sont pas la même opération : cofaces auparavant, facettes ensuite.
+Les agréger sous un même ancien calendrier serait trompeur.
+
+## Contre-fixture permanente : le nouveau chemin est plus long
+
+Prendre A=(0,3,3), B=(3,2,9), C=(8,6,12), D=(12,9,3), E=(13,6,11).
+L'oracle vérifie la régularité globale des 31 sous-ensembles non vides.
+À K=2, la directe ABD demande BD avant sa naissance β(ABD)=1909/41.
+
+| Label | β | Support | Statut |
+| --- | ---: | --- | --- |
+| BD | 83/2 | BD | seul intrus C |
+| BCD | 83/2 | BD | directe Gabriel |
+| CD | 53/2 | CD | seul intrus E |
+| DE | 37/2 | DE | minimum Gabriel |
+
+L'ancien resolver emprunte BD→BCD et termine par J=1 : **une** MEB, un census,
+un ordinal F, aucun pas de coface. Le nouveau emprunte BD→CD→DE : **deux** MEB,
+deux census, deux ordinaux F, deux pas de facettes. Les deux terminaux retrouvent
+exactement le même parent à la coupe stricte 1909/41. Cette comparaison C=0
+réfute une diminution universelle des appels même avec lookup du terminal avant
+MEB. Elle ne réfute pas les bénéfices possibles du nouveau chemin en moyenne.
+
+Pour P demandes initiales manquées et S pas du nouveau chemin, S≥P et le nouveau
+calendrier compte S MEB ; recalculer chaque minimum terminal ajouterait P MEB.
+Le calendrier **actuel**, avec T pas de cofaces, compte en revanche P+T MEB.
+Il ne faut pas identifier S et T. La finitude donne seulement une borne
+combinatoire par demande sur les labels distincts de cardinal K, pas une borne
+linéaire en n. À K10, les plafonds de combinaisons par MEB passent de 550 sur
+11 points à 375 sur 10 points ; cela ne compense pas universellement plus d'appels.
+
+## Tour : partage d'ancres et variante hybride
+
+Pour 2≤m≤Kmax, l'ancre **fermée** d'une directe de rang m dans l'ordre m−1 est
+précisément l'attache verticale de la feuille du même label dans l'ordre m.
+Ces ancres peuvent donc être partagées, puis normalisées par les successeurs
+inférieurs. Ce ne sont pas les parents stricts de la fusion avant fermeture,
+et les identités propres des ordres ne sont jamais fusionnées entre elles.
+Seul le dernier rang Kmax+1 n'a pas cette obligation verticale dans la tour
+demandée. Une tour seulement horizontale n'impose pas ces sorties verticales.
+
+Un hybride est donc fondé : conserver les ancres partagées, utiliser le raccourci
+J=1 lorsqu'il est disponible, et descendre les facettes sinon. Il évite le surcoût
+de la contre-fixture. Un lookup du cache aux facettes intermédiaires peut aussi
+aider, mais modifie son calendrier et doit être déclaré. Rien n'autorise à
+annoncer à la fois la suppression intégrale de ces ancres et leur réutilisation.
+
+Avant une intégration, il faut versionner les compteurs et budgets : notamment
+`minimum_lookups` ne serait plus borné par les seules demandes initiales. Conserver
+les charges prospectives/persistantes, les vérifications de coupe stricte jusque
+dans le terminal trouvé avant MEB, les lots atomiques, les miroirs d'échec et les
+refus fermés. Un même budget numérique peut censurer différemment les deux voies.
+
+## Test permanent et capture neuve
+
+Nouveau [full_gabriel_descent_comparison_gate.py](../../morsehgp3D_v7/tests/full_gabriel_descent_comparison_gate.py),
+SHA `5e357ead0d626121cf66e15d17f0817475520663db7fe5237d9cbd7f25448a16`.
+Il importe explicitement l'oracle mathématique quotient épinglé
+`bee615b5f8b937e11104597fd674d868828d6b850616582f5163b44454ab9434`,
+jamais le produit. `require` reste actif sous `-O` : 51 configurations,
+12 résolutions non minimales, E5 favorable et n5 défavorable sont des planchers
+fixes et des fixtures permanentes. La nouvelle fixture n5 s'ajoute aux 17 modèles.
+
+Le [reçu frais](descent_permanent_capture/receipt.json), SHA
+`7e2c6c99f5c7bc31d9baef7244ad7ba6e3a46e0f64605bb68fa002838f241318`,
+capture les quatre codes 0/2/0/2 (`--selftest`/`--unknown`, normal et `-O`),
+les commandes, sources/helper et leurs pins avant/après, les stdout/stderr bruts.
+Les sorties sont identiques entre les deux modes. Les 15 fichiers de
+[SHA256SUMS](descent_permanent_capture/SHA256SUMS) sont vérifiés, manifeste SHA
+`35692f7f788e0023ca0c164041f085a23b3c7282c45219d756fc338a7a3c13e4`.
+Les captures privées de préparation antérieures sont conservées sans réécriture.
+La qualification reste celle de modèles rationnels P0/ordinaux F, **pas de latence**.

@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/mhgp7_selftest.dir/tests/selftest.cpp.o -o mhgp7_selftest 

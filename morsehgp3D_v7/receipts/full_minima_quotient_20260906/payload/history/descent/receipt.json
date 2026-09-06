@@ -1,0 +1,88 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_descent_comparison_gate.py",
+        "--selftest"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 0,
+      "expected": 0,
+      "name": "normal_selftest",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c47221ac4b03de01d0a97257757a231d4855c399c98c43ff1ac330a96f5429d5",
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_descent_comparison_gate.py",
+        "--unknown"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 2,
+      "expected": 2,
+      "name": "normal_unknown",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "7d4961a42db8821c2efce1af6545ead61c52bfa2e4cb1e42a3ed553602e76787",
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_descent_comparison_gate.py",
+        "--selftest"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 0,
+      "expected": 0,
+      "name": "optimized_selftest",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c47221ac4b03de01d0a97257757a231d4855c399c98c43ff1ac330a96f5429d5",
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_descent_comparison_gate.py",
+        "--unknown"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 2,
+      "expected": 2,
+      "name": "optimized_unknown",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "7d4961a42db8821c2efce1af6545ead61c52bfa2e4cb1e42a3ed553602e76787",
+      "timeout_seconds": 10
+    }
+  ],
+  "engine_invoked": false,
+  "errors": [],
+  "normal_optimized_byte_parity": true,
+  "public_status": "not_claimed",
+  "schema": "mhgp7-rational-descent-calendar-capture-v1",
+  "sources_after": {
+    "build/v7_gabriel_minima_quotient_20260906/record_descent_gate.py": "e483d27b6d4d25b6d62e7769e128a6311bddedcf94c531341ce5877c368f1be9",
+    "morsehgp3D_v7/src/core/morton.hpp": "67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e",
+    "morsehgp3D_v7/src/forest/full_gabriel.hpp": "a946e31dde8fbd8ec528d6f5e94f9c727998acc172b4dd29c084dd522c730d1d",
+    "morsehgp3D_v7/src/forest/silent_incidence.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76",
+    "morsehgp3D_v7/tests/full_gabriel_descent_comparison_gate.py": "5e357ead0d626121cf66e15d17f0817475520663db7fe5237d9cbd7f25448a16",
+    "morsehgp3D_v7/tests/full_gabriel_minima_quotient_gate.py": "bee615b5f8b937e11104597fd674d868828d6b850616582f5163b44454ab9434"
+  },
+  "sources_before": {
+    "build/v7_gabriel_minima_quotient_20260906/record_descent_gate.py": "e483d27b6d4d25b6d62e7769e128a6311bddedcf94c531341ce5877c368f1be9",
+    "morsehgp3D_v7/src/core/morton.hpp": "67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e",
+    "morsehgp3D_v7/src/forest/full_gabriel.hpp": "a946e31dde8fbd8ec528d6f5e94f9c727998acc172b4dd29c084dd522c730d1d",
+    "morsehgp3D_v7/src/forest/silent_incidence.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76",
+    "morsehgp3D_v7/tests/full_gabriel_descent_comparison_gate.py": "5e357ead0d626121cf66e15d17f0817475520663db7fe5237d9cbd7f25448a16",
+    "morsehgp3D_v7/tests/full_gabriel_minima_quotient_gate.py": "bee615b5f8b937e11104597fd674d868828d6b850616582f5163b44454ab9434"
+  },
+  "status": "completed"
+}

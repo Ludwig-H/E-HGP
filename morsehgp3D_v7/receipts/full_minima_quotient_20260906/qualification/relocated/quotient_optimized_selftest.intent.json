@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-I",
+    "-B",
+    "-O",
+    "sources/morsehgp3D_v7/tests/full_gabriel_minima_quotient_gate.py",
+    "--selftest"
+  ],
+  "cwd": "/tmp/mhgp7_minima_math_relocation_1mzn89kc/payload",
+  "engine_invoked": false,
+  "expected": 0,
+  "historical_mode": "optimized",
+  "timeout_seconds": 10
+}

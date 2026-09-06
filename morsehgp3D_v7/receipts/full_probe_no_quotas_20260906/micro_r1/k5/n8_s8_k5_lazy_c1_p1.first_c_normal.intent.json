@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_cache_policy_audit.py",
+    "/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/k5/n8_s8_k5_lazy_c1_p1.receipt.json"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/taskset -c 0 /home/codespace/.python/current/bin/python3 -B /workspaces/E-HGP/morsehgp3D_v7/bench/full_gabriel_cache_policy_audit.py /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/k5/n8_s8_k5_lazy_c1_p1.receipt.json",
+  "cpu_limit_seconds": 1220,
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "expected_rc": [
+    0
+  ],
+  "file_size_limit_bytes": 67108864,
+  "id": "n8_s8_k5_lazy_c1_p1.first_c_normal",
+  "outer_timeout_seconds": 30,
+  "process_vm_max_bytes": 27917287424,
+  "sanitizer_virtual_address_reservation": false,
+  "started": "2026-09-06T11:07:14.856821+00:00"
+}

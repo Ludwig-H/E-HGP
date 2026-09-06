@@ -1,0 +1,113 @@
+Start testing: Sep 06 11:06 UTC
+----------------------------------------------------------
+31/421 Testing: mhgp7_full_gabriel_probe_limits
+31/421 Test: mhgp7_full_gabriel_probe_limits
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/cmake/mhgp7_full_gabriel_probe_limits_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/cmake
+"mhgp7_full_gabriel_probe_limits" start time: Sep 06 11:06 UTC
+Output:
+----------------------------------------------------------
+{"schema":"mhgp7-full-probe-limits-gate-v1","status":"passed","public_status":"not_claimed","checks":52,"work_ceilings":7,"actual_successor_MAX_cases":3,"full_hierarchy_built":false}
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_gabriel_probe_limits" end time: Sep 06 11:06 UTC
+"mhgp7_full_gabriel_probe_limits" time elapsed: 00:00:00
+----------------------------------------------------------
+
+32/421 Testing: mhgp7_full_gabriel_probe_limits_bad_argument
+32/421 Test: mhgp7_full_gabriel_probe_limits_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/cmake/mhgp7_full_gabriel_probe_limits_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/cmake
+"mhgp7_full_gabriel_probe_limits_bad_argument" start time: Sep 06 11:06 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_gabriel_probe_limits_bad_argument" end time: Sep 06 11:06 UTC
+"mhgp7_full_gabriel_probe_limits_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+33/421 Testing: mhgp7_full_minima_quotient_normal_selftest
+33/421 Test: mhgp7_full_minima_quotient_normal_selftest
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=python3" "-DARGS=-B /workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_minima_quotient_gate.py --selftest" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/cmake
+"mhgp7_full_minima_quotient_normal_selftest" start time: Sep 06 11:06 UTC
+Output:
+----------------------------------------------------------
+{"corrected_graph_cut_checks": 640, "engine_invoked": false, "event_histories_compared": 68, "fixtures": [{"minima": 2, "order": 1, "scene": "pair", "tested_cuts_per_graph": 4, "tree_edges": 1}, {"minima": 1, "order": 2, "scene": "pair", "tested_cuts_per_graph": 2, "tree_edges": 0}, {"minima": 3, "order": 1, "scene": "acute_triangle", "tested_cuts_per_graph": 8, "tree_edges": 2}, {"minima": 3, "order": 2, "scene": "acute_triangle", "tested_cuts_per_graph": 8, "tree_edges": 2}, {"minima": 1, "order": 3, "scene": "acute_triangle", "tested_cuts_per_graph": 2, "tree_edges": 0}, {"minima": 3, "order": 1, "scene": "obtuse_triangle", "tested_cuts_per_graph": 8, "tree_edges": 2}, {"minima": 2, "order": 2, "scene": "obtuse_triangle", "tested_cuts_per_graph": 6, "tree_edges": 1}, {"minima": 1, "order": 3, "scene": "obtuse_triangle", "tested_cuts_per_graph": 2, "tree_edges": 0}, {"minima": 4, "order": 1, "scene": "minimal_n4", "tested_cuts_per_graph": 14, "tree_edges": 3}, {"minima": 4, "order": 2, "scene": "minimal_n4", "tested_cuts_per_graph": 14, "tree_edges": 3}, {"minima": 2, "order": 3, "scene": "minimal_n4", "tested_cuts_per_graph": 6, "tree_edges": 1}, {"minima": 1, "order": 4, "scene": "minimal_n4", "tested_cuts_per_graph": 2, "tree_edges": 0}, {"minima": 5, "order": 1, "scene": "E5_silent_cofaces", "tested_cuts_per_graph": 20, "tree_edges": 4}, {"minima": 7, "order": 2, "scene": "E5_silent_cofaces", "tested_cuts_per_graph": 32, "tree_edges": 6}, {"minima": 5, "order": 3, "scene": "E5_silent_cofaces", "tested_cuts_per_graph": 20, "tree_edges": 4}, {"minima": 4, "order": 4, "scene": "E5_silent_cofaces", "tested_cuts_per_graph": 10, "tree_edges": 3}, {"minima": 1, "order": 5, "scene": "E5_silent_cofaces", "tested_cuts_per_graph": 2, "tree_edges": 0}], "gcp_used": false, "graphs_per_model": 4, "models": 17, "mutants_killed": ["promote_naive", "promote_induced", "underweight_minimax", "drop_transferred_bridge", "serial_equal_weight_merges", "closed_as_open", "vertices_without_births", "nongabriel_as_minimum", "point_overlap_as_adjacency", "foreign_shell_promoted_regular"], "n4_counterexample": {"bridge": "BD attaches through direct Gabriel BCD, not a silent coface", "cut_squared": "477/34", "delayed_induced_merge": "31/2", "full_closed_components": 1, "minima": [[0, 1], [0, 3], [1, 2], [2, 3]], "minima_witness_intersection_closed_components": 2, "naive_closed_components": 2, "order": 2, "points": [[1, 1, 7], [5, 2, 1], [7, 2, 2], [5, 2, 8]]}, "public_status": "not_claimed", "schema": "mhgp7-gabriel-minima-quotient-rational-v1", "scope": "bounded_independent_math_not_FULL_producer_or_sparse_complexity_qualification", "status": "passed"}
+
+<end of output>
+Test time =   0.22 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_minima_quotient_normal_selftest" end time: Sep 06 11:06 UTC
+"mhgp7_full_minima_quotient_normal_selftest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+34/421 Testing: mhgp7_full_minima_quotient_normal_unknown
+34/421 Test: mhgp7_full_minima_quotient_normal_unknown
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=python3" "-DARGS=-B /workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_minima_quotient_gate.py --unknown" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/cmake
+"mhgp7_full_minima_quotient_normal_unknown" start time: Sep 06 11:06 UTC
+Output:
+----------------------------------------------------------
+{"status": "invalid_arguments", "public_status": "not_claimed"}
+
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_minima_quotient_normal_unknown" end time: Sep 06 11:06 UTC
+"mhgp7_full_minima_quotient_normal_unknown" time elapsed: 00:00:00
+----------------------------------------------------------
+
+35/421 Testing: mhgp7_full_minima_quotient_optimized_selftest
+35/421 Test: mhgp7_full_minima_quotient_optimized_selftest
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=python3" "-DARGS=-B -O /workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_minima_quotient_gate.py --selftest" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/cmake
+"mhgp7_full_minima_quotient_optimized_selftest" start time: Sep 06 11:06 UTC
+Output:
+----------------------------------------------------------
+{"corrected_graph_cut_checks": 640, "engine_invoked": false, "event_histories_compared": 68, "fixtures": [{"minima": 2, "order": 1, "scene": "pair", "tested_cuts_per_graph": 4, "tree_edges": 1}, {"minima": 1, "order": 2, "scene": "pair", "tested_cuts_per_graph": 2, "tree_edges": 0}, {"minima": 3, "order": 1, "scene": "acute_triangle", "tested_cuts_per_graph": 8, "tree_edges": 2}, {"minima": 3, "order": 2, "scene": "acute_triangle", "tested_cuts_per_graph": 8, "tree_edges": 2}, {"minima": 1, "order": 3, "scene": "acute_triangle", "tested_cuts_per_graph": 2, "tree_edges": 0}, {"minima": 3, "order": 1, "scene": "obtuse_triangle", "tested_cuts_per_graph": 8, "tree_edges": 2}, {"minima": 2, "order": 2, "scene": "obtuse_triangle", "tested_cuts_per_graph": 6, "tree_edges": 1}, {"minima": 1, "order": 3, "scene": "obtuse_triangle", "tested_cuts_per_graph": 2, "tree_edges": 0}, {"minima": 4, "order": 1, "scene": "minimal_n4", "tested_cuts_per_graph": 14, "tree_edges": 3}, {"minima": 4, "order": 2, "scene": "minimal_n4", "tested_cuts_per_graph": 14, "tree_edges": 3}, {"minima": 2, "order": 3, "scene": "minimal_n4", "tested_cuts_per_graph": 6, "tree_edges": 1}, {"minima": 1, "order": 4, "scene": "minimal_n4", "tested_cuts_per_graph": 2, "tree_edges": 0}, {"minima": 5, "order": 1, "scene": "E5_silent_cofaces", "tested_cuts_per_graph": 20, "tree_edges": 4}, {"minima": 7, "order": 2, "scene": "E5_silent_cofaces", "tested_cuts_per_graph": 32, "tree_edges": 6}, {"minima": 5, "order": 3, "scene": "E5_silent_cofaces", "tested_cuts_per_graph": 20, "tree_edges": 4}, {"minima": 4, "order": 4, "scene": "E5_silent_cofaces", "tested_cuts_per_graph": 10, "tree_edges": 3}, {"minima": 1, "order": 5, "scene": "E5_silent_cofaces", "tested_cuts_per_graph": 2, "tree_edges": 0}], "gcp_used": false, "graphs_per_model": 4, "models": 17, "mutants_killed": ["promote_naive", "promote_induced", "underweight_minimax", "drop_transferred_bridge", "serial_equal_weight_merges", "closed_as_open", "vertices_without_births", "nongabriel_as_minimum", "point_overlap_as_adjacency", "foreign_shell_promoted_regular"], "n4_counterexample": {"bridge": "BD attaches through direct Gabriel BCD, not a silent coface", "cut_squared": "477/34", "delayed_induced_merge": "31/2", "full_closed_components": 1, "minima": [[0, 1], [0, 3], [1, 2], [2, 3]], "minima_witness_intersection_closed_components": 2, "naive_closed_components": 2, "order": 2, "points": [[1, 1, 7], [5, 2, 1], [7, 2, 2], [5, 2, 8]]}, "public_status": "not_claimed", "schema": "mhgp7-gabriel-minima-quotient-rational-v1", "scope": "bounded_independent_math_not_FULL_producer_or_sparse_complexity_qualification", "status": "passed"}
+
+<end of output>
+Test time =   0.28 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_minima_quotient_optimized_selftest" end time: Sep 06 11:06 UTC
+"mhgp7_full_minima_quotient_optimized_selftest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+36/421 Testing: mhgp7_full_minima_quotient_optimized_unknown
+36/421 Test: mhgp7_full_minima_quotient_optimized_unknown
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=python3" "-DARGS=-B -O /workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_minima_quotient_gate.py --unknown" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/cmake
+"mhgp7_full_minima_quotient_optimized_unknown" start time: Sep 06 11:06 UTC
+Output:
+----------------------------------------------------------
+{"status": "invalid_arguments", "public_status": "not_claimed"}
+
+<end of output>
+Test time =   0.10 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_minima_quotient_optimized_unknown" end time: Sep 06 11:06 UTC
+"mhgp7_full_minima_quotient_optimized_unknown" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 06 11:06 UTC
+
+full_minima_quotient =   0.65 sec*proc
+
+full_probe_limits =   0.03 sec*proc
+
+gate =   0.67 sec*proc
+
+oracle =   0.65 sec*proc
+

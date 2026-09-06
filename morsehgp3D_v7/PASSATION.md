@@ -23,6 +23,22 @@ ne sont pas toutes les facettes contributrices des poids du manuscrit.
 Un validateur structurel et une égalité de digests ne certifient pas la
 complétude géométrique d'un fournisseur de catalogues.
 
+L'[étude des sommets Gabriel](docs/SQUELETTE_MINIMA_GABRIEL.md) répond à
+la nouvelle question utilisateur : les minima suffisent avec les seuils
+des chemins supprimés, pas avec les anciennes adjacences seules. Une
+forêt de L−R connexions entre L minima encode les mêmes coupes. La descente
+de facettes à cardinal K constant fournit une méthode constructive pour
+les parents ; elle est correcte mais pas uniformément moins coûteuse que
+le J=1 actuel. Le partage des ancres entre ordres et le choix hybride
+restent des pistes produit, pas des optimisations livrées. Le
+[prototype indépendant de tour](audits/receipts_gabriel_vertices_20260906/README.md)
+vérifie aussi les images verticales et leur naturalité sur un petit cas.
+
+La [borne de sortie](docs/CROISSANCE_ET_BORNE_DE_SORTIE.md) interdit une
+garantie universelle sous-quadratique en n pour une sortie FULL explicite
+en 3D. L'objectif pratique reste de limiter le travail intermédiaire et
+de mesurer séparément croissance des sorties et temps sur 8k/16k/32k.
+
 ## Code courant et preuves du delta
 
 Le [producteur FULL](src/forest/full_gabriel.hpp) est
@@ -141,12 +157,22 @@ un changement de ce calendrier sur le tétraèdre régulier, à support égal.
 **Ce reçu qualifie le helper privé, pas son nouveau port produit. Aucun
 gain de tour n'est annoncé.**
 
-Suite mono : qualifier une sonde v4 publiant P, le calendrier MEB et
-les cinq diagnostics, puis mesurer sur les appels FULL réels avant
-une activation par défaut. Garder les anciens plafonds et les digests ;
-comparer P0 et l'opt-in sur 8k/16k/32k et s=8/10/12, sans bloquer le
-bras opt-in au seul motif qu'un bras P0 est refusé. Le
-filtre seul ne réduit pas le nombre d'appels qui bloque 32k. La piste
+Suite mono en cours : la [sonde v5](docs/CONTRAT_SONDE_FULL_MEB.md) retire
+les sept quotas arbitraires de travail FULL, les listes fermées de n/cache
+et le garde du fold F non appelé. Elle publie P, le calendrier MEB et les
+cinq diagnostics, avec `unlimited` explicite. Les types et admissions
+mémoire restent contrôlés. La compilation fraîche passe, ainsi que
+52 contrôles des limites par build O2/SAN et six CTests ciblés. La micro
+r1 s'arrête après 36 configurations Kmax5 valides et une tentative Kmax10
+sur un champ manquant du selftest first-C, corrigé séparément ; elle
+**n'est pas une campagne entière réussie**. Les captures restent intactes.
+
+Sur demande utilisateur, les mesures passent maintenant par un
+[enregistreur direct](bench/run_full_probe.py), avec suivi de progression
+et arrêt si le calcul tourne en rond, sans nouvelle admission de format.
+Comparer P0 et l'opt-in sur 8k/16k/32k et s=8/10/12 ; le premier triplet
+est s8/P=unlimited. Aucune activation par défaut ni extrapolation 50k/G4
+avant résultats. La piste
 distincte de [réutilisation des terminaisons certifiées](audits/MEB_DOUBLE_BUDGET_COURANT.md#réutiliser-une-certification-terminale-déjà-acquise)
 demande de mesurer T−U, puis de conserver le premier recalcul complet et
 de normaliser le token courant, sans mémoriser une racine périmée.

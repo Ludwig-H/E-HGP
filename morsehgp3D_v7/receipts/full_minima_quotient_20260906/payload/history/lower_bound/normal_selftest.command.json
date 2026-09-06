@@ -1,0 +1,44 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v7/tests/full_output_lower_bound_gate.py",
+    "--selftest"
+  ],
+  "capture": "separate_exact_bytes",
+  "closure_errors": [],
+  "command": "/usr/bin/taskset -c 0 /home/codespace/.python/current/bin/python3 -B /workspaces/E-HGP/morsehgp3D_v7/tests/full_output_lower_bound_gate.py --selftest",
+  "cpu_limit_seconds": 620,
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "elapsed_seconds": 0.21626670799923886,
+  "ended": "2026-09-06T10:19:50.703044+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_rc": [
+    0
+  ],
+  "file_size_limit_bytes": 67108864,
+  "id": "normal_selftest",
+  "outer_timeout_seconds": 30,
+  "pid": 242292,
+  "process_group_closed": true,
+  "process_vm_max_bytes": 27917287424,
+  "sanitizer_virtual_address_reservation": false,
+  "started": "2026-09-06T10:19:50.486570+00:00",
+  "status": "completed",
+  "streams": {
+    "normal_selftest.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "normal_selftest.stdout": {
+      "bytes": 1597,
+      "sha256": "3f438662acb95ebe4255e441ef92cb2b83ca031404ba6b9c3427ffb9d17a8868"
+    }
+  },
+  "unavailable_streams": []
+}

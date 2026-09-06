@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/cmake",
+    "--target",
+    "mhgp7_full_gabriel_probe_limits_gate",
+    "--parallel",
+    "1"
+  ],
+  "capture": "separate_exact_bytes",
+  "command": "/usr/bin/taskset -c 0 cmake --build /workspaces/E-HGP/build/v7_no_work_quotas_20260906_controller/micro_r1/cmake --target mhgp7_full_gabriel_probe_limits_gate --parallel 1",
+  "cpu_limit_seconds": 1220,
+  "cwd": "/workspaces/E-HGP",
+  "drain_term_grace_seconds": 10,
+  "expected_rc": [
+    0
+  ],
+  "file_size_limit_bytes": 536870912,
+  "id": "cmake_build",
+  "outer_timeout_seconds": 600,
+  "process_vm_max_bytes": 27917287424,
+  "sanitizer_virtual_address_reservation": false,
+  "started": "2026-09-06T11:06:56.815209+00:00"
+}

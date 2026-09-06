@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG -Wl,--wrap=fsync CMakeFiles/mhgp7_archive_api_gate.dir/tests/archive_api_gate.cpp.o -o mhgp7_archive_api_gate 

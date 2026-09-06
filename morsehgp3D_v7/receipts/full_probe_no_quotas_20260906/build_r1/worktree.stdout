@@ -1,0 +1,20 @@
+ M morsehgp3D_v7/CMakeLists.txt
+ M morsehgp3D_v7/bench/COMPARE_MONO.md
+ M morsehgp3D_v7/bench/full_gabriel_cache_policy_audit.py
+ M morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp
+ M morsehgp3D_v7/bench/full_gabriel_lazy_probe_audit.py
+ M morsehgp3D_v7/docs/CONTRAT_DIGEST_FULL.md
+ M morsehgp3D_v7/docs/CONTRAT_PERFORMANCE.md
+ M morsehgp3D_v7/docs/FAUSSES_PISTES.md
+ M morsehgp3D_v7/docs/RESIDENCE_MASSIVE.md
+ M morsehgp3D_v7/tests/meb_proposal_local_gate.cpp
+?? morsehgp3D_v7/bench/full_gabriel_meb_compare_audit.py
+?? morsehgp3D_v7/bench/full_gabriel_probe_limits.hpp
+?? morsehgp3D_v7/bench/full_gabriel_scaling_audit.py
+?? morsehgp3D_v7/docs/CONTRAT_SONDE_FULL_MEB.md
+?? morsehgp3D_v7/docs/CROISSANCE_ET_BORNE_DE_SORTIE.md
+?? morsehgp3D_v7/docs/SQUELETTE_MINIMA_GABRIEL.md
+?? morsehgp3D_v7/tests/full_gabriel_descent_comparison_gate.py
+?? morsehgp3D_v7/tests/full_gabriel_minima_quotient_gate.py
+?? morsehgp3D_v7/tests/full_gabriel_probe_limits_gate.cpp
+?? morsehgp3D_v7/tests/full_output_lower_bound_gate.py
