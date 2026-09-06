@@ -1,0 +1,178 @@
+{
+  "schema": "mhgp7-independent-shell-and-coverage-contribution-review-v1",
+  "date": "2026-09-06T16:41:44.727502+00:00",
+  "source_base_head": "56ace8d85f3c3321140f3a8522781299467cde24",
+  "public_status": "not_claimed",
+  "scope": "Exact four-ball 50k census and bounded local shell reader; constructive dated contribution proof and independent bounded H0 journal replay. No integrated C++ or archive qualification.",
+  "published_static_source_sha256": {
+    "morsehgp3D_v7/bench/full_extra_shell_diagnostic.hpp": "0aa228a251fd4b03d3db637334bd50ed24ef6c9636b6ac173aed296985b7585f",
+    "morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp": "45a7778c2dfd4563de98671a4f190b612238f24e7a123c0427508bbf7c4ee6f0",
+    "morsehgp3D_v7/tests/full_extra_shell_diagnostic_gate.cpp": "13b93cf5dee0633d41ba400ea122e94172ca7c2dea0c8a74d32810d25ef6d59b",
+    "morsehgp3D_v7/docs/PLATEAUX_FULL_ET_ANCRES.md": "e09f5623c4ba2bf1d2c6184ab3ae447ac3197d0c586e92096a23724f3e3ed56a",
+    "morsehgp3D_v7/src/forest/full_gabriel.hpp": "a946e31dde8fbd8ec528d6f5e94f9c727998acc172b4dd29c084dd522c730d1d",
+    "morsehgp3D_v7/src/forest/silent_incidence.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76"
+  },
+  "new_audit_source_sha256": {
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic.py": "1032cc5ef86da67e0064a56f68b35f0395181c16192ce92d863a1339254f426a",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic_test.py": "a8a8a57617088c8bc37c3cb8a3f0a90f0574b1e31b000d82177e869937c2a0ec",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic_inputs.jsonl": "ca6e9444f29a9af511c671905948e599a5ea25f3dae2240c62df12b24349db75",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic_invalid_last.jsonl": "64186ec022257daa7455c1afdf1e8a557ca644c0ea44727f263c95ebd66023e9",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/locals_gap_model.py": "a28e9b12ef79338973fae49e2fc547eac52b3294586ec031b8b06146546700bc",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/real_shell_census.py": "d935ec655563c75c29ad2bd0de67802c59000d0d359c09c1837fb4729b9089b0",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/coverage_contribution_model.py": "a0b713954a1af606db06277f0d0bd39669ad2002595ff829382bb6de7bede908"
+  },
+  "immutable_previous_evidence_sha256": {
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/plateau_model.py": "8afb5663c1fa0384d5ae392294cc03853676a89fcb18f858cd7d764ed9b1b93a",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/normal.json": "f7a7379ff0fa1d0a7fc5c760b289e07daefe4122a2e4337a41083a73f31aba56",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/optimized.json": "f7a7379ff0fa1d0a7fc5c760b289e07daefe4122a2e4337a41083a73f31aba56",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/ball_anchor_model.py": "8f13f02d6b2c36c79708f6bdb8482c3d01ec81c4164b2bb60422993861e0ded4",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/ball_anchor_normal.json": "f9133b79c6f5d59cf5045912f9931b27cf6367d9d6a016335b9ae97d783c9592",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/ball_anchor_optimized.json": "f9133b79c6f5d59cf5045912f9931b27cf6367d9d6a016335b9ae97d783c9592",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/source_review.json": "5130f1da7c7c058ad4726dd7c92a9979508a9b7022c84315f57690ee34c0b610",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/ball_anchor_review.json": "40ebf121e9bf100175902e956faef0c321cd4be7363fd1037f5599c92913087d"
+  },
+  "rational_oracle_sha256": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b",
+  "real_capture": {
+    "path": "morsehgp3D_v7/receipts/full_extra_shell_50000_20260906/run_r3/n50000_k10.stderr",
+    "sha256": "3cd74b330c62978d8c3eedd175e12bf5fe02893facb2e008150c32b5054aea72",
+    "source_publication": "56ace8d85f3c3321140f3a8522781299467cde24",
+    "records": 4,
+    "whole_cloud_size": 50000,
+    "point_ball_comparisons": 200000,
+    "point_rows_bound": 28,
+    "scope": "Complete census of supplied keys only; no global catalogue or parent certification; no historical G4 per-key identity inferred."
+  },
+  "runs": {
+    "shell_diagnostic": {
+      "commands": [
+        [
+          "taskset",
+          "-c",
+          "1",
+          "python3",
+          "-B",
+          "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic_test.py"
+        ],
+        [
+          "taskset",
+          "-c",
+          "1",
+          "python3",
+          "-B",
+          "-O",
+          "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic_test.py"
+        ]
+      ],
+      "exit_codes": [
+        0,
+        0
+      ],
+      "stderr_empty": true,
+      "outputs_identical": true,
+      "normal_file": "receipts_plateaux_full_20260906/shell_diagnostic_normal.json",
+      "optimized_file": "receipts_plateaux_full_20260906/shell_diagnostic_optimized.json",
+      "output_sha256": "4e202c9ed88287134aa8a2445b0ae88b243d786b0168097d0cf5cb771a442c9d"
+    },
+    "locals_gap": {
+      "commands": [
+        [
+          "taskset",
+          "-c",
+          "1",
+          "python3",
+          "-B",
+          "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/locals_gap_model.py"
+        ],
+        [
+          "taskset",
+          "-c",
+          "1",
+          "python3",
+          "-B",
+          "-O",
+          "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/locals_gap_model.py"
+        ]
+      ],
+      "exit_codes": [
+        0,
+        0
+      ],
+      "stderr_empty": true,
+      "outputs_identical": true,
+      "normal_file": "receipts_plateaux_full_20260906/locals_gap_normal.json",
+      "optimized_file": "receipts_plateaux_full_20260906/locals_gap_optimized.json",
+      "output_sha256": "9cbb54fec710c33278254b206614f289addbd0710f2198f92ebc9f3db458a981"
+    },
+    "real_shell_census": {
+      "commands": [
+        [
+          "taskset",
+          "-c",
+          "1",
+          "python3",
+          "-B",
+          "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/real_shell_census.py"
+        ],
+        [
+          "taskset",
+          "-c",
+          "1",
+          "python3",
+          "-B",
+          "-O",
+          "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/real_shell_census.py"
+        ]
+      ],
+      "exit_codes": [
+        0,
+        0
+      ],
+      "stderr_empty": true,
+      "outputs_identical": true,
+      "normal_file": "receipts_plateaux_full_20260906/real_shell_census_normal.json",
+      "optimized_file": "receipts_plateaux_full_20260906/real_shell_census_optimized.json",
+      "output_sha256": "91062f687e422ace92d045aa5f7f80fcc2769c25d9883c2638346165da10a058"
+    },
+    "coverage_contribution": {
+      "commands": [
+        [
+          "taskset",
+          "-c",
+          "1",
+          "python3",
+          "-B",
+          "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/coverage_contribution_model.py"
+        ],
+        [
+          "taskset",
+          "-c",
+          "1",
+          "python3",
+          "-B",
+          "-O",
+          "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/coverage_contribution_model.py"
+        ]
+      ],
+      "exit_codes": [
+        0,
+        0
+      ],
+      "stderr_empty": true,
+      "outputs_identical": true,
+      "normal_file": "receipts_plateaux_full_20260906/coverage_contribution_normal.json",
+      "optimized_file": "receipts_plateaux_full_20260906/coverage_contribution_optimized.json",
+      "output_sha256": "479e0b38103da9041841bdfa50309c9e90acce3bde9aaba362d63a991e505460"
+    }
+  },
+  "python_version": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "source_variants_D_to_O_unchanged": true,
+  "engine_invocations": 0,
+  "new_cpp_compilations": 0,
+  "gcp": "not_used_by_auditor",
+  "limitations": [
+    "Local reader accepts a supplied consistent census without certifying its completeness; separate fixed-campaign reader establishes that completeness for four keys.",
+    "Journal uses nominal serialization and references precomputed exact ball census; no industrial arbitrary-input validator or standalone geometry export.",
+    "Potential contributions are not exact disjoint growth deltas; component identities remain separate despite overlap.",
+    "No C++ quotient, global parent resolution, full tower timing, weights or public status promoted."
+  ]
+}

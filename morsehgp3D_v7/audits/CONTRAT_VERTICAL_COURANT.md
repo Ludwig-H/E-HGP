@@ -22,7 +22,7 @@ Soit Q une coface du lot de naissance à l’ordre k+1, de cardinal k+2 et de ni
 
 Conserver cette ancre à la naissance, la propager aux continuations, normaliser les ancres parentales au même état inférieur à chaque fusion et vérifier leur accord. Les successeurs inférieurs font avancer les tokens historiques. À la consultation ouverte, appliquer seulement les lots strictement inférieurs ; à la consultation fermée, fermer aussi le lot égal. Les numéros de batches locaux ne sont pas une horloge commune.
 
-Pour FULL, la route plus directe utilise chaque minimum comme directe de l’ordre inférieur, avec son ancre après fermeture du plateau. Le scan `born` réduit ne lui est pas transféré implicitement. Entrée, hashes des deux payloads, ordres, coupe exacte et succès terminal doivent accompagner la carte exportée.
+Pour FULL régulier, chaque minimum est une directe de l’ordre inférieur. Une naissance non régulière utilise l’[ancre de sa boule](receipts_plateaux_full_20260906/BALL_ANCHORS.md) à l’ordre inférieur, après fermeture du même niveau. Le scan `born` réduit ne lui est pas transféré implicitement. Entrée, hashes des deux payloads, ordres, coupe exacte et succès terminal doivent accompagner la carte exportée.
 
 ## 6. Contre-fixtures et reçus bornés
 

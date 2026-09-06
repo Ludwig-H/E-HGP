@@ -1,8 +1,6 @@
 # État courant de l’audit v7
 
-La priorité est le [traitement exact des plateaux non réguliers](receipts_plateaux_full_20260906/README.md), après les refus 50k K1..10 et K1..5 publiés par le constructeur. La garde actuelle protège un contrat régulier ; une extension locale est prouvée sur la coquille et partage sa table entre K. Les naissances peuvent couvrir plus de K points et les continuations gagner des points : le certificat doit représenter ces gains. Le modèle indépendant compare 28 ordres et 352 coupes exactes. Les cas réels 50k restent à extraire, le raccord C++ à qualifier.
-
-Le [complément par ancres de boule](receipts_plateaux_full_20260906/BALL_ANCHORS.md) ferme le raccord algorithmique proposé : un token par boule et ordre dans un intervalle explicite, normalisation après lot et résolution des facettes à la demande. La génération conserve ses seuils par arité minimale ; les labels faibles ne sont pas matérialisés comme catalogue global. Cette preuve et son modèle indépendant ne qualifient pas encore une implémentation C++.
+Les quatre diagnostics réels 50k sont extraits. Le [contrat de plateau et d’ancres](../docs/PLATEAUX_FULL_ET_ANCRES.md) est désormais repris par le constructeur ; les [preuves indépendantes](receipts_plateaux_full_20260906/README.md) restent conservées. Le [complément courant](receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md) vérifie ces données et propose un **journal de contributions de couverture**, exact aux coupes sans ensembles complets de points dans le producteur. Les contributions peuvent être réduites à un masque de coquille hors naissance. Le raccord global C++, le format exporté et leur qualification restent à réaliser.
 
 Le raccord FULL du proposeur MEB filtré publié par 20b28b1d dispose de la **qualification indépendante O2 et ASan/UBSan** : 2 784 sorties et 214 704 coupes par build, avec budgets, Work persistant et ordres n=14/K9/K10. L’export industriel et les contrats de performance restent ouverts.
 
@@ -34,6 +32,6 @@ La lecture intégrale des parties I et II du manuscrit, PDF 35–134, reste acqu
 
 Le [manifeste](validation_current.json) conserve O sur le publié `20b28b1d`, ainsi que D–N. Les écarts ultérieurs des documents, tests et du générateur sont affichés par le contrôle de fraîcheur, sans requalification implicite. Les headers FULL/MEB qualifiés sont inchangés. La réutilisation terminale q2 possède ses captures constructeur, contre-lues sans nouvelle exécution ; elle reste hors de O. Les sondes sans quotas et multi-CPU ne sont pas qualifiées par O. Le juge se rejoue sur les captures sans moteur.
 
-Le [dialogue actif](DIALOGUE_COURANT.md) porte désormais les contrats de plateau, le quotient local et les raccords à réaliser. Les autres questions sans incidence immédiate restent [regroupées](QUESTIONS_SECONDAIRES.md).
+Le [dialogue actif](DIALOGUE_COURANT.md) porte la réponse sur les couvertures factorisées et les conséquences des quatre coquilles réelles. Les autres questions sans incidence immédiate restent [regroupées](QUESTIONS_SECONDAIRES.md).
 
 Les reçus bruts et échecs restent conservés ; les anciennes synthèses sont accessibles par le [registre d’entretien](ENTRETIEN.json). GCP non utilisé.

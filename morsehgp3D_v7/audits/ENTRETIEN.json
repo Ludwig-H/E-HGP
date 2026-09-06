@@ -1965,5 +1965,217 @@
     "engine_invocations": 0,
     "gcp": "not_used_by_auditor",
     "publication_scope_paths": 13
+  },
+  "latest_shell_and_contributions_review_20260906": {
+    "date": "2026-09-06T16:42:52.582919+00:00",
+    "base_head": "56ace8d85f3c3321140f3a8522781299467cde24",
+    "receipt": "receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md",
+    "scope": "Exact four-ball 50k census and bounded local shell reader; constructive dated contribution proof and independent bounded H0 journal replay. No integrated C++ or archive qualification.",
+    "runs": {
+      "shell_diagnostic": {
+        "commands": [
+          [
+            "taskset",
+            "-c",
+            "1",
+            "python3",
+            "-B",
+            "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic_test.py"
+          ],
+          [
+            "taskset",
+            "-c",
+            "1",
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic_test.py"
+          ]
+        ],
+        "exit_codes": [
+          0,
+          0
+        ],
+        "stderr_empty": true,
+        "outputs_identical": true,
+        "normal_file": "receipts_plateaux_full_20260906/shell_diagnostic_normal.json",
+        "optimized_file": "receipts_plateaux_full_20260906/shell_diagnostic_optimized.json",
+        "output_sha256": "4e202c9ed88287134aa8a2445b0ae88b243d786b0168097d0cf5cb771a442c9d"
+      },
+      "locals_gap": {
+        "commands": [
+          [
+            "taskset",
+            "-c",
+            "1",
+            "python3",
+            "-B",
+            "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/locals_gap_model.py"
+          ],
+          [
+            "taskset",
+            "-c",
+            "1",
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/locals_gap_model.py"
+          ]
+        ],
+        "exit_codes": [
+          0,
+          0
+        ],
+        "stderr_empty": true,
+        "outputs_identical": true,
+        "normal_file": "receipts_plateaux_full_20260906/locals_gap_normal.json",
+        "optimized_file": "receipts_plateaux_full_20260906/locals_gap_optimized.json",
+        "output_sha256": "9cbb54fec710c33278254b206614f289addbd0710f2198f92ebc9f3db458a981"
+      },
+      "real_shell_census": {
+        "commands": [
+          [
+            "taskset",
+            "-c",
+            "1",
+            "python3",
+            "-B",
+            "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/real_shell_census.py"
+          ],
+          [
+            "taskset",
+            "-c",
+            "1",
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/real_shell_census.py"
+          ]
+        ],
+        "exit_codes": [
+          0,
+          0
+        ],
+        "stderr_empty": true,
+        "outputs_identical": true,
+        "normal_file": "receipts_plateaux_full_20260906/real_shell_census_normal.json",
+        "optimized_file": "receipts_plateaux_full_20260906/real_shell_census_optimized.json",
+        "output_sha256": "91062f687e422ace92d045aa5f7f80fcc2769c25d9883c2638346165da10a058"
+      },
+      "coverage_contribution": {
+        "commands": [
+          [
+            "taskset",
+            "-c",
+            "1",
+            "python3",
+            "-B",
+            "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/coverage_contribution_model.py"
+          ],
+          [
+            "taskset",
+            "-c",
+            "1",
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/coverage_contribution_model.py"
+          ]
+        ],
+        "exit_codes": [
+          0,
+          0
+        ],
+        "stderr_empty": true,
+        "outputs_identical": true,
+        "normal_file": "receipts_plateaux_full_20260906/coverage_contribution_normal.json",
+        "optimized_file": "receipts_plateaux_full_20260906/coverage_contribution_optimized.json",
+        "output_sha256": "479e0b38103da9041841bdfa50309c9e90acce3bde9aaba362d63a991e505460"
+      }
+    },
+    "real_census": {
+      "path": "morsehgp3D_v7/receipts/full_extra_shell_50000_20260906/run_r3/n50000_k10.stderr",
+      "sha256": "3cd74b330c62978d8c3eedd175e12bf5fe02893facb2e008150c32b5054aea72",
+      "source_publication": "56ace8d85f3c3321140f3a8522781299467cde24",
+      "records": 4,
+      "whole_cloud_size": 50000,
+      "point_ball_comparisons": 200000,
+      "point_rows_bound": 28,
+      "scope": "Complete census of supplied keys only; no global catalogue or parent certification; no historical G4 per-key identity inferred."
+    },
+    "journal": {
+      "orders": 45,
+      "order_cuts": 718,
+      "active_facets": 2588,
+      "component_coverages": 779,
+      "scheduled_blocks": 300,
+      "full_references": 300,
+      "local_gap_contributions": 163,
+      "births": 160,
+      "multifusions": 69,
+      "growth_topology_nodes": 0,
+      "targeted_mutants": [
+        "drop_continuation_contribution",
+        "ignore_contribution_activation_time"
+      ],
+      "nominal_serialization_only": true
+    },
+    "checks": {
+      "docs_normal_exit": 0,
+      "docs_optimized_exit": 0,
+      "active_markdown": 399,
+      "registry_exit": 0,
+      "registry_phases": 20,
+      "authored_markdown": 8,
+      "local_links": 151,
+      "link_math_errors": 0,
+      "git_diff_check_exit": 0,
+      "freshness": {
+        "common_pins": 2257,
+        "common_mismatches": 0,
+        "source_variants_unchanged": true,
+        "normal_exit": 1,
+        "optimized_exit": 1,
+        "outputs_identical": true,
+        "latest_variant": "O_full_meb_composition",
+        "latest_variant_deltas": [
+          "CMakeLists.txt",
+          "PASSATION.md",
+          "README.md",
+          "docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md",
+          "docs/FAUSSES_PISTES.md",
+          "docs/RESIDENCE_MASSIVE.md",
+          "src/pipeline/generate.hpp",
+          "tests/meb_proposal_local_gate.cpp"
+        ],
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "486c017d7a82f9afee1f5dfe524de2a9c1972e3fccd687c1f42ec83b3305e677"
+      }
+    },
+    "maintenance": {
+      "root_markdown_notes": 25,
+      "previous_root_words": 18529,
+      "current_root_words": 18221,
+      "root_words_removed_net": 308,
+      "action": "Condense adopted plateau/anchor exposition into main-contract links; replace stale extraction requests with exact four-ball census and current contribution proof; preserve original scientific data and source reviews."
+    },
+    "historical_scientific_receipts_modified": false,
+    "source_variants_D_to_O_unchanged": true,
+    "engine_invocations": 0,
+    "new_cpp_compilations": 0,
+    "gcp": "not_used_by_auditor",
+    "publication_scope_paths": 26,
+    "common_document_refresh": {
+      "path": "docs/LECTURE_ET_CONTRATS.md",
+      "previous_sha256": "5339653875c5c1ea51270f3d65e697f47c441471717d28a8f57a6f170d50b623",
+      "current_sha256": "118b592c911992b1d4bbac1311a715ea1c4dd948c0bc19465026045935f3833d",
+      "publication": "56ace8d85f3c3321140f3a8522781299467cde24",
+      "review": "Seven added lines link the nonregular plateau contract and distinguish regular leaf coverage from growth and weighted facet authority. Complete document read; no C++ source authority changed.",
+      "first_freshness_normal_exit": 1,
+      "first_freshness_optimized_exit": 1,
+      "first_freshness_common_deltas": [
+        "docs/LECTURE_ET_CONTRATS.md"
+      ]
+    }
   }
 }

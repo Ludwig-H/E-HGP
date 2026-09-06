@@ -2,7 +2,7 @@
 
 6 septembre 2026, après le refus 50k publié par 638205bb. phase=exploration_v7_hors_registre, backend=cpu_reference, profile=quantized_u16_input_only, mode=audit_independant_math_and_architecture, public_status=not_claimed. Les parties I/II du manuscrit et la définition par composantes des régions témoins K-NN restent l’autorité visée.
 
-**La garde actuelle ne peut pas être supprimée seule. Une extension exacte et locale est toutefois possible : quotient sur la coquille, raccord aux parents globaux avant le lot, naissances de plateau et deltas de couverture.** Les contre-fixtures sont permanentes. Elles ne sont pas les quatre enregistrements du run 50k, dont les coordonnées restent à extraire. Aucun moteur, compilation ou GCP utilisé par l’auditeur.
+**La garde actuelle ne peut pas être supprimée seule. Une extension exacte et locale est toutefois possible : quotient sur la coquille, raccord aux parents globaux avant le lot, naissances de plateau et deltas de couverture.** Les contre-fixtures sont permanentes. Elles sont distinctes des quatre enregistrements réels 50k, maintenant étudiés dans le [complément de diagnostic et de certificat](LOCAL_DIAGNOSTICS.md). Aucun moteur, compilation ou GCP utilisé par l’auditeur.
 
 La [suite sur les ancres de boule](BALL_ANCHORS.md) raccorde ce quotient à un producteur complet borné : fenêtre amont conservée, une ancre par boule et ordre, résolution à la demande et partage vertical. Les preuves et captures initiales ci-dessous restent inchangées.
 
@@ -46,7 +46,7 @@ Contre-fixture : boule de centre (2,0), rayon carré 4, coquille A=(0,0), B=(4,0
 
 Assembler ensuite tous les blocs du même rayon par leurs racines globales distinctes. Une facette née exactement à r ne peut appartenir à deux boules différentes de rayon r : par unicité de sa MEB, ces deux boules seraient identiques. Les blocs distincts se raccordent donc uniquement par les anciennes racines. Ne pas publier des fusions intermédiaires produites par un traitement séquentiel du plateau.
 
-Pour chaque groupe fermé : zéro parent donne une naissance, un parent une continuation, plusieurs parents une multifusion. Sa couverture est l’union des couvertures parentales et des S des blocs du groupe. Calculer explicitement la différence avec les couvertures parentales ; **un parent ne signifie pas nécessairement aucun effet public**. Les portails sans changement peuvent rester des ancres internes. Une même couverture de points ne fusionne jamais deux identités de composantes.
+Pour chaque groupe fermé : zéro parent donne une naissance, un parent une continuation, plusieurs parents une multifusion. Sa couverture est l’union des couvertures parentales et des S des blocs du groupe. Pour un delta disjoint, calculer la différence avec les couvertures parentales ; le [journal factorisé](LOCAL_DIAGNOSTICS.md) permet désormais d’éviter cette opération à la production. **Un parent ne signifie pas nécessairement aucun effet public**. Les portails sans changement peuvent rester des ancres internes. Une même couverture de points ne fusionne jamais deux identités de composantes.
 
 ### Deux décisions locales moins coûteuses
 
@@ -74,7 +74,7 @@ Le [producteur actuel](../../src/forest/full_gabriel.hpp) impose q≤4 et tous l
 
 Pour la vraie tour, une naissance de plateau supérieure s’ancre dans la composante inférieure **fermée au même niveau**, éventuellement sans coface unique distinguée. La naturalité vient toujours des inclusions des régions témoins. K=n reste une naissance de X à sa MEB, sans ordre supérieur ; le rayon zéro et les doublons gardent leur contrat distinct. Les poids sur toutes les facettes et leurs dates d’affectation ne sont pas remplacés par ces seules couvertures.
 
-Avant toute nouvelle mesure utile, extraire des quatre/trois enregistrements 50k : BallKey, niveau, arité minimale, I/U complets avec identifiants et coordonnées, puis les rangs concernés. Une petite ré-exécution du sous-problème suffit pour juger la géométrie locale ; la qualification des **parents globaux** doit conserver leur contexte extérieur. Aucune des fixtures ci-dessus n’est présentée comme cette extraction réelle.
+Les quatre enregistrements détaillés de la capture locale K10 sont maintenant disponibles ; leur [contrelecture](LOCAL_DIAGNOSTICS.md) vérifie BallKey, niveau et census complet. Les parents globaux des trois fusions possibles restent à résoudre dans leur contexte extérieur. Le repli K5 en retient trois par la fenêtre, sans nouvelle extraction détaillée K5.
 
 ## Vérifications indépendantes
 
