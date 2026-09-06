@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/snapshot",
+  "elapsed_seconds": 0.003524720999848796,
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "interrupted": null,
+  "started_utc": "2026-09-06T08:13:49.436770+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "39553616934606f58b27c04bed0cdbbe5b00c92c831a9aaadebd7ceda61d1334"
+}

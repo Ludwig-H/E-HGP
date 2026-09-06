@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/bin/o2_rational_bridge"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/snapshot",
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-06T08:14:05.670848+00:00",
+  "stdin_sha256": "3185d509a4ed2c4937c5f0d69c27496bfb85ee83fbadd41951f2eb731cd29dfa",
+  "timeout_seconds": 120
+}

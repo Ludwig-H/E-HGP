@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/bin/o2_rational_bridge"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/snapshot",
+  "elapsed_seconds": 0.034268538000105764,
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "interrupted": null,
+  "started_utc": "2026-09-06T08:14:05.670848+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "3185d509a4ed2c4937c5f0d69c27496bfb85ee83fbadd41951f2eb731cd29dfa",
+  "stdout_sha256": "1b247f6039cc7602855a86fed844ec08c82cfcb6d4562339b7d6663b1d2ec17e"
+}

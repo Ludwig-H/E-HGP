@@ -1,0 +1,9 @@
+ M audits/COORDINATION_MORSEHGP3D_V7.md
+ M morsehgp3D_v6/src/gpu/lot_ring.hpp
+ M morsehgp3D_v6/src/parallel/sort.hpp
+ M morsehgp3D_v6/src/pipeline/census.hpp
+ M morsehgp3D_v6/src/pipeline/expand.hpp
+ M morsehgp3D_v7/docs/FAUSSES_PISTES.md
+?? morsehgp3D_v6/src/gpu/route_c6.hpp
+?? morsehgp3D_v6/tests/perm_sort_gate.cpp
+?? morsehgp3D_v6/tests/route_c6_gate.cpp

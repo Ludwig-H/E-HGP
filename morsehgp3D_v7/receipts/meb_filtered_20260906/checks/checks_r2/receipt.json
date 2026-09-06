@@ -1,0 +1,110 @@
+{
+  "artifacts": {
+    "capture.py": "0f5f0f6c9cb5b86117cb92334d764e16baee060089f177e1e688a42eae6a874c",
+    "environment.json": "22cf17a2df50b1a7e060b718a4fd52eb4dd22a95c9b362d7d1fc52c2e0a5f614",
+    "normal.command.json": "bbd5af142aeed5399b6abd153ddfa0e4febd8ad65193a979869eab957343c882",
+    "normal.intent.json": "66284b6a3a06313f1d30dfb1fa65b4edd208f4affde51a12d8d859e991a6458d",
+    "normal.spawned.json": "3a449d3730217ec27c215195da38f8f93e58713f6f2b5bde5767f0e67c7b3bc7",
+    "normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "normal.stdout": "d178cf376b5888c10f808bda7e8043dbf3d7ffb9176d91fdc725a5928e095888",
+    "optimized.command.json": "331cc7d904758dc03a5ea08159801e0347a2f904192c6c979f1317b0388d1895",
+    "optimized.intent.json": "4bea778bef3f0024567af5f2f2340e19f33f9b6b29c506ab108418897117a408",
+    "optimized.spawned.json": "23395f5a5b931e71b8e920f815831eaa96c764863a6b69b78ae721ba885adde0",
+    "optimized.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "optimized.stdout": "d178cf376b5888c10f808bda7e8043dbf3d7ffb9176d91fdc725a5928e095888",
+    "record_r2.py": "6c0e42e4c7e2731d2202c0565f56053a8532392fbcc4fd304c2ccb2ef84ad1f2"
+  },
+  "combined_deadline_seconds": 30,
+  "commands": {
+    "normal": {
+      "argv": [
+        "/usr/local/python/3.12.1/bin/python3.12",
+        "-B",
+        "-I",
+        "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/snapshot/build/v7_meb_filter_qualification_20260906/capture.py",
+        "--judge",
+        "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2",
+        "--source-sha",
+        "7e881f998a2f6bcac8e709a3ee3fa0c176973a7670e2a22960a1d46641627172",
+        "--run-sha",
+        "981f3b3e67f3f8e731aceca964c9faaae32b16b372f58704b205585374f83e87"
+      ],
+      "cpu_affinity": [
+        0
+      ],
+      "cwd": "/workspaces/E-HGP/build/v7_meb_filter_checks_20260906/checks_r2",
+      "elapsed_seconds": 2.6723841650000395,
+      "ended_utc": "2026-09-06T08:16:21.049337+00:00",
+      "error": null,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "started_utc": "2026-09-06T08:16:18.376789+00:00",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 5966,
+      "stdout_sha256": "d178cf376b5888c10f808bda7e8043dbf3d7ffb9176d91fdc725a5928e095888",
+      "timeout_seconds": 27.99877096899945
+    },
+    "optimized": {
+      "argv": [
+        "/usr/local/python/3.12.1/bin/python3.12",
+        "-B",
+        "-I",
+        "-O",
+        "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/snapshot/build/v7_meb_filter_qualification_20260906/capture.py",
+        "--judge",
+        "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2",
+        "--source-sha",
+        "7e881f998a2f6bcac8e709a3ee3fa0c176973a7670e2a22960a1d46641627172",
+        "--run-sha",
+        "981f3b3e67f3f8e731aceca964c9faaae32b16b372f58704b205585374f83e87"
+      ],
+      "cpu_affinity": [
+        0
+      ],
+      "cwd": "/workspaces/E-HGP/build/v7_meb_filter_checks_20260906/checks_r2",
+      "elapsed_seconds": 2.7725266309998915,
+      "ended_utc": "2026-09-06T08:16:23.822668+00:00",
+      "error": null,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "started_utc": "2026-09-06T08:16:21.049984+00:00",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 5966,
+      "stdout_sha256": "d178cf376b5888c10f808bda7e8043dbf3d7ffb9176d91fdc725a5928e095888",
+      "timeout_seconds": 25.3255758159994
+    }
+  },
+  "compiler_runs": 0,
+  "driver_path": "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/snapshot/build/v7_meb_filter_qualification_20260906/capture.py",
+  "driver_sha256": "0f5f0f6c9cb5b86117cb92334d764e16baee060089f177e1e688a42eae6a874c",
+  "ended_utc": "2026-09-06T08:16:23.862957+00:00",
+  "engine_runs": 0,
+  "gcp_used": false,
+  "inputs_after": {
+    "/usr/local/python/3.12.1/bin/python3.12": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+    "/workspaces/E-HGP/build/v7_meb_filter_checks_20260906/record_r2.py": "6c0e42e4c7e2731d2202c0565f56053a8532392fbcc4fd304c2ccb2ef84ad1f2",
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/run.json": "981f3b3e67f3f8e731aceca964c9faaae32b16b372f58704b205585374f83e87",
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/snapshot/build/v7_meb_filter_qualification_20260906/capture.py": "0f5f0f6c9cb5b86117cb92334d764e16baee060089f177e1e688a42eae6a874c",
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/source_pins.json": "7e881f998a2f6bcac8e709a3ee3fa0c176973a7670e2a22960a1d46641627172"
+  },
+  "inputs_before": {
+    "/usr/local/python/3.12.1/bin/python3.12": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+    "/workspaces/E-HGP/build/v7_meb_filter_checks_20260906/record_r2.py": "6c0e42e4c7e2731d2202c0565f56053a8532392fbcc4fd304c2ccb2ef84ad1f2",
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/run.json": "981f3b3e67f3f8e731aceca964c9faaae32b16b372f58704b205585374f83e87",
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/snapshot/build/v7_meb_filter_qualification_20260906/capture.py": "0f5f0f6c9cb5b86117cb92334d764e16baee060089f177e1e688a42eae6a874c",
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/source_pins.json": "7e881f998a2f6bcac8e709a3ee3fa0c176973a7670e2a22960a1d46641627172"
+  },
+  "normal_optimized_bytes_equal": true,
+  "normal_optimized_json_equal": true,
+  "public_status": "not_claimed",
+  "recorder_sha256": "6c0e42e4c7e2731d2202c0565f56053a8532392fbcc4fd304c2ccb2ef84ad1f2",
+  "run_path": "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2",
+  "run_sha256": "981f3b3e67f3f8e731aceca964c9faaae32b16b372f58704b205585374f83e87",
+  "schema": "mhgp7-filtered-meb-pure-replays-v1",
+  "source_sha256": "7e881f998a2f6bcac8e709a3ee3fa0c176973a7670e2a22960a1d46641627172",
+  "started_utc": "2026-09-06T08:16:18.375566+00:00",
+  "status": "completed",
+  "writes_inside_r2": false
+}

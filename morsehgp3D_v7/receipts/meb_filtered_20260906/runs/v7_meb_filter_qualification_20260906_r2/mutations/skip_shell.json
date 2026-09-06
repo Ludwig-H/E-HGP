@@ -1,0 +1,7 @@
+{
+  "after": "fe46390038e4cc1b7c824080d264cb3258728eddab390da8a191420f047f7348",
+  "before": "484a89bc2dbd472cc0571ed31d59631d5f31f9b0a425118040c916fc16e5abcf",
+  "new": "if (false && shell != candidate.q) return false;",
+  "old": "if (shell != candidate.q) return false;",
+  "path": "build/v7_meb_filtered_preparation_20260905/pivot.hpp"
+}

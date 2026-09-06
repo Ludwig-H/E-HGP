@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/bin/skip_shell_rational_bridge"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/snapshot",
+  "elapsed_seconds": 0.11767079699984606,
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "interrupted": null,
+  "started_utc": "2026-09-06T08:14:35.507410+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "5d8e43c25f9aa374f8ce1b0968752aa923090ecc8909389c8a3d658177013e1e",
+  "stdout_sha256": "aea79fbcacf6ded88758d35c3496367576fd12ef97360d13f9b2f7a9baadffb9"
+}

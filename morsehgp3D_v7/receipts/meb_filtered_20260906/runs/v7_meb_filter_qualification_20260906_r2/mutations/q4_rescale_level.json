@@ -1,0 +1,7 @@
+{
+  "after": "827d5427bd7221d2588dd1ffb88551bda86cfa123d5a0c9c05d38695ee07b229",
+  "before": "d6dbba195eb17d7ae8f765b8295a374ccd43e39f88371afef86b03c3779b8ec5",
+  "new": "ball.level = q4_level_raw(candidate.four);\n    for (size_t j = 2; j > 0; --j) ball.level.num[j] = (ball.level.num[j] << 1) | (ball.level.num[j - 1] >> 63);\n    ball.level.num[0] <<= 1; ball.level.den *= 2;",
+  "old": "ball.level = q4_level_raw(candidate.four);",
+  "path": "build/v7_meb_pivot_prototype/pivot.hpp"
+}

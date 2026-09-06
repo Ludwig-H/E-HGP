@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/bin/san_budget_gate"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/snapshot",
+  "elapsed_seconds": 0.01819156799956545,
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "interrupted": null,
+  "started_utc": "2026-09-06T08:14:11.945795+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "9e3fd71dc43377a35b72761839e01fef25ded6c53358b39e9de08d82c55c5674"
+}

@@ -1,4 +1,4 @@
-# État de livraison v7 — 5 septembre 2026
+# État de livraison v7 — 6 septembre 2026
 
 `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -116,15 +116,23 @@ Les contrats **50k/tour 1..10 sous 1 s**, repli tour 1..5, puis 100 ms et
 dizaines de millions sur G4 sont **non atteints**. Les plafonds de sortie,
 catalogues, RAM/VRAM et reprise ne se résolvent pas par le seul cache.
 
-Suite mono : qualifier le proposeur MEB privé filtré et considérer le
-rejet précoce des blocs q4 sur sa preuve propre. Le coût MEB doit aussi être mesuré
-sur les appels FULL réels avant un éventuel dispatch de proposition.
-L'auditeur a précisé le [filtrage stable des pivots natifs](audits/MEB_DOUBLE_BUDGET_COURANT.md#réduction-démontrée-des-formes-de-pivot) :
-violateur obligatoire, aucun q2 après l'initialisation par diamètre global,
-première base acceptée conservée à P non limitant sur toute la séquence Work.
-La préparation privée `build/v7_meb_filtered_preparation_20260905/pivot.hpp`,
-pin `484a89bc…`, est relue mais **non compilée, non qualifiée et non intégrée**.
-Elle ne change aucun résultat ni aucune source de la présente campagne.
+Le [filtre MEB privé](docs/RESULTATS_MEB_FILTREE_20260906.md), pin
+`484a89bc…`, est désormais compilé et qualifié localement : 9 344 appels
+F/Trace/NoObserver, 59 frontières ciblées et 3 430 appels jugés rationnellement
+par build O2/ASan-UBSan, puis captures rejugées normalement et sous `-O`.
+Le triangle passe de cinq formes à deux. La correction avec l'auditeur
+établit une base positive unique dans le pivot admissible ; l'ordre des
+essais affecte P et ses admissions. Le complément R2 réfute précisément
+un changement de ce calendrier sur le tétraèdre régulier, à support égal.
+**Le helper reste privé, non intégré à FULL, sans gain de tour annoncé.**
+
+Suite mono : raccorder le Work persistant et ses budgets/miroirs au Builder,
+puis mesurer sur les appels FULL réels avant un éventuel dispatch. Le
+filtre seul ne réduit pas le nombre d'appels qui bloque 32k. La piste
+distincte de [réutilisation des terminaisons certifiées](audits/MEB_DOUBLE_BUDGET_COURANT.md#réutiliser-une-certification-terminale-déjà-acquise)
+demande de mesurer T−U, puis de conserver le premier recalcul complet et
+de normaliser le token courant, sans mémoriser une racine périmée.
+Le rejet précoce des blocs q4 reste une autre optimisation à qualifier.
 L'export FULL transactionnel avec son autorité terminale et ses ancres
 inter-K reste à raccorder avant qualification de la tour. Multi-CPU et
 GPU viennent après la réduction du coût mono, avec leurs reçus séparés.

@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "/usr/local/python/3.12.1/bin/python3.12",
+    "-B",
+    "-I",
+    "-O",
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/snapshot/build/v7_meb_filter_qualification_20260906/capture.py",
+    "--judge",
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2",
+    "--source-sha",
+    "7e881f998a2f6bcac8e709a3ee3fa0c176973a7670e2a22960a1d46641627172",
+    "--run-sha",
+    "981f3b3e67f3f8e731aceca964c9faaae32b16b372f58704b205585374f83e87"
+  ],
+  "cpu_affinity": [
+    0
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_meb_filter_checks_20260906/checks_r2",
+  "elapsed_seconds": 2.7725266309998915,
+  "ended_utc": "2026-09-06T08:16:23.822668+00:00",
+  "error": null,
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-06T08:16:21.049984+00:00",
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 5966,
+  "stdout_sha256": "d178cf376b5888c10f808bda7e8043dbf3d7ffb9176d91fdc725a5928e095888",
+  "timeout_seconds": 25.3255758159994
+}

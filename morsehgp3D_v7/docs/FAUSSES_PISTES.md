@@ -1,6 +1,6 @@
 # Fausses pistes et décisions écartées
 
-5 septembre 2026. `public_status=not_claimed`. Cette note garde les raisons
+6 septembre 2026. `public_status=not_claimed`. Cette note garde les raisons
 des abandons et corrections sans encombrer les entrées actives. Une piste
 non encore qualifiée n'est pas, à elle seule, une fausse piste.
 
@@ -17,6 +17,7 @@ non encore qualifiée n'est pas, à elle seule, une fausse piste.
 | Confondre déplacement du premier plafond et réussite à 32k | La normalisation v2 dépasse l'ancien préfixe de travail, mais K9 refuse ensuite à quatre millions d'appels MEB. Huit ordres réussis seulement, aucun cap relevé ni refus promu. [Mesures](RESULTATS_MONO_FULL_SUCCESSOR_20260905.md) |
 | Arrêter toute une corde q4 après un bloc trop profond | La profondeur n'est pas monotone : un bloc admissible peut suivre. Seul le bloc profond est écartable ; cette optimisation reste à implémenter séparément. [Contre-fixture indépendante](../audits/S1_COURANT.md#7-rejet-précoce-dun-bloc-q4--frontière-de-loptimisation) |
 | Borner le coût physique d'un proposeur MEB par le seul ordinal legacy | Un contre-exemple compilé distingue propositions réellement tentées et ordinal de référence. Employer deux charges persistantes distinctes. [Correction](PROPOSITION_MEB_ET_BUDGETS.md) |
+| Justifier l'ordre des essais par plusieurs bases positives possibles dans un pivot admissible | Motif corrigé avec l'auditeur : Q positif affinement indépendant et z strict donnent une base positive nouvelle unique, par le plan radical. L'ordre reste observable dans le nombre d'essais et l'admission sous P ; ne pas inventer une contre-fixture native à deux bases. [Preuve corrigée](../audits/MEB_DOUBLE_BUDGET_COURANT.md#réduction-démontrée-des-formes-de-pivot) |
 | Activer généralement la proposition MEB parce qu'elle teste moins de candidats | Le q2 immédiat répété ralentit ; les petits lots sont sensibles à l'ordre. Pas d'activation générale ni de seuil choisi sur ces seules mesures. [Résultat négatif](RESULTATS_COUT_MEB_20260905.md) |
 | Déclarer une accélération ou choisir s à partir d'une seule paire favorable | Les paires E/F mêlent gains et régressions. Conserver s=8/10/12, apparier les instruments et distinguer observation de qualification statistique. [Mesures](RESULTATS_MONO_F_20260905.md) |
 | Promouvoir FULL depuis le lecteur structurel, un digest égal ou les reçus F | Aucun ne certifie la complétude géométrique du producteur FULL. Garder les autorités séparées et le succès relatif explicite. [Contrat producteur](CONTRAT_PRODUCTEUR_FULL_GABRIEL.md) |

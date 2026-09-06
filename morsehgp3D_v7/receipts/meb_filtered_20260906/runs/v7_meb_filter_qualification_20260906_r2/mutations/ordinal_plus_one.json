@@ -1,0 +1,7 @@
+{
+  "after": "d76dbc577943dbc592e6fc92a9d564214096410ad519659cb4e0291881ff82c4",
+  "before": "484a89bc2dbd472cc0571ed31d59631d5f31f9b0a425118040c916fc16e5abcf",
+  "new": "const u64 count = ordinal(n, candidate) + 1;",
+  "old": "const u64 count = ordinal(n, candidate);",
+  "path": "build/v7_meb_filtered_preparation_20260905/pivot.hpp"
+}

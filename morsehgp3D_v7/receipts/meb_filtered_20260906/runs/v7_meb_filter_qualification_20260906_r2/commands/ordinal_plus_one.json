@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/bin/ordinal_plus_one_rational_bridge"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/snapshot",
+  "elapsed_seconds": 0.11767904900079884,
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "interrupted": null,
+  "started_utc": "2026-09-06T08:14:38.425638+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "5d8e43c25f9aa374f8ce1b0968752aa923090ecc8909389c8a3d658177013e1e",
+  "stdout_sha256": "7684d7c579e2ff5fd4fa6018811775da5dff965e013201ae57579ae48090a99e"
+}

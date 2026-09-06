@@ -4,6 +4,10 @@
 `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
+Suite distincte : le [filtre privé du 6 septembre](RESULTATS_MEB_FILTREE_20260906.md)
+est maintenant qualifié sur ses propres sources et captures. Le présent
+reçu conserve le calendrier historique et ses comptes, sans réattribution.
+
 ## Résultat et portée
 
 Le prototype privé à double budget conserve les terminaux de F dans

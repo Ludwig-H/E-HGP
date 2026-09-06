@@ -107,6 +107,12 @@ le travail de normalisation n'est pas une borne de résidence massive.
 À 32k, K9 atteint maintenant le plafond de quatre millions d'appels MEB,
 après huit ordres réussis ; ce déplacement du refus ne livre pas K1..10.
 
+Le [filtre MEB privé qualifié le 6 septembre](RESULTATS_MEB_FILTREE_20260906.md)
+réduit les essais locaux, sur un sous-ensemble d'au plus cinq sites. Il
+n'ajoute aucun catalogue global et ne diminue pas la taille des sorties
+FULL, ni le nombre d'appels MEB à parcours inchangé. Sa qualification
+locale n'est donc pas un palier de résidence ou de performance massive.
+
 Le [reçu lazy 8k/s8 historique](../receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s8_k10_lazy_c1000000.receipt.json)
 permet aussi de sommer la **sortie**, distinctement du pic : 3 976 472
 nœuds, 2 404 646 minima et 3 976 462 références parentales sur K1..10.

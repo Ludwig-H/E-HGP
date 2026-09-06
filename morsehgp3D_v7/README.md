@@ -35,6 +35,7 @@ distingués ; les minima FULL ne sont pas tout l'univers des poids.
 | [Cache FULL facultatif](docs/CONTRAT_CACHE_FULL_PARESSEUX.md) | API lazy distincte, capacité nulle permise, dispatcher J=1 ; minima et ancres restent obligatoires |
 | [Lots unitaires](docs/CONTRAT_LOT_UNITAIRE_FULL.md) | Tableau de quatre racines au lieu de la DSU locale ; mêmes demandes, compteurs, parents et ancres |
 | [Normalisation v2](docs/CONTRAT_NORMALISATION_FULL.md) | Dernière paire de compression supprimée ; mêmes forêts, calendrier d'accès et admissions explicitement versionnés |
+| [Proposeur MEB filtré](docs/RESULTATS_MEB_FILTREE_20260906.md) | Qualification locale O2/ASan-UBSan et oracle rationnel ; formes impossibles supprimées, toujours privé et non intégré à FULL |
 | CLI et archive | Route historique F séparée ; ni export FULL ni verticale FULL intégrée |
 
 Le delta singleton livré passe [17/17 CTests Release et 17/17 ASan/UBSan](receipts/full_gabriel_singleton_20260905/README.md),
@@ -59,6 +60,13 @@ puis refus 32k/K9 sur quatre millions d'appels MEB. Le premier chrono
 s8 contaminé reste exclu et conservé ; son rejeu est distinct. Les
 comparaisons historiques passent sur 204 ordres réussis, sans promouvoir
 le préfixe 32k. Aucun gain de temps robuste ni contrat 50k n'est établi.
+
+Le lot du 6 septembre qualifie le filtre MEB privé sur 9 344 comparaisons
+locales F/Trace/NoObserver et 3 430 appels jugés rationnellement par build,
+avec frontières budgétaires et mutants. Le triangle demande deux formes
+au lieu de cinq. Cette réduction de travail par appel ne lève pas, à elle
+seule, le plafond du **nombre** d'appels à 32k. Le raccord au Builder
+et les mesures sur la distribution FULL réelle sont les prochains verrous.
 
 Priorités : mono-thread, puis multi-CPU, puis GPU. Le
 [contrat 50k](docs/CONTRAT_PERFORMANCE.md) porte sur **toute la tour K=1..10

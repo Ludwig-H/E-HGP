@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/bin/san_trajectory_gate",
+    "--reverse-order-mutant"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/snapshot",
+  "elapsed_seconds": 0.0344433480004227,
+  "exit_code": 4,
+  "expected_exit_code": 4,
+  "interrupted": null,
+  "started_utc": "2026-09-06T08:14:18.527737+00:00",
+  "stderr_sha256": "8536d866c50c42cf1d0d34108df09255ba14b578974751bd3b9feb75b0a058d9",
+  "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

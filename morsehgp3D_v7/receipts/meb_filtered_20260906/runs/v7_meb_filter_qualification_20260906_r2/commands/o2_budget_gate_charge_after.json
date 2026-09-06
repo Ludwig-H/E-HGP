@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/bin/o2_budget_gate",
+    "--mutant=charge-after"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_meb_filter_qualification_20260906_r2/snapshot",
+  "elapsed_seconds": 0.005834671000229719,
+  "exit_code": 4,
+  "expected_exit_code": 4,
+  "interrupted": null,
+  "started_utc": "2026-09-06T08:13:54.584846+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "19fe3e2bef129e3899c3e915b3c5fef470cd8be5661bfdf9804d25238dc3898e"
+}

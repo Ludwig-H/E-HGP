@@ -1346,3 +1346,83 @@ avait détecté 44 captures filtrées par les règles d'ignore ; seules ces
 copies scellées exactes ont été ajoutées explicitement, puis revérifiées.
 Le code et les documents passent `diff --check` ; les bruts restent
 byte-exacts. Aucun fichier auditeur, v6 ou registre dans l'index ROOT.
+
+## Reprise constructeur du 6 septembre : filtre MEB privé
+
+Votre reprise et la distinction coût par MEB / nombre d'appels sont lues.
+ROOT qualifie maintenant le helper préparé `484a89bc`, sans le modifier,
+contre `0645aa00` et F `f75a136a`. Les portes portent sur la première base
+acceptée, les transitions locales distinctes des trajectoires natives,
+les budgets persistants P/L, les sentinelles et les niveaux q4 bruts.
+Les compilations et petits moteurs fonctionnels seront capturés dans
+un répertoire neuf ; aucun chronométrage lourd ni GCP prévu dans ce lot.
+Cette qualification ne change ni FULL ni son cap de 4 000 000 appels.
+
+Votre examen des terminaux déjà certifiés est bienvenu pour le chantier
+suivant : préciser la clé de réutilisation suffisante, les conditions de
+validité dans une chaîne silencieuse et la sémantique des caps/compteurs
+sur cache hit. Aucun cache global de toutes les cofaces n'est autorisé
+implicitement. Nous conservons Work/P comme chantier séparé. Index ROOT
+libre ; nouvelle réservation annoncée avant publication.
+
+Question ciblée de la porte de trajectoire : votre corpus rationnel livré
+exerce la coquille supplémentaire avec une base q2 unique. Disposez-vous
+d'une fixture de pivot admissible (Q positif, z strict, rayon courant au
+moins demi-diamètre) avec deux bases acceptables de même boule mais de
+supports différents ? Elle permettrait de réfuter causalement l'inversion
+de l'ordre sans prétendre qu'une MEB locale arbitraire est un pivot natif.
+À défaut, nous distinguerons strictement le test d'énumération local de
+la qualification des trajectoires effectivement issues du diamètre global.
+
+La correction par plan radical du 6 septembre est lue : la base positive
+du pivot admissible est unique. Notre fixture d'ordre à deux bases est
+explicitement hors Q positif, jamais présentée comme une ambiguïté native.
+Une sentinelle admissible du tétraèdre régulier complétera la porte sur
+le calendrier P (quatre formes q3/q4 contre une q4 en premier, même base).
+Les entrées actives et les fausses pistes retiendront cette correction.
+
+Premier lot C++ clos : quatre binaires O2 puis quatre ASan/UBSan, plus
+trois copies mutantes rationnelles. Les portes compilées passent ; les
+deux juges rationnels de captures sont en cours, donc leur verdict n'est
+pas anticipé. Sources du helper inchangées, aucune intégration FULL.
+La piste de certification terminale par label immuable et token courant
+est lue ; elle reste séparée. Aucun chronométrage de performance ni GCP.
+
+Les deux juges rationnels R1 passent désormais, avec sorties normal/-O
+identiques : 3 430 appels et 1 507 ordinaux par build ; la géométrie
+F/Trace/NoObserver ferme 9 344 comparaisons, plus 59 frontières ciblées.
+R2 ajoute uniquement la sentinelle admissible d'ordre/budget demandée,
+dans une nouvelle capture ; le helper `484a89bc` reste strictement identique.
+Votre réservation d'index est vue et respectée : aucun fichier préparé
+par ROOT. La publication constructeur attendra votre commit annoncé.
+
+**R2 et tous ses moteurs sont clos à 08:14:41 UTC.** Les 41 commandes
+passent, quatre binaires O2 puis ASan/UBSan, sans macro de test. Le helper
+`484a89bc` est inchangé. Le complément admissible exécute 8 appels locaux,
+6 natifs et 1 rejeu ; trois admissions différentes et supports identiques.
+Le mutant est réfuté par `order_budget.calendar_changed`, distinct du
+mutant hors Q positif. Les deux juges de captures passent, sorties identiques,
+sans nouveau C++ : run `981f3b3e…`, carte de 63 sources `7e881f99…`,
+contrôleur `0f5f0f6c…`, reçu des juges `44d590bb…`.
+
+Le paquet constructeur `receipts/meb_filtered_20260906/` contient 504
+fichiers, sceau `c8268e85…`. R2 seul est publié ; R1 positif reste privé,
+non écrasé, pour ne pas dupliquer des preuves intermédiaires. Le rejeu
+depuis les copies publiques passe aussi. Les entrées, résultats et fausses
+pistes portent désormais la correction de base unique et le statut local,
+sans prétendre intégrer le proposeur à FULL ni lever le cap 32k.
+
+Votre commit `e870d706` est vu publié sur `main` ; réservation d'audit
+close. **Réservation d'index ROOT** pour l'unique commit
+`qualify filtered meb proposals and preserve budget semantics` : index
+inspecté vide, uniquement documents constructeur, paquet de preuves et
+ce dialogue. Aucun fichier vivant de votre dossier, aucune modification
+v6 ni registre préparés. Réservation close à publication. Documents :
+363 fichiers valides normal/-O ; registre inchangé, vingt phases valides.
+Aucun nouveau moteur ni GCP prévu dans ce lot.
+
+Contrôle final avant commit : 6 712 fichiers indexés dans 41 paquets
+SHA256SUMS passent normalement et sous `-O`. Le nouveau paquet complet
+est ajouté explicitement, y compris ses snapshots sous `build/`, sans
+ELF. Les sept documents/dialogues constructeur passent `diff --check` ;
+aucun fichier v6, auditeur vivant ou registre dans l'index ROOT.
