@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_product_mutation_qualification_20260906/run_r1/bin/drop_FULL_P_mirror",
+    "--selftest"
+  ],
+  "cpu": 0,
+  "cpu_seconds": 120,
+  "cwd": "/workspaces/E-HGP/build/v7_meb_product_mutation_qualification_20260906/run_r1/variants/drop_FULL_P_mirror",
+  "elapsed_seconds": 1.670624954998857,
+  "ended_utc": "2026-09-06T09:32:20.864046+00:00",
+  "error": null,
+  "executable_sha256": "f24181f95f7c69514023c9ab6112ec42234cf6ad782c618839cb5e9466eb1b99",
+  "exit_code": 1,
+  "expected_exit_code": 1,
+  "file_size_limit_bytes": 67108864,
+  "pgid": 140629,
+  "pid": 140629,
+  "process_group_closed": true,
+  "process_wall_seconds": 300,
+  "started_utc": "2026-09-06T09:32:19.193880+00:00",
+  "stderr_bytes": 50357,
+  "stderr_sha256": "5d3d8dc4d7dc0c8a75323f791df899ed8b0d786e5efe1e455e4a4f20540bad82",
+  "stdin": "DEVNULL",
+  "stdout_bytes": 789,
+  "stdout_sha256": "11e88af83391d1aa8f43489ddfdf11764d042123af06d9c767be8e949581cd28",
+  "wall_wait_seconds": 296.0
+}

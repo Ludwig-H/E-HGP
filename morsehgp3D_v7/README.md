@@ -35,7 +35,7 @@ distingués ; les minima FULL ne sont pas tout l'univers des poids.
 | [Cache FULL facultatif](docs/CONTRAT_CACHE_FULL_PARESSEUX.md) | API lazy distincte, capacité nulle permise, dispatcher J=1 ; minima et ancres restent obligatoires |
 | [Lots unitaires](docs/CONTRAT_LOT_UNITAIRE_FULL.md) | Tableau de quatre racines au lieu de la DSU locale ; mêmes demandes, compteurs, parents et ancres |
 | [Normalisation v2](docs/CONTRAT_NORMALISATION_FULL.md) | Dernière paire de compression supprimée ; mêmes forêts, calendrier d'accès et admissions explicitement versionnés |
-| [Proposeur MEB filtré](docs/RESULTATS_MEB_FILTREE_20260906.md) | Qualification locale O2/ASan-UBSan et oracle rationnel ; formes impossibles supprimées, toujours privé et non intégré à FULL |
+| [Proposeur MEB filtré dans FULL](docs/CONTRAT_MEB_FULL.md) | Opt-in C++ P, désactivé par défaut ; budget partagé par ordre, F inchangé et coûts physiques p/A séparés ; qualification propre au raccord |
 | CLI et archive | Route historique F séparée ; ni export FULL ni verticale FULL intégrée |
 
 Le delta singleton livré passe [17/17 CTests Release et 17/17 ASan/UBSan](receipts/full_gabriel_singleton_20260905/README.md),
@@ -65,8 +65,16 @@ Le lot du 6 septembre qualifie le filtre MEB privé sur 9 344 comparaisons
 locales F/Trace/NoObserver et 3 430 appels jugés rationnellement par build,
 avec frontières budgétaires et mutants. Le triangle demande deux formes
 au lieu de cinq. Cette réduction de travail par appel ne lève pas, à elle
-seule, le plafond du **nombre** d'appels à 32k. Le raccord au Builder
-et les mesures sur la distribution FULL réelle sont les prochains verrous.
+seule, le plafond du **nombre** d'appels à 32k. Le
+[raccord au Builder](docs/CONTRAT_MEB_FULL.md) porte désormais le Work
+persistant ; sa qualification est distincte de ces reçus privés.
+Les mesures sur la distribution FULL réelle restent à établir avant
+toute activation par défaut.
+Le [raccord qualifié](docs/RESULTATS_MEB_FULL_20260906.md) passe 30/30
+CTest Release et 30/30 ASan/UBSan : budgets, coupes Gamma, allocations et
+injections explicites ; quatre copies mutantes sont réfutées. Les 9 344
+comparaisons locales sont aussi rejouées sur le header produit, sans
+héritage du reçu privé. Aucun nouveau chronométrage de tour dans ce lot.
 
 Priorités : mono-thread, puis multi-CPU, puis GPU. Le
 [contrat 50k](docs/CONTRAT_PERFORMANCE.md) porte sur **toute la tour K=1..10

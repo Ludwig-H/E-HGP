@@ -1,0 +1,24 @@
+ M audits/COORDINATION_MORSEHGP3D_V7.md
+ M morsehgp3D_v6/src/gpu/lot_ring.hpp
+ M morsehgp3D_v6/src/parallel/sort.hpp
+ M morsehgp3D_v6/src/pipeline/census.hpp
+ M morsehgp3D_v6/src/pipeline/expand.hpp
+ M morsehgp3D_v7/CMakeLists.txt
+ M morsehgp3D_v7/audits/DIALOGUE_COURANT.md
+ M morsehgp3D_v7/audits/ETAT_COURANT.md
+ M morsehgp3D_v7/audits/MEB_DOUBLE_BUDGET_COURANT.md
+ M morsehgp3D_v7/audits/README.md
+ M morsehgp3D_v7/audits/validation_current.json
+ M morsehgp3D_v7/docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md
+ M morsehgp3D_v7/src/forest/full_gabriel.hpp
+ M morsehgp3D_v7/tests/full_gabriel_allocation_gate.cpp
+ M morsehgp3D_v7/tests/full_gabriel_lazy_allocation_gate.cpp
+ M morsehgp3D_v7/tests/full_gabriel_singleton_fixtures.hpp
+?? morsehgp3D_v6/src/gpu/route_c6.hpp
+?? morsehgp3D_v6/tests/perm_sort_gate.cpp
+?? morsehgp3D_v6/tests/route_c6_gate.cpp
+?? morsehgp3D_v7/audits/receipts_filtered_review_20260906/
+?? morsehgp3D_v7/docs/CONTRAT_MEB_FULL.md
+?? morsehgp3D_v7/src/forest/meb_proposal.hpp
+?? morsehgp3D_v7/tests/full_gabriel_meb_gate.cpp
+?? morsehgp3D_v7/tests/meb_proposal_local_gate.cpp

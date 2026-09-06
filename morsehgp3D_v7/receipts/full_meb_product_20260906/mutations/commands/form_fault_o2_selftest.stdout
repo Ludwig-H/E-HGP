@@ -1,0 +1,1 @@
+{"schema":"mhgp7-private-full-meb-form-fault-v1","status":"passed","public_status":"not_claimed","nominal_noobserver_exception_claim":false,"F_exception_coverage":"not_exercised","cases":12,"public_refusals":4,"runtime_propagations":2,"builder_propagations":6,"mirrors":10,"compared_mirrors":8,"baselines":2,"retries":6,"paid_at_throw":36,"checks":9091,"failures":0}

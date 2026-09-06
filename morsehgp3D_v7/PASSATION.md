@@ -45,7 +45,21 @@ minima simultanés, ancres no-op, budgets et 33 compteurs sont conservés.
 Les lots multi-directes gardent le chemin général. La qualification
 singleton ci-dessous appartient au header `21b77d29…`.
 
-Le delta courant [normalisation v2](docs/CONTRAT_NORMALISATION_FULL.md)
+Le nouveau [raccord MEB](docs/CONTRAT_MEB_FULL.md) porte la proposition
+filtrée dans les API eager et lazy, via `max_meb_proposal_supports`.
+P=0 reste le défaut. Un Work persistant par ordre et le même Builder F
+conservent les charges ; cinq diagnostics distinguent p, pivots,
+certificats, replis et A physique. Le corps F est inchangé. Les données
+historiques qui suivent restent attribuées à leurs propres headers.
+Le [reçu propre au raccord](docs/RESULTATS_MEB_FULL_20260906.md) ferme
+30/30 CTests Release et 30/30 ASan/UBSan, avec 774 fautes d'allocation
+par build, 1 488 sorties FULL / 33 792 coupes Gamma par mode de la porte,
+quatre mutants réfutés et douze injections tardives par build séparé.
+Les 9 344 comparaisons et 3 430 appels rationnels locaux sont recompilés
+sur le header produit. Les deux incidents de configuration/compilation
+restent conservés. Aucun nouveau temps de tour ni activation par défaut.
+
+Le jalon [normalisation v2](docs/CONTRAT_NORMALISATION_FULL.md)
 supprime la dernière lecture/écriture redondante de compression, sans
 changer l'état final des successeurs. Son API et la sonde v3 nomment le
 nouveau calendrier de travail ; les plafonds numériques ne sont pas relevés.
@@ -63,7 +77,7 @@ avec forêts et 32 autres compteurs conservés, 16 plafonds exacts et
 réfute deux mutants causaux ; les 20+20 CTests constructeur sont
 contre-vérifiés sur captures seulement. Les jugements et pins sont
 liés dans le contrat ; ils ne qualifient pas la performance.
-Aucune modification q4 ou MEB. Les mesures ci-dessous restent historiques
+Ce jalon ne modifiait ni q4 ni MEB. Les mesures ci-dessous restent historiques
 dans les sections qui nomment leurs anciens headers ; les captures propres
 à la normalisation sont distinguées ci-dessous.
 
@@ -124,14 +138,22 @@ Le triangle passe de cinq formes à deux. La correction avec l'auditeur
 établit une base positive unique dans le pivot admissible ; l'ordre des
 essais affecte P et ses admissions. Le complément R2 réfute précisément
 un changement de ce calendrier sur le tétraèdre régulier, à support égal.
-**Le helper reste privé, non intégré à FULL, sans gain de tour annoncé.**
+**Ce reçu qualifie le helper privé, pas son nouveau port produit. Aucun
+gain de tour n'est annoncé.**
 
-Suite mono : raccorder le Work persistant et ses budgets/miroirs au Builder,
-puis mesurer sur les appels FULL réels avant un éventuel dispatch. Le
+Suite mono : qualifier une sonde v4 publiant P, le calendrier MEB et
+les cinq diagnostics, puis mesurer sur les appels FULL réels avant
+une activation par défaut. Garder les anciens plafonds et les digests ;
+comparer P0 et l'opt-in sur 8k/16k/32k et s=8/10/12, sans bloquer le
+bras opt-in au seul motif qu'un bras P0 est refusé. Le
 filtre seul ne réduit pas le nombre d'appels qui bloque 32k. La piste
 distincte de [réutilisation des terminaisons certifiées](audits/MEB_DOUBLE_BUDGET_COURANT.md#réutiliser-une-certification-terminale-déjà-acquise)
 demande de mesurer T−U, puis de conserver le premier recalcul complet et
 de normaliser le token courant, sans mémoriser une racine périmée.
+L'auditeur fournit désormais une [fixture n=12/K=7](audits/receipts_filtered_review_20260906/terminal_reuse_fixture.md)
+où deux visites du même terminal doivent suivre une racine qui a fusionné ;
+le mutant de racine ancienne crée réellement une fausse fusion. Elle
+servira au delta de réutilisation, pas à revendiquer ce mémo déjà livré.
 Le rejet précoce des blocs q4 reste une autre optimisation à qualifier.
 L'export FULL transactionnel avec son autorité terminale et ses ancres
 inter-K reste à raccorder avant qualification de la tour. Multi-CPU et

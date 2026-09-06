@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/build/v7_meb_product_publication_20260906/verify_extra.py",
+    "/workspaces/E-HGP/build/v7_meb_product_extra_qualification_20260906/run_r1"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "ended": "2026-09-06T09:40:00.065377+00:00",
+  "exit_code": 0,
+  "pid": 152294,
+  "process_group_closed": true,
+  "script_sha256": "f089415c60beb4eec4cecad220f69c871dec0d777012d2edeb7c472f248ea520",
+  "started": "2026-09-06T09:39:57.720511+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "8949530358ad1c84aca84b8aa71b6aa6e07223a3ff2ea1acc54e340bf2848a68"
+}

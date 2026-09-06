@@ -9,7 +9,9 @@
 Le proposeur privé filtré `484a89bc` passe une qualification fraîche :
 F, filtre instrumenté et filtre natif `NoObserver` conservent les sorties
 locales, et le juge rationnel indépendant retrouve leur géométrie.
-**Aucune activation dans FULL ni aucun gain de tour n'est revendiqué.**
+**Ce lot privé ne revendique aucune activation dans FULL ni aucun gain de tour.**
+Le [raccord produit ultérieur](CONTRAT_MEB_FULL.md) a son contrat et sa
+qualification distincts ; il n'hérite pas de ces résultats.
 Les [captures et sources reproductibles](../receipts/meb_filtered_20260906/README.md)
 portent les commandes C++20 strictes O2 et ASan/UBSan, sans macro de test,
 puis les rejugements Python normal et `-O` des mêmes octets.
@@ -108,9 +110,10 @@ télémétrie inexistante des supports internes de `propose`.
 ## Suite et limites
 
 Le proposeur n'ajoute aucune mosaïque, catalogue Gamma ni table globale
-de MEB : ses sous-ensembles ont au plus cinq sites. Il reste à raccorder
-au Work persistant du Builder avec ses miroirs, exceptions, caps et
-consommateurs publics, puis à mesurer sur les demandes FULL réelles.
+de MEB : ses sous-ensembles ont au plus cinq sites. Le raccord au Work
+persistant du Builder, ses miroirs, exceptions et caps est traité
+séparément par le contrat lié ci-dessus ; les demandes FULL réelles
+restent à mesurer avec leurs nouveaux diagnostics.
 Les exceptions d'observateurs ne sont pas qualifiées par ce lot ;
 l'équivalence de trajectoire suppose des observateurs passifs sans exception.
 
@@ -121,4 +124,4 @@ mérite un comptage T−U : terminaisons moins labels terminaux distincts.
 Elle doit conserver le premier recalcul complet, les rejets initiaux et
 la normalisation du token courant ; aucun gain n'est encore mesuré.
 Ni cette piste ni le filtre ne qualifient 50k/1 s, 100 ms ou les dizaines
-de millions de points sur G4. FULL, ses plafonds et la CLI F sont inchangés.
+de millions de points sur G4. Ce paquet privé ne modifie ni FULL ni la CLI F.

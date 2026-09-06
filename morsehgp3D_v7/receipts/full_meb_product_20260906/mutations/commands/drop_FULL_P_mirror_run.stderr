@@ -1,0 +1,530 @@
+FAIL [J1/s=8/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [J1/s=8/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=8/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=8/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=8/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=8/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [J1/s=8/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=8/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=8/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=8/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=8/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [J1/s=8/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=8/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=8/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=8/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=8/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [J1_sparse/s=8/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=8/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=8/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=8/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=8/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [J1_sparse/s=8/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=8/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=8/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=8/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=8/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [J1_sparse/s=8/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=8/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=8/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=8/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=0/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=8/K=2/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=8/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=8/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=8/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=3/route=1/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=8/K=3/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=3/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=3/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=3/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=3/route=2/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=8/K=3/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=3/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=3/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=3/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=3/route=3/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=8/K=3/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=3/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=3/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=8/K=3/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=0/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=2/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=0/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=3/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=3/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=3/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=3/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=3/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=0/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=4/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=4/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=4/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=4/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=4/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=0/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=5/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=5/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=5/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=5/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=5/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=6/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=6/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=6/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=6/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=6/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=6/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=6/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=6/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=6/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=6/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=6/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=8/K=6/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=6/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=6/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=8/K=6/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=8/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [shared/s=8/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=8/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=8/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=8/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=8/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [shared/s=8/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=8/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=8/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=8/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=8/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [shared/s=8/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=8/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=8/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=8/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=10/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [J1/s=10/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=10/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=10/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=10/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=10/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [J1/s=10/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=10/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=10/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=10/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=10/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [J1/s=10/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=10/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=10/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=10/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=10/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [J1_sparse/s=10/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=10/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=10/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=10/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=10/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [J1_sparse/s=10/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=10/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=10/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=10/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=10/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [J1_sparse/s=10/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=10/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=10/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=10/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=0/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=10/K=2/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=10/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=10/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=10/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=3/route=1/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=10/K=3/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=3/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=3/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=3/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=3/route=2/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=10/K=3/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=3/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=3/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=3/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=3/route=3/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=10/K=3/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=3/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=3/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=10/K=3/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=0/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=2/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=0/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=3/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=3/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=3/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=3/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=3/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=0/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=4/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=4/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=4/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=4/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=4/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=0/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=5/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=5/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=5/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=5/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=5/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=6/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=6/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=6/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=6/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=6/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=6/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=6/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=6/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=6/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=6/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=6/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=10/K=6/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=6/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=6/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=10/K=6/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=10/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [shared/s=10/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=10/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=10/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=10/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=10/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [shared/s=10/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=10/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=10/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=10/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=10/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [shared/s=10/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=10/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=10/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=10/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=12/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [J1/s=12/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=12/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=12/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=12/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=12/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [J1/s=12/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=12/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=12/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=12/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=12/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [J1/s=12/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=12/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=12/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1/s=12/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=12/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [J1_sparse/s=12/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=12/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=12/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=12/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=12/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [J1_sparse/s=12/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=12/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=12/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=12/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=12/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [J1_sparse/s=12/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=12/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=12/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [J1_sparse/s=12/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=0/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=12/K=2/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=12/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=12/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=12/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=3/route=1/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=12/K=3/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=3/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=3/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=3/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=3/route=2/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=12/K=3/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=3/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=3/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=3/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=3/route=3/P=0] P=0 retains only F work with A=c
+FAIL [E5/s=12/K=3/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=3/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=3/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [E5/s=12/K=3/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=0/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=2/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=0/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=3/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=3/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=3/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=3/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=3/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=0/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=4/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=4/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=4/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=4/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=4/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=0/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=5/route=0/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=0/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=0/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=0/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=5/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=5/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=5/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=5/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=6/route=1/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=6/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=6/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=6/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=6/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=6/route=2/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=6/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=6/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=6/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=6/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=6/route=3/P=0] P=0 retains only F work with A=c
+FAIL [two_step/s=12/K=6/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=6/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=6/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [two_step/s=12/K=6/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=12/K=2/route=1/P=0] P=0 retains only F work with A=c
+FAIL [shared/s=12/K=2/route=1/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=12/K=2/route=1/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=12/K=2/route=1/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=12/K=2/route=1/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=12/K=2/route=2/P=0] P=0 retains only F work with A=c
+FAIL [shared/s=12/K=2/route=2/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=12/K=2/route=2/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=12/K=2/route=2/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=12/K=2/route=2/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=12/K=2/route=3/P=0] P=0 retains only F work with A=c
+FAIL [shared/s=12/K=2/route=3/P=0] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=12/K=2/route=3/P=1] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=12/K=2/route=3/P=3] every completed MEB used exactly one certified or fallback route
+FAIL [shared/s=12/K=2/route=3/P=10000000] every completed MEB used exactly one certified or fallback route
+FAIL [tetra/s=12/K=4/route=3/P=10000000] non-vacuous regular/Gamma/q4-catalogue/chain/cache/persistent-P composition floors
+FAIL [tetra/s=12/K=4/route=3/P=10000000] both native certification and F fallback exercised on every route
+FAIL [tetra/s=12/K=4/route=3/P=10000000] both native certification and F fallback exercised on every route
+FAIL [tetra/s=12/K=4/route=3/P=10000000] both native certification and F fallback exercised on every route
+FAIL [tetra/s=12/K=4/route=3/P=10000000] both native certification and F fallback exercised on every route

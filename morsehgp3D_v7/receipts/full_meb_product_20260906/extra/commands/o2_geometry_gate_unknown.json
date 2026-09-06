@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_product_extra_qualification_20260906/run_r1/bin/o2_geometry_gate",
+    "--unknown"
+  ],
+  "cpu_seconds": 120,
+  "cwd": "/workspaces/E-HGP/build/v7_meb_product_extra_qualification_20260906/run_r1/snapshot",
+  "elapsed_seconds": 0.00548600200090732,
+  "ended_utc": "2026-09-06T09:31:39.960796+00:00",
+  "executable_sha256_after": "1e42871ac4288530b1009c0f9388ea8ccc860e3d35430dc58535155afded36de",
+  "executable_sha256_before": "1e42871ac4288530b1009c0f9388ea8ccc860e3d35430dc58535155afded36de",
+  "exit_code": 2,
+  "expected_exit_code": 2,
+  "file_size_bytes": 67108864,
+  "interrupted": null,
+  "pid": 139290,
+  "process_group_closed": true,
+  "residual_group_detected": false,
+  "source_sha256_after": "fd840afc5f134cdfb5052a358f3019323fc941bb53840b2e4658271a4dc567af",
+  "source_sha256_before": "fd840afc5f134cdfb5052a358f3019323fc941bb53840b2e4658271a4dc567af",
+  "started_utc": "2026-09-06T09:31:39.951353+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 120
+}

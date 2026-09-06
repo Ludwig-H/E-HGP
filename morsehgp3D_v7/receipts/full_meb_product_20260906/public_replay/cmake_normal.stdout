@@ -1,0 +1,1 @@
+{"Gamma_cuts_per_gate_mode": 33792, "P_configurations": 3, "commands": 10, "ctests_per_build": 30, "eager_faults_per_P": 49, "full_outputs_per_gate_mode": 1488, "lazy_faults_per_P": 209, "performance_claim": false, "public_status": "not_claimed", "source_pins": 120, "status": "passed"}

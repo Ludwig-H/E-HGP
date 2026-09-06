@@ -112,6 +112,9 @@ réduit les essais locaux, sur un sous-ensemble d'au plus cinq sites. Il
 n'ajoute aucun catalogue global et ne diminue pas la taille des sorties
 FULL, ni le nombre d'appels MEB à parcours inchangé. Sa qualification
 locale n'est donc pas un palier de résidence ou de performance massive.
+Son [raccord dans FULL](CONTRAT_MEB_FULL.md) ajoute un Work de cinq
+compteurs par ordre et des temporaires de taille bornée, sans table
+géométrique supplémentaire. Il ne change aucune de ces limites globales.
 
 Le [reçu lazy 8k/s8 historique](../receipts/full_gabriel_lazy_mono_20260905/paired/n8000_s8_k10_lazy_c1000000.receipt.json)
 permet aussi de sommer la **sortie**, distinctement du pic : 3 976 472

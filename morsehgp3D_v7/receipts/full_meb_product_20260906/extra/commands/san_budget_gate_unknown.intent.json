@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_product_extra_qualification_20260906/run_r1/bin/san_budget_gate",
+    "--unknown"
+  ],
+  "cpu_seconds": 120,
+  "cwd": "/workspaces/E-HGP/build/v7_meb_product_extra_qualification_20260906/run_r1/snapshot",
+  "executable_sha256_before": "624310ae166c242da5689d728c687334af4e13443d3c13e3a804f7aff6e5a8f9",
+  "expected_exit_code": 2,
+  "file_size_bytes": 67108864,
+  "source_sha256_before": "fd840afc5f134cdfb5052a358f3019323fc941bb53840b2e4658271a4dc567af",
+  "started_utc": "2026-09-06T09:31:49.932740+00:00",
+  "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 120
+}

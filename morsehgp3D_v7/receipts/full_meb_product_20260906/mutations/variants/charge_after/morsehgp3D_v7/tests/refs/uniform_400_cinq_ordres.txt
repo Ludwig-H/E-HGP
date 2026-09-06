@@ -1,0 +1,17 @@
+# FIXTURE NEGATIVE (palier P1) : uniform n=400 tronque aux CINQ premiers
+# ordres. A smax=6 le prefixe compte lui aussi cinq ordres : la reference
+# n'est alors PAS strictement plus longue que le prefixe, donc ce n'est plus
+# la lecture d'un prefixe et la porte doit REFUSER (code 2), jamais comparer.
+cardinalites K=1 evenements=1339 facettes=400 deltas=340 attachements=0 fusions=399 noeuds=340
+cardinalites K=2 evenements=2600 facettes=2675 deltas=1409 attachements=1264 fusions=2674 noeuds=1061
+cardinalites K=3 evenements=4209 facettes=8013 deltas=3492 attachements=5008 fusions=8012 noeuds=2084
+cardinalites K=4 evenements=6161 facettes=17421 deltas=5472 attachements=12262 fusions=17419 noeuds=3391
+cardinalites K=5 evenements=8428 facettes=31715 deltas=7692 attachements=24044 fusions=31712 noeuds=4955
+digest_balls=2b50f878e2ddb641f07358dc82c9d52e9db7482ae55a94d0e033b13c71f1e6f4
+digest_forest_K1=e4c82b979f11d70dae70a0975153c62f584b4e43108e66b095bcf4dc7e68bf2f
+digest_forest_K2=9b6ff6471806ee573c7b018da7cd80bb92f2cec1ae050916d2b43f1e0267123a
+digest_forest_K3=f245a8502f07678a236f2754f1802542701852c4b0db71a5c60929f46f366390
+digest_forest_K4=499ad956bff6d467d99a6d2a0df82a8f1c397a320df7d3794eb7475f37fb715d
+digest_forest_K5=ea5e9b4e3af0ace6129a6b5eeaaaff5d8b9c6f9f169a286080951402f30a72ec
+digest_all=de9098a99d1eb1be3c81c3970a128f7ccb10c80626454b212fa893c349533f5d
+

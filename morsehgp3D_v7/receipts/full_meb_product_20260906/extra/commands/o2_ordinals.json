@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_product_extra_qualification_20260906/run_r1/bin/o2_rational_bridge"
+  ],
+  "cpu_seconds": 120,
+  "cwd": "/workspaces/E-HGP/build/v7_meb_product_extra_qualification_20260906/run_r1/snapshot",
+  "elapsed_seconds": 0.03562000100100704,
+  "ended_utc": "2026-09-06T09:31:43.376135+00:00",
+  "executable_sha256_after": "3fc05cf79cb911150f984be540aa6cd8adacda4e1239b881759eb04b9dd2dbbd",
+  "executable_sha256_before": "3fc05cf79cb911150f984be540aa6cd8adacda4e1239b881759eb04b9dd2dbbd",
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "file_size_bytes": 67108864,
+  "interrupted": null,
+  "pid": 139575,
+  "process_group_closed": true,
+  "residual_group_detected": false,
+  "source_sha256_after": "fd840afc5f134cdfb5052a358f3019323fc941bb53840b2e4658271a4dc567af",
+  "source_sha256_before": "fd840afc5f134cdfb5052a358f3019323fc941bb53840b2e4658271a4dc567af",
+  "started_utc": "2026-09-06T09:31:43.335441+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "3185d509a4ed2c4937c5f0d69c27496bfb85ee83fbadd41951f2eb731cd29dfa",
+  "stdout_sha256": "1b247f6039cc7602855a86fed844ec08c82cfcb6d4562339b7d6663b1d2ec17e",
+  "timeout_seconds": 120
+}

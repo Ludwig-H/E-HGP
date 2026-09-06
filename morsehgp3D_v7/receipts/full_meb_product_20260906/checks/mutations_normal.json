@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/build/v7_meb_product_publication_20260906/verify_mutations.py",
+    "/workspaces/E-HGP/build/v7_meb_product_mutation_qualification_20260906/run_r1"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "ended": "2026-09-06T09:40:00.446559+00:00",
+  "exit_code": 0,
+  "pid": 152327,
+  "process_group_closed": true,
+  "script_sha256": "e52a9516204a92596faad71f1c5c69bcbe6df135c315a2062304beb911177046",
+  "started": "2026-09-06T09:40:00.065705+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "f1c3824d9356d3ba41916d030202af41e46ed9a43ba87794e1b93ebc6f225307"
+}

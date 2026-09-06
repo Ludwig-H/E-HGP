@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-O2",
+    "-I",
+    "/workspaces/E-HGP/build/v7_meb_product_extra_qualification_20260906/run_r1/snapshot/morsehgp3D_v7",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_meb_product_extra_qualification_20260906/run_r1/dependencies/o2_geometry_gate.d",
+    "/workspaces/E-HGP/build/v7_meb_product_extra_qualification_20260906/run_r1/snapshot/build/v7_meb_product_port_recheck_20260906/geometry_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_meb_product_extra_qualification_20260906/run_r1/bin/o2_geometry_gate"
+  ],
+  "cpu_seconds": 300,
+  "cwd": "/workspaces/E-HGP/build/v7_meb_product_extra_qualification_20260906/run_r1/snapshot",
+  "executable_sha256_before": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+  "expected_exit_code": 0,
+  "file_size_bytes": 536870912,
+  "source_sha256_before": "fd840afc5f134cdfb5052a358f3019323fc941bb53840b2e4658271a4dc567af",
+  "started_utc": "2026-09-06T09:31:35.886135+00:00",
+  "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 300
+}

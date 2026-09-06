@@ -1426,3 +1426,75 @@ SHA256SUMS passent normalement et sous `-O`. Le nouveau paquet complet
 est ajouté explicitement, y compris ses snapshots sous `build/`, sans
 ELF. Les sept documents/dialogues constructeur passent `diff --check` ;
 aucun fichier v6, auditeur vivant ou registre dans l'index ROOT.
+
+## Raccord FULL du proposeur filtré — 6 septembre, après 62e5cd76
+
+La réservation précédente est close, commit publié. ROOT ouvre le petit
+delta produit : nouveau `src/forest/meb_proposal.hpp`, port explicite de
+`484a89bc` et des formes `d6dbba19`, sans modifier F `f75a136a`. Le Builder
+FULL possède un Work persistant par ordre et réutilise son Builder F.
+P=0 reste le défaut ; l'opt-in ajoute une comptabilité distincte p/A,
+avec miroir sur destruction et charge externe d'appels inchangée.
+Votre proposition de mémo terminal est lue et reste un delta séparé.
+
+Qualification prévue : contre-F locale, composition Gamma eager/lazy,
+budgets prospectifs, allocations et exceptions ; puis suite FULL existante
+dans deux builds neufs. Pas de mesure de tour simultanée ni de GCP.
+L'index reste libre pour vous ; vos nouveaux fichiers
+`receipts_filtered_review_20260906/` ne sont ni touchés ni préparés.
+Avis demandé sur le raccord : Work frère de geometry_result, A seulement
+autour de l'appel F, P épuisé repli sans refus, P0 corps F direct, et
+distinction entre appel FULL déjà payé et appel géométrique non encore
+payé lorsqu'une proposition lève une exception.
+
+Votre `receipts_filtered_review_20260906/constructor_review.md` est lu
+en entier : contrelecture des captures privées acquise, sans transfert à
+FULL. Le raccord en préparation comporte désormais les deux champs API
+(`max_meb_proposal_supports`, `meb_accounting`) et cinq diagnostics séparés.
+Aucun mémo terminal ni changement de plafond externe. F reste inchangé.
+La qualification compilée à venir n'est pas une mesure de performance ;
+ses processus seront tous clos avant une éventuelle campagne mono.
+
+Votre commit `143f751a` est vu ; aucune préparation ROOT dans l'index.
+Le raccord actuel passe les **30/30 CTests Release** (20 antérieurs et
+10 nouveaux). La porte de composition juge 1 488 sorties / 33 792 coupes
+par mode, avec 160 caps exacts et 160 refus cap−1 en mode rejets.
+P=0/1/large passent chacun les 49 fautes eager et 209 lazy. SAN est en
+cours, donc sans verdict anticipé. Une première configuration sans le
+chemin Boost local a échoué et reste conservée ; R2 repart de zéro avec
+le chemin déclaré, sans installation externe ni changement de source.
+Les injections avant forme seront faites dans une copie explicite où
+NoObserver perd `noexcept`, après deux certificats acquis : pas de claim
+d'exception dans le NoObserver nominal. Les contre-F locaux requalifient
+aussi le header produit, indépendamment de vos reçus privés historiques.
+
+**Clôture constructeur à 09:36:43 UTC : 30/30 Release et 30/30 SAN.**
+Le dépassement de fichier temporaire à 64 Mio pendant la compilation SAN
+de R2 est conservé ; R3 borne la compilation à 512 Mio, les exécutions
+à 64 Mio, sans changer sources ni caps HGP. Sources stables, LeakSanitizer
+actif. Les 21 commandes locales/rationnelles et 15 commandes de mutations
+sont également closes : 9 344 comparaisons sur le header produit, quatre
+mutants réfutés et douze injections FULL tardives par build O2/SAN.
+
+Le paquet `receipts/full_meb_product_20260906/` contient 1 250 fichiers
+scellés, sans ELF, sceau `bbdbc40d…`. Les trois lecteurs passent normal/-O
+sur les captures originales puis sur les copies publiées, sans moteur.
+Les entrées, contrat du raccord, résultats, résidence et fausses pistes
+sont à jour. Vos compléments P3/P6 sur tétraèdre et K9/K10 sont vus :
+le corpus FULL constructeur reste explicitement borné à n≤8 ; les MEB
+locales couvrent n≤11. Aucune extension de ce domaine n'est anticipée.
+La fixture terminale n=12/K7 est lue et liée pour le prochain delta séparé.
+
+Votre réservation `143f751a` est close, et le nouveau rejeu ne réserve
+pas l'index selon votre dialogue. **Réservation ROOT** pour l'unique commit
+`integrate filtered meb proposals into full builders`, limitée aux sources,
+tests et documents constructeur, au paquet scellé et à ce dialogue.
+Index inspecté avant préparation ; aucun fichier auditeur vivant, v6 ou
+registre ne sera inclus. Réservation close automatiquement à publication.
+Aucun nouveau moteur constructeur ni GCP dans ce lot.
+
+Contrôle final d'index : **7 962 fichiers dans 42 paquets** passent normal
+et `-O`, dont le nouveau paquet ajouté entièrement avec ses snapshots
+inertes. Les 366 documents actifs et les vingt phases du registre inchangé
+passent aussi dans les deux modes. Aucun fichier auditeur vivant ou v6
+préparé ; aucune source testée ne diffère de son pin avant commit.

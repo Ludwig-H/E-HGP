@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_meb_product_20260906/protocol/verify_cmake.py",
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_meb_product_20260906/core"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "ended": "2026-09-06T09:42:08.742203+00:00",
+  "exit_code": 0,
+  "pid": 155162,
+  "process_group_closed": true,
+  "script_sha256": "8bf2c863cbd10dd70e68741a62108b0a872ecaae7222af7c6e0f918e78834651",
+  "started": "2026-09-06T09:42:08.705212+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "ec94e0e9080ddc7c6335af9b70a4646748d7985c1de5078363201ad1e70e17f9"
+}

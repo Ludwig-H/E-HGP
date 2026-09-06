@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_product_extra_qualification_20260906/run_r1/bin/san_rational_bridge",
+    "--unknown"
+  ],
+  "cpu_seconds": 120,
+  "cwd": "/workspaces/E-HGP/build/v7_meb_product_extra_qualification_20260906/run_r1/snapshot",
+  "elapsed_seconds": 0.018192561001342256,
+  "ended_utc": "2026-09-06T09:32:04.509905+00:00",
+  "executable_sha256_after": "15d31e2687dd1b6802226e92193d8238d7042d668875f8488ed750f087ad1a99",
+  "executable_sha256_before": "15d31e2687dd1b6802226e92193d8238d7042d668875f8488ed750f087ad1a99",
+  "exit_code": 2,
+  "expected_exit_code": 2,
+  "file_size_bytes": 67108864,
+  "interrupted": null,
+  "pid": 140233,
+  "process_group_closed": true,
+  "residual_group_detected": false,
+  "source_sha256_after": "fd840afc5f134cdfb5052a358f3019323fc941bb53840b2e4658271a4dc567af",
+  "source_sha256_before": "fd840afc5f134cdfb5052a358f3019323fc941bb53840b2e4658271a4dc567af",
+  "started_utc": "2026-09-06T09:32:04.485276+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 120
+}

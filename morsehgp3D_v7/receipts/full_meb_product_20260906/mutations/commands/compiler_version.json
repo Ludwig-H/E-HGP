@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "--version"
+  ],
+  "cpu": 0,
+  "cpu_seconds": 120,
+  "cwd": "/workspaces/E-HGP/build/v7_meb_product_mutation_qualification_20260906/run_r1/snapshot",
+  "elapsed_seconds": 0.008433573000729666,
+  "ended_utc": "2026-09-06T09:31:42.850551+00:00",
+  "error": null,
+  "executable_sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "file_size_limit_bytes": 536870912,
+  "pgid": 139568,
+  "pid": 139568,
+  "process_group_closed": true,
+  "process_wall_seconds": 300,
+  "started_utc": "2026-09-06T09:31:42.843120+00:00",
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin": "DEVNULL",
+  "stdout_bytes": 266,
+  "stdout_sha256": "39553616934606f58b27c04bed0cdbbe5b00c92c831a9aaadebd7ceda61d1334",
+  "wall_wait_seconds": 296.0
+}

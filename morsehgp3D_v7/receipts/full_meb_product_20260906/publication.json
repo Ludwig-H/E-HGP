@@ -1,0 +1,16 @@
+{
+  "admitted_runs": {
+    "core": "ca7c3a35b2ef8a80f202b1fe0c3dedc32f409f15604e700c5c3fb6b06b53071c",
+    "extra": "a709d26382b55820a6ee268e0aec49098f659869ed75419ba82241ee2f456ac2",
+    "mutations": "dbbe577e7ca392b680844c098b5a4fb122122ea2ccb10cd3629694af4c71044f"
+  },
+  "binaries_distributed": false,
+  "cpp_executed_during_publication": false,
+  "created": "2026-09-06T09:40:01.874377+00:00",
+  "failed_attempts_preserved": 2,
+  "gcp": "not_used",
+  "portable_verifiers": "protocol/verify_cmake.py, verify_extra.py, verify_mutations.py",
+  "private_extra_judge_requires_original_path_and_ELF": true,
+  "public_status": "not_claimed",
+  "schema": "mhgp7-full-meb-product-publication-v1"
+}

@@ -1,0 +1,5 @@
+CMake Error at CMakeLists.txt:135 (message):
+  FULL digest oracle needs Boost headers (libboost-dev or
+  MHGP7_DIGEST_BOOST_INCLUDE_DIR)
+
+

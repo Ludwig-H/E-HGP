@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_product_mutation_qualification_20260906/run_r1/bin/reset_Work",
+    "--selftest"
+  ],
+  "cpu": 0,
+  "cpu_seconds": 120,
+  "cwd": "/workspaces/E-HGP/build/v7_meb_product_mutation_qualification_20260906/run_r1/variants/reset_Work",
+  "executable_sha256": "1b0a0f9c68c2d10013edc33b408dbba462b9b893922ed02fc54f7669950df766",
+  "expected_exit_code": 1,
+  "file_size_limit_bytes": 67108864,
+  "process_wall_seconds": 300,
+  "started_utc": "2026-09-06T09:32:04.032136+00:00",
+  "stdin": "DEVNULL",
+  "wall_wait_seconds": 296.0
+}

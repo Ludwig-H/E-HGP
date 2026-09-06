@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/build/v7_meb_product_publication_20260906/verify_cmake.py",
+    "/workspaces/E-HGP/build/v7_meb_product_qualification_20260906_r3/capture"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "ended": "2026-09-06T09:39:55.571430+00:00",
+  "exit_code": 0,
+  "pid": 152265,
+  "process_group_closed": true,
+  "script_sha256": "8bf2c863cbd10dd70e68741a62108b0a872ecaae7222af7c6e0f918e78834651",
+  "started": "2026-09-06T09:39:55.389272+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "ec94e0e9080ddc7c6335af9b70a4646748d7985c1de5078363201ad1e70e17f9"
+}

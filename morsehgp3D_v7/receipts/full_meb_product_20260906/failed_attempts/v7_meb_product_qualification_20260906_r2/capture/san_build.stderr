@@ -1,0 +1,7 @@
+c++: internal compiler error: File size limit exceeded signal terminated program cc1plus
+Please submit a full bug report, with preprocessed source (by using -freport-bug).
+See <file:///usr/share/doc/gcc-13/README.Bugs> for instructions.
+gmake[3]: *** [CMakeFiles/mhgp7_full_gabriel_singleton_gate.dir/build.make:76: CMakeFiles/mhgp7_full_gabriel_singleton_gate.dir/tests/full_gabriel_singleton_gate.cpp.o] Error 4
+gmake[2]: *** [CMakeFiles/Makefile2:336: CMakeFiles/mhgp7_full_gabriel_singleton_gate.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:343: CMakeFiles/mhgp7_full_gabriel_singleton_gate.dir/rule] Error 2
+gmake: *** [Makefile:212: mhgp7_full_gabriel_singleton_gate] Error 2

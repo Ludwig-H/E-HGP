@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_product_mutation_qualification_20260906/run_r1/bin/reset_Work",
+    "--selftest"
+  ],
+  "cpu": 0,
+  "cpu_seconds": 120,
+  "cwd": "/workspaces/E-HGP/build/v7_meb_product_mutation_qualification_20260906/run_r1/variants/reset_Work",
+  "elapsed_seconds": 1.9219010550004896,
+  "ended_utc": "2026-09-06T09:32:05.953556+00:00",
+  "error": null,
+  "executable_sha256": "1b0a0f9c68c2d10013edc33b408dbba462b9b893922ed02fc54f7669950df766",
+  "exit_code": 1,
+  "expected_exit_code": 1,
+  "file_size_limit_bytes": 67108864,
+  "pgid": 140228,
+  "pid": 140228,
+  "process_group_closed": true,
+  "process_wall_seconds": 300,
+  "started_utc": "2026-09-06T09:32:04.032136+00:00",
+  "stderr_bytes": 38614,
+  "stderr_sha256": "437f4d9be534117ba546cf864a318576ca2a6e6b7a835487c86dd42a36f2cd6c",
+  "stdin": "DEVNULL",
+  "stdout_bytes": 797,
+  "stdout_sha256": "4facbb515c202399ca5343fe29bebfb4411e4d5a569e407efb38fdbcde29b3fc",
+  "wall_wait_seconds": 296.0
+}

@@ -1,0 +1,235 @@
+{
+  "GCP": "not_used",
+  "binaries": {
+    "release": {
+      "mhgp7_full_certificate_gate": "446111a83c7e453f50fcc09a9ebb1fcdef10a7a672d2ee4efe5429a962eb850a",
+      "mhgp7_full_gabriel_allocation_gate": "08f88869ca3f7738d83dc816b3bdb08f7827afd75dafdb28eccaf3b45bdcc5b3",
+      "mhgp7_full_gabriel_digest_gate": "1be5909f6a33516e1ad79d6874df9a47b61cd7386995a589e8136277a19e3b0d",
+      "mhgp7_full_gabriel_gate": "e727e731ed1feb9458052c226d6de3830d0714eb9080d9e956f46257c292a808",
+      "mhgp7_full_gabriel_lazy_allocation_gate": "23ed461af724976851b50288ec2787527d1b33838f6f909d8e83d158e206e6bc",
+      "mhgp7_full_gabriel_lazy_gate": "736972cef4ac2aecf76dcd7d5ae3be812906c1202e2725ef773ac1b9f16f1407",
+      "mhgp7_full_gabriel_meb_gate": "4e8193a3f6bd573b2d851eb6bde8272fba2a9a75565e98ed1ffe7d252123961c",
+      "mhgp7_full_gabriel_singleton_gate": "7c05afbf757b71bf40ff4490059284ef117adfc4d3320a721a769da9e0ae1b39",
+      "mhgp7_full_gabriel_successor_gate": "910eb6ea76c8cab76f9f9bdaaa1050ecb58a60f650a673956df26acb6d59fe3e",
+      "mhgp7_meb_proposal_local_gate": "b0b432ec05243a6fe4a320beaeceab28bb202d6970fb47dbd08de7447d747ccc"
+    }
+  },
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/c++",
+        "--version"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended": "2026-09-06T09:22:04.587442+00:00",
+      "exit_code": 0,
+      "name": "compiler",
+      "pid": 120060,
+      "process_group_closed": true,
+      "started": "2026-09-06T09:22:04.584415+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "88b7c4b67564a146863224148116065fee418539f0a408f3636a68f3bde51805",
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "cmake",
+        "--version"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended": "2026-09-06T09:22:04.605567+00:00",
+      "exit_code": 0,
+      "name": "cmake",
+      "pid": 120061,
+      "process_group_closed": true,
+      "started": "2026-09-06T09:22:04.588030+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d3d5b682f3f5ef5b24a79ed8cf4b8c5868fc950dad48cab1be0e3c060a77f8ee",
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended": "2026-09-06T09:22:04.611447+00:00",
+      "exit_code": 0,
+      "name": "git_head",
+      "pid": 120063,
+      "process_group_closed": true,
+      "started": "2026-09-06T09:22:04.606137+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "7bae9947876bb25c30598c8f4f25c1a3ed6d7968d5e4012993248b08192a657e",
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--short",
+        "--untracked-files=normal"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended": "2026-09-06T09:22:04.679675+00:00",
+      "exit_code": 0,
+      "name": "git_status",
+      "pid": 120064,
+      "process_group_closed": true,
+      "started": "2026-09-06T09:22:04.612028+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "efeca6492d90ae107c503e20ad8f2a16e84e1ef6938e8d7b300a634812f23ee7",
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/workspaces/E-HGP/morsehgp3D_v7",
+        "-B",
+        "/workspaces/E-HGP/build/v7_meb_product_qualification_20260906_r2/release",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+        "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended": "2026-09-06T09:22:05.147335+00:00",
+      "exit_code": 0,
+      "name": "release_configure",
+      "pid": 120085,
+      "process_group_closed": true,
+      "started": "2026-09-06T09:22:04.680496+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "80f45bff1ca70b28f1c8ac3d4ef760d880a11210c71f1d9f9aa81b40d8ec1c7b",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/workspaces/E-HGP/build/v7_meb_product_qualification_20260906_r2/release",
+        "--parallel",
+        "2",
+        "--target",
+        "mhgp7_full_certificate_gate",
+        "mhgp7_full_gabriel_gate",
+        "mhgp7_full_gabriel_allocation_gate",
+        "mhgp7_full_gabriel_lazy_gate",
+        "mhgp7_full_gabriel_lazy_allocation_gate",
+        "mhgp7_full_gabriel_singleton_gate",
+        "mhgp7_full_gabriel_successor_gate",
+        "mhgp7_full_gabriel_digest_gate",
+        "mhgp7_full_gabriel_meb_gate",
+        "mhgp7_meb_proposal_local_gate"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended": "2026-09-06T09:24:03.258535+00:00",
+      "exit_code": 0,
+      "name": "release_build",
+      "pid": 120197,
+      "process_group_closed": true,
+      "started": "2026-09-06T09:22:05.148312+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "0fe90252e3288aabd4b6ea160b391568958756ba5c1f9d641f31dc8ebcd0b46f",
+      "timeout_seconds": 1200
+    },
+    {
+      "argv": [
+        "ctest",
+        "--test-dir",
+        "/workspaces/E-HGP/build/v7_meb_product_qualification_20260906_r2/release",
+        "-V",
+        "--output-on-failure",
+        "-R",
+        "^mhgp7_(full_|meb_proposal_)"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended": "2026-09-06T09:24:08.544191+00:00",
+      "exit_code": 0,
+      "name": "release_ctest",
+      "pid": 124176,
+      "process_group_closed": true,
+      "started": "2026-09-06T09:24:03.264363+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "eac7690a6538e0ede9cd2fa69e466969850e7f21aa2c709bc0b42efc9016138a",
+      "timeout_seconds": 600
+    },
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/workspaces/E-HGP/morsehgp3D_v7",
+        "-B",
+        "/workspaces/E-HGP/build/v7_meb_product_qualification_20260906_r2/san",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+        "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-DCMAKE_CXX_FLAGS_RELEASE=-O1 -g -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer -fno-pie",
+        "-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined -no-pie"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended": "2026-09-06T09:24:09.062195+00:00",
+      "exit_code": 0,
+      "name": "san_configure",
+      "pid": 124298,
+      "process_group_closed": true,
+      "started": "2026-09-06T09:24:08.545131+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "9d6b1ed23aa7ecea8d1d32c9e2c70974dd1b266883b96694ece4ca9cb46e2395",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/workspaces/E-HGP/build/v7_meb_product_qualification_20260906_r2/san",
+        "--parallel",
+        "2",
+        "--target",
+        "mhgp7_full_certificate_gate",
+        "mhgp7_full_gabriel_gate",
+        "mhgp7_full_gabriel_allocation_gate",
+        "mhgp7_full_gabriel_lazy_gate",
+        "mhgp7_full_gabriel_lazy_allocation_gate",
+        "mhgp7_full_gabriel_singleton_gate",
+        "mhgp7_full_gabriel_successor_gate",
+        "mhgp7_full_gabriel_digest_gate",
+        "mhgp7_full_gabriel_meb_gate",
+        "mhgp7_meb_proposal_local_gate"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended": "2026-09-06T09:26:26.019860+00:00",
+      "exit_code": 2,
+      "name": "san_build",
+      "pid": 124346,
+      "process_group_closed": true,
+      "started": "2026-09-06T09:24:09.063219+00:00",
+      "status": "completed",
+      "stderr_sha256": "ea11e0e0f166edc0f2338b08aa7265552a93f40c9df98d9fb76c3cb2199e8935",
+      "stdout_sha256": "c57e364d0ac4116e0b74b4efb315040fdf8892ce434adcbb605359f70fb221c0",
+      "timeout_seconds": 1200
+    }
+  ],
+  "ended": "2026-09-06T09:26:26.032918+00:00",
+  "environment_overrides": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "LC_ALL": "C",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "failure": "RuntimeError: san_build: nonzero exit or residual process group",
+  "performance_capture": false,
+  "public_status": "not_claimed",
+  "schema": "mhgp7-full-meb-product-qualification-v1",
+  "sources_stable": true,
+  "started": "2026-09-06T09:22:04.584382+00:00",
+  "status": "failed"
+}

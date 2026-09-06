@@ -1,0 +1,112 @@
+{
+  "GCP": "not_used",
+  "binaries": {},
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/c++",
+        "--version"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended": "2026-09-06T09:20:17.603293+00:00",
+      "exit_code": 0,
+      "name": "compiler",
+      "pid": 115853,
+      "process_group_closed": true,
+      "started": "2026-09-06T09:20:17.600282+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "88b7c4b67564a146863224148116065fee418539f0a408f3636a68f3bde51805",
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "cmake",
+        "--version"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended": "2026-09-06T09:20:19.162645+00:00",
+      "exit_code": 0,
+      "name": "cmake",
+      "pid": 115854,
+      "process_group_closed": true,
+      "started": "2026-09-06T09:20:17.603843+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d3d5b682f3f5ef5b24a79ed8cf4b8c5868fc950dad48cab1be0e3c060a77f8ee",
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended": "2026-09-06T09:20:19.169026+00:00",
+      "exit_code": 0,
+      "name": "git_head",
+      "pid": 115886,
+      "process_group_closed": true,
+      "started": "2026-09-06T09:20:19.163389+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "7bae9947876bb25c30598c8f4f25c1a3ed6d7968d5e4012993248b08192a657e",
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--short",
+        "--untracked-files=normal"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended": "2026-09-06T09:20:19.237301+00:00",
+      "exit_code": 0,
+      "name": "git_status",
+      "pid": 115887,
+      "process_group_closed": true,
+      "started": "2026-09-06T09:20:19.169546+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "efeca6492d90ae107c503e20ad8f2a16e84e1ef6938e8d7b300a634812f23ee7",
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/workspaces/E-HGP/morsehgp3D_v7",
+        "-B",
+        "/workspaces/E-HGP/build/v7_meb_product_qualification_20260906/release",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "ended": "2026-09-06T09:20:19.855730+00:00",
+      "exit_code": 1,
+      "name": "release_configure",
+      "pid": 115908,
+      "process_group_closed": true,
+      "started": "2026-09-06T09:20:19.238252+00:00",
+      "status": "completed",
+      "stderr_sha256": "c19af97639309e426b4ee3185c11eaa46fec6bd7e86f48077f47bfe049ec00a2",
+      "stdout_sha256": "2fb0de1db916111befb1997d468e46c35e9128bf06d6091018155b10bb98b689",
+      "timeout_seconds": 60
+    }
+  ],
+  "ended": "2026-09-06T09:20:19.867592+00:00",
+  "environment_overrides": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "LC_ALL": "C",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "failure": "RuntimeError: release_configure: nonzero exit or residual process group",
+  "performance_capture": false,
+  "public_status": "not_claimed",
+  "schema": "mhgp7-full-meb-product-qualification-v1",
+  "sources_stable": true,
+  "started": "2026-09-06T09:20:17.600245+00:00",
+  "status": "failed"
+}

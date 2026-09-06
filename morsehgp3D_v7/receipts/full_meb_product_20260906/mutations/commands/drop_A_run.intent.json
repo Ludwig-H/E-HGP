@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_meb_product_mutation_qualification_20260906/run_r1/bin/drop_A",
+    "--selftest"
+  ],
+  "cpu": 0,
+  "cpu_seconds": 120,
+  "cwd": "/workspaces/E-HGP/build/v7_meb_product_mutation_qualification_20260906/run_r1/variants/drop_A",
+  "executable_sha256": "8207dc02cca636ea9b35f11fa60b85a3d734a8897e073c9922ebd8a3d596aa28",
+  "expected_exit_code": 1,
+  "file_size_limit_bytes": 67108864,
+  "process_wall_seconds": 300,
+  "started_utc": "2026-09-06T09:31:50.130155+00:00",
+  "stdin": "DEVNULL",
+  "wall_wait_seconds": 296.0
+}

@@ -21,6 +21,10 @@ fraîche est distincte des reçus historiques de ce document.
 La [normalisation v2](CONTRAT_NORMALISATION_FULL.md) supprime désormais
 la dernière paire de compression redondante ; son calendrier de travail
 est distinct de celui des reçus historiques ci-dessous.
+Le [raccord MEB filtré](CONTRAT_MEB_FULL.md) est un opt-in C++ séparé,
+désactivé par défaut : Work persistant par ordre, coût proposé p et coût
+F réel A distincts des ordinaux de référence. Les captures historiques
+ci-dessous ne qualifient pas ce nouveau raccord.
 
 ## 1. Autorité et domaine exacts
 
