@@ -4,7 +4,7 @@
 
 **La garde actuelle ne peut pas être supprimée seule. Une extension exacte et locale est toutefois possible : quotient sur la coquille, raccord aux parents globaux avant le lot, naissances de plateau et deltas de couverture.** Les contre-fixtures sont permanentes. Elles sont distinctes des quatre enregistrements réels 50k, maintenant étudiés dans le [complément de diagnostic et de certificat](LOCAL_DIAGNOSTICS.md). Aucun moteur, compilation ou GCP utilisé par l’auditeur.
 
-La [suite sur les ancres de boule](BALL_ANCHORS.md) raccorde ce quotient à un producteur complet borné : fenêtre amont conservée, une ancre par boule et ordre, résolution à la demande et partage vertical. Les preuves et captures initiales ci-dessous restent inchangées.
+La [suite sur les ancres de boule](BALL_ANCHORS.md) raccorde ce quotient à un producteur complet borné : fenêtre amont conservée, une ancre par boule et ordre, résolution à la demande et partage vertical. Les preuves et captures initiales ci-dessous restent inchangées. Le [helper local publié](../../receipts/local_plateau_20260906/README.md) a sa qualification constructeur distincte. Le [dernier complément](COVERAGE_THRESHOLDS.md) prouve des seuils de couverture partagés et un premier rang q2 sans DSU, sans supprimer l’obligation des parents globaux.
 
 ## 1. Deux changements réels du certificat hors régularité
 

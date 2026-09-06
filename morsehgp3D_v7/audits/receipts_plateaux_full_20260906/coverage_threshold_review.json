@@ -1,0 +1,108 @@
+{
+  "schema": "mhgp7-independent-coverage-threshold-review-v1",
+  "date": "2026-09-06T17:21:08.066145+00:00",
+  "source_base_head": "7debdbab58d92d63012034c03bf237c4acc67806",
+  "scope": "Original exact coverage-threshold and q2 first-rank proofs with bounded rational fixtures; favorable static review of the published local C++ quotient. No new C++ execution qualification.",
+  "public_status": "not_claimed",
+  "published_static_source_sha256": {
+    "morsehgp3D_v7/src/forest/local_plateau.hpp": "e953b617f9aeb8604a5e8d41c35782d7bdf8941a5a2c8fcc460f598bb31facaf",
+    "morsehgp3D_v7/src/forest/plateau.hpp": "9d40af95f4429c02fb4201dfd12608e58c00c593c7c4905e2304e4b4ae37ac49",
+    "morsehgp3D_v7/src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "morsehgp3D_v7/src/core/wide.hpp": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85",
+    "morsehgp3D_v7/src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+    "morsehgp3D_v7/src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+    "morsehgp3D_v7/tests/local_plateau_gate.cpp": "12092234827e2c7eb6e07c0dabb3fea2057f565817fe59b1dbaae3b395ac8477",
+    "morsehgp3D_v7/oracle/local_plateau_oracle.hpp": "7a002853749784bb14a8db178fbfe637244bd3019a08ae1daf92fd20aeae670d",
+    "morsehgp3D_v7/receipts/local_plateau_20260906/CONTRAT_LOCAL.md": "f5c95fde534fde4741f641babba4814c0750036dd6898873dc1afd3f7f65710f",
+    "morsehgp3D_v7/receipts/local_plateau_20260906/README.md": "ee8c4f6d9ea483c04b3b2ff0606085b5c787305b7f1e901648f595500a13b295"
+  },
+  "previous_scientific_evidence_sha256": {
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/coverage_contribution_optimized.json": "479e0b38103da9041841bdfa50309c9e90acce3bde9aaba362d63a991e505460",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/locals_gap_model.py": "a28e9b12ef79338973fae49e2fc547eac52b3294586ec031b8b06146546700bc",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic_invalid_last.jsonl": "64186ec022257daa7455c1afdf1e8a557ca644c0ea44727f263c95ebd66023e9",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/coverage_contribution_normal.json": "479e0b38103da9041841bdfa50309c9e90acce3bde9aaba362d63a991e505460",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/real_shell_census_optimized.json": "91062f687e422ace92d045aa5f7f80fcc2769c25d9883c2638346165da10a058",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/ball_anchor_normal.json": "f9133b79c6f5d59cf5045912f9931b27cf6367d9d6a016335b9ae97d783c9592",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/normal.json": "f7a7379ff0fa1d0a7fc5c760b289e07daefe4122a2e4337a41083a73f31aba56",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic.py": "1032cc5ef86da67e0064a56f68b35f0395181c16192ce92d863a1339254f426a",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/ball_anchor_review.json": "40ebf121e9bf100175902e956faef0c321cd4be7363fd1037f5599c92913087d",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/real_shell_census_normal.json": "91062f687e422ace92d045aa5f7f80fcc2769c25d9883c2638346165da10a058",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/source_review.json": "5130f1da7c7c058ad4726dd7c92a9979508a9b7022c84315f57690ee34c0b610",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/coverage_contribution_model.py": "a0b713954a1af606db06277f0d0bd39669ad2002595ff829382bb6de7bede908",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic_review.json": "d3d240ae9591c9b8fbcdb8404c9096a206ba6e02efc9d8c42405e4a7d0ea61ed",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/locals_gap_normal.json": "9cbb54fec710c33278254b206614f289addbd0710f2198f92ebc9f3db458a981",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/ball_anchor_model.py": "8f13f02d6b2c36c79708f6bdb8482c3d01ec81c4164b2bb60422993861e0ded4",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/plateau_model.py": "8afb5663c1fa0384d5ae392294cc03853676a89fcb18f858cd7d764ed9b1b93a",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic_inputs.jsonl": "ca6e9444f29a9af511c671905948e599a5ea25f3dae2240c62df12b24349db75",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/optimized.json": "f7a7379ff0fa1d0a7fc5c760b289e07daefe4122a2e4337a41083a73f31aba56",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic_optimized.json": "4e202c9ed88287134aa8a2445b0ae88b243d786b0168097d0cf5cb771a442c9d",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/ball_anchor_optimized.json": "f9133b79c6f5d59cf5045912f9931b27cf6367d9d6a016335b9ae97d783c9592",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic_test.py": "a8a8a57617088c8bc37c3cb8a3f0a90f0574b1e31b000d82177e869937c2a0ec",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/shell_diagnostic_normal.json": "4e202c9ed88287134aa8a2445b0ae88b243d786b0168097d0cf5cb771a442c9d",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/locals_gap_optimized.json": "9cbb54fec710c33278254b206614f289addbd0710f2198f92ebc9f3db458a981",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/real_shell_census.py": "d935ec655563c75c29ad2bd0de67802c59000d0d359c09c1837fb4729b9089b0"
+  },
+  "model_source_sha256": "411b384cdf9c439267510e025a9924d905c9d420b3405c1d8cd53765bc516f4a",
+  "rational_oracle_sha256": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b",
+  "commands": [
+    [
+      "taskset",
+      "-c",
+      "1",
+      "python3",
+      "-B",
+      "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/coverage_threshold_model.py"
+    ],
+    [
+      "taskset",
+      "-c",
+      "1",
+      "python3",
+      "-B",
+      "-O",
+      "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/coverage_threshold_model.py"
+    ]
+  ],
+  "exit_codes": [
+    0,
+    0
+  ],
+  "stderr_empty": true,
+  "outputs_identical": true,
+  "output_sha256": "dfa2f5fb8db5a3f8abb515104f7e0155e16868bc996f6e0c25ea04ccc0b4c00a",
+  "checks": {
+    "clouds": 10,
+    "maximum_points": 6,
+    "nonempty_rank_checks": 45,
+    "empty_rank_checks": 10,
+    "point_first_missing_order_checks": 45,
+    "exact_full_facet_checks": 306,
+    "exact_shell_mask_checks": 274,
+    "q2_first_anchor_order_checks": 6,
+    "regular_q2_first_anchor_components": 2
+  },
+  "targeted_countermodels": [
+    "replace_h_x_by_h",
+    "replace_h_x_by_h_minus_one",
+    "use_greater_equal_instead_of_greater",
+    "empty_gap_implies_local_inertia",
+    "coverage_thresholds_determine_local_components",
+    "q2_first_anchor_is_inert_with_two_shell_sites",
+    "empty_rank_is_a_birth_with_full_contribution"
+  ],
+  "static_findings": {
+    "arithmetic": "No overflow found in the admitted local coefficient/u16 domain; powers <2^106, coplanarity/determinants <2^123, signed triangle comparison <2^142.",
+    "quotient": "Representatives, stars, local coverage, empty ranks and potential contributions agree with the proved shell quotient.",
+    "test_gap": "The published gate checks each listed support for minimality but checks complete support lists only on the real single-support fixtures. Constructor has documented the proposed full-list equality and missing-square-diameter mutant. No C++ mutant was executed by the auditor."
+  },
+  "limitations": [
+    "Thresholds alone do not determine local components or global parents.",
+    "No speedup measured; calculating thresholds may not help when a required DSU already returns all coverage.",
+    "q2 first-rank shortcut requires u>=3 and keeps the closed anchor obligation.",
+    "Constructor execution receipts are attributed to its publication, not independently re-executed or fully requalified here."
+  ],
+  "source_variants_D_to_O_unchanged": true,
+  "new_cpp_compilations": 0,
+  "engine_invocations": 0,
+  "gcp": "not_used_by_auditor"
+}

@@ -2177,5 +2177,82 @@
         "docs/LECTURE_ET_CONTRATS.md"
       ]
     }
+  },
+  "latest_coverage_threshold_review_20260906": {
+    "date": "2026-09-06T17:22:30.210142+00:00",
+    "base_head": "7debdbab58d92d63012034c03bf237c4acc67806",
+    "receipt": "receipts_plateaux_full_20260906/COVERAGE_THRESHOLDS.md",
+    "scope": "Original exact coverage-threshold and q2 first-rank proofs with bounded rational fixtures; favorable static review of the published local C++ quotient. No new C++ execution qualification.",
+    "model_exit_codes": [
+      0,
+      0
+    ],
+    "model_outputs_identical": true,
+    "model_output_sha256": "dfa2f5fb8db5a3f8abb515104f7e0155e16868bc996f6e0c25ea04ccc0b4c00a",
+    "model_checks": {
+      "clouds": 10,
+      "maximum_points": 6,
+      "nonempty_rank_checks": 45,
+      "empty_rank_checks": 10,
+      "point_first_missing_order_checks": 45,
+      "exact_full_facet_checks": 306,
+      "exact_shell_mask_checks": 274,
+      "q2_first_anchor_order_checks": 6,
+      "regular_q2_first_anchor_components": 2
+    },
+    "countermodels": [
+      "replace_h_x_by_h",
+      "replace_h_x_by_h_minus_one",
+      "use_greater_equal_instead_of_greater",
+      "empty_gap_implies_local_inertia",
+      "coverage_thresholds_determine_local_components",
+      "q2_first_anchor_is_inert_with_two_shell_sites",
+      "empty_rank_is_a_birth_with_full_contribution"
+    ],
+    "checks": {
+      "docs_normal_exit": 0,
+      "docs_optimized_exit": 0,
+      "active_markdown": 401,
+      "registry_exit": 0,
+      "registry_phases": 20,
+      "authored_markdown": 5,
+      "local_links": 100,
+      "link_math_errors": 0,
+      "git_diff_check_exit": 0,
+      "freshness": {
+        "common_pins": 2262,
+        "common_mismatches": 0,
+        "source_variants_unchanged": true,
+        "normal_exit": 1,
+        "optimized_exit": 1,
+        "outputs_identical": true,
+        "latest_variant": "O_full_meb_composition",
+        "latest_variant_deltas": [
+          "CMakeLists.txt",
+          "PASSATION.md",
+          "README.md",
+          "docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md",
+          "docs/FAUSSES_PISTES.md",
+          "docs/RESIDENCE_MASSIVE.md",
+          "src/pipeline/generate.hpp",
+          "tests/meb_proposal_local_gate.cpp"
+        ],
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "486c017d7a82f9afee1f5dfe524de2a9c1972e3fccd687c1f42ec83b3305e677"
+      }
+    },
+    "maintenance": {
+      "root_markdown_notes": 25,
+      "previous_root_words": 18221,
+      "current_root_words": 18126,
+      "net_root_words_removed": 95,
+      "action": "Replace adopted journal and four-census discussion by source links; recognize published local component while keeping constructor execution and auditor static authority separate; current dialogue carries new shared thresholds and q2 first-rank proof."
+    },
+    "source_variants_D_to_O_unchanged": true,
+    "historical_scientific_receipts_modified": false,
+    "engine_invocations": 0,
+    "new_cpp_compilations": 0,
+    "gcp": "not_used_by_auditor",
+    "publication_scope_paths": 11
   }
 }
