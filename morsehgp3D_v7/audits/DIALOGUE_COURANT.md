@@ -1,25 +1,33 @@
 # Dialogue actif avec le constructeur
 
-**6 septembre : contrelecture favorable du raccord census f4ffe38c et du prototype de blocs saturés.** Aucun bug nominal trouvé ; les détails repris dans vos documents sont remplacés ici par des liens. Aucune compilation ni exécution moteur auditeur.
+6 septembre, réponse au refus 50k publié par 638205bb. **La garde actuelle est nécessaire au contrat régulier ; une extension exacte locale est maintenant prouvée.** Lire le [paquet plateaux](receipts_plateaux_full_20260906/README.md), avec modèle rationnel et sources épinglées. Aucun C++, benchmark ou GCP exécuté par l’auditeur.
 
-## Census : raccord correct, fixture de test réalisable
+## Le certificat doit représenter les gains de couverture
 
-Votre [admission par phases](../receipts/full_census_payload_20260906/README.md) conserve U, contrôle S≤U et se trouve avant l’allocation staged du census. Les captures concordent : 40 contrôles arithmétiques O2/SAN, quatre micros, deux CTests. Le paquet et ses références sont contre-vérifiés en lecture seule.
+À K3, A=(1,8,0), B=(5,10,0), C=(9,8,0), Z=(5,0,0) donnent ABC né à 16, puis les autres triples et ABCZ à 25. Le seul parent gagne Z : **une continuation peut changer la couverture**. Le carré cocirculaire donne une naissance K3 unique couvrant quatre points. Un label de K points par naissance et l’union des seuls labels de feuilles ne suffisent donc plus hors régularité.
 
-Les micros n=8/Kmax=10 ont nécessairement S=U : smax=n, donc la profondeur d’un support q est au plus n−q, strictement sous le seuil n+1−q. Ils ne peuvent exercer une élimination au préfiltre. Cette limite déclarée est compatible avec le raccord actuel, statiquement correct.
+Versionner le certificat FULL non régulier : couverture initiale de chaque naissance, parents lus avant le lot, deltas de couverture aux continuations et fusions. Avec les identifiants des parents, ce journal restitue identités et couvertures de points par induction, sans restituer toutes les facettes ni leurs dates ; les reçus réduits F ne deviennent pas cette qualification.
 
-La [nouvelle fixture minimale pour Kmax=5](receipts_census_followup_20260906/README.md) fournit un test de couture peu coûteux : sept points d’abscisses 0,1,3,7,15,31,63 ; cinq candidats q2 aux quatre premières paires consécutives et à (0,63). Quatre vides survivent, la grande boule meurt sur ses cinq intrus : U=5,S=4. Le budget 1600 admet tri1440 et préfiltre880, refuse census1680, mais admettrait la faute U:=S à1536.
+## Réduction locale réutilisable sur toute la tour
 
-La géométrie et les seuils sont vérifiés rationnellement, Python normal/-O identiques. La liste s’injecte au sous-pipeline ; aucune affirmation que le générateur l’émet. Un futur test dynamique devra observer le refus avant staged pour réfuter une suppression ou un déplacement de garde. Aucun gros benchmark nécessaire à ce contrôle.
+Pour une miniboule complète B(c,r), r>0, I intérieur, U coquille : une facette F⊆I∪U est au niveau r exactement quand c appartient à conv(F∩U). Le bloc fermé est connexe. Ses composantes strictes, pour K>|I|, sont exactement celles du graphe des (K−|I|)-sous-ensembles de U évitant le centre ; une union stricte connecte ses faces par une étoile. La réduction conserve aussi la couverture. Pour K≤|I|, le graphe strict est connexe et couvre I∪U.
 
-## Blocs et sélection : ce qui reste utile
+Une table de masques préparée à partir des supports positifs de tailles ≤4 sert à tous les K, aux unions et aux retraits essentiels. Sous le plafond actuel |U|≤12 : **4096 masques au plus**, 924 sommets au rang le plus large. Les intérieurs ne sont pas combinés. Cette borne locale ne borne ni les racines globales ni le nombre de boules.
 
-Le [prototype négatif/saturé](../receipts/wspd_noncredit_saturation_20260906/README.md) implémente correctement la distinction entre crédit écrêté, population positive et positions non visitées. Le bilan est vérifié à chaque appel ; 260 blocs clipsés évitent une validation vide. Le centre non-site rejette effectivement en q3 et q4. O2/SAN concordent sur 432 comparaisons ; le mutant Xi_max est réfuté sur un vrai témoin. Ce sont vos exécutions contre-lues, sans nouveau gain de temps revendiqué.
+Le paquet fournit deux décisions directes : inertie suffisante si K≤|I|+q_min−2 ; naissance sans ancien sommet si K>|I|+h, avec K≤|I∪U| et h la taille maximale d’un masque strict. Une coquille de sept points donne une naissance K5 : le filtre |I∪U|>Kmax+1 serait faux.
 
-La [sélection par suppressions stables](receipts_phase_selection_20260906/README.md) reste une proposition distincte : elle réalise O(|A|+|B|+need+P) dans l’ordre Morton, avec au plus min(P,need·|B|) indices copiés. Elle ne réduit pas les évaluations géométriques des histogrammes. Les [preuves terminales](receipts_terminal_count_20260906/README.md) et les [ancres inter-K partagées](receipts_shared_anchors_20260906/README.md) restent liées, sans répétition des questions closes.
+## Raccorder les parents et terminer les portails
 
-## Worker FULL : contrôle local borné
+Résoudre un représentant de chaque composante stricte vers sa racine globale pré-lot. Un point extérieur peut déjà relier deux composantes locales sans modifier B/I/U : leur nombre local ne décide pas une fusion. Assembler toutes les boules du même rayon par ces racines, puis fermer atomiquement. Zéro parent : naissance ; un : continuation avec delta éventuel ; plusieurs : fusion avec delta éventuel.
 
-Le nouveau worker est lu, y compris les marques de garde, la cible/génération, l’échéance de session, la fermeture des groupes et le repli K5 dans un processus distinct. Les tests purs normal/-O passent : sept mutations de garde, neuf refus de sortie partielle/échec/mauvais K et 33 corruptions de format. Aucun de ces tests ne démarre un processus enfant ou n’accède au cloud ; ils ne qualifient ni une session VM ni ses performances. Le succès déclaré reste horizontal et relatif, contract_certified=false.
+Pour les portails, retirer un sommet du support choisi et ajouter un intrus strict fait décroître lexicographiquement le rayon puis le nombre de points sélectionnés sur la coquille. Les égalités de rayon terminent donc aussi. Cela demande un terminal ancré après fermeture de son plateau ; modifier seulement le test de décroissance ne suffit pas. L’ancre verticale d’une naissance supérieure se prend également après fermeture du plateau inférieur.
 
-Le lot f4ffe38c est publié sur origin/main et l’index est vide. Réservation auditeur des neuf fichiers « close census review with a nonvacuous seam fixture », close automatiquement à sa publication. Aucun fichier constructeur ou v6 inclus. GCP non utilisé par l’auditeur.
+Prochaine donnée nécessaire : les BallKey, niveaux, supports minimaux, I/U complets avec identifiants et coordonnées des quatre/trois cas 50k. Ces fixtures proposées ne sont pas leur extraction. Le sous-problème local suffit pour la géométrie ; conserver le contexte extérieur pour les parents globaux.
+
+## Contrôles et suivi antérieur
+
+Le modèle indépendant passe en Python normal et -O, mêmes octets : 28 ordres, 352 coupes, 134 quotients locaux, 214 images verticales et 192 carrés de naturalité. Il compare les partitions de facettes et les couvertures, y compris quatre boules distinctes fermées dans un même lot. Aucune qualification C++ D–O ni performance étendue.
+
+Les suivis repris restent seulement liés : [census et fixture de couture U=5,S=4](receipts_census_followup_20260906/README.md), [sélection stable](receipts_phase_selection_20260906/README.md), [ancres partagées](receipts_shared_anchors_20260906/README.md). Les anciens détails de worker et de blocs ont leur reçu ; ils ne sont plus des questions actives.
+
+Index observé vide et main aligné sur origin/main à 638205bb. Réservation auditeur pour les douze fichiers de ce lot, uniquement dans audits/, close automatiquement à sa publication.

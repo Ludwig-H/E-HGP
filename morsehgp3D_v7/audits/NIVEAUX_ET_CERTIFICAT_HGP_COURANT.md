@@ -16,6 +16,14 @@ Le rejeu active les feuilles, puis contracte atomiquement les groupes de parents
 
 À K1, les points naissent à zéro, absent au côté ouvert et présent au côté fermé. À K=n, X est une feuille née à sa MEB, sans coface ni fusion. Hors régularité, AB peut être Gabriel faible et naître avec ABC : ce plateau ne justifie pas une feuille isolée persistante. Le [négatif permanent](receipts_gabriel_20260905/full_proof_review.md) conserve ce cas.
 
+## Extension non régulière : décision désormais constructive
+
+Le [refus réel 50k](../docs/RESULTATS_G4_FULL_20260906.md) rend ce domaine prioritaire. Les [preuves et contre-fixtures nouvelles](receipts_plateaux_full_20260906/README.md) montrent deux obligations : une naissance peut regrouper plusieurs K-facettes, et une continuation à un seul parent peut gagner des points. Le certificat régulier ne suffit donc pas hors de ses prémisses. Un journal FULL non régulier doit porter la couverture initiale des naissances et les deltas de couverture, y compris lors de continuations ou fusions. La borne topologique I≤L−R subsiste, mais ne borne pas ces ajouts. Les reçus du moteur réduit F restent distincts.
+
+Pour une boule complète I∪U de rayon positif, les composantes strictes se calculent exactement sur les sous-ensembles de coquille de cardinal K−|I| lorsque K>|I| ; sinon elles forment un seul groupe couvrant I∪U. Sous le plafond actuel |U|≤12, une table de 4096 masques au plus sert à tous les ordres. Les groupes locaux doivent être raccordés aux racines globales avant le lot, puis fermés atomiquement. Une descente lexicographique « rayon, nombre de points sélectionnés sur la coquille » permet aussi de traverser les supports alternatifs. Cela évite une énumération globale des facettes ; le coût des racines et la complétude du census restent à qualifier.
+
+Les 28 ordres et 352 coupes rationnelles du modèle borné conservent les identités et les couvertures. Les quatre/trois boules du run 50k ne sont pas encore extraites : ces preuves proposent leur traitement, sans qualifier leurs données ni une implémentation. Les descriptions par minima et ancres directes ci-dessous restent soumises aux prémisses régulières ; une naissance non régulière demande une ancre inférieure de plateau fermé.
+
 ## Sommets Gabriel et vraie hiérarchie K-NN
 
 La [preuve et la tour bornée](receipts_gabriel_vertices_20260906/README.md) répondent à la question utilisateur du 6 septembre. Les seuls minima peuvent représenter exactement les composantes de L_K(r), leurs naissances, fusions et couvertures, avec des liens portant les seuils des chemins omis. Leur graphe induit est faux : quatre points u16 réguliers en dimension trois retardent une fusion de 169/9 à 41/2, même avec toutes les unions de la définition 21. Ce n’est donc pas un remplacement littéral des sommets de Γ ou de la définition 29.

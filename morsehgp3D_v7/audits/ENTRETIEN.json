@@ -1785,5 +1785,87 @@
     "reviewed_constructor_commit": "f4ffe38caf1dde2025dd149a09654dc4998b8815",
     "publication_base_head": "0072c88d8749cedfd3c6670d898e6edd1deed103",
     "reviewed_sources_identical_to_f4ffe38c": true
+  },
+  "latest_plateau_review_20260906": {
+    "date": "2026-09-06T13:54:21.002120+00:00",
+    "base_head": "638205bb0a2cfb99cf00e5fa18e9d5fd5cea7fab",
+    "receipt": "receipts_plateaux_full_20260906/README.md",
+    "scope": "Original mathematical proof and independent bounded rational model; C++ static reads only. Constructor 50k observations are cited, not independent timing, geometry or session qualification.",
+    "model": {
+      "commands": [
+        "taskset -c 1 python3 -B morsehgp3D_v7/audits/receipts_plateaux_full_20260906/plateau_model.py",
+        "taskset -c 1 python3 -B -O morsehgp3D_v7/audits/receipts_plateaux_full_20260906/plateau_model.py"
+      ],
+      "exit_codes": [
+        0,
+        0
+      ],
+      "stderr_empty": true,
+      "outputs_identical": true,
+      "output_sha256": "f7a7379ff0fa1d0a7fc5c760b289e07daefe4122a2e4337a41083a73f31aba56",
+      "counts": {
+        "orders": 28,
+        "cuts": 352,
+        "shell_quotients": 134,
+        "inert_blocks": 30,
+        "birth_blocks": 60,
+        "vertical_maps": 214,
+        "naturality_squares": 192
+      },
+      "nonvacuum_fixtures": [
+        "single-parent point growth",
+        "plateau birth larger than K",
+        "four-parent merge",
+        "four distinct balls at same level",
+        "outside point changes global parents",
+        "shell7 birth above Kmax+1 closed cardinality",
+        "nonessential chosen support",
+        "equal-radius terminating portal"
+      ],
+      "limitation": "Full facet partitions are compared using stored members. Diagnostic events are not an exported/replayed certificate. Birth/parent/growth journal sufficiency concerns identities and point coverage, not all facet assignments and dates."
+    },
+    "checks": {
+      "docs_normal_exit": 0,
+      "docs_optimized_exit": 0,
+      "active_markdown": 395,
+      "registry_exit": 0,
+      "registry_phases": 20,
+      "authored_markdown": 6,
+      "local_links": 119,
+      "link_math_errors": 0,
+      "git_diff_check_exit": 0,
+      "freshness": {
+        "common_pins": 2229,
+        "common_mismatches": 0,
+        "source_variants_unchanged": true,
+        "normal_exit": 1,
+        "optimized_exit": 1,
+        "outputs_identical": true,
+        "latest_variant": "O_full_meb_composition",
+        "latest_variant_deltas": [
+          "CMakeLists.txt",
+          "PASSATION.md",
+          "README.md",
+          "docs/FAUSSES_PISTES.md",
+          "docs/RESIDENCE_MASSIVE.md",
+          "src/pipeline/generate.hpp",
+          "tests/meb_proposal_local_gate.cpp"
+        ],
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "5b02791a84b77cc3623399cf065a5c2c1e1bc314410d26de50ec49d323fe7c90"
+      }
+    },
+    "maintenance": {
+      "root_markdown_notes": 25,
+      "dialogue_previous_words": 491,
+      "dialogue_current_words": 665,
+      "action": "Replace closed census/worker/block discussion by source links; current entries focus on constructive nonregular plateau contract and distinguish constructor 50k refusals from successful horizontal runs."
+    },
+    "source_variants_D_to_O_unchanged": true,
+    "historical_scientific_receipts_modified": false,
+    "engine_invocations": 0,
+    "new_cpp_compilations": 0,
+    "gcp": "not_used_by_auditor",
+    "publication_scope_paths": 12
   }
 }

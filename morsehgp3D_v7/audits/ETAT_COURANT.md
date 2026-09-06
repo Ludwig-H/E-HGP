@@ -1,16 +1,12 @@
 # État courant de l’audit v7
 
+La priorité est le [traitement exact des plateaux non réguliers](receipts_plateaux_full_20260906/README.md), après les refus 50k K1..10 et K1..5 publiés par le constructeur. La garde actuelle protège un contrat régulier ; une extension locale est prouvée sur la coquille et partage sa table entre K. Les naissances peuvent couvrir plus de K points et les continuations gagner des points : le certificat doit représenter ces gains. Le modèle indépendant compare 28 ordres et 352 coupes exactes. Les cas réels 50k restent à extraire, le raccord C++ à qualifier.
+
 Le raccord FULL du proposeur MEB filtré publié par 20b28b1d dispose de la **qualification indépendante O2 et ASan/UBSan** : 2 784 sorties et 214 704 coupes par build, avec budgets, Work persistant et ordres n=14/K9/K10. L’export industriel et les contrats de performance restent ouverts.
 
 La [reconstruction de la vraie tour K-NN](receipts_gabriel_vertices_20260906/README.md) est établie sur un quotient des minima avec les bonnes connexions ; la restriction aux seules adjacences Gabriel est réfutée. Les [ancres horizontales et verticales](receipts_shared_anchors_20260906/README.md) peuvent partager leur valeur inférieure, avec leurs identités et coupes distinctes. Ces preuves ne qualifient pas encore une tour C++ intégrée ; les bornes et contre-fixtures restent accessibles depuis la décision FULL.
 
-Le [raccord d’admission constructeur f4ffe38c](receipts_census_followup_20260906/README.md) est contre-lu favorablement : les U candidats restent présents et la garde précède le census. Ses captures et celles du prototype de blocs saturés concordent, sans nouvelle exécution C++ indépendante. Les micros n=smax ne peuvent éliminer aucune boule ; une fixture rationnelle à sept points fournit désormais un cas U=5,S=4 pour tester ce raccord à budget serré.
-
-La [sélection stable](receipts_phase_selection_20260906/README.md) reste une proposition distincte : coût proportionnel aux entrées et sorties, même ordre Morton, crédits exacts des survivantes. Les preuves générales et contre-fixtures de saturation restent conservées.
-
-Le [terminal unique](receipts_terminal_count_20260906/README.md) reste correct mais non retenu après la mesure négative du constructeur. La frontière différée et les [certificats de blocs](receipts_block_histograms_20260906/README.md) restent des voies prouvées à mesurer. La réserve du gate de cœur q2 positif est close par contrelecture du correctif constructeur.
-
-Le [suivi mono](MONO_FULL_COURANT.md) reflète la clôture des dix ordres horizontaux à 8k/16k/32k et de la paire P0/unlimited, qui concentre 78,89 % de son delta FULL sur K9–K10. Le refus de l’ancien plafond reste historique. Ces mesures ne comprennent pas encore les cartes inter-K ni une archive retenue.
+Les sujets repris par le constructeur sont clos dans le dialogue : [admission census et fixture U=5,S=4](receipts_census_followup_20260906/README.md), [sélection stable proposée](receipts_phase_selection_20260906/README.md) et [certificats de blocs](receipts_block_histograms_20260906/README.md). Le [suivi des mesures](MONO_FULL_COURANT.md) distingue les dix ordres horizontaux terminés à 8k/16k/32k des refus 50k ; aucun de ces résultats ne qualifie une archive avec cartes inter-K.
 
 ```text
 phase=exploration_v7_hors_registre
@@ -36,6 +32,6 @@ La lecture intégrale des parties I et II du manuscrit, PDF 35–134, reste acqu
 
 Le [manifeste](validation_current.json) conserve O sur le publié `20b28b1d`, ainsi que D–N. Les écarts ultérieurs des documents, tests et du générateur sont affichés par le contrôle de fraîcheur, sans requalification implicite. Les headers FULL/MEB qualifiés sont inchangés. La réutilisation terminale q2 possède ses captures constructeur, contre-lues sans nouvelle exécution ; elle reste hors de O. Les sondes sans quotas et multi-CPU ne sont pas qualifiées par O. Le juge se rejoue sur les captures sans moteur.
 
-Le [dialogue actif](DIALOGUE_COURANT.md) suit les reprises WSPD et la recherche d’une tour plus efficace. Le [diagnostic mono](MONO_FULL_COURANT.md) conserve le refus historique 32k/K9 aux quatre millions d’appels ; sa suppression publiée dans la sonde par `a9ce3639` ne change pas ce reçu. La [réutilisation terminale](MEB_DOUBLE_BUDGET_COURANT.md#réutiliser-une-certification-terminale-déjà-acquise) reste une proposition séparée, avec sa [fixture causale n=12/K7](receipts_filtered_review_20260906/terminal_reuse_fixture.md). Les questions différées sont [regroupées](QUESTIONS_SECONDAIRES.md).
+Le [dialogue actif](DIALOGUE_COURANT.md) porte désormais les contrats de plateau, le quotient local et les raccords à réaliser. Les autres questions sans incidence immédiate restent [regroupées](QUESTIONS_SECONDAIRES.md).
 
 Les reçus bruts et échecs restent conservés ; les anciennes synthèses sont accessibles par le [registre d’entretien](ENTRETIEN.json). GCP non utilisé.

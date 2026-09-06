@@ -1,0 +1,101 @@
+{
+  "schema": "mhgp7-independent-full-plateau-review-v1",
+  "date": "2026-09-06T13:52:33.636958+00:00",
+  "source_head": "638205bb0a2cfb99cf00e5fa18e9d5fd5cea7fab",
+  "scope": "Original mathematical proof and independent bounded rational model; C++ static reads only. Constructor 50k observations are cited, not independent timing, geometry or session qualification.",
+  "assumptions": [
+    "distinct positions",
+    "complete ball census",
+    "positive-radius local quotient",
+    "1 <= K <= |I union U|",
+    "existing shell cap 12 only for stated bounded cost"
+  ],
+  "source_sha256": {
+    "AGENTS.md": "075c4dd104a1e842e4b40ff65401d5b12860baf2a743871cdd1e610c09b301b6",
+    "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef",
+    "morsehgp3D_v7/README.md": "3d66e212680d28b49d993ba32ab489ed5f6ec52301abec0e652fb70b649126c3",
+    "morsehgp3D_v7/PASSATION.md": "02c02f3afe6c57649c4e57fe6c7ae1322bf96d3615892265c4c44fa39763bfef",
+    "morsehgp3D_v7/docs/LECTURE_ET_CONTRATS.md": "5339653875c5c1ea51270f3d65e697f47c441471717d28a8f57a6f170d50b623",
+    "morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md": "0b9cd8e17636fcaeb2211bc2c9446bc7ebc6a356e07c399c42529a6f84c9abfd",
+    "morsehgp3D_v7/src/forest/full_gabriel.hpp": "a946e31dde8fbd8ec528d6f5e94f9c727998acc172b4dd29c084dd522c730d1d",
+    "morsehgp3D_v7/src/forest/full_certificate.hpp": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+    "morsehgp3D_v7/src/forest/silent_incidence.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76",
+    "morsehgp3D_v7/src/forest/plateau.hpp": "9d40af95f4429c02fb4201dfd12608e58c00c593c7c4905e2304e4b4ae37ac49",
+    "morsehgp3D_v7/src/pipeline/expand.hpp": "7cafb0341344fbc7d1584001e4685e2e5bf0122fe3b7e37277f5468d5c5e1cf0",
+    "morsehgp3D_v7/src/pipeline/census.hpp": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be",
+    "morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp": "3a17cbb8e16b3d38599aa22ef868fe3337032ae502506c09f41da2881df111d7",
+    "morsehgp3D_v7/audits/meb_rational_oracle_20260905.py": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/plateau_model.py": "8afb5663c1fa0384d5ae392294cc03853676a89fcb18f858cd7d764ed9b1b93a",
+    "morsehgp3D_v7/docs/RESULTATS_G4_FULL_20260906.md": "1e02a26f0a8af841a7652712cf5dbd13af5d27bac8818792a187e7edb7d14d9c",
+    "morsehgp3D_v7/receipts/full_g4_spot_50000_20260906/README.md": "d7b891d02353ae2630b7014e8c926a56bffaa31784c768728c725b45ca9cceef",
+    "morsehgp3D_v7/receipts/full_g4_spot_50000_20260906/SHA256SUMS": "54bd37110187a39e62d85f543f407440515fdc72d0029d5445236766b2be1d72",
+    "morsehgp3D_v7/receipts/full_g4_spot_50000_20260906/publication.json": "62b3fe59e58e415c1ad98dfead6498111835ac7f3ae6e96d787ade28d266a86f"
+  },
+  "thesis_read_pdf_pages": "35-134, parts I and II; model and connectivity definitions revisited at PDF84-85 and 110-115",
+  "model": {
+    "commands": [
+      "taskset -c 1 python3 -B morsehgp3D_v7/audits/receipts_plateaux_full_20260906/plateau_model.py",
+      "taskset -c 1 python3 -B -O morsehgp3D_v7/audits/receipts_plateaux_full_20260906/plateau_model.py"
+    ],
+    "exit_codes": [
+      0,
+      0
+    ],
+    "stderr_empty": true,
+    "outputs_identical": true,
+    "output_sha256": "f7a7379ff0fa1d0a7fc5c760b289e07daefe4122a2e4337a41083a73f31aba56",
+    "counts": {
+      "orders": 28,
+      "cuts": 352,
+      "shell_quotients": 134,
+      "inert_blocks": 30,
+      "birth_blocks": 60,
+      "vertical_maps": 214,
+      "naturality_squares": 192
+    },
+    "nonvacuum_fixtures": [
+      "single-parent point growth",
+      "plateau birth larger than K",
+      "four-parent merge",
+      "four distinct balls at same level",
+      "outside point changes global parents",
+      "shell7 birth above Kmax+1 closed cardinality",
+      "nonessential chosen support",
+      "equal-radius terminating portal"
+    ],
+    "limitation": "Full facet partitions are compared using stored members. Diagnostic events are not an exported/replayed certificate. Birth/parent/growth journal sufficiency concerns identities and point coverage, not all facet assignments and dates."
+  },
+  "constructor_50k": {
+    "published_commit": "638205bb",
+    "n": 50000,
+    "kmax_trials": [
+      10,
+      5
+    ],
+    "exit_codes": [
+      2,
+      2
+    ],
+    "full_orders": [
+      0,
+      0
+    ],
+    "reason": "probe_rank_relevant_extra_shell",
+    "extra_shell_records": [
+      4,
+      3
+    ],
+    "actual_record_coordinates_extracted": false,
+    "external_refusal_seconds": [
+      21.372,
+      5.646
+    ],
+    "timing_authority": "constructor published capture, not independent auditor measurement",
+    "gcp_closure_authority": "constructor published targeted stop and read-only closure; no auditor cloud command"
+  },
+  "source_variants_D_to_O_unchanged": true,
+  "engine_invocations": 0,
+  "new_cpp_compilations": 0,
+  "gcp": "not_used_by_auditor",
+  "public_status": "not_claimed"
+}
