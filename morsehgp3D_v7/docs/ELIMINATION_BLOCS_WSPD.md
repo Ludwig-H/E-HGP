@@ -111,6 +111,21 @@ Les listes stables gardent l'ordre de A et de B ; regrouper A par score
 change le préfixe d'émission. Leur stockage temporaire doit aussi être
 mesuré, et seules les listes de seuils effectivement demandées sont utiles.
 
+Un certificat complémentaire écarte les blocs **sans contribution** à
+h_a/h_b. Fixer a et un point entier b₀ dans Box(B), puis calculer
+M₄=hmax4_boxes({a},{b₀},Z) et un minorant Ξ_min par la distance à zéro
+des intervalles du produit vectoriel. Si M₄≤0 ou t M₄²≤16 Ξ_min, tout Z
+échoue pour ce b₀. La [preuve indépendante](../audits/receipts_terminal_count_20260906/README.md#non-crédit-de-blocs-q3q4--réponse-à-la-nouvelle-question)
+justifie aussi un b₀ intérieur entier, par convexité en b. Il s'agit de
+réfuter l'universalité sur la boîte, pas de tuer l'ancre ni de désigner
+un point réel de B. L'égalité rejette ; remplacer Ξ_min par Ξ_max peut
+supprimer de vrais témoins. Sous u16, i128 après conversion suffit.
+Le [prototype combiné rejet/saturation](../receipts/wspd_noncredit_saturation_20260906/README.md)
+passe désormais 432 comparaisons O2 et ASan/UBSan, y compris un b₀
+intérieur absent des sites et la partition des positions non parcourues.
+Le mutant Xi_max est réfuté. Ce helper reste privé, sans intégration
+produit ni mesure de performance sur les grands facteurs.
+
 ## Première économie indépendante : ne pas recompter q2
 
 Le premier compte du rectangle calcule déjà q2 entièrement. Le booléen
@@ -156,15 +171,36 @@ intérêt potentiel pour de grands facteurs, non rencontrés ici. Il ne faut
 pas déplacer l'effort vers un poste de l'ordre de 0,1 s en supposant qu'il
 explique les dizaines de secondes du front.
 
-Ce lot uniforme est clos. Un régime distinct mérite toutefois la mesure
-des grands facteurs : deux amas compacts très éloignés forment un rectangle
-racine séparé A×B avec h_cœur=0, puisque A∪B=X. Ses histogrammes scalaires
-coûtent alors |A|²+|B|² ; le résultat uniforme ne permet pas d'écarter le
-certificat par blocs dans ce régime. Une sonde séparée 8k/16k/32k doit
-trancher ce point, pendant la préparation du raccord multi-CPU.
+Le [triplet de grands facteurs](../receipts/wspd_large_factor_histograms_20260906/README.md)
+est ensuite clos. Deux amas très éloignés forment un rectangle racine
+séparé A×B avec h_cœur=0, puisque A∪B=X. Chaque facteur contient n/2
+positions ; le coût scalaire y est réellement quadratique.
 
-Viennent ensuite les essais multi-CPU locaux,
-puis G4 SPOT 48 CPU et GPU autorisés par l'utilisateur, avec des mesures
+| n | Histogrammes scalaires | Blocs forcés | Dispatch scalaire jusqu'à huit |
+| --- | ---: | ---: | ---: |
+| 8 000 | 2,042 s | 1,462 s | 1,466 s |
+| 16 000 | 8,393 s | 6,333 s | 6,321 s |
+| 32 000 | 31,077 s | 27,092 s | 27,518 s |
+
+Les 48k/96k/192k valeurs comparées sont littéralement égales. Ces temps
+O2 instrumentés portent sur les trois histogrammes d'un seul rectangle,
+pas le front complet ni FULL. La géométrie est une grille en deux amas,
+dont l'épaisseur change avec n, pas la famille uniforme régulière de la
+sonde FULL. Les trois séparations s8/10/12 sont vérifiées sur chaque
+rectangle ; l'histogramme ne dépendant pas directement de s, ce ne sont
+pas trois mesures indépendantes.
+
+Le gain reste insuffisant : q2 est accéléré d'un facteur constant mais
+ses visites croissent presque quadratiquement. À 32k, q4 ralentit de
+10,697 à 13,446 s ; les blocs situés hors q3/q4 mais dans W2 imposent
+encore des descentes coûteuses. La variante positive seule n'est pas
+intégrée. Rejet négatif et saturation à need sont qualifiés ensemble sur
+les petites fixtures, mais leur gain et leur croissance restent à mesurer.
+Borner le nombre de succès requis ne borne pas le nombre d'échecs à examiner.
+
+Le [raccord multi-CPU local](PARALLELISME_FULL_20260906.md) est appliqué
+à la sonde, avec FULL et boucle K encore séquentiels. Viennent ensuite
+les essais G4 SPOT 48 CPU et GPU autorisés par l'utilisateur, avec des mesures
 de bout en bout distinctes des composants.
 
 Les [mesures du triplet](RESULTATS_MONO_FULL_SANS_QUOTAS_20260906.md)

@@ -1,0 +1,14 @@
+{
+  "binary_reference": "../full_pipeline_threads_micro_20260906/binary_reference.json",
+  "binary_sha256": "4f5ba475ae5075cabab6c84222742b2dcdae226a0b3879e460b7fb8200b76aff",
+  "build_observation": "../full_pipeline_threads_micro_20260906/build_observation.json",
+  "project_dependencies": 42,
+  "references": {
+    "../full_pipeline_threads_micro_20260906/SHA256SUMS": "1f3dea9e9b96b0b43cabfa2a69e3bcc49fdb9f6f3006386232649a361062244c",
+    "../full_pipeline_threads_micro_20260906/receipt.json": "6256d27c354c085bc52096061ec07dd2d2d3752fc94db9d920e1cddfb41e4122",
+    "../full_pipeline_threads_micro_20260906/sources_before.json": "56425351d4c6a3f23872e3bf5785cbf1d833112c1d8a9831dd86beccacf7e9ca"
+  },
+  "runner": "../full_pipeline_threads_micro_20260906/sources/morsehgp3D_v7/bench/run_full_probe.py",
+  "source_directory": "../full_pipeline_threads_micro_20260906/sources",
+  "source_files_not_copied_again": true
+}

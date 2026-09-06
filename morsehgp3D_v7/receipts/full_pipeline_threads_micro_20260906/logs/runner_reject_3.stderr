@@ -1,0 +1,4 @@
+usage: run_full_probe.py [-h] --binary BINARY --output OUTPUT --n N --s S
+                         [--p P] [--cpu CPU | --cpu-list CPU_LIST]
+                         [--threads THREADS]
+run_full_probe.py: error: --threads>1 requires an explicit --cpu-list (a singleton permits intentional oversubscription)

@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "/usr/bin/taskset",
+    "-c",
+    "0-7",
+    "/workspaces/E-HGP/build/v7_full_pipeline_threads_20260906/full_probe",
+    "--n=8",
+    "--s=8",
+    "--kmax=10",
+    "--alias-policy=lazy",
+    "--cache-entries=1000000",
+    "--meb-proposal-supports=unlimited",
+    "--threads=-1"
+  ],
+  "cpu_limit_seconds": 45,
+  "cwd": "/workspaces/E-HGP",
+  "elapsed_seconds": 0.004983312999684131,
+  "ended_utc": "2026-09-06T12:36:57.127905+00:00",
+  "exit_code": 2,
+  "expected_exit": 2,
+  "file_limit_bytes": 67108864,
+  "group_closed": true,
+  "label": "probe_reject_6",
+  "pid": 541082,
+  "started_utc": "2026-09-06T12:36:57.122938+00:00",
+  "streams": {
+    "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout": "20d2637d7bd33d95ea620e91a00210089d3e5e650821f61fba0293c25f107177"
+  },
+  "wall_limit_seconds": 60
+}

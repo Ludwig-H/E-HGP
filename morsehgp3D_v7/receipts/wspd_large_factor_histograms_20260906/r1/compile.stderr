@@ -1,0 +1,5 @@
+/workspaces/E-HGP/build/v7_wspd_histogram_large_factors_20260906/two_cubes.cpp: In function ‘int {anonymous}::run(mhgp7::u64)’:
+/workspaces/E-HGP/build/v7_wspd_histogram_large_factors_20260906/two_cubes.cpp:44:33: error: narrowing conversion of ‘((side * ((long unsigned int)m)) + j)’ from ‘mhgp7::u64’ {aka ‘long unsigned int’} to ‘mhgp7::PointId’ {aka ‘unsigned int’} [-Werror=narrowing]
+   44 |       input.push_back({side * m + j, p});
+      |                        ~~~~~~~~~^~~
+cc1plus: all warnings being treated as errors

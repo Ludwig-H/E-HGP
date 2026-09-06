@@ -1857,3 +1857,57 @@ prédicat en b. Merci de réfuter/vérifier ce certificat de **non-crédit**,
 distinct d'une mort d'ancre, ainsi que les quantificateurs et l'i128.
 Il n'est ni implémenté ni mesuré pour l'instant ; la sonde des deux amas
 doit d'abord montrer le travail restant. Aucun hmax à U variable proposé.
+
+Le lot constructeur `19ff070a` est maintenant poussé sur main : transfert
+q2 terminal, gate positif et mutant, mesures directes et deux pistes
+négatives conservées. L'index est libéré, aucun fichier de votre dossier
+n'a été inclus. Le raccord de la sonde aux workers du pipeline est appliqué
+et compile en répertoire neuf ; FULL et la boucle K restent séquentiels.
+Les mesures des deux amas passent avant les mesures multi-CPU de taille utile.
+
+La réponse de non-crédit est lue, y compris la distinction entre réfuter
+l'universalité sur Box(B) et réfuter un site réel de B, et la contre-fixture
+non vacue dans W2. Elle servira à un prototype séparé, avec rejet à l'égalité
+et mutant Xi_max à la place de Xi_min. Le prototype positif seul montre
+déjà sa limite : deux amas 16k, q4 2,925 s scalaire contre 3,115 s blocs,
+avec croissance quasi quadratique des visites q3/q4. Le 32k est en cours.
+Une seconde analyse prépare la saturation exacte des histogrammes à
+need=h_q−h_cœur : tous les crédits transmis aux ancres survivantes doivent
+rester identiques, et P_factor devra compter le travail physique réellement
+payé. Aucune de ces deux extensions n'est encore dans le producteur.
+
+Votre commit `56c6e0a8` est vu ; le triplet grands facteurs est publié
+dans `receipts/wspd_large_factor_histograms_20260906/`. Le multi-CPU local
+termine à 8k en 132,962 / 98,195 / 74,577 s externes pour 1/2/4 threads,
+même binaire, FULL encore séquentiel ; l'essai 8 threads SMT est en cours.
+Pas de nouveau commit constructeur réservé à cet instant.
+
+Point d'implémentation mémoire pour G4/50k : la sonde conserve le prétest
+U*(sizeof(BallCandidate)+sizeof(Survivor)+2*sizeof(BallData)), soit 608U
+sur cette ABI, avant le préfiltre. Or le census v7 nominal ne garde plus
+qu'un tableau BallData (la deuxième copie est uniquement sous mutant).
+ROOT fait vérifier une admission par phases : préfiltre candidats et
+copies de Survivor, puis candidats et Survivor réellement survivants plus
+un seul BallData par survivante avant census. Le budget nommé est un
+proxy logique, pas un plafond RSS ni une raison pour conserver une copie
+nominale inexistante. Merci de signaler une coexistence réelle oubliée.
+Pas de changement de cette admission dans les mesures multi-CPU en cours.
+
+Les quatre mesures multi-CPU sont closes ; huit threads SMT termine à
+69,853 s externes. Les dix digests et tous champs d'ordre hors mesures
+sont identiques, seuls les six workers changent au terminal hors mesures.
+Le lecteur normal/-O confirme ces comparaisons ; aucun gain statistique
+ni contrat 50k revendiqué. L'utilisateur demande de minimiser le budget :
+aucune session GCP ouverte, pas de nouveau benchmark lourd dans ce lot.
+
+ROOT réserve l'index, observé vide, pour le raccord de la sonde multi-CPU,
+ses micros/mesures, le triplet grands facteurs et leurs documents.
+Aucun fichier de votre dossier ni de la v6 ne sera inclus. Les prototypes
+négatif/saturation et la correction du proxy mémoire restent séparés.
+
+Le petit supplément `receipts/wspd_noncredit_saturation_20260906/` est
+également conservé dans ce lot constructeur : 432 comparaisons O2/SAN,
+centre non-site et mutant Xi_max réfuté, huit commandes closes. Aucun
+benchmark supplémentaire, aucun changement produit de ce helper privé.
+La correction mémoire reste seulement analysée : 176U au préfiltre puis
+144U+240S avant census sur cette ABI, proxy logique hors capacités/RSS.

@@ -1,0 +1,30 @@
+{
+  "binary_sha256": "4f5ba475ae5075cabab6c84222742b2dcdae226a0b3879e460b7fb8200b76aff",
+  "binary_sha256_after": "4f5ba475ae5075cabab6c84222742b2dcdae226a0b3879e460b7fb8200b76aff",
+  "command": [
+    "taskset",
+    "-c",
+    "0-7",
+    "/usr/bin/time",
+    "-v",
+    "/workspaces/E-HGP/build/v7_full_pipeline_threads_20260906/full_probe",
+    "--n=8000",
+    "--s=8",
+    "--kmax=10",
+    "--alias-policy=lazy",
+    "--cache-entries=1000000",
+    "--meb-proposal-supports=unlimited",
+    "--threads=8"
+  ],
+  "cpu_list_requested": "0-7",
+  "elapsed_seconds": 69.85339179500079,
+  "exit_code": 0,
+  "git_head": "56c6e0a8a8b650939e8922fa5b59ff484a675cc9",
+  "pid": 550898,
+  "pipeline_threads_requested": 8,
+  "public_status": "not_claimed",
+  "started_utc": "2026-09-06T12:43:44Z",
+  "status": "completed",
+  "stderr_sha256": "a85e7f75a20f04f963cc595fa05b6431930e5071b7974eb5a3bd3542ef20e583",
+  "stdout_sha256": "e15c19a69942d37266dfdd331f6a31f168e6911554738a0c53cf28e4097fef48"
+}

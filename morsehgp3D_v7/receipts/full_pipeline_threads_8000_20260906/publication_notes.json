@@ -1,0 +1,7 @@
+{
+  "benchmark_captures_and_reader_results_unchanged": true,
+  "correction": "resolve sibling reference lexically before read; final directory name follows ROOT documentation",
+  "initial_copy_attempt_exit_code": 1,
+  "initial_copy_attempt_failure": "FileNotFoundError resolving a sibling reference through the not-yet-created destination",
+  "initial_copy_attempt_wrote_no_files": true
+}

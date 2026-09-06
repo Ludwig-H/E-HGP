@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "c++",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-MMD",
+    "-MF",
+    "build/v7_full_pipeline_threads_20260906/full_probe.d",
+    "morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp",
+    "-o",
+    "build/v7_full_pipeline_threads_20260906/full_probe"
+  ],
+  "authority": "ROOT_reported_compile_exit0_no_stderr_not_a_recorded_build_command",
+  "hermetic_build_claimed": false,
+  "source_timing": "42_actual_project_dependencies_copied_after_compilation_before_micros"
+}

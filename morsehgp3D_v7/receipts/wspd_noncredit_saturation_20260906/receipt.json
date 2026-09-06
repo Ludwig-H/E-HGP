@@ -1,0 +1,13 @@
+{
+  "binaries": {
+    "O2": "ee6e38a7e154ae03fef4fa7bd67f6f104e0fb5139c8839be8d96afdaed446e78",
+    "mutant": "58e70fa193a0191cc089739f330713b5c85efa6cc5101b45107ff30f35e0e3da",
+    "san": "5ec6e40d35f4b0d53fa35967c79a23a3e5b7dc6b8d5b2bf038baeae74259bf98"
+  },
+  "commands": 8,
+  "cpp_closed": true,
+  "public_status": "not_claimed",
+  "schema": "mhgp7-private-negative-histogram-qualification-v1",
+  "sources_stable": true,
+  "status": "completed"
+}

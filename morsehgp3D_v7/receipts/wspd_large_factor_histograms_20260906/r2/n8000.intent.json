@@ -1,0 +1,21 @@
+{
+  "address_space_bytes": 27917287424,
+  "argv": [
+    "taskset",
+    "--cpu-list",
+    "6",
+    "/workspaces/E-HGP/build/v7_wspd_histogram_large_factors_20260906_capture_r2/two_cubes",
+    "--n=8000"
+  ],
+  "binary_before": "d8d719f19dea863b2707bb78e21c954edc78b1ba50fa826502963b67034d5ec9",
+  "closed": false,
+  "cpu": 6,
+  "cpu_seconds": null,
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": null,
+  "expected_exit": 0,
+  "fsize_bytes": null,
+  "pid": null,
+  "started": "2026-09-06T12:33:16.443058+00:00",
+  "wall_seconds": null
+}

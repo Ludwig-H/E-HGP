@@ -1,0 +1,29 @@
+{
+  "address_space_bytes": 27917287424,
+  "argv": [
+    "taskset",
+    "--cpu-list",
+    "6",
+    "/workspaces/E-HGP/build/v7_wspd_histogram_large_factors_20260906_capture_r2/two_cubes",
+    "--n=32000"
+  ],
+  "binary_after": "d8d719f19dea863b2707bb78e21c954edc78b1ba50fa826502963b67034d5ec9",
+  "binary_before": "d8d719f19dea863b2707bb78e21c954edc78b1ba50fa826502963b67034d5ec9",
+  "closed": true,
+  "cpu": 6,
+  "cpu_seconds": null,
+  "cwd": "/workspaces/E-HGP",
+  "ended": "2026-09-06T12:36:09.948753+00:00",
+  "exit_code": 0,
+  "expected_exit": 0,
+  "fsize_bytes": null,
+  "pid": 536680,
+  "sources_stable": true,
+  "started": "2026-09-06T12:34:44.242837+00:00",
+  "status": "completed",
+  "streams": {
+    "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout": "3e8cc2702882228b21295af13a6611a1320da29c54c37cce718f199f76cb2310"
+  },
+  "wall_seconds": null
+}

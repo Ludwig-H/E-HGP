@@ -1,0 +1,60 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v7_full_pipeline_threads_20260906/read_results.py",
+        "--directory",
+        "/workspaces/E-HGP/build/v7_full_pipeline_threads_20260906",
+        "--run-pin",
+        "1=5e3ccdb2880bd449ccc9bd99615300fc9caf609d2a0592dea41d39896cf308eb",
+        "--run-pin",
+        "2=ca12d24b1e1f98e4074193158fb6de716dbc06a2dcdbb9d1dbda158578f8ef32",
+        "--run-pin",
+        "4=7cf81cb19342059fb320d9514b2004e3cca4e71c19bde47140a986737bb4d4a0",
+        "--run-pin",
+        "8=2364a2817193b5a11c3ab5f82eab0741f6a6e486a65b03210d1349b0743040d8"
+      ],
+      "elapsed_seconds": 0.054172918000404024,
+      "exit_code": 0,
+      "group_closed": true,
+      "pid": 560106,
+      "reader_sha256": "d318ac4204f20d67e4555c6d1fd080a080590471c3de82992f862e6fc6f25d9e",
+      "started_utc": "2026-09-06T12:47:28Z",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5ff615a7231a2eb2efdea448436784020a9e656dc7a579b7a967f77049c77ac6"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v7_full_pipeline_threads_20260906/read_results.py",
+        "--directory",
+        "/workspaces/E-HGP/build/v7_full_pipeline_threads_20260906",
+        "--run-pin",
+        "1=5e3ccdb2880bd449ccc9bd99615300fc9caf609d2a0592dea41d39896cf308eb",
+        "--run-pin",
+        "2=ca12d24b1e1f98e4074193158fb6de716dbc06a2dcdbb9d1dbda158578f8ef32",
+        "--run-pin",
+        "4=7cf81cb19342059fb320d9514b2004e3cca4e71c19bde47140a986737bb4d4a0",
+        "--run-pin",
+        "8=2364a2817193b5a11c3ab5f82eab0741f6a6e486a65b03210d1349b0743040d8"
+      ],
+      "elapsed_seconds": 0.053907663001155015,
+      "exit_code": 0,
+      "group_closed": true,
+      "pid": 560107,
+      "reader_sha256": "d318ac4204f20d67e4555c6d1fd080a080590471c3de82992f862e6fc6f25d9e",
+      "started_utc": "2026-09-06T12:47:28Z",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5ff615a7231a2eb2efdea448436784020a9e656dc7a579b7a967f77049c77ac6"
+    }
+  ],
+  "engine_invoked": false,
+  "normal_optimized_equal": true,
+  "public_status": "not_claimed",
+  "reader_stable": true,
+  "status": "completed"
+}

@@ -1,0 +1,5 @@
+--- a/histogram_negative.hpp
++++ b/histogram_negative.hpp
+@@ -45,1 +45,1 @@
+-  if ((lane == Lane::kQ3 ? 3 : 2) * m * m <= 16 * cross_lower(a, b0, z)) {
++  if ((lane == Lane::kQ3 ? 3 : 2) * m * m <= 16 * positive::cross_upper(a, positive::point_box(b0), z)) {

@@ -1,0 +1,18 @@
+{
+  "added_resource_quotas": "none",
+  "argv": [
+    "taskset",
+    "--cpu-list",
+    "0",
+    "/workspaces/E-HGP/build/v7_wspd_histogram_negative_20260906_qualification_r1/bin/mutant",
+    "--selftest"
+  ],
+  "closed": false,
+  "cpu": 0,
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": null,
+  "expected_exit": 1,
+  "label": "mutant_selftest",
+  "pid": null,
+  "started": "2026-09-06T12:49:59.782377+00:00"
+}

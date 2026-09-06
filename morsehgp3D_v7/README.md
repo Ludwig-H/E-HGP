@@ -79,10 +79,17 @@ Le certificat de blocs pour h_a/h_b est prouvé avec l'auditeur, mais son
 prototype n'est pas retenu sur la route mesurée : petits facteurs et
 surcoût, histogrammes identiques. Le terminal systématiquement
 à un seul passage est écarté en l'état : il double les coins sur le cas 8k.
-Ce lot uniforme est clos ; les grands facteurs de deux amas séparés sont
-étudiés distinctement pendant la préparation multi-CPU. La suite est
-multi-CPU local puis
-G4 SPOT 48 CPU et GPU, sans convertir les reçus F
+Le [triplet de grands facteurs](receipts/wspd_large_factor_histograms_20260906/README.md)
+est également clos : gain q2, mais visites presque quadratiques et
+ralentissement q4 à 32k. Le [prototype rejet angulaire/saturation](receipts/wspd_noncredit_saturation_20260906/README.md)
+passe 432 comparaisons O2/SAN et son mutant ciblé ; il reste privé,
+non intégré et sans nouveau temps de grand nuage.
+Le [raccord multi-CPU](docs/PARALLELISME_FULL_20260906.md) est appliqué
+à la sonde ; ses micros passent et les mesures 8k terminent en
+132,962 / 98,195 / 74,577 / 69,853 s externes à 1/2/4/8 threads,
+mêmes dix forêts. FULL et la boucle K restent séquentiels. La suite
+vise G4 SPOT 48 CPU et GPU, avec dépenses minimisées,
+sans convertir les reçus F
 ou les seules primitives device en résultats de tour FULL.
 
 Priorités : mono-thread, puis multi-CPU, puis GPU. Le

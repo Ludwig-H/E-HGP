@@ -1,0 +1,40 @@
+{
+  "address_space_bytes": 27917287424,
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-I/workspaces/E-HGP/morsehgp3D_v7",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_wspd_histogram_large_factors_20260906_capture_r2/compile.d",
+    "/workspaces/E-HGP/build/v7_wspd_histogram_large_factors_20260906/two_cubes.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_wspd_histogram_large_factors_20260906_capture_r2/two_cubes"
+  ],
+  "binary_after": "d8d719f19dea863b2707bb78e21c954edc78b1ba50fa826502963b67034d5ec9",
+  "binary_before": null,
+  "closed": true,
+  "cpu": 0,
+  "cpu_seconds": 320,
+  "cwd": "/workspaces/E-HGP",
+  "dependencies_bound": true,
+  "ended": "2026-09-06T12:26:21.685172+00:00",
+  "exit_code": 0,
+  "expected_exit": 0,
+  "fsize_bytes": 536870912,
+  "pid": 525738,
+  "sources_stable": true,
+  "started": "2026-09-06T12:26:18.411293+00:00",
+  "status": "completed",
+  "streams": {
+    "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "wall_seconds": 300
+}

@@ -140,9 +140,24 @@ pas intégré : résultats identiques mais coins doublés sur le cas 8k,
 sans gain mesuré sur le front O2. Cette paire est distincte des temps FULL.
 Le [contrôle q2 positif](receipts/wspd_q2_positive_core_20260906/README.md)
 ajouté à la demande de l'auditeur passe O2/SAN et réfute l'omission de copie.
-Ce lot uniforme est clos ; un rectangle de deux amas séparés vérifie
-distinctement le cas des grands facteurs. La transition multi-CPU commence par les étapes
-déjà parallélisables, avec le coût FULL séquentiel déclaré séparément.
+Le [triplet de deux amas](receipts/wspd_large_factor_histograms_20260906/README.md)
+ferme aussi 8k/16k/32k, avec 48k/96k/192k valeurs d'histogramme égales.
+Les blocs positifs accélèrent q2 mais restent presque quadratiques ;
+q4 ralentit à 32k. Pas d'intégration de cette variante seule. Le rejet
+angulaire est prouvé par l'auditeur. Le [helper privé rejet/saturation](receipts/wspd_noncredit_saturation_20260906/README.md)
+passe 432 comparaisons O2/SAN, centre non-site et mutant Xi_max inclus,
+avec comptes physiques distincts du volume logique. Aucun benchmark
+lourd supplémentaire ni intégration produit de cette variante.
+Le [raccord multi-CPU de la sonde](docs/PARALLELISME_FULL_20260906.md)
+est appliqué aux étapes déjà parallélisables. Cinq micros et seize rejets
+passent. Les mesures appariées 8k terminent en 132,962 / 98,195 /
+74,577 / 69,853 s externes à 1/2/4/8 threads, mêmes dix forêts et
+mêmes champs d'ordre non mesurés. Le coût FULL reste autour de 50 s ;
+`--threads` ne parallélise pas les ordres. Le dernier bras emploie le
+SMT sur quatre cœurs physiques, pas huit cœurs. Dépenses GCP à minimiser,
+aucune session ouverte. L'admission mémoire pré-census héritée avec deux
+BallData par candidate reste à corriger séparément, sans réétiqueter ces
+captures ni supprimer les contrôles de mémoire réellement nécessaires.
 
 La [campagne de normalisation v2](docs/RESULTATS_MONO_FULL_SUCCESSOR_20260905.md)
 ferme les cinq captures prévues : 8k/s10 et s12 à 143,301 et 145,404 s,

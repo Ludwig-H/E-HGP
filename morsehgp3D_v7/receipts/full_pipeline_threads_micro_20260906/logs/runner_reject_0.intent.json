@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/run_full_probe.py",
+    "--binary",
+    "/workspaces/E-HGP/build/v7_full_pipeline_threads_20260906/full_probe",
+    "--output",
+    "/workspaces/E-HGP/build/v7_full_pipeline_threads_micro_20260906/micro_r1/runner_reject_0_must_not_exist",
+    "--n",
+    "8",
+    "--s",
+    "8",
+    "--threads",
+    "1",
+    "--threads",
+    "1"
+  ],
+  "cpu_limit_seconds": 45,
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": null,
+  "expected_exit": 2,
+  "file_limit_bytes": 67108864,
+  "group_closed": false,
+  "label": "runner_reject_0",
+  "pid": null,
+  "started_utc": "2026-09-06T12:36:57.140056+00:00",
+  "wall_limit_seconds": 60
+}

@@ -1,0 +1,21 @@
+# Rejet angulaire et saturation : préparation privée
+
+Pas de modification produit, ni de nouveau claim. Le prototype positif `../v7_wspd_histogram_blocks_20260906/histogram_blocks.hpp` reste immuable (SHA `1da88985c33d66d016039f5d5494228d7cbc3b19ff9d50ccf144560194c5947a`). `histogram_negative.hpp` porte une nouvelle traversée privée explicitement dérivée de cette source, sans refaire ses mathématiques positives.
+
+À ancre a fixée et b0 entier fixé au centre inférieur de la boîte opposée, M4/4 majore H sur le bloc Z et la somme des distances à zéro des intervalles de produit vectoriel minore Xi. Rejeter lorsque M4≤0 ou lorsque M4>0 et t*M4²≤16*Xi_min (t=3 pour q3,2 pour q4). L'égalité rejette le fuseau strict. Les carrés sont en i128 ; les intervalles linéaires restent en i64 sous u16. L'[avis indépendant](../../morsehgp3D_v7/audits/DIALOGUE_COURANT.md) lu porte le SHA `912c54c3914dc84170ca6ee5ee3e8abb5b07047afc1859cb6ba053c253d25a0f`.
+
+b0 n'a pas besoin d'être un site réel : réussir aux huit coins impliquerait réussir en b0 par convexité séparée. On réfute seulement une contribution universelle à l'histogramme, pas un témoin pour chaque b réel, et surtout pas une ancre ni un rectangle. Ordre des décisions : ancien hmax à ancre fixée ; crédit positif ; nouveau rejet négatif ; descente. q2 ne paie pas le certificat négatif.
+
+Le dernier argument `need` vaut MAX par défaut. Un besoin fini arrête après autant de **succès**, pas après autant de tests. Créditer N positions certifiées, ajouter min(N,need−compte) au résultat puis arrêter conserve min(histogramme,need) sans addition risquant un débordement. Le compteur logique des positions créditées garde N entier. `saturation_unvisited_pairs` compte séparément les positions restantes, hors diagonale ; aucune n'est comptée deux fois. Les scalaires de secours appliquent le même arrêt ; need0 ne paie ni test ni visite.
+
+Invariant : `base.logical_pairs = base.credited_positions + base.hmax_rejected_pairs + base.scalar_tests + negative_rejected_pairs + saturation_unvisited_pairs`. `clipped_credit_blocks` distingue les crédits de bloc effectivement écrêtés ; MAX n'en produit aucun. Les nouveaux certificats ont leurs compteurs séparés, et le nombre d'appels scalaires ne résume plus le coût.
+
+`negative_gate.cpp` prépare 432 comparaisons bornées avec référence scalaire produit et prédicats H/Xi indépendants, besoins0/1/2/8/10/MAX et dispatch0/8/scalar-only. La fixture auditeur a0/b100/Z=[1,2]×[4,5]×[0,1] doit rejeter q3/q4 tout en restant dans W2. Sa variante B={(100,0,0),(102,2,2)} exige le centre (101,1,1), strictement intérieur et absent des sites, avec rejets q3/q4 non vacants. Une boîte mixte contenant un vrai témoin tue le mutant physique Xi_upper. Égalités strictes, diagonale, u16 grand et crédits positifs écrêtés sont contrôlés. Les planchers annoncés restent **attendus**, pas acquis avant exécution.
+
+Le [patch mutant](xi_upper.patch) n'est appliqué qu'à une copie privée pour la qualification : il remplace une borne inférieure par une borne supérieure et doit échouer exactement sur `negative.true_witness_preserved`. Les anciennes mesures restent intactes. Aucun nouveau délai automatique ni quota CPU/fichier pour la future capture ; Popen/wait direct et interruption/clôture ciblée.
+
+## Petite qualification close, sans benchmark supplémentaire
+
+Huit commandes closes le6septembre à `12:49:59.786301+00:00` : compilations O2/SAN et portes nominales0, arguments inconnus2 ; compilation du mutant0 puis porte1 exactement sur `negative.true_witness_preserved`. O2/SAN rendent les mêmes octets : 432 comparaisons, 2 400 paires rejetées négativement, 6 964 positions non visitées par saturation, 260 crédits de blocs écrêtés, 4 lanes non-site. Les sources sont stables ; aucune VM utilisée.
+
+Reçu `../v7_wspd_histogram_negative_20260906_qualification_r1/receipt.json`, SHA `bfc282673a0bffce3ba492a01f8a5a4a6e25da00532762725691d1af14eac2ef`. Header qualifié `bea5681890c5462cbef2a1af42b2fcd8d1f08df541b9f5dada49ee416e4fb198`, gate `83e1f2f1062d3440cb4e7fb5c5065efff95bb03e61f3b55a6631f3dbd49ea86c`. Ce résultat est une validation locale bornée, pas un gain de temps ni une intégration produit ; les mesures de ce nouveau delta sont suspendues à la demande de minimiser le budget.
