@@ -1,0 +1,10 @@
+{
+  "schema": "mhgp7-audit-published-source-pin-check-v1",
+  "source_commit": "62e5cd7675dafeb5f564e68a1c01f6df62d02e22",
+  "variant": "N_filtered_publication_review",
+  "published_pins_checked": 2145,
+  "mismatches": [],
+  "method": "git cat-file --batch, SHA256 of each 62e5cd76 blob; no checkout or worktree modification",
+  "scope": "Published source pins only. Current concurrent producer edits deliberately not promoted.",
+  "status": "passed"
+}

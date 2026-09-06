@@ -838,5 +838,98 @@
     },
     "maintenance": "25 root Markdown notes preserved. Closed publication/replay/index waits removed; historical successor predictions relabelled as confirmed counts; erroneous active mathematical rationale corrected without altering scientific history. No work/build directory created.",
     "gcp": "not_used"
+  },
+  "latest_filtered_review_20260906": {
+    "date": "2026-09-06T09:22:56.077565+00:00",
+    "base_head": "62e5cd7675dafeb5f564e68a1c01f6df62d02e22",
+    "scope": "Independent reread of private filtered R2 captures; one causal rational terminal fixture; constructive FULL dispatcher contract/static advice. No new C++ engine/build/CTest or performance measurement.",
+    "receipt": "receipts_filtered_review_20260906/README.md",
+    "new_variant": "N_filtered_publication_review",
+    "variants_D_to_M_unchanged": true,
+    "historical_scientific_receipts_modified": false,
+    "checks": {
+      "docs_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "active_documents": 364
+      },
+      "registry": {
+        "exit_code": 0,
+        "phases": 20
+      },
+      "authored_markdown": {
+        "files": 7,
+        "links": 110,
+        "anchors": 4,
+        "errors": []
+      },
+      "normal_optimized_receipts": {
+        "constructor_review": {
+          "exit_codes": [
+            0,
+            0
+          ],
+          "byte_identical": true,
+          "sha256": "dc97bf8b21c69ccc8f6d0794499a0a70577e2c6b8ca971ab645029c8caa45fbe"
+        },
+        "terminal_reuse": {
+          "exit_codes": [
+            0,
+            0
+          ],
+          "byte_identical": true,
+          "sha256": "4a72653b26a5e5055fa4cd5d1283682fa8095ededc57858327e3ee2c1540cbe9"
+        }
+      },
+      "published_source_pins": {
+        "variant": "N_filtered_publication_review",
+        "source_commit": "62e5cd7675dafeb5f564e68a1c01f6df62d02e22",
+        "files": 2145,
+        "mismatches": [],
+        "receipt": "receipts_filtered_review_20260906/publication_check.json"
+      },
+      "worktree_freshness_normal_optimized": {
+        "exit_codes": [
+          1,
+          1
+        ],
+        "expected": true,
+        "common_pins_valid": 1968,
+        "published_variant_pins_verified_separately": 2145,
+        "unqualified_concurrent_delta": [
+          "CMakeLists.txt",
+          "PASSATION.md",
+          "README.md",
+          "docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md",
+          "docs/FAUSSES_PISTES.md",
+          "docs/RESIDENCE_MASSIVE.md",
+          "src/forest/full_gabriel.hpp",
+          "tests/full_gabriel_allocation_gate.cpp",
+          "tests/full_gabriel_lazy_allocation_gate.cpp",
+          "tests/full_gabriel_singleton_fixtures.hpp"
+        ],
+        "reason": "Constructor is preparing the next FULL dispatcher; published pins intentionally unchanged."
+      }
+    },
+    "constructor_preparation": "Static advice on FULL a946e31d and helper f922544b with unchanged F f75a136a. No new compiled qualification inherited. Live concurrent files retain their previous published source pins and may correctly fail worktree freshness.",
+    "constructive_result": {
+      "n": 12,
+      "k": 7,
+      "cache_capacity": 0,
+      "gamma_facets": 792,
+      "gamma_cofaces": 495,
+      "strict_cuts": 43,
+      "P": 11,
+      "C": 3,
+      "J": 9,
+      "T": 2,
+      "U": 1,
+      "potential_reuses": 1,
+      "mutant": "Cached root creates false parents [25,34], adds a node and changes full successor state; numbering is rational model only."
+    },
+    "maintenance": "25 root Markdown notes retained; stale private-filter static-only and q4/MAX-open reservations removed, resolved facts linked to main documentation, active dialogue rewritten around current integration and concrete terminal fixture. No duplicate root note or work/build directory created.",
+    "gcp": "not_used"
   }
 }

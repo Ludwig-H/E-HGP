@@ -1,0 +1,236 @@
+{
+  "audit_geometry_sha256": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b",
+  "capture_binding": {
+    "binary_identities_only": 11,
+    "builds": 11,
+    "commands": 41,
+    "copied_files": 502,
+    "dependency_entries": 224,
+    "ended_utc": "2026-09-06T08:14:41.633637+00:00",
+    "files": 504,
+    "hermetic_build_claim": false,
+    "manifest_entries": 503,
+    "mutation_single_file_changes": {
+      "ordinal_plus_one": "build/v7_meb_filtered_preparation_20260905/pivot.hpp",
+      "q4_rescale_level": "build/v7_meb_pivot_prototype/pivot.hpp",
+      "skip_shell": "build/v7_meb_filtered_preparation_20260905/pivot.hpp"
+    },
+    "sources": 63
+  },
+  "constructor_gates_captured": {
+    "o2": {
+      "budget_recomputed": {
+        "budget_refusals": 28,
+        "cumulative_calls": 4,
+        "near_MAX_rows": 8,
+        "proposal_forms": 50,
+        "rows": 59,
+        "shell_refusals": 6,
+        "successes": 25
+      },
+      "geometry_captured_comparisons": 9344,
+      "trajectory_captured": {
+        "admissible_order_budget_differences": 3,
+        "admissible_order_global_replays": 1,
+        "admissible_order_local_calls": 8,
+        "admissible_order_mutant_domain": "strict_positive_Q_budget_only",
+        "admissible_order_native_calls": 6,
+        "admissible_order_same_support": 3,
+        "checks": 12398,
+        "engine_integration": false,
+        "false_domains": 3,
+        "independent_geometry_oracle": false,
+        "local_23": 2,
+        "local_34": 6,
+        "local_43": 24,
+        "local_44": 24,
+        "local_diameter": 32,
+        "local_extra_shell": 6,
+        "local_permutations": 62,
+        "native_ambiguity_claim": false,
+        "native_calls": 180,
+        "native_refusal": 92,
+        "native_success": 88,
+        "order_mutant_domain": "outside_positive_Q_not_native_ambiguity",
+        "prefix_calls": 654,
+        "public_status": "not_claimed",
+        "replay_23": 48,
+        "replay_34": 17,
+        "replay_intermediate_extra_shell": 3,
+        "replay_pivots": 74,
+        "schema": "mhgp7-private-filtered-meb-trajectory-v1",
+        "status": "passed",
+        "test_side_order_mutants": 1,
+        "trajectory_observation": "test_side_replay_bound_to_native_terminals_and_q_traces"
+      }
+    },
+    "san": {
+      "budget_recomputed": {
+        "budget_refusals": 28,
+        "cumulative_calls": 4,
+        "near_MAX_rows": 8,
+        "proposal_forms": 50,
+        "rows": 59,
+        "shell_refusals": 6,
+        "successes": 25
+      },
+      "geometry_captured_comparisons": 9344,
+      "trajectory_captured": {
+        "admissible_order_budget_differences": 3,
+        "admissible_order_global_replays": 1,
+        "admissible_order_local_calls": 8,
+        "admissible_order_mutant_domain": "strict_positive_Q_budget_only",
+        "admissible_order_native_calls": 6,
+        "admissible_order_same_support": 3,
+        "checks": 12398,
+        "engine_integration": false,
+        "false_domains": 3,
+        "independent_geometry_oracle": false,
+        "local_23": 2,
+        "local_34": 6,
+        "local_43": 24,
+        "local_44": 24,
+        "local_diameter": 32,
+        "local_extra_shell": 6,
+        "local_permutations": 62,
+        "native_ambiguity_claim": false,
+        "native_calls": 180,
+        "native_refusal": 92,
+        "native_success": 88,
+        "order_mutant_domain": "outside_positive_Q_not_native_ambiguity",
+        "prefix_calls": 654,
+        "public_status": "not_claimed",
+        "replay_23": 48,
+        "replay_34": 17,
+        "replay_intermediate_extra_shell": 3,
+        "replay_pivots": 74,
+        "schema": "mhgp7-private-filtered-meb-trajectory-v1",
+        "status": "passed",
+        "test_side_order_mutants": 1,
+        "trajectory_observation": "test_side_replay_bound_to_native_terminals_and_q_traces"
+      }
+    }
+  },
+  "constructor_judges_imported": 0,
+  "engines_invoked": 0,
+  "gcp": "not_used",
+  "independent_geometry_ordered_clouds": 178,
+  "limits": [
+    "new Python review of preserved C++ outputs, no new C++ execution",
+    "gate summaries bound to captured code and exit, not per-case geometry telemetry",
+    "source-level sanitizer environment setting; no independent environment capture",
+    "no FULL integration, persistent Builder, observer exception or latency qualification"
+  ],
+  "mutants_rejudged": {
+    "ordinal_plus_one": {
+      "budget_refusals": 1650,
+      "calls": 3430,
+      "certified_then_legacy_refused": 391,
+      "differing_rows": 990,
+      "fast_q2": 416,
+      "fast_q3": 510,
+      "fast_q4": 64,
+      "first_difference": {
+        "causes": [
+          "literal_F_difference",
+          "geometric_terminal",
+          "support",
+          "key",
+          "radius",
+          "reduced_level"
+        ],
+        "input": "M 2 1 1 0 0 0 65535 65535 65535",
+        "row_zero_based": 6
+      },
+      "geometric_terminal": 495,
+      "key": 495,
+      "legacy_charge_or_other_stat": 495,
+      "literal_F_difference": 990,
+      "proposal_forms": 4705,
+      "q4_raw_level": 32,
+      "radius": 495,
+      "reduced_level": 463,
+      "shell_refusals": 40,
+      "support": 495
+    },
+    "q4_rescale_level": {
+      "budget_refusals": 1650,
+      "calls": 3430,
+      "certified_then_legacy_refused": 391,
+      "differing_rows": 64,
+      "fast_q2": 416,
+      "fast_q3": 510,
+      "fast_q4": 64,
+      "first_difference": {
+        "causes": [
+          "literal_F_difference",
+          "q4_raw_level"
+        ],
+        "input": "M 4 11 401 0 0 0 65535 65535 0 65535 0 65535 0 65535 65535",
+        "row_zero_based": 84
+      },
+      "literal_F_difference": 64,
+      "proposal_forms": 4705,
+      "q4_raw_level": 64,
+      "shell_refusals": 40
+    },
+    "skip_shell": {
+      "budget_refusals": 1650,
+      "calls": 3430,
+      "certified_then_legacy_refused": 405,
+      "differing_rows": 28,
+      "fast_q2": 416,
+      "fast_q3": 510,
+      "fast_q4": 64,
+      "first_difference": {
+        "causes": [
+          "literal_F_difference",
+          "geometric_terminal",
+          "shell_fallback"
+        ],
+        "input": "M 4 2 1 0 0 0 8 0 0 8 8 0 0 8 0",
+        "row_zero_based": 121
+      },
+      "geometric_terminal": 28,
+      "literal_F_difference": 28,
+      "proposal_forms": 4705,
+      "shell_fallback": 28,
+      "shell_refusals": 40
+    }
+  },
+  "ordinal_inventory": {
+    "domain": "2<=n<=11, 2<=q<=min(n,4)",
+    "last_rank": 550,
+    "per_build": 1507
+  },
+  "public_status": "not_claimed",
+  "rational": {
+    "o2": {
+      "budget_refusals": 1650,
+      "calls": 3430,
+      "certified_then_legacy_refused": 391,
+      "fast_q2": 416,
+      "fast_q3": 510,
+      "fast_q4": 64,
+      "first_difference": null,
+      "proposal_forms": 4705,
+      "shell_refusals": 40
+    },
+    "san": {
+      "budget_refusals": 1650,
+      "calls": 3430,
+      "certified_then_legacy_refused": 391,
+      "fast_q2": 416,
+      "fast_q3": 510,
+      "fast_q4": 64,
+      "first_difference": null,
+      "proposal_forms": 4705,
+      "shell_refusals": 40
+    }
+  },
+  "run_sha256": "981f3b3e67f3f8e731aceca964c9faaae32b16b372f58704b205585374f83e87",
+  "schema": "mhgp7-independent-filtered-capture-review-v1",
+  "seal_sha256": "c8268e851e19c9a7b0e2433fec7cf0f715cbccda75d9c63c8e8645e57b492e2f",
+  "source_map_sha256": "7e881f998a2f6bcac8e709a3ee3fa0c176973a7670e2a22960a1d46641627172",
+  "status": "passed"
+}
