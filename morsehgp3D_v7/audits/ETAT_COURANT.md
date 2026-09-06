@@ -1,6 +1,8 @@
 # État courant de l’audit v7
 
-Le [quotient C++ local](../receipts/local_plateau_20260906/README.md) est publié par 7debdbab avec sa qualification constructeur ; la contrelecture indépendante est statique et favorable. Les quatre census 50k et le [journal factorisé](receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md) ont leurs preuves séparées. Le [complément courant](receipts_plateaux_full_20260906/COVERAGE_THRESHOLDS.md) donne un seuil de contribution par point, partagé entre tous les K, et une branche sans DSU au premier rang des coquilles supplémentaires à diamètre. Les contre-fixtures distinguent ces seuils de la connexité. Le raccord global FULL, le format exporté et leur qualification restent à réaliser.
+Les [parents globaux des trois blocs 50k](receipts_plateaux_full_20260906/GLOBAL_PARENTS.md) sont décidés par certificats exacts : 174406 est déjà connecté avant K5 ; 254569 à K2 et 996863 à K6 relient chacun deux parents distincts. Un pont extérieur et deux preuves d’isolement suffisent, sans reconstruire le catalogue. L’arité totale des lots égaux, le raccord FULL et l’export restent à qualifier.
+
+Le [quotient C++ local](../receipts/local_plateau_20260906/README.md), publié par 7debdbab, conserve sa qualification constructeur et sa contrelecture indépendante statique favorable. Les [census et contributions](receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md), puis les [seuils partagés et le raccourci q2](receipts_plateaux_full_20260906/COVERAGE_THRESHOLDS.md), ont leurs preuves distinctes. Les changements C++ ultérieurs en préparation ne sont pas qualifiés par ces lectures.
 
 Le raccord FULL du proposeur MEB filtré publié par 20b28b1d dispose de la **qualification indépendante O2 et ASan/UBSan** : 2 784 sorties et 214 704 coupes par build, avec budgets, Work persistant et ordres n=14/K9/K10. L’export industriel et les contrats de performance restent ouverts.
 
@@ -32,6 +34,6 @@ La lecture intégrale des parties I et II du manuscrit, PDF 35–134, reste acqu
 
 Le [manifeste](validation_current.json) conserve O sur le publié `20b28b1d`, ainsi que D–N. Les écarts ultérieurs des documents, tests et du générateur sont affichés par le contrôle de fraîcheur, sans requalification implicite. Les headers FULL/MEB qualifiés sont inchangés. La réutilisation terminale q2 possède ses captures constructeur, contre-lues sans nouvelle exécution ; elle reste hors de O. Les sondes sans quotas et multi-CPU ne sont pas qualifiées par O. Le juge se rejoue sur les captures sans moteur.
 
-Le [dialogue actif](DIALOGUE_COURANT.md) porte les seuils de couverture partagés et le raccourci local du premier rang q2. Les autres questions sans incidence immédiate restent [regroupées](QUESTIONS_SECONDAIRES.md).
+Le [dialogue actif](DIALOGUE_COURANT.md) porte les trois verdicts globaux réels et leur emploi comme fixtures de raccord. Les autres questions sans incidence immédiate restent [regroupées](QUESTIONS_SECONDAIRES.md).
 
 Les reçus bruts et échecs restent conservés ; les anciennes synthèses sont accessibles par le [registre d’entretien](ENTRETIEN.json). GCP non utilisé.

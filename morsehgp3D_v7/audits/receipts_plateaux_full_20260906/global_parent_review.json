@@ -1,0 +1,107 @@
+{
+  "schema": "mhgp7-independent-global-parent-review-v1",
+  "date": "2026-09-06T19:24:25.521563+00:00",
+  "source_head_at_review": "220033155b8e4b9f44c24981048537ace93cc150",
+  "scope": "Exact parent relations for three pinned real 50k shell blocks using full input scans and bounded rational MEB certificates. No reconstruction of whole atomic plateau nodes, global catalogue or product forest.",
+  "public_status": "not_claimed",
+  "scientific_source_pins": {
+    "../meb_rational_oracle_20260905.py": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b",
+    "real_shell_census.py": "d935ec655563c75c29ad2bd0de67802c59000d0d359c09c1837fb4729b9089b0",
+    "shell_diagnostic.py": "1032cc5ef86da67e0064a56f68b35f0395181c16192ce92d863a1339254f426a"
+  },
+  "script_sha256": "bed92649d96a4e6218bd85caf73f341b0e3da91cba4fc1d479ebae849fc8f0db",
+  "input_digest": "3f7c6dd47bcba4222e511c94f90aaeeeb80198b0d5ac8a6721e4ff55feedab3f",
+  "raw_capture_path": "morsehgp3D_v7/receipts/full_extra_shell_50000_20260906/run_r3/n50000_k10.stderr",
+  "raw_capture_sha256": "3cd74b330c62978d8c3eedd175e12bf5fe02893facb2e008150c32b5054aea72",
+  "commands": [
+    [
+      "taskset",
+      "-c",
+      "1",
+      "python3",
+      "-B",
+      "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/real_parent_certificates.py"
+    ],
+    [
+      "taskset",
+      "-c",
+      "1",
+      "python3",
+      "-B",
+      "-O",
+      "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/real_parent_certificates.py"
+    ]
+  ],
+  "exit_codes": [
+    0,
+    0
+  ],
+  "outputs_identical": true,
+  "output_sha256": "7cc7e28d44f09bf1a29874b8892599d7814811f339bee3b1d62459ba41920444",
+  "checks": {
+    "exact_MEB_calls": 24,
+    "rational_support_tests": 837,
+    "maximum_geometric_subset_size": 7,
+    "complete_ball_census_scans": 3,
+    "complete_ball_census_point_pairs": 150000,
+    "scanned_distance_populations": 4,
+    "scanned_point_population_pairs": 199981
+  },
+  "targeted_mutants": [
+    {
+      "mutant": "claim_isolation_from_distance_filter_only",
+      "rejection": "survivor_certificate_complete"
+    },
+    {
+      "mutant": "claim_isolation_despite_a_strict_coface",
+      "rejection": "strict_coface_refutes_isolation"
+    },
+    {
+      "mutant": "change_raw_point_id",
+      "rejection": "point_coordinate_binding"
+    },
+    {
+      "mutant": "change_input_digest",
+      "rejection": "input_identity"
+    }
+  ],
+  "counterexamples_verified": [
+    "distance_filter_survival_is_not_a_strict_edge",
+    "open_isolation_cannot_be_transferred_to_closed_cut"
+  ],
+  "verdicts": [
+    {
+      "ball_index": 174406,
+      "k": 5,
+      "parent_relation": "same_global_parent",
+      "radius_squared": "14352441/4"
+    },
+    {
+      "ball_index": 254569,
+      "k": 2,
+      "parent_relation": "distinct_global_parents",
+      "radius_squared": "2904043/2"
+    },
+    {
+      "ball_index": 996863,
+      "k": 6,
+      "parent_relation": "distinct_global_parents",
+      "radius_squared": "6675549/2"
+    }
+  ],
+  "mathematical_cross_review": "The diameter lower bound eliminates all incident strict cofaces, including non-Gabriel ones; exact residual MEBs complete the isolation proof. A strict two-coface bridge proves identical parent images. Distinct block parents do not determine the arity of the whole equal-radius atomic node.",
+  "new_cpp_qualification": false,
+  "engine_invocations": 0,
+  "new_cpp_compilations": 0,
+  "gcp": "not_used_by_auditor",
+  "source_variants_D_to_O_unchanged": true,
+  "limitations": [
+    "Sufficient certificates, not a replacement for a general global parent resolver.",
+    "No small worst-case bound on distance-filter survivors is proved.",
+    "Nominal generated MEB witnesses are checked by positive support and containment; this is not an external arbitrary-certificate format validator.",
+    "The local C++ shortcut and test changes being prepared by the constructor are outside this execution review."
+  ],
+  "capture": "Each command redirected stdout and stderr together to its JSON receipt. Each combined capture is exactly one valid JSON document; stderr was not measured separately.",
+  "failed_attempts": "none; both modes passed on their first execution",
+  "independent_code_cross_review": "No concrete defect found. Reviewed full incidence coverage, exact positive-support containment, equality/open-cut boundary, bounded geometry and distinction between block roots and entire atomic-node arity."
+}

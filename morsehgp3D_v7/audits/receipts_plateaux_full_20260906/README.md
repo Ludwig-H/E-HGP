@@ -4,7 +4,7 @@
 
 **La garde actuelle ne peut pas être supprimée seule. Une extension exacte et locale est toutefois possible : quotient sur la coquille, raccord aux parents globaux avant le lot, naissances de plateau et deltas de couverture.** Les contre-fixtures sont permanentes. Elles sont distinctes des quatre enregistrements réels 50k, maintenant étudiés dans le [complément de diagnostic et de certificat](LOCAL_DIAGNOSTICS.md). Aucun moteur, compilation ou GCP utilisé par l’auditeur.
 
-La [suite sur les ancres de boule](BALL_ANCHORS.md) raccorde ce quotient à un producteur complet borné : fenêtre amont conservée, une ancre par boule et ordre, résolution à la demande et partage vertical. Les preuves et captures initiales ci-dessous restent inchangées. Le [helper local publié](../../receipts/local_plateau_20260906/README.md) a sa qualification constructeur distincte. Le [dernier complément](COVERAGE_THRESHOLDS.md) prouve des seuils de couverture partagés et un premier rang q2 sans DSU, sans supprimer l’obligation des parents globaux.
+La [suite sur les ancres de boule](BALL_ANCHORS.md) raccorde ce quotient à un producteur complet borné : fenêtre amont conservée, une ancre par boule et ordre, résolution à la demande et partage vertical. Les preuves et captures initiales ci-dessous restent inchangées. Le [helper local publié](../../receipts/local_plateau_20260906/README.md) a sa qualification constructeur distincte. Les [seuils partagés](COVERAGE_THRESHOLDS.md) et le premier rang q2 sans DSU ont leurs preuves ; le [complément global](GLOBAL_PARENTS.md) décide désormais les trois blocs réels ambigus.
 
 ## 1. Deux changements réels du certificat hors régularité
 
@@ -74,7 +74,7 @@ Le [producteur actuel](../../src/forest/full_gabriel.hpp) impose q≤4 et tous l
 
 Pour la vraie tour, une naissance de plateau supérieure s’ancre dans la composante inférieure **fermée au même niveau**, éventuellement sans coface unique distinguée. La naturalité vient toujours des inclusions des régions témoins. K=n reste une naissance de X à sa MEB, sans ordre supérieur ; le rayon zéro et les doublons gardent leur contrat distinct. Les poids sur toutes les facettes et leurs dates d’affectation ne sont pas remplacés par ces seules couvertures.
 
-Les quatre enregistrements détaillés de la capture locale K10 sont maintenant disponibles ; leur [contrelecture](LOCAL_DIAGNOSTICS.md) vérifie BallKey, niveau et census complet. Les parents globaux des trois fusions possibles restent à résoudre dans leur contexte extérieur. Le repli K5 en retient trois par la fenêtre, sans nouvelle extraction détaillée K5.
+Les quatre enregistrements détaillés de la capture locale K10 ont leur [census complet indépendant](LOCAL_DIAGNOSTICS.md). Le [contrôle global](GLOBAL_PARENTS.md) établit une continuation inerte et deux fusions certaines ; il ne reconstruit pas l’arité des lots égaux. Le repli K5 retient trois boules par la fenêtre, sans nouvelle extraction détaillée K5.
 
 ## Vérifications indépendantes
 

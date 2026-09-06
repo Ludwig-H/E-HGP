@@ -42,16 +42,16 @@ Le [paquet constructeur](../../receipts/full_extra_shell_50000_20260906/README.m
 
 Chaque coquille a u=3 et contient un unique diamètre positif : q_min=2, h=2. À K=p+1, le quotient strict est connexe et couvre S. À K=p+2, les deux paires non diamétrales sont les deux classes strictes et couvrent ensemble S ; **aucun gain de points n’est possible**, même si les deux parents globaux sont distincts. À K=p+3=|S|, aucune facette stricte n’existe : c’est une naissance de couverture S.
 
-| Indice de capture | p | Seule fusion possible | Naissance prouvée par census complet | Contribution hors naissance |
+| Indice de capture | p | Verdict global au rang ambigu | Naissance prouvée par census complet | Contribution hors naissance |
 | ---: | ---: | --- | --- | --- |
-| 174406 | 3 | K5, après résolution des deux représentants | K6, six points | Vide |
-| 254569 | 0 | K2, après résolution des deux représentants | K3, trois points | Vide |
-| 996863 | 4 | K6, après résolution des deux représentants | K7, sept points | Vide |
+| 174406 | 3 | K5, un parent : bloc inerte | K6, six points | Vide |
+| 254569 | 0 | K2, deux parents distincts : fusion certaine | K3, trois points | Vide |
+| 996863 | 4 | K6, deux parents distincts : fusion certaine | K7, sept points | Vide |
 | 1251653 | 9 | Aucune dans K1..10 | Hors fenêtre demandée | Vide ; ancre K10 conservée |
 
 L’absence de classe stricte locale devient ici une naissance **globale géométrique**, puisque I/U sont complets. Toute connexion au même rayon depuis une facette nouvelle aurait une boule minimale contenant cette facette, de même rayon ; l’unicité de la MEB impose la même boule. Elle ne peut rejoindre des points extérieurs à S ni un parent strict inexistant dans S. Cela n’annonce pas un nœud déjà produit par le C++.
 
-La résolution globale reste nécessaire pour décider les trois fusions possibles. La garde FULL actuelle ne peut donc pas être supprimée après le seul classement local. Ce cas réel n’exerce ni croissance ni naissance de couverture supérieure à K ; les fixtures synthétiques restent nécessaires pour qualifier le domaine non régulier complet.
+Les [certificats globaux ultérieurs](GLOBAL_PARENTS.md) décident ces trois cas par un pont extérieur et deux preuves d’isolement ; ils ne déduisent pas ces verdicts du seul quotient local et ne reconstruisent pas les lots égaux complets. La garde FULL actuelle ne peut pas être supprimée après le seul classement local. Ces cas réels n’exercent ni croissance ni naissance de couverture supérieure à K ; les fixtures synthétiques restent nécessaires pour qualifier le domaine non régulier complet.
 
 ## 4. Vérifications et reproduction
 

@@ -2254,5 +2254,95 @@
     "new_cpp_compilations": 0,
     "gcp": "not_used_by_auditor",
     "publication_scope_paths": 11
+  },
+  "latest_global_parent_review_20260906": {
+    "date": "2026-09-06T19:25:42.299100+00:00",
+    "base_head": "220033155b8e4b9f44c24981048537ace93cc150",
+    "receipt": "receipts_plateaux_full_20260906/GLOBAL_PARENTS.md",
+    "scope": "Exact parent relations for three pinned real 50k shell blocks using full input scans and bounded rational MEB certificates. No reconstruction of whole atomic plateau nodes, global catalogue or product forest.",
+    "model_exit_codes": [
+      0,
+      0
+    ],
+    "model_outputs_identical": true,
+    "model_output_sha256": "7cc7e28d44f09bf1a29874b8892599d7814811f339bee3b1d62459ba41920444",
+    "model_checks": {
+      "exact_MEB_calls": 24,
+      "rational_support_tests": 837,
+      "maximum_geometric_subset_size": 7,
+      "complete_ball_census_scans": 3,
+      "complete_ball_census_point_pairs": 150000,
+      "scanned_distance_populations": 4,
+      "scanned_point_population_pairs": 199981
+    },
+    "countermodels": [
+      {
+        "mutant": "claim_isolation_from_distance_filter_only",
+        "rejection": "survivor_certificate_complete"
+      },
+      {
+        "mutant": "claim_isolation_despite_a_strict_coface",
+        "rejection": "strict_coface_refutes_isolation"
+      },
+      {
+        "mutant": "change_raw_point_id",
+        "rejection": "point_coordinate_binding"
+      },
+      {
+        "mutant": "change_input_digest",
+        "rejection": "input_identity"
+      }
+    ],
+    "capture": "Each command redirected stdout and stderr together to its JSON receipt. Each combined capture is exactly one valid JSON document; stderr was not measured separately.",
+    "checks": {
+      "docs_normal_exit": 0,
+      "docs_optimized_exit": 0,
+      "active_markdown_before_staging_new_note": 401,
+      "registry_exit": 0,
+      "registry_phases": 20,
+      "authored_markdown": 7,
+      "local_links": 138,
+      "link_math_errors": 0,
+      "git_diff_check_exit": 0,
+      "freshness": {
+        "common_pins": 2267,
+        "common_mismatches": 0,
+        "source_variants_unchanged": true,
+        "normal_exit": 1,
+        "optimized_exit": 1,
+        "messages_identical": true,
+        "latest_variant": "O_full_meb_composition",
+        "latest_variant_deltas": [
+          "CMakeLists.txt",
+          "PASSATION.md",
+          "README.md",
+          "docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md",
+          "docs/FAUSSES_PISTES.md",
+          "docs/RESIDENCE_MASSIVE.md",
+          "src/pipeline/generate.hpp",
+          "tests/meb_proposal_local_gate.cpp"
+        ],
+        "interpretation": "Expected immutable historical C++ variant deltas; no implicit source requalification."
+      }
+    },
+    "maintenance": {
+      "root_markdown_notes": 25,
+      "previous_root_words": 18126,
+      "current_root_words": 18136,
+      "net_root_words_removed": -10,
+      "action": "Replace unresolved three-real-parent claims in all current entrypoints by one exact global certificate packet; condense adopted threshold/support-test discussion into links. Keep historical local-only receipts and all prior scientific data immutable."
+    },
+    "source_variants_D_to_O_unchanged": true,
+    "historical_scientific_receipts_modified": false,
+    "engine_invocations": 0,
+    "new_cpp_compilations": 0,
+    "gcp": "not_used_by_auditor",
+    "publication_scope_paths": 13,
+    "index_reservation": {
+      "base_head": "220033155b8e4b9f44c24981048537ace93cc150",
+      "remote_head": "220033155b8e4b9f44c24981048537ace93cc150",
+      "previous_index_empty": true,
+      "scope": "13 explicit auditor paths only; constructor and v6 preparation excluded"
+    }
   }
 }

@@ -22,7 +22,7 @@ Le [contrat principal](../docs/PLATEAUX_FULL_ET_ANCRES.md) reprend le quotient d
 
 Hors régularité, une naissance peut couvrir plus de K points et une continuation gagner des points. Le [complément de certificat](receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md) permet d’encoder des contributions datées, éventuellement redondantes, puis d’en faire l’union exacte à la lecture. Il ne faut donc pas imposer au producteur le calcul de deltas disjoints ni d’ensembles de points par racine. Les contributions restent distinctes des nœuds topologiques et la borne I≤L−R ne borne pas leur volume. Les identités, la géométrie, la complétude et les poids ont toujours des autorités distinctes ; F n’est pas réinterprété FULL.
 
-Les quatre coquilles réelles 50k sont maintenant disponibles et contrôlées localement. Elles donnent trois naissances géométriques et trois blocs à deux parents locaux dont les parents globaux restent à identifier ; aucune croissance de points dans ces derniers. Le C++ intégré et l’archive industrielle ne sont pas qualifiés par ces preuves. Les descriptions régulières ci-dessous gardent leurs prémisses.
+Les quatre coquilles réelles 50k ont leur census complet. Les [certificats globaux](receipts_plateaux_full_20260906/GLOBAL_PARENTS.md) décident les trois blocs auparavant ambigus : un seul parent pour 174406 à K5, deux parents distincts pour 254569 à K2 et 996863 à K6. Leurs contributions hors naissance sont vides ; trois naissances géométriques suivent aux ordres supérieurs. L’arité totale des lots égaux, le C++ intégré et l’archive ne sont pas qualifiés par ces preuves. Les descriptions régulières ci-dessous gardent leurs prémisses.
 
 ## Sommets Gabriel et vraie hiérarchie K-NN
 

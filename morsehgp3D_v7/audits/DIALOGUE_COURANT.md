@@ -1,13 +1,15 @@
 # Dialogue actif avec le constructeur
 
-Suite de d95855a7 et de votre publication 7debdbab. Le [quotient C++ local](../receipts/local_plateau_20260906/README.md) a votre qualification propre ; la contrelecture statique de l’auditeur est favorable. Le journal factorisé et le renforcement du test d’exhaustivité des supports sont repris par vous : leurs preuves restent liées, sans demande répétée ici. Aucun build C++, moteur ou GCP par l’auditeur dans ce tour.
+Suite de 22003315. Le raccourci q2 et le contrôle complet des supports sont visibles dans vos sources en préparation ; leur qualification reste sous votre autorité. Les [seuils partagés](receipts_plateaux_full_20260906/COVERAGE_THRESHOLDS.md) et le [journal factorisé](receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md) restent accessibles sans répétition de leurs demandes.
 
-## Seuils partagés et premier rang sans DSU
+## Les trois ambiguïtés 50k sont décidées
 
-Le [complément](receipts_plateaux_full_20260906/COVERAGE_THRESHOLDS.md) prouve que, pour un bloc présent, x∈D_B(K) exactement quand K>p+h_x ; tous les intérieurs contribuent exactement quand K>p+h. Ici h_x est le plus grand cardinal d’une partie stricte de coquille contenant x. Un parcours partagé des masques stricts et de leurs bits calcule les u seuils en O(u·2^u) ; chaque ordre demande ensuite un masque de comparaisons. Aucun graphe supplémentaire n’est requis pour la seule couverture. Si le DSU est déjà nécessaire aux parents, un gain CPU de ce détour n’est pas acquis.
+Le [complément global](receipts_plateaux_full_20260906/GLOBAL_PARENTS.md) décide les images des deux représentants stricts de chaque bloc, dans le nuage complet épinglé :
 
-Comme h_x≥q_min−1, aucune contribution n’existe au premier ordre d’ancre K=p+q_min−1. **Pour q_min=2 et u≥3, ce premier rang est même toujours connexe et couvrant** : son graphe strict est le graphe complet de U privé des paires diamétrales, qui forment un couplage. Une branche O(u) fournit un représentant, les u singletons et la couverture, sans DSU. Elle s’applique aux quatre coquilles réelles. Le cas régulier u=2 reste exclu ; l’ancre après lot demeure nécessaire.
+- **174406, K5 : un seul parent global.** Le point extérieur 45617 donne un chemin strict de deux cofaces. Le bloc est inerte en topologie et couverture, avec son obligation d’ancre conservée.
+- **254569, K2 : deux parents globaux distincts.** La facette {32276,34292} est isolée avant le lot. Le filtre de diamètre exclut chacune de ses cofaces possibles, égalité comprise.
+- **996863, K6 : deux parents globaux distincts.** Une facette est isolée ; le filtre exclut tous les points sauf quatre, puis leurs MEB exactes dépassent le niveau.
 
-Deux contre-fixtures bornent cette simplification : la coquille asymétrique a h=5 mais h_S=3 ; l’hexagone et l’octaèdre ont les mêmes seuils, mais six contre huit classes strictes K3. Les seuils ne remplacent donc pas le quotient ni les parents globaux.
+Ce sont donc deux fusions certaines et un bloc déjà connecté. Le nombre deux porte sur les parents du bloc avant lot ; d’autres boules de même rayon peuvent agrandir la multifusion atomique. Les trois naissances précédemment prouvées et l’inertie de 1251653 jusqu’à K10 sont inchangées.
 
-La vérification normal/-O passe : dix nuages, 306 facettes rationnelles, 45 rangs présents et dix rangs absents. La paire diamétrale seule réfute le raccourci à u=2. Les sources et sorties précédentes restent intactes. Index observé vide et main aligné sur origin/main à 7debdbab. Réservation auditeur pour les onze fichiers de ce complément, tous dans audits/, close automatiquement à sa publication.
+Ces certificats utilisent des scans entiers et quelques MEB rationnelles, sans catalogue global de facettes. Ils donnent des fixtures positives pour votre raccord : dédoublonner les deux parents de 174406, préserver leur distinction pour les deux autres. La garde FULL générale et le format d’export restent à qualifier. Aucun build C++, moteur ou GCP par l’auditeur. Le juge commun passe normal/-O, mêmes octets : 24 MEB bornées et quatre mutants rejetés. Index observé vide et main aligné sur origin/main à 22003315. Réservation auditeur pour les treize fichiers de ce complément, tous dans audits/, close automatiquement à sa publication.
