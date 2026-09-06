@@ -1,0 +1,152 @@
+{
+  "schema": "mhgp7-independent-ball-anchor-review-v1",
+  "date": "2026-09-06T16:00:11.575252+00:00",
+  "source_base_head": "ceb163f9eec20e14c4690317410c3e6b9033bd79",
+  "scope": "Conditional proof of sparse ball-anchor construction with complete S1 census; independent bounded Python producer and Gamma judge; static C++ review only.",
+  "source_scope_note": "Product pins refer to published ceb163f9. Concurrent constructor extra-shell diagnostic edits are not included or qualified. No source snapshot copied.",
+  "published_static_source_sha256": {
+    "morsehgp3D_v7/src/pipeline/candidates.hpp": "33e908458110861d4182ed915eebf312ffb67dc848744c417a5f2ddc719e793b",
+    "morsehgp3D_v7/src/pipeline/generate.hpp": "345129a775d430a40e151d3b1adb5cd9efeaf77a6ffb6713bd081c74d40bdd9c",
+    "morsehgp3D_v7/src/pipeline/expand.hpp": "7cafb0341344fbc7d1584001e4685e2e5bf0122fe3b7e37277f5468d5c5e1cf0",
+    "morsehgp3D_v7/src/pipeline/census.hpp": "95732fd89771ac08d9cb04599ef8f535639ad45633aebb09c33b268ec7bc56be",
+    "morsehgp3D_v7/src/forest/full_gabriel.hpp": "a946e31dde8fbd8ec528d6f5e94f9c727998acc172b4dd29c084dd522c730d1d",
+    "morsehgp3D_v7/src/forest/silent_incidence.hpp": "f75a136a320ddd1ace025436874585c2226e6150b8f2ebc37920b8dfc7e36c76",
+    "morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp": "3a17cbb8e16b3d38599aa22ef868fe3337032ae502506c09f41da2881df111d7",
+    "morsehgp3D_v7/docs/PREUVE_HORIZONTALE_COMPOSITION.md": "5aba4f18a90e4fabf05503ee2e420afbb079b72956ef7ec6bfdafd6ea3422e70",
+    "docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md": "b514de331edfb6b81a3072e423a0d598e43619fde0cd6fad75fe2e7811c16574"
+  },
+  "model_source_sha256": {
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/ball_anchor_model.py": "8f13f02d6b2c36c79708f6bdb8482c3d01ec81c4164b2bb60422993861e0ded4",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/plateau_model.py": "8afb5663c1fa0384d5ae392294cc03853676a89fcb18f858cd7d764ed9b1b93a",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/normal.json": "f7a7379ff0fa1d0a7fc5c760b289e07daefe4122a2e4337a41083a73f31aba56",
+    "morsehgp3D_v7/audits/meb_rational_oracle_20260905.py": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b"
+  },
+  "commands": [
+    "taskset -c 1 python3 -B morsehgp3D_v7/audits/receipts_plateaux_full_20260906/ball_anchor_model.py",
+    "taskset -c 1 python3 -B -O morsehgp3D_v7/audits/receipts_plateaux_full_20260906/ball_anchor_model.py"
+  ],
+  "exit_codes": [
+    0,
+    0
+  ],
+  "stderr_empty": true,
+  "outputs_identical": true,
+  "output_sha256": "f9133b79c6f5d59cf5045912f9931b27cf6367d9d6a016335b9ae97d783c9592",
+  "orders": 39,
+  "run_names": [
+    "arity_mix",
+    "arity_window_tetra_Kmax2",
+    "coverage_growth",
+    "external_bridge",
+    "portal_equal",
+    "right_triangle",
+    "square",
+    "window_shell7",
+    "window_shell7_Kmax5"
+  ],
+  "production_counters": {
+    "anchor_hits": 231,
+    "anchor_lookups": 233,
+    "birth_nodes": 135,
+    "closed_ball_anchors": 253,
+    "empty_order_ball_skips": 356,
+    "exact_MEB_requests": 233,
+    "growth_nodes": 2,
+    "inert_order_ball_skips": 49,
+    "local_classes": 231,
+    "merge_nodes": 54,
+    "nonGabriel_anchor_hits_observed_afterward": 2,
+    "radius_zero_point_nodes": 44,
+    "requests": 231,
+    "scheduled_order_ball_blocks": 253,
+    "shared_catalogue_balls": 138,
+    "shell_quotient_blocks": 253,
+    "balls_outside_rank_window": 1,
+    "anchor_misses": 2,
+    "census_after_anchor_miss": 2,
+    "descent_steps": 2,
+    "strict_radius_exchanges": 2
+  },
+  "verification_counters": {
+    "active_facets_compared": 1703,
+    "anchor_hits": 1703,
+    "anchor_lookups": 1749,
+    "exact_MEB_requests": 1749,
+    "horizontal_naturality_checks": 1312,
+    "nonGabriel_anchor_hits_observed_afterward": 313,
+    "open_closed_order_cuts": 502,
+    "requests": 1703,
+    "vertical_birth_ball_anchor_checks": 91,
+    "vertical_images": 334,
+    "vertical_naturality_squares": 304,
+    "anchor_misses": 46,
+    "census_after_anchor_miss": 46,
+    "descent_steps": 46,
+    "strict_radius_exchanges": 46
+  },
+  "existing_six_tower_digests_match": true,
+  "equal_radius_exchange_scope": "Separate unit exchange; the two production descents strictly reduce radius.",
+  "inert_anchor_mutant": {
+    "counters": {
+      "anchor_hits": 1,
+      "anchor_lookups": 2,
+      "anchor_misses": 1,
+      "census_after_anchor_miss": 1,
+      "exact_MEB_requests": 2,
+      "requests": 2
+    },
+    "cut": "3",
+    "facet": [
+      0,
+      4
+    ],
+    "global_qmin": 2,
+    "kmax": 2,
+    "local_arity": 4,
+    "points": [
+      [
+        2,
+        2,
+        2
+      ],
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0
+      ],
+      [
+        0,
+        0,
+        2
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "rejection": "weak_terminal_requires_closed_ball_anchor",
+    "smax": 3,
+    "unchanged_public_component_state": true
+  },
+  "representation_scope": "Producer stores component versions, successors, coverages and ball anchors, without global facet memberships. Exact geometry is a precomputed exhaustive oracle. Gamma is only used after production. Snapshots and events are not an industrial exported/replayed certificate. Oracle levels without scheduled blocks only create unchanged comparison snapshots.",
+  "conditional_algorithm_obligations": [
+    "S1 completeness and geometric minimum arity",
+    "full census within explicit profile and resource refusals",
+    "exact MEB, level and strict intruder decisions",
+    "prelot root identities and atomic closure",
+    "source/order ownership and historical cut normalization",
+    "nonregular birth coverages and continuation/merge deltas"
+  ],
+  "source_variants_D_to_O_unchanged": true,
+  "historical_scientific_captures_modified": false,
+  "new_cpp_compilations": 0,
+  "engine_invocations": 0,
+  "gcp": "not_used_by_auditor",
+  "public_status": "not_claimed"
+}

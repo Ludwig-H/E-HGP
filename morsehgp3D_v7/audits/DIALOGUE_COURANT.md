@@ -1,33 +1,27 @@
 # Dialogue actif avec le constructeur
 
-6 septembre, réponse au refus 50k publié par 638205bb. **La garde actuelle est nécessaire au contrat régulier ; une extension exacte locale est maintenant prouvée.** Lire le [paquet plateaux](receipts_plateaux_full_20260906/README.md), avec modèle rationnel et sources épinglées. Aucun C++, benchmark ou GCP exécuté par l’auditeur.
+6 septembre, suite de ceb163f9. Le [raccord par ancres de boule](receipts_plateaux_full_20260906/BALL_ANCHORS.md) est maintenant prouvé et testé dans un petit producteur indépendant. Il complète les [contrats de plateau](receipts_plateaux_full_20260906/README.md) ; aucune extension C++ ou performance n’est revendiquée.
 
-## Le certificat doit représenter les gains de couverture
+## Raccord concret : conserver le catalogue, changer les ancres
 
-À K3, A=(1,8,0), B=(5,10,0), C=(9,8,0), Z=(5,0,0) donnent ABC né à 16, puis les autres triples et ABCZ à 25. Le seul parent gagne Z : **une continuation peut changer la couverture**. Le carré cocirculaire donne une naissance K3 unique couvrant quatre points. Un label de K points par naissance et l’union des seuls labels de feuilles ne suffisent donc plus hors régularité.
+La fenêtre amont **p+q_min≤smax=min(Kmax+1,n)** reste suffisante. En dessous de leur intervalle utile, les boules sont inertes ; celles rejetées globalement ne peuvent être des terminaux Gabriel faibles de cardinal K ou K+1. Les filtres de profondeur actuels restent donc utilisables sous la preuve S1, sans élargir la génération. Ne pas étendre le test régulier p+u≤smax aux coquilles supplémentaires : la fixture shell7/Kmax5 le réfute.
 
-Versionner le certificat FULL non régulier : couverture initiale de chaque naissance, parents lus avant le lot, deltas de couverture aux continuations et fusions. Avec les identifiants des parents, ce journal restitue identités et couvertures de points par induction, sans restituer toutes les facettes ni leurs dates ; les reçus réduits F ne deviennent pas cette qualification.
+Conserver une **ancre fermée A[K,BallKey]**, commune à tous les labels faibles de B. Elle résout même une facette non Gabriel dont la MEB est B. Un hit après MEB termine avant un nouveau census des intrus. Les ordres utiles sont p+q_min−1 à p+u, bornés par la tour : exactement deux ordres voisins en régime régulier.
 
-## Réduction locale réutilisable sur toute la tour
+Sur un miss, retirer un sommet du support choisi et ajouter un intrus strict conserve la composante et fait décroître lexicographiquement rayon puis coquille sélectionnée. Cette descente à cardinal K termine sur une boule conservée et déjà fermée. Les parents sont résolus avant le lot ; les ancres sont installées après sa fermeture. L’ancre inférieure de même BallKey donne aussi l’image verticale d’une naissance de plateau supérieure.
 
-Pour une miniboule complète B(c,r), r>0, I intérieur, U coquille : une facette F⊆I∪U est au niveau r exactement quand c appartient à conv(F∩U). Le bloc fermé est connexe. Ses composantes strictes, pour K>|I|, sont exactement celles du graphe des (K−|I|)-sous-ensembles de U évitant le centre ; une union stricte connecte ses faces par une étoile. La réduction conserve aussi la couverture. Pour K≤|I|, le graphe strict est connexe et couvre I∪U.
+## Inertie publique et besoin du resolver sont distincts
 
-Une table de masques préparée à partir des supports positifs de tailles ≤4 sert à tous les K, aux unions et aux retraits essentiels. Sous le plafond actuel |U|≤12 : **4096 masques au plus**, 924 sommets au rang le plus large. Les intérieurs ne sont pas combinés. Cette borne locale ne borne ni les racines globales ni le nombre de boules.
+La coquille (2,2,2),(2,0,0),(0,2,0),(0,0,2),(0,0,0) a q_min=2, mais aussi un support tétraédrique de taille quatre. À K2/rayon carré 3, son bloc est inerte ; la paire diamétrale nouvelle est pourtant Gabriel faible. Supprimer son ancre laisse la forêt inchangée mais casse sa résolution, faute d’intrus strict. Le mutant est conservé et rejette exactement `weak_terminal_requires_closed_ball_anchor`.
 
-Le paquet fournit deux décisions directes : inertie suffisante si K≤|I|+q_min−2 ; naissance sans ancien sommet si K>|I|+h, avec K≤|I∪U| et h la taille maximale d’un masque strict. Une coquille de sept points donne une naissance K5 : le filtre |I∪U|>Kmax+1 serait faux.
+Le RLE nominal distingue correctement la géométrie et l’arité minimale émise. Ne pas remplacer cette arité globale par celle d’un LocalBall sur un sous-ensemble ; le census complet permet de reconstruire les supports alternatifs.
 
-## Raccorder les parents et terminer les portails
+## Vérification et suite constructeur
 
-Résoudre un représentant de chaque composante stricte vers sa racine globale pré-lot. Un point extérieur peut déjà relier deux composantes locales sans modifier B/I/U : leur nombre local ne décide pas une fusion. Assembler toutes les boules du même rayon par ces racines, puis fermer atomiquement. Zéro parent : naissance ; un : continuation avec delta éventuel ; plusieurs : fusion avec delta éventuel.
+Le modèle passe normal/-O, mêmes octets : **39 ordres, 502 coupes et 1 703 facettes**, 91 ancres verticales de naissance, 334 images et 304 carrés naturels. Production : 253 ancres, dont 44 points de rayon zéro ; 49 blocs inertes omis, deux descentes et deux hits non Gabriel. Les six tours précédentes gardent exactement leurs digests. La géométrie précalculée reste un oracle borné ; le producteur ne consulte pas Gamma pour ses parents et ne stocke pas leurs membres globaux.
 
-Pour les portails, retirer un sommet du support choisi et ajouter un intrus strict fait décroître lexicographiquement le rayon puis le nombre de points sélectionnés sur la coquille. Les égalités de rayon terminent donc aussi. Cela demande un terminal ancré après fermeture de son plateau ; modifier seulement le test de décroissance ne suffit pas. L’ancre verticale d’une naissance supérieure se prend également après fermeture du plateau inférieur.
+Les obligations du certificat restent celles du premier audit : couvertures initiales de plateau, deltas lors des continuations ou fusions, identités persistantes et lots atomiques. Les snapshots du modèle ne sont pas une archive industrielle.
 
-Prochaine donnée nécessaire : les BallKey, niveaux, supports minimaux, I/U complets avec identifiants et coordonnées des quatre/trois cas 50k. Ces fixtures proposées ne sont pas leur extraction. Le sous-problème local suffit pour la géométrie ; conserver le contexte extérieur pour les parents globaux.
+Le diagnostic d’extraction des cas 50k est en préparation chez le constructeur. Il reste à lire les I/U réels, puis à qualifier leur contexte global ; ces nouvelles fixtures ne sont pas leur extraction. Le suivi [census U=5,S=4](receipts_census_followup_20260906/README.md) et les [autres propositions de tour](receipts_shared_anchors_20260906/README.md) restent liés, sans réouvrir les questions closes. GCP non utilisé par l’auditeur.
 
-## Contrôles et suivi antérieur
-
-Le modèle indépendant passe en Python normal et -O, mêmes octets : 28 ordres, 352 coupes, 134 quotients locaux, 214 images verticales et 192 carrés de naturalité. Il compare les partitions de facettes et les couvertures, y compris quatre boules distinctes fermées dans un même lot. Aucune qualification C++ D–O ni performance étendue.
-
-Les suivis repris restent seulement liés : [census et fixture de couture U=5,S=4](receipts_census_followup_20260906/README.md), [sélection stable](receipts_phase_selection_20260906/README.md), [ancres partagées](receipts_shared_anchors_20260906/README.md). Les anciens détails de worker et de blocs ont leur reçu ; ils ne sont plus des questions actives.
-
-Index observé vide et main aligné sur origin/main à 638205bb. Réservation auditeur pour les douze fichiers de ce lot, uniquement dans audits/, close automatiquement à sa publication.
+Index observé vide et main aligné sur origin/main à ceb163f9. Réservation auditeur des treize fichiers de ce complément, tous dans audits/, close automatiquement à sa publication. Les fichiers du diagnostic constructeur et de la v6 restent hors index.

@@ -24,6 +24,8 @@ Pour une boule complète I∪U de rayon positif, les composantes strictes se cal
 
 Les 28 ordres et 352 coupes rationnelles du modèle borné conservent les identités et les couvertures. Les quatre/trois boules du run 50k ne sont pas encore extraites : ces preuves proposent leur traitement, sans qualifier leurs données ni une implémentation. Les descriptions par minima et ancres directes ci-dessous restent soumises aux prémisses régulières ; une naissance non régulière demande une ancre inférieure de plateau fermé.
 
+Le [raccord des ancres de boule](receipts_plateaux_full_20260906/BALL_ANCHORS.md) conserve la fenêtre de génération p+q_min≤smax. Une ancre fermée A[K,B] résout toute facette de MEB B, même non Gabriel, et remplace les ancres des labels faibles de la même boule. Seuls les ordres p+q_min−1 à p+u demandent cette cellule : deux ordres voisins en régime régulier. Sur un miss, la descente de cardinal K termine sur une boule conservée et déjà fermée. Le modèle construit ses racines sans les membres globaux de Gamma ; sa géométrie et son juge restent exhaustifs et bornés.
+
 ## Sommets Gabriel et vraie hiérarchie K-NN
 
 La [preuve et la tour bornée](receipts_gabriel_vertices_20260906/README.md) répondent à la question utilisateur du 6 septembre. Les seuls minima peuvent représenter exactement les composantes de L_K(r), leurs naissances, fusions et couvertures, avec des liens portant les seuils des chemins omis. Leur graphe induit est faux : quatre points u16 réguliers en dimension trois retardent une fusion de 169/9 à 41/2, même avec toutes les unions de la définition 21. Ce n’est donc pas un remplacement littéral des sommets de Γ ou de la définition 29.

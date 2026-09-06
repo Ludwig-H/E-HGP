@@ -5,7 +5,7 @@ Lire l’[état courant](ETAT_COURANT.md), puis le [dialogue actif](DIALOGUE_COU
 | Sujet courant | Qualification indépendante |
 | --- | --- |
 | Modèle FULL et taille de sortie | [Décision et domaine](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md), [borne à K fixé et témoins u16](receipts_probe_meb_review_20260906/full_output_growth.md) |
-| Priorité 50k : plateaux non réguliers | [Quotient de coquille partagé entre K, deltas de couverture et portails](receipts_plateaux_full_20260906/README.md) ; preuve et modèle rationnel, extension C++ à qualifier |
+| Priorité 50k : plateaux non réguliers | [Quotient et deltas](receipts_plateaux_full_20260906/README.md), [une ancre par boule et ordre](receipts_plateaux_full_20260906/BALL_ANCHORS.md) ; modèle rationnel, extension C++ à qualifier |
 | Vraie hiérarchie K-NN et tour sur les minima | [Descente et prototype K1..4](receipts_gabriel_vertices_20260906/README.md), [ancres partagées et choix de retrait](receipts_shared_anchors_20260906/README.md) |
 | Génération WSPD et histogrammes | [Sélection stable et saturation](receipts_phase_selection_20260906/README.md), [blocs](receipts_block_histograms_20260906/README.md), [terminal unique et cœur q2 positif](receipts_terminal_count_20260906/README.md) |
 | Admission du payload CPU | [Raccord contre-lu et fixture à sept points](receipts_census_followup_20260906/README.md), [preuve des gardes](receipts_phase_selection_20260906/README.md) ; pas borne RSS |

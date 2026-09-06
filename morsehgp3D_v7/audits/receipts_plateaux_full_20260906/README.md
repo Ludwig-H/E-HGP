@@ -4,6 +4,8 @@
 
 **La garde actuelle ne peut pas être supprimée seule. Une extension exacte et locale est toutefois possible : quotient sur la coquille, raccord aux parents globaux avant le lot, naissances de plateau et deltas de couverture.** Les contre-fixtures sont permanentes. Elles ne sont pas les quatre enregistrements du run 50k, dont les coordonnées restent à extraire. Aucun moteur, compilation ou GCP utilisé par l’auditeur.
 
+La [suite sur les ancres de boule](BALL_ANCHORS.md) raccorde ce quotient à un producteur complet borné : fenêtre amont conservée, une ancre par boule et ordre, résolution à la demande et partage vertical. Les preuves et captures initiales ci-dessous restent inchangées.
+
 ## 1. Deux changements réels du certificat hors régularité
 
 Toutes les coordonnées suivantes sont u16, de troisième coordonnée zéro. Les niveaux donnés sont les rayons carrés exacts.

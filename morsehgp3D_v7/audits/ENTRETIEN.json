@@ -361,9 +361,9 @@
     }
   ],
   "current_root_markdown_files": 25,
-  "current_root_words_whitespace_split": 13155,
-  "reduction_percent": 82.78,
-  "secondary_questions_sha256": "ce9a471231c06936cf31c48dac96752550547f602963734aba52be5814d22b88",
+  "current_root_words_whitespace_split": 18529,
+  "reduction_percent": 75.75,
+  "secondary_questions_sha256": "d41daf7b69827114c19991984ba5bb4652886b4197350b2809e748caba68c9d8",
   "unchanged_other_common_pins": 1598,
   "constructor_document_refresh": {
     "documents": [
@@ -1867,5 +1867,103 @@
     "new_cpp_compilations": 0,
     "gcp": "not_used_by_auditor",
     "publication_scope_paths": 12
+  },
+  "latest_ball_anchor_review_20260906": {
+    "date": "2026-09-06T16:02:45.165884+00:00",
+    "base_head": "ceb163f9eec20e14c4690317410c3e6b9033bd79",
+    "receipt": "receipts_plateaux_full_20260906/BALL_ANCHORS.md",
+    "scope": "Conditional proof of sparse ball-anchor construction with complete S1 census; independent bounded Python producer and Gamma judge; static C++ review only.",
+    "model_output_sha256": "f9133b79c6f5d59cf5045912f9931b27cf6367d9d6a016335b9ae97d783c9592",
+    "model_orders": 39,
+    "model_exit_codes": [
+      0,
+      0
+    ],
+    "model_outputs_identical": true,
+    "production_counters": {
+      "anchor_hits": 231,
+      "anchor_lookups": 233,
+      "birth_nodes": 135,
+      "closed_ball_anchors": 253,
+      "empty_order_ball_skips": 356,
+      "exact_MEB_requests": 233,
+      "growth_nodes": 2,
+      "inert_order_ball_skips": 49,
+      "local_classes": 231,
+      "merge_nodes": 54,
+      "nonGabriel_anchor_hits_observed_afterward": 2,
+      "radius_zero_point_nodes": 44,
+      "requests": 231,
+      "scheduled_order_ball_blocks": 253,
+      "shared_catalogue_balls": 138,
+      "shell_quotient_blocks": 253,
+      "balls_outside_rank_window": 1,
+      "anchor_misses": 2,
+      "census_after_anchor_miss": 2,
+      "descent_steps": 2,
+      "strict_radius_exchanges": 2
+    },
+    "verification_counters": {
+      "active_facets_compared": 1703,
+      "anchor_hits": 1703,
+      "anchor_lookups": 1749,
+      "exact_MEB_requests": 1749,
+      "horizontal_naturality_checks": 1312,
+      "nonGabriel_anchor_hits_observed_afterward": 313,
+      "open_closed_order_cuts": 502,
+      "requests": 1703,
+      "vertical_birth_ball_anchor_checks": 91,
+      "vertical_images": 334,
+      "vertical_naturality_squares": 304,
+      "anchor_misses": 46,
+      "census_after_anchor_miss": 46,
+      "descent_steps": 46,
+      "strict_radius_exchanges": 46
+    },
+    "checks": {
+      "docs_normal_exit": 0,
+      "docs_optimized_exit": 0,
+      "active_markdown": 395,
+      "registry_exit": 0,
+      "registry_phases": 20,
+      "authored_markdown": 7,
+      "local_links": 122,
+      "link_math_errors": 0,
+      "git_diff_check_exit": 0,
+      "freshness": {
+        "common_pins": 2234,
+        "common_mismatches": 0,
+        "source_variants_unchanged": true,
+        "normal_exit": 1,
+        "optimized_exit": 1,
+        "outputs_identical": true,
+        "latest_variant": "O_full_meb_composition",
+        "latest_variant_deltas": [
+          "CMakeLists.txt",
+          "PASSATION.md",
+          "README.md",
+          "docs/FAUSSES_PISTES.md",
+          "docs/RESIDENCE_MASSIVE.md",
+          "src/pipeline/generate.hpp",
+          "tests/meb_proposal_local_gate.cpp"
+        ],
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "5b02791a84b77cc3623399cf065a5c2c1e1bc314410d26de50ec49d323fe7c90"
+      }
+    },
+    "maintenance": {
+      "root_markdown_notes": 25,
+      "dialogue_previous_words": 665,
+      "dialogue_current_words": 546,
+      "previous_root_words": 13155,
+      "previous_secondary_questions_sha256": "ce9a471231c06936cf31c48dac96752550547f602963734aba52be5814d22b88",
+      "action": "Condense dialogue around complete ball-anchor construction; remove now-active nonregular plateau topic from secondary questions; add source links without duplicating initial scientific captures."
+    },
+    "historical_scientific_receipts_modified": false,
+    "source_variants_D_to_O_unchanged": true,
+    "new_cpp_compilations": 0,
+    "engine_invocations": 0,
+    "gcp": "not_used_by_auditor",
+    "publication_scope_paths": 13
   }
 }
