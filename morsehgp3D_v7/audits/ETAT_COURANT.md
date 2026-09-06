@@ -2,6 +2,8 @@
 
 Le raccord FULL du proposeur MEB filtré publié par `20b28b1d` passe une **nouvelle qualification indépendante O2 et ASan/UBSan** : 2 784 sorties et 214 704 coupes par build, avec budgets et Work persistant. Deux ordres n=14/K9/K10 étendent le corpus. Les réserves d’intégration sont closes ; l’export industriel et les contrats de performance restent ouverts.
 
+Le [suivi du 6 septembre](receipts_probe_meb_review_20260906/README.md) ajoute une preuve quadratique sur les **minima FULL**, pour chaque K fixé≥2 à précision croissante, et des paires strictes sur les littéraux u16. Il apporte aussi deux gardes contre les faux diagnostics d’économie F et ferme les anciens défauts de format après contrelecture de 48 vraies paires / 312 ordres du comparateur réparé. Aucun nouveau moteur ni temps de tour n’est ajouté.
+
 ```text
 phase=exploration_v7_hors_registre
 backend=cpu_reference

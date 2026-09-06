@@ -1,0 +1,90 @@
+{
+  "captured_utc": "2026-09-06T10:15:17.801166+00:00",
+  "files": [
+    {
+      "bytes": 32743,
+      "copy": "inputs/compare.py",
+      "sha256": "be4b8712f55324af025d1ed69a2aa3748de45a8f2ba73519bf575243226fd7c6",
+      "source": "morsehgp3D_v7/bench/full_gabriel_meb_compare_audit.py"
+    },
+    {
+      "bytes": 36524,
+      "copy": "inputs/controller.py",
+      "sha256": "ee9d4640452c81bc4bd4d872630da2a334cf49da078c84dd74c82c8b4c20058d",
+      "source": "build/v7_meb_probe_20260906_controller/capture.py"
+    },
+    {
+      "bytes": 4446,
+      "copy": "inputs/attempt/protocol.json",
+      "sha256": "a614d31eab6f68c6a4810fd89f6ee4820c24ce561c4ac88575d154b7bbff35ac",
+      "source": "build/v7_meb_probe_20260906_controller/micro_r1/k5/protocol.json"
+    },
+    {
+      "bytes": 15733,
+      "copy": "inputs/attempt/n8_s8_k5_lazy_c0_p0.receipt.json",
+      "sha256": "4bc27d1171c036bf02293de0737165441d401acb34f6d23d3f91e72d575a2189",
+      "source": "build/v7_meb_probe_20260906_controller/micro_r1/k5/n8_s8_k5_lazy_c0_p0.receipt.json"
+    },
+    {
+      "bytes": 1582,
+      "copy": "inputs/attempt/n8_s8_k5_lazy_c0_p0.command.json",
+      "sha256": "01ed946cd717dc3e5e67c53645eddf02d5a88edd2fa324df9ecbfc09b977e6e0",
+      "source": "build/v7_meb_probe_20260906_controller/micro_r1/k5/n8_s8_k5_lazy_c0_p0.command.json"
+    },
+    {
+      "bytes": 1018,
+      "copy": "inputs/attempt/n8_s8_k5_lazy_c0_p0.intent.json",
+      "sha256": "412ab316b0602edaaf052e520393878565f25c40c06d42eb8121ccdf68970a5a",
+      "source": "build/v7_meb_probe_20260906_controller/micro_r1/k5/n8_s8_k5_lazy_c0_p0.intent.json"
+    },
+    {
+      "bytes": 83,
+      "copy": "inputs/attempt/n8_s8_k5_lazy_c0_p0.spawn.json",
+      "sha256": "3d710c23cb0995026acb30b1f3bd325a15528fb291a7e08aff0382ab05377ad9",
+      "source": "build/v7_meb_probe_20260906_controller/micro_r1/k5/n8_s8_k5_lazy_c0_p0.spawn.json"
+    },
+    {
+      "bytes": 6860,
+      "copy": "inputs/attempt/n8_s8_k5_lazy_c0_p0.sources_before.json",
+      "sha256": "a4242d5842184b5d6926adb7d4887e109f926178c39a600dc3d70d8ac1a91f57",
+      "source": "build/v7_meb_probe_20260906_controller/micro_r1/k5/n8_s8_k5_lazy_c0_p0.sources_before.json"
+    },
+    {
+      "bytes": 6860,
+      "copy": "inputs/attempt/n8_s8_k5_lazy_c0_p0.sources_after.json",
+      "sha256": "a4242d5842184b5d6926adb7d4887e109f926178c39a600dc3d70d8ac1a91f57",
+      "source": "build/v7_meb_probe_20260906_controller/micro_r1/k5/n8_s8_k5_lazy_c0_p0.sources_after.json"
+    },
+    {
+      "bytes": 427,
+      "copy": "inputs/attempt/n8_s8_k5_lazy_c0_p0.verdict.json",
+      "sha256": "152dcad32f44ed06dd5e778443c6266b66cf275ae6c659c571876ba174f5036c",
+      "source": "build/v7_meb_probe_20260906_controller/micro_r1/k5/n8_s8_k5_lazy_c0_p0.verdict.json"
+    },
+    {
+      "bytes": 14400,
+      "copy": "inputs/attempt/n8_s8_k5_lazy_c0_p0.raw.txt",
+      "sha256": "458624eee4aece948c21abde211d634f227e08e67067653750495c94eb787a84",
+      "source": "build/v7_meb_probe_20260906_controller/micro_r1/k5/n8_s8_k5_lazy_c0_p0.raw.txt"
+    },
+    {
+      "bytes": 0,
+      "copy": "inputs/attempt/n8_s8_k5_lazy_c0_p0.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "build/v7_meb_probe_20260906_controller/micro_r1/k5/n8_s8_k5_lazy_c0_p0.stderr"
+    },
+    {
+      "bytes": 704,
+      "copy": "inputs/attempt/n8_s8_k5_lazy_c0_p0.judge_normal.stdout",
+      "sha256": "d9ec625575f691ed3753e369126edd2040a5253f0eaa9b76262c5ee74ba76406",
+      "source": "build/v7_meb_probe_20260906_controller/micro_r1/k5/n8_s8_k5_lazy_c0_p0.judge_normal.stdout"
+    },
+    {
+      "bytes": 836,
+      "copy": "inputs/attempt/n8_s8_k5_lazy_c0_p0.first_c_normal.stdout",
+      "sha256": "28ae539ad6668b0580495db69e1e74e501e2053c4a14a105838ca2124fffa1b9",
+      "source": "build/v7_meb_probe_20260906_controller/micro_r1/k5/n8_s8_k5_lazy_c0_p0.first_c_normal.stdout"
+    }
+  ],
+  "kind": "read_only_metadata_counterfixture_no_ELF_no_engine"
+}

@@ -1,0 +1,200 @@
+{
+  "compiled_captures_rechecked": {
+    "counts": {
+      "K10_rows": 48,
+      "all_rows": 6816,
+      "budget_rows": 1248,
+      "certification_and_F_rows": 314,
+      "completed_rows": 5664,
+      "nominal_rows": 5568,
+      "positive_forms_rows": 1044,
+      "refused_prefix_rows": 1152,
+      "zero_certificate_with_physical_F": 602
+    },
+    "inputs": {
+      "O2_higher_P0": {
+        "gzip_sha256": "764dd7455cb3fadefd116ab7ed97ddda4604c58e9a62e4ee20449577ab3119b0",
+        "receipt_sha256": "103b2b1b443810de0b10474165cea6307fe4efed2e5419e67fa2d258779fb00f",
+        "stdout_sha256": "293ef24c7c0fcf8daa07434ba45375dad9a8bd05417b03f332c4f36efc93d06a"
+      },
+      "O2_higher_P1": {
+        "gzip_sha256": "1b3a35a4070b8d23652135673732d4e2557f2214fb8d08d4f8cf6559d7c587fb",
+        "receipt_sha256": "d52b6ee8ddff2cf2baf1fdd0aeb03f082eff303c350f93b429c474e268b87976",
+        "stdout_sha256": "05e4b33360dc27354d23146ac742717459a4baac55c48bdd0af2449c39677937"
+      },
+      "O2_higher_P1000000": {
+        "gzip_sha256": "d7605eabceddf420a28202e7cb4261c3d735e1f3e0921d880ef19b5645654ede",
+        "receipt_sha256": "9e45fb071411370ec99af87040553831494d88cd5c136097a5ad4cf5e5f11e91",
+        "stdout_sha256": "ee5287e49862f498685590e053dcc902041c60f9167ab8e42e88853e5321fb70"
+      },
+      "O2_legacy_P0": {
+        "gzip_sha256": "60c4515a8d12a4011b756001242684320f1dd753d1d310870bd20688fe64e9d2",
+        "receipt_sha256": "212b9ad3e780838c19542416384765ffb5d9b9144c14e99162dfa6496bc77d69",
+        "stdout_sha256": "57b4aa5ed3a27c99c39b26ff689e448f0bce16ac2eda4423ce97f38a51a6580b"
+      },
+      "O2_legacy_P1": {
+        "gzip_sha256": "d0d6c3f67c406c25744c1cbbfff73ee41a042b0e1d2a142a942e3b0af76275a7",
+        "receipt_sha256": "98425b20fe3c97b8e057fccfbfe635fdc8178628b46af9c75d324f06e181b416",
+        "stdout_sha256": "065db3526cf16f5ce7f6601db081dfc5a1c70b6d90f2c9c2581da3c87e552154"
+      },
+      "O2_legacy_P1000000": {
+        "gzip_sha256": "ab2dad9fe94a95a8ef414870b5394e681425f3d6b81083878febf8db987095b8",
+        "receipt_sha256": "5965cc88a4b58fa2dd1b38152b131070a61de113e410cf9cdc4b90ad34b94c1a",
+        "stdout_sha256": "f3178b8dc25c81ea0648764b5449df556f866e897cbabcbb9648150cb0697da9"
+      },
+      "O2_mixed_P0": {
+        "gzip_sha256": "ff4a464d4895966b240f5df41322157f68ced95b352a836fda3158fe068de7e1",
+        "receipt_sha256": "2c5b87cc8324330e2a4e892df72052229231190cb1a3292d4af3a82cdf6fff88",
+        "stdout_sha256": "2ea7ad6a6e5ed57cde3a481c34d84a9c16d1820aa004ed4e191a0d3d5960214c"
+      },
+      "O2_mixed_P1": {
+        "gzip_sha256": "a29ad8ab19939515b6e2c9b58be7dba1c53ff6c7465abd75d9f1712a4a87a87d",
+        "receipt_sha256": "f58a23d3ab7a9d5eb312a35c1efa1388b6401ef743907bd468f5554a11c49575",
+        "stdout_sha256": "4673b25d94e672e6240f7d8cf9edaa5ec84760e692e13b2309e0f7cc0584cbcf"
+      },
+      "O2_mixed_P1000000": {
+        "gzip_sha256": "cf0e801d7be08ad9631ca84108158718b0e327629eb08b9ec727115adf277724",
+        "receipt_sha256": "9d0b64f3a06049e728110b7fcfd7d435984c91c4af6a038b9f568adc6015d0a5",
+        "stdout_sha256": "7222dc2a7bd3624e33ce5d00e6f079faef10f9cc023435ced75e0fbf5be85e19"
+      },
+      "sanitized_higher_P0": {
+        "gzip_sha256": "764dd7455cb3fadefd116ab7ed97ddda4604c58e9a62e4ee20449577ab3119b0",
+        "receipt_sha256": "8e208850e496f4f1ebb7b0245c7cad181ec3fd60cf66713a19a67a0a9bd43576",
+        "stdout_sha256": "293ef24c7c0fcf8daa07434ba45375dad9a8bd05417b03f332c4f36efc93d06a"
+      },
+      "sanitized_higher_P1": {
+        "gzip_sha256": "1b3a35a4070b8d23652135673732d4e2557f2214fb8d08d4f8cf6559d7c587fb",
+        "receipt_sha256": "0805d5758445ba0d9406fa6bdb7fbc7532128dc6b36364cd11dcfcae2a78bdbf",
+        "stdout_sha256": "05e4b33360dc27354d23146ac742717459a4baac55c48bdd0af2449c39677937"
+      },
+      "sanitized_higher_P1000000": {
+        "gzip_sha256": "d7605eabceddf420a28202e7cb4261c3d735e1f3e0921d880ef19b5645654ede",
+        "receipt_sha256": "ffd6ea80f1db5953825d77b27d5aae9c9aa9135d5a760ca716fbf054ff5ccc1a",
+        "stdout_sha256": "ee5287e49862f498685590e053dcc902041c60f9167ab8e42e88853e5321fb70"
+      },
+      "sanitized_legacy_P0": {
+        "gzip_sha256": "60c4515a8d12a4011b756001242684320f1dd753d1d310870bd20688fe64e9d2",
+        "receipt_sha256": "19cc9117f59991e611e8cca2c5f4416bbf57750f95d2ae43781b5256d69b95cb",
+        "stdout_sha256": "57b4aa5ed3a27c99c39b26ff689e448f0bce16ac2eda4423ce97f38a51a6580b"
+      },
+      "sanitized_legacy_P1": {
+        "gzip_sha256": "d0d6c3f67c406c25744c1cbbfff73ee41a042b0e1d2a142a942e3b0af76275a7",
+        "receipt_sha256": "99fdb185228b5490c206d8a5b3cbb8cc6232d00c5d33cf4d15dfdf124411d4c1",
+        "stdout_sha256": "065db3526cf16f5ce7f6601db081dfc5a1c70b6d90f2c9c2581da3c87e552154"
+      },
+      "sanitized_legacy_P1000000": {
+        "gzip_sha256": "ab2dad9fe94a95a8ef414870b5394e681425f3d6b81083878febf8db987095b8",
+        "receipt_sha256": "6a7f424a2f21e517f4281597dc095d9bd16a6002a3a89cec8bed2b1f870d0749",
+        "stdout_sha256": "f3178b8dc25c81ea0648764b5449df556f866e897cbabcbb9648150cb0697da9"
+      },
+      "sanitized_mixed_P0": {
+        "gzip_sha256": "ff4a464d4895966b240f5df41322157f68ced95b352a836fda3158fe068de7e1",
+        "receipt_sha256": "e8f0a33bb4ffe1c35f97fde2b106be022357114d0424207c062c8650d4d6d36d",
+        "stdout_sha256": "2ea7ad6a6e5ed57cde3a481c34d84a9c16d1820aa004ed4e191a0d3d5960214c"
+      },
+      "sanitized_mixed_P1": {
+        "gzip_sha256": "a29ad8ab19939515b6e2c9b58be7dba1c53ff6c7465abd75d9f1712a4a87a87d",
+        "receipt_sha256": "e9300965011d850b6db152f0f6b154a8c5c2549e8b5824dc96708f84cae941ab",
+        "stdout_sha256": "4673b25d94e672e6240f7d8cf9edaa5ec84760e692e13b2309e0f7cc0584cbcf"
+      },
+      "sanitized_mixed_P1000000": {
+        "gzip_sha256": "cf0e801d7be08ad9631ca84108158718b0e327629eb08b9ec727115adf277724",
+        "receipt_sha256": "efdc36a512f2e68a0fcbe9a76299c791224bcead41818267867de3f2d7493013",
+        "stdout_sha256": "7222dc2a7bd3624e33ce5d00e6f079faef10f9cc023435ced75e0fbf5be85e19"
+      }
+    },
+    "max_ratios_as_exact_pairs": {
+      "forms_per_outer_call": [
+        21,
+        4
+      ],
+      "virtual_charge_per_certificate": [
+        493,
+        2
+      ]
+    },
+    "scope": "Existing nominal O2/SAN FULL captures only; reset-work mutant is excluded."
+  },
+  "engines_invoked": 0,
+  "execution_scope": "Only require plus each pure Work predicate are AST-extracted; no reader main or runner is executed.",
+  "gcp": "not_used",
+  "mutants": [
+    {
+      "P": 1,
+      "both_captured_predicates_accept": true,
+      "name": "erased_F_work_without_certificate",
+      "proposed_bound_rejects": "virtual_ordinal_charge_interval",
+      "row": {
+        "geometry_meb_calls": 1,
+        "meb_calls": 1,
+        "meb_proposal_certified": 0,
+        "meb_proposal_fallback": 1,
+        "meb_proposal_pivots": 1,
+        "meb_proposal_supports": 1,
+        "meb_reference_supports": 0,
+        "meb_supports": 4
+      }
+    },
+    {
+      "P": 1,
+      "both_captured_predicates_accept": true,
+      "name": "form_paid_without_FULL_call",
+      "proposed_bound_rejects": "proposal_forms_without_sufficient_FULL_calls",
+      "row": {
+        "geometry_meb_calls": 0,
+        "meb_calls": 0,
+        "meb_proposal_certified": 0,
+        "meb_proposal_fallback": 0,
+        "meb_proposal_pivots": 0,
+        "meb_proposal_supports": 1,
+        "meb_reference_supports": 0,
+        "meb_supports": 0
+      }
+    },
+    {
+      "P": 6,
+      "both_captured_predicates_accept": true,
+      "name": "one_certificate_charged_551",
+      "proposed_bound_rejects": "virtual_ordinal_charge_interval",
+      "row": {
+        "geometry_meb_calls": 1,
+        "meb_calls": 1,
+        "meb_proposal_certified": 1,
+        "meb_proposal_fallback": 0,
+        "meb_proposal_pivots": 2,
+        "meb_proposal_supports": 6,
+        "meb_reference_supports": 0,
+        "meb_supports": 551
+      }
+    }
+  ],
+  "positive_scalar_models_retained": 8,
+  "proof": {
+    "captured_helper_sha256": "f922544b5cfdc214de96ecd49520e318ea8632d14a8142ef21fd248f9cc38fb3",
+    "conclusion": "certified <= c-A <= 550*certified, on completed and normally observable refused prefixes; in particular certified=0 implies A=c even for P>0.",
+    "domain": "Fresh per-order Work/counters, immutable caps and input, K<=10, local sites<=11.",
+    "exceptions": "Observer injection occurs before form/certification, and the F mirror runs on unwind. No throwing operation lies between incrementing certified and charging c in this fixed arithmetic path.",
+    "excluded_observation": "An artificially exposed state stopped between ++certified and the c charge (certified=1,c=A=0) is not a C++ throw boundary of this code. An asynchronous termination there supplies no closed probe receipt and is outside this claim.",
+    "forms": "An outer FULL call is paid before any form; at most 146 forms per native attempt. Thus p<=146*FULL_calls even before geometry entry.",
+    "limits": "The new checks reject impossible accounting; they neither certify geometry nor prove all accepted scalar states reachable.",
+    "ordinal": "For K10 the chain has 11 sites; R<=C(11,2)+C(11,3)+C(11,4)=55+165+330=550.",
+    "positive_margin": "The stable dispatcher rejects c>=L before proposing; certification sees immutable L and positive remaining margin. Each virtual increment lies in [1,550].",
+    "virtual_work": "Starting at c=A=0, F increments c and A equally; every certificate increments c by min(R, L-c_before), never A."
+  },
+  "public_status": "not_claimed",
+  "scalar_models_are_engine_results": false,
+  "schema": "mhgp7-independent-probe-work-bounds-v1",
+  "snapshot_pins": {
+    "first_c": {
+      "extracted_function": "check_meb",
+      "file": "work_first_c.py.txt",
+      "sha256": "9f54cb46518390942079379168813da84a4789fae482cf851627122a857799b6"
+    },
+    "primary": {
+      "extracted_function": "meb_work",
+      "file": "work_primary.py.txt",
+      "sha256": "475b92884d4e0aac5f9a2856ab841401ea1681a3477ea53599faa9a5140b3e11"
+    }
+  },
+  "status": "passed"
+}

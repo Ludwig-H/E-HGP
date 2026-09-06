@@ -4,11 +4,12 @@ Lire l’[état courant](ETAT_COURANT.md), puis le [dialogue actif](DIALOGUE_COU
 
 | Sujet courant | Qualification indépendante |
 | --- | --- |
-| Modèle FULL | [Décision et domaine](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md) |
+| Modèle FULL et taille de sortie | [Décision et domaine](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md), [borne à K fixé et témoins u16](receipts_probe_meb_review_20260906/full_output_growth.md) |
 | Cache, lots et normalisation | [Verdict](CACHE_FULL_COURANT.md), [normalisation v2](receipts_full_successor_20260905/README.md), [lot unitaire](receipts_full_singleton_20260905/README.md) |
 | EAGER et composant structurel | [Producteur relatif](PRODUCTEUR_FULL_GABRIEL_COURANT.md), [lecteur](CERTIFICAT_FULL_CPP_COURANT.md) |
 | Mono : EAGER clos, successeurs et coût MEB | [Captures courantes, bornes et refus MEB](MONO_FULL_COURANT.md) |
 | MEB filtrée dans FULL | [Qualification indépendante jusqu’à K10](receipts_full_meb_20260906/README.md), [preuves et réutilisation terminale proposée](MEB_DOUBLE_BUDGET_COURANT.md) |
+| Lecteurs MEB en préparation | [Bornes de Work et suivi des formats](receipts_probe_meb_review_20260906/README.md) |
 | Intégrations différées | [Questions secondaires regroupées](QUESTIONS_SECONDAIRES.md) |
 
 ## Preuves conservées

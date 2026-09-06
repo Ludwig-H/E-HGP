@@ -1,0 +1,82 @@
+{
+  "capture": "n8_s8_k5_lazy_c0_p0",
+  "capture_closed_utc": "2026-09-06T10:13:30.602622+00:00",
+  "capture_verdict_closed_utc": "2026-09-06T10:13:30.880165+00:00",
+  "comparator_sha256": "be4b8712f55324af025d1ed69a2aa3748de45a8f2ba73519bf575243226fd7c6",
+  "controller_sha256": "ee9d4640452c81bc4bd4d872630da2a334cf49da078c84dd74c82c8b4c20058d",
+  "fix_direction": "consume declared controller snapshot/stream/intent formats and validate guard values explicitly",
+  "gcp": "not_used",
+  "intent_additional_fields": [
+    "cpu_limit_seconds",
+    "file_size_limit_bytes",
+    "sanitizer_virtual_address_reservation"
+  ],
+  "kind": "five_capture_format_incompatibilities",
+  "no_ELF_read": true,
+  "no_engine": true,
+  "no_primary_judge_executed": true,
+  "original_capture_admitted_by_its_two_readers": true,
+  "public_status": "not_claimed",
+  "results": [
+    {
+      "exception": "KeyError",
+      "prior_obstacles_adapted_only_in_memory": [],
+      "reason": "source_sha256",
+      "stage": 0
+    },
+    {
+      "exception": "KeyError",
+      "prior_obstacles_adapted_only_in_memory": [
+        "supply comparator source_sha256 from actual source_map_sha256"
+      ],
+      "reason": "probe_schema",
+      "stage": 1
+    },
+    {
+      "exception": "KeyError",
+      "prior_obstacles_adapted_only_in_memory": [
+        "supply comparator source_sha256 from actual source_map_sha256",
+        "supply probe_schema from actual protocol"
+      ],
+      "reason": "successor_accounting",
+      "stage": 2
+    },
+    {
+      "exception": "ValueError",
+      "prior_obstacles_adapted_only_in_memory": [
+        "supply comparator source_sha256 from actual source_map_sha256",
+        "supply probe_schema from actual protocol",
+        "supply successor_accounting from actual protocol"
+      ],
+      "reason": "stream_inventory",
+      "stage": 3
+    },
+    {
+      "exception": "ValueError",
+      "prior_obstacles_adapted_only_in_memory": [
+        "supply comparator source_sha256 from actual source_map_sha256",
+        "supply probe_schema from actual protocol",
+        "supply successor_accounting from actual protocol",
+        "remove the already-checked empty stderr only in memory"
+      ],
+      "reason": "intent_inventory",
+      "stage": 4
+    },
+    {
+      "exception": "PrimaryCheckpoint",
+      "prior_obstacles_adapted_only_in_memory": [
+        "supply comparator source_sha256 from actual source_map_sha256",
+        "supply probe_schema from actual protocol",
+        "supply successor_accounting from actual protocol",
+        "remove the already-checked empty stderr only in memory",
+        "remove the three current intent guards only in memory"
+      ],
+      "reason": "primary_judge_reached_not_executed",
+      "stage": 5
+    }
+  ],
+  "scope": "transport-format counterfixture only, no scientific refusal or forged success",
+  "script_sha256": "dc4092b457250c49d813a39f5dbfb81b24c5fce031072e5081bdaf6fc3121a3a",
+  "source_map_sha256": "f0b5afcd44ac4e793abf78f131f2a0c8e6ffcf5f6273e5dd5f5d5f1f03a12a7f",
+  "status": "demonstrated"
+}

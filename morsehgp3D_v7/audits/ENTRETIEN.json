@@ -1108,5 +1108,127 @@
       "preserved": "Sources, .d, binary identities, command intents, all streams and terminal receipts. Portable judges require no ELF.",
       "status": "completed"
     }
+  },
+  "latest_probe_and_growth_review_20260906": {
+    "date": "2026-09-06T10:30:38.222322+00:00",
+    "base_head": "3e62aadd3a348469c3e9042b596d1ffa8b4616e9",
+    "scope": "Independent exact rational FULL output lower bound for every fixed K>=2, integer linked-arcs pair witnesses, Work scalar consistency, and transport counterfixture plus dated closure on real pairs. No new C++/engine/benchmark.",
+    "receipt": "receipts_probe_meb_review_20260906/README.md",
+    "source_variant_added": false,
+    "variants_D_to_O_unchanged": true,
+    "historical_scientific_receipts_modified": false,
+    "checks": {
+      "docs_normal_optimized": {
+        "exit_codes": [
+          0,
+          0
+        ],
+        "active_documents": 368
+      },
+      "registry": {
+        "exit_code": 0,
+        "phases": 20
+      },
+      "normal_optimized_receipts": {
+        "capture_format": {
+          "exit_codes": [
+            0,
+            0
+          ],
+          "byte_identical": true,
+          "sha256": "3660b3e42339eb6bd049d02837ceb5be9b9bb2412309bcc47428447a63a29abf"
+        },
+        "work_bounds": {
+          "exit_codes": [
+            0,
+            0
+          ],
+          "byte_identical": true,
+          "sha256": "4fb44c4808b8b5352275a7c617c22344291957c03c76a09b6144f4c7671427b6"
+        },
+        "full_output_growth": {
+          "exit_codes": [
+            0,
+            0
+          ],
+          "byte_identical": true,
+          "sha256": "d37a08eccb11e34381d812d2916444f10d2e23cd873da516f287e06b84f66488"
+        }
+      },
+      "transport_repair_dated_read": {
+        "status": "passed",
+        "receipt_sha256": "2ccfdf750fd3f9de5c3d3039b0899f10159279ab1494c1d4b2cbdbb2f885a64e",
+        "stable_files": 735,
+        "direct_checks": 9171,
+        "real_attempts": 72,
+        "pairs": 48,
+        "compared_orders": 312,
+        "real_refusals": 0,
+        "effective_order_at_most": 8,
+        "scope": "No judge imported, ELF opened, engine launched or complete portable input packet claimed."
+      },
+      "work_bounds": {
+        "scalar_models": 8,
+        "capture_states": 6816,
+        "nominal_rows": 5568,
+        "budget_rows": 1248,
+        "refused_prefixes": 1152,
+        "K10_rows": 48,
+        "mutants_admitted_by_old_predicates_refuted_by_proposed_bounds": 3
+      },
+      "growth": {
+        "rational_models": 16,
+        "labelled_births": 1360,
+        "foreign_power_checks": 34720,
+        "anchor_power_checks": 3740,
+        "integer_u16_sizes": [
+          6,
+          10,
+          18,
+          34
+        ],
+        "integer_u16_cross_pair_births": [
+          9,
+          25,
+          81,
+          289
+        ],
+        "global_regularity_of_explicit_models_claimed": false,
+        "regular_perturbation": "Existence proof only; not executed or product input modification.",
+        "asymptotic_domain": "Exact Euclidean geometry with growing rational precision; not an infinite fixed-u16 family."
+      },
+      "authored_markdown": {
+        "files": 11,
+        "local_links": 153,
+        "anchors": 10,
+        "errors": 0,
+        "unpublished_external_targets": 0,
+        "math_format": "passed"
+      },
+      "unstaged_whitespace": "passed",
+      "freshness": {
+        "normal_optimized_exit_codes": [
+          1,
+          1
+        ],
+        "common_pins": 2185,
+        "common_mismatches": 0,
+        "source_variants_unchanged": 12,
+        "O_delta": [
+          "tests/meb_proposal_local_gate.cpp"
+        ],
+        "interpretation": "Expected non-promotion of the constructor local gate in preparation; prior C++ qualification remains pinned."
+      },
+      "publication_scope": {
+        "staged_paths": 40,
+        "outside_audits": 0,
+        "staged_whitespace": "passed",
+        "index_initially_empty": true,
+        "branch": "main"
+      }
+    },
+    "maintenance": "25 root Markdown notes retained. Closed transport reservations replaced with dated verified repair; old per-build details remain in their existing proof packet. Secondary MEB activation row removed because main documentation and current MEB note already cover it. No new root note/build directory; old evidence and failure receipts unchanged.",
+    "engine_invocations": 0,
+    "gcp": "not_used"
   }
 }

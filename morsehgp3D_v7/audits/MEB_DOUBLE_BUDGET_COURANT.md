@@ -20,6 +20,8 @@ La [revue budgétaire](receipts_meb_dual_20260905/budget/review.json) distingue 
 
 Exactement, $\Delta c=A+\sum\min(R,L-c_{\mathrm{avant}})$ sur les branches certifiées, tandis que $\Delta p$ compte les formes proposées. Ainsi $A+\Delta p\leq\Delta c+\Delta p$. Les plafonds restent deux u64 séparés : leur somme mathématique peut dépasser u64. Depuis un état cohérent A≤c, le miroir F conserve cette inégalité même sur exception. Les compteurs auxiliaires doivent garder leur marge ; injecter arbitrairement MAX dans un compteur déjà plein est hors contrat.
 
+La [contrelecture des diagnostics](receipts_probe_meb_review_20260906/README.md#empêcher-de-fausses-économies-meb) donne deux gardes supplémentaires pour un ordre frais, au plus onze sites par appel : `p ≤ 146 × appels_FULL` et `certified ≤ c−A ≤ 550 × certified`. Elles conservent les 6 816 états capturés relus et rejettent trois modèles impossibles encore acceptés par les prédicats préparés. En particulier, sans certificat, A=c même pour P>0. Ce complément ne détecte aucun défaut moteur et ne juge pas une interruption asynchrone privée de terminal.
+
 Un seul `Work` appartient à la tentative de l'ordre, sans réinitialisation par MEB ou repli. Le prototype historique conserve P=0 par défaut et `reference_ordinal_plus_proposal_v1`. Le port produit qualifié conserve P=0 et annonce désormais `reference_ordinal_plus_native_z_q3_q4_proposal_v2`. Le [juge arithmétique](receipts_meb_dual_20260905/budget/budget_transition_probe.py) offre un `--check-only` portable ; ses transitions Python ne sont pas des exécutions C++.
 
 ## 7. Reçus privés et obligations de qualification actualisées

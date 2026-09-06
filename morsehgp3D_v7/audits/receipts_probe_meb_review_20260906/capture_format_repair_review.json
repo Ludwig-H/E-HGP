@@ -1,0 +1,53 @@
+{
+  "closed_micro_receipt_sha256": "526f03ce20e8c4f529acb965574562dbb6fbf016b49fe99feca3e1153e10ac9c",
+  "constructor_review": {
+    "normal_and_optimized_identical": true,
+    "normal_and_optimized_stdout_sha256": "a758d6c75251aabe1e89e0ab3646d777f13b07a1757fb337fdf7f78d94eaf209",
+    "normal_exit_code": 0,
+    "optimized_exit_code": 0,
+    "path": "build/v7_meb_compare_20260906_preparation/checks_micro_r1",
+    "receipt_sha256": "37f6a202193aa629b0c27c72e5ee382c76e0d95612f8a0771cb32df4e414c112"
+  },
+  "five_historical_transport_obstacles_lifted": true,
+  "historical_counterfixture_unchanged": true,
+  "independent_review": {
+    "all_reported_MEB_and_measurement_deltas_recomputed": true,
+    "captured_primary_and_first_C_results_observed": 144,
+    "compared_horizontal_orders": 312,
+    "explicit_checks": 9171,
+    "metadata_files_read_and_rechecked": 735,
+    "old_Work_fields_per_order": 25,
+    "old_nonmeasurement_order_and_terminal_fields_equal": true,
+    "orders_per_opt_in": {
+      "1": 156,
+      "584000000": 156
+    },
+    "raw_receipt_source_stream_intent_spawn_links_verified": true,
+    "real_attempts": 72,
+    "real_pairs": 48
+  },
+  "limits": {
+    "ELF_read": false,
+    "K10_requested_effective_on_n8": 8,
+    "comparator_imported": false,
+    "constructor_judges_reexecuted": false,
+    "engine_invoked": false,
+    "full_413_command_campaign_reviewed": false,
+    "gcp_used": false,
+    "global_FULL_successful": false,
+    "heavy_attempts_reviewed": false,
+    "hermetic_build_proved": false,
+    "public_status": "not_claimed",
+    "raw_digest_recomputed": false,
+    "raw_forest_geometry_recomputed": false,
+    "real_refusal_pairs_exercised": 0,
+    "slo_claim": false
+  },
+  "repaired_comparator_sha256": "910b30ac2c8cfbca18c1ec19f57a1cc5fc1bbf741c3ec0412f10541ce748329b",
+  "reviewed_utc": "2026-09-06T10:27:51.529834+00:00",
+  "schema": "mhgp7-auditor-capture-format-repair-review-v1",
+  "source_map_sha256": [
+    "f0b5afcd44ac4e793abf78f131f2a0c8e6ffcf5f6273e5dd5f5d5f1f03a12a7f"
+  ],
+  "status": "passed"
+}
