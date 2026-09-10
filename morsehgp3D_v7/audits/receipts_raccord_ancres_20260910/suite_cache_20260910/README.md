@@ -103,3 +103,12 @@ refusé à travers l'adaptateur ; et une porte qui prouve le refus des phases
 inconnues (deux sources générées, absence de `-c`, présence de `-E`). Aucun
 résultat device n'en découle ; la compilation NVCC elle-même n'a pas été
 rejouée ici.
+
+## 7. Réflexion sur le chemin vers le contrat d'une seconde
+
+[`NOTE_REFLEXION_ECHELLE.md`](NOTE_REFLEXION_ECHELLE.md) : les ordres de
+grandeur scellés (965 s à 32k, 4,95 milliards de visites d'index à 50k), ce que
+la sortie impose, les étages dont le parallélisme est déjà prouvé exact, et
+trois leviers à instruire ; `mesure_cache_8k/` mesure le partage des
+représentants entre boules (54 % de hits sur `uniform`, 81 % sur `scanline`),
+qui justifie un tri-unique statique des représentants plutôt qu'un mémo évictif.
