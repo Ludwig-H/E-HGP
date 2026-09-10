@@ -1,0 +1,34 @@
+{
+  "binaries": {
+    "baseline_o2": "fb968f5b084a6594814c50fc4bf3e8c2f957eb61b69f562f640097229c355dd6",
+    "birth_interior_flag": "107d241d5aeab06e6977d45b86ebd6bbac85020ca63c2e559198e559ee4ad15b",
+    "birth_multiple_refs": "3735e624def675b347bfcfcfc3ccd986a6ad95870336883a07376441641c70ef",
+    "birth_small": "7f3c43cf1da511fb418a36bb1b531aef71e6f7fa89dcdb015ad0607dcbc64345",
+    "domain_smaller_order": "ff2f8ecc15660057c2318e50386e5b206c3b6cca11d73e41fd675d14c362ed90",
+    "k1_missing_birth": "8bd4e2f7dac5ee6a5c2e4712570b541d6d4561af293a49a7376b847e1039b9cd",
+    "nominal_o2": "30084250e8964ee76050c702c2cfb19932f81266f58da50ab6b80ffe64f50447",
+    "nominal_san": "e5f1c2640bbf2e4b7fb68e375a1618f9545d38d257b2c8c496c43c9ec788a7b9",
+    "order_above_max": "8d75b6fd0f875f80e3fb285b20995febeabfec5a8d66ac9e0842063e2254b2d2",
+    "reader_absent_root": "0c44cbe6fa6f0e5cb0dc32ef92bda9d9bd981170e0d3e343b1d59f9c07c2821d",
+    "reader_interior_always": "a5e35108902c364275c3738140e4e001b7fdffe12ba64dc72736e9cd4adebaea",
+    "unsorted_parents": "f7d383855c8189866b0f5b585486c6dcbc3daa8b0666f8e704104e1a62928649"
+  },
+  "engine_executed": false,
+  "exits": {
+    "baseline_o2": 0,
+    "birth_interior_flag": 1,
+    "birth_multiple_refs": 1,
+    "birth_small": 1,
+    "domain_smaller_order": 1,
+    "k1_missing_birth": 1,
+    "nominal_o2": 0,
+    "nominal_san": 1,
+    "order_above_max": 1,
+    "reader_absent_root": 1,
+    "reader_interior_always": 1,
+    "unsorted_parents": 1
+  },
+  "gcp_used": false,
+  "sources_stable": true,
+  "status": "failed"
+}

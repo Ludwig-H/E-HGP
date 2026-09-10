@@ -2533,5 +2533,94 @@
     },
     "source_variants_D_to_O_unchanged": true,
     "second_auditor_variant_preserved": "P_raccord_ancres_counter_reading (authored worktree metadata, receipt published by 467c12f5)"
+  },
+  "latest_journal_guards_review_20260910": {
+    "date": "2026-09-10T21:02:51.560497+00:00",
+    "base_head": "6bc225dfa17a583baaae1a60b28b043b163a1095",
+    "receipt": "receipts_journal_guards_20260910/README.md",
+    "scope": "Bounded structural journal guards and arena reserve on frozen WIP 7608e70e; original static-resolution reasoning in active dialogue, no offline backend or geometric engine qualification.",
+    "cpp_compilations": 12,
+    "cpp_executions": 24,
+    "geometric_engine_invocations": 0,
+    "gcp": "not_used_by_auditor",
+    "fixed_checks": 42,
+    "valid_cases": 10,
+    "reject_cases": 9,
+    "reader_checks": 6,
+    "mutants_detected": 9,
+    "allocations": {
+      "baseline": 14,
+      "reserved": 5,
+      "each_fault_transactional": true
+    },
+    "preserved_failure": "test_r1/wip_san: LeakSanitizer ptrace restriction, exit 1",
+    "successful_retry": "test_r2: same binaries outside sandbox, leak detection enabled, nominals 0 and causal mutants 1",
+    "cache_capacity": {
+      "allocation_executed": false,
+      "bytes": 12884901888,
+      "entry_bytes": 48,
+      "gib": 12,
+      "n": 10000000,
+      "slots": 268435456
+    },
+    "packet": {
+      "files_excluding_manifest": 117,
+      "manifest_sha256": "64aab882c5c83631702c9f31b6c2b18688bcbdf872ab8f2b382e4850812c6075"
+    },
+    "checks": {
+      "portable_normal_exit": 0,
+      "portable_optimized_exit": 0,
+      "portable_outputs_identical": true,
+      "docs_normal_exit": 1,
+      "docs_optimized_exit": 1,
+      "docs_failure_scope": "25 missing links in concurrent constructor full_ball_named_blocks_20260910/capture/authorities Markdown copies, outside auditor publication.",
+      "registry_exit": 0,
+      "registry_phases": 20,
+      "authored_markdown": 6,
+      "local_links": 116,
+      "link_math_errors": 0,
+      "freshness": {
+        "common_pins": 2707,
+        "normal_exit": 1,
+        "optimized_exit": 1,
+        "messages_identical": true,
+        "common_deltas": [
+          "audits/.gitignore",
+          "audits/receipts_raccord_ancres_20260910/suite_cache_20260910/README.md"
+        ],
+        "reason": "Both are owned by the second auditor, pending restoration/correction after this publication. Their previous pins remain unchanged; no whole-engine freshness asserted."
+      },
+      "authored_tracked_whitespace_exit": 0,
+      "sealed_whitespace": {
+        "staged_full_diff_check_exit": 2,
+        "preserved_blank_eof_captures_or_source_snapshots": 7,
+        "authored_staged_diff_check_exit": 0,
+        "reason": "Preserve exact sealed evidence bytes; no authored whitespace errors."
+      }
+    },
+    "maintenance": {
+      "closed_coordination_reservations_condensed": true,
+      "adopted_parent_csr_and_square_requests_closed": true,
+      "second_auditor_conclusions_preserved": true,
+      "historical_scientific_receipts_modified": false,
+      "journal_common_pin_removed": {
+        "path": "src/forest/full_coverage_certificate.hpp",
+        "sha256": "e8e65b211ec01964f35f1eb60587096a9b1e144d2c4634d2cad0c2f50ae5e883",
+        "preserved_in": "P_raccord_ancres_counter_reading and immutable dated journal receipt",
+        "reason": "The old journal belongs to its historical variant; new reserve WIP has a separate frozen component receipt. Do not make the old live header a common prerequisite for unrelated D-O variants or repin P."
+      }
+    },
+    "publication": {
+      "scope_paths": 125,
+      "index_observed_empty": true,
+      "reservation_closes_on_push": true,
+      "other_auditor_pending_files_excluded": true,
+      "main_origin_counts": [
+        0,
+        0
+      ]
+    },
+    "source_variants_D_to_P_unchanged": true,
+    "static_resolution_note": "Independent reasoning agrees with second auditor: earlier geometric terminal, block-dated arcs, atomic filtered replay, dated contributions, historical vertical images; graph storage O(A+R). No new duplicate proof file or engine implementation."
   }
 }

@@ -1,0 +1,38 @@
+{
+  "birth_interior_flag": {
+    "after": "          if (\n",
+    "before": "          if (ref.include_interior != !row.interior.empty() ||\n"
+  },
+  "birth_multiple_refs": {
+    "after": "          if (action.contributions.empty()) return invalid(\"coverage_birth_population\");",
+    "before": "          if (action.contributions.size() != 1) return invalid(\"coverage_birth_population\");"
+  },
+  "birth_small": {
+    "after": ") return invalid(\"coverage_birth_population\");",
+    "before": " ||\n              row.interior.size() + row.shell.size() < order) return invalid(\"coverage_birth_population\");"
+  },
+  "domain_smaller_order": {
+    "after": "      batches.empty())",
+    "before": "      bank->domain().size() < order || batches.empty())"
+  },
+  "k1_missing_birth": {
+    "after": "(!full_certificate_detail::zero(batch.level))",
+    "before": "(!full_certificate_detail::zero(batch.level) ||\n          batch.actions.size() != bank->domain().size())"
+  },
+  "order_above_max": {
+    "after": "if (order < 1 || !bank",
+    "before": "if (order < 1 || order > kFacetMaxK || !bank"
+  },
+  "reader_absent_root": {
+    "after": "  if (full_coverage_root_at(forest, root, cut, closed) != root)",
+    "before": "  if (root == kFullCoverageAbsent || full_coverage_root_at(forest, root, cut, closed) != root)"
+  },
+  "reader_interior_always": {
+    "after": "      if (true)\n        out.values.insert",
+    "before": "      if (record.ref.include_interior)\n        out.values.insert"
+  },
+  "unsorted_parents": {
+    "after": "if (parent >= prior_count || !live[parent])",
+    "before": "if ((j && action.parents[j - 1] >= parent) || parent >= prior_count || !live[parent])"
+  }
+}

@@ -1,0 +1,125 @@
+[
+  {
+    "argv": [
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_journal_guards_20260910/.work_build/baseline_o2"
+    ],
+    "ended_ns": 1789073057076775478,
+    "environment_delta": {},
+    "exit_code": 0,
+    "name": "baseline_o2",
+    "started_ns": 1789073057074570244
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_journal_guards_20260910/.work_build/birth_interior_flag"
+    ],
+    "ended_ns": 1789073057079371211,
+    "environment_delta": {},
+    "exit_code": 1,
+    "name": "birth_interior_flag",
+    "started_ns": 1789073057077390145
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_journal_guards_20260910/.work_build/birth_multiple_refs"
+    ],
+    "ended_ns": 1789073057082312459,
+    "environment_delta": {},
+    "exit_code": 1,
+    "name": "birth_multiple_refs",
+    "started_ns": 1789073057080106042
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_journal_guards_20260910/.work_build/birth_small"
+    ],
+    "ended_ns": 1789073057084772358,
+    "environment_delta": {},
+    "exit_code": 1,
+    "name": "birth_small",
+    "started_ns": 1789073057082917347
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_journal_guards_20260910/.work_build/domain_smaller_order"
+    ],
+    "ended_ns": 1789073057087210146,
+    "environment_delta": {},
+    "exit_code": 1,
+    "name": "domain_smaller_order",
+    "started_ns": 1789073057085365675
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_journal_guards_20260910/.work_build/k1_missing_birth"
+    ],
+    "ended_ns": 1789073057089637144,
+    "environment_delta": {},
+    "exit_code": 1,
+    "name": "k1_missing_birth",
+    "started_ns": 1789073057087823741
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_journal_guards_20260910/.work_build/nominal_o2"
+    ],
+    "ended_ns": 1789073057092122721,
+    "environment_delta": {},
+    "exit_code": 0,
+    "name": "nominal_o2",
+    "started_ns": 1789073057090250118
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_journal_guards_20260910/.work_build/nominal_san"
+    ],
+    "ended_ns": 1789073057112538611,
+    "environment_delta": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "exit_code": 0,
+    "name": "nominal_san",
+    "started_ns": 1789073057096874577
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_journal_guards_20260910/.work_build/order_above_max"
+    ],
+    "ended_ns": 1789073057119353295,
+    "environment_delta": {},
+    "exit_code": 1,
+    "name": "order_above_max",
+    "started_ns": 1789073057117030812
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_journal_guards_20260910/.work_build/reader_absent_root"
+    ],
+    "ended_ns": 1789073057122088959,
+    "environment_delta": {},
+    "exit_code": 1,
+    "name": "reader_absent_root",
+    "started_ns": 1789073057120031841
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_journal_guards_20260910/.work_build/reader_interior_always"
+    ],
+    "ended_ns": 1789073057124765993,
+    "environment_delta": {},
+    "exit_code": 1,
+    "name": "reader_interior_always",
+    "started_ns": 1789073057122719746
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_journal_guards_20260910/.work_build/unsorted_parents"
+    ],
+    "ended_ns": 1789073057127449612,
+    "environment_delta": {},
+    "exit_code": 1,
+    "name": "unsorted_parents",
+    "started_ns": 1789073057125473393
+  }
+]
