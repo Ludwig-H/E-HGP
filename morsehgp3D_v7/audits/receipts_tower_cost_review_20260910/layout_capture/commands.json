@@ -1,0 +1,42 @@
+[
+  {
+    "name": "compiler",
+    "argv": [
+      "g++",
+      "--version"
+    ],
+    "started_ns": 1789071218220256997,
+    "ended_ns": 1789071218222536560,
+    "exit_code": 0
+  },
+  {
+    "name": "compile",
+    "argv": [
+      "g++",
+      "-std=c++20",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_tower_cost_review_20260910/layout_capture/layout.d",
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_tower_cost_review_20260910/layout.cpp",
+      "-o",
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_tower_cost_review_20260910/.work_layout/layout"
+    ],
+    "started_ns": 1789071218223001377,
+    "ended_ns": 1789071219105646948,
+    "exit_code": 0
+  },
+  {
+    "name": "run",
+    "argv": [
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_tower_cost_review_20260910/.work_layout/layout"
+    ],
+    "started_ns": 1789071219106196643,
+    "ended_ns": 1789071219107184236,
+    "exit_code": 0
+  }
+]

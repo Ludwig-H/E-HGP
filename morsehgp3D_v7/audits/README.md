@@ -4,9 +4,11 @@ Lire l’[état courant](ETAT_COURANT.md), puis le [dialogue actif](DIALOGUE_COU
 
 | Sujet courant | Qualification indépendante |
 | --- | --- |
-| Journal daté v2 et parents exportés | [184 cas O2/SAN, 2 976 coupes et mutant du tableau de parents](receipts_coverage_cpp_20260910/README.md) ; raccord géométrique FULL encore distinct |
+| Raccord par ancres de boule `d188e3de` | [Contre-lecture, rejeux, corpus aléatoire, normaliseur temporel et verrous](receipts_raccord_ancres_20260910/README.md) ; second auditeur, deux verrous P1, non reçu |
+| Résidence de la nouvelle tour retenue | [Durées de vie, borne des brouillons et format des naissances](receipts_tower_cost_review_20260910/README.md) ; calculs statiques, pas gains mesurés |
+| Journal daté v2 et parents exportés | [184 cas O2/SAN, 2 976 coupes et mutant du tableau de parents](receipts_coverage_cpp_20260910/README.md) ; [lacune du test constructeur corrigée](../receipts/coverage_parent_array_20260910/README.md), raccord FULL distinct |
 | Modèle FULL et taille de sortie | [Décision et domaine](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md), [borne à K fixé et témoins u16](receipts_probe_meb_review_20260906/full_output_growth.md) |
-| Priorité 50k : plateaux non réguliers | [Trois cas globaux décidés](receipts_plateaux_full_20260906/GLOBAL_PARENTS.md), [C++ local publié](../receipts/local_plateau_20260906/README.md), [preuves et ancres](receipts_plateaux_full_20260906/README.md) ; raccord FULL à qualifier |
+| Priorité 50k : plateaux non réguliers | [Trois cas globaux décidés](receipts_plateaux_full_20260906/GLOBAL_PARENTS.md), [C++ local publié](../receipts/local_plateau_20260906/README.md), [preuves et ancres](receipts_plateaux_full_20260906/README.md) ; raccord [publié](../docs/TOUR_FULL_PAR_BOULES.md), contrelecture attribuée au second auditeur |
 | Vraie hiérarchie K-NN et tour sur les minima | [Descente et prototype K1..4](receipts_gabriel_vertices_20260906/README.md), [ancres partagées et choix de retrait](receipts_shared_anchors_20260906/README.md) |
 | Génération WSPD et histogrammes | [Sélection stable et saturation](receipts_phase_selection_20260906/README.md), [blocs](receipts_block_histograms_20260906/README.md), [terminal unique et cœur q2 positif](receipts_terminal_count_20260906/README.md) |
 | Admission du payload CPU | [Raccord contre-lu et fixture à sept points](receipts_census_followup_20260906/README.md), [preuve des gardes](receipts_phase_selection_20260906/README.md) ; pas borne RSS |
@@ -32,7 +34,7 @@ Ces notes portent des arguments encore cités par le dossier principal ; elles n
 python3 -B -O morsehgp3D_v7/audits/verify_current.py
 ```
 
-Le [manifeste](validation_current.json) vérifie des sources et preuves épinglées, affiche leur portée et ne réexécute aucun test. Code 0 : une variante entière correspond ; 1 : sources ou documents à actualiser ; 2 : manifeste invalide. Un fichier non épinglé n’est pas qualifié par ce contrôle. Les variantes D à O gardent leurs autorités distinctes.
+Le [manifeste](validation_current.json) vérifie des sources et preuves épinglées, affiche leur portée et ne réexécute aucun test. Code 0 : une variante entière correspond ; 1 : sources ou documents à actualiser ; 2 : manifeste invalide. Un fichier non épinglé n’est pas qualifié par ce contrôle. Les variantes D à O gardent leurs autorités distinctes ; P épingle la contrelecture du second auditeur, explicitement sans réception du raccord.
 
 Le [registre d’entretien](ENTRETIEN.json) donne les notes supprimées, leurs remplacements et leur version Git antérieure. Les sources, reçus scellés, contre-fixtures et échecs restent intacts. Les questions sans incidence immédiate sont raccourcies dans un seul fichier. Un nouvel audit ou push doit apporter une décision, une preuve, une correction ou un entretien utile ; aucune publication de routine sans contenu pertinent.
 

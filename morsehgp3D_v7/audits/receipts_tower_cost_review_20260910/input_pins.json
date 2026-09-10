@@ -1,0 +1,8 @@
+{
+  "morsehgp3D_v7/bench/full_ball_tower_probe.cpp": "ba6c16c365cb7255ad640bb1c036494c7c9c208a7b8ca6460515126d45f03143",
+  "morsehgp3D_v7/receipts/coverage_parent_array_20260910/manifest.json": "4846a705a4f83db47c87d94f41dcf42cfb78bd8ed352d120411f558c11baa474",
+  "morsehgp3D_v7/receipts/full_ball_runs_20260910/manifest.json": "16c14f8732a5d32d537ba673d116fd9815cc2daa1082e647d267d43ffa3c38df",
+  "morsehgp3D_v7/src/forest/full_ball_tower.hpp": "0b72b4e9cb3858f7026d6b5d2b55f8a7b191903fc37aa24c140dfb8b557657e8",
+  "morsehgp3D_v7/src/forest/full_coverage_certificate.hpp": "e8e65b211ec01964f35f1eb60587096a9b1e144d2c4634d2cad0c2f50ae5e883",
+  "morsehgp3D_v7/tests/full_coverage_certificate_gate.cpp": "2ebd45d8b03e81f8d1c18a58b1d205f528030ddad2a0ee78031dd13e06fe767b"
+}

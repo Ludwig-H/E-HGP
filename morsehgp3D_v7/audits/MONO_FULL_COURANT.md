@@ -1,44 +1,23 @@
-# Mono FULL : observations et diagnostics de travail
+# Mono FULL : mesures courantes et preuves de travail
 
-Le nouveau [run G4 CPU48 à 50k](../docs/RESULTATS_G4_FULL_20260906.md), publié par 638205bb, refuse K1..10 et le repli K1..5 avant tout ordre FULL : quatre/trois boules à coquille supplémentaire, code 2 `probe_rank_relevant_extra_shell`. L’admission mémoire corrigée passe. Les 21,372 s et 5,646 s sont des durées de refus, pas de tour. Le constructeur documente la fermeture ciblée de sa session ; l’auditeur n’a utilisé ni GCP ni moteur. La [réponse mathématique sur les plateaux](receipts_plateaux_full_20260906/README.md) fournit une extension locale et des contre-fixtures ; les quatre diagnostics locaux sont maintenant extraits et leur [contrelecture géométrique](receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md) reste distincte de ces chronométrages historiques.
+La [tour retenue d188e3de](../docs/RESULTATS_TOUR_BOULES_20260910.md) termine K1..10 avec cartes verticales à 8k/16k/32k. Les résultats et limites de protocole sont dans le dossier principal. Notre [relecture de résidence](receipts_tower_cost_review_20260910/README.md) chiffre les tableaux morts avant encodage et la borne des brouillons ; elle ne relance pas le moteur et ne certifie aucun gain de latence ou de pic RSS. Les contrats 50k/1s, 100ms et le régime massif restent ouverts.
 
-Les [résultats sans quotas](../docs/RESULTATS_MONO_FULL_SANS_QUOTAS_20260906.md) remplacent le diagnostic de blocage par un plafond MEB : 8k/16k/32k ont terminé chacun les dix ordres horizontaux. La sonde libère les forêts ; elle ne mesure pas encore les liens inter-K ni une archive retenue. Les variantes antérieures restent des témoins historiques. public_status=not_claimed.
-
-Le [relevé indépendant du 6 septembre](receipts_terminal_count_20260906/source_review.json) confirme le pairage P0/unlimited à 8k : mêmes données, binaire et digests, mêmes compteurs hors diagnostics MEB annoncés. K9–K10 concentrent 16,658 s des 21,114 s économisées dans FULL, soit 78,89 % sur cette paire. Cela étaye leur priorité d’optimisation ; ce n’est ni une nouvelle mesure, ni une vitesse isolée du MEB, ni une conclusion statistique. Les méthodes de mesure et les tableaux déjà décrits par le constructeur ne sont pas recopiés ici.
+Les [anciens passages sans quotas](../docs/RESULTATS_MONO_FULL_SANS_QUOTAS_20260906.md) libéraient chaque ordre horizontal ; ils ne sont pas une baseline appariée de cette tour retenue. Le [refus G4 CPU48 à 50k](../docs/RESULTATS_G4_FULL_20260906.md) est également historique : la garde extra-shell de cet ancien instrument ne décrit pas le nouveau raccord. Les échecs restent scellés, sans requalification rétroactive. GCP non utilisé par l’auditeur.
 
 ## Refus historique conservé
 
-Le [diagnostic 32k/K9](receipts_followup_20260906/work_review_normal.json) identifiait correctement la MEB initiale d’un nouveau portail au plafond de quatre millions, avec P+C=M+1. Ce plafond supprimé dans la sonde ne devient ni une nouvelle réussite de ce run ni un refus courant. Ses agrégats ne prouvaient pas la répétition des labels terminaux. La [réutilisation de certification](MEB_DOUBLE_BUDGET_COURANT.md#réutiliser-une-certification-terminale-déjà-acquise) reste une optimisation distincte des formes internes du proposeur.
+Le [préfixe refusé 32k/K9](receipts_followup_20260906/work_review_normal.json) attestait P+C=M+1 au plafond de quatre millions ; il ne devient pas une réussite après suppression de ce plafond. La [réutilisation terminale](MEB_DOUBLE_BUDGET_COURANT.md#réutiliser-une-certification-terminale-déjà-acquise) concerne la lignée lazy régulière, distincte du nouveau resolver à ancres.
 
-## Témoin EAGER historique
+## Preuves historiques indépendantes
 
-La campagne `98bb6578`, header `e02d163c`, garde ses [preuves](receipts_full_mono_20260905/README.md) : trois succès relatifs 8k à s=8/10/12 et deux refus d’alias, 16k/K9 et 32k/K7. Les [résultats EAGER](../docs/RESULTATS_MONO_FULL_20260905.md) ne deviennent pas des mesures du code courant.
+Les chronologies et tableaux de mesures déjà documentés par le constructeur sont retirés de cette note. Les preuves encore utiles restent consultables :
 
-## Borne indépendante conservée
-
-Pour un ordre réussi, noter L les minima, D les directes, T la somme des cardinaux de leurs supports et V les alias ajoutés par portails. L’identité EAGER est `A=L+2(K+1)D−T+V`. Les 44 lignes réussies la satisfont. Elle ne s’applique pas à un préfixe refusé ni à lazy.
-
-À 8k/s8/K10, les 6 209 024 alias se décomposent en 600 806 minima, 5 349 726 facettes égales et 258 492 alias de portail. Les seules demandes strictes sont Q=2 534 359 : minima et cache réunis sont donc bornés par **3 135 165 clés**. Cette borne compte des clés, pas des octets de RAM.
-
-Avec minima séparés, le cache strict est borné par 4D : 5 063 544 clés au premier ordre refusé 16k/K9, 6 856 080 à 32k/K7. Huit millions suffisent pour ces caches seuls ; les autres budgets et ordres suivants ne sont pas admis par cet argument. La [preuve mémoire](receipts_full_mono_20260905/memory_model_review.md) conserve hypothèses et propriétaires.
-
-## Lecteurs et diagnostics conservés
-
-Quatre [corruptions de données](receipts_full_mono_20260905/judge_review.md) exposaient les lacunes du juge v1 : minima, miroir MEB, identité d’alias et temps. Elles ne préservaient pas les sceaux historiques et n’invalident pas les runs nominaux. Le v2 et son supplément first-C ont depuis leur [contre-vérification propre](CACHE_FULL_COURANT.md).
-
-La sonde lazy a depuis publié ses [mesures appariées](../docs/RESULTATS_MONO_FULL_LAZY_20260905.md), digest compris. Les anciens temps sans digest restent historiques. Les RSS imprimés après destruction du Builder ne mesurent pas sa résidence pendant sa vie. Ces nouvelles latences ne sont pas qualifiées indépendamment ici.
-
-## Diagnostic des successeurs sur les captures lazy closes
-
-La [contrelecture ciblée](successor_work_review.json), reproductible par [ce script](successor_work_review.py), raccorde cinq bruts à leurs reçus et snapshots `13c6`, puis vérifie les identités de [normalisation](CACHE_FULL_COURANT.md#normalisation--supprimer-la-dernière-paire-redondante). Elle couvre 48 ordres réussis, identiques entre s=8/10/12 à 8k, et exclut explicitement le K9 refusé. Python normal/`-O` donnent les mêmes octets ; quatre corruptions de données sont refusées. Aucune exécution moteur, certification de latence ou extension de l’oracle géométrique.
-
-| Ordre clos | Opérations historiques v1 | Part des seules clôtures v1 | Prévision v2, maintenant retrouvée dans les captures |
-| --- | ---: | ---: | ---: |
-| 8k/K10, s8 | 38 240 799 | 4,91 % | 33 607 807 (−12,12 %) |
-| 16k/K10, s8 | 85 034 894 | 4,66 % | 75 223 906 (−11,54 %) |
-| 32k/K8, s8 | 119 950 564 | 4,57 % | 106 373 946 (−11,32 %) |
-
-Le dernier calcul concerne **K8 réussi**, pas K9 refusé. Les trois valeurs prédites sont désormais retrouvées dans les captures v2 contre-vérifiées, sans en déduire un temps économisé ou la fin de K9. Les profondeurs pré-lot moyennes historiques valent respectivement 4,4493, 4,7042 et 4,8201 : le volume de travail ne prouve pas une chaîne pathologique. Un effort limité à la fermeture des directes aurait visé moins de 5 % de ce compteur ; le delta qualifié concerne toutes les normalisations.
+| Objet historique | Preuve conservée et portée |
+| --- | --- |
+| Alias EAGER | [Modèle mémoire](receipts_full_mono_20260905/memory_model_review.md) : A=L+2(K+1)D−T+V ; 44 lignes réussies. Borne des clés, pas octets de RAM ni identité du moteur courant. |
+| Juges de mesures | [Quatre corruptions v1](receipts_full_mono_20260905/judge_review.md) ; résultats négatifs conservés, lecteurs successeurs qualifiés séparément. |
+| Normalisation lazy | [Recalcul reproductible](successor_work_review.json), [script](successor_work_review.py) : 48 ordres clos et quatre corruptions réfutées. Les comptes prévus de v2 sont retrouvés sans en déduire un temps économisé. |
+| Plafonds MEB supprimés | [Pairage P0/unlimited](receipts_terminal_count_20260906/source_review.json) : K9–K10 concentrent 78,89 % de la différence FULL observée à 8k ; une paire, pas une statistique ni un temps MEB isolé. |
 
 ## Borne des supports MEB q4 sur les six passages singleton
 

@@ -360,8 +360,8 @@
       "words": 1094
     }
   ],
-  "current_root_markdown_files": 25,
-  "current_root_words_whitespace_split": 18529,
+  "current_root_markdown_files": 26,
+  "current_root_words_whitespace_split": 20003,
   "reduction_percent": 75.75,
   "secondary_questions_sha256": "d41daf7b69827114c19991984ba5bb4652886b4197350b2809e748caba68c9d8",
   "unchanged_other_common_pins": 1598,
@@ -2456,5 +2456,82 @@
       "other_packet_included": false,
       "shared_coordination_message_read_and_preserved": true
     }
+  },
+  "latest_raccord_ancres_review_20260910": {
+    "date": "2026-09-10T20:16:04.198484+00:00",
+    "auditor": "second_auditor_session_e-hgp-c6",
+    "scope": "New receipt audits/receipts_raccord_ancres_20260910 (WIP ball-anchor tower counter-reading, locks, diameter delta, documentation coherence). Shared entries README/ETAT_COURANT/DIALOGUE_COURANT/COORDINATION_AUDITEURS extended, nothing retired. Historical receipts and code untouched.",
+    "retired_notes": [],
+    "historical_receipts_or_code_modified": false,
+    "gcp": "not_used",
+    "base_head": "d188e3de"
+  },
+  "latest_tower_cost_review_20260910": {
+    "date": "2026-09-10T20:25:05.241372+00:00",
+    "reviewed_constructor_head": "d188e3de",
+    "receipt": "receipts_tower_cost_review_20260910/README.md",
+    "scope": "Static object lifetimes and logical storage bounds from sealed retained-tower captures, one local ABI probe, closure of parent-array test request.",
+    "engine_invocations": 0,
+    "abi_cpp_compilations": 1,
+    "abi_cpp_executions": 1,
+    "gcp": "not_used_by_auditor",
+    "checks": {
+      "portable_normal_exit": 0,
+      "portable_optimized_exit": 0,
+      "portable_outputs_identical": true,
+      "data_mutants_rejected": 4,
+      "constructor_parents_normal_and_optimized_exit": 0,
+      "constructor_runs_normal_and_optimized_exit": 0,
+      "docs_normal_exit": 0,
+      "docs_optimized_exit": 0,
+      "active_markdown": 411,
+      "registry_exit": 0,
+      "registry_phases": 20,
+      "authored_markdown": 8,
+      "local_links": 149,
+      "link_math_errors": 0,
+      "git_diff_check_exit": 0,
+      "maintenance_guard_note": "Whole-list equality guards stopped twice because P was added by the second auditor in the worktree but not staged in 467c12f5. Historical D–O checked individually unchanged; the authored P and raccord followup are preserved verbatim with attribution.",
+      "freshness": {
+        "common_pins": 2526,
+        "common_mismatches": 0,
+        "normal_exit": 1,
+        "optimized_exit": 1,
+        "messages_identical": true,
+        "latest_variant": "P_raccord_ancres_counter_reading",
+        "latest_variant_deltas": [
+          "tests/full_ball_tower_gate.cpp",
+          "tests/full_ball_work_gate.cpp"
+        ],
+        "scope": "Preserve D–O and the new second-auditor P unchanged; no engine qualification by this cost review."
+      },
+      "sealed_capture_whitespace": {
+        "path": "receipts_tower_cost_review_20260910/layout_capture/compiler.stdout",
+        "diagnostic": "new blank line at EOF",
+        "preserved": true,
+        "staged_full_diff_check_exit": 2
+      }
+    },
+    "packet": {
+      "files_excluding_manifest": 16,
+      "manifest_sha256": "0cb19cf6edd0d1008b652496b7231c812e4f4b28a7ee4ca5f2e7afea7d56737e"
+    },
+    "maintenance": {
+      "parent_array_request_closed": true,
+      "historical_mono_words_before": 1198,
+      "historical_mono_words_after": 701,
+      "stale_local_anchor_fixed": "MEB_DOUBLE_BUDGET_COURANT.md -> MONO_FULL_COURANT.md#refus-historique-conserve",
+      "second_auditor_sections_preserved": true,
+      "historical_scientific_receipts_modified": false
+    },
+    "publication": {
+      "base_head": "467c12f5c402ea791b952a97a1fa0189d1ccad03",
+      "scope_paths": 26,
+      "index_observed_empty": true,
+      "main_aligned_with_origin": true,
+      "reservation_closes_on_push": true
+    },
+    "source_variants_D_to_O_unchanged": true,
+    "second_auditor_variant_preserved": "P_raccord_ancres_counter_reading (authored worktree metadata, receipt published by 467c12f5)"
   }
 }

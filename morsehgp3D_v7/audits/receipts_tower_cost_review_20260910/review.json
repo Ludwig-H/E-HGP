@@ -1,0 +1,66 @@
+{
+  "abi": {
+    "ExactLevel": 48,
+    "FullCoverageAction": 48,
+    "FullCoverageBatch": 80,
+    "FullCoveragePopulation": 48,
+    "FullCoverageRef": 16,
+    "FullDatedContribution": 80,
+    "FullNode": 64,
+    "u32": 4,
+    "u64": 8
+  },
+  "authority": "static_lifetimes_and_capture_counts_only",
+  "data_mutants_rejected": [
+    "parent_refs",
+    "lower_nodes_activated",
+    "resolver_meb_calls",
+    "lot_dsu_slots"
+  ],
+  "gcp_used": false,
+  "new_full_qualification": false,
+  "parent_array_request": "closed_by_d188e3de",
+  "public_status": "not_claimed",
+  "runs": [
+    {
+      "birth_records_logical_bytes": 192371680,
+      "births": 2404646,
+      "dead_working_arrays_logical_bytes": 147535504,
+      "draft_batches_lower_bound": 3967999,
+      "draft_metadata_bytes_lower_bound": 508310576,
+      "engine_reexecuted": false,
+      "k10_nodes": 987934,
+      "n": 8000,
+      "nodes": 3976472,
+      "rss_reduction_measured": false,
+      "selected_output_logical_bytes": 542301136
+    },
+    {
+      "birth_records_logical_bytes": 402112160,
+      "births": 5026402,
+      "dead_working_arrays_logical_bytes": 309882152,
+      "draft_batches_lower_bound": 8291348,
+      "draft_metadata_bytes_lower_bound": 1062206992,
+      "engine_reexecuted": false,
+      "k10_nodes": 2081240,
+      "n": 16000,
+      "nodes": 8310399,
+      "rss_reduction_measured": false,
+      "selected_output_logical_bytes": 1133427192
+    },
+    {
+      "birth_records_logical_bytes": 830477120,
+      "births": 10380964,
+      "dead_working_arrays_logical_bytes": 642249936,
+      "draft_batches_lower_bound": 17114695,
+      "draft_metadata_bytes_lower_bound": 2193190400,
+      "engine_reexecuted": false,
+      "k10_nodes": 4324933,
+      "n": 32000,
+      "nodes": 17166975,
+      "rss_reduction_measured": false,
+      "selected_output_logical_bytes": 2341170840
+    }
+  ],
+  "schema": "mhgp7-tower-cost-review-v1"
+}
